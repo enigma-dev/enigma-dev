@@ -40,7 +40,15 @@ struct SoundEmitter
   ALfloat pitch;
   ALfloat volume;
   vector<int> sound_tracks;
-  SoundEmitter(): emitPos {0.0f,0.0f,0.0f}, emitVel {0.0f,0.0f,0.0f}, falloff{0.0f,0.0f,1.0f}, volume(1.0f) {}
+  SoundEmitter() 
+  {
+	  emitPos[0] = emitPos[1] = emitPos[2] = 0.0f, 
+	  emitVel[0] = emitVel[1] = emitVel[2] = 0.0f, 
+	  falloff[0] = falloff[1] = 0.0f, 
+	  falloff[2] = 1.0f, 
+	  volume = 1.0f;
+   }
+
 };
 
 extern vector<SoundEmitter*> sound_emitters;

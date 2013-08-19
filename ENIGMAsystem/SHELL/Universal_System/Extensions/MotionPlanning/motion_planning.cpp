@@ -1,6 +1,7 @@
 /********************************************************************************\
 **                                                                              **
 **  Copyright (C) 2011 Harijs Grînbergs                                         **
+**  Modified 2013 by Josh Ventura                                               **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -85,7 +86,7 @@ void mp_grid_copy(unsigned id, unsigned srcid)
     grid->top = sgrid->top;
     for (unsigned int i = 0; i < sgrid->hcells*sgrid->vcells; i++)
     {
-        enigma::node node={floor(i / sgrid->vcells),i % sgrid->vcells,0,0,0,sgrid->nodearray[i].cost};
+        enigma::node node(floor(i / sgrid->vcells),i % sgrid->vcells,0,0,0,sgrid->nodearray[i].cost);
         grid->nodearray.push_back(node);
     }
 
@@ -223,21 +224,21 @@ bool mp_grid_path(unsigned id,unsigned pathid,double xstart,double ystart,double
     path->pointarray.clear();
 
     //push the very first point
-    enigma::path_point point={xstart,ystart,gr->speed_modifier/double(gr->nodearray[xs*vc+ys].cost)};
+    enigma::path_point point(xstart,ystart,gr->speed_modifier/double(gr->nodearray[xs*vc+ys].cost));
     path->pointarray.push_back(point);
     multimap<unsigned,enigma::node*>::reverse_iterator it;
     for (it=nodelist.rbegin(); it != nodelist.rend(); it++)
     {
-            point = enigma::path_point({gr->left+((*it).second->x+0.5)*gr->cellwidth,gr->top+((*it).second->y+0.5)*gr->cellheight,gr->speed_modifier/double((*it).second->cost)});
+            point = enigma::path_point(gr->left+((*it).second->x+0.5)*gr->cellwidth,gr->top+((*it).second->y+0.5)*gr->cellheight,gr->speed_modifier/double((*it).second->cost));
             path->pointarray.push_back(point);
     }
 
     //push the very last point if we can reach the destination
     if (status == true){
-        point = enigma::path_point({xgoal,ygoal,gr->speed_modifier/double(gr->nodearray[xg*vc+yg].cost)});
+        point = enigma::path_point(xgoal,ygoal,gr->speed_modifier/double(gr->nodearray[xg*vc+yg].cost));
         path->pointarray.push_back(point);
-    }else if (path->pointarray.size()==1){
-        point = enigma::path_point({path->pointarray.back().x,path->pointarray.back().y,gr->speed_modifier/double(gr->nodearray[xg*vc+yg].cost)});
+    } else if (path->pointarray.size()==1) {
+        point = enigma::path_point(path->pointarray.back().x,path->pointarray.back().y,gr->speed_modifier/double(gr->nodearray[xg*vc+yg].cost));
         path->pointarray.push_back(point);
     }
     enigma::path_recalculate(pathid);

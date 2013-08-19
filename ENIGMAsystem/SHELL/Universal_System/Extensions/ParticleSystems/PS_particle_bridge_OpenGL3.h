@@ -31,7 +31,11 @@
 #include <deque>
 #include <cmath>
 #include <algorithm>
+#ifndef __APPLE__
 #include <GL/gl.h>
+#else
+#include <OpenGL/gl.h>
+#endif
 #include <iostream>
 
 #include "PS_particle_system.h"
