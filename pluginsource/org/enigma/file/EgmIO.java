@@ -20,9 +20,10 @@ import javax.swing.filechooser.FileView;
 import org.enigma.messages.Messages;
 import org.lateralgm.components.impl.CustomFileFilter;
 import org.lateralgm.components.impl.ResNode;
-import org.lateralgm.file.GmFile;
+import org.lateralgm.file.ProjectFile;
 import org.lateralgm.file.GmFormatException;
-import org.lateralgm.file.GmFile.FormatFlavor;
+import org.lateralgm.file.ProjectFile.FormatFlavor;
+import org.lateralgm.file.ProjectFormatException;
 import org.lateralgm.main.FileChooser.FileReader;
 import org.lateralgm.main.FileChooser.FileWriter;
 import org.lateralgm.main.FileChooser.GroupFilter;
@@ -50,7 +51,7 @@ public class EgmIO extends FileView implements FileReader,FileWriter,GroupFilter
 		return filter.accept(new File(uri));
 		}
 
-	public GmFile read(InputStream in, URI uri, ResNode root) throws GmFormatException
+	public ProjectFile read(InputStream in, URI uri, ResNode root, boolean gmx) throws GmFormatException
 		{
 		return EFileReader.readEgmFile(new File(uri),root,true);
 		}
@@ -69,7 +70,7 @@ public class EgmIO extends FileView implements FileReader,FileWriter,GroupFilter
 		}
 
 	@Override
-	public void write(OutputStream out, GmFile gf, ResNode root) throws IOException
+	public void write(OutputStream out, ProjectFile gf, ResNode root) throws IOException
 		{
 		EFileWriter.writeEgmZipFile(out,gf,root);
 		}

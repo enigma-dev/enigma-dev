@@ -74,18 +74,18 @@ import org.enigma.frames.ProgressFrame;
 import org.enigma.messages.Messages;
 import org.enigma.utility.EnigmaBuildReader;
 import org.lateralgm.components.ErrorDialog;
-import org.lateralgm.components.GMLTextArea;
+import org.lateralgm.components.CodeTextArea;
 import org.lateralgm.components.GmMenu;
 import org.lateralgm.components.impl.CustomFileFilter;
 import org.lateralgm.components.impl.ResNode;
 import org.lateralgm.components.mdi.MDIFrame;
-import org.lateralgm.file.GmFile.ResourceHolder;
-import org.lateralgm.file.GmFile.SingletonResourceHolder;
+import org.lateralgm.file.ProjectFile.ResourceHolder;
+import org.lateralgm.file.ProjectFile.SingletonResourceHolder;
 import org.lateralgm.file.GmFormatException;
-import org.lateralgm.joshedit.GMLKeywords;
-import org.lateralgm.joshedit.GMLKeywords.Construct;
-import org.lateralgm.joshedit.GMLKeywords.Function;
-import org.lateralgm.joshedit.GMLKeywords.Keyword;
+import org.lateralgm.joshedit.lexers.GMLKeywords;
+import org.lateralgm.joshedit.lexers.GMLKeywords.Construct;
+import org.lateralgm.joshedit.lexers.GMLKeywords.Function;
+import org.lateralgm.joshedit.lexers.GMLKeywords.Keyword;
 import org.lateralgm.main.FileChooser;
 import org.lateralgm.main.LGM;
 import org.lateralgm.main.LGM.ReloadListener;
@@ -871,7 +871,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 	public void subframeAppeared(MDIFrame source)
 		{
 		JToolBar tool;
-		final GMLTextArea code;
+		final CodeTextArea code;
 		final JPanel status;
 		if (source instanceof ScriptFrame)
 			{

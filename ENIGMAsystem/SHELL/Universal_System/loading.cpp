@@ -22,6 +22,7 @@
 
 #include "resinit.h"
 #include "spritestruct.h"
+#include "backgroundstruct.h"
 #include "Platforms/platforms_mandatory.h"
 #include "Audio_Systems/audio_mandatory.h"
 #include "Widget_Systems/widgets_mandatory.h"
@@ -61,7 +62,7 @@ namespace enigma
     event_system_initialize();
     input_initialize();
     sprites_init();
-    //backgrounds_init();
+    backgrounds_init();
     widget_system_initialize();
 
     // Open the exe for resource load

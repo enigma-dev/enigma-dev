@@ -1,6 +1,7 @@
 /********************************************************************************\
 **                                                                              **
 **  Copyright (C) 2011 Harijs Grînbergs                                         **
+**  Modified 2013 by Josh Ventura                                               **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -164,8 +165,8 @@ void path_copy(unsigned pathid, unsigned srcid)
     enigma::pathstructarray[pathid]->pointarray.clear();
     enigma::path *pa = enigma::pathstructarray[pathid];
     enigma::path *pa2 = enigma::pathstructarray[srcid];
-    for (size_t i=0; i<pa2->pointarray.size(); i++){
-        enigma::path_point point={pa2->pointarray[i].x,pa2->pointarray[i].y,pa2->pointarray[i].speed};
+    for (size_t i=0; i<pa2->pointarray.size(); i++) {
+        enigma::path_point point(pa2->pointarray[i].x,pa2->pointarray[i].y,pa2->pointarray[i].speed);
         pa->pointarray.push_back(point);
     }
     enigma::path_recalculate(pathid);
@@ -181,8 +182,8 @@ void path_append(unsigned pathid, unsigned path)
 {
     enigma::path *pa = enigma::pathstructarray[pathid];
     enigma::path *pa2 = enigma::pathstructarray[path];
-    for (size_t i=0; i<pa2->pointarray.size(); i++){
-        enigma::path_point point={pa2->pointarray[i].x,pa2->pointarray[i].y,pa2->pointarray[i].speed};
+    for (size_t i=0; i<pa2->pointarray.size(); i++) {
+        enigma::path_point point(pa2->pointarray[i].x,pa2->pointarray[i].y,pa2->pointarray[i].speed);
         pa->pointarray.push_back(point);
     }
     enigma::path_recalculate(pathid);
@@ -362,7 +363,7 @@ void path_clear_points(unsigned pathid)
 
 void path_add_point(unsigned pathid, cs_scalar x, cs_scalar y, cs_scalar speed)
 {
-    enigma::path_point point={x,y,speed/100};
+    enigma::path_point point(x,y,speed/100);
     enigma::pathstructarray[pathid]->pointarray.push_back(point);
     enigma::path_recalculate(pathid);
 }
@@ -375,7 +376,7 @@ void path_insert_point(unsigned pathid, unsigned n, cs_scalar x, cs_scalar y, cs
         return;
     }
     #endif
-    enigma::path_point point={x,y,speed/100};
+    enigma::path_point point(x,y,speed/100);
     enigma::pathstructarray[pathid]->pointarray.insert(enigma::pathstructarray[pathid]->pointarray.begin() + n,point);
     enigma::path_recalculate(pathid);
 }

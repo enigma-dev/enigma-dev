@@ -1,6 +1,7 @@
 /********************************************************************************\
 **                                                                              **
 **  Copyright (C) 2011 Harijs Grînbergs                                         **
+**  Modified 2013 by Josh Ventura                                               **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -25,16 +26,10 @@
 **                                                                              **
 \********************************************************************************/
 
-//#include <string>
-//#include <string.h>
 #include <vector>
 #include <math.h>
-//#include <iostream>
 #include <float.h> //maxiumum values for certain datatypes. Useful for minx = DBL_MAX
 #include <cstdlib> //size_t
-//using namespace std;
-//#include "Graphics_Systems/graphics_mandatory.h"
-//#include "libEGMstd.h"
 
 #include "pathstruct.h"
 #include <floatcomp.h>
@@ -106,7 +101,7 @@ namespace enigma
 
     void path_add_point(unsigned pathid, cs_scalar x, cs_scalar y, cs_scalar speed)
     {
-        path_point point={x,y,speed};
+        path_point point(x,y,speed);
         pathstructarray[pathid]->pointarray.push_back(point);
     }
 

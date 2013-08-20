@@ -364,19 +364,11 @@ int sound_add(std::string fname, int kind, bool preload)
   int i = (int)sounds.size();
   sf::SoundBuffer *buffer = new sf::SoundBuffer();
   sf::Sound *snd;
-		
-  if (!buffer->loadFromFile(fname))
-  {
-    delete buffer;
-    return -1;
-  }
-  else
-  {
-    snd = new sf::Sound();
-    snd->setBuffer(*buffer);
-    sounds.push_back(new PlayableSoundInstance(snd, buffer));
-    return i;
-  }
+  
+  snd = new sf::Sound();
+  snd->setBuffer(*buffer);
+  sounds.push_back(new PlayableSoundInstance(snd, buffer));
+  return i;
 }
 
 bool sound_exists(int sound)
@@ -393,20 +385,12 @@ bool sound_replace(int sound, std::string fname, int kind, bool preload)
 {
   sf::SoundBuffer *buffer = new sf::SoundBuffer();
   sf::Sound *snd;
-
-  if (!buffer->loadFromFile(fname))
-  {
-    delete buffer;
-    return -1;
-  }
-  else
-  {
-    delete sounds[sound];
-    snd = new sf::Sound();
-    snd->setBuffer(*buffer);
-    sounds.push_back(new PlayableSoundInstance(snd, buffer));
-    return true;
-  }
+  
+  delete sounds[sound];
+  snd = new sf::Sound();
+  snd->setBuffer(*buffer);
+  sounds.push_back(new PlayableSoundInstance(snd, buffer));
+  return true;
 }
 
 bool sound_play(int sound)

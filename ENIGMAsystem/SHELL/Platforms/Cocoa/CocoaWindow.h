@@ -24,15 +24,14 @@
  **  or programs made in the environment.                                        **
  **                                                                              **
  \********************************************************************************/
+
 #include <string>
-
 #include "file_manip.h"
-
 using std::string;
 
 void gmw_init();
 
-void Sleep(int ms);
+namespace enigma_user {
 
 void window_set_position(int x,int y);
 
@@ -176,13 +175,15 @@ void window_default();
 int window_get_region_width_scaled();
 int window_get_region_height_scaled();
 
+#define enigmacatchmouse() //Linux should hopefully do that automatically.
+
+void game_end();
+void action_end_game();
+
+}
+
 namespace enigma {
 	extern char** parameters;
 	//void writename(char* x);
     long int current_time();
 }
-
-#define enigmacatchmouse() //Linux should hopefully do that automatically.
-
-void game_end();
-void action_end_game();
