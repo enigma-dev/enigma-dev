@@ -196,6 +196,7 @@ string filepart(string fqp)
   return fqp.substr(lp+1);
 }
 
+#include <iostream>
 typedef vector<string> CommandLineStringArgs;
 
 void myReplace(std::string& str, const std::string& oldStr, const std::string& newStr)
@@ -318,9 +319,12 @@ int main(int argc, char *argv[])
   lpExecInfo.hwnd = NULL;
   lpExecInfo.lpVerb = "open";
   string argsasstring = string("./run ");
+  
   if (argc > 1) {
+	myReplace(cmdlineStringArgs[1], "\\", "/");
 	argsasstring += cmdlineStringArgs[1];
   }
+  
   lpExecInfo.lpParameters = argsasstring.c_str();
   lpExecInfo.lpDirectory = NULL;
   lpExecInfo.nShow = SW_HIDE;
