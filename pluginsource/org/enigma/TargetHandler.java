@@ -91,7 +91,7 @@ public final class TargetHandler
 		if (os.contains("nux") || os.contains("nix")) return "Linux"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		if (os.contains("win")) return "Windows"; //$NON-NLS-1$ //$NON-NLS-2$
 		if (os.contains("mac")) return "MacOSX"; //$NON-NLS-1$ //$NON-NLS-2$
-		if (os.contains("bsd")) return "FreeBSD";
+		if (os.contains("bsd")) return "FreeBSD"; //$NON-NLS-1$ //$NON-NLS-2$
 		return os;
 		}
 

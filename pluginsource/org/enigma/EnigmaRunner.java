@@ -147,6 +147,10 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		setMenuEnabled(false);
 		stop.setVisible(false);
 		stopb.setVisible(false);
+		// this cannot be added to the thread because of passing the gmk, gmx, or egm path
+		// on the command line, otherwise this thread tries to access it before the lgm
+		// main thread has actually loaded it
+		final EnigmaSettings es = LGM.currentFile.resMap.get(EnigmaSettings.class).getResource();
 		new Thread()
 			{
 				public void run()
@@ -177,7 +181,6 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 						}
 
 					ENIGMA_READY = true;
-					EnigmaSettings es = LGM.currentFile.resMap.get(EnigmaSettings.class).getResource();
 					esf = new EnigmaSettingsFrame(es);
 					LGM.mdi.add(esf);
 					es.commitToDriver(DRIVER);
