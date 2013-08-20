@@ -60,7 +60,7 @@ int prepare(char **ret, const char *cmd, int argc, ...) {
 
 void ftpsend(int in, const char *msg) {
  printf("> %s",msg);
- if (net_send(in,msg,strlen(msg)) < 0)
+ if (net_send_raw(in,msg,strlen(msg)) < 0)
   die("Send",1,in);
 }
 
@@ -70,7 +70,7 @@ void ftpparse(int in, const char *cmd, const char *arg, const char *disp) {
  sprintf(packet,cmd,arg);
  printf("> ");
  printf(cmd,disp);
- len = net_send(in,packet,len);
+ len = net_send_raw(in,packet,len);
  free(packet);
  if (len < 0) die("Send",1,in);
 }
@@ -115,7 +115,7 @@ void net_ftp_send(int in, string file, string msg, int msglen) {
 
  ftpparse(in,"STOR %s\r\n",file.c_str(),file.c_str()); //ip overwritten
  ftpexpect(in,"150 ");
- net_send(out,msg,msglen);
+ net_send_raw(out,msg,msglen);
  closesocket(out);
  ftpexpect(in,"226 ");
 }
@@ -138,7 +138,7 @@ Host: %s\r\n\
 User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; rv:12.0) Gecko/20100101 Firefox/12.0\r\n\
 Connection: close\r\n\r\n";
  int len = prepare(&packet,cmd,2,loc.c_str(),host.c_str());
- int r = net_send(s,packet,len);
+ int r = net_send_raw(s,packet,len);
  free(packet);
  if (r < 0) die("Send",1,s);
 
