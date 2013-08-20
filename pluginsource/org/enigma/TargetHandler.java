@@ -22,6 +22,8 @@ import java.util.Set;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
+import javax.swing.JOptionPane;
+
 import org.enigma.file.YamlParser;
 import org.enigma.file.YamlParser.YamlContent;
 import org.enigma.file.YamlParser.YamlElement;
@@ -89,6 +91,7 @@ public final class TargetHandler
 		if (os.contains("nux") || os.contains("nix")) return "Linux"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		if (os.contains("win")) return "Windows"; //$NON-NLS-1$ //$NON-NLS-2$
 		if (os.contains("mac")) return "MacOSX"; //$NON-NLS-1$ //$NON-NLS-2$
+		if (os.contains("bsd")) return "FreeBSD";
 		return os;
 		}
 

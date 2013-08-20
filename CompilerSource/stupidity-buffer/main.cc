@@ -24,6 +24,7 @@
 #include <string>
 #include <sstream>
 #include <map>
+#include <vector>
 
 using namespace std;
 
@@ -195,7 +196,9 @@ string filepart(string fqp)
   return fqp.substr(lp+1);
 }
 
-int main()
+typedef vector<string> CommandLineStringArgs;
+
+int main(int argc, char *argv[])
 {
  /* //Set Env Paths
   char* pPath = getenv("PATH");
@@ -295,7 +298,12 @@ int main()
   lpExecInfo.fMask = SEE_MASK_DOENVSUBST|SEE_MASK_NOCLOSEPROCESS;
   lpExecInfo.hwnd = NULL;
   lpExecInfo.lpVerb = "open";
-  lpExecInfo.lpParameters = "./run";
+  CommandLineStringArgs cmdlineStringArgs(&argv[0], &argv[0 + argc]);
+  string argsasstring = string("./run ");
+  if (argc > 1) {
+	argsasstring += cmdlineStringArgs[1];
+  }
+  lpExecInfo.lpParameters = argsasstring.c_str();
   lpExecInfo.lpDirectory = NULL;
   lpExecInfo.nShow = SW_HIDE;
   lpExecInfo.hInstApp = (HINSTANCE) SE_ERR_DDEFAIL ;   //WINSHELLAPI BOOL WINAPI result;
