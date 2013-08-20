@@ -17,7 +17,7 @@
 
 #include "Bridges/General/DX9Device.h"
 #include "Direct3D9Headers.h"
-#include "../General/GSblend.h"
+#include "Graphics_Systems/General/GSblend.h"
 
 namespace enigma_user
 {

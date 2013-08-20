@@ -196,7 +196,6 @@ string filepart(string fqp)
   return fqp.substr(lp+1);
 }
 
-#include <iostream>
 typedef vector<string> CommandLineStringArgs;
 
 void myReplace(std::string& str, const std::string& oldStr, const std::string& newStr)
@@ -208,6 +207,8 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
      pos += newStr.length();
   }
 }
+
+#include <windows.h>
 
 int main(int argc, char *argv[])
 {
@@ -318,7 +319,7 @@ int main(int argc, char *argv[])
   lpExecInfo.fMask = SEE_MASK_DOENVSUBST|SEE_MASK_NOCLOSEPROCESS;
   lpExecInfo.hwnd = NULL;
   lpExecInfo.lpVerb = "open";
-  string argsasstring = string("./run ");
+  string argsasstring = filename + string("run ") + filename + " ";
   
   if (argc > 1) {
 	myReplace(cmdlineStringArgs[1], "\\", "/");
