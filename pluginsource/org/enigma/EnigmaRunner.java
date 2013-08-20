@@ -971,7 +971,12 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 
 	public static void main(String[] args)
 		{
-		LGM.main(args);
+		try {
+			LGM.main(args);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		new EnigmaRunner();
 		}
 	}
