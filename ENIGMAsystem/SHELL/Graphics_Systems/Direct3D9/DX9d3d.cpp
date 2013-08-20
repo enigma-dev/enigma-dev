@@ -15,9 +15,9 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 #include "Bridges/General/DX9Device.h"
-#include "../General/GSd3d.h"
+#include "Graphics_Systems/General/GSd3d.h"
 #include "Direct3D9Headers.h"
-#include "../General/GStextures.h"
+#include "Graphics_Systems/General/GStextures.h"
 #include "DX9binding.h"
 #include "DX9model.h"
 #include "DX9shapes.h"
