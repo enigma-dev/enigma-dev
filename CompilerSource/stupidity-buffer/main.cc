@@ -198,6 +198,16 @@ string filepart(string fqp)
 
 typedef vector<string> CommandLineStringArgs;
 
+void myReplace(std::string& str, const std::string& oldStr, const std::string& newStr)
+{
+  size_t pos = 0;
+  while((pos = str.find(oldStr, pos)) != std::string::npos)
+  {
+     str.replace(pos, oldStr.length(), newStr);
+     pos += newStr.length();
+  }
+}
+
 int main(int argc, char *argv[])
 {
  /* //Set Env Paths
@@ -290,15 +300,23 @@ int main(int argc, char *argv[])
   }
 
   //Run Lateral GM
-
+  CommandLineStringArgs cmdlineStringArgs(&argv[0], &argv[0 + argc]);
   puts("Calling LGM");
   SHELLEXECUTEINFO lpExecInfo;
   lpExecInfo.cbSize  = sizeof(SHELLEXECUTEINFO);
-  lpExecInfo.lpFile = "git-bash.bat";
+  
+  std::string path = cmdlineStringArgs[0];
+  std::string filename;
+
+  myReplace(path, "\\", "/");
+  size_t pos = path.find_last_of("/");
+  filename.assign(path, 0, pos + 1);
+	
+  string bashpath = filename + string("git-bash.bat");
+  lpExecInfo.lpFile = bashpath.c_str();
   lpExecInfo.fMask = SEE_MASK_DOENVSUBST|SEE_MASK_NOCLOSEPROCESS;
   lpExecInfo.hwnd = NULL;
   lpExecInfo.lpVerb = "open";
-  CommandLineStringArgs cmdlineStringArgs(&argv[0], &argv[0 + argc]);
   string argsasstring = string("./run ");
   if (argc > 1) {
 	argsasstring += cmdlineStringArgs[1];
