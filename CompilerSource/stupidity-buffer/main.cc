@@ -319,11 +319,11 @@ int main(int argc, char *argv[])
   lpExecInfo.fMask = SEE_MASK_DOENVSUBST|SEE_MASK_NOCLOSEPROCESS;
   lpExecInfo.hwnd = NULL;
   lpExecInfo.lpVerb = "open";
-  string argsasstring = filename + string("run ") + filename + " ";
+  string argsasstring = "\"" + filename + string("run\" ") + "\"" + filename + "\" ";
   
   if (argc > 1) {
 	myReplace(cmdlineStringArgs[1], "\\", "/");
-	argsasstring += cmdlineStringArgs[1];
+	argsasstring += "\"" + cmdlineStringArgs[1] + "\"";
   }
   
   lpExecInfo.lpParameters = argsasstring.c_str();
