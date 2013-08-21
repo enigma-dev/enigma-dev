@@ -323,13 +323,12 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   // FIRST FILE
   // Modes, settings and executable information.
   
-  #ifdef _WIN32
   GameSettings gameSet = es->gameSettings;
   edbg << "Writing executable information and resources." << flushl;
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/Resources.rc",ios_base::out);
     wto << license;
     wto << "#include <windows.h>\n";
-    wto << "IDI_MAIN_ICON          ICON                    \"" << gameSet.gameIcon << "\"\n";
+    wto << "IDI_MAIN_ICON          ICON                    \"" << string_replace_all(gameSet.gameIcon,"\\","/")  << "\"\n";
 	wto << "VS_VERSION_INFO VERSIONINFO\n";
 	wto << "FILEVERSION " << gameSet.versionMajor << "," << gameSet.versionMinor << "," << gameSet.versionRelease << "," << gameSet.versionBuild << "\n";
 	wto << "PRODUCTVERSION " << gameSet.versionMajor << "," << gameSet.versionMinor << "," << gameSet.versionRelease << "," << gameSet.versionBuild << "\n";
@@ -340,13 +339,12 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
 	wto << "VALUE \"ProductName\",         \"" << gameSet.product << "\"\n";
 	wto << "VALUE \"ProductVersion\",         \"" << gameSet.version << "\\0\"\n";
 	wto << "VALUE \"LegalCopyright\",         \"" << gameSet.copyright << "\"\n";
-	wto << "VALUE \"OriginalFilename\",         \"" << es->filename << "\"\n";
+	wto << "VALUE \"OriginalFilename\",         \"" << string_replace_all(es->filename,"\\","/") << "\"\n";
 	
 	wto << "END\nEND\nBLOCK \"VarFileInfo\"\nBEGIN\n";
 	wto << "VALUE \"Translation\", 0x409, 1252\n";
 	wto << "END\nEND";
   wto.close();
-  #endif
   
   edbg << "Writing modes and settings" << flushl;
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/GAME_SETTINGS.h",ios_base::out);
