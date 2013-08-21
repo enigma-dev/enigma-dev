@@ -225,6 +225,8 @@ public final class EnigmaWriter
 		og.abortOnError = ig.get(PGameSettings.ABORT_ON_ERROR);
 		og.treatUninitializedAs0 = ig.get(PGameSettings.TREAT_UNINIT_AS_0);
 		og.author = ig.get(PGameSettings.AUTHOR);
+		og.copyright = ig.get(PGameSettings.COPYRIGHT);
+		og.product = ig.get(PGameSettings.PRODUCT);
 		og.version = ig.get(PGameSettings.VERSION);
 		og.lastChanged = ig.get(PGameSettings.LAST_CHANGED);
 		og.information = ig.get(PGameSettings.INFORMATION);
