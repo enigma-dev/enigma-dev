@@ -640,7 +640,11 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			}
 
 		String ext = es.targets.get(TargetHandler.COMPILER).ext;
-
+		String os = TargetHandler.normalize(System.getProperty("os.name")); //$NON-NLS-1$
+		if (os.contains("win") && ext == null) {
+			ext = ".exe";
+		}
+		
 		//determine `outname` (rebuild has no `outname`)
 		File outname = null;
 		try
@@ -661,12 +665,18 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		if (mode == MODE_COMPILE)
 		{
 			JFileChooser fc = new JFileChooser();
-			fc.setFileFilter(new CustomFileFilter(ext,
-					Messages.getString("EnigmaRunner.CHOOSER_EXE_DESCRIPTION"))); //$NON-NLS-1$
+			CustomFileFilter exefilter = new CustomFileFilter(
+					Messages.getString("EnigmaRunner.CHOOSER_EXE_DESCRIPTION"), ext);
+			fc.setFileFilter(exefilter); //$NON-NLS-1$
+			fc.setDialogTitle(Messages.getString("EnigmaRunner.COMPILETO"));
 			if (fc.showSaveDialog(LGM.frame) != JFileChooser.APPROVE_OPTION) return;
 			outname = fc.getSelectedFile();
-			if (ext != null && !outname.getName().endsWith(ext))
-				outname = new File(outname.getPath() + ext);
+			if (!fc.getFileFilter().equals(exefilter)) {
+				ext = "";
+			}
+			if (ext != null)
+				if (!outname.getName().endsWith(ext))
+					outname = new File(outname.getPath() + ext);
 			else
 				outname = new File(outname.getPath());
 		}
