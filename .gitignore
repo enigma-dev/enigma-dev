@@ -30,6 +30,7 @@ CompilerSource/bin/
 CompilerSource/JDI/dox/
 CompilerSource/JDI/test/defines_linux.txt
 CompilerSource/JDI/test/defines_mingw.txt
+CompilerSource/stupidity-buffer/obj
 Compilers/Windows/gcc.ey
 ENIGMAsystem/SHELL/ENIGMAengine
 *.cbTemp
