@@ -399,7 +399,7 @@ public final class TargetHandler
 		}
 
 	/** get rid of any "[]-_ " (and space), and convert to lowercase. */
-	private static String normalize(String s)
+	public static String normalize(String s)
 		{
 		return NORMALIZER.matcher(s.toLowerCase()).replaceAll(""); //$NON-NLS-1$
 		}

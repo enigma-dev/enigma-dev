@@ -34,6 +34,11 @@ WIDGETS ?= None
 # NETWORKING { Networking_Systems/* }
 NETWORKING ?= None
 
+# RESOURCE FILE WITH ICON AND VERSION INFO
+ifeq ($(PLATFORM), Win32)
+RESOURCES += Preprocessor_Environment_Editable/Resources.rc
+endif
+
 # Default windres
 WINDRES = windres.exe
 

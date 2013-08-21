@@ -176,7 +176,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode) 
 
 int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
 {
-
+  
   cout << "Initializing dialog boxes" << endl;
     ide_dia_clear();
     ide_dia_open();
@@ -321,8 +321,30 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   idpr("Outputting Resources in Various Places...",10);
 
   // FIRST FILE
-  // Modes and settings.
-
+  // Modes, settings and executable information.
+  
+  #ifdef _WIN32
+  GameSettings gameSet = es->gameSettings;
+  edbg << "Writing executable information and resources." << flushl;
+  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/Resources.rc",ios_base::out);
+    wto << license;
+    wto << "#include <windows.h>\n";
+    wto << "IDI_MAIN_ICON          ICON                    \"" << gameSet.gameIcon << "\"\n";
+	wto << "VS_VERSION_INFO VERSIONINFO\n";
+	wto << "FILEVERSION " << gameSet.versionMajor << "," << gameSet.versionMinor << "," << gameSet.versionRelease << "," << gameSet.versionBuild << "\n";
+	wto << "PRODUCTVERSION " << gameSet.versionMajor << "," << gameSet.versionMinor << "," << gameSet.versionRelease << "," << gameSet.versionBuild << "\n";
+	wto << "BEGIN\n" << "BLOCK \"StringFileInfo\"\n" << "BEGIN\n" << "BLOCK \"040904E4\"\n" << "BEGIN\n";
+	wto << "VALUE \"CompanyName\",         \"" << gameSet.company << "\"\n";
+	wto << "VALUE \"FileDescription\",         \"" << gameSet.description << "\"\n";
+	wto << "VALUE \"FileVersion\",         \"" << gameSet.version << "\\0\"\n";
+	wto << "VALUE \"ProductName\",         \"" << gameSet.product << "\"\n";
+	wto << "VALUE \"ProductVersion\",         \"" << gameSet.version << "\\0\"\n";
+	wto << "VALUE \"LegalCopyright\",         \"" << gameSet.copyright << "\"\n";
+	//wto << "VALUE \"OriginalFilename\",         \"" << es->filename << "\"\n";
+	wto << "END\nEND\nEND";
+  wto.close();
+  #endif
+  
   edbg << "Writing modes and settings" << flushl;
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/GAME_SETTINGS.h",ios_base::out);
     wto << license;
