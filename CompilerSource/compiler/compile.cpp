@@ -323,6 +323,7 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   // FIRST FILE
   // Modes, settings and executable information.
   
+  #ifdef _WIN32
   GameSettings gameSet = es->gameSettings;
   edbg << "Writing executable information and resources." << flushl;
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/Resources.rc",ios_base::out);
@@ -345,6 +346,7 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
 	wto << "VALUE \"Translation\", 0x409, 1252\n";
 	wto << "END\nEND";
   wto.close();
+  #endif
   
   edbg << "Writing modes and settings" << flushl;
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/GAME_SETTINGS.h",ios_base::out);

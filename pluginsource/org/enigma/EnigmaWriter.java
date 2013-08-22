@@ -32,11 +32,17 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.ByteBuffer;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.LinkedList;
 import java.util.List;
@@ -45,6 +51,7 @@ import java.util.WeakHashMap;
 import java.util.zip.DeflaterOutputStream;
 
 import javax.swing.JOptionPane;
+import javax.xml.bind.DatatypeConverter;
 
 import org.enigma.backend.EnigmaStruct;
 import org.enigma.backend.other.Constant;
@@ -77,6 +84,7 @@ import org.enigma.utility.Masker.Mask;
 import org.lateralgm.components.impl.ResNode;
 import org.lateralgm.file.ProjectFile;
 import org.lateralgm.file.iconio.ICOFile;
+import org.lateralgm.main.LGM;
 import org.lateralgm.resources.Background.PBackground;
 import org.lateralgm.resources.Font.PFont;
 import org.lateralgm.resources.GameSettings.PGameSettings;
@@ -182,7 +190,13 @@ public final class EnigmaWriter
 		o.lastInstanceId = i.lastInstanceId;
 		o.lastTileId = i.lastTileId;
 		}
-
+	
+	// make sure we replace these md5 sum'd icons if they are in anybodies project
+	byte[][] icoBlackList = new byte[][] {
+			   DatatypeConverter.parseHexBinary("1f742f5c692b84bbe6e522233555e291"),
+			   DatatypeConverter.parseHexBinary("08aa73a35d0c8f45bcad79b0635007de")
+			 };
+	
 	protected void populateSettings()
 		{
 		org.lateralgm.resources.GameSettings ig = i.gameSettings;
@@ -246,20 +260,37 @@ public final class EnigmaWriter
 
 		//All this shit is just to write the icon to a temp file and provide the filename...
 		ICOFile ico = ig.get(PGameSettings.GAME_ICON);
+	
 		OutputStream os = null;
 		String fn = null;
-		if (ico != null) try
-			{
-			File f = File.createTempFile("gms_ico",".ico");
+		if (ico != null) { 
+		try
+		{
+			File f = File.createTempFile("egm_ico",".ico");
+			
+			// if the icon has been black listed, replace it with the defualt one
+			byte[] hash = ico.getDigest("MD5"); 
+			for (byte[] blhash : icoBlackList) {
+				if (Arrays.equals(hash, blhash)) { 
+					InputStream is = LGM.class.getClassLoader().getResourceAsStream("org/lateralgm/file/default.ico");	
+					ico = new ICOFile(is);
+					break; 
+				}
+			}
+			
 			ico.write(os = new FileOutputStream(f));
 			fn = f.getAbsolutePath();
-			}
+		}
 		catch (IOException e)
-			{
+		{
+			JOptionPane.showMessageDialog(null, e.getStackTrace());
 			e.printStackTrace();
-			}
+			} catch (NoSuchAlgorithmException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		finally
-			{
+		{
 			if (os != null) try
 				{
 				os.close();
@@ -268,9 +299,15 @@ public final class EnigmaWriter
 				{
 				e.printStackTrace();
 				}
-			}
+		}
 		og.gameIcon = fn;
 		}
+		
+		}
+	
+	protected String bytesAsHex(byte[] bs) { 
+		String res = ""; for (byte b: bs) res += String.format("%02x", b); return res; 
+	}
 
 	protected void populateSprites()
 		{
