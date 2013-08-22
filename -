@@ -1,0 +1,471 @@
+make -C ENIGMAsystem/SHELL
+g++ -I/opt/X11/include/ -IPlatforms/Cocoa/Info -IGraphics_Systems/OpenGL1/Info -IAudio_Systems/None/Info -ICollision_Systems/Precise/Info -IWidget_Systems/None/Info -INetworking_Systems/None/Info -IUniversal_System/Info -I. -Wall -s -O3   -MMD -MP -c -o .eobjs/MacOSX/MacOSX/Run/SHELLmain.o SHELLmain.cpp
+In file included from Graphics_Systems/OpenGL1/../General/actions.h:36,
+                 from Graphics_Systems/OpenGL1/include.h:14,
+                 from API_Switchboard.h:32,
+                 from SHELLmain.cpp:53:
+./Universal_System/lives.h:32: error: ‘livesv’ in namespace ‘enigma_user::enigma’ does not name a type
+In file included from Graphics_Systems/OpenGL1/include.h:14,
+                 from API_Switchboard.h:32,
+                 from SHELLmain.cpp:53:
+Graphics_Systems/OpenGL1/../General/actions.h: In function ‘void enigma_user::action_draw_rectangle(gs_scalar, gs_scalar, gs_scalar, gs_scalar, int)’:
+Graphics_Systems/OpenGL1/../General/actions.h:47: error: ‘object_planar’ is not a member of ‘enigma_user::enigma’
+Graphics_Systems/OpenGL1/../General/actions.h:47: error: expected primary-expression before ‘const’
+Graphics_Systems/OpenGL1/../General/actions.h:47: error: expected `;' before ‘const’
+Graphics_Systems/OpenGL1/../General/actions.h:48: error: ‘inst’ was not declared in this scope
+Graphics_Systems/OpenGL1/../General/actions.h: In function ‘void enigma_user::action_sprite_set(double, double, double)’:
+Graphics_Systems/OpenGL1/../General/actions.h:54: error: ‘object_graphics’ is not a member of ‘enigma_user::enigma’
+Graphics_Systems/OpenGL1/../General/actions.h:54: error: expected primary-expression before ‘const’
+Graphics_Systems/OpenGL1/../General/actions.h:54: error: expected `;' before ‘const’
+Graphics_Systems/OpenGL1/../General/actions.h:55: error: ‘inst’ was not declared in this scope
+Graphics_Systems/OpenGL1/../General/actions.h: In function ‘void enigma_user::action_draw_text(std::string, gs_scalar, gs_scalar)’:
+Graphics_Systems/OpenGL1/../General/actions.h:62: error: ‘object_planar’ is not a member of ‘enigma_user::enigma’
+Graphics_Systems/OpenGL1/../General/actions.h:62: error: expected primary-expression before ‘const’
+Graphics_Systems/OpenGL1/../General/actions.h:62: error: expected `;' before ‘const’
+Graphics_Systems/OpenGL1/../General/actions.h:63: error: ‘inst’ was not declared in this scope
+Graphics_Systems/OpenGL1/../General/actions.h: In function ‘void enigma_user::action_draw_background(int, gs_scalar, gs_scalar, int)’:
+Graphics_Systems/OpenGL1/../General/actions.h:84: error: ‘object_planar’ is not a member of ‘enigma_user::enigma’
+Graphics_Systems/OpenGL1/../General/actions.h:84: error: expected primary-expression before ‘const’
+Graphics_Systems/OpenGL1/../General/actions.h:84: error: expected `;' before ‘const’
+Graphics_Systems/OpenGL1/../General/actions.h:85: error: ‘inst’ was not declared in this scope
+Graphics_Systems/OpenGL1/../General/actions.h: In function ‘void enigma_user::action_draw_ellipse(gs_scalar, gs_scalar, gs_scalar, gs_scalar, int)’:
+Graphics_Systems/OpenGL1/../General/actions.h:95: error: ‘object_planar’ is not a member of ‘enigma_user::enigma’
+Graphics_Systems/OpenGL1/../General/actions.h:95: error: expected primary-expression before ‘const’
+Graphics_Systems/OpenGL1/../General/actions.h:95: error: expected `;' before ‘const’
+Graphics_Systems/OpenGL1/../General/actions.h:96: error: ‘inst’ was not declared in this scope
+Graphics_Systems/OpenGL1/../General/actions.h: In function ‘void enigma_user::action_draw_ellipse_gradient(gs_scalar, gs_scalar, gs_scalar, gs_scalar, int, int)’:
+Graphics_Systems/OpenGL1/../General/actions.h:106: error: ‘object_planar’ is not a member of ‘enigma_user::enigma’
+Graphics_Systems/OpenGL1/../General/actions.h:106: error: expected primary-expression before ‘const’
+Graphics_Systems/OpenGL1/../General/actions.h:106: error: expected `;' before ‘const’
+Graphics_Systems/OpenGL1/../General/actions.h:107: error: ‘inst’ was not declared in this scope
+Graphics_Systems/OpenGL1/../General/actions.h: In function ‘void enigma_user::action_draw_gradient_hor(gs_scalar, gs_scalar, gs_scalar, gs_scalar, int, int)’:
+Graphics_Systems/OpenGL1/../General/actions.h:117: error: ‘object_planar’ is not a member of ‘enigma_user::enigma’
+Graphics_Systems/OpenGL1/../General/actions.h:117: error: expected primary-expression before ‘const’
+Graphics_Systems/OpenGL1/../General/actions.h:117: error: expected `;' before ‘const’
+Graphics_Systems/OpenGL1/../General/actions.h:118: error: ‘inst’ was not declared in this scope
+Graphics_Systems/OpenGL1/../General/actions.h: In function ‘void enigma_user::action_draw_gradient_vert(gs_scalar, gs_scalar, gs_scalar, gs_scalar, int, int)’:
+Graphics_Systems/OpenGL1/../General/actions.h:128: error: ‘object_planar’ is not a member of ‘enigma_user::enigma’
+Graphics_Systems/OpenGL1/../General/actions.h:128: error: expected primary-expression before ‘const’
+Graphics_Systems/OpenGL1/../General/actions.h:128: error: expected `;' before ‘const’
+Graphics_Systems/OpenGL1/../General/actions.h:129: error: ‘inst’ was not declared in this scope
+Graphics_Systems/OpenGL1/../General/actions.h: In function ‘void enigma_user::action_draw_score(gs_scalar, gs_scalar, std::string)’:
+Graphics_Systems/OpenGL1/../General/actions.h:137: error: ‘object_planar’ is not a member of ‘enigma_user::enigma’
+Graphics_Systems/OpenGL1/../General/actions.h:137: error: expected primary-expression before ‘const’
+Graphics_Systems/OpenGL1/../General/actions.h:137: error: expected `;' before ‘const’
+Graphics_Systems/OpenGL1/../General/actions.h:138: error: ‘inst’ was not declared in this scope
+Graphics_Systems/OpenGL1/../General/actions.h: In function ‘void enigma_user::action_draw_sprite(int, gs_scalar, gs_scalar, int)’:
+Graphics_Systems/OpenGL1/../General/actions.h:144: error: ‘object_planar’ is not a member of ‘enigma_user::enigma’
+Graphics_Systems/OpenGL1/../General/actions.h:144: error: expected primary-expression before ‘const’
+Graphics_Systems/OpenGL1/../General/actions.h:144: error: expected `;' before ‘const’
+Graphics_Systems/OpenGL1/../General/actions.h:145: error: ‘inst’ was not declared in this scope
+Graphics_Systems/OpenGL1/../General/actions.h: In function ‘void enigma_user::action_draw_health(gs_scalar, gs_scalar, gs_scalar, gs_scalar, double, int)’:
+Graphics_Systems/OpenGL1/../General/actions.h:177: error: ‘object_planar’ is not a member of ‘enigma_user::enigma’
+Graphics_Systems/OpenGL1/../General/actions.h:177: error: expected primary-expression before ‘const’
+Graphics_Systems/OpenGL1/../General/actions.h:177: error: expected `;' before ‘const’
+Graphics_Systems/OpenGL1/../General/actions.h:178: error: ‘inst’ was not declared in this scope
+Graphics_Systems/OpenGL1/../General/actions.h: In function ‘void enigma_user::action_draw_life(gs_scalar, gs_scalar, std::string)’:
+Graphics_Systems/OpenGL1/../General/actions.h:188: error: ‘object_planar’ is not a member of ‘enigma_user::enigma’
+Graphics_Systems/OpenGL1/../General/actions.h:188: error: expected primary-expression before ‘const’
+Graphics_Systems/OpenGL1/../General/actions.h:188: error: expected `;' before ‘const’
+Graphics_Systems/OpenGL1/../General/actions.h:189: error: ‘inst’ was not declared in this scope
+Graphics_Systems/OpenGL1/../General/actions.h:189: error: ‘lives’ was not declared in this scope
+Graphics_Systems/OpenGL1/../General/actions.h:192: error: ‘lives’ was not declared in this scope
+Graphics_Systems/OpenGL1/../General/actions.h: In function ‘void enigma_user::action_draw_life_images(gs_scalar, gs_scalar, int)’:
+Graphics_Systems/OpenGL1/../General/actions.h:200: error: ‘object_planar’ is not a member of ‘enigma_user::enigma’
+Graphics_Systems/OpenGL1/../General/actions.h:200: error: expected primary-expression before ‘const’
+Graphics_Systems/OpenGL1/../General/actions.h:200: error: expected `;' before ‘const’
+Graphics_Systems/OpenGL1/../General/actions.h:201: error: ‘inst’ was not declared in this scope
+Graphics_Systems/OpenGL1/../General/actions.h:205: error: ‘lives’ was not declared in this scope
+Graphics_Systems/OpenGL1/../General/actions.h: In function ‘void enigma_user::action_draw_line(gs_scalar, gs_scalar, gs_scalar, gs_scalar)’:
+Graphics_Systems/OpenGL1/../General/actions.h:213: error: ‘object_planar’ is not a member of ‘enigma_user::enigma’
+Graphics_Systems/OpenGL1/../General/actions.h:213: error: expected primary-expression before ‘const’
+Graphics_Systems/OpenGL1/../General/actions.h:213: error: expected `;' before ‘const’
+Graphics_Systems/OpenGL1/../General/actions.h:214: error: ‘inst’ was not declared in this scope
+Graphics_Systems/OpenGL1/../General/actions.h: In function ‘void enigma_user::action_draw_text_transformed(std::string, gs_scalar, gs_scalar, gs_scalar, gs_scalar, double)’:
+Graphics_Systems/OpenGL1/../General/actions.h:224: error: ‘object_planar’ is not a member of ‘enigma_user::enigma’
+Graphics_Systems/OpenGL1/../General/actions.h:224: error: expected primary-expression before ‘const’
+Graphics_Systems/OpenGL1/../General/actions.h:224: error: expected `;' before ‘const’
+Graphics_Systems/OpenGL1/../General/actions.h:225: error: ‘inst’ was not declared in this scope
+Graphics_Systems/OpenGL1/../General/actions.h: In function ‘void enigma_user::action_draw_variable(variant, gs_scalar, gs_scalar)’:
+Graphics_Systems/OpenGL1/../General/actions.h:235: error: ‘object_planar’ is not a member of ‘enigma_user::enigma’
+Graphics_Systems/OpenGL1/../General/actions.h:235: error: expected primary-expression before ‘const’
+Graphics_Systems/OpenGL1/../General/actions.h:235: error: expected `;' before ‘const’
+Graphics_Systems/OpenGL1/../General/actions.h:236: error: ‘inst’ was not declared in this scope
+Graphics_Systems/OpenGL1/../General/actions.h: In function ‘int enigma_user::draw_self()’:
+Graphics_Systems/OpenGL1/../General/actions.h:254: error: ‘object_collisions’ is not a member of ‘enigma_user::enigma’
+Graphics_Systems/OpenGL1/../General/actions.h:254: error: expected primary-expression before ‘const’
+Graphics_Systems/OpenGL1/../General/actions.h:254: error: expected `;' before ‘const’
+Graphics_Systems/OpenGL1/../General/actions.h:255: error: ‘inst’ was not declared in this scope
+Graphics_Systems/OpenGL1/../General/actions.h: In function ‘void enigma_user::action_sprite_transform(gs_scalar, gs_scalar, double, int)’:
+Graphics_Systems/OpenGL1/../General/actions.h:266: error: ‘object_collisions’ is not a member of ‘enigma_user::enigma’
+Graphics_Systems/OpenGL1/../General/actions.h:266: error: expected primary-expression before ‘const’
+Graphics_Systems/OpenGL1/../General/actions.h:266: error: expected `;' before ‘const’
+Graphics_Systems/OpenGL1/../General/actions.h:267: error: ‘inst’ was not declared in this scope
+Graphics_Systems/OpenGL1/../General/actions.h: In function ‘void enigma_user::action_sprite_color(int, int)’:
+Graphics_Systems/OpenGL1/../General/actions.h:274: error: ‘object_collisions’ is not a member of ‘enigma_user::enigma’
+Graphics_Systems/OpenGL1/../General/actions.h:274: error: expected primary-expression before ‘const’
+Graphics_Systems/OpenGL1/../General/actions.h:274: error: expected `;' before ‘const’
+Graphics_Systems/OpenGL1/../General/actions.h:275: error: ‘inst’ was not declared in this scope
+In file included from Collision_Systems/Precise/include.h:2,
+                 from API_Switchboard.h:34,
+                 from SHELLmain.cpp:53:
+Collision_Systems/Precise/../General/coll_funcs.h: At global scope:
+Collision_Systems/Precise/../General/coll_funcs.h:33: error: ‘instance_t’ in namespace ‘enigma_user::enigma’ does not name a type
+Collision_Systems/Precise/../General/coll_funcs.h:34: error: ‘instance_t’ in namespace ‘enigma_user::enigma’ does not name a type
+Collision_Systems/Precise/../General/coll_funcs.h:35: error: ‘instance_t’ in namespace ‘enigma_user::enigma’ does not name a type
+Collision_Systems/Precise/../General/coll_funcs.h:36: error: ‘instance_t’ in namespace ‘enigma_user::enigma’ does not name a type
+Collision_Systems/Precise/../General/coll_funcs.h:37: error: ‘instance_t’ in namespace ‘enigma_user::enigma’ does not name a type
+Collision_Systems/Precise/../General/coll_funcs.h:38: error: ‘instance_t’ in namespace ‘enigma_user::enigma’ does not name a type
+Collision_Systems/Precise/../General/coll_funcs.h:39: error: ‘instance_t’ in namespace ‘enigma_user::enigma’ does not name a type
+In file included from Collision_Systems/Precise/include.h:3,
+                 from API_Switchboard.h:34,
+                 from SHELLmain.cpp:53:
+./Collision_Systems/actions.h: In function ‘bool enigma_user::action_if_object(int, cs_scalar, cs_scalar)’:
+./Collision_Systems/actions.h:28: error: ‘object_planar’ is not a member of ‘enigma_user::enigma’
+./Collision_Systems/actions.h:28: error: expected primary-expression before ‘const’
+./Collision_Systems/actions.h:28: error: expected `;' before ‘const’
+./Collision_Systems/actions.h:29: error: ‘inst’ was not declared in this scope
+./Collision_Systems/actions.h: In function ‘bool enigma_user::action_if_empty(cs_scalar, cs_scalar, int)’:
+./Collision_Systems/actions.h:40: error: ‘object_graphics’ is not a member of ‘enigma_user::enigma’
+./Collision_Systems/actions.h:40: error: expected primary-expression before ‘)’ token
+./Collision_Systems/actions.h:40: error: expected `)' before ‘enigma’
+./Collision_Systems/actions.h:42: error: ‘object_graphics’ is not a member of ‘enigma_user::enigma’
+./Collision_Systems/actions.h:42: error: expected primary-expression before ‘)’ token
+./Collision_Systems/actions.h:42: error: expected `)' before ‘enigma’
+./Collision_Systems/actions.h: In function ‘void enigma_user::action_kill_position(cs_scalar, cs_scalar)’:
+./Collision_Systems/actions.h:65: error: ‘object_planar’ is not a member of ‘enigma_user::enigma’
+./Collision_Systems/actions.h:65: error: expected primary-expression before ‘const’
+./Collision_Systems/actions.h:65: error: expected `;' before ‘const’
+./Collision_Systems/actions.h:66: error: ‘inst’ was not declared in this scope
+In file included from Universal_System/Extensions/MotionPlanning/include.h:3,
+                 from API_Switchboard.h:44,
+                 from SHELLmain.cpp:53:
+Universal_System/Extensions/MotionPlanning/actions.h: In function ‘void enigma_user::action_linear_step(double, double, double, bool)’:
+Universal_System/Extensions/MotionPlanning/actions.h:40: error: ‘object_graphics’ is not a member of ‘enigma_user::enigma’
+Universal_System/Extensions/MotionPlanning/actions.h:40: error: expected primary-expression before ‘)’ token
+Universal_System/Extensions/MotionPlanning/actions.h:40: error: expected `)' before ‘enigma’
+Universal_System/Extensions/MotionPlanning/actions.h: In function ‘void enigma_user::action_potential_step(double, double, double, bool)’:
+Universal_System/Extensions/MotionPlanning/actions.h:52: error: ‘object_graphics’ is not a member of ‘enigma_user::enigma’
+Universal_System/Extensions/MotionPlanning/actions.h:52: error: expected primary-expression before ‘)’ token
+Universal_System/Extensions/MotionPlanning/actions.h:52: error: expected `)' before ‘enigma’
+In file included from Universal_System/Extensions/ParticleSystems/include.h:5,
+                 from API_Switchboard.h:48,
+                 from SHELLmain.cpp:53:
+Universal_System/Extensions/ParticleSystems/PS_particle_bridge_OpenGL1.h: In function ‘void enigma::particle_bridge::draw_particle(enigma::particle_instance*)’:
+Universal_System/Extensions/ParticleSystems/PS_particle_bridge_OpenGL1.h:101: error: reference to ‘enigma’ is ambiguous
+Universal_System/var_te.h:30: error: candidates are: namespace enigma { }
+Platforms/Cocoa/CocoaWindow.h:178: error:                 namespace enigma_user::enigma { }
+Universal_System/Extensions/ParticleSystems/PS_particle_bridge_OpenGL1.h:101: error: reference to ‘enigma’ is ambiguous
+Universal_System/var_te.h:30: error: candidates are: namespace enigma { }
+Platforms/Cocoa/CocoaWindow.h:178: error:                 namespace enigma_user::enigma { }
+Universal_System/Extensions/ParticleSystems/PS_particle_bridge_OpenGL1.h:150: error: reference to ‘enigma’ is ambiguous
+Universal_System/var_te.h:30: error: candidates are: namespace enigma { }
+Platforms/Cocoa/CocoaWindow.h:178: error:                 namespace enigma_user::enigma { }
+Universal_System/Extensions/ParticleSystems/PS_particle_bridge_OpenGL1.h:150: error: reference to ‘enigma’ is ambiguous
+Universal_System/var_te.h:30: error: candidates are: namespace enigma { }
+Platforms/Cocoa/CocoaWindow.h:178: error:                 namespace enigma_user::enigma { }
+Universal_System/Extensions/ParticleSystems/PS_particle_bridge_OpenGL1.h: In function ‘void enigma::particle_bridge::draw_particles(std::vector<enigma::particle_instance, std::allocator<enigma::particle_instance> >&, bool, double, int, double, double)’:
+Universal_System/Extensions/ParticleSystems/PS_particle_bridge_OpenGL1.h:190: error: reference to ‘enigma’ is ambiguous
+Universal_System/var_te.h:30: error: candidates are: namespace enigma { }
+Platforms/Cocoa/CocoaWindow.h:178: error:                 namespace enigma_user::enigma { }
+Universal_System/Extensions/ParticleSystems/PS_particle_bridge_OpenGL1.h:190: error: ‘particle_bridge’ is not a namespace-name
+Universal_System/Extensions/ParticleSystems/PS_particle_bridge_OpenGL1.h:190: error: expected namespace-name before ‘;’ token
+In file included from SHELLmain.cpp:70:
+Universal_System/instance.h: At global scope:
+Universal_System/instance.h:37: error: ‘instance_t’ in namespace ‘enigma_user::enigma’ does not name a type
+Universal_System/instance.h:52: error: ‘instance_t’ in namespace ‘enigma_user::enigma’ does not name a type
+Universal_System/instance.h:54: error: ‘instance_t’ in namespace ‘enigma_user::enigma’ does not name a type
+Universal_System/instance.h:55: error: ‘instance_t’ in namespace ‘enigma_user::enigma’ does not name a type
+Universal_System/instance.h:62: error: reference to ‘enigma’ is ambiguous
+Universal_System/var_te.h:30: error: candidates are: namespace enigma { }
+Platforms/Cocoa/CocoaWindow.h:178: error:                 namespace enigma_user::enigma { }
+Universal_System/instance.h:62: error: expected ‘,’ or ‘...’ before ‘*’ token
+In file included from SHELLmain.cpp:71:
+Universal_System/roomsystem.h:167: error: ‘roomv’ in namespace ‘enigma_user::enigma’ does not name a type
+In file included from SHELLmain.cpp:81:
+Universal_System/actions.h: In function ‘void enigma_user::action_move_to(double, double)’:
+Universal_System/actions.h:49: error: ‘object_graphics’ is not a member of ‘enigma_user::enigma’
+Universal_System/actions.h:49: error: expected primary-expression before ‘)’ token
+Universal_System/actions.h:49: error: expected `)' before ‘enigma’
+Universal_System/actions.h:50: error: ‘object_graphics’ is not a member of ‘enigma_user::enigma’
+Universal_System/actions.h:50: error: expected primary-expression before ‘)’ token
+Universal_System/actions.h:50: error: expected `)' before ‘enigma’
+Universal_System/actions.h:53: error: ‘object_graphics’ is not a member of ‘enigma_user::enigma’
+Universal_System/actions.h:53: error: expected primary-expression before ‘)’ token
+Universal_System/actions.h:53: error: expected `)' before ‘enigma’
+Universal_System/actions.h:54: error: ‘object_graphics’ is not a member of ‘enigma_user::enigma’
+Universal_System/actions.h:54: error: expected primary-expression before ‘)’ token
+Universal_System/actions.h:54: error: expected `)' before ‘enigma’
+Universal_System/actions.h: In function ‘void enigma_user::action_set_life(double)’:
+Universal_System/actions.h:64: error: ‘lives’ was not declared in this scope
+Universal_System/actions.h:65: error: ‘lives’ was not declared in this scope
+Universal_System/actions.h: In function ‘void enigma_user::action_set_vspeed(double)’:
+Universal_System/actions.h:91: error: ‘object_graphics’ is not a member of ‘enigma_user::enigma’
+Universal_System/actions.h:91: error: expected primary-expression before ‘)’ token
+Universal_System/actions.h:91: error: expected `)' before ‘enigma’
+Universal_System/actions.h:93: error: ‘object_graphics’ is not a member of ‘enigma_user::enigma’
+Universal_System/actions.h:93: error: expected primary-expression before ‘)’ token
+Universal_System/actions.h:93: error: expected `)' before ‘enigma’
+Universal_System/actions.h: In function ‘void enigma_user::action_set_hspeed(double)’:
+Universal_System/actions.h:98: error: ‘object_graphics’ is not a member of ‘enigma_user::enigma’
+Universal_System/actions.h:98: error: expected primary-expression before ‘)’ token
+Universal_System/actions.h:98: error: expected `)' before ‘enigma’
+Universal_System/actions.h:100: error: ‘object_graphics’ is not a member of ‘enigma_user::enigma’
+Universal_System/actions.h:100: error: expected primary-expression before ‘)’ token
+Universal_System/actions.h:100: error: expected `)' before ‘enigma’
+Universal_System/actions.h: In function ‘void enigma_user::action_set_gravity(double, double)’:
+Universal_System/actions.h:105: error: ‘object_graphics’ is not a member of ‘enigma_user::enigma’
+Universal_System/actions.h:105: error: expected primary-expression before ‘)’ token
+Universal_System/actions.h:105: error: expected `)' before ‘enigma’
+Universal_System/actions.h:106: error: ‘object_graphics’ is not a member of ‘enigma_user::enigma’
+Universal_System/actions.h:106: error: expected primary-expression before ‘)’ token
+Universal_System/actions.h:106: error: expected `)' before ‘enigma’
+Universal_System/actions.h:108: error: ‘object_graphics’ is not a member of ‘enigma_user::enigma’
+Universal_System/actions.h:108: error: expected primary-expression before ‘)’ token
+Universal_System/actions.h:108: error: expected `)' before ‘enigma’
+Universal_System/actions.h:109: error: ‘object_graphics’ is not a member of ‘enigma_user::enigma’
+Universal_System/actions.h:109: error: expected primary-expression before ‘)’ token
+Universal_System/actions.h:109: error: expected `)' before ‘enigma’
+Universal_System/actions.h: In function ‘void enigma_user::action_set_friction(double)’:
+Universal_System/actions.h:115: error: ‘object_graphics’ is not a member of ‘enigma_user::enigma’
+Universal_System/actions.h:115: error: expected primary-expression before ‘)’ token
+Universal_System/actions.h:115: error: expected `)' before ‘enigma’
+Universal_System/actions.h:117: error: ‘object_graphics’ is not a member of ‘enigma_user::enigma’
+Universal_System/actions.h:117: error: expected primary-expression before ‘)’ token
+Universal_System/actions.h:117: error: expected `)' before ‘enigma’
+Universal_System/actions.h: In function ‘void enigma_user::action_move_point(double, double, double)’:
+Universal_System/actions.h:128: error: ‘object_planar’ is not a member of ‘enigma_user::enigma’
+Universal_System/actions.h:128: error: expected primary-expression before ‘const’
+Universal_System/actions.h:128: error: expected `;' before ‘const’
+Universal_System/actions.h:129: error: ‘inst’ was not declared in this scope
+Universal_System/actions.h: In function ‘bool enigma_user::action_if_previous_room()’:
+Universal_System/actions.h:139: error: ‘room’ was not declared in this scope
+Universal_System/actions.h: In function ‘bool enigma_user::action_if_next_room()’:
+Universal_System/actions.h:144: error: ‘room’ was not declared in this scope
+Universal_System/actions.h: In function ‘void enigma_user::action_move(const char*, int)’:
+Universal_System/actions.h:161: error: ‘object_planar’ is not a member of ‘enigma_user::enigma’
+Universal_System/actions.h:161: error: expected primary-expression before ‘)’ token
+Universal_System/actions.h:161: error: expected `)' before ‘enigma’
+Universal_System/actions.h:163: error: ‘object_planar’ is not a member of ‘enigma_user::enigma’
+Universal_System/actions.h:163: error: expected primary-expression before ‘)’ token
+Universal_System/actions.h:163: error: expected `)' before ‘enigma’
+Universal_System/actions.h:165: error: ‘object_planar’ is not a member of ‘enigma_user::enigma’
+Universal_System/actions.h:165: error: expected primary-expression before ‘)’ token
+Universal_System/actions.h:165: error: expected `)' before ‘enigma’
+Universal_System/actions.h:166: error: ‘object_planar’ is not a member of ‘enigma_user::enigma’
+Universal_System/actions.h:166: error: expected primary-expression before ‘)’ token
+Universal_System/actions.h:166: error: expected `)' before ‘enigma’
+Universal_System/actions.h:167: error: ‘object_planar’ is not a member of ‘enigma_user::enigma’
+Universal_System/actions.h:167: error: expected primary-expression before ‘)’ token
+Universal_System/actions.h:167: error: expected `)' before ‘enigma’
+Universal_System/actions.h:160: warning: unused variable ‘newdir’
+Universal_System/actions.h:164: warning: unused variable ‘newspd’
+Universal_System/actions.h: In function ‘void enigma_user::action_reverse_xdir()’:
+Universal_System/actions.h:171: error: ‘object_graphics’ is not a member of ‘enigma_user::enigma’
+Universal_System/actions.h:171: error: expected primary-expression before ‘)’ token
+Universal_System/actions.h:171: error: expected `)' before ‘enigma’
+Universal_System/actions.h: In function ‘void enigma_user::action_reverse_ydir()’:
+Universal_System/actions.h:175: error: ‘object_graphics’ is not a member of ‘enigma_user::enigma’
+Universal_System/actions.h:175: error: expected primary-expression before ‘)’ token
+Universal_System/actions.h:175: error: expected `)' before ‘enigma’
+Universal_System/actions.h: In function ‘void enigma_user::action_move_start()’:
+Universal_System/actions.h:183: error: ‘object_planar’ is not a member of ‘enigma_user::enigma’
+Universal_System/actions.h:183: error: expected primary-expression before ‘const’
+Universal_System/actions.h:183: error: expected `;' before ‘const’
+Universal_System/actions.h:184: error: ‘inst’ was not declared in this scope
+Universal_System/actions.h: In function ‘void enigma_user::action_set_motion(double, double)’:
+Universal_System/actions.h:226: error: ‘object_graphics’ is not a member of ‘enigma_user::enigma’
+Universal_System/actions.h:226: error: expected primary-expression before ‘const’
+Universal_System/actions.h:226: error: expected `;' before ‘const’
+Universal_System/actions.h:228: error: ‘inst’ was not declared in this scope
+Universal_System/actions.h:232: error: ‘inst’ was not declared in this scope
+Universal_System/actions.h: In function ‘void enigma_user::action_create_object(int, double, double)’:
+Universal_System/actions.h:250: error: ‘object_planar’ is not a member of ‘enigma_user::enigma’
+Universal_System/actions.h:250: error: expected primary-expression before ‘const’
+Universal_System/actions.h:250: error: expected `;' before ‘const’
+Universal_System/actions.h:251: error: ‘inst’ was not declared in this scope
+Universal_System/actions.h:251: error: ‘instance_create’ was not declared in this scope
+Universal_System/actions.h:254: error: ‘instance_create’ was not declared in this scope
+Universal_System/actions.h: In function ‘void enigma_user::action_create_object_random(int, int, int, int, double, double)’:
+Universal_System/actions.h:272: error: ‘object_planar’ is not a member of ‘enigma_user::enigma’
+Universal_System/actions.h:272: error: expected primary-expression before ‘const’
+Universal_System/actions.h:272: error: expected `;' before ‘const’
+Universal_System/actions.h:273: error: ‘inst’ was not declared in this scope
+Universal_System/actions.h:273: error: ‘instance_create’ was not declared in this scope
+Universal_System/actions.h:276: error: ‘instance_create’ was not declared in this scope
+Universal_System/actions.h: In function ‘bool enigma_user::action_if_life(double, int)’:
+Universal_System/actions.h:300: error: ‘lives’ was not declared in this scope
+Universal_System/actions.h: In function ‘void enigma_user::action_create_object_motion(int, double, double, double, double)’:
+Universal_System/actions.h:338: error: ‘object_planar’ is not a member of ‘enigma_user::enigma’
+Universal_System/actions.h:338: error: expected primary-expression before ‘const’
+Universal_System/actions.h:338: error: expected `;' before ‘const’
+Universal_System/actions.h:339: error: ‘object_planar’ is not a member of ‘enigma_user::enigma’
+Universal_System/actions.h:339: error: expected primary-expression before ‘const’
+Universal_System/actions.h:339: error: expected `;' before ‘const’
+Universal_System/actions.h:340: error: ‘ii’ was not declared in this scope
+Universal_System/actions.h:345: error: ‘object_planar’ is not a member of ‘enigma_user::enigma’
+Universal_System/actions.h:345: error: expected primary-expression before ‘const’
+Universal_System/actions.h:345: error: expected `;' before ‘const’
+Universal_System/actions.h:346: error: ‘ii’ was not declared in this scope
+Universal_System/actions.h: In function ‘variant event_perform(int, int)’:
+Universal_System/actions.h:483: error: reference to ‘enigma’ is ambiguous
+Universal_System/var_te.h:30: error: candidates are: namespace enigma { }
+Platforms/Cocoa/CocoaWindow.h:178: error:                 namespace enigma_user::enigma { }
+In file included from SHELLmain.cpp:95:
+Universal_System/with.h: At global scope:
+Universal_System/with.h:37: error: reference to ‘enigma’ is ambiguous
+Universal_System/var_te.h:30: error: candidates are: namespace enigma { }
+Platforms/Cocoa/CocoaWindow.h:178: error:                 namespace enigma_user::enigma { }
+Universal_System/with.h:37: error: expected `)' before ‘nt’
+In file included from SHELLmain.cpp:96:
+Preprocessor_Environment_Editable/IDE_EDIT_evparent.h: In member function ‘virtual variant enigma::event_parent::myevent_localsweep()’:
+Preprocessor_Environment_Editable/IDE_EDIT_evparent.h:52: error: reference to ‘enigma’ is ambiguous
+Universal_System/var_te.h:30: error: candidates are: namespace enigma { }
+Platforms/Cocoa/CocoaWindow.h:178: error:                 namespace enigma_user::enigma { }
+Preprocessor_Environment_Editable/IDE_EDIT_evparent.h: In member function ‘virtual variant enigma::event_parent::myevents_perf(int, int)’:
+Preprocessor_Environment_Editable/IDE_EDIT_evparent.h:61: warning: no return statement in function returning non-void
+In file included from SHELLmain.cpp:97:
+Preprocessor_Environment_Editable/IDE_EDIT_events.h: In function ‘variant enigma::ev_perf(int, int)’:
+Preprocessor_Environment_Editable/IDE_EDIT_events.h:63: error: reference to ‘enigma’ is ambiguous
+Universal_System/var_te.h:30: error: candidates are: namespace enigma { }
+Platforms/Cocoa/CocoaWindow.h:178: error:                 namespace enigma_user::enigma { }
+Preprocessor_Environment_Editable/IDE_EDIT_events.h:63: error: expected primary-expression before ‘)’ token
+Preprocessor_Environment_Editable/IDE_EDIT_events.h: In function ‘int enigma::ENIGMA_events()’:
+Preprocessor_Environment_Editable/IDE_EDIT_events.h:68: error: reference to ‘enigma’ is ambiguous
+Universal_System/var_te.h:30: error: candidates are: namespace enigma { }
+Platforms/Cocoa/CocoaWindow.h:178: error:                 namespace enigma_user::enigma { }
+Preprocessor_Environment_Editable/IDE_EDIT_events.h:68: error: expected primary-expression before ‘)’ token
+Preprocessor_Environment_Editable/IDE_EDIT_events.h:69: error: reference to ‘enigma’ is ambiguous
+Universal_System/var_te.h:30: error: candidates are: namespace enigma { }
+Platforms/Cocoa/CocoaWindow.h:178: error:                 namespace enigma_user::enigma { }
+Preprocessor_Environment_Editable/IDE_EDIT_events.h:72: error: reference to ‘enigma’ is ambiguous
+Universal_System/var_te.h:30: error: candidates are: namespace enigma { }
+Platforms/Cocoa/CocoaWindow.h:178: error:                 namespace enigma_user::enigma { }
+Preprocessor_Environment_Editable/IDE_EDIT_events.h:75: error: reference to ‘enigma’ is ambiguous
+Universal_System/var_te.h:30: error: candidates are: namespace enigma { }
+Platforms/Cocoa/CocoaWindow.h:178: error:                 namespace enigma_user::enigma { }
+Preprocessor_Environment_Editable/IDE_EDIT_events.h:75: error: expected primary-expression before ‘)’ token
+Preprocessor_Environment_Editable/IDE_EDIT_events.h:76: error: reference to ‘enigma’ is ambiguous
+Universal_System/var_te.h:30: error: candidates are: namespace enigma { }
+Platforms/Cocoa/CocoaWindow.h:178: error:                 namespace enigma_user::enigma { }
+Preprocessor_Environment_Editable/IDE_EDIT_events.h:79: error: reference to ‘enigma’ is ambiguous
+Universal_System/var_te.h:30: error: candidates are: namespace enigma { }
+Platforms/Cocoa/CocoaWindow.h:178: error:                 namespace enigma_user::enigma { }
+Preprocessor_Environment_Editable/IDE_EDIT_events.h:81: error: reference to ‘enigma’ is ambiguous
+Universal_System/var_te.h:30: error: candidates are: namespace enigma { }
+Platforms/Cocoa/CocoaWindow.h:178: error:                 namespace enigma_user::enigma { }
+Preprocessor_Environment_Editable/IDE_EDIT_events.h:83: error: reference to ‘enigma’ is ambiguous
+Universal_System/var_te.h:30: error: candidates are: namespace enigma { }
+Platforms/Cocoa/CocoaWindow.h:178: error:                 namespace enigma_user::enigma { }
+Preprocessor_Environment_Editable/IDE_EDIT_events.h:85: error: reference to ‘enigma’ is ambiguous
+Universal_System/var_te.h:30: error: candidates are: namespace enigma { }
+Platforms/Cocoa/CocoaWindow.h:178: error:                 namespace enigma_user::enigma { }
+Preprocessor_Environment_Editable/IDE_EDIT_events.h:87: error: reference to ‘enigma’ is ambiguous
+Universal_System/var_te.h:30: error: candidates are: namespace enigma { }
+Platforms/Cocoa/CocoaWindow.h:178: error:                 namespace enigma_user::enigma { }
+Preprocessor_Environment_Editable/IDE_EDIT_events.h:91: error: reference to ‘enigma’ is ambiguous
+Universal_System/var_te.h:30: error: candidates are: namespace enigma { }
+Platforms/Cocoa/CocoaWindow.h:178: error:                 namespace enigma_user::enigma { }
+Preprocessor_Environment_Editable/IDE_EDIT_events.h:97: error: reference to ‘enigma’ is ambiguous
+Universal_System/var_te.h:30: error: candidates are: namespace enigma { }
+Platforms/Cocoa/CocoaWindow.h:178: error:                 namespace enigma_user::enigma { }
+Preprocessor_Environment_Editable/IDE_EDIT_events.h:98: error: reference to ‘enigma’ is ambiguous
+Universal_System/var_te.h:30: error: candidates are: namespace enigma { }
+Platforms/Cocoa/CocoaWindow.h:178: error:                 namespace enigma_user::enigma { }
+Preprocessor_Environment_Editable/IDE_EDIT_events.h:99: error: reference to ‘enigma’ is ambiguous
+Universal_System/var_te.h:30: error: candidates are: namespace enigma { }
+Platforms/Cocoa/CocoaWindow.h:178: error:                 namespace enigma_user::enigma { }
+In file included from SHELLmain.cpp:110:
+Universal_System/instance_create.h: At global scope:
+Universal_System/instance_create.h:30: error: reference to ‘enigma’ is ambiguous
+Universal_System/var_te.h:30: error: candidates are: namespace enigma { }
+Platforms/Cocoa/CocoaWindow.h:178: error:                 namespace enigma_user::enigma { }
+Universal_System/instance_create.h:30: error: expected ‘,’ or ‘...’ before ‘*’ token
+Universal_System/instance_create.h: In function ‘void enigma::instance_change_inst(int, bool, int)’:
+Universal_System/instance_create.h:32: error: expected primary-expression before ‘->’ token
+Universal_System/instance_create.h:34: error: expected primary-expression before ‘->’ token
+Universal_System/instance_create.h:34: error: expected primary-expression before ‘->’ token
+Universal_System/instance_create.h:35: error: expected primary-expression before ‘->’ token
+Universal_System/instance_create.h:35: error: expected primary-expression before ‘->’ token
+Universal_System/instance_create.h:36: error: expected primary-expression before ‘->’ token
+Universal_System/instance_create.h:36: error: expected primary-expression before ‘->’ token
+Universal_System/instance_create.h:37: error: expected primary-expression before ‘->’ token
+Universal_System/instance_create.h:38: error: expected primary-expression before ‘->’ token
+Universal_System/instance_create.h:39: error: expected primary-expression before ‘->’ token
+Universal_System/instance_create.h:40: error: expected primary-expression before ‘->’ token
+Universal_System/instance_create.h:41: error: expected primary-expression before ‘->’ token
+Universal_System/instance_create.h:42: error: expected primary-expression before ‘->’ token
+Universal_System/instance_create.h:43: error: reference to ‘enigma’ is ambiguous
+Universal_System/var_te.h:30: error: candidates are: namespace enigma { }
+Platforms/Cocoa/CocoaWindow.h:178: error:                 namespace enigma_user::enigma { }
+Universal_System/instance_create.h:43: error: expected `;' before ‘vspeed’
+Universal_System/instance_create.h:44: error: reference to ‘enigma’ is ambiguous
+Universal_System/var_te.h:30: error: candidates are: namespace enigma { }
+Platforms/Cocoa/CocoaWindow.h:178: error:                 namespace enigma_user::enigma { }
+Universal_System/instance_create.h:44: error: expected `;' before ‘hspeed’
+Universal_System/instance_create.h:47: error: expected primary-expression before ‘->’ token
+Universal_System/instance_create.h:50: error: expected unqualified-id before ‘->’ token
+Universal_System/instance_create.h:51: error: expected unqualified-id before ‘->’ token
+Universal_System/instance_create.h:54: error: reference to ‘enigma’ is ambiguous
+Universal_System/var_te.h:30: error: candidates are: namespace enigma { }
+Platforms/Cocoa/CocoaWindow.h:178: error:                 namespace enigma_user::enigma { }
+Universal_System/instance_create.h:54: error: ‘ob’ was not declared in this scope
+In file included from SHELLmain.cpp:110:
+Universal_System/instance_create.h:67: error: reference to ‘enigma’ is ambiguous
+Universal_System/var_te.h:30: error: candidates are: namespace enigma { }
+Platforms/Cocoa/CocoaWindow.h:178: error:                 namespace enigma_user::enigma { }
+Universal_System/instance_create.h:67: error: ‘newinst’ was not declared in this scope
+Universal_System/instance_create.h:67: error: reference to ‘enigma’ is ambiguous
+Universal_System/var_te.h:30: error: candidates are: namespace enigma { }
+Platforms/Cocoa/CocoaWindow.h:178: error:                 namespace enigma_user::enigma { }
+Universal_System/instance_create.h:67: error: expected primary-expression before ‘)’ token
+Universal_System/instance_create.h:67: error: reference to ‘enigma’ is ambiguous
+Universal_System/var_te.h:30: error: candidates are: namespace enigma { }
+Platforms/Cocoa/CocoaWindow.h:178: error:                 namespace enigma_user::enigma { }
+Universal_System/instance_create.h:73: error: ‘hspeed’ was not declared in this scope
+Universal_System/instance_create.h:73: error: ‘vspeed’ was not declared in this scope
+Universal_System/instance_create.h: In function ‘enigma::object_basic* enigma::instance_create_id(int, int, int, int)’:
+Universal_System/instance_create.h:78: error: reference to ‘enigma’ is ambiguous
+Universal_System/var_te.h:30: error: candidates are: namespace enigma { }
+Platforms/Cocoa/CocoaWindow.h:178: error:                 namespace enigma_user::enigma { }
+Universal_System/instance_create.h:79: error: reference to ‘enigma’ is ambiguous
+Universal_System/var_te.h:30: error: candidates are: namespace enigma { }
+Platforms/Cocoa/CocoaWindow.h:178: error:                 namespace enigma_user::enigma { }
+Universal_System/instance_create.h:80: error: reference to ‘enigma’ is ambiguous
+Universal_System/var_te.h:30: error: candidates are: namespace enigma { }
+Platforms/Cocoa/CocoaWindow.h:178: error:                 namespace enigma_user::enigma { }
+Universal_System/instance_create.h:80: error: ‘ob’ was not declared in this scope
+In file included from SHELLmain.cpp:110:
+Universal_System/instance_create.h: At global scope:
+Universal_System/instance_create.h:97: error: ‘instance_t’ in namespace ‘enigma_user::enigma’ does not name a type
+In file included from SHELLmain.cpp:110:
+Universal_System/instance_create.h: In function ‘void enigma_user::instance_change(int, bool)’:
+Universal_System/instance_create.h:118: error: ‘object_graphics’ is not a member of ‘enigma_user::enigma’
+Universal_System/instance_create.h:118: error: ‘inst’ was not declared in this scope
+Universal_System/instance_create.h:118: error: ‘object_graphics’ is not a member of ‘enigma_user::enigma’
+Universal_System/instance_create.h:118: error: expected primary-expression before ‘)’ token
+Universal_System/instance_create.h:118: error: expected `;' before ‘enigma’
+Universal_System/instance_create.h:119: error: ‘instance_change_inst’ is not a member of ‘enigma_user::enigma’
+Universal_System/instance_create.h: In function ‘void enigma_user::instance_copy(bool)’:
+Universal_System/instance_create.h:124: error: ‘object_graphics’ is not a member of ‘enigma_user::enigma’
+Universal_System/instance_create.h:124: error: ‘inst’ was not declared in this scope
+Universal_System/instance_create.h:124: error: ‘object_graphics’ is not a member of ‘enigma_user::enigma’
+Universal_System/instance_create.h:124: error: expected primary-expression before ‘)’ token
+Universal_System/instance_create.h:124: error: expected `;' before ‘enigma’
+Universal_System/instance_create.h:125: error: ‘maxid’ is not a member of ‘enigma_user::enigma’
+Universal_System/instance_create.h:127: error: ‘object_basic’ is not a member of ‘enigma_user::enigma’
+Universal_System/instance_create.h:127: error: ‘ob’ was not declared in this scope
+In file included from SHELLmain.cpp:110:
+Universal_System/instance_create.h:143: error: ‘object_graphics’ is not a member of ‘enigma_user::enigma’
+Universal_System/instance_create.h:143: error: ‘newinst’ was not declared in this scope
+Universal_System/instance_create.h:143: error: ‘object_graphics’ is not a member of ‘enigma_user::enigma’
+Universal_System/instance_create.h:143: error: expected primary-expression before ‘)’ token
+Universal_System/instance_create.h:143: error: ‘fetch_inst_iter_by_int’ is not a member of ‘enigma_user::enigma’
+SHELLmain.cpp: In function ‘int enigma::game_ending()’:
+SHELLmain.cpp:118: error: reference to ‘enigma’ is ambiguous
+Universal_System/var_te.h:30: error: candidates are: namespace enigma { }
+Platforms/Cocoa/CocoaWindow.h:178: error:                 namespace enigma_user::enigma { }
+SHELLmain.cpp:118: error: expected `;' before ‘i’
+SHELLmain.cpp:118: error: ‘i’ was not declared in this scope
+make[1]: *** [.eobjs/MacOSX/MacOSX/Run/SHELLmain.o] Error 1
+make: *** [Game] Error 2

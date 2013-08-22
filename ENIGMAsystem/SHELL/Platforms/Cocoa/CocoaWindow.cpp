@@ -1,6 +1,7 @@
 /*
- * Copyright (C) 2008 IsmAvatar <cmagicj@nni.com>
+ * Copyright (C) 2008 IsmAvatar <ismavatar@gmail.com>
  * Copyright (C) 2010 Alasdair Morrison <ali@alasdairmorrison.com>
+ * Copyright (C) 2013 Josh Ventura <JoshV10@gmail.com>
  *
  * This file is part of ENIGMA.
  *
@@ -38,10 +39,8 @@ Atom wm_delwin;
 
 using namespace std;
 
-
-
-
-
+#include <Universal_System/roomsystem.h>
+#include <Universal_System/CallbackArrays.h>
 
 
 //////////
@@ -52,35 +51,44 @@ void gmw_init()
 {
 }
 
+extern char cocoa_keybdstatus[256];
+extern char cocoa_last_keybdstatus[256];
 
-void sleep(int ms){
-    if (ms > 1000) sleep(ms/1000);
-    usleep((ms % 1000) *1000);
-    };
-
-
-int visx = -1, visy = -1;
-
-int window_set_visible(int visible)
-{
-	return cocoa_window_set_visible(visible);
+namespace enigma {
+    extern char keybdstatus[256];
+    extern char mousestatus[3];
+    extern char last_mousestatus[3];
+    extern char last_keybdstatus[256];
+    extern char keybdstatus[256];
 }
 
-int window_get_visible()
-{
+namespace enigma_user {
+
+  void sleep(int ms) {
+    if (ms > 1000) ::sleep(ms/1000);
+    usleep((ms % 1000) *1000);
+  };
+
+  int visx = -1, visy = -1;
+
+  int window_set_visible(int visible) {
+	return cocoa_window_set_visible(visible);
+  }
+
+  int window_get_visible() {
 	/*XWindowAttributes wa;
 	XGetWindowAttributes(disp,win,&wa);
 	return wa.map_state != IsUnmapped;*/
-}
-
-int window_set_caption(string caption)
-{
+  }
+  
+  int window_set_caption(string caption)
+  {
 	cocoa_window_set_caption(caption.c_str());
-}
-string window_get_caption()
-{
+  }
+  string window_get_caption()
+  {
 	cocoa_window_get_caption();
-}
+  }
 
 
 
@@ -216,17 +224,17 @@ bool window_get_showicons() {return true;}
 
 void window_default()
 {
-    int xm = int(room_width), ym = int(room_height);
-    if (view_enabled)
+    int xm = int(enigma_user::room_width), ym = int(enigma_user::room_height);
+    if (enigma_user::view_enabled)
     {
       int tx = 0, ty = 0;
       for (int i = 0; i < 8; i++)
-        if (view_visible[i])
+        if (enigma_user::view_visible[i])
         {
-          if (view_xport[i]+view_wport[i] > tx)
-            tx = (int)(view_xport[i]+view_wport[i]);
-          if (view_yport[i]+view_hport[i] > ty)
-            ty = (int)(view_yport[i]+view_hport[i]);
+          if (enigma_user::view_xport[i] + enigma_user::view_wport[i] > tx)
+            tx = (int)(enigma_user::view_xport[i] + enigma_user::view_wport[i]);
+          if (enigma_user::view_yport[i] + enigma_user::view_hport[i] > ty)
+            ty = (int)(enigma_user::view_yport[i] + enigma_user::view_hport[i]);
         }
       if (tx and ty)
         xm = tx, ym = ty;
@@ -239,24 +247,14 @@ void screen_refresh() {
     cocoa_flush_opengl();
 }
 
-namespace enigma {
-    extern char keybdstatus[256];
-    extern char mousestatus[3];
-    extern char last_mousestatus[3];
-    extern char last_keybdstatus[256];
-    extern char keybdstatus[256];
-}
-
-extern char cocoa_keybdstatus[256];
-extern char cocoa_last_keybdstatus[256];
-void io_clear()
-{
+  void io_clear()
+  {
     for (int i = 0; i < 255; i++)
     enigma::keybdstatus[i] = enigma::last_keybdstatus[i] = cocoa_keybdstatus[i] = cocoa_last_keybdstatus[i] = 0;
     for (int i = 0; i < 3; i++)
         enigma::mousestatus[i] = enigma::last_mousestatus[i] = 0;
+  }
 }
-
 
 namespace enigma
 {
@@ -359,7 +357,8 @@ extern void ABORT_ON_ALL_ERRORS();
 #include <sys/time.h>
 #include <iostream>
 
-extern double fps;
+namespace enigma_user { extern double fps; }
+
 namespace enigma {
 	char** parameters;
 	void windowsystem_write_exename(char* x)
@@ -396,7 +395,7 @@ namespace enigma {
 		// Store this time for diff next time
 		gettimeofday(&tv, NULL);
 		last_second[hielem] = tv.tv_sec, last_microsecond[hielem] = tv.tv_usec;
-		fps = (hielem+1)*1000000 / ((last_second[hielem] - last_second[0]) * 1000000 + (last_microsecond[hielem] - last_microsecond[0]));
+		enigma_user::fps = (hielem+1)*1000000 / ((last_second[hielem] - last_second[0]) * 1000000 + (last_microsecond[hielem] - last_microsecond[0]));
 	}
 }
 
@@ -432,31 +431,30 @@ namespace enigma {
  */
 #include "CocoaFunctions.h"
 extern void cocoa_io_handle();
-void io_handle() {
 
+namespace enigma_user {
+  void io_handle() {
     cocoa_io_handle();
-}
-
-bool keyboard_check(int key);
-
-
-void keyboard_wait() {
+  }
+  
+  void keyboard_wait() {
     io_clear();
     while(!keyboard_check(1/*vk_anykey*/)) {
         io_handle();
     }
-}
-
-void window_set_region_scale(double scale, bool adaptwindow) {}
-bool window_get_region_scale() {return 1;}
-void window_set_region_size(int w, int h, bool adaptwindow) {}
-
-void game_end() {
+  }
+  
+  void window_set_region_scale(double scale, bool adaptwindow) {}
+  bool window_get_region_scale() {return 1;}
+  void window_set_region_size(int w, int h, bool adaptwindow) {}
+  
+  void game_end() {
     //audiosystem_cleanup();
     exit(0);
-}
-
-void action_end_game()
-{
+  }
+  
+  void action_end_game()
+  {
     game_end();
+  }
 }

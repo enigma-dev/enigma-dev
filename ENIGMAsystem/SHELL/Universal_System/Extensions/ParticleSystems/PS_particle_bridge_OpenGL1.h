@@ -28,7 +28,11 @@
 #include <vector>
 #include <cmath>
 #include <algorithm>
+#ifndef __APPLE__
 #include <GL/gl.h>
+#else
+#include <OpenGL/gl.h>
+#endif
 
 #include "PS_particle_system.h"
 #include "PS_particle.h"

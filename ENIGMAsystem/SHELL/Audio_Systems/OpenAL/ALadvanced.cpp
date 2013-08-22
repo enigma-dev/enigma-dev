@@ -44,6 +44,9 @@ using std::string;
 using std::vector;
 #include <time.h>
 
+#include <vector>
+using std::vector;
+
 namespace enigma_user
 {
 

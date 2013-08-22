@@ -1,6 +1,7 @@
 /********************************************************************************\
 **                                                                              **
 **  Copyright (C) 2011 Harijs Grînbergs                                         **
+**  Modified 2013 by Josh Ventura                                               **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -41,6 +42,8 @@ namespace enigma
   struct path_point
   {
     cs_scalar x, y, speed, length;
+    path_point(cs_scalar X = 0, cs_scalar Y = 0, cs_scalar Speed = 0, cs_scalar Length = 0):
+      x(X), y(Y), speed(Speed), length(Length) {}
   };
   struct path
   {
