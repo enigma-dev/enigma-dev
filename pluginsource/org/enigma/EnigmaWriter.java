@@ -280,7 +280,6 @@ public final class EnigmaWriter
 			
 			ico.write(os = new FileOutputStream(f));
 			fn = f.getAbsolutePath();
-			JOptionPane.showMessageDialog(null, fn);
 		}
 		catch (IOException e)
 		{
