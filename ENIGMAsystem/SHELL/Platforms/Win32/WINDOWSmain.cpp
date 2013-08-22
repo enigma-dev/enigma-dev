@@ -203,7 +203,7 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
         wcontainer.cbClsExtra = 0;
         wcontainer.cbWndExtra = 0;
         wcontainer.hInstance = hInstance;
-        wcontainer.hIcon = LoadIcon (NULL, IDI_APPLICATION);
+        wcontainer.hIcon = LoadIcon (hInstance, "IDI_MAIN_ICON");
         wcontainer.hCursor = LoadCursor (NULL, IDC_ARROW);
         wcontainer.hbrBackground = (HBRUSH) GetStockObject (BLACK_BRUSH);
         wcontainer.lpszMenuName = NULL;
