@@ -50,8 +50,6 @@ namespace enigma
 	  if (!fread(&bkg_highid,4,1,exe))
 	    return;
 
-	  backgrounds_init();
-
 	  for (int i = 0; i < bkgcount; i++)
 	  {
 		  int unpacked;

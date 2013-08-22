@@ -66,6 +66,7 @@
 					<Add library="GLU" />
 					<Add library="alure" />
 					<Add library="dumb" />
+					<Add library="X11" />
 				</Linker>
 			</Target>
 			<Target title="lin-profile">
@@ -250,7 +251,6 @@
 		<Unit filename="Graphics_Systems/OpenGL1/GLenable.h" />
 		<Unit filename="Graphics_Systems/OpenGL1/GLfont.cpp" />
 		<Unit filename="Graphics_Systems/OpenGL1/GLmesh.h" />
-		<Unit filename="Graphics_Systems/OpenGL1/GLmiscextra.cpp" />
 		<Unit filename="Graphics_Systems/OpenGL1/GLmiscextra.h" />
 		<Unit filename="Graphics_Systems/OpenGL1/GLmodel.cpp">
 			<Option target="win-debug" />
@@ -628,175 +628,53 @@
 		<Unit filename="Universal_System/Extensions/MotionPlanning/motion_planning_struct.h" />
 		<Unit filename="Universal_System/Extensions/MotionPlanning/mp_movement.cpp" />
 		<Unit filename="Universal_System/Extensions/MotionPlanning/mp_movement.h" />
-		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_actions.cpp">
-			<Option target="win-debug" />
-			<Option target="win-build" />
-			<Option target="lin-debug" />
-			<Option target="lin-profile" />
-			<Option target="lin-build" />
-			<Option target="mac-debug" />
-			<Option target="mac-build" />
-		</Unit>
+		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_actions.cpp" />
 		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_actions.h" />
-		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_effects.cpp">
-			<Option target="win-debug" />
-			<Option target="win-build" />
-			<Option target="lin-debug" />
-			<Option target="lin-profile" />
-			<Option target="lin-build" />
-			<Option target="mac-debug" />
-			<Option target="mac-build" />
-		</Unit>
+		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_effects.cpp" />
 		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_effects_constants.h" />
 		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_effects_enums.h" />
 		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle.h" />
-		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_attractor.cpp">
-			<Option target="win-debug" />
-			<Option target="win-build" />
-			<Option target="lin-debug" />
-			<Option target="lin-profile" />
-			<Option target="lin-build" />
-			<Option target="mac-debug" />
-			<Option target="mac-build" />
-		</Unit>
+		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_attractor.cpp" />
 		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_attractor.h" />
+		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_bridge_Direct3D9.h" />
 		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_bridge_OpenGL1.h" />
 		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_bridge_OpenGL3.h" />
-		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_bridge_fallback.h">
-			<Option target="win-debug" />
-			<Option target="win-build" />
-			<Option target="lin-debug" />
-			<Option target="lin-profile" />
-			<Option target="lin-build" />
-			<Option target="mac-debug" />
-			<Option target="mac-build" />
-		</Unit>
-		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_changer.cpp">
-			<Option target="win-debug" />
-			<Option target="win-build" />
-			<Option target="lin-debug" />
-			<Option target="lin-profile" />
-			<Option target="lin-build" />
-			<Option target="mac-debug" />
-			<Option target="mac-build" />
-		</Unit>
+		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_bridge_fallback.h" />
+		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_changer.cpp" />
 		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_changer.h" />
 		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_constants.h" />
-		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_deflector.cpp">
-			<Option target="win-debug" />
-			<Option target="win-build" />
-			<Option target="lin-debug" />
-			<Option target="lin-profile" />
-			<Option target="lin-build" />
-			<Option target="mac-debug" />
-			<Option target="mac-build" />
-		</Unit>
+		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_deflector.cpp" />
 		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_deflector.h" />
-		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_depths.cpp">
-			<Option target="win-debug" />
-			<Option target="win-build" />
-			<Option target="lin-debug" />
-			<Option target="lin-profile" />
-			<Option target="lin-build" />
-			<Option target="mac-debug" />
-			<Option target="mac-build" />
-		</Unit>
+		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_depths.cpp" />
 		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_depths.h" />
-		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_destroyer.cpp">
-			<Option target="win-debug" />
-			<Option target="win-build" />
-			<Option target="lin-debug" />
-			<Option target="lin-profile" />
-			<Option target="lin-build" />
-			<Option target="mac-debug" />
-			<Option target="mac-build" />
-		</Unit>
+		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_destroyer.cpp" />
 		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_destroyer.h" />
-		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_emitter.cpp">
-			<Option target="win-debug" />
-			<Option target="win-build" />
-			<Option target="lin-debug" />
-			<Option target="lin-profile" />
-			<Option target="lin-build" />
-			<Option target="mac-debug" />
-			<Option target="mac-build" />
-		</Unit>
+		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_emitter.cpp" />
 		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_emitter.h" />
 		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_enums.h" />
 		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_instance.h" />
-		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_particles_apiimpl.cpp">
-			<Option target="win-debug" />
-			<Option target="win-build" />
-			<Option target="lin-debug" />
-			<Option target="lin-profile" />
-			<Option target="lin-build" />
-			<Option target="mac-debug" />
-			<Option target="mac-build" />
-		</Unit>
-		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_sprites.cpp">
-			<Option target="win-debug" />
-			<Option target="win-build" />
-			<Option target="lin-debug" />
-			<Option target="lin-profile" />
-			<Option target="lin-build" />
-			<Option target="mac-debug" />
-			<Option target="mac-build" />
-		</Unit>
+		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_particles_apiimpl.cpp" />
+		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_sprites.cpp" />
 		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_sprites.h" />
-		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_system.cpp">
-			<Option target="win-debug" />
-			<Option target="win-build" />
-			<Option target="lin-debug" />
-			<Option target="lin-profile" />
-			<Option target="lin-build" />
-			<Option target="mac-debug" />
-			<Option target="mac-build" />
-		</Unit>
+		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_system.cpp" />
 		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_system.h" />
-		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_system_apiimpl.cpp">
-			<Option target="win-debug" />
-			<Option target="win-build" />
-			<Option target="lin-debug" />
-			<Option target="lin-profile" />
-			<Option target="lin-build" />
-			<Option target="mac-debug" />
-			<Option target="mac-build" />
-		</Unit>
-		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_system_manager.cpp">
-			<Option target="win-debug" />
-			<Option target="win-build" />
-			<Option target="lin-debug" />
-			<Option target="lin-profile" />
-			<Option target="lin-build" />
-			<Option target="mac-debug" />
-			<Option target="mac-build" />
-		</Unit>
+		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_system_apiimpl.cpp" />
+		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_system_manager.cpp" />
 		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_system_manager.h" />
-		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_type.cpp">
-			<Option target="win-debug" />
-			<Option target="win-build" />
-			<Option target="lin-debug" />
-			<Option target="lin-profile" />
-			<Option target="lin-build" />
-			<Option target="mac-debug" />
-			<Option target="mac-build" />
-		</Unit>
+		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_type.cpp" />
 		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_type.h" />
-		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_updatedraw.cpp">
-			<Option target="win-debug" />
-			<Option target="win-build" />
-			<Option target="lin-debug" />
-			<Option target="lin-profile" />
-			<Option target="lin-build" />
-			<Option target="mac-debug" />
-			<Option target="mac-build" />
-		</Unit>
+		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_updatedraw.cpp" />
 		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_updatedraw.h" />
 		<Unit filename="Universal_System/Extensions/ParticleSystems/implement.h" />
 		<Unit filename="Universal_System/Extensions/ParticleSystems/include.h" />
+		<Unit filename="Universal_System/Extensions/Paths/actions.h" />
 		<Unit filename="Universal_System/Extensions/Paths/implement.h" />
 		<Unit filename="Universal_System/Extensions/Paths/include.h" />
-		<Unit filename="Universal_System/Extensions/Paths/paths.cpp" />
+		<Unit filename="Universal_System/Extensions/Paths/path_functions.cpp" />
+		<Unit filename="Universal_System/Extensions/Paths/path_functions.h" />
+		<Unit filename="Universal_System/Extensions/Paths/pathinit.cpp" />
+		<Unit filename="Universal_System/Extensions/Paths/pathstruct.cpp" />
+		<Unit filename="Universal_System/Extensions/Paths/pathstruct.h" />
 		<Unit filename="Universal_System/Extensions/StudioPhysics/SB2Dfunctions.h" />
 		<Unit filename="Universal_System/Extensions/StudioPhysics/SB2Dinstances.h" />
 		<Unit filename="Universal_System/Extensions/StudioPhysics/SB2Djoints.h" />
@@ -814,6 +692,8 @@
 		<Unit filename="Universal_System/backgroundinit.cpp" />
 		<Unit filename="Universal_System/backgroundstruct.cpp" />
 		<Unit filename="Universal_System/backgroundstruct.h" />
+		<Unit filename="Universal_System/callbacks_events.cpp" />
+		<Unit filename="Universal_System/callbacks_events.h" />
 		<Unit filename="Universal_System/collisions_object.cpp" />
 		<Unit filename="Universal_System/collisions_object.h" />
 		<Unit filename="Universal_System/darray.cpp" />
@@ -856,6 +736,8 @@
 		<Unit filename="Universal_System/lives.h" />
 		<Unit filename="Universal_System/loading.cpp" />
 		<Unit filename="Universal_System/loading.h" />
+		<Unit filename="Universal_System/lodepng.cpp" />
+		<Unit filename="Universal_System/lodepng.h" />
 		<Unit filename="Universal_System/lua_table.h" />
 		<Unit filename="Universal_System/mathnc.cpp" />
 		<Unit filename="Universal_System/mathnc.h" />
@@ -866,10 +748,7 @@
 		<Unit filename="Universal_System/nlpo2.h" />
 		<Unit filename="Universal_System/object.cpp" />
 		<Unit filename="Universal_System/object.h" />
-		<Unit filename="Universal_System/path_functions.cpp" />
 		<Unit filename="Universal_System/path_functions.h" />
-		<Unit filename="Universal_System/pathinit.cpp" />
-		<Unit filename="Universal_System/pathstruct.cpp" />
 		<Unit filename="Universal_System/pathstruct.h" />
 		<Unit filename="Universal_System/planar_object.cpp" />
 		<Unit filename="Universal_System/planar_object.h" />
@@ -882,6 +761,7 @@
 		<Unit filename="Universal_System/resource_data.h" />
 		<Unit filename="Universal_System/roomsystem.cpp" />
 		<Unit filename="Universal_System/roomsystem.h" />
+		<Unit filename="Universal_System/scalar.h" />
 		<Unit filename="Universal_System/simplecollisions.h" />
 		<Unit filename="Universal_System/soundinit.cpp" />
 		<Unit filename="Universal_System/spriteinit.cpp" />

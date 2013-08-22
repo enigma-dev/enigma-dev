@@ -24,27 +24,3 @@
         Type: Radio-1
         Label: Treat literals as: 
         Options: "EDL (variant), C++ (scalar)"
-
--Sample: #to be removed
-    Layout: Grid
-    Columns: 1
-    -sample-combobox:
-        Type: Combobox
-        Label: #Combo box takes whole area
-        Options: Be really sluggish to better emulate GM, Be fast to not suck eggs
-    -sample-lots-of-radios:
-        Type: Radio-Multi
-        Label: Pick one
-        Options: Lots, Of, Different, Options, Which, Take, Multiple, Lines
-
--More Samples: #also to be removed
-    Layout: Grid
-    Columns: 2
-    -sample-edit:
-        Type: Edit
-        Label: Encryption key
-        Default: DEADBEEF
-    -sample-checkbox:
-        Type: Checkbox
-        Label: Do stuff
-        Default: on

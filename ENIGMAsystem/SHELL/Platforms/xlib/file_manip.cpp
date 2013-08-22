@@ -55,6 +55,10 @@ int directory_create(string dname) {
   return mkdir(dname.c_str(),S_IRUSR|S_IWUSR|S_IXUSR);
 }
 
+bool set_working_directory(string dir) {
+  return !chdir(dir.c_str());
+}
+
 }
 
 // File iteration functions and environment functions

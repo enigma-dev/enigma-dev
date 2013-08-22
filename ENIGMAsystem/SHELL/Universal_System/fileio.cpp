@@ -126,9 +126,11 @@ double file_text_read_real(int fileid) { // Reads a real value from the file and
   enigma::openFile &mf = enigma::files[fileid];
   double r1;
   int apos;
-  if (!mf.sdata[mf.spos]) return -1;
-  while (is_whitespace(mf.sdata[mf.spos]))
+  if (mf.spos >= mf.sdata.length()) return -1;
+  while (is_whitespace(mf.sdata[mf.spos])) {
     mf.spos++;
+    if (mf.spos >= mf.sdata.length()) return -1;
+  }
   if (sscanf(mf.sdata.substr(mf.spos).c_str(),"%lf%n",&r1,&apos),apos)
     mf.spos += apos;
   if (mf.spos >= (int)mf.sdata.length() && feof(mf.f))
