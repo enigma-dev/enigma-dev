@@ -340,8 +340,11 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
 	wto << "VALUE \"ProductName\",         \"" << gameSet.product << "\"\n";
 	wto << "VALUE \"ProductVersion\",         \"" << gameSet.version << "\\0\"\n";
 	wto << "VALUE \"LegalCopyright\",         \"" << gameSet.copyright << "\"\n";
-	//wto << "VALUE \"OriginalFilename\",         \"" << es->filename << "\"\n";
-	wto << "END\nEND\nEND";
+	wto << "VALUE \"OriginalFilename\",         \"" << es->filename << "\"\n";
+	
+	wto << "END\nEND\nBLOCK \"VarFileInfo\"\nBEGIN\n";
+	wto << "VALUE \"Translation\", 0x409, 1252\n";
+	wto << "END\nEND";
   wto.close();
   #endif
   
