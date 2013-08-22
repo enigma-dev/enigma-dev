@@ -1,4 +1,5 @@
-/** Copyright (C) 2008-2013 Josh Ventura
+/** Copyright (C) 2013 Josh Ventura
+*** Copyright (C) 2013 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -29,19 +30,6 @@
 using namespace std;
 
 #include "settings-parse/eyaml.h"
-
-string fixdrive(string p)
-{
-  if (p[0] != '\\' and p[0] != '/')
-    return p;
-
-  char buf[3];
-  GetCurrentDirectory(3,buf);
-
-  if (((*buf >= 'A' and *buf <= 'Z') or (*buf >= 'a' and *buf <= 'z')) and buf[1] == ':')
-    return string(buf,2) + p;
-  return p;
-}
 
 int better_system(const char* jname, const char* param, const char *direc = NULL)
 {
@@ -82,119 +70,8 @@ EMessage
 
 #define fixFont(hwnd) SendMessage(hwnd,WM_SETFONT,(WPARAM)GetStockObject(DEFAULT_GUI_FONT),0);
 
-string expand_message(string msg, string arg1)
-{
-  size_t p = msg.find("%s");
-  if (p != string::npos)
-    msg.replace(p,2,arg1);
-  return msg;
-}
-
 char drive_letter[4] = { '\\', 0, 0, 0 };
 static int keepgoing; HWND dlb = NULL, cbb = NULL;
-LRESULT CALLBACK getproc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
-
-  /*  Switch according to what type of message we have received  */
-        printf("Message %d %s %d\n",msg,msg==WM_COMMAND?"==":"!=",WM_COMMAND);
-  switch (msg) {
-    case WM_COMMAND:
-        puts("Notified.");
-        if (HIWORD(wParam) == BN_CLICKED)
-        {
-          if (LOWORD(wParam) == 4)
-          {
-            int sel = ComboBox_GetCurSel(cbb);
-            if (sel) ComboBox_GetText(cbb,drive_letter,4);
-            else drive_letter[0] = '\\', drive_letter[1] = drive_letter[2] = drive_letter[3] = 0;
-          }
-          keepgoing = 0;
-          DestroyWindow(dlb);
-          break;
-        }
-      break;
-    case WM_CLOSE:
-      keepgoing = 0;
-      break;
-  }
-  return DefWindowProc(hwnd, msg, wParam, lParam);
-}
-void get_new_drive_letter()
-{
-  WNDCLASSEX wndclass;
-    wndclass.cbSize         = sizeof(wndclass);
-    wndclass.style          = 0;
-    wndclass.lpfnWndProc    = getproc;
-    wndclass.cbClsExtra     = 0;
-    wndclass.cbWndExtra     = 0;
-    wndclass.hInstance      = NULL;
-    wndclass.hIcon          = LoadIcon(NULL, IDI_QUESTION);
-    wndclass.hIconSm        = LoadIcon(NULL, IDI_QUESTION);
-    wndclass.hCursor        = LoadCursor(NULL, IDC_ARROW);
-    wndclass.hbrBackground  = (HBRUSH)COLOR_WINDOW;
-    wndclass.lpszClassName  = "DrivePicker";
-    wndclass.lpszMenuName   = NULL;
-
-  if (!RegisterClassEx(&wndclass))
-    return;
-
-  const int WIDTH = 320, HEIGHT = 96;
-
-  RECT n; n.top = 0, n.bottom = HEIGHT, n.left = 0, n.right = WIDTH;
-  AdjustWindowRect(&n,WS_BORDER|WS_CAPTION,false);
-  dlb = CreateWindow("DrivePicker", "Drive Selection",
-      WS_OVERLAPPED,
-      CW_USEDEFAULT, CW_USEDEFAULT,
-      n.right - n.left, n.bottom - n.top,
-      NULL, NULL, NULL , NULL);
-
-  SIZE tsz; int y = 4;
-  LPCSTR tt = "Please select a drive onto which ENIGMA will install MinGW:";
-  HWND tr = CreateWindow("STATIC",tt,WS_CHILD,4,y,WIDTH-8,32,dlb,(HMENU)(1),NULL,NULL);
-  fixFont(tr); ShowWindow(tr,SW_SHOW); HDC dc = GetDC(tr); GetTextExtentPoint32(dc,tt,strlen(tt),&tsz); ReleaseDC(tr,dc);
-  SetWindowPos(tr,NULL,0,0,WIDTH-8,tsz.cy+4,SWP_NOMOVE|SWP_NOZORDER); y += 4 + tsz.cy;
-
-  cbb = CreateWindow("COMBOBOX","Drive",WS_CHILD | CBS_DROPDOWNLIST | CBS_HASSTRINGS | CBS_SORT,4,y,WIDTH-8,320,dlb,(HMENU)(2),NULL,NULL);
-  fixFont(cbb); ShowWindow(cbb,SW_SHOW);
-  y += 24 + 4;
-
-  HWND bc = CreateWindow("BUTTON","Cancel",WS_CHILD | BS_DEFPUSHBUTTON,4,y,64,24,dlb,(HMENU)(3),NULL,NULL);
-  fixFont(bc); ShowWindow(bc,SW_SHOW);
-  HWND bk = CreateWindow("BUTTON","OK",WS_CHILD | BS_DEFPUSHBUTTON,WIDTH-8-64,y,64,24,dlb,(HMENU)(4),NULL,NULL);
-  fixFont(bk); ShowWindow(bk,SW_SHOW);
-  y += 24 + 4;
-
-  n.top = 0, n.bottom = y, n.left = 0, n.right = WIDTH;
-  AdjustWindowRect(&n,WS_BORDER|WS_CAPTION,false);
-  SetWindowPos(dlb,NULL,0,0,n.right - n.left, n.bottom - n.top,SWP_NOMOVE|SWP_NOZORDER);
-
-  ComboBox_AddString(cbb,"\\ (Whatever drive ENIGMA is installed on)");
-  DWORD drives = GetLogicalDrives();
-  char drivename[4] = "A:\\";
-  for (int i = 0; i < 26; i++)
-    if (drives & (1 << i))
-      drivename[0] = 'A' + i, ComboBox_AddString(cbb,drivename);
-  ShowWindow(dlb, SW_SHOW);
-  UpdateWindow(dlb);
-
-  MSG msg; keepgoing = 1;
-  while (keepgoing and GetMessage(&msg, NULL, 0, 0)) {
-    TranslateMessage(&msg);    /*  for certain keyboard messages  */
-    DispatchMessage(&msg);     /*  send message to WndProc        */
-  }
-}
-
-string dirpart(string fqp)
-{
-  size_t lp = fqp.find_last_of("/\\");
-  if (lp == string::npos) return "";
-  return fqp.erase(lp+1);
-}
-string filepart(string fqp)
-{
-  size_t lp = fqp.find_last_of("/\\");
-  if (lp == string::npos) return fqp;
-  return fqp.substr(lp+1);
-}
 
 typedef vector<string> CommandLineStringArgs;
 
@@ -209,19 +86,11 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
 }
 
 #include <windows.h>
+#include <unistd.h>
+#include <stdlib.h>
 
 int main(int argc, char *argv[])
 {
- /* //Set Env Paths
-  char* pPath = getenv("PATH");
-  TCHAR cPath[MAX_PATH];
-  GetCurrentDirectory(MAX_PATH,cPath);
-  stringstream envSS;
-  envSS << "PATH=" << pPath << cPath << "\\mingw32\\bin;" << cPath << "\\git\\bin;";
-  const string& tmp = envSS.str();
-  const char* envPath = tmp.c_str();
-  puts(envPath);
-  putenv(envPath);*/
 
   //Look for java
   const char *jpath = "java";
@@ -268,11 +137,19 @@ int main(int argc, char *argv[])
   }
 
   //if init script exists; run it then delete it
-  const char *initpath = "init";
-  const char *winpatch = "WinPatch.zip";
 
-  GetFileAttributes(initpath);
-  if (INVALID_FILE_ATTRIBUTES == GetFileAttributes(initpath) && GetLastError()==ERROR_FILE_NOT_FOUND)  //If init script not found
+  CommandLineStringArgs cmdlineStringArgs(&argv[0], &argv[0 + argc]);
+	
+  std::string path = cmdlineStringArgs[0];
+  std::string exepath;
+  string initpath = exepath + "init";
+
+  myReplace(path, "\\", "/");
+  size_t pos = path.find_last_of("/");
+  exepath.assign(path, 0, pos + 1);
+  
+  GetFileAttributes(initpath.c_str());
+  if (INVALID_FILE_ATTRIBUTES == GetFileAttributes(initpath.c_str()) && GetLastError()==ERROR_FILE_NOT_FOUND)  //If init script not found
   {
   }
   else
@@ -280,11 +157,12 @@ int main(int argc, char *argv[])
       puts("Downloading The ENIGMA Repo, please wait...");
       SHELLEXECUTEINFO lpExecInfo;
       lpExecInfo.cbSize  = sizeof(SHELLEXECUTEINFO);
-      lpExecInfo.lpFile = "git-bash.bat";
+	  string bashpath = exepath + string("git-bash.bat");
+      lpExecInfo.lpFile = bashpath.c_str();
       lpExecInfo.fMask = SEE_MASK_DOENVSUBST|SEE_MASK_NOCLOSEPROCESS;
       lpExecInfo.hwnd = NULL;
       lpExecInfo.lpVerb = "open";
-      lpExecInfo.lpParameters = "./init";
+      lpExecInfo.lpParameters = initpath.c_str();
       lpExecInfo.lpDirectory = NULL;
       lpExecInfo.nShow = SW_SHOW;
       lpExecInfo.hInstApp = (HINSTANCE) SE_ERR_DDEFAIL ;   //WINSHELLAPI BOOL WINAPI result;
@@ -297,60 +175,45 @@ int main(int argc, char *argv[])
         ::CloseHandle(lpExecInfo.hProcess);
       }
 
-      DeleteFileA(winpatch);
-      DeleteFileA(initpath);
   }
+  
+  //Set Environment Path
+  puts("Setting Environment Path");
+  string fullpath = string("PATH=") + string(getenv("PATH")) + exepath + string("mingw32/bin;") + exepath + string("git/bin;");
+  putenv(fullpath.c_str());
+  
+  //Set Working Directory
+  string workpath = exepath + "enigma-dev";
+  string output = string("Setting Working Directory To:") + workpath;
+  puts(output.c_str());
+  chdir(workpath.c_str());
 
   //Run Lateral GM
-  CommandLineStringArgs cmdlineStringArgs(&argv[0], &argv[0 + argc]);
   puts("Calling LGM");
-  SHELLEXECUTEINFO lpExecInfo;
-  lpExecInfo.cbSize  = sizeof(SHELLEXECUTEINFO);
   
-  std::string path = cmdlineStringArgs[0];
-  std::string filename;
+  string jarpath = exepath + string("enigma-dev/lateralgm.jar");
+  string argsasstring = "";
 
-  myReplace(path, "\\", "/");
-  size_t pos = path.find_last_of("/");
-  filename.assign(path, 0, pos + 1);
-	
-  string bashpath = filename + string("git-bash.bat");
-  lpExecInfo.lpFile = bashpath.c_str();
-  lpExecInfo.fMask = SEE_MASK_DOENVSUBST|SEE_MASK_NOCLOSEPROCESS;
-  lpExecInfo.hwnd = NULL;
-  lpExecInfo.lpVerb = "open";
-  string argsasstring = "\"" + filename + string("run\" ") + "\"" + filename + "\" ";
-  
   if (argc > 1) {
 	myReplace(cmdlineStringArgs[1], "\\", "/");
-	argsasstring += "\"" + cmdlineStringArgs[1] + "\"";
+	argsasstring += " \"" + cmdlineStringArgs[1] + "\"";
+  } else {
+	argsasstring += " \"\"";
   }
   
-  lpExecInfo.lpParameters = argsasstring.c_str();
-  lpExecInfo.lpDirectory = NULL;
-  lpExecInfo.nShow = SW_HIDE;
-  lpExecInfo.hInstApp = (HINSTANCE) SE_ERR_DDEFAIL ;   //WINSHELLAPI BOOL WINAPI result;
-  ShellExecuteEx(&lpExecInfo);
+  argsasstring += " &> enigma_log.log";
+  string cmdline = string("java -jar \"") + jarpath + string("\"") + argsasstring;
+  puts(cmdline.c_str());
+ 
+  PROCESS_INFORMATION ProcessInfo; //This is what we get as an [out] parameter
+  STARTUPINFO StartupInfo; //This is an [in] parameter
 
-/*  const char *lgmdir = "enigma-dev\\";
-
-  printf("Calling `%s -jar l*.jar`\n\n",jpath);
-  clock_t x = clock();
-  int res = better_system(jpath,"-jar l*.jar &> enigma_log.log",lgmdir);
-  if (res and (clock() - x)/CLOCKS_PER_SEC <= 3)
-  {
-      printf("Failing that, calling `%s -jar lgm16b4.jar`\n\n",jpath);
-      res = better_system(jpath,"-jar lgm16b4.jar &> enigma_log.log",lgmdir);
-      if (res and (clock() - x)/CLOCKS_PER_SEC <= 5)
-          printf("Java error. Please make sure Java is actually installed and that LGM exists.\r\n\r\n");
-  }*/
+  ZeroMemory(&StartupInfo, sizeof(StartupInfo));
+  StartupInfo.cb = sizeof StartupInfo ; //Only compulsory field
+ 
+  CreateProcess(NULL,(char *)cmdline.c_str(),NULL,NULL,
+    FALSE,CREATE_NO_WINDOW,NULL,NULL,&StartupInfo,&ProcessInfo);
 
   //system("pause");
   return 0;
-}
-
-static inline bool CopyFile2(const char* x, const char* y)
-{
-  printf("      => Copy `%s`\n",x);
-  return CopyFile(x,y,FALSE);
 }
