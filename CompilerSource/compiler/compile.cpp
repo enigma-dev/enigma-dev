@@ -329,18 +329,26 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/Resources.rc",ios_base::out);
     wto << license;
     wto << "#include <windows.h>\n";
-    wto << "IDI_MAIN_ICON          ICON                    \"" << string_replace_all(gameSet.gameIcon,"\\","/")  << "\"\n";
+	if (strlen(gameSet.gameIcon) > 0) {
+		wto << "IDI_MAIN_ICON ICON          \"" << string_replace_all(gameSet.gameIcon,"\\","/")  << "\"\n";
+	} else {
+		wto << "IDI_MAIN_ICON ICON          \"\"\n";
+	}
 	wto << "VS_VERSION_INFO VERSIONINFO\n";
 	wto << "FILEVERSION " << gameSet.versionMajor << "," << gameSet.versionMinor << "," << gameSet.versionRelease << "," << gameSet.versionBuild << "\n";
 	wto << "PRODUCTVERSION " << gameSet.versionMajor << "," << gameSet.versionMinor << "," << gameSet.versionRelease << "," << gameSet.versionBuild << "\n";
 	wto << "BEGIN\n" << "BLOCK \"StringFileInfo\"\n" << "BEGIN\n" << "BLOCK \"040904E4\"\n" << "BEGIN\n";
 	wto << "VALUE \"CompanyName\",         \"" << gameSet.company << "\"\n";
-	wto << "VALUE \"FileDescription\",         \"" << gameSet.description << "\"\n";
+	wto << "VALUE \"FileDescription\",     \"" << gameSet.description << "\"\n";
 	wto << "VALUE \"FileVersion\",         \"" << gameSet.version << "\\0\"\n";
 	wto << "VALUE \"ProductName\",         \"" << gameSet.product << "\"\n";
-	wto << "VALUE \"ProductVersion\",         \"" << gameSet.version << "\\0\"\n";
-	wto << "VALUE \"LegalCopyright\",         \"" << gameSet.copyright << "\"\n";
-	wto << "VALUE \"OriginalFilename\",         \"" << string_replace_all(es->filename,"\\","/") << "\"\n";
+	wto << "VALUE \"ProductVersion\",      \"" << gameSet.version << "\\0\"\n";
+	wto << "VALUE \"LegalCopyright\",      \"" << gameSet.copyright << "\"\n";
+	if (strlen(es->filename) > 0) {
+		wto << "VALUE \"OriginalFilename\",         \"" << string_replace_all(es->filename,"\\","/") << "\"\n";
+	} else {
+		wto << "VALUE \"OriginalFilename\",         \"\"\n";
+	}
 	
 	wto << "END\nEND\nBLOCK \"VarFileInfo\"\nBEGIN\n";
 	wto << "VALUE \"Translation\", 0x409, 1252\n";
