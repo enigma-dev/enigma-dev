@@ -4,6 +4,7 @@ redirfile.txt
 definitions.h
 defines.txt
 debug.txt
+output_log.txt
 blank.txt
 *.class
 *.o
