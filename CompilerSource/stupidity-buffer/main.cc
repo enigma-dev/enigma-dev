@@ -140,49 +140,69 @@ int main(int argc, char *argv[])
   exepath.assign(path, 0, pos + 1);
   
   GetFileAttributes(initpath.c_str());
-  if (INVALID_FILE_ATTRIBUTES == GetFileAttributes(initpath.c_str()) && GetLastError()==ERROR_FILE_NOT_FOUND)  //If init script not found
+  string compiledpath = exepath + "compiled";
+  if (INVALID_FILE_ATTRIBUTES == GetFileAttributes(initpath.c_str()) && GetLastError()== ERROR_FILE_NOT_FOUND)  //If init script not found
   {
+      puts("ERROR: Initialization script not found.");
+	  return -1;
   }
-  else
+  else if (INVALID_FILE_ATTRIBUTES == GetFileAttributes(compiledpath.c_str()) && GetLastError() == ERROR_FILE_NOT_FOUND)  // make sure not already compiled
   {
-      puts("Downloading The ENIGMA Repo, please wait...");
-      SHELLEXECUTEINFO lpExecInfo;
-      lpExecInfo.cbSize  = sizeof(SHELLEXECUTEINFO);
-	  string bashpath = exepath + string("git-bash.bat");
-      lpExecInfo.lpFile = bashpath.c_str();
-      lpExecInfo.fMask = SEE_MASK_DOENVSUBST|SEE_MASK_NOCLOSEPROCESS;
-      lpExecInfo.hwnd = NULL;
-      lpExecInfo.lpVerb = "open";
-      lpExecInfo.lpParameters = initpath.c_str();
-      lpExecInfo.lpDirectory = NULL;
-      lpExecInfo.nShow = SW_SHOW;
-      lpExecInfo.hInstApp = (HINSTANCE) SE_ERR_DDEFAIL ;   //WINSHELLAPI BOOL WINAPI result;
-      ShellExecuteEx(&lpExecInfo);
+    puts("Downloading and Compiling Binaries, please wait...");
+	  
+	DWORD exit_status;
+	PROCESS_INFORMATION ProcessInfo; //This is what we get as an [out] parameter
+	STARTUPINFO StartupInfo; //This is an [in] parameter
+		
+	ZeroMemory(&StartupInfo, sizeof(STARTUPINFO));
+	StartupInfo.cb = sizeof(STARTUPINFO); //Only compulsory field
 
-      //wait until a file is finished printing
-      if (lpExecInfo.hProcess != NULL)
-      {
-        ::WaitForSingleObject(lpExecInfo.hProcess, INFINITE);
-        ::CloseHandle(lpExecInfo.hProcess);
-      }
+	string bashpath = exepath + "git-bash.bat";
+	string cmdline = bashpath + " " + initpath;
+  
+	if (CreateProcess(NULL,(char *)cmdline.c_str(),NULL,NULL,
+    FALSE,0,NULL,NULL,&StartupInfo,&ProcessInfo)) {
+	    WaitForSingleObject(ProcessInfo.hProcess, INFINITE);
+		GetExitCodeProcess(ProcessInfo.hProcess, &exit_status);
+		CloseHandle(ProcessInfo.hProcess);
+		CloseHandle(ProcessInfo.hThread);
+		
+		//create empty file to detect for initialization being successfull
+		SECURITY_ATTRIBUTES sa;
+		sa.nLength = sizeof(sa);
+		sa.lpSecurityDescriptor = NULL;
+		sa.bInheritHandle = TRUE; 
+	
+		CreateFile("compiled",
+		FILE_APPEND_DATA,
+		FILE_SHARE_WRITE | FILE_SHARE_READ,
+		&sa,
+		OPEN_ALWAYS,
+		FILE_ATTRIBUTE_NORMAL,
+		NULL );
+		// everythings good now just continue on down below and load lgm
+	} else {
+		puts("ERROR: Failed to create process for obtaining binaries.");
+		return -1;
+	}
 
   }
   
   //Set Environment Path
   puts("Setting Environment Path");
-  string fullpath = string("PATH=") + string(getenv("PATH")) + exepath + string("mingw32/bin;") + exepath + string("git/bin;");
+  string fullpath = string("PATH=") + getenv("PATH") + exepath + "mingw32/bin;" + exepath + "git/bin;";
   putenv(fullpath.c_str());
   
   //Set Working Directory
   string workpath = exepath + "enigma-dev";
-  string output = string("Setting Working Directory To:") + workpath;
+  string output = "Setting Working Directory To:" + workpath;
   puts(output.c_str());
   chdir(workpath.c_str());
 
   //Run Lateral GM
   puts("Calling LGM");
   
-  string jarpath = exepath + string("enigma-dev/lateralgm.jar");
+  string jarpath = exepath + "enigma-dev/lateralgm.jar";
   string argsasstring = "";
 
   if (argc > 1) {
@@ -192,7 +212,7 @@ int main(int argc, char *argv[])
 	argsasstring += " \"\"";
   }
   
-  string cmdline = string("java -jar \"") + jarpath + string("\"") + argsasstring;
+  string cmdline = "java -jar \"" + jarpath + "\"" + argsasstring;
   puts(cmdline.c_str());
  
   PROCESS_INFORMATION ProcessInfo; //This is what we get as an [out] parameter
