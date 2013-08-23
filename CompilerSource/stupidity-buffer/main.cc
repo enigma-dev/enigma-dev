@@ -82,65 +82,63 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
 
 int main(int argc, char *argv[])
 {
+	// Ensure that Java is installed
+	const char *jpath = "java";
 
-  //Look for java
-  const char *jpath = "java";
+	puts("Checking Java Installation");
+	{
+		char buf[MAX_PATH];
+		GetEnvironmentVariable("programfiles", buf, MAX_PATH);
+		string pfp = buf; pfp += "\\Java\\jre6\\bin\\java.exe";
+		GetEnvironmentVariable("programfiles(x86)", buf, MAX_PATH);
+		string pfx86p = buf; pfx86p += "\\Java\\jre6\\bin\\java.exe";
 
-  puts("Scouring for Java");
-  {
-
-    char buf[MAX_PATH];
-    GetEnvironmentVariable("programfiles", buf, MAX_PATH);
-    string pfp = buf; pfp += "\\Java\\jre6\\bin\\java.exe";
-    GetEnvironmentVariable("programfiles(x86)", buf, MAX_PATH);
-    string pfx86p = buf; pfx86p += "\\Java\\jre6\\bin\\java.exe";
-
-    int a = better_system(jpath, "-version");
-    if (a)
-    {
-      a = better_system(jpath = pfp.c_str(), "-version"); // This should hopefully take care of most of it
-      if (a)
-      {
-        a = better_system(jpath = pfx86p.c_str(), "-version"); //One would think this would take care of the rest
-        if (a)
-        {
-          a = better_system(jpath = "\\Program Files\\Java\\jre6\\bin\\java.exe", "-version");
-          if (a)
-          {
-            a = better_system(jpath = "\\Program Files (x86)\\Java\\jre6\\bin\\java.exe", "-version");
-            if (a)
-            {
-              a = better_system(jpath = "C:\\Program Files\\Java\\jre6\\bin\\java.exe", "-version"); //At this point, they're probably running something that uses C:.
-              if (a)
-                a = better_system(jpath = "C:\\Program Files (x86)\\Java\\jre6\\bin\\java.exe", "-version"); //What a fucked up configuration. *cough* dazappa *cough*
-            }
-          }
-        }
-      }
-    }
-    if (a)
-    {
-      puts(java_not_found);
-      MessageBox(NULL, java_not_found , "Java Problem", MB_OK);
-      system("pause");
-      return 0;
-    }
-  }
-
-  //if init script exists; run it then delete it
-
+		int a = better_system(jpath, "-version");
+		if (a)
+		{
+			a = better_system(jpath = pfp.c_str(), "-version"); // This should hopefully take care of most of it
+			if (a)
+			{
+				a = better_system(jpath = pfx86p.c_str(), "-version"); //One would think this would take care of the rest
+				if (a)
+				{
+				a = better_system(jpath = "\\Program Files\\Java\\jre6\\bin\\java.exe", "-version");
+				if (a)
+				{
+					a = better_system(jpath = "\\Program Files (x86)\\Java\\jre6\\bin\\java.exe", "-version");
+					if (a)
+					{
+					a = better_system(jpath = "C:\\Program Files\\Java\\jre6\\bin\\java.exe", "-version"); //At this point, they're probably running something that uses C:.
+					if (a)
+						a = better_system(jpath = "C:\\Program Files (x86)\\Java\\jre6\\bin\\java.exe", "-version"); //What a fucked up configuration. *cough* dazappa *cough*
+					}
+				}
+				}
+			}
+		}
+		if (a)
+		{
+			puts(java_not_found);
+			MessageBox(NULL, java_not_found , "Java Problem", MB_OK);
+			system("pause");
+			return 0;
+		}
+	}
+	
+  //if init script exists; run it then create flag file called "compiled"
   CommandLineStringArgs cmdlineStringArgs(&argv[0], &argv[0 + argc]);
 	
   std::string path = cmdlineStringArgs[0];
   std::string exepath;
-  string initpath = exepath + "init";
 
   myReplace(path, "\\", "/");
   size_t pos = path.find_last_of("/");
   exepath.assign(path, 0, pos + 1);
   
-  GetFileAttributes(initpath.c_str());
+  string initpath = exepath + "init";
   string compiledpath = exepath + "compiled";
+  //GetFileAttributes(initpath.c_str());
+  
   if (INVALID_FILE_ATTRIBUTES == GetFileAttributes(initpath.c_str()) && GetLastError()== ERROR_FILE_NOT_FOUND)  //If init script not found
   {
       puts("ERROR: Initialization script not found.");
@@ -186,7 +184,7 @@ int main(int argc, char *argv[])
 		return -1;
 	}
   }
-  
+	
   //Set Environment Path
   puts("Setting Environment Path");
   string fullpath = string("PATH=") + getenv("PATH") + exepath + "mingw32/bin;" + exepath + "git/bin;";
