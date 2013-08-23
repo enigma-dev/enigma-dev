@@ -130,14 +130,15 @@ int main(int argc, char *argv[])
 	
   std::string path = cmdlineStringArgs[0];
   std::string exepath;
-  string initpath = exepath + "init";
 
   myReplace(path, "\\", "/");
   size_t pos = path.find_last_of("/");
   exepath.assign(path, 0, pos + 1);
   
-  GetFileAttributes(initpath.c_str());
+  string initpath = exepath + "init";
   string compiledpath = exepath + "compiled";
+  //GetFileAttributes(initpath.c_str());
+  
   if (INVALID_FILE_ATTRIBUTES == GetFileAttributes(initpath.c_str()) && GetLastError()== ERROR_FILE_NOT_FOUND)  //If init script not found
   {
       puts("ERROR: Initialization script not found.");
@@ -183,7 +184,7 @@ int main(int argc, char *argv[])
 		return -1;
 	}
   }
-  
+	
   //Set Environment Path
   puts("Setting Environment Path");
   string fullpath = string("PATH=") + getenv("PATH") + exepath + "mingw32/bin;" + exepath + "git/bin;";
