@@ -82,28 +82,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
 
 int main(int argc, char *argv[])
 {
-  //if init script exists; run it then delete it
-
-  CommandLineStringArgs cmdlineStringArgs(&argv[0], &argv[0 + argc]);
-	
-  std::string path = cmdlineStringArgs[0];
-  std::string exepath;
-  string initpath = exepath + "init";
-
-  myReplace(path, "\\", "/");
-  size_t pos = path.find_last_of("/");
-  exepath.assign(path, 0, pos + 1);
-  
-  GetFileAttributes(initpath.c_str());
-  string compiledpath = exepath + "compiled";
-  if (INVALID_FILE_ATTRIBUTES == GetFileAttributes(initpath.c_str()) && GetLastError()== ERROR_FILE_NOT_FOUND)  //If init script not found
-  {
-      puts("ERROR: Initialization script not found.");
-	  return -1;
-  }
-  else if (INVALID_FILE_ATTRIBUTES == GetFileAttributes(compiledpath.c_str()) && GetLastError() == ERROR_FILE_NOT_FOUND)  // make sure not already compiled
-  {
-    // Ensure that Java is installed
+	// Ensure that Java is installed
 	const char *jpath = "java";
 
 	puts("Checking Java Installation");
@@ -145,7 +124,27 @@ int main(int argc, char *argv[])
 			return 0;
 		}
 	}
+	
+  //if init script exists; run it then create flag file called "compiled"
+  CommandLineStringArgs cmdlineStringArgs(&argv[0], &argv[0 + argc]);
+	
+  std::string path = cmdlineStringArgs[0];
+  std::string exepath;
+  string initpath = exepath + "init";
+
+  myReplace(path, "\\", "/");
+  size_t pos = path.find_last_of("/");
+  exepath.assign(path, 0, pos + 1);
   
+  GetFileAttributes(initpath.c_str());
+  string compiledpath = exepath + "compiled";
+  if (INVALID_FILE_ATTRIBUTES == GetFileAttributes(initpath.c_str()) && GetLastError()== ERROR_FILE_NOT_FOUND)  //If init script not found
+  {
+      puts("ERROR: Initialization script not found.");
+	  return -1;
+  }
+  else if (INVALID_FILE_ATTRIBUTES == GetFileAttributes(compiledpath.c_str()) && GetLastError() == ERROR_FILE_NOT_FOUND)  // make sure not already compiled
+  {
     puts("Downloading and Compiling Binaries, please wait...");
 	  
 	DWORD exit_status;
