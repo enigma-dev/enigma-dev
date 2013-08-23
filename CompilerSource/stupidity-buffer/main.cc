@@ -17,19 +17,12 @@
 **/
 
 #include <windows.h>
-#include <windowsx.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-#include <fstream>
 #include <string>
-#include <sstream>
 #include <map>
 #include <vector>
 
 using namespace std;
-
-#include "settings-parse/eyaml.h"
 
 int better_system(const char* jname, const char* param, const char *direc = NULL)
 {
@@ -71,7 +64,7 @@ EMessage
 #define fixFont(hwnd) SendMessage(hwnd,WM_SETFONT,(WPARAM)GetStockObject(DEFAULT_GUI_FONT),0);
 
 char drive_letter[4] = { '\\', 0, 0, 0 };
-static int keepgoing; HWND dlb = NULL, cbb = NULL;
+HWND dlb = NULL, cbb = NULL;
 
 typedef vector<string> CommandLineStringArgs;
 
@@ -85,9 +78,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
   }
 }
 
-#include <windows.h>
 #include <unistd.h>
-#include <stdlib.h>
 
 int main(int argc, char *argv[])
 {
@@ -201,18 +192,34 @@ int main(int argc, char *argv[])
 	argsasstring += " \"\"";
   }
   
-  argsasstring += " &> enigma_log.log";
   string cmdline = string("java -jar \"") + jarpath + string("\"") + argsasstring;
   puts(cmdline.c_str());
  
   PROCESS_INFORMATION ProcessInfo; //This is what we get as an [out] parameter
   STARTUPINFO StartupInfo; //This is an [in] parameter
 
-  ZeroMemory(&StartupInfo, sizeof(StartupInfo));
-  StartupInfo.cb = sizeof StartupInfo ; //Only compulsory field
- 
+  SECURITY_ATTRIBUTES sa;
+    sa.nLength = sizeof(sa);
+    sa.lpSecurityDescriptor = NULL;
+    sa.bInheritHandle = TRUE; 
+	
+  HANDLE h = CreateFile("output_log.txt",
+    FILE_APPEND_DATA,
+    FILE_SHARE_WRITE | FILE_SHARE_READ,
+    &sa,
+    OPEN_ALWAYS,
+    FILE_ATTRIBUTE_NORMAL,
+    NULL );
+		
+  ZeroMemory(&StartupInfo, sizeof(STARTUPINFO));
+  StartupInfo.cb = sizeof(STARTUPINFO); //Only compulsory field
+  StartupInfo.dwFlags |= STARTF_USESTDHANDLES;
+  StartupInfo.hStdInput = h;
+  StartupInfo.hStdError = h;
+  StartupInfo.hStdOutput = h;
+
   CreateProcess(NULL,(char *)cmdline.c_str(),NULL,NULL,
-    FALSE,CREATE_NO_WINDOW,NULL,NULL,&StartupInfo,&ProcessInfo);
+    TRUE,CREATE_NO_WINDOW,NULL,NULL,&StartupInfo,&ProcessInfo);
 
   //system("pause");
   return 0;
