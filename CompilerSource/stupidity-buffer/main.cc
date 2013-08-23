@@ -185,7 +185,6 @@ int main(int argc, char *argv[])
 		puts("ERROR: Failed to create process for obtaining binaries.");
 		return -1;
 	}
-
   }
   
   //Set Environment Path
