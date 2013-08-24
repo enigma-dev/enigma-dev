@@ -142,6 +142,7 @@ int main(int argc, char *argv[])
   if (INVALID_FILE_ATTRIBUTES == GetFileAttributes(initpath.c_str()) && GetLastError()== ERROR_FILE_NOT_FOUND)  //If init script not found
   {
       puts("ERROR: Initialization script not found.");
+	  system("pause");
 	  return -1;
   }
   else if (INVALID_FILE_ATTRIBUTES == GetFileAttributes(compiledpath.c_str()) && GetLastError() == ERROR_FILE_NOT_FOUND)  // make sure not already compiled
@@ -181,18 +182,31 @@ int main(int argc, char *argv[])
 		// everythings good now just continue on down below and load lgm
 	} else {
 		puts("ERROR: Failed to create process for obtaining binaries.");
+		system("pause");
 		return -1;
 	}
   }
 	
   //Set Environment Path
   puts("Setting Environment Path");
-  string fullpath = string("PATH=") + getenv("PATH") + exepath + "mingw32/bin;" + exepath + "git/bin;";
+  string envpath = getenv("PATH");
+  string fullpath = string("PATH=") + envpath;
+  if (std::string::npos == envpath.find("mingw")) // if mingw is not already in the path
+  {
+	fullpath += ";" + exepath + "mingw32/bin;";
+  }
   putenv(fullpath.c_str());
+  puts(fullpath.c_str());
+  
+  PROCESS_INFORMATION ProcessInfo; //This is what we get as an [out] parameter
+  STARTUPINFO StartupInfo; //This is an [in] parameter
   
   //Set Working Directory
   string workpath = exepath + "enigma-dev";
   string output = "Setting Working Directory To:" + workpath;
+    string cmdline = "cd \"" + workpath + "\"";
+	CreateProcess(NULL,(char *)cmdline.c_str(),NULL,NULL,
+    TRUE,CREATE_NO_WINDOW,NULL,NULL,&StartupInfo,&ProcessInfo);
   puts(output.c_str());
   chdir(workpath.c_str());
 
@@ -209,11 +223,8 @@ int main(int argc, char *argv[])
 	argsasstring += " \"\"";
   }
   
-  string cmdline = "java -jar \"" + jarpath + "\"" + argsasstring;
+  cmdline = "java -jar \"" + jarpath + "\"" + argsasstring;
   puts(cmdline.c_str());
- 
-  PROCESS_INFORMATION ProcessInfo; //This is what we get as an [out] parameter
-  STARTUPINFO StartupInfo; //This is an [in] parameter
 
   SECURITY_ATTRIBUTES sa;
     sa.nLength = sizeof(sa);
