@@ -140,8 +140,8 @@ int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
 
     // Game setting initaliser
   wto << "  int game_settings_initialize()" << endl << "  {" << endl;
-    wto  << "    window_set_fullscreen(" << es->gameSettings.startFullscreen << ");" << endl;
     wto  << "    texture_set_interpolation(" << es->gameSettings.interpolate << "); " << endl;
+    wto  << "    window_set_fullscreen(" << es->gameSettings.startFullscreen << ");" << endl;
     if (es->gameSettings.displayCursor)
         wto  << "    window_set_cursor(cr_default);" << endl;
     else
@@ -151,6 +151,7 @@ int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
     wto  << "    window_set_showborder(" << !es->gameSettings.dontDrawBorder << ");" << endl;
     wto  << "    window_set_showicons(" << !es->gameSettings.dontShowButtons << ");" << endl;
     wto  << "    window_set_region_scale(" << es->gameSettings.scaling/100.0 << ", 0);" << endl;
+    wto  << "    window_set_freezeonlosefocus(" << es->gameSettings.freezeOnLoseFocus << ");" << endl;
     wto << "    return 0;" << endl;
   wto << "  }" << endl;
 

@@ -50,6 +50,7 @@ namespace enigma
     extern char* currentCursor;
     extern HWND hWnd,hWndParent;
     extern void setchildsize(bool adapt);
+    extern bool freezeOnLoseFocus, freezeWindow;
     static short hdeltadelta = 0, vdeltadelta = 0;
     int tempLeft = 0, tempTop = 0, tempRight = 0, tempBottom = 0, tempWidth, tempHeight;
     RECT tempWindow;
@@ -72,6 +73,8 @@ namespace enigma
 
         case WM_SETFOCUS:
             input_initialize();
+            if (freezeOnLoseFocus)
+                freezeWindow = false;
             return 0;
 
         case WM_KILLFOCUS:
@@ -85,6 +88,8 @@ namespace enigma
                 last_mousestatus[i] = mousestatus[i];
                 mousestatus[i] = 0;
             }
+            if (freezeOnLoseFocus)
+                freezeWindow = true;
             return 0;
 
         case WM_ENTERSIZEMOVE:

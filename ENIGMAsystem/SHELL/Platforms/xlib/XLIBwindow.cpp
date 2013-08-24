@@ -398,10 +398,11 @@ void io_handle()
   enigma::update_mouse_variables();
 }
 
-void window_set_cursor(int c)
+int window_set_cursor(int c)
 {
 	XUndefineCursor(disp,win);
 	XDefineCursor(disp, win, (c == -1) ? NoCursor : XCreateFontCursor(disp,curs[-c]));
+	return 0;
 }
 
 void keyboard_wait()

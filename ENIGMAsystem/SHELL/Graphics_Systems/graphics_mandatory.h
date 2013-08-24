@@ -66,5 +66,8 @@ namespace enigma_user
   // Called by the room system to retrieve dimensions for background_width/height[room background index].
   int background_get_width(int backId);
   int background_get_height(int backId);
+
+  //For game settings
+  void texture_set_interpolation(int enable);
 }
 

@@ -77,7 +77,6 @@ void window_set_caption(string caption);
 string window_get_caption();
 void window_set_color(int color);
 int window_get_color();
-void window_set_region_scale(double scale, bool adaptwindow);
 double window_get_region_scale();
 void window_set_position(int x, int y);
 void window_set_size(unsigned int width, unsigned int height);
@@ -93,14 +92,11 @@ int window_get_region_height_scaled();
 
 void window_set_visible(bool visible);
 int window_get_visible();
-void window_set_stayontop(bool stay);
 bool window_get_stayontop();
-void window_set_sizeable(bool sizeable);
 bool window_get_sizeable();
-void window_set_showborder(bool show);
 bool window_get_showborder();
-void window_set_showicons(bool show);
 bool window_get_showicons();
+bool window_get_freezeonlosefocus();
 
 int display_mouse_get_x();
 int display_mouse_get_y();
@@ -122,8 +118,6 @@ int window_view_mouse_get_x(int id);
 int window_view_mouse_get_y(int id);
 void window_view_mouse_set(int id, int x, int y);
 void window_mouse_set(int x,int y);
-int window_set_cursor(int curs);
-void window_set_fullscreen(const bool full);
 int window_get_fullscreen();
 
 void game_end();

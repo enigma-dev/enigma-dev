@@ -47,7 +47,7 @@ static int displayInitialResolutionWidth = 0, displayInitialResolutionHeight = 0
 namespace enigma
 {
     extern HWND hWnd,hWndParent;
-    bool isSizeable = false, isVisible = true, showBorder = true, showIcons = true, windowIsTop = false;
+    bool isSizeable = false, isVisible = true, showBorder = true, showIcons = true, windowIsTop = false, freezeOnLoseFocus = true, freezeWindow = false;
     int windowcolor = 0, isFullScreen = 0, cursorInt = 0, viewScale = -1, regionWidth = 0, regionHeight = 0, windowWidth = 0, windowHeight = 0, windowX = 0, windowY = 0;
     double scaledWidth = 0, scaledHeight = 0;
     char* currentCursor = IDC_ARROW;
@@ -276,12 +276,12 @@ void window_default()
     window_center();
 }
 
-void window_set_fullscreen(const bool full)
+void window_set_fullscreen(bool full)
 {
     if (enigma::isFullScreen == full)
         return;
 
-    if (enigma::isFullScreen = full)
+    if ((enigma::isFullScreen = full))
     {
         SetWindowLongPtr(enigma::hWndParent,GWL_STYLE,WS_POPUP);
         ShowWindow(enigma::hWndParent,SW_MAXIMIZE);
@@ -361,7 +361,7 @@ void window_set_stayontop(bool stay)
     if (enigma::windowIsTop == stay)
         return;
 
-    if (enigma::windowIsTop = stay)
+    if ((enigma::windowIsTop = stay))
     {
         SetWindowPos(enigma::hWnd,HWND_TOPMOST,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE);
     }
@@ -370,6 +370,16 @@ void window_set_stayontop(bool stay)
         SetWindowPos(enigma::hWnd,HWND_BOTTOM,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE|SWP_NOACTIVATE);
         SetWindowPos(enigma::hWnd,HWND_TOP,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE);
     }
+}
+
+void window_set_freezeonlosefocus(bool freeze)
+{
+    enigma::freezeOnLoseFocus = freeze;
+}
+
+bool window_get_freezeonlosefocus()
+{
+    return enigma::freezeOnLoseFocus;
 }
 
 bool window_get_stayontop()
@@ -807,11 +817,11 @@ void window_views_mouse_set(int x, int y)
 namespace enigma_user
 {
 
-int window_set_cursor(int curs)
+int window_set_cursor(int c)
 {
-    switch (curs)
+    switch (c)
     {
-        enigma::cursorInt = curs;
+        enigma::cursorInt = c;
         case cr_default:
             enigma::currentCursor= IDC_ARROW; return 1;
             break;

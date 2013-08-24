@@ -80,7 +80,7 @@ namespace enigma_user {
 	XGetWindowAttributes(disp,win,&wa);
 	return wa.map_state != IsUnmapped;*/
   }
-  
+
   int window_set_caption(string caption)
   {
 	cocoa_window_set_caption(caption.c_str());
@@ -157,7 +157,7 @@ enum {
 	_NET_WM_STATE_TOGGLE
 };
 
-void window_set_fullscreen(const bool full)
+void window_set_fullscreen(bool full)
 {
 	/*Atom wmState = XInternAtom(disp, "_NET_WM_STATE", False);
 	Atom aFullScreen = XInternAtom(disp,"_NET_WM_STATE_FULLSCREEN", False);
@@ -193,11 +193,11 @@ int window_get_fullscreen()
 
 //default    +   -5   I    \    |    /    -    ^   ...  drg  no  -    |  drg3 ...  X  ...  ?   url  +
 short curs[] = { 68, 68, 68, 130, 52, 152, 135, 116, 136, 108, 114, 150, 90, 68, 108, 116, 90, 150, 0, 150, 92, 60, 52};
-int window_set_cursor(double c)
+int window_set_cursor(int c)
 {
 	/*XUndefineCursor(disp,win);
-	XDefineCursor(disp, win, (c == -1) ? NoCursor : XCreateFontCursor(disp,curs[-c]));
-	return 0;*/
+	XDefineCursor(disp, win, (c == -1) ? NoCursor : XCreateFontCursor(disp,curs[-c]));*/
+	return 0;
 }
 
 void window_set_color(int color) {}
@@ -436,23 +436,23 @@ namespace enigma_user {
   void io_handle() {
     cocoa_io_handle();
   }
-  
+
   void keyboard_wait() {
     io_clear();
     while(!keyboard_check(1/*vk_anykey*/)) {
         io_handle();
     }
   }
-  
+
   void window_set_region_scale(double scale, bool adaptwindow) {}
   bool window_get_region_scale() {return 1;}
   void window_set_region_size(int w, int h, bool adaptwindow) {}
-  
+
   void game_end() {
     //audiosystem_cleanup();
     exit(0);
   }
-  
+
   void action_end_game()
   {
     game_end();

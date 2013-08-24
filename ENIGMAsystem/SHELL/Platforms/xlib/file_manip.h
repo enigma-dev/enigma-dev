@@ -53,7 +53,6 @@ bool file_attributes(std::string fname,int attr);
 void export_include_file(std::string fname);
 void export_include_file_location(std::string fname, std::string location);
 void discard_include_file(std::string fname);
-bool set_working_directory(std::string dir);
 
 extern unsigned game_id;
 extern std::string working_directory;
