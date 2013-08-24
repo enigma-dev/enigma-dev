@@ -195,6 +195,10 @@ int main(int argc, char *argv[])
   {
 	fullpath += ";" + exepath + "mingw32/bin;";
   }
+  if (std::string::npos == envpath.find("git/bin")) // if mingw is not already in the path
+  {
+	fullpath += exepath + "git/bin;";
+  }
   putenv(fullpath.c_str());
   puts(fullpath.c_str());
   
