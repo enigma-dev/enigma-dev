@@ -20,7 +20,7 @@ else ifeq ($(OS), Darwin)
 	MKDIR := mkdir
 else
 	TARGET := ../$(BASE).dll
-	LDFLAGS += -static-libstdc++ -static-libgcc
+	LDFLAGS += -static-libgcc
 	MKDIR := mkdir.exe
 endif
 

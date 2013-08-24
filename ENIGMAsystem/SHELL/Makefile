@@ -73,7 +73,7 @@ ifeq ($(GMODE), Compile)
 endif
 
 ifeq ($(PLATFORM), Win32)
-	LDFLAGS += -static-libstdc++ -static-libgcc
+	LDFLAGS += -static-libgcc
 	ifeq ($(GMODE), Compile)
 		LDFLAGS += -static-libgcc -Wl,-subsystem,windows
 	endif
@@ -82,7 +82,6 @@ endif
 # CPPFLAGS needs these include dirs unconditionally
 override CPPFLAGS += $(SYSTEMS:%=-I%/Info)
 override CPPFLAGS += -I.
-
 
 .PHONY: all clean
 
