@@ -1,4 +1,4 @@
-/** Copyright (C) 2011-2012 Josh Ventura
+/** Copyright (C) 2013 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
