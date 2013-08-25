@@ -87,7 +87,7 @@ bool joystick_exists(int id) {
  
     if((wNumDevs = joyGetNumDevs()) == 0) 
         return false; 
-    bDevAttached = joyGetPos(JOYSTICKID1 + id, &joyinfo) != JOYERR_UNPLUGGED; 
+    bDevAttached = joyGetPos(JOYSTICKID1 + id, &joyinfo) == JOYERR_NOERROR; 
 	return bDevAttached;
 }
 
