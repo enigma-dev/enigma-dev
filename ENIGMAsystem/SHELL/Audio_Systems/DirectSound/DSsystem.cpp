@@ -126,7 +126,6 @@ namespace enigma {
 
   SoundResource* sound_new_with_source() {
     SoundResource *res = new SoundResource();
-	sound_resources.push_back(res);
     res->loaded = LOADSTATE_SOURCED;
     return res;
   }
@@ -135,6 +134,10 @@ namespace enigma {
   int sound_add_from_buffer(int id, void* buffer, size_t bufsize)
   {
     SoundResource *snd = sound_new_with_source();
+	if (id > sound_resources.size()) {
+		sound_resources.resize(id + 1);
+	}
+    sound_resources.insert(sound_resources.begin() + id, snd);
     if (snd->loaded != LOADSTATE_SOURCED) {
       //fprintf(stderr, "Could not load sound %d: %s\n", id, alureGetErrorString());
       return 1;
@@ -204,8 +207,19 @@ namespace enigma {
 
   int sound_allocate()
   {
-	int id = sound_resources.size();
-	sound_resources.push_back(new SoundResource());
+	int id = -1;
+	for (int i = 0; i < sound_resources.size(); i++) {
+		if (sound_resources[id] == NULL) {
+			id = i;
+		}
+	}
+	if (id < 0) {
+	  id = sound_resources.size();
+	}
+	if (id > sound_resources.size()) {
+		sound_resources.resize(id + 1);
+	}
+	sound_resources.insert(sound_resources.begin() + id, new SoundResource());
 	return id;
   }
 
