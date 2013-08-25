@@ -247,7 +247,6 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
       minimum_resolution = timer_resolution_info.wPeriodMin;
     }
     timeBeginPeriod(minimum_resolution);
-    long speed_error_mcs = 0;
     enigma::initialize_timing();
     int frames_count = 0;
 

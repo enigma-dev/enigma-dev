@@ -492,7 +492,7 @@ class d3d_model
 		    double u = (i + k) / (float)numc;
 		    double v = t / (float)numt;
 
-		    float ver[] = {x1 + x, y1 + y, z1 + z}, uv[] = {u, v};
+		    float ver[] = {float(x1 + x), float(y1 + y), float(z1 + z)}, uv[] = {(float)u, (float)v};
 		    model_vertex_texture(ver, uv);
                 }
             }

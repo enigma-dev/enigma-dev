@@ -391,6 +391,7 @@ void window_set_region_scale(double scale, bool adaptwindow)
 {
     enigma::viewScale = int(scale*100);
     enigma::setchildsize(adaptwindow);
+    window_center();
 }
 
 double window_get_region_scale()
@@ -405,6 +406,7 @@ void window_set_region_size(int w, int h, bool adaptwindow)
     enigma::regionWidth = w;
     enigma::regionHeight = h;
     enigma::setchildsize(adaptwindow);
+    window_center();
 }
 
 int window_get_region_width()

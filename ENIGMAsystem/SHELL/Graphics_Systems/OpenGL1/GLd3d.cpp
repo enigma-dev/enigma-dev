@@ -190,7 +190,7 @@ void d3d_set_line_width(float value) {
 
 void d3d_set_point_size(float value) {
   glPointSize(value);
-} 
+}
 
 void d3d_depth_clear() {
   d3d_depth_clear_value(1.0f);
@@ -800,7 +800,7 @@ class d3d_lights
             ind_pos.insert(pair<int,posi>(ms, posi(-dx, -dy, -dz, 0.0f)));
         }
 
-        const float dir[4] = {-dx, -dy, -dz, 0.0f}, color[4] = {__GETR(col), __GETG(col), __GETB(col), 1};
+        const float dir[4] = {float(-dx), float(-dy), float(-dz), 0.0f}, color[4] = {float(__GETR(col)), float(__GETG(col)), float(__GETB(col)), 1.0f};
         glLightfv(GL_LIGHT0+ms, GL_POSITION, dir);
         glLightfv(GL_LIGHT0+ms, GL_DIFFUSE, color);
         light_update_positions();
@@ -832,8 +832,8 @@ class d3d_lights
             light_ind.insert(pair<int,int>(id, ms));
             ind_pos.insert(pair<int,posi>(ms, posi(x, y, z, 1)));
         }
-        const float pos[4] = {x, y, z, 1}, color[4] = {__GETR(col), __GETG(col), __GETB(col), 1},
-            specular[4] = {0, 0, 0, 0}, ambient[4] = {0, 0, 0, 0};
+        const float pos[4] = {(float)x, (float)y, (float)z, 1.0f}, color[4] = {float(__GETR(col)), float(__GETG(col)), float(__GETB(col)), 1.0f},
+            specular[4] = {0.0f, 0.0f, 0.0f, 0.0f}, ambient[4] = {0.0f, 0.0f, 0.0f, 0.0f};
         glLightfv(GL_LIGHT0+ms, GL_POSITION, pos);
         glLightfv(GL_LIGHT0+ms, GL_DIFFUSE, color);
         glLightfv(GL_LIGHT0+ms, GL_SPECULAR, specular);
@@ -862,7 +862,7 @@ class d3d_lights
             if (ms >= MAX_LIGHTS)
                 return false;
         }
-        float specular[4] = {r, g, b, a};
+        float specular[4] = {(float)r, (float)g, (float)b, (float)a};
         glLightfv(GL_LIGHT0+ms, GL_SPECULAR, specular);
         return true;
     }
@@ -922,8 +922,8 @@ bool d3d_light_define_specularity(int id, int r, int g, int b, double a)
 
 void d3d_light_specularity(int facemode, int r, int g, int b, double a)
 {
-  float specular[4] = {r, g, b, a};
-  glMaterialfv(renderstates[facemode], GL_SPECULAR, specular);
+  double specular[4] = {(double)r, (double)g, (double)b, a};
+  glMaterialfv(renderstates[facemode], GL_SPECULAR, (float*)specular);
 }
 
 void d3d_light_shininess(int facemode, int shine)
@@ -933,7 +933,7 @@ void d3d_light_shininess(int facemode, int shine)
 
 void d3d_light_define_ambient(int col)
 {
-    const float color[4] = {__GETR(col), __GETG(col), __GETB(col), 1};
+    float color[4] = {float(__GETR(col)), float(__GETG(col)), float(__GETB(col)), 1.0f};
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, color);
 }
 

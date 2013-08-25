@@ -107,7 +107,7 @@ int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
               else wto << (e_is_inst ? " { } // No default " : " { return 0; } // No default ") << event_get_human_name(it->second.mid,it->second.id) << " code." << endl;
             }
   wto << "    //virtual void unlink() {} // This is already declared at the super level." << endl;
-  wto << "    virtual variant myevents_perf(int type, int numb) {}" << endl;
+  wto << "    virtual variant myevents_perf(int type, int numb) {return 0;}" << endl;
   wto << "    event_parent() {}" << endl;
   wto << "    event_parent(unsigned _x, int _y): " << system_get_uppermost_tier() << "(_x,_y) {}" << endl;
   wto << "  };" << endl;
@@ -141,7 +141,6 @@ int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
     // Game setting initaliser
   wto << "  int game_settings_initialize()" << endl << "  {" << endl;
     wto  << "    texture_set_interpolation(" << es->gameSettings.interpolate << "); " << endl;
-    wto  << "    window_set_fullscreen(" << es->gameSettings.startFullscreen << ");" << endl;
     if (es->gameSettings.displayCursor)
         wto  << "    window_set_cursor(cr_default);" << endl;
     else
@@ -151,6 +150,7 @@ int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
     wto  << "    window_set_showborder(" << !es->gameSettings.dontDrawBorder << ");" << endl;
     wto  << "    window_set_showicons(" << !es->gameSettings.dontShowButtons << ");" << endl;
     wto  << "    window_set_region_scale(" << es->gameSettings.scaling/100.0 << ", 0);" << endl;
+    wto  << "    window_set_fullscreen(" << es->gameSettings.startFullscreen << ");" << endl;
     wto  << "    window_set_freezeonlosefocus(" << es->gameSettings.freezeOnLoseFocus << ");" << endl;
     wto << "    return 0;" << endl;
   wto << "  }" << endl;
