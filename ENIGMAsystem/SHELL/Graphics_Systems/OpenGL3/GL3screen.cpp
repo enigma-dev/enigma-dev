@@ -210,7 +210,6 @@ void screen_redraw()
                 (enigma::particles_impl->draw_particlesystems)(high, low);
             }
         }
-        draw_globalVBO();
     }
     else
     {
@@ -373,6 +372,51 @@ void screen_redraw()
         }
         view_current = 0;
     }
+	
+	// Now process the sub event of draw called draw gui 
+	// It is for drawing GUI elements without view scaling and transformation
+	
+	    glViewport(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled());
+        glLoadIdentity();
+        glScalef(1, (bound_framebuffer==0?-1:1), 1);
+        glOrtho(0, room_width, 0, room_height, 0, 1);
+        glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
+        glMultMatrixd(transformation_matrix);
+
+        // Apply and clear stored depth changes.
+        for (map<int,pair<double,double> >::iterator it = id_to_currentnextdepth.begin(); it != id_to_currentnextdepth.end(); it++)
+        {
+            enigma::object_graphics* inst_depth = (enigma::object_graphics*)enigma::fetch_instance_by_id((*it).first);
+            if (inst_depth != NULL) {
+                drawing_depths[(*it).second.first].draw_events->unlink(inst_depth->depth.myiter);
+                inst_iter* mynewiter = drawing_depths[(*it).second.second].draw_events->add_inst(inst_depth->depth.myiter->inst);
+                if (instance_event_iterator == inst_depth->depth.myiter) {
+                    instance_event_iterator = inst_depth->depth.myiter->prev;
+                }
+                inst_depth->depth.myiter = mynewiter;
+            }
+        }
+        id_to_currentnextdepth.clear();
+
+        bool stop_loop = false;
+
+        for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
+        {
+
+            enigma::inst_iter* push_it = enigma::instance_event_iterator;
+            //loop instances
+            for (enigma::instance_event_iterator = dit->second.draw_events->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next) {
+				enigma::instance_event_iterator->inst->myevent_drawgui();
+                if (enigma::room_switching_id != -1) {
+                    stop_loop = true;
+                    break;
+                }
+            }
+            enigma::instance_event_iterator = push_it;
+            if (stop_loop) break;
+        }
+        draw_globalVBO();
+	
     screen_refresh();
 }
 

@@ -314,7 +314,8 @@ particlesystemsupdate: 100000
 # Fun fact: Draw comes after End Step.
 draw: 8
 	Name: Draw
-	Mode: Inline
+	Mode: Special
+	Case: 0
 	Sub Check: visible
 	Iterator-declare: /* Draw is handled by depth */
 	Iterator-initialize: /* Draw is initialized in the constructor */
@@ -322,6 +323,19 @@ draw: 8
 	Iterator-delete: /* Draw will destruct with this */
 	Default: if (visible && sprite_index != -1) draw_sprite_ext(sprite_index,image_index,x,y,image_xscale,image_yscale,image_angle,image_blend,image_alpha);
 	Instead: if (automatic_redraw) screen_redraw(); # We never want to iterate draw; we let screen_redraw() handle it.
+	
+#Draw GUI event is processed after all draw events iterating objects by depth and first resetting the projection to orthographic, ignoring views
+drawgui: 8
+	Name: Draw GUI
+	Mode: Special
+	Case: 64
+	Sub Check: visible
+	Iterator-declare: /* Draw GUI is handled by depth */
+	Iterator-initialize: /* Draw GUI is initialized in the constructor */
+	Iterator-remove: depth.remove();
+	Iterator-delete: /* Draw GUI will destruct with this */
+    Default: if (visible && sprite_index != -1) draw_sprite_ext(sprite_index,image_index,x,y,image_xscale,image_yscale,image_angle,image_blend,image_alpha);
+	Instead: 
 
 
 # Why this comes after "end step," I do not know. One would think it'd be back there with pathend.
