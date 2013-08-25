@@ -82,6 +82,21 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
 
 int main(int argc, char *argv[])
 {
+  //if init script exists; run it then create flag file called "compiled"
+  CommandLineStringArgs cmdlineStringArgs(&argv[0], &argv[0 + argc]);
+	
+  std::string path = cmdlineStringArgs[0];
+  std::string exepath;
+
+  myReplace(path, "\\", "/");
+  size_t pos = path.find_last_of("/");
+  exepath.assign(path, 0, pos + 1);
+  
+  string settingspath = exepath + "settings.ini";
+  
+  bool checkforjava = GetPrivateProfileInt("MAIN", "checkforjava", 1, settingspath.c_str());
+  
+  if (checkforjava) {
 	// Ensure that Java is installed
 	const char *jpath = "java";
 
@@ -124,20 +139,11 @@ int main(int argc, char *argv[])
 			return 0;
 		}
 	}
-	
-  //if init script exists; run it then create flag file called "compiled"
-  CommandLineStringArgs cmdlineStringArgs(&argv[0], &argv[0 + argc]);
-	
-  std::string path = cmdlineStringArgs[0];
-  std::string exepath;
-
-  myReplace(path, "\\", "/");
-  size_t pos = path.find_last_of("/");
-  exepath.assign(path, 0, pos + 1);
+  }
   
   string initpath = exepath + "init";
-  string compiledpath = exepath + "compiled";
-  //GetFileAttributes(initpath.c_str());
+  
+  bool setupcompleted = GetPrivateProfileInt("MAIN", "setupcompleted", 0, settingspath.c_str());
   
   if (INVALID_FILE_ATTRIBUTES == GetFileAttributes(initpath.c_str()) && GetLastError()== ERROR_FILE_NOT_FOUND)  //If init script not found
   {
@@ -145,7 +151,7 @@ int main(int argc, char *argv[])
 	  system("pause");
 	  return -1;
   }
-  else if (INVALID_FILE_ATTRIBUTES == GetFileAttributes(compiledpath.c_str()) && GetLastError() == ERROR_FILE_NOT_FOUND)  // make sure not already compiled
+  else if (!setupcompleted)  // make sure not already compiled
   {
     puts("Downloading and Compiling Binaries, please wait...");
 	  
@@ -179,6 +185,7 @@ int main(int argc, char *argv[])
 		OPEN_ALWAYS,
 		FILE_ATTRIBUTE_NORMAL,
 		NULL );
+		WritePrivateProfileString("MAIN", "setupcompleted", "1", settingspath.c_str());
 		// everythings good now just continue on down below and load lgm
 	} else {
 		puts("ERROR: Failed to create process for obtaining binaries.");
@@ -243,15 +250,25 @@ int main(int argc, char *argv[])
     FILE_ATTRIBUTE_NORMAL,
     NULL );
 		
+  bool redirectoutput = GetPrivateProfileInt("MAIN", "redirectoutput", 1, settingspath.c_str());
+		
   ZeroMemory(&StartupInfo, sizeof(STARTUPINFO));
   StartupInfo.cb = sizeof(STARTUPINFO); //Only compulsory field
-  StartupInfo.dwFlags |= STARTF_USESTDHANDLES;
-  StartupInfo.hStdInput = h;
-  StartupInfo.hStdError = h;
-  StartupInfo.hStdOutput = h;
+  if (redirectoutput) {
+    StartupInfo.dwFlags |= STARTF_USESTDHANDLES;
+    StartupInfo.hStdInput = h;
+    StartupInfo.hStdError = h;
+    StartupInfo.hStdOutput = h;
+  }
 
+  DWORD flags = NULL;
+  
+  if (redirectoutput) {
+	flags += CREATE_NO_WINDOW;
+  }
+  
   CreateProcess(NULL,(char *)cmdline.c_str(),NULL,NULL,
-    TRUE,CREATE_NO_WINDOW,NULL,NULL,&StartupInfo,&ProcessInfo);
+    TRUE,flags,NULL,NULL,&StartupInfo,&ProcessInfo);
 
   //system("pause");
   return 0;
