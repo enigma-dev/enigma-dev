@@ -110,9 +110,10 @@ namespace enigma
     //Go to the first room
     if (enigma_user::room_count)
       enigma::game_start();
+    else
+        enigma_user::window_default();
 
     enigma::game_settings_initialize();
-
     return 0;
   }
 }

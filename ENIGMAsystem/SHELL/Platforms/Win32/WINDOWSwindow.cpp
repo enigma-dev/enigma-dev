@@ -273,7 +273,6 @@ void window_default()
     enigma::windowWidth = xm;
     enigma::windowHeight = ym;
     window_set_region_size(xm, ym, true);
-    window_center();
 }
 
 void window_set_fullscreen(bool full)
@@ -389,8 +388,8 @@ bool window_get_stayontop()
 
 void window_set_region_scale(double scale, bool adaptwindow)
 {
-    enigma::viewScale = int(scale*100);
-    enigma::setchildsize(adaptwindow);
+  /*  enigma::viewScale = int(scale*100);
+    enigma::setchildsize(adaptwindow);*/
     window_center();
 }
 
