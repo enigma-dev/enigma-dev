@@ -76,8 +76,9 @@ double joystick_axis(int id, int axisnum) {
 
 bool joystick_button(int id, int buttonnum) {
 	JOYINFOEX joyinfo; 
+	joyinfo.dwFlags = JOY_RETURNBUTTONS;
     joyGetPosEx(JOYSTICKID1 + id, &joyinfo); 
-	return (joyinfo.dwButtons & (JOY_BUTTON1 + buttonnum));
+	return (joyinfo.dwButtons & (JOY_BUTTON1 << buttonnum));
 }
 
 bool joystick_exists(int id) {
