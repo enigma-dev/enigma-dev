@@ -632,23 +632,15 @@ void draw_healthbar(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2,float 
   amount = amount>=100 ? 1 : (amount<=0 ? 0 : amount/100);
 
   texture_reset();
-  if(showborder)
-  {
-    glColor4ub(__GETR(backcol),__GETG(backcol),__GETB(backcol),enigma::currentcolor[3]);
-    glBegin(GL_LINE_LOOP);
-      glVertex2f(x1-1,y1-1);
-      glVertex2f(x1-1,y2+1);
-      glVertex2f(x2+1,y2+1);
-      glVertex2f(x2+1,y1-1);
-    glEnd();
-    if (showback)
-      goto showback_yes;
-    goto showback_no;
-  }
+  
   if(showback) {
       glColor4ub(__GETR(backcol),__GETG(backcol),__GETB(backcol),enigma::currentcolor[3]);
-      showback_yes: glRectf(x1,y1,x2,y2);
-  } showback_no:
+	  if (showborder) {
+		glRectf(x1-1,y1-1,x2+1,y2+1);
+	  } else {
+	    glRectf(x1,y1,x2,y2);
+	  }
+  }
 
   switch(dir) {
   case 1:x1=x2-(x2-x1)*amount;
