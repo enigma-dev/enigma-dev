@@ -136,8 +136,9 @@ int main(int argc, char *argv[])
   exepath.assign(path, 0, pos + 1);
   
   string initpath = exepath + "init";
-  string compiledpath = exepath + "compiled";
-  //GetFileAttributes(initpath.c_str());
+  string settingspath = exepath + "settings.ini";
+  
+  bool setupcompleted = GetPrivateProfileInt("MAIN", "setupcompleted", 0, settingspath.c_str());
   
   if (INVALID_FILE_ATTRIBUTES == GetFileAttributes(initpath.c_str()) && GetLastError()== ERROR_FILE_NOT_FOUND)  //If init script not found
   {
@@ -145,7 +146,7 @@ int main(int argc, char *argv[])
 	  system("pause");
 	  return -1;
   }
-  else if (INVALID_FILE_ATTRIBUTES == GetFileAttributes(compiledpath.c_str()) && GetLastError() == ERROR_FILE_NOT_FOUND)  // make sure not already compiled
+  else if (!setupcompleted)  // make sure not already compiled
   {
     puts("Downloading and Compiling Binaries, please wait...");
 	  
@@ -179,6 +180,7 @@ int main(int argc, char *argv[])
 		OPEN_ALWAYS,
 		FILE_ATTRIBUTE_NORMAL,
 		NULL );
+		WritePrivateProfileString("MAIN", "setupcompleted", "1", settingspath.c_str());
 		// everythings good now just continue on down below and load lgm
 	} else {
 		puts("ERROR: Failed to create process for obtaining binaries.");
