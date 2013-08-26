@@ -334,8 +334,6 @@ drawgui: 8
 	Iterator-initialize: /* Draw GUI is initialized in the constructor */
 	Iterator-remove: depth.remove();
 	Iterator-delete: /* Draw GUI will destruct with this */
-    Default: if (visible && sprite_index != -1) draw_sprite_ext(sprite_index,image_index,x,y,image_xscale,image_yscale,image_angle,image_blend,image_alpha);
-	Instead: 
 
 
 # Why this comes after "end step," I do not know. One would think it'd be back there with pathend.

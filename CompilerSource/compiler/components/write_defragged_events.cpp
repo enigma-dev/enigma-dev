@@ -162,6 +162,7 @@ int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
     wto << event_get_super_check_function(it->second.mid, it->second.id);
 
   /* Now the event sequence */
+  bool using_gui = false;
   wto << "  int ENIGMA_events()" << endl << "  {" << endl;
     for (size_t i=0; i<event_sequence.size(); i++)
     {
@@ -170,6 +171,14 @@ int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
       evfit it = used_events.find(event_is_instance(mid,id) ? event_stacked_get_root_name(mid) : event_get_function_name(mid,id));
       if (it == used_events.end()) continue;
       if (mid == 7 && (id >= 10 && id <= 25)) continue;   //User events, don't want to be run in the event sequence. TODO: Remove hard-coded values.
+      if (mid == 8 && id == 64)
+      {
+          string seqcode = event_forge_sequence_code(mid,id,it->first);
+          if (seqcode != "")
+            using_gui = true;
+
+          continue;       // Don't want gui loop to be added
+      }
 
       string seqcode = event_forge_sequence_code(mid,id,it->first);
       if (seqcode != "")
@@ -200,6 +209,7 @@ int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
     wto << "    return 0;" << endl;
   wto << "  } // event function" << endl;
 
+  wto << "  bool gui_used = " << using_gui << ";" << endl;
   // Done, end the namespace
   wto << "} // namespace enigma" << endl;
   wto.close();

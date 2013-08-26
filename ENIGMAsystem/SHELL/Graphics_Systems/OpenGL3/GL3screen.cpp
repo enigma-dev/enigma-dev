@@ -372,10 +372,12 @@ void screen_redraw()
         }
         view_current = 0;
     }
-	
-	// Now process the sub event of draw called draw gui 
+    draw_globalVBO();
+
+	// Now process the sub event of draw called draw gui
 	// It is for drawing GUI elements without view scaling and transformation
-	
+    if (enigma::gui_used)
+    {
 	    glViewport(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled());
         glLoadIdentity();
         glScalef(1, (bound_framebuffer==0?-1:1), 1);
@@ -415,8 +417,8 @@ void screen_redraw()
             enigma::instance_event_iterator = push_it;
             if (stop_loop) break;
         }
-        draw_globalVBO();
-	
+    }
+
     screen_refresh();
 }
 

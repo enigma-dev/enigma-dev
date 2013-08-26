@@ -388,8 +388,8 @@ bool window_get_stayontop()
 
 void window_set_region_scale(double scale, bool adaptwindow)
 {
-  /*  enigma::viewScale = int(scale*100);
-    enigma::setchildsize(adaptwindow);*/
+    enigma::viewScale = int(scale*100);
+    enigma::setchildsize(adaptwindow);
     window_center();
 }
 
