@@ -482,18 +482,24 @@ public class EFileWriter
 	
 	static class ShaderEefWriter implements ResourceWriter
 	{
+		
+		public String getExt(Resource<?,?> r)
+		{
+		return EY; //$NON-NLS-1$
+		}
 
 	@Override
 	public void write(EGMOutputStream os, ProjectFile gf, ResNode child, List<String> dir) throws IOException
 		{
 		Resource<?,?> r = (Resource<?,?>) Util.deRef((ResourceReference<?>) child.getRes());
 		String name = (String) child.getUserObject();
-		PrintStream ps = new PrintStream(os.next(dir,name + ".shr"));
+		PrintStream ps = new PrintStream(os.next(dir,name + EY));
 
-		ps.println("Vertex_Code: " + name + ".vertex");
-		ps.println("Fragment_Code: " + name + ".fragment");
-		ps.println("Type: " + r.properties.get(PShader.TYPE));
-		ps.println("Precompile: " + r.properties.get(PShader.PRECOMPILE));
+		ps.println("DATA: " + name + EY);
+		ps.println("VCODE: " + name + ".vertex");
+		ps.println("FCODE: " + name + ".fragment");
+		ps.println("TYPE: " + r.properties.get(PShader.TYPE));
+		ps.println("PRECOMPILE: " + r.properties.get(PShader.PRECOMPILE));
 		
 		PrintStream vps = new PrintStream(os.next(dir,name + ".vertex"));
 		vps.print(r.properties.get(PShader.VCODE));
