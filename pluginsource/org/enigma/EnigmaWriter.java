@@ -64,6 +64,7 @@ import org.enigma.backend.resources.GmObject;
 import org.enigma.backend.resources.Path;
 import org.enigma.backend.resources.Room;
 import org.enigma.backend.resources.Script;
+import org.enigma.backend.resources.Shader;
 import org.enigma.backend.resources.Sound;
 import org.enigma.backend.resources.Sprite;
 import org.enigma.backend.resources.Timeline;
@@ -95,6 +96,7 @@ import org.lateralgm.resources.Resource;
 import org.lateralgm.resources.ResourceReference;
 import org.lateralgm.resources.Room.PRoom;
 import org.lateralgm.resources.Script.PScript;
+import org.lateralgm.resources.Shader.PShader;
 import org.lateralgm.resources.Sound.PSound;
 import org.lateralgm.resources.Sprite.MaskShape;
 import org.lateralgm.resources.Sprite.PSprite;
@@ -144,6 +146,7 @@ public final class EnigmaWriter
 		populateBackgrounds();
 		populatePaths();
 		populateScripts();
+		populateShaders();
 		populateFonts();
 		populateTimelines();
 		populateObjects();
@@ -541,6 +544,30 @@ public final class EnigmaWriter
 			oo.code = qs.get(s).execInfo;
 			}
 		}
+	
+	protected void populateShaders()
+	{
+	int size = i.resMap.getList(org.lateralgm.resources.Shader.class).size();
+	o.shaderCount = size;
+	if (size == 0) return;
+
+	o.shaders = new Shader.ByReference();
+	Shader[] osl = (Shader[]) o.shaders.toArray(size);
+	org.lateralgm.resources.Shader[] isl = i.resMap.getList(org.lateralgm.resources.Shader.class).toArray(
+			new org.lateralgm.resources.Shader[0]);
+	for (int s = 0; s < isl.length; s++)
+		{
+		Shader oo = osl[s];
+		org.lateralgm.resources.Shader io = isl[s];
+
+		oo.name = io.getName();
+		oo.id = io.getId();
+		oo.vcode = io.get(PShader.VCODE);
+		oo.fcode = io.get(PShader.FCODE);
+		oo.type = io.get(PShader.TYPE);
+		oo.precompile = io.get(PShader.PRECOMPILE);
+		}
+	}
 
 	protected void populateFonts()
 		{
