@@ -495,7 +495,6 @@ public class EFileWriter
 		String name = (String) child.getUserObject();
 		PrintStream ps = new PrintStream(os.next(dir,name + EY));
 
-		ps.println("DATA: " + name + EY);
 		ps.println("VCODE: " + name + ".vertex");
 		ps.println("FCODE: " + name + ".fragment");
 		ps.println("TYPE: " + r.properties.get(PShader.TYPE));
