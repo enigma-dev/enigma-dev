@@ -81,6 +81,11 @@ namespace enigma_user {
 	return wa.map_state != IsUnmapped;*/
   }
 
+void window_set_freezeonlosefocus(bool freeze)
+{
+}
+
+
   int window_set_caption(string caption)
   {
 	cocoa_window_set_caption(caption.c_str());

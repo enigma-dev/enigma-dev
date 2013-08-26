@@ -243,6 +243,10 @@ enum {
 namespace enigma_user
 {
 
+void window_set_freezeonlosefocus(bool freeze)
+{
+}
+
 void window_set_fullscreen(bool full)
 {
 	Atom wmState = XInternAtom(disp, "_NET_WM_STATE", False);
