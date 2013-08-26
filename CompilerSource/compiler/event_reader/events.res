@@ -264,7 +264,7 @@ drawgui: 8
 	Name: Draw GUI
 	Mode: Special
 	Case: 64
-	Instead: 
+	Sub Check: visible
 
 
 # Why this comes after "end step," I do not know. One would think it'd be back there with pathend.

@@ -277,6 +277,10 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   edbg << "Copying script names [" << es->scriptCount << "]" << flushl;
   for (int i = 0; i < es->scriptCount; i++)
     quickmember_script(&globals_scope,es->scripts[i].name);
+	
+  edbg << "Copying shader names [" << es->shaderCount << "]" << flushl;
+  for (int i = 0; i < es->shaderCount; i++)
+    quickmember_variable(&globals_scope,jdi::builtin_type__int,es->shaders[i].name);
 
   edbg << "Copying font names [" << es->fontCount << "]" << flushl;
   for (int i = 0; i < es->fontCount; i++)
@@ -293,7 +297,6 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   edbg << "Copying room names [" << es->roomCount << "]" << flushl;
   for (int i = 0; i < es->roomCount; i++)
     quickmember_variable(&globals_scope,jdi::builtin_type__int,es->rooms[i].name);
-
 
 
   /// Next we do a simple parse of the code, scouting for some variable names and adding semicolons.
@@ -500,6 +503,14 @@ wto << "namespace enigma_user {\nstring script_get_name(int i) {\n switch (i) {\
      wto << ss.str() << " default: return \"<undefined>\";}};}\n\n";
      ss.str( "" );
 
+	max = 0;
+    wto << "namespace enigma_user {\nenum //shader names\n{\n";
+    for (int i = 0; i < es->shaderCount; i++) {
+      if (es->shaders[i].id >= max) max = es->shaders[i].id + 1;
+      wto << "  " << es->shaders[i].name << " = " << es->shaders[i].id << ",\n";
+    }
+    wto << "};}\nnamespace enigma { size_t shader_idmax = " <<max << "; }\n\n";
+	 
     max = 0;
     wto << "namespace enigma_user {\nenum //room names\n{\n";
     for (int i = 0; i < es->roomCount; i++) {
@@ -708,6 +719,8 @@ wto << "namespace enigma_user {\nstring script_get_name(int i) {\n switch (i) {\
   current_language->module_write_fonts(es,gameModule);
 
   current_language->module_write_paths(es,gameModule);
+  
+  current_language->module_write_shaders(es,gameModule);
 
   // Tell where the resources start
   fwrite("\0\0\0\0res0",8,1,gameModule);
