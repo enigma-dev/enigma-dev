@@ -255,8 +255,15 @@ endstep: 3
 # Fun fact: Draw comes after End Step.
 draw: 8
 	Name: Draw
-	Mode: Inline
+	Mode: Special
+	Case: 0
 	Instead: screen_redraw(); screen_refresh(); # We never want to iterate draw; we let screen_redraw() handle it.
+	
+drawgui: 8
+	Name: Draw
+	Mode: Special
+	Case: 64
+	Instead: 
 
 
 # Why this comes after "end step," I do not know. One would think it'd be back there with pathend.
