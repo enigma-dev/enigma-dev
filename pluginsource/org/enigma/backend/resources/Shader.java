@@ -18,16 +18,16 @@ public class Shader extends Structure
 	public String name;
 	public int id;
 
-	public String vcode;
-	public String fcode;
+	public String vertex;
+	public String fragment;
 	
 	public String type;
-	public boolean preload;
+	public boolean precompile;
 
 	@Override
 	protected List<String> getFieldOrder()
 		{
-		return Arrays.asList("name","id","vcode","fcode","type","preload");
+		return Arrays.asList("name","id","vertex","fragment","type","precompile");
 		}
 
 	public static class ByReference extends Shader implements Structure.ByReference

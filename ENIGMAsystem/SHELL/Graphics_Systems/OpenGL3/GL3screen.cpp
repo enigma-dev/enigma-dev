@@ -91,6 +91,17 @@ static inline void draw_back()
     }
 }
 
+namespace enigma
+{
+    extern bool d3dHidden;
+    extern std::map<int,roomstruct*> roomdata;
+    particles_implementation* particles_impl;
+    void set_particles_implementation(particles_implementation* part_impl)
+    {
+        particles_impl = part_impl;
+    }
+}
+
 void draw_globalVBO()
 {
     if (globalVBO_verCount>0){
@@ -110,24 +121,23 @@ void draw_globalVBO()
         glTexCoordPointer( 2, GL_FLOAT, sizeof(gs_scalar) * 8, (void*)(sizeof(gs_scalar) * 2) );
         glColorPointer( 4, GL_FLOAT, sizeof(gs_scalar) * 8, (void*)(sizeof(gs_scalar) * 4) );
 
+		// this sprite batching mechanism does not allow one to apply transformations to sprites or text
+		// like is possible with the Direct3D 9 sprite batcher or traditionally in Game Maker.
+		if (d3dHidden) {
+		  glDisable(GL_DEPTH_TEST);
+		}
         glDrawElements(GL_TRIANGLES, globalVBO_indCount, GL_UNSIGNED_INT, &globalVBO_indices[0] );
-
+		if (d3dHidden) {
+		  glEnable(GL_DEPTH_TEST);
+		}
+			
         glDisableClientState( GL_COLOR_ARRAY );
         glDisableClientState( GL_TEXTURE_COORD_ARRAY );
         glDisableClientState( GL_VERTEX_ARRAY );
+		
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         globalVBO_datCount = globalVBO_verCount = globalVBO_indCount = 0;
-    }
-}
-
-namespace enigma
-{
-    extern bool d3dMode;
-    extern std::map<int,roomstruct*> roomdata;
-    particles_implementation* particles_impl;
-    void set_particles_implementation(particles_implementation* part_impl)
-    {
-        particles_impl = part_impl;
     }
 }
 
@@ -154,7 +164,7 @@ void screen_redraw()
         }
 
         // Clear the depth buffer if 3d mode is on at the beginning of the draw step.
-        if (enigma::d3dMode)
+        if (enigma::d3dHidden)
             clear_bits |= GL_DEPTH_BUFFER_BIT;
 
         if (clear_bits)
@@ -313,7 +323,7 @@ void screen_redraw()
                 }
 
                 // Clear the depth buffer if 3d mode is on at the beginning of the draw step.
-                if (enigma::d3dMode)
+                if (enigma::d3dHidden)
                     clear_bits |= GL_DEPTH_BUFFER_BIT;
 
                 if (clear_bits)
@@ -372,8 +382,9 @@ void screen_redraw()
         }
         view_current = 0;
     }
-    draw_globalVBO();
 
+	draw_globalVBO();
+			
 	// Now process the sub event of draw called draw gui
 	// It is for drawing GUI elements without view scaling and transformation
     if (enigma::gui_used)
@@ -384,6 +395,10 @@ void screen_redraw()
         glOrtho(0, room_width, 0, room_height, 0, 1);
         glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
         glMultMatrixd(transformation_matrix);
+		
+		// Clear the depth buffer if hidden surface removal is on at the beginning of the draw step.
+        if (enigma::d3dHidden)
+			glClear(GL_DEPTH_BUFFER_BIT);
 
         // Apply and clear stored depth changes.
         for (map<int,pair<double,double> >::iterator it = id_to_currentnextdepth.begin(); it != id_to_currentnextdepth.end(); it++)
@@ -417,8 +432,9 @@ void screen_redraw()
             enigma::instance_event_iterator = push_it;
             if (stop_loop) break;
         }
+		draw_globalVBO();
     }
-
+		
     screen_refresh();
 }
 

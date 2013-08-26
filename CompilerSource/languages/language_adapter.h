@@ -50,6 +50,7 @@ struct language_adapter {
   virtual int module_write_backgrounds(EnigmaStruct *es, FILE *gameModule) = 0;
   virtual int module_write_paths(EnigmaStruct *es, FILE *gameModule) = 0;
   virtual int module_write_fonts(EnigmaStruct *es, FILE *gameModule) = 0;
+  virtual int module_write_shaders(EnigmaStruct *es, FILE *gameModule) = 0;
   
   // Globals and locals
   virtual int  load_shared_locals() = 0;

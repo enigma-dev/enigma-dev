@@ -97,16 +97,18 @@ bool d3d_get_mode()
     return enigma::d3dMode;
 }
 
+// disabling hidden surface removal in means there is no depth buffer
 void d3d_set_hidden(bool enable)
 {
-    if (!enigma::d3dMode) return;
     (enable?glEnable:glDisable)(GL_DEPTH_TEST);
     enigma::d3dHidden = enable;
 }
 
+// disabling zwriting can let you turn off testing for a single model, for instance
+// to fix cutout billboards such as trees the alpha pixels on their edges may not depth sort
+// properly particle effects are usually drawn with zwriting disabled because of this as well
 void d3d_set_zwriteenable(bool enable)
 {
-    if (!enigma::d3dMode) return;
     (enable?glEnable:glDisable)(GL_DEPTH_TEST);
     enigma::d3dZWriteEnable = enable;
 }
@@ -166,7 +168,6 @@ void d3d_set_fog_density(double density)
 
 void d3d_set_culling(bool enable)
 {
-  if (!enigma::d3dMode) return;
   (enable?glEnable:glDisable)(GL_CULL_FACE);
   glFrontFace(GL_CW);
 }
@@ -206,7 +207,6 @@ void d3d_depth_operator(int mode) {
 
 void d3d_set_perspective(bool enable)
 {
-  if (!enigma::d3dMode) return;
   if (enable)
   {
     glMatrixMode(GL_PROJECTION);

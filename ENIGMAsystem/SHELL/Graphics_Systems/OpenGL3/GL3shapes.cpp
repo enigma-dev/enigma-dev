@@ -49,8 +49,10 @@ void plane2D_rotated(const gs_scalar data[])
     }
 
     copy(data,data+4*8, &enigma::globalVBO_data[enigma::globalVBO_datCount] );
+	//enigma::globalVBO_data.push_front(data);
     enigma::globalVBO_datCount+=4*8;
     copy(index,index+6, &enigma::globalVBO_indices[enigma::globalVBO_indCount] );
+	//enigma::globalVBO_indices.push_front(index);
     enigma::globalVBO_indCount+=6;
     enigma::globalVBO_verCount+=4;
 }

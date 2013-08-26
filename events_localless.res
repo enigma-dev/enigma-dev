@@ -319,10 +319,6 @@ drawgui: 8
 	Mode: Special
 	Case: 64
 	Sub Check: visible
-	Iterator-declare: /* Draw GUI is handled by depth */
-	Iterator-initialize: /* Draw GUI is initialized in the constructor */
-	Iterator-remove: depth.remove();
-	Iterator-delete: /* Draw GUI will destruct with this */ 
 
 # Why this comes after "end step," I do not know. One would think it'd be back there with pathend.
 animationend: 7
