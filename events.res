@@ -324,6 +324,7 @@ draw: 8
 	Default: if (visible && sprite_index != -1) draw_sprite_ext(sprite_index,image_index,x,y,image_xscale,image_yscale,image_angle,image_blend,image_alpha);
 	Instead: if (automatic_redraw) screen_redraw(); # We never want to iterate draw; we let screen_redraw() handle it.
 	
+#Draw GUI event is processed after all draw events iterating objects by depth and first resetting the projection to orthographic, ignoring views
 drawgui: 8
 	Name: Draw GUI
 	Mode: Special

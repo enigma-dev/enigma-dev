@@ -259,8 +259,9 @@ draw: 8
 	Case: 0
 	Instead: screen_redraw(); screen_refresh(); # We never want to iterate draw; we let screen_redraw() handle it.
 	
+#Draw GUI event is processed after all draw events iterating objects by depth and first resetting the projection to orthographic, ignoring views
 drawgui: 8
-	Name: Draw
+	Name: Draw GUI
 	Mode: Special
 	Case: 64
 	Instead: 
