@@ -115,6 +115,8 @@ void draw_globalVBO()
         glDisableClientState( GL_COLOR_ARRAY );
         glDisableClientState( GL_TEXTURE_COORD_ARRAY );
         glDisableClientState( GL_VERTEX_ARRAY );
+		
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         globalVBO_datCount = globalVBO_verCount = globalVBO_indCount = 0;
     }
@@ -122,7 +124,7 @@ void draw_globalVBO()
 
 namespace enigma
 {
-    extern bool d3dMode;
+    extern bool d3dHidden;
     extern std::map<int,roomstruct*> roomdata;
     particles_implementation* particles_impl;
     void set_particles_implementation(particles_implementation* part_impl)
@@ -154,7 +156,7 @@ void screen_redraw()
         }
 
         // Clear the depth buffer if 3d mode is on at the beginning of the draw step.
-        if (enigma::d3dMode)
+        if (enigma::d3dHidden)
             clear_bits |= GL_DEPTH_BUFFER_BIT;
 
         if (clear_bits)
@@ -313,7 +315,7 @@ void screen_redraw()
                 }
 
                 // Clear the depth buffer if 3d mode is on at the beginning of the draw step.
-                if (enigma::d3dMode)
+                if (enigma::d3dHidden)
                     clear_bits |= GL_DEPTH_BUFFER_BIT;
 
                 if (clear_bits)
@@ -372,8 +374,9 @@ void screen_redraw()
         }
         view_current = 0;
     }
-    draw_globalVBO();
 
+	draw_globalVBO();
+			
 	// Now process the sub event of draw called draw gui
 	// It is for drawing GUI elements without view scaling and transformation
     if (enigma::gui_used)
@@ -384,6 +387,10 @@ void screen_redraw()
         glOrtho(0, room_width, 0, room_height, 0, 1);
         glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
         glMultMatrixd(transformation_matrix);
+		
+		// Clear the depth buffer if hidden surface removal is on at the beginning of the draw step.
+        if (enigma::d3dHidden)
+			glClear(GL_DEPTH_BUFFER_BIT);
 
         // Apply and clear stored depth changes.
         for (map<int,pair<double,double> >::iterator it = id_to_currentnextdepth.begin(); it != id_to_currentnextdepth.end(); it++)
@@ -417,8 +424,9 @@ void screen_redraw()
             enigma::instance_event_iterator = push_it;
             if (stop_loop) break;
         }
+		draw_globalVBO();
     }
-
+		
     screen_refresh();
 }
 
