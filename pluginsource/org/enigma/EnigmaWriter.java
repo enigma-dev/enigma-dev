@@ -562,8 +562,8 @@ public final class EnigmaWriter
 
 		oo.name = io.getName();
 		oo.id = io.getId();
-		oo.vcode = io.get(PShader.VCODE);
-		oo.fcode = io.get(PShader.FCODE);
+		oo.vertex = io.get(PShader.VERTEX);
+		oo.fragment = io.get(PShader.FRAGMENT);
 		oo.type = io.get(PShader.TYPE);
 		oo.precompile = io.get(PShader.PRECOMPILE);
 		}

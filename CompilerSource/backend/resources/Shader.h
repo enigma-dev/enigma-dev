@@ -16,8 +16,8 @@ struct Shader
 	String name;
 	int id;
 
-	String vcode;
-	String fcode;
+	String vertex;
+	String fragment;
 	String type;
 	boolean precompile;
 };

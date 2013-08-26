@@ -495,16 +495,16 @@ public class EFileWriter
 		String name = (String) child.getUserObject();
 		PrintStream ps = new PrintStream(os.next(dir,name + EY));
 
-		ps.println("VCODE: " + name + ".vertex");
-		ps.println("FCODE: " + name + ".fragment");
+		ps.println("VERTEX: " + name + ".vertex");
+		ps.println("FRAGMENT: " + name + ".fragment");
 		ps.println("TYPE: " + r.properties.get(PShader.TYPE));
 		ps.println("PRECOMPILE: " + r.properties.get(PShader.PRECOMPILE));
 		
 		PrintStream vps = new PrintStream(os.next(dir,name + ".vertex"));
-		vps.print(r.properties.get(PShader.VCODE));
+		vps.print(r.properties.get(PShader.VERTEX));
 		
 		PrintStream fps = new PrintStream(os.next(dir,name + ".fragment"));
-		fps.print(r.properties.get(PShader.FCODE));
+		fps.print(r.properties.get(PShader.FRAGMENT));
 		}
 	
 	}

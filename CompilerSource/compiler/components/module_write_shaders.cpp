@@ -62,8 +62,8 @@ int lang_CPP::module_write_shaders(EnigmaStruct *es, FILE *gameModule)
   {
     writei(es->shaders[i].id,gameModule); //id
     
-    writes(es->shaders[i].vcode,gameModule); //Vertex code of the shader
-    writes(es->shaders[i].fcode,gameModule); //Fragment code of the shader
+    writes(es->shaders[i].vertex,gameModule); //Vertex code of the shader
+    writes(es->shaders[i].fragment,gameModule); //Fragment code of the shader
     writes(es->shaders[i].type,gameModule);    //Language of the shader
     writei(es->shaders[i].precompile,gameModule); //Compile the shader after loading
 
