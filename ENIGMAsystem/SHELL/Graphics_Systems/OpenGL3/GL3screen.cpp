@@ -91,6 +91,17 @@ static inline void draw_back()
     }
 }
 
+namespace enigma
+{
+    extern bool d3dHidden;
+    extern std::map<int,roomstruct*> roomdata;
+    particles_implementation* particles_impl;
+    void set_particles_implementation(particles_implementation* part_impl)
+    {
+        particles_impl = part_impl;
+    }
+}
+
 void draw_globalVBO()
 {
     if (globalVBO_verCount>0){
@@ -110,8 +121,16 @@ void draw_globalVBO()
         glTexCoordPointer( 2, GL_FLOAT, sizeof(gs_scalar) * 8, (void*)(sizeof(gs_scalar) * 2) );
         glColorPointer( 4, GL_FLOAT, sizeof(gs_scalar) * 8, (void*)(sizeof(gs_scalar) * 4) );
 
+		// this sprite batching mechanism does not allow one to apply transformations to sprites or text
+		// like is possible with the Direct3D 9 sprite batcher or traditionally in Game Maker.
+		if (d3dHidden) {
+		  glDisable(GL_DEPTH_TEST);
+		}
         glDrawElements(GL_TRIANGLES, globalVBO_indCount, GL_UNSIGNED_INT, &globalVBO_indices[0] );
-
+		if (d3dHidden) {
+		  glEnable(GL_DEPTH_TEST);
+		}
+			
         glDisableClientState( GL_COLOR_ARRAY );
         glDisableClientState( GL_TEXTURE_COORD_ARRAY );
         glDisableClientState( GL_VERTEX_ARRAY );
@@ -119,17 +138,6 @@ void draw_globalVBO()
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         globalVBO_datCount = globalVBO_verCount = globalVBO_indCount = 0;
-    }
-}
-
-namespace enigma
-{
-    extern bool d3dHidden;
-    extern std::map<int,roomstruct*> roomdata;
-    particles_implementation* particles_impl;
-    void set_particles_implementation(particles_implementation* part_impl)
-    {
-        particles_impl = part_impl;
     }
 }
 
