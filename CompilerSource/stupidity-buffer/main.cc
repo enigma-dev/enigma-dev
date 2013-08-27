@@ -260,6 +260,6 @@ int main(int argc, char *argv[])
   CreateProcess(NULL,(char *)cmdline.c_str(),NULL,NULL,
     TRUE,flags,NULL,NULL,&StartupInfo,&ProcessInfo);
 
-  system("pause");
+  //system("pause");
   return 0;
 }
