@@ -369,8 +369,11 @@ class Mesh
       }
     }
 
-    glBindBuffer( GL_ARRAY_BUFFER, 0 );
-
+	glBindBuffer( GL_ARRAY_BUFFER, 0 );
+	if (useIndexBuffer == true){
+        glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
+    }
+	
     glDisableClientState(GL_VERTEX_ARRAY);
     if (useTextureBuffer == true) glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     if (useNormalBuffer == true) glDisableClientState(GL_NORMAL_ARRAY);

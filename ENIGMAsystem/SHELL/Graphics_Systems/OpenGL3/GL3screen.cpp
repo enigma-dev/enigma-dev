@@ -109,7 +109,7 @@ void draw_globalVBO()
         //int fbo;
         //glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fbo);
         //printf("RENDERING THIS - Verts = %i, inds = %i and fbo = %i, data size = %i, index size = %i\n",globalVBO_verCount,globalVBO_indCount,fbo,globalVBO_data.size(),globalVBO_indices.size() );
-        glBindTexture(GL_TEXTURE_2D,d3dZWriteEnable);
+        //glBindTexture(GL_TEXTURE_2D,0);
         glEnableClientState(GL_VERTEX_ARRAY);
         glEnableClientState(GL_TEXTURE_COORD_ARRAY);
         glEnableClientState(GL_COLOR_ARRAY);
@@ -131,7 +131,7 @@ void draw_globalVBO()
 		if (d3dZWriteEnable) {
 		  glDepthMask(true);
 		}
-			
+		
         glDisableClientState( GL_COLOR_ARRAY );
         glDisableClientState( GL_TEXTURE_COORD_ARRAY );
         glDisableClientState( GL_VERTEX_ARRAY );
@@ -400,21 +400,6 @@ void screen_redraw()
 		// Clear the depth buffer if hidden surface removal is on at the beginning of the draw step.
         if (enigma::d3dMode)
 			glClear(GL_DEPTH_BUFFER_BIT);
-
-        // Apply and clear stored depth changes.
-        for (map<int,pair<double,double> >::iterator it = id_to_currentnextdepth.begin(); it != id_to_currentnextdepth.end(); it++)
-        {
-            enigma::object_graphics* inst_depth = (enigma::object_graphics*)enigma::fetch_instance_by_id((*it).first);
-            if (inst_depth != NULL) {
-                drawing_depths[(*it).second.first].draw_events->unlink(inst_depth->depth.myiter);
-                inst_iter* mynewiter = drawing_depths[(*it).second.second].draw_events->add_inst(inst_depth->depth.myiter->inst);
-                if (instance_event_iterator == inst_depth->depth.myiter) {
-                    instance_event_iterator = inst_depth->depth.myiter->prev;
-                }
-                inst_depth->depth.myiter = mynewiter;
-            }
-        }
-        id_to_currentnextdepth.clear();
 
         bool stop_loop = false;
 
