@@ -28,8 +28,6 @@ using namespace std;
 #include "Universal_System/roomsystem.h" // Room dimensions.
 #include "Graphics_Systems/graphics_mandatory.h" // Room dimensions.
 
-#include <windows.h>
-
 namespace enigma
 {
   unsigned bound_texture=0;
@@ -77,7 +75,7 @@ namespace enigma
 	  for (size_t i = 0; i < shader_idmax; i++) {
 	    ShaderStruct* shaderstruct = shaderdata[i];
 		
-		if (string(shaderstruct->type) != string("GLSL")) { continue; }
+		//if (string(shaderstruct->type) != string("GLSL")) { continue; }
 		
 		Shader* vshader = new Shader(enigma_user::sh_vertex);
 		shaders.push_back(vshader);

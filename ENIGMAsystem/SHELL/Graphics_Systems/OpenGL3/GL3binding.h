@@ -23,6 +23,7 @@ using std::vector;
 //GL3 uses VBO's, so when the texture is switched it not only binds it, but also renders the batched VBO
   namespace enigma {
    extern vector<float> globalVBO_data;
+   extern unsigned bound_texture;
   }
   void draw_globalVBO();
   
@@ -32,7 +33,6 @@ using std::vector;
 	
 	#define use_bound_texture_global
 #ifdef use_bound_texture_global
-  namespace enigma { extern unsigned bound_texture; }
   #define texture_reset() if(enigma::bound_texture) draw_globalVBO(), glBindTexture(GL_TEXTURE_2D,enigma::bound_texture=0);
   #define texture_use(texid) if (enigma::bound_texture != unsigned(texid)) \
     draw_globalVBO(), glBindTexture(GL_TEXTURE_2D,enigma::bound_texture = texid)
