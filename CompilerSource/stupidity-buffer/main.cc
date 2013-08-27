@@ -219,9 +219,9 @@ int main(int argc, char *argv[])
   //Run Lateral GM
   char idename[256], idecmd[256];
   GetPrivateProfileString("MAIN", "idename", "lateralgm.jar", idename, 256, settingspath.c_str());
-  GetPrivateProfileString("MAIN", "idecommand", "java -jar ", idecmd, 256, settingspath.c_str());
+  GetPrivateProfileString("MAIN", "idecommand", "java -jar", idecmd, 256, settingspath.c_str());
 
-  string idepath = "\"" + exepath + "enigma-dev/" + string(idename) + "\"";
+  string idepath = " \"" + exepath + "enigma-dev/" + string(idename) + "\"";
   cmdline = string(idecmd) + idepath;
 
 
