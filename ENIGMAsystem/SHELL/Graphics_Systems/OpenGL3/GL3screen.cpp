@@ -109,7 +109,7 @@ void draw_globalVBO()
         //int fbo;
         //glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fbo);
         //printf("RENDERING THIS - Verts = %i, inds = %i and fbo = %i, data size = %i, index size = %i\n",globalVBO_verCount,globalVBO_indCount,fbo,globalVBO_data.size(),globalVBO_indices.size() );
-        glBindTexture(GL_TEXTURE_2D,d3dZWriteEnable);
+        //glBindTexture(GL_TEXTURE_2D,0);
         glEnableClientState(GL_VERTEX_ARRAY);
         glEnableClientState(GL_TEXTURE_COORD_ARRAY);
         glEnableClientState(GL_COLOR_ARRAY);
@@ -131,7 +131,7 @@ void draw_globalVBO()
 		if (d3dZWriteEnable) {
 		  glDepthMask(true);
 		}
-			
+		
         glDisableClientState( GL_COLOR_ARRAY );
         glDisableClientState( GL_TEXTURE_COORD_ARRAY );
         glDisableClientState( GL_VERTEX_ARRAY );
