@@ -401,21 +401,6 @@ void screen_redraw()
         if (enigma::d3dMode)
 			glClear(GL_DEPTH_BUFFER_BIT);
 
-        // Apply and clear stored depth changes.
-        for (map<int,pair<double,double> >::iterator it = id_to_currentnextdepth.begin(); it != id_to_currentnextdepth.end(); it++)
-        {
-            enigma::object_graphics* inst_depth = (enigma::object_graphics*)enigma::fetch_instance_by_id((*it).first);
-            if (inst_depth != NULL) {
-                drawing_depths[(*it).second.first].draw_events->unlink(inst_depth->depth.myiter);
-                inst_iter* mynewiter = drawing_depths[(*it).second.second].draw_events->add_inst(inst_depth->depth.myiter->inst);
-                if (instance_event_iterator == inst_depth->depth.myiter) {
-                    instance_event_iterator = inst_depth->depth.myiter->prev;
-                }
-                inst_depth->depth.myiter = mynewiter;
-            }
-        }
-        id_to_currentnextdepth.clear();
-
         bool stop_loop = false;
 
         for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
