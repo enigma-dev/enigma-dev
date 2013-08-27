@@ -21,16 +21,22 @@
 #include "../General/OpenGLHeaders.h"
 using namespace std;
 #include "OPENGL3Std.h"
+#include "GL3shader.h"
+#include "GLSLshader.h"
+#include "Universal_System/shaderstruct.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h" // Room dimensions.
 #include "Graphics_Systems/graphics_mandatory.h" // Room dimensions.
+
+#include <windows.h>
+
 namespace enigma
 {
   unsigned bound_texture=0;
   unsigned char currentcolor[4] = {0,0,0,255};
   bool glew_isgo;
   bool pbo_isgo;
-
+  
   void graphicssystem_initialize()
   {
     GLenum err = glewInit();
@@ -65,6 +71,36 @@ namespace enigma
 
       glColor4f(0,0,0,1);
       glBindTexture(GL_TEXTURE_2D,bound_texture=0);
+	  
+	  init_shaders();
+	  // read shaders into graphics system structure and compile and link them if needed
+	  for (size_t i = 0; i < shader_idmax; i++) {
+	    ShaderStruct* shaderstruct = shaderdata[i];
+		
+		if (string(shaderstruct->type) != string("GLSL")) { continue; }
+		
+		Shader* vshader = new Shader(enigma_user::sh_vertex);
+		shaders.push_back(vshader);
+		glShaderSource(vshader->shader, 1, (const GLchar**)&shaderstruct->vertex, NULL);
+		
+		Shader* fshader = new Shader(enigma_user::sh_fragment);
+		shaders.push_back(fshader);
+		glShaderSource(fshader->shader, 1, (const GLchar**)&shaderstruct->fragment, NULL);
+		
+		ShaderProgram* program = new ShaderProgram();
+		shaderprograms.push_back(program);
+		
+		if (shaderstruct->precompile) {
+			glCompileShader(vshader->shader);
+			glCompileShader(fshader->shader);
+		}
+		
+		glAttachShader(program->shaderprogram, vshader->shader);
+		glAttachShader(program->shaderprogram, fshader->shader);
+		
+		glLinkProgram(program->shaderprogram);
+		glValidateProgram(program->shaderprogram);
+	  }
   }
 }
 

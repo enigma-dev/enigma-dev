@@ -41,6 +41,7 @@ struct language_adapter {
   virtual int compile_writeObjAccess(map<int,parsed_object*>&,parsed_object*) = 0;
   virtual int compile_writeFontInfo(EnigmaStruct* es) = 0;
   virtual int compile_writeRoomData(EnigmaStruct* es,parsed_object *EGMglobal) = 0;
+  virtual int compile_writeShaderData(EnigmaStruct* es,parsed_object *EGMglobal) = 0;
   virtual int compile_writeDefraggedEvents(EnigmaStruct* es) = 0;
   virtual int compile_handle_templates(EnigmaStruct* es) = 0;
 
@@ -50,7 +51,6 @@ struct language_adapter {
   virtual int module_write_backgrounds(EnigmaStruct *es, FILE *gameModule) = 0;
   virtual int module_write_paths(EnigmaStruct *es, FILE *gameModule) = 0;
   virtual int module_write_fonts(EnigmaStruct *es, FILE *gameModule) = 0;
-  virtual int module_write_shaders(EnigmaStruct *es, FILE *gameModule) = 0;
   
   // Globals and locals
   virtual int  load_shared_locals() = 0;
