@@ -575,12 +575,10 @@ void draw_button(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scal
 {
   texture_reset();
   if(x1>x2) {
-    gs_scalar t=x2;
     x2=x1;
     x1=x2;
   }
   if(y1>y2) {
-    gs_scalar t=y2;
     y2=y1;
     y1=y2;
   }
@@ -632,7 +630,7 @@ void draw_healthbar(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2,float 
   amount = amount>=100 ? 1 : (amount<=0 ? 0 : amount/100);
 
   texture_reset();
-  
+
   if(showback) {
       glColor4ub(__GETR(backcol),__GETG(backcol),__GETB(backcol),enigma::currentcolor[3]);
 	  if (showborder) {

@@ -47,13 +47,13 @@ namespace enigma
       return NULL;
     }
 
-    int
+    unsigned
       widfull = nlpo2dc(bmpwidth) + 1,
       hgtfull = nlpo2dc(bmpheight) + 1,
       ih,iw;
     const int bitmap_size = widfull*hgtfull*4;
     char* bitmap=new char[bitmap_size](); // Initialize to zero.
-    
+
     for(ih = bmpheight - 1; ih >= 0; ih--)
     {
       int tmp = ih*widfull*4;
@@ -94,9 +94,9 @@ namespace enigma
       return NULL;
     if (fread(&bmpheight,1,4,imgfile) != 4)
       return NULL;
-    
+
     fseek(imgfile,28,SEEK_SET); // Color depth
-    
+
     // Only take 24 or 32-bit bitmaps for now
     int bitdepth=fgetc(imgfile);
     if(bitdepth != 24 && bitdepth != 32)
@@ -104,7 +104,7 @@ namespace enigma
 
     fseek(imgfile,69,SEEK_SET); // Alpha in last byte
     int bgramask=fgetc(imgfile);
-    
+
     int
       widfull = nlpo2dc(bmpwidth) + 1,
       hgtfull = nlpo2dc(bmpheight) + 1,
@@ -113,7 +113,7 @@ namespace enigma
     char* bitmap=new char[bitmap_size](); // Initialize to zero.
     long int pad=bmpwidth & 3; //This is that set of nulls that follows each line
       fseek(imgfile,bmpstart,SEEK_SET);
-    
+
     for(ih = bmpheight - 1; ih >= 0; ih--)
     {
       int tmp = ih*widfull*4;

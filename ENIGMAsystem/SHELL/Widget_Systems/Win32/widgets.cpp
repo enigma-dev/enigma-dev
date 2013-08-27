@@ -27,11 +27,10 @@
 
 // As is typical of Win32 code, this code is fuck-ugly. Refer to the GTK version for
 // porting to competent widget systems. Use this only for low-level APIs.
-#include "../General/WSwidgets.h"
-
 #define WINVER 9001
 #include <windows.h>
 #define _WIN32_IE 9001
+#include "Widget_Systems/General/WSwidgets.h"
 #include <commctrl.h>
 #include <windowsx.h>
 #include <stdio.h>
@@ -72,7 +71,7 @@ struct enigma_widget_alignment: gtkl_container
   enigma_widget_alignment(int id, int w, int h):  gtkl_container(id,w,h,false), child(NULL) {}
   enigma_widget_alignment(int id, int w, int h, enigma_widget* c):  gtkl_container(id,w,h,false), child(c) {}
   void insert(enigma_widget* whom) { child = whom; }
-  
+
   void clear()   { delete child; }
   void resolve() { if (child) child->resolve(), srw = child->srw+8, srh = child->srh+8; }
   void resize(int x,int y,int w,int h)  { if (child) child->resize(x+4,y+4,w-8,h-8); }
@@ -87,7 +86,7 @@ bool wgt_exists(int id) {
 
 #define getID(hwnd) GetWindowLong((HWND)(hwnd),GWL_USERDATA)
 #define setID(hwnd,id) SetWindowLong((HWND)(hwnd),GWL_USERDATA,(id))
-#define fixFont(hwnd) SendMessage(hwnd,WM_SETFONT,(WPARAM)GetStockObject(DEFAULT_GUI_FONT),0); 
+#define fixFont(hwnd) SendMessage(hwnd,WM_SETFONT,(WPARAM)GetStockObject(DEFAULT_GUI_FONT),0);
 
 struct enigma_window: enigma_widget {
   int layout_id;
@@ -96,7 +95,7 @@ struct enigma_window: enigma_widget {
 };
 
 static LRESULT CALLBACK GenWindowProcedure (HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
-{ 
+{
   switch (message)
   {
     case WM_COMMAND:
@@ -140,7 +139,7 @@ void log_enigma_widget(gtkl_object* wgt)
 struct Sgeneric_window
 {
   WNDCLASSEX wincl;        /* Data structure for the window class */
-  
+
   Sgeneric_window()
   {
     /* The Window structure */
@@ -149,7 +148,7 @@ struct Sgeneric_window
     wincl.lpfnWndProc = GenWindowProcedure;      /* This function is called by windows */
     wincl.style = CS_DBLCLKS;                 /* Catch double-clicks */
     wincl.cbSize = sizeof (WNDCLASSEX);
-    
+
     /* Use default icon and mouse-pointer */
     wincl.hIcon = LoadIcon (NULL, IDI_APPLICATION);
     wincl.hIconSm = LoadIcon (NULL, IDI_APPLICATION);
@@ -157,9 +156,9 @@ struct Sgeneric_window
     wincl.lpszMenuName = NULL;                 /* No menu */
     wincl.cbClsExtra = 0;                      /* No extra bytes after the window class */
     wincl.cbWndExtra = 0;                      /* structure or the window instance */
-    
+
     wincl.hbrBackground = (HBRUSH)COLOR_WINDOW;
-    
+
     RegisterClassEx (&wincl);
   }
 } generic_window;
@@ -196,7 +195,7 @@ int wgt_layout_create(int win, string layout, int hpad, int vpad)
   vector<const char*> rows;
   rows.push_back(lyt);
   unsigned cc = 1;
-  
+
   for (unsigned i = 0, tr = 1; lyt[i]; i++, tr++)
   {
     if (lyt[i] == '\r' and lyt[i+1] == '\n') i++;
@@ -205,22 +204,22 @@ int wgt_layout_create(int win, string layout, int hpad, int vpad)
     if (tr > cc)
       cc = tr;
   }
-  
+
   enigma_window *window = (enigma_window*)getWidget(win);
   gtkl_table *table = new gtkl_table(rows.size(),cc);
   table->parent_id = win;
-  
+
   for (unsigned y = 0; y < rows.size(); y++)
   for (unsigned x = 0; x < cc; x++)
   {
     // Pick a char
     char cat = rows[y][x];
     unsigned cs = 1, rs = 1;
-    
+
     // Determine cell dimensions
     while (cs < cc - x          and rows[y][x + cs] == cat) cs++;
     while (rs < rows.size() - y and rows[y + rs][x] == cat) rs++;
-    
+
     enigma_widget_alignment *wa = new enigma_widget_alignment(-1,2,2);
     if (!table->attach(wa,x,x+cs,y,y+rs,cat))
       delete wa;
@@ -250,7 +249,7 @@ struct enigma_button: enigma_widget {
 void enigma_button::resolve()
 {
   HDC dc = GetDC(me);
-  int tl = Button_GetTextLength(me); 
+  int tl = Button_GetTextLength(me);
   char t[tl+1]; Button_GetText(me,t,tl+1);
   SIZE d; GetTextExtentPoint32(dc,t,tl,&d);
   ReleaseDC(me,dc);
@@ -320,7 +319,7 @@ struct enigma_checkbox: enigma_button {
   void resolve()
   {
     HDC dc = GetDC(me);
-    int tl = Button_GetTextLength(me); 
+    int tl = Button_GetTextLength(me);
     char t[tl+1]; Button_GetText(me,t,tl+1);
     SIZE d; GetTextExtentPoint32(dc,t,tl,&d);
     ReleaseDC(me,dc);
@@ -349,8 +348,8 @@ struct enigma_textline: enigma_widget {
   enigma_textline(int id,HWND hwnd, int at, int w, int h): gtkl_widget(id,hwnd,at,w,h) {}
 };
 
-void enigma_textline::resolve() { 
-  TEXTMETRIC tm; 
+void enigma_textline::resolve() {
+  TEXTMETRIC tm;
   HDC dc = GetDC(me);
   GetTextMetrics(dc,&tm);
   ReleaseDC(me,dc);
@@ -384,7 +383,7 @@ int wgt_radio_create(string text)
   log_enigma_widget(new enigma_widget(rb));
   return widget_idmax++;
 }
-                      
+
 int wgt_radio_add(string text, int rbo)
 {
   HWND rb = gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON(widgets[rbo]), text.c_str());
