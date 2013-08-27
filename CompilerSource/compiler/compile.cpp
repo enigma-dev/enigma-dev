@@ -503,13 +503,17 @@ wto << "namespace enigma_user {\nstring script_get_name(int i) {\n switch (i) {\
      wto << ss.str() << " default: return \"<undefined>\";}};}\n\n";
      ss.str( "" );
 
-	max = 0;
+    max = 0;
     wto << "namespace enigma_user {\nenum //shader names\n{\n";
     for (int i = 0; i < es->shaderCount; i++) {
       if (es->shaders[i].id >= max) max = es->shaders[i].id + 1;
       wto << "  " << es->shaders[i].name << " = " << es->shaders[i].id << ",\n";
-    }
-    wto << "};}\nnamespace enigma { size_t shader_idmax = " <<max << "; }\n\n";
+      ss << "    case " << es->shaders[i].id << ": return \"" << es->shaders[i].name << "\"; break;\n";
+    } wto << "};}\nnamespace enigma { size_t shader_idmax = " <<max << "; }\n\n";
+
+wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\n";
+     wto << ss.str() << " default: return \"<undefined>\";}};}\n\n";
+     ss.str( "" );
 	 
     max = 0;
     wto << "namespace enigma_user {\nenum //room names\n{\n";
@@ -552,6 +556,9 @@ wto << "namespace enigma_user {\nstring script_get_name(int i) {\n switch (i) {\
   res = current_language->compile_writeRoomData(es,&EGMglobal);
   irrr();
 
+  edbg << "Writing shader data" << flushl;
+  res = current_language->compile_writeShaderData(es,&EGMglobal);
+  irrr();
 
 
   // Write the global variables to their own file to be included before any of the objects
@@ -719,8 +726,6 @@ wto << "namespace enigma_user {\nstring script_get_name(int i) {\n switch (i) {\
   current_language->module_write_fonts(es,gameModule);
 
   current_language->module_write_paths(es,gameModule);
-  
-  current_language->module_write_shaders(es,gameModule);
 
   // Tell where the resources start
   fwrite("\0\0\0\0res0",8,1,gameModule);
