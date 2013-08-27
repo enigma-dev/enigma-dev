@@ -28,8 +28,6 @@ using namespace std;
 #include "Universal_System/roomsystem.h" // Room dimensions.
 #include "Graphics_Systems/graphics_mandatory.h" // Room dimensions.
 
-#include <windows.h>
-
 namespace enigma
 {
   unsigned bound_texture=0;
