@@ -100,8 +100,8 @@ bool d3d_get_mode()
 // disabling hidden surface removal in means there is no depth buffer
 void d3d_set_hidden(bool enable)
 {
-    (enable?glEnable:glDisable)(GL_DEPTH_TEST);
-    enigma::d3dHidden = enable;
+	(enable?glEnable:glDisable)(GL_DEPTH_TEST);
+	enigma::d3dHidden = enable;
 }
 
 // disabling zwriting can let you turn off testing for a single model, for instance
@@ -109,8 +109,8 @@ void d3d_set_hidden(bool enable)
 // properly particle effects are usually drawn with zwriting disabled because of this as well
 void d3d_set_zwriteenable(bool enable)
 {
-    (enable?glEnable:glDisable)(GL_DEPTH_TEST);
-    enigma::d3dZWriteEnable = enable;
+	glDepthMask(enable);
+	enigma::d3dZWriteEnable = enable;
 }
 
 void d3d_set_lighting(bool enable)

@@ -93,7 +93,8 @@ static inline void draw_back()
 
 namespace enigma
 {
-    extern bool d3dHidden;
+    extern bool d3dMode;
+	extern bool d3dZWriteEnable;
     extern std::map<int,roomstruct*> roomdata;
     particles_implementation* particles_impl;
     void set_particles_implementation(particles_implementation* part_impl)
@@ -108,7 +109,7 @@ void draw_globalVBO()
         //int fbo;
         //glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fbo);
         //printf("RENDERING THIS - Verts = %i, inds = %i and fbo = %i, data size = %i, index size = %i\n",globalVBO_verCount,globalVBO_indCount,fbo,globalVBO_data.size(),globalVBO_indices.size() );
-        glBindTexture(GL_TEXTURE_2D,enigma::bound_texture);
+        glBindTexture(GL_TEXTURE_2D,d3dZWriteEnable);
         glEnableClientState(GL_VERTEX_ARRAY);
         glEnableClientState(GL_TEXTURE_COORD_ARRAY);
         glEnableClientState(GL_COLOR_ARRAY);
@@ -123,12 +124,12 @@ void draw_globalVBO()
 
 		// this sprite batching mechanism does not allow one to apply transformations to sprites or text
 		// like is possible with the Direct3D 9 sprite batcher or traditionally in Game Maker.
-		if (d3dHidden) {
-		  glDisable(GL_DEPTH_TEST);
+		if (d3dZWriteEnable) {
+		  glDepthMask(false);
 		}
         glDrawElements(GL_TRIANGLES, globalVBO_indCount, GL_UNSIGNED_INT, &globalVBO_indices[0] );
-		if (d3dHidden) {
-		  glEnable(GL_DEPTH_TEST);
+		if (d3dZWriteEnable) {
+		  glDepthMask(true);
 		}
 			
         glDisableClientState( GL_COLOR_ARRAY );
@@ -164,7 +165,7 @@ void screen_redraw()
         }
 
         // Clear the depth buffer if 3d mode is on at the beginning of the draw step.
-        if (enigma::d3dHidden)
+        if (enigma::d3dMode)
             clear_bits |= GL_DEPTH_BUFFER_BIT;
 
         if (clear_bits)
@@ -323,7 +324,7 @@ void screen_redraw()
                 }
 
                 // Clear the depth buffer if 3d mode is on at the beginning of the draw step.
-                if (enigma::d3dHidden)
+                if (enigma::d3dMode)
                     clear_bits |= GL_DEPTH_BUFFER_BIT;
 
                 if (clear_bits)
@@ -397,7 +398,7 @@ void screen_redraw()
         glMultMatrixd(transformation_matrix);
 		
 		// Clear the depth buffer if hidden surface removal is on at the beginning of the draw step.
-        if (enigma::d3dHidden)
+        if (enigma::d3dMode)
 			glClear(GL_DEPTH_BUFFER_BIT);
 
         // Apply and clear stored depth changes.
