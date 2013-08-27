@@ -84,18 +84,18 @@ int main(int argc, char *argv[])
 {
   //if init script exists; run it then create flag file called "compiled"
   CommandLineStringArgs cmdlineStringArgs(&argv[0], &argv[0 + argc]);
-	
+
   std::string path = cmdlineStringArgs[0];
   std::string exepath;
 
   myReplace(path, "\\", "/");
   size_t pos = path.find_last_of("/");
   exepath.assign(path, 0, pos + 1);
-  
+
   string settingspath = exepath + "settings.ini";
-  
+
   bool checkforjava = GetPrivateProfileInt("MAIN", "checkforjava", 1, settingspath.c_str());
-  
+
   if (checkforjava) {
 	// Ensure that Java is installed
 	const char *jpath = "java";
@@ -140,11 +140,11 @@ int main(int argc, char *argv[])
 		}
 	}
   }
-  
+
   string initpath = exepath + "init";
-  
+
   bool setupcompleted = GetPrivateProfileInt("MAIN", "setupcompleted", 0, settingspath.c_str());
-  
+
   if (INVALID_FILE_ATTRIBUTES == GetFileAttributes(initpath.c_str()) && GetLastError()== ERROR_FILE_NOT_FOUND)  //If init script not found
   {
       puts("ERROR: Initialization script not found.");
@@ -154,37 +154,30 @@ int main(int argc, char *argv[])
   else if (!setupcompleted)  // make sure not already compiled
   {
     puts("Downloading and Compiling Binaries, please wait...");
-	  
+
 	DWORD exit_status;
 	PROCESS_INFORMATION ProcessInfo; //This is what we get as an [out] parameter
 	STARTUPINFO StartupInfo; //This is an [in] parameter
-		
+
 	ZeroMemory(&StartupInfo, sizeof(STARTUPINFO));
 	StartupInfo.cb = sizeof(STARTUPINFO); //Only compulsory field
 
 	string bashpath = exepath + "git-bash.bat";
 	string cmdline = bashpath + " " + initpath;
-  
+
 	if (CreateProcess(NULL,(char *)cmdline.c_str(),NULL,NULL,
     FALSE,0,NULL,NULL,&StartupInfo,&ProcessInfo)) {
 	    WaitForSingleObject(ProcessInfo.hProcess, INFINITE);
 		GetExitCodeProcess(ProcessInfo.hProcess, &exit_status);
 		CloseHandle(ProcessInfo.hProcess);
 		CloseHandle(ProcessInfo.hThread);
-		
+
 		//create empty file to detect for initialization being successfull
 		SECURITY_ATTRIBUTES sa;
 		sa.nLength = sizeof(sa);
 		sa.lpSecurityDescriptor = NULL;
-		sa.bInheritHandle = TRUE; 
-	
-		CreateFile("compiled",
-		FILE_APPEND_DATA,
-		FILE_SHARE_WRITE | FILE_SHARE_READ,
-		&sa,
-		OPEN_ALWAYS,
-		FILE_ATTRIBUTE_NORMAL,
-		NULL );
+		sa.bInheritHandle = TRUE;
+
 		WritePrivateProfileString("MAIN", "setupcompleted", "1", settingspath.c_str());
 		// everythings good now just continue on down below and load lgm
 	} else {
@@ -193,25 +186,18 @@ int main(int argc, char *argv[])
 		return -1;
 	}
   }
-	
+
   //Set Environment Path
   puts("Setting Environment Path");
   string envpath = getenv("PATH");
-  string fullpath = string("PATH=") + envpath;
-  if (std::string::npos == envpath.find("mingw")) // if mingw is not already in the path
-  {
-	fullpath += ";" + exepath + "mingw32/bin;";
-  }
-  if (std::string::npos == envpath.find("git/bin")) // if mingw is not already in the path
-  {
-	fullpath += exepath + "git/bin;";
-  }
+  string fullpath = string("PATH=") + exepath + "mingw32/bin;" + envpath;
+
   putenv(fullpath.c_str());
   puts(fullpath.c_str());
-  
+
   PROCESS_INFORMATION ProcessInfo; //This is what we get as an [out] parameter
   STARTUPINFO StartupInfo; //This is an [in] parameter
-  
+
   //Set Working Directory
   string workpath = exepath + "enigma-dev";
   string output = "Setting Working Directory To:" + workpath;
@@ -221,27 +207,31 @@ int main(int argc, char *argv[])
   puts(output.c_str());
   chdir(workpath.c_str());
 
-  //Run Lateral GM
-  puts("Calling LGM");
-  
-  string jarpath = exepath + "enigma-dev/lateralgm.jar";
+  //arguments
   string argsasstring = "";
-
   if (argc > 1) {
 	myReplace(cmdlineStringArgs[1], "\\", "/");
 	argsasstring += " \"" + cmdlineStringArgs[1] + "\"";
   } else {
 	argsasstring += " \"\"";
   }
-  
-  cmdline = "java -jar \"" + jarpath + "\"" + argsasstring;
-  puts(cmdline.c_str());
 
+  //Run Lateral GM
+  char idename[256], idecmd[256];
+  GetPrivateProfileString("MAIN", "idename", "lateralgm.jar", idename, 256, settingspath.c_str());
+  GetPrivateProfileString("MAIN", "idecommand", "java -jar ", idecmd, 256, settingspath.c_str());
+
+  string idepath = "\"" + exepath + "enigma-dev/" + string(idename) + "\"";
+  cmdline = string(idecmd) + idepath;
+
+
+  cmdline += argsasstring;
+  puts(cmdline.c_str());
   SECURITY_ATTRIBUTES sa;
     sa.nLength = sizeof(sa);
     sa.lpSecurityDescriptor = NULL;
-    sa.bInheritHandle = TRUE; 
-	
+    sa.bInheritHandle = TRUE;
+
   HANDLE h = CreateFile("output_log.txt",
     FILE_APPEND_DATA,
     FILE_SHARE_WRITE | FILE_SHARE_READ,
@@ -249,9 +239,9 @@ int main(int argc, char *argv[])
     OPEN_ALWAYS,
     FILE_ATTRIBUTE_NORMAL,
     NULL );
-		
+
   bool redirectoutput = GetPrivateProfileInt("MAIN", "redirectoutput", 1, settingspath.c_str());
-		
+
   ZeroMemory(&StartupInfo, sizeof(STARTUPINFO));
   StartupInfo.cb = sizeof(STARTUPINFO); //Only compulsory field
   if (redirectoutput) {
@@ -262,14 +252,14 @@ int main(int argc, char *argv[])
   }
 
   DWORD flags = NULL;
-  
+
   if (redirectoutput) {
 	flags += CREATE_NO_WINDOW;
   }
-  
+
   CreateProcess(NULL,(char *)cmdline.c_str(),NULL,NULL,
     TRUE,flags,NULL,NULL,&StartupInfo,&ProcessInfo);
 
-  //system("pause");
+  system("pause");
   return 0;
 }
