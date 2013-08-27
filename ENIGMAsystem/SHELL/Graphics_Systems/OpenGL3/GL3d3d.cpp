@@ -109,8 +109,8 @@ void d3d_set_hidden(bool enable)
 // properly particle effects are usually drawn with zwriting disabled because of this as well
 void d3d_set_zwriteenable(bool enable)
 {
-    (enable?glEnable:glDisable)(GL_DEPTH_TEST);
-    enigma::d3dZWriteEnable = enable;
+	glDepthMask(enable);
+	enigma::d3dZWriteEnable = enable;
 }
 
 void d3d_set_lighting(bool enable)
