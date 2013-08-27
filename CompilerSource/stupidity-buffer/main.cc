@@ -18,6 +18,7 @@
 
 #include <windows.h>
 #include <stdio.h>
+#include <iostream>
 #include <string>
 #include <map>
 #include <vector>
@@ -144,14 +145,26 @@ int main(int argc, char *argv[])
   string initpath = exepath + "init";
 
   bool setupcompleted = GetPrivateProfileInt("MAIN", "setupcompleted", 0, settingspath.c_str());
+  bool skippedinit = GetPrivateProfileInt("MAIN", "skippedinit", 0, settingspath.c_str());
 
-  if (INVALID_FILE_ATTRIBUTES == GetFileAttributes(initpath.c_str()) && GetLastError()== ERROR_FILE_NOT_FOUND)  //If init script not found
+  if (skippedinit==false && INVALID_FILE_ATTRIBUTES == GetFileAttributes(initpath.c_str()) && GetLastError()== ERROR_FILE_NOT_FOUND)  //If init script not found
   {
       puts("ERROR: Initialization script not found.");
-	  system("pause");
-	  return -1;
+      puts("Launch anyway? Useful in cases when compiling from source. [y/n]");
+      char c;
+      do{
+          cin >> c;
+          c = tolower(c);
+      }while( !cin.fail() && c!='y' && c!='n' );
+
+      if (c == 'y'){
+          WritePrivateProfileString("MAIN", "skippedinit", "1", settingspath.c_str());
+      }else{
+          system("pause");
+          return -1;
+      }
   }
-  else if (!setupcompleted)  // make sure not already compiled
+  else if (setupcompleted==false && skippedinit==false)  // make sure not already compiled
   {
     puts("Downloading and Compiling Binaries, please wait...");
 
@@ -199,7 +212,11 @@ int main(int argc, char *argv[])
   STARTUPINFO StartupInfo; //This is an [in] parameter
 
   //Set Working Directory
-  string workpath = exepath + "enigma-dev";
+  string workpath = exepath + "enigma-dev/"; //Test if subdirectory exists, if it doesn't, then assume exe is in it
+  if (INVALID_FILE_ATTRIBUTES == GetFileAttributes(workpath.c_str()) && GetLastError()== ERROR_FILE_NOT_FOUND)
+  {
+      workpath = exepath;
+  }
   string output = "Setting Working Directory To:" + workpath;
     string cmdline = "cd \"" + workpath + "\"";
 	CreateProcess(NULL,(char *)cmdline.c_str(),NULL,NULL,
@@ -221,9 +238,8 @@ int main(int argc, char *argv[])
   GetPrivateProfileString("MAIN", "idename", "lateralgm.jar", idename, 256, settingspath.c_str());
   GetPrivateProfileString("MAIN", "idecommand", "java -jar", idecmd, 256, settingspath.c_str());
 
-  string idepath = " \"" + exepath + "enigma-dev/" + string(idename) + "\"";
+  string idepath = " \"" + workpath + string(idename) + "\"";
   cmdline = string(idecmd) + idepath;
-
 
   cmdline += argsasstring;
   puts(cmdline.c_str());
