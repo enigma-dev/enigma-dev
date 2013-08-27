@@ -213,10 +213,12 @@ int main(int argc, char *argv[])
 
   //Set Working Directory
   string workpath = exepath + "enigma-dev/"; //Test if subdirectory exists, if it doesn't, then assume exe is in it
-  if (INVALID_FILE_ATTRIBUTES == GetFileAttributes(workpath.c_str()) && GetLastError()== ERROR_FILE_NOT_FOUND)
-  {
-      workpath = exepath;
-  }
+  //if (INVALID_FILE_ATTRIBUTES == GetFileAttributes(workpath.c_str()) && GetLastError()== ERROR_FILE_NOT_FOUND)
+  //{
+      // this breaks enigma.exe for me, why? because this is a fucking directory being checked
+	  // not a fuck file
+      //workpath = exepath;
+  //}
   string output = "Setting Working Directory To:" + workpath;
     string cmdline = "cd \"" + workpath + "\"";
 	CreateProcess(NULL,(char *)cmdline.c_str(),NULL,NULL,
