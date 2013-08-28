@@ -134,8 +134,9 @@ const std::string currentDateTime() {
 
 void install_updates() {
 	
-	WritePrivateProfileString("MAIN", "currentversion", "0.0.0.0", settingspath.c_str());
-	WritePrivateProfileString("MAIN", "lastupdated", currentDateTime().c_str(), settingspath.c_str());
+	WritePrivateProfileString("MAIN", "currentversion", "\"0.0.0.0\"", settingspath.c_str());
+	string datetime = "\"" + currentDateTime() + "\"";
+	WritePrivateProfileString("MAIN", "lastupdated", datetime.c_str(), settingspath.c_str());
 }
 
 void show_update_change_log() {
@@ -329,7 +330,8 @@ int main(int argc, char *argv[])
 		CloseHandle(ProcessInfo.hThread);
 
 		WritePrivateProfileString("MAIN", "setupcompleted", "1", settingspath.c_str());
-		WritePrivateProfileString("MAIN", "dateinstalled", currentDateTime().c_str(), settingspath.c_str());
+		string datetime = "\"" + currentDateTime() + "\"";
+		WritePrivateProfileString("MAIN", "dateinstalled", datetime.c_str(), settingspath.c_str());
 		
 		bool cleanupsetup = GetPrivateProfileInt("MAIN", "cleanupsetup", 1, settingspath.c_str());
 		if (cleanupsetup) {
