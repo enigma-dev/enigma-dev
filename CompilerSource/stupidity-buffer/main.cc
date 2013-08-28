@@ -221,7 +221,7 @@ int main(int argc, char *argv[])
   // set the console window title
   system("title ENIGMA Development Environment");
   system("Color 1F");
-  puts("Copyright (C) 2007-2013 GNU GPL\n");
+  puts("Copyright (C) 2013 The ENIGMA Team\n");
   
   bool checkforupdates = GetPrivateProfileInt("MAIN", "checkforupdates", 1, settingspath.c_str());
   if (checkforupdates) { check_for_updates(); }
@@ -329,6 +329,7 @@ int main(int argc, char *argv[])
 		CloseHandle(ProcessInfo.hThread);
 
 		WritePrivateProfileString("MAIN", "setupcompleted", "1", settingspath.c_str());
+		WritePrivateProfileString("MAIN", "dateinstalled", currentDateTime().c_str(), settingspath.c_str());
 		
 		bool cleanupsetup = GetPrivateProfileInt("MAIN", "cleanupsetup", 1, settingspath.c_str());
 		if (cleanupsetup) {
