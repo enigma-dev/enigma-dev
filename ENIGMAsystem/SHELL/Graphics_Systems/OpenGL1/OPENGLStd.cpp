@@ -42,6 +42,8 @@ namespace enigma
     {
       std::cout<<"GLEW ERROR!"<<std::endl;
     }
+	#else
+	glewInit();
     #endif
 
     //enigma::pbo_isgo=GL_ARB_pixel_buffer_object;
