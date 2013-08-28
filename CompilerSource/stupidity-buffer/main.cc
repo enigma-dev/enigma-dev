@@ -264,7 +264,7 @@ int main(int argc, char *argv[])
 	  output_error("Setup script not found.");
 	  bool launchanyway = false;
 	  if (redirectoutput) {
-		MessageBox(NULL, "Setup script not found. Launch anyway? Useful in cases when compiling from source.", "Error", MB_YESNO|MB_ICONERROR);
+		launchanyway = (IDYES == MessageBox(NULL, "Setup script not found. Launch anyway? Useful in cases when compiling from source.", "Error", MB_YESNO|MB_ICONERROR));
 	  } else {
 	    puts("Launch anyway? Useful in cases when compiling from source. [y/n]");
 		char c;
