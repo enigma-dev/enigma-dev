@@ -31,6 +31,9 @@ int better_system(const char* jname, const char* param, const char *direc = NULL
 
   if (direc)
     SetCurrentDirectory(direc);
+	
+  // set the console window title
+  system("title ENIGMA");
 
   STARTUPINFO StartupInfo;
   PROCESS_INFORMATION ProcessInformation;
@@ -83,7 +86,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
 
 int main(int argc, char *argv[])
 {
-  //if init script exists; run it then create flag file called "compiled"
+  //if setup script exists; run it then create flag file called "compiled"
   CommandLineStringArgs cmdlineStringArgs(&argv[0], &argv[0 + argc]);
 
   std::string path = cmdlineStringArgs[0];
@@ -142,14 +145,15 @@ int main(int argc, char *argv[])
 	}
   }
 
-  string initpath = exepath + "init";
+  string setuppath = exepath + "setup";
+  string zippath = exepath + "WinPatch.zip";
 
   bool setupcompleted = GetPrivateProfileInt("MAIN", "setupcompleted", 0, settingspath.c_str());
-  bool skippedinit = GetPrivateProfileInt("MAIN", "skippedinit", 0, settingspath.c_str());
+  bool skippedsetup = GetPrivateProfileInt("MAIN", "skippedsetup", 0, settingspath.c_str());
 
-  if (skippedinit==false && INVALID_FILE_ATTRIBUTES == GetFileAttributes(initpath.c_str()) && GetLastError()== ERROR_FILE_NOT_FOUND)  //If init script not found
+  if (!skippedsetup && !setupcompleted && INVALID_FILE_ATTRIBUTES == GetFileAttributes(setuppath.c_str()) && GetLastError()== ERROR_FILE_NOT_FOUND)  //If setup script not found
   {
-      puts("ERROR: Initialization script not found.");
+      puts("ERROR: Setup script not found.");
       puts("Launch anyway? Useful in cases when compiling from source. [y/n]");
       char c;
       do{
@@ -158,13 +162,13 @@ int main(int argc, char *argv[])
       }while( !cin.fail() && c!='y' && c!='n' );
 
       if (c == 'y'){
-          WritePrivateProfileString("MAIN", "skippedinit", "1", settingspath.c_str());
+          WritePrivateProfileString("MAIN", "skippedsetup", "1", settingspath.c_str());
       }else{
           system("pause");
           return -1;
       }
   }
-  else if (setupcompleted==false && skippedinit==false)  // make sure not already compiled
+  else if (!setupcompleted && !skippedsetup)  // make sure not already compiled
   {
     puts("Downloading and Compiling Binaries, please wait...");
 
@@ -176,7 +180,7 @@ int main(int argc, char *argv[])
 	StartupInfo.cb = sizeof(STARTUPINFO); //Only compulsory field
 
 	string bashpath = exepath + "git-bash.bat";
-	string cmdline = bashpath + " " + initpath;
+	string cmdline = bashpath + " " + setuppath;
 
 	if (CreateProcess(NULL,(char *)cmdline.c_str(),NULL,NULL,
     FALSE,0,NULL,NULL,&StartupInfo,&ProcessInfo)) {
@@ -185,13 +189,13 @@ int main(int argc, char *argv[])
 		CloseHandle(ProcessInfo.hProcess);
 		CloseHandle(ProcessInfo.hThread);
 
-		//create empty file to detect for initialization being successfull
-		SECURITY_ATTRIBUTES sa;
-		sa.nLength = sizeof(sa);
-		sa.lpSecurityDescriptor = NULL;
-		sa.bInheritHandle = TRUE;
-
 		WritePrivateProfileString("MAIN", "setupcompleted", "1", settingspath.c_str());
+		
+		bool cleanupsetup = GetPrivateProfileInt("MAIN", "cleanupsetup", 1, settingspath.c_str());
+		if (cleanupsetup) {
+		  DeleteFile(setuppath.c_str());
+		  DeleteFile(zippath.c_str());
+		}
 		// everythings good now just continue on down below and load lgm
 	} else {
 		puts("ERROR: Failed to create process for obtaining binaries.");
@@ -203,7 +207,7 @@ int main(int argc, char *argv[])
   //Set Environment Path
   puts("Setting Environment Path");
   string envpath = getenv("PATH");
-  string fullpath = string("PATH=") + exepath + "mingw32/bin;" + envpath;
+  string fullpath = string("PATH=") + exepath + "mingw32/bin;" + exepath + "git/bin;" + envpath;
 
   putenv(fullpath.c_str());
   puts(fullpath.c_str());
@@ -213,12 +217,11 @@ int main(int argc, char *argv[])
 
   //Set Working Directory
   string workpath = exepath + "enigma-dev/"; //Test if subdirectory exists, if it doesn't, then assume exe is in it
-  //if (INVALID_FILE_ATTRIBUTES == GetFileAttributes(workpath.c_str()) && GetLastError()== ERROR_FILE_NOT_FOUND)
-  //{
-      // this breaks enigma.exe for me, why? because this is a fucking directory being checked
-	  // not a fuck file
-      //workpath = exepath;
-  //}
+  DWORD ftyp = GetFileAttributesA(workpath.c_str());
+  if (ftyp == INVALID_FILE_ATTRIBUTES && !(ftyp & FILE_ATTRIBUTE_DIRECTORY))
+  {
+      workpath = exepath;
+  }
   string output = "Setting Working Directory To:" + workpath;
     string cmdline = "cd \"" + workpath + "\"";
 	CreateProcess(NULL,(char *)cmdline.c_str(),NULL,NULL,
