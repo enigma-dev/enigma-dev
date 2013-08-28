@@ -118,8 +118,24 @@ void output_warning(const char* msg) {
 	cout << msg << "\n";
 }
 
-void install_updates() {
+#include <ctime>
 
+// Get current date/time, format is MM/DD/YYYY HH:MM:SS
+const std::string currentDateTime() {
+    time_t     now = time(0);
+    struct tm  tstruct;
+    char       buf[80];
+    tstruct = *localtime(&now);
+    // Visit http://www.cplusplus.com/reference/clibrary/ctime/strftime/
+    // for more information about date/time format
+    strftime(buf, sizeof(buf), "%m/%d/%Y %X", &tstruct);
+    return buf;
+}
+
+void install_updates() {
+	
+	WritePrivateProfileString("MAIN", "currentversion", "0.0.0.0", settingspath.c_str());
+	WritePrivateProfileString("MAIN", "lastupdated", currentDateTime().c_str(), settingspath.c_str());
 }
 
 void show_update_change_log() {
@@ -161,14 +177,21 @@ void check_for_updates() {
     // Set the new color information
     SetConsoleTextAttribute ( h, FOREGROUND_BLUE+FOREGROUND_GREEN | BACKGROUND_BLUE | FOREGROUND_INTENSITY );
 
+	char currentversion[256], lastupdated[256];
+	GetPrivateProfileString("MAIN", "lastupdated", "Never", lastupdated, 256, settingspath.c_str());
+	GetPrivateProfileString("MAIN", "currentversion", "0.0.0.0", currentversion, 256, settingspath.c_str());
+	
     puts("*** Updates Available ***");
 	
     // Restore the original colors
     SetConsoleTextAttribute ( h, wOldColorAttrs);
-
-	puts("Latest Version:");
-	puts("Current Version:");
-	puts("Last Updated:\n");
+	
+	string lvtxt = "Latest Version: ";
+	puts(lvtxt.c_str());
+	string cvtxt = "Current Version: " + string(currentversion);
+	puts(cvtxt.c_str());
+	string lutxt = "Last Updated: " + string(lastupdated) + "\n";
+	puts(lutxt.c_str());
 	
     puts("Would you like to install them?");
     puts("[Y] Yes");
