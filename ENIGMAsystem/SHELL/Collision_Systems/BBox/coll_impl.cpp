@@ -104,6 +104,11 @@ enigma::object_collisions* const collide_inst_inst(int object, bool solid_only, 
 
 enigma::object_collisions* const collide_inst_rect(int object, bool solid_only, bool notme, int x1, int y1, int x2, int y2)
 {
+    if (x1 > x2)
+        x1 ^= (x2 ^= (x1 ^= x2));
+    if (y1 > y2)
+        y1 ^= (y2 ^= (y1 ^= y2));
+
     for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)
     {
         enigma::object_collisions* const inst = (enigma::object_collisions*)*it;
@@ -129,6 +134,10 @@ enigma::object_collisions* const collide_inst_rect(int object, bool solid_only, 
 
 enigma::object_collisions* const collide_inst_line(int object, bool solid_only, bool notme, int x1, int y1, int x2, int y2)
 {
+    // Ensure x1 != x2 || y1 != y2.
+    if (x1 == x2 && y1 == y2)
+        return collide_inst_point(object, solid_only, notme, x1, y1);
+
     for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)
     {
         enigma::object_collisions* const inst = (enigma::object_collisions*)*it;
