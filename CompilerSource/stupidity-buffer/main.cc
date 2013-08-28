@@ -31,9 +31,6 @@ int better_system(const char* jname, const char* param, const char *direc = NULL
 
   if (direc)
     SetCurrentDirectory(direc);
-	
-  // set the console window title
-  system("title ENIGMA");
 
   STARTUPINFO StartupInfo;
   PROCESS_INFORMATION ProcessInformation;
@@ -60,7 +57,7 @@ int better_system(const char* jname, const char* param, const char *direc = NULL
 typedef const char* const EMessage;
 EMessage
  java_not_found =
-  "Could not find Java.exe. Please install Sun's Java runtime environment so LGM can run.\r\n"
+  "Could not find Java.exe. Please install Sun's Java runtime environment.\r\n"
   "http://www.java.com/en/download/manual.jsp\r\n\r\n"
   "If you already have Java, and believe you have received this message in error, you could "
   "try adding it to your system PATH variable.";
@@ -82,6 +79,108 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
   }
 }
 
+string exepath;
+string settingspath;
+
+void output_error(const char* msg) {
+    HANDLE h = GetStdHandle ( STD_OUTPUT_HANDLE );
+    WORD wOldColorAttrs;
+    CONSOLE_SCREEN_BUFFER_INFO csbiInfo;
+
+    //First save the current color information
+    GetConsoleScreenBufferInfo(h, &csbiInfo);
+    wOldColorAttrs = csbiInfo.wAttributes;
+
+    // Set the new color information
+    SetConsoleTextAttribute ( h, FOREGROUND_RED | BACKGROUND_BLUE | FOREGROUND_INTENSITY );
+
+    cout << "ERROR! ";
+	// Restore the original colors
+    SetConsoleTextAttribute ( h, wOldColorAttrs);
+	cout << msg << "\n";
+}
+
+void output_warning(const char* msg) {
+    HANDLE h = GetStdHandle ( STD_OUTPUT_HANDLE );
+    WORD wOldColorAttrs;
+    CONSOLE_SCREEN_BUFFER_INFO csbiInfo;
+
+    //First save the current color information
+    GetConsoleScreenBufferInfo(h, &csbiInfo);
+    wOldColorAttrs = csbiInfo.wAttributes;
+
+    // Set the new color information
+    SetConsoleTextAttribute ( h, FOREGROUND_RED+FOREGROUND_GREEN | BACKGROUND_BLUE | FOREGROUND_INTENSITY );
+
+    cout << "WARNING! ";
+	// Restore the original colors
+    SetConsoleTextAttribute ( h, wOldColorAttrs);
+	cout << msg << "\n";
+}
+
+void install_updates() {
+
+}
+
+void show_update_change_log() {
+
+}
+
+void ask_for_updates() {
+  char c;
+  cin >> c;
+  c = tolower(c);
+  
+  if (c == 'y') {
+    install_updates();
+  } else if (c == 'n') {
+    return;
+  } else if (c == 'g') {
+    show_update_change_log();
+	ask_for_updates();
+  } else if (c == 'a') {
+    WritePrivateProfileString("MAIN", "checkforupdates", "0", settingspath.c_str());
+  } else {
+    puts("Please enter [Y], [N], [G], or [A]");
+    ask_for_updates();
+  }
+  return;
+}
+
+void check_for_updates() {
+  bool updatesavailable = false;
+  if (updatesavailable) {
+    HANDLE h = GetStdHandle ( STD_OUTPUT_HANDLE );
+    WORD wOldColorAttrs;
+    CONSOLE_SCREEN_BUFFER_INFO csbiInfo;
+
+    //First save the current color information
+    GetConsoleScreenBufferInfo(h, &csbiInfo);
+    wOldColorAttrs = csbiInfo.wAttributes;
+
+    // Set the new color information
+    SetConsoleTextAttribute ( h, FOREGROUND_BLUE+FOREGROUND_GREEN | BACKGROUND_BLUE | FOREGROUND_INTENSITY );
+
+    puts("*** Updates Available ***");
+	
+    // Restore the original colors
+    SetConsoleTextAttribute ( h, wOldColorAttrs);
+
+	puts("Latest Version:");
+	puts("Current Version:");
+	puts("Last Updated:\n");
+	
+    puts("Would you like to install them?");
+    puts("[Y] Yes");
+    puts("[N] No");
+    puts("[G] See change log");
+    puts("[A] Never ask again for updates");
+    ask_for_updates();
+  }
+   
+  return;
+}
+
 #include <unistd.h>
 
 int main(int argc, char *argv[])
@@ -90,16 +189,23 @@ int main(int argc, char *argv[])
   CommandLineStringArgs cmdlineStringArgs(&argv[0], &argv[0 + argc]);
 
   std::string path = cmdlineStringArgs[0];
-  std::string exepath;
 
   myReplace(path, "\\", "/");
   size_t pos = path.find_last_of("/");
   exepath.assign(path, 0, pos + 1);
-
-  string settingspath = exepath + "settings.ini";
+  settingspath = exepath + "settings.ini";
+  
+  // set the console window title
+  system("title ENIGMA Development Environment");
+  system("Color 1F");
+  puts("Copyright (C) 2007-2013 GNU GPL\n");
+  
+  bool checkforupdates = GetPrivateProfileInt("MAIN", "checkforupdates", 1, settingspath.c_str());
+  if (checkforupdates) { check_for_updates(); }
 
   bool checkforjava = GetPrivateProfileInt("MAIN", "checkforjava", 1, settingspath.c_str());
-
+  bool redirectoutput = GetPrivateProfileInt("MAIN", "redirectoutput", 1, settingspath.c_str());
+	
   if (checkforjava) {
 	// Ensure that Java is installed
 	const char *jpath = "java";
@@ -137,8 +243,10 @@ int main(int argc, char *argv[])
 		}
 		if (a)
 		{
-			puts(java_not_found);
-			MessageBox(NULL, java_not_found , "Java Problem", MB_OK);
+			output_error(java_not_found);
+			if (redirectoutput) {
+			  MessageBox(NULL, java_not_found , "Java Runtime Environment", MB_OK|MB_ICONERROR);
+			}
 			system("pause");
 			return 0;
 		}
@@ -150,21 +258,29 @@ int main(int argc, char *argv[])
 
   bool setupcompleted = GetPrivateProfileInt("MAIN", "setupcompleted", 0, settingspath.c_str());
   bool skippedsetup = GetPrivateProfileInt("MAIN", "skippedsetup", 0, settingspath.c_str());
-
+  
   if (!skippedsetup && !setupcompleted && INVALID_FILE_ATTRIBUTES == GetFileAttributes(setuppath.c_str()) && GetLastError()== ERROR_FILE_NOT_FOUND)  //If setup script not found
   {
-      puts("ERROR: Setup script not found.");
-      puts("Launch anyway? Useful in cases when compiling from source. [y/n]");
-      char c;
-      do{
-          cin >> c;
+	  output_error("Setup script not found.");
+	  bool launchanyway = false;
+	  if (redirectoutput) {
+		MessageBox(NULL, "Setup script not found. Launch anyway? Useful in cases when compiling from source.", "Error", MB_YESNO|MB_ICONERROR);
+	  } else {
+	    puts("Launch anyway? Useful in cases when compiling from source. [y/n]");
+		char c;
+		do{
+		  cin >> c;
           c = tolower(c);
-      }while( !cin.fail() && c!='y' && c!='n' );
+		}while( !cin.fail() && c!='y' && c!='n' );
+		launchanyway = (c == 'y'); 
+	  }
 
-      if (c == 'y'){
+      if (launchanyway){
           WritePrivateProfileString("MAIN", "skippedsetup", "1", settingspath.c_str());
-      }else{
-          system("pause");
+      } else {
+		  if (!redirectoutput) {
+            system("pause");
+		  }
           return -1;
       }
   }
@@ -260,8 +376,6 @@ int main(int argc, char *argv[])
     OPEN_ALWAYS,
     FILE_ATTRIBUTE_NORMAL,
     NULL );
-
-  bool redirectoutput = GetPrivateProfileInt("MAIN", "redirectoutput", 1, settingspath.c_str());
 
   ZeroMemory(&StartupInfo, sizeof(STARTUPINFO));
   StartupInfo.cb = sizeof(STARTUPINFO); //Only compulsory field
