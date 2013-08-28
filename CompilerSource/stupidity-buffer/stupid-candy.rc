@@ -15,6 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include <windows.h>
 1 ICON "enigma.ico"
 VS_VERSION_INFO VERSIONINFO
 FILEVERSION 1,0,0,0
