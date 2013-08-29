@@ -21,12 +21,6 @@
 
 namespace enigma_user {
 
-enum {
-  vbo_static,
-  vbo_dynamic,
-  vbo_stream
-};
-
   unsigned int d3d_model_create();
   void d3d_model_destroy(int id);
   bool d3d_model_exists(int id);
