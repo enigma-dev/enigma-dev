@@ -177,10 +177,10 @@ class Mesh
 		case enigma_user::pr_linestrip:
 			for (int i = 0; i < vertices.size() / stride - 1; i++) {
 				unsigned pos = i * stride;
-				triangleVertices.insert(triangleVertices.end(), vertices.begin() + pos, vertices.begin() + pos + stride);
+				lineVertices.insert(lineVertices.end(), vertices.begin() + pos, vertices.begin() + pos + stride);
 				pos += stride;
-				triangleVertices.insert(triangleVertices.end(), vertices.begin() + pos, vertices.begin() + pos + stride);
-				triangleCount += 1;
+				lineVertices.insert(lineVertices.end(), vertices.begin() + pos, vertices.begin() + pos + stride);
+				lineCount += 1;
 			}
 			break;
 		case enigma_user::pr_linelist:
