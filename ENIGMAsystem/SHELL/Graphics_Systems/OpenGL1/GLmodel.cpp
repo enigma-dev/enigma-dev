@@ -209,6 +209,9 @@ class Mesh
 			}
 			break;
 	}
+	
+	// Clean up the temporary vertex container since it has been batched into the proper containers
+	vertices.clear();
   }
   
   void DrawArray(vector<gs_scalar> &vec, GLsizei count) {
@@ -228,24 +231,24 @@ class Mesh
 	// enable vertex array's for fast vertex processing
 	glEnableClientState(GL_VERTEX_ARRAY);
 	int offset = 0;
-	glVertexPointer( 3, GL_FLOAT, STRIDE, &vec[0] ); 
+	glVertexPointer( 3, GL_FLOAT, STRIDE, ( const GLvoid * ) &vec[0] + OFFSET(offset) ); 
 	offset += 3;
 	
     if (useNormals){
 		glEnableClientState(GL_NORMAL_ARRAY);
-		glNormalPointer( GL_FLOAT, STRIDE, &vec[0] + OFFSET(offset) );
+		glNormalPointer( GL_FLOAT, STRIDE, ( const GLvoid * ) &vec[0] + OFFSET(offset) );
 		offset += 3;
     }
 
 	if (useTextures){
 		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-		glTexCoordPointer( 2, GL_FLOAT, STRIDE, &vec[0] + OFFSET(offset) ); 
+		glTexCoordPointer( 2, GL_FLOAT, STRIDE, ( const GLvoid * ) &vec[0] + OFFSET(offset) ); 
 		offset += 2;
 	}
 	
     if (useColors){
 		glEnableClientState(GL_COLOR_ARRAY);
-        glColorPointer( 4, GL_FLOAT, STRIDE, &vec[0] + OFFSET(offset)); // Set The Color Pointer To The Color Buffer
+        glColorPointer( 4, GL_FLOAT, STRIDE, ( const GLvoid * ) &vec[0] + OFFSET(offset)); // Set The Color Pointer To The Color Buffer
     }
 	
 	glDrawArrays(GL_TRIANGLES, 0, count);
