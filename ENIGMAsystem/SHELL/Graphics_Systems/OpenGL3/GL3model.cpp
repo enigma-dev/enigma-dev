@@ -146,6 +146,7 @@ class Mesh
 	useTextures = true;
   }
 
+  // NOTE: The vertex format for this class should be written so that color is an integer and not float.
   void AddColor(int col, double alpha)
   {
     vertices.push_back(__GETR(col)); vertices.push_back(__GETG(col)); vertices.push_back(__GETB(col)); vertices.push_back(alpha);
