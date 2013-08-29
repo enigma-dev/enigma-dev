@@ -214,7 +214,7 @@ class Mesh
 	vertices.clear();
   }
   
-  void DrawArray(vector<gs_scalar> &vec, GLsizei count) {
+  void DrawArray(GLenum mode, vector<gs_scalar> &vec, GLsizei count) {
 	if (!count) {
 		return;
 	}
@@ -251,24 +251,24 @@ class Mesh
         glColorPointer( 4, GL_FLOAT, STRIDE, ( const GLvoid * ) &vec[0] + OFFSET(offset)); // Set The Color Pointer To The Color Buffer
     }
 	
-	glDrawArrays(GL_TRIANGLES, 0, count);
+	glDrawArrays(mode, 0, count);
   }
 
   void Draw()
   {
 	// Draw the batched point list
 	if (pointCount > 0) {
-	    DrawArray(pointVertices, pointCount);
+	    DrawArray(GL_POINTS, pointVertices, pointCount);
 	}
 	
 	// Draw the batched line list
 	if (lineCount > 0) {
-		DrawArray(lineVertices, lineCount * 2);
+		DrawArray(GL_LINES, lineVertices, lineCount * 2);
 	}
 	
 	// Draw the batched triangle list
 	if (triangleCount > 0) { 
-		DrawArray(triangleVertices, triangleCount * 3);
+		DrawArray(GL_TRIANGLES, triangleVertices, triangleCount * 3);
 	}
 	
 	glDisableClientState(GL_VERTEX_ARRAY);

@@ -270,7 +270,7 @@ class Mesh
     ClearData();
   }
   
-  void DrawBuffer(GLuint buffer, GLsizei count) {
+  void DrawBuffer(GLenum mode, GLuint buffer, GLsizei count) {
 	if (!count) {
 		return;
 	}
@@ -308,7 +308,7 @@ class Mesh
         glColorPointer( 4, GL_FLOAT, STRIDE, OFFSET(offset)); // Set The Color Pointer To The Color Buffer
     }
 	
-	glDrawArrays(GL_TRIANGLES, 0, count);
+	glDrawArrays(mode, 0, count);
   }
 
   void Draw()
@@ -324,17 +324,17 @@ class Mesh
 	
 	// Draw the batched point list
 	if (pointCount > 0) {
-	    DrawBuffer(pointBuffer, pointCount);
+	    DrawBuffer(GL_POINTS, pointBuffer, pointCount);
 	}
 	
 	// Draw the batched line list
 	if (lineCount > 0) {
-		DrawBuffer(lineBuffer, lineCount * 2);
+		DrawBuffer(GL_LINES, lineBuffer, lineCount * 2);
 	}
 	
 	// Draw the batched triangle list
 	if (triangleCount > 0) { 
-		DrawBuffer(triangleBuffer, triangleCount * 3);
+		DrawBuffer(GL_TRIANGLES, triangleBuffer, triangleCount * 3);
 	}
 	
 	glBindBuffer( GL_ARRAY_BUFFER, 0 );
