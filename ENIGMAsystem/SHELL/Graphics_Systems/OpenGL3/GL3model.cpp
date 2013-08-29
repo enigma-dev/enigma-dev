@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton, DatZach, Polygone
+/** Copyright (C) 2008-2013 Robert B. Colton, Josh Ventura, DatZach, Polygone
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -175,14 +175,20 @@ class Mesh
 	switch (currentPrimitive) {
 		case enigma_user::pr_pointlist:
 			pointVertices.insert(pointVertices.end(), vertices.begin(), vertices.end());
+			pointCount += vertices.size() / stride;
 			break;
 		case enigma_user::pr_linestrip:
-			for (int i = 1; i < vertices.size(); i++) {
-	
+			for (int i = 0; i < vertices.size() / stride - 1; i++) {
+				unsigned pos = i * stride;
+				triangleVertices.insert(triangleVertices.end(), vertices.begin() + pos, vertices.begin() + pos + stride);
+				pos += stride;
+				triangleVertices.insert(triangleVertices.end(), vertices.begin() + pos, vertices.begin() + pos + stride);
+				triangleCount += 1;
 			}
 			break;
 		case enigma_user::pr_linelist:
 			lineVertices.insert(lineVertices.end(), vertices.begin(), vertices.end());
+			lineCount += vertices.size() / stride / 2;
 			break;
 		case enigma_user::pr_trianglestrip:
 			for (int i = 0; i < vertices.size() / stride - 2; i++) {
@@ -206,10 +212,16 @@ class Mesh
 			break;
 		case enigma_user::pr_trianglelist:
 			triangleVertices.insert(triangleVertices.end(), vertices.begin(), vertices.end());
+			triangleCount += vertices.size() / stride / 3;
 			break;
 		case enigma_user::pr_trianglefan:
-			for (int i = 1; i < vertices.size(); i += 2) {
-	
+			for (int i = 1; i < vertices.size() / stride - 1; i++) {
+				triangleVertices.insert(triangleVertices.end(), vertices.begin(), vertices.begin() + stride);
+				unsigned pos = i * stride;
+				triangleVertices.insert(triangleVertices.end(), vertices.begin() + pos, vertices.begin() + pos + stride);
+				pos += stride;
+				triangleVertices.insert(triangleVertices.end(), vertices.begin() + pos, vertices.begin() + pos + stride);
+				triangleCount += 1;
 			}
 			break;
 	}
@@ -220,7 +232,6 @@ class Mesh
 
   void BufferGenerate(bool subdata)
   {
-    //triangleCount += triangleVertices.size();
 	if (triangleCount > 0) {
 	    glGenBuffers( 1, &triangleBuffer );
 		// Bind The Vertex Buffer
@@ -233,7 +244,6 @@ class Mesh
 		}
 	}
 	
-	pointCount += pointVertices.size();
 	if (pointCount > 0) {
 		glGenBuffers( 1, &pointBuffer );
 		// Bind The Vertex Buffer
@@ -246,7 +256,6 @@ class Mesh
 		}
 	}
 	
-	lineCount += lineVertices.size();
 	if (lineCount > 0) {
 		glGenBuffers( 1, &lineBuffer );
 		// Bind The Vertex Buffer
