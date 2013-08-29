@@ -183,17 +183,10 @@ class d3d_model
 
     void draw(gs_scalar x, gs_scalar y, gs_scalar z, int texId)
     {
-        texture_reset();
-        texture_use(get_texture(texId));
         glPushAttrib(GL_CURRENT_BIT);
-        glLoadIdentity();
-        glLoadMatrixd(projection_matrix);
-        glMultMatrixd(transformation_matrix);
-        glTranslatef(x, y, z);
+
         glCallList(model);
-        glLoadIdentity();
-        glLoadMatrixd(projection_matrix);
-        glMultMatrixd(transformation_matrix);
+
         glPopAttrib();
     }
 
@@ -539,7 +532,7 @@ static unsigned int d3d_models_maxid = 0;
 namespace enigma_user
 {
 
-unsigned int d3d_model_create(int vbot)
+unsigned int d3d_model_create()
 {
     d3d_models.insert(pair<unsigned int, d3d_model>(d3d_models_maxid++, d3d_model()));
     return d3d_models_maxid-1;
@@ -572,9 +565,33 @@ bool d3d_model_load(int id, string fname)
     return d3d_models[id].load(fname);
 }
 
+void d3d_model_draw(int id)
+{
+    d3d_models[id].draw();
+}
+
+void d3d_model_draw(int id, int texId)
+{
+    texture_use(get_texture(texId));
+    d3d_models[id].draw();
+}
+
+void d3d_model_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z)
+{
+    glLoadIdentity();
+    glLoadMatrixd(projection_matrix);
+    glMultMatrixd(transformation_matrix);
+    glTranslatef(x, y, z);
+    d3d_models[id].draw();
+    glLoadIdentity();
+    glLoadMatrixd(projection_matrix);
+    glMultMatrixd(transformation_matrix);
+}
+
 void d3d_model_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z, int texId)
 {
-    d3d_models[id].draw(x, y, z, texId);
+	texture_use(get_texture(texId));
+    d3d_model_draw(id, x, y, z);
 }
 
 void d3d_model_primitive_begin(int id, int kind)

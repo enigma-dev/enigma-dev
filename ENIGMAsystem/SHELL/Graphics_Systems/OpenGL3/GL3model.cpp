@@ -20,7 +20,7 @@
 #include "GL3shapes.h"
 #include "../General/GSprimitives.h"
 #include "../General/GStextures.h"
-#include "GL3model.h"
+#include "../General/GSModel.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
 #include <math.h>
@@ -50,334 +50,258 @@ namespace enigma {
   extern unsigned char currentcolor[4];
 }
 
-GLenum vbotypes[3] = {
-  GL_STATIC_DRAW, GL_DYNAMIC_DRAW, GL_STREAM_DRAW
-};
-
-struct Primitive
-{
-  unsigned int vertcount;
-  unsigned int vertstart;
-  unsigned int indexcount;
-  unsigned int indexstart;
-  int type;
-
-  Primitive(int pt)
-  {
-    type = pt;
-    vertcount = 0;
-    vertstart = 0;
-    indexcount = 0;
-    indexstart = 0;
-  }
-
-  ~Primitive()
-  {
-
-  }
-};
-
-/* Mesh clearing has a memory leak */
-// TODO: Verify that Mesh clearing no longer has memory leaks after latest changes.
 class Mesh
 {
   public:
-  vector<Primitive*> primitives;
-  unsigned int currentPrimitive;
-  unsigned int basicShapesPrimitive;
+  unsigned int currentPrimitive; //The type of the current primitive being added to the model
 
-  vector<gs_scalar> vertices;
-  vector<gs_scalar> textures;
-  vector<gs_scalar> normals;
-  vector<gs_scalar> colors;
-  vector<GLuint> indices;
-
-  /* NOTE: only use 1 VBO per model, this could be
-     rewritten to make attributes offset in the single vbo */
-  GLuint verticesVBO;
-  GLuint texturesVBO;
-  GLuint normalsVBO;
-  GLuint colorsVBO;
-  GLuint indexVBO;
-  GLuint maxindice;
-  GLuint rebufferOffset;
-  bool vbogenerated;
-  bool vbobuffered;
-  int vbotype;
-  bool useColorBuffer; //If color is not used, then it won't bind the color buffer
-  bool useTextureBuffer;
-  bool useNormalBuffer;
-  bool useIndexBuffer;
-
-  unsigned int Begin(int pt)
+  vector<gs_scalar> vertices; //Temporary vertices container for the current primitive until they are batched
+  vector<gs_scalar> triangleVertices; //The vertices added to all triangle primitives batched into a single triangle list to be buffered to the GPU
+  vector<gs_scalar> pointVertices; //The vertices added to all point primitives batched into a single point list to be buffered to the GPU
+  vector<gs_scalar> lineVertices; //The vertices added to all line primitives batched into a single line list to be buffered to the GPU 
+  
+  GLuint triangleBuffer; //Triangle List Vertex Buffer Object
+  GLuint lineBuffer; //Line List Vertex Buffer Object
+  GLuint pointBuffer; //Point List Vertex Buffer Object
+  
+  bool vbogenerated; //Whether or not the buffer objects have been generated
+  bool vbobuffered; //Whether or not the buffer objects have been buffered
+  
+  bool useColors; //If colors have been added to the model
+  bool useTextures; //If texture coordinates have been added
+  bool useNormals; //If normals have been added
+  bool useIndexBuffer; //If indices have been added
+  
+  bool pointCount; //The number of vertices in the point buffer
+  bool triangleCount; //The number of vertices in the triangle buffer
+  bool lineCount; //The number of vertices in the line buffer
+  
+  void Begin(int pt)
   {
     vbobuffered = false;
-    unsigned int id = primitives.size();
-    currentPrimitive = id;
-    Primitive* newPrim = new Primitive(pt);
-    newPrim->vertstart = vertices.size()/3;
-    newPrim->indexstart = indices.size();
-    primitives.push_back(newPrim);
-
-    return id;
-  }
-
-  void SetPrimitive(int pr) {
-	vbobuffered = false;
-	currentPrimitive = pr;
+    currentPrimitive = pt;
   }
   
-  Mesh(int vbot = enigma_user::vbo_static)
+  Mesh()
   {
-    vbotype = vbot;
-    maxindice = 0;
     vbogenerated = false;
-    vbobuffered = false;
-    useColorBuffer = false;
+	
+    useColors = false;
+    useTextures = false;
+    useNormals = false;
+	
+	pointCount = 0;
+	triangleCount = 0;
+	lineCount = 0;
+	
     currentPrimitive = 0;
-    basicShapesPrimitive = Begin(4);
   }
 
   ~Mesh()
   {
-    glDeleteBuffers(1, &verticesVBO);
-    glDeleteBuffers(1, &texturesVBO);
-    glDeleteBuffers(1, &normalsVBO);
-    glDeleteBuffers(1, &colorsVBO);
-    glDeleteBuffers(1, &indexVBO);
-  }
-
-  void useColor()
-  {
-      useColorBuffer = true;
+    glDeleteBuffers(1, &triangleBuffer);
+	glDeleteBuffers(1, &lineBuffer);
+	glDeleteBuffers(1, &pointBuffer);
   }
 
   void ClearData()
   {
-    vertices.clear();
-    textures.clear();
-    normals.clear();
-    colors.clear();
-    indices.clear();
+    triangleVertices.clear();
+	pointVertices.clear();
+	lineVertices.clear();
   }
 
   void Clear()
   {
-    for (unsigned int i = 0; i < primitives.size(); i++) {
-      delete primitives[i];
-    }
-    primitives.clear();
     ClearData();
-    vbobuffered = false;
+	
+	glDeleteBuffers(1, &triangleBuffer);
+	glDeleteBuffers(1, &lineBuffer);
+	glDeleteBuffers(1, &pointBuffer);
+	
+	vbogenerated = false;
+	
+	useColors = false;
+    useTextures = false;
+    useNormals = false;
+	
+	pointCount = 0;
+	triangleCount = 0;
+	lineCount = 0;
   }
 
-  void VertexVector(gs_scalar x, gs_scalar y, gs_scalar z)
+  void AddVertex(gs_scalar x, gs_scalar y, gs_scalar z)
   {
     vertices.push_back(x); vertices.push_back(y); vertices.push_back(z);
-    primitives[currentPrimitive]->vertcount += 1;
   }
 
-  void VertexIndex(GLuint vi)
+  void AddNormal(gs_scalar nx, gs_scalar ny, gs_scalar nz)
   {
-    if (vi > maxindice) { maxindice = vi; }
-    indices.push_back(vi);
-    primitives[currentPrimitive]->indexcount += 1;
+    vertices.push_back(nx); vertices.push_back(ny); vertices.push_back(nz);
+	useNormals = true;
   }
 
-  void NormalVector(gs_scalar nx, gs_scalar ny, gs_scalar nz)
+  void AddTexture(gs_scalar tx, gs_scalar ty)
   {
-    normals.push_back(nx); normals.push_back(ny); normals.push_back(nz);
+    vertices.push_back(tx); vertices.push_back(ty);
+	useTextures = true;
   }
 
-  void TextureVector(gs_scalar tx, gs_scalar ty)
+  void AddColor(int col, double alpha)
   {
-    textures.push_back(tx); textures.push_back(ty);
-  }
-
-/* For reference...
-    glColor4f(__GETR(color), __GETG(color), __GETB(color), alpha);
-    glVertex3d(x,y,z);
-    glColor4ubv(enigma::currentcolor);
-*/
-  void ColorVector(int col, double alpha)
-  {
-    colors.push_back(__GETR(col)); colors.push_back(__GETG(col)); colors.push_back(__GETB(col)); colors.push_back(alpha);
+    vertices.push_back(__GETR(col)); vertices.push_back(__GETG(col)); vertices.push_back(__GETB(col)); vertices.push_back(alpha);
+	useColors = true;
   }
 
   void End()
   {
-
+	// Primitive has ended so now we need to batch the vertices that were given into single lists, eg. line list, triangle list, point list
+	switch (currentPrimitive) {
+		case enigma_user::pr_pointlist:
+			pointVertices.insert(pointVertices.end(), vertices.begin(), vertices.end());
+			break;
+		case enigma_user::pr_linestrip:
+			for (int i = 1; i < vertices.size(); i++) {
+	
+			}
+			break;
+		case enigma_user::pr_linelist:
+			lineVertices.insert(lineVertices.end(), vertices.begin(), vertices.end());
+			break;
+		case enigma_user::pr_trianglestrip:
+			for (int i = 1; i < vertices.size(); i += 2) {
+	
+			}
+			break;
+		case enigma_user::pr_trianglelist:
+			triangleVertices.insert(triangleVertices.end(), vertices.begin(), vertices.end());
+			break;
+		case enigma_user::pr_trianglefan:
+			for (int i = 1; i < vertices.size(); i += 2) {
+	
+			}
+			break;
+	}
+	
+	// clean up the temporary vertex container now that they have been batched efficiently
+	vertices.clear();
   }
 
-  void BufferGenerate()
+  void BufferGenerate(bool subdata)
   {
-    glGenBuffers( 1, &verticesVBO );
-    glGenBuffers( 1, &texturesVBO );
-    glGenBuffers( 1, &normalsVBO );
-    glGenBuffers( 1, &colorsVBO );
-    glGenBuffers( 1, &indexVBO );
-  }
+    triangleCount += triangleVertices.size();
+	if (triangleCount > 0) {
+	    glGenBuffers( 1, &triangleBuffer );
+		// Bind The Vertex Buffer
+		glBindBuffer( GL_ARRAY_BUFFER, triangleBuffer );
+		// Send the data to the GPU
+		if (subdata) {
+		
+		} else {
+			glBufferData( GL_ARRAY_BUFFER, triangleVertices.size() * sizeof(gs_scalar), &triangleVertices[0], GL_STATIC_DRAW );
+		}
+	}
+	
+	pointCount += pointVertices.size();
+	if (pointCount > 0) {
+		glGenBuffers( 1, &pointBuffer );
+		// Bind The Vertex Buffer
+		glBindBuffer( GL_ARRAY_BUFFER, pointBuffer );
+		// Send the data to the GPU
+		if (subdata) {
+		
+		} else {
+			glBufferData( GL_ARRAY_BUFFER, pointVertices.size() * sizeof(gs_scalar), &pointVertices[0], GL_STATIC_DRAW );
+		}
+	}
+	
+	lineCount += lineVertices.size();
+	if (lineCount > 0) {
+		glGenBuffers( 1, &lineBuffer );
+		// Bind The Vertex Buffer
+		glBindBuffer( GL_ARRAY_BUFFER, lineBuffer );
+		// Send the data to the GPU
+		if (subdata) {
+		
+		} else {
+			glBufferData( GL_ARRAY_BUFFER, lineVertices.size() * sizeof(gs_scalar), &lineVertices[0], GL_STATIC_DRAW );
+		}
+	}
 
-  void BufferData()
-  {
-    // Bind The Vertex Buffer
-    glBindBuffer( GL_ARRAY_BUFFER, verticesVBO );
-    // Send the data to the GPU
-    glBufferData( GL_ARRAY_BUFFER, vertices.size() * sizeof(GLfloat), &vertices[0], vbotypes[vbotype] );
-
-    if (textures.size()>0){
-        // Bind The Texture Coordinate Buffer
-        glBindBuffer( GL_ARRAY_BUFFER, texturesVBO );
-        // Send the data to the GPU
-        glBufferData( GL_ARRAY_BUFFER, textures.size() * sizeof(GLfloat), &textures[0], vbotypes[vbotype] );
-        useTextureBuffer = true;
-    }else{
-        useTextureBuffer = false;
-    }
-
-    if (normals.size()>0){
-        // Bind The Normal Coordinate Buffer
-        glBindBuffer( GL_ARRAY_BUFFER, normalsVBO );
-        // Send the data to the GPU
-        glBufferData( GL_ARRAY_BUFFER, normals.size() * sizeof(GLfloat), &normals[0], vbotypes[vbotype] );
-        useNormalBuffer = true;
-    }else{
-        useNormalBuffer = false;
-    }
-
-    if (useColorBuffer == true && colors.size()>0){
-        // Bind The Colors Buffer
-        glBindBuffer( GL_ARRAY_BUFFER, colorsVBO );
-        // Send the data to the GPU
-        glBufferData( GL_ARRAY_BUFFER, colors.size() * sizeof(GLfloat), &colors[0], vbotypes[vbotype] );
-    }
-
-    if (indices.size()>0){
-        glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indexVBO );        // Bind The Buffer
-        // Send the data to the GPU
-        glBufferData( GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), &indices[0], vbotypes[vbotype] );
-        useIndexBuffer = true;
-    }else{
-        useIndexBuffer = false;
-    }
-
-    glBindBuffer( GL_ARRAY_BUFFER, 0 );
-
+	glBindBuffer( GL_ARRAY_BUFFER, 0 );
     // Clean up the data from RAM it is now safe on VRAM
     ClearData();
   }
+  
+  void DrawBuffer(GLuint buffer, GLsizei count) {
+	GLsizei stride = 3;
+    if (useNormals) stride += 3;
+	if (useTextures) stride += 2;
+    if (useColors) stride += 4;
+	stride = stride * sizeof( gs_scalar );
+	
+	#define OFFSET( P )  ( ( const GLvoid * ) ( sizeof( gs_scalar ) * ( P         ) ) )
+	GLsizei STRIDE = stride;
 
-  void BufferSubData(GLint offset)
-  {
-    if (!vbobuffered) { return; }
-    glBindBuffer( GL_ARRAY_BUFFER, verticesVBO );         // Bind The Buffer
-    // Send the data to the GPU
-    glBufferSubData( GL_ARRAY_BUFFER, offset * 3 * sizeof(GLfloat), vertices.size(), &vertices[0] );
-
-    if (textures.size()>0){
-        glBindBuffer( GL_ARRAY_BUFFER, texturesVBO );        // Bind The Buffer
-        // Send the data to the GPU
-        glBufferSubData( GL_ARRAY_BUFFER, offset * 2 * sizeof(GLfloat), textures.size(), &textures[0] );
-        useTextureBuffer = true;
-    }else{
-        useTextureBuffer = false;
+	// enable vertex array's for fast vertex processing
+	glBindBuffer( GL_ARRAY_BUFFER, buffer );
+	glEnableClientState(GL_VERTEX_ARRAY);
+	int offset = 0;
+	glVertexPointer( 3, GL_FLOAT, STRIDE, OFFSET(offset) ); 
+	offset += 3;
+	
+    if (useNormals){
+		glEnableClientState(GL_NORMAL_ARRAY);
+		glNormalPointer( GL_FLOAT, STRIDE, OFFSET(offset) );
+		offset += 3;
     }
 
-    if (normals.size()>0){
-        glBindBuffer( GL_ARRAY_BUFFER, normalsVBO );        // Bind The Buffer
-        // Send the data to the GPU
-        glBufferSubData( GL_ARRAY_BUFFER, offset * 3 * sizeof(GLfloat), normals.size(), &normals[0] );
-        useNormalBuffer = true;
-    }else{
-        useNormalBuffer = false;
+	if (useTextures){
+		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+		glTexCoordPointer( 2, GL_FLOAT, STRIDE, OFFSET(offset) ); 
+		offset += 2;
+	}
+	
+    if (useColors){
+		glEnableClientState(GL_COLOR_ARRAY);
+        glColorPointer( 4, GL_FLOAT, STRIDE, OFFSET(offset)); // Set The Color Pointer To The Color Buffer
     }
-
-    if (useColorBuffer == true && colors.size()>0){
-        glBindBuffer( GL_ARRAY_BUFFER, colorsVBO );        // Bind The Buffer
-        // Send the data to the GPU
-        glBufferSubData( GL_ARRAY_BUFFER, offset * 4 * sizeof(GLfloat), colors.size(), &colors[0] );
-    }
-
-    if (indices.size()>0){
-        glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indexVBO );        // Bind The Buffer
-        // Send the data to the GPU
-        glBufferSubData( GL_ELEMENT_ARRAY_BUFFER, offset * sizeof(GLuint), indices.size(), &indices[0] );
-    }else{
-        useIndexBuffer = false;
-    }
-
-    glBindBuffer( GL_ARRAY_BUFFER, 0 );
-
-    // Clean up the data from RAM it is now safe on VRAM
-    ClearData();
-  }
-
-  void Open(int offset)
-  {
-    rebufferOffset = offset;
-  }
-
-  void Close()
-  {
-    BufferSubData(rebufferOffset);
+	
+	glDrawArrays(GL_TRIANGLES, 0, count);
   }
 
   void Draw()
   {
     if (!vbogenerated) {
       vbogenerated = true;
-      BufferGenerate();
-    }
-    if (!vbobuffered) {
-      vbobuffered = true;
-      BufferData();
-    }
-
-    // enable vertex array's for fast vertex processing
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glBindBuffer( GL_ARRAY_BUFFER, verticesVBO );
-    glVertexPointer( 3, GL_FLOAT, 0, (char *) NULL );       // Set The Vertex Pointer To The Vertex Buffer
-
-    if (useTextureBuffer == true){
-        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-        glBindBuffer( GL_ARRAY_BUFFER, texturesVBO );
-        glTexCoordPointer( 2, GL_FLOAT, 0, (char *) NULL );     // Set The TexCoord Pointer To The TexCoord Buffer
-    }
-
-    if (useNormalBuffer == true){
-        glEnableClientState(GL_NORMAL_ARRAY);
-        glBindBuffer( GL_ARRAY_BUFFER, normalsVBO );
-        glNormalPointer( GL_FLOAT, 0, (char *) NULL );     // Set The Normal Pointer To The Normal Buffer
-    }
-
-    if (useColorBuffer == true){
-        glEnableClientState(GL_COLOR_ARRAY);
-        glBindBuffer( GL_ARRAY_BUFFER, colorsVBO );
-        glColorPointer( 4, GL_FLOAT, 0, (char *) NULL );     // Set The Color Pointer To The Color Buffer
-    }
-
-    if (useIndexBuffer == true){
-        glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indexVBO );
-    }
-
-    for (unsigned int i = 0; i < primitives.size(); i++)
-    {
-      if (primitives[i]->indexcount > 0) {
-        glDrawRangeElements(ptypes_by_id[primitives[i]->type], primitives[i]->indexstart, maxindice + 1, primitives[i]->indexcount, GL_UNSIGNED_INT, 0);
-      } else {
-        glDrawArrays(ptypes_by_id[primitives[i]->type], primitives[i]->vertstart, primitives[i]->vertcount);
-      }
-    }
-
-	glBindBuffer( GL_ARRAY_BUFFER, 0 );
-	if (useIndexBuffer == true){
-        glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
-    }
+	  vbobuffered = true;
+      BufferGenerate(false);
+    } else if (!vbobuffered) {
+	  vbobuffered = true;
+	  BufferGenerate(true);
+	}
 	
-    glDisableClientState(GL_VERTEX_ARRAY);
-    if (useTextureBuffer == true) glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-    if (useNormalBuffer == true) glDisableClientState(GL_NORMAL_ARRAY);
-    if (useColorBuffer == true) glDisableClientState(GL_COLOR_ARRAY);
+	// Draw the batched point list
+	if (pointCount > 0) {
+	    DrawBuffer(pointBuffer, pointCount);
+	}
+	
+	// Draw the batched line list
+	if (lineCount > 0) {
+		DrawBuffer(lineBuffer, lineCount * 2);
+	}
+	
+	// Draw the batched triangle list
+	if (triangleCount > 0) { 
+		DrawBuffer(triangleBuffer, triangleCount * 3);
+	}
+	
+	glBindBuffer( GL_ARRAY_BUFFER, 0 );
+	
+	glDisableClientState(GL_VERTEX_ARRAY);
+    if (useTextures) glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    if (useNormals) glDisableClientState(GL_NORMAL_ARRAY);
+    if (useColors) glDisableClientState(GL_COLOR_ARRAY);
   }
 };
 
@@ -386,10 +310,10 @@ vector<Mesh*> meshes;
 namespace enigma_user
 {
 
-unsigned int d3d_model_create(int vbot)
+unsigned int d3d_model_create()
 {
   unsigned int id = meshes.size();
-  meshes.push_back(new Mesh(vbot));
+  meshes.push_back(new Mesh());
   return id;
 }
 
@@ -397,21 +321,6 @@ void d3d_model_destroy(int id)
 {
   meshes[id]->Clear();
   delete meshes[id];
-}
-
-void d3d_model_copy(int id, const unsigned int source)
-{
-  //TODO: Write copy meshes code
-}
-
-void d3d_model_merge(int id, const unsigned int source)
-{
-  //TODO: Write merge meshes code
-}
-
-unsigned int d3d_model_duplicate(const unsigned int source)
-{
-  //TODO: Write duplicate meshes code
 }
 
 bool d3d_model_exists(int id)
@@ -562,137 +471,108 @@ void d3d_model_primitive_end(int id)
   meshes[id]->End();
 }
 
-void d3d_model_open(int id, int offset)
-{
-  meshes[id]->Open(offset);
-}
-
-void d3d_model_close(int id)
-{
-  meshes[id]->Close();
-}
-
 void d3d_model_vertex(int id, gs_scalar x, gs_scalar y, gs_scalar z)
 {
-  meshes[id]->VertexVector(x, y, z);
-  int col = enigma::currentcolor[0] | (enigma::currentcolor[1] << 8) | (enigma::currentcolor[2] << 16);
-  float alpha = (float)enigma::currentcolor[3] / 255.0;
-  meshes[id]->ColorVector(col, alpha);
-}
-
-void d3d_model_index(int id, GLuint in)
-{
-  meshes[id]->VertexIndex(in);
+  meshes[id]->AddVertex(x, y, z);
 }
 
 void d3d_model_vertex_color(int id, gs_scalar x, gs_scalar y, gs_scalar z, int col, double alpha)
 {
-  meshes[id]->VertexVector(x, y, z);
-  meshes[id]->ColorVector(col, alpha);
-  meshes[id]->useColor();
+  meshes[id]->AddVertex(x, y, z);
+  meshes[id]->AddColor(col, alpha);
 }
 
 void d3d_model_vertex_texture(int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar tx, gs_scalar ty)
 {
-  meshes[id]->VertexVector(x, y, z);
-  meshes[id]->TextureVector(tx, ty);
-  int col = enigma::currentcolor[0] | (enigma::currentcolor[1] << 8) | (enigma::currentcolor[2] << 16);
-  float alpha = (float)enigma::currentcolor[3] / 255.0;
-  meshes[id]->ColorVector(col, alpha);
+  meshes[id]->AddVertex(x, y, z);
+  meshes[id]->AddTexture(tx, ty);
 }
 
 void d3d_model_vertex_texture_color(int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar tx, gs_scalar ty, int col, double alpha)
 {
-  meshes[id]->VertexVector(x, y, z);
-  meshes[id]->TextureVector(tx, ty);
-  meshes[id]->ColorVector(col, alpha);
-  meshes[id]->useColor();
+  meshes[id]->AddVertex(x, y, z);
+  meshes[id]->AddTexture(tx, ty);
+  meshes[id]->AddColor(col, alpha);
 }
 
 void d3d_model_vertex_normal(int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz)
 {
-  meshes[id]->VertexVector(x, y, z);
-  meshes[id]->NormalVector(nx, ny, nz);
-  int col = enigma::currentcolor[0] | (enigma::currentcolor[1] << 8) | (enigma::currentcolor[2] << 16);
-  float alpha = (float)enigma::currentcolor[3] / 255.0;
-  meshes[id]->ColorVector(col, alpha);
+  meshes[id]->AddVertex(x, y, z);
+  meshes[id]->AddNormal(nx, ny, nz);
 }
 
 void d3d_model_vertex_normal_color(int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, int col, double alpha)
 {
-  meshes[id]->VertexVector(x, y, z);
-  meshes[id]->NormalVector(nx, ny, nz);
-  meshes[id]->ColorVector(col, alpha);
-  meshes[id]->useColor();
+  meshes[id]->AddVertex(x, y, z);
+  meshes[id]->AddNormal(nx, ny, nz);
+  meshes[id]->AddColor(col, alpha);
 }
 
 void d3d_model_vertex_normal_texture(int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, gs_scalar tx, gs_scalar ty)
 {
-  meshes[id]->VertexVector(x, y, z);
-  meshes[id]->NormalVector(nx, ny, nz);
-  meshes[id]->TextureVector(tx, ty);
-  int col = enigma::currentcolor[0] | (enigma::currentcolor[1] << 8) | (enigma::currentcolor[2] << 16);
-  float alpha = (float)enigma::currentcolor[3] / 255.0;
-  meshes[id]->ColorVector(col, alpha);
+  meshes[id]->AddVertex(x, y, z);
+  meshes[id]->AddNormal(nx, ny, nz);
+  meshes[id]->AddTexture(tx, ty);
 }
 
 void d3d_model_vertex_normal_texture_color(int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, gs_scalar tx, gs_scalar ty, int col, double alpha)
 {
-  meshes[id]->VertexVector(x, y, z);
-  meshes[id]->NormalVector(nx, ny, nz);
-  meshes[id]->TextureVector(tx, ty);
-  meshes[id]->ColorVector(col, alpha);
-  meshes[id]->useColor();
+  meshes[id]->AddVertex(x, y, z);
+  meshes[id]->AddNormal(nx, ny, nz);
+  meshes[id]->AddTexture(tx, ty);
+  meshes[id]->AddColor(col, alpha);
 }
 
 void d3d_model_block(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, gs_scalar hrep, gs_scalar vrep, bool closed)
 {
-  unsigned fp = meshes[id]->currentPrimitive;
-  meshes[id]->SetPrimitive(meshes[id]->basicShapesPrimitive);
-  
-  GLfloat verts[] = {x1,y1,z1, x1,y1,z2, x1,y2,z1, x1,y2,z2, x2,y2,z1, x2,y2,z2, x2,y1,z1, x2,y1,z2, // sides
-                     x1,y1,z1, x2,y1,z1, x1,y2,z1, x2,y2,z1,  // bottom
-                     x1,y1,z2, x2,y1,z2, x1,y2,z2, x2,y2,z2}, // top
-          texts[] = {0,vrep, 0,0, hrep,vrep, hrep,0,
-		     0,vrep, 0,0, hrep,vrep, hrep,0,
-                     0,0, hrep,0, 0,vrep, hrep,vrep,
-                     0,0, hrep,0, 0,vrep, hrep,vrep},
-	  norms[] = {-0.5,-0.5,-0.5, -0.5,-0.5,0.5, -0.5,0.5,-0.5, -0.5,0.5,0.5,
-                     0.5,0.5,-0.5, 0.5,0.5,0.5, 0.5,-0.5,-0.5, 0.5,-0.5,0.5,
-                     -0.5,-0.5,-0.5, 0.5,-0.5,-0.5, -0.5,0.5,-0.5, 0.5,0.5,-0.5, // bottom
-                     -0.5,-0.5,0.5, 0.5,-0.5,0.5, -0.5,0.5,0.5, 0.5,0.5,0.5}; // top
- GLuint inds[] = {1,3,0, 3,2,0, 3,5,2, 5,4,2, 5,6,4, 5,7,6, 7,1,6, 0,6,1, // sides
-                   11,9,8, 10,11,8, 12,13,15, 12,15,14}; // top and bottom
+        gs_scalar v0[] = {x1, y1, z1}, v1[] = {x1, y1, z2}, v2[] = {x2, y1, z1}, v3[] = {x2, y1, z2},
+              v4[] = {x2, y2, z1}, v5[] = {x2, y2, z2}, v6[] = {x1, y2, z1}, v7[] = {x1, y2, z2},
+              t0[] = {0, vrep}, t1[] = {0, 0}, t2[] = {hrep, vrep}, t3[] = {hrep, 0},
+              t4[] = {hrep*2, vrep}, t5[] = {hrep*2, 0}, t6[] = {hrep*3, vrep}, t7[] = {hrep*3, 0},
+              t8[] = {hrep*4, vrep}, t9[] = {hrep*4, 0},
+	          n0[] = {-0.5, -0.5, -0.5}, n1[] = {-0.5, -0.5, 0.5}, n2[] = {-0.5, 0.5, -0.5}, n3[] = {-0.5, 0.5, 0.5},
+              n4[] = {0.5, 0.5, -0.5}, n5[] = {0.5, 0.5, 0.5}, n6[] = {0.5, -0.5, -0.5}, n7[] = {0.5, -0.5, 0.5};
 
-  unsigned indoff = meshes[id]->maxindice + (meshes[id]->maxindice > 0);
-  for (int ix = 0; ix < 36; ix++) {
-    inds[ix] += indoff;
-    if (inds[ix] > meshes[id]->maxindice) {
-      meshes[id]->maxindice = inds[ix];
-    }
-  }
+/*
+		d3d_model_primitive_begin(id, pr_trianglestrip);
+        d3d_model_vertex_normal_texture(id,v0,n0,t0);
+        d3d_model_vertex_normal_texture(id,v1,n1,t1);
+		
+        d3d_model_vertex_normal_texture(id,v6,n2,t2);
+        d3d_model_vertex_normal_texture(id,v7,n3,t3);
+		
+        d3d_model_vertex_normal_texture(id,v4,n4,t4);
+        d3d_model_vertex_normal_texture(id,v5,n5,t5);
+		
+        d3d_model_vertex_normal_texture(id,v2,n6,t8);
+        d3d_model_vertex_normal_texture(id,v3,n7,t9);
+		
+        d3d_model_vertex_normal_texture(id,v0,n0,t6);
+        d3d_model_vertex_normal_texture(id,v1,n1,t7);
+		d3d_model_primitive_end(id);
 
-  meshes[id]->vertices.insert(meshes[id]->vertices.end(), verts, verts + 48);
-  meshes[id]->primitives[0]->vertcount += 16;
-  meshes[id]->normals.insert(meshes[id]->normals.end(), norms, norms + 48);
-  meshes[id]->textures.insert(meshes[id]->textures.end(), texts, texts + 32);
+        if (closed)
+        {
+			d3d_model_primitive_begin(id, pr_trianglestrip);
+            d3d_model_vertex_normal_texture(id,v0,n4,t0);
+            d3d_model_vertex_normal_texture(id,v2,n6,t1);
+			
+            d3d_model_vertex_normal_texture(id,v6,n2,t2);
+            d3d_model_vertex_normal_texture(id,v4,n0,t3);
+			d3d_model_primitive_end(id);
 
-  if (closed) {
-    meshes[id]->indices.insert(meshes[id]->indices.end(), inds, inds + 36);
-    meshes[id]->primitives[0]->indexcount += 36;
-  } else {
-    meshes[id]->indices.insert(meshes[id]->indices.end(), inds, inds + 24);
-    meshes[id]->primitives[0]->indexcount += 24;
-  }
-  
-  meshes[id]->SetPrimitive(fp);
+			d3d_model_primitive_begin(id, pr_trianglestrip);
+            d3d_model_vertex_normal_texture(id,v1,n1,t0);
+            d3d_model_vertex_normal_texture(id,v3,n7,t1);
+			
+            d3d_model_vertex_normal_texture(id,v7,n3,t2);
+            d3d_model_vertex_normal_texture(id,v5,n5,t3);
+			d3d_model_primitive_end(id);
+        }*/
 }
 
 void d3d_model_cylinder(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, gs_scalar hrep, gs_scalar vrep, bool closed, int steps)
 {
-  unsigned fp = meshes[id]->currentPrimitive;
-  meshes[id]->SetPrimitive(meshes[id]->basicShapesPrimitive);
-  
         float v[100][3];
         float t[100][3];
         steps = min(max(steps, 3), 48); // i think 48 should be circle_presicion
@@ -748,14 +628,10 @@ void d3d_model_cylinder(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_sca
                 d3d_model_vertex_normal_texture(id, v[i+2][0], v[i+2][1], v[i+2][2], 0, 0, -1, t[i+2][0], t[i+2][1]);
             }
         }
-	meshes[id]->SetPrimitive(fp);
 }
 
 void d3d_model_cone(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, gs_scalar hrep, gs_scalar vrep, bool closed, int steps)
 {
-  unsigned fp = meshes[id]->currentPrimitive;
-  meshes[id]->SetPrimitive(meshes[id]->basicShapesPrimitive);
-  
   steps = min(max(steps, 3), 48);
   const double cx = (x1+x2)/2, cy = (y1+y2)/2, rx = (x2-x1)/2, ry = (y2-y1)/2, invstep = (1.0/steps)*hrep, pr = 2*M_PI/steps;
   double a, px, py, tp;
@@ -783,14 +659,10 @@ void d3d_model_cone(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar 
     }
     d3d_model_primitive_end(id);
   }
-  meshes[id]->SetPrimitive(fp);
 }
 
 void d3d_model_ellipsoid(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, gs_scalar hrep, gs_scalar vrep, int steps)
 {
-  unsigned fp = meshes[id]->currentPrimitive;
-  meshes[id]->SetPrimitive(meshes[id]->basicShapesPrimitive);
-  
   float v[277][3];
   float t[277][3];
   steps = min(max(steps, 3), 24);
@@ -852,26 +724,19 @@ void d3d_model_ellipsoid(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_sc
   {
   d3d_model_vertex_texture(id, v[i][0], v[i][1], v[i][2], t[i][0], t[i][1]);
   }
-  meshes[id]->SetPrimitive(fp);
 }
 
 void d3d_model_icosahedron(int id)
 {
-  unsigned fp = meshes[id]->currentPrimitive;
-  meshes[id]->SetPrimitive(meshes[id]->basicShapesPrimitive);
-  // fill icosahedron
-  meshes[id]->SetPrimitive(fp);
+  //TODO: Write this shit
 }
 
 void d3d_model_torus(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar hrep, gs_scalar vrep, int csteps, int tsteps, double radius, double tradius, double TWOPI)
 {
-  unsigned fp = meshes[id]->currentPrimitive;
-  meshes[id]->SetPrimitive(meshes[id]->basicShapesPrimitive);
-  
   int numc = csteps, numt = tsteps;
 
   for (int i = 0; i < numc; i++) {
-    //d3d_model_primitive_begin(id, pr_quadstrip); // quads are deprecated all basic shapes on models are batched into primitive 0 as triangle list
+    d3d_model_primitive_begin(id, pr_trianglestrip); // quads are deprecated all basic shapes on models are batched into primitive 0 as triangle list
     for (int j = 0; j <= numt; j++) {
       for (int k = 1; k >= 0; k--) {
 
@@ -889,59 +754,35 @@ void d3d_model_torus(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar
     }
     d3d_model_primitive_end(id);
   }
-  
-  meshes[id]->SetPrimitive(fp);
 }
 
 void d3d_model_wall(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, gs_scalar hrep, gs_scalar vrep)
 {
-  if ((x1 == x2 && y1 == y2) || z1 == z2) {
-    return;
-  }
-  
-  unsigned fp = meshes[id]->currentPrimitive;
-  meshes[id]->SetPrimitive(meshes[id]->basicShapesPrimitive);
-
   float xd = x2-x1, yd = y2-y1, zd = z2-z1;
   float normal[3] = {xd*zd, zd*yd, 0};
   float mag = hypot(normal[0], normal[1]);
   normal[0] /= mag;
   normal[1] /= mag;
 
-  d3d_model_vertex_normal_texture(id, x1, y1, z1, 0, 0, normal[0], normal[1], normal[2]);
-  d3d_model_vertex_normal_texture(id, x2, y2, z1, hrep, 0, normal[0], normal[1], normal[2]);
-  d3d_model_vertex_normal_texture(id, x1, y1, z2, 0, vrep, normal[0], normal[1], normal[2]);
-  d3d_model_vertex_normal_texture(id, x2, y2, z2, hrep, vrep, normal[0], normal[1], normal[2]);
-
-  unsigned indoff = meshes[id]->maxindice + (meshes[id]->maxindice > 0);
-  d3d_model_index(id, indoff);
-  d3d_model_index(id, indoff + 1);
-  d3d_model_index(id, indoff + 2);
-  d3d_model_index(id, indoff + 2);
-  d3d_model_index(id, indoff + 1);
-  d3d_model_index(id, indoff + 3);
-
-  meshes[id]->SetPrimitive(fp);
+  d3d_model_primitive_begin(id, pr_trianglestrip);
+  d3d_model_vertex_normal_texture(id, x1, y1, z1, normal[0], normal[1], normal[2], 0, 0);
+  d3d_model_vertex_normal_texture(id, x2, y2, z1, normal[0], normal[1], normal[2], hrep, 0);
+  d3d_model_vertex_normal_texture(id, x1, y1, z2, normal[0], normal[1], normal[2], 0, vrep);
+  d3d_model_vertex_normal_texture(id, x2, y2, z2, normal[0], normal[1], normal[2], hrep, vrep);
+  d3d_model_primitive_end(id);
 }
 
 void d3d_model_floor(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, gs_scalar hrep, gs_scalar vrep)
 {
   GLfloat normal[] = {0, 0, 1};
 
-  unsigned fp = meshes[id]->currentPrimitive;
-  meshes[id]->SetPrimitive(meshes[id]->basicShapesPrimitive);
+  d3d_model_primitive_begin(id, pr_trianglestrip);
 
-  unsigned indoff = meshes[id]->maxindice + (meshes[id]->maxindice > 0);
-  d3d_model_index(id, indoff); d3d_model_index(id, indoff + 1); d3d_model_index(id, indoff + 2); 
-  d3d_model_index(id, indoff + 2); d3d_model_index(id, indoff + 1); d3d_model_index(id, indoff + 3);
-
-  d3d_model_vertex_normal_texture(id, x1, y1, z1, 0, 0, normal[0], normal[1], normal[2]);
-  d3d_model_vertex_normal_texture(id, x2, y1, z2, 0, vrep, normal[0], normal[1], normal[2]);
-  d3d_model_vertex_normal_texture(id, x1, y2, z1, hrep, 0, normal[0], normal[1], normal[2]);
-  d3d_model_vertex_normal_texture(id, x2, y2, z2, hrep, vrep, normal[0], normal[1], normal[2]);
-
-  meshes[id]->SetPrimitive(fp);
+  d3d_model_vertex_normal_texture(id, x1, y1, z1, normal[0], normal[1], normal[2], 0, 0);
+  d3d_model_vertex_normal_texture(id, x2, y1, z2, normal[0], normal[1], normal[2], 0, vrep);
+  d3d_model_vertex_normal_texture(id, x1, y2, z1, normal[0], normal[1], normal[2], hrep, 0);
+  d3d_model_vertex_normal_texture(id, x2, y2, z2, normal[0], normal[1], normal[2], hrep, vrep);
+  d3d_model_primitive_end(id);
 }
 
 }
-
