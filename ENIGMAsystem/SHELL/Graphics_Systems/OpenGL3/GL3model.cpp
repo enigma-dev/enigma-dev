@@ -27,7 +27,10 @@
 #include <stdio.h>
 
 #include "GL3binding.h"
-
+#include <windows.h>
+#include <sstream>
+#include <string>
+#include <iostream>
 using namespace std;
 
 #define __GETR(x) ((x & 0x0000FF))/255.0
@@ -72,9 +75,9 @@ class Mesh
   bool useNormals; //If normals have been added
   bool useIndexBuffer; //If indices have been added
   
-  bool pointCount; //The number of vertices in the point buffer
-  bool triangleCount; //The number of vertices in the triangle buffer
-  bool lineCount; //The number of vertices in the line buffer
+  unsigned pointCount; //The number of vertices in the point buffer
+  unsigned triangleCount; //The number of vertices in the triangle buffer
+  unsigned lineCount; //The number of vertices in the line buffer
   
   void Begin(int pt)
   {
@@ -155,6 +158,19 @@ class Mesh
 
   void End()
   {
+    //NOTE: The reason this batching does not incorporate index buffers is because it is impossible to detect the efficiency gain of it, 
+	//for example if it first batches a point list it does not need indices because its already in the best possible format, but if a 
+	//line strip comes along it would benefit from an index buffer, however if there was a point list previously added them you would have 
+	//to go back and add indices for that as well, and in the end the performance gain would be very little.
+	
+	//NOTE: This batching is not checking for degenerate primitives more efficiency could be provided if it were.
+	
+	GLsizei stride = 3;
+    if (useNormals) stride += 3;
+	if (useTextures) stride += 2;
+    if (useColors) stride += 4;
+	stride = stride;
+	
 	// Primitive has ended so now we need to batch the vertices that were given into single lists, eg. line list, triangle list, point list
 	switch (currentPrimitive) {
 		case enigma_user::pr_pointlist:
@@ -169,8 +185,23 @@ class Mesh
 			lineVertices.insert(lineVertices.end(), vertices.begin(), vertices.end());
 			break;
 		case enigma_user::pr_trianglestrip:
-			for (int i = 1; i < vertices.size(); i += 2) {
-	
+			for (int i = 0; i < vertices.size() / stride - 2; i++) {
+				unsigned pos = i * stride;
+				if (i % 2) {
+					triangleVertices.insert(triangleVertices.end(), vertices.begin() + pos, vertices.begin() + pos + stride);
+					pos += stride * 2;
+					triangleVertices.insert(triangleVertices.end(), vertices.begin() + pos, vertices.begin() + pos + stride);
+					pos -= stride;
+					triangleVertices.insert(triangleVertices.end(), vertices.begin() + pos, vertices.begin() + pos + stride);
+					triangleCount += 1;
+				} else {
+					triangleVertices.insert(triangleVertices.end(), vertices.begin() + pos, vertices.begin() + pos + stride);
+					pos += stride;
+					triangleVertices.insert(triangleVertices.end(), vertices.begin() + pos, vertices.begin() + pos + stride);
+					pos += stride;
+					triangleVertices.insert(triangleVertices.end(), vertices.begin() + pos, vertices.begin() + pos + stride);
+					triangleCount += 1;
+				}
 			}
 			break;
 		case enigma_user::pr_trianglelist:
@@ -182,14 +213,14 @@ class Mesh
 			}
 			break;
 	}
-	
+
 	// clean up the temporary vertex container now that they have been batched efficiently
 	vertices.clear();
   }
 
   void BufferGenerate(bool subdata)
   {
-    triangleCount += triangleVertices.size();
+    //triangleCount += triangleVertices.size();
 	if (triangleCount > 0) {
 	    glGenBuffers( 1, &triangleBuffer );
 		// Bind The Vertex Buffer
@@ -234,6 +265,10 @@ class Mesh
   }
   
   void DrawBuffer(GLuint buffer, GLsizei count) {
+	if (!count) {
+		return;
+	}
+  
 	GLsizei stride = 3;
     if (useNormals) stride += 3;
 	if (useTextures) stride += 2;
