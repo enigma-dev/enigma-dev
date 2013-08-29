@@ -59,9 +59,7 @@ class Mesh
   vector<gs_scalar> pointVertices; //The vertices added to all point primitives batched into a single point list to be buffered to the GPU
   vector<gs_scalar> lineVertices; //The vertices added to all line primitives batched into a single line list to be buffered to the GPU 
   
-  GLuint triangleBuffer; //Triangle List Vertex Buffer Object
-  GLuint lineBuffer; //Line List Vertex Buffer Object
-  GLuint pointBuffer; //Point List Vertex Buffer Object
+  GLuint vertexBuffer; //Interleaved vertex buffer object TRIANGLES|LINES|POINTS
   
   bool vbogenerated; //Whether or not the buffer objects have been generated
   bool vbobuffered; //Whether or not the buffer objects have been buffered
@@ -98,9 +96,7 @@ class Mesh
 
   ~Mesh()
   {
-    glDeleteBuffers(1, &triangleBuffer);
-	glDeleteBuffers(1, &lineBuffer);
-	glDeleteBuffers(1, &pointBuffer);
+    glDeleteBuffers(1, &vertexBuffer);
   }
 
   void ClearData()
@@ -114,9 +110,7 @@ class Mesh
   {
     ClearData();
 	
-	glDeleteBuffers(1, &triangleBuffer);
-	glDeleteBuffers(1, &lineBuffer);
-	glDeleteBuffers(1, &pointBuffer);
+	glDeleteBuffers(1, &vertexBuffer);
 	
 	vbogenerated = false;
 	
@@ -229,50 +223,46 @@ class Mesh
 
   void BufferGenerate(bool subdata)
   {
+  	glGenBuffers( 1, &vertexBuffer );
+	// Bind The Vertex Buffer
+	glBindBuffer( GL_ARRAY_BUFFER, vertexBuffer );
+		
+	vector<gs_scalar> data;
+		
 	if (triangleCount > 0) {
-	    glGenBuffers( 1, &triangleBuffer );
-		// Bind The Vertex Buffer
-		glBindBuffer( GL_ARRAY_BUFFER, triangleBuffer );
-		// Send the data to the GPU
-		if (subdata) {
-		
-		} else {
-			glBufferData( GL_ARRAY_BUFFER, triangleVertices.size() * sizeof(gs_scalar), &triangleVertices[0], GL_STATIC_DRAW );
-		}
-	}
-	
-	if (pointCount > 0) {
-		glGenBuffers( 1, &pointBuffer );
-		// Bind The Vertex Buffer
-		glBindBuffer( GL_ARRAY_BUFFER, pointBuffer );
-		// Send the data to the GPU
-		if (subdata) {
-		
-		} else {
-			glBufferData( GL_ARRAY_BUFFER, pointVertices.size() * sizeof(gs_scalar), &pointVertices[0], GL_STATIC_DRAW );
-		}
+		data.insert(data.begin(), triangleVertices.begin(), triangleVertices.end());
 	}
 	
 	if (lineCount > 0) {
-		glGenBuffers( 1, &lineBuffer );
-		// Bind The Vertex Buffer
-		glBindBuffer( GL_ARRAY_BUFFER, lineBuffer );
-		// Send the data to the GPU
-		if (subdata) {
+		data.insert(data.begin(), lineVertices.begin(), lineVertices.end());
+	}
+	
+	if (pointCount > 0) {
+		data.insert(data.begin(), pointVertices.begin(), pointVertices.end());
+	}
+	
+	// Send the data to the GPU
+	if (subdata) {
 		
-		} else {
-			glBufferData( GL_ARRAY_BUFFER, lineVertices.size() * sizeof(gs_scalar), &lineVertices[0], GL_STATIC_DRAW );
-		}
+	} else {
+		glBufferData( GL_ARRAY_BUFFER, data.size() * sizeof(gs_scalar), &data[0], GL_STATIC_DRAW );
 	}
 
+	// Unbind the buffer we do not need it anymore
 	glBindBuffer( GL_ARRAY_BUFFER, 0 );
     // Clean up the data from RAM it is now safe on VRAM
     ClearData();
   }
-  
-  void DrawBuffer(GLenum mode, GLuint buffer, GLsizei count) {
-	if (!count) {
-		return;
+
+  void Draw()
+  {
+    if (!vbogenerated) {
+      vbogenerated = true;
+	  vbobuffered = true;
+      BufferGenerate(false);
+    } else if (!vbobuffered) {
+	  vbobuffered = true;
+	  BufferGenerate(true);
 	}
   
 	GLsizei stride = 3;
@@ -285,7 +275,7 @@ class Mesh
 	GLsizei STRIDE = stride;
 
 	// enable vertex array's for fast vertex processing
-	glBindBuffer( GL_ARRAY_BUFFER, buffer );
+	glBindBuffer( GL_ARRAY_BUFFER, vertexBuffer );
 	glEnableClientState(GL_VERTEX_ARRAY);
 	int offset = 0;
 	glVertexPointer( 3, GL_FLOAT, STRIDE, OFFSET(offset) ); // Set the vertex pointer to the offset in the buffer
@@ -308,33 +298,19 @@ class Mesh
         glColorPointer( 4, GL_FLOAT, STRIDE, OFFSET(offset)); // Set The Color Pointer To The Color Buffer
     }
 	
-	glDrawArrays(mode, 0, count);
-  }
-
-  void Draw()
-  {
-    if (!vbogenerated) {
-      vbogenerated = true;
-	  vbobuffered = true;
-      BufferGenerate(false);
-    } else if (!vbobuffered) {
-	  vbobuffered = true;
-	  BufferGenerate(true);
-	}
-	
-	// Draw the batched point list
-	if (pointCount > 0) {
-	    DrawBuffer(GL_POINTS, pointBuffer, pointCount);
+	// Draw the batched triangle list
+	if (triangleCount > 0) { 
+		glDrawArrays(GL_TRIANGLES, 0, triangleCount * 3);
 	}
 	
 	// Draw the batched line list
 	if (lineCount > 0) {
-		DrawBuffer(GL_LINES, lineBuffer, lineCount * 2);
+		glDrawArrays(GL_LINES, triangleCount * 3, lineCount * 2);
 	}
 	
-	// Draw the batched triangle list
-	if (triangleCount > 0) { 
-		DrawBuffer(GL_TRIANGLES, triangleBuffer, triangleCount * 3);
+	// Draw the batched point list
+	if (pointCount > 0) {
+		glDrawArrays(GL_POINTS, lineCount * 2 + triangleCount * 3, pointCount);
 	}
 	
 	glBindBuffer( GL_ARRAY_BUFFER, 0 );
@@ -566,50 +542,48 @@ void d3d_model_vertex_normal_texture_color(int id, gs_scalar x, gs_scalar y, gs_
 
 void d3d_model_block(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, gs_scalar hrep, gs_scalar vrep, bool closed)
 {
-        gs_scalar v0[] = {x1, y1, z1}, v1[] = {x1, y1, z2}, v2[] = {x2, y1, z1}, v3[] = {x2, y1, z2},
-              v4[] = {x2, y2, z1}, v5[] = {x2, y2, z2}, v6[] = {x1, y2, z1}, v7[] = {x1, y2, z2},
-              t0[] = {0, vrep}, t1[] = {0, 0}, t2[] = {hrep, vrep}, t3[] = {hrep, 0},
-              t4[] = {hrep*2, vrep}, t5[] = {hrep*2, 0}, t6[] = {hrep*3, vrep}, t7[] = {hrep*3, 0},
-              t8[] = {hrep*4, vrep}, t9[] = {hrep*4, 0},
-	          n0[] = {-0.5, -0.5, -0.5}, n1[] = {-0.5, -0.5, 0.5}, n2[] = {-0.5, 0.5, -0.5}, n3[] = {-0.5, 0.5, 0.5},
-              n4[] = {0.5, 0.5, -0.5}, n5[] = {0.5, 0.5, 0.5}, n6[] = {0.5, -0.5, -0.5}, n7[] = {0.5, -0.5, 0.5};
 
 /*
-		d3d_model_primitive_begin(id, pr_trianglestrip);
-        d3d_model_vertex_normal_texture(id,v0,n0,t0);
-        d3d_model_vertex_normal_texture(id,v1,n1,t1);
-		
-        d3d_model_vertex_normal_texture(id,v6,n2,t2);
-        d3d_model_vertex_normal_texture(id,v7,n3,t3);
-		
-        d3d_model_vertex_normal_texture(id,v4,n4,t4);
-        d3d_model_vertex_normal_texture(id,v5,n5,t5);
-		
-        d3d_model_vertex_normal_texture(id,v2,n6,t8);
-        d3d_model_vertex_normal_texture(id,v3,n7,t9);
-		
-        d3d_model_vertex_normal_texture(id,v0,n0,t6);
-        d3d_model_vertex_normal_texture(id,v1,n1,t7);
-		d3d_model_primitive_end(id);
+  d3d_model_primitive_begin(id, pr_trianglelist);
+  
+  GLfloat verts[] = {x1,y1,z1, x1,y1,z2, x1,y2,z1, x1,y2,z2, x2,y2,z1, x2,y2,z2, x2,y1,z1, x2,y1,z2, // sides
+                     x1,y1,z1, x2,y1,z1, x1,y2,z1, x2,y2,z1,  // bottom
+                     x1,y1,z2, x2,y1,z2, x1,y2,z2, x2,y2,z2}, // top
+          texts[] = {0,vrep, 0,0, hrep,vrep, hrep,0,
+					 0,vrep, 0,0, hrep,vrep, hrep,0,
+                     0,0, hrep,0, 0,vrep, hrep,vrep,
+                     0,0, hrep,0, 0,vrep, hrep,vrep},
+		  norms[] = {-0.5,-0.5,-0.5, -0.5,-0.5,0.5, -0.5,0.5,-0.5, -0.5,0.5,0.5,
+                     0.5,0.5,-0.5, 0.5,0.5,0.5, 0.5,-0.5,-0.5, 0.5,-0.5,0.5,
+                     -0.5,-0.5,-0.5, 0.5,-0.5,-0.5, -0.5,0.5,-0.5, 0.5,0.5,-0.5, // bottom
+                     -0.5,-0.5,0.5, 0.5,-0.5,0.5, -0.5,0.5,0.5, 0.5,0.5,0.5}; // top
+  GLuint inds[] = {1,3,0, 3,2,0, 3,5,2, 5,4,2, 5,6,4, 5,7,6, 7,1,6, 0,6,1, // sides
+                   11,9,8, 10,11,8, 12,13,15, 12,15,14}; // top and bottom
 
-        if (closed)
-        {
-			d3d_model_primitive_begin(id, pr_trianglestrip);
-            d3d_model_vertex_normal_texture(id,v0,n4,t0);
-            d3d_model_vertex_normal_texture(id,v2,n6,t1);
-			
-            d3d_model_vertex_normal_texture(id,v6,n2,t2);
-            d3d_model_vertex_normal_texture(id,v4,n0,t3);
-			d3d_model_primitive_end(id);
+  unsigned indoff = meshes[id]->maxindice + (meshes[id]->maxindice > 0);
+  for (int ix = 0; ix < 36; ix++) {
+    inds[ix] += indoff;
+    if (inds[ix] > meshes[id]->maxindice) {
+      meshes[id]->maxindice = inds[ix];
+    }
+  }
 
-			d3d_model_primitive_begin(id, pr_trianglestrip);
-            d3d_model_vertex_normal_texture(id,v1,n1,t0);
-            d3d_model_vertex_normal_texture(id,v3,n7,t1);
-			
-            d3d_model_vertex_normal_texture(id,v7,n3,t2);
-            d3d_model_vertex_normal_texture(id,v5,n5,t3);
-			d3d_model_primitive_end(id);
-        }*/
+  meshes[id]->vertices.insert(meshes[id]->vertices.end(), verts, verts + 48);
+  meshes[id]->primitives[0]->vertcount += 16;
+  meshes[id]->normals.insert(meshes[id]->normals.end(), norms, norms + 48);
+  meshes[id]->textures.insert(meshes[id]->textures.end(), texts, texts + 32);
+
+  if (closed) {
+    meshes[id]->indices.insert(meshes[id]->indices.end(), inds, inds + 36);
+    meshes[id]->primitives[0]->indexcount += 36;
+  } else {
+    meshes[id]->indices.insert(meshes[id]->indices.end(), inds, inds + 24);
+    meshes[id]->primitives[0]->indexcount += 24;
+  }
+  
+  d3d_model_primitive_end(id);
+  
+  */
 }
 
 void d3d_model_cylinder(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, gs_scalar hrep, gs_scalar vrep, bool closed, int steps)
