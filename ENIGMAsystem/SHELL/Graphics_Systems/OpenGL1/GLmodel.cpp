@@ -231,24 +231,24 @@ class Mesh
 	// enable vertex array's for fast vertex processing
 	glEnableClientState(GL_VERTEX_ARRAY);
 	int offset = 0;
-	glVertexPointer( 3, GL_FLOAT, STRIDE, ( const GLvoid * ) &vec[0] + OFFSET(offset) ); 
+	glVertexPointer( 3, GL_FLOAT, STRIDE, ( const GLvoid * ) &vec[0] + OFFSET(offset) ); // Set the vertex pointer
 	offset += 3;
 	
     if (useNormals){
 		glEnableClientState(GL_NORMAL_ARRAY);
-		glNormalPointer( GL_FLOAT, STRIDE, ( const GLvoid * ) &vec[0] + OFFSET(offset) );
+		glNormalPointer( GL_FLOAT, STRIDE, ( const GLvoid * ) &vec[0] + OFFSET(offset) ); // Set the normal pointer to the offset in the array
 		offset += 3;
     }
 
 	if (useTextures){
 		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-		glTexCoordPointer( 2, GL_FLOAT, STRIDE, ( const GLvoid * ) &vec[0] + OFFSET(offset) ); 
+		glTexCoordPointer( 2, GL_FLOAT, STRIDE, ( const GLvoid * ) &vec[0] + OFFSET(offset) ); // Set the texture pointer to the offset in the array
 		offset += 2;
 	}
 	
     if (useColors){
 		glEnableClientState(GL_COLOR_ARRAY);
-        glColorPointer( 4, GL_FLOAT, STRIDE, ( const GLvoid * ) &vec[0] + OFFSET(offset)); // Set The Color Pointer To The Color Buffer
+        glColorPointer( 4, GL_FLOAT, STRIDE, ( const GLvoid * ) &vec[0] + OFFSET(offset)); // Set the color pointer to the offset in the array
     }
 	
 	glDrawArrays(mode, 0, count);
