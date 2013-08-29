@@ -27,10 +27,6 @@
 #include <stdio.h>
 
 #include "GL3binding.h"
-#include <windows.h>
-#include <sstream>
-#include <string>
-#include <iostream>
 using namespace std;
 
 #define __GETR(x) ((x & 0x0000FF))/255.0
