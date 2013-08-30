@@ -38,11 +38,12 @@ namespace enigma_user
 void d3d_start()
 {
 	d3ddev->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+	d3d_set_hidden(false);
 }
 
 void d3d_end()
 {
-
+	d3d_set_hidden(false);
 }
 
 bool d3d_get_mode()
@@ -52,12 +53,15 @@ bool d3d_get_mode()
 
 void d3d_set_hidden(bool enable)
 {
+	d3d_set_zwriteenable(enable);
+	d3ddev->SetRenderState(D3DRS_ZENABLE, enable);
     d3dHidden = enable;
 }   // TODO: Write function
 
 void d3d_set_zwriteenable(bool enable)
 {
-	d3ddev->SetRenderState(D3DRS_ZENABLE, enable);    // enable/disable the z-buffer
+	d3dZWriteEnable = enable;
+	d3ddev->SetRenderState(D3DRS_ZWRITEENABLE, enable);    // enable/disable the z-buffer
 }
 
 void d3d_set_lighting(bool enable)

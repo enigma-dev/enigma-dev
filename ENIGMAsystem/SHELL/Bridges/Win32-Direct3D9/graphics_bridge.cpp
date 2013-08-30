@@ -44,21 +44,24 @@ namespace enigma
 		HRESULT hr;
 		
 		d3dr = Direct3DCreate9(D3D_SDK_VERSION);    // create the Direct3D interface
-		D3DFORMAT format = D3DFMT_R5G6B5; //For simplicity we'll hard-code this for now.
+		D3DFORMAT format = D3DFMT_A8R8G8B8; //For simplicity we'll hard-code this for now.
 		D3DPRESENT_PARAMETERS d3dpp;    // create a struct to hold various device information
 		
 		ZeroMemory(&d3dpp, sizeof(d3dpp));    // clear out the struct for use
 		d3dpp.Windowed = TRUE;    // program windowed, not fullscreen
-		d3dpp.BackBufferCount = 1;  //We only need a single back buffer
-		//d3dpp.MultiSampleType = D3DMULTISAMPLE_8_SAMPLES; // 8 levels of multi-sampling
-		//d3dpp.MultiSampleQuality = 0;                //No multi-sampling
+		d3dpp.MultiSampleType = D3DMULTISAMPLE_NONE; // 8 levels of multi-sampling
+		d3dpp.MultiSampleQuality = 0;                //No multi-sampling
 		d3dpp.SwapEffect = D3DSWAPEFFECT_DISCARD;  // Throw away previous frames, we don't need them
 		d3dpp.hDeviceWindow = hWnd;  //This is our main (and only) window
-		d3dpp.Flags = 0;            //No flags to set
+		d3dpp.Flags = NULL;            //No flags to set
 		d3dpp.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT; //Default Refresh Rate
 		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT;   //Default Presentation rate
+		d3dpp.BackBufferCount = 1;  //We only need a single back buffer
 		d3dpp.BackBufferFormat = format;      //Display format
-		d3dpp.EnableAutoDepthStencil = FALSE; //No depth/stencil buffer
+		d3dpp.BackBufferWidth = 640;
+		d3dpp.BackBufferHeight = 480;
+		d3dpp.EnableAutoDepthStencil = TRUE; //No depth/stencil buffer
+		d3dpp.AutoDepthStencilFormat = D3DFMT_D16;
 		
 		// create a device class using this information and information from the d3dpp stuct
 		hr = d3dr->CreateDevice(D3DADAPTER_DEFAULT,
@@ -68,9 +71,9 @@ namespace enigma
                       &d3dpp,
                       &d3ddev);
 		if(FAILED(hr)){
-			MessageBox(NULL,
-               DXGetErrorDescription9(hr),
-               DXGetErrorString9(hr),
+			MessageBox(hWnd,
+               "Failed to create Direct3D 9.0 Device",
+			   DXGetErrorDescription9(hr), //DXGetErrorString9(hr)
                MB_ICONERROR | MB_OK);
 		}
 		

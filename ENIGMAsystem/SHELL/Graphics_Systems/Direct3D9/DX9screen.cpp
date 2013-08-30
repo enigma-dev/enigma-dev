@@ -129,11 +129,13 @@ void screen_redraw()
 		d3ddev->SetTransform(D3DTS_PROJECTION, &matProjection);    // set the projection transform
 		
         int clear_bits = 0;
+		d3ddev->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
 		if (background_showcolor)
 		{
 			int clearcolor = ((int)background_color) & 0x00FFFFFF;
 			// clear the window to a deep blue
 			d3ddev->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(__GETR(clearcolor), __GETG(clearcolor), __GETB(clearcolor)), 1.0f, 0);
+			// clear the depth buffer
 		}
 
         draw_back();
@@ -298,6 +300,7 @@ void screen_redraw()
 				d3ddev->SetTransform(D3DTS_PROJECTION, &matProjection);    // set the projection transform
 				
                 int clear_bits = 0;
+				d3ddev->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
 				if (background_showcolor)
 				{
 					int clearcolor = ((int)background_color) & 0x00FFFFFF;
