@@ -59,7 +59,7 @@ namespace enigma
 		d3dpp.BackBufferCount = 1;  //We only need a single back buffer
 		d3dpp.BackBufferFormat = format;      //Display format
 		d3dpp.EnableAutoDepthStencil = TRUE; // Automatic depth stencil buffer
-		d3dpp.AutoDepthStencilFormat = D3DFMT_D32; //32-bit zbuffer
+		d3dpp.AutoDepthStencilFormat = D3DFMT_D24S8; //32-bit zbuffer 24bits for depth 8 for stencil buffer
 		
 		// create a device class using this information and information from the d3dpp stuct
 		hr = d3dr->CreateDevice(D3DADAPTER_DEFAULT,
