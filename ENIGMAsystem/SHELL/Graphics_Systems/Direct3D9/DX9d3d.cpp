@@ -28,39 +28,43 @@
 #define __GETG(x) ((x & 0x00FF00)>>8)/255.0
 #define __GETB(x) ((x & 0xFF0000)>>16)/255.0
 
-bool d3dMode = false;
-bool d3dHidden = false;
-bool d3dZWriteEnable = true;
+namespace enigma {
+  bool d3dMode = false;
+  bool d3dHidden = false;
+  bool d3dZWriteEnable = true;
+}
 
 namespace enigma_user
 {
 
 void d3d_start()
 {
+	enigma::d3dMode = true;
 	d3ddev->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
 	d3d_set_hidden(false);
 }
 
 void d3d_end()
 {
+	enigma::d3dMode = false;
 	d3d_set_hidden(false);
 }
 
 bool d3d_get_mode()
 {
-    return d3dMode;
+    return enigma::d3dMode;
 }
 
 void d3d_set_hidden(bool enable)
 {
 	d3d_set_zwriteenable(enable);
 	d3ddev->SetRenderState(D3DRS_ZENABLE, enable);
-    d3dHidden = enable;
+    enigma::d3dHidden = enable;
 }   // TODO: Write function
 
 void d3d_set_zwriteenable(bool enable)
 {
-	d3dZWriteEnable = enable;
+	enigma::d3dZWriteEnable = enable;
 	d3ddev->SetRenderState(D3DRS_ZWRITEENABLE, enable);    // enable/disable the z-buffer
 }
 
