@@ -31,6 +31,9 @@
 
 namespace enigma {
   extern unsigned char currentcolor[4];
+  D3DCOLOR get_currentcolor() {
+	return D3DCOLOR_COLORVALUE(currentcolor[0] / 255, currentcolor[1] / 255, currentcolor[2] / 255, 1);
+  }
 }
 
 namespace enigma_user
@@ -63,30 +66,24 @@ void draw_set_color(int color)
 	enigma::currentcolor[0] = __GETR(color);
 	enigma::currentcolor[1] = __GETG(color);
 	enigma::currentcolor[2] = __GETB(color);
-	D3DMATERIAL9 mat;
-	//zero memory (NEW)
-	ZeroMemory(&mat, sizeof(mat));
-	//diffuse color (NEW)
-	mat.Diffuse.r = 1.0f;
-	mat.Diffuse.g = 0.0f;
-	mat.Diffuse.b = 0.0f;
-	mat.Diffuse.a = 0;
-	d3ddev->SetMaterial(&mat);
 }
 
 void draw_set_color_rgb(unsigned char red,unsigned char green,unsigned char blue)
 {
-
+	enigma::currentcolor[0] = red;
+	enigma::currentcolor[1] = green;
+	enigma::currentcolor[2] = blue;
 }
-
 void draw_set_alpha(float alpha)
 {
-
+	enigma::currentcolor[3] = bind_alpha(alpha);
 }
-
 void draw_set_color_rgba(unsigned char red,unsigned char green,unsigned char blue,float alpha)
 {
-
+	enigma::currentcolor[0] = red;
+	enigma::currentcolor[1] = green;
+	enigma::currentcolor[2] = blue;
+	enigma::currentcolor[3] = bind_alpha(alpha);
 }
 
 int draw_get_color() {

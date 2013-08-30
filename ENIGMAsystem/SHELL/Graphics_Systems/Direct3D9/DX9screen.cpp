@@ -100,7 +100,7 @@ namespace enigma_user
 void screen_redraw()
 {
     d3ddev->BeginScene();    // begins the 3D scene
-	dsprite->Begin(D3DXSPRITE_ALPHABLEND);
+
 	if (!view_enabled)
     {
 		D3DVIEWPORT9 pViewport = { 0, 0, (DWORD)window_get_region_width_scaled(), (DWORD)window_get_region_height_scaled(), 0, 1.0f };
@@ -389,7 +389,7 @@ void screen_redraw()
 							0.0f,    // the near view-plane
 							1.0f);    // the far view-plane
 		d3ddev->SetTransform(D3DTS_PROJECTION, &matProjection);    // set the projection transform
-
+	dsprite->Begin(D3DXSPRITE_ALPHABLEND);
         // Apply and clear stored depth changes.
         for (map<int,pair<double,double> >::iterator it = id_to_currentnextdepth.begin(); it != id_to_currentnextdepth.end(); it++)
         {
