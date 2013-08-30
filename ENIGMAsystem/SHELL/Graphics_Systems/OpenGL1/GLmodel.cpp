@@ -244,7 +244,7 @@ class Mesh
 			break;
 	}
 
-	// clean up the temporary vertex and index container now that they have been batched efficiently
+	// Clean up the temporary vertex and index containers now that they have been batched efficiently.
 	vertices.clear();
 	indices.clear();
   }

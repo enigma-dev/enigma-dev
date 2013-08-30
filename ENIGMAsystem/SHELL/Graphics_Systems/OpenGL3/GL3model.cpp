@@ -256,7 +256,7 @@ class Mesh
 			break;
 	}
 
-	// clean up the temporary vertex and index container now that they have been batched efficiently
+	// Clean up the temporary vertex and index containers now that they have been batched efficiently
 	vertices.clear();
 	indices.clear();
   }
@@ -331,7 +331,7 @@ class Mesh
 	#define OFFSET( P )  ( ( const GLvoid * ) ( sizeof( gs_scalar ) * ( P         ) ) )
 	GLsizei STRIDE = stride;
 
-	// enable vertex array's for fast vertex processing
+	// Enable vertex array's for fast vertex processing
 	glBindBuffer( GL_ARRAY_BUFFER, vertexBuffer );
 	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indexBuffer );
 
