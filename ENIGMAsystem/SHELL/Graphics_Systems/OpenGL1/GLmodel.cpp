@@ -156,67 +156,100 @@ class Mesh
     if (useColors) stride += 4;
 	
 	// Primitive has ended so now we need to batch the vertices that were given into single lists, eg. line list, triangle list, point list
+	// Indices are optionally supplied, model functions can also be added for the end user to supply the indexing themselves for each primitive
+	// but the batching system does not care either way if they are not supplied it will automatically generate them.
 	switch (currentPrimitive) {
 		case enigma_user::pr_pointlist:
 			pointVertices.insert(pointVertices.end(), vertices.begin(), vertices.end());
-			for (unsigned i = 0; i < vertices.size() / stride; i++) {
-				pointIndices.push_back(pointCount + i);
+			if (indices.size() > 0) {
+				for (std::vector<GLuint>::iterator it = indices.begin(); it != indices.end(); ++it) { *it += pointCount; }
+				pointIndices.insert(pointIndices.end(), indices.begin(), indices.end());
+			} else {
+				for (unsigned i = 0; i < vertices.size() / stride; i++) {
+					pointIndices.push_back(pointCount + i);
+				}
 			}
 			pointCount += vertices.size() / stride;
 			break;
 		case enigma_user::pr_linestrip:
 			lineVertices.insert(lineVertices.end(), vertices.begin(), vertices.end());
-			for (unsigned i = 0; i < vertices.size() / stride - 1; i++) {
-				lineIndices.push_back(lineCount + i);
-				lineIndices.push_back(lineCount + i + 1);
+			if (indices.size() > 0) {
+				for (std::vector<GLuint>::iterator it = indices.begin(); it != indices.end(); ++it) { *it += lineCount; }
+				lineIndices.insert(lineIndices.end(), indices.begin(), indices.end());
+			} else {
+				for (unsigned i = 0; i < vertices.size() / stride - 1; i++) {
+					lineIndices.push_back(lineCount + i);
+					lineIndices.push_back(lineCount + i + 1);
+				}
 			}
 			lineCount += vertices.size() / stride;
 			break;
 		case enigma_user::pr_linelist:
 			lineVertices.insert(lineVertices.end(), vertices.begin(), vertices.end());
-			for (unsigned i = 0; i < vertices.size() / stride; i++) {
-				lineIndices.push_back(lineCount + i);
+			if (indices.size() > 0) {
+				for (std::vector<GLuint>::iterator it = indices.begin(); it != indices.end(); ++it) { *it += lineCount; }
+				lineIndices.insert(lineIndices.end(), indices.begin(), indices.end());
+			} else {
+				for (unsigned i = 0; i < vertices.size() / stride; i++) {
+					lineIndices.push_back(lineCount + i);
+				}
 			}
 			lineCount += vertices.size() / stride;
 			break;
 		case enigma_user::pr_trianglestrip:
 			triangleVertices.insert(triangleVertices.end(), vertices.begin(), vertices.end());
-			for (unsigned i = 0; i < vertices.size() / stride - 2; i++) {
-				if (i % 2) {
-					triangleIndices.push_back(triangleCount + i + 2);
-					triangleIndices.push_back(triangleCount + i + 1);
-					triangleIndices.push_back(triangleCount + i);
-				} else {
-					triangleIndices.push_back(triangleCount + i);
-					triangleIndices.push_back(triangleCount + i + 1);
-					triangleIndices.push_back(triangleCount + i + 2);
+			if (indices.size() > 0) {
+				for (std::vector<GLuint>::iterator it = indices.begin(); it != indices.end(); ++it) { *it += triangleCount; }
+				triangleIndices.insert(triangleIndices.end(), indices.begin(), indices.end());
+			} else {
+				for (unsigned i = 0; i < vertices.size() / stride - 2; i++) {
+					if (i % 2) {
+						triangleIndices.push_back(triangleCount + i + 2);
+						triangleIndices.push_back(triangleCount + i + 1);
+						triangleIndices.push_back(triangleCount + i);
+					} else {
+						triangleIndices.push_back(triangleCount + i);
+						triangleIndices.push_back(triangleCount + i + 1);
+						triangleIndices.push_back(triangleCount + i + 2);
+					}
 				}
 			}
 			triangleCount += vertices.size() / stride;
 			break;
 		case enigma_user::pr_trianglelist:
 			triangleVertices.insert(triangleVertices.end(), vertices.begin(), vertices.end());
-			for (unsigned i = 0; i < vertices.size() / stride; i++) {
-				triangleIndices.push_back(triangleCount + i);
+			if (indices.size() > 0) {
+				for (std::vector<GLuint>::iterator it = indices.begin(); it != indices.end(); ++it) { *it += triangleCount; }
+				triangleIndices.insert(triangleIndices.end(), indices.begin(), indices.end());
+			} else {
+				for (unsigned i = 0; i < vertices.size() / stride; i++) {
+					triangleIndices.push_back(triangleCount + i);
+				}
 			}
 			triangleCount += vertices.size() / stride;
 			break;
 		case enigma_user::pr_trianglefan:
 			triangleVertices.insert(triangleVertices.end(), vertices.begin(), vertices.end());
-			for (unsigned i = 1; i < vertices.size() / stride - 1; i++) {
-				triangleIndices.push_back(triangleCount);
-				triangleIndices.push_back(triangleCount + i);
-				triangleIndices.push_back(triangleCount + i + 1);
+			if (indices.size() > 0) {
+				for (std::vector<GLuint>::iterator it = indices.begin(); it != indices.end(); ++it) { *it += triangleCount; }
+				triangleIndices.insert(triangleIndices.end(), indices.begin(), indices.end());
+			} else {
+				for (unsigned i = 1; i < vertices.size() / stride - 1; i++) {
+					triangleIndices.push_back(triangleCount);
+					triangleIndices.push_back(triangleCount + i);
+					triangleIndices.push_back(triangleCount + i + 1);
+				}
 			}
 			triangleCount += vertices.size() / stride;
 			break;
 	}
 
-	// clean up the temporary vertex container now that they have been batched efficiently
+	// clean up the temporary vertex and index container now that they have been batched efficiently
 	vertices.clear();
+	indices.clear();
   }
   
-  void DrawArray(GLenum mode, vector<gs_scalar> &vec, GLsizei count) {
+  void DrawElements(GLenum mode, vector<gs_scalar> &verts, vector<GLuint> &inds, GLsizei count) {
 	if (!count) {
 		return;
 	}
@@ -228,50 +261,50 @@ class Mesh
     if (useColors) stride += 4;
 	stride = stride * sizeof( gs_scalar );
 	
-	#define OFFSET( P )  ( ( sizeof( gs_scalar ) * ( P         ) ) )
+	#define OFFSET( P )  ( char* ) ( &verts[0] ) + ( ( sizeof( gs_scalar ) * ( P         ) ) ) 
 	GLsizei STRIDE = stride;
 
 	// Enable vertex array's for fast vertex processing
 	glEnableClientState(GL_VERTEX_ARRAY);
 	int offset = 0;
-	glVertexPointer( 3, GL_FLOAT, STRIDE, ( const GLvoid * ) &vec[0] + OFFSET(offset) ); // Set the vertex pointer
+	glVertexPointer( 3, GL_FLOAT, STRIDE, OFFSET(offset) ); // Set the vertex pointer
 	offset += 3;
 	
     if (useNormals){
 		glEnableClientState(GL_NORMAL_ARRAY);
-		glNormalPointer( GL_FLOAT, STRIDE, ( const GLvoid * ) &vec[0] + OFFSET(offset) ); // Set the normal pointer to the offset in the array
+		glNormalPointer( GL_FLOAT, STRIDE, OFFSET(offset) ); // Set the normal pointer to the offset in the array
 		offset += 3;
     }
 
 	if (useTextures){
 		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-		glTexCoordPointer( 2, GL_FLOAT, STRIDE, ( const GLvoid * ) &vec[0] + OFFSET(offset) ); // Set the texture pointer to the offset in the array
+		glTexCoordPointer( 2, GL_FLOAT, STRIDE,  OFFSET(offset) ); // Set the texture pointer to the offset in the array
 		offset += 2;
 	}
 	
     if (useColors){
 		glEnableClientState(GL_COLOR_ARRAY);
-        glColorPointer( 4, GL_FLOAT, STRIDE, ( const GLvoid * ) &vec[0] + OFFSET(offset)); // Set the color pointer to the offset in the array
+        glColorPointer( 4, GL_FLOAT, STRIDE, OFFSET(offset)); // Set the color pointer to the offset in the array
     }
 	
-	glDrawArrays(mode, 0, count);
+	glDrawElements(mode, count, GL_UNSIGNED_INT, &inds[0]);
   }
 
   void Draw()
   {
 	// Draw the batched point list
 	if (pointCount > 0) {
-	    DrawArray(GL_POINTS, pointVertices, pointCount);
+	    DrawElements(GL_POINTS, pointVertices, pointIndices, pointIndices.size());
 	}
 	
 	// Draw the batched line list
 	if (lineCount > 0) {
-		DrawArray(GL_LINES, lineVertices, lineCount * 2);
+		DrawElements(GL_LINES, lineVertices, lineIndices, lineIndices.size());
 	}
 	
 	// Draw the batched triangle list
 	if (triangleCount > 0) { 
-		DrawArray(GL_TRIANGLES, triangleVertices, triangleCount * 3);
+		DrawElements(GL_TRIANGLES, triangleVertices, triangleIndices, triangleIndices.size());
 	}
 	
 	glDisableClientState(GL_VERTEX_ARRAY);
@@ -301,7 +334,7 @@ void d3d_model_destroy(int id)
 
 bool d3d_model_exists(int id)
 {
-  return (id >= 0 && id < meshes.size());
+  return (id >= 0 && (unsigned)id < meshes.size());
 }
 
 void d3d_model_clear(int id)
