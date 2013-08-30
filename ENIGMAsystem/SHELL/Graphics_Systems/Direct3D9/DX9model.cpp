@@ -127,7 +127,6 @@ class Mesh
   unsigned int rebufferOffset;
   bool vbogenerated;
   bool vbobuffered;
-  int vbotype;
   bool useColorBuffer; //If color is not used, then it won't bind the color buffer
 
   unsigned int Begin(int pt)
@@ -148,11 +147,10 @@ class Mesh
 	currentPrimitive = pr;
   }
 
-  Mesh(int vbot = enigma_user::vbo_static)
+  Mesh()
   {
   	v_buffer = NULL;    // the pointer to the vertex buffer
 	i_buffer = NULL;    // the pointer to the index buffer
-    vbotype = vbot;
     maxindice = 0;
     vbogenerated = false;
     vbobuffered = false;
@@ -313,10 +311,10 @@ vector<Mesh*> meshes;
 namespace enigma_user
 {
 
-unsigned int d3d_model_create(int vbot)
+unsigned int d3d_model_create()
 {
   int id = meshes.size();
-  meshes.push_back(new Mesh(vbot));
+  meshes.push_back(new Mesh());
   return id;
 }
 
@@ -512,11 +510,6 @@ void d3d_model_vertex(int id, gs_scalar x, gs_scalar y, gs_scalar z)
   meshes[id]->VertexVector(x, y, z, 0, 0, 0, 0, 0, c_white, 1);
 }
 
-void d3d_model_index(int id, unsigned in)
-{
-  meshes[id]->VertexIndex(in);
-}
-
 void d3d_model_vertex_color(int id, gs_scalar x, gs_scalar y, gs_scalar z, int col, double alpha)
 {
   meshes[id]->VertexVector(x, y, z, 0, 0, 0, 0, 0, col, alpha); 
@@ -575,35 +568,30 @@ void d3d_model_block(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar
   unsigned inds[] = {1,3,0, 3,2,0, 3,5,2, 5,4,2, 5,6,4, 5,7,6, 7,1,6, 0,6,1, // sides
                    11,9,8, 10,11,8, 12,13,15, 12,15,14}; // top and bottom
 
-  unsigned indoff = meshes[id]->maxindice + (meshes[id]->maxindice > 0);
-  for (int ix = 0; ix < 36; ix++) {
-    inds[ix] += indoff;
-    if (inds[ix] > meshes[id]->maxindice) {
-      meshes[id]->maxindice = inds[ix];
-    }
-  }
-
-  //meshes[id]->vertices.insert(meshes[id]->vertices.end(), verts, verts + 48);
-  //meshes[id]->primitives[0]->vertcount += 16;
-  //meshes[id]->normals.insert(meshes[id]->normals.end(), norms, norms + 48);
-  //meshes[id]->textures.insert(meshes[id]->textures.end(), texts, texts + 32);
-
-  if (closed) {
-    //meshes[id]->indices.insert(meshes[id]->indices.end(), inds, inds + 36);
-    //meshes[id]->primitives[0]->indexcount += 36;
-  } else {
-    //meshes[id]->indices.insert(meshes[id]->indices.end(), inds, inds + 24);
-   // meshes[id]->primitives[0]->indexcount += 24;
+  d3d_model_primitive_begin(id, pr_trianglestrip);
+  
+  for (int i = 0; i < 16; i++) {
+	//copy(&verts[i * 3], &verts[i * 3 + 3], back_inserter(meshes[id]->vertices));
+	//copy(&norms[i * 3], &norms[i * 3 + 3], back_inserter(meshes[id]->vertices));
+	//copy(&texts[i * 2], &texts[i * 2 + 2], back_inserter(meshes[id]->vertices));
+	
+	//meshes[id]->useColors = true;
+    //meshes[id]->useTextures = true;
+    //meshes[id]->useNormals = true;
   }
   
-  meshes[id]->SetPrimitive(fp);
+  // Supply the indices, the batcher will automatically offset them for us
+  if (closed) {
+    //meshes[id]->indices.insert(meshes[id]->indices.end(), inds, inds + 36);
+  } else {
+    //meshes[id]->indices.insert(meshes[id]->indices.end(), inds, inds + 24);
+  }
+  
+  d3d_model_primitive_end(id);
 }
 
 void d3d_model_cylinder(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, gs_scalar hrep, gs_scalar vrep, bool closed, int steps)
 {
-  unsigned fp = meshes[id]->currentPrimitive;
-  meshes[id]->SetPrimitive(meshes[id]->basicShapesPrimitive);
-  
         float v[100][3];
         float t[100][3];
         steps = min(max(steps, 3), 48); // i think 48 should be circle_presicion
@@ -622,19 +610,6 @@ void d3d_model_cylinder(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_sca
             t[k][0] = tp; t[k][1] = vrep;
             d3d_model_vertex_texture(id, px, py, z1, tp, vrep);
             k++; a += pr; px = cx+cos(a)*rx; py = cy+sin(a)*ry; tp += invstep;
-            v[k][0] = px; v[k][1] = py; v[k][2] = z2;
-            t[k][0] = tp; t[k][1] = 0;
-            d3d_model_vertex_texture(id, px, py, z1, tp, vrep);
-/*
-            v[k][0] = px; v[k][1] = py; v[k][2] = z2;
-            t[k][0] = tp; t[k][1] = 0;
-            d3d_model_vertex_texture(id, px, py, z2, tp, 0);
-            k++;
-            v[k][0] = px; v[k][1] = py; v[k][2] = z1;
-            t[k][0] = tp; t[k][1] = vrep;
-            d3d_model_vertex_texture(id, px, py, z1, tp, vrep);
-            k++; a += pr; px = cx+cos(a)*rx; py = cy+sin(a)*ry; tp += invstep;
-            d3d_model_vertex_texture(id, v[k-4][0], v[k-4][1], v[k-4][3], t[k-4][0], t[k-4][1]);*/
         }
 
         if (closed)
@@ -659,14 +634,10 @@ void d3d_model_cylinder(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_sca
                 d3d_model_vertex_normal_texture(id, v[i+2][0], v[i+2][1], v[i+2][2], 0, 0, -1, t[i+2][0], t[i+2][1]);
             }
         }
-	meshes[id]->SetPrimitive(fp);
 }
 
 void d3d_model_cone(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, gs_scalar hrep, gs_scalar vrep, bool closed, int steps)
 {
-  unsigned fp = meshes[id]->currentPrimitive;
-  meshes[id]->SetPrimitive(meshes[id]->basicShapesPrimitive);
-  
   steps = min(max(steps, 3), 48);
   const double cx = (x1+x2)/2, cy = (y1+y2)/2, rx = (x2-x1)/2, ry = (y2-y1)/2, invstep = (1.0/steps)*hrep, pr = 2*M_PI/steps;
   double a, px, py, tp;
@@ -687,21 +658,17 @@ void d3d_model_cone(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar 
     d3d_model_vertex_texture(id, cx, cy, z1, 0, vrep);
     k++;
     tp = 0;
-    for (int i = steps + 1; i >= 0; i--)
+    for (int i = 0; i <= steps + 1; i++)
     {
-      d3d_model_vertex_texture(id, cx, cy, z1, tp, 0);
-      k++; tp += invstep;
+      d3d_model_vertex_texture(id, px, py, z1, tp, 0);
+      k++; a -= pr; px = cx+cos(a)*rx; py = cy+sin(a)*ry; tp += invstep;
     }
     d3d_model_primitive_end(id);
   }
-  meshes[id]->SetPrimitive(fp);
 }
 
 void d3d_model_ellipsoid(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, gs_scalar hrep, gs_scalar vrep, int steps)
 {
-  unsigned fp = meshes[id]->currentPrimitive;
-  meshes[id]->SetPrimitive(meshes[id]->basicShapesPrimitive);
-  
   float v[277][3];
   float t[277][3];
   steps = min(max(steps, 3), 24);
@@ -763,26 +730,19 @@ void d3d_model_ellipsoid(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_sc
   {
   d3d_model_vertex_texture(id, v[i][0], v[i][1], v[i][2], t[i][0], t[i][1]);
   }
-  meshes[id]->SetPrimitive(fp);
 }
 
 void d3d_model_icosahedron(int id)
 {
-  unsigned fp = meshes[id]->currentPrimitive;
-  meshes[id]->SetPrimitive(meshes[id]->basicShapesPrimitive);
-  // fill icosahedron
-  meshes[id]->SetPrimitive(fp);
+  //TODO: Implement this function.
 }
 
 void d3d_model_torus(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar hrep, gs_scalar vrep, int csteps, int tsteps, double radius, double tradius, double TWOPI)
 {
-  unsigned fp = meshes[id]->currentPrimitive;
-  meshes[id]->SetPrimitive(meshes[id]->basicShapesPrimitive);
-  
   int numc = csteps, numt = tsteps;
 
   for (int i = 0; i < numc; i++) {
-    //d3d_model_primitive_begin(id, pr_quadstrip); // quads are deprecated all basic shapes on models are batched into primitive 0 as triangle list
+    d3d_model_primitive_begin(id, pr_trianglestrip); // quads are deprecated all basic shapes on models are batched into primitive 0 as triangle list
     for (int j = 0; j <= numt; j++) {
       for (int k = 1; k >= 0; k--) {
 
@@ -800,58 +760,34 @@ void d3d_model_torus(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar
     }
     d3d_model_primitive_end(id);
   }
-  
-  meshes[id]->SetPrimitive(fp);
 }
 
 void d3d_model_wall(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, gs_scalar hrep, gs_scalar vrep)
 {
-  if ((x1 == x2 && y1 == y2) || z1 == z2) {
-    return;
-  }
-  
-  unsigned fp = meshes[id]->currentPrimitive;
-  meshes[id]->SetPrimitive(meshes[id]->basicShapesPrimitive);
-
   float xd = x2-x1, yd = y2-y1, zd = z2-z1;
   float normal[3] = {xd*zd, zd*yd, 0};
   float mag = hypot(normal[0], normal[1]);
   normal[0] /= mag;
   normal[1] /= mag;
 
-  d3d_model_vertex_normal_texture(id, x1, y1, z1, 0, 0, normal[0], normal[1], normal[2]);
-  d3d_model_vertex_normal_texture(id, x2, y2, z1, hrep, 0, normal[0], normal[1], normal[2]);
-  d3d_model_vertex_normal_texture(id, x1, y1, z2, 0, vrep, normal[0], normal[1], normal[2]);
-  d3d_model_vertex_normal_texture(id, x2, y2, z2, hrep, vrep, normal[0], normal[1], normal[2]);
-
-  unsigned indoff = meshes[id]->maxindice + (meshes[id]->maxindice > 0);
-  d3d_model_index(id, indoff);
-  d3d_model_index(id, indoff + 1);
-  d3d_model_index(id, indoff + 2);
-  d3d_model_index(id, indoff + 2);
-  d3d_model_index(id, indoff + 1);
-  d3d_model_index(id, indoff + 3);
-
-  meshes[id]->SetPrimitive(fp);
+  d3d_model_primitive_begin(id, pr_trianglestrip);
+  d3d_model_vertex_normal_texture(id, x1, y1, z1, normal[0], normal[1], normal[2], 0, 0);
+  d3d_model_vertex_normal_texture(id, x2, y2, z1, normal[0], normal[1], normal[2], hrep, 0);
+  d3d_model_vertex_normal_texture(id, x1, y1, z2, normal[0], normal[1], normal[2], 0, vrep);
+  d3d_model_vertex_normal_texture(id, x2, y2, z2, normal[0], normal[1], normal[2], hrep, vrep);
+  d3d_model_primitive_end(id);
 }
 
 void d3d_model_floor(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, gs_scalar hrep, gs_scalar vrep)
 {
   float normal[] = {0, 0, 1};
 
-  unsigned fp = meshes[id]->currentPrimitive;
-  meshes[id]->SetPrimitive(meshes[id]->basicShapesPrimitive);
-
-  unsigned indoff = meshes[id]->maxindice + (meshes[id]->maxindice > 0);
-  d3d_model_index(id, indoff); d3d_model_index(id, indoff + 1); d3d_model_index(id, indoff + 2); 
-  d3d_model_index(id, indoff + 2); d3d_model_index(id, indoff + 1); d3d_model_index(id, indoff + 3);
-
-  d3d_model_vertex_normal_texture(id, x1, y1, z1, 0, 0, normal[0], normal[1], normal[2]);
-  d3d_model_vertex_normal_texture(id, x2, y1, z2, 0, vrep, normal[0], normal[1], normal[2]);
-  d3d_model_vertex_normal_texture(id, x1, y2, z1, hrep, 0, normal[0], normal[1], normal[2]);
-  d3d_model_vertex_normal_texture(id, x2, y2, z2, hrep, vrep, normal[0], normal[1], normal[2]);
-
-  meshes[id]->SetPrimitive(fp);
+  d3d_model_primitive_begin(id, pr_trianglestrip);
+  d3d_model_vertex_normal_texture(id, x1, y1, z1, normal[0], normal[1], normal[2], 0, 0);
+  d3d_model_vertex_normal_texture(id, x2, y1, z2, normal[0], normal[1], normal[2], 0, vrep);
+  d3d_model_vertex_normal_texture(id, x1, y2, z1, normal[0], normal[1], normal[2], hrep, 0);
+  d3d_model_vertex_normal_texture(id, x2, y2, z2, normal[0], normal[1], normal[2], hrep, vrep);
+  d3d_model_primitive_end(id);
 }
 
 }
