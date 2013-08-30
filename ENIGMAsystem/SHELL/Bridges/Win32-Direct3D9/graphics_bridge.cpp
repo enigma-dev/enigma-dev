@@ -58,8 +58,6 @@ namespace enigma
 		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT;   //Default Presentation rate
 		d3dpp.BackBufferCount = 1;  //We only need a single back buffer
 		d3dpp.BackBufferFormat = format;      //Display format
-		d3dpp.BackBufferWidth = 640;
-		d3dpp.BackBufferHeight = 480;
 		d3dpp.EnableAutoDepthStencil = TRUE; //No depth/stencil buffer
 		d3dpp.AutoDepthStencilFormat = D3DFMT_D16;
 		
