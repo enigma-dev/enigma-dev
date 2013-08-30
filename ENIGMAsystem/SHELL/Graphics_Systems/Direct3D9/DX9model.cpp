@@ -46,52 +46,6 @@ namespace enigma {
   extern unsigned char currentcolor[4];
 }
 
-/*
-struct Primitive
-{
-  unsigned GetPrimCount()
-  {
-	switch (type) {
-		case enigma_user::pr_trianglestrip:
-			return (vertcount - 3) + 1;
-			break;
-		case enigma_user::pr_trianglelist:
-			return vertcount / 3;
-			break;
-		case enigma_user::pr_trianglefan:
-			return (vertcount - 3) + 1;
-			break;
-		case enigma_user::pr_linelist:
-			return vertcount / 2;
-			break;
-		case enigma_user::pr_linestrip:
-			return vertcount - 1;
-			break;
-		case enigma_user::pr_pointlist:
-			return vertcount;
-			break;
-	}
-  }
-};
-
-struct CUSTOMVERTEX
-{
-    float x, y, z;
-    D3DCOLOR diffuse;
-	//float nx, ny, nz;
-    float u, v;
-    CUSTOMVERTEX(){}
-    CUSTOMVERTEX(float px, float py, float pz, float pnx, float pny, float pnz, D3DCOLOR pdiffuse, float pu, float pv)
-    {
-        x = px; y = py; z = pz;
-        diffuse = pdiffuse;
-		//nx = pnx; ny = pny; nz = pnz;
-        u = pu; v = pv;
-    }
-};
-#define CUSTOMFVF (D3DFVF_XYZ | D3DFVF_DIFFUSE | D3DFVF_TEX1)
-*/
-
 /* Mesh clearing has a memory leak */
 class Mesh
 {
@@ -114,7 +68,9 @@ class Mesh
   
   unsigned pointCount; // The number of vertices in the point buffer
   unsigned triangleCount; // The number of vertices in the triangle buffer
+  unsigned triangleVertCount;
   unsigned lineCount; // The number of vertices in the line buffer
+  unsigned lineVertCount;
   
   DWORD CUSTOMFVF;
   LPDIRECT3DVERTEXBUFFER9 vertexbuffer;    // Interleaved vertex buffer object TRIANGLES|LINES|POINTS with triangles first since they are most likely to be used
@@ -199,15 +155,15 @@ class Mesh
 
   void AddTexture(gs_scalar tx, gs_scalar ty)
   {
-   // vertices.push_back(tx); vertices.push_back(ty);
-	//useTextures = true;
+    vertices.push_back(tx); vertices.push_back(ty);
+	useTextures = true;
   }
 
   // NOTE: The vertex format for this class should be written so that color is an integer and not float.
   void AddColor(int col, double alpha)
   {
-    //vertices.push_back(__GETR(col)); vertices.push_back(__GETG(col)); vertices.push_back(__GETB(col)); vertices.push_back(alpha);
-	//useColors = true;
+    vertices.push_back(__GETR(col)); vertices.push_back(__GETG(col)); vertices.push_back(__GETB(col)); vertices.push_back(alpha);
+	useColors = true;
   }
 
   void End()
@@ -312,7 +268,7 @@ class Mesh
 	vertices.clear();
 	indices.clear();
   }
-  	IDirect3DVertexDeclaration9* myVertexDeclaration;
+
   void BufferGenerate(bool subdata)
   {
 	vector<gs_scalar> vdata;
@@ -323,7 +279,8 @@ class Mesh
 	if (triangleCount > 0) {
 		vdata.insert(vdata.begin(), triangleVertices.begin(), triangleVertices.end());
 		idata.insert(idata.begin(), triangleIndices.begin(), triangleIndices.end());
-		//triangleCount = triangleIndices.size();
+		triangleVertCount = triangleCount;
+		triangleCount = triangleIndices.size();
 	}
 	
 	if (lineCount > 0) {
@@ -331,7 +288,8 @@ class Mesh
 		interleave += triangleVertices.size();
 		for (std::vector<unsigned>::iterator it = lineIndices.begin(); it != lineIndices.end(); ++it) { *it += interleave; }
 		idata.insert(idata.begin(), lineIndices.begin(), lineIndices.end());
-		//lineCount = lineIndices.size();
+		lineVertCount = lineCount;
+		lineCount = lineIndices.size();
 	}
 	
 	if (pointCount > 0) {
@@ -339,25 +297,23 @@ class Mesh
 		interleave += lineVertices.size();
 		for (std::vector<unsigned>::iterator it = lineIndices.begin(); it != lineIndices.end(); ++it) { *it += interleave; }
 		idata.insert(idata.begin(), pointIndices.begin(), pointIndices.end());
-		//pointCount = pointIndices.size();
+		pointCount = pointIndices.size();
 	}
 	
 	// Logical or the flexible vertex format flags
-	CUSTOMFVF = D3DFVF_XYZ | D3DFVF_NORMAL;
-	//if (useNormals) { CUSTOMFVF |= D3DFVF_NORMAL; }
-	//if (useColors) { CUSTOMFVF |= D3DFVF_DIFFUSE; }
-	//if (useTextures) { CUSTOMFVF |= D3DFVF_TEX1; }
+	CUSTOMFVF = D3DFVF_XYZ;
+	if (useNormals) { CUSTOMFVF |= D3DFVF_NORMAL; }
+	if (useColors) { CUSTOMFVF |= D3DFVF_DIFFUSE; }
+	if (useTextures) { CUSTOMFVF |= D3DFVF_TEX1; }
 	
 	unsigned stride = 3;
     if (useNormals) stride += 3;
-	//if (useTextures) stride += 2;
-  //  if (useColors) stride += 4;
-  
-  
+	if (useTextures) stride += 2;
+    if (useColors) stride += 4;
 	
-	 // create a vertex buffer interface
+	// create a vertex buffer interface
 	d3ddev->CreateVertexBuffer(vdata.size() * sizeof( gs_scalar ),
-		0,
+		D3DUSAGE_WRITEONLY,
 		CUSTOMFVF,
 		D3DPOOL_MANAGED,
 		&vertexbuffer,
@@ -365,8 +321,8 @@ class Mesh
 					
 	// create a index buffer interface
 	d3ddev->CreateIndexBuffer(idata.size() * sizeof(unsigned),
-		0,
-        D3DFMT_INDEX16,
+		D3DUSAGE_WRITEONLY,
+        D3DFMT_INDEX32,
         D3DPOOL_MANAGED,
         &indexbuffer,
         NULL);
@@ -378,7 +334,7 @@ class Mesh
 		VOID* pVoid;    // a void pointer
 		// lock vertex buffer and load the vertices into it
 		vertexbuffer->Lock(0, 0, (void**)&pVoid, 0);
-		memcpy(pVoid, &(vdata[0]), vdata.size() * sizeof(gs_scalar));
+		memcpy(pVoid, &vdata[0], vdata.size() * sizeof(gs_scalar));
 		vertexbuffer->Unlock();
 	  
 		// lock index buffer and load the indices into it
@@ -408,7 +364,7 @@ class Mesh
   
 	unsigned stride = 3;
     if (useNormals) stride += 3;
-	//if (useTextures) stride += 2;
+	if (useTextures) stride += 2;
     if (useColors) stride += 4;
 	
 	#define OFFSET( P )  ( ( VOID* ) ( sizeof( gs_scalar ) * ( P         ) ) )
@@ -416,35 +372,32 @@ class Mesh
 
 	
 	// select the vertex buffer to display
-	d3ddev->SetStreamSource(0, vertexbuffer, 0, stride * sizeof( gs_scalar ));
-	//d3ddev->SetIndices(indexbuffer);
-
-	//d3ddev->SetVertexDeclaration(myVertexDeclaration);
+	d3ddev->SetStreamSource(0, vertexbuffer, 0, stride * sizeof(gs_scalar) );
+	//d3ddev->SetFVF(CUSTOMFVF);
+	d3ddev->SetIndices(indexbuffer);
 	
 	#define OFFSETE( P )  ( ( const GLvoid * ) ( sizeof( unsigned ) * ( P         ) ) )
 	
 	// Draw the batched triangle list
 	if (triangleCount > 0) { 
-		//glDrawElements(GL_TRIANGLES, triangleCount, GL_UNSIGNED_INT, );
-		d3ddev->DrawPrimitive(D3DPT_TRIANGLELIST, 0, triangleCount / 3);
-				//d3ddev->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, 
-			//triangleCount, 0, triangleCount / 3);
+		d3ddev->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, 
+			triangleVertCount, 0, triangleCount / 3);
 	}
 	
 	// Draw the batched line list
 	if (lineCount > 0) {
 		//glDrawElements(GL_LINES, lineCount, GL_UNSIGNED_INT, OFFSETE(triangleCount));
-		
-				//d3ddev->DrawIndexedPrimitive(D3DPT_LINELIST, primitives[i]->vertstart, 0, 
-			//primitives[i]->vertcount, primitives[i]->indexstart, primitives[i]->GetPrimCount());
+			
+		d3ddev->DrawIndexedPrimitive(D3DPT_LINELIST, 0, 0, 
+			lineVertCount, 0, lineCount / 2);
 	}
 	
 	// Draw the batched point list
 	if (pointCount > 0) {
 		//glDrawElements(GL_POINTS, pointCount, GL_UNSIGNED_INT, OFFSETE(lineCount + triangleCount));
-		
-				//d3ddev->DrawIndexedPrimitive(D3DPT_POINTLIST, primitives[i]->vertstart, 0, 
-			//primitives[i]->vertcount, primitives[i]->indexstart, primitives[i]->GetPrimCount());
+			
+		d3ddev->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, 
+			pointCount, 0, pointCount);
 	}
   }
 };
