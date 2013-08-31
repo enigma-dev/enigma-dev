@@ -395,13 +395,15 @@ class Mesh
 	if (useTextures) stride += 2;
     if (useColors) stride += 4;
 	
-	//dsprite->Flush();
-	//dsprite->End();
+
 	
 	d3ddev->SetVertexDeclaration(vertex_declaration);
 	// select the vertex buffer to display
 	d3ddev->SetStreamSource(0, vertexbuffer, 0, stride * sizeof(gs_scalar));
 	d3ddev->SetIndices(indexbuffer);
+	
+		//dsprite->Flush();
+	//dsprite->End();
 	
 	// Draw the batched triangle list
 	if (triangleCount > 0) { 

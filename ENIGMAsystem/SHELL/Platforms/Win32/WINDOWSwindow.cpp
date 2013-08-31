@@ -463,7 +463,8 @@ int display_get_frequency()
 	return GetDeviceCaps(GetDC(enigma::hWnd), VREFRESH);
 }
 
-void display_reset()
+// This display reset function needs moved to graphics bridges
+void display_reset(int aa, bool vsync)
 {
 	DEVMODE devMode;
 
