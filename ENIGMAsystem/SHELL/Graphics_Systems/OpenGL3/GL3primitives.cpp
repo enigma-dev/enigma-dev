@@ -18,7 +18,7 @@
 #include "../General/OpenGLHeaders.h"
 #include "../General/GSprimitives.h"
 #include "../General/GStextures.h"
-#include "../General/GSModel.h"
+#include "../General/GSmodel.h"
 #include "GL3binding.h"
 
 #include <stdio.h>

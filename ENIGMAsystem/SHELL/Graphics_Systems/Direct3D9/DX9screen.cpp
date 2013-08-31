@@ -100,8 +100,11 @@ namespace enigma_user
 
 void screen_redraw()
 {
+	// Should implement extended lost device checking
+	//if (d3ddev == NULL ) return;
+
     d3ddev->BeginScene();    // begins the 3D scene
-	dsprite->Begin(D3DXSPRITE_ALPHABLEND);
+	dsprite->Begin(D3DXSPRITE_ALPHABLEND | D3DXSPRITE_DO_NOT_ADDREF_TEXTURE);
 	if (!view_enabled)
     {
 		D3DVIEWPORT9 pViewport = { 0, 0, (DWORD)window_get_region_width_scaled(), (DWORD)window_get_region_height_scaled(), 0, 1.0f };
@@ -366,7 +369,7 @@ void screen_redraw()
         }
         view_current = 0;
     }
-	
+
 	// Now process the sub event of draw called draw gui
 	// It is for drawing GUI elements without view scaling and transformation
     if (enigma::gui_used)
