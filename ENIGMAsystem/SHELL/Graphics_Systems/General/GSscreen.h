@@ -28,5 +28,6 @@ namespace enigma_user {
   void screen_redraw();
   void screen_refresh();
   void screen_init();
+  
 
 }
