@@ -28,9 +28,12 @@
 
 using namespace std;
 
-#define __GETR(x) ((x & 0x0000FF))/255.0
-#define __GETG(x) ((x & 0x00FF00)>>8)/255.0
-#define __GETB(x) ((x & 0xFF0000)>>16)/255.0
+#define __GETR(x) ((x & 0x0000FF))
+#define __GETG(x) ((x & 0x00FF00)>>8)
+#define __GETB(x) ((x & 0xFF0000)>>16)
+#define __GETRf(x) fmod(__GETR(x),256)
+#define __GETGf(x) fmod(x/256,256)
+#define __GETBf(x) fmod(x/65536,256)*
 
 #include <iostream>
 #include <map>
@@ -172,15 +175,11 @@ class Mesh
     vertices.push_back(tx); vertices.push_back(ty);
 	useTextures = true;
   }
-  
-#define __GETR(x) ((x & 0x0000FF))
-#define __GETG(x) ((x & 0x00FF00)>>8)
-#define __GETB(x) ((x & 0xFF0000)>>16)
 
   // NOTE: The vertex format for this class should be written so that color is an integer and not float.
   void AddColor(int col, double alpha)
-  {
-    vertices.push_back((float)D3DCOLOR_COLORVALUE(__GETR(col), __GETG(col), __GETB(col), 1));//__GETR(col)); //vertices.push_back(__GETG(col)); vertices.push_back(__GETB(col)); vertices.push_back(alpha);
+  {               
+	vertices.push_back((float)__GETR(col)/256); vertices.push_back((float)__GETG(col)/256); vertices.push_back((float)__GETB(col)/256); vertices.push_back(alpha);
 	useColors = true;
   }
 
@@ -191,7 +190,7 @@ class Mesh
 	unsigned stride = 3;
     if (useNormals) stride += 3;
 	if (useTextures) stride += 2;
-    if (useColors) stride += 1;
+    if (useColors) stride += 4;
 	
 	// Primitive has ended so now we need to batch the vertices that were given into single lists, eg. line list, triangle list, point list
 	// Indices are optionally supplied, model functions can also be added for the end user to supply the indexing themselves for each primitive
@@ -318,26 +317,21 @@ class Mesh
 		pointCount = pointIndices.size();
 	}
 	
-	
-    
-	
-    
-	
 	D3DVERTEXELEMENT9 POSITIONELEMENT =
 	{ 0,  0, D3DDECLTYPE_FLOAT3,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0 };
 	unsigned stride = 3;
 
 	D3DVERTEXELEMENT9 NORMALELEMENT =
-	{ 0, stride * sizeof(gs_scalar), D3DDECLTYPE_FLOAT3,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_NORMAL,   0 };
+	{ 0, static_cast< WORD >(stride * sizeof(gs_scalar)), D3DDECLTYPE_FLOAT3,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_NORMAL,   0 };
 	if (useNormals) stride += 3;
 
 	D3DVERTEXELEMENT9 TEXTUREELEMENT =
-	{ 0, stride * sizeof(gs_scalar), D3DDECLTYPE_FLOAT2,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0 };
+	{ 0, static_cast< WORD >(stride * sizeof(gs_scalar)), D3DDECLTYPE_FLOAT2,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0 };
 	if (useTextures) stride += 2;
 
 	D3DVERTEXELEMENT9 COLORELEMENT =
-	{ 0, stride * sizeof(gs_scalar), D3DDECLTYPE_D3DCOLOR, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR,    0  };
-	if (useColors) stride += 1;
+	{ 0, static_cast< WORD >(stride * sizeof(gs_scalar)), D3DDECLTYPE_FLOAT4, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR,    0  };
+	if (useColors) stride += 4;
 
 	int elements = 1 + useNormals + useTextures + useColors + 1;
 	D3DVERTEXELEMENT9 customvertex[elements];
@@ -346,7 +340,9 @@ class Mesh
 	if (useNormals) { customvertex[i] = NORMALELEMENT; i += 1; }
 	if (useTextures) { customvertex[i] = TEXTUREELEMENT; i += 1; }
 	if (useColors) { customvertex[i] = COLORELEMENT; i += 1; }
-	customvertex[i] = D3DDECL_END();
+	// declared const for C++0x compatibility
+	const D3DVERTEXELEMENT9 strideelement = D3DDECL_END();
+	customvertex[i] = strideelement;
 	
 	d3ddev->CreateVertexDeclaration (customvertex, &vertex_declaration);
 	
@@ -405,7 +401,7 @@ class Mesh
 	unsigned stride = 3;
     if (useNormals) stride += 3;
 	if (useTextures) stride += 2;
-    if (useColors) stride += 1;
+    if (useColors) stride += 4;
 	
 	#define OFFSET( P )  ( ( VOID* ) ( sizeof( gs_scalar ) * ( P         ) ) )
 	
