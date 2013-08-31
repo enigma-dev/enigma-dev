@@ -46,6 +46,12 @@ namespace enigma {
   extern unsigned char currentcolor[4];
 }
 
+struct LVertex
+{
+    FLOAT    x, y, z;
+    FLOAT    nx, ny, nz;
+};
+
 /* Mesh clearing has a memory leak */
 class Mesh
 {
@@ -64,7 +70,6 @@ class Mesh
   bool useColors; // If colors have been added to the model
   bool useTextures; // If texture coordinates have been added
   bool useNormals; // If normals have been added
-  bool useIndexBuffer; // If indices have been added
   
   unsigned pointCount; // The number of vertices in the point buffer
   unsigned triangleCount; // The number of vertices in the triangle buffer
@@ -98,7 +103,9 @@ class Mesh
 	
 	pointCount = 0;
 	triangleCount = 0;
+	triangleVertCount = 0;
 	lineCount = 0;
+	lineVertCount = 0;
 	
     currentPrimitive = 0;
   }
@@ -122,8 +129,10 @@ class Mesh
   {
     ClearData();
 	
-	//glDeleteBuffers(1, &vertexBuffer);
-	//glDeleteBuffers(1, &indexBuffer);
+	vertexbuffer->Release();
+	vertexbuffer = NULL;
+	indexbuffer->Release();
+	indexbuffer = NULL;
 	
 	vbogenerated = false;
 	
@@ -133,7 +142,9 @@ class Mesh
 	
 	pointCount = 0;
 	triangleCount = 0;
+	triangleVertCount = 0;
 	lineCount = 0;
+	lineVertCount = 0;
   }
   
   void Begin(int pt)
@@ -155,15 +166,15 @@ class Mesh
 
   void AddTexture(gs_scalar tx, gs_scalar ty)
   {
-    vertices.push_back(tx); vertices.push_back(ty);
-	useTextures = true;
+    //vertices.push_back(tx); vertices.push_back(ty);
+	//useTextures = true;
   }
 
   // NOTE: The vertex format for this class should be written so that color is an integer and not float.
   void AddColor(int col, double alpha)
   {
-    vertices.push_back(__GETR(col)); vertices.push_back(__GETG(col)); vertices.push_back(__GETB(col)); vertices.push_back(alpha);
-	useColors = true;
+    //vertices.push_back(__GETR(col)); vertices.push_back(__GETG(col)); vertices.push_back(__GETB(col)); vertices.push_back(alpha);
+	//useColors = true;
   }
 
   void End()
@@ -333,8 +344,13 @@ class Mesh
 	} else {
 		VOID* pVoid;    // a void pointer
 		// lock vertex buffer and load the vertices into it
-		vertexbuffer->Lock(0, 0, (void**)&pVoid, 0);
+		vertexbuffer->Lock(0, 0, (VOID**)&pVoid, 0);
 		memcpy(pVoid, &vdata[0], vdata.size() * sizeof(gs_scalar));
+		
+		//for (int i = 0; i < vdata.size(); i += stride) {
+			//pVoid[i].x = vdata[i]; pVoid[i + 1].y = vdata[i + 1]; pVoid[i + 2].z = vdata[i + 2];
+		//}
+		
 		vertexbuffer->Unlock();
 	  
 		// lock index buffer and load the indices into it

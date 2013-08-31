@@ -66,7 +66,6 @@ class Mesh
   bool useColors; // If colors have been added to the model
   bool useTextures; // If texture coordinates have been added
   bool useNormals; // If normals have been added
-  bool useIndexBuffer; // If indices have been added
   
   unsigned pointCount; // The number of vertices in the point buffer
   unsigned triangleCount; // The number of vertices in the triangle buffer

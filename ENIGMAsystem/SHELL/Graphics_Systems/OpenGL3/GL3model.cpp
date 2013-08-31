@@ -19,8 +19,8 @@
 #include "../General/GSd3d.h"
 #include "GL3shapes.h"
 #include "../General/GSprimitives.h"
-#include "../General/GStextures.h"
 #include "../General/GSmodel.h"
+#include "../General/GStextures.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
 #include <math.h>
@@ -67,7 +67,6 @@ class Mesh
   bool useColors; // If colors have been added to the model
   bool useTextures; // If texture coordinates have been added
   bool useNormals; // If normals have been added
-  bool useIndexBuffer; // If indices have been added
   
   unsigned pointCount; // The number of vertices in the point buffer
   unsigned triangleCount; // The number of vertices in the triangle buffer
