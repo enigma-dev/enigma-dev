@@ -204,7 +204,7 @@ void glsl_program_free(int id)
   delete shaderprograms[id];
 }
 
-int glsl_get_uniform_location(unsigned program, string name) {
+int glsl_get_uniform_location(int program, string name) {
 	return glGetUniformLocation(shaderprograms[program]->shaderprogram, name.c_str());
 }
 

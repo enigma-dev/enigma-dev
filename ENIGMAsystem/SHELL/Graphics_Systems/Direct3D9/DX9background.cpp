@@ -56,6 +56,7 @@ namespace enigma_user {
 }
 namespace enigma {
   extern size_t background_idmax;
+  D3DCOLOR get_currentcolor();
 }
 
 #include "DX9binding.h"
@@ -71,7 +72,7 @@ void draw_background(int back, gs_scalar x, gs_scalar y)
 {
   get_background(bck2d, back);
   D3DXVECTOR3 pos(x, y, 0);
-  dsprite->Draw(GmTextures[bck2d->texture]->gTexture,NULL,NULL,&pos,0xFFFFFFFF);
+  dsprite->Draw(GmTextures[bck2d->texture]->gTexture, NULL, NULL, &pos, enigma::get_currentcolor());
 }
 
 void draw_background_stretched(int back, gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height)
@@ -94,7 +95,7 @@ void draw_background_stretched(int back, gs_scalar x, gs_scalar y, gs_scalar wid
 	// Tell the sprite about the matrix
 	dsprite->SetTransform(&mat);
 
-	dsprite->Draw(GmTextures[bck2d->texture]->gTexture, NULL, NULL, NULL, 0xFFFFFFFF);
+	dsprite->Draw(GmTextures[bck2d->texture]->gTexture, NULL, NULL, NULL, enigma::get_currentcolor());
 
 	D3DXMatrixTransformation2D(&mat,NULL,0.0,0,NULL,0,0);
 	dsprite->SetTransform(&mat);
@@ -107,7 +108,7 @@ void draw_background_part(int back, gs_scalar left, gs_scalar top, gs_scalar wid
 	D3DXVECTOR3 pos(x, y, 0);
 	tagRECT rect;
 	rect.left = left; rect.top = top; rect.right = left + width; rect.bottom = top + height;
-	dsprite->Draw(GmTextures[bck2d->texture]->gTexture, &rect, NULL, &pos, 0xFFFFFFFF);
+	dsprite->Draw(GmTextures[bck2d->texture]->gTexture, &rect, NULL, &pos, enigma::get_currentcolor());
 }
 
 void draw_background_tiled(int back, gs_scalar x, gs_scalar y)
@@ -132,7 +133,7 @@ void draw_background_tiled(int back, gs_scalar x, gs_scalar y)
         {
 			
 			D3DXVECTOR3 pos(xvert1, yvert1, 0);
-			dsprite->Draw(GmTextures[bck2d->texture]->gTexture, NULL, NULL, &pos, 0xFFFFFFFF);
+			dsprite->Draw(GmTextures[bck2d->texture]->gTexture, NULL, NULL, &pos, enigma::get_currentcolor());
 	
             yvert1 = yvert2;
             yvert2 += bck2d->height;
@@ -174,7 +175,7 @@ void draw_background_tiled_area(int back, gs_scalar x, gs_scalar y, gs_scalar x1
         else height = sh-top;
 		  
 		D3DXVECTOR3 pos(X, Y, 0);
-		dsprite->Draw(GmTextures[bck2d->texture]->gTexture, NULL, NULL, &pos, 0xFFFFFFFF);
+		dsprite->Draw(GmTextures[bck2d->texture]->gTexture, NULL, NULL, &pos, enigma::get_currentcolor());
       }
       j = jj;
     }
