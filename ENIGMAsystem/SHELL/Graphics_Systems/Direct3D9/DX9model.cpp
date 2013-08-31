@@ -77,9 +77,12 @@ class Mesh
   unsigned lineCount; // The number of vertices in the line buffer
   unsigned lineVertCount;
   
-  DWORD CUSTOMFVF;
+  int vshader;
+  int pshader;
+  
   LPDIRECT3DVERTEXBUFFER9 vertexbuffer;    // Interleaved vertex buffer object TRIANGLES|LINES|POINTS with triangles first since they are most likely to be used
   LPDIRECT3DINDEXBUFFER9 indexbuffer;    // Interleaved index buffer object TRIANGLES|LINES|POINTS with triangles first since they are most likely to be used
+  IDirect3DVertexDeclaration9* vertex_declaration;
   
   bool vbogenerated; // Whether or not the buffer objects have been generated
   bool vbobuffered; // Whether or not the buffer objects have been buffered
@@ -166,15 +169,19 @@ class Mesh
 
   void AddTexture(gs_scalar tx, gs_scalar ty)
   {
-    //vertices.push_back(tx); vertices.push_back(ty);
-	//useTextures = true;
+    vertices.push_back(tx); vertices.push_back(ty);
+	useTextures = true;
   }
+  
+#define __GETR(x) ((x & 0x0000FF))
+#define __GETG(x) ((x & 0x00FF00)>>8)
+#define __GETB(x) ((x & 0xFF0000)>>16)
 
   // NOTE: The vertex format for this class should be written so that color is an integer and not float.
   void AddColor(int col, double alpha)
   {
-    //vertices.push_back(__GETR(col)); vertices.push_back(__GETG(col)); vertices.push_back(__GETB(col)); vertices.push_back(alpha);
-	//useColors = true;
+    vertices.push_back((float)D3DCOLOR_COLORVALUE(__GETR(col), __GETG(col), __GETB(col), 1));//__GETR(col)); //vertices.push_back(__GETG(col)); vertices.push_back(__GETB(col)); vertices.push_back(alpha);
+	useColors = true;
   }
 
   void End()
@@ -184,7 +191,7 @@ class Mesh
 	unsigned stride = 3;
     if (useNormals) stride += 3;
 	if (useTextures) stride += 2;
-    if (useColors) stride += 4;
+    if (useColors) stride += 1;
 	
 	// Primitive has ended so now we need to batch the vertices that were given into single lists, eg. line list, triangle list, point list
 	// Indices are optionally supplied, model functions can also be added for the end user to supply the indexing themselves for each primitive
@@ -311,21 +318,42 @@ class Mesh
 		pointCount = pointIndices.size();
 	}
 	
-	// Logical or the flexible vertex format flags
-	CUSTOMFVF = D3DFVF_XYZ;
-	if (useNormals) { CUSTOMFVF |= D3DFVF_NORMAL; }
-	if (useColors) { CUSTOMFVF |= D3DFVF_DIFFUSE; }
-	if (useTextures) { CUSTOMFVF |= D3DFVF_TEX1; }
 	
+    
+	
+    
+	
+	D3DVERTEXELEMENT9 POSITIONELEMENT =
+	{ 0,  0, D3DDECLTYPE_FLOAT3,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0 };
 	unsigned stride = 3;
-    if (useNormals) stride += 3;
+
+	D3DVERTEXELEMENT9 NORMALELEMENT =
+	{ 0, stride * sizeof(gs_scalar), D3DDECLTYPE_FLOAT3,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_NORMAL,   0 };
+	if (useNormals) stride += 3;
+
+	D3DVERTEXELEMENT9 TEXTUREELEMENT =
+	{ 0, stride * sizeof(gs_scalar), D3DDECLTYPE_FLOAT2,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0 };
 	if (useTextures) stride += 2;
-    if (useColors) stride += 4;
+
+	D3DVERTEXELEMENT9 COLORELEMENT =
+	{ 0, stride * sizeof(gs_scalar), D3DDECLTYPE_D3DCOLOR, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR,    0  };
+	if (useColors) stride += 1;
+
+	int elements = 1 + useNormals + useTextures + useColors + 1;
+	D3DVERTEXELEMENT9 customvertex[elements];
+	customvertex[0] = POSITIONELEMENT;
+	int i = 1;
+	if (useNormals) { customvertex[i] = NORMALELEMENT; i += 1; }
+	if (useTextures) { customvertex[i] = TEXTUREELEMENT; i += 1; }
+	if (useColors) { customvertex[i] = COLORELEMENT; i += 1; }
+	customvertex[i] = D3DDECL_END();
+	
+	d3ddev->CreateVertexDeclaration (customvertex, &vertex_declaration);
 	
 	// create a vertex buffer interface
 	d3ddev->CreateVertexBuffer(vdata.size() * sizeof( gs_scalar ),
 		D3DUSAGE_WRITEONLY,
-		CUSTOMFVF,
+		0,
 		D3DPOOL_MANAGED,
 		&vertexbuffer,
 		NULL);
@@ -337,6 +365,7 @@ class Mesh
         D3DPOOL_MANAGED,
         &indexbuffer,
         NULL);
+		
 	
 	// Send the data to the GPU
 	if (subdata) {
@@ -347,10 +376,6 @@ class Mesh
 		vertexbuffer->Lock(0, 0, (VOID**)&pVoid, 0);
 		memcpy(pVoid, &vdata[0], vdata.size() * sizeof(gs_scalar));
 		
-		//for (int i = 0; i < vdata.size(); i += stride) {
-			//pVoid[i].x = vdata[i]; pVoid[i + 1].y = vdata[i + 1]; pVoid[i + 2].z = vdata[i + 2];
-		//}
-		
 		vertexbuffer->Unlock();
 	  
 		// lock index buffer and load the indices into it
@@ -359,7 +384,6 @@ class Mesh
 		indexbuffer->Unlock();
 	}
 
-	
 	// Clean up temporary interleaved data
 	vdata.clear();
 	idata.clear();
@@ -381,15 +405,13 @@ class Mesh
 	unsigned stride = 3;
     if (useNormals) stride += 3;
 	if (useTextures) stride += 2;
-    if (useColors) stride += 4;
+    if (useColors) stride += 1;
 	
 	#define OFFSET( P )  ( ( VOID* ) ( sizeof( gs_scalar ) * ( P         ) ) )
-
-
 	
+	d3ddev->SetVertexDeclaration(vertex_declaration);
 	// select the vertex buffer to display
-	d3ddev->SetStreamSource(0, vertexbuffer, 0, stride * sizeof(gs_scalar) );
-	//d3ddev->SetFVF(CUSTOMFVF);
+	d3ddev->SetStreamSource(0, vertexbuffer, 0, stride * sizeof(gs_scalar));
 	d3ddev->SetIndices(indexbuffer);
 	
 	#define OFFSETE( P )  ( ( const GLvoid * ) ( sizeof( unsigned ) * ( P         ) ) )
@@ -415,6 +437,7 @@ class Mesh
 		d3ddev->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, 
 			pointCount, 0, pointCount);
 	}
+	
   }
 };
 
