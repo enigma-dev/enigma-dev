@@ -95,8 +95,8 @@ class Mesh
 
   ~Mesh()
   {
-	glDeleteBuffers(1, &vertexBuffer);
-	glDeleteBuffers(1, &indexBuffer);
+	glDeleteBuffersARB(1, &vertexBuffer);
+	glDeleteBuffersARB(1, &indexBuffer);
   }
 
   void ClearData()
@@ -289,23 +289,23 @@ class Mesh
 		pointCount = pointIndices.size();
 	}
 	
-	glGenBuffers( 1, &vertexBuffer );
-	glGenBuffers( 1, &indexBuffer );
+	glGenBuffersARB( 1, &vertexBuffer );
+	glGenBuffersARB( 1, &indexBuffer );
 	// Bind The Vertex Buffer
-	glBindBuffer( GL_ARRAY_BUFFER, vertexBuffer );
-	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indexBuffer );
+	glBindBufferARB( GL_ARRAY_BUFFER, vertexBuffer );
+	glBindBufferARB( GL_ELEMENT_ARRAY_BUFFER, indexBuffer );
 	
 	// Send the data to the GPU
 	if (subdata) {
 		
 	} else {
-		glBufferData( GL_ARRAY_BUFFER, vdata.size() * sizeof(gs_scalar), &vdata[0], GL_STATIC_DRAW );
-		glBufferData( GL_ELEMENT_ARRAY_BUFFER, idata.size() * sizeof(GLuint), &idata[0], GL_STATIC_DRAW );
+		glBufferDataARB( GL_ARRAY_BUFFER, vdata.size() * sizeof(gs_scalar), &vdata[0], GL_STATIC_DRAW );
+		glBufferDataARB( GL_ELEMENT_ARRAY_BUFFER, idata.size() * sizeof(GLuint), &idata[0], GL_STATIC_DRAW );
 	}
 
 	// Unbind the buffers we do not need them anymore
-	glBindBuffer( GL_ARRAY_BUFFER, 0 );
-	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
+	glBindBufferARB( GL_ARRAY_BUFFER, 0 );
+	glBindBufferARB( GL_ELEMENT_ARRAY_BUFFER, 0 );
 	// Clean up temporary interleaved data
 	vdata.clear();
 	idata.clear();
@@ -334,8 +334,8 @@ class Mesh
 	GLsizei STRIDE = stride;
 
 	// Enable vertex array's for fast vertex processing
-	glBindBuffer( GL_ARRAY_BUFFER, vertexBuffer );
-	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indexBuffer );
+	glBindBufferARB( GL_ARRAY_BUFFER, vertexBuffer );
+	glBindBufferARB( GL_ELEMENT_ARRAY_BUFFER, indexBuffer );
 
 	glEnableClientState(GL_VERTEX_ARRAY);
 	int offset = 0;
@@ -375,8 +375,8 @@ class Mesh
 		glDrawElements(GL_POINTS, pointCount, GL_UNSIGNED_INT, OFFSETE(lineCount + triangleCount));
 	}
 	
-	glBindBuffer( GL_ARRAY_BUFFER, 0 );
-	glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
+	glBindBufferARB( GL_ARRAY_BUFFER, 0 );
+	glBindBufferARB( GL_ELEMENT_ARRAY_BUFFER, 0 );
 	
 	glDisableClientState(GL_VERTEX_ARRAY);
     if (useTextures) glDisableClientState(GL_TEXTURE_COORD_ARRAY);
