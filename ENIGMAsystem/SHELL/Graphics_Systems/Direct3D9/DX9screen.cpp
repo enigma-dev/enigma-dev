@@ -83,6 +83,7 @@ static inline void draw_back()
 
 namespace enigma
 {
+	extern bool d3dMode;
     extern bool d3dHidden;
     extern std::map<int,roomstruct*> roomdata;
     particles_implementation* particles_impl;
@@ -128,14 +129,18 @@ void screen_redraw()
 							1.0f);    // the far view-plane
 		d3ddev->SetTransform(D3DTS_PROJECTION, &matProjection);    // set the projection transform
 		
-        int clear_bits = 0;
 		if (background_showcolor)
 		{
 			int clearcolor = ((int)background_color) & 0x00FFFFFF;
-			// clear the window to a deep blue
+			// clear the window to the background color
 			d3ddev->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(__GETR(clearcolor), __GETG(clearcolor), __GETB(clearcolor)), 1.0f, 0);
+			// clear the depth buffer
 		}
 
+		// Clear the depth buffer if 3d mode is on at the beginning of the draw step.
+        if (enigma::d3dMode)
+			d3ddev->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
+		
         draw_back();
 	
         // Apply and clear stored depth changes.
@@ -297,13 +302,16 @@ void screen_redraw()
 							1.0f);    // the far view-plane
 				d3ddev->SetTransform(D3DTS_PROJECTION, &matProjection);    // set the projection transform
 				
-                int clear_bits = 0;
 				if (background_showcolor)
 				{
 					int clearcolor = ((int)background_color) & 0x00FFFFFF;
-					// clear the window to a deep blue
+					// clear the window to the background color
 					d3ddev->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(__GETR(clearcolor), __GETG(clearcolor), __GETB(clearcolor)), 1.0f, 0);
 				}
+				
+				// Clear the depth buffer if 3d mode is on at the beginning of the draw step.
+                if (enigma::d3dMode)
+                    d3ddev->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
 
                 draw_back();
 
@@ -359,10 +367,13 @@ void screen_redraw()
         view_current = 0;
     }
 	
-	// Now process the sub event of draw called draw gui 
+	// Now process the sub event of draw called draw gui
 	// It is for drawing GUI elements without view scaling and transformation
-	
-	D3DVIEWPORT9 pViewport = { 0, 0, (DWORD)window_get_region_width_scaled(), (DWORD)window_get_region_height_scaled(), 0, 1.0f };
+    if (enigma::gui_used)
+    {
+		// Now process the sub event of draw called draw gui 
+		// It is for drawing GUI elements without view scaling and transformation
+		D3DVIEWPORT9 pViewport = { 0, 0, (DWORD)window_get_region_width_scaled(), (DWORD)window_get_region_height_scaled(), 0, 1.0f };
 		d3ddev->SetViewport(&pViewport);
 		
 		D3DXMATRIX matTrans, matScale;
@@ -387,26 +398,15 @@ void screen_redraw()
 							1.0f);    // the far view-plane
 		d3ddev->SetTransform(D3DTS_PROJECTION, &matProjection);    // set the projection transform
 
-        // Apply and clear stored depth changes.
-        for (map<int,pair<double,double> >::iterator it = id_to_currentnextdepth.begin(); it != id_to_currentnextdepth.end(); it++)
-        {
-            enigma::object_graphics* inst_depth = (enigma::object_graphics*)enigma::fetch_instance_by_id((*it).first);
-            if (inst_depth != NULL) {
-                drawing_depths[(*it).second.first].draw_events->unlink(inst_depth->depth.myiter);
-                inst_iter* mynewiter = drawing_depths[(*it).second.second].draw_events->add_inst(inst_depth->depth.myiter->inst);
-                if (instance_event_iterator == inst_depth->depth.myiter) {
-                    instance_event_iterator = inst_depth->depth.myiter->prev;
-                }
-                inst_depth->depth.myiter = mynewiter;
-            }
-        }
-        id_to_currentnextdepth.clear();
+		//dsprite->SetWorldViewRH(NULL, &matWorld);
 
+		// Clear the depth buffer if hidden surface removal is on at the beginning of the draw step.
+        if (enigma::d3dMode)
+			d3ddev->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
+			
         bool stop_loop = false;
-
         for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
         {
-
             enigma::inst_iter* push_it = enigma::instance_event_iterator;
             //loop instances
             for (enigma::instance_event_iterator = dit->second.draw_events->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next) {
@@ -419,6 +419,7 @@ void screen_redraw()
             enigma::instance_event_iterator = push_it;
             if (stop_loop) break;
         }
+	}
 	
 	dsprite->End();
     d3ddev->EndScene();    // ends the 3D scene
@@ -461,14 +462,16 @@ void screen_init()
 							1.0f);    // the far view-plane
 		d3ddev->SetTransform(D3DTS_PROJECTION, &matProjection);    // set the projection transform
 				
-        //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        //glDisable(GL_DEPTH_TEST);
+		d3ddev->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
+		d3ddev->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
+				
+		d3ddev->SetRenderState(D3DRS_ZENABLE, FALSE);
+		d3ddev->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
         //glEnable(GL_BLEND);
-        //glEnable(GL_ALPHA_TEST);
         //glEnable(GL_TEXTURE_2D);
         //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		//d3ddev->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-  		//d3ddev->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+		d3ddev->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+		d3ddev->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
         //glAlphaFunc(GL_ALWAYS,0);
         //glColor4f(0,0,0,1);
     }
@@ -508,11 +511,11 @@ void screen_init()
 				d3ddev->SetTransform(D3DTS_PROJECTION, &matProjection);    // set the projection transform
 				  
 				d3ddev->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
-				  
-                //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-                //glDisable(GL_DEPTH_TEST);
+				d3ddev->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
+				
+				d3ddev->SetRenderState(D3DRS_ZENABLE, FALSE);
+				d3ddev->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
                 //glEnable(GL_BLEND);
-                //glEnable(GL_ALPHA_TEST);
                 //glEnable(GL_TEXTURE_2D);
                 //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 				d3ddev->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);

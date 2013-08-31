@@ -21,17 +21,8 @@
 
 namespace enigma_user {
 
-enum {
-  vbo_static,
-  vbo_dynamic,
-  vbo_stream
-};
-
-  unsigned int d3d_model_create(int vbot = vbo_static);
+  unsigned d3d_model_create();
   void d3d_model_destroy(int id);
-  void d3d_model_copy(int id, const unsigned int source);
-  unsigned int d3d_model_duplicate(const unsigned int source);
-  void d3d_model_merge(int id, const unsigned int source);
   bool d3d_model_exists(int id);
   void d3d_model_clear(int id);
   void d3d_model_save(int id, std::string fname);
@@ -43,7 +34,6 @@ enum {
   void d3d_model_primitive_begin(int id, int kind);
   void d3d_model_primitive_end(int id);
   void d3d_model_vertex(int id, gs_scalar x, gs_scalar y, gs_scalar z);
-  void d3d_model_index(int id, unsigned in);
   void d3d_model_vertex_color(int id, gs_scalar x, gs_scalar y, gs_scalar z, int col, double alpha);
   void d3d_model_vertex_texture(int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar tx, gs_scalar ty);
   void d3d_model_vertex_texture_color(int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar tx, gs_scalar ty, int col, double alpha);

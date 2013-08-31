@@ -114,10 +114,10 @@ void draw_globalVBO()
         glEnableClientState(GL_TEXTURE_COORD_ARRAY);
         glEnableClientState(GL_COLOR_ARRAY);
 
-        glBindBuffer(GL_ARRAY_BUFFER, globalVBO);
+        glBindBufferARB(GL_ARRAY_BUFFER, globalVBO);
 
-        if (globalVBO_verCount>globalVBO_maxBSize) glBufferData(GL_ARRAY_BUFFER, globalVBO_datCount * sizeof(gs_scalar), &globalVBO_data[0], GL_DYNAMIC_DRAW), globalVBO_maxBSize = globalVBO_verCount;
-        else glBufferSubData(GL_ARRAY_BUFFER, 0, globalVBO_datCount * sizeof(gs_scalar), &globalVBO_data[0]);
+        if (globalVBO_verCount>globalVBO_maxBSize) glBufferDataARB(GL_ARRAY_BUFFER, globalVBO_datCount * sizeof(gs_scalar), &globalVBO_data[0], GL_DYNAMIC_DRAW), globalVBO_maxBSize = globalVBO_verCount;
+        else glBufferSubDataARB(GL_ARRAY_BUFFER, 0, globalVBO_datCount * sizeof(gs_scalar), &globalVBO_data[0]);
         glVertexPointer( 2, GL_FLOAT, sizeof(gs_scalar) * 8, NULL );
         glTexCoordPointer( 2, GL_FLOAT, sizeof(gs_scalar) * 8, (void*)(sizeof(gs_scalar) * 2) );
         glColorPointer( 4, GL_FLOAT, sizeof(gs_scalar) * 8, (void*)(sizeof(gs_scalar) * 4) );
@@ -136,7 +136,7 @@ void draw_globalVBO()
         glDisableClientState( GL_TEXTURE_COORD_ARRAY );
         glDisableClientState( GL_VERTEX_ARRAY );
 		
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindBufferARB(GL_ARRAY_BUFFER, 0);
 
         globalVBO_datCount = globalVBO_verCount = globalVBO_indCount = 0;
     }
@@ -426,7 +426,7 @@ void screen_redraw()
 
 void screen_init()
 {
-    glGenBuffers(1, &globalVBO);
+    glGenBuffersARB(1, &globalVBO);
     texture_reset();
     if (!view_enabled)
     {

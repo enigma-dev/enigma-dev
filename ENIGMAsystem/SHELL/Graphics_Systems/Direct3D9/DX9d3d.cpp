@@ -19,7 +19,7 @@
 #include "Direct3D9Headers.h"
 #include "Graphics_Systems/General/GStextures.h"
 #include "DX9binding.h"
-#include "DX9model.h"
+#include "../General/GSmodel.h"
 #include "DX9shapes.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
@@ -28,36 +28,44 @@
 #define __GETG(x) ((x & 0x00FF00)>>8)/255.0
 #define __GETB(x) ((x & 0xFF0000)>>16)/255.0
 
-bool d3dMode = false;
-bool d3dHidden = false;
-bool d3dZWriteEnable = true;
+namespace enigma {
+  bool d3dMode = false;
+  bool d3dHidden = false;
+  bool d3dZWriteEnable = true;
+}
 
 namespace enigma_user
 {
 
 void d3d_start()
 {
+	enigma::d3dMode = true;
 	d3ddev->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+	d3d_set_hidden(false);
 }
 
 void d3d_end()
 {
-
+	enigma::d3dMode = false;
+	d3d_set_hidden(false);
 }
 
 bool d3d_get_mode()
 {
-    return d3dMode;
+    return enigma::d3dMode;
 }
 
 void d3d_set_hidden(bool enable)
 {
-    d3dHidden = enable;
+	d3d_set_zwriteenable(enable);
+	d3ddev->SetRenderState(D3DRS_ZENABLE, enable);
+    enigma::d3dHidden = enable;
 }   // TODO: Write function
 
 void d3d_set_zwriteenable(bool enable)
 {
-	d3ddev->SetRenderState(D3DRS_ZENABLE, enable);    // enable/disable the z-buffer
+	enigma::d3dZWriteEnable = enable;
+	d3ddev->SetRenderState(D3DRS_ZWRITEENABLE, enable);    // enable/disable the z-buffer
 }
 
 void d3d_set_lighting(bool enable)
@@ -316,12 +324,14 @@ void d3d_draw_torus(gs_scalar x1, gs_scalar y1, gs_scalar z1, int texId, gs_scal
 }
 
 D3DXMATRIX matWorld; 
-#define DEGTORAD(degree) ((D3DX_PI / 180.0f) * (degree)) // converts from degrees to radians
+D3DXMATRIX matNull;
 
 // ***** TRANSFORMATIONS BEGIN *****
 void d3d_transform_set_identity()
 {
+	matWorld = matNull;
 	D3DXMatrixIdentity( &matWorld );
+	d3ddev->SetTransform(D3DTS_WORLD, &matWorld);
 }
 
 void d3d_transform_add_translation(gs_scalar xt, gs_scalar yt, gs_scalar zt)
@@ -358,7 +368,7 @@ void d3d_transform_add_rotation_x(double angle)
 	D3DXMATRIX matRot;
 
 	// build a matrix to rotate the model 3.14 radians
-	D3DXMatrixRotationX(&matRot, DEGTORAD(-angle));
+	D3DXMatrixRotationX(&matRot, D3DXToRadian(-angle));
 	
 	matWorld *= matRot;
 
@@ -368,10 +378,11 @@ void d3d_transform_add_rotation_x(double angle)
 
 void d3d_transform_add_rotation_y(double angle)
 {
+//D3DXMatrixIdentity( &matWorld );
 	D3DXMATRIX matRot;
 	
 	// build a matrix to rotate the model 3.14 radians
-	D3DXMatrixRotationY(&matRot, DEGTORAD(-angle));
+	D3DXMatrixRotationY(&matRot, D3DXToRadian(-angle));
 	
 	matWorld *= matRot;
 
@@ -384,7 +395,7 @@ void d3d_transform_add_rotation_z(double angle)
 	D3DXMATRIX matRot;
 	
 	// build a matrix to rotate the model 3.14 radians
-	D3DXMatrixRotationZ(&matRot, DEGTORAD(-angle));
+	D3DXMatrixRotationZ(&matRot, D3DXToRadian(-angle));
 	
 	matWorld *= matRot;
 
@@ -397,7 +408,7 @@ void d3d_transform_add_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, doub
 	D3DXMATRIX matRot;
 	
 	// build a matrix to rotate the model 3.14 radians
-	angle = DEGTORAD(-angle);
+	angle = D3DXToRadian(-angle);
 	D3DXMatrixRotationYawPitchRoll(&matRot, y * angle, x * angle, z * angle);
 	
 	matWorld *= matRot;
@@ -408,71 +419,61 @@ void d3d_transform_add_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, doub
 
 void d3d_transform_set_translation(gs_scalar xt, gs_scalar yt, gs_scalar zt)
 {
-	D3DXMATRIX matTrans;
-	
 	// build a matrix to move the model 12 units along the x-axis and 4 units along the y-axis
 	// store it to matTranslate
-	D3DXMatrixTranslation(&matTrans, xt, yt, zt);
+	D3DXMatrixTranslation(&matWorld, xt, yt, zt);
 
 	// tell Direct3D about our matrix
-	d3ddev->SetTransform(D3DTS_WORLD, &matTrans);
+	d3ddev->SetTransform(D3DTS_WORLD, &matWorld);
 }
 
 void d3d_transform_set_scaling(gs_scalar xs, gs_scalar ys, gs_scalar zs)
 {
-	D3DXMATRIX matScale;
-	
 	// build a matrix to double the size of the model
 	// store it to matScale
-	D3DXMatrixScaling(&matScale, xs, ys, zs);
+	D3DXMatrixScaling(&matWorld, xs, ys, zs);
 
 	// tell Direct3D about our matrix
-	d3ddev->SetTransform(D3DTS_WORLD, &matScale);
+	d3ddev->SetTransform(D3DTS_WORLD, &matWorld);
 }
 
 void d3d_transform_set_rotation_x(double angle)
 {
-	D3DXMATRIX matRot;
-	
 	// build a matrix to rotate the model 3.14 radians
-	D3DXMatrixRotationX(&matRot, DEGTORAD(-angle));
+	D3DXMatrixRotationX(&matWorld, D3DXToRadian(-angle));
 	
 	// tell Direct3D about our matrix
-	d3ddev->SetTransform(D3DTS_WORLD, &matRot);
+	d3ddev->SetTransform(D3DTS_WORLD, &matWorld);
 }
 
 void d3d_transform_set_rotation_y(double angle)
 {
-	D3DXMATRIX matRot;
-	
 	// build a matrix to rotate the model 3.14 radians
-	D3DXMatrixRotationY(&matRot, DEGTORAD(-angle));
+	D3DXMatrixRotationY(&matWorld, D3DXToRadian(-angle));
 		
 	// tell Direct3D about our matrix
-	d3ddev->SetTransform(D3DTS_WORLD, &matRot);
+	d3ddev->SetTransform(D3DTS_WORLD, &matWorld);
 }
 
 void d3d_transform_set_rotation_z(double angle)
 {
-	D3DXMATRIX matRot;
-	
+
+	D3DXMatrixIdentity( &matWorld );
 	// build a matrix to rotate the model 3.14 radians
-	D3DXMatrixRotationZ(&matRot, DEGTORAD(-angle));
+	D3DXMatrixRotationZ(&matWorld, D3DXToRadian(-angle));
 		
 	// tell Direct3D about our matrix
-	d3ddev->SetTransform(D3DTS_WORLD, &matRot);
+	d3ddev->SetTransform(D3DTS_WORLD, &matWorld);
 }
 
 void d3d_transform_set_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, double angle)
 {
-	D3DXMATRIX matRot;
-	
 	// build a matrix to rotate the model 3.14 radians
-	angle = DEGTORAD(-angle);
-	D3DXMatrixRotationYawPitchRoll(&matRot, y * angle, x * angle, z * angle);
+	angle = D3DXToRadian(-angle);
+	D3DXMatrixRotationYawPitchRoll(&matWorld, y * angle, x * angle, z * angle);
 		
 	// tell Direct3D about our matrix
-	d3ddev->SetTransform(D3DTS_WORLD, &matRot);
+	d3ddev->SetTransform(D3DTS_WORLD, &matWorld);
 }
 
 }

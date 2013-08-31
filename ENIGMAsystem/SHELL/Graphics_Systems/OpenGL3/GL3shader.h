@@ -69,6 +69,7 @@ void glsl_uniformui(int location, unsigned v0, unsigned v1, unsigned v2, unsigne
 #define shader_set            glsl_program_set
 #define shader_reset          glsl_program_reset
 #define shader_get_uniform    glsl_get_uniform_location
+#define shader_get_sampler_index glsl_get_uniform_location
 #define shader_set_uniform_f  glsl_uniformf
 #define shader_set_uniform_i  glsl_uniformi
 

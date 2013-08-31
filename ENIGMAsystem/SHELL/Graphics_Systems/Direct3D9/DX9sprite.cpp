@@ -65,6 +65,10 @@ using std::string;
 #include "Bridges/General/DX9Device.h"
 #include "DX9TextureStruct.h"
 
+namespace enigma {
+  D3DCOLOR get_currentcolor();
+}
+
 namespace enigma_user
 {
 
@@ -79,7 +83,7 @@ void draw_sprite(int spr,int subimg, gs_scalar x, gs_scalar y)
 
 	D3DXVECTOR3 offset(spr2d->xoffset, spr2d->yoffset, 0);
 	D3DXVECTOR3 pos(x, y, 0);
-	dsprite->Draw(GmTextures[spr2d->texturearray[usi]]->gTexture, NULL, &offset, &pos, 0xFFFFFFFF);
+	dsprite->Draw(GmTextures[spr2d->texturearray[usi]]->gTexture, NULL, &offset, &pos, enigma::get_currentcolor());
 }
 
 void draw_sprite_stretched(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height)
@@ -108,7 +112,7 @@ void draw_sprite_stretched(int spr, int subimg, gs_scalar x, gs_scalar y, gs_sca
 	// Screen position of the sprite
 	D3DXVECTOR3 offset = D3DXVECTOR3(spr2d->xoffset, spr2d->yoffset, 0);
 
-	dsprite->Draw(GmTextures[spr2d->texturearray[usi]]->gTexture, NULL, &offset, NULL, 0xFFFFFFFF);
+	dsprite->Draw(GmTextures[spr2d->texturearray[usi]]->gTexture, NULL, &offset, NULL, enigma::get_currentcolor());
 
 	D3DXMatrixTransformation2D(&mat,NULL,0.0,0,NULL,0,0);
 	dsprite->SetTransform(&mat);
@@ -122,7 +126,7 @@ void draw_sprite_part(int spr, int subimg, gs_scalar left, gs_scalar top, gs_sca
 	D3DXVECTOR3 pos(x, y, 0);
 	tagRECT rect;
 	rect.left = left; rect.top = top; rect.right = left + width; rect.bottom = top + height;
-	dsprite->Draw(GmTextures[spr2d->texturearray[usi]]->gTexture, &rect, 0, &pos, 0xFFFFFFFF);
+	dsprite->Draw(GmTextures[spr2d->texturearray[usi]]->gTexture, &rect, 0, &pos, enigma::get_currentcolor());
 }
 
 void draw_sprite_part_offset(int spr, int subimg, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y)
@@ -134,7 +138,7 @@ void draw_sprite_part_offset(int spr, int subimg, gs_scalar left, gs_scalar top,
 	D3DXVECTOR3 pos(x, y, 0);
 	tagRECT rect;
 	rect.left = left; rect.top = top; rect.right = left + width; rect.bottom = top + height;
-	dsprite->Draw(GmTextures[spr2d->texturearray[usi]]->gTexture, &rect, &offset, &pos, 0xFFFFFFFF);
+	dsprite->Draw(GmTextures[spr2d->texturearray[usi]]->gTexture, &rect, &offset, &pos, enigma::get_currentcolor());
 }
 
 void draw_sprite_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int color, gs_scalar alpha)
@@ -270,7 +274,7 @@ void draw_sprite_tiled(int spr, int subimg, gs_scalar x, gs_scalar y)
         {
 			D3DXVECTOR3 offset(spr2d->xoffset, spr2d->yoffset, 0);
 			D3DXVECTOR3 pos(xvert1, yvert1, 0);
-			dsprite->Draw(GmTextures[spr2d->texturearray[usi]]->gTexture, NULL, &offset, &pos, 0xFFFFFFFF);
+			dsprite->Draw(GmTextures[spr2d->texturearray[usi]]->gTexture, NULL, &offset, &pos, enigma::get_currentcolor());
 			
             yvert1 = yvert2;
             yvert2 += spr2d->height;
