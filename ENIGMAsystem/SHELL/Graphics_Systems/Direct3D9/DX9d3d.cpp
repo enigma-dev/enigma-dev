@@ -19,7 +19,7 @@
 #include "Direct3D9Headers.h"
 #include "Graphics_Systems/General/GStextures.h"
 #include "DX9binding.h"
-#include "DX9model.h"
+#include "../General/GSmodel.h"
 #include "DX9shapes.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"

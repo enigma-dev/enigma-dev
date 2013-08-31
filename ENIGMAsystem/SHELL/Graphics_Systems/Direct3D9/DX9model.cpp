@@ -20,7 +20,7 @@
 #include "DX9shapes.h"
 #include "../General/GSprimitives.h"
 #include "../General/GStextures.h"
-#include "DX9model.h"
+#include "../General/GSmodel.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
 #include <math.h>
@@ -49,12 +49,6 @@ namespace enigma {
   extern unsigned char currentcolor[4];
 }
 
-struct LVertex
-{
-    FLOAT    x, y, z;
-    FLOAT    nx, ny, nz;
-};
-
 /* Mesh clearing has a memory leak */
 class Mesh
 {
@@ -74,18 +68,15 @@ class Mesh
   bool useTextures; // If texture coordinates have been added
   bool useNormals; // If normals have been added
   
-  unsigned pointCount; // The number of vertices in the point buffer
-  unsigned triangleCount; // The number of vertices in the triangle buffer
-  unsigned triangleVertCount;
-  unsigned lineCount; // The number of vertices in the line buffer
-  unsigned lineVertCount;
-  
-  int vshader;
-  int pshader;
+  unsigned pointCount; // The number of indices in the point buffer
+  unsigned triangleCount; // The number of indices in the triangle buffer
+  unsigned triangleVertCount; // The number of vertices in the triangle buffer
+  unsigned lineCount; // The number of indices in the line buffer
+  unsigned lineVertCount; //The number of vertices in the line buffer
   
   LPDIRECT3DVERTEXBUFFER9 vertexbuffer;    // Interleaved vertex buffer object TRIANGLES|LINES|POINTS with triangles first since they are most likely to be used
   LPDIRECT3DINDEXBUFFER9 indexbuffer;    // Interleaved index buffer object TRIANGLES|LINES|POINTS with triangles first since they are most likely to be used
-  IDirect3DVertexDeclaration9* vertex_declaration;
+  IDirect3DVertexDeclaration9* vertex_declaration; // Pointer to our custom vertex declaration which we will use later for something actually flexible where FVF is not
   
   bool vbogenerated; // Whether or not the buffer objects have been generated
   bool vbobuffered; // Whether or not the buffer objects have been buffered
@@ -135,6 +126,7 @@ class Mesh
   {
     ClearData();
 	
+	// Release the buffers and make sure we don't leave hanging pointers.
 	vertexbuffer->Release();
 	vertexbuffer = NULL;
 	indexbuffer->Release();
@@ -176,7 +168,7 @@ class Mesh
 	useTextures = true;
   }
 
-  // NOTE: The vertex format for this class should be written so that color is an integer and not float.
+  // NOTE: The vertex format for this class should be written so that color is a single DWORD and not four floats.
   void AddColor(int col, double alpha)
   {               
 	vertices.push_back((float)__GETR(col)/256); vertices.push_back((float)__GETG(col)/256); vertices.push_back((float)__GETB(col)/256); vertices.push_back(alpha);

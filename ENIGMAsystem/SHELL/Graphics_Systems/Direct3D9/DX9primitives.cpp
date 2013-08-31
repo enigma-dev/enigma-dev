@@ -18,7 +18,7 @@
 #include "Direct3D9Headers.h"
 #include "../General/GSprimitives.h"
 #include "../General/GStextures.h"
-#include "DX9model.h"
+#include "../General/GSmodel.h"
 #include "DX9binding.h"
 
 #include <string>

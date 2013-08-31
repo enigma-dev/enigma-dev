@@ -67,9 +67,9 @@ class Mesh
   bool useTextures; // If texture coordinates have been added
   bool useNormals; // If normals have been added
   
-  unsigned pointCount; // The number of vertices in the point buffer
-  unsigned triangleCount; // The number of vertices in the triangle buffer
-  unsigned lineCount; // The number of vertices in the line buffer
+  unsigned pointCount; // The number of vertices in the point container but after batching it becomes the number of indices
+  unsigned triangleCount; // The number of vertices in the triangle container but after batching it becomes the number of indices
+  unsigned lineCount; // The number of vertices in the line container but after batching it becomes the number of indices
   
   Mesh()
   {
@@ -134,7 +134,7 @@ class Mesh
 	useTextures = true;
   }
 
-  // NOTE: The vertex format for this class should be written so that color is an integer and not float.
+  // NOTE: The vertex format for this class should really only be handling 4 integers not 4 floats.
   void AddColor(int col, double alpha)
   {
     vertices.push_back(__GETR(col)); vertices.push_back(__GETG(col)); vertices.push_back(__GETB(col)); vertices.push_back(alpha);
