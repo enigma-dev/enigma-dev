@@ -395,14 +395,13 @@ class Mesh
 	if (useTextures) stride += 2;
     if (useColors) stride += 4;
 	
-	#define OFFSET( P )  ( ( VOID* ) ( sizeof( gs_scalar ) * ( P         ) ) )
+	//dsprite->Flush();
+	//dsprite->End();
 	
 	d3ddev->SetVertexDeclaration(vertex_declaration);
 	// select the vertex buffer to display
 	d3ddev->SetStreamSource(0, vertexbuffer, 0, stride * sizeof(gs_scalar));
 	d3ddev->SetIndices(indexbuffer);
-	
-	#define OFFSETE( P )  ( ( const GLvoid * ) ( sizeof( unsigned ) * ( P         ) ) )
 	
 	// Draw the batched triangle list
 	if (triangleCount > 0) { 
@@ -412,20 +411,17 @@ class Mesh
 	
 	// Draw the batched line list
 	if (lineCount > 0) {
-		//glDrawElements(GL_LINES, lineCount, GL_UNSIGNED_INT, OFFSETE(triangleCount));
-			
-		d3ddev->DrawIndexedPrimitive(D3DPT_LINELIST, 0, 0, 
-			lineVertCount, 0, lineCount / 2);
+		d3ddev->DrawIndexedPrimitive(D3DPT_LINELIST, triangleVertCount, 0, 
+			lineVertCount, triangleCount, lineCount / 2);
 	}
 	
 	// Draw the batched point list
 	if (pointCount > 0) {
-		//glDrawElements(GL_POINTS, pointCount, GL_UNSIGNED_INT, OFFSETE(lineCount + triangleCount));
-			
-		d3ddev->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, 0, 0, 
-			pointCount, 0, pointCount);
+		d3ddev->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, triangleVertCount + lineVertCount, 0, 
+			pointCount, triangleCount + lineCount, pointCount);
 	}
-	
+
+	//dsprite->Begin(D3DXSPRITE_ALPHABLEND | D3DXSPRITE_DO_NOT_ADDREF_TEXTURE);
   }
 };
 

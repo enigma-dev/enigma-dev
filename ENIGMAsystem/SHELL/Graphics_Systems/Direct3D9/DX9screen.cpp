@@ -101,7 +101,7 @@ namespace enigma_user
 void screen_redraw()
 {
     d3ddev->BeginScene();    // begins the 3D scene
-	dsprite->Begin(D3DXSPRITE_ALPHABLEND);
+	//dsprite->Begin(D3DXSPRITE_ALPHABLEND);
 	if (!view_enabled)
     {
 		D3DVIEWPORT9 pViewport = { 0, 0, (DWORD)window_get_region_width_scaled(), (DWORD)window_get_region_height_scaled(), 0, 1.0f };
@@ -421,7 +421,7 @@ void screen_redraw()
         }
 	}
 	
-	dsprite->End();
+	//dsprite->End();
     d3ddev->EndScene();    // ends the 3D scene
 		
 	screen_refresh();
