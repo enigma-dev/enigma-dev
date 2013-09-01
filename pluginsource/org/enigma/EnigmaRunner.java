@@ -131,7 +131,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		{
 		addResourceHook();
 		populateMenu();
-		populateTree();
+		//populateTree();
 		LGM.addReloadListener(this);
 		SubframeInformer.addSubframeListener(this);
 		applyBackground("org/enigma/enigma.png"); //$NON-NLS-1$

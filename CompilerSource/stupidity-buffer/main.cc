@@ -396,7 +396,7 @@ int main(int argc, char *argv[])
     sa.bInheritHandle = TRUE;
 
   HANDLE h = CreateFile("output_log.txt",
-    FILE_APPEND_DATA,
+    FILE_WRITE_DATA,
     FILE_SHARE_WRITE | FILE_SHARE_READ,
     &sa,
     OPEN_ALWAYS,
