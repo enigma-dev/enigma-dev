@@ -507,6 +507,11 @@ public class EFileReader
 		{
 		gf.format = EFileWriter.FLAVOR_EGM;
 		readNodeChildren(f,gf,root,null,new String());
+
+		if (!f.isDirectory("Shaders")) {
+			ResNode node = new ResNode("Shaders", (byte)1, Shader.class, null);
+			root.insert(node, 5);
+		}
 		while (!postpone.isEmpty())
 			postpone.remove().invoke();
 		}
