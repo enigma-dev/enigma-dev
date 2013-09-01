@@ -153,15 +153,6 @@ namespace jdi {
       virtual void toSVG(int x, int y, SVGrenderInfo* svg); ///< Renders this node and its children as an SVG.
       AST_Node_delete(AST_Node* param, bool array);
     };
-	struct AST_Node_TempInstByKey: AST_Node_Unary {
-      bool array; ///< True if we are delete[] rather than regular delete.
-      
-      virtual string toString() const; ///< Renders this node and its children as a string, recursively.
-      virtual value eval() const; ///< Behaves funny for sizeof; coerces instead, then takes size of result type.
-      virtual full_type coerce() const; ///< Behaves funny for sizeof; returns unsigned long every time.
-      virtual void toSVG(int x, int y, SVGrenderInfo* svg); ///< Renders this node and its children as an SVG.
-      AST_Node_TempInstByKey(AST_Node* param, bool array);
-    };
     /// Child of AST_Node_Unary specifically for sizeof
     struct AST_Node_Cast: AST_Node_Unary {
       full_type cast_type; ///< The type this cast represents.
