@@ -29,6 +29,7 @@ import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -131,7 +132,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		{
 		addResourceHook();
 		populateMenu();
-		//populateTree();
+		populateTree();
 		LGM.addReloadListener(this);
 		SubframeInformer.addSubframeListener(this);
 		applyBackground("org/enigma/enigma.png"); //$NON-NLS-1$
@@ -147,11 +148,8 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		setMenuEnabled(false);
 		stop.setVisible(false);
 		stopb.setVisible(false);
-		// this cannot be added to the thread because of passing the gmk, gmx, or egm path
-		// on the command line, otherwise this thread tries to access it before the lgm
-		// main thread has actually loaded it
-		final EnigmaSettings es = LGM.currentFile.resMap.get(EnigmaSettings.class).getResource();
-		new Thread()
+		
+		final Thread initthread = new Thread()
 			{
 				public void run()
 					{
@@ -179,16 +177,13 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 						ENIGMA_FAIL = true;
 						return;
 						}
-
-					ENIGMA_READY = true;
-					esf = new EnigmaSettingsFrame(es);
-					LGM.mdi.add(esf);
-					es.commitToDriver(DRIVER);
+					ENIGMA_READY = true;	
 					setupBaseKeywords();
 					populateKeywords();
 					setMenuEnabled(true);
 					}
-			}.start();
+			};
+			initthread.start();
 		}
 
 	private static UnsatisfiedLinkError attemptLib()
@@ -948,17 +943,32 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 	public void reloadPerformed(boolean newRoot)
 		{
 		if (newRoot) populateTree();
-		if (ENIGMA_READY)
-			{
+		new Thread() {
+		public void run() {
+				
+			// Delay reload performed until the compiler is ready
+			while (!ENIGMA_READY) {
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+		
 			ResourceHolder<EnigmaSettings> rh = LGM.currentFile.resMap.get(EnigmaSettings.class);
 			if (rh == null)
 				LGM.currentFile.resMap.put(EnigmaSettings.class,
 						rh = new SingletonResourceHolder<EnigmaSettings>(new EnigmaSettings()));
 			esf.resOriginal = rh.getResource();
 			esf.revertResource(); //updates local res copy as well
-			}
+			
+			esf = new EnigmaSettingsFrame(rh.getResource());
+			LGM.mdi.add(esf);
+			rh.getResource().commitToDriver(DRIVER);
 		}
+		}.start();
 
+		}
 	public static ImageIcon findIcon(String loc)
 		{
 		ImageIcon ico = new ImageIcon(loc);
