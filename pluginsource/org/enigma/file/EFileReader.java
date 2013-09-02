@@ -507,7 +507,6 @@ public class EFileReader
 		{
 		gf.format = EFileWriter.FLAVOR_EGM;
 		readNodeChildren(f,gf,root,null,new String());
-
 		while (!postpone.isEmpty())
 			postpone.remove().invoke();
 		}
