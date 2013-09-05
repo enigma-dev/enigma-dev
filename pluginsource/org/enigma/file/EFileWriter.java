@@ -54,7 +54,9 @@ import org.lateralgm.resources.ResourceReference;
 import org.lateralgm.resources.Room;
 import org.lateralgm.resources.Room.PRoom;
 import org.lateralgm.resources.Script;
+import org.lateralgm.resources.Shader;
 import org.lateralgm.resources.Sound;
+import org.lateralgm.resources.Shader.PShader;
 import org.lateralgm.resources.Sound.PSound;
 import org.lateralgm.resources.Sprite;
 import org.lateralgm.resources.library.LibAction;
@@ -90,6 +92,7 @@ public class EFileWriter
 		writers.put(Background.class,new BackgroundWriter());
 		writers.put(Path.class,new PathTextWriter());
 		writers.put(Script.class,new ScriptWriter());
+		writers.put(Shader.class,new ShaderEefWriter());
 		writers.put(Font.class,new FontRawWriter());
 		// writers.put(Timeline.class,new TimelineIO());
 		writers.put(GmObject.class,new ObjectEefWriter());
@@ -476,6 +479,35 @@ public class EFileWriter
 			return false;
 			}
 		}
+	
+	static class ShaderEefWriter implements ResourceWriter
+	{
+		
+		public String getExt(Resource<?,?> r)
+		{
+		return EY; //$NON-NLS-1$
+		}
+
+	@Override
+	public void write(EGMOutputStream os, ProjectFile gf, ResNode child, List<String> dir) throws IOException
+		{
+		Resource<?,?> r = (Resource<?,?>) Util.deRef((ResourceReference<?>) child.getRes());
+		String name = (String) child.getUserObject();
+		PrintStream ps = new PrintStream(os.next(dir,name + EY));
+
+		ps.println("VERTEX: " + name + ".vertex");
+		ps.println("FRAGMENT: " + name + ".fragment");
+		ps.println("TYPE: " + r.properties.get(PShader.TYPE));
+		ps.println("PRECOMPILE: " + r.properties.get(PShader.PRECOMPILE));
+		
+		PrintStream vps = new PrintStream(os.next(dir,name + ".vertex"));
+		vps.print(r.properties.get(PShader.VERTEX));
+		
+		PrintStream fps = new PrintStream(os.next(dir,name + ".fragment"));
+		fps.print(r.properties.get(PShader.FRAGMENT));
+		}
+	
+	}
 
 	static class FontRawWriter implements ResourceWriter
 		{

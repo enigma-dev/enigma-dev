@@ -1,4 +1,4 @@
-/** Copyright (C) 2011-2012 Josh Ventura
+/** Copyright (C) 2013 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -76,8 +76,9 @@ double joystick_axis(int id, int axisnum) {
 
 bool joystick_button(int id, int buttonnum) {
 	JOYINFOEX joyinfo; 
+	joyinfo.dwFlags = JOY_RETURNBUTTONS;
     joyGetPosEx(JOYSTICKID1 + id, &joyinfo); 
-	return (joyinfo.dwButtons & (JOY_BUTTON1 + buttonnum));
+	return (joyinfo.dwButtons & (JOY_BUTTON1 << buttonnum));
 }
 
 bool joystick_exists(int id) {
@@ -87,7 +88,7 @@ bool joystick_exists(int id) {
  
     if((wNumDevs = joyGetNumDevs()) == 0) 
         return false; 
-    bDevAttached = joyGetPos(JOYSTICKID1 + id, &joyinfo) != JOYERR_UNPLUGGED; 
+    bDevAttached = joyGetPos(JOYSTICKID1 + id, &joyinfo) == JOYERR_NOERROR; 
 	return bDevAttached;
 }
 

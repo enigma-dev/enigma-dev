@@ -154,9 +154,10 @@ void screen_redraw()
         for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
         {
             if (dit->second.tiles.size())
+            {
                 glCallList(drawing_depths[dit->second.tiles[0].depth].tilelist);
-
-            texture_reset();
+                texture_reset();
+            }
             enigma::inst_iter* push_it = enigma::instance_event_iterator;
             //loop instances
             for (enigma::instance_event_iterator = dit->second.draw_events->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next) {
@@ -318,9 +319,10 @@ void screen_redraw()
                 for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
                 {
                     if (dit->second.tiles.size())
+                    {
                         glCallList(drawing_depths[dit->second.tiles[0].depth].tilelist);
-
-                    texture_reset();
+                        texture_reset();
+                    }
                     enigma::inst_iter* push_it = enigma::instance_event_iterator;
                     //loop instances
                     for (enigma::instance_event_iterator = dit->second.draw_events->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next) {
@@ -346,6 +348,47 @@ void screen_redraw()
         }
         view_current = 0;
     }
+
+	// Now process the sub event of draw called draw gui
+	// It is for drawing GUI elements without view scaling and transformation
+    if (enigma::gui_used)
+    {
+        glViewport(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled());
+        glLoadIdentity();
+        if (GLEW_EXT_framebuffer_object)
+        {
+            glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &FBO);
+            glScalef(1, (FBO==0?-1:1), 1);
+        }
+        else
+        {
+            glScalef(1, -1, 1);
+        }
+        glOrtho(0, room_width, 0, room_height, 0, 1);
+        glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
+        glMultMatrixd(transformation_matrix);
+		
+		// Clear the depth buffer if hidden surface removal is on at the beginning of the draw step.
+        if (enigma::d3dMode)
+			glClear(GL_DEPTH_BUFFER_BIT);
+
+        bool stop_loop = false;
+        for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
+        {
+            enigma::inst_iter* push_it = enigma::instance_event_iterator;
+            //loop instances
+            for (enigma::instance_event_iterator = dit->second.draw_events->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next) {
+				enigma::instance_event_iterator->inst->myevent_drawgui();
+                if (enigma::room_switching_id != -1) {
+                    stop_loop = true;
+                    break;
+                }
+            }
+            enigma::instance_event_iterator = push_it;
+            if (stop_loop) break;
+        }
+    }
+
     screen_refresh();
 }
 

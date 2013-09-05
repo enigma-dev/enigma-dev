@@ -22,14 +22,23 @@ using std::vector;
 
 //GL3 uses VBO's, so when the texture is switched it not only binds it, but also renders the batched VBO
   namespace enigma {
-   extern unsigned bound_texture;
    extern vector<float> globalVBO_data;
+   extern unsigned bound_texture;
   }
   void draw_globalVBO();
-  #define texture_reset() if(enigma::bound_texture) draw_globalVBO(), enigma::bound_texture = 0, glBindTexture(GL_TEXTURE_2D,enigma::bound_texture);
+  
   //The (now removed) enigma::globalVBO_data.size()>enigma::globalVBO_data.max_size()-100 is used to check if we don't fill it over top and segfault
   //This only happens when drawing over 5000000 (5 million) sprites at once. When texture atlas is implemented there is a greater chance of this happening
+
+	
+	#define use_bound_texture_global
+#ifdef use_bound_texture_global
+  #define texture_reset() if(enigma::bound_texture) draw_globalVBO(), glBindTexture(GL_TEXTURE_2D,enigma::bound_texture=0);
   #define texture_use(texid) if (enigma::bound_texture != unsigned(texid)) \
-    draw_globalVBO(), enigma::bound_texture = texid;
+    draw_globalVBO(), glBindTexture(GL_TEXTURE_2D,enigma::bound_texture = texid)
+ #else
+  #define texture_reset() draw_globalVBO(), glBindTexture(GL_TEXTURE_2D, 0)
+  #define texture_use(texid) draw_globalVBO(), glBindTexture(GL_TEXTURE_2D, texid)
+#endif
 
 #endif

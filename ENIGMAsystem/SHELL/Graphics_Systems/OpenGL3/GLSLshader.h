@@ -1,4 +1,4 @@
-/** Copyright (C) 2013 Robert B. Colton
+/** Copyright (C) 2008-2013 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,10 +15,47 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "../General/GSmodel.h"
+#ifndef _GLSLSHADER__H
+#define _GLSLSHADER__H
 
-namespace enigma_user {
-  void d3d_model_open(int id, int offset);
-  void d3d_model_close(int id);
-}
+#include <vector>
+#include <string>
+using std::string;
+using std::vector;
 
+#include "../General/OpenGLHeaders.h"
+
+extern GLenum shadertypes[];
+
+struct Shader{
+  string log;
+  GLuint shader;
+  Shader(int type) 
+  {
+    shader = glCreateShader(shadertypes[type]);
+  }
+ 
+  ~Shader()
+  {
+    glDeleteShader(shader);
+  }
+};
+
+struct ShaderProgram{
+  GLuint shaderprogram;
+
+  ShaderProgram()
+  {
+    shaderprogram = glCreateProgram();
+  }
+
+  ~ShaderProgram()
+  {
+    glDeleteProgram(shaderprogram);
+  }
+};
+
+extern vector<Shader*> shaders;
+extern vector<ShaderProgram*> shaderprograms;
+
+#endif

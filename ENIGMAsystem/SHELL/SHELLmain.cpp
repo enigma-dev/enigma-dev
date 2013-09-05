@@ -101,6 +101,7 @@ using namespace enigma_user;
   #include "Preprocessor_Environment_Editable/IDE_EDIT_objectfunctionality.h"
   #include "Preprocessor_Environment_Editable/IDE_EDIT_roomcreates.h"
   #include "Preprocessor_Environment_Editable/IDE_EDIT_roomarrays.h"
+  #include "Preprocessor_Environment_Editable/IDE_EDIT_shaderarrays.h"
   #include "Preprocessor_Environment_Editable/IDE_EDIT_fontinfo.h"
 
   #if defined(BUILDMODE) && BUILDMODE

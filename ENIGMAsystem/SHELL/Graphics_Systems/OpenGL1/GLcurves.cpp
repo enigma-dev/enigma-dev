@@ -394,7 +394,7 @@ void draw_spline_begin(int mode)
 
 int draw_spline_vertex(gs_scalar x, gs_scalar y)
 {
-    splinePoint point={x,y,enigma::currentcolor[3],enigma::currentcolor[0] + (enigma::currentcolor[1] << 8) + (enigma::currentcolor[2] << 16)};
+    splinePoint point={x,y,float(enigma::currentcolor[3]),float(enigma::currentcolor[0] + (enigma::currentcolor[1] << 8) + (enigma::currentcolor[2] << 16))};
     startedSplines.top()->push_back(point);
     return startedSplines.top()->size()-2;
 }

@@ -60,6 +60,7 @@ void d3d_start()
   enigma::d3dMode = true;
   enigma::d3dHidden = true;
   enigma::d3dZWriteEnable = true;
+  glDepthMask(true);
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_ALPHA_TEST);
   glAlphaFunc(GL_NOTEQUAL, 0);
@@ -82,6 +83,8 @@ void d3d_end()
 {
   enigma::d3dMode = false;
   enigma::d3dHidden = false;
+  enigma::d3dZWriteEnable = false;
+  glDepthMask(false);
   glDisable(GL_DEPTH_TEST);
   glDisable(GL_ALPHA_TEST);
   glDisable(GL_NORMALIZE);
@@ -97,18 +100,21 @@ bool d3d_get_mode()
     return enigma::d3dMode;
 }
 
+// disabling hidden surface removal in means there is no depth buffer
 void d3d_set_hidden(bool enable)
 {
-    if (!enigma::d3dMode) return;
-    (enable?glEnable:glDisable)(GL_DEPTH_TEST);
-    enigma::d3dHidden = enable;
+	(enable?glEnable:glDisable)(GL_DEPTH_TEST);
+	enigma::d3dHidden = enable;
+	d3d_set_zwriteenable(enable);
 }
 
+// disabling zwriting can let you turn off testing for a single model, for instance
+// to fix cutout billboards such as trees the alpha pixels on their edges may not depth sort
+// properly particle effects are usually drawn with zwriting disabled because of this as well
 void d3d_set_zwriteenable(bool enable)
 {
-    if (!enigma::d3dMode) return;
-    (enable?glEnable:glDisable)(GL_DEPTH_TEST);
-    enigma::d3dZWriteEnable = enable;
+	glDepthMask(enable);
+	enigma::d3dZWriteEnable = enable;
 }
 
 void d3d_set_lighting(bool enable)
@@ -166,7 +172,6 @@ void d3d_set_fog_density(double density)
 
 void d3d_set_culling(bool enable)
 {
-  if (!enigma::d3dMode) return;
   (enable?glEnable:glDisable)(GL_CULL_FACE);
   glFrontFace(GL_CW);
 }
@@ -190,7 +195,7 @@ void d3d_set_line_width(float value) {
 
 void d3d_set_point_size(float value) {
   glPointSize(value);
-} 
+}
 
 void d3d_depth_clear() {
   d3d_depth_clear_value(1.0f);
@@ -206,7 +211,6 @@ void d3d_depth_operator(int mode) {
 
 void d3d_set_perspective(bool enable)
 {
-  if (!enigma::d3dMode) return;
   if (enable)
   {
     glMatrixMode(GL_PROJECTION);
@@ -321,11 +325,19 @@ void d3d_draw_wall(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_sc
 
   texture_use(get_texture(texId));
 
+  glEnableClientState(GL_VERTEX_ARRAY);
+  glEnableClientState(GL_NORMAL_ARRAY);
+  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+  
   glVertexPointer(3, GL_FLOAT, 0, verts);
   glNormalPointer(GL_FLOAT, 0, norms);
   glTexCoordPointer(2, GL_FLOAT, 0, texts);
 
   glDrawRangeElements(GL_TRIANGLE_STRIP, 0, 4, 4, GL_UNSIGNED_BYTE, indices);
+  
+  glDisableClientState(GL_VERTEX_ARRAY);
+  glDisableClientState(GL_NORMAL_ARRAY);
+  glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 }
 
 void d3d_draw_floor(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep)
@@ -337,11 +349,19 @@ void d3d_draw_floor(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_s
 
   texture_use(get_texture(texId));
 
+  glEnableClientState(GL_VERTEX_ARRAY);
+  glEnableClientState(GL_NORMAL_ARRAY);
+  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+  
   glVertexPointer(3, GL_FLOAT, 0, verts);
   glNormalPointer(GL_FLOAT, 0, norms);
   glTexCoordPointer(2, GL_FLOAT, 0, texts);
-
+  
   glDrawRangeElements(GL_TRIANGLE_STRIP, 0, 4, 4, GL_UNSIGNED_BYTE, floor_indices);
+  
+  glDisableClientState(GL_VERTEX_ARRAY);
+  glDisableClientState(GL_NORMAL_ARRAY);
+  glDisableClientState(GL_TEXTURE_COORD_ARRAY);
 }
 
 void d3d_draw_block(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, bool closed)
@@ -800,7 +820,7 @@ class d3d_lights
             ind_pos.insert(pair<int,posi>(ms, posi(-dx, -dy, -dz, 0.0f)));
         }
 
-        const float dir[4] = {-dx, -dy, -dz, 0.0f}, color[4] = {__GETR(col), __GETG(col), __GETB(col), 1};
+        const float dir[4] = {float(-dx), float(-dy), float(-dz), 0.0f}, color[4] = {float(__GETR(col)), float(__GETG(col)), float(__GETB(col)), 1.0f};
         glLightfv(GL_LIGHT0+ms, GL_POSITION, dir);
         glLightfv(GL_LIGHT0+ms, GL_DIFFUSE, color);
         light_update_positions();
@@ -832,8 +852,8 @@ class d3d_lights
             light_ind.insert(pair<int,int>(id, ms));
             ind_pos.insert(pair<int,posi>(ms, posi(x, y, z, 1)));
         }
-        const float pos[4] = {x, y, z, 1}, color[4] = {__GETR(col), __GETG(col), __GETB(col), 1},
-            specular[4] = {0, 0, 0, 0}, ambient[4] = {0, 0, 0, 0};
+        const float pos[4] = {(float)x, (float)y, (float)z, 1.0f}, color[4] = {float(__GETR(col)), float(__GETG(col)), float(__GETB(col)), 1.0f},
+            specular[4] = {0.0f, 0.0f, 0.0f, 0.0f}, ambient[4] = {0.0f, 0.0f, 0.0f, 0.0f};
         glLightfv(GL_LIGHT0+ms, GL_POSITION, pos);
         glLightfv(GL_LIGHT0+ms, GL_DIFFUSE, color);
         glLightfv(GL_LIGHT0+ms, GL_SPECULAR, specular);
@@ -862,7 +882,7 @@ class d3d_lights
             if (ms >= MAX_LIGHTS)
                 return false;
         }
-        float specular[4] = {r, g, b, a};
+        float specular[4] = {(float)r, (float)g, (float)b, (float)a};
         glLightfv(GL_LIGHT0+ms, GL_SPECULAR, specular);
         return true;
     }
@@ -922,8 +942,8 @@ bool d3d_light_define_specularity(int id, int r, int g, int b, double a)
 
 void d3d_light_specularity(int facemode, int r, int g, int b, double a)
 {
-  float specular[4] = {r, g, b, a};
-  glMaterialfv(renderstates[facemode], GL_SPECULAR, specular);
+  double specular[4] = {(double)r, (double)g, (double)b, a};
+  glMaterialfv(renderstates[facemode], GL_SPECULAR, (float*)specular);
 }
 
 void d3d_light_shininess(int facemode, int shine)
@@ -933,7 +953,7 @@ void d3d_light_shininess(int facemode, int shine)
 
 void d3d_light_define_ambient(int col)
 {
-    const float color[4] = {__GETR(col), __GETG(col), __GETB(col), 1};
+    float color[4] = {float(__GETR(col)), float(__GETG(col)), float(__GETB(col)), 1.0f};
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, color);
 }
 

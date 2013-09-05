@@ -80,7 +80,6 @@ int window_center();
 ////////////////
 // FULLSCREEN //
 ////////////////
-int window_set_fullscreen(const bool full);
 int window_get_fullscreen();
 
 ////////////
@@ -109,7 +108,7 @@ int window_get_fullscreen();
 #define cr_handpoint -21
 #define cr_size_all -22
 
-int window_set_cursor(double c);
+int window_set_cursor(int c);
 
 void window_set_color(int color);
 
@@ -123,13 +122,9 @@ void window_views_mouse_set(int x, int y);
 int window_get_region_width();
 int window_get_region_height();
 
-void window_set_stayontop(bool stay);
 bool window_get_stayontop();
-void window_set_sizeable(bool sizeable);
 bool window_get_sizeable();
-void window_set_showborder(bool show);
 bool window_get_showborder();
-void window_set_showicons(bool show);
 bool window_get_showicons();
 
 /*
@@ -168,7 +163,6 @@ void io_handle();
 void io_clear();
 void keyboard_wait();
 
-void window_set_region_scale(double scale, bool adaptwindow);
 bool window_get_region_scale();
 void window_set_region_size(int w, int h, bool adaptwindow);
 void window_default();

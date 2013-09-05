@@ -48,6 +48,7 @@ struct lang_CPP: language_adapter {
   int compile_writeObjAccess(map<int,parsed_object*>&,parsed_object*);
   int compile_writeFontInfo(EnigmaStruct* es);
   int compile_writeRoomData(EnigmaStruct* es, parsed_object *EGMglobal);
+  int compile_writeShaderData(EnigmaStruct* es, parsed_object *EGMglobal);
   int compile_writeDefraggedEvents(EnigmaStruct* es);
   int compile_handle_templates(EnigmaStruct* es);
 

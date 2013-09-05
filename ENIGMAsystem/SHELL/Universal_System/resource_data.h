@@ -53,6 +53,7 @@ string timeline_get_name(int i);
 string path_get_name(int i);
 string sound_get_name(int i);
 string script_get_name(int i);
+string shader_get_name(int i);
 
 }
 

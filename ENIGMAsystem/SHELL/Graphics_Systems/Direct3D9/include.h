@@ -5,7 +5,7 @@
 #include "DX9shader.h"
 #include "../General/GStextures.h"
 #include "DX9material.h"
-#include "DX9model.h"
+#include "../General/GSmodel.h"
 
 #include "../General/GSfont.h"
 #include "../General/GScurves.h"

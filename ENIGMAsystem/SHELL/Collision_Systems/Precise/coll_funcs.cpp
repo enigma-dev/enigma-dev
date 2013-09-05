@@ -399,7 +399,6 @@ double move_outside_object(int object, double angle, double max_dist, bool solid
     }
 
     const double DMIN = 1, DMAX = 1000; // Arbitrary max for non-positive values, 1000 fits with other implementations.
-    const double contact_distance = DMIN;
     if (max_dist <= 0) { // Use the arbitrary max for non-positive values.
         max_dist = DMAX;
     }
@@ -486,7 +485,7 @@ bool move_bounce_object(int object, bool adv, bool solid_only)
         const double flipped_on_normal_x = dot_product*normal_x, flipped_on_normal_y = dot_product*normal_y;
 
         const double crossed_x = flipped_x - flipped_on_normal_x, crossed_y = flipped_y - flipped_on_normal_y;
-        
+
         const double mirror_x = flipped_x - 2*crossed_x, mirror_y = flipped_y - 2*crossed_y;
 
         // Set final direction from flipped, mirrored direction unit vector.

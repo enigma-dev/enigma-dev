@@ -38,13 +38,9 @@ namespace enigma_user {
 namespace enigma_user {
 int window_set_visible(bool visible);
 int window_get_visible();
-void window_set_stayontop(bool stay);
 bool window_get_stayontop();
-void window_set_sizeable(bool sizeable);
 bool window_get_sizeable();
-void window_set_showborder(bool show);
 bool window_get_showborder();
-void window_set_showicons(bool show);
 bool window_get_showicons();
 }
 
@@ -103,7 +99,6 @@ void window_center();
 ////////////////
 
 namespace enigma_user {
-void window_set_fullscreen(bool full);
 bool window_get_fullscreen();
 }
 
@@ -139,14 +134,11 @@ enum {
   cr_size_all  = -22
 };
 
-void window_set_cursor(int c);
-
 void game_end();
 void action_end_game();
 void io_handle();
 void keyboard_wait();
 
-void window_set_region_scale(double scale, bool adaptwindow);
 bool window_get_region_scale();
 void window_set_region_size(int w, int h, bool adaptwindow);
 int window_get_region_width();

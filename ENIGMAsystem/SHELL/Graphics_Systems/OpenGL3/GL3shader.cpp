@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton
+/** Copyright (C) 2013 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -17,6 +17,7 @@
 
 #include "../General/OpenGLHeaders.h"
 #include "GL3shader.h"
+#include "GLSLshader.h"
 #include <math.h>
 
 #include <stdio.h>      /* printf, scanf, NULL */
@@ -29,37 +30,9 @@ using namespace std;
 #include <vector>
 using std::vector;
 
-GLenum shadertypes[5] = {   
-  GL_VERTEX_SHADER, GL_TESS_CONTROL_SHADER, GL_TESS_EVALUATION_SHADER, GL_GEOMETRY_SHADER, GL_FRAGMENT_SHADER
+extern GLenum shadertypes[5] = {   
+  GL_VERTEX_SHADER, GL_FRAGMENT_SHADER, GL_TESS_CONTROL_SHADER, GL_TESS_EVALUATION_SHADER, GL_GEOMETRY_SHADER
 }; 
-
-struct Shader{
-  string log;
-  GLuint shader;
-  Shader(int type) 
-  {
-    shader = glCreateShader(shadertypes[type]);
-  }
- 
-  ~Shader()
-  {
-    glDeleteShader(shader);
-  }
-};
-
-struct ShaderProgram{
-  GLuint shaderprogram;
-
-  ShaderProgram()
-  {
-    shaderprogram = glCreateProgram();
-  }
-
-  ~ShaderProgram()
-  {
-    glDeleteProgram(shaderprogram);
-  }
-};
 
 vector<Shader*> shaders(0);
 vector<ShaderProgram*> shaderprograms(0);
@@ -139,7 +112,18 @@ bool glsl_shader_compile(int id)
   } else {
     shaders[id]->log = "Shader compile log empty";
   }
+  
+  GLint compiled;
+  glGetProgramiv(shaders[id]->shader, GL_COMPILE_STATUS, &compiled);
+  if (compiled)
+  {
+    return true;
+  } else {
+    return false;
+  }
+}
 
+bool glsl_shader_get_compiled(int id) {
   GLint compiled;
   glGetProgramiv(shaders[id]->shader, GL_COMPILE_STATUS, &compiled);
   if (compiled)
@@ -205,7 +189,7 @@ void glsl_program_detach(int id, int sid)
   glDetachShader(shaderprograms[id]->shaderprogram, shaders[sid]->shader);
 }
 
-void glsl_program_use(int id)
+void glsl_program_set(int id)
 {
   glUseProgram(shaderprograms[id]->shaderprogram);
 }
@@ -220,7 +204,7 @@ void glsl_program_free(int id)
   delete shaderprograms[id];
 }
 
-int glsl_get_uniform_location(unsigned program, string name) {
+int glsl_get_uniform_location(int program, string name) {
 	return glGetUniformLocation(shaderprograms[program]->shaderprogram, name.c_str());
 }
 

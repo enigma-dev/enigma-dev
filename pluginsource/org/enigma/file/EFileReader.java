@@ -16,6 +16,8 @@ import java.awt.Rectangle;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -45,6 +47,7 @@ import javax.imageio.ImageIO;
 import javax.swing.Icon;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileView;
 
 import org.enigma.EnigmaRunner;
@@ -80,6 +83,8 @@ import org.lateralgm.resources.Room;
 import org.lateralgm.resources.Room.PRoom;
 import org.lateralgm.resources.Script;
 import org.lateralgm.resources.Script.PScript;
+import org.lateralgm.resources.Shader;
+import org.lateralgm.resources.Shader.PShader;
 import org.lateralgm.resources.Sound;
 import org.lateralgm.resources.Sound.PSound;
 import org.lateralgm.resources.Sprite;
@@ -147,6 +152,7 @@ public class EFileReader
 		readers.put(Background.class,new BackgroundReader());
 		readers.put(Path.class,new PathTextReader());
 		readers.put(Script.class,new ScriptReader());
+		readers.put(Shader.class,new ShaderReader());
 		readers.put(Font.class,new FontRawReader());
 		//		readers.put(Timeline.class,new TimelineIO());
 		readers.put(GmObject.class,new ObjectEefReader());
@@ -705,6 +711,40 @@ public class EFileReader
 			}
 		}
 
+	static class ShaderReader extends DataPropReader<Shader,PShader>
+	{
+
+	@Override
+	protected void readDataFile(EProjectFile f, ProjectFile gf, Shader sh, Properties i, String dir)
+			throws IOException
+		{
+		try {
+			InputStream in = f.getEntry("Shaders/" + sh.getFragmentCode()).asInputStream();
+			byte[] b = new byte[in.available()];
+		    in.read(b);
+		    String text = new String(b);
+		    sh.setFragmentCode(text);
+		        
+		    in = f.getEntry("Shaders/" + sh.getVertexCode()).asInputStream();
+			b = new byte[in.available()];
+			in.read(b);
+			text = new String(b);
+			sh.setVertexCode(text);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			JOptionPane.showMessageDialog(null, e.getStackTrace());
+		}
+
+		}
+	
+	@Override
+	protected void readData(ProjectFile gf, Shader sh, InputStream in)
+		{
+
+		}
+	}
+	
 	static class FontRawReader extends DataPropReader<Font,PFont>
 		{
 		@Override

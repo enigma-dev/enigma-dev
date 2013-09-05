@@ -16,6 +16,7 @@
 #include "resources/Background.h"
 #include "resources/Path.h"
 #include "resources/Script.h"
+#include "resources/Shader.h"
 #include "resources/Font.h"
 #include "resources/Timeline.h"
 #include "resources/GmObject.h"
@@ -41,6 +42,8 @@ struct EnigmaStruct
 	int pathCount;
 	Script *scripts;
 	int scriptCount;
+	Shader *shaders;
+	int shaderCount;
 	Font *fonts;
 	int fontCount;
 	Timeline *timelines;

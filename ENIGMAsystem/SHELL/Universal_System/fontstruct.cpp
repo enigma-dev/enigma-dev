@@ -67,7 +67,7 @@ namespace enigma
 
       int gwm = sspr->width, // Glyph width max: sprite width
           ghm = sspr->height, // Glyph height max: sprite height
-          gtw;
+          gtw = 0;
 
       font->height = ghm;
 

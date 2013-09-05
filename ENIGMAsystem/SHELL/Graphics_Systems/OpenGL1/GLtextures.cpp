@@ -249,14 +249,14 @@ void texture_set_priority(int texid, double prio)
 
 void texture_set_border(int texid, int r, int g, int b, double a)
 {
-  GLint color[4] = {r, g, b, a * 255};
+  GLint color[4] = {(int)r, (int)g, (int)b, int(a * 255)};
   glBindTexture(GL_TEXTURE_2D, GmTextures[texid]->gltex);
   glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color);
 }
 
 void texture_set_swizzle(int texid, int r, int g, int b, double a)
 {
-  GLint color[4] = {r, g, b, a * 255};
+  GLint color[4] = {(int)r, (int)g, (int)b, int(a * 255)};
   glBindTexture(GL_TEXTURE_2D, GmTextures[texid]->gltex);
   glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_RGBA, color);
 }

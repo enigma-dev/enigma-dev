@@ -39,7 +39,6 @@ void d3d_primitive_begin(int kind);
 void d3d_primitive_begin_texture(int kind, int texId);
 void d3d_primitive_end();
 void d3d_vertex(gs_scalar x, gs_scalar y, gs_scalar z);
-void d3d_index(int in);
 void d3d_vertex_color(gs_scalar x, gs_scalar y, gs_scalar z, int color, double alpha);
 void d3d_vertex_texture(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar tx, gs_scalar ty);
 void d3d_vertex_texture_color(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar tx, gs_scalar ty, int color, double alpha);

@@ -41,6 +41,7 @@ struct language_adapter {
   virtual int compile_writeObjAccess(map<int,parsed_object*>&,parsed_object*) = 0;
   virtual int compile_writeFontInfo(EnigmaStruct* es) = 0;
   virtual int compile_writeRoomData(EnigmaStruct* es,parsed_object *EGMglobal) = 0;
+  virtual int compile_writeShaderData(EnigmaStruct* es,parsed_object *EGMglobal) = 0;
   virtual int compile_writeDefraggedEvents(EnigmaStruct* es) = 0;
   virtual int compile_handle_templates(EnigmaStruct* es) = 0;
 

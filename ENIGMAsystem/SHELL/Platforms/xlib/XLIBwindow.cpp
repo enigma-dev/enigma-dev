@@ -243,6 +243,10 @@ enum {
 namespace enigma_user
 {
 
+void window_set_freezeonlosefocus(bool freeze)
+{
+}
+
 void window_set_fullscreen(bool full)
 {
 	Atom wmState = XInternAtom(disp, "_NET_WM_STATE", False);
@@ -398,10 +402,11 @@ void io_handle()
   enigma::update_mouse_variables();
 }
 
-void window_set_cursor(int c)
+int window_set_cursor(int c)
 {
 	XUndefineCursor(disp,win);
 	XDefineCursor(disp, win, (c == -1) ? NoCursor : XCreateFontCursor(disp,curs[-c]));
+	return 0;
 }
 
 void keyboard_wait()

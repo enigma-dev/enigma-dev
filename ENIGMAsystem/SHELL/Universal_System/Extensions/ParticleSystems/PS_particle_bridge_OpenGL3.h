@@ -418,7 +418,7 @@ namespace enigma {
 
         // Draw. 
 
-        for (int i = 0; i < switch_offset_instcount.size(); i++) {
+        for (unsigned i = 0; i < switch_offset_instcount.size(); i++) {
           int switch_offset = switch_offset_instcount[i].first;
           int switch_count = switch_offset_instcount[i].second;
 

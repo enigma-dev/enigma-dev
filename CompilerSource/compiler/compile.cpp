@@ -277,6 +277,10 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   edbg << "Copying script names [" << es->scriptCount << "]" << flushl;
   for (int i = 0; i < es->scriptCount; i++)
     quickmember_script(&globals_scope,es->scripts[i].name);
+	
+  edbg << "Copying shader names [" << es->shaderCount << "]" << flushl;
+  for (int i = 0; i < es->shaderCount; i++)
+    quickmember_variable(&globals_scope,jdi::builtin_type__int,es->shaders[i].name);
 
   edbg << "Copying font names [" << es->fontCount << "]" << flushl;
   for (int i = 0; i < es->fontCount; i++)
@@ -293,7 +297,6 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   edbg << "Copying room names [" << es->roomCount << "]" << flushl;
   for (int i = 0; i < es->roomCount; i++)
     quickmember_variable(&globals_scope,jdi::builtin_type__int,es->rooms[i].name);
-
 
 
   /// Next we do a simple parse of the code, scouting for some variable names and adding semicolons.
@@ -329,7 +332,7 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/Resources.rc",ios_base::out);
     wto << license;
     wto << "#include <windows.h>\n";
-	if (strlen(gameSet.gameIcon) > 0) {
+	if (gameSet.gameIcon != NULL && strlen(gameSet.gameIcon) > 0) {
 		wto << "IDI_MAIN_ICON ICON          \"" << string_replace_all(gameSet.gameIcon,"\\","/")  << "\"\n";
 	} else {
 		wto << "IDI_MAIN_ICON ICON          \"\"\n";
@@ -344,12 +347,11 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
 	wto << "VALUE \"ProductName\",         \"" << gameSet.product << "\"\n";
 	wto << "VALUE \"ProductVersion\",      \"" << gameSet.version << "\\0\"\n";
 	wto << "VALUE \"LegalCopyright\",      \"" << gameSet.copyright << "\"\n";
-	if (strlen(es->filename) > 0) {
+	if (es->filename != NULL && strlen(es->filename) > 0) {
 		wto << "VALUE \"OriginalFilename\",         \"" << string_replace_all(es->filename,"\\","/") << "\"\n";
 	} else {
 		wto << "VALUE \"OriginalFilename\",         \"\"\n";
 	}
-	
 	wto << "END\nEND\nBLOCK \"VarFileInfo\"\nBEGIN\n";
 	wto << "VALUE \"Translation\", 0x409, 1252\n";
 	wto << "END\nEND";
@@ -502,6 +504,18 @@ wto << "namespace enigma_user {\nstring script_get_name(int i) {\n switch (i) {\
      ss.str( "" );
 
     max = 0;
+    wto << "namespace enigma_user {\nenum //shader names\n{\n";
+    for (int i = 0; i < es->shaderCount; i++) {
+      if (es->shaders[i].id >= max) max = es->shaders[i].id + 1;
+      wto << "  " << es->shaders[i].name << " = " << es->shaders[i].id << ",\n";
+      ss << "    case " << es->shaders[i].id << ": return \"" << es->shaders[i].name << "\"; break;\n";
+    } wto << "};}\nnamespace enigma { size_t shader_idmax = " <<max << "; }\n\n";
+
+wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\n";
+     wto << ss.str() << " default: return \"<undefined>\";}};}\n\n";
+     ss.str( "" );
+	 
+    max = 0;
     wto << "namespace enigma_user {\nenum //room names\n{\n";
     for (int i = 0; i < es->roomCount; i++) {
       if (es->rooms[i].id >= max) max = es->rooms[i].id + 1;
@@ -542,6 +556,9 @@ wto << "namespace enigma_user {\nstring script_get_name(int i) {\n switch (i) {\
   res = current_language->compile_writeRoomData(es,&EGMglobal);
   irrr();
 
+  edbg << "Writing shader data" << flushl;
+  res = current_language->compile_writeShaderData(es,&EGMglobal);
+  irrr();
 
 
   // Write the global variables to their own file to be included before any of the objects

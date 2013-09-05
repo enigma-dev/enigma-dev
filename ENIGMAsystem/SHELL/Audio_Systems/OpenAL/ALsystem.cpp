@@ -75,7 +75,7 @@ namespace enigma {
         return i;
       }
     }
-  
+
     return -1;
   }
 
@@ -111,7 +111,6 @@ namespace enigma {
 
   SoundResource* sound_new_with_source() {
     SoundResource *res = new SoundResource();
-	sound_resources.push_back(res);
     alGetError();
     int a = alGetError();
     if(a != AL_NO_ERROR) {
@@ -126,8 +125,11 @@ namespace enigma {
 
   int sound_add_from_buffer(int id, void* buffer, size_t bufsize)
   {
-	
     SoundResource *snd = sound_new_with_source();
+	if (unsigned(id) > sound_resources.size()) {
+		sound_resources.resize(id + 1);
+	}
+    sound_resources.insert(sound_resources.begin() + id, snd);
 
     if (snd->loaded != LOADSTATE_SOURCED) {
       fprintf(stderr, "Could not load sound %d: %s\n", id, alureGetErrorString());
@@ -148,7 +150,11 @@ namespace enigma {
   int sound_add_from_stream(int id, size_t (*callback)(void *userdata, void *buffer, size_t size), void (*seek)(void *userdata, float position), void (*cleanup)(void *userdata), void *userdata)
   {
     SoundResource *snd = sound_new_with_source();
-	
+	if (unsigned(id) > sound_resources.size()) {
+		sound_resources.resize(id + 1);
+	}
+	sound_resources.insert(sound_resources.begin() + id, snd);
+
     if (snd->loaded != LOADSTATE_SOURCED)
       return 1;
 
@@ -167,8 +173,19 @@ namespace enigma {
 
   int sound_allocate()
   {
-	int id = sound_resources.size();
-	sound_resources.push_back(new SoundResource());
+	int id = -1;
+	for (unsigned i = 0; i < sound_resources.size(); i++) {
+		if (sound_resources[id] == NULL) {
+			id = i;
+		}
+	}
+	if (id < 0) {
+	  id = sound_resources.size();
+	}
+	else if (unsigned(id) > sound_resources.size()) {
+		sound_resources.resize(id + 1);
+	}
+	sound_resources.insert(sound_resources.begin() + id, new SoundResource());
 	return id;
   }
 
@@ -204,7 +221,7 @@ namespace enigma {
             alDeleteSources(1, &sound_channels[j]->source);
           }
           break;
-        
+
         case LOADSTATE_INDICATED:
         case LOADSTATE_NONE:
         default: ;

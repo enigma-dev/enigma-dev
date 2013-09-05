@@ -18,7 +18,7 @@
 #include "../General/OpenGLHeaders.h"
 #include "../General/GSprimitives.h"
 #include "../General/GStextures.h"
-#include "GL3model.h"
+#include "../General/GSmodel.h"
 #include "GL3binding.h"
 
 #include <stdio.h>
@@ -157,11 +157,6 @@ void d3d_vertex(gs_scalar x, gs_scalar y, gs_scalar z)
   int col = enigma::currentcolor[0] | (enigma::currentcolor[1] << 8) | (enigma::currentcolor[2] << 16);
   float alpha = (float)enigma::currentcolor[3] / 255.0;
   d3d_model_vertex_color(prim_d3d_model, x, y, z, col, alpha);
-}
-
-void d3d_index(int in)
-{
-  d3d_model_index(prim_d3d_model, in);
 }
 
 void d3d_vertex_color(gs_scalar x, gs_scalar y, gs_scalar z, int color, double alpha)

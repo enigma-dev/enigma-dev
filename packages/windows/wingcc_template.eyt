@@ -16,8 +16,8 @@ searchdirs: ${binpath}gcc -E -x c++ -v $blank
 searchdirs-start: "#include <...> search starts here:"
 searchdirs-end: "End of search list."
 resources: $exe
-ldflags: -static-libstdc++ -static-libgcc
-links: -static-libstdc++ -static-libgcc
+ldflags: -static-libgcc
+links: -static-libgcc
 
 resource-linker: windres.exe
 

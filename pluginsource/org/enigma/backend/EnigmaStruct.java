@@ -22,6 +22,7 @@ import org.enigma.backend.resources.GmObject;
 import org.enigma.backend.resources.Path;
 import org.enigma.backend.resources.Room;
 import org.enigma.backend.resources.Script;
+import org.enigma.backend.resources.Shader;
 import org.enigma.backend.resources.Sound;
 import org.enigma.backend.resources.Sprite;
 import org.enigma.backend.resources.Timeline;
@@ -31,7 +32,7 @@ import com.sun.jna.Structure;
 
 public class EnigmaStruct extends Structure
 	{
-	/** One of 530, 600, 701, 800, or 820 */
+	/** One of 530, 600, 701, 800 */
 	public int fileVersion = 600;
 	public String filename = null;
 
@@ -45,6 +46,8 @@ public class EnigmaStruct extends Structure
 	public int pathCount;
 	public Script.ByReference scripts;
 	public int scriptCount;
+	public Shader.ByReference shaders;
+	public int shaderCount;
 	public Font.ByReference fonts;
 	public int fontCount;
 	public Timeline.ByReference timelines;

@@ -67,6 +67,16 @@ int window_mouse_get_y();
 int window_get_region_width_scaled();
 int window_get_region_height_scaled();
 
+// For game settings
+void window_set_fullscreen(bool full);
+int window_set_cursor(int c);
+void window_set_region_scale(double scale, bool adaptwindow);
+void window_set_stayontop(bool stay);
+void window_set_sizeable(bool sizeable);
+void window_set_showborder(bool show);
+void window_set_showicons(bool show);
+void window_set_freezeonlosefocus(bool freeze);
+bool set_working_directory(std::string dir = "");
 }
 
 #endif

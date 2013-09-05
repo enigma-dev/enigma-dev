@@ -313,6 +313,12 @@ draw: 8
 	Default: /* Not drawing the sprite in localless */
 	Instead: if (automatic_redraw) screen_redraw(); # We never want to iterate draw; we let screen_redraw() handle it.
 
+#Draw GUI event is processed after all draw events iterating objects by depth and first resetting the projection to orthographic, ignoring views
+drawgui: 8
+	Name: Draw GUI
+	Mode: Special
+	Case: 64
+	Sub Check: visible
 
 # Why this comes after "end step," I do not know. One would think it'd be back there with pathend.
 animationend: 7

@@ -35,6 +35,7 @@
 
 namespace enigma
 {
+  extern bool gui_used;
   struct depthv: multifunction_variant {
     INHERIT_OPERATORS(depthv)
     struct inst_iter *myiter;

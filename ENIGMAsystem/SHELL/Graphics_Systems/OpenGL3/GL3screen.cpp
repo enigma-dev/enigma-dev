@@ -91,43 +91,54 @@ static inline void draw_back()
     }
 }
 
+namespace enigma
+{
+    extern bool d3dMode;
+	extern bool d3dZWriteEnable;
+    extern std::map<int,roomstruct*> roomdata;
+    particles_implementation* particles_impl;
+    void set_particles_implementation(particles_implementation* part_impl)
+    {
+        particles_impl = part_impl;
+    }
+}
+
 void draw_globalVBO()
 {
     if (globalVBO_verCount>0){
         //int fbo;
         //glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fbo);
         //printf("RENDERING THIS - Verts = %i, inds = %i and fbo = %i, data size = %i, index size = %i\n",globalVBO_verCount,globalVBO_indCount,fbo,globalVBO_data.size(),globalVBO_indices.size() );
-        glBindTexture(GL_TEXTURE_2D,enigma::bound_texture);
+        //glBindTexture(GL_TEXTURE_2D,0);
         glEnableClientState(GL_VERTEX_ARRAY);
         glEnableClientState(GL_TEXTURE_COORD_ARRAY);
         glEnableClientState(GL_COLOR_ARRAY);
 
-        glBindBuffer(GL_ARRAY_BUFFER, globalVBO);
+        glBindBufferARB(GL_ARRAY_BUFFER, globalVBO);
 
-        if (globalVBO_verCount>globalVBO_maxBSize) glBufferData(GL_ARRAY_BUFFER, globalVBO_datCount * sizeof(gs_scalar), &globalVBO_data[0], GL_DYNAMIC_DRAW), globalVBO_maxBSize = globalVBO_verCount;
-        else glBufferSubData(GL_ARRAY_BUFFER, 0, globalVBO_datCount * sizeof(gs_scalar), &globalVBO_data[0]);
+        if (globalVBO_verCount>globalVBO_maxBSize) glBufferDataARB(GL_ARRAY_BUFFER, globalVBO_datCount * sizeof(gs_scalar), &globalVBO_data[0], GL_DYNAMIC_DRAW), globalVBO_maxBSize = globalVBO_verCount;
+        else glBufferSubDataARB(GL_ARRAY_BUFFER, 0, globalVBO_datCount * sizeof(gs_scalar), &globalVBO_data[0]);
         glVertexPointer( 2, GL_FLOAT, sizeof(gs_scalar) * 8, NULL );
         glTexCoordPointer( 2, GL_FLOAT, sizeof(gs_scalar) * 8, (void*)(sizeof(gs_scalar) * 2) );
         glColorPointer( 4, GL_FLOAT, sizeof(gs_scalar) * 8, (void*)(sizeof(gs_scalar) * 4) );
 
+		// this sprite batching mechanism does not allow one to apply transformations to sprites or text
+		// like is possible with the Direct3D 9 sprite batcher or traditionally in Game Maker.
+		if (d3dZWriteEnable) {
+		  glDepthMask(false);
+		}
         glDrawElements(GL_TRIANGLES, globalVBO_indCount, GL_UNSIGNED_INT, &globalVBO_indices[0] );
-
+		if (d3dZWriteEnable) {
+		  glDepthMask(true);
+		}
+		
         glDisableClientState( GL_COLOR_ARRAY );
         glDisableClientState( GL_TEXTURE_COORD_ARRAY );
         glDisableClientState( GL_VERTEX_ARRAY );
+		
+		glBindBufferARB(GL_ARRAY_BUFFER, 0);
 
         globalVBO_datCount = globalVBO_verCount = globalVBO_indCount = 0;
-    }
-}
-
-namespace enigma
-{
-    extern bool d3dMode;
-    extern std::map<int,roomstruct*> roomdata;
-    particles_implementation* particles_impl;
-    void set_particles_implementation(particles_implementation* part_impl)
-    {
-        particles_impl = part_impl;
     }
 }
 
@@ -210,7 +221,6 @@ void screen_redraw()
                 (enigma::particles_impl->draw_particlesystems)(high, low);
             }
         }
-        draw_globalVBO();
     }
     else
     {
@@ -373,12 +383,50 @@ void screen_redraw()
         }
         view_current = 0;
     }
+
+	draw_globalVBO();
+			
+	// Now process the sub event of draw called draw gui
+	// It is for drawing GUI elements without view scaling and transformation
+    if (enigma::gui_used)
+    {
+	    glViewport(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled());
+        glLoadIdentity();
+        glScalef(1, (bound_framebuffer==0?-1:1), 1);
+        glOrtho(0, room_width, 0, room_height, 0, 1);
+        glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
+        glMultMatrixd(transformation_matrix);
+		
+		// Clear the depth buffer if hidden surface removal is on at the beginning of the draw step.
+        if (enigma::d3dMode)
+			glClear(GL_DEPTH_BUFFER_BIT);
+
+        bool stop_loop = false;
+
+        for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
+        {
+
+            enigma::inst_iter* push_it = enigma::instance_event_iterator;
+            //loop instances
+            for (enigma::instance_event_iterator = dit->second.draw_events->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next) {
+				enigma::instance_event_iterator->inst->myevent_drawgui();
+                if (enigma::room_switching_id != -1) {
+                    stop_loop = true;
+                    break;
+                }
+            }
+            enigma::instance_event_iterator = push_it;
+            if (stop_loop) break;
+        }
+		draw_globalVBO();
+    }
+		
     screen_refresh();
 }
 
 void screen_init()
 {
-    glGenBuffers(1, &globalVBO);
+    glGenBuffersARB(1, &globalVBO);
     texture_reset();
     if (!view_enabled)
     {

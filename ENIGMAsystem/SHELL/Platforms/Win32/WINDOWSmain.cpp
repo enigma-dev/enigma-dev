@@ -60,6 +60,7 @@ namespace enigma //TODO: Find where this belongs
   HWND hWnd;
   LRESULT CALLBACK WndProc (HWND hWnd, UINT message,WPARAM wParam, LPARAM lParam);
   HDC window_hDC;
+  extern bool freezeWindow;
 
   vector<string> main_argv;
   int main_argc;
@@ -246,7 +247,6 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
       minimum_resolution = timer_resolution_info.wPeriodMin;
     }
     timeBeginPeriod(minimum_resolution);
-    long speed_error_mcs = 0;
     enigma::initialize_timing();
     int frames_count = 0;
 
@@ -308,6 +308,8 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
           }
           else
           {
+              if (GetForegroundWindow() != enigma::hWnd && enigma::freezeWindow)  continue;
+
               enigma::ENIGMA_events();
               enigma::input_push();
 
@@ -343,9 +345,12 @@ int parameter_count()
 }
 
 extern string working_directory;
-bool set_working_directory()
+bool set_working_directory(string dir)
 {
-    SetCurrentDirectory(working_directory.c_str());
+    if (dir == "")
+        SetCurrentDirectory(working_directory.c_str());
+    else
+        SetCurrentDirectory(working_directory.c_str());   //Change to working_directory + dir/
     return 1;
 }
 

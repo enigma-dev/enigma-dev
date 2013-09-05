@@ -51,6 +51,7 @@ void instance_destroy();
 bool instance_exists (int obj);
 enigma::instance_t instance_find   (int obj,int n);
 int instance_number (int obj);
+enigma::instance_t instance_last(int obj);
 enigma::instance_t instance_nearest (int x,int y,int obj,bool notme = false);
 enigma::instance_t instance_furthest(int x,int y,int obj,bool notme = false);
 }
