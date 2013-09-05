@@ -71,7 +71,8 @@ int lang_CPP::module_write_fonts(EnigmaStruct *es, FILE *gameModule)
     cout << "Iterating included fonts..." << endl;
     // Simple allocations and initializations
     const int gc = es->fonts[i].rangeMax - es->fonts[i].rangeMin + 1;
-    pvrect boxes[gc]; list<unsigned int> box_order;
+    pvrect* boxes = new pvrect[gc];
+    list<unsigned int> box_order;
     cout << "Allocated some font stuff" << endl;
 
     /*cout << "Font name `" << es->fonts[i].name << "` uses " << es->fonts[i].fontName << endl;
@@ -167,6 +168,7 @@ int lang_CPP::module_write_fonts(EnigmaStruct *es, FILE *gameModule)
 
     fwrite("endf",1,4,gameModule);
     cout << "Wrote all data for font " << i << endl;
+      delete[] boxes;
   }
 
   edbg << "Done writing fonts." << flushl;

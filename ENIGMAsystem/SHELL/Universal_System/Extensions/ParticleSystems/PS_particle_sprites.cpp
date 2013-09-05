@@ -811,7 +811,7 @@ namespace enigma
       ss[i] = V2(center_x + radius*cos(i*M_PI*2/6 + M_PI/2), center_y - radius*sin(i*M_PI*2/6 + M_PI/2));
     }
 
-    int triangle_count = 8;
+    const int triangle_count = 8;
     V2 cs[triangle_count][3];
     cs[0][0] = ss[0], cs[0][1] = ss[2], cs[0][2] = ss[4];
     cs[1][0] = ss[1], cs[1][1] = ss[3], cs[1][2] = ss[5];

@@ -24,18 +24,11 @@
 #include <unistd.h> //usleep
 #include <time.h> //clock
 #include <string> //Return strings without needing a GC
-#include <X11/Xlib.h>
+
 #include "ObjectiveC.h"
 
 std::string working_directory, temp_directory;
 
-Display *disp;
-Window win;
-GC gc;
-Atom wm_delwin;
-
-#include <X11/Xlib.h>
-#define uint unsigned int
 
 using namespace std;
 
@@ -46,7 +39,7 @@ using namespace std;
 //////////
 // INIT //
 //////////
-Cursor NoCursor,DefCursor;
+
 void gmw_init()
 {
 }

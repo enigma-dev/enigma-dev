@@ -32,6 +32,8 @@ using std::string;
 void gmw_init();
 
 namespace enigma_user {
+    
+    void sleep(int ms);
 
 void window_set_position(int x,int y);
 
