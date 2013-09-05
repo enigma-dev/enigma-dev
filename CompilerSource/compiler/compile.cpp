@@ -258,7 +258,7 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
     cout << "Name on this side2: " << ((jdi::definition_scope*)&globals_scope)->name << endl;
     cout << "Pointer on this side: " << (&globals_scope) << endl;
     cout << "Address on this side: " << ((jdi::definition_scope*)&globals_scope) << endl;
-    cout << "Char on this side: " << (*(char**)&globals_scope.name) << endl;
+    
     quickmember_variable(&globals_scope,jdi::builtin_type__int,es->sprites[i].name);
   }
 

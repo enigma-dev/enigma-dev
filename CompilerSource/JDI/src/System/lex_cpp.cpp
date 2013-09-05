@@ -188,7 +188,7 @@ string lexer_cpp::_flatten(const string param, const macro_map& macros, const to
             size_t p = i - begin;
             const macro_function* mf = (macro_function*)mac->second;
             parse_macro_params(mf, macros, begin, p, param.length(), arguments, errep, herr);
-            char *buf, *bufe;
+            char *buf=0, *bufe=0;
             mf->parse(arguments, buf, bufe, errep, herr);
             i = begin + p;
             result.replace(s-begin, i-s, buf, bufe-buf);
@@ -279,7 +279,7 @@ bool lexer_cpp::parse_macro_function(const macro_function* mf, error_handler *he
   openfile of(filename, line, lpos, *this);
   files.enswap(of);
   alias(files.top().file);
-  char *buf, *bufe;
+  char *buf=0, *bufe=0;
   if (!mf->parse(params, buf, bufe, token_t(token_basics(TT_INVALID,filename,line,lpos-pos)), herr)) {
     this->consume(files.top().file);
     files.pop();
