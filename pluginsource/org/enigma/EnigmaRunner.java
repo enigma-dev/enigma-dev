@@ -178,6 +178,13 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 						return;
 						}
 					ENIGMA_READY = true;	
+					ResourceHolder<EnigmaSettings> rh = LGM.currentFile.resMap.get(EnigmaSettings.class);
+					if (rh == null)
+						LGM.currentFile.resMap.put(EnigmaSettings.class,
+								rh = new SingletonResourceHolder<EnigmaSettings>(new EnigmaSettings()));
+					esf = new EnigmaSettingsFrame(rh.getResource());
+					LGM.mdi.add(esf);
+					rh.getResource().commitToDriver(DRIVER);
 					setupBaseKeywords();
 					populateKeywords();
 					setMenuEnabled(true);
@@ -942,29 +949,24 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 	@Override
 	public void reloadPerformed(boolean newRoot)
 		{
-		if (newRoot) populateTree();
+		populateTree();
 		new Thread() {
-		public void run() {
-				
+		public void run() {	
 			// Delay reload performed until the compiler is ready
-			while (!ENIGMA_READY) {
+			while (!ENIGMA_READY && !LGM.isloaded) {
 				try {
 					Thread.sleep(1000);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}
 			}
-		
 			ResourceHolder<EnigmaSettings> rh = LGM.currentFile.resMap.get(EnigmaSettings.class);
 			if (rh == null)
 				LGM.currentFile.resMap.put(EnigmaSettings.class,
 						rh = new SingletonResourceHolder<EnigmaSettings>(new EnigmaSettings()));
+			
 			esf.resOriginal = rh.getResource();
 			esf.revertResource(); //updates local res copy as well
-			
-			esf = new EnigmaSettingsFrame(rh.getResource());
-			LGM.mdi.add(esf);
-			rh.getResource().commitToDriver(DRIVER);
 		}
 		}.start();
 

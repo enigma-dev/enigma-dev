@@ -79,8 +79,9 @@ public class EnigmaStruct extends Structure
 		{
 		return Arrays.asList("fileVersion","filename","sprites","spriteCount","sounds","soundCount",
 				"backgrounds","backgroundCount","paths","pathCount","scripts","scriptCount","fonts",
-				"fontCount","timelines","timelineCount","gmObjects","gmObjectCount","rooms","roomCount",
-				"triggers","triggerCount","constants","constantCount","includes","includeCount","packages",
-				"packageCount","extensions","extensionCount","gameSettings","lastInstanceId","lastTileId");
+				"fontCount","timelines","timelineCount","gmObjects","gmObjectCount",
+				"rooms","roomCount","triggers","triggerCount","constants","constantCount","includes",
+				"includeCount","packages","packageCount","extensions","extensionCount","gameSettings",
+				"lastInstanceId","lastTileId");
 		}
 	}
