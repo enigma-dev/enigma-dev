@@ -426,11 +426,9 @@ void screen_redraw()
             if (stop_loop) break;
         }
 		
-		//d3ddev->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
-		
 		// reset the culling
 		if (enigma::d3dCulling) {
-			
+			d3ddev->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
 		}
 	}
 	
