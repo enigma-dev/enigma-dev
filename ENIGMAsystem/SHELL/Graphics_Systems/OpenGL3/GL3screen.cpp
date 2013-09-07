@@ -95,6 +95,7 @@ namespace enigma
 {
     extern bool d3dMode;
 	extern bool d3dZWriteEnable;
+	extern bool d3dCulling;
     extern std::map<int,roomstruct*> roomdata;
     particles_implementation* particles_impl;
     void set_particles_implementation(particles_implementation* part_impl)
@@ -383,9 +384,8 @@ void screen_redraw()
         }
         view_current = 0;
     }
-	
+
 	draw_globalVBO();
-	
 			
 	// Now process the sub event of draw called draw gui
 	// It is for drawing GUI elements without view scaling and transformation
@@ -401,11 +401,11 @@ void screen_redraw()
 		// Clear the depth buffer if hidden surface removal is on at the beginning of the draw step.
         if (enigma::d3dMode)
 			glClear(GL_DEPTH_BUFFER_BIT);
-
+		
+		glDisable(GL_CULL_FACE);
+		
         bool stop_loop = false;
 
-		d3d_set_culling(false);
-		
         for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
         {
 
@@ -422,6 +422,11 @@ void screen_redraw()
             if (stop_loop) break;
         }
 		draw_globalVBO();
+		
+		// reset the culling
+		if (enigma::d3dCulling) {
+			glEnable(GL_CULL_FACE);
+		}
     }
 		
     screen_refresh();

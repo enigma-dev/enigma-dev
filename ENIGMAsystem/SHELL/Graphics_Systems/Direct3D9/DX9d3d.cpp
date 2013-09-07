@@ -32,6 +32,7 @@ namespace enigma {
   bool d3dMode = false;
   bool d3dHidden = false;
   bool d3dZWriteEnable = true;
+  bool d3dCulling = false;
 }
 
 namespace enigma_user
@@ -40,6 +41,7 @@ namespace enigma_user
 void d3d_start()
 {
 	enigma::d3dMode = true;
+	enigma::d3dCulling =  false;
 	d3ddev->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
 	d3d_set_hidden(false);
 }
@@ -47,6 +49,7 @@ void d3d_start()
 void d3d_end()
 {
 	enigma::d3dMode = false;
+	enigma::d3dCulling = false;
 	d3d_set_hidden(false);
 }
 
@@ -58,14 +61,14 @@ bool d3d_get_mode()
 void d3d_set_hidden(bool enable)
 {
 	d3d_set_zwriteenable(enable);
-	d3ddev->SetRenderState(D3DRS_ZENABLE, enable);
+	d3ddev->SetRenderState(D3DRS_ZENABLE, enable); // enable/disable the z-buffer
     enigma::d3dHidden = enable;
-}   // TODO: Write function
+}   
 
 void d3d_set_zwriteenable(bool enable)
 {
 	enigma::d3dZWriteEnable = enable;
-	d3ddev->SetRenderState(D3DRS_ZWRITEENABLE, enable);    // enable/disable the z-buffer
+	d3ddev->SetRenderState(D3DRS_ZWRITEENABLE, enable);    // enable/disable z-writing
 }
 
 void d3d_set_lighting(bool enable)
@@ -124,6 +127,7 @@ void d3d_set_fog_density(double density)
 
 void d3d_set_culling(bool enable)
 {
+	enigma::d3dCulling = enable;
 	if (enable) {
 		//d3ddev->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
 	} else {

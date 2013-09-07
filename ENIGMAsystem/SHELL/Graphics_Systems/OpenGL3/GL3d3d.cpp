@@ -35,6 +35,7 @@ namespace enigma {
   bool d3dMode = false;
   bool d3dHidden = false;
   bool d3dZWriteEnable = true;
+  bool d3dCulling = false;
 }
 
 double projection_matrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1}, transformation_matrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
@@ -60,6 +61,7 @@ void d3d_start()
   enigma::d3dMode = true;
   enigma::d3dHidden = true;
   enigma::d3dZWriteEnable = true;
+  enigma::d3dCulling = true;
   glDepthMask(true);
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_ALPHA_TEST);
@@ -84,6 +86,7 @@ void d3d_end()
   enigma::d3dMode = false;
   enigma::d3dHidden = false;
   enigma::d3dZWriteEnable = false;
+  enigma::d3dCulling = false;
   glDepthMask(false);
   glDisable(GL_DEPTH_TEST);
   glDisable(GL_ALPHA_TEST);
@@ -172,6 +175,7 @@ void d3d_set_fog_density(double density)
 
 void d3d_set_culling(bool enable)
 {
+  enigma::d3dCulling = enable;
   (enable?glEnable:glDisable)(GL_CULL_FACE);
   // Game Maker uses clockwise culling, the opposite of the OpenGL and Direct3D defaults
   glFrontFace(GL_CW); 
