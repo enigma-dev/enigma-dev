@@ -140,7 +140,7 @@ int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
 
     // Game setting initaliser
   wto << "  int game_settings_initialize()" << endl << "  {" << endl;
-    wto  << "    texture_set_interpolation(" << es->gameSettings.interpolate << "); " << endl;
+    wto  << "    texture_set_interpolation(" << es->gameSettings.interpolate << " || texture_get_interpolation()); " << endl;
     if (es->gameSettings.displayCursor)
         wto  << "    window_set_cursor(cr_default);" << endl;
     else
