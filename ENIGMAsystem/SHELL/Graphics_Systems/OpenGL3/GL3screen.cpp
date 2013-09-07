@@ -95,6 +95,7 @@ namespace enigma
 {
     extern bool d3dMode;
 	extern bool d3dZWriteEnable;
+	extern int d3dCulling;
     extern std::map<int,roomstruct*> roomdata;
     particles_implementation* particles_impl;
     void set_particles_implementation(particles_implementation* part_impl)
@@ -400,7 +401,10 @@ void screen_redraw()
 		// Clear the depth buffer if hidden surface removal is on at the beginning of the draw step.
         if (enigma::d3dMode)
 			glClear(GL_DEPTH_BUFFER_BIT);
-
+		
+		int culling = d3d_get_culling();
+		d3d_set_culling(rs_none);
+		
         bool stop_loop = false;
 
         for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
@@ -419,6 +423,9 @@ void screen_redraw()
             if (stop_loop) break;
         }
 		draw_globalVBO();
+		
+		// reset the culling
+		d3d_set_culling(culling);
     }
 		
     screen_refresh();

@@ -605,40 +605,57 @@ void d3d_model_vertex_normal_texture_color(int id, gs_scalar x, gs_scalar y, gs_
 
 void d3d_model_block(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, gs_scalar hrep, gs_scalar vrep, bool closed)
 {
-  GLfloat verts[] = { x1,y1,z1, x1,y1,z2, x1,y2,z1, x1,y2,z2, x2,y2,z1, x2,y2,z2, x2,y1,z1, x2,y1,z2, // sides
-                     x1,y1,z1, x2,y1,z1, x1,y2,z1, x2,y2,z1,  // bottom
-                     x1,y1,z2, x2,y1,z2, x1,y2,z2, x2,y2,z2 }, // top
-          texts[] = { 0,vrep, 0,0, hrep,vrep, hrep,0,
-					  0,vrep, 0,0, hrep,vrep, hrep,0,
-                      0,0, hrep,0, 0,vrep, hrep,vrep,
-                      0,0, hrep,0, 0,vrep, hrep,vrep },
-		  norms[] = { -0.5,-0.5,-0.5, -0.5,-0.5,0.5, -0.5,0.5,-0.5, -0.5,0.5,0.5,
-                       0.5,0.5,-0.5, 0.5,0.5,0.5, 0.5,-0.5,-0.5, 0.5,-0.5,0.5,
-                      -0.5,-0.5,-0.5, 0.5,-0.5,-0.5, -0.5,0.5,-0.5, 0.5,0.5,-0.5, // bottom
-                      -0.5,-0.5,0.5, 0.5,-0.5,0.5, -0.5,0.5,0.5, 0.5,0.5,0.5 }; // top
-  GLuint inds[] = { 1,3,0, 3,2,0, 3,5,2, 5,4,2, 5,6,4, 5,7,6, 7,1,6, 0,6,1, // sides
-                    11,9,8, 10,11,8, 12,13,15, 12,15,14 }; // top and bottom
-  
-  d3d_model_primitive_begin(id, pr_trianglestrip);
-  
-  for (int i = 0; i < 16; i++) {
-	copy(&verts[i * 3], &verts[i * 3 + 3], back_inserter(meshes[id]->vertices));
-	copy(&norms[i * 3], &norms[i * 3 + 3], back_inserter(meshes[id]->vertices));
-	copy(&texts[i * 2], &texts[i * 2 + 2], back_inserter(meshes[id]->vertices));
+	//NOTE: This is the fastest way to batch cubes with uninterpolated normals thanks to my model batching, still slower than a triangle strip with interpolated normals
+	//however.
+	// Negative X
+	d3d_model_primitive_begin( id, pr_trianglefan );
+	d3d_model_vertex_normal_texture( id, x1,y1,z1, -1,0,0, 0,1 );
+	d3d_model_vertex_normal_texture( id, x1,y1,z2, -1,0,0, 0,0 );
+	d3d_model_vertex_normal_texture( id, x1,y2,z2, -1,0,0, 1,0 );
+	d3d_model_vertex_normal_texture( id, x1,y2,z1, -1,0,0, 1,1 );
+	d3d_model_primitive_end(id);
+
+	// Positive X
+	d3d_model_primitive_begin( id, pr_trianglefan );
+	d3d_model_vertex_normal_texture( id, x2,y1,z1, 1,0,0, 1,1 );
+	d3d_model_vertex_normal_texture( id, x2,y2,z1, 1,0,0, 0,1 );
+	d3d_model_vertex_normal_texture( id, x2,y2,z2, 1,0,0, 0,0 );
+	d3d_model_vertex_normal_texture( id, x2,y1,z2, 1,0,0, 1,0 );
+	d3d_model_primitive_end( id );
 	
-	//meshes[id]->useColors = true;
-    meshes[id]->useTextures = true;
-    meshes[id]->useNormals = true;
-  }
-  
-  // Supply the indices, the batcher will automatically offset them for us
-  if (closed) {
-    meshes[id]->indices.insert(meshes[id]->indices.end(), inds, inds + 36);
-  } else {
-    meshes[id]->indices.insert(meshes[id]->indices.end(), inds, inds + 24);
-  }
-  
-  d3d_model_primitive_end(id);
+	// Negative Y
+	d3d_model_primitive_begin( id, pr_trianglefan );
+	d3d_model_vertex_normal_texture( id, x1,y1,z1, 0,-1,0, 0,1 );
+	d3d_model_vertex_normal_texture( id, x2,y1,z1, 0,-1,0, 1,1 );
+	d3d_model_vertex_normal_texture( id, x2,y1,z2, 0,-1,0, 1,0 );
+	d3d_model_vertex_normal_texture( id, x1,y1,z2, 0,-1,0, 0,0 );
+	d3d_model_primitive_end( id );
+
+	// Positive Y
+	d3d_model_primitive_begin( id, pr_trianglefan );
+	d3d_model_vertex_normal_texture( id, x1,y2,z1, 0,1,0, 1,1 );
+	d3d_model_vertex_normal_texture( id, x1,y2,z2, 0,1,0, 1,0 );
+	d3d_model_vertex_normal_texture( id, x2,y2,z2, 0,1,0, 0,0 );
+	d3d_model_vertex_normal_texture( id, x2,y2,z1, 0,1,0, 0,1 );
+	d3d_model_primitive_end( id );
+	
+	if (closed) {
+		// Negative Z
+		d3d_model_primitive_begin( id, pr_trianglefan );
+		d3d_model_vertex_normal_texture( id, x1,y1,z1, 0,0,-1, 0,0 );
+		d3d_model_vertex_normal_texture( id, x1,y2,z1, 0,0,-1, 0,1 );
+		d3d_model_vertex_normal_texture( id, x2,y2,z1, 0,0,-1, 1,1 );
+		d3d_model_vertex_normal_texture( id, x2,y1,z1, 0,0,-1, 1,0 );
+		d3d_model_primitive_end( id );
+
+		// Positive Z
+		d3d_model_primitive_begin( id, pr_trianglefan );
+		d3d_model_vertex_normal_texture( id, x1,y1,z2, 0,0,1, 0,0 );
+		d3d_model_vertex_normal_texture( id, x2,y1,z2, 0,0,1, 1,0 );
+		d3d_model_vertex_normal_texture( id, x2,y2,z2, 0,0,1, 1,1 );
+		d3d_model_vertex_normal_texture( id, x1,y2,z2, 0,0,1, 0,1 );
+		d3d_model_primitive_end( id );
+	}
 }
 
 void d3d_model_cylinder(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, gs_scalar hrep, gs_scalar vrep, bool closed, int steps)
@@ -738,7 +755,7 @@ void d3d_model_ellipsoid(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_sc
   d3d_model_primitive_begin(id, pr_trianglefan);
   v[k][0] = cx; v[k][1] = cy; v[k][2] = cz - rz;
   t[k][0] = 0; t[k][1] = vrep;
-  d3d_model_vertex_texture(id, cx, cy, cz - rz, 0, vrep);
+  d3d_model_vertex_normal_texture(id, cx, cy, cz - rz, cx, cy, cz - rz, 0, vrep);
   k++;
   b = qr-M_PI/2;
   cosb = cos(b);
@@ -749,7 +766,7 @@ void d3d_model_ellipsoid(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_sc
   {
     v[k][0] = px; v[k][1] = py; v[k][2] = cz + pz;
     t[k][0] = txp[i]; t[k][1] = tzp;
-    d3d_model_vertex_texture(id, px, py, cz + pz, txp[i], tzp);
+    d3d_model_vertex_normal_texture(id, px, py, cz + pz, px, py, cz + pz, txp[i], tzp);
     k++; px = cx+cosx[i]*cosb; py = cy+siny[i]*cosb;
  }
  d3d_model_primitive_end(id);
@@ -764,10 +781,10 @@ void d3d_model_ellipsoid(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_sc
     for (int i = 0; i <= steps; i++)
     {
         kk = k - steps - 1;
-        d3d_model_vertex_texture(id, v[kk][0], v[kk][1], v[kk][2], t[kk][0], t[kk][1]);
+        d3d_model_vertex_normal_texture(id, v[kk][0], v[kk][1], v[kk][2], 0, 0, 0, t[kk][0], t[kk][1]);
         v[k][0] = px; v[k][1] = py; v[k][2] = cz + pz;
         t[k][0] = txp[i]; t[k][1] = tzp;
-        d3d_model_vertex_texture(id, px, py, cz + pz, txp[i], tzp);
+        d3d_model_vertex_normal_texture(id, px, py, cz + pz, px, py, cz + pz, txp[i], tzp);
         k++; px = cx+cosx[i]*cosb; py = cy+siny[i]*cosb;
     }
     d3d_model_primitive_end(id);
@@ -775,12 +792,13 @@ void d3d_model_ellipsoid(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_sc
   d3d_model_primitive_begin(id, pr_trianglefan);
   v[k][0] = cx; v[k][1] = cy; v[k][2] = cz + rz;
   t[k][0] = 0; t[k][1] = 0;
-  d3d_model_vertex_texture(id, cx, cy, cz + rz, 0, 0);
+  d3d_model_vertex_normal_texture(id, cx, cy, cz + rz, 0,0,0, 0, 0);
   k++;
   for (int i = k - steps - 2; i <= k - 2; i++)
   {
-  d3d_model_vertex_texture(id, v[i][0], v[i][1], v[i][2], t[i][0], t[i][1]);
+	d3d_model_vertex_normal_texture(id, v[i][0], v[i][1], v[i][2], 0, 0, 0, t[i][0], t[i][1]);
   }
+  d3d_model_primitive_end(id);
 }
 
 void d3d_model_icosahedron(int id)

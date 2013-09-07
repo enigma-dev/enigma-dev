@@ -85,6 +85,7 @@ namespace enigma
 {
 	extern bool d3dMode;
     extern bool d3dHidden;
+	extern int d3dCulling;
     extern std::map<int,roomstruct*> roomdata;
     particles_implementation* particles_impl;
     void set_particles_implementation(particles_implementation* part_impl)
@@ -369,6 +370,9 @@ void screen_redraw()
         }
         view_current = 0;
     }
+	
+	int culling = d3d_get_culling();
+	d3d_set_culling(rs_none);
 
 	// Now process the sub event of draw called draw gui
 	// It is for drawing GUI elements without view scaling and transformation
@@ -407,6 +411,8 @@ void screen_redraw()
         if (enigma::d3dMode)
 			d3ddev->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
 			
+		d3ddev->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+			
         bool stop_loop = false;
         for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
         {
@@ -422,9 +428,13 @@ void screen_redraw()
             enigma::instance_event_iterator = push_it;
             if (stop_loop) break;
         }
+		
 	}
 	
+	//d3ddev->SetRenderState(D3DRS_CULLMODE, D3DCULL_CW);
 	dsprite->End();
+	// reset the culling
+	d3d_set_culling(culling);
     d3ddev->EndScene();    // ends the 3D scene
 		
 	screen_refresh();
