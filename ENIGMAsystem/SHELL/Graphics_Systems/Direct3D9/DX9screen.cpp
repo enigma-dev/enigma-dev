@@ -426,13 +426,14 @@ void screen_redraw()
             if (stop_loop) break;
         }
 		
-		// reset the culling
-		if (enigma::d3dCulling) {
-			d3ddev->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
-		}
 	}
 	
+	d3ddev->SetRenderState(D3DRS_CULLMODE, D3DCULL_CW);
 	dsprite->End();
+	// reset the culling
+	if (enigma::d3dCulling) {
+		d3ddev->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
+	}
     d3ddev->EndScene();    // ends the 3D scene
 		
 	screen_refresh();

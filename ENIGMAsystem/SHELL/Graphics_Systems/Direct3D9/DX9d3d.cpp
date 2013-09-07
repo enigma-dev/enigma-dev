@@ -129,9 +129,9 @@ void d3d_set_culling(bool enable)
 {
 	enigma::d3dCulling = enable;
 	if (enable) {
-		//d3ddev->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
+		d3ddev->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
 	} else {
-		//d3ddev->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+		d3ddev->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
 	}
 }
 
