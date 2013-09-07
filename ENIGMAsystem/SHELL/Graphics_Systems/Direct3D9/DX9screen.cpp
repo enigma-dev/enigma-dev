@@ -407,6 +407,8 @@ void screen_redraw()
         if (enigma::d3dMode)
 			d3ddev->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
 			
+		d3d_set_culling(false);
+			
         bool stop_loop = false;
         for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
         {

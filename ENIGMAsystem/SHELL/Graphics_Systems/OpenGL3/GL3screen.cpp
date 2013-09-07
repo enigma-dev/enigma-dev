@@ -383,8 +383,9 @@ void screen_redraw()
         }
         view_current = 0;
     }
-
+	
 	draw_globalVBO();
+	
 			
 	// Now process the sub event of draw called draw gui
 	// It is for drawing GUI elements without view scaling and transformation
@@ -403,6 +404,8 @@ void screen_redraw()
 
         bool stop_loop = false;
 
+		d3d_set_culling(false);
+		
         for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
         {
 

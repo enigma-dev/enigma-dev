@@ -372,6 +372,8 @@ void screen_redraw()
         if (enigma::d3dMode)
 			glClear(GL_DEPTH_BUFFER_BIT);
 
+		d3d_set_culling(false);
+			
         bool stop_loop = false;
         for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
         {
