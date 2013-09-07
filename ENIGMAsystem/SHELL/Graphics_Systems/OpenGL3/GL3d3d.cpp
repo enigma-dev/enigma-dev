@@ -173,7 +173,6 @@ void d3d_set_fog_density(double density)
 void d3d_set_culling(bool enable)
 {
   (enable?glEnable:glDisable)(GL_CULL_FACE);
-  glFrontFace(GL_CW);
 }
 
 void d3d_set_culling_mode(int mode) {
