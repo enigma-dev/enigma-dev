@@ -36,9 +36,6 @@ enum {
   rs_back,
   rs_front_back,
   
-  rs_clockwise,
-  rs_counterclockwise,
-  
   rs_nicest,
   rs_fastest,
   rs_dontcare,
@@ -56,6 +53,12 @@ enum {
   rs_gequal, 	// source Z >= depth Z     D3DCMP_GREATEREQUAL
   rs_always     // Always True             D3DCMP_ALWAYS
 };
+
+enum {
+  rs_none, // No culling
+  rs_cw, // Clockwise culling
+  rs_ccw // Counter-clockwise culling
+};
 }
 
 extern double projection_matrix[16];
@@ -72,9 +75,8 @@ void d3d_set_hidden(bool enable);
 void d3d_set_zwriteenable(bool enable);
 void d3d_set_lighting(bool enable);
 
-void d3d_set_culling(bool enable);
-void d3d_set_culling_mode(int mode);
-void d3d_set_culling_orientation(int mode);
+void d3d_set_culling(int mode);
+int d3d_get_culling();
 void d3d_set_render_mode(int face, int fill);
 void d3d_set_line_width(float value);
 void d3d_set_point_size(float value);
