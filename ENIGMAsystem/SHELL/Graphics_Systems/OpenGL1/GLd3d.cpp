@@ -173,6 +173,8 @@ void d3d_set_fog_density(double density)
 void d3d_set_culling(bool enable)
 {
   (enable?glEnable:glDisable)(GL_CULL_FACE);
+  // Game Maker uses clockwise culling, the opposite of the OpenGL and Direct3D defaults
+  glFrontFace(GL_CW); 
 }
 
 void d3d_set_culling_mode(int mode) {
