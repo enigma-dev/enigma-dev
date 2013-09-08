@@ -174,6 +174,7 @@ void texture_set_enabled(bool enable)
 
 void texture_set_interpolation(int enable)
 {
+  enigma::interpolate_textures = enable;
   for (int i = 0; i < GmTextures.size(); i++)
   {
     glBindTexture(GL_TEXTURE_2D, GmTextures[i]->gltex);
