@@ -431,8 +431,25 @@ void screen_redraw()
 		
 	}
 	
+	// Textures should be clamped when rendering 2D sprites and stuff, so memorize it.
+	DWORD wrapu, wrapv, wrapw;
+	d3ddev->GetSamplerState( 0, D3DSAMP_ADDRESSU, &wrapu );
+	d3ddev->GetSamplerState( 0, D3DSAMP_ADDRESSV, &wrapv );
+	d3ddev->GetSamplerState( 0, D3DSAMP_ADDRESSW, &wrapw );
+	
+	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP );
+	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP );
+	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSW, D3DTADDRESS_CLAMP );
+	// The D3D sprite batcher uses clockwise face culling which is default but can't tell if 
+	// this here should memorize it and force it to CW all the time and then reset what the user had
+	// or not.
 	//d3ddev->SetRenderState(D3DRS_CULLMODE, D3DCULL_CW);
 	dsprite->End();
+	// And now reset the texture repetition.
+	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSU, wrapu );
+	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSV, wrapv );
+	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSW, wrapw );
+	
 	// reset the culling
 	d3d_set_culling(culling);
     d3ddev->EndScene();    // ends the 3D scene
