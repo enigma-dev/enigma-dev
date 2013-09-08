@@ -35,17 +35,21 @@ namespace enigma {
   bool d3dMode = false;
   bool d3dHidden = false;
   bool d3dZWriteEnable = true;
-  bool d3dCulling = false;
+  int d3dCulling = 0;
 }
 
 double projection_matrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1}, transformation_matrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
 
 GLenum renderstates[22] = {
   GL_FILL, GL_LINE, GL_POINT, GL_FRONT, GL_BACK,
-  GL_FRONT_AND_BACK, GL_CW, GL_CCW,
-  GL_NICEST, GL_FASTEST, GL_DONT_CARE, GL_EXP, GL_EXP2,
-  GL_LINEAR, GL_NEVER, GL_LESS, GL_EQUAL, GL_LEQUAL,
-  GL_GREATER, GL_NOTEQUAL, GL_GEQUAL, GL_ALWAYS
+  GL_FRONT_AND_BACK, GL_NICEST, GL_FASTEST, GL_DONT_CARE, 
+  GL_EXP, GL_EXP2, GL_LINEAR, GL_NEVER, GL_LESS, 
+  GL_EQUAL, GL_LEQUAL, GL_GREATER, GL_NOTEQUAL, 
+  GL_GEQUAL, GL_ALWAYS
+};
+
+GLenum cullingstates[3] = {
+  0, GL_CW, GL_CCW
 };
 
 namespace enigma_user
@@ -61,7 +65,7 @@ void d3d_start()
   enigma::d3dMode = true;
   enigma::d3dHidden = true;
   enigma::d3dZWriteEnable = true;
-  enigma::d3dCulling = false;
+  enigma::d3dCulling = rs_none;
   glDepthMask(true);
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_ALPHA_TEST);
@@ -86,7 +90,7 @@ void d3d_end()
   enigma::d3dMode = false;
   enigma::d3dHidden = false;
   enigma::d3dZWriteEnable = false;
-  enigma::d3dCulling = false;
+  enigma::d3dCulling = rs_none;
   glDepthMask(false);
   glDisable(GL_DEPTH_TEST);
   glDisable(GL_ALPHA_TEST);
@@ -173,20 +177,16 @@ void d3d_set_fog_density(double density)
   glFogf(GL_FOG_DENSITY, density);
 }
 
-void d3d_set_culling(bool enable)
+void d3d_set_culling(int mode)
 {
-  enigma::d3dCulling = enable;
-  (enable?glEnable:glDisable)(GL_CULL_FACE);
+  enigma::d3dCulling = mode;
+  ((mode > 0)?glEnable:glDisable)(GL_CULL_FACE);
   // Game Maker uses clockwise culling, the opposite of the OpenGL and Direct3D defaults
-  glFrontFace(GL_CW); 
+  glFrontFace(cullingstates[mode]);
 }
 
-void d3d_set_culling_mode(int mode) {
-  glCullFace(renderstates[mode]);
-}
-
-void d3d_set_culling_orientation(int mode) {
-  glFrontFace(renderstates[mode]);
+int d3d_get_culling() {
+	return enigma::d3dCulling;
 }
 
 void d3d_set_render_mode(int face, int fill)

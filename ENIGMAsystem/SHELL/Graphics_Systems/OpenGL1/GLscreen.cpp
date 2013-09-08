@@ -82,7 +82,7 @@ static inline void draw_back()
 namespace enigma
 {
     extern bool d3dMode;
-	extern bool d3dCulling;
+	extern int d3dCulling;
     extern std::map<int,roomstruct*> roomdata;
     particles_implementation* particles_impl;
     void set_particles_implementation(particles_implementation* part_impl)
@@ -373,7 +373,8 @@ void screen_redraw()
         if (enigma::d3dMode)
 			glClear(GL_DEPTH_BUFFER_BIT);
 
-		glDisable(GL_CULL_FACE);
+		int culling = d3d_get_culling();
+		d3d_set_culling(rs_none);
 			
         bool stop_loop = false;
         for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
@@ -392,9 +393,7 @@ void screen_redraw()
         }
 		
 		// reset the culling
-		if (enigma::d3dCulling) {
-			glEnable(GL_CULL_FACE);
-		}
+		d3d_set_culling(culling);
     }
 
     screen_refresh();

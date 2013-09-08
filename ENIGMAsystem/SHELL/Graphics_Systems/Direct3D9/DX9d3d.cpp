@@ -32,8 +32,12 @@ namespace enigma {
   bool d3dMode = false;
   bool d3dHidden = false;
   bool d3dZWriteEnable = true;
-  bool d3dCulling = false;
+  int d3dCulling = 0;
 }
+
+D3DCULL cullingstates[3] = {
+  D3DCULL_NONE, D3DCULL_CW, D3DCULL_CCW
+};
 
 namespace enigma_user
 {
@@ -41,7 +45,7 @@ namespace enigma_user
 void d3d_start()
 {
 	enigma::d3dMode = true;
-	enigma::d3dCulling =  false;
+	enigma::d3dCulling =  rs_none;
 	d3ddev->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
 	d3d_set_hidden(false);
 }
@@ -49,7 +53,7 @@ void d3d_start()
 void d3d_end()
 {
 	enigma::d3dMode = false;
-	enigma::d3dCulling = false;
+	enigma::d3dCulling = rs_none;
 	d3d_set_hidden(false);
 }
 
@@ -125,14 +129,15 @@ void d3d_set_fog_density(double density)
 	d3ddev->SetRenderState(D3DRS_FOGDENSITY, *(DWORD *)(&density));
 }
 
-void d3d_set_culling(bool enable)
+void d3d_set_culling(int mode)
 {
-	enigma::d3dCulling = enable;
-	if (enable) {
-		d3ddev->SetRenderState(D3DRS_CULLMODE, D3DCULL_CCW);
-	} else {
-		d3ddev->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
-	}
+	enigma::d3dCulling = mode;
+	// Game Maker uses clockwise culling, the opposite of the OpenGL and Direct3D defaults
+	d3ddev->SetRenderState(D3DRS_CULLMODE, cullingstates[mode]);
+}
+
+int d3d_get_culling() {
+	return enigma::d3dCulling;
 }
 
 void d3d_set_culling_mode(int mode) {
