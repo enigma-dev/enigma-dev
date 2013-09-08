@@ -170,7 +170,10 @@ void texture_set_stage(int stage, int texid) {
 
 void texture_set_repeat(bool repeat)
 {
-
+	enigma::interpolate_textures = repeat;
+	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSU, repeat?D3DTADDRESS_WRAP:D3DTADDRESS_CLAMP );
+	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSV, repeat?D3DTADDRESS_WRAP:D3DTADDRESS_CLAMP );
+	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSW, repeat?D3DTADDRESS_WRAP:D3DTADDRESS_CLAMP );
 }
 
 void texture_set_repeat(int texid, bool repeat)

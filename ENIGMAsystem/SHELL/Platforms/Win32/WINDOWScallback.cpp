@@ -39,11 +39,13 @@ extern short mouse_hscrolls;
 extern short mouse_vscrolls;
 namespace enigma_user {
 extern string keyboard_lastchar;
+extern string keyboard_string;
 }
 
 namespace enigma
 {
     using enigma_user::keyboard_lastchar;
+	using enigma_user::keyboard_string;
     extern char mousestatus[3],last_mousestatus[3],keybdstatus[256],last_keybdstatus[256];
     extern int windowX, windowY, windowWidth, windowHeight;
     extern double  scaledWidth, scaledHeight;
@@ -122,6 +124,7 @@ namespace enigma
 
         case WM_CHAR:
             keyboard_lastchar = string(1,wParam);
+			keyboard_string += keyboard_lastchar;
             return 0;
 
         case WM_KEYDOWN:

@@ -116,12 +116,23 @@ void draw_globalVBO()
         glEnableClientState(GL_COLOR_ARRAY);
 
         glBindBufferARB(GL_ARRAY_BUFFER, globalVBO);
+		
+		// Textures should be clamped when rendering 2D sprites and stuff, so memorize it.
+		GLint wrapr, wraps, wrapt;
+		glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, &wrapr);
+		glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, &wraps);
+		glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, &wrapt);
+		
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 
         if (globalVBO_verCount>globalVBO_maxBSize) glBufferDataARB(GL_ARRAY_BUFFER, globalVBO_datCount * sizeof(gs_scalar), &globalVBO_data[0], GL_DYNAMIC_DRAW), globalVBO_maxBSize = globalVBO_verCount;
         else glBufferSubDataARB(GL_ARRAY_BUFFER, 0, globalVBO_datCount * sizeof(gs_scalar), &globalVBO_data[0]);
         glVertexPointer( 2, GL_FLOAT, sizeof(gs_scalar) * 8, NULL );
         glTexCoordPointer( 2, GL_FLOAT, sizeof(gs_scalar) * 8, (void*)(sizeof(gs_scalar) * 2) );
         glColorPointer( 4, GL_FLOAT, sizeof(gs_scalar) * 8, (void*)(sizeof(gs_scalar) * 4) );
+		
 
 		// this sprite batching mechanism does not allow one to apply transformations to sprites or text
 		// like is possible with the Direct3D 9 sprite batcher or traditionally in Game Maker.
@@ -132,6 +143,11 @@ void draw_globalVBO()
 		if (d3dZWriteEnable) {
 		  glDepthMask(true);
 		}
+		
+		// And now reset the textures repetition
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, wrapr);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wraps);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapt);
 		
         glDisableClientState( GL_COLOR_ARRAY );
         glDisableClientState( GL_TEXTURE_COORD_ARRAY );

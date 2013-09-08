@@ -174,6 +174,7 @@ void texture_set_interpolation(int enable)
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,enable?GL_LINEAR:GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,enable?GL_LINEAR:GL_NEAREST);
   }
+  glBindTexture(GL_TEXTURE_2D, enigma::bound_texture);
 }
 
 bool texture_get_interpolation()
