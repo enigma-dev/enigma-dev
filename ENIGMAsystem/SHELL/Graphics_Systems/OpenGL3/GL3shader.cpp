@@ -17,6 +17,7 @@
 
 #include "../General/OpenGLHeaders.h"
 #include "GL3shader.h"
+#include "GL3binding.h"
 #include "GLSLshader.h"
 #include <math.h>
 
@@ -197,6 +198,7 @@ void glsl_program_set(int id)
 void glsl_program_reset()
 {
   glUseProgram(0);
+  texture_reset();
 }
 
 void glsl_program_free(int id)
