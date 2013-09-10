@@ -182,7 +182,9 @@ class Mesh
 
   void End()
   {
-	//NOTE: This batching does not check for degenerate primitives or remove duplicate vertices.
+	//NOTE: This batching only checks for degenerate primitives on triangle strips and fans since the GPU does not render triangles where the two
+	//vertices are exactly the same, triangle lists could also check for degenerates, it is unknown whether the GPU will render a degenerative 
+	//in a line strip primitive.
 	
 	unsigned stride = 3;
     if (useNormals) stride += 3;
@@ -238,6 +240,8 @@ class Mesh
 			if (indices.size() > 0) {
 				for (std::vector<unsigned>::iterator it = indices.begin(); it != indices.end(); ++it) { *it += triangleCount; }
 				for (unsigned i = 0; i < indices.size() - 2; i++) {
+					// check for and continue if indexed triangle is degenerate, because the GPU won't render it anyway
+					if (indices[i] == indices[i + 1] || indices[i] == indices[i + 2]  || indices[i + 1] == indices[i + 2] ) { continue; }
 					triangleIndices.push_back(indices[i]);
 					triangleIndices.push_back(indices[i+1]);
 					triangleIndices.push_back(indices[i+2]);
@@ -274,6 +278,8 @@ class Mesh
 			if (indices.size() > 0) {
 				for (std::vector<unsigned>::iterator it = indices.begin(); it != indices.end(); ++it) { *it += triangleCount; }
 				for (unsigned i = 1; i < indices.size() - 1; i++) {
+					// check for and continue if indexed triangle is degenerate, because the GPU won't render it anyway
+					if (indices[0] == indices[i] || indices[0] == indices[i + 1]  || indices[i] == indices[i + 1] ) { continue; }
 					triangleIndices.push_back(indices[0]);
 					triangleIndices.push_back(indices[i]);
 					triangleIndices.push_back(indices[i + 1]);
