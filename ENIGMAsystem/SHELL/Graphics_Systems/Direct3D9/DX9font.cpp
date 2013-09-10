@@ -342,6 +342,11 @@ void draw_text(gs_scalar x, gs_scalar y, variant vstr)
   }
 }
 
+void draw_text_skewed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar top, gs_scalar bottom)
+{
+
+}
+
 void draw_text_ext(gs_scalar x, gs_scalar y, variant vstr, gs_scalar sep, gs_scalar w)
 {
   string str = toString(vstr);

@@ -103,6 +103,9 @@ void screen_redraw()
 {
 	// Should implement extended lost device checking
 	//if (d3ddev == NULL ) return;
+	
+	// Clean up any textures that ENIGMA may still think are binded but actually are not
+	texture_reset();
 
     d3ddev->BeginScene();    // begins the 3D scene
 	dsprite->Begin(D3DXSPRITE_ALPHABLEND | D3DXSPRITE_DO_NOT_ADDREF_TEXTURE);

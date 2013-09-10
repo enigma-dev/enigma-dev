@@ -51,7 +51,7 @@ public class EgmIO extends FileView implements FileReader,FileWriter,GroupFilter
 		return filter.accept(new File(uri));
 		}
 
-	public ProjectFile read(InputStream in, URI uri, ResNode root, boolean gmx) throws GmFormatException
+	public ProjectFile read(InputStream in, URI uri, ResNode root) throws GmFormatException
 		{
 		return EFileReader.readEgmFile(new File(uri),root,true);
 		}

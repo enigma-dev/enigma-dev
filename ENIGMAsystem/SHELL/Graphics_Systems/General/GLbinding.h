@@ -27,11 +27,11 @@ unsigned get_texture(int texid);
 #define use_bound_texture_global
 #ifdef use_bound_texture_global
   namespace enigma { extern unsigned bound_texture; }
-  #define texture_reset() if(enigma::bound_texture) glBindTexture(GL_TEXTURE_2D,enigma::bound_texture=0);
+  #define texture_reset() if(enigma::bound_texture) glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_2D,enigma::bound_texture=0);
   #define texture_use(texid) if (enigma::bound_texture != unsigned(texid)) \
     glBindTexture(GL_TEXTURE_2D,enigma::bound_texture = texid)
 #else
-  #define texture_reset() glBindTexture(GL_TEXTURE_2D, 0)
+  #define texture_reset() glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_2D, 0)
   #define texture_use(texid) glBindTexture(GL_TEXTURE_2D, texid)
 #endif
 

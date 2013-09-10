@@ -350,6 +350,73 @@ void draw_text(gs_scalar x, gs_scalar y,variant vstr)
   }
 }
 
+void draw_text_skewed(gs_scalar x, gs_scalar y,variant vstr, gs_scalar top, gs_scalar bottom)
+{
+  #ifdef CODEBLOX
+    return;
+  #endif
+  string str = toString(vstr);
+  get_fontv(fnt,currentfont);
+  //texture_use(fnt->texture);
+    texture_use(GmTextures[fnt->texture]->gltex);
+  float yy = valign == fa_top ? y+fnt->yoffset : valign == fa_middle ? y +fnt->yoffset - string_height(str)/2 : y + fnt->yoffset - string_height(str);
+  if (halign == fa_left){
+      float xx = x;
+      glBegin(GL_QUADS);
+      for (unsigned i = 0; i < str.length(); i++)
+      {
+        if (str[i] == '\r')
+          xx = x, yy += fnt->height, i += str[i+1] == '\n';
+        else if (str[i] == '\n')
+          xx = x, yy += fnt->height;
+        else if (str[i] == ' ')
+          xx += get_space_width(fnt);
+        else
+        {
+          fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
+            glTexCoord2f(g.tx,  g.ty);
+              glVertex2i(xx + g.x + top,  yy + g.y + top);
+            glTexCoord2f(g.tx2, g.ty);
+              glVertex2i(xx + g.x2 + top, yy + g.y + top);
+            glTexCoord2f(g.tx2, g.ty2);
+              glVertex2i(xx + g.x2 + bottom, yy + g.y2 + bottom);
+            glTexCoord2f(g.tx,  g.ty2);
+              glVertex2i(xx + g.x + bottom,  yy + g.y2 + bottom);
+          xx += int(g.xs);
+        }
+      }
+      glEnd();
+  } else {
+      float xx = halign == fa_center ? x-float(string_width_line(str,0)/2) : x-float(string_width_line(str,0)), line = 0;
+      glBegin(GL_QUADS);
+      for (unsigned i = 0; i < str.length(); i++)
+      {
+        if (str[i] == '\r'){
+          line +=1, yy += fnt->height, i += str[i+1] == '\n';
+          xx = halign == fa_center ? x-float(string_width_line(str,line)/2) : x-float(string_width_line(str,line));
+        } else if (str[i] == '\n'){
+          line +=1, yy += fnt->height;
+          xx = halign == fa_center ? x-float(string_width_line(str,line)/2) : x-float(string_width_line(str,line));
+        } else if (str[i] == ' ')
+          xx += get_space_width(fnt);
+        else
+        {
+          fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
+            glTexCoord2f(g.tx,  g.ty);
+              glVertex2i(xx + g.x + top,  yy + g.y + top);
+            glTexCoord2f(g.tx2, g.ty);
+              glVertex2i(xx + g.x2 + top, yy + g.y + top);
+            glTexCoord2f(g.tx2, g.ty2);
+              glVertex2i(xx + g.x2 + bottom, yy + g.y2 + bottom);
+            glTexCoord2f(g.tx,  g.ty2);
+              glVertex2i(xx + g.x + bottom,  yy + g.y2 + bottom);
+          xx += float(g.xs);
+        }
+      }
+      glEnd();
+  }
+}
+
 void draw_text_ext(gs_scalar x, gs_scalar y,variant vstr, gs_scalar sep, gs_scalar w)
 {
   string str = toString(vstr);
