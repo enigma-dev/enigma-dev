@@ -400,7 +400,7 @@ int main(int argc, char *argv[])
     FILE_WRITE_DATA,
     FILE_SHARE_WRITE | FILE_SHARE_READ,
     &sa,
-    OPEN_ALWAYS,
+    CREATE_ALWAYS,
     FILE_ATTRIBUTE_NORMAL,
     NULL );
 
