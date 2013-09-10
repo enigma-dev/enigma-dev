@@ -96,6 +96,9 @@ namespace enigma_user
 
 void screen_redraw()
 {
+	// Clean up any textures that ENIGMA may still think are binded but actually are not
+	texture_reset();
+	
     int FBO;
     if (!view_enabled)
     {
