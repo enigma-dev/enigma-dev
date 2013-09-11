@@ -128,7 +128,7 @@ string net_receive(int sock) {
 int net_bounce(int sock) {
  struct sockaddr_storage whom;
  u_int len = sizeof(whom);
- int n = recvfrom(sock,buf,BUFSIZE,0,(struct sockaddr *)&whom,&len);
+ int n = recvfrom(sock,buf,BUFSIZE,0,(struct sockaddr *)&whom,(int*)&len);
  if (n == 0) return 1;
  if (n == SOCKET_ERROR) return -1;
  printf("Bouncing: %s\n",buf);
@@ -139,13 +139,14 @@ int net_bounce(int sock) {
 }
 
 int net_send_raw(int sock, string msg, int len) {
-  send(sock, msg.c_str(), len, 0); 
+  send(sock, msg.c_str(), len, 0);
+  return 0;
 }
 
 int net_get_port(int sock) {
  struct sockaddr_in sa;
  u_int sas = sizeof(sa);
- if (getsockname(sock, (struct sockaddr*) &sa, &sas) == SOCKET_ERROR) {
+ if (getsockname(sock, (struct sockaddr*) &sa, (int*)&sas) == SOCKET_ERROR) {
   closesocket(sock);
   return -1;
  }
