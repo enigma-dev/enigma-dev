@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Robert B. Colton, Josh Ventura, DatZach, Polygone
+/** Copyright (C) 2008-2013 Robert B. Colton, Adriano Tumminelli, Josh Ventura, DatZach, Polygone
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -47,6 +47,94 @@ unsigned get_texture(int texid);
 extern GLenum ptypes_by_id[16];
 namespace enigma {
   extern unsigned char currentcolor[4];
+  
+  
+//split a string and convert to float
+vector<float> float_split(const string& str, const char& ch) {
+	string next;
+	vector<float> result;
+
+	for (string::const_iterator it = str.begin(); it != str.end(); it++)
+	{
+		if (*it == ch)
+		{
+			if (!next.empty())
+			{
+				result.push_back(atof(next.c_str()));
+				next.clear();
+			}
+		}else {
+			next += *it;
+		}
+	}
+	if (!next.empty())
+		 result.push_back(atof(next.c_str()));
+	return result;
+}
+
+//obj model parsing functions
+void string_parse( string *s )
+{
+	size_t spaces = 0;
+	bool trimmed = false;
+	bool checknormal = false;
+	for (unsigned int i = 0; i < s->size() ; i++)
+	{ 
+		//comment
+		if ((*s)[i] == '#')
+		{
+			s->erase(i, s->length() - i);
+			break;
+		}
+		else if((*s)[i] == ' ')
+		{
+			if (!trimmed)
+			{
+				s->erase(i,1);
+				i--;
+			}
+			else
+			{
+				if (spaces >= 1)
+				{
+					s->erase(i,1);
+					i--;
+				}
+				spaces++;
+			}
+			
+			
+		}
+		else
+		{
+			if((*s)[i] == '/')
+			{
+				(*s)[i] = ' ';
+				if(checknormal)
+				{
+					s->erase(i, 1);
+					checknormal = false;
+				}
+				else
+					checknormal = true;
+			}
+			else
+				checknormal = false;
+			spaces = 0;
+			trimmed = true;
+		}
+
+		
+	}
+	//end trim
+	if (s->size() > 0)
+		if ((*s)[s->size()-1] == ' ')
+		{
+			s->erase(s->size()-1, 1);
+		}
+	
+}
+
 }
 
 //NOTE: This class handles batching, indexing, and other optimization for you and is very very efficient.
@@ -137,11 +225,6 @@ class Mesh
   {
     vertices.push_back(x); vertices.push_back(y); vertices.push_back(z);
   }
-  
-  void AddIndex(unsigned ind)
-  {
-    indices.push_back(ind);
-  }
 
   void AddNormal(gs_scalar nx, gs_scalar ny, gs_scalar nz)
   {
@@ -164,14 +247,10 @@ class Mesh
 
   void End()
   {
-	//NOTE: This batching only checks for degenerate primitives on triangle strips and fans since the GPU does not render triangles where the two
-	//vertices are exactly the same, triangle lists could also check for degenerates, it is unknown whether the GPU will render a degenerative 
-	//in a line strip primitive.
+	//NOTE: This batching does not check for degenerate primitives or remove duplicate vertices.
 	
-	unsigned stride = 3;
-    if (useNormals) stride += 3;
-	if (useTextures) stride += 2;
-    if (useColors) stride += 4;
+	
+	unsigned int stride = 3 + useNormals*3 + useTextures*2 + useColors*4;
 	
 	// Primitive has ended so now we need to batch the vertices that were given into single lists, eg. line list, triangle list, point list
 	// Indices are optionally supplied, model functions can also be added for the end user to supply the indexing themselves for each primitive
@@ -193,10 +272,7 @@ class Mesh
 			lineVertices.insert(lineVertices.end(), vertices.begin(), vertices.end());
 			if (indices.size() > 0) {
 				for (std::vector<GLuint>::iterator it = indices.begin(); it != indices.end(); ++it) { *it += lineCount; }
-				for (unsigned i = 0; i < indices.size() - 2; i++) {
-					lineIndices.push_back(indices[i]);
-					lineIndices.push_back(indices[i + 1]);
-				}
+				lineIndices.insert(lineIndices.end(), indices.begin(), indices.end());
 			} else {
 				for (unsigned i = 0; i < vertices.size() / stride - 1; i++) {
 					lineIndices.push_back(lineCount + i);
@@ -221,13 +297,7 @@ class Mesh
 			triangleVertices.insert(triangleVertices.end(), vertices.begin(), vertices.end());
 			if (indices.size() > 0) {
 				for (std::vector<GLuint>::iterator it = indices.begin(); it != indices.end(); ++it) { *it += triangleCount; }
-				for (unsigned i = 0; i < indices.size() - 2; i++) {
-					// check for and continue if indexed triangle is degenerate, because the GPU won't render it anyway
-					if (indices[i] == indices[i + 1] || indices[i] == indices[i + 2]  || indices[i + 1] == indices[i + 2] ) { continue; }
-					triangleIndices.push_back(indices[i]);
-					triangleIndices.push_back(indices[i+1]);
-					triangleIndices.push_back(indices[i+2]);
-				}
+				triangleIndices.insert(triangleIndices.end(), indices.begin(), indices.end());
 			} else {
 				for (unsigned i = 0; i < vertices.size() / stride - 2; i++) {
 					if (i % 2) {
@@ -259,13 +329,7 @@ class Mesh
 			triangleVertices.insert(triangleVertices.end(), vertices.begin(), vertices.end());
 			if (indices.size() > 0) {
 				for (std::vector<GLuint>::iterator it = indices.begin(); it != indices.end(); ++it) { *it += triangleCount; }
-				for (unsigned i = 1; i < indices.size() - 1; i++) {
-					// check for and continue if indexed triangle is degenerate, because the GPU won't render it anyway
-					if (indices[0] == indices[i] || indices[0] == indices[i + 1]  || indices[i] == indices[i + 1] ) { continue; }
-					triangleIndices.push_back(indices[0]);
-					triangleIndices.push_back(indices[i]);
-					triangleIndices.push_back(indices[i + 1]);
-				}
+				triangleIndices.insert(triangleIndices.end(), indices.begin(), indices.end());
 			} else {
 				for (unsigned i = 1; i < vertices.size() / stride - 1; i++) {
 					triangleIndices.push_back(triangleCount);
@@ -282,6 +346,214 @@ class Mesh
 	indices.clear();
   }
 
+  
+   void Translate(gs_scalar x, gs_scalar y, gs_scalar z)
+  {
+	unsigned int stride = 3 + (useNormals*3) + (useTextures*2)  + (useColors*4) ;
+	unsigned int size = triangleVertices.size();
+	for (unsigned int i = 0; i < size; i += stride)
+	{
+		triangleVertices[i] += x;
+		triangleVertices[i+1] += y;
+		triangleVertices[i+2] += z;
+	}
+  }
+   
+   
+  void RotateX(gs_scalar angle)
+  {
+	unsigned int stride = 3 + (useNormals*3) + (useTextures*2)  + (useColors*4) ;
+	angle *= 3.14159/180.0;
+	gs_scalar _cos = cos(angle);
+	gs_scalar _sin = sin(angle);
+	unsigned int size = triangleVertices.size();
+	for (unsigned int i = 0; i < size; i += stride)
+	{
+		gs_scalar y = triangleVertices[i+1];
+		gs_scalar z = triangleVertices[i+2];
+		triangleVertices[i+1] = y*_cos - z*_sin;
+		triangleVertices[i+2] = y*_sin - z*_cos;
+	}
+  }
+  
+  
+  void RotateY(gs_scalar angle)
+  {
+	unsigned int stride = 3 + (useNormals*3) + (useTextures*2)  + (useColors*4) ;
+	angle *= 3.14159/180.0;
+	gs_scalar _cos = cos(angle);
+	gs_scalar _sin = sin(angle);
+	unsigned int size = triangleVertices.size();
+	for (unsigned int i = 0; i < size; i += stride)
+	{
+		gs_scalar x = triangleVertices[i];
+		gs_scalar z = triangleVertices[i+2];
+		triangleVertices[i] = z*_sin - x*_cos;
+		triangleVertices[i+2] = z*_cos - x*_sin;
+	}
+  }
+  
+  void RotateZ(gs_scalar angle)
+  {
+	unsigned int stride = 3 + (useNormals*3) + (useTextures*2)  + (useColors*4) ;
+	angle *= 3.14159/180.0;
+	gs_scalar _cos = cos(angle);
+	gs_scalar _sin = sin(angle);
+	unsigned int size = triangleVertices.size();
+	for (unsigned int i = 0; i < size; i += stride)
+	{
+		gs_scalar x = triangleVertices[i];
+		gs_scalar y = triangleVertices[i+1];
+		triangleVertices[i] = x*_cos - y*_sin;
+		triangleVertices[i+1] = x*_sin - y*_cos;
+	}
+  }
+  
+  void Scale(gs_scalar xscale, gs_scalar yscale, gs_scalar zscale)
+  {
+	unsigned int stride = 3 + useNormals*3 + useTextures*2 + useColors*4;
+
+	for (vector<gs_scalar>::iterator i = triangleVertices.begin(); i != triangleVertices.end(); i += stride)
+	{
+		*(i+0) *= xscale;
+		*(i+1) *= yscale;
+		*(i+2) *= zscale;
+	}
+  }
+   
+  
+  
+  bool CalculateNormals(bool smooth, bool outside)
+  {
+	
+	unsigned int stride = 3 + useNormals*3 + useTextures*2 + useColors*4;
+	
+	int oft = useNormals * 3;
+	int ofc = oft + useTextures * 2 ;
+	vector<gs_scalar> tempVertices;
+
+	for (vector<gs_scalar>::const_iterator i = triangleVertices.begin(); i != triangleVertices.end(); i += stride*3)
+	{
+		gs_scalar x1 = *i;
+		gs_scalar y1 = *(i+1);
+		gs_scalar z1 = *(i+2);
+
+		gs_scalar x2 = *(i +stride);
+		gs_scalar y2 = *(i+1 +stride);
+		gs_scalar z2 = *(i+2 +stride);
+		
+		gs_scalar x3 = *(i +stride*2);
+		gs_scalar y3 = *(i+1 +stride*2);
+		gs_scalar z3 = *(i+2 +stride*2);
+		
+		gs_scalar nX = (y2-y1)*(z3-z1)-(y3-y1)*(z2-z1);
+		gs_scalar nY = (z2-z1)*(x3-x1)-(z3-z1)*(x2-x1);
+		gs_scalar nZ = (x2-x1)*(y3-y1)-(x3-x1)*(y2-y1);
+		gs_scalar  m = sqrt(nX*nX + nY*nY + nZ*nZ);
+		nX /= m;
+		nY /= m;
+		nZ /= m;
+		
+		for(int n = 0; n < 3; n++)
+		{
+			int v = n*stride;
+			//add position
+			tempVertices.push_back(*(i+0 + v));
+			tempVertices.push_back(*(i+1 + v));
+			tempVertices.push_back(*(i+2 + v));
+			//add normals
+			tempVertices.push_back(nX);
+			tempVertices.push_back(nY);
+			tempVertices.push_back(nZ);
+			//add texture
+			if(useTextures){
+				tempVertices.push_back(*(i+3+oft + v));
+				tempVertices.push_back(*(i+4+oft + v));
+			}
+			//add color
+			if(useColors){
+				tempVertices.push_back(*(i+5+ofc + v));
+				tempVertices.push_back(*(i+6+ofc + v));
+				tempVertices.push_back(*(i+7+ofc + v));
+				tempVertices.push_back(*(i+8+ofc + v));
+			}
+		}
+	}
+	triangleVertices = tempVertices;
+	useNormals = true;
+	if(smooth) SmoothNormals();
+	return true;
+  }
+  
+  void SmoothNormals()
+  {
+	unsigned int stride = 3 + useNormals*3 + useTextures*2 + useColors*4;
+	
+	vector<vector<unsigned int> > groupList;
+	unsigned int n = 0;
+	//group all vertices
+	for (vector<gs_scalar>::const_iterator i = triangleVertices.begin(); i != triangleVertices.end(); i += stride)
+	{
+		gs_scalar x1 = *(i+0);
+		gs_scalar y1 = *(i+1);
+		gs_scalar z1 = *(i+2);
+		
+		bool added = false;
+		//check each group 
+		if (groupList.size() > 0)
+		for (vector< vector<unsigned int> >::iterator ig = groupList.begin(); ig != groupList.end(); ++ig)
+		{
+			
+			//compute first element and add it if has the same position
+			unsigned int index = (*ig)[0];
+			gs_scalar x2 = triangleVertices[index*stride + 0];
+			gs_scalar y2 = triangleVertices[index*stride + 1];
+			gs_scalar z2 = triangleVertices[index*stride + 2]; 
+			if( x1 == x2 && y1 == y2 && z1 == z2)
+			{
+				added = true;
+				(*ig).push_back(n);
+				break;
+			}
+			 
+		}
+		if (!added)
+		{
+			vector<unsigned int> vec = vector<unsigned int>();
+			vec.push_back(n);
+			groupList.push_back(vec);
+		}
+		 
+		n++;
+	}
+	
+	//add average values
+	for (vector< vector<unsigned int> >::iterator ig = groupList.begin(); ig != groupList.end(); ++ig)
+	{
+		gs_scalar count = 0;
+		gs_scalar anx = 0, any = 0, anz = 0;
+		for (vector<unsigned int>::iterator i = (*ig).begin(); i != (*ig).end(); ++i)
+		{
+			anx += triangleVertices[(*i)*stride+3];
+			any += triangleVertices[(*i)*stride+4];
+			anz += triangleVertices[(*i)*stride+5];
+			
+			count++;
+		}
+		anx /= count;
+		any /= count;
+		anz /= count;
+		
+		for (vector<unsigned int>::iterator i = (*ig).begin(); i != (*ig).end(); ++i)
+		{
+			triangleVertices[(*i)*stride+3] = anx;
+			triangleVertices[(*i)*stride+4] = any;
+			triangleVertices[(*i)*stride+5] = anz;
+		}
+	}
+  }
+  
+  
   void BufferGenerate(bool subdata)
   {
 	vector<gs_scalar> vdata;
@@ -440,101 +712,210 @@ void d3d_model_save(int id, string fname)
   //TODO: Write save code for meshes
 }
 
+bool d3d_model_calculate_normals(int id, bool smooth, bool outside )
+{
+	return meshes[id]->CalculateNormals(smooth, outside);
+}
+
 bool d3d_model_load(int id, string fname)
 {
   //TODO: this needs to be rewritten properly not using the file_text functions
   using namespace enigma_user;
+  
   int file = file_text_open_read(fname);
+  
   if (file == -1) {
-    return false;
+	return false;
   }
-  int something = file_text_read_real(file);
-  if (something != 100) {
-    return false;
-  }
-  file_text_readln(file);
-  file_text_read_real(file);  //don't see the use in this value, it doesn't equal the number of calls left exactly
-  file_text_readln(file);
-  int kind;
-  float v[3], n[3], t[2];
-  double col, alpha;
-  while (!file_text_eof(file))
+  
+  string fileExt = fname.substr(fname.find_last_of(".") + 1) ;
+  if( fileExt == "obj")
   {
-    switch (int(file_text_read_real(file)))
-    {
-      case  0:
-        kind = file_text_read_real(file);
-        d3d_model_primitive_begin(id, kind);
-        break;
-      case  1:
-        d3d_model_primitive_end(id);
-        break;
-      case  2:
-        v[0] = file_text_read_real(file); v[1] = file_text_read_real(file); v[2] = file_text_read_real(file);
-        d3d_model_vertex(id, v[0],v[1],v[2]);
-        break;
-      case  3:
-        v[0] = file_text_read_real(file); v[1] = file_text_read_real(file); v[2] = file_text_read_real(file);
-        col = file_text_read_real(file); alpha = file_text_read_real(file);
-        d3d_model_vertex_color(id, v[0],v[1],v[2],col,alpha);
-        break;
-      case  4:
-        v[0] = file_text_read_real(file); v[1] = file_text_read_real(file); v[2] = file_text_read_real(file);
-        t[0] = file_text_read_real(file); t[1] = file_text_read_real(file);
-        d3d_model_vertex_texture(id, v[0],v[1],v[2],t[0],t[1]);
-        break;
-      case  5:
-        v[0] = file_text_read_real(file); v[1] = file_text_read_real(file); v[2] = file_text_read_real(file);
-        t[0] = file_text_read_real(file); t[1] = file_text_read_real(file);
-        col = file_text_read_real(file); alpha = file_text_read_real(file);
-        d3d_model_vertex_texture_color(id, v[0],v[1],v[2],t[0],t[1],col,alpha);
-        break;
-      case  6:
-        v[0] = file_text_read_real(file); v[1] = file_text_read_real(file); v[2] = file_text_read_real(file);
-        n[0] = file_text_read_real(file); n[1] = file_text_read_real(file); n[2] = file_text_read_real(file);
-        d3d_model_vertex_normal(id, v[0],v[1],v[2],n[0],n[1],n[2]);
-        break;
-      case  7:
-        v[0] = file_text_read_real(file); v[1] = file_text_read_real(file); v[2] = file_text_read_real(file);
-        n[0] = file_text_read_real(file); n[1] = file_text_read_real(file); n[2] = file_text_read_real(file);
-        col = file_text_read_real(file); alpha = file_text_read_real(file);
-        d3d_model_vertex_normal_color(id, v[0],v[1],v[2],n[0],n[1],n[2],col,alpha);
-        break;
-      case  8:
-        v[0] = file_text_read_real(file); v[1] = file_text_read_real(file); v[2] = file_text_read_real(file);
-        n[0] = file_text_read_real(file); n[1] = file_text_read_real(file); n[2] = file_text_read_real(file);
-        t[0] = file_text_read_real(file); t[1] = file_text_read_real(file);
-        d3d_model_vertex_normal_texture(id, v[0],v[1],v[2],n[0],n[1],n[2],t[0],t[1]);
-        break;
-      case  9:
-        v[0] = file_text_read_real(file); v[1] = file_text_read_real(file); v[2] = file_text_read_real(file);
-        n[0] = file_text_read_real(file); n[1] = file_text_read_real(file); n[2] = file_text_read_real(file);
-        t[0] = file_text_read_real(file); t[1] = file_text_read_real(file);
-        col = file_text_read_real(file); alpha = file_text_read_real(file);
-        d3d_model_vertex_normal_texture_color(id, v[0],v[1],v[2],n[0],n[1],n[2],t[0],t[1],col,alpha);
-        break;
-      case  10:
-        d3d_model_block(id, file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file), true);
-        break;
-      case  11:
-        d3d_model_cylinder(id, file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file));
-        break;
-      case  12:
-        d3d_model_cone(id, file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file));
-        break;
-      case  13:
-        d3d_model_ellipsoid(id, file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file));
-        break;
-      case  14:
-        d3d_model_wall(id, file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file));
-        break;
-      case  15:
-        d3d_model_floor(id, file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file));
-        break;
-    }
-    file_text_readln(file);
+	vector< float > vertices;
+	vector< float > uvs;
+	vector< float > normals;
+	
+	int faceCount = 0;
+	bool hasTexture = false;
+	bool hasNormals = false;
+	meshes[id]->Begin(pr_trianglelist);
+	
+	while (!file_text_eof(file))
+	{
+		string line = file_text_read_string(file);
+		file_text_readln(file);
+		enigma::string_parse(&line); 
+		if (line.length() > 0)
+		{
+			if(line[0] == 'v')
+			{
+				vector<float> floats = enigma::float_split(line, ' ');
+				floats.erase( floats.begin());
+					
+				int n = 0;
+				switch(line[1])
+				{
+				case ' ':
+					n = 0;
+					for( vector<float>::const_iterator i = floats.begin(); i != floats.end(); ++i)
+					{
+						if(n < 3) vertices.push_back(*i);
+						n++;
+					}
+					break;
+				case 't':
+					n = 0;
+					for( vector<float>::const_iterator i = floats.begin(); i != floats.end(); ++i)
+					{
+						if(n < 2) uvs.push_back(*i);
+						n++;
+					}
+					hasTexture = true;
+					break;
+				case 'n':
+					n = 0;
+					for( vector<float>::const_iterator i = floats.begin(); i != floats.end(); ++i)
+					{
+						if(n < 3) normals.push_back(*i);
+						n++;
+					}
+					hasNormals = true;
+					break;
+				default:
+					break;
+				}
+			}
+			else if(line[0] == 'f')
+			{
+				faceCount++; 
+				vector<float> f = enigma::float_split(line, ' ');
+				f.erase( f.begin());
+				int faceVertices = f.size() / (1 + hasTexture + hasNormals);
+				int of = 1 + hasTexture + hasNormals;
+				
+				meshes[id]->AddVertex(vertices[(f[0]-1)*3],  vertices[(f[0]-1)*3 +1], vertices[(f[0]-1)*3 +2]);
+				if(hasNormals) meshes[id]->AddNormal(normals[(f[2]-1)*3], normals[(f[2]-1)*3 +1], normals[(f[2]-1)*3 +2]);
+				if(hasTexture) meshes[id]->AddTexture(uvs[(f[1]-1)*2], 1 - uvs[(f[1]-1)*2 +1]);
+				
+				meshes[id]->AddVertex(vertices[(f[1*of]-1)*3],  vertices[(f[1*of]-1)*3 +1] , vertices[(f[1*of]-1)*3 +2]);
+				if(hasNormals) meshes[id]->AddNormal(normals[(f[1*of + 2]-1)*3], normals[(f[1*of  + 2]-1)*3 +1], normals[(f[1*of  + 2]-1)*3 +2]);
+				if(hasTexture) meshes[id]->AddTexture(uvs[(f[1*of + 1]-1)*2], 1 - uvs[(f[1*of + 1]-1)*2 +1]);
+				
+				meshes[id]->AddVertex(vertices[(f[2*of]-1)*3],  vertices[(f[2*of]-1)*3 +1] , vertices[(f[2*of]-1)*3 +2]);
+				if(hasNormals) meshes[id]->AddNormal(normals[(f[2*of + 2]-1)*3], normals[(f[2*of  + 2]-1)*3 +1], normals[(f[2*of  + 2]-1)*3 +2]);
+				if(hasTexture) meshes[id]->AddTexture(uvs[(f[2*of + 1]-1)*2], 1 - uvs[(f[2*of + 1]-1)*2 +1]);
+				
+				//is a quad
+				if(faceVertices == 4)
+				{
+					meshes[id]->AddVertex(vertices[(f[2*of]-1)*3],  vertices[(f[2*of]-1)*3 +1] , vertices[(f[2*of]-1)*3 +2]);
+					if(hasNormals) meshes[id]->AddNormal(normals[(f[2*of + 2]-1)*3], normals[(f[2*of  + 2]-1)*3 +1], normals[(f[2*of  + 2]-1)*3 +2]);
+					if(hasTexture) meshes[id]->AddTexture(uvs[(f[2*of + 1]-1)*2], 1 - uvs[(f[2*of + 1]-1)*2 +1]);
+					
+					meshes[id]->AddVertex( vertices[(f[3*of]-1)*3],  vertices[(f[3*of]-1)*3 +1] , vertices[(f[3*of]-1)*3 +2]);
+					if(hasNormals) meshes[id]->AddNormal(normals[(f[3*of + 2]-1)*3], normals[(f[3*of  + 2]-1)*3 +1], normals[(f[3*of  + 2]-1)*3 +2]);
+					if(hasTexture) meshes[id]->AddTexture(uvs[(f[3*of + 1]-1)*2], 1 - uvs[(f[3*of + 1]-1)*2 +1]);
+					
+					meshes[id]->AddVertex(vertices[(f[0]-1)*3],  vertices[(f[0]-1)*3 +1], vertices[(f[0]-1)*3 +2]);
+					if(hasNormals) meshes[id]->AddNormal(normals[(f[2]-1)*3], normals[(f[2]-1)*3 +1], normals[(f[2]-1)*3 +2]);
+					if(hasTexture) meshes[id]->AddTexture(uvs[(f[0 + 1]-1)*2], 1 - uvs[(f[0 + 1]-1)*2 +1]);
+				}
+				
+			}	
+		}
+	}
+	meshes[id]->End();  
+	
   }
-
+  else
+  {
+	  int something = file_text_read_real(file);
+	  if (something != 100) {
+		return false;
+	  }
+	  file_text_readln(file);
+	  file_text_read_real(file);  //don't see the use in this value, it doesn't equal the number of calls left exactly
+	  file_text_readln(file);
+	  int kind;
+	  float v[3], n[3], t[2];
+	  double col, alpha;
+	  while (!file_text_eof(file))
+	  {
+		switch (int(file_text_read_real(file)))
+		{
+		  case  0:
+			kind = file_text_read_real(file);
+			d3d_model_primitive_begin(id, kind);
+			break;
+		  case  1:
+			d3d_model_primitive_end(id);
+			break;
+		  case  2:
+			v[0] = file_text_read_real(file); v[1] = file_text_read_real(file); v[2] = file_text_read_real(file);
+			d3d_model_vertex(id, v[0],v[1],v[2]);
+			break;
+		  case  3:
+			v[0] = file_text_read_real(file); v[1] = file_text_read_real(file); v[2] = file_text_read_real(file);
+			col = file_text_read_real(file); alpha = file_text_read_real(file);
+			d3d_model_vertex_color(id, v[0],v[1],v[2],col,alpha);
+			break;
+		  case  4:
+			v[0] = file_text_read_real(file); v[1] = file_text_read_real(file); v[2] = file_text_read_real(file);
+			t[0] = file_text_read_real(file); t[1] = file_text_read_real(file);
+			d3d_model_vertex_texture(id, v[0],v[1],v[2],t[0],t[1]);
+			break;
+		  case  5:
+			v[0] = file_text_read_real(file); v[1] = file_text_read_real(file); v[2] = file_text_read_real(file);
+			t[0] = file_text_read_real(file); t[1] = file_text_read_real(file);
+			col = file_text_read_real(file); alpha = file_text_read_real(file);
+			d3d_model_vertex_texture_color(id, v[0],v[1],v[2],t[0],t[1],col,alpha);
+			break;
+		  case  6:
+			v[0] = file_text_read_real(file); v[1] = file_text_read_real(file); v[2] = file_text_read_real(file);
+			n[0] = file_text_read_real(file); n[1] = file_text_read_real(file); n[2] = file_text_read_real(file);
+			d3d_model_vertex_normal(id, v[0],v[1],v[2],n[0],n[1],n[2]);
+			break;
+		  case  7:
+			v[0] = file_text_read_real(file); v[1] = file_text_read_real(file); v[2] = file_text_read_real(file);
+			n[0] = file_text_read_real(file); n[1] = file_text_read_real(file); n[2] = file_text_read_real(file);
+			col = file_text_read_real(file); alpha = file_text_read_real(file);
+			d3d_model_vertex_normal_color(id, v[0],v[1],v[2],n[0],n[1],n[2],col,alpha);
+			break;
+		  case  8:
+			v[0] = file_text_read_real(file); v[1] = file_text_read_real(file); v[2] = file_text_read_real(file);
+			n[0] = file_text_read_real(file); n[1] = file_text_read_real(file); n[2] = file_text_read_real(file);
+			t[0] = file_text_read_real(file); t[1] = file_text_read_real(file);
+			d3d_model_vertex_normal_texture(id, v[0],v[1],v[2],n[0],n[1],n[2],t[0],t[1]);
+			break;
+		  case  9:
+			v[0] = file_text_read_real(file); v[1] = file_text_read_real(file); v[2] = file_text_read_real(file);
+			n[0] = file_text_read_real(file); n[1] = file_text_read_real(file); n[2] = file_text_read_real(file);
+			t[0] = file_text_read_real(file); t[1] = file_text_read_real(file);
+			col = file_text_read_real(file); alpha = file_text_read_real(file);
+			d3d_model_vertex_normal_texture_color(id, v[0],v[1],v[2],n[0],n[1],n[2],t[0],t[1],col,alpha);
+			break;
+		  case  10:
+			d3d_model_block(id, file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file), true);
+			break;
+		  case  11:
+			d3d_model_cylinder(id, file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file));
+			break;
+		  case  12:
+			d3d_model_cone(id, file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file));
+			break;
+		  case  13:
+			d3d_model_ellipsoid(id, file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file));
+			break;
+		  case  14:
+			d3d_model_wall(id, file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file));
+			break;
+		  case  15:
+			d3d_model_floor(id, file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file));
+			break;
+		}
+		file_text_readln(file);
+	  }
+  }
   file_text_close(file);
   return true;
 }
@@ -573,13 +954,42 @@ void d3d_model_primitive_end(int id)
   meshes[id]->End();
 }
 
+void d3d_model_translate(int id, gs_scalar x, gs_scalar y, gs_scalar z)
+{
+  meshes[id]->Translate(x, y, z);
+}
+
+void d3d_model_scale(int id, gs_scalar xscale, gs_scalar yscale, gs_scalar zscale)
+{
+  meshes[id]->Scale(xscale, yscale, zscale);
+}
+
+void d3d_model_rotate_x(int id, gs_scalar angle)
+{
+  meshes[id]->RotateX(angle);
+}
+
+void d3d_model_rotate_y(int id, gs_scalar angle)
+{
+  meshes[id]->RotateY(angle);
+}
+
+void d3d_model_rotate_z(int id, gs_scalar angle)
+{
+  meshes[id]->RotateZ(angle);
+}
+
+void d3d_model_rotate(int id, gs_scalar anglex, gs_scalar angley, gs_scalar anglez)
+{
+	//must be rewritten usin a single function
+  meshes[id]->RotateX(anglex);
+  meshes[id]->RotateY(angley);
+  meshes[id]->RotateZ(anglez);
+}
+
 void d3d_model_vertex(int id, gs_scalar x, gs_scalar y, gs_scalar z)
 {
   meshes[id]->AddVertex(x, y, z);
-}
-
-void d3d_model_index(int id, unsigned ind) {
-  meshes[id]->AddIndex(ind);
 }
 
 void d3d_model_vertex_color(int id, gs_scalar x, gs_scalar y, gs_scalar z, int col, double alpha)
