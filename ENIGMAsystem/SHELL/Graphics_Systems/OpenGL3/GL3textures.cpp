@@ -224,7 +224,6 @@ int texture_get_texel_height(int texid)
 
 void texture_set_stage(int stage, int texid) {
 	glActiveTexture(GL_TEXTURE0 + stage);
-	glEnable(GL_TEXTURE_2D); 
 	glBindTexture(GL_TEXTURE_2D, get_texture(texid));
 }
 

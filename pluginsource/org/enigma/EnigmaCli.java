@@ -325,7 +325,7 @@ public final class EnigmaCli
 		URI uri = file.toURI();
 		FileReader reader = FileChooser.findReader(uri);
 
-		LGM.currentFile = reader.read(uri.toURL().openStream(),uri,LGM.newRoot(), false);
+		LGM.currentFile = reader.read(uri.toURL().openStream(),uri,LGM.newRoot());
 
 		try
 			{

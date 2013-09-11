@@ -4,7 +4,6 @@
 #include "../General/GSbackground.h"
 #include "DX9shader.h"
 #include "../General/GStextures.h"
-#include "DX9material.h"
 #include "../General/GSmodel.h"
 
 #include "../General/GSfont.h"
