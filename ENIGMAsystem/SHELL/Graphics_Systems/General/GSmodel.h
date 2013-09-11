@@ -24,6 +24,7 @@ namespace enigma_user {
   unsigned d3d_model_create();
   void d3d_model_destroy(int id);
   bool d3d_model_exists(int id);
+  bool d3d_model_calculate_normals(int id, bool smooth, bool outside );
   void d3d_model_clear(int id);
   void d3d_model_save(int id, std::string fname);
   bool d3d_model_load(int id, std::string fname);
