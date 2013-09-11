@@ -4,7 +4,6 @@
 #include "../General/GSbackground.h"
 #include "GL3shader.h"
 #include "../General/GStextures.h"
-#include "GL3material.h"
 #include "../General/GSmodel.h"
 
 #include "../General/GSfont.h"

@@ -360,10 +360,11 @@ int main(int argc, char *argv[])
   //Set Working Directory
   string workpath = exepath + "enigma-dev/"; //Test if subdirectory exists, if it doesn't, then assume exe is in it
   DWORD ftyp = GetFileAttributesA(workpath.c_str());
-  if (ftyp == INVALID_FILE_ATTRIBUTES && !(ftyp & FILE_ATTRIBUTE_DIRECTORY))
+  if (!(ftyp & FILE_ATTRIBUTE_DIRECTORY))
   {
       workpath = exepath;
   }
+  
   string output = "Setting Working Directory To:" + workpath;
     string cmdline = "cd \"" + workpath + "\"";
 	CreateProcess(NULL,(char *)cmdline.c_str(),NULL,NULL,
@@ -399,7 +400,7 @@ int main(int argc, char *argv[])
     FILE_WRITE_DATA,
     FILE_SHARE_WRITE | FILE_SHARE_READ,
     &sa,
-    OPEN_ALWAYS,
+    CREATE_ALWAYS,
     FILE_ATTRIBUTE_NORMAL,
     NULL );
 

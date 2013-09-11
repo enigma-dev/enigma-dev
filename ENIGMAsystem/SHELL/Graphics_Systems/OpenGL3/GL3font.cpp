@@ -287,9 +287,6 @@ namespace enigma_user
 
 void draw_text(gs_scalar x, gs_scalar y,variant vstr)
 {
-  #ifdef CODEBLOX
-    return;
-  #endif
   string str = toString(vstr);
   get_fontv(fnt,currentfont);
   texture_use(GmTextures[fnt->texture]->gltex);
@@ -338,6 +335,64 @@ void draw_text(gs_scalar x, gs_scalar y,variant vstr)
             xx + g.x2, yy + g.y, g.tx2, g.ty, re, gr, bl, al,
             xx + g.x2, yy + g.y2, g.tx2, g.ty2, re, gr, bl, al,
             xx + g.x,  yy + g.y2, g.tx,  g.ty2, re, gr, bl, al
+          };
+          plane2D_rotated(data);
+          xx += gs_scalar(g.xs);
+        }
+      }
+  }
+}
+
+void draw_text_skewed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar top, gs_scalar bottom)
+{
+  string str = toString(vstr);
+  get_fontv(fnt,currentfont);
+  texture_use(GmTextures[fnt->texture]->gltex);
+  gs_scalar yy = valign == fa_top ? y+fnt->yoffset : valign == fa_middle ? y +fnt->yoffset - string_height(str)/2 : y + fnt->yoffset - string_height(str);
+  gs_scalar re = (gs_scalar)enigma::currentcolor[0]/255.0, gr = (gs_scalar)enigma::currentcolor[1]/255.0, bl = (gs_scalar)enigma::currentcolor[2]/255.0, al = (gs_scalar)enigma::currentcolor[3]/255.0;
+  if (halign == fa_left){
+      gs_scalar xx = x;
+      for (unsigned i = 0; i < str.length(); i++)
+      {
+        if (str[i] == '\r')
+          xx = x, yy += fnt->height, i += str[i+1] == '\n';
+        else if (str[i] == '\n')
+          xx = x, yy += fnt->height;
+        else if (str[i] == ' ')
+          xx += get_space_width(fnt);
+        else
+        {
+          fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
+          const gs_scalar data[4*8] = {
+            xx + g.x + top,  yy + g.y + top, g.tx,  g.ty, re, gr, bl, al,
+            xx + g.x2 + top, yy + g.y + top, g.tx2, g.ty, re, gr, bl, al,
+            xx + g.x2 + bottom, yy + g.y2+ bottom, g.tx2, g.ty2, re, gr, bl, al,
+            xx + g.x + bottom,  yy + g.y2 + bottom, g.tx,  g.ty2, re, gr, bl, al
+          };
+          plane2D_rotated(data);
+          xx += gs_scalar(g.xs);
+        }
+      }
+  } else {
+      gs_scalar xx = halign == fa_center ? x-gs_scalar(string_width_line(str,0)/2) : x-gs_scalar(string_width_line(str,0)), line = 0;
+      for (unsigned i = 0; i < str.length(); i++)
+      {
+        if (str[i] == '\r'){
+          line +=1, yy += fnt->height, i += str[i+1] == '\n';
+          xx = halign == fa_center ? x-gs_scalar(string_width_line(str,line)/2) : x-gs_scalar(string_width_line(str,line));
+        } else if (str[i] == '\n'){
+          line +=1, yy += fnt->height;
+          xx = halign == fa_center ? x-gs_scalar(string_width_line(str,line)/2) : x-gs_scalar(string_width_line(str,line));
+        } else if (str[i] == ' ')
+          xx += get_space_width(fnt);
+        else
+        {
+          fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
+          const gs_scalar data[4*8] = {
+            xx + g.x + top,  yy + g.y + top, g.tx,  g.ty, re, gr, bl, al,
+            xx + g.x2 + top, yy + g.y + top, g.tx2, g.ty, re, gr, bl, al,
+            xx + g.x2 + bottom, yy + g.y2 + bottom, g.tx2, g.ty2, re, gr, bl, al,
+            xx + g.x + bottom,  yy + g.y2 + bottom, g.tx,  g.ty2, re, gr, bl, al
           };
           plane2D_rotated(data);
           xx += gs_scalar(g.xs);

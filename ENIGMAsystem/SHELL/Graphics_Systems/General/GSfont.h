@@ -34,6 +34,7 @@ unsigned draw_get_valign();
 void draw_set_font(int fnt);
 int draw_get_font();
 void draw_text(gs_scalar x, gs_scalar y, variant str);
+void draw_text_skewed(gs_scalar x, gs_scalar y, variant str, gs_scalar top, gs_scalar bottom);
 void draw_text_color(gs_scalar x, gs_scalar y, variant str, int c1, int c2, int c3, int c4, gs_scalar a);
 
 void draw_text_ext(gs_scalar x, gs_scalar y, variant str, gs_scalar sep, gs_scalar wid);

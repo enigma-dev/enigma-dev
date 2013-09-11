@@ -17,6 +17,7 @@
 
 #include <iostream>
 #include <string>
+#include <stdlib.h>     /* malloc, free, rand */
 
 #include "../General/OpenGLHeaders.h"
 using namespace std;
@@ -91,6 +92,34 @@ namespace enigma
 		if (shaderstruct->precompile) {
 			glCompileShader(vshader->shader);
 			glCompileShader(fshader->shader);
+			
+			GLint blen = 0;
+			GLsizei slen = 0;
+
+			glGetShaderiv(vshader->shader, GL_INFO_LOG_LENGTH , &blen);       
+
+			if (blen > 1)
+			{
+				GLchar* compiler_log = (GLchar*)malloc(blen);
+
+				glGetInfoLogARB(vshader->shader, blen, &slen, compiler_log);
+				std::cout << compiler_log;
+			} else {
+				std::cout << "Vertex shader compile log empty";
+			}
+			
+			glGetShaderiv(fshader->shader, GL_INFO_LOG_LENGTH , &blen);       
+
+			if (blen > 1)
+			{
+				GLchar* compiler_log = (GLchar*)malloc(blen);
+
+				glGetInfoLogARB(fshader->shader, blen, &slen, compiler_log);
+				std::cout << compiler_log;
+			} else {
+				std::cout << "Fragment shader compile log empty";
+			}
+  
 		}
 		
 		glAttachShader(program->shaderprogram, vshader->shader);

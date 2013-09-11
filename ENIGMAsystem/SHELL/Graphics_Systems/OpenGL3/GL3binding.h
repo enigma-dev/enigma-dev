@@ -33,11 +33,11 @@ using std::vector;
 	
 	#define use_bound_texture_global
 #ifdef use_bound_texture_global
-  #define texture_reset() if(enigma::bound_texture) draw_globalVBO(), glBindTexture(GL_TEXTURE_2D,enigma::bound_texture=0);
+  #define texture_reset() if(enigma::bound_texture) draw_globalVBO(), glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_2D,enigma::bound_texture=0);
   #define texture_use(texid) if (enigma::bound_texture != unsigned(texid)) \
     draw_globalVBO(), glBindTexture(GL_TEXTURE_2D,enigma::bound_texture = texid)
  #else
-  #define texture_reset() draw_globalVBO(), glBindTexture(GL_TEXTURE_2D, 0)
+  #define texture_reset() draw_globalVBO(), glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_2D, 0)
   #define texture_use(texid) draw_globalVBO(), glBindTexture(GL_TEXTURE_2D, texid)
 #endif
 
