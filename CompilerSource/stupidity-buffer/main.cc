@@ -133,7 +133,7 @@ const std::string currentDateTime() {
 }
 
 void install_updates() {
-	
+
 	WritePrivateProfileString("MAIN", "currentversion", "\"0.0.0.0\"", settingspath.c_str());
 	string datetime = "\"" + currentDateTime() + "\"";
 	WritePrivateProfileString("MAIN", "lastupdated", datetime.c_str(), settingspath.c_str());
@@ -147,7 +147,7 @@ void ask_for_updates() {
   char c;
   cin >> c;
   c = tolower(c);
-  
+
   if (c == 'y') {
     install_updates();
   } else if (c == 'n') {
@@ -181,19 +181,19 @@ void check_for_updates() {
 	char currentversion[256], lastupdated[256];
 	GetPrivateProfileString("MAIN", "lastupdated", "Never", lastupdated, 256, settingspath.c_str());
 	GetPrivateProfileString("MAIN", "currentversion", "0.0.0.0", currentversion, 256, settingspath.c_str());
-	
+
     puts("*** Updates Available ***");
-	
+
     // Restore the original colors
     SetConsoleTextAttribute ( h, wOldColorAttrs);
-	
+
 	string lvtxt = "Latest Version: ";
 	puts(lvtxt.c_str());
 	string cvtxt = "Current Version: " + string(currentversion);
 	puts(cvtxt.c_str());
 	string lutxt = "Last Updated: " + string(lastupdated) + "\n";
 	puts(lutxt.c_str());
-	
+
     puts("Would you like to install them?");
     puts("[Y] Yes");
     puts("[N] No");
@@ -201,7 +201,7 @@ void check_for_updates() {
     puts("[A] Never ask again for updates");
     ask_for_updates();
   }
-   
+
   return;
 }
 
@@ -218,18 +218,18 @@ int main(int argc, char *argv[])
   size_t pos = path.find_last_of("/");
   exepath.assign(path, 0, pos + 1);
   settingspath = exepath + "settings.ini";
-  
+
   // set the console window title
   system("title ENIGMA Development Environment");
   system("Color 1F");
   puts("Copyright (C) 2013 The ENIGMA Team\n");
-  
+
   bool checkforupdates = GetPrivateProfileInt("MAIN", "checkforupdates", 1, settingspath.c_str());
   if (checkforupdates) { check_for_updates(); }
 
   bool checkforjava = GetPrivateProfileInt("MAIN", "checkforjava", 1, settingspath.c_str());
   bool redirectoutput = GetPrivateProfileInt("MAIN", "redirectoutput", 1, settingspath.c_str());
-	
+
   if (checkforjava) {
 	// Ensure that Java is installed
 	const char *jpath = "java";
@@ -282,7 +282,7 @@ int main(int argc, char *argv[])
 
   bool setupcompleted = GetPrivateProfileInt("MAIN", "setupcompleted", 0, settingspath.c_str());
   bool skippedsetup = GetPrivateProfileInt("MAIN", "skippedsetup", 0, settingspath.c_str());
-  
+
   if (!skippedsetup && !setupcompleted && INVALID_FILE_ATTRIBUTES == GetFileAttributes(setuppath.c_str()) && GetLastError()== ERROR_FILE_NOT_FOUND)  //If setup script not found
   {
 	  output_error("Setup script not found.");
@@ -296,7 +296,7 @@ int main(int argc, char *argv[])
 		  cin >> c;
           c = tolower(c);
 		}while( !cin.fail() && c!='y' && c!='n' );
-		launchanyway = (c == 'y'); 
+		launchanyway = (c == 'y');
 	  }
 
       if (launchanyway){
@@ -332,7 +332,7 @@ int main(int argc, char *argv[])
 		WritePrivateProfileString("MAIN", "setupcompleted", "1", settingspath.c_str());
 		string datetime = "\"" + currentDateTime() + "\"";
 		WritePrivateProfileString("MAIN", "dateinstalled", datetime.c_str(), settingspath.c_str());
-		
+
 		bool cleanupsetup = GetPrivateProfileInt("MAIN", "cleanupsetup", 1, settingspath.c_str());
 		if (cleanupsetup) {
 		  DeleteFile(setuppath.c_str());
@@ -360,11 +360,11 @@ int main(int argc, char *argv[])
   //Set Working Directory
   string workpath = exepath + "enigma-dev/"; //Test if subdirectory exists, if it doesn't, then assume exe is in it
   DWORD ftyp = GetFileAttributesA(workpath.c_str());
-  if (!(ftyp & FILE_ATTRIBUTE_DIRECTORY))
+  if (ftyp == INVALID_FILE_ATTRIBUTES || !(ftyp & FILE_ATTRIBUTE_DIRECTORY))
   {
       workpath = exepath;
   }
-  
+
   string output = "Setting Working Directory To:" + workpath;
     string cmdline = "cd \"" + workpath + "\"";
 	CreateProcess(NULL,(char *)cmdline.c_str(),NULL,NULL,
