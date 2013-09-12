@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Robert B. Colton, Adriano Tumminelli, Josh Ventura, DatZach, Polygone
+/** Copyright (C) 2008-2013 Robert B. Colton, Adriano Tumminelli
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -21,12 +21,11 @@
 #include "../General/GSprimitives.h"
 #include "../General/GStextures.h"
 #include "../General/GSmodel.h"
-
 #include "Universal_System/var4.h"
-#include "Universal_System/estring.h"
 #include "Universal_System/roomsystem.h"
 #include <math.h>
 #include <stdio.h>
+
 #include "../General/GLbinding.h"
 using namespace std;
 
@@ -49,93 +48,87 @@ extern GLenum ptypes_by_id[16];
 namespace enigma {
   extern unsigned char currentcolor[4];
   
-	  
-	//split a string and convert to float
-	vector<float> float_split(const string& str, const char& ch) {
-		string next;
-		vector<float> result;
+  //split a string and convert to float
+  vector<float> float_split(const string& str, const char& ch) {
+    string next;
+    vector<float> result;
 
-		for (string::const_iterator it = str.begin(); it != str.end(); it++)
-		{
-			if (*it == ch)
-			{
-				if (!next.empty())
-				{
-					result.push_back(atof(next.c_str()));
-					next.clear();
-				}
-			}else {
-				next += *it;
-			}
-		}
-		if (!next.empty())
-			 result.push_back(atof(next.c_str()));
-		return result;
-	}
-	//obj model parsing functions
-	void string_parse( string *s )
+    for (string::const_iterator it = str.begin(); it != str.end(); it++)
 	{
-		size_t spaces = 0;
-		bool trimmed = false;
-		bool checknormal = false;
-		for (unsigned int i = 0; i < s->size() ; i++)
-		{ 
-			//comment
-			if ((*s)[i] == '#')
+		if (*it == ch)
+		{
+			if (!next.empty())
 			{
-				s->erase(i, s->length() - i);
-				break;
+				result.push_back(atof(next.c_str()));
+				next.clear();
 			}
-			else if((*s)[i] == ' ')
+        } else {
+            next += *it;
+        }
+    }
+    if (!next.empty())
+         result.push_back(atof(next.c_str()));
+    return result;
+  }
+
+  //obj model parsing functions
+  void string_parse( string *s )
+  {
+	size_t spaces = 0;
+	bool trimmed = false;
+	bool checknormal = false;
+	for (unsigned int i = 0; i < s->size() ; i++)
+	{ 
+		//comment
+		if ((*s)[i] == '#')
+		{
+			s->erase(i, s->length() - i);
+			break;
+		}
+		else if((*s)[i] == ' ')
+		{
+			if (!trimmed)
 			{
-				if (!trimmed)
+				s->erase(i,1);
+				i--;
+			}
+			else
+			{
+				if (spaces >= 1)
 				{
 					s->erase(i,1);
 					i--;
 				}
-				else
+				spaces++;
+			}
+		}
+		else
+		{
+			if((*s)[i] == '/')
+			{
+				(*s)[i] = ' ';
+				if(checknormal)
 				{
-					if (spaces >= 1)
-					{
-						s->erase(i,1);
-						i--;
-					}
-					spaces++;
+					s->erase(i, 1);
+					checknormal = false;
 				}
-				
-				
+				else
+					checknormal = true;
 			}
 			else
-			{
-				if((*s)[i] == '/')
-				{
-					(*s)[i] = ' ';
-					if(checknormal)
-					{
-						s->erase(i, 1);
-						checknormal = false;
-					}
-					else
-						checknormal = true;
-				}
-				else
-					checknormal = false;
-				spaces = 0;
-				trimmed = true;
-			}
-
-			
+				checknormal = false;
+			spaces = 0;
+			trimmed = true;
 		}
-		//end trim
-		if (s->size() > 0)
-			if ((*s)[s->size()-1] == ' ')
-			{
-				s->erase(s->size()-1, 1);
-			}
-		
 	}
-
-
+	//end trim
+	if (s->size() > 0) {
+		if ((*s)[s->size()-1] == ' ')
+		{
+			s->erase(s->size()-1, 1);
+		}
+	}
+  }
 }
 
 class Mesh
@@ -210,6 +203,11 @@ class Mesh
   {
     vertices.push_back(x); vertices.push_back(y); vertices.push_back(z);
   }
+  
+  void AddIndex(unsigned ind)
+  {
+    indices.push_back(ind);
+  }
 
   void AddNormal(gs_scalar nx, gs_scalar ny, gs_scalar nz)
   {
@@ -229,109 +227,8 @@ class Mesh
     vertices.push_back(__GETR(col)); vertices.push_back(__GETG(col)); vertices.push_back(__GETB(col)); vertices.push_back(alpha);
 	useColors = true;
   }
-
- void End()
-  {
-	//NOTE: This batching does not check for degenerate primitives or remove duplicate vertices.
-	
-	
-	unsigned int stride = 3 + useNormals*3 + useTextures*2 + useColors*4;
-	
-	// Primitive has ended so now we need to batch the vertices that were given into single lists, eg. line list, triangle list, point list
-	// Indices are optionally supplied, model functions can also be added for the end user to supply the indexing themselves for each primitive
-	// but the batching system does not care either way if they are not supplied it will automatically generate them.
-	switch (currentPrimitive) {
-		case enigma_user::pr_pointlist:
-			pointVertices.insert(pointVertices.end(), vertices.begin(), vertices.end());
-			if (indices.size() > 0) {
-				for (std::vector<GLuint>::iterator it = indices.begin(); it != indices.end(); ++it) { *it += pointCount; }
-				pointIndices.insert(pointIndices.end(), indices.begin(), indices.end());
-			} else {
-				for (unsigned i = 0; i < vertices.size() / stride; i++) {
-					pointIndices.push_back(pointCount + i);
-				}
-			}
-			pointCount += vertices.size() / stride;
-			break;
-		case enigma_user::pr_linestrip:
-			lineVertices.insert(lineVertices.end(), vertices.begin(), vertices.end());
-			if (indices.size() > 0) {
-				for (std::vector<GLuint>::iterator it = indices.begin(); it != indices.end(); ++it) { *it += lineCount; }
-				lineIndices.insert(lineIndices.end(), indices.begin(), indices.end());
-			} else {
-				for (unsigned i = 0; i < vertices.size() / stride - 1; i++) {
-					lineIndices.push_back(lineCount + i);
-					lineIndices.push_back(lineCount + i + 1);
-				}
-			}
-			lineCount += vertices.size() / stride;
-			break;
-		case enigma_user::pr_linelist:
-			lineVertices.insert(lineVertices.end(), vertices.begin(), vertices.end());
-			if (indices.size() > 0) {
-				for (std::vector<GLuint>::iterator it = indices.begin(); it != indices.end(); ++it) { *it += lineCount; }
-				lineIndices.insert(lineIndices.end(), indices.begin(), indices.end());
-			} else {
-				for (unsigned i = 0; i < vertices.size() / stride; i++) {
-					lineIndices.push_back(lineCount + i);
-				}
-			}
-			lineCount += vertices.size() / stride;
-			break;
-		case enigma_user::pr_trianglestrip:
-			triangleVertices.insert(triangleVertices.end(), vertices.begin(), vertices.end());
-			if (indices.size() > 0) {
-				for (std::vector<GLuint>::iterator it = indices.begin(); it != indices.end(); ++it) { *it += triangleCount; }
-				triangleIndices.insert(triangleIndices.end(), indices.begin(), indices.end());
-			} else {
-				for (unsigned i = 0; i < vertices.size() / stride - 2; i++) {
-					if (i % 2) {
-						triangleIndices.push_back(triangleCount + i + 2);
-						triangleIndices.push_back(triangleCount + i + 1);
-						triangleIndices.push_back(triangleCount + i);
-					} else {
-						triangleIndices.push_back(triangleCount + i);
-						triangleIndices.push_back(triangleCount + i + 1);
-						triangleIndices.push_back(triangleCount + i + 2);
-					}
-				}
-			}
-			triangleCount += vertices.size() / stride;
-			break;
-		case enigma_user::pr_trianglelist:
-			triangleVertices.insert(triangleVertices.end(), vertices.begin(), vertices.end());
-			if (indices.size() > 0) {
-				for (std::vector<GLuint>::iterator it = indices.begin(); it != indices.end(); ++it) { *it += triangleCount; }
-				triangleIndices.insert(triangleIndices.end(), indices.begin(), indices.end());
-			} else {
-				for (unsigned i = 0; i < vertices.size() / stride; i++) {
-					triangleIndices.push_back(triangleCount + i);
-				}
-			}
-			triangleCount += vertices.size() / stride;
-			break;
-		case enigma_user::pr_trianglefan:
-			triangleVertices.insert(triangleVertices.end(), vertices.begin(), vertices.end());
-			if (indices.size() > 0) {
-				for (std::vector<GLuint>::iterator it = indices.begin(); it != indices.end(); ++it) { *it += triangleCount; }
-				triangleIndices.insert(triangleIndices.end(), indices.begin(), indices.end());
-			} else {
-				for (unsigned i = 1; i < vertices.size() / stride - 1; i++) {
-					triangleIndices.push_back(triangleCount);
-					triangleIndices.push_back(triangleCount + i);
-					triangleIndices.push_back(triangleCount + i + 1);
-				}
-			}
-			triangleCount += vertices.size() / stride;
-			break;
-	}
-
-	// Clean up the temporary vertex and index containers now that they have been batched efficiently.
-	vertices.clear();
-	indices.clear();
-  }
   
-  void Translate(gs_scalar x, gs_scalar y, gs_scalar z)
+     void Translate(gs_scalar x, gs_scalar y, gs_scalar z)
   {
 	unsigned int stride = 3 + (useNormals*3) + (useTextures*2)  + (useColors*4) ;
 	unsigned int size = triangleVertices.size();
@@ -393,6 +290,33 @@ class Mesh
 	}
   }
   
+  void RotateUV(gs_scalar angle)
+  {
+	unsigned int stride = 3 + (useNormals*3) + (useTextures*2)  + (useColors*4) ;
+	angle *= 3.14159/180.0;
+	gs_scalar _cos = cos(angle);
+	gs_scalar _sin = sin(angle);
+	unsigned int size = triangleVertices.size();
+	for (unsigned int i = 0; i < size; i += stride)
+	{
+		gs_scalar x = triangleVertices[i+3];
+		gs_scalar y = triangleVertices[i+4];
+		triangleVertices[i+3] = x*_cos - y*_sin;
+		triangleVertices[i+4] = x*_sin - y*_cos;
+	}
+  }
+  
+  void ScaleUV(gs_scalar xscale, gs_scalar yscale)
+  {
+	unsigned int stride = 3 + useNormals*3 + useTextures*2 + useColors*4;
+
+	for (vector<gs_scalar>::iterator i = triangleVertices.begin(); i != triangleVertices.end(); i += stride)
+	{
+		*(i+3) *= xscale;
+		*(i+4) *= yscale;
+	}
+  }
+  
   void Scale(gs_scalar xscale, gs_scalar yscale, gs_scalar zscale)
   {
 	unsigned int stride = 3 + useNormals*3 + useTextures*2 + useColors*4;
@@ -404,12 +328,9 @@ class Mesh
 		*(i+2) *= zscale;
 	}
   }
-   
   
-  
-  bool CalculateNormals(bool smooth, bool outside)
+  bool CalculateNormals(bool smooth, bool invert)
   {
-	
 	unsigned int stride = 3 + useNormals*3 + useTextures*2 + useColors*4;
 	
 	int oft = useNormals * 3;
@@ -446,9 +367,15 @@ class Mesh
 			tempVertices.push_back(*(i+1 + v));
 			tempVertices.push_back(*(i+2 + v));
 			//add normals
-			tempVertices.push_back(nX);
-			tempVertices.push_back(nY);
-			tempVertices.push_back(nZ);
+			if (invert) {
+				tempVertices.push_back(nX * -1);
+				tempVertices.push_back(nY * -1);
+				tempVertices.push_back(nZ * -1);
+			} else {
+				tempVertices.push_back(nX);
+				tempVertices.push_back(nY);
+				tempVertices.push_back(nZ);
+			}
 			//add texture
 			if(useTextures){
 				tempVertices.push_back(*(i+3+oft + v));
@@ -536,6 +463,126 @@ class Mesh
 		}
 	}
   }
+
+  void End()
+  {
+	//NOTE: This batching only checks for degenerate primitives on triangle strips and fans since the GPU does not render triangles where the two
+	//vertices are exactly the same, triangle lists could also check for degenerates, it is unknown whether the GPU will render a degenerative 
+	//in a line strip primitive.
+	
+	unsigned stride = 3;
+    if (useNormals) stride += 3;
+	if (useTextures) stride += 2;
+    if (useColors) stride += 4;
+	
+	// Primitive has ended so now we need to batch the vertices that were given into single lists, eg. line list, triangle list, point list
+	// Indices are optionally supplied, model functions can also be added for the end user to supply the indexing themselves for each primitive
+	// but the batching system does not care either way if they are not supplied it will automatically generate them.
+	switch (currentPrimitive) {
+		case enigma_user::pr_pointlist:
+			pointVertices.insert(pointVertices.end(), vertices.begin(), vertices.end());
+			if (indices.size() > 0) {
+				for (std::vector<GLuint>::iterator it = indices.begin(); it != indices.end(); ++it) { *it += pointCount; }
+				pointIndices.insert(pointIndices.end(), indices.begin(), indices.end());
+			} else {
+				for (unsigned i = 0; i < vertices.size() / stride; i++) {
+					pointIndices.push_back(pointCount + i);
+				}
+			}
+			pointCount += vertices.size() / stride;
+			break;
+		case enigma_user::pr_linestrip:
+			lineVertices.insert(lineVertices.end(), vertices.begin(), vertices.end());
+			if (indices.size() > 0) {
+				for (std::vector<GLuint>::iterator it = indices.begin(); it != indices.end(); ++it) { *it += lineCount; }
+				for (unsigned i = 0; i < indices.size() - 2; i++) {
+					lineIndices.push_back(indices[i]);
+					lineIndices.push_back(indices[i + 1]);
+				}
+			} else {
+				for (unsigned i = 0; i < vertices.size() / stride - 1; i++) {
+					lineIndices.push_back(lineCount + i);
+					lineIndices.push_back(lineCount + i + 1);
+				}
+			}
+			lineCount += vertices.size() / stride;
+			break;
+		case enigma_user::pr_linelist:
+			lineVertices.insert(lineVertices.end(), vertices.begin(), vertices.end());
+			if (indices.size() > 0) {
+				for (std::vector<GLuint>::iterator it = indices.begin(); it != indices.end(); ++it) { *it += lineCount; }
+				lineIndices.insert(lineIndices.end(), indices.begin(), indices.end());
+			} else {
+				for (unsigned i = 0; i < vertices.size() / stride; i++) {
+					lineIndices.push_back(lineCount + i);
+				}
+			}
+			lineCount += vertices.size() / stride;
+			break;
+		case enigma_user::pr_trianglestrip:
+			triangleVertices.insert(triangleVertices.end(), vertices.begin(), vertices.end());
+			if (indices.size() > 0) {
+				for (std::vector<GLuint>::iterator it = indices.begin(); it != indices.end(); ++it) { *it += triangleCount; }
+				for (unsigned i = 0; i < indices.size() - 2; i++) {
+					// check for and continue if indexed triangle is degenerate, because the GPU won't render it anyway
+					if (indices[i] == indices[i + 1] || indices[i] == indices[i + 2]  || indices[i + 1] == indices[i + 2] ) { continue; }
+					triangleIndices.push_back(indices[i]);
+					triangleIndices.push_back(indices[i+1]);
+					triangleIndices.push_back(indices[i+2]);
+				}
+			} else {
+				for (unsigned i = 0; i < vertices.size() / stride - 2; i++) {
+					if (i % 2) {
+						triangleIndices.push_back(triangleCount + i + 2);
+						triangleIndices.push_back(triangleCount + i + 1);
+						triangleIndices.push_back(triangleCount + i);
+					} else {
+						triangleIndices.push_back(triangleCount + i);
+						triangleIndices.push_back(triangleCount + i + 1);
+						triangleIndices.push_back(triangleCount + i + 2);
+					}
+				}
+			}
+			triangleCount += vertices.size() / stride;
+			break;
+		case enigma_user::pr_trianglelist:
+			triangleVertices.insert(triangleVertices.end(), vertices.begin(), vertices.end());
+			if (indices.size() > 0) {
+				for (std::vector<GLuint>::iterator it = indices.begin(); it != indices.end(); ++it) { *it += triangleCount; }
+				triangleIndices.insert(triangleIndices.end(), indices.begin(), indices.end());
+			} else {
+				for (unsigned i = 0; i < vertices.size() / stride; i++) {
+					triangleIndices.push_back(triangleCount + i);
+				}
+			}
+			triangleCount += vertices.size() / stride;
+			break;
+		case enigma_user::pr_trianglefan:
+			triangleVertices.insert(triangleVertices.end(), vertices.begin(), vertices.end());
+			if (indices.size() > 0) {
+				for (std::vector<GLuint>::iterator it = indices.begin(); it != indices.end(); ++it) { *it += triangleCount; }
+				for (unsigned i = 1; i < indices.size() - 1; i++) {
+					// check for and continue if indexed triangle is degenerate, because the GPU won't render it anyway
+					if (indices[0] == indices[i] || indices[0] == indices[i + 1]  || indices[i] == indices[i + 1] ) { continue; }
+					triangleIndices.push_back(indices[0]);
+					triangleIndices.push_back(indices[i]);
+					triangleIndices.push_back(indices[i + 1]);
+				}
+			} else {
+				for (unsigned i = 1; i < vertices.size() / stride - 1; i++) {
+					triangleIndices.push_back(triangleCount);
+					triangleIndices.push_back(triangleCount + i);
+					triangleIndices.push_back(triangleCount + i + 1);
+				}
+			}
+			triangleCount += vertices.size() / stride;
+			break;
+	}
+
+	// Clean up the temporary vertex and index containers now that they have been batched efficiently.
+	vertices.clear();
+	indices.clear();
+  }
   
   void DrawElements(GLenum mode, vector<gs_scalar> &verts, vector<GLuint> &inds, GLsizei count) {
 	if (!count) {
@@ -543,7 +590,10 @@ class Mesh
 	}
   
     // Calculate the number of bytes to get to the next vertex
-	GLsizei stride = 3 + useNormals*3 + useTextures*2 + useColors*4;
+	GLsizei stride = 3;
+    if (useNormals) stride += 3;
+	if (useTextures) stride += 2;
+    if (useColors) stride += 4;
 	stride = stride * sizeof( gs_scalar );
 	
 	#define OFFSET( P )  ( char* ) ( &verts[0] ) + ( ( sizeof( gs_scalar ) * ( P         ) ) ) 
@@ -632,11 +682,6 @@ void d3d_model_save(int id, string fname)
   //TODO: Write save code for meshes
 }
 
-bool d3d_model_calculate_normals(int id, bool smooth, bool outside )
-{
-	return meshes[id]->CalculateNormals(smooth, outside);
-}
-
 bool d3d_model_load(int id, string fname)
 {
   //TODO: this needs to be rewritten properly not using the file_text functions
@@ -649,7 +694,7 @@ bool d3d_model_load(int id, string fname)
   }
   
   string fileExt = fname.substr(fname.find_last_of(".") + 1) ;
-  if( fileExt == "obj")
+  if (fileExt == "obj")
   {
 	vector< float > vertices;
 	vector< float > uvs;
@@ -840,6 +885,46 @@ bool d3d_model_load(int id, string fname)
   return true;
 }
 
+void d3d_model_translate(int id, gs_scalar x, gs_scalar y, gs_scalar z)
+{
+  meshes[id]->Translate(x, y, z);
+}
+
+void d3d_model_scale(int id, gs_scalar xscale, gs_scalar yscale, gs_scalar zscale)
+{
+  meshes[id]->Scale(xscale, yscale, zscale);
+}
+
+void d3d_model_scale_uv(int id, gs_scalar xscale, gs_scalar yscale)
+{
+  meshes[id]->ScaleUV(xscale, yscale, zscale);
+}
+
+void d3d_model_rotate_uv(int id, gs_scalar angle)
+{
+  meshes[id]->RotateUV(angle);
+}
+
+void d3d_model_rotate_x(int id, gs_scalar angle)
+{
+  meshes[id]->RotateX(angle);
+}
+
+void d3d_model_rotate_y(int id, gs_scalar angle)
+{
+  meshes[id]->RotateY(angle);
+}
+
+void d3d_model_rotate_z(int id, gs_scalar angle)
+{
+  meshes[id]->RotateZ(angle);
+}
+
+bool d3d_model_calculate_normals(int id, bool smooth, bool invert)
+{
+  return meshes[id]->CalculateNormals(smooth, invert);
+}
+
 void d3d_model_draw(int id) // overload for no additional texture or transformation call's
 {
     meshes[id]->Draw();
@@ -874,43 +959,13 @@ void d3d_model_primitive_end(int id)
   meshes[id]->End();
 }
 
-void d3d_model_translate(int id, gs_scalar x, gs_scalar y, gs_scalar z)
-{
-  meshes[id]->Translate(x, y, z);
-}
-
-void d3d_model_scale(int id, gs_scalar xscale, gs_scalar yscale, gs_scalar zscale)
-{
-  meshes[id]->Scale(xscale, yscale, zscale);
-}
-
-void d3d_model_rotate_x(int id, gs_scalar angle)
-{
-  meshes[id]->RotateX(angle);
-}
-
-void d3d_model_rotate_y(int id, gs_scalar angle)
-{
-  meshes[id]->RotateY(angle);
-}
-
-void d3d_model_rotate_z(int id, gs_scalar angle)
-{
-  meshes[id]->RotateZ(angle);
-}
-
-void d3d_model_rotate(int id, gs_scalar anglex, gs_scalar angley, gs_scalar anglez)
-{
-	//must be rewritten usin a single function
-  meshes[id]->RotateX(anglex);
-  meshes[id]->RotateY(angley);
-  meshes[id]->RotateZ(anglez);
-}
-
-
 void d3d_model_vertex(int id, gs_scalar x, gs_scalar y, gs_scalar z)
 {
   meshes[id]->AddVertex(x, y, z);
+}
+
+void d3d_model_index(int id, unsigned ind) {
+  meshes[id]->AddIndex(ind);
 }
 
 void d3d_model_vertex_color(int id, gs_scalar x, gs_scalar y, gs_scalar z, int col, double alpha)
