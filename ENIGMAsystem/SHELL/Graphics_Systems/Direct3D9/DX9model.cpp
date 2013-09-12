@@ -334,10 +334,10 @@ class Mesh
 	unsigned int size = triangleVertices.size();
 	for (unsigned int i = 0; i < size; i += stride)
 	{
-		gs_scalar x = triangleVertices[i+3];
-		gs_scalar y = triangleVertices[i+4];
-		triangleVertices[i+3] = x*_cos - y*_sin;
-		triangleVertices[i+4] = x*_sin - y*_cos;
+		gs_scalar x = triangleVertices[i + 3 + 3*useNormals];
+		gs_scalar y = triangleVertices[i + 4 + 3*useNormals];
+		triangleVertices[i + 3 + 3*useNormals] = x*_cos - y*_sin;
+		triangleVertices[i + 4 + 3*useNormals] = x*_sin - y*_cos;
 	}
   }
   
@@ -347,8 +347,8 @@ class Mesh
 
 	for (vector<gs_scalar>::iterator i = triangleVertices.begin(); i != triangleVertices.end(); i += stride)
 	{
-		*(i+3) *= xscale;
-		*(i+4) *= yscale;
+		*(i + 3 + 3*useNormals) *= xscale;
+		*(i + 4 + 3*useNormals) *= yscale;
 	}
   }
   
@@ -1013,7 +1013,7 @@ void d3d_model_translate(int id, gs_scalar x, gs_scalar y, gs_scalar z)
 
 void d3d_model_scale_uv(int id, gs_scalar xscale, gs_scalar yscale)
 {
-  meshes[id]->ScaleUV(xscale, yscale, zscale);
+  meshes[id]->ScaleUV(xscale, yscale);
 }
 
 void d3d_model_rotate_uv(int id, gs_scalar angle)
