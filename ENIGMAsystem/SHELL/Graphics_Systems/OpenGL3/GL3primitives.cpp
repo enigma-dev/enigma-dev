@@ -112,8 +112,6 @@ int draw_primitive_end()
 {
   if (prim_draw_texture != -1) {
     texture_use(get_texture(prim_draw_texture));
-  } else {
-    texture_reset();
   }
   prim_draw_texture = -1;
   d3d_model_draw(prim_draw_model);
@@ -144,8 +142,6 @@ void d3d_primitive_end()
 {
   if (prim_d3d_texture != -1) {
     texture_use(get_texture(prim_d3d_texture));
-  } else {
-    texture_reset();
   }
   prim_d3d_texture = -1;
   d3d_model_draw(prim_d3d_model);
