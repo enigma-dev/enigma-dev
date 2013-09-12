@@ -33,7 +33,7 @@ namespace enigma_user {
   void d3d_model_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z, int texId);
   void d3d_model_primitive_begin(int id, int kind);
   void d3d_model_primitive_end(int id);
-  bool d3d_model_calculate_normals(int id, bool smooth, bool outside );
+  bool d3d_model_calculate_normals(int id, bool smooth, bool invert);
   void d3d_model_translate(int id, gs_scalar x, gs_scalar y, gs_scalar z);
   void d3d_model_scale(int id, gs_scalar xscale, gs_scalar yscale, gs_scalar zscale);
   void d3d_model_rotate_x(int id, gs_scalar angle);

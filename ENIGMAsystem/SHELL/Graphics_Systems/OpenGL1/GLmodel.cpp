@@ -302,10 +302,8 @@ class Mesh
 	}
   }
   
-  
-  bool CalculateNormals(bool smooth, bool outside)
+  bool CalculateNormals(bool smooth, bool invert)
   {
-	
 	unsigned int stride = 3 + useNormals*3 + useTextures*2 + useColors*4;
 	
 	int oft = useNormals * 3;
@@ -342,9 +340,15 @@ class Mesh
 			tempVertices.push_back(*(i+1 + v));
 			tempVertices.push_back(*(i+2 + v));
 			//add normals
-			tempVertices.push_back(nX);
-			tempVertices.push_back(nY);
-			tempVertices.push_back(nZ);
+			if (invert) {
+				tempVertices.push_back(nX * -1);
+				tempVertices.push_back(nY * -1);
+				tempVertices.push_back(nZ * -1);
+			} else {
+				tempVertices.push_back(nX);
+				tempVertices.push_back(nY);
+				tempVertices.push_back(nZ);
+			}
 			//add texture
 			if(useTextures){
 				tempVertices.push_back(*(i+3+oft + v));
@@ -879,9 +883,9 @@ void d3d_model_rotate_z(int id, gs_scalar angle)
   meshes[id]->RotateZ(angle);
 }
 
-bool d3d_model_calculate_normals(int id, bool smooth, bool outside )
+bool d3d_model_calculate_normals(int id, bool smooth, bool invert)
 {
-  return meshes[id]->CalculateNormals(smooth, outside);
+  return meshes[id]->CalculateNormals(smooth, invert);
 }
 
 void d3d_model_draw(int id) // overload for no additional texture or transformation call's
