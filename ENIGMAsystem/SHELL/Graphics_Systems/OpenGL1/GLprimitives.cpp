@@ -45,8 +45,7 @@ namespace enigma_user
 
 int draw_primitive_begin(int dink)
 {
-	texture_reset();
-	GLenum kind = ptypes_by_id[ dink & 15 ];
+  GLenum kind = ptypes_by_id[ dink & 15 ];
   glBegin(kind);
   return 0;
 }
@@ -54,8 +53,8 @@ int draw_primitive_begin(int dink)
 int draw_primitive_begin_texture(int dink,unsigned tex)
 {
   texture_use(tex);
-	GLenum kind = ptypes_by_id[ dink & 15 ];
-	glBegin(kind);
+  GLenum kind = ptypes_by_id[ dink & 15 ];
+  glBegin(kind);
   return 0;
 }
 
@@ -104,7 +103,6 @@ int draw_primitive_end()
 
 void d3d_primitive_begin(int kind)
 {
-    texture_reset();
     glBegin(ptypes_by_id[kind]);
 }
 void d3d_primitive_begin_texture(int kind, int texId)
