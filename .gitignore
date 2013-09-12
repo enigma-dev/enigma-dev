@@ -37,3 +37,4 @@ Compilers/Windows/gcc.ey
 ENIGMAsystem/SHELL/ENIGMAengine
 *.cbTemp
 ENIGMAsystem/SHELL/.objs
+CompilerSource/us.stackdump
