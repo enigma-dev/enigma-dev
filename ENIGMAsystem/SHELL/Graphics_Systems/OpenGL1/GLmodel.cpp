@@ -239,7 +239,34 @@ class Mesh
 		triangleVertices[i+2] += z;
 	}
   }
-   
+     
+  void RotateUV(gs_scalar angle)
+  {
+	unsigned int stride = 3 + (useNormals*3) + (useTextures*2)  + (useColors*4) ;
+	angle *= 3.14159/180.0;
+	gs_scalar _cos = cos(angle);
+	gs_scalar _sin = sin(angle);
+	unsigned int size = triangleVertices.size();
+	for (unsigned int i = 0; i < size; i += stride)
+	{
+		gs_scalar x = triangleVertices[i + 3 + 3*useNormals];
+		gs_scalar y = triangleVertices[i + 4 + 3*useNormals];
+		triangleVertices[i + 3 + 3*useNormals] = x*_cos - y*_sin;
+		triangleVertices[i + 4 + 3*useNormals] = x*_sin - y*_cos;
+	}
+  }
+  
+  void ScaleUV(gs_scalar xscale, gs_scalar yscale)
+  {
+	unsigned int stride = 3 + useNormals*3 + useTextures*2 + useColors*4;
+
+	for (vector<gs_scalar>::iterator i = triangleVertices.begin(); i != triangleVertices.end(); i += stride)
+	{
+		*(i + 3 + 3*useNormals) *= xscale;
+		*(i + 4 + 3*useNormals) *= yscale;
+	}
+  }
+  
    
   void RotateX(gs_scalar angle)
   {
