@@ -34,6 +34,7 @@ CompilerSource/JDI/test/defines_linux.txt
 CompilerSource/JDI/test/defines_mingw.txt
 CompilerSource/stupidity-buffer/obj
 Compilers/Windows/gcc.ey
+CompilerSource/us.stackdump
 ENIGMAsystem/SHELL/ENIGMAengine
 *.cbTemp
 ENIGMAsystem/SHELL/.objs
