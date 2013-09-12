@@ -95,7 +95,9 @@ namespace enigma
       enigma::exe_loadsounds(exe);
       enigma::exe_loadbackgrounds(exe);
       enigma::exe_loadfonts(exe);
-      enigma::exe_loadpaths(exe);
+      #ifdef PATH_EXT_SET
+		enigma::exe_loadpaths(exe);
+	  #endif
 
       fclose(exe);
     }
