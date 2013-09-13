@@ -118,7 +118,7 @@ namespace enigma
         boxes.push_back((glyphmetrics[i].w * glyphmetrics[i].h << 8) + i);
       boxes.sort();
 
-      int w = 64, h = 64;
+      int w = glyphmetrics[0].w , h = glyphmetrics[0].h ;
       enigma::rect_packer::rectpnode *rectplane = new enigma::rect_packer::rectpnode(0,0,w,h);
       for (list<unsigned int>::reverse_iterator i = boxes.rbegin(); i != boxes.rend() and w and h; )
       {
