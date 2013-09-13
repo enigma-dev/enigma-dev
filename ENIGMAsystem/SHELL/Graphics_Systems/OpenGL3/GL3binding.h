@@ -31,7 +31,7 @@ using std::vector;
   //This only happens when drawing over 5000000 (5 million) sprites at once. When texture atlas is implemented there is a greater chance of this happening
 
 	
-	#define use_bound_texture_global
+#define use_bound_texture_global
 #ifdef use_bound_texture_global
   #define texture_reset() if(enigma::bound_texture) draw_globalVBO(), glActiveTexture(GL_TEXTURE0); glBindTexture(GL_TEXTURE_2D,enigma::bound_texture=0);
   #define texture_use(texid) if (enigma::bound_texture != unsigned(texid)) \
