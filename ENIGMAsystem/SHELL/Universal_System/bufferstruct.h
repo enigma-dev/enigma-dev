@@ -21,62 +21,6 @@ using std::vector;
 
 #include "var4.h"
 
-namespace enigma
-{
-  struct BinaryBuffer
-  {
-	vector<char> data;
-	unsigned position;
-	unsigned alignment;
-	int type;
-	
-    BinaryBuffer(unsigned size) {
-		data.resize(size);
-		std::fill(data.begin(), data.end(), 0);
-	}
-	
-	~BinaryBuffer() {
-	
-	}
-	
-	void Seek(unsigned offset) {
-		position = offset;
-	}
-	
-	unsigned GetSize() {
-		return data.size();
-	}
-	
-	void Resize(unsigned size) {
-		data.resize(size);
-	}
-
-  };
-  
-  extern vector<BinaryBuffer*> buffers;
-  
-  #ifdef DEBUG_MODE
-  #include "Widget_Systems/widgets_mandatory.h"
-  #define get_buffer(binbuff,buff)\
-    if (buff < 0 or size_t(buff) >= enigma::buffers.size() or !enigma::backgroundstructarray[buff]) {\
-      show_error("Attempting to access non-existing buffer " + toString(buff), false);\
-      return;\
-    }\
-    enigma::BinaryBuffer *binbuff = enigma::buffers[buff];
-  #define get_bufferr(binbuff,buff,r)\
-    if (buff < 0 or size_t(buff) >= enigma::buffers.size() or !enigma::backgroundstructarray[buff]) {\
-      show_error("Attempting to access non-existing buffer " + toString(buff), false);\
-      return r;\
-    }\
-    enigma::BinaryBuffer *binbuff = enigma::buffers[buff];
-	#else
-	  #define get_buffer(binbuff,buff)\
-		enigma::BinaryBuffer *binbuff = enigma::buffers[buff];
-	  #define get_bufferr(binbuff,buff,r)\
-		enigma::BinaryBuffer *binbuff = enigma::buffers[buff];
-	#endif
-}
-
 namespace enigma_user
 {
 
@@ -126,6 +70,79 @@ enum {
 	buffer_string = 11
 };
 
+}
+
+namespace enigma
+{
+  struct BinaryBuffer
+  {
+	vector<char> data;
+	unsigned position;
+	unsigned alignment;
+	int type;
+	
+    BinaryBuffer(unsigned size) {
+		data.resize(size);
+		std::fill(data.begin(), data.end(), 0);
+	}
+	
+	~BinaryBuffer() {
+	
+	}
+	
+	unsigned GetSize() {
+		return data.size();
+	}
+	
+	void Resize(unsigned size) {
+		data.resize(size);
+	}
+	
+	void Seek(unsigned offset) {
+		position = offset;
+		while (position >= GetSize()) {
+			switch (type) {
+				case enigma_user::buffer_grow:
+				Resize(position + GetSize());
+				break;
+				case enigma_user::buffer_wrap:
+				position -= GetSize();
+				break;
+				default:
+				position = GetSize() - 1;
+			}
+		}
+	}
+
+  };
+  
+  extern vector<BinaryBuffer*> buffers;
+  
+  #ifdef DEBUG_MODE
+  #include "Widget_Systems/widgets_mandatory.h"
+  #define get_buffer(binbuff,buff)\
+    if (buff < 0 or size_t(buff) >= enigma::buffers.size() or !enigma::backgroundstructarray[buff]) {\
+      show_error("Attempting to access non-existing buffer " + toString(buff), false);\
+      return;\
+    }\
+    enigma::BinaryBuffer *binbuff = enigma::buffers[buff];
+  #define get_bufferr(binbuff,buff,r)\
+    if (buff < 0 or size_t(buff) >= enigma::buffers.size() or !enigma::backgroundstructarray[buff]) {\
+      show_error("Attempting to access non-existing buffer " + toString(buff), false);\
+      return r;\
+    }\
+    enigma::BinaryBuffer *binbuff = enigma::buffers[buff];
+	#else
+	  #define get_buffer(binbuff,buff)\
+		enigma::BinaryBuffer *binbuff = enigma::buffers[buff];
+	  #define get_bufferr(binbuff,buff,r)\
+		enigma::BinaryBuffer *binbuff = enigma::buffers[buff];
+	#endif
+}
+
+namespace enigma_user
+{
+
 int buffer_create(unsigned size, int type, unsigned alignment);
 void buffer_delete(int buffer);
 void buffer_copy(int src_buffer, unsigned src_offset, unsigned size, int dest_buffer, unsigned dest_offset);
@@ -141,6 +158,8 @@ string buffer_md5(int buffer, unsigned offset, unsigned size);
 string buffer_sha1(int buffer, unsigned offset, unsigned size);
 
 unsigned buffer_get_size(int buffer);
+unsigned buffer_get_alignment(int buffer);
+int buffer_get_type(int buffer);
 void buffer_get_surface(int buffer, int surface, int mode, unsigned offset, int modulo);
 void buffer_resize(int buffer, unsigned size);
 void buffer_seek(int buffer, int base, unsigned offset);

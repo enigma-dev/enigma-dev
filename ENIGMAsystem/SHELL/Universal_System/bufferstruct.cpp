@@ -167,12 +167,35 @@ void buffer_load_ext(int buffer, string filename, unsigned offset) {
 
 void buffer_fill(int buffer, unsigned offset, int type, variant value, unsigned size) {
 	get_buffer(binbuff, buffer);
-	//TODO: Write this function
+	unsigned nsize = offset + size;
+	if (binbuff->GetSize() < nsize && binbuff->type == buffer_grow) {
+		binbuff->data.resize(nsize);
+	}
+	unsigned pos = offset;
+	for (unsigned i = 0; i < buffer_sizeof(type); i++) {
+		binbuff[pos] = value[i];
+		if (i > binbuff->GetSize()) {
+			if (binbuff->type != buffer_wrap) {
+				break;
+			}
+			pos = 0;
+		}
+	}
 }
 
 unsigned buffer_get_size(int buffer) {
 	get_buffer(binbuff, buffer);
 	return binbuff->GetSize();
+}
+
+unsigned buffer_get_alignment(int buffer) {
+	get_buffer(binbuff, buffer);
+	return binbuff->alignment;
+}
+
+int buffer_get_type(int buffer) {
+	get_buffer(binbuff, buffer);
+	return binbuff->type;
 }
 
 void buffer_get_surface(int buffer, int surface, int mode, unsigned offset, int modulo) {
@@ -236,22 +259,50 @@ int buffer_tell(int buffer) {
 
 variant buffer_peek(int buffer, unsigned offset, int type) {
 	get_buffer(binbuff, buffer);
-	//TODO: Write this function
+	unsigned pos = offset;
+	unsigned dsize = buffer_sizeof(type) + binbuff->alignment - 1;
+	char data[buffer_sizeof(type)];
+	binbuff->Seek(pos + dsize);
+	for (unsigned i = 0; i < buffer_sizeof(type); i++) {
+		while (pos >= binbuff->GetSize()) {
+			if (binbuff->type != buffer_wrap) {
+				break;
+			}
+			pos -= binbuff->GetSize();
+		}
+		data[i] = binbuff->data[pos];
+	}
+	return variant(data);
 }
 
 variant buffer_read(int buffer, int type) {
 	get_buffer(binbuff, buffer);
-	//TODO: Write this function
+	return buffer_peek(buffer, binbuff->position, type);
 }
 
 void buffer_poke(int buffer, unsigned offset, int type, variant value) {
 	get_buffer(binbuff, buffer);
-	//TODO: Write this function
+	unsigned pos = offset;
+	unsigned dsize = buffer_sizeof(type) + binbuff->alignment - 1;
+	char data[dsize];
+	binbuff->Seek(pos + dsize);
+	for (unsigned i = 0; i < buffer_sizeof(type); i++) {
+		data[i] = value[i];
+	}
+	for (unsigned i = 0; i < dsize; i++) {
+		while (pos >= binbuff->GetSize()) {
+			if (binbuff->type != buffer_wrap) {
+				break;
+			}
+			pos -= binbuff->GetSize();
+		}
+		binbuff[pos] = data[i];
+	}
 }
 
 void buffer_write(int buffer, int type, variant value) {
 	get_buffer(binbuff, buffer);
-	//TODO: Write this function
+	buffer_poke(buffer, binbuff->position, type, value);
 }
 
 string buffer_md5(int buffer, unsigned offset, unsigned size) {
