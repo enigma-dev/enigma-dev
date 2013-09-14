@@ -17,6 +17,8 @@
 
 #include <string>
 #include <cstring>
+#include <fstream>
+#include <iostream>
 using namespace std;
 
 #include "Graphics_Systems/graphics_mandatory.h"
@@ -57,17 +59,62 @@ void buffer_delete(int buffer) {
 void buffer_copy(int src_buffer, unsigned src_offset, unsigned size, int dest_buffer, unsigned dest_offset) {
 	get_buffer(srcbuff, src_buffer);
 	get_buffer(dstbuff, dest_buffer);
-	//TODO: Write this function
+	
+	unsigned over = size - srcbuff->GetSize();
+	if (over < 0) { over = 0; }
+	switch (dstbuff->type) {
+		case buffer_wrap:
+		dstbuff->data.insert(dstbuff->data.begin() + dest_offset, srcbuff->data.begin() + src_offset, srcbuff->data.begin() + src_offset + size - over);
+		dstbuff->data.insert(dstbuff->data.begin() + dest_offset, srcbuff->data.begin(), srcbuff->data.begin() + over);
+		break;
+		case buffer_grow:
+		dstbuff->data.insert(dstbuff->data.begin() + dest_offset, srcbuff->data.begin() + src_offset, srcbuff->data.begin() + src_offset + size);
+		break;
+		default:
+		dstbuff->data.insert(dstbuff->data.begin() + dest_offset, srcbuff->data.begin() + src_offset, srcbuff->data.begin() + src_offset + size - over);
+		break;
+	}
 }
 
 void buffer_save(int buffer, string filename) {
 	get_buffer(binbuff, buffer);
-	//TODO: Write this function
+	ofstream myfile(filename.c_str());
+	if (!myfile.is_open())
+	{
+		cout << "Unable to open file " << filename;
+		return;
+	}
+	myfile.write(reinterpret_cast<const char*>(&binbuff->data[0]), binbuff->data.size());
+    myfile.close();
 }
 
 void buffer_save_ext(int buffer, string filename, unsigned offset, unsigned size) {
 	get_buffer(binbuff, buffer);
-	//TODO: Write this function
+	ofstream myfile(filename.c_str());
+	if (!myfile.is_open())
+	{
+		cout << "Unable to open file " << filename;
+		return;
+	}
+
+	unsigned over = size - binbuff->GetSize();
+	if (over < 0) { over = 0; }
+	switch (binbuff->type) {
+		case buffer_wrap:
+		myfile.write(reinterpret_cast<const char*>(&binbuff->data[offset]), size - over);
+		myfile.write(reinterpret_cast<const char*>(&binbuff->data[0]), over);
+		break;
+		case buffer_grow:
+		//TODO: Might need to use min(size, binbuff->GetSize()); for the last parameter.
+		//Depends on whether Stupido will write 0's to fill in the entire size you gave it even though the data isn't that big.
+		myfile.write(reinterpret_cast<const char*>(&binbuff->data[offset]), size);
+		break;
+		default:
+		myfile.write(reinterpret_cast<const char*>(&binbuff->data[offset]), binbuff->GetSize());
+		break;
+	}
+	
+    myfile.close();
 }
 
 int buffer_load(string filename) {
@@ -76,13 +123,46 @@ int buffer_load(string filename) {
 	buffer->alignment = 1;
 	int id = enigma::get_free_buffer();
 	enigma::buffers.insert(enigma::buffers.begin() + id, buffer);
-	//TODO: Write this function
+	
+	ifstream myfile(filename.c_str());
+	if (!myfile.is_open())
+	{
+		cout << "Unable to open file " << filename;
+		return -1;
+	}
+	myfile.read(reinterpret_cast<char*>(&buffer->data[0]), myfile.tellg());
+    myfile.close();
+	
 	return id;
 }
 
 void buffer_load_ext(int buffer, string filename, unsigned offset) {
 	get_buffer(binbuff, buffer);
-	//TODO: Write this function
+	
+	ifstream myfile(filename.c_str());
+	if (!myfile.is_open())
+	{
+		cout << "Unable to open file " << filename;
+		return;
+	}
+	vector<char> data;
+	myfile.read(reinterpret_cast<char*>(&data[0]), myfile.tellg());
+	unsigned over = data.size() - binbuff->GetSize();
+	if (over < 0) { over = 0; }
+	switch (binbuff->type) {
+		case buffer_wrap:
+		binbuff->data.insert(binbuff->data.begin() + offset, data.begin(), data.end() - over);
+		binbuff->data.insert(binbuff->data.begin(), data.begin(), data.begin() + over);
+		break;
+		case buffer_grow:
+		binbuff->data.insert(binbuff->data.begin() + offset, data.begin(), data.end());
+		break;
+		default:
+		binbuff->data.insert(binbuff->data.begin() + offset, data.begin(), data.end() - over);
+		break;
+	}
+	
+    myfile.close();
 }
 
 void buffer_fill(int buffer, unsigned offset, int type, variant value, unsigned size) {
@@ -96,41 +176,6 @@ unsigned buffer_get_size(int buffer) {
 }
 
 void buffer_get_surface(int buffer, int surface, int mode, unsigned offset, int modulo) {
-	get_buffer(binbuff, buffer);
-	//TODO: Write this function
-}
-
-string buffer_md5(int buffer, unsigned offset, unsigned size) {
-	get_buffer(binbuff, buffer);
-	//TODO: Write this function
-}
-
-string buffer_sha1(int buffer, unsigned offset, unsigned size) {
-	get_buffer(binbuff, buffer);
-	//TODO: Write this function
-}
-
-int buffer_base64_decode(string str) {
-	enigma::BinaryBuffer* buffer = new enigma::BinaryBuffer(0);
-	buffer->type = buffer_grow;
-	buffer->alignment = 1;
-	int id = enigma::get_free_buffer();
-	enigma::buffers.insert(enigma::buffers.begin() + id, buffer);
-	//TODO: Write this function
-	return id;
-}
-
-int buffer_base64_decode_ext(int buffer, string str, unsigned offset) {
-	get_buffer(binbuff, buffer);
-	//TODO: Write this function
-}
-
-string buffer_base64_encode(int buffer, unsigned offset, unsigned size) {
-	get_buffer(binbuff, buffer);
-	//TODO: Write this function
-}
-
-void buffer_poke(int buffer, unsigned offset, int type, variant value) {
 	get_buffer(binbuff, buffer);
 	//TODO: Write this function
 }
@@ -199,7 +244,42 @@ variant buffer_read(int buffer, int type) {
 	//TODO: Write this function
 }
 
+void buffer_poke(int buffer, unsigned offset, int type, variant value) {
+	get_buffer(binbuff, buffer);
+	//TODO: Write this function
+}
+
 void buffer_write(int buffer, int type, variant value) {
+	get_buffer(binbuff, buffer);
+	//TODO: Write this function
+}
+
+string buffer_md5(int buffer, unsigned offset, unsigned size) {
+	get_buffer(binbuff, buffer);
+	//TODO: Write this function
+}
+
+string buffer_sha1(int buffer, unsigned offset, unsigned size) {
+	get_buffer(binbuff, buffer);
+	//TODO: Write this function
+}
+
+int buffer_base64_decode(string str) {
+	enigma::BinaryBuffer* buffer = new enigma::BinaryBuffer(0);
+	buffer->type = buffer_grow;
+	buffer->alignment = 1;
+	int id = enigma::get_free_buffer();
+	enigma::buffers.insert(enigma::buffers.begin() + id, buffer);
+	//TODO: Write this function
+	return id;
+}
+
+int buffer_base64_decode_ext(int buffer, string str, unsigned offset) {
+	get_buffer(binbuff, buffer);
+	//TODO: Write this function
+}
+
+string buffer_base64_encode(int buffer, unsigned offset, unsigned size) {
 	get_buffer(binbuff, buffer);
 	//TODO: Write this function
 }
