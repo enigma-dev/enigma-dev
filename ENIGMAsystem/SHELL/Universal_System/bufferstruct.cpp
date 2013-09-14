@@ -271,7 +271,6 @@ variant buffer_peek(int buffer, unsigned offset, int type) {
 		vector<char> data;
 		while (byte != 0x00) {
 			byte = binbuff->ReadByte();
-			//cout << " " << byte << " ";
 			data.push_back(byte);
 		}
 		return variant(&data[0]);
@@ -304,6 +303,11 @@ void buffer_poke(int buffer, unsigned offset, int type, variant value) {
 			byte = value[pos];
 			pos += 1;
 			binbuff->WriteByte(byte);
+		}
+		if (binbuff->alignment > pos) {
+			for (unsigned i = 0; i < binbuff->alignment - pos; i++) {
+				binbuff->WriteByte(0);
+			}
 		}
 	}
 }
