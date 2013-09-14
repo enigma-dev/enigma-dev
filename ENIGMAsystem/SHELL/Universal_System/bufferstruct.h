@@ -20,7 +20,6 @@
 using std::vector;
 
 #include "var4.h"
-
 namespace enigma_user
 {
 
@@ -82,8 +81,11 @@ namespace enigma
 	int type;
 	
     BinaryBuffer(unsigned size) {
-		data.resize(size);
-		std::fill(data.begin(), data.end(), 0);
+		data.resize(size, 0);
+		position = 0;
+		alignment = 1;
+		type = 0;
+		//std::fill(data.begin(), data.end(), 0);
 	}
 	
 	~BinaryBuffer() {
@@ -95,23 +97,37 @@ namespace enigma
 	}
 	
 	void Resize(unsigned size) {
-		data.resize(size);
+		data.resize(size, 0);
 	}
-	
+
 	void Seek(unsigned offset) {
 		position = offset;
 		while (position >= GetSize()) {
 			switch (type) {
 				case enigma_user::buffer_grow:
-				Resize(position + GetSize());
-				break;
+				Resize(position + 1);
+				return;
 				case enigma_user::buffer_wrap:
 				position -= GetSize();
-				break;
+				return;
 				default:
 				position = GetSize() - 1;
+				return;
 			}
 		}
+	}
+	
+	char ReadByte() {
+		Seek(position);
+		char byte = data[position];
+		Seek(position + 1);
+		return byte;
+	}
+	
+	void WriteByte(char byte) {
+		Seek(position);
+		data[position] = byte;
+		Seek(position + 1);
 	}
 
   };

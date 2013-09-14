@@ -15,7 +15,6 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <string>
 #include <cstring>
 #include <fstream>
 #include <iostream>
@@ -259,44 +258,53 @@ int buffer_tell(int buffer) {
 
 variant buffer_peek(int buffer, unsigned offset, int type) {
 	get_buffer(binbuff, buffer);
-	unsigned pos = offset;
-	unsigned dsize = buffer_sizeof(type) + binbuff->alignment - 1;
-	char data[buffer_sizeof(type)];
-	binbuff->Seek(pos + dsize);
-	for (unsigned i = 0; i < buffer_sizeof(type); i++) {
-		while (pos >= binbuff->GetSize()) {
-			if (binbuff->type != buffer_wrap) {
-				break;
-			}
-			pos -= binbuff->GetSize();
+	binbuff->Seek(offset);
+	if (type != buffer_string) {
+		unsigned dsize = buffer_sizeof(type) + binbuff->alignment - 1;
+		char data[buffer_sizeof(type)];
+		for (unsigned i = 0; i < buffer_sizeof(type); i++) {
+			data[i] = binbuff->ReadByte();
 		}
-		data[i] = binbuff->data[pos];
+		return variant(data);
+	} else {
+		char byte = '1';
+		vector<char> data;
+		while (byte != 0x00) {
+			byte = binbuff->ReadByte();
+			//cout << " " << byte << " ";
+			data.push_back(byte);
+		}
+		return variant(&data[0]);
 	}
-	return variant(data);
+	
 }
 
 variant buffer_read(int buffer, int type) {
 	get_buffer(binbuff, buffer);
+	char tit[4] = {'1','2','3','\0'};
 	return buffer_peek(buffer, binbuff->position, type);
 }
 
 void buffer_poke(int buffer, unsigned offset, int type, variant value) {
 	get_buffer(binbuff, buffer);
-	unsigned pos = offset;
-	unsigned dsize = buffer_sizeof(type) + binbuff->alignment - 1;
-	char data[dsize];
-	binbuff->Seek(pos + dsize);
-	for (unsigned i = 0; i < buffer_sizeof(type); i++) {
-		data[i] = value[i];
-	}
-	for (unsigned i = 0; i < dsize; i++) {
-		while (pos >= binbuff->GetSize()) {
-			if (binbuff->type != buffer_wrap) {
-				break;
-			}
-			pos -= binbuff->GetSize();
+	binbuff->Seek(offset);
+	if (type != buffer_string) {
+		unsigned dsize = buffer_sizeof(type) + binbuff->alignment - 1;
+		char data[dsize];
+		for (unsigned i = 0; i < buffer_sizeof(type); i++) {
+			data[i] = value[i];
 		}
-		binbuff[pos] = data[i];
+		for (unsigned i = 0; i < dsize; i++) {
+			binbuff->WriteByte(data[i]);
+		}
+	} else {
+		char byte = '1';
+		unsigned pos = 0;
+		while (byte != 0x00) {
+			byte = value[pos];
+			pos += 1;
+			binbuff->WriteByte(byte);
+		}
 	}
 }
 
