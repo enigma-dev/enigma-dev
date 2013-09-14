@@ -17,6 +17,7 @@
 
 #include <string>
 #include <vector>
+using std::vector;
 
 #include "var4.h"
 
