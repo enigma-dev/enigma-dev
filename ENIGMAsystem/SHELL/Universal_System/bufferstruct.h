@@ -75,7 +75,7 @@ namespace enigma
 {
   struct BinaryBuffer
   {
-	vector<char> data;
+	vector<unsigned char> data;
 	unsigned position;
 	unsigned alignment;
 	int type;
@@ -117,14 +117,14 @@ namespace enigma
 		}
 	}
 	
-	char ReadByte() {
+	unsigned char ReadByte() {
 		Seek(position);
-		char byte = data[position];
+		unsigned char byte = data[position];
 		Seek(position + 1);
 		return byte;
 	}
 	
-	void WriteByte(char byte) {
+	void WriteByte(unsigned char byte) {
 		Seek(position);
 		data[position] = byte;
 		Seek(position + 1);

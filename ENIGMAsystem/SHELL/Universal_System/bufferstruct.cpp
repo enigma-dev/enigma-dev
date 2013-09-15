@@ -15,10 +15,10 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <cstring>
-#include <fstream>
 #include <iostream>
 using namespace std;
+#include <cstring>
+#include <fstream>
 
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "libEGMstd.h"
@@ -35,6 +35,15 @@ namespace enigma
 			}
 		}
 		return buffers.size();
+	}
+	
+	std::vector<unsigned char> valToBytes(variant value, unsigned count)
+	{
+		std::vector<unsigned char> result(0);
+		for (unsigned i = 0; i < count; i++) {
+			result.push_back(value >> ((i) * 8));
+		}
+		return result;
 	}
 }
 
@@ -261,11 +270,13 @@ variant buffer_peek(int buffer, unsigned offset, int type) {
 	binbuff->Seek(offset);
 	if (type != buffer_string) {
 		unsigned dsize = buffer_sizeof(type) + binbuff->alignment - 1;
-		char data[buffer_sizeof(type)];
+		unsigned char data[buffer_sizeof(type)];
+		long res = 0;
 		for (unsigned i = 0; i < buffer_sizeof(type); i++) {
 			data[i] = binbuff->ReadByte();
+			res += data[i] << i * 8;
 		}
-		return variant(data);
+		return res;
 	} else {
 		char byte = '1';
 		vector<char> data;
@@ -280,7 +291,6 @@ variant buffer_peek(int buffer, unsigned offset, int type) {
 
 variant buffer_read(int buffer, int type) {
 	get_buffer(binbuff, buffer);
-	char tit[4] = {'1','2','3','\0'};
 	return buffer_peek(buffer, binbuff->position, type);
 }
 
@@ -289,11 +299,8 @@ void buffer_poke(int buffer, unsigned offset, int type, variant value) {
 	binbuff->Seek(offset);
 	if (type != buffer_string) {
 		unsigned dsize = buffer_sizeof(type) + binbuff->alignment - 1;
-		char data[dsize];
-		for (unsigned i = 0; i < buffer_sizeof(type); i++) {
-			data[i] = value[i];
-		}
-		for (unsigned i = 0; i < dsize; i++) {
+		vector<unsigned char> data = enigma::valToBytes(value, buffer_sizeof(type));
+		for (unsigned i = 0; i < data.size(); i++) {
 			binbuff->WriteByte(data[i]);
 		}
 	} else {
