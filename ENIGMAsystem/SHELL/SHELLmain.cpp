@@ -30,6 +30,7 @@
 
 #include "Universal_System/mathnc.h"
 #include "Universal_System/estring.h"
+#include "Universal_System/bufferstruct.h"
 #include "Universal_System/fileio.h"
 #include "Universal_System/terminal_io.h"
 

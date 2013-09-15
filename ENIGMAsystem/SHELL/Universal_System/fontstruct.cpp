@@ -37,7 +37,7 @@ namespace enigma
   int font_new(unsigned char gs, unsigned char gc) // Creates a new font, allocating 'gc' glyphs
   {
     font *ret = new font;
-    ret->glyphstart = gs;
+    ret->glyphstart = gs - 1; //TODO: For some reason the glyphs are off by 1, -1 is temporary fix.
     ret->glyphcount = gc;
     ret->glyphs = new fontglyph[gc];
     ret->height = 0;
@@ -118,7 +118,8 @@ namespace enigma
         boxes.push_back((glyphmetrics[i].w * glyphmetrics[i].h << 8) + i);
       boxes.sort();
 
-      int w = 64, h = 64;
+	  //NOTE: This was hardcoded with 64x64 now it starts with the size of the first glyph, maybe should be fixed properly?
+      int w = glyphmetrics[0].w , h = glyphmetrics[0].h ;
       enigma::rect_packer::rectpnode *rectplane = new enigma::rect_packer::rectpnode(0,0,w,h);
       for (list<unsigned int>::reverse_iterator i = boxes.rbegin(); i != boxes.rend() and w and h; )
       {
@@ -231,7 +232,7 @@ bool font_replace_sprite(int ind, int spr, unsigned char first, bool prop, int s
   unsigned char gcount = sspr->subcount;
   enigma::font *font = enigma::fontstructarray[ind];
   delete[] font->glyphs;
-  font->glyphstart = first;
+  font->glyphstart = first - 1; //TODO: For some reason the glyphs are off by 1, -1 is temporary fix.
   font->glyphcount = gcount;
   font->glyphs = new enigma::fontglyph[gcount];
   return enigma::font_pack(font, spr, gcount, prop, sep);
