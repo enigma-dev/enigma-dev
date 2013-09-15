@@ -197,8 +197,9 @@ void glsl_program_set(int id)
 
 void glsl_program_reset()
 {
-  glUseProgram(0);
+  //NOTE: Texture must be reset first so the Global VBO can draw and let people use shaders on text.
   texture_reset();
+  glUseProgram(0);
 }
 
 void glsl_program_free(int id)
