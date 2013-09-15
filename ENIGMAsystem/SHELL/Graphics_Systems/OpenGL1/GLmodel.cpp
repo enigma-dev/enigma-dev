@@ -25,6 +25,8 @@
 #include "Universal_System/roomsystem.h"
 #include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
+
 
 #include "../General/GLbinding.h"
 using namespace std;
