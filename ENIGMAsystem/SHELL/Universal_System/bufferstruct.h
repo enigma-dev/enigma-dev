@@ -42,8 +42,8 @@ enum {
 // Buffer seek base
 enum {
 	buffer_seek_start = 0,
-	buffer_seek_end = 2,
-	buffer_seek_relative = 1
+	buffer_seek_relative = 1,
+	buffer_seek_end = 2
 };
 
 // Buffer types
@@ -85,7 +85,6 @@ namespace enigma
 		position = 0;
 		alignment = 1;
 		type = 0;
-		//std::fill(data.begin(), data.end(), 0);
 	}
 	
 	~BinaryBuffer() {

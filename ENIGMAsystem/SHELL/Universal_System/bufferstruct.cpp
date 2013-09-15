@@ -206,6 +206,7 @@ int buffer_get_type(int buffer) {
 	return binbuff->type;
 }
 
+//NOTE: This function should most likely be added in graphics systems.
 void buffer_get_surface(int buffer, int surface, int mode, unsigned offset, int modulo) {
 	get_buffer(binbuff, buffer);
 	//TODO: Write this function
@@ -271,6 +272,8 @@ variant buffer_peek(int buffer, unsigned offset, int type) {
 	if (type != buffer_string) {
 		unsigned dsize = buffer_sizeof(type) + binbuff->alignment - 1;
 		unsigned char data[buffer_sizeof(type)];
+		//NOTE: These buffers most likely need a little more code added to take care of endianess on different architectures.
+		//TODO: Fix floating point precision.
 		long res = 0;
 		for (unsigned i = 0; i < buffer_sizeof(type); i++) {
 			data[i] = binbuff->ReadByte();
@@ -298,7 +301,8 @@ void buffer_poke(int buffer, unsigned offset, int type, variant value) {
 	get_buffer(binbuff, buffer);
 	binbuff->Seek(offset);
 	if (type != buffer_string) {
-		unsigned dsize = buffer_sizeof(type) + binbuff->alignment - 1;
+		//TODO: Implement buffer alignment.
+		unsigned dsize = buffer_sizeof(type); //+ binbuff->alignment - 1;
 		vector<unsigned char> data = enigma::valToBytes(value, buffer_sizeof(type));
 		for (unsigned i = 0; i < data.size(); i++) {
 			binbuff->WriteByte(data[i]);
