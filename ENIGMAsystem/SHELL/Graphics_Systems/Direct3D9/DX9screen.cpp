@@ -37,7 +37,7 @@ using namespace std;
 #include "Universal_System/graphics_object.h"
 #include "Universal_System/depth_draw.h"
 #include "Platforms/platforms_mandatory.h"
-#include "Platforms/Win32/WINDOWSwindow.h"
+#include "Platforms/General/PFwindow.h"
 #include "Universal_System/CallbackArrays.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 #include <limits>

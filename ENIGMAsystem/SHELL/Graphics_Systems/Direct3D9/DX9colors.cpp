@@ -74,16 +74,28 @@ void draw_set_color_rgb(unsigned char red,unsigned char green,unsigned char blue
 	enigma::currentcolor[1] = green;
 	enigma::currentcolor[2] = blue;
 }
+
 void draw_set_alpha(float alpha)
 {
 	enigma::currentcolor[3] = bind_alpha(alpha);
 }
+
 void draw_set_color_rgba(unsigned char red,unsigned char green,unsigned char blue,float alpha)
 {
 	enigma::currentcolor[0] = red;
 	enigma::currentcolor[1] = green;
 	enigma::currentcolor[2] = blue;
 	enigma::currentcolor[3] = bind_alpha(alpha);
+}
+
+void draw_set_color_write_enable(bool red, bool green, bool blue, bool alpha)
+{
+	DWORD flags;
+	if (red) { flags |= D3DCOLORWRITEENABLE_RED; }
+	if (green) { flags |= D3DCOLORWRITEENABLE_GREEN; }
+	if (blue) { flags |= D3DCOLORWRITEENABLE_BLUE; }
+	if (alpha) { flags |= D3DCOLORWRITEENABLE_ALPHA; }
+	d3ddev->SetRenderState(D3DRS_COLORWRITEENABLE, flags);
 }
 
 int draw_get_color() {

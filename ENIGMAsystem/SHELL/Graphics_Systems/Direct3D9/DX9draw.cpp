@@ -49,6 +49,33 @@ void draw_set_msaa_enabled(bool enable)
 
 }
 
+void draw_enable_alphablend(bool enable) {
+	d3ddev->SetRenderState(D3DRS_ALPHABLENDENABLE, enable);
+}
+
+bool draw_get_alpha_test() {
+	DWORD* enabled;
+	d3ddev->GetRenderState(D3DRS_ALPHATESTENABLE, enabled);
+	return *enabled;
+}
+
+unsigned draw_get_alpha_test_ref_value()
+{
+	DWORD* val;
+	d3ddev->GetRenderState(D3DRS_ALPHAREF, val);
+	return *val;
+}
+
+void draw_set_alpha_test(bool enable)
+{
+	d3ddev->SetRenderState(D3DRS_ALPHATESTENABLE, enable); 
+}
+
+void draw_set_alpha_test_ref_value(unsigned val)
+{
+	d3ddev->SetRenderState(D3DRS_ALPHAREF, val);
+}
+
 void draw_set_line_pattern(unsigned short pattern, int scale)
 {
 
