@@ -15,8 +15,10 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <cstring>
+#include <string>
 using std::string;
+
+#include "Universal_System/var4.h"
 
 #ifndef ___NSMPlAY_H_
 #define ___NSMPLAY_H_

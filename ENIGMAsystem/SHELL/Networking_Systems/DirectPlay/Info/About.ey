@@ -3,7 +3,7 @@
 
 Name: DirectPlay
 Identifier: DirectPlay
-Description: Support for the use of obsolete mplay_ functions.
+Description: Support for the use of obsolete mplay functions. This system is Windows only like the original functions were.
 Author: Robert B. Colton
 
 Depends: None
