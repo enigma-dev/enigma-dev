@@ -28,7 +28,7 @@
 #include <string>
 using std::string;
 #include <windows.h>
-#include "WINDOWSwindow.h"
+#include "../General/PFwindow.h"
 #include "WINDOWScallback.h"
 
 #ifndef WM_MOUSEHWHEEL
