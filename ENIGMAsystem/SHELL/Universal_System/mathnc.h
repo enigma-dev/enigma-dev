@@ -116,6 +116,9 @@ namespace enigma_user
   double dot_product(double x1, double y1, double x2, double y2);
   double dot_product_3d(double x1, double y1, double z1, double x2,
   double y2, double z2);
+  double dot_product_normalised(double x1, double y1, double x2, double y2);
+  double dot_product_normalised_3d(double x1, double y1, double z1, double x2,
+  double y2, double z2);
   double lerp(double x, double y, double a);
   double clamp(double x, double y, double a);
 
