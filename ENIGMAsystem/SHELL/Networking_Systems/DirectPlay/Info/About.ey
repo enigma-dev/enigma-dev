@@ -1,0 +1,12 @@
+%e-yaml
+---
+
+Name: DirectPlay
+Identifier: DirectPlay
+Description: Support for the use of obsolete mplay_ functions.
+Author: Robert B. Colton
+
+Depends: None
+
+Represents:
+	Build-platforms: None
