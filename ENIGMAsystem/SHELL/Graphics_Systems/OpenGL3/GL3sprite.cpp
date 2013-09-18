@@ -95,6 +95,23 @@ void draw_sprite(int spr, int subimg, gs_scalar x, gs_scalar y)
     plane2D_rotated(data);
 }
 
+void draw_sprite_pos(int spr, int subimg, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, gs_scalar x4, gs_scalar y4, gs_scalar alpha)
+{
+    get_spritev(spr2d,spr);
+    const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
+    texture_use(GmTextures[spr2d->texturearray[usi]]->gltex);
+
+    const gs_scalar tbx = spr2d->texbordxarray[usi], tby = spr2d->texbordyarray[usi];
+
+    const gs_scalar data[4*8] = {
+         x1, y1, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0,
+         x2, y1, tbx, 0.0, 1.0, 1.0, 1.0, 1.0,
+         x2, y2, tbx, tby, 1.0, 1.0, 1.0, 1.0,
+         x1, y2, 0.0, tby, 1.0, 1.0, 1.0, 1.0
+    };
+    plane2D_rotated(data);
+}
+
 void draw_sprite_stretched(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height)
 {
     get_spritev(spr2d,spr);
