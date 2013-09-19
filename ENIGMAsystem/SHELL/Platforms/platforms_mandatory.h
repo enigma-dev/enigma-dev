@@ -71,7 +71,17 @@ int window_get_region_height_scaled();
 
 // For game settings
 void window_set_fullscreen(bool full);
+
 int window_set_cursor(int c);
+inline void action_set_cursor(int spr, bool c) {
+	// TODO: if spr exists should create a sprite cursor, game maker allows
+	// both the sprite cursor and system cursor to be visible at the same time
+	if (c) {
+		window_set_cursor(0); // no system cursor
+	} else {
+		window_set_cursor(-1); // default system cursor
+	}
+}
 void window_set_region_scale(double scale, bool adaptwindow);
 void window_set_stayontop(bool stay);
 void window_set_sizeable(bool sizeable);
