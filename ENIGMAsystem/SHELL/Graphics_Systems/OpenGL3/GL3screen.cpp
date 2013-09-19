@@ -413,10 +413,10 @@ void screen_redraw()
 	// It is for drawing GUI elements without view scaling and transformation
     if (enigma::gui_used)
     {
-	    glViewport(0, 0, enigma::gui_width, enigma::gui_height);
+	    glViewport(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled());
         glLoadIdentity();
         glScalef(1, (bound_framebuffer==0?-1:1), 1);
-        glOrtho(0, room_width, 0, room_height, 0, 1);
+        glOrtho(0, enigma::gui_width, 0, enigma::gui_height, 0, 1);
         glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
         glMultMatrixd(transformation_matrix);
 		
@@ -585,6 +585,11 @@ int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h
 	fclose(bmp);
 	delete[] scrbuf;
 	return 0;
+}
+
+void display_set_gui_size(unsigned width, unsigned height) {
+	enigma::gui_width = width;
+	enigma::gui_height = height;
 }
 
 }
