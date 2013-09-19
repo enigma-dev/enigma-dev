@@ -661,6 +661,7 @@ int window_mouse_get_x()
 
 	return mouse.x-window.left;
 }
+
 int window_mouse_get_y()
 {
     RECT window;
@@ -670,6 +671,7 @@ int window_mouse_get_y()
 
 	return mouse.y-window.top;
 }
+
 void window_mouse_set(int x, int y)
 {
     RECT window;
@@ -702,6 +704,49 @@ void window_view_mouse_set(int id, int x, int y)
     RECT window;
     GetWindowRect(enigma::hWnd,&window);
     SetCursorPos(window.left + x + view_xview[id],window.top + y + view_yview[id]);
+}
+
+int window_views_mouse_get_x()
+{
+    RECT window;
+    GetWindowRect(enigma::hWnd,&window);
+    POINT mouse;
+	GetCursorPos(&mouse);
+
+	for (int i = 0; i < 8; i++) {
+		if (view_visible[i]) {
+			return mouse.x-window.left+view_xview[i];
+		}
+	}
+	return mouse.x-window.left;
+}
+
+int window_views_mouse_get_y()
+{
+    RECT window;
+    GetWindowRect(enigma::hWnd,&window);
+    POINT mouse;
+	GetCursorPos(&mouse);
+
+	for (int i = 0; i < 8; i++) {
+		if (view_visible[i]) {
+			return mouse.y-window.top+view_yview[i];
+		}
+	}
+	return mouse.y-window.top;
+}
+
+void window_views_mouse_set(int x, int y)
+{
+    RECT window;
+    GetWindowRect(enigma::hWnd,&window);
+	for (int i = 0; i < 8; i++) {
+		if (view_visible[i]) {
+			SetCursorPos(window.left + x + view_xview[i], window.top + y + view_yview[i]);
+			return;
+		}
+	}
+	SetCursorPos(window.left + x, window.top + y);
 }
 
 }
