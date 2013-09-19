@@ -89,6 +89,9 @@ namespace enigma
     {
         particles_impl = part_impl;
     }
+	
+	unsigned gui_width;
+	unsigned gui_height;
 }
 
 namespace enigma_user
@@ -357,7 +360,7 @@ void screen_redraw()
 	// It is for drawing GUI elements without view scaling and transformation
     if (enigma::gui_used)
     {
-        glViewport(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled());
+        glViewport(0, 0,  enigma::gui_width, enigma::gui_height);
         glLoadIdentity();
         if (GLEW_EXT_framebuffer_object)
         {
@@ -404,6 +407,9 @@ void screen_redraw()
 
 void screen_init()
 {
+	enigma::gui_width = window_get_region_width_scaled();
+	enigma::gui_height = window_get_region_height_scaled();
+	
     texture_reset();
     if (!view_enabled)
     {

@@ -92,6 +92,9 @@ namespace enigma
     {
         particles_impl = part_impl;
     }
+	
+	unsigned gui_width;
+	unsigned gui_height;
 }
 
 #include "Bridges/General/DX9Device.h"
@@ -383,7 +386,7 @@ void screen_redraw()
     {
 		// Now process the sub event of draw called draw gui 
 		// It is for drawing GUI elements without view scaling and transformation
-		D3DVIEWPORT9 pViewport = { 0, 0, (DWORD)window_get_region_width_scaled(), (DWORD)window_get_region_height_scaled(), 0, 1.0f };
+		D3DVIEWPORT9 pViewport = { 0, 0, enigma::gui_width, enigma::gui_height, 0, 1.0f };
 		d3ddev->SetViewport(&pViewport);
 		
 		D3DXMATRIX matTrans, matScale;
@@ -462,6 +465,8 @@ void screen_redraw()
 
 void screen_init()
 {
+	enigma::gui_width = window_get_region_width_scaled();
+	enigma::gui_height = window_get_region_height_scaled();
     if (!view_enabled)
     {
         //glMatrixMode(GL_PROJECTION);

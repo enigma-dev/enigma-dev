@@ -29,5 +29,7 @@ namespace enigma_user {
   void screen_refresh();
   void screen_init();
   
-
+  unsigned display_get_gui_width();
+  unsigned display_get_gui_height();
+  void display_set_gui_size(unsigned width, unsigned height);
 }

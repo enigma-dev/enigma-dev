@@ -102,6 +102,9 @@ namespace enigma
     {
         particles_impl = part_impl;
     }
+	
+	unsigned gui_width;
+	unsigned gui_height;
 }
 
 void draw_globalVBO()
@@ -410,7 +413,7 @@ void screen_redraw()
 	// It is for drawing GUI elements without view scaling and transformation
     if (enigma::gui_used)
     {
-	    glViewport(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled());
+	    glViewport(0, 0, enigma::gui_width, enigma::gui_height);
         glLoadIdentity();
         glScalef(1, (bound_framebuffer==0?-1:1), 1);
         glOrtho(0, room_width, 0, room_height, 0, 1);
@@ -452,6 +455,9 @@ void screen_redraw()
 
 void screen_init()
 {
+	enigma::gui_width = window_get_region_width_scaled();
+	enigma::gui_height = window_get_region_height_scaled();
+	
     glGenBuffersARB(1, &globalVBO);
     texture_reset();
     if (!view_enabled)
