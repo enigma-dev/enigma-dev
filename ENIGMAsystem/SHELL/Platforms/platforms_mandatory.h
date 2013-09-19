@@ -76,6 +76,7 @@ int window_set_cursor(int c);
 inline void action_set_cursor(int spr, bool c) {
 	// TODO: if spr exists should create a sprite cursor, game maker allows
 	// both the sprite cursor and system cursor to be visible at the same time
+	// TODO: For some reason this don't work in create events
 	if (c) {
 		window_set_cursor(0); // no system cursor
 	} else {
