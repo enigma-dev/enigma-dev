@@ -98,10 +98,10 @@ namespace enigma_user
     return (x1 * x2 + y1 * y2 + z1 * z2); 
   }
   double lerp(double x, double y, double a) { return x + ((y-x)*a); }
-  double clamp(double x, double y, double a) {
-      if (x < y) { return y; }
-      if (x > a) { return a; }
-      return x;
+  double clamp(double val, double min, double max) {
+      if (val < min) { return min; }
+      if (val > max) { return max; }
+      return val;
   }
 
   double min(double x, double y) { return x < y ? x : y; }
