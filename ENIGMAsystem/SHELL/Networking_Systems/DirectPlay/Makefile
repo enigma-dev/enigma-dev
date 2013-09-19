@@ -1,2 +1,2 @@
 SOURCES += $(wildcard Networking_Systems/DirectPlay/*.cpp)
-LDLIBS += -lDPLAYX
+LDLIBS += -ldplayx -ldxguid -lole32

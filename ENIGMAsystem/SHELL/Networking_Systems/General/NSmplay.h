@@ -32,7 +32,7 @@ namespace enigma_user {
 	void mplay_init_ipx();  
 	void mplay_init_modem(string initstr, string phonenr); 
 	bool mplay_init_serial(unsigned portno, unsigned baudrate, unsigned stopbits, unsigned parity, unsigned flow); 
-	void mplay_init_tcpip(string addr); 
+	bool mplay_init_tcpip(string addr); 
 	string mplay_ipaddress(); 
 	void mplay_message_clear(); 
 	unsigned mplay_message_count(string player);
