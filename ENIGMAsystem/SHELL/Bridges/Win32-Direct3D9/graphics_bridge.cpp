@@ -25,7 +25,7 @@ using namespace std;
 #include "libEGMstd.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Platforms/Win32/WINDOWSmain.h"
-#include "Platforms/Win32/WINDOWSwindow.h"
+#include "Platforms/General/PFwindow.h"
 #include "../General/DX9Device.h"
 LPD3DXSPRITE dsprite = NULL;
 

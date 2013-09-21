@@ -39,6 +39,6 @@ void set_synchronization(bool enable);
 void enigma_catchmouse_backend(bool x);
 
 #define enigmacatchmouse() enigma_catchmouse_backend(enigma::mousestatus[0]==1 && enigma::last_mousestatus[0]==1)
-#include "WINDOWSwindow.h"
+#include "../General/PFwindow.h"
 
 #include "externals.h"

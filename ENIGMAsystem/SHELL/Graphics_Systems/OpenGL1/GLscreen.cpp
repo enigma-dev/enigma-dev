@@ -89,6 +89,9 @@ namespace enigma
     {
         particles_impl = part_impl;
     }
+	
+	unsigned gui_width;
+	unsigned gui_height;
 }
 
 namespace enigma_user
@@ -364,11 +367,11 @@ void screen_redraw()
             glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &FBO);
             glScalef(1, (FBO==0?-1:1), 1);
         }
-        else
+        else 
         {
             glScalef(1, -1, 1);
         }
-        glOrtho(0, room_width, 0, room_height, 0, 1);
+        glOrtho(0, enigma::gui_width, 0, enigma::gui_height, 0, 1);
         glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
         glMultMatrixd(transformation_matrix);
 		
@@ -404,6 +407,9 @@ void screen_redraw()
 
 void screen_init()
 {
+	enigma::gui_width = window_get_region_width_scaled();
+	enigma::gui_height = window_get_region_height_scaled();
+	
     texture_reset();
     if (!view_enabled)
     {
@@ -530,6 +536,11 @@ int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h
 	fclose(bmp);
 	delete[] scrbuf;
 	return 0;
+}
+
+void display_set_gui_size(unsigned width, unsigned height) {
+	enigma::gui_width = width;
+	enigma::gui_height = height;
 }
 
 }

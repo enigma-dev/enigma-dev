@@ -37,7 +37,7 @@ using namespace std;
 #include "Universal_System/graphics_object.h"
 #include "Universal_System/depth_draw.h"
 #include "Platforms/platforms_mandatory.h"
-#include "Platforms/Win32/WINDOWSwindow.h"
+#include "Platforms/General/PFwindow.h"
 #include "Universal_System/CallbackArrays.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 #include <limits>
@@ -92,6 +92,9 @@ namespace enigma
     {
         particles_impl = part_impl;
     }
+	
+	unsigned gui_width;
+	unsigned gui_height;
 }
 
 #include "Bridges/General/DX9Device.h"
@@ -383,7 +386,7 @@ void screen_redraw()
     {
 		// Now process the sub event of draw called draw gui 
 		// It is for drawing GUI elements without view scaling and transformation
-		D3DVIEWPORT9 pViewport = { 0, 0, (DWORD)window_get_region_width_scaled(), (DWORD)window_get_region_height_scaled(), 0, 1.0f };
+		D3DVIEWPORT9 pViewport = { 0, 0, window_get_region_width_scaled(), window_get_region_height_scaled(), 0, 1.0f };
 		d3ddev->SetViewport(&pViewport);
 		
 		D3DXMATRIX matTrans, matScale;
@@ -401,9 +404,9 @@ void screen_redraw()
 		D3DXMATRIX matProjection;    // the projection transform matrix
 		D3DXMatrixOrthoOffCenterLH(&matProjection,
 							0,
-							(FLOAT)room_width,   
+							(FLOAT)enigma::gui_width,   
 							0, 
-							(FLOAT)room_height,   
+							(FLOAT)enigma::gui_height,   
 							0.0f,    // the near view-plane
 							1.0f);    // the far view-plane
 		d3ddev->SetTransform(D3DTS_PROJECTION, &matProjection);    // set the projection transform
@@ -462,6 +465,8 @@ void screen_redraw()
 
 void screen_init()
 {
+	enigma::gui_width = window_get_region_width_scaled();
+	enigma::gui_height = window_get_region_height_scaled();
     if (!view_enabled)
     {
         //glMatrixMode(GL_PROJECTION);
@@ -569,6 +574,11 @@ int screen_save(string filename) //Assumes native integers are little endian
 int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h) //Assumes native integers are little endian
 {
 	
+}
+
+void display_set_gui_size(unsigned width, unsigned height) {
+	enigma::gui_width = width;
+	enigma::gui_height = height;
 }
 
 }

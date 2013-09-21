@@ -52,6 +52,7 @@ void draw_set_color(int col);
 void draw_set_color_rgb(unsigned char red, unsigned char green, unsigned char blue);
 void draw_set_alpha(float alpha);
 void draw_set_color_rgba(unsigned char red, unsigned char green, unsigned char blue, float alpha);
+void draw_set_color_write_enable(bool red, bool green, bool blue, bool alpha);
 int draw_get_color();
 int draw_get_red();
 int draw_get_green();

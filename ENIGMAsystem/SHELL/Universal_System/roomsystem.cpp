@@ -676,8 +676,8 @@ namespace enigma
     using namespace enigma_user;
     mouse_xprevious = mouse_x;
     mouse_yprevious = mouse_y;
-    mouse_x = window_mouse_get_x();
-    mouse_y = window_mouse_get_y();
+    mouse_x = window_views_mouse_get_x();
+    mouse_y = window_views_mouse_get_y();
 
     if (view_enabled)
       for (int i=0; i<8; i++)
