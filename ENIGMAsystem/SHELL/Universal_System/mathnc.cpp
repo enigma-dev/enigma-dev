@@ -71,11 +71,37 @@ namespace enigma_user
   double y2,double z2)  { return ::sqrt(sqr(x1-x2) + sqr(y1-y2) + sqr(z1-z2)); }
   double dot_product(double x1,double y1,double x2,double y2) { return (x1 * x2 + y1 * y2); }
   double dot_product_3d(double x1,double y1,double z1,double x2,double y2, double z2) { return (x1 * x2 + y1 * y2 + z1 * z2); }
+  double dot_product_normalised(double x1,double y1,double x2,double y2) { 
+  	double length = sqrt(x1*x1+y1*y1);
+
+    x1 = x1/length;
+    y1 = y1/length;
+	
+	length = sqrt(x2*x2+y2*y2);
+
+    x2 = x2/length;
+    y2 = y2/length;
+    return (x1 * x2 + y1 * y2); 
+  }
+  double dot_product_normalised_3d(double x1,double y1,double z1,double x2,double y2, double z2) { 
+	double length = sqrt(x1*x1+y1*y1+z1*z1);
+
+    x1 = x1/length;
+    y1 = y1/length;
+    z1 = z1/length;
+	
+	length = sqrt(x2*x2+y2*y2+z2*z2);
+
+    x2 = x2/length;
+    y2 = y2/length;
+    z2 = z2/length;
+    return (x1 * x2 + y1 * y2 + z1 * z2); 
+  }
   double lerp(double x, double y, double a) { return x + ((y-x)*a); }
-  double clamp(double x, double y, double a) {
-      if (x < y) { return y; }
-      if (x > a) { return a; }
-      return x;
+  double clamp(double val, double min, double max) {
+      if (val < min) { return min; }
+      if (val > max) { return max; }
+      return val;
   }
 
   double min(double x, double y) { return x < y ? x : y; }

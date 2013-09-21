@@ -105,6 +105,8 @@ int display_get_width();
 int display_get_height();
 int display_get_colordepth();
 int display_get_frequency();
+unsigned display_get_dpi_x();
+unsigned display_get_dpi_y();
 extern int display_aa;
 void display_reset(int aa, bool vsync);
 void display_set_colordepth(int depth);
@@ -118,6 +120,9 @@ int window_mouse_get_y();
 int window_view_mouse_get_x(int id);
 int window_view_mouse_get_y(int id);
 void window_view_mouse_set(int id, int x, int y);
+int window_views_mouse_get_x(); // mouse_x constant, respect to all views
+int window_views_mouse_get_y(); // mouse_y constant, respect to all views
+void window_views_mouse_set(int x, int y); // with respect to first visible view
 void window_mouse_set(int x,int y);
 int window_get_fullscreen();
 

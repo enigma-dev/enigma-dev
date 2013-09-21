@@ -37,7 +37,7 @@ using std::vector;
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
 #include "Universal_System/estring.h"
-#include "WINDOWSwindow.h"
+#include "../General/PFwindow.h"
 #include "WINDOWSmain.h"
 
 #include "Platforms/platforms_mandatory.h"

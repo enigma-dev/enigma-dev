@@ -62,6 +62,8 @@ void window_default();
 // These two are a surprisingly integral part of the system
 int window_mouse_get_x();
 int window_mouse_get_y();
+int window_views_mouse_get_x(); // mouse_x constant, with respect to all views
+int window_views_mouse_get_y(); // mouse_y constant, with respect to all views
 
 // These two are used by screen_redraw for view calculations and such.
 int window_get_region_width_scaled();
@@ -69,7 +71,18 @@ int window_get_region_height_scaled();
 
 // For game settings
 void window_set_fullscreen(bool full);
+
 int window_set_cursor(int c);
+inline void action_set_cursor(int spr, bool c) {
+	// TODO: if spr exists should create a sprite cursor, game maker allows
+	// both the sprite cursor and system cursor to be visible at the same time
+	// TODO: For some reason this don't work in create events
+	if (c) {
+		window_set_cursor(0); // no system cursor
+	} else {
+		window_set_cursor(-1); // default system cursor
+	}
+}
 void window_set_region_scale(double scale, bool adaptwindow);
 void window_set_stayontop(bool stay);
 void window_set_sizeable(bool sizeable);

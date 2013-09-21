@@ -67,6 +67,7 @@ void draw_set_color(int color)
 	enigma::currentcolor[2] = __GETB(color);
 	glColor4ubv(enigma::currentcolor);
 }
+
 void draw_set_color_rgb(unsigned char red,unsigned char green,unsigned char blue)
 {
 	enigma::currentcolor[0] = red;
@@ -74,11 +75,13 @@ void draw_set_color_rgb(unsigned char red,unsigned char green,unsigned char blue
 	enigma::currentcolor[2] = blue;
 	glColor4ubv(enigma::currentcolor);
 }
+
 void draw_set_alpha(float alpha)
 {
 	enigma::currentcolor[3] = bind_alpha(alpha);
 	glColor4ubv(enigma::currentcolor);
 }
+
 void draw_set_color_rgba(unsigned char red,unsigned char green,unsigned char blue,float alpha)
 {
 	enigma::currentcolor[0] = red;
@@ -86,6 +89,11 @@ void draw_set_color_rgba(unsigned char red,unsigned char green,unsigned char blu
 	enigma::currentcolor[2] = blue;
 	enigma::currentcolor[3] = bind_alpha(alpha);
 	glColor4ubv(enigma::currentcolor);
+}
+
+void draw_set_color_write_enable(bool red, bool green, bool blue, bool alpha)
+{
+	glColorMask(red, green, blue, alpha);
 }
 
 int draw_get_color() {

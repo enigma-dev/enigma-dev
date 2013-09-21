@@ -430,7 +430,8 @@ enum
     ev_global_right_release     = 57,
     ev_global_middle_release    = 58,
     ev_mouse_wheel_up           = 60,
-    ev_mouse_wheel_down         = 61
+    ev_mouse_wheel_down         = 61,
+	ev_gui                      = 64
 };
 
 enum

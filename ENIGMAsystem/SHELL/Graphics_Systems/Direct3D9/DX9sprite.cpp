@@ -86,6 +86,11 @@ void draw_sprite(int spr,int subimg, gs_scalar x, gs_scalar y)
 	dsprite->Draw(GmTextures[spr2d->texturearray[usi]]->gTexture, NULL, &offset, &pos, enigma::get_currentcolor());
 }
 
+void draw_sprite_pos(int spr, int subimg, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, gs_scalar x4, gs_scalar y4, gs_scalar alpha)
+{
+
+}
+
 void draw_sprite_stretched(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height)
 {
     get_spritev(spr2d,spr);

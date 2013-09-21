@@ -39,13 +39,13 @@ inline void action_path_end()
 {
     path_end();
 }
-inline void action_path_position(cs_scalar position, bool relative)
+inline void action_path_position(cs_scalar position)
 {
-    path_set_position(position, relative);
+    path_set_position(position, argument_relative);
 }
-inline void action_path_speed(cs_scalar speed, bool relative)
+inline void action_path_speed(cs_scalar speed)
 {
-    path_set_speed(speed, relative);
+    path_set_speed(speed, argument_relative);
 }
 
 }
