@@ -178,7 +178,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 						return;
 						}
 					ENIGMA_READY = true;	
-					// Delay reload performed until the compiler is ready
+					// Delay compiler until reload performed is ready
 					while (!LGM.isloaded) {
 						try {
 							Thread.sleep(1000);
