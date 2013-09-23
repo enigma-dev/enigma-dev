@@ -178,6 +178,14 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 						return;
 						}
 					ENIGMA_READY = true;	
+					// Delay compiler until reload performed is ready
+					while (!LGM.isloaded) {
+						try {
+							Thread.sleep(1000);
+						} catch (InterruptedException e1) {
+							e1.printStackTrace();
+						}
+					}
 					ResourceHolder<EnigmaSettings> rh = LGM.currentFile.resMap.get(EnigmaSettings.class);
 					if (rh == null)
 						LGM.currentFile.resMap.put(EnigmaSettings.class,

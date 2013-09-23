@@ -52,6 +52,9 @@ namespace enigma
     enigma_user::random_set_seed(ss);
     enigma_user::mtrandom_seed(ss);
 
+	// must occur before the create/room start/game start events so that it does not override the user setting them in code
+	enigma::game_settings_initialize();
+	
     graphicssystem_initialize();
     audiosystem_initialize();
 
@@ -115,7 +118,6 @@ namespace enigma
     else
         enigma_user::window_default();
 
-    enigma::game_settings_initialize();
     return 0;
   }
 }
