@@ -76,10 +76,13 @@ namespace enigma {
 
 namespace enigma_user {
   extern double fps;
+  unsigned long current_time; // milliseconds since the start of the game
+  unsigned long delta_time; // microseconds since the last step event
 }
 
 namespace enigma {
   int current_room_speed;
+  unsigned long start_time; // microseconds since the start of the computer at which the game started
   bool use_pc;
   // Filetime.
   ULARGE_INTEGER time_offset_ft;
@@ -105,6 +108,15 @@ namespace enigma {
   {
     current_room_speed = rs;
   }
+  long get_current_time()
+  {
+    if (use_pc) {
+      return time_offset_pc.QuadPart/frequency_pc.QuadPart;
+    }
+    else {
+      return time_offset_ft.QuadPart/10;
+    }
+  }
   void initialize_timing()
   {
     use_pc = QueryPerformanceFrequency(&frequency_pc);
@@ -119,6 +131,7 @@ namespace enigma {
       time_offset_ft.HighPart = time_values.dwHighDateTime;
       time_offset_slowing_ft.QuadPart = time_offset_ft.QuadPart;
     }
+	start_time = get_current_time();
   }
   void update_current_time()
   {
@@ -262,6 +275,7 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
           {
               // Find diff between current and offset.
               long passed_mcs = enigma::get_current_offset_difference_mcs();
+			  enigma_user::current_time = enigma::get_current_time() - enigma::start_time;
               if (passed_mcs >= 1000000) { // Handle resetting.
                   // If more than one second has passed, update fps variable, reset frames count,
                   // and advance offset by difference in seconds, rounded down.
@@ -310,6 +324,7 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
           {
               if (GetForegroundWindow() != enigma::hWnd && enigma::freezeWindow)  continue;
 
+			  enigma_user::delta_time = enigma::get_current_offset_slowing_difference_mcs();
               enigma::ENIGMA_events();
               enigma::input_push();
 

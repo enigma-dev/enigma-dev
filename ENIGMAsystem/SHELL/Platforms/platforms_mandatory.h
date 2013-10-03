@@ -36,6 +36,8 @@
 
 namespace enigma_user {
   extern const int os_type;
+  extern unsigned long current_time; // milliseconds since the start of the game
+  extern unsigned long delta_time; // microseconds since the last step event
 }
 
 namespace enigma
@@ -76,7 +78,6 @@ int window_set_cursor(int c);
 inline void action_set_cursor(int spr, bool c) {
 	// TODO: if spr exists should create a sprite cursor, game maker allows
 	// both the sprite cursor and system cursor to be visible at the same time
-	// TODO: For some reason this don't work in create events
 	if (c) {
 		window_set_cursor(0); // no system cursor
 	} else {
@@ -90,6 +91,7 @@ void window_set_showborder(bool show);
 void window_set_showicons(bool show);
 void window_set_freezeonlosefocus(bool freeze);
 bool set_working_directory(std::string dir = "");
+unsigned long get_timer(); // number of microseconds since the game started
 }
 
 #endif

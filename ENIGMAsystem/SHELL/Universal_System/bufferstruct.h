@@ -136,13 +136,13 @@ namespace enigma
   #ifdef DEBUG_MODE
   #include "Widget_Systems/widgets_mandatory.h"
   #define get_buffer(binbuff,buff)\
-    if (buff < 0 or size_t(buff) >= enigma::buffers.size() or !enigma::backgroundstructarray[buff]) {\
+    if (buff < 0 or size_t(buff) >= enigma::buffers.size() or !enigma::buffers[buff]) {\
       show_error("Attempting to access non-existing buffer " + toString(buff), false);\
       return;\
     }\
     enigma::BinaryBuffer *binbuff = enigma::buffers[buff];
   #define get_bufferr(binbuff,buff,r)\
-    if (buff < 0 or size_t(buff) >= enigma::buffers.size() or !enigma::backgroundstructarray[buff]) {\
+    if (buff < 0 or size_t(buff) >= enigma::buffers.size() or !enigma::buffers[buff]) {\
       show_error("Attempting to access non-existing buffer " + toString(buff), false);\
       return r;\
     }\
