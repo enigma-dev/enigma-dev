@@ -73,9 +73,6 @@ extern vector<B2DBody*> b2dbodies;
 namespace enigma_user
 {
 
-bool place_free(double x,double y);
-bool place_meeting(double x, double y, int object);
-
 /************** Worlds **************/
 
 void b2d_world_create(int pixeltometerscale);

@@ -28,8 +28,8 @@
 #include <string>
 using std::string;
 
+double show_menu(string str, double def);
+double show_menu_pos(double x, double y, string str, double def);
 int show_menu(int x, int y, string text);
 int show_menu_ext(int x, int y, string text);
 int show_menu_ext_nl(int x, int y, string text);
-double show_menu(string str, double def);
-double show_menu_pos(double x, double y, string str, double def);
