@@ -132,7 +132,8 @@ namespace enigma
   };
   
   extern vector<BinaryBuffer*> buffers;
-  
+}
+
   #ifdef DEBUG_MODE
   #include "Widget_Systems/widgets_mandatory.h"
   #define get_buffer(binbuff,buff)\
@@ -153,7 +154,6 @@ namespace enigma
 	  #define get_bufferr(binbuff,buff,r)\
 		enigma::BinaryBuffer *binbuff = enigma::buffers[buff];
 	#endif
-}
 
 namespace enigma_user
 {

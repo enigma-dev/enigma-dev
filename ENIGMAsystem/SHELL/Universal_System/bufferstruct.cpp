@@ -192,17 +192,17 @@ void buffer_fill(int buffer, unsigned offset, int type, variant value, unsigned 
 }
 
 unsigned buffer_get_size(int buffer) {
-	get_buffer(binbuff, buffer);
+	get_bufferr(binbuff, buffer, -1);
 	return binbuff->GetSize();
 }
 
 unsigned buffer_get_alignment(int buffer) {
-	get_buffer(binbuff, buffer);
+	get_bufferr(binbuff, buffer, -1);
 	return binbuff->alignment;
 }
 
 int buffer_get_type(int buffer) {
-	get_buffer(binbuff, buffer);
+	get_bufferr(binbuff, buffer, -1);
 	return binbuff->type;
 }
 
@@ -262,12 +262,12 @@ unsigned buffer_sizeof(int type) {
 }
 
 int buffer_tell(int buffer) {
-	get_buffer(binbuff, buffer);
+	get_bufferr(binbuff, buffer, -1);
 	return binbuff->position;
 }
 
 variant buffer_peek(int buffer, unsigned offset, int type) {
-	get_buffer(binbuff, buffer);
+	get_bufferr(binbuff, buffer, -1);
 	binbuff->Seek(offset);
 	if (type != buffer_string) {
 		unsigned dsize = buffer_sizeof(type) + binbuff->alignment - 1;
@@ -293,7 +293,7 @@ variant buffer_peek(int buffer, unsigned offset, int type) {
 }
 
 variant buffer_read(int buffer, int type) {
-	get_buffer(binbuff, buffer);
+	get_bufferr(binbuff, buffer, -1);
 	return buffer_peek(buffer, binbuff->position, type);
 }
 
@@ -329,12 +329,12 @@ void buffer_write(int buffer, int type, variant value) {
 }
 
 string buffer_md5(int buffer, unsigned offset, unsigned size) {
-	get_buffer(binbuff, buffer);
+	get_bufferr(binbuff, buffer, 0);
 	//TODO: Write this function
 }
 
 string buffer_sha1(int buffer, unsigned offset, unsigned size) {
-	get_buffer(binbuff, buffer);
+	get_bufferr(binbuff, buffer, 0);
 	//TODO: Write this function
 }
 
@@ -349,12 +349,12 @@ int buffer_base64_decode(string str) {
 }
 
 int buffer_base64_decode_ext(int buffer, string str, unsigned offset) {
-	get_buffer(binbuff, buffer);
+	get_bufferr(binbuff, buffer, -1);
 	//TODO: Write this function
 }
 
 string buffer_base64_encode(int buffer, unsigned offset, unsigned size) {
-	get_buffer(binbuff, buffer);
+	get_bufferr(binbuff, buffer, 0);
 	//TODO: Write this function
 }
 
