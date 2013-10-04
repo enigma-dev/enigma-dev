@@ -78,9 +78,6 @@ struct fixtureInstance {
 }; 
 extern vector<fixtureInstance*> fixtures;
 
-bool place_free(double x,double y);
-bool place_meeting(double x, double y, int object);
-
 namespace enigma_user
 {
 
