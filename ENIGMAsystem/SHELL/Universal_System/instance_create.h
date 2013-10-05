@@ -27,7 +27,7 @@
 
 namespace enigma
 {
-  void instance_change_inst(int obj, bool perf, enigma::object_graphics* inst)
+  void instance_change_inst(int obj, bool perf, object_graphics* inst)
   {
       if (inst->object_index == obj) return; //prevents infinite loop
 
@@ -40,8 +40,8 @@ namespace enigma
       double image_xscale=inst->image_xscale;
       double image_yscale=inst->image_yscale;
       double image_angle=inst->image_angle;
-      enigma::vspeedv vspeed=inst->vspeed;
-      enigma::hspeedv hspeed=inst->hspeed;
+      vspeedv vspeed=inst->vspeed;
+      hspeedv hspeed=inst->hspeed;
 
       //the instance id is the same
       int idn=inst->id;
@@ -51,7 +51,7 @@ namespace enigma
       inst->unlink();
 
       //Create the instance
-      enigma::object_basic* ob = NULL;
+      object_basic* ob = NULL;
       switch((int)obj)
       {
       #define NEW_OBJ_PREFIX ob =
@@ -64,7 +64,7 @@ namespace enigma
       }
       (void)ob;
       
-      enigma::object_graphics* newinst = (enigma::object_graphics*) (*enigma::fetch_inst_iter_by_int(idn));
+      object_graphics* newinst = (object_graphics*) (*fetch_inst_iter_by_int(idn));
       if (perf) newinst->myevent_create();
       newinst->x=x; newinst->y=y; newinst->yprevious=yprevious; newinst->xprevious=xprevious;
       newinst->xstart=xstart; newinst->ystart=ystart;
@@ -75,9 +75,9 @@ namespace enigma
   
   object_basic* instance_create_id(int x,int y,int object,int idn)
   { //This is for use by the system only. Please leave be.
-    if (enigma::maxid<idn)
-      enigma::maxid = idn;
-    enigma::object_basic* ob;
+    if (maxid < idn)
+      maxid = idn;
+    object_basic* ob;
     switch (object)
     {
         #define NEW_OBJ_PREFIX ob =
