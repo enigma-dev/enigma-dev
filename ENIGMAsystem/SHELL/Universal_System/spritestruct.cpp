@@ -346,7 +346,7 @@ namespace enigma
                                 tmpcell+=4;
                         }
                 }
-                unsigned texture = graphics_create_texture(cellwidth, fullheight, pixels);
+                unsigned texture = graphics_create_texture(cellwidth, fullheight, pixels, false);
                 ns->texturearray[ii] = texture;
                 ns->texbordxarray[ii] = (double) 1.0;//width/fullwidth;
                 ns->texbordyarray[ii] = (double) height/fullheight;
@@ -395,7 +395,7 @@ namespace enigma
     }
     memset(imgpxptr,0,(fullheight-h) * fullwidth);
 
-    unsigned texture = graphics_create_texture(fullwidth,fullheight,imgpxdata);
+    unsigned texture = graphics_create_texture(fullwidth,fullheight,imgpxdata,false);
 
     sprite* sprstr = spritestructarray[sprid];
 

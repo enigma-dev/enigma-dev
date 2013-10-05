@@ -25,6 +25,7 @@ using std::vector;
 
 struct GmTexture {
 	LPDIRECT3DTEXTURE9 gTexture;
+	bool isFont;
 	GmTexture(LPDIRECT3DTEXTURE9 gTex);
 	~GmTexture();
 };
