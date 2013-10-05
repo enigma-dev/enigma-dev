@@ -54,7 +54,7 @@ namespace enigma
     const int bitmap_size = widfull*hgtfull*4;
     char* bitmap=new char[bitmap_size](); // Initialize to zero.
 
-    for(ih = bmpheight - 1; ih >= 0; ih--)
+    for(ih = 0; ih <= bmpheight - 1; ih++)
     {
       int tmp = ih*widfull*4;
       for (iw=0; iw < bmpwidth; iw++){
