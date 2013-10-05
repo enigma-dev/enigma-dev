@@ -25,6 +25,7 @@ using std::vector;
 
 struct GmTexture {
 	unsigned gltex;
+	bool isFont;
 	GmTexture(unsigned gtex);
 	~GmTexture();
 };

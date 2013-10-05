@@ -63,7 +63,7 @@ namespace enigma
 {
   bool interpolate_textures = false; //NOTE: set value here when game settings are used
 
-  int graphics_create_texture(int fullwidth, int fullheight, void* pxdata)
+  int graphics_create_texture(int fullwidth, int fullheight, void* pxdata, bool isfont)
   {
     LPDIRECT3DTEXTURE9 texture = NULL;
 	HRESULT hr;
@@ -93,7 +93,9 @@ namespace enigma
 
 	texture->UnlockRect(0);
 	
-    GmTextures.push_back(new GmTexture(texture));
+	GmTexture* gmTexture = new GmTexture(texture);
+	gmTexture->isFont = isfont;
+    GmTextures.push_back(gmTexture);
     return GmTextures.size()-1;
   }
 
