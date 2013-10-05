@@ -70,17 +70,20 @@ namespace enigma
 {
   bool interpolate_textures = false; //NOTE: set value here when game settings are used
 
-  int graphics_create_texture(int fullwidth, int fullheight, void* pxdata)
+  int graphics_create_texture(int fullwidth, int fullheight, void* pxdata, bool isfont)
   {
     GLuint texture;
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexImage2D(GL_TEXTURE_2D, 0, 4, fullwidth, fullheight, 0, GL_RGBA, GL_UNSIGNED_BYTE, pxdata);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,interpolate_textures?GL_LINEAR:GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,interpolate_textures?GL_LINEAR:GL_NEAREST);
+	bool interpolate = (interpolate_textures && !isfont);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,interpolate?GL_LINEAR:GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,interpolate?GL_LINEAR:GL_NEAREST);
     glBindTexture(GL_TEXTURE_2D, enigma::bound_texture);
 
-    GmTextures.push_back(new GmTexture(texture));
+	GmTexture* gmTexture = new GmTexture(texture);
+	gmTexture->isFont = isfont;
+    GmTextures.push_back(gmTexture);
     return GmTextures.size()-1;
   }
 
@@ -94,8 +97,9 @@ namespace enigma
     glDisable(GL_DEPTH_TEST);
     glBindTexture(GL_TEXTURE_2D, texture);
     int w, h;
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,interpolate_textures?GL_LINEAR:GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,interpolate_textures?GL_LINEAR:GL_NEAREST);
+	bool interpolate = (interpolate_textures && !GmTextures[tex]->isFont);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,interpolate?GL_LINEAR:GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,interpolate?GL_LINEAR:GL_NEAREST);
     glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_WIDTH, &w);
     glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_HEIGHT, &h);
     char* bitmap = new char[(h<<(lgpp2(w)+2))|2];
@@ -105,7 +109,9 @@ namespace enigma
     glBindTexture(GL_TEXTURE_2D, enigma::bound_texture);
     glPopAttrib();
 
-    GmTextures.push_back(new GmTexture(dup_tex));
+	GmTexture* gmTexture = new GmTexture(dup_tex);
+	gmTexture->isFont = GmTextures[tex]->isFont;
+    GmTextures.push_back(gmTexture);
     return GmTextures.size()-1;
   }
 
@@ -134,8 +140,9 @@ namespace enigma
 
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexImage2D(GL_TEXTURE_2D, 0, 4, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, bitmap);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,interpolate_textures?GL_LINEAR:GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,interpolate_textures?GL_LINEAR:GL_NEAREST);
+	bool interpolate = (interpolate_textures && !GmTextures[tex]->isFont);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,interpolate?GL_LINEAR:GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,interpolate?GL_LINEAR:GL_NEAREST);
     glBindTexture(GL_TEXTURE_2D, enigma::bound_texture);
 
     delete[] bitmap;
@@ -177,6 +184,7 @@ void texture_set_interpolation(int enable)
   enigma::interpolate_textures = enable;
   for (int i = 0; i < GmTextures.size(); i++)
   {
+	if (GmTextures[i]->isFont) { continue; }
     glBindTexture(GL_TEXTURE_2D, GmTextures[i]->gltex);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,enable?GL_LINEAR:GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,enable?GL_LINEAR:GL_NEAREST);

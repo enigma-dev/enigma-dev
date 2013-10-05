@@ -97,7 +97,7 @@ namespace enigma
     }
     memset(imgpxptr,0,(fullheight-h) * fullwidth);
 
-    int texture = graphics_create_texture(fullwidth,fullheight,imgpxdata);
+    int texture = graphics_create_texture(fullwidth,fullheight,imgpxdata,false);
     delete[] imgpxdata;
 
     backgroundstructarray[bkgid] = useAsTileset ? new background(w,h,texture,transparent,smoothEdges,preload) : new background_tileset(w,h,texture,transparent,smoothEdges,preload,tileWidth, tileHeight, hOffset, vOffset, hSep, vSep);
@@ -111,7 +111,7 @@ namespace enigma
     unsigned int w, h, fullwidth, fullheight;
 
     char *pxdata = load_bitmap(filename,&w,&h,&fullwidth,&fullheight);
-    unsigned texture = graphics_create_texture(fullwidth, fullheight, pxdata);
+    unsigned texture = graphics_create_texture(fullwidth, fullheight, pxdata, false);
     delete[] pxdata;
 
     bak->width = w;
