@@ -69,7 +69,6 @@ void buffer_copy(int src_buffer, unsigned src_offset, unsigned size, int dest_bu
 	get_buffer(dstbuff, dest_buffer);
 	
 	unsigned over = size - srcbuff->GetSize();
-	if (over < 0) { over = 0; }
 	switch (dstbuff->type) {
 		case buffer_wrap:
 		dstbuff->data.insert(dstbuff->data.begin() + dest_offset, srcbuff->data.begin() + src_offset, srcbuff->data.begin() + src_offset + size - over);
@@ -106,7 +105,6 @@ void buffer_save_ext(int buffer, string filename, unsigned offset, unsigned size
 	}
 
 	unsigned over = size - binbuff->GetSize();
-	if (over < 0) { over = 0; }
 	switch (binbuff->type) {
 		case buffer_wrap:
 		myfile.write(reinterpret_cast<const char*>(&binbuff->data[offset]), size - over);
@@ -156,7 +154,6 @@ void buffer_load_ext(int buffer, string filename, unsigned offset) {
 	vector<char> data;
 	myfile.read(reinterpret_cast<char*>(&data[0]), myfile.tellg());
 	unsigned over = data.size() - binbuff->GetSize();
-	if (over < 0) { over = 0; }
 	switch (binbuff->type) {
 		case buffer_wrap:
 		binbuff->data.insert(binbuff->data.begin() + offset, data.begin(), data.end() - over);

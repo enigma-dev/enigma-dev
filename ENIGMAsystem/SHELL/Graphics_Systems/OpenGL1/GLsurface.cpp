@@ -346,9 +346,9 @@ void draw_surface_tiled_area(int id, gs_scalar x, gs_scalar y, gs_scalar x1, gs_
     jj = j;
 
     glBegin(GL_QUADS);
-    for(i=i; i<=x2; i+=sw)
+    for(; i<=x2; i+=sw)
     {
-      for(j=j; j<=y2; j+=sh)
+      for(; j<=y2; j+=sh)
       {
         if(i <= x1) left = x1-i;
         else left = 0;
@@ -501,9 +501,9 @@ void draw_surface_tiled_area_ext(int id, gs_scalar x, gs_scalar y, gs_scalar x1,
     jj = j;
 
     glBegin(GL_QUADS);
-    for(i=i; i<=x2; i+=sw)
+    for(; i<=x2; i+=sw)
     {
-      for(j=j; j<=y2; j+=sh)
+      for(; j<=y2; j+=sh)
       {
         if(i <= x1) left = x1-i;
         else left = 0;
