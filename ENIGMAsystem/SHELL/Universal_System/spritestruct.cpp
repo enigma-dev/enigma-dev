@@ -289,7 +289,7 @@ namespace enigma
           int t_pixel_g = pxdata[(height-1)*width*4+1]; 
           int t_pixel_b = pxdata[(height-1)*width*4+2];
           unsigned int ih, iw;
-          for (ih = height - 1; ih >= 0; ih--)
+          for (ih = 0; ih <= height - 1; ih++)
           {
             int tmp = ih*width*4;
             for (iw=0; iw < width; iw++)

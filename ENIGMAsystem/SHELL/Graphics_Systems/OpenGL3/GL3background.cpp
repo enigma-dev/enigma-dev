@@ -170,9 +170,9 @@ void draw_background_tiled_area(int back, gs_scalar x, gs_scalar y, gs_scalar x1
     j = y1-(fmod(y1,sh) - fmod(y,sh)) - sh*(fmod(y1,sh)<fmod(y,sh));
     jj = j;
 
-    for(i=i; i<=x2; i+=sw)
+    for(; i<=x2; i+=sw)
     {
-      for(j=j; j<=y2; j+=sh)
+      for(; j<=y2; j+=sh)
       {
         if(i <= x1) left = x1-i;
         else left = 0;
@@ -320,9 +320,9 @@ void draw_background_tiled_area_ext(int back, gs_scalar x, gs_scalar y, gs_scala
     jj = j;
 
     const gs_scalar r = __GETR(blend), g = __GETG(blend), b = __GETB(blend);
-    for(i=i; i<=x2; i+=sw)
+    for(; i<=x2; i+=sw)
     {
-      for(j=j; j<=y2; j+=sh)
+      for(; j<=y2; j+=sh)
       {
         if(i <= x1) left = x1-i;
         else left = 0;
