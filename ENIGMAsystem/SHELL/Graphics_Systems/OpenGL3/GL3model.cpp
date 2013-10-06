@@ -1149,6 +1149,7 @@ void d3d_model_cylinder(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_sca
         int k;
         a = 0; px = cx+rx; py = cy; tp = 0; k = 0;
 
+		d3d_model_primitive_begin(id, pr_trianglestrip);
         for (int i = 0; i <= steps; i++)
         {
             v[k][0] = px; v[k][1] = py; v[k][2] = z2;
@@ -1160,28 +1161,33 @@ void d3d_model_cylinder(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_sca
             d3d_model_vertex_texture(id, px, py, z1, tp, vrep);
             k++; a += pr; px = cx+cos(a)*rx; py = cy+sin(a)*ry; tp += invstep;
         }
+		d3d_model_primitive_end(id);
 
         if (closed)
         {
+			// BOTTOM
+            d3d_model_primitive_begin(id, pr_trianglefan);
             v[k][0] = cx; v[k][1] = cy; v[k][2] = z1;
             t[k][0] = 0; t[k][1] = vrep;
+            d3d_model_vertex_texture(id, cx, cy, z1, 0, vrep);
             k++;
-            for (int i = 0; i < steps*2; i+=2)
+            for (int i = steps*2; i >= 0; i-=2)
             {
-                d3d_model_vertex_normal_texture(id, cx, cy, z1, 0, 0, -1, 0, vrep);
-                d3d_model_vertex_normal_texture(id, v[i+3][0], v[i+3][1], v[i+3][2], 0, 0, -1, t[i+2][0], t[i+2][1]);
-                d3d_model_vertex_normal_texture(id, v[i+1][0], v[i+1][1], v[i+1][2], 0, 0, -1, t[i][0], t[i][1]);
+                d3d_model_vertex_texture(id, v[i+1][0], v[i+1][1], v[i+1][2], t[i][0], t[i][1]);
             }
+            d3d_model_primitive_end(id);
 
+			// TOP
+            d3d_model_primitive_begin(id, pr_trianglefan);
             v[k][0] = cx; v[k][1] = cy; v[k][2] = z2;
             t[k][0] = 0; t[k][1] = vrep;
+            d3d_model_vertex_texture(id, cx, cy, z2, 0, vrep);
             k++;
-            for (int i = 0; i < steps*2; i+=2)
+            for (int i = 0; i <= steps*2; i+=2)
             {
-                d3d_model_vertex_normal_texture(id, cx, cy, z2, 0, 0, -1, 0, vrep);
-                d3d_model_vertex_normal_texture(id, v[i][0], v[i][1], v[i][2], 0, 0, -1, t[i][0], t[i][1]);
-                d3d_model_vertex_normal_texture(id, v[i+2][0], v[i+2][1], v[i+2][2], 0, 0, -1, t[i+2][0], t[i+2][1]);
+                d3d_model_vertex_texture(id, v[i][0], v[i][1], v[i][2], t[i][0], t[i][1]);
             }
+            d3d_model_primitive_end(id);
         }
 }
 
