@@ -1243,14 +1243,16 @@ void d3d_model_ellipsoid(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_sc
   pz = rz*sin(b);
   tzp = vrep-invstep2;
   px = cx+rx*cosb; py = cy;
+  // BOTTOM
   for (int i = 0; i <= steps; i++)
   {
     v[k][0] = px; v[k][1] = py; v[k][2] = cz + pz;
     t[k][0] = txp[i]; t[k][1] = tzp;
     d3d_model_vertex_normal_texture(id, px, py, cz + pz, px, py, cz + pz, txp[i], tzp);
-    k++; px = cx+cosx[i]*cosb; py = cy+siny[i]*cosb;
+    k++; px = cx+cosx[i]*cosb; py = cy-siny[i]*cosb;
  }
  d3d_model_primitive_end(id);
+ // SIDES
  for (int ii = 0; ii < zsteps - 2; ii++)
  {
     b += qr;
@@ -1266,7 +1268,7 @@ void d3d_model_ellipsoid(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_sc
         v[k][0] = px; v[k][1] = py; v[k][2] = cz + pz;
         t[k][0] = txp[i]; t[k][1] = tzp;
         d3d_model_vertex_normal_texture(id, px, py, cz + pz, px, py, cz + pz, txp[i], tzp);
-        k++; px = cx+cosx[i]*cosb; py = cy+siny[i]*cosb;
+        k++; px = cx+cosx[i]*cosb; py = cy-siny[i]*cosb;
     }
     d3d_model_primitive_end(id);
   }
@@ -1275,7 +1277,8 @@ void d3d_model_ellipsoid(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_sc
   t[k][0] = 0; t[k][1] = 0;
   d3d_model_vertex_normal_texture(id, cx, cy, cz + rz, 0,0,0, 0, 0);
   k++;
-  for (int i = k - steps - 2; i <= k - 2; i++)
+  // TOP
+  for (int i = k - 2; i >= k - steps - 2; i--)
   {
 	d3d_model_vertex_normal_texture(id, v[i][0], v[i][1], v[i][2], 0, 0, 0, t[i][0], t[i][1]);
   }
