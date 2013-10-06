@@ -1159,21 +1159,23 @@ void d3d_model_ellipsoid(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_sc
   d3d_model_primitive_begin(id, pr_trianglefan);
   v[k][0] = cx; v[k][1] = cy; v[k][2] = cz - rz;
   t[k][0] = 0; t[k][1] = vrep;
-  d3d_model_vertex_texture(id, cx, cy, cz - rz, 0, vrep);
+  d3d_model_vertex_normal_texture(id, cx, cy, cz - rz, cx, cy, cz - rz, 0, vrep);
   k++;
   b = qr-M_PI/2;
   cosb = cos(b);
   pz = rz*sin(b);
   tzp = vrep-invstep2;
   px = cx+rx*cosb; py = cy;
+  // BOTTOM
   for (int i = 0; i <= steps; i++)
   {
     v[k][0] = px; v[k][1] = py; v[k][2] = cz + pz;
     t[k][0] = txp[i]; t[k][1] = tzp;
-    d3d_model_vertex_texture(id, px, py, cz + pz, txp[i], tzp);
-    k++; px = cx+cosx[i]*cosb; py = cy+siny[i]*cosb;
+    d3d_model_vertex_normal_texture(id, px, py, cz + pz, px, py, cz + pz, txp[i], tzp);
+    k++; px = cx+cosx[i]*cosb; py = cy-siny[i]*cosb;
  }
  d3d_model_primitive_end(id);
+ // SIDES
  for (int ii = 0; ii < zsteps - 2; ii++)
  {
     b += qr;
@@ -1185,23 +1187,25 @@ void d3d_model_ellipsoid(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_sc
     for (int i = 0; i <= steps; i++)
     {
         kk = k - steps - 1;
-        d3d_model_vertex_texture(id, v[kk][0], v[kk][1], v[kk][2], t[kk][0], t[kk][1]);
+        d3d_model_vertex_normal_texture(id, v[kk][0], v[kk][1], v[kk][2], 0, 0, 0, t[kk][0], t[kk][1]);
         v[k][0] = px; v[k][1] = py; v[k][2] = cz + pz;
         t[k][0] = txp[i]; t[k][1] = tzp;
-        d3d_model_vertex_texture(id, px, py, cz + pz, txp[i], tzp);
-        k++; px = cx+cosx[i]*cosb; py = cy+siny[i]*cosb;
+        d3d_model_vertex_normal_texture(id, px, py, cz + pz, px, py, cz + pz, txp[i], tzp);
+        k++; px = cx+cosx[i]*cosb; py = cy-siny[i]*cosb;
     }
     d3d_model_primitive_end(id);
   }
   d3d_model_primitive_begin(id, pr_trianglefan);
   v[k][0] = cx; v[k][1] = cy; v[k][2] = cz + rz;
   t[k][0] = 0; t[k][1] = 0;
-  d3d_model_vertex_texture(id, cx, cy, cz + rz, 0, 0);
+  d3d_model_vertex_normal_texture(id, cx, cy, cz + rz, 0,0,0, 0, 0);
   k++;
-  for (int i = k - steps - 2; i <= k - 2; i++)
+  // TOP
+  for (int i = k - 2; i >= k - steps - 2; i--)
   {
-  d3d_model_vertex_texture(id, v[i][0], v[i][1], v[i][2], t[i][0], t[i][1]);
+	d3d_model_vertex_normal_texture(id, v[i][0], v[i][1], v[i][2], 0, 0, 0, t[i][0], t[i][1]);
   }
+  d3d_model_primitive_end(id);
 }
 
 void d3d_model_icosahedron(int id)
