@@ -407,52 +407,66 @@ void d3d_draw_block(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_s
 void d3d_draw_cylinder(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, bool closed, int steps)
 {
     float v[100][3];
+	float n[100][3];
     float t[100][3];
     steps = min(max(steps, 3), 48);
     const double cx = (x1+x2)/2, cy = (y1+y2)/2, rx = (x2-x1)/2, ry = (y2-y1)/2, invstep = (1.0/steps)*hrep, pr = 2*M_PI/steps;
     double a, px, py, tp;
     int k;
   texture_use(get_texture(texId));
+	//SIDES
     glBegin(GL_TRIANGLE_STRIP);
     a = 0; px = cx+rx; py = cy; tp = 0; k = 0;
     for (int i = 0; i <= steps; i++)
     {
         v[k][0] = px; v[k][1] = py; v[k][2] = z2;
+		n[k][0] = cos(a); n[k][1] = sin(a); n[k][2] = 0;
         t[k][0] = tp; t[k][1] = 0;
         glTexCoord2fv(t[k]);
+		glNormal3fv(n[k]);
           glVertex3fv(v[k]);
         k++;
         v[k][0] = px; v[k][1] = py; v[k][2] = z1;
+		n[k][0] = cos(a); n[k][1] = sin(a); n[k][2] = 0;
         t[k][0] = tp; t[k][1] = vrep;
         glTexCoord2fv(t[k]);
+		glNormal3fv(n[k]);
           glVertex3fv(v[k]);
         k++; a += pr; px = cx+cos(a)*rx; py = cy+sin(a)*ry; tp += invstep;
     }
     glEnd();
     if (closed)
     {
+		//BOTTOM
         glBegin(GL_TRIANGLE_FAN);
         v[k][0] = cx; v[k][1] = cy; v[k][2] = z1;
+		n[k][0] = 0; n[k][1] = 0; n[k][2] = -1;
         t[k][0] = 0; t[k][1] = vrep;
         glTexCoord2fv(t[k]);
+		glNormal3fv(n[k]);
           glVertex3fv(v[k]);
         k++;
         for (int i = 0; i <= steps*2; i+=2)
         {
             glTexCoord2fv(t[i]);
+			glNormal3fv(n[k]);
               glVertex3fv(v[i+1]);
         }
         glEnd();
 
+		//TOP
         glBegin(GL_TRIANGLE_FAN);
         v[k][0] = cx; v[k][1] = cy; v[k][2] = z2;
+		n[k][0] = 0; n[k][1] = 0; n[k][2] = 1;
         t[k][0] = 0; t[k][1] = vrep;
         glTexCoord2fv(t[k]);
+		glNormal3fv(n[k]);
           glVertex3fv(v[k]);
         k++;
         for (int i = 0; i <= steps*2; i+=2)
         {
             glTexCoord2fv(t[i]);
+			glNormal3fv(n[i]);
               glVertex3fv(v[i]);
         }
         glEnd();
@@ -464,6 +478,7 @@ void d3d_draw_cone(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_sc
     steps = min(max(steps, 3), 48);
     const double cx = (x1+x2)/2, cy = (y1+y2)/2, rx = (x2-x1)/2, ry = (y2-y1)/2, invstep = (1.0/steps)*hrep, pr = 2*M_PI/steps;
     float v[(steps + 1)*3 + 1][3];
+	float n[(steps + 1)*3 + 1][3];
     float t[(steps + 1)*3 + 1][2];
     double a, px, py, tp;
     int k = 0;
@@ -473,13 +488,17 @@ void d3d_draw_cone(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_sc
     for (int i = 0; i <= steps; i++)
     {
         v[k][0] = cx; v[k][1] = cy; v[k][2] = z2;
+		n[k][0] = cos(a); n[k][1] = sin(a); n[k][2] = 0;
         t[k][0] = tp; t[k][1] = vrep;
         glTexCoord2fv(t[k]);
+		glNormal3fv(n[k]);
         glVertex3fv(v[k]);
         k += steps + 1;
         v[k][0] = px; v[k][1] = py; v[k][2] = z1;
+		n[k][0] = cos(a); n[k][1] = sin(a); n[k][2] = 0;
         t[k][0] = tp; t[k][1] = 0;
         glTexCoord2fv(t[k]);
+		glNormal3fv(n[k]);
         glVertex3fv(v[k]);
         k -= steps + 1;
         k++; a += pr; px = cx+cos(a)*rx; py = cy+sin(a)*ry; tp += invstep;
@@ -490,16 +509,20 @@ void d3d_draw_cone(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_sc
     {
         glBegin(GL_TRIANGLE_FAN);
         v[k][0] = cx; v[k][1] = cy; v[k][2] = z1;
+		n[k][0] = 0; n[k][1] = 0; n[k][2] = -1;
         t[k][0] = 0; t[k][1] = 0;
         glTexCoord2fv(t[k]);
+		glNormal3fv(n[k]);
         glVertex3fv(v[k]);
         k++;
         tp = 0;
         for (int i = steps; i >= 0; i--)
         {
             v[k][0] = v[i + steps + 1][0]; v[k][1] = v[i + steps + 1][1]; v[k][2] = v[i + steps + 1][2];
+			n[k][0] = 0; n[k][1] = 0; n[k][2] = -1;
             t[k][0] = 0; t[k][1] = 0;
             glTexCoord2fv(t[k]);
+			glNormal3fv(n[k]);
             glVertex3fv(v[k]);
             k++; tp += invstep;
         }
@@ -513,6 +536,7 @@ void d3d_draw_ellipsoid(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, 
     const int zsteps = ceil(steps/2.0);
     const double cx = (x1+x2)/2, cy = (y1+y2)/2, cz = (z1+z2)/2, rx = (x2-x1)/2, ry = (y2-y1)/2, rz = (z2-z1)/2, invstep = (1.0/steps)*hrep, invstep2 = (1.0/zsteps)*vrep, pr = 2*M_PI/steps, qr = M_PI/zsteps;
     float v[(steps+2)*(zsteps+2)][3];
+	float n[(steps+2)*(zsteps+2)][3];
     float t[(steps+2)*(zsteps+2)][2];
     double a, b, px, py, pz, tp, tzp, cosb;
     double cosx[steps+1], siny[steps+1], txp[steps+1];
@@ -533,6 +557,7 @@ void d3d_draw_ellipsoid(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, 
     {
         px = cx+cosx[i]*cosb; py = cy+siny[i]*cosb;
         v[k][0] = px; v[k][1] = py; v[k][2] = cz + pz;
+		n[k][0] = cosx[i]; n[k][1] = siny[i]; n[k][2] = cosb;
         t[k][0] = txp[i]; t[k][1] = tzp;
         k++;
     }
@@ -548,10 +573,13 @@ void d3d_draw_ellipsoid(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, 
             px = cx+cosx[i]*cosb; py = cy+siny[i]*cosb;
             kk = k - steps - 1;
             glTexCoord2fv(t[kk]);
+			glNormal3fv(n[kk]);
             glVertex3fv(v[kk]);
             v[k][0] = px; v[k][1] = py; v[k][2] = cz + pz;
+			n[k][0] = cosx[i]; n[k][1] = -siny[i]; n[k][2] = sin(b);
             t[k][0] = txp[i]; t[k][1] = tzp;
             glTexCoord2fv(t[k]);
+			glNormal3fv(n[k]);
             glVertex3fv(v[k]);
             k++;
         }
