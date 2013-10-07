@@ -1084,6 +1084,40 @@ void d3d_model_vertex_normal_texture_color(int id, gs_scalar x, gs_scalar y, gs_
   meshes[id]->AddColor(col, alpha);
 }
 
+void d3d_model_floor(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, gs_scalar hrep, gs_scalar vrep)
+{
+  gs_scalar nX = (y2-y1)*(z2-z1)*(z2-z1);
+  gs_scalar nY = (z2-z1)*(x2-x1)*(x2-x1);
+  gs_scalar nZ = (x2-x1)*(y2-y1)*(y2-y1);
+  
+  gs_scalar  m = sqrt(nX*nX + nY*nY + nZ*nZ);
+  nX /= m; nY /= m; nZ /= m;
+
+  d3d_model_primitive_begin(id, pr_trianglestrip);
+  d3d_model_vertex_normal_texture(id, x1, y1, z1, -nX, nY, nZ, 0, 0);
+  d3d_model_vertex_normal_texture(id, x2, y1, z2, -nX, nY, nZ, 0, vrep);
+  d3d_model_vertex_normal_texture(id, x1, y2, z1, -nX, nY, nZ, hrep, 0);
+  d3d_model_vertex_normal_texture(id, x2, y2, z2, -nX, nY, nZ, hrep, vrep);
+  d3d_model_primitive_end(id);
+}
+
+void d3d_model_wall(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, gs_scalar hrep, gs_scalar vrep)
+{
+  gs_scalar nX = (y2-y1)*(z2-z1)*(z2-z1);
+  gs_scalar nY = (z2-z1)*(x2-x1)*(x2-x1);
+  gs_scalar nZ = (x2-x1)*(y2-y1)*(y2-y1);
+  
+  gs_scalar  m = sqrt(nX*nX + nY*nY + nZ*nZ);
+  nX /= m; nY /= m; nZ /= m;
+
+  d3d_model_primitive_begin(id, pr_trianglestrip);
+  d3d_model_vertex_normal_texture(id, x1, y1, z1, nX, -nY, nZ, 0, 0);
+  d3d_model_vertex_normal_texture(id, x2, y2, z1, nX, -nY, nZ, hrep, 0);
+  d3d_model_vertex_normal_texture(id, x1, y1, z2, nX, -nY, nZ, 0, vrep);
+  d3d_model_vertex_normal_texture(id, x2, y2, z2, nX, -nY, nZ, hrep, vrep);
+  d3d_model_primitive_end(id);
+}
+
 void d3d_model_block(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, gs_scalar hrep, gs_scalar vrep, bool closed)
 {
 	//NOTE: This is the fastest way to batch cubes with uninterpolated normals thanks to my model batching, still slower than a triangle strip with interpolated normals
@@ -1319,34 +1353,6 @@ void d3d_model_torus(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar
     }
     d3d_model_primitive_end(id);
   }
-}
-
-void d3d_model_wall(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, gs_scalar hrep, gs_scalar vrep)
-{
-  float xd = x2-x1, yd = y2-y1, zd = z2-z1;
-  float normal[3] = {xd*zd, zd*yd, 0};
-  float mag = hypot(normal[0], normal[1]);
-  normal[0] /= mag;
-  normal[1] /= mag;
-
-  d3d_model_primitive_begin(id, pr_trianglestrip);
-  d3d_model_vertex_normal_texture(id, x1, y1, z1, normal[0], normal[1], normal[2], 0, 0);
-  d3d_model_vertex_normal_texture(id, x2, y2, z1, normal[0], normal[1], normal[2], hrep, 0);
-  d3d_model_vertex_normal_texture(id, x1, y1, z2, normal[0], normal[1], normal[2], 0, vrep);
-  d3d_model_vertex_normal_texture(id, x2, y2, z2, normal[0], normal[1], normal[2], hrep, vrep);
-  d3d_model_primitive_end(id);
-}
-
-void d3d_model_floor(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, gs_scalar hrep, gs_scalar vrep)
-{
-  GLfloat normal[] = {0, 0, 1};
-
-  d3d_model_primitive_begin(id, pr_trianglestrip);
-  d3d_model_vertex_normal_texture(id, x1, y1, z1, normal[0], normal[1], normal[2], 0, 0);
-  d3d_model_vertex_normal_texture(id, x2, y1, z2, normal[0], normal[1], normal[2], 0, vrep);
-  d3d_model_vertex_normal_texture(id, x1, y2, z1, normal[0], normal[1], normal[2], hrep, 0);
-  d3d_model_vertex_normal_texture(id, x2, y2, z2, normal[0], normal[1], normal[2], hrep, vrep);
-  d3d_model_primitive_end(id);
 }
 
 }

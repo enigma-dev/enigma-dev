@@ -309,22 +309,64 @@ void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, g
   enigma::d3d_light_update_positions();
 }
 
+void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, double angle)
+{
+  glDisable(GL_DEPTH_TEST);
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  gluPerspective(45, -view_wview[view_current] / (double)view_hview[view_current], 1, 32000);
+  glMatrixMode(GL_MODELVIEW);
+  glScalef(1, -1, 1);
+  glOrtho(x,x + width,y,y + height,0,1);
+  glRotatef(angle,0,0,1);
+  glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
+  glMultMatrixd(transformation_matrix);
+  enigma::d3d_light_update_positions();
+}
+
+void d3d_draw_floor(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep)
+{
+  gs_scalar nX = (y2-y1)*(z2-z1)*(z2-z1);
+  gs_scalar nY = (z2-z1)*(x2-x1)*(x2-x1);
+  gs_scalar nZ = (x2-x1)*(y2-y1)*(y2-y1);
+  
+  gs_scalar  m = sqrt(nX*nX + nY*nY + nZ*nZ);
+  nX /= m; nY /= m; nZ /= m;
+  
+  GLfloat verts[] = {x1, y1, z1, x2, y1, z2, x1, y2, z1, x2, y2, z2},
+          texts[] = {0, 0, 0, vrep, hrep, 0, hrep, vrep},
+          norms[] = {-nX, nY, nZ, -nX, nY, nZ, -nX, nY, nZ, -nX, nY, nZ};
+  GLubyte floor_indices[] = {0, 1, 2, 3};
+
+  texture_use(get_texture(texId));
+
+  glEnableClientState(GL_VERTEX_ARRAY);
+  glEnableClientState(GL_NORMAL_ARRAY);
+  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+  
+  glVertexPointer(3, GL_FLOAT, 0, verts);
+  glNormalPointer(GL_FLOAT, 0, norms);
+  glTexCoordPointer(2, GL_FLOAT, 0, texts);
+  
+  glDrawRangeElements(GL_TRIANGLE_STRIP, 0, 4, 4, GL_UNSIGNED_BYTE, floor_indices);
+  
+  glDisableClientState(GL_VERTEX_ARRAY);
+  glDisableClientState(GL_NORMAL_ARRAY);
+  glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+}
+
 void d3d_draw_wall(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep)
 {
-  float xd = x2-x1, yd = y2-y1, zd = z2-z1;
-  float normal[3] = {xd*zd, zd*yd, 0};
-  float mag = hypot(normal[0], normal[1]);
-  normal[0] /= mag;
-  normal[1] /= mag;
-  if (x2 < x1) {
-    normal[0]=-normal[0]; }
-  if (y2 < y1) {
-    normal[1]=-normal[1]; }
+  gs_scalar nX = (y2-y1)*(z2-z1)*(z2-z1);
+  gs_scalar nY = (z2-z1)*(x2-x1)*(x2-x1);
+  gs_scalar nZ = (x2-x1)*(y2-y1)*(y2-y1);
+  
+  gs_scalar  m = sqrt(nX*nX + nY*nY + nZ*nZ);
+  nX /= m; nY /= m; nZ /= m;
 
   GLfloat verts[] = {x1, y1, z1, x2, y2, z1, x1, y1, z2, x2, y2, z2},
           texts[] = {0, 0, hrep, 0, 0, vrep, hrep, vrep},
-          norms[] = {normal[0], normal[1], normal[2], normal[0], normal[1], normal[2],
-                     normal[0], normal[1], normal[2], normal[0], normal[1], normal[2]};
+          norms[] = {nX, -nY, nZ, nX, -nY, nZ, nX, -nY, nZ, nX, -nY, nZ};
 
   GLubyte indices[] = {0, 1, 2, 3};
 
@@ -339,30 +381,6 @@ void d3d_draw_wall(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_sc
   glTexCoordPointer(2, GL_FLOAT, 0, texts);
 
   glDrawRangeElements(GL_TRIANGLE_STRIP, 0, 4, 4, GL_UNSIGNED_BYTE, indices);
-  
-  glDisableClientState(GL_VERTEX_ARRAY);
-  glDisableClientState(GL_NORMAL_ARRAY);
-  glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-}
-
-void d3d_draw_floor(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep)
-{
-  GLfloat verts[] = {x1, y1, z1, x2, y1, z2, x1, y2, z1, x2, y2, z2},
-          texts[] = {0, 0, 0, vrep, hrep, 0, hrep, vrep},
-          norms[] = {0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1};
-  GLubyte floor_indices[] = {3, 1, 2, 0};
-
-  texture_use(get_texture(texId));
-
-  glEnableClientState(GL_VERTEX_ARRAY);
-  glEnableClientState(GL_NORMAL_ARRAY);
-  glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-  
-  glVertexPointer(3, GL_FLOAT, 0, verts);
-  glNormalPointer(GL_FLOAT, 0, norms);
-  glTexCoordPointer(2, GL_FLOAT, 0, texts);
-  
-  glDrawRangeElements(GL_TRIANGLE_STRIP, 0, 4, 4, GL_UNSIGNED_BYTE, floor_indices);
   
   glDisableClientState(GL_VERTEX_ARRAY);
   glDisableClientState(GL_NORMAL_ARRAY);
