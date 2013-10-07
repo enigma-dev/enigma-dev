@@ -1121,24 +1121,24 @@ void d3d_model_cone(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar 
   double a, px, py, tp;
   int k = 0;
   d3d_model_primitive_begin(id, pr_trianglefan);
-  d3d_model_vertex_texture(id, cx, cy, z2, 0, 0);
+  d3d_model_vertex_normal_texture(id, cx, cy, z2, 0, 0, 1, 0, 0);
   k++;
   a = 0; px = cx+rx; py = cy; tp = 0;
   for (int i = 0; i <= steps; i++)
   {
-    d3d_model_vertex_texture(id, px, py, z1, tp, vrep);
+    d3d_model_vertex_normal_texture(id, px, py, z1, cos(a), sin(a), 0, tp, vrep);
     k++; a += pr; px = cx+cos(a)*rx; py = cy+sin(a)*ry; tp += invstep;
   }
   d3d_model_primitive_end(id);
   if (closed)
   {
     d3d_model_primitive_begin(id, pr_trianglefan);
-    d3d_model_vertex_texture(id, cx, cy, z1, 0, vrep);
+    d3d_model_vertex_normal_texture(id, cx, cy, z1, 0, 0, -1, 0, vrep);
     k++;
     tp = 0;
     for (int i = 0; i <= steps + 1; i++)
     {
-      d3d_model_vertex_texture(id, px, py, z1, tp, 0);
+      d3d_model_vertex_normal_texture(id, px, py, z1, 0, 0, -1, tp, 0);
       k++; a -= pr; px = cx+cos(a)*rx; py = cy+sin(a)*ry; tp += invstep;
     }
     d3d_model_primitive_end(id);
