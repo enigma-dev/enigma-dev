@@ -1253,9 +1253,29 @@ void d3d_model_ellipsoid(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_sc
   d3d_model_primitive_end(id);
 }
 
-void d3d_model_icosahedron(int id)
+void d3d_model_icosahedron(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, gs_scalar hrep, gs_scalar vrep, int steps)
 {
-  //TODO: Write this shit
+  const double width = (x2-x1), length = (y2-y1), height = (z2-z1);
+  static GLfloat vdata[12][3] = {    
+   {0, 0.5, 1}, {1, 0.5, 1}, {0, 0.5, 0}, {1, 0.5, 0},    
+   {0.5, 1, 1}, {0.5, 1, 0}, {0.5, 0, 1}, {0.5, 0, 0},    
+   {1, 1, 0.5}, {0, 1, 0.5}, {1, 0, 0.5}, {0, 0, 0.5} 
+  };
+
+  static GLint tindices[20][3] = { 
+   {0,4,1}, {0,9,4}, {9,5,4}, {4,5,8}, {4,8,1},    
+   {8,10,1}, {8,3,10}, {5,3,8}, {5,2,3}, {2,7,3},    
+   {7,10,3}, {7,6,10}, {7,11,6}, {11,0,6}, {0,1,6}, 
+   {6,1,10}, {9,0,11}, {9,11,2}, {9,2,5}, {7,2,11} };
+
+  d3d_model_primitive_begin(id, pr_trianglelist);
+  for (unsigned i = 0; i < 20; i++) {    
+	d3d_model_vertex(id, x1 + vdata[tindices[i][0]][0] * width, y1 + vdata[tindices[i][0]][1] * length, z1 + vdata[tindices[i][0]][2] * height);
+	d3d_model_vertex(id, x1 + vdata[tindices[i][1]][0] * width, y1 + vdata[tindices[i][1]][1] * length, z1 + vdata[tindices[i][1]][2] * height);
+	d3d_model_vertex(id, x1 + vdata[tindices[i][2]][0] * width, y1 + vdata[tindices[i][2]][1] * length, z1 + vdata[tindices[i][2]][2] * height);
+	// TODO: Add normals, uv's, and subdivide by the number of steps
+  }
+  d3d_model_primitive_end(id);
 }
 
 void d3d_model_torus(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar hrep, gs_scalar vrep, int csteps, int tsteps, double radius, double tradius)
