@@ -61,8 +61,6 @@ inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect 
 
 namespace enigma
 {
-  bool interpolate_textures = false; //NOTE: set value here when game settings are used
-
   int graphics_create_texture(int fullwidth, int fullheight, void* pxdata, bool isfont)
   {
     GLuint texture;

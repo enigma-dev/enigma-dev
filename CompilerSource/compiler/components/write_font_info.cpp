@@ -40,7 +40,7 @@ int lang_CPP::compile_writeFontInfo(EnigmaStruct* es)
   ofstream wto("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_fontinfo.h",ios_base::out);
   wto << license << "#include \"Universal_System/fontstruct.h\"" << endl
       << endl;
-  
+
   int maxid = -1, rawfontcount = 0;
   wto << "namespace enigma {" << endl;
     wto << "  rawfont rawfontdata[] = {" << endl;
@@ -49,15 +49,15 @@ int lang_CPP::compile_writeFontInfo(EnigmaStruct* es)
       wto << "    {\"" <<
       es->fonts[i].name   << "\", " <<   // string name;
       es->fonts[i].id     << ", \"" <<   // int id;
-      
+
       es->fonts[i].fontName << "\", " << // string fontName;
       es->fonts[i].size     <<   ", " << // int size;
-      es->fonts[i].bold     <<   ", " << // bool bold;
-      es->fonts[i].italic   <<   ", " << // bool italic;
+      bool(es->fonts[i].bold)     <<   ", " << // bool bold;
+      bool(es->fonts[i].italic)   <<   ", " << // bool italic;
       es->fonts[i].rangeMin <<   ", " << // int rangeMin;
       es->fonts[i].rangeMax - es->fonts[i].rangeMin + 1 //  int rangeMax;
       << "}," << endl;
-      
+
       if (es->fonts[i].id > maxid)
         maxid = es->fonts[i].id;
       rawfontcount++;

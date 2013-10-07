@@ -27,16 +27,16 @@ using namespace std;
 namespace enigma
 {
 	vector<BinaryBuffer*> buffers(0);
-	
+
 	int get_free_buffer() {
-		for (int i = 0; i < buffers.size(); i++) {
+		for (unsigned i = 0; i < buffers.size(); i++) {
 			if (!buffers[i]) {
 				return i;
 			}
 		}
 		return buffers.size();
 	}
-	
+
 	std::vector<unsigned char> valToBytes(variant value, unsigned count)
 	{
 		std::vector<unsigned char> result(0);
@@ -67,7 +67,7 @@ void buffer_delete(int buffer) {
 void buffer_copy(int src_buffer, unsigned src_offset, unsigned size, int dest_buffer, unsigned dest_offset) {
 	get_buffer(srcbuff, src_buffer);
 	get_buffer(dstbuff, dest_buffer);
-	
+
 	unsigned over = size - srcbuff->GetSize();
 	switch (dstbuff->type) {
 		case buffer_wrap:
@@ -119,7 +119,7 @@ void buffer_save_ext(int buffer, string filename, unsigned offset, unsigned size
 		myfile.write(reinterpret_cast<const char*>(&binbuff->data[offset]), binbuff->GetSize());
 		break;
 	}
-	
+
     myfile.close();
 }
 
@@ -129,7 +129,7 @@ int buffer_load(string filename) {
 	buffer->alignment = 1;
 	int id = enigma::get_free_buffer();
 	enigma::buffers.insert(enigma::buffers.begin() + id, buffer);
-	
+
 	ifstream myfile(filename.c_str());
 	if (!myfile.is_open())
 	{
@@ -138,13 +138,13 @@ int buffer_load(string filename) {
 	}
 	myfile.read(reinterpret_cast<char*>(&buffer->data[0]), myfile.tellg());
     myfile.close();
-	
+
 	return id;
 }
 
 void buffer_load_ext(int buffer, string filename, unsigned offset) {
 	get_buffer(binbuff, buffer);
-	
+
 	ifstream myfile(filename.c_str());
 	if (!myfile.is_open())
 	{
@@ -166,7 +166,7 @@ void buffer_load_ext(int buffer, string filename, unsigned offset) {
 		binbuff->data.insert(binbuff->data.begin() + offset, data.begin(), data.end() - over);
 		break;
 	}
-	
+
     myfile.close();
 }
 
@@ -205,7 +205,7 @@ int buffer_get_type(int buffer) {
 
 //NOTE: This function should most likely be added in graphics systems.
 void buffer_get_surface(int buffer, int surface, int mode, unsigned offset, int modulo) {
-	get_buffer(binbuff, buffer);
+	//get_buffer(binbuff, buffer);
 	//TODO: Write this function
 }
 
@@ -267,7 +267,7 @@ variant buffer_peek(int buffer, unsigned offset, int type) {
 	get_bufferr(binbuff, buffer, -1);
 	binbuff->Seek(offset);
 	if (type != buffer_string) {
-		unsigned dsize = buffer_sizeof(type) + binbuff->alignment - 1;
+		//unsigned dsize = buffer_sizeof(type) + binbuff->alignment - 1;
 		unsigned char data[buffer_sizeof(type)];
 		//NOTE: These buffers most likely need a little more code added to take care of endianess on different architectures.
 		//TODO: Fix floating point precision.
@@ -286,7 +286,7 @@ variant buffer_peek(int buffer, unsigned offset, int type) {
 		}
 		return variant(&data[0]);
 	}
-	
+
 }
 
 variant buffer_read(int buffer, int type) {
@@ -299,7 +299,7 @@ void buffer_poke(int buffer, unsigned offset, int type, variant value) {
 	binbuff->Seek(offset);
 	if (type != buffer_string) {
 		//TODO: Implement buffer alignment.
-		unsigned dsize = buffer_sizeof(type); //+ binbuff->alignment - 1;
+		//unsigned dsize = buffer_sizeof(type); //+ binbuff->alignment - 1;
 		vector<unsigned char> data = enigma::valToBytes(value, buffer_sizeof(type));
 		for (unsigned i = 0; i < data.size(); i++) {
 			binbuff->WriteByte(data[i]);
@@ -326,13 +326,15 @@ void buffer_write(int buffer, int type, variant value) {
 }
 
 string buffer_md5(int buffer, unsigned offset, unsigned size) {
-	get_bufferr(binbuff, buffer, 0);
+	//get_bufferr(binbuff, buffer, 0);
 	//TODO: Write this function
+	return NULL;
 }
 
 string buffer_sha1(int buffer, unsigned offset, unsigned size) {
-	get_bufferr(binbuff, buffer, 0);
+	//get_bufferr(binbuff, buffer, 0);
 	//TODO: Write this function
+	return NULL;
 }
 
 int buffer_base64_decode(string str) {
@@ -346,22 +348,24 @@ int buffer_base64_decode(string str) {
 }
 
 int buffer_base64_decode_ext(int buffer, string str, unsigned offset) {
-	get_bufferr(binbuff, buffer, -1);
+	//get_bufferr(binbuff, buffer, -1);
 	//TODO: Write this function
+	return 0;
 }
 
 string buffer_base64_encode(int buffer, unsigned offset, unsigned size) {
-	get_bufferr(binbuff, buffer, 0);
+	//get_bufferr(binbuff, buffer, 0);
 	//TODO: Write this function
+	return NULL;
 }
 
 void game_save_buffer(int buffer) {
-	get_buffer(binbuff, buffer);
+	//get_buffer(binbuff, buffer);
 	//TODO: Write this function
 }
 
 void game_load_buffer(int buffer) {
-	get_buffer(binbuff, buffer);
+	//get_buffer(binbuff, buffer);
 	//TODO: Write this function
 }
 

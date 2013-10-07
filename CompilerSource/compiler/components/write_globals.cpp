@@ -68,8 +68,20 @@ int lang_CPP::compile_writeGlobals(EnigmaStruct* es, parsed_object* global)
         s = string_replace_all(s, "/", "\\\\");
         s = string_replace_all(s, "%20", " ");
     }
-    wto << "namespace enigma_user {string working_directory = \"" << s << "\";}" << endl;
-    wto << "namespace enigma_user {unsigned int game_id = " << es->gameSettings.gameId << ";}" << endl;
+    wto << "namespace enigma_user { " << endl;
+    wto << "  string working_directory = \"" << s << "\";" << endl;
+    wto << "  unsigned int game_id = " << es->gameSettings.gameId << ";" << endl;
+    wto << "}" << endl;
+
+    wto << "namespace enigma {" << endl;
+    wto << "  bool interpolate_textures = " << es->gameSettings.interpolate << ";" << endl;
+    wto << "  bool isSizeable = " << es->gameSettings.allowWindowResize << ";" << endl;
+    wto << "  bool showBorder = " << !es->gameSettings.dontDrawBorder << ";" << endl;
+    wto << "  bool showIcons = " << !es->gameSettings.dontShowButtons << ";" << endl;
+    wto << "  bool freezeOnLoseFocus = " << es->gameSettings.freezeOnLoseFocus << ";" << endl;
+    wto << "  bool isFullScreen = " << es->gameSettings.startFullscreen << ";" << endl;
+    wto << "  int viewScale = " << es->gameSettings.scaling << ";" << endl;
+    wto << "}" << endl;
 
     for (parsed_object::globit i = global->globals.begin(); i != global->globals.end(); i++)
       wto << i->second.type << " " << i->second.prefix << i->first << i->second.suffix << ";" << endl;

@@ -47,10 +47,12 @@ static int displayInitialResolutionWidth = 0, displayInitialResolutionHeight = 0
 namespace enigma
 {
     extern HWND hWnd,hWndParent;
-    bool isSizeable = false, isVisible = true, showBorder = true, showIcons = true, windowIsTop = false, freezeOnLoseFocus = true, freezeWindow = false;
-    int windowcolor = 0, isFullScreen = 0, cursorInt = 0, viewScale = -1, regionWidth = 0, regionHeight = 0, windowWidth = 0, windowHeight = 0, windowX = 0, windowY = 0;
+    bool isVisible = true, windowIsTop = false, freezeWindow = false;
+    int windowcolor = 0, cursorInt = 0, regionWidth = 0, regionHeight = 0, windowWidth = 0, windowHeight = 0, windowX = 0, windowY = 0;
     double scaledWidth = 0, scaledHeight = 0;
     char* currentCursor = IDC_ARROW;
+    extern bool isSizeable, showBorder, showIcons, freezeOnLoseFocus, isFullScreen;
+    extern int viewScale;
 
     LONG_PTR getparentstyle()
     {
@@ -225,8 +227,8 @@ void window_center()
 {
     int screen_width = GetSystemMetrics(SM_CXSCREEN);
     int screen_height = GetSystemMetrics(SM_CYSCREEN);
-    enigma::windowX = (screen_width - enigma::windowWidth)/2;
-    enigma::windowY = (screen_height - enigma::windowHeight)/2;
+    enigma::windowX = (screen_width - enigma::scaledWidth)/2;
+    enigma::windowY = (screen_height - enigma::scaledHeight)/2;
     enigma::clampparent();
     enigma::centerchild();
 }
@@ -248,9 +250,22 @@ void window_default()
       if (tx and ty)
         xm = tx, ym = ty;
     }
-    enigma::windowWidth = xm;
-    enigma::windowHeight = ym;
-    window_set_region_size(xm, ym, true);
+
+    enigma::windowWidth = enigma::regionWidth = xm;
+    enigma::windowHeight = enigma::regionHeight = ym;
+    enigma::setchildsize(true);
+    window_center();
+    if (enigma::isFullScreen)
+    {
+        SetWindowLongPtr(enigma::hWndParent,GWL_STYLE,WS_POPUP);
+        ShowWindow(enigma::hWndParent,SW_MAXIMIZE);
+    }
+    else
+    {
+        enigma::setparentstyle();
+        ShowWindow(enigma::hWndParent,SW_RESTORE);
+    }
+    enigma::setchildsize(true);
 }
 
 void window_set_fullscreen(bool full)
@@ -262,14 +277,13 @@ void window_set_fullscreen(bool full)
     {
         SetWindowLongPtr(enigma::hWndParent,GWL_STYLE,WS_POPUP);
         ShowWindow(enigma::hWndParent,SW_MAXIMIZE);
-        enigma::setchildsize(false);
     }
     else
     {
         enigma::setparentstyle();
         ShowWindow(enigma::hWndParent,SW_RESTORE);
     }
-    enigma::setchildsize(false);
+    enigma::setchildsize(true);
 }
 
 int window_get_fullscreen()

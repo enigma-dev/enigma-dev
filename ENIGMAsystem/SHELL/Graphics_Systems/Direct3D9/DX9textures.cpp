@@ -61,8 +61,6 @@ inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect 
 
 namespace enigma
 {
-  bool interpolate_textures = false; //NOTE: set value here when game settings are used
-
   int graphics_create_texture(int fullwidth, int fullheight, void* pxdata, bool isfont)
   {
     LPDIRECT3DTEXTURE9 texture = NULL;
@@ -78,11 +76,11 @@ namespace enigma
 		&texture,
 		0
 	);
- 
+
 	D3DLOCKED_RECT rect;
 
 	texture->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
-	
+
 	unsigned char* dest = static_cast<unsigned char*>(rect.pBits);
 	for(int x = 0; x < fullwidth * fullheight * 4; x += 4){
 		((unsigned char*)dest)[x]  =((unsigned char*)pxdata)[x + 2];   //A
@@ -92,7 +90,7 @@ namespace enigma
 	}
 
 	texture->UnlockRect(0);
-	
+
 	GmTexture* gmTexture = new GmTexture(texture);
 	gmTexture->isFont = isfont;
     GmTextures.push_back(gmTexture);
@@ -190,7 +188,7 @@ void texture_set_wrap(int texid, bool wrapr, bool wraps, bool wrapt)
 
 void texture_preload(int texid)
 {
-  
+
 }//functionality has been removed in ENIGMA, all textures are automatically preloaded
 
 void texture_set_priority(int texid, double prio)
@@ -198,7 +196,7 @@ void texture_set_priority(int texid, double prio)
 
 }
 
-void texture_set_border(int texid, int r, int g, int b, double a) 
+void texture_set_border(int texid, int r, int g, int b, double a)
 {
 
 }
@@ -213,7 +211,7 @@ void texture_set_levelofdetail(int texid, double minlod, double maxlod, int maxl
 
 }
 
-void texture_mipmapping_filter(int texid, int filter) 
+void texture_mipmapping_filter(int texid, int filter)
 {
 
 }

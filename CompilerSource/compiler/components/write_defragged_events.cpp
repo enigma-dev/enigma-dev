@@ -140,18 +140,13 @@ int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
 
     // Game setting initaliser
   wto << "  int game_settings_initialize()" << endl << "  {" << endl;
-    wto  << "    texture_set_interpolation(" << es->gameSettings.interpolate << "); " << endl;
-    if (es->gameSettings.displayCursor)
-        wto  << "    window_set_cursor(cr_default);" << endl;
-    else
+  // This should only effect texture interpolation if it has not already been enabled
+    if (!es->gameSettings.displayCursor)
         wto  << "    window_set_cursor(cr_none);" << endl;
-    wto  << "    window_set_sizeable(" << es->gameSettings.allowWindowResize << ");" << endl;
-    wto  << "    window_set_stayontop(" << es->gameSettings.alwaysOnTop << ");" << endl;
-    wto  << "    window_set_showborder(" << !es->gameSettings.dontDrawBorder << ");" << endl;
-    wto  << "    window_set_showicons(" << !es->gameSettings.dontShowButtons << ");" << endl;
-    wto  << "    window_set_region_scale(" << es->gameSettings.scaling/100.0 << ", 0);" << endl;
-    wto  << "    window_set_fullscreen(" << es->gameSettings.startFullscreen << ");" << endl;
-    wto  << "    window_set_freezeonlosefocus(" << es->gameSettings.freezeOnLoseFocus << ");" << endl;
+
+    if (es->gameSettings.alwaysOnTop)
+        wto  << "    window_set_stayontop(true);" << endl;
+
     wto << "    return 0;" << endl;
   wto << "  }" << endl;
 

@@ -108,19 +108,19 @@ int lang_CPP::compile_writeRoomData(EnigmaStruct* es, parsed_object *EGMglobal)
     << es->rooms[i].caption << "\",\n      " // The caption of this room
 
     << lgmRoomBGColor(es->rooms[i].backgroundColor) << ", "//Background color
-    << es->rooms[i].drawBackgroundColor
+    << (es->rooms[i].drawBackgroundColor ? "true" : "false")
     << ", roomcreate" << es->rooms[i].id << ",\n      " // Creation code
 
     << es->rooms[i].width << ", " << es->rooms[i].height << ", " // Width and Height
     << es->rooms[i].speed << ",  "  // Speed
-    << es->rooms[i].persistent << ",  "  // Persistent
+    << (es->rooms[i].persistent ? "true" : "false") << ",  "  // Persistent
 
     << (es->rooms[i].enableViews ? "true" : "false") << ", {\n"; // Views Enabled
 
     for (int ii = 0; ii < es->rooms[i].viewCount; ii++) // For each view
     {
       wto << "      { "
-      << es->rooms[i].views[ii].visible << ",   " // Visible
+      << (es->rooms[i].views[ii].visible ? "true" : "false") << ",   " // Visible
 
       << es->rooms[i].views[ii].viewX << ", " << es->rooms[i].views[ii].viewY << ", "   // Xview and Yview
       << es->rooms[i].views[ii].viewW << ", " << es->rooms[i].views[ii].viewH << ",   " // Wview and Hview

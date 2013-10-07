@@ -31,9 +31,9 @@ using namespace std;
 #include <vector>
 using std::vector;
 
-extern GLenum shadertypes[5] = {   
+GLenum shadertypes[5] = {
   GL_VERTEX_SHADER, GL_FRAGMENT_SHADER, GL_TESS_CONTROL_SHADER, GL_TESS_EVALUATION_SHADER, GL_GEOMETRY_SHADER
-}; 
+};
 
 vector<Shader*> shaders(0);
 vector<ShaderProgram*> shaderprograms(0);
@@ -53,12 +53,12 @@ int glsl_shader_create(int type)
 unsigned long getFileLength(ifstream& file)
 {
     if(!file.good()) return 0;
-    
-    unsigned long pos=file.tellg();
+
+    //unsigned long pos=file.tellg();  UNUSED
     file.seekg(0,ios::end);
     unsigned long len = file.tellg();
     file.seekg(ios::beg);
-    
+
     return len;
 }
 
@@ -72,8 +72,8 @@ int glsl_shader_load(int id, string fname)
   if (!file.is_open()) return 1; // Error: File could not be oppenned
 
   unsigned long len = getFileLength(file);
-  if (len == 0) return 2;   // Error: Empty File 
-  
+  if (len == 0) return 2;   // Error: Empty File
+
   GLchar* ShaderSource;
   ShaderSource = (GLchar*) new char[len+1];
 
@@ -86,7 +86,7 @@ int glsl_shader_load(int id, string fname)
     if (!file.eof())
     i++;
   }
-    
+
   ShaderSource[i] = 0;  // 0-terminate it at the correct position
 
   glShaderSource(shaders[id]->shader, 1, (const GLchar**)&ShaderSource, NULL);
@@ -99,10 +99,10 @@ bool glsl_shader_compile(int id)
 {
   glCompileShader(shaders[id]->shader);
 
-  GLint blen = 0;	
+  GLint blen = 0;
   GLsizei slen = 0;
 
-  glGetShaderiv(shaders[id]->shader, GL_INFO_LOG_LENGTH , &blen);       
+  glGetShaderiv(shaders[id]->shader, GL_INFO_LOG_LENGTH , &blen);
 
   if (blen > 1)
   {
@@ -113,7 +113,7 @@ bool glsl_shader_compile(int id)
   } else {
     shaders[id]->log = "Shader compile log empty";
   }
-  
+
   GLint compiled;
   glGetProgramiv(shaders[id]->shader, GL_COMPILE_STATUS, &compiled);
   if (compiled)

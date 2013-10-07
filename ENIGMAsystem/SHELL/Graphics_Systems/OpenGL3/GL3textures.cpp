@@ -68,8 +68,6 @@ unsigned get_texture(int texid)
 
 namespace enigma
 {
-  bool interpolate_textures = false; //NOTE: set value here when game settings are used
-
   int graphics_create_texture(int fullwidth, int fullheight, void* pxdata, bool isfont)
   {
     GLuint texture;

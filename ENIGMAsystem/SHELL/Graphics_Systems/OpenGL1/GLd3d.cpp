@@ -42,9 +42,9 @@ double projection_matrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1}, transformation
 
 GLenum renderstates[22] = {
   GL_FILL, GL_LINE, GL_POINT, GL_FRONT, GL_BACK,
-  GL_FRONT_AND_BACK, GL_NICEST, GL_FASTEST, GL_DONT_CARE, 
-  GL_EXP, GL_EXP2, GL_LINEAR, GL_NEVER, GL_LESS, 
-  GL_EQUAL, GL_LEQUAL, GL_GREATER, GL_NOTEQUAL, 
+  GL_FRONT_AND_BACK, GL_NICEST, GL_FASTEST, GL_DONT_CARE,
+  GL_EXP, GL_EXP2, GL_LINEAR, GL_NEVER, GL_LESS,
+  GL_EQUAL, GL_LEQUAL, GL_GREATER, GL_NOTEQUAL,
   GL_GEQUAL, GL_ALWAYS
 };
 
@@ -314,10 +314,10 @@ void d3d_draw_floor(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_s
   gs_scalar nX = (y2-y1)*(z2-z1)*(z2-z1);
   gs_scalar nY = (z2-z1)*(x2-x1)*(x2-x1);
   gs_scalar nZ = (x2-x1)*(y2-y1)*(y2-y1);
-  
+
   gs_scalar  m = sqrt(nX*nX + nY*nY + nZ*nZ);
   nX /= m; nY /= m; nZ /= m;
-  
+
   GLfloat verts[] = {x1, y1, z1, x2, y1, z2, x1, y2, z1, x2, y2, z2},
           texts[] = {0, 0, 0, vrep, hrep, 0, hrep, vrep},
           norms[] = {-nX, nY, nZ, -nX, nY, nZ, -nX, nY, nZ, -nX, nY, nZ};
@@ -328,13 +328,13 @@ void d3d_draw_floor(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_s
   glEnableClientState(GL_VERTEX_ARRAY);
   glEnableClientState(GL_NORMAL_ARRAY);
   glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-  
+
   glVertexPointer(3, GL_FLOAT, 0, verts);
   glNormalPointer(GL_FLOAT, 0, norms);
   glTexCoordPointer(2, GL_FLOAT, 0, texts);
-  
+
   glDrawRangeElements(GL_TRIANGLE_STRIP, 0, 4, 4, GL_UNSIGNED_BYTE, floor_indices);
-  
+
   glDisableClientState(GL_VERTEX_ARRAY);
   glDisableClientState(GL_NORMAL_ARRAY);
   glDisableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -345,7 +345,7 @@ void d3d_draw_wall(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_sc
   gs_scalar nX = (y2-y1)*(z2-z1)*(z2-z1);
   gs_scalar nY = (z2-z1)*(x2-x1)*(x2-x1);
   gs_scalar nZ = (x2-x1)*(y2-y1)*(y2-y1);
-  
+
   gs_scalar  m = sqrt(nX*nX + nY*nY + nZ*nZ);
   nX /= m; nY /= m; nZ /= m;
 
@@ -360,13 +360,13 @@ void d3d_draw_wall(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_sc
   glEnableClientState(GL_VERTEX_ARRAY);
   glEnableClientState(GL_NORMAL_ARRAY);
   glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-  
+
   glVertexPointer(3, GL_FLOAT, 0, verts);
   glNormalPointer(GL_FLOAT, 0, norms);
   glTexCoordPointer(2, GL_FLOAT, 0, texts);
 
   glDrawRangeElements(GL_TRIANGLE_STRIP, 0, 4, 4, GL_UNSIGNED_BYTE, indices);
-  
+
   glDisableClientState(GL_VERTEX_ARRAY);
   glDisableClientState(GL_NORMAL_ARRAY);
   glDisableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -384,7 +384,7 @@ void d3d_draw_block(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_s
 
   texture_use(get_texture(texId));
  // glClientActiveTexture(GL_TEXTURE0);
- 
+
   glEnableClientState(GL_VERTEX_ARRAY);
   glEnableClientState(GL_NORMAL_ARRAY);
   glEnableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -398,7 +398,7 @@ void d3d_draw_block(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_s
   } else {
     glDrawRangeElements(GL_TRIANGLE_STRIP, 0, 8, 10, GL_UNSIGNED_BYTE, indices);
   }
-  
+
   glDisableClientState(GL_VERTEX_ARRAY);
   glDisableClientState(GL_NORMAL_ARRAY);
   glDisableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -589,34 +589,34 @@ void d3d_draw_ellipsoid(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, 
 
 void d3d_draw_icosahedron(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, int steps)
 {
-  gs_scalar width = (x2-x1), length = (y2-y1), height = (z2-z1);
-  static gs_scalar vdata[12][3] = {    
-   {0, 0.5, 1}, {1, 0.5, 1}, {0, 0.5, 0}, {1, 0.5, 0},    
-   {0.5, 1, 1}, {0.5, 1, 0}, {0.5, 0, 1}, {0.5, 0, 0},    
-   {1, 1, 0.5}, {0, 1, 0.5}, {1, 0, 0.5}, {0, 0, 0.5} 
+ // gs_scalar width = (x2-x1), length = (y2-y1), height = (z2-z1);  UNUSED
+  static gs_scalar vdata[12][3] = {
+   {0, 0.5, 1}, {1, 0.5, 1}, {0, 0.5, 0}, {1, 0.5, 0},
+   {0.5, 1, 1}, {0.5, 1, 0}, {0.5, 0, 1}, {0.5, 0, 0},
+   {1, 1, 0.5}, {0, 1, 0.5}, {1, 0, 0.5}, {0, 0, 0.5}
   };
 
-  static int tindices[20][3] = { 
-   {0,4,1}, {0,9,4}, {9,5,4}, {4,5,8}, {4,8,1},    
-   {8,10,1}, {8,3,10}, {5,3,8}, {5,2,3}, {2,7,3},    
-   {7,10,3}, {7,6,10}, {7,11,6}, {11,0,6}, {0,1,6}, 
+  static int tindices[20][3] = {
+   {0,4,1}, {0,9,4}, {9,5,4}, {4,5,8}, {4,8,1},
+   {8,10,1}, {8,3,10}, {5,3,8}, {5,2,3}, {2,7,3},
+   {7,10,3}, {7,6,10}, {7,11,6}, {11,0,6}, {0,1,6},
    {6,1,10}, {9,0,11}, {9,11,2}, {9,2,5}, {7,2,11} };
 
   texture_use(get_texture(texId));
-  glBegin(GL_TRIANGLES);  
-  for (unsigned i = 0; i < 20; i++) {      
-    glVertex3fv(&vdata[tindices[i][0]][0]); 
-    glVertex3fv(&vdata[tindices[i][1]][0]); 
+  glBegin(GL_TRIANGLES);
+  for (unsigned i = 0; i < 20; i++) {
+    glVertex3fv(&vdata[tindices[i][0]][0]);
+    glVertex3fv(&vdata[tindices[i][1]][0]);
     glVertex3fv(&vdata[tindices[i][2]][0]);
 	// TODO: Add normals, uv's, and subdivide by the number of steps
   }
-  glEnd(); 
+  glEnd();
 }
 
 void d3d_draw_torus(gs_scalar x1, gs_scalar y1, gs_scalar z1, int texId, gs_scalar hrep, gs_scalar vrep, int csteps, int tsteps, double radius, double tradius) {
 	texture_use(get_texture(texId));
 	double TWOPI = 2 * (double)M_PI;
-	
+
     for (int i = 0; i < csteps; i++) {
         glBegin(GL_QUAD_STRIP);
         for (int j = 0; j <= tsteps; j++) {
@@ -634,7 +634,7 @@ void d3d_draw_torus(gs_scalar x1, gs_scalar y1, gs_scalar z1, int texId, gs_scal
 				gs_scalar nX = cos(s * TWOPI / csteps) * cos(t * TWOPI / tsteps);
 				gs_scalar nY = cos(s * TWOPI / csteps) * sin(t * TWOPI / tsteps);
 				gs_scalar nZ = sin(s * TWOPI / csteps);
-				
+
 				glTexCoord2f(v, u);
 				glNormal3f(nX, nY, nZ);
                 glVertex3f(x1 + x, y1 + y, z1 + z);
