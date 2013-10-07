@@ -1182,6 +1182,7 @@ void d3d_model_cone(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar 
 void d3d_model_ellipsoid(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, gs_scalar hrep, gs_scalar vrep, int steps)
 {
   float v[277][3];
+  float n[277][3];
   float t[277][3];
   steps = min(max(steps, 3), 24);
   const int zsteps = ceil(steps/2);
@@ -1196,22 +1197,24 @@ void d3d_model_ellipsoid(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_sc
     a += pr; tp += invstep;
   }
   int k = 0, kk;
+  // BOTTOM
   d3d_model_primitive_begin(id, pr_trianglefan);
   v[k][0] = cx; v[k][1] = cy; v[k][2] = cz - rz;
+  n[k][0] = 0; n[k][1] = 0; n[k][2] = -1;
   t[k][0] = 0; t[k][1] = vrep;
-  d3d_model_vertex_normal_texture(id, cx, cy, cz - rz, cx, cy, cz - rz, 0, vrep);
+  d3d_model_vertex_normal_texture(id, cx, cy, cz - rz, 0, 0, -1, 0, vrep);
   k++;
   b = qr-M_PI/2;
   cosb = cos(b);
   pz = rz*sin(b);
   tzp = vrep-invstep2;
   px = cx+rx*cosb; py = cy;
-  // BOTTOM
   for (int i = 0; i <= steps; i++)
   {
     v[k][0] = px; v[k][1] = py; v[k][2] = cz + pz;
+	n[k][0] = cosx[i]; n[k][1] = -siny[i]; n[k][2] = cosb;
     t[k][0] = txp[i]; t[k][1] = tzp;
-    d3d_model_vertex_normal_texture(id, px, py, cz + pz, px, py, cz + pz, txp[i], tzp);
+    d3d_model_vertex_normal_texture(id, px, py, cz + pz, cosx[i], -siny[i], sin(b), txp[i], tzp);
     k++; px = cx+cosx[i]*cosb; py = cy-siny[i]*cosb;
  }
  d3d_model_primitive_end(id);
@@ -1227,23 +1230,25 @@ void d3d_model_ellipsoid(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_sc
     for (int i = 0; i <= steps; i++)
     {
         kk = k - steps - 1;
-        d3d_model_vertex_normal_texture(id, v[kk][0], v[kk][1], v[kk][2], 0, 0, 0, t[kk][0], t[kk][1]);
+        d3d_model_vertex_normal_texture(id, v[kk][0], v[kk][1], v[kk][2], n[kk][0], n[kk][1], n[kk][2], t[kk][0], t[kk][1]);
         v[k][0] = px; v[k][1] = py; v[k][2] = cz + pz;
+		n[k][0] = cosx[i]; n[k][1] = -siny[i]; n[k][2] = sin(b);
         t[k][0] = txp[i]; t[k][1] = tzp;
-        d3d_model_vertex_normal_texture(id, px, py, cz + pz, px, py, cz + pz, txp[i], tzp);
+        d3d_model_vertex_normal_texture(id, px, py, cz + pz, cosx[i], -siny[i], sin(b), txp[i], tzp);
         k++; px = cx+cosx[i]*cosb; py = cy-siny[i]*cosb;
     }
     d3d_model_primitive_end(id);
   }
+  // TOP
   d3d_model_primitive_begin(id, pr_trianglefan);
   v[k][0] = cx; v[k][1] = cy; v[k][2] = cz + rz;
+  n[k][0] = 0; n[k][1] = 0; n[k][2] = 1;
   t[k][0] = 0; t[k][1] = 0;
-  d3d_model_vertex_normal_texture(id, cx, cy, cz + rz, 0,0,0, 0, 0);
+  d3d_model_vertex_normal_texture(id, cx, cy, cz + rz, 0, 0, 1, 0, 0);
   k++;
-  // TOP
   for (int i = k - 2; i >= k - steps - 2; i--)
   {
-	d3d_model_vertex_normal_texture(id, v[i][0], v[i][1], v[i][2], 0, 0, 0, t[i][0], t[i][1]);
+	d3d_model_vertex_normal_texture(id, v[i][0], v[i][1], v[i][2], n[i][0], n[i][1], n[i][2], t[i][0], t[i][1]);
   }
   d3d_model_primitive_end(id);
 }
