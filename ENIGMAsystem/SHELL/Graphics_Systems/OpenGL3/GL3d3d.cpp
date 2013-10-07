@@ -557,7 +557,7 @@ void d3d_draw_ellipsoid(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, 
     {
         px = cx+cosx[i]*cosb; py = cy+siny[i]*cosb;
         v[k][0] = px; v[k][1] = py; v[k][2] = cz + pz;
-		n[k][0] = cosx[i]; n[k][1] = siny[i]; n[k][2] = cosb;
+		n[k][0] = -cosx[i]; n[k][1] = -siny[i]; n[k][2] = -sin(b);
         t[k][0] = txp[i]; t[k][1] = tzp;
         k++;
     }
@@ -576,7 +576,7 @@ void d3d_draw_ellipsoid(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, 
 			glNormal3fv(n[kk]);
             glVertex3fv(v[kk]);
             v[k][0] = px; v[k][1] = py; v[k][2] = cz + pz;
-			n[k][0] = cosx[i]; n[k][1] = -siny[i]; n[k][2] = sin(b);
+			n[k][0] = -cosx[i]; n[k][1] = -siny[i]; n[k][2] = -sin(b);
             t[k][0] = txp[i]; t[k][1] = tzp;
             glTexCoord2fv(t[k]);
 			glNormal3fv(n[k]);
