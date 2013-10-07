@@ -309,21 +309,6 @@ void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, g
   enigma::d3d_light_update_positions();
 }
 
-void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, double angle)
-{
-  glDisable(GL_DEPTH_TEST);
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  gluPerspective(45, -view_wview[view_current] / (double)view_hview[view_current], 1, 32000);
-  glMatrixMode(GL_MODELVIEW);
-  glScalef(1, -1, 1);
-  glOrtho(x,x + width,y,y + height,0,1);
-  glRotatef(angle,0,0,1);
-  glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
-  glMultMatrixd(transformation_matrix);
-  enigma::d3d_light_update_positions();
-}
-
 void d3d_draw_floor(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep)
 {
   gs_scalar nX = (y2-y1)*(z2-z1)*(z2-z1);
