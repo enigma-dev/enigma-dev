@@ -1391,8 +1391,8 @@ void d3d_model_torus(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar
         double x = (radius + tradius * cos(s * TWOPI / csteps)) * cos(t * TWOPI / tsteps);
         double y = (radius + tradius * cos(s * TWOPI / csteps)) * sin(t * TWOPI / tsteps);
         double z = tradius * sin(s * TWOPI / csteps);
-		double u = (i + k) / (float)csteps;
-		double v = j / (float)tsteps;
+		double u = ((i + k) / (float)csteps) * hrep;
+		double v = (j / (float)tsteps) * vrep;
 		
 		gs_scalar nX = cos(s * TWOPI / csteps) * cos(t * TWOPI / tsteps);
 		gs_scalar nY = cos(s * TWOPI / csteps) * sin(t * TWOPI / tsteps);
