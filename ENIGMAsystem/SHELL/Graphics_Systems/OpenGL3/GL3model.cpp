@@ -1335,25 +1335,33 @@ void d3d_model_icosahedron(int id)
   //TODO: Write this shit
 }
 
-void d3d_model_torus(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar hrep, gs_scalar vrep, int csteps, int tsteps, double radius, double tradius, double TWOPI)
+void d3d_model_torus(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar hrep, gs_scalar vrep, int csteps, int tsteps, double radius, double tradius)
 {
   int numc = csteps, numt = tsteps;
 
+  double TWOPI = 2 * (double)M_PI;
   for (int i = 0; i < numc; i++) {
-    d3d_model_primitive_begin(id, pr_trianglestrip); // quads are deprecated all basic shapes on models are batched into primitive 0 as triangle list
+    d3d_model_primitive_begin(id, pr_trianglestrip); 
     for (int j = 0; j <= numt; j++) {
       for (int k = 1; k >= 0; k--) {
 
         double s = (i + k) % numc + 0.5;
         double t = j % numt;
-
+		
         double x = (radius + tradius * cos(s * TWOPI / numc)) * cos(t * TWOPI / numt);
         double y = (radius + tradius * cos(s * TWOPI / numc)) * sin(t * TWOPI / numt);
         double z = tradius * sin(s * TWOPI / numc);
-	double u = (i + k) / (float)numc;
-	double v = t / (float)numt;
+		double u = (i + k) / (float)numc;
+		double v = t / (float)numt;
+		
+		gs_scalar nX = cos(s * TWOPI / numc) * cos(t * TWOPI / numt);
+		gs_scalar nY = cos(s * TWOPI / numc) * sin(t * TWOPI / numt);
+		gs_scalar nZ = sin(s * TWOPI / numc);
+  
+		gs_scalar  m = sqrt(nX*nX + nY*nY + nZ*nZ);
+		nX /= m; nY /= m; nZ /= m;
 
-	d3d_model_vertex_texture(id, x1 + x, y1 + y, z1 + z, u, v);
+		d3d_model_vertex_normal_texture(id, x1 + x, y1 + y, z1 + z, nX, nY, nZ, u, v);
       }
     }
     d3d_model_primitive_end(id);

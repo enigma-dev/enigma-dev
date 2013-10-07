@@ -592,30 +592,39 @@ void d3d_draw_icosahedron() {
 
 }
 
-void d3d_draw_torus(gs_scalar x1, gs_scalar y1, gs_scalar z1, int texId, gs_scalar hrep, gs_scalar vrep, int csteps, int tsteps, double radius, double tradius, double TWOPI) {
-        int numc = csteps, numt = tsteps;
+void d3d_draw_torus(gs_scalar x1, gs_scalar y1, gs_scalar z1, int texId, gs_scalar hrep, gs_scalar vrep, int csteps, int tsteps, double radius, double tradius) {
+    int numc = csteps, numt = tsteps;
 	texture_use(get_texture(texId));
-        for (int i = 0; i < numc; i++) {
-            glBegin(GL_QUAD_STRIP);
+	double TWOPI = 2 * (double)M_PI;
+	
+    for (int i = 0; i < numc; i++) {
+        glBegin(GL_QUAD_STRIP);
+        for (int j = 0; j <= numt; j++) {
+            for (int k = 1; k >= 0; k--) {
 
-            for (int j = 0; j <= numt; j++) {
-                for (int k = 1; k >= 0; k--) {
+                double s = (i + k) % numc + 0.5;
+                double t = j % numt;
 
-                    double s = (i + k) % numc + 0.5;
-                    double t = j % numt;
+                double x = (radius + tradius * cos(s * TWOPI / numc)) * cos(t * TWOPI / numt);
+                double y = (radius + tradius * cos(s * TWOPI / numc)) * sin(t * TWOPI / numt);
+                double z = tradius * sin(s * TWOPI / numc);
+				double u = (i + k) / (float)numc;
+				double v = t / (float)numt;
 
-                    double x = (radius + tradius * cos(s * TWOPI / numc)) * cos(t * TWOPI / numt);
-                    double y = (radius + tradius * cos(s * TWOPI / numc)) * sin(t * TWOPI / numt);
-                    double z = tradius * sin(s * TWOPI / numc);
-		    double u = (i + k) / (float)numc;
-		    double v = t / (float)numt;
-
-		    glTexCoord2f(v, u);
-                    glVertex3f(x1 + x, y1 + y, z1 + z);
-                }
+				gs_scalar nX = cos(s * TWOPI / numc) * cos(t * TWOPI / numt);
+				gs_scalar nY = cos(s * TWOPI / numc) * sin(t * TWOPI / numt);
+				gs_scalar nZ = sin(s * TWOPI / numc);
+  
+				gs_scalar  m = sqrt(nX*nX + nY*nY + nZ*nZ);
+				nX /= m; nY /= m; nZ /= m;
+				
+				glTexCoord2f(v, u);
+				glNormal3f(nX, nY, nZ);
+                glVertex3f(x1 + x, y1 + y, z1 + z);
             }
-	    glEnd();
         }
+		glEnd();
+    }
 }
 
 //TODO: with all basic drawing add in normals
