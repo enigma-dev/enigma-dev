@@ -593,30 +593,26 @@ void d3d_draw_icosahedron() {
 }
 
 void d3d_draw_torus(gs_scalar x1, gs_scalar y1, gs_scalar z1, int texId, gs_scalar hrep, gs_scalar vrep, int csteps, int tsteps, double radius, double tradius) {
-    int numc = csteps, numt = tsteps;
 	texture_use(get_texture(texId));
 	double TWOPI = 2 * (double)M_PI;
 	
-    for (int i = 0; i < numc; i++) {
+    for (int i = 0; i < csteps; i++) {
         glBegin(GL_QUAD_STRIP);
-        for (int j = 0; j <= numt; j++) {
+        for (int j = 0; j <= tsteps; j++) {
             for (int k = 1; k >= 0; k--) {
 
-                double s = (i + k) % numc + 0.5;
-                double t = j % numt;
+                double s = (i + k) % csteps + 0.5;
+                double t = j % tsteps;
 
-                double x = (radius + tradius * cos(s * TWOPI / numc)) * cos(t * TWOPI / numt);
-                double y = (radius + tradius * cos(s * TWOPI / numc)) * sin(t * TWOPI / numt);
-                double z = tradius * sin(s * TWOPI / numc);
-				double u = (i + k) / (float)numc;
-				double v = t / (float)numt;
+                double x = (radius + tradius * cos(s * TWOPI / csteps)) * cos(t * TWOPI / tsteps);
+                double y = (radius + tradius * cos(s * TWOPI / csteps)) * sin(t * TWOPI / tsteps);
+                double z = tradius * sin(s * TWOPI / csteps);
+				double u = (i + k) / (float)csteps;
+				double v = j / (float)tsteps;
 
-				gs_scalar nX = cos(s * TWOPI / numc) * cos(t * TWOPI / numt);
-				gs_scalar nY = cos(s * TWOPI / numc) * sin(t * TWOPI / numt);
-				gs_scalar nZ = sin(s * TWOPI / numc);
-  
-				gs_scalar  m = sqrt(nX*nX + nY*nY + nZ*nZ);
-				nX /= m; nY /= m; nZ /= m;
+				gs_scalar nX = cos(s * TWOPI / csteps) * cos(t * TWOPI / tsteps);
+				gs_scalar nY = cos(s * TWOPI / csteps) * sin(t * TWOPI / tsteps);
+				gs_scalar nZ = sin(s * TWOPI / csteps);
 				
 				glTexCoord2f(v, u);
 				glNormal3f(nX, nY, nZ);
