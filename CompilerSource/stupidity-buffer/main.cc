@@ -320,7 +320,7 @@ int main(int argc, char *argv[])
 	StartupInfo.cb = sizeof(STARTUPINFO); //Only compulsory field
 
 	string bashpath = exepath + "git-bash.bat";
-	string cmdline = bashpath + " " + setuppath;
+	string cmdline = "\"" + bashpath + "\" \"" + setuppath + "\"";
 
 	if (CreateProcess(NULL,(char *)cmdline.c_str(),NULL,NULL,
     FALSE,0,NULL,NULL,&StartupInfo,&ProcessInfo)) {
@@ -364,8 +364,8 @@ int main(int argc, char *argv[])
   {
       workpath = exepath;
   }
-
-  string output = "Setting Working Directory To:" + workpath;
+  
+  string output = "Setting Working Directory To: \"" + workpath + "\"";
     string cmdline = "cd \"" + workpath + "\"";
 	CreateProcess(NULL,(char *)cmdline.c_str(),NULL,NULL,
     TRUE,CREATE_NO_WINDOW,NULL,NULL,&StartupInfo,&ProcessInfo);
