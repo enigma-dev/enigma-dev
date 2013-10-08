@@ -287,21 +287,24 @@ void screen_redraw()
                 glMultMatrixd(transformation_matrix);
 
                 int clear_bits = 0;
-                if (background_showcolor)
+                if (background_showcolor && view_current == 0)
                 {
                     int clearcolor = ((int)background_color) & 0x00FFFFFF;
                     glClearColor(__GETR(clearcolor) / 255.0, __GETG(clearcolor) / 255.0, __GETB(clearcolor) / 255.0, 1);
                     clear_bits |= GL_COLOR_BUFFER_BIT;
                 }
 
-                // Clear the depth buffer if 3d mode is on at the beginning of the draw step.
-                if (enigma::d3dMode)
-                    clear_bits |= GL_DEPTH_BUFFER_BIT;
+				// Clear the depth buffer if 3d mode is on at the beginning of the draw step.
+				// Always clear the depth buffer for every view, this was Game Maker 8.1 behaviour
+				if (enigma::d3dMode)
+					clear_bits |= GL_DEPTH_BUFFER_BIT;
 
-                if (clear_bits)
-                    glClear(clear_bits);
+				if (clear_bits)
+					glClear(clear_bits);
 
-                draw_back();
+				if (view_current == 0) {
+					draw_back();
+				}
 
                 // Apply and clear stored depth changes.
                 for (map<int,pair<double,double> >::iterator it = id_to_currentnextdepth.begin(); it != id_to_currentnextdepth.end(); it++)
