@@ -312,7 +312,7 @@ void screen_redraw()
 							1.0f);    // the far view-plane
 				d3ddev->SetTransform(D3DTS_PROJECTION, &matProjection);    // set the projection transform
 				
-				if (background_showcolor)
+				if (background_showcolor && view_current == 0)
 				{
 					int clearcolor = ((int)background_color) & 0x00FFFFFF;
 					// clear the window to the background color
@@ -323,7 +323,9 @@ void screen_redraw()
                 if (enigma::d3dMode)
                     d3ddev->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
 
-                draw_back();
+                if (view_current == 0) {
+					draw_back();
+				}
 
                 // Apply and clear stored depth changes.
                 for (map<int,pair<double,double> >::iterator it = id_to_currentnextdepth.begin(); it != id_to_currentnextdepth.end(); it++)
