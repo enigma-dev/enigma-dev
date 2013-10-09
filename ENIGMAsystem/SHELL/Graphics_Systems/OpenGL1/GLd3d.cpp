@@ -318,7 +318,7 @@ void d3d_draw_floor(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_s
   gs_scalar  m = sqrt(nX*nX + nY*nY + nZ*nZ);
   nX /= m; nY /= m; nZ /= m;
 
-  GLfloat verts[] = {x1, y1, z1, x2, y1, z2, x1, y2, z1, x2, y2, z2},
+  GLfloat verts[] = {x1, y1, z1, x1, y2, z1, x2, y1, z2, x2, y2, z2},
           texts[] = {0, 0, 0, vrep, hrep, 0, hrep, vrep},
           norms[] = {-nX, nY, nZ, -nX, nY, nZ, -nX, nY, nZ, -nX, nY, nZ};
   GLubyte floor_indices[] = {0, 1, 2, 3};
