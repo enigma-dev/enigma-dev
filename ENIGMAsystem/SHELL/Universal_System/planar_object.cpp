@@ -70,6 +70,10 @@ namespace enigma
 
   void propagate_locals(object_planar* instance)
   {
+    #ifdef PATH_EXT_SET
+        if (enigma_user::path_update()) {instance->speed = 0; return;}
+    #endif
+
     if (fnzero(instance->gravity) || fnzero(instance->friction))
     {
       double
@@ -128,8 +132,4 @@ namespace enigma
     instance->x += instance->hspeed.rval.d;
     instance->y += instance->vspeed.rval.d;
   }
-
-  #ifdef PATH_EXT_SET
-    if (enigma_user::path_update()) {instance->speed = 0; return 0;}
-  #endif
 }
