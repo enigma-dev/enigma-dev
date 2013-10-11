@@ -33,7 +33,7 @@
 #include <floatcomp.h>
 
 #ifdef PATH_EXT_SET
-  include "Extensions\Paths\path_functions.cpp"
+    #include "Universal_System/Extensions/Paths/path_functions.h"
 #endif
 
 namespace enigma
