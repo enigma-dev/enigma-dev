@@ -117,10 +117,10 @@ namespace enigma
       if(instance->direction.rval.d < 0)
         instance->direction.rval.d += 360;*/
 
-      instance->speed.rval.d = instance->speed.rval.d < 0? -hypot(instance->hspeed.rval.d, instance->vspeed.rval.d) : 
+      instance->speed.rval.d = instance->speed.rval.d < 0? -hypot(instance->hspeed.rval.d, instance->vspeed.rval.d) :
       hypot(instance->hspeed.rval.d, instance->vspeed.rval.d);
       if (fabs(instance->speed.rval.d) > 1e-12)
-      instance->direction.rval.d = fmod((atan2(-instance->vspeed.rval.d, instance->hspeed.rval.d) * (180/M_PI)) 
+      instance->direction.rval.d = fmod((atan2(-instance->vspeed.rval.d, instance->hspeed.rval.d) * (180/M_PI))
       + (instance->speed.rval.d < 0?  180 : 360), 360);
 
     }
@@ -128,4 +128,8 @@ namespace enigma
     instance->x += instance->hspeed.rval.d;
     instance->y += instance->vspeed.rval.d;
   }
+
+  #ifdef PATH_EXT_SET
+    if (enigma_user::path_update()) {instance->speed = 0; return 0;}
+  #endif
 }
