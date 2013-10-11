@@ -32,6 +32,10 @@
 
 #include <floatcomp.h>
 
+#ifdef PATH_EXT_SET
+  include "Extensions\Paths\path_functions.cpp"
+#endif
+
 namespace enigma
 {
   object_planar::object_planar()
