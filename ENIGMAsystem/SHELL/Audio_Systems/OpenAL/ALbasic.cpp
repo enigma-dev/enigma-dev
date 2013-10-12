@@ -64,7 +64,8 @@ bool sound_play(int sound) // Returns whether sound is playing
     alSourcei(sound_channels[src]->source, AL_BUFFER, snd->buf[0]);
     alSourcei(sound_channels[src]->source, AL_SOURCE_RELATIVE, AL_TRUE);
     alSourcei(sound_channels[src]->source, AL_REFERENCE_DISTANCE, 1);
-    alSourcei(sound_channels[src]->source, AL_LOOPING, AL_FALSE); //Just playing
+    alSourcei(sound_channels[src]->source, AL_LOOPING, AL_FALSE);
+	//alSourcei(sound_channels[src]->source, AL_GAIN, 1);
     sound_channels[src]->soundIndex = sound;
     return !(snd->idle = !(snd->playing = !snd->stream ?
       alurePlaySource(sound_channels[src]->source, enigma::eos_callback, (void*)(ptrdiff_t)sound) != AL_FALSE :
@@ -75,6 +76,7 @@ bool sound_play(int sound) // Returns whether sound is playing
     return -1;
   }
 }
+
 bool sound_loop(int sound) // Returns whether sound is playing
 {
   int src = enigma::get_free_channel(1);
@@ -123,6 +125,7 @@ void sound_stop_all()
     alureStopSource(sound_channels[i]->source, AL_FALSE);
   }
 }
+
 void sound_delete(int sound) {
   sound_stop(sound);
   get_sound(snd,sound,);
@@ -136,17 +139,21 @@ void sound_delete(int sound) {
   delete sound_resources[sound];
   sound_resources[sound] = NULL;
 }
-void sound_volume(int sound, float volume) {
 
+void sound_volume(int sound, float volume) {
+  sound_resources[sound]->volume = volume;
+  
   for(size_t i = 1; i < sound_channels.size(); i++) {
     if (sound_channels[i]->soundIndex == sound) {
       alSourcef(sound_channels[i]->source, AL_GAIN, volume);
     }
   }
 }
+
 void sound_global_volume(float mastervolume) {
     alListenerf(AL_GAIN, mastervolume);
 }
+
 bool sound_resume(int sound) // Returns whether the sound is playing
 {
   for(size_t i = 1; i < sound_channels.size(); i++) {
@@ -156,12 +163,14 @@ bool sound_resume(int sound) // Returns whether the sound is playing
   }
   return false;
 }
+
 void sound_resume_all()
 {
   for(size_t i = 1; i < sound_channels.size(); i++) {
     alureResumeSource(sound_channels[i]->source);
   }
 }
+
 bool sound_isplaying(int sound) {
   // test for channels playing the sound
   for(size_t i = 1; i < sound_channels.size(); i++)
@@ -177,6 +186,7 @@ bool sound_isplaying(int sound) {
   }
   return false;
 }
+
 bool sound_ispaused(int sound) {
   return !sound_resources[sound]->idle and !sound_resources[sound]->playing;
 }
@@ -190,6 +200,7 @@ void sound_pan(int sound, float value)
     }
   }
 }
+
 float sound_get_length(int sound) { // Not for Streams
   get_sound(snd,sound,0);
   ALint size, bits, channels, freq;
@@ -201,6 +212,7 @@ float sound_get_length(int sound) { // Not for Streams
 
   return size / channels / (bits/8) / (float)freq;
 }
+
 float sound_get_position(int sound) { // Not for Streams
   float offset = -1;
   for(size_t i = 1; i < sound_channels.size(); i++) {
@@ -209,6 +221,7 @@ float sound_get_position(int sound) { // Not for Streams
   }
   return offset;
 }
+
 void sound_seek(int sound, float position) {
   get_sound(snd,sound,);
   if (snd->seek) snd->seek(snd->userdata, position); // Streams
@@ -218,6 +231,7 @@ void sound_seek(int sound, float position) {
     }
   }
 }
+
 void sound_seek_all(float position) {
   for(size_t i = 0;i < sound_resources.size();i++) {
     if(sound_resources[i]) {

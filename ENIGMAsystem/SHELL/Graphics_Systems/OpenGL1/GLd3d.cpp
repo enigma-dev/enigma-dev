@@ -351,7 +351,7 @@ void d3d_draw_wall(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_sc
 
   GLfloat verts[] = {x1, y1, z1, x2, y2, z1, x1, y1, z2, x2, y2, z2},
           texts[] = {0, 0, hrep, 0, 0, vrep, hrep, vrep},
-          norms[] = {nX, -nY, nZ, nX, -nY, nZ, nX, -nY, nZ, nX, -nY, nZ};
+          norms[] = {nX, nY, nZ, nX, nY, nZ, nX, nY, nZ, nX, nY, nZ};
 
   GLubyte indices[] = {0, 1, 2, 3};
 
@@ -932,7 +932,7 @@ class d3d_lights
         glLightf(GL_LIGHT0+ms, GL_CONSTANT_ATTENUATION, 1.0);
         glLightf(GL_LIGHT0+ms, GL_LINEAR_ATTENUATION, 0.0);
         // 48 is a number gotten through manual calibration. Make it lower to increase the light power.
-        const float attenuation_calibration = 48.0;
+        const float attenuation_calibration = 4.0;
         glLightf(GL_LIGHT0+ms, GL_QUADRATIC_ATTENUATION, attenuation_calibration/(range*range));
         return true;
     }

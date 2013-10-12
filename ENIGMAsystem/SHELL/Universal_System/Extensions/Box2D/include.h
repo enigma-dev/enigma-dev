@@ -28,5 +28,4 @@
 
 #include "B2Dfunctions.h"
 #include "B2Djoints.h"
-#include "B2Dinstances.h"
 #include "B2Dshapes.h"
