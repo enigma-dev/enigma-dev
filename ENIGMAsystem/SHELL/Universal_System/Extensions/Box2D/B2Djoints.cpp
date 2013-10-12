@@ -19,69 +19,82 @@
 using std::vector;
 
 #include <Box2D/Box2D.h>
+#include "Box2DWorld.h"
+#include "Box2DJoint.h"
 #include "B2Djoints.h"
 #include "B2Dfunctions.h"
+#include "Universal_System/scalar.h"
 
 vector<B2DJoint*> b2djoints(0);
 
 namespace enigma_user
 {
 
-int b2d_joint_create(int world)
+int b2d_joint_create_distance(int world, int bodya, int bodyb, bool collide)
 {
-    int i = b2djoints.size();
-    B2DJoint* b2djoint = new B2DJoint();
-    b2djoint->worldid = world;
-    b2djoints.push_back(b2djoint);
-    return i;
-}
-
-void b2d_joint_distance_create(int id, int body1, int body2, bool collide_connected)
-{
-  if (unsigned(id) >= b2djoints.size() || id < 0)
-  {
-    return;
-  }
-  else
-  {
+	get_worldr(b2dworld, world, -1);
     b2DistanceJointDef jointDef;
-    jointDef.bodyA = b2dbodies[body1]->body;
-    jointDef.bodyB = b2dbodies[body2]->body;
-    jointDef.collideConnected = collide_connected;
+    jointDef.bodyA = b2dbodies[bodya]->body;
+    jointDef.bodyB = b2dbodies[bodyb]->body;
+    jointDef.collideConnected = collide;
     jointDef.frequencyHz = 4.0f;
     jointDef.dampingRatio = 0.5f;
-    b2djoints[id]->joint = b2dworlds[b2djoints[id]->worldid]->world->CreateJoint(&jointDef);
-  }
+	B2DJoint* b2djoint = new B2DJoint();
+    b2djoint->joint = b2dworld->world->CreateJoint(&jointDef);
+    b2djoint->worldid = world;
+    b2djoints.push_back(b2djoint);
+    return b2djoints.size() - 1;
 }
 
-void b2d_joint_mouse_create(int id, int bodyid)
+int b2d_joint_create_mouse(int world, int bodya, int bodyb, bool collide, double x, double y)
 {
-  if (unsigned(id) >= b2djoints.size() || id < 0)
-  {
-    return;
-  }
-  else
-  {
+	get_worldr(b2dworld, world, -1);
     b2MouseJointDef jointDef;
-    jointDef.bodyA = b2dbodies[bodyid]->body;
-    b2djoints[id]->joint = b2dworlds[b2djoints[id]->worldid]->world->CreateJoint(&jointDef);
-  }
+    jointDef.bodyA = b2dbodies[bodya]->body;
+	jointDef.bodyB = b2dbodies[bodyb]->body;
+	jointDef.target.Set(x, y);
+	jointDef.maxForce = 30000;
+	jointDef.collideConnected = collide;
+	B2DJoint* b2djoint = new B2DJoint();
+    b2djoint->joint = b2dworld->world->CreateJoint(&jointDef);
+	b2djoint->worldid = world;
+    b2djoints.push_back(b2djoint);
+    return b2djoints.size() - 1;
+}
+
+int b2d_joint_create_revolute(int world, int bodya, int bodyb, bool limit, double lower, double upper)
+{
+	get_worldr(b2dworld, world, -1);
+	get_bodyr(b2dbodya, bodya, -1);
+	get_bodyr(b2dbodyb, bodyb, -1);
+    b2RevoluteJointDef jointDef;
+    jointDef.bodyA = b2dbodya->body;
+	jointDef.bodyB = b2dbodyb->body;
+	jointDef.lowerAngle = cs_angular_degrees(lower);
+	jointDef.upperAngle = cs_angular_degrees(upper);
+	jointDef.localAnchorA = b2Vec2(0,0);
+	jointDef.localAnchorB =b2Vec2(1,1);
+	jointDef.enableLimit = limit;
+	B2DJoint* b2djoint = new B2DJoint();
+    b2djoint->joint = b2dworld->world->CreateJoint(&jointDef);
+	b2djoint->worldid = world;
+    b2djoints.push_back(b2djoint);
+    return b2djoints.size() - 1;
+}
+
+void b2d_joint_delete(int id) {
+	get_joint(b2djoint, id);
+	delete b2djoint;
 }
 
 void b2d_joint_set_target(int id, double x, double y)
 {
-  if (unsigned(id) >= b2djoints.size() || id < 0)
-  {
-    return;
-  }
-  else
-  {
-    if (b2djoints[id]->joint->GetType() != e_mouseJoint) {
-      return;
+	get_joint(b2djoint, id);
+    if (b2djoint->joint->GetType() != e_mouseJoint) {
+     // return;
     }
-    b2MouseJoint* mouseJoint = (b2MouseJoint*)b2djoints[id]->joint;
+    b2MouseJoint* mouseJoint = (b2MouseJoint*)b2djoint->joint;
     mouseJoint->SetTarget(b2Vec2(x, y));
-  }
 }
 
 }

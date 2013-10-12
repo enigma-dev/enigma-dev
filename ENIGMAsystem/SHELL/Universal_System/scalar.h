@@ -43,3 +43,34 @@ typedef double cs_scalar;
 #else
 typedef float cs_scalar;
 #endif
+
+//TODO: Implement the following angular unit functions to easily switch the engine internally between radians and degrees.
+
+// Comment out the defines below to switch major systems to radians for the internal angular unit.
+#define GS_ANGULAR_UNIT_DEGREES
+#define AS_ANGULAR_UNIT_DEGREES
+#define CS_ANGULAR_UNIT_DEGREES
+
+#ifdef GS_ANGULAR_UNIT_DEGREES
+#define gs_angular_radians(radians) (radians * 180 / 3.14)
+#define gs_angular_degrees(degrees) (degrees / 180 * 3.14)
+#else
+#define gs_angular_radians(radians) (radians)
+#define gs_angular_degrees(degrees) (degrees)
+#endif
+
+#ifdef AS_ANGULAR_UNIT_DEGREES
+#define as_angular_radians(radians) (radians * 180 / 3.14)
+#define as_angular_degrees(degrees) (degrees / 180 * 3.14)
+#else
+#define as_angular_radians(radians) (radians)
+#define as_angular_degrees(degrees) (degrees)
+#endif 
+
+#ifdef CS_ANGULAR_UNIT_DEGREES
+#define cs_angular_radians(radians) (radians * 180 / 3.14)
+#define cs_angular_degrees(degrees) (degrees / 180 * 3.14)
+#else
+#define cs_angular_radians(radians) (radians * 180 / 3.14)
+#define cs_angular_degrees(degrees) (degrees / 180 * 3.14)
+#endif

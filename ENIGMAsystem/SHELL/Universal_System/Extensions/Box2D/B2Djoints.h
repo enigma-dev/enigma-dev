@@ -15,69 +15,26 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef _B2D_JOINTS__H
-#define _B2D_JOINTS__H
+#ifndef ENIGMA_B2D_JOINTS__H
+#define ENIGMA_B2D_JOINTS__H
 
 #include <Box2D/Box2D.h>
 
-struct B2DJoint {
-  int worldid;
-  b2Joint* joint;
-  b2MouseJoint* mousejoint;
-
-  B2DJoint()
-  {
-  }
-
-  ~B2DJoint()
-  {
-    //worlds[worldid].world->DestroyJoint(joint);
-  }
-}; 
-extern vector<B2DJoint*> b2djoints;
-
-// constants for getting and setting joint data using b2d_joint_get_value and b2d_joint_set_value, use switch case
-// see http://enigma-dev.org/docs/Wiki/, for information on what they are
 namespace enigma_user
 {
 
-enum {
-  phy_joint_anchor_1_x,
-  phy_joint_anchor_1_y,
-  phy_joint_anchor_2_x,	
-  phy_joint_anchor_2_y,	
-  phy_joint_reaction_force_x,
-  phy_joint_reaction_force_y,
-  phy_joint_reaction_torque,
-  phy_joint_max_motor_force,
-  phy_joint_max_motor_torque,
-  phy_joint_motor_force,
-  phy_joint_motor_speed,
-  phy_joint_motor_torque,
-  phy_joint_angle,
-  phy_joint_translation,
-  phy_joint_speed,
-  phy_joint_length_1,
-  phy_joint_length_2,
-  phy_joint_damping_ratio,
-  phy_joint_frequency
-};
-
-int b2d_joint_create(int world);
-void b2d_joint_distance_create(int id, int fixture1, int fixture2,  bool collide_connected = true);
-void b2d_joint_revolute_create(int id);
-void b2d_joint_prismatic_create(int id);
-void b2d_joint_pulley_create(int id);
-void b2d_joint_gear_create(int id);
-void b2d_joint_mouse_create(int id, int fixture);
+int b2d_joint_create_distance(int world, int bodya, int bodyb,  bool collide_connected = true);
+int b2d_joint_create_revolute(int world, int bodya, int bodyb, bool limit, double lower, double upper);
+int b2d_joint_create_prismatic(int world);
+int b2d_joint_create_pulley(int world);
+int b2d_joint_create_gear(int world);
+int b2d_joint_create_mouse(int world, int bodya, int bodyb, bool collide, double x, double y);
 void b2d_joint_delete(int id);
 
 void b2d_joint_set_target(int id, double x, double y);
 void b2d_joint_enable_motor(int id);
-void b2d_joint_get_value(int id);
-void b2d_joint_set_value(int id);
 
 }
 
-#endif // _ENIGMA_B2D_JOINTS__H
+#endif // ENIGMA_B2D_JOINTS__H
 

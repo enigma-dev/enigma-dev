@@ -33,10 +33,12 @@ namespace enigma {
 #include "Universal_System/callbacks_events.h"
 
 #include <Box2D/Box2D.h>
+#include "Box2DWorld.h"
 #include "SB2Dfunctions.h"
 bool systemPaused = false;
 
 static inline double r2d(double r) { return r * 180 / M_PI; }
+static inline double d2r(double d) { return d / 180 * M_PI; }
 
 // NOTES:
 // 1) box2d uses an inversed y-axis, thus why physics_fixture_get_angle() returns -radianstodegrees(angle)
@@ -300,7 +302,7 @@ void physics_fixture_add_point(int id, double x, double y)
 void physics_fixture_set_transform(int id, double x, double y, double angle)
 {
   get_fixture(sb2dfixture, id);
-  sb2dfixture->body->SetTransform(b2Vec2(x, y), angle);
+  sb2dfixture->body->SetTransform(b2Vec2(x, y), d2r(angle));
 }
 
 void physics_fixture_set_position(int id, double x, double y)
@@ -312,7 +314,7 @@ void physics_fixture_set_position(int id, double x, double y)
 void physics_fixture_set_angle(int id, double angle)
 {
   get_fixture(sb2dfixture, id);
-  sb2dfixture->body->SetTransform(sb2dfixture->body->GetPosition(), angle);
+  sb2dfixture->body->SetTransform(sb2dfixture->body->GetPosition(), d2r(angle));
 }
 
 void physics_fixture_set_density(int id, double density)
