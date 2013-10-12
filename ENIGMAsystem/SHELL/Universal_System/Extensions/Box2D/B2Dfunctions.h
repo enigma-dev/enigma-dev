@@ -15,60 +15,14 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef _B2D_FUNCTIONS__H
-#define _B2D_FUNCTIONS__H
+#ifndef ENIGMA_B2D_FUNCTIONS__H
+#define ENIGMA_B2D_FUNCTIONS__H
 
 #include <vector>
 using std::vector;
 
 #include <Box2D/Box2D.h>
 #include "B2Dshapes.h"
-
-struct B2DWorld {
-  b2World* world;
-  // Prepare for simulation. Typically we use a time step of 1/60 of a
-  // second (60Hz) and 10 iterations. This provides a high quality simulation
-  // in most game scenarios.
-  float32 timeStep;
-  int32 velocityIterations;
-  int32 positionIterations;
-  int32 pixelstometers;
-  bool paused;
-
-  B2DWorld()
-  {
-    // Define the gravity vector.
-    b2Vec2 gravity(0.0f, 10.0f);
-
-    // Construct a world object, which will hold and simulate the rigid bodies.
-    world = new b2World(gravity);
-    timeStep = 1.0f / 60.0f;
-    velocityIterations = 8;
-    pixelstometers = 32;
-    paused = false;
-  }
-
-  void world_update();
-}; 
-extern vector<B2DWorld*> b2dworlds;
-
-struct B2DBody {
-  int world;
-  vector<int> fixtures;
-  b2Body* body;
-
-  B2DBody() 
-  {
-
-  }
-
-  ~B2DBody()
-  {
-
-  }
-
-}; 
-extern vector<B2DBody*> b2dbodies;
 
 namespace enigma_user
 {
@@ -79,19 +33,20 @@ void b2d_world_create(int pixeltometerscale);
 int b2d_world_create();
 void b2d_world_delete(int index);
 void b2d_world_pause_enable(int index, bool paused);
-void b2d_world_scale(int index, int pixelstometers);
-void b2d_world_gravity(int index, double gx, double gy);
 void b2d_world_update(int index); 
 void b2d_world_dump(int index);
 void b2d_world_update_settings(int index, double timeStep, int velocityIterations, int positionIterations);
 void b2d_world_update_iterations(int index, int iterationsperstep);
 void b2d_world_update_speed(int index, int updatesperstep);
 void b2d_world_clear_forces(int index);
+void b2d_world_set_gravity(int index, double gx, double gy);
+void b2d_world_set_scale(int index, int pixelstometers);
 void b2d_world_set_sleep(int index, bool sleeping);
 void b2d_world_set_warmstarting(int index, bool warmstarting);
 void b2d_world_set_continuous(int index, bool continuous);
 void b2d_world_set_substepping(int index, bool substepping);
 void b2d_world_set_clearforces(int index, bool autoclear);
+int b2d_world_get_scale(int index);
 bool b2d_world_get_sleep(int index);
 bool b2d_world_get_warmstarting(int index);
 bool b2d_world_get_continuous(int index);
@@ -162,9 +117,9 @@ void b2d_world_apply_impulse_radial(int world, double xpos, double ypos);
 
 /************** Miscellaneous **************/
 void b2d_draw_debug(); 
-void b2d_pause_enable(bool pause);
+void b2d_pause_system(bool pause);
 
 }
 
-#endif // _ENIGMA_B2D_FUNCTIONS__H
+#endif // ENIGMA_B2D_FUNCTIONS__H
 

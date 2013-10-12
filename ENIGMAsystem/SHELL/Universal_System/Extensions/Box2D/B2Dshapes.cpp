@@ -15,6 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "Box2DShape.h"
+#include "Box2DWorld.h"
 #include "B2Dshapes.h"
 #include "B2Dfunctions.h"
 vector<B2DShape*> b2dshapes;
@@ -24,45 +26,6 @@ vector<B2DFixture*> b2dfixtures;
 #include <cstdlib>
 #include <string>
 using std::string;
-
-#ifdef DEBUG_MODE
-  #include "libEGMstd.h"
-  #include "Widget_Systems/widgets_mandatory.h"
-  #define get_shaper(s,id,r) \
-    if (unsigned(id) >= b2dshapes.size() || id < 0) { \
-      show_error("Cannot access Box2D physics shape with id " + toString(id), false); \
-      return r; \
-    } B2DShape* s = b2dshapes[id];
-  #define get_shape(s,id) \
-    if (unsigned(id) >= b2dshapes.size() || id < 0) { \
-      show_error("Cannot access Box2D physics shape with id " + toString(id), false); \
-      return; \
-    } B2DShape* s = b2dshapes[id];
-  #define get_fixturer(f,id,r) \
-    if (unsigned(id) >= b2dfixtures.size() || id < 0) { \
-      show_error("Cannot access Box2D physics fixture with id " + toString(id), false); \
-      return r; \
-    } B2DFixture* f = b2dfixtures[id];
-  #define get_fixture(f,id) \
-    if (unsigned(id) >= b2dfixtures.size() || id < 0) { \
-      show_error("Cannot access Box2D physics fixture with id " + toString(id), false); \
-      return; \
-    } B2DFixture* f = b2dfixtures[id];
-  #define check_cast(obj, shapeid, failv) { \
-    if ((obj)->shape != shapeid) { \
-      show_error("Invalid cast of Box2D shape.", false); return failv; \
-    } }
-#else
-  #define get_shaper(s,id,r) \
-    B2DShape* s = b2dshapes[id];
-  #define get_shape(s,id) \
-    B2DShape* s = b2dshapes[id];
-  #define get_fixturer(f,id,r) \
-    B2DFixture* f = b2dfixtures[id];
-  #define get_fixture(f,id) \
-    B2DFixture* f = b2dfixtures[id];
-  #define check_cast(obj, shapeid, failv)
-#endif
 
 namespace enigma_user {
 

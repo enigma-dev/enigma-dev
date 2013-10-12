@@ -19,6 +19,7 @@
 using std::vector;
 
 #include <Box2D/Box2D.h>
+#include "Box2DJoint.h"
 #include "SB2Dfunctions.h"
 #include "SB2Djoints.h"
 
@@ -27,61 +28,40 @@ vector<jointInstance> joints(0);
 namespace enigma_user
 {
 
-int physics_joint_create(int world)
-{
-    int i = joints.size();
-    jointInstance joint = jointInstance();
-    joint.worldid = world;
-    joints.push_back(joint);
-    return i;
+void physics_joint_distance_create(int inst1, int inst2, double w_anchor1_x, double w_anchor1_y, double w_anchor2_x, double w_anchor2_y, bool col){
+
 }
 
-void physics_joint_distance_create(int id, int fixture1, int fixture2, bool collide_connected)
-{
-  if (unsigned(id) >= joints.size() || id < 0)
-  {
-    return;
-  }
-  else
-  {
-    b2DistanceJointDef jointDef;
-    jointDef.bodyA = fixtures[fixture1]->body;
-    jointDef.bodyB = fixtures[fixture2]->body;
-    jointDef.collideConnected = collide_connected;
-    jointDef.frequencyHz = 4.0f;
-    jointDef.dampingRatio = 0.5f;
-    joints[id].joint = worlds[joints[id].worldid]->world->CreateJoint(&jointDef);
-  }
+void physics_joint_revolute_create(int inst1, int inst2, double w_anchor_x, double w_anchor_y, double ang_min_limt, double ang_max_limit, double ang_limit, double max_motor_torque, double motor_speed, bool motor, bool col){
+
 }
 
-void physics_joint_mouse_create(int id, int fixture)
-{
-  if (unsigned(id) >= joints.size() || id < 0)
-  {
-    return;
-  }
-  else
-  {
-    b2MouseJointDef jointDef;
-    jointDef.bodyA = fixtures[fixture]->body;
-    joints[id].joint = worlds[joints[id].worldid]->world->CreateJoint(&jointDef);
-  }
+void physics_joint_prismatic_create(int inst1, int inst2, double w_anchor_x, double w_anchor_y, double w_axis_x, double w_axis_y, double lower_trans_limit, double upper_trans_limit, double limit, double max_motor_force, double motor_speed, bool motor, bool col){
+
 }
 
-void physics_joint_set_target(int id, double x, double y)
-{
-  if (unsigned(id) >= joints.size() || id < 0)
-  {
-    return;
-  }
-  else
-  {
-    if (joints[id].joint->GetType() != e_mouseJoint) {
-      return;
-    }
-    b2MouseJoint* mouseJoint = (b2MouseJoint*)joints[id].joint;
-    mouseJoint->SetTarget(b2Vec2(x, y));
-  }
+void physics_joint_pulley_create(int inst1, int inst2, double w_anchor1_x, double w_anchor1_y, double w_anchor2_x, double w_anchor2_y, double l_anchor1_x, double l_anchor1_y, double l_anchor2_x, double l_anchor2_y, double ratio, double max_len1, double max_len2, bool col){
+
+}
+
+void physics_joint_gear_create(int inst1, int inst2, int joint_1, int joint_2, double ratio){
+
+}
+
+void physics_joint_delete(int id){
+
+}
+
+void physics_joint_enable_motor(int id){
+
+}
+
+variant physics_joint_get_value(int id, int field){
+
+}
+
+void physics_joint_set_value(int id, int field, variant value){
+
 }
 
 }

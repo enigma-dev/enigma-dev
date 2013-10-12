@@ -20,12 +20,13 @@
 //using namespace std;
 
 #include "Universal_System/callbacks_events.h"
+#include "Universal_System/scalar.h"
 
 #include <Box2D/Box2D.h>
+#include "Box2DWorld.h"
+#include "Box2DShape.h"
 #include "B2Dfunctions.h"
 bool systemPaused = false;
-
-static inline double r2d(double r) { return r * 180 / M_PI; }
 
 vector<B2DWorld*> b2dworlds(0);
 vector<B2DBody*> b2dbodies;
@@ -42,40 +43,6 @@ void B2DWorld::world_update()
 #include <cstdlib>
 #include <string>
 using std::string;
-
-#ifdef DEBUG_MODE
-  #include "libEGMstd.h"
-  #include "Widget_Systems/widgets_mandatory.h"
-  #define get_worldr(w,id,r) \
-    if (unsigned(id) >= b2dworlds.size() || id < 0) { \
-      show_error("Cannot access Box2D physics world with id " + toString(id), false); \
-      return r; \
-    } B2DWorld* w = b2dworlds[id];
-  #define get_world(w,id) \
-    if (unsigned(id) >= b2dworlds.size() || id < 0) { \
-      show_error("Cannot access Box2D physics world with id " + toString(id), false); \
-      return; \
-    } B2DWorld* w = b2dworlds[id];
-  #define get_bodyr(b,id,r) \
-    if (unsigned(id) >= b2dbodies.size() || id < 0) { \
-      show_error("Cannot access Box2D physics body with id " + toString(id), false); \
-      return r; \
-    } B2DBody* b = b2dbodies[id];
-  #define get_body(b,id) \
-    if (unsigned(id) >= b2dbodies.size() || id < 0) { \
-      show_error("Cannot access Box2D physics body with id " + toString(id), false); \
-      return; \
-    } B2DBody* b = b2dbodies[id];
-#else
-  #define get_worldr(w,id,r) \
-    B2DWorld* w = b2dworlds[id];
-  #define get_world(w,id) \
-    B2DWorld* w = b2dworlds[id];
-  #define get_bodyr(b,id,r) \
-    B2DBody* b = b2dbodies[id];
-  #define get_body(b,id) \
-    B2DBody* b = b2dbodies[id];
-#endif
 
 namespace enigma {
   bool has_been_initialized = false;
@@ -130,28 +97,16 @@ void b2d_world_pause_enable(int index, bool paused)
   b2dworld->paused = paused;
 }
 
-void b2d_world_scale(int index, int pixelstometers)
+void b2d_world_dump(int index)
 {
   get_world(b2dworld, index);
-  b2dworld->pixelstometers = pixelstometers;
-}
-
-void b2d_world_gravity(int index, double gx, double gy)
-{
-  get_world(b2dworld, index);
-  b2dworld->world->SetGravity(b2Vec2(gx, gy));
+  b2dworld->world->Dump();
 }
 
 void b2d_world_update(int index)
 {
   get_world(b2dworld, index);
   b2dworld->world_update();
-}
-
-void b2d_world_dump(int index)
-{
-  get_world(b2dworld, index);
-  b2dworld->world->Dump();
 }
 
 void b2d_world_update_settings(int index, double timeStep, int velocityIterations, int positionIterations)
@@ -198,6 +153,18 @@ void b2d_world_clear_forces(int index)
   b2dworld->world->ClearForces();
 }
 
+void b2d_world_set_gravity(int index, double gx, double gy)
+{
+  get_world(b2dworld, index);
+  b2dworld->world->SetGravity(b2Vec2(gx, gy));
+}
+
+void b2d_world_set_scale(int index, int pixelstometers)
+{
+  get_world(b2dworld, index);
+  b2dworld->pixelstometers = pixelstometers;
+}
+
 void b2d_world_set_sleep(int index, bool sleeping)
 {
   get_world(b2dworld, index);
@@ -226,6 +193,12 @@ void b2d_world_set_clearforces(int index, bool autoclear)
 {
   get_world(b2dworld, index);
   b2dworld->world->SetAutoClearForces(autoclear);
+}
+
+int b2d_world_get_scale(int index)
+{
+  get_world(b2dworld, index);
+  return b2dworld->pixelstometers;
 }
 
 bool b2d_world_get_sleep(int index)
@@ -359,7 +332,7 @@ void b2d_body_set_collision_group(int id, int group)
 void b2d_body_set_transform(int id, double x, double y, double angle)
 {
   get_body(b2dbody, id);
-  b2dbody->body->SetTransform(b2Vec2(x, y), angle);
+  b2dbody->body->SetTransform(b2Vec2(x, y), cs_angular_degrees(angle));
 }
 
 void b2d_body_set_position(int id, double x, double y)
@@ -371,7 +344,7 @@ void b2d_body_set_position(int id, double x, double y)
 void b2d_body_set_angle(int id, double angle)
 {
   get_body(b2dbody, id);
-  b2dbody->body->SetTransform(b2dbodies[id]->body->GetPosition(), angle);
+  b2dbody->body->SetTransform(b2dbodies[id]->body->GetPosition(), cs_angular_degrees(angle));
 }
 
 void b2d_body_set_angle_fixed(int id, bool fixed)
@@ -483,7 +456,7 @@ void b2d_body_set_dynamic(int id)
 double b2d_body_get_angle(int id)
 {
   get_bodyr(b2dbody, id, -1);
-  return -r2d(b2dbody->body->GetAngle());
+  return -cs_angular_radians(b2dbody->body->GetAngle());
 }
 
 double b2d_body_get_x(int id)
@@ -536,7 +509,7 @@ double b2d_body_get_angular_velocity(int id)
   return b2dbody->body->GetAngularVelocity();
 }
 
-bool b2d_body_get_active(int id)
+bool b2d_body_get_awake(int id)
 {
   get_bodyr(b2dbody, id, false);
   return b2dbody->body->IsActive();
@@ -621,7 +594,7 @@ void b2d_world_apply_impulse(int world, double xpos, double ypos, double ximpuls
   }
 }
 
-void b2d_pause_enable(bool pause)
+void b2d_pause_system(bool pause)
 {
   systemPaused = pause;
 }

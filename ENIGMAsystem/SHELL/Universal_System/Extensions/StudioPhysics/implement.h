@@ -15,6 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "Box2DWorld.h"
 #include "SB2Dfunctions.h"
 
 #include <vector>

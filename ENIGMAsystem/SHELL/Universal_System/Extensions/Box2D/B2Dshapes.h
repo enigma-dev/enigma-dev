@@ -18,48 +18,7 @@
 #ifndef _B2D_SHAPES__H
 #define _B2D_SHAPES__H
 
-#include <vector>
-using std::vector;
-
 #include <Box2D/Box2D.h>
-
-struct B2DShape {
-  int type;
-  int worldid;
-  b2Shape* shape;
-  bool shapeBuilt;
-  vector<b2Vec2> vertices;
-
-  B2DShape()
-  {
-    shapeBuilt = false;
-  }
-
-  ~B2DShape()
-  {
-
-  }
-
-}; 
-extern vector<B2DShape*> b2dshapes;
-
-struct B2DFixture {
-  int worldid;
-  int bodyid;
-  int shapeid;
-  b2Fixture* fixture;
-
-  B2DFixture()
-  {
-  }
-
-  ~B2DFixture()
-  {
-
-  }
-
-}; 
-extern vector<B2DFixture*> b2dfixtures;
 
 namespace enigma_user {
 

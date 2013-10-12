@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "B2Dfunctions.h"
+#include "Box2DWorld.h"
 
 #include <vector>
 using std::vector;
