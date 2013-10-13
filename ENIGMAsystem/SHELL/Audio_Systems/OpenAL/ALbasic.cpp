@@ -65,7 +65,8 @@ bool sound_play(int sound) // Returns whether sound is playing
     alSourcei(sound_channels[src]->source, AL_SOURCE_RELATIVE, AL_TRUE);
     alSourcei(sound_channels[src]->source, AL_REFERENCE_DISTANCE, 1);
     alSourcei(sound_channels[src]->source, AL_LOOPING, AL_FALSE);
-	//alSourcei(sound_channels[src]->source, AL_GAIN, 1);
+	alSourcef(sound_channels[src]->source, AL_GAIN, snd->volume);
+	alSource3f(sound_channels[src]->source, AL_POSITION, snd->pan, sqrt(1 - snd->pan * snd->pan), 0);
     sound_channels[src]->soundIndex = sound;
     return !(snd->idle = !(snd->playing = !snd->stream ?
       alurePlaySource(sound_channels[src]->source, enigma::eos_callback, (void*)(ptrdiff_t)sound) != AL_FALSE :
@@ -86,7 +87,9 @@ bool sound_loop(int sound) // Returns whether sound is playing
     alSourcei(sound_channels[src]->source, AL_BUFFER, snd->buf[0]);
     alSourcei(sound_channels[src]->source, AL_SOURCE_RELATIVE, AL_TRUE);
     alSourcei(sound_channels[src]->source, AL_REFERENCE_DISTANCE, 1);
-    alSourcei(sound_channels[src]->source, AL_LOOPING, AL_TRUE); //Just playing
+    alSourcei(sound_channels[src]->source, AL_LOOPING, 1); //Just playing
+	alSourcef(sound_channels[src]->source, AL_GAIN, snd->volume);
+	alSource3f(sound_channels[src]->source, AL_POSITION, snd->pan, sqrt(1 - snd->pan * snd->pan), 0);
     sound_channels[src]->soundIndex = sound;
     return !(snd->idle = !(snd->playing = !snd->stream ?
       alurePlaySource(sound_channels[src]->source, enigma::eos_callback, (void*)(ptrdiff_t)sound) != AL_FALSE :
@@ -141,7 +144,8 @@ void sound_delete(int sound) {
 }
 
 void sound_volume(int sound, float volume) {
-  sound_resources[sound]->volume = volume;
+  get_sound(snd,sound,);
+  snd->volume = volume;
   
   for(size_t i = 1; i < sound_channels.size(); i++) {
     if (sound_channels[i]->soundIndex == sound) {
@@ -193,6 +197,8 @@ bool sound_ispaused(int sound) {
 
 void sound_pan(int sound, float value)
 {
+  get_sound(snd,sound,);
+  snd->pan = value;
   for(size_t i = 1; i < sound_channels.size(); i++) {
     if (sound_channels[i]->soundIndex == sound) {
       const float pan = value*2-1;
