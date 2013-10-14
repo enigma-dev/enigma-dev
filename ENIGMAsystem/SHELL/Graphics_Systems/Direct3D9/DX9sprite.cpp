@@ -202,7 +202,7 @@ void draw_sprite_part_ext(int spr, int subimg, gs_scalar left, gs_scalar top, gs
 	tagRECT rect;
 	rect.left = left; rect.top = top; rect.right = left + width; rect.bottom = top + height;
 
-	dsprite->Draw(GmTextures[spr2d->texturearray[usi]]->gTexture, NULL, &offset, NULL,
+	dsprite->Draw(GmTextures[spr2d->texturearray[usi]]->gTexture, &rect, &offset, NULL,
 		D3DCOLOR_ARGB(char(alpha*255), __GETR(color), __GETG(color), __GETB(color)));
 }
 

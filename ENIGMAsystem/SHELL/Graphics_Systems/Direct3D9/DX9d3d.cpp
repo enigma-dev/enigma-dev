@@ -39,8 +39,30 @@ D3DCULL cullingstates[3] = {
   D3DCULL_NONE, D3DCULL_CW, D3DCULL_CCW
 };
 
+D3DFILLMODE fillmodes[3] = {
+  D3DFILL_POINT, D3DFILL_WIREFRAME, D3DFILL_SOLID
+};
+
+D3DCMPFUNC depthoperators[8] = {
+  D3DCMP_NEVER, D3DCMP_LESS, D3DCMP_EQUAL,
+  D3DCMP_LESSEQUAL, D3DCMP_GREATER, D3DCMP_NOTEQUAL,
+  D3DCMP_GREATEREQUAL, D3DCMP_ALWAYS
+};
+
+D3DFOGMODE fogmodes[3] = {
+    D3DFOG_EXP, D3DFOG_EXP2, D3DFOG_LINEAR
+};
+
 namespace enigma_user
 {
+
+void d3d_depth_clear() {
+  d3d_depth_clear_value(1.0f);
+}
+
+void d3d_depth_clear_value(float value) {
+	d3ddev->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), value, 0);
+}
 
 void d3d_start()
 {
@@ -97,7 +119,7 @@ void d3d_set_fog_enabled(bool enable)
 
 void d3d_set_fog_mode(int mode)
 {
-
+	d3ddev->SetRenderState(D3DRS_FOGTABLEMODE, fogmodes[mode]);
 }
 
 void d3d_set_fog_hint(int mode) {
@@ -140,17 +162,9 @@ int d3d_get_culling() {
 	return enigma::d3dCulling;
 }
 
-void d3d_set_culling_mode(int mode) {
-
-}
-
-void d3d_set_culling_orientation(int mode) {
-
-}
-
-void d3d_set_render_mode(int face, int fill)
+void d3d_set_fill_mode(int fill)
 {
-
+	d3ddev->SetRenderState(D3DRS_FILLMODE, fillmodes[fill]);
 }
 
 void d3d_set_line_width(float value) {
@@ -158,24 +172,26 @@ void d3d_set_line_width(float value) {
 }
 
 void d3d_set_point_size(float value) {
-
+	d3ddev->SetRenderState(D3DRS_POINTSIZE, value);
 } 
 
-void d3d_depth_clear() {
-  d3d_depth_clear_value(1.0f);
-}
-
-void d3d_depth_clear_value(float value) {
-	d3ddev->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), value, 0);
-}
-
-void d3d_depth_operator(int mode) {
-
+void d3d_set_depth_operator(int mode) {
+	d3ddev->SetRenderState(D3DRS_ZFUNC, depthoperators[mode]);
 }
 
 void d3d_set_perspective(bool enable)
 {
-
+  D3DXMATRIX matProjection;
+  if (enable) {
+    D3DXMatrixPerspectiveFovLH(&matProjection, 45, -view_wview[view_current] / (double)view_hview[view_current], 1, 32000);
+  } else {
+    D3DXMatrixPerspectiveFovLH(&matProjection, 0, 1, 0, 1);
+  }
+  //set projection matrix
+  d3ddev->SetTransform(D3DTS_PROJECTION, &matProjection);
+  // Unverified note: Perspective not the same as in GM when turning off perspective and using d3d projection
+  // Unverified note: GM has some sort of dodgy behaviour where this function doesn't affect anything when calling after d3d_set_projection_ext
+  // See also OpenGL3/GL3d3d.cpp Direct3D9/DX9d3d.cpp OpenGL1/GLd3d.cpp
 }
 
 void d3d_set_depth(double dep)
@@ -185,7 +201,7 @@ void d3d_set_depth(double dep)
 
 void d3d_set_shading(bool smooth)
 {
-
+	d3ddev->SetRenderState(D3DRS_SHADEMODE, smooth?D3DSHADE_GOURAUD:D3DSHADE_FLAT);
 }
 
 }
@@ -259,8 +275,8 @@ void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scal
 							(FLOAT)width,   
 							0, 
 							(FLOAT)height,   
-							0.0f,    // the near view-plane
-							1.0f);    // the far view-plane
+							1.0f,    // the near view-plane
+							32000.0f);    // the far view-plane
 						   
 	d3ddev->SetTransform(D3DTS_PROJECTION, &matProjection);    // set the projection transform
 }
@@ -289,7 +305,7 @@ void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, g
                            (FLOAT)width,   
 						   0, 
                            (FLOAT)height,   
-                           0.0f,    // the near view-plane
+                           1.0f,    // the near view-plane
                            32000.0f);    // the far view-plane
 						   
 	d3ddev->SetTransform(D3DTS_PROJECTION, &matProj);    // set the projection transform
