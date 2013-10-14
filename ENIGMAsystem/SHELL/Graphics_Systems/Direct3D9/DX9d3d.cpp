@@ -181,7 +181,14 @@ void d3d_set_depth_operator(int mode) {
 
 void d3d_set_perspective(bool enable)
 {
-
+  D3DXMATRIX matProjection;
+  if (enable) {
+    D3DXMatrixPerspectiveFovLH(&matProjection, 45, -view_wview[view_current] / (double)view_hview[view_current], 1, 32000);
+  } else {
+    D3DXMatrixPerspectiveFovLH(&matProjection, 0, 1, 0, 1);
+  }
+  //set projection matrix
+  d3ddev->SetTransform(D3DTS_PROJECTION, &matProjection);
   // Unverified note: Perspective not the same as in GM when turning off perspective and using d3d projection
   // Unverified note: GM has some sort of dodgy behaviour where this function doesn't affect anything when calling after d3d_set_projection_ext
   // See also OpenGL3/GL3d3d.cpp Direct3D9/DX9d3d.cpp OpenGL1/GLd3d.cpp
