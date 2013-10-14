@@ -377,7 +377,7 @@ void d3d_transform_add_rotation_x(double angle)
 	D3DXMATRIX matRot;
 
 	// build a matrix to rotate the model 3.14 radians
-	D3DXMatrixRotationX(&matRot, D3DXToRadian(-angle));
+	D3DXMatrixRotationX(&matRot, gs_angular_degrees(-angle));
 	
 	matWorld *= matRot;
 
@@ -391,7 +391,7 @@ void d3d_transform_add_rotation_y(double angle)
 	D3DXMATRIX matRot;
 	
 	// build a matrix to rotate the model 3.14 radians
-	D3DXMatrixRotationY(&matRot, D3DXToRadian(-angle));
+	D3DXMatrixRotationY(&matRot, gs_angular_degrees(-angle));
 	
 	matWorld *= matRot;
 
@@ -404,7 +404,7 @@ void d3d_transform_add_rotation_z(double angle)
 	D3DXMATRIX matRot;
 	
 	// build a matrix to rotate the model 3.14 radians
-	D3DXMatrixRotationZ(&matRot, D3DXToRadian(-angle));
+	D3DXMatrixRotationZ(&matRot, gs_angular_degrees(-angle));
 	
 	matWorld *= matRot;
 
@@ -449,7 +449,7 @@ void d3d_transform_set_scaling(gs_scalar xs, gs_scalar ys, gs_scalar zs)
 void d3d_transform_set_rotation_x(double angle)
 {
 	// build a matrix to rotate the model 3.14 radians
-	D3DXMatrixRotationX(&matWorld, D3DXToRadian(-angle));
+	D3DXMatrixRotationX(&matWorld, gs_angular_degrees(-angle));
 	
 	// tell Direct3D about our matrix
 	d3ddev->SetTransform(D3DTS_WORLD, &matWorld);
@@ -458,7 +458,7 @@ void d3d_transform_set_rotation_x(double angle)
 void d3d_transform_set_rotation_y(double angle)
 {
 	// build a matrix to rotate the model 3.14 radians
-	D3DXMatrixRotationY(&matWorld, D3DXToRadian(-angle));
+	D3DXMatrixRotationY(&matWorld, gs_angular_degrees(-angle));
 		
 	// tell Direct3D about our matrix
 	d3ddev->SetTransform(D3DTS_WORLD, &matWorld);
@@ -469,7 +469,7 @@ void d3d_transform_set_rotation_z(double angle)
 
 	D3DXMatrixIdentity( &matWorld );
 	// build a matrix to rotate the model 3.14 radians
-	D3DXMatrixRotationZ(&matWorld, D3DXToRadian(-angle));
+	D3DXMatrixRotationZ(&matWorld, gs_angular_degrees(-angle));
 		
 	// tell Direct3D about our matrix
 	d3ddev->SetTransform(D3DTS_WORLD, &matWorld);
@@ -478,7 +478,7 @@ void d3d_transform_set_rotation_z(double angle)
 void d3d_transform_set_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, double angle)
 {
 	// build a matrix to rotate the model 3.14 radians
-	angle = D3DXToRadian(-angle);
+	angle = gs_angular_degrees(-angle);
 	D3DXMatrixRotationYawPitchRoll(&matWorld, y * angle, x * angle, z * angle);
 		
 	// tell Direct3D about our matrix
