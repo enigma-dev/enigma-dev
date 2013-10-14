@@ -58,7 +58,7 @@ bool surface_is_supported()
 int surface_create(int width, int height)
 {
 	LPDIRECT3DTEXTURE9 texture;
-	d3ddev->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_R5G6B5, D3DPOOL_DEFAULT, &texture, NULL);			 
+	d3ddev->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &texture, NULL);			 
 	enigma::Surface* surface = new enigma::Surface();	 
 	GmTexture* gmTexture = new GmTexture(texture);
 	gmTexture->isFont = false;
@@ -77,13 +77,11 @@ int surface_msaa_create(int width, int height, int levels)
 }
 
 LPDIRECT3DSURFACE9 pBackBuffer;
-D3DXMATRIX matOldProjection;
 
 void surface_set_target(int id)
 {
 	get_surface(surface,id);
 	
-	d3ddev->GetTransform(D3DTS_PROJECTION, &matOldProjection);
 	d3ddev->GetRenderTarget(0, &pBackBuffer);
 		// Textures should be clamped when rendering 2D sprites and stuff, so memorize it.
 	DWORD wrapu, wrapv, wrapw;
@@ -97,7 +95,7 @@ void surface_set_target(int id)
 	// The D3D sprite batcher uses clockwise face culling which is default but can't tell if 
 	// this here should memorize it and force it to CW all the time and then reset what the user had
 	// or not.
-	//d3ddev->SetRenderState(D3DRS_CULLMODE, D3DCULL_CW);
+	d3ddev->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
 	dsprite->End();
 	// And now reset the texture repetition.
 	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSU, wrapu );
@@ -111,14 +109,6 @@ void surface_set_target(int id)
 	d3ddev->SetRenderTarget(0, surface->surf);
 	  
 	dsprite->Begin(D3DXSPRITE_ALPHABLEND | D3DXSPRITE_DO_NOT_ADDREF_TEXTURE);
-	
-	//d3ddev->SetTransform(D3DTS_WORLD, &(matRotationY * matTranslation));
-	//set projection matrix
-	D3DXMATRIX matProjection;
-	D3DXMatrixPerspectiveFovLH(&matProjection,D3DX_PI / 4.0f,1,1,100);
-
-	//d3ddev->SetTransform(D3DTS_PROJECTION, &matOldProjection);
-	
 }
 
 void surface_reset_target(void)
