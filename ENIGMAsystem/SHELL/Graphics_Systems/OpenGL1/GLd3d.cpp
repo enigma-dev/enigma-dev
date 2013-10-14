@@ -936,7 +936,7 @@ class d3d_lights
         glLightf(GL_LIGHT0+ms, GL_CONSTANT_ATTENUATION, 1.0);
         glLightf(GL_LIGHT0+ms, GL_LINEAR_ATTENUATION, 0.0);
         // 48 is a number gotten through manual calibration. Make it lower to increase the light power.
-        const float attenuation_calibration = 4.0;
+        const float attenuation_calibration = 8.0;
         glLightf(GL_LIGHT0+ms, GL_QUADRATIC_ATTENUATION, attenuation_calibration/(range*range));
         return true;
     }
