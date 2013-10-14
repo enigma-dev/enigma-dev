@@ -38,9 +38,9 @@ enum {
 };
 
 enum {
-  rs_exp,
-  rs_exp2, 
-  rs_linear,
+  rs_exp,    // D3DFOG_EXP
+  rs_exp2,   // D3DFOG_EXP2
+  rs_linear, // D3DFOG_LINEAR
 };
 
 enum {

@@ -49,6 +49,10 @@ D3DCMPFUNC depthoperators[8] = {
   D3DCMP_GREATEREQUAL, D3DCMP_ALWAYS
 };
 
+D3DFOGMODE fogmodes[3] = {
+    D3DFOG_EXP, D3DFOG_EXP2, D3DFOG_LINEAR
+};
+
 namespace enigma_user
 {
 
@@ -115,7 +119,7 @@ void d3d_set_fog_enabled(bool enable)
 
 void d3d_set_fog_mode(int mode)
 {
-
+	d3ddev->SetRenderState(D3DRS_FOGTABLEMODE, fogmodes[mode]);
 }
 
 void d3d_set_fog_hint(int mode) {
