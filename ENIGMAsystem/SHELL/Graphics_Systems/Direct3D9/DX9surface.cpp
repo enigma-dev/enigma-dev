@@ -36,47 +36,39 @@ extern int room_width, room_height/*, sprite_idmax*/;
 }
 #include "../General/GSsurface.h"
 #include "DX9SurfaceStruct.h"
-
-#ifdef DEBUG_MODE
-  #include <string>
-  #include "libEGMstd.h"
-  #include "Widget_Systems/widgets_mandatory.h"
-  #define get_surface(surf,id)\
-    if (id < 0 or id >= enigma::surface_max or !enigma::surface_array[id]) {\
-      show_error("Attempting to use non-existing surface " + toString(id), false);\
-      return;\
-    }\
-    enigma::surface* surf = enigma::surface_array[id];
-  #define get_surfacev(surf,id,r)\
-    if (id < 0 or size_t(id) >= enigma::surface_max or !enigma::surface_array[id]) {\
-      show_error("Attempting to use non-existing surface " + toString(id), false);\
-      return r;\
-    }\
-    enigma::surface* surf = enigma::surface_array[id];
-#else
-  #define get_surface(surf,id)\
-    enigma::surface* surf = enigma::surface_array[id];
-  #define get_surfacev(surf,id,r)\
-    enigma::surface* surf = enigma::surface_array[id];
-#endif
+#include "DX9TextureStruct.h"
 
 namespace enigma
 {
-  surface **surface_array;
-  int surface_max=0;
+  vector<Surface*> Surfaces(0);
+  
+  D3DCOLOR get_currentcolor();
 }
+
 
 namespace enigma_user
 {
 
 bool surface_is_supported()
 {
-
+	//TODO: Implement with IDirect3D9::CheckDeviceFormat
+	return true;
 }
 
 int surface_create(int width, int height)
 {
-
+	LPDIRECT3DTEXTURE9 texture;
+	d3ddev->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_R5G6B5, D3DPOOL_DEFAULT, &texture, NULL);			 
+	enigma::Surface* surface = new enigma::Surface();	 
+	GmTexture* gmTexture = new GmTexture(texture);
+	gmTexture->isFont = false;
+    GmTextures.push_back(gmTexture);
+    surface->tex = GmTextures.size() - 1;
+	surface->width = width; surface->height = height;
+	texture->GetSurfaceLevel(0, &surface->surf);
+	
+	enigma::Surfaces.push_back(surface);
+	return enigma::Surfaces.size() - 1;
 }
 
 int surface_msaa_create(int width, int height, int levels)
@@ -84,29 +76,99 @@ int surface_msaa_create(int width, int height, int levels)
 
 }
 
+LPDIRECT3DSURFACE9 pBackBuffer;
+D3DXMATRIX matOldProjection;
+
 void surface_set_target(int id)
 {
+	get_surface(surface,id);
+	
+	d3ddev->GetTransform(D3DTS_PROJECTION, &matOldProjection);
+	d3ddev->GetRenderTarget(0, &pBackBuffer);
+		// Textures should be clamped when rendering 2D sprites and stuff, so memorize it.
+	DWORD wrapu, wrapv, wrapw;
+	d3ddev->GetSamplerState( 0, D3DSAMP_ADDRESSU, &wrapu );
+	d3ddev->GetSamplerState( 0, D3DSAMP_ADDRESSV, &wrapv );
+	d3ddev->GetSamplerState( 0, D3DSAMP_ADDRESSW, &wrapw );
+	
+	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP );
+	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP );
+	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSW, D3DTADDRESS_CLAMP );
+	// The D3D sprite batcher uses clockwise face culling which is default but can't tell if 
+	// this here should memorize it and force it to CW all the time and then reset what the user had
+	// or not.
+	//d3ddev->SetRenderState(D3DRS_CULLMODE, D3DCULL_CW);
+	dsprite->End();
+	// And now reset the texture repetition.
+	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSU, wrapu );
+	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSV, wrapv );
+	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSW, wrapw );
+	
+	// reset the culling
+	//d3d_set_culling(culling);
 
+
+	d3ddev->SetRenderTarget(0, surface->surf);
+	  
+	dsprite->Begin(D3DXSPRITE_ALPHABLEND | D3DXSPRITE_DO_NOT_ADDREF_TEXTURE);
+	
+	//d3ddev->SetTransform(D3DTS_WORLD, &(matRotationY * matTranslation));
+	//set projection matrix
+	D3DXMATRIX matProjection;
+	D3DXMatrixPerspectiveFovLH(&matProjection,D3DX_PI / 4.0f,1,1,100);
+
+	//d3ddev->SetTransform(D3DTS_PROJECTION, &matOldProjection);
+	
 }
 
 void surface_reset_target(void)
 {
 
+		// Textures should be clamped when rendering 2D sprites and stuff, so memorize it.
+	DWORD wrapu, wrapv, wrapw;
+	d3ddev->GetSamplerState( 0, D3DSAMP_ADDRESSU, &wrapu );
+	d3ddev->GetSamplerState( 0, D3DSAMP_ADDRESSV, &wrapv );
+	d3ddev->GetSamplerState( 0, D3DSAMP_ADDRESSW, &wrapw );
+	
+	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP );
+	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP );
+	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSW, D3DTADDRESS_CLAMP );
+	// The D3D sprite batcher uses clockwise face culling which is default but can't tell if 
+	// this here should memorize it and force it to CW all the time and then reset what the user had
+	// or not.
+	d3ddev->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+	dsprite->End();
+	// And now reset the texture repetition.
+	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSU, wrapu );
+	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSV, wrapv );
+	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSW, wrapw );
+	
+	// reset the culling
+	//d3d_set_culling(culling);
+
+	d3ddev->SetRenderTarget(0, pBackBuffer);
+
+	dsprite->Begin(D3DXSPRITE_ALPHABLEND | D3DXSPRITE_DO_NOT_ADDREF_TEXTURE);
 }
 
 void surface_free(int id)
 {
-
+	get_surface(surface, id);
+	delete surface;
 }
 
 bool surface_exists(int id)
 {
-    return !((id<0) or (id>enigma::surface_max) or (enigma::surface_array[id]==NULL));
+    return !((id < 0) or (id > enigma::Surfaces.size()) or (enigma::Surfaces[id] == NULL));
 }
 
 void draw_surface(int id, gs_scalar x, gs_scalar y)
 {
-
+    get_surface(surface,id);
+	
+	D3DXVECTOR3 offset(0, 0, 0);
+	D3DXVECTOR3 pos(x, y, 0);
+	dsprite->Draw(GmTextures[surface->tex]->gTexture, NULL, &offset, &pos, enigma::get_currentcolor());
 }
 
 void draw_surface_stretched(int id, gs_scalar x, gs_scalar y, float w, float h)
@@ -161,7 +223,8 @@ void draw_surface_general(int id, gs_scalar left, gs_scalar top, gs_scalar width
 
 int surface_get_texture(int id)
 {
-
+	get_surfacev(surf,id,-1);
+	return (surf->tex);
 }
 
 int surface_get_width(int id)
