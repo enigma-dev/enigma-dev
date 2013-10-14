@@ -82,6 +82,7 @@ int surface_create_msaa(int width, int height, int levels)
     surface->tex = GmTextures.size() - 1;
 	surface->width = width; surface->height = height;
 	texture->GetSurfaceLevel(0, &surface->surf);
+	// Does not seem to work this way, it says online you must create the surface as a render target then blit it to the texture
 	d3ddev->CreateRenderTarget(width, height, D3DFMT_A8R8G8B8, D3DMULTISAMPLE_2_SAMPLES, 2, false, &surface->surf, NULL);
 	
 	enigma::Surfaces.push_back(surface);
@@ -124,15 +125,14 @@ void surface_set_target(int id)
 	D3DXMATRIX matProjection;
 	D3DXMatrixPerspectiveFovLH(&matProjection,D3DX_PI / 4.0f,1,1,100);
 	//set projection matrix
-  d3ddev->SetTransform(D3DTS_PROJECTION,&matProjection);
+	d3ddev->SetTransform(D3DTS_PROJECTION,&matProjection);
 	  
 	dsprite->Begin(D3DXSPRITE_ALPHABLEND | D3DXSPRITE_DO_NOT_ADDREF_TEXTURE);
 }
 
 void surface_reset_target(void)
 {
-
-		// Textures should be clamped when rendering 2D sprites and stuff, so memorize it.
+	// Textures should be clamped when rendering 2D sprites and stuff, so memorize it.
 	DWORD wrapu, wrapv, wrapw;
 	d3ddev->GetSamplerState( 0, D3DSAMP_ADDRESSU, &wrapu );
 	d3ddev->GetSamplerState( 0, D3DSAMP_ADDRESSV, &wrapv );
@@ -176,9 +176,8 @@ void draw_surface(int id, gs_scalar x, gs_scalar y)
 {
     get_surface(surface,id);
 	
-	D3DXVECTOR3 offset(0, 0, 0);
 	D3DXVECTOR3 pos(x, y, 0);
-	dsprite->Draw(GmTextures[surface->tex]->gTexture, NULL, &offset, &pos, enigma::get_currentcolor());
+	dsprite->Draw(GmTextures[surface->tex]->gTexture, NULL, NULL, &pos, enigma::get_currentcolor());
 }
 
 void draw_surface_stretched(int id, gs_scalar x, gs_scalar y, float w, float h)
@@ -188,7 +187,12 @@ void draw_surface_stretched(int id, gs_scalar x, gs_scalar y, float w, float h)
 
 void draw_surface_part(int id, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y)
 {
+	get_surface(surface,id);
 
+	D3DXVECTOR3 pos(x, y, 0);
+	tagRECT rect;
+	rect.left = left; rect.top = top; rect.right = left + width; rect.bottom = top + height;
+	dsprite->Draw(GmTextures[surface->tex]->gTexture, &rect, 0, &pos, enigma::get_currentcolor());
 }
 
 void draw_surface_tiled(int id, gs_scalar x, gs_scalar y)
@@ -203,7 +207,27 @@ void draw_surface_tiled_area(int id, gs_scalar x, gs_scalar y, float x1, float y
 
 void draw_surface_ext(int id,gs_scalar x, gs_scalar y,gs_scalar xscale, gs_scalar yscale,double rot,int color,double alpha)
 {
+	get_surface(surface,id);
 
+	// Build our matrix to rotate, scale and position our sprite
+	D3DXMATRIX mat;
+	
+	// Screen position of the sprite
+	D3DXVECTOR2 trans = D3DXVECTOR2(x, y);
+
+	D3DXVECTOR2 scaling(xscale, yscale);
+
+	// out, scaling centre, scaling rotation, scaling, rotation centre, rotation, translation
+	D3DXMatrixTransformation2D(&mat,NULL,0.0,&scaling,NULL,rot,&trans);
+
+	// Tell the sprite about the matrix
+	dsprite->SetTransform(&mat);
+
+	dsprite->Draw(GmTextures[surface->tex]->gTexture, NULL, NULL, NULL,
+		D3DCOLOR_ARGB(char(alpha*255), __GETR(color), __GETG(color), __GETB(color)));
+
+	D3DXMatrixTransformation2D(&mat,NULL,0.0,0,NULL,0,0);
+	dsprite->SetTransform(&mat);
 }
 
 void draw_surface_stretched_ext(int id, gs_scalar x, gs_scalar y, float w, float h, int color, double alpha)
@@ -213,7 +237,27 @@ void draw_surface_stretched_ext(int id, gs_scalar x, gs_scalar y, float w, float
 
 void draw_surface_part_ext(int id, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale,int color, double alpha)
 {
+    get_surface(surface,id);
+	
+	// Build our matrix to rotate, scale and position our sprite
+	D3DXMATRIX mat;
+	
+	// Screen position of the sprite
+	D3DXVECTOR2 trans = D3DXVECTOR2(x, y);
 
+	D3DXVECTOR2 scaling(xscale, yscale);
+
+	// out, scaling centre, scaling rotation, scaling, rotation centre, rotation, translation
+	D3DXMatrixTransformation2D(&mat,NULL,0.0,&scaling,0,0,&trans);
+
+	// Tell the sprite about the matrix
+	dsprite->SetTransform(&mat);
+
+	tagRECT rect;
+	rect.left = left; rect.top = top; rect.right = left + width; rect.bottom = top + height;
+
+	dsprite->Draw(GmTextures[surface->tex]->gTexture, &rect, NULL, NULL,
+		D3DCOLOR_ARGB(char(alpha*255), __GETR(color), __GETG(color), __GETB(color)));
 }
 
 void draw_surface_tiled_ext(int id, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, double alpha)
