@@ -40,12 +40,22 @@ namespace enigma {
 
 double projection_matrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1}, transformation_matrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
 
-GLenum renderstates[22] = {
-  GL_FILL, GL_LINE, GL_POINT, GL_FRONT, GL_BACK,
-  GL_FRONT_AND_BACK, GL_NICEST, GL_FASTEST, GL_DONT_CARE, 
-  GL_EXP, GL_EXP2, GL_LINEAR, GL_NEVER, GL_LESS, 
-  GL_EQUAL, GL_LEQUAL, GL_GREATER, GL_NOTEQUAL, 
+GLenum renderstates[6] = {
+  GL_FRONT, GL_BACK, GL_FRONT_AND_BACK, 
+  GL_NICEST, GL_FASTEST, GL_DONT_CARE
+};
+
+GLenum fogmodes[3] = {
+  GL_EXP, GL_EXP2, GL_LINEAR
+};
+
+GLenum depthoperators[8] = {
+  GL_NEVER, GL_LESS, GL_EQUAL, GL_LEQUAL, GL_GREATER, GL_NOTEQUAL,
   GL_GEQUAL, GL_ALWAYS
+};
+
+GLenum fillmodes[3] = {
+  GL_POINT, GL_LINE, GL_FILL
 };
 
 GLenum cullingstates[3] = {
@@ -54,6 +64,14 @@ GLenum cullingstates[3] = {
 
 namespace enigma_user
 {
+
+void d3d_depth_clear() {
+  d3d_depth_clear_value(1.0f);
+}
+
+void d3d_depth_clear_value(float value) {
+  glClearDepthf(value);
+}
 
 void d3d_start()
 {
@@ -146,7 +164,7 @@ void d3d_set_fog_enabled(bool enable)
 
 void d3d_set_fog_mode(int mode)
 {
-  glFogi(GL_FOG_MODE, renderstates[mode]);
+  glFogi(GL_FOG_MODE, fogmodes[mode]);
 }
 
 void d3d_set_fog_hint(int mode) {
@@ -189,9 +207,9 @@ int d3d_get_culling() {
 	return enigma::d3dCulling;
 }
 
-void d3d_set_render_mode(int face, int fill)
+void d3d_set_fill_mode(int fill)
 {
-  glPolygonMode(renderstates[face], renderstates[fill]);
+  glPolygonMode(GL_FRONT_AND_BACK, fillmodes[fill]);
 }
 
 void d3d_set_line_width(float value) {
@@ -202,37 +220,23 @@ void d3d_set_point_size(float value) {
   glPointSize(value);
 } 
 
-void d3d_depth_clear() {
-  d3d_depth_clear_value(1.0f);
-}
-
-void d3d_depth_clear_value(float value) {
-  glClearDepthf(value);
-}
-
-void d3d_depth_operator(int mode) {
-  glDepthFunc(renderstates[mode]);
+void d3d_set_depth_operator(int mode) {
+  glDepthFunc(depthoperators[mode]);
 }
 
 void d3d_set_perspective(bool enable)
 {
-  if (enable)
-  {
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  if (enable) {
     gluPerspective(45, -view_wview[view_current] / (double)view_hview[view_current], 1, 32000);
-    glMatrixMode(GL_MODELVIEW);
-  }
-  else
-  {
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
+  } else {
     gluPerspective(0, 1, 0, 1);
-    glMatrixMode(GL_MODELVIEW);
   }
+  glMatrixMode(GL_MODELVIEW);
   // Unverified note: Perspective not the same as in GM when turning off perspective and using d3d projection
   // Unverified note: GM has some sort of dodgy behaviour where this function doesn't affect anything when calling after d3d_set_projection_ext
-  // See also OpenGL3/GL3d3d.cpp.
+  // See also OpenGL3/GL3d3d.cpp Direct3D9/DX9d3d.cpp OpenGL1/GLd3d.cpp
 }
 
 void d3d_set_depth(double dep)
