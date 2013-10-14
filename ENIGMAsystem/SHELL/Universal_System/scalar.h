@@ -16,9 +16,10 @@
 **/
 
 // This header implements scalar data types for double and floating point precision
-// for major systems and coordinate space. Uncomment the three lines below to switch
-// to double.
+// for major systems and coordinate space. Angular unit functions are also implemented
+// to allow you to easily switch major systems between degrees and radians.
 
+// Uncomment the following lines below to switch to double.
 //#define GS_SCALAR_64
 //#define AS_SCALAR_64
 //#define CS_SCALAR_64
@@ -44,33 +45,33 @@ typedef double cs_scalar;
 typedef float cs_scalar;
 #endif
 
-//TODO: Implement the following angular unit functions to easily switch the engine internally between radians and degrees.
+// Uncomment the following lines below to switch major systems to radians for the internal angular unit.
+//#define GS_ANGULAR_UNIT_RADIANS
+//#define AS_ANGULAR_UNIT_RADIANS
+//#define CS_ANGULAR_UNIT_RADIANS
 
-// Comment out the defines below to switch major systems to radians for the internal angular unit.
-#define GS_ANGULAR_UNIT_DEGREES
-#define AS_ANGULAR_UNIT_DEGREES
-#define CS_ANGULAR_UNIT_DEGREES
+#include <math.h>
 
-#ifdef GS_ANGULAR_UNIT_DEGREES
-#define gs_angular_radians(radians) (radians * 180 / 3.14)
-#define gs_angular_degrees(degrees) (degrees / 180 * 3.14)
-#else
+#ifdef GS_ANGULAR_UNIT_RADIANS
 #define gs_angular_radians(radians) (radians)
 #define gs_angular_degrees(degrees) (degrees)
+#else
+#define gs_angular_radians(radians) (radians * 180 / M_PI)
+#define gs_angular_degrees(degrees) (degrees / 180 * M_PI)
 #endif
 
-#ifdef AS_ANGULAR_UNIT_DEGREES
-#define as_angular_radians(radians) (radians * 180 / 3.14)
-#define as_angular_degrees(degrees) (degrees / 180 * 3.14)
-#else
+#ifdef AS_ANGULAR_UNIT_RADIANS
 #define as_angular_radians(radians) (radians)
 #define as_angular_degrees(degrees) (degrees)
+#else
+#define as_angular_radians(radians) (radians * 180 / M_PI)
+#define as_angular_degrees(degrees) (degrees / 180 * M_PI)
 #endif 
 
-#ifdef CS_ANGULAR_UNIT_DEGREES
-#define cs_angular_radians(radians) (radians * 180 / 3.14)
-#define cs_angular_degrees(degrees) (degrees / 180 * 3.14)
+#ifdef CS_ANGULAR_UNIT_RADIANS
+#define cs_angular_radians(radians) (radians)
+#define cs_angular_degrees(degrees) (degrees)
 #else
-#define cs_angular_radians(radians) (radians * 180 / 3.14)
-#define cs_angular_degrees(degrees) (degrees / 180 * 3.14)
+#define cs_angular_radians(radians) (radians * 180 / M_PI)
+#define cs_angular_degrees(degrees) (degrees / 180 * M_PI)
 #endif
