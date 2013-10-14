@@ -22,13 +22,49 @@
 #include "Direct3D9Headers.h"
 using std::string;
 
+#include <vector>
+using std::vector;
+
 namespace enigma
 {
-  struct surface
+  struct Surface
   {
-    //GLuint tex, fbo;
-    int width, height;
+    LPDIRECT3DSURFACE9 surf;
+    int tex, width, height;
+	Surface() {
+	
+	};
+	
+	~Surface() {
+		surf->Release();
+		surf = NULL;
+	};
   };
+  
+  extern vector<Surface*> Surfaces;
 }
+
+#ifdef DEBUG_MODE
+  #include <string>
+  #include "libEGMstd.h"
+  #include "Widget_Systems/widgets_mandatory.h"
+  #define get_surface(surf,id)\
+    if (id < 0 or id >= enigma::Surfaces.size() or !enigma::Surfaces[id]) {\
+      show_error("Attempting to use non-existing surface " + toString(id), false);\
+      return;\
+    }\
+    enigma::Surface* surf = enigma::Surfaces[id];
+  #define get_surfacev(surf,id,r)\
+    if (id < 0 or size_t(id) >= enigma::Surfaces.size() or !enigma::Surfaces[id]) {\
+      show_error("Attempting to use non-existing surface " + toString(id), false);\
+      return r;\
+    }\
+    enigma::Surface* surf = enigma::Surfaces[id];
+#else
+  #define get_surface(surf,id)\
+    enigma::Surface* surf = enigma::Surfaces[id];
+  #define get_surfacev(surf,id,r)\
+    enigma::Surface* surf = enigma::Surfaces[id];
+#endif
 
 #endif
