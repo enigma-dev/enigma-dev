@@ -167,7 +167,7 @@ class Mesh
   
   bool vbogenerated; // Whether or not the buffer objects have been generated
   bool vbobuffered; // Whether or not the buffer objects have been buffered
-  bool vboindexed;
+  bool vboindexed; // Whether or not the model contains any indexed primitives or just regular lists
   
   Mesh()
   {
