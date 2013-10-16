@@ -527,7 +527,6 @@ class Mesh
 				pointIndexedVertices.insert(pointIndexedVertices.end(), vertices.begin(), vertices.end());
 				for (std::vector<GLuint>::iterator it = indices.begin(); it != indices.end(); ++it) { *it += pointIndexedCount; }
 				pointIndices.insert(pointIndices.end(), indices.begin(), indices.end());
-				pointIndexedCount += indices.size();
 			} else {
 				pointVertices.insert(pointVertices.end(), vertices.begin(), vertices.end());
 				pointCount += vertices.size() / stride;
@@ -538,7 +537,6 @@ class Mesh
 				lineIndexedVertices.insert(lineIndexedVertices.end(), vertices.begin(), vertices.end());
 				for (std::vector<GLuint>::iterator it = indices.begin(); it != indices.end(); ++it) { *it += lineIndexedCount; }
 				lineIndices.insert(lineIndices.end(), indices.begin(), indices.end());
-				lineIndexedCount += indices.size();
 			} else {
 				lineVertices.insert(lineVertices.end(), vertices.begin(), vertices.end());
 				lineCount += vertices.size() / stride;
@@ -551,23 +549,20 @@ class Mesh
 				for (unsigned i = 0; i < indices.size() - 2; i++) {
 					lineIndices.push_back(indices[i]);
 					lineIndices.push_back(indices[i + 1]);
-					lineIndexedCount += 2;
 				}
 			} else {
 				unsigned offset = (lineIndexedVertices.size() - vertices.size()) / stride;
 				for (unsigned i = 0; i < vertices.size() / stride - 1; i++) {
 					lineIndices.push_back(offset + i);
 					lineIndices.push_back(offset + i + 1);
-					lineIndexedCount += 2;
 				}
 			}
 			break;
 		case enigma_user::pr_trianglelist:
 			if (indices.size() > 0) {
 				triangleIndexedVertices.insert(triangleIndexedVertices.end(), vertices.begin(), vertices.end());
-				for (std::vector<GLuint>::iterator it = indices.begin(); it != indices.end(); ++it) { *it += triangleCount; }
+				for (std::vector<GLuint>::iterator it = indices.begin(); it != indices.end(); ++it) { *it += triangleIndexedCount; }
 				triangleIndices.insert(triangleIndices.end(), indices.begin(), indices.end());
-				triangleIndexedCount += indices.size();
 			} else {
 				triangleVertices.insert(triangleVertices.end(), vertices.begin(), vertices.end());
 				triangleCount += vertices.size() / stride;
@@ -583,7 +578,6 @@ class Mesh
 					triangleIndices.push_back(indices[i]);
 					triangleIndices.push_back(indices[i+1]);
 					triangleIndices.push_back(indices[i+2]);
-					triangleIndexedCount += 3;
 				}
 			} else {
 				unsigned offset = (triangleIndexedVertices.size() - vertices.size()) / stride;
@@ -597,21 +591,19 @@ class Mesh
 						triangleIndices.push_back(offset + i + 1);
 						triangleIndices.push_back(offset + i + 2);
 					}
-					triangleIndexedCount += 3;
 				}
 			}
 			break;
 		case enigma_user::pr_trianglefan:
 			triangleIndexedVertices.insert(triangleIndexedVertices.end(), vertices.begin(), vertices.end());
 			if (indices.size() > 0) {
-				for (std::vector<GLuint>::iterator it = indices.begin(); it != indices.end(); ++it) { *it += triangleCount; }
+				for (std::vector<GLuint>::iterator it = indices.begin(); it != indices.end(); ++it) { *it += triangleIndexedCount; }
 				for (unsigned i = 1; i < indices.size() - 1; i++) {
 					// check for and continue if indexed triangle is degenerate, because the GPU won't render it anyway
 					if (indices[0] == indices[i] || indices[0] == indices[i + 1]  || indices[i] == indices[i + 1] ) { continue; }
 					triangleIndices.push_back(indices[0]);
 					triangleIndices.push_back(indices[i]);
 					triangleIndices.push_back(indices[i + 1]);
-					triangleIndexedCount += 3;
 				}
 			} else {
 				unsigned offset = (triangleIndexedVertices.size() - vertices.size()) / stride;
@@ -619,7 +611,6 @@ class Mesh
 					triangleIndices.push_back(offset);
 					triangleIndices.push_back(offset + i);
 					triangleIndices.push_back(offset + i + 1);
-					triangleIndexedCount += 3;
 				}
 			}
 			break;
@@ -637,12 +628,14 @@ class Mesh
 	
 	unsigned interleave = 0;
 	
+	triangleIndexedCount = triangleIndices.size();
 	if (triangleIndexedCount > 0) {
 		vdata.insert(vdata.end(), triangleIndexedVertices.begin(), triangleIndexedVertices.end());
 		idata.insert(idata.end(), triangleIndices.begin(), triangleIndices.end());
 		interleave += triangleIndexedCount;
 	}
 	
+	lineIndexedCount = lineIndices.size();
 	if (lineIndexedCount > 0) {
 		vdata.insert(vdata.end(), lineIndexedVertices.begin(), lineIndexedVertices.end());
 		for (std::vector<GLuint>::iterator it = lineIndices.begin(); it != lineIndices.end(); ++it) { *it += interleave; }
@@ -650,6 +643,7 @@ class Mesh
 		interleave += lineIndexedCount;
 	}
 	
+	pointIndexedCount = pointIndices.size();
 	if (pointIndexedCount > 0) {
 		vdata.insert(vdata.end(), pointIndexedVertices.begin(), pointIndexedVertices.end());
 		for (std::vector<GLuint>::iterator it = lineIndices.begin(); it != lineIndices.end(); ++it) { *it += interleave; }

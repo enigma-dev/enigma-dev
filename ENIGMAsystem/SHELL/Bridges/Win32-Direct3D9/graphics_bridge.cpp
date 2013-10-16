@@ -33,7 +33,7 @@ using namespace std;
 LPD3DXSPRITE dsprite = NULL;
 
 // global declarations
-LPDIRECT3D9 d3dr;    // the pointer to our Direct3D interface
+LPDIRECT3D9 d3dobj;    // the pointer to our Direct3D interface
 LPDIRECT3DDEVICE9 d3ddev;    // the pointer to the device class
 
 // the WindowProc function prototype
@@ -47,7 +47,7 @@ namespace enigma
 		HRESULT hr;
 		
 		D3DPRESENT_PARAMETERS d3dpp;    // create a struct to hold various device information
-		d3dr = Direct3DCreate9(D3D_SDK_VERSION);    // create the Direct3D interface
+		d3dobj = Direct3DCreate9(D3D_SDK_VERSION);    // create the Direct3D interface
 		D3DFORMAT format = D3DFMT_A8R8G8B8; //For simplicity we'll hard-code this for now.
 		
 		ZeroMemory(&d3dpp, sizeof(d3dpp));    // clear out the struct for use
@@ -67,7 +67,7 @@ namespace enigma
 		d3dpp.AutoDepthStencilFormat = D3DFMT_D24S8; //32-bit zbuffer 24bits for depth 8 for stencil buffer
 		
 		// create a device class using this information and information from the d3dpp stuct
-		hr = d3dr->CreateDevice(D3DADAPTER_DEFAULT,
+		hr = d3dobj->CreateDevice(D3DADAPTER_DEFAULT,
                       D3DDEVTYPE_HAL,
                       hWnd,
                       D3DCREATE_HARDWARE_VERTEXPROCESSING,
@@ -92,7 +92,7 @@ namespace enigma
 		
 		enigma_user::display_aa = 0;
 		for (int i = 16; i > 1; i--) {
-			if (SUCCEEDED(d3dr->CheckDeviceMultiSampleType(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, format, TRUE, (D3DMULTISAMPLE_TYPE)((int)D3DMULTISAMPLE_NONE + i), NULL))) {
+			if (SUCCEEDED(d3dobj->CheckDeviceMultiSampleType(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, format, TRUE, (D3DMULTISAMPLE_TYPE)((int)D3DMULTISAMPLE_NONE + i), NULL))) {
 				enigma_user::display_aa += i;
 			}
 		}
@@ -119,7 +119,7 @@ namespace enigma
     void DisableDrawing (HWND hWnd, HDC hDC, HGLRC hRC)
     {
 		d3ddev->Release();    // close and release the 3D device
-		d3dr->Release();    // close and release Direct3D
+		d3dobj->Release();    // close and release Direct3D
     }
 }
 

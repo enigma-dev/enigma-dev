@@ -20,6 +20,6 @@
 #include <d3d9.h>
 #include "Graphics_Systems/Direct3D9/Direct3D9Headers.h"
 
-extern LPDIRECT3D9 d3dr;    // the pointer to our Direct3D interface
+extern LPDIRECT3D9 d3dobj;    // the pointer to our Direct3D interface
 extern LPDIRECT3DDEVICE9 d3ddev;    // the pointer to the device class
 extern LPD3DXSPRITE dsprite;
