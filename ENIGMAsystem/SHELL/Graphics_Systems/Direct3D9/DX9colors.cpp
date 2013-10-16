@@ -66,6 +66,18 @@ void draw_set_color(int color)
 	enigma::currentcolor[0] = __GETR(color);
 	enigma::currentcolor[1] = __GETG(color);
 	enigma::currentcolor[2] = __GETB(color);
+	
+	/*
+			//d3ddev->SetRenderState(D3DRS_LIGHTING, TRUE);    // enable/disable the 3D lighting
+	D3DMATERIAL9 mtrl;
+	ZeroMemory( &mtrl, sizeof(D3DMATERIAL9) );
+	mtrl.Emissive.r = mtrl.Ambient.r = __GETR(color);
+	mtrl.Emissive.g = mtrl.Ambient.g = __GETG(color);
+	mtrl.Emissive.b = mtrl.Ambient.b = __GETB(color);
+	mtrl.Emissive.a = mtrl.Ambient.a = 1.0f;
+	d3ddev->SetMaterial( &mtrl );
+	*/
+
 }
 
 void draw_set_color_rgb(unsigned char red,unsigned char green,unsigned char blue)
