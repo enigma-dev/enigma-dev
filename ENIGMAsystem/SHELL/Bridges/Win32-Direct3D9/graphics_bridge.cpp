@@ -99,18 +99,38 @@ namespace enigma
     }
 	
 	void WindowResized() {
-		LPDIRECT3DSWAPCHAIN9 sc;
-		d3ddev->GetSwapChain(0, &sc);
+		if (d3ddev == NULL) { return; }
+		IDirect3DSwapChain9 *sc;	
+		HRESULT hr = d3ddev->GetSwapChain(0, &sc);
+		if(FAILED(hr)){
+			MessageBox(hWnd,
+               "Failed to retrieve the Direct3D 9.0 Swap Chain",
+			   DXGetErrorDescription9(hr), //DXGetErrorString9(hr)
+               MB_ICONERROR | MB_OK);
+		}
 		D3DPRESENT_PARAMETERS d3dpp;
 		sc->GetPresentParameters(&d3dpp);
 		d3dpp.BackBufferWidth = enigma_user::window_get_region_width_scaled();
 		d3dpp.BackBufferHeight = enigma_user::window_get_region_height_scaled();
 		sc->Release();
+		
+		bool spritenull = (dsprite == NULL);
+		if (!spritenull) {
+			dsprite->Release();
+		}
 
-		HRESULT hr = d3ddev->Reset(&d3dpp);
+		hr = d3ddev->Reset(&d3dpp);
 		if(FAILED(hr)){
 			MessageBox(hWnd,
                "Failed to reset Direct3D 9.0 Device",
+			   DXGetErrorDescription9(hr), //DXGetErrorString9(hr)
+               MB_ICONERROR | MB_OK);
+		}
+		
+		if (FAILED(D3DXCreateSprite(d3ddev,&dsprite)))
+		{
+			MessageBox(enigma::hWnd,
+               "Failed to create Direct3D 9.0 Sprite Object",
 			   DXGetErrorDescription9(hr), //DXGetErrorString9(hr)
                MB_ICONERROR | MB_OK);
 		}
@@ -133,6 +153,7 @@ int display_aa = 0;
 
 // Not really sure if you have to reset everything or if you can just reset a few things.
 void display_reset(int aa, bool vsync) {
+		if (d3ddev == NULL) { return; }
 		LPDIRECT3DSWAPCHAIN9 sc;
 		d3ddev->GetSwapChain(0, &sc);
 		D3DPRESENT_PARAMETERS d3dpp;
@@ -150,7 +171,10 @@ void display_reset(int aa, bool vsync) {
 			d3ddev->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, FALSE); 
 		}
 		sc->Release();
-		dsprite->Release();
+		bool spritenull = (dsprite == NULL);
+		if (!spritenull) {
+			dsprite->Release();
+		}
 
 		HRESULT hr = d3ddev->Reset(&d3dpp);
 		if(FAILED(hr)){
@@ -181,4 +205,3 @@ void set_synchronization(bool enable) //TODO: Needs to be rewritten
 }  
 
 }
-

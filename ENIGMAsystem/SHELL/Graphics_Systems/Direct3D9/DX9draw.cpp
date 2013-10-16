@@ -26,6 +26,9 @@
 #define __GETG(x) ((x & 0x00FF00) >> 8)
 #define __GETB(x) ((x & 0xFF0000) >> 16)
 
+#include <vector>
+using std::vector;
+
 namespace enigma {
   float circleprecision=24;
   extern unsigned char currentcolor[4];
@@ -133,9 +136,58 @@ float draw_get_circle_precision() {
     return enigma::circleprecision;
 }
 
+struct D3DTLVERTEX
+{
+	float fX;
+	float fY;
+	float fZ;
+};
+
+
+
 void draw_circle(gs_scalar x, gs_scalar y, float rad, bool outline)
 {
-
+    double pr = 2 * M_PI / enigma::circleprecision;
+	vector<float> Circle;
+	    d3ddev->SetFVF(D3DFVF_XYZ);
+    if(outline)
+    {
+        for (double i = 0; i <= 2*M_PI; i += pr)
+        {
+            double xc1=cos(i)*rad,yc1=sin(i)*rad;
+			//D3DTLVERTEX v; 
+			//v.fX = x+xc1; v.fY = y+yc1; v.fZ = 0;
+			//v.fRHW = RHW;
+			//v.Color = color;
+			//v.fU = U; v.fV = V;
+			//Circle.push_back(v);
+			
+			Circle.push_back(x+xc1); Circle.push_back(y+yc1); Circle.push_back(0);
+        }
+		d3ddev->DrawPrimitiveUP(D3DPT_LINESTRIP, enigma::circleprecision, &Circle[0], sizeof(float) * 3);
+    }
+    else
+    {
+		//D3DTLVERTEX v; 
+		//v.fX = x; v.fY = y; v.fZ = 0;
+		//v.fRHW = RHW;
+		//v.Color = color;
+		//v.fU = U; v.fV = V;
+		//Circle.push_back(v);
+		Circle.push_back(x); Circle.push_back(y); Circle.push_back(0);
+        for (double i = 0; i <= 2*M_PI; i += pr)
+        {
+            double xc1=cos(i)*rad,yc1=sin(i)*rad;
+			//D3DTLVERTEX v; 
+			//v.fX = x+xc1; v.fY = y+yc1; v.fZ = 0;
+			//v.fRHW = RHW;
+			//v.Color = color;
+			//v.fU = U; v.fV = V;
+			//Circle.push_back(v);
+			Circle.push_back(x+xc1); Circle.push_back(y+yc1); Circle.push_back(0);
+        }
+		d3ddev->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, enigma::circleprecision, &Circle[0], sizeof(float) * 3);
+    }
 }
 
 void draw_circle_color(gs_scalar x, gs_scalar y, float rad, int c1, int c2, bool outline)
