@@ -54,8 +54,10 @@ enum {
   rs_always     // Always True             D3DCMP_ALWAYS           GL_ALWAYS
 };
 
+// NOTE: Game Maker uses clockwise culling to define the front face, 
+// OpenGL's mode sets what defines the front face, Direct3D's mode sets what defines the back face
 enum {
-  rs_none, // No culling
+  rs_none, // No culling 
   rs_cw, // Clockwise culling
   rs_ccw // Counter-clockwise culling
 };

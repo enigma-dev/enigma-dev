@@ -465,7 +465,7 @@ unsigned display_get_dpi_y()
 	return GetDeviceCaps(GetDC(enigma::hWnd), LOGPIXELSY);
 }
 
-// This display reset function needs moved to graphics bridges
+/* This function was moved to Direct3D9-Win32 bridge
 void display_reset(int aa, bool vsync)
 {
 	DEVMODE devMode;
@@ -499,6 +499,7 @@ void display_reset(int aa, bool vsync)
 
 	ChangeDisplaySettings(&devMode, 0);
 }
+*/
 
 void display_set_colordepth(int depth)
 {

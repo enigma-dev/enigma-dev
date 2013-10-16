@@ -36,7 +36,7 @@ namespace enigma {
 }
 
 D3DCULL cullingstates[3] = {
-  D3DCULL_NONE, D3DCULL_CW, D3DCULL_CCW
+  D3DCULL_NONE, D3DCULL_CCW, D3DCULL_CW
 };
 
 D3DFILLMODE fillmodes[3] = {
@@ -154,7 +154,6 @@ void d3d_set_fog_density(double density)
 void d3d_set_culling(int mode)
 {
 	enigma::d3dCulling = mode;
-	// Game Maker uses clockwise culling, the opposite of the OpenGL and Direct3D defaults
 	d3ddev->SetRenderState(D3DRS_CULLMODE, cullingstates[mode]);
 }
 
@@ -275,7 +274,7 @@ void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scal
 							(FLOAT)width,   
 							0, 
 							(FLOAT)height,   
-							1.0f,    // the near view-plane
+							0.0f,    // the near view-plane
 							32000.0f);    // the far view-plane
 						   
 	d3ddev->SetTransform(D3DTS_PROJECTION, &matProjection);    // set the projection transform

@@ -58,7 +58,7 @@ bool surface_is_supported()
 int surface_create(int width, int height)
 {
 	LPDIRECT3DTEXTURE9 texture;
-	d3ddev->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &texture, NULL);			 
+	d3ddev->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &texture, NULL);			 
 	enigma::Surface* surface = new enigma::Surface();	 
 	GmTexture* gmTexture = new GmTexture(texture);
 	gmTexture->isFont = false;
@@ -74,7 +74,7 @@ int surface_create(int width, int height)
 int surface_create_msaa(int width, int height, int levels)
 {
 	LPDIRECT3DTEXTURE9 texture;
-	d3ddev->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &texture, NULL);			 
+	d3ddev->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &texture, NULL);			 
 	enigma::Surface* surface = new enigma::Surface();	 
 	GmTexture* gmTexture = new GmTexture(texture);
 	gmTexture->isFont = false;

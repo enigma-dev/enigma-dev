@@ -112,6 +112,7 @@ void screen_redraw()
 
     d3ddev->BeginScene();    // begins the 3D scene
 	dsprite->Begin(D3DXSPRITE_ALPHABLEND | D3DXSPRITE_DO_NOT_ADDREF_TEXTURE);
+		
 	if (!view_enabled)
     {
 		D3DVIEWPORT9 pViewport = { 0, 0, (DWORD)window_get_region_width_scaled(), (DWORD)window_get_region_height_scaled(), 0, 1.0f };
@@ -152,6 +153,7 @@ void screen_redraw()
 			d3ddev->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
 		
         draw_back();
+
 	
         // Apply and clear stored depth changes.
         for (map<int,pair<double,double> >::iterator it = id_to_currentnextdepth.begin(); it != id_to_currentnextdepth.end(); it++)
@@ -200,6 +202,7 @@ void screen_redraw()
                 (enigma::particles_impl->draw_particlesystems)(high, low);
             }
         }
+		//return;
     }
     else
     {
