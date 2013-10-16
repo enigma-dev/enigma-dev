@@ -26,6 +26,9 @@ using namespace std;
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Platforms/Win32/WINDOWSmain.h"
 #include "Platforms/General/PFwindow.h"
+#include "Platforms/platforms_mandatory.h"
+#include "Universal_System/roomsystem.h"
+#include "Graphics_Systems/graphics_mandatory.h"
 #include "../General/DX9Device.h"
 LPD3DXSPRITE dsprite = NULL;
 
@@ -49,6 +52,8 @@ namespace enigma
 		
 		ZeroMemory(&d3dpp, sizeof(d3dpp));    // clear out the struct for use
 		d3dpp.Windowed = TRUE;    // program windowed, not fullscreen
+		d3dpp.BackBufferWidth = enigma_user::window_get_region_width_scaled();
+		d3dpp.BackBufferHeight = enigma_user::window_get_region_height_scaled();
 		d3dpp.MultiSampleType = D3DMULTISAMPLE_NONE; // 0 Levels of multi-sampling
 		d3dpp.MultiSampleQuality = 0;                //No multi-sampling
 		d3dpp.SwapEffect = D3DSWAPEFFECT_DISCARD;  // Throw away previous frames, we don't need them
@@ -82,6 +87,25 @@ namespace enigma
 			// created OK
 		}
     }
+	
+	void WindowResized() {
+		LPDIRECT3DSWAPCHAIN9 sc;
+		d3ddev->GetSwapChain(0, &sc);
+		D3DPRESENT_PARAMETERS d3dpp;
+		sc->GetPresentParameters(&d3dpp);
+		d3dpp.BackBufferWidth = enigma_user::window_get_region_width_scaled();
+		d3dpp.BackBufferHeight = enigma_user::window_get_region_height_scaled();
+		sc->Release();
+
+		HRESULT hr = d3ddev->Reset(&d3dpp);
+		if(FAILED(hr)){
+			MessageBox(hWnd,
+               "Failed to reset Direct3D 9.0 Device",
+			   DXGetErrorDescription9(hr), //DXGetErrorString9(hr)
+               MB_ICONERROR | MB_OK);
+		}
+
+	}
 
     void DisableDrawing (HWND hWnd, HDC hDC, HGLRC hRC)
     {

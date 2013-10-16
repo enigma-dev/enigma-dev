@@ -199,7 +199,6 @@ void d3d_set_culling(int mode)
 {
   enigma::d3dCulling = mode;
   ((mode > 0)?glEnable:glDisable)(GL_CULL_FACE);
-  // Game Maker uses clockwise culling, the opposite of the OpenGL and Direct3D defaults
   glFrontFace(cullingstates[mode]);
 }
 

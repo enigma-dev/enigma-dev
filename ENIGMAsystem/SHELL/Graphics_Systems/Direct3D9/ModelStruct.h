@@ -689,7 +689,7 @@ class Mesh
 					
 	// create a index buffer interface
 	d3ddev->CreateIndexBuffer(idata.size() * sizeof(unsigned),
-		D3DUSAGE_WRITEONLY,
+		0,
         D3DFMT_INDEX32,
         D3DPOOL_MANAGED,
         &indexbuffer,
