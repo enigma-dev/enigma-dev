@@ -82,9 +82,19 @@ namespace enigma
 		
 		d3ddev->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, FALSE); 
 		
-		if (SUCCEEDED(D3DXCreateSprite(d3ddev,&dsprite)))
+		if (FAILED(D3DXCreateSprite(d3ddev,&dsprite)))
 		{
-			// created OK
+			MessageBox(hWnd,
+               "Failed to create Direct3D 9.0 Sprite Object",
+			   DXGetErrorDescription9(hr), //DXGetErrorString9(hr)
+               MB_ICONERROR | MB_OK);
+		}
+		
+		enigma_user::display_aa = 0;
+		for (int i = 16; i > 1; i--) {
+			if (SUCCEEDED(d3dr->CheckDeviceMultiSampleType(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, format, TRUE, (D3DMULTISAMPLE_TYPE)((int)D3DMULTISAMPLE_NONE + i), NULL))) {
+				enigma_user::display_aa += i;
+			}
 		}
     }
 	
@@ -104,7 +114,6 @@ namespace enigma
 			   DXGetErrorDescription9(hr), //DXGetErrorString9(hr)
                MB_ICONERROR | MB_OK);
 		}
-
 	}
 
     void DisableDrawing (HWND hWnd, HDC hDC, HGLRC hRC)
@@ -121,41 +130,44 @@ namespace enigma_user
 
 int display_aa = 0;
 
-/* Two things wrong here...
-a) this shit dont work
-b) display_reset needs moved out of WINDOWSwindow.cpp/.h
-
-
 
 // Not really sure if you have to reset everything or if you can just reset a few things.
 void display_reset(int aa, bool vsync) {
-		HRESULT hr;
-		
-		D3DPRESENT_PARAMETERS d3dpp;    // create a struct to hold various device information
-		D3DFORMAT format = D3DFMT_A8R8G8B8; //For simplicity we'll hard-code this for now.
-
-		ZeroMemory(&d3dpp, sizeof(d3dpp));    // clear out the struct for use
-		d3dpp.Windowed = TRUE;    // program windowed, not fullscreen
-		d3dpp.MultiSampleType = D3DMULTISAMPLE_NONE; // 0 Levels of multi-sampling
-		d3dpp.MultiSampleQuality = aa;                //No multi-sampling
-		d3dpp.SwapEffect = D3DSWAPEFFECT_DISCARD;  // Throw away previous frames, we don't need them
-		d3dpp.hDeviceWindow = enigma::hWnd;  // This is our main (and only) window
-		d3dpp.Flags = NULL;            // No flags to set
-		d3dpp.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT; //Default Refresh Rate
-		d3dpp.BackBufferCount = 1;  //We only need a single back buffer
-		d3dpp.BackBufferFormat = format;      //Display format
-		d3dpp.EnableAutoDepthStencil = TRUE; // Automatic depth stencil buffer
-		d3dpp.AutoDepthStencilFormat = D3DFMT_D24S8; //32-bit zbuffer 24bits for depth 8 for stencil buffer
-		d3dpp.Flags = NULL;            // No flags to set
+		LPDIRECT3DSWAPCHAIN9 sc;
+		d3ddev->GetSwapChain(0, &sc);
+		D3DPRESENT_PARAMETERS d3dpp;
+		sc->GetPresentParameters(&d3dpp);
 		if (vsync) {
 			d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT;   //Present the frame immediately
 		} else {
 			d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;   //Present the frame immediately
 		}
+		d3dpp.MultiSampleType = (D3DMULTISAMPLE_TYPE)((int)D3DMULTISAMPLE_NONE + aa); // Levels of multi-sampling
+		d3dpp.MultiSampleQuality = 0;                //No multi-sampling
+		if (aa) {
+			d3ddev->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, TRUE); 
+		} else {
+			d3ddev->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, FALSE); 
+		}
+		sc->Release();
+		dsprite->Release();
+
+		HRESULT hr = d3ddev->Reset(&d3dpp);
+		if(FAILED(hr)){
+			MessageBox(enigma::hWnd,
+               "Failed to reset Direct3D 9.0 Device",
+			   DXGetErrorDescription9(hr), //DXGetErrorString9(hr)
+               MB_ICONERROR | MB_OK);
+		}
 		
-		hr = d3ddev->Reset(&d3dpp);
+		if (FAILED(D3DXCreateSprite(d3ddev,&dsprite)))
+		{
+			MessageBox(enigma::hWnd,
+               "Failed to create Direct3D 9.0 Sprite Object",
+			   DXGetErrorDescription9(hr), //DXGetErrorString9(hr)
+               MB_ICONERROR | MB_OK);
+		}
 }
-*/
 
 void screen_refresh() {
     window_set_caption(room_caption);
