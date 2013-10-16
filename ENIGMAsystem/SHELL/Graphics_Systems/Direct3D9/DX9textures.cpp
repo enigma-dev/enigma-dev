@@ -70,9 +70,9 @@ namespace enigma
 		fullwidth,
 		fullheight,
 		1,
-		D3DUSAGE_DYNAMIC,
+		0,
 		D3DFMT_A8R8G8B8,
-		D3DPOOL_DEFAULT,
+		D3DPOOL_MANAGED,
 		&texture,
 		0
 	);

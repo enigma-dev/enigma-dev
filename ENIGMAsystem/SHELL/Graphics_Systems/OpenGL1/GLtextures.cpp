@@ -295,12 +295,11 @@ void texture_mipmapping_filter(int texid, int filter)
 
 void texture_mipmapping_generate(int texid, int levels)
 {
-  glBindTexture(GL_TEXTURE_2D, GmTextures[texid]->gltex);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-  for (int i = 0; i < levels; i++)
-  {
-    glGenerateMipmap(GL_TEXTURE_2D);
-  }
+  texture_use(GmTextures[texid]->gltex);
+  glGenerateMipmap(GL_TEXTURE_2D);
+  
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, levels);
 }
 
 bool  texture_anisotropy_supported()

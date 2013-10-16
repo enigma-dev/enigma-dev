@@ -59,6 +59,10 @@ namespace enigma
         *hRC = wglCreateContext( enigma::window_hDC );
         wglMakeCurrent( enigma::window_hDC, *hRC );
     }
+	
+	void WindowResized() {
+
+	}
 
     void DisableDrawing (HWND hWnd, HDC hDC, HGLRC hRC)
     {
