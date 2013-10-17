@@ -39,6 +39,13 @@ namespace enigma
 {
     void EnableDrawing (HGLRC *hRC)
     {
+		/**
+		 * Edited by Cool Breeze on 16th October 2013
+		 * + Updated the Pixel Format to support 24-bitdepth buffers
+		 * + Correctly create a GL 3.x compliant context
+		 */
+		
+		HGLRC LegacyRC;
         PIXELFORMATDESCRIPTOR pfd;
         int iFormat;
 
@@ -49,15 +56,43 @@ namespace enigma
         pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
         pfd.iPixelType = PFD_TYPE_RGBA;
         pfd.cColorBits = 24;
-        pfd.cDepthBits = 16;
+        pfd.cDepthBits = 24;
         pfd.iLayerType = PFD_MAIN_PLANE;
         iFormat = ChoosePixelFormat (enigma::window_hDC, &pfd);
 
         if (iFormat==0) { show_error("Total failure. Abort.",1); }
 
-        SetPixelFormat (enigma::window_hDC, iFormat, &pfd);
-        *hRC = wglCreateContext( enigma::window_hDC );
-        wglMakeCurrent( enigma::window_hDC, *hRC );
+        SetPixelFormat ( enigma::window_hDC, iFormat, &pfd );
+        LegacyRC = wglCreateContext( enigma::window_hDC );
+        wglMakeCurrent( enigma::window_hDC, LegacyRC );
+        
+        // -- Initialise GLEW
+        GLenum err = glewInit();
+        if (GLEW_OK != err)
+        {
+			return;
+        }
+ 
+		// -- Define an array of Context Attributes
+        int attribs[] =
+        {
+			WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
+			WGL_CONTEXT_MINOR_VERSION_ARB, 0,
+			WGL_CONTEXT_FLAGS_ARB, 0,
+			0
+        };
+ 
+        if ( wglewIsSupported("WGL_ARB_create_context") )
+        {
+                *hRC = wglCreateContextAttribsARB( enigma::window_hDC,0, attribs );
+                wglMakeCurrent( NULL,NULL );
+                wglDeleteContext( LegacyRC );
+                wglMakeCurrent(enigma::window_hDC, *hRC );
+        }
+        else // Unable to get a 3.0 Core Context, use the Legacy 1.x context
+        {
+                *hRC = LegacyRC;
+        }
     }
 
 	void WindowResized() {
