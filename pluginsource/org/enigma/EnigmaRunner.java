@@ -177,25 +177,19 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 						ENIGMA_FAIL = true;
 						return;
 						}
-					ENIGMA_READY = true;	
-					// Delay compiler until reload performed is ready
-					while (!LGM.isloaded) {
-						try {
-							Thread.sleep(1000);
-						} catch (InterruptedException e1) {
-							e1.printStackTrace();
-						}
-					}
+		
 					ResourceHolder<EnigmaSettings> rh = LGM.currentFile.resMap.get(EnigmaSettings.class);
 					if (rh == null)
 						LGM.currentFile.resMap.put(EnigmaSettings.class,
 								rh = new SingletonResourceHolder<EnigmaSettings>(new EnigmaSettings()));
 					esf = new EnigmaSettingsFrame(rh.getResource());
+					esf.revertResource();
 					LGM.mdi.add(esf);
 					rh.getResource().commitToDriver(DRIVER);
 					setupBaseKeywords();
 					populateKeywords();
 					setMenuEnabled(true);
+					ENIGMA_READY = true;
 					}
 			};
 			initthread.start();
@@ -758,6 +752,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 			Messages.getString("EnigmaRunner.KEY_TYPES") }; //$NON-NLS-1$
 	private MDIFrame keywordListFrames[] = new MDIFrame[3];
 	private KeywordListModel keywordLists[] = new KeywordListModel[3];
+
 	private final static Pattern nameRegex = Pattern.compile("[a-zA-Z][a-zA-Z0-9_]*"); //$NON-NLS-1$
 
 	public void showKeywordListFrame(final int mode)
@@ -956,29 +951,19 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 
 	@Override
 	public void reloadPerformed(boolean newRoot)
-		{
+	{
 		populateTree();
-		new Thread() {
-		public void run() {	
-			// Delay reload performed until the compiler is ready
-			while (!ENIGMA_READY && !LGM.isloaded) {
-				try {
-					Thread.sleep(1000);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-			}
-			ResourceHolder<EnigmaSettings> rh = LGM.currentFile.resMap.get(EnigmaSettings.class);
-			if (rh == null)
-				LGM.currentFile.resMap.put(EnigmaSettings.class,
-						rh = new SingletonResourceHolder<EnigmaSettings>(new EnigmaSettings()));
-			
-			esf.resOriginal = rh.getResource();
-			esf.revertResource(); //updates local res copy as well
+		
+		if (esf != null) {
+		ResourceHolder<EnigmaSettings> rh = LGM.currentFile.resMap.get(EnigmaSettings.class);
+		if (rh == null)
+			LGM.currentFile.resMap.put(EnigmaSettings.class,
+					rh = new SingletonResourceHolder<EnigmaSettings>(new EnigmaSettings()));
+				
+		esf.resOriginal = rh.getResource();
+		esf.revertResource(); //updates local res copy as well
 		}
-		}.start();
-
-		}
+	}
 	public static ImageIcon findIcon(String loc)
 		{
 		ImageIcon ico = new ImageIcon(loc);
