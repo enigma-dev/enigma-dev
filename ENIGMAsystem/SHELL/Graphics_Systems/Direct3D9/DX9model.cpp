@@ -19,11 +19,12 @@
 #include "../General/GSd3d.h"
 #include "DX9shapes.h"
 #include "../General/GSmodel.h"
+#include "../General/GStextures.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
 #include <math.h>
 #include <stdlib.h>
-#include "DX9binding.h"
+
 
 using namespace std;
 
@@ -320,13 +321,13 @@ void d3d_model_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z) // overload f
 
 void d3d_model_draw(int id, int texId)
 {
-    texture_use(texId);
+    texture_set(texId);
     meshes[id]->Draw();
 }
 
 void d3d_model_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z, int texId)
 {
-    texture_use(texId);
+    texture_set(texId);
     d3d_model_draw(id, x, y, z);
 }
 

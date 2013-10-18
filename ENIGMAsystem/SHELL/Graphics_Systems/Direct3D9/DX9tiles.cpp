@@ -40,7 +40,7 @@
 #include "../General/GSbackground.h"
 #include "Universal_System/backgroundstruct.h"
 #include "../General/GStextures.h"
-#include "DX9binding.h"
+
 #include "Direct3D9Headers.h"
 #include "../General/GStiles.h"
 #include "../General/DXtilestruct.h"

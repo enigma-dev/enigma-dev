@@ -18,7 +18,7 @@
 #include <math.h>
 #include "../General/OpenGLHeaders.h"
 #include "../General/GSstdraw.h"
-#include "../General/GLbinding.h"
+#include "../General/GStextures.h"
 #include <stdio.h>
 #include "Universal_System/roomsystem.h"
 

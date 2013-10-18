@@ -23,16 +23,13 @@
 
 #include "Universal_System/scalar.h"
 
-#ifndef _GLTEXTURES__H
-#define _GLTEXTURES__H
+#ifndef GSTEXTURES__H
+#define GSTEXTURES__H
 
 namespace enigma
 {
     extern bool interpolate_textures;
 }
-
-#define GL_TEXTURE_MAX_ANISOTROPY_EXT 0x84FE
-#define GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT 0x84FF
 
 namespace enigma_user {
 enum {
@@ -50,7 +47,10 @@ void texture_set_enabled(bool enable);
 bool texture_get_interpolation();
 int texture_get_texel_width(int texid);
 int texture_get_texel_height(int texid);
+void texture_set(int texid);
+void texture_set_stage(int stage);
 void texture_set_stage(int stage, int texid);
+void texture_reset();
 void texture_set_blending(bool enable);
 void texture_set_repeat(bool repeat);
 void texture_set_repeat(int texid, bool repeat);

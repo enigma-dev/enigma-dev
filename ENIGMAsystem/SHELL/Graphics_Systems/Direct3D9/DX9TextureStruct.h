@@ -26,9 +26,16 @@ using std::vector;
 struct GmTexture {
 	LPDIRECT3DTEXTURE9 gTexture;
 	bool isFont;
-	GmTexture(LPDIRECT3DTEXTURE9 gTex);
-	~GmTexture();
+	GmTexture(LPDIRECT3DTEXTURE9 gTex) {
+		gTexture = gTex;
+	}
+	
+	~GmTexture() {
+		
+	}
 };
 extern vector<GmTexture*> GmTextures;
+
+LPDIRECT3DTEXTURE9 get_texture(int texid);
 
 #endif

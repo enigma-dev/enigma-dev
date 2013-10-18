@@ -19,7 +19,6 @@
 #include "../General/GSprimitives.h"
 #include "../General/GStextures.h"
 #include "../General/GSmodel.h"
-#include "GL3binding.h"
 
 #include <stdio.h>
 
@@ -111,7 +110,7 @@ int draw_vertex_texture_color(gs_scalar x, gs_scalar y, gs_scalar tx, gs_scalar 
 int draw_primitive_end()
 {
   if (prim_draw_texture != -1) {
-    texture_use(get_texture(prim_draw_texture));
+    texture_set(get_texture(prim_draw_texture));
   }
   prim_draw_texture = -1;
   d3d_model_draw(prim_draw_model);
@@ -141,7 +140,7 @@ void d3d_primitive_begin_texture(int kind, int texId)
 void d3d_primitive_end()
 {
   if (prim_d3d_texture != -1) {
-    texture_use(get_texture(prim_d3d_texture));
+    texture_set(get_texture(prim_d3d_texture));
   }
   prim_d3d_texture = -1;
   d3d_model_draw(prim_d3d_model);

@@ -15,6 +15,9 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#ifndef ENIGMA_USER_GSMODEL
+#define ENIGMA_USER_GSMODEL
+
 #include "Universal_System/scalar.h"
 
 #include <string>
@@ -60,3 +63,4 @@ namespace enigma_user {
   void d3d_model_torus(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar hrep, gs_scalar vrep, int csteps, int tsteps, double radius, double tradius);
 }
 
+#endif

@@ -24,7 +24,6 @@ using namespace std;
 #include <algorithm>
 #include <fstream>      // std::ofstream
 
-#include "GL3binding.h"
 #include "GL3shapes.h"
 
 #include <stdio.h> //for file writing (surface_save)
@@ -43,6 +42,7 @@ namespace enigma_user {
 }
 #include "../General/GSsurface.h"
 #include "../General/GLSurfaceStruct.h"
+#include "../General/GStextures.h"
 
 #ifdef DEBUG_MODE
   #include <string>
@@ -137,7 +137,8 @@ int surface_create(int width, int height)
       enigma::surface_array[id]->tex = tex;
       enigma::surface_array[id]->fbo = fbo;
 
-      glBindTexture(GL_TEXTURE_2D, enigma::bound_texture);
+      texture_reset();
+	  
       glPopAttrib();
 
       return id;
@@ -251,7 +252,7 @@ bool surface_exists(int id)
 void draw_surface(int id, gs_scalar x, gs_scalar y)
 {
   get_surface(surf,id);
-  texture_use(surf->tex);
+  texture_set(surf->tex);
   int w=surf->width;
   int h=surf->height;
 
@@ -267,7 +268,7 @@ void draw_surface(int id, gs_scalar x, gs_scalar y)
 void draw_surface_stretched(int id, gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h)
 {
   get_surface(surf,id);
-  texture_use(surf->tex);
+  texture_set(surf->tex);
 
   const gs_scalar data[4*8] = {
     x, y, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0,
@@ -281,7 +282,7 @@ void draw_surface_stretched(int id, gs_scalar x, gs_scalar y, gs_scalar w, gs_sc
 void draw_surface_part(int id, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y)
 {
   get_surface(surf,id);
-  texture_use(surf->tex);
+  texture_set(surf->tex);
 
   const float tbw=surf->width,tbh=surf->height;
 
@@ -297,7 +298,7 @@ void draw_surface_part(int id, gs_scalar left, gs_scalar top, gs_scalar width, g
 void draw_surface_tiled(int id, gs_scalar x, gs_scalar y)
 {
   get_surface(surf,id);
-  texture_use(surf->tex);
+  texture_set(surf->tex);
 
   x=surf->width-fmod(x,surf->width);
   y=surf->height-fmod(y,surf->height);
@@ -322,7 +323,7 @@ void draw_surface_tiled(int id, gs_scalar x, gs_scalar y)
 void draw_surface_tiled_area(int id, gs_scalar x, gs_scalar y, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2)
 {
   get_surface(surf,id);
-  texture_use(surf->tex);
+  texture_set(surf->tex);
 
   gs_scalar sw,sh,i,j,jj,left,top,width,height,X,Y;
   sw = surf->width;
@@ -365,7 +366,7 @@ void draw_surface_tiled_area(int id, gs_scalar x, gs_scalar y, gs_scalar x1, gs_
 void draw_surface_ext(int id, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int color, gs_scalar alpha)
 {
   get_surface(surf,id);
-  texture_use(surf->tex);
+  texture_set(surf->tex);
 
   const gs_scalar w=surf->width*xscale, h=surf->height*yscale;
   rot *= M_PI/180;
@@ -391,7 +392,7 @@ void draw_surface_ext(int id, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_sca
 void draw_surface_stretched_ext(int id, gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h, int color, gs_scalar alpha)
 {
   get_surface(surf,id);
-  texture_use(surf->tex);
+  texture_set(surf->tex);
 
   gs_scalar r = __GETR(color), g = __GETG(color), b = __GETB(color);
   const gs_scalar data[4*8] = {
@@ -406,7 +407,7 @@ void draw_surface_stretched_ext(int id, gs_scalar x, gs_scalar y, gs_scalar w, g
 void draw_surface_part_ext(int id, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, gs_scalar alpha)
 {
   get_surface(surf,id);
-  texture_use(surf->tex);
+  texture_set(surf->tex);
 
   const float tbw = surf->width, tbh = surf->height;
 
@@ -423,7 +424,7 @@ void draw_surface_part_ext(int id, gs_scalar left, gs_scalar top, gs_scalar widt
 void draw_surface_tiled_ext(int id, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, gs_scalar alpha)
 {
   get_surface(surf,id);
-  texture_use(surf->tex);
+  texture_set(surf->tex);
 
   const gs_scalar w=surf->width*xscale, h=surf->height*yscale;
   const int hortil= int (ceil(room_width/(surf->width))),
@@ -449,7 +450,7 @@ void draw_surface_tiled_ext(int id, gs_scalar x, gs_scalar y, gs_scalar xscale, 
 void draw_surface_tiled_area_ext(int id, gs_scalar x, gs_scalar y, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar xscale, gs_scalar yscale, int color, gs_scalar alpha)
 {
   get_surface(surf,id);
-  texture_use(surf->tex);
+  texture_set(surf->tex);
 
   gs_scalar sw,sh,i,j,jj,left,top,width,height,X,Y;
   sw = surf->width*xscale;
@@ -493,7 +494,7 @@ void draw_surface_tiled_area_ext(int id, gs_scalar x, gs_scalar y, gs_scalar x1,
 void draw_surface_general(int id, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, gs_scalar a1, gs_scalar a2, gs_scalar a3, gs_scalar a4)
 {
   get_surface(surf,id);
-  texture_use(surf->tex);
+  texture_set(surf->tex);
 
   const gs_scalar tbw = surf->width, tbh = surf->height,
         w = width*xscale, h = height*yscale;

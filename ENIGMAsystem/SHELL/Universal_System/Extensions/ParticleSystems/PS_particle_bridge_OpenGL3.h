@@ -20,7 +20,6 @@
 
 #include "Graphics_Systems/General/OpenGLHeaders.h"
 #include "Graphics_Systems/General/GSsprite.h"
-#include "Graphics_Systems/General/GLbinding.h"
 #include "Graphics_Systems/General/GStextures.h"
 #include "Graphics_Systems/General/GLTextureStruct.h"
 #include "Graphics_Systems/General/GScolors.h"
@@ -426,7 +425,7 @@ namespace enigma {
           if (!oldtonew) {
             actual_index = pi_list_size - switch_offset - 1;
           }
-          texture_use(GmTextures[texture_indices[actual_index]]->gltex);
+          enigma_user::texture_set(GmTextures[texture_indices[actual_index]]->gltex);
           if (blend_adds[actual_index]) {
             glBlendFunc(GL_SRC_ALPHA,GL_ONE);
           }

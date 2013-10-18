@@ -26,7 +26,6 @@
 #include <stdlib.h>
 
 
-#include "../General/GLbinding.h"
 using namespace std;
 
 #define __GETR(x) ((x & 0x0000FF))/255.0

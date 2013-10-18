@@ -23,7 +23,6 @@ namespace enigma_user
 {
 
 int draw_set_blend_mode(int mode){
-
 	switch (mode)
 	{
     case bm_add:

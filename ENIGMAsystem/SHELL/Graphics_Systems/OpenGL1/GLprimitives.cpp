@@ -16,8 +16,8 @@
 **/
 
 #include "../General/OpenGLHeaders.h"
-#include "../General/GLbinding.h"
 #include "../General/GStextures.h"
+#include "../General/GLTextureStruct.h"
 #include "../General/GSprimitives.h"
 
 #include <string>
@@ -52,7 +52,7 @@ int draw_primitive_begin(int dink)
 
 int draw_primitive_begin_texture(int dink,unsigned tex)
 {
-  texture_use(tex);
+  texture_set(tex);
   GLenum kind = ptypes_by_id[ dink & 15 ];
   glBegin(kind);
   return 0;
@@ -107,7 +107,7 @@ void d3d_primitive_begin(int kind)
 }
 void d3d_primitive_begin_texture(int kind, int texId)
 {
-    texture_use(get_texture(texId));
+    texture_set(get_texture(texId));
     glBegin(ptypes_by_id[kind]);
 }
 

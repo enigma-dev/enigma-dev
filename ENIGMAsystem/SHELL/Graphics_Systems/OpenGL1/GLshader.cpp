@@ -16,8 +16,8 @@
 **/
 
 #include "../General/OpenGLHeaders.h"
+#include "../General/GStextures.h"
 #include "GLshader.h"
-#include "../General/GLbinding.h"
 #include "GLSLshader.h"
 #include <math.h>
 

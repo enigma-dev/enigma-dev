@@ -22,7 +22,6 @@ using namespace std;
 #include <math.h>
 #include <string.h>
 
-#include "../General/GLbinding.h"
 #include <stdio.h> //for file writing (surface_save)
 #include "Universal_System/nlpo2.h"
 #include "Universal_System/spritestruct.h"
@@ -37,6 +36,9 @@ namespace enigma_user {
 }
 #include "../General/GSsurface.h"
 #include "../General/GLSurfaceStruct.h"
+#include "../General/GLTextureStruct.h"
+#include "../General/GStextures.h"
+
 
 #ifdef DEBUG_MODE
   #include <string>
@@ -242,7 +244,7 @@ bool surface_exists(int id)
 void draw_surface(int id, gs_scalar x, gs_scalar y)
 {
   get_surface(surf,id);
-  texture_use(surf->tex);
+  texture_set(surf->tex);
   glPushAttrib(GL_CURRENT_BIT);
   glColor4f(1,1,1,1);
   int w=surf->width;
@@ -261,7 +263,7 @@ void draw_surface(int id, gs_scalar x, gs_scalar y)
 void draw_surface_stretched(int id, gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h)
 {
   get_surface(surf,id);
-  texture_use(surf->tex);
+  texture_set(surf->tex);
   glPushAttrib(GL_CURRENT_BIT);
   glColor4f(1,1,1,1);
 
@@ -278,7 +280,7 @@ void draw_surface_stretched(int id, gs_scalar x, gs_scalar y, gs_scalar w, gs_sc
 void draw_surface_part(int id, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y)
 {
   get_surface(surf,id);
-  texture_use(surf->tex);
+  texture_set(surf->tex);
 
   glPushAttrib(GL_CURRENT_BIT);
   glColor4f(1,1,1,1);
@@ -301,7 +303,7 @@ void draw_surface_part(int id, gs_scalar left, gs_scalar top, gs_scalar width, g
 void draw_surface_tiled(int id, gs_scalar x, gs_scalar y)
 {
   get_surface(surf,id);
-  texture_use(surf->tex);
+  texture_set(surf->tex);
 
   glPushAttrib(GL_CURRENT_BIT);
     glColor4f(1,1,1,1);
@@ -332,7 +334,7 @@ void draw_surface_tiled(int id, gs_scalar x, gs_scalar y)
 void draw_surface_tiled_area(int id, gs_scalar x, gs_scalar y, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2)
 {
   get_surface(surf,id);
-  texture_use(surf->tex);
+  texture_set(surf->tex);
 
   glPushAttrib(GL_CURRENT_BIT);
     glColor4f(1,1,1,1);
@@ -382,7 +384,7 @@ void draw_surface_tiled_area(int id, gs_scalar x, gs_scalar y, gs_scalar x1, gs_
 void draw_surface_ext(int id, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int color, gs_scalar alpha)
 {
   get_surface(surf,id);
-  texture_use(surf->tex);
+  texture_set(surf->tex);
 
   glPushAttrib(GL_CURRENT_BIT);
     glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
@@ -411,7 +413,7 @@ void draw_surface_ext(int id, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_sca
 void draw_surface_stretched_ext(int id, gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, int color, gs_scalar alpha)
 {
   get_surface(surf,id);
-  texture_use(surf->tex);
+  texture_set(surf->tex);
 
   glPushAttrib(GL_CURRENT_BIT);
     glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
@@ -432,7 +434,7 @@ void draw_surface_stretched_ext(int id, gs_scalar x, gs_scalar y, gs_scalar widt
 void draw_surface_part_ext(int id, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, gs_scalar alpha)
 {
   get_surface(surf,id);
-  texture_use(surf->tex);
+  texture_set(surf->tex);
 
   glPushAttrib(GL_CURRENT_BIT);
   glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
@@ -456,7 +458,7 @@ void draw_surface_part_ext(int id, gs_scalar left, gs_scalar top, gs_scalar widt
 void draw_surface_tiled_ext(int id, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, gs_scalar alpha)
 {
   get_surface(surf,id);
-  texture_use(surf->tex);
+  texture_set(surf->tex);
 
   glPushAttrib(GL_CURRENT_BIT);
     glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
@@ -487,7 +489,7 @@ void draw_surface_tiled_ext(int id, gs_scalar x, gs_scalar y, gs_scalar xscale, 
 void draw_surface_tiled_area_ext(int id, gs_scalar x, gs_scalar y, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar xscale, gs_scalar yscale, int color, gs_scalar alpha)
 {
   get_surface(surf,id);
-  texture_use(surf->tex);
+  texture_set(surf->tex);
 
   glPushAttrib(GL_CURRENT_BIT);
     glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
@@ -537,7 +539,7 @@ void draw_surface_tiled_area_ext(int id, gs_scalar x, gs_scalar y, gs_scalar x1,
 void draw_surface_general(int id, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, gs_scalar a1, gs_scalar a2, gs_scalar a3, gs_scalar a4)
 {
   get_surface(surf,id);
-  texture_use(surf->tex);
+  texture_set(surf->tex);
 
   glPushAttrib(GL_CURRENT_BIT);
     const gs_scalar tbw = surf->width, tbh = surf->height,

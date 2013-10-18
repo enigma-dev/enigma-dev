@@ -15,13 +15,14 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "Bridges/General/DX9device.h"
 #include "Direct3D9Headers.h"
 using namespace std;
 #include <cstddef>
 #include <iostream>
 #include <math.h>
 
-#include "DX9binding.h"
+
 #include <stdio.h> //for file writing (surface_save)
 #include "Universal_System/nlpo2.h"
 #include "Universal_System/spritestruct.h"
@@ -94,31 +95,6 @@ LPDIRECT3DSURFACE9 pBackBuffer;
 void surface_set_target(int id)
 {
 	get_surface(surface,id);
-	
-	d3ddev->GetRenderTarget(0, &pBackBuffer);
-		// Textures should be clamped when rendering 2D sprites and stuff, so memorize it.
-	DWORD wrapu, wrapv, wrapw;
-	d3ddev->GetSamplerState( 0, D3DSAMP_ADDRESSU, &wrapu );
-	d3ddev->GetSamplerState( 0, D3DSAMP_ADDRESSV, &wrapv );
-	d3ddev->GetSamplerState( 0, D3DSAMP_ADDRESSW, &wrapw );
-	
-	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP );
-	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP );
-	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSW, D3DTADDRESS_CLAMP );
-	// The D3D sprite batcher uses clockwise face culling which is default but can't tell if 
-	// this here should memorize it and force it to CW all the time and then reset what the user had
-	// or not.
-	DWORD cullmode;
-	d3ddev->GetRenderState(D3DRS_CULLMODE, &cullmode);
-	d3ddev->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
-	dsprite->End();
-	// And now reset the texture repetition.
-	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSU, wrapu );
-	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSV, wrapv );
-	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSW, wrapw );
-	
-	// reset the culling
-	d3ddev->SetRenderState(D3DRS_CULLMODE, cullmode);
 
 	d3ddev->SetRenderTarget(0, surface->surf);
 	
@@ -132,33 +108,7 @@ void surface_set_target(int id)
 
 void surface_reset_target(void)
 {
-	// Textures should be clamped when rendering 2D sprites and stuff, so memorize it.
-	DWORD wrapu, wrapv, wrapw;
-	d3ddev->GetSamplerState( 0, D3DSAMP_ADDRESSU, &wrapu );
-	d3ddev->GetSamplerState( 0, D3DSAMP_ADDRESSV, &wrapv );
-	d3ddev->GetSamplerState( 0, D3DSAMP_ADDRESSW, &wrapw );
-	
-	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP );
-	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP );
-	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSW, D3DTADDRESS_CLAMP );
-	// The D3D sprite batcher uses clockwise face culling which is default but can't tell if 
-	// this here should memorize it and force it to CW all the time and then reset what the user had
-	// or not.
-	DWORD cullmode;
-	d3ddev->GetRenderState(D3DRS_CULLMODE, &cullmode);
-	d3ddev->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
-	dsprite->End();
-	// And now reset the texture repetition.
-	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSU, wrapu );
-	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSV, wrapv );
-	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSW, wrapw );
-	
-	// reset the culling
-	d3ddev->SetRenderState(D3DRS_CULLMODE, cullmode);
-
-	d3ddev->SetRenderTarget(0, pBackBuffer);
-
-	dsprite->Begin(D3DXSPRITE_ALPHABLEND | D3DXSPRITE_DO_NOT_ADDREF_TEXTURE);
+	d3ddev->ResetRenderTarget();
 }
 
 void surface_free(int id)

@@ -21,7 +21,7 @@
 #include "../General/GSbackground.h"
 #include "../General/GSscreen.h"
 #include "../General/GSd3d.h"
-#include "DX9binding.h"
+#include "../General/GStextures.h"
 
 using namespace std;
 
@@ -48,6 +48,8 @@ using namespace std;
 #endif
 
 using namespace enigma;
+
+#include "../General/GSmodel.h"
 
 namespace enigma_user {
   extern int window_get_width();
@@ -106,12 +108,8 @@ void screen_redraw()
 {
 	// Should implement extended lost device checking
 	//if (d3ddev == NULL ) return;
-	
-	// Clean up any textures that ENIGMA may still think are binded but actually are not
-	texture_reset();
 
     d3ddev->BeginScene();    // begins the 3D scene
-	dsprite->Begin(D3DXSPRITE_ALPHABLEND | D3DXSPRITE_DO_NOT_ADDREF_TEXTURE);
 		
 	if (!view_enabled)
     {
@@ -442,27 +440,6 @@ void screen_redraw()
 		
 	}
 	
-	// Textures should be clamped when rendering 2D sprites and stuff, so memorize it.
-	DWORD wrapu, wrapv, wrapw;
-	d3ddev->GetSamplerState( 0, D3DSAMP_ADDRESSU, &wrapu );
-	d3ddev->GetSamplerState( 0, D3DSAMP_ADDRESSV, &wrapv );
-	d3ddev->GetSamplerState( 0, D3DSAMP_ADDRESSW, &wrapw );
-	
-	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP );
-	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP );
-	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSW, D3DTADDRESS_CLAMP );
-	// The D3D sprite batcher uses clockwise face culling which is default but can't tell if 
-	// this here should memorize it and force it to CW all the time and then reset what the user had
-	// or not.
-	//d3ddev->SetRenderState(D3DRS_CULLMODE, D3DCULL_CW);
-	dsprite->End();
-	// And now reset the texture repetition.
-	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSU, wrapu );
-	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSV, wrapv );
-	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSW, wrapw );
-	
-	// reset the culling
-	d3d_set_culling(culling);
     d3ddev->EndScene();    // ends the 3D scene
 		
 	screen_refresh();

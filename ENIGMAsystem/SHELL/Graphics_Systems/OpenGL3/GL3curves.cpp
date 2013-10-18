@@ -22,7 +22,7 @@
 #include "../General/OpenGLHeaders.h"
 #include "../General/GScolors.h"
 #include "../General/GScurves.h"
-#include "../General/GLbinding.h"
+#include "../General/GStextures.h"
 
 #define __GETR(x) (((x & 0x0000FF))/255.0)
 #define __GETG(x) (((x & 0x00FF00)>>8)/255.0)

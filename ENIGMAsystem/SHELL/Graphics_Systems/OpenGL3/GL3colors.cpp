@@ -17,7 +17,7 @@
 
 #include "../General/OpenGLHeaders.h"
 #include "../General/GScolors.h"
-#include "GL3binding.h"
+#include "../General/GStextures.h"
 #include <math.h>
 
 #define __GETR(x) ((x & 0x0000FF))
