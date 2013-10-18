@@ -23,7 +23,7 @@
 #include "Universal_System/roomsystem.h"
 #include <math.h>
 #include <stdlib.h>
-#include "DX9binding.h"
+
 
 using namespace std;
 
@@ -231,6 +231,8 @@ class Mesh
 	vertexbuffer = NULL;
 	indexbuffer->Release();
 	indexbuffer = NULL;
+	vertex_declaration->Release();
+	vertex_declaration = NULL;
 	
 	vbogenerated = false;
 	

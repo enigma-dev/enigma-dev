@@ -24,7 +24,6 @@
 #include "../General/GLTextureStruct.h"
 #include "../General/GStiles.h"
 #include "../General/GLtilestruct.h"
-#include "../General/GLbinding.h"
 #include "../General/OpenGLHeaders.h"
 
 #ifdef DEBUG_MODE
@@ -52,7 +51,7 @@ namespace enigma
     {
         if (!enigma_user::background_exists(back)) return;
         get_background(bck2d,back);
-        texture_use(GmTextures[bck2d->texture]->gltex);
+        enigma_user::texture_set(GmTextures[bck2d->texture]->gltex);
 
         glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
 
@@ -80,7 +79,7 @@ namespace enigma
         for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
             if (dit->second.tiles.size())
             {
-                texture_reset();
+                enigma_user::texture_reset();
                 sort(dit->second.tiles.begin(), dit->second.tiles.end(), bkinxcomp);
                 int index = int(glGenLists(1));
                 drawing_depths[dit->second.tiles[0].depth].tilelist = index;
@@ -105,14 +104,14 @@ namespace enigma
     void rebuild_tile_layer(int layer_depth)
     {
         glPushAttrib(GL_CURRENT_BIT);
-        texture_reset();
+        enigma_user::texture_reset();
         for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
             if (dit->second.tiles.size())
             {
                 if (dit->second.tiles[0].depth != layer_depth)
                     continue;
 
-                texture_reset();
+                enigma_user::texture_reset();
                 glDeleteLists(drawing_depths[dit->second.tiles[0].depth].tilelist, 1);
                 int index = int(glGenLists(1));
                 drawing_depths[dit->second.tiles[0].depth].tilelist = index;

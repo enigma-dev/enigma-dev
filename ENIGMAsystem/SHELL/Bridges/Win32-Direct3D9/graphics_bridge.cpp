@@ -34,7 +34,7 @@ LPD3DXSPRITE dsprite = NULL;
 
 // global declarations
 LPDIRECT3D9 d3dobj;    // the pointer to our Direct3D interface
-LPDIRECT3DDEVICE9 d3ddev;    // the pointer to the device class
+DeviceManager* d3ddev;    // the pointer to the device class
 
 // the WindowProc function prototype
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
@@ -44,6 +44,7 @@ namespace enigma
 	
     void EnableDrawing (HGLRC *hRC)
     {
+		d3ddev = new DeviceManager();
 		HRESULT hr;
 		
 		D3DPRESENT_PARAMETERS d3dpp;    // create a struct to hold various device information
@@ -65,29 +66,31 @@ namespace enigma
 		d3dpp.BackBufferFormat = format;      //Display format
 		d3dpp.EnableAutoDepthStencil = TRUE; // Automatic depth stencil buffer
 		d3dpp.AutoDepthStencilFormat = D3DFMT_D24S8; //32-bit zbuffer 24bits for depth 8 for stencil buffer
-		
 		// create a device class using this information and information from the d3dpp stuct
 		hr = d3dobj->CreateDevice(D3DADAPTER_DEFAULT,
                       D3DDEVTYPE_HAL,
                       hWnd,
                       D3DCREATE_HARDWARE_VERTEXPROCESSING,
                       &d3dpp,
-                      &d3ddev);
+                      &d3ddev->device);
 		if(FAILED(hr)){
 			MessageBox(hWnd,
                "Failed to create Direct3D 9.0 Device",
 			   DXGetErrorDescription9(hr), //DXGetErrorString9(hr)
                MB_ICONERROR | MB_OK);
+			   return; // should probably force the game closed
 		}
 		
 		d3ddev->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, FALSE); 
 		
-		if (FAILED(D3DXCreateSprite(d3ddev,&dsprite)))
+		hr = D3DXCreateSprite(d3ddev->device, &dsprite);
+		if (FAILED(hr))
 		{
 			MessageBox(hWnd,
                "Failed to create Direct3D 9.0 Sprite Object",
 			   DXGetErrorDescription9(hr), //DXGetErrorString9(hr)
                MB_ICONERROR | MB_OK);
+			   return;  // should probably force the game closed
 		}
 		
 		enigma_user::display_aa = 0;
@@ -96,18 +99,13 @@ namespace enigma
 				enigma_user::display_aa += i;
 			}
 		}
+		
     }
 	
 	void WindowResized() {
 		if (d3ddev == NULL) { return; }
-		IDirect3DSwapChain9 *sc;	
-		HRESULT hr = d3ddev->GetSwapChain(0, &sc);
-		if(FAILED(hr)){
-			MessageBox(hWnd,
-               "Failed to retrieve the Direct3D 9.0 Swap Chain",
-			   DXGetErrorDescription9(hr), //DXGetErrorString9(hr)
-               MB_ICONERROR | MB_OK);
-		}
+		IDirect3DSwapChain9 *sc;
+		d3ddev->GetSwapChain(0, &sc);
 		D3DPRESENT_PARAMETERS d3dpp;
 		sc->GetPresentParameters(&d3dpp);
 		d3dpp.BackBufferWidth = enigma_user::window_get_region_width_scaled();
@@ -118,21 +116,17 @@ namespace enigma
 		if (!spritenull) {
 			dsprite->Release();
 		}
-
-		hr = d3ddev->Reset(&d3dpp);
-		if(FAILED(hr)){
-			MessageBox(hWnd,
-               "Failed to reset Direct3D 9.0 Device",
-			   DXGetErrorDescription9(hr), //DXGetErrorString9(hr)
-               MB_ICONERROR | MB_OK);
-		}
 		
-		if (FAILED(D3DXCreateSprite(d3ddev,&dsprite)))
+		d3ddev->Reset(&d3dpp);
+		
+		HRESULT hr = D3DXCreateSprite(d3ddev->device,&dsprite);
+		if (FAILED(hr))
 		{
-			MessageBox(enigma::hWnd,
+			MessageBox(hWnd,
                "Failed to create Direct3D 9.0 Sprite Object",
 			   DXGetErrorDescription9(hr), //DXGetErrorString9(hr)
                MB_ICONERROR | MB_OK);
+			return;  // should probably force the game closed
 		}
 	}
 
@@ -154,7 +148,7 @@ int display_aa = 0;
 // Not really sure if you have to reset everything or if you can just reset a few things.
 void display_reset(int aa, bool vsync) {
 		if (d3ddev == NULL) { return; }
-		LPDIRECT3DSWAPCHAIN9 sc;
+		IDirect3DSwapChain9 *sc;
 		d3ddev->GetSwapChain(0, &sc);
 		D3DPRESENT_PARAMETERS d3dpp;
 		sc->GetPresentParameters(&d3dpp);
@@ -176,21 +170,18 @@ void display_reset(int aa, bool vsync) {
 			dsprite->Release();
 		}
 
-		HRESULT hr = d3ddev->Reset(&d3dpp);
-		if(FAILED(hr)){
-			MessageBox(enigma::hWnd,
-               "Failed to reset Direct3D 9.0 Device",
-			   DXGetErrorDescription9(hr), //DXGetErrorString9(hr)
-               MB_ICONERROR | MB_OK);
-		}
+		d3ddev->Reset(&d3dpp);
 		
-		if (FAILED(D3DXCreateSprite(d3ddev,&dsprite)))
+		HRESULT hr = D3DXCreateSprite(d3ddev->device,&dsprite);
+		if (FAILED(hr))
 		{
 			MessageBox(enigma::hWnd,
                "Failed to create Direct3D 9.0 Sprite Object",
 			   DXGetErrorDescription9(hr), //DXGetErrorString9(hr)
                MB_ICONERROR | MB_OK);
+			return;  // should probably force the game closed
 		}
+
 }
 
 void screen_refresh() {

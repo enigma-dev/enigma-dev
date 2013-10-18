@@ -24,7 +24,6 @@
 #include "../General/GSfont.h"
 #include "../General/GLTextureStruct.h"
 #include "../General/GStextures.h"
-#include "../General/GLbinding.h"
 
 using namespace std;
 #include "Universal_System/fontstruct.h"
@@ -290,8 +289,8 @@ void draw_text(gs_scalar x, gs_scalar y,variant vstr)
   #endif
   string str = toString(vstr);
   get_fontv(fnt,currentfont);
-  //texture_use(fnt->texture);
-    texture_use(GmTextures[fnt->texture]->gltex);
+  //texture_set(fnt->texture);
+    texture_set(GmTextures[fnt->texture]->gltex);
   float yy = valign == fa_top ? y+fnt->yoffset : valign == fa_middle ? y +fnt->yoffset - string_height(str)/2 : y + fnt->yoffset - string_height(str);
   if (halign == fa_left){
       float xx = x;
@@ -357,8 +356,8 @@ void draw_text_skewed(gs_scalar x, gs_scalar y,variant vstr, gs_scalar top, gs_s
   #endif
   string str = toString(vstr);
   get_fontv(fnt,currentfont);
-  //texture_use(fnt->texture);
-    texture_use(GmTextures[fnt->texture]->gltex);
+  //texture_set(fnt->texture);
+    texture_set(GmTextures[fnt->texture]->gltex);
   float yy = valign == fa_top ? y+fnt->yoffset : valign == fa_middle ? y +fnt->yoffset - string_height(str)/2 : y + fnt->yoffset - string_height(str);
   if (halign == fa_left){
       float xx = x;
@@ -421,7 +420,7 @@ void draw_text_ext(gs_scalar x, gs_scalar y,variant vstr, gs_scalar sep, gs_scal
 {
   string str = toString(vstr);
   get_fontv(fnt,currentfont);
-texture_use(GmTextures[fnt->texture]->gltex);
+texture_set(GmTextures[fnt->texture]->gltex);
 
   float yy = valign == fa_top ? y+fnt->yoffset : valign == fa_middle ? y + fnt->yoffset - string_height_ext(str,sep,w)/2 : y + fnt->yoffset - string_height_ext(str,sep,w);
 
@@ -504,7 +503,7 @@ void draw_text_transformed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar xsc
 {
   string str = toString(vstr);
   get_fontv(fnt,currentfont);
-texture_use(GmTextures[fnt->texture]->gltex);
+texture_set(GmTextures[fnt->texture]->gltex);
 
   rot *= M_PI/180;
 
@@ -610,7 +609,7 @@ void draw_text_ext_transformed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar
 {
   string str = toString(vstr);
   get_fontv(fnt,currentfont);
-texture_use(GmTextures[fnt->texture]->gltex);
+texture_set(GmTextures[fnt->texture]->gltex);
 
   rot *= M_PI/180;
 
@@ -749,7 +748,7 @@ void draw_text_transformed_color(gs_scalar x, gs_scalar y, variant vstr, gs_scal
 {
   string str = toString(vstr);
   get_fontv(fnt,currentfont);
-texture_use(GmTextures[fnt->texture]->gltex);
+texture_set(GmTextures[fnt->texture]->gltex);
 
   rot *= M_PI/180;
 
@@ -874,7 +873,7 @@ void draw_text_ext_transformed_color(gs_scalar x, gs_scalar y, variant vstr, gs_
 {
   string str = toString(vstr);
   get_fontv(fnt,currentfont);
-texture_use(GmTextures[fnt->texture]->gltex);
+texture_set(GmTextures[fnt->texture]->gltex);
 
   rot *= M_PI/180;
 
@@ -1025,7 +1024,7 @@ void draw_text_color(gs_scalar x, gs_scalar y, variant vstr, int c1, int c2, int
 {
   string str = toString(vstr);
   get_fontv(fnt,currentfont);
-texture_use(GmTextures[fnt->texture]->gltex);
+texture_set(GmTextures[fnt->texture]->gltex);
 
 
   glPushAttrib(GL_CURRENT_BIT);
@@ -1121,7 +1120,7 @@ void draw_text_ext_color(gs_scalar x, gs_scalar y, variant vstr, gs_scalar sep, 
 {
   string str = toString(vstr);
   get_fontv(fnt,currentfont);
-texture_use(GmTextures[fnt->texture]->gltex);
+texture_set(GmTextures[fnt->texture]->gltex);
 
   glPushAttrib(GL_CURRENT_BIT);
   float yy = valign == fa_top ? y+fnt->yoffset : valign == fa_middle ? y + fnt->yoffset - string_height_ext(str,sep,w)/2 : y + fnt->yoffset - string_height_ext(str,sep,w);

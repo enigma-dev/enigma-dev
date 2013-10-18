@@ -24,7 +24,9 @@
 #include "Universal_System/backgroundstruct.h"
 #include "Universal_System/spritestruct.h"
 #include "Graphics_Systems/graphics_mandatory.h"
-#include "../General/GLbinding.h"
+
+#define GL_TEXTURE_MAX_ANISOTROPY_EXT 0x84FE
+#define GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT 0x84FF
 
 vector<GmTexture*> GmTextures(0);
 
@@ -34,6 +36,7 @@ extern int room_width, room_height;
 
 namespace enigma {
   extern size_t background_idmax;
+  extern unsigned bound_texture;
 }
 
 GmTexture::GmTexture(unsigned gtex)
@@ -149,7 +152,7 @@ namespace enigma
 
   unsigned char* graphics_get_texture_rgba(unsigned texture)
   {
-    texture_use(texture);
+    enigma_user::texture_set(texture);
 
     int w,h;
     glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_WIDTH, &w);
@@ -211,9 +214,23 @@ int texture_get_texel_height(int texid)
   return height;
 }
 
+void texture_set(int texid) {
+	if (enigma::bound_texture != unsigned(texid)) {
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, enigma::bound_texture = texid);
+	}
+}
+
 void texture_set_stage(int stage, int texid) {
 	glActiveTexture(GL_TEXTURE0 + stage);
 	glBindTexture(GL_TEXTURE_2D, get_texture(texid));
+}
+
+void texture_reset() {
+	if (enigma::bound_texture) {
+		glActiveTexture(GL_TEXTURE0); 
+		glBindTexture(GL_TEXTURE_2D, enigma::bound_texture = 0);
+	}
 }
 
 void texture_set_repeat(bool repeat)
@@ -295,7 +312,7 @@ void texture_mipmapping_filter(int texid, int filter)
 
 void texture_mipmapping_generate(int texid, int levels)
 {
-  texture_use(GmTextures[texid]->gltex);
+  texture_set(GmTextures[texid]->gltex);
   glGenerateMipmap(GL_TEXTURE_2D);
   
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);

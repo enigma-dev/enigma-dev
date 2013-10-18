@@ -25,7 +25,7 @@
 #include "Universal_System/backgroundstruct.h"
 #include "Universal_System/spritestruct.h"
 #include "Graphics_Systems/graphics_mandatory.h"
-#include "DX9binding.h"
+
 
 vector<GmTexture*> GmTextures(0);
 
@@ -34,16 +34,6 @@ namespace enigma_user {
 }
 namespace enigma {
   extern size_t background_idmax;
-}
-
-GmTexture::GmTexture(LPDIRECT3DTEXTURE9 gTex)
-{
-	gTexture = gTex;
-}
-
-GmTexture::~GmTexture()
-{
-
 }
 
 LPDIRECT3DTEXTURE9 get_texture(int texid) {
@@ -64,18 +54,8 @@ namespace enigma
   int graphics_create_texture(int fullwidth, int fullheight, void* pxdata, bool isfont)
   {
     LPDIRECT3DTEXTURE9 texture = NULL;
-	HRESULT hr;
 
-	hr = d3ddev->CreateTexture(
-		fullwidth,
-		fullheight,
-		1,
-		0,
-		D3DFMT_A8R8G8B8,
-		D3DPOOL_MANAGED,
-		&texture,
-		0
-	);
+	d3ddev->CreateTexture(fullwidth, fullheight, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &texture, 0);
 
 	D3DLOCKED_RECT rect;
 
@@ -129,6 +109,7 @@ void texture_set_enabled(bool enable)
 
 void texture_set_interpolation(int enable)
 {
+	enigma::interpolate_textures = enable;
 	d3ddev->SetSamplerState( 0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR );
 	d3ddev->SetSamplerState( 0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR );
 	d3ddev->SetSamplerState( 0, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR );
@@ -164,13 +145,20 @@ int texture_get_texel_height(int texid)
 
 }
 
+void texture_set(int texid) {
+	d3ddev->SetTexture(0, get_texture(texid));
+}
+
 void texture_set_stage(int stage, int texid) {
-	d3ddev->SetTexture(stage, enigma::bound_texture = get_texture(texid));
+	d3ddev->SetTexture(stage, get_texture(texid));
+}
+
+void texture_reset() {
+	d3ddev->SetTexture(0, 0);
 }
 
 void texture_set_repeat(bool repeat)
 {
-	enigma::interpolate_textures = repeat;
 	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSU, repeat?D3DTADDRESS_WRAP:D3DTADDRESS_CLAMP );
 	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSV, repeat?D3DTADDRESS_WRAP:D3DTADDRESS_CLAMP );
 	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSW, repeat?D3DTADDRESS_WRAP:D3DTADDRESS_CLAMP );

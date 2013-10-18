@@ -18,6 +18,7 @@
 #include "ModelStruct.h"
 #include "../General/OpenGLHeaders.h"
 #include "../General/GSd3d.h"
+#include "../General/GStextures.h"
 #include "GLshapes.h"
 #include "../General/GSmodel.h"
 #include "Universal_System/var4.h"
@@ -27,7 +28,6 @@
 #include <stdlib.h>
 
 
-#include "../General/GLbinding.h"
 using namespace std;
 
 #define __GETR(x) ((x & 0x0000FF))/255.0
@@ -320,13 +320,13 @@ void d3d_model_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z) // overload f
 
 void d3d_model_draw(int id, int texId)
 {
-    texture_use(get_texture(texId));
+    texture_set(get_texture(texId));
     meshes[id]->Draw();
 }
 
 void d3d_model_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z, int texId)
 {
-    texture_use(get_texture(texId));
+    texture_set(get_texture(texId));
     d3d_model_draw(id, x, y, z);
 }
 

@@ -23,7 +23,7 @@
 #include "../General/GScolors.h"
 #include "../General/GSfont.h"
 #include "../General/GStextures.h"
-#include "DX9binding.h"
+
 
 using namespace std;
 #include "Universal_System/fontstruct.h"

@@ -52,7 +52,7 @@ struct Shader {
   void SetVector(string name, const D3DXVECTOR4 *vec) {
     D3DXHANDLE handle;
     handle = constants->GetConstantByName(NULL, name.c_str());
-    constants->SetVector(d3ddev, handle, vec);
+    constants->SetVector(d3ddev->device, handle, vec);
   }
 };
 
@@ -88,13 +88,8 @@ struct VertexShader : public Shader {
     }
   
     char* szCode = (char*)pCode->GetBufferPointer();
-    hrErr = d3ddev->CreateVertexShader((DWORD*)pCode->GetBufferPointer(), &shader);
+    d3ddev->CreateVertexShader((DWORD*)pCode->GetBufferPointer(), &shader);
     pCode->Release();
-    if(FAILED(hrErr))
-    {
-      MessageBox(NULL,"CreateVertexShader failed","CRendererDX9::Create",MB_OK|MB_ICONEXCLAMATION);
-	  return 2;
-    }
 	return 3;
   }
   
@@ -139,13 +134,8 @@ struct PixelShader : public Shader {
     }
 
     char* szCode = (char*)pCode->GetBufferPointer();
-    hrErr  = d3ddev->CreatePixelShader((DWORD*)pCode->GetBufferPointer(), &shader);
+    d3ddev->CreatePixelShader((DWORD*)pCode->GetBufferPointer(), &shader);
     pCode->Release();
-    if(FAILED(hrErr))
-    {
-      MessageBox(NULL,"CreatePixelShader failed","CRendererDX9::Create",MB_OK|MB_ICONEXCLAMATION);
-      return false;
-    }
   }
   
   void Use() {

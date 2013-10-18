@@ -19,7 +19,6 @@
 #define ENIGMA_PS_PARTICLE_BRIDGE_DIRECTX9_H
 
 #include "Graphics_Systems/General/GSsprite.h"
-#include "Graphics_Systems/General/GLbinding.h"
 #include "Graphics_Systems/General/GStextures.h"
 #include "Graphics_Systems/General/GScolors.h"
 #include "PS_particle_instance.h"

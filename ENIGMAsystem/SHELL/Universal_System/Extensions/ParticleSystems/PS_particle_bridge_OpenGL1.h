@@ -19,7 +19,6 @@
 #define ENIGMA_PS_PARTICLE_BRIDGE_OPENGL1_H
 
 #include "Graphics_Systems/General/GSsprite.h"
-#include "Graphics_Systems/General/GLbinding.h"
 #include "Graphics_Systems/General/GStextures.h"
 #include "Graphics_Systems/General/GLTextureStruct.h"
 #include "Graphics_Systems/General/GScolors.h"
@@ -98,7 +97,7 @@ namespace enigma {
         else { // Draw particle sprite.
 
           particle_sprite* ps = pt->part_sprite;
-          texture_use(GmTextures[ps->texture]->gltex);
+          enigma_user::texture_set(GmTextures[ps->texture]->gltex);
 
           if (pt->blend_additive) {
              glBlendFunc(GL_SRC_ALPHA,GL_ONE);
@@ -147,7 +146,7 @@ namespace enigma {
 
         particle_sprite* ps = get_particle_sprite(pt_sh_pixel);
         if (ps == NULL) return; // NOTE: Skip to next particle.
-        texture_use(GmTextures[ps->texture]->gltex);
+        enigma_user::texture_set(GmTextures[ps->texture]->gltex);
 
         glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
         glColor4ub(__GETR(color),__GETG(color),__GETB(color), alpha);

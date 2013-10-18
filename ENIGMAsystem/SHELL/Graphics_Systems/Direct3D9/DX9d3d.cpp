@@ -18,7 +18,7 @@
 #include "Graphics_Systems/General/GSd3d.h"
 #include "Direct3D9Headers.h"
 #include "Graphics_Systems/General/GStextures.h"
-#include "DX9binding.h"
+
 #include "../General/GSmodel.h"
 #include "DX9shapes.h"
 #include "Universal_System/var4.h"
@@ -115,11 +115,13 @@ void d3d_set_fog(bool enable, int color, double start, double end)
 void d3d_set_fog_enabled(bool enable)
 {
 	d3ddev->SetRenderState(D3DRS_FOGENABLE, enable);
+	d3ddev->SetRenderState(D3DRS_RANGEFOGENABLE, enable);
 }
 
 void d3d_set_fog_mode(int mode)
 {
 	d3ddev->SetRenderState(D3DRS_FOGTABLEMODE, fogmodes[mode]);
+	d3ddev->SetRenderState(D3DRS_FOGVERTEXMODE, fogmodes[mode]);
 }
 
 void d3d_set_fog_hint(int mode) {
@@ -128,22 +130,20 @@ void d3d_set_fog_hint(int mode) {
 
 void d3d_set_fog_color(int color)
 {
-	HRESULT hr;
-	hr = d3ddev->SetRenderState(
-                    D3DRS_FOGCOLOR,
+	d3ddev->SetRenderState(D3DRS_FOGCOLOR,
                     D3DCOLOR_COLORVALUE(__GETR(color), __GETG(color), __GETB(color), 1.0f)); // Highest 8 bits are not used.
-	//if(FAILED(hr))
-		//return hr;
 }
 
 void d3d_set_fog_start(double start)
 {
-    d3ddev->SetRenderState(D3DRS_FOGSTART, *(DWORD *)(&start));
+	float fFogStart = start;
+	d3ddev->SetRenderState(D3DRS_FOGSTART,*(DWORD*)(&fFogStart));
 }
 
 void d3d_set_fog_end(double end)
 {
-    d3ddev->SetRenderState(D3DRS_FOGEND, *(DWORD *)(&end));
+  float fFogEnd = end;
+  d3ddev->SetRenderState(D3DRS_FOGEND,*(DWORD*)(&fFogEnd));
 }
 
 void d3d_set_fog_density(double density)
@@ -227,7 +227,7 @@ void d3d_set_projection(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs_sca
 	
 	D3DXMATRIX matProj;
 
-	D3DXMatrixPerspectiveFovLH( &matProj, D3DXToRadian(60), 4/3, 1.0f, 32000.0f );
+	D3DXMatrixPerspectiveFovLH( &matProj, D3DXToRadian(45), view_wview[view_current] / (double)view_hview[view_current], 1.0f, 32000.0f );
 	d3ddev->SetTransform( D3DTS_PROJECTION, &matProj );
 }
 
@@ -252,6 +252,7 @@ void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs
 
 void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, double angle)
 {
+	
 	D3DXMATRIX matRotZ, matTrans, matScale;
 
 	// Calculate rotation matrix
@@ -312,39 +313,46 @@ void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, g
 
 void d3d_draw_floor(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep)
 {
-
+	d3ddev->BeginShapesBatching(texId);
+	d3d_model_floor(d3ddev->GetShapesModel(), x1, y1, z1, x2, y2, z2, hrep, vrep);
 }
 
 void d3d_draw_wall(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep)
 {
-
+	d3ddev->BeginShapesBatching(texId);
+	d3d_model_wall(d3ddev->GetShapesModel(), x1, y1, z1, x2, y2, z2, hrep, vrep);
 }
 
 void d3d_draw_block(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, bool closed)
 {
-
+	d3ddev->BeginShapesBatching(texId);
+	d3d_model_block(d3ddev->GetShapesModel(), x1, y1, z1, x2, y2, z2, hrep, vrep, closed);
 }
 
 void d3d_draw_cylinder(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, bool closed, int steps)
 {
-
+	d3ddev->BeginShapesBatching(texId);
+	d3d_model_cylinder(d3ddev->GetShapesModel(), x1, y1, z1, x2, y2, z2, hrep, vrep, closed, steps);
 }
 
 void d3d_draw_cone(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, bool closed, int steps)
 {
-
+	d3ddev->BeginShapesBatching(texId);
+	d3d_model_cone(d3ddev->GetShapesModel(), x1, y1, z1, x2, y2, z2, hrep, vrep, closed, steps);
 }
 
 void d3d_draw_ellipsoid(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, int steps)
 {
-
+	d3ddev->BeginShapesBatching(texId);
+	d3d_model_ellipsoid(d3ddev->GetShapesModel(), x1, y1, z1, x2, y2, z2, hrep, vrep, steps);
 }
 
 void d3d_draw_icosahedron(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, int steps) {
 }
 
 void d3d_draw_torus(gs_scalar x1, gs_scalar y1, gs_scalar z1, int texId, gs_scalar hrep, gs_scalar vrep, int csteps, int tsteps, double radius, double tradius) {
-
+	d3ddev->BeginShapesBatching(texId);
+	d3d_model_torus(d3ddev->GetShapesModel(), x1, y1, z1, hrep, vrep, csteps, tsteps, radius, tradius);
 }
 
 D3DXMATRIX matWorld; 

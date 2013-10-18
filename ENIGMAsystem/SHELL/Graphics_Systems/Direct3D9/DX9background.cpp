@@ -59,7 +59,7 @@ namespace enigma {
   D3DCOLOR get_currentcolor();
 }
 
-#include "DX9binding.h"
+
 #include <string.h> // needed for querying ARB extensions
 
 #include "Bridges/General/DX9Device.h"

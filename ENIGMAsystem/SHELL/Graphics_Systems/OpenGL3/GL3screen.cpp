@@ -21,7 +21,7 @@
 #include "../General/GSbackground.h"
 #include "../General/GSscreen.h"
 #include "../General/GSd3d.h"
-#include "GL3binding.h"
+#include "../General/GStextures.h"
 
 using namespace std;
 
@@ -105,8 +105,7 @@ namespace enigma
 	
 	unsigned gui_width;
 	unsigned gui_height;
-}
-
+	
 void draw_globalVBO()
 {
     if (globalVBO_verCount>0){
@@ -160,6 +159,8 @@ void draw_globalVBO()
 
         globalVBO_datCount = globalVBO_verCount = globalVBO_indCount = 0;
     }
+}
+
 }
 
 namespace enigma_user
@@ -410,7 +411,7 @@ void screen_redraw()
         view_current = 0;
     }
 
-	draw_globalVBO();
+	enigma::draw_globalVBO();
 			
 	// Now process the sub event of draw called draw gui
 	// It is for drawing GUI elements without view scaling and transformation
@@ -447,7 +448,7 @@ void screen_redraw()
             enigma::instance_event_iterator = push_it;
             if (stop_loop) break;
         }
-		draw_globalVBO();
+		enigma::draw_globalVBO();
 		
 		// reset the culling
 		d3d_set_culling(culling);

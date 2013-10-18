@@ -24,15 +24,33 @@
 #include "Universal_System/backgroundstruct.h"
 #include "Universal_System/spritestruct.h"
 #include "Graphics_Systems/graphics_mandatory.h"
-#include "../General/GLbinding.h"
+
+#define GL_TEXTURE_MAX_ANISOTROPY_EXT 0x84FE
+#define GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT 0x84FF
 
 vector<GmTexture*> GmTextures(0);
 
 namespace enigma_user {
   extern int room_width, room_height;
 }
+
+#include <vector>
+using std::vector;
+
 namespace enigma {
   extern size_t background_idmax;
+  extern vector<float> globalVBO_data;
+  extern unsigned bound_texture;
+  void draw_globalVBO();
+}
+
+inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect powers of two
+	x =  (x & -x) - 1;
+	x -= ((x >> 1) & 0x55555555);
+	x =  ((x >> 2) & 0x33333333) + (x & 0x33333333);
+	x =  ((x >> 4) + x) & 0x0f0f0f0f;
+	x += x >> 8;
+	return (x + (x >> 16)) & 63;
 }
 
 GmTexture::GmTexture(unsigned gtex)
@@ -43,15 +61,6 @@ GmTexture::GmTexture(unsigned gtex)
 GmTexture::~GmTexture()
 {
 	glDeleteTextures(1, &gltex);
-}
-
-inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect powers of two
-	x =  (x & -x) - 1;
-	x -= ((x >> 1) & 0x55555555);
-	x =  ((x >> 2) & 0x33333333) + (x & 0x33333333);
-	x =  ((x >> 4) + x) & 0x0f0f0f0f;
-	x += x >> 8;
-	return (x + (x >> 16)) & 63;
 }
 
 unsigned get_texture(int texid)
@@ -156,7 +165,7 @@ namespace enigma
 
   unsigned char* graphics_get_texture_rgba(unsigned texture)
   {
-    texture_use(texture);
+    enigma_user::texture_set(texture);
 
     int w,h;
     glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_WIDTH, &w);
@@ -214,7 +223,7 @@ int texture_get_texel_width(int texid)
 {
   // returns the actual number of pixels in the texture across the xaxis
   GLint width = 0;
-  texture_use(GmTextures[texid]->gltex);
+  texture_set(GmTextures[texid]->gltex);
   glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width);
   return width;
 }
@@ -223,14 +232,30 @@ int texture_get_texel_height(int texid)
 {
   // returns the actual number of pixels in the tex across the yaxis
   GLint height = 0;
-  texture_use(GmTextures[texid]->gltex);
+  texture_set(GmTextures[texid]->gltex);
   glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &height);
   return height;
+}
+
+void texture_set(int texid) {
+	if (enigma::bound_texture != unsigned(texid)) {
+		enigma::draw_globalVBO();
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, enigma::bound_texture = texid);
+	}
 }
 
 void texture_set_stage(int stage, int texid) {
 	glActiveTexture(GL_TEXTURE0 + stage);
 	glBindTexture(GL_TEXTURE_2D, get_texture(texid));
+}
+
+void texture_reset() {
+	if (enigma::bound_texture) {
+		enigma::draw_globalVBO();
+		glActiveTexture(GL_TEXTURE0); 
+		glBindTexture(GL_TEXTURE_2D, enigma::bound_texture = 0);
+	}
 }
 
 void texture_set_repeat(bool repeat)
@@ -247,7 +272,7 @@ void texture_set_repeat(bool repeat)
 
 void texture_set_repeat(int texid, bool repeat)
 {
-  texture_use(GmTextures[texid]->gltex);
+  texture_set(GmTextures[texid]->gltex);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, repeat?GL_REPEAT:GL_CLAMP);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, repeat?GL_REPEAT:GL_CLAMP);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, repeat?GL_REPEAT:GL_CLAMP);
@@ -255,7 +280,7 @@ void texture_set_repeat(int texid, bool repeat)
 
 void texture_set_wrap(int texid, bool wrapr, bool wraps, bool wrapt)
 {
-  texture_use(GmTextures[texid]->gltex);
+  texture_set(GmTextures[texid]->gltex);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, wrapr?GL_REPEAT:GL_CLAMP);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wraps?GL_REPEAT:GL_CLAMP);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapt?GL_REPEAT:GL_CLAMP);
@@ -268,27 +293,27 @@ void texture_preload(int texid)
 
 void texture_set_priority(int texid, double prio)
 {
-  texture_use(GmTextures[texid]->gltex);
+  texture_set(GmTextures[texid]->gltex);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_PRIORITY, prio);
 }
 
 void texture_set_border(int texid, int r, int g, int b, double a)
 {
   GLint color[4] = {r, g, b, a * 255};
-  texture_use(GmTextures[texid]->gltex);
+  texture_set(GmTextures[texid]->gltex);
   glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color);
 }
 
 void texture_set_swizzle(int texid, int r, int g, int b, double a)
 {
   GLint color[4] = {r, g, b, a * 255};
-  texture_use(GmTextures[texid]->gltex);
+  texture_set(GmTextures[texid]->gltex);
   glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_RGBA, color);
 }
 
 void texture_set_levelofdetail(int texid, double minlod, double maxlod, int maxlevel)
 {
-  texture_use(GmTextures[texid]->gltex);
+  texture_set(GmTextures[texid]->gltex);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_LOD, minlod);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LOD, maxlod);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, maxlevel);
@@ -296,7 +321,7 @@ void texture_set_levelofdetail(int texid, double minlod, double maxlod, int maxl
 
 void texture_mipmapping_filter(int texid, int filter)
 {
-  texture_use(GmTextures[texid]->gltex);
+  texture_set(GmTextures[texid]->gltex);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   if (filter == tx_trilinear) {
@@ -313,7 +338,7 @@ void texture_mipmapping_filter(int texid, int filter)
 
 void texture_mipmapping_generate(int texid, int levels)
 {
-  texture_use(GmTextures[texid]->gltex);
+  texture_set(GmTextures[texid]->gltex);
   glGenerateMipmap(GL_TEXTURE_2D);
   
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
@@ -335,7 +360,7 @@ float texture_anisotropy_maxlevel()
 
 void  texture_anisotropy_filter(int texid, gs_scalar levels)
 {
-  texture_use(GmTextures[texid]->gltex);
+  texture_set(GmTextures[texid]->gltex);
   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, levels);
 }
 

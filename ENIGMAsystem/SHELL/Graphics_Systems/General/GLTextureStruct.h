@@ -31,4 +31,6 @@ struct GmTexture {
 };
 extern vector<GmTexture*> GmTextures;
 
+unsigned get_texture(int texid);
+
 #endif

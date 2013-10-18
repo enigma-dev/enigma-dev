@@ -18,10 +18,10 @@
 #include <string>
 #include <cstdio>
 #include "../General/OpenGLHeaders.h"
+#include "../General/GStextures.h"
 #include "../General/GSbackground.h"
 #include "../General/GSscreen.h"
 #include "../General/GSd3d.h"
-#include "../General/GLbinding.h"
 
 using namespace std;
 

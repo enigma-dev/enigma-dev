@@ -18,10 +18,10 @@
 #include "../General/OpenGLHeaders.h"
 #include "../General/GSd3d.h"
 #include "../General/GStextures.h"
+#include "../General/GLTextureStruct.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
 #include <math.h>
-#include "../General/GLbinding.h"
 
 using namespace std;
 
@@ -326,7 +326,7 @@ void d3d_draw_floor(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_s
           norms[] = {-nX, nY, nZ, -nX, nY, nZ, -nX, nY, nZ, -nX, nY, nZ};
   GLubyte floor_indices[] = {0, 1, 2, 3};
 
-  texture_use(get_texture(texId));
+  texture_set(get_texture(texId));
 
   glEnableClientState(GL_VERTEX_ARRAY);
   glEnableClientState(GL_NORMAL_ARRAY);
@@ -358,7 +358,7 @@ void d3d_draw_wall(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_sc
 
   GLubyte indices[] = {0, 1, 2, 3};
 
-  texture_use(get_texture(texId));
+  texture_set(get_texture(texId));
 
   glEnableClientState(GL_VERTEX_ARRAY);
   glEnableClientState(GL_NORMAL_ARRAY);
@@ -385,7 +385,7 @@ void d3d_draw_block(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_s
   GLubyte indices[] = {0, 1, 2, 3, 4, 5, 6, 7, 0, 1, // sides
                        0, 2, 6, 4, 1, 7, 3, 5}; // top and bottom
 
-  texture_use(get_texture(texId));
+  texture_set(get_texture(texId));
  // glClientActiveTexture(GL_TEXTURE0);
 
   glEnableClientState(GL_VERTEX_ARRAY);
@@ -416,7 +416,7 @@ void d3d_draw_cylinder(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, g
     const double cx = (x1+x2)/2, cy = (y1+y2)/2, rx = (x2-x1)/2, ry = (y2-y1)/2, invstep = (1.0/steps)*hrep, pr = 2*M_PI/steps;
     double a, px, py, tp;
     int k;
-  texture_use(get_texture(texId));
+  texture_set(get_texture(texId));
 	//SIDES
     glBegin(GL_TRIANGLE_STRIP);
     a = 0; px = cx+rx; py = cy; tp = 0; k = 0;
@@ -485,7 +485,7 @@ void d3d_draw_cone(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_sc
     float t[(steps + 1)*3 + 1][2];
     double a, px, py, tp;
     int k = 0;
-    texture_use(get_texture(texId));
+    texture_set(get_texture(texId));
     glBegin(GL_TRIANGLE_STRIP);
     a = 0; px = cx+rx; py = cy; tp = 0;
     for (int i = 0; i <= steps; i++)
@@ -551,7 +551,7 @@ void d3d_draw_ellipsoid(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, 
         a += pr; tp += invstep;
     }
     int k = 0, kk;
-    texture_use(get_texture(texId));
+    texture_set(get_texture(texId));
     b = M_PI/2;
     cosb = cos(b);
     pz = rz*sin(b);
@@ -605,7 +605,7 @@ void d3d_draw_icosahedron(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2
    {7,10,3}, {7,6,10}, {7,11,6}, {11,0,6}, {0,1,6},
    {6,1,10}, {9,0,11}, {9,11,2}, {9,2,5}, {7,2,11} };
 
-  texture_use(get_texture(texId));
+  texture_set(get_texture(texId));
   glBegin(GL_TRIANGLES);
   for (unsigned i = 0; i < 20; i++) {
     glVertex3fv(&vdata[tindices[i][0]][0]);
@@ -617,7 +617,7 @@ void d3d_draw_icosahedron(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2
 }
 
 void d3d_draw_torus(gs_scalar x1, gs_scalar y1, gs_scalar z1, int texId, gs_scalar hrep, gs_scalar vrep, int csteps, int tsteps, double radius, double tradius) {
-	texture_use(get_texture(texId));
+	texture_set(get_texture(texId));
 	double TWOPI = 2 * (double)M_PI;
 
     for (int i = 0; i < csteps; i++) {
