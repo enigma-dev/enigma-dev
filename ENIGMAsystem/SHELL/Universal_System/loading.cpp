@@ -54,7 +54,7 @@ namespace enigma
 
 	// must occur before the create/room start/game start events so that it does not override the user setting them in code
 	enigma::game_settings_initialize();
-	
+
     graphicssystem_initialize();
     audiosystem_initialize();
 
@@ -98,9 +98,9 @@ namespace enigma
       enigma::exe_loadsounds(exe);
       enigma::exe_loadbackgrounds(exe);
       enigma::exe_loadfonts(exe);
-      #ifdef PATH_EXT_SET
+  //    #ifdef PATH_EXT_SET
 		enigma::exe_loadpaths(exe);
-	  #endif
+	//  #endif
 
       fclose(exe);
     }
