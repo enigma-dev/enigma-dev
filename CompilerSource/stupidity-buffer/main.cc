@@ -364,7 +364,7 @@ int main(int argc, char *argv[])
   {
       workpath = exepath;
   }
-  
+
   string output = "Setting Working Directory To: \"" + workpath + "\"";
     string cmdline = "cd \"" + workpath + "\"";
 	CreateProcess(NULL,(char *)cmdline.c_str(),NULL,NULL,
@@ -389,7 +389,10 @@ int main(int argc, char *argv[])
   string idepath = " \"" + workpath + string(idename) + "\"";
   cmdline = string(idecmd) + idepath;
 
-  cmdline += argsasstring;
+  int useargs = GetPrivateProfileInt("MAIN", "useargs", 1, settingspath.c_str());
+  if (useargs)
+    cmdline += argsasstring;
+
   puts(cmdline.c_str());
   SECURITY_ATTRIBUTES sa;
     sa.nLength = sizeof(sa);
