@@ -651,7 +651,7 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
 
   // Redirect it
   ide_output_redirect_file(redirfile);
-  int makeres = e_execs(MAKE_location,make,"&>",redirfile);
+  int makeres = e_execs(MAKE_location,make + " --no-print-directory ","&>",redirfile);
 
   // Stop redirecting GCC output
   ide_output_redirect_reset();
