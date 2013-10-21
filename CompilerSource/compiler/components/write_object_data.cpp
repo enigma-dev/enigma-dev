@@ -238,14 +238,20 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
         /* Event Perform Code */
         wto << "\n//Event Perform Code\n      variant myevents_perf(int type, int numb)\n      {\n";
 
-        for (unsigned ii = 0; ii < i->second->events.size; ii++)
-          if  (i->second->events[ii].code != "")
+        for (unsigned ii = 0; ii < i->second->events.size; ii++) {
+		  bool foundmatch = false;
+		  // Check and see if we inherited this event from our parent
+		  for (po_i her = parsed_objects.find(i->second->parent); her != parsed_objects.end(); her = parsed_objects.find(her->second->parent)) {
+			if  (her->second->events[ii].code != "") { foundmatch = true; break; }
+		  }
+          if  (i->second->events[ii].code != "" || foundmatch)
           {
             //Look up the event name
             string evname = event_get_function_name(i->second->events[ii].mainId,i->second->events[ii].id);
             wto << "        if (type == " << i->second->events[ii].mainId << " && numb == " << i->second->events[ii].id << ")\n";
             wto << "          return myevent_" << evname << "();\n";
           }
+		}
 
         wto << "\n        return 0;\n      }\n";
 
