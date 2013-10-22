@@ -487,3 +487,11 @@ inline variant event_perform(int type, int numb) {
 inline variant event_user(int numb) {
     return event_perform(enigma_user::ev_other, numb + enigma_user::ev_user0);
 }
+
+inline void event_inherited() {
+#ifdef DEBUG_MODE
+  #include "libEGMstd.h"
+  #include "Widget_Systems/widgets_mandatory.h"
+  show_error("Event inherited called on an object that has no event to inherit.", false);
+#endif
+}

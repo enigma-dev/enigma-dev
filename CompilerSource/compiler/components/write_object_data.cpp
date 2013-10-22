@@ -38,9 +38,19 @@ using namespace std;
 #include "compiler/compile_common.h"
 #include "compiler/event_reader/event_parser.h"
 #include "general/parse_basics_old.h"
-#include "settings.h"
 
 #include "languages/lang_CPP.h"
+
+template<class InputIt, class T>
+bool find(InputIt first, InputIt last, const T& value)
+{
+    for (; first != last; ++first) {
+        if (*first == value) {
+            return true;
+        }
+    }
+    return false;
+}
 
 inline bool iscomment(const string &n) {
   if (n.length() < 2 or n[0] != '/') return false;
@@ -97,9 +107,23 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
         wto << "    std::map<string, var> *vmap;\n";
         wto << "    object_locals() {vmap = NULL;}\n";
         wto << "    object_locals(unsigned _x, int _y): event_parent(_x,_y) {vmap = NULL;}\n  };\n";
-      for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
+      po_i i = parsed_objects.begin();
+	  vector<unsigned> parsed(0);
+	  while (parsed.size() < parsed_objects.size())
       {
-        wto << "  \n  struct OBJ_" << i->second->name << ": object_locals\n  {";
+		if (i == parsed_objects.end()) { i = parsed_objects.begin(); }
+		// if we have already been written or we have a parent that has not been written, continue
+		if (find(parsed.begin(), parsed.end(), i->first) || 
+		(parsed_objects.find(i->second->parent)->second && !find(parsed.begin(), parsed.end(), i->second->parent))) { 
+			i++; continue; 
+		}
+		wto << "  \n  struct OBJ_" << i->second->name;
+		if (parsed_objects.find(i->second->parent)->second) {
+			wto << ": OBJ_" << parsed_objects.find(i->second->parent)->second->name;
+		} else {
+			wto << ": object_locals";
+		}
+		wto << "\n  {";
 
         for (unsigned ii = 0; ii < i->second->events.size; ii++)
         {
@@ -151,41 +175,35 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
           }
         }
 
-		for (po_i her = i; her != parsed_objects.end(); her = parsed_objects.find(her->second->parent)) {
-			for (deciter ii =  her->second->locals.begin(); ii != her->second->locals.end(); ii++) {
-			  bool writeit = true; //Whether this "local" should be declared such
-
-			  if (setting::inherit_locals) {
-				  // if the object declares this variable no need to inherit it from its parent
-				  if (her != i) {
-					  bool matchfound = false;
-					  for (deciter it =  i->second->locals.begin(); it != i->second->locals.end(); it++)
-					  {
-						if (ii->first == it->first && ii->second.type == it->second.type && 
-						  ii->second.prefix == it->second.prefix && ii->second.suffix == it->second.suffix) { 
-							matchfound = true;
-							break;
-						}
-					  }
-					  if (matchfound) { continue; }
-				  }
-			  }
-			
-			  // If it's not explicitely defined, we must question whether it should be given a unique presence in this scope
-			  if (!ii->second.defined())
-			  {
-				parsed_object::globit ve = global->globals.find(ii->first); // So, we look for a global by this name
-				if (ve != global->globals.end()) {  // If a global by this name is indeed found,
-				  if (ve->second.defined()) // And this global is explicitely defined, not just accessed with a dot,
-					writeit = false; // We assume that its definition will cover us, and we do not redeclare it as a local.
-				  cout << "enigma: scopedebug: variable `" << ii->first << "' from object `" << her->second->name << "' will be used from the " << (writeit ? "object" : "global") << " scope." << endl;
+        for (deciter ii =  i->second->locals.begin(); ii != i->second->locals.end(); ii++)
+        {
+          bool writeit = true; //Whether this "local" should be declared such
+		  bool foundmatch = false;
+		  // look to see if the parent declares this local otherwise we don't need to or it will get overridden and screwed up, eg. nulled
+		  for (po_i her = parsed_objects.find(i->second->parent); her != parsed_objects.end(); her = parsed_objects.find(her->second->parent)) {
+			for (deciter it =  her->second->locals.begin(); it != her->second->locals.end(); it++)
+			{
+				if (it->first == ii->first && it->second.prefix == ii->second.prefix && it->second.type == ii->second.type && it->second.suffix == ii->second.suffix) {
+					foundmatch = true; break;
 				}
-			  }
-			  if (writeit)
-				wto << tdefault(ii->second.type) << " " << ii->second.prefix << ii->first << ii->second.suffix << ";\n    ";
 			}
-			if (!setting::inherit_locals) { break; }
-		}
+			if (foundmatch) { break; }
+		  }
+		  if (foundmatch) { continue; }
+		
+          // If it's not explicitely defined, we must question whether it should be given a unique presence in this scope
+          if (!ii->second.defined())
+          {
+            parsed_object::globit ve = global->globals.find(ii->first); // So, we look for a global by this name
+            if (ve != global->globals.end()) {  // If a global by this name is indeed found,
+              if (ve->second.defined()) // And this global is explicitely defined, not just accessed with a dot,
+                writeit = false; // We assume that its definition will cover us, and we do not redeclare it as a local.
+              cout << "enigma: scopedebug: variable `" << ii->first << "' from object `" << i->second->name << "' will be used from the " << (writeit ? "object" : "global") << " scope." << endl;
+            }
+          }
+          if (writeit)
+            wto << tdefault(ii->second.type) << " " << ii->second.prefix << ii->first << ii->second.suffix << ";\n    ";
+        }
 
         // Next, we write the list of all the scripts this object will hoard a copy of for itself.
         wto << "\n    //Scripts called by this object\n    ";
@@ -270,6 +288,7 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
           for (map<int,cspair>::iterator it = nemap.begin(); it != nemap.end(); it++) // The stacked ones should have their root exported
             wto << "      enigma::inst_iter *ENOBJ_ITER_myevent_" << it->second.s << ";\n";
 
+
         //This is the actual call to remove the current instance from all linked records before destroying it.
         wto << "\n    void unlink()\n    {\n";
           wto << "      instance_iter_queue_for_destroy(ENOBJ_ITER_me); // Queue for delete while we're still valid\n";
@@ -295,7 +314,12 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
         * @ *   Automatic constructor:  The constructor generates the ID from a global maximum and links by that alias.
         *////   Directed constructor:   Meant for use by the room system, the constructor uses a specified ID alias assumed to have been checked for conflict.
         wto <<   "\n    OBJ_" <<  i->second->name << "(int enigma_genericconstructor_newinst_x = 0, int enigma_genericconstructor_newinst_y = 0, const int id = (enigma::maxid++))";
-          wto << ": object_locals(id, " << i->second->id << ")";
+         
+		 if (parsed_objects.find(i->second->parent)->second) { 
+			wto << ": OBJ_" << parsed_objects.find(i->second->parent)->second->name << "(enigma_genericconstructor_newinst_x,enigma_genericconstructor_newinst_y,id)";
+		 } else {
+			wto << ": object_locals(id, " << i->second->id << ")";
+		 }
           for (size_t ii = 0; ii < i->second->initializers.size(); ii++)
             wto << ", " << i->second->initializers[ii].first << "(" << i->second->initializers[ii].second << ")";
           wto << "\n    {\n";
@@ -335,9 +359,10 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
                       wto << "      " << event_get_iterator_initialize_code(i->second->events[ii].mainId,i->second->events[ii].id) << ";\n";
                   } else
                     wto << "      ENOBJ_ITER_myevent_" << evname << " = enigma::event_" << evname << "->add_inst(this);\n";
-              }
+                }
               for (map<int,cspair>::iterator it = nemap.begin(); it != nemap.end(); it++)
                 wto << "      ENOBJ_ITER_myevent_" << it->second.s << " = enigma::event_" << it->second.s << "->add_inst(this);\n";
+				
           wto << "    }\n";
 
 
@@ -360,6 +385,8 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
           wto << "    }\n";
 
         wto << "  };\n";
+		parsed.push_back(i->first);
+		i++;
       }
       wto << "\n  objectstruct objs[] = {\n  ";
       int objcunt = 0, obmx = 0;
@@ -410,9 +437,19 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
       for (unsigned ii = 0; ii < i->second->events.size; ii++)
       if  (i->second->events[ii].code != "")
       {
-    cout << "DBGMSG 4-1" << endl;
+	     cout << "DBGMSG 4-1" << endl;
         const int mid = i->second->events[ii].mainId, id = i->second->events[ii].id;
         string evname = event_get_function_name(mid,id);
+	   bool defined_inherited = false;
+	  
+	  for (po_i her = parsed_objects.find(i->second->parent); her != parsed_objects.end(); her = parsed_objects.find(her->second->parent)) {
+		if (her->second->events[ii].code != "") {
+			wto << "#define event_inherited OBJ_" + her->second->name + "::myevent_" + evname + "\n";
+			defined_inherited = true;
+			break;
+	    }
+	  }
+
     cout << "DBGMSG 4-2" << endl;
         wto << "variant enigma::OBJ_" << i->second->name << "::myevent_" << evname << "()\n{\n  ";
           if (!event_execution_uses_default(i->second->events[ii].mainId,i->second->events[ii].id))
@@ -429,7 +466,12 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
           if (event_has_suffix_code(mid, id))
             wto << event_get_suffix_code(mid, id) << endl;
     cout << "DBGMSG 4-5" << endl;
-        wto << "\n  return 0;\n}\n\n";
+        wto << "\n  return 0;\n}\n";
+		
+		if (defined_inherited) {
+			wto << "#undef event_inherited\n";
+		}
+		
       }
     cout << "DBGMSG 5" << endl;
 
