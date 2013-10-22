@@ -34,7 +34,7 @@
          easier to write a custom reader for since the format doesn't implement
          most of the noise that makes YAML general-purpose.
 */
-
+#include <cstring>
 #include <iostream>
 #include <fstream>
 #include <map>
@@ -98,6 +98,9 @@ ey_string &eyscalar(eyit x)
 
 #include <cstdlib>
 ey_string::operator string&() { return value; }
+bool ey_string::toBool()  { 
+	if (strstr("true", value.c_str())) { return true; } else { return false; }
+}
 char ey_string::toByte()      { return atoi(value.c_str()); }
 double ey_string::toDouble()  { return atof(value.c_str()); }
 int ey_string::toInt()        { cout << "TOINT: " << value << endl; return atoi(value.c_str()); }

@@ -24,3 +24,15 @@
         Type: Radio-1
         Label: Treat literals as: 
         Options: "EDL (variant), C++ (scalar)"
+		
+-Polymorphism:
+    Layout: Grid
+    Columns: 3
+    -inherit-events:
+        Type: Checkbox
+        Label: Inherit events: 
+        Default: true
+    -inherit-locals:
+        Type: Checkbox
+        Label: Inherit locals: 
+        Default: true
