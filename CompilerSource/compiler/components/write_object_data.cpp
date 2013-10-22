@@ -445,6 +445,7 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
 	  for (po_i her = parsed_objects.find(i->second->parent); her != parsed_objects.end(); her = parsed_objects.find(her->second->parent)) {
 		if (her->second->events[ii].code != "") {
 			wto << "#define event_inherited OBJ_" + her->second->name + "::myevent_" + evname + "\n";
+			wto << "#define action_inherited OBJ_" + her->second->name + "::myevent_" + evname + "\n";
 			defined_inherited = true;
 			break;
 	    }
@@ -470,6 +471,7 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
 		
 		if (defined_inherited) {
 			wto << "#undef event_inherited\n";
+			wto << "#undef action_inherited\n\n";
 		}
 		
       }
