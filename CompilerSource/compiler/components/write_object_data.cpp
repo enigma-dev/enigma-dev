@@ -37,8 +37,8 @@ using namespace std;
 #include "backend/EnigmaStruct.h" //LateralGM interface structures
 #include "compiler/compile_common.h"
 #include "compiler/event_reader/event_parser.h"
-#include "settings.h"
 #include "general/parse_basics_old.h"
+#include "settings.h"
 
 #include "languages/lang_CPP.h"
 
@@ -211,7 +211,7 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
         // Now we output all the events this object uses
         // Defaulted events were already added into this array.
         map<int, cspair> nemap; // Keep track of events that need added to honor et_stacked
-        for (unsigned ii = 0; ii < i->second->events.size; ii++) {
+        for (unsigned ii = 0; ii < i->second->events.size; ii++)
           if  (i->second->events[ii].code != "")
           {
             //Look up the event name
@@ -221,44 +221,19 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
                 "        if (" + event_get_super_check_condition(i->second->events[ii].mainId,i->second->events[ii].id) + ") myevent_" : "        myevent_") + evname + "();\n",
               nemap[i->second->events[ii].mainId].s = event_stacked_get_root_name(i->second->events[ii].mainId);
             wto << "    variant myevent_" << evname << "();\n    ";
-          } else {
-			if (setting::inherit_events) {
-				for (po_i her = parsed_objects.find(i->second->parent); her != parsed_objects.end(); her = parsed_objects.find(her->second->parent)) {
-				  if  (her->second->events[ii].code != "")
-				  {
-					//Look up the event name
-					string evname = event_get_function_name(her->second->events[ii].mainId,her->second->events[ii].id);
-					if (event_is_instance(her->second->events[ii].mainId,her->second->events[ii].id))
-					  nemap[her->second->events[ii].mainId].c += (event_has_super_check(her->second->events[ii].mainId,her->second->events[ii].id) ?
-						"        if (" + event_get_super_check_condition(her->second->events[ii].mainId,her->second->events[ii].id) + ") myevent_" : "        myevent_") + evname + "();\n",
-					  nemap[her->second->events[ii].mainId].s = event_stacked_get_root_name(her->second->events[ii].mainId);
-					wto << "    variant myevent_" << evname << "();\n    ";
-					break;
-				  } 
-				}
-			}
-		  }
-		}
+          }
 
         /* Event Perform Code */
         wto << "\n//Event Perform Code\n      variant myevents_perf(int type, int numb)\n      {\n";
 
-        for (unsigned ii = 0; ii < i->second->events.size; ii++) {
-		  bool foundmatch = false;
-		  // Check and see if we inherited this event from our parent
-		  if (setting::inherit_events) {
-			  for (po_i her = parsed_objects.find(i->second->parent); her != parsed_objects.end(); her = parsed_objects.find(her->second->parent)) {
-				if  (her->second->events[ii].code != "") { foundmatch = true; break; }
-			  }
-		  }
-          if  (i->second->events[ii].code != "" || foundmatch)
+        for (unsigned ii = 0; ii < i->second->events.size; ii++)
+          if  (i->second->events[ii].code != "")
           {
             //Look up the event name
             string evname = event_get_function_name(i->second->events[ii].mainId,i->second->events[ii].id);
             wto << "        if (type == " << i->second->events[ii].mainId << " && numb == " << i->second->events[ii].id << ")\n";
             wto << "          return myevent_" << evname << "();\n";
           }
-		}
 
         wto << "\n        return 0;\n      }\n";
 
@@ -435,56 +410,27 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
       for (unsigned ii = 0; ii < i->second->events.size; ii++)
       if  (i->second->events[ii].code != "")
       {
-		cout << "DBGMSG 4-1" << endl;
+    cout << "DBGMSG 4-1" << endl;
         const int mid = i->second->events[ii].mainId, id = i->second->events[ii].id;
         string evname = event_get_function_name(mid,id);
-		cout << "DBGMSG 4-2" << endl;
+    cout << "DBGMSG 4-2" << endl;
         wto << "variant enigma::OBJ_" << i->second->name << "::myevent_" << evname << "()\n{\n  ";
           if (!event_execution_uses_default(i->second->events[ii].mainId,i->second->events[ii].id))
             wto << "enigma::temp_event_scope ENIGMA_PUSH_ITERATOR_AND_VALIDATE(this);\n  ";
-		cout << "DBGMSG 4-3" << endl;
+    cout << "DBGMSG 4-3" << endl;
           if (event_has_sub_check(mid, id))
             wto << event_get_sub_check_condition(mid, id) << endl;
           if (event_has_const_code(mid, id))
             wto << event_get_const_code(mid, id) << endl;
           if (event_has_prefix_code(mid, id))
             wto << event_get_prefix_code(mid, id) << endl;
-		cout << "DBGMSG 4-4" << endl;
+    cout << "DBGMSG 4-4" << endl;
           print_to_file(i->second->events[ii].code,i->second->events[ii].synt,i->second->events[ii].strc,i->second->events[ii].strs,2,wto);
           if (event_has_suffix_code(mid, id))
             wto << event_get_suffix_code(mid, id) << endl;
-		cout << "DBGMSG 4-5" << endl;
+    cout << "DBGMSG 4-5" << endl;
         wto << "\n  return 0;\n}\n\n";
-      } else {
-	    if (setting::inherit_events) {
-			for (po_i her = parsed_objects.find(i->second->parent); her != parsed_objects.end(); her = parsed_objects.find(her->second->parent)) {
-			  if  (her->second->events[ii].code != "")
-			  {
-				cout << "DBGMSG 4-1" << endl;
-				const int mid = her->second->events[ii].mainId, id = her->second->events[ii].id;
-				string evname = event_get_function_name(mid,id);
-				cout << "DBGMSG 4-2" << endl;
-				wto << "variant enigma::OBJ_" << i->second->name << "::myevent_" << evname << "()\n{\n  ";
-				  if (!event_execution_uses_default(her->second->events[ii].mainId,her->second->events[ii].id))
-					wto << "enigma::temp_event_scope ENIGMA_PUSH_ITERATOR_AND_VALIDATE(this);\n  ";
-				cout << "DBGMSG 4-3" << endl;
-				  if (event_has_sub_check(mid, id))
-					wto << event_get_sub_check_condition(mid, id) << endl;
-				  if (event_has_const_code(mid, id))
-					wto << event_get_const_code(mid, id) << endl;
-				  if (event_has_prefix_code(mid, id))
-					wto << event_get_prefix_code(mid, id) << endl;
-				cout << "DBGMSG 4-4" << endl;
-				  print_to_file(her->second->events[ii].code,her->second->events[ii].synt,her->second->events[ii].strc,her->second->events[ii].strs,2,wto);
-				  if (event_has_suffix_code(mid, id))
-					wto << event_get_suffix_code(mid, id) << endl;
-				cout << "DBGMSG 4-5" << endl;
-				wto << "\n  return 0;\n}\n\n";
-				break;
-			  }
-			}
-		}
-	  }
+      }
     cout << "DBGMSG 5" << endl;
 
       parsed_object* t = i->second;
