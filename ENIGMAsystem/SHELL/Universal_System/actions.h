@@ -495,3 +495,7 @@ inline void event_inherited() {
   show_error("Event inherited called on an object that has no event to inherit.", false);
 #endif
 }
+
+inline void action_inherited() {
+	event_inherited();
+}
