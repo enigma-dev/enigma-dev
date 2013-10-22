@@ -30,9 +30,9 @@
     Columns: 3
     -inherit-events:
         Type: Checkbox
-        Label: Inherit events: 
+        Label: Inherit Events
         Default: true
     -inherit-locals:
         Type: Checkbox
-        Label: Inherit locals: 
+        Label: Inherit Locals
         Default: true
