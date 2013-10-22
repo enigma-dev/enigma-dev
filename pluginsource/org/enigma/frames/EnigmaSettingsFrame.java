@@ -49,6 +49,7 @@ import javax.swing.GroupLayout.Group;
 import javax.swing.GroupLayout.SequentialGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
@@ -146,7 +147,8 @@ public class EnigmaSettingsFrame extends ResourceFrame<EnigmaSettings,PEnigmaSet
 		JComponent[] cChoices;
 
 		IndexButtonGroup ibg = null;
-		JComboBox cb = null;
+		JComboBox combo = null;
+		JCheckBox checkbox = null;
 		String other = null;
 
 		Option(String name, String type, int cnum, String choices)
@@ -159,6 +161,8 @@ public class EnigmaSettingsFrame extends ResourceFrame<EnigmaSettings,PEnigmaSet
 				populateRadio1(name,choices == null ? null : choices.split(",")); //$NON-NLS-1$
 			else if (type.equalsIgnoreCase("Combobox")) //$NON-NLS-1$
 				populateCombo(name,choices == null ? null : choices.split(",")); //$NON-NLS-1$
+			else if (type.equalsIgnoreCase("Checkbox")) //$NON-NLS-1$
+				populateCheckbox(name,false); //$NON-NLS-1$
 			else
 				populateLabel(type,name,choices);
 			//				throw new IllegalArgumentException(type);
@@ -195,8 +199,16 @@ public class EnigmaSettingsFrame extends ResourceFrame<EnigmaSettings,PEnigmaSet
 			{
 			cChoices = new JComponent[name == null ? 1 : 2];
 			if (name != null) cChoices[0] = new JLabel(name);
-			cChoices[name == null ? 0 : 1] = cb = new JComboBox(choices);
+			cChoices[name == null ? 0 : 1] = combo = new JComboBox(choices);
 			}
+		
+		void populateCheckbox(String name, boolean enabled)
+		{
+		cChoices = new JComponent[1];
+		checkbox = new JCheckBox(name);
+		checkbox.setSelected(enabled);
+		cChoices[0] = checkbox;
+		}
 
 		void setValue(String val)
 			{
@@ -204,6 +216,10 @@ public class EnigmaSettingsFrame extends ResourceFrame<EnigmaSettings,PEnigmaSet
 			if (val == null) return;
 			try
 				{
+				if (checkbox != null) { 
+					checkbox.setSelected(Boolean.parseBoolean(val));
+				}
+				
 				setValue(Integer.parseInt(val));
 				}
 			catch (NumberFormatException e)
@@ -216,13 +232,23 @@ public class EnigmaSettingsFrame extends ResourceFrame<EnigmaSettings,PEnigmaSet
 			{
 			if (ibg != null)
 				ibg.setValue(val);
-			else if (cb != null) cb.setSelectedIndex(val);
+			else if (combo != null) combo.setSelectedIndex(val);
 			}
+		
+		void setValue(boolean val)
+		{
+		
+		}
 
 		String getValue()
 			{
 			if (ibg != null) return Integer.toString(ibg.getValue());
-			if (cb != null) return Integer.toString(cb.getSelectedIndex());
+			if (combo != null) return Integer.toString(combo.getSelectedIndex());
+			
+			if (checkbox != null) {
+				return Boolean.toString(checkbox.isSelected());
+			}
+				
 			return other;
 			}
 		}
