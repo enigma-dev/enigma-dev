@@ -153,7 +153,12 @@ int file_copy(std::string fname, std::string newname) {
     }
 }
 
-int directory_exists(std::string dname);
+int directory_exists(std::string dname) {
+  DWORD dwAttrib = GetFileAttributes(dname.c_str());
+
+  return (dwAttrib != INVALID_FILE_ATTRIBUTES && 
+         (dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
+}
 
 // NOTICE: May behave differently than GM. May fail if there are
 // directories in the path missing, whereas GM would create them all

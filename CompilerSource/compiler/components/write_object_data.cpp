@@ -38,6 +38,7 @@ using namespace std;
 #include "compiler/compile_common.h"
 #include "compiler/event_reader/event_parser.h"
 #include "general/parse_basics_old.h"
+#include "settings.h"
 
 #include "languages/lang_CPP.h"
 
@@ -108,7 +109,12 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
         wto << "    object_locals() {vmap = NULL;}\n";
         wto << "    object_locals(unsigned _x, int _y): event_parent(_x,_y) {vmap = NULL;}\n  };\n";
       po_i i = parsed_objects.begin();
-	  vector<unsigned> parsed(0);
+	  vector<int> parsed(0);
+	  // Hold an iterator for our parent for later usage
+	  po_i parent = parsed_objects.find(i->second->parent);
+	  // Hold a map of all the
+	  map<int, vector<unsigned> > parent_definitions;
+	  vector<unsigned> parent_defined;
 	  while (parsed.size() < parsed_objects.size())
       {
 		if (i == parsed_objects.end()) { i = parsed_objects.begin(); }
@@ -117,13 +123,15 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
 		(parsed_objects.find(i->second->parent)->second && !find(parsed.begin(), parsed.end(), i->second->parent))) { 
 			i++; continue; 
 		}
+		parent = parsed_objects.find(i->second->parent);
+		
 		wto << "  \n  struct OBJ_" << i->second->name;
-		if (parsed_objects.find(i->second->parent)->second) {
+		if (setting::inherit_objects && parsed_objects.find(i->second->parent) != parsed_objects.end()) {
 			wto << ": OBJ_" << parsed_objects.find(i->second->parent)->second->name;
 		} else {
 			wto << ": object_locals";
 		}
-		wto << "\n  {";
+		wto << "\n  {\n	// Local variables\n	";
 
         for (unsigned ii = 0; ii < i->second->events.size; ii++)
         {
@@ -178,18 +186,20 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
         for (deciter ii =  i->second->locals.begin(); ii != i->second->locals.end(); ii++)
         {
           bool writeit = true; //Whether this "local" should be declared such
-		  bool foundmatch = false;
-		  // look to see if the parent declares this local otherwise we don't need to or it will get overridden and screwed up, eg. nulled
-		  for (po_i her = parsed_objects.find(i->second->parent); her != parsed_objects.end(); her = parsed_objects.find(her->second->parent)) {
-			for (deciter it =  her->second->locals.begin(); it != her->second->locals.end(); it++)
-			{
-				if (it->first == ii->first && it->second.prefix == ii->second.prefix && it->second.type == ii->second.type && it->second.suffix == ii->second.suffix) {
-					foundmatch = true; break;
+		  if (setting::inherit_objects) {
+			  bool foundmatch = false;
+			  // Look to see if the parent declares this local otherwise we don't need to or it will get overridden and screwed up, eg. nulled
+			  for (po_i her = parsed_objects.find(i->second->parent); her != parsed_objects.end(); her = parsed_objects.find(her->second->parent)) {
+				for (deciter it =  her->second->locals.begin(); it != her->second->locals.end(); it++)
+				{
+					if (it->first == ii->first && it->second.prefix == ii->second.prefix && it->second.type == ii->second.type && it->second.suffix == ii->second.suffix) {
+						foundmatch = true; break;
+					}
 				}
-			}
-			if (foundmatch) { break; }
+				if (foundmatch) { break; }
+			  }
+			  if (foundmatch) { continue; }
 		  }
-		  if (foundmatch) { continue; }
 		
           // If it's not explicitely defined, we must question whether it should be given a unique presence in this scope
           if (!ii->second.defined())
@@ -225,11 +235,26 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
           }
         } wto << "\n    ";
 
+		// Keep a container of all the events the parent defined so they don't need searched more than one time.
+		vector<unsigned> parent_defined;
+		if (setting::inherit_objects) {
+			for (unsigned ii = 0; ii < i->second->events.size; ii++) {
+			  for (po_i her = parsed_objects.find(i->second->parent); her != parsed_objects.end(); her = parsed_objects.find(her->second->parent)) {
+				for (unsigned pi = 0; pi < her->second->events.size; pi++) {
+					if (her->second->events[pi].mainId == i->second->events[ii].mainId && 
+					her->second->events[pi].id == i->second->events[ii].id) {
+						parent_defined.push_back(ii);
+					}
+				}
+			  }
+			}
+			parent_definitions[i->second->id] = parent_defined;
+		}
 
         // Now we output all the events this object uses
         // Defaulted events were already added into this array.
         map<int, cspair> nemap; // Keep track of events that need added to honor et_stacked
-        for (unsigned ii = 0; ii < i->second->events.size; ii++)
+        for (unsigned ii = 0; ii < i->second->events.size; ii++) {
           if  (i->second->events[ii].code != "")
           {
             //Look up the event name
@@ -240,11 +265,16 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
               nemap[i->second->events[ii].mainId].s = event_stacked_get_root_name(i->second->events[ii].mainId);
             wto << "    variant myevent_" << evname << "();\n    ";
           }
+		}
 
         /* Event Perform Code */
-        wto << "\n//Event Perform Code\n      variant myevents_perf(int type, int numb)\n      {\n";
-
-        for (unsigned ii = 0; ii < i->second->events.size; ii++)
+        wto << "\n      //Event Perform Code\n      variant myevents_perf(int type, int numb)\n      {\n";
+		
+		if (setting::inherit_objects && parent != parsed_objects.end()) {
+			wto << "        OBJ_" << parent->second->name << "::myevents_perf(type,numb);\n";
+		}
+        for (unsigned ii = 0; ii < i->second->events.size; ii++) {
+		  if (setting::inherit_objects && find(parent_defined.begin(), parent_defined.end(), ii)) { continue; }
           if  (i->second->events[ii].code != "")
           {
             //Look up the event name
@@ -252,6 +282,7 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
             wto << "        if (type == " << i->second->events[ii].mainId << " && numb == " << i->second->events[ii].id << ")\n";
             wto << "          return myevent_" << evname << "();\n";
           }
+		}
 
         wto << "\n        return 0;\n      }\n";
 
@@ -260,10 +291,26 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
         if (nemap.size())
         {
           wto << "\n    \n    // Grouped event bases\n    ";
-          for (map<int,cspair>::iterator it = nemap.begin(); it != nemap.end(); it++)
-            wto << "  void myevent_" << it->second.s << "()\n      {\n" << it->second.c << "      }\n    ";
+          for (map<int,cspair>::iterator it = nemap.begin(); it != nemap.end(); it++) {
+			wto << "  void myevent_" << it->second.s << "()\n      {\n";
+			// If the parent also wrote this grouped event for instance some input events in the parent and some in the child, then we need to call the super method
+			if (setting::inherit_objects) {
+				for (po_i her = parsed_objects.find(i->second->parent); her != parsed_objects.end(); her = parsed_objects.find(her->second->parent)) {
+					bool written = false;
+					for (unsigned ii = 0; ii < her->second->events.size; ii++) {
+						if  (her->second->events[ii].mainId == it->first && her->second->events[ii].code != "") {
+							wto << "        OBJ_" << her->second->name << "::myevent_" << it->second.s << "();\n"; 
+							written = true; break;
+						}
+					}
+					if (written) { break; }
+				}
+			}
+            wto << it->second.c << "      }\n    ";
+		  }
         }
-
+		
+		
         /**** Now we write the callable unlinker. Its job is to disconnect the instance for destroy.
         * @ * This is an important component that tracks multiple pieces of the instance. These pieces
         *//// are created for efficiency. See the instance system documentation for full details.
@@ -272,12 +319,16 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
         wto << "\n    // Self-tracking\n";
 
         // This tracks components of the instance system.
-        wto << "      enigma::pinstance_list_iterator ENOBJ_ITER_me;\n";
+		bool has_parent = (parsed_objects.find(i->second->parent) != parsed_objects.end());
+		if (!setting::inherit_objects || !has_parent) {
+			wto << "      enigma::pinstance_list_iterator ENOBJ_ITER_me;\n";
+		}
         for (po_i her = i; her != parsed_objects.end(); her = parsed_objects.find(her->second->parent)) // For this object and each parent thereof
           wto << "      enigma::inst_iter *ENOBJ_ITER_myobj" << her->second->id << ";\n"; // Keep track of a pointer to `this` inside this list.
 
         // This tracks components of the event system.
-          for (unsigned ii = 0; ii < i->second->events.size; ii++) // Export a tracker for all events
+          for (unsigned ii = 0; ii < i->second->events.size; ii++) { // Export a tracker for all events
+			if (setting::inherit_objects && find(parent_defined.begin(), parent_defined.end(), ii)) { continue; }
             if (!event_is_instance(i->second->events[ii].mainId,i->second->events[ii].id)) { //...well, all events which aren't stacked
               if (event_has_iterator_declare_code(i->second->events[ii].mainId,i->second->events[ii].id)) {
                 if (!iscomment(event_get_iterator_declare_code(i->second->events[ii].mainId,i->second->events[ii].id)))
@@ -285,18 +336,23 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
               } else
                 wto << "      enigma::inst_iter *ENOBJ_ITER_myevent_" << event_get_function_name(i->second->events[ii].mainId,i->second->events[ii].id) << ";\n";
             }
+		  }
           for (map<int,cspair>::iterator it = nemap.begin(); it != nemap.end(); it++) // The stacked ones should have their root exported
             wto << "      enigma::inst_iter *ENOBJ_ITER_myevent_" << it->second.s << ";\n";
 
-
         //This is the actual call to remove the current instance from all linked records before destroying it.
         wto << "\n    void unlink()\n    {\n";
-          wto << "      instance_iter_queue_for_destroy(ENOBJ_ITER_me); // Queue for delete while we're still valid\n";
-          wto << "      deactivate();\n    }\n void deactivate()\n    {\n";
-          wto << "      enigma::unlink_main(ENOBJ_ITER_me); // Remove this instance from the non-redundant, tree-structured list.\n";
+		  if (!setting::inherit_objects || !has_parent) { 
+			wto << "      instance_iter_queue_for_destroy(ENOBJ_ITER_me); // Queue for delete while we're still valid\n";
+		  }
+          wto << "      deactivate();\n    }\n\n    void deactivate()\n    {\n";
+		  if (!setting::inherit_objects || !has_parent) { 
+			wto << "      enigma::unlink_main(ENOBJ_ITER_me); // Remove this instance from the non-redundant, tree-structured list.\n";
+		  }
           for (po_i her = i; her != parsed_objects.end(); her = parsed_objects.find(her->second->parent))
             wto << "      unlink_object_id_iter(ENOBJ_ITER_myobj" << her->second->id << ", " << her->second->id << ");\n";
-          for (unsigned ii = 0; ii < i->second->events.size; ii++)
+          for (unsigned ii = 0; ii < i->second->events.size; ii++) {
+			if (setting::inherit_objects && find(parent_defined.begin(), parent_defined.end(), ii)) { continue; }
             if (!event_is_instance(i->second->events[ii].mainId,i->second->events[ii].id)) {
               const string evname = event_get_function_name(i->second->events[ii].mainId,i->second->events[ii].id);
               if (event_has_iterator_unlink_code(i->second->events[ii].mainId,i->second->events[ii].id)) {
@@ -304,7 +360,8 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
                   wto << "      " << event_get_iterator_unlink_code(i->second->events[ii].mainId,i->second->events[ii].id) << ";\n";
               } else
                 wto << "      enigma::event_" << evname << "->unlink(ENOBJ_ITER_myevent_" << evname << ");\n";
-          }
+            }
+		  }
           for (map<int,cspair>::iterator it = nemap.begin(); it != nemap.end(); it++) // The stacked ones should have their root exported
             wto << "      enigma::event_" << it->second.s << "->unlink(ENOBJ_ITER_myevent_" << it->second.s << ");\n";
           wto << "    }\n    ";
@@ -315,7 +372,7 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
         *////   Directed constructor:   Meant for use by the room system, the constructor uses a specified ID alias assumed to have been checked for conflict.
         wto <<   "\n    OBJ_" <<  i->second->name << "(int enigma_genericconstructor_newinst_x = 0, int enigma_genericconstructor_newinst_y = 0, const int id = (enigma::maxid++))";
          
-		 if (parsed_objects.find(i->second->parent)->second) { 
+		 if (setting::inherit_objects && parsed_objects.find(i->second->parent) != parsed_objects.end()) { 
 			wto << ": OBJ_" << parsed_objects.find(i->second->parent)->second->name << "(enigma_genericconstructor_newinst_x,enigma_genericconstructor_newinst_y,id)";
 		 } else {
 			wto << ": object_locals(id, " << i->second->id << ")";
@@ -332,34 +389,44 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
                     << "      mask_index = enigma::objectdata[" << i->second->id << "]->mask;\n";
               wto << "      visible = enigma::objectdata[" << i->second->id << "]->visible;\n      solid = enigma::objectdata[" << i->second->id << "]->solid;\n";
               wto << "      persistent = enigma::objectdata[" << i->second->id << "]->persistent;\n";
-              wto << "      activate();\n";
+              
+			wto << "      activate();\n";
+			  
+			  
             // Coordinates
               wto << "      x = enigma_genericconstructor_newinst_x, y = enigma_genericconstructor_newinst_y;\n";
 
           wto << "      enigma::constructor(this);\n";
-          wto << "    }\n";
+          wto << "    }\n\n";
 
-
-          wto << " void activate()\n    {\n";
-          // Depth
-
-              wto << "      depth.init(enigma::objectdata[" << i->second->id << "]->depth, this);\n";
-
+		
+          wto << "    void activate()\n    {\n";
+			if (setting::inherit_objects && has_parent) {
+				// Have to remove the one the parent added so we can add our own
+				wto << "      depth.remove();\n";
+			}
+		  // Depth iterator used for draw events in graphics system screen_redraw
+		  wto << "      depth.init(enigma::objectdata[" << i->second->id << "]->depth, this);\n";
             // Instance system interface
+			if (!setting::inherit_objects || !has_parent) {
               wto << "      ENOBJ_ITER_me = enigma::link_instance(this);\n";
+			}
               for (po_i her = i; her != parsed_objects.end(); her = parsed_objects.find(her->second->parent))
                 wto << "      ENOBJ_ITER_myobj" << her->second->id << " = enigma::link_obj_instance(this, " << her->second->id << ");\n";
 
             // Event system interface
-              for (unsigned ii = 0; ii < i->second->events.size; ii++)
+              for (unsigned ii = 0; ii < i->second->events.size; ii++) {
+				if (find(parent_defined.begin(), parent_defined.end(), ii)) { continue; }
                 if (!event_is_instance(i->second->events[ii].mainId,i->second->events[ii].id)) {
                   const string evname = event_get_function_name(i->second->events[ii].mainId,i->second->events[ii].id);
                   if (event_has_iterator_initialize_code(i->second->events[ii].mainId,i->second->events[ii].id)) {
                     if (!iscomment(event_get_iterator_initialize_code(i->second->events[ii].mainId,i->second->events[ii].id)))
                       wto << "      " << event_get_iterator_initialize_code(i->second->events[ii].mainId,i->second->events[ii].id) << ";\n";
-                  } else
+                  } else {
                     wto << "      ENOBJ_ITER_myevent_" << evname << " = enigma::event_" << evname << "->add_inst(this);\n";
+				  }
                 }
+			  }
               for (map<int,cspair>::iterator it = nemap.begin(); it != nemap.end(); it++)
                 wto << "      ENOBJ_ITER_myevent_" << it->second.s << " = enigma::event_" << it->second.s << "->add_inst(this);\n";
 				
@@ -369,10 +436,13 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
           // Destructor
           wto <<   "    \n    ~OBJ_" <<  i->second->name << "()\n    {\n";
             wto << "      delete vmap;\n";
-            wto << "      enigma::winstance_list_iterator_delete(ENOBJ_ITER_me);\n";
+			if (!setting::inherit_objects || !has_parent) {
+              wto << "      enigma::winstance_list_iterator_delete(ENOBJ_ITER_me);\n";
+			}
             for (po_i her = i; her != parsed_objects.end(); her = parsed_objects.find(her->second->parent))
               wto << "      delete ENOBJ_ITER_myobj" << her->second->id << ";\n";
-            for (unsigned ii = 0; ii < i->second->events.size; ii++)
+            for (unsigned ii = 0; ii < i->second->events.size; ii++) {
+			  if (setting::inherit_objects && find(parent_defined.begin(), parent_defined.end(), ii)) { continue; }
               if (!event_is_instance(i->second->events[ii].mainId,i->second->events[ii].id)) {
                 if (event_has_iterator_delete_code(i->second->events[ii].mainId,i->second->events[ii].id)) {
                   if (!iscomment(event_get_iterator_delete_code(i->second->events[ii].mainId,i->second->events[ii].id)))
@@ -380,6 +450,7 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
                 } else
                   wto << "      delete ENOBJ_ITER_myevent_" << event_get_function_name(i->second->events[ii].mainId,i->second->events[ii].id) << ";\n";
               }
+			}
             for (map<int,cspair>::iterator it = nemap.begin(); it != nemap.end(); it++) // The stacked ones should have their root exported
               wto << "      delete ENOBJ_ITER_myevent_" << it->second.s << ";\n";
           wto << "    }\n";
@@ -437,20 +508,21 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
       for (unsigned ii = 0; ii < i->second->events.size; ii++)
       if  (i->second->events[ii].code != "")
       {
-	     cout << "DBGMSG 4-1" << endl;
+	    cout << "DBGMSG 4-1" << endl;
         const int mid = i->second->events[ii].mainId, id = i->second->events[ii].id;
         string evname = event_get_function_name(mid,id);
-	   bool defined_inherited = false;
+	    bool defined_inherited = false;
+	    if (setting::inherit_objects) {
+			parent = parsed_objects.find(i->second->parent);
+			if (parent != parsed_objects.end()) {
+				parent_defined = parent_definitions.find(i->second->parent)->second;
+				if (find(parent_defined.begin(), parent_defined.end(), ii)) {
+					wto << "#define event_inherited OBJ_" + parent->second->name + "::myevent_" + evname + "\n";
+						defined_inherited = true;
+				}
+			}
+		}
 	  
-	  for (po_i her = parsed_objects.find(i->second->parent); her != parsed_objects.end(); her = parsed_objects.find(her->second->parent)) {
-		if (her->second->events[ii].code != "") {
-			wto << "#define event_inherited OBJ_" + her->second->name + "::myevent_" + evname + "\n";
-			wto << "#define action_inherited OBJ_" + her->second->name + "::myevent_" + evname + "\n";
-			defined_inherited = true;
-			break;
-	    }
-	  }
-
     cout << "DBGMSG 4-2" << endl;
         wto << "variant enigma::OBJ_" << i->second->name << "::myevent_" << evname << "()\n{\n  ";
           if (!event_execution_uses_default(i->second->events[ii].mainId,i->second->events[ii].id))
@@ -471,12 +543,12 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
 		
 		if (defined_inherited) {
 			wto << "#undef event_inherited\n";
-			wto << "#undef action_inherited\n\n";
 		}
 		
       }
     cout << "DBGMSG 5" << endl;
 
+	
       parsed_object* t = i->second;
       for (parsed_object::funcit it = t->funcs.begin(); it != t->funcs.end(); it++) //For each function called by this object
       {
@@ -499,6 +571,9 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
     cout << "DBGMSG 6" << endl;
     }
     cout << "DBGMSG 7" << endl;
+	
+	parent_defined.clear();
+	parent_definitions.clear();
 
     wto << "namespace enigma\n{\n"
     "  callable_script callable_scripts[] = {\n";
