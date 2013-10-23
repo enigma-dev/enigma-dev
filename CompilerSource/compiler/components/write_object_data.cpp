@@ -117,6 +117,9 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
 		(parsed_objects.find(i->second->parent)->second && !find(parsed.begin(), parsed.end(), i->second->parent))) { 
 			i++; continue; 
 		}
+		// Hold an iterator for our parent for later usage
+		po_i parent = parsed_objects.find(i->second->parent);
+		
 		wto << "  \n  struct OBJ_" << i->second->name;
 		if (parsed_objects.find(i->second->parent)->second) {
 			wto << ": OBJ_" << parsed_objects.find(i->second->parent)->second->name;
@@ -243,7 +246,7 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
 
         /* Event Perform Code */
         wto << "\n      //Event Perform Code\n      variant myevents_perf(int type, int numb)\n      {\n";
-		po_i parent = parsed_objects.find(i->second->parent);
+		
 		if (parent != parsed_objects.end()) {
 			wto << "        OBJ_" << parent->second->name << "::myevents_perf(type,numb);\n";
 		}
@@ -302,7 +305,10 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
         wto << "\n    // Self-tracking\n";
 
         // This tracks components of the instance system.
-        wto << "      enigma::pinstance_list_iterator ENOBJ_ITER_me;\n";
+		bool has_parent = (parsed_objects.find(i->second->parent) != parsed_objects.end());
+		if (!has_parent) {
+			wto << "      enigma::pinstance_list_iterator ENOBJ_ITER_me;\n";
+		}
         for (po_i her = i; her != parsed_objects.end(); her = parsed_objects.find(her->second->parent)) // For this object and each parent thereof
           wto << "      enigma::inst_iter *ENOBJ_ITER_myobj" << her->second->id << ";\n"; // Keep track of a pointer to `this` inside this list.
 
@@ -320,12 +326,15 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
           for (map<int,cspair>::iterator it = nemap.begin(); it != nemap.end(); it++) // The stacked ones should have their root exported
             wto << "      enigma::inst_iter *ENOBJ_ITER_myevent_" << it->second.s << ";\n";
 
-
         //This is the actual call to remove the current instance from all linked records before destroying it.
         wto << "\n    void unlink()\n    {\n";
-          wto << "      instance_iter_queue_for_destroy(ENOBJ_ITER_me); // Queue for delete while we're still valid\n";
+		  if (!has_parent) { 
+			wto << "      instance_iter_queue_for_destroy(ENOBJ_ITER_me); // Queue for delete while we're still valid\n";
+		  }
           wto << "      deactivate();\n    }\n\n    void deactivate()\n    {\n";
-          wto << "      enigma::unlink_main(ENOBJ_ITER_me); // Remove this instance from the non-redundant, tree-structured list.\n";
+		  if (!has_parent) { 
+			wto << "      enigma::unlink_main(ENOBJ_ITER_me); // Remove this instance from the non-redundant, tree-structured list.\n";
+		  }
           for (po_i her = i; her != parsed_objects.end(); her = parsed_objects.find(her->second->parent))
             wto << "      unlink_object_id_iter(ENOBJ_ITER_myobj" << her->second->id << ", " << her->second->id << ");\n";
           for (unsigned ii = 0; ii < i->second->events.size; ii++) {
@@ -350,7 +359,7 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
         wto <<   "\n    OBJ_" <<  i->second->name << "(int enigma_genericconstructor_newinst_x = 0, int enigma_genericconstructor_newinst_y = 0, const int id = (enigma::maxid++))";
          
 		 if (parsed_objects.find(i->second->parent)->second) { 
-			//wto << ": OBJ_" << parsed_objects.find(i->second->parent)->second->name << "(enigma_genericconstructor_newinst_x,enigma_genericconstructor_newinst_y,id)";
+			wto << ": OBJ_" << parsed_objects.find(i->second->parent)->second->name << "(enigma_genericconstructor_newinst_x,enigma_genericconstructor_newinst_y,id)";
 		 } else {
 			wto << ": object_locals(id, " << i->second->id << ")";
 		 }
@@ -378,7 +387,6 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
 
 		
           wto << "    void activate()\n    {\n";
-			bool has_parent = (parsed_objects.find(i->second->parent) != parsed_objects.end());
 			if (has_parent) {
 				// Have to remove the one the parent added so we can add our own
 				wto << "      depth.remove();\n";
@@ -414,7 +422,9 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
           // Destructor
           wto <<   "    \n    ~OBJ_" <<  i->second->name << "()\n    {\n";
             wto << "      delete vmap;\n";
-            wto << "      enigma::winstance_list_iterator_delete(ENOBJ_ITER_me);\n";
+			if (!has_parent) {
+              wto << "      enigma::winstance_list_iterator_delete(ENOBJ_ITER_me);\n";
+			}
             for (po_i her = i; her != parsed_objects.end(); her = parsed_objects.find(her->second->parent))
               wto << "      delete ENOBJ_ITER_myobj" << her->second->id << ";\n";
             for (unsigned ii = 0; ii < i->second->events.size; ii++) {
