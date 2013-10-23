@@ -27,27 +27,19 @@
     -inherit-negatives-as:
         Type: Radio-1
         Label: Treat negatives as: 
-        Options: "GML (boolean true), C++ (scalar)"
+        Options: "GML (true > 0), C++ (true != 0)"
 		
 -Polymorphism:
     Layout: Grid
-    Columns: 3
-    -inherit-events:
+    Columns: 2
+    -inherit-objects:
         Type: Checkbox
-        Label: Inherit Events
+        Label: Object Inheritance
         Default: true
-    -inherit-locals:
-        Type: Checkbox
-        Label: Inherit Locals
-        Default: true
-		
+
 -Graphics:
     Layout: Grid
     Columns: 3
-    -software-vertex-processing:
-        Type: Checkbox
-        Label: Software Vertex Processing
-        Default: false
     -angular-unit:
         Type: Radio-1
         Label: Angular unit: 
