@@ -172,7 +172,8 @@ namespace enigma
     if (gamestart)
     for (int i = 0; i<instancecount; i++)
       is[i]->myevent_gamestart();
-
+    for (int i = 0; i<instancecount; i++)
+      is[i]->myevent_roomstart();
     if (createcode)
         createcode();
   }
