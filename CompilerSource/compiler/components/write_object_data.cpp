@@ -352,7 +352,7 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
 		 if (parsed_objects.find(i->second->parent)->second) { 
 			//wto << ": OBJ_" << parsed_objects.find(i->second->parent)->second->name << "(enigma_genericconstructor_newinst_x,enigma_genericconstructor_newinst_y,id)";
 		 } else {
-			//wto << ": object_locals(id, " << i->second->id << ")";
+			wto << ": object_locals(id, " << i->second->id << ")";
 		 }
           for (size_t ii = 0; ii < i->second->initializers.size(); ii++)
             wto << ", " << i->second->initializers[ii].first << "(" << i->second->initializers[ii].second << ")";
@@ -389,8 +389,8 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
 			if (!has_parent) {
               wto << "      ENOBJ_ITER_me = enigma::link_instance(this);\n";
 			}
-              //for (po_i her = i; her != parsed_objects.end(); her = parsed_objects.find(her->second->parent))
-                //wto << "      ENOBJ_ITER_myobj" << her->second->id << " = enigma::link_obj_instance(this, " << her->second->id << ");\n";
+              for (po_i her = i; her != parsed_objects.end(); her = parsed_objects.find(her->second->parent))
+                wto << "      ENOBJ_ITER_myobj" << her->second->id << " = enigma::link_obj_instance(this, " << her->second->id << ");\n";
 
             // Event system interface
               for (unsigned ii = 0; ii < i->second->events.size; ii++) {
