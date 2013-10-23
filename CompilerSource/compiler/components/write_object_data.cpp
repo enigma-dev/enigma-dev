@@ -24,7 +24,7 @@
 **  or programs made in the environment.                                        **
 **                                                                              **
 \********************************************************************************/
-#include <windows.h>
+
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
@@ -179,7 +179,7 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
         {
           bool writeit = true; //Whether this "local" should be declared such
 		  bool foundmatch = false;
-		  // look to see if the parent declares this local otherwise we don't need to or it will get overridden and screwed up, eg. nulled
+		  // Look to see if the parent declares this local otherwise we don't need to or it will get overridden and screwed up, eg. nulled
 		  for (po_i her = parsed_objects.find(i->second->parent); her != parsed_objects.end(); her = parsed_objects.find(her->second->parent)) {
 			for (deciter it =  her->second->locals.begin(); it != her->second->locals.end(); it++)
 			{
@@ -263,8 +263,21 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
         if (nemap.size())
         {
           wto << "\n    \n    // Grouped event bases\n    ";
-          for (map<int,cspair>::iterator it = nemap.begin(); it != nemap.end(); it++)
-            wto << "  void myevent_" << it->second.s << "()\n      {\n" << it->second.c << "      }\n    ";
+          for (map<int,cspair>::iterator it = nemap.begin(); it != nemap.end(); it++) {
+			wto << "  void myevent_" << it->second.s << "()\n      {\n";
+			// If the parent also wrote this grouped event for instance some input events in the parent and some in the child, then we need to call the super method
+			for (po_i her = parsed_objects.find(i->second->parent); her != parsed_objects.end(); her = parsed_objects.find(her->second->parent)) {
+				bool written = false;
+				for (unsigned ii = 0; ii < her->second->events.size; ii++) {
+					if  (her->second->events[ii].mainId == it->first && her->second->events[ii].code != "") {
+						wto << "        OBJ_" << her->second->name << "::myevent_" << it->second.s << "();\n"; break;
+						written = true;
+					}
+				}
+				if (written) { break; }
+			}
+            wto << it->second.c << "      }\n    ";
+		  }
         }
 
         /**** Now we write the callable unlinker. Its job is to disconnect the instance for destroy.
@@ -359,6 +372,7 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
             // Event system interface
               for (unsigned ii = 0; ii < i->second->events.size; ii++) {
 					bool parent_defined = false;
+					// If the parent already linked this event then we don't need to or inherited events will fire off twice.
 					  for (po_i her = parsed_objects.find(i->second->parent); her != parsed_objects.end(); her = parsed_objects.find(her->second->parent)) {
 						for (unsigned pi = 0; pi < her->second->events.size; pi++) {
 							if (her->second->events[pi].mainId == i->second->events[ii].mainId && 

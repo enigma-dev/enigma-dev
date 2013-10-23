@@ -24,7 +24,6 @@
 **  or programs made in the environment.                                        **
 **                                                                              **
 \********************************************************************************/
-#include <windows.h>
 #include <iostream>
 #include <fstream>
 #include <string>
