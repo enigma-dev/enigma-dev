@@ -24,6 +24,10 @@
         Type: Radio-1
         Label: Treat literals as: 
         Options: "EDL (variant), C++ (scalar)"
+    -inherit-negatives-as:
+        Type: Radio-1
+        Label: Treat negatives as: 
+        Options: "GML (boolean true), C++ (scalar)"
 		
 -Polymorphism:
     Layout: Grid
@@ -36,3 +40,43 @@
         Type: Checkbox
         Label: Inherit Locals
         Default: true
+		
+-Graphics:
+    Layout: Grid
+    Columns: 3
+    -software-vertex-processing:
+        Type: Checkbox
+        Label: Software Vertex Processing
+        Default: false
+    -angular-unit:
+        Type: Radio-1
+        Label: Angular unit: 
+        Options: "degrees, radians"
+    -scalar-precision:
+        Type: Radio-1
+        Label: Scalar precision: 
+        Options: "float, double"
+		
+-Collision:
+    Layout: Grid
+    Columns: 3
+    -angular-unit:
+        Type: Radio-1
+        Label: Angular unit: 
+        Options: "degrees, radians"
+    -scalar-precision:
+        Type: Radio-1
+        Label: Scalar precision: 
+        Options: "float, double"
+		
+-Audio:
+    Layout: Grid
+    Columns: 3
+    -angular-unit:
+        Type: Radio-1
+        Label: Angular unit: 
+        Options: "degrees, radians"
+    -scalar-precision:
+        Type: Radio-1
+        Label: Scalar precision: 
+        Options: "float, double"
