@@ -24,7 +24,6 @@
 **  or programs made in the environment.                                        **
 **                                                                              **
 \********************************************************************************/
-#include <windows.h>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -152,8 +151,7 @@ void parse_ide_settings(const char* eyaml)
   setting::use_incrementals = settree.get("inherit-increment-from").toInt();
   setting::use_gml_equals   =!settree.get("inherit-equivalence-from").toInt();
   setting::literal_autocast = settree.get("treat-literals-as").toInt();
-  setting::inherit_locals = settree.get("inherit-locals").toBool();
-  setting::inherit_events = settree.get("inherit-events").toBool();
+  setting::inherit_objects = settree.get("inherit-objects").toBool();
 
   cout << "Setting up IDE editables... " << endl;
   requested_extensions.clear();

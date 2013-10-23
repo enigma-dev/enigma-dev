@@ -496,6 +496,4 @@ inline void event_inherited() {
 #endif
 }
 
-inline void action_inherited() {
-	event_inherited();
-}
+#define action_inherited event_inherited

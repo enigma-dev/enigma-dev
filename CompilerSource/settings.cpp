@@ -42,8 +42,7 @@ namespace setting
   bool use_gml_equals = 0;   // Defines what language operator= is inherited from.   0 = C++,               1 = GML
   bool use_incrementals = 0; // Defines how operators ++ and -- are treated.         0 = GML,               1 = C++
   bool literal_autocast = 0; // Determines how literals are treated.                 0 = enigma::variant,   1 = C++ scalars
-  bool inherit_locals = 0; // Determines whether objects should automatically inherit locals from their parents
-  bool inherit_events = 0; // Determines whether objects should automatically inherit events from their parents
+  bool inherit_objects = 0;  // Determines whether objects should automatically inherit locals and events from their parents
 };
 
 
