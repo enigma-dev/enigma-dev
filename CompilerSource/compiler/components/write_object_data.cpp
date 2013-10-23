@@ -360,13 +360,18 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
 
 		
           wto << " void activate()\n    {\n";
-          // Depth
-
-              wto << "      depth.init(enigma::objectdata[" << i->second->id << "]->depth, this);\n";
-
+			bool has_parent = (parsed_objects.find(i->second->parent) != parsed_objects.end());
+			if (has_parent) {
+				// Have to remove the one the parent added so we can add our own
+				wto << "depth.remove();\n";
+			}
+		  // Depth iterator used for draw events in graphics system screen_redraw
+		  wto << "      depth.init(enigma::objectdata[" << i->second->id << "]->depth, this);\n";
             // Instance system interface
+			if (!has_parent) {
               wto << "      ENOBJ_ITER_me = enigma::link_instance(this);\n";
-             // for (po_i her = i; her != parsed_objects.end(); her = parsed_objects.find(her->second->parent))
+			}
+              //for (po_i her = i; her != parsed_objects.end(); her = parsed_objects.find(her->second->parent))
                 //wto << "      ENOBJ_ITER_myobj" << her->second->id << " = enigma::link_obj_instance(this, " << her->second->id << ");\n";
 
             // Event system interface
@@ -376,7 +381,7 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
 					  for (po_i her = parsed_objects.find(i->second->parent); her != parsed_objects.end(); her = parsed_objects.find(her->second->parent)) {
 						for (unsigned pi = 0; pi < her->second->events.size; pi++) {
 							if (her->second->events[pi].mainId == i->second->events[ii].mainId && 
-							her->second->events[pi].id == i->second->events[ii].id && her->second->events[pi].code != "") {
+							her->second->events[pi].id == i->second->events[ii].id) {
 								parent_defined = true;
 								break;
 							}
