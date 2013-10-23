@@ -94,7 +94,7 @@ namespace enigma
     {
         particles_impl = part_impl;
     }
-	
+
 	unsigned gui_width;
 	unsigned gui_height;
 }
@@ -110,34 +110,34 @@ void screen_redraw()
 	//if (d3ddev == NULL ) return;
 
     d3ddev->BeginScene();    // begins the 3D scene
-		
+
 	if (!view_enabled)
     {
 		D3DVIEWPORT9 pViewport = { 0, 0, (DWORD)window_get_region_width_scaled(), (DWORD)window_get_region_height_scaled(), 0, 1.0f };
 		d3ddev->SetViewport(&pViewport);
-		
+
 		D3DXMATRIX matTrans, matScale;
 
 		// Calculate a translation matrix
 		D3DXMatrixTranslation(&matTrans, -0.5, -room_height - 0.5, 0);
 		D3DXMatrixScaling(&matScale, 1, -1, 1);
-		
+
 		// Calculate our world matrix by multiplying the above (in the correct order)
 		D3DXMATRIX matWorld = matTrans * matScale;
 
 		// Set the matrix to be applied to anything we render from now on
 		d3ddev->SetTransform( D3DTS_VIEW, &matWorld);
-	
+
 		D3DXMATRIX matProjection;    // the projection transform matrix
 		D3DXMatrixOrthoOffCenterLH(&matProjection,
 							0,
-							(FLOAT)room_width,   
-							0, 
-							(FLOAT)room_height,   
+							(FLOAT)room_width,
+							0,
+							(FLOAT)room_height,
 							0.0f,    // the near view-plane
 							1.0f);    // the far view-plane
 		d3ddev->SetTransform(D3DTS_PROJECTION, &matProjection);    // set the projection transform
-		
+
 		if (background_showcolor)
 		{
 			int clearcolor = ((int)background_color) & 0x00FFFFFF;
@@ -149,10 +149,10 @@ void screen_redraw()
 		// Clear the depth buffer if 3d mode is on at the beginning of the draw step.
         if (enigma::d3dMode)
 			d3ddev->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
-		
+
         draw_back();
 
-	
+
         // Apply and clear stored depth changes.
         for (map<int,pair<double,double> >::iterator it = id_to_currentnextdepth.begin(); it != id_to_currentnextdepth.end(); it++)
         {
@@ -286,40 +286,40 @@ void screen_redraw()
                             view_yview[vc] = room_height - view_hview[vc];
                     }
                 }
-				
-				D3DVIEWPORT9 pViewport = { (DWORD)view_xport[vc], (DWORD)view_yport[vc], 
+
+				D3DVIEWPORT9 pViewport = { (DWORD)view_xport[vc], (DWORD)view_yport[vc],
 					(DWORD)(window_get_region_width_scaled() - view_xport[vc]), (DWORD)(window_get_region_height_scaled() - view_yport[vc]), 0, 1.0f };
 				d3ddev->SetViewport(&pViewport);
-		
+
 				D3DXMATRIX matTrans, matScale;
 
 				// Calculate a translation matrix
 				D3DXMatrixTranslation(&matTrans, -view_xview[vc] - 0.5, -view_yview[vc] - room_height - 0.5, 0);
 				D3DXMatrixScaling(&matScale, 1, -1, 1);
-		
+
 				// Calculate our world matrix by multiplying the above (in the correct order)
 				D3DXMATRIX matWorld = matTrans * matScale;
 
 				// Set the matrix to be applied to anything we render from now on
 				d3ddev->SetTransform( D3DTS_VIEW, &matWorld);
-	
+
 				D3DXMATRIX matProjection;    // the projection transform matrix
 				D3DXMatrixOrthoOffCenterLH(&matProjection,
 							0,
-							(FLOAT)view_wview[vc],   
-							0, 
-							(FLOAT)view_hview[vc],   
+							(int)view_wview[vc],
+							0,
+							(int)view_hview[vc],
 							0.0f,    // the near view-plane
 							1.0f);    // the far view-plane
 				d3ddev->SetTransform(D3DTS_PROJECTION, &matProjection);    // set the projection transform
-				
+
 				if (background_showcolor && view_current == 0)
 				{
 					int clearcolor = ((int)background_color) & 0x00FFFFFF;
 					// clear the window to the background color
 					d3ddev->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(__GETR(clearcolor), __GETG(clearcolor), __GETB(clearcolor)), 1.0f, 0);
 				}
-				
+
 				// Clear the depth buffer if 3d mode is on at the beginning of the draw step.
                 if (enigma::d3dMode)
                     d3ddev->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
@@ -379,7 +379,7 @@ void screen_redraw()
         }
         view_current = 0;
     }
-	
+
 	int culling = d3d_get_culling();
 	d3d_set_culling(rs_none);
 
@@ -387,29 +387,29 @@ void screen_redraw()
 	// It is for drawing GUI elements without view scaling and transformation
     if (enigma::gui_used)
     {
-		// Now process the sub event of draw called draw gui 
+		// Now process the sub event of draw called draw gui
 		// It is for drawing GUI elements without view scaling and transformation
 		D3DVIEWPORT9 pViewport = { 0, 0, window_get_region_width_scaled(), window_get_region_height_scaled(), 0, 1.0f };
 		d3ddev->SetViewport(&pViewport);
-		
+
 		D3DXMATRIX matTrans, matScale;
 
 		// Calculate a translation matrix
 		D3DXMatrixTranslation(&matTrans, -0.5, -room_height - 0.5, 0);
 		D3DXMatrixScaling(&matScale, 1, -1, 1);
-		
+
 		// Calculate our world matrix by multiplying the above (in the correct order)
 		D3DXMATRIX matWorld = matTrans * matScale;
 
 		// Set the matrix to be applied to anything we render from now on
 		d3ddev->SetTransform( D3DTS_VIEW, &matWorld);
-	
+
 		D3DXMATRIX matProjection;    // the projection transform matrix
 		D3DXMatrixOrthoOffCenterLH(&matProjection,
 							0,
-							(FLOAT)enigma::gui_width,   
-							0, 
-							(FLOAT)enigma::gui_height,   
+							(FLOAT)enigma::gui_width,
+							0,
+							(FLOAT)enigma::gui_height,
 							0.0f,    // the near view-plane
 							1.0f);    // the far view-plane
 		d3ddev->SetTransform(D3DTS_PROJECTION, &matProjection);    // set the projection transform
@@ -419,9 +419,9 @@ void screen_redraw()
 		// Clear the depth buffer if hidden surface removal is on at the beginning of the draw step.
         if (enigma::d3dMode)
 			d3ddev->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
-			
+
 		d3ddev->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
-			
+
         bool stop_loop = false;
         for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
         {
@@ -437,11 +437,11 @@ void screen_redraw()
             enigma::instance_event_iterator = push_it;
             if (stop_loop) break;
         }
-		
+
 	}
-	
+
     d3ddev->EndScene();    // ends the 3D scene
-		
+
 	screen_refresh();
 }
 
@@ -456,35 +456,35 @@ void screen_init()
         //glMatrixMode(GL_MODELVIEW);
 
 		d3ddev->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
-		
+
 		D3DVIEWPORT9 pViewport = { 0, 0, (DWORD)window_get_region_width_scaled(), (DWORD)window_get_region_height_scaled(), 0, 1.0f };
 		d3ddev->SetViewport(&pViewport);
-		
+
 		D3DXMATRIX matTrans, matScale;
-						
+
 		// Calculate a translation matrix
 		D3DXMatrixTranslation(&matTrans, -0.5, -room_height - 0.5, 0);
 		D3DXMatrixScaling(&matScale, 1, -1, 1);
-		
+
 		// Calculate our world matrix by multiplying the above (in the correct order)
 		D3DXMATRIX matWorld = matTrans * matScale;
 
 		// Set the matrix to be applied to anything we render from now on
 		d3ddev->SetTransform( D3DTS_VIEW, &matWorld);
-	
+
 		D3DXMATRIX matProjection;    // the projection transform matrix
 		D3DXMatrixOrthoOffCenterLH(&matProjection,
 							0,
-							(FLOAT)room_width,   
-							0, 
-							(FLOAT)room_height,   
+							(FLOAT)room_width,
+							0,
+							(FLOAT)room_height,
 							0.0f,    // the near view-plane
 							1.0f);    // the far view-plane
 		d3ddev->SetTransform(D3DTS_PROJECTION, &matProjection);    // set the projection transform
-				
+
 		d3ddev->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
 		d3ddev->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
-				
+
 		d3ddev->SetRenderState(D3DRS_ZENABLE, FALSE);
 		d3ddev->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
         //glEnable(GL_BLEND);
@@ -503,36 +503,36 @@ void screen_init()
             {
                 int vc = (int)view_current;
                   //gluPerspective(0, 1, 0, 1);
-				  
-				D3DVIEWPORT9 pViewport = { (DWORD)view_xport[vc], (DWORD)view_yport[vc], 
+
+				D3DVIEWPORT9 pViewport = { (DWORD)view_xport[vc], (DWORD)view_yport[vc],
 					(DWORD)(window_get_region_width_scaled() - view_xport[vc]), (DWORD)(window_get_region_height_scaled() - view_yport[vc]), 0, 1.0f };
 				d3ddev->SetViewport(&pViewport);
-		
+
 				D3DXMATRIX matTrans, matScale;
 
 				// Calculate a translation matrix
 				D3DXMatrixTranslation(&matTrans, -view_xview[vc] - 0.5, -view_yview[vc] - room_height - 0.5, 0);
 				D3DXMatrixScaling(&matScale, 1, -1, 1);
-		
+
 				// Calculate our world matrix by multiplying the above (in the correct order)
 				D3DXMATRIX matWorld = matTrans * matScale;
 
 				// Set the matrix to be applied to anything we render from now on
 				d3ddev->SetTransform( D3DTS_VIEW, &matWorld);
-	
+
 				D3DXMATRIX matProjection;    // the projection transform matrix
 				D3DXMatrixOrthoOffCenterLH(&matProjection,
 							0,
-							(FLOAT)view_wview[vc],   
-							0, 
-							(FLOAT)view_hview[vc],   
+							(FLOAT)view_wview[vc],
+							0,
+							(FLOAT)view_hview[vc],
 							0.0f,    // the near view-plane
 							1.0f);    // the far view-plane
 				d3ddev->SetTransform(D3DTS_PROJECTION, &matProjection);    // set the projection transform
-				  
+
 				d3ddev->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
 				d3ddev->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
-				
+
 				d3ddev->SetRenderState(D3DRS_ZENABLE, FALSE);
 				d3ddev->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
                 //glEnable(GL_BLEND);
@@ -545,17 +545,17 @@ void screen_init()
                 break;
             }
         }
-    }  
+    }
 }
 
 int screen_save(string filename) //Assumes native integers are little endian
 {
-	
+
 }
 
 int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h) //Assumes native integers are little endian
 {
-	
+
 }
 
 void display_set_gui_size(unsigned width, unsigned height) {

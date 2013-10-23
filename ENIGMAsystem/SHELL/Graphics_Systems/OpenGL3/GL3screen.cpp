@@ -102,10 +102,10 @@ namespace enigma
     {
         particles_impl = part_impl;
     }
-	
+
 	unsigned gui_width;
 	unsigned gui_height;
-	
+
 void draw_globalVBO()
 {
     if (globalVBO_verCount>0){
@@ -118,13 +118,13 @@ void draw_globalVBO()
         glEnableClientState(GL_COLOR_ARRAY);
 
         glBindBufferARB(GL_ARRAY_BUFFER, globalVBO);
-		
+
 		// Textures should be clamped when rendering 2D sprites and stuff, so memorize it.
 		GLint wrapr, wraps, wrapt;
 		glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, &wrapr);
 		glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, &wraps);
 		glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, &wrapt);
-		
+
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
@@ -134,7 +134,7 @@ void draw_globalVBO()
         glVertexPointer( 2, GL_FLOAT, sizeof(gs_scalar) * 8, NULL );
         glTexCoordPointer( 2, GL_FLOAT, sizeof(gs_scalar) * 8, (void*)(sizeof(gs_scalar) * 2) );
         glColorPointer( 4, GL_FLOAT, sizeof(gs_scalar) * 8, (void*)(sizeof(gs_scalar) * 4) );
-		
+
 
 		// this sprite batching mechanism does not allow one to apply transformations to sprites or text
 		// like is possible with the Direct3D 9 sprite batcher or traditionally in Game Maker.
@@ -145,16 +145,16 @@ void draw_globalVBO()
 		if (d3dZWriteEnable) {
 		  glDepthMask(true);
 		}
-		
+
 		// And now reset the textures repetition
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, wrapr);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wraps);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapt);
-		
+
         glDisableClientState( GL_COLOR_ARRAY );
         glDisableClientState( GL_TEXTURE_COORD_ARRAY );
         glDisableClientState( GL_VERTEX_ARRAY );
-		
+
 		glBindBufferARB(GL_ARRAY_BUFFER, 0);
 
         globalVBO_datCount = globalVBO_verCount = globalVBO_indCount = 0;
@@ -170,7 +170,7 @@ void screen_redraw()
 {
 	// Clean up any textures that ENIGMA may still think are binded but actually are not
 	texture_reset();
-	
+
     if (!view_enabled)
     {
         glViewport(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled());
@@ -335,7 +335,7 @@ void screen_redraw()
                 glLoadIdentity();
                 glScalef(1, (bound_framebuffer==0?-1:1), 1);
 
-                glOrtho(view_xview[vc], view_wview[vc] + view_xview[vc], view_yview[vc], view_hview[vc] + view_yview[vc], 0, 1);
+                glOrtho(int(view_xview[vc]), int(view_wview[vc] + view_xview[vc]), int(view_yview[vc]), int(view_hview[vc] + view_yview[vc]), 0, 1);
                 glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
                 glMultMatrixd(transformation_matrix);
 
@@ -412,7 +412,7 @@ void screen_redraw()
     }
 
 	enigma::draw_globalVBO();
-			
+
 	// Now process the sub event of draw called draw gui
 	// It is for drawing GUI elements without view scaling and transformation
     if (enigma::gui_used)
@@ -423,14 +423,14 @@ void screen_redraw()
         glOrtho(0, enigma::gui_width, 0, enigma::gui_height, 0, 1);
         glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
         glMultMatrixd(transformation_matrix);
-		
+
 		// Clear the depth buffer if hidden surface removal is on at the beginning of the draw step.
         if (enigma::d3dMode)
 			glClear(GL_DEPTH_BUFFER_BIT);
-		
+
 		int culling = d3d_get_culling();
 		d3d_set_culling(rs_none);
-		
+
         bool stop_loop = false;
 
         for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
@@ -449,11 +449,11 @@ void screen_redraw()
             if (stop_loop) break;
         }
 		enigma::draw_globalVBO();
-		
+
 		// reset the culling
 		d3d_set_culling(culling);
     }
-		
+
     screen_refresh();
 }
 
@@ -461,7 +461,7 @@ void screen_init()
 {
 	enigma::gui_width = window_get_region_width_scaled();
 	enigma::gui_height = window_get_region_height_scaled();
-	
+
     glGenBuffersARB(1, &globalVBO);
     texture_reset();
     if (!view_enabled)
