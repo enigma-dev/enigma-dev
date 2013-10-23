@@ -89,7 +89,7 @@ namespace enigma
     {
         particles_impl = part_impl;
     }
-	
+
 	unsigned gui_width;
 	unsigned gui_height;
 }
@@ -101,7 +101,7 @@ void screen_redraw()
 {
 	// Clean up any textures that ENIGMA may still think are binded but actually are not
 	texture_reset();
-	
+
     int FBO;
     if (!view_enabled)
     {
@@ -282,7 +282,7 @@ void screen_redraw()
                 {
                     glScalef(1, -1, 1);
                 }
-                glOrtho(view_xview[vc], view_wview[vc] + view_xview[vc], view_yview[vc], view_hview[vc] + view_yview[vc], 0, 1);
+                glOrtho(int(view_xview[vc]), int(view_wview[vc] + view_xview[vc]), int(view_yview[vc]), int(view_hview[vc] + view_yview[vc]), 0, 1);
                 glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
                 glMultMatrixd(transformation_matrix);
 
@@ -370,21 +370,21 @@ void screen_redraw()
             glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &FBO);
             glScalef(1, (FBO==0?-1:1), 1);
         }
-        else 
+        else
         {
             glScalef(1, -1, 1);
         }
         glOrtho(0, enigma::gui_width, 0, enigma::gui_height, 0, 1);
         glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
         glMultMatrixd(transformation_matrix);
-		
+
 		// Clear the depth buffer if hidden surface removal is on at the beginning of the draw step.
         if (enigma::d3dMode)
 			glClear(GL_DEPTH_BUFFER_BIT);
 
 		int culling = d3d_get_culling();
 		d3d_set_culling(rs_none);
-			
+
         bool stop_loop = false;
         for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
         {
@@ -400,7 +400,7 @@ void screen_redraw()
             enigma::instance_event_iterator = push_it;
             if (stop_loop) break;
         }
-		
+
 		// reset the culling
 		d3d_set_culling(culling);
     }
@@ -412,7 +412,7 @@ void screen_init()
 {
 	enigma::gui_width = window_get_region_width_scaled();
 	enigma::gui_height = window_get_region_height_scaled();
-	
+
     texture_reset();
     if (!view_enabled)
     {
