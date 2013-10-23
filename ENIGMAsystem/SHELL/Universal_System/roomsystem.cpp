@@ -169,13 +169,16 @@ namespace enigma
     instance_event_iterator = new inst_iter(NULL,NULL,NULL);
     for (int i = 0; i<instancecount; i++)
       is[i]->myevent_create();
+	 // instance create code should be added here or occur at this exact moment in time, but guess what the code 
+	 // isn't here, so where the fuck is it? and no not the create event, the instance create code from the room editor
+	 // WHERE THE FUCK IS IT?
     if (gamestart)
     for (int i = 0; i<instancecount; i++)
       is[i]->myevent_gamestart();
+	if (createcode)
+       createcode();
     for (int i = 0; i<instancecount; i++)
       is[i]->myevent_roomstart();
-    if (createcode)
-        createcode();
   }
 
   extern int room_loadtimecount;
