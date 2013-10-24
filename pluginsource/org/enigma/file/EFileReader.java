@@ -17,7 +17,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -177,6 +176,8 @@ public class EFileReader
 		public abstract SortedSet<String> getEntries();
 
 		public abstract Set<String> getEntries(String dir);
+
+		public abstract void close();
 		}
 
 	static class EGMZipFile extends EProjectFile
@@ -254,6 +255,16 @@ public class EFileReader
 			if (!dir.isEmpty() && dir.charAt(0) != '/') dir = '/' + dir;
 			return tree.get(dir);
 			}
+
+		@Override
+		public void close() {
+			try {
+				z.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 		}
 
 	static class EGMFolderFile extends EProjectFile
@@ -310,6 +321,12 @@ public class EFileReader
 				r.add(n);
 			return r;
 			}
+
+
+		public void close() {
+			
+		}
+		
 		}
 
 	static class EgmEntry
@@ -492,15 +509,22 @@ public class EFileReader
 		gf.resMap.put(EnigmaSettings.class,new SingletonResourceHolder<EnigmaSettings>(
 				new EnigmaSettings()));
 		gf.uri = f.toURI();
+		EProjectFile epf = null;
 		try
 			{
-			readEgmFile(zip ? new EGMZipFile(f) : new EGMFolderFile(f),gf,root);
+			epf = zip ? new EGMZipFile(f) : new EGMFolderFile(f);
+			readEgmFile(epf,gf,root);
 			return gf;
 			}
 		catch (IOException e)
 			{
 			throw new GmFormatException(gf,e);
+			} 
+		finally {
+			if (zip) {
+				epf.close();
 			}
+		}
 		}
 
 	public static void readEgmFile(EProjectFile f, ProjectFile gf, ResNode root) throws IOException
@@ -529,7 +553,7 @@ public class EFileReader
 			{
 			orphans.remove("toc.txt");
 			BufferedReader in = new BufferedReader(new InputStreamReader(f.asInputStream()));
-
+			
 			for (String entry = in.readLine(); entry != null; entry = in.readLine())
 				{
 				Class<? extends Resource<?,?>> ck = k;
@@ -546,6 +570,7 @@ public class EFileReader
 				if (!orphans.remove(entry)) eyOrphans.remove(entry + EY);
 				toc.add(new EgmEntry(entry,ck));
 				}
+			in.close();
 			}
 
 		if (!eyOrphans.isEmpty())
@@ -607,6 +632,7 @@ public class EFileReader
 
 		Resource<?,?> r = gf.resMap.get(kind).getResource();
 		reader.readUnknown(f,gf,is,dir,name,r);
+		is.close();
 		return r == null ? null : r.reference;
 		}
 
@@ -686,6 +712,13 @@ public class EFileReader
 				{
 				e.printStackTrace();
 				}
+			finally {
+				try {
+					br.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 			}
 		}
 
@@ -1303,6 +1336,7 @@ public class EFileReader
 
 			es.fromProperties(i);
 			readDataFile(f,gf,es,i,dir);
+			in.close();
 			}
 
 		protected void readData(ProjectFile gf, EnigmaSettings r, InputStream in)

@@ -503,6 +503,7 @@ public final class ApngIO
 						png.write(pngBase);
 						png.write(imageHeader);
 						hasData = false;
+						bais.close();
 						}
 					}
 				else if (genChunk.isType(IDAT.type))
@@ -521,6 +522,7 @@ public final class ApngIO
 					png.write(genChunk.getBytes());
 					ByteArrayInputStream bais = new ByteArrayInputStream(png.toByteArray());
 					ret.add(ImageIO.read(bais));
+					bais.close();
 					break;
 					}
 				else if (genChunk.isType(IHDR_Dummy.type)) {
