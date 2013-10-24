@@ -53,7 +53,14 @@ public class EgmIO extends FileView implements FileReader,FileWriter,GroupFilter
 
 	public ProjectFile read(InputStream in, URI uri, ResNode root) throws GmFormatException
 		{
-		return EFileReader.readEgmFile(new File(uri),root,true);
+		ProjectFile file = EFileReader.readEgmFile(new File(uri),root,true);
+		try {
+			in.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return file;
 		}
 
 	//Writer
@@ -73,6 +80,7 @@ public class EgmIO extends FileView implements FileReader,FileWriter,GroupFilter
 	public void write(OutputStream out, ProjectFile gf, ResNode root) throws IOException
 		{
 		EFileWriter.writeEgmZipFile(out,gf,root);
+		out.close();
 		}
 
 	@Override
