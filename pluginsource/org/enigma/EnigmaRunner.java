@@ -199,17 +199,11 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 	private static UnsatisfiedLinkError attemptLib()
 	{
 		try {
-			System.setProperty("jna.library.path","compileEGMf.dll");
 			String lib = "compileEGMf"; //$NON-NLS-1$
-			NativeLibrary.addSearchPath(lib,"."); //$NON-NLS-1$
 			NativeLibrary.addSearchPath(lib,".."); //$NON-NLS-1$
-			NativeLibrary.addSearchPath(lib,"../.."); //$NON-NLS-1$
-			NativeLibrary.addSearchPath(lib,"shared/"); //$NON-NLS-1$
-			NativeLibrary.addSearchPath(lib,"plugins/shared"); //$NON-NLS-1$
-			NativeLibrary.addSearchPath(lib,"C:/Users/Owner/Desktop/ENIGMA/enigma-dev/"); //$NON-NLS-1$
 			NativeLibrary.addSearchPath(lib,LGM.workDir.getParent());
 			NativeLibrary.addSearchPath(lib,LGM.workDir.getPath());
-			DRIVER = (EnigmaDriver) Native.loadLibrary("C:/Users/Owner/Desktop/ENIGMA/enigma-dev/compileEGMf.dll",EnigmaDriver.class);
+			DRIVER = (EnigmaDriver) Native.loadLibrary(lib,EnigmaDriver.class);
 		} catch (UnsatisfiedLinkError e) {
 			e.printStackTrace();
 			return e;
