@@ -78,7 +78,7 @@ public class EnigmaStruct extends Structure
 	protected List<String> getFieldOrder()
 		{
 		return Arrays.asList("fileVersion","filename","sprites","spriteCount","sounds","soundCount",
-				"backgrounds","backgroundCount","paths","pathCount","scripts","scriptCount","fonts",
+				"backgrounds","backgroundCount","paths","pathCount","scripts","scriptCount","shaders","shaderCount","fonts",
 				"fontCount","timelines","timelineCount","gmObjects","gmObjectCount",
 				"rooms","roomCount","triggers","triggerCount","constants","constantCount","includes",
 				"includeCount","packages","packageCount","extensions","extensionCount","gameSettings",
