@@ -162,6 +162,7 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 					Error e = attemptLib();
 					if (e != null)
 						{
+						e.printStackTrace();
 						String err = Messages.getString("EnigmaRunner.ERROR_LIBRARY") //$NON-NLS-1$
 								+ Messages.format("EnigmaRunner.ERROR_LIBRARY_EXACT",e.getMessage()); //$NON-NLS-1$
 						JOptionPane.showMessageDialog(null,err);
@@ -196,20 +197,21 @@ public class EnigmaRunner implements ActionListener,SubframeListener,ReloadListe
 		}
 
 	private static UnsatisfiedLinkError attemptLib()
-		{
-		try
-			{
+	{
+		try {
 			String lib = "compileEGMf"; //$NON-NLS-1$
-			NativeLibrary.addSearchPath(lib,"."); //$NON-NLS-1$
+			NativeLibrary.addSearchPath(lib,".."); //$NON-NLS-1$
 			NativeLibrary.addSearchPath(lib,LGM.workDir.getParent());
+			NativeLibrary.addSearchPath(lib,LGM.workDir.getPath());
 			DRIVER = (EnigmaDriver) Native.loadLibrary(lib,EnigmaDriver.class);
-			return null;
-			}
-		catch (UnsatisfiedLinkError e)
-			{
+		} catch (UnsatisfiedLinkError e) {
+			e.printStackTrace();
 			return e;
-			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
+		return null;
+	}
 
 	//This can be static since the ENIGMA_READY and Enigma dll are both static.
 	public static boolean assertReady()
