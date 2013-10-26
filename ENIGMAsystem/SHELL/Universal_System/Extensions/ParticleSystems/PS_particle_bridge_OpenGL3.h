@@ -425,7 +425,7 @@ namespace enigma {
           if (!oldtonew) {
             actual_index = pi_list_size - switch_offset - 1;
           }
-          enigma_user::texture_set(GmTextures[texture_indices[actual_index]]->gltex);
+          enigma_user::texture_set(textureStructs[texture_indices[actual_index]]->gltex);
           if (blend_adds[actual_index]) {
             glBlendFunc(GL_SRC_ALPHA,GL_ONE);
           }

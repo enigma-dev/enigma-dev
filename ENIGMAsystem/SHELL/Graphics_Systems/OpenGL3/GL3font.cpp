@@ -288,7 +288,7 @@ void draw_text(gs_scalar x, gs_scalar y,variant vstr)
 {
   string str = toString(vstr);
   get_fontv(fnt,currentfont);
-  texture_set(GmTextures[fnt->texture]->gltex);
+  texture_set(textureStructs[fnt->texture]->gltex);
   gs_scalar yy = valign == fa_top ? y+fnt->yoffset : valign == fa_middle ? y +fnt->yoffset - string_height(str)/2 : y + fnt->yoffset - string_height(str);
   gs_scalar re = (gs_scalar)enigma::currentcolor[0]/255.0, gr = (gs_scalar)enigma::currentcolor[1]/255.0, bl = (gs_scalar)enigma::currentcolor[2]/255.0, al = (gs_scalar)enigma::currentcolor[3]/255.0;
   if (halign == fa_left){
@@ -346,7 +346,7 @@ void draw_text_skewed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar top, gs_
 {
   string str = toString(vstr);
   get_fontv(fnt,currentfont);
-  texture_set(GmTextures[fnt->texture]->gltex);
+  texture_set(textureStructs[fnt->texture]->gltex);
   gs_scalar yy = valign == fa_top ? y+fnt->yoffset : valign == fa_middle ? y +fnt->yoffset - string_height(str)/2 : y + fnt->yoffset - string_height(str);
   gs_scalar re = (gs_scalar)enigma::currentcolor[0]/255.0, gr = (gs_scalar)enigma::currentcolor[1]/255.0, bl = (gs_scalar)enigma::currentcolor[2]/255.0, al = (gs_scalar)enigma::currentcolor[3]/255.0;
   if (halign == fa_left){
@@ -404,7 +404,7 @@ void draw_text_ext(gs_scalar x, gs_scalar y,variant vstr, gs_scalar sep, gs_scal
 {
   string str = toString(vstr);
   get_fontv(fnt,currentfont);
-  texture_set(GmTextures[fnt->texture]->gltex);
+  texture_set(textureStructs[fnt->texture]->gltex);
 
   gs_scalar yy = valign == fa_top ? y+fnt->yoffset : valign == fa_middle ? y + fnt->yoffset - string_height_ext(str,sep,w)/2 : y + fnt->yoffset - string_height_ext(str,sep,w);
   gs_scalar re = (gs_scalar)enigma::currentcolor[0]/255.0, gr = (gs_scalar)enigma::currentcolor[1]/255.0, bl = (gs_scalar)enigma::currentcolor[2]/255.0, al = (gs_scalar)enigma::currentcolor[3]/255.0;
@@ -481,7 +481,7 @@ void draw_text_transformed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar xsc
 {
   string str = toString(vstr);
   get_fontv(fnt,currentfont);
-  texture_set(GmTextures[fnt->texture]->gltex);
+  texture_set(textureStructs[fnt->texture]->gltex);
   gs_scalar re = (gs_scalar)enigma::currentcolor[0]/255.0, gr = (gs_scalar)enigma::currentcolor[1]/255.0, bl = (gs_scalar)enigma::currentcolor[2]/255.0, al = (gs_scalar)enigma::currentcolor[3]/255.0;
 
   rot *= M_PI/180;
@@ -577,7 +577,7 @@ void draw_text_ext_transformed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar
 {
   string str = toString(vstr);
   get_fontv(fnt,currentfont);
-  texture_set(GmTextures[fnt->texture]->gltex);
+  texture_set(textureStructs[fnt->texture]->gltex);
   gs_scalar re = (gs_scalar)enigma::currentcolor[0]/255.0, gr = (gs_scalar)enigma::currentcolor[1]/255.0, bl = (gs_scalar)enigma::currentcolor[2]/255.0, al = (gs_scalar)enigma::currentcolor[3]/255.0;
 
   rot *= M_PI/180;
@@ -706,7 +706,7 @@ void draw_text_transformed_color(gs_scalar x, gs_scalar y, variant vstr, gs_scal
 {
   string str = toString(vstr);
   get_fontv(fnt,currentfont);
-  texture_set(GmTextures[fnt->texture]->gltex);
+  texture_set(textureStructs[fnt->texture]->gltex);
 
   rot *= M_PI/180;
 
@@ -813,7 +813,7 @@ void draw_text_ext_transformed_color(gs_scalar x, gs_scalar y, variant vstr, gs_
 {
   string str = toString(vstr);
   get_fontv(fnt,currentfont);
-  texture_set(GmTextures[fnt->texture]->gltex);
+  texture_set(textureStructs[fnt->texture]->gltex);
 
   rot *= M_PI/180;
 
@@ -947,7 +947,7 @@ void draw_text_color(gs_scalar x, gs_scalar y, variant vstr, int c1, int c2, int
 {
   string str = toString(vstr);
   get_fontv(fnt,currentfont);
-  texture_set(GmTextures[fnt->texture]->gltex);
+  texture_set(textureStructs[fnt->texture]->gltex);
 
   gs_scalar yy = valign == fa_top ? y+fnt->yoffset : valign == fa_middle ? y +fnt->yoffset - string_height(str)/2 : y + fnt->yoffset - string_height(str);
   int hcol1 = c1, hcol2 = c1, hcol3 = c3, hcol4 = c4,  line = 0;
@@ -1023,7 +1023,7 @@ void draw_text_ext_color(gs_scalar x, gs_scalar y, variant vstr, gs_scalar sep, 
 {
   string str = toString(vstr);
   get_fontv(fnt,currentfont);
-  texture_set(GmTextures[fnt->texture]->gltex);
+  texture_set(textureStructs[fnt->texture]->gltex);
 
   gs_scalar yy = valign == fa_top ? y+fnt->yoffset : valign == fa_middle ? y + fnt->yoffset - string_height_ext(str,sep,w)/2 : y + fnt->yoffset - string_height_ext(str,sep,w);
   gs_scalar width = 0, tw = 0, line = 0, sw = string_width_ext_line(str, w, line);

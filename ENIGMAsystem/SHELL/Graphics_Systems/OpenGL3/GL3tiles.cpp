@@ -51,7 +51,7 @@ namespace enigma
     {
         if (!enigma_user::background_exists(back)) return;
         get_background(bck2d,back);
-        enigma_user::texture_set(GmTextures[bck2d->texture]->gltex);
+        enigma_user::texture_set(textureStructs[bck2d->texture]->gltex);
 
         glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
 

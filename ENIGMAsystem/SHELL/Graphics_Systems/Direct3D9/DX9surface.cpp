@@ -61,10 +61,10 @@ int surface_create(int width, int height)
 	LPDIRECT3DTEXTURE9 texture;
 	d3ddev->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &texture, NULL);			 
 	enigma::Surface* surface = new enigma::Surface();	 
-	GmTexture* gmTexture = new GmTexture(texture);
+	TextureStruct* gmTexture = new TextureStruct(texture);
 	gmTexture->isFont = false;
-    GmTextures.push_back(gmTexture);
-    surface->tex = GmTextures.size() - 1;
+    textureStructs.push_back(gmTexture);
+    surface->tex = textureStructs.size() - 1;
 	surface->width = width; surface->height = height;
 	texture->GetSurfaceLevel(0, &surface->surf);
 	
@@ -77,10 +77,10 @@ int surface_create_msaa(int width, int height, int levels)
 	LPDIRECT3DTEXTURE9 texture;
 	d3ddev->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &texture, NULL);			 
 	enigma::Surface* surface = new enigma::Surface();	 
-	GmTexture* gmTexture = new GmTexture(texture);
+	TextureStruct* gmTexture = new TextureStruct(texture);
 	gmTexture->isFont = false;
-    GmTextures.push_back(gmTexture);
-    surface->tex = GmTextures.size() - 1;
+    textureStructs.push_back(gmTexture);
+    surface->tex = textureStructs.size() - 1;
 	surface->width = width; surface->height = height;
 	texture->GetSurfaceLevel(0, &surface->surf);
 	// Does not seem to work this way, it says online you must create the surface as a render target then blit it to the texture
@@ -127,7 +127,7 @@ void draw_surface(int id, gs_scalar x, gs_scalar y)
     get_surface(surface,id);
 	
 	D3DXVECTOR3 pos(x, y, 0);
-	dsprite->Draw(GmTextures[surface->tex]->gTexture, NULL, NULL, &pos, enigma::get_currentcolor());
+	dsprite->Draw(textureStructs[surface->tex]->gTexture, NULL, NULL, &pos, enigma::get_currentcolor());
 }
 
 void draw_surface_stretched(int id, gs_scalar x, gs_scalar y, float w, float h)
@@ -142,7 +142,7 @@ void draw_surface_part(int id, gs_scalar left, gs_scalar top, gs_scalar width, g
 	D3DXVECTOR3 pos(x, y, 0);
 	tagRECT rect;
 	rect.left = left; rect.top = top; rect.right = left + width; rect.bottom = top + height;
-	dsprite->Draw(GmTextures[surface->tex]->gTexture, &rect, 0, &pos, enigma::get_currentcolor());
+	dsprite->Draw(textureStructs[surface->tex]->gTexture, &rect, 0, &pos, enigma::get_currentcolor());
 }
 
 void draw_surface_tiled(int id, gs_scalar x, gs_scalar y)
@@ -173,7 +173,7 @@ void draw_surface_ext(int id,gs_scalar x, gs_scalar y,gs_scalar xscale, gs_scala
 	// Tell the sprite about the matrix
 	dsprite->SetTransform(&mat);
 
-	dsprite->Draw(GmTextures[surface->tex]->gTexture, NULL, NULL, NULL,
+	dsprite->Draw(textureStructs[surface->tex]->gTexture, NULL, NULL, NULL,
 		D3DCOLOR_ARGB(char(alpha*255), __GETR(color), __GETG(color), __GETB(color)));
 
 	D3DXMatrixTransformation2D(&mat,NULL,0.0,0,NULL,0,0);
@@ -206,7 +206,7 @@ void draw_surface_part_ext(int id, gs_scalar left, gs_scalar top, gs_scalar widt
 	tagRECT rect;
 	rect.left = left; rect.top = top; rect.right = left + width; rect.bottom = top + height;
 
-	dsprite->Draw(GmTextures[surface->tex]->gTexture, &rect, NULL, NULL,
+	dsprite->Draw(textureStructs[surface->tex]->gTexture, &rect, NULL, NULL,
 		D3DCOLOR_ARGB(char(alpha*255), __GETR(color), __GETG(color), __GETB(color)));
 }
 

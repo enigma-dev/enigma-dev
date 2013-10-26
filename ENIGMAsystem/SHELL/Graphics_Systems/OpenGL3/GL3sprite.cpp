@@ -79,7 +79,7 @@ void draw_sprite(int spr, int subimg, gs_scalar x, gs_scalar y)
 {
     get_spritev(spr2d,spr);
     const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
-    texture_set(GmTextures[spr2d->texturearray[usi]]->gltex);
+    texture_set(textureStructs[spr2d->texturearray[usi]]->gltex);
 
     const gs_scalar tbx = spr2d->texbordxarray[usi], tby = spr2d->texbordyarray[usi],
                 xvert1 = x-spr2d->xoffset, xvert2 = xvert1 + spr2d->width,
@@ -98,7 +98,7 @@ void draw_sprite_pos(int spr, int subimg, gs_scalar x1, gs_scalar y1, gs_scalar 
 {
     get_spritev(spr2d,spr);
     const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
-    texture_set(GmTextures[spr2d->texturearray[usi]]->gltex);
+    texture_set(textureStructs[spr2d->texturearray[usi]]->gltex);
 
     const gs_scalar tbx = spr2d->texbordxarray[usi], tby = spr2d->texbordyarray[usi];
 
@@ -115,7 +115,7 @@ void draw_sprite_stretched(int spr, int subimg, gs_scalar x, gs_scalar y, gs_sca
 {
     get_spritev(spr2d,spr);
     const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
-    texture_set(GmTextures[spr2d->texturearray[usi]]->gltex);
+    texture_set(textureStructs[spr2d->texturearray[usi]]->gltex);
 
     const gs_scalar tbx = spr2d->texbordxarray[usi], tby = spr2d->texbordyarray[usi],
                 xvert1 = x-spr2d->xoffset, xvert2 = xvert1 + width,
@@ -134,7 +134,7 @@ void draw_sprite_part(int spr, int subimg, gs_scalar left, gs_scalar top, gs_sca
 {
     get_spritev(spr2d,spr);
     const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
-    texture_set(GmTextures[spr2d->texturearray[usi]]->gltex);
+    texture_set(textureStructs[spr2d->texturearray[usi]]->gltex);
 
     const gs_scalar tbw = spr2d->width/(float)spr2d->texbordxarray[usi], tbh = spr2d->height/(float)spr2d->texbordyarray[usi],
           tbx1 = left/tbw, tbx2 = tbx1 + width/tbw,
@@ -153,7 +153,7 @@ void draw_sprite_part_offset(int spr, int subimg, gs_scalar left, gs_scalar top,
 {
     get_spritev(spr2d,spr);
     const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
-    texture_set(GmTextures[spr2d->texturearray[usi]]->gltex);
+    texture_set(textureStructs[spr2d->texturearray[usi]]->gltex);
 
     const gs_scalar tbw = spr2d->width/spr2d->texbordxarray[usi], tbh = spr2d->height/spr2d->texbordyarray[usi],
           xvert1 = x-spr2d->xoffset, xvert2 = xvert1 + spr2d->width,
@@ -174,7 +174,7 @@ void draw_sprite_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar xs
 {
     get_spritev(spr2d,spr);
     const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
-    texture_set(GmTextures[spr2d->texturearray[usi]]->gltex);
+    texture_set(textureStructs[spr2d->texturearray[usi]]->gltex);
 
     rot *= M_PI/180;
 
@@ -202,7 +202,7 @@ void draw_sprite_part_ext(int spr, int subimg, gs_scalar left, gs_scalar top, gs
 {
     get_spritev(spr2d,spr);
     const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
-    texture_set(GmTextures[spr2d->texturearray[usi]]->gltex);
+    texture_set(textureStructs[spr2d->texturearray[usi]]->gltex);
 
     const gs_scalar tbw = spr2d->width/(float)spr2d->texbordxarray[usi], tbh = spr2d->height/(float)spr2d->texbordyarray[usi],
           xvert1 = x, xvert2 = xvert1 + width*xscale,
@@ -224,7 +224,7 @@ void draw_sprite_general(int spr, int subimg, gs_scalar left, gs_scalar top, gs_
 {
     get_spritev(spr2d,spr);
     const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
-    texture_set(GmTextures[spr2d->texturearray[usi]]->gltex);
+    texture_set(textureStructs[spr2d->texturearray[usi]]->gltex);
 
     const gs_scalar
     tbw = spr2d->width/spr2d->texbordxarray[usi], tbh = spr2d->height/spr2d->texbordyarray[usi],
@@ -252,7 +252,7 @@ void draw_sprite_stretched_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs
 {
     get_spritev(spr2d,spr);
     const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
-    texture_set(GmTextures[spr2d->texturearray[usi]]->gltex);
+    texture_set(textureStructs[spr2d->texturearray[usi]]->gltex);
 
     const gs_scalar tbx = spr2d->texbordxarray[usi], tby = spr2d->texbordyarray[usi],
                 xvert1 = x-spr2d->xoffset, xvert2 = xvert1 + width,
@@ -285,7 +285,7 @@ void draw_sprite_tiled(int spr, int subimg, gs_scalar x, gs_scalar y)
 {
     get_spritev(spr2d,spr);
     const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
-    texture_set(GmTextures[spr2d->texturearray[usi]]->gltex);
+    texture_set(textureStructs[spr2d->texturearray[usi]]->gltex);
 
     const gs_scalar tbx  = spr2d->texbordxarray[usi], tby  = spr2d->texbordyarray[usi],
     xoff = fmod(spr2d->xoffset+x,spr2d->width)-spr2d->width, yoff = fmod(spr2d->yoffset+y,spr2d->height)-spr2d->height;
@@ -319,7 +319,7 @@ void draw_sprite_tiled_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_sca
 {
     get_spritev(spr2d,spr);
     const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
-    texture_set(GmTextures[spr2d->texturearray[usi]]->gltex);
+    texture_set(textureStructs[spr2d->texturearray[usi]]->gltex);
 
     const gs_scalar
     tbx  = spr2d->texbordxarray[usi], tby  = spr2d->texbordyarray[usi],

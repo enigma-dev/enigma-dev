@@ -23,18 +23,18 @@
 #include <vector>
 using std::vector;
 
-struct GmTexture {
+struct TextureStruct {
 	LPDIRECT3DTEXTURE9 gTexture;
 	bool isFont;
-	GmTexture(LPDIRECT3DTEXTURE9 gTex) {
+	TextureStruct(LPDIRECT3DTEXTURE9 gTex) {
 		gTexture = gTex;
 	}
 	
-	~GmTexture() {
+	~TextureStruct() {
 		
 	}
 };
-extern vector<GmTexture*> GmTextures;
+extern vector<TextureStruct*> textureStructs;
 
 LPDIRECT3DTEXTURE9 get_texture(int texid);
 

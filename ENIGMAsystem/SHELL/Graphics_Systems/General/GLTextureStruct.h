@@ -23,13 +23,13 @@
 #include <vector>
 using std::vector;
 
-struct GmTexture {
+struct TextureStruct {
 	unsigned gltex;
 	bool isFont;
-	GmTexture(unsigned gtex);
-	~GmTexture();
+	TextureStruct(unsigned gtex);
+	~TextureStruct();
 };
-extern vector<GmTexture*> GmTextures;
+extern vector<TextureStruct*> textureStructs;
 
 unsigned get_texture(int texid);
 
