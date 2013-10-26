@@ -97,7 +97,7 @@ namespace enigma {
         else { // Draw particle sprite.
 
           particle_sprite* ps = pt->part_sprite;
-          enigma_user::texture_set(GmTextures[ps->texture]->gltex);
+          enigma_user::texture_set(textureStructs[ps->texture]->gltex);
 
           if (pt->blend_additive) {
              glBlendFunc(GL_SRC_ALPHA,GL_ONE);
@@ -146,7 +146,7 @@ namespace enigma {
 
         particle_sprite* ps = get_particle_sprite(pt_sh_pixel);
         if (ps == NULL) return; // NOTE: Skip to next particle.
-        enigma_user::texture_set(GmTextures[ps->texture]->gltex);
+        enigma_user::texture_set(textureStructs[ps->texture]->gltex);
 
         glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
         glColor4ub(__GETR(color),__GETG(color),__GETB(color), alpha);

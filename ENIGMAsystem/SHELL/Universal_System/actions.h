@@ -26,6 +26,8 @@
  **                                                                              **
  \********************************************************************************/
 
+#include <stdio.h>
+
 extern bool argument_relative;
 
 #include "instance_system_base.h"
@@ -33,6 +35,14 @@ extern bool argument_relative;
 
 namespace enigma_user
 {
+
+void action_webpage(const std::string &url)
+{
+	//TODO: Look for cross-platform method.
+	#ifdef _WIN32
+		ShellExecute (NULL, "open", url.c_str(), NULL, NULL, SW_SHOWNORMAL);
+	#endif
+}
 
 inline bool action_if_variable(const variant& variable, const variant& value, int operation) {
     switch (operation)

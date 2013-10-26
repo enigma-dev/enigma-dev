@@ -27,7 +27,7 @@
 #include "Graphics_Systems/graphics_mandatory.h"
 
 
-vector<GmTexture*> GmTextures(0);
+vector<TextureStruct*> textureStructs(0);
 
 namespace enigma_user {
   extern int room_width, room_height;
@@ -37,7 +37,7 @@ namespace enigma {
 }
 
 LPDIRECT3DTEXTURE9 get_texture(int texid) {
-  return (size_t(texid) >= GmTextures.size())? NULL : GmTextures[texid]->gTexture;
+  return (size_t(texid) >= textureStructs.size())? NULL : textureStructs[texid]->gTexture;
 }
 
 inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect powers of two
@@ -71,10 +71,10 @@ namespace enigma
 
 	texture->UnlockRect(0);
 
-	GmTexture* gmTexture = new GmTexture(texture);
-	gmTexture->isFont = isfont;
-    GmTextures.push_back(gmTexture);
-    return GmTextures.size()-1;
+	TextureStruct* textureStruct = new TextureStruct(texture);
+	textureStruct->isFont = isfont;
+    textureStructs.push_back(textureStruct);
+    return textureStructs.size()-1;
   }
 
   int graphics_duplicate_texture(int tex)
@@ -87,10 +87,10 @@ namespace enigma
 
   }
 
-// V when this is called its passing the Gluint, but the Gluint is also stored by my GmTexture struct
+// V when this is called its passing the Gluint, but the Gluint is also stored by my TextureStruct struct
   void graphics_delete_texture(int tex)
   {
-    delete GmTextures[tex];
+    delete textureStructs[tex];
   }
 
   unsigned char* graphics_get_texture_rgba(unsigned texture)

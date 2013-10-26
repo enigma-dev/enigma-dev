@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton
+/** Copyright (C) 2013 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,22 +15,10 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Universal_System/scalar.h"
 
-#ifndef _GLTEXTURESTRUCT__H
-#define _GLTEXTURESTRUCT__H
+#include <string>
+using std::string;
 
-#include <vector>
-using std::vector;
-
-struct TextureStruct {
-	unsigned gltex;
-	bool isFont;
-	TextureStruct(unsigned gtex);
-	~TextureStruct();
-};
-extern vector<TextureStruct*> textureStructs;
-
-unsigned get_texture(int texid);
-
-#endif
+namespace enigma_user {
+	void action_show_video(string fname, bool windowed, bool loop);
+}
