@@ -69,7 +69,7 @@ namespace enigma_user
 void draw_background(int back, gs_scalar x, gs_scalar y)
 {
     get_background(bck2d,back);
-    texture_set(GmTextures[bck2d->texture]->gltex);
+    texture_set(textureStructs[bck2d->texture]->gltex);
 
     const gs_scalar tbx=bck2d->texbordx,tby=bck2d->texbordy,
                 xvert1 = x, xvert2 = x+bck2d->width,
@@ -87,7 +87,7 @@ void draw_background(int back, gs_scalar x, gs_scalar y)
 void draw_background_stretched(int back, gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height)
 {
     get_background(bck2d,back);
-    texture_set(GmTextures[bck2d->texture]->gltex);
+    texture_set(textureStructs[bck2d->texture]->gltex);
 
     const gs_scalar tbx=bck2d->texbordx,tby=bck2d->texbordy,
                 xvert1 = x, xvert2 = x+width,
@@ -105,7 +105,7 @@ void draw_background_stretched(int back, gs_scalar x, gs_scalar y, gs_scalar wid
 void draw_background_part(int back, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y)
 {
     get_background(bck2d,back);
-    texture_set(GmTextures[bck2d->texture]->gltex);
+    texture_set(textureStructs[bck2d->texture]->gltex);
 
     const gs_scalar tbw = bck2d->width/(float)bck2d->texbordx, tbh = bck2d->height/(float)bck2d->texbordy,
           tbx1 = left/tbw, tbx2 = tbx1 + width/tbw,
@@ -125,7 +125,7 @@ void draw_background_part(int back, gs_scalar left, gs_scalar top, gs_scalar wid
 void draw_background_tiled(int back, gs_scalar x, gs_scalar y)
 {
     get_background(bck2d,back);
-    texture_set(GmTextures[bck2d->texture]->gltex);
+    texture_set(textureStructs[bck2d->texture]->gltex);
 
     const gs_scalar tbx  = bck2d->texbordx, tby  = bck2d->texbordy,
     xoff = fmod(x,bck2d->width)-bck2d->width, yoff = fmod(y,bck2d->height)-bck2d->height;
@@ -158,7 +158,7 @@ void draw_background_tiled(int back, gs_scalar x, gs_scalar y)
 void draw_background_tiled_area(int back, gs_scalar x, gs_scalar y, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2)
 {
     get_background(bck2d,back);
-    texture_set(GmTextures[bck2d->texture]->gltex);
+    texture_set(textureStructs[bck2d->texture]->gltex);
 
     const gs_scalar tbx=bck2d->texbordx,tby=bck2d->texbordy;
     gs_scalar sw,sh,i,j,jj,left,top,width,height,X,Y;
@@ -203,7 +203,7 @@ void draw_background_tiled_area(int back, gs_scalar x, gs_scalar y, gs_scalar x1
 void draw_background_ext(int back, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int blend, gs_scalar alpha)
 {
     get_background(bck2d,back);
-    texture_set(GmTextures[bck2d->texture]->gltex);
+    texture_set(textureStructs[bck2d->texture]->gltex);
 
     rot *= M_PI/180;
 
@@ -230,7 +230,7 @@ void draw_background_ext(int back, gs_scalar x, gs_scalar y, gs_scalar xscale, g
 void draw_background_stretched_ext(int back, gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, int blend, gs_scalar alpha)
 {
     get_background(bck2d,back);
-    texture_set(GmTextures[bck2d->texture]->gltex);
+    texture_set(textureStructs[bck2d->texture]->gltex);
 
     const gs_scalar tbx=bck2d->texbordx, tby=bck2d->texbordy;
 
@@ -247,7 +247,7 @@ void draw_background_stretched_ext(int back, gs_scalar x, gs_scalar y, gs_scalar
 void draw_background_part_ext(int back, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int blend, gs_scalar alpha)
 {
     get_background(bck2d,back);
-      texture_set(GmTextures[bck2d->texture]->gltex);
+      texture_set(textureStructs[bck2d->texture]->gltex);
 
     gs_scalar tbw = bck2d->width/(gs_scalar)bck2d->texbordx, tbh = bck2d->height/(gs_scalar)bck2d->texbordy,
           xvert1 = x, xvert2 = xvert1 + width*xscale,
@@ -268,7 +268,7 @@ void draw_background_part_ext(int back, gs_scalar left, gs_scalar top, gs_scalar
 void draw_background_tiled_ext(int back, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int blend, gs_scalar alpha)
 {
     get_background(bck2d,back);
-    texture_set(GmTextures[bck2d->texture]->gltex);
+    texture_set(textureStructs[bck2d->texture]->gltex);
 
     const gs_scalar
     tbx = bck2d->texbordx, tby = bck2d->texbordy,
@@ -307,7 +307,7 @@ void draw_background_tiled_ext(int back, gs_scalar x, gs_scalar y, gs_scalar xsc
 void draw_background_tiled_area_ext(int back, gs_scalar x, gs_scalar y, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar xscale, gs_scalar yscale, int blend, gs_scalar alpha)
 {
     get_background(bck2d,back);
-    texture_set(GmTextures[bck2d->texture]->gltex);
+    texture_set(textureStructs[bck2d->texture]->gltex);
 
     const gs_scalar tbx=bck2d->texbordx,tby=bck2d->texbordy;
     gs_scalar sw,sh,i,j,jj,left,top,width,height,X,Y;
@@ -352,7 +352,7 @@ void draw_background_tiled_area_ext(int back, gs_scalar x, gs_scalar y, gs_scala
 void draw_background_general(int back, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, gs_scalar a1, gs_scalar a2, gs_scalar a3, gs_scalar a4)
 {
     get_background(bck2d,back);
-    texture_set(GmTextures[bck2d->texture]->gltex);
+    texture_set(textureStructs[bck2d->texture]->gltex);
 
     const gs_scalar
       tbx = bck2d->texbordx,  tby = bck2d->texbordy,
