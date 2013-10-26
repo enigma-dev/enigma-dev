@@ -313,7 +313,7 @@ void draw_text(gs_scalar x, gs_scalar y, variant vstr)
 			D3DXVECTOR3 pos(xx + g.x, yy + g.y, 0);
 			tagRECT rect;
 			rect.left = g.tx * fnt->twid; rect.top = g.ty * fnt->thgt; rect.right = g.tx2 * fnt->twid; rect.bottom = g.ty2 * fnt->thgt;
-			dsprite->Draw(GmTextures[fnt->texture]->gTexture, &rect, NULL, &pos, enigma::get_currentcolor());
+			dsprite->Draw(textureStructs[fnt->texture]->gTexture, &rect, NULL, &pos, enigma::get_currentcolor());
           xx += int(g.xs);
         }
       }
@@ -335,7 +335,7 @@ void draw_text(gs_scalar x, gs_scalar y, variant vstr)
 			D3DXVECTOR3 pos(xx + g.x, yy + g.y, 0);
 			tagRECT rect;
 			rect.left = g.tx * fnt->twid; rect.top = g.ty * fnt->thgt; rect.right = g.tx2 * fnt->twid; rect.bottom = g.ty2 * fnt->thgt;
-			dsprite->Draw(GmTextures[fnt->texture]->gTexture, &rect, NULL, &pos, enigma::get_currentcolor());
+			dsprite->Draw(textureStructs[fnt->texture]->gTexture, &rect, NULL, &pos, enigma::get_currentcolor());
           xx += float(g.xs);
         }
       }
@@ -380,7 +380,7 @@ void draw_text_ext(gs_scalar x, gs_scalar y, variant vstr, gs_scalar sep, gs_sca
 			D3DXVECTOR3 pos(xx + g.x, yy + g.y, 0);
 			tagRECT rect;
 			rect.left = g.tx * fnt->twid; rect.top = g.ty * fnt->thgt; rect.right = g.tx2 * fnt->twid; rect.bottom = g.ty2 * fnt->thgt;
-			dsprite->Draw(GmTextures[fnt->texture]->gTexture, &rect, NULL, &pos, enigma::get_currentcolor());
+			dsprite->Draw(textureStructs[fnt->texture]->gTexture, &rect, NULL, &pos, enigma::get_currentcolor());
           xx += float(g.xs);
         }
       }
@@ -409,7 +409,7 @@ void draw_text_ext(gs_scalar x, gs_scalar y, variant vstr, gs_scalar sep, gs_sca
             D3DXVECTOR3 pos(xx + g.x, yy + g.y, 0);
 			tagRECT rect;
 			rect.left = g.tx * fnt->twid; rect.top = g.ty * fnt->thgt; rect.right = g.tx2 * fnt->twid; rect.bottom = g.ty2 * fnt->thgt;
-			dsprite->Draw(GmTextures[fnt->texture]->gTexture, &rect, NULL, &pos, enigma::get_currentcolor());
+			dsprite->Draw(textureStructs[fnt->texture]->gTexture, &rect, NULL, &pos, enigma::get_currentcolor());
           xx += float(g.xs);
           width += g.xs;
         }

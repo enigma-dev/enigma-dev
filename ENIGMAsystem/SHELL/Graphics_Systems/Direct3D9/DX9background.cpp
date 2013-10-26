@@ -72,7 +72,7 @@ void draw_background(int back, gs_scalar x, gs_scalar y)
 {
   get_background(bck2d, back);
   D3DXVECTOR3 pos(x, y, 0);
-  dsprite->Draw(GmTextures[bck2d->texture]->gTexture, NULL, NULL, &pos, enigma::get_currentcolor());
+  dsprite->Draw(textureStructs[bck2d->texture]->gTexture, NULL, NULL, &pos, enigma::get_currentcolor());
 }
 
 void draw_background_stretched(int back, gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height)
@@ -95,7 +95,7 @@ void draw_background_stretched(int back, gs_scalar x, gs_scalar y, gs_scalar wid
 	// Tell the sprite about the matrix
 	dsprite->SetTransform(&mat);
 
-	dsprite->Draw(GmTextures[bck2d->texture]->gTexture, NULL, NULL, NULL, enigma::get_currentcolor());
+	dsprite->Draw(textureStructs[bck2d->texture]->gTexture, NULL, NULL, NULL, enigma::get_currentcolor());
 
 	D3DXMatrixTransformation2D(&mat,NULL,0.0,0,NULL,0,0);
 	dsprite->SetTransform(&mat);
@@ -108,7 +108,7 @@ void draw_background_part(int back, gs_scalar left, gs_scalar top, gs_scalar wid
 	D3DXVECTOR3 pos(x, y, 0);
 	tagRECT rect;
 	rect.left = left; rect.top = top; rect.right = left + width; rect.bottom = top + height;
-	dsprite->Draw(GmTextures[bck2d->texture]->gTexture, &rect, NULL, &pos, enigma::get_currentcolor());
+	dsprite->Draw(textureStructs[bck2d->texture]->gTexture, &rect, NULL, &pos, enigma::get_currentcolor());
 }
 
 void draw_background_tiled(int back, gs_scalar x, gs_scalar y)
@@ -133,7 +133,7 @@ void draw_background_tiled(int back, gs_scalar x, gs_scalar y)
         {
 			
 			D3DXVECTOR3 pos(xvert1, yvert1, 0);
-			dsprite->Draw(GmTextures[bck2d->texture]->gTexture, NULL, NULL, &pos, enigma::get_currentcolor());
+			dsprite->Draw(textureStructs[bck2d->texture]->gTexture, NULL, NULL, &pos, enigma::get_currentcolor());
 	
             yvert1 = yvert2;
             yvert2 += bck2d->height;
@@ -175,7 +175,7 @@ void draw_background_tiled_area(int back, gs_scalar x, gs_scalar y, gs_scalar x1
         else height = sh-top;
 		  
 		D3DXVECTOR3 pos(X, Y, 0);
-		dsprite->Draw(GmTextures[bck2d->texture]->gTexture, NULL, NULL, &pos, enigma::get_currentcolor());
+		dsprite->Draw(textureStructs[bck2d->texture]->gTexture, NULL, NULL, &pos, enigma::get_currentcolor());
       }
       j = jj;
     }
@@ -199,7 +199,7 @@ void draw_background_ext(int back, gs_scalar x, gs_scalar y, gs_scalar xscale, g
 	// Tell the sprite about the matrix
 	dsprite->SetTransform(&mat);
 
-	dsprite->Draw(GmTextures[bck2d->texture]->gTexture, NULL, NULL, NULL,
+	dsprite->Draw(textureStructs[bck2d->texture]->gTexture, NULL, NULL, NULL,
 		D3DCOLOR_ARGB(char(alpha*255), __GETR(color), __GETG(color), __GETB(color)));
 
 	D3DXMatrixTransformation2D(&mat,NULL,0.0,0,NULL,0,0);
@@ -226,7 +226,7 @@ void draw_background_stretched_ext(int back, gs_scalar x, gs_scalar y, gs_scalar
 	// Tell the sprite about the matrix
 	dsprite->SetTransform(&mat);
 
-	dsprite->Draw(GmTextures[bck2d->texture]->gTexture, NULL, NULL, NULL,
+	dsprite->Draw(textureStructs[bck2d->texture]->gTexture, NULL, NULL, NULL,
 		D3DCOLOR_ARGB(char(alpha*255), __GETR(color), __GETG(color), __GETB(color)));
 
 	D3DXMatrixTransformation2D(&mat,NULL,0.0,0,NULL,0,0);
@@ -254,7 +254,7 @@ void draw_background_part_ext(int back, gs_scalar left, gs_scalar top, gs_scalar
 	tagRECT rect;
 	rect.left = left; rect.top = top; rect.right = left + width; rect.bottom = top + height;
 
-	dsprite->Draw(GmTextures[bck2d->texture]->gTexture, &rect, NULL, NULL,
+	dsprite->Draw(textureStructs[bck2d->texture]->gTexture, &rect, NULL, NULL,
 		D3DCOLOR_ARGB(char(alpha*255), __GETR(color), __GETG(color), __GETB(color)));
 
 	D3DXMatrixTransformation2D(&mat,NULL,0.0,0,NULL,0,0);
@@ -298,7 +298,7 @@ void draw_background_tiled_ext(int back, gs_scalar x, gs_scalar y, gs_scalar xsc
 			// Tell the sprite about the matrix
 			dsprite->SetTransform(&mat);
 			
-			dsprite->Draw(GmTextures[bck2d->texture]->gTexture, NULL, NULL, NULL,
+			dsprite->Draw(textureStructs[bck2d->texture]->gTexture, NULL, NULL, NULL,
 				D3DCOLOR_ARGB(char(alpha*255), __GETR(color), __GETG(color), __GETB(color)));
 	
             yvert1 = yvert2;
@@ -357,7 +357,7 @@ void draw_background_tiled_area_ext(int back, gs_scalar x, gs_scalar y, gs_scala
 		// Tell the sprite about the matrix
 		dsprite->SetTransform(&mat);
 
-		dsprite->Draw(GmTextures[bck2d->texture]->gTexture, NULL, NULL, NULL,
+		dsprite->Draw(textureStructs[bck2d->texture]->gTexture, NULL, NULL, NULL,
 			D3DCOLOR_ARGB(char(alpha*255), __GETR(color), __GETG(color), __GETB(color)));
       }
       j = jj;
