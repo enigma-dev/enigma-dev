@@ -21,4 +21,18 @@ using std::string;
 
 namespace enigma_user {
 	void action_show_video(string fname, bool windowed, bool loop);
+	int video_add(string fname);
+	void video_delete(int id);
+	bool video_exists(int id);
+	void video_start(int id, bool loop);
+	void video_pause(int id);
+	void video_stop(int id);
+	void video_seek(int id, int position);
+	void video_set_fullscreen(int id, bool fullscreen);
+	void video_set_window_region(int id, long x, long y, long w, long h);
+	void video_set_destination_region(int id, long x, long y, long w, long h);
+	void video_set_source_region(int id, long x, long y, long w, long h);
+	void video_set_scale(int id, bool scale);
+	int video_get_width(int id);
+	int video_get_height(int id);
 }
