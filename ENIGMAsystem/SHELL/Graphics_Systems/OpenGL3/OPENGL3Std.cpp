@@ -35,7 +35,7 @@ namespace enigma
   unsigned char currentcolor[4] = {0,0,0,255};
   bool glew_isgo;
   bool pbo_isgo;
-  
+
   void graphicssystem_initialize()
   {
     GLenum err = glewInit();
@@ -70,61 +70,61 @@ namespace enigma
 
       glColor4f(0,0,0,1);
       glBindTexture(GL_TEXTURE_2D,bound_texture=0);
-	  
+
 	  init_shaders();
 	  // read shaders into graphics system structure and compile and link them if needed
 	  for (size_t i = 0; i < shader_idmax; i++) {
 	    ShaderStruct* shaderstruct = shaderdata[i];
-		
+
 		//if (string(shaderstruct->type) != string("GLSL")) { continue; }
-		
+
 		Shader* vshader = new Shader(enigma_user::sh_vertex);
 		shaders.push_back(vshader);
 		glShaderSource(vshader->shader, 1, (const GLchar**)&shaderstruct->vertex, NULL);
-		
+
 		Shader* fshader = new Shader(enigma_user::sh_fragment);
 		shaders.push_back(fshader);
 		glShaderSource(fshader->shader, 1, (const GLchar**)&shaderstruct->fragment, NULL);
-		
+
 		ShaderProgram* program = new ShaderProgram();
 		shaderprograms.push_back(program);
-		
+
 		if (shaderstruct->precompile) {
 			glCompileShader(vshader->shader);
 			glCompileShader(fshader->shader);
-			
+
 			GLint blen = 0;
 			GLsizei slen = 0;
 
-			glGetShaderiv(vshader->shader, GL_INFO_LOG_LENGTH , &blen);       
+			glGetShaderiv(vshader->shader, GL_INFO_LOG_LENGTH , &blen);
 
 			if (blen > 1)
 			{
 				GLchar* compiler_log = (GLchar*)malloc(blen);
 
 				glGetInfoLogARB(vshader->shader, blen, &slen, compiler_log);
-				std::cout << compiler_log;
+				std::cout << compiler_log << std::endl;
 			} else {
-				std::cout << "Vertex shader compile log empty";
+				std::cout << "Vertex shader compile log empty" << std::endl;
 			}
-			
-			glGetShaderiv(fshader->shader, GL_INFO_LOG_LENGTH , &blen);       
+
+			glGetShaderiv(fshader->shader, GL_INFO_LOG_LENGTH , &blen);
 
 			if (blen > 1)
 			{
 				GLchar* compiler_log = (GLchar*)malloc(blen);
 
 				glGetInfoLogARB(fshader->shader, blen, &slen, compiler_log);
-				std::cout << compiler_log;
+				std::cout << compiler_log << std::endl;
 			} else {
-				std::cout << "Fragment shader compile log empty";
+				std::cout << "Fragment shader compile log empty" << std::endl;
 			}
-  
+
 		}
-		
+
 		glAttachShader(program->shaderprogram, vshader->shader);
 		glAttachShader(program->shaderprogram, fshader->shader);
-		
+
 		glLinkProgram(program->shaderprogram);
 		glValidateProgram(program->shaderprogram);
 	  }
