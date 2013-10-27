@@ -65,6 +65,7 @@ namespace enigma
         case WM_CREATE:
             return 0;
         case WM_CLOSE:
+			
             PostQuitMessage (0);
             return 0;
 
@@ -179,6 +180,12 @@ namespace enigma
         case WM_RBUTTONDOWN: mousestatus[1]=1; return 0;
         case WM_MBUTTONUP:   mousestatus[2]=0; return 0;
         case WM_MBUTTONDOWN: mousestatus[2]=1; return 0;
+		
+		//#ifdef DSHOW_EXT
+		//#include <dshow.h>
+		//case WM_GRAPHNOTIFY:
+			//TODO: Handle DirectShow media events
+		//return 0;
 
         default:
             return DefWindowProc (hWnd, message, wParam, lParam);
