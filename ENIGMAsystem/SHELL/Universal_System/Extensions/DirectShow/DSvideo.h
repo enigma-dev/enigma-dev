@@ -27,12 +27,14 @@ namespace enigma_user {
 	void video_start(int id, bool loop);
 	void video_pause(int id);
 	void video_stop(int id);
-	void video_seek(int id, int position);
+	void video_set_seek(int id, long position);
 	void video_set_fullscreen(int id, bool fullscreen);
 	void video_set_window_region(int id, long x, long y, long w, long h);
 	void video_set_destination_region(int id, long x, long y, long w, long h);
 	void video_set_source_region(int id, long x, long y, long w, long h);
 	void video_set_scale(int id, bool scale);
-	int video_get_width(int id);
-	int video_get_height(int id);
+	long video_get_seek(int id);
+	long video_get_duration(int id);
+	long video_get_width(int id);
+	long video_get_height(int id);
 }

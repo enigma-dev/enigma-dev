@@ -111,7 +111,7 @@ void video_start(int id, bool loop) {
 		}
 		
 		if (loop) {
-			video_seek(id, 0);
+			video_set_seek(id, 0);
 		} else {
 			break;
 		}
@@ -131,10 +131,10 @@ void video_pause(int id) {
 
 void video_stop(int id) {
 	video_pause(id);
-	video_seek(id, 0);
+	video_set_seek(id, 0);
 }
 
-void video_seek(int id, int position) {
+void video_set_seek(int id, long position) {
 	get_video(videoStruct, id);
 	IMediaSeeking* pSeek;
 	HRESULT hr = videoStruct->pGraph->QueryInterface(IID_IMediaSeeking, (void**)&pSeek);
@@ -207,7 +207,43 @@ void video_set_scale(int id, bool scale) {
 	pVidWin->SetWindowPosition(0, 0, rc.right, rc.bottom);
 }
 
-int video_get_width(int id) {
+long video_get_seek(int id) {
+	get_video(videoStruct, id);
+	IMediaSeeking* pSeek;
+	HRESULT hr = videoStruct->pGraph->QueryInterface(IID_IMediaSeeking, (void**)&pSeek);
+	DWORD dwCap = 0;
+	hr = pSeek->GetCapabilities(&dwCap);
+	
+	long long position = 0;
+	if (AM_SEEKING_CanSeekAbsolute & dwCap)
+	{
+		hr = pSeek->GetCurrentPosition(&position);
+	}
+
+	pSeek->Release();
+	
+	return position;
+}
+
+long video_get_duration(int id) {
+	get_video(videoStruct, id);
+	IMediaSeeking* pSeek;
+	HRESULT hr = videoStruct->pGraph->QueryInterface(IID_IMediaSeeking, (void**)&pSeek);
+	DWORD dwCap = 0;
+	hr = pSeek->GetCapabilities(&dwCap);
+	
+	long long duration = 0;
+	if (AM_SEEKING_CanSeekAbsolute & dwCap)
+	{
+		hr = pSeek->GetDuration(&duration);
+	}
+
+	pSeek->Release();
+	
+	return duration;
+}
+
+long video_get_width(int id) {
 	get_video(videoStruct, id);
 	IBasicVideo *pBasicVideo;
 	videoStruct->pGraph->QueryInterface(IID_IBasicVideo,
@@ -223,7 +259,7 @@ int video_get_width(int id) {
 	return width;
 }
 
-int video_get_height(int id) {
+long video_get_height(int id) {
 	get_video(videoStruct, id);
 	IBasicVideo *pBasicVideo;
 	videoStruct->pGraph->QueryInterface(IID_IBasicVideo,
