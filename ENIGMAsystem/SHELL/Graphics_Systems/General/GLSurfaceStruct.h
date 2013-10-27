@@ -26,7 +26,8 @@ namespace enigma
 {
   struct surface
   {
-    GLuint tex, fbo;
+    GLuint fbo;
+    int tex;
     int width, height;
   };
 }

@@ -16,6 +16,8 @@
 **/
 
 #include "../General/OpenGLHeaders.h"
+#include "../General/GLTextureStruct.h"
+#include "Graphics_Systems/graphics_mandatory.h"
 
 using namespace std;
 #include <cstddef>
@@ -86,7 +88,7 @@ int surface_create(int width, int height)
 {
     if (GLEW_ARB_framebuffer_object)
     {
-      GLuint tex, fbo;
+      GLuint fbo;
 
       unsigned int id,
         w=(int)width,
@@ -117,28 +119,24 @@ int surface_create(int width, int height)
       enigma::surface_array[id]->width = w;
       enigma::surface_array[id]->height = h;
 
-      glGenTextures(1, &tex);
       glGenFramebuffers(1, &fbo);
+      int texture = enigma::graphics_create_texture(w,h,0,false);
 
       glPushAttrib(GL_TEXTURE_BIT);
-      glBindTexture(GL_TEXTURE_2D, tex);
-      glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
       glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
-      glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, tex, 0);
+      glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureStructs[texture]->gltex, 0);
       glDrawBuffer(GL_COLOR_ATTACHMENT0);
       glReadBuffer(GL_COLOR_ATTACHMENT0);
       glClearColor(1,1,1,0);
       glClear(GL_COLOR_BUFFER_BIT);
       glBindFramebuffer(GL_DRAW_FRAMEBUFFER, enigma::bound_framebuffer);
 
-      enigma::surface_array[id]->tex = tex;
+      enigma::surface_array[id]->tex = texture;
       enigma::surface_array[id]->fbo = fbo;
 
       texture_reset();
-	  
+
       glPopAttrib();
 
       return id;
@@ -153,7 +151,7 @@ int surface_create_msaa(int width, int height, int samples)
     return -1;
   }
 
-  GLuint tex, fbo;
+  GLuint fbo;
 
   size_t id,
   w = (int)width,
@@ -184,17 +182,17 @@ int surface_create_msaa(int width, int height, int samples)
   enigma::surface_array[id]->width = w;
   enigma::surface_array[id]->height = h;
 
-  glGenTextures(1, &tex);
+  int texture = enigma::graphics_create_texture(w,h,0,false);
   glGenFramebuffers(1, &fbo);
   glPushAttrib(GL_TEXTURE_BIT);
-  glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, tex);
+  glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, textureStructs[texture]->gltex);
 
   glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples, GL_RGBA, w, h, false);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
-  glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, tex, 0);
+  glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, textureStructs[texture]->gltex, 0);
   glDrawBuffer(GL_COLOR_ATTACHMENT0);
   glReadBuffer(GL_COLOR_ATTACHMENT0);
     glClearColor(1,1,1,0);
@@ -202,7 +200,7 @@ int surface_create_msaa(int width, int height, int samples)
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, enigma::bound_framebuffer);
   glPopAttrib();
 
-  enigma::surface_array[id]->tex = tex;
+  enigma::surface_array[id]->tex = texture;
   enigma::surface_array[id]->fbo = fbo;
 
   return id;
@@ -237,7 +235,7 @@ void surface_free(int id)
 {
   get_surface(surf,id);
   if (enigma::bound_framebuffer == surf->fbo) glBindFramebuffer(GL_DRAW_FRAMEBUFFER, enigma::bound_framebuffer=0);
-  glDeleteTextures(1, &surf->tex);
+  enigma::graphics_delete_texture(surf->tex);
   glDeleteFramebuffers(1, &surf->fbo);
   surf->width = surf->height = surf->tex = surf->fbo = 0;
   delete surf;
@@ -252,7 +250,7 @@ bool surface_exists(int id)
 void draw_surface(int id, gs_scalar x, gs_scalar y)
 {
   get_surface(surf,id);
-  texture_set(surf->tex);
+  texture_set(textureStructs[surf->tex]->gltex);
   int w=surf->width;
   int h=surf->height;
 
@@ -268,7 +266,7 @@ void draw_surface(int id, gs_scalar x, gs_scalar y)
 void draw_surface_stretched(int id, gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h)
 {
   get_surface(surf,id);
-  texture_set(surf->tex);
+  texture_set(textureStructs[surf->tex]->gltex);
 
   const gs_scalar data[4*8] = {
     x, y, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0,
@@ -282,7 +280,7 @@ void draw_surface_stretched(int id, gs_scalar x, gs_scalar y, gs_scalar w, gs_sc
 void draw_surface_part(int id, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y)
 {
   get_surface(surf,id);
-  texture_set(surf->tex);
+  texture_set(textureStructs[surf->tex]->gltex);
 
   const float tbw=surf->width,tbh=surf->height;
 
@@ -298,7 +296,7 @@ void draw_surface_part(int id, gs_scalar left, gs_scalar top, gs_scalar width, g
 void draw_surface_tiled(int id, gs_scalar x, gs_scalar y)
 {
   get_surface(surf,id);
-  texture_set(surf->tex);
+  texture_set(textureStructs[surf->tex]->gltex);
 
   x=surf->width-fmod(x,surf->width);
   y=surf->height-fmod(y,surf->height);
@@ -323,7 +321,7 @@ void draw_surface_tiled(int id, gs_scalar x, gs_scalar y)
 void draw_surface_tiled_area(int id, gs_scalar x, gs_scalar y, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2)
 {
   get_surface(surf,id);
-  texture_set(surf->tex);
+  texture_set(textureStructs[surf->tex]->gltex);
 
   gs_scalar sw,sh,i,j,jj,left,top,width,height,X,Y;
   sw = surf->width;
@@ -366,7 +364,7 @@ void draw_surface_tiled_area(int id, gs_scalar x, gs_scalar y, gs_scalar x1, gs_
 void draw_surface_ext(int id, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int color, gs_scalar alpha)
 {
   get_surface(surf,id);
-  texture_set(surf->tex);
+  texture_set(textureStructs[surf->tex]->gltex);
 
   const gs_scalar w=surf->width*xscale, h=surf->height*yscale;
   rot *= M_PI/180;
@@ -392,7 +390,7 @@ void draw_surface_ext(int id, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_sca
 void draw_surface_stretched_ext(int id, gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h, int color, gs_scalar alpha)
 {
   get_surface(surf,id);
-  texture_set(surf->tex);
+  texture_set(textureStructs[surf->tex]->gltex);
 
   gs_scalar r = __GETR(color), g = __GETG(color), b = __GETB(color);
   const gs_scalar data[4*8] = {
@@ -407,7 +405,7 @@ void draw_surface_stretched_ext(int id, gs_scalar x, gs_scalar y, gs_scalar w, g
 void draw_surface_part_ext(int id, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, gs_scalar alpha)
 {
   get_surface(surf,id);
-  texture_set(surf->tex);
+  texture_set(textureStructs[surf->tex]->gltex);
 
   const float tbw = surf->width, tbh = surf->height;
 
@@ -424,7 +422,7 @@ void draw_surface_part_ext(int id, gs_scalar left, gs_scalar top, gs_scalar widt
 void draw_surface_tiled_ext(int id, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, gs_scalar alpha)
 {
   get_surface(surf,id);
-  texture_set(surf->tex);
+  texture_set(textureStructs[surf->tex]->gltex);
 
   const gs_scalar w=surf->width*xscale, h=surf->height*yscale;
   const int hortil= int (ceil(room_width/(surf->width))),
@@ -450,7 +448,7 @@ void draw_surface_tiled_ext(int id, gs_scalar x, gs_scalar y, gs_scalar xscale, 
 void draw_surface_tiled_area_ext(int id, gs_scalar x, gs_scalar y, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar xscale, gs_scalar yscale, int color, gs_scalar alpha)
 {
   get_surface(surf,id);
-  texture_set(surf->tex);
+  texture_set(textureStructs[surf->tex]->gltex);
 
   gs_scalar sw,sh,i,j,jj,left,top,width,height,X,Y;
   sw = surf->width*xscale;
@@ -494,7 +492,7 @@ void draw_surface_tiled_area_ext(int id, gs_scalar x, gs_scalar y, gs_scalar x1,
 void draw_surface_general(int id, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, gs_scalar a1, gs_scalar a2, gs_scalar a3, gs_scalar a4)
 {
   get_surface(surf,id);
-  texture_set(surf->tex);
+  texture_set(textureStructs[surf->tex]->gltex);
 
   const gs_scalar tbw = surf->width, tbh = surf->height,
         w = width*xscale, h = height*yscale;
