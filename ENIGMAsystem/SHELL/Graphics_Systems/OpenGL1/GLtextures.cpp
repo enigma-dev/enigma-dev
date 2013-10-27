@@ -147,6 +147,7 @@ namespace enigma
 // V when this is called its passing the Gluint, but the Gluint is also stored by my TextureStruct struct
   void graphics_delete_texture(int tex)
   {
+    glDeleteTextures(1, &textureStructs[tex]->gltex);
     delete textureStructs[tex];
   }
 
@@ -228,7 +229,7 @@ void texture_set_stage(int stage, int texid) {
 
 void texture_reset() {
 	if (enigma::bound_texture) {
-		glActiveTexture(GL_TEXTURE0); 
+		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, enigma::bound_texture = 0);
 	}
 }
@@ -314,7 +315,7 @@ void texture_mipmapping_generate(int texid, int levels)
 {
   texture_set(textureStructs[texid]->gltex);
   glGenerateMipmap(GL_TEXTURE_2D);
-  
+
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, levels);
 }

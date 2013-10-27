@@ -405,7 +405,8 @@ void screen_redraw()
 		d3d_set_culling(culling);
     }
 
-    screen_refresh();
+    ///TODO: screen_refresh() shouldn't be in screen_redraw(). They are seperate functions for a reason.
+    if (FBO==0) { screen_refresh(); }
 }
 
 void screen_init()
