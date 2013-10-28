@@ -16,6 +16,7 @@ blank.txt
 *.exe
 *.jar
 *.log
+*.ini
 *~
 .DS_Store
 .eobjs/

@@ -29,6 +29,7 @@
 namespace enigma {
   float circleprecision=24;
   extern unsigned char currentcolor[4];
+  void draw_globalVBO();
 }
 
 namespace enigma_user
@@ -656,7 +657,7 @@ void draw_healthbar(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2,float 
   amount = amount>=100 ? 1 : (amount<=0 ? 0 : amount/100);
 
   texture_reset();
-  
+
   if(showback) {
       glColor4ub(__GETR(backcol),__GETG(backcol),__GETB(backcol),enigma::currentcolor[3]);
 	  if (showborder) {
@@ -711,6 +712,7 @@ int draw_getpixel(int x,int y)
         if (y < 0) y = 0;
         if (x > enigma_user::room_width || y > enigma_user::room_height) return 0;
     }
+  enigma::draw_globalVBO();
   #if defined __BIG_ENDIAN__ || defined __BIG_ENDIAN
     int ret;
     glReadPixels(x,y,1,1,GL_RGB,GL_UNSIGNED_BYTE,&ret);
