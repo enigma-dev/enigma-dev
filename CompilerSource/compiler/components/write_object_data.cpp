@@ -322,10 +322,11 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
 		bool has_parent = (parsed_objects.find(i->second->parent) != parsed_objects.end());
 		if (!setting::inherit_objects || !has_parent) {
 			wto << "      enigma::pinstance_list_iterator ENOBJ_ITER_me;\n";
+			for (po_i her = i; her != parsed_objects.end(); her = parsed_objects.find(her->second->parent)) // For this object and each parent thereof
+				wto << "      enigma::inst_iter *ENOBJ_ITER_myobj" << her->second->id << ";\n"; // Keep track of a pointer to `this` inside this list.
+		} else {
+			wto << "      enigma::inst_iter *ENOBJ_ITER_myobj" << i->second->id << ";\n"; // Keep track of a pointer to `this` inside this list.
 		}
-        for (po_i her = i; her != parsed_objects.end(); her = parsed_objects.find(her->second->parent)) // For this object and each parent thereof
-          wto << "      enigma::inst_iter *ENOBJ_ITER_myobj" << her->second->id << ";\n"; // Keep track of a pointer to `this` inside this list.
-
         // This tracks components of the event system.
           for (unsigned ii = 0; ii < i->second->events.size; ii++) { // Export a tracker for all events
 			if (setting::inherit_objects && find(parent_defined.begin(), parent_defined.end(), ii)) { continue; }
@@ -342,15 +343,16 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
 
         //This is the actual call to remove the current instance from all linked records before destroying it.
         wto << "\n    void unlink()\n    {\n";
-		  if (!setting::inherit_objects || !has_parent) { 
-			wto << "      instance_iter_queue_for_destroy(ENOBJ_ITER_me); // Queue for delete while we're still valid\n";
-		  }
+		wto << "      instance_iter_queue_for_destroy(ENOBJ_ITER_me); // Queue for delete while we're still valid\n";
           wto << "      deactivate();\n    }\n\n    void deactivate()\n    {\n";
 		  if (!setting::inherit_objects || !has_parent) { 
 			wto << "      enigma::unlink_main(ENOBJ_ITER_me); // Remove this instance from the non-redundant, tree-structured list.\n";
+			for (po_i her = i; her != parsed_objects.end(); her = parsed_objects.find(her->second->parent))
+				wto << "      unlink_object_id_iter(ENOBJ_ITER_myobj" << her->second->id << ", " << her->second->id << ");\n";
+		  } else {
+			wto << "      OBJ_" << parsed_objects.find(i->second->parent)->second->name << "::deactivate();\n";
+			wto << "      unlink_object_id_iter(ENOBJ_ITER_myobj" << i->second->id << ", " << i->second->id << ");\n";
 		  }
-          for (po_i her = i; her != parsed_objects.end(); her = parsed_objects.find(her->second->parent))
-            wto << "      unlink_object_id_iter(ENOBJ_ITER_myobj" << her->second->id << ", " << her->second->id << ");\n";
           for (unsigned ii = 0; ii < i->second->events.size; ii++) {
 			if (setting::inherit_objects && find(parent_defined.begin(), parent_defined.end(), ii)) { continue; }
             if (!event_is_instance(i->second->events[ii].mainId,i->second->events[ii].id)) {
@@ -370,12 +372,13 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
         /**** Next are the constructors. One is automated, the other directed.
         * @ *   Automatic constructor:  The constructor generates the ID from a global maximum and links by that alias.
         *////   Directed constructor:   Meant for use by the room system, the constructor uses a specified ID alias assumed to have been checked for conflict.
-        wto <<   "\n    OBJ_" <<  i->second->name << "(int enigma_genericconstructor_newinst_x = 0, int enigma_genericconstructor_newinst_y = 0, const int id = (enigma::maxid++))";
+        wto <<   "\n    OBJ_" <<  i->second->name << "(int enigma_genericconstructor_newinst_x = 0, int enigma_genericconstructor_newinst_y = 0, const int id = (enigma::maxid++)" 
+			<< ", const int enigma_genericobjid = " << i->second->id << ")";
          
 		 if (setting::inherit_objects && parsed_objects.find(i->second->parent) != parsed_objects.end()) { 
-			wto << ": OBJ_" << parsed_objects.find(i->second->parent)->second->name << "(enigma_genericconstructor_newinst_x,enigma_genericconstructor_newinst_y,id)";
+			wto << ": OBJ_" << parsed_objects.find(i->second->parent)->second->name << "(enigma_genericconstructor_newinst_x,enigma_genericconstructor_newinst_y,id,enigma_genericobjid)";
 		 } else {
-			wto << ": object_locals(id, " << i->second->id << ")";
+			wto << ": object_locals(id,enigma_genericobjid) ";
 		 }
           for (size_t ii = 0; ii < i->second->initializers.size(); ii++)
             wto << ", " << i->second->initializers[ii].first << "(" << i->second->initializers[ii].second << ")";
@@ -410,10 +413,11 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
             // Instance system interface
 			if (!setting::inherit_objects || !has_parent) {
               wto << "      ENOBJ_ITER_me = enigma::link_instance(this);\n";
-			}
-              for (po_i her = i; her != parsed_objects.end(); her = parsed_objects.find(her->second->parent))
+			  for (po_i her = i; her != parsed_objects.end(); her = parsed_objects.find(her->second->parent))
                 wto << "      ENOBJ_ITER_myobj" << her->second->id << " = enigma::link_obj_instance(this, " << her->second->id << ");\n";
-
+			} else {
+				wto << "      ENOBJ_ITER_myobj" << i->second->id << " = enigma::link_obj_instance(this, " << i->second->id << ");\n";
+			}
             // Event system interface
               for (unsigned ii = 0; ii < i->second->events.size; ii++) {
 				if (find(parent_defined.begin(), parent_defined.end(), ii)) { continue; }
@@ -435,12 +439,15 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
 
           // Destructor
           wto <<   "    \n    ~OBJ_" <<  i->second->name << "()\n    {\n";
-            wto << "      delete vmap;\n";
+            
 			if (!setting::inherit_objects || !has_parent) {
-              wto << "      enigma::winstance_list_iterator_delete(ENOBJ_ITER_me);\n";
+				wto << "      delete vmap;\n";
+				wto << "      enigma::winstance_list_iterator_delete(ENOBJ_ITER_me);\n";
+				for (po_i her = i; her != parsed_objects.end(); her = parsed_objects.find(her->second->parent))
+					wto << "      delete ENOBJ_ITER_myobj" << her->second->id << ";\n";
+			} else {
+				wto << "      delete ENOBJ_ITER_myobj" << i->second->id << ";\n";
 			}
-            for (po_i her = i; her != parsed_objects.end(); her = parsed_objects.find(her->second->parent))
-              wto << "      delete ENOBJ_ITER_myobj" << her->second->id << ";\n";
             for (unsigned ii = 0; ii < i->second->events.size; ii++) {
 			  if (setting::inherit_objects && find(parent_defined.begin(), parent_defined.end(), ii)) { continue; }
               if (!event_is_instance(i->second->events[ii].mainId,i->second->events[ii].id)) {
