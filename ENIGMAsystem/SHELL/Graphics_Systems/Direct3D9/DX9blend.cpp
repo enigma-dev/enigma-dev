@@ -41,6 +41,7 @@ int draw_set_blend_mode(int mode){
 		d3ddev->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCCOLOR);
       return 0;
     default:
+		// bm_normal
         d3ddev->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
 		d3ddev->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
 		d3ddev->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
