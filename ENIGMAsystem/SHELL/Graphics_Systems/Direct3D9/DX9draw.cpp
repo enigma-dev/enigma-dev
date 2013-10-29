@@ -208,26 +208,26 @@ struct D3DTLVERTEX
 void draw_circle(gs_scalar x, gs_scalar y, float rad, bool outline)
 {
     double pr = 2 * M_PI / enigma::circleprecision;
-	vector<float> Circle;
+	vector<float> shape;
 	    d3ddev->SetFVF(D3DFVF_XYZ);
     if(outline)
     {
         for (double i = 0; i <= 2*M_PI; i += pr)
         {
             double xc1=cos(i)*rad,yc1=sin(i)*rad;
-			Circle.push_back(x+xc1); Circle.push_back(y+yc1); Circle.push_back(0);
+			shape.push_back(x+xc1); shape.push_back(y+yc1); shape.push_back(0);
         }
-		d3ddev->DrawPrimitiveUP(D3DPT_LINESTRIP, enigma::circleprecision, &Circle[0], sizeof(float) * 3);
+		d3ddev->DrawPrimitiveUP(D3DPT_LINESTRIP, enigma::circleprecision, &shape[0], sizeof(float) * 3);
     }
     else
     {
-		Circle.push_back(x); Circle.push_back(y); Circle.push_back(0);
+		shape.push_back(x); shape.push_back(y); shape.push_back(0);
         for (double i = 0; i <= 2*M_PI; i += pr)
         {
             double xc1=cos(i)*rad,yc1=sin(i)*rad;
-			Circle.push_back(x+xc1); Circle.push_back(y+yc1); Circle.push_back(0);
+			shape.push_back(x+xc1); shape.push_back(y+yc1); shape.push_back(0);
         }
-		d3ddev->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, enigma::circleprecision, &Circle[0], sizeof(float) * 3);
+		d3ddev->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, enigma::circleprecision, &shape[0], sizeof(float) * 3);
     }
 }
 
@@ -263,22 +263,22 @@ void draw_ellipse_perfect(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2,
 
 void draw_triangle(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, float x3, float y3, bool outline)
 {
-	vector<float> Circle;
+	vector<float> shape;
 	    d3ddev->SetFVF(D3DFVF_XYZ);
     if (outline)
     {
-		Circle.push_back(x1); Circle.push_back(y1); Circle.push_back(0);
-		Circle.push_back(x2); Circle.push_back(y2); Circle.push_back(0);
-		Circle.push_back(x3); Circle.push_back(y3); Circle.push_back(0);
-		Circle.push_back(x1); Circle.push_back(y1); Circle.push_back(0);
-		d3ddev->DrawPrimitiveUP(D3DPT_LINESTRIP, 3, &Circle[0], sizeof(float) * 3);
+		shape.push_back(x1); shape.push_back(y1); shape.push_back(0);
+		shape.push_back(x2); shape.push_back(y2); shape.push_back(0);
+		shape.push_back(x3); shape.push_back(y3); shape.push_back(0);
+		shape.push_back(x1); shape.push_back(y1); shape.push_back(0);
+		d3ddev->DrawPrimitiveUP(D3DPT_LINESTRIP, 3, &shape[0], sizeof(float) * 3);
     }
     else
     {
-		Circle.push_back(x1); Circle.push_back(y1); Circle.push_back(0);
-		Circle.push_back(x2); Circle.push_back(y2); Circle.push_back(0);
-		Circle.push_back(x3); Circle.push_back(y3); Circle.push_back(0);
-		d3ddev->DrawPrimitiveUP(D3DPT_TRIANGLELIST, 1, &Circle[0], sizeof(float) * 3);
+		shape.push_back(x1); shape.push_back(y1); shape.push_back(0);
+		shape.push_back(x2); shape.push_back(y2); shape.push_back(0);
+		shape.push_back(x3); shape.push_back(y3); shape.push_back(0);
+		d3ddev->DrawPrimitiveUP(D3DPT_TRIANGLELIST, 1, &shape[0], sizeof(float) * 3);
     }
 }
 
