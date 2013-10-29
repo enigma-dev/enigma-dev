@@ -31,6 +31,7 @@
 const char *enigma_license = "/********************************************************************************\\\r\n\
 **                                                                              **\r\n\
 **  Copyright (C) 2008 Josh Ventura                                             **\r\n\
+**  Copyright (C) 2013 Robert B. Colton                                         **\r\n\
 **                                                                              **\r\n\
 **  This file is a part of the ENIGMA Development Environment.                  **\r\n\
 **                                                                              **\r\n\
