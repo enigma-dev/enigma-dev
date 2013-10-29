@@ -97,7 +97,11 @@ void draw_point_color(gs_scalar x, gs_scalar y, int col)
 
 void draw_line(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2)
 {
-
+	vector<float> shape;
+	    d3ddev->SetFVF(D3DFVF_XYZ);
+	shape.push_back(x1); shape.push_back(y1); shape.push_back(0);
+	shape.push_back(x2); shape.push_back(y2); shape.push_back(0);
+	d3ddev->DrawPrimitiveUP(D3DPT_LINESTRIP, 1, &shape[0], sizeof(float) * 3);
 }
 
 void draw_line_width(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, float width)
@@ -117,12 +121,67 @@ void draw_line_width_color(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2
 
 void draw_rectangle(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, bool outline)
 {
-
+	vector<float> shape;
+	    d3ddev->SetFVF(D3DFVF_XYZ);
+    if (outline)
+    {
+		shape.push_back(x1); shape.push_back(y1); shape.push_back(0);
+		shape.push_back(x2); shape.push_back(y1); shape.push_back(0);
+		shape.push_back(x2); shape.push_back(y2); shape.push_back(0);
+		shape.push_back(x1); shape.push_back(y2); shape.push_back(0);
+		shape.push_back(x1); shape.push_back(y1); shape.push_back(0);
+		d3ddev->DrawPrimitiveUP(D3DPT_LINESTRIP, 4, &shape[0], sizeof(float) * 3);
+    }
+    else
+    {
+		shape.push_back(x2); shape.push_back(y1); shape.push_back(0);
+		shape.push_back(x1); shape.push_back(y1); shape.push_back(0);
+		shape.push_back(x2); shape.push_back(y2); shape.push_back(0);
+		shape.push_back(x1); shape.push_back(y2); shape.push_back(0);
+		d3ddev->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, &shape[0], sizeof(float) * 3);
+    }
 }
 
 void draw_rectangle_angle(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, float angle, bool outline)
 {
+  angle *= M_PI/180;
 
+  float
+    xm = (x2+x1)/2,
+    ym = (y2+y1)/2;
+
+  float
+    len = hypot(xm-x1,ym-y1),
+    dir = atan2(y1-ym,x1-xm)+angle;
+
+  float
+    ldx1 = len*cos(dir),
+    ldy1 = len*sin(dir);
+
+  dir = atan2(y2-ym,x1-xm)+angle;
+  float
+    ldx2 = len*cos(dir),
+    ldy2 = len*sin(dir);
+  
+	vector<float> shape;
+	    d3ddev->SetFVF(D3DFVF_XYZ);
+    if (outline)
+    {
+		shape.push_back(xm+ldx1); shape.push_back(ym-ldy1); shape.push_back(0);
+		shape.push_back(xm+ldx2); shape.push_back(ym-ldy2); shape.push_back(0);
+		shape.push_back(xm-ldx1); shape.push_back(ym+ldy1); shape.push_back(0);
+		shape.push_back(xm-ldx2); shape.push_back(ym+ldy2); shape.push_back(0);
+		shape.push_back(xm+ldx1); shape.push_back(ym-ldy1); shape.push_back(0);
+		d3ddev->DrawPrimitiveUP(D3DPT_LINESTRIP, 4, &shape[0], sizeof(float) * 3);
+    }
+    else
+    {
+		shape.push_back(xm+ldx2); shape.push_back(ym-ldy2); shape.push_back(0);
+		shape.push_back(xm+ldx1); shape.push_back(ym-ldy1); shape.push_back(0);
+		shape.push_back(xm-ldx1); shape.push_back(ym+ldy1); shape.push_back(0);
+		shape.push_back(xm-ldx2); shape.push_back(ym+ldy2); shape.push_back(0);
+		d3ddev->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, &shape[0], sizeof(float) * 3);
+    }
 }
 
 void draw_rectangle_color(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, int c1, int c2, int c3, int c4, bool outline)
@@ -156,35 +215,16 @@ void draw_circle(gs_scalar x, gs_scalar y, float rad, bool outline)
         for (double i = 0; i <= 2*M_PI; i += pr)
         {
             double xc1=cos(i)*rad,yc1=sin(i)*rad;
-			//D3DTLVERTEX v; 
-			//v.fX = x+xc1; v.fY = y+yc1; v.fZ = 0;
-			//v.fRHW = RHW;
-			//v.Color = color;
-			//v.fU = U; v.fV = V;
-			//Circle.push_back(v);
-			
 			Circle.push_back(x+xc1); Circle.push_back(y+yc1); Circle.push_back(0);
         }
 		d3ddev->DrawPrimitiveUP(D3DPT_LINESTRIP, enigma::circleprecision, &Circle[0], sizeof(float) * 3);
     }
     else
     {
-		//D3DTLVERTEX v; 
-		//v.fX = x; v.fY = y; v.fZ = 0;
-		//v.fRHW = RHW;
-		//v.Color = color;
-		//v.fU = U; v.fV = V;
-		//Circle.push_back(v);
 		Circle.push_back(x); Circle.push_back(y); Circle.push_back(0);
         for (double i = 0; i <= 2*M_PI; i += pr)
         {
             double xc1=cos(i)*rad,yc1=sin(i)*rad;
-			//D3DTLVERTEX v; 
-			//v.fX = x+xc1; v.fY = y+yc1; v.fZ = 0;
-			//v.fRHW = RHW;
-			//v.Color = color;
-			//v.fU = U; v.fV = V;
-			//Circle.push_back(v);
 			Circle.push_back(x+xc1); Circle.push_back(y+yc1); Circle.push_back(0);
         }
 		d3ddev->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, enigma::circleprecision, &Circle[0], sizeof(float) * 3);
@@ -223,7 +263,23 @@ void draw_ellipse_perfect(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2,
 
 void draw_triangle(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, float x3, float y3, bool outline)
 {
-
+	vector<float> Circle;
+	    d3ddev->SetFVF(D3DFVF_XYZ);
+    if (outline)
+    {
+		Circle.push_back(x1); Circle.push_back(y1); Circle.push_back(0);
+		Circle.push_back(x2); Circle.push_back(y2); Circle.push_back(0);
+		Circle.push_back(x3); Circle.push_back(y3); Circle.push_back(0);
+		Circle.push_back(x1); Circle.push_back(y1); Circle.push_back(0);
+		d3ddev->DrawPrimitiveUP(D3DPT_LINESTRIP, 3, &Circle[0], sizeof(float) * 3);
+    }
+    else
+    {
+		Circle.push_back(x1); Circle.push_back(y1); Circle.push_back(0);
+		Circle.push_back(x2); Circle.push_back(y2); Circle.push_back(0);
+		Circle.push_back(x3); Circle.push_back(y3); Circle.push_back(0);
+		d3ddev->DrawPrimitiveUP(D3DPT_TRIANGLELIST, 1, &Circle[0], sizeof(float) * 3);
+    }
 }
 
 void draw_triangle_color(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, float x3, float y3, int col1, int col2, int col3, bool outline)
