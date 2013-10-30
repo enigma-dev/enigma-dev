@@ -28,13 +28,13 @@ enum {
   pr_trianglefan    = 6      // GL_TRIANGLE_FAN      D3DPT_TRIANGLEFAN
 };
 
-int draw_primitive_begin(int kind);
-int draw_primitive_begin_texture(int kind,unsigned tex);
-int draw_vertex(gs_scalar x, gs_scalar y);
-int draw_vertex_color(gs_scalar x, gs_scalar y, int color, float alpha);
-int draw_vertex_texture(gs_scalar x, gs_scalar y, gs_scalar tx, gs_scalar ty);
-int draw_vertex_texture_color(gs_scalar x, gs_scalar y, gs_scalar tx, gs_scalar ty, int col, float alpha);
-int draw_primitive_end();
+void draw_primitive_begin(int kind);
+void draw_primitive_begin_texture(int kind, int texId);
+void draw_primitive_end();
+void draw_vertex(gs_scalar x, gs_scalar y);
+void draw_vertex_color(gs_scalar x, gs_scalar y, int color, float alpha);
+void draw_vertex_texture(gs_scalar x, gs_scalar y, gs_scalar tx, gs_scalar ty);
+void draw_vertex_texture_color(gs_scalar x, gs_scalar y, gs_scalar tx, gs_scalar ty, int col, float alpha);
 void d3d_primitive_begin(int kind);
 void d3d_primitive_begin_texture(int kind, int texId);
 void d3d_primitive_end();
