@@ -70,6 +70,11 @@ void d3d_start()
 	enigma::d3dCulling =  rs_none;
 	d3ddev->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
 	d3d_set_hidden(false);
+	
+	// Enable texture repetition by default
+	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP );
+	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP );
+	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSW, D3DTADDRESS_WRAP );
 }
 
 void d3d_end()
@@ -578,11 +583,37 @@ class d3d_lights
 
     void light_update_positions()
     {
-
+        map<int, posi>::iterator end = ind_pos.end();
+        for (map<int, posi>::iterator it = ind_pos.begin(); it != end; it++) {
+            const posi pos1 = (*it).second;
+            const float pos[4] = {pos1.x, pos1.y, pos1.z, pos1.w};
+            //glLightfv(GL_LIGHT0+(*it).first, GL_POSITION, pos);
+        }
     }
 
     bool light_define_direction(int id, gs_scalar dx, gs_scalar dy, gs_scalar dz, int col)
     {
+	    int ms;
+        if (light_ind.find(id) != light_ind.end())
+        {
+            ms = (*light_ind.find(id)).second;
+            multimap<int,posi>::iterator it = ind_pos.find(ms);
+            if (it != ind_pos.end())
+                ind_pos.erase(it);
+            ind_pos.insert(pair<int,posi>(ms, posi(-dx, -dy, -dz, 0.0f)));
+        }
+        else
+        {
+            ms = light_ind.size();
+            D3DCAPS9 caps;
+			d3ddev->GetDeviceCaps(&caps);
+            if (ms >= caps.MaxActiveLights)
+                return false;
+
+            light_ind.insert(pair<int,int>(id, ms));
+            ind_pos.insert(pair<int,posi>(ms, posi(-dx, -dy, -dz, 0.0f)));
+        }
+		
 		D3DLIGHT9 light;    // create the light struct
 
 		ZeroMemory(&light, sizeof(light));    // clear out the light struct for use
@@ -590,41 +621,109 @@ class d3d_lights
 		light.Diffuse = D3DXCOLOR(__GETR(col), __GETR(col), __GETB(col), 1.0f);    // set the light's color
 		light.Direction = D3DXVECTOR3(dx, dy, dz);
 
-		d3ddev->SetLight(id, &light);    // send the light struct properties to nth light 
+		d3ddev->SetLight(ms, &light);    // send the light struct properties to nth light 
+		light_update_positions();
+        return true;
     }
 
     bool light_define_point(int id, gs_scalar x, gs_scalar y, gs_scalar z, double range, int col)
     {
+	    if (range <= 0.0) {
+            return false;
+        }
+        int ms;
+        if (light_ind.find(id) != light_ind.end())
+        {
+            ms = (*light_ind.find(id)).second;
+            multimap<int,posi>::iterator it = ind_pos.find(ms);
+            if (it != ind_pos.end())
+                ind_pos.erase(it);
+            ind_pos.insert(pair<int,posi>(ms, posi(x, y, z, 1)));
+        }
+        else
+        {
+            ms = light_ind.size();
+            D3DCAPS9 caps;
+			d3ddev->GetDeviceCaps(&caps);
+            if (ms >= caps.MaxActiveLights)
+                return false;
+
+            light_ind.insert(pair<int,int>(id, ms));
+            ind_pos.insert(pair<int,posi>(ms, posi(x, y, z, 1)));
+        }
 		D3DLIGHT9 light;    // create the light struct
 
 		ZeroMemory(&light, sizeof(light));    // clear out the light struct for use
 		light.Type = D3DLIGHT_POINT;    // make the light type 'directional light'
-		light.Diffuse = D3DXCOLOR(__GETR(col), __GETR(col), __GETB(col), 1.0f);    // set the light's color
+		light.Diffuse = D3DXCOLOR(__GETR(col), __GETG(col), __GETB(col), 1.0f);    // set the light's color
 		light.Position = D3DXVECTOR3(x, y, z);
 		light.Range = range;
-		light.Attenuation0 = 0.0f;    // no constant inverse attenuation
-		light.Attenuation1 = 0.125f;    // only .125 inverse attenuation
+		light.Attenuation0 = 1.0f;    // no constant inverse attenuation
+		light.Attenuation1 = 0.0f;    // only .125 inverse attenuation
 		light.Attenuation2 = 0.0f;    // no square inverse attenuation
-	    light.Phi = D3DXToRadian(360.0f);    // set the outer cone to 360 degrees
-		light.Theta = D3DXToRadian(60.0f);    // set the inner cone to 360 degrees
+	    //light.Phi = D3DXToRadian(360.0f);    // set the outer cone to 360 degrees
+		//light.Theta = D3DXToRadian(360.0f);    // set the inner cone to 360 degrees
 		light.Falloff = 1.0f;    // use the typical falloff
 	
-		d3ddev->SetLight(id, &light);    // send the light struct properties to nth light 
+		d3ddev->SetLight(ms, &light);    // send the light struct properties to nth light 
+		d3ddev->LightEnable(ms, TRUE);
+		
+		D3DMATERIAL9 material;
+		ZeroMemory(&material, sizeof(D3DMATERIAL9));
+		material.Diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+		material.Ambient = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+
+		d3ddev->SetMaterial(&material);
+	
+		return true;
     }
 
     bool light_define_specularity(int id, int r, int g, int b, double a) 
     {
-
+        int ms;
+        if (light_ind.find(id) != light_ind.end())
+        {
+            ms = (*light_ind.find(id)).second;
+        }
+        else
+        {
+            ms = light_ind.size();
+            D3DCAPS9 caps;
+			d3ddev->GetDeviceCaps(&caps);
+            if (ms >= caps.MaxActiveLights)
+                return false;
+        }
+		
+		return true;
     }
 
     bool light_enable(int id)
     {
-		d3ddev->LightEnable(id, TRUE);    // turn on light #0
+	    map<int, int>::iterator it = light_ind.find(id);
+        if (it == light_ind.end()) {
+            const int ms = light_ind.size();
+			D3DCAPS9 caps;
+			d3ddev->GetDeviceCaps(&caps);
+            if (ms >= caps.MaxActiveLights)
+                return false;
+            light_ind.insert(pair<int,int>(id, ms));
+			d3ddev->LightEnable(ms, TRUE);
+        } else {
+			d3ddev->LightEnable((*it).second, TRUE);
+        }
+        return true;
     }
 
     bool light_disable(int id)
     {
-		d3ddev->LightEnable(id, FALSE);    // turn on light #0
+	    map<int, int>::iterator it = light_ind.find(id);
+        if (it == light_ind.end()) {
+            return false;
+        } else {
+			d3ddev->LightEnable((*it).second, FALSE);
+        }
+        return true;
+		
     }
 } d3d_lighting;
 

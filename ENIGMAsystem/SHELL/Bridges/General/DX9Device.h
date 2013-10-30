@@ -55,10 +55,11 @@ bool renderingScene;
 protected:
   typedef map<D3DTEXTURESTAGESTATETYPE, DWORD> textureStateStageCache;
   typedef map<D3DSAMPLERSTATETYPE, DWORD> SamplerStateCache;
-	
    map<D3DRENDERSTATETYPE, DWORD> cacheRenderStates;    /// cached RenderStates
    vector<textureStateStageCache> vecCacheTextureStates;       /// cached TextureStage States
    vector<SamplerStateCache> vecCacheSamplerStates;            /// cached SamplerStage States
+   map<DWORD, D3DLIGHT9> cacheLightStates; /// cached Light States
+   map<DWORD, BOOL> cacheLightEnable; /// cached Light States
   
 public:
 LPDIRECT3DDEVICE9 device;    // the pointer to the device class
@@ -84,12 +85,14 @@ void RestoreState() {
 	device->SetVertexShader(vertexShader);
 	device->SetPixelShader(pixelShader);
 	
+	// Cached Render States
 	map< D3DRENDERSTATETYPE, DWORD >::iterator it = cacheRenderStates.begin();
     while (it != cacheRenderStates.end()) {
 		device->SetRenderState(it->first, it->second);
 		it++;
 	}
 	
+	// Cached Sampler States
 	vector<SamplerStateCache>::iterator samplerCache = vecCacheSamplerStates.begin();
 	unsigned i = 0;
 	while (samplerCache != vecCacheSamplerStates.end()) {
@@ -99,6 +102,18 @@ void RestoreState() {
 			cit++;
 		}
 		samplerCache++; i++;
+	}
+	
+	// Cached Lights
+	map< DWORD, D3DLIGHT9 >::iterator lit = cacheLightStates.begin();
+    while (lit != cacheLightStates.end()) {
+		device->SetLight(lit->first, &lit->second);
+		lit++;
+	}
+	map< DWORD, BOOL >::iterator lite = cacheLightEnable.begin();
+    while (lite != cacheLightEnable.end()) {
+		device->LightEnable(lite->first, lite->second);
+		lite++;
 	}
 }
 
@@ -161,8 +176,22 @@ void Clear(DWORD Count, const D3DRECT *pRects, DWORD Flags, D3DCOLOR Color, floa
 	device->Clear(Count, pRects, Flags, Color, Z, Stencil);
 }
 
-void LightEnable(DWORD LightIndex, BOOL bEnable) {
-	device->LightEnable(LightIndex, bEnable);
+void LightEnable(DWORD Index, BOOL bEnable) {
+	// Update the light state cache
+    // If the return value is 'true', the command must be forwarded to the D3D Runtime.
+	map< DWORD, BOOL >::iterator it = cacheLightEnable.find( Index );
+    if( cacheLightEnable.end() == it )
+    {
+        cacheLightEnable.insert( map< DWORD, BOOL >::value_type(Index, bEnable) );
+		EndShapesBatching();
+        device->LightEnable( Index, bEnable );
+		return;
+    }
+    if( it->second == bEnable )
+        return;
+    it->second = bEnable;
+	EndShapesBatching();
+    device->LightEnable( Index, bEnable );
 }
 
 void BeginScene() {
@@ -272,6 +301,14 @@ void GetSamplerState(DWORD Sampler, D3DSAMPLERSTATETYPE Type, DWORD *pValue) {
 	device->GetSamplerState(Sampler, Type, pValue);
 }
 
+void GetDeviceCaps(D3DCAPS9 *pCaps) {
+	device->GetDeviceCaps(pCaps);
+}
+
+void SetMaterial(const D3DMATERIAL9 *pMaterial) {
+	device->SetMaterial(pMaterial);
+}
+
 void SetFVF(DWORD FVF) {
 	//EndShapesBatching();
 	device->SetFVF(FVF);
@@ -283,8 +320,21 @@ void SetViewport(const D3DVIEWPORT9 *pViewport) {
 }
 
 void SetLight(DWORD Index, const D3DLIGHT9 *pLight) {
+	// Update the light state cache
+    // If the return value is 'true', the command must be forwarded to the D3D Runtime.
+	map< DWORD, D3DLIGHT9 >::iterator it = cacheLightStates.find( Index );
+    if( cacheLightStates.end() == it )
+    {
+        cacheLightStates.insert( map< DWORD, D3DLIGHT9 >::value_type(Index, *pLight) );
+		EndShapesBatching();
+        device->SetLight( Index, pLight );
+		return;
+    }
+    //if( it->second == *pLight )
+        //return;
+    it->second = *pLight;
 	EndShapesBatching();
-	device->SetLight(Index, pLight);
+    device->SetLight( Index, pLight );
 }
 
 void SetTransform(D3DTRANSFORMSTATETYPE State, const D3DMATRIX *pMatrix) {

@@ -61,53 +61,47 @@ unsigned get_texture(int texid);
 namespace enigma_user
 {
 
-int draw_primitive_begin(int kind)
+void draw_primitive_begin(int kind)
 {
   prim_draw_texture = -1;
   if (prim_draw_model == -1) {
     prim_draw_model = d3d_model_create();
   }
   d3d_model_primitive_begin(prim_draw_model, kind);
-  return 0;
 }
 
-int draw_primitive_begin_texture(int kind,unsigned tex)
+void draw_primitive_begin_texture(int kind,unsigned tex)
 {
   if (prim_draw_model == -1) {
     prim_draw_model = d3d_model_create();
   }
   prim_draw_texture = tex;
   d3d_model_primitive_begin(prim_draw_model, kind);
-  return 0;
 }
 
-int draw_vertex(gs_scalar x, gs_scalar y)
+void draw_vertex(gs_scalar x, gs_scalar y)
 {
   d3d_model_vertex(prim_draw_model, x, y, 0);
-  return 0;
 }
 
-int draw_vertex_color(gs_scalar x, gs_scalar y, int col, float alpha)
+void draw_vertex_color(gs_scalar x, gs_scalar y, int col, float alpha)
 {
   d3d_model_vertex_color(prim_draw_model, x, y, 0, col, alpha);
-  return 0;
 }
 
-int draw_vertex_texture(gs_scalar x, gs_scalar y, gs_scalar tx, gs_scalar ty)
+void draw_vertex_texture(gs_scalar x, gs_scalar y, gs_scalar tx, gs_scalar ty)
 {
   int col = enigma::currentcolor[0] | (enigma::currentcolor[1] << 8) | (enigma::currentcolor[2] << 16);
   float alpha = (float)enigma::currentcolor[3] / 255.0;
   d3d_model_vertex_texture_color(prim_draw_model, x, y, 0, tx, ty, col, alpha);
-  return 0;
 }
 
-int draw_vertex_texture_color(gs_scalar x, gs_scalar y, gs_scalar tx, gs_scalar ty, int col, float alpha)
+void draw_vertex_texture_color(gs_scalar x, gs_scalar y, gs_scalar tx, gs_scalar ty, int col, float alpha)
 {
   d3d_model_vertex_texture_color(prim_draw_model, x, y, 0, tx, ty, col, alpha);
-  return 0;
 }
 
-int draw_primitive_end()
+void draw_primitive_end()
 {
   if (prim_draw_texture != -1) {
     texture_set(get_texture(prim_draw_texture));
@@ -115,7 +109,6 @@ int draw_primitive_end()
   prim_draw_texture = -1;
   d3d_model_draw(prim_draw_model);
   d3d_model_clear(prim_draw_model);
-  return 0;
 }
 
 void d3d_primitive_begin(int kind)

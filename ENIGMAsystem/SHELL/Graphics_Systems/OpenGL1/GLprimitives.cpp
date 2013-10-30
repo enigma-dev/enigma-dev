@@ -43,28 +43,25 @@ namespace enigma {
 namespace enigma_user
 {
 
-int draw_primitive_begin(int dink)
+void draw_primitive_begin(int dink)
 {
   GLenum kind = ptypes_by_id[ dink & 15 ];
   glBegin(kind);
-  return 0;
 }
 
-int draw_primitive_begin_texture(int dink,unsigned tex)
+void draw_primitive_begin_texture(int dink,unsigned tex)
 {
   texture_set(tex);
   GLenum kind = ptypes_by_id[ dink & 15 ];
   glBegin(kind);
-  return 0;
 }
 
-int draw_vertex(gs_scalar x, gs_scalar y)
+void draw_vertex(gs_scalar x, gs_scalar y)
 {
-	glVertex2f(x,y);
-	return 0;
+  glVertex2f(x,y);
 }
 
-int draw_vertex_color(gs_scalar x, gs_scalar y, int col, float alpha)
+void draw_vertex_color(gs_scalar x, gs_scalar y, int col, float alpha)
 {
   glPushAttrib(GL_CURRENT_BIT);
     glColor4f(
@@ -74,15 +71,15 @@ int draw_vertex_color(gs_scalar x, gs_scalar y, int col, float alpha)
       alpha);
     glVertex2f(x,y);
   glPopAttrib();
-	return 0;
 }
-int draw_vertex_texture(gs_scalar x, gs_scalar y, gs_scalar tx, gs_scalar ty)
+
+void draw_vertex_texture(gs_scalar x, gs_scalar y, gs_scalar tx, gs_scalar ty)
 {
     glTexCoord2f(tx,ty);
     glVertex2f(x,y);
-	return 0;
 }
-int draw_vertex_texture_color(gs_scalar x, gs_scalar y, gs_scalar tx, gs_scalar ty, int col, float alpha)
+
+void draw_vertex_texture_color(gs_scalar x, gs_scalar y, gs_scalar tx, gs_scalar ty, int col, float alpha)
 {
   glPushAttrib(GL_CURRENT_BIT);
     glColor4f(
@@ -93,18 +90,18 @@ int draw_vertex_texture_color(gs_scalar x, gs_scalar y, gs_scalar tx, gs_scalar 
     glTexCoord2f(tx,ty);
     glVertex2f(x,y);
   glPopAttrib();
-	return 0;
 }
-int draw_primitive_end()
+
+void draw_primitive_end()
 {
 	glEnd();
-	return 0;
 }
 
 void d3d_primitive_begin(int kind)
 {
     glBegin(ptypes_by_id[kind]);
 }
+
 void d3d_primitive_begin_texture(int kind, int texId)
 {
     texture_set(get_texture(texId));
