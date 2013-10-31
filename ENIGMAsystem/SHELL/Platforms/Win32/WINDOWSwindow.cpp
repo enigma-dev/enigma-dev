@@ -1021,10 +1021,6 @@ bool keyboard_check_direct(int key)
   return keyState[key & 0xFF];
 }
 
-bool keyboard_get_numlock() {
-	return (((unsigned short)GetKeyState(0x90)) & 0xffff) != 0;
-}
-
 void keyboard_key_press(int key) {
     BYTE keyState[256];
 
@@ -1043,10 +1039,35 @@ void keyboard_key_release(int key) {
     GetKeyboardState((LPBYTE)&keyState);
 
 	// Simulate a key release
-	 keybd_event( key,
-				  keyState[key],
-				  KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP,
-				  0);
+	keybd_event( key, keyState[key], KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
+}
+
+bool keyboard_get_capital() {
+	return (((unsigned short)GetKeyState(0x14)) & 0xffff) != 0;
+}
+
+bool keyboard_get_numlock() {
+	return (((unsigned short)GetKeyState(0x90)) & 0xffff) != 0;
+}
+
+bool keyboard_get_scroll() {
+	return (((unsigned short)GetKeyState(0x91)) & 0xffff) != 0;
+}
+
+void keyboard_set_capital(bool on) {
+    BYTE keyState[256];
+
+    GetKeyboardState((LPBYTE)&keyState);
+	
+	if( (on && !(keyState[VK_CAPITAL] & 1)) ||
+	  (!on && (keyState[VK_CAPITAL] & 1)) )
+	{
+	// Simulate a key press
+	 keybd_event( VK_CAPITAL, 0x14, KEYEVENTF_EXTENDEDKEY | 0, 0 );
+
+	// Simulate a key release
+	 keybd_event( VK_CAPITAL, 0x14, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
+	}
 }
 
 void keyboard_set_numlock(bool on) {
@@ -1058,16 +1079,26 @@ void keyboard_set_numlock(bool on) {
 	  (!on && (keyState[VK_NUMLOCK] & 1)) )
 	{
 	// Simulate a key press
-	 keybd_event( VK_NUMLOCK,
-				  0x45,
-				  KEYEVENTF_EXTENDEDKEY | 0,
-				  0 );
+	 keybd_event( VK_NUMLOCK, 0x45, KEYEVENTF_EXTENDEDKEY | 0, 0 );
 
 	// Simulate a key release
-	 keybd_event( VK_NUMLOCK,
-				  0x45,
-				  KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP,
-				  0);
+	 keybd_event( VK_NUMLOCK, 0x45, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
+	}
+}
+
+void keyboard_set_scroll(bool on) {
+    BYTE keyState[256];
+
+    GetKeyboardState((LPBYTE)&keyState);
+	
+	if( (on && !(keyState[VK_SCROLL] & 1)) ||
+	  (!on && (keyState[VK_SCROLL] & 1)) )
+	{
+	// Simulate a key press
+	 keybd_event( VK_SCROLL, 0x91, KEYEVENTF_EXTENDEDKEY | 0, 0 );
+
+	// Simulate a key release
+	 keybd_event( VK_SCROLL, 0x91, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
 	}
 }
 
