@@ -62,7 +62,11 @@ bool keyboard_check_direct(int key);
 void keyboard_key_press(int key);
 void keyboard_key_release(int key);
 bool keyboard_get_numlock();
+bool keyboard_get_capital();
+bool keyboard_get_scroll();
 void keyboard_set_numlock(bool on);
+void keyboard_set_capital(bool on);
+void keyboard_set_scroll(bool on);
 void mouse_clear(const int button);
 
 int window_get_x();
