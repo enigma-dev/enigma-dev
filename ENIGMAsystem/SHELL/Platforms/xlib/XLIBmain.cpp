@@ -40,7 +40,6 @@
 namespace enigma_user {
   const int os_type = os_linux;
   int keyboard_lastkey = 0;
-  extern string keyboard_lastchar;
 }
 
 namespace enigma
