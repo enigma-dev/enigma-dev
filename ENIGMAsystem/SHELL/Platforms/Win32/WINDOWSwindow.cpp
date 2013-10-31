@@ -1025,6 +1025,30 @@ bool keyboard_get_numlock() {
 	return (((unsigned short)GetKeyState(0x90)) & 0xffff) != 0;
 }
 
+void keyboard_key_press(int key) {
+    BYTE keyState[256];
+
+    GetKeyboardState((LPBYTE)&keyState);
+	
+	// Simulate a key press
+	 keybd_event( key,
+				  keyState[key],
+				  KEYEVENTF_EXTENDEDKEY | 0,
+				  0 );
+}
+
+void keyboard_key_release(int key) {
+    BYTE keyState[256];
+
+    GetKeyboardState((LPBYTE)&keyState);
+
+	// Simulate a key release
+	 keybd_event( key,
+				  keyState[key],
+				  KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP,
+				  0);
+}
+
 void keyboard_set_numlock(bool on) {
     BYTE keyState[256];
 
