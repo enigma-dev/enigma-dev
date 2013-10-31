@@ -39,12 +39,14 @@ using std::map;
 extern short mouse_hscrolls;
 extern short mouse_vscrolls;
 namespace enigma_user {
+extern int keyboard_lastkey;
 extern string keyboard_lastchar;
 extern string keyboard_string;
 }
 
 namespace enigma
 {
+	using enigma_user::keyboard_lastkey;
     using enigma_user::keyboard_lastchar;
 	using enigma_user::keyboard_string;
     extern char mousestatus[3],last_mousestatus[3],keybdstatus[256],last_keybdstatus[256];
@@ -133,18 +135,19 @@ namespace enigma
             return 0;
 
         case WM_KEYDOWN:
-			
-		
+			keyboard_lastkey = wParam;
             last_keybdstatus[wParam]=keybdstatus[wParam];
             keybdstatus[wParam]=1;
             return 0;
 
         case WM_KEYUP:
+			keyboard_lastkey = wParam;
             last_keybdstatus[wParam]=keybdstatus[wParam];
             keybdstatus[wParam]=0;
             return 0;
 
         case WM_SYSKEYDOWN:
+			keyboard_lastkey = wParam;
             last_keybdstatus[wParam]=keybdstatus[wParam];
             keybdstatus[wParam]=1;
             if (wParam!=18)
@@ -156,6 +159,7 @@ namespace enigma
             return 0;
 
         case WM_SYSKEYUP:
+			keyboard_lastkey = wParam;
             last_keybdstatus[wParam]=keybdstatus[wParam];
             keybdstatus[wParam]=0;
             if (wParam!=(unsigned int)18)
