@@ -42,7 +42,6 @@ namespace enigma {
 }
 
 namespace enigma_user {
-  extern int keyboard_lastkey;
   extern string keyboard_string;
   void set_synchronization(bool enable);
 }
