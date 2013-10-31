@@ -68,6 +68,9 @@ bool keyboard_get_scroll();
 void keyboard_set_numlock(bool on);
 void keyboard_set_capital(bool on);
 void keyboard_set_scroll(bool on);
+void keyboard_set_map(int key1, int key2);
+int keyboard_get_map(int key);
+void keyboard_unset_map();
 void mouse_clear(const int button);
 
 int window_get_x();
