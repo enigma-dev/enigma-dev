@@ -111,6 +111,7 @@ int display_get_frequency();
 unsigned display_get_dpi_x();
 unsigned display_get_dpi_y();
 extern int display_aa;
+void display_reset(); 
 void display_reset(int aa, bool vsync);
 void display_set_colordepth(int depth);
 void display_set_size(int w, int h);
