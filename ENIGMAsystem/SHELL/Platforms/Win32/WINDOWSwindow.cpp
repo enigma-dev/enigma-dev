@@ -996,6 +996,31 @@ void keyboard_clear(const int key)
     enigma::keybdstatus[key] = enigma::last_keybdstatus[key] = 0;
 }
 
+bool keyboard_check_direct(int key)
+{
+   BYTE keyState[256];
+ 
+   if ( GetKeyboardState( keyState ) )  {
+	  for (int x = 0; x < 256; x++)
+		keyState[x] = (char) (GetKeyState(x) >> 8);
+   } else {
+      // print error message.
+	  return 0;
+   }
+
+  if (key == vk_anykey) {
+    for(int i = 0; i < 256; i++)
+      if (keyState[i] == 1) return 1;
+    return 0;
+  }
+  if (key == vk_nokey) {
+    for(int i = 0; i < 256; i++)
+      if (keyState[i] == 1) return 0;
+    return 1; 
+  }
+  return keyState[key & 0xFF];
+}
+
 void mouse_clear(const int button)
 {
     enigma::mousestatus[button] = enigma::last_mousestatus[button] = 0;

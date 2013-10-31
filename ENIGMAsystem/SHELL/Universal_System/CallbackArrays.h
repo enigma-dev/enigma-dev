@@ -103,6 +103,8 @@ enum {
   vk_delete    = 46,
 
   // These are for check_direct only
+  vk_lshift   = 160,
+  vk_rshift   = 161,
   vk_lcontrol = 162,
   vk_rcontrol = 163,
   vk_lalt     = 164,
