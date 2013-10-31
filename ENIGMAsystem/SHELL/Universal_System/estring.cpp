@@ -48,7 +48,7 @@ int ord(string str)  { return str[0]; }
 
 double real(variant str) { return str.type ? atof(((string)str).c_str()) : (double) str; }
 
-int string_byte_length(string str) {
+size_t string_byte_length(string str) {
 	return str.size();
 }
 size_t string_length(string str) { return str.length(); }
