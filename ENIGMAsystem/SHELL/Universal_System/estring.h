@@ -29,7 +29,7 @@ int ord(string str);
 
 double real(variant str);
 
-int string_byte_length(string str);
+size_t string_byte_length(string str);
 size_t string_length(string str);
 size_t string_length(const char* str);
 int string_pos(string substr,string str);
