@@ -1004,7 +1004,7 @@ bool keyboard_check_direct(int key)
 	  for (int x = 0; x < 256; x++)
 		keyState[x] = (char) (GetKeyState(x) >> 8);
    } else {
-      // print error message.
+      //TODO: print error message.
 	  return 0;
    }
 
@@ -1019,6 +1019,32 @@ bool keyboard_check_direct(int key)
     return 1; 
   }
   return keyState[key & 0xFF];
+}
+
+bool keyboard_get_numlock() {
+	return (((unsigned short)GetKeyState(0x90)) & 0xffff) != 0;
+}
+
+void keyboard_set_numlock(bool on) {
+    BYTE keyState[256];
+
+    GetKeyboardState((LPBYTE)&keyState);
+	
+	if( (on && !(keyState[VK_NUMLOCK] & 1)) ||
+	  (!on && (keyState[VK_NUMLOCK] & 1)) )
+	{
+	// Simulate a key press
+	 keybd_event( VK_NUMLOCK,
+				  0x45,
+				  KEYEVENTF_EXTENDEDKEY | 0,
+				  0 );
+
+	// Simulate a key release
+	 keybd_event( VK_NUMLOCK,
+				  0x45,
+				  KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP,
+				  0);
+	}
 }
 
 void mouse_clear(const int button)

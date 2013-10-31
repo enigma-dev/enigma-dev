@@ -59,6 +59,8 @@ void keyboard_wait();
 void mouse_wait();
 void keyboard_clear(const int key);
 bool keyboard_check_direct(int key);
+bool keyboard_get_numlock();
+void keyboard_set_numlock(bool on);
 void mouse_clear(const int button);
 
 int window_get_x();
