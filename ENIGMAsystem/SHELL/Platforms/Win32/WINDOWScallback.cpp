@@ -29,6 +29,7 @@
 using std::string;
 using std::map;
 #include <windows.h>
+
 #include "../General/PFwindow.h"
 #include "WINDOWScallback.h"
 
@@ -192,6 +193,10 @@ namespace enigma
         case WM_RBUTTONDOWN: mousestatus[1]=1; return 0;
         case WM_MBUTTONUP:   mousestatus[2]=0; return 0;
         case WM_MBUTTONDOWN: mousestatus[2]=1; return 0;
+		
+		//case WM_TOUCH: 
+		//TODO: touchscreen stuff
+		//return 0;
 		
 		//#ifdef DSHOW_EXT
 		//#include <dshow.h>

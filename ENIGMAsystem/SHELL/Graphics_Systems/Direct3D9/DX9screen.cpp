@@ -205,177 +205,179 @@ void screen_redraw()
     else
     {
         bool stop_loop = false;
+		//TODO: Possibly implement view option from Stupido to control which view clears the background
+		// Only clear the background on the first visible view by checking if it hasn't been cleared yet
+		bool view_first = true;
         for (view_current = 0; view_current < 7; view_current++)
         {
-            if (view_visible[(int)view_current])
-            {
-                int vc = (int)view_current;
-                int vob = (int)view_object[vc];
+            if (!view_visible[(int)view_current]) { continue; }
+			int vc = (int)view_current;
+			int vob = (int)view_object[vc];
 
-                if (vob != -1)
-                {
-                    object_basic *instanceexists = fetch_instance_by_int(vob);
+			if (vob != -1)
+			{
+				object_basic *instanceexists = fetch_instance_by_int(vob);
 
-                    if (instanceexists)
-                    {
-                        object_planar* vobr = (object_planar*)instanceexists;
-
-                        double vobx = vobr->x, voby = vobr->y;
-
-                        //int bbl=*vobr.x+*vobr.bbox_left,bbr=*vobr.x+*vobr.bbox_right,bbt=*vobr.y+*vobr.bbox_top,bbb=*vobr.y+*vobr.bbox_bottom;
-                        //if (bbl<view_xview[vc]+view_hbor[vc]) view_xview[vc]=bbl-view_hbor[vc];
-
-                        double vbc_h, vbc_v;
-                        (view_hborder[vc] > view_wview[vc]/2) ? vbc_h = view_wview[vc]/2 : vbc_h = view_hborder[vc];
-                        (view_vborder[vc] > view_hview[vc]/2) ? vbc_v = view_hview[vc]/2 : vbc_v = view_vborder[vc];
-
-                        if (view_hspeed[vc] == -1)
-                        {
-                            if (vobx < view_xview[vc] + vbc_h)
-                                view_xview[vc] = vobx - vbc_h;
-                            else if (vobx > view_xview[vc] + view_wview[vc] - vbc_h)
-                                view_xview[vc] = vobx + vbc_h - view_wview[vc];
-                        }
-                        else
-                        {
-                            if (vobx < view_xview[vc] + vbc_h)
-                            {
-                                view_xview[vc] -= view_hspeed[vc];
-                                if (view_xview[vc] < vobx - vbc_h)
-                                    view_xview[vc] = vobx - vbc_h;
-                            }
-                            else if (vobx > view_xview[vc] + view_wview[vc] - vbc_h)
-                            {
-                                view_xview[vc] += view_hspeed[vc];
-                                if (view_xview[vc] > vobx + vbc_h - view_wview[vc])
-                                    view_xview[vc] = vobx + vbc_h - view_wview[vc];
-                            }
-                        }
-
-                        if (view_vspeed[vc] == -1)
-                        {
-                            if (voby < view_yview[vc] + vbc_v)
-                                view_yview[vc] = voby - vbc_v;
-                            else if (voby > view_yview[vc] + view_hview[vc] - vbc_v)
-                                view_yview[vc] = voby + vbc_v - view_hview[vc];
-                        }
-                        else
-                        {
-                            if (voby < view_yview[vc] + vbc_v)
-                            {
-                                view_yview[vc] -= view_vspeed[vc];
-                                if (view_yview[vc] < voby - vbc_v)
-                                    view_yview[vc] = voby - vbc_v;
-                            }
-                            if (voby > view_yview[vc] + view_hview[vc] - vbc_v)
-                            {
-                                view_yview[vc] += view_vspeed[vc];
-                                if (view_yview[vc] > voby + vbc_v - view_hview[vc])
-                                    view_yview[vc] = voby + vbc_v - view_hview[vc];
-                            }
-                        }
-
-                        if (view_xview[vc] < 0)
-                            view_xview[vc] = 0;
-                        else if (view_xview[vc] > room_width - view_wview[vc])
-                            view_xview[vc] = room_width - view_wview[vc];
-
-                        if (view_yview[vc] < 0)
-                            view_yview[vc] = 0;
-                        else if (view_yview[vc] > room_height - view_hview[vc])
-                            view_yview[vc] = room_height - view_hview[vc];
-                    }
-                }
-
-				D3DVIEWPORT9 pViewport = { (DWORD)view_xport[vc], (DWORD)view_yport[vc],
-					(DWORD)(window_get_region_width_scaled() - view_xport[vc]), (DWORD)(window_get_region_height_scaled() - view_yport[vc]), 0, 1.0f };
-				d3ddev->SetViewport(&pViewport);
-
-				D3DXMATRIX matTrans, matScale;
-
-				// Calculate a translation matrix
-				D3DXMatrixTranslation(&matTrans, -view_xview[vc] - 0.5, -view_yview[vc] - room_height - 0.5, 0);
-				D3DXMatrixScaling(&matScale, 1, -1, 1);
-
-				// Calculate our world matrix by multiplying the above (in the correct order)
-				D3DXMATRIX matWorld = matTrans * matScale;
-
-				// Set the matrix to be applied to anything we render from now on
-				d3ddev->SetTransform( D3DTS_VIEW, &matWorld);
-
-				D3DXMATRIX matProjection;    // the projection transform matrix
-				D3DXMatrixOrthoOffCenterLH(&matProjection,
-							0,
-							(int)view_wview[vc],
-							0,
-							(int)view_hview[vc],
-							0.0f,    // the near view-plane
-							1.0f);    // the far view-plane
-				d3ddev->SetTransform(D3DTS_PROJECTION, &matProjection);    // set the projection transform
-
-				if (background_showcolor && view_current == 0)
+				if (instanceexists)
 				{
-					int clearcolor = ((int)background_color) & 0x00FFFFFF;
-					// clear the window to the background color
-					d3ddev->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(__GETR(clearcolor), __GETG(clearcolor), __GETB(clearcolor)), 1.0f, 0);
+					object_planar* vobr = (object_planar*)instanceexists;
+
+					double vobx = vobr->x, voby = vobr->y;
+
+					//int bbl=*vobr.x+*vobr.bbox_left,bbr=*vobr.x+*vobr.bbox_right,bbt=*vobr.y+*vobr.bbox_top,bbb=*vobr.y+*vobr.bbox_bottom;
+					//if (bbl<view_xview[vc]+view_hbor[vc]) view_xview[vc]=bbl-view_hbor[vc];
+
+					double vbc_h, vbc_v;
+					(view_hborder[vc] > view_wview[vc]/2) ? vbc_h = view_wview[vc]/2 : vbc_h = view_hborder[vc];
+					(view_vborder[vc] > view_hview[vc]/2) ? vbc_v = view_hview[vc]/2 : vbc_v = view_vborder[vc];
+
+					if (view_hspeed[vc] == -1)
+					{
+						if (vobx < view_xview[vc] + vbc_h)
+							view_xview[vc] = vobx - vbc_h;
+						else if (vobx > view_xview[vc] + view_wview[vc] - vbc_h)
+							view_xview[vc] = vobx + vbc_h - view_wview[vc];
+					}
+					else
+					{
+						if (vobx < view_xview[vc] + vbc_h)
+						{
+							view_xview[vc] -= view_hspeed[vc];
+							if (view_xview[vc] < vobx - vbc_h)
+								view_xview[vc] = vobx - vbc_h;
+						}
+						else if (vobx > view_xview[vc] + view_wview[vc] - vbc_h)
+						{
+							view_xview[vc] += view_hspeed[vc];
+							if (view_xview[vc] > vobx + vbc_h - view_wview[vc])
+								view_xview[vc] = vobx + vbc_h - view_wview[vc];
+						}
+					}
+
+					if (view_vspeed[vc] == -1)
+					{
+						if (voby < view_yview[vc] + vbc_v)
+							view_yview[vc] = voby - vbc_v;
+						else if (voby > view_yview[vc] + view_hview[vc] - vbc_v)
+							view_yview[vc] = voby + vbc_v - view_hview[vc];
+					}
+					else
+					{
+						if (voby < view_yview[vc] + vbc_v)
+						{
+							view_yview[vc] -= view_vspeed[vc];
+							if (view_yview[vc] < voby - vbc_v)
+								view_yview[vc] = voby - vbc_v;
+						}
+						if (voby > view_yview[vc] + view_hview[vc] - vbc_v)
+						{
+							view_yview[vc] += view_vspeed[vc];
+							if (view_yview[vc] > voby + vbc_v - view_hview[vc])
+								view_yview[vc] = voby + vbc_v - view_hview[vc];
+						}
+					}
+
+					if (view_xview[vc] < 0)
+						view_xview[vc] = 0;
+					else if (view_xview[vc] > room_width - view_wview[vc])
+						view_xview[vc] = room_width - view_wview[vc];
+
+					if (view_yview[vc] < 0)
+						view_yview[vc] = 0;
+					else if (view_yview[vc] > room_height - view_hview[vc])
+						view_yview[vc] = room_height - view_hview[vc];
 				}
+			}
 
-				// Clear the depth buffer if 3d mode is on at the beginning of the draw step.
-                if (enigma::d3dMode)
-                    d3ddev->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
+			D3DVIEWPORT9 pViewport = { (DWORD)view_xport[vc], (DWORD)view_yport[vc],
+				(DWORD)(window_get_region_width_scaled() - view_xport[vc]), (DWORD)(window_get_region_height_scaled() - view_yport[vc]), 0, 1.0f };
+			d3ddev->SetViewport(&pViewport);
 
-                if (view_current == 0) {
-					draw_back();
+			D3DXMATRIX matTrans, matScale;
+
+			// Calculate a translation matrix
+			D3DXMatrixTranslation(&matTrans, -view_xview[vc] - 0.5, -view_yview[vc] - room_height - 0.5, 0);
+			D3DXMatrixScaling(&matScale, 1, -1, 1);
+
+			// Calculate our world matrix by multiplying the above (in the correct order)
+			D3DXMATRIX matWorld = matTrans * matScale;
+
+			// Set the matrix to be applied to anything we render from now on
+			d3ddev->SetTransform( D3DTS_VIEW, &matWorld);
+
+			D3DXMATRIX matProjection;    // the projection transform matrix
+			D3DXMatrixOrthoOffCenterLH(&matProjection,
+						0,
+						(int)view_wview[vc],
+						0,
+						(int)view_hview[vc],
+						0.0f,    // the near view-plane
+						1.0f);    // the far view-plane
+			d3ddev->SetTransform(D3DTS_PROJECTION, &matProjection);    // set the projection transform
+
+			if (background_showcolor && view_first)
+			{
+				int clearcolor = ((int)background_color) & 0x00FFFFFF;
+				// clear the window to the background color
+				d3ddev->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(__GETR(clearcolor), __GETG(clearcolor), __GETB(clearcolor)), 1.0f, 0);
+			}
+
+			// Clear the depth buffer if 3d mode is on at the beginning of the draw step.
+			if (enigma::d3dMode)
+				d3ddev->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
+
+			if (view_first) {
+				draw_back();
+			}
+
+			// Apply and clear stored depth changes.
+			for (map<int,pair<double,double> >::iterator it = id_to_currentnextdepth.begin(); it != id_to_currentnextdepth.end(); it++)
+			{
+				enigma::object_graphics* inst_depth = (enigma::object_graphics*)enigma::fetch_instance_by_id((*it).first);
+				if (inst_depth != NULL) {
+					drawing_depths[(*it).second.first].draw_events->unlink(inst_depth->depth.myiter);
+					inst_iter* mynewiter = drawing_depths[(*it).second.second].draw_events->add_inst(inst_depth->depth.myiter->inst);
+					if (instance_event_iterator == inst_depth->depth.myiter) {
+						instance_event_iterator = inst_depth->depth.myiter->prev;
+					}
+					inst_depth->depth.myiter = mynewiter;
 				}
+			}
+			id_to_currentnextdepth.clear();
 
-                // Apply and clear stored depth changes.
-                for (map<int,pair<double,double> >::iterator it = id_to_currentnextdepth.begin(); it != id_to_currentnextdepth.end(); it++)
-                {
-                    enigma::object_graphics* inst_depth = (enigma::object_graphics*)enigma::fetch_instance_by_id((*it).first);
-                    if (inst_depth != NULL) {
-                        drawing_depths[(*it).second.first].draw_events->unlink(inst_depth->depth.myiter);
-                        inst_iter* mynewiter = drawing_depths[(*it).second.second].draw_events->add_inst(inst_depth->depth.myiter->inst);
-                        if (instance_event_iterator == inst_depth->depth.myiter) {
-                            instance_event_iterator = inst_depth->depth.myiter->prev;
-                        }
-                        inst_depth->depth.myiter = mynewiter;
-                    }
-                }
-                id_to_currentnextdepth.clear();
+			if (enigma::particles_impl != NULL) {
+				const double high = numeric_limits<double>::max();
+				const double low = drawing_depths.rbegin() != drawing_depths.rend() ? drawing_depths.rbegin()->first : -numeric_limits<double>::max();
+				(enigma::particles_impl->draw_particlesystems)(high, low);
+			}
+			for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
+			{
+				if (dit->second.tiles.size())
+					//glCallList(drawing_depths[dit->second.tiles[0].depth].tilelist);
 
-                if (enigma::particles_impl != NULL) {
-                    const double high = numeric_limits<double>::max();
-                    const double low = drawing_depths.rbegin() != drawing_depths.rend() ? drawing_depths.rbegin()->first : -numeric_limits<double>::max();
-                    (enigma::particles_impl->draw_particlesystems)(high, low);
-                }
-                for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
-                {
-                    if (dit->second.tiles.size())
-                        //glCallList(drawing_depths[dit->second.tiles[0].depth].tilelist);
-
-                    texture_reset();
-                    enigma::inst_iter* push_it = enigma::instance_event_iterator;
-                    //loop instances
-                    for (enigma::instance_event_iterator = dit->second.draw_events->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next) {
-                        enigma::instance_event_iterator->inst->myevent_draw();
-                        if (enigma::room_switching_id != -1) {
-                            stop_loop = true;
-                            break;
-                        }
-                    }
-                    enigma::instance_event_iterator = push_it;
-                    if (stop_loop) break;
-                    //particles
-                    if (enigma::particles_impl != NULL) {
-                        const double high = dit->first;
-                        dit++;
-                        const double low = dit != drawing_depths.rend() ? dit->first : -numeric_limits<double>::max();
-                        dit--;
-                        (enigma::particles_impl->draw_particlesystems)(high, low);
-                    }
-                }
-                if (stop_loop) break;
-            }
+				texture_reset();
+				enigma::inst_iter* push_it = enigma::instance_event_iterator;
+				//loop instances
+				for (enigma::instance_event_iterator = dit->second.draw_events->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next) {
+					enigma::instance_event_iterator->inst->myevent_draw();
+					if (enigma::room_switching_id != -1) {
+						stop_loop = true;
+						break;
+					}
+				}
+				enigma::instance_event_iterator = push_it;
+				if (stop_loop) break;
+				//particles
+				if (enigma::particles_impl != NULL) {
+					const double high = dit->first;
+					dit++;
+					const double low = dit != drawing_depths.rend() ? dit->first : -numeric_limits<double>::max();
+					dit--;
+					(enigma::particles_impl->draw_particlesystems)(high, low);
+				}
+			}
+			view_first = false;
+			if (stop_loop) break;
         }
         view_current = 0;
     }
