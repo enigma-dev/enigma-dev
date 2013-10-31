@@ -125,6 +125,7 @@ enum {
 extern double mouse_x, mouse_y;
 extern int mouse_button, mouse_lastbutton;
 extern string keyboard_lastchar;
+extern int keyboard_lastkey;
 
 bool mouse_check_button(int button);
 bool mouse_check_button_pressed(int button);

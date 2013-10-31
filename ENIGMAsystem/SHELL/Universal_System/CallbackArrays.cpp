@@ -93,6 +93,7 @@ namespace enigma_user
 {
 
 string keyboard_lastchar = "";
+int keyboard_lastkey = 0;
 
 bool keyboard_check(int key)
 {
