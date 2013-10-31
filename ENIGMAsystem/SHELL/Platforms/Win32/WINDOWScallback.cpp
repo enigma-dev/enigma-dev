@@ -24,9 +24,10 @@
 **  or programs made in the environment.                                        **
 **                                                                              **
 \********************************************************************************/
-
+#include <map>
 #include <string>
 using std::string;
+using std::map;
 #include <windows.h>
 #include "../General/PFwindow.h"
 #include "WINDOWScallback.h"
@@ -38,15 +39,18 @@ using std::string;
 extern short mouse_hscrolls;
 extern short mouse_vscrolls;
 namespace enigma_user {
+extern int keyboard_lastkey;
 extern string keyboard_lastchar;
 extern string keyboard_string;
 }
 
 namespace enigma
 {
+	using enigma_user::keyboard_lastkey;
     using enigma_user::keyboard_lastchar;
 	using enigma_user::keyboard_string;
     extern char mousestatus[3],last_mousestatus[3],keybdstatus[256],last_keybdstatus[256];
+	map<int,int> keybdmap;
     extern int windowX, windowY, windowWidth, windowHeight;
     extern double  scaledWidth, scaledHeight;
     extern char* currentCursor;
@@ -130,38 +134,46 @@ namespace enigma
 			keyboard_string += keyboard_lastchar;
             return 0;
 
-        case WM_KEYDOWN:
-            last_keybdstatus[wParam]=keybdstatus[wParam];
-            keybdstatus[wParam]=1;
+        case WM_KEYDOWN: {
+			int key = enigma_user::keyboard_get_map(wParam);
+			keyboard_lastkey = key;
+            last_keybdstatus[key]=keybdstatus[key];
+            keybdstatus[key]=1;
             return 0;
-
-        case WM_KEYUP:
-            last_keybdstatus[wParam]=keybdstatus[wParam];
-            keybdstatus[wParam]=0;
+		}
+        case WM_KEYUP: {
+			int key = enigma_user::keyboard_get_map(wParam);
+			keyboard_lastkey = key;
+            last_keybdstatus[key]=keybdstatus[key];
+            keybdstatus[key]=0;
             return 0;
-
-        case WM_SYSKEYDOWN:
-            last_keybdstatus[wParam]=keybdstatus[wParam];
-            keybdstatus[wParam]=1;
-            if (wParam!=18)
+		}
+        case WM_SYSKEYDOWN: {
+			int key = enigma_user::keyboard_get_map(wParam);
+			keyboard_lastkey = key;
+            last_keybdstatus[key]=keybdstatus[key];
+            keybdstatus[key]=1;
+            if (key!=18)
             {
               if ((lParam&(1<<29))>0)
                    last_keybdstatus[18]=keybdstatus[18], keybdstatus[18]=1;
               else last_keybdstatus[18]=keybdstatus[18], keybdstatus[18]=0;
             }
             return 0;
-
-        case WM_SYSKEYUP:
-            last_keybdstatus[wParam]=keybdstatus[wParam];
-            keybdstatus[wParam]=0;
-            if (wParam!=(unsigned int)18)
+		}
+        case WM_SYSKEYUP: {
+			int key = enigma_user::keyboard_get_map(key);
+			keyboard_lastkey = key;
+            last_keybdstatus[key]=keybdstatus[key];
+            keybdstatus[key]=0;
+            if (key!=(unsigned int)18)
             {
               if ((lParam&(1<<29))>0)
                    last_keybdstatus[18]=keybdstatus[18], keybdstatus[18]=0;
               else last_keybdstatus[18]=keybdstatus[18], keybdstatus[18]=1;
             }
             return 0;
-
+		}
         case WM_MOUSEWHEEL:
              vdeltadelta += (int)HIWORD(wParam);
              mouse_vscrolls += vdeltadelta / WHEEL_DELTA;
