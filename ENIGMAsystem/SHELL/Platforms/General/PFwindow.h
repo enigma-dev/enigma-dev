@@ -1,6 +1,7 @@
 /********************************************************************************\
 **                                                                              **
 **  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2013 Robert B. Colton                                         **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -58,6 +59,18 @@ void io_clear();
 void keyboard_wait();
 void mouse_wait();
 void keyboard_clear(const int key);
+bool keyboard_check_direct(int key);
+void keyboard_key_press(int key);
+void keyboard_key_release(int key);
+bool keyboard_get_numlock();
+bool keyboard_get_capital();
+bool keyboard_get_scroll();
+void keyboard_set_numlock(bool on);
+void keyboard_set_capital(bool on);
+void keyboard_set_scroll(bool on);
+void keyboard_set_map(int key1, int key2);
+int keyboard_get_map(int key);
+void keyboard_unset_map();
 void mouse_clear(const int button);
 
 int window_get_x();
@@ -101,6 +114,7 @@ int display_get_frequency();
 unsigned display_get_dpi_x();
 unsigned display_get_dpi_y();
 extern int display_aa;
+void display_reset(); 
 void display_reset(int aa, bool vsync);
 void display_set_colordepth(int depth);
 void display_set_size(int w, int h);

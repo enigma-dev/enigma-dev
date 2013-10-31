@@ -1,6 +1,7 @@
 /********************************************************************************\
 **                                                                              **
 **  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2013 Robert B. Colton                                         **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -465,8 +466,7 @@ unsigned display_get_dpi_y()
 	return GetDeviceCaps(GetDC(enigma::hWnd), LOGPIXELSY);
 }
 
-/* This function was moved to Direct3D9-Win32 bridge
-void display_reset(int aa, bool vsync)
+void display_reset()
 {
 	DEVMODE devMode;
 
@@ -499,7 +499,6 @@ void display_reset(int aa, bool vsync)
 
 	ChangeDisplaySettings(&devMode, 0);
 }
-*/
 
 void display_set_colordepth(int depth)
 {
@@ -994,6 +993,134 @@ void mouse_wait()
 void keyboard_clear(const int key)
 {
     enigma::keybdstatus[key] = enigma::last_keybdstatus[key] = 0;
+}
+
+bool keyboard_check_direct(int key)
+{
+   BYTE keyState[256];
+ 
+   if ( GetKeyboardState( keyState ) )  {
+	  for (int x = 0; x < 256; x++)
+		keyState[x] = (char) (GetKeyState(x) >> 8);
+   } else {
+      //TODO: print error message.
+	  return 0;
+   }
+
+  if (key == vk_anykey) {
+    for(int i = 0; i < 256; i++)
+      if (keyState[i] == 1) return 1;
+    return 0;
+  }
+  if (key == vk_nokey) {
+    for(int i = 0; i < 256; i++)
+      if (keyState[i] == 1) return 0;
+    return 1; 
+  }
+  return keyState[key & 0xFF];
+}
+
+void keyboard_key_press(int key) {
+    BYTE keyState[256];
+
+    GetKeyboardState((LPBYTE)&keyState);
+	
+	// Simulate a key press
+	 keybd_event( key,
+				  keyState[key],
+				  KEYEVENTF_EXTENDEDKEY | 0,
+				  0 );
+}
+
+void keyboard_key_release(int key) {
+    BYTE keyState[256];
+
+    GetKeyboardState((LPBYTE)&keyState);
+
+	// Simulate a key release
+	keybd_event( key, keyState[key], KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
+}
+
+bool keyboard_get_capital() {
+	return (((unsigned short)GetKeyState(0x14)) & 0xffff) != 0;
+}
+
+bool keyboard_get_numlock() {
+	return (((unsigned short)GetKeyState(0x90)) & 0xffff) != 0;
+}
+
+bool keyboard_get_scroll() {
+	return (((unsigned short)GetKeyState(0x91)) & 0xffff) != 0;
+}
+
+void keyboard_set_capital(bool on) {
+    BYTE keyState[256];
+
+    GetKeyboardState((LPBYTE)&keyState);
+	
+	if( (on && !(keyState[VK_CAPITAL] & 1)) ||
+	  (!on && (keyState[VK_CAPITAL] & 1)) )
+	{
+	// Simulate a key press
+	 keybd_event( VK_CAPITAL, 0x14, KEYEVENTF_EXTENDEDKEY | 0, 0 );
+
+	// Simulate a key release
+	 keybd_event( VK_CAPITAL, 0x14, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
+	}
+}
+
+void keyboard_set_numlock(bool on) {
+    BYTE keyState[256];
+
+    GetKeyboardState((LPBYTE)&keyState);
+	
+	if( (on && !(keyState[VK_NUMLOCK] & 1)) ||
+	  (!on && (keyState[VK_NUMLOCK] & 1)) )
+	{
+	// Simulate a key press
+	 keybd_event( VK_NUMLOCK, 0x45, KEYEVENTF_EXTENDEDKEY | 0, 0 );
+
+	// Simulate a key release
+	 keybd_event( VK_NUMLOCK, 0x45, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
+	}
+}
+
+void keyboard_set_scroll(bool on) {
+    BYTE keyState[256];
+
+    GetKeyboardState((LPBYTE)&keyState);
+	
+	if( (on && !(keyState[VK_SCROLL] & 1)) ||
+	  (!on && (keyState[VK_SCROLL] & 1)) )
+	{
+	// Simulate a key press
+	 keybd_event( VK_SCROLL, 0x91, KEYEVENTF_EXTENDEDKEY | 0, 0 );
+
+	// Simulate a key release
+	 keybd_event( VK_SCROLL, 0x91, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
+	}
+}
+
+void keyboard_set_map(int key1, int key2) {
+	map< int, int >::iterator it = enigma::keybdmap.find( key1 );
+    if ( enigma::keybdmap.end() != it ) {
+		it->second = key2;
+    } else {
+		enigma::keybdmap.insert( map< int, int >::value_type(key1, key2) );
+	}
+}
+
+int keyboard_get_map(int key) {
+	map< int, int >::iterator it = enigma::keybdmap.find( key );
+    if ( enigma::keybdmap.end() != it ) {
+		return it->second;
+    } else {
+		return key;
+	}
+}
+
+void keyboard_unset_map() {
+	enigma::keybdmap.clear();
 }
 
 void mouse_clear(const int button)
