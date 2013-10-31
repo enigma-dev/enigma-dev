@@ -323,8 +323,7 @@ void SetLight(DWORD Index, const D3DLIGHT9 *pLight) {
 	// Update the light state cache
     // If the return value is 'true', the command must be forwarded to the D3D Runtime.
 	map< DWORD, D3DLIGHT9 >::iterator it = cacheLightStates.find( Index );
-    if( cacheLightStates.end() == it )
-    {
+    if ( cacheLightStates.end() == it ) {
         cacheLightStates.insert( map< DWORD, D3DLIGHT9 >::value_type(Index, *pLight) );
 		EndShapesBatching();
         device->SetLight( Index, pLight );
@@ -347,8 +346,7 @@ void SetRenderState(D3DRENDERSTATETYPE State, DWORD Value) {
 	// Update the render state cache
     // If the return value is 'true', the command must be forwarded to the D3D Runtime.
 	map< D3DRENDERSTATETYPE, DWORD >::iterator it = cacheRenderStates.find( State );
-    if( cacheRenderStates.end() == it )
-    {
+    if ( cacheRenderStates.end() == it ) {
         cacheRenderStates.insert( map< D3DRENDERSTATETYPE, DWORD >::value_type(State, Value) );
 		EndShapesBatching();
         device->SetRenderState( State, Value );
