@@ -24,9 +24,10 @@
 **  or programs made in the environment.                                        **
 **                                                                              **
 \********************************************************************************/
-
+#include <map>
 #include <string>
 using std::string;
+using std::map;
 #include <windows.h>
 #include "../General/PFwindow.h"
 #include "WINDOWScallback.h"
@@ -47,6 +48,7 @@ namespace enigma
     using enigma_user::keyboard_lastchar;
 	using enigma_user::keyboard_string;
     extern char mousestatus[3],last_mousestatus[3],keybdstatus[256],last_keybdstatus[256];
+	map<int,int> keybdmap;
     extern int windowX, windowY, windowWidth, windowHeight;
     extern double  scaledWidth, scaledHeight;
     extern char* currentCursor;
@@ -131,6 +133,8 @@ namespace enigma
             return 0;
 
         case WM_KEYDOWN:
+			
+		
             last_keybdstatus[wParam]=keybdstatus[wParam];
             keybdstatus[wParam]=1;
             return 0;
