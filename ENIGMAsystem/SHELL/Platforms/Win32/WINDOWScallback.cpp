@@ -134,42 +134,46 @@ namespace enigma
 			keyboard_string += keyboard_lastchar;
             return 0;
 
-        case WM_KEYDOWN:
-			keyboard_lastkey = wParam;
-            last_keybdstatus[wParam]=keybdstatus[wParam];
-            keybdstatus[wParam]=1;
+        case WM_KEYDOWN: {
+			int key = enigma_user::keyboard_get_map(wParam);
+			keyboard_lastkey = key;
+            last_keybdstatus[key]=keybdstatus[key];
+            keybdstatus[key]=1;
             return 0;
-
-        case WM_KEYUP:
-			keyboard_lastkey = wParam;
-            last_keybdstatus[wParam]=keybdstatus[wParam];
-            keybdstatus[wParam]=0;
+		}
+        case WM_KEYUP: {
+			int key = enigma_user::keyboard_get_map(wParam);
+			keyboard_lastkey = key;
+            last_keybdstatus[key]=keybdstatus[key];
+            keybdstatus[key]=0;
             return 0;
-
-        case WM_SYSKEYDOWN:
-			keyboard_lastkey = wParam;
-            last_keybdstatus[wParam]=keybdstatus[wParam];
-            keybdstatus[wParam]=1;
-            if (wParam!=18)
+		}
+        case WM_SYSKEYDOWN: {
+			int key = enigma_user::keyboard_get_map(wParam);
+			keyboard_lastkey = key;
+            last_keybdstatus[key]=keybdstatus[key];
+            keybdstatus[key]=1;
+            if (key!=18)
             {
               if ((lParam&(1<<29))>0)
                    last_keybdstatus[18]=keybdstatus[18], keybdstatus[18]=1;
               else last_keybdstatus[18]=keybdstatus[18], keybdstatus[18]=0;
             }
             return 0;
-
-        case WM_SYSKEYUP:
-			keyboard_lastkey = wParam;
-            last_keybdstatus[wParam]=keybdstatus[wParam];
-            keybdstatus[wParam]=0;
-            if (wParam!=(unsigned int)18)
+		}
+        case WM_SYSKEYUP: {
+			int key = enigma_user::keyboard_get_map(key);
+			keyboard_lastkey = key;
+            last_keybdstatus[key]=keybdstatus[key];
+            keybdstatus[key]=0;
+            if (key!=(unsigned int)18)
             {
               if ((lParam&(1<<29))>0)
                    last_keybdstatus[18]=keybdstatus[18], keybdstatus[18]=0;
               else last_keybdstatus[18]=keybdstatus[18], keybdstatus[18]=1;
             }
             return 0;
-
+		}
         case WM_MOUSEWHEEL:
              vdeltadelta += (int)HIWORD(wParam);
              mouse_vscrolls += vdeltadelta / WHEEL_DELTA;
