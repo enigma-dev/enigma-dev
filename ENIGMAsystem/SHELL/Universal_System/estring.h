@@ -23,23 +23,27 @@ namespace enigma_user
 bool is_string(variant val);
 bool is_real(variant val);
 
+string ansi_char(char byte);
 string chr(char val);
 int ord(string str);
 
 double real(variant str);
 
+int string_byte_length(string str);
 size_t string_length(string str);
 size_t string_length(const char* str);
 int string_pos(string substr,string str);
 
 string string_format(double val, unsigned tot, unsigned dec);
-string string_copy(string str,int index,int count);
+string string_copy(string str, int index,int count);
+string string_set_byte_at(string str, int pos, char byte);
+char string_byte_at(string str, int index);
 string string_char_at(string str,int index);
 string string_delete(string str,int index,int count);
 string string_insert(string substr,string str,int index);
 string string_replace(string str,string substr,string newstr);
 string string_replace_all(string str,string substr,string newstr);
-int string_count(string substr,string str);
+int string_count(string substr, string str);
 
 string string_lower(string str);
 string string_upper(string str);

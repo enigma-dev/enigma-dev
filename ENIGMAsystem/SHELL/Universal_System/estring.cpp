@@ -42,11 +42,15 @@ namespace enigma_user
 
 bool is_string(variant val) { return val.type;  }
 bool is_real(variant val)   { return !val.type; }
+string ansi_char(char byte) { return string(1,byte); }
 string chr(char val) { return string(1,val); }
 int ord(string str)  { return str[0]; }
 
 double real(variant str) { return str.type ? atof(((string)str).c_str()) : (double) str; }
 
+int string_byte_length(string str) {
+	return str.size();
+}
 size_t string_length(string str) { return str.length(); }
 size_t string_length(const char* str)
 {
@@ -71,6 +75,21 @@ string string_format(double val, unsigned tot, unsigned dec)
 string string_copy(string str, int index, int count) {
 	index = index < 0 ? 0 : index;
 	return (size_t)index > str.length()? "": str.substr(index < 2? 0: index-1, count < 1? 0: count);
+}
+
+string string_set_byte_at(string str, int index, char byte) {
+	if (index<=1) return str + byte;
+	const size_t x = index-1;
+	return x>str.length()? str + byte: str.replace(x, 1, 1, byte);
+}
+
+char string_byte_at(string str, int index) {
+	unsigned int n = index <= 1? 0: (unsigned int)index-1;
+	#ifdef DEBUG_MODE
+	  if (n > str.length())
+	    show_error("Index " + toString(index) + " is outside range " + toString(str.length()) + " in the following string:\n\"" + str + "\".", false);
+  #endif
+	return str[n];
 }
 
 string string_char_at(string str,int index) {
