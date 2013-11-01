@@ -117,13 +117,6 @@ bool sprite_replace(int ind, string filename, int imgnumb, bool transparent, boo
     return sprite_replace(ind, filename, imgnumb, false, transparent, smooth, true, x_offset, y_offset, free_texture);
 }
 
-void sprite_set_offset(int ind, int xoff, int yoff)
-{
-    get_spritev_mutable(spr,ind);
-    spr->xoffset = xoff;
-    spr->yoffset = yoff;
-}
-
 void sprite_delete(int ind, bool free_texture)
 {
     get_spritev_mutable(spr,ind);
@@ -182,19 +175,6 @@ void sprite_merge(int ind, int copy_sprite)
     spr->subcount = t_subcount;
     spr->width    = (spr->width > spr_copy->width)?spr->width:spr_copy->width;
     spr->height   = (spr->height > spr_copy->height)?spr->height:spr_copy->height;
-}
-
-void sprite_set_bbox(int ind, int left, int top, int right, int bottom)
-{
-    get_spritev_mutable(spr,ind);
-    spr->bbox.left = left;
-    spr->bbox.top = top;
-    spr->bbox.right = right;
-    spr->bbox.bottom = bottom;
-    spr->bbox_relative.left = left - spr->xoffset;
-    spr->bbox_relative.top = top - spr->yoffset;
-    spr->bbox_relative.right = right - spr->xoffset;
-    spr->bbox_relative.bottom = bottom - spr->yoffset;
 }
 
 }
@@ -531,6 +511,38 @@ int sprite_get_yoffset(int sprite)
 {
   get_sprite(spr,sprite,0);
   return spr->yoffset;
+}
+
+void sprite_set_offset(int ind, int xoff, int yoff)
+{
+    get_spritev_mutable(spr,ind);
+    spr->xoffset = xoff;
+    spr->yoffset = yoff;
+}
+
+void sprite_set_bbox_mode(int ind, int mode) {
+  get_sprite(spr,ind,0);
+}
+
+void sprite_set_bbox(int ind, int left, int top, int right, int bottom)
+{
+    get_spritev_mutable(spr,ind);
+    spr->bbox.left = left;
+    spr->bbox.top = top;
+    spr->bbox.right = right;
+    spr->bbox.bottom = bottom;
+    spr->bbox_relative.left = left - spr->xoffset;
+    spr->bbox_relative.top = top - spr->yoffset;
+    spr->bbox_relative.right = right - spr->xoffset;
+    spr->bbox_relative.bottom = bottom - spr->yoffset;
+}
+
+void sprite_collision_mask(int ind, bool sepmasks, int mode, int left, int right, int top, int bottom, int kind, unsigned char tolerance) {
+	sprite_set_bbox(ind, left, top, right, bottom);
+}
+
+void sprite_set_precise(int ind, bool precise) {
+  get_sprite(spr,ind,0);
 }
 
 }
