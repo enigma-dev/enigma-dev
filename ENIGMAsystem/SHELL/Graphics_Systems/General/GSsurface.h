@@ -15,6 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#ifndef ENIGMA_GSSURFACE_H
+#define ENIGMA_GSSURFACE_H
 #include "Universal_System/scalar.h"
 
 namespace enigma_user
@@ -47,8 +49,15 @@ int surface_save(int id, string filename);
 int surface_save_part(int id, string filename, unsigned x, unsigned y, unsigned w, unsigned h);
 void surface_copy(int destination,gs_scalar x, gs_scalar y,int source);
 void surface_copy_part(int destination, gs_scalar x, gs_scalar y, int source ,int xs, int ys, int ws, int hs);
+
+int background_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, bool preload=true);
 int sprite_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, int xorig, int yorig);
+int sprite_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, bool preload, int xorig, int yorig);
+void sprite_add_from_surface(int ind, int id, int x, int y, int w, int h, bool removeback, bool smooth);
+
 bool surface_is_supported();
 #define surface_destroy surface_free
 
 }
+
+#endif
