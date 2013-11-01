@@ -1,32 +1,25 @@
-/********************************************************************************\
-**                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
-**                                                                              **
-**  This file is a part of the ENIGMA Development Environment.                  **
-**                                                                              **
-**                                                                              **
-**  ENIGMA is free software: you can redistribute it and/or modify it under the **
-**  terms of the GNU General Public License as published by the Free Software   **
-**  Foundation, version 3 of the license or any later version.                  **
-**                                                                              **
-**  This application and its source code is distributed AS-IS, WITHOUT ANY      **
-**  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS   **
-**  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more       **
-**  details.                                                                    **
-**                                                                              **
-**  You should have recieved a copy of the GNU General Public License along     **
-**  with this code. If not, see <http://www.gnu.org/licenses/>                  **
-**                                                                              **
-**  ENIGMA is an environment designed to create games and other programs with a **
-**  high-level, fully compilable language. Developers of ENIGMA or anything     **
-**  associated with ENIGMA are in no way responsible for its users or           **
-**  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **
-**                                                                              **
-\********************************************************************************/
+/** Copyright (C) 2008 Josh Ventura
+*** Copyright (C) 2013 Robert B. Colton
+***
+*** This file is a part of the ENIGMA Development Environment.
+***
+*** ENIGMA is free software: you can redistribute it and/or modify it under the
+*** terms of the GNU General Public License as published by the Free Software
+*** Foundation, version 3 of the license or any later version.
+***
+*** This application and its source code is distributed AS-IS, WITHOUT ANY
+*** WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+*** FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+*** details.
+***
+*** You should have received a copy of the GNU General Public License along
+*** with this code. If not, see <http://www.gnu.org/licenses/>
+**/
 
 #include <stdlib.h>
 #include <string>
+#include <vector>
+using std::vector;
 
 #include "Collision_Systems/collision_types.h"
 
@@ -41,9 +34,11 @@ namespace enigma
   struct sprite
   {
     int width,height,subcount,xoffset,yoffset,id;
-    int *texturearray; //Each subimage has a texture
-    double *texbordxarray, *texbordyarray;
-    void **colldata; // Each subimage has collision data
+	
+	vector<int> texturearray; //Each subimage has a texture
+	vector<double> texbordxarray;
+	vector<double> texbordyarray;
+	vector<void*> colldata; // Each subimage has collision data
 
     //void*  *pixeldata;
     bbox_rect_t bbox, bbox_relative;
@@ -67,9 +62,10 @@ namespace enigma
   void sprite_add_to_index(sprite *ns, std::string filename, int imgnumb, bool precise, bool transparent, bool smooth, int x_offset, int y_offset);
   void sprite_add_copy(sprite *spr, sprite *spr_copy);
 
-  //Adds a subimage to an existing sprite from the exe
-  void sprite_set_subimage(int sprid, int imgindex, int x, int y, unsigned int w,unsigned int h,unsigned char*chunk, unsigned char*collision_data, collision_type ct);
-
+  //Sets the subimage
+  void sprite_set_subimage(int sprid, int imgindex, unsigned int w,unsigned int h,unsigned char*chunk, unsigned char*collision_data, collision_type ct);
+  //Appends a subimage
+  void sprite_add_subimage(int sprid, unsigned int w, unsigned int h, unsigned char*chunk, unsigned char*collision_data, collision_type ct);
   void spritestructarray_reallocate();
 }
 

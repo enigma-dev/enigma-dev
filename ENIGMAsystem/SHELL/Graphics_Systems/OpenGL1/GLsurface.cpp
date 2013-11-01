@@ -28,6 +28,7 @@ using namespace std;
 #include <stdio.h> //for file writing (surface_save)
 #include "Universal_System/nlpo2.h"
 #include "Universal_System/spritestruct.h"
+#include "Universal_System/backgroundstruct.h"
 #include "Collision_Systems/collision_types.h"
 
 #define __GETR(x) ((x & 0x0000FF))
@@ -741,13 +742,33 @@ int surface_save_part(int id, string filename, unsigned x, unsigned y, unsigned 
 	return 1;
 }
 
-int sprite_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, int xorig, int yorig)
+int background_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, bool preload)
+{
+    get_surfacev(surf,id,-1);
+    int full_width=nlpo2dc(w)+1, full_height=nlpo2dc(h)+1;
+    
+    unsigned sz=full_width*full_height;
+    unsigned char *surfbuf=new unsigned char[sz*4];
+	int prevFbo;
+	glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
+ 	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, surf->fbo);
+	glReadPixels(x,y,w,h,GL_RGBA,GL_UNSIGNED_BYTE,surfbuf);
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, prevFbo);
+	enigma::backgroundstructarray_reallocate();
+    int bckid=enigma::background_idmax;
+	enigma::background_new(bckid, w, h, surfbuf, removeback, smooth, preload, false, 0, 0, 0, 0, 0, 0);
+    delete[] surfbuf;
+	enigma::background_idmax++;
+    return bckid;
+}
+
+int sprite_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, bool preload, int xorig, int yorig)
 {
     get_surfacev(surf,id,-1);
     int full_width=nlpo2dc(w)+1, full_height=nlpo2dc(h)+1;
     enigma::spritestructarray_reallocate();
     int sprid=enigma::sprite_idmax;
-    enigma::sprite_new_empty(sprid, 1, w, h, xorig, yorig, 0, h, 0, w, 1,0);
+    enigma::sprite_new_empty(sprid, 1, w, h, xorig, yorig, 0, h, 0, w, preload, smooth);
 
     unsigned sz=full_width*full_height;
     unsigned char *surfbuf=new unsigned char[sz*4];
@@ -756,9 +777,30 @@ int sprite_create_from_surface(int id, int x, int y, int w, int h, bool removeba
  	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, surf->fbo);
 	glReadPixels(x,y,w,h,GL_RGBA,GL_UNSIGNED_BYTE,surfbuf);
 	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, prevFbo);
-    enigma::sprite_set_subimage(sprid, 0, xorig, yorig, w, h, surfbuf, surfbuf, enigma::ct_precise); //TODO: Support toggling of precise.
+    enigma::sprite_set_subimage(sprid, 0, w, h, surfbuf, surfbuf, enigma::ct_precise); //TODO: Support toggling of precise.
     delete[] surfbuf;
     return sprid;
+}
+
+int sprite_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, int xorig, int yorig)
+{
+	return sprite_create_from_surface(id, x, y, w, h, removeback, smooth, true, xorig, yorig);
+}
+
+void sprite_add_from_surface(int ind, int id, int x, int y, int w, int h, bool removeback, bool smooth)
+{
+    get_surfacev(surf,id,-1);
+    int full_width=nlpo2dc(w)+1, full_height=nlpo2dc(h)+1;
+
+    unsigned sz=full_width*full_height;
+    unsigned char *surfbuf=new unsigned char[sz*4];
+	int prevFbo;
+	glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
+ 	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, surf->fbo);
+	glReadPixels(x,y,w,h,GL_RGBA,GL_UNSIGNED_BYTE,surfbuf);
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, prevFbo);
+    enigma::sprite_add_subimage(ind, w, h, surfbuf, surfbuf, enigma::ct_precise); //TODO: Support toggling of precise.
+    delete[] surfbuf;
 }
 
 void surface_copy_part(int destination, gs_scalar x, gs_scalar y, int source, int xs, int ys, int ws, int hs)

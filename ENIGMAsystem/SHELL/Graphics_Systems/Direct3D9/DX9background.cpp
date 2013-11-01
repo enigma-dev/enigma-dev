@@ -21,6 +21,7 @@
 #include "Direct3D9Headers.h"
 #include "Graphics_Systems/General/GSbackground.h"
 #include "Graphics_Systems/General/GStextures.h"
+#include "Universal_System/nlpo2.h"
 #include "Universal_System/backgroundstruct.h"
 #include "Universal_System/spritestruct.h"
 
@@ -395,6 +396,11 @@ double background_get_texture_width_factor(int backId) {
 double background_get_texture_height_factor(int backId) {
   get_backgroundnv(bck2d,backId,-1);
   return bck2d->texbordy;
+}
+
+int background_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload)
+{
+
 }
 
 }

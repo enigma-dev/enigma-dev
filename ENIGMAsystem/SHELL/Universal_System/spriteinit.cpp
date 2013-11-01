@@ -114,7 +114,7 @@ namespace enigma
           default: collision_data = 0; break;
         };
         
-        sprite_set_subimage(sprid, ii, xorig, yorig, width, height, pixels, collision_data, coll_type);
+        sprite_set_subimage(sprid, ii, width, height, pixels, collision_data, coll_type);
         
         delete[] pixels;
         if (!fread(&nullhere,4,1,exe)) return;

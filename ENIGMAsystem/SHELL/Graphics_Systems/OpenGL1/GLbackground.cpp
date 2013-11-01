@@ -16,12 +16,12 @@
 **/
 
 #include <cstddef>
-
 #include <math.h>
 #include "../General/OpenGLHeaders.h"
 #include "../General/GSbackground.h"
 #include "../General/GStextures.h"
 #include "../General/GLTextureStruct.h"
+#include "Universal_System/nlpo2.h"
 #include "Universal_System/backgroundstruct.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Universal_System/spritestruct.h"
@@ -479,6 +479,33 @@ double background_get_texture_width_factor(int backId) {
 double background_get_texture_height_factor(int backId) {
   get_backgroundnv(bck2d,backId,-1);
   return bck2d->texbordy;
+}
+
+int background_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload)
+{
+    int full_width=nlpo2dc(w)+1, full_height=nlpo2dc(h)+1;
+	int prevFbo;
+	glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
+ 	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+	int patchSize = full_width*full_height;
+	std::vector<unsigned char> temp_rgbdata(4*patchSize);
+	glReadPixels(x, h-y,w,h,GL_RGBA, GL_UNSIGNED_BYTE, &temp_rgbdata[0]);
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, prevFbo);
+	
+	//Flip upside down
+	std::vector< unsigned char > rgbdata(4*patchSize);
+	for (int i=0; i < h; i++) // Doesn't matter the order now
+		memcpy(&rgbdata[i*h*4],                    // address of destination
+			   &temp_rgbdata[(h-i-1)*h*4], // address of source
+			   w*4*sizeof(unsigned char) );        // number of bytes to copy
+	
+	enigma::backgroundstructarray_reallocate();
+    int bckid=enigma::background_idmax;
+	enigma::background_new(bckid, w, h, &rgbdata[0], removeback, smooth, preload, false, 0, 0, 0, 0, 0, 0);
+    temp_rgbdata.clear(); // Clear the temporary array
+	rgbdata.clear();
+	enigma::background_idmax++;
+    return bckid;
 }
 
 }
