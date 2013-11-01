@@ -81,6 +81,8 @@ static inline void draw_back()
 
 namespace enigma
 {
+	extern GLuint msaa_fbo;
+	int FBO = 0;
     extern bool d3dMode;
 	extern int d3dCulling;
     extern std::map<int,roomstruct*> roomdata;
@@ -102,14 +104,13 @@ void screen_redraw()
 	// Clean up any textures that ENIGMA may still think are binded but actually are not
 	texture_reset();
 
-    int FBO;
     if (!view_enabled)
     {
         glViewport(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled());
         glLoadIdentity();
         if (GLEW_EXT_framebuffer_object)
         {
-            glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &FBO);
+            glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &enigma::FBO);
             glScalef(1, (FBO==0?-1:1), 1);
         }
         else
@@ -277,7 +278,7 @@ void screen_redraw()
 			glLoadIdentity();
 			if (GLEW_EXT_framebuffer_object)
 			{
-				glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &FBO);
+				glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &enigma::FBO);
 				glScalef(1, (FBO==0?-1:1), 1);
 			}
 			else
@@ -368,7 +369,7 @@ void screen_redraw()
         glLoadIdentity();
         if (GLEW_EXT_framebuffer_object)
         {
-            glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &FBO);
+            glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &enigma::FBO);
             glScalef(1, (FBO==0?-1:1), 1);
         }
         else
@@ -406,8 +407,19 @@ void screen_redraw()
 		d3d_set_culling(culling);
     }
 
+	if (enigma::msaa_fbo != 0) {
+		GLint fbo;
+		glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &fbo);
+		glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, enigma::msaa_fbo);
+		glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, 0);
+		//TODO: Change the code below to fix this to size properly to views
+		glBlitFramebufferEXT(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled(), 0, 0, window_get_region_width_scaled(), window_get_region_height_scaled(), GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, fbo);
+		// glReadPixels(0, 0, width, height, GL_BGRA, GL_UNSIGNED_BYTE, pixels);
+	}
+	
     ///TODO: screen_refresh() shouldn't be in screen_redraw(). They are seperate functions for a reason.
-    if (FBO==0) { screen_refresh(); }
+    if (enigma::FBO == 0 || enigma::msaa_fbo != 0) { screen_refresh(); }
 }
 
 void screen_init()
