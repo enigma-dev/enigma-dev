@@ -37,6 +37,8 @@ using namespace std;
 
 namespace enigma
 {
+	GLuint msaa_fbo = 0;
+		
     void EnableDrawing (HGLRC *hRC)
     {
         PIXELFORMATDESCRIPTOR pfd;
@@ -53,11 +55,14 @@ namespace enigma
         pfd.iLayerType = PFD_MAIN_PLANE;
         iFormat = ChoosePixelFormat (enigma::window_hDC, &pfd);
 
-        if (iFormat==0) { show_error("Total failure. Abort.",1); }
+        if (iFormat==0) { show_error("Failed to set the format of the OpenGL graphics device.",1); }
 
         SetPixelFormat (enigma::window_hDC, iFormat, &pfd);
         *hRC = wglCreateContext( enigma::window_hDC );
         wglMakeCurrent( enigma::window_hDC, *hRC );
+		
+		//TODO: This never reports higher than 8, but display_aa should be 14 if 2,4,and 8 are supported and 8 only when only 8 is supported
+		glGetIntegerv(GL_MAX_SAMPLES_EXT, &enigma_user::display_aa);
     }
 	
 	void WindowResized() {
@@ -100,6 +105,49 @@ namespace enigma {
 #include "Universal_System/roomsystem.h"
 
 namespace enigma_user {
+
+	int display_aa = 0;
+
+	void display_reset(int samples, bool vsync) {
+		int interval = vsync ? 1 : 0;
+
+		if (enigma::is_ext_swapcontrol_supported()) {
+		  wglSwapIntervalEXT(interval);
+		}
+ 
+		GLint fbo;
+		glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &fbo);
+ 
+		GLuint ColorBufferID, DepthBufferID;
+
+		// Cleanup the multi-sampler fbo if turning off multi-sampling
+		if (samples == 0) {
+			if (enigma::msaa_fbo != 0) {
+				glDeleteFramebuffers(1, &enigma::msaa_fbo);
+				enigma::msaa_fbo = 0;
+			}
+			return;
+		}
+
+		//TODO: Change the code below to fix this to size properly to views
+		// If we don't already have a multi-sample fbo then create one
+		if (enigma::msaa_fbo == 0) {
+			glGenFramebuffersEXT(1, &enigma::msaa_fbo);
+		}
+		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, enigma::msaa_fbo);
+		// Now make a multi-sample color buffer
+		glGenRenderbuffersEXT(1, &ColorBufferID);
+		glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, ColorBufferID);
+		glRenderbufferStorageMultisampleEXT(GL_RENDERBUFFER_EXT, samples, GL_RGBA8, window_get_region_width_scaled(), window_get_region_height_scaled());
+		// We also need a depth buffer
+		glGenRenderbuffersEXT(1, &DepthBufferID);
+		glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, DepthBufferID);
+		glRenderbufferStorageMultisampleEXT(GL_RENDERBUFFER_EXT, samples, GL_DEPTH_COMPONENT24, window_get_region_width_scaled(), window_get_region_height_scaled());
+		// Attach the render buffers to the multi-sampler fbo
+		glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_RENDERBUFFER_EXT, ColorBufferID);
+		glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, DepthBufferID);
+		
+	}
 
   void screen_refresh() {
     window_set_caption(room_caption);
