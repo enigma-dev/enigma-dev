@@ -25,6 +25,7 @@
 // NOTE: Changes/fixes that applies to this likely also applies to the OpenGL1 version.
 
 namespace enigma {
+  GLuint msaa_fbo = 0;
   namespace swaphandling {
     bool has_checked_extensions = false;
     bool ext_swapcontrol_supported;
@@ -61,6 +62,50 @@ namespace enigma {
 #include <Universal_System/roomsystem.h> // room_caption, update_mouse_variables
 
 namespace enigma_user {
+    // Don't know where to query this on XLIB, just defaulting it to 2,4,and 8 samples all supported, Windows puts it in EnableDrawing
+  	int display_aa = 14;
+
+	void display_reset(int samples, bool vsync) {
+		int interval = vsync ? 1 : 0;
+
+		if (enigma::is_ext_swapcontrol_supported()) {
+		  wglSwapIntervalEXT(interval);
+		}
+ 
+		GLint fbo;
+		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fbo);
+ 
+		GLuint ColorBufferID, DepthBufferID;
+
+		// Cleanup the multi-sampler fbo if turning off multi-sampling
+		if (samples == 0) {
+			if (enigma::msaa_fbo != 0) {
+				glDeleteFramebuffers(1, &enigma::msaa_fbo);
+				enigma::msaa_fbo = 0;
+			}
+			return;
+		}
+
+		//TODO: Change the code below to fix this to size properly to views
+		// If we don't already have a multi-sample fbo then create one
+		if (enigma::msaa_fbo == 0) {
+			glGenFramebuffers(1, &enigma::msaa_fbo);
+		}
+		glBindFramebuffer(GL_FRAMEBUFFER, enigma::msaa_fbo);
+		// Now make a multi-sample color buffer
+		glGenRenderbuffers(1, &ColorBufferID);
+		glBindRenderbuffer(GL_RENDERBUFFER, ColorBufferID);
+		glRenderbufferStorageMultisampleEXT(GL_RENDERBUFFER, samples, GL_RGBA8, window_get_region_width_scaled(), window_get_region_height_scaled());
+		// We also need a depth buffer
+		glGenRenderbuffersEXT(1, &DepthBufferID);
+		glBindRenderbufferEXT(GL_RENDERBUFFER, DepthBufferID);
+		glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples, GL_DEPTH_COMPONENT24, window_get_region_width_scaled(), window_get_region_height_scaled());
+		// Attach the render buffers to the multi-sampler fbo
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, ColorBufferID);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, DepthBufferID);
+		
+	}
+
   void set_synchronization(bool enable) {
 
     // General notes:

@@ -93,6 +93,7 @@ static inline void draw_back()
 
 namespace enigma
 {
+	extern GLuint msaa_fbo;
     extern bool d3dMode;
 	extern bool d3dZWriteEnable;
 	extern int d3dCulling;
@@ -106,18 +107,18 @@ namespace enigma
 	unsigned gui_width;
 	unsigned gui_height;
 
-void draw_globalVBO()
-{
-    if (globalVBO_verCount>0){
-        //int fbo;
-        //glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fbo);
-        //printf("RENDERING THIS - Verts = %i, inds = %i and fbo = %i, data size = %i, index size = %i\n",globalVBO_verCount,globalVBO_indCount,fbo,globalVBO_data.size(),globalVBO_indices.size() );
-        //glBindTexture(GL_TEXTURE_2D,0);
-        glEnableClientState(GL_VERTEX_ARRAY);
-        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-        glEnableClientState(GL_COLOR_ARRAY);
+	void draw_globalVBO()
+	{
+		if (globalVBO_verCount < 1) { return; }
+		//int fbo;
+		//glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fbo);
+		//printf("RENDERING THIS - Verts = %i, inds = %i and fbo = %i, data size = %i, index size = %i\n",globalVBO_verCount,globalVBO_indCount,fbo,globalVBO_data.size(),globalVBO_indices.size() );
+		//glBindTexture(GL_TEXTURE_2D,0);
+		glEnableClientState(GL_VERTEX_ARRAY);
+		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+		glEnableClientState(GL_COLOR_ARRAY);
 
-        glBindBufferARB(GL_ARRAY_BUFFER, globalVBO);
+		glBindBufferARB(GL_ARRAY_BUFFER, globalVBO);
 
 		// Textures should be clamped when rendering 2D sprites and stuff, so memorize it.
 		GLint wrapr, wraps, wrapt;
@@ -129,11 +130,11 @@ void draw_globalVBO()
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
 
-        if (globalVBO_verCount>globalVBO_maxBSize) glBufferDataARB(GL_ARRAY_BUFFER, globalVBO_datCount * sizeof(gs_scalar), &globalVBO_data[0], GL_DYNAMIC_DRAW), globalVBO_maxBSize = globalVBO_verCount;
-        else glBufferSubDataARB(GL_ARRAY_BUFFER, 0, globalVBO_datCount * sizeof(gs_scalar), &globalVBO_data[0]);
-        glVertexPointer( 2, GL_FLOAT, sizeof(gs_scalar) * 8, NULL );
-        glTexCoordPointer( 2, GL_FLOAT, sizeof(gs_scalar) * 8, (void*)(sizeof(gs_scalar) * 2) );
-        glColorPointer( 4, GL_FLOAT, sizeof(gs_scalar) * 8, (void*)(sizeof(gs_scalar) * 4) );
+		if (globalVBO_verCount>globalVBO_maxBSize) glBufferDataARB(GL_ARRAY_BUFFER, globalVBO_datCount * sizeof(gs_scalar), &globalVBO_data[0], GL_DYNAMIC_DRAW), globalVBO_maxBSize = globalVBO_verCount;
+		else glBufferSubDataARB(GL_ARRAY_BUFFER, 0, globalVBO_datCount * sizeof(gs_scalar), &globalVBO_data[0]);
+		glVertexPointer( 2, GL_FLOAT, sizeof(gs_scalar) * 8, NULL );
+		glTexCoordPointer( 2, GL_FLOAT, sizeof(gs_scalar) * 8, (void*)(sizeof(gs_scalar) * 2) );
+		glColorPointer( 4, GL_FLOAT, sizeof(gs_scalar) * 8, (void*)(sizeof(gs_scalar) * 4) );
 
 
 		// this sprite batching mechanism does not allow one to apply transformations to sprites or text
@@ -141,7 +142,7 @@ void draw_globalVBO()
 		if (d3dZWriteEnable) {
 		  glDepthMask(false);
 		}
-        glDrawElements(GL_TRIANGLES, globalVBO_indCount, GL_UNSIGNED_INT, &globalVBO_indices[0] );
+		glDrawElements(GL_TRIANGLES, globalVBO_indCount, GL_UNSIGNED_INT, &globalVBO_indices[0] );
 		if (d3dZWriteEnable) {
 		  glDepthMask(true);
 		}
@@ -151,15 +152,14 @@ void draw_globalVBO()
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wraps);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapt);
 
-        glDisableClientState( GL_COLOR_ARRAY );
-        glDisableClientState( GL_TEXTURE_COORD_ARRAY );
-        glDisableClientState( GL_VERTEX_ARRAY );
+		glDisableClientState( GL_COLOR_ARRAY );
+		glDisableClientState( GL_TEXTURE_COORD_ARRAY );
+		glDisableClientState( GL_VERTEX_ARRAY );
 
 		glBindBufferARB(GL_ARRAY_BUFFER, 0);
 
-        globalVBO_datCount = globalVBO_verCount = globalVBO_indCount = 0;
-    }
-}
+		globalVBO_datCount = globalVBO_verCount = globalVBO_indCount = 0;
+	}
 
 }
 
@@ -455,7 +455,18 @@ void screen_redraw()
 		// reset the culling
 		d3d_set_culling(culling);
     }
-
+		
+	if (enigma::msaa_fbo != 0) {
+		GLint fbo;
+		glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &fbo);
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, enigma::msaa_fbo);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+		//TODO: Change the code below to fix this to size properly to views
+		glBlitFramebuffer(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled(), 0, 0, window_get_region_width_scaled(), window_get_region_height_scaled(), GL_COLOR_BUFFER_BIT, GL_NEAREST);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
+		// glReadPixels(0, 0, width, height, GL_BGRA, GL_UNSIGNED_BYTE, pixels);
+	}
+	
     ///TODO: screen_refresh() shouldn't be in screen_redraw(). They are seperate functions for a reason.
     if (bound_framebuffer==0) { screen_refresh(); }
 }

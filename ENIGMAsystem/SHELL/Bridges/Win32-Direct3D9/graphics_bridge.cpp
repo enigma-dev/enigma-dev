@@ -139,48 +139,44 @@ namespace enigma
 
 #include "Universal_System/roomsystem.h"
 
-namespace enigma_user
+namespace enigma_user 
 {
-
 int display_aa = 0;
 
-
-// Not really sure if you have to reset everything or if you can just reset a few things.
 void display_reset(int aa, bool vsync) {
-		if (d3ddev == NULL) { return; }
-		IDirect3DSwapChain9 *sc;
-		d3ddev->GetSwapChain(0, &sc);
-		D3DPRESENT_PARAMETERS d3dpp;
-		sc->GetPresentParameters(&d3dpp);
-		if (vsync) {
-			d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT;   //Present the frame immediately
-		} else {
-			d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;   //Present the frame immediately
-		}
-		d3dpp.MultiSampleType = (D3DMULTISAMPLE_TYPE)((int)D3DMULTISAMPLE_NONE + aa); // Levels of multi-sampling
-		d3dpp.MultiSampleQuality = 0;                //No multi-sampling
-		if (aa) {
-			d3ddev->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, TRUE); 
-		} else {
-			d3ddev->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, FALSE); 
-		}
-		sc->Release();
-		bool spritenull = (dsprite == NULL);
-		if (!spritenull) {
-			dsprite->Release();
-		}
+	if (d3ddev == NULL) { return; }
+	IDirect3DSwapChain9 *sc;
+	d3ddev->GetSwapChain(0, &sc);
+	D3DPRESENT_PARAMETERS d3dpp;
+	sc->GetPresentParameters(&d3dpp);
+	if (vsync) {
+		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT;   //Present the frame immediately
+	} else {
+		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;   //Present the frame immediately
+	}
+	d3dpp.MultiSampleType = (D3DMULTISAMPLE_TYPE)((int)D3DMULTISAMPLE_NONE + aa); // Levels of multi-sampling
+	d3dpp.MultiSampleQuality = 0;                //No multi-sampling
+	if (aa) {
+		d3ddev->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, TRUE); 
+	} else {
+		d3ddev->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, FALSE); 
+	}
+	sc->Release();
+	bool spritenull = (dsprite == NULL);
+	if (!spritenull) {
+		dsprite->Release();
+	}
 
-		d3ddev->Reset(&d3dpp);
-		
-		HRESULT hr = D3DXCreateSprite(d3ddev->device,&dsprite);
-		if (FAILED(hr))
-		{
-			MessageBox(enigma::hWnd,
-               "Failed to create Direct3D 9.0 Sprite Object",
-			   DXGetErrorDescription9(hr), //DXGetErrorString9(hr)
-               MB_ICONERROR | MB_OK);
-			return;  // should probably force the game closed
-		}
+	d3ddev->Reset(&d3dpp);
+	
+	HRESULT hr = D3DXCreateSprite(d3ddev->device,&dsprite);
+	if (FAILED(hr)) {
+		MessageBox(enigma::hWnd,
+		   "Failed to create Direct3D 9.0 Sprite Object",
+		   DXGetErrorDescription9(hr), //DXGetErrorString9(hr)
+		   MB_ICONERROR | MB_OK);
+		return;  // should probably force the game closed
+	}
 
 }
 
@@ -192,7 +188,32 @@ void screen_refresh() {
 
 void set_synchronization(bool enable) //TODO: Needs to be rewritten
 {
+	if (d3ddev == NULL) { return; }
+	IDirect3DSwapChain9 *sc;
+	d3ddev->GetSwapChain(0, &sc);
+	D3DPRESENT_PARAMETERS d3dpp;
+	sc->GetPresentParameters(&d3dpp);
+	if (enable) {
+		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_DEFAULT;   //Present the frame immediately
+	} else {
+		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;   //Present the frame immediately
+	}
+	sc->Release();
+	bool spritenull = (dsprite == NULL);
+	if (!spritenull) {
+		dsprite->Release();
+	}
 
+	d3ddev->Reset(&d3dpp);
+	
+	HRESULT hr = D3DXCreateSprite(d3ddev->device,&dsprite);
+	if (FAILED(hr)) {
+		MessageBox(enigma::hWnd,
+		   "Failed to create Direct3D 9.0 Sprite Object",
+		   DXGetErrorDescription9(hr), //DXGetErrorString9(hr)
+		   MB_ICONERROR | MB_OK);
+		return;  // should probably force the game closed
+	}
 }  
 
 }
