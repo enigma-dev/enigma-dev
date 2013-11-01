@@ -1,5 +1,6 @@
 /** Copyright (C) 2008-2011 Josh Ventura
 *** Copyright (C) 2010 Alasdair Morrison <tgmg@g-java.com>
+*** Copyright (C) 2013 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -77,6 +78,17 @@ namespace enigma
   background_tileset::background_tileset(int w,int h,int tex,bool trans,bool smth,bool prel,int tw, int th, int ho, int vo, int hs, int vs):
     background(true, w, h, tex, trans, smth, prel), tileWidth(tw), tileHeight(th), hOffset(ho), vOffset(vo), hSep(hs), vSep(vs) {}
 
+  size_t backgroundstructarray_actualsize = 0; // INVARIANT: Should always be equal to the actual size of spritestructarray.
+	
+  //Allocates and zero-fills the array at game start
+  void backgrounds_init()
+  {
+    backgroundstructarray_actualsize = background_idmax+1;
+    backgroundstructarray = new background*[backgroundstructarray_actualsize];
+    for (unsigned i = 0; i < background_idmax; i++)
+      backgroundstructarray[i] = NULL;
+  }
+	
   //Adds a subimage to an existing sprite from the exe
   void background_new(int bkgid, unsigned w, unsigned h, unsigned char* chunk, bool transparent, bool smoothEdges, bool preload, bool useAsTileset, int tileWidth, int tileHeight, int hOffset, int vOffset, int hSep, int vSep)
   {
@@ -137,17 +149,24 @@ namespace enigma
     bak->texbordy = bck_copy->texbordy;
     bak->texture = graphics_duplicate_texture(bck_copy->texture);
   }
-
-  //Allocates and zero-fills the array at game start
-  void backgrounds_init()
+  
+  void backgroundstructarray_reallocate()
   {
-    backgroundstructarray = new background*[background_idmax+1];
-    for (unsigned i = 0; i < background_idmax; i++)
-      backgroundstructarray[i] = NULL;
+	if (backgroundstructarray_actualsize > background_idmax + 2) { // Ignore reallocation request if array is big enough.
+		return;
+	}
+	background** backgroundold = backgroundstructarray;
+	backgroundstructarray_actualsize = (background_idmax + 2)*2; // Grow by doubling size, minimizing needed reallocations.
+	backgroundstructarray = new background*[backgroundstructarray_actualsize];
+	for (size_t i = 0; i < background_idmax; i++) backgroundstructarray[i] = backgroundold[i];
+	delete[] backgroundold;
   }
 }
 
 #include "estring.h"
+#define __GETR(x) ((x & 0x0000FF))
+#define __GETG(x) ((x & 0x00FF00)>>8)
+#define __GETB(x) ((x & 0xFF0000)>>16)
 
 namespace enigma_user
 {
@@ -156,6 +175,28 @@ namespace enigma_user
     enigma::background *bck = enigma::backgroundstructarray[enigma::background_idmax] = new enigma::background;
     enigma::background_add_to_index(bck, filename, transparent, smooth, preload);
     return enigma::background_idmax++;
+  }
+  
+  int background_create_color(unsigned w, unsigned h, int col, bool preload)
+  {
+    int full_width=nlpo2dc(w)+1, full_height=nlpo2dc(h)+1;
+    
+    unsigned sz=full_width*full_height;
+    unsigned char *surfbuf=new unsigned char[sz*4];
+
+	for (int i = 0; i + 3 < sz*4; i += 4) {
+		surfbuf[i] = __GETR(col);
+		surfbuf[i+1] = __GETG(col);
+		surfbuf[i+2] = __GETB(col);
+		surfbuf[i+3] = 255;
+	}
+	
+	enigma::backgroundstructarray_reallocate();
+    int bckid=enigma::background_idmax;
+	enigma::background_new(bckid, w, h, surfbuf, false, false, preload, false, 0, 0, 0, 0, 0, 0);
+    delete[] surfbuf;
+	enigma::background_idmax++;
+    return bckid;
   }
 
   bool background_replace(int back, string filename, bool transparent, bool smooth, bool preload, bool free_texture)

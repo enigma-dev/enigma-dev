@@ -26,6 +26,7 @@ using namespace std;
 #include <stdio.h> //for file writing (surface_save)
 #include "Universal_System/nlpo2.h"
 #include "Universal_System/spritestruct.h"
+#include "Universal_System/backgroundstruct.h"
 #include "Collision_Systems/collision_types.h"
 
 #define __GETR(x) ((x & 0x0000FF))
@@ -281,7 +282,22 @@ int surface_save_part(int id, string filename, unsigned x, unsigned y, unsigned 
 
 }
 
+int background_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, bool preload)
+{
+
+}
+
+int sprite_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, bool preload, int xorig, int yorig)
+{
+
+}
+
 int sprite_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, int xorig, int yorig)
+{
+	return sprite_create_from_surface(id, x, y, w, h, removeback, smooth, true, xorig, yorig);
+}
+
+void sprite_add_from_surface(int ind, int id, int x, int y, int w, int h, bool removeback, bool smooth)
 {
 
 }
