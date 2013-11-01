@@ -25,6 +25,7 @@ using std::string;
 #include "../General/GStextures.h"
 
 
+#include "Universal_System/nlpo2.h"
 #include "Universal_System/spritestruct.h"
 #include "Universal_System/instance_system.h"
 #include "Universal_System/graphics_object.h"
@@ -340,6 +341,18 @@ void draw_sprite_tiled_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_sca
 
 	D3DXMatrixTransformation2D(&mat,NULL,0.0,0,NULL,0,0);
 	dsprite->SetTransform(&mat);
+}
+
+int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload, int xorig, int yorig) {
+
+}
+
+int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, int xorig, int yorig) {
+	return sprite_create_from_screen(x, y, w, h, removeback, smooth, true, xorig, yorig);
+}
+
+void sprite_add_from_screen(int id, int x, int y, int w, int h, bool removeback, bool smooth) {
+
 }
 
 }
