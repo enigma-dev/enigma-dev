@@ -111,7 +111,11 @@ void sprite_assign(int ind, int copy_sprite, bool free_texture = true);
 void sprite_merge(int ind, int copy_sprite);
 void sprite_set_offset(int ind, int xoff, int yoff);
 void sprite_set_alpha_from_sprite(int ind, int copy_sprite, bool free_texture=true);
-void sprite_set_bbox(int sprite, int left, int top, int right, int bottom);
+void sprite_set_offset(int ind, int xorig, int yorig);
+void sprite_set_bbox_mode(int ind, int mode);
+void sprite_set_bbox(int ind, int left, int top, int right, int bottom);
+void sprite_set_precise(int ind, bool precise);
+void sprite_collision_mask(int ind, bool sepmasks, int mode, int left, int right, int top, int bottom, int kind, unsigned char tolerance);
 
 }
 
