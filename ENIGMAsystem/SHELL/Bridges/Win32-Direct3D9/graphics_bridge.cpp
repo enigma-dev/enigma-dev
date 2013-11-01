@@ -143,7 +143,7 @@ namespace enigma_user
 {
 int display_aa = 0;
 
-void display_reset(int aa, bool vsync) {
+void display_reset(int samples, bool vsync) {
 	if (d3ddev == NULL) { return; }
 	IDirect3DSwapChain9 *sc;
 	d3ddev->GetSwapChain(0, &sc);
@@ -154,9 +154,9 @@ void display_reset(int aa, bool vsync) {
 	} else {
 		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;   //Present the frame immediately
 	}
-	d3dpp.MultiSampleType = (D3DMULTISAMPLE_TYPE)((int)D3DMULTISAMPLE_NONE + aa); // Levels of multi-sampling
+	d3dpp.MultiSampleType = (D3DMULTISAMPLE_TYPE)((int)D3DMULTISAMPLE_NONE + samples); // Levels of multi-sampling
 	d3dpp.MultiSampleQuality = 0;                //No multi-sampling
-	if (aa) {
+	if (samples) {
 		d3ddev->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, TRUE); 
 	} else {
 		d3ddev->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, FALSE); 
