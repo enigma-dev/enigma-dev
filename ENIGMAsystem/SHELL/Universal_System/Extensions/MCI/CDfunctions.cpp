@@ -22,51 +22,6 @@
 #include <windows.h>
 #include <mmsystem.h>
 
-namespace enigma {
-
-void ControlCdTray(TCHAR drive, DWORD command)
-{
-	// Not used here, only for debug
-	MCIERROR mciError = 0;
- 
-	// Flags for MCI command
-	DWORD mciFlags = MCI_WAIT | MCI_OPEN_SHAREABLE | 
-		MCI_OPEN_TYPE | MCI_OPEN_TYPE_ID | MCI_OPEN_ELEMENT;
- 
-	// Open drive device and get device ID
-	TCHAR elementName[] = { drive };
-	MCI_OPEN_PARMS mciOpenParms = { 0 };
-	mciOpenParms.lpstrDeviceType = (LPCTSTR)MCI_DEVTYPE_CD_AUDIO;
-	mciOpenParms.lpstrElementName = elementName;	
-	mciError = mciSendCommand(0, 
-		MCI_OPEN, mciFlags, (DWORD_PTR)&mciOpenParms);
- 
-	// Eject or close tray using device ID
-	MCI_SET_PARMS mciSetParms = { 0 };
-	mciFlags = MCI_WAIT | command; // command is sent by caller
-	mciError = mciSendCommand(mciOpenParms.wDeviceID, 
-		MCI_SET, mciFlags, (DWORD_PTR)&mciSetParms);
-	
-	// Close device ID
-	mciFlags = MCI_WAIT;
-	MCI_GENERIC_PARMS mciGenericParms = { 0 };
-	mciError = mciSendCommand(mciOpenParms.wDeviceID, 
-		MCI_CLOSE, mciFlags, (DWORD_PTR)&mciGenericParms);
-}
- 
-// Eject drive tray
-void EjectCdTray(TCHAR drive)
-{
-	ControlCdTray(drive, MCI_SET_DOOR_OPEN);
-}
- 
-// Retract drive tray
-void CloseCdTray(TCHAR drive)
-{
-	ControlCdTray(drive, MCI_SET_DOOR_CLOSED);
-}
-}
-
 namespace enigma_user {
 
 string MCI_command(string str) {
@@ -76,30 +31,55 @@ string MCI_command(string str) {
 }
 
 void cd_open_door() {
-	enigma::EjectCdTray('D');
+	mciSendString("set cdaudio door open wait", NULL, 0, NULL);
 }
 
 void cd_close_door() {
-	enigma::CloseCdTray('D');
+	mciSendString("set cdaudio door closed wait", NULL, 0, NULL);
 }
 
 void cd_init() {
+	mciSendString("open cdaudio", NULL, 0, NULL); 
+	//mciSendString("close cdaudio", NULL, 0, NULL); 
 }
 
 unsigned long cd_length() {
+
 }
 
 unsigned cd_number() {
+	unsigned count;
+    MCIERROR mciError;
+    TCHAR mciReturnBuffer[512];
+    mciError = mciSendString("status cdaudio number of tracks", mciReturnBuffer, sizeof(mciReturnBuffer), NULL);
+    if (mciError != 0)
+    {
+        //TODO: Show error message
+		// HRESULT_FROM_WIN32(mciError)
+        return 0;
+    }
+    sscanf(mciReturnBuffer, "%d", &count);
+	return count;
 }
 
 void cd_play(unsigned first, unsigned last) {
+	mciSendString("set cdaudio time format tmsf", NULL, 0, NULL);
+
+	if (first == 1 && last == 1000) {
+		mciSendString("play cdaudio", NULL, 0, NULL);
+		return;
+	}
+
+	unsigned last_track = cd_number();
+	if (last > last_track) { last = last_track; }
+
     TCHAR achCommandBuff[128]; 
     int result;
     MCIERROR err;
 
     // Form the command string.
     result = sprintf_s(
-        achCommandBuff, 128,
+        achCommandBuff, sizeof(achCommandBuff),
         "play cdaudio from %u to %u", first, last); 
 
     if (result == -1) {
@@ -113,7 +93,7 @@ void cd_play(unsigned first, unsigned last) {
 		//TODO: show error message
         return;
     }
-
+	
     return;
 }
 
@@ -129,27 +109,77 @@ void cd_stop() {
 	mciSendString("stop cdaudio", NULL, 0, NULL); 
 }
 
-void cd_paused() {
+bool cd_paused() {
+    MCIERROR mciError;
+    TCHAR mciReturnBuffer[512];
+
+    mciError = mciSendString("status cdaudio mode", mciReturnBuffer, sizeof(mciReturnBuffer), NULL);
+    if (mciError != 0)
+    {
+        //TODO: Show error message
+		//HRESULT_FROM_WIN32(mciError)
+        return false;
+    }
+    return (stricmp(mciReturnBuffer, "paused") == 0 || stricmp(mciReturnBuffer, "stopped") == 0);
 }
 
 bool cd_playing() {
+    MCIERROR mciError;
+    TCHAR mciReturnBuffer[512];
+
+    mciError = mciSendString("status cdaudio mode", mciReturnBuffer, sizeof(mciReturnBuffer), NULL);
+    if (mciError != 0)
+    {
+        //TODO: Show error message
+		//HRESULT_FROM_WIN32(mciError)
+        return false;
+    }
+    return (stricmp(mciReturnBuffer, "playing") == 0);
 }
 
 bool cd_present() {
+    MCIERROR mciError;
+    TCHAR mciReturnBuffer[512];
+
+    mciError = mciSendString("status cdaudio media present", mciReturnBuffer, sizeof(mciReturnBuffer), NULL);
+    if (mciError != 0)
+    {
+        //TODO: Show error message
+		//HRESULT_FROM_WIN32(mciError)
+        return false;
+    }
+    return (stricmp(mciReturnBuffer, "false") != 0);
 }
 
 unsigned long cd_position() {
+	mciSendString("set cdaudio time format milliseconds", NULL, 0, NULL);
+	unsigned long position;
+	MCIERROR mciError;
+	TCHAR mciReturnBuffer[512];
+	mciError = mciSendString("status cdaudio position", mciReturnBuffer, sizeof(mciReturnBuffer), NULL);
+    if (mciError != 0)
+    {
+        //TODO: Show error message
+		// HRESULT_FROM_WIN32(mciError)
+        return 0;
+    }
+	sscanf(mciReturnBuffer, "%d", &position);
+	return position;
 }
 
 void cd_set_position(unsigned long pos) {
+	bool was_playing = cd_playing();
+
+	mciSendString("set cdaudio time format milliseconds", NULL, 0, NULL);
+	mciSendString("set seek exactly on", NULL, 0, NULL);
     TCHAR achCommandBuff[128]; 
     int result;
     MCIERROR err;
-
+	
     // Form the command string.
     result = sprintf_s(
-        achCommandBuff, 128,
-        "seek cdaudio to %s", pos); 
+        achCommandBuff, sizeof(achCommandBuff),
+        "seek cdaudio to %u", pos); 
 
     if (result == -1) {
 		//TODO: show error message
@@ -163,20 +193,80 @@ void cd_set_position(unsigned long pos) {
         return;
     }
 
+	if (was_playing) {
+		mciSendString("play cdaudio", NULL, 0, NULL);
+	}
+	
     return;
 }
 
 void cd_set_track_position(unsigned long pos) {
+	mciSendString("set cdaudio time format milliseconds", NULL, 0, NULL);
+	unsigned long position;
+	MCIERROR mciError;
+	TCHAR mciCommandBuffer[512];
+	TCHAR mciReturnBuffer[512];
+	sprintf(mciCommandBuffer, "status cdaudio position track %u", cd_track());
+	mciError = mciSendString(mciCommandBuffer, mciReturnBuffer, sizeof(mciReturnBuffer), NULL);
+    if (mciError != 0)
+    {
+        //TODO: Show error message
+		// HRESULT_FROM_WIN32(mciError)
+        return;
+    }
+	sscanf(mciReturnBuffer, "%d", &position);
+	cd_set_position(position + pos);
 }
 
 unsigned cd_track() {
+	unsigned current;
+    MCIERROR mciError;
+    TCHAR mciReturnBuffer[512];
+    mciError = mciSendString("status cdaudio current track", mciReturnBuffer, sizeof(mciReturnBuffer), NULL);
+    if (mciError != 0)
+    {
+        //TODO: Show error message
+		// HRESULT_FROM_WIN32(mciError)
+        return 0;
+    }
+    sscanf(mciReturnBuffer, "%d", &current);
+	return current;
 }
 
-unsigned long cd_track_length() {
+unsigned long cd_track_length(unsigned n) {
+	mciSendString("set cdaudio time format milliseconds", NULL, 0, NULL);
+	unsigned long length;
+	MCIERROR mciError;
+	TCHAR mciCommandBuffer[512];
+	TCHAR mciReturnBuffer[512];
+	sprintf(mciCommandBuffer, "status cdaudio length track %u", n);
+	mciError = mciSendString(mciCommandBuffer, mciReturnBuffer, sizeof(mciReturnBuffer), NULL);
+    if (mciError != 0)
+    {
+        //TODO: Show error message
+		// HRESULT_FROM_WIN32(mciError)
+        return 0;
+    }
+	sscanf(mciReturnBuffer, "%d", &length);
+	return length;
 }
 
 unsigned long cd_track_position() {
+	mciSendString("set cdaudio time format milliseconds", NULL, 0, NULL);
+	unsigned long position;
+	MCIERROR mciError;
+	TCHAR mciCommandBuffer[512];
+	TCHAR mciReturnBuffer[512];
+	sprintf(mciCommandBuffer, "status cdaudio position track %u", cd_track());
+	mciError = mciSendString(mciCommandBuffer, mciReturnBuffer, sizeof(mciReturnBuffer), NULL);
+    if (mciError != 0)
+    {
+        //TODO: Show error message
+		// HRESULT_FROM_WIN32(mciError)
+        return 0;
+    }
+	sscanf(mciReturnBuffer, "%d", &position);
+	return cd_position() - position;
 }
-
 
 }
