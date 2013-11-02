@@ -1,0 +1,13 @@
+%E-YAML
+---
+
+Name: Media Control Interface
+ID: Media Control Interface
+Description: CD playback on Windows using the MCI.
+Default: false
+Build-date: 11/2/2013
+Icon: mcilogo.png
+
+Depends: None
+Dependencies: None
+Implement: extension_mediacontrolinterface
