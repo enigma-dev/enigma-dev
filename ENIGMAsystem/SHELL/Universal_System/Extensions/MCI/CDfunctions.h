@@ -29,17 +29,18 @@ namespace enigma_user {
     void cd_pause();
 	void cd_resume();
 	void cd_stop();
-    void cd_paused();
+    bool cd_paused();
     bool cd_playing();
     bool cd_present();
 	unsigned long cd_position();
     void cd_set_position(unsigned long pos);
     void cd_set_track_position(unsigned long pos);
     unsigned cd_track();
-    unsigned long cd_track_length();
+    unsigned long cd_track_length(unsigned n);
     unsigned long cd_track_position();
 	
 	inline void action_cd_play(unsigned first, unsigned last) {
+		cd_init(); // needs to be called once in a while and at least once otherwise pause and stop and seeking and tracks are all wrong
 		cd_play(first, last);
 	}
 	

@@ -7,7 +7,7 @@ Description: Advanced audio using XAudio 2 compatible with Windows XP to Windows
 Author: Robert B. Colton
 
 Depends:
-	Build-platforms: Windows
+	Build-platforms: None
 Represents:
 	Build-platforms: None
 
