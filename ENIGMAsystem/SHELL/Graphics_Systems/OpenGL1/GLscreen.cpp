@@ -527,9 +527,13 @@ int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h
 	if (!bmp) return -1;
 	fwrite("BM", 2, 1, bmp);
 
-	char *scrbuf = new char[sz*3];
-	glReadPixels(x, y, w, h, GL_BGR, GL_UNSIGNED_BYTE, scrbuf);
-
+	std::vector<unsigned char> rgbdata(3*sz);
+	GLint prevFbo;
+	glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
+ 	glBindFramebuffer(GL_FRAMEBUFFER_EXT, 0);
+	glReadPixels(x,window_get_region_height_scaled()-h-y,w,h,GL_BGR, GL_UNSIGNED_BYTE, &rgbdata[0]);
+	glBindFramebuffer(GL_FRAMEBUFFER_EXT, prevFbo);
+	
 	sz <<= 2;
 	fwrite(&sz,4,1,bmp);
 	fwrite("\0\0\0\0\x36\0\0\0\x28\0\0",12,1,bmp);
@@ -537,21 +541,21 @@ int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h
 	fwrite(&h,4,1,bmp);
 	fwrite("\1\0\x18\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0",28,1,bmp);
 
-	if (w & 3)
-	{
-		size_t pad = w & 3;
+	if (w & 3) {
 		w *= 3;
+		size_t pad = w & 3;
 		sz -= sz >> 2;
-		for(unsigned i = 0; i < sz; i += w)
-		{
-			fwrite(scrbuf+i,w,1,bmp);
-			fwrite("\0\0",pad,1,bmp);
+		unsigned xx  = 0;
+		for(unsigned i = 0; i <= sz; i += w) {
+			fwrite(&rgbdata[i + xx],sizeof(char),w,bmp);
+			fwrite("\0\0\0",sizeof(char),pad,bmp);
+			xx+=pad;
 		}
-	}
-	else fwrite(scrbuf, w*3, h, bmp);
+		
+	} else { fwrite(&rgbdata[0], w*3, h, bmp); }
 
 	fclose(bmp);
-	delete[] scrbuf;
+	rgbdata.clear();
 	return 0;
 }
 
