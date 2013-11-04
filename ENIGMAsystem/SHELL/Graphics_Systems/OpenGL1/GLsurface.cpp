@@ -26,6 +26,7 @@ using namespace std;
 #include <string.h>
 
 #include <stdio.h> //for file writing (surface_save)
+#include "Universal_System/image_formats.h"
 #include "Universal_System/nlpo2.h"
 #include "Universal_System/spritestruct.h"
 #include "Universal_System/backgroundstruct.h"
@@ -640,106 +641,59 @@ namespace enigma_user
 int surface_save(int id, string filename)
 {
     get_surfacev(surf,id,-1);
-	FILE *bmp=fopen(filename.c_str(),"wb");
-	if(!bmp) return -1;
 	unsigned int w=surf->width,h=surf->height,sz=w*h;
-	char *surfbuf=new char[sz*3];
-	char *revbuf=new char[sz*3];
-    int prevFbo;
+
+    string ext = enigma::image_get_format(filename);
+
+    unsigned char *rgbdata = new unsigned char[sz*4];
+	
+	int prevFbo;
 	glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
+	glBindFramebuffer(GL_FRAMEBUFFER_EXT, surf->fbo);
+	glPixelStorei(GL_PACK_ALIGNMENT, 1);
+	glReadPixels(0,0,w,h,GL_RGBA,GL_UNSIGNED_BYTE,rgbdata);
+    glBindFramebuffer(GL_FRAMEBUFFER_EXT, prevFbo);
 
-	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, surf->fbo);
-	glReadPixels(0,0,w,h,GL_BGR,GL_UNSIGNED_BYTE,surfbuf);
-    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, prevFbo);
-
-    //This code flips the buffer vertically. It needs to be done or else the picture will be upside down.
-    for (unsigned int i=0; i<h; i++)
-    {
-        for (unsigned int c=0; c<w; c++)
-        {
-            revbuf[(c+(i)*w)*3]=surfbuf[(c+(h-i)*w)*3];
-            revbuf[(c+(i)*w)*3+1]=surfbuf[(c+(h-i)*w)*3+1];
-            revbuf[(c+(i)*w)*3+2]=surfbuf[(c+(h-i)*w)*3+2];
-        }
-    }
-
-	fwrite("BM",2,1,bmp);
-	sz<<=2;
-
-	fwrite(&sz,4,1,bmp);
-	fwrite("\0\0\0\0\x36\0\0\0\x28\0\0",12,1,bmp);
-	fwrite(&w,4,1,bmp);
-	fwrite(&h,4,1,bmp);
-	fwrite("\1\0\x18\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0",28,1,bmp);
-
-	if(w&3)
-	{
-		size_t pad=w&3;
-		w*=3;
-		sz-=sz>>2;
-		for(unsigned int i=0;i<sz;i+=w)
-		{
-			fwrite(revbuf+i,w,1,bmp);
-			fwrite("\0\0",pad,1,bmp);
-		}
-	} else fwrite(revbuf,w*3,h,bmp);
-	fclose(bmp);
-	delete[] surfbuf;
-	delete[] revbuf;
-	return 1;
+	int ret;
+	if (ext == ".bmp") {
+		unsigned char* data = enigma::image_reverse_scanlines(rgbdata, w, h, 4);
+		ret = enigma::image_save(filename, data, w, h, w, h);
+		delete[] data;
+	} else {
+		ret = enigma::image_save(filename, rgbdata, w, h, w, h);
+	}
+	
+	delete[] rgbdata;
+	return ret;
 }
 
 int surface_save_part(int id, string filename, unsigned x, unsigned y, unsigned w, unsigned h)
 {
     get_surfacev(surf,id,-1);
-	FILE *bmp=fopen(filename.c_str(),"wb");
-	if(!bmp) return -1;
-    int prevFbo;
+	unsigned int sz=w*h;
+
+    string ext = enigma::image_get_format(filename);
+
+    unsigned char *rgbdata = new unsigned char[sz*4];
+	
+	int prevFbo;
 	glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
-    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, surf->fbo);
-	unsigned sz=w*h;
-	char *surfbuf=new char[sz*3];
-	glReadPixels(x,y,w,h,GL_BGR,GL_UNSIGNED_BYTE,surfbuf);
-	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, prevFbo);
+	glBindFramebuffer(GL_FRAMEBUFFER_EXT, surf->fbo);
+	glPixelStorei(GL_PACK_ALIGNMENT, 1);
+	glReadPixels(x,y,w,h,GL_RGBA,GL_UNSIGNED_BYTE,rgbdata);
+    glBindFramebuffer(GL_FRAMEBUFFER_EXT, prevFbo);
 
-    char *revbuf=new char[sz*3];
-    //This code flips the buffer vertically. It needs to be done or else the picture will be upside down.
-    for (unsigned int i=0; i<h; i++)
-    {
-        for (unsigned int c=0; c<w; c++)
-        {
-            revbuf[(c+(i)*w)*3]=surfbuf[(c+(h-i)*w)*3];
-            revbuf[(c+(i)*w)*3+1]=surfbuf[(c+(h-i)*w)*3+1];
-            revbuf[(c+(i)*w)*3+2]=surfbuf[(c+(h-i)*w)*3+2];
-        }
-    }
-
-	fwrite("BM",2,1,bmp);
-
-	sz <<= 2;
-	fwrite(&sz,4,1,bmp);
-	fwrite("\0\0\0\0\x36\0\0\0\x28\0\0",12,1,bmp);
-	fwrite(&w,4,1,bmp);
-	fwrite(&h,4,1,bmp);
-	fwrite("\1\0\x18\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0",28,1,bmp);
-
-	if(w&3)
-	{
-		size_t pad=w&3;
-		w*=3;
-		sz-=sz>>2;
-		for(unsigned i=0;i<sz;i+=w)
-		{
-			fwrite(revbuf+i,w,1,bmp);
-			fwrite("\0\0",pad,1,bmp);
-		}
+	int ret;
+	if (ext == ".bmp") {
+		unsigned char* data = enigma::image_reverse_scanlines(rgbdata, w, h, 4);
+		ret = enigma::image_save(filename, data, w, h, w, h);
+		delete[] data;
+	} else {
+		ret = enigma::image_save(filename, rgbdata, w, h, w, h);
 	}
-	else fwrite(revbuf,w*3,h,bmp);
-
-	fclose(bmp);
-	delete[] surfbuf;
-    delete[] revbuf;
-	return 1;
+	
+	delete[] rgbdata;
+	return ret;
 }
 
 int background_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, bool preload)
