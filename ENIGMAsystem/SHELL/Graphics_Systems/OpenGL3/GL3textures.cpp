@@ -174,6 +174,7 @@ namespace enigma
 
     unsigned char* ret = new unsigned char[(w*h*4)];
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
+	// The following line does not work when the texture is non power of two.
     glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, ret);
 
     return ret;
