@@ -20,6 +20,8 @@
 #include "../General/OpenGLHeaders.h"
 #include "../General/GSbackground.h"
 #include "../General/GLTextureStruct.h"
+
+#include "Universal_System/image_formats.h"
 #include "Universal_System/nlpo2.h"
 #include "Universal_System/backgroundstruct.h"
 #include "Graphics_Systems/graphics_mandatory.h"
@@ -66,8 +68,7 @@ namespace enigma {
 namespace enigma_user
 {
 
-void draw_background(int back, gs_scalar x, gs_scalar y)
-{
+void draw_background(int back, gs_scalar x, gs_scalar y) {
     get_background(bck2d,back);
     texture_set(textureStructs[bck2d->texture]->gltex);
 
@@ -84,8 +85,7 @@ void draw_background(int back, gs_scalar x, gs_scalar y)
     plane2D_rotated(data);
 }
 
-void draw_background_stretched(int back, gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height)
-{
+void draw_background_stretched(int back, gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height) {
     get_background(bck2d,back);
     texture_set(textureStructs[bck2d->texture]->gltex);
 
@@ -102,8 +102,7 @@ void draw_background_stretched(int back, gs_scalar x, gs_scalar y, gs_scalar wid
     plane2D_rotated(data);
 }
 
-void draw_background_part(int back, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y)
-{
+void draw_background_part(int back, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y) {
     get_background(bck2d,back);
     texture_set(textureStructs[bck2d->texture]->gltex);
 
@@ -122,8 +121,7 @@ void draw_background_part(int back, gs_scalar left, gs_scalar top, gs_scalar wid
     plane2D_rotated(data);
 }
 
-void draw_background_tiled(int back, gs_scalar x, gs_scalar y)
-{
+void draw_background_tiled(int back, gs_scalar x, gs_scalar y) {
     get_background(bck2d,back);
     texture_set(textureStructs[bck2d->texture]->gltex);
 
@@ -155,8 +153,7 @@ void draw_background_tiled(int back, gs_scalar x, gs_scalar y)
     }
 }
 
-void draw_background_tiled_area(int back, gs_scalar x, gs_scalar y, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2)
-{
+void draw_background_tiled_area(int back, gs_scalar x, gs_scalar y, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2) {
     get_background(bck2d,back);
     texture_set(textureStructs[bck2d->texture]->gltex);
 
@@ -402,28 +399,22 @@ double background_get_texture_height_factor(int backId) {
   return bck2d->texbordy;
 }
 
-int background_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload)
-{
+int background_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload) {
     int full_width=nlpo2dc(w)+1, full_height=nlpo2dc(h)+1;
 	int prevFbo;
 	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFbo);
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 	int patchSize = full_width*full_height;
-	std::vector<unsigned char> temp_rgbdata(4*patchSize);
-	glReadPixels(x, h-y,w,h,GL_RGBA, GL_UNSIGNED_BYTE, &temp_rgbdata[0]);
-	
-	//Flip upside down
-	std::vector< unsigned char > rgbdata(4*patchSize);
-	for (int i=0; i < h; i++) // Doesn't matter the order now
-		memcpy(&rgbdata[i*h*4],                    // address of destination
-			   &temp_rgbdata[(h-i-1)*h*4], // address of source
-			   w*4*sizeof(unsigned char) );        // number of bytes to copy
-	
+	std::vector<unsigned char> rgbdata(4*patchSize);
+	glReadPixels(x, h-y,w,h,GL_RGBA, GL_UNSIGNED_BYTE, &rgbdata[0]);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, prevFbo);
+	
+	unsigned char* data = enigma::image_reverse_scanlines(&rgbdata[0], w, h, 4);
+	
 	enigma::backgroundstructarray_reallocate();
     int bckid=enigma::background_idmax;
-	enigma::background_new(bckid, w, h, &rgbdata[0], removeback, smooth, preload, false, 0, 0, 0, 0, 0, 0);
-    temp_rgbdata.clear(); // Clear the temporary array
+	enigma::background_new(bckid, w, h, &data[0], removeback, smooth, preload, false, 0, 0, 0, 0, 0, 0);
+    delete[] data;
 	rgbdata.clear();
 	enigma::background_idmax++;
     return bckid;

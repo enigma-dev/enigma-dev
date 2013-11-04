@@ -23,8 +23,6 @@ using namespace std;
 #include <cstddef>
 #include <iostream>
 #include <cmath>
-#include <algorithm>
-#include <fstream>      // std::ofstream
 
 #include "GL3shapes.h"
 
@@ -33,8 +31,6 @@ using namespace std;
 #include "Universal_System/spritestruct.h"
 #include "Universal_System/backgroundstruct.h"
 #include "Collision_Systems/collision_types.h"
-
-#include "Universal_System/lodepng.h"
 
 #define __GETR(x) (gs_scalar)(((x & 0x0000FF))/255.0)
 #define __GETG(x) (gs_scalar)(((x & 0x00FF00) >> 8)/255.0)
@@ -567,85 +563,7 @@ int surface_get_bound()
 #endif
 
 #include "Universal_System/estring.h"
-
-int image_save_bmp(string filename, unsigned char *surfbuf, int w, int h)
-{
-    //3 bytes per pixel used for both input and output.
-    int inputChannels = 3;
-    int outputChannels = 3;
-
-    std::vector<unsigned char> bmp;
-    //bytes 0-13
-    bmp.push_back('B'); bmp.push_back('M'); //0: bfType
-    bmp.push_back(0); bmp.push_back(0); bmp.push_back(0); bmp.push_back(0); //2: bfSize; size not yet known for now, filled in later.
-    bmp.push_back(0); bmp.push_back(0); //6: bfReserved1
-    bmp.push_back(0); bmp.push_back(0); //8: bfReserved2
-    bmp.push_back(54 % 256); bmp.push_back(54 / 256); bmp.push_back(0); bmp.push_back(0); //10: bfOffBits (54 header bytes)
-
-    //bytes 14-53
-    bmp.push_back(40); bmp.push_back(0); bmp.push_back(0); bmp.push_back(0);  //14: biSize
-    bmp.push_back(w % 256); bmp.push_back(w / 256); bmp.push_back(0); bmp.push_back(0); //18: biWidth
-    bmp.push_back(h % 256); bmp.push_back(h / 256); bmp.push_back(0); bmp.push_back(0); //22: biHeight
-    bmp.push_back(1); bmp.push_back(0); //26: biPlanes
-    bmp.push_back(outputChannels * 8); bmp.push_back(0); //28: biBitCount
-    bmp.push_back(0); bmp.push_back(0); bmp.push_back(0); bmp.push_back(0);  //30: biCompression
-    bmp.push_back(0); bmp.push_back(0); bmp.push_back(0); bmp.push_back(0);  //34: biSizeImage
-    bmp.push_back(196); bmp.push_back(14); bmp.push_back(0); bmp.push_back(0);  //38: biXPelsPerMeter
-    bmp.push_back(196); bmp.push_back(14); bmp.push_back(0); bmp.push_back(0);  //42: biYPelsPerMeter
-    bmp.push_back(0); bmp.push_back(0); bmp.push_back(0); bmp.push_back(0);  //46: biClrUsed
-    bmp.push_back(0); bmp.push_back(0); bmp.push_back(0); bmp.push_back(0);  //50: biClrImportant
-
-    /*
-    Convert the input RGBRGBRGB pixel buffer to the BMP pixel buffer format. There are 3 differences with the input buffer:
-    -BMP stores the rows inversed, from bottom to top
-    -BMP stores the color channels in BGR instead of RGB order
-    -BMP requires each row to have a multiple of 4 bytes, so sometimes padding bytes are added between rows
-    */
-
-    int imagerowbytes = outputChannels * w;
-    imagerowbytes = imagerowbytes % 4 == 0 ? imagerowbytes : imagerowbytes + (4 - imagerowbytes % 4); //must be multiple of 4
-
-    for(int y = h - 1; y >= 0; y--) //the rows are stored inversed in bmp
-    {
-        int c = 0;
-        for(int x = 0; x < imagerowbytes; x++)
-        {
-          if(x < w * outputChannels)
-          {
-              bmp.push_back(surfbuf[inputChannels * (w * y + x / outputChannels) + c]);
-          }
-          else bmp.push_back(170);
-          c++;
-          if(c >= outputChannels) c = 0;
-        }
-    }
-
-    // Fill in the size
-    bmp[2] = bmp.size() % 256;
-    bmp[3] = (bmp.size() / 256) % 256;
-    bmp[4] = (bmp.size() / 65536) % 256;
-    bmp[5] = bmp.size() / 16777216;
-
-    std::ofstream file(filename.c_str(), std::ios::out|std::ios::binary);
-    file.write(bmp.empty() ? 0 : (char*)&bmp[0], std::streamsize(bmp.size()));
-    file.close();
-    return 1;
-}
-
-int image_save_png(string filename, const unsigned char *surfbuf, int w, int h)
-{
-    unsigned char* buffer;
-    size_t buffersize;
-    unsigned error = lodepng_encode_memory(&buffer, &buffersize, surfbuf, w, h, LCT_RGBA, 8);
-    if(!error){
-        std::ofstream file(filename.c_str(), std::ios::out|std::ios::binary);
-        file.write(reinterpret_cast<const char*>(buffer), std::streamsize(buffersize));
-        file.close();
-    }
-    free(buffer);
-
-    if (error) return -1; else return 1;
-}
+#include "Universal_System/image_formats.h"
 
 namespace enigma_user
 {
@@ -655,29 +573,26 @@ int surface_save(int id, string filename)
     get_surfacev(surf,id,-1);
 	unsigned int w=surf->width,h=surf->height,sz=w*h;
 
-    size_t fp = filename.find_last_of(".");
-    if (fp == string::npos){
-        return -1;
-    }
-    string ext = filename.substr(fp);
-    transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
-    GLenum format;
-    int bytes;
-    if (ext == ".bmp") format = GL_BGR, bytes = 3;
-    else if (ext == ".png") format = GL_RGBA, bytes = 4;
-    else return -1;
+    string ext = enigma::image_get_format(filename);
 
-    unsigned char *surfbuf=new unsigned char[sz*bytes];
+    unsigned char *rgbdata = new unsigned char[sz*4];
 
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, surf->fbo);
-	glReadPixels(0,0,w,h,format,GL_UNSIGNED_BYTE,surfbuf);
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, enigma::bound_framebuffer);
+	glPixelStorei(GL_PACK_ALIGNMENT, 1);
+	glReadPixels(0,0,w,h,GL_RGBA,GL_UNSIGNED_BYTE,rgbdata);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, enigma::bound_framebuffer);
 
-    int status=-1;
-    if (ext == ".bmp") status=image_save_bmp(filename, surfbuf, w, h);
-    else if (ext == ".png") status=image_save_png(filename, surfbuf, w, h);
-    delete[] surfbuf;
-    return status;
+	int ret;
+	if (ext == ".bmp") {
+		unsigned char* data = enigma::image_reverse_scanlines(rgbdata, w, h, 4);
+		ret = enigma::image_save(filename, data, w, h, w, h);
+		delete[] data;
+	} else {
+		ret = enigma::image_save(filename, rgbdata, w, h, w, h);
+	}
+	
+	delete[] rgbdata;
+	return ret;
 }
 
 int surface_save_part(int id, string filename, unsigned x, unsigned y, unsigned w, unsigned h)
@@ -685,29 +600,26 @@ int surface_save_part(int id, string filename, unsigned x, unsigned y, unsigned 
     get_surfacev(surf,id,-1);
 	unsigned int sz=w*h;
 
-    size_t fp = filename.find_last_of(".");
-    if (fp == string::npos){
-        return -1;
-    }
-    string ext = filename.substr(fp);
-    transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
-    GLenum format;
-    int bytes;
-    if (ext == ".bmp") format = GL_BGR, bytes = 3;
-    else if (ext == ".png") format = GL_RGBA, bytes = 4;
-    else return -1;
+    string ext = enigma::image_get_format(filename);
 
-    unsigned char *surfbuf=new unsigned char[sz*bytes];
-
+    unsigned char *rgbdata = new unsigned char[sz*4];
+	
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, surf->fbo);
-	glReadPixels(x,y,w,h,format,GL_UNSIGNED_BYTE,surfbuf);
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, enigma::bound_framebuffer);
+	glPixelStorei(GL_PACK_ALIGNMENT, 1);
+	glReadPixels(x,y,w,h,GL_RGBA,GL_UNSIGNED_BYTE,rgbdata);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, enigma::bound_framebuffer);
 
-    int status=-1;;
-    if (ext == ".bmp") status=image_save_bmp(filename, surfbuf, w, h);
-    else if (ext == ".png") status=image_save_png(filename, surfbuf, w, h);
-    delete[] surfbuf;
-    return status;
+	int ret;
+	if (ext == ".bmp") {
+		unsigned char* data = enigma::image_reverse_scanlines(rgbdata, w, h, 4);
+		ret = enigma::image_save(filename, data, w, h, w, h);
+		delete[] data;
+	} else {
+		ret = enigma::image_save(filename, rgbdata, w, h, w, h);
+	}
+	
+	delete[] rgbdata;
+	return ret;
 }
 
 int background_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, bool preload)

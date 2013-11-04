@@ -172,7 +172,8 @@ namespace enigma
     glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_WIDTH, &w);
     glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_HEIGHT,&h);
 
-    unsigned char* ret = new unsigned char[(w*h) << 2];
+    unsigned char* ret = new unsigned char[(w*h*4)];
+	glPixelStorei(GL_PACK_ALIGNMENT, 1);
     glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, ret);
 
     return ret;
