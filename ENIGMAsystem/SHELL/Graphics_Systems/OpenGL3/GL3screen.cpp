@@ -25,6 +25,7 @@
 
 using namespace std;
 
+#include "Universal_System/image_formats.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/estring.h"
 
@@ -539,74 +540,55 @@ void screen_init()
 int screen_save(string filename) //Assumes native integers are little endian
 {
 	unsigned int w=window_get_width(),h=window_get_height(),sz=w*h;
-	FILE *bmp = fopen(filename.c_str(),"wb");
-	if(!bmp) return -1;
+	
+	string ext = enigma::image_get_format(filename);
+	
+	unsigned char *rgbdata = new unsigned char[sz*4];
+	GLint prevFbo;
+	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFbo);
+	glPixelStorei(GL_PACK_ALIGNMENT, 1);
+ 	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+	glReadPixels(0,0,w,h, GL_RGBA, GL_UNSIGNED_BYTE, rgbdata);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, prevFbo);
 
-	char *scrbuf = new char[sz*3];
-	glReadPixels(0,0,w,h,GL_BGR,GL_UNSIGNED_BYTE,scrbuf);
-
-	fwrite("BM",2,1,bmp);
-	sz <<= 2;
-
-	fwrite(&sz,4,1,bmp);
-	fwrite("\0\0\0\0\x36\0\0\0\x28\0\0",12,1,bmp);
-	fwrite(&w,4,1,bmp);
-	fwrite(&h,4,1,bmp);
-	fwrite("\1\0\x18\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0",28,1,bmp);
-
-	if (w & 3)
-	{
-		size_t pad=w&3;
-		w*=3;
-		sz-=sz>>2;
-		for(unsigned int i=0;i<sz;i+=w)
-		{
-			fwrite(scrbuf+i,w,1,bmp);
-			fwrite("\0\0",pad,1,bmp);
-		}
-	} else fwrite(scrbuf,w*3,h,bmp);
-	fclose(bmp);
-	delete[] scrbuf;
-	return 0;
+	int ret;
+	if (ext == ".png") {
+		unsigned char* data = image_reverse_scanlines(rgbdata, w, h, 4);
+		ret = image_save(filename, data, w, h, w, h);
+		delete[] data;
+	} else {
+		ret = image_save(filename, rgbdata, w, h, w, h);
+	}
+	
+	delete[] rgbdata;
+	return ret;
 }
 
 int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h) //Assumes native integers are little endian
 {
-	unsigned sz = w * h;
-	FILE *bmp=fopen(filename.c_str(), "wb");
-	if (!bmp) return -1;
-	fwrite("BM", 2, 1, bmp);
-
-	std::vector<unsigned char> rgbdata(3*sz);
+	unsigned sz = w*h;
+	
+	string ext = enigma::image_get_format(filename);
+	
+	unsigned char *rgbdata = new unsigned char[sz*4];
 	GLint prevFbo;
 	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFbo);
+	glPixelStorei(GL_PACK_ALIGNMENT, 1);
  	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-	glReadPixels(x,window_get_region_height_scaled()-h-y,w,h,GL_BGR, GL_UNSIGNED_BYTE, &rgbdata[0]);
+	glReadPixels(x,window_get_region_height_scaled()-h-y,w,h, GL_RGBA, GL_UNSIGNED_BYTE, rgbdata);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, prevFbo);
 	
-	sz <<= 2;
-	fwrite(&sz,4,1,bmp);
-	fwrite("\0\0\0\0\x36\0\0\0\x28\0\0",12,1,bmp);
-	fwrite(&w,4,1,bmp);
-	fwrite(&h,4,1,bmp);
-	fwrite("\1\0\x18\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0",28,1,bmp);
-
-	if (w & 3) {
-		w *= 3;
-		size_t pad = w & 3;
-		sz -= sz >> 2;
-		unsigned xx  = 0;
-		for(unsigned i = 0; i <= sz; i += w) {
-			fwrite(&rgbdata[i + xx],sizeof(char),w,bmp);
-			fwrite("\0\0\0",sizeof(char),pad,bmp);
-			xx+=pad;
-		}
-		
-	} else { fwrite(&rgbdata[0], w*3, h, bmp); }
-
-	fclose(bmp);
-	rgbdata.clear();
-	return 0;
+	int ret;
+	if (ext == ".png") {
+		unsigned char* data = image_reverse_scanlines(rgbdata, w, h, 4);
+		ret = image_save(filename, data, w, h, w, h);
+		delete[] data;
+	} else {
+		ret = image_save(filename, rgbdata, w, h, w, h);
+	}
+	
+	delete[] rgbdata;
+	return ret;
 }
 
 void display_set_gui_size(unsigned width, unsigned height) {
