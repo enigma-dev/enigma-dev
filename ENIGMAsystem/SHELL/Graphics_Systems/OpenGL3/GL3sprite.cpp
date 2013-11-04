@@ -27,6 +27,7 @@ using std::string;
 
 #include "GL3shapes.h"
 
+#include "Universal_System/image_formats.h"
 #include "Universal_System/nlpo2.h"
 #include "Universal_System/spritestruct.h"
 #include "Universal_System/instance_system.h"
@@ -360,23 +361,18 @@ int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool 
 	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFbo);
  	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 	int patchSize = full_width*full_height;
-	std::vector<unsigned char> temp_rgbdata(4*patchSize);
-	glReadPixels(x, h-y,w,h,GL_RGBA, GL_UNSIGNED_BYTE, &temp_rgbdata[0]);
+	std::vector<unsigned char> rgbdata(4*patchSize);
+	glReadPixels(x, h-y,w,h,GL_RGBA, GL_UNSIGNED_BYTE, &rgbdata[0]);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, prevFbo);
 	
-	//Flip upside down
-	std::vector< unsigned char > rgbdata(4*patchSize);
-	for (int i=0; i < h; i++) // Doesn't matter the order now
-		memcpy(&rgbdata[i*h*4],                    // address of destination
-			   &temp_rgbdata[(h-i-1)*h*4], // address of source
-			   w*4*sizeof(unsigned char) );        // number of bytes to copy
+	unsigned char* data = enigma::image_reverse_scanlines(&rgbdata[0], w, h, 4);
 	
 	enigma::spritestructarray_reallocate();
     int sprid=enigma::sprite_idmax;
     enigma::sprite_new_empty(sprid, 1, w, h, xorig, yorig, 0, h, 0, w, preload, smooth);
-	enigma::sprite_set_subimage(sprid, 0, w, h, &rgbdata[0], &rgbdata[0], enigma::ct_precise); //TODO: Support toggling of precise.
-    temp_rgbdata.clear(); // Clear the temporary array
-	rgbdata.clear();
+	enigma::sprite_set_subimage(sprid, 0, w, h, &data[0], &data[0], enigma::ct_precise); //TODO: Support toggling of precise.
+    rgbdata.clear(); // Clear the temporary array
+	delete[] data;
     return sprid;
 }
 
@@ -390,19 +386,14 @@ void sprite_add_from_screen(int id, int x, int y, int w, int h, bool removeback,
 	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFbo);
  	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 	int patchSize = full_width*full_height;
-	std::vector<unsigned char> temp_rgbdata(4*patchSize);
-	glReadPixels(x, h-y,w,h,GL_RGBA, GL_UNSIGNED_BYTE, &temp_rgbdata[0]);
+	std::vector<unsigned char> rgbdata(4*patchSize);
+	glReadPixels(x, h-y,w,h,GL_RGBA, GL_UNSIGNED_BYTE, &rgbdata[0]);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, prevFbo);
 	
-	//Flip upside down
-	std::vector< unsigned char > rgbdata(4*patchSize);
-	for (int i=0; i < h; i++) // Doesn't matter the order now
-		memcpy(&rgbdata[i*h*4],                    // address of destination
-			   &temp_rgbdata[(h-i-1)*h*4], // address of source
-			   w*4*sizeof(unsigned char) );        // number of bytes to copy
-	
-	enigma::sprite_add_subimage(id, w, h, &rgbdata[0], &rgbdata[0], enigma::ct_precise); //TODO: Support toggling of precise.
-    temp_rgbdata.clear(); // Clear the temporary array
+	unsigned char* data = enigma::image_reverse_scanlines(&rgbdata[0], w, h, 4);
+
+	enigma::sprite_add_subimage(id, w, h, &data[0], &data[0], enigma::ct_precise); //TODO: Support toggling of precise.
+	delete[] data;
 	rgbdata.clear();
 }
 

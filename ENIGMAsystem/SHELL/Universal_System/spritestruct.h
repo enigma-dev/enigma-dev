@@ -101,10 +101,12 @@ extern int sprite_get_texture (int sprite, int subimage);
 extern int sprite_get_xoffset (int sprite);
 extern int sprite_get_yoffset (int sprite);
 
-int sprite_add(std::string filename, int imgnumb, bool precise, bool transparent, bool smooth, bool preload, int x_offset, int y_offset);
+int sprite_add(std::string filename, int imgnumb, bool precise, bool transparent, bool smooth, bool preload, int x_offset, int y_offset); //GM8+ compatible
 int sprite_add(std::string filename, int imgnumb, bool transparent, bool smooth, int x_offset, int y_offset);  //GM7+ compatible
-bool sprite_replace(int ind, std::string filename, int imgnumb, bool precise, bool transparent, bool smooth, bool preload, int x_offset, int y_offset, bool free_texture = true);
-bool sprite_replace(int ind, std::string filename, int imgnumb, bool transparent, bool smooth, int x_offset, int y_offset, bool free_texture = true);   //GM7+ compatible
+bool sprite_replace(int ind, std::string fname, int imgnumb, bool precise, bool transparent, bool smooth, bool preload, int x_offset, int y_offset, bool free_texture = true); //GM8+ compatible
+bool sprite_replace(int ind, std::string fname, int imgnumb, bool transparent, bool smooth, int x_offset, int y_offset, bool free_texture = true);   //GM7+ compatible
+void sprite_save(int ind, unsigned subimg, std::string fname);
+void sprite_save_strip(int ind, std::string fname);
 void sprite_delete(int ind, bool free_texture = true);
 int sprite_duplicate(int ind);
 void sprite_assign(int ind, int copy_sprite, bool free_texture = true);

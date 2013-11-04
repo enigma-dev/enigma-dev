@@ -65,7 +65,7 @@
 
 extern int amain();
 
-#include "Universal_System/IMGloading.h"
+#include "Universal_System/image_formats.h"
 
 #include "Universal_System/object.h"
 #include "Universal_System/instance.h"

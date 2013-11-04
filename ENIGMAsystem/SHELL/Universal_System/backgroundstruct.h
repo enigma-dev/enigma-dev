@@ -67,6 +67,7 @@ namespace enigma_user
 int background_add(std::string filename, bool transparent = false, bool smooth = false, bool preload = true);
 int background_create_color(unsigned w, unsigned h, int col, bool preload = true);
 bool background_replace(int back, std::string filename, bool transparent = false, bool smooth = false, bool preload = true, bool free_texture = true);
+void background_save(int back, std::string fname);
 void background_delete(int back, bool free_texture = true);
 int background_duplicate(int back);
 void background_assign(int back, int copy_background, bool free_texture = true);

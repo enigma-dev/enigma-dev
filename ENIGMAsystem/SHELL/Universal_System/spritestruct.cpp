@@ -27,7 +27,7 @@ using namespace std;
 #include "graphics_object.h"
 #include "Universal_System/instance_system.h"
 #include "libEGMstd.h"
-#include "IMGloading.h"
+#include "image_formats.h"
 #include "estring.h"
 
 #ifdef DEBUG_MODE
@@ -115,6 +115,26 @@ bool sprite_replace(int ind, string filename, int imgnumb, bool precise, bool tr
 bool sprite_replace(int ind, string filename, int imgnumb, bool transparent, bool smooth, int x_offset, int y_offset, bool free_texture)
 {
     return sprite_replace(ind, filename, imgnumb, false, transparent, smooth, true, x_offset, y_offset, free_texture);
+}
+
+void sprite_save(int ind, unsigned subimg, string fname) {
+	get_sprite_mutable(spr,ind,false);
+	unsigned char* rgbdata = enigma::graphics_get_texture_rgba(spr->texturearray[subimg]);
+	
+    string ext = enigma::image_get_format(fname);
+	if (ext == ".bmp") {
+		unsigned char* data = enigma::image_reverse_scanlines(rgbdata, spr->width, spr->height, 4);
+		enigma::image_save(fname, data, spr->width, spr->height, spr->width, spr->height);
+		delete[] data;
+	} else {
+		enigma::image_save(fname, rgbdata, spr->width, spr->height, spr->width, spr->height);
+	}
+	
+	delete[] rgbdata;
+}
+
+void sprite_save_strip(int ind, string fname) {
+
 }
 
 void sprite_delete(int ind, bool free_texture)
@@ -241,7 +261,7 @@ namespace enigma
     {
         unsigned int width, height,fullwidth, fullheight;
 
-        char *pxdata = load_bitmap(filename, &width, &height, &fullwidth, &fullheight);
+        unsigned char *pxdata = image_load(filename, &width, &height, &fullwidth, &fullheight);
         
         // If sprite transparent, set the alpha to zero for pixels that should be transparent from lower left pixel color
         if (pxdata && transparent)
