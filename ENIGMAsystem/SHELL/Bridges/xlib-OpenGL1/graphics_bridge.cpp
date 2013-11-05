@@ -63,85 +63,49 @@ namespace enigma {
 #include <Universal_System/roomsystem.h> // room_caption, update_mouse_variables
 
 namespace enigma_user {
-    // Don't know where to query this on XLIB, just defaulting it to 2,4,and 8 samples all supported, Windows puts it in EnableDrawing
-  	int display_aa = 14;
+// Don't know where to query this on XLIB, just defaulting it to 2,4,and 8 samples all supported, Windows puts it in EnableDrawing
+int display_aa = 14;
 
-	void display_reset(int samples, bool vsync) {
-		int interval = vsync ? 1 : 0;
+void set_synchronization(bool enable) {
+	// General notes:
+	// Setting swapping on and off is platform-dependent and requires platform-specific extensions.
+	// Platform-specific extensions are even more bothersome than regular extensions.
+	// What functions and features to use depends on which version of OpenGL is used.
+	// For more information, see the following pages:
+	// http://www.opengl.org/wiki/Load_OpenGL_Functions
+	// http://www.opengl.org/wiki/OpenGL_Loading_Library
+	// http://www.opengl.org/wiki/Swap_Interval
+	// http://en.wikipedia.org/wiki/GLX
+	// Also note that OpenGL version >= 3.0 does not use glGetString for getting extensions.
 
-		if (enigma::is_ext_swapcontrol_supported()) {
-		  wglSwapIntervalEXT(interval);
-		}
- 
-		GLint fbo;
-		glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &fbo);
- 
-		GLuint ColorBufferID, DepthBufferID;
+	if (enigma::x11::disp != 0) {
+	  GLXDrawable drawable = glXGetCurrentDrawable();
 
-		// Cleanup the multi-sampler fbo if turning off multi-sampling
-		if (samples == 0) {
-			if (enigma::msaa_fbo != 0) {
-				glDeleteFramebuffers(1, &enigma::msaa_fbo);
-				enigma::msaa_fbo = 0;
-			}
-			return;
-		}
+	  int interval = enable ? 1 : 0;
 
-		//TODO: Change the code below to fix this to size properly to views
-		// If we don't already have a multi-sample fbo then create one
-		if (enigma::msaa_fbo == 0) {
-			glGenFramebuffersEXT(1, &enigma::msaa_fbo);
-		}
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, enigma::msaa_fbo);
-		// Now make a multi-sample color buffer
-		glGenRenderbuffersEXT(1, &ColorBufferID);
-		glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, ColorBufferID);
-		glRenderbufferStorageMultisampleEXT(GL_RENDERBUFFER_EXT, samples, GL_RGBA8, window_get_region_width_scaled(), window_get_region_height_scaled());
-		// We also need a depth buffer
-		glGenRenderbuffersEXT(1, &DepthBufferID);
-		glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, DepthBufferID);
-		glRenderbufferStorageMultisampleEXT(GL_RENDERBUFFER_EXT, samples, GL_DEPTH_COMPONENT24, window_get_region_width_scaled(), window_get_region_height_scaled());
-		// Attach the render buffers to the multi-sampler fbo
-		glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_RENDERBUFFER_EXT, ColorBufferID);
-		glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, DepthBufferID);
-		
+	  if (enigma::is_ext_swapcontrol_supported()) {
+		glXSwapIntervalEXT(enigma::x11::disp, drawable, interval);
+	  }
+	  else if (enigma::is_mesa_swapcontrol_supported()) {
+		glXSwapIntervalMESA(interval);
+	  }
+	  // NOTE: GLX_SGI_swap_control, which is not used here, does not seem
+	  // to support disabling of synchronization, since its argument may not
+	  // be zero or less, so therefore it is not used here.
+	  // See http://www.opengl.org/registry/specs/SGI/swap_control.txt for more information.
 	}
+}
   
-  void set_synchronization(bool enable) {
-
-    // General notes:
-    // Setting swapping on and off is platform-dependent and requires platform-specific extensions.
-    // Platform-specific extensions are even more bothersome than regular extensions.
-    // What functions and features to use depends on which version of OpenGL is used.
-    // For more information, see the following pages:
-    // http://www.opengl.org/wiki/Load_OpenGL_Functions
-    // http://www.opengl.org/wiki/OpenGL_Loading_Library
-    // http://www.opengl.org/wiki/Swap_Interval
-    // http://en.wikipedia.org/wiki/GLX
-    // Also note that OpenGL version >= 3.0 does not use glGetString for getting extensions.
-
-    if (enigma::x11::disp != 0) {
-      GLXDrawable drawable = glXGetCurrentDrawable();
-
-      int interval = enable ? 1 : 0;
-
-      if (enigma::is_ext_swapcontrol_supported()) {
-        glXSwapIntervalEXT(enigma::x11::disp, drawable, interval);
-      }
-      else if (enigma::is_mesa_swapcontrol_supported()) {
-        glXSwapIntervalMESA(interval);
-      }
-      // NOTE: GLX_SGI_swap_control, which is not used here, does not seem
-      // to support disabling of synchronization, since its argument may not
-      // be zero or less, so therefore it is not used here.
-      // See http://www.opengl.org/registry/specs/SGI/swap_control.txt for more information.
-    }
-  }
+void display_reset(int samples, bool vsync) {
+	set_synchronization(vsync);
+	//TODO: Copy over from the Win32 bridge
+}
   
-  void screen_refresh() {
-    glXSwapBuffers(enigma::x11::disp, enigma::x11::win);
-    enigma::update_mouse_variables();
-    window_set_caption(room_caption);
-  }
+void screen_refresh() {
+	glXSwapBuffers(enigma::x11::disp, enigma::x11::win);
+	enigma::update_mouse_variables();
+	window_set_caption(room_caption);
+}
+
 }
 

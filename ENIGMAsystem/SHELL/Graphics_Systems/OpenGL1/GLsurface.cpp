@@ -232,7 +232,8 @@ void surface_reset_target(void)
 void surface_free(int id)
 {
   get_surface(surf,id);
-  int prevFbo; glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo); if (prevFbo == surf->fbo) glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+  GLint prevFbo; glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo); 
+  if (prevFbo == surf->fbo) { glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0); }
   enigma::graphics_delete_texture(surf->tex);
   glDeleteFramebuffers(1, &surf->fbo);
   surf->width = surf->height = surf->tex = surf->fbo = 0;
@@ -743,7 +744,7 @@ int sprite_create_from_surface(int id, int x, int y, int w, int h, bool removeba
 
 void sprite_add_from_surface(int ind, int id, int x, int y, int w, int h, bool removeback, bool smooth)
 {
-    get_surfacev(surf,id,-1);
+    get_surface(surf,id);
     int full_width=nlpo2dc(w)+1, full_height=nlpo2dc(h)+1;
 
     unsigned sz=full_width*full_height;

@@ -118,7 +118,7 @@ bool sprite_replace(int ind, string filename, int imgnumb, bool transparent, boo
 }
 
 void sprite_save(int ind, unsigned subimg, string fname) {
-	get_sprite_mutable(spr,ind,false);
+	get_spritev_mutable(spr,ind);
 	unsigned char* rgbdata = enigma::graphics_get_texture_rgba(spr->texturearray[subimg]);
 	
     string ext = enigma::image_get_format(fname);
@@ -541,7 +541,7 @@ void sprite_set_offset(int ind, int xoff, int yoff)
 }
 
 void sprite_set_bbox_mode(int ind, int mode) {
-  get_sprite(spr,ind,0);
+  get_spritev_mutable(spr,ind);
 }
 
 void sprite_set_bbox(int ind, int left, int top, int right, int bottom)
@@ -562,7 +562,7 @@ void sprite_collision_mask(int ind, bool sepmasks, int mode, int left, int right
 }
 
 void sprite_set_precise(int ind, bool precise) {
-  get_sprite(spr,ind,0);
+  get_spritev_mutable(spr,ind);
 }
 
 }

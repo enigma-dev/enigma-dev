@@ -14,7 +14,6 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
-
 #include <stdio.h>
 
 #include "ALsystem.h"
@@ -36,7 +35,7 @@ ALfloat listenerVel[] = {0.0f,0.0f,0.0f};
 ALfloat listenerOri[] = {0.0f,0.0f,1.0f, 0.0f,1.0f,0.0f};
 
 // first one is reserved for music
-vector<SoundChannel*> sound_channels(1);
+vector<SoundChannel*> sound_channels;
 vector<SoundResource*> sound_resources(0);
 vector<SoundEmitter*> sound_emitters(0);
 
@@ -47,31 +46,26 @@ namespace enigma {
   int get_free_channel(double priority)
   {
     // test for channels not playing anything
-    for(size_t i = 1; i < sound_channels.size(); i++)
-    {
+    for (size_t i = 0; i < sound_channels.size(); i++) {
       ALint state;
       alGetSourcei(sound_channels[i]->source, AL_SOURCE_STATE, &state);
-      if (state != AL_PLAYING)
-      {
+      if (state != AL_PLAYING) {
         return i;
       }
     }
     // finally if you still couldnt find an empty channel, and we have a few more we can generate
     // go ahead and generate a new one
-    if (sound_channels.size() < channel_num)
-    {
+    if (sound_channels.size() < channel_num) {
       int i = sound_channels.size();
       ALuint src;
       alGenSources(1, &src);
-      SoundChannel* sndsrc = new SoundChannel(src,i);
+      SoundChannel* sndsrc = new SoundChannel(src,-1);
       sound_channels.push_back(sndsrc);
       return i;
     }
     // test for channels playing a lower priority sound, and take their spot if they are
-    for(size_t i = 1; i < sound_channels.size(); i++)
-    {
-      if (sound_channels[i]->priority < priority)
-      {
+    for (size_t i = 0; i < sound_channels.size(); i++) {
+      if (sound_channels[i]->priority < priority) {
         return i;
       }
     }

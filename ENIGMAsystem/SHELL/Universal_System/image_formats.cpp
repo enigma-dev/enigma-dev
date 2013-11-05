@@ -27,9 +27,6 @@
 using namespace std;
 #include "image_formats.h"
 
-#include <windows.h>
-#include <sstream>
-
 #include "nlpo2.h"
 inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect powers of two
 	x =  (x & -x) - 1;

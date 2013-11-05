@@ -17,6 +17,7 @@
 
 #ifndef _SOUND_CHANNEL__H
 #define _SOUND_CHANNEL__H
+
 #include "../General/ASadvanced.h"
 #include "ALsystem.h"
 
@@ -35,12 +36,12 @@
 using std::vector;
 
 struct SoundChannel {
-  ALuint source;
-  int soundIndex;
-  double priority;
-  int type;
-  SoundChannel(ALint alsource, int sound_id): source(alsource), soundIndex(sound_id) {}
-  SoundChannel() {}
+ALuint source;
+int soundIndex;
+double priority;
+int type;
+SoundChannel(ALuint alsource, int sound_id): source(alsource), soundIndex(sound_id), priority(0), type(0) {}
+~SoundChannel() {}
 
 void sound_update()
 {
