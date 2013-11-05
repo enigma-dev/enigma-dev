@@ -84,12 +84,13 @@ namespace enigma
   {
     using namespace enigma_user;
 
-    //Destroy all objects
+    // Destroy all objects
     for (enigma::iterator it = enigma::instance_list_first(); it; ++it)
     {
       it->myevent_roomend();
+	  // Destroy the object if it is not persistent
       if (!((object_planar*)*it)->persistent)
-      instance_destroy(it->id, false);
+		instance_destroy(it->id, false);
     }
     perform_callbacks_clean_up_roomend();
 
@@ -151,9 +152,11 @@ namespace enigma
 
     //Load tiles
     delete_tiles();
-    drawing_depths.clear();
-    for (int i = 0; i < tilecount; i++)
-    {
+	for (int i = 0; i < tilecount; i++) {
+        tile t = tiles[i];
+		drawing_depths[t.depth].tiles.clear();
+    }
+    for (int i = 0; i < tilecount; i++) {
         tile t = tiles[i];
         drawing_depths[t.depth].tiles.push_back(t);
     }
@@ -161,24 +164,36 @@ namespace enigma
     //Tiles end
 
     object_basic* is[instancecount];
-    for (int i = 0; i<instancecount; i++) {
+    for (int i = 0; i < instancecount; i++) {
       inst *obj = &instances[i];
       is[i] = instance_create_id(obj->x,obj->y,obj->obj,obj->id);
     }
 
     instance_event_iterator = new inst_iter(NULL,NULL,NULL);
-    for (int i = 0; i<instancecount; i++)
+	
+	// Fire the create event of all the new instances
+    for (int i = 0; i < instancecount; i++)
       is[i]->myevent_create();
-	 // instance create code should be added here or occur at this exact moment in time, but guess what the code 
-	 // isn't here, so where the fuck is it? and no not the create event, the instance create code from the room editor
-	 // WHERE THE FUCK IS IT?
+	  
+	// instance create code should be added here or occur at this exact moment in time, but guess what the code 
+	// isn't here, so where the fuck is it? and no not the create event, the instance create code from the room editor
+	// WHERE THE FUCK IS IT?
+	 
+	// Fire the game start event for all the new instances, persistent objects don't matter since this is the first time 
+	// the game ran they won't even exist yet
     if (gamestart)
-    for (int i = 0; i<instancecount; i++)
+    for (int i = 0; i < instancecount; i++)
       is[i]->myevent_gamestart();
+	  
+	// Fire the rooms creation code
 	if (createcode)
        createcode();
-    for (int i = 0; i<instancecount; i++)
-      is[i]->myevent_roomstart();
+	   
+	// Fire the room start event for all persistent objects still kept alive and all the new instances
+	for (enigma::iterator it = enigma::instance_list_first(); it; ++it)
+    {
+      it->myevent_roomstart();
+    }
   }
 
   extern int room_loadtimecount;

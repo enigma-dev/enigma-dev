@@ -175,7 +175,7 @@ namespace enigma_user
 	enigma::backgroundstructarray_reallocate();
     enigma::background *bck = enigma::backgroundstructarray[enigma::background_idmax] = new enigma::background;
     enigma::background_add_to_index(bck, filename, transparent, smooth, preload);
-    return enigma::background_idmax;
+    return enigma::background_idmax++;
   }
   
   int background_create_color(unsigned w, unsigned h, int col, bool preload)
