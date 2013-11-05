@@ -45,6 +45,9 @@ namespace enigma_user
 
 void draw_primitive_begin(int dink)
 {
+  // This has to be done because these immediate mode vertex functions will
+  // blend with the texture whether or specify texture coordinates or not.
+  texture_set(0);
   GLenum kind = ptypes_by_id[ dink & 15 ];
   glBegin(kind);
 }
@@ -92,44 +95,42 @@ void draw_vertex_texture_color(gs_scalar x, gs_scalar y, gs_scalar tx, gs_scalar
   glPopAttrib();
 }
 
-void draw_primitive_end()
-{
+void draw_primitive_end() {
 	glEnd();
 }
 
-void d3d_primitive_begin(int kind)
-{
+void d3d_primitive_begin(int kind) {	
+	// This has to be done because these immediate mode vertex functions will
+	// blend with the texture whether or specify texture coordinates or not.
+	texture_set(0);
     glBegin(ptypes_by_id[kind]);
 }
 
-void d3d_primitive_begin_texture(int kind, int texId)
-{
+void d3d_primitive_begin_texture(int kind, int texId) {
     texture_set(get_texture(texId));
     glBegin(ptypes_by_id[kind]);
 }
 
-void d3d_primitive_end()
-{
+void d3d_primitive_end() {
     glEnd();
 }
 
-void d3d_vertex(gs_scalar x, gs_scalar y, gs_scalar z)
-{
+void d3d_vertex(gs_scalar x, gs_scalar y, gs_scalar z) {
     glVertex3d(x,y,z);
 }
-void d3d_vertex_color(gs_scalar x, gs_scalar y, gs_scalar z, int color, double alpha)
-{
+
+void d3d_vertex_color(gs_scalar x, gs_scalar y, gs_scalar z, int color, double alpha) {
     glColor4f(GETR(color), GETG(color), GETB(color), alpha);
     glVertex3d(x,y,z);
     glColor4ubv(enigma::currentcolor);
 }
-void d3d_vertex_texture(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar tx, gs_scalar ty)
-{
+
+void d3d_vertex_texture(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar tx, gs_scalar ty) {
     glTexCoord2f(tx,ty);
     glVertex3d(x,y,z);
 }
-void d3d_vertex_texture_color(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar tx, gs_scalar ty, int color, double alpha)
-{
+
+void d3d_vertex_texture_color(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar tx, gs_scalar ty, int color, double alpha) {
     glColor4f(GETR(color), GETG(color), GETB(color), alpha);
     glTexCoord2f(tx,ty);
     glVertex3d(x,y,z);
