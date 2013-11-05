@@ -130,7 +130,7 @@ void d3d_set_hidden(bool enable)
 {
 	(enable?glEnable:glDisable)(GL_DEPTH_TEST);
 	enigma::d3dHidden = enable;
-	d3d_set_zwriteenable(enable);
+	//d3d_set_zwriteenable(enable);
 }
 
 // disabling zwriting can let you turn off testing for a single model, for instance
@@ -302,10 +302,11 @@ void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, g
   glDisable(GL_DEPTH_TEST);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  gluPerspective(45, -view_wview[view_current] / (double)view_hview[view_current], 1, 32000);
+  gluPerspective(60, view_wview[view_current] / (double)view_hview[view_current], 0.1, 32000);
   glMatrixMode(GL_MODELVIEW);
-  glScalef(1, -1, 1);
-  glOrtho(x,x + width,y,y + height,0,1);
+  glLoadIdentity();
+  glScalef(1, 1, 1);
+  glOrtho(x,x + width,y,y + height,0.1,32000);
   glRotatef(angle,0,0,1);
   glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
   glMultMatrixd(transformation_matrix);

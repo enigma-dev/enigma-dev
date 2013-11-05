@@ -665,7 +665,7 @@ int sprite_create_from_surface(int id, int x, int y, int w, int h, bool removeba
 
 void sprite_add_from_surface(int ind, int id, int x, int y, int w, int h, bool removeback, bool smooth)
 {
-    get_surfacev(surf,id,-1);
+    get_surface(surf,id);
     int full_width=nlpo2dc(w)+1, full_height=nlpo2dc(h)+1;
 
     unsigned sz=full_width*full_height;
