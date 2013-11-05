@@ -171,7 +171,7 @@ void screen_redraw()
 {
 	// Clean up any textures that ENIGMA may still think are binded but actually are not
 	texture_reset();
-
+	d3d_set_zwriteenable(true);
     if (!view_enabled)
     {
         glViewport(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled());

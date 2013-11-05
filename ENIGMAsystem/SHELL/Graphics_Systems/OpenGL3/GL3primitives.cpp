@@ -137,7 +137,8 @@ void d3d_primitive_end()
   }
   prim_d3d_texture = -1;
   d3d_model_draw(prim_d3d_model);
-  d3d_model_clear(prim_d3d_model);
+  d3d_model_destroy(prim_d3d_model);
+  prim_d3d_model = -1;
 }
 
 void d3d_vertex(gs_scalar x, gs_scalar y, gs_scalar z)
