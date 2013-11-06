@@ -327,17 +327,17 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
           {
               if (GetForegroundWindow() != enigma::hWnd && enigma::freezeWindow)  continue;
 				  
-			  unsigned long dt = (spent_mcs - last_time);
+			  unsigned long dt = 0;
+			  if (spent_mcs > last_time) {
+				dt = (spent_mcs - last_time);
+			  } else {
+				//TODO: figure out what to do here this happens when the fps is reached and the timers start over
+				dt = enigma_user::delta_time;
+			  }
 			  last_time = spent_mcs;
-			  if (dt < 0) {
-				dt = -dt;
-			  }
-			  //TODO: I don't know why by for some reason this will be a really big number at a regular interval
-			  if (dt < 100000) {
-				enigma_user::delta_time = dt;
-				current_time_mcs += enigma_user::delta_time;
-				enigma_user::current_time += enigma_user::delta_time / 1000;
-			  }
+			  enigma_user::delta_time = dt;
+			  current_time_mcs += enigma_user::delta_time;
+			  enigma_user::current_time += enigma_user::delta_time / 1000;
 
 			 // enigma_user::current_time = enigma::get_current_time();
               enigma::ENIGMA_events();
