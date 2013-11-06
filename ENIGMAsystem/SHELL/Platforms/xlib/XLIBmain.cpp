@@ -39,7 +39,7 @@
 
 namespace enigma_user {
   const int os_type = os_linux;
-  int keyboard_lastkey = 0;
+  extern int keyboard_lastkey;
 }
 
 namespace enigma
@@ -174,6 +174,8 @@ namespace enigma
 
 namespace enigma_user {
   extern double fps;
+  unsigned long current_time = 0; // milliseconds since the start of the game
+  unsigned long delta_time = 0; // microseconds since the last step event
 }
 
 static inline long clamp(long value, long min, long max)
