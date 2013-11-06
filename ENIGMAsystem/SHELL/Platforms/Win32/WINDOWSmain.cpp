@@ -74,7 +74,7 @@ namespace enigma {
   int ENIGMA_events();
 } // TODO: synchronize with XLib by moving these declarations to a platform_includes header in the root.
 
-unsigned long last_time_mcs = 0; // the last current_time in microseconds
+//TODO: Implement pause events
 unsigned long current_time_mcs = 0; // microseconds since the start of the game
 
 namespace enigma_user {
@@ -261,7 +261,6 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
     int frames_count = 0;
 
       char bQuit = 0;
-	  long start_time = 0;
 	  long last_time = 0;
       long spent_mcs = 0;
       long remaining_mcs = 0;
