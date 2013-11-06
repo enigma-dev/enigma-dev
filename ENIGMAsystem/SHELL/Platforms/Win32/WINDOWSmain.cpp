@@ -74,15 +74,21 @@ namespace enigma {
   int ENIGMA_events();
 } // TODO: synchronize with XLib by moving these declarations to a platform_includes header in the root.
 
+unsigned long last_time_mcs = 0; // the last current_time in microseconds
+unsigned long current_time_mcs = 0; // microseconds since the start of the game
+
 namespace enigma_user {
   extern double fps;
   unsigned long current_time = 0; // milliseconds since the start of the game
   unsigned long delta_time = 0; // microseconds since the last step event
+  
+  unsigned long get_timer() {  // microseconds since the start of the game
+	return current_time_mcs;
+  }
 }
 
 namespace enigma {
   int current_room_speed;
-  unsigned long start_time; // microseconds since the start of the computer at which the game started
   bool use_pc;
   // Filetime.
   ULARGE_INTEGER time_offset_ft;
@@ -108,15 +114,7 @@ namespace enigma {
   {
     current_room_speed = rs;
   }
-  long get_current_time()
-  {
-    if (use_pc) {
-      return time_offset_pc.QuadPart/frequency_pc.QuadPart;
-    }
-    else {
-      return time_offset_ft.QuadPart/10;
-    }
-  }
+
   void initialize_timing()
   {
     use_pc = QueryPerformanceFrequency(&frequency_pc);
@@ -131,7 +129,6 @@ namespace enigma {
       time_offset_ft.HighPart = time_values.dwHighDateTime;
       time_offset_slowing_ft.QuadPart = time_offset_ft.QuadPart;
     }
-	start_time = get_current_time();
   }
   void update_current_time()
   {
@@ -263,22 +260,26 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
     enigma::initialize_timing();
     int frames_count = 0;
 
-      char bQuit=0;
-      long spent_mcs;
-      long remaining_mcs;
-      long needed_mcs;
+      char bQuit = 0;
+	  long start_time = 0;
+	  long last_time = 0;
+      long spent_mcs = 0;
+      long remaining_mcs = 0;
+      long needed_mcs = 0;
       while (!bQuit)
       {
           using enigma::current_room_speed;
+		 
           // Update current time.
           enigma::update_current_time();
           {
               // Find diff between current and offset.
+			  
               long passed_mcs = enigma::get_current_offset_difference_mcs();
-			  enigma_user::current_time = enigma::get_current_time() - enigma::start_time;
               if (passed_mcs >= 1000000) { // Handle resetting.
                   // If more than one second has passed, update fps variable, reset frames count,
                   // and advance offset by difference in seconds, rounded down.
+				  
                   enigma_user::fps = frames_count;
                   frames_count = 0;
                   enigma::offset_modulus_one_second();
@@ -287,6 +288,7 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
 
           if (current_room_speed > 0) {
               spent_mcs = enigma::get_current_offset_slowing_difference_mcs();
+			  
               remaining_mcs = 1000000 - spent_mcs;
               needed_mcs = long((1.0 - 1.0*frames_count/current_room_speed)*1e6);
               const int catchup_limit_ms = 50;
@@ -297,6 +299,7 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
                 // without any sleep.
                 // And if there is very heavy load once in a while, the game will only run too fast for catchup_limit ms.
                 enigma::increase_offset_slowing(needed_mcs - (remaining_mcs + catchup_limit_ms*1000));
+
                 spent_mcs = enigma::get_current_offset_slowing_difference_mcs();
                 remaining_mcs = 1000000 - spent_mcs;
                 needed_mcs = long((1.0 - 1.0*frames_count/current_room_speed)*1e6);
@@ -323,8 +326,20 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
           else
           {
               if (GetForegroundWindow() != enigma::hWnd && enigma::freezeWindow)  continue;
+				  
+			  unsigned long dt = (spent_mcs - last_time);
+			  last_time = spent_mcs;
+			  if (dt < 0) {
+				dt = -dt;
+			  }
+			  //TODO: I don't know why by for some reason this will be a really big number at a regular interval
+			  if (dt < 100000) {
+				enigma_user::delta_time = dt;
+				current_time_mcs += enigma_user::delta_time;
+				enigma_user::current_time += enigma_user::delta_time / 1000;
+			  }
 
-			  enigma_user::delta_time = enigma::get_current_offset_slowing_difference_mcs();
+			 // enigma_user::current_time = enigma::get_current_time();
               enigma::ENIGMA_events();
               enigma::input_push();
 
