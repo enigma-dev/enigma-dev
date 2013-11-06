@@ -172,10 +172,16 @@ namespace enigma
   int game_ending();
 }
 
+unsigned long current_time_mcs = 0; // microseconds since the start of the game
+
 namespace enigma_user {
   extern double fps;
   unsigned long current_time = 0; // milliseconds since the start of the game
   unsigned long delta_time = 0; // microseconds since the last step event
+  
+  unsigned long get_timer() {  // microseconds since the start of the game
+	return current_time_mcs;
+  }
 }
 
 static inline long clamp(long value, long min, long max)
@@ -287,8 +293,11 @@ int main(int argc,char** argv)
 		clock_gettime(CLOCK_MONOTONIC, &time_current);
 		{
 			long passed_mcs = (time_current.tv_sec - time_offset.tv_sec)*1000000 + (time_current.tv_nsec/1000 - + time_offset.tv_nsec/1000);
+			enigma_user::current_time = passed_mcs/1000;
+			current_time_mcs = passed_mcs;
 			passed_mcs = clamp(passed_mcs, 0, 1000000);
 			if (passed_mcs >= 1000000) { // Handle resetting.
+				
 				enigma_user::fps = frames_count;
 				frames_count = 0;
 				time_offset.tv_sec += passed_mcs/1000000;
@@ -296,9 +305,9 @@ int main(int argc,char** argv)
 				time_offset_slowing.tv_nsec = time_offset.tv_nsec;
 			}
 		}
-
+		long spent_mcs = 0;
 		if (current_room_speed > 0) {
-			long spent_mcs = (time_current.tv_sec - time_offset_slowing.tv_sec)*1000000 + (time_current.tv_nsec/1000 - time_offset_slowing.tv_nsec/1000);
+			spent_mcs = (time_current.tv_sec - time_offset_slowing.tv_sec)*1000000 + (time_current.tv_nsec/1000 - time_offset_slowing.tv_nsec/1000);
 			spent_mcs = clamp(spent_mcs, 0, 1000000);
 			long remaining_mcs = 1000000 - spent_mcs;
 			long needed_mcs = long((1.0 - 1.0*frames_count/current_room_speed)*1e6);
@@ -327,6 +336,7 @@ int main(int argc,char** argv)
 				goto end;
 
 		enigma::handle_joysticks();
+		enigma_user::delta_time = spent_mcs;
 		enigma::ENIGMA_events();
 		enigma::input_push();
 
