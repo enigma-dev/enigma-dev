@@ -261,7 +261,7 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
     int frames_count = 0;
 
       char bQuit = 0;
-	  long last_time = 0;
+	  long last_mcs = 0;
       long spent_mcs = 0;
       long remaining_mcs = 0;
       long needed_mcs = 0;
@@ -327,18 +327,17 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
               if (GetForegroundWindow() != enigma::hWnd && enigma::freezeWindow)  continue;
 				  
 			  unsigned long dt = 0;
-			  if (spent_mcs > last_time) {
-				dt = (spent_mcs - last_time);
+			  if (spent_mcs > last_mcs) {
+				dt = (spent_mcs - last_mcs);
 			  } else {
 				//TODO: figure out what to do here this happens when the fps is reached and the timers start over
 				dt = enigma_user::delta_time;
 			  }
-			  last_time = spent_mcs;
+			  last_mcs = spent_mcs;
 			  enigma_user::delta_time = dt;
 			  current_time_mcs += enigma_user::delta_time;
 			  enigma_user::current_time += enigma_user::delta_time / 1000;
 
-			 // enigma_user::current_time = enigma::get_current_time();
               enigma::ENIGMA_events();
               enigma::input_push();
 

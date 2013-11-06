@@ -172,6 +172,7 @@ namespace enigma
   int game_ending();
 }
 
+//TODO: Implement pause events
 unsigned long current_time_mcs = 0; // microseconds since the start of the game
 
 namespace enigma_user {
@@ -293,8 +294,6 @@ int main(int argc,char** argv)
 		clock_gettime(CLOCK_MONOTONIC, &time_current);
 		{
 			long passed_mcs = (time_current.tv_sec - time_offset.tv_sec)*1000000 + (time_current.tv_nsec/1000 - + time_offset.tv_nsec/1000);
-			enigma_user::current_time = passed_mcs/1000;
-			current_time_mcs = passed_mcs;
 			passed_mcs = clamp(passed_mcs, 0, 1000000);
 			if (passed_mcs >= 1000000) { // Handle resetting.
 				
@@ -306,6 +305,7 @@ int main(int argc,char** argv)
 			}
 		}
 		long spent_mcs = 0;
+		long last_mcs = 0;
 		if (current_room_speed > 0) {
 			spent_mcs = (time_current.tv_sec - time_offset_slowing.tv_sec)*1000000 + (time_current.tv_nsec/1000 - time_offset_slowing.tv_nsec/1000);
 			spent_mcs = clamp(spent_mcs, 0, 1000000);
@@ -331,12 +331,23 @@ int main(int argc,char** argv)
 			}
 		}
 
+		unsigned long dt = 0;
+		if (spent_mcs > last_mcs) {
+			dt = (spent_mcs - last_mcs);
+		} else {
+			//TODO: figure out what to do here this happens when the fps is reached and the timers start over
+			dt = enigma_user::delta_time;
+		}
+		last_mcs = spent_mcs;
+		enigma_user::delta_time = dt;
+		current_time_mcs += enigma_user::delta_time;
+		enigma_user::current_time += enigma_user::delta_time / 1000;
+		
 		while(XQLength(disp))
 			if(handleEvents() > 0)
 				goto end;
 
 		enigma::handle_joysticks();
-		enigma_user::delta_time = spent_mcs;
 		enigma::ENIGMA_events();
 		enigma::input_push();
 
