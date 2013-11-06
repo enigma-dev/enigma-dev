@@ -57,7 +57,7 @@ bool sound_exists(int sound)
 bool sound_play(int sound) { // Returns whether sound is playing
   int src = enigma::get_free_channel(1);
   if (src == -1) { return false; }
-  get_sound(snd,sound,-1); //snd.looping = false;
+  get_sound(snd,sound,-1);
   alSourcei(sound_channels[src]->source, AL_BUFFER, snd->buf[0]);
   alSourcei(sound_channels[src]->source, AL_SOURCE_RELATIVE, AL_TRUE);
   alSourcei(sound_channels[src]->source, AL_REFERENCE_DISTANCE, 1);
@@ -74,7 +74,7 @@ bool sound_play(int sound) { // Returns whether sound is playing
 bool sound_loop(int sound) { // Returns whether sound is playing
   int src = enigma::get_free_channel(1);
   if (src == -1) { return false; }
-  get_sound(snd,sound,-1); //snd.looping = false;
+  get_sound(snd,sound,-1);
   alSourcei(sound_channels[src]->source, AL_BUFFER, snd->buf[0]);
   alSourcei(sound_channels[src]->source, AL_SOURCE_RELATIVE, AL_TRUE);
   alSourcei(sound_channels[src]->source, AL_REFERENCE_DISTANCE, 1);
