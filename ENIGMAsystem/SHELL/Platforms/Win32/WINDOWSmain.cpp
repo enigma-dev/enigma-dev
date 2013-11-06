@@ -1,29 +1,21 @@
-/********************************************************************************\
-**                                                                              **
-**  Copyright (C) 2008-2011 Josh Ventura                                        **
-**                                                                              **
-**  This file is a part of the ENIGMA Development Environment.                  **
-**                                                                              **
-**                                                                              **
-**  ENIGMA is free software: you can redistribute it and/or modify it under the **
-**  terms of the GNU General Public License as published by the Free Software   **
-**  Foundation, version 3 of the license or any later version.                  **
-**                                                                              **
-**  This application and its source code is distributed AS-IS, WITHOUT ANY      **
-**  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS   **
-**  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more       **
-**  details.                                                                    **
-**                                                                              **
-**  You should have received a copy of the GNU General Public License along     **
-**  with this code. If not, see <http://www.gnu.org/licenses/>                  **
-**                                                                              **
-**  ENIGMA is an environment designed to create games and other programs with a **
-**  high-level, fully compilable language. Developers of ENIGMA or anything     **
-**  associated with ENIGMA are in no way responsible for its users or           **
-**  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **
-**                                                                              **
-\********************************************************************************/
+/** Copyright (C) 2008-2011 Josh Ventura
+*** Copyright (C) 2013 Robert B. Colton
+***
+*** This file is a part of the ENIGMA Development Environment.
+***
+*** ENIGMA is free software: you can redistribute it and/or modify it under the
+*** terms of the GNU General Public License as published by the Free Software
+*** Foundation, version 3 of the license or any later version.
+***
+*** This application and its source code is distributed AS-IS, WITHOUT ANY
+*** WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+*** FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+*** details.
+***
+*** You should have received a copy of the GNU General Public License along
+*** with this code. If not, see <http://www.gnu.org/licenses/>
+**/
+
 #include <time.h>
 #include <string>
 #include <sstream>
@@ -74,15 +66,21 @@ namespace enigma {
   int ENIGMA_events();
 } // TODO: synchronize with XLib by moving these declarations to a platform_includes header in the root.
 
+//TODO: Implement pause events
+unsigned long current_time_mcs = 0; // microseconds since the start of the game
+
 namespace enigma_user {
   extern double fps;
   unsigned long current_time = 0; // milliseconds since the start of the game
   unsigned long delta_time = 0; // microseconds since the last step event
+  
+  unsigned long get_timer() {  // microseconds since the start of the game
+	return current_time_mcs;
+  }
 }
 
 namespace enigma {
   int current_room_speed;
-  unsigned long start_time; // microseconds since the start of the computer at which the game started
   bool use_pc;
   // Filetime.
   ULARGE_INTEGER time_offset_ft;
@@ -108,15 +106,7 @@ namespace enigma {
   {
     current_room_speed = rs;
   }
-  long get_current_time()
-  {
-    if (use_pc) {
-      return time_offset_pc.QuadPart/frequency_pc.QuadPart;
-    }
-    else {
-      return time_offset_ft.QuadPart/10;
-    }
-  }
+
   void initialize_timing()
   {
     use_pc = QueryPerformanceFrequency(&frequency_pc);
@@ -131,7 +121,6 @@ namespace enigma {
       time_offset_ft.HighPart = time_values.dwHighDateTime;
       time_offset_slowing_ft.QuadPart = time_offset_ft.QuadPart;
     }
-	start_time = get_current_time();
   }
   void update_current_time()
   {
@@ -263,22 +252,25 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
     enigma::initialize_timing();
     int frames_count = 0;
 
-      char bQuit=0;
-      long spent_mcs;
-      long remaining_mcs;
-      long needed_mcs;
+      char bQuit = 0;
+	  long last_mcs = 0;
+      long spent_mcs = 0;
+      long remaining_mcs = 0;
+      long needed_mcs = 0;
       while (!bQuit)
       {
           using enigma::current_room_speed;
+		 
           // Update current time.
           enigma::update_current_time();
           {
               // Find diff between current and offset.
+			  
               long passed_mcs = enigma::get_current_offset_difference_mcs();
-			  enigma_user::current_time = enigma::get_current_time() - enigma::start_time;
               if (passed_mcs >= 1000000) { // Handle resetting.
                   // If more than one second has passed, update fps variable, reset frames count,
                   // and advance offset by difference in seconds, rounded down.
+				  
                   enigma_user::fps = frames_count;
                   frames_count = 0;
                   enigma::offset_modulus_one_second();
@@ -287,6 +279,7 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
 
           if (current_room_speed > 0) {
               spent_mcs = enigma::get_current_offset_slowing_difference_mcs();
+			  
               remaining_mcs = 1000000 - spent_mcs;
               needed_mcs = long((1.0 - 1.0*frames_count/current_room_speed)*1e6);
               const int catchup_limit_ms = 50;
@@ -297,6 +290,7 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
                 // without any sleep.
                 // And if there is very heavy load once in a while, the game will only run too fast for catchup_limit ms.
                 enigma::increase_offset_slowing(needed_mcs - (remaining_mcs + catchup_limit_ms*1000));
+
                 spent_mcs = enigma::get_current_offset_slowing_difference_mcs();
                 remaining_mcs = 1000000 - spent_mcs;
                 needed_mcs = long((1.0 - 1.0*frames_count/current_room_speed)*1e6);
@@ -323,8 +317,19 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
           else
           {
               if (GetForegroundWindow() != enigma::hWnd && enigma::freezeWindow)  continue;
+				  
+			  unsigned long dt = 0;
+			  if (spent_mcs > last_mcs) {
+				dt = (spent_mcs - last_mcs);
+			  } else {
+				//TODO: figure out what to do here this happens when the fps is reached and the timers start over
+				dt = enigma_user::delta_time;
+			  }
+			  last_mcs = spent_mcs;
+			  enigma_user::delta_time = dt;
+			  current_time_mcs += enigma_user::delta_time;
+			  enigma_user::current_time += enigma_user::delta_time / 1000;
 
-			  enigma_user::delta_time = enigma::get_current_offset_slowing_difference_mcs();
               enigma::ENIGMA_events();
               enigma::input_push();
 
