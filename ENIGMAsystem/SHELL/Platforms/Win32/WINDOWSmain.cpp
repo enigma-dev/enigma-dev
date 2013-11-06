@@ -76,8 +76,8 @@ namespace enigma {
 
 namespace enigma_user {
   extern double fps;
-  unsigned long current_time; // milliseconds since the start of the game
-  unsigned long delta_time; // microseconds since the last step event
+  unsigned long current_time = 0; // milliseconds since the start of the game
+  unsigned long delta_time = 0; // microseconds since the last step event
 }
 
 namespace enigma {
