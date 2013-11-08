@@ -262,7 +262,7 @@ void draw_background_part_ext(int back, gs_scalar left, gs_scalar top, gs_scalar
     plane2D_rotated(data);
 }
 
-void draw_background_tiled_ext(int back, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int blend, gs_scalar alpha)
+void draw_background_tiled_ext(int back, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int blend, gs_scalar alpha, bool htiled, bool vtiled)
 {
     get_background(bck2d,back);
     texture_set(textureStructs[bck2d->texture]->gltex);
@@ -271,18 +271,25 @@ void draw_background_tiled_ext(int back, gs_scalar x, gs_scalar y, gs_scalar xsc
     tbx = bck2d->texbordx, tby = bck2d->texbordy,
     width_scaled = bck2d->width*xscale, height_scaled = bck2d->height*yscale;
 
-    x = width_scaled-fmod(x,width_scaled);
-    y = height_scaled-fmod(y,height_scaled);
+    int hortil, vertil;
+	if (htiled) {
+		hortil = int(ceil(room_width/(width_scaled*tbx))) + 1;
+		x = -(width_scaled-fmod(x,width_scaled));
+	} else {
+		hortil = 1;
+	}
+	if (vtiled) { 
+		vertil = int(ceil(room_height/(height_scaled*tby))) + 1;
+		y = -(height_scaled-fmod(y,height_scaled));
+	} else {
+		vertil = 1;
+	}
 
-    const int
-    hortil = int(ceil(room_width/(width_scaled*tbx))) + 1,
-    vertil = int(ceil(room_height/(height_scaled*tby))) + 1;
-
-    gs_scalar xvert1 = -x, xvert2 = xvert1 + width_scaled, yvert1, yvert2;
+    gs_scalar xvert1 = x, xvert2 = xvert1 + width_scaled, yvert1, yvert2;
     const gs_scalar r = __GETR(blend), g = __GETG(blend), b = __GETB(blend);
     for (int i=0; i<hortil; i++)
     {
-        yvert1 = -y; yvert2 = yvert1 + height_scaled;
+        yvert1 = y; yvert2 = yvert1 + height_scaled;
         for (int c=0; c<vertil; c++)
         {
             const gs_scalar data[4*8] = {

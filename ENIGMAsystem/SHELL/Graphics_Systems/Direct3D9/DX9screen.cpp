@@ -66,6 +66,8 @@ static inline void draw_back()
     using enigma_user::background_yscale;
     using enigma_user::background_htiled;
     using enigma_user::background_vtiled;
+	using enigma_user::background_hspeed;
+	using enigma_user::background_vspeed;
     using enigma_user::background_index;
     using enigma_user::background_coloring;
     using enigma_user::draw_background_tiled_ext;
@@ -75,8 +77,14 @@ static inline void draw_back()
     {
         if (background_visible[back_current] == 1)
         {
+			//NOTE: This has been double checked with Game Maker 8.1 to work exactly the same, the background_x/y is modified just as object locals are
+			//and also just as one would assume the system to work.
+			//TODO: This should probably be moved to room system.
+			background_x[back_current] += background_hspeed[back_current];
+			background_y[back_current] += background_vspeed[back_current];
             if (background_htiled[back_current] || background_vtiled[back_current])
-                draw_background_tiled_ext(background_index[back_current], background_x[back_current], background_y[back_current], background_xscale[back_current], background_xscale[back_current], background_coloring[back_current], background_alpha[back_current]);
+                draw_background_tiled_ext(background_index[back_current], background_x[back_current], background_y[back_current], background_xscale[back_current], 
+					background_xscale[back_current], background_coloring[back_current], background_alpha[back_current], background_htiled[back_current], background_vtiled[back_current]);
             else
                 draw_background_ext(background_index[back_current], background_x[back_current], background_y[back_current], background_xscale[back_current], background_xscale[back_current], 0, background_coloring[back_current], background_alpha[back_current]);
         }
