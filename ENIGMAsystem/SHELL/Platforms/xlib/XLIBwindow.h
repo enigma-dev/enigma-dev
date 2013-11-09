@@ -63,9 +63,6 @@ namespace enigma_user {
 int window_mouse_get_x();
 int window_mouse_get_y();
 #endif
-int window_views_mouse_get_x(); // mouse_x constant
-int window_views_mouse_get_y(); // mouse_y constant
-void window_views_mouse_set(int x, int y); // with respect to the first visible view
 int display_mouse_get_x();
 int display_mouse_get_y();
 
