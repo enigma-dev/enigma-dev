@@ -137,8 +137,6 @@ int display_mouse_get_x() { return getMouse(0); }
 int display_mouse_get_y() { return getMouse(1); }
 int window_mouse_get_x()  { return getMouse(2); }
 int window_mouse_get_y()  { return getMouse(3); }
-int window_views_mouse_get_x()  { return getMouse(2); } // this should be changed, it needs to be in respect to all views, look at Win32
-int window_views_mouse_get_y()  { return getMouse(3); } // this should be changed, it needs to be in respect to all views, look at Win32
 
 void window_set_stayontop(bool stay) {}
 bool window_get_stayontop() {return false;}
@@ -172,6 +170,11 @@ void window_default()
 void window_mouse_set(double x,double y) {
 	XWarpPointer(disp,None,win,0,0,0,0,(int)x,(int)y);
 }
+
+void window_view_mouse_set(int id, double x,double y) {
+	XWarpPointer(disp,None,win,0,0,0,0,(int)(view_xview[id] + x),(int)(view_yview[id] + y));
+}
+
 void display_mouse_set(double x,double y) {
 	XWarpPointer(disp,None,DefaultRootWindow(disp),0,0,0,0,(int)x,(int)y);
 }

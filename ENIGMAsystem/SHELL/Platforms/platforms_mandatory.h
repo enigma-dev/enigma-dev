@@ -55,8 +55,8 @@ void window_default();
 // These two are a surprisingly integral part of the system
 int window_mouse_get_x();
 int window_mouse_get_y();
-int window_views_mouse_get_x(); // mouse_x constant, with respect to all views
-int window_views_mouse_get_y(); // mouse_y constant, with respect to all views
+void window_view_mouse_set(int id, int x, int y);
+void window_mouse_set(int x,int y);
 
 // These two are used by screen_redraw for view calculations and such.
 int window_get_region_width_scaled();
