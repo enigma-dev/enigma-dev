@@ -128,7 +128,7 @@ bool sound_ispaused(int sound) {
 void sound_pan(int sound, float value)
 {
 	get_sound(snd, sound, 0);
-	snd->soundBuffer->SetPan(value/10000);
+	snd->soundBuffer->SetPan(value * 10000);
 }
 
 float sound_get_pan(int sound) {
