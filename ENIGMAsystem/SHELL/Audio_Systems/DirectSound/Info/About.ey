@@ -3,7 +3,7 @@
 
 Name: DirectSound
 Identifier: DirectSound
-Description: Play sounds using DirectSound, which is part of the DirectX runtime, is included with the MinGW compiler.
+Description: Basic audio playback using DirectSound for regular WAVE format audio and 3D positional sounds with other effects and  DirectMusic for MIDI and MP3 formats. Fully compatible with older Game Maker versions and for simple and easy audio playback. Requires the DirectX 9.0 End User Runtime or later which is included with our MinGW in the Windows Portable ZIP, DirectX, being Microsoft technology is also exceptionally proprietary.
 Author: Robert B. Colton
 
 Depends:

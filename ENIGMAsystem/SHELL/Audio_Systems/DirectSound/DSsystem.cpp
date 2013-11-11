@@ -18,22 +18,25 @@
 #include <stdio.h>
 
 #include "DSsystem.h"
-	struct WaveHeaderType
-	{
-		char chunkId[4];
-		unsigned long chunkSize;
-		char format[4];
-		char subChunkId[4];
-		unsigned long subChunkSize;
-		unsigned short audioFormat;
-		unsigned short numChannels;
-		unsigned long sampleRate;
-		unsigned long bytesPerSecond;
-		unsigned short blockAlign;
-		unsigned short bitsPerSample;
-		char dataChunkId[4];
-		unsigned long dataSize;
-	};
+struct WaveHeaderType
+{
+	char chunkId[4];
+	unsigned long chunkSize;
+	char format[4];
+	char subChunkId[4];
+	unsigned long subChunkSize;
+	unsigned short audioFormat;
+	unsigned short numChannels;
+	unsigned long sampleRate;
+	unsigned long bytesPerSecond;
+	unsigned short blockAlign;
+	unsigned short bitsPerSample;
+	unsigned short parSize;
+	unsigned short headerSize;
+	unsigned long dataOffset;
+	char dataChunkId[4];
+	unsigned long dataSize;
+};
 	
 IDirectSound8* dsound;
 
@@ -52,6 +55,8 @@ float listenerVel[] = {0.0f,0.0f,0.0f};
 float listenerOri[] = {0.0f,0.0f,1.0f, 0.0f,1.0f,0.0f};
 
 #include <string>
+#include <sstream>
+using std::stringstream;
 using std::string;
 
 #include "Platforms/Win32/WINDOWSmain.h"
@@ -60,11 +65,6 @@ IDirectSoundBuffer* primaryBuffer;
 vector<SoundResource*> sound_resources(0);
 	
 namespace enigma {
-
-  int get_free_channel(double priority)
-  {
-
-  }
 
   void eos_callback(void *soundID, unsigned src)
   {
@@ -130,6 +130,38 @@ namespace enigma {
     return res;
   }
 
+WaveHeaderType* buffer_get_wave_header(char* buffer, size_t bufsize) {
+	WaveHeaderType* waveHeader = new WaveHeaderType();
+
+	memcpy(waveHeader,buffer,36);
+	
+	unsigned long remaining = waveHeader->subChunkSize - 16;
+	if (remaining) {
+		memcpy(&waveHeader->parSize,buffer+36,2);
+	}
+	
+	if (strncmp(waveHeader->chunkId, "RIFF",4) != 0 || strncmp(waveHeader->format, "WAVE",4) != 0) {
+		return NULL; // Not a WAVE file or the format is just messed up
+	} 
+		
+	// Read Subchunks
+	char chunkId[5] = { 'H', 'U', 'N', 'G' };
+	unsigned long chunkSize = 0;
+	for (unsigned i = 36 + remaining; i < bufsize; i += 8 + chunkSize) {
+		
+		memcpy(&chunkId, buffer + i, 4);
+		memcpy(&chunkSize, buffer + i + 4, 4);
+		if (strncmp(chunkId, "data", 4) == 0) {
+			waveHeader->dataSize = chunkSize;
+			waveHeader->dataOffset = i + 8;
+			break;
+		} else {
+			continue;
+		}
+	}
+	
+	return waveHeader;
+}
 
   int sound_add_from_buffer(int id, void* buffer, size_t bufsize)
   {
@@ -142,41 +174,42 @@ namespace enigma {
       //fprintf(stderr, "Could not load sound %d: %s\n", id, alureGetErrorString());
       return 1;
     }
-	  
+
+	WaveHeaderType* waveHeader = buffer_get_wave_header((char*)buffer, bufsize);
 	WAVEFORMATEX waveFormat;
-	waveFormat.wFormatTag = WAVE_FORMAT_PCM;
-	waveFormat.nSamplesPerSec = 16000;
-	waveFormat.wBitsPerSample = 16;
-	waveFormat.nChannels = 1;
-	waveFormat.nBlockAlign = (waveFormat.wBitsPerSample / 8) * waveFormat.nChannels;
-	waveFormat.nAvgBytesPerSec = waveFormat.nSamplesPerSec * waveFormat.nBlockAlign;
-	waveFormat.cbSize = 0;
+	waveFormat.wFormatTag = waveHeader->audioFormat;
+	waveFormat.nSamplesPerSec = waveHeader->sampleRate;
+	waveFormat.wBitsPerSample = waveHeader->bitsPerSample;
+	waveFormat.nChannels = waveHeader->numChannels;
+	waveFormat.nBlockAlign = waveHeader->blockAlign;
+	waveFormat.nAvgBytesPerSec = waveHeader->bytesPerSecond;
+	waveFormat.cbSize = waveHeader->parSize;
 	
-    unsigned int& buf = snd->buf[0];
 	DSBUFFERDESC bufferDesc;
 	bufferDesc.dwSize = sizeof(DSBUFFERDESC);
-	bufferDesc.dwFlags = DSBCAPS_CTRLVOLUME;
-	bufferDesc.dwBufferBytes = bufsize;
+	bufferDesc.dwFlags = DSBCAPS_CTRLDEFAULT;
+	bufferDesc.dwBufferBytes = waveHeader->dataSize;
 	bufferDesc.dwReserved = 0;
 	bufferDesc.lpwfxFormat = &waveFormat;
 	bufferDesc.guid3DAlgorithm = GUID_NULL;
 	dsound->CreateSoundBuffer(&bufferDesc, &snd->soundBuffer, NULL);
-	
+
+	//DSBLOCK_ENTIREBUFFER
 	LPVOID lpvWrite;
 	DWORD  dwLength;
 
 	IDirectSoundBuffer* sndBuf = snd->soundBuffer;
-	//sndBuf->SetFormat(&waveFormat);
+	
 	if (DS_OK == sndBuf->Lock(
       0,          // Offset at which to start lock.
-      0,          // Size of lock; ignored because of flag.
+      waveHeader->dataSize,          // Size of lock; ignored because of flag.
       &lpvWrite,  // Gets address of first part of lock.
       &dwLength,  // Gets size of first part of lock.
       NULL,       // Address of wraparound not needed. 
       NULL,       // Size of wraparound not needed.
-      DSBLOCK_ENTIREBUFFER))  // Flag.
+      0))  // Flag.
 	{
-		memcpy(lpvWrite, buffer, dwLength);
+		memcpy(lpvWrite, (char*)buffer + waveHeader->dataOffset, waveHeader->dataSize);
 		sndBuf->Unlock(
 		lpvWrite,   // Address of lock start.
 		dwLength,   // Size of lock.
@@ -188,27 +221,21 @@ namespace enigma {
 	
 	snd->soundBuffer->SetCurrentPosition(0);
 	// Set volume of the buffer to 100%.
-	snd->soundBuffer->SetVolume(DSBVOLUME_MAX);
-	
-    if (!buf) {
-      //fprintf(stderr, "Could not load sound %d: %s\n", id, alureGetErrorString());
-      return 2;
-    }
+	snd->soundBuffer->SetVolume(0);
 
     snd->loaded = LOADSTATE_COMPLETE;
     return 0;
   }
 
-
   int sound_add_from_stream(int id, size_t (*callback)(void *userdata, void *buffer, size_t size), void (*seek)(void *userdata, float position), void (*cleanup)(void *userdata), void *userdata)
   {
-
+	return -1;
   }
 
   int sound_allocate()
   {
 	int id = -1;
-	for (int i = 0; i < sound_resources.size(); i++) {
+	for (unsigned i = 0; i < sound_resources.size(); i++) {
 		if (sound_resources[id] == NULL) {
 			id = i;
 		}

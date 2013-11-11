@@ -88,7 +88,7 @@ void sound_delete(int sound) {
 
 void sound_volume(int sound, float volume) {
 	get_sound(snd,sound,0);
-	snd->soundBuffer->SetVolume(volume);
+	snd->soundBuffer->SetVolume(volume/DSBVOLUME_MAX);
 }
 
 void sound_global_volume(float volume) {
