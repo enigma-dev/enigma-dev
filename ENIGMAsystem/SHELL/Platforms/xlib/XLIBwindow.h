@@ -66,7 +66,7 @@ int window_mouse_get_y();
 int display_mouse_get_x();
 int display_mouse_get_y();
 
-void window_mouse_set(double x,double y);
+void window_mouse_set(int x,int y);
 void display_mouse_set(double x,double y);
 }
 

@@ -167,11 +167,11 @@ void window_default()
     window_set_size(xm, ym);
 }
 
-void window_mouse_set(double x,double y) {
+void window_mouse_set(int x,int y) {
 	XWarpPointer(disp,None,win,0,0,0,0,(int)x,(int)y);
 }
 
-void window_view_mouse_set(int id, double x,double y) {
+void window_view_mouse_set(int id, int x,int y) {
 	XWarpPointer(disp,None,win,0,0,0,0,(int)(view_xview[id] + x),(int)(view_yview[id] + y));
 }
 
