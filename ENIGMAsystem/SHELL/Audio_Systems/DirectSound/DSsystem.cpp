@@ -194,7 +194,6 @@ WaveHeaderType* buffer_get_wave_header(char* buffer, size_t bufsize) {
 	bufferDesc.guid3DAlgorithm = GUID_NULL;
 	dsound->CreateSoundBuffer(&bufferDesc, &snd->soundBuffer, NULL);
 
-	//DSBLOCK_ENTIREBUFFER
 	LPVOID lpvWrite;
 	DWORD  dwLength;
 
