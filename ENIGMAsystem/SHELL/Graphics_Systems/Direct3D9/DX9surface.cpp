@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Bridges/General/DX9device.h"
+#include "Bridges/General/DX9Device.h"
 #include "Direct3D9Headers.h"
 using namespace std;
 #include <cstddef>

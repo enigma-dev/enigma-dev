@@ -87,12 +87,12 @@ namespace enigma {
     lasttime = elapsedtime;
     printf("Initializing audio system...\n");
 
-    #ifdef _WIN32
+    /*#ifdef _WIN32
     if (!load_al_dll())
       return 1;
 	printf("Starting ALURE (Windows thing).\n");
 	init_alure();
-    #endif
+    #endif*/
 
 	printf("Opening ALURE devices.\n");
     if(!alureInitDevice(NULL, NULL)) {

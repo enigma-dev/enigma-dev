@@ -17,7 +17,7 @@
 
 #include <math.h>
 #include "Direct3D9Headers.h"
-#include "Bridges/General/DX9device.h"
+#include "Bridges/General/DX9Device.h"
 #include "Graphics_Systems/General/GSstdraw.h"
 
 #include <stdio.h>
