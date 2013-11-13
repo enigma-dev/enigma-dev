@@ -87,10 +87,9 @@ namespace enigma
 
   }
 
-// V when this is called its passing the Gluint, but the Gluint is also stored by my TextureStruct struct
   void graphics_delete_texture(int tex)
   {
-    delete textureStructs[tex];
+	 textureStructs.erase(textureStructs.begin() + tex);
   }
 
   unsigned char* graphics_get_texture_rgba(unsigned texture)
