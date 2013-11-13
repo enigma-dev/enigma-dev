@@ -70,7 +70,7 @@ void draw_primitive_begin(int kind)
   d3d_model_primitive_begin(prim_draw_model, kind);
 }
 
-void draw_primitive_begin_texture(int kind,unsigned tex)
+void draw_primitive_begin_texture(int kind, int tex)
 {
   if (prim_draw_model == -1) {
     prim_draw_model = d3d_model_create();

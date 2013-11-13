@@ -43,20 +43,18 @@ namespace enigma {
 namespace enigma_user
 {
 
-void draw_primitive_begin(int dink)
+void draw_primitive_begin(int kind)
 {
   // This has to be done because these immediate mode vertex functions will
   // blend with the texture whether or specify texture coordinates or not.
   texture_set(0);
-  GLenum kind = ptypes_by_id[ dink & 15 ];
-  glBegin(kind);
+  glBegin(ptypes_by_id[ kind & 15 ]);
 }
 
-void draw_primitive_begin_texture(int dink,unsigned tex)
+void draw_primitive_begin_texture(int kind, int tex)
 {
   texture_set(tex);
-  GLenum kind = ptypes_by_id[ dink & 15 ];
-  glBegin(kind);
+  glBegin(ptypes_by_id[ kind & 15 ]);
 }
 
 void draw_vertex(gs_scalar x, gs_scalar y)
