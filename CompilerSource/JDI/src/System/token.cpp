@@ -46,6 +46,9 @@ void token_t::report_error(error_handler *herr, std::string error) const
     p = pos
   );
   
+  #ifndef USELESS_ERRORS
+  return;
+  #endif
   herr->error(error, fn, l, p);
 }
 
@@ -141,7 +144,10 @@ void token_t::report_errorf(error_handler *herr, std::string error) const
     error.replace(f,2,str);
     f = error.find("%s");
   }
-  
+
+  #ifndef USELESS_ERRORS
+  return;
+  #endif
   #ifdef DEBUG_MODE
     if (herr)
   #endif
