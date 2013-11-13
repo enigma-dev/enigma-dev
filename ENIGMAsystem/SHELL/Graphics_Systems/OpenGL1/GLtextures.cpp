@@ -84,11 +84,6 @@ namespace enigma
   int graphics_duplicate_texture(int tex)
   {
     GLuint texture = textureStructs[tex]->gltex;
-    glPushAttrib(GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT | GL_ENABLE_BIT);
-    glColor4f(1,1,1,1);
-    glClear(GL_COLOR_BUFFER_BIT);
-    glDisable(GL_BLEND);
-    glDisable(GL_DEPTH_TEST);
     glBindTexture(GL_TEXTURE_2D, texture);
     int w, h;
 	bool interpolate = (interpolate_textures && !textureStructs[tex]->isFont);
@@ -98,24 +93,16 @@ namespace enigma
     glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_HEIGHT, &h);
     char* bitmap = new char[(h<<(lgpp2(w)+2))|2];
     glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, bitmap);
-    unsigned dup_tex = graphics_create_texture(w, h, bitmap);
+    unsigned dup_tex = graphics_create_texture(w, h, bitmap, textureStructs[tex]->isFont);
     delete[] bitmap;
     glPopAttrib();
-
-	TextureStruct* textureStruct = new TextureStruct(dup_tex);
-	textureStruct->isFont = textureStructs[tex]->isFont;
-    textureStructs.push_back(textureStruct);
-    return textureStructs.size()-1;
+    return dup_tex;
   }
 
   void graphics_replace_texture_alpha_from_texture(int tex, int copy_tex)
   {
     GLuint texture = textureStructs[tex]->gltex;
     GLuint copy_texture = textureStructs[copy_tex]->gltex;
-    glPushAttrib(GL_CURRENT_BIT | GL_COLOR_BUFFER_BIT | GL_ENABLE_BIT);
-    glColor4f(1,1,1,1);
-    glClear(GL_COLOR_BUFFER_BIT);
-    glDisable(GL_BLEND);
 
     int w, h, size;
     glBindTexture(GL_TEXTURE_2D, texture);
@@ -144,11 +131,10 @@ namespace enigma
     glPopAttrib();
   }
 
-// V when this is called its passing the Gluint, but the Gluint is also stored by my TextureStruct struct
   void graphics_delete_texture(int tex)
   {
     glDeleteTextures(1, &textureStructs[tex]->gltex);
-    delete textureStructs[tex];
+    textureStructs.erase(textureStructs.begin() + tex);
   }
 
   unsigned char* graphics_get_texture_rgba(unsigned texture)
