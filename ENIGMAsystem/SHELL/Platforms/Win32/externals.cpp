@@ -25,6 +25,10 @@
 **                                                                              **
 \********************************************************************************/
 
+#ifndef X86_WIN32  
+#define X86_WIN32 
+#endif
+
 #include <map>
 #include <string>
 #include <windows.h>
