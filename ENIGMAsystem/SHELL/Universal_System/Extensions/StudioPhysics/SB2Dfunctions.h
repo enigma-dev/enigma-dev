@@ -81,15 +81,15 @@ double physics_fixture_get_inertia(int id);
 
 /************** Forces **************/
 
-void physics_apply_force(int world, double xpos, double ypos, double xforce, double yforce);
-void physics_apply_force_radial(int world, double xpos, double ypos);
-void physics_apply_impulse(int world, double xpos, double ypos, double ximpulse, double yimpulse);
-void physics_apply_impulse_radial(int world, double xpos, double ypos);
-void physics_apply_local_force(int id, double xlocal, double ylocal, double xforce, double yforce);
-void physics_apply_local_force_radial(int world, double xpos, double ypos);
-void physics_apply_local_impulse(int id, double xlocal, double ylocal, double ximpulse, double yimpulse);
-void physics_apply_local_impulse_radial(int world, double xpos, double ypos);
-void physics_apply_local_torque(int id, double torque);
+void physics_apply_force(int world, double xpos, double ypos, double xforce, double yforce, bool wake=true);
+void physics_apply_force_radial(int world, double xpos, double ypos, bool wake=true);
+void physics_apply_impulse(int world, double xpos, double ypos, double ximpulse, double yimpulse, bool wake=true);
+void physics_apply_impulse_radial(int world, double xpos, double ypos, bool wake=true);
+void physics_apply_local_force(int id, double xlocal, double ylocal, double xforce, double yforce, bool wake=true);
+void physics_apply_local_force_radial(int world, double xpos, double ypos, bool wake=true);
+void physics_apply_local_impulse(int id, double xlocal, double ylocal, double ximpulse, double yimpulse, bool wake=true);
+void physics_apply_local_impulse_radial(int world, double xpos, double ypos, bool wake=true);
+void physics_apply_local_torque(int id, double torque, bool wake=true);
 
 /************** Miscellaneous **************/
 void physics_test_overlap();

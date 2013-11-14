@@ -452,46 +452,46 @@ double physics_fixture_get_inertia(int id)
   return lMassData.I;
 }
 
-void physics_apply_force(int world, double xpos, double ypos, double xforce, double yforce)
+void physics_apply_force(int world, double xpos, double ypos, double xforce, double yforce, bool wake)
 {
   get_fixture(sb2dworld, world);
   for (int i = 0; i < fixtures.size(); i++)
   {
     if (fixtures[i]->world == world)
     {
-      fixtures[i]->body->ApplyForce(b2Vec2(xforce, yforce), b2Vec2(xpos, ypos));
+      fixtures[i]->body->ApplyForce(b2Vec2(xforce, yforce), b2Vec2(xpos, ypos), wake);
     }
   }
 }
 
-void physics_apply_impulse(int world, double xpos, double ypos, double ximpulse, double yimpulse)
+void physics_apply_impulse(int world, double xpos, double ypos, double ximpulse, double yimpulse, bool wake)
 {
   get_fixture(sb2dworld, world);
   for (int i = 0; i < fixtures.size(); i++)
   {
     if (fixtures[i]->world == world)
     {
-      fixtures[i]->body->ApplyLinearImpulse(b2Vec2(ximpulse, yimpulse), b2Vec2(xpos, ypos));
+      fixtures[i]->body->ApplyLinearImpulse(b2Vec2(ximpulse, yimpulse), b2Vec2(xpos, ypos), wake);
     }
   }
 }
 
-void physics_apply_local_force(int id, double xlocal, double ylocal, double xforce, double yforce)
+void physics_apply_local_force(int id, double xlocal, double ylocal, double xforce, double yforce, bool wake)
 {
   get_fixture(sb2dfixture, id);
-  sb2dfixture->body->ApplyForce(b2Vec2(xforce, yforce), b2Vec2(xlocal, ylocal));
+  sb2dfixture->body->ApplyForce(b2Vec2(xforce, yforce), b2Vec2(xlocal, ylocal), wake);
 }
 
-void physics_apply_local_impulse(int id, double xlocal, double ylocal, double ximpulse, double yimpulse)
+void physics_apply_local_impulse(int id, double xlocal, double ylocal, double ximpulse, double yimpulse, bool wake)
 {
   get_fixture(sb2dfixture, id);
-  sb2dfixture->body->ApplyLinearImpulse(b2Vec2(ximpulse, yimpulse), b2Vec2(xlocal, ylocal));
+  sb2dfixture->body->ApplyLinearImpulse(b2Vec2(ximpulse, yimpulse), b2Vec2(xlocal, ylocal), wake);
 }
 
-void physics_apply_local_torque(int id, double torque)
+void physics_apply_local_torque(int id, double torque, bool wake)
 {
   get_fixture(sb2dfixture, id);
-  sb2dfixture->body->ApplyTorque(torque);
+  sb2dfixture->body->ApplyTorque(torque, wake);
 }
 
 void physics_pause_enable(bool pause)
