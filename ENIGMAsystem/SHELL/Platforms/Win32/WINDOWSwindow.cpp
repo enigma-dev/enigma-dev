@@ -500,28 +500,12 @@ void display_reset()
 	ChangeDisplaySettings(&devMode, 0);
 }
 
-void display_set_colordepth(int depth)
+bool display_set_size(int w, int h)
 {
 	DEVMODE devMode;
 
 	if (!EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &devMode))
-		return;
-
-	if (displayInitialBitdepth == 0)
-		displayInitialBitdepth = devMode.dmBitsPerPel;
-
-	devMode.dmFields = DM_BITSPERPEL;
-	devMode.dmBitsPerPel = depth;
-
-	ChangeDisplaySettings(&devMode, 0);
-}
-
-void display_set_size(int w, int h)
-{
-	DEVMODE devMode;
-
-	if (!EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &devMode))
-		return;
+		return false;
 
 	if (displayInitialResolutionWidth == 0)
 		displayInitialResolutionWidth = devMode.dmPelsWidth;
@@ -534,14 +518,15 @@ void display_set_size(int w, int h)
 	devMode.dmPelsHeight = h;
 
 	ChangeDisplaySettings(&devMode, 0);
+	return true;
 }
 
-void display_set_frequency(int freq)
+bool display_set_frequency(int freq)
 {
 	DEVMODE devMode;
 
 	if (!EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &devMode))
-		return;
+		return false;
 
 	if (displayInitialFrequency == 0)
 		displayInitialFrequency = devMode.dmBitsPerPel;
@@ -550,6 +535,24 @@ void display_set_frequency(int freq)
 	devMode.dmDisplayFrequency = freq;
 
 	ChangeDisplaySettings(&devMode, 0);
+	return true;
+}
+
+bool display_set_colordepth(int depth)
+{
+	DEVMODE devMode;
+
+	if (!EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &devMode))
+		return true;
+
+	if (displayInitialBitdepth == 0)
+		displayInitialBitdepth = devMode.dmBitsPerPel;
+
+	devMode.dmFields = DM_BITSPERPEL;
+	devMode.dmBitsPerPel = depth;
+
+	ChangeDisplaySettings(&devMode, 0);
+	return true;
 }
 
 bool display_set_all(int w, int h, int freq, int bitdepth)
