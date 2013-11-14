@@ -104,16 +104,16 @@ bool b2d_body_get_bullet(int id);
 int b2d_body_get_fixture(int id, int fid);
 
 /************** Forces **************/
-void b2d_body_apply_force(int id, double xpos, double ypos, double xforce, double yforce);
-void b2d_body_apply_force_center(int id, double xforce, double yforce);
-void b2d_body_apply_torque(int id, double torque);
-void b2d_body_apply_impulse_linear(int id, double xpos, double ypos, double ximpulse, double yimpulse);
-void b2d_body_apply_impulse_angular(int id, double impulse);
+void b2d_body_apply_force(int id, double xpos, double ypos, double xforce, double yforce, bool wake);
+void b2d_body_apply_force_center(int id, double xforce, double yforce, bool wake);
+void b2d_body_apply_torque(int id, double torque, bool wake);
+void b2d_body_apply_impulse_linear(int id, double xpos, double ypos, double ximpulse, double yimpulse, bool wake);
+void b2d_body_apply_impulse_angular(int id, double impulse, bool wake);
 
-void b2d_world_apply_force(int world, double xpos, double ypos, double xforce, double yforce);
-void b2d_world_apply_force_radial(int world, double xpos, double ypos);
-void b2d_world_apply_impulse(int world, double xpos, double ypos, double ximpulse, double yimpulse);
-void b2d_world_apply_impulse_radial(int world, double xpos, double ypos);
+void b2d_world_apply_force(int world, double xpos, double ypos, double xforce, double yforce, bool wake);
+void b2d_world_apply_force_radial(int world, double xpos, double ypos, bool wake);
+void b2d_world_apply_impulse(int world, double xpos, double ypos, double ximpulse, double yimpulse, bool wake);
+void b2d_world_apply_impulse_radial(int world, double xpos, double ypos, bool wake);
 
 /************** Miscellaneous **************/
 void b2d_draw_debug(); 

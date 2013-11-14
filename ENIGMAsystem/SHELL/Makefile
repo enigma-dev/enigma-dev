@@ -54,7 +54,7 @@ CXX := g++
 ifeq ($(GMODE), Debug)
 	CXXFLAGS += -Wall -g -DDEBUG_MODE
 else
-	CXXFLAGS += -Wall -s -O3
+	CXXFLAGS += -Wall -s -O2 -fno-rtti -fno-exceptions
 endif
 
 CC := gcc
