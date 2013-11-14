@@ -540,56 +540,56 @@ int b2d_body_get_fixture(int id, int fid)
 }
 
 /************** Forces **************/
-void b2d_body_apply_force(int id, double xpos, double ypos, double xforce, double yforce)
+void b2d_body_apply_force(int id, double xpos, double ypos, double xforce, double yforce, bool wake)
 {
   get_body(b2dbody, id);
-  b2dbody->body->ApplyForce(b2Vec2(xforce, yforce), b2Vec2(xpos, ypos));
+  b2dbody->body->ApplyForce(b2Vec2(xforce, yforce), b2Vec2(xpos, ypos), wake);
 }
 
-void b2d_body_apply_force_center(int id, double xforce, double yforce)
+void b2d_body_apply_force_center(int id, double xforce, double yforce, bool wake)
 {
   get_body(b2dbody, id);
-  b2dbody->body->ApplyForceToCenter(b2Vec2(xforce, yforce));
+  b2dbody->body->ApplyForceToCenter(b2Vec2(xforce, yforce), wake);
 }
 
-void b2d_body_apply_torque(int id, double torque)
+void b2d_body_apply_torque(int id, double torque, bool wake)
 {
   get_body(b2dbody, id);
-  b2dbody->body->ApplyTorque(torque);
+  b2dbody->body->ApplyTorque(torque, wake);
 }
 
-void b2d_body_apply_impulse_linear(int id, double xpos, double ypos, double ximpulse, double yimpulse)
+void b2d_body_apply_impulse_linear(int id, double xpos, double ypos, double ximpulse, double yimpulse, bool wake)
 {
   get_body(b2dbody, id);
-  b2dbody->body->ApplyLinearImpulse(b2Vec2(ximpulse, yimpulse), b2Vec2(xpos, ypos));
+  b2dbody->body->ApplyLinearImpulse(b2Vec2(ximpulse, yimpulse), b2Vec2(xpos, ypos), wake);
 }
 
-void b2d_body_apply_impulse_angular(int id, double impulse)
+void b2d_body_apply_impulse_angular(int id, double impulse, bool wake)
 {
   get_body(b2dbody, id);
-  b2dbody->body->ApplyAngularImpulse(impulse);
+  b2dbody->body->ApplyAngularImpulse(impulse, wake);
 }
 
-void b2d_world_apply_force(int world, double xpos, double ypos, double xforce, double yforce)
+void b2d_world_apply_force(int world, double xpos, double ypos, double xforce, double yforce, bool wake)
 {
   get_world(b2dworld, world);
   for (int i = 0; i < b2dbodies.size(); i++)
   {
     if (b2dbodies[i]->world == world)
     {
-      b2dbodies[i]->body->ApplyForce(b2Vec2(xforce, yforce), b2Vec2(xpos, ypos));
+      b2dbodies[i]->body->ApplyForce(b2Vec2(xforce, yforce), b2Vec2(xpos, ypos), wake);
     }
   }
 }
 
-void b2d_world_apply_impulse(int world, double xpos, double ypos, double ximpulse, double yimpulse)
+void b2d_world_apply_impulse(int world, double xpos, double ypos, double ximpulse, double yimpulse, bool wake)
 {
   get_body(b2dworld, world);
   for (int i = 0; i < b2dbodies.size(); i++)
   {
     if (b2dbodies[i]->world == world)
     {
-      b2dbodies[i]->body->ApplyLinearImpulse(b2Vec2(ximpulse, yimpulse), b2Vec2(xpos, ypos));
+      b2dbodies[i]->body->ApplyLinearImpulse(b2Vec2(ximpulse, yimpulse), b2Vec2(xpos, ypos), wake);
     }
   }
 }
