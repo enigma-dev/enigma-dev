@@ -109,9 +109,9 @@ unsigned display_get_dpi_y();
 extern int display_aa;
 void display_reset(int samples, bool vsync);
 void display_reset(); //TODO: for some odd reason this has to be second or it will error if you call the one that has parameters
-void display_set_colordepth(int depth);
-void display_set_size(int w, int h);
-void display_set_frequency(int freq);
+bool display_set_colordepth(int depth);
+bool display_set_size(int w, int h);
+bool display_set_frequency(int freq);
 bool display_set_all(int w, int h, int freq, int bitdepth);
 bool display_test_all(int w, int h, int freq, int bitdepth);
 
