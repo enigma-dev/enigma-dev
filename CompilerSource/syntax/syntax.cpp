@@ -258,7 +258,6 @@ namespace syncheck
           }
         }
         
-        not_a_macro:
         if (is_wordop(name)) { //this is actually a word-based operator, such as `and', `or', and `not' 
           bool unary = name[0] == 'n'; //not is the only unary word operator.
           if (unary and (!lex[lexlast].separator and !lex[lexlast].operatorlike)) {
