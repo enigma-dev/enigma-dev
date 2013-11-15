@@ -343,8 +343,6 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
 
       // Determine the type of the left-hand expression
       cout << "Request for type of " << exp << ": returning int!" << endl;
-      jdi::definition *ct = jdi::builtin_type__int;
-      // FIXME: IF YOU DARE: Actually resolve the expression
       
       if (true) // No member by this name can be accessed
       {
