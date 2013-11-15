@@ -131,7 +131,6 @@ dllexport void libFree() {
 #include "parser/object_storage.h"
 
 extern void print_definition(string n);
-static bool firstpass = true;
 
 #include "languages/language_adapter.h"
 
