@@ -150,7 +150,6 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
         }
       }
       
-      out_of_here:
       char c = 'n';
       
       jdi::definition* d;
