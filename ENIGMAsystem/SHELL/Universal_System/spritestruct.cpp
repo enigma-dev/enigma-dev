@@ -30,50 +30,26 @@ using namespace std;
 #include "image_formats.h"
 #include "estring.h"
 
+bool get_sprite(enigma::sprite* &spr, int id)
+{
 #ifdef DEBUG_MODE
-  #include "../Widget_Systems/widgets_mandatory.h"
-  #define get_sprite(spr,id,r) \
-    if (id < -1 or size_t(id) > enigma::sprite_idmax or !enigma::spritestructarray[id]) { \
-      show_error("Cannot access sprite with id " + toString(id), false); \
-      return r; \
-    } const enigma::sprite *const spr = enigma::spritestructarray[id];
-  #define get_spritev(spr,id) \
-    if (id < -1 or size_t(id) > enigma::sprite_idmax or !enigma::spritestructarray[id]) { \
-      show_error("Cannot access sprite with id " + toString(id), false); \
-      return; \
-    } const enigma::sprite *const spr = enigma::spritestructarray[id];
-  #define get_sprite_null(spr,id,r) \
-    if (id < -1 or size_t(id) > enigma::sprite_idmax) { \
-      show_error("Cannot access sprite with id " + toString(id), false); \
-      return r; \
-    } const enigma::sprite *const spr = enigma::spritestructarray[id];
-  #define get_sprite_mutable(spr,id,r) \
-    if (id < -1 or size_t(id) > enigma::sprite_idmax or !enigma::spritestructarray[id]) { \
-      show_error("Cannot access sprite with id " + toString(id), false); \
-      return r; \
-    } enigma::sprite *const spr = enigma::spritestructarray[id];
-  #define get_spritev_mutable(spr,id) \
-    if (id < -1 or size_t(id) > enigma::sprite_idmax or !enigma::spritestructarray[id]) { \
-      show_error("Cannot access sprite with id " + toString(id), false); \
-      return; \
-    } enigma::sprite *const spr = enigma::spritestructarray[id];
-#else
-  /// Retrieve a sprite by the given index, doing bound/null checking if in debug mode and bailing with result r if an error occurs.
-  #define get_sprite(spr,id,r) \
-    const enigma::sprite *const spr = enigma::spritestructarray[id];
-  /// Retrieve a sprite by the given index, doing bound/null checking if in debug mode and bailing with no result if an error occurs.
-  #define get_spritev(spr,id) \
-    const enigma::sprite *const spr = enigma::spritestructarray[id];
-  /// Retrieve a sprite by the given index, doing bounds checking (but not null checking) if in debug mode and bailing with result r if an error occurs.
-  #define get_sprite_null(spr,id,r) \
-    const enigma::sprite *const spr = enigma::spritestructarray[id];
-  /// Retrieve a sprite (and a lock thereto) by the given index, doing bound/null checking if in debug mode and bailing with result r if an error occurs.
-  #define get_sprite_mutable(spr,id,r) \
-    enigma::sprite *const spr = enigma::spritestructarray[id];
-  /// Retrieve a sprite (and a lock thereto) by the given index, doing bound/null checking if in debug mode and bailing with no result if an error occurs.
-  #define get_spritev_mutable(spr,id) \
-    enigma::sprite *const spr = enigma::spritestructarray[id];
+    if (id < -1 || size_t(id) > enigma::sprite_idmax || !enigma::spritestructarray[id]) {
+        show_error("Cannot access sprite with id " + toString(id), false);
+        return false;
+    }
 #endif
+    spr = enigma::spritestructarray[id];
+    return true;
+}
+
+bool get_sprite_mtx(enigma::sprite* &spr, int id)
+{
+    bool rtn = get_sprite(spr, id);
+    if (rtn) {
+        // TODO: Lock a lock by reference and allow it to be timely destructed and released
+    }
+    return rtn;
+}
 
 namespace enigma {
   sprite** spritestructarray;
@@ -100,7 +76,10 @@ int sprite_add(string filename, int imgnumb, bool transparent, bool smooth, int 
 
 bool sprite_replace(int ind, string filename, int imgnumb, bool precise, bool transparent, bool smooth, bool preload, int x_offset, int y_offset, bool free_texture)
 {
-    get_sprite_mutable(spr,ind,false);
+    enigma::sprite *spr;
+    if (!get_sprite_mtx(spr, ind))
+        return false;
+
     if (free_texture)
         for (int ii = 0; ii < spr->subcount; ii++)
             enigma::graphics_delete_texture(spr->texturearray[ii]);
@@ -118,7 +97,10 @@ bool sprite_replace(int ind, string filename, int imgnumb, bool transparent, boo
 }
 
 void sprite_save(int ind, unsigned subimg, string fname) {
-	get_spritev_mutable(spr,ind);
+    enigma::sprite *spr;
+    if (!get_sprite_mtx(spr, ind))
+        return;
+
 	unsigned char* rgbdata = enigma::graphics_get_texture_rgba(spr->texturearray[subimg]);
 	
     string ext = enigma::image_get_format(fname);
@@ -139,7 +121,10 @@ void sprite_save_strip(int ind, string fname) {
 
 void sprite_delete(int ind, bool free_texture)
 {
-    get_spritev_mutable(spr,ind);
+    enigma::sprite* spr;
+    if (!get_sprite_mtx(spr, ind))
+        return;
+
     if (free_texture)
         for (int ii = 0; ii < spr->subcount; ii++)
             enigma::graphics_delete_texture(spr->texturearray[ii]);
@@ -150,7 +135,10 @@ void sprite_delete(int ind, bool free_texture)
 
 int sprite_duplicate(int copy_sprite)
 {
-    get_sprite_mutable(spr_copy,copy_sprite,-1);
+    enigma::sprite* spr_copy;
+    if (!get_sprite_mtx(spr_copy, copy_sprite))
+        return -1;
+
     enigma::spritestructarray_reallocate();
     enigma::sprite *spr = enigma::spritestructarray[enigma::sprite_idmax] = new enigma::sprite();
     spr->id = enigma::sprite_idmax;
@@ -160,8 +148,12 @@ int sprite_duplicate(int copy_sprite)
 
 void sprite_assign(int ind, int copy_sprite, bool free_texture)
 {
-    get_spritev_mutable(spr,ind);
-    get_spritev_mutable(spr_copy,copy_sprite);
+    enigma::sprite *spr, *spr_copy;
+    if (!get_sprite_mtx(spr, ind))
+        return;
+    if (!get_sprite_mtx(spr_copy, copy_sprite))
+        return;
+
     if (free_texture)
         for (int ii = 0; ii < spr->subcount; ii++)
             enigma::graphics_delete_texture(spr->texturearray[ii]);
@@ -174,16 +166,24 @@ void sprite_assign(int ind, int copy_sprite, bool free_texture)
 
 void sprite_set_alpha_from_sprite(int ind, int copy_sprite, bool free_texture)
 {
-    get_spritev_mutable(spr,ind);
-    get_spritev_mutable(spr_copy,copy_sprite);
+    enigma::sprite *spr, *spr_copy;
+    if (!get_sprite_mtx(spr, ind))
+        return;
+    if (!get_sprite_mtx(spr_copy, copy_sprite))
+        return;
+
     for (int i = 0; i < spr->subcount; i++)
         enigma::graphics_replace_texture_alpha_from_texture(spr->texturearray[i], spr_copy->texturearray[i % spr_copy->subcount]);
 }
 
 void sprite_merge(int ind, int copy_sprite)
 {
-    get_spritev_mutable(spr,ind);
-    get_spritev_mutable(spr_copy,copy_sprite);
+    enigma::sprite *spr, *spr_copy;
+    if (!get_sprite_mtx(spr, ind))
+        return;
+    if (!get_sprite_mtx(spr_copy, copy_sprite))
+        return;
+
     int i = 0, j = 0, t_subcount = spr->subcount + spr_copy->subcount;
     while (j < spr_copy->subcount)
     {
@@ -424,84 +424,125 @@ namespace enigma_user
 
 int sprite_get_width(int sprite)
 {
-  get_sprite(spr,sprite,32);
-  return spr->width;
+    enigma::sprite *spr;
+    if (!get_sprite(spr,sprite))
+        return 32;
+
+    return spr->width;
 }
 
 int sprite_get_height(int sprite)
 {
-  get_sprite(spr,sprite,32);
-  return spr->height;
+    enigma::sprite *spr;
+    if (!get_sprite(spr,sprite))
+        return 32;
+    
+    return spr->height;
 }
 
 double sprite_get_texture_width_factor(int sprite, int subimg)
 {
-  get_sprite(spr,sprite,32);
-  return spr->texbordxarray[subimg];
+    enigma::sprite *spr;
+    if (!get_sprite(spr,sprite))
+        return 32;
+
+    return spr->texbordxarray[subimg];
 }
 
 double sprite_get_texture_height_factor(int sprite, int subimg)
 {
-  get_sprite(spr,sprite,32);
-  return spr->texbordyarray[subimg];
+    enigma::sprite *spr;
+    if (!get_sprite(spr,sprite))
+        return 32;
+
+    return spr->texbordyarray[subimg];
 }
 
 int sprite_get_bbox_bottom(int sprite)
 {
-  get_sprite(spr,sprite,32);
-  return spr->bbox.bottom;
+    enigma::sprite *spr;
+    if (!get_sprite(spr,sprite))
+        return 32;
+
+    return spr->bbox.bottom;
 }
 int sprite_get_bbox_left(int sprite)
 {
-  get_sprite(spr,sprite,0);
-  return spr->bbox.left;
+    enigma::sprite *spr;
+    if (!get_sprite(spr,sprite))
+        return 0;
+
+    return spr->bbox.left;
 }
 int sprite_get_bbox_right(int sprite)
 {
-  get_sprite(spr,sprite,32);
-  return spr->bbox.right;
+    enigma::sprite *spr;
+    if (!get_sprite(spr,sprite))
+        return 32;
+
+    return spr->bbox.right;
 }
 int sprite_get_bbox_top(int sprite)
 {
-  get_sprite(spr,sprite,0);
-  return spr->bbox.top;
+    enigma::sprite *spr;
+    if (!get_sprite(spr,sprite))
+        return 0;
+
+    return spr->bbox.top;
 }
 
 }
 
 int sprite_get_bbox_bottom_relative(int sprite)
 {
-  get_sprite(spr,sprite,32);
-  return spr->bbox_relative.bottom;
+    enigma::sprite *spr;
+    if (!get_sprite(spr,sprite))
+        return 32;
+
+    return spr->bbox_relative.bottom;
 }
 int sprite_get_bbox_left_relative(int sprite)
 {
-  get_sprite(spr,sprite,0);
-  return spr->bbox_relative.left;
+    enigma::sprite *spr;
+    if (!get_sprite(spr,sprite))
+        return 0;
+
+    return spr->bbox_relative.left;
 }
 int sprite_get_bbox_right_relative(int sprite)
 {
-  get_sprite(spr,sprite,32);
-  return spr->bbox_relative.right;
+    enigma::sprite *spr;
+    if (!get_sprite(spr,sprite))
+        return 32;
+
+    return spr->bbox_relative.right;
 }
 int sprite_get_bbox_top_relative(int sprite)
 {
-  get_sprite(spr,sprite,0);
-  return spr->bbox_relative.top;
+    enigma::sprite *spr;
+    if (!get_sprite(spr,sprite))
+        return 0;
+
+    return spr->bbox_relative.top;
 }
 
-#ifdef DEBUG_MODE
-  bbox_rect_t dummy_bbox = {32,0,32,0};
-#endif
+bbox_rect_t dummy_bbox = {32,0,32,0};
+
 const bbox_rect_t &sprite_get_bbox(int sprite)
 {
-  get_sprite(spr,sprite,dummy_bbox);
-  return spr->bbox;
+    enigma::sprite *spr;
+    if (!get_sprite(spr,sprite))
+        return dummy_bbox;
+
+    return spr->bbox;
 }
 const bbox_rect_t &sprite_get_bbox_relative(int sprite)
 {
-  get_sprite(spr,sprite,dummy_bbox);
-  return spr->bbox_relative;
+    enigma::sprite *spr;
+    if (!get_sprite(spr,sprite))
+        return dummy_bbox;
+
+    return spr->bbox_relative;
 }
 
 namespace enigma_user
@@ -509,44 +550,67 @@ namespace enigma_user
 
 int sprite_get_number(int sprite)
 {
-  if (sprite == -1) return 0;
-  get_sprite(spr,sprite,0);
-  return spr->subcount;
+    if (sprite == -1) return 0;
+
+    enigma::sprite *spr;
+    if (!get_sprite(spr,sprite))
+        return 0;
+
+    return spr->subcount;
 }
 
 int sprite_get_texture(int sprite,int subimage)
 {
-  get_sprite(spr,sprite,0);
+    enigma::sprite *spr;
+    if (!get_sprite(spr,sprite))
+        return 0;
+
     const int usi = subimage >= 0 ? (subimage % spr->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr->subcount;
-  return spr->texturearray[usi];
+    return spr->texturearray[usi];
 }
 
 int sprite_get_xoffset(int sprite)
 {
-  get_sprite(spr,sprite,0);
-  return spr->xoffset;
+    enigma::sprite *spr;
+    if (!get_sprite(spr,sprite))
+        return 0;
+
+    return spr->xoffset;
 }
 
 int sprite_get_yoffset(int sprite)
 {
-  get_sprite(spr,sprite,0);
-  return spr->yoffset;
+    enigma::sprite *spr;
+    if (!get_sprite(spr,sprite))
+        return 0;
+
+    return spr->yoffset;
 }
 
 void sprite_set_offset(int ind, int xoff, int yoff)
 {
-    get_spritev_mutable(spr,ind);
+    enigma::sprite *spr;
+    if (!get_sprite_mtx(spr,ind))
+        return;
+
     spr->xoffset = xoff;
     spr->yoffset = yoff;
 }
 
 void sprite_set_bbox_mode(int ind, int mode) {
-  get_spritev_mutable(spr,ind);
+    enigma::sprite *spr;
+    if (!get_sprite_mtx(spr,ind))
+        return;
+
+    // TODO
 }
 
 void sprite_set_bbox(int ind, int left, int top, int right, int bottom)
 {
-    get_spritev_mutable(spr,ind);
+    enigma::sprite *spr;
+    if (!get_sprite_mtx(spr,ind))
+        return;
+
     spr->bbox.left = left;
     spr->bbox.top = top;
     spr->bbox.right = right;
@@ -562,7 +626,11 @@ void sprite_collision_mask(int ind, bool sepmasks, int mode, int left, int right
 }
 
 void sprite_set_precise(int ind, bool precise) {
-  get_spritev_mutable(spr,ind);
+    enigma::sprite *spr;
+    if (!get_sprite_mtx(spr,ind))
+        return;
+
+    // TODO
 }
 
 }
