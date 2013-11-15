@@ -64,6 +64,7 @@ int window_get_region_height_scaled();
 
 // For game settings
 void window_set_fullscreen(bool full);
+bool window_get_fullscreen();
 
 int window_set_cursor(int c);
 inline void action_set_cursor(int spr, bool c) {

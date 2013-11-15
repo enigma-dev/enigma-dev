@@ -29,6 +29,7 @@
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
+#include <algorithm>
 
 using namespace std;
 
@@ -42,17 +43,6 @@ using namespace std;
 #include "settings.h"
 
 #include "languages/lang_CPP.h"
-
-template<class InputIt, class T>
-bool find(InputIt first, InputIt last, const T& value)
-{
-    for (; first != last; ++first) {
-        if (*first == value) {
-            return true;
-        }
-    }
-    return false;
-}
 
 inline bool iscomment(const string &n) {
   if (n.length() < 2 or n[0] != '/') return false;
@@ -120,8 +110,8 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
       {
 		if (i == parsed_objects.end()) { i = parsed_objects.begin(); }
 		// if we have already been written or we have a parent that has not been written, continue
-		if (find(parsed.begin(), parsed.end(), i->first) || 
-		(parsed_objects.find(i->second->parent)->second && !find(parsed.begin(), parsed.end(), i->second->parent))) { 
+		if (find(parsed.begin(), parsed.end(), i->first) != parsed.end() || 
+		(parsed_objects.find(i->second->parent)->second && find(parsed.begin(), parsed.end(), i->second->parent) != parsed.end())) { 
 			i++; continue; 
 		}
 		parent = parsed_objects.find(i->second->parent);
@@ -275,7 +265,7 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
 			wto << "        OBJ_" << parent->second->name << "::myevents_perf(type,numb);\n";
 		}
         for (unsigned ii = 0; ii < i->second->events.size; ii++) {
-		  if (setting::inherit_objects && find(parent_defined.begin(), parent_defined.end(), ii)) { continue; }
+		  if (setting::inherit_objects && find(parent_defined.begin(), parent_defined.end(), ii) != parent_defined.end()) { continue; }
           if  (i->second->events[ii].code != "")
           {
             //Look up the event name
@@ -330,7 +320,7 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
 		}
         // This tracks components of the event system.
           for (unsigned ii = 0; ii < i->second->events.size; ii++) { // Export a tracker for all events
-			if (setting::inherit_objects && find(parent_defined.begin(), parent_defined.end(), ii)) { continue; }
+			if (setting::inherit_objects && find(parent_defined.begin(), parent_defined.end(), ii) != parent_defined.end()) { continue; }
             if (!event_is_instance(i->second->events[ii].mainId,i->second->events[ii].id)) { //...well, all events which aren't stacked
               if (event_has_iterator_declare_code(i->second->events[ii].mainId,i->second->events[ii].id)) {
                 if (!iscomment(event_get_iterator_declare_code(i->second->events[ii].mainId,i->second->events[ii].id)))
@@ -355,7 +345,7 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
 			wto << "      unlink_object_id_iter(ENOBJ_ITER_myobj" << i->second->id << ", " << i->second->id << ");\n";
 		  }
           for (unsigned ii = 0; ii < i->second->events.size; ii++) {
-			if (setting::inherit_objects && find(parent_defined.begin(), parent_defined.end(), ii)) { continue; }
+			if (setting::inherit_objects && find(parent_defined.begin(), parent_defined.end(), ii) != parent_defined.end()) { continue; }
             if (!event_is_instance(i->second->events[ii].mainId,i->second->events[ii].id)) {
               const string evname = event_get_function_name(i->second->events[ii].mainId,i->second->events[ii].id);
               if (event_has_iterator_unlink_code(i->second->events[ii].mainId,i->second->events[ii].id)) {
@@ -421,7 +411,7 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
 			}
             // Event system interface
               for (unsigned ii = 0; ii < i->second->events.size; ii++) {
-				if (find(parent_defined.begin(), parent_defined.end(), ii)) { continue; }
+				if (find(parent_defined.begin(), parent_defined.end(), ii) != parent_defined.end()) { continue; }
                 if (!event_is_instance(i->second->events[ii].mainId,i->second->events[ii].id)) {
                   const string evname = event_get_function_name(i->second->events[ii].mainId,i->second->events[ii].id);
                   if (event_has_iterator_initialize_code(i->second->events[ii].mainId,i->second->events[ii].id)) {
@@ -450,7 +440,7 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
 				wto << "      delete ENOBJ_ITER_myobj" << i->second->id << ";\n";
 			}
             for (unsigned ii = 0; ii < i->second->events.size; ii++) {
-			  if (setting::inherit_objects && find(parent_defined.begin(), parent_defined.end(), ii)) { continue; }
+			  if (setting::inherit_objects && find(parent_defined.begin(), parent_defined.end(), ii) != parent_defined.end()) { continue; }
               if (!event_is_instance(i->second->events[ii].mainId,i->second->events[ii].id)) {
                 if (event_has_iterator_delete_code(i->second->events[ii].mainId,i->second->events[ii].id)) {
                   if (!iscomment(event_get_iterator_delete_code(i->second->events[ii].mainId,i->second->events[ii].id)))
@@ -524,7 +514,7 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
 			parent = parsed_objects.find(i->second->parent);
 			if (parent != parsed_objects.end()) {
 				parent_defined = parent_definitions.find(i->second->parent)->second;
-				if (find(parent_defined.begin(), parent_defined.end(), ii)) {
+				if (find(parent_defined.begin(), parent_defined.end(), ii) != parent_defined.end()) {
 					wto << "#define event_inherited OBJ_" + parent->second->name + "::myevent_" + evname + "\n";
 						defined_inherited = true;
 				}
