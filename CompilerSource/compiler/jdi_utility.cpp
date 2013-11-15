@@ -45,7 +45,7 @@ int referencers_varargs_at(ref_stack &refs) {
  */
 void iterate_overloads(definition_function* d, unsigned &min, unsigned &max) {
     bool variadic = false;
-    int local_min=0,local_max=0;
+    unsigned int local_min=0,local_max=0;
     
     const ref_stack &refs = ((definition_function*)d)->referencers;
     const ref_stack::parameter_ct& params = ((ref_stack::node_func*)&refs.top())->params;
