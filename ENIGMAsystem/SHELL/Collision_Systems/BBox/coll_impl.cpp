@@ -104,10 +104,16 @@ enigma::object_collisions* const collide_inst_inst(int object, bool solid_only, 
 
 enigma::object_collisions* const collide_inst_rect(int object, bool solid_only, bool notme, int x1, int y1, int x2, int y2)
 {
-    if (x1 > x2)
-        x1 ^= (x2 ^= (x1 ^= x2));
-    if (y1 > y2)
-        y1 ^= (y2 ^= (y1 ^= y2));
+    if (x1 > x2) {
+        int x3 = x1;
+        x2 = x1;
+        x1 = x3;
+    }
+    if (y1 > y2) {
+        int y3 = y1;
+        y2 = y1;
+        y1 = y3;
+    }
 
     for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)
     {
