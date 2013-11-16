@@ -185,7 +185,7 @@ namespace enigma_user
     unsigned sz=full_width*full_height;
     unsigned char *surfbuf=new unsigned char[sz*4];
 
-	for (int i = 0; i + 3 < sz*4; i += 4) {
+	for (unsigned int i = 0; i + 3 < sz*4; i += 4) {
 		surfbuf[i] = __GETR(col);
 		surfbuf[i+1] = __GETG(col);
 		surfbuf[i+2] = __GETB(col);
