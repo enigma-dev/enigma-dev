@@ -118,7 +118,7 @@ bool display_test_all(int w, int h, int freq, int bitdepth);
 int window_mouse_get_x();
 int window_mouse_get_y();
 int window_view_mouse_get_x(int id);
-int window_view_mouse_get_y(int id);\
+int window_view_mouse_get_y(int id);
 
 void game_end();
 void action_end_game();
