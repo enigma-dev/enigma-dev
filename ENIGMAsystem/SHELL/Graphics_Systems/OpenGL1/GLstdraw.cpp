@@ -76,7 +76,7 @@ void draw_set_alpha_test_ref_value(unsigned val)
 	glAlphaFunc(GL_GREATER, val/256);
 }
 
-void draw_set_line_pattern(unsigned short pattern, int scale)
+void draw_set_line_pattern(short pattern, int scale)
 {
   if (pattern == -1)
       glDisable(GL_LINE_STIPPLE);
