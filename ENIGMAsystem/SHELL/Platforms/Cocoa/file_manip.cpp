@@ -61,10 +61,9 @@ int directory_create(string dname) {
   return mkdir(dname.c_str(),S_IRUSR|S_IWUSR|S_IXUSR);
 }
 
-
-
 string file_find_first(string mask,int attr) {
-
+  // TODO
+  return string("");
 }
 
 enum {
@@ -89,14 +88,17 @@ extern string working_directory;
 extern string program_directory;
 extern string temp_directory;
 
-
 int parameter_count(){
-
+  // TODO
+  return 0;
 }
-string parameter_string(int n) {
 
+string parameter_string(int n) {
+  // TODO
+  return string("");
 }
 
 string environment_get_variable(string name) {
-
+  // TODO
+  return string("");
 }
