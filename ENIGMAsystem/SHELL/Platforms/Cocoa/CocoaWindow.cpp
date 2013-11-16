@@ -72,6 +72,8 @@ namespace enigma_user {
 	/*XWindowAttributes wa;
 	XGetWindowAttributes(disp,win,&wa);
 	return wa.map_state != IsUnmapped;*/
+
+	return 1; // TODO
   }
 
 void window_set_freezeonlosefocus(bool freeze)
@@ -82,10 +84,11 @@ void window_set_freezeonlosefocus(bool freeze)
   int window_set_caption(string caption)
   {
 	cocoa_window_set_caption(caption.c_str());
+	return 0; // TODO, this function should be void in all files
   }
   string window_get_caption()
   {
-	cocoa_window_get_caption();
+	return string(cocoa_window_get_caption());
   }
 
 
@@ -133,6 +136,7 @@ void window_set_position(int x,int y)
 int window_set_size(unsigned int w,unsigned int h)
 {
 	cocoa_window_set_size(w,h);
+	return 0; // TODO, this function should be void in all files
 }
 
 //Center
@@ -200,8 +204,8 @@ int window_set_cursor(int c)
 
 void window_set_color(int color) {}
 
-int window_view_mouse_get_x(int wid) {}
-int window_view_mouse_get_y(int wid) {}
+int window_view_mouse_get_x(int wid) { return 0; } // TODO
+int window_view_mouse_get_y(int wid) { return 0; } // TODO
 void window_view_mouse_set(int wid, int x, int y) {}
 
 int window_get_region_width() { return cocoa_window_get_region_width();}
