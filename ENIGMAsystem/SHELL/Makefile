@@ -42,6 +42,9 @@ endif
 # Default windres
 WINDRES = windres.exe
 
+# Default find
+FIND = find
+
 SYSTEMS := Platforms/$(PLATFORM) Graphics_Systems/$(GRAPHICS) Audio_Systems/$(AUDIO) Collision_Systems/$(COLLISION) Widget_Systems/$(WIDGETS) Networking_Systems/$(NETWORKING) Universal_System
 
 OBJDIR := .eobjs/$(COMPILEPATH)/$(GMODE)
@@ -51,29 +54,23 @@ OBJDIR := .eobjs/$(COMPILEPATH)/$(GMODE)
 ###########
 
 CXX := g++
+CC := gcc
+DEPENDENCIES :=
+
 ifeq ($(GMODE), Debug)
 	CXXFLAGS += -Wall -g -DDEBUG_MODE
-else
-	CXXFLAGS += -Wall -s -O2 -fno-rtti -fno-exceptions
-endif
-
-CC := gcc
-ifeq ($(GMODE), Debug)
 	CFLAGS += -Wall -g -DDEBUG_MODE
+else ifeq ($(GMODE), Compile)
+	CXXFLAGS += -Wall -s -O3 -fno-rtti -fno-exceptions -flto -fdata-sections -ffunction-sections
+	CFLAGS += -Wall -s -O3 -flto -fno-exceptions -fdata-sections -ffunction-sections
+	LDFLAGS += -flto -s -O3
 else
-	CFLAGS += -Wall -s -O2 
-endif
-
-DEPENDENCIES := 
-
-ifeq ($(GMODE), Compile)
-	CXXFLAGS += -fdata-sections -ffunction-sections
-	CFLAGS += -fdata-sections -ffunction-sections
-	LDFLAGS += -gc-sections
+	CXXFLAGS += -Wall -s -O3 -fno-rtti -fno-exceptions
+	CFLAGS += -Wall -s -O3 -fno-exceptions
 endif
 
 ifeq ($(PLATFORM), Win32)
-	LDFLAGS += -static-libgcc
+	LDFLAGS += -L../Additional/i686-w64-mingw32/lib -static-libgcc -static-libstdc++
 	ifeq ($(GMODE), Compile)
 		LDFLAGS += -static-libgcc -Wl,-subsystem,windows
 	endif
@@ -88,7 +85,9 @@ override CPPFLAGS += -I.
 all: compile_game
 
 clean:
-	$(RM) $(OUTPUTNAME) $(OBJECTS) $(RESOURCEBINARY) $(DEPENDS)
+	$(RM) $(OUTPUTNAME) $(RESOURCEBINARY)
+	$(FIND) $(OBJDIR) -name "*.o" -exec $(RM) -rf {} \;
+	$(FIND) $(OBJDIR) -name "*.d" -exec $(RM) -rf {} \;
 
 SOURCES := $(wildcard *.cpp)
 include $(addsuffix /Makefile,$(SYSTEMS) $(EXTENSIONS))
