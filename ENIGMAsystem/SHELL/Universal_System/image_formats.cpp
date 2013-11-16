@@ -44,7 +44,7 @@ unsigned char* image_reverse_scanlines(const unsigned char* data, unsigned width
 	//Flip upside down
 	unsigned sz = width * height;
 	unsigned char* rgbdata = new unsigned char[sz * bytes];
-	for (int i = 0; i < height; i++) { // Doesn't matter the order now
+	for (unsigned int i = 0; i < height; i++) { // Doesn't matter the order now
 		memcpy(&rgbdata[i*width*bytes*sizeof(unsigned char)],                    // address of destination
 			   &data[(height-i-1)*width*bytes*sizeof(unsigned char)], 		    // address of source
 			   width*bytes*sizeof(unsigned char) );        // number of bytes to copy
