@@ -155,11 +155,7 @@ void highscore_add_current() {
 }
 
 int highscore_value(int place) {
-    try {
     return enigma::highscore_list.at(place).player_score;
-    } catch (...) {
-        return 0;
-    }
 }
 
 std::string highscore_name(int place) {

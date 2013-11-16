@@ -18,7 +18,7 @@ resources: $exe
 cppflags:
 cxxflags: -I../Additional/i686-w64-mingw32/include
 cflags:
-ldflags: -L../Additional/i686-w64-mingw32/lib -static-libgcc -static-libstdc++ -static
+ldflags:
 links:
 
 Build-Extension:
