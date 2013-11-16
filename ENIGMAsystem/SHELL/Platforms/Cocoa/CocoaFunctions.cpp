@@ -38,10 +38,6 @@ namespace enigma
 	extern int initialize_everything();
 }
 
-int handleEvents()
-{
-}
-
 namespace enigma
 {
 	void initkeymap();
