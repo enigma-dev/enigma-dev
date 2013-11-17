@@ -43,8 +43,15 @@ namespace enigma {
         show_error("Sound " + toString(id) + " does not exist", false);\
         return failure;\
       } SoundResource *const snd = sound_resources[id];
+	#define get_soundv(snd,id)\
+      if (id < 0 or size_t(id) >= sound_resources.size() or !sound_resources[id]) {\
+        show_error("Sound " + toString(id) + " does not exist", false);\
+		return;\
+      } SoundResource *const snd = sound_resources[id];
   #else
     #define get_sound(snd,id,failure)\
+      SoundResource *const snd = sound_resources[id];
+	#define get_soundv(snd,id)\
       SoundResource *const snd = sound_resources[id];
   #endif
 

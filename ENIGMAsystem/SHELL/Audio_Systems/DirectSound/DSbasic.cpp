@@ -41,53 +41,56 @@ bool sound_exists(int sound)
 
 bool sound_play(int sound) // Returns whether sound is playing
 {
-	get_sound(snd, sound, 0);
+	get_sound(snd, sound, false);
 	snd->soundBuffer->SetCurrentPosition(0);
 	snd->soundBuffer->Play(0, 0, 0);
+	return true;
 }
 
 bool sound_loop(int sound) // Returns whether sound is playing
 {
-	get_sound(snd, sound, 0);
+	get_sound(snd, sound, false);
 	snd->soundBuffer->SetCurrentPosition(0);
 	snd->soundBuffer->Play(0, 0, DSBPLAY_LOOPING);
+	return true;
 }
 
 bool sound_pause(int sound) // Returns whether the sound was successfully paused
 {
-	get_sound(snd, sound, 0);
+	get_sound(snd, sound, false);
 	snd->soundBuffer->Stop();
+	return true;
 }
 
 void sound_pause_all()
 {
   for (size_t i = 0; i < sound_resources.size(); i++) {
-    get_sound(snd, i, 0);
+    get_soundv(snd, i);
 	snd->soundBuffer->Stop();
   }
 }
 
 void sound_stop(int sound) {
-	get_sound(snd, sound, 0);
+	get_soundv(snd, sound);
 	snd->soundBuffer->Stop();
 }
 
 void sound_stop_all()
 {
   for (size_t i = 0; i < sound_resources.size(); i++) {
-    get_sound(snd, i, 0);
+    get_soundv(snd, i);
 	snd->soundBuffer->Stop();
   }
 }
 
 void sound_delete(int sound) {
-  get_sound(snd,sound,0);
+  get_soundv(snd, sound);
   sound_stop(sound);
   sound_resources.erase(sound_resources.begin() + sound);
 }
 
 void sound_volume(int sound, float volume) {
-	get_sound(snd,sound,0);
+	get_soundv(snd, sound);
 	snd->soundBuffer->SetVolume((1-volume) * DSBVOLUME_MIN);
 }
 
@@ -97,21 +100,22 @@ void sound_global_volume(float volume) {
 
 bool sound_resume(int sound) // Returns whether the sound is playing
 {
-	get_sound(snd, sound, 0);
+	get_sound(snd, sound, false);
 	snd->soundBuffer->Play(0, 0, 0);
+	return true;
 }
 
 void sound_resume_all()
 {
   for (size_t i = 0; i < sound_resources.size(); i++) {
-    get_sound(snd, i, 0);
+    get_soundv(snd, i);
 	snd->soundBuffer->Play(0, 0, 0);
   }
 }
 
 bool sound_isplaying(int sound) {
-	get_sound(snd, sound, 0);
-	LPDWORD ret;
+	get_sound(snd, sound, false);
+	LPDWORD ret = NULL;
 	snd->soundBuffer->GetStatus(ret);
 	if (*ret == DSBSTATUS_LOOPING || *ret == DSBSTATUS_LOOPING) {
 		return true;
@@ -121,50 +125,51 @@ bool sound_isplaying(int sound) {
 }
 
 bool sound_ispaused(int sound) {
-  get_sound(snd,sound,0);
+  get_sound(snd, sound, false);
   return !snd->idle and !snd->playing;
 }
 
 void sound_pan(int sound, float value)
 {
-	get_sound(snd, sound, 0);
+	get_soundv(snd, sound);
 	snd->soundBuffer->SetPan(value * 10000);
 }
 
 float sound_get_pan(int sound) {
-	get_sound(snd, sound, 0);
-	LPLONG ret;
+	get_sound(snd, sound, -1);
+	LPLONG ret = NULL;
 	snd->soundBuffer->GetPan(ret);
 	return *ret;
 }
 
 float sound_get_volume(int sound) {
-	get_sound(snd, sound, 0);
-	LPLONG ret;
+	get_sound(snd, sound, -1);
+	LPLONG ret = NULL;
 	snd->soundBuffer->GetVolume(ret);
 	return *ret;
 }
 
 float sound_get_length(int sound) { // Not for Streams
-	get_sound(snd, sound, 0);
+	get_sound(snd, sound, -1);
 	//snd->soundBuffer->GetLength();
+	return 0;
 }
 
 float sound_get_position(int sound) { // Not for Streams
-	get_sound(snd, sound, 0);
-	LPDWORD ret;
+	get_sound(snd, sound, -1);
+	LPDWORD ret = NULL;
 	snd->soundBuffer->GetCurrentPosition(ret, NULL);
 	return *ret;
 }
 
 void sound_seek(int sound, float position) {
-	get_sound(snd, sound, 0);
+	get_soundv(snd, sound);
 	snd->soundBuffer->SetCurrentPosition(position);
 }
 
 void sound_seek_all(float position) {
   for (size_t i = 0; i < sound_resources.size(); i++) {
-    get_sound(snd, i, 0);
+    get_soundv(snd, i);
 	snd->soundBuffer->SetCurrentPosition(position);
   }
 }
@@ -175,7 +180,7 @@ void action_sound(int snd, bool loop)
 }
 
 const char* sound_get_audio_error() {
-
+	return "";
 }
 
 }
@@ -214,7 +219,7 @@ int sound_add(string fname, int kind, bool preload) //At the moment, the latter 
 
 bool sound_replace(int sound, string fname, int kind, bool preload)
 {
-
+	return false;
 }
 
 void sound_3d_set_sound_cone(int sound, float x, float y, float z, double anglein, double angleout, long voloutside) {
