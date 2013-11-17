@@ -111,7 +111,7 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
 		if (i == parsed_objects.end()) { i = parsed_objects.begin(); }
 		// if we have already been written or we have a parent that has not been written, continue
 		if (find(parsed.begin(), parsed.end(), i->first) != parsed.end() || 
-		(parsed_objects.find(i->second->parent)->second && find(parsed.begin(), parsed.end(), i->second->parent) != parsed.end())) { 
+		(parsed_objects.find(i->second->parent)->second && find(parsed.begin(), parsed.end(), i->second->parent) == parsed.end())) { 
 			i++; continue; 
 		}
 		parent = parsed_objects.find(i->second->parent);
