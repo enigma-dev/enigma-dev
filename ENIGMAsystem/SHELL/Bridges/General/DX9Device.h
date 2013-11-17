@@ -67,6 +67,9 @@ LPDIRECT3DDEVICE9 device;    // the pointer to the device class
 DeviceManager() {
 	shapes_d3d_model = -1;
 	shapes_d3d_texture = -1;
+	bound_texture = NULL;
+	vertexShader = NULL;
+	pixelShader = NULL;
 }
 
 ~DeviceManager() {
