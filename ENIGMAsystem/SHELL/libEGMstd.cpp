@@ -33,8 +33,8 @@ string toString(unsigned n)           { char buf[12]; return string(buf,sprintf(
 string toString(unsigned long n)      { char buf[12]; return string(buf,sprintf(buf,"%lu", n)); }
 string toString(unsigned short n)     { char buf[12]; return string(buf,sprintf(buf,"%u",  n)); }
 #if defined(_WIN32) || defined(__WIN32__) || defined(_WIN64) || defined(__WIN64__)
-string toString(long long n)          { char buf[32]; return string(buf,sprintf(buf,"%I64d", n)); }
-string toString(unsigned long long n) { char buf[32]; return string(buf,sprintf(buf,"%I64u", n)); }
+string toString(long long n)          { char buf[32]; return string(buf,sprintf(buf,"%lld", n)); }
+string toString(unsigned long long n) { char buf[32]; return string(buf,sprintf(buf,"%llu", n)); }
 #else
 string toString(long long n)          { char buf[32]; return string(buf,sprintf(buf,"%lld", n)); }
 string toString(unsigned long long n) { char buf[32]; return string(buf,sprintf(buf,"%llu", n)); }
