@@ -78,9 +78,7 @@ void cd_play(unsigned first, unsigned last) {
     MCIERROR err;
 
     // Form the command string.
-    result = sprintf_s(
-        achCommandBuff, sizeof(achCommandBuff),
-        "play cdaudio from %u to %u", first, last); 
+	sprintf(achCommandBuff, "play cdaudio from %u to %u", first, last);
 
     if (result == -1) {
 		//TODO: show error message
@@ -177,9 +175,7 @@ void cd_set_position(unsigned long pos) {
     MCIERROR err;
 	
     // Form the command string.
-    result = sprintf_s(
-        achCommandBuff, sizeof(achCommandBuff),
-        "seek cdaudio to %u", pos); 
+    result = sprintf(achCommandBuff, "seek cdaudio to %u", pos); 
 
     if (result == -1) {
 		//TODO: show error message
