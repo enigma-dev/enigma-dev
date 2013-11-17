@@ -286,7 +286,7 @@ namespace enigma_user {
         if (p_t != NULL) {
           for (int i = 1; i <= number; i++)
           {
-            int x, y;
+            int x = 0, y = 0;
             p_e->get_point(x, y);
             p_s->create_particles(x, y, p_t, 1);
           }
