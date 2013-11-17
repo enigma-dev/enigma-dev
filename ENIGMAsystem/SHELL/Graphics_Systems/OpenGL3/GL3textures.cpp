@@ -65,12 +65,9 @@ TextureStruct::~TextureStruct()
 
 unsigned get_texture(int texid)
 {
-	if (texid < 0 || texid >= textureStructs.size())
-	{
+	if (texid < 0 || texid >= textureStructs.size()) {
 		return -1;
-	}
-	else
-	{
+	} else {
 		return textureStructs[texid]->gltex;
 	}
 }
@@ -178,7 +175,7 @@ void texture_set_enabled(bool enable)
 void texture_set_interpolation(int enable)
 {
   enigma::interpolate_textures = enable;
-  for (int i = 0; i < textureStructs.size(); i++)
+  for (unsigned i = 0; i < textureStructs.size(); i++)
   {
 	if (textureStructs[i]->isFont) { continue; }
     glBindTexture(GL_TEXTURE_2D, textureStructs[i]->gltex);
@@ -201,11 +198,13 @@ void texture_set_blending(bool enable)
 double texture_get_width(int texid)
 {
   // returns floating point scale to the bg or some shit
+  return 0;
 }
 
 double texture_get_height(int texid)
 {
   // so does this one
+  return 0;
 }
 
 int texture_get_texel_width(int texid)
@@ -249,8 +248,7 @@ void texture_reset() {
 
 void texture_set_repeat(bool repeat)
 {
-  for (int i = 0; i < textureStructs.size(); i++)
-  {
+  for (unsigned i = 0; i < textureStructs.size(); i++) {
     glBindTexture(GL_TEXTURE_2D, textureStructs[i]->gltex);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, repeat?GL_REPEAT:GL_CLAMP);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, repeat?GL_REPEAT:GL_CLAMP);
@@ -288,14 +286,14 @@ void texture_set_priority(int texid, double prio)
 
 void texture_set_border(int texid, int r, int g, int b, double a)
 {
-  GLint color[4] = {r, g, b, a * 255};
+  GLint color[4] = {r, g, b, (int)a * 255};
   texture_set(textureStructs[texid]->gltex);
   glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color);
 }
 
 void texture_set_swizzle(int texid, int r, int g, int b, double a)
 {
-  GLint color[4] = {r, g, b, a * 255};
+  GLint color[4] = {r, g, b, (int)a * 255};
   texture_set(textureStructs[texid]->gltex);
   glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_RGBA, color);
 }

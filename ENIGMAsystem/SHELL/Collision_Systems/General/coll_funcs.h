@@ -24,6 +24,7 @@ namespace enigma_user
 bool place_free(cs_scalar x, cs_scalar y);
 bool place_empty(cs_scalar x, cs_scalar y);
 bool place_meeting(cs_scalar x, cs_scalar y, int object);
+void position_change(cs_scalar x1, cs_scalar y1, int obj, bool perf);
 bool position_free(cs_scalar x, cs_scalar y);
 bool position_empty(cs_scalar x, cs_scalar y);
 bool position_meeting(cs_scalar x, cs_scalar y, int object);
@@ -79,8 +80,6 @@ void instance_deactivate_region(int rleft, int rtop, int rwidth, int rheight, in
 void instance_activate_region(int left, int top, int width, int height, int inside = true);
 void instance_deactivate_circle(int x, int y, int r, int inside = true, bool notme = true);
 void instance_activate_circle(int x, int y, int r, int inside = true);
-
-void position_change(cs_scalar x1, cs_scalar y1, int obj, bool perf);
 
 }
 

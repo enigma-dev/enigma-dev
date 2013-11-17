@@ -24,7 +24,7 @@ namespace enigma
 	
 	void init_shaders() {
 		    shaderdata = new ShaderStruct*[shader_idmax];
-    for (int i = 0; i < shader_idmax; i++) {
+    for (unsigned i = 0; i < shader_idmax; i++) {
       shaderdata[i] = &shaderstructarray[i];
     }
 

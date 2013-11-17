@@ -29,7 +29,7 @@
 // porting to competent widget systems. Use this only for low-level APIs.
 #define WINVER 9001
 #include <windows.h>
-#define _WIN32_IE 9001
+//#define _WIN32_IE 9001
 #include "Widget_Systems/General/WSwidgets.h"
 #include <commctrl.h>
 #include <windowsx.h>

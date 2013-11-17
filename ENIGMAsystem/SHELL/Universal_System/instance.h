@@ -65,7 +65,7 @@ namespace enigma {
 
 namespace enigma_user {
 void instance_change(int obj, bool perf = false);
-void instance_copy(bool perf = true);
+void instance_copy(bool perf = true); // this is supposed to return an iterator
 inline void action_change_object(int obj, bool perf);
 }
 
