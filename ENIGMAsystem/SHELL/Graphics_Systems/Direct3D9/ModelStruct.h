@@ -227,10 +227,14 @@ class Mesh
     ClearData();
 	
 	// Release the buffers and make sure we don't leave hanging pointers.
-	vertexbuffer->Release();
-	vertexbuffer = NULL;
-	indexbuffer->Release();
-	indexbuffer = NULL;
+	if (vertexbuffer != NULL) {
+		vertexbuffer->Release();
+		vertexbuffer = NULL;
+	}
+	if (indexbuffer != NULL) {
+		indexbuffer->Release();
+		indexbuffer = NULL;
+	}
 	vertex_declaration->Release();
 	vertex_declaration = NULL;
 	

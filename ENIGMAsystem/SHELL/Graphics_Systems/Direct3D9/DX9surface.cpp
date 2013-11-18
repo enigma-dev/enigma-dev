@@ -65,10 +65,9 @@ int surface_create(int width, int height)
 	TextureStruct* gmTexture = new TextureStruct(texture);
 	gmTexture->isFont = false;
     textureStructs.push_back(gmTexture);
+	d3ddev->CreateRenderTarget(width, height, D3DFMT_A8R8G8B8, D3DMULTISAMPLE_2_SAMPLES, 2, false, &surface->surf, NULL);
     surface->tex = textureStructs.size() - 1;
 	surface->width = width; surface->height = height;
-	texture->GetSurfaceLevel(0, &surface->surf);
-	
 	enigma::Surfaces.push_back(surface);
 	return enigma::Surfaces.size() - 1;
 }
@@ -81,12 +80,9 @@ int surface_create_msaa(int width, int height, int levels)
 	TextureStruct* gmTexture = new TextureStruct(texture);
 	gmTexture->isFont = false;
     textureStructs.push_back(gmTexture);
+	d3ddev->CreateRenderTarget(width, height, D3DFMT_A8R8G8B8, D3DMULTISAMPLE_2_SAMPLES, 2, false, &surface->surf, NULL);
     surface->tex = textureStructs.size() - 1;
 	surface->width = width; surface->height = height;
-	texture->GetSurfaceLevel(0, &surface->surf);
-	// Does not seem to work this way, it says online you must create the surface as a render target then blit it to the texture
-	d3ddev->CreateRenderTarget(width, height, D3DFMT_A8R8G8B8, D3DMULTISAMPLE_2_SAMPLES, 2, false, &surface->surf, NULL);
-	
 	enigma::Surfaces.push_back(surface);
 	return enigma::Surfaces.size() - 1;
 }
