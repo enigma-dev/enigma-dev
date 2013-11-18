@@ -36,7 +36,6 @@ using namespace std;
 
 void show_error(string errortext,const bool fatal)
 {
-	return;
   if (MessageBox(NULL,("Error in some event or another for some object: \r\n"+errortext).c_str(),"Error",MB_ABORTRETRYIGNORE | MB_ICONERROR)==IDABORT)
     exit(0);
 
