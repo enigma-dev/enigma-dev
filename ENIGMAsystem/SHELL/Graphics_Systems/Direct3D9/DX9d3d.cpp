@@ -306,7 +306,7 @@ void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, g
 	D3DXMatrixOrthoOffCenterLH(&matProjection,
 							0,
 							(FLOAT)width,   
-							0, 
+							0,
 							(FLOAT)height,   
 							-32000.0f,    // the near view-plane
 							32000.0f);    // the far view-plane
