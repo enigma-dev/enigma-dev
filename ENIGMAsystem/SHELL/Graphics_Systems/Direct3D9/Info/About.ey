@@ -3,11 +3,10 @@
 
 Name: Direct3D 9.0
 Identifier: Direct3D9
-Description: Graphics using DirectX 9 for native Windows platforms.
+Description: Native hardware accelerated rendering on Windows platforms. Requires the DirectX 9.0 End User Runtime or later which is included with our MinGW in the Windows Portable ZIP, DirectX, being Microsoft technology is also exceptionally proprietary.
 Author: Robert B. Colton
 
 Depends:
-	Windowing: Win32
-
+	Build-platforms: Windows
 Represents:
-	Build-platforms: None
+	Build-platforms: Windows
