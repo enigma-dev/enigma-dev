@@ -3,10 +3,11 @@
 
 Name: FMOD
 Identifier: FMODAudio
-Description: Play sounds using FMOD on Windows.
+Description: Basic cross-platform audio playback compatible with old versions of Game Maker.
 Author: icuurd12b42, Harijs Grînbergs
 
 Depends:
-	Build-platforms: Windows
+	Build-platforms: None
 Represents:
+	Build-platforms: None
 
