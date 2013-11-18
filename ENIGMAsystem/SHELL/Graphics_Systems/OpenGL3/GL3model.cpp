@@ -40,6 +40,30 @@ using namespace std;
 
 vector<Mesh*> meshes(0);
 
+namespace enigma {
+
+unsigned int split(const std::string &txt, std::vector<std::string> &strs, char ch)
+{
+	unsigned int pos = txt.find( ch );
+	unsigned int initialPos = 0;
+	strs.clear();
+
+	// Decompose statement
+	while( pos != std::string::npos ) {
+		strs.push_back( txt.substr( initialPos, pos - initialPos + 1 ) );
+		initialPos = pos + 1;
+
+		pos = txt.find( ch, initialPos );
+	}
+
+	// Add the last one
+	strs.push_back( txt.substr( initialPos, std::min( pos, txt.size() ) - initialPos + 1 ) );
+
+	return strs.size();
+}
+
+}
+
 namespace enigma_user
 {
 
@@ -183,92 +207,94 @@ bool d3d_model_load(int id, string fname)
   }
   else
   {
-	  int something = file_text_read_real(file);
-	  if (something != 100) {
+	int something = file_text_read_real(file);
+	if (something != 100) {
 		return false;
-	  }
-	  file_text_readln(file);
-	  file_text_read_real(file);  //don't see the use in this value, it doesn't equal the number of calls left exactly
-	  file_text_readln(file);
-	  int kind;
-	  float v[3], n[3], t[2];
-	  double col, alpha;
-	  while (!file_text_eof(file))
-	  {
-		switch (int(file_text_read_real(file)))
+	}
+	file_text_readln(file);
+	unsigned count = file_text_read_real(file);
+	file_text_readln(file);
+	int kind;
+	float v[3], n[3], t[2];
+	double col, alpha;
+	for (unsigned i = 0; i < count; i++) {
+		string str = file_text_read_string(file);
+		std::vector<std::string> split;
+		enigma::split(str, split, ' ');
+		switch (atoi(split[0].c_str()))
 		{
-		  case  0:
-			kind = file_text_read_real(file);
+		case  0:
+			kind = atoi(split[1].c_str());
 			d3d_model_primitive_begin(id, kind);
 			break;
-		  case  1:
+		case  1:
 			d3d_model_primitive_end(id);
 			break;
-		  case  2:
-			v[0] = file_text_read_real(file); v[1] = file_text_read_real(file); v[2] = file_text_read_real(file);
+		case  2:
+			v[0] = atof(split[1].c_str()); v[1] = atof(split[2].c_str()); v[2] = atof(split[3].c_str());
 			d3d_model_vertex(id, v[0],v[1],v[2]);
 			break;
-		  case  3:
-			v[0] = file_text_read_real(file); v[1] = file_text_read_real(file); v[2] = file_text_read_real(file);
-			col = file_text_read_real(file); alpha = file_text_read_real(file);
+		case  3:
+			v[0] = atof(split[1].c_str()); v[1] = atof(split[2].c_str()); v[2] = atof(split[3].c_str());
+			col = atoi(split[4].c_str()); alpha = atof(split[5].c_str());
 			d3d_model_vertex_color(id, v[0],v[1],v[2],col,alpha);
 			break;
-		  case  4:
-			v[0] = file_text_read_real(file); v[1] = file_text_read_real(file); v[2] = file_text_read_real(file);
-			t[0] = file_text_read_real(file); t[1] = file_text_read_real(file);
+		case  4:
+			v[0] = atof(split[1].c_str()); v[1] = atof(split[2].c_str()); v[2] = atof(split[3].c_str());
+			t[0] = atof(split[4].c_str()); t[1] = atof(split[5].c_str());
 			d3d_model_vertex_texture(id, v[0],v[1],v[2],t[0],t[1]);
 			break;
-		  case  5:
-			v[0] = file_text_read_real(file); v[1] = file_text_read_real(file); v[2] = file_text_read_real(file);
-			t[0] = file_text_read_real(file); t[1] = file_text_read_real(file);
-			col = file_text_read_real(file); alpha = file_text_read_real(file);
+		case  5:
+			v[0] = atof(split[1].c_str()); v[1] = atof(split[2].c_str()); v[2] = atof(split[3].c_str());
+			t[0] = atof(split[4].c_str()); t[1] = atof(split[5].c_str());
+			col = atoi(split[6].c_str()); alpha = atof(split[7].c_str());
 			d3d_model_vertex_texture_color(id, v[0],v[1],v[2],t[0],t[1],col,alpha);
 			break;
-		  case  6:
-			v[0] = file_text_read_real(file); v[1] = file_text_read_real(file); v[2] = file_text_read_real(file);
-			n[0] = file_text_read_real(file); n[1] = file_text_read_real(file); n[2] = file_text_read_real(file);
+		case  6:
+			v[0] = atof(split[1].c_str()); v[1] = atof(split[2].c_str()); v[2] = atof(split[3].c_str());
+			n[0] = atof(split[4].c_str()); n[1] = atof(split[5].c_str()); n[2] = atof(split[6].c_str());
 			d3d_model_vertex_normal(id, v[0],v[1],v[2],n[0],n[1],n[2]);
 			break;
-		  case  7:
-			v[0] = file_text_read_real(file); v[1] = file_text_read_real(file); v[2] = file_text_read_real(file);
-			n[0] = file_text_read_real(file); n[1] = file_text_read_real(file); n[2] = file_text_read_real(file);
-			col = file_text_read_real(file); alpha = file_text_read_real(file);
+		case  7:
+			v[0] = atof(split[1].c_str()); v[1] = atof(split[2].c_str()); v[2] = atof(split[3].c_str());
+			n[0] = atof(split[4].c_str()); n[1] = atof(split[5].c_str()); n[2] = atof(split[6].c_str());
+			col = atoi(split[7].c_str()); alpha = atof(split[8].c_str());
 			d3d_model_vertex_normal_color(id, v[0],v[1],v[2],n[0],n[1],n[2],col,alpha);
 			break;
-		  case  8:
-			v[0] = file_text_read_real(file); v[1] = file_text_read_real(file); v[2] = file_text_read_real(file);
-			n[0] = file_text_read_real(file); n[1] = file_text_read_real(file); n[2] = file_text_read_real(file);
-			t[0] = file_text_read_real(file); t[1] = file_text_read_real(file);
+		case  8:
+			v[0] = atof(split[1].c_str()); v[1] = atof(split[2].c_str()); v[2] = atof(split[3].c_str());
+			n[0] = atof(split[4].c_str()); n[1] = atof(split[5].c_str()); n[2] = atof(split[6].c_str());
+			t[0] = atof(split[7].c_str()); t[1] = atof(split[8].c_str());
 			d3d_model_vertex_normal_texture(id, v[0],v[1],v[2],n[0],n[1],n[2],t[0],t[1]);
 			break;
-		  case  9:
-			v[0] = file_text_read_real(file); v[1] = file_text_read_real(file); v[2] = file_text_read_real(file);
-			n[0] = file_text_read_real(file); n[1] = file_text_read_real(file); n[2] = file_text_read_real(file);
-			t[0] = file_text_read_real(file); t[1] = file_text_read_real(file);
-			col = file_text_read_real(file); alpha = file_text_read_real(file);
+		case  9:
+			v[0] = atof(split[1].c_str()); v[1] = atof(split[2].c_str()); v[2] = atof(split[3].c_str());
+			n[0] = atof(split[4].c_str()); n[1] = atof(split[5].c_str()); n[2] = atof(split[6].c_str());
+			t[0] = atof(split[7].c_str()); t[1] = atof(split[8].c_str());
+			col = atoi(split[9].c_str()); alpha = atof(split[10].c_str());
 			d3d_model_vertex_normal_texture_color(id, v[0],v[1],v[2],n[0],n[1],n[2],t[0],t[1],col,alpha);
 			break;
-		  case  10:
-			d3d_model_block(id, file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file), true);
+		case  10:
+			d3d_model_block(id, atof(split[1].c_str()), atof(split[2].c_str()), atof(split[3].c_str()), atof(split[4].c_str()), atof(split[5].c_str()), atof(split[6].c_str()), atof(split[7].c_str()), atof(split[9].c_str()), true);
 			break;
-		  case  11:
-			d3d_model_cylinder(id, file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file));
+		case  11:
+			d3d_model_cylinder(id, atof(split[1].c_str()), atof(split[2].c_str()), atof(split[3].c_str()), atof(split[4].c_str()), atof(split[5].c_str()), atof(split[6].c_str()), atof(split[7].c_str()), atof(split[9].c_str()), atoi(split[10].c_str()), atoi(split[11].c_str()));
 			break;
-		  case  12:
-			d3d_model_cone(id, file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file));
+		case  12:
+			d3d_model_cone(id, atof(split[1].c_str()), atof(split[2].c_str()), atof(split[3].c_str()), atof(split[4].c_str()), atof(split[5].c_str()), atof(split[6].c_str()), atof(split[7].c_str()), atof(split[9].c_str()), atoi(split[10].c_str()), atoi(split[11].c_str()));
 			break;
-		  case  13:
-			d3d_model_ellipsoid(id, file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file));
+		case  13:
+			d3d_model_ellipsoid(id, atof(split[1].c_str()), atof(split[2].c_str()), atof(split[3].c_str()), atof(split[4].c_str()), atof(split[5].c_str()), atof(split[6].c_str()), atof(split[7].c_str()), atof(split[9].c_str()), atoi(split[10].c_str()));
 			break;
-		  case  14:
-			d3d_model_wall(id, file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file));
+		case  14:
+			d3d_model_wall(id, atof(split[1].c_str()), atof(split[2].c_str()), atof(split[3].c_str()), atof(split[4].c_str()), atof(split[5].c_str()), atof(split[6].c_str()), atof(split[7].c_str()), atof(split[9].c_str()));
 			break;
-		  case  15:
-			d3d_model_floor(id, file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file),file_text_read_real(file));
+		case  15:
+			d3d_model_floor(id, atof(split[1].c_str()), atof(split[2].c_str()), atof(split[3].c_str()), atof(split[4].c_str()), atof(split[5].c_str()), atof(split[6].c_str()), atof(split[7].c_str()), atof(split[9].c_str()));
 			break;
 		}
 		file_text_readln(file);
-	  }
+	}
   }
   file_text_close(file);
   return true;
