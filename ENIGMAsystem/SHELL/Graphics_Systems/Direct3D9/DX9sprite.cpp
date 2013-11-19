@@ -73,10 +73,6 @@ namespace enigma {
 namespace enigma_user
 {
 
-bool sprite_exists(int spr) {
-    return (unsigned(spr) < enigma::sprite_idmax) and bool(enigma::spritestructarray[spr]);
-}
-
 void draw_sprite(int spr,int subimg, gs_scalar x, gs_scalar y)
 {
     get_spritev(spr2d,spr);
