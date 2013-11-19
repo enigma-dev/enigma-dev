@@ -17,20 +17,14 @@
 
 #include <math.h>
 #include <string>
-#include "Direct3D9Headers.h"
 #include "Universal_System/var4.h"
 #include "libEGMstd.h"
 #include "../General/GScolors.h"
 #include "../General/GSfont.h"
 #include "../General/GStextures.h"
-#include "../General/GSprimitives.h"
-
 
 using namespace std;
 #include "Universal_System/fontstruct.h"
-
-#include "Bridges/General/DX9Context.h"
-#include "DX9TextureStruct.h"
 
 #define __GETR(x) ((x & 0x0000FF))
 #define __GETG(x) ((x & 0x00FF00) >> 8)
@@ -42,34 +36,6 @@ namespace enigma {
 }
 
 using namespace enigma;
-/*const int fa_left = 0;
-const int fa_center = 1;
-const int fa_right = 2;
-const int fa_top = 0;
-const int fa_middle = 1;
-const int fa_bottom = 2;*/
-
-unsigned halign = enigma_user::fa_left; //default alignment
-unsigned valign = enigma_user::fa_top; //default alignment
-
-namespace enigma_user
-{
-
-void draw_set_halign(unsigned align){
-    halign = align;
-}
-void draw_set_valign(unsigned align){
-    valign = align;
-}
-
-unsigned draw_get_halign(){
-    return halign;
-}
-unsigned draw_get_valign(){
-    return valign;
-}
-
-}
 
 #ifdef DEBUG_MODE
   #include "Widget_Systems/widgets_mandatory.h"
@@ -281,10 +247,6 @@ unsigned int string_height_ext(variant vstr, gs_scalar sep, gs_scalar w)
 
 }
 
-namespace enigma {
-  D3DCOLOR get_currentcolor();
-}
-
 ////////////////////////////////////////////////////
 
 namespace enigma_user
@@ -292,120 +254,7 @@ namespace enigma_user
 
 void draw_text(gs_scalar x, gs_scalar y, variant vstr)
 {
-  string str = toString(vstr);
-  get_fontv(fnt,currentfont);
-  float yy = valign == fa_top ? y+fnt->yoffset : valign == fa_middle ? y +fnt->yoffset - string_height(str)/2 : y + fnt->yoffset - string_height(str);
-  if (halign == fa_left){
-      float xx = x;
-      for (unsigned i = 0; i < str.length(); i++)
-      {
-        if (str[i] == '\r')
-          xx = x, yy += fnt->height, i += str[i+1] == '\n';
-        else if (str[i] == '\n')
-          xx = x, yy += fnt->height;
-        else if (str[i] == ' ')
-          xx += get_space_width(fnt);
-        else
-        {
-          fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
-			draw_primitive_begin_texture(pr_trianglestrip, fnt->texture);
-			draw_vertex_texture(xx + g.x,  yy + g.y, g.tx, g.ty);
-			draw_vertex_texture(xx + g.x2, yy + g.y, g.tx2, g.ty);
-			draw_vertex_texture(xx + g.x,  yy + g.y2, g.tx,  g.ty2);
-			draw_vertex_texture(xx + g.x2, yy + g.y2, g.tx2, g.ty2);
-			draw_primitive_end();
-          xx += int(g.xs);
-        }
-      }
-  } else {
-      float xx = halign == fa_center ? x-float(string_width_line(str,0)/2) : x-float(string_width_line(str,0)), line = 0;
-      for (unsigned i = 0; i < str.length(); i++)
-      {
-        if (str[i] == '\r'){
-          line +=1, yy += fnt->height, i += str[i+1] == '\n';
-          xx = halign == fa_center ? x-float(string_width_line(str,line)/2) : x-float(string_width_line(str,line));
-        } else if (str[i] == '\n'){
-          line +=1, yy += fnt->height;
-          xx = halign == fa_center ? x-float(string_width_line(str,line)/2) : x-float(string_width_line(str,line));
-        } else if (str[i] == ' ')
-          xx += get_space_width(fnt);
-        else
-        {
-          fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
-			draw_primitive_begin_texture(pr_trianglestrip, fnt->texture);
-			draw_vertex_texture(xx + g.x,  yy + g.y, g.tx, g.ty);
-			draw_vertex_texture(xx + g.x2, yy + g.y, g.tx2, g.ty);
-			draw_vertex_texture(xx + g.x,  yy + g.y2, g.tx,  g.ty2);
-			draw_vertex_texture(xx + g.x2, yy + g.y2, g.tx2, g.ty2);
-			draw_primitive_end();
-          xx += float(g.xs);
-        }
-      }
-  }
-}
 
-void draw_text_skewed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar top, gs_scalar bottom)
-{
-
-}
-
-void draw_text_ext(gs_scalar x, gs_scalar y, variant vstr, gs_scalar sep, gs_scalar w)
-{
-
-}
-
-void draw_text_transformed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar xscale, gs_scalar yscale, double rot)
-{
-
-}
-
-void draw_text_ext_transformed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar sep, gs_scalar w, gs_scalar xscale, gs_scalar yscale, double rot)
-{
-
-}
-
-void draw_text_transformed_color(gs_scalar x, gs_scalar y, variant vstr, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, double a)
-{
-
-}
-
-void draw_text_ext_transformed_color(gs_scalar x, gs_scalar y, variant vstr, gs_scalar sep, gs_scalar w, gs_scalar xscale, gs_scalar yscale, double rot,int c1, int c2, int c3, int c4, double a)
-{
-
-}
-
-void draw_text_color(gs_scalar x, gs_scalar y,variant vstr,int c1,int c2,int c3,int c4,double a)
-{
-
-}
-
-void draw_text_ext_color(gs_scalar x, gs_scalar y,variant vstr,gs_scalar sep, gs_scalar w, int c1,int c2,int c3,int c4,double a)
-{
-
-}
-
-unsigned int font_get_texture(int fnt)
-{
-  get_font_null(f,fnt,-1);
-  return f ? f->texture : unsigned(-1);
-}
-unsigned int font_get_texture_width(int fnt)
-{
-  get_font_null(f,fnt,-1);
-  return f ? f->twid: unsigned(-1);
-}
-unsigned int font_get_texture_height(int fnt)
-{
-  get_font_null(f,fnt,-1);
-  return f ? f->thgt: unsigned(-1);
-}
-
-void draw_set_font(int fnt) {
-  enigma::currentfont = fnt;
-}
-
-int draw_get_font() {
-  return enigma::currentfont;
 }
 
 }
