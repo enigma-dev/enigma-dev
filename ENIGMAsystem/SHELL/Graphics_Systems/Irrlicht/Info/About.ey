@@ -1,0 +1,12 @@
+%e-yaml
+---
+
+Name: Irrlicht
+Identifier: Irrlicht
+Description: Open source 3D engine written in C++. It is cross-platform, officially running on Windows, Mac OS X, Linux and Windows CE and due to its open nature ports to other systems are available, including FreeBSD, Xbox, PlayStation Portable, Raspberry Pi, SymbianOS,[2] iPhone[3] and Google Native Client.
+Author: Robert B. Colton
+
+Depends:
+	Build-platforms: Windows, Linux, Mac
+Represents:
+	Build-platforms: Windows
