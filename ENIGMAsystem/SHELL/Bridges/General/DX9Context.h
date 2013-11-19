@@ -15,8 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef DIRECTX9DEVICEMANAGER
-#define DIRECTX9DEVICEMANAGER
+#ifndef DIRECTX9CONTEXTMANAGER
+#define DIRECTX9CONTEXTMANAGER
 
 #include <windows.h>
 #include <windowsx.h>
@@ -35,9 +35,10 @@ using std::map;
 extern LPDIRECT3D9 d3dobj;    // the pointer to our Direct3D interface
 extern LPD3DXSPRITE dsprite; // sprite batching object used to render sprites, backgrounds, and fonts
 
-class DeviceManager {
+//TODO: Replace the fixed function pipeline with shaders
+
+class ContextManager {
 private:
-LPDIRECT3DTEXTURE9 bound_texture;
 
 //Keep track of current shaders.
 LPDIRECT3DPIXELSHADER9	pixelShader;
@@ -53,38 +54,50 @@ int shapes_d3d_texture;
 bool renderingScene;
 
 protected:
-  typedef map<D3DTEXTURESTAGESTATETYPE, DWORD> textureStateStageCache;
-  typedef map<D3DSAMPLERSTATETYPE, DWORD> SamplerStateCache;
-   map<D3DRENDERSTATETYPE, DWORD> cacheRenderStates;    /// cached RenderStates
-   vector<textureStateStageCache> vecCacheTextureStates;       /// cached TextureStage States
-   vector<SamplerStateCache> vecCacheSamplerStates;            /// cached SamplerStage States
-   map<DWORD, D3DLIGHT9> cacheLightStates; /// cached Light States
-   map<DWORD, BOOL> cacheLightEnable; /// cached Light States
+   map< D3DRENDERSTATETYPE, DWORD > cacheRenderStates;                  /// cached RenderStates
+   map< DWORD, LPDIRECT3DTEXTURE9 > cacheTextureStates;                 /// cached Texture States
+   map< DWORD, map< D3DSAMPLERSTATETYPE, DWORD > > cacheSamplerStates;  /// cached Sampler States
+   map< DWORD, D3DLIGHT9 > cacheLightStates;                            /// cached Light States
+   map< DWORD, BOOL > cacheLightEnable;                                 /// cached Light States
   
 public:
 LPDIRECT3DDEVICE9 device;    // the pointer to the device class
 
-DeviceManager() {
+ContextManager() {
 	shapes_d3d_model = -1;
 	shapes_d3d_texture = -1;
-	bound_texture = NULL;
 	vertexShader = NULL;
 	pixelShader = NULL;
 }
 
-~DeviceManager() {
+~ContextManager() {
 
 }
 
-// Event fired whenever a projection change occurs
-void ProjectionChanged() {
+//TODO: Write this method so that for debugging purposes we can dump the entire render state to a text file.
+void DumpState() {
+
+}
+
+//TODO: Write this method so that we can serialize and save the entire render state to be reloaded
+void SaveState() {
+
+}
+
+//TODO: Write this method so that we can read and restore a previously saved render state
+void LoadState() {
 
 }
 
 // Reapply the render states and other stuff to the device.
 void RestoreState() {
-
-	device->SetTexture(0, bound_texture);
+	// Cached Texture Stage States
+	map< DWORD, LPDIRECT3DTEXTURE9 >::iterator tit = cacheTextureStates.begin();
+    while (tit != cacheTextureStates.end()) {
+		device->SetTexture(tit->first, tit->second);
+		tit++;
+	}
+	
 	device->SetVertexShader(vertexShader);
 	device->SetPixelShader(pixelShader);
 	
@@ -96,27 +109,27 @@ void RestoreState() {
 	}
 	
 	// Cached Sampler States
-	vector<SamplerStateCache>::iterator samplerCache = vecCacheSamplerStates.begin();
-	unsigned i = 0;
-	while (samplerCache != vecCacheSamplerStates.end()) {
-		map< D3DSAMPLERSTATETYPE, DWORD >::iterator cit = (*samplerCache).begin();
-		while (cit != (*samplerCache).end()) {
-			device->SetSamplerState((DWORD)i, cit->first, cit->second);
-			cit++;
+	map< DWORD, map< D3DSAMPLERSTATETYPE, DWORD > >::iterator sit = cacheSamplerStates.begin();
+    while (sit != cacheSamplerStates.end()) {
+		map< D3DSAMPLERSTATETYPE, DWORD >::iterator secit = sit->second.begin();
+		while (secit != sit->second.end()) {
+			device->SetSamplerState(sit->first, secit->first, secit->second);
+			secit++;
 		}
-		samplerCache++; i++;
+		sit++;
 	}
-	
+
 	// Cached Lights
-	map< DWORD, D3DLIGHT9 >::iterator lit = cacheLightStates.begin();
-    while (lit != cacheLightStates.end()) {
-		device->SetLight(lit->first, &lit->second);
-		lit++;
-	}
 	map< DWORD, BOOL >::iterator lite = cacheLightEnable.begin();
     while (lite != cacheLightEnable.end()) {
 		device->LightEnable(lite->first, lite->second);
 		lite++;
+	}
+	return;
+	map< DWORD, D3DLIGHT9 >::iterator lit = cacheLightStates.begin();
+    while (lit != cacheLightStates.end()) {
+		device->SetLight(lit->first, &lit->second);
+		lit++;
 	}
 }
 
@@ -323,6 +336,8 @@ void SetViewport(const D3DVIEWPORT9 *pViewport) {
 }
 
 void SetLight(DWORD Index, const D3DLIGHT9 *pLight) {
+device->SetLight( Index, pLight );
+	return;
 	// Update the light state cache
     // If the return value is 'true', the command must be forwarded to the D3D Runtime.
 	map< DWORD, D3DLIGHT9 >::iterator it = cacheLightStates.find( Index );
@@ -381,35 +396,46 @@ void ResetRenderTarget() {
 }
 
 void SetSamplerState(DWORD Sampler, D3DSAMPLERSTATETYPE Type, DWORD Value) {
-	// Update the sampler state cache
+	// Update the render state cache
     // If the return value is 'true', the command must be forwarded to the D3D Runtime.
-	vector<SamplerStateCache>::iterator samplerCache = vecCacheSamplerStates.begin() + Sampler;
-	if (samplerCache == vecCacheSamplerStates.end()) { 
-		vecCacheSamplerStates.push_back(SamplerStateCache()); 
-		samplerCache = vecCacheSamplerStates.begin() + Sampler; 
-	}
-
-	map< D3DSAMPLERSTATETYPE, DWORD >::iterator it = (*samplerCache).find( Type );
-
-    if( (*samplerCache).end() == it)
-    {
-        (*samplerCache).insert( map< D3DSAMPLERSTATETYPE, DWORD >::value_type(Type, Value) );
-		EndShapesBatching();
+	typedef map<D3DSAMPLERSTATETYPE, DWORD> innerType;
+	map< DWORD, map< D3DSAMPLERSTATETYPE, DWORD >  >::iterator it = cacheSamplerStates.find( Sampler );
+    if ( it == cacheSamplerStates.end() ) {
+		map<DWORD, innerType> outer;
+		innerType inner;
+		inner.insert(pair<D3DSAMPLERSTATETYPE, DWORD>(Type, Value));
+        cacheSamplerStates.insert( pair<DWORD, innerType>(Sampler, inner) );
+		//EndShapesBatching();
         device->SetSamplerState( Sampler, Type, Value );
-		return;
     }
-    if( it->second == Value )
-        return;
-    it->second = Value;
-	EndShapesBatching();
-    device->SetSamplerState( Sampler, Type, Value );
+	map< D3DSAMPLERSTATETYPE, DWORD >::iterator sit = it->second.find( Type );
+    if ( sit != it->second.end() ) {
+		if (sit->second == Value) {
+			return;
+		}
+		sit->second = Value;
+		//EndShapesBatching();
+		device->SetSamplerState( Sampler, Type, Value );
+	} else {
+		it->second.insert(map< D3DSAMPLERSTATETYPE, DWORD >::value_type(Type, Value));
+		device->SetSamplerState( Sampler, Type, Value );
+	}
 }
 
 void SetTexture(DWORD Sampler, LPDIRECT3DTEXTURE9 pTexture) {
-	if (bound_texture != pTexture) {
+	// Update the render state cache
+    // If the return value is 'true', the command must be forwarded to the D3D Runtime.
+	map< DWORD, LPDIRECT3DTEXTURE9 >::iterator it = cacheTextureStates.find( Sampler );
+    if ( cacheTextureStates.end() == it ) {
+        cacheTextureStates.insert( map< DWORD, LPDIRECT3DTEXTURE9 >::value_type(Sampler, pTexture) );
 		//EndShapesBatching();
-		device->SetTexture(Sampler, bound_texture = pTexture);
-	}
+        device->SetTexture( Sampler, pTexture );
+    }
+    if( it->second == pTexture )
+        return;
+    it->second = pTexture;
+	//EndShapesBatching();
+    device->SetTexture( Sampler, pTexture );
 }
 
 void SetStreamSource(UINT StreamNumber, IDirect3DVertexBuffer9 *pStreamData, UINT OffsetInBytes, UINT Stride) {
@@ -452,6 +478,6 @@ void SetPixelShaderConstantF(UINT StartRegister, const float *pConstantData, UIN
 
 };
 
-extern DeviceManager* d3ddev; // point to our device manager
+extern ContextManager* d3dmgr; // point to our device manager
 
 #endif

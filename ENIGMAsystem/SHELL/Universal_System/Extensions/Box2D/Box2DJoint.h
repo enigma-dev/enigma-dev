@@ -38,6 +38,7 @@ struct B2DJoint {
 extern vector<B2DJoint*> b2djoints;
 
 #ifdef DEBUG_MODE
+  #include <string>
   #include "libEGMstd.h"
   #include "Widget_Systems/widgets_mandatory.h"
   #define get_jointr(j,id,r) \

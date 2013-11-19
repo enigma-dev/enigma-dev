@@ -1,2 +1,2 @@
 SOURCES += $(wildcard Universal_System/Extensions/BulletDynamics/*.cpp) 
-LDLIBS += -lBulletDynamics -lBulletSoftBody -lBulletCollision -lLinearMath
+LDLIBS += -lBulletSoftBody -lBulletDynamics -lBulletCollision -lLinearMath

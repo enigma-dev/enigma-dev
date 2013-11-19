@@ -62,6 +62,7 @@ struct B2DFixture {
 extern vector<B2DFixture*> b2dfixtures;
 
 #ifdef DEBUG_MODE
+  #include <string>
   #include "libEGMstd.h"
   #include "Widget_Systems/widgets_mandatory.h"
   #define get_shaper(s,id,r) \

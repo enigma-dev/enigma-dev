@@ -32,12 +32,17 @@ namespace enigma
     LPDIRECT3DSURFACE9 surf;
     int tex, width, height;
 	Surface() {
-	
+		tex = 0;
+		width = 0;
+		height = 0;
+		surf = NULL;
 	};
 	
 	~Surface() {
-		surf->Release();
-		surf = NULL;
+		if (surf != NULL) {
+			surf->Release();
+			surf = NULL;
+		}
 	};
   };
   

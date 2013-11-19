@@ -14,7 +14,7 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
-#include "Bridges/General/DX9Device.h"
+#include "Bridges/General/DX9Context.h"
 #include "Graphics_Systems/General/GSd3d.h"
 #include "Direct3D9Headers.h"
 #include "Graphics_Systems/General/GStextures.h"
@@ -61,20 +61,20 @@ void d3d_depth_clear() {
 }
 
 void d3d_depth_clear_value(float value) {
-	d3ddev->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), value, 0);
+	d3dmgr->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), value, 0);
 }
 
 void d3d_start()
 {
 	enigma::d3dMode = true;
 	enigma::d3dCulling =  rs_none;
-	d3ddev->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+	d3dmgr->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
 	d3d_set_hidden(false);
 	
 	// Enable texture repetition by default
-	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP );
-	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP );
-	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSW, D3DTADDRESS_WRAP );
+	d3dmgr->SetSamplerState( 0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP );
+	d3dmgr->SetSamplerState( 0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP );
+	d3dmgr->SetSamplerState( 0, D3DSAMP_ADDRESSW, D3DTADDRESS_WRAP );
 }
 
 void d3d_end()
@@ -92,19 +92,19 @@ bool d3d_get_mode()
 void d3d_set_hidden(bool enable)
 {
 	d3d_set_zwriteenable(enable);
-	d3ddev->SetRenderState(D3DRS_ZENABLE, enable); // enable/disable the z-buffer
+	d3dmgr->SetRenderState(D3DRS_ZENABLE, enable); // enable/disable the z-buffer
     enigma::d3dHidden = enable;
 }   
 
 void d3d_set_zwriteenable(bool enable)
 {
 	enigma::d3dZWriteEnable = enable;
-	d3ddev->SetRenderState(D3DRS_ZWRITEENABLE, enable);    // enable/disable z-writing
+	d3dmgr->SetRenderState(D3DRS_ZWRITEENABLE, enable);    // enable/disable z-writing
 }
 
 void d3d_set_lighting(bool enable)
 {
-	d3ddev->SetRenderState(D3DRS_LIGHTING, enable);    // enable/disable the 3D lighting
+	d3dmgr->SetRenderState(D3DRS_LIGHTING, enable);    // enable/disable the 3D lighting
 }
 
 void d3d_set_fog(bool enable, int color, double start, double end)
@@ -119,14 +119,14 @@ void d3d_set_fog(bool enable, int color, double start, double end)
 
 void d3d_set_fog_enabled(bool enable)
 {
-	d3ddev->SetRenderState(D3DRS_FOGENABLE, enable);
-	d3ddev->SetRenderState(D3DRS_RANGEFOGENABLE, enable);
+	d3dmgr->SetRenderState(D3DRS_FOGENABLE, enable);
+	d3dmgr->SetRenderState(D3DRS_RANGEFOGENABLE, enable);
 }
 
 void d3d_set_fog_mode(int mode)
 {
-	d3ddev->SetRenderState(D3DRS_FOGTABLEMODE, fogmodes[mode]);
-	d3ddev->SetRenderState(D3DRS_FOGVERTEXMODE, fogmodes[mode]);
+	d3dmgr->SetRenderState(D3DRS_FOGTABLEMODE, fogmodes[mode]);
+	d3dmgr->SetRenderState(D3DRS_FOGVERTEXMODE, fogmodes[mode]);
 }
 
 void d3d_set_fog_hint(int mode) {
@@ -135,31 +135,31 @@ void d3d_set_fog_hint(int mode) {
 
 void d3d_set_fog_color(int color)
 {
-	d3ddev->SetRenderState(D3DRS_FOGCOLOR,
+	d3dmgr->SetRenderState(D3DRS_FOGCOLOR,
                     D3DCOLOR_COLORVALUE(__GETR(color), __GETG(color), __GETB(color), 1.0f)); // Highest 8 bits are not used.
 }
 
 void d3d_set_fog_start(double start)
 {
 	float fFogStart = start;
-	d3ddev->SetRenderState(D3DRS_FOGSTART,*(DWORD*)(&fFogStart));
+	d3dmgr->SetRenderState(D3DRS_FOGSTART,*(DWORD*)(&fFogStart));
 }
 
 void d3d_set_fog_end(double end)
 {
   float fFogEnd = end;
-  d3ddev->SetRenderState(D3DRS_FOGEND,*(DWORD*)(&fFogEnd));
+  d3dmgr->SetRenderState(D3DRS_FOGEND,*(DWORD*)(&fFogEnd));
 }
 
 void d3d_set_fog_density(double density)
 {
-	d3ddev->SetRenderState(D3DRS_FOGDENSITY, *(DWORD *)(&density));
+	d3dmgr->SetRenderState(D3DRS_FOGDENSITY, *(DWORD *)(&density));
 }
 
 void d3d_set_culling(int mode)
 {
 	enigma::d3dCulling = mode;
-	d3ddev->SetRenderState(D3DRS_CULLMODE, cullingstates[mode]);
+	d3dmgr->SetRenderState(D3DRS_CULLMODE, cullingstates[mode]);
 }
 
 int d3d_get_culling() {
@@ -168,7 +168,7 @@ int d3d_get_culling() {
 
 void d3d_set_fill_mode(int fill)
 {
-	d3ddev->SetRenderState(D3DRS_FILLMODE, fillmodes[fill]);
+	d3dmgr->SetRenderState(D3DRS_FILLMODE, fillmodes[fill]);
 }
 
 void d3d_set_line_width(float value) {
@@ -176,11 +176,11 @@ void d3d_set_line_width(float value) {
 }
 
 void d3d_set_point_size(float value) {
-	d3ddev->SetRenderState(D3DRS_POINTSIZE, value);
+	d3dmgr->SetRenderState(D3DRS_POINTSIZE, value);
 } 
 
 void d3d_set_depth_operator(int mode) {
-	d3ddev->SetRenderState(D3DRS_ZFUNC, depthoperators[mode]);
+	d3dmgr->SetRenderState(D3DRS_ZFUNC, depthoperators[mode]);
 }
 
 void d3d_set_perspective(bool enable)
@@ -192,7 +192,7 @@ void d3d_set_perspective(bool enable)
     D3DXMatrixPerspectiveFovLH(&matProjection, 0, 1, 0, 1);
   }
   //set projection matrix
-  d3ddev->SetTransform(D3DTS_PROJECTION, &matProjection);
+  d3dmgr->SetTransform(D3DTS_PROJECTION, &matProjection);
   // Unverified note: Perspective not the same as in GM when turning off perspective and using d3d projection
   // Unverified note: GM has some sort of dodgy behaviour where this function doesn't affect anything when calling after d3d_set_projection_ext
   // See also OpenGL3/GL3d3d.cpp Direct3D9/DX9d3d.cpp OpenGL1/GLd3d.cpp
@@ -205,7 +205,7 @@ void d3d_set_depth(double dep)
 
 void d3d_set_shading(bool smooth)
 {
-	d3ddev->SetRenderState(D3DRS_SHADEMODE, smooth?D3DSHADE_GOURAUD:D3DSHADE_FLAT);
+	d3dmgr->SetRenderState(D3DRS_SHADEMODE, smooth?D3DSHADE_GOURAUD:D3DSHADE_FLAT);
 }
 
 }
@@ -228,12 +228,12 @@ void d3d_set_projection(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs_sca
 	D3DXMatrixLookAtLH( &matView, &vEyePt, &vLookatPt, &vUpVec );
 
 	// Set our view matrix
-	d3ddev->SetTransform( D3DTS_VIEW, &matView ); 
+	d3dmgr->SetTransform( D3DTS_VIEW, &matView ); 
 	
 	D3DXMATRIX matProj;
 
 	D3DXMatrixPerspectiveFovLH( &matProj, D3DXToRadian(45), view_wview[view_current] / (double)view_hview[view_current], 1.0f, 32000.0f );
-	d3ddev->SetTransform( D3DTS_PROJECTION, &matProj );
+	d3dmgr->SetTransform( D3DTS_PROJECTION, &matProj );
 }
 
 void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs_scalar xto, gs_scalar yto, gs_scalar zto,gs_scalar xup, gs_scalar yup, gs_scalar zup,double angle,double aspect,double znear,double zfar)
@@ -247,12 +247,12 @@ void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs
 	D3DXMatrixLookAtLH( &matView, &vEyePt, &vLookatPt, &vUpVec );
 		
 	// Set our view matrix
-	d3ddev->SetTransform( D3DTS_VIEW, &matView ); 
+	d3dmgr->SetTransform( D3DTS_VIEW, &matView ); 
 	
 	D3DXMATRIX matProj;
 
 	D3DXMatrixPerspectiveFovLH( &matProj, D3DXToRadian(angle), aspect, znear, zfar );
-	d3ddev->SetTransform( D3DTS_PROJECTION, &matProj );
+	d3dmgr->SetTransform( D3DTS_PROJECTION, &matProj );
 }
 
 void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, double angle)
@@ -272,7 +272,7 @@ void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scal
 	D3DXMATRIX matWorld=matRotZ*matTrans*matScale;
 
 	// Set the matrix to be applied to anything we render from now on
-	d3ddev->SetTransform( D3DTS_VIEW, &matWorld);
+	d3dmgr->SetTransform( D3DTS_VIEW, &matWorld);
 	
 	D3DXMATRIX matProjection;    // the projection transform matrix
 	D3DXMatrixOrthoOffCenterLH(&matProjection,
@@ -283,7 +283,7 @@ void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scal
 							-32000.0f,    // the near view-plane
 							32000.0f);    // the far view-plane
 						   
-	d3ddev->SetTransform(D3DTS_PROJECTION, &matProjection);    // set the projection transform
+	d3dmgr->SetTransform(D3DTS_PROJECTION, &matProjection);    // set the projection transform
 }
 
 void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, double angle)
@@ -312,57 +312,57 @@ void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, g
 							32000.0f);    // the far view-plane
 	
 	// Set the matrix to be applied to anything we render from now on
-	d3ddev->SetTransform( D3DTS_VIEW, &matProjection);
+	d3dmgr->SetTransform( D3DTS_VIEW, &matProjection);
 	
 	D3DXMATRIX matProj;    // the projection transform matrix
 	D3DXMatrixPerspectiveFovLH(&matProj,
 							D3DXToRadian(60), width/height, 0.1, 32000);    // the far view-plane
 					
-	d3ddev->SetTransform(D3DTS_PROJECTION, &matProj);    // set the projection transform
+	d3dmgr->SetTransform(D3DTS_PROJECTION, &matProj);    // set the projection transform
 }
 
 void d3d_draw_floor(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep)
 {
-	d3ddev->BeginShapesBatching(texId);
-	d3d_model_floor(d3ddev->GetShapesModel(), x1, y1, z1, x2, y2, z2, hrep, vrep);
+	d3dmgr->BeginShapesBatching(texId);
+	d3d_model_floor(d3dmgr->GetShapesModel(), x1, y1, z1, x2, y2, z2, hrep, vrep);
 }
 
 void d3d_draw_wall(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep)
 {
-	d3ddev->BeginShapesBatching(texId);
-	d3d_model_wall(d3ddev->GetShapesModel(), x1, y1, z1, x2, y2, z2, hrep, vrep);
+	d3dmgr->BeginShapesBatching(texId);
+	d3d_model_wall(d3dmgr->GetShapesModel(), x1, y1, z1, x2, y2, z2, hrep, vrep);
 }
 
 void d3d_draw_block(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, bool closed)
 {
-	d3ddev->BeginShapesBatching(texId);
-	d3d_model_block(d3ddev->GetShapesModel(), x1, y1, z1, x2, y2, z2, hrep, vrep, closed);
+	d3dmgr->BeginShapesBatching(texId);
+	d3d_model_block(d3dmgr->GetShapesModel(), x1, y1, z1, x2, y2, z2, hrep, vrep, closed);
 }
 
 void d3d_draw_cylinder(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, bool closed, int steps)
 {
-	d3ddev->BeginShapesBatching(texId);
-	d3d_model_cylinder(d3ddev->GetShapesModel(), x1, y1, z1, x2, y2, z2, hrep, vrep, closed, steps);
+	d3dmgr->BeginShapesBatching(texId);
+	d3d_model_cylinder(d3dmgr->GetShapesModel(), x1, y1, z1, x2, y2, z2, hrep, vrep, closed, steps);
 }
 
 void d3d_draw_cone(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, bool closed, int steps)
 {
-	d3ddev->BeginShapesBatching(texId);
-	d3d_model_cone(d3ddev->GetShapesModel(), x1, y1, z1, x2, y2, z2, hrep, vrep, closed, steps);
+	d3dmgr->BeginShapesBatching(texId);
+	d3d_model_cone(d3dmgr->GetShapesModel(), x1, y1, z1, x2, y2, z2, hrep, vrep, closed, steps);
 }
 
 void d3d_draw_ellipsoid(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, int steps)
 {
-	d3ddev->BeginShapesBatching(texId);
-	d3d_model_ellipsoid(d3ddev->GetShapesModel(), x1, y1, z1, x2, y2, z2, hrep, vrep, steps);
+	d3dmgr->BeginShapesBatching(texId);
+	d3d_model_ellipsoid(d3dmgr->GetShapesModel(), x1, y1, z1, x2, y2, z2, hrep, vrep, steps);
 }
 
 void d3d_draw_icosahedron(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, int steps) {
 }
 
 void d3d_draw_torus(gs_scalar x1, gs_scalar y1, gs_scalar z1, int texId, gs_scalar hrep, gs_scalar vrep, int csteps, int tsteps, double radius, double tradius) {
-	d3ddev->BeginShapesBatching(texId);
-	d3d_model_torus(d3ddev->GetShapesModel(), x1, y1, z1, hrep, vrep, csteps, tsteps, radius, tradius);
+	d3dmgr->BeginShapesBatching(texId);
+	d3d_model_torus(d3dmgr->GetShapesModel(), x1, y1, z1, hrep, vrep, csteps, tsteps, radius, tradius);
 }
 
 D3DXMATRIX matWorld; 
@@ -373,7 +373,7 @@ void d3d_transform_set_identity()
 {
 	matWorld = matNull;
 	D3DXMatrixIdentity( &matWorld );
-	d3ddev->SetTransform(D3DTS_WORLD, &matWorld);
+	d3dmgr->SetTransform(D3DTS_WORLD, &matWorld);
 }
 
 void d3d_transform_add_translation(gs_scalar xt, gs_scalar yt, gs_scalar zt)
@@ -387,7 +387,7 @@ void d3d_transform_add_translation(gs_scalar xt, gs_scalar yt, gs_scalar zt)
 	matWorld *= matTranslate;
 
 	// tell Direct3D about our matrix
-	d3ddev->SetTransform(D3DTS_WORLD, &matWorld);
+	d3dmgr->SetTransform(D3DTS_WORLD, &matWorld);
 	
 }
 
@@ -402,7 +402,7 @@ void d3d_transform_add_scaling(gs_scalar xs, gs_scalar ys, gs_scalar zs)
 	matWorld *= matScale;
 
 	// tell Direct3D about our matrix
-	d3ddev->SetTransform(D3DTS_WORLD, &matWorld);
+	d3dmgr->SetTransform(D3DTS_WORLD, &matWorld);
 }
 
 void d3d_transform_add_rotation_x(double angle)
@@ -415,7 +415,7 @@ void d3d_transform_add_rotation_x(double angle)
 	matWorld *= matRot;
 
 	// tell Direct3D about our matrix
-	d3ddev->SetTransform(D3DTS_WORLD, &matWorld);
+	d3dmgr->SetTransform(D3DTS_WORLD, &matWorld);
 }
 
 void d3d_transform_add_rotation_y(double angle)
@@ -429,7 +429,7 @@ void d3d_transform_add_rotation_y(double angle)
 	matWorld *= matRot;
 
 	// tell Direct3D about our matrix
-	d3ddev->SetTransform(D3DTS_WORLD, &matWorld);
+	d3dmgr->SetTransform(D3DTS_WORLD, &matWorld);
 }
 
 void d3d_transform_add_rotation_z(double angle)
@@ -442,7 +442,7 @@ void d3d_transform_add_rotation_z(double angle)
 	matWorld *= matRot;
 
 	// tell Direct3D about our matrix
-	d3ddev->SetTransform(D3DTS_WORLD, &matWorld);
+	d3dmgr->SetTransform(D3DTS_WORLD, &matWorld);
 }
 
 void d3d_transform_add_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, double angle)
@@ -456,7 +456,7 @@ void d3d_transform_add_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, doub
 	matWorld *= matRot;
 	
 	// tell Direct3D about our matrix
-	d3ddev->SetTransform(D3DTS_WORLD, &matWorld);
+	d3dmgr->SetTransform(D3DTS_WORLD, &matWorld);
 }
 
 void d3d_transform_set_translation(gs_scalar xt, gs_scalar yt, gs_scalar zt)
@@ -466,7 +466,7 @@ void d3d_transform_set_translation(gs_scalar xt, gs_scalar yt, gs_scalar zt)
 	D3DXMatrixTranslation(&matWorld, xt, yt, zt);
 
 	// tell Direct3D about our matrix
-	d3ddev->SetTransform(D3DTS_WORLD, &matWorld);
+	d3dmgr->SetTransform(D3DTS_WORLD, &matWorld);
 }
 
 void d3d_transform_set_scaling(gs_scalar xs, gs_scalar ys, gs_scalar zs)
@@ -476,7 +476,7 @@ void d3d_transform_set_scaling(gs_scalar xs, gs_scalar ys, gs_scalar zs)
 	D3DXMatrixScaling(&matWorld, xs, ys, zs);
 
 	// tell Direct3D about our matrix
-	d3ddev->SetTransform(D3DTS_WORLD, &matWorld);
+	d3dmgr->SetTransform(D3DTS_WORLD, &matWorld);
 }
 
 void d3d_transform_set_rotation_x(double angle)
@@ -485,7 +485,7 @@ void d3d_transform_set_rotation_x(double angle)
 	D3DXMatrixRotationX(&matWorld, gs_angular_degrees(-angle));
 	
 	// tell Direct3D about our matrix
-	d3ddev->SetTransform(D3DTS_WORLD, &matWorld);
+	d3dmgr->SetTransform(D3DTS_WORLD, &matWorld);
 }
 
 void d3d_transform_set_rotation_y(double angle)
@@ -494,7 +494,7 @@ void d3d_transform_set_rotation_y(double angle)
 	D3DXMatrixRotationY(&matWorld, gs_angular_degrees(-angle));
 		
 	// tell Direct3D about our matrix
-	d3ddev->SetTransform(D3DTS_WORLD, &matWorld);
+	d3dmgr->SetTransform(D3DTS_WORLD, &matWorld);
 }
 
 void d3d_transform_set_rotation_z(double angle)
@@ -505,7 +505,7 @@ void d3d_transform_set_rotation_z(double angle)
 	D3DXMatrixRotationZ(&matWorld, gs_angular_degrees(-angle));
 		
 	// tell Direct3D about our matrix
-	d3ddev->SetTransform(D3DTS_WORLD, &matWorld);
+	d3dmgr->SetTransform(D3DTS_WORLD, &matWorld);
 }
 
 void d3d_transform_set_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, double angle)
@@ -515,7 +515,7 @@ void d3d_transform_set_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, doub
 	D3DXMatrixRotationYawPitchRoll(&matWorld, y * angle, x * angle, z * angle);
 		
 	// tell Direct3D about our matrix
-	d3ddev->SetTransform(D3DTS_WORLD, &matWorld);
+	d3dmgr->SetTransform(D3DTS_WORLD, &matWorld);
 }
 
 }
@@ -611,7 +611,7 @@ class d3d_lights
         {
             ms = light_ind.size();
             D3DCAPS9 caps;
-			d3ddev->GetDeviceCaps(&caps);
+			d3dmgr->GetDeviceCaps(&caps);
             if (ms >= caps.MaxActiveLights)
                 return false;
 
@@ -626,7 +626,15 @@ class d3d_lights
 		light.Diffuse = D3DXCOLOR(__GETR(col), __GETR(col), __GETB(col), 1.0f);    // set the light's color
 		light.Direction = D3DXVECTOR3(dx, dy, dz);
 
-		d3ddev->SetLight(ms, &light);    // send the light struct properties to nth light 
+		d3dmgr->SetLight(ms, &light);    // send the light struct properties to nth light 
+		
+		D3DMATERIAL9 material;
+		ZeroMemory(&material, sizeof(D3DMATERIAL9));
+		material.Diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+		material.Ambient = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
+
+		d3dmgr->SetMaterial(&material);
+		
 		light_update_positions();
         return true;
     }
@@ -649,7 +657,7 @@ class d3d_lights
         {
             ms = light_ind.size();
             D3DCAPS9 caps;
-			d3ddev->GetDeviceCaps(&caps);
+			d3dmgr->GetDeviceCaps(&caps);
             if (ms >= caps.MaxActiveLights)
                 return false;
 
@@ -670,15 +678,14 @@ class d3d_lights
 		//light.Theta = D3DXToRadian(360.0f);    // set the inner cone to 360 degrees
 		light.Falloff = 1.0f;    // use the typical falloff
 	
-		d3ddev->SetLight(ms, &light);    // send the light struct properties to nth light 
-		d3ddev->LightEnable(ms, TRUE);
+		d3dmgr->SetLight(ms, &light);    // send the light struct properties to nth light 
 		
 		D3DMATERIAL9 material;
 		ZeroMemory(&material, sizeof(D3DMATERIAL9));
 		material.Diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
 		material.Ambient = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
 
-		d3ddev->SetMaterial(&material);
+		d3dmgr->SetMaterial(&material);
 	
 		return true;
     }
@@ -694,7 +701,7 @@ class d3d_lights
         {
             ms = light_ind.size();
             D3DCAPS9 caps;
-			d3ddev->GetDeviceCaps(&caps);
+			d3dmgr->GetDeviceCaps(&caps);
             if (ms >= caps.MaxActiveLights)
                 return false;
         }
@@ -708,13 +715,13 @@ class d3d_lights
         if (it == light_ind.end()) {
             const int ms = light_ind.size();
 			D3DCAPS9 caps;
-			d3ddev->GetDeviceCaps(&caps);
+			d3dmgr->GetDeviceCaps(&caps);
             if (ms >= caps.MaxActiveLights)
                 return false;
             light_ind.insert(pair<int,int>(id, ms));
-			d3ddev->LightEnable(ms, TRUE);
+			d3dmgr->LightEnable(ms, TRUE);
         } else {
-			d3ddev->LightEnable((*it).second, TRUE);
+			d3dmgr->LightEnable((*it).second, TRUE);
         }
         return true;
     }
@@ -725,7 +732,7 @@ class d3d_lights
         if (it == light_ind.end()) {
             return false;
         } else {
-			d3ddev->LightEnable((*it).second, FALSE);
+			d3dmgr->LightEnable((*it).second, FALSE);
         }
         return true;
 		
@@ -763,7 +770,7 @@ void d3d_light_shininess(int facemode, int shine)
 
 void d3d_light_define_ambient(int col)
 {
-	d3ddev->SetRenderState(D3DRS_AMBIENT, D3DCOLOR_COLORVALUE(__GETR(col), __GETG(col), __GETB(col), 1));  
+	d3dmgr->SetRenderState(D3DRS_AMBIENT, D3DCOLOR_COLORVALUE(__GETR(col), __GETG(col), __GETB(col), 1));  
 }
 
 bool d3d_light_enable(int id, bool enable)

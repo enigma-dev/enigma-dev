@@ -22,6 +22,7 @@
 #include "../General/GSscreen.h"
 #include "../General/GSd3d.h"
 #include "../General/GStextures.h"
+#include "Bridges/General/GL3Context.h"
 
 using namespace std;
 
@@ -47,19 +48,6 @@ using namespace std;
 #endif
 
 using namespace enigma;
-namespace enigma
-{
-    vector<gs_scalar> globalVBO_data;
-    vector<unsigned int> globalVBO_indices;
-    GLuint globalVBO; //The buffer itself
-    unsigned int globalVBO_texture;
-    unsigned int globalVBO_datCount; //Length of the VBO data buffer
-    unsigned int globalVBO_verCount; //Number of vertices on this buffer
-    unsigned int globalVBO_indCount; //Number of indices
-    unsigned int globalVBO_maxBSize; //Maximum buffer size. Buffer will not be regenerated if the current buffer size is smaller than the maximum
-    unsigned int bound_framebuffer = 0; //Shows the bound framebuffer, so glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &fbo); don't need to be called (they are very slow)
-}
-
 namespace enigma_user {
   extern int window_get_width();
   extern int window_get_height();
@@ -114,61 +102,7 @@ namespace enigma
 
 	unsigned gui_width;
 	unsigned gui_height;
-
-	void draw_globalVBO()
-	{
-		if (globalVBO_verCount < 1) { return; }
-		//int fbo;
-		//glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fbo);
-		//printf("RENDERING THIS - Verts = %i, inds = %i and fbo = %i, data size = %i, index size = %i\n",globalVBO_verCount,globalVBO_indCount,fbo,globalVBO_data.size(),globalVBO_indices.size() );
-		//glBindTexture(GL_TEXTURE_2D,0);
-		glEnableClientState(GL_VERTEX_ARRAY);
-		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-		glEnableClientState(GL_COLOR_ARRAY);
-
-		glBindBufferARB(GL_ARRAY_BUFFER, globalVBO);
-
-		// Textures should be clamped when rendering 2D sprites and stuff, so memorize it.
-		GLint wrapr, wraps, wrapt;
-		glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, &wrapr);
-		glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, &wraps);
-		glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, &wrapt);
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-
-		if (globalVBO_verCount>globalVBO_maxBSize) glBufferDataARB(GL_ARRAY_BUFFER, globalVBO_datCount * sizeof(gs_scalar), &globalVBO_data[0], GL_DYNAMIC_DRAW), globalVBO_maxBSize = globalVBO_verCount;
-		else glBufferSubDataARB(GL_ARRAY_BUFFER, 0, globalVBO_datCount * sizeof(gs_scalar), &globalVBO_data[0]);
-		glVertexPointer( 2, GL_FLOAT, sizeof(gs_scalar) * 8, NULL );
-		glTexCoordPointer( 2, GL_FLOAT, sizeof(gs_scalar) * 8, (void*)(sizeof(gs_scalar) * 2) );
-		glColorPointer( 4, GL_FLOAT, sizeof(gs_scalar) * 8, (void*)(sizeof(gs_scalar) * 4) );
-
-
-		// this sprite batching mechanism does not allow one to apply transformations to sprites or text
-		// like is possible with the Direct3D 9 sprite batcher or traditionally in Game Maker.
-		if (d3dZWriteEnable) {
-		  glDepthMask(false);
-		}
-		glDrawElements(GL_TRIANGLES, globalVBO_indCount, GL_UNSIGNED_INT, &globalVBO_indices[0] );
-		if (d3dZWriteEnable) {
-		  glDepthMask(true);
-		}
-
-		// And now reset the textures repetition
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, wrapr);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wraps);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapt);
-
-		glDisableClientState( GL_COLOR_ARRAY );
-		glDisableClientState( GL_TEXTURE_COORD_ARRAY );
-		glDisableClientState( GL_VERTEX_ARRAY );
-
-		glBindBufferARB(GL_ARRAY_BUFFER, 0);
-
-		globalVBO_datCount = globalVBO_verCount = globalVBO_indCount = 0;
-	}
-
+	unsigned int bound_framebuffer = 0; //Shows the bound framebuffer, so glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &fbo); don't need to be called (they are very slow)
 }
 
 namespace enigma_user
@@ -176,6 +110,7 @@ namespace enigma_user
 
 void screen_redraw()
 {
+	oglmgr->BeginScene();
 	// Clean up any textures that ENIGMA may still think are binded but actually are not
 	texture_reset();
 	d3d_set_zwriteenable(true);
@@ -421,8 +356,6 @@ void screen_redraw()
         view_current = 0;
     }
 
-	enigma::draw_globalVBO();
-
 	// Now process the sub event of draw called draw gui
 	// It is for drawing GUI elements without view scaling and transformation
     if (enigma::gui_used)
@@ -458,11 +391,12 @@ void screen_redraw()
             enigma::instance_event_iterator = push_it;
             if (stop_loop) break;
         }
-		enigma::draw_globalVBO();
 
 		// reset the culling
 		d3d_set_culling(culling);
     }
+		
+	oglmgr->EndScene();
 		
 	if (enigma::msaa_fbo != 0) {
 		GLint fbo;
@@ -484,7 +418,6 @@ void screen_init()
 	enigma::gui_width = window_get_region_width_scaled();
 	enigma::gui_height = window_get_region_height_scaled();
 
-    glGenBuffersARB(1, &globalVBO);
     texture_reset();
     if (!view_enabled)
     {

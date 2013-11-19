@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton
+/** Copyright (C) 2013 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,6 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "Bridges/General/GL3Context.h"
 #include "GL3shapes.h"
 #include <vector>
 #include <algorithm>
@@ -22,39 +23,29 @@
 using std::vector;
 using std::copy;
 
-namespace enigma
-{
-    extern vector<float> globalVBO_data;
-    extern vector<unsigned int> globalVBO_indices;
-    extern unsigned int globalVBO_texture;
-    extern unsigned int globalVBO_datCount; //Length of the VBO data buffer
-    extern unsigned int globalVBO_verCount; //Number of vertices on this buffer
-    extern unsigned int globalVBO_indCount; //Number of indices
-}
-
 void plane2D_rotated(const gs_scalar data[])
 {
     //Automatically fill the six indices, so it uses the four vertices
-    unsigned int index[6] = { enigma::globalVBO_verCount, enigma::globalVBO_verCount+1, enigma::globalVBO_verCount+2,
-                              enigma::globalVBO_verCount+2, enigma::globalVBO_verCount+3, enigma::globalVBO_verCount  };
+    unsigned int index[6] = { oglmgr->globalVBO_verCount, oglmgr->globalVBO_verCount+1, oglmgr->globalVBO_verCount+2,
+                              oglmgr->globalVBO_verCount+2, oglmgr->globalVBO_verCount+3, oglmgr->globalVBO_verCount  };
 
     //if (enigma::globalVBO_data.size()>4*8*5*1000000){
         //printf("VBO size = %i\n",enigma::globalVBO_data.size());
     //}
 
-    if (enigma::globalVBO_data.size()<(enigma::globalVBO_datCount+4*8)){
+    if (oglmgr->globalVBO_data.size()<(oglmgr->globalVBO_datCount+4*8)){
         //Increase size for 5 sprites at a time
-        enigma::globalVBO_data.resize(enigma::globalVBO_datCount+4*8*5);
-        enigma::globalVBO_indices.resize(enigma::globalVBO_indCount+6*5);
+        //oglmgr->globalVBO_data.resize(oglmgr->globalVBO_datCount+4*8*5);
+        //oglmgr->globalVBO_indices.resize(oglmgr->globalVBO_indCount+6*5);
     }
 
-    copy(data,data+4*8, &enigma::globalVBO_data[enigma::globalVBO_datCount] );
+    copy(data,data+4*8, oglmgr->globalVBO_data.begin() + oglmgr->globalVBO_datCount );
 	//enigma::globalVBO_data.push_front(data);
-    enigma::globalVBO_datCount+=4*8;
-    copy(index,index+6, &enigma::globalVBO_indices[enigma::globalVBO_indCount] );
+    oglmgr->globalVBO_datCount+=4*8;
+    copy(index,index+6, oglmgr->globalVBO_indices.begin() + oglmgr->globalVBO_indCount );
 	//enigma::globalVBO_indices.push_front(index);
-    enigma::globalVBO_indCount+=6;
-    enigma::globalVBO_verCount+=4;
+    oglmgr->globalVBO_indCount+=6;
+    oglmgr->globalVBO_verCount+=4;
 }
 
 /*GLfloat* block_vertices(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2)

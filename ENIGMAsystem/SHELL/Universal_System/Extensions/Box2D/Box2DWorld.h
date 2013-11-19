@@ -71,6 +71,7 @@ struct B2DBody {
 extern vector<B2DBody*> b2dbodies;
 
 #ifdef DEBUG_MODE
+  #include <string>
   #include "libEGMstd.h"
   #include "Widget_Systems/widgets_mandatory.h"
   #define get_worldr(w,id,r) \

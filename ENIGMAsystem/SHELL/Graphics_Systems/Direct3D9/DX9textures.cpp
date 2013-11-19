@@ -17,7 +17,7 @@
 
 #include <stdio.h>
 #include "Direct3D9Headers.h"
-#include "Bridges/General/DX9Device.h"
+#include "Bridges/General/DX9Context.h"
 #include <string.h>
 //using std::string;
 #include "../General/GStextures.h"
@@ -37,7 +37,7 @@ namespace enigma {
 }
 
 LPDIRECT3DTEXTURE9 get_texture(int texid) {
-  return (size_t(texid) >= textureStructs.size())? NULL : textureStructs[texid]->gTexture;
+  return (size_t(texid) >= textureStructs.size() || texid < 0)? NULL : textureStructs[texid]->gTexture;
 }
 
 inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect powers of two
@@ -55,7 +55,7 @@ namespace enigma
   {
     LPDIRECT3DTEXTURE9 texture = NULL;
 
-	d3ddev->CreateTexture(fullwidth, fullheight, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &texture, 0);
+	d3dmgr->CreateTexture(fullwidth, fullheight, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &texture, 0);
 
 	D3DLOCKED_RECT rect;
 
@@ -109,9 +109,9 @@ void texture_set_enabled(bool enable)
 void texture_set_interpolation(int enable)
 {
 	enigma::interpolate_textures = enable;
-	d3ddev->SetSamplerState( 0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR );
-	d3ddev->SetSamplerState( 0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR );
-	d3ddev->SetSamplerState( 0, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR );
+	d3dmgr->SetSamplerState( 0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR );
+	d3dmgr->SetSamplerState( 0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR );
+	d3dmgr->SetSamplerState( 0, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR );
 }
 
 bool texture_get_interpolation()
@@ -145,22 +145,22 @@ int texture_get_texel_height(int texid)
 }
 
 void texture_set(int texid) {
-	d3ddev->SetTexture(0, get_texture(texid));
+	d3dmgr->SetTexture(0, get_texture(texid));
 }
 
 void texture_set_stage(int stage, int texid) {
-	d3ddev->SetTexture(stage, get_texture(texid));
+	d3dmgr->SetTexture(stage, get_texture(texid));
 }
 
 void texture_reset() {
-	d3ddev->SetTexture(0, 0);
+	d3dmgr->SetTexture(0, 0);
 }
 
 void texture_set_repeat(bool repeat)
 {
-	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSU, repeat?D3DTADDRESS_WRAP:D3DTADDRESS_CLAMP );
-	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSV, repeat?D3DTADDRESS_WRAP:D3DTADDRESS_CLAMP );
-	d3ddev->SetSamplerState( 0, D3DSAMP_ADDRESSW, repeat?D3DTADDRESS_WRAP:D3DTADDRESS_CLAMP );
+	d3dmgr->SetSamplerState( 0, D3DSAMP_ADDRESSU, repeat?D3DTADDRESS_WRAP:D3DTADDRESS_CLAMP );
+	d3dmgr->SetSamplerState( 0, D3DSAMP_ADDRESSV, repeat?D3DTADDRESS_WRAP:D3DTADDRESS_CLAMP );
+	d3dmgr->SetSamplerState( 0, D3DSAMP_ADDRESSW, repeat?D3DTADDRESS_WRAP:D3DTADDRESS_CLAMP );
 }
 
 void texture_set_repeat(int texid, bool repeat)

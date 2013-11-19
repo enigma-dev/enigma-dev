@@ -18,15 +18,10 @@
 #include "../General/OpenGLHeaders.h"
 #include "../General/GSblend.h"
 
-namespace enigma {
-	void draw_globalVBO();
-}
-
 namespace enigma_user
 {
 
 int draw_set_blend_mode(int mode){
-    enigma::draw_globalVBO(); //Draw and clear VBO
 	switch (mode)
 	{
     case bm_add:
@@ -45,7 +40,6 @@ int draw_set_blend_mode(int mode){
 }
 
 int draw_set_blend_mode_ext(int src, int dest){
-    enigma::draw_globalVBO(); //Draw and clear VBO
 	const static GLenum blendequivs[11] = {
 	  GL_ZERO, GL_ONE, GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR, GL_SRC_ALPHA,
 	  GL_ONE_MINUS_SRC_ALPHA, GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA, GL_DST_COLOR,

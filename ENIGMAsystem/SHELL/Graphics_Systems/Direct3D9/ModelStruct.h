@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Bridges/General/DX9Device.h"
+#include "Bridges/General/DX9Context.h"
 #include "../General/GSd3d.h"
 #include "DX9shapes.h"
 #include "../General/GSprimitives.h"
@@ -681,7 +681,7 @@ class Mesh
 		vboindexed = true;
 		indexedoffset += vdata.size();
 		// create a index buffer interface
-		d3ddev->CreateIndexBuffer(idata.size() * sizeof(unsigned), 0, D3DFMT_INDEX32, D3DPOOL_MANAGED, &indexbuffer, NULL);
+		d3dmgr->CreateIndexBuffer(idata.size() * sizeof(unsigned), 0, D3DFMT_INDEX32, D3DPOOL_MANAGED, &indexbuffer, NULL);
 		if (subdata) {
 		
 		} else {
@@ -734,10 +734,10 @@ class Mesh
 	const D3DVERTEXELEMENT9 strideelement = D3DDECL_END();
 	customvertex[i] = strideelement;
 	
-	d3ddev->CreateVertexDeclaration (customvertex, &vertex_declaration);
+	d3dmgr->CreateVertexDeclaration (customvertex, &vertex_declaration);
 	
 	// create a vertex buffer interface
-	d3ddev->CreateVertexBuffer(vdata.size() * sizeof( gs_scalar ), D3DUSAGE_WRITEONLY, 0, D3DPOOL_MANAGED, &vertexbuffer, NULL);
+	d3dmgr->CreateVertexBuffer(vdata.size() * sizeof( gs_scalar ), D3DUSAGE_WRITEONLY, 0, D3DPOOL_MANAGED, &vertexbuffer, NULL);
 	
 	// Send the data to the GPU
 	if (subdata) {
@@ -772,11 +772,11 @@ class Mesh
 	if (useTextures) stride += 2;
     if (useColors) stride += 4;
 	
-	d3ddev->SetVertexDeclaration(vertex_declaration);
+	d3dmgr->SetVertexDeclaration(vertex_declaration);
 	// select the vertex buffer to display
-	d3ddev->SetStreamSource(0, vertexbuffer, 0, stride * sizeof(gs_scalar));
+	d3dmgr->SetStreamSource(0, vertexbuffer, 0, stride * sizeof(gs_scalar));
 	if (vboindexed) {
-		d3ddev->SetIndices(indexbuffer);
+		d3dmgr->SetIndices(indexbuffer);
 	}
 	
 		//dsprite->Flush();
@@ -786,19 +786,19 @@ class Mesh
 	
 	// Draw the indexed primitives
 	if (triangleIndexedCount > 0) { 
-		d3ddev->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, base, base, 
+		d3dmgr->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, base, base, 
 			triangleVertCount, offset, triangleIndexedCount / 3);
 			offset += triangleIndexedCount;
 			base += triangleVertCount;
 	}
 	if (lineVertCount > 0) {
-		d3ddev->DrawIndexedPrimitive(D3DPT_LINELIST, base, base, 
+		d3dmgr->DrawIndexedPrimitive(D3DPT_LINELIST, base, base, 
 			lineVertCount/stride, offset, lineIndexedCount/2);
 			offset += lineIndexedCount;
 			base += lineVertCount;
 	}
 	if (pointIndexedCount > 0) {
-		d3ddev->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, base, base,
+		d3dmgr->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, base, base,
 			pointCount, offset, pointIndexedCount);
 	}
 	
@@ -806,15 +806,15 @@ class Mesh
 	
 	// Draw the unindexed primitives
 	if (triangleCount > 0) { 
-		d3ddev->DrawPrimitive(D3DPT_TRIANGLELIST, offset, triangleCount / 3);
+		d3dmgr->DrawPrimitive(D3DPT_TRIANGLELIST, offset, triangleCount / 3);
 		offset += triangleCount / 3;
 	}
 	if (lineCount > 0) {
-		d3ddev->DrawPrimitive(D3DPT_LINELIST, offset, lineCount / 2);
+		d3dmgr->DrawPrimitive(D3DPT_LINELIST, offset, lineCount / 2);
 		offset += lineCount / 2;
 	}
 	if (pointCount > 0) {
-		d3ddev->DrawPrimitive(D3DPT_TRIANGLELIST, offset, pointCount);
+		d3dmgr->DrawPrimitive(D3DPT_TRIANGLELIST, offset, pointCount);
 	}
 
 	//dsprite->Begin(D3DXSPRITE_ALPHABLEND | D3DXSPRITE_DO_NOT_ADDREF_TEXTURE);

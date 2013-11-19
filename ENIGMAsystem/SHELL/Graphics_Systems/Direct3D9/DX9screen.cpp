@@ -17,6 +17,7 @@
 
 #include <string>
 #include <cstdio>
+#include "Bridges/General/DX9Context.h"
 #include "Direct3D9Headers.h"
 #include "../General/GSbackground.h"
 #include "../General/GSscreen.h"
@@ -106,22 +107,20 @@ namespace enigma
 	unsigned gui_height;
 }
 
-#include "Bridges/General/DX9Device.h"
-
 namespace enigma_user
 {
 
 void screen_redraw()
 {
 	// Should implement extended lost device checking
-	//if (d3ddev == NULL ) return;
+	//if (d3dmgr == NULL ) return;
 
-    d3ddev->BeginScene();    // begins the 3D scene
+    d3dmgr->BeginScene();    // begins the 3D scene
 
 	if (!view_enabled)
     {
 		D3DVIEWPORT9 pViewport = { 0, 0, (DWORD)window_get_region_width_scaled(), (DWORD)window_get_region_height_scaled(), 0, 1.0f };
-		d3ddev->SetViewport(&pViewport);
+		d3dmgr->SetViewport(&pViewport);
 
 		D3DXMATRIX matTrans, matScale;
 
@@ -133,7 +132,7 @@ void screen_redraw()
 		D3DXMATRIX matWorld = matTrans * matScale;
 
 		// Set the matrix to be applied to anything we render from now on
-		d3ddev->SetTransform( D3DTS_VIEW, &matWorld);
+		d3dmgr->SetTransform( D3DTS_VIEW, &matWorld);
 
 		D3DXMATRIX matProjection;    // the projection transform matrix
 		D3DXMatrixOrthoOffCenterLH(&matProjection,
@@ -143,19 +142,19 @@ void screen_redraw()
 							(FLOAT)room_height,
 							0.0f,    // the near view-plane
 							1.0f);    // the far view-plane
-		d3ddev->SetTransform(D3DTS_PROJECTION, &matProjection);    // set the projection transform
+		d3dmgr->SetTransform(D3DTS_PROJECTION, &matProjection);    // set the projection transform
 
 		if (background_showcolor)
 		{
 			int clearcolor = ((int)background_color) & 0x00FFFFFF;
 			// clear the window to the background color
-			d3ddev->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(__GETR(clearcolor), __GETG(clearcolor), __GETB(clearcolor)), 1.0f, 0);
+			d3dmgr->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(__GETR(clearcolor), __GETG(clearcolor), __GETB(clearcolor)), 1.0f, 0);
 			// clear the depth buffer
 		}
 
 		// Clear the depth buffer if 3d mode is on at the beginning of the draw step.
         if (enigma::d3dMode)
-			d3ddev->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
+			d3dmgr->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
 
         draw_back();
 
@@ -298,7 +297,7 @@ void screen_redraw()
 
 			D3DVIEWPORT9 pViewport = { (DWORD)view_xport[vc], (DWORD)view_yport[vc],
 				(DWORD)(window_get_region_width_scaled() - view_xport[vc]), (DWORD)(window_get_region_height_scaled() - view_yport[vc]), 0, 1.0f };
-			d3ddev->SetViewport(&pViewport);
+			d3dmgr->SetViewport(&pViewport);
 
 			D3DXMATRIX matTrans, matScale;
 
@@ -310,7 +309,7 @@ void screen_redraw()
 			D3DXMATRIX matWorld = matTrans * matScale;
 
 			// Set the matrix to be applied to anything we render from now on
-			d3ddev->SetTransform( D3DTS_VIEW, &matWorld);
+			d3dmgr->SetTransform( D3DTS_VIEW, &matWorld);
 
 			D3DXMATRIX matProjection;    // the projection transform matrix
 			D3DXMatrixOrthoOffCenterLH(&matProjection,
@@ -320,18 +319,18 @@ void screen_redraw()
 						(int)view_hview[vc],
 						0.0f,    // the near view-plane
 						1.0f);    // the far view-plane
-			d3ddev->SetTransform(D3DTS_PROJECTION, &matProjection);    // set the projection transform
+			d3dmgr->SetTransform(D3DTS_PROJECTION, &matProjection);    // set the projection transform
 
 			if (background_showcolor && view_first)
 			{
 				int clearcolor = ((int)background_color) & 0x00FFFFFF;
 				// clear the window to the background color
-				d3ddev->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(__GETR(clearcolor), __GETG(clearcolor), __GETB(clearcolor)), 1.0f, 0);
+				d3dmgr->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(__GETR(clearcolor), __GETG(clearcolor), __GETB(clearcolor)), 1.0f, 0);
 			}
 
 			// Clear the depth buffer if 3d mode is on at the beginning of the draw step.
 			if (enigma::d3dMode)
-				d3ddev->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
+				d3dmgr->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
 
 			if (view_first) {
 				draw_back();
@@ -399,7 +398,7 @@ void screen_redraw()
 		// Now process the sub event of draw called draw gui
 		// It is for drawing GUI elements without view scaling and transformation
 		D3DVIEWPORT9 pViewport = { 0, 0, window_get_region_width_scaled(), window_get_region_height_scaled(), 0, 1.0f };
-		d3ddev->SetViewport(&pViewport);
+		d3dmgr->SetViewport(&pViewport);
 
 		D3DXMATRIX matTrans, matScale;
 
@@ -411,7 +410,7 @@ void screen_redraw()
 		D3DXMATRIX matWorld = matTrans * matScale;
 
 		// Set the matrix to be applied to anything we render from now on
-		d3ddev->SetTransform( D3DTS_VIEW, &matWorld);
+		d3dmgr->SetTransform( D3DTS_VIEW, &matWorld);
 
 		D3DXMATRIX matProjection;    // the projection transform matrix
 		D3DXMatrixOrthoOffCenterLH(&matProjection,
@@ -421,15 +420,15 @@ void screen_redraw()
 							(FLOAT)enigma::gui_height,
 							0.0f,    // the near view-plane
 							1.0f);    // the far view-plane
-		d3ddev->SetTransform(D3DTS_PROJECTION, &matProjection);    // set the projection transform
+		d3dmgr->SetTransform(D3DTS_PROJECTION, &matProjection);    // set the projection transform
 
 		//dsprite->SetWorldViewRH(NULL, &matWorld);
 
 		// Clear the depth buffer if hidden surface removal is on at the beginning of the draw step.
         if (enigma::d3dMode)
-			d3ddev->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
+			d3dmgr->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
 
-		d3ddev->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+		d3dmgr->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
 
         bool stop_loop = false;
         for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
@@ -449,7 +448,7 @@ void screen_redraw()
 
 	}
 
-    d3ddev->EndScene();    // ends the 3D scene
+    d3dmgr->EndScene();    // ends the 3D scene
 
 	screen_refresh();
 }
@@ -464,10 +463,10 @@ void screen_init()
           //gluPerspective(0, 1, 0, 1);
         //glMatrixMode(GL_MODELVIEW);
 
-		d3ddev->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
+		d3dmgr->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
 
 		D3DVIEWPORT9 pViewport = { 0, 0, (DWORD)window_get_region_width_scaled(), (DWORD)window_get_region_height_scaled(), 0, 1.0f };
-		d3ddev->SetViewport(&pViewport);
+		d3dmgr->SetViewport(&pViewport);
 
 		D3DXMATRIX matTrans, matScale;
 
@@ -479,7 +478,7 @@ void screen_init()
 		D3DXMATRIX matWorld = matTrans * matScale;
 
 		// Set the matrix to be applied to anything we render from now on
-		d3ddev->SetTransform( D3DTS_VIEW, &matWorld);
+		d3dmgr->SetTransform( D3DTS_VIEW, &matWorld);
 
 		D3DXMATRIX matProjection;    // the projection transform matrix
 		D3DXMatrixOrthoOffCenterLH(&matProjection,
@@ -489,18 +488,18 @@ void screen_init()
 							(FLOAT)room_height,
 							0.0f,    // the near view-plane
 							1.0f);    // the far view-plane
-		d3ddev->SetTransform(D3DTS_PROJECTION, &matProjection);    // set the projection transform
+		d3dmgr->SetTransform(D3DTS_PROJECTION, &matProjection);    // set the projection transform
 
-		d3ddev->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
-		d3ddev->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
+		d3dmgr->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
+		d3dmgr->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
 
-		d3ddev->SetRenderState(D3DRS_ZENABLE, FALSE);
-		d3ddev->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+		d3dmgr->SetRenderState(D3DRS_ZENABLE, FALSE);
+		d3dmgr->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
         //glEnable(GL_BLEND);
         //glEnable(GL_TEXTURE_2D);
         //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		d3ddev->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-		d3ddev->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+		d3dmgr->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+		d3dmgr->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
         //glAlphaFunc(GL_ALWAYS,0);
         //glColor4f(0,0,0,1);
     }
@@ -515,7 +514,7 @@ void screen_init()
 
 				D3DVIEWPORT9 pViewport = { (DWORD)view_xport[vc], (DWORD)view_yport[vc],
 					(DWORD)(window_get_region_width_scaled() - view_xport[vc]), (DWORD)(window_get_region_height_scaled() - view_yport[vc]), 0, 1.0f };
-				d3ddev->SetViewport(&pViewport);
+				d3dmgr->SetViewport(&pViewport);
 
 				D3DXMATRIX matTrans, matScale;
 
@@ -527,7 +526,7 @@ void screen_init()
 				D3DXMATRIX matWorld = matTrans * matScale;
 
 				// Set the matrix to be applied to anything we render from now on
-				d3ddev->SetTransform( D3DTS_VIEW, &matWorld);
+				d3dmgr->SetTransform( D3DTS_VIEW, &matWorld);
 
 				D3DXMATRIX matProjection;    // the projection transform matrix
 				D3DXMatrixOrthoOffCenterLH(&matProjection,
@@ -537,18 +536,18 @@ void screen_init()
 							(FLOAT)view_hview[vc],
 							0.0f,    // the near view-plane
 							1.0f);    // the far view-plane
-				d3ddev->SetTransform(D3DTS_PROJECTION, &matProjection);    // set the projection transform
+				d3dmgr->SetTransform(D3DTS_PROJECTION, &matProjection);    // set the projection transform
 
-				d3ddev->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
-				d3ddev->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
+				d3dmgr->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
+				d3dmgr->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
 
-				d3ddev->SetRenderState(D3DRS_ZENABLE, FALSE);
-				d3ddev->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+				d3dmgr->SetRenderState(D3DRS_ZENABLE, FALSE);
+				d3dmgr->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
                 //glEnable(GL_BLEND);
                 //glEnable(GL_TEXTURE_2D);
                 //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-				d3ddev->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-				d3ddev->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+				d3dmgr->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+				d3dmgr->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
                 //glAlphaFunc(GL_ALWAYS,0);
                 //glColor4f(0,0,0,1);
                 break;

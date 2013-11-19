@@ -19,6 +19,7 @@
 #include <string>
 #include <stdlib.h>     /* malloc, free, rand */
 
+#include "Bridges/General/GL3Context.h"
 #include "../General/OpenGLHeaders.h"
 using namespace std;
 #include "OPENGL3Std.h"
@@ -29,6 +30,8 @@ using namespace std;
 #include "Universal_System/roomsystem.h" // Room dimensions.
 #include "Graphics_Systems/graphics_mandatory.h" // Room dimensions.
 
+ContextManager* oglmgr = NULL;
+
 namespace enigma
 {
   unsigned bound_texture=0;
@@ -38,6 +41,7 @@ namespace enigma
 
   void graphicssystem_initialize()
   {
+	oglmgr = new ContextManager();
     GLenum err = glewInit();
 
     #ifdef DEBUG_MODE

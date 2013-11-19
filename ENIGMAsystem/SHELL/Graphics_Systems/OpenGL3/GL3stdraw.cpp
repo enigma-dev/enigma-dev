@@ -29,7 +29,6 @@
 namespace enigma {
   float circleprecision=24;
   extern unsigned char currentcolor[4];
-  void draw_globalVBO();
 }
 
 namespace enigma_user
@@ -712,7 +711,6 @@ int draw_getpixel(int x,int y)
         if (y < 0) y = 0;
         if (x > enigma_user::room_width || y > enigma_user::room_height) return 0;
     }
-  enigma::draw_globalVBO();
   #if defined __BIG_ENDIAN__ || defined __BIG_ENDIAN
     int ret;
     glReadPixels(x,y,1,1,GL_RGB,GL_UNSIGNED_BYTE,&ret);

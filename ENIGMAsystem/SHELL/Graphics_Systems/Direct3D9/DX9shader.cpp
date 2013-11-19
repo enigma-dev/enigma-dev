@@ -16,7 +16,7 @@
 **/
 
 #include "Universal_System/scalar.h"
-#include "Bridges/General/DX9Device.h"
+#include "Bridges/General/DX9Context.h"
 #include "Direct3D9Headers.h"
 #include "DX9shader.h"
 #include <math.h>
@@ -52,7 +52,7 @@ struct Shader {
   void SetVector(string name, const D3DXVECTOR4 *vec) {
     D3DXHANDLE handle;
     handle = constants->GetConstantByName(NULL, name.c_str());
-    constants->SetVector(d3ddev->device, handle, vec);
+    constants->SetVector(d3dmgr->device, handle, vec);
   }
 };
 
@@ -88,18 +88,18 @@ struct VertexShader : public Shader {
     }
   
     char* szCode = (char*)pCode->GetBufferPointer();
-    d3ddev->CreateVertexShader((DWORD*)pCode->GetBufferPointer(), &shader);
+    d3dmgr->CreateVertexShader((DWORD*)pCode->GetBufferPointer(), &shader);
     pCode->Release();
 	return 3;
   }
   
   void Use() {
-	d3ddev->SetVertexDeclaration(declaration);
-	d3ddev->SetVertexShader(shader);
+	d3dmgr->SetVertexDeclaration(declaration);
+	d3dmgr->SetVertexShader(shader);
   }
   
   void SetConstantF(unsigned start, const float* data, unsigned count) {
-    d3ddev->SetVertexShaderConstantF(start, data, count);
+    d3dmgr->SetVertexShaderConstantF(start, data, count);
   }
 };
 
@@ -134,16 +134,16 @@ struct PixelShader : public Shader {
     }
 
     char* szCode = (char*)pCode->GetBufferPointer();
-    d3ddev->CreatePixelShader((DWORD*)pCode->GetBufferPointer(), &shader);
+    d3dmgr->CreatePixelShader((DWORD*)pCode->GetBufferPointer(), &shader);
     pCode->Release();
   }
   
   void Use() {
-	d3ddev->SetPixelShader(shader);
+	d3dmgr->SetPixelShader(shader);
   }
   
   void SetConstantF(unsigned start, const float* data, unsigned count) {
-    d3ddev->SetPixelShaderConstantF(start, data, count);
+    d3dmgr->SetPixelShaderConstantF(start, data, count);
   }
 };
 
@@ -195,9 +195,9 @@ void hlsl_shader_use(int id)
 
 void hlsl_shader_reset()
 {
-  d3ddev->SetVertexDeclaration(NULL);
-  d3ddev->SetVertexShader(NULL);
-  d3ddev->SetPixelShader(NULL);
+  d3dmgr->SetVertexDeclaration(NULL);
+  d3dmgr->SetVertexShader(NULL);
+  d3dmgr->SetPixelShader(NULL);
 }
 
 void hlsl_shader_free(int id)
