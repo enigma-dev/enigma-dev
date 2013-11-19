@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Bridges/General/DX9Device.h"
+#include "Bridges/General/DX9Context.h"
 #include "Direct3D9Headers.h"
 #include "DX9enable.h"
 
@@ -23,7 +23,7 @@ namespace enigma_user
 {
 
 void gs_enable_alpha(bool enable) {
-	d3ddev->SetRenderState(D3DRS_ALPHATESTENABLE, enable);
+	d3dmgr->SetRenderState(D3DRS_ALPHATESTENABLE, enable);
 }///If enabled, do alpha testing. See glAlphaFunc.
 
 void gs_enable_blending(bool enable) {
@@ -31,7 +31,7 @@ void gs_enable_blending(bool enable) {
 }///If enabled, blend the incoming RGBA color values with the values in the color buffers. See glBlendFunc.
 
 void gs_enable_depthbuffer(bool enable) {
-	d3ddev->SetRenderState(D3DRS_ZENABLE, enable);
+	d3dmgr->SetRenderState(D3DRS_ZENABLE, enable);
 }///If enabled, do depth comparisons and update the depth buffer. See glDepthFunc and glDepthRange.
 
 void gs_enable_dither(bool enable) {
@@ -59,7 +59,7 @@ void gs_enable_smooth_polygons(bool enable) {
 }///If enabled, draw polygons with proper filtering. If disabled, draw aliased polygons. See glPolygonMode.
 
 void gs_enable_stencil(bool enable) {
-	d3ddev->SetRenderState(D3DRS_STENCILENABLE, enable);
+	d3dmgr->SetRenderState(D3DRS_STENCILENABLE, enable);
 }///If enabled, do stencil testing and update the stencil buffer. See glStencilFunc and glStencilOp.
 
 void gs_enable_texture(bool enable) {

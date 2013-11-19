@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Bridges/General/DX9Device.h"
+#include "Bridges/General/DX9Context.h"
 #include "Direct3D9Headers.h"
 using namespace std;
 #include <cstddef>
@@ -59,13 +59,14 @@ bool surface_is_supported()
 
 int surface_create(int width, int height)
 {
-	LPDIRECT3DTEXTURE9 texture;
-	d3ddev->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &texture, NULL);			 
+	LPDIRECT3DTEXTURE9 texture = NULL;
+	d3dmgr->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &texture, NULL);			 
 	enigma::Surface* surface = new enigma::Surface();	 
 	TextureStruct* gmTexture = new TextureStruct(texture);
 	gmTexture->isFont = false;
     textureStructs.push_back(gmTexture);
-	d3ddev->CreateRenderTarget(width, height, D3DFMT_A8R8G8B8, D3DMULTISAMPLE_2_SAMPLES, 2, false, &surface->surf, NULL);
+	//d3dmgr->CreateRenderTarget(width, height, D3DFMT_A8R8G8B8, D3DMULTISAMPLE_2_SAMPLES, 2, false, &surface->surf, NULL);
+	texture->GetSurfaceLevel(0,&surface->surf);
     surface->tex = textureStructs.size() - 1;
 	surface->width = width; surface->height = height;
 	enigma::Surfaces.push_back(surface);
@@ -74,13 +75,13 @@ int surface_create(int width, int height)
 
 int surface_create_msaa(int width, int height, int levels)
 {
-	LPDIRECT3DTEXTURE9 texture;
-	d3ddev->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &texture, NULL);			 
+	LPDIRECT3DTEXTURE9 texture = NULL;
+	d3dmgr->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &texture, NULL);			 
 	enigma::Surface* surface = new enigma::Surface();	 
 	TextureStruct* gmTexture = new TextureStruct(texture);
 	gmTexture->isFont = false;
     textureStructs.push_back(gmTexture);
-	d3ddev->CreateRenderTarget(width, height, D3DFMT_A8R8G8B8, D3DMULTISAMPLE_2_SAMPLES, 2, false, &surface->surf, NULL);
+	d3dmgr->CreateRenderTarget(width, height, D3DFMT_A8R8G8B8, D3DMULTISAMPLE_2_SAMPLES, 2, false, &surface->surf, NULL);
     surface->tex = textureStructs.size() - 1;
 	surface->width = width; surface->height = height;
 	enigma::Surfaces.push_back(surface);
@@ -92,20 +93,20 @@ LPDIRECT3DSURFACE9 pBackBuffer;
 void surface_set_target(int id)
 {
 	get_surface(surface,id);
-
-	d3ddev->SetRenderTarget(0, surface->surf);
+d3dmgr->device->GetRenderTarget(0, &pBackBuffer);
+	d3dmgr->device->SetRenderTarget(0, surface->surf);
 	
 	D3DXMATRIX matProjection;
 	D3DXMatrixPerspectiveFovLH(&matProjection,D3DX_PI / 4.0f,1,1,100);
 	//set projection matrix
-	d3ddev->SetTransform(D3DTS_PROJECTION,&matProjection);
-	  
-	dsprite->Begin(D3DXSPRITE_ALPHABLEND | D3DXSPRITE_DO_NOT_ADDREF_TEXTURE);
+	d3dmgr->SetTransform(D3DTS_PROJECTION,&matProjection);
 }
 
-void surface_reset_target(void)
+void surface_reset_target()
 {
-	d3ddev->ResetRenderTarget();
+	//d3dmgr->ResetRenderTarget();
+	d3dmgr->EndShapesBatching();
+	d3dmgr->device->SetRenderTarget(0, pBackBuffer);
 }
 
 void surface_free(int id)
@@ -122,9 +123,7 @@ bool surface_exists(int id)
 void draw_surface(int id, gs_scalar x, gs_scalar y)
 {
     get_surface(surface,id);
-	
-	D3DXVECTOR3 pos(x, y, 0);
-	dsprite->Draw(textureStructs[surface->tex]->gTexture, NULL, NULL, &pos, enigma::get_currentcolor());
+
 }
 
 void draw_surface_stretched(int id, gs_scalar x, gs_scalar y, float w, float h)
@@ -134,12 +133,7 @@ void draw_surface_stretched(int id, gs_scalar x, gs_scalar y, float w, float h)
 
 void draw_surface_part(int id, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y)
 {
-	get_surface(surface,id);
 
-	D3DXVECTOR3 pos(x, y, 0);
-	tagRECT rect;
-	rect.left = left; rect.top = top; rect.right = left + width; rect.bottom = top + height;
-	dsprite->Draw(textureStructs[surface->tex]->gTexture, &rect, 0, &pos, enigma::get_currentcolor());
 }
 
 void draw_surface_tiled(int id, gs_scalar x, gs_scalar y)
@@ -154,27 +148,7 @@ void draw_surface_tiled_area(int id, gs_scalar x, gs_scalar y, float x1, float y
 
 void draw_surface_ext(int id,gs_scalar x, gs_scalar y,gs_scalar xscale, gs_scalar yscale,double rot,int color,double alpha)
 {
-	get_surface(surface,id);
 
-	// Build our matrix to rotate, scale and position our sprite
-	D3DXMATRIX mat;
-	
-	// Screen position of the sprite
-	D3DXVECTOR2 trans = D3DXVECTOR2(x, y);
-
-	D3DXVECTOR2 scaling(xscale, yscale);
-
-	// out, scaling centre, scaling rotation, scaling, rotation centre, rotation, translation
-	D3DXMatrixTransformation2D(&mat,NULL,0.0,&scaling,NULL,rot,&trans);
-
-	// Tell the sprite about the matrix
-	dsprite->SetTransform(&mat);
-
-	dsprite->Draw(textureStructs[surface->tex]->gTexture, NULL, NULL, NULL,
-		D3DCOLOR_ARGB(char(alpha*255), __GETR(color), __GETG(color), __GETB(color)));
-
-	D3DXMatrixTransformation2D(&mat,NULL,0.0,0,NULL,0,0);
-	dsprite->SetTransform(&mat);
 }
 
 void draw_surface_stretched_ext(int id, gs_scalar x, gs_scalar y, float w, float h, int color, double alpha)
@@ -184,27 +158,7 @@ void draw_surface_stretched_ext(int id, gs_scalar x, gs_scalar y, float w, float
 
 void draw_surface_part_ext(int id, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale,int color, double alpha)
 {
-    get_surface(surface,id);
-	
-	// Build our matrix to rotate, scale and position our sprite
-	D3DXMATRIX mat;
-	
-	// Screen position of the sprite
-	D3DXVECTOR2 trans = D3DXVECTOR2(x, y);
-
-	D3DXVECTOR2 scaling(xscale, yscale);
-
-	// out, scaling centre, scaling rotation, scaling, rotation centre, rotation, translation
-	D3DXMatrixTransformation2D(&mat,NULL,0.0,&scaling,0,0,&trans);
-
-	// Tell the sprite about the matrix
-	dsprite->SetTransform(&mat);
-
-	tagRECT rect;
-	rect.left = left; rect.top = top; rect.right = left + width; rect.bottom = top + height;
-
-	dsprite->Draw(textureStructs[surface->tex]->gTexture, &rect, NULL, NULL,
-		D3DCOLOR_ARGB(char(alpha*255), __GETR(color), __GETG(color), __GETB(color)));
+ 
 }
 
 void draw_surface_tiled_ext(int id, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, double alpha)

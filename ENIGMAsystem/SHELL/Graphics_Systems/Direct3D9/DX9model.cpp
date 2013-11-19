@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 #include "ModelStruct.h"
-#include "Bridges/General/DX9Device.h"
+#include "Bridges/General/DX9Context.h"
 #include "../General/GSd3d.h"
 #include "DX9shapes.h"
 #include "../General/GSmodel.h"
@@ -91,6 +91,10 @@ bool d3d_model_exists(int id)
 void d3d_model_clear(int id)
 {
   meshes[id]->Clear();
+}
+
+unsigned d3d_model_get_stride(int id) {
+	return meshes[id]->GetStride();
 }
 
 void d3d_model_save(int id, string fname)
