@@ -23,7 +23,6 @@
 namespace enigma_user
 {
 
-int background_get_texture(int backId);
 double background_get_texture_width_factor(int backId);
 double background_get_texture_height_factor(int backId);
 void draw_background(int back, gs_scalar x, gs_scalar y);
