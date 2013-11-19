@@ -20,7 +20,7 @@
 #include <stddef.h>
 #include <math.h>
 using std::string;
-#include "DSbasic.h"
+#include "../General/ASbasic.h"
 #include "Audio_Systems/audio_mandatory.h"
 #include "DSsystem.h"
 
