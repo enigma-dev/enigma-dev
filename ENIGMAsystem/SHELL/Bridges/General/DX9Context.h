@@ -32,8 +32,13 @@ using namespace enigma_user;
 using std::vector;
 using std::map;
 
+#include "Widget_Systems/widgets_mandatory.h"
+#include <sstream>
+#include <string.h>
+using std::string;
+using std::stringstream;
+
 extern LPDIRECT3D9 d3dobj;    // the pointer to our Direct3D interface
-extern LPD3DXSPRITE dsprite; // sprite batching object used to render sprites, backgrounds, and fonts
 
 //TODO: Replace the fixed function pipeline with shaders
 
@@ -48,6 +53,8 @@ LPDIRECT3DVERTEXSHADER9	vertexShader;
 LPDIRECT3DSURFACE9 pBackBuffer;
 LPDIRECT3DSURFACE9 pRenderTarget;
 
+float current_depth;
+int last_stride;
 int shapes_d3d_model;
 int shapes_d3d_texture;
 
@@ -68,10 +75,18 @@ ContextManager() {
 	shapes_d3d_texture = -1;
 	vertexShader = NULL;
 	pixelShader = NULL;
+	current_depth = 0;
+	last_stride = -1;
 }
 
 ~ContextManager() {
 
+}
+
+//TODO: This is just a quick hack to fix depths by incrementing the z-value for draw_primitive calls, figure out a better solution, 
+// the issue is only with different primitive types mixed with the same batch.
+float GetDepth() {
+	return current_depth;
 }
 
 //TODO: Write this method so that for debugging purposes we can dump the entire render state to a text file.
@@ -133,10 +148,7 @@ void RestoreState() {
 	}
 }
 
-void BeginSpriteBatch() {
-	dsprite->Begin(D3DXSPRITE_ALPHABLEND | D3DXSPRITE_DO_NOT_ADDREF_TEXTURE);
-}
-
+/*
 void EndSpriteBatch() {
 	// Textures should be clamped when rendering 2D sprites and stuff, so memorize it.
 	DWORD wrapu, wrapv, wrapw;
@@ -162,20 +174,28 @@ void EndSpriteBatch() {
 	// reset the culling
 	device->SetRenderState(D3DRS_CULLMODE, cullmode);
 }
+*/
 
 int GetShapesModel() {
 	return shapes_d3d_model;
 }
 
 void BeginShapesBatching(int texId) {
-					
+	current_depth -= 1;
 	if (shapes_d3d_model == -1) {
 		shapes_d3d_model = d3d_model_create();
-	}
-	if (texId != shapes_d3d_texture && shapes_d3d_texture != -1) {
+		last_stride = -1;
+	} else if (texId != shapes_d3d_texture || (d3d_model_get_stride(shapes_d3d_model) != last_stride && last_stride != -1)) {
+		
+		stringstream ss;
+		ss << last_stride;
+		//show_error(ss.str(), false);
+		last_stride = -1;
 		d3d_model_draw(shapes_d3d_model, shapes_d3d_texture);
 		d3d_model_destroy(shapes_d3d_model);
 		shapes_d3d_model = d3d_model_create();
+	} else {
+		last_stride = d3d_model_get_stride(shapes_d3d_model);
 	}
 	shapes_d3d_texture = texId;
 }
@@ -211,14 +231,13 @@ void LightEnable(DWORD Index, BOOL bEnable) {
 }
 
 void BeginScene() {
+	current_depth = 0;
 	device->BeginScene();
-	BeginSpriteBatch();
 	// Reapply the stored render states and what not
 	RestoreState();
 }
 
 void EndScene() {
-	EndSpriteBatch();
 	EndShapesBatching();
 	device->EndScene();
 }
@@ -380,19 +399,15 @@ void SetRenderTarget(DWORD RenderTargetIndex, IDirect3DSurface9 *pTarget) {
 	device->GetRenderTarget(0, &pBackBuffer);
 	if (pBackBuffer == pTarget) { return; }
 	EndShapesBatching();
-	EndSpriteBatch();
 	device->SetRenderTarget(RenderTargetIndex, pTarget);
 	pRenderTarget = pTarget;
-	BeginSpriteBatch();
 }
 
 void ResetRenderTarget() {
 	device->GetRenderTarget(0, &pBackBuffer);
 	if (pBackBuffer == pRenderTarget) { return; }
 	EndShapesBatching();
-	EndSpriteBatch();
 	device->SetRenderTarget(0, pBackBuffer);
-	BeginSpriteBatch();
 }
 
 void SetSamplerState(DWORD Sampler, D3DSAMPLERSTATETYPE Type, DWORD Value) {

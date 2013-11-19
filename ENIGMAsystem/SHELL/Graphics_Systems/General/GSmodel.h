@@ -28,6 +28,7 @@ namespace enigma_user {
   void d3d_model_destroy(int id);
   bool d3d_model_exists(int id);
   void d3d_model_clear(int id);
+  unsigned d3d_model_get_stride(int id);
   void d3d_model_save(int id, std::string fname);
   bool d3d_model_load(int id, std::string fname);
   void d3d_model_draw(int id);

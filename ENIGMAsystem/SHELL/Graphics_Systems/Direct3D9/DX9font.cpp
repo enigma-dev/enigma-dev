@@ -23,6 +23,7 @@
 #include "../General/GScolors.h"
 #include "../General/GSfont.h"
 #include "../General/GStextures.h"
+#include "../General/GSprimitives.h"
 
 
 using namespace std;
@@ -291,9 +292,6 @@ namespace enigma_user
 
 void draw_text(gs_scalar x, gs_scalar y, variant vstr)
 {
-  #ifdef CODEBLOX
-    return;
-  #endif
   string str = toString(vstr);
   get_fontv(fnt,currentfont);
   float yy = valign == fa_top ? y+fnt->yoffset : valign == fa_middle ? y +fnt->yoffset - string_height(str)/2 : y + fnt->yoffset - string_height(str);
@@ -310,10 +308,12 @@ void draw_text(gs_scalar x, gs_scalar y, variant vstr)
         else
         {
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
-			D3DXVECTOR3 pos(xx + g.x, yy + g.y, 0);
-			tagRECT rect;
-			rect.left = g.tx * fnt->twid; rect.top = g.ty * fnt->thgt; rect.right = g.tx2 * fnt->twid; rect.bottom = g.ty2 * fnt->thgt;
-			dsprite->Draw(textureStructs[fnt->texture]->gTexture, &rect, NULL, &pos, enigma::get_currentcolor());
+			draw_primitive_begin_texture(pr_trianglestrip, fnt->texture);
+			draw_vertex_texture(xx + g.x,  yy + g.y, g.tx, g.ty);
+			draw_vertex_texture(xx + g.x2, yy + g.y, g.tx2, g.ty);
+			draw_vertex_texture(xx + g.x,  yy + g.y2, g.tx,  g.ty2);
+			draw_vertex_texture(xx + g.x2, yy + g.y2, g.tx2, g.ty2);
+			draw_primitive_end();
           xx += int(g.xs);
         }
       }
@@ -332,10 +332,12 @@ void draw_text(gs_scalar x, gs_scalar y, variant vstr)
         else
         {
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
-			D3DXVECTOR3 pos(xx + g.x, yy + g.y, 0);
-			tagRECT rect;
-			rect.left = g.tx * fnt->twid; rect.top = g.ty * fnt->thgt; rect.right = g.tx2 * fnt->twid; rect.bottom = g.ty2 * fnt->thgt;
-			dsprite->Draw(textureStructs[fnt->texture]->gTexture, &rect, NULL, &pos, enigma::get_currentcolor());
+			draw_primitive_begin_texture(pr_trianglestrip, fnt->texture);
+			draw_vertex_texture(xx + g.x,  yy + g.y, g.tx, g.ty);
+			draw_vertex_texture(xx + g.x2, yy + g.y, g.tx2, g.ty);
+			draw_vertex_texture(xx + g.x,  yy + g.y2, g.tx,  g.ty2);
+			draw_vertex_texture(xx + g.x2, yy + g.y2, g.tx2, g.ty2);
+			draw_primitive_end();
           xx += float(g.xs);
         }
       }
@@ -349,72 +351,7 @@ void draw_text_skewed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar top, gs_
 
 void draw_text_ext(gs_scalar x, gs_scalar y, variant vstr, gs_scalar sep, gs_scalar w)
 {
-  string str = toString(vstr);
-  get_fontv(fnt,currentfont);
 
-  float yy = valign == fa_top ? y+fnt->yoffset : valign == fa_middle ? y + fnt->yoffset - string_height_ext(str,sep,w)/2 : y + fnt->yoffset - string_height_ext(str,sep,w);
-
-  if (halign == fa_left){
-      float xx = x, width = 0, tw = 0;
-      for (unsigned i = 0; i < str.length(); i++)
-      {
-        if (str[i] == '\r')
-          xx = x, yy += (sep+2 ? fnt->height : sep), i += str[i+1] == '\n';
-        else if (str[i] == '\n')
-          xx = x, yy += (sep+2 ? fnt->height : sep);
-        else if (str[i] == ' '){
-          xx += get_space_width(fnt), width = xx-x;
-          tw = 0;
-          for (unsigned c = i+1; c < str.length(); c++)
-          {
-            if (str[c] == ' ' or str[c] == '\r' or str[c] == '\n')
-              break;
-            fontglyph &g = fnt->glyphs[(unsigned char)(str[c] - fnt->glyphstart) % fnt->glyphcount];
-            tw += g.xs;
-          }
-
-          if (width+tw >= w && w != -1)
-            xx = x, yy += (sep==-1 ? fnt->height : sep), width = 0, tw = 0;
-        } else {
-          fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
-			D3DXVECTOR3 pos(xx + g.x, yy + g.y, 0);
-			tagRECT rect;
-			rect.left = g.tx * fnt->twid; rect.top = g.ty * fnt->thgt; rect.right = g.tx2 * fnt->twid; rect.bottom = g.ty2 * fnt->thgt;
-			dsprite->Draw(textureStructs[fnt->texture]->gTexture, &rect, NULL, &pos, enigma::get_currentcolor());
-          xx += float(g.xs);
-        }
-      }
-  } else {
-      float xx = halign == fa_center ? x-float(string_width_ext_line(str,w,0)/2) : x-float(string_width_ext_line(str,w,0)), line = 0, width = 0, tw = 0;
-      for (unsigned i = 0; i < str.length(); i++)
-      {
-        if (str[i] == '\r')
-          line += 1, xx = halign == fa_center ? x-float(string_width_ext_line(str,w,line)/2) : x-float(string_width_ext_line(str,w,line)), yy += (sep+2 ? fnt->height : sep), i += str[i+1] == '\n', width = 0;
-        else if (str[i] == '\n')
-          line += 1, xx = halign == fa_center ? x-float(string_width_ext_line(str,w,line)/2) : x-float(string_width_ext_line(str,w,line)), yy += (sep+2 ? fnt->height : sep), width = 0;
-        else if (str[i] == ' '){
-          xx += get_space_width(fnt), width += get_space_width(fnt), tw = 0;
-          for (unsigned c = i+1; c < str.length(); c++)
-          {
-            if (str[c] == ' ' or str[c] == '\r' or str[c] == '\n')
-              break;
-            fontglyph &g = fnt->glyphs[(unsigned char)(str[c] - fnt->glyphstart) % fnt->glyphcount];
-            tw += g.xs;
-          }
-
-          if (width+tw >= w && w != -1)
-            line += 1, xx = halign == fa_center ? x-float(string_width_ext_line(str,w,line)/2) : x-float(string_width_ext_line(str,w,line)), yy += (sep==-1 ? fnt->height : sep), width = 0, tw = 0;
-        } else {
-          fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
-            D3DXVECTOR3 pos(xx + g.x, yy + g.y, 0);
-			tagRECT rect;
-			rect.left = g.tx * fnt->twid; rect.top = g.ty * fnt->thgt; rect.right = g.tx2 * fnt->twid; rect.bottom = g.ty2 * fnt->thgt;
-			dsprite->Draw(textureStructs[fnt->texture]->gTexture, &rect, NULL, &pos, enigma::get_currentcolor());
-          xx += float(g.xs);
-          width += g.xs;
-        }
-      }
-    }
 }
 
 void draw_text_transformed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar xscale, gs_scalar yscale, double rot)

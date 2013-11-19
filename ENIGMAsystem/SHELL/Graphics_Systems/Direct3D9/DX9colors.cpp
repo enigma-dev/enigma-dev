@@ -32,7 +32,7 @@
 namespace enigma {
   extern unsigned char currentcolor[4];
   D3DCOLOR get_currentcolor() {
-	return D3DCOLOR_COLORVALUE(currentcolor[0] / 255, currentcolor[1] / 255, currentcolor[2] / 255, 1);
+	return D3DCOLOR_RGBA(currentcolor[0], currentcolor[1], currentcolor[2], currentcolor[3]);
   }
 }
 
@@ -66,11 +66,6 @@ void draw_set_color(int col)
 	enigma::currentcolor[0] = __GETR(col);
 	enigma::currentcolor[1] = __GETG(col);
 	enigma::currentcolor[2] = __GETB(col);
-    D3DCOLOR D3DColor = D3DCOLOR_RGBA(__GETR(col), __GETG(col), __GETB(col), enigma::currentcolor[3]);
-	d3dmgr->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
-    d3dmgr->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_BLENDFACTOR);
-    d3dmgr->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
-    d3dmgr->SetRenderState(D3DRS_BLENDFACTOR, D3DColor);
 }
 
 void draw_set_color_rgb(unsigned char red,unsigned char green,unsigned char blue)
@@ -78,21 +73,11 @@ void draw_set_color_rgb(unsigned char red,unsigned char green,unsigned char blue
 	enigma::currentcolor[0] = red;
 	enigma::currentcolor[1] = green;
 	enigma::currentcolor[2] = blue;
-    D3DCOLOR D3DColor = D3DCOLOR_RGBA(red * enigma::currentcolor[3], green * enigma::currentcolor[3], blue * enigma::currentcolor[3], 0);
-	d3dmgr->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
-    d3dmgr->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_BLENDFACTOR);
-    d3dmgr->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
-    d3dmgr->SetRenderState(D3DRS_BLENDFACTOR, D3DColor);
 }
 
 void draw_set_alpha(float alpha)
 {
 	enigma::currentcolor[3] = bind_alpha(alpha);
-	D3DCOLOR D3DColor = D3DCOLOR_RGBA(bind_alpha(alpha), bind_alpha(alpha),bind_alpha(alpha), bind_alpha(alpha));
-	d3dmgr->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
-	d3dmgr->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_BLENDFACTOR);
-	d3dmgr->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVBLENDFACTOR);
-    d3dmgr->SetRenderState(D3DRS_BLENDFACTOR, D3DColor);
 }
 
 void draw_set_color_rgba(unsigned char red,unsigned char green,unsigned char blue,float alpha)
@@ -101,11 +86,7 @@ void draw_set_color_rgba(unsigned char red,unsigned char green,unsigned char blu
 	enigma::currentcolor[1] = green;
 	enigma::currentcolor[2] = blue;
 	enigma::currentcolor[3] = bind_alpha(alpha);	
-	D3DCOLOR D3DColor = D3DCOLOR_RGBA(enigma::currentcolor[0] * bind_alpha(alpha),enigma::currentcolor[1] * bind_alpha(alpha),enigma::currentcolor[2] * bind_alpha(alpha), 0);
-	d3dmgr->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
-	d3dmgr->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_BLENDFACTOR);
-	d3dmgr->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVBLENDFACTOR);
-    d3dmgr->SetRenderState(D3DRS_BLENDFACTOR, D3DColor);
+	D3DCOLOR D3DColor = D3DCOLOR_RGBA(enigma::currentcolor[0],enigma::currentcolor[1],enigma::currentcolor[2], enigma::currentcolor[3]);
 }
 
 void draw_set_color_write_enable(bool red, bool green, bool blue, bool alpha)

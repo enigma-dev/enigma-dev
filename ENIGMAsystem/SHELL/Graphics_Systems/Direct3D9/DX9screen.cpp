@@ -140,8 +140,8 @@ void screen_redraw()
 							(FLOAT)room_width,
 							0,
 							(FLOAT)room_height,
-							0.0f,    // the near view-plane
-							1.0f);    // the far view-plane
+							-32000.0f,    // the near view-plane
+							32000.0f);    // the far view-plane
 		d3dmgr->SetTransform(D3DTS_PROJECTION, &matProjection);    // set the projection transform
 
 		if (background_showcolor)
@@ -317,8 +317,8 @@ void screen_redraw()
 						(int)view_wview[vc],
 						0,
 						(int)view_hview[vc],
-						0.0f,    // the near view-plane
-						1.0f);    // the far view-plane
+						-32000.0f,    // the near view-plane
+						32000.0f);    // the far view-plane
 			d3dmgr->SetTransform(D3DTS_PROJECTION, &matProjection);    // set the projection transform
 
 			if (background_showcolor && view_first)
@@ -418,8 +418,8 @@ void screen_redraw()
 							(FLOAT)enigma::gui_width,
 							0,
 							(FLOAT)enigma::gui_height,
-							0.0f,    // the near view-plane
-							1.0f);    // the far view-plane
+							-32000.0f,    // the near view-plane
+							32000.0f);    // the far view-plane
 		d3dmgr->SetTransform(D3DTS_PROJECTION, &matProjection);    // set the projection transform
 
 		//dsprite->SetWorldViewRH(NULL, &matWorld);
