@@ -465,21 +465,6 @@ void draw_background_general(int back, gs_scalar left, gs_scalar top, gs_scalar 
   glPopAttrib();
 }
 
-int background_get_texture(int backId) {
-  get_backgroundnv(bck2d,backId,-1);
-  return bck2d->texture;
-}
-
-int background_get_width(int backId) {
-  get_backgroundnv(bck2d,backId,-1);
-  return bck2d->width;
-}
-
-int background_get_height(int backId) {
-  get_backgroundnv(bck2d,backId,-1);
-  return bck2d->height;
-}
-
 double background_get_texture_width_factor(int backId) {
   get_backgroundnv(bck2d,backId,-1);
   return bck2d->texbordx;
