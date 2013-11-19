@@ -23,7 +23,7 @@ using std::string;
 #include "Direct3D9Headers.h"
 #include "../General/GSsprite.h"
 #include "../General/GStextures.h"
-
+#include "../General/GSprimitives.h"
 
 #include "Universal_System/nlpo2.h"
 #include "Universal_System/spritestruct.h"
@@ -81,10 +81,6 @@ void draw_sprite(int spr,int subimg, gs_scalar x, gs_scalar y)
 {
     get_spritev(spr2d,spr);
     const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
-
-	D3DXVECTOR3 offset(spr2d->xoffset, spr2d->yoffset, 0);
-	D3DXVECTOR3 pos(x, y, 0);
-	dsprite->Draw(textureStructs[spr2d->texturearray[usi]]->gTexture, NULL, &offset, &pos, enigma::get_currentcolor());
 }
 
 void draw_sprite_pos(int spr, int subimg, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, gs_scalar x4, gs_scalar y4, gs_scalar alpha)
@@ -98,53 +94,18 @@ void draw_sprite_stretched(int spr, int subimg, gs_scalar x, gs_scalar y, gs_sca
     const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
 
 	const float texw = spr2d->width, texh = spr2d->height;
-
-	// Build our matrix to rotate, scale and position our sprite
-	D3DXMATRIX mat;
-	
-	// Screen position of the sprite
-	D3DXVECTOR2 center = D3DXVECTOR2(spr2d->xoffset, spr2d->yoffset);
-	// Screen position of the sprite
-	D3DXVECTOR2 trans = D3DXVECTOR2(x, y);
-
-	D3DXVECTOR2 scaling(width/texw, height/texh);
-
-	// out, scaling centre, scaling rotation, scaling, rotation centre, rotation, translation
-	D3DXMatrixTransformation2D(&mat,NULL,0.0,&scaling,&center,0,&trans);
-
-	// Tell the sprite about the matrix
-	dsprite->SetTransform(&mat);
-
-	// Screen position of the sprite
-	D3DXVECTOR3 offset = D3DXVECTOR3(spr2d->xoffset, spr2d->yoffset, 0);
-
-	dsprite->Draw(textureStructs[spr2d->texturearray[usi]]->gTexture, NULL, &offset, NULL, enigma::get_currentcolor());
-
-	D3DXMatrixTransformation2D(&mat,NULL,0.0,0,NULL,0,0);
-	dsprite->SetTransform(&mat);
 }
 
 void draw_sprite_part(int spr, int subimg, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y)
 {
     get_spritev(spr2d,spr);
     const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
-
-	D3DXVECTOR3 pos(x, y, 0);
-	tagRECT rect;
-	rect.left = left; rect.top = top; rect.right = left + width; rect.bottom = top + height;
-	dsprite->Draw(textureStructs[spr2d->texturearray[usi]]->gTexture, &rect, 0, &pos, enigma::get_currentcolor());
 }
 
 void draw_sprite_part_offset(int spr, int subimg, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y)
 {
     get_spritev(spr2d,spr);
     const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
-
-	D3DXVECTOR3 offset(spr2d->xoffset, spr2d->yoffset, 0);
-	D3DXVECTOR3 pos(x, y, 0);
-	tagRECT rect;
-	rect.left = left; rect.top = top; rect.right = left + width; rect.bottom = top + height;
-	dsprite->Draw(textureStructs[spr2d->texturearray[usi]]->gTexture, &rect, &offset, &pos, enigma::get_currentcolor());
 }
 
 void draw_sprite_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int color, gs_scalar alpha)
@@ -152,30 +113,25 @@ void draw_sprite_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar xs
     get_spritev(spr2d,spr);
     const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
 
-	// Build our matrix to rotate, scale and position our sprite
-	D3DXMATRIX mat;
+	rot *= M_PI/180;
+
+    const float
+    w = spr2d->width*xscale, h = spr2d->height*yscale,
+    tbx = spr2d->texbordxarray[usi], tby = spr2d->texbordyarray[usi],
+    wsinrot = w*sin(rot), wcosrot = w*cos(rot);
 	
-	// Screen position of the sprite
-	D3DXVECTOR2 center = D3DXVECTOR2(spr2d->xoffset, spr2d->yoffset);
-	// Screen position of the sprite
-	D3DXVECTOR2 trans = D3DXVECTOR2(x, y);
-
-	D3DXVECTOR2 scaling(xscale, yscale);
-
-	// out, scaling centre, scaling rotation, scaling, rotation centre, rotation, translation
-	D3DXMatrixTransformation2D(&mat,NULL,0.0,&scaling,&center,rot,&trans);
-
-	// Tell the sprite about the matrix
-	dsprite->SetTransform(&mat);
-
-	// Screen position of the sprite
-	D3DXVECTOR3 offset = D3DXVECTOR3(spr2d->xoffset, spr2d->yoffset, 0);
-
-	dsprite->Draw(textureStructs[spr2d->texturearray[usi]]->gTexture, NULL, &offset, NULL,
-		D3DCOLOR_ARGB(char(alpha*255), __GETR(color), __GETG(color), __GETB(color)));
-
-	D3DXMatrixTransformation2D(&mat,NULL,0.0,0,NULL,0,0);
-	dsprite->SetTransform(&mat);
+	draw_primitive_begin_texture(pr_trianglestrip, spr2d->texturearray[usi]);
+	float
+		ulcx = x - xscale * spr2d->xoffset * cos(rot) + yscale * spr2d->yoffset * cos(M_PI/2+rot),
+		ulcy = y + xscale * spr2d->xoffset * sin(rot) - yscale * spr2d->yoffset * sin(M_PI/2+rot);
+	draw_vertex_texture_color(ulcx,ulcy, 0,0, color, alpha);
+	draw_vertex_texture_color(ulcx + wcosrot, ulcy - wsinrot, tbx, 0, color, alpha);
+	const double mpr = 3*M_PI/2 + rot;
+    ulcx += h * cos(mpr);
+    ulcy -= h * sin(mpr);
+	draw_vertex_texture_color(ulcx,ulcy, 0,tby, color, alpha);
+	draw_vertex_texture_color(ulcx + wcosrot, ulcy - wsinrot, tbx,tby, color, alpha);
+	draw_primitive_end();
 }
 
 void draw_sprite_part_ext(int spr, int subimg, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, gs_scalar alpha)
@@ -183,28 +139,6 @@ void draw_sprite_part_ext(int spr, int subimg, gs_scalar left, gs_scalar top, gs
     get_spritev(spr2d,spr);
     const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
 
-	// Build our matrix to rotate, scale and position our sprite
-	D3DXMATRIX mat;
-	
-	// Screen position of the sprite
-	D3DXVECTOR2 trans = D3DXVECTOR2(x, y);
-
-	D3DXVECTOR2 scaling(xscale, yscale);
-
-	// out, scaling centre, scaling rotation, scaling, rotation centre, rotation, translation
-	D3DXMatrixTransformation2D(&mat,NULL,0.0,&scaling,0,0,&trans);
-
-	// Tell the sprite about the matrix
-	dsprite->SetTransform(&mat);
-
-	// Screen position of the sprite
-	D3DXVECTOR3 offset = D3DXVECTOR3(spr2d->xoffset, spr2d->yoffset, 0);
-
-	tagRECT rect;
-	rect.left = left; rect.top = top; rect.right = left + width; rect.bottom = top + height;
-
-	dsprite->Draw(textureStructs[spr2d->texturearray[usi]]->gTexture, &rect, &offset, NULL,
-		D3DCOLOR_ARGB(char(alpha*255), __GETR(color), __GETG(color), __GETB(color)));
 }
 
 void draw_sprite_general(int spr, int subimg, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, gs_scalar a1, gs_scalar a2, gs_scalar a3, gs_scalar a4)
@@ -220,30 +154,6 @@ void draw_sprite_stretched_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs
 	const float
     texw = spr2d->width, texh = spr2d->height;
 
-	// Build our matrix to rotate, scale and position our sprite
-	D3DXMATRIX mat;
-	
-	// Screen position of the sprite
-	D3DXVECTOR2 center = D3DXVECTOR2(spr2d->xoffset, spr2d->yoffset);
-	// Screen position of the sprite
-	D3DXVECTOR2 trans = D3DXVECTOR2(x, y);
-
-	D3DXVECTOR2 scaling(width/texw, height/texh);
-
-	// out, scaling centre, scaling rotation, scaling, rotation centre, rotation, translation
-	D3DXMatrixTransformation2D(&mat,NULL,0.0,&scaling,&center,0,&trans);
-
-	// Screen position of the sprite
-	D3DXVECTOR3 offset = D3DXVECTOR3(spr2d->xoffset, spr2d->yoffset, 0);
-
-	// Tell the sprite about the matrix
-	dsprite->SetTransform(&mat);
-
-	dsprite->Draw(textureStructs[spr2d->texturearray[usi]]->gTexture, NULL, &offset, NULL,
-		D3DCOLOR_ARGB(char(alpha*255), __GETR(color), __GETG(color), __GETB(color)));
-
-	D3DXMatrixTransformation2D(&mat,NULL,0.0,0,NULL,0,0);
-	dsprite->SetTransform(&mat);
 }
 
 }
@@ -271,23 +181,6 @@ void draw_sprite_tiled(int spr, int subimg, gs_scalar x, gs_scalar y)
     const int
     hortil = int(ceil((view_enabled ? int(view_xview[view_current] + view_wview[view_current]) : room_width) / (spr2d->width*tbx))) + 1,
     vertil = int(ceil((view_enabled ? int(view_yview[view_current] + view_hview[view_current]) : room_height) / (spr2d->height*tby))) + 1;
-
-    float xvert1 = xoff, xvert2 = xvert1 + spr2d->width, yvert1, yvert2;
-    for (int i=0; i<hortil; i++)
-    {
-        yvert1 = yoff; yvert2 = yvert1 + spr2d->height;
-        for (int c=0; c<vertil; c++)
-        {
-			D3DXVECTOR3 offset(spr2d->xoffset, spr2d->yoffset, 0);
-			D3DXVECTOR3 pos(xvert1, yvert1, 0);
-			dsprite->Draw(textureStructs[spr2d->texturearray[usi]]->gTexture, NULL, &offset, &pos, enigma::get_currentcolor());
-			
-            yvert1 = yvert2;
-            yvert2 += spr2d->height;
-        }
-        xvert1 = xvert2;
-        xvert2 += spr2d->width;
-    }
 }
 
 void draw_sprite_tiled_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, gs_scalar alpha)
@@ -305,42 +198,6 @@ void draw_sprite_tiled_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_sca
     vertil = int(ceil((view_enabled ? int(view_yview[view_current] + view_hview[view_current]) : room_height) / (height_scaled*tby))) + 1;
 
     float xvert1 = xoff, xvert2 = xvert1 + width_scaled, yvert1, yvert2;
-	
-	// Build our matrix to rotate, scale and position our sprite
-	D3DXMATRIX mat;
-			
-    for (int i=0; i<hortil; i++)
-    {
-        yvert1 = yoff; yvert2 = yvert1 + height_scaled;
-        for (int c=0; c<vertil; c++)
-        {
-			// Screen position of the sprite
-			D3DXVECTOR2 center = D3DXVECTOR2(spr2d->xoffset, spr2d->yoffset);
-			// Screen position of the sprite
-			D3DXVECTOR2 trans = D3DXVECTOR2(xvert1, yvert1);
-
-			D3DXVECTOR2 scaling(xscale, yscale);
-
-			// out, scaling centre, scaling rotation, scaling, rotation centre, rotation, translation
-			D3DXMatrixTransformation2D(&mat,NULL,0.0,&scaling,&center,0,&trans);
-
-			// Screen position of the sprite
-			D3DXVECTOR3 offset = D3DXVECTOR3(spr2d->xoffset, spr2d->yoffset, 0);
-
-			dsprite->SetTransform(&mat);
-			
-			dsprite->Draw(textureStructs[spr2d->texturearray[usi]]->gTexture, NULL, &offset, NULL,
-				D3DCOLOR_ARGB(char(alpha*255), __GETR(color), __GETG(color), __GETB(color)));
-			
-            yvert1 = yvert2;
-            yvert2 += height_scaled;
-       }
-       xvert1 = xvert2;
-       xvert2 += width_scaled;
-    }
-
-	D3DXMatrixTransformation2D(&mat,NULL,0.0,0,NULL,0,0);
-	dsprite->SetTransform(&mat);
 }
 
 int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload, int xorig, int yorig) {

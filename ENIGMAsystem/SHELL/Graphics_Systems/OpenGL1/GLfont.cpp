@@ -284,9 +284,6 @@ namespace enigma_user
 
 void draw_text(gs_scalar x, gs_scalar y,variant vstr)
 {
-  #ifdef CODEBLOX
-    return;
-  #endif
   string str = toString(vstr);
   get_fontv(fnt,currentfont);
   //texture_set(fnt->texture);
@@ -351,9 +348,6 @@ void draw_text(gs_scalar x, gs_scalar y,variant vstr)
 
 void draw_text_skewed(gs_scalar x, gs_scalar y,variant vstr, gs_scalar top, gs_scalar bottom)
 {
-  #ifdef CODEBLOX
-    return;
-  #endif
   string str = toString(vstr);
   get_fontv(fnt,currentfont);
   //texture_set(fnt->texture);

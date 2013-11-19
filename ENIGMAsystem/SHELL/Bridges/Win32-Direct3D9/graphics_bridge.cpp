@@ -30,7 +30,6 @@ using namespace std;
 #include "Universal_System/roomsystem.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Bridges/General/DX9Context.h"
-LPD3DXSPRITE dsprite = NULL;
 
 // global declarations
 LPDIRECT3D9 d3dobj;    // the pointer to our Direct3D interface
@@ -83,16 +82,6 @@ namespace enigma
 		
 		d3dmgr->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, FALSE); 
 		
-		hr = D3DXCreateSprite(d3dmgr->device, &dsprite);
-		if (FAILED(hr))
-		{
-			MessageBox(hWnd,
-               "Failed to create Direct3D 9.0 Sprite Object",
-			   DXGetErrorDescription9(hr), //DXGetErrorString9(hr)
-               MB_ICONERROR | MB_OK);
-			   return;  // should probably force the game closed
-		}
-		
 		enigma_user::display_aa = 0;
 		for (int i = 16; i > 1; i--) {
 			if (SUCCEEDED(d3dobj->CheckDeviceMultiSampleType(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, format, TRUE, (D3DMULTISAMPLE_TYPE)((int)D3DMULTISAMPLE_NONE + i), NULL))) {
@@ -112,22 +101,7 @@ namespace enigma
 		d3dpp.BackBufferHeight = enigma_user::window_get_region_height_scaled();
 		sc->Release();
 		
-		bool spritenull = (dsprite == NULL);
-		if (!spritenull) {
-			dsprite->Release();
-		}
-		
 		d3dmgr->Reset(&d3dpp);
-		
-		HRESULT hr = D3DXCreateSprite(d3dmgr->device,&dsprite);
-		if (FAILED(hr))
-		{
-			MessageBox(hWnd,
-               "Failed to create Direct3D 9.0 Sprite Object",
-			   DXGetErrorDescription9(hr), //DXGetErrorString9(hr)
-               MB_ICONERROR | MB_OK);
-			return;  // should probably force the game closed
-		}
 	}
 
     void DisableDrawing (HWND hWnd, HDC hDC, HGLRC hRC)
@@ -162,21 +136,8 @@ void display_reset(int samples, bool vsync) {
 		d3dmgr->SetRenderState(D3DRS_MULTISAMPLEANTIALIAS, FALSE); 
 	}
 	sc->Release();
-	bool spritenull = (dsprite == NULL);
-	if (!spritenull) {
-		dsprite->Release();
-	}
 
 	d3dmgr->Reset(&d3dpp);
-	
-	HRESULT hr = D3DXCreateSprite(d3dmgr->device,&dsprite);
-	if (FAILED(hr)) {
-		MessageBox(enigma::hWnd,
-		   "Failed to create Direct3D 9.0 Sprite Object",
-		   DXGetErrorDescription9(hr), //DXGetErrorString9(hr)
-		   MB_ICONERROR | MB_OK);
-		return;  // should probably force the game closed
-	}
 
 }
 
@@ -199,21 +160,8 @@ void set_synchronization(bool enable) //TODO: Needs to be rewritten
 		d3dpp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;   //Present the frame immediately
 	}
 	sc->Release();
-	bool spritenull = (dsprite == NULL);
-	if (!spritenull) {
-		dsprite->Release();
-	}
 
 	d3dmgr->Reset(&d3dpp);
-	
-	HRESULT hr = D3DXCreateSprite(d3dmgr->device,&dsprite);
-	if (FAILED(hr)) {
-		MessageBox(enigma::hWnd,
-		   "Failed to create Direct3D 9.0 Sprite Object",
-		   DXGetErrorDescription9(hr), //DXGetErrorString9(hr)
-		   MB_ICONERROR | MB_OK);
-		return;  // should probably force the game closed
-	}
 }  
 
 }
