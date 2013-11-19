@@ -21,6 +21,7 @@
 #include "../General/GLTextureStruct.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
+#include "Bridges/General/GL3Context.h"
 #include <math.h>
 
 using namespace std;
@@ -198,7 +199,7 @@ void d3d_set_fog_density(double density)
 void d3d_set_culling(int mode)
 {
   enigma::d3dCulling = mode;
-  ((mode > 0)?glEnable:glDisable)(GL_CULL_FACE);
+  oglmgr->SetEnabled(GL_CULL_FACE, mode > 0);
   glFrontFace(cullingstates[mode]);
 }
 

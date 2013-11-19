@@ -208,7 +208,7 @@ void video_set_scale(int id, bool scale) {
 }
 
 long video_get_seek(int id) {
-	get_video(videoStruct, id);
+	get_videor(videoStruct, id, -1);
 	IMediaSeeking* pSeek;
 	HRESULT hr = videoStruct->pGraph->QueryInterface(IID_IMediaSeeking, (void**)&pSeek);
 	DWORD dwCap = 0;
@@ -226,7 +226,7 @@ long video_get_seek(int id) {
 }
 
 long video_get_duration(int id) {
-	get_video(videoStruct, id);
+	get_videor(videoStruct, id, -1);
 	IMediaSeeking* pSeek;
 	HRESULT hr = videoStruct->pGraph->QueryInterface(IID_IMediaSeeking, (void**)&pSeek);
 	DWORD dwCap = 0;
@@ -244,7 +244,7 @@ long video_get_duration(int id) {
 }
 
 long video_get_width(int id) {
-	get_video(videoStruct, id);
+	get_videor(videoStruct, id, -1);
 	IBasicVideo *pBasicVideo;
 	videoStruct->pGraph->QueryInterface(IID_IBasicVideo,
 	 (LPVOID *)&pBasicVideo);
@@ -260,7 +260,7 @@ long video_get_width(int id) {
 }
 
 long video_get_height(int id) {
-	get_video(videoStruct, id);
+	get_videor(videoStruct, id, -1);
 	IBasicVideo *pBasicVideo;
 	videoStruct->pGraph->QueryInterface(IID_IBasicVideo,
 	 (LPVOID *)&pBasicVideo);

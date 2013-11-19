@@ -17,7 +17,7 @@
 
 #include <math.h>
 #include "Direct3D9Headers.h"
-#include "Bridges/General/DX9Device.h"
+#include "Bridges/General/DX9Context.h"
 #include "Graphics_Systems/General/GSstdraw.h"
 
 #include <stdio.h>
@@ -54,30 +54,30 @@ void draw_set_msaa_enabled(bool enable)
 }
 
 void draw_enable_alphablend(bool enable) {
-	d3ddev->SetRenderState(D3DRS_ALPHABLENDENABLE, enable);
+	d3dmgr->SetRenderState(D3DRS_ALPHABLENDENABLE, enable);
 }
 
 bool draw_get_alpha_test() {
 	DWORD* enabled;
-	d3ddev->GetRenderState(D3DRS_ALPHATESTENABLE, enabled);
+	d3dmgr->GetRenderState(D3DRS_ALPHATESTENABLE, enabled);
 	return *enabled;
 }
 
 unsigned draw_get_alpha_test_ref_value()
 {
 	DWORD* val;
-	d3ddev->GetRenderState(D3DRS_ALPHAREF, val);
+	d3dmgr->GetRenderState(D3DRS_ALPHAREF, val);
 	return *val;
 }
 
 void draw_set_alpha_test(bool enable)
 {
-	d3ddev->SetRenderState(D3DRS_ALPHATESTENABLE, enable); 
+	d3dmgr->SetRenderState(D3DRS_ALPHATESTENABLE, enable); 
 }
 
 void draw_set_alpha_test_ref_value(unsigned val)
 {
-	d3ddev->SetRenderState(D3DRS_ALPHAREF, val);
+	d3dmgr->SetRenderState(D3DRS_ALPHAREF, val);
 }
 
 void draw_set_line_pattern(unsigned short pattern, int scale)
@@ -98,10 +98,10 @@ void draw_point_color(gs_scalar x, gs_scalar y, int col)
 void draw_line(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2)
 {
 	vector<float> shape;
-	    d3ddev->SetFVF(D3DFVF_XYZ);
+	    d3dmgr->SetFVF(D3DFVF_XYZ);
 	shape.push_back(x1); shape.push_back(y1); shape.push_back(0);
 	shape.push_back(x2); shape.push_back(y2); shape.push_back(0);
-	d3ddev->DrawPrimitiveUP(D3DPT_LINESTRIP, 1, &shape[0], sizeof(float) * 3);
+	d3dmgr->DrawPrimitiveUP(D3DPT_LINESTRIP, 1, &shape[0], sizeof(float) * 3);
 }
 
 void draw_line_width(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, float width)
@@ -122,7 +122,7 @@ void draw_line_width_color(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2
 void draw_rectangle(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, bool outline)
 {
 	vector<float> shape;
-	    d3ddev->SetFVF(D3DFVF_XYZ);
+	    d3dmgr->SetFVF(D3DFVF_XYZ);
     if (outline)
     {
 		shape.push_back(x1); shape.push_back(y1); shape.push_back(0);
@@ -130,7 +130,7 @@ void draw_rectangle(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, bool 
 		shape.push_back(x2); shape.push_back(y2); shape.push_back(0);
 		shape.push_back(x1); shape.push_back(y2); shape.push_back(0);
 		shape.push_back(x1); shape.push_back(y1); shape.push_back(0);
-		d3ddev->DrawPrimitiveUP(D3DPT_LINESTRIP, 4, &shape[0], sizeof(float) * 3);
+		d3dmgr->DrawPrimitiveUP(D3DPT_LINESTRIP, 4, &shape[0], sizeof(float) * 3);
     }
     else
     {
@@ -138,7 +138,7 @@ void draw_rectangle(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, bool 
 		shape.push_back(x1); shape.push_back(y1); shape.push_back(0);
 		shape.push_back(x2); shape.push_back(y2); shape.push_back(0);
 		shape.push_back(x1); shape.push_back(y2); shape.push_back(0);
-		d3ddev->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, &shape[0], sizeof(float) * 3);
+		d3dmgr->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, &shape[0], sizeof(float) * 3);
     }
 }
 
@@ -164,7 +164,7 @@ void draw_rectangle_angle(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2,
     ldy2 = len*sin(dir);
   
 	vector<float> shape;
-	    d3ddev->SetFVF(D3DFVF_XYZ);
+	    d3dmgr->SetFVF(D3DFVF_XYZ);
     if (outline)
     {
 		shape.push_back(xm+ldx1); shape.push_back(ym-ldy1); shape.push_back(0);
@@ -172,7 +172,7 @@ void draw_rectangle_angle(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2,
 		shape.push_back(xm-ldx1); shape.push_back(ym+ldy1); shape.push_back(0);
 		shape.push_back(xm-ldx2); shape.push_back(ym+ldy2); shape.push_back(0);
 		shape.push_back(xm+ldx1); shape.push_back(ym-ldy1); shape.push_back(0);
-		d3ddev->DrawPrimitiveUP(D3DPT_LINESTRIP, 4, &shape[0], sizeof(float) * 3);
+		d3dmgr->DrawPrimitiveUP(D3DPT_LINESTRIP, 4, &shape[0], sizeof(float) * 3);
     }
     else
     {
@@ -180,7 +180,7 @@ void draw_rectangle_angle(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2,
 		shape.push_back(xm+ldx1); shape.push_back(ym-ldy1); shape.push_back(0);
 		shape.push_back(xm-ldx1); shape.push_back(ym+ldy1); shape.push_back(0);
 		shape.push_back(xm-ldx2); shape.push_back(ym+ldy2); shape.push_back(0);
-		d3ddev->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, &shape[0], sizeof(float) * 3);
+		d3dmgr->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, &shape[0], sizeof(float) * 3);
     }
 }
 
@@ -209,7 +209,7 @@ void draw_circle(gs_scalar x, gs_scalar y, float rad, bool outline)
 {
     double pr = 2 * M_PI / enigma::circleprecision;
 	vector<float> shape;
-	    d3ddev->SetFVF(D3DFVF_XYZ);
+	    d3dmgr->SetFVF(D3DFVF_XYZ);
     if(outline)
     {
         for (double i = 0; i <= 2*M_PI; i += pr)
@@ -217,7 +217,7 @@ void draw_circle(gs_scalar x, gs_scalar y, float rad, bool outline)
             double xc1=cos(i)*rad,yc1=sin(i)*rad;
 			shape.push_back(x+xc1); shape.push_back(y+yc1); shape.push_back(0);
         }
-		d3ddev->DrawPrimitiveUP(D3DPT_LINESTRIP, enigma::circleprecision, &shape[0], sizeof(float) * 3);
+		d3dmgr->DrawPrimitiveUP(D3DPT_LINESTRIP, enigma::circleprecision, &shape[0], sizeof(float) * 3);
     }
     else
     {
@@ -227,7 +227,7 @@ void draw_circle(gs_scalar x, gs_scalar y, float rad, bool outline)
             double xc1=cos(i)*rad,yc1=sin(i)*rad;
 			shape.push_back(x+xc1); shape.push_back(y+yc1); shape.push_back(0);
         }
-		d3ddev->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, enigma::circleprecision, &shape[0], sizeof(float) * 3);
+		d3dmgr->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, enigma::circleprecision, &shape[0], sizeof(float) * 3);
     }
 }
 
@@ -264,21 +264,21 @@ void draw_ellipse_perfect(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2,
 void draw_triangle(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, float x3, float y3, bool outline)
 {
 	vector<float> shape;
-	    d3ddev->SetFVF(D3DFVF_XYZ);
+	    d3dmgr->SetFVF(D3DFVF_XYZ);
     if (outline)
     {
 		shape.push_back(x1); shape.push_back(y1); shape.push_back(0);
 		shape.push_back(x2); shape.push_back(y2); shape.push_back(0);
 		shape.push_back(x3); shape.push_back(y3); shape.push_back(0);
 		shape.push_back(x1); shape.push_back(y1); shape.push_back(0);
-		d3ddev->DrawPrimitiveUP(D3DPT_LINESTRIP, 3, &shape[0], sizeof(float) * 3);
+		d3dmgr->DrawPrimitiveUP(D3DPT_LINESTRIP, 3, &shape[0], sizeof(float) * 3);
     }
     else
     {
 		shape.push_back(x1); shape.push_back(y1); shape.push_back(0);
 		shape.push_back(x2); shape.push_back(y2); shape.push_back(0);
 		shape.push_back(x3); shape.push_back(y3); shape.push_back(0);
-		d3ddev->DrawPrimitiveUP(D3DPT_TRIANGLELIST, 1, &shape[0], sizeof(float) * 3);
+		d3dmgr->DrawPrimitiveUP(D3DPT_TRIANGLELIST, 1, &shape[0], sizeof(float) * 3);
     }
 }
 

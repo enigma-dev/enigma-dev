@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 #include "ModelStruct.h"
-#include "Bridges/General/DX9Device.h"
+#include "Bridges/General/DX9Context.h"
 #include "../General/GSd3d.h"
 #include "DX9shapes.h"
 #include "../General/GSmodel.h"
