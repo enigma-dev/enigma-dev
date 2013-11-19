@@ -24,6 +24,7 @@
 #include "Universal_System/backgroundstruct.h"
 #include "Universal_System/spritestruct.h"
 #include "Graphics_Systems/graphics_mandatory.h"
+#include "Bridges/General/GL3Context.h"
 
 #define GL_TEXTURE_MAX_ANISOTROPY_EXT 0x84FE
 #define GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT 0x84FF
@@ -39,9 +40,6 @@ using std::vector;
 
 namespace enigma {
   extern size_t background_idmax;
-  extern vector<float> globalVBO_data;
-  extern unsigned bound_texture;
-  void draw_globalVBO();
 }
 
 inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect powers of two
@@ -78,13 +76,13 @@ namespace enigma
   {
     GLuint texture;
     glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
+    oglmgr->glBindTexture(GL_TEXTURE_2D, texture);
     glTexImage2D(GL_TEXTURE_2D, 0, 4, fullwidth, fullheight, 0, GL_RGBA, GL_UNSIGNED_BYTE, pxdata);
 	bool interpolate = (interpolate_textures && !isfont);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,interpolate?GL_LINEAR:GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,interpolate?GL_LINEAR:GL_NEAREST);
-    glBindTexture(GL_TEXTURE_2D, enigma::bound_texture);
-
+    oglmgr->ResetTextureStates();
+	
 	TextureStruct* textureStruct = new TextureStruct(texture);
 	textureStruct->isFont = isfont;
     textureStructs.push_back(textureStruct);
@@ -94,7 +92,7 @@ namespace enigma
   int graphics_duplicate_texture(int tex)
   {
     GLuint texture = textureStructs[tex]->gltex;
-    glBindTexture(GL_TEXTURE_2D, texture);
+    oglmgr->glBindTexture(GL_TEXTURE_2D, texture);
     int w, h;
 	bool interpolate = (interpolate_textures && !textureStructs[tex]->isFont);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,interpolate?GL_LINEAR:GL_NEAREST);
@@ -105,7 +103,7 @@ namespace enigma
     glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, bitmap);
     unsigned dup_tex = graphics_create_texture(w, h, bitmap, textureStructs[tex]->isFont);
     delete[] bitmap;
-    glBindTexture(GL_TEXTURE_2D, enigma::bound_texture);
+    oglmgr->ResetTextureStates();
     glPopAttrib();
     return dup_tex;
   }
@@ -116,14 +114,14 @@ namespace enigma
     GLuint copy_texture = textureStructs[copy_tex]->gltex;
 
     int w, h, size;
-    glBindTexture(GL_TEXTURE_2D, texture);
+    oglmgr->glBindTexture(GL_TEXTURE_2D, texture);
     glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_WIDTH, &w);
     glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_HEIGHT, &h);
     size = (h<<(lgpp2(w)+2))|2;
     char* bitmap = new char[size];
     char* bitmap2 = new char[size];
     glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, bitmap);
-    glBindTexture(GL_TEXTURE_2D, copy_texture);
+    oglmgr->glBindTexture(GL_TEXTURE_2D, copy_texture);
     glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, bitmap2);
 
     for (int i = 3; i < size; i += 4)
@@ -134,7 +132,7 @@ namespace enigma
 	bool interpolate = (interpolate_textures && !textureStructs[tex]->isFont);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,interpolate?GL_LINEAR:GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,interpolate?GL_LINEAR:GL_NEAREST);
-    glBindTexture(GL_TEXTURE_2D, enigma::bound_texture);
+    oglmgr->ResetTextureStates();
 
     delete[] bitmap;
     delete[] bitmap2;
@@ -178,11 +176,11 @@ void texture_set_interpolation(int enable)
   for (unsigned i = 0; i < textureStructs.size(); i++)
   {
 	if (textureStructs[i]->isFont) { continue; }
-    glBindTexture(GL_TEXTURE_2D, textureStructs[i]->gltex);
+    oglmgr->glBindTexture(GL_TEXTURE_2D, textureStructs[i]->gltex);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,enable?GL_LINEAR:GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,enable?GL_LINEAR:GL_NEAREST);
   }
-  glBindTexture(GL_TEXTURE_2D, enigma::bound_texture);
+  oglmgr->ResetTextureStates();
 }
 
 bool texture_get_interpolation()
@@ -226,24 +224,18 @@ int texture_get_texel_height(int texid)
 }
 
 void texture_set(int texid) {
-	if (enigma::bound_texture != unsigned(texid)) {
-		enigma::draw_globalVBO();
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, enigma::bound_texture = texid);
-	}
+	glActiveTexture(GL_TEXTURE0);
+	oglmgr->glBindTexture(GL_TEXTURE_2D, texid);
 }
 
 void texture_set_stage(int stage, int texid) {
 	glActiveTexture(GL_TEXTURE0 + stage);
-	glBindTexture(GL_TEXTURE_2D, get_texture(texid));
+	oglmgr->glBindTexture(GL_TEXTURE_2D, get_texture(texid));
 }
 
 void texture_reset() {
-	if (enigma::bound_texture) {
-		enigma::draw_globalVBO();
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, enigma::bound_texture = 0);
-	}
+	glActiveTexture(GL_TEXTURE0);
+	oglmgr->glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void texture_set_repeat(bool repeat)
@@ -254,7 +246,7 @@ void texture_set_repeat(bool repeat)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, repeat?GL_REPEAT:GL_CLAMP);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, repeat?GL_REPEAT:GL_CLAMP);
   }
-  glBindTexture(GL_TEXTURE_2D, enigma::bound_texture);
+  oglmgr->ResetTextureStates();
 }
 
 void texture_set_repeat(int texid, bool repeat)

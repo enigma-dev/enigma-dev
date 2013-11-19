@@ -65,11 +65,6 @@ using std::string;
     const enigma::sprite *const spr = enigma::spritestructarray[id];
 #endif
 
-namespace enigma
-{
-    extern unsigned int globalVBO_texture;
-}
-
 namespace enigma_user
 {
 

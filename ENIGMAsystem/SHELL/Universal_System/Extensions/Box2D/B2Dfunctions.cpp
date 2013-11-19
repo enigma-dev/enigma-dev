@@ -197,7 +197,7 @@ void b2d_world_set_clearforces(int index, bool autoclear)
 
 int b2d_world_get_scale(int index)
 {
-  get_world(b2dworld, index);
+  get_worldr(b2dworld, index, -1);
   return b2dworld->pixelstometers;
 }
 

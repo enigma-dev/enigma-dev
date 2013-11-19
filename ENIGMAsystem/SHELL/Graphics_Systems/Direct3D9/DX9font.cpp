@@ -28,7 +28,7 @@
 using namespace std;
 #include "Universal_System/fontstruct.h"
 
-#include "Bridges/General/DX9Device.h"
+#include "Bridges/General/DX9Context.h"
 #include "DX9TextureStruct.h"
 
 #define __GETR(x) ((x & 0x0000FF))

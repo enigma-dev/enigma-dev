@@ -63,7 +63,7 @@ using std::string;
 #endif
 
 #include "Direct3D9Headers.h"
-#include "Bridges/General/DX9Device.h"
+#include "Bridges/General/DX9Context.h"
 #include "DX9TextureStruct.h"
 
 namespace enigma {
