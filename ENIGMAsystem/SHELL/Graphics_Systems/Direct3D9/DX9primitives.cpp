@@ -17,6 +17,7 @@
 
 #include "Bridges/General/DX9Context.h"
 #include "Direct3D9Headers.h"
+#include "../General/GScolors.h"
 #include "../General/GSprimitives.h"
 #include "../General/GStextures.h"
 #include "../General/GSmodel.h"
@@ -45,10 +46,6 @@ int ptypes_by_id[16] = {
   D3DPT_POINTLIST, D3DPT_POINTLIST, D3DPT_POINTLIST, D3DPT_POINTLIST, D3DPT_POINTLIST
 };
 
-namespace enigma {
-  extern unsigned char currentcolor[4];
-}
-
 namespace enigma_user
 {
 
@@ -71,22 +68,22 @@ void draw_primitive_end()
 
 void draw_vertex(gs_scalar x, gs_scalar y)
 {
-  d3d_model_vertex(d3dmgr->GetShapesModel(), x, y, 0);
+  d3d_model_vertex_color(d3dmgr->GetShapesModel(), x, y, d3dmgr->GetDepth(), draw_get_color(), draw_get_alpha());
 }
 
 void draw_vertex_color(gs_scalar x, gs_scalar y, int col, float alpha)
 {
-  d3d_model_vertex_color(d3dmgr->GetShapesModel(), x, y, 0, col, alpha);
+  d3d_model_vertex_color(d3dmgr->GetShapesModel(), x, y, d3dmgr->GetDepth(), col, alpha);
 }
 
 void draw_vertex_texture(gs_scalar x, gs_scalar y, gs_scalar tx, gs_scalar ty)
 {
-  d3d_model_vertex_texture(d3dmgr->GetShapesModel(), x, y, 0, tx, ty);
+  d3d_model_vertex_texture_color(d3dmgr->GetShapesModel(), x, y, d3dmgr->GetDepth(), tx, ty, draw_get_color(), draw_get_alpha());
 }
 
 void draw_vertex_texture_color(gs_scalar x, gs_scalar y, gs_scalar tx, gs_scalar ty, int col, float alpha)
 {
-  d3d_model_vertex_texture_color(d3dmgr->GetShapesModel(), x, y, 0, tx, ty, col, alpha);
+  d3d_model_vertex_texture_color(d3dmgr->GetShapesModel(), x, y, d3dmgr->GetDepth(), tx, ty, col, alpha);
 }
 
 void d3d_primitive_begin(int kind)
@@ -108,7 +105,7 @@ void d3d_primitive_end()
 
 void d3d_vertex(gs_scalar x, gs_scalar y, gs_scalar z)
 {
-  d3d_model_vertex(d3dmgr->GetShapesModel(), x, y, z);
+  d3d_model_vertex_color(d3dmgr->GetShapesModel(), x, y, z, draw_get_color(), draw_get_alpha());
 }
 
 void d3d_vertex_color(gs_scalar x, gs_scalar y, gs_scalar z, int color, double alpha)
@@ -118,7 +115,7 @@ void d3d_vertex_color(gs_scalar x, gs_scalar y, gs_scalar z, int color, double a
 
 void d3d_vertex_texture(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar tx, gs_scalar ty)
 {
-  d3d_model_vertex_texture(d3dmgr->GetShapesModel(), x, y, z, tx, ty);
+  d3d_model_vertex_texture_color(d3dmgr->GetShapesModel(), x, y, z, tx, ty, draw_get_color(), draw_get_alpha());
 }
 
 void d3d_vertex_texture_color(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar tx, gs_scalar ty, int color, double alpha)
@@ -128,7 +125,7 @@ void d3d_vertex_texture_color(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar t
 
 void d3d_vertex_normal(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz)
 {
-  d3d_model_vertex_normal(d3dmgr->GetShapesModel(), x, y, z, nx, ny, nz);
+  d3d_model_vertex_normal_color(d3dmgr->GetShapesModel(), x, y, z, nx, ny, nz, draw_get_color(), draw_get_alpha());
 }
 
 void d3d_vertex_normal_color(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, int color, double alpha)
@@ -138,7 +135,7 @@ void d3d_vertex_normal_color(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx
 
 void d3d_vertex_normal_texture(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, gs_scalar tx, gs_scalar ty)
 {
-  d3d_model_vertex_normal_texture(d3dmgr->GetShapesModel(), x, y, z, nx, ny, nz, tx, ty);
+  d3d_model_vertex_normal_texture_color(d3dmgr->GetShapesModel(), x, y, z, nx, ny, nz, tx, ty, draw_get_color(), draw_get_alpha());
 }
 
 void d3d_vertex_normal_texture_color(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, gs_scalar tx, gs_scalar ty, int color, double alpha)
