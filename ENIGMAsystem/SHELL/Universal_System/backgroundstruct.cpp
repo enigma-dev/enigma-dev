@@ -263,5 +263,20 @@ namespace enigma_user
     get_background(bck_copy,copy_background);
     enigma::graphics_replace_texture_alpha_from_texture(bck->texture, bck_copy->texture);
   }
+  
+  int background_get_texture(int backId) {
+    get_backgroundnv(bck2d,backId,-1);
+    return bck2d->texture;
+  }
+
+  int background_get_width(int backId) {
+    get_backgroundnv(bck2d,backId,-1);
+    return bck2d->width;
+  }
+
+  int background_get_height(int backId) {
+    get_backgroundnv(bck2d,backId,-1);
+    return bck2d->height;
+  }
 }
 

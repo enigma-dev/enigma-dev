@@ -73,6 +73,9 @@ int background_duplicate(int back);
 void background_assign(int back, int copy_background, bool free_texture = true);
 bool background_exists(int back);
 void background_set_alpha_from_background(int back, int copy_background, bool free_texture = true);
-
+int background_get_texture(int backId);
+int background_get_width(int backId);
+int background_get_height(int backId);
+  
 }
 

@@ -20,7 +20,6 @@
 #include <string>
 using std::string;
 
-#include "Direct3D9Headers.h"
 #include "../General/GSsprite.h"
 
 #include "Universal_System/nlpo2.h"
@@ -59,14 +58,6 @@ using std::string;
   #define get_sprite_null(spr,id,r) \
     const enigma::sprite *const spr = enigma::spritestructarray[id];
 #endif
-
-#include "Direct3D9Headers.h"
-#include "Bridges/General/DX9Context.h"
-#include "DX9TextureStruct.h"
-
-namespace enigma {
-  D3DCOLOR get_currentcolor();
-}
 
 namespace enigma_user
 {
