@@ -96,6 +96,10 @@ bool sprite_replace(int ind, string filename, int imgnumb, bool transparent, boo
     return sprite_replace(ind, filename, imgnumb, false, transparent, smooth, true, x_offset, y_offset, free_texture);
 }
 
+bool sprite_exists(int spr) {
+    return (unsigned(spr) < enigma::sprite_idmax) and bool(enigma::spritestructarray[spr]);
+}
+
 void sprite_save(int ind, unsigned subimg, string fname) {
     enigma::sprite *spr;
     if (!get_sprite_mtx(spr, ind))

@@ -39,8 +39,6 @@ void draw_sprite_general(int spr, int subimg, gs_scalar left, gs_scalar top, gs_
 void draw_sprite_tiled(int spr, int subimg, gs_scalar x, gs_scalar y);
 void draw_sprite_tiled_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, gs_scalar alpha);
 
-bool sprite_exists(int sprite);
-
 int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload, int xorig, int yorig);
 int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, int xorig, int yorig);
 void sprite_add_from_screen(int id, int x, int y, int w, int h, bool removeback, bool smooth);

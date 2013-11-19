@@ -105,6 +105,7 @@ int sprite_add(std::string filename, int imgnumb, bool precise, bool transparent
 int sprite_add(std::string filename, int imgnumb, bool transparent, bool smooth, int x_offset, int y_offset);  //GM7+ compatible
 bool sprite_replace(int ind, std::string fname, int imgnumb, bool precise, bool transparent, bool smooth, bool preload, int x_offset, int y_offset, bool free_texture = true); //GM8+ compatible
 bool sprite_replace(int ind, std::string fname, int imgnumb, bool transparent, bool smooth, int x_offset, int y_offset, bool free_texture = true);   //GM7+ compatible
+bool sprite_exists(int spr);
 void sprite_save(int ind, unsigned subimg, std::string fname);
 void sprite_save_strip(int ind, std::string fname);
 void sprite_delete(int ind, bool free_texture = true);
