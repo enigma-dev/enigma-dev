@@ -14,7 +14,7 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
-#include "ModelStruct.h"
+#include "GL3ModelStruct.h"
 #include "../General/OpenGLHeaders.h"
 #include "../General/GSd3d.h"
 #include "GL3shapes.h"
@@ -219,78 +219,78 @@ bool d3d_model_load(int id, string fname)
 	double col, alpha;
 	for (unsigned i = 0; i < count; i++) {
 		string str = file_text_read_string(file);
-		std::vector<std::string> split;
-		enigma::split(str, split, ' ');
-		switch (atoi(split[0].c_str()))
+		std::vector<std::string> dat;
+		enigma::split(str, dat, ' ');
+		switch (atoi(dat[0].c_str()))
 		{
 		case  0:
-			kind = atoi(split[1].c_str());
+			kind = atoi(dat[1].c_str());
 			d3d_model_primitive_begin(id, kind);
 			break;
 		case  1:
 			d3d_model_primitive_end(id);
 			break;
 		case  2:
-			v[0] = atof(split[1].c_str()); v[1] = atof(split[2].c_str()); v[2] = atof(split[3].c_str());
+			v[0] = atof(dat[1].c_str()); v[1] = atof(dat[2].c_str()); v[2] = atof(dat[3].c_str());
 			d3d_model_vertex(id, v[0],v[1],v[2]);
 			break;
 		case  3:
-			v[0] = atof(split[1].c_str()); v[1] = atof(split[2].c_str()); v[2] = atof(split[3].c_str());
-			col = atoi(split[4].c_str()); alpha = atof(split[5].c_str());
+			v[0] = atof(dat[1].c_str()); v[1] = atof(dat[2].c_str()); v[2] = atof(dat[3].c_str());
+			col = atoi(dat[4].c_str()); alpha = atof(dat[5].c_str());
 			d3d_model_vertex_color(id, v[0],v[1],v[2],col,alpha);
 			break;
 		case  4:
-			v[0] = atof(split[1].c_str()); v[1] = atof(split[2].c_str()); v[2] = atof(split[3].c_str());
-			t[0] = atof(split[4].c_str()); t[1] = atof(split[5].c_str());
+			v[0] = atof(dat[1].c_str()); v[1] = atof(dat[2].c_str()); v[2] = atof(dat[3].c_str());
+			t[0] = atof(dat[4].c_str()); t[1] = atof(dat[5].c_str());
 			d3d_model_vertex_texture(id, v[0],v[1],v[2],t[0],t[1]);
 			break;
 		case  5:
-			v[0] = atof(split[1].c_str()); v[1] = atof(split[2].c_str()); v[2] = atof(split[3].c_str());
-			t[0] = atof(split[4].c_str()); t[1] = atof(split[5].c_str());
-			col = atoi(split[6].c_str()); alpha = atof(split[7].c_str());
+			v[0] = atof(dat[1].c_str()); v[1] = atof(dat[2].c_str()); v[2] = atof(dat[3].c_str());
+			t[0] = atof(dat[4].c_str()); t[1] = atof(dat[5].c_str());
+			col = atoi(dat[6].c_str()); alpha = atof(dat[7].c_str());
 			d3d_model_vertex_texture_color(id, v[0],v[1],v[2],t[0],t[1],col,alpha);
 			break;
 		case  6:
-			v[0] = atof(split[1].c_str()); v[1] = atof(split[2].c_str()); v[2] = atof(split[3].c_str());
-			n[0] = atof(split[4].c_str()); n[1] = atof(split[5].c_str()); n[2] = atof(split[6].c_str());
+			v[0] = atof(dat[1].c_str()); v[1] = atof(dat[2].c_str()); v[2] = atof(dat[3].c_str());
+			n[0] = atof(dat[4].c_str()); n[1] = atof(dat[5].c_str()); n[2] = atof(dat[6].c_str());
 			d3d_model_vertex_normal(id, v[0],v[1],v[2],n[0],n[1],n[2]);
 			break;
 		case  7:
-			v[0] = atof(split[1].c_str()); v[1] = atof(split[2].c_str()); v[2] = atof(split[3].c_str());
-			n[0] = atof(split[4].c_str()); n[1] = atof(split[5].c_str()); n[2] = atof(split[6].c_str());
-			col = atoi(split[7].c_str()); alpha = atof(split[8].c_str());
+			v[0] = atof(dat[1].c_str()); v[1] = atof(dat[2].c_str()); v[2] = atof(dat[3].c_str());
+			n[0] = atof(dat[4].c_str()); n[1] = atof(dat[5].c_str()); n[2] = atof(dat[6].c_str());
+			col = atoi(dat[7].c_str()); alpha = atof(dat[8].c_str());
 			d3d_model_vertex_normal_color(id, v[0],v[1],v[2],n[0],n[1],n[2],col,alpha);
 			break;
 		case  8:
-			v[0] = atof(split[1].c_str()); v[1] = atof(split[2].c_str()); v[2] = atof(split[3].c_str());
-			n[0] = atof(split[4].c_str()); n[1] = atof(split[5].c_str()); n[2] = atof(split[6].c_str());
-			t[0] = atof(split[7].c_str()); t[1] = atof(split[8].c_str());
+			v[0] = atof(dat[1].c_str()); v[1] = atof(dat[2].c_str()); v[2] = atof(dat[3].c_str());
+			n[0] = atof(dat[4].c_str()); n[1] = atof(dat[5].c_str()); n[2] = atof(dat[6].c_str());
+			t[0] = atof(dat[7].c_str()); t[1] = atof(dat[8].c_str());
 			d3d_model_vertex_normal_texture(id, v[0],v[1],v[2],n[0],n[1],n[2],t[0],t[1]);
 			break;
 		case  9:
-			v[0] = atof(split[1].c_str()); v[1] = atof(split[2].c_str()); v[2] = atof(split[3].c_str());
-			n[0] = atof(split[4].c_str()); n[1] = atof(split[5].c_str()); n[2] = atof(split[6].c_str());
-			t[0] = atof(split[7].c_str()); t[1] = atof(split[8].c_str());
-			col = atoi(split[9].c_str()); alpha = atof(split[10].c_str());
+			v[0] = atof(dat[1].c_str()); v[1] = atof(dat[2].c_str()); v[2] = atof(dat[3].c_str());
+			n[0] = atof(dat[4].c_str()); n[1] = atof(dat[5].c_str()); n[2] = atof(dat[6].c_str());
+			t[0] = atof(dat[7].c_str()); t[1] = atof(dat[8].c_str());
+			col = atoi(dat[9].c_str()); alpha = atof(dat[10].c_str());
 			d3d_model_vertex_normal_texture_color(id, v[0],v[1],v[2],n[0],n[1],n[2],t[0],t[1],col,alpha);
 			break;
 		case  10:
-			d3d_model_block(id, atof(split[1].c_str()), atof(split[2].c_str()), atof(split[3].c_str()), atof(split[4].c_str()), atof(split[5].c_str()), atof(split[6].c_str()), atof(split[7].c_str()), atof(split[9].c_str()), true);
+			d3d_model_block(id, atof(dat[1].c_str()), atof(dat[2].c_str()), atof(dat[3].c_str()), atof(dat[4].c_str()), atof(dat[5].c_str()), atof(dat[6].c_str()), atof(dat[7].c_str()), atof(dat[9].c_str()), true);
 			break;
 		case  11:
-			d3d_model_cylinder(id, atof(split[1].c_str()), atof(split[2].c_str()), atof(split[3].c_str()), atof(split[4].c_str()), atof(split[5].c_str()), atof(split[6].c_str()), atof(split[7].c_str()), atof(split[9].c_str()), atoi(split[10].c_str()), atoi(split[11].c_str()));
+			d3d_model_cylinder(id, atof(dat[1].c_str()), atof(dat[2].c_str()), atof(dat[3].c_str()), atof(dat[4].c_str()), atof(dat[5].c_str()), atof(dat[6].c_str()), atof(dat[7].c_str()), atof(dat[9].c_str()), atoi(dat[10].c_str()), atoi(dat[11].c_str()));
 			break;
 		case  12:
-			d3d_model_cone(id, atof(split[1].c_str()), atof(split[2].c_str()), atof(split[3].c_str()), atof(split[4].c_str()), atof(split[5].c_str()), atof(split[6].c_str()), atof(split[7].c_str()), atof(split[9].c_str()), atoi(split[10].c_str()), atoi(split[11].c_str()));
+			d3d_model_cone(id, atof(dat[1].c_str()), atof(dat[2].c_str()), atof(dat[3].c_str()), atof(dat[4].c_str()), atof(dat[5].c_str()), atof(dat[6].c_str()), atof(dat[7].c_str()), atof(dat[9].c_str()), atoi(dat[10].c_str()), atoi(dat[11].c_str()));
 			break;
 		case  13:
-			d3d_model_ellipsoid(id, atof(split[1].c_str()), atof(split[2].c_str()), atof(split[3].c_str()), atof(split[4].c_str()), atof(split[5].c_str()), atof(split[6].c_str()), atof(split[7].c_str()), atof(split[9].c_str()), atoi(split[10].c_str()));
+			d3d_model_ellipsoid(id, atof(dat[1].c_str()), atof(dat[2].c_str()), atof(dat[3].c_str()), atof(dat[4].c_str()), atof(dat[5].c_str()), atof(dat[6].c_str()), atof(dat[7].c_str()), atof(dat[9].c_str()), atoi(dat[10].c_str()));
 			break;
 		case  14:
-			d3d_model_wall(id, atof(split[1].c_str()), atof(split[2].c_str()), atof(split[3].c_str()), atof(split[4].c_str()), atof(split[5].c_str()), atof(split[6].c_str()), atof(split[7].c_str()), atof(split[9].c_str()));
+			d3d_model_wall(id, atof(dat[1].c_str()), atof(dat[2].c_str()), atof(dat[3].c_str()), atof(dat[4].c_str()), atof(dat[5].c_str()), atof(dat[6].c_str()), atof(dat[7].c_str()), atof(dat[9].c_str()));
 			break;
 		case  15:
-			d3d_model_floor(id, atof(split[1].c_str()), atof(split[2].c_str()), atof(split[3].c_str()), atof(split[4].c_str()), atof(split[5].c_str()), atof(split[6].c_str()), atof(split[7].c_str()), atof(split[9].c_str()));
+			d3d_model_floor(id, atof(dat[1].c_str()), atof(dat[2].c_str()), atof(dat[3].c_str()), atof(dat[4].c_str()), atof(dat[5].c_str()), atof(dat[6].c_str()), atof(dat[7].c_str()), atof(dat[9].c_str()));
 			break;
 		}
 		file_text_readln(file);
