@@ -51,7 +51,7 @@ unsigned int split(const std::string &txt, std::vector<std::string> &strs, char 
 	strs.clear();
 
 	// Decompose statement
-	while( pos != std::string::npos ) {
+	while( pos != txt.length() ) {
 		strs.push_back( txt.substr( initialPos, pos - initialPos + 1 ) );
 		initialPos = pos + 1;
 
@@ -59,7 +59,7 @@ unsigned int split(const std::string &txt, std::vector<std::string> &strs, char 
 	}
 
 	// Add the last one
-	strs.push_back( txt.substr( initialPos, std::min( pos, txt.size() ) - initialPos + 1 ) );
+	strs.push_back( txt.substr( initialPos, std::min( pos, (unsigned)txt.size() ) - initialPos + 1 ) );
 
 	return strs.size();
 }
