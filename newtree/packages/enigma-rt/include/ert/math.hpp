@@ -28,8 +28,8 @@ namespace ert {
   variant choose(const varargs&);
   double random(double);
   double random_range(double, double);
-  int irandom(int);
-  int irandom_range(int, int);
+  double irandom(double);
+  double irandom_range(double, double);
   void random_set_seed(double);
   double random_get_seed();
   void randomize();
@@ -48,24 +48,12 @@ namespace ert {
   double lengthdir_y(double, double);
 
   // Rounding Functions
-  inline int round(const variant&);
-  int round(double);
-  int round(int);
-  inline int floor(const variant&);
-  int floor(double);
-  int floor(int);
-  inline double frac(const variant&);
+  double round(double);
+  double floor(double);
   double frac(double);
-  double frac(int);
-  inline variant abs(const variant&);
   double abs(double);
-  int abs(int);
-  inline int sign(const variant&);
-  int sign(double);
-  int sign(int);
-  inline int ceil(const variant&);
-  int ceil(double);
-  int ceil(int);
+  double sign(double);
+  double ceil(double);
   variant max(const varargs&);
   variant mean(const varargs&);
   variant median(const varargs&);
@@ -78,13 +66,8 @@ namespace ert {
   int is_string(const variant&);
   double exp(double);
   double ln(double);
-  inline variant power(const variant&, double);
-  inline variant power(const variant&, int);
   double power(double, double);
-  int power(int, int);
-  inline variant sqr(const variant&);
   double sqr(double);
-  int sqr(int);
   double sqrt(double);
   double log2(double);
   double log10(double);
