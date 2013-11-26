@@ -53,25 +53,25 @@ namespace ert {
   // Buffer Functions
   double buffer_create(double, double, double);
   double buffer_delete(double);
-  variant buffer_read(double, double);
-  double buffer_write(double, double, const variant&);
-  double buffer_fill(double, double, double, const variant&, double);
+  variant_t buffer_read(double, double);
+  double buffer_write(double, double, const variant_t&);
+  double buffer_fill(double, double, double, const variant_t&, double);
   double buffer_seek(double, double, double);
   double buffer_tell(double);
-  variant buffer_peek(double, double, double);
-  double buffer_poke(double, double, double, const variant&);
-  double buffer_save(double, const string&);
-  double buffer_save_ext(double, const string&, double, double);
-  double buffer_load(const string&);
-  double buffer_load_ext(double, const string&, double);
+  variant_t buffer_peek(double, double, double);
+  double buffer_poke(double, double, double, const variant_t&);
+  double buffer_save(double, const string_t&);
+  double buffer_save_ext(double, const string_t&, double, double);
+  double buffer_load(const string_t&);
+  double buffer_load_ext(double, const string_t&, double);
   double buffer_copy(double, double, double, double, double);
   double buffer_get_size(double);
   double buffer_resize(double, double);
   double buffer_sizeof(double);
-  string buffer_md5(double, double, double);
-  string buffer_sha1(double, double, double);
-  string buffer_base64_encode(double, double, double);
-  double buffer_base64_decode(const string&);
+  string_t buffer_md5(double, double, double);
+  string_t buffer_sha1(double, double, double);
+  string_t buffer_base64_encode(double, double, double);
+  double buffer_base64_decode(const string_t&);
 }
 
 #endif // ERT_BUFFER_HPP_
