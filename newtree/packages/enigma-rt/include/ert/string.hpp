@@ -25,7 +25,7 @@
 
 namespace ert {
   // std::string is well optimized by many platforms and toolchains
-  typedef std::string string;
+  typedef std::string string_t;
 }
 
 #endif // ERT_STRING_HPP_
