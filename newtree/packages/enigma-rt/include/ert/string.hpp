@@ -21,6 +21,8 @@
 #ifndef ERT_STRING_HPP_
 #define ERT_STRING_HPP_
 
+#include <string>
+
 namespace ert {
   // std::string is well optimized by many platforms and toolchains
   typedef std::string string;
