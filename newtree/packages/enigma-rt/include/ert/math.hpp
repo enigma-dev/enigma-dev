@@ -25,7 +25,7 @@ namespace ert {
   double math_set_epsilon(double);
 
   // Random Functions
-  variant choose(const varargs&);
+  variant_t choose(const varargs_t&);
   double random(double);
   double random_range(double, double);
   double irandom(double);
@@ -54,16 +54,16 @@ namespace ert {
   double abs(double);
   double sign(double);
   double ceil(double);
-  variant max(const varargs&);
-  variant mean(const varargs&);
-  variant median(const varargs&);
-  variant min(const varargs&);
+  variant_t max(const varargs_t&);
+  variant_t mean(const varargs_t&);
+  variant_t median(const varargs_t&);
+  variant_t min(const varargs_t&);
   double lerp(double, double, double);
   double clamp(double, double, double);
 
   // Miscellaneous Functions
-  double is_real(const variant&);
-  double is_string(const variant&);
+  double is_real(const variant_t&);
+  double is_string(const variant_t&);
   double exp(double);
   double ln(double);
   double power(double, double);
