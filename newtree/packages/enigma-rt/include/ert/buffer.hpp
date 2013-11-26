@@ -21,33 +21,36 @@
 #ifndef ERT_BUFFER_HPP_
 #define ERT_BUFFER_HPP_
 
+#include "string.hpp"
+
 namespace ert {
   // Buffer Constants
   enum {
-    buffer_fixed  = 0,
-    buffer_grow   = 1,
-    buffer_wrap   = 2,
-    buffer_fast   = 3
+    buffer_fixed = 0,
+    buffer_grow,
+    buffer_wrap,
+    buffer_fast
   };
   enum {
-    buffer_u8     = 0,
-    buffer_s8     = 1,
-    buffer_u16    = 2,
-    buffer_s16    = 3,
-    buffer_u32    = 4,
-    buffer_s32    = 5,
-    buffer_f16    = 6,
-    buffer_f32    = 7,
-    buffer_f64    = 8,
-    buffer_bool   = 9,
-    buffer_string = 10
+    buffer_u8 = 0,
+    buffer_s8,
+    buffer_u16,
+    buffer_s16,
+    buffer_u32,
+    buffer_s32,
+    buffer_f16,
+    buffer_f32,
+    buffer_f64,
+    buffer_bool,
+    buffer_string
   };
   enum {
-    buffer_seek_start     = 0,
-    buffer_seek_relative  = 1,
-    buffer_seek_end       = 2
+    buffer_seek_start = 0,
+    buffer_seek_relative,
+    buffer_seek_end
   }
-  // Vector Functions
+
+  // Buffer Functions
   double buffer_create(double, double, double);
   double buffer_delete(double);
   variant buffer_read(double, double);
