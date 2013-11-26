@@ -22,7 +22,7 @@
 #define ERT_MATH_HPP_
 
 namespace ert {
-  void math_set_epsilon(double);
+  double math_set_epsilon(double);
 
   // Random Functions
   variant choose(const varargs&);
@@ -30,9 +30,9 @@ namespace ert {
   double random_range(double, double);
   double irandom(double);
   double irandom_range(double, double);
-  void random_set_seed(double);
+  double random_set_seed(double);
   double random_get_seed();
-  void randomize();
+  double randomize();
 
   // Trigonometric Functions
   double arccos(double);
@@ -62,8 +62,8 @@ namespace ert {
   double clamp(double, double, double);
 
   // Miscellaneous Functions
-  int is_real(const variant&);
-  int is_string(const variant&);
+  double is_real(const variant&);
+  double is_string(const variant&);
   double exp(double);
   double ln(double);
   double power(double, double);
