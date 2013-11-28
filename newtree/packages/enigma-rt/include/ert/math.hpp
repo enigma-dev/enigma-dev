@@ -23,6 +23,7 @@
 
 #include "ert/real.hpp"
 #include "ert/variant.hpp"
+#include "ert/varargs.hpp"
 
 namespace ert {
   real_t math_set_epsilon(real_t);
