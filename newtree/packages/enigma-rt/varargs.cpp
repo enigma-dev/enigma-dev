@@ -18,21 +18,16 @@
 
 ******************************************************************************/
 
-#ifndef ERT_VARARGS_HPP_
-#define ERT_VARARGS_HPP_
-
 #include "ert/variant.hpp"
+#include "ert/varargs.hpp"
 
 namespace ert {
-  struct varargs {
-    varargs();
-    varargs& operator ,(const variant_t&);
+  varargs::varargs()
+    : argc(0) {
+  }
 
-    int argc;
-    variant_t argv[15];
-  };
-
-  typedef varargs varargs_t;
+  varargs& varargs::operator ,(const variant_t& arg) {
+    this->argv[this->argc++] = arg;
+    return *this;
+  }
 }
-
-#endif // ERT_VARARGS_HPP_
