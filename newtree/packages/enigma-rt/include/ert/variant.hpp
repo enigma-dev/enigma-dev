@@ -27,6 +27,8 @@
 namespace ert {
   struct variant {
     variant();
+    variant(real_t);
+    variant(string_t);
     operator real_t();
     operator string_t();
 
