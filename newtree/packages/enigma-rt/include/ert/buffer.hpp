@@ -21,6 +21,7 @@
 #ifndef ERT_BUFFER_HPP_
 #define ERT_BUFFER_HPP_
 
+#include "ert/real.hpp"
 #include "ert/string.hpp"
 #include "ert/variant.hpp"
 
@@ -52,27 +53,27 @@ namespace ert {
   }
 
   // Buffer Functions
-  double buffer_create(double, double, double);
-  double buffer_delete(double);
-  variant_t buffer_read(double, double);
-  double buffer_write(double, double, const variant_t&);
-  double buffer_fill(double, double, double, const variant_t&, double);
-  double buffer_seek(double, double, double);
-  double buffer_tell(double);
-  variant_t buffer_peek(double, double, double);
-  double buffer_poke(double, double, double, const variant_t&);
-  double buffer_save(double, const string_t&);
-  double buffer_save_ext(double, const string_t&, double, double);
-  double buffer_load(const string_t&);
-  double buffer_load_ext(double, const string_t&, double);
-  double buffer_copy(double, double, double, double, double);
-  double buffer_get_size(double);
-  double buffer_resize(double, double);
-  double buffer_sizeof(double);
-  string_t buffer_md5(double, double, double);
-  string_t buffer_sha1(double, double, double);
-  string_t buffer_base64_encode(double, double, double);
-  double buffer_base64_decode(const string_t&);
+  real_t buffer_create(real_t, real_t, real_t);
+  real_t buffer_delete(real_t);
+  variant_t buffer_read(real_t, real_t);
+  real_t buffer_write(real_t, real_t, const variant_t&);
+  real_t buffer_fill(real_t, real_t, real_t, const variant_t&, real_t);
+  real_t buffer_seek(real_t, real_t, real_t);
+  real_t buffer_tell(real_t);
+  variant_t buffer_peek(real_t, real_t, real_t);
+  real_t buffer_poke(real_t, real_t, real_t, const variant_t&);
+  real_t buffer_save(real_t, const string_t&);
+  real_t buffer_save_ext(real_t, const string_t&, real_t, real_t);
+  real_t buffer_load(const string_t&);
+  real_t buffer_load_ext(real_t, const string_t&, real_t);
+  real_t buffer_copy(real_t, real_t, real_t, real_t, real_t);
+  real_t buffer_get_size(real_t);
+  real_t buffer_resize(real_t, real_t);
+  real_t buffer_sizeof(real_t);
+  string_t buffer_md5(real_t, real_t, real_t);
+  string_t buffer_sha1(real_t, real_t, real_t);
+  string_t buffer_base64_encode(real_t, real_t, real_t);
+  real_t buffer_base64_decode(const string_t&);
 }
 
 #endif // ERT_BUFFER_HPP_

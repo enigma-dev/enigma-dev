@@ -18,28 +18,11 @@
 
 ******************************************************************************/
 
-#ifndef ERT_VARIANT_HPP_
-#define ERT_VARIANT_HPP_
-
-#include "ert/real.hpp"
-#include "ert/string.hpp"
+#ifndef ERT_REAL_HPP_
+#define ERT_REAL_HPP_
 
 namespace ert {
-  struct variant {
-    variant();
-    operator real_t();
-    operator string_t();
-
-    enum type_t {
-      vt_real = 0,
-      vt_string
-    } type;
-
-    real_t real;
-    string_t string;
-  };
-
-  typedef variant variant_t;
+  typedef double real_t;
 }
 
-#endif // ERT_VARIANT_HPP_
+#endif // ERT_REAL_HPP_
