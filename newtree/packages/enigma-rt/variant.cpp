@@ -18,31 +18,36 @@
 
 ******************************************************************************/
 
-#ifndef ERT_VARIANT_HPP_
-#define ERT_VARIANT_HPP_
-
 #include "ert/real.hpp"
 #include "ert/string.hpp"
+#include "ert/variant.hpp"
 
 namespace ert {
-  struct variant {
-    variant();
-    variant(real_t);
-    variant(string_t);
-    operator real_t() const;
-    operator string_t() const;
+  variant::variant()
+    : type(vt_uninit) {
+  }
 
-    enum type_t {
-      vt_uninit = 0,
-      vt_real,
-      vt_string
-    } type;
+  variant::variant(real_t val)
+    : type(vt_real), real(val) {
+  }
 
-    real_t real;
-    string_t string;
-  };
+  variant::variant(string_t val)
+    : type(vt_string), string(val) {
+  }
 
-  typedef variant variant_t;
+  variant::operator real_t() const {
+    if (this->type != vt_real) {
+      // TODO: show error
+      throw;
+    }
+    return this->real;
+  }
+
+  variant::operator string_t() const {
+    if (this->type != vt_string) {
+      // TODO: show error
+      throw;
+    }
+    return this->string;
+  }
 }
-
-#endif // ERT_VARIANT_HPP_
