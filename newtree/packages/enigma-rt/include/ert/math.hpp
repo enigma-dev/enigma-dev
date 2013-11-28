@@ -21,59 +21,60 @@
 #ifndef ERT_MATH_HPP_
 #define ERT_MATH_HPP_
 
+#include "ert/real.hpp"
 #include "ert/variant.hpp"
 
 namespace ert {
-  double math_set_epsilon(double);
+  real_t math_set_epsilon(real_t);
 
   // Random Functions
   variant_t choose(const varargs_t&);
-  double random(double);
-  double random_range(double, double);
-  double irandom(double);
-  double irandom_range(double, double);
-  double random_set_seed(double);
-  double random_get_seed();
-  double randomize();
+  real_t random(real_t);
+  real_t random_range(real_t, real_t);
+  real_t irandom(real_t);
+  real_t irandom_range(real_t, real_t);
+  real_t random_set_seed(real_t);
+  real_t random_get_seed();
+  real_t randomize();
 
   // Trigonometric Functions
-  double arccos(double);
-  double arcsin(double);
-  double arctan(double);
-  double arctan2(double, double);
-  double sin(double);
-  double tan(double);
-  double cos(double);
-  double degtorad(double);
-  double radtodeg(double);
-  double lengthdir_x(double, double);
-  double lengthdir_y(double, double);
+  real_t arccos(real_t);
+  real_t arcsin(real_t);
+  real_t arctan(real_t);
+  real_t arctan2(real_t, real_t);
+  real_t sin(real_t);
+  real_t tan(real_t);
+  real_t cos(real_t);
+  real_t degtorad(real_t);
+  real_t radtodeg(real_t);
+  real_t lengthdir_x(real_t, real_t);
+  real_t lengthdir_y(real_t, real_t);
 
   // Rounding Functions
-  double round(double);
-  double floor(double);
-  double frac(double);
-  double abs(double);
-  double sign(double);
-  double ceil(double);
+  real_t round(real_t);
+  real_t floor(real_t);
+  real_t frac(real_t);
+  real_t abs(real_t);
+  real_t sign(real_t);
+  real_t ceil(real_t);
   variant_t max(const varargs_t&);
   variant_t mean(const varargs_t&);
   variant_t median(const varargs_t&);
   variant_t min(const varargs_t&);
-  double lerp(double, double, double);
-  double clamp(double, double, double);
+  real_t lerp(real_t, real_t, real_t);
+  real_t clamp(real_t, real_t, real_t);
 
   // Miscellaneous Functions
-  double is_real(const variant_t&);
-  double is_string(const variant_t&);
-  double exp(double);
-  double ln(double);
-  double power(double, double);
-  double sqr(double);
-  double sqrt(double);
-  double log2(double);
-  double log10(double);
-  double logn(double, double);
+  real_t is_real(const variant_t&);
+  real_t is_string(const variant_t&);
+  real_t exp(real_t);
+  real_t ln(real_t);
+  real_t power(real_t, real_t);
+  real_t sqr(real_t);
+  real_t sqrt(real_t);
+  real_t log2(real_t);
+  real_t log10(real_t);
+  real_t logn(real_t, real_t);
 }
 
 #endif // ERT_MATH_HPP_

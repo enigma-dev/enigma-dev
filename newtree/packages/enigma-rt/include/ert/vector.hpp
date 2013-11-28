@@ -21,15 +21,17 @@
 #ifndef ERT_VECTOR_HPP_
 #define ERT_VECTOR_HPP_
 
+#include "ert/real.hpp"
+
 namespace ert {
   // Vector Functions
-  double point_direction(double, double, double, double);
-  double point_distance(double, double, double, double);
-  double point_distance_3d(double, double, double, double, double, double);
-  double dot_product(double, double, double, double);
-  double dot_product_3d(double, double, double, double, double, double);
-  double dot_product_normalised(double, double, double, double);
-  double dot_product_normalised_3d(double, double, double, double, double, double);
+  real_t point_direction(real_t, real_t, real_t, real_t);
+  real_t point_distance(real_t, real_t, real_t, real_t);
+  real_t point_distance_3d(real_t, real_t, real_t, real_t, real_t, real_t);
+  real_t dot_product(real_t, real_t, real_t, real_t);
+  real_t dot_product_3d(real_t, real_t, real_t, real_t, real_t, real_t);
+  real_t dot_product_normalised(real_t, real_t, real_t, real_t);
+  real_t dot_product_normalised_3d(real_t, real_t, real_t, real_t, real_t, real_t);
 }
 
 #endif // ERT_VECTOR_HPP_
