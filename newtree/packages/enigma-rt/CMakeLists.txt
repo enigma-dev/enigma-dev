@@ -1,4 +1,6 @@
 
+project (ENIGMA_RT)
+
 include_directories ("include")
 
 set (ENIGMA_RT_SRCS
