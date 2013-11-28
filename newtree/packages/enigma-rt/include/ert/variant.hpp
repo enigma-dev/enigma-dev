@@ -24,23 +24,20 @@
 #include "ert/string.hpp"
 
 namespace ert {
-  enum variant_type {
-    vt_real = 0,
-    vt_string
-  };
-
   struct variant {
-  public:
     variant();
-
     operator double();
     operator string_t();
 
-    variant_type type;
+    enum type_t {
+      vt_real = 0,
+      vt_string
+    } type;
+
     double real;
     string_t string;
   };
-  
+
   typedef variant variant_t;
 }
 
