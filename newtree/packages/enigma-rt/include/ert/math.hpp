@@ -21,6 +21,8 @@
 #ifndef ERT_MATH_HPP_
 #define ERT_MATH_HPP_
 
+#include "ert/variant.hpp"
+
 namespace ert {
   double math_set_epsilon(double);
 
