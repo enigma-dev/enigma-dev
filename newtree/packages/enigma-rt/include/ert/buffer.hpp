@@ -21,7 +21,8 @@
 #ifndef ERT_BUFFER_HPP_
 #define ERT_BUFFER_HPP_
 
-#include "string.hpp"
+#include "ert/string.hpp"
+#include "ert/variant.hpp"
 
 namespace ert {
   // Buffer Constants
