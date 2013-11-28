@@ -29,8 +29,8 @@ namespace ert {
     variant();
     variant(real_t);
     variant(string_t);
-    operator real_t();
-    operator string_t();
+    operator real_t() const;
+    operator string_t() const;
 
     enum type_t {
       vt_real = 0,
