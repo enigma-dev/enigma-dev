@@ -18,13 +18,30 @@
 
 ******************************************************************************/
 
-#ifndef ERT_STRING_HPP_
-#define ERT_STRING_HPP_
+#ifndef ERT_VARIANT_HPP_
+#define ERT_VARIANT_HPP_
 
-#include <string>
+#include "ert/string.hpp"
 
 namespace ert {
-  typedef std::string string_t;
+  enum variant_type {
+    vt_real = 0,
+    vt_string
+  };
+
+  struct variant {
+  public:
+    variant();
+
+    operator double();
+    operator string_t();
+
+    variant_type type;
+    double real;
+    string_t string;
+  };
+  
+  typedef variant variant_t;
 }
 
-#endif // ERT_STRING_HPP_
+#endif // ERT_VARIANT_HPP_

@@ -1,4 +1,4 @@
-//#include "ert/math.hpp"
+#include "ert/math.hpp"
 
 int foo()
 {
