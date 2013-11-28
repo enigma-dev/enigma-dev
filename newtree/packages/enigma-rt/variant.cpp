@@ -40,8 +40,6 @@ namespace ert {
       // TODO: show error
       throw;
     }
-    // varargs_t n = (varargs_t(3), 4, 5, 6);
-    // choose((varargs_t(3),4,5,6));
     return this->real;
   }
 
