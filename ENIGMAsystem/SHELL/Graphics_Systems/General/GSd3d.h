@@ -80,14 +80,12 @@ void d3d_depth_clear();
 void d3d_depth_clear_value(float value);
 void d3d_start();
 void d3d_end();
-bool d3d_get_mode();
 void d3d_set_perspective(bool enable);
 void d3d_set_hidden(bool enable);
 void d3d_set_zwriteenable(bool enable);
 void d3d_set_lighting(bool enable);
 
 void d3d_set_culling(int mode);
-int d3d_get_culling();
 void d3d_set_fill_mode(int fill);
 void d3d_set_line_width(float value);
 void d3d_set_point_size(float value);
@@ -102,6 +100,10 @@ void d3d_set_fog_end(double end);
 void d3d_set_fog_density(double density);
 void d3d_set_depth(double dep);
 void d3d_set_shading(bool smooth);
+
+bool d3d_get_mode();
+int d3d_get_culling();
+bool d3d_get_hidden();
 
 void d3d_set_projection(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs_scalar xto, gs_scalar yto, gs_scalar zto,gs_scalar xup, gs_scalar yup, gs_scalar zup);
 void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs_scalar xto, gs_scalar yto, gs_scalar zto, gs_scalar xup, gs_scalar yup, gs_scalar zup, double angle, double aspect, double znear, double zfar);

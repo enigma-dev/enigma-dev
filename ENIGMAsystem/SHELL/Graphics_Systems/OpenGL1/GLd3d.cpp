@@ -120,11 +120,6 @@ void d3d_end()
   glMatrixMode(GL_MODELVIEW);
 }
 
-bool d3d_get_mode()
-{
-    return enigma::d3dMode;
-}
-
 // disabling hidden surface removal in means there is no depth buffer
 void d3d_set_hidden(bool enable)
 {
@@ -200,6 +195,15 @@ void d3d_set_culling(int mode)
   enigma::d3dCulling = mode;
   ((mode > 0)?glEnable:glDisable)(GL_CULL_FACE);
   glFrontFace(cullingstates[mode]);
+}
+
+bool d3d_get_mode()
+{
+    return enigma::d3dMode;
+}
+
+bool d3d_get_hidden() {
+	return enigma::d3dHidden;
 }
 
 int d3d_get_culling() {

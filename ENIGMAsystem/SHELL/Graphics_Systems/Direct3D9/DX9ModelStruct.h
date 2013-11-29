@@ -249,6 +249,7 @@ class Mesh
   void Clear()
   {
     ClearData();
+	
 	pointVertices.reserve(64000);
 	pointIndices.reserve(64000);
 	lineVertices.reserve(64000);
@@ -686,6 +687,9 @@ class Mesh
 	vector<gs_scalar> vdata;
 	vector<unsigned> idata;
 	
+	vdata.reserve(triangleIndexedVertices.size() + lineIndexedVertices.size() + pointIndexedVertices.size() + triangleVertices.size() + lineVertices.size() + pointVertices.size());
+	idata.reserve(triangleIndices.size() + lineIndices.size() + pointIndices.size());
+	
 	unsigned interleave = 0;
 		
 	if (triangleIndices.size() > 0) {
@@ -728,7 +732,7 @@ class Mesh
 		// create a index buffer interface
 		if (indexbuffer == NULL) {
 			if (vbodynamic) {
-				d3dmgr->CreateIndexBuffer(idata.size() * sizeof(unsigned), D3DUSAGE_DYNAMIC, D3DFMT_INDEX32, D3DPOOL_SYSTEMMEM, &indexbuffer, NULL);
+				d3dmgr->CreateIndexBuffer(idata.size() * sizeof(unsigned), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, D3DFMT_INDEX32, D3DPOOL_SYSTEMMEM, &indexbuffer, NULL);
 			} else {
 				d3dmgr->CreateIndexBuffer(idata.size() * sizeof(unsigned), D3DUSAGE_WRITEONLY, D3DFMT_INDEX32, D3DPOOL_MANAGED, &indexbuffer, NULL);
 			}
@@ -818,7 +822,7 @@ class Mesh
 	// create a vertex buffer interface
 	if (vertexbuffer == NULL) {
 		if (vbodynamic) {
-			d3dmgr->CreateVertexBuffer(vdata.size() * sizeof( gs_scalar ), D3DUSAGE_DYNAMIC, 0, D3DPOOL_SYSTEMMEM, &vertexbuffer, NULL);
+			d3dmgr->CreateVertexBuffer(vdata.size() * sizeof( gs_scalar ), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, 0, D3DPOOL_SYSTEMMEM, &vertexbuffer, NULL);
 		} else {
 			d3dmgr->CreateVertexBuffer(vdata.size() * sizeof( gs_scalar ), D3DUSAGE_WRITEONLY, 0, D3DPOOL_MANAGED, &vertexbuffer, NULL);
 		}

@@ -84,11 +84,6 @@ void d3d_end()
 	d3d_set_hidden(false);
 }
 
-bool d3d_get_mode()
-{
-    return enigma::d3dMode;
-}
-
 void d3d_set_hidden(bool enable)
 {
 	d3d_set_zwriteenable(enable);
@@ -162,6 +157,16 @@ void d3d_set_culling(int mode)
 	d3dmgr->SetRenderState(D3DRS_CULLMODE, cullingstates[mode]);
 }
 
+bool d3d_get_mode()
+{
+    return enigma::d3dMode;
+}
+
+bool d3d_get_hidden()
+{
+    return enigma::d3dHidden;
+}
+
 int d3d_get_culling() {
 	return enigma::d3dCulling;
 }
@@ -187,7 +192,7 @@ void d3d_set_perspective(bool enable)
 {
   D3DXMATRIX matProjection;
   if (enable) {
-    D3DXMatrixPerspectiveFovLH(&matProjection, 45, -view_wview[view_current] / (double)view_hview[view_current], 1, 32000);
+    D3DXMatrixPerspectiveFovLH(&matProjection, 45, -view_wview[view_current] / (double)view_hview[view_current], 32000, -32000);
   } else {
     D3DXMatrixPerspectiveFovLH(&matProjection, 0, 1, 0, 1);
   }
