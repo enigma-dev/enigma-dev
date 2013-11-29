@@ -249,7 +249,6 @@ class Mesh
   void Clear()
   {
     ClearData();
-	
 	pointVertices.reserve(64000);
 	pointIndices.reserve(64000);
 	lineVertices.reserve(64000);
@@ -432,7 +431,6 @@ class Mesh
   
   bool CalculateNormals(bool smooth, bool invert)
   {
-	
 	unsigned int stride = vertexStride + useNormals*3 + useTextures*2 + useColors*4;
 	
 	int oft = useNormals * 3;
@@ -724,7 +722,6 @@ class Mesh
 		}
 	}
 	
-	VOID* pVoid;    // a void pointer
 	if (idata.size() > 0) {
 		vboindexed = true;
 		indexedoffset += vdata.size();
@@ -737,8 +734,9 @@ class Mesh
 			}
 		}
 		// lock index buffer and load the indices into it
-		indexbuffer->Lock(0, 0, (void**)&pVoid, 0);
-		memcpy(pVoid, &idata[0], idata.size() * sizeof(unsigned));
+		VOID* iVoid;    // a void pointer
+		indexbuffer->Lock(0, 0, (void**)&iVoid, D3DLOCK_DISCARD);
+		memcpy(iVoid, &idata[0], idata.size() * sizeof(unsigned));
 		indexbuffer->Unlock();
 
 		// Clean up temporary interleaved data
@@ -793,7 +791,11 @@ class Mesh
 		bool different = (elements != numElements);
 		
 		//TODO: Might need a loop here to check if the declaration really is different
-		//for (int i = 0; i < elements; 
+		for (unsigned i = 0; i < elements; i++) {
+			if (decl[i].Type != customvertex[i].Type) {
+				different = true; break;
+			}
+		}
 		
 		if (different) {
 			vertex_declaration->Release();
@@ -824,7 +826,8 @@ class Mesh
 	
 	// Send the data to the GPU
 	// lock vertex buffer and load the vertices into it
-	vertexbuffer->Lock(0, 0, (VOID**)&pVoid, 0);
+	VOID* pVoid;    // a void pointer
+	vertexbuffer->Lock(0, 0, (VOID**)&pVoid, D3DLOCK_DISCARD);
 	memcpy(pVoid, &vdata[0], vdata.size() * sizeof(gs_scalar));
 	
 	vertexbuffer->Unlock();
@@ -836,13 +839,13 @@ class Mesh
   }
 
   void Draw()
-  {
+  {				
 	if (!GetStride()) { return; }
     if (vertexbuffer == NULL || !vbogenerated) {
 	  vbogenerated = true;
       BufferGenerate();
     }
-  
+
 	unsigned stride = GetStride();
 	
 	d3dmgr->SetVertexDeclaration(vertex_declaration);

@@ -97,11 +97,6 @@ unsigned d3d_model_get_stride(int id) {
 	return meshes[id]->GetStride();
 }
 
-void d3d_model_save(int id, string fname)
-{
-  //TODO: Write save code for meshes, will need to get the vertex data back from the GPU if buffered
-}
-
 bool d3d_model_load(int id, string fname)
 {
   //TODO: this needs to be rewritten properly not using the file_text functions

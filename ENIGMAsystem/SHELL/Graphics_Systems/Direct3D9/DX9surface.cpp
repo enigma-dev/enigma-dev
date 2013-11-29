@@ -76,7 +76,7 @@ int surface_create(int width, int height)
 int surface_create_msaa(int width, int height, int levels)
 {
 	LPDIRECT3DTEXTURE9 texture = NULL;
-	d3dmgr->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &texture, NULL);			 
+	d3dmgr->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &texture, NULL);			 
 	enigma::Surface* surface = new enigma::Surface();	 
 	TextureStruct* gmTexture = new TextureStruct(texture);
 	gmTexture->isFont = false;

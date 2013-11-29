@@ -54,6 +54,7 @@ LPDIRECT3DSURFACE9 pBackBuffer;
 LPDIRECT3DSURFACE9 pRenderTarget;
 
 int last_stride;
+bool hasdrawn;
 int shapes_d3d_model;
 int shapes_d3d_texture;
 
@@ -70,11 +71,12 @@ public:
 LPDIRECT3DDEVICE9 device;    // the pointer to the device class
 
 ContextManager() {
+	hasdrawn = false;
 	shapes_d3d_model = -1;
 	shapes_d3d_texture = -1;
+	last_stride = -1;
 	vertexShader = NULL;
 	pixelShader = NULL;
-	last_stride = -1;
 }
 
 ~ContextManager() {
@@ -177,21 +179,21 @@ void BeginShapesBatching(int texId) {
 		shapes_d3d_model = d3d_model_create(true);
 		last_stride = -1;
 	} else if (texId != shapes_d3d_texture || (d3d_model_get_stride(shapes_d3d_model) != last_stride && last_stride != -1)) {
-		
-		stringstream ss;
-		ss << last_stride;
-		//show_error(ss.str(), false);
 		last_stride = -1;
-		d3d_model_draw(shapes_d3d_model, shapes_d3d_texture);
-		d3d_model_clear(shapes_d3d_model);
+		if (!hasdrawn) {
+			d3d_model_draw(shapes_d3d_model, shapes_d3d_texture);
+			d3d_model_clear(shapes_d3d_model);
+		}
 	} else {
 		last_stride = d3d_model_get_stride(shapes_d3d_model);
 	}
+	hasdrawn = false;
 	shapes_d3d_texture = texId;
 }
 
 void EndShapesBatching() {
-	if (shapes_d3d_model == -1) { return; }
+	if (hasdrawn || shapes_d3d_model == -1) { return; }
+	hasdrawn = true;
 	d3d_model_draw(shapes_d3d_model, shapes_d3d_texture);
 	d3d_model_clear(shapes_d3d_model);
 	shapes_d3d_texture = -1;
