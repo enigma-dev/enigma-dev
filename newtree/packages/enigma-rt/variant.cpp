@@ -77,31 +77,9 @@ namespace ert {
 
   variant& variant::operator =(const variant& rhs) {
     assert_init(rhs);
-    assert_similar(*this, rhs);
     this->type = rhs.type;
     this->real = rhs.real;
     this->string = rhs.string;
-    return *this;
-  }
-
-  variant& variant::operator +=(const variant& rhs) {
-    assert_init(*this);
-    assert_init(rhs);
-    assert_similar(*this, rhs);
-    if (this->type == vt_real) {
-      this->real += rhs.real;
-    } else {
-      this->string += rhs.string;
-    }
-    return *this;
-  }
-
-  variant& variant::operator -=(real_t rhs) {
-    assert_init(*this);
-    assert_init(rhs);
-    assert_real(*this);
-    assert_real(rhs);
-    this->real -= rhs;
     return *this;
   }
 }
