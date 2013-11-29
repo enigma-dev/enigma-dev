@@ -29,8 +29,6 @@
 
 #include "Universal_System/roomsystem.h"
 
-#include "GL3shapes.h"
-
 #define __GETR(x) (gs_scalar)(((x & 0x0000FF))/255.0)
 #define __GETG(x) (gs_scalar)(((x & 0x00FF00) >> 8)/255.0)
 #define __GETB(x) (gs_scalar)(((x & 0xFF0000) >> 16)/255.0)

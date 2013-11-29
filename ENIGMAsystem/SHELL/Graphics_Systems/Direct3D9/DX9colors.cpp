@@ -109,8 +109,13 @@ int draw_get_blue()  { return enigma::currentcolor[2]; }
 float draw_get_alpha() {
   return enigma::currentcolor[3] / 255.0;
 }
+
 int make_color_rgb(unsigned char r, unsigned char g, unsigned char b) {
   return r + (g << 8) + (b << 16);
+}
+
+int make_color_rgba(unsigned char r, unsigned char g, unsigned char b, unsigned char a) {
+  return r + (g << 8) + (b << 16) + (a << 24);
 }
 
 int color_get_red  (int c) { return __GETR(c); }

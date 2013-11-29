@@ -24,8 +24,6 @@ using namespace std;
 #include <iostream>
 #include <cmath>
 
-#include "GL3shapes.h"
-
 #include <stdio.h> //for file writing (surface_save)
 #include "Universal_System/nlpo2.h"
 #include "Universal_System/spritestruct.h"

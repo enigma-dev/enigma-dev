@@ -16,7 +16,7 @@
 **/
 
 #include "../General/OpenGLHeaders.h"
-#include "GL3enable.h"
+#include "../General/GSenable.h"
 
 namespace enigma_user
 {

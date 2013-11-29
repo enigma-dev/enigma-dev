@@ -17,7 +17,6 @@
 #include "GL3ModelStruct.h"
 #include "../General/OpenGLHeaders.h"
 #include "../General/GSd3d.h"
-#include "GL3shapes.h"
 #include "../General/GSmodel.h"
 #include "../General/GStextures.h"
 #include "Universal_System/var4.h"
