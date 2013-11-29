@@ -17,7 +17,7 @@
 
 #include "Bridges/General/DX9Context.h"
 #include "Direct3D9Headers.h"
-#include "DX9enable.h"
+#include "../General/GSenable.h"
 
 namespace enigma_user
 {

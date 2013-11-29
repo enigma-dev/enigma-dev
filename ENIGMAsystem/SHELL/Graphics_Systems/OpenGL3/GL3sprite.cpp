@@ -25,8 +25,6 @@ using std::string;
 #include "../General/GStextures.h"
 #include "../General/GLTextureStruct.h"
 
-#include "GL3shapes.h"
-
 #include "Universal_System/image_formats.h"
 #include "Universal_System/nlpo2.h"
 #include "Universal_System/spritestruct.h"
