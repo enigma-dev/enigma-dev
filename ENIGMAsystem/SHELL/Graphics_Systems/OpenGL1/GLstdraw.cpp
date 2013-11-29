@@ -417,6 +417,7 @@ void draw_triangle_color(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2,g
   glColor4ubv(enigma::currentcolor);
 }
 
+//TODO: Needs rewritten to use circle precision for the corners
 void draw_roundrect(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, float rad, bool outline)
 {
   if(x1>x2) {
@@ -477,6 +478,7 @@ void draw_roundrect(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, float
   }
 }
 
+//TODO: Needs rewritten to use circle precision for the corners
 void draw_roundrect_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, float rad, int col1, int col2, bool outline)
 {
   if(x1>x2) {
@@ -643,11 +645,11 @@ void draw_healthbar(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2,float 
 	  }
   }
 
-  switch(dir) {
-  case 1:x1=x2-(x2-x1)*amount;
-  break;case 2:y2=y1+(y2-y1)*amount;
-  break;case 3:y1=y2-(y2-y1)*amount;
-  default:x2=x1+(x2-x1)*amount;
+  switch (dir) {
+	  case 1:x1=x2-(x2-x1)*amount;break;
+	  case 2:y2=y1+(y2-y1)*amount;break;
+	  case 3:y1=y2-(y2-y1)*amount;break;
+	  default:x2=x1+(x2-x1)*amount;
   }
 
   const int

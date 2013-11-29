@@ -1,4 +1,4 @@
-/** Copyright (C) 2013 Robert B. Colton
+/** Copyright (C) 2010-2013 Alasdair Morrison, Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***

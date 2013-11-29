@@ -16,7 +16,6 @@
 **/
 #include "../General/OpenGLHeaders.h"
 #include "../General/GSd3d.h"
-#include "GL3shapes.h"
 #include "../General/GSprimitives.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
