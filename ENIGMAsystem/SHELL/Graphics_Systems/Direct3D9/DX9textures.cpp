@@ -37,7 +37,7 @@ namespace enigma {
 }
 
 LPDIRECT3DTEXTURE9 get_texture(int texid) {
-  return (size_t(texid) >= textureStructs.size() || texid < 0)? NULL : textureStructs[texid]->gTexture;
+  return (size_t(texid) >= textureStructs.size() || texid < 0) ? NULL : textureStructs[texid]->gTexture;
 }
 
 inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect powers of two
@@ -145,6 +145,7 @@ int texture_get_texel_height(int texid)
 }
 
 void texture_set(int texid) {
+	if (texid == -1) { d3dmgr->SetTexture(0, NULL); return; }
 	d3dmgr->SetTexture(0, get_texture(texid));
 }
 
@@ -153,7 +154,7 @@ void texture_set_stage(int stage, int texid) {
 }
 
 void texture_reset() {
-	d3dmgr->SetTexture(0, 0);
+	d3dmgr->SetTexture(0, NULL);
 }
 
 void texture_set_repeat(bool repeat)
