@@ -23,6 +23,34 @@
 #include "ert/variant.hpp"
 
 namespace ert {
+  static void assert_init(const variant_t& var) {
+    if (var.type != variant::vt_uninit) {
+      // TODO: error
+      throw;
+    }
+  }
+
+  static void assert_real(const variant_t& var) {
+    if (var.type != variant::vt_real) {
+      // TODO: error
+      throw;
+    }
+  }
+
+  static void assert_string(const variant_t& var) {
+    if (var.type != variant::vt_string) {
+      // TODO: error
+      throw;
+    }
+  }
+
+  static void assert_similar(const variant_t& fst, const variant_t& snd) {
+    if (fst.type != snd.type) {
+      // TODO: error
+      throw;
+    }
+  }
+
   variant::variant()
     : type(vt_uninit) {
   }
@@ -36,18 +64,44 @@ namespace ert {
   }
 
   variant::operator real_t() const {
-    if (this->type != vt_real) {
-      // TODO: show error
-      throw;
-    }
+    assert_init(*this);
+    assert_real(*this);
     return this->real;
   }
 
   variant::operator string_t() const {
-    if (this->type != vt_string) {
-      // TODO: show error
-      throw;
-    }
+    assert_init(*this);
+    assert_string(*this);
     return this->string;
+  }
+
+  variant& variant::operator =(const variant& rhs) {
+    assert_init(rhs);
+    assert_similar(*this, rhs);
+    this->type = rhs.type;
+    this->real = rhs.real;
+    this->string = rhs.string;
+    return *this;
+  }
+
+  variant& variant::operator +=(const variant& rhs) {
+    assert_init(*this);
+    assert_init(rhs);
+    assert_similar(*this, rhs);
+    if (this->type == vt_real) {
+      this->real += rhs.real;
+    } else {
+      this->string += rhs.string;
+    }
+    return *this;
+  }
+
+  variant& variant::operator -=(real_t rhs) {
+    assert_init(*this);
+    assert_init(rhs);
+    assert_real(*this);
+    assert_real(rhs);
+    this->real -= rhs;
+    return *this;
   }
 }
