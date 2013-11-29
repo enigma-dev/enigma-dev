@@ -17,7 +17,6 @@
 
 #include "Bridges/General/DX9Context.h"
 #include "../General/GSd3d.h"
-#include "DX9shapes.h"
 #include "../General/GSprimitives.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"

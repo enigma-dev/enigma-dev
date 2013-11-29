@@ -17,7 +17,6 @@
 
 #include <math.h>
 #include <string>
-#include "Direct3D9Headers.h"
 #include "Universal_System/var4.h"
 #include "libEGMstd.h"
 #include "../General/GScolors.h"
@@ -28,9 +27,6 @@
 
 using namespace std;
 #include "Universal_System/fontstruct.h"
-
-#include "Bridges/General/DX9Context.h"
-#include "DX9TextureStruct.h"
 
 #define __GETR(x) ((x & 0x0000FF))
 #define __GETG(x) ((x & 0x00FF00) >> 8)
@@ -279,10 +275,6 @@ unsigned int string_height_ext(variant vstr, gs_scalar sep, gs_scalar w)
   return height;
 }
 
-}
-
-namespace enigma {
-  D3DCOLOR get_currentcolor();
 }
 
 ////////////////////////////////////////////////////

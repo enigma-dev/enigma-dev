@@ -20,7 +20,6 @@
 #include "Graphics_Systems/General/GStextures.h"
 
 #include "../General/GSmodel.h"
-#include "DX9shapes.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
 
