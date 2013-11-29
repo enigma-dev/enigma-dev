@@ -36,6 +36,7 @@ namespace ert {
     variant& operator =(const variant&);
 
     // Binary Operations
+    /*
     static variant& add(const variant&, const variant&);
     static variant& sub(const variant&, const variant&);
     static variant& mul(const variant&, const variant&);
@@ -51,6 +52,7 @@ namespace ert {
     static variant& gte(const variant&, const variant&);
     static variant& lt(const variant&, const variant&);
     static variant& lte(const variant&, const variant&);
+    */
 
     enum type_t {
       vt_uninit = 0,
