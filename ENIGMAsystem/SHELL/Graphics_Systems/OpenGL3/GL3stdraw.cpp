@@ -726,6 +726,38 @@ int draw_getpixel(int x,int y)
   #endif
 }
 
+int draw_getpixel_ext(int x,int y)
+{
+    if (view_enabled)
+    {
+        x = x - enigma_user::view_xview[enigma_user::view_current];
+        y = enigma_user::view_hview[enigma_user::view_current] - (y - enigma_user::view_yview[enigma_user::view_current]) - 1;
+        if (x < 0) x = 0;
+        if (y < 0) y = 0;
+        if (x > enigma_user::view_wview[enigma_user::view_current] || y > enigma_user::view_hview[enigma_user::view_current]) return 0;
+    }
+    else
+    {
+        y = enigma_user::room_height - y - 1;
+        if (x < 0) x = 0;
+        if (y < 0) y = 0;
+        if (x > enigma_user::room_width || y > enigma_user::room_height) return 0;
+    }
+  #if defined __BIG_ENDIAN__ || defined __BIG_ENDIAN
+    int ret;
+    glReadPixels(x,y,1,1,GL_RGBA,GL_UNSIGNED_BYTE,&ret);
+    return ret;
+  #elif defined __LITTLE_ENDIAN__ || defined __LITTLE_ENDIAN
+    int ret;
+    glReadPixels(x,y,1,1,GL_BGRA,GL_UNSIGNED_BYTE,&ret);
+    return ret>>8;
+  #else
+    unsigned char rgba[4];
+    glReadPixels(x,y,1,1,GL_RGBA,GL_UNSIGNED_BYTE,&rgba);
+    return rgba[0] | rgba[1] << 8 | rgba[2] << 16 | rgba[3] << 24;
+  #endif
+}
+
 int draw_mandelbrot(int x,int y,float w,double Zx,double Zy,double Zw,unsigned iter)
 {
   int c=0;

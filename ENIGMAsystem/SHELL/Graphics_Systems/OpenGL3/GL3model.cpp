@@ -90,6 +90,10 @@ void d3d_model_clear(int id)
   meshes[id]->Clear();
 }
 
+unsigned d3d_model_get_stride(int id) {
+	return meshes[id]->GetStride();
+}
+
 void d3d_model_save(int id, string fname)
 {
   //TODO: Write save code for meshes

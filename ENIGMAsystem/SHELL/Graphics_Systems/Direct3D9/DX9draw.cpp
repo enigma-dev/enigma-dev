@@ -348,6 +348,11 @@ int draw_getpixel(int x, int y)
 
 }
 
+int draw_getpixel_ext(int x, int y)
+{
+
+}
+
 int draw_mandelbrot(int x, int y, float w, double Zx, double Zy, double Zw, unsigned iter)
 {
 
