@@ -31,32 +31,26 @@ namespace ert {
     variant(string_t);
     operator real_t() const;
     operator string_t() const;
-
+    operator bool() const;
+    bool operator !() const;
     variant& operator =(const variant&);
-    variant& operator +=(const variant&);
-    variant& operator -=(real_t);
-    variant& operator *=(real_t);
-    variant& operator /=(real_t);
-    variant& operator <<=(real_t);
-    variant& operator >>=(real_t);
-    variant& operator &=(real_t);
-    variant& operator ^=(real_t);
-    variant& operator +(const variant&);
-    variant& operator -(real_t);
-    variant& operator *(const variant& other);
-    variant& operator /(const variant& other);
-    variant& operator %(const variant& other);
-    variant& operator <<(const variant& other);
-    variant& operator >>(const variant& other);
-    variant& operator &(const variant& other);
-    variant& operator |(const variant& other);
-    variant& operator ^(const variant& other);
-    variant& operator ==(const variant& other);
-    variant& operator !=(const variant& other);
-    variant& operator >=(const variant& other);
-    variant& operator <=(const variant& other);
-    variant& operator >(const variant& other);
-    variant& operator <(const variant& other);
+
+    // Binary Operations
+    static variant& add(const variant&, const variant&);
+    static variant& sub(const variant&, const variant&);
+    static variant& mul(const variant&, const variant&);
+    static variant& div(const variant&, const variant&);
+    static variant& and(const variant&, const variant&);
+    static variant& or(const variant&, const variant&);
+    static variant& xor(const variant&, const variant&);
+    static variant& lsh(const variant&, const variant&);
+    static variant& rsh(const variant&, const variant&);
+    static variant& eq(const variant&, const variant&);
+    static variant& neq(const variant&, const variant&);
+    static variant& gt(const variant&, const variant&);
+    static variant& gte(const variant&, const variant&);
+    static variant& lt(const variant&, const variant&);
+    static variant& lte(const variant&, const variant&);
 
     enum type_t {
       vt_uninit = 0,
