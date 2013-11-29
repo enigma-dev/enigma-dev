@@ -17,7 +17,6 @@
 #include "DX9ModelStruct.h"
 #include "Bridges/General/DX9Context.h"
 #include "../General/GSd3d.h"
-#include "DX9shapes.h"
 #include "../General/GSmodel.h"
 #include "../General/GStextures.h"
 #include "Universal_System/var4.h"
