@@ -282,6 +282,56 @@ void draw_surface_stretched(int id, gs_scalar x, gs_scalar y, gs_scalar w, gs_sc
   glPopAttrib();
 }
 
+void draw_surface_ext(int id, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int color, gs_scalar alpha)
+{
+  get_surface(surf,id);
+  texture_set(textureStructs[surf->tex]->gltex);
+
+  glPushAttrib(GL_CURRENT_BIT);
+    glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
+
+    const gs_scalar w=surf->width*xscale, h=surf->height*yscale;
+    rot *= M_PI/180;
+
+    gs_scalar ulcx = x + xscale * cos(M_PI+rot) + yscale * cos(M_PI/2+rot),
+          ulcy = y - yscale * sin(M_PI+rot) - yscale * sin(M_PI/2+rot);
+
+    glBegin(GL_QUADS);
+      glTexCoord2f(0,0);
+        glVertex2f(ulcx,ulcy);
+      glTexCoord2f(1,0);
+        glVertex2f(ulcx + w*cos(rot), ulcy - w*sin(rot));
+      glTexCoord2f(1,1);
+        ulcx += h * cos(3*M_PI/2 + rot);
+        ulcy -= h * sin(3*M_PI/2 + rot);
+        glVertex2f(ulcx + w*cos(rot), ulcy - w*sin(rot));
+      glTexCoord2f(0,1);
+        glVertex2f(ulcx,ulcy);
+    glEnd();
+  glPopAttrib();
+}
+
+void draw_surface_stretched_ext(int id, gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, int color, gs_scalar alpha)
+{
+  get_surface(surf,id);
+  texture_set(textureStructs[surf->tex]->gltex);
+
+  glPushAttrib(GL_CURRENT_BIT);
+    glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
+
+    glBegin(GL_QUADS);
+      glTexCoord2f(0,0);
+        glVertex2f(x,y);
+      glTexCoord2f(1,0);
+        glVertex2f(x+width,y);
+      glTexCoord2f(1,1);
+        glVertex2f(x+width,y+height);
+      glTexCoord2f(0,1);
+        glVertex2f(x,y+height);
+    glEnd();
+  glPopAttrib();
+}
+
 void draw_surface_part(int id, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y)
 {
   get_surface(surf,id);
@@ -302,6 +352,66 @@ void draw_surface_part(int id, gs_scalar left, gs_scalar top, gs_scalar width, g
       glVertex2f(x,y+height);
   glEnd();
 
+  glPopAttrib();
+}
+
+void draw_surface_part_ext(int id, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, gs_scalar alpha)
+{
+  get_surface(surf,id);
+  texture_set(textureStructs[surf->tex]->gltex);
+
+  glPushAttrib(GL_CURRENT_BIT);
+  glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
+
+  const gs_scalar tbw = surf->width, tbh = surf->height;
+
+  glBegin(GL_QUADS);
+    glTexCoord2f(left/tbw,top/tbh);
+      glVertex2f(x,y);
+    glTexCoord2f((left+width)/tbw,top/tbh);
+      glVertex2f(x+width*xscale,y);
+    glTexCoord2f((left+width)/tbw,(top+height)/tbh);
+      glVertex2f(x+width*xscale,y+height*yscale);
+    glTexCoord2f(left/tbw,(top+height)/tbh);
+      glVertex2f(x,y+height*yscale);
+  glEnd();
+
+  glPopAttrib();
+}
+
+void draw_surface_general(int id, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, gs_scalar a1, gs_scalar a2, gs_scalar a3, gs_scalar a4)
+{
+  get_surface(surf,id);
+  texture_set(textureStructs[surf->tex]->gltex);
+
+  glPushAttrib(GL_CURRENT_BIT);
+    const gs_scalar tbw = surf->width, tbh = surf->height,
+      w = width*xscale, h = height*yscale;
+
+    rot *= M_PI/180;
+
+    gs_scalar ulcx = x + xscale * cos(M_PI+rot) + yscale * cos(M_PI/2+rot),
+          ulcy = y - yscale * sin(M_PI+rot) - yscale * sin(M_PI/2+rot);
+
+    glBegin(GL_QUADS);
+      glColor4ub(__GETR(c1),__GETG(c1),__GETB(c1),char(a1*255));
+      glTexCoord2f(left/tbw,top/tbh);
+        glVertex2f(ulcx,ulcy);
+
+      glColor4ub(__GETR(c2),__GETG(c2),__GETB(c2),char(a2*255));
+      glTexCoord2f((left+width)/tbw,top/tbh);
+        glVertex2f((ulcx + w*cos(rot)), (ulcy - w*sin(rot)));
+
+      ulcx += h * cos(3*M_PI/2 + rot);
+      ulcy -= h * sin(3*M_PI/2 + rot);
+      glColor4ub(__GETR(c3),__GETG(c3),__GETB(c3),char(a3*255));
+      glTexCoord2f((left+width)/tbw,(top+height)/tbh);
+        glVertex2f((ulcx + w*cos(rot)), (ulcy - w*sin(rot)));
+
+      glColor4ub(__GETR(c4),__GETG(c4),__GETB(c4),char(a4*255));
+      glTexCoord2f(left/tbw,(top+height)/tbh);
+        glVertex2f(ulcx,ulcy);
+    glEnd();
   glPopAttrib();
 }
 
@@ -386,80 +496,6 @@ void draw_surface_tiled_area(int id, gs_scalar x, gs_scalar y, gs_scalar x1, gs_
   glPopAttrib();
 }
 
-void draw_surface_ext(int id, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int color, gs_scalar alpha)
-{
-  get_surface(surf,id);
-  texture_set(textureStructs[surf->tex]->gltex);
-
-  glPushAttrib(GL_CURRENT_BIT);
-    glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
-
-    const gs_scalar w=surf->width*xscale, h=surf->height*yscale;
-    rot *= M_PI/180;
-
-    gs_scalar ulcx = x + xscale * cos(M_PI+rot) + yscale * cos(M_PI/2+rot),
-          ulcy = y - yscale * sin(M_PI+rot) - yscale * sin(M_PI/2+rot);
-
-    glBegin(GL_QUADS);
-      glTexCoord2f(0,0);
-        glVertex2f(ulcx,ulcy);
-      glTexCoord2f(1,0);
-        glVertex2f(ulcx + w*cos(rot), ulcy - w*sin(rot));
-      glTexCoord2f(1,1);
-        ulcx += h * cos(3*M_PI/2 + rot);
-        ulcy -= h * sin(3*M_PI/2 + rot);
-        glVertex2f(ulcx + w*cos(rot), ulcy - w*sin(rot));
-      glTexCoord2f(0,1);
-        glVertex2f(ulcx,ulcy);
-    glEnd();
-  glPopAttrib();
-}
-
-void draw_surface_stretched_ext(int id, gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, int color, gs_scalar alpha)
-{
-  get_surface(surf,id);
-  texture_set(textureStructs[surf->tex]->gltex);
-
-  glPushAttrib(GL_CURRENT_BIT);
-    glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
-
-    glBegin(GL_QUADS);
-      glTexCoord2f(0,0);
-        glVertex2f(x,y);
-      glTexCoord2f(1,0);
-        glVertex2f(x+width,y);
-      glTexCoord2f(1,1);
-        glVertex2f(x+width,y+height);
-      glTexCoord2f(0,1);
-        glVertex2f(x,y+height);
-    glEnd();
-  glPopAttrib();
-}
-
-void draw_surface_part_ext(int id, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, gs_scalar alpha)
-{
-  get_surface(surf,id);
-  texture_set(textureStructs[surf->tex]->gltex);
-
-  glPushAttrib(GL_CURRENT_BIT);
-  glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
-
-  const gs_scalar tbw = surf->width, tbh = surf->height;
-
-  glBegin(GL_QUADS);
-    glTexCoord2f(left/tbw,top/tbh);
-      glVertex2f(x,y);
-    glTexCoord2f((left+width)/tbw,top/tbh);
-      glVertex2f(x+width*xscale,y);
-    glTexCoord2f((left+width)/tbw,(top+height)/tbh);
-      glVertex2f(x+width*xscale,y+height*yscale);
-    glTexCoord2f(left/tbw,(top+height)/tbh);
-      glVertex2f(x,y+height*yscale);
-  glEnd();
-
-  glPopAttrib();
-}
-
 void draw_surface_tiled_ext(int id, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, gs_scalar alpha)
 {
   get_surface(surf,id);
@@ -537,42 +573,6 @@ void draw_surface_tiled_area_ext(int id, gs_scalar x, gs_scalar y, gs_scalar x1,
       }
       j = jj;
     }
-    glEnd();
-  glPopAttrib();
-}
-
-void draw_surface_general(int id, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, gs_scalar a1, gs_scalar a2, gs_scalar a3, gs_scalar a4)
-{
-  get_surface(surf,id);
-  texture_set(textureStructs[surf->tex]->gltex);
-
-  glPushAttrib(GL_CURRENT_BIT);
-    const gs_scalar tbw = surf->width, tbh = surf->height,
-      w = width*xscale, h = height*yscale;
-
-    rot *= M_PI/180;
-
-    gs_scalar ulcx = x + xscale * cos(M_PI+rot) + yscale * cos(M_PI/2+rot),
-          ulcy = y - yscale * sin(M_PI+rot) - yscale * sin(M_PI/2+rot);
-
-    glBegin(GL_QUADS);
-      glColor4ub(__GETR(c1),__GETG(c1),__GETB(c1),char(a1*255));
-      glTexCoord2f(left/tbw,top/tbh);
-        glVertex2f(ulcx,ulcy);
-
-      glColor4ub(__GETR(c2),__GETG(c2),__GETB(c2),char(a2*255));
-      glTexCoord2f((left+width)/tbw,top/tbh);
-        glVertex2f((ulcx + w*cos(rot)), (ulcy - w*sin(rot)));
-
-      ulcx += h * cos(3*M_PI/2 + rot);
-      ulcy -= h * sin(3*M_PI/2 + rot);
-      glColor4ub(__GETR(c3),__GETG(c3),__GETB(c3),char(a3*255));
-      glTexCoord2f((left+width)/tbw,(top+height)/tbh);
-        glVertex2f((ulcx + w*cos(rot)), (ulcy - w*sin(rot)));
-
-      glColor4ub(__GETR(c4),__GETG(c4),__GETB(c4),char(a4*255));
-      glTexCoord2f(left/tbw,(top+height)/tbh);
-        glVertex2f(ulcx,ulcy);
     glEnd();
   glPopAttrib();
 }

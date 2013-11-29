@@ -36,6 +36,8 @@ using namespace std;
 namespace enigma_user {
 extern int room_width, room_height/*, sprite_idmax*/;
 }
+
+#include "../General/GSprimitives.h"
 #include "../General/GSsurface.h"
 #include "DX9SurfaceStruct.h"
 #include "DX9TextureStruct.h"
@@ -111,8 +113,8 @@ void surface_reset_target()
 
 void surface_free(int id)
 {
-	get_surface(surface, id);
-	delete surface;
+	get_surface(surf, id);
+	delete surf;
 }
 
 bool surface_exists(int id)
@@ -122,21 +124,117 @@ bool surface_exists(int id)
 
 void draw_surface(int id, gs_scalar x, gs_scalar y)
 {
-    get_surface(surface,id);
+    get_surface(surf,id);
 
+	int w=surf->width;
+	int h=surf->height;
+  
+	draw_primitive_begin_texture(pr_trianglestrip, surf->tex);
+	draw_vertex_texture(x,y,0,0);
+	draw_vertex_texture(x+w,y,1,0);
+	draw_vertex_texture(x,y+h,0,1);
+	draw_vertex_texture(x+w,y+h,1,1);
+	draw_primitive_end();
+}
+
+void draw_surface_ext(int id,gs_scalar x, gs_scalar y,gs_scalar xscale, gs_scalar yscale,double rot,int color,double alpha)
+{
+    get_surface(surf,id);
+
+    const gs_scalar w=surf->width*xscale, h=surf->height*yscale;
+    rot *= M_PI/180;
+
+    gs_scalar ulcx = x + xscale * cos(M_PI+rot) + yscale * cos(M_PI/2+rot),
+          ulcy = y - yscale * sin(M_PI+rot) - yscale * sin(M_PI/2+rot);
+
+	draw_primitive_begin_texture(pr_trianglestrip, surf->tex);
+	draw_vertex_texture(ulcx,ulcy,0,0);
+	draw_vertex_texture(ulcx + w*cos(rot), ulcy - w*sin(rot),1,0);
+	draw_vertex_texture(ulcx,ulcy,0,1);
+	draw_vertex_texture(ulcx + w*cos(rot), ulcy - w*sin(rot),1,1);
+	draw_primitive_end();
 }
 
 void draw_surface_stretched(int id, gs_scalar x, gs_scalar y, float w, float h)
 {
-
+    get_surface(surf,id);
+  
+	draw_primitive_begin_texture(pr_trianglestrip, surf->tex);
+	draw_vertex_texture(x,y,0,0);
+	draw_vertex_texture(x+w,y,1,0);
+	draw_vertex_texture(x,y+h,0,1);
+	draw_vertex_texture(x+w,y+h,1,1);
+	draw_primitive_end();
 }
 
-void draw_surface_part(int id, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y)
+void draw_surface_stretched_ext(int id, gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h, int color, double alpha)
+{
+    get_surface(surf,id);
+  
+	draw_primitive_begin_texture(pr_trianglestrip, surf->tex);
+	draw_vertex_texture(x,y,0,0);
+	draw_vertex_texture(x+w,y,1,0);
+	draw_vertex_texture(x,y+h,0,1);
+	draw_vertex_texture(x+w,y+h,1,1);
+	draw_primitive_end();
+}
+
+void draw_surface_part(int id, gs_scalar left, gs_scalar top, gs_scalar w, gs_scalar h, gs_scalar x, gs_scalar y)
+{
+	get_surface(surf,id);
+  
+	const gs_scalar tbw=surf->width,tbh=surf->height;
+	
+	draw_primitive_begin_texture(pr_trianglestrip, surf->tex);
+	draw_vertex_texture(x,y,left/tbw,top/tbh);
+	draw_vertex_texture(x+w,y,(left+w)/tbw,top/tbh);
+	draw_vertex_texture(x,y+h,left/tbw,(top+h)/tbh);
+	draw_vertex_texture(x+w,y+h,(left+w)/tbw,(top+h)/tbh);
+	draw_primitive_end();
+}
+
+void draw_surface_part_ext(int id, gs_scalar left, gs_scalar top, gs_scalar w, gs_scalar h, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale,int color, double alpha)
+{
+	get_surface(surf,id);
+
+	const gs_scalar tbw = surf->width, tbh = surf->height;
+	draw_primitive_begin_texture(pr_trianglestrip, surf->tex);
+	draw_vertex_texture_color(x,y,left/tbw,top/tbh,color,alpha);
+	draw_vertex_texture_color(x+w*xscale,y,(left+w)/tbw,top/tbh,color,alpha);
+	draw_vertex_texture_color(x,y+h*yscale,left/tbw,(top+h)/tbh,color,alpha);
+	draw_vertex_texture_color(x+w*xscale,y+h*yscale,(left+w)/tbw,(top+h)/tbh,color,alpha);
+	draw_primitive_end();
+}
+
+void draw_surface_general(int id, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, double a1, double a2, double a3, double a4)
+{
+	get_surface(surf,id);
+	const gs_scalar tbw = surf->width, tbh = surf->height,
+	  w = width*xscale, h = height*yscale;
+
+    rot *= M_PI/180;
+
+    gs_scalar ulcx = x + xscale * cos(M_PI+rot) + yscale * cos(M_PI/2+rot),
+          ulcy = y - yscale * sin(M_PI+rot) - yscale * sin(M_PI/2+rot);
+
+    draw_primitive_begin_texture(pr_trianglestrip, surf->tex);
+	draw_vertex_texture_color(ulcx,ulcy,left/tbw,top/tbh,c1,a1);
+	draw_vertex_texture_color((ulcx + w*cos(rot)), (ulcy - w*sin(rot)), (left+width)/tbw,top/tbh, c2, a2);
+		
+      ulcx += h * cos(3*M_PI/2 + rot);
+      ulcy -= h * sin(3*M_PI/2 + rot);
+	  
+	draw_vertex_texture_color((ulcx + w*cos(rot)), (ulcy - w*sin(rot)), (left+width)/tbw,(top+height)/tbh, c3, a3);
+	draw_vertex_texture_color(ulcx, ulcy, left/tbw, (top+height)/tbh, c4, a4);
+    draw_primitive_end();
+}
+
+void draw_surface_tiled(int id, gs_scalar x, gs_scalar y)
 {
 
 }
 
-void draw_surface_tiled(int id, gs_scalar x, gs_scalar y)
+void draw_surface_tiled_ext(int id, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, double alpha)
 {
 
 }
@@ -146,32 +244,7 @@ void draw_surface_tiled_area(int id, gs_scalar x, gs_scalar y, float x1, float y
 
 }
 
-void draw_surface_ext(int id,gs_scalar x, gs_scalar y,gs_scalar xscale, gs_scalar yscale,double rot,int color,double alpha)
-{
-
-}
-
-void draw_surface_stretched_ext(int id, gs_scalar x, gs_scalar y, float w, float h, int color, double alpha)
-{
-
-}
-
-void draw_surface_part_ext(int id, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale,int color, double alpha)
-{
- 
-}
-
-void draw_surface_tiled_ext(int id, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, double alpha)
-{
-
-}
-
 void draw_surface_tiled_area_ext(int id, gs_scalar x, gs_scalar y, float x1, float y1, float x2, float y2, gs_scalar xscale, gs_scalar yscale, int color, double alpha)
-{
-
-}
-
-void draw_surface_general(int id, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, double a1, double a2, double a3, double a4)
 {
 
 }
