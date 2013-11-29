@@ -100,6 +100,103 @@ void draw_background_part(int back, gs_scalar left, gs_scalar top, gs_scalar wid
 {
 	get_background(bck2d, back);
 
+	float tbw = bck2d->width/(float)bck2d->texbordx, tbh = bck2d->height/(float)bck2d->texbordy,
+	  tbx1 = left/tbw, tbx2 = tbx1 + width/tbw,
+	  tby1 = top/tbh, tby2 = tby1 + height/tbh;
+	
+	draw_primitive_begin_texture(pr_trianglestrip, bck2d->texture);
+	draw_vertex_texture(x,y,tbx1,tby1);
+	draw_vertex_texture(x+width,y,tbx2,tby1);
+	draw_vertex_texture(x,y+height,tbx1,tby2);
+	draw_vertex_texture(x+width,y+height,tbx2,tby2);
+	draw_primitive_end();
+}
+
+void draw_background_ext(int back, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int color, gs_scalar alpha)
+{
+    get_background(bck2d,back);
+	
+    rot *= M_PI/180;
+
+    const float
+    tbx = bck2d->texbordx, tby = bck2d->texbordy,
+    w = bck2d->width*xscale, h = bck2d->height*yscale,
+    wsinrot = w*sin(rot), wcosrot = w*cos(rot);
+
+    draw_primitive_begin_texture(pr_trianglestrip, bck2d->texture);
+
+    float
+    ulcx = x + xscale * cos(M_PI+rot) + yscale * cos(M_PI/2+rot),
+    ulcy = y - yscale * sin(M_PI+rot) - yscale * sin(M_PI/2+rot);
+
+	draw_vertex_texture(ulcx, ulcy, 0, 0);
+	draw_vertex_texture(ulcx + wcosrot, ulcy - wsinrot, tbx, 0);
+
+    const double mpr = 3*M_PI/2 + rot;
+    ulcx += h * cos(mpr);
+    ulcy -= h * sin(mpr);
+	draw_vertex_texture(ulcx + wcosrot, ulcy - wsinrot, tbx, tby);
+	draw_vertex_texture(ulcx, ulcy, 0, tby);
+    draw_primitive_end();
+
+}
+
+void draw_background_stretched_ext(int back, gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, int color, gs_scalar alpha)
+{
+	get_background(bck2d,back);
+
+	const float tbx=bck2d->texbordx, tby=bck2d->texbordy;
+
+	draw_primitive_begin_texture(pr_trianglestrip, bck2d->texture);
+	draw_vertex_texture(x,y,0,0);
+	draw_vertex_texture(x+width,y,tbx,0);
+	draw_vertex_texture(x,y+height,0,tby);
+	draw_vertex_texture(x+width,y+height,tbx,tby);
+	draw_primitive_end();
+}
+
+void draw_background_part_ext(int back, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, gs_scalar alpha)
+{
+	get_background(bck2d, back);
+	
+	float tbw = bck2d->width/(float)bck2d->texbordx, tbh = bck2d->height/(float)bck2d->texbordy,
+	  xvert1 = x, xvert2 = xvert1 + width*xscale,
+	  yvert1 = y, yvert2 = yvert1 + height*yscale,
+	  tbx1 = left/tbw, tbx2 = tbx1 + width/tbw,
+	  tby1 = top/tbh, tby2 = tby1 + height/tbh;
+
+	draw_primitive_begin_texture(pr_trianglestrip, bck2d->texture);
+	draw_vertex_texture(xvert1,yvert1,tbx1,tby1);
+	draw_vertex_texture(xvert2,yvert1,tbx2,tby1);
+	draw_vertex_texture(xvert1,yvert2,tbx1,tby2);
+	draw_vertex_texture(xvert2,yvert2,tbx2,tby2);
+	draw_primitive_end();
+}
+
+void draw_background_general(int back, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, gs_scalar a1, gs_scalar a2, gs_scalar a3, gs_scalar a4)
+{
+	get_background(bck2d, back);
+    const float
+      tbx = bck2d->texbordx,  tby = bck2d->texbordy,
+      tbw = bck2d->width/tbx, tbh = bck2d->height/tby,
+      w = width*xscale, h = height*yscale;
+
+    rot *= M_PI/180;
+    const float wcosrot = w*cos(rot), wsinrot = w*sin(rot);
+
+    float ulcx = x + xscale * cos(M_PI+rot) + yscale * cos(M_PI/2+rot),
+          ulcy = y - yscale * sin(M_PI+rot) - yscale * sin(M_PI/2+rot);
+
+    draw_primitive_begin_texture(pr_trianglestrip, bck2d->texture);
+	draw_vertex_texture_color(ulcx,ulcy,left/tbw,top/tbh,c1,a1);
+	draw_vertex_texture_color((ulcx + wcosrot), (ulcy - wsinrot), (left+width)/tbw,top/tbh, c2, a2);
+		
+	ulcx += h * cos(3*M_PI/2 + rot);
+	ulcy -= h * sin(3*M_PI/2 + rot);
+
+	draw_vertex_texture_color((ulcx + wcosrot), (ulcy - wsinrot), (left+width)/tbw,(top+height)/tbh,c3,a3);
+	draw_vertex_texture_color(ulcx, ulcy, left/tbw, (top+height)/tbh,c4,a4);
+    draw_primitive_end();
 }
 
 void draw_background_tiled(int back, gs_scalar x, gs_scalar y)
@@ -116,6 +213,67 @@ void draw_background_tiled(int back, gs_scalar x, gs_scalar y)
     hortil = int (ceil(room_width/(bck2d->width*tbx))) + 1,
     vertil = int (ceil(room_height/(bck2d->height*tby))) + 1;
 
+    float xvert1 = -x, xvert2 = xvert1 + bck2d->width, yvert1, yvert2;
+    for (int i=0; i<hortil; i++)
+    {
+        yvert1 = -y; yvert2 = yvert1 + bck2d->height;
+        for (int c=0; c<vertil; c++)
+        {
+			draw_primitive_begin_texture(pr_trianglestrip, bck2d->texture);
+			draw_vertex_texture(xvert1,yvert1,0,0);
+			draw_vertex_texture(xvert2,yvert1,tbx,0);
+			draw_vertex_texture(xvert1,yvert2,0,tby);
+			draw_vertex_texture(xvert2,yvert2,tbx,tby);
+			draw_primitive_end();
+            yvert1 = yvert2;
+            yvert2 += bck2d->height;
+        }
+        xvert1 = xvert2;
+        xvert2 += bck2d->width;
+    }
+
+}
+
+void draw_background_tiled_ext(int back, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, gs_scalar alpha, bool htiled, bool vtiled)
+{
+	get_background(bck2d,back);
+	
+	const float
+	  tbx = bck2d->texbordx, tby = bck2d->texbordy,
+	  width_scaled = bck2d->width*xscale, height_scaled = bck2d->height*yscale;
+
+    int hortil, vertil;
+	if (htiled) {
+		hortil = int(ceil(room_width/(width_scaled*tbx))) + 1;
+		x = -(width_scaled-fmod(x,width_scaled));
+	} else {
+		hortil = 1;
+	}
+	if (vtiled) { 
+		vertil = int(ceil(room_height/(height_scaled*tby))) + 1;
+		y = -(height_scaled-fmod(y,height_scaled));
+	} else {
+		vertil = 1;
+	}
+
+    float xvert1 = x, xvert2 = xvert1 + width_scaled, yvert1, yvert2;
+    for (int i=0; i<hortil; i++)
+    {
+        yvert1 = y; yvert2 = yvert1 + height_scaled;
+        for (int c=0; c<vertil; c++)
+        {
+			draw_primitive_begin_texture(pr_trianglestrip, bck2d->texture);
+			draw_vertex_texture(xvert1,yvert1,0,0);
+			draw_vertex_texture(xvert2,yvert1,tbx,0);
+			draw_vertex_texture(xvert1,yvert2,0,tby);
+			draw_vertex_texture(xvert2,yvert2,tbx,tby);
+			draw_primitive_end();
+            yvert1 = yvert2;
+            yvert2 += height_scaled;
+        }
+        xvert1 = xvert2;
+        xvert2 += width_scaled;
+    }
 }
 
 void draw_background_tiled_area(int back, gs_scalar x, gs_scalar y, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2)
@@ -131,39 +289,75 @@ void draw_background_tiled_area(int back, gs_scalar x, gs_scalar y, gs_scalar x1
     j = y1-(fmod(y1,sh) - fmod(y,sh)) - sh*(fmod(y1,sh)<fmod(y,sh));
     jj = j;
 
-}
+	for(; i<=x2; i+=sw)
+    {
+      for(; j<=y2; j+=sh)
+      {
+        if(i <= x1) left = x1-i;
+        else left = 0;
+        X = i+left;
 
-void draw_background_ext(int back, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int color, gs_scalar alpha)
-{
-	get_background(bck2d, back);
+        if(j <= y1) top = y1-j;
+        else top = 0;
+        Y = j+top;
 
-}
+        if(x2 <= i+sw) width = ((sw)-(i+sw-x2)+1)-left;
+        else width = sw-left;
 
-void draw_background_stretched_ext(int back, gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, int color, gs_scalar alpha)
-{
-	get_background(bck2d, back);
-
-}
-
-void draw_background_part_ext(int back, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, gs_scalar alpha)
-{
-	get_background(bck2d, back);
-
-}
-
-void draw_background_tiled_ext(int back, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, gs_scalar alpha, bool htiled, bool vtiled)
-{
-
+        if(y2 <= j+sh) height = ((sh)-(j+sh-y2)+1)-top;
+        else height = sh-top;
+		  
+		draw_primitive_begin_texture(pr_trianglestrip, bck2d->texture);
+		draw_vertex_texture(X,Y,left/sw*tbx,top/sh*tby);
+		draw_vertex_texture(X+width,Y,(left+width)/sw*tbx,top/sh*tby);
+		draw_vertex_texture(X+width,Y+height,left/sw*tbx,(top+height)/sh*tby);
+		draw_vertex_texture(X,Y+height,(left+width)/sw*tbx,(top+height)/sh*tby);
+		draw_primitive_end();
+      }
+      j = jj;
+    }
 }
 
 void draw_background_tiled_area_ext(int back, gs_scalar x, gs_scalar y, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar xscale, gs_scalar yscale, int color, gs_scalar alpha)
 {
+	get_background(bck2d,back);
+	
+    const float tbx=bck2d->texbordx,tby=bck2d->texbordy;
+    float sw,sh,i,j,jj,left,top,width,height,X,Y;
+    sw = bck2d->width*xscale;
+    sh = bck2d->height*yscale;
 
-}
+    i = x1-(fmod(x1,sw) - fmod(x,sw)) - sw*(fmod(x1,sw)<fmod(x,sw));
+    j = y1-(fmod(y1,sh) - fmod(y,sh)) - sh*(fmod(y1,sh)<fmod(y,sh));
+    jj = j;
 
-void draw_background_general(int back, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, gs_scalar a1, gs_scalar a2, gs_scalar a3, gs_scalar a4)
-{
+    for(; i<=x2; i+=sw)
+    {
+      for(; j<=y2; j+=sh)
+      {
+        if(i <= x1) left = x1-i;
+        else left = 0;
+        X = i+left;
 
+        if(j <= y1) top = y1-j;
+        else top = 0;
+        Y = j+top;
+
+        if(x2 <= i+sw) width = ((sw)-(i+sw-x2)+1)-left;
+        else width = sw-left;
+
+        if(y2 <= j+sh) height = ((sh)-(j+sh-y2)+1)-top;
+        else height = sh-top;
+		  
+		draw_primitive_begin_texture(pr_trianglestrip, bck2d->texture);
+		draw_vertex_texture(X,Y,left/sw*tbx,top/sh*tby);
+		draw_vertex_texture(X+width,Y,(left+width)/sw*tbx,top/sh*tby);
+		draw_vertex_texture(X+width,Y+height,left/sw*tbx,(top+height)/sh*tby);
+		draw_vertex_texture(X,Y+height,(left+width)/sw*tbx,(top+height)/sh*tby);
+		draw_primitive_end();
+      }
+      j = jj;
+    }
 }
 
 double background_get_texture_width_factor(int backId) {
