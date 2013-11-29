@@ -32,6 +32,32 @@ namespace ert {
     operator real_t() const;
     operator string_t() const;
 
+    variant& operator =(const variant&);
+    variant& operator +=(const variant&);
+    variant& operator -=(real_t);
+    variant& operator *=(real_t);
+    variant& operator /=(real_t);
+    variant& operator <<=(real_t);
+    variant& operator >>=(real_t);
+    variant& operator &=(real_t);
+    variant& operator ^=(real_t);
+    variant& operator +(const variant&);
+    variant& operator -(real_t);
+    variant& operator *(const variant& other);
+    variant& operator /(const variant& other);
+    variant& operator %(const variant& other);
+    variant& operator <<(const variant& other);
+    variant& operator >>(const variant& other);
+    variant& operator &(const variant& other);
+    variant& operator |(const variant& other);
+    variant& operator ^(const variant& other);
+    variant& operator ==(const variant& other);
+    variant& operator !=(const variant& other);
+    variant& operator >=(const variant& other);
+    variant& operator <=(const variant& other);
+    variant& operator >(const variant& other);
+    variant& operator <(const variant& other);
+
     enum type_t {
       vt_uninit = 0,
       vt_real,
