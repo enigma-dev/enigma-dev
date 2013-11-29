@@ -199,6 +199,11 @@ int surface_getpixel(int id, int x, int y)
 
 }
 
+int surface_getpixel_ext(int id, int x, int y)
+{
+
+}
+
 int surface_getpixel_alpha(int id, int x, int y)
 {
 

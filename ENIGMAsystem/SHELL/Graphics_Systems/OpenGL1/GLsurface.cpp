@@ -607,6 +607,18 @@ int surface_getpixel(int id, int x, int y)
     return pixelbuf[0] + (pixelbuf[1] << 8) + (pixelbuf[2] << 16);
 }
 
+int surface_getpixel_ext(int id, int x, int y)
+{
+    get_surfacev(surf,id,-1);
+    unsigned char *pixelbuf=new unsigned char[3];
+    int prevFbo;
+	glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, surf->fbo);
+	glReadPixels(x,y,1,1,GL_RGBA,GL_UNSIGNED_BYTE,pixelbuf);
+	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, prevFbo);
+    return pixelbuf[0] + (pixelbuf[1] << 8) + (pixelbuf[2] << 16) + (pixelbuf[3] << 24);
+}
+
 int surface_getpixel_alpha(int id, int x, int y)
 {
     get_surfacev(surf,id,-1);

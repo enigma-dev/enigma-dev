@@ -44,7 +44,13 @@ int surface_get_texture(int id);
 int surface_get_width(int id);
 int surface_get_height(int id);
 int surface_getpixel(int id, int x, int y);
+int surface_getpixel_ext(int id, int x, int y);
 int surface_getpixel_alpha(int id, int x, int y);
+
+#define surface_get_pixel        surface_getpixel
+#define surface_get_pixel_ext    surface_getpixel_ext
+#define surface_get_pixel_alpha  surface_getpixel_alpha
+
 int surface_save(int id, string filename);
 int surface_save_part(int id, string filename, unsigned x, unsigned y, unsigned w, unsigned h);
 void surface_copy(int destination,gs_scalar x, gs_scalar y,int source);
