@@ -19,6 +19,7 @@
 
 #include <math.h>
 #include "Direct3D9Headers.h"
+#include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GSbackground.h"
 #include "Graphics_Systems/General/GStextures.h"
 #include "Universal_System/nlpo2.h"
@@ -71,14 +72,30 @@ namespace enigma_user
 
 void draw_background(int back, gs_scalar x, gs_scalar y)
 {
-  get_background(bck2d, back);
+  get_background(bck2d,back);
 
+  const float tbx=bck2d->texbordx,tby=bck2d->texbordy;
+  draw_primitive_begin_texture(pr_trianglestrip, bck2d->texture);
+	draw_vertex_texture(x,y,0,0);
+	draw_vertex_texture(x+bck2d->width,y,tbx,0);
+	draw_vertex_texture(x,y+bck2d->height, 0,tby);
+	draw_vertex_texture(x+bck2d->width,y+bck2d->height, tbx,tby);
+  draw_primitive_end();
 }
 
 void draw_background_stretched(int back, gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height)
 {
-	get_background(bck2d, back);
+  get_background(bck2d, back);
 
+  const float tbx=bck2d->texbordx,tby=bck2d->texbordy;
+
+  draw_primitive_begin_texture(pr_trianglestrip, bck2d->texture);
+	draw_vertex_texture(x,y,0,0);
+	draw_vertex_texture(x+width,y,tbx,0);
+	draw_vertex_texture(x,y+height, 0,tby);
+	draw_vertex_texture(x+width,y+height, tbx,tby);
+  draw_primitive_end();
+	
 }
 
 void draw_background_part(int back, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y)

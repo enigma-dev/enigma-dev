@@ -53,6 +53,7 @@ LPDIRECT3DVERTEXSHADER9	vertexShader;
 LPDIRECT3DSURFACE9 pBackBuffer;
 LPDIRECT3DSURFACE9 pRenderTarget;
 
+float last_depth;
 int last_stride;
 bool hasdrawn;
 int shapes_d3d_model;
@@ -77,10 +78,15 @@ ContextManager() {
 	last_stride = -1;
 	vertexShader = NULL;
 	pixelShader = NULL;
+	last_depth = 0.0f;
 }
 
 ~ContextManager() {
 
+}
+
+float GetDepth() {
+	return last_depth;
 }
 
 //TODO: Write this method so that for debugging purposes we can dump the entire render state to a text file.
@@ -176,7 +182,7 @@ int GetShapesModel() {
 
 void BeginShapesBatching(int texId) {
 	if (shapes_d3d_model == -1) {
-		shapes_d3d_model = d3d_model_create(true);
+		shapes_d3d_model = d3d_model_create(true, false);
 		last_stride = -1;
 	} else if (texId != shapes_d3d_texture || (d3d_model_get_stride(shapes_d3d_model) != last_stride && last_stride != -1)) {
 		last_stride = -1;
@@ -192,6 +198,7 @@ void BeginShapesBatching(int texId) {
 }
 
 void EndShapesBatching() {
+	last_depth -= 1;
 	if (hasdrawn || shapes_d3d_model == -1) { return; }
 	hasdrawn = true;
 	d3d_model_draw(shapes_d3d_model, shapes_d3d_texture);
@@ -223,6 +230,7 @@ void LightEnable(DWORD Index, BOOL bEnable) {
 }
 
 void BeginScene() {
+	last_depth = 0;
 	device->BeginScene();
 	// Reapply the stored render states and what not
 	RestoreState();
@@ -442,6 +450,10 @@ void SetTexture(DWORD Sampler, LPDIRECT3DTEXTURE9 pTexture) {
     it->second = pTexture;
 	//EndShapesBatching();
     device->SetTexture( Sampler, pTexture );
+}
+
+void SetTextureStageState(DWORD Sampler, D3DTEXTURESTAGESTATETYPE Type, DWORD Value) {
+	device->SetTextureStageState(Sampler, Type, Value);
 }
 
 void SetStreamSource(UINT StreamNumber, IDirect3DVertexBuffer9 *pStreamData, UINT OffsetInBytes, UINT Stride) {

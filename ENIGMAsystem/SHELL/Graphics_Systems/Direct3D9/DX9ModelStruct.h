@@ -148,7 +148,8 @@ class Mesh
   vector<gs_scalar> pointIndexedVertices; // The vertices added to indexed point primitives batched into a single point list to be buffered to the GPU
   vector<unsigned> pointIndices; // The point indices either concatenated by batching or supplied in the temporary container.
   
-  unsigned vertexStride; // whether the vertices are 2D or 3D
+  unsigned vertexStride; // Whether the vertices are 2D or 3D
+  bool useDepth; // Whether or not the Z-values should be treated as a depth component
   bool useColors; // If colors have been added to the model
   bool useTextures; // If texture coordinates have been added
   bool useNormals; // If normals have been added
@@ -179,7 +180,7 @@ class Mesh
 	currentPrimitive = pr;
   }
 
-  Mesh(bool dynamic)
+  Mesh (bool dynamic, bool depth)
   {
 	pointVertices.reserve(64000);
 	pointIndices.reserve(64000);
@@ -198,6 +199,7 @@ class Mesh
 	vbodynamic = dynamic;
 
 	vertexStride = 0;
+	useDepth = depth;
 	useColors = false;
     useTextures = false;
     useNormals = false;
@@ -761,9 +763,19 @@ class Mesh
 	
 	
 	unsigned stride = vertexStride;
-	D3DVERTEXELEMENT9 POSITIONELEMENT =
-	{ 0,  0, stride < 3 ? D3DDECLTYPE_FLOAT2 : D3DDECLTYPE_FLOAT3,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0 };
+	D3DVERTEXELEMENT9 POSITIONELEMENT;
+	D3DVERTEXELEMENT9 DEPTHELEMENT;
 
+	if (useDepth) {
+		POSITIONELEMENT =
+		{ 0,  0, D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0 };
+		DEPTHELEMENT = 
+		{ 0,  0, D3DDECLTYPE_FLOAT1, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_DEPTH, 0 };
+	} else {
+		POSITIONELEMENT =
+		{ 0,  0, stride < 3 ? D3DDECLTYPE_FLOAT2 : D3DDECLTYPE_FLOAT3,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0 };
+	}
+	
 	D3DVERTEXELEMENT9 NORMALELEMENT =
 	{ 0, static_cast< WORD >(stride * sizeof(gs_scalar)), D3DDECLTYPE_FLOAT3,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_NORMAL,   0 };
 	if (useNormals) stride += 3;
@@ -776,10 +788,11 @@ class Mesh
 	{ 0, static_cast< WORD >(stride * sizeof(gs_scalar)), D3DDECLTYPE_FLOAT4, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR,    0  };
 	if (useColors) stride += 4;
 
-	unsigned elements = 1 + useNormals + useTextures + useColors + 1;
+	unsigned elements = 1 + useDepth + useNormals + useTextures + useColors + 1;
 	D3DVERTEXELEMENT9 customvertex[elements];
 	customvertex[0] = POSITIONELEMENT;
 	int i = 1;
+	if (useDepth) { customvertex[i] = DEPTHELEMENT; i += 1; }
 	if (useNormals) { customvertex[i] = NORMALELEMENT; i += 1; }
 	if (useTextures) { customvertex[i] = TEXTUREELEMENT; i += 1; }
 	if (useColors) { customvertex[i] = COLORELEMENT; i += 1; }
