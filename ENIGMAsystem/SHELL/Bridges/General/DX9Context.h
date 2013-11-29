@@ -53,7 +53,6 @@ LPDIRECT3DVERTEXSHADER9	vertexShader;
 LPDIRECT3DSURFACE9 pBackBuffer;
 LPDIRECT3DSURFACE9 pRenderTarget;
 
-float current_depth;
 int last_stride;
 int shapes_d3d_model;
 int shapes_d3d_texture;
@@ -75,18 +74,11 @@ ContextManager() {
 	shapes_d3d_texture = -1;
 	vertexShader = NULL;
 	pixelShader = NULL;
-	current_depth = 0;
 	last_stride = -1;
 }
 
 ~ContextManager() {
 
-}
-
-//TODO: This is just a quick hack to fix depths by incrementing the z-value for draw_primitive calls, figure out a better solution, 
-// the issue is only with different primitive types mixed with the same batch.
-float GetDepth() {
-	return current_depth;
 }
 
 //TODO: Write this method so that for debugging purposes we can dump the entire render state to a text file.
@@ -181,9 +173,8 @@ int GetShapesModel() {
 }
 
 void BeginShapesBatching(int texId) {
-	current_depth -= 1;
 	if (shapes_d3d_model == -1) {
-		shapes_d3d_model = d3d_model_create();
+		shapes_d3d_model = d3d_model_create(true);
 		last_stride = -1;
 	} else if (texId != shapes_d3d_texture || (d3d_model_get_stride(shapes_d3d_model) != last_stride && last_stride != -1)) {
 		
@@ -192,8 +183,7 @@ void BeginShapesBatching(int texId) {
 		//show_error(ss.str(), false);
 		last_stride = -1;
 		d3d_model_draw(shapes_d3d_model, shapes_d3d_texture);
-		d3d_model_destroy(shapes_d3d_model);
-		shapes_d3d_model = d3d_model_create();
+		d3d_model_clear(shapes_d3d_model);
 	} else {
 		last_stride = d3d_model_get_stride(shapes_d3d_model);
 	}
@@ -203,9 +193,9 @@ void BeginShapesBatching(int texId) {
 void EndShapesBatching() {
 	if (shapes_d3d_model == -1) { return; }
 	d3d_model_draw(shapes_d3d_model, shapes_d3d_texture);
-	d3d_model_destroy(shapes_d3d_model);
+	d3d_model_clear(shapes_d3d_model);
 	shapes_d3d_texture = -1;
-	shapes_d3d_model = -1;
+	last_stride = -1;
 }
 
 void Clear(DWORD Count, const D3DRECT *pRects, DWORD Flags, D3DCOLOR Color, float Z, DWORD Stencil) {
@@ -231,7 +221,6 @@ void LightEnable(DWORD Index, BOOL bEnable) {
 }
 
 void BeginScene() {
-	current_depth = 0;
 	device->BeginScene();
 	// Reapply the stored render states and what not
 	RestoreState();

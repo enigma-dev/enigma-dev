@@ -148,6 +148,7 @@ class Mesh
   vector<gs_scalar> pointIndexedVertices; // The vertices added to indexed point primitives batched into a single point list to be buffered to the GPU
   vector<unsigned> pointIndices; // The point indices either concatenated by batching or supplied in the temporary container.
   
+  unsigned vertexStride; // whether the vertices are 2D or 3D
   bool useColors; // If colors have been added to the model
   bool useTextures; // If texture coordinates have been added
   bool useNormals; // If normals have been added
@@ -169,23 +170,34 @@ class Mesh
   LPDIRECT3DINDEXBUFFER9 indexbuffer;    // Interleaved index buffer object TRIANGLES|LINES|POINTS with triangles first since they are most likely to be used
   IDirect3DVertexDeclaration9* vertex_declaration; // Pointer to our custom vertex declaration which we will use later for something actually flexible where FVF is not
   
+  bool vbodynamic; // Whether the buffer is dynamically allocated in system memory, should be true for simple primitive calls
   bool vbogenerated; // Whether or not the buffer objects have been generated
-  bool vbobuffered; // Whether or not the buffer objects have been buffered
   bool vboindexed; // Whether or not the model contains any indexed primitives or just regular lists
   
   void SetPrimitive(int pr) {
-	vbobuffered = false;
+	vbogenerated = false;
 	currentPrimitive = pr;
   }
 
-  Mesh()
+  Mesh(bool dynamic)
   {
+	pointVertices.reserve(64000);
+	pointIndices.reserve(64000);
+	lineVertices.reserve(64000);
+	lineIndices.reserve(64000);
+	triangleVertices.reserve(64000);
+	triangleIndices.reserve(64000);
+	vertices.reserve(64000);
+	indices.reserve(64000);
+  
   	vertexbuffer = NULL;    // the pointer to the vertex buffer
 	indexbuffer = NULL;    // the pointer to the index buffer
+	vertex_declaration = NULL;
 	
     vbogenerated = false;
-    vbobuffered = false;
+	vbodynamic = dynamic;
 
+	vertexStride = 0;
 	useColors = false;
     useTextures = false;
     useNormals = false;
@@ -206,7 +218,19 @@ class Mesh
 
   ~Mesh()
   {
-
+	// Release the buffers and make sure we don't leave hanging pointers.
+	if (vertexbuffer != NULL) {
+		vertexbuffer->Release();
+		vertexbuffer = NULL;
+	}
+	if (indexbuffer != NULL) {
+		indexbuffer->Release();
+		indexbuffer = NULL;
+	}
+	if (vertex_declaration != NULL) {
+		vertex_declaration->Release();
+		vertex_declaration = NULL;
+	}
   }
   
   void ClearData()
@@ -226,20 +250,18 @@ class Mesh
   {
     ClearData();
 	
-	// Release the buffers and make sure we don't leave hanging pointers.
-	if (vertexbuffer != NULL) {
-		vertexbuffer->Release();
-		vertexbuffer = NULL;
-	}
-	if (indexbuffer != NULL) {
-		indexbuffer->Release();
-		indexbuffer = NULL;
-	}
-	vertex_declaration->Release();
-	vertex_declaration = NULL;
+	pointVertices.reserve(64000);
+	pointIndices.reserve(64000);
+	lineVertices.reserve(64000);
+	lineIndices.reserve(64000);
+	triangleVertices.reserve(64000);
+	triangleIndices.reserve(64000);
+	vertices.reserve(64000);
+	indices.reserve(64000);
 	
 	vbogenerated = false;
 	
+	vertexStride = 0;
 	useColors = false;
     useTextures = false;
     useNormals = false;
@@ -257,7 +279,7 @@ class Mesh
   }
   
   unsigned GetStride() {
-	unsigned stride = 3;
+	unsigned stride = vertexStride;
     if (useNormals) stride += 3;
 	if (useTextures) stride += 2;
     if (useColors) stride += 4;
@@ -266,13 +288,20 @@ class Mesh
   
   void Begin(int pt)
   {
-    vbobuffered = false;
+    vbogenerated = false;
     currentPrimitive = pt;
   }
 
+  void AddVertex(gs_scalar x, gs_scalar y)
+  {
+    vertices.push_back(x); vertices.push_back(y);
+	vertexStride = 2;
+  }
+  
   void AddVertex(gs_scalar x, gs_scalar y, gs_scalar z)
   {
     vertices.push_back(x); vertices.push_back(y); vertices.push_back(z);
+	vertexStride = 3;
   }
   
   void AddIndex(unsigned ind)
@@ -299,9 +328,9 @@ class Mesh
 	useColors = true;
   }
   
-    void Translate(gs_scalar x, gs_scalar y, gs_scalar z)
+  void Translate(gs_scalar x, gs_scalar y, gs_scalar z)
   {
-	unsigned int stride = 3 + (useNormals*3) + (useTextures*2)  + (useColors*4) ;
+	unsigned int stride = vertexStride + (useNormals*3) + (useTextures*2)  + (useColors*4) ;
 	unsigned int size = triangleVertices.size();
 	for (unsigned int i = 0; i < size; i += stride)
 	{
@@ -313,7 +342,7 @@ class Mesh
      
   void RotateUV(gs_scalar angle)
   {
-	unsigned int stride = 3 + (useNormals*3) + (useTextures*2)  + (useColors*4) ;
+	unsigned int stride = vertexStride + (useNormals*3) + (useTextures*2)  + (useColors*4) ;
 	angle *= 3.14159/180.0;
 	gs_scalar _cos = cos(angle);
 	gs_scalar _sin = sin(angle);
@@ -329,7 +358,7 @@ class Mesh
   
   void ScaleUV(gs_scalar xscale, gs_scalar yscale)
   {
-	unsigned int stride = 3 + useNormals*3 + useTextures*2 + useColors*4;
+	unsigned int stride = vertexStride + useNormals*3 + useTextures*2 + useColors*4;
 
 	for (vector<gs_scalar>::iterator i = triangleVertices.begin(); i != triangleVertices.end(); i += stride)
 	{
@@ -341,7 +370,7 @@ class Mesh
    
   void RotateX(gs_scalar angle)
   {
-	unsigned int stride = 3 + (useNormals*3) + (useTextures*2)  + (useColors*4) ;
+	unsigned int stride = vertexStride + (useNormals*3) + (useTextures*2)  + (useColors*4) ;
 	angle *= 3.14159/180.0;
 	gs_scalar _cos = cos(angle);
 	gs_scalar _sin = sin(angle);
@@ -358,7 +387,7 @@ class Mesh
   
   void RotateY(gs_scalar angle)
   {
-	unsigned int stride = 3 + (useNormals*3) + (useTextures*2)  + (useColors*4) ;
+	unsigned int stride = vertexStride + (useNormals*3) + (useTextures*2)  + (useColors*4) ;
 	angle *= 3.14159/180.0;
 	gs_scalar _cos = cos(angle);
 	gs_scalar _sin = sin(angle);
@@ -374,7 +403,7 @@ class Mesh
   
   void RotateZ(gs_scalar angle)
   {
-	unsigned int stride = 3 + (useNormals*3) + (useTextures*2)  + (useColors*4) ;
+	unsigned int stride = vertexStride + (useNormals*3) + (useTextures*2)  + (useColors*4) ;
 	angle *= 3.14159/180.0;
 	gs_scalar _cos = cos(angle);
 	gs_scalar _sin = sin(angle);
@@ -390,7 +419,7 @@ class Mesh
   
   void Scale(gs_scalar xscale, gs_scalar yscale, gs_scalar zscale)
   {
-	unsigned int stride = 3 + useNormals*3 + useTextures*2 + useColors*4;
+	unsigned int stride = vertexStride + useNormals*3 + useTextures*2 + useColors*4;
 
 	for (vector<gs_scalar>::iterator i = triangleVertices.begin(); i != triangleVertices.end(); i += stride)
 	{
@@ -404,7 +433,7 @@ class Mesh
   bool CalculateNormals(bool smooth, bool invert)
   {
 	
-	unsigned int stride = 3 + useNormals*3 + useTextures*2 + useColors*4;
+	unsigned int stride = vertexStride + useNormals*3 + useTextures*2 + useColors*4;
 	
 	int oft = useNormals * 3;
 	int ofc = oft + useTextures * 2 ;
@@ -471,7 +500,7 @@ class Mesh
   
   void SmoothNormals()
   {
-	unsigned int stride = 3 + useNormals*3 + useTextures*2 + useColors*4;
+	unsigned int stride = vertexStride + useNormals*3 + useTextures*2 + useColors*4;
 	
 	vector<vector<unsigned int> > groupList;
 	unsigned int n = 0;
@@ -543,7 +572,7 @@ class Mesh
 	//vertices are exactly the same, triangle lists could also check for degenerates, it is unknown whether the GPU will render a degenerative 
 	//in a line strip primitive.
 	
-	unsigned stride = 3;
+	unsigned stride = vertexStride;
     if (useNormals) stride += 3;
 	if (useTextures) stride += 2;
     if (useColors) stride += 4;
@@ -612,7 +641,9 @@ class Mesh
 				}
 			} else {
 				unsigned offset = (triangleIndexedVertices.size() - vertices.size()) / stride;
-				for (unsigned i = 0; i < vertices.size() / stride - 2; i++) {
+				unsigned elements = (vertices.size() / stride - 2);
+
+				for (unsigned i = 0; i < elements; i++) {
 					if (i % 2) {
 						triangleIndices.push_back(offset + i + 2);
 						triangleIndices.push_back(offset + i + 1);
@@ -652,7 +683,7 @@ class Mesh
 	indices.clear();
   }
 
-  void BufferGenerate(bool subdata)
+  void BufferGenerate()
   {
 	vector<gs_scalar> vdata;
 	vector<unsigned> idata;
@@ -684,20 +715,31 @@ class Mesh
 		pointIndexedCount = pointIndices.size();
 	}
 	
+	if (indexbuffer != NULL) {
+		D3DINDEXBUFFER_DESC pDesc;
+		indexbuffer->GetDesc(&pDesc);
+		if (pDesc.Size < idata.size() * sizeof( unsigned ) || idata.size() == 0) {
+			indexbuffer->Release();
+			indexbuffer = NULL;
+		}
+	}
+	
 	VOID* pVoid;    // a void pointer
 	if (idata.size() > 0) {
 		vboindexed = true;
 		indexedoffset += vdata.size();
 		// create a index buffer interface
-		d3dmgr->CreateIndexBuffer(idata.size() * sizeof(unsigned), 0, D3DFMT_INDEX32, D3DPOOL_MANAGED, &indexbuffer, NULL);
-		if (subdata) {
-		
-		} else {
-			// lock index buffer and load the indices into it
-			indexbuffer->Lock(0, 0, (void**)&pVoid, 0);
-			memcpy(pVoid, &idata[0], idata.size() * sizeof(unsigned));
-			indexbuffer->Unlock();
+		if (indexbuffer == NULL) {
+			if (vbodynamic) {
+				d3dmgr->CreateIndexBuffer(idata.size() * sizeof(unsigned), D3DUSAGE_DYNAMIC, D3DFMT_INDEX32, D3DPOOL_SYSTEMMEM, &indexbuffer, NULL);
+			} else {
+				d3dmgr->CreateIndexBuffer(idata.size() * sizeof(unsigned), D3DUSAGE_WRITEONLY, D3DFMT_INDEX32, D3DPOOL_MANAGED, &indexbuffer, NULL);
+			}
 		}
+		// lock index buffer and load the indices into it
+		indexbuffer->Lock(0, 0, (void**)&pVoid, 0);
+		memcpy(pVoid, &idata[0], idata.size() * sizeof(unsigned));
+		indexbuffer->Unlock();
 
 		// Clean up temporary interleaved data
 		idata.clear();
@@ -715,9 +757,10 @@ class Mesh
 		vdata.insert(vdata.end(), pointVertices.begin(), pointVertices.end());
 	}
 	
+	
+	unsigned stride = vertexStride;
 	D3DVERTEXELEMENT9 POSITIONELEMENT =
-	{ 0,  0, D3DDECLTYPE_FLOAT3,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0 };
-	unsigned stride = 3;
+	{ 0,  0, stride < 3 ? D3DDECLTYPE_FLOAT2 : D3DDECLTYPE_FLOAT3,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0 };
 
 	D3DVERTEXELEMENT9 NORMALELEMENT =
 	{ 0, static_cast< WORD >(stride * sizeof(gs_scalar)), D3DDECLTYPE_FLOAT3,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_NORMAL,   0 };
@@ -731,7 +774,7 @@ class Mesh
 	{ 0, static_cast< WORD >(stride * sizeof(gs_scalar)), D3DDECLTYPE_FLOAT4, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR,    0  };
 	if (useColors) stride += 4;
 
-	int elements = 1 + useNormals + useTextures + useColors + 1;
+	unsigned elements = 1 + useNormals + useTextures + useColors + 1;
 	D3DVERTEXELEMENT9 customvertex[elements];
 	customvertex[0] = POSITIONELEMENT;
 	int i = 1;
@@ -741,22 +784,50 @@ class Mesh
 	// declared const for C++0x compatibility
 	const D3DVERTEXELEMENT9 strideelement = D3DDECL_END();
 	customvertex[i] = strideelement;
+		
+	if (vertex_declaration != NULL) {
+		D3DVERTEXELEMENT9 decl[elements];
+		UINT numElements;
+		vertex_declaration->GetDeclaration(decl, &numElements);
+		
+		bool different = (elements != numElements);
+		
+		//TODO: Might need a loop here to check if the declaration really is different
+		//for (int i = 0; i < elements; 
+		
+		if (different) {
+			vertex_declaration->Release();
+			vertex_declaration = NULL;
+		}
+	}
+		
+	if (vertex_declaration == NULL) {
+		d3dmgr->CreateVertexDeclaration (customvertex, &vertex_declaration);
+	}
 	
-	d3dmgr->CreateVertexDeclaration (customvertex, &vertex_declaration);
-	
+	if (vertexbuffer != NULL) {
+		D3DVERTEXBUFFER_DESC pDesc;
+		vertexbuffer->GetDesc(&pDesc);
+		if (pDesc.Size < vdata.size() * sizeof( gs_scalar )) {
+			vertexbuffer->Release();
+			vertexbuffer = NULL;
+		}
+	}
 	// create a vertex buffer interface
-	d3dmgr->CreateVertexBuffer(vdata.size() * sizeof( gs_scalar ), D3DUSAGE_WRITEONLY, 0, D3DPOOL_MANAGED, &vertexbuffer, NULL);
+	if (vertexbuffer == NULL) {
+		if (vbodynamic) {
+			d3dmgr->CreateVertexBuffer(vdata.size() * sizeof( gs_scalar ), D3DUSAGE_DYNAMIC, 0, D3DPOOL_SYSTEMMEM, &vertexbuffer, NULL);
+		} else {
+			d3dmgr->CreateVertexBuffer(vdata.size() * sizeof( gs_scalar ), D3DUSAGE_WRITEONLY, 0, D3DPOOL_MANAGED, &vertexbuffer, NULL);
+		}
+	}
 	
 	// Send the data to the GPU
-	if (subdata) {
-		//NOTE: Buffering subdata might not be any different in DX than just buffering it
-	} else {
-		// lock vertex buffer and load the vertices into it
-		vertexbuffer->Lock(0, 0, (VOID**)&pVoid, 0);
-		memcpy(pVoid, &vdata[0], vdata.size() * sizeof(gs_scalar));
-		
-		vertexbuffer->Unlock();
-	}
+	// lock vertex buffer and load the vertices into it
+	vertexbuffer->Lock(0, 0, (VOID**)&pVoid, 0);
+	memcpy(pVoid, &vdata[0], vdata.size() * sizeof(gs_scalar));
+	
+	vertexbuffer->Unlock();
 
 	// Clean up temporary interleaved data
 	vdata.clear();
@@ -766,19 +837,13 @@ class Mesh
 
   void Draw()
   {
-    if (!vbogenerated) {
-      vbogenerated = true;
-	  vbobuffered = true;
-      BufferGenerate(false);
-    } else if (!vbobuffered) {
-	  vbobuffered = true;
-	  BufferGenerate(true);
-	}
+	if (!GetStride()) { return; }
+    if (vertexbuffer == NULL || !vbogenerated) {
+	  vbogenerated = true;
+      BufferGenerate();
+    }
   
-	unsigned stride = 3;
-    if (useNormals) stride += 3;
-	if (useTextures) stride += 2;
-    if (useColors) stride += 4;
+	unsigned stride = GetStride();
 	
 	d3dmgr->SetVertexDeclaration(vertex_declaration);
 	// select the vertex buffer to display

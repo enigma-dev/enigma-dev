@@ -232,9 +232,18 @@ void draw_circle(gs_scalar x, gs_scalar y, float rad, bool outline)
     }
 }
 
-void draw_circle_color(gs_scalar x, gs_scalar y, float rad, int c1, int c2, bool outline)
+void draw_circle_color(gs_scalar x, gs_scalar y, float rad,int c1, int c2,bool outline)
 {
-
+    if(outline) {
+		draw_primitive_begin(pr_linestrip);
+    } else {
+        draw_primitive_begin(pr_trianglefan);
+		draw_vertex_color(x, y, c1, 1.0);
+    }
+	float pr=2*M_PI/enigma::circleprecision;
+	for(float i=0;i<=2*M_PI;i+=pr)
+		draw_vertex_color(x+rad*cos(i),y-rad*sin(i), c2, 1.0);
+    draw_primitive_end();
 }
 
 void draw_circle_perfect(gs_scalar x, gs_scalar y, float rad, bool outline)

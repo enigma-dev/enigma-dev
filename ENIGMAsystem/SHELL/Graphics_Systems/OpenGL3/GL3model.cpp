@@ -49,7 +49,7 @@ unsigned int split(const std::string &txt, std::vector<std::string> &strs, char 
 	strs.clear();
 
 	// Decompose statement
-	while( pos != txt.length() ) {
+	while( pos != std::string::npos ) {
 		strs.push_back( txt.substr( initialPos, pos - initialPos + 1 ) );
 		initialPos = pos + 1;
 
@@ -364,6 +364,11 @@ void d3d_model_primitive_end(int id)
   meshes[id]->End();
 }
 
+void d3d_model_vertex(int id, gs_scalar x, gs_scalar y)
+{
+  meshes[id]->AddVertex(x, y);
+}
+
 void d3d_model_vertex(int id, gs_scalar x, gs_scalar y, gs_scalar z)
 {
   meshes[id]->AddVertex(x, y, z);
@@ -373,16 +378,35 @@ void d3d_model_index(int id, unsigned ind) {
   meshes[id]->AddIndex(ind);
 }
 
+void d3d_model_vertex_color(int id, gs_scalar x, gs_scalar y, int col, double alpha)
+{
+  meshes[id]->AddVertex(x, y);
+  meshes[id]->AddColor(col, alpha);
+}
+
 void d3d_model_vertex_color(int id, gs_scalar x, gs_scalar y, gs_scalar z, int col, double alpha)
 {
   meshes[id]->AddVertex(x, y, z);
   meshes[id]->AddColor(col, alpha);
 }
 
+void d3d_model_vertex_texture(int id, gs_scalar x, gs_scalar y, gs_scalar tx, gs_scalar ty)
+{
+  meshes[id]->AddVertex(x, y);
+  meshes[id]->AddTexture(tx, ty);
+}
+
 void d3d_model_vertex_texture(int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar tx, gs_scalar ty)
 {
   meshes[id]->AddVertex(x, y, z);
   meshes[id]->AddTexture(tx, ty);
+}
+
+void d3d_model_vertex_texture_color(int id, gs_scalar x, gs_scalar y, gs_scalar tx, gs_scalar ty, int col, double alpha)
+{
+  meshes[id]->AddVertex(x, y);
+  meshes[id]->AddTexture(tx, ty);
+  meshes[id]->AddColor(col, alpha);
 }
 
 void d3d_model_vertex_texture_color(int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar tx, gs_scalar ty, int col, double alpha)

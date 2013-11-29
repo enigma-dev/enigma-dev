@@ -24,7 +24,7 @@
 
 namespace enigma_user {
 
-  unsigned d3d_model_create();
+  unsigned d3d_model_create(bool dynamic = false);
   void d3d_model_destroy(int id);
   bool d3d_model_exists(int id);
   void d3d_model_clear(int id);
@@ -45,10 +45,14 @@ namespace enigma_user {
   void d3d_model_rotate_y(int id, gs_scalar angle);
   void d3d_model_rotate_z(int id, gs_scalar angle);
   void d3d_model_rotate_uv(int id, gs_scalar angle);
+  void d3d_model_vertex(int id, gs_scalar x, gs_scalar y);
   void d3d_model_vertex(int id, gs_scalar x, gs_scalar y, gs_scalar z);
   void d3d_model_index(int id, unsigned ind);
+  void d3d_model_vertex_color(int id, gs_scalar x, gs_scalar y, int col, double alpha);
   void d3d_model_vertex_color(int id, gs_scalar x, gs_scalar y, gs_scalar z, int col, double alpha);
+  void d3d_model_vertex_texture(int id, gs_scalar x, gs_scalar y, gs_scalar tx, gs_scalar ty);
   void d3d_model_vertex_texture(int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar tx, gs_scalar ty);
+  void d3d_model_vertex_texture_color(int id, gs_scalar x, gs_scalar y, gs_scalar tx, gs_scalar ty, int col, double alpha);
   void d3d_model_vertex_texture_color(int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar tx, gs_scalar ty, int col, double alpha);
   void d3d_model_vertex_normal(int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz);
   void d3d_model_vertex_normal_color(int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, int col, double alpha);

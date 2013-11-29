@@ -7,6 +7,6 @@ Description: Basic audio playback using DirectSound for regular WAVE format audi
 Author: Robert B. Colton
 
 Depends:
-	Build-platforms: None
+	Build-platforms: Windows
 Represents:
 	Build-platforms: None
