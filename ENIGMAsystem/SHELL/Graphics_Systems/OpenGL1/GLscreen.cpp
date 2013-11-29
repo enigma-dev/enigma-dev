@@ -432,7 +432,9 @@ void screen_init()
 	enigma::gui_width = window_get_region_width_scaled();
 	enigma::gui_height = window_get_region_height_scaled();
 
-    texture_reset();
+	glClearColor(0,0,0,0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	
     if (!view_enabled)
     {
         glMatrixMode(GL_PROJECTION);
@@ -446,19 +448,7 @@ void screen_init()
           glOrtho(0, room_width, 0, room_height, 0, 1);
           glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
           glMultMatrixd(transformation_matrix);
-          glClearColor(0,0,0,0);
-          glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-          glDisable(GL_DEPTH_TEST);
-          glEnable(GL_BLEND);
-          glEnable(GL_ALPHA_TEST);
-          glEnable(GL_TEXTURE_2D);
-          glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-          glAlphaFunc(GL_ALWAYS,0);
-          glColor4f(0,0,0,1);
-          glBindTexture(GL_TEXTURE_2D,0);
-    }
-    else
-    {
+    } else {
         for (view_current = 0; view_current < 7; view_current++)
         {
             if (view_visible[(int)view_current])
@@ -475,20 +465,19 @@ void screen_init()
                   glOrtho(view_xview[vc], view_wview[vc] + view_xview[vc], view_yview[vc], view_hview[vc] + view_yview[vc], 0, 1);
                   glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
                   glMultMatrixd(transformation_matrix);
-                  glClearColor(0,0,0,0);
-                  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-                  glDisable(GL_DEPTH_TEST);
-                  glEnable(GL_BLEND);
-                  glEnable(GL_ALPHA_TEST);
-                  glEnable(GL_TEXTURE_2D);
-                  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-                  glAlphaFunc(GL_ALWAYS,0);
-                  glColor4f(0,0,0,1);
-                  glBindTexture(GL_TEXTURE_2D,0);
                 break;
             }
         }
     }
+	
+	glDisable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glEnable(GL_ALPHA_TEST);
+	glEnable(GL_TEXTURE_2D);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glAlphaFunc(GL_ALWAYS,0);
+	glColor4f(0,0,0,1);
+	glBindTexture(GL_TEXTURE_2D,0);
 }
 
 int screen_save(string filename) { //Assumes native integers are little endian

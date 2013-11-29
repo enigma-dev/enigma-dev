@@ -457,6 +457,10 @@ void screen_init()
 {
 	enigma::gui_width = window_get_region_width_scaled();
 	enigma::gui_height = window_get_region_height_scaled();
+	
+	d3dmgr->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
+	d3dmgr->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
+	
     if (!view_enabled)
     {
         //glMatrixMode(GL_PROJECTION);
@@ -489,22 +493,7 @@ void screen_init()
 							0.0f,    // the near view-plane
 							1.0f);    // the far view-plane
 		d3dmgr->SetTransform(D3DTS_PROJECTION, &matProjection);    // set the projection transform
-
-		d3dmgr->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
-		d3dmgr->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
-
-		d3dmgr->SetRenderState(D3DRS_ZENABLE, FALSE);
-		d3dmgr->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-        //glEnable(GL_BLEND);
-        //glEnable(GL_TEXTURE_2D);
-        //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		d3dmgr->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-		d3dmgr->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
-        //glAlphaFunc(GL_ALWAYS,0);
-        //glColor4f(0,0,0,1);
-    }
-    else
-    {
+    } else {
 		for (view_current = 0; view_current < 7; view_current++)
         {
             if (view_visible[(int)view_current])
@@ -538,22 +527,21 @@ void screen_init()
 							1.0f);    // the far view-plane
 				d3dmgr->SetTransform(D3DTS_PROJECTION, &matProjection);    // set the projection transform
 
-				d3dmgr->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
-				d3dmgr->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
-
-				d3dmgr->SetRenderState(D3DRS_ZENABLE, FALSE);
-				d3dmgr->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-                //glEnable(GL_BLEND);
-                //glEnable(GL_TEXTURE_2D);
-                //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-				d3dmgr->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-				d3dmgr->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
-                //glAlphaFunc(GL_ALWAYS,0);
-                //glColor4f(0,0,0,1);
                 break;
             }
         }
     }
+
+	d3dmgr->SetRenderState(D3DRS_LIGHTING, FALSE);
+	d3dmgr->SetRenderState(D3DRS_ZENABLE, FALSE);
+	d3dmgr->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+	//glEnable(GL_BLEND);
+	//glEnable(GL_TEXTURE_2D);
+	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	d3dmgr->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+	d3dmgr->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+	//glAlphaFunc(GL_ALWAYS,0);
+	//glColor4f(0,0,0,1);
 }
 
 int screen_save(string filename) //Assumes native integers are little endian
