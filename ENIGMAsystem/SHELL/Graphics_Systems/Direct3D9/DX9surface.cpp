@@ -148,10 +148,10 @@ void draw_surface_ext(int id,gs_scalar x, gs_scalar y,gs_scalar xscale, gs_scala
           ulcy = y - yscale * sin(M_PI+rot) - yscale * sin(M_PI/2+rot);
 
 	draw_primitive_begin_texture(pr_trianglestrip, surf->tex);
-	draw_vertex_texture(ulcx,ulcy,0,0);
-	draw_vertex_texture(ulcx + w*cos(rot), ulcy - w*sin(rot),1,0);
-	draw_vertex_texture(ulcx,ulcy,0,1);
-	draw_vertex_texture(ulcx + w*cos(rot), ulcy - w*sin(rot),1,1);
+	draw_vertex_texture_color(ulcx,ulcy,0,0,color,alpha);
+	draw_vertex_texture_color(ulcx + w*cos(rot), ulcy - w*sin(rot),1,0,color,alpha);
+	draw_vertex_texture_color(ulcx,ulcy,0,1,color,alpha);
+	draw_vertex_texture_color(ulcx + w*cos(rot), ulcy - w*sin(rot),1,1,color,alpha);
 	draw_primitive_end();
 }
 
@@ -172,10 +172,10 @@ void draw_surface_stretched_ext(int id, gs_scalar x, gs_scalar y, gs_scalar w, g
     get_surface(surf,id);
   
 	draw_primitive_begin_texture(pr_trianglestrip, surf->tex);
-	draw_vertex_texture(x,y,0,0);
-	draw_vertex_texture(x+w,y,1,0);
-	draw_vertex_texture(x,y+h,0,1);
-	draw_vertex_texture(x+w,y+h,1,1);
+	draw_vertex_texture_color(x,y,0,0,color,alpha);
+	draw_vertex_texture_color(x+w,y,1,0,color,alpha);
+	draw_vertex_texture_color(x,y+h,0,1,color,alpha);
+	draw_vertex_texture_color(x+w,y+h,1,1,color,alpha);
 	draw_primitive_end();
 }
 
@@ -231,22 +231,132 @@ void draw_surface_general(int id, gs_scalar left, gs_scalar top, gs_scalar width
 
 void draw_surface_tiled(int id, gs_scalar x, gs_scalar y)
 {
+	get_surface(surf,id);
 
+	x=surf->width-fmod(x,surf->width);
+	y=surf->height-fmod(y,surf->height);
+	const int hortil= int (ceil(room_width/(surf->width))),
+			  vertil= int (ceil(room_height/(surf->height)));
+
+    
+	for (int i=0; i<hortil; i++)
+	{
+		for (int c=0; c<vertil; c++)
+		{
+			draw_primitive_begin_texture(pr_trianglestrip, surf->tex);
+			draw_vertex_texture(i*surf->width-x,c*surf->height-y,0,0);
+			draw_vertex_texture((i+1)*surf->width-x,c*surf->height-y,1,0);
+			draw_vertex_texture(i*surf->width-x,(c+1)*surf->height-y,0,1);
+			draw_vertex_texture((i+1)*surf->width-x,(c+1)*surf->height-y,1,1);
+			draw_primitive_end();
+		}
+	}
 }
 
 void draw_surface_tiled_ext(int id, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, double alpha)
 {
+	get_surface(surf,id);
 
+    const gs_scalar w=surf->width*xscale, h=surf->height*yscale;
+    const int hortil= int (ceil(room_width/(surf->width))),
+        vertil= int (ceil(room_height/(surf->height)));
+    x=w-fmod(x,w);
+    y=h-fmod(y,h);
+ 
+    for (int i=0; i<hortil; i++)
+    {
+      for (int c=0; c<vertil; c++)
+      {		  
+		draw_primitive_begin_texture(pr_trianglestrip, surf->tex);
+		draw_vertex_texture_color(i*w-x,c*h-y,0,0,color,alpha);
+		draw_vertex_texture_color((i+1)*w-x,c*h-y,1,0,color,alpha);
+		draw_vertex_texture_color(i*w-x,(c+1)*h-y,0,1,color,alpha);
+		draw_vertex_texture_color((i+1)*w-x,(c+1)*h-y,1,1,color,alpha);
+		draw_primitive_end();
+      }
+    }
 }
 
 void draw_surface_tiled_area(int id, gs_scalar x, gs_scalar y, float x1, float y1, float x2, float y2)
 {
+	get_surface(surf,id);
+	
+    gs_scalar sw,sh,i,j,jj,left,top,width,height,X,Y;
+    sw = surf->width;
+    sh = surf->height;
 
+    i = x1-(fmod(x1,sw) - fmod(x,sw)) - sw*(fmod(x1,sw)<fmod(x,sw));
+    j = y1-(fmod(y1,sh) - fmod(y,sh)) - sh*(fmod(y1,sh)<fmod(y,sh));
+    jj = j;
+
+    for(; i<=x2; i+=sw)
+    {
+      for(; j<=y2; j+=sh)
+      {
+        if(i <= x1) left = x1-i;
+        else left = 0;
+        X = i+left;
+
+        if(j <= y1) top = y1-j;
+        else top = 0;
+        Y = j+top;
+
+        if(x2 <= i+sw) width = ((sw)-(i+sw-x2)+1)-left;
+        else width = sw-left;
+
+        if(y2 <= j+sh) height = ((sh)-(j+sh-y2)+1)-top;
+        else height = sh-top;
+		  
+		draw_primitive_begin_texture(pr_trianglestrip, surf->tex);
+		draw_vertex_texture(X,Y,left/sw,top/sh);
+		draw_vertex_texture(X+width,Y,(left+width)/sw,top/sh);
+		draw_vertex_texture(X,Y+height,left/sw,(top+height)/sh);
+		draw_vertex_texture(X+width,Y+height,(left+width)/sw,(top+height)/sh);
+		draw_primitive_end();
+      }
+      j = jj;
+    }
 }
 
 void draw_surface_tiled_area_ext(int id, gs_scalar x, gs_scalar y, float x1, float y1, float x2, float y2, gs_scalar xscale, gs_scalar yscale, int color, double alpha)
 {
+	get_surface(surf,id);
+  
+    gs_scalar sw,sh,i,j,jj,left,top,width,height,X,Y;
+    sw = surf->width*xscale;
+    sh = surf->height*yscale;
 
+    i = x1-(fmod(x1,sw) - fmod(x,sw)) - sw*(fmod(x1,sw)<fmod(x,sw));
+    j = y1-(fmod(y1,sh) - fmod(y,sh)) - sh*(fmod(y1,sh)<fmod(y,sh));
+    jj = j;
+
+    for(; i<=x2; i+=sw)
+    {
+      for(; j<=y2; j+=sh)
+      {
+        if(i <= x1) left = x1-i;
+        else left = 0;
+        X = i+left;
+
+        if(j <= y1) top = y1-j;
+        else top = 0;
+        Y = j+top;
+
+        if(x2 <= i+sw) width = ((sw)-(i+sw-x2)+1)-left;
+        else width = sw-left;
+
+        if(y2 <= j+sh) height = ((sh)-(j+sh-y2)+1)-top;
+        else height = sh-top;
+		  
+		draw_primitive_begin_texture(pr_trianglestrip, surf->tex);
+		draw_vertex_texture_color(X,Y,left/sw,top/sh,color,alpha);
+		draw_vertex_texture_color(X+width,Y,(left+width)/sw,top/sh,color,alpha);
+		draw_vertex_texture_color(X,Y+height,left/sw,(top+height)/sh,color,alpha);
+		draw_vertex_texture_color(X+width,Y+height,(left+width)/sw,(top+height)/sh,color,alpha);
+		draw_primitive_end();
+      }
+      j = jj;
+    }
 }
 
 int surface_get_texture(int id)

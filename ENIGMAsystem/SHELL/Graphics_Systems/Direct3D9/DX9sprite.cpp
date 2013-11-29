@@ -21,6 +21,7 @@
 using std::string;
 
 #include "Direct3D9Headers.h"
+#include "../General/GScolors.h"
 #include "../General/GSsprite.h"
 #include "../General/GStextures.h"
 #include "../General/GSprimitives.h"
@@ -124,10 +125,10 @@ void draw_sprite_pos(int spr, int subimg, gs_scalar x1, gs_scalar y1, gs_scalar 
     const float tbx = spr2d->texbordxarray[usi], tby = spr2d->texbordyarray[usi];
 
 	draw_primitive_begin_texture(pr_trianglestrip, spr2d->texturearray[usi]);
-	draw_vertex_texture(x1,y1,0,0);
-	draw_vertex_texture(x2,y1,tbx,0);
-	draw_vertex_texture(x1,y2,0,tby);
-	draw_vertex_texture(x2,y2,tbx,tby);
+	draw_vertex_texture_color(x1,y1,0,0,draw_get_color(),alpha);
+	draw_vertex_texture_color(x2,y1,tbx,0,draw_get_color(),alpha);
+	draw_vertex_texture_color(x1,y2,0,tby,draw_get_color(),alpha);
+	draw_vertex_texture_color(x2,y2,tbx,tby,draw_get_color(),alpha);
 	draw_primitive_end();
 }
 
@@ -179,10 +180,10 @@ void draw_sprite_part_ext(int spr, int subimg, gs_scalar left, gs_scalar top, gs
 	  tby1 = top/tbh, tby2 = tby1 + height/tbh;
 
 	draw_primitive_begin_texture(pr_trianglestrip, spr2d->texturearray[usi]);
-	draw_vertex_texture(xvert1,yvert1,tbx1,tby1);
-	draw_vertex_texture(xvert2,yvert1,tbx2,tby1);
-	draw_vertex_texture(xvert1,yvert2,tbx1,tby2);
-	draw_vertex_texture(xvert2,yvert2,tbx2,tby2);
+	draw_vertex_texture_color(xvert1,yvert1,tbx1,tby1,color,alpha);
+	draw_vertex_texture_color(xvert2,yvert1,tbx2,tby1,color,alpha);
+	draw_vertex_texture_color(xvert1,yvert2,tbx1,tby2,color,alpha);
+	draw_vertex_texture_color(xvert2,yvert2,tbx2,tby2,color,alpha);
 	draw_primitive_end();
 }
 
@@ -244,10 +245,10 @@ void draw_sprite_stretched_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs
                 yvert1 = y-spr2d->yoffset, yvert2 = yvert1 + height;
 
 	draw_primitive_begin_texture(pr_trianglestrip, spr2d->texturearray[usi]);
-	draw_vertex_texture(xvert1,yvert1,0,0);
-	draw_vertex_texture(xvert2,yvert1,tbx,0);
-	draw_vertex_texture(xvert1,yvert2, 0,tby);
-	draw_vertex_texture(xvert2,yvert2, tbx,tby);
+	draw_vertex_texture_color(xvert1,yvert1,0,0,color,alpha);
+	draw_vertex_texture_color(xvert2,yvert1,tbx,0,color,alpha);
+	draw_vertex_texture_color(xvert1,yvert2, 0,tby,color,alpha);
+	draw_vertex_texture_color(xvert2,yvert2, tbx,tby,color,alpha);
 	draw_primitive_end();
 }
 
