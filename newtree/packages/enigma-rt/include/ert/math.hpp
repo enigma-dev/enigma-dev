@@ -30,7 +30,7 @@ namespace ert {
   extern real_t pi;
 
   // Random Functions
-  variant_t choose(const varargs_t&);
+  variant_t choose(const varargs<variant_t>&);
   real_t random(real_t);
   real_t random_range(real_t, real_t);
   real_t irandom(real_t);
@@ -59,10 +59,10 @@ namespace ert {
   real_t abs(real_t);
   real_t sign(real_t);
   real_t ceil(real_t);
-  variant_t max(const varargs_t&);
-  variant_t min(const varargs_t&);
-  variant_t mean(const varargs_t&);
-  variant_t median(const varargs_t&);
+  variant_t max(const varargs<variant_t>&);
+  variant_t min(const varargs<variant_t>&);
+  real_t mean(const varargs<real_t>&);
+  real_t median(const varargs<real_t>&);
   real_t lerp(real_t, real_t, real_t);
   real_t clamp(real_t, real_t, real_t);
 
