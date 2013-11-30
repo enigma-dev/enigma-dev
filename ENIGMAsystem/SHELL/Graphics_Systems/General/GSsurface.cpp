@@ -131,8 +131,8 @@ void draw_surface_general(int id, gs_scalar left, gs_scalar top, gs_scalar width
       ulcx += h * cos(3*M_PI/2 + rot);
       ulcy -= h * sin(3*M_PI/2 + rot);
 	  
-	draw_vertex_texture_color((ulcx + w*cos(rot)), (ulcy - w*sin(rot)), (left+width)/tbw,(top+height)/tbh, c3, a3);
-	draw_vertex_texture_color(ulcx, ulcy, left/tbw, (top+height)/tbh, c4, a4);
+	draw_vertex_texture_color((ulcx + w*cos(rot)), (ulcy - w*sin(rot)), (left+width)/tbw,(top+height)/tbh, c4, a4);
+	draw_vertex_texture_color(ulcx, ulcy, left/tbw, (top+height)/tbh, c3, a3);
     draw_primitive_end();
 }
 
