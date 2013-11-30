@@ -37,20 +37,18 @@ protected:
   
 public:
 
-    vector<gs_scalar> globalVBO_data;
-    vector<unsigned int> globalVBO_indices;
-    GLuint globalVBO; //The buffer itself
-    unsigned int globalVBO_datCount; //Length of the VBO data buffer
-    unsigned int globalVBO_verCount; //Number of vertices on this buffer
-    unsigned int globalVBO_indCount; //Number of indices
-    unsigned int globalVBO_maxBSize; //Maximum buffer size. Buffer will not be regenerated if the current buffer size is smaller than the maximum
+float last_depth;
+int last_stride;
+bool hasdrawn;
+int shapes_d3d_model;
+int shapes_d3d_texture;
 
 ContextManager() {
-	glGenBuffersARB(1, &globalVBO);
-	
-    unsigned int globalVBO_datCount = 0; //Length of the VBO data buffer
-    unsigned int globalVBO_verCount = 0; //Number of vertices on this buffer
-    unsigned int globalVBO_indCount = 0; //Number of indices
+	hasdrawn = false;
+	shapes_d3d_model = -1;
+	shapes_d3d_texture = -1;
+	last_stride = -1;
+	last_depth = 0.0f;
 }
 
 ~ContextManager() {
@@ -77,65 +75,37 @@ void RestoreState() {
 
 }
 
-void BeginShapesBatching() {
-
+void BeginShapesBatching(int texId) {
+	if (shapes_d3d_model == -1) {
+		shapes_d3d_model = d3d_model_create(true, false);
+		last_stride = -1;
+	} else if (texId != shapes_d3d_texture || (d3d_model_get_stride(shapes_d3d_model) != last_stride && last_stride != -1)) {
+		last_stride = -1;
+		if (!hasdrawn) {
+			d3d_model_draw(shapes_d3d_model, shapes_d3d_texture);
+			d3d_model_clear(shapes_d3d_model);
+		}
+	} else {
+		last_stride = d3d_model_get_stride(shapes_d3d_model);
+	}
+	hasdrawn = false;
+	shapes_d3d_texture = texId;
 }
 
 void EndShapesBatching() {
-	if (globalVBO_verCount < 1) { return; }
-	//int fbo;
-	//glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fbo);
-	//printf("RENDERING THIS - Verts = %i, inds = %i and fbo = %i, data size = %i, index size = %i\n",globalVBO_verCount,globalVBO_indCount,fbo,globalVBO_data.size(),globalVBO_indices.size() );
-	//glBindTexture(GL_TEXTURE_2D,0);
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	glEnableClientState(GL_COLOR_ARRAY);
-
-	glBindBufferARB(GL_ARRAY_BUFFER, globalVBO);
-
-	// Textures should be clamped when rendering 2D sprites and stuff, so memorize it.
-	GLint wrapr, wraps, wrapt;
-	glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, &wrapr);
-	glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, &wraps);
-	glGetTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, &wrapt);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, GL_CLAMP);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-
-	if (globalVBO_verCount>globalVBO_maxBSize) glBufferDataARB(GL_ARRAY_BUFFER, globalVBO_datCount * sizeof(gs_scalar), &globalVBO_data[0], GL_DYNAMIC_DRAW), globalVBO_maxBSize = globalVBO_verCount;
-	else glBufferSubDataARB(GL_ARRAY_BUFFER, 0, globalVBO_datCount * sizeof(gs_scalar), &globalVBO_data[0]);
-	glVertexPointer( 2, GL_FLOAT, sizeof(gs_scalar) * 8, NULL );
-	glTexCoordPointer( 2, GL_FLOAT, sizeof(gs_scalar) * 8, (void*)(sizeof(gs_scalar) * 2) );
-	glColorPointer( 4, GL_FLOAT, sizeof(gs_scalar) * 8, (void*)(sizeof(gs_scalar) * 4) );
-
-
-	// this sprite batching mechanism does not allow one to apply transformations to sprites or text
-	// like is possible with the Direct3D 9 sprite batcher or traditionally in Game Maker.
-	//if (d3dZWriteEnable) {
-	 // glDepthMask(false);
-	//}
-	glDrawElements(GL_TRIANGLES, globalVBO_indCount, GL_UNSIGNED_INT, &globalVBO_indices[0] );
-	//if (d3dZWriteEnable) {
-	 // glDepthMask(true);
-	//}
-
-	// And now reset the textures repetition
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, wrapr);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wraps);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapt);
-
-	glDisableClientState( GL_COLOR_ARRAY );
-	glDisableClientState( GL_TEXTURE_COORD_ARRAY );
-	glDisableClientState( GL_VERTEX_ARRAY );
-
-	glBindBufferARB(GL_ARRAY_BUFFER, 0);
-
-	globalVBO_datCount = globalVBO_verCount = globalVBO_indCount = 0;
+	last_depth -= 1;
+	if (hasdrawn || shapes_d3d_model == -1) { return; }
+	hasdrawn = true;
+	d3d_model_draw(shapes_d3d_model, shapes_d3d_texture);
+	d3d_model_clear(shapes_d3d_model);
+	shapes_d3d_texture = -1;
+	last_stride = -1;
 }
 
 void BeginScene() {
-	BeginShapesBatching();
+	last_depth = 0;
+	// Reapply the stored render states and what not
+	RestoreState();
 }
 
 void EndScene() {
@@ -147,19 +117,19 @@ void SetEnabled(GLenum cap, bool enabled) {
 	(enabled?glEnable:glDisable)(cap);
 }
 
-void glBind() {
+void Bind() {
 	EndShapesBatching();
 }
 
-void glActiveTexture() {
+void ActiveTexture() {
 	EndShapesBatching();
 }
 
-void glReadPixels() {
+void ReadPixels() {
 	EndShapesBatching();
 }
 
-void glBindTexture(GLenum target,  GLuint texture) {
+void BindTexture(GLenum target,  GLuint texture) {
 	// Update the texture state cache
     // If the return value is 'true', the command must be forwarded to OpenGL
 	map< GLenum, GLuint >::iterator it = cacheTextureStates.find( target );
@@ -179,11 +149,11 @@ void ResetTextureStates() {
 	// loop through and check if any of the texture states opengl has set do not match the ones we've cached
 }
 
-void glViewport() {
+void Viewport() {
 	EndShapesBatching();
 }
 
-void glBlendFunc() {
+void BlendFunc() {
 	EndShapesBatching();
 }
 

@@ -76,7 +76,7 @@ namespace enigma
   {
     GLuint texture;
     glGenTextures(1, &texture);
-    oglmgr->glBindTexture(GL_TEXTURE_2D, texture);
+    oglmgr->BindTexture(GL_TEXTURE_2D, texture);
     glTexImage2D(GL_TEXTURE_2D, 0, 4, fullwidth, fullheight, 0, GL_RGBA, GL_UNSIGNED_BYTE, pxdata);
 	bool interpolate = (interpolate_textures && !isfont);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,interpolate?GL_LINEAR:GL_NEAREST);
@@ -92,7 +92,7 @@ namespace enigma
   int graphics_duplicate_texture(int tex)
   {
     GLuint texture = textureStructs[tex]->gltex;
-    oglmgr->glBindTexture(GL_TEXTURE_2D, texture);
+    oglmgr->BindTexture(GL_TEXTURE_2D, texture);
     int w, h;
 	bool interpolate = (interpolate_textures && !textureStructs[tex]->isFont);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,interpolate?GL_LINEAR:GL_NEAREST);
@@ -114,20 +114,20 @@ namespace enigma
     GLuint copy_texture = textureStructs[copy_tex]->gltex;
 
     int w, h, size;
-    oglmgr->glBindTexture(GL_TEXTURE_2D, texture);
+    oglmgr->BindTexture(GL_TEXTURE_2D, texture);
     glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_WIDTH, &w);
     glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_HEIGHT, &h);
     size = (h<<(lgpp2(w)+2))|2;
     char* bitmap = new char[size];
     char* bitmap2 = new char[size];
     glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, bitmap);
-    oglmgr->glBindTexture(GL_TEXTURE_2D, copy_texture);
+    oglmgr->BindTexture(GL_TEXTURE_2D, copy_texture);
     glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, bitmap2);
 
     for (int i = 3; i < size; i += 4)
         bitmap[i] = (bitmap2[i-1] + bitmap2[i-2] + bitmap2[i-3])/3;
 
-    glBindTexture(GL_TEXTURE_2D, texture);
+    oglmgr->BindTexture(GL_TEXTURE_2D, texture);
     glTexImage2D(GL_TEXTURE_2D, 0, 4, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, bitmap);
 	bool interpolate = (interpolate_textures && !textureStructs[tex]->isFont);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,interpolate?GL_LINEAR:GL_NEAREST);
@@ -176,7 +176,7 @@ void texture_set_interpolation(int enable)
   for (unsigned i = 0; i < textureStructs.size(); i++)
   {
 	if (textureStructs[i]->isFont) { continue; }
-    oglmgr->glBindTexture(GL_TEXTURE_2D, textureStructs[i]->gltex);
+    oglmgr->BindTexture(GL_TEXTURE_2D, textureStructs[i]->gltex);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,enable?GL_LINEAR:GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,enable?GL_LINEAR:GL_NEAREST);
   }
@@ -225,17 +225,17 @@ int texture_get_texel_height(int texid)
 
 void texture_set(int texid) {
 	glActiveTexture(GL_TEXTURE0);
-	oglmgr->glBindTexture(GL_TEXTURE_2D, texid);
+	oglmgr->BindTexture(GL_TEXTURE_2D, texid);
 }
 
 void texture_set_stage(int stage, int texid) {
 	glActiveTexture(GL_TEXTURE0 + stage);
-	oglmgr->glBindTexture(GL_TEXTURE_2D, get_texture(texid));
+	oglmgr->BindTexture(GL_TEXTURE_2D, get_texture(texid));
 }
 
 void texture_reset() {
 	glActiveTexture(GL_TEXTURE0);
-	oglmgr->glBindTexture(GL_TEXTURE_2D, 0);
+	oglmgr->BindTexture(GL_TEXTURE_2D, 0);
 }
 
 void texture_set_repeat(bool repeat)
