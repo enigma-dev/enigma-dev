@@ -32,8 +32,9 @@ namespace ert {
     operator real_t() const;
     operator string_t() const;
     operator bool() const;
-    bool operator !() const;
     variant& operator =(const variant&);
+    bool operator <(const variant&);
+    bool operator >(const variant&);
 
     // Binary Operations
     /*
@@ -63,6 +64,9 @@ namespace ert {
     real_t real;
     string_t string;
   };
+
+  bool operator <(const variant&, const variant&);
+  bool operator >(const variant&, const variant&);
 
   typedef variant variant_t;
 }
