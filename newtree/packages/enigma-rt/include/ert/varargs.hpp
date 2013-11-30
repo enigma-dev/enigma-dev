@@ -28,7 +28,7 @@ namespace ert {
     varargs();
     varargs& operator ,(const variant_t&);
 
-    int argc;
+    unsigned argc;
     variant_t argv[15];
   };
 
