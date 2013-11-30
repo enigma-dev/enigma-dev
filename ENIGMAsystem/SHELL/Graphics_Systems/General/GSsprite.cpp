@@ -203,8 +203,8 @@ void draw_sprite_general(int spr, int subimg, gs_scalar left, gs_scalar top, gs_
     ulcx += h * cos(3*M_PI/2 + rot);
     ulcy -= h * sin(3*M_PI/2 + rot);
 
-	draw_vertex_texture_color((ulcx + wcosrot), (ulcy - wsinrot), (left+width)/tbw, (top+height)/tbh, c3, a3);
-	draw_vertex_texture_color(ulcx, ulcy, left/tbw, (top+height)/tbh, c4, a4);
+	draw_vertex_texture_color((ulcx + wcosrot), (ulcy - wsinrot), (left+width)/tbw, (top+height)/tbh, c4, a4);
+	draw_vertex_texture_color(ulcx, ulcy, left/tbw, (top+height)/tbh, c3, a3);
 
     draw_primitive_end();
 }
@@ -310,10 +310,10 @@ void draw_sprite_tiled_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_sca
         for (int c=0; c<vertil; c++)
         {
 			draw_primitive_begin_texture(pr_trianglestrip, spr2d->texturearray[usi]);
-			draw_vertex_texture(xvert1,yvert1,0,0);
-			draw_vertex_texture(xvert2,yvert1,tbx,0);
-			draw_vertex_texture(xvert1,yvert2, 0,tby);
-			draw_vertex_texture(xvert2,yvert2, tbx,tby);
+			draw_vertex_texture_color(xvert1,yvert1,0,0,color,alpha);
+			draw_vertex_texture_color(xvert2,yvert1,tbx,0,color,alpha);
+			draw_vertex_texture_color(xvert1,yvert2,0,tby,color,alpha);
+			draw_vertex_texture_color(xvert2,yvert2,tbx,tby,color,alpha);
 			draw_primitive_end();
             yvert1 = yvert2;
             yvert2 += height_scaled;
