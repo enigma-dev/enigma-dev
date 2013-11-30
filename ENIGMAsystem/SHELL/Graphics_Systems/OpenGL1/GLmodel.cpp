@@ -463,8 +463,8 @@ void d3d_model_floor(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar
 
   d3d_model_primitive_begin(id, pr_trianglestrip);
   d3d_model_vertex_normal_texture(id, x1, y1, z1, -nX, nY, nZ, 0, 0);
-  d3d_model_vertex_normal_texture(id, x1, y2, z1, -nX, nY, nZ, hrep, 0);
-  d3d_model_vertex_normal_texture(id, x2, y1, z2, -nX, nY, nZ, 0, vrep);
+  d3d_model_vertex_normal_texture(id, x2, y1, z1, -nX, nY, nZ, hrep, 0);
+  d3d_model_vertex_normal_texture(id, x1, y2, z2, -nX, nY, nZ, 0, vrep);
   d3d_model_vertex_normal_texture(id, x2, y2, z2, -nX, nY, nZ, hrep, vrep);
   d3d_model_primitive_end(id);
 }

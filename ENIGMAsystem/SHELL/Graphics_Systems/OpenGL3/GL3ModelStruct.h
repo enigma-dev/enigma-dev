@@ -235,6 +235,14 @@ class Mesh
 	lineIndexedCount = 0;
   }
   
+  unsigned GetStride() {
+  	unsigned stride = vertexStride;
+    if (useNormals) stride += 3;
+	if (useTextures) stride += 2;
+    if (useColors) stride += 4;
+	return stride;
+  }
+  
   void Begin(int pt)
   {
     vbobuffered = false;
@@ -279,7 +287,7 @@ class Mesh
   
      void Translate(gs_scalar x, gs_scalar y, gs_scalar z)
   {
-	unsigned int stride = vertexStride + (useNormals*3) + (useTextures*2)  + (useColors*4) ;
+	unsigned int stride = GetStride();
 	unsigned int size = triangleVertices.size();
 	for (unsigned int i = 0; i < size; i += stride)
 	{
@@ -291,7 +299,7 @@ class Mesh
      
   void RotateUV(gs_scalar angle)
   {
-	unsigned int stride = vertexStride + (useNormals*3) + (useTextures*2)  + (useColors*4) ;
+	unsigned int stride = GetStride();
 	angle *= 3.14159/180.0;
 	gs_scalar _cos = cos(angle);
 	gs_scalar _sin = sin(angle);
@@ -307,7 +315,7 @@ class Mesh
   
   void ScaleUV(gs_scalar xscale, gs_scalar yscale)
   {
-	unsigned int stride = vertexStride + useNormals*3 + useTextures*2 + useColors*4;
+	unsigned int stride = GetStride();
 
 	for (vector<gs_scalar>::iterator i = triangleVertices.begin(); i != triangleVertices.end(); i += stride)
 	{
@@ -319,7 +327,7 @@ class Mesh
    
   void RotateX(gs_scalar angle)
   {
-	unsigned int stride = vertexStride + (useNormals*3) + (useTextures*2)  + (useColors*4) ;
+	unsigned int stride = GetStride();
 	angle *= 3.14159/180.0;
 	gs_scalar _cos = cos(angle);
 	gs_scalar _sin = sin(angle);
@@ -336,7 +344,7 @@ class Mesh
   
   void RotateY(gs_scalar angle)
   {
-	unsigned int stride = vertexStride + (useNormals*3) + (useTextures*2)  + (useColors*4) ;
+	unsigned int stride = GetStride();
 	angle *= 3.14159/180.0;
 	gs_scalar _cos = cos(angle);
 	gs_scalar _sin = sin(angle);
@@ -352,7 +360,7 @@ class Mesh
   
   void RotateZ(gs_scalar angle)
   {
-	unsigned int stride = vertexStride + (useNormals*3) + (useTextures*2)  + (useColors*4) ;
+	unsigned int stride = GetStride();
 	angle *= 3.14159/180.0;
 	gs_scalar _cos = cos(angle);
 	gs_scalar _sin = sin(angle);
@@ -368,7 +376,7 @@ class Mesh
   
   void Scale(gs_scalar xscale, gs_scalar yscale, gs_scalar zscale)
   {
-	unsigned int stride = vertexStride + useNormals*3 + useTextures*2 + useColors*4;
+	unsigned int stride = GetStride();
 
 	for (vector<gs_scalar>::iterator i = triangleVertices.begin(); i != triangleVertices.end(); i += stride)
 	{
@@ -381,7 +389,7 @@ class Mesh
   
   bool CalculateNormals(bool smooth, bool invert)
   {
-	unsigned int stride = vertexStride + useNormals*3 + useTextures*2 + useColors*4;
+	unsigned int stride = GetStride();
 	
 	int oft = useNormals * 3;
 	int ofc = oft + useTextures * 2 ;
@@ -448,7 +456,7 @@ class Mesh
   
   void SmoothNormals()
   {
-	unsigned int stride = vertexStride + useNormals*3 + useTextures*2 + useColors*4;
+	unsigned int stride = GetStride();
 	
 	vector<vector<unsigned int> > groupList;
 	unsigned int n = 0;
@@ -520,10 +528,7 @@ class Mesh
 	//vertices are exactly the same, triangle lists could also check for degenerates, it is unknown whether the GPU will render a degenerative 
 	//in a line strip primitive.
 	
-	unsigned stride = vertexStride;
-    if (useNormals) stride += 3;
-	if (useTextures) stride += 2;
-    if (useColors) stride += 4;
+	unsigned stride = GetStride();
 	
 	// Primitive has ended so now we need to batch the vertices that were given into single lists, eg. line list, triangle list, point list
 	// Indices are optionally supplied, model functions can also be added for the end user to supply the indexing themselves for each primitive
@@ -717,10 +722,7 @@ class Mesh
 	  BufferGenerate(true);
 	}
   
-	GLsizei stride = vertexStride;
-    if (useNormals) stride += 3;
-	if (useTextures) stride += 2;
-    if (useColors) stride += 4;
+	GLsizei stride = GetStride();
 	
 	#define OFFSET( P )  ( ( const GLvoid * ) ( sizeof( gs_scalar ) * ( P         ) ) )
 	GLsizei STRIDE = stride * sizeof( gs_scalar );
