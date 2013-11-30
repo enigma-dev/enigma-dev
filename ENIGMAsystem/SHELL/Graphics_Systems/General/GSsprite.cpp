@@ -178,7 +178,7 @@ void draw_sprite_part_ext(int spr, int subimg, gs_scalar left, gs_scalar top, gs
 	draw_primitive_end();
 }
 
-void draw_sprite_general(int spr, int subimg, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, gs_scalar a1, gs_scalar a2, gs_scalar a3, gs_scalar a4)
+void draw_sprite_general(int spr, int subimg, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, gs_scalar alpha)
 {
     get_spritev(spr2d,spr);
     const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
@@ -197,14 +197,14 @@ void draw_sprite_general(int spr, int subimg, gs_scalar left, gs_scalar top, gs_
     ulcx = x + xscale * cos(M_PI+rot) + yscale * cos(M_PI/2+rot),
     ulcy = y - yscale * sin(M_PI+rot) - yscale * sin(M_PI/2+rot);
 
-	draw_vertex_texture_color(ulcx, ulcy, left/tbw, top/tbh, c1, a1);
-	draw_vertex_texture_color((ulcx + wcosrot), (ulcy - wsinrot), (left+width)/tbw, top/tbh, c2, a2);
+	draw_vertex_texture_color(ulcx, ulcy, left/tbw, top/tbh, c1, alpha);
+	draw_vertex_texture_color((ulcx + wcosrot), (ulcy - wsinrot), (left+width)/tbw, top/tbh, c2, alpha);
 	
     ulcx += h * cos(3*M_PI/2 + rot);
     ulcy -= h * sin(3*M_PI/2 + rot);
 
-	draw_vertex_texture_color((ulcx + wcosrot), (ulcy - wsinrot), (left+width)/tbw, (top+height)/tbh, c4, a4);
-	draw_vertex_texture_color(ulcx, ulcy, left/tbw, (top+height)/tbh, c3, a3);
+	draw_vertex_texture_color((ulcx + wcosrot), (ulcy - wsinrot), (left+width)/tbw, (top+height)/tbh, c4, alpha);
+	draw_vertex_texture_color(ulcx, ulcy, left/tbw, (top+height)/tbh, c3, alpha);
 
     draw_primitive_end();
 }
