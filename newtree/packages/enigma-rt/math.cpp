@@ -20,10 +20,12 @@
 
 #include "ert/real.hpp"
 #include "ert/variant.hpp"
+#include "ert/varargs.hpp"
 
 #include <cmath>
 #include <cstdlib>
 #include <ctime>
+#include <algorithm>
 
 namespace ert {
   template <int N>
@@ -58,6 +60,10 @@ namespace ert {
   real_t math_set_epsilon(real_t eps) {
     epsilon = eps;
     return 0;
+  }
+
+  variant_t choose(const varargs_t&) {
+    // TODO
   }
 
   real_t random(real_t ub) {
@@ -162,6 +168,17 @@ namespace ert {
     return ::ceil(x);
   }
 
+  variant_t max(const varargs_t& var) {
+    return std::max_element(&var.argv[0], &var.argv[var.argc]);
+  }
+
+  variant_t min(const varargs_t&) {
+    return std::min_element(&var.argv[0], &var.argv[var.argc]);
+  }
+
+  variant_t mean(const varargs_t&);
+  variant_t median(const varargs_t&);
+  
   real_t is_real(const variant_t& var) {
     return var.type == variant::vt_real;
   }
