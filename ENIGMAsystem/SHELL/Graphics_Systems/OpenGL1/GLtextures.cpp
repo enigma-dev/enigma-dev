@@ -204,10 +204,10 @@ int texture_get_texel_height(int texid)
 }
 
 void texture_set(int texid) {
-	if (enigma::bound_texture != unsigned(texid)) {
+	//if (enigma::bound_texture != unsigned(get_texture(texid))) {
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, enigma::bound_texture = texid);
-	}
+		glBindTexture(GL_TEXTURE_2D, enigma::bound_texture = get_texture(texid));
+	//}
 }
 
 void texture_set_stage(int stage, int texid) {
