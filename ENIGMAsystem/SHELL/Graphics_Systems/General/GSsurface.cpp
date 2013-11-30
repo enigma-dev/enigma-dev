@@ -114,7 +114,7 @@ void draw_surface_part_ext(int id, gs_scalar left, gs_scalar top, gs_scalar w, g
 	draw_primitive_end();
 }
 
-void draw_surface_general(int id, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, double a1, double a2, double a3, double a4)
+void draw_surface_general(int id, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, gs_scalar alpha)
 {
 	const gs_scalar tbw = surface_get_width(id), tbh = surface_get_height(id),
 	  w = width*xscale, h = height*yscale;
@@ -125,14 +125,14 @@ void draw_surface_general(int id, gs_scalar left, gs_scalar top, gs_scalar width
           ulcy = y - yscale * sin(M_PI+rot) - yscale * sin(M_PI/2+rot);
 
     draw_primitive_begin_texture(pr_trianglestrip, surface_get_texture(id));
-	draw_vertex_texture_color(ulcx,ulcy,left/tbw,top/tbh,c1,a1);
-	draw_vertex_texture_color((ulcx + w*cos(rot)), (ulcy - w*sin(rot)), (left+width)/tbw,top/tbh, c2, a2);
+	draw_vertex_texture_color(ulcx,ulcy,left/tbw,top/tbh,c1,alpha);
+	draw_vertex_texture_color((ulcx + w*cos(rot)), (ulcy - w*sin(rot)), (left+width)/tbw,top/tbh, c2, alpha);
 		
       ulcx += h * cos(3*M_PI/2 + rot);
       ulcy -= h * sin(3*M_PI/2 + rot);
 	  
-	draw_vertex_texture_color((ulcx + w*cos(rot)), (ulcy - w*sin(rot)), (left+width)/tbw,(top+height)/tbh, c4, a4);
-	draw_vertex_texture_color(ulcx, ulcy, left/tbw, (top+height)/tbh, c3, a3);
+	draw_vertex_texture_color((ulcx + w*cos(rot)), (ulcy - w*sin(rot)), (left+width)/tbw,(top+height)/tbh, c4, alpha);
+	draw_vertex_texture_color(ulcx, ulcy, left/tbw, (top+height)/tbh, c3, alpha);
     draw_primitive_end();
 }
 
