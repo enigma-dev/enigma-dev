@@ -60,9 +60,9 @@ namespace ert {
   real_t sign(real_t);
   real_t ceil(real_t);
   variant_t max(const varargs_t&);
+  variant_t min(const varargs_t&);
   variant_t mean(const varargs_t&);
   variant_t median(const varargs_t&);
-  variant_t min(const varargs_t&);
   real_t lerp(real_t, real_t, real_t);
   real_t clamp(real_t, real_t, real_t);
 
