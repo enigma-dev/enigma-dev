@@ -5,7 +5,6 @@ include_directories ("include")
 
 set (ENIGMA_RT_SRCS
     variant.cpp
-    varargs.cpp
     math.cpp
 )
 
