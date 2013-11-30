@@ -36,25 +36,6 @@ namespace ert {
     bool operator <(const variant&);
     bool operator >(const variant&);
 
-    // Binary Operations
-    /*
-    static variant& add(const variant&, const variant&);
-    static variant& sub(const variant&, const variant&);
-    static variant& mul(const variant&, const variant&);
-    static variant& div(const variant&, const variant&);
-    static variant& and(const variant&, const variant&);
-    static variant& or(const variant&, const variant&);
-    static variant& xor(const variant&, const variant&);
-    static variant& lsh(const variant&, const variant&);
-    static variant& rsh(const variant&, const variant&);
-    static variant& eq(const variant&, const variant&);
-    static variant& neq(const variant&, const variant&);
-    static variant& gt(const variant&, const variant&);
-    static variant& gte(const variant&, const variant&);
-    static variant& lt(const variant&, const variant&);
-    static variant& lte(const variant&, const variant&);
-    */
-
     enum type_t {
       vt_uninit = 0,
       vt_real,
