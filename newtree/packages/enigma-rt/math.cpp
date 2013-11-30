@@ -184,7 +184,11 @@ namespace ert {
     return sum / var.argc;
   }
 
-  variant_t median(const varargs_t&);
+  variant_t median(const varargs_t& var) {
+    variant_t tmp[varargs_t::max_count];
+    std::partial_sort_copy(&var.argv[0], &var.argv[var.argc], &tmp[0], &tmp[var.argc]);
+    return tmp[var.argc / 2];
+  }
   
   real_t is_real(const variant_t& var) {
     return var.type == variant::vt_real;
