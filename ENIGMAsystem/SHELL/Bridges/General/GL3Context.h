@@ -55,6 +55,14 @@ ContextManager() {
 
 }
 
+float GetDepth() {
+	return last_depth;
+}
+
+int GetShapesModel() {
+	return shapes_d3d_model;
+}
+
 //TODO: Write this method so that for debugging purposes we can dump the entire render state to a text file.
 void DumpState() {
 
@@ -77,7 +85,7 @@ void RestoreState() {
 
 void BeginShapesBatching(int texId) {
 	if (shapes_d3d_model == -1) {
-		shapes_d3d_model = d3d_model_create(true, false);
+		shapes_d3d_model = d3d_model_create(true);
 		last_stride = -1;
 	} else if (texId != shapes_d3d_texture || (d3d_model_get_stride(shapes_d3d_model) != last_stride && last_stride != -1)) {
 		last_stride = -1;
@@ -130,6 +138,13 @@ void ReadPixels() {
 }
 
 void BindTexture(GLenum target,  GLuint texture) {
+GLint tex;
+glGetIntegerv(target, &tex);
+if (tex != texture) {
+EndShapesBatching();
+		glBindTexture(target, texture);
+}
+		return;
 	// Update the texture state cache
     // If the return value is 'true', the command must be forwarded to OpenGL
 	map< GLenum, GLuint >::iterator it = cacheTextureStates.find( target );

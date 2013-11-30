@@ -325,50 +325,6 @@ void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, g
 	d3dmgr->SetTransform(D3DTS_PROJECTION, &matProj);    // set the projection transform
 }
 
-void d3d_draw_floor(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep)
-{
-	d3dmgr->BeginShapesBatching(texId);
-	d3d_model_floor(d3dmgr->GetShapesModel(), x1, y1, z1, x2, y2, z2, hrep, vrep);
-}
-
-void d3d_draw_wall(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep)
-{
-	d3dmgr->BeginShapesBatching(texId);
-	d3d_model_wall(d3dmgr->GetShapesModel(), x1, y1, z1, x2, y2, z2, hrep, vrep);
-}
-
-void d3d_draw_block(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, bool closed)
-{
-	d3dmgr->BeginShapesBatching(texId);
-	d3d_model_block(d3dmgr->GetShapesModel(), x1, y1, z1, x2, y2, z2, hrep, vrep, closed);
-}
-
-void d3d_draw_cylinder(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, bool closed, int steps)
-{
-	d3dmgr->BeginShapesBatching(texId);
-	d3d_model_cylinder(d3dmgr->GetShapesModel(), x1, y1, z1, x2, y2, z2, hrep, vrep, closed, steps);
-}
-
-void d3d_draw_cone(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, bool closed, int steps)
-{
-	d3dmgr->BeginShapesBatching(texId);
-	d3d_model_cone(d3dmgr->GetShapesModel(), x1, y1, z1, x2, y2, z2, hrep, vrep, closed, steps);
-}
-
-void d3d_draw_ellipsoid(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, int steps)
-{
-	d3dmgr->BeginShapesBatching(texId);
-	d3d_model_ellipsoid(d3dmgr->GetShapesModel(), x1, y1, z1, x2, y2, z2, hrep, vrep, steps);
-}
-
-void d3d_draw_icosahedron(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, int steps) {
-}
-
-void d3d_draw_torus(gs_scalar x1, gs_scalar y1, gs_scalar z1, int texId, gs_scalar hrep, gs_scalar vrep, int csteps, int tsteps, double radius, double tradius) {
-	d3dmgr->BeginShapesBatching(texId);
-	d3d_model_torus(d3dmgr->GetShapesModel(), x1, y1, z1, hrep, vrep, csteps, tsteps, radius, tradius);
-}
-
 D3DXMATRIX matWorld; 
 D3DXMATRIX matNull;
 

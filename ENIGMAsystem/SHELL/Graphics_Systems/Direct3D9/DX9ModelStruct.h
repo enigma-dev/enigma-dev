@@ -171,15 +171,15 @@ class Mesh
   IDirect3DVertexDeclaration9* vertex_declaration; // Pointer to our custom vertex declaration which we will use later for something actually flexible where FVF is not
   
   bool vbodynamic; // Whether the buffer is dynamically allocated in system memory, should be true for simple primitive calls
-  bool vbogenerated; // Whether or not the buffer objects have been generated
+  bool vbobuffered; // Whether or not the buffer objects have been generated
   bool vboindexed; // Whether or not the model contains any indexed primitives or just regular lists
   
   void SetPrimitive(int pr) {
-	vbogenerated = false;
+	vbobuffered = false;
 	currentPrimitive = pr;
   }
 
-  Mesh (bool dynamic, bool depth)
+  Mesh (bool dynamic)
   {
 	pointVertices.reserve(64000);
 	pointIndices.reserve(64000);
@@ -194,11 +194,11 @@ class Mesh
 	indexbuffer = NULL;    // the pointer to the index buffer
 	vertex_declaration = NULL;
 	
-    vbogenerated = false;
+    vbobuffered = false;
 	vbodynamic = dynamic;
 
 	vertexStride = 0;
-	useDepth = depth;
+	useDepth = false;
 	useColors = false;
     useTextures = false;
     useNormals = false;
@@ -260,7 +260,7 @@ class Mesh
 	vertices.reserve(64000);
 	indices.reserve(64000);
 	
-	vbogenerated = false;
+	vbobuffered = false;
 	
 	vertexStride = 0;
 	useColors = false;
@@ -289,7 +289,7 @@ class Mesh
   
   void Begin(int pt)
   {
-    vbogenerated = false;
+    vbobuffered = false;
     currentPrimitive = pt;
   }
 
@@ -746,6 +746,8 @@ class Mesh
 
 		// Clean up temporary interleaved data
 		idata.clear();
+	} else {
+		vboindexed = false;
 	}
 	
 	if (triangleCount > 0) {
@@ -857,8 +859,8 @@ class Mesh
   void Draw()
   {				
 	if (!GetStride()) { return; }
-    if (vertexbuffer == NULL || !vbogenerated) {
-	  vbogenerated = true;
+    if (vertexbuffer == NULL || !vbobuffered) {
+	  vbobuffered = true;
       BufferGenerate();
     }
 

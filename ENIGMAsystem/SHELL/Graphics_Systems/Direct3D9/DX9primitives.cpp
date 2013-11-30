@@ -16,7 +16,6 @@
 **/
 
 #include "Bridges/General/DX9Context.h"
-#include "Direct3D9Headers.h"
 #include "../General/GScolors.h"
 #include "../General/GSprimitives.h"
 #include "../General/GStextures.h"
@@ -24,27 +23,6 @@
 
 #include <string>
 #include "Widget_Systems/widgets_mandatory.h"
-
-#if PRIMBUFFER
-int __primitivelength[PRIMDEPTH2];
-float __primitivecolor[PRIMBUFFER][PRIMDEPTH2][4];
-float __primitivexy[PRIMBUFFER][PRIMDEPTH2][2];
-int __currentpcount[PRIMDEPTH2];
-int __currentpdepth;
-#endif
-
-#define __GETR(x) ((x & 0x0000FF))/255.0
-#define __GETG(x) ((x & 0x00FF00)>>8)/255.0
-#define __GETB(x) ((x & 0xFF0000)>>16)/255.0
-
-int ptypes_by_id[16] = {
-  D3DPT_POINTLIST, D3DPT_POINTLIST, D3DPT_LINELIST, D3DPT_LINESTRIP, D3DPT_TRIANGLELIST,
-  D3DPT_TRIANGLESTRIP, D3DPT_TRIANGLEFAN, D3DPT_POINTLIST, D3DPT_POINTLIST,
-  D3DPT_POINTLIST, D3DPT_POINTLIST,
-
-  //These are padding.
-  D3DPT_POINTLIST, D3DPT_POINTLIST, D3DPT_POINTLIST, D3DPT_POINTLIST, D3DPT_POINTLIST
-};
 
 namespace enigma_user
 {
@@ -141,6 +119,50 @@ void d3d_vertex_normal_texture(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar 
 void d3d_vertex_normal_texture_color(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, gs_scalar tx, gs_scalar ty, int color, double alpha)
 {
   d3d_model_vertex_normal_texture_color(d3dmgr->GetShapesModel(), x, y, z, nx, ny, nz, tx, ty, color, alpha);
+}
+
+void d3d_draw_floor(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep)
+{
+	d3dmgr->BeginShapesBatching(texId);
+	d3d_model_floor(d3dmgr->GetShapesModel(), x1, y1, z1, x2, y2, z2, hrep, vrep);
+}
+
+void d3d_draw_wall(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep)
+{
+	d3dmgr->BeginShapesBatching(texId);
+	d3d_model_wall(d3dmgr->GetShapesModel(), x1, y1, z1, x2, y2, z2, hrep, vrep);
+}
+
+void d3d_draw_block(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, bool closed)
+{
+	d3dmgr->BeginShapesBatching(texId);
+	d3d_model_block(d3dmgr->GetShapesModel(), x1, y1, z1, x2, y2, z2, hrep, vrep, closed);
+}
+
+void d3d_draw_cylinder(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, bool closed, int steps)
+{
+	d3dmgr->BeginShapesBatching(texId);
+	d3d_model_cylinder(d3dmgr->GetShapesModel(), x1, y1, z1, x2, y2, z2, hrep, vrep, closed, steps);
+}
+
+void d3d_draw_cone(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, bool closed, int steps)
+{
+	d3dmgr->BeginShapesBatching(texId);
+	d3d_model_cone(d3dmgr->GetShapesModel(), x1, y1, z1, x2, y2, z2, hrep, vrep, closed, steps);
+}
+
+void d3d_draw_ellipsoid(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, int steps)
+{
+	d3dmgr->BeginShapesBatching(texId);
+	d3d_model_ellipsoid(d3dmgr->GetShapesModel(), x1, y1, z1, x2, y2, z2, hrep, vrep, steps);
+}
+
+void d3d_draw_icosahedron(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, int steps) {
+}
+
+void d3d_draw_torus(gs_scalar x1, gs_scalar y1, gs_scalar z1, int texId, gs_scalar hrep, gs_scalar vrep, int csteps, int tsteps, double radius, double tradius) {
+	d3dmgr->BeginShapesBatching(texId);
+	d3d_model_torus(d3dmgr->GetShapesModel(), x1, y1, z1, hrep, vrep, csteps, tsteps, radius, tradius);
 }
 
 }
