@@ -28,8 +28,10 @@ namespace ert {
     varargs();
     varargs& operator ,(const variant_t&);
 
+    static const unsigned max_count = 15;
+
     unsigned argc;
-    variant_t argv[15];
+    variant_t argv[max_count];
   };
 
   typedef varargs varargs_t;
