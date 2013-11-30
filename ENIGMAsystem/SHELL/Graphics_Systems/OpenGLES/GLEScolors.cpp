@@ -31,6 +31,8 @@ namespace enigma {
   extern unsigned char currentcolor[4];
 }
 
+namespace enigma_user {
+
 void draw_unbind_all()
  	 {
          glBindTexture(GL_TEXTURE_2D, 0);
@@ -97,8 +99,13 @@ int draw_get_blue()  { return enigma::currentcolor[2]; }
 float draw_get_alpha() {
   return enigma::currentcolor[3] / 255.0;
 }
+
 int make_color_rgb(unsigned char r, unsigned char g, unsigned char b) {
   return r + (g << 8) + (b << 16);
+}
+
+int make_color_rgba(unsigned char r, unsigned char g, unsigned char b, unsigned char a) {
+  return r + (g << 8) + (b << 16) + (a << 24);
 }
 
 int color_get_red  (int c) { return __GETR(c); }
@@ -149,4 +156,6 @@ int make_color_hsv(int hue,int saturation,int value)
   int bluer  = int(blue);
 
   return (redr>0 ? redr : 0) | (greenr>0 ? (greenr<<8) : 0) | (bluer>0 ? (bluer<<16) : 0);
+}
+
 }

@@ -48,6 +48,8 @@ namespace enigma
   int surface_max=0;
 }
 
+namespace enigma_user {
+
 int surface_create(gs_scalar width, gs_scalar height)
 {
 	GLuint tex, fbo;
@@ -174,5 +176,7 @@ int draw_surface(double id, gs_scalar x, gs_scalar y)
     glPopAttrib();
 
     return 0;
+}
+
 }
 */

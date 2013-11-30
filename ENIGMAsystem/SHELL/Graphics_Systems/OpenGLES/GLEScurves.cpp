@@ -32,6 +32,8 @@ namespace enigma{
 }
 #define untexture() if(enigma::bound_texture) glBindTexture(GL_TEXTURE_2D,enigma::bound_texture=0);
 
+namespace enigma_user {
+
 int pr_curve_detail = 20;
 float pr_curve_alpha1 = 1;
 float pr_curve_alpha2 = 1;
@@ -340,4 +342,6 @@ int draw_spline_optimized_end()
     startedSplinesMode.pop();
     pr_curve_detail = (int)tmp_detail;
     return tot_det;*/
+}
+
 }

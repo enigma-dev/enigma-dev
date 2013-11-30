@@ -15,6 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "../General/GSenable.h"
 #include "OpenGLHeaders.h"
 
 int gs_enable_alpha(bool enable){

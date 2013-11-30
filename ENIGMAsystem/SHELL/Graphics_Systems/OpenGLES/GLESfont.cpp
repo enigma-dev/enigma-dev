@@ -34,6 +34,8 @@ namespace enigma {
 
 using namespace enigma;
 
+namespace enigma_user {
+
 void draw_text(gs_scalar x, gs_scalar y, string str)
 {
   font *fnt = fontstructarray[currentfont];
@@ -665,3 +667,4 @@ unsigned int string_height_ext(string str, gs_scalar sep, gs_scalar w)
   return height;
 }
 
+}
