@@ -43,7 +43,7 @@ namespace ert {
 
   static unsigned hash_real(real_t val) {
     const unsigned N = sizeof(double) / sizeof(unsigned char);
-    const unsigned char(&chunks)[] = reinterpret_cast<unsigned char(&)[]>(val);
+    const unsigned char(&chunks)[N] = reinterpret_cast<unsigned char(&)[N]>(val);
     unsigned hash = hash_const<sizeof(unsigned)>::base;
     for (int i = 0; i < N; i++) {
         hash ^= chunks[i];
@@ -53,7 +53,7 @@ namespace ert {
   }
 
   static real_t epsilon = 1e-16;
-  real_t pi = 3.14159265358979323846;
+  const real_t pi = 3.14159265358979323846;
 
   real_t math_set_epsilon(real_t eps) {
     epsilon = eps;
@@ -122,11 +122,11 @@ namespace ert {
   }
 
   real_t degtorad(real_t d) {
-    return d * pi / 180;
+    return pi / 180 * d;
   }
 
   real_t radtodeg(real_t r) {
-    return r * 180 / pi;
+    return 180 / pi * r;
   }
 
   real_t lengthdir_x(real_t len, real_t dir) {
@@ -135,5 +135,70 @@ namespace ert {
 
   real_t lengthdir_y(real_t len, real_t dir) {
     return len * sin(dir);
+  }
+
+  real_t round(real_t x) {
+    return ::round(x);
+  }
+
+  real_t floor(real_t x) {
+    return ::floor(x);
+  }
+
+  real_t frac(real_t x) {
+    double i;
+    return ::modf(x, &i);
+  }
+
+  real_t abs(real_t x) {
+    return ::fabs(x);
+  }
+
+  real_t sign(real_t x) {
+    return (x > 0) - (x < 0);
+  }
+
+  real_t ceil(real_t x) {
+    return ::ceil(x);
+  }
+
+  real_t is_real(const variant_t& var) {
+    return var.type == variant::vt_real;
+  }
+
+  real_t is_string(const variant_t& var) {
+    return var.type == variant::vt_string;
+  }
+
+  real_t exp(real_t x) {
+    return ::exp(x);
+  }
+
+  real_t ln(real_t x) {
+    return ::log(x);
+  }
+
+  real_t power(real_t b, real_t e) {
+    return ::pow(b, e);
+  }
+
+  real_t sqr(real_t x) {
+    return ::pow(x, 2);
+  }
+
+  real_t sqrt(real_t x) {
+    return ::sqrt(x);
+  }
+
+  real_t log2(real_t x) {
+    return ::log2(x);
+  }
+
+  real_t log10(real_t x) {
+    return ::log10(x);
+  }
+
+  real_t logn(real_t base, real_t val) {
+    return ln(val) / ln(base);
   }
 }
