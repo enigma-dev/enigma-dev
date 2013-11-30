@@ -24,17 +24,23 @@
 #include "ert/variant.hpp"
 
 namespace ert {
-  struct varargs {
-    varargs();
-    varargs& operator ,(const variant_t&);
+  const unsigned MAX_VARGS = 15;
 
-    static const unsigned max_count = 15;
+  template <typename T>
+  struct varargs {
+  public:
+    varargs()
+      : argc(0) {
+    }
+
+    varargs& operator ,(const T& arg) {
+      this->argv[this->argc++] = arg;
+      return *this;
+    }
 
     unsigned argc;
-    variant_t argv[max_count];
+    T argv[MAX_VARGS];
   };
-
-  typedef varargs varargs_t;
 }
 
 #endif // ERT_VARARGS_HPP_
