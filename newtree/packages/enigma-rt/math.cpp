@@ -78,11 +78,11 @@ namespace ert {
   }
 
   real_t irandom(real_t ub) {
-    return std::floor(std::fmod(std::rand(), ub)) + 1;
+    return std::floor(std::fmod(std::rand(), ub));
   }
 
   real_t irandom_range(real_t lb, real_t ub) {
-    return lb + std::floor(std::fmod(std::rand(), ub - lb)) + 1;
+    return lb + std::floor(std::fmod(std::rand(), ub - lb));
   }
 
   static real_t rand_seed = 0;
@@ -180,8 +180,7 @@ namespace ert {
   }
 
   real_t mean(const varargs<real_t>& var) {
-    double sum = std::accumulate(&var.argv[0], &var.argv[var.argc], 0, std::plus<double>());
-    return sum / var.argc;
+    return std::accumulate(&var.argv[0], &var.argv[var.argc], 0, std::plus<double>()) / var.argc;
   }
 
   real_t median(const varargs<real_t>& var) {
