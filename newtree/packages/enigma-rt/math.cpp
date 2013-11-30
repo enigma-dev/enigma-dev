@@ -26,6 +26,8 @@
 #include <cstdlib>
 #include <ctime>
 #include <algorithm>
+#include <functional>
+#include <numeric>
 
 namespace ert {
   template <int N>
@@ -64,29 +66,30 @@ namespace ert {
 
   variant_t choose(const varargs_t&) {
     // TODO
+    return 0;
   }
 
   real_t random(real_t ub) {
-    return (::rand() * ub) / RAND_MAX;
+    return (std::rand() * ub) / RAND_MAX;
   }
 
   real_t random_range(real_t lb, real_t ub) {
-    return lb + (::rand() * (ub - lb)) / RAND_MAX;
+    return lb + (std::rand() * (ub - lb)) / RAND_MAX;
   }
 
   real_t irandom(real_t ub) {
-    return ::fmod(::rand(), ub) + 1;
+    return std::fmod(std::rand(), ub) + 1;
   }
 
   real_t irandom_range(real_t lb, real_t ub) {
-    return lb + ::fmod(::rand(), ub - lb) + 1;
+    return lb + std::fmod(std::rand(), ub - lb) + 1;
   }
 
   static real_t rand_seed = 0;
 
   real_t random_set_seed(real_t seed) {
     rand_seed = seed;
-    ::srand(hash_real(rand_seed));
+    std::srand(hash_real(rand_seed));
     return 0;
   }
 
@@ -95,36 +98,36 @@ namespace ert {
   }
 
   real_t randomize() {
-    random_set_seed(::time(NULL));
+    random_set_seed(std::time(NULL));
     return 0;
   }
 
   real_t arccos(real_t x) {
-    return ::acos(x);
+    return std::acos(x);
   }
 
   real_t arcsin(real_t x) {
-    return ::asin(x);
+    return std::asin(x);
   }
 
   real_t arctan(real_t x) {
-    return ::atan(x);
+    return std::atan(x);
   }
 
   real_t arctan2(real_t x, real_t y) {
-    return ::atan2(x, y);
+    return std::atan2(x, y);
   }
 
   real_t sin(real_t x) {
-    return ::sin(x);
+    return std::sin(x);
   }
 
   real_t tan(real_t x) {
-    return ::tan(x);
+    return std::tan(x);
   }
 
   real_t cos(real_t x) {
-    return ::cos(x);
+    return std::cos(x);
   }
 
   real_t degtorad(real_t d) {
@@ -136,28 +139,28 @@ namespace ert {
   }
 
   real_t lengthdir_x(real_t len, real_t dir) {
-    return len * cos(dir);
+    return len * std::cos(dir);
   }
 
   real_t lengthdir_y(real_t len, real_t dir) {
-    return len * sin(dir);
+    return len * std::sin(dir);
   }
 
   real_t round(real_t x) {
-    return ::round(x);
+    return std::round(x);
   }
 
   real_t floor(real_t x) {
-    return ::floor(x);
+    return std::floor(x);
   }
 
   real_t frac(real_t x) {
     double i;
-    return ::modf(x, &i);
+    return std::modf(x, &i);
   }
 
   real_t abs(real_t x) {
-    return ::fabs(x);
+    return std::fabs(x);
   }
 
   real_t sign(real_t x) {
@@ -165,18 +168,22 @@ namespace ert {
   }
 
   real_t ceil(real_t x) {
-    return ::ceil(x);
+    return std::ceil(x);
   }
 
   variant_t max(const varargs_t& var) {
-    return std::max_element(&var.argv[0], &var.argv[var.argc]);
+    return *std::max_element(&var.argv[0], &var.argv[var.argc]);
   }
 
-  variant_t min(const varargs_t&) {
-    return std::min_element(&var.argv[0], &var.argv[var.argc]);
+  variant_t min(const varargs_t& var) {
+    return *std::min_element(&var.argv[0], &var.argv[var.argc]);
   }
 
-  variant_t mean(const varargs_t&);
+  variant_t mean(const varargs_t& var) {
+    double sum = std::accumulate(&var.argv[0], &var.argv[var.argc], 0, std::plus<double>());
+    return sum / var.argc;
+  }
+
   variant_t median(const varargs_t&);
   
   real_t is_real(const variant_t& var) {
@@ -188,34 +195,34 @@ namespace ert {
   }
 
   real_t exp(real_t x) {
-    return ::exp(x);
+    return std::exp(x);
   }
 
   real_t ln(real_t x) {
-    return ::log(x);
+    return std::log(x);
   }
 
   real_t power(real_t b, real_t e) {
-    return ::pow(b, e);
+    return std::pow(b, e);
   }
 
   real_t sqr(real_t x) {
-    return ::pow(x, 2);
+    return std::pow(x, 2);
   }
 
   real_t sqrt(real_t x) {
-    return ::sqrt(x);
+    return std::sqrt(x);
   }
 
   real_t log2(real_t x) {
-    return ::log2(x);
+    return std::log2(x);
   }
 
   real_t log10(real_t x) {
-    return ::log10(x);
+    return std::log10(x);
   }
 
   real_t logn(real_t base, real_t val) {
-    return ln(val) / ln(base);
+    return std::log(val) / std::log(base);
   }
 }
