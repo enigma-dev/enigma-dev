@@ -533,8 +533,11 @@ void screen_init()
     }
 
 	d3dmgr->SetRenderState(D3DRS_LIGHTING, FALSE);
-	d3dmgr->SetRenderState(D3DRS_ZENABLE, FALSE);
+	d3dmgr->SetRenderState(D3DRS_ZENABLE, TRUE);
 	d3dmgr->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+	d3dmgr->SetRenderState(D3DRS_ALPHAREF, (DWORD)0x00000001);
+	d3dmgr->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE); 
+	d3dmgr->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATEREQUAL);
 	//glEnable(GL_BLEND);
 	//glEnable(GL_TEXTURE_2D);
 	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

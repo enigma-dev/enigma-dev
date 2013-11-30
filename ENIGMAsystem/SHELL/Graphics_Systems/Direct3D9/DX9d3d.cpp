@@ -85,7 +85,7 @@ void d3d_end()
 
 void d3d_set_hidden(bool enable)
 {
-	d3d_set_zwriteenable(enable);
+	//d3d_set_zwriteenable(enable);
 	d3dmgr->SetRenderState(D3DRS_ZENABLE, enable); // enable/disable the z-buffer
     enigma::d3dHidden = enable;
 }   

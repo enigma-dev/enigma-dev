@@ -863,7 +863,7 @@ class Mesh
     }
 
 	unsigned stride = GetStride();
-	
+
 	d3dmgr->SetVertexDeclaration(vertex_declaration);
 	// select the vertex buffer to display
 	d3dmgr->SetStreamSource(0, vertexbuffer, 0, stride * sizeof(gs_scalar));

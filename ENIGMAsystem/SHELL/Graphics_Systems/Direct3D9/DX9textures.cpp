@@ -148,15 +148,11 @@ void texture_set(int texid) {
 	if (texid == -1) { d3dmgr->SetTexture(0, NULL); return; }
 	d3dmgr->SetTexture(0, get_texture(texid));
 	d3dmgr->SetTextureStageState(0,D3DTSS_ALPHAOP, D3DTOP_MODULATE);
-	d3dmgr->SetTextureStageState(0,D3DTSS_ALPHAARG1,D3DTA_DIFFUSE);
-	d3dmgr->SetTextureStageState(0,D3DTSS_ALPHAARG2,D3DTA_TEXTURE);
 }
 
 void texture_set_stage(int stage, int texid) {
 	d3dmgr->SetTexture(stage, get_texture(texid));
 	d3dmgr->SetTextureStageState(stage,D3DTSS_ALPHAOP, D3DTOP_MODULATE);
-	d3dmgr->SetTextureStageState(stage,D3DTSS_ALPHAARG1,D3DTA_DIFFUSE);
-	d3dmgr->SetTextureStageState(stage,D3DTSS_ALPHAARG2,D3DTA_TEXTURE);
 }
 
 void texture_reset() {
