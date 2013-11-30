@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton, Harijs Grinbergs
+/** Copyright (C) 2013 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -17,13 +17,13 @@
 
 #include <math.h>
 #include <string>
-#include "../General/OpenGLHeaders.h"
 #include "Universal_System/var4.h"
 #include "libEGMstd.h"
 #include "../General/GScolors.h"
 #include "../General/GSfont.h"
-#include "../General/GLTextureStruct.h"
 #include "../General/GStextures.h"
+#include "../General/GSprimitives.h"
+
 
 using namespace std;
 #include "Universal_System/fontstruct.h"
@@ -45,11 +45,11 @@ const int fa_top = 0;
 const int fa_middle = 1;
 const int fa_bottom = 2;*/
 
+unsigned halign = enigma_user::fa_left; //default alignment
+unsigned valign = enigma_user::fa_top; //default alignment
+
 namespace enigma_user
 {
-
-unsigned halign = fa_left; //default alignment
-unsigned valign = fa_top; //default alignment
 
 void draw_set_halign(unsigned align){
     halign = align;
@@ -129,7 +129,7 @@ unsigned int string_width_line(variant vstr, int line)
       cl += 1;
       len = 0;
     } else if (str[i] == ' ')
-      len += get_space_width(fnt);
+      len += fnt->height/3; // FIXME: what's GM do about this?
     else {
       len += fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount].xs;
     }
@@ -150,7 +150,7 @@ unsigned int string_width_ext_line(variant vstr, gs_scalar w, int line)
     else if (str[i] == '\n')
       if (cl == line) return width; else width = 0, cl +=1;
     else if (str[i] == ' '){
-      width += get_space_width(fnt), tw = 0;
+      width += fnt->height/3, tw = 0;
       for (unsigned c = i+1; c < str.length(); c++)
       {
         if (str[c] == ' ' or str[c] == '\r' or str[c] == '\n')
@@ -178,7 +178,7 @@ unsigned int string_width_ext_line_count(variant vstr, gs_scalar w)
     else if (str[i] == '\n')
       width = 0, cl +=1;
     else if (str[i] == ' '){
-      width += get_space_width(fnt), tw = 0;
+      width += fnt->height/3, tw = 0;
       for (unsigned c = i+1; c < str.length(); c++)
       {
         if (str[c] == ' ' or str[c] == '\r' or str[c] == '\n')
@@ -203,7 +203,7 @@ unsigned int string_width(variant vstr)
     if (str[i] == '\r' or str[i] == '\n')
       tlen = 0;
     else if (str[i] == ' ')
-      tlen += get_space_width(fnt);
+      tlen += fnt->height/3; // FIXME: what's GM do about this?
     else {
       tlen += fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount].xs;
       if (tlen > mlen) mlen = tlen;
@@ -216,7 +216,7 @@ unsigned int string_height(variant vstr)
 {
   string str = toString(vstr);
   get_font(fnt,currentfont,0);
-  int hgt = fnt->height;
+  float hgt = fnt->height;
   for (unsigned i = 0; i < str.length(); i++)
     if (str[i] == '\r' or str[i] == '\n')
       hgt += fnt->height;
@@ -235,7 +235,7 @@ unsigned int string_width_ext(variant vstr, gs_scalar sep, gs_scalar w) //here s
         if (width >= unsigned(w) && w!=-1)
             (width>maxwidth ? maxwidth=width, width = 0 : width = 0);
         else
-            width += get_space_width(fnt);
+            width += fnt->height/3; // FIXME: what's GM do about this?
     } else {
         fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
         width += g.xs;
@@ -255,7 +255,7 @@ unsigned int string_height_ext(variant vstr, gs_scalar sep, gs_scalar w)
     if (str[i] == '\r' or str[i] == '\n')
       width = 0, height +=  (sep+2 ? fnt->height : sep);
     else if (str[i] == ' '){
-      width += get_space_width(fnt);
+      width += fnt->height/3;
       tw = 0;
       for (unsigned c = i+1; c < str.length(); c++)
       {
@@ -282,19 +282,13 @@ unsigned int string_height_ext(variant vstr, gs_scalar sep, gs_scalar w)
 namespace enigma_user
 {
 
-void draw_text(gs_scalar x, gs_scalar y,variant vstr)
+void draw_text(gs_scalar x, gs_scalar y, variant vstr)
 {
-  #ifdef CODEBLOX
-    return;
-  #endif
   string str = toString(vstr);
   get_fontv(fnt,currentfont);
-  //texture_set(fnt->texture);
-    texture_set(textureStructs[fnt->texture]->gltex);
   float yy = valign == fa_top ? y+fnt->yoffset : valign == fa_middle ? y +fnt->yoffset - string_height(str)/2 : y + fnt->yoffset - string_height(str);
   if (halign == fa_left){
       float xx = x;
-      glBegin(GL_QUADS);
       for (unsigned i = 0; i < str.length(); i++)
       {
         if (str[i] == '\r')
@@ -306,21 +300,17 @@ void draw_text(gs_scalar x, gs_scalar y,variant vstr)
         else
         {
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
-            glTexCoord2f(g.tx,  g.ty);
-              glVertex2i(xx + g.x,  yy + g.y);
-            glTexCoord2f(g.tx2, g.ty);
-              glVertex2i(xx + g.x2, yy + g.y);
-            glTexCoord2f(g.tx2, g.ty2);
-              glVertex2i(xx + g.x2, yy + g.y2);
-            glTexCoord2f(g.tx,  g.ty2);
-              glVertex2i(xx + g.x,  yy + g.y2);
+			draw_primitive_begin_texture(pr_trianglestrip, fnt->texture);
+			draw_vertex_texture(xx + g.x,  yy + g.y, g.tx, g.ty);
+			draw_vertex_texture(xx + g.x2, yy + g.y, g.tx2, g.ty);
+			draw_vertex_texture(xx + g.x,  yy + g.y2, g.tx,  g.ty2);
+			draw_vertex_texture(xx + g.x2, yy + g.y2, g.tx2, g.ty2);
+			draw_primitive_end();
           xx += int(g.xs);
         }
       }
-      glEnd();
   } else {
       float xx = halign == fa_center ? x-float(string_width_line(str,0)/2) : x-float(string_width_line(str,0)), line = 0;
-      glBegin(GL_QUADS);
       for (unsigned i = 0; i < str.length(); i++)
       {
         if (str[i] == '\r'){
@@ -334,34 +324,25 @@ void draw_text(gs_scalar x, gs_scalar y,variant vstr)
         else
         {
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
-            glTexCoord2f(g.tx,  g.ty);
-              glVertex2i(xx + g.x,  yy + g.y);
-            glTexCoord2f(g.tx2, g.ty);
-              glVertex2i(xx + g.x2, yy + g.y);
-            glTexCoord2f(g.tx2, g.ty2);
-              glVertex2i(xx + g.x2, yy + g.y2);
-            glTexCoord2f(g.tx,  g.ty2);
-              glVertex2i(xx + g.x,  yy + g.y2);
+			draw_primitive_begin_texture(pr_trianglestrip, fnt->texture);
+			draw_vertex_texture(xx + g.x,  yy + g.y, g.tx, g.ty);
+			draw_vertex_texture(xx + g.x2, yy + g.y, g.tx2, g.ty);
+			draw_vertex_texture(xx + g.x,  yy + g.y2, g.tx,  g.ty2);
+			draw_vertex_texture(xx + g.x2, yy + g.y2, g.tx2, g.ty2);
+			draw_primitive_end();
           xx += float(g.xs);
         }
       }
-      glEnd();
   }
 }
 
-void draw_text_skewed(gs_scalar x, gs_scalar y,variant vstr, gs_scalar top, gs_scalar bottom)
+void draw_text_skewed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar top, gs_scalar bottom)
 {
-  #ifdef CODEBLOX
-    return;
-  #endif
   string str = toString(vstr);
   get_fontv(fnt,currentfont);
-  //texture_set(fnt->texture);
-    texture_set(textureStructs[fnt->texture]->gltex);
-  float yy = valign == fa_top ? y+fnt->yoffset : valign == fa_middle ? y +fnt->yoffset - string_height(str)/2 : y + fnt->yoffset - string_height(str);
+  gs_scalar yy = valign == fa_top ? y+fnt->yoffset : valign == fa_middle ? y +fnt->yoffset - string_height(str)/2 : y + fnt->yoffset - string_height(str);
   if (halign == fa_left){
-      float xx = x;
-      glBegin(GL_QUADS);
+      gs_scalar xx = x;
       for (unsigned i = 0; i < str.length(); i++)
       {
         if (str[i] == '\r')
@@ -373,60 +354,52 @@ void draw_text_skewed(gs_scalar x, gs_scalar y,variant vstr, gs_scalar top, gs_s
         else
         {
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
-            glTexCoord2f(g.tx,  g.ty);
-              glVertex2i(xx + g.x + top,  yy + g.y + top);
-            glTexCoord2f(g.tx2, g.ty);
-              glVertex2i(xx + g.x2 + top, yy + g.y + top);
-            glTexCoord2f(g.tx2, g.ty2);
-              glVertex2i(xx + g.x2 + bottom, yy + g.y2 + bottom);
-            glTexCoord2f(g.tx,  g.ty2);
-              glVertex2i(xx + g.x + bottom,  yy + g.y2 + bottom);
-          xx += int(g.xs);
+		  
+			draw_primitive_begin_texture(pr_trianglestrip, fnt->texture);
+			draw_vertex_texture(xx + g.x + top,     yy + g.y + top, g.tx, g.ty);
+			draw_vertex_texture(xx + g.x2 + top,    yy + g.y + top, g.tx2, g.ty);
+			draw_vertex_texture(xx + g.x + bottom,  yy + g.y2 + bottom, g.tx,  g.ty2);
+			draw_vertex_texture(xx + g.x2 + bottom, yy + g.y2 + bottom, g.tx2, g.ty2);
+			draw_primitive_end();
+		  
+          xx += gs_scalar(g.xs);
         }
       }
-      glEnd();
   } else {
-      float xx = halign == fa_center ? x-float(string_width_line(str,0)/2) : x-float(string_width_line(str,0)), line = 0;
-      glBegin(GL_QUADS);
+      gs_scalar xx = halign == fa_center ? x-gs_scalar(string_width_line(str,0)/2) : x-gs_scalar(string_width_line(str,0)), line = 0;
       for (unsigned i = 0; i < str.length(); i++)
       {
         if (str[i] == '\r'){
           line +=1, yy += fnt->height, i += str[i+1] == '\n';
-          xx = halign == fa_center ? x-float(string_width_line(str,line)/2) : x-float(string_width_line(str,line));
+          xx = halign == fa_center ? x-gs_scalar(string_width_line(str,line)/2) : x-gs_scalar(string_width_line(str,line));
         } else if (str[i] == '\n'){
           line +=1, yy += fnt->height;
-          xx = halign == fa_center ? x-float(string_width_line(str,line)/2) : x-float(string_width_line(str,line));
+          xx = halign == fa_center ? x-gs_scalar(string_width_line(str,line)/2) : x-gs_scalar(string_width_line(str,line));
         } else if (str[i] == ' ')
           xx += get_space_width(fnt);
         else
         {
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
-            glTexCoord2f(g.tx,  g.ty);
-              glVertex2i(xx + g.x + top,  yy + g.y + top);
-            glTexCoord2f(g.tx2, g.ty);
-              glVertex2i(xx + g.x2 + top, yy + g.y + top);
-            glTexCoord2f(g.tx2, g.ty2);
-              glVertex2i(xx + g.x2 + bottom, yy + g.y2 + bottom);
-            glTexCoord2f(g.tx,  g.ty2);
-              glVertex2i(xx + g.x + bottom,  yy + g.y2 + bottom);
-          xx += float(g.xs);
+			draw_primitive_begin_texture(pr_trianglestrip, fnt->texture);
+			draw_vertex_texture(xx + g.x + top,     yy + g.y + top, g.tx, g.ty);
+			draw_vertex_texture(xx + g.x2 + top,    yy + g.y + top, g.tx2, g.ty);
+			draw_vertex_texture(xx + g.x + bottom,  yy + g.y2 + bottom, g.tx,  g.ty2);
+			draw_vertex_texture(xx + g.x2 + bottom, yy + g.y2 + bottom, g.tx2, g.ty2);
+			draw_primitive_end();
+          xx += gs_scalar(g.xs);
         }
       }
-      glEnd();
   }
 }
 
-void draw_text_ext(gs_scalar x, gs_scalar y,variant vstr, gs_scalar sep, gs_scalar w)
+void draw_text_ext(gs_scalar x, gs_scalar y, variant vstr, gs_scalar sep, gs_scalar w)
 {
   string str = toString(vstr);
   get_fontv(fnt,currentfont);
-texture_set(textureStructs[fnt->texture]->gltex);
 
-  float yy = valign == fa_top ? y+fnt->yoffset : valign == fa_middle ? y + fnt->yoffset - string_height_ext(str,sep,w)/2 : y + fnt->yoffset - string_height_ext(str,sep,w);
-
+  gs_scalar yy = valign == fa_top ? y+fnt->yoffset : valign == fa_middle ? y + fnt->yoffset - string_height_ext(str,sep,w)/2 : y + fnt->yoffset - string_height_ext(str,sep,w);
   if (halign == fa_left){
-      float xx = x, width = 0, tw = 0;
-      glBegin(GL_QUADS);
+      gs_scalar xx = x, width = 0, tw = 0;
       for (unsigned i = 0; i < str.length(); i++)
       {
         if (str[i] == '\r')
@@ -448,27 +421,23 @@ texture_set(textureStructs[fnt->texture]->gltex);
             xx = x, yy += (sep==-1 ? fnt->height : sep), width = 0, tw = 0;
         } else {
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
-            glTexCoord2f(g.tx,  g.ty);
-              glVertex2i(xx + g.x,  yy + g.y);
-            glTexCoord2f(g.tx2, g.ty);
-              glVertex2i(xx + g.x2, yy + g.y);
-            glTexCoord2f(g.tx2, g.ty2);
-              glVertex2i(xx + g.x2, yy + g.y2);
-            glTexCoord2f(g.tx,  g.ty2);
-              glVertex2i(xx + g.x,  yy + g.y2);
-          xx += float(g.xs);
+			draw_primitive_begin_texture(pr_trianglestrip, fnt->texture);
+			draw_vertex_texture(xx + g.x,  yy + g.y, g.tx, g.ty);
+			draw_vertex_texture(xx + g.x2, yy + g.y, g.tx2, g.ty);
+			draw_vertex_texture(xx + g.x,  yy + g.y2, g.tx,  g.ty2);
+			draw_vertex_texture(xx + g.x2, yy + g.y2, g.tx2, g.ty2);
+			draw_primitive_end();
+          xx += gs_scalar(g.xs);
         }
       }
-      glEnd();
   } else {
-      float xx = halign == fa_center ? x-float(string_width_ext_line(str,w,0)/2) : x-float(string_width_ext_line(str,w,0)), line = 0, width = 0, tw = 0;
-      glBegin(GL_QUADS);
+      gs_scalar xx = halign == fa_center ? x-gs_scalar(string_width_ext_line(str,w,0)/2) : x-gs_scalar(string_width_ext_line(str,w,0)), line = 0, width = 0, tw = 0;
       for (unsigned i = 0; i < str.length(); i++)
       {
         if (str[i] == '\r')
-          line += 1, xx = halign == fa_center ? x-float(string_width_ext_line(str,w,line)/2) : x-float(string_width_ext_line(str,w,line)), yy += (sep+2 ? fnt->height : sep), i += str[i+1] == '\n', width = 0;
+          line += 1, xx = halign == fa_center ? x-gs_scalar(string_width_ext_line(str,w,line)/2) : x-gs_scalar(string_width_ext_line(str,w,line)), yy += (sep+2 ? fnt->height : sep), i += str[i+1] == '\n', width = 0;
         else if (str[i] == '\n')
-          line += 1, xx = halign == fa_center ? x-float(string_width_ext_line(str,w,line)/2) : x-float(string_width_ext_line(str,w,line)), yy += (sep+2 ? fnt->height : sep), width = 0;
+          line += 1, xx = halign == fa_center ? x-gs_scalar(string_width_ext_line(str,w,line)/2) : x-gs_scalar(string_width_ext_line(str,w,line)), yy += (sep+2 ? fnt->height : sep), width = 0;
         else if (str[i] == ' '){
           xx += get_space_width(fnt), width += get_space_width(fnt), tw = 0;
           for (unsigned c = i+1; c < str.length(); c++)
@@ -480,22 +449,19 @@ texture_set(textureStructs[fnt->texture]->gltex);
           }
 
           if (width+tw >= w && w != -1)
-            line += 1, xx = halign == fa_center ? x-float(string_width_ext_line(str,w,line)/2) : x-float(string_width_ext_line(str,w,line)), yy += (sep==-1 ? fnt->height : sep), width = 0, tw = 0;
+            line += 1, xx = halign == fa_center ? x-gs_scalar(string_width_ext_line(str,w,line)/2) : x-gs_scalar(string_width_ext_line(str,w,line)), yy += (sep==-1 ? fnt->height : sep), width = 0, tw = 0;
         } else {
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
-            glTexCoord2f(g.tx,  g.ty);
-              glVertex2i(xx + g.x,  yy + g.y);
-            glTexCoord2f(g.tx2, g.ty);
-              glVertex2i(xx + g.x2, yy + g.y);
-            glTexCoord2f(g.tx2, g.ty2);
-              glVertex2i(xx + g.x2, yy + g.y2);
-            glTexCoord2f(g.tx,  g.ty2);
-              glVertex2i(xx + g.x,  yy + g.y2);
-          xx += float(g.xs);
+			draw_primitive_begin_texture(pr_trianglestrip, fnt->texture);
+			draw_vertex_texture(xx + g.x,  yy + g.y, g.tx, g.ty);
+			draw_vertex_texture(xx + g.x2, yy + g.y, g.tx2, g.ty);
+			draw_vertex_texture(xx + g.x,  yy + g.y2, g.tx,  g.ty2);
+			draw_vertex_texture(xx + g.x2, yy + g.y2, g.tx2, g.ty2);
+			draw_primitive_end();
+          xx += gs_scalar(g.xs);
           width += g.xs;
         }
       }
-      glEnd();
     }
 }
 
@@ -503,16 +469,15 @@ void draw_text_transformed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar xsc
 {
   string str = toString(vstr);
   get_fontv(fnt,currentfont);
-texture_set(textureStructs[fnt->texture]->gltex);
 
   rot *= M_PI/180;
 
-  const float sv = sin(rot), cv = cos(rot),
+  const gs_scalar sv = sin(rot), cv = cos(rot),
     svx = sv*xscale, cvx = cv*xscale, svy = sv * yscale,
     cvy = cv*yscale, sw = get_space_width(fnt) * cvx, sh = fnt->height/3 * svx,
     chi = fnt->height * cvy, shi = fnt->height * svy;
 
-  float xx, yy, tmpx, tmpy, tmpsize;
+  gs_scalar xx, yy, tmpx, tmpy, tmpsize;
   if (valign == fa_top)
     yy = y + fnt->yoffset * cvy, xx = x + fnt->yoffset * svy;
   else if (valign == fa_middle)
@@ -521,9 +486,7 @@ texture_set(textureStructs[fnt->texture]->gltex);
     tmpsize = string_height(str), yy = y + (fnt->yoffset - tmpsize) * cvy, xx = x + (fnt->yoffset - tmpsize) * svy;
   tmpx = xx, tmpy = yy;
   if (halign == fa_left){
-
       int lines = 0, w;
-      glBegin(GL_QUADS);
       for (unsigned i = 0; i < str.length(); i++)
       {
         if (str[i] == '\r')
@@ -537,24 +500,20 @@ texture_set(textureStructs[fnt->texture]->gltex);
         {
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
           w = g.x2-g.x;
-            const float lx = xx + g.y * svy;
-            const float ly = yy + g.y * cvy;
-
-            glTexCoord2f(g.tx,  g.ty);
-              glVertex2f(lx, ly);
-            glTexCoord2f(g.tx2, g.ty);
-              glVertex2f(lx + w * cvx, ly - w * svx);
-
-            glTexCoord2f(g.tx2, g.ty2);
-              glVertex2f(xx + w * cvx + g.y2 * svy, yy - w * svx + g.y2 * cvy);
-            glTexCoord2f(g.tx,  g.ty2);
-              glVertex2f(xx + g.y2 * svy,  yy + g.y2 * cvy);
-
-          xx += int(g.xs) * cvx;
-          yy -= int(g.xs) * svx;
+            const gs_scalar lx = xx + g.y * svy;
+            const gs_scalar ly = yy + g.y * cvy;
+		  
+			draw_primitive_begin_texture(pr_trianglestrip, fnt->texture);
+			draw_vertex_texture(lx, ly, g.tx, g.ty);
+			draw_vertex_texture(lx + w * cvx, ly - w * svx, g.tx2, g.ty);
+			draw_vertex_texture(xx + g.y2 * svy,  yy + g.y2 * cvy, g.tx,  g.ty2);
+			draw_vertex_texture(xx + w * cvx + g.y2 * svy, yy - w * svx + g.y2 * cvy, g.tx2, g.ty2);
+			draw_primitive_end();
+		  
+          xx += gs_scalar(g.xs) * cvx;
+          yy -= gs_scalar(g.xs) * svx;
         }
       }
-      glEnd();
     } else {
       tmpsize = string_width_line(str,0);
       if (halign == fa_center)
@@ -562,7 +521,6 @@ texture_set(textureStructs[fnt->texture]->gltex);
       else
         xx = tmpx-tmpsize * cvx, yy = tmpy+tmpsize * svx;
       int lines = 0, w;
-      glBegin(GL_QUADS);
       for (unsigned i = 0; i < str.length(); i++)
       {
         if (str[i] == '\r'){
@@ -584,24 +542,20 @@ texture_set(textureStructs[fnt->texture]->gltex);
         {
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
           w = g.x2-g.x;
-            const float lx = xx + g.y * svy;
-            const float ly = yy + g.y * cvy;
-
-            glTexCoord2f(g.tx,  g.ty);
-              glVertex2f(lx, ly);
-            glTexCoord2f(g.tx2, g.ty);
-              glVertex2f(lx + w * cvx, ly - w * svx);
-
-            glTexCoord2f(g.tx2, g.ty2);
-              glVertex2f(xx + w * cvx + g.y2 * svy, yy - w * svx + g.y2 * cvy);
-            glTexCoord2f(g.tx,  g.ty2);
-              glVertex2f(xx + g.y2 * svy,  yy + g.y2 * cvy);
-
-          xx += float(g.xs) * cvx;
-          yy -= float(g.xs) * svx;
+            const gs_scalar lx = xx + g.y * svy;
+            const gs_scalar ly = yy + g.y * cvy;
+		  
+		  	draw_primitive_begin_texture(pr_trianglestrip, fnt->texture);
+			draw_vertex_texture(lx, ly, g.tx, g.ty);
+			draw_vertex_texture(lx + w * cvx, ly - w * svx, g.tx2, g.ty);
+			draw_vertex_texture(xx + g.y2 * svy,  yy + g.y2 * cvy, g.tx,  g.ty2);
+			draw_vertex_texture(xx + w * cvx + g.y2 * svy, yy - w * svx + g.y2 * cvy, g.tx2, g.ty2);
+			draw_primitive_end();
+		  
+          xx += gs_scalar(g.xs) * cvx;
+          yy -= gs_scalar(g.xs) * svx;
         }
       }
-      glEnd();
     }
 }
 
@@ -609,16 +563,15 @@ void draw_text_ext_transformed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar
 {
   string str = toString(vstr);
   get_fontv(fnt,currentfont);
-texture_set(textureStructs[fnt->texture]->gltex);
 
   rot *= M_PI/180;
 
-  const float sv = sin(rot), cv = cos(rot),
+  const gs_scalar sv = sin(rot), cv = cos(rot),
     svx = sv*xscale, cvx = cv*xscale, svy = sv * yscale,
     cvy = cv*yscale, sw = get_space_width(fnt) * cvx, sh = fnt->height/3 * svx,
     chi = fnt->height * cvy, shi = fnt->height * svy;
 
-  float xx, yy, tmpx, tmpy, wi, tmpsize;
+  gs_scalar xx, yy, tmpx, tmpy, wi, tmpsize;
   if (valign == fa_top)
     yy = y + fnt->yoffset * cvy, xx = x + fnt->yoffset * svy;
   else if (valign == fa_middle)
@@ -629,7 +582,6 @@ texture_set(textureStructs[fnt->texture]->gltex);
 
   if (halign == fa_left){
       int lines = 0,width = 0, tw = 0;
-      glBegin(GL_QUADS);
       for (unsigned i = 0; i < str.length(); i++)
       {
         if (str[i] == '\r')
@@ -655,26 +607,21 @@ texture_set(textureStructs[fnt->texture]->gltex);
         } else {
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
           wi = g.x2-g.x;
-            const float lx = xx + g.y * svy;
-            const float ly = yy + g.y * cvy;
-
-            glTexCoord2f(g.tx,  g.ty);
-              glVertex2f(lx, ly);
-            glTexCoord2f(g.tx2, g.ty);
-              glVertex2f(lx + wi * cvx, ly - wi * svx);
-
-            glTexCoord2f(g.tx2, g.ty2);
-              glVertex2f(xx + wi * cvx + g.y2 * svy, yy - wi * svx + g.y2 * cvy);
-            glTexCoord2f(g.tx,  g.ty2);
-              glVertex2f(xx + g.y2 * svy,  yy + g.y2 * cvy);
-
-
-          xx += float(g.xs) * cvx;
-          yy -= float(g.xs) * svx;
-          width += float(g.xs);
+            const gs_scalar lx = xx + g.y * svy;
+            const gs_scalar ly = yy + g.y * cvy;
+		  
+		  	draw_primitive_begin_texture(pr_trianglestrip, fnt->texture);
+			draw_vertex_texture(lx, ly, g.tx,  g.ty);
+			draw_vertex_texture(lx + wi * cvx, ly - wi * svx, g.tx2, g.ty);
+			draw_vertex_texture(xx + g.y2 * svy,  yy + g.y2 * cvy, g.tx,  g.ty2);
+			draw_vertex_texture(xx + wi * cvx + g.y2 * svy, yy - wi * svx + g.y2 * cvy, g.tx2, g.ty2);
+			draw_primitive_end();
+		  
+          xx += gs_scalar(g.xs) * cvx;
+          yy -= gs_scalar(g.xs) * svx;
+          width += gs_scalar(g.xs);
         }
       }
-      glEnd();
   } else {
       int lines = 0,width = 0, tw = 0;
       tmpsize = string_width_ext_line(str,w,0);
@@ -682,7 +629,6 @@ texture_set(textureStructs[fnt->texture]->gltex);
         xx = tmpx-tmpsize/2 * cvx, yy = tmpy+tmpsize/2 * svx;
       else
         xx = tmpx-tmpsize * cvx, yy = tmpy+tmpsize * svx;
-      glBegin(GL_QUADS);
       for (unsigned i = 0; i < str.length(); i++)
       {
         if (str[i] == '\r'){
@@ -722,25 +668,21 @@ texture_set(textureStructs[fnt->texture]->gltex);
         } else {
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
           wi = g.x2-g.x;
-            const float lx = xx + g.y * svy;
-            const float ly = yy + g.y * cvy;
+            const gs_scalar lx = xx + g.y * svy;
+            const gs_scalar ly = yy + g.y * cvy;
 
-            glTexCoord2f(g.tx,  g.ty);
-              glVertex2f(lx, ly);
-            glTexCoord2f(g.tx2, g.ty);
-              glVertex2f(lx + wi * cvx, ly - wi * svx);
-
-            glTexCoord2f(g.tx2, g.ty2);
-              glVertex2f(xx + wi * cvx + g.y2 * svy, yy - wi * svx + g.y2 * cvy);
-            glTexCoord2f(g.tx,  g.ty2);
-              glVertex2f(xx + g.y2 * svy,  yy + g.y2 * cvy);
-
-          xx += float(g.xs) * cvx;
-          yy -= float(g.xs) * svx;
-          width += float(g.xs);
+		  	draw_primitive_begin_texture(pr_trianglestrip, fnt->texture);
+			draw_vertex_texture(lx, ly, g.tx,  g.ty);
+			draw_vertex_texture(lx + wi * cvx, ly - wi * svx, g.tx2, g.ty);
+			draw_vertex_texture(xx + g.y2 * svy,  yy + g.y2 * cvy, g.tx,  g.ty2);
+			draw_vertex_texture(xx + wi * cvx + g.y2 * svy, yy - wi * svx + g.y2 * cvy, g.tx2, g.ty2);
+			draw_primitive_end();
+			
+          xx += gs_scalar(g.xs) * cvx;
+          yy -= gs_scalar(g.xs) * svx;
+          width += gs_scalar(g.xs);
         }
       }
-      glEnd();
   }
 }
 
@@ -748,16 +690,15 @@ void draw_text_transformed_color(gs_scalar x, gs_scalar y, variant vstr, gs_scal
 {
   string str = toString(vstr);
   get_fontv(fnt,currentfont);
-texture_set(textureStructs[fnt->texture]->gltex);
 
   rot *= M_PI/180;
 
-  const float sv = sin(rot), cv = cos(rot),
+  const gs_scalar sv = sin(rot), cv = cos(rot),
     svx = sv*xscale, cvx = cv*xscale, svy = sv * yscale,
     cvy = cv*yscale, sw = get_space_width(fnt) * cvx, sh = fnt->height/3 * svx,
     chi = fnt->height * cvy, shi = fnt->height * svy;
 
-  float xx, yy, tmpx, tmpy, tmpsize;
+  gs_scalar xx, yy, tmpx, tmpy, tmpsize;
   int hcol1 = c1, hcol2 = c1, hcol3 = c3, hcol4 = c4, width = 0;
   if (valign == fa_top)
     yy = y + fnt->yoffset * cvy, xx = x + fnt->yoffset * svy;
@@ -766,8 +707,6 @@ texture_set(textureStructs[fnt->texture]->gltex);
   else
     tmpsize = string_height(str), yy = y + (fnt->yoffset - tmpsize) * cvy, xx = x + (fnt->yoffset - tmpsize) * svy;
   tmpx = xx, tmpy = yy;
-  glPushAttrib(GL_CURRENT_BIT);
-  glBegin(GL_QUADS);
   if (halign == fa_left){
       int lines = 0, w;
       tmpsize = string_width_line(str,0);
@@ -784,30 +723,23 @@ texture_set(textureStructs[fnt->texture]->gltex);
         {
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
           w = g.x2-g.x;
-            const float lx = xx + g.y * svy;
-            const float ly = yy + g.y * cvy;
-            hcol1 = merge_color(c1,c2,(float)(width)/tmpsize);
-            hcol2 = merge_color(c1,c2,(float)(width+g.xs)/tmpsize);
-            hcol3 = merge_color(c4,c3,(float)(width)/tmpsize);
-            hcol4 = merge_color(c4,c3,(float)(width+g.xs)/tmpsize);
-
-            glColor4ub(__GETR(hcol1),__GETG(hcol1),__GETB(hcol1),char(a*255));
-            glTexCoord2f(g.tx,  g.ty);
-              glVertex2f(lx, ly);
-            glColor4ub(__GETR(hcol2),__GETG(hcol2),__GETB(hcol2),char(a*255));
-            glTexCoord2f(g.tx2, g.ty);
-              glVertex2f(lx + w * cvx, ly - w * svx);
-
-            glColor4ub(__GETR(hcol3),__GETG(hcol3),__GETB(hcol3),char(a*255));
-            glTexCoord2f(g.tx2, g.ty2);
-              glVertex2f(xx + w * cvx + g.y2 * svy, yy - w * svx + g.y2 * cvy);
-            glColor4ub(__GETR(hcol4),__GETG(hcol4),__GETB(hcol4),char(a*255));
-            glTexCoord2f(g.tx,  g.ty2);
-              glVertex2f(xx + g.y2 * svy,  yy + g.y2 * cvy);
-
-          xx += float(g.xs) * cvx;
-          yy -= float(g.xs) * svx;
-          width += float(g.xs);
+          const gs_scalar lx = xx + g.y * svy;
+          const gs_scalar ly = yy + g.y * cvy;
+          hcol1 = merge_color(c1,c2,(gs_scalar)(width)/tmpsize);
+          hcol2 = merge_color(c1,c2,(gs_scalar)(width+g.xs)/tmpsize);
+          hcol3 = merge_color(c4,c3,(gs_scalar)(width)/tmpsize);
+          hcol4 = merge_color(c4,c3,(gs_scalar)(width+g.xs)/tmpsize);
+		  
+			draw_primitive_begin_texture(pr_trianglestrip, fnt->texture);
+			draw_vertex_texture_color(lx, ly, g.tx,  g.ty, hcol1, a);
+			draw_vertex_texture_color(lx + w * cvx, ly - w * svx, g.tx2, g.ty, hcol2, a);
+			draw_vertex_texture_color(xx + g.y2 * svy,  yy + g.y2 * cvy, g.tx, g.ty2, hcol4, a);
+			draw_vertex_texture_color(xx + w * cvx + g.y2 * svy, yy - w * svx + g.y2 * cvy, g.tx2, g.ty2, hcol3, a);
+			draw_primitive_end();
+		  
+          xx += gs_scalar(g.xs) * cvx;
+          yy -= gs_scalar(g.xs) * svx;
+          width += gs_scalar(g.xs);
         }
       }
     } else {
@@ -838,51 +770,41 @@ texture_set(textureStructs[fnt->texture]->gltex);
         {
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
           w = g.x2-g.x;
-            const float lx = xx + g.y * svy;
-            const float ly = yy + g.y * cvy;
-            hcol1 = merge_color(c1,c2,(float)(width)/tmpsize);
-            hcol2 = merge_color(c1,c2,(float)(width+g.xs)/tmpsize);
-            hcol3 = merge_color(c4,c3,(float)(width)/tmpsize);
-            hcol4 = merge_color(c4,c3,(float)(width+g.xs)/tmpsize);
-
-            glColor4ub(__GETR(hcol1),__GETG(hcol1),__GETB(hcol1),char(a*255));
-            glTexCoord2f(g.tx,  g.ty);
-              glVertex2f(lx, ly);
-            glColor4ub(__GETR(hcol2),__GETG(hcol2),__GETB(hcol2),char(a*255));
-            glTexCoord2f(g.tx2, g.ty);
-              glVertex2f(lx + w * cvx, ly - w * svx);
-
-            glColor4ub(__GETR(hcol3),__GETG(hcol3),__GETB(hcol3),char(a*255));
-            glTexCoord2f(g.tx2, g.ty2);
-              glVertex2f(xx + w * cvx + g.y2 * svy, yy - w * svx + g.y2 * cvy);
-            glColor4ub(__GETR(hcol4),__GETG(hcol4),__GETB(hcol4),char(a*255));
-            glTexCoord2f(g.tx,  g.ty2);
-              glVertex2f(xx + g.y2 * svy,  yy + g.y2 * cvy);
-
-          xx += float(g.xs) * cvx;
-          yy -= float(g.xs) * svx;
-          width += float(g.xs);
+            const gs_scalar lx = xx + g.y * svy;
+            const gs_scalar ly = yy + g.y * cvy;
+            hcol1 = merge_color(c1,c2,(gs_scalar)(width)/tmpsize);
+            hcol2 = merge_color(c1,c2,(gs_scalar)(width+g.xs)/tmpsize);
+            hcol3 = merge_color(c4,c3,(gs_scalar)(width)/tmpsize);
+            hcol4 = merge_color(c4,c3,(gs_scalar)(width+g.xs)/tmpsize);
+		  
+			draw_primitive_begin_texture(pr_trianglestrip, fnt->texture);
+			draw_vertex_texture_color(lx, ly, g.tx,  g.ty, hcol1, a);
+			draw_vertex_texture_color(lx + w * cvx, ly - w * svx, g.tx2, g.ty, hcol2, a);
+			draw_vertex_texture_color(xx + g.y2 * svy,  yy + g.y2 * cvy, g.tx, g.ty2, hcol4, a);
+			draw_vertex_texture_color(xx + w * cvx + g.y2 * svy, yy - w * svx + g.y2 * cvy, g.tx2, g.ty2, hcol3, a);
+			draw_primitive_end();
+		  
+          xx += gs_scalar(g.xs) * cvx;
+          yy -= gs_scalar(g.xs) * svx;
+          width += gs_scalar(g.xs);
         }
       }
     }
-    glEnd();
-    glPopAttrib();
 }
 
-void draw_text_ext_transformed_color(gs_scalar x, gs_scalar y, variant vstr, gs_scalar sep, gs_scalar w, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, gs_scalar a)
+void draw_text_ext_transformed_color(gs_scalar x, gs_scalar y, variant vstr, gs_scalar sep, gs_scalar w, gs_scalar xscale, gs_scalar yscale, double rot,int c1, int c2, int c3, int c4, gs_scalar a)
 {
   string str = toString(vstr);
   get_fontv(fnt,currentfont);
-texture_set(textureStructs[fnt->texture]->gltex);
 
   rot *= M_PI/180;
 
-  const float sv = sin(rot), cv = cos(rot),
+  const gs_scalar sv = sin(rot), cv = cos(rot),
     svx = sv*xscale, cvx = cv*xscale, svy = sv * yscale,
     cvy = cv*yscale, sw = get_space_width(fnt) * cvx, sh = fnt->height/3 * svx,
     chi = fnt->height * cvy, shi = fnt->height * svy;
 
-  float xx, yy, tmpx, tmpy, tmpsize;
+  gs_scalar xx, yy, tmpx, tmpy, tmpsize;
   int hcol1 = c1, hcol2 = c1, hcol3 = c3, hcol4 = c4, width = 0;
   if (valign == fa_top)
     yy = y + fnt->yoffset * cvy, xx = x + fnt->yoffset * svy;
@@ -891,8 +813,6 @@ texture_set(textureStructs[fnt->texture]->gltex);
   else
     tmpsize = string_height_ext(str,sep,w), yy = y + (fnt->yoffset - tmpsize) * cvy, xx = x + (fnt->yoffset - tmpsize) * svy;
   tmpx = xx, tmpy = yy;
-  glPushAttrib(GL_CURRENT_BIT);
-  glBegin(GL_QUADS);
   if (halign == fa_left){
       int lines = 0, tw = 0, wi;
       tmpsize = string_width_ext_line(str,w,0);
@@ -919,30 +839,24 @@ texture_set(textureStructs[fnt->texture]->gltex);
         } else {
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
           wi = g.x2-g.x;
-            const float lx = xx + g.y * svy;
-            const float ly = yy + g.y * cvy;
-            hcol1 = merge_color(c1,c2,(float)(width)/tmpsize);
-            hcol2 = merge_color(c1,c2,(float)(width+g.xs)/tmpsize);
-            hcol3 = merge_color(c4,c3,(float)(width)/tmpsize);
-            hcol4 = merge_color(c4,c3,(float)(width+g.xs)/tmpsize);
-
-            glColor4ub(__GETR(hcol1),__GETG(hcol1),__GETB(hcol1),char(a*255));
-            glTexCoord2f(g.tx,  g.ty);
-              glVertex2f(lx, ly);
-            glColor4ub(__GETR(hcol2),__GETG(hcol2),__GETB(hcol2),char(a*255));
-            glTexCoord2f(g.tx2, g.ty);
-              glVertex2f(lx + wi * cvx, ly - wi * svx);
-
-            glColor4ub(__GETR(hcol3),__GETG(hcol3),__GETB(hcol3),char(a*255));
-            glTexCoord2f(g.tx2, g.ty2);
-              glVertex2f(xx + wi * cvx + g.y2 * svy, yy - wi * svx + g.y2 * cvy);
-            glColor4ub(__GETR(hcol4),__GETG(hcol4),__GETB(hcol4),char(a*255));
-            glTexCoord2f(g.tx,  g.ty2);
-              glVertex2f(xx + g.y2 * svy,  yy + g.y2 * cvy);
-
-          xx += float(g.xs) * cvx;
-          yy -= float(g.xs) * svx;
-          width += float(g.xs);
+            const gs_scalar lx = xx + g.y * svy;
+            const gs_scalar ly = yy + g.y * cvy;
+            hcol1 = merge_color(c1,c2,(gs_scalar)(width)/tmpsize);
+            hcol2 = merge_color(c1,c2,(gs_scalar)(width+g.xs)/tmpsize);
+            hcol3 = merge_color(c4,c3,(gs_scalar)(width)/tmpsize);
+            hcol4 = merge_color(c4,c3,(gs_scalar)(width+g.xs)/tmpsize);
+		  
+		  	draw_primitive_begin_texture(pr_trianglestrip, fnt->texture);
+			draw_vertex_texture_color(lx, ly, g.tx,  g.ty, hcol1, a);
+			draw_vertex_texture_color(lx + wi * cvx, ly - wi * svx, g.tx2, g.ty, hcol2, a);
+			draw_vertex_texture_color(xx + g.y2 * svy,  yy + g.y2 * cvy, g.tx,  g.ty2, hcol4, a);
+			draw_vertex_texture_color(xx + wi * cvx + g.y2 * svy, yy - wi * svx + g.y2 * cvy, g.tx2, g.ty2, hcol3, a);
+			draw_primitive_end();
+		  
+		  
+          xx += gs_scalar(g.xs) * cvx;
+          yy -= gs_scalar(g.xs) * svx;
+          width += gs_scalar(g.xs);
         }
       }
     } else {
@@ -989,146 +903,113 @@ texture_set(textureStructs[fnt->texture]->gltex);
         } else {
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
           wi = g.x2-g.x;
-            const float lx = xx + g.y * svy;
-            const float ly = yy + g.y * cvy;
-            hcol1 = merge_color(c1,c2,(float)(width)/tmpsize);
-            hcol2 = merge_color(c1,c2,(float)(width+g.xs)/tmpsize);
-            hcol3 = merge_color(c4,c3,(float)(width)/tmpsize);
-            hcol4 = merge_color(c4,c3,(float)(width+g.xs)/tmpsize);
+            const gs_scalar lx = xx + g.y * svy;
+            const gs_scalar ly = yy + g.y * cvy;
+            hcol1 = merge_color(c1,c2,(gs_scalar)(width)/tmpsize);
+            hcol2 = merge_color(c1,c2,(gs_scalar)(width+g.xs)/tmpsize);
+            hcol3 = merge_color(c4,c3,(gs_scalar)(width)/tmpsize);
+            hcol4 = merge_color(c4,c3,(gs_scalar)(width+g.xs)/tmpsize);
 
-            glColor4ub(__GETR(hcol1),__GETG(hcol1),__GETB(hcol1),char(a*255));
-            glTexCoord2f(g.tx,  g.ty);
-              glVertex2f(lx, ly);
-            glColor4ub(__GETR(hcol2),__GETG(hcol2),__GETB(hcol2),char(a*255));
-            glTexCoord2f(g.tx2, g.ty);
-              glVertex2f(lx + wi * cvx, ly - wi * svx);
+		  	draw_primitive_begin_texture(pr_trianglestrip, fnt->texture);
+			draw_vertex_texture_color(lx, ly, g.tx,  g.ty, hcol1, a);
+			draw_vertex_texture_color(lx + wi * cvx, ly - wi * svx, g.tx2, g.ty, hcol2, a);
+			draw_vertex_texture_color(xx + g.y2 * svy,  yy + g.y2 * cvy, g.tx,  g.ty2, hcol4, a);
+			draw_vertex_texture_color(xx + wi * cvx + g.y2 * svy, yy - wi * svx + g.y2 * cvy, g.tx2, g.ty2, hcol3, a);
+			draw_primitive_end();
 
-            glColor4ub(__GETR(hcol3),__GETG(hcol3),__GETB(hcol3),char(a*255));
-            glTexCoord2f(g.tx2, g.ty2);
-              glVertex2f(xx + wi * cvx + g.y2 * svy, yy - wi * svx + g.y2 * cvy);
-            glColor4ub(__GETR(hcol4),__GETG(hcol4),__GETB(hcol4),char(a*255));
-            glTexCoord2f(g.tx,  g.ty2);
-              glVertex2f(xx + g.y2 * svy,  yy + g.y2 * cvy);
-
-          xx += float(g.xs) * cvx;
-          yy -= float(g.xs) * svx;
-          width += float(g.xs);
+          xx += gs_scalar(g.xs) * cvx;
+          yy -= gs_scalar(g.xs) * svx;
+          width += gs_scalar(g.xs);
         }
       }
     }
-    glEnd();
-    glPopAttrib();
 }
 
-void draw_text_color(gs_scalar x, gs_scalar y, variant vstr, int c1, int c2, int c3, int c4, gs_scalar a)
+void draw_text_color(gs_scalar x, gs_scalar y,variant vstr,int c1,int c2,int c3,int c4,gs_scalar a)
 {
   string str = toString(vstr);
   get_fontv(fnt,currentfont);
-texture_set(textureStructs[fnt->texture]->gltex);
 
-
-  glPushAttrib(GL_CURRENT_BIT);
-  float yy = valign == fa_top ? y+fnt->yoffset : valign == fa_middle ? y +fnt->yoffset - string_height(str)/2 : y + fnt->yoffset - string_height(str);
-  int hcol1 = c1, hcol2 = c1, hcol3 = c3, hcol4 = c4,  line = 0, sw = string_width_line(str, line);
-  float tx1, tx2;
-  glBegin(GL_QUADS);
+  gs_scalar yy = valign == fa_top ? y+fnt->yoffset : valign == fa_middle ? y +fnt->yoffset - string_height(str)/2 : y + fnt->yoffset - string_height(str);
+  int hcol1 = c1, hcol2 = c1, hcol3 = c3, hcol4 = c4,  line = 0;
+  gs_scalar tx1, tx2, sw = (gs_scalar)string_width_line(str, line);
   if (halign == fa_left){
-      float xx = x;
+      gs_scalar xx = x;
       for (unsigned i = 0; i < str.length(); i++)
       {
         if (str[i] == '\r'){
           xx = x, yy += fnt->height, i += str[i+1] == '\n';
           line += 1;
-          sw = string_width_line(str, line);
+          sw = (gs_scalar)string_width_line(str, line);
         } else if (str[i] == '\n'){
           xx = x, yy += fnt->height;
           line += 1;
-          sw = string_width_line(str, line);
+          sw = (gs_scalar)string_width_line(str, line);
         } else if (str[i] == ' ')
           xx += get_space_width(fnt);
         else
         {
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
-          tx1 = (float)(xx-x)/sw, tx2 = (float)(xx+g.xs-x)/sw;
+          tx1 = (xx-x)/sw, tx2 = (xx+g.xs-x)/sw;
           hcol1 = merge_color(c1,c2,tx1);
           hcol2 = merge_color(c1,c2,tx2);
           hcol3 = merge_color(c4,c3,tx1);
           hcol4 = merge_color(c4,c3,tx2);
-            glColor4ub(__GETR(hcol1),__GETG(hcol1),__GETB(hcol1),char(a*255));
-            glTexCoord2f(g.tx,  g.ty);
-              glVertex2i(xx + g.x,  yy + g.y);
 
-            glColor4ub(__GETR(hcol2),__GETG(hcol2),__GETB(hcol2),char(a*255));
-            glTexCoord2f(g.tx2, g.ty);
-              glVertex2i(xx + g.x2, yy + g.y);
-
-            glColor4ub(__GETR(hcol3),__GETG(hcol3),__GETB(hcol3),char(a*255));
-            glTexCoord2f(g.tx2, g.ty2);
-              glVertex2i(xx + g.x2, yy + g.y2);
-
-            glColor4ub(__GETR(hcol4),__GETG(hcol4),__GETB(hcol4),char(a*255));
-            glTexCoord2f(g.tx,  g.ty2);
-              glVertex2i(xx + g.x,  yy + g.y2);
-          xx += float(g.xs);
+		  	draw_primitive_begin_texture(pr_trianglestrip, fnt->texture);
+			draw_vertex_texture_color(xx + g.x,  yy + g.y, g.tx, g.ty, hcol1, a);
+			draw_vertex_texture_color(xx + g.x2, yy + g.y, g.tx2, g.ty, hcol2, a);
+			draw_vertex_texture_color(xx + g.x,  yy + g.y2, g.tx,  g.ty2, hcol4, a);
+			draw_vertex_texture_color(xx + g.x2, yy + g.y2, g.tx2, g.ty2, hcol3, a);
+			draw_primitive_end();
+			
+          xx += gs_scalar(g.xs);
         }
       }
   } else {
-      float xx = halign == fa_center ? x-sw/2 : x-sw, tmpx = xx;
+      gs_scalar xx = halign == fa_center ? x-sw/2 : x-sw, tmpx = xx;
       for (unsigned i = 0; i < str.length(); i++)
       {
         if (str[i] == '\r'){
           yy += fnt->height, i += str[i+1] == '\n', line += 1,
-          sw = string_width_line(str, line), xx = halign == fa_center ? x-sw/2 : x-sw, tmpx = xx;
+          sw = (gs_scalar)string_width_line(str, line), xx = halign == fa_center ? x-sw/2 : x-sw, tmpx = xx;
         } else if (str[i] == '\n'){
-          yy += fnt->height, line += 1, sw = string_width_line(str, line),
+          yy += fnt->height, line += 1, sw = (gs_scalar)string_width_line(str, line),
           xx = halign == fa_center ? x-sw/2 : x-sw, tmpx = xx;
         } else if (str[i] == ' ')
           xx += get_space_width(fnt);
         else
         {
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
-          tx1 = (float)(xx-tmpx)/sw, tx2 = (float)(xx+g.xs-tmpx)/sw;
-          //tx1 = (float)tmpx/sw, tx2 = (float)(tmpx+g.xs)/sw;
+          tx1 = (xx-tmpx)/sw, tx2 = (xx+g.xs-tmpx)/sw;
           hcol1 = merge_color(c1,c2,tx1);
           hcol2 = merge_color(c1,c2,tx2);
           hcol3 = merge_color(c4,c3,tx1);
           hcol4 = merge_color(c4,c3,tx2);
-            glColor4ub(__GETR(hcol1),__GETG(hcol1),__GETB(hcol1),char(a*255));
-            glTexCoord2f(g.tx,  g.ty);
-              glVertex2i(xx + g.x,  yy + g.y);
-
-            glColor4ub(__GETR(hcol2),__GETG(hcol2),__GETB(hcol2),char(a*255));
-            glTexCoord2f(g.tx2, g.ty);
-              glVertex2i(xx + g.x2, yy + g.y);
-
-            glColor4ub(__GETR(hcol3),__GETG(hcol3),__GETB(hcol3),char(a*255));
-            glTexCoord2f(g.tx2, g.ty2);
-              glVertex2i(xx + g.x2, yy + g.y2);
-
-            glColor4ub(__GETR(hcol4),__GETG(hcol4),__GETB(hcol4),char(a*255));
-            glTexCoord2f(g.tx,  g.ty2);
-              glVertex2i(xx + g.x,  yy + g.y2);
-          xx += float(g.xs);
+		  
+		  	draw_primitive_begin_texture(pr_trianglestrip, fnt->texture);
+			draw_vertex_texture_color(xx + g.x,  yy + g.y, g.tx, g.ty, hcol1, a);
+			draw_vertex_texture_color(xx + g.x2, yy + g.y, g.tx2, g.ty, hcol2, a);
+			draw_vertex_texture_color(xx + g.x,  yy + g.y2, g.tx,  g.ty2, hcol4, a);
+			draw_vertex_texture_color(xx + g.x2, yy + g.y2, g.tx2, g.ty2, hcol3, a);
+			draw_primitive_end();
+		  
+          xx += gs_scalar(g.xs);
         }
       }
   }
-  glEnd();
-  glPopAttrib();
 }
 
-void draw_text_ext_color(gs_scalar x, gs_scalar y, variant vstr, gs_scalar sep, gs_scalar w, int c1, int c2, int c3, int c4, gs_scalar a)
+void draw_text_ext_color(gs_scalar x, gs_scalar y,variant vstr,gs_scalar sep, gs_scalar w, int c1,int c2,int c3,int c4, gs_scalar a)
 {
   string str = toString(vstr);
   get_fontv(fnt,currentfont);
-texture_set(textureStructs[fnt->texture]->gltex);
 
-  glPushAttrib(GL_CURRENT_BIT);
-  float yy = valign == fa_top ? y+fnt->yoffset : valign == fa_middle ? y + fnt->yoffset - string_height_ext(str,sep,w)/2 : y + fnt->yoffset - string_height_ext(str,sep,w);
-  float width = 0, tw = 0, line = 0, sw = string_width_ext_line(str, w, line);
+  gs_scalar yy = valign == fa_top ? y+fnt->yoffset : valign == fa_middle ? y + fnt->yoffset - string_height_ext(str,sep,w)/2 : y + fnt->yoffset - string_height_ext(str,sep,w);
+  gs_scalar width = 0, tw = 0, line = 0, sw = string_width_ext_line(str, w, line);
   int hcol1 = c1, hcol2 = c1, hcol3 = c3, hcol4 = c4;
-  glBegin(GL_QUADS);
   if (halign == fa_left){
-      float xx = x;
+      gs_scalar xx = x;
       for (unsigned i = 0; i < str.length(); i++)
       {
         if (str[i] == '\r')
@@ -1151,28 +1032,24 @@ texture_set(textureStructs[fnt->texture]->gltex);
             xx = x, yy += (sep==-1 ? fnt->height : sep), width = 0, line += 1, sw = string_width_ext_line(str, w, line);
         } else {
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
-          hcol1 = merge_color(c1,c2,(float)(width)/sw);
-          hcol2 = merge_color(c1,c2,(float)(width+g.xs)/sw);
-          hcol3 = merge_color(c4,c3,(float)(width)/sw);
-          hcol4 = merge_color(c4,c3,(float)(width+g.xs)/sw);
-            glColor4ub(__GETR(hcol1),__GETG(hcol1),__GETB(hcol1),char(a*255));
-            glTexCoord2f(g.tx,  g.ty);
-              glVertex2i(xx + g.x,  yy + g.y);
-            glColor4ub(__GETR(hcol2),__GETG(hcol2),__GETB(hcol2),char(a*255));
-            glTexCoord2f(g.tx2, g.ty);
-              glVertex2i(xx + g.x2, yy + g.y);
-            glColor4ub(__GETR(hcol3),__GETG(hcol3),__GETB(hcol3),char(a*255));
-            glTexCoord2f(g.tx2, g.ty2);
-              glVertex2i(xx + g.x2, yy + g.y2);
-            glColor4ub(__GETR(hcol4),__GETG(hcol4),__GETB(hcol4),char(a*255));
-            glTexCoord2f(g.tx,  g.ty2);
-              glVertex2i(xx + g.x,  yy + g.y2);
-          xx += float(g.xs);
+          hcol1 = merge_color(c1,c2,(gs_scalar)(width)/sw);
+          hcol2 = merge_color(c1,c2,(gs_scalar)(width+g.xs)/sw);
+          hcol3 = merge_color(c4,c3,(gs_scalar)(width)/sw);
+          hcol4 = merge_color(c4,c3,(gs_scalar)(width+g.xs)/sw);
+
+		  	draw_primitive_begin_texture(pr_trianglestrip, fnt->texture);
+			draw_vertex_texture_color(xx + g.x,  yy + g.y, g.tx, g.ty, hcol1, a);
+			draw_vertex_texture_color(xx + g.x2, yy + g.y, g.tx2, g.ty, hcol2, a);
+			draw_vertex_texture_color(xx + g.x,  yy + g.y2, g.tx,  g.ty2, hcol4, a);
+			draw_vertex_texture_color(xx + g.x2, yy + g.y2, g.tx2, g.ty2, hcol3, a);
+			draw_primitive_end();
+			
+          xx += gs_scalar(g.xs);
           width = xx-x;
         }
       }
   } else {
-      float xx = halign == fa_center ? x-sw/2 : x-sw, tmpx = xx;
+      gs_scalar xx = halign == fa_center ? x-sw/2 : x-sw, tmpx = xx;
       for (unsigned i = 0; i < str.length(); i++)
       {
         if (str[i] == '\r')
@@ -1193,29 +1070,23 @@ texture_set(textureStructs[fnt->texture]->gltex);
             yy += (sep==-1 ? fnt->height : sep), width = 0, line += 1, sw = string_width_ext_line(str, w, line), xx = halign == fa_center ? x-sw/2 : x-sw, tmpx = xx;
         } else {
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
-          hcol1 = merge_color(c1,c2,(float)(width)/sw);
-          hcol2 = merge_color(c1,c2,(float)(width+g.xs)/sw);
-          hcol3 = merge_color(c4,c3,(float)(width)/sw);
-          hcol4 = merge_color(c4,c3,(float)(width+g.xs)/sw);
-            glColor4ub(__GETR(hcol1),__GETG(hcol1),__GETB(hcol1),char(a*255));
-            glTexCoord2f(g.tx,  g.ty);
-              glVertex2i(xx + g.x,  yy + g.y);
-            glColor4ub(__GETR(hcol2),__GETG(hcol2),__GETB(hcol2),char(a*255));
-            glTexCoord2f(g.tx2, g.ty);
-              glVertex2i(xx + g.x2, yy + g.y);
-            glColor4ub(__GETR(hcol3),__GETG(hcol3),__GETB(hcol3),char(a*255));
-            glTexCoord2f(g.tx2, g.ty2);
-              glVertex2i(xx + g.x2, yy + g.y2);
-            glColor4ub(__GETR(hcol4),__GETG(hcol4),__GETB(hcol4),char(a*255));
-            glTexCoord2f(g.tx,  g.ty2);
-              glVertex2i(xx + g.x,  yy + g.y2);
-          xx += float(g.xs);
+          hcol1 = merge_color(c1,c2,(gs_scalar)(width)/sw);
+          hcol2 = merge_color(c1,c2,(gs_scalar)(width+g.xs)/sw);
+          hcol3 = merge_color(c4,c3,(gs_scalar)(width)/sw);
+          hcol4 = merge_color(c4,c3,(gs_scalar)(width+g.xs)/sw);
+
+		  	draw_primitive_begin_texture(pr_trianglestrip, fnt->texture);
+			draw_vertex_texture_color(xx + g.x,  yy + g.y, g.tx, g.ty, hcol1, a);
+			draw_vertex_texture_color(xx + g.x2, yy + g.y, g.tx2, g.ty, hcol2, a);
+			draw_vertex_texture_color(xx + g.x,  yy + g.y2, g.tx,  g.ty2, hcol4, a);
+			draw_vertex_texture_color(xx + g.x2, yy + g.y2, g.tx2, g.ty2, hcol3, a);
+			draw_primitive_end();
+			
+          xx += gs_scalar(g.xs);
           width = xx-tmpx;
         }
       }
   }
-  glEnd();
-  glPopAttrib();
 }
 
 unsigned int font_get_texture(int fnt)

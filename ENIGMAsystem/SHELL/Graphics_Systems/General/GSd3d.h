@@ -80,14 +80,12 @@ void d3d_depth_clear();
 void d3d_depth_clear_value(float value);
 void d3d_start();
 void d3d_end();
-bool d3d_get_mode();
 void d3d_set_perspective(bool enable);
 void d3d_set_hidden(bool enable);
 void d3d_set_zwriteenable(bool enable);
 void d3d_set_lighting(bool enable);
 
 void d3d_set_culling(int mode);
-int d3d_get_culling();
 void d3d_set_fill_mode(int fill);
 void d3d_set_line_width(float value);
 void d3d_set_point_size(float value);
@@ -103,19 +101,14 @@ void d3d_set_fog_density(double density);
 void d3d_set_depth(double dep);
 void d3d_set_shading(bool smooth);
 
+bool d3d_get_mode();
+int d3d_get_culling();
+bool d3d_get_hidden();
+
 void d3d_set_projection(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs_scalar xto, gs_scalar yto, gs_scalar zto,gs_scalar xup, gs_scalar yup, gs_scalar zup);
 void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs_scalar xto, gs_scalar yto, gs_scalar zto, gs_scalar xup, gs_scalar yup, gs_scalar zup, double angle, double aspect, double znear, double zfar);
 void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, double angle);
 void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, double angle);
-
-void d3d_draw_wall(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep);
-void d3d_draw_floor(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep);
-void d3d_draw_block(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, bool closed = true);
-void d3d_draw_cylinder(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texid, gs_scalar hrep, gs_scalar vrep, bool closed, int steps);
-void d3d_draw_cone(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texid, gs_scalar hrep, gs_scalar vrep, bool closed, int steps);
-void d3d_draw_ellipsoid(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texid, gs_scalar hrep, gs_scalar vrep, int steps);
-void d3d_draw_icosahedron(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, int steps);
-void d3d_draw_torus(gs_scalar x1, gs_scalar y1, gs_scalar z1, int texId, gs_scalar hrep, gs_scalar vrep, int csteps, int tsteps, float radius, float tradius);
 
 // ***** TRANSFORMATIONS BEGIN *****
 void d3d_transform_set_identity();

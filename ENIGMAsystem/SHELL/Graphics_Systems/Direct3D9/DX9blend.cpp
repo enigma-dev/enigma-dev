@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Bridges/General/DX9Device.h"
+#include "Bridges/General/DX9Context.h"
 #include "Direct3D9Headers.h"
 #include "Graphics_Systems/General/GSblend.h"
 
@@ -26,25 +26,25 @@ int draw_set_blend_mode(int mode){
 	switch (mode)
 	{
     case bm_add:
-		d3ddev->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
-		d3ddev->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-		d3ddev->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
+		d3dmgr->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
+		d3dmgr->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+		d3dmgr->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
       return 0;
     case bm_max:
-		d3ddev->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_MAX);
-		d3ddev->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-		d3ddev->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCCOLOR);
+		d3dmgr->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_MAX);
+		d3dmgr->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+		d3dmgr->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCCOLOR);
       return 0;
     case bm_subtract:
-		d3ddev->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_SUBTRACT);
-		d3ddev->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ZERO);
-		d3ddev->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCCOLOR);
+		d3dmgr->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_SUBTRACT);
+		d3dmgr->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ZERO);
+		d3dmgr->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCCOLOR);
       return 0;
     default:
 		// bm_normal
-        d3ddev->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
-		d3ddev->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-		d3ddev->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+        d3dmgr->SetRenderState(D3DRS_BLENDOP, D3DBLENDOP_ADD);
+		d3dmgr->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+		d3dmgr->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
       return 0;
   }
 }
@@ -55,8 +55,8 @@ int draw_set_blend_mode_ext(int src, int dest){
 	  D3DBLEND_INVSRCALPHA, D3DBLEND_DESTALPHA, D3DBLEND_INVDESTALPHA, D3DBLEND_DESTCOLOR,
 	  D3DBLEND_INVDESTCOLOR, D3DBLEND_SRCALPHASAT
   };
-  d3ddev->SetRenderState(D3DRS_SRCBLEND, blendequivs[(src-1)%10]);
-  d3ddev->SetRenderState(D3DRS_DESTBLEND, blendequivs[(dest-1)%10]);
+  d3dmgr->SetRenderState(D3DRS_SRCBLEND, blendequivs[(src-1)%10]);
+  d3dmgr->SetRenderState(D3DRS_DESTBLEND, blendequivs[(dest-1)%10]);
   return 0;
 }
 

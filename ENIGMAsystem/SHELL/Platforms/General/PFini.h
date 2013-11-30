@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton
+/** Copyright (C) 2008 Josh Ventura
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,17 +15,19 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-namespace enigma_user {
-void gs_enable_alpha(bool enable);
-void gs_enable_blending(bool enable);
-void gs_enable_depthbuffer(bool enable);
-void gs_enable_dither(bool enable);
-void gs_enable_smooth_lines(bool enable);
-void gs_enable_stipple(bool enable);
-void gs_enable_logical_op(bool enable);
-void gs_enable_smooth_points(bool enable);
-void gs_enable_smooth_polygons(bool enable);
-void gs_enable_stencil(bool enable);
-void gs_enable_texture(bool enable);
+namespace enigma_user
+{
+
+void ini_open(std::string fname);
+void ini_close();
+std::string ini_read_string(std::string section, std::string key, string defaultValue);
+int ini_read_real(std::string section, std::string key, int defaultValue);
+void ini_write_string(std::string section, std::string key, string value);
+void ini_write_real(std::string section, std::string key, int value);
+bool ini_key_exists(std::string section, std::string key);
+bool ini_section_exists(std::string section);
+void ini_key_delete(std::string section, std::string key);
+void ini_section_delete(std::string section);
+
 }
 

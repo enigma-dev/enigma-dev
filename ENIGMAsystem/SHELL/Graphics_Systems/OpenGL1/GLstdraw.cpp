@@ -87,7 +87,6 @@ void draw_set_line_pattern(short pattern, int scale)
 
 void draw_point(gs_scalar x, gs_scalar y)
 {
-  texture_reset();
   glBegin(GL_POINTS);
     glVertex2f(x,y);
   glEnd();
@@ -95,7 +94,6 @@ void draw_point(gs_scalar x, gs_scalar y)
 
 void draw_point_color(gs_scalar x, gs_scalar y,int col)
 {
-  texture_reset();
   glPushAttrib(GL_CURRENT_BIT);
     glColor4ub(__GETR(col),__GETG(col),__GETB(col),enigma::currentcolor[3]);
     glBegin(GL_POINTS);
@@ -106,7 +104,6 @@ void draw_point_color(gs_scalar x, gs_scalar y,int col)
 
 void draw_line(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2)
 {
-  texture_reset();
   glBegin(GL_LINES);
     glVertex2f(x1,y1);
     glVertex2f(x2,y2);
@@ -115,7 +112,6 @@ void draw_line(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2)
 
 void draw_line_width(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, gs_scalar width)
 {
-  texture_reset();
   glPushAttrib(GL_LINE_BIT);
     glLineWidth(width);
     glBegin(GL_LINES);
@@ -127,7 +123,6 @@ void draw_line_width(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, gs_s
 
 void draw_line_color(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2,int c1,int c2)
 {
-  texture_reset();
   glBegin(GL_LINES);
     glColor4ub(__GETR(c1),__GETG(c1),__GETB(c1),enigma::currentcolor[3]);
       glVertex2f(x1,y1);
@@ -139,7 +134,6 @@ void draw_line_color(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2,int c
 
 void draw_line_width_color(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, gs_scalar width,int c1,int c2)
 {
-  texture_reset();
   glPushAttrib(GL_LINE_BIT);
     glLineWidth(width);
     glBegin(GL_LINES);
@@ -154,7 +148,6 @@ void draw_line_width_color(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2
 
 void draw_rectangle(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2,bool outline)
 {
-  texture_reset();
   if(outline)
   {
     glBegin(GL_LINE_LOOP);
@@ -169,7 +162,6 @@ void draw_rectangle(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2,bool o
 
 void draw_rectangle_angle(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2,float angle,bool outline)
 {
-  texture_reset();
   angle *= M_PI/180;
 
   float
@@ -199,7 +191,6 @@ void draw_rectangle_angle(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2,
 
 void draw_rectangle_color(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2,int c1,int c2,int c3,int c4,bool outline)
 {
-    texture_reset();
     glBegin(outline?GL_LINE_LOOP:GL_QUADS);
       glColor4ub(__GETR(c1),__GETG(c1),__GETB(c1),enigma::currentcolor[3]);
         glVertex2f(x1,y1);
@@ -248,7 +239,6 @@ void draw_circle(gs_scalar x, gs_scalar y, float rad, bool outline)
 
 void draw_circle_color(gs_scalar x, gs_scalar y, float rad,int c1, int c2,bool outline)
 {
-  texture_reset();
     if(outline)
       glBegin(GL_LINE_STRIP);
     else
@@ -270,7 +260,6 @@ void draw_circle_color(gs_scalar x, gs_scalar y, float rad,int c1, int c2,bool o
 
 void draw_circle_perfect(gs_scalar x, gs_scalar y, float rad,bool outline)
 {
-    texture_reset();
     const gs_scalar r2 = rad*rad, r12 = rad*M_SQRT1_2;
     glBegin(outline?GL_POINTS:GL_LINES);
     for(gs_scalar xc=0, yc=rad; xc <= r12; xc++)
@@ -290,7 +279,6 @@ void draw_circle_perfect(gs_scalar x, gs_scalar y, float rad,bool outline)
 
 void draw_circle_color_perfect(gs_scalar x, gs_scalar y, float rad, int c1, int c2, bool outline)
 {
-    texture_reset();
     gs_scalar r2=rad*rad;
     if(outline)
     {
@@ -331,7 +319,6 @@ void draw_circle_color_perfect(gs_scalar x, gs_scalar y, float rad, int c1, int 
 
 void draw_ellipse(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2,bool outline)
 {
-  texture_reset();
   gs_scalar
       x=(x1+x2)/2,y=(y1+y2)/2,
       hr=fabs(x2-x),vr=fabs(y2-y),
@@ -367,7 +354,6 @@ void draw_ellipse(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2,bool ou
 
 void draw_ellipse_color(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2,int c1, int c2,bool outline)
 {
-  texture_reset();
     float
         x=(x1+x2)/2,y=(y1+y2)/2,
         hr=fabs(x2-x),vr=fabs(y2-y),
@@ -394,7 +380,6 @@ void draw_ellipse_color(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2,in
 
 void draw_ellipse_perfect(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2,bool outline)
 {
-  texture_reset();
   float
     x=(x1+x2)/2,y=(y1+y2)/2,
     hr=fabs(x2-x),vr=fabs(y2-y);
@@ -412,7 +397,6 @@ void draw_ellipse_perfect(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2,
 
 void draw_triangle(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2,gs_scalar x3, gs_scalar y3,bool outline)
 {
-  texture_reset();
   glBegin(outline?GL_LINE_LOOP:GL_TRIANGLES);
     glVertex2f(x1,y1);
     glVertex2f(x2,y2);
@@ -422,7 +406,6 @@ void draw_triangle(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2,gs_scal
 
 void draw_triangle_color(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2,gs_scalar x3, gs_scalar y3,int col1,int col2,int col3,bool outline)
 {
-  texture_reset();
   glBegin(outline?GL_LINE_LOOP:GL_TRIANGLES);
     glColor4ub(__GETR(col1),__GETG(col1),__GETB(col1),enigma::currentcolor[3]);
       glVertex2f(x1,y1);
@@ -434,9 +417,9 @@ void draw_triangle_color(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2,g
   glColor4ubv(enigma::currentcolor);
 }
 
+//TODO: Needs rewritten to use circle precision for the corners
 void draw_roundrect(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, float rad, bool outline)
 {
-  texture_reset();
   if(x1>x2) {
     gs_scalar t=x2;
     x2=x1;
@@ -495,9 +478,9 @@ void draw_roundrect(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, float
   }
 }
 
+//TODO: Needs rewritten to use circle precision for the corners
 void draw_roundrect_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, float rad, int col1, int col2, bool outline)
 {
-  texture_reset();
   if(x1>x2) {
     gs_scalar t=x2;
     x2=x1;
@@ -574,7 +557,6 @@ void draw_roundrect_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2
 
 void draw_arrow(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar arrow_size, gs_scalar line_size, bool outline)
 {
-  texture_reset();
   double dir = atan2(y2-y1,x2-x1);
   gs_scalar tc = cos(dir), ts = sin(dir),
   xs = x2-tc*arrow_size, ys = y2-ts*arrow_size,
@@ -597,7 +579,6 @@ void draw_arrow(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scala
 
 void draw_button(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar border_width, bool up)
 {
-  texture_reset();
   if(x1>x2) {
     x2=x1;
     x1=x2;
@@ -664,11 +645,11 @@ void draw_healthbar(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2,float 
 	  }
   }
 
-  switch(dir) {
-  case 1:x1=x2-(x2-x1)*amount;
-  break;case 2:y2=y1+(y2-y1)*amount;
-  break;case 3:y1=y2-(y2-y1)*amount;
-  default:x2=x1+(x2-x1)*amount;
+  switch (dir) {
+	  case 1:x1=x2-(x2-x1)*amount;break;
+	  case 2:y2=y1+(y2-y1)*amount;break;
+	  case 3:y1=y2-(y2-y1)*amount;break;
+	  default:x2=x1+(x2-x1)*amount;
   }
 
   const int
@@ -721,6 +702,38 @@ int draw_getpixel(int x,int y)
     unsigned char rgb[3];
     glReadPixels(x,y,1,1,GL_RGB,GL_UNSIGNED_BYTE,&rgb);
     return rgb[0] | rgb[1] << 8 | rgb[2] << 16;
+  #endif
+}
+
+int draw_getpixel_ext(int x,int y)
+{
+    if (view_enabled)
+    {
+        x = x - enigma_user::view_xview[enigma_user::view_current];
+        y = enigma_user::view_hview[enigma_user::view_current] - (y - enigma_user::view_yview[enigma_user::view_current]) - 1;
+        if (x < 0) x = 0;
+        if (y < 0) y = 0;
+        if (x > enigma_user::view_wview[enigma_user::view_current] || y > enigma_user::view_hview[enigma_user::view_current]) return 0;
+    }
+    else
+    {
+        y = enigma_user::room_height - y - 1;
+        if (x < 0) x = 0;
+        if (y < 0) y = 0;
+        if (x > enigma_user::room_width || y > enigma_user::room_height) return 0;
+    }
+  #if defined __BIG_ENDIAN__ || defined __BIG_ENDIAN
+    int ret;
+    glReadPixels(x,y,1,1,GL_RGBA,GL_UNSIGNED_BYTE,&ret);
+    return ret;
+  #elif defined __LITTLE_ENDIAN__ || defined __LITTLE_ENDIAN
+    int ret;
+    glReadPixels(x,y,1,1,GL_BGRA,GL_UNSIGNED_BYTE,&ret);
+    return ret>>8;
+  #else
+    unsigned char rgba[4];
+    glReadPixels(x,y,1,1,GL_RGBA,GL_UNSIGNED_BYTE,&rgba);
+    return rgba[0] | rgba[1] << 8 | rgba[2] << 16 | rgba[3] << 24;
   #endif
 }
 

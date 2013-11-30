@@ -15,8 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef DIRECTX9DEVICEMANAGER
-#define DIRECTX9DEVICEMANAGER
+#ifndef DIRECTX9CONTEXTMANAGER
+#define DIRECTX9CONTEXTMANAGER
 
 #include <windows.h>
 #include <windowsx.h>
@@ -32,12 +32,18 @@ using namespace enigma_user;
 using std::vector;
 using std::map;
 
-extern LPDIRECT3D9 d3dobj;    // the pointer to our Direct3D interface
-extern LPD3DXSPRITE dsprite; // sprite batching object used to render sprites, backgrounds, and fonts
+#include "Widget_Systems/widgets_mandatory.h"
+#include <sstream>
+#include <string.h>
+using std::string;
+using std::stringstream;
 
-class DeviceManager {
+extern LPDIRECT3D9 d3dobj;    // the pointer to our Direct3D interface
+
+//TODO: Replace the fixed function pipeline with shaders
+
+class ContextManager {
 private:
-LPDIRECT3DTEXTURE9 bound_texture;
 
 //Keep track of current shaders.
 LPDIRECT3DPIXELSHADER9	pixelShader;
@@ -47,44 +53,66 @@ LPDIRECT3DVERTEXSHADER9	vertexShader;
 LPDIRECT3DSURFACE9 pBackBuffer;
 LPDIRECT3DSURFACE9 pRenderTarget;
 
+float last_depth;
+int last_stride;
+bool hasdrawn;
 int shapes_d3d_model;
 int shapes_d3d_texture;
 
 bool renderingScene;
 
 protected:
-  typedef map<D3DTEXTURESTAGESTATETYPE, DWORD> textureStateStageCache;
-  typedef map<D3DSAMPLERSTATETYPE, DWORD> SamplerStateCache;
-   map<D3DRENDERSTATETYPE, DWORD> cacheRenderStates;    /// cached RenderStates
-   vector<textureStateStageCache> vecCacheTextureStates;       /// cached TextureStage States
-   vector<SamplerStateCache> vecCacheSamplerStates;            /// cached SamplerStage States
-   map<DWORD, D3DLIGHT9> cacheLightStates; /// cached Light States
-   map<DWORD, BOOL> cacheLightEnable; /// cached Light States
+   map< D3DRENDERSTATETYPE, DWORD > cacheRenderStates;                  /// cached RenderStates
+   map< DWORD, LPDIRECT3DTEXTURE9 > cacheTextureStates;                 /// cached Texture States
+   map< DWORD, map< D3DSAMPLERSTATETYPE, DWORD > > cacheSamplerStates;  /// cached Sampler States
+   map< DWORD, D3DLIGHT9 > cacheLightStates;                            /// cached Light States
+   map< DWORD, BOOL > cacheLightEnable;                                 /// cached Light States
   
 public:
 LPDIRECT3DDEVICE9 device;    // the pointer to the device class
 
-DeviceManager() {
+ContextManager() {
+	hasdrawn = false;
 	shapes_d3d_model = -1;
 	shapes_d3d_texture = -1;
-	bound_texture = NULL;
+	last_stride = -1;
 	vertexShader = NULL;
 	pixelShader = NULL;
+	last_depth = 0.0f;
 }
 
-~DeviceManager() {
+~ContextManager() {
 
 }
 
-// Event fired whenever a projection change occurs
-void ProjectionChanged() {
+float GetDepth() {
+	return last_depth;
+}
+
+//TODO: Write this method so that for debugging purposes we can dump the entire render state to a text file.
+void DumpState() {
+
+}
+
+//TODO: Write this method so that we can serialize and save the entire render state to be reloaded
+void SaveState() {
+
+}
+
+//TODO: Write this method so that we can read and restore a previously saved render state
+void LoadState() {
 
 }
 
 // Reapply the render states and other stuff to the device.
 void RestoreState() {
-
-	device->SetTexture(0, bound_texture);
+	// Cached Texture Stage States
+	map< DWORD, LPDIRECT3DTEXTURE9 >::iterator tit = cacheTextureStates.begin();
+    while (tit != cacheTextureStates.end()) {
+		device->SetTexture(tit->first, tit->second);
+		tit++;
+	}
+	
 	device->SetVertexShader(vertexShader);
 	device->SetPixelShader(pixelShader);
 	
@@ -96,34 +124,31 @@ void RestoreState() {
 	}
 	
 	// Cached Sampler States
-	vector<SamplerStateCache>::iterator samplerCache = vecCacheSamplerStates.begin();
-	unsigned i = 0;
-	while (samplerCache != vecCacheSamplerStates.end()) {
-		map< D3DSAMPLERSTATETYPE, DWORD >::iterator cit = (*samplerCache).begin();
-		while (cit != (*samplerCache).end()) {
-			device->SetSamplerState((DWORD)i, cit->first, cit->second);
-			cit++;
+	map< DWORD, map< D3DSAMPLERSTATETYPE, DWORD > >::iterator sit = cacheSamplerStates.begin();
+    while (sit != cacheSamplerStates.end()) {
+		map< D3DSAMPLERSTATETYPE, DWORD >::iterator secit = sit->second.begin();
+		while (secit != sit->second.end()) {
+			device->SetSamplerState(sit->first, secit->first, secit->second);
+			secit++;
 		}
-		samplerCache++; i++;
+		sit++;
 	}
-	
+
 	// Cached Lights
-	map< DWORD, D3DLIGHT9 >::iterator lit = cacheLightStates.begin();
-    while (lit != cacheLightStates.end()) {
-		device->SetLight(lit->first, &lit->second);
-		lit++;
-	}
 	map< DWORD, BOOL >::iterator lite = cacheLightEnable.begin();
     while (lite != cacheLightEnable.end()) {
 		device->LightEnable(lite->first, lite->second);
 		lite++;
 	}
+	return;
+	map< DWORD, D3DLIGHT9 >::iterator lit = cacheLightStates.begin();
+    while (lit != cacheLightStates.end()) {
+		device->SetLight(lit->first, &lit->second);
+		lit++;
+	}
 }
 
-void BeginSpriteBatch() {
-	dsprite->Begin(D3DXSPRITE_ALPHABLEND | D3DXSPRITE_DO_NOT_ADDREF_TEXTURE);
-}
-
+/*
 void EndSpriteBatch() {
 	// Textures should be clamped when rendering 2D sprites and stuff, so memorize it.
 	DWORD wrapu, wrapv, wrapw;
@@ -149,30 +174,37 @@ void EndSpriteBatch() {
 	// reset the culling
 	device->SetRenderState(D3DRS_CULLMODE, cullmode);
 }
+*/
 
 int GetShapesModel() {
 	return shapes_d3d_model;
 }
 
 void BeginShapesBatching(int texId) {
-					
 	if (shapes_d3d_model == -1) {
-		shapes_d3d_model = d3d_model_create();
+		shapes_d3d_model = d3d_model_create(true);
+		last_stride = -1;
+	} else if (texId != shapes_d3d_texture || (d3d_model_get_stride(shapes_d3d_model) != last_stride && last_stride != -1)) {
+		last_stride = -1;
+		if (!hasdrawn) {
+			d3d_model_draw(shapes_d3d_model, shapes_d3d_texture);
+			d3d_model_clear(shapes_d3d_model);
+		}
+	} else {
+		last_stride = d3d_model_get_stride(shapes_d3d_model);
 	}
-	if (texId != shapes_d3d_texture && shapes_d3d_texture != -1) {
-		d3d_model_draw(shapes_d3d_model, shapes_d3d_texture);
-		d3d_model_destroy(shapes_d3d_model);
-		shapes_d3d_model = d3d_model_create();
-	}
+	hasdrawn = false;
 	shapes_d3d_texture = texId;
 }
 
 void EndShapesBatching() {
-	if (shapes_d3d_model == -1) { return; }
+	last_depth -= 1;
+	if (hasdrawn || shapes_d3d_model == -1) { return; }
+	hasdrawn = true;
 	d3d_model_draw(shapes_d3d_model, shapes_d3d_texture);
-	d3d_model_destroy(shapes_d3d_model);
+	d3d_model_clear(shapes_d3d_model);
 	shapes_d3d_texture = -1;
-	shapes_d3d_model = -1;
+	last_stride = -1;
 }
 
 void Clear(DWORD Count, const D3DRECT *pRects, DWORD Flags, D3DCOLOR Color, float Z, DWORD Stencil) {
@@ -198,14 +230,13 @@ void LightEnable(DWORD Index, BOOL bEnable) {
 }
 
 void BeginScene() {
+	last_depth = 0;
 	device->BeginScene();
-	BeginSpriteBatch();
 	// Reapply the stored render states and what not
 	RestoreState();
 }
 
 void EndScene() {
-	EndSpriteBatch();
 	EndShapesBatching();
 	device->EndScene();
 }
@@ -323,6 +354,8 @@ void SetViewport(const D3DVIEWPORT9 *pViewport) {
 }
 
 void SetLight(DWORD Index, const D3DLIGHT9 *pLight) {
+device->SetLight( Index, pLight );
+	return;
 	// Update the light state cache
     // If the return value is 'true', the command must be forwarded to the D3D Runtime.
 	map< DWORD, D3DLIGHT9 >::iterator it = cacheLightStates.find( Index );
@@ -365,51 +398,62 @@ void SetRenderTarget(DWORD RenderTargetIndex, IDirect3DSurface9 *pTarget) {
 	device->GetRenderTarget(0, &pBackBuffer);
 	if (pBackBuffer == pTarget) { return; }
 	EndShapesBatching();
-	EndSpriteBatch();
 	device->SetRenderTarget(RenderTargetIndex, pTarget);
 	pRenderTarget = pTarget;
-	BeginSpriteBatch();
 }
 
 void ResetRenderTarget() {
 	device->GetRenderTarget(0, &pBackBuffer);
 	if (pBackBuffer == pRenderTarget) { return; }
 	EndShapesBatching();
-	EndSpriteBatch();
 	device->SetRenderTarget(0, pBackBuffer);
-	BeginSpriteBatch();
 }
 
 void SetSamplerState(DWORD Sampler, D3DSAMPLERSTATETYPE Type, DWORD Value) {
-	// Update the sampler state cache
+	// Update the render state cache
     // If the return value is 'true', the command must be forwarded to the D3D Runtime.
-	vector<SamplerStateCache>::iterator samplerCache = vecCacheSamplerStates.begin() + Sampler;
-	if (samplerCache == vecCacheSamplerStates.end()) { 
-		vecCacheSamplerStates.push_back(SamplerStateCache()); 
-		samplerCache = vecCacheSamplerStates.begin() + Sampler; 
-	}
-
-	map< D3DSAMPLERSTATETYPE, DWORD >::iterator it = (*samplerCache).find( Type );
-
-    if( (*samplerCache).end() == it)
-    {
-        (*samplerCache).insert( map< D3DSAMPLERSTATETYPE, DWORD >::value_type(Type, Value) );
-		EndShapesBatching();
+	typedef map<D3DSAMPLERSTATETYPE, DWORD> innerType;
+	map< DWORD, map< D3DSAMPLERSTATETYPE, DWORD >  >::iterator it = cacheSamplerStates.find( Sampler );
+    if ( it == cacheSamplerStates.end() ) {
+		map<DWORD, innerType> outer;
+		innerType inner;
+		inner.insert(pair<D3DSAMPLERSTATETYPE, DWORD>(Type, Value));
+        cacheSamplerStates.insert( pair<DWORD, innerType>(Sampler, inner) );
+		//EndShapesBatching();
         device->SetSamplerState( Sampler, Type, Value );
-		return;
     }
-    if( it->second == Value )
-        return;
-    it->second = Value;
-	EndShapesBatching();
-    device->SetSamplerState( Sampler, Type, Value );
+	map< D3DSAMPLERSTATETYPE, DWORD >::iterator sit = it->second.find( Type );
+    if ( sit != it->second.end() ) {
+		if (sit->second == Value) {
+			return;
+		}
+		sit->second = Value;
+		//EndShapesBatching();
+		device->SetSamplerState( Sampler, Type, Value );
+	} else {
+		it->second.insert(map< D3DSAMPLERSTATETYPE, DWORD >::value_type(Type, Value));
+		device->SetSamplerState( Sampler, Type, Value );
+	}
 }
 
 void SetTexture(DWORD Sampler, LPDIRECT3DTEXTURE9 pTexture) {
-	if (bound_texture != pTexture) {
+	// Update the render state cache
+    // If the return value is 'true', the command must be forwarded to the D3D Runtime.
+	map< DWORD, LPDIRECT3DTEXTURE9 >::iterator it = cacheTextureStates.find( Sampler );
+    if ( cacheTextureStates.end() == it ) {
+        cacheTextureStates.insert( map< DWORD, LPDIRECT3DTEXTURE9 >::value_type(Sampler, pTexture) );
 		//EndShapesBatching();
-		device->SetTexture(Sampler, bound_texture = pTexture);
-	}
+        device->SetTexture( Sampler, pTexture );
+    }
+    if( it->second == pTexture )
+        return;
+    it->second = pTexture;
+	//EndShapesBatching();
+    device->SetTexture( Sampler, pTexture );
+}
+
+void SetTextureStageState(DWORD Sampler, D3DTEXTURESTAGESTATETYPE Type, DWORD Value) {
+	device->SetTextureStageState(Sampler, Type, Value);
 }
 
 void SetStreamSource(UINT StreamNumber, IDirect3DVertexBuffer9 *pStreamData, UINT OffsetInBytes, UINT Stride) {
@@ -452,6 +496,6 @@ void SetPixelShaderConstantF(UINT StartRegister, const float *pConstantData, UIN
 
 };
 
-extern DeviceManager* d3ddev; // point to our device manager
+extern ContextManager* d3dmgr; // point to our device manager
 
 #endif
