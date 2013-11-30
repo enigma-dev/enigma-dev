@@ -24,7 +24,7 @@
 
 namespace enigma_user {
 
-  unsigned d3d_model_create(bool dynamic = false, bool depth = false);
+  unsigned d3d_model_create(bool dynamic = false);
   void d3d_model_destroy(int id);
   bool d3d_model_exists(int id);
   void d3d_model_clear(int id);
