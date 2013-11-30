@@ -189,7 +189,6 @@ void draw_background_general(int back, gs_scalar left, gs_scalar top, gs_scalar 
 	ulcx += h * cos(3*M_PI/2 + rot);
 	ulcy -= h * sin(3*M_PI/2 + rot);
 
-	
 	draw_vertex_texture_color(ulcx, ulcy, left/tbw, (top+height)/tbh,c3,alpha);
 	draw_vertex_texture_color((ulcx + wcosrot), (ulcy - wsinrot), (left+width)/tbw,(top+height)/tbh,c4,alpha);
     draw_primitive_end();
