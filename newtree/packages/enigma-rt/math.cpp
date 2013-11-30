@@ -64,9 +64,9 @@ namespace ert {
     return 0;
   }
 
-  variant_t choose(const varargs_t&) {
-    // TODO
-    return 0;
+  variant_t choose(const varargs<variant_t>& var) {
+    unsigned n = std::fmod(std::rand(), var.argc);
+    return var.argv[n];
   }
 
   real_t random(real_t ub) {
@@ -78,11 +78,11 @@ namespace ert {
   }
 
   real_t irandom(real_t ub) {
-    return std::fmod(std::rand(), ub) + 1;
+    return std::floor(std::fmod(std::rand(), ub)) + 1;
   }
 
   real_t irandom_range(real_t lb, real_t ub) {
-    return lb + std::fmod(std::rand(), ub - lb) + 1;
+    return lb + std::floor(std::fmod(std::rand(), ub - lb)) + 1;
   }
 
   static real_t rand_seed = 0;
@@ -171,23 +171,29 @@ namespace ert {
     return std::ceil(x);
   }
 
-  variant_t max(const varargs_t& var) {
+  variant_t max(const varargs<variant_t>& var) {
     return *std::max_element(&var.argv[0], &var.argv[var.argc]);
   }
 
-  variant_t min(const varargs_t& var) {
+  variant_t min(const varargs<variant_t>& var) {
     return *std::min_element(&var.argv[0], &var.argv[var.argc]);
   }
 
-  variant_t mean(const varargs_t& var) {
+  real_t mean(const varargs<real_t>& var) {
     double sum = std::accumulate(&var.argv[0], &var.argv[var.argc], 0, std::plus<double>());
     return sum / var.argc;
   }
 
-  variant_t median(const varargs_t& var) {
-    variant_t tmp[varargs_t::max_count];
-    std::partial_sort_copy(&var.argv[0], &var.argv[var.argc], &tmp[0], &tmp[var.argc]);
-    return tmp[var.argc / 2];
+  real_t median(const varargs<real_t>& var) {
+    real_t tmp[MAX_VARGS];
+    const unsigned x = var.argc / 2;
+    if (x & 1) {
+      std::partial_sort_copy(&var.argv[0], &var.argv[var.argc], &tmp[0], &tmp[x]);
+      return tmp[x];
+    }
+    const unsigned y = x + 1;
+    std::partial_sort_copy(&var.argv[0], &var.argv[var.argc], &tmp[0], &tmp[y]);
+    return (tmp[x] + tmp[y]) / 2;
   }
   
   real_t is_real(const variant_t& var) {
