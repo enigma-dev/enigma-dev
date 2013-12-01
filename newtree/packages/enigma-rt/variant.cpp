@@ -26,28 +26,18 @@ namespace ert {
   static void assert_init(const variant_t& var) {
     if (var.type != variant::vt_uninit) {
       // TODO: error
-      throw;
     }
   }
 
   static void assert_real(const variant_t& var) {
     if (var.type != variant::vt_real) {
       // TODO: error
-      throw;
     }
   }
 
   static void assert_string(const variant_t& var) {
     if (var.type != variant::vt_string) {
       // TODO: error
-      throw;
-    }
-  }
-
-  static void assert_similar(const variant_t& fst, const variant_t& snd) {
-    if (fst.type != snd.type) {
-      // TODO: error
-      throw;
     }
   }
 
@@ -81,5 +71,10 @@ namespace ert {
     this->real = rhs.real;
     this->string = rhs.string;
     return *this;
+  }
+
+  // TODO
+  bool operator <(const variant&, const variant&) {
+    return true;
   }
 }
