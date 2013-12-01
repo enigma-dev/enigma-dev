@@ -177,6 +177,9 @@ class Mesh
 	
     currentPrimitive = 0;
 	
+	triangleIndexedVertices.reserve(64000);
+	pointIndexedVertices.reserve(64000);
+	lineIndexedVertices.reserve(64000);
 	pointVertices.reserve(64000);
 	pointIndices.reserve(64000);
 	lineVertices.reserve(64000);
@@ -206,6 +209,9 @@ class Mesh
   void Clear() {
     ClearData();
 	
+	triangleIndexedVertices.reserve(64000);
+	pointIndexedVertices.reserve(64000);
+	lineIndexedVertices.reserve(64000);
 	pointVertices.reserve(64000);
 	pointIndices.reserve(64000);
 	lineVertices.reserve(64000);
