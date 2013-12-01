@@ -15,6 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "../General/OpenGLHeaders.h"
 #include <vector>
 #include <map>
 using std::vector;
