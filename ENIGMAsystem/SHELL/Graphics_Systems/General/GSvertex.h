@@ -21,6 +21,29 @@
 #include "Universal_System/scalar.h"
 
 namespace enigma_user {
+	enum {
+		vertex_usage_position,
+		vertex_usage_colour,
+		vertex_usage_normal,
+		vertex_usage_textcoord,
+		vertex_usage_blendweight,
+		vertex_usage_blendindices,
+		vertex_usage_depth,
+		vertex_usage_tangent,
+		vertex_usage_binormal,
+		vertex_usage_fog,
+		vertex_usage_sample
+	};
+	
+	enum {
+		vertex_type_float1,
+		vertex_type_float2,
+		vertex_type_float3,
+		vertex_type_float4,
+		vertex_type_colour,
+		vertex_type_ubyte4
+	};
+
     int vertex_create_buffer();
     int vertex_create_buffer_ext(unsigned size);
     void vertex_delete_buffer(int buffer);
@@ -49,7 +72,7 @@ namespace enigma_user {
     void vertex_format_add_position_3d();
     void vertex_format_add_textcoord();
     void vertex_format_add_normal();
-    void vertex_format_add_custom();
+    void vertex_format_add_custom(int type, int usage);
     int vertex_format_end();
 }
 

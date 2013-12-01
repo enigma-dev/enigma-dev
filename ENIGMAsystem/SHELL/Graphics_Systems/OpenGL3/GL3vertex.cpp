@@ -15,4 +15,24 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include <vector>
+#include <map>
+using std::vector;
+using std::map;
+
 #include "../General/GSvertex.h"
+
+struct VertexFormat {
+	map<int,int> flags;
+};
+
+struct VertexBuffer {
+
+};
+
+vector<VertexFormat*> vertexFormats;
+vector<VertexBuffer*> vertexBuffers;
+
+namespace enigma_user {
+
+}
