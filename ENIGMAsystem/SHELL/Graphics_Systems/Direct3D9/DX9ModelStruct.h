@@ -181,6 +181,9 @@ class Mesh
 
   Mesh (bool dynamic)
   {
+	triangleIndexedVertices.reserve(64000);
+	pointIndexedVertices.reserve(64000);
+	lineIndexedVertices.reserve(64000);
 	pointVertices.reserve(64000);
 	pointIndices.reserve(64000);
 	lineVertices.reserve(64000);
@@ -251,6 +254,9 @@ class Mesh
   {
     ClearData();
 	
+	triangleIndexedVertices.reserve(64000);
+	pointIndexedVertices.reserve(64000);
+	lineIndexedVertices.reserve(64000);
 	pointVertices.reserve(64000);
 	pointIndices.reserve(64000);
 	lineVertices.reserve(64000);
