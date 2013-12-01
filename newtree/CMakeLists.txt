@@ -17,7 +17,7 @@ set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/bin)
 # Increase warning levels
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic -Werror")
 
-# Optimizations
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -flto -fno-rtti -fno-exceptions")
+# Link time optimizations
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -flto")
 
 add_subdirectory (packages)
