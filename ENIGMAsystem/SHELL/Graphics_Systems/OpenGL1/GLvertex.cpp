@@ -58,23 +58,23 @@ void vertex_format_begin() {
 }
 
 void vertex_format_add_colour() {
-	vertex_format_add_custom(vertex_type_colour, vertex_usage_colour);
+	enigma::vertexFormat->AddAttribute(vertex_type_colour, vertex_usage_colour);
 }
 
 void vertex_format_add_position() {
-	vertex_format_add_custom(vertex_type_float3, vertex_usage_position);
+	enigma::vertexFormat->AddAttribute(vertex_type_float2, vertex_usage_position);
 }
 
 void vertex_format_add_position_3d() {
-	vertex_format_add_custom(vertex_type_float2, vertex_usage_position);
+	enigma::vertexFormat->AddAttribute(vertex_type_float3, vertex_usage_position);
 } 
 
 void vertex_format_add_textcoord() {
-	vertex_format_add_custom(vertex_type_float2, vertex_usage_textcoord);
+	enigma::vertexFormat->AddAttribute(vertex_type_float2, vertex_usage_textcoord);
 }
 
 void vertex_format_add_normal() {
-	vertex_format_add_custom(vertex_type_float3, vertex_usage_normal);
+	enigma::vertexFormat->AddAttribute(vertex_type_float3, vertex_usage_normal);
 }
 
 void vertex_format_add_custom(int type, int usage) {
