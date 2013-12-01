@@ -22,26 +22,26 @@
 
 namespace enigma_user {
 	enum {
-		vertex_type_float1,
-		vertex_type_float2,
-		vertex_type_float3,
-		vertex_type_float4,
-		vertex_type_colour,
-		vertex_type_ubyte4
+		vertex_type_float1,   // D3DDECLTYPE_FLOAT1
+		vertex_type_float2,   // D3DDECLTYPE_FLOAT2
+		vertex_type_float3,   // D3DDECLTYPE_FLOAT3
+		vertex_type_float4,   // D3DDECLTYPE_FLOAT4
+		vertex_type_colour,   // D3DDECLTYPE_D3DCOLOR
+		vertex_type_ubyte4    // D3DDECLTYPE_UBYTE4
 	};
 	
 	enum {
-		vertex_usage_position,
-		vertex_usage_colour,
-		vertex_usage_normal,
-		vertex_usage_textcoord,
-		vertex_usage_blendweight,
-		vertex_usage_blendindices,
-		vertex_usage_depth,
-		vertex_usage_tangent,
-		vertex_usage_binormal,
-		vertex_usage_fog,
-		vertex_usage_sample
+		vertex_usage_position,              // D3DDECLUSAGE_POSITION
+		vertex_usage_colour,                // D3DDECLUSAGE_COLOR
+		vertex_usage_normal,                // D3DDECLUSAGE_NORMAL
+		vertex_usage_textcoord,             // D3DDECLUSAGE_TEXCOORD
+		vertex_usage_blendweight,           // D3DDECLUSAGE_BLENDWEIGHT
+		vertex_usage_blendindices,          // D3DDECLUSAGE_BLENDINDICES
+		vertex_usage_depth,                 // D3DDECLUSAGE_DEPTH 
+		vertex_usage_tangent,               // D3DDECLUSAGE_TANGENT
+		vertex_usage_binormal,              // D3DDECLUSAGE_BINORMAL
+		vertex_usage_fog,                   // D3DDECLUSAGE_FOG
+		vertex_usage_sample                 // D3DDECLUSAGE_SAMPLE
 	};
 
     int vertex_create_buffer();
