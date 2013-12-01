@@ -21,17 +21,19 @@
 #include "ert/real.hpp"
 #include "ert/math.hpp"
 
+#include <cmath>
+
 namespace ert {
   real_t point_direction(real_t x1, real_t y1, real_t x2, real_t y2) {
-    return radtodeg(arctan2(y2 - y1, x2 - x1)) + 360 * (y2 > y1);
+    return 180 / pi * std::atan2(y2 - y1, x2 - x1) + 360 * (y2 > y1);
   }
 
   real_t point_distance(real_t x1, real_t y1, real_t x2, real_t y2) {
-    return sqrt(sqr(x2 - x1) + sqr(y2 - y1));
+    return std::sqrt(std::pow(x2 - x1, 2) + std::pow(y2 - y1, 2));
   }
 
   real_t point_distance_3d(real_t x1, real_t y1, real_t z1, real_t x2, real_t y2, real_t z2) {
-    return sqrt(sqr(x2 - x1) + sqr(y2 - y1) + sqr(z2 - z1));
+    return std::sqrt(std::pow(x2 - x1, 2) + std::pow(y2 - y1, 2) + std::pow(z2 - z1, 2));
   }
 
   real_t dot_product(real_t x1, real_t y1, real_t x2, real_t y2) {
