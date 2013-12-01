@@ -22,8 +22,22 @@ using std::map;
 
 #include "../General/GSvertex.h"
 
+namespace enigma {
+
 struct VertexFormat {
 	map<int,int> flags;
+	
+	VertexFormat() {
+	
+	}
+	
+	~VertexFormat() {
+	
+	}
+	
+	void AddAttribute(int type, int usage) {
+		flags.insert(map<int,int>::value_type(type, usage));
+	}
 };
 
 struct VertexBuffer {
@@ -32,7 +46,44 @@ struct VertexBuffer {
 
 vector<VertexFormat*> vertexFormats;
 vector<VertexBuffer*> vertexBuffers;
+	
+VertexFormat* vertexFormat = 0;
+
+}
 
 namespace enigma_user {
+
+void vertex_format_begin() {
+	enigma::vertexFormat = new enigma::VertexFormat();
+}
+
+void vertex_format_add_colour() {
+	vertex_format_add_custom(vertex_type_colour, vertex_usage_colour);
+}
+
+void vertex_format_add_position() {
+	vertex_format_add_custom(vertex_type_float3, vertex_usage_position);
+}
+
+void vertex_format_add_position_3d() {
+	vertex_format_add_custom(vertex_type_float2, vertex_usage_position);
+} 
+
+void vertex_format_add_textcoord() {
+	vertex_format_add_custom(vertex_type_float2, vertex_usage_textcoord);
+}
+
+void vertex_format_add_normal() {
+	vertex_format_add_custom(vertex_type_float3, vertex_usage_normal);
+}
+
+void vertex_format_add_custom(int type, int usage) {
+	enigma::vertexFormat->AddAttribute(type, usage);
+}
+
+int vertex_format_end() {
+	enigma::vertexFormats.push_back(enigma::vertexFormat);
+	return enigma::vertexFormats.size() - 1;
+}
 
 }
