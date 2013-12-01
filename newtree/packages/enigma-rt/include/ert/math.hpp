@@ -27,7 +27,7 @@
 
 namespace ert {
   real_t math_set_epsilon(real_t);
-  extern real_t pi;
+  extern const real_t pi;
 
   // Random Functions
   variant_t choose(const varargs<variant_t>&);
