@@ -17,7 +17,6 @@
 
 #include <math.h>
 #include "GSprimitives.h"
-#include "Bridges/General/DX9Context.h"
 #include "Graphics_Systems/General/GSstdraw.h"
 #include "Graphics_Systems/General/GScolors.h"
 
