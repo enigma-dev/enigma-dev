@@ -679,17 +679,7 @@ class Mesh
 		for (std::vector<GLuint>::iterator it = lineIndices.begin(); it != lineIndices.end(); ++it) { *it += interleave; }
 		idata.insert(idata.end(), pointIndices.begin(), pointIndices.end());
 	}
-	
-	if (ibogenerated) {
-		glBindBufferARB( GL_ELEMENT_ARRAY_BUFFER, indexBuffer );
-		GLint nBufferSize = 0;
-		glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &nBufferSize);
-		if (nBufferSize < idata.size() * sizeof(GLuint)) {
-			ibogenerated = false;
-			glBindBufferARB( GL_ELEMENT_ARRAY_BUFFER, 0 );
-			glDeleteBuffersARB(1, &indexBuffer);
-		}
-	}
+	//vbodynamic = false;
 	
 	if (idata.size() > 0) {
 		vboindexed = true;
@@ -699,12 +689,11 @@ class Mesh
 		if (!ibogenerated) {
 			glGenBuffersARB( 1, &indexBuffer );
 			ibogenerated = true;
-			glBindBufferARB( GL_ELEMENT_ARRAY_BUFFER, indexBuffer );
-			glBufferDataARB( GL_ELEMENT_ARRAY_BUFFER, idata.size() * sizeof(GLuint), &idata[0], vbodynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW );
-		} else {
-			glBindBufferARB( GL_ELEMENT_ARRAY_BUFFER, indexBuffer );
-			glBufferSubDataARB( GL_ELEMENT_ARRAY_BUFFER, 0, idata.size() * sizeof(GLuint), &idata[0]);
-		}
+		} 
+		glBindBufferARB( GL_ELEMENT_ARRAY_BUFFER, indexBuffer );
+		
+		// BufferData in all cases, BufferSubData is only quicker when updating small regions
+		glBufferDataARB( GL_ELEMENT_ARRAY_BUFFER, idata.size() * sizeof(GLuint), &idata[0], vbodynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW );
 	
 		// Unbind the buffer we do not need anymore
 		glBindBufferARB( GL_ELEMENT_ARRAY_BUFFER, 0 );
@@ -726,30 +715,16 @@ class Mesh
 		vdata.insert(vdata.end(), pointVertices.begin(), pointVertices.end());
 	}
 	
-	// If the vertex buffer was already created, see if its capacity was created big enough for the new vertex data,
-	// if it is not then delete it.
-	if (vbogenerated) {
-		glBindBufferARB( GL_ARRAY_BUFFER, vertexBuffer );
-		GLint nBufferSize = 0;
-		glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &nBufferSize);
-		if (nBufferSize < vdata.size() * sizeof(gs_scalar)) {
-			vbogenerated = false;
-			glBindBufferARB( GL_ARRAY_BUFFER, 0 );
-			glDeleteBuffersARB(1, &vertexBuffer);
-		}
-	}
-	
-	// Check if the vertex buffer exists, if it doesn't, then we need to generate it.
+	// Bind The Index Buffer
 	if (!vbogenerated) {
 		glGenBuffersARB( 1, &vertexBuffer );
 		vbogenerated = true;
-		glBindBufferARB( GL_ARRAY_BUFFER, vertexBuffer );
-		glBufferDataARB( GL_ARRAY_BUFFER, vdata.size() * sizeof(gs_scalar), &vdata[0], vbodynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW );
-	} else {
-		glBindBufferARB( GL_ARRAY_BUFFER, vertexBuffer );
-		glBufferSubDataARB( GL_ARRAY_BUFFER, 0, vdata.size() * sizeof(gs_scalar), &vdata[0]);
-	}
+	} 
+	glBindBufferARB( GL_ARRAY_BUFFER, vertexBuffer );
 
+	// BufferData in all cases, BufferSubData is only quicker when updating small regions
+	glBufferDataARB( GL_ARRAY_BUFFER, vdata.size() * sizeof(gs_scalar), &vdata[0], vbodynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW );
+	
 	// Unbind the buffer we do not need anymore
 	glBindBufferARB( GL_ARRAY_BUFFER, 0 );
 	// Clean up temporary interleaved data
