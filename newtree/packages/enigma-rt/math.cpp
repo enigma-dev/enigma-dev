@@ -50,8 +50,8 @@ namespace ert {
     const unsigned char(&chunks)[N] = reinterpret_cast<unsigned char(&)[N]>(val);
     unsigned hash = hash_const<sizeof(unsigned)>::base;
     for (int i = 0; i < N; i++) {
-        hash ^= chunks[i];
-        hash *= hash_const<sizeof(unsigned)>::prime;
+      hash ^= chunks[i];
+      hash *= hash_const<sizeof(unsigned)>::prime;
     }
     return hash;
   }
