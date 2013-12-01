@@ -22,6 +22,15 @@
 
 namespace enigma_user {
 	enum {
+		vertex_type_float1,
+		vertex_type_float2,
+		vertex_type_float3,
+		vertex_type_float4,
+		vertex_type_colour,
+		vertex_type_ubyte4
+	};
+	
+	enum {
 		vertex_usage_position,
 		vertex_usage_colour,
 		vertex_usage_normal,
@@ -34,37 +43,30 @@ namespace enigma_user {
 		vertex_usage_fog,
 		vertex_usage_sample
 	};
-	
-	enum {
-		vertex_type_float1,
-		vertex_type_float2,
-		vertex_type_float3,
-		vertex_type_float4,
-		vertex_type_colour,
-		vertex_type_ubyte4
-	};
 
     int vertex_create_buffer();
     int vertex_create_buffer_ext(unsigned size);
     void vertex_delete_buffer(int buffer);
 
     void vertex_begin(int buffer, int format);
-    void vertex_colour(int buffer, int color, double alpha);
-    void vertex_normal(int buffer, gs_scalar nx, gs_scalar ny, gs_scalar nz);
+	void vertex_end(int buffer);
+    void vertex_freeze(int buffer);
+	void vertex_submit(int buffer, int primitive);
+    void vertex_submit(int buffer, int primitive, int texture);
+    void vertex_delete(int buffer);
+
+	void vertex_index(int buffer, unsigned id);
     void vertex_position(int buffer, gs_scalar x, gs_scalar y);
     void vertex_position_3d(int buffer, gs_scalar x, gs_scalar y, gs_scalar z);
-    void vertex_argb(int buffer, double alpha, unsigned char r, unsigned char g, unsigned char b);
+	void vertex_normal(int buffer, gs_scalar nx, gs_scalar ny, gs_scalar nz);
     void vertex_texcoord(int buffer, gs_scalar u, gs_scalar v);
+	void vertex_argb(int buffer, double alpha, unsigned char r, unsigned char g, unsigned char b);
+	void vertex_colour(int buffer, int color, double alpha);
     void vertex_float1(int buffer, float f1);
     void vertex_float2(int buffer, float f1, float f2);
     void vertex_float3(int buffer, float f1, float f2, float f3);
     void vertex_float4(int buffer, float f1, float f2, float f3, float f4);
     void vertex_ubyte4(int buffer, unsigned char u1, unsigned char u2, unsigned char u3, unsigned char u4);
-    void vertex_end(int buffer);
-    void vertex_freeze(int buffer);
-	void vertex_submit(int buffer, int primitive);
-    void vertex_submit(int buffer, int primitive, int texture);
-    void vertex_delete(int buffer);
 
     void vertex_format_begin();
     void vertex_format_add_colour();
