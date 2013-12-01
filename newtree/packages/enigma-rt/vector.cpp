@@ -39,4 +39,18 @@ namespace ert {
   real_t dot_product(real_t x1, real_t y1, real_t x2, real_t y2) {
     return x1 * x2 + y1 * y2;
   }
+
+  real_t dot_product_3d(real_t x1, real_t y1, real_t z1, real_t x2, real_t y2, real_t z2) {
+    return x1 * x2 + y1 * y2 + z1 * z2;
+  }
+
+  real_t dot_product_normalised(real_t x1, real_t y1, real_t x2, real_t y2) {
+    return (x1 * x2 + y1 * y2) /
+      std::sqrt(std::pow(x2 - x1, 2) + std::pow(y2 - y1, 2));
+  }
+
+  real_t dot_product_normalised_3d(real_t x1, real_t y1, real_t z1, real_t x2, real_t y2, real_t z2) {
+    return (x1 * x2 + y1 * y2 + z1 * z2) /
+      std::sqrt(std::pow(x2 - x1, 2) + std::pow(y2 - y1, 2) + std::pow(z2 - z1, 2));
+  }
 }
