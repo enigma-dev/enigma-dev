@@ -685,7 +685,7 @@ class Mesh
 	if (triangleIndexedCount > 0) {
 		vdata.insert(vdata.end(), triangleIndexedVertices.begin(), triangleIndexedVertices.end());
 		idata.insert(idata.end(), triangleIndices.begin(), triangleIndices.end());
-		interleave += triangleIndexedCount;
+		interleave += triangleIndexedVertices.size()/GetStride();
 	}
 	
 	lineIndexedCount = lineIndices.size();
@@ -693,7 +693,7 @@ class Mesh
 		vdata.insert(vdata.end(), lineIndexedVertices.begin(), lineIndexedVertices.end());
 		for (std::vector<GLuint>::iterator it = lineIndices.begin(); it != lineIndices.end(); ++it) { *it += interleave; }
 		idata.insert(idata.end(), lineIndices.begin(), lineIndices.end());
-		interleave += lineIndexedCount;
+		interleave += lineIndexedVertices.size()/GetStride();
 	}
 	
 	pointIndexedCount = pointIndices.size();
