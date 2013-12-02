@@ -345,7 +345,7 @@ class Mesh
   
   void Translate(gs_scalar x, gs_scalar y, gs_scalar z)
   {
-	unsigned int stride = vertexStride + (useNormals*3) + (useTextures*2)  + (useColors*1) ;
+	unsigned int stride = GetStride();
 	unsigned int size = triangleVertices.size();
 	for (unsigned int i = 0; i < size; i += stride)
 	{
@@ -357,7 +357,7 @@ class Mesh
      
   void RotateUV(gs_scalar angle)
   {
-	unsigned int stride = vertexStride + (useNormals*3) + (useTextures*2)  + (useColors*1) ;
+	unsigned int stride = GetStride();
 	angle *= 3.14159/180.0;
 	gs_scalar _cos = cos(angle);
 	gs_scalar _sin = sin(angle);
@@ -374,7 +374,7 @@ class Mesh
   /*
   void ScaleUV(gs_scalar xscale, gs_scalar yscale)
   {
-	unsigned int stride = vertexStride + useNormals*3 + useTextures*2 + useColors*1;
+	unsigned int stride = GetStride();
 
 	for (vector<gs_scalar>::iterator i = triangleVertices.begin(); i != triangleVertices.end(); i += stride)
 	{
@@ -386,7 +386,7 @@ class Mesh
    
   void RotateX(gs_scalar angle)
   {
-	unsigned int stride = vertexStride + (useNormals*3) + (useTextures*2)  + (useColors*1) ;
+	unsigned int stride = GetStride();
 	angle *= 3.14159/180.0;
 	gs_scalar _cos = cos(angle);
 	gs_scalar _sin = sin(angle);
@@ -403,7 +403,7 @@ class Mesh
   
   void RotateY(gs_scalar angle)
   {
-	unsigned int stride = vertexStride + (useNormals*3) + (useTextures*2)  + (useColors*1) ;
+	unsigned int stride = GetStride();
 	angle *= 3.14159/180.0;
 	gs_scalar _cos = cos(angle);
 	gs_scalar _sin = sin(angle);
@@ -419,7 +419,7 @@ class Mesh
   
   void RotateZ(gs_scalar angle)
   {
-	unsigned int stride = vertexStride + (useNormals*3) + (useTextures*2)  + (useColors*1) ;
+	unsigned int stride = GetStride();
 	angle *= 3.14159/180.0;
 	gs_scalar _cos = cos(angle);
 	gs_scalar _sin = sin(angle);
@@ -436,7 +436,7 @@ class Mesh
   /*
   void Scale(gs_scalar xscale, gs_scalar yscale, gs_scalar zscale)
   {
-	unsigned int stride = vertexStride + useNormals*3 + useTextures*2 + useColors*1;
+	unsigned int stride = GetStride();
 
 	for (vector<gs_scalar>::iterator i = triangleVertices.begin(); i != triangleVertices.end(); i += stride)
 	{
@@ -450,7 +450,7 @@ class Mesh
   /*
   bool CalculateNormals(bool smooth, bool invert)
   {
-	unsigned int stride = vertexStride + useNormals*3 + useTextures*2 + useColors*1;
+	unsigned int stride = GetStride();
 	
 	int oft = useNormals * 3;
 	int ofc = oft + useTextures * 2 ;
@@ -519,7 +519,7 @@ class Mesh
   /*
   void SmoothNormals()
   {
-	unsigned int stride = vertexStride + useNormals*3 + useTextures*2 + useColors*1;
+	unsigned int stride = GetStride();
 	
 	vector<vector<unsigned int> > groupList;
 	unsigned int n = 0;
