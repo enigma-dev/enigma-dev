@@ -108,6 +108,9 @@ float draw_get_alpha() {
 int make_color_rgb(unsigned char r, unsigned char g, unsigned char b) {
   return r + (g << 8) + (b << 16);
 }
+int make_color_rgba(unsigned char r, unsigned char g, unsigned char b, unsigned char a) {
+  return r + (g << 8) + (b << 16) + (a << 24);
+}
 
 int color_get_red  (int c) { return __GETR(c); }
 int color_get_green(int c) { return __GETG(c); }
