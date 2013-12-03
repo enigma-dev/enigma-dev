@@ -65,7 +65,7 @@ namespace ert {
   }
 
   variant_t choose(const varargs<variant_t>& var) {
-    unsigned n = std::fmod(std::rand(), var.argc);
+    unsigned n = static_cast<unsigned>(std::fmod(std::rand(), var.argc));
     return var.argv[n];
   }
 
@@ -98,7 +98,7 @@ namespace ert {
   }
 
   real_t randomize() {
-    random_set_seed(std::time(NULL));
+    random_set_seed(static_cast<real_t>(std::time(NULL)));
     return 0;
   }
 
