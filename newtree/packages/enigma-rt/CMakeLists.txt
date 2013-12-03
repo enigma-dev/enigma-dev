@@ -1,5 +1,9 @@
 
-project (ENIGMA_RT)
+project (ENIGMA_RT CXX)
+
+if (UNIX)
+    LIST(APPEND CMAKE_CXX_FLAGS "-std=c++11 -flto -Wall -Wextra -pedantic -Werror")
+endif ()
 
 include_directories ("include")
 

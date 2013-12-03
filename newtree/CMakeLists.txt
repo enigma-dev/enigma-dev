@@ -1,5 +1,5 @@
 
-project (ENIGMA)
+project (ENIGMA NONE)
 cmake_minimum_required (VERSION 2.8)
 
 set (ENIGMA_VERSION_MAJOR 1)
@@ -13,11 +13,5 @@ set (PACKAGE_BUGREPORT "https://github.com/enigma-dev/enigma-dev/issues/")
 set (CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/lib)
 set (CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/lib)
 set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/bin)
-
-# Increase warning levels
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -pedantic -Werror")
-
-# Link time optimizations
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -flto")
 
 add_subdirectory (packages)
