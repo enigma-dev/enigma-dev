@@ -7,8 +7,6 @@ endif ()
 
 include_directories ("${ENIGMA_RT_SOURCE_DIR}/include")
 
-set (ENIGMA_RT_OPENGL_SRCS
-    test.cpp
-)
+file (GLOB ENIGMA_RT_OPENGL_SRCS "src/*.cpp")
 
 add_library (enigma-rt-opengl ${ENIGMA_RT_OPENGL_SRCS})
