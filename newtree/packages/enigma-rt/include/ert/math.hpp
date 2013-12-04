@@ -30,8 +30,13 @@
 #include <initializer_list>
 
 namespace ert {
-  real_t math_set_epsilon(real_t);
   extern const real_t pi;
+  
+  namespace internal {
+    extern real_t epsilon;
+  }
+  
+  real_t math_set_epsilon(real_t);
   
   // Random Functions
   real_t random(real_t);
