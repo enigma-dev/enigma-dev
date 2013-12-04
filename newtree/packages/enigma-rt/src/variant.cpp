@@ -22,23 +22,28 @@
 #include "ert/string.hpp"
 #include "ert/variant.hpp"
 
+#include <iostream>
+
 namespace ert {
   namespace {
     void assert_init(const variant_t& var) {
       if (var.type != variant::vt_uninit) {
-        // TODO: error
+        std::cerr << "error: attempted to access uninitialized variable" << std::endl;
+        std::abort();
       }
     }
     
     void assert_real(const variant_t& var) {
       if (var.type != variant::vt_real) {
-        // TODO: error
+        std::cerr << "error: variable is not of type real" << std::endl;
+        std::abort();
       }
     }
     
     void assert_string(const variant_t& var) {
       if (var.type != variant::vt_string) {
-        // TODO: error
+        std::cerr << "error: variable is not of type string" << std::endl;
+        std::abort();
       }
     }
   }
