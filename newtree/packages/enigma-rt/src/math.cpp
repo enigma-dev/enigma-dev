@@ -23,8 +23,6 @@
 #include "ert/math.hpp"
 
 #include <cmath>
-#include <cstdlib>
-#include <ctime>
 #include <algorithm>
 #include <functional>
 #include <numeric>
