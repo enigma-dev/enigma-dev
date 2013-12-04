@@ -28,6 +28,7 @@
 #include <numeric>
 #include <functional>
 #include <initializer_list>
+#include <random>
 
 namespace ert {
   extern const real_t pi;
@@ -37,6 +38,24 @@ namespace ert {
   }
   
   real_t math_set_epsilon(real_t);
+  
+  namespace internal {
+    template <int N>
+    struct arch_random_t {
+      using gen = std::mt19937;
+    };
+  
+    template <>
+    struct arch_random_t<8> {
+      using gen = std::mt19937_64;
+    };
+  
+    using gen_t = arch_random_t<sizeof(void*)>::gen;
+    
+    extern gen_t rand_gen;
+    extern real_t rand_seed;
+    extern std::random_device rand_rd;
+  }
   
   // Random Functions
   real_t random(real_t);
