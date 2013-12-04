@@ -20,7 +20,6 @@
 
 #include "ert/real.hpp"
 #include "ert/variant.hpp"
-#include "ert/varargs.hpp"
 #include "ert/math.hpp"
 
 #include <cmath>
@@ -185,7 +184,7 @@ namespace ert {
   }
 
   real_t median(const std::initializer_list<real_t> vars) {
-    real_t tmp[MAX_VARGS];
+    real_t tmp[15];
     const unsigned x = vars.size() / 2;
     if (x & 1) {
       std::partial_sort_copy(vars.begin(), vars.end(), &tmp[0], &tmp[x]);
