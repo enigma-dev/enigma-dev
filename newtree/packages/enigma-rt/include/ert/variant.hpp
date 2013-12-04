@@ -29,7 +29,6 @@ namespace ert {
     variant();
     variant(real_t);
     variant(string_t);
-    variant(const variant&);
     variant(const variant&&);
     operator real_t() const;
     operator string_t() const;
