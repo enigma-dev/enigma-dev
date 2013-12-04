@@ -23,7 +23,6 @@
 
 #include "ert/real.hpp"
 #include "ert/variant.hpp"
-#include "ert/varargs.hpp"
 
 #include <initializer_list>
 
