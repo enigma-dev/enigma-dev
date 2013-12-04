@@ -9,4 +9,4 @@ Author: Robert B. Colton
 Depends:
 	Windowing: Win32
 Represents:
-	Build-platforms: Windows
+	Build-platforms: None
