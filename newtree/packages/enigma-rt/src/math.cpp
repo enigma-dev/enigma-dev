@@ -60,13 +60,13 @@ namespace ert {
   }
 
   real_t irandom(real_t ub) {
-    std::uniform_int_distribution<> dis(0, ub);
-    return dis(internal::rand_gen);
+    std::uniform_real_distribution<real_t> dis(0, ub);
+    return std::floor(dis(internal::rand_gen));
   }
 
   real_t irandom_range(real_t lb, real_t ub) {
-    std::uniform_int_distribution<> dis(lb, ub);
-    return dis(internal::rand_gen);
+    std::uniform_real_distribution<real_t> dis(lb, ub);
+    return std::floor(dis(internal::rand_gen));
   }
 
   real_t random_set_seed(real_t seed) {
