@@ -182,13 +182,11 @@ namespace ert {
 
   real_t median(const std::initializer_list<real_t> vars) {
     const unsigned x = vars.size() / 2;
+    std::sort(vars.begin(), vars.end());
     if (x & 1) {
-      std::nth_element(vars.begin(), vars.begin() + x, vars.end());
       return *(vars.begin() + x);
     }
-    const unsigned y = x + 1;
-    std::nth_element(vars.begin(), vars.begin() + y, vars.end());
-    return (*(vars.begin() + x) + *(vars.begin() + y)) * 0.5;
+    return (*(vars.begin() + x) + *(vars.begin() + x + 1)) * 0.5;
   }
   
   real_t is_real(const variant_t& var) {
