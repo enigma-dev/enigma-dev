@@ -28,35 +28,10 @@
 #include <algorithm>
 #include <functional>
 #include <numeric>
+#include <random>
 #include <initializer_list>
 
 namespace ert {
-  template <int N>
-  struct hash_const;
-
-  template <>
-  struct hash_const<4> {
-    static const unsigned long base = 2166136261u;
-    static const unsigned long prime = 16777619u;
-  };
-
-  template <>
-  struct hash_const<8> {
-    static const unsigned long base = 14695981039346656037u;
-    static const unsigned long prime = 1099511628211u;
-  };
-
-  static unsigned hash_real(real_t val) {
-    const unsigned N = sizeof(double) / sizeof(unsigned char);
-    const unsigned char(&chunks)[N] = reinterpret_cast<unsigned char(&)[N]>(val);
-    unsigned hash = hash_const<sizeof(unsigned)>::base;
-    for (unsigned i = 0; i < N; i++) {
-      hash ^= chunks[i];
-      hash *= hash_const<sizeof(unsigned)>::prime;
-    }
-    return hash;
-  }
-
   static real_t epsilon = 1e-16;
   const real_t pi = 3.14159265358979323846;
 
@@ -64,41 +39,62 @@ namespace ert {
     epsilon = eps;
     return 0;
   }
+  
+  namespace {
+    template <int N>
+    struct arch_random_t {
+      using gen = std::mt19937;
+    };
+  
+    template <>
+    struct arch_random_t<8> {
+      using gen = std::mt19937_64;
+    };
+    
+    using gen_t = arch_random_t<sizeof(void*)>::gen;
+    
+    gen_t gen;
+    real_t gen_seed = std::hash<unsigned>()(gen.default_seed);
+    std::random_device rd;
+  }
     
   variant_t choose(const std::initializer_list<variant_t> vars) {
-    return *(vars.begin() + static_cast<unsigned>(irandom(vars.size())));
+    std::uniform_int_distribution<> dis(0, vars.size());
+    return *(vars.begin() + dis(gen));
   }
 
   real_t random(real_t ub) {
-    return (std::rand() * ub) / RAND_MAX;
+    std::uniform_real_distribution<real_t> dis(0, ub);
+    return dis(gen);
   }
 
   real_t random_range(real_t lb, real_t ub) {
-    return lb + (std::rand() * (ub - lb)) / RAND_MAX;
+    std::uniform_real_distribution<real_t> dis(lb, ub);
+    return dis(gen);
   }
 
   real_t irandom(real_t ub) {
-    return std::floor(std::fmod(std::rand(), ub));
+    std::uniform_int_distribution<> dis(0, ub);
+    return dis(gen);
   }
 
   real_t irandom_range(real_t lb, real_t ub) {
-    return lb + std::floor(std::fmod(std::rand(), ub - lb));
+    std::uniform_int_distribution<> dis(lb, ub);
+    return dis(gen);
   }
 
-  static real_t rand_seed = 0;
-
   real_t random_set_seed(real_t seed) {
-    rand_seed = seed;
-    std::srand(hash_real(rand_seed));
+    gen_seed = seed;
+    gen = gen_t(std::hash<real_t>()(seed));
     return 0;
   }
 
   real_t random_get_seed() {
-    return rand_seed;
+    return gen_seed;
   }
 
   real_t randomize() {
-    random_set_seed(static_cast<real_t>(std::time(NULL)));
+    random_set_seed(rd());
     return 0;
   }
 
