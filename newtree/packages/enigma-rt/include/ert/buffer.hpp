@@ -26,13 +26,13 @@
 #include "ert/variant.hpp"
 
 namespace ert {
-  // Buffer Constants
   enum {
     buffer_fixed = 0,
     buffer_grow,
     buffer_wrap,
     buffer_fast
   };
+  
   enum {
     buffer_u8 = 0,
     buffer_s8,
@@ -46,6 +46,7 @@ namespace ert {
     buffer_bool,
     buffer_string
   };
+  
   enum {
     buffer_seek_start = 0,
     buffer_seek_relative,
