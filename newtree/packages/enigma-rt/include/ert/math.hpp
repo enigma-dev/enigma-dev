@@ -104,7 +104,8 @@ namespace ert {
   namespace templates {
     template <size_t N>
     variant_t choose_helper(std::array<variant_t, N> & vars) {
-      return vars[static_cast<unsigned>(irandom(N - 1))];
+      std::uniform_int_distribution<> dis(0, N - 1);
+      return vars[dis(internal::rand_gen)];
     }
     
     template <size_t N>
