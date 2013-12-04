@@ -51,9 +51,6 @@ namespace ert {
     string_t string;
   };
   
-  //bool operator<(variant const &, variant const &);
-  //bool operator>(variant const &, variant const &);
-  
   typedef variant variant_t;
 }
 
