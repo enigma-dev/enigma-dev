@@ -182,7 +182,7 @@ namespace ert {
     return std::accumulate(vars.begin(), vars.end(), 0, std::plus<double>()) / vars.size();
   }
 
-  real_t median(std::initializer_list<real_t> vars) {
+  real_t median(const std::initializer_list<real_t> vars) {
     const unsigned x = vars.size() / 2;
     if (x & 1) {
       std::nth_element(vars.begin(), vars.begin() + x, vars.end());
