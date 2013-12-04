@@ -55,6 +55,10 @@ namespace ert {
   variant::variant(string_t val)
     : type(vt_string), string(std::move(val)) {
   }
+
+  variant::variant(variant && rhs)
+    : type(rhs.type), real(rhs.real), string(std::move(rhs.string)) {
+  }
   
   variant::operator real_t() const {
     assert_init(*this);
@@ -67,14 +71,26 @@ namespace ert {
     assert_string(*this);
     return this->string;
   }
+
+  variant& variant::operator=(variant && rhs) {
+    assert_init(rhs);
+    this->type = rhs.type;
+    this->real = rhs.real;
+    this->string = std::move(rhs.string);
+    return *this;
+  }
   
-  bool operator <(const variant&, const variant&) {
-    // TODO
+  bool operator <(const variant& lhs, const variant& rhs) {
+    if (lhs.type == variant::vt_real) {
+      return lhs.real < static_cast<real_t>(rhs);
+    }
     return true;
   }
   
-  bool operator >(const variant&, const variant&) {
-    // TODO
+  bool operator >(const variant& lhs, const variant& rhs) {
+    if (lhs.type == variant::vt_real) {
+      return lhs.real > static_cast<real_t>(rhs);
+    }
     return true;
   }
 }
