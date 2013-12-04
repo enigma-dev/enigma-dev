@@ -80,9 +80,9 @@ namespace ert {
   namespace templates {
     template <size_t N>
     real_t median_helper(std::array<real_t, N> & vars) {
+      const unsigned n = N / 2;
       std::sort(vars.begin(), vars.end());
-      const unsigned n = vars.size() >> 1;
-      if (vars.size() & 1) {
+      if (n & 1) {
         return vars[n];
       }
       return (vars[n] + vars[n + 1]) * 0.5;
