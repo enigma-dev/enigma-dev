@@ -7,6 +7,6 @@ Description: Native hardware accelerated rendering on Windows platforms. Require
 Author: Robert B. Colton
 
 Depends:
-	Build-platforms: Windows
+	Windowing: Win32
 Represents:
-	Build-platforms: None
+	Build-platforms: Windows
