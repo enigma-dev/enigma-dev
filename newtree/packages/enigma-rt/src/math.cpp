@@ -32,14 +32,14 @@
 #include <initializer_list>
 
 namespace ert {
-  namespace {
-    static real_t epsilon = 1e-16;
-  }
-  
   const real_t pi = 3.14159265358979323846;
+  
+  namespace internal {
+    real_t epsilon = 1e-16;
+  }
 
   real_t math_set_epsilon(real_t eps) {
-    epsilon = eps;
+    internal::epsilon = eps;
     return 0;
   }
   
