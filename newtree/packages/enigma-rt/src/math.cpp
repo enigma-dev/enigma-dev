@@ -68,8 +68,7 @@ namespace ert {
 
   real_t random_range(real_t lb, real_t ub) {
     std::uniform_real_distribution<real_t> dis(lb, ub);
-    return choose(1, 2, 3, 4);
-    //return dis(gen);
+    return dis(gen);
   }
 
   real_t irandom(real_t ub) {
