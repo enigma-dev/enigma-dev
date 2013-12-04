@@ -27,7 +27,6 @@
 #include <array>
 #include <numeric>
 #include <functional>
-#include <initializer_list>
 #include <random>
 
 namespace ert {
