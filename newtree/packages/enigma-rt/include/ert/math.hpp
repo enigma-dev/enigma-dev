@@ -27,6 +27,7 @@
 #include <array>
 #include <numeric>
 #include <functional>
+#include <initializer_list>
 
 namespace ert {
   real_t math_set_epsilon(real_t);
@@ -40,13 +41,6 @@ namespace ert {
   real_t random_set_seed(real_t);
   real_t random_get_seed();
   real_t randomize();
-  
-  template <typename...T>
-  variant_t& choose(T...args) {
-    auto const size = sizeof...(args);
-    std::array<variant_t, size> vars = {args...};
-    return vars[irandom(size)];
-  }
 
   // Trigonometric Functions
   real_t arccos(real_t);
@@ -88,8 +82,9 @@ namespace ert {
     real_t median_helper(std::array<real_t, N> & vars) {
       std::sort(vars.begin(), vars.end());
       const unsigned n = vars.size() >> 1;
-      if (n & 1)
+      if (vars.size() & 1) {
         return vars[n];
+      }
       return (vars[n] + vars[n + 1]) * 0.5;
     }
     
@@ -106,11 +101,6 @@ namespace ert {
     template <size_t N>
     real_t mean_helper(std::array<real_t, N> & vars) {
       return std::accumulate(vars.begin(), vars.end(), 0, std::plus<real_t>()) * (1 / vars.size());
-    }
-    
-    template <size_t N>
-    variant_t& choose_helper(std::array<variant_t, N> & vars) {
-      return vars[irandom(N)];
     }
   }
   
@@ -137,11 +127,15 @@ namespace ert {
     std::array<real_t, sizeof...(args)> vars = {args...};
     return mean_helper(vars);
   }
+
+  variant_t choose_helper(std::initializer_list<variant_t> args) {
+    return args.begin()[static_cast<unsigned>(irandom(args.size() - 1))];
+  }
   
   template <typename...T>
-  variant_t choose(T const & ... args) {
-    std::array<variant_t, sizeof...(args)> vars = {args...};
-    return choose_helper(vars);
+  variant_t choose(T const & ...args) {
+    std::initializer_list<variant_t> vars = {args...};
+    return vars.begin()[static_cast<unsigned>(irandom(vars.size() - 1))];
   }
 }
 
