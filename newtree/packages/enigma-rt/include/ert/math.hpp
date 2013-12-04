@@ -79,6 +79,11 @@ namespace ert {
   
   namespace templates {
     template <size_t N>
+    variant_t choose_helper(std::array<variant_t, N> & vars) {
+      return vars[static_cast<unsigned>(irandom(N - 1))];
+    }
+    
+    template <size_t N>
     real_t median_helper(std::array<real_t, N> & vars) {
       const unsigned n = N / 2;
       std::sort(vars.begin(), vars.end());
@@ -102,11 +107,12 @@ namespace ert {
     real_t mean_helper(std::array<real_t, N> & vars) {
       return std::accumulate(vars.begin(), vars.end(), 0, std::plus<real_t>()) * (1 / vars.size());
     }
-    
-    template <size_t N>
-    variant_t choose_helper(std::array<variant_t, N> & vars) {
-      return vars[static_cast<unsigned>(irandom(N - 1))];
-    }
+  }
+  
+  template <typename...T>
+  variant_t choose(T const & ...args) {
+    std::array<variant_t, sizeof...(args)> vars = {{ args... }};
+    return templates::choose_helper(vars);
   }
   
   template <typename...T>
@@ -131,12 +137,6 @@ namespace ert {
   real_t mean(T const & ... args) {
     std::array<real_t, sizeof...(args)> vars = {args...};
     return templates::mean_helper(vars);
-  }
-
-  template <typename...T>
-  variant_t choose(T const & ...args) {
-    std::array<variant_t, sizeof...(args)> vars = {{ args... }};
-    return templates::choose_helper(vars);
   }
 }
 
