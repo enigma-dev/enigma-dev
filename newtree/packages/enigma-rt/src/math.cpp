@@ -183,16 +183,15 @@ namespace ert {
     return std::accumulate(vars.begin(), vars.end(), 0, std::plus<double>()) / vars.size();
   }
 
-  real_t median(const std::initializer_list<real_t> vars) {
-    real_t tmp[15];
+  real_t median(std::initializer_list<real_t> vars) {
     const unsigned x = vars.size() / 2;
     if (x & 1) {
-      std::partial_sort_copy(vars.begin(), vars.end(), &tmp[0], &tmp[x]);
-      return tmp[x];
+      std::nth_element(vars.begin(), vars.begin() + x, vars.end());
+      return *(vars.begin() + x);
     }
     const unsigned y = x + 1;
-    std::partial_sort_copy(vars.begin(), vars.end(), &tmp[0], &tmp[y]);
-    return (tmp[x] + tmp[y]) / 2;
+    std::nth_element(vars.begin(), vars.begin() + y, vars.end());
+    return (*(vars.begin() + x) + *(vars.begin() + y)) * 0.5;
   }
   
   real_t is_real(const variant_t& var) {
@@ -216,7 +215,7 @@ namespace ert {
   }
 
   real_t sqr(real_t x) {
-    return std::pow(x, 2);
+    return x * x;
   }
 
   real_t sqrt(real_t x) {
