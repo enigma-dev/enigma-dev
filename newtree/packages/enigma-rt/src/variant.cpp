@@ -27,7 +27,7 @@
 namespace ert {
   namespace {
     void assert_init(const variant_t& var) {
-      if (var.type != variant::vt_uninit) {
+      if (var.type == variant::vt_uninit) {
         std::cerr << "error: attempted to access uninitialized variable" << std::endl;
         std::abort();
       }
