@@ -47,7 +47,7 @@ FIND = find
 
 SYSTEMS := Platforms/$(PLATFORM) Graphics_Systems/$(GRAPHICS) Audio_Systems/$(AUDIO) Collision_Systems/$(COLLISION) Widget_Systems/$(WIDGETS) Networking_Systems/$(NETWORKING) Universal_System
 
-OBJDIR := .eobjs/$(COMPILEPATH)/$(GMODE)
+OBJDIR := $(WORKDIR).eobjs/$(COMPILEPATH)/$(GMODE)
 
 ###########
 # options #
@@ -78,7 +78,7 @@ endif
 
 # CPPFLAGS needs these include dirs unconditionally
 override CPPFLAGS += $(SYSTEMS:%=-I%/Info)
-override CPPFLAGS += -I.
+override CPPFLAGS += -I. -I${WORKDIR}
 
 .PHONY: all clean
 

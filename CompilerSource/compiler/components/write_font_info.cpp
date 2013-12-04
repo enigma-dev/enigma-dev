@@ -25,6 +25,7 @@
 **                                                                              **
 \********************************************************************************/
 
+#include "workdir.h"
 #include <cstdio>
 #include <fstream>
 #include "backend/EnigmaStruct.h" //LateralGM interface structures
@@ -37,7 +38,7 @@ using namespace std;
 #include "languages/lang_CPP.h"
 int lang_CPP::compile_writeFontInfo(EnigmaStruct* es)
 {
-  ofstream wto("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_fontinfo.h",ios_base::out);
+  ofstream wto((workdir +"Preprocessor_Environment_Editable/IDE_EDIT_fontinfo.h").c_str(),ios_base::out);
   wto << license << "#include \"Universal_System/fontstruct.h\"" << endl
       << endl;
 

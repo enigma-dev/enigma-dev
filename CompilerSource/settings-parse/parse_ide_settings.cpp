@@ -108,8 +108,8 @@ void parse_ide_settings(const char* eyaml)
   }
   string platn = tolower(extensions::targetAPI.windowSys);
 
-  #define eygl(fn,v) \
-  {\
+  #define eygl(fn,v) {};
+  /*{\
     ifs.open((eyname = "ENIGMAsystem/SHELL/" #fn "/" + extensions::targetAPI.v ## Sys + "/Config/" + platn + ".ey").c_str()); \
     if (ifs.is_open()) \
     { \
@@ -122,7 +122,7 @@ void parse_ide_settings(const char* eyaml)
       ifs.close(); \
     } \
     else user << "Could not open " << eyname << ".\n"; \
-  }
+  }*/
 
   eygl(Graphics_Systems, graphics);
   eygl(Widget_Systems, widget);

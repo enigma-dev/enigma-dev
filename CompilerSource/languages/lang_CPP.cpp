@@ -18,6 +18,7 @@
     with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "../workdir.h"
 #include <ctime>
 #include <cstdio>
 #include "languages/lang_CPP.h"
@@ -96,8 +97,8 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode, const char* targ
   delete main_context;
   main_context = new jdi::context();
   
-  cout << "Dumping whiteSpace definitions...";
-  FILE *of = wscode ? fopen("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_whitespace.h","wb") : NULL;
+  cout << "Dumping whiteSpace definitions..." << endl;
+  FILE *of = wscode ? fopen((workdir +"Preprocessor_Environment_Editable/IDE_EDIT_whitespace.h").c_str(),"wb") : NULL;
   if (of) fputs(wscode,of), fclose(of);
   
   cout << "Opening ENIGMA for parse..." << endl;
