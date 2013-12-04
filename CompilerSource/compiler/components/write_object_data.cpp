@@ -26,6 +26,7 @@
 **                                                                              **
 \********************************************************************************/
 
+#include "workdir.h"
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
@@ -62,10 +63,10 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
   //NEXT FILE ----------------------------------------
   //Object declarations: object classes/names and locals.
   ofstream wto;
-  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_objectdeclarations.h",ios_base::out);
+  wto.open((workdir +"Preprocessor_Environment_Editable/IDE_EDIT_objectdeclarations.h").c_str(),ios_base::out);
     wto << license;
-    wto << "#include \"../Universal_System/collisions_object.h\"\n";
-    wto << "#include \"../Universal_System/object.h\"\n\n";
+    wto << "#include \"Universal_System/collisions_object.h\"\n";
+    wto << "#include \"Universal_System/object.h\"\n\n";
     wto << "#include <map>";
 
     // Write the script names
@@ -95,7 +96,7 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
             wto << ", virtual " << parsed_extensions[i].implements;
           else wto << " /*" << parsed_extensions[i].name << "*/";
         wto << "\n  {\n";
-        wto << "    #include \"../Preprocessor_Environment_Editable/IDE_EDIT_inherited_locals.h\"\n\n";
+        wto << "    #include \"Preprocessor_Environment_Editable/IDE_EDIT_inherited_locals.h\"\n\n";
         wto << "    std::map<string, var> *vmap;\n";
         wto << "    object_locals() {vmap = NULL;}\n";
         wto << "    object_locals(unsigned _x, int _y): event_parent(_x,_y) {vmap = NULL;}\n  };\n";
@@ -477,7 +478,7 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
   ********************************************************/
 
     cout << "DBGMSG 1" << endl;
-  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_objectfunctionality.h",ios_base::out);
+  wto.open((workdir +"Preprocessor_Environment_Editable/IDE_EDIT_objectfunctionality.h").c_str(),ios_base::out);
     wto << license;
 
     cout << "DBGMSG 2" << endl;
