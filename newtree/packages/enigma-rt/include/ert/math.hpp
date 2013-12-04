@@ -25,12 +25,14 @@
 #include "ert/variant.hpp"
 #include "ert/varargs.hpp"
 
+#include <initializer_list>
+
 namespace ert {
   real_t math_set_epsilon(real_t);
   extern const real_t pi;
 
   // Random Functions
-  variant_t choose(const varargs<variant_t>&);
+  variant_t choose(const std::initializer_list<variant_t>);
   real_t random(real_t);
   real_t random_range(real_t, real_t);
   real_t irandom(real_t);
@@ -59,10 +61,10 @@ namespace ert {
   real_t abs(real_t);
   real_t sign(real_t);
   real_t ceil(real_t);
-  variant_t max(const varargs<variant_t>&);
-  variant_t min(const varargs<variant_t>&);
-  real_t mean(const varargs<real_t>&);
-  real_t median(const varargs<real_t>&);
+  variant_t max(const std::initializer_list<variant_t>);
+  variant_t min(const std::initializer_list<variant_t>);
+  real_t mean(const std::initializer_list<real_t>);
+  real_t median(const std::initializer_list<real_t>);
   real_t lerp(real_t, real_t, real_t);
   real_t clamp(real_t, real_t, real_t);
 
