@@ -88,7 +88,7 @@ namespace ert {
 
   real_t random_set_seed(real_t seed) {
     gen_seed = seed;
-    gen = gen_t(std::hash<real_t>()(seed));
+    gen.seed(std::hash<real_t>()(seed));
     return 0;
   }
 
