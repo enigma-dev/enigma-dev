@@ -23,6 +23,8 @@
 #include "ert/math.hpp"
 
 #include <cmath>
+#include <cstdlib>
+#include <ctime>
 #include <algorithm>
 #include <functional>
 #include <numeric>
@@ -58,11 +60,6 @@ namespace ert {
     real_t gen_seed = std::hash<unsigned>()(gen.default_seed);
     std::random_device rd;
   }
-    
-  variant_t choose(const std::initializer_list<variant_t> vars) {
-    std::uniform_int_distribution<> dis(0, vars.size());
-    return *(vars.begin() + dis(gen));
-  }
 
   real_t random(real_t ub) {
     std::uniform_real_distribution<real_t> dis(0, ub);
@@ -71,7 +68,8 @@ namespace ert {
 
   real_t random_range(real_t lb, real_t ub) {
     std::uniform_real_distribution<real_t> dis(lb, ub);
-    return dis(gen);
+    return choose(1, 2, 3, 4);
+    //return dis(gen);
   }
 
   real_t irandom(real_t ub) {
@@ -166,27 +164,6 @@ namespace ert {
 
   real_t ceil(real_t x) {
     return std::ceil(x);
-  }
-
-  variant_t max(const std::initializer_list<variant_t> vars) {
-    return *std::max_element(vars.begin(), vars.end());
-  }
-
-  variant_t min(const std::initializer_list<variant_t> vars) {
-    return *std::min_element(vars.begin(), vars.end());
-  }
-
-  real_t mean(const std::initializer_list<real_t> vars) {
-    return std::accumulate(vars.begin(), vars.end(), 0, std::plus<double>()) / vars.size();
-  }
-
-  real_t median(std::initializer_list<real_t> vars) {
-    const unsigned x = vars.size() / 2;
-    std::sort(vars.begin(), vars.end());
-    if (x & 1) {
-      return *(vars.begin() + x);
-    }
-    return (*(vars.begin() + x) + *(vars.begin() + x + 1)) * 0.5;
   }
   
   real_t is_real(const variant_t& var) {
