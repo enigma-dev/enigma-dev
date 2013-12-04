@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<classpath>
-	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/JNA"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry exported="true" kind="lib" path="C:/Users/Owner/Desktop/ENIGMA/enigma-dev/plugins/shared/jna.jar"/>
-	<classpathentry kind="src" path=""/>
-	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/LateralGM"/>
-	<classpathentry kind="output" path=""/>
-</classpath>
