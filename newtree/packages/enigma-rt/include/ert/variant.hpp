@@ -31,8 +31,12 @@ namespace ert {
     variant(string_t);
     variant(variant const &) = default;
     variant(variant &&);
+
     variant& operator=(variant const &) = default;
     variant& operator=(variant &&);
+    bool operator<(variant const &);
+    bool operator>(variant const &);
+
     operator real_t() const;
     operator string_t() const;
     operator bool() const;
@@ -47,8 +51,8 @@ namespace ert {
     string_t string;
   };
   
-  bool operator<(variant const &, variant const &);
-  bool operator>(variant const &, variant const &);
+  //bool operator<(variant const &, variant const &);
+  //bool operator>(variant const &, variant const &);
   
   typedef variant variant_t;
 }
