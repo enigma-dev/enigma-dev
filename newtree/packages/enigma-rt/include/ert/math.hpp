@@ -63,7 +63,7 @@ namespace ert {
   variant_t max(const std::initializer_list<variant_t>);
   variant_t min(const std::initializer_list<variant_t>);
   real_t mean(const std::initializer_list<real_t>);
-  real_t median(const std::initializer_list<real_t>);
+  real_t median(std::initializer_list<real_t>);
   real_t lerp(real_t, real_t, real_t);
   real_t clamp(real_t, real_t, real_t);
 

@@ -26,31 +26,30 @@
 
 namespace ert {
   struct variant {
-    variant();
+    variant() = default;
     variant(real_t);
     variant(string_t);
-    variant(const variant&);
-    variant(const variant&&);
+    variant(variant const &) = default;
+    variant(variant &&) = default;
+    variant & operator=(variant const &) = default;
+    variant & operator=(variant &&) = default;
     operator real_t() const;
     operator string_t() const;
     operator bool() const;
-    variant& operator =(const variant&);
-    bool operator <(const variant&);
-    bool operator >(const variant&);
-
+    
     enum type_t {
       vt_uninit = 0,
       vt_real,
       vt_string
-    } type;
-
-    real_t real;
+    } type = vt_uninit;
+    
+    real_t real = 0;
     string_t string;
   };
-
-  bool operator <(const variant&, const variant&);
-  bool operator >(const variant&, const variant&);
-
+  
+  bool operator<(variant const &, variant const &);
+  bool operator>(variant const &, variant const &);
+  
   typedef variant variant_t;
 }
 
