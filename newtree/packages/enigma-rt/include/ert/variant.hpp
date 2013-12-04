@@ -43,7 +43,7 @@ namespace ert {
       vt_string
     } type = vt_uninit;
     
-    real_t real = 0;
+    real_t real;
     string_t string;
   };
   
