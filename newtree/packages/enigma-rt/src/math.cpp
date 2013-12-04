@@ -153,6 +153,14 @@ namespace ert {
     return std::ceil(x);
   }
   
+  real_t lerp(real_t lb, real_t ub, real_t amt) {
+    return lb + (ub - lb) * amt;
+  }
+  
+  real_t clamp(real_t val, real_t min, real_t max) {
+    return val < min ? min : val > max ? max : val;
+  }
+  
   real_t is_real(const variant_t& var) {
     return var.type == variant::vt_real;
   }
