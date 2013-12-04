@@ -21,6 +21,7 @@
 #include "ert/real.hpp"
 #include "ert/variant.hpp"
 #include "ert/varargs.hpp"
+#include "ert/math.hpp"
 
 #include <cmath>
 #include <cstdlib>
@@ -28,6 +29,7 @@
 #include <algorithm>
 #include <functional>
 #include <numeric>
+#include <initializer_list>
 
 namespace ert {
   template <int N>
@@ -63,10 +65,9 @@ namespace ert {
     epsilon = eps;
     return 0;
   }
-
-  variant_t choose(const varargs<variant_t>& var) {
-    unsigned n = static_cast<unsigned>(std::fmod(std::rand(), var.argc));
-    return var.argv[n];
+    
+  variant_t choose(const std::initializer_list<variant_t> vars) {
+    return *(vars.begin() + static_cast<unsigned>(irandom(vars.size())));
   }
 
   real_t random(real_t ub) {
@@ -171,27 +172,27 @@ namespace ert {
     return std::ceil(x);
   }
 
-  variant_t max(const varargs<variant_t>& var) {
-    return *std::max_element(&var.argv[0], &var.argv[var.argc]);
+  variant_t max(const std::initializer_list<variant_t> vars) {
+    return *std::max_element(vars.begin(), vars.end());
   }
 
-  variant_t min(const varargs<variant_t>& var) {
-    return *std::min_element(&var.argv[0], &var.argv[var.argc]);
+  variant_t min(const std::initializer_list<variant_t> vars) {
+    return *std::min_element(vars.begin(), vars.end());
   }
 
-  real_t mean(const varargs<real_t>& var) {
-    return std::accumulate(&var.argv[0], &var.argv[var.argc], 0, std::plus<double>()) / var.argc;
+  real_t mean(const std::initializer_list<real_t> vars) {
+    return std::accumulate(vars.begin(), vars.end(), 0, std::plus<double>()) / vars.size();
   }
 
-  real_t median(const varargs<real_t>& var) {
+  real_t median(const std::initializer_list<real_t> vars) {
     real_t tmp[MAX_VARGS];
-    const unsigned x = var.argc / 2;
+    const unsigned x = vars.size() / 2;
     if (x & 1) {
-      std::partial_sort_copy(&var.argv[0], &var.argv[var.argc], &tmp[0], &tmp[x]);
+      std::partial_sort_copy(vars.begin(), vars.end(), &tmp[0], &tmp[x]);
       return tmp[x];
     }
     const unsigned y = x + 1;
-    std::partial_sort_copy(&var.argv[0], &var.argv[var.argc], &tmp[0], &tmp[y]);
+    std::partial_sort_copy(vars.begin(), vars.end(), &tmp[0], &tmp[y]);
     return (tmp[x] + tmp[y]) / 2;
   }
   
