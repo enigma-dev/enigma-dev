@@ -30,9 +30,9 @@ namespace ert {
     variant(real_t);
     variant(string_t);
     variant(variant const &) = default;
-    variant(variant &&) = default;
+    variant(variant &&);
     variant & operator=(variant const &) = default;
-    variant & operator=(variant &&) = default;
+    variant & operator=(variant &&);
     operator real_t() const;
     operator string_t() const;
     operator bool() const;
