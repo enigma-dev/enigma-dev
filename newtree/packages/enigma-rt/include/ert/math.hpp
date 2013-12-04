@@ -77,7 +77,7 @@ namespace ert {
   real_t log10(real_t);
   real_t logn(real_t, real_t);
   
-  namespace {
+  namespace templates {
     template <size_t N>
     real_t median_helper(std::array<real_t, N> & vars) {
       std::sort(vars.begin(), vars.end());
@@ -102,40 +102,41 @@ namespace ert {
     real_t mean_helper(std::array<real_t, N> & vars) {
       return std::accumulate(vars.begin(), vars.end(), 0, std::plus<real_t>()) * (1 / vars.size());
     }
+    
+    template <size_t N>
+    variant_t choose_helper(std::array<variant_t, N> & vars) {
+      return vars[static_cast<unsigned>(irandom(N - 1))];
+    }
   }
   
   template <typename...T>
   real_t median(T const & ... args) {
     std::array<real_t, sizeof...(args)> vars = {args...};
-    return median_helper(vars);
+    return templates::median_helper(vars);
   }
   
   template <typename...T>
   real_t max(T const & ... args) {
     std::array<real_t, sizeof...(args)> vars = {args...};
-    return max_helper(vars);
+    return templates::max_helper(vars);
   }
   
   template <typename...T>
   real_t min(T const & ... args) {
     std::array<real_t, sizeof...(args)> vars = {args...};
-    return min_helper(vars);
+    return templates::min_helper(vars);
   }
   
   template <typename...T>
   real_t mean(T const & ... args) {
     std::array<real_t, sizeof...(args)> vars = {args...};
-    return mean_helper(vars);
+    return templates::mean_helper(vars);
   }
 
-  variant_t choose_helper(std::initializer_list<variant_t> args) {
-    return args.begin()[static_cast<unsigned>(irandom(args.size() - 1))];
-  }
-  
   template <typename...T>
   variant_t choose(T const & ...args) {
-    std::initializer_list<variant_t> vars = {args...};
-    return vars.begin()[static_cast<unsigned>(irandom(vars.size() - 1))];
+    std::array<variant_t, sizeof...(args)> vars = {{ args... }};
+    return templates::choose_helper(vars);
   }
 }
 
