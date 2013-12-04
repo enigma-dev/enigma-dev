@@ -23,21 +23,23 @@
 #include "ert/variant.hpp"
 
 namespace ert {
-  static void assert_init(const variant_t& var) {
-    if (var.type != variant::vt_uninit) {
-      // TODO: error
+  namespace {
+    void assert_init(const variant_t& var) {
+      if (var.type != variant::vt_uninit) {
+        // TODO: error
+      }
     }
-  }
 
-  static void assert_real(const variant_t& var) {
-    if (var.type != variant::vt_real) {
-      // TODO: error
+    void assert_real(const variant_t& var) {
+      if (var.type != variant::vt_real) {
+        // TODO: error
+      }
     }
-  }
 
-  static void assert_string(const variant_t& var) {
-    if (var.type != variant::vt_string) {
-      // TODO: error
+    void assert_string(const variant_t& var) {
+      if (var.type != variant::vt_string) {
+        // TODO: error
+      }
     }
   }
 
