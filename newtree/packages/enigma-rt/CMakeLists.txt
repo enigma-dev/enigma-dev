@@ -1,7 +1,7 @@
 
 project (ENIGMA_RT CXX)
 
-if (UNIX)
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     LIST(APPEND CMAKE_CXX_FLAGS "-std=c++11 -flto -Wall -Wextra -pedantic -Werror")
 endif ()
 
