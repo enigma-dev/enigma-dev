@@ -88,8 +88,9 @@ namespace ert {
     real_t median_helper(std::array<real_t, N> & vars) {
       std::sort(vars.begin(), vars.end());
       const unsigned n = vars.size() >> 1;
-      if (n & 1)
+      if (n & 1) {
         return vars[n];
+      }
       return (vars[n] + vars[n + 1]) * 0.5;
     }
     
