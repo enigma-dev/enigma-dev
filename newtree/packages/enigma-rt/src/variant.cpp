@@ -29,54 +29,47 @@ namespace ert {
         // TODO: error
       }
     }
-
+    
     void assert_real(const variant_t& var) {
       if (var.type != variant::vt_real) {
         // TODO: error
       }
     }
-
+    
     void assert_string(const variant_t& var) {
       if (var.type != variant::vt_string) {
         // TODO: error
       }
     }
   }
-
-  variant::variant()
-    : type(vt_uninit) {
-  }
-
+  
   variant::variant(real_t val)
     : type(vt_real), real(val) {
   }
-
+  
   variant::variant(string_t val)
-    : type(vt_string), string(val) {
+    : type(vt_string), string(std::move(val)) {
   }
-
+  
   variant::operator real_t() const {
     assert_init(*this);
     assert_real(*this);
     return this->real;
   }
-
+  
   variant::operator string_t() const {
     assert_init(*this);
     assert_string(*this);
     return this->string;
   }
-
-  variant& variant::operator =(const variant& rhs) {
-    assert_init(rhs);
-    this->type = rhs.type;
-    this->real = rhs.real;
-    this->string = rhs.string;
-    return *this;
-  }
-
-  // TODO
+  
   bool operator <(const variant&, const variant&) {
+    // TODO
+    return true;
+  }
+  
+  bool operator >(const variant&, const variant&) {
+    // TODO
     return true;
   }
 }
