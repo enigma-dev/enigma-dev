@@ -1,0 +1,4 @@
+
+* text diff merge=text encoding=utf-8
+*.cpp diff=cpp
+*.hpp diff=cpp
