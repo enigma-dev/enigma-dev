@@ -20,9 +20,17 @@
 // to allow you to easily switch major systems between degrees and radians.
 
 // Uncomment the following lines below to switch to double.
+//#define MA_SCALAR_64
 //#define GS_SCALAR_64
 //#define AS_SCALAR_64
 //#define CS_SCALAR_64
+
+// Controls mathematics scalar precision
+#ifdef MA_SCALAR_64
+typedef double ma_scalar;
+#else
+typedef float ma_scalar;
+#endif
 
 // Controls graphics, particles, and other rendering precision
 #ifdef GS_SCALAR_64
@@ -46,11 +54,20 @@ typedef float cs_scalar;
 #endif
 
 // Uncomment the following lines below to switch major systems to radians for the internal angular unit.
+//#define MA_ANGULAR_UNIT_RADIANS
 //#define GS_ANGULAR_UNIT_RADIANS
 //#define AS_ANGULAR_UNIT_RADIANS
 //#define CS_ANGULAR_UNIT_RADIANS
 
 #include <math.h>
+
+#ifdef MA_ANGULAR_UNIT_RADIANS
+#define ma_angular_radians(radians) (radians)
+#define ma_angular_degrees(degrees) (degrees)
+#else
+#define ma_angular_radians(radians) (radians * 180 / M_PI)
+#define ma_angular_degrees(degrees) (degrees / 180 * M_PI)
+#endif
 
 #ifdef GS_ANGULAR_UNIT_RADIANS
 #define gs_angular_radians(radians) (radians)
