@@ -29,11 +29,16 @@ namespace ert {
   }
 
   real_t point_distance(real_t x1, real_t y1, real_t x2, real_t y2) {
-    return sqrt(sqr(x2 - x1) + sqr(y2 - y1));
+    real_t dx = x2 - x1;
+    real_t dy = y2 - y1;
+    return std::sqrt(dx * dx + dy * dy);
   }
 
   real_t point_distance_3d(real_t x1, real_t y1, real_t z1, real_t x2, real_t y2, real_t z2) {
-    return sqrt(sqr(x2 - x1) + sqr(y2 - y1) + sqr(z2 - z1));
+    real_t dx = x2 - x1;
+    real_t dy = y2 - y1;
+    real_t dz = z2 - z1;
+    return std::sqrt(dx * dx + dy * dy + dz * dz);
   }
 
   real_t dot_product(real_t x1, real_t y1, real_t x2, real_t y2) {
@@ -45,12 +50,15 @@ namespace ert {
   }
 
   real_t dot_product_normalised(real_t x1, real_t y1, real_t x2, real_t y2) {
-    return (x1 * x2 + y1 * y2) /
-      std::sqrt(std::pow(x2 - x1, 2) + std::pow(y2 - y1, 2));
+    real_t dx = x2 - x1;
+    real_t dy = y2 - y1;
+    return (x1 * x2 + y1 * y2) / std::sqrt(dx * dx + dy * dy);
   }
 
   real_t dot_product_normalised_3d(real_t x1, real_t y1, real_t z1, real_t x2, real_t y2, real_t z2) {
-    return (x1 * x2 + y1 * y2 + z1 * z2) /
-      std::sqrt(std::pow(x2 - x1, 2) + std::pow(y2 - y1, 2) + std::pow(z2 - z1, 2));
+    real_t dx = x2 - x1;
+    real_t dy = y2 - y1;
+    real_t dz = z2 - z1;
+    return (x1 * x2 + y1 * y2 + z1 * z2) / std::sqrt(dx * dx + dy * dy + dz * dz);
   }
 }
