@@ -163,14 +163,21 @@ int main(int, char*[])
   definition_scope cs("[obj]", main_context->get_global(), 0), ls, gs;
   
   EDL_AST east(&cs, &ls, &gs);
-  if (east.parse_edl(in2))
+  
+  timeval st, et;
+  gettimeofday(&st, NULL);
+  bool ps = east.parse_edl(in2);
+  gettimeofday(&et, NULL);
+  long micros = (et.tv_sec - st.tv_sec) * 1000000 + (et.tv_usec - st.tv_usec);
+  
+  if (ps)
     cout << "Parse failed. :(" << endl << endl;
   else {
     cout << "Parse succeeded :)" << endl << endl;
     cout << east.toString();
     cout << endl << endl << endl << endl;
   }
-  
+  cout << "Time taken: " << micros << "µsec (" << st.tv_sec << st.tv_usec << "->" << et.tv_sec << et.tv_usec << ")" << endl;
   
   /*
   EnigmaStruct es = {

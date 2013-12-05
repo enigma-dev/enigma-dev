@@ -268,6 +268,7 @@
 		<Unit filename="general/bettersystem.h" />
 		<Unit filename="general/darray.cpp" />
 		<Unit filename="general/darray.h" />
+		<Unit filename="general/estring.cpp" />
 		<Unit filename="general/estring.h" />
 		<Unit filename="general/implicit_stack.h" />
 		<Unit filename="general/macro_integration.cpp" />
@@ -295,6 +296,7 @@
 		<Unit filename="main.h" />
 		<Unit filename="parser/collect_variables.cpp" />
 		<Unit filename="parser/collect_variables.h" />
+		<Unit filename="parser/edl_vector.cpp" />
 		<Unit filename="parser/lex_edl.cpp" />
 		<Unit filename="parser/lex_edl.h" />
 		<Unit filename="parser/object_storage.cpp" />
