@@ -23,6 +23,7 @@
 #include "ert/variant.hpp"
 
 #include <iostream>
+#include <algorithm>
 
 namespace ert {
   namespace {
@@ -81,16 +82,20 @@ namespace ert {
   }
   
   bool variant::operator <(const variant& rhs) const {
+    assert_init(*this);
     if (this->type == variant::vt_real) {
       return this->real < static_cast<real_t>(rhs);
     }
-    return true;
+    return std::lexicographical_compare(this->string.begin(), this->string.end(),
+                                        rhs.string.begin(), rhs.string.end());
   }
   
   bool variant::operator >(const variant& rhs) const {
+    assert_init(*this);
     if (this->type == variant::vt_real) {
       return this->real > static_cast<real_t>(rhs);
     }
-    return true;
+    return std::lexicographical_compare(rhs.string.begin(), rhs.string.end(),
+                                        this->string.begin(), this->string.end());
   }
 }
