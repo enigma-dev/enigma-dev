@@ -34,8 +34,8 @@ namespace ert {
 
     variant& operator=(variant const &) = default;
     variant& operator=(variant &&);
-    bool operator<(variant const &);
-    bool operator>(variant const &);
+    bool operator<(variant const &) const;
+    bool operator>(variant const &) const;
 
     operator real_t() const;
     operator string_t() const;

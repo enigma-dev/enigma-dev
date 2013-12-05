@@ -80,14 +80,14 @@ namespace ert {
     return *this;
   }
   
-  bool variant::operator <(const variant& rhs) {
+  bool variant::operator <(const variant& rhs) const {
     if (this->type == variant::vt_real) {
       return this->real < static_cast<real_t>(rhs);
     }
     return true;
   }
   
-  bool variant::operator >(const variant& rhs) {
+  bool variant::operator >(const variant& rhs) const {
     if (this->type == variant::vt_real) {
       return this->real > static_cast<real_t>(rhs);
     }
