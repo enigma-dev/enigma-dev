@@ -24,6 +24,7 @@
 
 #include <iostream>
 #include <algorithm>
+#include <functional>
 
 namespace ert {
   namespace {
@@ -87,7 +88,16 @@ namespace ert {
       return this->real < static_cast<real_t>(rhs);
     }
     return std::lexicographical_compare(this->string.begin(), this->string.end(),
-                                        rhs.string.begin(), rhs.string.end());
+      rhs.string.begin(), rhs.string.end(), std::less<char>());
+  }
+  
+  bool variant::operator <=(const variant& rhs) const {
+    assert_init(*this);
+    if (this->type == variant::vt_real) {
+      return this->real <= static_cast<real_t>(rhs);
+    }
+    return std::lexicographical_compare(this->string.begin(), this->string.end(),
+      rhs.string.begin(), rhs.string.end(), std::less_equal<char>());
   }
   
   bool variant::operator >(const variant& rhs) const {
@@ -96,6 +106,15 @@ namespace ert {
       return this->real > static_cast<real_t>(rhs);
     }
     return std::lexicographical_compare(rhs.string.begin(), rhs.string.end(),
-                                        this->string.begin(), this->string.end());
+      this->string.begin(), this->string.end(), std::greater<char>());
+  }
+  
+  bool variant::operator >=(const variant& rhs) const {
+    assert_init(*this);
+    if (this->type == variant::vt_real) {
+      return this->real >= static_cast<real_t>(rhs);
+    }
+    return std::lexicographical_compare(rhs.string.begin(), rhs.string.end(),
+      this->string.begin(), this->string.end(), std::greater_equal<char>());
   }
 }
