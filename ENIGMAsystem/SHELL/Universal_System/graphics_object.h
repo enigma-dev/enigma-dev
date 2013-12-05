@@ -30,6 +30,7 @@
   #include <cmath>
 #endif
 
+#include "scalar.h"
 #include "planar_object.h"
 #include "multifunction_variant.h"
 
@@ -40,7 +41,7 @@ namespace enigma
     INHERIT_OPERATORS(depthv)
     struct inst_iter *myiter;
     void function(variant oldval);
-    void init(double depth, object_basic* who);
+    void init(gs_scalar depth, object_basic* who);
     void remove();
     ~depthv();
   };
@@ -48,17 +49,17 @@ namespace enigma
   {
     //Sprites: these are mostly for higher tiers...
       int sprite_index;
-      double image_index;
-      double image_speed;
+      gs_scalar image_index;
+      gs_scalar image_speed;
 
       //Depth
       enigma::depthv  depth;
       bool visible;
 
     //Transformations: these are mostly for higher tiers...
-      double image_xscale;
-      double image_yscale;
-      double image_angle;
+      gs_scalar image_xscale;
+      gs_scalar image_yscale;
+      gs_scalar image_angle;
 
     //Accessors
       #ifdef JUST_DEFINE_IT_RUN

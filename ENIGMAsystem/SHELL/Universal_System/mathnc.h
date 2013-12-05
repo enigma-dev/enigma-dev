@@ -39,104 +39,105 @@
 #endif
 
 #include <cstdlib> // random()
+#include "scalar.h"
 
 namespace enigma_user
 {
-  const double pi = M_PI;
+  const ma_scalar pi = M_PI;
 
   // Overloading
   // TODO: Once the user space switch to namespace enigma_user has been made,
   // remove these functions.
-  double abs(const variant& x);
-  double abs(const var& x);
+  ma_scalar abs(const variant& x);
+  ma_scalar abs(const var& x);
 
   // Functions
 
   // TODO: Once the user space switch to namespace enigma_user has been made,
   // comment in all these functions.
-  inline double abs(double x)   { return ::fabs(x); }
-  //inline double ceil(double x)  { return ::ceil(x); }
-  //inline double floor(double x) { return ::floor(x); }
-  //inline double round(double x) { return ::round(x); }
-  //inline double exp(double x)   { return ::exp(x); }
-  //inline double sqrt(double x)  { return ::sqrt(x); }
-  inline double ln(double x)    { return ::log(x); }
-  //inline double log(double x)   { return ::log(x); }
-  //inline double log2(double x)  { return ::log2(x); }
-  //inline double log10(double x) { return ::log10(x); }
-  //inline double sin(double x)   { return ::sin(x); }
-  //inline double cos(double x)   { return ::cos(x); }
-  //inline double tan(double x)   { return ::tan(x); }
-  inline double power(double x,double p)   { return ::pow(x,p); }
-  inline double arcsin(double x)           { return ::asin(x); }
-  inline double arccos(double x)           { return ::acos(x); }
-  inline double arctan(double x)           { return ::atan(x); }
-  inline double arctan2(double y,double x) { return ::atan2(y,x); }
+  inline ma_scalar abs(ma_scalar x)   { return ::fabs(x); }
+  //inline ma_scalar ceil(ma_scalar x)  { return ::ceil(x); }
+  //inline ma_scalar floor(ma_scalar x) { return ::floor(x); }
+  //inline ma_scalar round(ma_scalar x) { return ::round(x); }
+  //inline ma_scalar exp(ma_scalar x)   { return ::exp(x); }
+  //inline ma_scalar sqrt(ma_scalar x)  { return ::sqrt(x); }
+  inline ma_scalar ln(ma_scalar x)    { return ::log(x); }
+  //inline ma_scalar log(ma_scalar x)   { return ::log(x); }
+  //inline ma_scalar log2(ma_scalar x)  { return ::log2(x); }
+  //inline ma_scalar log10(ma_scalar x) { return ::log10(x); }
+  //inline ma_scalar sin(ma_scalar x)   { return ::sin(x); }
+  //inline ma_scalar cos(ma_scalar x)   { return ::cos(x); }
+  //inline ma_scalar tan(ma_scalar x)   { return ::tan(x); }
+  inline ma_scalar power(ma_scalar x,ma_scalar p)   { return ::pow(x,p); }
+  inline ma_scalar arcsin(ma_scalar x)           { return ::asin(x); }
+  inline ma_scalar arccos(ma_scalar x)           { return ::acos(x); }
+  inline ma_scalar arctan(ma_scalar x)           { return ::atan(x); }
+  inline ma_scalar arctan2(ma_scalar y,ma_scalar x) { return ::atan2(y,x); }
 
   // TODO: Once the user space switch to namespace enigma_user has been made,
   // comment in these functions.
   /*
-  inline double bessel_j0(double x)        {return ::j0(x);};
-  inline double bessel_j1(double x)        {return ::j1(x);};
-  inline double bessel_jn(int x, double y) {return ::jn(x, y);};
-  inline double bessel_y0(double x)        {return ::y0(x);};
-  inline double bessel_y1(double x)        {return ::y1(x);};
-  inline double bessel_yn(int x, double y) {return ::yn(x, y);};
+  inline ma_scalar bessel_j0(ma_scalar x)        {return ::j0(x);};
+  inline ma_scalar bessel_j1(ma_scalar x)        {return ::j1(x);};
+  inline ma_scalar bessel_jn(int x, ma_scalar y) {return ::jn(x, y);};
+  inline ma_scalar bessel_y0(ma_scalar x)        {return ::y0(x);};
+  inline ma_scalar bessel_y1(ma_scalar x)        {return ::y1(x);};
+  inline ma_scalar bessel_yn(int x, ma_scalar y) {return ::yn(x, y);};
   */
 
-  double sqr(double x);
-  double logn(double n,double x);
+  ma_scalar sqr(ma_scalar x);
+  ma_scalar logn(ma_scalar n,ma_scalar x);
 
-  double sind(double x);
-  double cosd(double x);
-  double tand(double x);
-  double asind(double x);
-  double acosd(double x);
-  double atand(double x);
-  double atand2(double y,double x);
-  double arcsind(double x);
-  double arccosd(double x);
-  double arctand(double x);
-  double arctand2(double y,double x);
+  ma_scalar sind(ma_scalar x);
+  ma_scalar cosd(ma_scalar x);
+  ma_scalar tand(ma_scalar x);
+  ma_scalar asind(ma_scalar x);
+  ma_scalar acosd(ma_scalar x);
+  ma_scalar atand(ma_scalar x);
+  ma_scalar atand2(ma_scalar y,ma_scalar x);
+  ma_scalar arcsind(ma_scalar x);
+  ma_scalar arccosd(ma_scalar x);
+  ma_scalar arctand(ma_scalar x);
+  ma_scalar arctand2(ma_scalar y,ma_scalar x);
 
-  int sign(double x);
-  int cmp(double x,double y);
-  double frac(double x);
+  int sign(ma_scalar x);
+  int cmp(ma_scalar x,ma_scalar y);
+  ma_scalar frac(ma_scalar x);
 
-  double degtorad(double x);
-  double radtodeg(double x);
+  ma_scalar degtorad(ma_scalar x);
+  ma_scalar radtodeg(ma_scalar x);
 
-  double lengthdir_x(double len,double dir);
-  double lengthdir_y(double len,double dir);
-  double direction_difference(double dir1,double dir2);
-  double point_direction(double x1,double y1,double x2,double y2);
-  double point_distance(double x1, double y1, double x2, double y2);
-  double point_distance_3d(double x1, double y1, double z1, double x2,
-  double y2, double z2);
-  double dot_product(double x1, double y1, double x2, double y2);
-  double dot_product_3d(double x1, double y1, double z1, double x2,
-  double y2, double z2);
-  double dot_product_normalised(double x1, double y1, double x2, double y2);
-  double dot_product_normalised_3d(double x1, double y1, double z1, double x2,
-  double y2, double z2);
-  double lerp(double x, double y, double a);
-  double clamp(double val, double min, double max);
+  ma_scalar lengthdir_x(ma_scalar len,ma_scalar dir);
+  ma_scalar lengthdir_y(ma_scalar len,ma_scalar dir);
+  ma_scalar direction_difference(ma_scalar dir1,ma_scalar dir2);
+  ma_scalar point_direction(ma_scalar x1,ma_scalar y1,ma_scalar x2,ma_scalar y2);
+  ma_scalar point_distance(ma_scalar x1, ma_scalar y1, ma_scalar x2, ma_scalar y2);
+  ma_scalar point_distance_3d(ma_scalar x1, ma_scalar y1, ma_scalar z1, ma_scalar x2,
+  ma_scalar y2, ma_scalar z2);
+  ma_scalar dot_product(ma_scalar x1, ma_scalar y1, ma_scalar x2, ma_scalar y2);
+  ma_scalar dot_product_3d(ma_scalar x1, ma_scalar y1, ma_scalar z1, ma_scalar x2,
+  ma_scalar y2, ma_scalar z2);
+  ma_scalar dot_product_normalised(ma_scalar x1, ma_scalar y1, ma_scalar x2, ma_scalar y2);
+  ma_scalar dot_product_normalised_3d(ma_scalar x1, ma_scalar y1, ma_scalar z1, ma_scalar x2,
+  ma_scalar y2, ma_scalar z2);
+  ma_scalar lerp(ma_scalar x, ma_scalar y, ma_scalar a);
+  ma_scalar clamp(ma_scalar val, ma_scalar min, ma_scalar max);
 
-  double max(const enigma::varargs &t);
-  double min(const enigma::varargs &t);
-  double min(double x, double y);
-  double max(double x, double y);
-  double median(enigma::varargs t);
-  double mean(const enigma::varargs &t);
+  ma_scalar max(const enigma::varargs &t);
+  ma_scalar min(const enigma::varargs &t);
+  ma_scalar min(ma_scalar x, ma_scalar y);
+  ma_scalar max(ma_scalar x, ma_scalar y);
+  ma_scalar median(enigma::varargs t);
+  ma_scalar mean(const enigma::varargs &t);
   variant choose(const enigma::varargs& args);
 
   // Delphi-esque Random
 
-  extern double random(double n);
-  inline double random(double low, double high) {
+  extern ma_scalar random(ma_scalar n);
+  inline ma_scalar random(ma_scalar low, ma_scalar high) {
     return low + random(high - low);
   }
-  inline double random_range(double low, double high) { return random(low, high); }
+  inline ma_scalar random_range(ma_scalar low, ma_scalar high) { return random(low, high); }
 
   int random_set_seed(int seed);
   int random_get_seed();
@@ -144,7 +145,7 @@ namespace enigma_user
   static inline int random_integer(int x) { // Mark made this inclusive of x...
     return int(random(x + 1));
   }
-  static inline double random_integer(int low, int high) {
+  static inline ma_scalar random_integer(int low, int high) {
     return low + random_integer(high - low);
   }
 
@@ -152,18 +153,18 @@ namespace enigma_user
   // GML's lack of function overload capability. Since irandom is a nice shorthand, it supports
   // random_integer's overload. Since irandom_range is a stupid idea, it uses only GM's behavior.
   #define irandom random_integer
-  inline double irandom_range(int low, int high) { return random_integer(low, high); }
+  inline ma_scalar irandom_range(int low, int high) { return random_integer(low, high); }
 
   // Mersenne random
   int randomize();
   int mtrandom_integer(int x);
-  double mtrandom();
+  ma_scalar mtrandom();
   int mtrandom_seed(int x);
   unsigned int mtrandom32();
-  static inline double mtrandom(double x) {
+  static inline ma_scalar mtrandom(ma_scalar x) {
     return mtrandom() * x;
   }
-  static inline double mtrandom(double x, double y) {
+  static inline ma_scalar mtrandom(ma_scalar x, ma_scalar y) {
     return x + mtrandom() * (y-x);
   }
 
