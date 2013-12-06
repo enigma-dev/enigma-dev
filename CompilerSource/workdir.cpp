@@ -1,9 +1,8 @@
 #include "workdir.h"
 #include "OS_Switchboard.h" //Tell us where the hell we are
+#include <cstdlib>
 
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
-#include <cstdlib>
-	
 std::string myReplace(std::string str, const std::string& oldStr, const std::string& newStr)
 {
   std::string nstr = str;
