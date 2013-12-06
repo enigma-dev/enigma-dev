@@ -108,7 +108,11 @@ inline string fc(const char* fn)
 string toUpper(string x) { string res = x; for (size_t i = 0; i < res.length(); i++) res[i] = res[i] >= 'a' and res[i] <= 'z' ? res[i] + 'A' - 'a' : res[i]; return res; }
 void clear_ide_editables()
 {
-  if (mkdir((workdir +"Preprocessor_Environment_Editable").c_str()) == -1)
+#if CURRENT_PLATFORM_ID == OS_WINDOWS
+  if (!CreateDirectory((workdir +"Preprocessor_Environment_Editable").c_str(), NULL))
+#else
+  if (mkdir((workdir +"Preprocessor_Environment_Editable").c_str(),0755) == -1)
+#endif
   {
 	  std::cout << "Failed to create build directory at " << workdir << endl;
   }

@@ -1,7 +1,8 @@
 #include "workdir.h"
+#include "OS_Switchboard.h" //Tell us where the hell we are
 
-#if defined(_WIN32) || defined(__WIN32__) || defined(_WIN64) || defined(__WIN64__)
-	#include <cstdlib>
+#if CURRENT_PLATFORM_ID == OS_WINDOWS
+#include <cstdlib>
 	
 std::string myReplace(std::string str, const std::string& oldStr, const std::string& newStr)
 {
@@ -17,5 +18,5 @@ std::string myReplace(std::string str, const std::string& oldStr, const std::str
 	
 std::string workdir = myReplace(getenv("APPDATA"), "\\","/") + std::string("/ENIGMA/");
 #else
-std::string workdir = myReplace(getenv("$HOME"), "\\","/") + "/tmp/";
+std::string workdir = getenv("$HOME") + "/tmp/";
 #endif
