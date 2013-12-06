@@ -109,8 +109,10 @@ string toUpper(string x) { string res = x; for (size_t i = 0; i < res.length(); 
 void clear_ide_editables()
 {
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
+  CreateDirectory((workdir).c_str(), NULL);
   if (!CreateDirectory((workdir +"Preprocessor_Environment_Editable").c_str(), NULL))
 #else
+  mkdir((workdir).c_str(),0755);
   if (mkdir((workdir +"Preprocessor_Environment_Editable").c_str(),0755) == -1)
 #endif
   {
