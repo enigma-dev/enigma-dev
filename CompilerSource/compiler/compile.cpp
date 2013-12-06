@@ -1,29 +1,19 @@
-/********************************************************************************\
-**                                                                              **
-**  Copyright (C) 2011 Josh Ventura                                             **
-**                                                                              **
-**  This file is a part of the ENIGMA Development Environment.                  **
-**                                                                              **
-**                                                                              **
-**  ENIGMA is free software: you can redistribute it and/or modify it under the **
-**  terms of the GNU General Public License as published by the Free Software   **
-**  Foundation, version 3 of the license or any later version.                  **
-**                                                                              **
-**  This application and its source code is distributed AS-IS, WITHOUT ANY      **
-**  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS   **
-**  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more       **
-**  details.                                                                    **
-**                                                                              **
-**  You should have recieved a copy of the GNU General Public License along     **
-**  with this code. If not, see <http://www.gnu.org/licenses/>                  **
-**                                                                              **
-**  ENIGMA is an environment designed to create games and other programs with a **
-**  high-level, fully compilable language. Developers of ENIGMA or anything     **
-**  associated with ENIGMA are in no way responsible for its users or           **
-**  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **
-**                                                                              **
-\********************************************************************************/
+/** Copyright (C) 2011 Josh Ventura
+***
+*** This file is a part of the ENIGMA Development Environment.
+***
+*** ENIGMA is free software: you can redistribute it and/or modify it under the
+*** terms of the GNU General Public License as published by the Free Software
+*** Foundation, version 3 of the license or any later version.
+***
+*** This application and its source code is distributed AS-IS, WITHOUT ANY
+*** WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+*** FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+*** details.
+***
+*** You should have received a copy of the GNU General Public License along
+*** with this code. If not, see <http://www.gnu.org/licenses/>
+**/
 
 #include "workdir.h"
 #include "OS_Switchboard.h" //Tell us where the hell we are
@@ -118,7 +108,7 @@ inline string fc(const char* fn)
 string toUpper(string x) { string res = x; for (size_t i = 0; i < res.length(); i++) res[i] = res[i] >= 'a' and res[i] <= 'z' ? res[i] + 'A' - 'a' : res[i]; return res; }
 void clear_ide_editables()
 {
-  if (mkdir((workdir +"Preprocessor_Environment_Editable").c_str(),0755) == -1)
+  if (mkdir((workdir +"Preprocessor_Environment_Editable").c_str()) == -1)
   {
 	  std::cout << "Failed to create build directory at " << workdir << endl;
   }
@@ -194,7 +184,8 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
     edbg << "Cleaning..." << flushl;
 
 	string make = "clean-game ";
-	make += "COMPILEPATH=" CURRENT_PLATFORM_NAME "/" + extensions::targetOS.identifier + " ";
+	make += "COMPILEPATH=" CURRENT_PLATFORM_NAME "\"" + extensions::targetOS.identifier + "\" ";
+	make += "WORKDIR=\"" + workdir + "\" ";
 	make += "eTCpath=\"" + MAKE_tcpaths + "\"";
 
 	edbg << "Full command line: " << MAKE_location << " " << make << flushl;
@@ -604,7 +595,7 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
 
   string make = "Game ";
 
-  make += "WORKDIR=" + workdir + " ";
+  make += "WORKDIR=\"" + workdir + "\" ";
   make += mode == emode_debug? "GMODE=Debug ": mode == emode_design? "GMODE=Design ": mode == emode_compile?"GMODE=Compile ": "GMODE=Run ";
   make += "GRAPHICS=" + extensions::targetAPI.graphicsSys + " ";
   make += "AUDIO=" + extensions::targetAPI.audioSys + " ";

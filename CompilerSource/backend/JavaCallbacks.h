@@ -1,12 +1,19 @@
-/*
- * Copyright (C) 2010 IsmAvatar <IsmAvatar@gmail.com>, Josh Ventura
- *
- * This file is part of Enigma Plugin.
- * Enigma Plugin is free software and comes with ABSOLUTELY NO WARRANTY.
- * See LICENSE for details. If you can find it. But I mean, this is just
- * a piece of GNU General Public License software. So you can refer to it
- * instead, if you like. Version 3, or any later version.
- */
+/** Copyright (C) 2010 IsmAvatar <IsmAvatar@gmail.com>, Josh Ventura
+***
+*** This file is a part of the ENIGMA Development Environment.
+***
+*** ENIGMA is free software: you can redistribute it and/or modify it under the
+*** terms of the GNU General Public License as published by the Free Software
+*** Foundation, version 3 of the license or any later version.
+***
+*** This application and its source code is distributed AS-IS, WITHOUT ANY
+*** WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+*** FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+*** details.
+***
+*** You should have received a copy of the GNU General Public License along
+*** with this code. If not, see <http://www.gnu.org/licenses/>
+**/
 
 #include "JavaStruct.h"
 #include "util/Image.h"
