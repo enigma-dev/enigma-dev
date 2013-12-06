@@ -130,8 +130,9 @@ void draw_background_ext(int back, gs_scalar x, gs_scalar y, gs_scalar xscale, g
     const double mpr = 3*M_PI/2 + rot;
     ulcx += h * cos(mpr);
     ulcy -= h * sin(mpr);
-	draw_vertex_texture_color(ulcx + wcosrot, ulcy - wsinrot, tbx, tby,color,alpha);
+	
 	draw_vertex_texture_color(ulcx, ulcy, 0, tby,color,alpha);
+	draw_vertex_texture_color(ulcx + wcosrot, ulcy - wsinrot, tbx, tby,color,alpha);
     draw_primitive_end();
 
 }
