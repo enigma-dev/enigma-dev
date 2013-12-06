@@ -639,12 +639,12 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
 //  int makeres = better_system(MAKE_location,"MacOS");
 
   // Pick a file and flush it
-  const char* redirfile = (workdir + "enigma_compile.log").c_str();
-  fclose(fopen(redirfile,"wb"));
+  const string redirfile = (workdir + "enigma_compile.log");
+  fclose(fopen(redirfile.c_str(),"wb"));
 
   // Redirect it
-  ide_output_redirect_file(redirfile);
-  int makeres = e_execs(MAKE_location,make,"&>",redirfile);
+  ide_output_redirect_file(redirfile.c_str()); //TODO: If you pass this function the address it will screw up the value; most likely a JNA/Plugin bug.
+  int makeres = e_execs(MAKE_location,make,"&>",redirfile.c_str());
 
   // Stop redirecting GCC output
   ide_output_redirect_reset();
