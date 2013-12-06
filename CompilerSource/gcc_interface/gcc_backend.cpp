@@ -80,11 +80,9 @@ inline int rdir_system(string x, string y)
 #include <API/context.h>
 
 // Include for mkdir
-#if CURRENT_PLATFORM_ID == OS_WINDOWS
-#define _POSIX_SOURCE
+#if CURRENT_PLATFORM_ID != OS_WINDOWS
 #include <sys/stat.h>
 #include <unistd.h>
-#undef _POSIX_SOURCE
 #endif
 
 // This function parses one command line specified to the eYAML into a filename string and a parameter string,
