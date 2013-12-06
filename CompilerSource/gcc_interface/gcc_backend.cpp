@@ -90,13 +90,7 @@ inline int rdir_system(string x, string y)
 // This function parses one command line specified to the eYAML into a filename string and a parameter string,
 // then returns whether or not the output from this call must be manually redirected to the output file ofile.
 static inline bool toolchain_parseout(string line, string &exename, string &command, string ofile = "")
-{
-#if CURRENT_PLATFORM_ID == OS_WINDOWS
-  CreateDirectory((workdir).c_str(), NULL);
-#else
-  mkdir((workdir).c_str(),0755);
-#endif
-  
+{ 
   pt pos = 0, spos;
 
   /* Isolate the executable path and filename
