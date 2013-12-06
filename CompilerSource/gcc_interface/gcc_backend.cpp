@@ -91,6 +91,17 @@ inline int rdir_system(string x, string y)
 // then returns whether or not the output from this call must be manually redirected to the output file ofile.
 static inline bool toolchain_parseout(string line, string &exename, string &command, string ofile = "")
 { 
+#if CURRENT_PLATFORM_ID == OS_WINDOWS
+  CreateDirectory((workdir).c_str(), NULL);
+  if (!CreateDirectory((workdir +"Preprocessor_Environment_Editable").c_str(), NULL))
+#else
+  mkdir((workdir).c_str(),0755);
+  if (mkdir((workdir +"Preprocessor_Environment_Editable").c_str(),0755) == -1)
+#endif
+  {
+	  std::cout << "Failed to create build directory at " << workdir << endl;
+  }
+
   pt pos = 0, spos;
 
   /* Isolate the executable path and filename
