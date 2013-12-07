@@ -22,6 +22,7 @@
 #define ERT_OBJECT_HPP_
 
 #include "ert/real.hpp"
+#include "ert/property.hpp"
 
 namespace ert {
   struct object {
@@ -33,6 +34,11 @@ namespace ert {
     
     const real_t xstart;
     const real_t ystart;
+    
+    real_t x;
+    real_t y;
+    real_t xprevious;
+    real_t yprevious;
     
     real_t solid;
     real_t visible;
@@ -52,8 +58,11 @@ namespace ert {
     real_t image_index;
     real_t image_number;
     real_t image_speed;
-    real_t image_xscale;
+    // real_t image_xscale;
     real_t image_yscale;
+    
+    real_t get_image_xscale();
+    property_ro<object, real_t, &object::get_image_xscale> image_xscale;
     
     real_t mask_index;
     real_t bbox_bottom;
@@ -69,10 +78,7 @@ namespace ert {
     real_t vspeed;
     real_t speed;
     
-    real_t x;
-    real_t y;
-    real_t xprevious;
-    real_t yprevious;
+
   };
 }
 
