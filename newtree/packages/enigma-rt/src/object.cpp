@@ -21,5 +21,7 @@
 #include "ert/object.hpp"
 
 namespace ert {
-  //
+  object::object(unsigned long id, real_t x, real_t y)
+    : id(id), xstart(x), ystart(y), x(x), y(y) {
+  }
 }
