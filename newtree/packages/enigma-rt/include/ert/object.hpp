@@ -21,9 +21,55 @@
 #ifndef ERT_OBJECT_HPP_
 #define ERT_OBJECT_HPP_
 
+#include "ert/real.hpp"
+
 namespace ert {
   struct object {
-    //
+    const unsigned long id;
+    const unsigned long object_index;
+    
+    const real_t xstart;
+    const real_t ystart;
+    
+    real_t solid;
+    real_t visible;
+    real_t persistent;
+    real_t depth;
+    
+    // TODO: alarm events require variant array support
+    
+    real_t sprite_index;
+    real_t sprite_width;
+    real_t sprite_height;
+    real_t sprite_xoffset;
+    real_t sprite_yoffset;
+    real_t image_alpha;
+    real_t image_angle;
+    real_t image_blend;
+    real_t image_index;
+    real_t image_number;
+    real_t image_speed;
+    real_t image_xscale;
+    real_t image_yscale;
+    
+    real_t mask_index;
+    real_t bbox_bottom;
+    real_t bbox_left;
+    real_t bbox_right;
+    real_t bbox_top;
+    
+    real_t direction;
+    real_t friction;
+    real_t gravity;
+    real_t gravity_direction;
+    real_t hspeed;
+    real_t vspeed;
+    real_t speed;
+    
+    real_t x;
+    real_t y;
+    real_t xprevious;
+    real_t yprevious;
   };
 }
 
