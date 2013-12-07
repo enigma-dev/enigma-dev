@@ -38,6 +38,7 @@ using namespace std;
 }//I need to include GL/glu.h*/
 //I need it for gluLookAt()
 
+namespace enigma_user {
 
 int d3d_start()
 {
@@ -77,4 +78,6 @@ int d3d_set_projection(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom, gs_sca
 {
    // gluLookAt(xfrom, yfrom, zfrom, xto, yto, zto, xup, yup, zup);
     return 0;
+}
+
 }

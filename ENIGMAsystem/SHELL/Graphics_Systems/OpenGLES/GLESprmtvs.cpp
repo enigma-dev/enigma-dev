@@ -15,6 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "../General/GSprimitives.h"
 #include "OpenGLHeaders.h"
 #if PRIMBUFFER
 GLenum __primitivetype[PRIMDEPTH2];
@@ -37,6 +38,8 @@ GLenum ptypes_by_id[16] = {
   //These are padding.
   GL_POINTS, GL_POINTS, GL_POINTS, GL_POINTS, GL_POINTS
 }; //OPENGLES replaced GL_QUADS, GL_QUAD_STRIP, GL_POLYGON, with GL_TRIANGLE_STRIP's
+
+namespace enigma_user {
 
 void draw_set_primitive_aa(bool enable, int quality)
 {
@@ -202,4 +205,6 @@ int draw_primitive_end()
 	#endif
 	//glEnd(); OPENGLES
 	return 0;
+}
+
 }

@@ -1,30 +1,21 @@
-/********************************************************************************\
-**                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
-**                                                                              **
-**  This file is a part of the ENIGMA Development Environment.                  **
-**                                                                              **
-**                                                                              **
-**  ENIGMA is free software: you can redistribute it and/or modify it under the **
-**  terms of the GNU General Public License as published by the Free Software   **
-**  Foundation, version 3 of the license or any later version.                  **
-**                                                                              **
-**  This application and its source code is distributed AS-IS, WITHOUT ANY      **
-**  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS   **
-**  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more       **
-**  details.                                                                    **
-**                                                                              **
-**  You should have recieved a copy of the GNU General Public License along     **
-**  with this code. If not, see <http://www.gnu.org/licenses/>                  **
-**                                                                              **
-**  ENIGMA is an environment designed to create games and other programs with a **
-**  high-level, fully compilable language. Developers of ENIGMA or anything     **
-**  associated with ENIGMA are in no way responsible for its users or           **
-**  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **
-**                                                                              **
-\********************************************************************************/
+/** Copyright (C) 2008 Josh Ventura
+***
+*** This file is a part of the ENIGMA Development Environment.
+***
+*** ENIGMA is free software: you can redistribute it and/or modify it under the
+*** terms of the GNU General Public License as published by the Free Software
+*** Foundation, version 3 of the license or any later version.
+***
+*** This application and its source code is distributed AS-IS, WITHOUT ANY
+*** WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+*** FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+*** details.
+***
+*** You should have received a copy of the GNU General Public License along
+*** with this code. If not, see <http://www.gnu.org/licenses/>
+**/
 
+#include "workdir.h"
 #include <time.h>
 #include <string>
 #include <iostream>
@@ -88,10 +79,27 @@ inline int rdir_system(string x, string y)
 #include <System/builtins.h>
 #include <API/context.h>
 
+// Include for mkdir
+#if CURRENT_PLATFORM_ID != OS_WINDOWS
+#include <sys/stat.h>
+#include <unistd.h>
+#endif
+
 // This function parses one command line specified to the eYAML into a filename string and a parameter string,
 // then returns whether or not the output from this call must be manually redirected to the output file ofile.
 static inline bool toolchain_parseout(string line, string &exename, string &command, string ofile = "")
-{
+{ 
+#if CURRENT_PLATFORM_ID == OS_WINDOWS
+  CreateDirectory((workdir).c_str(), NULL);
+  if (!CreateDirectory((workdir +"Preprocessor_Environment_Editable").c_str(), NULL))
+#else
+  mkdir((workdir).c_str(),0755);
+  if (mkdir((workdir +"Preprocessor_Environment_Editable").c_str(),0755) == -1)
+#endif
+  {
+	  std::cout << "Failed to create build directory at " << workdir << endl;
+  }
+
   pt pos = 0, spos;
 
   /* Isolate the executable path and filename
@@ -131,12 +139,12 @@ static inline bool toolchain_parseout(string line, string &exename, string &comm
     bool mblank = false;
     srp = command.find("$blank");
     while (srp != string::npos) {
-      command.replace(srp,6,"blank.txt");
+      command.replace(srp,6,(workdir + "enigma_blank.txt").c_str());
       srp = command.find("$blank");
       mblank = true;
     }
     if (mblank)
-      fclose(fopen("blank.txt","wb"));
+      fclose(fopen((workdir + "enigma_blank.txt").c_str(),"wb"));
 
   /* Return whether or not to redirect */
   return redir;
@@ -187,9 +195,9 @@ const char* establish_bearings(const char *compiler)
   ***********************************************************/
   if ((cmd = compey.get("defines")) == "")
     return (sprintf(errbuf,"Compiler descriptor file `%s` does not specify 'defines' executable.\n", compfq.c_str()), errbuf);
-  redir = toolchain_parseout(cmd, toolchainexec,parameters,"defines.txt");
+  redir = toolchain_parseout(cmd, toolchainexec,parameters,(workdir + "enigma_defines.txt").c_str());
   cout << "Read key `defines` as `" << cmd << "`\nParsed `" << toolchainexec << "` `" << parameters << "`: redirect=" << (redir?"yes":"no") << "\n";
-  got_success = !(redir? e_execsp(toolchainexec, parameters, "> defines.txt",MAKE_paths) : e_execsp(toolchainexec, parameters, MAKE_paths));
+  got_success = !(redir? e_execsp(toolchainexec, parameters, ("> " + workdir +"enigma_defines.txt").c_str(),MAKE_paths) : e_execsp(toolchainexec, parameters, MAKE_paths));
   if (!got_success) return "Call to 'defines' toolchain executable returned non-zero!\n";
   else cout << "Call succeeded" << endl;
 
@@ -198,15 +206,15 @@ const char* establish_bearings(const char *compiler)
   ****************************************************/
   if ((cmd = compey.get("searchdirs")) == "")
     return (sprintf(errbuf,"Compiler descriptor file `%s` does not specify 'searchdirs' executable.", compfq.c_str()), errbuf);
-  redir = toolchain_parseout(cmd, toolchainexec,parameters,"searchdirs.txt");
+  redir = toolchain_parseout(cmd, toolchainexec,parameters,(workdir + "enigma_searchdirs.txt").c_str());
   cout << "Read key `searchdirs` as `" << cmd << "`\nParsed `" << toolchainexec << "` `" << parameters << "`: redirect=" << (redir?"yes":"no") << "\n";
-  got_success = !(redir? e_execsp(toolchainexec, parameters, "&> searchdirs.txt", MAKE_paths) : e_execsp(toolchainexec, parameters, MAKE_paths));
+  got_success = !(redir? e_execsp(toolchainexec, parameters, ("&> " + workdir +"enigma_searchdirs.txt").c_str(), MAKE_paths) : e_execsp(toolchainexec, parameters, MAKE_paths));
   if (!got_success) return "Call to 'searchdirs' toolchain executable returned non-zero!";
   else cout << "Call succeeded" << endl;
 
   /* Parse include directories
   ****************************************/
-    string idirs = fc("searchdirs.txt");
+    string idirs = fc((workdir + "enigma_searchdirs.txt").c_str());
     if (idirs == "")
       return "Invalid search directories returned. Error 6.";
 
@@ -222,6 +230,7 @@ const char* establish_bearings(const char *compiler)
       pos += idirstart.length();
     }
     jdi::builtin->add_search_directory("ENIGMAsystem/SHELL/");
+    jdi::builtin->add_search_directory(workdir.c_str());
 
     while (is_useless(idirs[++pos]));
 
@@ -244,11 +253,11 @@ const char* establish_bearings(const char *compiler)
 
   /* Parse built-in #defines
   ****************************/
-    llreader macro_reader("defines.txt");
+    llreader macro_reader((workdir + "enigma_defines.txt").c_str());
     if (!macro_reader.is_open())
       return "Call to `defines' toolchain executable returned no data.\n";
 
-    int res = jdi::builtin->parse_C_stream(macro_reader, "defines.txt");
+    int res = jdi::builtin->parse_C_stream(macro_reader, (workdir + "enigma_defines.txt").c_str());
     if (res)
       return "Highly unlikely error: Compiler builtins failed to parse. But stupid things can happen when working with files.";
 

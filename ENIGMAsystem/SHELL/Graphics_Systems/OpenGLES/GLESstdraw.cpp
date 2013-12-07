@@ -30,6 +30,8 @@ extern unsigned char currentcolor[4];
 }
 #define untexture() if(enigma::bound_texture) glBindTexture(GL_TEXTURE_2D,enigma::bound_texture=0);
 
+namespace enigma_user {
+
 void draw_set_line_pattern(unsigned short pattern, int scale)
 {
    /* if (pattern == -1){
@@ -721,4 +723,6 @@ int draw_mandelbrot(int x, int y, float w, double Zx, double Zy, double Zw, unsi
 		}
 	glEnd(); OPENGLES*/
 	return c;
+}
+
 }
