@@ -1,30 +1,21 @@
-/********************************************************************************\
-**                                                                              **
-**  Copyright (C) 2011 Josh Ventura                                             **
-**                                                                              **
-**  This file is a part of the ENIGMA Development Environment.                  **
-**                                                                              **
-**                                                                              **
-**  ENIGMA is free software: you can redistribute it and/or modify it under the **
-**  terms of the GNU General Public License as published by the Free Software   **
-**  Foundation, version 3 of the license or any later version.                  **
-**                                                                              **
-**  This application and its source code is distributed AS-IS, WITHOUT ANY      **
-**  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS   **
-**  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more       **
-**  details.                                                                    **
-**                                                                              **
-**  You should have recieved a copy of the GNU General Public License along     **
-**  with this code. If not, see <http://www.gnu.org/licenses/>                  **
-**                                                                              **
-**  ENIGMA is an environment designed to create games and other programs with a **
-**  high-level, fully compilable language. Developers of ENIGMA or anything     **
-**  associated with ENIGMA are in no way responsible for its users or           **
-**  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **
-**                                                                              **
-\********************************************************************************/
+/** Copyright (C) 2011 Josh Ventura
+***
+*** This file is a part of the ENIGMA Development Environment.
+***
+*** ENIGMA is free software: you can redistribute it and/or modify it under the
+*** terms of the GNU General Public License as published by the Free Software
+*** Foundation, version 3 of the license or any later version.
+***
+*** This application and its source code is distributed AS-IS, WITHOUT ANY
+*** WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+*** FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+*** details.
+***
+*** You should have received a copy of the GNU General Public License along
+*** with this code. If not, see <http://www.gnu.org/licenses/>
+**/
 
+#include "workdir.h"
 #include "OS_Switchboard.h" //Tell us where the hell we are
 #include "backend/EnigmaStruct.h" //LateralGM interface structures
 
@@ -50,6 +41,8 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
+//#include <dirent.h>
+#include <sys/stat.h>
 #include "backend/ideprint.h"
 
 using namespace std;
@@ -116,7 +109,7 @@ string toUpper(string x) { string res = x; for (size_t i = 0; i < res.length(); 
 void clear_ide_editables()
 {
   ofstream wto;
-  string f2comp = fc("ENIGMAsystem/SHELL/API_Switchboard.h");
+  string f2comp = fc((workdir + "API_Switchboard.h").c_str());
   string f2write = license;
     string inc = "/include.h\"\n";
     f2write += "#include \"Platforms/" + (extensions::targetAPI.windowSys)            + "/include.h\"\n"
@@ -139,12 +132,12 @@ void clear_ide_editables()
 
   if (f2comp != f2write)
   {
-    wto.open("ENIGMAsystem/SHELL/API_Switchboard.h",ios_base::out);
+    wto.open((workdir +"API_Switchboard.h").c_str(),ios_base::out);
       wto << f2write << endl;
     wto.close();
   }
 
-  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/LIBINCLUDE.h");
+  wto.open((workdir +"Preprocessor_Environment_Editable/LIBINCLUDE.h").c_str());
     wto << license;
     wto << "/*************************************************************\nOptionally included libraries\n****************************/\n";
     wto << "#define STRINGLIB 1\n#define COLORSLIB 1\n#define STDRAWLIB 1\n#define PRIMTVLIB 1\n#define WINDOWLIB 1\n"
@@ -152,7 +145,7 @@ void clear_ide_editables()
     wto << "/***************\nEnd optional libs\n ***************/\n";
   wto.close();
 
-  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/GAME_SETTINGS.h",ios_base::out);
+  wto.open((workdir +"Preprocessor_Environment_Editable/GAME_SETTINGS.h").c_str(),ios_base::out);
     wto << license;
     wto << "#define ASSUMEZERO 0\n";
     wto << "#define PRIMBUFFER 0\n";
@@ -187,7 +180,8 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
     edbg << "Cleaning..." << flushl;
 
 	string make = "clean-game ";
-	make += "COMPILEPATH=" CURRENT_PLATFORM_NAME "/" + extensions::targetOS.identifier + " ";
+	make += "COMPILEPATH=" CURRENT_PLATFORM_NAME "\"" + extensions::targetOS.identifier + "\" ";
+	make += "WORKDIR=\"" + workdir + "\" ";
 	make += "eTCpath=\"" + MAKE_tcpaths + "\"";
 
 	edbg << "Full command line: " << MAKE_location << " " << make << flushl;
@@ -197,10 +191,10 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
 	idpr("Done.", 100);
 	return 0;
   }
-
   edbg << "Building for mode (" << mode << ")" << flushl;
 
   // CLean up from any previous executions.
+
   edbg << "Cleaning up from previous executions" << flushl;
     parsed_objects.clear(); //Make sure we don't dump in any old object code...
     edbg << " - Cleared parsed objects" << flushl;
@@ -328,7 +322,7 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   
   GameSettings gameSet = es->gameSettings;
   edbg << "Writing executable information and resources." << flushl;
-  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/Resources.rc",ios_base::out);
+  wto.open((workdir +"Preprocessor_Environment_Editable/Resources.rc").c_str(),ios_base::out);
     wto << license;
     wto << "#include <windows.h>\n";
 	if (gameSet.gameIcon != NULL && strlen(gameSet.gameIcon) > 0) {
@@ -357,7 +351,7 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   wto.close();
   
   edbg << "Writing modes and settings" << flushl;
-  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/GAME_SETTINGS.h",ios_base::out);
+  wto.open((workdir +"Preprocessor_Environment_Editable/GAME_SETTINGS.h").c_str(),ios_base::out);
     wto << license;
     wto << "#define ASSUMEZERO 0\n";
     wto << "#define PRIMBUFFER 0\n";
@@ -368,21 +362,21 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
     wto << '\n';
   wto.close();
 
-  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_modesenabled.h",ios_base::out);
+  wto.open((workdir +"Preprocessor_Environment_Editable/IDE_EDIT_modesenabled.h").c_str(),ios_base::out);
     wto << license;
     wto << "#define BUILDMODE " << 0 << "\n";
     wto << "#define DEBUGMODE " << 0 << "\n";
     wto << '\n';
   wto.close();
 
-  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_inherited_locals.h",ios_base::out);
+  wto.open((workdir +"Preprocessor_Environment_Editable/IDE_EDIT_inherited_locals.h").c_str(),ios_base::out);
   wto.close();
 
 
   //NEXT FILE ----------------------------------------
   //Object switch: A listing of all object IDs and the code to allocate them.
   edbg << "Writing object switch" << flushl;
-  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h",ios_base::out);
+  wto.open((workdir +"Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h").c_str(),ios_base::out);
     wto << license;
     wto << "#ifndef NEW_OBJ_PREFIX\n#  define NEW_OBJ_PREFIX\n#endif\n\n";
     for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
@@ -399,7 +393,7 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   //Resource names: Defines integer constants for all resources.
   int max;
   edbg << "Writing resource names and maxima" << flushl;
-  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_resourcenames.h",ios_base::out);
+  wto.open((workdir +"Preprocessor_Environment_Editable/IDE_EDIT_resourcenames.h").c_str(),ios_base::out);
     wto << license;
 
 
@@ -597,6 +591,7 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
 
   string make = "Game ";
 
+  make += "WORKDIR=\"" + workdir + "\" ";
   make += mode == emode_debug? "GMODE=Debug ": mode == emode_design? "GMODE=Design ": mode == emode_compile?"GMODE=Compile ": "GMODE=Run ";
   make += "GRAPHICS=" + extensions::targetAPI.graphicsSys + " ";
   make += "AUDIO=" + extensions::targetAPI.audioSys + " ";
@@ -644,12 +639,12 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
 //  int makeres = better_system(MAKE_location,"MacOS");
 
   // Pick a file and flush it
-  const char* redirfile = "redirfile.txt";
-  fclose(fopen(redirfile,"wb"));
+  const string redirfile = (workdir + "enigma_compile.log");
+  fclose(fopen(redirfile.c_str(),"wb"));
 
   // Redirect it
-  ide_output_redirect_file(redirfile);
-  int makeres = e_execs(MAKE_location,make,"&>",redirfile);
+  ide_output_redirect_file(redirfile.c_str()); //TODO: If you pass this function the address it will screw up the value; most likely a JNA/Plugin bug.
+  int makeres = e_execs(MAKE_location,make,"&>",redirfile.c_str());
 
   // Stop redirecting GCC output
   ide_output_redirect_reset();
@@ -672,7 +667,7 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 
   #ifdef OS_ANDROID
-    "ENIGMAsystem/SHELL/Platforms/Android/EnigmaAndroidGame/libs/armeabi/libndkEnigmaGame.so";
+    "Platforms/Android/EnigmaAndroidGame/libs/armeabi/libndkEnigmaGame.so";
   #endif
 
   FILE *gameModule;

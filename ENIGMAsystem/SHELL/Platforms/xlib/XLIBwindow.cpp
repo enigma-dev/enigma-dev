@@ -1,3 +1,5 @@
+
+
 /** Copyright (C) 2008-2011 IsmAvatar <cmagicj@nni.com>, Josh Ventura
 ***
 *** This file is a part of the ENIGMA Development Environment.
@@ -80,7 +82,7 @@ int visx = -1, visy = -1;
 namespace enigma_user
 {
 
-int window_set_visible(bool visible)
+void window_set_visible(bool visible)
 {
 	if(visible)
 	{
@@ -92,7 +94,6 @@ int window_set_visible(bool visible)
 	}
 	else
 	  XUnmapWindow(disp, win);
-	return 0;
 }
 int window_get_visible()
 {
@@ -428,7 +429,7 @@ void keyboard_wait()
 }
 
 void window_set_region_scale(double scale, bool adaptwindow) {}
-bool window_get_region_scale() {return 1;}
+double window_get_region_scale() {return 1;}
 void window_set_region_size(int w, int h, bool adaptwindow) {}
 
 int window_get_region_width()
