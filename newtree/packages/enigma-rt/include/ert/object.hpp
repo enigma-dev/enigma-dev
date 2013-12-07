@@ -25,8 +25,11 @@
 
 namespace ert {
   struct object {
+    object(unsigned long id, real_t x, real_t y);
+    virtual ~object() = 0;
+    
     const unsigned long id;
-    const unsigned long object_index;
+    virtual unsigned long object_index() = 0;
     
     const real_t xstart;
     const real_t ystart;

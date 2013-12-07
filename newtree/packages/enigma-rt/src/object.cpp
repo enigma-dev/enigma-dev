@@ -20,3 +20,6 @@
 
 #include "ert/object.hpp"
 
+namespace ert {
+  //
+}
