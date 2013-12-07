@@ -24,6 +24,24 @@
 #include <functional>
 
 namespace ert {
+  template <typename C, typename T, T (C::*getter)()>
+  struct property_ro {
+    property_ro(C *th)
+    : owner(th) {
+    }
+    property_ro(property_ro&&) = default;
+    property_ro(const property_ro&) = delete;
+    property_ro& operator=(const property_ro&) = delete;
+    property_ro& operator=(property_ro&&) = delete;
+    
+    operator T() {
+      return (this->owner->*getter)();
+    }
+    
+  private:
+    C* const owner;
+  };
+  
   template <typename C, typename T, T (C::*getter)(), void (C::*setter)(T)>
   struct property {
     property (C *th)
