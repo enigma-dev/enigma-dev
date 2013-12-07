@@ -44,7 +44,7 @@ namespace ert {
   
   template <typename C, typename T, T (C::*getter)(), void (C::*setter)(T)>
   struct property {
-    property (C *th)
+    property(C *th)
       : owner(th) {
     }
     property(property&&) = default;
