@@ -30,9 +30,6 @@ namespace ert {
     virtual ~object() = 0;
     
     const unsigned long id;
-    virtual unsigned long get_object_index() = 0;
-    property_ro<object, unsigned long, &object::get_object_index> object_index;
-    
     const real_t xstart;
     const real_t ystart;
     
@@ -40,6 +37,9 @@ namespace ert {
     real_t y;
     real_t xprevious;
     real_t yprevious;
+    
+    virtual unsigned long get_object_index() = 0;
+    property_ro<object, unsigned long, &object::get_object_index> object_index;
     
     real_t solid;
     real_t visible;
