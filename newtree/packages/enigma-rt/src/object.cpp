@@ -306,7 +306,17 @@ namespace ert {
   
   void object::set_gravity(real_t gravity) {
     this->properties.gravity = gravity;
-    // TODO, set {h,v}gravity
+    this->update_gravity();
+  }
+  
+  void object::update_gravity() {
+    if (this->properties.gravity != 0) {
+      this->properties.hgravity = this->properties.gravity * std::cos(this->properties.gravity_direction);
+      this->properties.vgravity = -this->properties.gravity * std::sin(this->properties.gravity_direction);
+      return;
+    }
+    this->properties.hgravity = 0;
+    this->properties.vgravity = 0;
   }
   
   property<object, real_t, &object::get_gravity, &object::set_gravity> object::gravity() {
@@ -314,13 +324,12 @@ namespace ert {
   }
   
   real_t object::get_gravity_direction() {
-    // TODO, point direction is broken
-    return 0;
+    return radtodeg(this->properties.gravity_direction);
   }
   
   void object::set_gravity_direction(real_t direction) {
-    // TODO
-    (void)direction;
+    this->properties.gravity_direction = degtorad(direction);
+    this->update_gravity();
   }
   
   property<object, real_t, &object::get_gravity_direction, &object::set_gravity_direction> object::gravity_direction() {
