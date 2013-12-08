@@ -70,8 +70,6 @@ namespace ert {
       real_t vspeed;
     } properties;
     
-    void initialize_properties(object::object_properties& prop);
-    
     bool get_solid();
     void set_solid(bool);
     property<object, bool, &object::get_solid, &object::set_solid> solid();
