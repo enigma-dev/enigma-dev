@@ -18,6 +18,8 @@
 
 ******************************************************************************/
 
+#include "ert/real.hpp"
+#include "ert/property.hpp"
 #include "ert/object.hpp"
 
 namespace ert {
