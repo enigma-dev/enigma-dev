@@ -62,8 +62,10 @@ namespace ert {
       real_t image_speed;
       real_t image_xscale;
       real_t image_yscale;
+      real_t friction;
       real_t hfriction;
       real_t vfriction;
+      real_t gravity;
       real_t hgravity;
       real_t vgravity;
       real_t hspeed;
