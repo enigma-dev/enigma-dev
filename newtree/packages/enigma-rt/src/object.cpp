@@ -21,8 +21,8 @@
 #include "ert/real.hpp"
 #include "ert/property.hpp"
 #include "ert/object.hpp"
-
 #include "ert/math.hpp"
+#include "ert/vector.hpp"
 
 namespace ert {
   object::object(unsigned long id, real_t x, real_t y)
@@ -291,9 +291,9 @@ namespace ert {
   
   void object::set_friction(real_t friction) {
     this->properties.friction = friction;
-    // TODO, these are broken
-    this->properties.hfriction = friction * this->properties.hspeed / this->properties.vspeed;
-    this->properties.vfriction = friction * this->properties.vspeed / this->properties.hspeed;
+    real_t dir = internal::vector_direction_rad(this->properties.hspeed, this->properties.vspeed);
+    this->properties.hfriction = friction * std::cos(dir);
+    this->properties.vfriction = -friction * std::sin(dir);
   }
   
   property<object, real_t, &object::get_friction, &object::set_friction> object::friction() {
