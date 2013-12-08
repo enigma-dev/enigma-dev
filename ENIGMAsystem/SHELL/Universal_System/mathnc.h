@@ -55,13 +55,13 @@ namespace enigma_user
 
   // TODO: Once the user space switch to namespace enigma_user has been made,
   // comment in all these functions.
-  inline ma_scalar abs(ma_scalar x)   { return ::fabs(x); }
+  inline ma_scalar abs(double x)   { return ::fabs(x); }
   //inline ma_scalar ceil(ma_scalar x)  { return ::ceil(x); }
   //inline ma_scalar floor(ma_scalar x) { return ::floor(x); }
   //inline ma_scalar round(ma_scalar x) { return ::round(x); }
   //inline ma_scalar exp(ma_scalar x)   { return ::exp(x); }
   //inline ma_scalar sqrt(ma_scalar x)  { return ::sqrt(x); }
-  inline ma_scalar ln(ma_scalar x)    { return ::log(x); }
+  inline ma_scalar ln(double x)    { return ::log(x); }
   //inline ma_scalar log(ma_scalar x)   { return ::log(x); }
   //inline ma_scalar log2(ma_scalar x)  { return ::log2(x); }
   //inline ma_scalar log10(ma_scalar x) { return ::log10(x); }
