@@ -26,7 +26,7 @@
 
 namespace ert {
   real_t point_direction(real_t x1, real_t y1, real_t x2, real_t y2) {
-    return 180 / pi * std::atan2(y2 - y1, x2 - x1) + 360 * (y2 > y1);
+    return 180 / pi * std::atan2(y1 - y2, x2 - x1) + 360 * (y2 > y1);
   }
 
   real_t point_distance(real_t x1, real_t y1, real_t x2, real_t y2) {
