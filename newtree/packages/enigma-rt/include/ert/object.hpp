@@ -27,7 +27,7 @@
 namespace ert {
   struct object {
     object(unsigned long id, real_t x, real_t y);
-    virtual ~object() = 0;
+    virtual ~object();
     
     const unsigned long id;
     const real_t xstart;
