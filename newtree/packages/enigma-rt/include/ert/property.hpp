@@ -58,8 +58,8 @@ namespace ert {
     }
     
     T&& operator=(T&& val) {
-      (this->owner->*setter)(std::forward<T>(val));
-      return std::move((this->owner->*getter)());
+      (this->owner->*setter)(std::move(val));
+      return (this->owner->*getter)();
     }
     
     operator T() {
