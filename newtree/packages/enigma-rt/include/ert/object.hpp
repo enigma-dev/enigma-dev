@@ -39,7 +39,9 @@ namespace ert {
     real_t yprevious;
     
     virtual unsigned long get_object_index() = 0;
-    property_ro<object, unsigned long, &object::get_object_index> object_index;
+    property_ro<object, unsigned long, &object::get_object_index> object_index();
+    
+    //property_ro<object, unsigned long, &object::get_object_index> object_index;
     
     real_t solid;
     real_t visible;
@@ -63,7 +65,7 @@ namespace ert {
     real_t image_yscale;
     
     real_t get_image_xscale();
-    property_ro<object, real_t, &object::get_image_xscale> image_xscale;
+    property_ro<object, real_t, &object::get_image_xscale> image_xscale();
     
     real_t mask_index;
     real_t bbox_bottom;
