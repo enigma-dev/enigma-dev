@@ -71,6 +71,8 @@ namespace ert {
       real_t gravity_direction;
       real_t hspeed;
       real_t vspeed;
+      real_t speed;
+      real_t direction;
     } properties;
     
     bool get_solid();
