@@ -41,12 +41,20 @@ namespace ert {
     virtual unsigned long get_object_index() = 0;
     property_ro<object, unsigned long, &object::get_object_index> object_index();
     
-    struct {
+    virtual bool object_is_solid() = 0;
+    virtual bool object_is_visible() = 0;
+    virtual bool object_is_persistent() = 0;
+    virtual real_t object_depth() = 0;
+    virtual real_t object_sprite_index() = 0;
+    virtual real_t object_mask_index() = 0;
+    
+    struct object_properties {
       bool solid;
       bool visible;
       bool persistent;
       real_t depth;
       real_t sprite_index;
+      real_t mask_index;
       real_t image_alpha;
       real_t image_angle;
       real_t image_blend;
@@ -54,7 +62,6 @@ namespace ert {
       real_t image_speed;
       real_t image_xscale;
       real_t image_yscale;
-      real_t mask_index;
       real_t hfriction;
       real_t vfriction;
       real_t hgravity;
@@ -62,6 +69,8 @@ namespace ert {
       real_t hspeed;
       real_t vspeed;
     } properties;
+    
+    void initialize_properties(object::object_properties& prop);
     
     bool get_solid();
     void set_solid(bool);
