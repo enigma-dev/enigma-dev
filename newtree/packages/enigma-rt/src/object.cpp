@@ -311,13 +311,13 @@ namespace ert {
   }
   
   void object::update_gravity() {
-    if (this->properties.gravity != 0) {
-      this->properties.hgravity = this->properties.gravity * std::cos(this->properties.gravity_direction);
-      this->properties.vgravity = -this->properties.gravity * std::sin(this->properties.gravity_direction);
+    if (this->properties.gravity == 0) {
+      this->properties.hgravity = 0;
+      this->properties.vgravity = 0;
       return;
     }
-    this->properties.hgravity = 0;
-    this->properties.vgravity = 0;
+    this->properties.hgravity = this->properties.gravity * std::cos(this->properties.gravity_direction);
+    this->properties.vgravity = -this->properties.gravity * std::sin(this->properties.gravity_direction);
   }
   
   property<object, real_t, &object::get_gravity, &object::set_gravity> object::gravity() {
