@@ -25,8 +25,18 @@
 #include <cmath>
 
 namespace ert {
+  namespace internal {
+    real_t point_direction_rad(real_t x1, real_t y1, real_t x2, real_t y2) {
+      return std::atan2(y1 - y2, x2 - x1) + 2 * pi * (y2 > y1);
+    }
+    
+    real_t vector_direction_rad(real_t x, real_t y) {
+      return std::atan2(-y, x) + 2 * pi * (y > 0);
+    }
+  }
+  
   real_t point_direction(real_t x1, real_t y1, real_t x2, real_t y2) {
-    return 180 / pi * std::atan2(y1 - y2, x2 - x1) + 360 * (y2 > y1);
+    return radtodeg(internal::point_direction_rad(x1, y1, x2, y2));
   }
 
   real_t point_distance(real_t x1, real_t y1, real_t x2, real_t y2) {

@@ -24,6 +24,11 @@
 #include "ert/real.hpp"
 
 namespace ert {
+  namespace internal {
+    real_t point_direction_rad(real_t x1, real_t y1, real_t x2, real_t y2);
+    real_t vector_direction_rad(real_t x, real_t y);
+  }
+  
   // Vector Functions
   real_t point_direction(real_t, real_t, real_t, real_t);
   real_t point_distance(real_t, real_t, real_t, real_t);
