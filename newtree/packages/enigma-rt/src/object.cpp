@@ -291,6 +291,7 @@ namespace ert {
   
   void object::set_friction(real_t friction) {
     this->properties.friction = friction;
+    // TODO: port to this->direction?
     real_t dir = internal::vector_direction_rad(this->properties.hspeed, this->properties.vspeed);
     this->properties.hfriction = friction * std::cos(dir);
     this->properties.vfriction = -friction * std::sin(dir);
