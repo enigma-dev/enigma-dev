@@ -68,6 +68,7 @@ namespace ert {
       real_t gravity;
       real_t hgravity;
       real_t vgravity;
+      real_t gravity_direction;
       real_t hspeed;
       real_t vspeed;
     } properties;
@@ -161,6 +162,7 @@ namespace ert {
     
     real_t get_gravity();
     void set_gravity(real_t);
+    void update_gravity();
     property<object, real_t, &object::get_gravity, &object::set_gravity> gravity();
     
     real_t get_gravity_direction();
