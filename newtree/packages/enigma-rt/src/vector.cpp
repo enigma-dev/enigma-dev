@@ -20,6 +20,7 @@
 
 #include "ert/real.hpp"
 #include "ert/math.hpp"
+#include "ert/vector.hpp"
 
 #include <cmath>
 
