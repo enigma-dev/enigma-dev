@@ -24,12 +24,4 @@ namespace ert {
   object::object(unsigned long id, real_t x, real_t y)
     : id(id), xstart(x), ystart(y), x(x), y(y) {
   }
-  
-  property_ro<object, unsigned long, &object::get_object_index> object::object_index() {
-    return {this};
-  }
-  
-  property_ro<object, real_t, &object::get_image_xscale> object::image_xscale() {
-    return {this};
-  }
 }
