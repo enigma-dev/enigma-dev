@@ -22,6 +22,7 @@
 #include "../General/GSbackground.h"
 #include "../General/GSscreen.h"
 #include "../General/GSd3d.h"
+#include "../General/GScolors.h"
 
 using namespace std;
 
@@ -476,8 +477,8 @@ void screen_init()
 	glEnable(GL_TEXTURE_2D);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glAlphaFunc(GL_ALWAYS,0);
-	glColor4f(0,0,0,1);
 	glBindTexture(GL_TEXTURE_2D,0);
+	draw_set_color(c_white);
 }
 
 int screen_save(string filename) { //Assumes native integers are little endian

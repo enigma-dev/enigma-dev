@@ -23,6 +23,7 @@
 #include "../General/GSscreen.h"
 #include "../General/GSd3d.h"
 #include "../General/GStextures.h"
+#include "../General/GScolors.h"
 
 using namespace std;
 
@@ -538,13 +539,9 @@ void screen_init()
 	d3dmgr->SetRenderState(D3DRS_ALPHAREF, (DWORD)0x00000001);
 	d3dmgr->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE); 
 	d3dmgr->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATEREQUAL);
-	//glEnable(GL_BLEND);
-	//glEnable(GL_TEXTURE_2D);
-	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	d3dmgr->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
 	d3dmgr->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
-	//glAlphaFunc(GL_ALWAYS,0);
-	//glColor4f(0,0,0,1);
+	draw_set_color(c_white);
 }
 
 int screen_save(string filename) //Assumes native integers are little endian
