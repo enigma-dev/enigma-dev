@@ -79,7 +79,7 @@ inline int rdir_system(string x, string y)
 #include <System/builtins.h>
 #include <API/context.h>
 
-// Include for mkdir
+// Only include the headers for mkdir() if we are not on Windows; on Windows we use CreateDirectory() from windows.h
 #if CURRENT_PLATFORM_ID != OS_WINDOWS
 #include <sys/stat.h>
 #include <unistd.h>
