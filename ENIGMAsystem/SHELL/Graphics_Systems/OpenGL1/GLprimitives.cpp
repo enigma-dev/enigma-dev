@@ -53,7 +53,7 @@ void draw_primitive_begin(int kind)
 {
   // This has to be done because these immediate mode vertex functions will
   // blend with the texture whether or specify texture coordinates or not.
-  texture_set(0);
+  texture_reset();
   glBegin(ptypes_by_id[ kind & 15 ]);
 }
 
@@ -61,6 +61,10 @@ void draw_primitive_begin_texture(int kind, int tex)
 {
   texture_set(tex);
   glBegin(ptypes_by_id[ kind & 15 ]);
+}
+
+void draw_primitive_end() {
+  glEnd();
 }
 
 void draw_vertex(gs_scalar x, gs_scalar y)
@@ -97,10 +101,6 @@ void draw_vertex_texture_color(gs_scalar x, gs_scalar y, gs_scalar tx, gs_scalar
     glTexCoord2f(tx,ty);
     glVertex2f(x,y);
   glPopAttrib();
-}
-
-void draw_primitive_end() {
-	glEnd();
 }
 
 void d3d_primitive_begin(int kind) {	
