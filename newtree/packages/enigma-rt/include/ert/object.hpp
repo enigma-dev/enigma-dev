@@ -161,6 +161,7 @@ namespace ert {
     
     real_t get_friction();
     void set_friction(real_t);
+    void update_friction();
     property<object, real_t, &object::get_friction, &object::set_friction> friction();
     
     real_t get_gravity();
