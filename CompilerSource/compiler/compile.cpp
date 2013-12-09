@@ -162,6 +162,9 @@ void clear_ide_editables()
 // modes: 0=run, 1=debug, 2=design, 3=compile
 enum { emode_run, emode_debug, emode_design, emode_compile, emode_rebuild };
 
+// The games working directory, in run/debug it is the GMK/GMX location where the IDE is working with the project,
+// in compile mode it is the same as program_directory, or where the (*.exe executable) is located.
+string working_directory = "";
 
 dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode) {
   return current_language->compile(es, exe_filename, mode);
@@ -192,6 +195,19 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
 	return 0;
   }
   edbg << "Building for mode (" << mode << ")" << flushl;
+  
+    string s;
+    if (!es->filename || mode == emode_compile) {
+        s = ".";
+    } else {
+        s = es->filename;
+        s = s.substr(0, s.find_last_of("/"));
+        s = s.substr(s.find("file:/",0) + 6);
+        s = string_replace_all(s, "/", "\\\\");
+        s = string_replace_all(s, "%20", " ");
+    }
+	
+	working_directory = s;
 
   // CLean up from any previous executions.
 
