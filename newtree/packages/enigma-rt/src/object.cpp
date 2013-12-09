@@ -272,17 +272,16 @@ namespace ert {
   }
   
   real_t object::get_direction() {
-    // TODO, point direction is broken
-    return 0;
+    return this->properties.direction;
   }
   
   void object::set_direction(real_t direction) {
-    // TODO, point direction is broken
+    // TODO
     (void)direction;
   }
   
   void object::update_direction() {
-    //
+    this->properties.direction = internal::vector_direction_rad(this->properties.hspeed, this->properties.vspeed);
   }
   
   property<object, real_t, &object::get_direction, &object::set_direction> object::direction() {
