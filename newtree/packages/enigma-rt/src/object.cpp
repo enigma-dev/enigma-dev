@@ -360,10 +360,6 @@ namespace ert {
   }
   
   void object::update_hspeed() {
-    if (this->properties.speed == 0) {
-      this->properties.hspeed = 0;
-      return;
-    }
     this->properties.hspeed = this->properties.speed * std::cos(this->properties.direction);
   }
   
@@ -382,10 +378,6 @@ namespace ert {
   }
   
   void object::update_vspeed() {
-    if (this->properties.speed == 0) {
-      this->properties.vspeed = 0;
-      return;
-    }
     this->properties.vspeed = -this->properties.speed * std::sin(this->properties.direction);
   }
   
