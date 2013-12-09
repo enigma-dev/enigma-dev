@@ -178,15 +178,15 @@ struct PlayableSoundInstance : public PlayableSound {
 	  return sound->getPosition().z;
 	}
 
-        bool setLoop(bool loop) {
-          sound->setLoop(loop);
-        }
+    bool setLoop(bool loop) {
+        sound->setLoop(loop);
+    }
 
-        void setVolume(float volume) {
+    void setVolume(float volume) {
 	  sound->setVolume(volume);
-        }
+    }
 
-        void setPlayingOffset(sf::Time offset) {
+    void setPlayingOffset(sf::Time offset) {
 	  sound->setPlayingOffset(offset);
 	}
 
