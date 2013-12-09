@@ -53,7 +53,6 @@ using std::string;
 #include <vector>
 using std::vector;
 
-#undef None
 #include <BulletSoftBody/btSoftBody.h>
 #include <btBulletDynamicsCommon.h>
 #include <BulletSoftBody/btSoftRigidDynamicsWorld.h>
