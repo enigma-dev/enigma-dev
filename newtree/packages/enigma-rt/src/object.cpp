@@ -300,11 +300,6 @@ namespace ert {
   }
   
   void object::update_friction() {
-    if (this->properties.friction == 0) {
-      this->properties.hfriction = 0;
-      this->properties.vfriction = 0;
-      return;
-    }
     this->properties.hfriction = this->properties.friction * std::cos(this->properties.direction);
     this->properties.vfriction = -this->properties.friction * std::sin(this->properties.direction);
   }
@@ -323,11 +318,6 @@ namespace ert {
   }
   
   void object::update_gravity() {
-    if (this->properties.gravity == 0) {
-      this->properties.hgravity = 0;
-      this->properties.vgravity = 0;
-      return;
-    }
     this->properties.hgravity = this->properties.gravity * std::cos(this->properties.gravity_direction);
     this->properties.vgravity = -this->properties.gravity * std::sin(this->properties.gravity_direction);
   }
