@@ -41,7 +41,7 @@ namespace enigma {
 double projection_matrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1}, transformation_matrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
 
 GLenum renderstates[6] = {
-  GL_FRONT, GL_BACK, GL_FRONT_AND_BACK, 
+  GL_FRONT, GL_BACK, GL_FRONT_AND_BACK,
   GL_NICEST, GL_FASTEST, GL_DONT_CARE
 };
 
@@ -287,6 +287,7 @@ void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom, g
 
 void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, double angle)
 {
+  glDisable(GL_DEPTH_TEST);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   glScalef(1, -1, 1);
