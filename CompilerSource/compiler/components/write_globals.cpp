@@ -25,6 +25,7 @@
 **                                                                              **
 \********************************************************************************/
 
+#include "workdir.h"
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
@@ -42,10 +43,12 @@ using namespace std;
 
 int global_script_argument_count = 0;
 
+extern string working_directory;
+
 int lang_CPP::compile_writeGlobals(EnigmaStruct* es, parsed_object* global)
 {
   ofstream wto;
-  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_globals.h",ios_base::out);
+  wto.open((workdir +"Preprocessor_Environment_Editable/IDE_EDIT_globals.h").c_str(),ios_base::out);
     wto << license;
 
     global_script_argument_count=16; //write all 16 arguments
@@ -56,20 +59,9 @@ int lang_CPP::compile_writeGlobals(EnigmaStruct* es, parsed_object* global)
         wto << ", argument" << i << " = 0";
       wto << ";\n\n";
     }
-
-    string s;
-    if (!es->filename)
-        s = "";
-    else
-    {
-        s = es->filename;
-        s = s.substr(0, s.find_last_of("/"));
-        s = s.substr(s.find("file:/",0) + 6);
-        s = string_replace_all(s, "/", "\\\\");
-        s = string_replace_all(s, "%20", " ");
-    }
+	
     wto << "namespace enigma_user { " << endl;
-    wto << "  string working_directory = \"" << s << "\";" << endl;
+    wto << "  string working_directory = \"" << working_directory << "\";" << endl;
     wto << "  unsigned int game_id = " << es->gameSettings.gameId << ";" << endl;
     wto << "}" << endl;
 

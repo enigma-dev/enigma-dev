@@ -49,6 +49,8 @@ namespace enigma {
 
 using namespace enigma;
 
+namespace enigma_user {
+
 static inline void draw_back()
 {
     //Draw backgrounds
@@ -209,5 +211,7 @@ int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h
 	fclose(bmp);
 	delete[] scrbuf;
 	return 0;
+}
+
 }
 

@@ -1,0 +1,8 @@
+
+*
+!.gitignore
+!.gitattributes
+!CMakeLists.txt
+!**/
+!/packages/**/*.cpp
+!/packages/**/*.hpp

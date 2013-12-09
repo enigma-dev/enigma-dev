@@ -32,47 +32,47 @@ namespace enigma_user
   // Overloading
   // TODO: Once the user space switch to namespace enigma_user has been made,
   // remove these functions.
-  double abs(const variant& x)   { return ::fabs(double(x)); }
-  double abs(const var& x)     { return ::fabs(double(x)); }
+  ma_scalar abs(const variant& x)   { return ::fabs(ma_scalar(x)); }
+  ma_scalar abs(const var& x)     { return ::fabs(ma_scalar(x)); }
 
   // Functions
 
-  double sqr(double x)              { return x*x;      }
-  double logn(double n,double x)    { return ::log(x)/::log(n); }
+  ma_scalar sqr(ma_scalar x)              { return x*x;      }
+  ma_scalar logn(ma_scalar n,ma_scalar x)    { return ::log(x)/::log(n); }
 
-  double sind(double x)              { return ::sin(x * M_PI / 180.0); }
-  double cosd(double x)              { return ::cos(x * M_PI / 180.0); }
-  double tand(double x)              { return ::tan(x * M_PI / 180.0); }
-  double asind(double x)             { return ::asin(x)    * 180.0 / M_PI; }
-  double acosd(double x)             { return ::acos(x)    * 180.0 / M_PI; }
-  double atand(double x)             { return ::atan(x)    * 180.0 / M_PI; }
-  double atand2(double y,double x)   { return ::atan2(y,x) * 180.0 / M_PI; }
-  double arcsind(double x)           { return ::asin(x)    * 180.0 / M_PI; }
-  double arccosd(double x)           { return ::acos(x)    * 180.0 / M_PI; }
-  double arctand(double x)           { return ::atan(x)    * 180.0 / M_PI; }
-  double arctand2(double y,double x) { return ::atan2(y,x) * 180.0 / M_PI; }
+  ma_scalar sind(ma_scalar x)              { return ::sin(x * M_PI / 180.0); }
+  ma_scalar cosd(ma_scalar x)              { return ::cos(x * M_PI / 180.0); }
+  ma_scalar tand(ma_scalar x)              { return ::tan(x * M_PI / 180.0); }
+  ma_scalar asind(ma_scalar x)             { return ::asin(x)    * 180.0 / M_PI; }
+  ma_scalar acosd(ma_scalar x)             { return ::acos(x)    * 180.0 / M_PI; }
+  ma_scalar atand(ma_scalar x)             { return ::atan(x)    * 180.0 / M_PI; }
+  ma_scalar atand2(ma_scalar y,ma_scalar x)   { return ::atan2(y,x) * 180.0 / M_PI; }
+  ma_scalar arcsind(ma_scalar x)           { return ::asin(x)    * 180.0 / M_PI; }
+  ma_scalar arccosd(ma_scalar x)           { return ::acos(x)    * 180.0 / M_PI; }
+  ma_scalar arctand(ma_scalar x)           { return ::atan(x)    * 180.0 / M_PI; }
+  ma_scalar arctand2(ma_scalar y,ma_scalar x) { return ::atan2(y,x) * 180.0 / M_PI; }
 
-  int sign(double x)                { return (x>0)-(x<0); }
-  int cmp(double x,double y)        { return (x>y)-(x<y); }
-  double frac(double x)             { return x-(int)x;    }
+  int sign(ma_scalar x)                { return (x>0)-(x<0); }
+  int cmp(ma_scalar x,ma_scalar y)        { return (x>y)-(x<y); }
+  ma_scalar frac(ma_scalar x)             { return x-(int)x;    }
 
-  double degtorad(double x)         { return x*(M_PI/180.0);}
-  double radtodeg(double x)         { return x*(180.0/M_PI);}
+  ma_scalar degtorad(ma_scalar x)         { return x*(M_PI/180.0);}
+  ma_scalar radtodeg(ma_scalar x)         { return x*(180.0/M_PI);}
 
-  double lengthdir_x(double len,double dir) { return len *  cosd(dir); }
-  double lengthdir_y(double len,double dir) { return len * -sind(dir); }
+  ma_scalar lengthdir_x(ma_scalar len,ma_scalar dir) { return len *  cosd(dir); }
+  ma_scalar lengthdir_y(ma_scalar len,ma_scalar dir) { return len * -sind(dir); }
 
-  double direction_difference(double dir1,double dir2) {
+  ma_scalar direction_difference(ma_scalar dir1,ma_scalar dir2) {
 	  return fmod((fmod((dir1 - dir2),360) + 540), 360) - 180;
   }
-  double point_direction(double x1,double y1,double x2,double y2) { return ::fmod((::atan2(y1-y2,x2-x1)*(180/M_PI))+360,360); }
-  double point_distance(double x1,double y1,double x2,double y2)  { return ::hypot(x2-x1,y2-y1); }
-  double point_distance_3d(double x1,double y1,double z1,double x2,
-  double y2,double z2)  { return ::sqrt(sqr(x1-x2) + sqr(y1-y2) + sqr(z1-z2)); }
-  double dot_product(double x1,double y1,double x2,double y2) { return (x1 * x2 + y1 * y2); }
-  double dot_product_3d(double x1,double y1,double z1,double x2,double y2, double z2) { return (x1 * x2 + y1 * y2 + z1 * z2); }
-  double dot_product_normalised(double x1,double y1,double x2,double y2) { 
-  	double length = sqrt(x1*x1+y1*y1);
+  ma_scalar point_direction(ma_scalar x1,ma_scalar y1,ma_scalar x2,ma_scalar y2) { return ::fmod((::atan2(y1-y2,x2-x1)*(180/M_PI))+360,360); }
+  ma_scalar point_distance(ma_scalar x1,ma_scalar y1,ma_scalar x2,ma_scalar y2)  { return ::hypot(x2-x1,y2-y1); }
+  ma_scalar point_distance_3d(ma_scalar x1,ma_scalar y1,ma_scalar z1,ma_scalar x2,
+  ma_scalar y2,ma_scalar z2)  { return ::sqrt(sqr(x1-x2) + sqr(y1-y2) + sqr(z1-z2)); }
+  ma_scalar dot_product(ma_scalar x1,ma_scalar y1,ma_scalar x2,ma_scalar y2) { return (x1 * x2 + y1 * y2); }
+  ma_scalar dot_product_3d(ma_scalar x1,ma_scalar y1,ma_scalar z1,ma_scalar x2,ma_scalar y2, ma_scalar z2) { return (x1 * x2 + y1 * y2 + z1 * z2); }
+  ma_scalar dot_product_normalised(ma_scalar x1,ma_scalar y1,ma_scalar x2,ma_scalar y2) { 
+  	ma_scalar length = sqrt(x1*x1+y1*y1);
 
     x1 = x1/length;
     y1 = y1/length;
@@ -83,8 +83,8 @@ namespace enigma_user
     y2 = y2/length;
     return (x1 * x2 + y1 * y2); 
   }
-  double dot_product_normalised_3d(double x1,double y1,double z1,double x2,double y2, double z2) { 
-	double length = sqrt(x1*x1+y1*y1+z1*z1);
+  ma_scalar dot_product_normalised_3d(ma_scalar x1,ma_scalar y1,ma_scalar z1,ma_scalar x2,ma_scalar y2, ma_scalar z2) { 
+	ma_scalar length = sqrt(x1*x1+y1*y1+z1*z1);
 
     x1 = x1/length;
     y1 = y1/length;
@@ -97,35 +97,35 @@ namespace enigma_user
     z2 = z2/length;
     return (x1 * x2 + y1 * y2 + z1 * z2); 
   }
-  double lerp(double x, double y, double a) { return x + ((y-x)*a); }
-  double clamp(double val, double min, double max) {
+  ma_scalar lerp(ma_scalar x, ma_scalar y, ma_scalar a) { return x + ((y-x)*a); }
+  ma_scalar clamp(ma_scalar val, ma_scalar min, ma_scalar max) {
       if (val < min) { return min; }
       if (val > max) { return max; }
       return val;
   }
 
-  double min(double x, double y) { return x < y ? x : y; }
-  double max(double x, double y) { return x > y ? x : y; }
+  ma_scalar min(ma_scalar x, ma_scalar y) { return x < y ? x : y; }
+  ma_scalar max(ma_scalar x, ma_scalar y) { return x > y ? x : y; }
 
-  double max(const enigma::varargs &t)
+  ma_scalar max(const enigma::varargs &t)
   {
-    register double ret = t.get(0), tst;
+    register ma_scalar ret = t.get(0), tst;
     for (int i = 1; i < t.argc; i++)
       if ((tst = t.get(i)) > ret)
         ret = tst;
     return ret;
   }
 
-  double min(const enigma::varargs &t)
+  ma_scalar min(const enigma::varargs &t)
   {
-    register double ret = t.get(0), tst;
+    register ma_scalar ret = t.get(0), tst;
     for (int i = 1; i < t.argc; i++)
       if ((tst = t.get(i)) < ret)
         ret = tst;
     return ret;
   }
 
-  double median(enigma::varargs t)
+  ma_scalar median(enigma::varargs t)
   {
     t.sort();
     if (t.argc & 1)
@@ -133,9 +133,9 @@ namespace enigma_user
     return (t.get(t.argc/2) + t.get(t.argc/2-1)) / 2.;
   }
 
-  double mean(const enigma::varargs &t)
+  ma_scalar mean(const enigma::varargs &t)
   {
-    register double ret = 0;
+    register ma_scalar ret = 0;
     for (int i = 0; i < t.argc; i++)
         ret += t.get(i);
     return ret/t.argc;
@@ -239,7 +239,7 @@ namespace enigma_user
 	  return y^(y >> 18);
   }
 
-  double mtrandom(){
+  ma_scalar mtrandom(){
 	  return ((mtrandom32()>>5)*67108864.+(mtrandom32()>>6))/9007199254740992.;
   }
 
@@ -255,9 +255,9 @@ namespace enigma_user
 
   // ENIGMA Random Functions
 
-  double random(double n) // Do not fix:  Based off of Delphi PRNG.
+  ma_scalar random(ma_scalar n) // Do not fix:  Based off of Delphi PRNG.
   {
-    double rval = frac(
+    ma_scalar rval = frac(
       3.1379939289763571e-2  * (enigma::Random_Seed % 32)
       + 2.3283064365387e-10  * (enigma::Random_Seed / 32 + 1)
       + 4.158057505264878e-3 * (enigma::Random_Seed / 32)

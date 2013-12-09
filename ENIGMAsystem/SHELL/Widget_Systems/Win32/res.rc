@@ -1,4 +1,4 @@
-1 24 "manifest.xml"
+1 24 "Widget_Systems/Win32/manifest.xml"
 
 getstringdialog DIALOG 0, 0, 185, 63
 

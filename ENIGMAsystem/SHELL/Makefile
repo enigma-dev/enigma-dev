@@ -47,7 +47,7 @@ FIND = find
 
 SYSTEMS := Platforms/$(PLATFORM) Graphics_Systems/$(GRAPHICS) Audio_Systems/$(AUDIO) Collision_Systems/$(COLLISION) Widget_Systems/$(WIDGETS) Networking_Systems/$(NETWORKING) Universal_System
 
-OBJDIR := .eobjs/$(COMPILEPATH)/$(GMODE)
+OBJDIR := $(WORKDIR).eobjs/$(COMPILEPATH)/$(GMODE)
 
 ###########
 # options #
@@ -78,7 +78,7 @@ endif
 
 # CPPFLAGS needs these include dirs unconditionally
 override CPPFLAGS += $(SYSTEMS:%=-I%/Info)
-override CPPFLAGS += -I.
+override CPPFLAGS += -I. -I${WORKDIR}
 
 .PHONY: all clean
 
@@ -93,8 +93,9 @@ SOURCES := $(wildcard *.cpp)
 include $(addsuffix /Makefile,$(SYSTEMS) $(EXTENSIONS))
 include Bridges/$(PLATFORM)-$(GRAPHICS)/Makefile
 
+#This does not work, use a for loop and prepend it to each one not the whole string
 OBJECTS := $(addprefix $(OBJDIR)/,$(patsubst %.m, %.o, $(patsubst %.cpp, %.o, $(patsubst %.c, %.o, $(SOURCES)))))
-RCFILES := $(addprefix $(OBJDIR)/,$(RESOURCES))
+#RCFILES := $(addprefix $(WORKDIR),$(RESOURCES))
 DEPENDS := $(OBJECTS:.o=.d)
 
 OBJDIRS := $(sort $(dir $(OBJECTS) $(RCFILES)))
@@ -126,12 +127,13 @@ $(OBJDIR)/%.o $(OBJDIR)/%.d: %.m | $(OBJDIRS)
 
 $(OBJDIR)/resources.res: $(RCFILES) GENERATED_FILE
 	echo "// GENERATED RESOURCE FILE FRONTEND" > $(OBJDIR)/resources.rc
+	
 	for res in $(RESOURCES); do echo "#include \"$$res\"" >> $(OBJDIR)/resources.rc; done
-	$(WINDRES) -o $@ -i $(OBJDIR)/resources.rc -O coff
+	$(WINDRES) -o $@ -I. -I$(WORKDIR) $(OBJDIR)/resources.rc -O coff
 GENERATED_FILE:
 
 $(OBJDIR)/%.rc: %.rc
-	$(WINDRES) -o $@ -i $^ -O rc
+	$(WINDRES) -o $@ -I. -I$(WORKDIR) $^ -O rc
 
 $(OBJDIRS):
 	$(MKDIR) -p $@

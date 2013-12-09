@@ -22,6 +22,7 @@
 #include "../General/GSbackground.h"
 #include "../General/GSscreen.h"
 #include "../General/GSd3d.h"
+#include "../General/GScolors.h"
 
 using namespace std;
 
@@ -116,16 +117,13 @@ void screen_redraw()
     {
         glViewport(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled());
         glLoadIdentity();
-        if (GLEW_EXT_framebuffer_object)
-        {
+        if (GLEW_EXT_framebuffer_object) {
             glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &enigma::FBO);
-            glScalef(1, (FBO==0?-1:1), 1);
-        }
-        else
-        {
+            glScalef(1, ((FBO==0||enigma::msaa_fbo!=0)?-1:1), 1);
+        } else {
             glScalef(1, -1, 1);
         }
-        glOrtho(0, room_width, 0, room_height, 0, 1);
+        glOrtho(0, room_width, 0, room_height, 32000, -32000);
         glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
         glMultMatrixd(transformation_matrix);
 
@@ -284,16 +282,13 @@ void screen_redraw()
 
 			glViewport(view_xport[vc], view_yport[vc], window_get_region_width_scaled() - view_xport[vc], window_get_region_height_scaled() - view_yport[vc]);
 			glLoadIdentity();
-			if (GLEW_EXT_framebuffer_object)
-			{
+			if (GLEW_EXT_framebuffer_object) {
 				glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &enigma::FBO);
-				glScalef(1, (FBO==0?-1:1), 1);
-			}
-			else
-			{
+				glScalef(1, ((FBO==0||enigma::msaa_fbo!=0)?-1:1), 1);
+			} else {
 				glScalef(1, -1, 1);
 			}
-			glOrtho(int(view_xview[vc]), int(view_wview[vc] + view_xview[vc]), int(view_yview[vc]), int(view_hview[vc] + view_yview[vc]), 0, 1);
+			glOrtho(int(view_xview[vc]), int(view_wview[vc] + view_xview[vc]), int(view_yview[vc]), int(view_hview[vc] + view_yview[vc]), 32000, -32000);
 			glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
 			glMultMatrixd(transformation_matrix);
 
@@ -375,16 +370,13 @@ void screen_redraw()
     {
         glViewport(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled());
         glLoadIdentity();
-        if (GLEW_EXT_framebuffer_object)
-        {
+        if (GLEW_EXT_framebuffer_object) {
             glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &enigma::FBO);
-            glScalef(1, (FBO==0?-1:1), 1);
-        }
-        else
-        {
+            glScalef(1, ((FBO==0||enigma::msaa_fbo!=0)?-1:1), 1);
+        } else {
             glScalef(1, -1, 1);
         }
-        glOrtho(0, enigma::gui_width, 0, enigma::gui_height, 0, 1);
+        glOrtho(0, enigma::gui_width, 0, enigma::gui_height, -32000, 32000);
         glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
         glMultMatrixd(transformation_matrix);
 
@@ -393,7 +385,9 @@ void screen_redraw()
 			glClear(GL_DEPTH_BUFFER_BIT);
 
 		int culling = d3d_get_culling();
+		bool hidden = d3d_get_hidden();
 		d3d_set_culling(rs_none);
+		d3d_set_hidden(false);
 
         bool stop_loop = false;
         for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
@@ -413,6 +407,10 @@ void screen_redraw()
 
 		// reset the culling
 		d3d_set_culling(culling);
+		// only restore hidden if the user didn't change it
+		if (!d3d_get_hidden()) {
+			d3d_set_hidden(hidden);
+		}
     }
 
 	if (enigma::msaa_fbo != 0) {
@@ -426,7 +424,7 @@ void screen_redraw()
 		// glReadPixels(0, 0, width, height, GL_BGRA, GL_UNSIGNED_BYTE, pixels);
 	}
 	
-    ///TODO: screen_refresh() shouldn't be in screen_redraw(). They are seperate functions for a reason.
+    ///TODO: screen_refresh() shouldn't be in screen_redraw(). They are separate functions for a reason.
     if (enigma::FBO == 0 || enigma::msaa_fbo != 0) { screen_refresh(); }
 }
 
@@ -435,7 +433,9 @@ void screen_init()
 	enigma::gui_width = window_get_region_width_scaled();
 	enigma::gui_height = window_get_region_height_scaled();
 
-    texture_reset();
+	glClearColor(0,0,0,0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	
     if (!view_enabled)
     {
         glMatrixMode(GL_PROJECTION);
@@ -449,19 +449,7 @@ void screen_init()
           glOrtho(0, room_width, 0, room_height, 0, 1);
           glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
           glMultMatrixd(transformation_matrix);
-          glClearColor(0,0,0,0);
-          glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-          glDisable(GL_DEPTH_TEST);
-          glEnable(GL_BLEND);
-          glEnable(GL_ALPHA_TEST);
-          glEnable(GL_TEXTURE_2D);
-          glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-          glAlphaFunc(GL_ALWAYS,0);
-          glColor4f(0,0,0,1);
-          glBindTexture(GL_TEXTURE_2D,0);
-    }
-    else
-    {
+    } else {
         for (view_current = 0; view_current < 7; view_current++)
         {
             if (view_visible[(int)view_current])
@@ -478,20 +466,19 @@ void screen_init()
                   glOrtho(view_xview[vc], view_wview[vc] + view_xview[vc], view_yview[vc], view_hview[vc] + view_yview[vc], 0, 1);
                   glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
                   glMultMatrixd(transformation_matrix);
-                  glClearColor(0,0,0,0);
-                  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-                  glDisable(GL_DEPTH_TEST);
-                  glEnable(GL_BLEND);
-                  glEnable(GL_ALPHA_TEST);
-                  glEnable(GL_TEXTURE_2D);
-                  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-                  glAlphaFunc(GL_ALWAYS,0);
-                  glColor4f(0,0,0,1);
-                  glBindTexture(GL_TEXTURE_2D,0);
                 break;
             }
         }
     }
+	
+	glDisable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glEnable(GL_ALPHA_TEST);
+	glEnable(GL_TEXTURE_2D);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glAlphaFunc(GL_ALWAYS,0);
+	glBindTexture(GL_TEXTURE_2D,0);
+	draw_set_color(c_white);
 }
 
 int screen_save(string filename) { //Assumes native integers are little endian
