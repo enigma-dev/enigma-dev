@@ -374,19 +374,8 @@ namespace ert {
   }
   
   void object::set_speed(real_t speed) {
-    do {
-      if (this->properties.hspeed == 0) {
-        this->properties.vspeed = speed;
-        break;
-      }
-      if (this->properties.vspeed == 0) {
-        this->properties.hspeed = speed;
-        break;
-      }
-      real_t ratio = speed / this->properties.speed;
-      this->properties.hspeed *= ratio;
-      this->properties.vspeed *= ratio;
-    } while(0);
+    this->properties.hspeed = speed * std::cos(this->properties.direction);
+    this->properties.vspeed = -speed * std::sin(this->properties.direction);
     this->properties.speed = speed;
   }
   
