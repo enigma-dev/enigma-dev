@@ -20,20 +20,39 @@
 
 #include "ert/real.hpp"
 #include "ert/math.hpp"
+#include "ert/vector.hpp"
 
 #include <cmath>
 
 namespace ert {
+  namespace internal {
+    real_t point_direction_rad(real_t x1, real_t y1, real_t x2, real_t y2) {
+      return std::atan2(y1 - y2, x2 - x1) + 2 * pi * (y2 > y1);
+    }
+    
+    real_t vector_direction_rad(real_t x, real_t y) {
+      return std::atan2(-y, x) + 2 * pi * (y > 0);
+    }
+    
+    real_t vector_length(real_t x, real_t y) {
+      return std::sqrt(x * x + y * y);
+    }
+    
+    real_t vector_length_3d(real_t x, real_t y, real_t z) {
+      return std::sqrt(x * x + y * y + z * z);
+    }
+  }
+  
   real_t point_direction(real_t x1, real_t y1, real_t x2, real_t y2) {
-    return 180 / pi * std::atan2(y2 - y1, x2 - x1) + 360 * (y2 > y1);
+    return radtodeg(internal::point_direction_rad(x1, y1, x2, y2));
   }
 
   real_t point_distance(real_t x1, real_t y1, real_t x2, real_t y2) {
-    return sqrt(sqr(x2 - x1) + sqr(y2 - y1));
+    return internal::vector_length(x2 - x1, y2 - y1);
   }
 
   real_t point_distance_3d(real_t x1, real_t y1, real_t z1, real_t x2, real_t y2, real_t z2) {
-    return sqrt(sqr(x2 - x1) + sqr(y2 - y1) + sqr(z2 - z1));
+    return internal::vector_length_3d(x2 - x1, y2 - y1, z2 - z1);
   }
 
   real_t dot_product(real_t x1, real_t y1, real_t x2, real_t y2) {
@@ -45,12 +64,10 @@ namespace ert {
   }
 
   real_t dot_product_normalised(real_t x1, real_t y1, real_t x2, real_t y2) {
-    return (x1 * x2 + y1 * y2) /
-      std::sqrt(std::pow(x2 - x1, 2) + std::pow(y2 - y1, 2));
+    return (x1 * x2 + y1 * y2) / internal::vector_length(x2 - x1, y2 - y1);
   }
 
   real_t dot_product_normalised_3d(real_t x1, real_t y1, real_t z1, real_t x2, real_t y2, real_t z2) {
-    return (x1 * x2 + y1 * y2 + z1 * z2) /
-      std::sqrt(std::pow(x2 - x1, 2) + std::pow(y2 - y1, 2) + std::pow(z2 - z1, 2));
+    return (x1 * x2 + y1 * y2 + z1 * z2) / internal::vector_length_3d(x2 - x1, y2 - y1, z2 - z1);
   }
 }
