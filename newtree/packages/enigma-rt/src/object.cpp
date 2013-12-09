@@ -398,9 +398,9 @@ namespace ert {
   }
   
   void object::set_speed(real_t speed) {
-    this->properties.hspeed = speed * std::cos(this->properties.direction);
-    this->properties.vspeed = -speed * std::sin(this->properties.direction);
     this->properties.speed = speed;
+    this->update_hspeed();
+    this->update_vspeed();
   }
   
   void object::update_speed() {
