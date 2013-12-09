@@ -175,10 +175,12 @@ namespace ert {
     
     real_t get_hspeed();
     void set_hspeed(real_t);
+    void update_hspeed();
     property<object, real_t, &object::get_hspeed, &object::set_hspeed> hspeed();
     
     real_t get_vspeed();
     void set_vspeed(real_t);
+    void update_vspeed();
     property<object, real_t, &object::get_vspeed, &object::set_vspeed> vspeed();
     
     real_t get_speed();

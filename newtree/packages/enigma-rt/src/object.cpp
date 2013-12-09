@@ -276,10 +276,10 @@ namespace ert {
   }
   
   void object::set_direction(real_t direction) {
-    // TODO
-    (void)direction;
-    // Update friction because it has components dependent on direction
-    update_friction();
+    this->properties.direction = direction;
+    this->update_hspeed();
+    this->update_vspeed();
+    this->update_friction();
   }
   
   void object::update_direction() {
@@ -359,6 +359,14 @@ namespace ert {
     this->update_direction();
   }
   
+  void object::update_hspeed() {
+    if (this->properties.speed == 0) {
+      this->properties.hspeed = 0;
+      return;
+    }
+    this->properties.hspeed = this->properties.speed * std::cos(this->properties.direction);
+  }
+  
   property<object, real_t, &object::get_hspeed, &object::set_hspeed> object::hspeed() {
     return {this};
   }
@@ -371,6 +379,14 @@ namespace ert {
     this->properties.vspeed = vspeed;
     this->update_speed();
     this->update_direction();
+  }
+  
+  void object::update_vspeed() {
+    if (this->properties.speed == 0) {
+      this->properties.vspeed = 0;
+      return;
+    }
+    this->properties.vspeed = -this->properties.speed * std::sin(this->properties.direction);
   }
   
   property<object, real_t, &object::get_vspeed, &object::set_vspeed> object::vspeed() {
