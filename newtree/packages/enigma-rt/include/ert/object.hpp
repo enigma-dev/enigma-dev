@@ -156,6 +156,7 @@ namespace ert {
     
     real_t get_direction();
     void set_direction(real_t);
+    void update_direction();
     property<object, real_t, &object::get_direction, &object::set_direction> direction();
     
     real_t get_friction();
@@ -181,6 +182,7 @@ namespace ert {
     
     real_t get_speed();
     void set_speed(real_t);
+    void update_speed();
     property<object, real_t, &object::get_speed, &object::set_speed> speed();
   };
 }

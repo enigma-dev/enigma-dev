@@ -281,6 +281,10 @@ namespace ert {
     (void)direction;
   }
   
+  void object::update_direction() {
+    //
+  }
+  
   property<object, real_t, &object::get_direction, &object::set_direction> object::direction() {
     return {this};
   }
@@ -343,6 +347,8 @@ namespace ert {
   
   void object::set_hspeed(real_t hspeed) {
     this->properties.hspeed = hspeed;
+    this->update_speed();
+    this->update_direction();
   }
   
   property<object, real_t, &object::get_hspeed, &object::set_hspeed> object::hspeed() {
@@ -355,6 +361,8 @@ namespace ert {
   
   void object::set_vspeed(real_t vspeed) {
     this->properties.vspeed = vspeed;
+    this->update_speed();
+    this->update_direction();
   }
   
   property<object, real_t, &object::get_vspeed, &object::set_vspeed> object::vspeed() {
@@ -362,14 +370,28 @@ namespace ert {
   }
   
   real_t object::get_speed() {
-    real_t xx = this->properties.hspeed;
-    real_t yy = this->properties.vspeed;
-    return std::sqrt(xx * xx + yy * yy);
+    return this->properties.speed;
   }
   
   void object::set_speed(real_t speed) {
-    // TODO, point direction is broken
-    (void)speed;
+    do {
+      if (this->properties.hspeed == 0) {
+        this->properties.vspeed = speed;
+        break;
+      }
+      if (this->properties.vspeed == 0) {
+        this->properties.hspeed = speed;
+        break;
+      }
+      real_t ratio = speed / this->properties.speed;
+      this->properties.hspeed *= ratio;
+      this->properties.vspeed *= ratio;
+    } while(0);
+    this->properties.speed = speed;
+  }
+  
+  void object::update_speed() {
+    this->properties.speed = internal::vector_length(this->properties.hspeed, this->properties.vspeed);
   }
   
   property<object, real_t, &object::get_speed, &object::set_speed> object::speed() {
