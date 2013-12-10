@@ -176,8 +176,7 @@ class Mesh
   // INDEXEDTRIANGLES|INDEXEDLINES|INDEXEDPOINTS|TRIANGLES|LINES|POINTS
   LPDIRECT3DVERTEXBUFFER9 vertexbuffer;    // Interleaved vertex buffer object TRIANGLES|LINES|POINTS with triangles first since they are most likely to be used
   LPDIRECT3DINDEXBUFFER9 indexbuffer;    // Interleaved index buffer object TRIANGLES|LINES|POINTS with triangles first since they are most likely to be used
-  IDirect3DVertexDeclaration9* vertex_declaration; // Pointer to our custom vertex declaration which we will use later for something actually flexible where FVF is not
-  
+
   bool vbodynamic; // Whether the buffer is dynamically allocated in system memory, should be true for simple primitive calls
   bool vbobuffered; // Whether or not the buffer objects have been generated
   bool vboindexed; // Whether or not the model contains any indexed primitives or just regular lists
@@ -203,7 +202,6 @@ class Mesh
   
   	vertexbuffer = NULL;    // the pointer to the vertex buffer
 	indexbuffer = NULL;    // the pointer to the index buffer
-	vertex_declaration = NULL;
 	
     vbobuffered = false;
 	vbodynamic = dynamic;
@@ -238,10 +236,6 @@ class Mesh
 	if (indexbuffer != NULL) {
 		indexbuffer->Release();
 		indexbuffer = NULL;
-	}
-	if (vertex_declaration != NULL) {
-		vertex_declaration->Release();
-		vertex_declaration = NULL;
 	}
   }
   
@@ -301,6 +295,14 @@ class Mesh
 	return stride;
   }
   
+  DWORD GetFVF() {
+	DWORD fvf = D3DFVF_XYZ;
+    if (useNormals) fvf |= D3DFVF_NORMAL;
+    if (useColors) fvf |= D3DFVF_DIFFUSE;
+	if (useTextures) fvf |= D3DFVF_TEX2;
+	return fvf;
+  }
+  
   void Begin(int pt)
   {
     vbobuffered = false;
@@ -309,8 +311,8 @@ class Mesh
 
   void AddVertex(gs_scalar x, gs_scalar y)
   {
-    vertices.push_back(x); vertices.push_back(y);
-	vertexStride = 2;
+    vertices.push_back(x); vertices.push_back(y); vertices.push_back(0.0f);
+	vertexStride = 3;
   }
   
   void AddVertex(gs_scalar x, gs_scalar y, gs_scalar z)
@@ -338,7 +340,7 @@ class Mesh
 
   void AddColor(int col, double alpha)
   {               
-	unsigned long final = D3DCOLOR_RGBA( __GETR(col), __GETG(col), __GETB(col), (unsigned char)(alpha*255) );
+	DWORD final = D3DCOLOR_ARGB( (unsigned char)(alpha*255), __GETR(col), __GETG(col), __GETB(col) );
 	vertices.push_back(final); 
 	useColors = true;
   }
@@ -781,66 +783,6 @@ class Mesh
 	
 	
 	unsigned stride = vertexStride;
-	D3DVERTEXELEMENT9 POSITIONELEMENT;
-	D3DVERTEXELEMENT9 DEPTHELEMENT;
-
-	if (useDepth) {
-		POSITIONELEMENT =
-		{ 0,  0, D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0 };
-		DEPTHELEMENT = 
-		{ 0,  0, D3DDECLTYPE_FLOAT1, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_DEPTH, 0 };
-	} else {
-		POSITIONELEMENT =
-		{ 0,  0, stride < 3 ? D3DDECLTYPE_FLOAT2 : D3DDECLTYPE_FLOAT3,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_POSITION, 0 };
-	}
-	
-	D3DVERTEXELEMENT9 NORMALELEMENT =
-	{ 0, static_cast< WORD >(stride * sizeof(gs_scalar)), D3DDECLTYPE_FLOAT3,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_NORMAL,   0 };
-	if (useNormals) stride += 3;
-
-	D3DVERTEXELEMENT9 TEXTUREELEMENT =
-	{ 0, static_cast< WORD >(stride * sizeof(gs_scalar)), D3DDECLTYPE_FLOAT2,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD, 0 };
-	if (useTextures) stride += 2;
-
-	D3DVERTEXELEMENT9 COLORELEMENT =
-	{ 0, static_cast< WORD >(stride * sizeof(gs_scalar)), D3DDECLTYPE_D3DCOLOR, D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_COLOR,    0  };
-	if (useColors) stride += 1;
-
-	unsigned elements = 1 + useDepth + useNormals + useTextures + useColors + 1;
-	D3DVERTEXELEMENT9 customvertex[elements];
-	customvertex[0] = POSITIONELEMENT;
-	int i = 1;
-	if (useDepth) { customvertex[i] = DEPTHELEMENT; i += 1; }
-	if (useNormals) { customvertex[i] = NORMALELEMENT; i += 1; }
-	if (useTextures) { customvertex[i] = TEXTUREELEMENT; i += 1; }
-	if (useColors) { customvertex[i] = COLORELEMENT; i += 1; }
-	// declared const for C++0x compatibility
-	const D3DVERTEXELEMENT9 strideelement = D3DDECL_END();
-	customvertex[i] = strideelement;
-		
-	if (vertex_declaration != NULL) {
-		D3DVERTEXELEMENT9 decl[elements];
-		UINT numElements;
-		vertex_declaration->GetDeclaration(decl, &numElements);
-		
-		bool different = (elements != numElements);
-		
-		//TODO: Might need a loop here to check if the declaration really is different
-		for (unsigned i = 0; i < elements; i++) {
-			if (decl[i].Type != customvertex[i].Type) {
-				different = true; break;
-			}
-		}
-		
-		if (different) {
-			vertex_declaration->Release();
-			vertex_declaration = NULL;
-		}
-	}
-		
-	if (vertex_declaration == NULL) {
-		d3dmgr->CreateVertexDeclaration (customvertex, &vertex_declaration);
-	}
 	
 	if (vertexbuffer != NULL) {
 		D3DVERTEXBUFFER_DESC pDesc;
@@ -853,9 +795,9 @@ class Mesh
 	// create a vertex buffer interface
 	if (vertexbuffer == NULL) {
 		if (vbodynamic) {
-			d3dmgr->CreateVertexBuffer(vdata.size() * sizeof( gs_scalar ), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, 0, D3DPOOL_SYSTEMMEM, &vertexbuffer, NULL);
+			d3dmgr->CreateVertexBuffer(vdata.size() * sizeof( gs_scalar ), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, GetFVF(), D3DPOOL_SYSTEMMEM, &vertexbuffer, NULL);
 		} else {
-			d3dmgr->CreateVertexBuffer(vdata.size() * sizeof( gs_scalar ), D3DUSAGE_WRITEONLY, 0, D3DPOOL_MANAGED, &vertexbuffer, NULL);
+			d3dmgr->CreateVertexBuffer(vdata.size() * sizeof( gs_scalar ), D3DUSAGE_WRITEONLY, GetFVF(), D3DPOOL_MANAGED, &vertexbuffer, NULL);
 		}
 	}
 	
@@ -883,7 +825,7 @@ class Mesh
 
 	unsigned stride = GetStride();
 
-	d3dmgr->SetVertexDeclaration(vertex_declaration);
+	d3dmgr->SetFVF(GetFVF());
 	// select the vertex buffer to display
 	d3dmgr->SetStreamSource(0, vertexbuffer, 0, stride * sizeof(gs_scalar));
 	if (vboindexed) {

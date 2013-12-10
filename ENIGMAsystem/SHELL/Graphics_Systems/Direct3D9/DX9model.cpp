@@ -390,8 +390,8 @@ void d3d_model_vertex_texture(int id, gs_scalar x, gs_scalar y, gs_scalar tx, gs
 void d3d_model_vertex_texture_color(int id, gs_scalar x, gs_scalar y, gs_scalar tx, gs_scalar ty, int col, double alpha)
 {
   meshes[id]->AddVertex(x, y);
-  meshes[id]->AddTexture(tx, ty);
   meshes[id]->AddColor(col, alpha);
+  meshes[id]->AddTexture(tx, ty);
 }
 
 // 3D Vertex Functions
@@ -415,8 +415,8 @@ void d3d_model_vertex_texture(int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_
 void d3d_model_vertex_texture_color(int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar tx, gs_scalar ty, int col, double alpha)
 {
   meshes[id]->AddVertex(x, y, z);
-  meshes[id]->AddTexture(tx, ty);
   meshes[id]->AddColor(col, alpha);
+  meshes[id]->AddTexture(tx, ty);
 }
 
 void d3d_model_vertex_normal(int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz)
@@ -443,8 +443,8 @@ void d3d_model_vertex_normal_texture_color(int id, gs_scalar x, gs_scalar y, gs_
 {
   meshes[id]->AddVertex(x, y, z);
   meshes[id]->AddNormal(nx, ny, nz);
-  meshes[id]->AddTexture(tx, ty);
   meshes[id]->AddColor(col, alpha);
+  meshes[id]->AddTexture(tx, ty);
 }
 
 void d3d_model_floor(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, gs_scalar hrep, gs_scalar vrep)
