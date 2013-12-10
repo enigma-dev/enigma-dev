@@ -635,7 +635,7 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
   }
 
   string compilepath = CURRENT_PLATFORM_NAME "/" + extensions::targetOS.identifier;
-  make += "COMPILEPATH=" + compilepath + " ";
+  make += "COMPILEPATH=\"" + compilepath + "\" ";
 
   string extstr = "EXTENSIONS=\"";
   for (unsigned i = 0; i < parsed_extensions.size(); i++)
