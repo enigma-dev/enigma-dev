@@ -26,7 +26,7 @@ namespace enigma_user
 
 void draw_sprite(int spr, int subimg, gs_scalar x, gs_scalar y, int color = 16777215, gs_scalar alpha = 1);
 void draw_sprite(int spr, int subimg, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, gs_scalar x4, gs_scalar y4, gs_scalar alpha);
-void draw_sprite_stretched(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar wid, gs_scalar hei);
+void draw_sprite_stretched(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar wid, gs_scalar hei, int color = 16777215, gs_scalar alpha = 1);
 void draw_sprite_pos(int spr, int subimg, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, gs_scalar x4, gs_scalar y4, gs_scalar alpha = 1);
 void draw_sprite_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar xscale = 1, gs_scalar yscale = 1, double rot = 0, int color = 16777215, gs_scalar alpha = 1);
 void draw_sprite_stretched_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar wid, gs_scalar hei, int blend = 16777215, gs_scalar alpha = 1);
