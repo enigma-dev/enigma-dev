@@ -82,10 +82,10 @@ inline void action_draw_background(const int background, const gs_scalar x, cons
     if (argument_relative)
     {
         enigma::object_planar* const inst = ((enigma::object_planar*)enigma::instance_event_iterator->inst);
-        (tiled ? draw_background_tiled : draw_background)(background, inst->x+x, inst->y+y);
+        (tiled ? draw_background_tiled : draw_background)(background, inst->x+x, inst->y+y,16777215,1);
     }
     else
-      (tiled ? draw_background_tiled : draw_background)(background, x, y);
+      (tiled ? draw_background_tiled : draw_background)(background, x, y,16777215,1);
 }
 
 inline void action_draw_ellipse(const gs_scalar x1, const gs_scalar y1, const gs_scalar x2, const gs_scalar y2, const int filled)
