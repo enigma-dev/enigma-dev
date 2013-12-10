@@ -15,7 +15,7 @@ std::string myReplace(std::string str, const std::string& oldStr, const std::str
   return nstr;
 }
 
-std::string workdir = "ENIGMAsystem/SHELL/";
+std::string workdir = myReplace(getenv("APPDATA"), "\\","/") + std::string("/ENIGMA/");
 #else
 std::string workdir = getenv("HOME") + std::string("/.enigma/");
 #endif

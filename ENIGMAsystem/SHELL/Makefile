@@ -47,7 +47,7 @@ FIND = find
 
 SYSTEMS := Platforms/$(PLATFORM) Graphics_Systems/$(GRAPHICS) Audio_Systems/$(AUDIO) Collision_Systems/$(COLLISION) Widget_Systems/$(WIDGETS) Networking_Systems/$(NETWORKING) Universal_System
 
-OBJDIR := $(WORKDIR).eobjs/$(COMPILEPATH)/$(GMODE)
+OBJDIR := .eobjs/$(COMPILEPATH)/$(GMODE)
 
 ###########
 # options #
