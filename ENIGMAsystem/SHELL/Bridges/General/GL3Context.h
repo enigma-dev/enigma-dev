@@ -140,11 +140,9 @@ void ReadPixels() {
 }
 
 void BindTexture(GLenum target,  GLuint texture) {
-//GLint tex;
-//glGetIntegerv(target, &tex);
 if (bound_tex != texture) {
-EndShapesBatching();
-		glBindTexture(target, bound_tex = texture);
+	EndShapesBatching();
+	glBindTexture(target, bound_tex = texture);
 }
 		return;
 	// Update the texture state cache
