@@ -135,6 +135,7 @@ void d3d_vertex_texture_color(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar t
     glColor4f(GETR(color), GETG(color), GETB(color), alpha);
     glTexCoord2f(tx,ty);
     glVertex3d(x,y,z);
+    glColor4ubv(enigma::currentcolor);
 }
 
 void d3d_vertex_normal(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz)
@@ -148,6 +149,7 @@ void d3d_vertex_normal_color(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx
     glColor4f(GETR(color), GETG(color), GETB(color), alpha);
     glNormal3f(nx, ny, nz);
     glVertex3d(x,y,z);
+    glColor4ubv(enigma::currentcolor);
 }
 
 void d3d_vertex_normal_texture(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, gs_scalar tx, gs_scalar ty)
@@ -163,6 +165,7 @@ void d3d_vertex_normal_texture_color(gs_scalar x, gs_scalar y, gs_scalar z, gs_s
     glTexCoord2f(tx,ty);
     glNormal3f(nx, ny, nz);
     glVertex3d(x,y,z);
+    glColor4ubv(enigma::currentcolor);
 }
 
 void d3d_draw_block(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, bool closed)

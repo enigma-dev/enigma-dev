@@ -366,5 +366,18 @@ double background_get_texture_height_factor(int backId) {
   return bck2d->texbordy;
 }
 
+void d3d_draw_background(int back, gs_scalar x, gs_scalar y, gs_scalar z)
+{
+	get_background(bck2d,back);
+
+	const float tbx=bck2d->texbordx,tby=bck2d->texbordy;
+	draw_primitive_begin_texture(pr_trianglestrip, bck2d->texture);
+	d3d_vertex_texture(x,y,z,0,0);
+	d3d_vertex_texture(x+bck2d->width,y,z,tbx,0);
+	d3d_vertex_texture(x,y+bck2d->height,z, 0,tby);
+	d3d_vertex_texture(x+bck2d->width,y+bck2d->height,z, tbx,tby);
+	draw_primitive_end();
+}
+
 }
 

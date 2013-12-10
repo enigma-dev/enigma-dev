@@ -243,6 +243,23 @@ void draw_sprite_stretched_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs
 	draw_primitive_end();
 }
 
+void d3d_draw_sprite(int spr,int subimg, gs_scalar x, gs_scalar y, gs_scalar z)
+{
+    get_spritev(spr2d,spr);
+    const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
+
+	const float tbx = spr2d->texbordxarray[usi], tby = spr2d->texbordyarray[usi],
+			xvert1 = x-spr2d->xoffset, xvert2 = xvert1 + spr2d->width,
+			yvert1 = y-spr2d->yoffset, yvert2 = yvert1 + spr2d->height;
+
+	draw_primitive_begin_texture(pr_trianglestrip, spr2d->texturearray[usi]);
+	d3d_vertex_texture(xvert1,yvert1,z,0,0);
+	d3d_vertex_texture(xvert2,yvert1,z,tbx,0);
+	d3d_vertex_texture(xvert1,yvert2,z,0,tby);
+	d3d_vertex_texture(xvert2,yvert2,z,tbx,tby);
+	draw_primitive_end();
+}
+
 }
 
 // These two leave a bad taste in my mouth because they depend on views, which should be removable.
