@@ -288,7 +288,6 @@ void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom, g
 void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, double angle)
 {
   glDisable(GL_DEPTH_TEST);
-  enigma::d3dHidden = 0;
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
   glScalef(1, -1, 1);
