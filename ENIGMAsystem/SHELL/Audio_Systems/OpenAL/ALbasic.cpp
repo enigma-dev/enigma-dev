@@ -63,8 +63,8 @@ bool sound_play(int sound) { // Returns whether sound is playing
   alSourcei(sound_channels[src]->source, AL_REFERENCE_DISTANCE, 1);
   alSourcei(sound_channels[src]->source, AL_LOOPING, AL_FALSE);
   alSourcef(sound_channels[src]->source, AL_GAIN, snd->volume);
-  float sourcePosAL[] = { snd->pan, 0.0f, 0.0f}; 
-  alSourcefv(sound_channels[src]->source, AL_POSITION, sourcePosAL); 
+  float sourcePosAL[] = { snd->pan, 0.0f, 0.0f};
+  alSourcefv(sound_channels[src]->source, AL_POSITION, sourcePosAL);
   sound_channels[src]->soundIndex = sound;
   return !(snd->idle = !(snd->playing = !snd->stream ?
 	alurePlaySource(sound_channels[src]->source, enigma::eos_callback, (void*)(ptrdiff_t)sound) != AL_FALSE :
@@ -80,8 +80,8 @@ bool sound_loop(int sound) { // Returns whether sound is playing
   alSourcei(sound_channels[src]->source, AL_REFERENCE_DISTANCE, 1);
   alSourcei(sound_channels[src]->source, AL_LOOPING, AL_TRUE); //Just playing
   alSourcef(sound_channels[src]->source, AL_GAIN, snd->volume);
-  float sourcePosAL[] = { snd->pan, 0.0f, 0.0f}; 
-  alSourcefv(sound_channels[src]->source, AL_POSITION, sourcePosAL); 
+  float sourcePosAL[] = { snd->pan, 0.0f, 0.0f};
+  alSourcefv(sound_channels[src]->source, AL_POSITION, sourcePosAL);
   sound_channels[src]->soundIndex = sound;
   return !(snd->idle = !(snd->playing = !snd->stream ?
 	alurePlaySource(sound_channels[src]->source, enigma::eos_callback, (void*)(ptrdiff_t)sound) != AL_FALSE :
@@ -136,8 +136,8 @@ void sound_pan(int sound, float value) {
   snd->pan = value;
   for (size_t i = 0; i < sound_channels.size(); i++) {
     if (sound_channels[i]->soundIndex == sound) {
-		float sourcePosAL[] = { value, 0.0f, 0.0f}; 
-		alSourcefv(sound_channels[i]->source, AL_POSITION, sourcePosAL); 
+		float sourcePosAL[] = { value, 0.0f, 0.0f};
+		alSourcefv(sound_channels[i]->source, AL_POSITION, sourcePosAL);
     }
   }
 }
@@ -273,7 +273,7 @@ int sound_add(string fname, int kind, bool preload) //At the moment, the latter 
   int rid = enigma::sound_allocate();
   bool fail = enigma::sound_add_from_buffer(rid,fdata,flen);
   delete fdata;
-  
+
   if (fail)
     return -1;
   return rid;
@@ -291,6 +291,82 @@ bool sound_replace(int sound, string fname, int kind, bool preload)
   }
   sound_resources[sound] = enigma::sound_new_with_source();
   return true;
+}
+
+void sound_3d_set_sound_cone(int sound, float x, float y, float z, double anglein, double angleout, long voloutside) {
+}
+
+void sound_3d_set_sound_distance(int sound, float mindist, float maxdist) {
+}
+
+void sound_3d_set_sound_position(int sound, float x, float y, float z) {
+}
+
+void sound_3d_set_sound_velocity(int sound, float x, float y, float z) {
+}
+
+void sound_effect_chorus(int sound, float wetdry, float depth, float feedback, float frequency, long wave, float delay, long phase) {
+	/*
+	DSFXChorus pcDsFxChorus;
+	IDirectSoundFXChorus::SetAllParameters(pcDsFxChorus);
+	*/
+}
+
+void sound_effect_compressor(int sound, float gain, float attack, float release, float threshold, float ratio, float delay) {
+}
+
+void sound_effect_echo(int sound, float wetdry, float feedback, float leftdelay, float rightdelay, long pandelay) {
+}
+
+void sound_effect_equalizer(int sound, float center, float bandwidth, float gain) {
+}
+
+void sound_effect_flanger(int sound, float wetdry, float depth, float feedback, float frequency, long wave, float delay, long phase) {
+}
+
+void sound_effect_gargle(int sound, unsigned rate, unsigned wave) {
+}
+
+void sound_effect_reverb(int sound, float gain, float mix, float time, float ratio) {
+}
+
+//const _GUID& sound_effect_types[8] = { GUID_DSFX_STANDARD_CHORUS, GUID_DSFX_STANDARD_ECHO, GUID_DSFX_STANDARD_FLANGER, GUID_DSFX_STANDARD_GARGLE,
+	//GUID_DSFX_WAVES_REVERB, GUID_DSFX_STANDARD_COMPRESSOR, GUID_DSFX_STANDARD_PARAMEQ };
+
+void sound_effect_set(int sound, int effect) {
+/*
+  HRESULT hr;
+  DWORD dwResults[1];  // One element for each effect.
+
+  // Describe the effect.
+  DSEFFECTDESC dsEffect;
+  memset(&dsEffect, 0, sizeof(DSEFFECTDESC));
+  dsEffect.dwSize = sizeof(DSEFFECTDESC);
+  dsEffect.dwFlags = 0;
+  dsEffect.guidDSFXClass = sound_effect_types[effect];
+
+  get_sound(snd, sound, 0);
+
+  // Set the effect
+  if (SUCCEEDED(hr = snd->soundBuffer->SetFX(1, &dsEffect, dwResults)))
+  {
+    #ifdef DEBUG_MODE
+    switch (dwResults[0])
+    {
+      case DSFXR_LOCHARDWARE:
+        printf("Effect was placed in hardware.");
+        break;
+      case DSFXR_LOCSOFTWARE:
+        printf("Effect was placed in software.");
+        break;
+      case DSFXR_UNALLOCATED:
+        printf("Effect is not yet allocated to hardware or software.");
+        break;
+    }
+	#endif
+  }
+  return;
+  */
 }
 
 }
