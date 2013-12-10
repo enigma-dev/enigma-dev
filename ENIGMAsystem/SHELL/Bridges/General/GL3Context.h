@@ -31,6 +31,7 @@ using std::map;
 
 class ContextManager {
 private:
+GLint bound_tex;
 
 protected:
   map< GLenum, GLuint > cacheTextureStates;    /// cached texture stages
@@ -49,6 +50,7 @@ ContextManager() {
 	shapes_d3d_texture = -1;
 	last_stride = -1;
 	last_depth = 0.0f;
+	bound_tex = 0;
 }
 
 ~ContextManager() {
@@ -138,11 +140,11 @@ void ReadPixels() {
 }
 
 void BindTexture(GLenum target,  GLuint texture) {
-GLint tex;
-glGetIntegerv(target, &tex);
-if (tex != texture) {
+//GLint tex;
+//glGetIntegerv(target, &tex);
+if (bound_tex != texture) {
 EndShapesBatching();
-		glBindTexture(target, texture);
+		glBindTexture(target, bound_tex = texture);
 }
 		return;
 	// Update the texture state cache
