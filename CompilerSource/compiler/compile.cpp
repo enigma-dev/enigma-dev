@@ -183,7 +183,8 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
     edbg << "Cleaning..." << flushl;
 
 	string make = "clean-game ";
-	make += "COMPILEPATH=" CURRENT_PLATFORM_NAME "\"" + extensions::targetOS.identifier + "\" ";
+	string compilepath = CURRENT_PLATFORM_NAME "/" + extensions::targetOS.identifier;
+	make += "COMPILEPATH=\"" + compilepath + "\" ";
 	make += "WORKDIR=\"" + workdir + "\" ";
 	make += "eTCpath=\"" + MAKE_tcpaths + "\"";
 
