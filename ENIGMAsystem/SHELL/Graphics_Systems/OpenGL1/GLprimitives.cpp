@@ -74,14 +74,13 @@ void draw_vertex(gs_scalar x, gs_scalar y)
 
 void draw_vertex_color(gs_scalar x, gs_scalar y, int col, float alpha)
 {
-  glPushAttrib(GL_CURRENT_BIT);
     glColor4f(
       (col&0xFF)/255.0,
       ((col&0xFF00)>>8)/255.0,
       ((col&0xFF0000)>>16)/255.0,
       alpha);
     glVertex2f(x,y);
-  glPopAttrib();
+  glColor4ubv(enigma::currentcolor);
 }
 
 void draw_vertex_texture(gs_scalar x, gs_scalar y, gs_scalar tx, gs_scalar ty)
@@ -92,7 +91,6 @@ void draw_vertex_texture(gs_scalar x, gs_scalar y, gs_scalar tx, gs_scalar ty)
 
 void draw_vertex_texture_color(gs_scalar x, gs_scalar y, gs_scalar tx, gs_scalar ty, int col, float alpha)
 {
-  glPushAttrib(GL_CURRENT_BIT);
     glColor4f(
       (col&0xFF)/255.0,
       ((col&0xFF00)>>8)/255.0,
@@ -100,10 +98,10 @@ void draw_vertex_texture_color(gs_scalar x, gs_scalar y, gs_scalar tx, gs_scalar
       alpha);
     glTexCoord2f(tx,ty);
     glVertex2f(x,y);
-  glPopAttrib();
+  glColor4ubv(enigma::currentcolor);
 }
 
-void d3d_primitive_begin(int kind) {	
+void d3d_primitive_begin(int kind) {
 	// This has to be done because these immediate mode vertex functions will
 	// blend with the texture whether or specify texture coordinates or not.
 	texture_reset();
