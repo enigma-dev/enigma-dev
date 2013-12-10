@@ -813,7 +813,10 @@ void keyboard_wait()
     io_handle();
     for (int i = 0; i < 255; i++)
       if (enigma::keybdstatus[i])
+      {
+        io_clear();
         return;
+      }
     usleep(10000); // Sleep 1/100 second
   }
 }
@@ -838,7 +841,7 @@ void keyboard_clear(const int key)
 bool keyboard_check_direct(int key)
 {
    BYTE keyState[256];
- 
+
    if ( GetKeyboardState( keyState ) )  {
 	  for (int x = 0; x < 256; x++)
 		keyState[x] = (char) (GetKeyState(x) >> 8);
@@ -855,7 +858,7 @@ bool keyboard_check_direct(int key)
   if (key == vk_nokey) {
     for(int i = 0; i < 256; i++)
       if (keyState[i] == 1) return 0;
-    return 1; 
+    return 1;
   }
   return keyState[key & 0xFF];
 }
@@ -864,7 +867,7 @@ void keyboard_key_press(int key) {
     BYTE keyState[256];
 
     GetKeyboardState((LPBYTE)&keyState);
-	
+
 	// Simulate a key press
 	 keybd_event( key,
 				  keyState[key],
@@ -897,7 +900,7 @@ void keyboard_set_capital(bool on) {
     BYTE keyState[256];
 
     GetKeyboardState((LPBYTE)&keyState);
-	
+
 	if( (on && !(keyState[VK_CAPITAL] & 1)) ||
 	  (!on && (keyState[VK_CAPITAL] & 1)) )
 	{
@@ -913,7 +916,7 @@ void keyboard_set_numlock(bool on) {
     BYTE keyState[256];
 
     GetKeyboardState((LPBYTE)&keyState);
-	
+
 	if( (on && !(keyState[VK_NUMLOCK] & 1)) ||
 	  (!on && (keyState[VK_NUMLOCK] & 1)) )
 	{
@@ -929,7 +932,7 @@ void keyboard_set_scroll(bool on) {
     BYTE keyState[256];
 
     GetKeyboardState((LPBYTE)&keyState);
-	
+
 	if( (on && !(keyState[VK_SCROLL] & 1)) ||
 	  (!on && (keyState[VK_SCROLL] & 1)) )
 	{
