@@ -66,6 +66,7 @@ namespace enigma
       virtual void activate();
       virtual variant myevent_create();
       virtual variant myevent_gamestart();
+	  virtual variant myevent_closebutton();
       virtual variant myevent_draw();
 	  virtual variant myevent_drawgui();
 	  virtual variant myevent_roomstart();
