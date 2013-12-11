@@ -71,6 +71,7 @@ int lang_CPP::compile_writeGlobals(EnigmaStruct* es, parsed_object* global)
     wto << "  bool showBorder = " << !es->gameSettings.dontDrawBorder << ";" << endl;
     wto << "  bool showIcons = " << !es->gameSettings.dontShowButtons << ";" << endl;
     wto << "  bool freezeOnLoseFocus = " << es->gameSettings.freezeOnLoseFocus << ";" << endl;
+	wto << "  bool treatCloseAsEscape = " << es->gameSettings.treatCloseAsEscape << ";" << endl;
     wto << "  bool isFullScreen = " << es->gameSettings.startFullscreen << ";" << endl;
     wto << "  int viewScale = " << es->gameSettings.scaling << ";" << endl;
     wto << "}" << endl;
