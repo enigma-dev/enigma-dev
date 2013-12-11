@@ -23,9 +23,9 @@
 #include <string>
 #include "Widget_Systems/widgets_mandatory.h"
 
-#define GETR(x) ((x & 0x0000FF))/255.0
-#define GETG(x) ((x & 0x00FF00)>>8)/255.0
-#define GETB(x) ((x & 0xFF0000)>>16)/255.0
+#define GETR(x) ((x & 0x0000FF))
+#define GETG(x) ((x & 0x00FF00)>>8)
+#define GETB(x) ((x & 0xFF0000)>>16)
 
 #include <math.h>
 
@@ -74,13 +74,12 @@ void draw_vertex(gs_scalar x, gs_scalar y)
 
 void draw_vertex_color(gs_scalar x, gs_scalar y, int col, float alpha)
 {
-    glColor4f(
-      (col&0xFF)/255.0,
-      ((col&0xFF00)>>8)/255.0,
-      ((col&0xFF0000)>>16)/255.0,
-      alpha);
+    glColor4ub(
+      (col&0xFF),
+      ((col&0xFF00)>>8),
+      ((col&0xFF0000)>>16),
+      (unsigned char)alpha*255);
     glVertex2f(x,y);
-  glColor4ubv(enigma::currentcolor);
 }
 
 void draw_vertex_texture(gs_scalar x, gs_scalar y, gs_scalar tx, gs_scalar ty)
@@ -91,14 +90,13 @@ void draw_vertex_texture(gs_scalar x, gs_scalar y, gs_scalar tx, gs_scalar ty)
 
 void draw_vertex_texture_color(gs_scalar x, gs_scalar y, gs_scalar tx, gs_scalar ty, int col, float alpha)
 {
-    glColor4f(
-      (col&0xFF)/255.0,
-      ((col&0xFF00)>>8)/255.0,
-      ((col&0xFF0000)>>16)/255.0,
-      alpha);
+    glColor4ub(
+      (col&0xFF),
+      ((col&0xFF00)>>8),
+      ((col&0xFF0000)>>16),
+      (unsigned char)alpha*255);
     glTexCoord2f(tx,ty);
     glVertex2f(x,y);
-  glColor4ubv(enigma::currentcolor);
 }
 
 void d3d_primitive_begin(int kind) {
@@ -122,7 +120,7 @@ void d3d_vertex(gs_scalar x, gs_scalar y, gs_scalar z) {
 }
 
 void d3d_vertex_color(gs_scalar x, gs_scalar y, gs_scalar z, int color, double alpha) {
-    glColor4f(GETR(color), GETG(color), GETB(color), alpha);
+    glColor4ub(GETR(color), GETG(color), GETB(color), (unsigned char)alpha*255);
     glVertex3d(x,y,z);
 }
 
@@ -132,7 +130,7 @@ void d3d_vertex_texture(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar tx, gs_
 }
 
 void d3d_vertex_texture_color(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar tx, gs_scalar ty, int color, double alpha) {
-    glColor4f(GETR(color), GETG(color), GETB(color), alpha);
+    glColor4ub(GETR(color), GETG(color), GETB(color), (unsigned char)alpha*255);
     glTexCoord2f(tx,ty);
     glVertex3d(x,y,z);
     glColor4ubv(enigma::currentcolor);
@@ -146,7 +144,7 @@ void d3d_vertex_normal(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_s
 
 void d3d_vertex_normal_color(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, int color, double alpha)
 {
-    glColor4f(GETR(color), GETG(color), GETB(color), alpha);
+    glColor4ub(GETR(color), GETG(color), GETB(color), (unsigned char)alpha*255);
     glNormal3f(nx, ny, nz);
     glVertex3d(x,y,z);
     glColor4ubv(enigma::currentcolor);
@@ -161,7 +159,7 @@ void d3d_vertex_normal_texture(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar 
 
 void d3d_vertex_normal_texture_color(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, gs_scalar tx, gs_scalar ty, int color, double alpha)
 {
-    glColor4f(GETR(color), GETG(color), GETB(color), alpha);
+    glColor4ub(GETR(color), GETG(color), GETB(color), (unsigned char)alpha*255);
     glTexCoord2f(tx,ty);
     glNormal3f(nx, ny, nz);
     glVertex3d(x,y,z);
