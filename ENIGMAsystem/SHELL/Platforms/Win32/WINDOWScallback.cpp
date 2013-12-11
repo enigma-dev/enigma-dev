@@ -72,6 +72,7 @@ namespace enigma
 			}
 			// Game Maker actually checks this first I am making the decision to check if after, since that is how it is expected to work
 			// so the user can execute something before the escape is processed, no sense in an override if user is going to call game_end() anyway.
+			// - Robert
 			if (treatCloseAsEscape) {
 				PostQuitMessage (0);
 			}
