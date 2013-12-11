@@ -25,6 +25,9 @@ using std::map;
 #include "../General/PFwindow.h"
 #include "WINDOWScallback.h"
 
+#include "Universal_System/instance_system.h"
+#include "Universal_System/instance.h"
+
 #ifndef WM_MOUSEHWHEEL
   #define WM_MOUSEHWHEEL 0x020E
 #endif
@@ -62,7 +65,11 @@ namespace enigma
         case WM_CREATE:
             return 0;
         case WM_CLOSE:
-			
+			instance_event_iterator = new inst_iter(NULL,NULL,NULL);
+			for (enigma::iterator it = enigma::instance_list_first(); it; ++it)
+			{
+			  it->myevent_closebutton();
+			}
             PostQuitMessage (0);
             return 0;
 
