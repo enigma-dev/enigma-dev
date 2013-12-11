@@ -80,6 +80,7 @@ void draw_vertex_color(gs_scalar x, gs_scalar y, int col, float alpha)
       ((col&0xFF0000)>>16),
       (unsigned char)alpha*255);
     glVertex2f(x,y);
+    glColor4ubv(enigma::currentcolor);
 }
 
 void draw_vertex_texture(gs_scalar x, gs_scalar y, gs_scalar tx, gs_scalar ty)
@@ -97,6 +98,7 @@ void draw_vertex_texture_color(gs_scalar x, gs_scalar y, gs_scalar tx, gs_scalar
       (unsigned char)alpha*255);
     glTexCoord2f(tx,ty);
     glVertex2f(x,y);
+    glColor4ubv(enigma::currentcolor);
 }
 
 void d3d_primitive_begin(int kind) {
@@ -122,6 +124,7 @@ void d3d_vertex(gs_scalar x, gs_scalar y, gs_scalar z) {
 void d3d_vertex_color(gs_scalar x, gs_scalar y, gs_scalar z, int color, double alpha) {
     glColor4ub(GETR(color), GETG(color), GETB(color), (unsigned char)alpha*255);
     glVertex3d(x,y,z);
+    glColor4ubv(enigma::currentcolor);
 }
 
 void d3d_vertex_texture(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar tx, gs_scalar ty) {
