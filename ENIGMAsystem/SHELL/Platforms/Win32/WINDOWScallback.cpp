@@ -53,7 +53,7 @@ namespace enigma
     extern HWND hWnd,hWndParent;
     extern void setchildsize(bool adapt);
 	extern void WindowResized();
-    extern bool freezeOnLoseFocus, freezeWindow;
+    extern bool freezeOnLoseFocus, freezeWindow, treatCloseAsEscape;
     static short hdeltadelta = 0, vdeltadelta = 0;
     int tempLeft = 0, tempTop = 0, tempRight = 0, tempBottom = 0, tempWidth, tempHeight;
     RECT tempWindow;
@@ -70,7 +70,11 @@ namespace enigma
 			{
 			  it->myevent_closebutton();
 			}
-            PostQuitMessage (0);
+			// Game Maker actually checks this first I am making the decision to check if after, since that is how it is expected to work
+			// so the user can execute something before the escape is processed, no sense in an override if user is going to call game_end() anyway.
+			if (treatCloseAsEscape) {
+				PostQuitMessage (0);
+			}
             return 0;
 
         case WM_DESTROY:
