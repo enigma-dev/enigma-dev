@@ -20,6 +20,8 @@
 
 #include <windows.h>
 #include <windowsx.h>
+#include <dxgi.h>
+#include <d3dcommon.h>
 #include <d3d11.h>
 #include "Graphics_Systems/Direct3D11/Direct3D11Headers.h"
 #include "Graphics_Systems/General/GSmodel.h"
@@ -37,6 +39,17 @@ using std::map;
 using std::string;
 using std::stringstream;
 
+extern bool m_vsync_enabled;
+extern int m_videoCardMemory;
+extern char m_videoCardDescription[128];
+extern IDXGISwapChain* m_swapChain;
+extern ID3D11Device* m_device;
+extern ID3D11DeviceContext* m_deviceContext;
+extern ID3D11RenderTargetView* m_renderTargetView;
+extern ID3D11Texture2D* m_depthStencilBuffer;
+extern ID3D11DepthStencilState* m_depthStencilState;
+extern ID3D11DepthStencilView* m_depthStencilView;
+extern ID3D11RasterizerState* m_rasterState;
 
 //TODO: Replace the fixed function pipeline with shaders
 

@@ -113,6 +113,20 @@ namespace enigma_user
 
 void screen_redraw()
 {
+	float color[4];
+	
+	int clearcolor = ((int)background_color) & 0x00FFFFFF;
+	// Setup the color to clear the buffer to.
+	color[0] = __GETR(clearcolor);
+	color[1] = __GETG(clearcolor);
+	color[2] = __GETB(clearcolor);
+	color[3] = 1;
+
+	// Clear the back buffer.
+	m_deviceContext->ClearRenderTargetView(m_renderTargetView, color);
+    
+	// Clear the depth buffer.
+	m_deviceContext->ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 	
 	screen_refresh();
 }
