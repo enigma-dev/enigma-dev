@@ -92,19 +92,19 @@ dllexport const char* libInit(EnigmaCallbacks* ecs)
   }
   else cout << "IDE Not Found. Continuing without graphical output." << endl;
   
-  #if CURRENT_PLATFORM_ID == OS_WINDOWS
+#if CURRENT_PLATFORM_ID == OS_WINDOWS
   CreateDirectory((workdir).c_str(), NULL);
   if (!CreateDirectory((workdir +"Preprocessor_Environment_Editable").c_str(), NULL)) {
 	DWORD error = GetLastError();
 	switch (error) {
 		case ERROR_ALREADY_EXISTS: 
-			std::cout << "WARNING! Directory already exists. Failed to create build directory \"" << workdir << "\"" << endl;
+			std::cout << "WARNING! Failed to create build directory, directory already exists: \"" << workdir << "\"" << endl;
 			break;
 		case ERROR_PATH_NOT_FOUND:
-			std::cout << "WARNING! Path not found. Failed to create build directory \"" << workdir << "\"" << endl;
+			std::cout << "ERROR! Failed to create build directory, path not found: \"" << workdir << "\"" << endl;
 			break;
 		default:
-			std::cout << "ERROR! Failed to create build directory \"" << workdir << "\"" << endl;
+			std::cout << "ERROR! Failed to create build directory: \"" << workdir << "\"" << endl;
 			break;
 	}
   }

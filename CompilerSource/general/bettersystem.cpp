@@ -89,6 +89,16 @@ inline string cutout_block(const char* source, pt& pos, bool& qed)
   return ret;
 }
 
+void myReplace(std::string& str, const std::string& oldStr, const std::string& newStr)
+{
+  size_t pos = 0;
+  while((pos = str.find(oldStr, pos)) != std::string::npos)
+  {
+     str.replace(pos, oldStr.length(), newStr);
+     pos += newStr.length();
+  }
+}
+
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
     #include <windows.h>
 
@@ -131,6 +141,8 @@ inline string cutout_block(const char* source, pt& pos, bool& qed)
           parameters += " " + pcur;
         }
       }
+	  myReplace(redirout, "\"", "");
+	  myReplace(redirerr, "\"", "");
 
 
       STARTUPINFO StartupInfo;
@@ -198,6 +210,7 @@ inline string cutout_block(const char* source, pt& pos, bool& qed)
       }
 
       printf("\n\n********* EXECUTE:\n%s\n\n",parameters.c_str());
+
       if (CreateProcess(NULL,(CHAR*)parameters.c_str(),NULL,&inheritibility,TRUE,CREATE_DEFAULT_ERROR_MODE,Cenviron_use,NULL,&StartupInfo,&ProcessInformation ))
       {
         WaitForSingleObject(ProcessInformation.hProcess, INFINITE);
@@ -284,6 +297,7 @@ inline string cutout_block(const char* source, pt& pos, bool& qed)
         int redirchr = 0;
         string pcur = cutout_block(fcmd, pos, qued);
 
+
         if (!redirchr and !qued and
         (  ((pcur[0] == '>' or pcur.substr(0,2) == "1>") and (redirchr = 1))
         or ((pcur.substr(0,2) == "2>") and (redirchr = 2))
@@ -321,9 +335,10 @@ inline string cutout_block(const char* source, pt& pos, bool& qed)
 
       int result = -1;
       pid_t fk = fork();
+
       if (!fk)
       {
-        // Redirect STDOUT
+		// Redirect STDOUT
         if (redirout == "") {
             int flags = fcntl(STDOUT_FILENO, F_GETFD);
             if (flags != -1)
@@ -337,7 +352,7 @@ inline string cutout_block(const char* source, pt& pos, bool& qed)
           if (redirerr == redirout)
             dup2(1,2);
         }
-
+		
         // Redirect STDERR
         if (redirerr == "") {
             int flags = fcntl(STDERR_FILENO, F_GETFD);
