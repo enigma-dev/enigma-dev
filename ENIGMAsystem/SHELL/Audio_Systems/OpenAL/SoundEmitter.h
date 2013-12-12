@@ -44,8 +44,7 @@ struct SoundEmitter
   {
 	  emitPos[0] = emitPos[1] = emitPos[2] = 0.0f, 
 	  emitVel[0] = emitVel[1] = emitVel[2] = 0.0f, 
-	  falloff[0] = falloff[1] = 0.0f, 
-	  falloff[2] = 1.0f, 
+	  falloff[0] = 100.0f, falloff[1] = 300.0f, falloff[2] = 1.0f, 
 	  volume = 1.0f;
    }
 

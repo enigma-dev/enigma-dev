@@ -44,6 +44,11 @@ using std::string;
 using std::vector;
 #include <time.h>
 
+ALenum falloff_models[7] = { 
+  AL_NONE, AL_INVERSE_DISTANCE, AL_INVERSE_DISTANCE_CLAMPED, AL_LINEAR_DISTANCE,
+  AL_LINEAR_DISTANCE_CLAMPED, AL_EXPONENT_DISTANCE, AL_EXPONENT_DISTANCE_CLAMPED
+};
+
 namespace enigma_user
 {
 
@@ -112,15 +117,18 @@ int audio_play_sound(int sound, double priority, bool loop)
   }
 }
 
-int audio_play_sound_at(int sound, as_scalar x, as_scalar y, as_scalar z, int falloff_ref, as_scalar falloff_max, as_scalar falloff_factor, bool loop, double priority)
+int audio_play_sound_at(int sound, as_scalar x, as_scalar y, as_scalar z, as_scalar falloff_ref, as_scalar falloff_max, as_scalar falloff_factor, bool loop, double priority)
 {
   int src = enigma::get_free_channel(priority);
   if (src != -1)
   {
     get_sound(snd,sound,0);
     alSourcei(sound_channels[src]->source, AL_LOOPING, loop?AL_TRUE:AL_FALSE);
-    ALfloat soundPos[]={0.0f,0.0f,0.0f};
+    ALfloat soundPos[3] = { x, y, z };
     alSourcefv(sound_channels[src]->source, AL_POSITION, soundPos);
+    alSourcef(sound_channels[src]->source, AL_REFERENCE_DISTANCE, falloff_ref);
+	alSourcef(sound_channels[src]->source, AL_MAX_DISTANCE, falloff_max);
+	alSourcef(sound_channels[src]->source, AL_ROLLOFF_FACTOR, falloff_factor);
     sound_channels[src]->priority = priority;
     sound_channels[src]->soundIndex = sound;
     sound_channels[src]->type = 0;
@@ -134,6 +142,15 @@ int audio_play_sound_at(int sound, as_scalar x, as_scalar y, as_scalar z, int fa
   {
     return -1;
   }
+}
+
+void audio_play_sound_on(int emitter, int sound, bool loop, double priority)
+{
+  SoundEmitter *emit = sound_emitters[emitter];
+  int src = audio_play_sound_at(sound, emit->emitPos[0], emit->emitPos[1], emit->emitPos[2],
+    emit->falloff[0], emit->falloff[1], emit->falloff[2], loop, priority);
+  alSourcefv(sound_channels[src]->source, AL_VELOCITY, emit->emitVel);
+  alSourcei(sound_channels[src]->source, AL_PITCH, emit->pitch);
 }
 
 void audio_pause_sound(int index)
@@ -341,7 +358,7 @@ void audio_delete(int sound)
 
 void audio_falloff_set_model(int model)
 {
-  falloff_model = model;
+  alDistanceModel(falloff_models[model]);
 }
 
 int audio_emitter_create()
@@ -396,15 +413,6 @@ void audio_emitter_velocity(int emitter, as_scalar vx, as_scalar vy, as_scalar v
   emit->emitVel[0] = vx;
   emit->emitVel[1] = vy;
   emit->emitVel[2] = vz;
-}
-
-void audio_play_sound_on(int emitter, int sound, bool loop, double priority)
-{
-  SoundEmitter *emit = sound_emitters[emitter];
-  int src = audio_play_sound_at(sound, emit->emitPos[0], emit->emitPos[1], emit->emitPos[2],
-    emit->falloff[0], emit->falloff[1], emit->falloff[2], loop, priority);
-  alSourcefv(sound_channels[src]->source, AL_VELOCITY, emit->emitVel);
-  alSourcei(sound_channels[src]->source, AL_PITCH, emit->pitch);
 }
 
 }
