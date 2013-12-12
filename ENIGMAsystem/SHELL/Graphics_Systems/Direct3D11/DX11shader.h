@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton
+/** Copyright (C) 2013 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,36 +15,26 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef _SOUND_CHANNEL__H
-#define _SOUND_CHANNEL__H
+#ifndef _DX11SHADER__H
+#define _DX11SHADER__H
 
-#include "../General/ASadvanced.h"
-#include "ALsystem.h"
+namespace enigma_user
+{
 
-#ifdef __APPLE__
-#include "../../../additional/alure/include/AL/alure.h"
-#else
-#include <AL/alure.h>
-#endif
-
-#ifdef DEBUG_MODE
-#include "libEGMstd.h"
-#include "Widget_Systems/widgets_mandatory.h" // show_error
-#endif
-
-#include <vector>
-using std::vector;
-
-struct SoundChannel {
-ALuint source;
-int soundIndex;
-double priority;
-int type;
-SoundChannel(ALuint alsource, int sound_id): source(alsource), soundIndex(sound_id), priority(0), type(0) {}
-~SoundChannel() {}
-
+enum {
+  sh_unknown = 0,
+  sh_vertex = 1,
+  sh_pixel = 2
 };
 
-extern vector<SoundChannel*> sound_channels;
+int hlsl_shader_create(int type);
+int hlsl_shader_load(int id, string fname);
+void hlsl_shader_set_constantf(int id, unsigned start, const float* data, unsigned count);
+void hlsl_shader_set_vector(int id, string name, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar w);
+void hlsl_shader_use(int id);
+void hlsl_shader_reset();
+void hlsl_shader_free(int id);
+
+}
 
 #endif

@@ -94,7 +94,7 @@ class grid
         ygrid = copy_id.ygrid;
         for (unsigned i = 0; i < ygrid; i++)
             for (unsigned ii = 0; ii < xgrid; ii++)
-                grid_array[i * xgrid + ii] = grid_array[i * copy_id.xgrid + ii];
+                grid_array[i * xgrid + ii] = copy_id.grid_array[i * copy_id.xgrid + ii];
     }
     unsigned int width()
     {
@@ -201,7 +201,7 @@ class grid
                 const int upx = minv(tx2 - tx1 + 1, minv(int(xgrid - x), xd)), upy = minv(ty2 - ty1 + 1, minv(int(ygrid - y), yd));
                 for (int i = 0; i < upy; i++)
                     for (int ii = 0; ii < upx; ii++)
-                        grid_array[(x + i)*xgrid + (y + ii)] = source_id.grid_array[(tx1 + i)*source_id.xgrid + (ty1 + ii)];
+                        grid_array[(y + i)*xgrid + (x + ii)] = source_id.grid_array[(ty1 + i)*source_id.xgrid + (tx1 + ii)];
             }
         }
     }
@@ -215,7 +215,7 @@ class grid
                 const int upx = minv(tx2 - tx1 + 1, minv(int(xgrid - x), xd)), upy = minv(ty2 - ty1 + 1, minv(int(ygrid - y), yd));
                 for (int i = 0; i < upy; i++)
                     for (int ii = 0; ii < upx; ii++)
-                        grid_array[(x + i)*xgrid + (y + ii)] += source_id.grid_array[(tx1 + i)*source_id.xgrid + (ty1 + ii)];
+                        grid_array[(y + i)*xgrid + (x + ii)] += source_id.grid_array[(ty1 + i)*source_id.xgrid + (tx1 + ii)];
             }
         }
     }
@@ -229,7 +229,7 @@ class grid
                 const int upx = minv(tx2 - tx1 + 1, minv(int(xgrid - x), xd)), upy = minv(ty2 - ty1 + 1, minv(int(ygrid - y), yd));
                 for (int i = 0; i < upy; i++)
                     for (int ii = 0; ii < upx; ii++)
-                        grid_array[(x + i)*xgrid + (y + ii)] *= source_id.grid_array[(tx1 + i)*source_id.xgrid + (ty1 + ii)];
+                        grid_array[(y + i)*xgrid + (x + ii)] *= source_id.grid_array[(ty1 + i)*source_id.xgrid + (tx1 + ii)];
             }
         }
     }
