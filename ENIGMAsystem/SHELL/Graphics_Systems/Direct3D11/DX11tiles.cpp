@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 polygone
+/** Copyright (C) 2013 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -14,18 +14,6 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
-
-// Tile system
-#include "Graphics_Systems/General/GSprimitives.h"
-#include "Universal_System/depth_draw.h"
-#include <algorithm>
-#include "../General/GSbackground.h"
-#include "Universal_System/backgroundstruct.h"
-#include "../General/GStextures.h"
-#include "../General/GLTextureStruct.h"
-#include "../General/GStiles.h"
-#include "../General/GLtilestruct.h"
-#include "../General/OpenGLHeaders.h"
 
 #ifdef DEBUG_MODE
   #include <string>
@@ -46,79 +34,36 @@
 #define __GETG(x) ((x & 0x00FF00) >> 8)
 #define __GETB(x) ((x & 0xFF0000) >> 16)
 
+// Tile system
+#include "Universal_System/depth_draw.h"
+#include <algorithm>
+#include "../General/GSbackground.h"
+#include "Universal_System/backgroundstruct.h"
+#include "../General/GStextures.h"
+
+#include "Direct3D11Headers.h"
+#include "../General/GStiles.h"
+#include "../General/DXtilestruct.h"
 namespace enigma
 {
-    static void draw_tile(int back, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, double alpha)
+    void draw_tile(int back, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, double alpha)
     {
-        if (!enigma_user::background_exists(back)) return;
-        get_background(bck2d,back);
-
-        float tbw = bck2d->width/(float)bck2d->texbordx, tbh = bck2d->height/(float)bck2d->texbordy,
-          xvert1 = x, xvert2 = xvert1 + width*xscale,
-          yvert1 = y, yvert2 = yvert1 + height*yscale,
-          tbx1 = left/tbw, tbx2 = tbx1 + width/tbw,
-          tby1 = top/tbh, tby2 = tby1 + height/tbh;
-
-        enigma_user::draw_primitive_begin_texture(enigma_user::pr_trianglestrip, bck2d->texture);
-        enigma_user::draw_vertex_texture_color(xvert1,yvert1,tbx1,tby1,color,alpha);
-        enigma_user::draw_vertex_texture_color(xvert2,yvert1,tbx2,tby1,color,alpha);
-        enigma_user::draw_vertex_texture_color(xvert1,yvert2,tbx1,tby2,color,alpha);
-        enigma_user::draw_vertex_texture_color(xvert2,yvert2,tbx2,tby2,color,alpha);
-        enigma_user::draw_primitive_end();
 
     }
 
     void load_tiles()
     {
-        glPushAttrib(GL_CURRENT_BIT);
-        for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
-            if (dit->second.tiles.size())
-            {
-                enigma_user::texture_reset();
-                sort(dit->second.tiles.begin(), dit->second.tiles.end(), bkinxcomp);
-                int index = int(glGenLists(1));
-                drawing_depths[dit->second.tiles[0].depth].tilelist = index;
-                glNewList(index, GL_COMPILE);
-                for(std::vector<tile>::size_type i = 0; i !=  dit->second.tiles.size(); i++)
-                {
-                    tile t = dit->second.tiles[i];
-                    draw_tile(t.bckid, t.bgx, t.bgy, t.width, t.height, t.roomX, t.roomY, t.xscale, t.yscale, t.color, t.alpha);
-                }
-                glEndList();
-            }
-        glPopAttrib();
+
     }
 
     void delete_tiles()
     {
-        for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
-            if (dit->second.tiles.size())
-                glDeleteLists(drawing_depths[dit->second.tiles[0].depth].tilelist, 1);
+
     }
 
     void rebuild_tile_layer(int layer_depth)
     {
-        glPushAttrib(GL_CURRENT_BIT);
-        enigma_user::texture_reset();
-        for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
-            if (dit->second.tiles.size())
-            {
-                if (dit->second.tiles[0].depth != layer_depth)
-                    continue;
 
-                enigma_user::texture_reset();
-                glDeleteLists(drawing_depths[dit->second.tiles[0].depth].tilelist, 1);
-                int index = int(glGenLists(1));
-                drawing_depths[dit->second.tiles[0].depth].tilelist = index;
-                glNewList(index, GL_COMPILE);
-                for(std::vector<tile>::size_type i = 0; i !=  dit->second.tiles.size(); i++)
-                {
-                    tile t = dit->second.tiles[i];
-                    draw_tile(t.bckid, t.bgx, t.bgy, t.width, t.height, t.roomX, t.roomY, t.xscale, t.yscale, t.color, t.alpha);
-                }
-                glEndList();
-            }
-        glPopAttrib();
     }
 }
 
@@ -247,7 +192,7 @@ double tile_get_visible(int id)
         if (dit->second.tiles.size())
             for(std::vector<enigma::tile>::size_type i = 0; i !=  dit->second.tiles.size(); i++)
                 if (dit->second.tiles[i].id == id)
-                    return (dit->second.tiles[i].alpha > 0);
+                    return (dit->second.tiles[i].alpha == 0);
     return 0;
 }
 
@@ -426,16 +371,7 @@ bool tile_set_depth(int id, int depth)
 
 bool tile_layer_delete(int layer_depth)
 {
-    for (enigma::diter dit = enigma::drawing_depths.rbegin(); dit != enigma::drawing_depths.rend(); dit++)
-        if (dit->second.tiles.size())
-        {
-            if (dit->second.tiles[0].depth != layer_depth)
-                continue;
-            glDeleteLists(enigma::drawing_depths[dit->second.tiles[0].depth].tilelist, 1);
-            dit->second.tiles.clear();
-            return true;
-        }
-    return false;
+
 }
 
 bool tile_layer_delete_at(int layer_depth, int x, int y)
@@ -504,7 +440,7 @@ bool tile_layer_hide(int layer_depth)
                 continue;
             for(std::vector<enigma::tile>::size_type i = 0; i !=  dit->second.tiles.size(); i++)
             {
-                enigma::tile &t = dit->second.tiles[i];
+                enigma::tile t = dit->second.tiles[i];
                 t.alpha = 0;
             }
             return true;
@@ -521,7 +457,7 @@ bool tile_layer_show(int layer_depth)
                 continue;
             for(std::vector<enigma::tile>::size_type i = 0; i !=  dit->second.tiles.size(); i++)
             {
-                enigma::tile &t = dit->second.tiles[i];
+                enigma::tile t = dit->second.tiles[i];
                 t.alpha = 1;
             }
             return true;
@@ -538,7 +474,7 @@ bool tile_layer_shift(int layer_depth, int x, int y)
                 continue;
             for(std::vector<enigma::tile>::size_type i = 0; i !=  dit->second.tiles.size(); i++)
             {
-                enigma::tile &t = dit->second.tiles[i];
+                enigma::tile t = dit->second.tiles[i];
                 t.roomX += x;
                 t.roomY += y;
             }

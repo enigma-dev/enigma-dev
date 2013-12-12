@@ -1,0 +1,12 @@
+#include "DIRECTX11Std.h"
+#include "Info/graphics_info.h" 
+#include "../General/GSsprite.h"
+#include "../General/GSbackground.h"
+#include "DX11shader.h"
+#include "../General/GStextures.h"
+#include "../General/GSmodel.h"
+
+#include "../General/GSfont.h"
+#include "../General/GScurves.h"
+#include "../General/GSsurface.h"
+#include "../General/actions.h"
