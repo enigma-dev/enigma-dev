@@ -28,7 +28,6 @@
 #include <AL/alure.h>
 #endif
 
-extern int falloff_model;
 extern bool load_al_dll();
 extern size_t channel_num;
 
