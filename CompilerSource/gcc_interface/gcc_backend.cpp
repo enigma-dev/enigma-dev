@@ -195,7 +195,7 @@ const char* establish_bearings(const char *compiler)
   ***********************************************************/
   if ((cmd = compey.get("defines")) == "")
     return (sprintf(errbuf,"Compiler descriptor file `%s` does not specify 'defines' executable.\n", compfq.c_str()), errbuf);
-  redir = toolchain_parseout(cmd, toolchainexec,parameters,(workdir + "enigma_defines.txt").c_str());
+  redir = toolchain_parseout(cmd, toolchainexec,parameters,("\"" + workdir + "enigma_defines.txt\"").c_str());
   cout << "Read key `defines` as `" << cmd << "`\nParsed `" << toolchainexec << "` `" << parameters << "`: redirect=" << (redir?"yes":"no") << "\n";
   got_success = !(redir? e_execsp(toolchainexec, parameters, ("> \"" + workdir +"enigma_defines.txt\"").c_str(),MAKE_paths) : e_execsp(toolchainexec, parameters, MAKE_paths));
   if (!got_success) return "Call to 'defines' toolchain executable returned non-zero!\n";
@@ -206,7 +206,7 @@ const char* establish_bearings(const char *compiler)
   ****************************************************/
   if ((cmd = compey.get("searchdirs")) == "")
     return (sprintf(errbuf,"Compiler descriptor file `%s` does not specify 'searchdirs' executable.", compfq.c_str()), errbuf);
-  redir = toolchain_parseout(cmd, toolchainexec,parameters,(workdir + "enigma_searchdirs.txt").c_str());
+  redir = toolchain_parseout(cmd, toolchainexec,parameters,("\"" + workdir + "enigma_searchdirs.txt\"").c_str());
   cout << "Read key `searchdirs` as `" << cmd << "`\nParsed `" << toolchainexec << "` `" << parameters << "`: redirect=" << (redir?"yes":"no") << "\n";
   got_success = !(redir? e_execsp(toolchainexec, parameters, ("&> \"" + workdir +"enigma_searchdirs.txt\"").c_str(), MAKE_paths) : e_execsp(toolchainexec, parameters, MAKE_paths));
   if (!got_success) return "Call to 'searchdirs' toolchain executable returned non-zero!";
