@@ -274,14 +274,14 @@ int b2d_body_create(int world)
   return i;
 }
 
-int  b2d_body_create_shape(int world, int shape)
+int b2d_body_create_shape(int world, int shape)
 {
   int i = b2d_body_create(world);
   int f = b2d_fixture_create(i, shape);
   return i;
 }
 
-int  b2d_body_create_box(int world, double halfwidth, double halfheight)
+int b2d_body_create_box(int world, double halfwidth, double halfheight)
 {
   int i = b2d_body_create(world);
   int s = b2d_shape_create();
@@ -290,7 +290,7 @@ int  b2d_body_create_box(int world, double halfwidth, double halfheight)
   return i;
 }
 
-int  b2d_body_create_circle(int world, double radius)
+int b2d_body_create_circle(int world, double radius)
 {
   int i = b2d_body_create(world);
   int s = b2d_shape_create();
