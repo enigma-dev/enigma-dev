@@ -122,7 +122,7 @@ static inline bool toolchain_parseout(string line, string &exename, string &comm
     bool mblank = false;
     srp = command.find("$blank");
     while (srp != string::npos) {
-      command.replace(srp,6,(workdir + "enigma_blank.txt").c_str());
+      command.replace(srp,6,("\"" + workdir + "enigma_blank.txt\"").c_str());
       srp = command.find("$blank");
       mblank = true;
     }
