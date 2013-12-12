@@ -28,13 +28,16 @@ namespace enigma_user
 {
 
 enum { 
-  audio_falloff_exponent_distance,
-  audio_falloff_exponent_distance_clamped,
-  audio_falloff_inverse_distance,
-  audio_falloff_inverse_distance_clamped,
-  audio_falloff_linear_distance,
-  audio_falloff_linear_distance_clamped,
-  audio_falloff_none,
+  audio_falloff_none,                         // AL_NONE
+  audio_falloff_inverse_distance,             // AL_INVERSE_DISTANCE
+  audio_falloff_inverse_distance_clamped,     // AL_INVERSE_DISTANCE_CLAMPED
+  audio_falloff_linear_distance,              // AL_LINEAR_DISTANCE
+  audio_falloff_linear_distance_clamped,      // AL_LINEAR_DISTANCE_CLAMPED
+  audio_falloff_exponent_distance,            // AL_EXPONENT_DISTANCE
+  audio_falloff_exponent_distance_clamped,    // AL_EXPONENT_DISTANCE_CLAMPED
+};
+
+enum {
   audio_old_system,
   audio_new_system
 };
@@ -48,7 +51,7 @@ void audio_resume_music();
 void audio_stop_music(); 
 
 int audio_play_sound(int index, double priority, bool loop);
-int audio_play_sound_at(int sound, as_scalar x, as_scalar y, as_scalar z, int falloff_ref, as_scalar falloff_max, as_scalar falloff_factor, bool loop, double priority);
+int audio_play_sound_at(int sound, as_scalar x, as_scalar y, as_scalar z, as_scalar falloff_ref, as_scalar falloff_max, as_scalar falloff_factor, bool loop, double priority);
 void audio_pause_sound(int index);
 void audio_resume_sound(int index);
 void audio_stop_sound(int index);

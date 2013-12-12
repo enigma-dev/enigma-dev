@@ -43,44 +43,6 @@ int type;
 SoundChannel(ALuint alsource, int sound_id): source(alsource), soundIndex(sound_id), priority(0), type(0) {}
 ~SoundChannel() {}
 
-void sound_update()
-{
-  // NOTE: Use starttime, elapsedtime, and lasttime
-  // calculate fade
-
-  // calculate falloff
-  switch (falloff_model)
-  {
-    case enigma_user::audio_falloff_exponent_distance:
-      // gain = (listener_distance / reference_distance) ^ (-falloff_factor)
-      break;
-    case enigma_user::audio_falloff_exponent_distance_clamped:
-      // distance = clamp(listener_distance, reference_distance, maximum_distance)
-      // gain = (distance / reference_distance) ^ (-falloff_factor)
-      break;
-    case enigma_user::audio_falloff_inverse_distance:
-      // gain = reference_distance / (reference_distance + falloff_factor * (listener_distance – reference_distance))
-      break;
-    case enigma_user::audio_falloff_inverse_distance_clamped:
-      // distance = clamp(listener_distance, reference_distance, maximum_distance)
-      // gain = reference_distance / (reference_distance + falloff_factor * (distance – reference_distance))
-      break;
-    case enigma_user::audio_falloff_linear_distance:
-      // distance = min(distance, maximum_distance)
-      // gain = (1 – falloff_factor * (distance – reference_distance) / (maximum_distance – reference_distance))
-      break;
-    case enigma_user::audio_falloff_linear_distance_clamped:
-      // distance = clamp(listener_distance, reference_distance, maximum_distance)
-      // gain = (1 – falloff_factor * (distance – reference_distance) / (maximum_distance – reference_distance))
-      break;
-    case enigma_user::audio_falloff_none:
-      // gain = 1
-      break;
-    default:
-      break;
-  }
-}
-
 };
 
 extern vector<SoundChannel*> sound_channels;
