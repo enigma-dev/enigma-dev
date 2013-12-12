@@ -7,6 +7,8 @@
 #include "PS_particle_bridge_OpenGL3.h"
 #elif defined(ENIGMA_GS_DIRECT3D9) && ENIGMA_GS_DIRECT3D9
 #include "PS_particle_bridge_Direct3D9.h"
+#elif defined(ENIGMA_GS_DIRECT3D11) && ENIGMA_GS_DIRECT3D11
+#include "PS_particle_bridge_Direct3D11.h"
 #else
 #include "PS_particle_bridge_fallback.h"
 #endif
