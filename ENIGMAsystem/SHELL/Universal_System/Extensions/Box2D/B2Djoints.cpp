@@ -70,8 +70,8 @@ int b2d_joint_create_revolute(int world, int bodya, int bodyb, bool limit, doubl
     b2RevoluteJointDef jointDef;
     jointDef.bodyA = b2dbodya->body;
 	jointDef.bodyB = b2dbodyb->body;
-	jointDef.lowerAngle = cs_angular_degrees(lower);
-	jointDef.upperAngle = cs_angular_degrees(upper);
+	jointDef.lowerAngle = cs_angular_degtorad(lower);
+	jointDef.upperAngle = cs_angular_degtorad(upper);
 	jointDef.localAnchorA = b2Vec2(0,0);
 	jointDef.localAnchorB =b2Vec2(1,1);
 	jointDef.enableLimit = limit;

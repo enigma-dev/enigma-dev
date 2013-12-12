@@ -340,7 +340,7 @@ void d3d_transform_add_translation(gs_scalar xt, gs_scalar yt, gs_scalar zt)
 {
 	D3DXMATRIX matTranslate;    // a matrix to store the translation information
 
-	// build a matrix to move the model 12 units along the x-axis and 4 units along the y-axis
+	// build a matrix to move the model
 	// store it to matTranslate
 	D3DXMatrixTranslation(&matTranslate, xt, yt, zt);
 	
@@ -369,8 +369,8 @@ void d3d_transform_add_rotation_x(double angle)
 {
 	D3DXMATRIX matRot;
 
-	// build a matrix to rotate the model 3.14 radians
-	D3DXMatrixRotationX(&matRot, gs_angular_degrees(-angle));
+	// build a matrix to rotate the model by so many radians
+	D3DXMatrixRotationX(&matRot, gs_angular_degtorad(-angle));
 	
 	matWorld *= matRot;
 
@@ -383,8 +383,8 @@ void d3d_transform_add_rotation_y(double angle)
 //D3DXMatrixIdentity( &matWorld );
 	D3DXMATRIX matRot;
 	
-	// build a matrix to rotate the model 3.14 radians
-	D3DXMatrixRotationY(&matRot, gs_angular_degrees(-angle));
+	// build a matrix to rotate the model by so many radians
+	D3DXMatrixRotationY(&matRot, gs_angular_degtorad(-angle));
 	
 	matWorld *= matRot;
 
@@ -396,8 +396,8 @@ void d3d_transform_add_rotation_z(double angle)
 {
 	D3DXMATRIX matRot;
 	
-	// build a matrix to rotate the model 3.14 radians
-	D3DXMatrixRotationZ(&matRot, gs_angular_degrees(-angle));
+	// build a matrix to rotate the model by so many radians
+	D3DXMatrixRotationZ(&matRot, gs_angular_degtorad(-angle));
 	
 	matWorld *= matRot;
 
@@ -409,7 +409,7 @@ void d3d_transform_add_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, doub
 {
 	D3DXMATRIX matRot;
 	
-	// build a matrix to rotate the model 3.14 radians
+	// build a matrix to rotate the model by so many radians
 	angle = D3DXToRadian(-angle);
 	D3DXMatrixRotationYawPitchRoll(&matRot, y * angle, x * angle, z * angle);
 	
@@ -421,7 +421,7 @@ void d3d_transform_add_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, doub
 
 void d3d_transform_set_translation(gs_scalar xt, gs_scalar yt, gs_scalar zt)
 {
-	// build a matrix to move the model 12 units along the x-axis and 4 units along the y-axis
+	// build a matrix to move the model
 	// store it to matTranslate
 	D3DXMatrixTranslation(&matWorld, xt, yt, zt);
 
@@ -441,8 +441,8 @@ void d3d_transform_set_scaling(gs_scalar xs, gs_scalar ys, gs_scalar zs)
 
 void d3d_transform_set_rotation_x(double angle)
 {
-	// build a matrix to rotate the model 3.14 radians
-	D3DXMatrixRotationX(&matWorld, gs_angular_degrees(-angle));
+	// build a matrix to rotate the model by so many radians
+	D3DXMatrixRotationX(&matWorld, gs_angular_degtorad(-angle));
 	
 	// tell Direct3D about our matrix
 	d3dmgr->SetTransform(D3DTS_WORLD, &matWorld);
@@ -450,8 +450,8 @@ void d3d_transform_set_rotation_x(double angle)
 
 void d3d_transform_set_rotation_y(double angle)
 {
-	// build a matrix to rotate the model 3.14 radians
-	D3DXMatrixRotationY(&matWorld, gs_angular_degrees(-angle));
+	// build a matrix to rotate the model by so many radians
+	D3DXMatrixRotationY(&matWorld, gs_angular_degtorad(-angle));
 		
 	// tell Direct3D about our matrix
 	d3dmgr->SetTransform(D3DTS_WORLD, &matWorld);
@@ -459,10 +459,9 @@ void d3d_transform_set_rotation_y(double angle)
 
 void d3d_transform_set_rotation_z(double angle)
 {
-
 	D3DXMatrixIdentity( &matWorld );
-	// build a matrix to rotate the model 3.14 radians
-	D3DXMatrixRotationZ(&matWorld, gs_angular_degrees(-angle));
+	// build a matrix to rotate the model by so many radians
+	D3DXMatrixRotationZ(&matWorld, gs_angular_degtorad(-angle));
 		
 	// tell Direct3D about our matrix
 	d3dmgr->SetTransform(D3DTS_WORLD, &matWorld);
@@ -470,8 +469,8 @@ void d3d_transform_set_rotation_z(double angle)
 
 void d3d_transform_set_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, double angle)
 {
-	// build a matrix to rotate the model 3.14 radians
-	angle = gs_angular_degrees(-angle);
+	// build a matrix to rotate the model by so many radians
+	angle = gs_angular_degtorad(-angle);
 	D3DXMatrixRotationYawPitchRoll(&matWorld, y * angle, x * angle, z * angle);
 		
 	// tell Direct3D about our matrix
