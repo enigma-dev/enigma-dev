@@ -36,6 +36,9 @@ void draw_background_part_ext(int back, gs_scalar left, gs_scalar top, gs_scalar
 void draw_background_tiled_ext(int back, gs_scalar x, gs_scalar y, gs_scalar xscale = 1, gs_scalar yscale = 1, int color = 16777215, gs_scalar alpha = 1, bool htiled = true, bool vtiled = true);
 void draw_background_tiled_area_ext(int back, gs_scalar x, gs_scalar y, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar xscale = 1, gs_scalar yscale = 1, int color = 16777215, gs_scalar alpha = 1);
 void draw_background_general(int back, gs_scalar left, gs_scalar top, gs_scalar wid, gs_scalar hei, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, gs_scalar alpha);
+
+void d3d_draw_background(int back, gs_scalar x, gs_scalar y, gs_scalar z = 0);
+
 int background_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload = true);
 
 }
