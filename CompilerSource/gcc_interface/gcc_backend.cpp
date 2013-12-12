@@ -79,27 +79,10 @@ inline int rdir_system(string x, string y)
 #include <System/builtins.h>
 #include <API/context.h>
 
-// Only include the headers for mkdir() if we are not on Windows; on Windows we use CreateDirectory() from windows.h
-#if CURRENT_PLATFORM_ID != OS_WINDOWS
-#include <sys/stat.h>
-#include <unistd.h>
-#endif
-
 // This function parses one command line specified to the eYAML into a filename string and a parameter string,
 // then returns whether or not the output from this call must be manually redirected to the output file ofile.
 static inline bool toolchain_parseout(string line, string &exename, string &command, string ofile = "")
 { 
-#if CURRENT_PLATFORM_ID == OS_WINDOWS
-  CreateDirectory((workdir).c_str(), NULL);
-  if (!CreateDirectory((workdir +"Preprocessor_Environment_Editable").c_str(), NULL))
-#else
-  mkdir((workdir).c_str(),0755);
-  if (mkdir((workdir +"Preprocessor_Environment_Editable").c_str(),0755) == -1)
-#endif
-  {
-	  std::cout << "Failed to create build directory at " << workdir << endl;
-  }
-
   pt pos = 0, spos;
 
   /* Isolate the executable path and filename
@@ -139,7 +122,7 @@ static inline bool toolchain_parseout(string line, string &exename, string &comm
     bool mblank = false;
     srp = command.find("$blank");
     while (srp != string::npos) {
-      command.replace(srp,6,("\"" + workdir + "enigma_blank.txt\"").c_str());
+      command.replace(srp,6,(workdir + "enigma_blank.txt").c_str());
       srp = command.find("$blank");
       mblank = true;
     }
@@ -195,9 +178,9 @@ const char* establish_bearings(const char *compiler)
   ***********************************************************/
   if ((cmd = compey.get("defines")) == "")
     return (sprintf(errbuf,"Compiler descriptor file `%s` does not specify 'defines' executable.\n", compfq.c_str()), errbuf);
-  redir = toolchain_parseout(cmd, toolchainexec,parameters,("\"" + workdir + "enigma_defines.txt\"").c_str());
+  redir = toolchain_parseout(cmd, toolchainexec,parameters,("\"" + workdir + "enigma_defines.txt\""));
   cout << "Read key `defines` as `" << cmd << "`\nParsed `" << toolchainexec << "` `" << parameters << "`: redirect=" << (redir?"yes":"no") << "\n";
-  got_success = !(redir? e_execsp(toolchainexec, parameters, ("> \"" + workdir +"enigma_defines.txt\"").c_str(),MAKE_paths) : e_execsp(toolchainexec, parameters, MAKE_paths));
+  got_success = !(redir? e_execsp(toolchainexec, parameters, ("&> \"" + workdir + "enigma_defines.txt\""),MAKE_paths) : e_execsp(toolchainexec, parameters, MAKE_paths));
   if (!got_success) return "Call to 'defines' toolchain executable returned non-zero!\n";
   else cout << "Call succeeded" << endl;
 
@@ -206,9 +189,9 @@ const char* establish_bearings(const char *compiler)
   ****************************************************/
   if ((cmd = compey.get("searchdirs")) == "")
     return (sprintf(errbuf,"Compiler descriptor file `%s` does not specify 'searchdirs' executable.", compfq.c_str()), errbuf);
-  redir = toolchain_parseout(cmd, toolchainexec,parameters,("\"" + workdir + "enigma_searchdirs.txt\"").c_str());
+  redir = toolchain_parseout(cmd, toolchainexec,parameters,("\"" + workdir + "enigma_searchdirs.txt\""));
   cout << "Read key `searchdirs` as `" << cmd << "`\nParsed `" << toolchainexec << "` `" << parameters << "`: redirect=" << (redir?"yes":"no") << "\n";
-  got_success = !(redir? e_execsp(toolchainexec, parameters, ("&> \"" + workdir +"enigma_searchdirs.txt\"").c_str(), MAKE_paths) : e_execsp(toolchainexec, parameters, MAKE_paths));
+  got_success = !(redir? e_execsp(toolchainexec, parameters, ("&> \"" + workdir + "enigma_searchdirs.txt\""), MAKE_paths) : e_execsp(toolchainexec, parameters, MAKE_paths));
   if (!got_success) return "Call to 'searchdirs' toolchain executable returned non-zero!";
   else cout << "Call succeeded" << endl;
 
