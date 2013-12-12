@@ -30,16 +30,6 @@ using namespace std;
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Bridges/General/DX11Context.h"
 
-#include <dxgi.h>
-#include <d3dcommon.h>
-#include <d3d11.h>
-
-// global declarations
-ContextManager* d3dmgr;    // the pointer to the device class
-
-// the WindowProc function prototype
-LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
-
 	bool m_vsync_enabled;
 	int m_videoCardMemory;
 	char m_videoCardDescription[128];
@@ -51,6 +41,12 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 	ID3D11DepthStencilState* m_depthStencilState;
 	ID3D11DepthStencilView* m_depthStencilView;
 	ID3D11RasterizerState* m_rasterState;
+
+// global declarations
+ContextManager* d3dmgr;    // the pointer to the device class
+
+// the WindowProc function prototype
+LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 	
 namespace enigma
 {
@@ -233,9 +229,9 @@ void EnableDrawing (HGLRC *hRC) {
 	featureLevel = D3D_FEATURE_LEVEL_11_0;
 
 	// Create the swap chain, Direct3D device, and Direct3D device context.
-	//result = D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, 0, &featureLevel, 1, 
-		//D3D11_SDK_VERSION, &swapChainDesc, &m_swapChain, &m_device, NULL, &m_deviceContext);
-						   return;
+	result = D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, 0, &featureLevel, 1, 
+					       D3D11_SDK_VERSION, &swapChainDesc, &m_swapChain, &m_device, NULL, &m_deviceContext);
+
 	if(FAILED(result))
 	{
 		//return false;
@@ -355,6 +351,17 @@ void EnableDrawing (HGLRC *hRC) {
 
 	// Now set the rasterizer state.
 	m_deviceContext->RSSetState(m_rasterState);
+		
+	// Setup the viewport for rendering.
+	viewport.Width = (float)screenWidth;
+	viewport.Height = (float)screenHeight;
+	viewport.MinDepth = 0.0f;
+	viewport.MaxDepth = 1.0f;
+	viewport.TopLeftX = 0.0f;
+	viewport.TopLeftY = 0.0f;
+
+	// Create the viewport.
+	m_deviceContext->RSSetViewports(1, &viewport);
 }
 	
 void WindowResized() {
@@ -379,7 +386,9 @@ void display_reset(int samples, bool vsync) {
 }
 
 void screen_refresh() {
-   
+    window_set_caption(room_caption);
+    enigma::update_mouse_variables();
+	m_swapChain->Present(0, 0);
 }
 
 void set_synchronization(bool enable) //TODO: Needs to be rewritten
