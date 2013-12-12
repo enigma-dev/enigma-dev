@@ -26,7 +26,6 @@ clock_t starttime;
 clock_t elapsedtime;
 clock_t lasttime;
 
-int falloff_model = 0;
 bool load_al_dll();
 size_t channel_num = 128;
 
@@ -186,13 +185,6 @@ namespace enigma {
   void audiosystem_update(void)
   {
     alureUpdate();
-
-    elapsedtime = clock() - lasttime;
-    lasttime = elapsedtime;
-    // update all the sound channels so they can calculate fall off and gain
-    for(size_t i = 1; i < sound_channels.size(); i++) {
-      sound_channels[i]->sound_update();
-    }
   }
 
   void audiosystem_cleanup()
