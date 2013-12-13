@@ -26,6 +26,11 @@ gamestart: 7		# This event is executed from within code at the start of the game
 	Mode: Spec-sys
 	Case: 2
 
+closebutton: 7		# This event is executed from within code when the game window close button is hit
+	Name: Close Button
+	Mode: Spec-sys
+	Case: 30
+
 roomstart: 7		# This event is executed from within the code that loads a new room
 	Name: Room Start
 	Mode: Spec-sys
@@ -319,6 +324,15 @@ drawgui: 8
 	Mode: Special
 	Case: 64
 	Sub Check: visible
+
+#Draw Resize event is processed whenever a resize to the game window occurs, basically so you can resize the GUI layer and shit,
+#why is it not under other along with the removed close button event? Good fucking question, well, it goes like this young Timmy,
+#there once was a man named Yolo, who came the fuck out of nowhere and destroyed Game Maker with evil capitalism, the fucking end, now go to bed.
+drawresize: 8
+	Name: Draw Resize
+	Mode: Spec-sys
+	Case: 65
+
 
 # Why this comes after "end step," I do not know. One would think it'd be back there with pathend.
 animationend: 7

@@ -37,7 +37,7 @@ namespace enigma
     objectstruct** objectdata;
     int instancecount = 0;
     int id_current =0;
-    
+
     #ifdef DEBUG_MODE
       static inline int DEBUG_ID_CHECK(int id, int objind) {
         std::map<int, inst_iter*>::iterator it = instance_list.find(id);
@@ -55,7 +55,7 @@ namespace enigma
     #else
     # define DEBUG_ID_CHECK(x, y) (x)
     #endif
-    
+
     double newinst_x, newinst_y;
     int newinst_obj, newinst_id;
 
@@ -67,6 +67,7 @@ namespace enigma
 	variant object_basic::myevent_closebutton() { return 0; }
     variant object_basic::myevent_draw()      { return 0; }
 	variant object_basic::myevent_drawgui()   { return 0; }
+	variant object_basic::myevent_drawresize()   { return 0; }
 	variant object_basic::myevent_roomstart()   { return 0; }
     variant object_basic::myevent_roomend()   { return 0; }
     variant object_basic::myevent_destroy()   { return 0; }
