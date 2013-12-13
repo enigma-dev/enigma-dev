@@ -274,14 +274,14 @@ int b2d_body_create(int world)
   return i;
 }
 
-int  b2d_body_create_shape(int world, int shape)
+int b2d_body_create_shape(int world, int shape)
 {
   int i = b2d_body_create(world);
   int f = b2d_fixture_create(i, shape);
   return i;
 }
 
-int  b2d_body_create_box(int world, double halfwidth, double halfheight)
+int b2d_body_create_box(int world, double halfwidth, double halfheight)
 {
   int i = b2d_body_create(world);
   int s = b2d_shape_create();
@@ -290,7 +290,7 @@ int  b2d_body_create_box(int world, double halfwidth, double halfheight)
   return i;
 }
 
-int  b2d_body_create_circle(int world, double radius)
+int b2d_body_create_circle(int world, double radius)
 {
   int i = b2d_body_create(world);
   int s = b2d_shape_create();
@@ -332,7 +332,7 @@ void b2d_body_set_collision_group(int id, int group)
 void b2d_body_set_transform(int id, double x, double y, double angle)
 {
   get_body(b2dbody, id);
-  b2dbody->body->SetTransform(b2Vec2(x, y), cs_angular_degrees(angle));
+  b2dbody->body->SetTransform(b2Vec2(x, y), cs_angular_degtorad(angle));
 }
 
 void b2d_body_set_position(int id, double x, double y)
@@ -344,7 +344,7 @@ void b2d_body_set_position(int id, double x, double y)
 void b2d_body_set_angle(int id, double angle)
 {
   get_body(b2dbody, id);
-  b2dbody->body->SetTransform(b2dbodies[id]->body->GetPosition(), cs_angular_degrees(angle));
+  b2dbody->body->SetTransform(b2dbodies[id]->body->GetPosition(), cs_angular_degtorad(angle));
 }
 
 void b2d_body_set_angle_fixed(int id, bool fixed)
@@ -456,7 +456,7 @@ void b2d_body_set_dynamic(int id)
 double b2d_body_get_angle(int id)
 {
   get_bodyr(b2dbody, id, -1);
-  return -cs_angular_radians(b2dbody->body->GetAngle());
+  return -cs_angular_radtodeg(b2dbody->body->GetAngle());
 }
 
 double b2d_body_get_x(int id)

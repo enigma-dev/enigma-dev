@@ -661,7 +661,7 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
 
   // Redirect it
   ide_output_redirect_file(redirfile.c_str()); //TODO: If you pass this function the address it will screw up the value; most likely a JNA/Plugin bug.
-  int makeres = e_execs(MAKE_location,make,"&>",redirfile.c_str());
+  int makeres = e_execs(MAKE_location,make,"&> \"" + redirfile + "\"");
 
   // Stop redirecting GCC output
   ide_output_redirect_reset();
@@ -671,10 +671,6 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
     return E_ERROR_BUILD;
   }
   user << "******** Make Completed Successfully ******** \n";
-
-
-
-
 
   /**  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     Segment three: Add resources into the game executable. They are

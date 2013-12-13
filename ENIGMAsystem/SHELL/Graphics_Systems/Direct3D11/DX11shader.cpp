@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton
+/** Copyright (C) 2013 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,36 +15,18 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef _SOUND_CHANNEL__H
-#define _SOUND_CHANNEL__H
+#include "Universal_System/scalar.h"
+#include "Bridges/General/DX11Context.h"
+#include "Direct3D11Headers.h"
+#include "DX11shader.h"
+#include <math.h>
 
-#include "../General/ASadvanced.h"
-#include "ALsystem.h"
-
-#ifdef __APPLE__
-#include "../../../additional/alure/include/AL/alure.h"
-#else
-#include <AL/alure.h>
-#endif
-
-#ifdef DEBUG_MODE
-#include "libEGMstd.h"
-#include "Widget_Systems/widgets_mandatory.h" // show_error
-#endif
+#include <stdio.h>      /* printf, scanf, NULL */
+#include <stdlib.h>     /* malloc, free, rand */
 
 #include <vector>
 using std::vector;
 
-struct SoundChannel {
-ALuint source;
-int soundIndex;
-double priority;
-int type;
-SoundChannel(ALuint alsource, int sound_id): source(alsource), soundIndex(sound_id), priority(0), type(0) {}
-~SoundChannel() {}
-
-};
-
-extern vector<SoundChannel*> sound_channels;
-
-#endif
+#include <iostream>
+#include <fstream>
+using namespace std;
