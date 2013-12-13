@@ -82,6 +82,11 @@ namespace enigma
             return 0;
 
         case WM_SIZE:
+			instance_event_iterator = new inst_iter(NULL,NULL,NULL);
+			for (enigma::iterator it = enigma::instance_list_first(); it; ++it)
+			{
+			  it->myevent_drawresize();
+			}
 			WindowResized();
             return 0;
 
@@ -197,11 +202,11 @@ namespace enigma
         case WM_RBUTTONDOWN: mousestatus[1]=1; return 0;
         case WM_MBUTTONUP:   mousestatus[2]=0; return 0;
         case WM_MBUTTONDOWN: mousestatus[2]=1; return 0;
-		
-		//case WM_TOUCH: 
+
+		//case WM_TOUCH:
 		//TODO: touchscreen stuff
 		//return 0;
-		
+
 		//#ifdef DSHOW_EXT
 		//#include <dshow.h>
 		//case WM_GRAPHNOTIFY:
