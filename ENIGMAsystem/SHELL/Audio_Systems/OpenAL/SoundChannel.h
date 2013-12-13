@@ -41,6 +41,7 @@ int soundIndex;
 double priority;
 SoundChannel(ALuint alsource, int sound_id): source(alsource), soundIndex(sound_id), priority(0) {}
 ~SoundChannel() {}
+
 };
 
 extern vector<SoundChannel*> sound_channels;
