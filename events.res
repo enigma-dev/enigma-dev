@@ -342,9 +342,8 @@ drawgui: 8
 #there once was a man named Yolo, who came the fuck out of nowhere and destroyed Game Maker with evil capitalism, the fucking end, now go to bed.
 drawresize: 8
 	Name: Draw Resize
-	Mode: Special
+	Mode: Spec-sys
 	Case: 65
-	Sub Check: visible
 
 
 # Why this comes after "end step," I do not know. One would think it'd be back there with pathend.
