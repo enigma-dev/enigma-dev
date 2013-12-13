@@ -44,11 +44,7 @@ enum {
 
 bool audio_exists(int index);
 bool audio_is_playing(int index);
-
-void audio_play_music(int index, bool loop);
-void audio_pause_music();
-void audio_resume_music();
-void audio_stop_music(); 
+bool audio_is_paused(int index);
 
 int audio_play_sound(int index, double priority, bool loop);
 int audio_play_sound_at(int index, as_scalar x, as_scalar y, as_scalar z, as_scalar falloff_ref, as_scalar falloff_max, as_scalar falloff_factor, bool loop, double priority);
@@ -64,9 +60,7 @@ void audio_pause_all();
 void audio_resume_all();
 void audio_stop_all();
 
-void audio_music_seek(double offset);
 void audio_sound_seek(int index, double offset);
-double audio_music_offset();
 double audio_sound_offset(int index);
 
 void audio_listener_orientation(as_scalar lookat_x, as_scalar lookat_y, as_scalar lookat_z, as_scalar up_x, as_scalar up_y, as_scalar up_z);
@@ -74,11 +68,10 @@ void audio_listener_position(as_scalar x, as_scalar y, as_scalar z);
 void audio_listener_velocity(as_scalar vx, as_scalar vy, as_scalar vz);
 
 double audio_sound_length(int index);
-void audio_master_gain(float volume, double time);
-void audio_music_gain(float volume, double time);
+void audio_sound_pitch(int index, float pitch);
 void audio_sound_gain(int index, float volume, double time);
+void audio_master_gain(float volume, double time);
 
-int audio_get_type(int index);
 void audio_channel_num(int num);
 
 int audio_system();
