@@ -316,7 +316,7 @@ int audio_system()
   return audio_new_system;
 }
 
-int audio_add(string fname, int type)
+int audio_add(string fname)
 {
   // Open sound
   FILE *afile = fopen(fname.c_str(),"rb");

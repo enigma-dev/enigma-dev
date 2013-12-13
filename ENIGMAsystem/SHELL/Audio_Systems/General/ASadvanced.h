@@ -51,7 +51,7 @@ void audio_resume_music();
 void audio_stop_music(); 
 
 int audio_play_sound(int index, double priority, bool loop);
-int audio_play_sound_at(int sound, as_scalar x, as_scalar y, as_scalar z, as_scalar falloff_ref, as_scalar falloff_max, as_scalar falloff_factor, bool loop, double priority);
+int audio_play_sound_at(int index, as_scalar x, as_scalar y, as_scalar z, as_scalar falloff_ref, as_scalar falloff_max, as_scalar falloff_factor, bool loop, double priority);
 void audio_pause_sound(int index);
 void audio_resume_sound(int index);
 void audio_stop_sound(int index);
@@ -82,8 +82,8 @@ int audio_get_type(int index);
 void audio_channel_num(int num);
 
 int audio_system();
-int audio_add(string fname, int type);
-void audio_delete(int sound);
+int audio_add(string fname);
+void audio_delete(int index);
 void audio_falloff_set_model(int model);
 
 int audio_emitter_create();
