@@ -91,83 +91,83 @@ leftbutton: 6
 	Mode: Special
 	Case: 0
 	Super Check: mouse_check_button(mb_left)
-	Sub Check:   mouse_x > bbox_left and mouse_x < bbox_right and mouse_y > bbox_top and mouse_y < bbox_bottom
+	Sub Check:   position_meeting(mouse_x, mouse_y, id)
 
 rightbutton: 6
 	Name: Right Button
 	Mode: Special
 	Case: 1
 	Super Check: mouse_check_button(mb_right)
-	Sub Check:   mouse_x > bbox_left and mouse_x < bbox_right and mouse_y > bbox_top and mouse_y < bbox_bottom
+	Sub Check:   position_meeting(mouse_x, mouse_y, id)
 
 middlebutton: 6
 	Name: Middle Button
 	Mode: Special
 	Case: 2
 	Super Check: mouse_check_button(mb_middle)
-	Sub Check:   mouse_x > bbox_left and mouse_x < bbox_right and mouse_y > bbox_top and mouse_y < bbox_bottom
+	Sub Check:   position_meeting(mouse_x, mouse_y, id)
 
 nobutton: 6
 	Name: No Button
 	Mode: Special
 	Case: 3
-	Sub Check:   mouse_check_button(mb_none) && !(mouse_x > bbox_left and mouse_x < bbox_right and mouse_y > bbox_top and mouse_y < bbox_bottom)
+	Sub Check:   mouse_check_button(mb_none)
 
 leftpress: 6
 	Name: Left Press
 	Mode: Special
 	Case: 4
 	Super Check: mouse_check_button_pressed(mb_left)
-	Sub Check:   mouse_x > bbox_left and mouse_x < bbox_right and mouse_y > bbox_top and mouse_y < bbox_bottom
+	Sub Check:   position_meeting(mouse_x, mouse_y, id)
 
 rightpress: 6
 	Name: Right Press
 	Mode: Special
 	Case: 5
 	Super Check: mouse_check_button_pressed(mb_right)
-	Sub Check:   mouse_x > bbox_left and mouse_x < bbox_right and mouse_y > bbox_top and mouse_y < bbox_bottom
+	Sub Check:   position_meeting(mouse_x, mouse_y, id)
 
 middlepress: 6
 	Name: Middle Press
 	Mode: Special
 	Case: 6
 	Super Check: mouse_check_button_pressed(mb_middle)
-	Sub Check:   mouse_x > bbox_left and mouse_x < bbox_right and mouse_y > bbox_top and mouse_y < bbox_bottom
+	Sub Check:   position_meeting(mouse_x, mouse_y, id)
 
 leftrelease: 6
 	Name: Left Release
 	Mode: Special
 	Case: 7
 	Super Check: mouse_check_button_released(mb_left)
-	Sub Check:   mouse_x > bbox_left and mouse_x < bbox_right and mouse_y > bbox_top and mouse_y < bbox_bottom
+	Sub Check:   position_meeting(mouse_x, mouse_y, id)
 
 rightrelease: 6
 	Name: Right Release
 	Mode: Special
 	Case: 8
 	Super Check: mouse_check_button_released(mb_right)
-	Sub Check:   mouse_x > bbox_left and mouse_x < bbox_right and mouse_y > bbox_top and mouse_y < bbox_bottom
+	Sub Check:   position_meeting(mouse_x, mouse_y, id)
 
 middlerelease: 6
 	Name: Middle Release
 	Mode: Special
 	Case: 9
 	Super Check: mouse_check_button_released(mb_middle)
-	Sub Check:   mouse_x > bbox_left and mouse_x < bbox_right and mouse_y > bbox_top and mouse_y < bbox_bottom
+	Sub Check:   position_meeting(mouse_x, mouse_y, id)
 
 mouseenter: 6
 	Name: Mouse Enter
 	Mode: Special
 	Case: 10
 	Locals: bool $innowEnter = false;
-	Sub Check: { const bool wasin = $innowEnter; $innowEnter = mouse_x > bbox_left and mouse_x < bbox_right and mouse_y > bbox_top and mouse_y < bbox_bottom; if (!$innowEnter or wasin) return 0; }
+	Sub Check: { const bool wasin = $innowEnter; $innowEnter = position_meeting(mouse_x, mouse_y, id); if (!$innowEnter or wasin) return 0; }
 
 mouseleave: 6
 	Name: Mouse Leave
 	Mode: Special
 	Case: 11
 	Locals: bool $innowLeave = false;
-	Sub Check: { const bool wasin = $innowLeave; $innowLeave = mouse_x > bbox_left and mouse_x < bbox_right and mouse_y > bbox_top and mouse_y < bbox_bottom; if ($innowLeave or !wasin) return 0; }
+	Sub Check: { const bool wasin = $innowLeave; $innowLeave = position_meeting(mouse_x, mouse_y, id); if ($innowLeave or !wasin) return 0; }
 
 mouseunknown: 6
 	Name: Mouse Unknown (old? LGM doesn't even know!)
