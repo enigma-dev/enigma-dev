@@ -33,8 +33,7 @@ ALfloat listenerPos[] = {0.0f,0.0f,0.0f};
 ALfloat listenerVel[] = {0.0f,0.0f,0.0f};
 ALfloat listenerOri[] = {0.0f,0.0f,1.0f, 0.0f,1.0f,0.0f};
 
-// first one is reserved for music
-vector<SoundChannel*> sound_channels;
+vector<SoundChannel*> sound_channels(0);
 vector<SoundResource*> sound_resources(0);
 vector<SoundEmitter*> sound_emitters(0);
 
@@ -202,7 +201,7 @@ namespace enigma {
           }
           // fallthrough
         case LOADSTATE_SOURCED:
-          for(size_t j = 1; j < sound_channels.size(); j++) {
+          for (size_t j = 0; j < sound_channels.size(); j++) {
 			alureStopSource(sound_channels[i]->source, true);
             alDeleteSources(1, &sound_channels[j]->source);
           }
