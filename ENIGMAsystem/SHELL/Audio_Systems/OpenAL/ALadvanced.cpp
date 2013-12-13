@@ -85,7 +85,6 @@ int audio_play_sound(int sound, double priority, bool loop)
     alSourcei(sound_channels[src]->source, AL_LOOPING, loop?AL_TRUE:AL_FALSE);
     sound_channels[src]->priority = priority;
     sound_channels[src]->soundIndex = sound;
-    sound_channels[src]->type = 0;
     !(snd->idle = !(snd->playing = !snd->stream ?
       alurePlaySource(sound_channels[src]->source, enigma::eos_callback, (void*)(ptrdiff_t)sound) != AL_FALSE :
       alurePlaySourceStream(sound_channels[src]->source, snd->stream, 3, -1, enigma::eos_callback,
@@ -112,7 +111,6 @@ int audio_play_sound_at(int sound, as_scalar x, as_scalar y, as_scalar z, as_sca
 	alSourcef(sound_channels[src]->source, AL_ROLLOFF_FACTOR, falloff_factor);
     sound_channels[src]->priority = priority;
     sound_channels[src]->soundIndex = sound;
-    sound_channels[src]->type = 0;
     !(snd->idle = !(snd->playing = !snd->stream ?
       alurePlaySource(sound_channels[src]->source, enigma::eos_callback, (void*)(ptrdiff_t)sound) != AL_FALSE :
       alurePlaySourceStream(sound_channels[src]->source, snd->stream, 3, -1, enigma::eos_callback,
@@ -167,21 +165,21 @@ void audio_stop_channel(int index)
 
 void audio_stop_all()
 {
-  for(size_t i = 0; i < sound_channels.size(); i++) {
+  for (size_t i = 0; i < sound_channels.size(); i++) {
       alureStopSource(sound_channels[i]->source, AL_FALSE);
   }
 }
 
 void audio_pause_all()
 {
-  for(size_t i = 0; i < sound_channels.size(); i++) {
+  for (size_t i = 0; i < sound_channels.size(); i++) {
       alurePauseSource(sound_channels[i]->source);
   }
 }
 
 void audio_resume_all()
 {
-  for(size_t i = 0; i < sound_channels.size(); i++) {
+  for (size_t i = 0; i < sound_channels.size(); i++) {
       alureResumeSource(sound_channels[i]->source);
   }
 }

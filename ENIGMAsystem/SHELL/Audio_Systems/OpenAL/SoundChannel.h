@@ -39,10 +39,8 @@ struct SoundChannel {
 ALuint source;
 int soundIndex;
 double priority;
-int type;
-SoundChannel(ALuint alsource, int sound_id): source(alsource), soundIndex(sound_id), priority(0), type(0) {}
+SoundChannel(ALuint alsource, int sound_id): source(alsource), soundIndex(sound_id), priority(0) {}
 ~SoundChannel() {}
-
 };
 
 extern vector<SoundChannel*> sound_channels;
