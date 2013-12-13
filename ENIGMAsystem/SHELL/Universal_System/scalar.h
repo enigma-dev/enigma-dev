@@ -62,33 +62,33 @@ typedef float cs_scalar;
 #include <math.h>
 
 #ifdef MA_ANGULAR_UNIT_RADIANS
-#define ma_angular_radtodeg(radians) (radians)
-#define ma_angular_degtorad(degrees) (degrees)
+#define ma_angle_from_radians(radians) (radians)
+#define ma_angle_to_radians(degrees) (degrees)
 #else
-#define ma_angular_radtodeg(radians) (radians * 180 / M_PI)
-#define ma_angular_degtorad(degrees) (degrees / 180 * M_PI)
+#define ma_angle_from_radians(radians) (radians * 180 / M_PI)
+#define ma_angle_to_radians(degrees) (degrees / 180 * M_PI)
 #endif
 
 #ifdef GS_ANGULAR_UNIT_RADIANS
-#define gs_angular_radtodeg(radians) (radians)
-#define gs_angular_degtorad(degrees) (degrees)
+#define gs_angle_from_radians(radians) (radians)
+#define gs_angle_to_radians(degrees) (degrees)
 #else
-#define gs_angular_radtodeg(radians) (radians * 180 / M_PI)
-#define gs_angular_degtorad(degrees) (degrees / 180 * M_PI)
+#define gs_angle_from_radians(radians) (radians * 180 / M_PI)
+#define gs_angle_to_radians(degrees) (degrees / 180 * M_PI)
 #endif
 
 #ifdef AS_ANGULAR_UNIT_RADIANS
-#define as_angular_radtodeg(radians) (radians)
-#define as_angular_degtorad(degrees) (degrees)
+#define as_angle_from_radians(radians) (radians)
+#define as_angle_to_radians(degrees) (degrees)
 #else
-#define as_angular_radtodeg(radians) (radians * 180 / M_PI)
-#define as_angular_degtorad(degrees) (degrees / 180 * M_PI)
+#define as_angle_from_radians(radians) (radians * 180 / M_PI)
+#define as_angle_to_radians(degrees) (degrees / 180 * M_PI)
 #endif 
 
 #ifdef CS_ANGULAR_UNIT_RADIANS
-#define cs_angular_radtodeg(radians) (radians)
-#define cs_angular_degtorad(degrees) (degrees)
+#define cs_angle_from_radians(radians) (radians)
+#define cs_angle_to_radians(degrees) (degrees)
 #else
-#define cs_angular_radtodeg(radians) (radians * 180 / M_PI)
-#define cs_angular_degtorad(degrees) (degrees / 180 * M_PI)
+#define cs_angle_from_radians(radians) (radians * 180 / M_PI)
+#define cs_angle_to_radians(degrees) (degrees / 180 * M_PI)
 #endif
