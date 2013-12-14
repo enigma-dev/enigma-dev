@@ -40,6 +40,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 
 namespace enigma
 {
+	extern bool forceSoftwareVertexProcessing;
 	
     void EnableDrawing (HGLRC *hRC)
     {
@@ -66,10 +67,14 @@ namespace enigma
 		d3dpp.EnableAutoDepthStencil = TRUE; // Automatic depth stencil buffer
 		d3dpp.AutoDepthStencilFormat = D3DFMT_D24S8; //32-bit zbuffer 24bits for depth 8 for stencil buffer
 		// create a device class using this information and information from the d3dpp stuct
+		DWORD behaviors = D3DCREATE_MIXED_VERTEXPROCESSING;
+		if (forceSoftwareVertexProcessing) {
+			behaviors = D3DCREATE_SOFTWARE_VERTEXPROCESSING;
+		}
 		hr = d3dobj->CreateDevice(D3DADAPTER_DEFAULT,
                       D3DDEVTYPE_HAL,
                       hWnd,
-                      D3DCREATE_MIXED_VERTEXPROCESSING,
+                      behaviors,
                       &d3dpp,
                       &d3dmgr->device);
 		if(FAILED(hr)){

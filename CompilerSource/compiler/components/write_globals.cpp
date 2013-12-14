@@ -67,6 +67,7 @@ int lang_CPP::compile_writeGlobals(EnigmaStruct* es, parsed_object* global)
 
     wto << "namespace enigma {" << endl;
     wto << "  bool interpolate_textures = " << es->gameSettings.interpolate << ";" << endl;
+	wto << "  bool forceSoftwareVertexProcessing = " << es->gameSettings.forceSoftwareVertexProcessing << ";" << endl;
     wto << "  bool isSizeable = " << es->gameSettings.allowWindowResize << ";" << endl;
     wto << "  bool showBorder = " << !es->gameSettings.dontDrawBorder << ";" << endl;
     wto << "  bool showIcons = " << !es->gameSettings.dontShowButtons << ";" << endl;

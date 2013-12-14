@@ -18,6 +18,7 @@ struct GameSettings
 	int gameId; // randomized in GmFile constructor
 	boolean startFullscreen;
 	boolean interpolate;
+	boolean forceSoftwareVertexProcessing;
 	boolean dontDrawBorder;
 	boolean displayCursor;
 	int scaling;
