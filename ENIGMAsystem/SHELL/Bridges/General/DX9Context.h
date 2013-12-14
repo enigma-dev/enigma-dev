@@ -339,6 +339,10 @@ void GetDeviceCaps(D3DCAPS9 *pCaps) {
 	device->GetDeviceCaps(pCaps);
 }
 
+void SetSoftwareVertexProcessing(bool bSoftware) {
+	device->SetSoftwareVertexProcessing(bSoftware);
+}
+
 void SetMaterial(const D3DMATERIAL9 *pMaterial) {
 	device->SetMaterial(pMaterial);
 }

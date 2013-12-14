@@ -50,7 +50,7 @@ int lang_CPP::compile_handle_templates(EnigmaStruct* es)
   values["gameid"]      = gs->gameId; // randomized in GmFile constructor
 	values["fullscreen"]  = gs->startFullscreen;
 	values["interpolate"] = gs->interpolate;
-	values["forceSoftwareVertexProcessing"] = gs->forceSoftwareVertexProcessing;
+	values["forcesoftwarevertexprocessing"] = gs->forceSoftwareVertexProcessing;
 	values["drawborder"]  =!gs->dontDrawBorder;
 	values["showcursor"]  = gs->displayCursor;
 	values["scaling"]     = gs->scaling;
