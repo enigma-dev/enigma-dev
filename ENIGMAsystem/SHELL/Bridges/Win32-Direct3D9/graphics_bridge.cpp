@@ -69,7 +69,7 @@ namespace enigma
 		hr = d3dobj->CreateDevice(D3DADAPTER_DEFAULT,
                       D3DDEVTYPE_HAL,
                       hWnd,
-                      D3DCREATE_HARDWARE_VERTEXPROCESSING,
+                      D3DCREATE_MIXED_VERTEXPROCESSING,
                       &d3dpp,
                       &d3dmgr->device);
 		if(FAILED(hr)){

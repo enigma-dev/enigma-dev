@@ -83,6 +83,10 @@ void d3d_end()
 	d3d_set_hidden(false);
 }
 
+void d3d_set_software_vertex_processing(bool software) {
+	d3dmgr->device->SetSoftwareVertexProcessing(software);
+}
+
 void d3d_set_hidden(bool enable)
 {
 	//d3d_set_zwriteenable(enable);
