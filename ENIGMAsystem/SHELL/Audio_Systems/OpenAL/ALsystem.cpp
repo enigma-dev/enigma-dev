@@ -26,7 +26,6 @@ clock_t starttime;
 clock_t elapsedtime;
 clock_t lasttime;
 
-int falloff_model = 0;
 bool load_al_dll();
 size_t channel_num = 128;
 
@@ -34,8 +33,7 @@ ALfloat listenerPos[] = {0.0f,0.0f,0.0f};
 ALfloat listenerVel[] = {0.0f,0.0f,0.0f};
 ALfloat listenerOri[] = {0.0f,0.0f,1.0f, 0.0f,1.0f,0.0f};
 
-// first one is reserved for music
-vector<SoundChannel*> sound_channels;
+vector<SoundChannel*> sound_channels(0);
 vector<SoundResource*> sound_resources(0);
 vector<SoundEmitter*> sound_emitters(0);
 
@@ -186,13 +184,6 @@ namespace enigma {
   void audiosystem_update(void)
   {
     alureUpdate();
-
-    elapsedtime = clock() - lasttime;
-    lasttime = elapsedtime;
-    // update all the sound channels so they can calculate fall off and gain
-    for(size_t i = 1; i < sound_channels.size(); i++) {
-      sound_channels[i]->sound_update();
-    }
   }
 
   void audiosystem_cleanup()
@@ -210,7 +201,7 @@ namespace enigma {
           }
           // fallthrough
         case LOADSTATE_SOURCED:
-          for(size_t j = 1; j < sound_channels.size(); j++) {
+          for (size_t j = 0; j < sound_channels.size(); j++) {
 			alureStopSource(sound_channels[i]->source, true);
             alDeleteSources(1, &sound_channels[j]->source);
           }
