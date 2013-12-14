@@ -84,7 +84,7 @@ void d3d_end()
 }
 
 void d3d_set_software_vertex_processing(bool software) {
-	d3dmgr->device->SetSoftwareVertexProcessing(software);
+	d3dmgr->SetSoftwareVertexProcessing(software);
 }
 
 void d3d_set_hidden(bool enable)
