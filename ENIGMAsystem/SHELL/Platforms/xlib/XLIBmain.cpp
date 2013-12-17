@@ -48,7 +48,9 @@ namespace enigma
   extern char keymap[512];
   extern char usermap[256];
   void ENIGMA_events(void); //TODO: Synchronize this with Windows by putting these two in a single header.
-
+  extern bool gameFroze;
+  extern bool freezeOnLoseFocus;
+ 
   namespace x11
   {
     Display *disp;
@@ -125,6 +127,14 @@ namespace enigma
             //screen_refresh();
           return 0;
         }
+		case FocusIn:
+			gameFroze = false;
+			return 0;
+		case FocusOut:
+			if (enigma::freezeOnLoseFocus) {
+				gameFroze = true;
+			}
+			return 0;
         case ClientMessage:
           if ((unsigned)e.xclient.data.l[0] == (unsigned)wm_delwin) //For some reason, this line warns whether we cast to unsigned or not.
             return 1;
@@ -332,6 +342,8 @@ int main(int argc,char** argv)
 			}
 		}
 
+		if (gameFroze) { continue; }
+		
 		unsigned long dt = 0;
 		if (spent_mcs > last_mcs) {
 			dt = (spent_mcs - last_mcs);
