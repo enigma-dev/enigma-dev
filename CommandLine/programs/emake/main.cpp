@@ -21,22 +21,24 @@
 
 #include <iostream>
 #include <string>
-#include "../../gmk/src/include/gmk.h"
+#include "gmk.hpp"
+#include "library.h"
 
 using namespace std;
 
 int main(int argc, char* argv[])
 {
     cout << "ENIGMA Make" << endl;
-    gmk = new Gmk::GmkFile();
+    Gmk::GmkFile* gmk = new Gmk::GmkFile();
     gmk->Load(argv[1]);
 
-    void *result = LoadPluginLib(this);
-    //void *result;
+    void *result = LoadPluginLib();
+
     if (result == NULL)
     {
-        //wxMessageDialog (NULL, "Failed to communicate with the plugin. Have you compiled and built ENIGMA yet?",
-                        // "Plugin Loading Failed", wxOK|wxCENTRE|wxICON_ERROR, wxDefaultPosition).ShowModal();
+		cout << "ERROR! Failed to communicate with the plugin. Have you compiled and built ENIGMA yet?" << endl;
+		cout << "Press any key to continue";
+		cin.ignore(1);
     }
 
     definitionsModified("", ((const char*) "%e-yaml\n"

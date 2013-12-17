@@ -25,7 +25,7 @@
 #include <string>
 using namespace std;
 
-#include "enigma/CompilerSource/OS_Switchboard.h"
+#include "OS_Switchboard.h"
 #include "link.h"
 
 enum {
@@ -37,7 +37,7 @@ enum {
 };
 
 typedef void(*GenericFunction)();
-void* LoadPluginLib(ENIGMA_IDEFrame* frame);
+void* LoadPluginLib();
 void* FreePluginLib();
 GenericFunction LoadPluginFnc(void *library, string funcname);
 

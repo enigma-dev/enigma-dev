@@ -13,7 +13,15 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-g" />
+					<Add option="-I../../" />
+					<Add option="-L..\..\gmk\bin\linux\libgmk.a" />
+					<Add directory="../../../CompilerSource" />
+					<Add directory="../../../CompilerSource/backend/" />
+					<Add directory="../../gmk/src/include/" />
 				</Compiler>
+				<Linker>
+					<Add library="..\..\gmk\bin\linux\libgmk.a" />
+				</Linker>
 			</Target>
 			<Target title="Release">
 				<Option output="bin/Release/emake" prefix_auto="1" extension_auto="1" />
@@ -22,9 +30,14 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-O2" />
+					<Add directory="../../../CompilerSource" />
+					<Add directory="../../../CompilerSource/backend/" />
+					<Add directory="../../gmk/src/include/" />
+					<Add directory="../../" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
+					<Add library="..\..\gmk\bin\linux\libgmk.a" />
 				</Linker>
 			</Target>
 		</Build>

@@ -48,7 +48,7 @@ static int displayInitialResolutionWidth = 0, displayInitialResolutionHeight = 0
 namespace enigma
 {
     extern HWND hWnd,hWndParent;
-    bool isVisible = true, windowIsTop = false, freezeWindow = false;
+    bool isVisible = true, windowIsTop = false, gameFroze = false;
     int windowcolor = 0, cursorInt = 0, regionWidth = 0, regionHeight = 0, windowWidth = 0, windowHeight = 0, windowX = 0, windowY = 0;
     double scaledWidth = 0, scaledHeight = 0;
     char* currentCursor = IDC_ARROW;
