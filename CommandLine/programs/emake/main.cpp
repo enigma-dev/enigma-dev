@@ -21,7 +21,7 @@
 
 #include <iostream>
 #include <string>
-#include "gmk\src\include/gmk.hpp"
+#include "gmk.hpp"
 #include "library.h"
 
 using namespace std;
