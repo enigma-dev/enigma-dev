@@ -32,36 +32,43 @@ static void ede_dia_open()
 {
 
 }
+
 //Appends a given text to the frame log
 static void ede_dia_add(const char* text)
 {
     cout << text;
 }
+
 //Clears the frame log
 static void ede_dia_clear()
 {
 
 }
+
 //Sets the progress bar (0-100)
 static void ede_dia_progress(int progress)
 {
 
 }
+
 //Applies a given text to the progress bar
 static void ede_dia_progress_text(const char* caption)
 {
 
 }
+
 //Sets the file from which data is redirected to frame log
 static void ede_output_redirect_file(const char* filepath)
 {
 
 }
+
 //Indicates file completion, dumps remainder to frame log
 static void ede_output_redirect_reset()
 {
 
 }
+
 //Executes a given command, returns errors or ret val
 //static int ede_ide_execute(const char*, const char**, bool) {  }
  //Compresses data. Note image width/height unused
@@ -76,15 +83,18 @@ void* LoadPluginLib()
 
 void* LoadPluginLib()
 {
-    enigmaFrame = frame;
     #if CURRENT_PLATFORM_ID == OS_MAC
     string extension = ".dylib";
     #else
     string extension = ".so";
     #endif
 
+	#if CURRENT_PLATFORM_ID == OS_LINUX
     void *handle = dlopen(("enigma/libcompileEGMf" + extension).c_str(), RTLD_NOW | RTLD_GLOBAL);
-
+	#else
+	
+	#endif
+	
     if (handle == NULL)
     {
       return 0;
@@ -123,6 +133,10 @@ void* LoadPluginLib()
 
 GenericFunction LoadPluginFnc(void *library, string funcname)
 {
+	#if CURRENT_PLATFORM_ID == OS_LINUX
     return (GenericFunction)dlsym(library, funcname.c_str());
+	#else
+	
+	#endif
 }
 #endif
