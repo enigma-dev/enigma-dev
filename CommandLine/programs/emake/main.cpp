@@ -36,7 +36,9 @@ int main(int argc, char* argv[])
 
     if (result == NULL)
     {
-		cout << "Failed to communicate with the plugin. Have you compiled and built ENIGMA yet?";
+		cout << "ERROR! Failed to communicate with the plugin. Have you compiled and built ENIGMA yet?" << endl;
+		cout << "Press any key to continue";
+		cin.ignore(1);
     }
 
     definitionsModified("", ((const char*) "%e-yaml\n"
