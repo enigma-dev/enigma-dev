@@ -316,7 +316,7 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
           }
           else
           {
-              if (GetForegroundWindow() != enigma::hWnd && enigma::gameFroze)  continue;
+              if (enigma::gameFroze)  continue;
 				  
 			  unsigned long dt = 0;
 			  if (spent_mcs > last_mcs) {
