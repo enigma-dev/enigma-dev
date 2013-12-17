@@ -29,7 +29,7 @@ using namespace std;
 #include "backend/EnigmaStruct.h"
 #include "backend/JavaCallbacks.h"
 #include "syntax_error.h"
-#include <dlfcn.h>
+//#include <dlfcn.h>
 
 extern int (*compileEGMf)(EnigmaStruct *es, const char* exe_filename, int mode);
 extern const char* (*next_available_resource)();
