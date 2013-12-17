@@ -53,7 +53,7 @@ namespace enigma
     extern HWND hWnd,hWndParent;
     extern void setchildsize(bool adapt);
 	extern void WindowResized();
-    extern bool freezeOnLoseFocus, freezeWindow, treatCloseAsEscape;
+    extern bool freezeOnLoseFocus, gameFroze, treatCloseAsEscape;
     static short hdeltadelta = 0, vdeltadelta = 0;
     int tempLeft = 0, tempTop = 0, tempRight = 0, tempBottom = 0, tempWidth, tempHeight;
     RECT tempWindow;
@@ -92,8 +92,9 @@ namespace enigma
 
         case WM_SETFOCUS:
             input_initialize();
-            if (freezeOnLoseFocus)
-                freezeWindow = false;
+            if (freezeOnLoseFocus) {
+                gameFroze = false;
+			}
             return 0;
 
         case WM_KILLFOCUS:
@@ -107,8 +108,9 @@ namespace enigma
                 last_mousestatus[i] = mousestatus[i];
                 mousestatus[i] = 0;
             }
-            if (freezeOnLoseFocus)
-                freezeWindow = true;
+            if (freezeOnLoseFocus) {
+                gameFroze = true;
+			}
             return 0;
 
         case WM_ENTERSIZEMOVE:
