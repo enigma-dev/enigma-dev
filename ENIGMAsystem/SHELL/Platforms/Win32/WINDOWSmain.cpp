@@ -52,7 +52,7 @@ namespace enigma //TODO: Find where this belongs
   HWND hWnd;
   LRESULT CALLBACK WndProc (HWND hWnd, UINT message,WPARAM wParam, LPARAM lParam);
   HDC window_hDC;
-  extern bool freezeWindow;
+  extern bool gameFroze;
 
   vector<string> main_argv;
   int main_argc;
@@ -316,7 +316,7 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
           }
           else
           {
-              if (GetForegroundWindow() != enigma::hWnd && enigma::freezeWindow)  continue;
+              if (GetForegroundWindow() != enigma::hWnd && enigma::gameFroze)  continue;
 				  
 			  unsigned long dt = 0;
 			  if (spent_mcs > last_mcs) {
