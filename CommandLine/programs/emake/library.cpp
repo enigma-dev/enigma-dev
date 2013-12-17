@@ -23,6 +23,8 @@
 
 #include <cstring>
 #include <cstdio>
+#include <iostream>
+#include <string>
 using namespace std;
 
 //Opens the EnigmaFrame
@@ -66,13 +68,13 @@ static void ede_output_redirect_reset()
 //static Image* ede_ide_compress_data(char *, int) {  }
 
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
-void* LoadPluginLib(ENIGMA_IDEFrame* frame)
+void* LoadPluginLib()
 {
 
 }
 #else
 
-void* LoadPluginLib(ENIGMA_IDEFrame* frame)
+void* LoadPluginLib()
 {
     enigmaFrame = frame;
     #if CURRENT_PLATFORM_ID == OS_MAC
