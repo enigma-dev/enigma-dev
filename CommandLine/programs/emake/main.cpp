@@ -33,11 +33,10 @@ int main(int argc, char* argv[])
     gmk->Load(argv[1]);
 
     void *result = LoadPluginLib();
-    //void *result;
+
     if (result == NULL)
     {
-        //wxMessageDialog (NULL, "Failed to communicate with the plugin. Have you compiled and built ENIGMA yet?",
-                        // "Plugin Loading Failed", wxOK|wxCENTRE|wxICON_ERROR, wxDefaultPosition).ShowModal();
+		cout << "Failed to communicate with the plugin. Have you compiled and built ENIGMA yet?";
     }
 
     definitionsModified("", ((const char*) "%e-yaml\n"
