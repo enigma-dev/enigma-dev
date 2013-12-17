@@ -1,14 +1,14 @@
 OS := $(shell uname -s)
 ifeq ($(OS), Linux)
-	TARGET := ../enigger.elf
+	TARGET := ../emake.elf
 	CXXFLAGS += -fPIC
 	MKDIR := mkdir
 else ifeq ($(OS), Darwin)
-	TARGET := ../enigger.elf
+	TARGET := ../emake.elf
 	CXXFLAGS += -fPIC
 	MKDIR := mkdir
 else
-	TARGET := ../enigger.exe
+	TARGET := ../emake.exe
 	LDFLAGS += -static-libgcc
 	MKDIR := mkdir.exe
 endif
@@ -18,10 +18,10 @@ endif
 ###########
 
 CXX := g++
-CXXFLAGS += -Wall -g -I. -I../CompilerSource
-LDFLAGS += -shared
+CXXFLAGS += -Wall -g -I. -I../CompilerSource -IGmk/src/include/
+LDFLAGS += -shared -L./Gmk/bin/linux/libgmk.a
 
-SOURCES := $(shell find * -name "*.cpp")
+SOURCES := $(shell find programs/ -name "*.cpp")
 OBJECTS := $(addprefix .eobjs/,$(SOURCES:.cpp=.o))
 DEPENDS := $(OBJECTS:.o=.d)
 
