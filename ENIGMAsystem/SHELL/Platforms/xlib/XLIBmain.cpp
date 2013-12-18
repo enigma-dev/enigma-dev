@@ -48,7 +48,7 @@ namespace enigma
   extern char keymap[512];
   extern char usermap[256];
   void ENIGMA_events(void); //TODO: Synchronize this with Windows by putting these two in a single header.
-  extern bool gameFroze;
+  bool gameFroze = false;
   extern bool freezeOnLoseFocus;
  
   namespace x11
@@ -239,7 +239,7 @@ int main(int argc,char** argv)
 	swa.border_pixel = 0;
 	swa.background_pixel = 0;
 	swa.colormap = XCreateColormap(disp,root,vi->visual,AllocNone);
-	swa.event_mask = ExposureMask | KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask;// | StructureNotifyMask;
+	swa.event_mask = ExposureMask | KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask | FocusChangeMask;// | StructureNotifyMask;
 	unsigned long valmask = CWColormap | CWEventMask; //  | CWBackPixel | CWBorderPixel;
 
 	//default window size
@@ -341,8 +341,6 @@ int main(int argc,char** argv)
 				continue;
 			}
 		}
-
-		if (gameFroze) { continue; }
 		
 		unsigned long dt = 0;
 		if (spent_mcs > last_mcs) {
@@ -355,11 +353,13 @@ int main(int argc,char** argv)
 		enigma_user::delta_time = dt;
 		current_time_mcs += enigma_user::delta_time;
 		enigma_user::current_time += enigma_user::delta_time / 1000;
-		
+				
 		while(XQLength(disp))
 			if(handleEvents() > 0)
 				goto end;
-
+				
+		if (enigma::gameFroze) { continue; }
+		
 		enigma::handle_joysticks();
 		enigma::ENIGMA_events();
 		enigma::input_push();
