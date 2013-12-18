@@ -50,6 +50,10 @@ using namespace std;
 
 using namespace enigma::x11;
 
+namespace enigma {
+	extern bool freezeOnLoseFocus;
+}
+
 //////////
 // INIT //
 //////////
