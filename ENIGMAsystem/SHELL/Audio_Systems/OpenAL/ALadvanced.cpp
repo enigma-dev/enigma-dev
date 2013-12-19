@@ -57,11 +57,21 @@ bool audio_exists(int sound)
   return unsigned(sound) < sound_resources.size() && bool(sound_resources[sound]);
 }
 
-bool audio_is_playing(int sound) {
+bool audio_is_playing(int index) {
+  if (index >= 200000) {
+	if (sound_channels[index - 200000]->soundIndex == index) {
+      ALint state;
+      alGetSourcei(sound_channels[index - 200000]->source, AL_SOURCE_STATE, &state);
+      if (state == AL_PLAYING)
+      {
+        return true;
+      }
+    }
+  }
   // test for channels playing the sound
-  for(size_t i = 0; i < sound_channels.size(); i++)
+  for (size_t i = 0; i < sound_channels.size(); i++)
   {
-    if (sound_channels[i]->soundIndex == sound) {
+    if (sound_channels[i]->soundIndex == index) {
       ALint state;
       alGetSourcei(sound_channels[i]->source, AL_SOURCE_STATE, &state);
       if (state == AL_PLAYING)
@@ -73,11 +83,36 @@ bool audio_is_playing(int sound) {
   return false;
 }
 
+bool audio_is_paused(int index) {
+  if (index >= 200000) {
+	if (sound_channels[index - 200000]->soundIndex == index) {
+      ALint state;
+      alGetSourcei(sound_channels[index - 200000]->source, AL_SOURCE_STATE, &state);
+      if (state == AL_PAUSED)
+      {
+        return true;
+      }
+    }
+  }
+  // test for channels with the sound paused
+  for (size_t i = 0; i < sound_channels.size(); i++)
+  {
+    if (sound_channels[i]->soundIndex == index) {
+      ALint state;
+      alGetSourcei(sound_channels[i]->source, AL_SOURCE_STATE, &state);
+      if (state == AL_PAUSED)
+      {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 int audio_play_sound(int sound, double priority, bool loop)
 {
   int src = enigma::get_free_channel(priority);
-  if (src != -1)
-  {
+  if (src != -1) {
     get_sound(snd,sound,0);
     alSourcei(sound_channels[src]->source, AL_BUFFER, snd->buf[0]);
     alSourcei(sound_channels[src]->source, AL_SOURCE_RELATIVE, AL_TRUE);
@@ -89,10 +124,8 @@ int audio_play_sound(int sound, double priority, bool loop)
       alurePlaySource(sound_channels[src]->source, enigma::eos_callback, (void*)(ptrdiff_t)sound) != AL_FALSE :
       alurePlaySourceStream(sound_channels[src]->source, snd->stream, 3, -1, enigma::eos_callback,
         (void*)(ptrdiff_t)sound) != AL_FALSE));
-    return sound_channels[src]->source;
-  }
-  else
-  {
+    return src + 200000;
+  } else {
     return -1;
   }
 }
@@ -100,8 +133,7 @@ int audio_play_sound(int sound, double priority, bool loop)
 int audio_play_sound_at(int sound, as_scalar x, as_scalar y, as_scalar z, as_scalar falloff_ref, as_scalar falloff_max, as_scalar falloff_factor, bool loop, double priority)
 {
   int src = enigma::get_free_channel(priority);
-  if (src != -1)
-  {
+  if (src != -1) {
     get_sound(snd,sound,0);
     alSourcei(sound_channels[src]->source, AL_LOOPING, loop?AL_TRUE:AL_FALSE);
     ALfloat soundPos[3] = { x, y, z };
@@ -115,47 +147,59 @@ int audio_play_sound_at(int sound, as_scalar x, as_scalar y, as_scalar z, as_sca
       alurePlaySource(sound_channels[src]->source, enigma::eos_callback, (void*)(ptrdiff_t)sound) != AL_FALSE :
       alurePlaySourceStream(sound_channels[src]->source, snd->stream, 3, -1, enigma::eos_callback,
         (void*)(ptrdiff_t)sound) != AL_FALSE));
-    return src;
-  }
-  else
-  {
+    return src + 200000;
+  } else {
     return -1;
   }
 }
 
-void audio_play_sound_on(int emitter, int sound, bool loop, double priority)
+int audio_play_sound_on(int emitter, int sound, bool loop, double priority)
 {
-  SoundEmitter *emit = sound_emitters[emitter];
-  int src = audio_play_sound_at(sound, emit->emitPos[0], emit->emitPos[1], emit->emitPos[2],
-    emit->falloff[0], emit->falloff[1], emit->falloff[2], loop, priority);
-  alSourcefv(sound_channels[src]->source, AL_VELOCITY, emit->emitVel);
-  alSourcei(sound_channels[src]->source, AL_PITCH, emit->pitch);
+	get_sound(snd,sound,0);
+	SoundEmitter *emit = sound_emitters[emitter];
+	int src = audio_play_sound_at(sound, emit->emitPos[0], emit->emitPos[1], emit->emitPos[2],
+	emit->falloff[0], emit->falloff[1], emit->falloff[2], loop, priority);
+	alSourcefv(sound_channels[src]->source, AL_VELOCITY, emit->emitVel);
+	alSourcei(sound_channels[src]->source, AL_PITCH, emit->pitch);
+	return src;
 }
 
 void audio_pause_sound(int index)
 {
-  for (size_t i = 0; i < sound_channels.size(); i++) {
-    if (sound_channels[i]->soundIndex == index) {
-      alurePauseSource(sound_channels[i]->source);
-    }
+  if (index >= 200000) {
+	alurePauseSource(sound_channels[index - 200000]->source);
+  } else {
+	  for (size_t i = 0; i < sound_channels.size(); i++) {
+		if (sound_channels[i]->soundIndex == index) {
+		  alurePauseSource(sound_channels[i]->source);
+		}
+	  }
   }
 }
 
 void audio_resume_sound(int index)
 {
-    for (size_t i = 0; i < sound_channels.size(); i++) {
-    if (sound_channels[i]->soundIndex == index) {
-      alureResumeSource(sound_channels[i]->source);
-    }
+  if (index >= 200000) {
+	alureResumeSource(sound_channels[index - 200000]->source);
+  } else {
+	  for (size_t i = 0; i < sound_channels.size(); i++) {
+		if (sound_channels[i]->soundIndex == index) {
+		  alureResumeSource(sound_channels[i]->source);
+		}
+	  }
   }
 }
 
 void audio_stop_sound(int index)
 {
-  for (size_t i = 0; i < sound_channels.size(); i++) {
-    if (sound_channels[i]->soundIndex == index) {
-      alureStopSource(sound_channels[i]->source, AL_TRUE);
-    }
+  if (index >= 200000) {
+	alureResumeSource(sound_channels[index - 200000]->source);
+  } else {
+	  for (size_t i = 0; i < sound_channels.size(); i++) {
+		if (sound_channels[i]->soundIndex == index) {
+		  alureStopSource(sound_channels[i]->source, AL_TRUE);
+		}
+	  }
   }
 }
 
