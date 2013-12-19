@@ -66,6 +66,8 @@ void draw_surface_ext(int id,gs_scalar x, gs_scalar y,gs_scalar xscale, gs_scala
 	draw_primitive_begin_texture(pr_trianglestrip, surface_get_texture(id));
 	draw_vertex_texture_color(ulcx,ulcy,0,0,color,alpha);
 	draw_vertex_texture_color(ulcx + w*cos(rot), ulcy - w*sin(rot),1,0,color,alpha);
+	ulcx += h * cos(3*M_PI/2 + rot);
+	ulcy -= h * sin(3*M_PI/2 + rot);
 	draw_vertex_texture_color(ulcx,ulcy,0,1,color,alpha);
 	draw_vertex_texture_color(ulcx + w*cos(rot), ulcy - w*sin(rot),1,1,color,alpha);
 	draw_primitive_end();
