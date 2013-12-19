@@ -50,6 +50,10 @@ using namespace std;
 
 using namespace enigma::x11;
 
+namespace enigma {
+	extern bool freezeOnLoseFocus;
+}
+
 //////////
 // INIT //
 //////////
@@ -251,6 +255,12 @@ namespace enigma_user
 
 void window_set_freezeonlosefocus(bool freeze)
 {
+    enigma::freezeOnLoseFocus = freeze;
+}
+
+bool window_get_freezeonlosefocus()
+{
+    return enigma::freezeOnLoseFocus;
 }
 
 void window_set_fullscreen(bool full)

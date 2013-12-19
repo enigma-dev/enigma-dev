@@ -48,13 +48,10 @@ bool audio_is_paused(int index);
 
 int audio_play_sound(int index, double priority, bool loop);
 int audio_play_sound_at(int index, as_scalar x, as_scalar y, as_scalar z, as_scalar falloff_ref, as_scalar falloff_max, as_scalar falloff_factor, bool loop, double priority);
+int audio_play_sound_on(int emitter, int sound, bool loop, double priority);
 void audio_pause_sound(int index);
 void audio_resume_sound(int index);
 void audio_stop_sound(int index);
-
-void audio_pause_channel(int index);
-void audio_resume_channel(int index);
-void audio_stop_channel(int index);
 
 void audio_pause_all();
 void audio_resume_all();
@@ -67,7 +64,7 @@ void audio_listener_orientation(as_scalar lookat_x, as_scalar lookat_y, as_scala
 void audio_listener_position(as_scalar x, as_scalar y, as_scalar z);
 void audio_listener_velocity(as_scalar vx, as_scalar vy, as_scalar vz);
 
-double audio_sound_length(int index);
+int audio_sound_length(int index);
 void audio_sound_pitch(int index, float pitch);
 void audio_sound_gain(int index, float volume, double time);
 void audio_master_gain(float volume, double time);
@@ -87,7 +84,6 @@ void audio_emitter_gain(int emitter, double gain);
 void audio_emitter_pitch(int emitter, double pitch);
 void audio_emitter_position(int emitter, as_scalar x, as_scalar y, as_scalar z);
 void audio_emitter_velocity(int emitter, as_scalar vx, as_scalar vy, as_scalar vz);
-void audio_play_sound_on(int emitter, int sound, bool loop, double priority);
 
 }
 

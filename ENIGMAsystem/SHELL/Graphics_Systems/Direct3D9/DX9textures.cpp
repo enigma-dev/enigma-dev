@@ -124,12 +124,12 @@ void texture_set_blending(bool enable)
 
 }
 
-double texture_get_width(int texid)
+gs_scalar texture_get_width(int texid)
 {
 
 }
 
-double texture_get_height(int texid)
+gs_scalar texture_get_height(int texid)
 {
 
 }

@@ -103,17 +103,17 @@ namespace enigma_user
 
 bool position_free(cs_scalar x, cs_scalar y)
 {
-  return collide_inst_point(all,true,true,true,x+.5,y+.5) == NULL;
+  return collide_inst_point(all,true,true,false,x+.5,y+.5) == NULL;
 }
 
 bool position_empty(cs_scalar x, cs_scalar y)
 {
-  return collide_inst_point(all,false,true,true,x+.5,y+.5) == NULL;
+  return collide_inst_point(all,false,true,false,x+.5,y+.5) == NULL;
 }
 
 bool position_meeting(cs_scalar x, cs_scalar y, int object)
 {
-  return collide_inst_point(object,false,true,true,x+.5,y+.5);
+  return collide_inst_point(object,false,true,false,x+.5,y+.5);
 }
 
 void position_destroy_object(cs_scalar x, cs_scalar y, int object, bool solid_only)
