@@ -48,6 +48,7 @@ bool audio_is_paused(int index);
 
 int audio_play_sound(int index, double priority, bool loop);
 int audio_play_sound_at(int index, as_scalar x, as_scalar y, as_scalar z, as_scalar falloff_ref, as_scalar falloff_max, as_scalar falloff_factor, bool loop, double priority);
+int audio_play_sound_on(int emitter, int sound, bool loop, double priority);
 void audio_pause_sound(int index);
 void audio_resume_sound(int index);
 void audio_stop_sound(int index);
@@ -83,7 +84,6 @@ void audio_emitter_gain(int emitter, double gain);
 void audio_emitter_pitch(int emitter, double pitch);
 void audio_emitter_position(int emitter, as_scalar x, as_scalar y, as_scalar z);
 void audio_emitter_velocity(int emitter, as_scalar vx, as_scalar vy, as_scalar vz);
-void audio_play_sound_on(int emitter, int sound, bool loop, double priority);
 
 }
 
