@@ -118,6 +118,8 @@ int audio_play_sound(int sound, double priority, bool loop)
     alSourcei(sound_channels[src]->source, AL_SOURCE_RELATIVE, AL_TRUE);
     alSourcei(sound_channels[src]->source, AL_REFERENCE_DISTANCE, 1);
     alSourcei(sound_channels[src]->source, AL_LOOPING, loop?AL_TRUE:AL_FALSE);
+	alSourcef(sound_channels[src]->source, AL_PITCH, snd->pitch);
+	alSourcef(sound_channels[src]->source, AL_GAIN, snd->volume);
     sound_channels[src]->priority = priority;
     sound_channels[src]->soundIndex = sound;
     !(snd->idle = !(snd->playing = !snd->stream ?
@@ -141,6 +143,8 @@ int audio_play_sound_at(int sound, as_scalar x, as_scalar y, as_scalar z, as_sca
     alSourcef(sound_channels[src]->source, AL_REFERENCE_DISTANCE, falloff_ref);
 	alSourcef(sound_channels[src]->source, AL_MAX_DISTANCE, falloff_max);
 	alSourcef(sound_channels[src]->source, AL_ROLLOFF_FACTOR, falloff_factor);
+	alSourcef(sound_channels[src]->source, AL_PITCH, snd->pitch);
+	alSourcef(sound_channels[src]->source, AL_GAIN, snd->volume);
     sound_channels[src]->priority = priority;
     sound_channels[src]->soundIndex = sound;
     !(snd->idle = !(snd->playing = !snd->stream ?
@@ -158,10 +162,10 @@ int audio_play_sound_on(int emitter, int sound, bool loop, double priority)
 	get_sound(snd,sound,0);
 	SoundEmitter *emit = sound_emitters[emitter];
 	int src = audio_play_sound_at(sound, emit->emitPos[0], emit->emitPos[1], emit->emitPos[2],
-	emit->falloff[0], emit->falloff[1], emit->falloff[2], loop, priority);
+	emit->falloff[0], emit->falloff[1], emit->falloff[2], loop, priority) - 200000;
 	alSourcefv(sound_channels[src]->source, AL_VELOCITY, emit->emitVel);
 	alSourcei(sound_channels[src]->source, AL_PITCH, emit->pitch);
-	return src;
+	return src + 200000;
 }
 
 void audio_pause_sound(int index)
@@ -236,6 +240,51 @@ double audio_sound_offset(int index)
   return offset;
 }
 
+int audio_sound_length(int index)
+{
+  ALint buffer;
+  if (index >= 200000) {
+	alGetSourcei(sound_channels[index - 200000]->source, AL_BUFFER, &buffer);
+  } else {
+	get_sound(snd,index,-1);
+	buffer = snd->buf[0];
+  }
+  ALint size, bits, channels, freq;
+
+  alGetBufferi(buffer, AL_SIZE, &size);
+  alGetBufferi(buffer, AL_BITS, &bits);
+  alGetBufferi(buffer, AL_CHANNELS, &channels);
+  alGetBufferi(buffer, AL_FREQUENCY, &freq);
+
+  return size / channels / (bits/8) / (float)freq;
+}
+
+void audio_sound_gain(int index, float volume, double time)
+{
+  if (index >= 200000) {
+	alSourcef(sound_channels[index - 200000]->source, AL_GAIN, volume);
+  } else {
+	for (size_t i = 0; i < sound_channels.size(); i++) {
+		if (sound_channels[i]->soundIndex == index) {
+		  alSourcef(sound_channels[i]->source, AL_GAIN, volume);
+		}
+	}
+  }
+}
+
+void audio_sound_pitch(int index, float pitch)
+{
+  if (index >= 200000) {
+	alSourcef(sound_channels[index - 200000]->source, AL_PITCH, pitch);
+  } else {
+	for (size_t i = 0; i < sound_channels.size(); i++) {
+		if (sound_channels[i]->soundIndex == index) {
+		  alSourcef(sound_channels[i]->source, AL_PITCH, pitch);
+		}
+	}
+  }
+}
+
 void audio_listener_orientation(as_scalar lookat_x, as_scalar lookat_y, as_scalar lookat_z, as_scalar up_x, as_scalar up_y, as_scalar up_z)
 {
   listenerOri[0] = up_x;
@@ -263,27 +312,9 @@ void audio_listener_velocity(as_scalar vx, as_scalar vy, as_scalar vz)
   alListenerfv(AL_VELOCITY, listenerVel);
 }
 
-double audio_sound_length(int index)
-{
-  get_sound(snd,index,0);
-  ALint size, bits, channels, freq;
-
-  alGetBufferi(snd->buf[0], AL_SIZE, &size);
-  alGetBufferi(snd->buf[0], AL_BITS, &bits);
-  alGetBufferi(snd->buf[0], AL_CHANNELS, &channels);
-  alGetBufferi(snd->buf[0], AL_FREQUENCY, &freq);
-
-  return size / channels / (bits/8) / (float)freq;
-}
-
 void audio_master_gain(float volume, double time)
 {
   alListenerf(AL_GAIN, volume);
-}
-
-void audio_sound_gain(int index, float volume, double time)
-{
-  alSourcef(sound_channels[index]->source, AL_GAIN, volume);
 }
 
 void audio_channel_num(int num) {

@@ -50,13 +50,14 @@ struct SoundResource
 	int kind; //
 	float volume;
 	float pan;
+	float pitch;
 
     load_state loaded;   // Degree to which this sound has been loaded successfully
     bool idle;    // True if this sound is not being used, false if playing or paused.
     bool playing; // True if this sound is playing; not paused or idle.
 
 	SoundResource(): stream(0), cleanup(0), userdata(0), seek(0), kind(0), loaded(LOADSTATE_NONE), idle(1), playing(0) {
-		buf[0] = 0; buf[1] = 0; buf[2] = 0; volume = 1.0f; pan = 0.0f;
+		buf[0] = 0; buf[1] = 0; buf[2] = 0; volume = 1.0f; pan = 0.0f; pitch = 1.0f;
 	}
 		
 	~SoundResource() {

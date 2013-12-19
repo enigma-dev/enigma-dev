@@ -30,8 +30,6 @@ bool sound_play(int sound);
 bool sound_loop(int sound);
 void sound_stop(int sound);
 void sound_stop_all();
-void sound_volume(int sound, float volume);
-void sound_global_volume(float mastervolume);
 void sound_delete(int sound);
 bool sound_pause(int sound);
 void sound_pause_all();
@@ -50,8 +48,6 @@ bool sound_ispaused(int sound);
 
 void action_sound(int snd, bool loop);
 
-void sound_pan(int sound, float value);
-
 int sound_add(string fname, int kind, bool preload);
 bool sound_replace(int sound, string fname, int kind, bool preload);
 inline bool action_replace_sound(int sound, string fname)
@@ -61,7 +57,10 @@ inline bool action_replace_sound(int sound, string fname)
 
 const char* sound_get_audio_error();
 
+void sound_pan(int sound, float value);
 void sound_pitch(int sound, float value);
+void sound_volume(int sound, float value);
+void sound_global_volume(float mastervolume);
 
 // these functions can not be added for compatibility until we modify the dsound.h header from mingw
 // and redistribute it, wait until someone requests them before adding them if they are not requested

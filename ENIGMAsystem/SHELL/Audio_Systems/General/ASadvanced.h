@@ -64,7 +64,7 @@ void audio_listener_orientation(as_scalar lookat_x, as_scalar lookat_y, as_scala
 void audio_listener_position(as_scalar x, as_scalar y, as_scalar z);
 void audio_listener_velocity(as_scalar vx, as_scalar vy, as_scalar vz);
 
-double audio_sound_length(int index);
+int audio_sound_length(int index);
 void audio_sound_pitch(int index, float pitch);
 void audio_sound_gain(int index, float volume, double time);
 void audio_master_gain(float volume, double time);
