@@ -69,6 +69,7 @@ namespace enigma
 	  virtual variant myevent_closebutton();
       virtual variant myevent_draw();
 	  virtual variant myevent_drawgui();
+	  virtual variant myevent_drawresize();
 	  virtual variant myevent_roomstart();
       virtual variant myevent_roomend();
       virtual variant myevent_destroy();

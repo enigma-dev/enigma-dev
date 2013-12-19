@@ -45,6 +45,8 @@ namespace enigma_user
 
 void texture_set_enabled(bool enable);
 bool texture_get_interpolation();
+gs_scalar texture_get_width(int texid);
+gs_scalar texture_get_height(int texid);
 int texture_get_texel_width(int texid);
 int texture_get_texel_height(int texid);
 void texture_set(int texid);
