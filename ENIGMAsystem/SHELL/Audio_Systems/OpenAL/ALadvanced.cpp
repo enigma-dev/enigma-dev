@@ -134,39 +134,35 @@ void audio_play_sound_on(int emitter, int sound, bool loop, double priority)
 
 void audio_pause_sound(int index)
 {
-  alurePauseSource(sound_channels[index]->source);
+  for (size_t i = 0; i < sound_channels.size(); i++) {
+    if (sound_channels[i]->soundIndex == index) {
+      alurePauseSource(sound_channels[i]->source);
+    }
+  }
 }
 
 void audio_resume_sound(int index)
 {
-  alureResumeSource(sound_channels[index]->source);
+    for (size_t i = 0; i < sound_channels.size(); i++) {
+    if (sound_channels[i]->soundIndex == index) {
+      alureResumeSource(sound_channels[i]->source);
+    }
+  }
 }
 
 void audio_stop_sound(int index)
 {
-  alureStopSource(sound_channels[index]->source, AL_TRUE);
+  for (size_t i = 0; i < sound_channels.size(); i++) {
+    if (sound_channels[i]->soundIndex == index) {
+      alureStopSource(sound_channels[i]->source, AL_TRUE);
+    }
+  }
 }
-
-void audio_pause_channel(int index)
-{
-  alurePauseSource(index);
-}
-
-void audio_resume_channel(int index)
-{
-  alureResumeSource(index);
-}
-
-void audio_stop_channel(int index)
-{
-  alureStopSource(index, AL_TRUE);
-}
-
 
 void audio_stop_all()
 {
   for (size_t i = 0; i < sound_channels.size(); i++) {
-      alureStopSource(sound_channels[i]->source, AL_FALSE);
+      alureStopSource(sound_channels[i]->source, AL_TRUE);
   }
 }
 
@@ -284,7 +280,7 @@ void audio_delete(int sound)
 {
   get_sound(snd,sound,);
   alureDestroyStream(snd->stream, 0, 0);
-  for(size_t i = 1; i < sound_channels.size(); i++) {
+  for(size_t i = 0; i < sound_channels.size(); i++) {
     if (sound_channels[i]->soundIndex == sound) {
       alDeleteSources(1, &sound_channels[i]->source);
       sound_channels[i]->soundIndex=-1;
