@@ -63,6 +63,7 @@ bool sound_play(int sound) { // Returns whether sound is playing
   alSourcei(sound_channels[src]->source, AL_REFERENCE_DISTANCE, 1);
   alSourcei(sound_channels[src]->source, AL_LOOPING, AL_FALSE);
   alSourcef(sound_channels[src]->source, AL_GAIN, snd->volume);
+  alSourcef(sound_channels[src]->source, AL_PITCH, snd->pitch);
   float sourcePosAL[] = { snd->pan, 0.0f, 0.0f};
   alSourcefv(sound_channels[src]->source, AL_POSITION, sourcePosAL);
   sound_channels[src]->soundIndex = sound;
@@ -80,6 +81,7 @@ bool sound_loop(int sound) { // Returns whether sound is playing
   alSourcei(sound_channels[src]->source, AL_REFERENCE_DISTANCE, 1);
   alSourcei(sound_channels[src]->source, AL_LOOPING, AL_TRUE); //Just playing
   alSourcef(sound_channels[src]->source, AL_GAIN, snd->volume);
+  alSourcef(sound_channels[src]->source, AL_PITCH, snd->pitch);
   float sourcePosAL[] = { snd->pan, 0.0f, 0.0f};
   alSourcefv(sound_channels[src]->source, AL_POSITION, sourcePosAL);
   sound_channels[src]->soundIndex = sound;
@@ -142,12 +144,22 @@ void sound_pan(int sound, float value) {
   }
 }
 
-void sound_volume(int sound, float volume) {
+void sound_volume(int sound, float value) {
   get_sound(snd,sound,);
-  snd->volume = volume;
+  snd->volume = value;
   for (size_t i = 0; i < sound_channels.size(); i++) {
     if (sound_channels[i]->soundIndex == sound) {
-      alSourcef(sound_channels[i]->source, AL_GAIN, volume);
+      alSourcef(sound_channels[i]->source, AL_GAIN, value);
+    }
+  }
+}
+
+void sound_pitch(int sound, float value) {
+  get_sound(snd,sound,);
+  snd->pitch = value;
+  for (size_t i = 0; i < sound_channels.size(); i++) {
+    if (sound_channels[i]->soundIndex == sound) {
+      alSourcef(sound_channels[i]->source, AL_PITCH, value);
     }
   }
 }

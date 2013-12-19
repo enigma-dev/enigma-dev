@@ -185,6 +185,24 @@ void texture_set_blending(bool enable)
     (enable?glEnable:glDisable)(GL_BLEND);
 }
 
+gs_scalar texture_get_width(int texid)
+{
+  // returns the actual number of pixels in the texture across the xaxis
+  GLint width = 0;
+  glBindTexture(GL_TEXTURE_2D, texid);
+  glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width);
+  return width;
+}
+
+gs_scalar texture_get_height(int texid)
+{
+  // returns the actual number of pixels in the tex across the yaxis
+  GLint height = 0;
+  glBindTexture(GL_TEXTURE_2D, texid);
+  glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &height);
+  return height;
+}
+
 int texture_get_texel_width(int texid)
 {
   // returns the actual number of pixels in the texture across the xaxis
