@@ -55,7 +55,7 @@ void draw_surface(int id, gs_scalar x, gs_scalar y)
 	draw_primitive_end();
 }
 
-void draw_surface_ext(int id,gs_scalar x, gs_scalar y,gs_scalar xscale, gs_scalar yscale,double rot,int color,double alpha)
+void draw_surface_ext(int id,gs_scalar x, gs_scalar y,gs_scalar xscale, gs_scalar yscale,double rot,int color,gs_scalar alpha)
 {
     const gs_scalar w=surface_get_width(id)*xscale, h=surface_get_height(id)*yscale;
     rot *= M_PI/180;
@@ -71,7 +71,7 @@ void draw_surface_ext(int id,gs_scalar x, gs_scalar y,gs_scalar xscale, gs_scala
 	draw_primitive_end();
 }
 
-void draw_surface_stretched(int id, gs_scalar x, gs_scalar y, float w, float h)
+void draw_surface_stretched(int id, gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h)
 {
 	draw_primitive_begin_texture(pr_trianglestrip, surface_get_texture(id));
 	draw_vertex_texture(x,y,0,0);
@@ -81,7 +81,7 @@ void draw_surface_stretched(int id, gs_scalar x, gs_scalar y, float w, float h)
 	draw_primitive_end();
 }
 
-void draw_surface_stretched_ext(int id, gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h, int color, double alpha)
+void draw_surface_stretched_ext(int id, gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h, int color, gs_scalar alpha)
 {
 	draw_primitive_begin_texture(pr_trianglestrip, surface_get_texture(id));
 	draw_vertex_texture_color(x,y,0,0,color,alpha);
@@ -103,7 +103,7 @@ void draw_surface_part(int id, gs_scalar left, gs_scalar top, gs_scalar w, gs_sc
 	draw_primitive_end();
 }
 
-void draw_surface_part_ext(int id, gs_scalar left, gs_scalar top, gs_scalar w, gs_scalar h, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale,int color, double alpha)
+void draw_surface_part_ext(int id, gs_scalar left, gs_scalar top, gs_scalar w, gs_scalar h, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale,int color, gs_scalar alpha)
 {
 	const gs_scalar tbw = surface_get_width(id), tbh = surface_get_height(id);
 	draw_primitive_begin_texture(pr_trianglestrip, surface_get_texture(id));
@@ -159,7 +159,7 @@ void draw_surface_tiled(int id, gs_scalar x, gs_scalar y)
 	}
 }
 
-void draw_surface_tiled_ext(int id, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, double alpha)
+void draw_surface_tiled_ext(int id, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, gs_scalar alpha)
 {
     const gs_scalar w=surface_get_width(id)*xscale, h=surface_get_height(id)*yscale;
     const int hortil= int (ceil(room_width/(surface_get_width(id)))),
@@ -181,7 +181,7 @@ void draw_surface_tiled_ext(int id, gs_scalar x, gs_scalar y, gs_scalar xscale, 
     }
 }
 
-void draw_surface_tiled_area(int id, gs_scalar x, gs_scalar y, float x1, float y1, float x2, float y2)
+void draw_surface_tiled_area(int id, gs_scalar x, gs_scalar y, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2)
 {
     gs_scalar sw,sh,i,j,jj,left,top,width,height,X,Y;
     sw = surface_get_width(id);
@@ -220,7 +220,7 @@ void draw_surface_tiled_area(int id, gs_scalar x, gs_scalar y, float x1, float y
     }
 }
 
-void draw_surface_tiled_area_ext(int id, gs_scalar x, gs_scalar y, float x1, float y1, float x2, float y2, gs_scalar xscale, gs_scalar yscale, int color, double alpha)
+void draw_surface_tiled_area_ext(int id, gs_scalar x, gs_scalar y, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar xscale, gs_scalar yscale, int color, gs_scalar alpha)
 {
     gs_scalar sw,sh,i,j,jj,left,top,width,height,X,Y;
     sw = surface_get_width(id)*xscale;

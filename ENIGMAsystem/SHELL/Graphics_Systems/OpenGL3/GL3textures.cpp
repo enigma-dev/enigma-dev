@@ -193,13 +193,13 @@ void texture_set_blending(bool enable)
     (enable?glEnable:glDisable)(GL_BLEND);
 }
 
-double texture_get_width(int texid)
+gs_scalar texture_get_width(int texid)
 {
   // returns floating point scale to the bg or some shit
   return 0;
 }
 
-double texture_get_height(int texid)
+gs_scalar texture_get_height(int texid)
 {
   // so does this one
   return 0;

@@ -246,15 +246,41 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
         // Now we output all the events this object uses
         // Defaulted events were already added into this array.
         map<int, cspair> nemap; // Keep track of events that need added to honor et_stacked
+		map<int, cspair> semap; // Keep track of events that need added to honor et_stacked
         for (unsigned ii = 0; ii < i->second->events.size; ii++) {
+			// If the parent also wrote this grouped event for instance some input events in the parent and some in the child, then we need to call the super method
+			bool found = false;
+			if (setting::inherit_objects) {
+				
+				for (po_i her = parsed_objects.find(i->second->parent); her != parsed_objects.end(); her = parsed_objects.find(her->second->parent)) {
+					for (unsigned xx = 0; xx < her->second->events.size; xx++) {
+						if (her->second->events[xx].mainId == i->second->events[ii].mainId && her->second->events[xx].code != "") {
+							 found = true; break;
+						}
+					}
+					if (found) { break; }
+				}
+				//if (found) { continue; }
+			}
+		
           if  (i->second->events[ii].code != "")
           {
             //Look up the event name
             string evname = event_get_function_name(i->second->events[ii].mainId,i->second->events[ii].id);
-            if (event_is_instance(i->second->events[ii].mainId,i->second->events[ii].id))
-              nemap[i->second->events[ii].mainId].c += (event_has_super_check(i->second->events[ii].mainId,i->second->events[ii].id) ?
-                "        if (" + event_get_super_check_condition(i->second->events[ii].mainId,i->second->events[ii].id) + ") myevent_" : "        myevent_") + evname + "();\n",
-              nemap[i->second->events[ii].mainId].s = event_stacked_get_root_name(i->second->events[ii].mainId);
+            if (event_is_instance(i->second->events[ii].mainId,i->second->events[ii].id)) {
+			  if (!found) {
+				nemap[i->second->events[ii].mainId].c += (event_has_super_check(i->second->events[ii].mainId,i->second->events[ii].id) ?
+				  "        if (" + event_get_super_check_condition(i->second->events[ii].mainId,i->second->events[ii].id) + ") myevent_" : "        myevent_") + evname + "();\n",
+				nemap[i->second->events[ii].mainId].s = event_stacked_get_root_name(i->second->events[ii].mainId);
+				semap[i->second->events[ii].mainId].c += (event_has_super_check(i->second->events[ii].mainId,i->second->events[ii].id) ?
+				  "        if (" + event_get_super_check_condition(i->second->events[ii].mainId,i->second->events[ii].id) + ") myevent_" : "        myevent_") + evname + "();\n",
+				semap[i->second->events[ii].mainId].s = event_stacked_get_root_name(i->second->events[ii].mainId);
+			  } else {
+				semap[i->second->events[ii].mainId].c += (event_has_super_check(i->second->events[ii].mainId,i->second->events[ii].id) ?
+				  "        if (" + event_get_super_check_condition(i->second->events[ii].mainId,i->second->events[ii].id) + ") myevent_" : "        myevent_") + evname + "();\n",
+				semap[i->second->events[ii].mainId].s = event_stacked_get_root_name(i->second->events[ii].mainId);
+			  }
+			}
             wto << "    variant myevent_" << evname << "();\n    ";
           }
 		}
@@ -280,24 +306,11 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
 
         wto << "\n    //Locals to instances of this object\n    ";
 
-        if (nemap.size())
+		wto << "\n    \n    // Grouped event bases\n    ";
+        if (semap.size())
         {
-          wto << "\n    \n    // Grouped event bases\n    ";
-          for (map<int,cspair>::iterator it = nemap.begin(); it != nemap.end(); it++) {
+          for (map<int,cspair>::iterator it = semap.begin(); it != semap.end(); it++) {
 			wto << "  void myevent_" << it->second.s << "()\n      {\n";
-			// If the parent also wrote this grouped event for instance some input events in the parent and some in the child, then we need to call the super method
-			if (setting::inherit_objects) {
-				for (po_i her = parsed_objects.find(i->second->parent); her != parsed_objects.end(); her = parsed_objects.find(her->second->parent)) {
-					bool written = false;
-					for (unsigned ii = 0; ii < her->second->events.size; ii++) {
-						if  (her->second->events[ii].mainId == it->first && her->second->events[ii].code != "") {
-							wto << "        OBJ_" << her->second->name << "::myevent_" << it->second.s << "();\n"; 
-							written = true; break;
-						}
-					}
-					if (written) { break; }
-				}
-			}
             wto << it->second.c << "      }\n    ";
 		  }
         }
@@ -514,7 +527,7 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
 	    if (setting::inherit_objects) {
 			parent = parsed_objects.find(i->second->parent);
 			if (parent != parsed_objects.end()) {
-				parent_defined = parent_definitions.find(i->second->parent)->second;
+				parent_defined = parent_definitions.find(i->first)->second;
 				if (find(parent_defined.begin(), parent_defined.end(), ii) != parent_defined.end()) {
 					wto << "#define event_inherited OBJ_" + parent->second->name + "::myevent_" + evname + "\n";
 						defined_inherited = true;

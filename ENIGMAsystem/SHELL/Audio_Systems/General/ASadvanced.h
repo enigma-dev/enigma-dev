@@ -52,10 +52,6 @@ void audio_pause_sound(int index);
 void audio_resume_sound(int index);
 void audio_stop_sound(int index);
 
-void audio_pause_channel(int index);
-void audio_resume_channel(int index);
-void audio_stop_channel(int index);
-
 void audio_pause_all();
 void audio_resume_all();
 void audio_stop_all();
