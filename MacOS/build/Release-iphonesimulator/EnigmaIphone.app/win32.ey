@@ -1,0 +1,5 @@
+%e-yaml
+---
+#This file is complete bullshit. I don't think GTK+ will be easy at all on Windows.
+Links: -lGTK+
+
