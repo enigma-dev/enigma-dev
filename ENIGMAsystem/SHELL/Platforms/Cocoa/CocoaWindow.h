@@ -82,7 +82,7 @@ int window_center();
 ////////////////
 // FULLSCREEN //
 ////////////////
-int window_get_fullscreen();
+bool window_get_fullscreen();
 
 ////////////
 // CURSOR //
@@ -117,6 +117,7 @@ void window_set_color(int color);
 int window_view_mouse_get_x(int wid);
 int window_view_mouse_get_y(int wid);
 void window_view_mouse_set(int wid, int x, int y);
+void window_mouse_set(int x,int y);
 
 int window_get_region_width();
 int window_get_region_height();
