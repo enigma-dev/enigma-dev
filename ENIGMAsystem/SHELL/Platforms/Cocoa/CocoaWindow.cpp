@@ -98,7 +98,7 @@ int display_mouse_get_y() { return getMouse(1); }
 int window_mouse_get_x()  { return getMouse(2); }
 int window_mouse_get_y()  { return getMouse(3); }
 
-void window_mouse_set(int x,int y) {
+void window_mouse_set(double x,double y) {
 	//XWarpPointer(disp,None,win,0,0,0,0,(int)x,(int)y);
 }
 void display_mouse_set(double x,double y) {
@@ -175,7 +175,7 @@ void window_set_fullscreen(bool full)
 	xev.xclient.data.l[2] = 0;
 	XSendEvent(disp,DefaultRootWindow(disp),False,SubstructureRedirectMask|SubstructureNotifyMask,&xev);*/
 }
-bool window_get_fullscreen()
+int window_get_fullscreen()
 {
 	/*Atom aFullScreen = XInternAtom(disp,"_NET_WM_STATE_FULLSCREEN",False);
 	Atom ra;
@@ -190,7 +190,7 @@ bool window_get_fullscreen()
 	/*printf("%d %d %d %d\n",ra,ri,nr,bar);
 	 for (int i = 0; i < nr; i++) printf("%02X ",data[i]);
 	 printf("\n");*/
-	return false;
+	return 0;
 }
 
 //default    +   -5   I    \    |    /    -    ^   ...  drg  no  -    |  drg3 ...  X  ...  ?   url  +
