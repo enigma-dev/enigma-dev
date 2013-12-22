@@ -42,12 +42,30 @@ void draw_unbind_all() {
 
 void draw_clear_alpha(int col, float alpha)
 {
+	float color[4];
+	
+	// Setup the color to clear the buffer to.
+	color[0] = __GETR(col)/255.0;
+	color[1] = __GETG(col)/255.0;
+	color[2] = __GETB(col)/255.0;
+	color[3] = alpha;
 
+	// Clear the back buffer.
+	m_deviceContext->ClearRenderTargetView(m_renderTargetView, color);
 }
 
 void draw_clear(int col)
 {
+	float color[4];
+	
+	// Setup the color to clear the buffer to.
+	color[0] = __GETR(col)/255.0;
+	color[1] = __GETG(col)/255.0;
+	color[2] = __GETB(col)/255.0;
+	color[3] = 1;
 
+	// Clear the back buffer.
+	m_deviceContext->ClearRenderTargetView(m_renderTargetView, color);
 }
 
 int merge_color(int c1,int c2,double amount)

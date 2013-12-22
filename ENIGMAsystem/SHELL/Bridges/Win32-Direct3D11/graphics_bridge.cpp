@@ -52,7 +52,7 @@ namespace enigma
 {
 	
 void EnableDrawing (HGLRC *hRC) {
-	
+	d3dmgr = new ContextManager();
 	int screenWidth = 640;
 	int screenHeight = 480;
 	bool vsync = false;

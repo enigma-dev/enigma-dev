@@ -172,6 +172,11 @@ class Mesh
   unsigned triangleIndexedCount; // The number of triangle indices
   unsigned lineIndexedCount; // The number of line indices
   
+  // Indexed primitives are first since the indices must be offset, and keeps them as small as possible.
+  // INDEXEDTRIANGLES|INDEXEDLINES|INDEXEDPOINTS|TRIANGLES|LINES|POINTS
+  ID3D11Buffer* vertexbuffer;    // Interleaved vertex buffer object TRIANGLES|LINES|POINTS with triangles first since they are most likely to be used
+  ID3D11Buffer* indexbuffer;    // Interleaved index buffer object TRIANGLES|LINES|POINTS with triangles first since they are most likely to be used
+  
   bool vbodynamic; // Whether the buffer is dynamically allocated in system memory, should be true for simple primitive calls
   bool vbobuffered; // Whether or not the buffer objects have been generated
   bool vboindexed; // Whether or not the model contains any indexed primitives or just regular lists
@@ -194,6 +199,9 @@ class Mesh
 	triangleIndices.reserve(64000);
 	vertices.reserve(64000);
 	indices.reserve(64000);
+  
+    vertexbuffer = NULL;    // the pointer to the vertex buffer
+	indexbuffer = NULL;    // the pointer to the index buffer
   
     vbobuffered = false;
 	vbodynamic = dynamic;
@@ -220,7 +228,15 @@ class Mesh
 
   ~Mesh()
   {
-
+	// Release the buffers and make sure we don't leave hanging pointers.
+	if (vertexbuffer != NULL) {
+		vertexbuffer->Release();
+		vertexbuffer = NULL;
+	}
+	if (indexbuffer != NULL) {
+		indexbuffer->Release();
+		indexbuffer = NULL;
+	}
   }
   
   void ClearData()
@@ -746,6 +762,29 @@ class Mesh
 		vboindexed = false;
 	}
 	*/
+	HRESULT result;
+	D3D11_BUFFER_DESC vertexBufferDesc, indexBufferDesc;
+	D3D11_SUBRESOURCE_DATA vertexData, indexData;
+	
+	// Set up the description of the static index buffer.
+	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	indexBufferDesc.ByteWidth = idata.size() * sizeof(unsigned);
+	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	indexBufferDesc.CPUAccessFlags = 0;
+	indexBufferDesc.MiscFlags = 0;
+	indexBufferDesc.StructureByteStride = 0;
+
+	// Give the subresource structure a pointer to the index data.
+	indexData.pSysMem = &idata[0];
+	indexData.SysMemPitch = 0;
+	indexData.SysMemSlicePitch = 0;
+
+	// Create the index buffer.
+	result = m_device->CreateBuffer(&indexBufferDesc, &indexData, &indexbuffer);
+	if(FAILED(result))
+	{
+		return;
+	}
 	
 	if (triangleCount > 0) {
 		vdata.insert(vdata.end(), triangleVertices.begin(), triangleVertices.end());
@@ -787,6 +826,27 @@ class Mesh
 	
 	vertexbuffer->Unlock();
 */
+
+	// Set up the description of the static vertex buffer.
+	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	vertexBufferDesc.ByteWidth = vdata.size() * sizeof(gs_scalar);
+	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	vertexBufferDesc.CPUAccessFlags = 0;
+	vertexBufferDesc.MiscFlags = 0;
+	vertexBufferDesc.StructureByteStride = 0;
+
+	// Give the subresource structure a pointer to the vertex data.
+	vertexData.pSysMem = &vdata[0];
+	vertexData.SysMemPitch = 0;
+	vertexData.SysMemSlicePitch = 0;
+
+	// Now create the vertex buffer.
+	result = m_device->CreateBuffer(&vertexBufferDesc, &vertexData, &vertexbuffer);
+	if (FAILED(result))
+	{
+		return;
+	}
+
 	// Clean up temporary interleaved data
 	vdata.clear();
     // Clean up the data from RAM it is now safe on VRAM
@@ -794,16 +854,58 @@ class Mesh
   }
 
   void Draw()
-  {				
+  {
 	if (!GetStride()) { return; }
-    //if (vertexbuffer == NULL || !vbobuffered) {
-	 // vbobuffered = true;
-      //BufferGenerate();
-    //}
-
+    if (vertexbuffer == NULL || !vbobuffered) {
+	  vbobuffered = true;
+      BufferGenerate();
+    }
+	
 	unsigned stride = GetStride();
+	unsigned offset = 0, base = 0;
 
-
+	// Set the vertex buffer to active in the input assembler so it can be rendered.
+	m_deviceContext->IASetVertexBuffers(0, 1, &vertexbuffer, &stride, &offset);
+	if (vboindexed) {
+		// Set the index buffer to active in the input assembler so it can be rendered.
+		m_deviceContext->IASetIndexBuffer(indexbuffer, DXGI_FORMAT_R32_UINT, 0);
+	}
+	
+	// Draw the indexed primitives
+	if (triangleIndexedCount > 0) { 
+		m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		m_deviceContext->DrawIndexed(triangleIndexedCount / 3, offset, base);
+		offset += triangleIndexedCount;
+		base += triangleVertCount/stride;
+	}
+	if (lineVertCount > 0) {
+		m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+		m_deviceContext->DrawIndexed(lineIndexedCount/2, offset, base);
+		offset += lineIndexedCount;
+		base += lineVertCount/stride;
+	}
+	if (pointIndexedCount > 0) {
+		m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
+		m_deviceContext->DrawIndexed(pointIndexedCount, offset, base);
+	}
+	
+	offset = indexedoffset/stride;
+	
+	// Draw the unindexed primitives
+	if (triangleCount > 0) { 
+		m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		m_deviceContext->Draw(triangleCount / 3, offset);
+		offset += triangleCount / 3;
+	}
+	if (lineCount > 0) {
+		m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
+		m_deviceContext->Draw(lineCount / 2, offset);
+		offset += lineCount / 2;
+	}
+	if (pointCount > 0) {
+		m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
+		m_deviceContext->Draw(pointCount, offset);
+	}
   }
 };
 

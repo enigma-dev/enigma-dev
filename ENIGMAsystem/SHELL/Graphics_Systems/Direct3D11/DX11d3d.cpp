@@ -38,11 +38,13 @@ namespace enigma_user
 {
 
 void d3d_depth_clear() {
-
+	// Clear the depth buffer.
+	m_deviceContext->ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
 }
 
 void d3d_depth_clear_value(float value) {
-
+	// Clear the depth buffer.
+	m_deviceContext->ClearDepthStencilView(m_depthStencilView, D3D11_CLEAR_DEPTH, value, 0);
 }
 
 void d3d_start()
