@@ -422,9 +422,7 @@ void screen_redraw()
 							-32000.0f,    // the near view-plane
 							32000.0f);    // the far view-plane
 		d3dmgr->SetTransform(D3DTS_PROJECTION, &matProjection);    // set the projection transform
-
-		//dsprite->SetWorldViewRH(NULL, &matWorld);
-
+		
 		// Clear the depth buffer if hidden surface removal is on at the beginning of the draw step.
         if (enigma::d3dMode)
 			d3dmgr->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
