@@ -521,7 +521,7 @@ typedef std::pair<int,enigma::inst_iter*> inode_pair;
 namespace enigma_user
 {
 
-void instance_deactivate_region(int rleft, int rtop, int rwidth, int rheight, bool inside, bool notme) {
+void instance_deactivate_region(int rleft, int rtop, int rwidth, int rheight, int inside, bool notme) {
     for (enigma::iterator it = enigma::instance_list_first(); it; ++it) {
         if (notme && (*it)->id == enigma::instance_event_iterator->inst->id) continue;
         enigma::object_collisions* const inst = ((enigma::object_collisions*)*it);
@@ -544,7 +544,7 @@ void instance_deactivate_region(int rleft, int rtop, int rwidth, int rheight, bo
     }
 }
 
-void instance_activate_region(int rleft, int rtop, int rwidth, int rheight, bool inside) {
+void instance_activate_region(int rleft, int rtop, int rwidth, int rheight, int inside) {
     for (std::map<int,enigma::inst_iter*>::iterator iter = enigma::instance_deactivated_list.begin();
          iter != enigma::instance_deactivated_list.end();
          ++iter) {
