@@ -748,7 +748,7 @@ typedef std::pair<int,enigma::inst_iter*> inode_pair;
 namespace enigma_user
 {
 
-void instance_deactivate_region(int rleft, int rtop, int rwidth, int rheight, int inside, bool notme) {
+void instance_deactivate_region(int rleft, int rtop, int rwidth, int rheight, bool inside, bool notme) {
     for (enigma::iterator it = enigma::instance_list_first(); it; ++it) {
         if (notme && (*it)->id == enigma::instance_event_iterator->inst->id) continue;
         enigma::object_collisions* const inst = ((enigma::object_collisions*)*it);
@@ -778,7 +778,7 @@ void instance_deactivate_region(int rleft, int rtop, int rwidth, int rheight, in
     }
 }
 
-void instance_activate_region(int rleft, int rtop, int rwidth, int rheight, int inside) {
+void instance_activate_region(int rleft, int rtop, int rwidth, int rheight, bool inside) {
     std::map<int,enigma::inst_iter*>::iterator iter = enigma::instance_deactivated_list.begin();
     while (iter != enigma::instance_deactivated_list.end()) {
 
@@ -836,7 +836,7 @@ static bool line_ellipse_intersects(cs_scalar rx, cs_scalar ry, cs_scalar x, cs_
 namespace enigma_user
 {
 
-void instance_deactivate_circle(int x, int y, int r, int inside, bool notme)
+void instance_deactivate_circle(int x, int y, int r, bool inside, bool notme)
 {
     for (enigma::iterator it = enigma::instance_list_first(); it; ++it)
     {
@@ -881,7 +881,7 @@ void instance_deactivate_circle(int x, int y, int r, int inside, bool notme)
 }
 
 
-void instance_activate_circle(int x, int y, int r, int inside)
+void instance_activate_circle(int x, int y, int r, bool inside)
 {
     std::map<int,enigma::inst_iter*>::iterator iter = enigma::instance_deactivated_list.begin();
     while (iter != enigma::instance_deactivated_list.end()) {
