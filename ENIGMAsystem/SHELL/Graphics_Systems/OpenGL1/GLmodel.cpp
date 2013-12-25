@@ -105,37 +105,37 @@ bool d3d_model_load(int id, string fname)
 {
   //TODO: this needs to be rewritten properly not using the file_text functions
   using namespace enigma_user;
-  
+
   int file = file_text_open_read(fname);
-  
+
   if (file == -1) {
 	return false;
   }
-  
+
   string fileExt = fname.substr(fname.find_last_of(".") + 1) ;
   if (fileExt == "obj")
   {
 	vector< float > vertices;
 	vector< float > uvs;
 	vector< float > normals;
-	
+
 	int faceCount = 0;
 	bool hasTexture = false;
 	bool hasNormals = false;
 	meshes[id]->Begin(pr_trianglelist);
-	
+
 	while (!file_text_eof(file))
 	{
 		string line = file_text_read_string(file);
 		file_text_readln(file);
-		enigma::string_parse(&line); 
+		enigma::string_parse(&line);
 		if (line.length() > 0)
 		{
 			if(line[0] == 'v')
 			{
 				vector<float> floats = enigma::float_split(line, ' ');
 				floats.erase( floats.begin());
-					
+
 				int n = 0;
 				switch(line[1])
 				{
@@ -171,45 +171,45 @@ bool d3d_model_load(int id, string fname)
 			}
 			else if(line[0] == 'f')
 			{
-				faceCount++; 
+				faceCount++;
 				vector<float> f = enigma::float_split(line, ' ');
 				f.erase( f.begin());
 				int faceVertices = f.size() / (1 + hasTexture + hasNormals);
 				int of = 1 + hasTexture + hasNormals;
-				
+
 				meshes[id]->AddVertex(vertices[(f[0]-1)*3],  vertices[(f[0]-1)*3 +1], vertices[(f[0]-1)*3 +2]);
 				if(hasNormals) meshes[id]->AddNormal(normals[(f[2]-1)*3], normals[(f[2]-1)*3 +1], normals[(f[2]-1)*3 +2]);
 				if(hasTexture) meshes[id]->AddTexture(uvs[(f[1]-1)*2], 1 - uvs[(f[1]-1)*2 +1]);
-				
+
 				meshes[id]->AddVertex(vertices[(f[1*of]-1)*3],  vertices[(f[1*of]-1)*3 +1] , vertices[(f[1*of]-1)*3 +2]);
 				if(hasNormals) meshes[id]->AddNormal(normals[(f[1*of + 2]-1)*3], normals[(f[1*of  + 2]-1)*3 +1], normals[(f[1*of  + 2]-1)*3 +2]);
 				if(hasTexture) meshes[id]->AddTexture(uvs[(f[1*of + 1]-1)*2], 1 - uvs[(f[1*of + 1]-1)*2 +1]);
-				
+
 				meshes[id]->AddVertex(vertices[(f[2*of]-1)*3],  vertices[(f[2*of]-1)*3 +1] , vertices[(f[2*of]-1)*3 +2]);
 				if(hasNormals) meshes[id]->AddNormal(normals[(f[2*of + 2]-1)*3], normals[(f[2*of  + 2]-1)*3 +1], normals[(f[2*of  + 2]-1)*3 +2]);
 				if(hasTexture) meshes[id]->AddTexture(uvs[(f[2*of + 1]-1)*2], 1 - uvs[(f[2*of + 1]-1)*2 +1]);
-				
+
 				//is a quad
 				if(faceVertices == 4)
 				{
 					meshes[id]->AddVertex(vertices[(f[2*of]-1)*3],  vertices[(f[2*of]-1)*3 +1] , vertices[(f[2*of]-1)*3 +2]);
 					if(hasNormals) meshes[id]->AddNormal(normals[(f[2*of + 2]-1)*3], normals[(f[2*of  + 2]-1)*3 +1], normals[(f[2*of  + 2]-1)*3 +2]);
 					if(hasTexture) meshes[id]->AddTexture(uvs[(f[2*of + 1]-1)*2], 1 - uvs[(f[2*of + 1]-1)*2 +1]);
-					
+
 					meshes[id]->AddVertex( vertices[(f[3*of]-1)*3],  vertices[(f[3*of]-1)*3 +1] , vertices[(f[3*of]-1)*3 +2]);
 					if(hasNormals) meshes[id]->AddNormal(normals[(f[3*of + 2]-1)*3], normals[(f[3*of  + 2]-1)*3 +1], normals[(f[3*of  + 2]-1)*3 +2]);
 					if(hasTexture) meshes[id]->AddTexture(uvs[(f[3*of + 1]-1)*2], 1 - uvs[(f[3*of + 1]-1)*2 +1]);
-					
+
 					meshes[id]->AddVertex(vertices[(f[0]-1)*3],  vertices[(f[0]-1)*3 +1], vertices[(f[0]-1)*3 +2]);
 					if(hasNormals) meshes[id]->AddNormal(normals[(f[2]-1)*3], normals[(f[2]-1)*3 +1], normals[(f[2]-1)*3 +2]);
 					if(hasTexture) meshes[id]->AddTexture(uvs[(f[0 + 1]-1)*2], 1 - uvs[(f[0 + 1]-1)*2 +1]);
 				}
-				
-			}	
+
+			}
 		}
 	}
-	meshes[id]->End();  
-	
+	meshes[id]->End();
+
   }
   else
   {
@@ -336,6 +336,32 @@ bool d3d_model_calculate_normals(int id, bool smooth, bool invert)
   //return meshes[id]->CalculateNormals(smooth, invert);
 }
 
+void d3d_model_part_draw(int id, int vertex_start, int vertex_count) // overload for no additional texture or transformation call's
+{
+    meshes[id]->Draw(vertex_start, vertex_count);
+}
+
+void d3d_model_part_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z, int vertex_start, int vertex_count) // overload for no additional texture call's
+{
+    glTranslatef(x, y, z);
+    meshes[id]->Draw(vertex_start, vertex_count);
+    glTranslatef(-x, -y, -z);
+}
+
+void d3d_model_part_draw(int id, int texId, int vertex_start, int vertex_count)
+{
+    texture_set(get_texture(texId));
+    meshes[id]->Draw(vertex_start, vertex_count);
+}
+
+void d3d_model_part_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z, int texId, int vertex_start, int vertex_count)
+{
+    texture_set(get_texture(texId));
+    glTranslatef(x, y, z);
+    meshes[id]->Draw(vertex_start, vertex_count);
+    glTranslatef(-x, -y, -z);
+}
+
 void d3d_model_draw(int id) // overload for no additional texture or transformation call's
 {
     meshes[id]->Draw();
@@ -357,7 +383,9 @@ void d3d_model_draw(int id, int texId)
 void d3d_model_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z, int texId)
 {
     texture_set(texId);
-    d3d_model_draw(id, x, y, z);
+    glTranslatef(x, y, z);
+    meshes[id]->Draw();
+    glTranslatef(-x, -y, -z);
 }
 
 void d3d_model_primitive_begin(int id, int kind)
@@ -457,7 +485,7 @@ void d3d_model_floor(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar
   gs_scalar nX = (y2-y1)*(z2-z1)*(z2-z1);
   gs_scalar nY = (z2-z1)*(x2-x1)*(x2-x1);
   gs_scalar nZ = (x2-x1)*(y2-y1)*(y2-y1);
-  
+
   gs_scalar  m = sqrt(nX*nX + nY*nY + nZ*nZ);
   nX /= m; nY /= m; nZ /= m;
 
@@ -474,7 +502,7 @@ void d3d_model_wall(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar 
   gs_scalar nX = (y2-y1)*(z2-z1)*(z2-z1);
   gs_scalar nY = (z2-z1)*(x2-x1)*(x2-x1);
   gs_scalar nZ = (x2-x1)*(y2-y1)*(y2-y1);
-  
+
   gs_scalar  m = sqrt(nX*nX + nY*nY + nZ*nZ);
   nX /= m; nY /= m; nZ /= m;
 
@@ -505,7 +533,7 @@ void d3d_model_block(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar
 	d3d_model_vertex_normal_texture( id, x2,y2,z2, 1,0,0, 0,0 );
 	d3d_model_vertex_normal_texture( id, x2,y1,z2, 1,0,0, 1,0 );
 	d3d_model_primitive_end( id );
-	
+
 	// Negative Y
 	d3d_model_primitive_begin( id, pr_trianglefan );
 	d3d_model_vertex_normal_texture( id, x1,y1,z1, 0,-1,0, 0,1 );
@@ -521,7 +549,7 @@ void d3d_model_block(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar
 	d3d_model_vertex_normal_texture( id, x2,y2,z2, 0,1,0, 0,0 );
 	d3d_model_vertex_normal_texture( id, x2,y2,z1, 0,1,0, 0,1 );
 	d3d_model_primitive_end( id );
-	
+
 	if (closed) {
 		// Negative Z
 		d3d_model_primitive_begin( id, pr_trianglefan );
@@ -701,20 +729,20 @@ void d3d_model_ellipsoid(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_sc
 void d3d_model_icosahedron(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, gs_scalar hrep, gs_scalar vrep, int steps)
 {
   gs_scalar width = (x2-x1), length = (y2-y1), height = (z2-z1);
-  static gs_scalar vdata[12][3] = {    
-   {0, 0.5, 1}, {1, 0.5, 1}, {0, 0.5, 0}, {1, 0.5, 0},    
-   {0.5, 1, 1}, {0.5, 1, 0}, {0.5, 0, 1}, {0.5, 0, 0},    
-   {1, 1, 0.5}, {0, 1, 0.5}, {1, 0, 0.5}, {0, 0, 0.5} 
+  static gs_scalar vdata[12][3] = {
+   {0, 0.5, 1}, {1, 0.5, 1}, {0, 0.5, 0}, {1, 0.5, 0},
+   {0.5, 1, 1}, {0.5, 1, 0}, {0.5, 0, 1}, {0.5, 0, 0},
+   {1, 1, 0.5}, {0, 1, 0.5}, {1, 0, 0.5}, {0, 0, 0.5}
   };
 
-  static int tindices[20][3] = { 
-   {0,4,1}, {0,9,4}, {9,5,4}, {4,5,8}, {4,8,1},    
-   {8,10,1}, {8,3,10}, {5,3,8}, {5,2,3}, {2,7,3},    
-   {7,10,3}, {7,6,10}, {7,11,6}, {11,0,6}, {0,1,6}, 
+  static int tindices[20][3] = {
+   {0,4,1}, {0,9,4}, {9,5,4}, {4,5,8}, {4,8,1},
+   {8,10,1}, {8,3,10}, {5,3,8}, {5,2,3}, {2,7,3},
+   {7,10,3}, {7,6,10}, {7,11,6}, {11,0,6}, {0,1,6},
    {6,1,10}, {9,0,11}, {9,11,2}, {9,2,5}, {7,2,11} };
 
   d3d_model_primitive_begin(id, pr_trianglelist);
-  for (unsigned i = 0; i < 20; i++) {    
+  for (unsigned i = 0; i < 20; i++) {
 	d3d_model_vertex(id, x1 + vdata[tindices[i][0]][0] * width, y1 + vdata[tindices[i][0]][1] * length, z1 + vdata[tindices[i][0]][2] * height);
 	d3d_model_vertex(id, x1 + vdata[tindices[i][1]][0] * width, y1 + vdata[tindices[i][1]][1] * length, z1 + vdata[tindices[i][1]][2] * height);
 	d3d_model_vertex(id, x1 + vdata[tindices[i][2]][0] * width, y1 + vdata[tindices[i][2]][1] * length, z1 + vdata[tindices[i][2]][2] * height);
@@ -727,19 +755,19 @@ void d3d_model_torus(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar
 {
   double TWOPI = 2 * (double)M_PI;
   for (int i = 0; i < csteps; i++) {
-    d3d_model_primitive_begin(id, pr_trianglestrip); 
+    d3d_model_primitive_begin(id, pr_trianglestrip);
     for (int j = 0; j <= tsteps; j++) {
       for (int k = 1; k >= 0; k--) {
 
         double s = (i + k) % csteps + 0.5;
         double t = j % tsteps;
-		
+
         double x = (radius + tradius * cos(s * TWOPI / csteps)) * cos(t * TWOPI / tsteps);
         double y = (radius + tradius * cos(s * TWOPI / csteps)) * sin(t * TWOPI / tsteps);
         double z = tradius * sin(s * TWOPI / csteps);
 		double u = ((i + k) / (float)csteps) * hrep;
 		double v = (j / (float)tsteps) * vrep;
-		
+
 		gs_scalar nX = cos(s * TWOPI / csteps) * cos(t * TWOPI / tsteps);
 		gs_scalar nY = cos(s * TWOPI / csteps) * sin(t * TWOPI / tsteps);
 		gs_scalar nZ = sin(s * TWOPI / csteps);

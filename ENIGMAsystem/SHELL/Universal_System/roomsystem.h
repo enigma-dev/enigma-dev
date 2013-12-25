@@ -108,8 +108,8 @@ namespace enigma
     int id,obj,x,y;
   };
     struct tile {
-        int id,bckid,bgx,bgy,depth,height,width,roomX,roomY,xscale,yscale;
-        double alpha;
+        int id,bckid,bgx,bgy,depth,height,width,roomX,roomY;
+        double alpha, xscale, yscale;
         int color;
     };
   struct viewstruct

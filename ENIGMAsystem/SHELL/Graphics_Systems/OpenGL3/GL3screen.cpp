@@ -79,7 +79,7 @@ static inline void draw_back()
 			background_x[back_current] += background_hspeed[back_current];
 			background_y[back_current] += background_vspeed[back_current];
             if (background_htiled[back_current] || background_vtiled[back_current]) {
-                draw_background_tiled_ext(background_index[back_current], background_x[back_current], background_y[back_current], background_xscale[back_current], 
+                draw_background_tiled_ext(background_index[back_current], background_x[back_current], background_y[back_current], background_xscale[back_current],
 					background_xscale[back_current], background_coloring[back_current], background_alpha[back_current], background_htiled[back_current], background_vtiled[back_current]);
             } else {
                 draw_background_ext(background_index[back_current], background_x[back_current], background_y[back_current], background_xscale[back_current], background_xscale[back_current], 0, background_coloring[back_current], background_alpha[back_current]);
@@ -111,15 +111,19 @@ namespace enigma_user
 
 void screen_redraw()
 {
+    //oglmgr->EndShapesBatching(); //If called inside bound surface we need to finish drawing
 	oglmgr->BeginScene();
 	// Clean up any textures that ENIGMA may still think are binded but actually are not
-	texture_reset();
 	d3d_set_zwriteenable(true);
     if (!view_enabled)
     {
-        glViewport(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled());
+        if (bound_framebuffer!=0){ //This fixes off-by-one error when rendering on surfaces. This should be checked to see if other GPU's have the same effect
+            glViewport(1, 1, window_get_region_width_scaled()+1, window_get_region_height_scaled()+1);
+        }else{
+            glViewport(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled());
+        }
         glLoadIdentity();
-        glScalef(1, (bound_framebuffer==0?-1:1), 1);
+        glScalef(1, ((bound_framebuffer==0||enigma::msaa_fbo!=0)?-1:1), 1);
         glOrtho(0, room_width, 0, room_height, 0, 1);
         glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
         glMultMatrixd(transformation_matrix);
@@ -163,12 +167,18 @@ void screen_redraw()
         }
         bool stop_loop = false;
 
+        oglmgr->EndShapesBatching(); //This is needed bacause tiles are individual models
+        printf("Drawing tiles\n");
         for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
         {
-            texture_reset();
             if (dit->second.tiles.size())
-                glCallList(drawing_depths[dit->second.tiles[0].depth].tilelist);
-
+            {
+                for (unsigned int t = 0; t<drawing_depths[dit->second.tiles[0].depth].tilevector.size(); ++t){
+                    enigma_user::texture_set(drawing_depths[dit->second.tiles[0].depth].tilevector[t][0]);
+                    d3d_model_part_draw(drawing_depths[dit->second.tiles[0].depth].tilelist, drawing_depths[dit->second.tiles[0].depth].tilevector[t][1], drawing_depths[dit->second.tiles[0].depth].tilevector[t][2]);
+                    printf("Drawing a depth = %i, index start = %i, index count = %i\n",dit->second.tiles[0].depth,drawing_depths[dit->second.tiles[0].depth].tilevector[t][1],drawing_depths[dit->second.tiles[0].depth].tilevector[t][2] );
+                }
+            }
             enigma::inst_iter* push_it = enigma::instance_event_iterator;
             //loop instances
             for (enigma::instance_event_iterator = dit->second.draw_events->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next) {
@@ -277,17 +287,20 @@ void screen_redraw()
 				}
 			}
 
-			glViewport(view_xport[vc], view_yport[vc], window_get_region_width_scaled() - view_xport[vc], window_get_region_height_scaled() - view_yport[vc]);
+            if (bound_framebuffer!=0){ //This fixes off-by-one error when rendering on surfaces. This should be checked to see if other GPU's have the same effect
+                glViewport(view_xport[vc]+1, view_yport[vc]+1, window_get_region_width_scaled() - view_xport[vc]+1, window_get_region_height_scaled() - view_yport[vc]+1);
+            }else{
+                glViewport(view_xport[vc], view_yport[vc], window_get_region_width_scaled() - view_xport[vc], window_get_region_height_scaled() - view_yport[vc]);
+            }
 			glLoadIdentity();
-			glScalef(1, (bound_framebuffer==0?-1:1), 1);
+			glScalef(1, ((bound_framebuffer==0||enigma::msaa_fbo!=0)?-1:1), 1);
 
 			glOrtho(int(view_xview[vc]), int(view_wview[vc] + view_xview[vc]), int(view_yview[vc]), int(view_hview[vc] + view_yview[vc]), 0, 1);
 			glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
 			glMultMatrixd(transformation_matrix);
 
 			int clear_bits = 0;
-			if (background_showcolor && view_first)
-			{
+			if (background_showcolor && view_first) {
 				int clearcolor = ((int)background_color) & 0x00FFFFFF;
 				glClearColor(__GETR(clearcolor) / 255.0, __GETG(clearcolor) / 255.0, __GETB(clearcolor) / 255.0, 1);
 				clear_bits |= GL_COLOR_BUFFER_BIT;
@@ -325,12 +338,17 @@ void screen_redraw()
 				const double low = drawing_depths.rbegin() != drawing_depths.rend() ? drawing_depths.rbegin()->first : -numeric_limits<double>::max();
 				(enigma::particles_impl->draw_particlesystems)(high, low);
 			}
+
+            oglmgr->EndShapesBatching(); //This is needed bacause tiles are individual models
 			for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
 			{
-				texture_reset();
 				if (dit->second.tiles.size())
-					glCallList(drawing_depths[dit->second.tiles[0].depth].tilelist);
-
+                {
+                    for (unsigned int t = 0; t<drawing_depths[dit->second.tiles[0].depth].tilevector.size(); ++t){
+                        enigma_user::texture_set(drawing_depths[dit->second.tiles[0].depth].tilevector[t][0]);
+                        d3d_model_part_draw(drawing_depths[dit->second.tiles[0].depth].tilelist, drawing_depths[dit->second.tiles[0].depth].tilevector[t][1], drawing_depths[dit->second.tiles[0].depth].tilevector[t][2]);
+                    }
+                }
 				enigma::inst_iter* push_it = enigma::instance_event_iterator;
 				//loop instances
 				for (enigma::instance_event_iterator = dit->second.draw_events->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next) {
@@ -363,7 +381,7 @@ void screen_redraw()
     {
 	    glViewport(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled());
         glLoadIdentity();
-        glScalef(1, (bound_framebuffer==0?-1:1), 1);
+        glScalef(1, ((bound_framebuffer==0||enigma::msaa_fbo!=0)?-1:1), 1);
         glOrtho(0, enigma::gui_width, 0, enigma::gui_height, 0, 1);
         glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
         glMultMatrixd(transformation_matrix);
@@ -373,13 +391,13 @@ void screen_redraw()
 			glClear(GL_DEPTH_BUFFER_BIT);
 
 		int culling = d3d_get_culling();
+        bool hidden = d3d_get_hidden();
 		d3d_set_culling(rs_none);
+		d3d_set_hidden(false);
 
         bool stop_loop = false;
-
         for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
         {
-
             enigma::inst_iter* push_it = enigma::instance_event_iterator;
             //loop instances
             for (enigma::instance_event_iterator = dit->second.draw_events->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next) {
@@ -395,10 +413,14 @@ void screen_redraw()
 
 		// reset the culling
 		d3d_set_culling(culling);
+        // only restore hidden if the user didn't change it
+		if (!d3d_get_hidden()) {
+			d3d_set_hidden(hidden);
+		}
     }
-		
+
 	oglmgr->EndScene();
-		
+
 	if (enigma::msaa_fbo != 0) {
 		GLint fbo;
 		glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &fbo);
@@ -409,9 +431,9 @@ void screen_redraw()
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
 		// glReadPixels(0, 0, width, height, GL_BGRA, GL_UNSIGNED_BYTE, pixels);
 	}
-	
+
     ///TODO: screen_refresh() shouldn't be in screen_redraw(). They are seperate functions for a reason.
-    if (bound_framebuffer==0) { screen_refresh(); }
+    if (bound_framebuffer==0 || enigma::msaa_fbo != 0) { screen_refresh(); }
 }
 
 void screen_init()
@@ -421,7 +443,7 @@ void screen_init()
 
 	glClearColor(0,0,0,0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	
+
     if (!view_enabled)
     {
         glMatrixMode(GL_PROJECTION);
@@ -434,9 +456,8 @@ void screen_init()
           glScalef(1, -1, 1);
           glOrtho(0, room_width, 0, room_height, 0, 1);
           glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
-    }
-    else
-    {
+          glMultMatrixd(transformation_matrix);
+    } else {
         for (view_current = 0; view_current < 7; view_current++)
         {
             if (view_visible[(int)view_current])
@@ -457,7 +478,7 @@ void screen_init()
             }
         }
     }
-	
+
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
 	glEnable(GL_ALPHA_TEST);
@@ -471,9 +492,9 @@ void screen_init()
 int screen_save(string filename) //Assumes native integers are little endian
 {
 	unsigned int w=window_get_width(),h=window_get_height(),sz=w*h;
-	
+
 	string ext = enigma::image_get_format(filename);
-	
+
 	unsigned char *rgbdata = new unsigned char[sz*4];
 	GLint prevFbo;
 	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFbo);
@@ -490,7 +511,7 @@ int screen_save(string filename) //Assumes native integers are little endian
 	} else {
 		ret = image_save(filename, rgbdata, w, h, w, h);
 	}
-	
+
 	delete[] rgbdata;
 	return ret;
 }
@@ -498,9 +519,9 @@ int screen_save(string filename) //Assumes native integers are little endian
 int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h) //Assumes native integers are little endian
 {
 	unsigned sz = w*h;
-	
+
 	string ext = enigma::image_get_format(filename);
-	
+
 	unsigned char *rgbdata = new unsigned char[sz*4];
 	GLint prevFbo;
 	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFbo);
@@ -508,7 +529,7 @@ int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h
  	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 	glReadPixels(x,window_get_region_height_scaled()-h-y,w,h, GL_RGBA, GL_UNSIGNED_BYTE, rgbdata);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, prevFbo);
-	
+
 	int ret;
 	if (ext == ".png") {
 		unsigned char* data = image_reverse_scanlines(rgbdata, w, h, 4);
@@ -517,7 +538,7 @@ int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h
 	} else {
 		ret = image_save(filename, rgbdata, w, h, w, h);
 	}
-	
+
 	delete[] rgbdata;
 	return ret;
 }

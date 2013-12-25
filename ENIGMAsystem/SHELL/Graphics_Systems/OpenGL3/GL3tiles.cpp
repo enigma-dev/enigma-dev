@@ -25,6 +25,8 @@
 #include "../General/GStiles.h"
 #include "../General/GLtilestruct.h"
 #include "../General/OpenGLHeaders.h"
+#include "../General/GSprimitives.h" //pr_trianglestrip
+#include "../General/GSmodel.h" //For batcher
 
 #ifdef DEBUG_MODE
   #include <string>
@@ -47,90 +49,128 @@
 
 namespace enigma
 {
-    static void draw_tile(int back, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, double alpha)
+    static void draw_tile(int index, int back, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, double alpha)
     {
         if (!enigma_user::background_exists(back)) return;
         get_background(bck2d,back);
-        enigma_user::texture_set(textureStructs[bck2d->texture]->gltex);
-
-        glColor4ub(__GETR(color),__GETG(color),__GETB(color),char(alpha*255));
-
         float tbw = bck2d->width/(float)bck2d->texbordx, tbh = bck2d->height/(float)bck2d->texbordy,
               xvert1 = x, xvert2 = xvert1 + width*xscale,
               yvert1 = y, yvert2 = yvert1 + height*yscale,
               tbx1 = left/tbw, tbx2 = tbx1 + width/tbw,
               tby1 = top/tbh, tby2 = tby1 + height/tbh;
 
-        glBegin(GL_TRIANGLE_STRIP);
-        glTexCoord2f(tbx1,tby1);
-        glVertex2f(xvert1,yvert1);
-        glTexCoord2f(tbx2,tby1);
-        glVertex2f(xvert2,yvert1);
-        glTexCoord2f(tbx1,tby2);
-        glVertex2f(xvert1,yvert2);
-        glTexCoord2f(tbx2,tby2);
-        glVertex2f(xvert2,yvert2);
-        glEnd();
+        //TODO: The model should probably be populated manually along with indicies. The _end() calls a lot of useless code now. Upside is that this needs to be done once.
+        enigma_user::d3d_model_primitive_begin(index, enigma_user::pr_trianglestrip);
+        enigma_user::d3d_model_vertex_texture_color(index, xvert1, yvert1, tbx1, tby1, color, alpha);
+        enigma_user::d3d_model_vertex_texture_color(index, xvert2, yvert1, tbx2, tby1, color, alpha);
+        enigma_user::d3d_model_vertex_texture_color(index, xvert1, yvert2, tbx1, tby2, color, alpha);
+        enigma_user::d3d_model_vertex_texture_color(index, xvert2, yvert2, tbx2, tby2, color, alpha);
+        enigma_user::d3d_model_primitive_end(index);
     }
 
     void load_tiles()
     {
-        glPushAttrib(GL_CURRENT_BIT);
-        for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
+        int prev_bkid;
+        int vert_size = 0;
+        int vert_start = 0;
+        for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++){
             if (dit->second.tiles.size())
             {
-                enigma_user::texture_reset();
+                //TODO: Should they really be sorted by background? This may help batching, but breaks compatiblity. Nothing texture atlas wouldn't solve.
                 sort(dit->second.tiles.begin(), dit->second.tiles.end(), bkinxcomp);
-                int index = int(glGenLists(1));
+                int index = enigma_user::d3d_model_create(false);
                 drawing_depths[dit->second.tiles[0].depth].tilelist = index;
-                glNewList(index, GL_COMPILE);
-                for(std::vector<tile>::size_type i = 0; i !=  dit->second.tiles.size(); i++)
+                vert_size = 0;
+                vert_start = 0;
+                for(std::vector<tile>::size_type i = 0; i != dit->second.tiles.size(); ++i)
                 {
                     tile t = dit->second.tiles[i];
-                    draw_tile(t.bckid, t.bgx, t.bgy, t.width, t.height, t.roomX, t.roomY, t.xscale, t.yscale, t.color, t.alpha);
+                    if (i==0){ prev_bkid = t.bckid; }
+                    draw_tile(index, t.bckid, t.bgx, t.bgy, t.width, t.height, t.roomX, t.roomY, t.xscale, t.yscale, t.color, t.alpha);
+
+                    if (prev_bkid != t.bckid || i == dit->second.tiles.size()-1){ //Texture switch has happened. Create new batch
+                        get_background(bck2d,prev_bkid);
+                        drawing_depths[dit->second.tiles[0].depth].tilevector.push_back( vector< int >(3) );
+                        drawing_depths[dit->second.tiles[0].depth].tilevector.back()[0] = textureStructs[bck2d->texture]->gltex;
+                        drawing_depths[dit->second.tiles[0].depth].tilevector.back()[1] = vert_start;
+                        drawing_depths[dit->second.tiles[0].depth].tilevector.back()[2] = vert_size;
+                        //printf("Texture id = %i and vertices to render = %i and start = %i\n", prev_bkid, vert_size, vert_start );
+                        vert_start += vert_size;
+                        vert_size = 0;
+                        //printf("Texture switch at i = %i and now texture = %i\n", i, prev_bkid );
+                        prev_bkid = t.bckid;
+                    }
+                    vert_size+=6;
+                    //printf("Tile = %i, tile x = %i and tile y = %i\n", i, t.bgx, t.bgy);
                 }
-                glEndList();
+                drawing_depths[dit->second.tiles[0].depth].tilevector.back()[2] += 6; //Add last quad
             }
-        glPopAttrib();
+        }
     }
 
     void delete_tiles()
     {
-        for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
-            if (dit->second.tiles.size())
-                glDeleteLists(drawing_depths[dit->second.tiles[0].depth].tilelist, 1);
+        for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++){
+            if (dit->second.tiles.size()){
+                drawing_depths[dit->second.tiles[0].depth].tilevector.clear();
+                enigma_user::d3d_model_destroy( drawing_depths[dit->second.tiles[0].depth].tilelist );
+            }
+        }
     }
 
     void rebuild_tile_layer(int layer_depth)
     {
-        glPushAttrib(GL_CURRENT_BIT);
-        enigma_user::texture_reset();
-        for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
+        int prev_bkid;
+        for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++){
             if (dit->second.tiles.size())
             {
                 if (dit->second.tiles[0].depth != layer_depth)
                     continue;
 
-                enigma_user::texture_reset();
-                glDeleteLists(drawing_depths[dit->second.tiles[0].depth].tilelist, 1);
-                int index = int(glGenLists(1));
-                drawing_depths[dit->second.tiles[0].depth].tilelist = index;
-                glNewList(index, GL_COMPILE);
-                for(std::vector<tile>::size_type i = 0; i !=  dit->second.tiles.size(); i++)
+                //TODO: Should they really be sorted by background? This may help batching, but breaks compatiblity. Nothing texture atlas wouldn't solve.
+                //sort(dit->second.tiles.begin(), dit->second.tiles.end(), bkinxcomp);
+                int index = drawing_depths[dit->second.tiles[0].depth].tilelist;
+                if (enigma_user::d3d_model_exists( index )){
+                    enigma_user::d3d_model_clear( index );
+                    drawing_depths[dit->second.tiles[0].depth].tilevector.clear();
+                }else{
+                    index = enigma_user::d3d_model_create(false);
+                    drawing_depths[dit->second.tiles[0].depth].tilelist = index;
+                }
+                int vert_size = 0;
+                int vert_start = 0;
+                for(std::vector<tile>::size_type i = 0; i != dit->second.tiles.size(); ++i)
                 {
                     tile t = dit->second.tiles[i];
-                    draw_tile(t.bckid, t.bgx, t.bgy, t.width, t.height, t.roomX, t.roomY, t.xscale, t.yscale, t.color, t.alpha);
+                    if (i==0){ prev_bkid = t.bckid; }
+                    draw_tile(index, t.bckid, t.bgx, t.bgy, t.width, t.height, t.roomX, t.roomY, t.xscale, t.yscale, t.color, t.alpha);
+
+                    if (prev_bkid != t.bckid || i == dit->second.tiles.size()-1){ //Texture switch has happened. Create new batch
+                        get_background(bck2d,prev_bkid);
+                        drawing_depths[dit->second.tiles[0].depth].tilevector.push_back( vector< int >(3) );
+                        drawing_depths[dit->second.tiles[0].depth].tilevector.back()[0] = textureStructs[bck2d->texture]->gltex;
+                        drawing_depths[dit->second.tiles[0].depth].tilevector.back()[1] = vert_start;
+                        drawing_depths[dit->second.tiles[0].depth].tilevector.back()[2] = vert_size;
+                        //printf("Texture id = %i and vertices to render = %i and start = %i\n", prev_bkid, vert_size, vert_start );
+                        vert_start += vert_size;
+                        vert_size = 0;
+                        //printf("Texture switch at i = %i and now texture = %i\n", i, prev_bkid );
+                        prev_bkid = t.bckid;
+                    }
+                    vert_size+=6;
+                    //printf("Tile = %i, vertices = %i, prev_bkid = %i, t.bckid = %i, size() = %i\n", i, vert_size,prev_bkid, t.bckid, dit->second.tiles.size() );
                 }
-                glEndList();
+                drawing_depths[dit->second.tiles[0].depth].tilevector.back()[2] += 6; //Add last quad
+                break;
             }
-        glPopAttrib();
+        }
     }
 }
 
 namespace enigma_user
 {
 
-int tile_add(int background, int left, int top, int width, int height, int x, int y, int depth, int alpha, int color)
+int tile_add(int background, int left, int top, int width, int height, int x, int y, int depth, double xscale, double yscale, double alpha, int color)
 {
     enigma::tile *ntile = new enigma::tile;
     ntile->id = enigma::maxtileid++;
@@ -144,6 +184,8 @@ int tile_add(int background, int left, int top, int width, int height, int x, in
     ntile->depth = depth;
     ntile->alpha = alpha;
     ntile->color = color;
+    ntile->xscale = xscale;
+    ntile->yscale = yscale;
     enigma::drawing_depths[ntile->depth].tiles.push_back(*ntile);
     enigma::rebuild_tile_layer(ntile->depth);
     return ntile->id;

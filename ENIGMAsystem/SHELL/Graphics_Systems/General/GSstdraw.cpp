@@ -43,7 +43,7 @@ void draw_point(gs_scalar x, gs_scalar y)
 void draw_point_color(gs_scalar x, gs_scalar y, int col)
 {
 	draw_primitive_begin(pr_pointlist);
-	draw_vertex_color(x, y, col, 1.0);
+	draw_vertex_color(x, y, col, draw_get_alpha());
 	draw_primitive_end();
 }
 
@@ -57,20 +57,38 @@ void draw_line(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2)
 
 void draw_line_color(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, int c1, int c2)
 {
+    gs_scalar alpha = draw_get_alpha();
 	draw_primitive_begin(pr_linestrip);
-	draw_vertex_color(x1, y1, c1, 1.0);
-	draw_vertex_color(x2, y2, c2, 1.0);
+	draw_vertex_color(x1, y1, c1, alpha);
+	draw_vertex_color(x2, y2, c2, alpha);
 	draw_primitive_end();
 }
 
 void draw_line_width(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, float width)
 {
-	//TODO: Write this as a trianglestrip primitive
+    double dir = fmod(atan2(y1-y2,x2-x1)+2*M_PI,2*M_PI);
+    double cv = cos(dir-M_PI/2.0), sv = -sin(dir-M_PI/2.0);
+    double dw = width/2.0;
+    draw_primitive_begin(pr_trianglestrip);
+	draw_vertex(x1+dw*cv, y1+dw*sv);
+	draw_vertex(x1-dw*cv, y1-dw*sv);
+    draw_vertex(x2+dw*cv, y2+dw*sv);
+    draw_vertex(x2-dw*cv, y2-dw*sv);
+	draw_primitive_end();
 }
 
 void draw_line_width_color(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, float width, int c1, int c2)
 {
-	//TODO: Write this as a trianglestrip primitive
+    gs_scalar alpha = draw_get_alpha();
+    double dir = fmod(atan2(y1-y2,x2-x1)+2*M_PI,2*M_PI);
+    double cv = cos(dir-M_PI/2.0), sv = -sin(dir-M_PI/2.0);
+    double dw = width/2.0;
+    draw_primitive_begin(pr_trianglestrip);
+	draw_vertex_color(x1+dw*cv, y1+dw*sv, c1, alpha);
+	draw_vertex_color(x1-dw*cv, y1-dw*sv, c1, alpha);
+    draw_vertex_color(x2+dw*cv, y2+dw*sv, c2, alpha);
+    draw_vertex_color(x2-dw*cv, y2-dw*sv, c2, alpha);
+	draw_primitive_end();
 }
 
 void draw_rectangle(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, bool outline)
@@ -113,7 +131,7 @@ void draw_rectangle_angle(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2,
   float
     ldx2 = len*cos(dir),
     ldy2 = len*sin(dir);
-	
+
     if (outline) {
 		draw_primitive_begin(pr_linestrip);
 		draw_vertex(xm+ldx1, ym-ldy1);
@@ -134,20 +152,21 @@ void draw_rectangle_angle(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2,
 
 void draw_rectangle_color(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, int c1, int c2, int c3, int c4, bool outline)
 {
+    gs_scalar alpha = draw_get_alpha();
     if (outline) {
 		draw_primitive_begin(pr_linestrip);
-		draw_vertex_color(x1, y1, c1, 1.0);
-		draw_vertex_color(x2, y1, c2, 1.0);
-		draw_vertex_color(x2, y2, c3, 1.0);
-		draw_vertex_color(x1, y2, c4, 1.0);
-		draw_vertex_color(x1, y1, c1, 1.0);
+		draw_vertex_color(x1, y1, c1, alpha);
+		draw_vertex_color(x2, y1, c2, alpha);
+		draw_vertex_color(x2, y2, c3, alpha);
+		draw_vertex_color(x1, y2, c4, alpha);
+		draw_vertex_color(x1, y1, c1, alpha);
 		draw_primitive_end();
     } else {
 		draw_primitive_begin(pr_trianglestrip);
-		draw_vertex_color(x1, y1, c1, 1.0);
-		draw_vertex_color(x2, y1, c2, 1.0);
-		draw_vertex_color(x1, y2, c3, 1.0);
-		draw_vertex_color(x2, y2, c4, 1.0);
+		draw_vertex_color(x1, y1, c1, alpha);
+		draw_vertex_color(x2, y1, c2, alpha);
+		draw_vertex_color(x1, y2, c3, alpha);
+		draw_vertex_color(x2, y2, c4, alpha);
 		draw_primitive_end();
     }
 }
@@ -181,15 +200,16 @@ void draw_circle(gs_scalar x, gs_scalar y, float rad, bool outline)
 
 void draw_circle_color(gs_scalar x, gs_scalar y, float rad,int c1, int c2,bool outline)
 {
+    gs_scalar alpha = draw_get_alpha();
     if(outline) {
 		draw_primitive_begin(pr_linestrip);
     } else {
         draw_primitive_begin(pr_trianglefan);
-		draw_vertex_color(x, y, c1, 1.0);
+		draw_vertex_color(x, y, c1, alpha);
     }
 	float pr=2*M_PI/enigma::circleprecision;
 	for(float i=0;i<=2*M_PI;i+=pr)
-		draw_vertex_color(x+rad*cos(i),y-rad*sin(i), c2, 1.0);
+		draw_vertex_color(x+rad*cos(i),y-rad*sin(i), c2, alpha);
     draw_primitive_end();
 }
 
@@ -215,7 +235,7 @@ void draw_circle_perfect(gs_scalar x, gs_scalar y, float rad, bool outline)
 void draw_circle_color_perfect(gs_scalar x, gs_scalar y, float rad, int c1, int c2, bool outline)
 {
     gs_scalar r2=rad*rad;
-	gs_scalar alpha = draw_get_alpha();
+    gs_scalar alpha = draw_get_alpha();
     if (outline)
     {
 	  draw_primitive_begin(pr_pointlist);
@@ -341,18 +361,19 @@ void draw_triangle(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, gs_sca
 
 void draw_triangle_color(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, int col1, int col2, int col3, bool outline)
 {
+    gs_scalar alpha = draw_get_alpha();
     if (outline) {
 		draw_primitive_begin(pr_linestrip);
-		draw_vertex_color(x1, y1, col1, 1.0);
-		draw_vertex_color(x2, y2, col2, 1.0);
-		draw_vertex_color(x3, y3, col3, 1.0);
-		draw_vertex_color(x1, y1, col1, 1.0);
+		draw_vertex_color(x1, y1, col1, alpha);
+		draw_vertex_color(x2, y2, col2, alpha);
+		draw_vertex_color(x3, y3, col3, alpha);
+		draw_vertex_color(x1, y1, col1, alpha);
 		draw_primitive_end();
     } else {
 		draw_primitive_begin(pr_trianglestrip);
-		draw_vertex_color(x1, y1, col1, 1.0);
-		draw_vertex_color(x2, y2, col2, 1.0);
-		draw_vertex_color(x3, y3, col3, 1.0);
+		draw_vertex_color(x1, y1, col1, alpha);
+		draw_vertex_color(x2, y2, col2, alpha);
+		draw_vertex_color(x3, y3, col3, alpha);
 		draw_primitive_end();
     }
 }
@@ -375,16 +396,16 @@ void draw_arrow(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, gs_scalar
 	lw = ts*(line_size/2), lh = tc*(line_size/2);
 	double at = atan2(ys-y1,xs-x1);
 	if (fabs((dir<0?dir+2*M_PI:dir)-(at<0?at+2*M_PI:at)) < 0.01){
-		draw_primitive_begin(outline?pr_trianglestrip:pr_linestrip);
+		draw_primitive_begin(outline?pr_linestrip:pr_trianglestrip);
 		draw_vertex(x1+lw,y1-lh);
 		draw_vertex(x1-lw,y1+lh);
-		draw_vertex(xs+lw,ys-lh);
-		draw_vertex(xs-lw,ys+lh);
-		if (outline) { draw_vertex(x1+lw,y1-lh); }
+		if (!outline) { draw_vertex(xs+lw,ys-lh); }
+        draw_vertex(xs-lw,ys+lh);
+		if (outline) { draw_vertex(xs+lw,ys-lh); draw_vertex(x1+lw,y1-lh); }
 		draw_primitive_end();
 	}
- 
-	draw_primitive_begin(outline?pr_trianglestrip:pr_linestrip);
+
+	draw_primitive_begin(outline?pr_linestrip:pr_trianglestrip);
 	draw_vertex(x2,y2);
 	draw_vertex(xs-ts*(arrow_size/3),ys+tc*(arrow_size/3));
 	draw_vertex(xs+ts*(arrow_size/3),ys-tc*(arrow_size/3));
@@ -404,7 +425,7 @@ void draw_button(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, gs_scala
   }
   if (x2-x1<border_width*2){border_width=(x2-x1)/2;}
   if (y2-y1<border_width*2){border_width=(y2-y1)/2;}
-	
+
 	draw_primitive_begin(pr_trianglestrip);
 	draw_vertex(x1,y1);
 	draw_vertex(x2,y1);
@@ -422,7 +443,7 @@ void draw_button(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, gs_scala
 	draw_vertex_color(x1,y2,color,alpha);
 	draw_vertex_color(x2,y2,color,alpha);
 	draw_primitive_end();
-	
+
 	draw_primitive_begin(pr_trianglestrip);
 	draw_vertex_color(x2-border_width,y1+border_width,color,alpha);
 	draw_vertex_color(x2,y1,color,alpha);
@@ -437,8 +458,8 @@ void draw_button(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, gs_scala
 	draw_vertex_color(x1+border_width,y1+border_width,color,alpha);
 	draw_vertex_color(x2-border_width,y2+border_width,color,alpha);
 	draw_primitive_end();
-	
-	
+
+
 	draw_primitive_begin(pr_trianglestrip);
 	draw_vertex_color(x1,y1,color,alpha);
 	draw_vertex_color(x1+border_width,y1+border_width,color,alpha);
@@ -485,7 +506,7 @@ void draw_healthbar(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, float
 	draw_vertex_color(x1,y2,col,alpha);
 	draw_vertex_color(x2,y2,col,alpha);
 	draw_primitive_end();
-	
+
 	if (showborder) {
 		draw_primitive_begin(pr_linestrip);
 		draw_vertex_color(x1,y1,0,alpha);

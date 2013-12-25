@@ -1,6 +1,7 @@
 #include "OPENGL3Std.h"
-#include "Info/graphics_info.h" 
+#include "Info/graphics_info.h"
 #include "../General/GSsprite.h"
+#include "../General/GStiles.h"
 #include "../General/GSbackground.h"
 #include "GL3shader.h"
 #include "../General/GStextures.h"

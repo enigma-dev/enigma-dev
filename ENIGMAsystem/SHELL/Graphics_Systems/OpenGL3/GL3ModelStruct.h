@@ -43,7 +43,7 @@ unsigned get_texture(int texid);
 extern GLenum ptypes_by_id[16];
 namespace enigma {
   extern unsigned char currentcolor[4];
-  
+
   //split a string and convert to float
   vector<float> float_split(const string& str, const char& ch) {
     string next;
@@ -74,7 +74,7 @@ namespace enigma {
 	bool trimmed = false;
 	bool checknormal = false;
 	for (unsigned int i = 0; i < s->size() ; i++)
-	{ 
+	{
 		//comment
 		if ((*s)[i] == '#')
 		{
@@ -130,7 +130,7 @@ namespace enigma {
 union VertexElement {
 	unsigned long d;
 	gs_scalar f;
-	
+
 	VertexElement(gs_scalar v): f(v) {}
 	VertexElement(unsigned long v): d(v) {}
 };
@@ -152,32 +152,32 @@ class Mesh
   vector<VertexElement> pointVertices; // The vertices added to point primitives batched into a single point list to be buffered to the GPU
   vector<VertexElement> pointIndexedVertices; // The vertices added to indexed point primitives batched into a single point list to be buffered to the GPU
   vector<GLuint> pointIndices; // The point indices either concatenated by batching or supplied in the temporary container.
-  
+
   unsigned vertexStride; // whether the vertices are 2D or 3D
   bool useColors; // If colors have been added to the model
   bool useTextures; // If texture coordinates have been added
   bool useNormals; // If normals have been added
-  
+
   unsigned pointCount; // The number of vertices in the point buffer
   unsigned triangleCount; // The number of vertices in the triangle buffer
   unsigned lineCount; // The number of vertices in the line buffer
-  
+
   unsigned indexedoffset; // The number of indexed vertices
   unsigned pointIndexedCount; // The number of point indices
   unsigned triangleIndexedCount; // The number of triangle indices
   unsigned lineIndexedCount; // The number of line indices
-  
+
   // Indexed primitives are first since the indices must be offset, and keeps them as small as possible.
   // INDEXEDTRIANGLES|INDEXEDLINES|INDEXEDPOINTS|TRIANGLES|LINES|POINTS
   GLuint vertexBuffer; // Interleaved vertex buffer object with triangles first since they are most likely to be used
   GLuint indexBuffer; // Interleaved index buffer object with triangles first since they are most likely to be used
-  
+
   bool vbodynamic; // Whether or not the buffer should be prepared for dynamic memory usage, eg. constantly changing vertex data
   bool ibogenerated;
   bool vbogenerated;
   bool vbobuffered; // Whether or not the buffer objects have been generated
   bool vboindexed; // Whether or not the model contains any indexed primitives or just regular lists
-  
+
   Mesh (bool dynamic)
   {
 	triangleIndexedVertices.reserve(64000);
@@ -191,27 +191,27 @@ class Mesh
 	triangleIndices.reserve(64000);
 	vertices.reserve(64000);
 	indices.reserve(64000);
-  
+
 	vbodynamic = false;
 	ibogenerated = false;
 	vbogenerated = false;
     vbobuffered = false;
 	vboindexed = false;
-	
+
 	vertexStride = 0;
     useColors = false;
     useTextures = false;
     useNormals = false;
-	
+
 	pointCount = 0;
 	triangleCount = 0;
 	lineCount = 0;
-	
+
 	indexedoffset = 0;
 	pointIndexedCount = 0;
 	triangleIndexedCount = 0;
 	lineIndexedCount = 0;
-	
+
     currentPrimitive = 0;
   }
 
@@ -239,7 +239,7 @@ class Mesh
   void Clear()
   {
     ClearData();
-	
+
 	triangleIndexedVertices.reserve(64000);
 	pointIndexedVertices.reserve(64000);
 	lineIndexedVertices.reserve(64000);
@@ -254,12 +254,12 @@ class Mesh
 
     vbobuffered = false;
 	vboindexed = false;
-	
+
 	vertexStride = 0;
 	useColors = false;
     useTextures = false;
     useNormals = false;
-	
+
 	pointCount = 0;
 	triangleCount = 0;
 	lineCount = 0;
@@ -268,7 +268,7 @@ class Mesh
 	triangleIndexedCount = 0;
 	lineIndexedCount = 0;
   }
-  
+
   unsigned GetStride() {
   	unsigned stride = vertexStride;
     if (useNormals) stride += 3;
@@ -276,7 +276,7 @@ class Mesh
     if (useColors) stride += 1;
 	return stride;
   }
-  
+
   void Begin(int pt)
   {
     vbobuffered = false;
@@ -294,7 +294,7 @@ class Mesh
     vertices.push_back(x); vertices.push_back(y); vertices.push_back(z);
 	vertexStride = 3;
   }
-  
+
   void AddIndex(unsigned ind)
   {
     indices.push_back(ind);
@@ -311,14 +311,14 @@ class Mesh
     vertices.push_back(tx); vertices.push_back(ty);
 	useTextures = true;
   }
-  
+
   void AddColor(int col, double alpha)
-  {               
-	unsigned long final = col + ((unsigned char)alpha*255 << 24);
-	vertices.push_back(final); 
+  {
+	unsigned long final = col + ((unsigned char)(alpha*255) << 24);
+	vertices.push_back(final);
 	useColors = true;
   }
-  
+
   void Translate(gs_scalar x, gs_scalar y, gs_scalar z)
   {
 	unsigned int stride = GetStride();
@@ -330,7 +330,7 @@ class Mesh
 		triangleVertices[i+2].f += z;
 	}
   }
-     
+
   void RotateUV(gs_scalar angle)
   {
 	unsigned int stride = GetStride();
@@ -346,7 +346,7 @@ class Mesh
 		triangleVertices[i + 4 + 3*useNormals].f = x*_sin - y*_cos;
 	}
   }
-  
+
   /*
   void ScaleUV(gs_scalar xscale, gs_scalar yscale)
   {
@@ -359,7 +359,7 @@ class Mesh
 	}
   }
   */
-   
+
   void RotateX(gs_scalar angle)
   {
 	unsigned int stride = GetStride();
@@ -375,8 +375,8 @@ class Mesh
 		triangleVertices[i+2].f = y*_sin - z*_cos;
 	}
   }
-  
-  
+
+
   void RotateY(gs_scalar angle)
   {
 	unsigned int stride = GetStride();
@@ -392,7 +392,7 @@ class Mesh
 		triangleVertices[i+2].f = z*_cos - x*_sin;
 	}
   }
-  
+
   void RotateZ(gs_scalar angle)
   {
 	unsigned int stride = GetStride();
@@ -408,7 +408,7 @@ class Mesh
 		triangleVertices[i+1].f = x*_sin - y*_cos;
 	}
   }
-  
+
   /*
   void Scale(gs_scalar xscale, gs_scalar yscale, gs_scalar zscale)
   {
@@ -422,12 +422,12 @@ class Mesh
 	}
   }
   */
-  
+
   /*
   bool CalculateNormals(bool smooth, bool invert)
   {
 	unsigned int stride = GetStride();
-	
+
 	int oft = useNormals * 3;
 	int ofc = oft + useTextures * 2 ;
 	vector<gs_scalar> tempVertices;
@@ -441,11 +441,11 @@ class Mesh
 		gs_scalar x2 = *(i +stride);
 		gs_scalar y2 = *(i+1 +stride);
 		gs_scalar z2 = *(i+2 +stride);
-		
+
 		gs_scalar x3 = *(i +stride*2);
 		gs_scalar y3 = *(i+1 +stride*2);
 		gs_scalar z3 = *(i+2 +stride*2);
-		
+
 		gs_scalar nX = (y2-y1)*(z3-z1)-(y3-y1)*(z2-z1);
 		gs_scalar nY = (z2-z1)*(x3-x1)-(z3-z1)*(x2-x1);
 		gs_scalar nZ = (x2-x1)*(y3-y1)-(x3-x1)*(y2-y1);
@@ -453,7 +453,7 @@ class Mesh
 		nX /= m;
 		nY /= m;
 		nZ /= m;
-		
+
 		for(int n = 0; n < 3; n++)
 		{
 			int v = n*stride;
@@ -495,7 +495,7 @@ class Mesh
   void SmoothNormals()
   {
 	unsigned int stride = GetStride();
-	
+
 	vector<vector<unsigned int> > groupList;
 	unsigned int n = 0;
 	//group all vertices
@@ -504,25 +504,25 @@ class Mesh
 		gs_scalar x1 = *(i+0);
 		gs_scalar y1 = *(i+1);
 		gs_scalar z1 = *(i+2);
-		
+
 		bool added = false;
-		//check each group 
+		//check each group
 		if (groupList.size() > 0)
 		for (vector< vector<unsigned int> >::iterator ig = groupList.begin(); ig != groupList.end(); ++ig)
 		{
-			
+
 			//compute first element and add it if has the same position
 			unsigned int index = (*ig)[0];
 			gs_scalar x2 = triangleVertices[index*stride + 0];
 			gs_scalar y2 = triangleVertices[index*stride + 1];
-			gs_scalar z2 = triangleVertices[index*stride + 2]; 
+			gs_scalar z2 = triangleVertices[index*stride + 2];
 			if( x1 == x2 && y1 == y2 && z1 == z2)
 			{
 				added = true;
 				(*ig).push_back(n);
 				break;
 			}
-			 
+
 		}
 		if (!added)
 		{
@@ -530,10 +530,10 @@ class Mesh
 			vec.push_back(n);
 			groupList.push_back(vec);
 		}
-		 
+
 		n++;
 	}
-	
+
 	//add average values
 	for (vector< vector<unsigned int> >::iterator ig = groupList.begin(); ig != groupList.end(); ++ig)
 	{
@@ -544,13 +544,13 @@ class Mesh
 			anx += triangleVertices[(*i)*stride+3];
 			any += triangleVertices[(*i)*stride+4];
 			anz += triangleVertices[(*i)*stride+5];
-			
+
 			count++;
 		}
 		anx /= count;
 		any /= count;
 		anz /= count;
-		
+
 		for (vector<unsigned int>::iterator i = (*ig).begin(); i != (*ig).end(); ++i)
 		{
 			triangleVertices[(*i)*stride+3] = anx;
@@ -563,11 +563,11 @@ class Mesh
   void End()
   {
 	//NOTE: This batching only checks for degenerate primitives on triangle strips and fans since the GPU does not render triangles where the two
-	//vertices are exactly the same, triangle lists could also check for degenerates, it is unknown whether the GPU will render a degenerative 
+	//vertices are exactly the same, triangle lists could also check for degenerates, it is unknown whether the GPU will render a degenerative
 	//in a line strip primitive.
-	
+
 	unsigned stride = GetStride();
-	
+
 	// Primitive has ended so now we need to batch the vertices that were given into single lists, eg. line list, triangle list, point list
 	// Indices are optionally supplied, model functions can also be added for the end user to supply the indexing themselves for each primitive
 	// but the batching system does not care either way if they are not supplied it will automatically generate them.
@@ -675,19 +675,19 @@ class Mesh
   {
 	vector<VertexElement> vdata;
 	vector<GLuint> idata;
-	
+
 	vdata.reserve(triangleVertices.size() + lineVertices.size() + pointVertices.size() + triangleIndexedVertices.size() + lineIndexedVertices.size() + pointIndexedVertices.size());
 	idata.reserve(triangleIndices.size() + lineIndices.size() + pointIndices.size());
-	
+
 	unsigned interleave = 0;
-	
+
 	triangleIndexedCount = triangleIndices.size();
 	if (triangleIndexedCount > 0) {
 		vdata.insert(vdata.end(), triangleIndexedVertices.begin(), triangleIndexedVertices.end());
 		idata.insert(idata.end(), triangleIndices.begin(), triangleIndices.end());
 		interleave += triangleIndexedVertices.size()/GetStride();
 	}
-	
+
 	lineIndexedCount = lineIndices.size();
 	if (lineIndexedCount > 0) {
 		vdata.insert(vdata.end(), lineIndexedVertices.begin(), lineIndexedVertices.end());
@@ -695,18 +695,18 @@ class Mesh
 		idata.insert(idata.end(), lineIndices.begin(), lineIndices.end());
 		interleave += lineIndexedVertices.size()/GetStride();
 	}
-	
+
 	pointIndexedCount = pointIndices.size();
 	if (pointIndexedCount > 0) {
 		vdata.insert(vdata.end(), pointIndexedVertices.begin(), pointIndexedVertices.end());
 		for (std::vector<GLuint>::iterator it = lineIndices.begin(); it != lineIndices.end(); ++it) { *it += interleave; }
 		idata.insert(idata.end(), pointIndices.begin(), pointIndices.end());
 	}
-	
+
 	if (idata.size() > 0) {
 		vboindexed = true;
 		indexedoffset += vdata.size();
-		
+
 		if (!ibogenerated) {
 			glGenBuffersARB( 1, &indexBuffer );
 			ibogenerated = true;
@@ -714,7 +714,7 @@ class Mesh
 			glBufferDataARB( GL_ELEMENT_ARRAY_BUFFER, idata.size() * sizeof(GLuint), &idata[0], vbodynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW );
 		} else {
 			glBindBufferARB( GL_ELEMENT_ARRAY_BUFFER, indexBuffer );
-			
+
 			GLint nBufferSize = 0;
 			glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &nBufferSize);
 			if (idata.size() * sizeof(GLuint) / nBufferSize > 0.5 ) {
@@ -731,15 +731,15 @@ class Mesh
 	} else {
 		vboindexed = false;
 	}
-	
+
 	if (triangleCount > 0) {
 		vdata.insert(vdata.end(), triangleVertices.begin(), triangleVertices.end());
 	}
-	
+
 	if (lineCount > 0) {
 		vdata.insert(vdata.end(), lineVertices.begin(), lineVertices.end());
 	}
-	
+
 	if (pointCount > 0) {
 		vdata.insert(vdata.end(), pointVertices.begin(), pointVertices.end());
 	}
@@ -751,7 +751,7 @@ class Mesh
 		glBufferDataARB( GL_ARRAY_BUFFER, vdata.size() * sizeof(gs_scalar), &vdata[0], vbodynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW );
 	} else {
 		glBindBufferARB( GL_ARRAY_BUFFER, vertexBuffer );
-		
+
 		GLint nBufferSize = 0;
 		glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &nBufferSize);
 		if (vdata.size() * sizeof(gs_scalar) / nBufferSize > 0.5 ) {
@@ -760,26 +760,26 @@ class Mesh
 			glBufferSubDataARB( GL_ARRAY_BUFFER, 0, vdata.size() * sizeof(gs_scalar), &vdata[0]);
 		}
 	}
-	
+
 	// Unbind the buffer we do not need anymore
 	glBindBufferARB( GL_ARRAY_BUFFER, 0 );
 	// Clean up temporary interleaved data
 	vdata.clear();
-	
+
     // Clean up the data from RAM it is now safe on VRAM
     ClearData();
   }
 
-  void Draw()
+  void Draw(int vertex_start = 0, int vertex_count = -1)
   {
 	if (!GetStride()) { return; }
     if (!vbogenerated || !vbobuffered) {
 	  vbobuffered = true;
       BufferGenerate();
     }
-  
+
 	GLsizei stride = GetStride();
-	
+
 	#define OFFSET( P )  ( ( const GLvoid * ) ( sizeof( gs_scalar ) * ( P         ) ) )
 	GLsizei STRIDE = stride * sizeof( gs_scalar );
 
@@ -793,7 +793,7 @@ class Mesh
 	unsigned offset = 0;
 	glVertexPointer( vertexStride, GL_FLOAT, STRIDE, OFFSET(offset) ); // Set the vertex pointer to the offset in the buffer
 	offset += vertexStride;
-	
+
     if (useNormals){
 		glEnableClientState(GL_NORMAL_ARRAY);
 		glNormalPointer( GL_FLOAT, STRIDE, OFFSET(offset) ); // Set the normal pointer to the offset in the buffer
@@ -805,18 +805,18 @@ class Mesh
 		glTexCoordPointer( 2, GL_FLOAT, STRIDE, OFFSET(offset) ); // Set the texture pointer to the offset in the buffer
 		offset += 2;
 	}
-	
+
     if (useColors){
 		glEnableClientState(GL_COLOR_ARRAY);
         glColorPointer( 4, GL_UNSIGNED_BYTE, STRIDE, OFFSET(offset)); // Set The Color Pointer To The Color Buffer
     }
 
 	#define OFFSETE( P )  ( ( const GLvoid * ) ( sizeof( GLuint ) * ( P         ) ) )
-	offset = 0;
-	
+	offset = vertex_start;
+
 	// Draw the indexed primitives
-	if (triangleIndexedCount > 0) { 
-		glDrawElements(GL_TRIANGLES, triangleIndexedCount, GL_UNSIGNED_INT, OFFSETE(offset));
+	if (triangleIndexedCount > 0) {
+		glDrawElements(GL_TRIANGLES, (vertex_count==-1?triangleIndexedCount:vertex_count), GL_UNSIGNED_INT, OFFSETE(offset));
 		offset += triangleIndexedCount;
 	}
 	if (lineIndexedCount > 0) {
@@ -826,12 +826,12 @@ class Mesh
 	if (pointIndexedCount > 0) {
 		glDrawElements(GL_POINTS, pointIndexedCount, GL_UNSIGNED_INT, OFFSETE(offset));
 	}
-	
+
 	offset = indexedoffset/stride;
 
 	// Draw the unindexed primitives
-	if (triangleCount > 0) { 
-		glDrawArrays(GL_TRIANGLES, offset, triangleCount);
+	if (triangleCount > 0) {
+		glDrawArrays(GL_TRIANGLES, (vertex_start==0?offset:vertex_start), (vertex_count==-1?triangleCount:vertex_count));
 		offset += triangleCount;
 	}
 	if (lineCount > 0) {
@@ -841,12 +841,12 @@ class Mesh
 	if (pointCount > 0) {
 		glDrawArrays(GL_POINTS, offset, pointCount);
 	}
-	
+
 	glBindBufferARB( GL_ARRAY_BUFFER, 0 );
 	if (vboindexed) {
 		glBindBufferARB( GL_ELEMENT_ARRAY_BUFFER, 0 );
 	}
-	
+
 	glDisableClientState(GL_VERTEX_ARRAY);
     if (useTextures) glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     if (useNormals) glDisableClientState(GL_NORMAL_ARRAY);

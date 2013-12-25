@@ -82,7 +82,7 @@ namespace enigma
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,interpolate?GL_LINEAR:GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,interpolate?GL_LINEAR:GL_NEAREST);
     oglmgr->ResetTextureStates();
-	
+
 	TextureStruct* textureStruct = new TextureStruct(texture);
 	textureStruct->isFont = isfont;
     textureStructs.push_back(textureStruct);
@@ -236,6 +236,7 @@ void texture_set_stage(int stage, int texid) {
 void texture_reset() {
 	glActiveTexture(GL_TEXTURE0);
 	oglmgr->BindTexture(GL_TEXTURE_2D, 0);
+	oglmgr->EndShapesBatching();
 }
 
 void texture_set_repeat(bool repeat)
