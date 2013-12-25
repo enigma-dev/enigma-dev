@@ -100,7 +100,7 @@ namespace enigma
     {
         glPushAttrib(GL_CURRENT_BIT);
         enigma_user::texture_reset();
-        for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++)
+        for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++){
             if (dit->second.tiles.size())
             {
                 if (dit->second.tiles[0].depth != layer_depth)
@@ -117,7 +117,9 @@ namespace enigma
                     draw_tile(t.bckid, t.bgx, t.bgy, t.width, t.height, t.roomX, t.roomY, t.xscale, t.yscale, t.color, t.alpha);
                 }
                 glEndList();
+                break;
             }
+        }
         glPopAttrib();
     }
 }
@@ -125,7 +127,7 @@ namespace enigma
 namespace enigma_user
 {
 
-int tile_add(int background, int left, int top, int width, int height, int x, int y, int depth, int alpha, int color)
+int tile_add(int background, int left, int top, int width, int height, int x, int y, int depth, double xscale, double yscale, double alpha, int color)
 {
     enigma::tile *ntile = new enigma::tile;
     ntile->id = enigma::maxtileid++;
@@ -137,6 +139,8 @@ int tile_add(int background, int left, int top, int width, int height, int x, in
     ntile->roomX = x;
     ntile->roomY = y;
     ntile->depth = depth;
+    ntile->xscale = xscale;
+    ntile->yscale = yscale;
     ntile->alpha = alpha;
     ntile->color = color;
     enigma::drawing_depths[ntile->depth].tiles.push_back(*ntile);

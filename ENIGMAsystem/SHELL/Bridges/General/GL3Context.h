@@ -35,7 +35,7 @@ GLint bound_tex;
 
 protected:
   map< GLenum, GLuint > cacheTextureStates;    /// cached texture stages
-  
+
 public:
 
 float last_depth;
@@ -50,7 +50,7 @@ ContextManager() {
 	shapes_d3d_texture = -1;
 	last_stride = -1;
 	last_depth = 0.0f;
-	bound_tex = 0;
+	bound_tex = -1;
 }
 
 ~ContextManager() {
@@ -140,11 +140,11 @@ void ReadPixels() {
 }
 
 void BindTexture(GLenum target,  GLuint texture) {
-if (bound_tex != texture) {
-	EndShapesBatching();
-	glBindTexture(target, bound_tex = texture);
-}
-		return;
+    if (bound_tex != texture) {
+        EndShapesBatching();
+        glBindTexture(target, bound_tex = texture);
+    }
+    return;
 	// Update the texture state cache
     // If the return value is 'true', the command must be forwarded to OpenGL
 	map< GLenum, GLuint >::iterator it = cacheTextureStates.find( target );
@@ -165,6 +165,10 @@ void ResetTextureStates() {
 }
 
 void Viewport() {
+	EndShapesBatching();
+}
+
+void Transformation() { //Used when calling 3d transformations (translation, scaling etc.)
 	EndShapesBatching();
 }
 

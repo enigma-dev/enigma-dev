@@ -152,9 +152,10 @@ namespace enigma
 
     //Load tiles
     delete_tiles();
-	for (int i = 0; i < tilecount; i++) {
-        tile t = tiles[i];
-		drawing_depths[t.depth].tiles.clear();
+    for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++){
+        if (dit->second.tiles.size()){
+            dit->second.tiles.clear();
+        }
     }
     for (int i = 0; i < tilecount; i++) {
         tile t = tiles[i];
@@ -170,25 +171,25 @@ namespace enigma
     }
 
     instance_event_iterator = new inst_iter(NULL,NULL,NULL);
-	
+
 	// Fire the create event of all the new instances
     for (int i = 0; i < instancecount; i++)
       is[i]->myevent_create();
-	  
-	// instance create code should be added here or occur at this exact moment in time, but guess what the code 
+
+	// instance create code should be added here or occur at this exact moment in time, but guess what the code
 	// isn't here, so where the fuck is it? and no not the create event, the instance create code from the room editor
 	// WHERE THE FUCK IS IT?
-	 
-	// Fire the game start event for all the new instances, persistent objects don't matter since this is the first time 
+
+	// Fire the game start event for all the new instances, persistent objects don't matter since this is the first time
 	// the game ran they won't even exist yet
     if (gamestart)
     for (int i = 0; i < instancecount; i++)
       is[i]->myevent_gamestart();
-	  
+
 	// Fire the rooms creation code
 	if (createcode)
        createcode();
-	   
+
 	// Fire the room start event for all persistent objects still kept alive and all the new instances
 	for (enigma::iterator it = enigma::instance_list_first(); it; ++it)
     {
