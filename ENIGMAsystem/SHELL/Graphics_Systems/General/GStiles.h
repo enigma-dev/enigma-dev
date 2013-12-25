@@ -14,13 +14,15 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
+#ifndef ENIGMA_GSTILES__H
+#define ENIGMA_GSTILES__H
 
 #include "Universal_System/scalar.h"
 
 namespace enigma_user
 {
 
-int tile_add(int background, int left, int top, int width, int height, int x, int y, int depth, int alpha = 1, int color = 0xFFFFFF);
+int tile_add(int background, int left, int top, int width, int height, int x, int y, int depth, double xscale = 1.0, double yscale = 1.0, double alpha = 1, int color = 0xFFFFFF);
 bool tile_delete(int id);
 bool tile_exists(int id);
 double tile_get_alpha(int id);
@@ -53,4 +55,4 @@ bool tile_layer_show(int layer_depth);
 bool tile_layer_shift(int layer_depth, int x, int y);
 
 }
-
+#endif

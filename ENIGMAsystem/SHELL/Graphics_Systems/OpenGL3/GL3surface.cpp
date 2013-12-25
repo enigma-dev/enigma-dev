@@ -214,7 +214,7 @@ void surface_set_target(int id)
   glPushAttrib(GL_VIEWPORT_BIT); //same
   glViewport(0,0,surf->width,surf->height);
   glLoadIdentity();
-  glOrtho(0, surf->width, 0, surf->height, -1, 1);
+  glOrtho(-1, surf->width, -1, surf->height, -1, 1);
 }
 
 void surface_reset_target(void)
@@ -332,7 +332,7 @@ int surface_save(int id, string filename)
 	} else {
 		ret = enigma::image_save(filename, rgbdata, w, h, w, h);
 	}
-	
+
 	delete[] rgbdata;
 	return ret;
 }
@@ -345,7 +345,7 @@ int surface_save_part(int id, string filename, unsigned x, unsigned y, unsigned 
     string ext = enigma::image_get_format(filename);
 
     unsigned char *rgbdata = new unsigned char[sz*4];
-	
+
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, surf->fbo);
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
 	glReadPixels(x,y,w,h,GL_RGBA,GL_UNSIGNED_BYTE,rgbdata);
@@ -359,7 +359,7 @@ int surface_save_part(int id, string filename, unsigned x, unsigned y, unsigned 
 	} else {
 		ret = enigma::image_save(filename, rgbdata, w, h, w, h);
 	}
-	
+
 	delete[] rgbdata;
 	return ret;
 }
@@ -368,7 +368,7 @@ int background_create_from_surface(int id, int x, int y, int w, int h, bool remo
 {
     get_surfacev(surf,id,-1);
     int full_width=nlpo2dc(w)+1, full_height=nlpo2dc(h)+1;
-    
+
     unsigned sz=full_width*full_height;
     unsigned char *surfbuf=new unsigned char[sz*4];
     glBindFramebuffer(GL_READ_FRAMEBUFFER, surf->fbo);
