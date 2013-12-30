@@ -355,7 +355,7 @@ inline bool needs_semi_sepd(char c1,char c2)
 
 int parser_reinterpret(string &code,string &synt)
 {
-  cout << "Second pass...";
+  cout << "Second pass...\n";
   for (pt pos = 1; pos < code.length(); pos++)
   {
     if (synt[pos] == '0' and synt[pos-1] == '.')
@@ -423,6 +423,42 @@ int parser_reinterpret(string &code,string &synt)
       }
       cout << "SUXXESS" << endl;
       pos = epos;
+    }
+    else if (synt[pos] == '(' and synt[pos-1] == ')')
+    {
+      //We are catching function-dot calls and replacing  (nnnnn()).   with   nnnnn().
+      //Since this only affects semantics in GM-style single-line if statements, 
+      //  we only perform this check after ')' (e.g., "if (x)").
+      const pt spos = pos;
+      pt epos = pos;
+
+      //Advance through the next word.
+      while (epos+1<synt.length() && synt[++epos] == 'n');
+      if (spos+1 < epos) {     //If we found at least one 'n'
+        if (synt[epos]=='(') {
+          //Advance through the function call, counting brackets.
+          int n_left_paren = 1;
+          while (epos+1<synt.length() && n_left_paren>0) {
+            char it = synt[++epos];
+            if (it == '(') { n_left_paren++; }
+            if (it == ')') { n_left_paren--; }
+          }
+          if (n_left_paren==0) { //We matched it completely.
+            //Check the next two characters; should be ")."
+            if (epos+2<synt.length() && synt[epos+1]==')' && synt[epos+2]=='.') {
+              epos++;
+              cout <<"function-dot; removing parens around \"" <<code.substr(spos, epos-spos+1) <<"\"\n"; //DEBUG
+  
+              //Delete; set up the index for the next iteration.
+              code.erase(epos,1);
+              synt.erase(epos,1);
+              code.erase(spos,1);
+              synt.erase(spos,1);
+              pos = spos-1;
+            }
+          }
+        }
+      }
     }
   }
   //cout << "done. " << synt << endl << endl;
@@ -568,6 +604,10 @@ void parser_add_semicolons(string &code,string &synt)
 
   code = string(codebuf,bufpos);
   synt = string(syntbuf,bufpos);
+
+  //Free memory here, lest it leak.
+  delete codebuf;
+  delete syntbuf;
 
   //cout << code << endl << synt << endl << endl;
   //cout << "cp1"; fflush(stdout);
