@@ -46,7 +46,7 @@ namespace enigma_user {
 namespace enigma
 {
   extern char keymap[512];
-  extern char usermap[256];
+  //extern char usermap[256];
   void ENIGMA_events(void); //TODO: Synchronize this with Windows by putting these two in a single header.
   bool gameFroze = false;
   extern bool freezeOnLoseFocus;
@@ -70,8 +70,8 @@ namespace enigma
               if (gk==NoSymbol)
                 return 0;
 
-              if (!(gk & 0xFF00)) actualKey = enigma::usermap[(int)enigma::keymap[gk & 0xFF]];
-              else actualKey = enigma::usermap[(int)enigma::keymap[gk & 0x1FF]];
+              if (!(gk & 0xFF00)) actualKey = enigma_user::keyboard_get_map((int)enigma::keymap[gk & 0xFF]);
+              else actualKey = enigma_user::keyboard_get_map((int)enigma::keymap[gk & 0x1FF]);
               { // Set keyboard_lastchar. Seems to work without 
                   char str[1];
                   int len = XLookupString(&e.xkey, str, 1, NULL, NULL);
@@ -94,8 +94,8 @@ namespace enigma
             if (gk == NoSymbol)
               return 0;
 
-            if (!(gk & 0xFF00)) actualKey = enigma::usermap[(int)enigma::keymap[gk & 0xFF]];
-            else actualKey = enigma::usermap[(int)enigma::keymap[gk & 0x1FF]];
+            if (!(gk & 0xFF00)) actualKey = enigma_user::keyboard_get_map((int)enigma::keymap[gk & 0xFF]);
+            else actualKey = enigma_user::keyboard_get_map((int)enigma::keymap[gk & 0x1FF]);
 
             enigma::last_keybdstatus[actualKey]=enigma::keybdstatus[actualKey];
             enigma::keybdstatus[actualKey]=0;

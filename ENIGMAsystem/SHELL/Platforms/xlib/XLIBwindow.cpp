@@ -25,6 +25,7 @@
 #include <unistd.h> //usleep
 #include <time.h> //clock
 #include <string> //Return strings without needing a GC
+#include <map>
 #include <X11/Xlib.h>
 //#include <X11/Xutil.h>
 //#include <X11/Xos.h>
@@ -305,8 +306,11 @@ short curs[] = { 68, 68, 68, 130, 52, 152, 135, 116, 136, 108, 114, 150, 90, 68,
 
 namespace enigma
 {
+  //Replacing usermap array with keybdmap map, to align code with Windows implementation.
+  std::map<int,int> keybdmap;
+  //unsigned char usermap[256];
+
   unsigned char keymap[512];
-  unsigned char usermap[256];
   void initkeymap()
   {
     using namespace enigma_user;
@@ -365,8 +369,8 @@ namespace enigma
     keymap[0x163] = vk_insert;
 
     // Set up identity map...
-    for (int i = 0; i < 255; i++)
-      usermap[i] = i;
+    //for (int i = 0; i < 255; i++)
+    //  usermap[i] = i;
 
     for (int i = 0; i < 255; i++)
       keymap[i] = i;
@@ -437,6 +441,37 @@ void keyboard_wait()
     usleep(10000); // Sleep 1/100 second
   }
 }
+
+void keyboard_set_map(int key1, int key2) 
+{
+  std::map< int, int >::iterator it = enigma::keybdmap.find( key1 );
+  if ( enigma::keybdmap.end() != it ) {
+    it->second = key2;
+  } else {
+    enigma::keybdmap.insert( map< int, int >::value_type(key1, key2) );
+  }
+}
+
+int keyboard_get_map(int key) 
+{
+  std::map< int, int >::iterator it = enigma::keybdmap.find( key );
+  if ( enigma::keybdmap.end() != it ) {
+    return it->second;
+  } else {
+    return key;
+  }
+}
+
+void keyboard_unset_map() 
+{
+  enigma::keybdmap.clear();
+}
+
+void keyboard_clear(const int key)
+{
+  enigma::keybdstatus[key] = enigma::last_keybdstatus[key] = 0;
+}
+
 
 void window_set_region_scale(double scale, bool adaptwindow) {}
 double window_get_region_scale() {return 1;}
