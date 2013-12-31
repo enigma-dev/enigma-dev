@@ -54,6 +54,7 @@ namespace enigma
     extern void setchildsize(bool adapt);
 	extern void WindowResized();
     extern bool freezeOnLoseFocus, gameFroze, treatCloseAsEscape;
+	bool hitTestClientArea = false;
     static short hdeltadelta = 0, vdeltadelta = 0;
     int tempLeft = 0, tempTop = 0, tempRight = 0, tempBottom = 0, tempWidth, tempHeight;
     RECT tempWindow;
@@ -138,9 +139,21 @@ namespace enigma
             return 0;
 
         case WM_SETCURSOR:
-            SetCursor(LoadCursor(NULL, currentCursor));
+			// Set the user cursor if the mouse is in the client area of the window, otherwise let Windows handle setting the cursor
+			// since it knows how to set the gripper cursor for window resizing. This is exactly how GM handles it.
+			if (hitTestClientArea) {
+				SetCursor(LoadCursor(NULL, currentCursor));
+			} else {
+				DefWindowProc(hWnd, message, wParam, lParam);
+			}
             return 0;
-
+			
+		case WM_NCHITTEST: {
+			// This is to check when a hit test is needed on the window, so we can see if the mouse is in the client area.
+			LRESULT res = DefWindowProc(hWnd, message, wParam, lParam);
+			hitTestClientArea = (res == HTCLIENT);
+			return res;
+		}
         case WM_CHAR:
             keyboard_lastchar = string(1,wParam);
 			keyboard_string += keyboard_lastchar;
