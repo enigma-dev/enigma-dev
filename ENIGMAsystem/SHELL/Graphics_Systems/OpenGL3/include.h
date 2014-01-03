@@ -6,6 +6,7 @@
 #include "GL3shader.h"
 #include "../General/GStextures.h"
 #include "../General/GSmodel.h"
+#include "../General/GSmatrix.h"
 
 #include "../General/GSfont.h"
 #include "../General/GScurves.h"
