@@ -27,6 +27,12 @@ extern double transformation_matrix[16];
 namespace enigma_user
 {
 
+enum {
+	matrix_view,
+	matrix_projection,
+	matrix_world
+};
+
 void d3d_set_perspective(bool enable);
 void d3d_set_projection(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs_scalar xto, gs_scalar yto, gs_scalar zto,gs_scalar xup, gs_scalar yup, gs_scalar zup);
 void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs_scalar xto, gs_scalar yto, gs_scalar zto, gs_scalar xup, gs_scalar yup, gs_scalar zup, double angle, double aspect, double znear, double zfar);
@@ -53,7 +59,7 @@ bool d3d_transform_stack_empty();
 bool d3d_transform_stack_top();
 bool d3d_transform_stack_disgard();
 
-gs_scalar* matrix_get();
+gs_scalar* matrix_get(int type);
 void matrix_set(int type, gs_scalar* matrix);
 void matrix_build(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar xrotation, gs_scalar yrotation, gs_scalar zrotation, gs_scalar xscale, gs_scalar yscale, gs_scalar zscale);
 void matrix_multiply(gs_scalar* matrix1, gs_scalar* matrix2);
