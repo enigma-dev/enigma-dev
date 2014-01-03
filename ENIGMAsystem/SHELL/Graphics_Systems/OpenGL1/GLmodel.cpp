@@ -306,36 +306,6 @@ bool d3d_model_load(int id, string fname)
   return true;
 }
 
-void d3d_model_translate(int id, gs_scalar x, gs_scalar y, gs_scalar z)
-{
-  //meshes[id]->Translate(x, y, z);
-}
-
-void d3d_model_scale(int id, gs_scalar xscale, gs_scalar yscale, gs_scalar zscale)
-{
-  //meshes[id]->Scale(xscale, yscale, zscale);
-}
-
-void d3d_model_rotate_x(int id, gs_scalar angle)
-{
-  //meshes[id]->RotateX(angle);
-}
-
-void d3d_model_rotate_y(int id, gs_scalar angle)
-{
-  //meshes[id]->RotateY(angle);
-}
-
-void d3d_model_rotate_z(int id, gs_scalar angle)
-{
-  //meshes[id]->RotateZ(angle);
-}
-
-bool d3d_model_calculate_normals(int id, bool smooth, bool invert)
-{
-  //return meshes[id]->CalculateNormals(smooth, invert);
-}
-
 void d3d_model_part_draw(int id, int vertex_start, int vertex_count) // overload for no additional texture or transformation call's
 {
     meshes[id]->Draw(vertex_start, vertex_count);

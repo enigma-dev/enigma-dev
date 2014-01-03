@@ -15,14 +15,18 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef ENIGMA_GS3D3D_H
-#define ENIGMA_GS3D3D_H 
+#ifndef ENIGMA_GSD3D_H
+#define ENIGMA_GSD3D_H 
 
 #include "Universal_System/scalar.h"
 #include <string>
 
 namespace enigma {
-    void d3d_light_update_positions();
+  extern bool d3dMode;
+  extern bool d3dHidden;
+  extern bool d3dZWriteEnable;
+  extern int d3dCulling;
+  void d3d_light_update_positions();
 }
 
 // ***** RENDER STATE CONSTANTS *****
@@ -70,9 +74,6 @@ enum {
 
 }
 
-extern double projection_matrix[16];
-extern double transformation_matrix[16];
-
 namespace enigma_user
 {
 
@@ -80,7 +81,6 @@ void d3d_depth_clear();
 void d3d_depth_clear_value(float value);
 void d3d_start();
 void d3d_end();
-void d3d_set_perspective(bool enable);
 void d3d_set_hidden(bool enable);
 void d3d_set_zwriteenable(bool enable);
 void d3d_set_lighting(bool enable);
@@ -105,33 +105,6 @@ void d3d_set_shading(bool smooth);
 bool d3d_get_mode();
 int d3d_get_culling();
 bool d3d_get_hidden();
-
-void d3d_set_projection(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs_scalar xto, gs_scalar yto, gs_scalar zto,gs_scalar xup, gs_scalar yup, gs_scalar zup);
-void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs_scalar xto, gs_scalar yto, gs_scalar zto, gs_scalar xup, gs_scalar yup, gs_scalar zup, double angle, double aspect, double znear, double zfar);
-void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, double angle);
-void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, double angle);
-
-// ***** TRANSFORMATIONS BEGIN *****
-void d3d_transform_set_identity();
-void d3d_transform_add_translation(gs_scalar xt, gs_scalar yt, gs_scalar zt);
-void d3d_transform_add_scaling(gs_scalar xs, gs_scalar ys, gs_scalar zs);
-void d3d_transform_add_rotation_x(double angle);
-void d3d_transform_add_rotation_y(double angle);
-void d3d_transform_add_rotation_z(double angle);
-void d3d_transform_add_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, double angle);
-void d3d_transform_set_translation(gs_scalar xt, gs_scalar yt, gs_scalar zt);
-void d3d_transform_set_scaling(gs_scalar xs, gs_scalar ys, gs_scalar zs);
-void d3d_transform_set_rotation_x(double angle);
-void d3d_transform_set_rotation_y(double angle);
-void d3d_transform_set_rotation_z(double angle);
-void d3d_transform_set_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, double angle);
-bool d3d_transform_stack_push();
-bool d3d_transform_stack_pop();
-void d3d_transform_stack_clear();
-bool d3d_transform_stack_empty();
-bool d3d_transform_stack_top();
-bool d3d_transform_stack_disgard();
-// ***** TRANSFORMATIONS END *****
 
 // ***** LIGHTS BEGIN *****
 bool d3d_light_define_direction(int id, gs_scalar dx, gs_scalar dy, gs_scalar dz, int col);
