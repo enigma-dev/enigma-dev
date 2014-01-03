@@ -5,6 +5,7 @@
 #include "../General/GStextures.h"
 #include "../General/GStiles.h"
 #include "../General/GSmodel.h"
+#include "../General/GSmatrix.h"
 #include "GLshader.h"
 
 #include "../General/GSfont.h"
