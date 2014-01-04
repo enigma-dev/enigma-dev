@@ -18,16 +18,19 @@
 #ifndef ENIGMA_NSNET_H
 #define ENIGMA_NSNET_H
 
-void network_connect();
-void network_conenct_raw();
-void network_create_server();
-void network_create_socket();
-void network_resolve();
-void network_send_broadcase();
-void network_send_packet();
-void network_send_raw();
-void network_send_udp();
-void network_set_timeout();
-void network_destroy();
+#include <string>
+using std::string;
+
+int network_connect(int socket, string url, int port);
+int network_conenct_raw(int socket, string url, int port);
+int network_create_server(int type, int port, int clients);
+int network_create_socket(int type);
+void network_destroy(int socket);
+string network_resolve(string url);
+unsigned network_send_broadcast(int socket, int port, int buffer, unsigned size);
+unsigned network_send_packet(int socket, int buffer, unsigned size);
+unsigned network_send_raw(int socket, int buffer, unsigned size);
+unsigned network_send_udp(int socket, string url, int port, int buffer, unsigned size);
+void network_set_timeout(int socket, long read, long write);
 
 #endif
