@@ -15,8 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef ENIGMA_NSNET_H
-#define ENIGMA_NSNET_H
+#ifndef ENIGMA_NSNETWORK_H
+#define ENIGMA_NSNETWORK_H
 
 #include <string>
 using std::string;
