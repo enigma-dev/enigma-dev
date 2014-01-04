@@ -1,26 +1,20 @@
-/*
-  The MIT License
-
-  Copyright (c) 2010-2013 IsmAvatar <IsmAvatar@gmail.com> and Robert B. Colton
-
-  Permission is hereby granted, free of charge, to any person obtaining a copy
-  of this software and associated documentation files (the "Software"), to deal
-  in the Software without restriction, including without limitation the rights
-  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-  copies of the Software, and to permit persons to whom the Software is
-  furnished to do so, subject to the following conditions:
-
-  The above copyright notice and this permission notice shall be included in
-  all copies or substantial portions of the Software.
-
-  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-  THE SOFTWARE.
-*/
+/** Copyright (C) 2010 IsmAvatar
+*** Copyright (C) 2013 Robert B. Colton
+***
+*** This file is a part of the ENIGMA Development Environment.
+***
+*** ENIGMA is free software: you can redistribute it and/or modify it under the
+*** terms of the GNU General Public License as published by the Free Software
+*** Foundation, version 3 of the license or any later version.
+***
+*** This application and its source code is distributed AS-IS, WITHOUT ANY
+*** WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+*** FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+*** details.
+***
+*** You should have received a copy of the GNU General Public License along
+*** with this code. If not, see <http://www.gnu.org/licenses/>
+**/
 
 // Implementation of some major aspects of protocols for http and ftp.
 // This allows easy communication with FTP and HTTP servers.
@@ -36,7 +30,7 @@ RFC 2616 (very difficult to read)
 http://www.ietf.org/rfc/rfc2616.txt
 */
 
-#include "BS_net.h"
+#include "BSnet.h"
 #include <stdarg.h>
 #include <stdlib.h>
 
@@ -45,6 +39,9 @@ int prepare(char **ret, const char *cmd, int argc, ...);
 void ftpsend(int in, const char *msg);
 void ftpparse(int in, const char *cmd, const char *arg, const char *disp);
 char *ftpexpect(int in, const char *exp);
+
+namespace enigma_user {
+
 //Opens a connection with an FTP server using given hostname, username, and password.
 //Returns an identifier for the FTP connection.
 int net_ftp_open(string host, string user, string pass);
@@ -57,3 +54,4 @@ void net_ftp_close(int in);
 //This method handles the packets and headers for you
 string net_http(string host, string loc);
 
+}
