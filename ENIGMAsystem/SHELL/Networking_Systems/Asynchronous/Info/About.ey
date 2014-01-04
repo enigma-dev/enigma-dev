@@ -1,0 +1,12 @@
+%e-yaml
+---
+
+Name: Asynchronous
+Identifier: Asynchronous
+Description: Utilization of the Berkley Sockets library for asynchronous cross-platform networking compatible with GameMaker: Studio.
+Author: Robert B. Colton
+
+Depends: None
+
+Represents:
+	Build-platforms: None
