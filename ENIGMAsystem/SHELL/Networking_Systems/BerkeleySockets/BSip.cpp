@@ -1,5 +1,5 @@
 /** Copyright (C) 2010 IsmAvatar
-*** Copyright (C) 2013 Robert B. Colton
+*** Copyright (C) 2013-2014 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
