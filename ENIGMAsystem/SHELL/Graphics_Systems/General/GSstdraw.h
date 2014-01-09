@@ -58,6 +58,13 @@ void draw_button(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, float b
 int draw_mandelbrot(int x, int y, float w, double Zx, double Zy, double Zw, unsigned iter);
 int draw_getpixel(int,int);
 int draw_getpixel_ext(int, int);
+
+
+void draw_polygon_begin();
+void draw_polygon_vertex(gs_scalar x, gs_scalar y, int color=-1);
+void draw_polygon_end(bool outline);
+
+
 #define draw_get_pixel draw_getpixel
 #define draw_get_pixel_ext draw_getpixel_ext
 }
