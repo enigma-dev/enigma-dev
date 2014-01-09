@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include "Universal_System/roomsystem.h"
 
+#include <list>
 #include <vector>
 using std::vector;
 
@@ -538,6 +539,61 @@ int draw_mandelbrot(int x,int y,float w,double Zx,double Zy,double Zw,unsigned i
     draw_primitive_end();
     return c;
 }
+
+
+namespace {
+  //Simple container class for a Vertex in a Polygon.
+  struct PolyVertex {
+    PolyVertex(gs_scalar x, gs_scalar y, int color) : x(x),y(y),color(color) {}
+    gs_scalar x;
+    gs_scalar y;
+    int color;
+  };
+
+  //List of vertices we are buffering to draw.
+  std::list<PolyVertex> currPoly;
+}
+
+
+void draw_polygon_begin()
+{
+  currPoly.clear();
+}
+
+void draw_polygon_vertex(gs_scalar x, gs_scalar y, int color)
+{
+  //-1 means "the color of the previous vertex.
+  //The default color (first vertex) is the current draw color.
+  //This conforms to GM5's treatment of draw colors.
+  currPoly.push_back(PolyVertex(x, y, color));
+}
+
+void draw_polygon_end(bool outline)
+{
+  //At least two vertices are needed.
+  if (currPoly.size() > 1) {
+    int color = draw_get_color();
+    gs_scalar alpha = draw_get_alpha();
+
+    draw_primitive_begin(outline ? pr_linestrip : pr_trianglefan);
+    for (std::list<PolyVertex>::iterator it = currPoly.begin(); it!=currPoly.end(); it++) {
+      color = (it->color!=-1 ? it->color : color);
+      draw_vertex_color(it->x, it->y, color, alpha);
+    }
+
+    //Close it.
+    if (true) {
+      std::list<PolyVertex>::iterator it = currPoly.begin();
+      color = (it->color!=-1 ? it->color : color);
+      draw_vertex_color(it->x, it->y, color, alpha);
+    }
+    draw_primitive_end();
+  }
+
+  currPoly.clear();
+}
+
+
 
 }
 
