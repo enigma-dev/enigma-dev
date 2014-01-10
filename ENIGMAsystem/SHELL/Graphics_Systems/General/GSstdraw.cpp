@@ -542,14 +542,6 @@ int draw_mandelbrot(int x,int y,float w,double Zx,double Zy,double Zw,unsigned i
 
 
 namespace {
-  //Simple container class for a Vertex in a Polygon.
-  struct PolyVertex {
-    PolyVertex(gs_scalar x, gs_scalar y, int color) : x(x),y(y),color(color) {}
-    gs_scalar x;
-    gs_scalar y;
-    int color;
-  };
-
   //List of vertices we are buffering to draw.
   std::list<PolyVertex> currPoly;
 }
@@ -570,24 +562,31 @@ void draw_polygon_vertex(gs_scalar x, gs_scalar y, int color)
 
 void draw_polygon_end(bool outline)
 {
-  //At least two vertices are needed.
-  if (currPoly.size() > 1) {
-    int color = draw_get_color();
-    gs_scalar alpha = draw_get_alpha();
+  if (outline) {
+    if (currPoly.size() >= 2) {
+      int color = draw_get_color();
+      gs_scalar alpha = draw_get_alpha();
 
-    draw_primitive_begin(outline ? pr_linestrip : pr_trianglefan);
-    for (std::list<PolyVertex>::iterator it = currPoly.begin(); it!=currPoly.end(); it++) {
-      color = (it->color!=-1 ? it->color : color);
-      draw_vertex_color(it->x, it->y, color, alpha);
-    }
+      //Close it, ensure the correct color.
+      currPoly.push_back(currPoly.front());
+      if (currPoly.back().color==-1) { currPoly.back().color = color; }
 
-    //Close it.
-    if (true) {
-      std::list<PolyVertex>::iterator it = currPoly.begin();
-      color = (it->color!=-1 ? it->color : color);
-      draw_vertex_color(it->x, it->y, color, alpha);
+      //Draw it.
+      draw_primitive_begin(pr_linestrip);
+      for (std::list<PolyVertex>::iterator it = currPoly.begin(); it!=currPoly.end(); it++) {
+        color = (it->color!=-1 ? it->color : color);
+        draw_vertex_color(it->x, it->y, color, alpha);
+      }
+
+      //Close it.
+      draw_primitive_end();
     }
-    draw_primitive_end();
+  } else {
+    if (currPoly.size() >= 3) {
+      //Self-intersecting polygons makes this much harder than "outline" mode; we need to make a call
+      //   to the platform-specific Graphics backend.
+      fill_complex_polygon(currPoly, draw_get_color(), draw_get_alpha());
+    }
   }
 
   currPoly.clear();

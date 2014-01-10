@@ -15,6 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include <cstdlib>
 #include <math.h>
 #include "../General/OpenGLHeaders.h"
 #include "../General/GSstdraw.h"
@@ -157,6 +158,125 @@ int draw_getpixel_ext(int x,int y)
     return rgba[0] | rgba[1] << 8 | rgba[2] << 16 | rgba[3] << 24;
   #endif
 }
+
+
+namespace {
+
+std::list<GLdouble*> extra_vertices;
+
+GLdouble* make_vertex(unsigned int numComp)
+{
+  GLdouble* vertex = (GLdouble*) malloc(numComp * sizeof(GLdouble));
+  if (vertex) { extra_vertices.push_back(vertex); }
+  return vertex;
+}
+
+void clear_free_extra_vertex_list()
+{
+  for (std::list<GLdouble*>::iterator it=extra_vertices.begin(); it!=extra_vertices.end(); it++) {
+    free(*it);
+  }
+  extra_vertices.clear();
+}
+
+void combineCallback(GLdouble coords[3], GLdouble* vertex_data[4], GLdouble weight[4], GLdouble **dataOut)
+{
+  GLdouble* vertex = make_vertex(6);
+  if (vertex) {
+    vertex[0] = coords[0];
+    vertex[1] = coords[1];
+    vertex[2] = coords[2];
+
+    for (int i = 3; i < 6; i++) {
+      vertex[i] = weight[0] * vertex_data[0][i] 
+                + weight[1] * vertex_data[1][i] 
+                + weight[2] * vertex_data[2][i]
+                + weight[3] * vertex_data[3][i];
+    }
+  }
+
+  //We must write back to *dataOut. If NULL, the error GLU_TESS_NEED_COMBINE_CALLBACK will occur, 
+  //  but we can't avoid that (not enough memory if vertex fails to be allocated).
+  *dataOut = vertex;
+}
+
+void vertexCallback(GLvoid *vertex)
+{
+  GLdouble* ptr = (GLdouble*)vertex;
+  glColor3dv(ptr + 3);  //TODO: We don't use alpha here? (use 4dv if so)
+  glVertex2dv(ptr);
+}
+}
+
+void fill_complex_polygon(const std::list<PolyVertex>& vertices, int defaultColor, int currAlpha)
+{
+  //Supposedly this is required; see notes in GLPrimities.cpp
+  texture_reset();
+
+  //Create a GLU tessellation object.
+  GLUtesselator* tessObj = gluNewTess();
+  if (!tessObj) { return; }
+
+  //Assign callback functions for vertex drawing and combining.
+  gluTessCallback(tessObj, GLU_TESS_BEGIN,   (GLvoid (*) ( )) &glBegin);
+  gluTessCallback(tessObj, GLU_TESS_END,     (GLvoid (*) ( )) &glEnd);
+  gluTessCallback(tessObj, GLU_TESS_VERTEX,  (GLvoid (*) ( )) &vertexCallback);
+  gluTessCallback(tessObj, GLU_TESS_COMBINE, (GLvoid (*) ( )) &combineCallback);
+
+  //Set the winding rule for overlapping edges.
+  gluTessProperty(tessObj, GLU_TESS_WINDING_RULE,  GLU_TESS_WINDING_ODD); 
+
+  //Start drawing our polygon, which comprises a single contour.
+  gluTessBeginPolygon(tessObj, NULL);
+  gluTessBeginContour(tessObj);
+  for (std::list<PolyVertex>::const_iterator it=vertices.begin(); it!=vertices.end(); it++) {
+    //Account for the default color.
+    defaultColor = (it->color!=-1 ? it->color : defaultColor);
+
+    //Draw it.
+    GLdouble* vertex = make_vertex(6);
+    if (vertex) {
+      vertex[0] = it->x;
+      vertex[1] = it->y;
+      vertex[2] = 0.0; //Not used
+      vertex[3] = (defaultColor&0xFF) / 255.0;
+      vertex[4] = ((defaultColor&0xFF00)>>8) / 255.0;
+      vertex[5] = ((defaultColor&0xFF0000)>>16) / 255.0;
+      //TODO: Maybe put alpha here?
+      gluTessVertex(tessObj, vertex, vertex);
+    }
+  }
+  gluTessEndContour(tessObj);
+  gluTessEndPolygon(tessObj);
+  
+  //Done, reclaim memory.
+  gluDeleteTess(tessObj);
+  clear_free_extra_vertex_list();
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 }
 
