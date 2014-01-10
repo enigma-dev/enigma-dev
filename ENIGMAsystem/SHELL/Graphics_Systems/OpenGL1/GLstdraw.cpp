@@ -179,7 +179,7 @@ void clear_free_extra_vertex_list()
   extra_vertices.clear();
 }
 
-void combineCallback(GLdouble coords[3], GLdouble* vertex_data[4], GLdouble weight[4], GLdouble **dataOut)
+void combineCallback(GLdouble coords[3], GLdouble* vertex_data[4], GLfloat weight[4], GLdouble **dataOut)
 {
   GLdouble* vertex = make_vertex(6);
   if (vertex) {
