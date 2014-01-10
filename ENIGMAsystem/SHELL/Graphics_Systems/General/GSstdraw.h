@@ -72,12 +72,12 @@ struct PolyVertex {
 
 ///The draw_polygon functions use this to fill in convex/self-intersecting polygons.
 ///Its implementation is platform-specific.
-void fill_complex_polygon(const std::list<PolyVertex>& vertices, int defaultColor, int currAlpha);
+void fill_complex_polygon(const std::list<PolyVertex>& vertices, int defaultColor, bool allowHoles);
 
 
 void draw_polygon_begin();
 void draw_polygon_vertex(gs_scalar x, gs_scalar y, int color=-1);
-void draw_polygon_end(bool outline);
+void draw_polygon_end(bool outline, bool allowHoles=true);
 
 
 #define draw_get_pixel draw_getpixel
