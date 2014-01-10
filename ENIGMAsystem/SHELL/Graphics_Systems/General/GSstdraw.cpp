@@ -560,7 +560,7 @@ void draw_polygon_vertex(gs_scalar x, gs_scalar y, int color)
   currPoly.push_back(PolyVertex(x, y, color));
 }
 
-void draw_polygon_end(bool outline)
+void draw_polygon_end(bool outline, bool allowHoles)
 {
   if (outline) {
     if (currPoly.size() >= 2) {
@@ -585,7 +585,7 @@ void draw_polygon_end(bool outline)
     if (currPoly.size() >= 3) {
       //Self-intersecting polygons makes this much harder than "outline" mode; we need to make a call
       //   to the platform-specific Graphics backend.
-      fill_complex_polygon(currPoly, draw_get_color(), draw_get_alpha());
+      fill_complex_polygon(currPoly, draw_get_color(), allowHoles);
     }
   }
 

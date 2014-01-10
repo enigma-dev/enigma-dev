@@ -203,12 +203,12 @@ void combineCallback(GLdouble coords[3], GLdouble* vertex_data[4], GLfloat weigh
 void vertexCallback(GLvoid *vertex)
 {
   GLdouble* ptr = (GLdouble*)vertex;
-  glColor3dv(ptr + 3);  //TODO: We don't use alpha here? (use 4dv if so)
+  glColor3dv(ptr + 3);
   glVertex2dv(ptr);
 }
 }
 
-void fill_complex_polygon(const std::list<PolyVertex>& vertices, int defaultColor, int currAlpha)
+void fill_complex_polygon(const std::list<PolyVertex>& vertices, int defaultColor, bool allowHoles)
 {
   //Supposedly this is required; see notes in GLPrimities.cpp
   texture_reset();
@@ -224,7 +224,7 @@ void fill_complex_polygon(const std::list<PolyVertex>& vertices, int defaultColo
   gluTessCallback(tessObj, GLU_TESS_COMBINE, (GLvoid (*) ( )) &combineCallback);
 
   //Set the winding rule for overlapping edges.
-  gluTessProperty(tessObj, GLU_TESS_WINDING_RULE,  GLU_TESS_WINDING_ODD); 
+  gluTessProperty(tessObj, GLU_TESS_WINDING_RULE,  (allowHoles?GLU_TESS_WINDING_ODD:GLU_TESS_WINDING_NONZERO)); 
 
   //Start drawing our polygon, which comprises a single contour.
   gluTessBeginPolygon(tessObj, NULL);
@@ -242,7 +242,7 @@ void fill_complex_polygon(const std::list<PolyVertex>& vertices, int defaultColo
       vertex[3] = (defaultColor&0xFF) / 255.0;
       vertex[4] = ((defaultColor&0xFF00)>>8) / 255.0;
       vertex[5] = ((defaultColor&0xFF0000)>>16) / 255.0;
-      //TODO: Maybe put alpha here?
+      //NOTE: We can put a per-vertex alpha component here if it's desired.
       gluTessVertex(tessObj, vertex, vertex);
     }
   }
