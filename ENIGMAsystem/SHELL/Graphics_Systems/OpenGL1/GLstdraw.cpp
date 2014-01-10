@@ -208,14 +208,14 @@ void vertexCallback(GLvoid *vertex)
 }
 }
 
-void fill_complex_polygon(const std::list<PolyVertex>& vertices, int defaultColor, bool allowHoles)
+bool fill_complex_polygon(const std::list<PolyVertex>& vertices, int defaultColor, bool allowHoles)
 {
   //Supposedly this is required; see notes in GLPrimities.cpp
   texture_reset();
 
   //Create a GLU tessellation object.
   GLUtesselator* tessObj = gluNewTess();
-  if (!tessObj) { return; }
+  if (!tessObj) { return false; }
 
   //Assign callback functions for vertex drawing and combining.
   gluTessCallback(tessObj, GLU_TESS_BEGIN,   (GLvoid (*) ( )) &glBegin);
@@ -252,31 +252,7 @@ void fill_complex_polygon(const std::list<PolyVertex>& vertices, int defaultColo
   //Done, reclaim memory.
   gluDeleteTess(tessObj);
   clear_free_extra_vertex_list();
+  return true;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
 
