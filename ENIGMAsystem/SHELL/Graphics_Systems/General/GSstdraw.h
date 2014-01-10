@@ -71,8 +71,9 @@ struct PolyVertex {
 };
 
 ///The draw_polygon functions use this to fill in convex/self-intersecting polygons.
+///The return value indicates success; if false, a "backup" convex-only polygon drawing routine will be used.
 ///Its implementation is platform-specific.
-void fill_complex_polygon(const std::list<PolyVertex>& vertices, int defaultColor, bool allowHoles);
+bool fill_complex_polygon(const std::list<PolyVertex>& vertices, int defaultColor, bool allowHoles);
 
 
 void draw_polygon_begin();
