@@ -23,6 +23,7 @@
 #include "../General/GSfont.h"
 #include "../General/GStextures.h"
 #include "../General/GSprimitives.h"
+#include "../General/GSsprite.h"
 
 
 using namespace std;
@@ -335,6 +336,42 @@ void draw_text(gs_scalar x, gs_scalar y, variant vstr)
       }
   }
 }
+
+
+void draw_text_sprite(gs_scalar x, gs_scalar y, variant vstr, int sep, int lineWidth, int sprite, int firstChar, int scale)
+{
+  string str = toString(vstr);
+
+  //Easy lookup of width/height, accounting for scale.
+  int w = sprite_get_width(sprite)  * scale;
+  int h = sprite_get_height(sprite) * scale;
+
+  //Default line separation height is just the font sprite's height.
+  if (sep == -1) {
+    sep = h;
+  }
+
+  //Now, simply draw each letter via sub-images, accounting for the width if required. 
+  int offX = 0;
+  int offY = 0;
+  for (size_t i=0; i<str.length(); i++) {
+    //Draw, update.
+    char c = str[i];
+    int subIndex = c - firstChar;
+    draw_sprite_stretched(sprite, subIndex, x+offX, y+offY, w, h);
+    offX += w;
+
+    //Wrap if we've passed a wrappable character. Note that, contrary to GM5's documentation,
+    //line-wrapping for text_sprites does NOT occur after hyphens. Only spaces break the line.
+    if (lineWidth!=-1 && c==' ') {
+      if (offX+w  > lineWidth) {
+        offX = 0;
+        offY += sep;
+      }
+    }
+  }
+}
+
 
 void draw_text_skewed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar top, gs_scalar bottom)
 {
