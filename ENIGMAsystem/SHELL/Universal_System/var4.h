@@ -51,6 +51,9 @@ struct variant
   enigma::rvt rval;
   string sval;
   int type;
+
+  ///Hints at the expected type of the object. If the current type is undefined, set it to the hinted type.
+  void type_hint(int h_type);
   
   operator int();
   operator bool();
