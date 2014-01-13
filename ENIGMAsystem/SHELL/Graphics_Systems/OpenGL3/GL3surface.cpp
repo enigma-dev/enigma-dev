@@ -214,7 +214,7 @@ void surface_set_target(int id)
   glPushAttrib(GL_VIEWPORT_BIT); //same
   glViewport(0,0,surf->width,surf->height);
   glLoadIdentity();
-  glOrtho(-1, surf->width, -1, surf->height, -1, 1);
+  glOrtho(0, surf->width, 0, surf->height, -1, 1);
 }
 
 void surface_reset_target(void)
