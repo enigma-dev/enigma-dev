@@ -26,23 +26,29 @@
 
 using namespace std;
 
-string toString(int n)                { char buf[12]; return string(buf,sprintf(buf,"%d",  n)); }
-string toString(long n)               { char buf[12]; return string(buf,sprintf(buf,"%ld", n)); }
-string toString(short n)              { char buf[12]; return string(buf,sprintf(buf,"%d",  n)); }
-string toString(unsigned n)           { char buf[12]; return string(buf,sprintf(buf,"%u",  n)); }
-string toString(unsigned long n)      { char buf[12]; return string(buf,sprintf(buf,"%lu", n)); }
-string toString(unsigned short n)     { char buf[12]; return string(buf,sprintf(buf,"%u",  n)); }
+namespace {
+  ///Many integral types (such as long) vary based on platform and architecture. 
+  ///To avoid crashing in string(#), we reserve generously.
+  char buf[128];
+}
+
+string toString(int n)                { return string(buf,sprintf(buf,"%d",  n)); }
+string toString(long n)               { return string(buf,sprintf(buf,"%ld", n)); }
+string toString(short n)              { return string(buf,sprintf(buf,"%d",  n)); }
+string toString(unsigned n)           { return string(buf,sprintf(buf,"%u",  n)); }
+string toString(unsigned long n)      { return string(buf,sprintf(buf,"%lu", n)); }
+string toString(unsigned short n)     { return string(buf,sprintf(buf,"%u",  n)); }
 #if defined(_WIN32) || defined(__WIN32__) || defined(_WIN64) || defined(__WIN64__)
-string toString(long long n)          { char buf[32]; return string(buf,sprintf(buf,"%lld", n)); }
-string toString(unsigned long long n) { char buf[32]; return string(buf,sprintf(buf,"%llu", n)); }
+string toString(long long n)          { return string(buf,sprintf(buf,"%lld", n)); }
+string toString(unsigned long long n) { return string(buf,sprintf(buf,"%llu", n)); }
 #else
-string toString(long long n)          { char buf[32]; return string(buf,sprintf(buf,"%lld", n)); }
-string toString(unsigned long long n) { char buf[32]; return string(buf,sprintf(buf,"%llu", n)); }
+string toString(long long n)          { return string(buf,sprintf(buf,"%lld", n)); }
+string toString(unsigned long long n) { return string(buf,sprintf(buf,"%llu", n)); }
 #endif
-string toString(char n)               { char buf[8];  return string(buf,sprintf(buf,"%d", n)); }
+string toString(char n)               { return string(buf,sprintf(buf,"%d", n)); }
 string toString(char* n)              { return string(n); }
-string toString(float n)              { char buf[32]; return string(buf,sprintf(buf,"%g", n)); }
-string toString(double n)             { char buf[32]; return string(buf,sprintf(buf,"%g", n)); }
+string toString(float n)              { return string(buf,sprintf(buf,"%g", n)); }
+string toString(double n)             { return string(buf,sprintf(buf,"%g", n)); }
 
 string toString()                                        { return string ();     }
 string toString(const string& str)                       { return string (str);  }
