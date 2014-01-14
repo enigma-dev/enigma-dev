@@ -36,6 +36,7 @@ namespace enigma
       double  xstart=inst->xstart, ystart=inst->ystart;
       double image_index=inst->image_index;
       double image_speed=inst->image_speed;
+      int image_single = inst->image_single;
       bool visible=inst->visible;
       double image_xscale=inst->image_xscale;
       double image_yscale=inst->image_yscale;
@@ -68,7 +69,7 @@ namespace enigma
       if (perf) newinst->myevent_create();
       newinst->x=x; newinst->y=y; newinst->yprevious=yprevious; newinst->xprevious=xprevious;
       newinst->xstart=xstart; newinst->ystart=ystart;
-      newinst->image_index=image_index; newinst->image_speed=image_speed;
+      newinst->image_index=image_index; newinst->image_speed=image_speed; newinst->image_single=image_single;
       newinst->visible=visible; newinst->image_xscale=image_xscale; newinst->image_yscale=image_yscale; newinst->image_angle=image_angle;
       newinst->hspeed=hspeed; newinst->vspeed=vspeed;
   }

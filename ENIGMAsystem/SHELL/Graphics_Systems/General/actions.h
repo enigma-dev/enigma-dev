@@ -55,6 +55,7 @@ inline void action_sprite_set(const double spritep, const  double subimage, cons
     inst->sprite_index=spritep;
 	if ((int)subimage !=-1) inst->image_index=subimage;
 	inst->image_speed=speed;
+	inst->image_single=-1; 
 }
 
 inline void action_draw_text(const string text, const gs_scalar x, const gs_scalar y) {
@@ -252,7 +253,7 @@ inline bool action_replace_background(int ind, std::string filename)
 inline int draw_self()
 {
     enigma::object_collisions* const inst = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
-    draw_sprite_ext(inst->sprite_index, inst->image_index, inst->x, inst->y, inst->image_xscale, inst->image_yscale, inst->image_angle, inst->image_blend, inst->image_alpha);
+    draw_sprite_ext(inst->sprite_index, inst->get_image_index(), inst->x, inst->y, inst->image_xscale, inst->image_yscale, inst->image_angle, inst->image_blend, inst->image_alpha);
     return 0;
 }  //actions seemed the best place for this
 

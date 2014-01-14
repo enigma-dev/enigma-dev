@@ -87,7 +87,7 @@ beginstep: 3
 	Name: Begin Step
 	Mode: Special
 	Case: 1
-	Constant: {xprevious = x; yprevious = y; if (sprite_index != -1) image_index = fmod((image_speed < 0)?(sprite_get_number(sprite_index) + image_index - fmod(abs(image_speed),sprite_get_number(sprite_index))):(image_index + image_speed), sprite_get_number(sprite_index));}
+	Constant: {xprevious = x; yprevious = y; if (sprite_index != -1) if (image_single < 0) image_index = fmod((image_speed < 0)?(sprite_get_number(sprite_index) + image_index - fmod(abs(image_speed),sprite_get_number(sprite_index))):(image_index + image_speed), sprite_get_number(sprite_index));}
 
 alarm: 2
 	Group: Alarm
@@ -372,7 +372,7 @@ draw: 8
 	Iterator-initialize: /* Draw is initialized in the constructor */
 	Iterator-remove: depth.remove();
 	Iterator-delete: /* Draw will destruct with this */
-	Default: if (visible && sprite_index != -1) draw_sprite_ext(sprite_index,image_index,x,y,image_xscale,image_yscale,image_angle,image_blend,image_alpha);
+	Default: if (visible && sprite_index != -1) draw_sprite_ext(sprite_index,get_image_index(),x,y,image_xscale,image_yscale,image_angle,image_blend,image_alpha);
 	Instead: if (automatic_redraw) screen_redraw(); # We never want to iterate draw; we let screen_redraw() handle it.
 	
 #Draw GUI event is processed after all draw events iterating objects by depth and first resetting the projection to orthographic, ignoring views
@@ -396,7 +396,7 @@ animationend: 7
 	Name: Animation End
 	Mode: Special
 	Case: 7
-	Sub Check: {if (image_index + image_speed < sprite_get_number(sprite_index)) return 0; }
+	Sub Check: {if (image_index + image_speed < sprite_get_number(sprite_index)) return 0; if (image_single >= 0) return 0; }
 
 
 # End of in-linked events

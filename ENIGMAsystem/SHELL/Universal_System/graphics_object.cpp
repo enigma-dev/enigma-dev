@@ -31,6 +31,8 @@ namespace enigma
   object_graphics::object_graphics(unsigned _x, int _y): object_planar(_x,_y) {}
   object_graphics::~object_graphics() {}
 
+  int object_graphics::get_image_index() const { return image_single<0 ? image_index : fmod(image_single, enigma_user::sprite_get_number(sprite_index)); }
+
   INTERCEPT_DEFAULT_COPY(enigma::depthv)
   void depthv::function(variant oldval) {
     rval.d = floor(rval.d);
