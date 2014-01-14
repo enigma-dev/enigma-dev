@@ -512,9 +512,16 @@ double    var::operator+ () const { return +(double)(**this); }
 #include "libEGMstd.h"
 string toString(const variant &a)
 {
-  char buf[32];
-  if (a.type == real)
-    return string(buf,sprintf(buf,"%g",a.rval.d));
+  if (a.type == real) {
+    //Ensure that integral types don't pick up any baggage from being stored 
+    //  as a double in a var-type.
+    double dVal = a.rval.d;
+    long lVal = (long)dVal;
+    if (dVal == lVal) {
+      return toString(lVal);
+    }
+    return toString(dVal);
+  }
   return a.sval;
 }
 string toString(const var &a) {
