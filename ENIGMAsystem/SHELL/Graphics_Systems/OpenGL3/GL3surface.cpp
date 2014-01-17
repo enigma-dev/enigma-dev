@@ -1,4 +1,5 @@
 /** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton, Dave "biggoron", Harijs Grinbergs
+*** Copyright (C) 2014 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -214,7 +215,7 @@ void surface_set_target(int id)
   glPushAttrib(GL_VIEWPORT_BIT); //same
   glViewport(0,0,surf->width,surf->height);
   glLoadIdentity();
-  glOrtho(-1, surf->width, -1, surf->height, -1, 1);
+  glOrtho(0, surf->width, 0, surf->height, -1, 1);
 }
 
 void surface_reset_target(void)
@@ -431,7 +432,7 @@ void surface_copy_part(int destination, float x, float y, int source, int xs, in
     glPushAttrib(GL_VIEWPORT_BIT);
     glViewport(0,0,dsurf->width,dsurf->height);
     glLoadIdentity();
-    glOrtho(-1, dsurf->width, -1, dsurf->height, -1, 1);
+    glOrtho(0, dsurf->width, 0, dsurf->height, -1, 1);
 	glRasterPos2d(x, y);
 	glDrawPixels(ws,hs,GL_RGBA,GL_UNSIGNED_BYTE,surfbuf);
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, enigma::bound_framebuffer);
@@ -453,7 +454,7 @@ void surface_copy(int destination, float x, float y, int source)
     glPushAttrib(GL_VIEWPORT_BIT);
     glViewport(0,0,dsurf->width,dsurf->height);
     glLoadIdentity();
-    glOrtho(-1, dsurf->width, -1, dsurf->height, -1, 1);
+    glOrtho(0, dsurf->width, 0, dsurf->height, -1, 1);
 	glRasterPos2d(x, y);
 	glDrawPixels(dsurf->width,dsurf->height,GL_RGBA,GL_UNSIGNED_BYTE,surfbuf);
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, enigma::bound_framebuffer);
