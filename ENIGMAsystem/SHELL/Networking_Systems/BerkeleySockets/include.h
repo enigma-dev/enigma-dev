@@ -1,2 +1,2 @@
-#include "BS_net.h"
-#include "BS_browser.h"
+#include "BSnet.h"
+#include "BSbrowser.h"
