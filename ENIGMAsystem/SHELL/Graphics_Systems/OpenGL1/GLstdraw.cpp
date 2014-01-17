@@ -188,14 +188,14 @@ void combineCallback(GLdouble coords[3], GLdouble* vertex_data[4], GLfloat weigh
     vertex[2] = coords[2];
 
     for (int i = 3; i < 6; i++) {
-      vertex[i] = weight[0] * vertex_data[0][i] 
-                + weight[1] * vertex_data[1][i] 
+      vertex[i] = weight[0] * vertex_data[0][i]
+                + weight[1] * vertex_data[1][i]
                 + weight[2] * vertex_data[2][i]
                 + weight[3] * vertex_data[3][i];
     }
   }
 
-  //We must write back to *dataOut. If NULL, the error GLU_TESS_NEED_COMBINE_CALLBACK will occur, 
+  //We must write back to *dataOut. If NULL, the error GLU_TESS_NEED_COMBINE_CALLBACK will occur,
   //  but we can't avoid that (not enough memory if vertex fails to be allocated).
   *dataOut = vertex;
 }
@@ -216,15 +216,14 @@ bool fill_complex_polygon(const std::list<PolyVertex>& vertices, int defaultColo
   //Create a GLU tessellation object.
   GLUtesselator* tessObj = gluNewTess();
   if (!tessObj) { return false; }
-
   //Assign callback functions for vertex drawing and combining.
-  gluTessCallback(tessObj, GLU_TESS_BEGIN,   (GLvoid (*) ( )) &glBegin);
-  gluTessCallback(tessObj, GLU_TESS_END,     (GLvoid (*) ( )) &glEnd);
-  gluTessCallback(tessObj, GLU_TESS_VERTEX,  (GLvoid (*) ( )) &vertexCallback);
-  gluTessCallback(tessObj, GLU_TESS_COMBINE, (GLvoid (*) ( )) &combineCallback);
+  gluTessCallback(tessObj, GLU_TESS_BEGIN,   (void (__stdcall*)(void))glBegin);
+  gluTessCallback(tessObj, GLU_TESS_END,     (void (__stdcall*)(void))glEnd);
+  gluTessCallback(tessObj, GLU_TESS_VERTEX,  (void (__stdcall*)(void))vertexCallback);
+  gluTessCallback(tessObj, GLU_TESS_COMBINE, (void (__stdcall*)(void))combineCallback);
 
   //Set the winding rule for overlapping edges.
-  gluTessProperty(tessObj, GLU_TESS_WINDING_RULE,  (allowHoles?GLU_TESS_WINDING_ODD:GLU_TESS_WINDING_NONZERO)); 
+  gluTessProperty(tessObj, GLU_TESS_WINDING_RULE,  (allowHoles?GLU_TESS_WINDING_ODD:GLU_TESS_WINDING_NONZERO));
 
   //Start drawing our polygon, which comprises a single contour.
   gluTessBeginPolygon(tessObj, NULL);
@@ -248,7 +247,7 @@ bool fill_complex_polygon(const std::list<PolyVertex>& vertices, int defaultColo
   }
   gluTessEndContour(tessObj);
   gluTessEndPolygon(tessObj);
-  
+
   //Done, reclaim memory.
   gluDeleteTess(tessObj);
   clear_free_extra_vertex_list();
