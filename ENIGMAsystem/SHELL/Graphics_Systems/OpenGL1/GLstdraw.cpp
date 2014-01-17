@@ -27,6 +27,12 @@
 #define __GETG(x) ((x & 0x00FF00) >> 8)
 #define __GETB(x) ((x & 0xFF0000) >> 16)
 
+//glew.h defines CALLBACK on Windows. 
+//If we are on Linux, it hasn't been defined yet, so just define it as empty.
+#ifndef CALLBACK
+#define CALLBACK
+#endif
+
 namespace enigma {
   extern unsigned char currentcolor[4];
 }
@@ -217,10 +223,10 @@ bool fill_complex_polygon(const std::list<PolyVertex>& vertices, int defaultColo
   GLUtesselator* tessObj = gluNewTess();
   if (!tessObj) { return false; }
   //Assign callback functions for vertex drawing and combining.
-  gluTessCallback(tessObj, GLU_TESS_BEGIN,   (void (__stdcall*)(void))glBegin);
-  gluTessCallback(tessObj, GLU_TESS_END,     (void (__stdcall*)(void))glEnd);
-  gluTessCallback(tessObj, GLU_TESS_VERTEX,  (void (__stdcall*)(void))vertexCallback);
-  gluTessCallback(tessObj, GLU_TESS_COMBINE, (void (__stdcall*)(void))combineCallback);
+  gluTessCallback(tessObj, GLU_TESS_BEGIN,   (void (CALLBACK*)(void)) glBegin);
+  gluTessCallback(tessObj, GLU_TESS_END,     (void (CALLBACK*)(void)) glEnd);
+  gluTessCallback(tessObj, GLU_TESS_VERTEX,  (void (CALLBACK*)(void)) vertexCallback);
+  gluTessCallback(tessObj, GLU_TESS_COMBINE, (void (CALLBACK*)(void)) combineCallback);
 
   //Set the winding rule for overlapping edges.
   gluTessProperty(tessObj, GLU_TESS_WINDING_RULE,  (allowHoles?GLU_TESS_WINDING_ODD:GLU_TESS_WINDING_NONZERO));
