@@ -124,12 +124,7 @@ void screen_redraw()
         }else{
             screen_set_viewport(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled());
         }
-        glLoadIdentity();
-        glScalef(1, ((FBO==0||enigma::msaa_fbo!=0)?-1:1), 1);
-
-        glOrtho(0, room_width, 0, room_height, 32000, -32000);
-        glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
-        glMultMatrixd(transformation_matrix);
+        d3d_set_projection_ortho(0, 0, room_width, room_height, 0);
 
         int clear_bits = 0;
         if (background_showcolor)
@@ -289,12 +284,7 @@ void screen_redraw()
             }else{
                 screen_set_viewport(view_xport[vc], view_yport[vc], window_get_region_width_scaled() - view_xport[vc], window_get_region_height_scaled() - view_yport[vc]);
             }
-			glLoadIdentity();
-			glScalef(1, ((FBO==0||enigma::msaa_fbo!=0)?-1:1), 1);
-
-			glOrtho(int(view_xview[vc]), int(view_wview[vc] + view_xview[vc]), int(view_yview[vc]), int(view_hview[vc] + view_yview[vc]), 32000, -32000);
-			glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
-			glMultMatrixd(transformation_matrix);
+			d3d_set_projection_ortho(view_xport[vc], view_yport[vc], window_get_region_width_scaled() - view_xport[vc], window_get_region_height_scaled() - view_yport[vc], 0);
 
 			int clear_bits = 0;
 			if (background_showcolor && view_first) {
@@ -373,16 +363,7 @@ void screen_redraw()
     if (enigma::gui_used)
     {
         screen_set_viewport(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled());
-        glLoadIdentity();
-        if (GLEW_EXT_framebuffer_object) {
-            glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &enigma::FBO);
-            glScalef(1, ((FBO==0||enigma::msaa_fbo!=0)?-1:1), 1);
-        } else {
-            glScalef(1, -1, 1);
-        }
-        glOrtho(0, enigma::gui_width, 0, enigma::gui_height, -32000, 32000);
-        glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
-        glMultMatrixd(transformation_matrix);
+		d3d_set_projection_ortho(0, 0, enigma::gui_width, enigma::gui_height, 0);
 
 		// Clear the depth buffer if hidden surface removal is on at the beginning of the draw step.
         if (enigma::d3dMode)
@@ -442,34 +423,18 @@ void screen_init()
 
     if (!view_enabled)
     {
-        glMatrixMode(GL_PROJECTION);
           glClearColor(0,0,0,0);
-          glLoadIdentity();
-          gluPerspective(0, 1, 0, 1);
-        glMatrixMode(GL_MODELVIEW);
           screen_set_viewport(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled());
-          glLoadIdentity();
-          glScalef(1, -1, 1);
-          glOrtho(0, room_width, 0, room_height, 0, 1);
-          glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
-          glMultMatrixd(transformation_matrix);
+		  d3d_set_projection_ortho(0, 0, room_width, room_height, 0);
     } else {
         for (view_current = 0; view_current < 7; view_current++)
         {
             if (view_visible[(int)view_current])
             {
                 int vc = (int)view_current;
-                glMatrixMode(GL_PROJECTION);
                   glClearColor(0,0,0,0);
-                  glLoadIdentity();
-                  gluPerspective(0, 1, 0, 1);
-                glMatrixMode(GL_MODELVIEW);
                   screen_set_viewport(view_xport[vc], view_yport[vc], view_wport[vc], view_hport[vc]);
-                  glLoadIdentity();
-                  glScalef(1, -1, 1);
-                  glOrtho(view_xview[vc], view_wview[vc] + view_xview[vc], view_yview[vc], view_hview[vc] + view_yview[vc], 0, 1);
-                  glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
-                  glMultMatrixd(transformation_matrix);
+				  d3d_set_projection_ortho(view_xport[vc], view_yport[vc], view_wport[vc], view_hport[vc], 0);
                 break;
             }
         }
