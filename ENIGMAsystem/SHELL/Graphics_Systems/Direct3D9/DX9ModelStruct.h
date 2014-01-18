@@ -45,7 +45,7 @@ using std::vector;
 extern int ptypes_by_id[16];
 namespace enigma {
   extern unsigned char currentcolor[4];
-  
+
   //split a string and convert to float
   vector<float> float_split(const string& str, const char& ch) {
     string next;
@@ -76,7 +76,7 @@ namespace enigma {
 	bool trimmed = false;
 	bool checknormal = false;
 	for (unsigned int i = 0; i < s->size() ; i++)
-	{ 
+	{
 		//comment
 		if ((*s)[i] == '#')
 		{
@@ -132,7 +132,7 @@ namespace enigma {
 union VertexElement {
 	unsigned long d;
 	gs_scalar f;
-	
+
 	VertexElement(gs_scalar v): f(v) {}
 	VertexElement(unsigned long v): d(v) {}
 };
@@ -154,24 +154,24 @@ class Mesh
   vector<VertexElement> pointVertices; // The vertices added to point primitives batched into a single point list to be buffered to the GPU
   vector<VertexElement> pointIndexedVertices; // The vertices added to indexed point primitives batched into a single point list to be buffered to the GPU
   vector<unsigned> pointIndices; // The point indices either concatenated by batching or supplied in the temporary container.
-  
+
   unsigned vertexStride; // Whether the vertices are 2D or 3D
   bool useDepth; // Whether or not the Z-values should be treated as a depth component
   bool useColors; // If colors have been added to the model
   bool useTextures; // If texture coordinates have been added
   bool useNormals; // If normals have been added
-  
+
   unsigned pointCount; // The number of indices in the point buffer
   unsigned triangleCount; // The number of indices in the triangle buffer
   unsigned triangleVertCount; // The number of vertices in the triangle buffer
   unsigned lineCount; // The number of indices in the line buffer
   unsigned lineVertCount; //The number of vertices in the line buffer
-  
+
   unsigned indexedoffset; // The number of indexed vertices
   unsigned pointIndexedCount; // The number of point indices
   unsigned triangleIndexedCount; // The number of triangle indices
   unsigned lineIndexedCount; // The number of line indices
-  
+
   // Indexed primitives are first since the indices must be offset, and keeps them as small as possible.
   // INDEXEDTRIANGLES|INDEXEDLINES|INDEXEDPOINTS|TRIANGLES|LINES|POINTS
   LPDIRECT3DVERTEXBUFFER9 vertexbuffer;    // Interleaved vertex buffer object TRIANGLES|LINES|POINTS with triangles first since they are most likely to be used
@@ -180,7 +180,7 @@ class Mesh
   bool vbodynamic; // Whether the buffer is dynamically allocated in system memory, should be true for simple primitive calls
   bool vbobuffered; // Whether or not the buffer objects have been generated
   bool vboindexed; // Whether or not the model contains any indexed primitives or just regular lists
-  
+
   void SetPrimitive(int pr) {
 	vbobuffered = false;
 	currentPrimitive = pr;
@@ -199,10 +199,10 @@ class Mesh
 	triangleIndices.reserve(64000);
 	vertices.reserve(64000);
 	indices.reserve(64000);
-  
+
   	vertexbuffer = NULL;    // the pointer to the vertex buffer
 	indexbuffer = NULL;    // the pointer to the index buffer
-	
+
     vbobuffered = false;
 	vbodynamic = dynamic;
 
@@ -211,18 +211,18 @@ class Mesh
 	useColors = false;
     useTextures = false;
     useNormals = false;
-	
+
 	pointCount = 0;
 	triangleCount = 0;
 	triangleVertCount = 0;
 	lineCount = 0;
 	lineVertCount = 0;
-	
+
 	indexedoffset = 0;
 	pointIndexedCount = 0;
 	triangleIndexedCount = 0;
 	lineIndexedCount = 0;
-	
+
     currentPrimitive = 0;
   }
 
@@ -238,7 +238,7 @@ class Mesh
 		indexbuffer = NULL;
 	}
   }
-  
+
   void ClearData()
   {
     triangleVertices.clear();
@@ -255,7 +255,7 @@ class Mesh
   void Clear()
   {
     ClearData();
-	
+
 	triangleIndexedVertices.reserve(64000);
 	pointIndexedVertices.reserve(64000);
 	lineIndexedVertices.reserve(64000);
@@ -267,26 +267,26 @@ class Mesh
 	triangleIndices.reserve(64000);
 	vertices.reserve(64000);
 	indices.reserve(64000);
-	
+
 	vbobuffered = false;
-	
+
 	vertexStride = 0;
 	useColors = false;
     useTextures = false;
     useNormals = false;
-	
+
 	pointCount = 0;
 	triangleCount = 0;
 	triangleVertCount = 0;
 	lineCount = 0;
 	lineVertCount = 0;
-	
+
 	indexedoffset = 0;
 	pointIndexedCount = 0;
 	triangleIndexedCount = 0;
 	lineIndexedCount = 0;
   }
-  
+
   unsigned GetStride() {
 	unsigned stride = vertexStride;
     if (useNormals) stride += 3;
@@ -294,7 +294,7 @@ class Mesh
     if (useColors) stride += 1;
 	return stride;
   }
-  
+
   DWORD GetFVF() {
 	DWORD fvf = D3DFVF_XYZ;
     if (useNormals) fvf |= D3DFVF_NORMAL;
@@ -302,7 +302,7 @@ class Mesh
 	if (useTextures) fvf |= D3DFVF_TEX2;
 	return fvf;
   }
-  
+
   void Begin(int pt)
   {
     vbobuffered = false;
@@ -314,13 +314,13 @@ class Mesh
     vertices.push_back(x); vertices.push_back(y); vertices.push_back(0.0f);
 	vertexStride = 3;
   }
-  
+
   void AddVertex(gs_scalar x, gs_scalar y, gs_scalar z)
   {
     vertices.push_back(x); vertices.push_back(y); vertices.push_back(z);
 	vertexStride = 3;
   }
-  
+
   void AddIndex(unsigned ind)
   {
     indices.push_back(ind);
@@ -339,20 +339,21 @@ class Mesh
   }
 
   void AddColor(int col, double alpha)
-  {               
+  {
 	DWORD final = D3DCOLOR_ARGB( (unsigned char)(alpha*255), __GETR(col), __GETG(col), __GETB(col) );
-	vertices.push_back(final); 
+	vertices.push_back(final);
 	useColors = true;
   }
 
   void End()
   {
 	//NOTE: This batching only checks for degenerate primitives on triangle strips and fans since the GPU does not render triangles where the two
-	//vertices are exactly the same, triangle lists could also check for degenerates, it is unknown whether the GPU will render a degenerative 
+	//vertices are exactly the same, triangle lists could also check for degenerates, it is unknown whether the GPU will render a degenerative
 	//in a line strip primitive.
-	
+
 	unsigned stride = GetStride();
-	
+	if (vertices.size() == 0) return;
+
 	// Primitive has ended so now we need to batch the vertices that were given into single lists, eg. line list, triangle list, point list
 	// Indices are optionally supplied, model functions can also be added for the end user to supply the indexing themselves for each primitive
 	// but the batching system does not care either way if they are not supplied it will automatically generate them.
@@ -366,7 +367,7 @@ class Mesh
 				pointVertices.insert(pointVertices.end(), vertices.begin(), vertices.end());
 				pointCount += vertices.size() / stride;
 			}
-			
+
 			break;
 		case enigma_user::pr_linelist:
 			if (indices.size() > 0) {
@@ -463,12 +464,12 @@ class Mesh
   {
 	vector<VertexElement> vdata;
 	vector<unsigned> idata;
-	
+
 	vdata.reserve(triangleIndexedVertices.size() + lineIndexedVertices.size() + pointIndexedVertices.size() + triangleVertices.size() + lineVertices.size() + pointVertices.size());
 	idata.reserve(triangleIndices.size() + lineIndices.size() + pointIndices.size());
-	
+
 	unsigned interleave = 0;
-		
+
 	if (triangleIndices.size() > 0) {
 		vdata.insert(vdata.end(), triangleIndexedVertices.begin(), triangleIndexedVertices.end());
 		idata.insert(idata.end(), triangleIndices.begin(), triangleIndices.end());
@@ -476,7 +477,7 @@ class Mesh
 		triangleVertCount = triangleIndexedVertices.size();
 		triangleIndexedCount = triangleIndices.size();
 	}
-	
+
 	if (lineIndices.size() > 0) {
 		vdata.insert(vdata.end(), lineIndexedVertices.begin(), lineIndexedVertices.end());
 		for (unsigned i = 0; i < lineIndices.size(); i++) { lineIndices[i] += interleave; }
@@ -485,7 +486,7 @@ class Mesh
 		lineVertCount = lineIndexedVertices.size();
 		lineIndexedCount = lineIndices.size();
 	}
-	
+
 	if (pointIndices.size() > 0) {
 		vdata.insert(vdata.end(), pointIndexedVertices.begin(), pointIndexedVertices.end());
 		for (unsigned i = 0; i < pointIndices.size(); i++) { pointIndices[i] += interleave; }
@@ -493,7 +494,7 @@ class Mesh
 		//pointVertCount = pointIndexedVertices.size();
 		pointIndexedCount = pointIndices.size();
 	}
-	
+
 	if (indexbuffer != NULL) {
 		D3DINDEXBUFFER_DESC pDesc;
 		indexbuffer->GetDesc(&pDesc);
@@ -502,7 +503,7 @@ class Mesh
 			indexbuffer = NULL;
 		}
 	}
-	
+
 	if (idata.size() > 0) {
 		vboindexed = true;
 		indexedoffset += vdata.size();
@@ -525,22 +526,22 @@ class Mesh
 	} else {
 		vboindexed = false;
 	}
-	
+
 	if (triangleCount > 0) {
 		vdata.insert(vdata.end(), triangleVertices.begin(), triangleVertices.end());
 	}
-	
+
 	if (lineCount > 0) {
 		vdata.insert(vdata.end(), lineVertices.begin(), lineVertices.end());
 	}
-	
+
 	if (pointCount > 0) {
 		vdata.insert(vdata.end(), pointVertices.begin(), pointVertices.end());
 	}
-	
-	
+
+
 	unsigned stride = vertexStride;
-	
+
 	if (vertexbuffer != NULL) {
 		D3DVERTEXBUFFER_DESC pDesc;
 		vertexbuffer->GetDesc(&pDesc);
@@ -557,13 +558,13 @@ class Mesh
 			d3dmgr->CreateVertexBuffer(vdata.size() * sizeof( gs_scalar ), D3DUSAGE_WRITEONLY, GetFVF(), D3DPOOL_MANAGED, &vertexbuffer, NULL);
 		}
 	}
-	
+
 	// Send the data to the GPU
 	// lock vertex buffer and load the vertices into it
 	VOID* pVoid;    // a void pointer
 	vertexbuffer->Lock(0, 0, (VOID**)&pVoid, D3DLOCK_DISCARD);
 	memcpy(pVoid, &vdata[0], vdata.size() * sizeof(gs_scalar));
-	
+
 	vertexbuffer->Unlock();
 
 	// Clean up temporary interleaved data
@@ -573,7 +574,7 @@ class Mesh
   }
 
   void Draw()
-  {				
+  {
 	if (!GetStride()) { return; }
     if (vertexbuffer == NULL || !vbobuffered) {
 	  vbobuffered = true;
@@ -588,18 +589,18 @@ class Mesh
 	if (vboindexed) {
 		d3dmgr->SetIndices(indexbuffer);
 	}
-	
+
 	unsigned offset = 0, base = 0;
-	
+
 	// Draw the indexed primitives
-	if (triangleIndexedCount > 0) { 
-		d3dmgr->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, base, base, 
+	if (triangleIndexedCount > 0) {
+		d3dmgr->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, base, base,
 			triangleVertCount, offset, triangleIndexedCount / 3);
 			offset += triangleIndexedCount;
 			base += triangleVertCount/stride;
 	}
 	if (lineVertCount > 0) {
-		d3dmgr->DrawIndexedPrimitive(D3DPT_LINELIST, base, 0, 
+		d3dmgr->DrawIndexedPrimitive(D3DPT_LINELIST, base, 0,
 			lineVertCount/stride, offset, lineIndexedCount/2);
 			offset += lineIndexedCount;
 			base += lineVertCount/stride;
@@ -608,11 +609,11 @@ class Mesh
 		d3dmgr->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, base, 0,
 			pointCount, offset, pointIndexedCount);
 	}
-	
+
 	offset = indexedoffset/stride;
-	
+
 	// Draw the unindexed primitives
-	if (triangleCount > 0) { 
+	if (triangleCount > 0) {
 		d3dmgr->DrawPrimitive(D3DPT_TRIANGLELIST, offset, triangleCount / 3);
 		offset += triangleCount / 3;
 	}
