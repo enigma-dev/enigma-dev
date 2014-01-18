@@ -17,6 +17,7 @@
 
 #include <string>
 using std::string;
+#include "Universal_System/scalar.h"
 
 namespace enigma_user {
   int screen_save(string filename);
@@ -28,7 +29,8 @@ namespace enigma_user {
   void screen_redraw();
   void screen_refresh();
   void screen_init();
-  
+  void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height);
+
   unsigned display_get_gui_width();
   unsigned display_get_gui_height();
   void display_set_gui_size(unsigned width, unsigned height);

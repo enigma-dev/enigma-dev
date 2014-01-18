@@ -22,6 +22,7 @@
 #include "../General/GSbackground.h"
 #include "../General/GSscreen.h"
 #include "../General/GSd3d.h"
+#include "../General/GSmatrix.h"
 #include "../General/GStextures.h"
 #include "../General/GScolors.h"
 
@@ -113,37 +114,15 @@ namespace enigma_user
 
 void screen_redraw()
 {
-	// Should implement extended lost device checking
+	//TODO: Should implement extended lost device checking
 	//if (d3dmgr == NULL ) return;
 
     d3dmgr->BeginScene();    // begins the 3D scene
 
 	if (!view_enabled)
     {
-		D3DVIEWPORT9 pViewport = { 0, 0, (DWORD)window_get_region_width_scaled(), (DWORD)window_get_region_height_scaled(), 0, 1.0f };
-		d3dmgr->SetViewport(&pViewport);
-
-		D3DXMATRIX matTrans, matScale;
-
-		// Calculate a translation matrix
-		D3DXMatrixTranslation(&matTrans, -0.5, -room_height - 0.5, 0);
-		D3DXMatrixScaling(&matScale, 1, -1, 1);
-
-		// Calculate our world matrix by multiplying the above (in the correct order)
-		D3DXMATRIX matWorld = matTrans * matScale;
-
-		// Set the matrix to be applied to anything we render from now on
-		d3dmgr->SetTransform( D3DTS_VIEW, &matWorld);
-
-		D3DXMATRIX matProjection;    // the projection transform matrix
-		D3DXMatrixOrthoOffCenterLH(&matProjection,
-							0,
-							(FLOAT)room_width,
-							0,
-							(FLOAT)room_height,
-							-32000.0f,    // the near view-plane
-							32000.0f);    // the far view-plane
-		d3dmgr->SetTransform(D3DTS_PROJECTION, &matProjection);    // set the projection transform
+		screen_set_viewport(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled());
+		d3d_set_projection_ortho(0, 0, room_width, room_height, 0);
 
 		if (background_showcolor)
 		{
@@ -296,31 +275,9 @@ void screen_redraw()
 				}
 			}
 
-			D3DVIEWPORT9 pViewport = { (DWORD)view_xport[vc], (DWORD)view_yport[vc],
-				(DWORD)(window_get_region_width_scaled() - view_xport[vc]), (DWORD)(window_get_region_height_scaled() - view_yport[vc]), 0, 1.0f };
-			d3dmgr->SetViewport(&pViewport);
-
-			D3DXMATRIX matTrans, matScale;
-
-			// Calculate a translation matrix
-			D3DXMatrixTranslation(&matTrans, -view_xview[vc] - 0.5, -view_yview[vc] - room_height - 0.5, 0);
-			D3DXMatrixScaling(&matScale, 1, -1, 1);
-
-			// Calculate our world matrix by multiplying the above (in the correct order)
-			D3DXMATRIX matWorld = matTrans * matScale;
-
-			// Set the matrix to be applied to anything we render from now on
-			d3dmgr->SetTransform( D3DTS_VIEW, &matWorld);
-
-			D3DXMATRIX matProjection;    // the projection transform matrix
-			D3DXMatrixOrthoOffCenterLH(&matProjection,
-						0,
-						(int)view_wview[vc],
-						0,
-						(int)view_hview[vc],
-						-32000.0f,    // the near view-plane
-						32000.0f);    // the far view-plane
-			d3dmgr->SetTransform(D3DTS_PROJECTION, &matProjection);    // set the projection transform
+			screen_set_viewport(view_xport[vc], view_yport[vc],
+				(window_get_region_width_scaled() - view_xport[vc]), (window_get_region_height_scaled() - view_yport[vc]));
+			d3d_set_projection_ortho(view_xview[vc], view_wview[vc] + view_xview[vc], view_yview[vc], view_hview[vc] + view_yview[vc], 0);
 
 			if (background_showcolor && view_first)
 			{
@@ -398,30 +355,8 @@ void screen_redraw()
     {
 		// Now process the sub event of draw called draw gui
 		// It is for drawing GUI elements without view scaling and transformation
-		D3DVIEWPORT9 pViewport = { 0, 0, window_get_region_width_scaled(), window_get_region_height_scaled(), 0, 1.0f };
-		d3dmgr->SetViewport(&pViewport);
-
-		D3DXMATRIX matTrans, matScale;
-
-		// Calculate a translation matrix
-		D3DXMatrixTranslation(&matTrans, -0.5, -room_height - 0.5, 0);
-		D3DXMatrixScaling(&matScale, 1, -1, 1);
-
-		// Calculate our world matrix by multiplying the above (in the correct order)
-		D3DXMATRIX matWorld = matTrans * matScale;
-
-		// Set the matrix to be applied to anything we render from now on
-		d3dmgr->SetTransform( D3DTS_VIEW, &matWorld);
-
-		D3DXMATRIX matProjection;    // the projection transform matrix
-		D3DXMatrixOrthoOffCenterLH(&matProjection,
-							0,
-							(FLOAT)enigma::gui_width,
-							0,
-							(FLOAT)enigma::gui_height,
-							-32000.0f,    // the near view-plane
-							32000.0f);    // the far view-plane
-		d3dmgr->SetTransform(D3DTS_PROJECTION, &matProjection);    // set the projection transform
+		screen_set_viewport(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled());
+		d3d_set_projection_ortho(0, 0, enigma::gui_width, enigma::gui_height, 0);
 		
 		// Clear the depth buffer if hidden surface removal is on at the beginning of the draw step.
         if (enigma::d3dMode)
@@ -462,70 +397,20 @@ void screen_init()
 	
     if (!view_enabled)
     {
-        //glMatrixMode(GL_PROJECTION);
-          //gluPerspective(0, 1, 0, 1);
-        //glMatrixMode(GL_MODELVIEW);
-
 		d3dmgr->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
 
-		D3DVIEWPORT9 pViewport = { 0, 0, (DWORD)window_get_region_width_scaled(), (DWORD)window_get_region_height_scaled(), 0, 1.0f };
-		d3dmgr->SetViewport(&pViewport);
-
-		D3DXMATRIX matTrans, matScale;
-
-		// Calculate a translation matrix
-		D3DXMatrixTranslation(&matTrans, -0.5, -room_height - 0.5, 0);
-		D3DXMatrixScaling(&matScale, 1, -1, 1);
-
-		// Calculate our world matrix by multiplying the above (in the correct order)
-		D3DXMATRIX matWorld = matTrans * matScale;
-
-		// Set the matrix to be applied to anything we render from now on
-		d3dmgr->SetTransform( D3DTS_VIEW, &matWorld);
-
-		D3DXMATRIX matProjection;    // the projection transform matrix
-		D3DXMatrixOrthoOffCenterLH(&matProjection,
-							0,
-							(FLOAT)room_width,
-							0,
-							(FLOAT)room_height,
-							0.0f,    // the near view-plane
-							1.0f);    // the far view-plane
-		d3dmgr->SetTransform(D3DTS_PROJECTION, &matProjection);    // set the projection transform
+		screen_set_viewport(0, 0, (DWORD)window_get_region_width_scaled(), (DWORD)window_get_region_height_scaled());
+		d3d_set_projection_ortho(0, 0, room_width, room_height, 0);
     } else {
 		for (view_current = 0; view_current < 7; view_current++)
         {
             if (view_visible[(int)view_current])
             {
                 int vc = (int)view_current;
-                  //gluPerspective(0, 1, 0, 1);
 
-				D3DVIEWPORT9 pViewport = { (DWORD)view_xport[vc], (DWORD)view_yport[vc],
-					(DWORD)(window_get_region_width_scaled() - view_xport[vc]), (DWORD)(window_get_region_height_scaled() - view_yport[vc]), 0, 1.0f };
-				d3dmgr->SetViewport(&pViewport);
-
-				D3DXMATRIX matTrans, matScale;
-
-				// Calculate a translation matrix
-				D3DXMatrixTranslation(&matTrans, -view_xview[vc] - 0.5, -view_yview[vc] - room_height - 0.5, 0);
-				D3DXMatrixScaling(&matScale, 1, -1, 1);
-
-				// Calculate our world matrix by multiplying the above (in the correct order)
-				D3DXMATRIX matWorld = matTrans * matScale;
-
-				// Set the matrix to be applied to anything we render from now on
-				d3dmgr->SetTransform( D3DTS_VIEW, &matWorld);
-
-				D3DXMATRIX matProjection;    // the projection transform matrix
-				D3DXMatrixOrthoOffCenterLH(&matProjection,
-							0,
-							(FLOAT)view_wview[vc],
-							0,
-							(FLOAT)view_hview[vc],
-							0.0f,    // the near view-plane
-							1.0f);    // the far view-plane
-				d3dmgr->SetTransform(D3DTS_PROJECTION, &matProjection);    // set the projection transform
-
+				screen_set_viewport(view_xport[vc], view_yport[vc],
+					(window_get_region_width_scaled() - view_xport[vc]), (window_get_region_height_scaled() - view_yport[vc]));
+				d3d_set_projection_ortho(view_xview[vc], view_wview[vc] + view_xview[vc], view_yview[vc], view_hview[vc] + view_yview[vc], 0);
                 break;
             }
         }
@@ -550,6 +435,11 @@ int screen_save(string filename) //Assumes native integers are little endian
 int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h) //Assumes native integers are little endian
 {
 
+}
+
+void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height) {
+	D3DVIEWPORT9 pViewport = { x, y, width, height, 0, 1.0f };
+	d3dmgr->SetViewport(&pViewport);
 }
 
 void display_set_gui_size(unsigned width, unsigned height) {
