@@ -339,6 +339,7 @@ class Mesh
 	//in a line strip primitive.
 
 	unsigned stride = GetStride();
+	if (vertices.size() == 0) return;
 
 	// Primitive has ended so now we need to batch the vertices that were given into single lists, eg. line list, triangle list, point list
 	// Indices are optionally supplied, model functions can also be added for the end user to supply the indexing themselves for each primitive
