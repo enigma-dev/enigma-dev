@@ -485,4 +485,3 @@ void display_set_gui_size(unsigned width, unsigned height) {
 }
 
 }
-
