@@ -132,6 +132,7 @@ namespace enigma
           return 0;
         case FocusOut:
           if (enigma::freezeOnLoseFocus) {
+			//TODO: Application hangs and then crashes and will not unfreeze when the form regains focus, needs fixed.
             //gameFroze = true;
           }
           return 0;
