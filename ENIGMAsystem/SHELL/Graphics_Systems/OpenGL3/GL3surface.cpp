@@ -18,6 +18,8 @@
 
 #include "../General/OpenGLHeaders.h"
 #include "../General/GLTextureStruct.h"
+#include "../General/GSscreen.h"
+#include "../General/GSmatrix.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 
 using namespace std;
@@ -208,14 +210,12 @@ void surface_set_target(int id)
   texture_reset();
   //This fixes several consecutive surface_set_target() calls without surface_reset_target.
   if (enigma::bound_framebuffer != 0) glPopAttrib(); glPopMatrix();
-  //
   enigma::bound_framebuffer = surf->fbo;
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, surf->fbo); //bind it
   glPushMatrix(); //So you can pop it in the reset
   glPushAttrib(GL_VIEWPORT_BIT); //same
-  glViewport(0,0,surf->width,surf->height);
-  glLoadIdentity();
-  glOrtho(0, surf->width, 0, surf->height, -1, 1);
+  screen_set_viewport(0, 0, surf->width, surf->height);
+  d3d_set_projection_ortho(0, 0, surf->width, surf->height, 0);
 }
 
 void surface_reset_target(void)
@@ -430,9 +430,8 @@ void surface_copy_part(int destination, float x, float y, int source, int xs, in
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dsurf->fbo);
     glPushMatrix();
     glPushAttrib(GL_VIEWPORT_BIT);
-    glViewport(0,0,dsurf->width,dsurf->height);
-    glLoadIdentity();
-    glOrtho(0, dsurf->width, 0, dsurf->height, -1, 1);
+    screen_set_viewport(0, 0, dsurf->width, dsurf->height);
+    d3d_set_projection_ortho(0, 0, dsurf->width, dsurf->height, 0);
 	glRasterPos2d(x, y);
 	glDrawPixels(ws,hs,GL_RGBA,GL_UNSIGNED_BYTE,surfbuf);
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, enigma::bound_framebuffer);
@@ -452,9 +451,8 @@ void surface_copy(int destination, float x, float y, int source)
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dsurf->fbo);
     glPushMatrix();
     glPushAttrib(GL_VIEWPORT_BIT);
-    glViewport(0,0,dsurf->width,dsurf->height);
-    glLoadIdentity();
-    glOrtho(0, dsurf->width, 0, dsurf->height, -1, 1);
+    screen_set_viewport(0, 0, dsurf->width, dsurf->height);
+    d3d_set_projection_ortho(0, 0, dsurf->width, dsurf->height, 0);
 	glRasterPos2d(x, y);
 	glDrawPixels(dsurf->width,dsurf->height,GL_RGBA,GL_UNSIGNED_BYTE,surfbuf);
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, enigma::bound_framebuffer);
