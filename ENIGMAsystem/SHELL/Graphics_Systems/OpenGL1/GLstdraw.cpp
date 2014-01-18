@@ -27,10 +27,16 @@
 #define __GETG(x) ((x & 0x00FF00) >> 8)
 #define __GETB(x) ((x & 0xFF0000) >> 16)
 
-//glew.h defines CALLBACK on Windows. 
-//If we are on Linux, it hasn't been defined yet, so just define it as empty.
+//Proper calling convention is needed on Windows to prevent random crashing.
+//However, we assume that if CALLBACK is already defined then it is defined correctly.
 #ifndef CALLBACK
-#define CALLBACK
+#  if defined(__MINGW32__) || defined(__CYGWIN__)
+#    define CALLBACK __attribute__ ((__stdcall__))
+#  elif (defined(_M_MRX000) || defined(_M_IX86) || defined(_M_ALPHA) || defined(_M_PPC)) && !defined(MIDL_PASS)
+#    define CALLBACK __stdcall
+#  else
+#    define CALLBACK
+#  endif
 #endif
 
 namespace enigma {
@@ -185,7 +191,7 @@ void clear_free_extra_vertex_list()
   extra_vertices.clear();
 }
 
-void combineCallback(GLdouble coords[3], GLdouble* vertex_data[4], GLfloat weight[4], GLdouble **dataOut)
+void CALLBACK combineCallback(GLdouble coords[3], GLdouble* vertex_data[4], GLfloat weight[4], GLdouble **dataOut)
 {
   GLdouble* vertex = make_vertex(6);
   if (vertex) {
@@ -206,7 +212,7 @@ void combineCallback(GLdouble coords[3], GLdouble* vertex_data[4], GLfloat weigh
   *dataOut = vertex;
 }
 
-void vertexCallback(GLvoid *vertex)
+void CALLBACK vertexCallback(GLvoid *vertex)
 {
   GLdouble* ptr = (GLdouble*)vertex;
   glColor3dv(ptr + 3);
@@ -223,10 +229,10 @@ bool fill_complex_polygon(const std::list<PolyVertex>& vertices, int defaultColo
   GLUtesselator* tessObj = gluNewTess();
   if (!tessObj) { return false; }
   //Assign callback functions for vertex drawing and combining.
-  gluTessCallback(tessObj, GLU_TESS_BEGIN,   (void (CALLBACK*)(void)) glBegin);
-  gluTessCallback(tessObj, GLU_TESS_END,     (void (CALLBACK*)(void)) glEnd);
-  gluTessCallback(tessObj, GLU_TESS_VERTEX,  (void (CALLBACK*)(void)) vertexCallback);
-  gluTessCallback(tessObj, GLU_TESS_COMBINE, (void (CALLBACK*)(void)) combineCallback);
+  gluTessCallback(tessObj, GLU_TESS_BEGIN,   (GLvoid (CALLBACK*)()) &glBegin);
+  gluTessCallback(tessObj, GLU_TESS_END,     (GLvoid (CALLBACK*)()) &glEnd);
+  gluTessCallback(tessObj, GLU_TESS_VERTEX,  (GLvoid (CALLBACK*)()) &vertexCallback);
+  gluTessCallback(tessObj, GLU_TESS_COMBINE, (GLvoid (CALLBACK*)()) &combineCallback);
 
   //Set the winding rule for overlapping edges.
   gluTessProperty(tessObj, GLU_TESS_WINDING_RULE,  (allowHoles?GLU_TESS_WINDING_ODD:GLU_TESS_WINDING_NONZERO));
