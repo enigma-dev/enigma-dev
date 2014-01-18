@@ -1,4 +1,4 @@
-       /** Copyright (C) 2013 Robert B. Colton, Adriano Tumminelli
+/** Copyright (C) 2013 Robert B. Colton, Adriano Tumminelli
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
