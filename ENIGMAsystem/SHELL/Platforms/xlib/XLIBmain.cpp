@@ -127,14 +127,14 @@ namespace enigma
             //screen_refresh();
           return 0;
         }
-		case FocusIn:
-			gameFroze = false;
-			return 0;
-		case FocusOut:
-			if (enigma::freezeOnLoseFocus) {
-				gameFroze = true;
-			}
-			return 0;
+        case FocusIn:
+          gameFroze = false;
+          return 0;
+        case FocusOut:
+          if (enigma::freezeOnLoseFocus) {
+            //gameFroze = true;
+          }
+          return 0;
         case ClientMessage:
           if ((unsigned)e.xclient.data.l[0] == (unsigned)wm_delwin) //For some reason, this line warns whether we cast to unsigned or not.
             return 1;

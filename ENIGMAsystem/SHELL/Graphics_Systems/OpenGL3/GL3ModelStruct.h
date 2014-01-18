@@ -20,6 +20,7 @@
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
 #include <math.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -127,12 +128,23 @@ namespace enigma {
   }
 }
 
+template<int x> struct intmatch { };
+template<int x> struct uintmatch { };
+template<> struct intmatch<1>   { typedef int8_t type;  };
+template<> struct intmatch<2>   { typedef int16_t type; };
+template<> struct intmatch<4>   { typedef int32_t type; };
+template<> struct intmatch<8>   { typedef int64_t type; };
+template<> struct uintmatch<1>  { typedef uint8_t type;  };
+template<> struct uintmatch<2>  { typedef uint16_t type; };
+template<> struct uintmatch<4>  { typedef uint32_t type; };
+template<> struct uintmatch<8>  { typedef uint64_t type; };
+typedef uintmatch<sizeof(gs_scalar)>::type color_t;
 union VertexElement {
-	unsigned long d;
+	color_t d;
 	gs_scalar f;
 
 	VertexElement(gs_scalar v): f(v) {}
-	VertexElement(unsigned long v): d(v) {}
+	VertexElement(color_t v): d(v) {}
 };
 
 //NOTE: This class handles batching, indexing, and other optimization for you and is very very efficient.
@@ -314,8 +326,8 @@ class Mesh
 
   void AddColor(int col, double alpha)
   {
-	unsigned long final = col + ((unsigned char)(alpha*255) << 24);
-	vertices.push_back(final);
+	color_t finalcol = col + ((unsigned char)(alpha*255) << 24);
+	vertices.push_back(finalcol);
 	useColors = true;
   }
 
