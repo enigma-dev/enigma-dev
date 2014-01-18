@@ -120,9 +120,9 @@ void screen_redraw()
     if (!view_enabled)
     {
         if (FBO!=0){ //This fixes off-by-one error when rendering on surfaces. This should be checked to see if other GPU's have the same effect
-            glViewport(1, 1, window_get_region_width_scaled()+1, window_get_region_height_scaled()+1);
+            screen_set_viewport(1, 1, window_get_region_width_scaled()+1, window_get_region_height_scaled()+1);
         }else{
-            glViewport(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled());
+            screen_set_viewport(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled());
         }
         glLoadIdentity();
         glScalef(1, ((FBO==0||enigma::msaa_fbo!=0)?-1:1), 1);
@@ -285,9 +285,9 @@ void screen_redraw()
 			}
 
             if (FBO!=0){ //This fixes off-by-one error when rendering on surfaces. This should be checked to see if other GPU's have the same effect
-                glViewport(view_xport[vc]+1, view_yport[vc]+1, window_get_region_width_scaled() - view_xport[vc]+1, window_get_region_height_scaled() - view_yport[vc]+1);
+                screen_set_viewport(view_xport[vc]+1, view_yport[vc]+1, window_get_region_width_scaled() - view_xport[vc]+1, window_get_region_height_scaled() - view_yport[vc]+1);
             }else{
-                glViewport(view_xport[vc], view_yport[vc], window_get_region_width_scaled() - view_xport[vc], window_get_region_height_scaled() - view_yport[vc]);
+                screen_set_viewport(view_xport[vc], view_yport[vc], window_get_region_width_scaled() - view_xport[vc], window_get_region_height_scaled() - view_yport[vc]);
             }
 			glLoadIdentity();
 			glScalef(1, ((FBO==0||enigma::msaa_fbo!=0)?-1:1), 1);
@@ -372,7 +372,7 @@ void screen_redraw()
 	// It is for drawing GUI elements without view scaling and transformation
     if (enigma::gui_used)
     {
-        glViewport(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled());
+        screen_set_viewport(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled());
         glLoadIdentity();
         if (GLEW_EXT_framebuffer_object) {
             glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &enigma::FBO);
@@ -447,7 +447,7 @@ void screen_init()
           glLoadIdentity();
           gluPerspective(0, 1, 0, 1);
         glMatrixMode(GL_MODELVIEW);
-          glViewport(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled());
+          screen_set_viewport(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled());
           glLoadIdentity();
           glScalef(1, -1, 1);
           glOrtho(0, room_width, 0, room_height, 0, 1);
@@ -464,7 +464,7 @@ void screen_init()
                   glLoadIdentity();
                   gluPerspective(0, 1, 0, 1);
                 glMatrixMode(GL_MODELVIEW);
-                  glViewport(view_xport[vc], view_yport[vc], view_wport[vc], view_hport[vc]);
+                  screen_set_viewport(view_xport[vc], view_yport[vc], view_wport[vc], view_hport[vc]);
                   glLoadIdentity();
                   glScalef(1, -1, 1);
                   glOrtho(view_xview[vc], view_wview[vc] + view_xview[vc], view_yview[vc], view_hview[vc] + view_yview[vc], 0, 1);
@@ -535,6 +535,10 @@ int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h
 
 	delete[] rgbdata;
 	return ret;
+}
+
+void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height) {
+	glViewport(x, y, width, height);
 }
 
 void display_set_gui_size(unsigned width, unsigned height) {
