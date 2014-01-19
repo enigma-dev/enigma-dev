@@ -30,7 +30,7 @@ BEGIN
 			VALUE "FileVersion",         "100\0"
 			VALUE "ProductName",         "ENIGMA Development Environment"
 			VALUE "ProductVersion",      "100\0"
-			VALUE "LegalCopyright",      "Copyright (C) 2013 The ENIGMA Team"
+			VALUE "LegalCopyright",      "Copyright (C) 2008-2014 The ENIGMA Team"
 			VALUE "OriginalFilename",         "enigma.exe"
 		END
 	END
