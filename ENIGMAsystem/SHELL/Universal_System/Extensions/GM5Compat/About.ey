@@ -1,0 +1,14 @@
+%E-YAML
+---
+
+Name: GM5Compat
+ID: GM5 Compat
+Description: Compatibility function calls for Game Maker 5.
+Default: false
+Build-date: 01/18/2014
+Icon: gm5compat_logo.png
+
+Depends: None
+Dependencies: None
+Implement: extension_gm5compat
+
