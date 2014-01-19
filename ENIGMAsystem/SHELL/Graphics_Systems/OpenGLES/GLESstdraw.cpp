@@ -724,6 +724,9 @@ int draw_mandelbrot(int x, int y, float w, double Zx, double Zy, double Zw, unsi
 	glEnd(); OPENGLES*/
 	return c;
 }
+}
+
+namespace enigma{
 
 bool fill_complex_polygon(const std::list<PolyVertex>& vertices, int defaultColor, bool allowHoles)
 {

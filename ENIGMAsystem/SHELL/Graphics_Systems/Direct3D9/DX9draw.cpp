@@ -106,6 +106,10 @@ int draw_getpixel_ext(int x, int y)
 
 }
 
+}
+
+namespace enigma{
+
 bool fill_complex_polygon(const std::list<PolyVertex>& vertices, int defaultColor, bool allowHoles)
 {
   //TODO: Complex polygon supported only in OpenGL1 at the moment. By returning false here, we fall back
