@@ -101,6 +101,9 @@ int draw_getpixel_ext(int x, int y)
 {
 
 }
+}
+
+namespace enigma{
 
 bool fill_complex_polygon(const std::list<PolyVertex>& vertices, int defaultColor, bool allowHoles)
 {
