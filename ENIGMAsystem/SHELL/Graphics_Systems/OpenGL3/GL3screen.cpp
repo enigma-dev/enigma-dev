@@ -242,7 +242,7 @@ static inline int draw_tiles()
   return 0;
 }
 
-void clear_view(float x, float w, float y, float h, bool showcolor)
+void clear_view(float x, float y, float w, float h, bool showcolor)
 {
   d3d_set_projection_ortho(x, y, w, h, 0);
 
@@ -310,7 +310,7 @@ void screen_redraw()
     else
       screen_set_viewport(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled());
     
-    clear_view(0, room_width, 0, room_height, background_showcolor);
+    clear_view(0, 0, room_width, room_height, background_showcolor);
     draw_back();
     draw_insts();
     draw_tiles();
@@ -337,7 +337,7 @@ void screen_redraw()
         printf("%d %d %d %d\n", (int)view_xport[vc], (int)view_yport[vc], (int)view_wport[vc], (int)view_hport[vc]),
         screen_set_viewport(view_xport[vc], view_yport[vc], view_wport[vc], view_hport[vc]);
 	  
-      clear_view(float(view_xview[vc]), float(view_wview[vc] + view_xview[vc]), float(view_yview[vc]), float(view_hview[vc] + view_yview[vc]), background_showcolor && draw_backs);
+      clear_view(view_xview[vc], view_yview[vc], view_wview[vc], view_hview[vc], background_showcolor && draw_backs);
 
       if (draw_backs)
         draw_back();
