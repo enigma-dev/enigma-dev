@@ -99,7 +99,7 @@ string get_open_filename(string filter, string fname, string caption)
   gdk_threads_enter();
 
     GtkWidget *dialog;
-    dialog = gtk_file_chooser_dialog_new (caption.length()? "Open File" : caption.c_str(), NULL, GTK_FILE_CHOOSER_ACTION_OPEN,
+    dialog = gtk_file_chooser_dialog_new (caption.empty()? "Open File" : caption.c_str(), NULL, GTK_FILE_CHOOSER_ACTION_OPEN,
              GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
 
     parse_filter_string(GTK_FILE_CHOOSER(dialog), filter);
@@ -126,7 +126,7 @@ string get_save_filename(string filter, string fname, string caption)
   gdk_threads_enter();
 
     GtkWidget *dialog;
-    dialog = gtk_file_chooser_dialog_new (caption.length()? "Save File" : caption.c_str(), NULL, GTK_FILE_CHOOSER_ACTION_SAVE,
+    dialog = gtk_file_chooser_dialog_new (caption.empty()? "Save File" : caption.c_str(), NULL, GTK_FILE_CHOOSER_ACTION_SAVE,
              GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
 
     parse_filter_string(GTK_FILE_CHOOSER(dialog), filter);
