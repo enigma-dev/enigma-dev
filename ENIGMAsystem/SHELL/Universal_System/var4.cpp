@@ -97,7 +97,7 @@ types_extrapolate_string_p(variant::variant,: rval(0), sval(x), type(tstr) {})
 //variant::variant(var x): rval(x[0].rval), sval(x[0].sval) { }
 variant::variant(const variant& x): rval(x.rval.d), sval(x.sval), type(x.type) { }
 variant::variant(const var& x): rval((*x).rval.d), sval((*x).sval), type((*x).type) { }
-variant::variant(): rval(0), sval( ), type(-1) { }
+variant::variant(): rval(0), sval( ), type(default_type) { }
 
 types_extrapolate_real_p  (variant& variant::operator=, { rval.d = x; type = real; return *this; })
 types_extrapolate_string_p(variant& variant::operator=, { sval   = x; type = tstr; return *this; })

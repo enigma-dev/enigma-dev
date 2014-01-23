@@ -63,7 +63,10 @@ int lang_CPP::compile_writeGlobals(EnigmaStruct* es, parsed_object* global)
     wto << "namespace enigma_user { " << endl;
     wto << "  string working_directory = \"" << working_directory << "\";" << endl;
     wto << "  unsigned int game_id = " << es->gameSettings.gameId << ";" << endl;
-    wto << "}" << endl;
+    wto << "}" << endl <<endl;
+
+    wto << "//Default variable type: \"undefined\" or \"real\"" <<endl;
+    wto << "const int variant::default_type = " <<(es->gameSettings.treatUninitializedAs0 ? "enigma::vt_real" : "-1") <<";" <<endl <<endl;
 
     wto << "namespace enigma {" << endl;
     wto << "  bool interpolate_textures = " << es->gameSettings.interpolate << ";" << endl;
