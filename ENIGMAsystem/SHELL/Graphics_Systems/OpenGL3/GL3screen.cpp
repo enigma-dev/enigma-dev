@@ -18,11 +18,11 @@
 #include <string>
 #include <cstdio>
 #include "../General/OpenGLHeaders.h"
+#include "../General/GStextures.h"
 #include "../General/GSbackground.h"
 #include "../General/GSscreen.h"
 #include "../General/GSd3d.h"
 #include "../General/GSmatrix.h"
-#include "../General/GStextures.h"
 #include "../General/GScolors.h"
 #include "Bridges/General/GL3Context.h"
 
@@ -53,6 +53,23 @@ using namespace enigma;
 namespace enigma_user {
   extern int window_get_width();
   extern int window_get_height();
+}
+
+namespace enigma
+{
+  extern GLuint msaa_fbo;
+  extern bool d3dMode;
+  extern bool d3dZWriteEnable;
+  extern int d3dCulling;
+  extern std::map<int,roomstruct*> roomdata;
+  particles_implementation* particles_impl;
+  void set_particles_implementation(particles_implementation* part_impl) {
+    particles_impl = part_impl;
+  }
+
+  unsigned gui_width;
+  unsigned gui_height;
+  unsigned int bound_framebuffer = 0; //Shows the bound framebuffer, so glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &fbo); don't need to be called (they are very slow)
 }
 
 static inline void draw_back()
@@ -162,23 +179,6 @@ static inline void follow_object(int vob, size_t vc)
     else if (view_yview[vc] > room_height - view_hview[vc])
       view_yview[vc] = room_height - view_hview[vc];
   }
-}
-
-namespace enigma
-{
-  extern GLuint msaa_fbo;
-  extern bool d3dMode;
-  extern bool d3dZWriteEnable;
-  extern int d3dCulling;
-  extern std::map<int,roomstruct*> roomdata;
-  particles_implementation* particles_impl;
-  void set_particles_implementation(particles_implementation* part_impl) {
-    particles_impl = part_impl;
-  }
-
-  unsigned gui_width;
-  unsigned gui_height;
-  unsigned int bound_framebuffer = 0; //Shows the bound framebuffer, so glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &fbo); don't need to be called (they are very slow)
 }
 
 static inline void draw_insts()

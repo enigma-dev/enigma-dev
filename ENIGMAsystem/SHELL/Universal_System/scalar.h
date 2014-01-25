@@ -20,10 +20,10 @@
 // to allow you to easily switch major systems between degrees and radians.
 
 // Uncomment the following lines below to switch to double.
-//#define MA_SCALAR_64
+#define MA_SCALAR_64
 //#define GS_SCALAR_64
 //#define AS_SCALAR_64
-//#define CS_SCALAR_64
+#define CS_SCALAR_64
 
 // Controls mathematics scalar precision
 #ifdef MA_SCALAR_64
