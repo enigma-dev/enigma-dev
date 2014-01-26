@@ -170,7 +170,7 @@ int draw_getpixel_ext(int x,int y)
     return rgba[0] | rgba[1] << 8 | rgba[2] << 16 | rgba[3] << 24;
   #endif
 }
-
+}
 
 namespace {
 
@@ -220,10 +220,13 @@ void CALLBACK vertexCallback(GLvoid *vertex)
 }
 }
 
+namespace enigma
+{
+
 bool fill_complex_polygon(const std::list<PolyVertex>& vertices, int defaultColor, bool allowHoles)
 {
   //Supposedly this is required; see notes in GLPrimities.cpp
-  texture_reset();
+  enigma_user::texture_reset();
 
   //Create a GLU tessellation object.
   GLUtesselator* tessObj = gluNewTess();
@@ -265,5 +268,6 @@ bool fill_complex_polygon(const std::list<PolyVertex>& vertices, int defaultColo
   clear_free_extra_vertex_list();
   return true;
 }
+
 }
 
