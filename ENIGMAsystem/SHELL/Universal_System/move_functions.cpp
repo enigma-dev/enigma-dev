@@ -21,6 +21,7 @@
 #include "instance_system.h"
 #include "roomsystem.h"
 #include "move_functions.h"
+
 #include <floatcomp.h>
 
 namespace enigma_user
@@ -90,7 +91,7 @@ void move_towards_point (const cs_scalar point_x, const cs_scalar point_y, const
     inst->speed = (newspeed);
 }
 
-extern cs_scalar random(cs_scalar x);
+extern ma_scalar random(ma_scalar x);
 
 void move_random(const cs_scalar snapHor, const cs_scalar snapVer)
 {

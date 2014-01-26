@@ -1,5 +1,5 @@
 /** Copyright (C) 2008-2012 Josh Ventura, DatZach, Polygone
-*** Copyright (C) 2013-2014 Robert B. Colton, Polygone
+*** Copyright (C) 2013-2014 Robert B. Colton, Polygone, Harijs Grinbergs
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -19,6 +19,7 @@
 #include "../General/OpenGLHeaders.h"
 #include "../General/GSd3d.h"
 #include "../General/GSmatrix.h"
+#include "../General/GSmath.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
 #include "Universal_System/var4.h"
@@ -28,7 +29,22 @@ using namespace std;
 
 #include <floatcomp.h>
 
-double projection_matrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1}, transformation_matrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
+enigma::Matrix4f view_matrix(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1), model_matrix(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1);
+
+//NOTE: THIS IS STILL FFP
+#ifdef GS_SCALAR_64
+#define glLoadMatrix(m)   glLoadMatrixd((gs_scalar*)m);
+#define glMultMatrix(m)   glMultMatrixd((gs_scalar*)m);
+#define glGet(m,n)        glGetDoublev(m,(gs_scalar*)n);
+#define glScale(x,y,z)    glScaled(x,y,z);
+#define glRotate(a,x,y,z) glRotated(a,x,y,z);
+#else
+#define glLoadMatrix(m)   glLoadMatrixf((gs_scalar*)m);
+#define glMultMatrix(m)   glMultMatrixf((gs_scalar*)m);
+#define glGet(m,n)        glGetFloatv(m,(gs_scalar*)n);
+#define glScale(x,y,z)    glScalef(x,y,z);
+#define glRotate(a,x,y,z) glRotatef(a,x,y,z);
+#endif
 
 namespace enigma_user
 {
@@ -57,12 +73,12 @@ void d3d_set_projection(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom, gs_sc
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
   gluLookAt(xfrom, yfrom, zfrom, xto, yto, zto, xup, yup, zup);
-  glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
-  glMultMatrixd(transformation_matrix);
+  glGet(GL_MODELVIEW_MATRIX,view_matrix);
+  glMultMatrix(model_matrix);
   enigma::d3d_light_update_positions();
 }
 
-void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom, gs_scalar xto, gs_scalar yto, gs_scalar zto, gs_scalar xup, gs_scalar yup, gs_scalar zup, double angle, double aspect, double znear, double zfar)
+void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom, gs_scalar xto, gs_scalar yto, gs_scalar zto, gs_scalar xup, gs_scalar yup, gs_scalar zup, gs_scalar angle, gs_scalar aspect, gs_scalar znear, gs_scalar zfar)
 {
   (enigma::d3dHidden?glEnable:glDisable)(GL_DEPTH_TEST);
   glMatrixMode(GL_PROJECTION);
@@ -71,39 +87,39 @@ void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom, g
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
   gluLookAt(xfrom, yfrom, zfrom, xto, yto, zto, xup, yup, zup);
-  glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
-  glMultMatrixd(transformation_matrix);
+  glGet(GL_MODELVIEW_MATRIX,view_matrix);
+  glMultMatrix(model_matrix);
   enigma::d3d_light_update_positions();
 }
 
-void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, double angle)
+void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, gs_scalar angle)
 {
   glDisable(GL_DEPTH_TEST);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  glScalef(1, -1, 1);
-  glRotatef(angle,0,0,1);
+  glScale(1, -1, 1);
+  glRotate(angle,0,0,1);
   gluPerspective(0, 1, 32000,-32000);
   glOrtho(x-0.5,x + width,y-0.5,y + height,32000,-32000);
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
-  glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
-  glMultMatrixd(transformation_matrix);
+  glGet(GL_MODELVIEW_MATRIX,view_matrix);
+  glMultMatrix(model_matrix);
   enigma::d3d_light_update_positions();
 }
 
-void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, double angle)
+void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, gs_scalar angle)
 {
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  glScalef(1, 1, 1);
-  glRotatef(angle,0,0,1);
+  glScale(1, 1, 1);
+  glRotate(angle,0,0,1);
   gluPerspective(60, 1, 0.1,32000);
   glOrtho(x,x + width,y,y + height,0.1,32000);
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
-  glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
-  glMultMatrixd(transformation_matrix);
+  glGet(GL_MODELVIEW_MATRIX,view_matrix);
+  glMultMatrix(model_matrix);
   enigma::d3d_light_update_positions();
 }
 
@@ -111,127 +127,112 @@ void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, g
 
 void d3d_transform_set_identity()
 {
-  transformation_matrix[0] = 1;
-  transformation_matrix[1] = 0;
-  transformation_matrix[2] = 0;
-  transformation_matrix[3] = 0;
-  transformation_matrix[4] = 0;
-  transformation_matrix[5] = 1;
-  transformation_matrix[6] = 0;
-  transformation_matrix[7] = 0;
-  transformation_matrix[8] = 0;
-  transformation_matrix[9] = 0;
-  transformation_matrix[10] = 1;
-  transformation_matrix[11] = 0;
-  transformation_matrix[12] = 0;
-  transformation_matrix[13] = 0;
-  transformation_matrix[14] = 0;
-  transformation_matrix[15] = 1;
-  glLoadMatrixd(projection_matrix);
+  model_matrix.InitIdentity();
+  glLoadMatrix(view_matrix);
 }
 
 void d3d_transform_add_translation(gs_scalar xt, gs_scalar yt, gs_scalar zt)
 {
   glLoadIdentity();
   glTranslatef(xt, yt, zt);
-  glMultMatrixd(transformation_matrix);
-  glGetDoublev(GL_MODELVIEW_MATRIX,transformation_matrix);
-  glLoadMatrixd(projection_matrix);
-  glMultMatrixd(transformation_matrix);
+  glMultMatrix(model_matrix);
+  glGet(GL_MODELVIEW_MATRIX,model_matrix);
+  glLoadMatrix(view_matrix);
+  glMultMatrix(model_matrix);
 }
 void d3d_transform_add_scaling(gs_scalar xs, gs_scalar ys, gs_scalar zs)
 {
   glLoadIdentity();
-  glScalef(xs, ys, zs);
-  glMultMatrixd(transformation_matrix);
-  glGetDoublev(GL_MODELVIEW_MATRIX,transformation_matrix);
-  glLoadMatrixd(projection_matrix);
-  glMultMatrixd(transformation_matrix);
+  glScale(xs, ys, zs);
+  glMultMatrix(model_matrix);
+  glGet(GL_MODELVIEW_MATRIX,model_matrix);
+  glLoadMatrix(view_matrix);
+  glMultMatrix(model_matrix);
 }
-void d3d_transform_add_rotation_x(double angle)
+void d3d_transform_add_rotation_x(gs_scalar angle)
 {
   glLoadIdentity();
-  glRotatef(-angle,1,0,0);
-  glMultMatrixd(transformation_matrix);
-  glGetDoublev(GL_MODELVIEW_MATRIX,transformation_matrix);
-  glLoadMatrixd(projection_matrix);
-  glMultMatrixd(transformation_matrix);
+  glRotate(-angle,1,0,0);
+  glMultMatrix(model_matrix);
+  glGet(GL_MODELVIEW_MATRIX,model_matrix);
+  glLoadMatrix(view_matrix);
+  glMultMatrix(model_matrix);
 }
-void d3d_transform_add_rotation_y(double angle)
+void d3d_transform_add_rotation_y(gs_scalar angle)
 {
   glLoadIdentity();
-  glRotatef(-angle,0,1,0);
-  glMultMatrixd(transformation_matrix);
-  glGetDoublev(GL_MODELVIEW_MATRIX,transformation_matrix);
-  glLoadMatrixd(projection_matrix);
-  glMultMatrixd(transformation_matrix);
+  glRotate(-angle,0,1,0);
+  glMultMatrix(model_matrix);
+  glGet(GL_MODELVIEW_MATRIX,model_matrix);
+  glLoadMatrix(view_matrix);
+  glMultMatrix(model_matrix);
 }
-void d3d_transform_add_rotation_z(double angle)
+void d3d_transform_add_rotation_z(gs_scalar angle)
 {
   glLoadIdentity();
-  glRotatef(-angle,0,0,1);
-  glMultMatrixd(transformation_matrix);
-  glGetDoublev(GL_MODELVIEW_MATRIX,transformation_matrix);
-  glLoadMatrixd(projection_matrix);
-  glMultMatrixd(transformation_matrix);
+  glRotate(-angle,0,0,1);
+  glMultMatrix(model_matrix);
+  glGet(GL_MODELVIEW_MATRIX,model_matrix);
+  glLoadMatrix(view_matrix);
+  glMultMatrix(model_matrix);
 }
-void d3d_transform_add_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, double angle)
+void d3d_transform_add_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar angle)
 {
   glLoadIdentity();
-  glRotatef(-angle,x,y,z);
-  glMultMatrixd(transformation_matrix);
-  glGetDoublev(GL_MODELVIEW_MATRIX,transformation_matrix);
-  glLoadMatrixd(projection_matrix);
-  glMultMatrixd(transformation_matrix);
+  glRotate(-angle,x,y,z);
+  glMultMatrix(model_matrix);
+  glGet(GL_MODELVIEW_MATRIX,model_matrix);
+  glLoadMatrix(view_matrix);
+  glMultMatrix(model_matrix);
 }
 
 void d3d_transform_set_translation(gs_scalar xt, gs_scalar yt, gs_scalar zt)
 {
   glLoadIdentity();
   glTranslatef(xt, yt, zt);
-  glGetDoublev(GL_MODELVIEW_MATRIX,transformation_matrix);
-  glLoadMatrixd(projection_matrix);
-  glMultMatrixd(transformation_matrix);
+  glGet(GL_MODELVIEW_MATRIX,model_matrix);
+  glLoadMatrix(view_matrix);
+  glMultMatrix(model_matrix);
 }
 void d3d_transform_set_scaling(gs_scalar xs, gs_scalar ys, gs_scalar zs)
 {
   glLoadIdentity();
-  glScalef(xs, ys, zs);
-  glGetDoublev(GL_MODELVIEW_MATRIX,transformation_matrix);
-  glLoadMatrixd(projection_matrix);
-  glMultMatrixd(transformation_matrix);
+  glScale(xs, ys, zs);
+  glGet(GL_MODELVIEW_MATRIX,model_matrix);
+  glLoadMatrix(view_matrix);
+  glMultMatrix(model_matrix);
 }
-void d3d_transform_set_rotation_x(double angle)
+void d3d_transform_set_rotation_x(gs_scalar angle)
 {
   glLoadIdentity();
-  glRotatef(-angle,1,0,0);
-  glGetDoublev(GL_MODELVIEW_MATRIX,transformation_matrix);
-  glLoadMatrixd(projection_matrix);
-  glMultMatrixd(transformation_matrix);
+  glRotate(-angle,1,0,0);
+  glGet(GL_MODELVIEW_MATRIX,model_matrix);
+  glLoadMatrix(view_matrix);
+  glMultMatrix(model_matrix);
 }
-void d3d_transform_set_rotation_y(double angle)
+void d3d_transform_set_rotation_y(gs_scalar angle)
 {
   glLoadIdentity();
-  glRotatef(-angle,0,1,0);
-  glGetDoublev(GL_MODELVIEW_MATRIX,transformation_matrix);
-  glLoadMatrixd(projection_matrix);
-  glMultMatrixd(transformation_matrix);
+  glRotate(-angle,0,1,0);
+  glGet(GL_MODELVIEW_MATRIX,model_matrix);
+  glLoadMatrix(view_matrix);
+  glMultMatrix(model_matrix);
 }
-void d3d_transform_set_rotation_z(double angle)
+void d3d_transform_set_rotation_z(gs_scalar angle)
 {
   glLoadIdentity();
-  glRotatef(-angle,0,0,1);
-  glGetDoublev(GL_MODELVIEW_MATRIX,transformation_matrix);
-  glLoadMatrixd(projection_matrix);
-  glMultMatrixd(transformation_matrix);
+  glRotate(-angle,0,0,1);
+  glGet(GL_MODELVIEW_MATRIX,model_matrix);
+  glLoadMatrix(view_matrix);
+  glMultMatrix(model_matrix);
 }
-void d3d_transform_set_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, double angle)
+void d3d_transform_set_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar angle)
 {
   glLoadIdentity();
-  glRotatef(-angle,x,y,z);
-  glGetDoublev(GL_MODELVIEW_MATRIX,transformation_matrix);
-  glLoadMatrixd(projection_matrix);
-  glMultMatrixd(transformation_matrix);
+  glRotate(-angle,x,y,z);
+  glGet(GL_MODELVIEW_MATRIX,model_matrix);
+  glLoadMatrix(view_matrix);
+  glMultMatrix(model_matrix);
 }
 
 }
