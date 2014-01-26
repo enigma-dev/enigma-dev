@@ -135,7 +135,7 @@ namespace enigma {
     int subimage_index;
     double x_offset;
     double y_offset;
-  
+
   void draw_particles(std::vector<particle_instance>& pi_list, bool oldtonew, double a_wiggle, int a_subimage_index,
       double a_x_offset, double a_y_offset) {
       using namespace enigma::particle_bridge;
@@ -170,7 +170,7 @@ namespace enigma {
         std::deque<bool> blend_adds;
 
         for (unsigned int i = 0; i < pi_list_size; i++) {
-          
+
           particle_instance& pi = pi_list[i];
           double x, y;
           int color = pi.color;
@@ -256,7 +256,7 @@ namespace enigma {
             width = ps->width, height = ps->height;
             tbx = 1, tby = 1;
           }
-          
+
           const double
           w = width*xscale, h = height*yscale,
           wsinrot = w*sin(rot), wcosrot = w*cos(rot);
@@ -405,7 +405,7 @@ namespace enigma {
         GLfloat trans_mat[16];
         GLfloat proj_mat[16];
         for (unsigned i = 0; i < 16; i++) {
-          trans_mat[i] = (GLfloat)(transformation_matrix[i]);
+          trans_mat[i] = (GLfloat)(model_matrix[i]);
           proj_mat[i] = (GLfloat)(projection_matrix[i]);
         }
 
@@ -415,7 +415,7 @@ namespace enigma {
         GLint projection_matrix_location = glGetUniformLocation(shader_program, "proj_mat");
         glUniformMatrix4fv(projection_matrix_location, 1, GL_FALSE, proj_mat);
 
-        // Draw. 
+        // Draw.
 
         for (unsigned i = 0; i < switch_offset_instcount.size(); i++) {
           int switch_offset = switch_offset_instcount[i].first;
