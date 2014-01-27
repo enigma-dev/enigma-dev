@@ -209,7 +209,7 @@ static inline void draw_insts()
 
 /**
   Handles tile drawing for a view; returns whether to break the view loop.
-  @return Returns 0 if all is well, or nonzero if the view loop should be broken.
+  @return Returns 0 if all is well, or non-zero if the view loop should be broken.
 */
 static inline int draw_tiles()
 {
@@ -378,7 +378,7 @@ void screen_redraw()
     // glReadPixels(0, 0, width, height, GL_BGRA, GL_UNSIGNED_BYTE, pixels);
   }
 
-  ///TODO: screen_refresh() shouldn't be in screen_redraw(). They are seperate functions for a reason.
+  ///TODO: screen_refresh() shouldn't be in screen_redraw(). They are separate functions for a reason.
   if (bound_framebuffer==0 || enigma::msaa_fbo != 0) { screen_refresh(); }
 }
 
