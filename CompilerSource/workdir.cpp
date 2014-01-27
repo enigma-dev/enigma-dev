@@ -18,14 +18,22 @@ string myReplace(string str, const string& oldStr, const string& newStr)
   return nstr;
 }
 
+string escapeEnv(string str, string env) {
+	char* val = getenv(env.c_str());
+	if (val != NULL)
+		return myReplace(str, "%" + env + "%", val);
+	return str;
+}
+
 string escapeEnv(string str) {
-	string escaped = myReplace(str, "%PROGRAMDATA%", getenv("PROGRAMDATA"));
-	escaped = myReplace(str, "%ALLUSERSPROFILE%", getenv("ALLUSERSPROFILE"));
-	return myReplace(str, "%HOME%", getenv("HOME"));
+	string escaped = escapeEnv(str, "PROGRAMDATA");
+	escaped = escapeEnv(escaped, "ALLUSERSPROFILE");
+	escaped = escapeEnv(escaped, "HOME");
+	return escaped;
 }
 
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
-string workdir = myReplace(escapeEnv(make_directory), "\\","/");
+string workdir = myReplace(escapeEnv("%PROGRAMDATA%/ENIGMA/"), "\\","/");
 #else
-string workdir = mescapeEnv(make_directory);
+string workdir = mescapeEnv(setting::make_directory);
 #endif
