@@ -72,7 +72,11 @@ extern const char* establish_bearings(const char *compiler);
 #include "workdir.h"
 
 dllexport void libSetMakeDirectory(const char* dir) {
+#if CURRENT_PLATFORM_ID == OS_WINDOWS
+	workdir = myReplace(escapeEnv(dir), "\\","/");
+#else
 	workdir = escapeEnv(dir);
+#endif
 }
 
 dllexport const char* libInit(EnigmaCallbacks* ecs)
