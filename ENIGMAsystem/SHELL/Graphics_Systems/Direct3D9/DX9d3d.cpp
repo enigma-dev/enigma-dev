@@ -14,6 +14,7 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
+
 #include "Bridges/General/DX9Context.h"
 #include "Graphics_Systems/General/GSd3d.h"
 #include "Direct3D9Headers.h"
