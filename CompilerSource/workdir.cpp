@@ -4,8 +4,9 @@
 #include <cstdlib>
 #include <string.h>
 
-#if CURRENT_PLATFORM_ID == OS_WINDOWS
-std::string myReplace(std::string str, const std::string& oldStr, const std::string& newStr)
+using std::string;
+
+string myReplace(string str, const string& oldStr, const string& newStr)
 {
   std::string nstr = str;
   size_t pos = 0;
@@ -17,7 +18,14 @@ std::string myReplace(std::string str, const std::string& oldStr, const std::str
   return nstr;
 }
 
-std::string workdir = myReplace(myReplace(make_directory, "%PROGRAMDATA%", myReplace(getenv("ALLUSERSPROFILE")), "\\","/"); //myReplace(getenv("ALLUSERSPROFILE"), "\\","/") + std::string("/ENIGMA/");
+string escapeEnv(string str) {
+	string escaped = myReplace(str, "%PROGRAMDATA%", getenv("PROGRAMDATA"));
+	escaped = myReplace(str, "%ALLUSERSPROFILE%", getenv("ALLUSERSPROFILE"));
+	return myReplace(str, "%HOME%", getenv("HOME"));
+}
+
+#if CURRENT_PLATFORM_ID == OS_WINDOWS
+string workdir = myReplace(escapeEnv(make_directory), "\\","/");
 #else
-std::string workdir = make_directory; //getenv("HOME") + std::string("/.enigma/");
+string workdir = mescapeEnv(make_directory);
 #endif
