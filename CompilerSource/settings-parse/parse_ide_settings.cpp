@@ -146,12 +146,13 @@ void parse_ide_settings(const char* eyaml)
   extensions::targetOS.identifier = cinfo.get("target-platform");
 
   // Read settings info
-  setting::use_cpp_strings  = settree.get("inherit-strings-from").toInt();
-  setting::use_cpp_escapes  = settree.get("inherit-escapes-from").toInt();
-  setting::use_incrementals = settree.get("inherit-increment-from").toInt();
-  setting::use_gml_equals   =!settree.get("inherit-equivalence-from").toInt();
-  setting::literal_autocast = settree.get("treat-literals-as").toInt();
-  setting::inherit_objects = settree.get("inherit-objects").toBool();
+  setting::use_cpp_strings   = settree.get("inherit-strings-from").toInt();
+  setting::use_cpp_escapes   = settree.get("inherit-escapes-from").toInt();
+  setting::use_incrementals  = settree.get("inherit-increment-from").toInt();
+  setting::use_gml_equals    = !settree.get("inherit-equivalence-from").toInt();
+  setting::literal_autocast  = settree.get("treat-literals-as").toInt();
+  setting::inherit_objects   = settree.get("inherit-objects").toBool();
+  setting::make_directory = settree.get("make-directory");
 
   cout << "Setting up IDE editables... " << endl;
   requested_extensions.clear();
