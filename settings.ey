@@ -29,14 +29,19 @@
         Label: Treat negatives as: 
         Options: "GML (true > 0), C++ (true != 0)"
 		
--Polymorphism:
+
+-Build Options:
     Layout: Grid
     Columns: 2
+    -make-directory:
+        Type: Textfield
+        Label: Make Directory
+        Default: C:/ProgramData/ENIGMA/
     -inherit-objects:
         Type: Checkbox
         Label: Object Inheritance
         Default: true
-
+		
 -Graphics:
     Layout: Grid
     Columns: 3
