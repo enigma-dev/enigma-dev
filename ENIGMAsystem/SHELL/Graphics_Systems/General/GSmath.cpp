@@ -20,7 +20,6 @@
 //#include <stdlib.h>
 //#include <assert.h>
 #include <cmath> //For cos, sin and tan
-#include <algorithm>  //For std::copy - could probably be done better
 #include "GSmath.h"
 
 namespace enigma
@@ -28,7 +27,6 @@ namespace enigma
 
 #define cosd(x)  ::cos(x * M_PI / 180.0)
 #define sind(x)  ::sin(x * M_PI / 180.0)
-#define tand(x)  ::tan(x * M_PI / 180.0)
 #define degtorad(x) x*(M_PI/180.0)
 
 Vector3f Vector3f::Cross(const Vector3f& v) const
@@ -74,37 +72,33 @@ void Vector3f::Rotate(gs_scalar Angle, const Vector3f& Axe)
 //This 3 could techincally be expanded like others - It would of be faster
 void Matrix4f::scale(gs_scalar ScaleX, gs_scalar ScaleY, gs_scalar ScaleZ)
 {
-    Matrix4f sm, tm;
+    Matrix4f sm;
     sm.InitScaleTransform(ScaleX, ScaleY, ScaleZ);
-    std::copy(m, m+16, tm.m);
-    *this = tm*sm;
+    *this = *this*sm;
 }
 
 //By a vector
 void Matrix4f::rotate(gs_scalar RotateX, gs_scalar RotateY, gs_scalar RotateZ)
 {
-    Matrix4f sm, tm;
+    Matrix4f sm;
     sm.InitRotateTransform(RotateX, RotateY, RotateZ);
-    std::copy(m, m+16, tm.m);
-    *this = tm*sm;
+    *this = *this*sm;
 }
 
 //Around an axis
 void Matrix4f::rotate(gs_scalar angle, gs_scalar x, gs_scalar y, gs_scalar z)
 {
-    Matrix4f sm, tm;
+    Matrix4f sm;
     Vector3f V(x,y,z);
     sm.InitRotateVectorTransform(angle, V);
-    std::copy(m, m+16, tm.m);
-    *this = tm*sm;
+    *this = *this*sm;
 }
 
 void Matrix4f::translate(gs_scalar x, gs_scalar y, gs_scalar z)
 {
-    Matrix4f sm, tm;
+    Matrix4f sm;
     sm.InitTranslationTransform(x, y, z);
-    std::copy(m, m+16, tm.m);
-    *this = tm*sm;
+    *this = *this*sm;
 }
 
 void Matrix4f::InitScaleTransform(gs_scalar ScaleX, gs_scalar ScaleY, gs_scalar ScaleZ)
@@ -175,30 +169,32 @@ void Matrix4f::InitTranslationTransform(gs_scalar x, gs_scalar y, gs_scalar z)
 
 void Matrix4f::InitCameraTransform(const Vector3f& Target, const Vector3f& Up)
 {
-    Vector3f N = Target;
-    N.Normalize();
+    Vector3f f = Target;
+    f.Normalize();
     Vector3f U = Up;
-    U = U.Cross(N);
     U.Normalize();
-    Vector3f V = N.Cross(U);
-    V.Normalize();
 
-    m[0][0] = U.x;   m[0][1] = U.y;   m[0][2] = U.z;   m[0][3] = 0.0f;
-    m[1][0] = V.x;   m[1][1] = V.y;   m[1][2] = V.z;   m[1][3] = 0.0f;
-    m[2][0] = N.x;   m[2][1] = N.y;   m[2][2] = N.z;   m[2][3] = 0.0f;
-    m[3][0] = 0.0f;  m[3][1] = 0.0f;  m[3][2] = 0.0f;  m[3][3] = 1.0f;
+    Vector3f s = f.Cross(U);
+    s.Normalize();
+
+    U = s.Cross(f);
+    U.Normalize();
+
+    m[0][0] = s.x;    m[0][1] = s.y;   m[0][2] = s.z;   m[0][3] = 0.0f;
+    m[1][0] = U.x;    m[1][1] = U.y;   m[1][2] = U.z;   m[1][3] = 0.0f;
+    m[2][0] = -f.x;   m[2][1] = -f.y;  m[2][2] = -f.z;  m[2][3] = 0.0f;
+    m[3][0] = 0.0f;   m[3][1] = 0.0f;  m[3][2] = 0.0f;  m[3][3] = 1.0f;
 }
 
 void Matrix4f::InitPersProjTransform(gs_scalar fovy, gs_scalar aspect_ratio, gs_scalar znear, gs_scalar zfar)
 {
-    const gs_scalar ar         = aspect_ratio;
     const gs_scalar zRange     = znear - zfar;
-    const gs_scalar tanHalfFOV = tand(fovy / 2.0);
+    const gs_scalar f = 1.0 / tan(fovy * M_PI / 360.0);
 
-    m[0][0] = 1.0f/(tanHalfFOV * ar); m[0][1] = 0.0f;            m[0][2] = 0.0f;            m[0][3] = 0.0;
-    m[1][0] = 0.0f;                   m[1][1] = 1.0f/tanHalfFOV; m[1][2] = 0.0f;            m[1][3] = 0.0;
-    m[2][0] = 0.0f;                   m[2][1] = 0.0f;            m[2][2] = (-znear - zfar)/zRange ; m[2][3] = 2.0f*zfar*znear/zRange;
-    m[3][0] = 0.0f;                   m[3][1] = 0.0f;            m[3][2] = 1.0f;            m[3][3] = 0.0;
+    m[0][0] = f / aspect_ratio; m[0][1] = 0.0f; m[0][2] = 0.0f;                m[0][3] = 0.0f;
+    m[1][0] = 0.0f;             m[1][1] = f;    m[1][2] = 0.0f;                m[1][3] = 0.0f;
+    m[2][0] = 0.0f;             m[2][1] = 0.0f; m[2][2] = (zfar+znear)/zRange; m[2][3] = 2.0f*zfar*znear/zRange;
+    m[3][0] = 0.0f;             m[3][1] = 0.0f; m[3][2] = -1.0f;               m[3][3] = 0.0f;
 }
 
 void Matrix4f::InitOtrhoProjTransform(gs_scalar left, gs_scalar right, gs_scalar bottom, gs_scalar top, gs_scalar znear, gs_scalar zfar)
@@ -206,7 +202,7 @@ void Matrix4f::InitOtrhoProjTransform(gs_scalar left, gs_scalar right, gs_scalar
     m[0][0] = 2.0f/(right - left);    m[0][1] = 0.0f;                m[0][2] = 0.0f;                m[0][3] = -(right+left)/(right-left);
     m[1][0] = 0.0f;                   m[1][1] = 2.0f/(top - bottom); m[1][2] = 0.0f;                m[1][3] = -(top+bottom)/(top-bottom);
     m[2][0] = 0.0f;                   m[2][1] = 0.0f;                m[2][2] = -2.0f/(zfar-znear);  m[2][3] = -(zfar+znear)/(zfar-znear);
-    m[3][0] = 0.0f;                   m[3][1] = 0.0f;                m[3][2] = 1.0f;                m[3][3] = 0.0;
+    m[3][0] = 0.0f;                   m[3][1] = 0.0f;                m[3][2] = 0.0f;                m[3][3] = 1.0f;
 }
 
 

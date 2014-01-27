@@ -21,7 +21,7 @@
 #define	GS_MATH_H
 
 #include "Universal_System/scalar.h"
-//#include <stdio.h>
+#include <stdio.h> //For printf
 //#include "util.h"
 
 namespace enigma
@@ -196,6 +196,13 @@ public:
 
     operator gs_scalar*(){
         return &(m[0][0]);
+    }
+
+    void Print() const
+    {
+        for (int i = 0 ; i < 4 ; ++i) {
+            printf("%f %f %f %f\n", m[i][0], m[i][1], m[i][2], m[i][3]);
+        }
     }
 
     gs_scalar Determinant() const;

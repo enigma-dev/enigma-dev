@@ -55,8 +55,6 @@ void d3d_set_perspective(bool enable)
   glLoadIdentity();
   if (enable) {
     gluPerspective(45, -view_wview[view_current] / (double)view_hview[view_current], 1, 32000);
-  } else {
-    gluPerspective(0, 1, 0, 1);
   }
   glMatrixMode(GL_MODELVIEW);
   // Unverified note: Perspective not the same as in GM when turning off perspective and using d3d projection
@@ -80,6 +78,7 @@ void d3d_set_projection(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom, gs_sc
 
 void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom, gs_scalar xto, gs_scalar yto, gs_scalar zto, gs_scalar xup, gs_scalar yup, gs_scalar zup, gs_scalar angle, gs_scalar aspect, gs_scalar znear, gs_scalar zfar)
 {
+  if (angle == 0 || znear == 0) return; //THEY CANNOT BE 0!!!
   (enigma::d3dHidden?glEnable:glDisable)(GL_DEPTH_TEST);
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
@@ -99,12 +98,13 @@ void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scal
   glLoadIdentity();
   glScale(1, -1, 1);
   glRotate(angle,0,0,1);
-  gluPerspective(0, 1, 32000,-32000);
   glOrtho(x-0.5,x + width,y-0.5,y + height,32000,-32000);
+
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
   glGet(GL_MODELVIEW_MATRIX,view_matrix);
   glMultMatrix(model_matrix);
+
   enigma::d3d_light_update_positions();
 }
 
