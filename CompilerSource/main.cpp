@@ -69,13 +69,13 @@ extern const char* establish_bearings(const char *compiler);
 #include <System/builtins.h>
 #include <API/jdi.h>
 
-#include "workdir.h"
+#include "makedir.h"
 
 dllexport void libSetMakeDirectory(const char* dir) {
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
-	workdir = myReplace(escapeEnv(dir), "\\","/");
+	makedir = myReplace(escapeEnv(dir), "\\","/");
 #else
-	workdir = escapeEnv(dir);
+	makedir = escapeEnv(dir);
 #endif
 }
 
