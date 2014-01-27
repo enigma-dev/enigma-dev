@@ -69,13 +69,6 @@ extern const char* establish_bearings(const char *compiler);
 #include <System/builtins.h>
 #include <API/jdi.h>
 
-#include "workdir.h"
-// Only include the headers for mkdir() if we are not on Windows; on Windows we use CreateDirectory() from windows.h
-#if CURRENT_PLATFORM_ID != OS_WINDOWS
-#include <sys/stat.h>
-#include <unistd.h>
-#endif
-
 dllexport const char* libInit(EnigmaCallbacks* ecs)
 {
   if (ecs)
@@ -91,30 +84,6 @@ dllexport const char* libInit(EnigmaCallbacks* ecs)
     ide_output_redirect_reset = ecs->output_redirect_reset;
   }
   else cout << "IDE Not Found. Continuing without graphical output." << endl;
-  
-#if CURRENT_PLATFORM_ID == OS_WINDOWS
-  CreateDirectory((workdir).c_str(), NULL);
-  if (!CreateDirectory((workdir +"Preprocessor_Environment_Editable").c_str(), NULL)) {
-	DWORD error = GetLastError();
-	switch (error) {
-		case ERROR_ALREADY_EXISTS: 
-			std::cout << "WARNING! Failed to create build directory, directory already exists: \"" << workdir << "\"" << endl;
-			break;
-		case ERROR_PATH_NOT_FOUND:
-			std::cout << "ERROR! Failed to create build directory, path not found: \"" << workdir << "\"" << endl;
-			break;
-		default:
-			std::cout << "ERROR! Failed to create build directory: \"" << workdir << "\"" << endl;
-			break;
-	}
-  }
-#else
-  mkdir((workdir).c_str(),0755);
-  if (mkdir((workdir +"Preprocessor_Environment_Editable").c_str(),0755) == -1)
-  {
-	  std::cout << "Failed to create build directory at " << workdir << endl;
-  }
-#endif
   
   cout << "Implementing JDI basics" << endl;
   jdi::initialize();
