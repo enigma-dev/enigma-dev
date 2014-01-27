@@ -25,7 +25,7 @@
 **                                                                              **
 \********************************************************************************/
 
-#include "workdir.h"
+#include "makedir.h"
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
@@ -68,7 +68,7 @@ struct usedtype { int uc; dectrip original; usedtype(): uc(0) {} }; // uc is the
 int lang_CPP::compile_writeObjAccess(map<int,parsed_object*> &parsed_objects, parsed_object* global)
 {
   ofstream wto;
-  wto.open((workdir +"Preprocessor_Environment_Editable/IDE_EDIT_objectaccess.h").c_str(),ios_base::out);
+  wto.open((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_objectaccess.h").c_str(),ios_base::out);
     wto << license;
     wto << "// Depending on how many times your game accesses variables via OBJECT.varname, this file may be empty." << endl << endl;
     wto << "namespace enigma" << endl << "{" << endl;

@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "workdir.h"
+#include "makedir.h"
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
@@ -59,7 +59,7 @@ static string esc(string str) {
 
 int lang_CPP::compile_writeShaderData(EnigmaStruct* es, parsed_object *EGMglobal)
 {
-  ofstream wto((workdir +"Preprocessor_Environment_Editable/IDE_EDIT_shaderarrays.h").c_str(),ios_base::out);
+  ofstream wto((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_shaderarrays.h").c_str(),ios_base::out);
   
   wto << license << "#include \"Universal_System/shaderstruct.h\"\n" << "namespace enigma {\n";
   wto << "  ShaderStruct shaderstructarray[] = {\n";

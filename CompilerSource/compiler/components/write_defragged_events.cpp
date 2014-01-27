@@ -25,7 +25,7 @@
 **                                                                              **
 \********************************************************************************/
 
-#include "workdir.h"
+#include "makedir.h"
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
@@ -52,7 +52,7 @@ typedef map<string,foundevent>::iterator evfit;
 
 int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
 {
-  ofstream wto((workdir +"Preprocessor_Environment_Editable/IDE_EDIT_evparent.h").c_str());
+  ofstream wto((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_evparent.h").c_str());
   wto << license;
 
 
@@ -119,7 +119,7 @@ int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
   /* Now we write the actual event sequence code, as
   ** well as an initializer function for the whole system.
   ***************************************************************/
-  wto.open((workdir +"Preprocessor_Environment_Editable/IDE_EDIT_events.h").c_str());
+  wto.open((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_events.h").c_str());
   wto << license;
   wto << "namespace enigma" << endl << "{" << endl;
 

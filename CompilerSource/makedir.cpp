@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "workdir.h"
+#include "makedir.h"
 
 string myReplace(string str, const string& oldStr, const string& newStr)
 {
