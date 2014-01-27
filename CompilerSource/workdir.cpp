@@ -1,4 +1,5 @@
 #include "workdir.h"
+#include "settings.h"
 #include "OS_Switchboard.h" //Tell us where the hell we are
 #include <cstdlib>
 #include <string.h>
@@ -16,7 +17,7 @@ std::string myReplace(std::string str, const std::string& oldStr, const std::str
   return nstr;
 }
 
-std::string workdir = myReplace(getenv("ALLUSERSPROFILE"), "\\","/") + std::string("/ENIGMA/");
+std::string workdir = myReplace(myReplace(make_directory, "%PROGRAMDATA%", myReplace(getenv("ALLUSERSPROFILE")), "\\","/"); //myReplace(getenv("ALLUSERSPROFILE"), "\\","/") + std::string("/ENIGMA/");
 #else
-std::string workdir = getenv("HOME") + std::string("/.enigma/");
+std::string workdir = make_directory; //getenv("HOME") + std::string("/.enigma/");
 #endif
