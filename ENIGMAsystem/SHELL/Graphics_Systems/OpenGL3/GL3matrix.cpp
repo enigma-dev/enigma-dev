@@ -39,9 +39,9 @@ enigma::Matrix4f mv_matrix(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1), mvp_matrix(1,0,0,0,
 
 //NOTE: THIS IS STILL FFP
 #ifdef GS_SCALAR_64
-#define glLoadMatrix(m) glLoadMatrixd((gs_scalar*)m);
+#define glLoadMatrix(m) glLoadMatrixd((gs_scalar*)m.Transpose());
 #else
-#define glLoadMatrix(m) glLoadMatrixf((gs_scalar*)m);
+#define glLoadMatrix(m) glLoadMatrixf((gs_scalar*)m.Transpose());
 #endif
 
 namespace enigma_user
@@ -49,6 +49,7 @@ namespace enigma_user
 
 void d3d_set_perspective(bool enable)
 {
+    printf("SET PERSPECTIVE RAN!\n");
   //glMatrixMode(GL_PROJECTION);
   //glLoadIdentity();
   if (enable) {
@@ -63,6 +64,9 @@ void d3d_set_perspective(bool enable)
   glMatrixMode(GL_PROJECTION);
   glLoadMatrix(projection_matrix);
 
+      printf("SET PERSPECTIVE FINISHED!\n");
+
+
   //glMatrixMode(GL_MODELVIEW);
   // Unverified note: Perspective not the same as in GM when turning off perspective and using d3d projection
   // Unverified note: GM has some sort of dodgy behaviour where this function doesn't affect anything when calling after d3d_set_projection_ext
@@ -71,6 +75,8 @@ void d3d_set_perspective(bool enable)
 
 void d3d_set_projection(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom, gs_scalar xto, gs_scalar yto, gs_scalar zto, gs_scalar xup, gs_scalar yup, gs_scalar zup)
 {
+        printf("SET Projection RAN!\n");
+
   (enigma::d3dHidden?glEnable:glDisable)(GL_DEPTH_TEST);
   //glMatrixMode(GL_PROJECTION);
   //glLoadIdentity();
@@ -95,10 +101,15 @@ void d3d_set_projection(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom, gs_sc
   glLoadMatrix(mv_matrix);
 
   enigma::d3d_light_update_positions();
+
+        printf("SET Projection FINISHED!\n");
+
 }
 
 void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom, gs_scalar xto, gs_scalar yto, gs_scalar zto, gs_scalar xup, gs_scalar yup, gs_scalar zup, gs_scalar angle, gs_scalar aspect, gs_scalar znear, gs_scalar zfar)
 {
+    printf("SET projection ext RAN!\n");
+
   (enigma::d3dHidden?glEnable:glDisable)(GL_DEPTH_TEST);
   //glMatrixMode(GL_PROJECTION);
   //glLoadIdentity();
@@ -125,20 +136,30 @@ void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom, g
   glLoadMatrix(mv_matrix);
 
   enigma::d3d_light_update_positions();
+
+    printf("SET projection ext FINISHED!\n");
+
 }
 
 void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, gs_scalar angle)
 {
+        printf("SET ortho RAN!\n");
+
   //glMatrixMode(GL_PROJECTION);
   //glLoadIdentity();
   projection_matrix.InitScaleTransform(1, -1, 1);
-  projection_matrix.rotate(angle, 0, 0, 1);
 
-  enigma::Matrix4f persp, orhto;
-  persp.InitPersProjTransform(0, 1, 32000,-32000);
+  //projection_matrix.rotate(angle, 0, 0, 1);
+
+  enigma::Matrix4f orhto;
+  //persp.InitPersProjTransform(0, 1, 32000,-32000);
+
+ // printf("persp. matrix = \n");
+  //persp.Print();
+
   orhto.InitOtrhoProjTransform(x-0.5,x + width,y-0.5,y + height,32000,-32000);
 
-  projection_matrix = projection_matrix * persp * orhto;
+  projection_matrix = projection_matrix * orhto;
   //glScalef(1, -1, 1);
   //glRotatef(angle,0,0,1);
   //gluPerspective(0, 1, 32000,-32000);
@@ -147,22 +168,31 @@ void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scal
   //glLoadIdentity();
 
   //mv_matrix = view_matrix * model_matrix;
+
   mvp_matrix = projection_matrix * mv_matrix;
 
   //NOTE: THIS IS STILL FFP
   glMatrixMode(GL_PROJECTION);
   glLoadMatrix(projection_matrix);
+  printf("Proj. matrix = \n");
+  projection_matrix.Transpose().Print();
 
   glMatrixMode(GL_MODELVIEW);
   glLoadMatrix(mv_matrix);
+  printf("Model view matrix = \n");
+  mv_matrix.Transpose().Print();
 
   //glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
   //glMultMatrixd(transformation_matrix);
   enigma::d3d_light_update_positions();
+
+  printf("SET ortho FINISHED!\n");
 }
 
 void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, gs_scalar angle)
 {
+        printf("SET proj perspect RAN!\n");
+
   //glMatrixMode(GL_PROJECTION);
   projection_matrix.InitRotateVectorTransform(angle, enigma::Vector3f(0,0,1));
 
@@ -191,12 +221,17 @@ void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, g
   //glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
   //glMultMatrixd(transformation_matrix);
   enigma::d3d_light_update_positions();
+
+        printf("SET proj perspect FINISHED!\n");
+
 }
 
 //TODO: with all basic drawing add in normals
 
 void d3d_transform_set_identity()
 {
+        printf("SET set ident RAN!\n");
+
     oglmgr->Transformation();
     model_matrix.InitIdentity();
     mv_matrix = view_matrix * model_matrix;
@@ -205,6 +240,9 @@ void d3d_transform_set_identity()
     //NOTE: THIS IS STILL FFP
     glMatrixMode(GL_MODELVIEW);
     glLoadMatrix(mv_matrix);
+
+          printf("SET set ident FINISHED!\n");
+
 
     /*transformation_matrix[0] = 1;
     transformation_matrix[1] = 0;
