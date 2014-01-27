@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "workdir.h"
+#include "makedir.h"
 #include "OS_Switchboard.h" //Tell us where the hell we are
 #include "backend/EnigmaStruct.h" //LateralGM interface structures
 
@@ -109,7 +109,7 @@ string toUpper(string x) { string res = x; for (size_t i = 0; i < res.length(); 
 void clear_ide_editables()
 {
   ofstream wto;
-  string f2comp = fc((workdir + "API_Switchboard.h").c_str());
+  string f2comp = fc((makedir + "API_Switchboard.h").c_str());
   string f2write = license;
     string inc = "/include.h\"\n";
     f2write += "#include \"Platforms/" + (extensions::targetAPI.windowSys)            + "/include.h\"\n"
@@ -132,12 +132,12 @@ void clear_ide_editables()
 
   if (f2comp != f2write)
   {
-    wto.open((workdir +"API_Switchboard.h").c_str(),ios_base::out);
+    wto.open((makedir +"API_Switchboard.h").c_str(),ios_base::out);
       wto << f2write << endl;
     wto.close();
   }
 
-  wto.open((workdir +"Preprocessor_Environment_Editable/LIBINCLUDE.h").c_str());
+  wto.open((makedir +"Preprocessor_Environment_Editable/LIBINCLUDE.h").c_str());
     wto << license;
     wto << "/*************************************************************\nOptionally included libraries\n****************************/\n";
     wto << "#define STRINGLIB 1\n#define COLORSLIB 1\n#define STDRAWLIB 1\n#define PRIMTVLIB 1\n#define WINDOWLIB 1\n"
@@ -145,7 +145,7 @@ void clear_ide_editables()
     wto << "/***************\nEnd optional libs\n ***************/\n";
   wto.close();
 
-  wto.open((workdir +"Preprocessor_Environment_Editable/GAME_SETTINGS.h").c_str(),ios_base::out);
+  wto.open((makedir +"Preprocessor_Environment_Editable/GAME_SETTINGS.h").c_str(),ios_base::out);
     wto << license;
     wto << "#define ASSUMEZERO 0\n";
     wto << "#define PRIMBUFFER 0\n";
@@ -185,7 +185,7 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
 	string make = "clean-game ";
 	string compilepath = CURRENT_PLATFORM_NAME "/" + extensions::targetOS.identifier;
 	make += "COMPILEPATH=\"" + compilepath + "\" ";
-	make += "WORKDIR=\"" + workdir + "\" ";
+	make += "WORKDIR=\"" + makedir + "\" ";
 	make += "eTCpath=\"" + MAKE_tcpaths + "\"";
 
 	edbg << "Full command line: " << MAKE_location << " " << make << flushl;
@@ -339,7 +339,7 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   
   GameSettings gameSet = es->gameSettings;
   edbg << "Writing executable information and resources." << flushl;
-  wto.open((workdir +"Preprocessor_Environment_Editable/Resources.rc").c_str(),ios_base::out);
+  wto.open((makedir +"Preprocessor_Environment_Editable/Resources.rc").c_str(),ios_base::out);
     wto << license;
     wto << "#include <windows.h>\n";
 	if (gameSet.gameIcon != NULL && strlen(gameSet.gameIcon) > 0) {
@@ -368,7 +368,7 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   wto.close();
   
   edbg << "Writing modes and settings" << flushl;
-  wto.open((workdir +"Preprocessor_Environment_Editable/GAME_SETTINGS.h").c_str(),ios_base::out);
+  wto.open((makedir +"Preprocessor_Environment_Editable/GAME_SETTINGS.h").c_str(),ios_base::out);
     wto << license;
     wto << "#define ASSUMEZERO 0\n";
     wto << "#define PRIMBUFFER 0\n";
@@ -379,21 +379,21 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
     wto << '\n';
   wto.close();
 
-  wto.open((workdir +"Preprocessor_Environment_Editable/IDE_EDIT_modesenabled.h").c_str(),ios_base::out);
+  wto.open((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_modesenabled.h").c_str(),ios_base::out);
     wto << license;
     wto << "#define BUILDMODE " << 0 << "\n";
     wto << "#define DEBUGMODE " << 0 << "\n";
     wto << '\n';
   wto.close();
 
-  wto.open((workdir +"Preprocessor_Environment_Editable/IDE_EDIT_inherited_locals.h").c_str(),ios_base::out);
+  wto.open((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_inherited_locals.h").c_str(),ios_base::out);
   wto.close();
 
 
   //NEXT FILE ----------------------------------------
   //Object switch: A listing of all object IDs and the code to allocate them.
   edbg << "Writing object switch" << flushl;
-  wto.open((workdir +"Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h").c_str(),ios_base::out);
+  wto.open((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h").c_str(),ios_base::out);
     wto << license;
     wto << "#ifndef NEW_OBJ_PREFIX\n#  define NEW_OBJ_PREFIX\n#endif\n\n";
     for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
@@ -410,7 +410,7 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   //Resource names: Defines integer constants for all resources.
   int max;
   edbg << "Writing resource names and maxima" << flushl;
-  wto.open((workdir +"Preprocessor_Environment_Editable/IDE_EDIT_resourcenames.h").c_str(),ios_base::out);
+  wto.open((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_resourcenames.h").c_str(),ios_base::out);
     wto << license;
 
 
@@ -608,7 +608,7 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
 
   string make = "Game ";
 
-  make += "WORKDIR=\"" + workdir + "\" ";
+  make += "WORKDIR=\"" + makedir + "\" ";
   make += mode == emode_debug? "GMODE=Debug ": mode == emode_design? "GMODE=Design ": mode == emode_compile?"GMODE=Compile ": "GMODE=Run ";
   make += "GRAPHICS=" + extensions::targetAPI.graphicsSys + " ";
   make += "AUDIO=" + extensions::targetAPI.audioSys + " ";
@@ -656,7 +656,7 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
 //  int makeres = better_system(MAKE_location,"MacOS");
 
   // Pick a file and flush it
-  const string redirfile = (workdir + "enigma_compile.log");
+  const string redirfile = (makedir + "enigma_compile.log");
   fclose(fopen(redirfile.c_str(),"wb"));
 
   // Redirect it
