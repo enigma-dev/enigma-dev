@@ -22,11 +22,11 @@
 #include <string>
 using std::string;
 
-#include "workdir.h"
+#include "makedir.h"
 #include "settings.h"
 #include "OS_Switchboard.h" //Tell us where the hell we are
 
-extern string workdir;
+extern string makedir;
 
 string myReplace(string str, const string& oldStr, const string& newStr);
 string escapeEnv(string str, string env);
