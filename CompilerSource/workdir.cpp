@@ -33,7 +33,7 @@ string escapeEnv(string str) {
 }
 
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
-string workdir = myReplace(escapeEnv("%PROGRAMDATA%/ENIGMA/"), "\\","/");
+string workdir = myReplace(escapeEnv(setting::make_directory), "\\","/");
 #else
 string workdir = escapeEnv(setting::make_directory);
 #endif
