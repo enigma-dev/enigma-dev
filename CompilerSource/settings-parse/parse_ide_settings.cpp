@@ -84,7 +84,7 @@ string escapeEnv(string str) {
 #include <windows.h>
 #endif
 
-string workdir = "C:/ProgramData/ENIGMA/";
+string workdir = "";
 
 void clear_ide_editables();
 static inline vector<string> explode(string n) {
