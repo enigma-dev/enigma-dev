@@ -69,6 +69,12 @@ extern const char* establish_bearings(const char *compiler);
 #include <System/builtins.h>
 #include <API/jdi.h>
 
+#include "workdir.h"
+
+dllexport void libSetMakeDirectory(const char* dir) {
+	workdir = escapeEnv(dir);
+}
+
 dllexport const char* libInit(EnigmaCallbacks* ecs)
 {
   if (ecs)
