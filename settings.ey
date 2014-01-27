@@ -36,7 +36,10 @@
     -make-directory:
         Type: Textfield
         Label: Make Directory
-        Default: C:/ProgramData/ENIGMA/
+        Default-Windows: "%PROGRAMDATA%/ENIGMA/"
+        Default-Linux: "%HOME%/ENIGMA/"
+        Default-MacOSX: "./ENIGMA/"
+        Default: "./ENIGMA/"
     -inherit-objects:
         Type: Checkbox
         Label: Object Inheritance

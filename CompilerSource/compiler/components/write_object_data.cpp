@@ -26,7 +26,7 @@
 **                                                                              **
 \********************************************************************************/
 
-#include "workdir.h"
+#include "makedir.h"
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
@@ -63,7 +63,7 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
   //NEXT FILE ----------------------------------------
   //Object declarations: object classes/names and locals.
   ofstream wto;
-  wto.open((workdir +"Preprocessor_Environment_Editable/IDE_EDIT_objectdeclarations.h").c_str(),ios_base::out);
+  wto.open((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_objectdeclarations.h").c_str(),ios_base::out);
     wto << license;
     wto << "#include \"Universal_System/collisions_object.h\"\n";
     wto << "#include \"Universal_System/object.h\"\n\n";
@@ -491,7 +491,7 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
   ********************************************************/
 
     cout << "DBGMSG 1" << endl;
-  wto.open((workdir +"Preprocessor_Environment_Editable/IDE_EDIT_objectfunctionality.h").c_str(),ios_base::out);
+  wto.open((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_objectfunctionality.h").c_str(),ios_base::out);
     wto << license;
 
     cout << "DBGMSG 2" << endl;

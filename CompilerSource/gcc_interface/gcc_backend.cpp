@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "workdir.h"
+#include "makedir.h"
 #include <time.h>
 #include <string>
 #include <iostream>
@@ -122,12 +122,12 @@ static inline bool toolchain_parseout(string line, string &exename, string &comm
     bool mblank = false;
     srp = command.find("$blank");
     while (srp != string::npos) {
-      command.replace(srp,6,("\"" + workdir + "enigma_blank.txt\"").c_str());
+      command.replace(srp,6,("\"" + makedir + "enigma_blank.txt\"").c_str());
       srp = command.find("$blank");
       mblank = true;
     }
     if (mblank)
-      fclose(fopen((workdir + "enigma_blank.txt").c_str(),"wb"));
+      fclose(fopen((makedir + "enigma_blank.txt").c_str(),"wb"));
 
   /* Return whether or not to redirect */
   return redir;
@@ -178,9 +178,9 @@ const char* establish_bearings(const char *compiler)
   ***********************************************************/
   if ((cmd = compey.get("defines")) == "")
     return (sprintf(errbuf,"Compiler descriptor file `%s` does not specify 'defines' executable.\n", compfq.c_str()), errbuf);
-  redir = toolchain_parseout(cmd, toolchainexec,parameters,("\"" + workdir + "enigma_defines.txt\""));
+  redir = toolchain_parseout(cmd, toolchainexec,parameters,("\"" + makedir + "enigma_defines.txt\""));
   cout << "Read key `defines` as `" << cmd << "`\nParsed `" << toolchainexec << "` `" << parameters << "`: redirect=" << (redir?"yes":"no") << "\n";
-  got_success = !(redir? e_execsp(toolchainexec, parameters, ("> \"" + workdir + "enigma_defines.txt\""),MAKE_paths) : e_execsp(toolchainexec, parameters, MAKE_paths));
+  got_success = !(redir? e_execsp(toolchainexec, parameters, ("> \"" + makedir + "enigma_defines.txt\""),MAKE_paths) : e_execsp(toolchainexec, parameters, MAKE_paths));
   if (!got_success) return "Call to 'defines' toolchain executable returned non-zero!\n";
   else cout << "Call succeeded" << endl;
 
@@ -189,15 +189,15 @@ const char* establish_bearings(const char *compiler)
   ****************************************************/
   if ((cmd = compey.get("searchdirs")) == "")
     return (sprintf(errbuf,"Compiler descriptor file `%s` does not specify 'searchdirs' executable.", compfq.c_str()), errbuf);
-  redir = toolchain_parseout(cmd, toolchainexec,parameters,("\"" + workdir + "enigma_searchdirs.txt\""));
+  redir = toolchain_parseout(cmd, toolchainexec,parameters,("\"" + makedir + "enigma_searchdirs.txt\""));
   cout << "Read key `searchdirs` as `" << cmd << "`\nParsed `" << toolchainexec << "` `" << parameters << "`: redirect=" << (redir?"yes":"no") << "\n";
-  got_success = !(redir? e_execsp(toolchainexec, parameters, ("&> \"" + workdir + "enigma_searchdirs.txt\""), MAKE_paths) : e_execsp(toolchainexec, parameters, MAKE_paths));
+  got_success = !(redir? e_execsp(toolchainexec, parameters, ("&> \"" + makedir + "enigma_searchdirs.txt\""), MAKE_paths) : e_execsp(toolchainexec, parameters, MAKE_paths));
   if (!got_success) return "Call to 'searchdirs' toolchain executable returned non-zero!";
   else cout << "Call succeeded" << endl;
 
   /* Parse include directories
   ****************************************/
-    string idirs = fc((workdir + "enigma_searchdirs.txt").c_str());
+    string idirs = fc((makedir + "enigma_searchdirs.txt").c_str());
     if (idirs == "")
       return "Invalid search directories returned. Error 6.";
 
@@ -213,7 +213,7 @@ const char* establish_bearings(const char *compiler)
       pos += idirstart.length();
     }
     jdi::builtin->add_search_directory("ENIGMAsystem/SHELL/");
-    jdi::builtin->add_search_directory(workdir.c_str());
+    jdi::builtin->add_search_directory(makedir.c_str());
 
     while (is_useless(idirs[++pos]));
 
@@ -236,11 +236,11 @@ const char* establish_bearings(const char *compiler)
 
   /* Parse built-in #defines
   ****************************/
-    llreader macro_reader((workdir + "enigma_defines.txt").c_str());
+    llreader macro_reader((makedir + "enigma_defines.txt").c_str());
     if (!macro_reader.is_open())
       return "Call to `defines' toolchain executable returned no data.\n";
 
-    int res = jdi::builtin->parse_C_stream(macro_reader, (workdir + "enigma_defines.txt").c_str());
+    int res = jdi::builtin->parse_C_stream(macro_reader, (makedir + "enigma_defines.txt").c_str());
     if (res)
       return "Highly unlikely error: Compiler builtins failed to parse. But stupid things can happen when working with files.";
 

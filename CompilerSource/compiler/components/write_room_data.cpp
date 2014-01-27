@@ -25,7 +25,7 @@
 **                                                                              **
 \********************************************************************************/
 
-#include "workdir.h"
+#include "makedir.h"
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
@@ -49,7 +49,7 @@ using namespace std;
 
 int lang_CPP::compile_writeRoomData(EnigmaStruct* es, parsed_object *EGMglobal)
 {
-  ofstream wto((workdir +"Preprocessor_Environment_Editable/IDE_EDIT_roomarrays.h").c_str(),ios_base::out);
+  ofstream wto((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_roomarrays.h").c_str(),ios_base::out);
 
   wto << license << "namespace enigma {\n"
   << "  int room_loadtimecount = " << es->roomCount << ";\n";
@@ -185,7 +185,7 @@ int lang_CPP::compile_writeRoomData(EnigmaStruct* es, parsed_object *EGMglobal)
 wto.close();
 
 
-wto.open((workdir +"Preprocessor_Environment_Editable/IDE_EDIT_roomcreates.h").c_str(),ios_base::out);
+wto.open((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_roomcreates.h").c_str(),ios_base::out);
   wto << license;
   for (int i = 0; i < es->roomCount; i++)
   {

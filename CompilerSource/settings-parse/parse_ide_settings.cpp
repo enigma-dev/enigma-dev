@@ -40,6 +40,16 @@ using namespace std;
 #include "eyaml.h"
 
 #include "parse_ide_settings.h"
+#include "makedir.h"
+// Only include the headers for mkdir() if we are not on Windows; on Windows we use CreateDirectory() from windows.h
+#if CURRENT_PLATFORM_ID != OS_WINDOWS
+#include <sys/stat.h>
+#include <unistd.h>
+#else
+#include <windows.h>
+#endif
+
+string makedir = "";
 
 void clear_ide_editables();
 static inline vector<string> explode(string n) {
@@ -73,6 +83,47 @@ void parse_ide_settings(const char* eyaml)
 {
   ey_data settree = parse_eyaml_str(eyaml);
   eyit it;
+  
+  // Read settings info
+  setting::use_cpp_strings   = settree.get("inherit-strings-from").toInt();
+  setting::use_cpp_escapes   = settree.get("inherit-escapes-from").toInt();
+  setting::use_incrementals  = settree.get("inherit-increment-from").toInt();
+  setting::use_gml_equals    = !settree.get("inherit-equivalence-from").toInt();
+  setting::literal_autocast  = settree.get("treat-literals-as").toInt();
+  setting::inherit_objects   = settree.get("inherit-objects").toBool();
+  setting::make_directory = settree.get("make-directory").toString();
+
+#if CURRENT_PLATFORM_ID == OS_WINDOWS
+	makedir = myReplace(escapeEnv(setting::make_directory), "\\","/");
+#else
+	makedir = escapeEnv(setting::make_directory);
+#endif
+
+#if CURRENT_PLATFORM_ID == OS_WINDOWS
+  CreateDirectory((makedir).c_str(), NULL);
+  if (!CreateDirectory((makedir +"Preprocessor_Environment_Editable").c_str(), NULL)) {
+	DWORD error = GetLastError();
+	switch (error) {
+		case ERROR_ALREADY_EXISTS: 
+			std::cout << "WARNING! Failed to create build directory, directory already exists: \"" << makedir << "\"" << endl;
+			break;
+		case ERROR_PATH_NOT_FOUND:
+			std::cout << "ERROR! Failed to create build directory, path not found: \"" << makedir << "\"" << endl;
+			break;
+		default:
+			std::cout << "Created build directory: \"" << makedir << "\"" << endl;
+			break;
+	}
+  }
+#else
+  mkdir((makedir).c_str(),0755);
+  if (mkdir((makedir +"Preprocessor_Environment_Editable").c_str(),0755) == -1)
+  {
+	  std::cout << "Failed to create build directory at " << makedir << endl;
+  } else {
+	  std::cout << "Created build directory: \"" << makedir << "\"" << endl;
+  }
+#endif
 
   //ide_dia_open();
 
@@ -144,15 +195,6 @@ void parse_ide_settings(const char* eyaml)
   extensions::targetOS.runprog   = cinfo.get("run-program");
   extensions::targetOS.runparam  = cinfo.get("run-params");
   extensions::targetOS.identifier = cinfo.get("target-platform");
-
-  // Read settings info
-  setting::use_cpp_strings   = settree.get("inherit-strings-from").toInt();
-  setting::use_cpp_escapes   = settree.get("inherit-escapes-from").toInt();
-  setting::use_incrementals  = settree.get("inherit-increment-from").toInt();
-  setting::use_gml_equals    = !settree.get("inherit-equivalence-from").toInt();
-  setting::literal_autocast  = settree.get("treat-literals-as").toInt();
-  setting::inherit_objects   = settree.get("inherit-objects").toBool();
-  setting::make_directory = settree.get("make-directory");
 
   cout << "Setting up IDE editables... " << endl;
   requested_extensions.clear();

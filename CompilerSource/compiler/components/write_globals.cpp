@@ -25,7 +25,7 @@
 **                                                                              **
 \********************************************************************************/
 
-#include "workdir.h"
+#include "makedir.h"
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
@@ -48,7 +48,7 @@ extern string working_directory;
 int lang_CPP::compile_writeGlobals(EnigmaStruct* es, parsed_object* global)
 {
   ofstream wto;
-  wto.open((workdir +"Preprocessor_Environment_Editable/IDE_EDIT_globals.h").c_str(),ios_base::out);
+  wto.open((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_globals.h").c_str(),ios_base::out);
     wto << license;
 
     global_script_argument_count=16; //write all 16 arguments
