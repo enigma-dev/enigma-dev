@@ -310,9 +310,9 @@ void d3d_model_part_draw(int id, int vertex_start, int vertex_count) // overload
 
 void d3d_model_part_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z, int vertex_start, int vertex_count) // overload for no additional texture call's
 {
-    glTranslatef(x, y, z);
+    model_matrix.translate(x, y, z);
     meshes[id]->Draw(vertex_start, vertex_count);
-    glTranslatef(-x, -y, -z);
+    model_matrix.translate(-x, -y, -z);
 }
 
 void d3d_model_part_draw(int id, int texId, int vertex_start, int vertex_count)
@@ -324,9 +324,9 @@ void d3d_model_part_draw(int id, int texId, int vertex_start, int vertex_count)
 void d3d_model_part_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z, int texId, int vertex_start, int vertex_count)
 {
     texture_set(get_texture(texId));
-    glTranslatef(x, y, z);
+    model_matrix.translate(x, y, z);
     meshes[id]->Draw(vertex_start, vertex_count);
-    glTranslatef(-x, -y, -z);
+    model_matrix.translate(-x, -y, -z);
 }
 
 void d3d_model_draw(int id) // overload for no additional texture or transformation call's
@@ -336,9 +336,9 @@ void d3d_model_draw(int id) // overload for no additional texture or transformat
 
 void d3d_model_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z) // overload for no additional texture call's
 {
-    glTranslatef(x, y, z);
+    model_matrix.translate(x, y, z);
     meshes[id]->Draw();
-    glTranslatef(-x, -y, -z);
+    model_matrix.translate(-x, -y, -z);
 }
 
 void d3d_model_draw(int id, int texId)
@@ -350,9 +350,9 @@ void d3d_model_draw(int id, int texId)
 void d3d_model_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z, int texId)
 {
     texture_set(get_texture(texId));
-    glTranslatef(x, y, z);
+    model_matrix.translate(x, y, z);
     meshes[id]->Draw();
-    glTranslatef(-x, -y, -z);
+    model_matrix.translate(-x, -y, -z);
 }
 
 void d3d_model_primitive_begin(int id, int kind)
