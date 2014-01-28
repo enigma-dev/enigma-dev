@@ -48,6 +48,10 @@ struct var;
 
 struct variant
 {
+  //Default type (-1 or real), changes based on "assume_uninitialized_is_zero" flag.
+  //This variable is defined in a compiler-generated class.
+  static const int default_type;
+
   enigma::rvt rval;
   string sval;
   int type;
