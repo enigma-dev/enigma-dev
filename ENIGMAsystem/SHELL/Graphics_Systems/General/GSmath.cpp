@@ -40,7 +40,7 @@ Vector3f Vector3f::Cross(const Vector3f& v) const
 
 Vector3f& Vector3f::Normalize()
 {
-    const gs_scalar Length = sqrtf(x * x + y * y + z * z);
+    const gs_scalar Length = sqrt(x * x + y * y + z * z);
 
     x /= Length;
     y /= Length;
@@ -74,7 +74,7 @@ void Matrix4f::scale(gs_scalar ScaleX, gs_scalar ScaleY, gs_scalar ScaleZ)
 {
     Matrix4f sm;
     sm.InitScaleTransform(ScaleX, ScaleY, ScaleZ);
-    *this = *this*sm;
+    *this = sm*(*this);
 }
 
 //By a vector
@@ -82,7 +82,7 @@ void Matrix4f::rotate(gs_scalar RotateX, gs_scalar RotateY, gs_scalar RotateZ)
 {
     Matrix4f sm;
     sm.InitRotateTransform(RotateX, RotateY, RotateZ);
-    *this = *this*sm;
+    *this = sm*(*this);
 }
 
 //Around an axis
@@ -91,14 +91,14 @@ void Matrix4f::rotate(gs_scalar angle, gs_scalar x, gs_scalar y, gs_scalar z)
     Matrix4f sm;
     Vector3f V(x,y,z);
     sm.InitRotateVectorTransform(angle, V);
-    *this = *this*sm;
+    *this = sm*(*this);
 }
 
 void Matrix4f::translate(gs_scalar x, gs_scalar y, gs_scalar z)
 {
     Matrix4f sm;
     sm.InitTranslationTransform(x, y, z);
-    *this = *this*sm;
+    *this = sm*(*this);
 }
 
 void Matrix4f::InitScaleTransform(gs_scalar ScaleX, gs_scalar ScaleY, gs_scalar ScaleZ)
@@ -167,23 +167,27 @@ void Matrix4f::InitTranslationTransform(gs_scalar x, gs_scalar y, gs_scalar z)
 }
 
 
-void Matrix4f::InitCameraTransform(const Vector3f& Target, const Vector3f& Up)
+void Matrix4f::InitCameraTransform(const Vector3f& from, const Vector3f& to, const Vector3f& up)
 {
-    Vector3f f = Target;
+    Vector3f f(to.x - from.x,to.y - from.y,to.z - from.z);
     f.Normalize();
-    Vector3f U = Up;
+
+    Vector3f U = up;
     U.Normalize();
 
     Vector3f s = f.Cross(U);
     s.Normalize();
 
     U = s.Cross(f);
-    U.Normalize();
 
     m[0][0] = s.x;    m[0][1] = s.y;   m[0][2] = s.z;   m[0][3] = 0.0f;
     m[1][0] = U.x;    m[1][1] = U.y;   m[1][2] = U.z;   m[1][3] = 0.0f;
     m[2][0] = -f.x;   m[2][1] = -f.y;  m[2][2] = -f.z;  m[2][3] = 0.0f;
     m[3][0] = 0.0f;   m[3][1] = 0.0f;  m[3][2] = 0.0f;  m[3][3] = 1.0f;
+
+    Matrix4f trans;
+    trans.InitTranslationTransform(-from.x,-from.y,-from.z);
+    *this = (*this) * trans;
 }
 
 void Matrix4f::InitPersProjTransform(gs_scalar fovy, gs_scalar aspect_ratio, gs_scalar znear, gs_scalar zfar)
