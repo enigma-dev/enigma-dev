@@ -21,6 +21,7 @@
 #include "../General/GStextures.h"
 #include <stdio.h>
 #include "Universal_System/roomsystem.h"
+#include "Bridges/General/GL3Context.h"
 
 #define __GETR(x) ((x & 0x0000FF))
 #define __GETG(x) ((x & 0x00FF00) >> 8)
@@ -111,6 +112,7 @@ int draw_getpixel(int x,int y)
         if (y < 0) y = 0;
         if (x > enigma_user::room_width || y > enigma_user::room_height) return 0;
     }
+  oglmgr->ReadPixels();
   #if defined __BIG_ENDIAN__ || defined __BIG_ENDIAN
     int ret;
     glReadPixels(x,y,1,1,GL_RGB,GL_UNSIGNED_BYTE,&ret);
@@ -143,6 +145,7 @@ int draw_getpixel_ext(int x,int y)
         if (y < 0) y = 0;
         if (x > enigma_user::room_width || y > enigma_user::room_height) return 0;
     }
+  oglmgr->ReadPixels();
   #if defined __BIG_ENDIAN__ || defined __BIG_ENDIAN
     int ret;
     glReadPixels(x,y,1,1,GL_RGBA,GL_UNSIGNED_BYTE,&ret);
