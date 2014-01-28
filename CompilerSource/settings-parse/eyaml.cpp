@@ -99,7 +99,7 @@ ey_string &eyscalar(eyit x)
 #include <cstdlib>
 ey_string::operator string&() { return value; }
 bool ey_string::toBool()  { 
-	if (strstr("true", value.c_str())) { return true; } else { return false; }
+	if (strstr(value.c_str(), "true")) { return true; } else { return false; }
 }
 char ey_string::toByte()      { return atoi(value.c_str()); }
 double ey_string::toDouble()  { return atof(value.c_str()); }
