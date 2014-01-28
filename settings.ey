@@ -37,7 +37,7 @@
         Type: Textfield
         Label: Make Directory
         Default-Windows: "%PROGRAMDATA%/ENIGMA/"
-        Default-Linux: "%HOME%/ENIGMA/"
+        Default-Linux: "%HOME%/.enigma/"
         Default-MacOSX: "./ENIGMA/"
         Default: "./ENIGMA/"
     -inherit-objects:
