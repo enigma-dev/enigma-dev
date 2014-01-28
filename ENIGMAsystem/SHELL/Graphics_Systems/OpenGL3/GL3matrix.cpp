@@ -40,8 +40,12 @@ enigma::Matrix4f mv_matrix(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1), mvp_matrix(1,0,0,0,
 //NOTE: THIS IS STILL FFP
 #ifdef GS_SCALAR_64
 #define glLoadMatrix(m) glLoadMatrixd((gs_scalar*)m.Transpose());
+#define glGet(m,n)        glGetDoublev(m,(gs_scalar*)n); //For debug
+
 #else
 #define glLoadMatrix(m) glLoadMatrixf((gs_scalar*)m.Transpose());
+#define glGet(m,n)        glGetFloatv(m,(gs_scalar*)n); //For debug
+
 #endif
 
 namespace enigma_user
@@ -49,6 +53,7 @@ namespace enigma_user
 
 void d3d_set_perspective(bool enable)
 {
+    oglmgr->Transformation();
     printf("SET PERSPECTIVE RAN!\n");
   //glMatrixMode(GL_PROJECTION);
   //glLoadIdentity();
@@ -75,6 +80,7 @@ void d3d_set_perspective(bool enable)
 
 void d3d_set_projection(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom, gs_scalar xto, gs_scalar yto, gs_scalar zto, gs_scalar xup, gs_scalar yup, gs_scalar zup)
 {
+    oglmgr->Transformation();
         printf("SET Projection RAN!\n");
 
   (enigma::d3dHidden?glEnable:glDisable)(GL_DEPTH_TEST);
@@ -108,8 +114,9 @@ void d3d_set_projection(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom, gs_sc
 
 void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom, gs_scalar xto, gs_scalar yto, gs_scalar zto, gs_scalar xup, gs_scalar yup, gs_scalar zup, gs_scalar angle, gs_scalar aspect, gs_scalar znear, gs_scalar zfar)
 {
+    oglmgr->Transformation();
     printf("SET projection ext RAN!\n");
-
+  if (angle == 0 || znear == 0) return; //THEY CANNOT BE 0!!!
   (enigma::d3dHidden?glEnable:glDisable)(GL_DEPTH_TEST);
   //glMatrixMode(GL_PROJECTION);
   //glLoadIdentity();
@@ -117,7 +124,7 @@ void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom, g
   projection_matrix.InitPersProjTransform(angle, -aspect, znear, zfar);
 
   view_matrix.InitCameraTransform(enigma::Vector3f(xto - xfrom, yto - yfrom, zto - zfrom),enigma::Vector3f(xup,yup,zup));
-
+  view_matrix.translate(-xfrom,-yfrom,-zfrom);
   //gluPerspective(angle, -aspect, znear, zfar);
   //glMatrixMode(GL_MODELVIEW);
   //glLoadIdentity();
@@ -132,17 +139,33 @@ void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom, g
   glMatrixMode(GL_PROJECTION);
   glLoadMatrix(projection_matrix);
 
+ printf("projection_ext(%f, %f, %f, %f, %f, %f, %f, %f, %f) \n", xfrom, yfrom, zfrom, xto, yto, zto, xup, yup, zup);
+
+    printf("Projection matrix = \n");
+    enigma::Matrix4f tmp;
+    glGet(GL_PROJECTION_MATRIX,tmp);
+    tmp.Print();
+    printf("\n");
+
   glMatrixMode(GL_MODELVIEW);
   glLoadMatrix(mv_matrix);
 
+    printf("view matrix = \n");
+    view_matrix.Transpose().Print();
+    printf("\n");
+
+    printf("model matrix = \n");
+    model_matrix.Transpose().Print();
+    printf("\n");
+
   enigma::d3d_light_update_positions();
 
-    printf("SET projection ext FINISHED!\n");
-
+  printf("SET projection ext FINISHED!\n");
 }
 
 void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, gs_scalar angle)
 {
+    oglmgr->Transformation();
         printf("SET ortho RAN!\n");
 
   //glMatrixMode(GL_PROJECTION);
@@ -167,7 +190,8 @@ void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scal
   //glMatrixMode(GL_MODELVIEW);
   //glLoadIdentity();
 
-  //mv_matrix = view_matrix * model_matrix;
+  view_matrix.InitIdentity();
+  mv_matrix = view_matrix * model_matrix;
 
   mvp_matrix = projection_matrix * mv_matrix;
 
@@ -191,7 +215,8 @@ void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scal
 
 void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, gs_scalar angle)
 {
-        printf("SET proj perspect RAN!\n");
+   oglmgr->Transformation();
+   printf("SET proj perspect RAN!\n");
 
   //glMatrixMode(GL_PROJECTION);
   projection_matrix.InitRotateVectorTransform(angle, enigma::Vector3f(0,0,1));
@@ -241,7 +266,11 @@ void d3d_transform_set_identity()
     glMatrixMode(GL_MODELVIEW);
     glLoadMatrix(mv_matrix);
 
-          printf("SET set ident FINISHED!\n");
+    printf("Set identity function\n");
+    enigma::Matrix4f tmp;
+    glGet(GL_MODELVIEW_MATRIX,tmp);
+    tmp.Print();
+    printf("\n");
 
 
     /*transformation_matrix[0] = 1;
@@ -265,6 +294,8 @@ void d3d_transform_set_identity()
 
 void d3d_transform_add_translation(gs_scalar xt, gs_scalar yt, gs_scalar zt)
 {
+    printf("Add translation RAN!\n");
+
     oglmgr->Transformation();
     //model_matrix.InitIdentity();
     model_matrix.translate(xt, yt, zt);
@@ -275,6 +306,12 @@ void d3d_transform_add_translation(gs_scalar xt, gs_scalar yt, gs_scalar zt)
     glMatrixMode(GL_MODELVIEW);
     glLoadMatrix(mv_matrix);
 
+    printf("Add translations function\n");
+    enigma::Matrix4f tmp;
+    glGet(GL_MODELVIEW_MATRIX,tmp);
+    tmp.Print();
+    printf("\n");
+
     //glLoadIdentity();
     //glTranslatef(xt, yt, zt);
     //glMultMatrixd(transformation_matrix);
@@ -284,6 +321,8 @@ void d3d_transform_add_translation(gs_scalar xt, gs_scalar yt, gs_scalar zt)
 }
 void d3d_transform_add_scaling(gs_scalar xs, gs_scalar ys, gs_scalar zs)
 {
+    printf("Add scaling RAN!\n");
+
     oglmgr->Transformation();
     //model_matrix.InitIdentity();
     model_matrix.scale(xs, ys, zs);
@@ -294,6 +333,12 @@ void d3d_transform_add_scaling(gs_scalar xs, gs_scalar ys, gs_scalar zs)
     glMatrixMode(GL_MODELVIEW);
     glLoadMatrix(mv_matrix);
 
+    printf("Add scaling function\n");
+    enigma::Matrix4f tmp;
+    glGet(GL_MODELVIEW_MATRIX,tmp);
+    tmp.Print();
+    printf("\n");
+
     /*glLoadIdentity();
     glScalef(xs, ys, zs);
     glMultMatrixd(transformation_matrix);
@@ -303,6 +348,9 @@ void d3d_transform_add_scaling(gs_scalar xs, gs_scalar ys, gs_scalar zs)
 }
 void d3d_transform_add_rotation_x(gs_scalar angle)
 {
+    oglmgr->Transformation();
+    printf("Add rotation x RAN!\n");
+
     model_matrix.rotate(-angle,1,0,0);
     mv_matrix = view_matrix * model_matrix;
     mvp_matrix = projection_matrix * mv_matrix;
@@ -321,6 +369,8 @@ void d3d_transform_add_rotation_x(gs_scalar angle)
 }
 void d3d_transform_add_rotation_y(gs_scalar angle)
 {
+    printf("Add rotation y RAN!\n");
+
     oglmgr->Transformation();
     model_matrix.rotate(-angle,0,1,0);
     mv_matrix = view_matrix * model_matrix;
@@ -339,6 +389,8 @@ void d3d_transform_add_rotation_y(gs_scalar angle)
 }
 void d3d_transform_add_rotation_z(gs_scalar angle)
 {
+    printf("Add rotation z RAN!\n");
+
     oglmgr->Transformation();
     model_matrix.rotate(-angle,0,0,1);
     mv_matrix = view_matrix * model_matrix;
@@ -357,6 +409,8 @@ void d3d_transform_add_rotation_z(gs_scalar angle)
 }
 void d3d_transform_add_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar angle)
 {
+    printf("Add rotation axis RAN!\n");
+
     oglmgr->Transformation();
     model_matrix.rotate(-angle,x,y,z);
     mv_matrix = view_matrix * model_matrix;
@@ -376,6 +430,8 @@ void d3d_transform_add_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, gs_s
 
 void d3d_transform_set_translation(gs_scalar xt, gs_scalar yt, gs_scalar zt)
 {
+    printf("Set translation RAN!\n");
+
     oglmgr->Transformation();
     model_matrix.InitIdentity();
     model_matrix.translate(xt, yt, zt);
@@ -394,6 +450,9 @@ void d3d_transform_set_translation(gs_scalar xt, gs_scalar yt, gs_scalar zt)
 }
 void d3d_transform_set_scaling(gs_scalar xs, gs_scalar ys, gs_scalar zs)
 {
+    printf("Set scaling RAN!\n");
+
+
     oglmgr->Transformation();
     model_matrix.InitIdentity();
     model_matrix.scale(xs, ys, zs);
@@ -412,6 +471,8 @@ void d3d_transform_set_scaling(gs_scalar xs, gs_scalar ys, gs_scalar zs)
 }
 void d3d_transform_set_rotation_x(gs_scalar angle)
 {
+    printf("Set rotation x RAN!\n");
+
     oglmgr->Transformation();
     model_matrix.InitIdentity();
     model_matrix.rotate(-angle, 1, 0, 0);
@@ -430,6 +491,8 @@ void d3d_transform_set_rotation_x(gs_scalar angle)
 }
 void d3d_transform_set_rotation_y(gs_scalar angle)
 {
+    printf("Set rotation y RAN!\n");
+
     oglmgr->Transformation();
     model_matrix.InitIdentity();
     model_matrix.rotate(-angle, 0, 1, 0);
@@ -448,6 +511,8 @@ void d3d_transform_set_rotation_y(gs_scalar angle)
 }
 void d3d_transform_set_rotation_z(gs_scalar angle)
 {
+    printf("Set rotation z RAN!\n");
+
     oglmgr->Transformation();
     model_matrix.InitIdentity();
     model_matrix.rotate(-angle, 0, 0, 1);
@@ -466,6 +531,8 @@ void d3d_transform_set_rotation_z(gs_scalar angle)
 }
 void d3d_transform_set_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar angle)
 {
+    printf("Set rotation axis RAN!\n");
+
     oglmgr->Transformation();
     model_matrix.InitIdentity();
     model_matrix.rotate(-angle, x, y, z);

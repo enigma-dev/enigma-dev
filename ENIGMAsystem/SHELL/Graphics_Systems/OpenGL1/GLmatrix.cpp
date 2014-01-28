@@ -89,6 +89,21 @@ void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom, g
   glGet(GL_MODELVIEW_MATRIX,view_matrix);
   glMultMatrix(model_matrix);
   enigma::d3d_light_update_positions();
+
+ printf("projection_ext(%f, %f, %f, %f, %f, %f, %f, %f, %f) \n", xfrom, yfrom, zfrom, xto, yto, zto, xup, yup, zup);
+    printf("Projection matrix = \n");
+    enigma::Matrix4f tmp;
+    glGet(GL_PROJECTION_MATRIX,tmp);
+    tmp.Print();
+    printf("\n");
+
+    printf("view matrix = \n");
+    view_matrix.Print();
+    printf("\n");
+
+    printf("model matrix = \n");
+    model_matrix.Print();
+    printf("\n");
 }
 
 void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, gs_scalar angle)
@@ -101,8 +116,7 @@ void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scal
   glOrtho(x-0.5,x + width,y-0.5,y + height,32000,-32000);
 
   glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
-  glGet(GL_MODELVIEW_MATRIX,view_matrix);
+  view_matrix.InitIdentity();
   glMultMatrix(model_matrix);
 
   enigma::d3d_light_update_positions();
@@ -117,8 +131,7 @@ void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, g
   gluPerspective(60, 1, 0.1,32000);
   glOrtho(x,x + width,y,y + height,0.1,32000);
   glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
-  glGet(GL_MODELVIEW_MATRIX,view_matrix);
+  view_matrix.InitIdentity();
   glMultMatrix(model_matrix);
   enigma::d3d_light_update_positions();
 }
@@ -129,6 +142,12 @@ void d3d_transform_set_identity()
 {
   model_matrix.InitIdentity();
   glLoadMatrix(view_matrix);
+
+  printf("Set identity function\n");
+  enigma::Matrix4f tmp;
+  glGet(GL_MODELVIEW_MATRIX,tmp);
+  tmp.Print();
+  printf("\n");
 }
 
 void d3d_transform_add_translation(gs_scalar xt, gs_scalar yt, gs_scalar zt)
@@ -139,6 +158,13 @@ void d3d_transform_add_translation(gs_scalar xt, gs_scalar yt, gs_scalar zt)
   glGet(GL_MODELVIEW_MATRIX,model_matrix);
   glLoadMatrix(view_matrix);
   glMultMatrix(model_matrix);
+
+  printf("Add translations function\n");
+  enigma::Matrix4f tmp;
+  glGet(GL_MODELVIEW_MATRIX,tmp);
+  tmp.Print();
+  printf("\n");
+
 }
 void d3d_transform_add_scaling(gs_scalar xs, gs_scalar ys, gs_scalar zs)
 {
@@ -148,6 +174,12 @@ void d3d_transform_add_scaling(gs_scalar xs, gs_scalar ys, gs_scalar zs)
   glGet(GL_MODELVIEW_MATRIX,model_matrix);
   glLoadMatrix(view_matrix);
   glMultMatrix(model_matrix);
+
+  printf("Add scaling function\n");
+  enigma::Matrix4f tmp;
+  glGet(GL_MODELVIEW_MATRIX,tmp);
+  tmp.Print();
+  printf("\n");
 }
 void d3d_transform_add_rotation_x(gs_scalar angle)
 {
@@ -157,6 +189,12 @@ void d3d_transform_add_rotation_x(gs_scalar angle)
   glGet(GL_MODELVIEW_MATRIX,model_matrix);
   glLoadMatrix(view_matrix);
   glMultMatrix(model_matrix);
+
+  printf("Add rotation x function\n");
+  enigma::Matrix4f tmp;
+  glGet(GL_MODELVIEW_MATRIX,tmp);
+  tmp.Print();
+  printf("\n");
 }
 void d3d_transform_add_rotation_y(gs_scalar angle)
 {
@@ -166,6 +204,12 @@ void d3d_transform_add_rotation_y(gs_scalar angle)
   glGet(GL_MODELVIEW_MATRIX,model_matrix);
   glLoadMatrix(view_matrix);
   glMultMatrix(model_matrix);
+
+  printf("Add rotation y function\n");
+  enigma::Matrix4f tmp;
+  glGet(GL_MODELVIEW_MATRIX,tmp);
+  tmp.Print();
+  printf("\n");
 }
 void d3d_transform_add_rotation_z(gs_scalar angle)
 {
@@ -175,6 +219,12 @@ void d3d_transform_add_rotation_z(gs_scalar angle)
   glGet(GL_MODELVIEW_MATRIX,model_matrix);
   glLoadMatrix(view_matrix);
   glMultMatrix(model_matrix);
+
+  printf("Add rotation z function\n");
+  enigma::Matrix4f tmp;
+  glGet(GL_MODELVIEW_MATRIX,tmp);
+  tmp.Print();
+  printf("\n");
 }
 void d3d_transform_add_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar angle)
 {
@@ -184,6 +234,12 @@ void d3d_transform_add_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, gs_s
   glGet(GL_MODELVIEW_MATRIX,model_matrix);
   glLoadMatrix(view_matrix);
   glMultMatrix(model_matrix);
+
+  printf("Add rotation axis function\n");
+  enigma::Matrix4f tmp;
+  glGet(GL_MODELVIEW_MATRIX,tmp);
+  tmp.Print();
+  printf("\n");
 }
 
 void d3d_transform_set_translation(gs_scalar xt, gs_scalar yt, gs_scalar zt)
@@ -193,6 +249,12 @@ void d3d_transform_set_translation(gs_scalar xt, gs_scalar yt, gs_scalar zt)
   glGet(GL_MODELVIEW_MATRIX,model_matrix);
   glLoadMatrix(view_matrix);
   glMultMatrix(model_matrix);
+
+  printf("Set translation function\n");
+  enigma::Matrix4f tmp;
+  glGet(GL_MODELVIEW_MATRIX,tmp);
+  tmp.Print();
+  printf("\n");
 }
 void d3d_transform_set_scaling(gs_scalar xs, gs_scalar ys, gs_scalar zs)
 {
@@ -201,6 +263,12 @@ void d3d_transform_set_scaling(gs_scalar xs, gs_scalar ys, gs_scalar zs)
   glGet(GL_MODELVIEW_MATRIX,model_matrix);
   glLoadMatrix(view_matrix);
   glMultMatrix(model_matrix);
+
+  printf("Set scaling function\n");
+  enigma::Matrix4f tmp;
+  glGet(GL_MODELVIEW_MATRIX,tmp);
+  tmp.Print();
+  printf("\n");
 }
 void d3d_transform_set_rotation_x(gs_scalar angle)
 {
