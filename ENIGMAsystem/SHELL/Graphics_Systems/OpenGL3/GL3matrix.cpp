@@ -54,24 +54,11 @@ namespace enigma_user
 void d3d_set_perspective(bool enable)
 {
     oglmgr->Transformation();
-    printf("SET PERSPECTIVE RAN!\n");
-  //glMatrixMode(GL_PROJECTION);
-  //glLoadIdentity();
-  if (enable) {
-    projection_matrix.InitPersProjTransform(45, -view_wview[view_current] / (gs_scalar)view_hview[view_current], 1, 32000);
-  } else {
-    projection_matrix.InitPersProjTransform(0, 1, 0, 1);
-  }
-
-  mvp_matrix = projection_matrix * view_matrix * model_matrix;
-
-  //NOTE: THIS IS STILL FFP
-  glMatrixMode(GL_PROJECTION);
-  glLoadMatrix(projection_matrix);
-
-      printf("SET PERSPECTIVE FINISHED!\n");
-
-
+    if (enable) {
+      projection_matrix.InitPersProjTransform(45, -view_wview[view_current] / (gs_scalar)view_hview[view_current], 1, 32000);
+    } else {
+      //projection_matrix.InitPersProjTransform(0, 1, 0, 1); //they cannot be zeroes!
+    }
   //glMatrixMode(GL_MODELVIEW);
   // Unverified note: Perspective not the same as in GM when turning off perspective and using d3d projection
   // Unverified note: GM has some sort of dodgy behaviour where this function doesn't affect anything when calling after d3d_set_projection_ext
@@ -81,473 +68,119 @@ void d3d_set_perspective(bool enable)
 void d3d_set_projection(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom, gs_scalar xto, gs_scalar yto, gs_scalar zto, gs_scalar xup, gs_scalar yup, gs_scalar zup)
 {
     oglmgr->Transformation();
-        printf("SET Projection RAN!\n");
-
-  (enigma::d3dHidden?glEnable:glDisable)(GL_DEPTH_TEST);
-  //glMatrixMode(GL_PROJECTION);
-  //glLoadIdentity();
-
-  projection_matrix.InitPersProjTransform(45, -view_wview[view_current] / (gs_scalar)view_hview[view_current], 1, 32000);
-
-  //gluPerspective(45, -view_wview[view_current] / (double)view_hview[view_current], 1, 32000);
-  //glMatrixMode(GL_MODELVIEW);
-  //glLoadIdentity();
-  view_matrix.InitCameraTransform(enigma::Vector3f(xto - xfrom, yto - yfrom, zto - zfrom),enigma::Vector3f(xup,yup,zup));
-
-  //gluLookAt(xfrom, yfrom, zfrom, xto, yto, zto, xup, yup, zup);
-
-  mv_matrix = view_matrix * model_matrix;
-  mvp_matrix = projection_matrix * mv_matrix;
-
-  //NOTE: THIS IS STILL FFP
-  glMatrixMode(GL_PROJECTION);
-  glLoadMatrix(projection_matrix);
-
-  glMatrixMode(GL_MODELVIEW);
-  glLoadMatrix(mv_matrix);
-
-  enigma::d3d_light_update_positions();
-
-        printf("SET Projection FINISHED!\n");
-
+    (enigma::d3dHidden?glEnable:glDisable)(GL_DEPTH_TEST);
+    projection_matrix.InitPersProjTransform(45, -view_wview[view_current] / (gs_scalar)view_hview[view_current], 1, 32000);
+    view_matrix.InitCameraTransform(enigma::Vector3f(xfrom,yfrom,zfrom),enigma::Vector3f(xto,yto,zto),enigma::Vector3f(xup,yup,zup));
 }
 
 void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom, gs_scalar xto, gs_scalar yto, gs_scalar zto, gs_scalar xup, gs_scalar yup, gs_scalar zup, gs_scalar angle, gs_scalar aspect, gs_scalar znear, gs_scalar zfar)
 {
+    if (angle == 0 || znear == 0) return; //THEY CANNOT BE 0!!!
     oglmgr->Transformation();
-    printf("SET projection ext RAN!\n");
-  if (angle == 0 || znear == 0) return; //THEY CANNOT BE 0!!!
-  (enigma::d3dHidden?glEnable:glDisable)(GL_DEPTH_TEST);
-  //glMatrixMode(GL_PROJECTION);
-  //glLoadIdentity();
+    (enigma::d3dHidden?glEnable:glDisable)(GL_DEPTH_TEST);
 
-  projection_matrix.InitPersProjTransform(angle, -aspect, znear, zfar);
+    projection_matrix.InitPersProjTransform(angle, -aspect, znear, zfar);
 
-  view_matrix.InitCameraTransform(enigma::Vector3f(xto - xfrom, yto - yfrom, zto - zfrom),enigma::Vector3f(xup,yup,zup));
-  view_matrix.translate(-xfrom,-yfrom,-zfrom);
-  //gluPerspective(angle, -aspect, znear, zfar);
-  //glMatrixMode(GL_MODELVIEW);
-  //glLoadIdentity();
-  //gluLookAt(xfrom, yfrom, zfrom, xto, yto, zto, xup, yup, zup);
-  //glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
-  //glMultMatrixd(transformation_matrix);
-
-  mv_matrix = view_matrix * model_matrix;
-  mvp_matrix = projection_matrix * mv_matrix;
-
-  //NOTE: THIS IS STILL FFP
-  glMatrixMode(GL_PROJECTION);
-  glLoadMatrix(projection_matrix);
-
- printf("projection_ext(%f, %f, %f, %f, %f, %f, %f, %f, %f) \n", xfrom, yfrom, zfrom, xto, yto, zto, xup, yup, zup);
-
-    printf("Projection matrix = \n");
-    enigma::Matrix4f tmp;
-    glGet(GL_PROJECTION_MATRIX,tmp);
-    tmp.Print();
-    printf("\n");
-
-  glMatrixMode(GL_MODELVIEW);
-  glLoadMatrix(mv_matrix);
-
-    printf("view matrix = \n");
-    view_matrix.Transpose().Print();
-    printf("\n");
-
-    printf("model matrix = \n");
-    model_matrix.Transpose().Print();
-    printf("\n");
-
-  enigma::d3d_light_update_positions();
-
-  printf("SET projection ext FINISHED!\n");
+    view_matrix.InitCameraTransform(enigma::Vector3f(xfrom,yfrom,zfrom),enigma::Vector3f(xto,yto,zto),enigma::Vector3f(xup,yup,zup));
 }
 
 void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, gs_scalar angle)
 {
     oglmgr->Transformation();
-        printf("SET ortho RAN!\n");
+    projection_matrix.InitScaleTransform(1, -1, 1);
+    projection_matrix.rotate(angle, 0, 0, 1);
 
-  //glMatrixMode(GL_PROJECTION);
-  //glLoadIdentity();
-  projection_matrix.InitScaleTransform(1, -1, 1);
+    enigma::Matrix4f orhto;
+    orhto.InitOtrhoProjTransform(x-0.5,x + width,y-0.5,y + height,32000,-32000);
 
-  //projection_matrix.rotate(angle, 0, 0, 1);
-
-  enigma::Matrix4f orhto;
-  //persp.InitPersProjTransform(0, 1, 32000,-32000);
-
- // printf("persp. matrix = \n");
-  //persp.Print();
-
-  orhto.InitOtrhoProjTransform(x-0.5,x + width,y-0.5,y + height,32000,-32000);
-
-  projection_matrix = projection_matrix * orhto;
-  //glScalef(1, -1, 1);
-  //glRotatef(angle,0,0,1);
-  //gluPerspective(0, 1, 32000,-32000);
-  //glOrtho(x-0.5,x + width,y-0.5,y + height,32000,-32000);
-  //glMatrixMode(GL_MODELVIEW);
-  //glLoadIdentity();
-
-  view_matrix.InitIdentity();
-  mv_matrix = view_matrix * model_matrix;
-
-  mvp_matrix = projection_matrix * mv_matrix;
-
-  //NOTE: THIS IS STILL FFP
-  glMatrixMode(GL_PROJECTION);
-  glLoadMatrix(projection_matrix);
-  printf("Proj. matrix = \n");
-  projection_matrix.Transpose().Print();
-
-  glMatrixMode(GL_MODELVIEW);
-  glLoadMatrix(mv_matrix);
-  printf("Model view matrix = \n");
-  mv_matrix.Transpose().Print();
-
-  //glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
-  //glMultMatrixd(transformation_matrix);
-  enigma::d3d_light_update_positions();
-
-  printf("SET ortho FINISHED!\n");
+    projection_matrix = projection_matrix * orhto;
+    view_matrix.InitIdentity();
 }
 
 void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, gs_scalar angle)
 {
-   oglmgr->Transformation();
-   printf("SET proj perspect RAN!\n");
+    oglmgr->Transformation();
+    projection_matrix.InitRotateVectorTransform(angle, enigma::Vector3f(0,0,1));
 
-  //glMatrixMode(GL_PROJECTION);
-  projection_matrix.InitRotateVectorTransform(angle, enigma::Vector3f(0,0,1));
+    enigma::Matrix4f persp, orhto;
+    persp.InitPersProjTransform(60, 1, 0.1,32000);
+    orhto.InitOtrhoProjTransform(x,x + width,y,y + height,0.1,32000);
 
-  enigma::Matrix4f persp, orhto;
-  persp.InitPersProjTransform(60, 1, 0.1,32000);
-  orhto.InitOtrhoProjTransform(x,x + width,y,y + height,0.1,32000);
-
-  projection_matrix = projection_matrix * persp * orhto;
-  mvp_matrix = projection_matrix * mv_matrix;
-
-  //NOTE: THIS IS STILL FFP
-  glMatrixMode(GL_PROJECTION);
-  glLoadMatrix(projection_matrix);
-
-  glMatrixMode(GL_MODELVIEW);
-  glLoadMatrix(mv_matrix);
-
-  //glLoadIdentity();
-  //glScalef(1, 1, 1);
-
-  //glRotatef(angle,0,0,1);
-  //gluPerspective(60, 1, 0.1,32000);
-  //glOrtho(x,x + width,y,y + height,0.1,32000);
-  //glMatrixMode(GL_MODELVIEW);
-  //glLoadIdentity();
-  //glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
-  //glMultMatrixd(transformation_matrix);
-  enigma::d3d_light_update_positions();
-
-        printf("SET proj perspect FINISHED!\n");
-
+    projection_matrix = projection_matrix * persp * orhto;
 }
-
-//TODO: with all basic drawing add in normals
 
 void d3d_transform_set_identity()
 {
-        printf("SET set ident RAN!\n");
-
     oglmgr->Transformation();
     model_matrix.InitIdentity();
-    mv_matrix = view_matrix * model_matrix;
-    mvp_matrix = projection_matrix * mv_matrix;
-
-    //NOTE: THIS IS STILL FFP
-    glMatrixMode(GL_MODELVIEW);
-    glLoadMatrix(mv_matrix);
-
-    printf("Set identity function\n");
-    enigma::Matrix4f tmp;
-    glGet(GL_MODELVIEW_MATRIX,tmp);
-    tmp.Print();
-    printf("\n");
-
-
-    /*transformation_matrix[0] = 1;
-    transformation_matrix[1] = 0;
-    transformation_matrix[2] = 0;
-    transformation_matrix[3] = 0;
-    transformation_matrix[4] = 0;
-    transformation_matrix[5] = 1;
-    transformation_matrix[6] = 0;
-    transformation_matrix[7] = 0;
-    transformation_matrix[8] = 0;
-    transformation_matrix[9] = 0;
-    transformation_matrix[10] = 1;
-    transformation_matrix[11] = 0;
-    transformation_matrix[12] = 0;
-    transformation_matrix[13] = 0;
-    transformation_matrix[14] = 0;
-    transformation_matrix[15] = 1;
-    glLoadMatrixd(projection_matrix);*/
 }
 
 void d3d_transform_add_translation(gs_scalar xt, gs_scalar yt, gs_scalar zt)
 {
-    printf("Add translation RAN!\n");
-
     oglmgr->Transformation();
-    //model_matrix.InitIdentity();
     model_matrix.translate(xt, yt, zt);
-    mv_matrix = view_matrix * model_matrix;
-    mvp_matrix = projection_matrix * mv_matrix;
-
-    //NOTE: THIS IS STILL FFP
-    glMatrixMode(GL_MODELVIEW);
-    glLoadMatrix(mv_matrix);
-
-    printf("Add translations function\n");
-    enigma::Matrix4f tmp;
-    glGet(GL_MODELVIEW_MATRIX,tmp);
-    tmp.Print();
-    printf("\n");
-
-    //glLoadIdentity();
-    //glTranslatef(xt, yt, zt);
-    //glMultMatrixd(transformation_matrix);
-    //glGetDoublev(GL_MODELVIEW_MATRIX,transformation_matrix);
-    //glLoadMatrixd(projection_matrix);
-    //glMultMatrixd(transformation_matrix);
 }
 void d3d_transform_add_scaling(gs_scalar xs, gs_scalar ys, gs_scalar zs)
 {
-    printf("Add scaling RAN!\n");
-
     oglmgr->Transformation();
-    //model_matrix.InitIdentity();
     model_matrix.scale(xs, ys, zs);
-    mv_matrix = view_matrix * model_matrix;
-    mvp_matrix = projection_matrix * mv_matrix;
-
-    //NOTE: THIS IS STILL FFP
-    glMatrixMode(GL_MODELVIEW);
-    glLoadMatrix(mv_matrix);
-
-    printf("Add scaling function\n");
-    enigma::Matrix4f tmp;
-    glGet(GL_MODELVIEW_MATRIX,tmp);
-    tmp.Print();
-    printf("\n");
-
-    /*glLoadIdentity();
-    glScalef(xs, ys, zs);
-    glMultMatrixd(transformation_matrix);
-    glGetDoublev(GL_MODELVIEW_MATRIX,transformation_matrix);
-    glLoadMatrixd(projection_matrix);
-    glMultMatrixd(transformation_matrix);*/
 }
 void d3d_transform_add_rotation_x(gs_scalar angle)
 {
     oglmgr->Transformation();
-    printf("Add rotation x RAN!\n");
-
     model_matrix.rotate(-angle,1,0,0);
-    mv_matrix = view_matrix * model_matrix;
-    mvp_matrix = projection_matrix * mv_matrix;
-
-    //NOTE: THIS IS STILL FFP
-    glMatrixMode(GL_MODELVIEW);
-    glLoadMatrix(mv_matrix);
-
-    /*oglmgr->Transformation();
-    glLoadIdentity();
-    glRotatef(-angle,1,0,0);
-    glMultMatrixd(transformation_matrix);
-    glGetDoublev(GL_MODELVIEW_MATRIX,transformation_matrix);
-    glLoadMatrixd(projection_matrix);
-    glMultMatrixd(transformation_matrix);*/
 }
 void d3d_transform_add_rotation_y(gs_scalar angle)
 {
-    printf("Add rotation y RAN!\n");
-
     oglmgr->Transformation();
     model_matrix.rotate(-angle,0,1,0);
-    mv_matrix = view_matrix * model_matrix;
-    mvp_matrix = projection_matrix * mv_matrix;
-
-    //NOTE: THIS IS STILL FFP
-    glMatrixMode(GL_MODELVIEW);
-    glLoadMatrix(mv_matrix);
-
-    /*glLoadIdentity();
-    glRotatef(-angle,0,1,0);
-    glMultMatrixd(transformation_matrix);
-    glGetDoublev(GL_MODELVIEW_MATRIX,transformation_matrix);
-    glLoadMatrixd(projection_matrix);
-    glMultMatrixd(transformation_matrix);*/
 }
 void d3d_transform_add_rotation_z(gs_scalar angle)
 {
-    printf("Add rotation z RAN!\n");
-
     oglmgr->Transformation();
     model_matrix.rotate(-angle,0,0,1);
-    mv_matrix = view_matrix * model_matrix;
-    mvp_matrix = projection_matrix * mv_matrix;
-
-    //NOTE: THIS IS STILL FFP
-    glMatrixMode(GL_MODELVIEW);
-    glLoadMatrix(mv_matrix);
-
-    /*glLoadIdentity();
-    glRotatef(-angle,0,0,1);
-    glMultMatrixd(transformation_matrix);
-    glGetDoublev(GL_MODELVIEW_MATRIX,transformation_matrix);
-    glLoadMatrixd(projection_matrix);
-    glMultMatrixd(transformation_matrix);*/
 }
 void d3d_transform_add_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar angle)
 {
-    printf("Add rotation axis RAN!\n");
-
     oglmgr->Transformation();
     model_matrix.rotate(-angle,x,y,z);
-    mv_matrix = view_matrix * model_matrix;
-    mvp_matrix = projection_matrix * mv_matrix;
-
-    //NOTE: THIS IS STILL FFP
-    glMatrixMode(GL_MODELVIEW);
-    glLoadMatrix(mv_matrix);
-
-    /*glLoadIdentity();
-    glRotatef(-angle,x,y,z);
-    glMultMatrixd(transformation_matrix);
-    glGetDoublev(GL_MODELVIEW_MATRIX,transformation_matrix);
-    glLoadMatrixd(projection_matrix);
-    glMultMatrixd(transformation_matrix);*/
 }
 
 void d3d_transform_set_translation(gs_scalar xt, gs_scalar yt, gs_scalar zt)
 {
-    printf("Set translation RAN!\n");
-
     oglmgr->Transformation();
     model_matrix.InitIdentity();
     model_matrix.translate(xt, yt, zt);
-    mv_matrix = view_matrix * model_matrix;
-    mvp_matrix = projection_matrix * mv_matrix;
-
-    //NOTE: THIS IS STILL FFP
-    glMatrixMode(GL_MODELVIEW);
-    glLoadMatrix(mv_matrix);
-
-    /*glLoadIdentity();
-    glTranslatef(xt, yt, zt);
-    glGetDoublev(GL_MODELVIEW_MATRIX,transformation_matrix);
-    glLoadMatrixd(projection_matrix);
-    glMultMatrixd(transformation_matrix);*/
 }
 void d3d_transform_set_scaling(gs_scalar xs, gs_scalar ys, gs_scalar zs)
 {
-    printf("Set scaling RAN!\n");
-
-
     oglmgr->Transformation();
     model_matrix.InitIdentity();
     model_matrix.scale(xs, ys, zs);
-    mv_matrix = view_matrix * model_matrix;
-    mvp_matrix = projection_matrix * mv_matrix;
-
-    //NOTE: THIS IS STILL FFP
-    glMatrixMode(GL_MODELVIEW);
-    glLoadMatrix(mv_matrix);
-
-    /*glLoadIdentity();
-    glScalef(xs, ys, zs);
-    glGetDoublev(GL_MODELVIEW_MATRIX,transformation_matrix);
-    glLoadMatrixd(projection_matrix);
-    glMultMatrixd(transformation_matrix);*/
 }
 void d3d_transform_set_rotation_x(gs_scalar angle)
 {
-    printf("Set rotation x RAN!\n");
-
     oglmgr->Transformation();
     model_matrix.InitIdentity();
     model_matrix.rotate(-angle, 1, 0, 0);
-    mv_matrix = view_matrix * model_matrix;
-    mvp_matrix = projection_matrix * mv_matrix;
-
-    //NOTE: THIS IS STILL FFP
-    glMatrixMode(GL_MODELVIEW);
-    glLoadMatrix(mv_matrix);
-
-    /*glLoadIdentity();
-    glRotatef(-angle,1,0,0);
-    glGetDoublev(GL_MODELVIEW_MATRIX,transformation_matrix);
-    glLoadMatrixd(projection_matrix);
-    glMultMatrixd(transformation_matrix);*/
 }
 void d3d_transform_set_rotation_y(gs_scalar angle)
 {
-    printf("Set rotation y RAN!\n");
-
     oglmgr->Transformation();
     model_matrix.InitIdentity();
     model_matrix.rotate(-angle, 0, 1, 0);
-    mv_matrix = view_matrix * model_matrix;
-    mvp_matrix = projection_matrix * mv_matrix;
-
-    //NOTE: THIS IS STILL FFP
-    glMatrixMode(GL_MODELVIEW);
-    glLoadMatrix(mv_matrix);
-
-    /*glLoadIdentity();
-    glRotatef(-angle,0,1,0);
-    glGetDoublev(GL_MODELVIEW_MATRIX,transformation_matrix);
-    glLoadMatrixd(projection_matrix);
-    glMultMatrixd(transformation_matrix);*/
 }
 void d3d_transform_set_rotation_z(gs_scalar angle)
 {
-    printf("Set rotation z RAN!\n");
-
     oglmgr->Transformation();
     model_matrix.InitIdentity();
     model_matrix.rotate(-angle, 0, 0, 1);
-    mv_matrix = view_matrix * model_matrix;
-    mvp_matrix = projection_matrix * mv_matrix;
-
-    //NOTE: THIS IS STILL FFP
-    glMatrixMode(GL_MODELVIEW);
-    glLoadMatrix(mv_matrix);
-
-    /*glLoadIdentity();
-    glRotatef(-angle,0,0,1);
-    glGetDoublev(GL_MODELVIEW_MATRIX,transformation_matrix);
-    glLoadMatrixd(projection_matrix);
-    glMultMatrixd(transformation_matrix);*/
 }
 void d3d_transform_set_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar angle)
 {
-    printf("Set rotation axis RAN!\n");
-
     oglmgr->Transformation();
     model_matrix.InitIdentity();
     model_matrix.rotate(-angle, x, y, z);
-    mv_matrix = view_matrix * model_matrix;
-    mvp_matrix = projection_matrix * mv_matrix;
-
-    //NOTE: THIS IS STILL FFP
-    glMatrixMode(GL_MODELVIEW);
-    glLoadMatrix(mv_matrix);
-
-    /*glLoadIdentity();
-    glRotatef(-angle,x,y,z);
-    glGetDoublev(GL_MODELVIEW_MATRIX,transformation_matrix);
-    glLoadMatrixd(projection_matrix);
-    glMultMatrixd(transformation_matrix);*/
 }
 
 }

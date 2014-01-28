@@ -213,7 +213,7 @@ public:
     void InitRotateTransform(gs_scalar RotateX, gs_scalar RotateY, gs_scalar RotateZ);
     void InitRotateVectorTransform(gs_scalar angle, const Vector3f& vect);
     void InitTranslationTransform(gs_scalar x, gs_scalar y, gs_scalar z);
-    void InitCameraTransform(const Vector3f& Target, const Vector3f& Up);
+    void InitCameraTransform(const Vector3f& from, const Vector3f& to, const Vector3f& up);
     void InitPersProjTransform(gs_scalar fovy, gs_scalar aspect_ratio, gs_scalar znear, gs_scalar zfar);
     void InitOtrhoProjTransform(gs_scalar left, gs_scalar right, gs_scalar bottom, gs_scalar top, gs_scalar znear, gs_scalar zfar);
 

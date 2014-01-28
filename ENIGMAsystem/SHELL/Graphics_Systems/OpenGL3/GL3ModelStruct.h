@@ -18,6 +18,7 @@
 #include "../General/OpenGLHeaders.h"
 #include "../General/GSd3d.h"
 #include "../General/GSprimitives.h"
+#include "../General/GSmatrix.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
 #include <math.h>
@@ -36,6 +37,15 @@ using namespace std;
 #include <list>
 #include "Universal_System/fileio.h"
 #include "Universal_System/estring.h"
+
+//NOTE: THIS IS STILL FFP
+#ifdef GS_SCALAR_64
+#define glLoadMatrix(m)   glLoadMatrixd((gs_scalar*)m.Transpose());
+#define glGet(m,n)        glGetDoublev(m,(gs_scalar*)n); //For debug
+#else
+#define glLoadMatrix(m)   glLoadMatrixf((gs_scalar*)m.Transpose());
+#define glGet(m,n)        glGetFloatv(m,(gs_scalar*)n); //For debug
+#endif
 
 #include <vector>
 using std::vector;
@@ -546,6 +556,19 @@ class Mesh
   void Draw(int vertex_start = 0, int vertex_count = -1)
   {
 	if (!GetStride()) { return; }
+
+    //Calculate matrices and pass to GL (THIS IS STILL FFP)
+    mv_matrix = view_matrix * model_matrix;
+    mvp_matrix = projection_matrix * mv_matrix;
+
+    glMatrixMode(GL_PROJECTION);
+    glLoadMatrix(projection_matrix);
+
+    glMatrixMode(GL_MODELVIEW);
+    glLoadMatrix(mv_matrix);
+
+    enigma::d3d_light_update_positions();
+
     if (!vbogenerated || !vbobuffered) {
 	  vbobuffered = true;
       BufferGenerate();
