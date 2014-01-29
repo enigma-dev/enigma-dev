@@ -54,7 +54,9 @@ string escapeEnv(string str) {
 	return escaped;
 }
 
-void createMakeDirectory() {
+void setMakeDirectory(string dir) {
+if (makedir.compare(dir) == 0) { return; }
+makedir = dir;
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
   CreateDirectory((makedir).c_str(), NULL);
   if (!CreateDirectory((makedir +"Preprocessor_Environment_Editable").c_str(), NULL)) {
