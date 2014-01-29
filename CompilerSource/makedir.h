@@ -31,5 +31,6 @@ extern string makedir;
 string myReplace(string str, const string& oldStr, const string& newStr);
 string escapeEnv(string str, string env);
 string escapeEnv(string str);
+void createMakeDirectory();
 
 #endif //_WORKDIR_H
