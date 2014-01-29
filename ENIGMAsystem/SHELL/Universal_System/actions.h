@@ -218,7 +218,10 @@ inline void action_next_room(const int transition) {
     room_goto_next();
 }
 
-inline void action_another_room(const int roomind, const int transition) {
+//NOTE: The second parameter for the transition should default to 0.
+//Studio implemented this action with the same LIB id (224) but removed the transition option
+//because they deprecated room transitions.
+inline void action_another_room(const int roomind, const int transition=0) {
 	//transition_kind=transition;
 	room_goto(roomind);
 }
