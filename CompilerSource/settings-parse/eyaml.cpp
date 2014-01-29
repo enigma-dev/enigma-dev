@@ -99,6 +99,7 @@ ey_string &eyscalar(eyit x)
 #include <cstdlib>
 ey_string::operator string&() { return value; }
 bool ey_string::toBool()  { 
+	//TODO: Possibly undo this and reverse the parameter order?
 	if (strstr(value.c_str(), "true")) { return true; } else { return false; }
 }
 char ey_string::toByte()      { return atoi(value.c_str()); }
