@@ -73,9 +73,9 @@ extern const char* establish_bearings(const char *compiler);
 
 dllexport void libSetMakeDirectory(const char* dir) {
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
-	makedir = myReplace(escapeEnv(dir), "\\","/");
+	setMakeDirectory(myReplace(escapeEnv(dir), "\\","/"));
 #else
-	makedir = escapeEnv(dir);
+	setMakeDirectory(escapeEnv(dir));
 #endif
 }
 
