@@ -87,12 +87,10 @@ void parse_ide_settings(const char* eyaml)
   setting::make_directory = settree.get("make-directory").toString();
 
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
-	makedir = myReplace(escapeEnv(setting::make_directory), "\\","/");
+	setMakeDirectory(myReplace(escapeEnv(setting::make_directory), "\\","/"));
 #else
-	makedir = escapeEnv(setting::make_directory);
+	setMakeDirectory(escapeEnv(setting::make_directory));
 #endif
-
-	createMakeDirectory();
 
   //ide_dia_open();
 
