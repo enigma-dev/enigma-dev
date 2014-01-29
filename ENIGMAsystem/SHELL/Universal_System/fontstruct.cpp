@@ -37,7 +37,7 @@ namespace enigma
   int font_new(unsigned char gs, unsigned char gc) // Creates a new font, allocating 'gc' glyphs
   {
     font *ret = new font;
-    ret->glyphstart = gs - 1; //TODO: For some reason the glyphs are off by 1, -1 is temporary fix.
+    ret->glyphstart = gs;
     ret->glyphcount = gc;
     ret->glyphs = new fontglyph[gc];
     ret->height = 0;
@@ -232,7 +232,7 @@ bool font_replace_sprite(int ind, int spr, unsigned char first, bool prop, int s
   unsigned char gcount = sspr->subcount;
   enigma::font *font = enigma::fontstructarray[ind];
   delete[] font->glyphs;
-  font->glyphstart = first - 1; //TODO: For some reason the glyphs are off by 1, -1 is temporary fix.
+  font->glyphstart = first;
   font->glyphcount = gcount;
   font->glyphs = new enigma::fontglyph[gcount];
   return enigma::font_pack(font, spr, gcount, prop, sep);
