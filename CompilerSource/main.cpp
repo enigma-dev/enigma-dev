@@ -77,6 +77,7 @@ dllexport void libSetMakeDirectory(const char* dir) {
 #else
 	makedir = escapeEnv(dir);
 #endif
+	createMakeDirectory();
 }
 
 dllexport const char* libInit(EnigmaCallbacks* ecs)

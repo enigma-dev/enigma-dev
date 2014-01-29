@@ -41,13 +41,6 @@ using namespace std;
 
 #include "parse_ide_settings.h"
 #include "makedir.h"
-// Only include the headers for mkdir() if we are not on Windows; on Windows we use CreateDirectory() from windows.h
-#if CURRENT_PLATFORM_ID != OS_WINDOWS
-#include <sys/stat.h>
-#include <unistd.h>
-#else
-#include <windows.h>
-#endif
 
 string makedir = "";
 
@@ -99,31 +92,7 @@ void parse_ide_settings(const char* eyaml)
 	makedir = escapeEnv(setting::make_directory);
 #endif
 
-#if CURRENT_PLATFORM_ID == OS_WINDOWS
-  CreateDirectory((makedir).c_str(), NULL);
-  if (!CreateDirectory((makedir +"Preprocessor_Environment_Editable").c_str(), NULL)) {
-	DWORD error = GetLastError();
-	switch (error) {
-		case ERROR_ALREADY_EXISTS: 
-			std::cout << "WARNING! Failed to create build directory, directory already exists: \"" << makedir << "\"" << endl;
-			break;
-		case ERROR_PATH_NOT_FOUND:
-			std::cout << "ERROR! Failed to create build directory, path not found: \"" << makedir << "\"" << endl;
-			break;
-		default:
-			std::cout << "Created build directory: \"" << makedir << "\"" << endl;
-			break;
-	}
-  }
-#else
-  mkdir((makedir).c_str(),0755);
-  if (mkdir((makedir +"Preprocessor_Environment_Editable").c_str(),0755) == -1)
-  {
-	  std::cout << "Failed to create build directory at " << makedir << endl;
-  } else {
-	  std::cout << "Created build directory: \"" << makedir << "\"" << endl;
-  }
-#endif
+	createMakeDirectory();
 
   //ide_dia_open();
 
