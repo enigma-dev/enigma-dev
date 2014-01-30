@@ -1,0 +1,14 @@
+%E-YAML
+---
+
+Name: Asynchronous
+ID: Asynchronous
+Description: Asynchronous dialog support for GameMaker: Studio. Requires a set Widget System and the Data Structure extension enabled.
+Default: false
+Build-date: 1/30/2014
+Icon: asynclogo.png
+
+Depends: None
+Dependencies: None
+Implement: extension_async
+

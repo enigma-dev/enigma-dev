@@ -39,7 +39,7 @@ namespace enigma_user
 void action_webpage(const std::string &url)
 {
 	//TODO: Look for cross-platform method.
-	#ifdef _WIN32
+	#if CURRENT_PLATFORM_ID == OS_WINDOWS
 		ShellExecute (NULL, "open", url.c_str(), NULL, NULL, SW_SHOWNORMAL);
 	#endif
 }

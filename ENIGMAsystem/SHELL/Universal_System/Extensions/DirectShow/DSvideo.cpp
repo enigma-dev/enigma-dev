@@ -154,6 +154,17 @@ void video_set_seek(int id, long position) {
 	pSeek->Release();
 }
 
+void video_set_rate(int id, double rate) {
+	get_video(videoStruct, id);
+	IMediaSeeking* pSeek;
+	HRESULT hr = videoStruct->pGraph->QueryInterface(IID_IMediaSeeking, (void**)&pSeek);
+	
+	// Set the playback rate, can not be 0
+	hr = pSeek->SetRate(rate);
+
+	pSeek->Release();
+}
+
 void video_set_fullscreen(int id, bool fullscreen) {
 	get_video(videoStruct, id);
 	IVideoWindow *pVidWin = NULL;
@@ -202,7 +213,7 @@ void video_set_scale(int id, bool scale) {
 	if (scale) {
 		GetClientRect(enigma::hWnd, &rc);
 	} else {
-	
+		//TODO: Finish me
 	}
 	pVidWin->SetWindowPosition(0, 0, rc.right, rc.bottom);
 }
@@ -225,6 +236,19 @@ long video_get_seek(int id) {
 	return position;
 }
 
+double video_get_rate(int id) {
+	get_videor(videoStruct, id, -1);
+	IMediaSeeking* pSeek;
+	HRESULT hr = videoStruct->pGraph->QueryInterface(IID_IMediaSeeking, (void**)&pSeek);
+	
+	double rate = 0;
+	hr = pSeek->GetRate(&rate);
+
+	pSeek->Release();
+	
+	return rate;
+}
+
 long video_get_duration(int id) {
 	get_videor(videoStruct, id, -1);
 	IMediaSeeking* pSeek;
@@ -233,7 +257,7 @@ long video_get_duration(int id) {
 	hr = pSeek->GetCapabilities(&dwCap);
 	
 	long long duration = 0;
-	if (AM_SEEKING_CanSeekAbsolute & dwCap)
+	if (AM_SEEKING_CanSeekAbsolute & dwCap) //TODO: This if check might not be needed
 	{
 		hr = pSeek->GetDuration(&duration);
 	}
@@ -249,7 +273,7 @@ long video_get_width(int id) {
 	videoStruct->pGraph->QueryInterface(IID_IBasicVideo,
 	 (LPVOID *)&pBasicVideo);
 
-	// obtain width and height
+	// obtain width
 	long width;
 	pBasicVideo->get_VideoWidth(&width);
 
@@ -265,7 +289,7 @@ long video_get_height(int id) {
 	videoStruct->pGraph->QueryInterface(IID_IBasicVideo,
 	 (LPVOID *)&pBasicVideo);
 
-	// obtain width and height
+	// obtain height
 	long height;
 	pBasicVideo->get_VideoHeight(&height);
 
@@ -273,6 +297,38 @@ long video_get_height(int id) {
 	pBasicVideo->Release();
 	
 	return height;
+}
+
+double video_get_frame_time(int id) {
+	get_videor(videoStruct, id, -1);
+	IBasicVideo *pBasicVideo;
+	videoStruct->pGraph->QueryInterface(IID_IBasicVideo,
+	 (LPVOID *)&pBasicVideo);
+
+	// obtain average time between frames
+	REFTIME frametime;
+	pBasicVideo->get_AvgTimePerFrame(&frametime);
+
+	// release
+	pBasicVideo->Release();
+	
+	return frametime;
+}
+
+int video_get_frame_rate(int id) {
+	get_videor(videoStruct, id, -1);
+	IQualProp *pQualProp;
+	videoStruct->pGraph->QueryInterface(IID_IQualProp,
+	 (LPVOID *)&pQualProp);
+
+	// obtain average frame rate
+	int framerate;
+	pQualProp->get_AvgFrameRate(&framerate);
+
+	// release
+	pQualProp->Release();
+	
+	return framerate;
 }
 
 }

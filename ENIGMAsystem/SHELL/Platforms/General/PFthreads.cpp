@@ -1,4 +1,5 @@
-/** Copyright (C) 2011 Josh Ventura
+/** Copyright (C) 2008-2011 Josh Ventura
+*** Copyright (C) 2014 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,24 +16,9 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <deque>
-#include <stdio.h>
-#include <pthread.h>
 #include "Universal_System/var4.h"
 #include "Universal_System/resource_data.h"
-#include "XLIBthreads.h"
-
-using namespace std;
-
-struct ethread
-{
-  pthread_t me;
-  bool active;
-  variant ret;
-  ethread(): me(-1), active(true), ret(0) {};
-};
-
-static deque<ethread*> threads;
+#include "PFthreads.h"
 
 struct scrtdata {
   int scr;
@@ -40,7 +26,6 @@ struct scrtdata {
   ethread* mt;
   scrtdata(int s, variant nargs[8], ethread* mythread): scr(s), mt(mythread) { for (int i = 0; i < 8; i++) args[i] = nargs[i]; }
 };
-
 
 static void* thread_script_func(void* data) {
   const scrtdata* const md = (scrtdata*)data;
@@ -57,20 +42,29 @@ int script_thread(int scr,variant arg0, variant arg1, variant arg2, variant arg3
   ethread* newthread = new ethread();
   variant args[] = {arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7};
   scrtdata *sd = new scrtdata(scr, args, newthread);
+#if CURRENT_PLATFORM_ID == OS_WINDOWS
+  uintptr_t ret = _beginthread((void (*)(void*))thread_script_func, 0, sd);
+  //TODO: May need to check if ret is -1L, and yes it is quite obvious the return value is
+  //an unsigned integer, but Microsoft says to for some reason. See their documentation here.
+  //http://msdn.microsoft.com/en-us/library/kdzttdcb.aspx
+  //NOTE: Same issue is in Universal_Systems/Extensions/Asynchronous/ASYNCdialog.cpp
+  if (ret == NULL) {
+#else
   if (pthread_create(&newthread->me, NULL, thread_script_func, sd)) {
+#endif
     delete sd; delete newthread;
     return -1;
   }
-  const int ret = threads.size();
   threads.push_back(newthread);
-  return ret;
+  return threads.size() - 1;
 }
+
 bool thread_finished(int thread) {
   return !threads[thread]->active;
 }
+
 variant thread_get_return(int thread) {
   return threads[thread]->ret;
 }
 
 }
-
