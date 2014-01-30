@@ -18,7 +18,7 @@
 #ifndef ENIGMA_PLATFORM_THREADS_H
 #define ENIGMA_PLATFORM_THREADS_H
 
-//#include "../../../../../CompilerSource/OS_Switchboard.h"
+//#include "../../../../../CompilerSource/OS_Switchboard.h" //TODO: Possibly not needed?
 
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
 #include <process.h>
