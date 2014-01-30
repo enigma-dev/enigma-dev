@@ -154,6 +154,17 @@ void video_set_seek(int id, long position) {
 	pSeek->Release();
 }
 
+void video_set_rate(int id, double rate) {
+	get_video(videoStruct, id);
+	IMediaSeeking* pSeek;
+	HRESULT hr = videoStruct->pGraph->QueryInterface(IID_IMediaSeeking, (void**)&pSeek);
+	
+	// Set the playback rate, can not be 0
+	hr = pSeek->SetRate(rate);
+
+	pSeek->Release();
+}
+
 void video_set_fullscreen(int id, bool fullscreen) {
 	get_video(videoStruct, id);
 	IVideoWindow *pVidWin = NULL;
@@ -225,6 +236,19 @@ long video_get_seek(int id) {
 	return position;
 }
 
+double video_get_rate(int id) {
+	get_videor(videoStruct, id, -1);
+	IMediaSeeking* pSeek;
+	HRESULT hr = videoStruct->pGraph->QueryInterface(IID_IMediaSeeking, (void**)&pSeek);
+	
+	double rate = 0;
+	hr = pSeek->GetRate(&rate);
+
+	pSeek->Release();
+	
+	return rate;
+}
+
 long video_get_duration(int id) {
 	get_videor(videoStruct, id, -1);
 	IMediaSeeking* pSeek;
@@ -233,7 +257,7 @@ long video_get_duration(int id) {
 	hr = pSeek->GetCapabilities(&dwCap);
 	
 	long long duration = 0;
-	if (AM_SEEKING_CanSeekAbsolute & dwCap)
+	if (AM_SEEKING_CanSeekAbsolute & dwCap) //TODO: This if check might not be needed
 	{
 		hr = pSeek->GetDuration(&duration);
 	}
