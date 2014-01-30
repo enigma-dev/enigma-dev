@@ -1,4 +1,4 @@
-/** Copyright (C) 2013 Robert B. Colton
+/** Copyright (C) 2014 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -19,7 +19,7 @@
 using std::string;
 
 namespace enigma_user {
-	extern int async_load;
+	extern unsigned async_load;
 	
 	int show_message_async(string str);
 	int show_question_async(string str);
