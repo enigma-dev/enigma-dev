@@ -1,4 +1,5 @@
 /** Copyright (C) 2008-2011 Josh Ventura
+*** Copyright (C) 2014 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,24 +16,9 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <deque>
-#include <stdio.h>
-#include <pthread.h>
 #include "Universal_System/var4.h"
 #include "Universal_System/resource_data.h"
 #include "PFthreads.h"
-
-using namespace std;
-
-struct ethread
-{
-  pthread_t me;
-  bool active;
-  variant ret;
-  ethread(): me(-1), active(true), ret(0) {};
-};
-
-static deque<ethread*> threads;
 
 struct scrtdata {
   int scr;
@@ -48,20 +34,25 @@ static void* thread_script_func(void* data) {
   return NULL;
 }
 
-namespace enigma_user {
+namespace enigma_user
+{
 
 int script_thread(int scr,variant arg0, variant arg1, variant arg2, variant arg3, variant arg4, variant arg5, variant arg6, variant arg7)
 {
   ethread* newthread = new ethread();
   variant args[] = {arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7};
   scrtdata *sd = new scrtdata(scr, args, newthread);
+#if CURRENT_PLATFORM_ID == OS_WINDOWS
+  uintptr_t ret = _beginthread((void (*)(void*))thread_script_func, 0, sd);
+  if (ret == -1L || ret == NULL) {
+#else
   if (pthread_create(&newthread->me, NULL, thread_script_func, sd)) {
+#endif
     delete sd; delete newthread;
     return -1;
   }
-  const int ret = threads.size();
   threads.push_back(newthread);
-  return ret;
+  return threads.size() - 1;
 }
 
 bool thread_finished(int thread) {

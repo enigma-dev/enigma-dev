@@ -20,6 +20,51 @@ closebutton: 7		# This event is executed from within code when the game window c
 	Name: Close Button
 	Mode: Spec-sys
 	Case: 30
+	
+imageloaded: 7		# This event is executed from within code when an image finishes loading
+	Name: Image Loaded
+	Mode: Spec-sys
+	Case: 60
+	
+soundloaded: 7		# This event is executed from within code when a sound finishes loading
+	Name: Sound Loaded
+	Mode: Spec-sys
+	Case: 61
+	
+http: 7			# This event is executed from within code when an asynchronous http event is triggered
+	Name: HTTP
+	Mode: Spec-sys
+	Case: 62
+	
+dialog: 7		# This event is executed from within code when an asynchronous dialog is resolved
+	Name: Dialog
+	Mode: Spec-sys
+	Case: 63
+	
+inapp: 7		# This event is executed from within code when an asynchronous In-App purchase is triggered
+	Name: IAP
+	Mode: Spec-sys
+	Case: 66
+	
+cloud: 7		# This event is executed from within code when an asynchronous cloud event is triggered
+	Name: Cloud
+	Mode: Spec-sys
+	Case: 67
+	
+networking: 7	# This event is executed from within code when an asynchronous networking event is triggered
+	Name: Networking
+	Mode: Spec-sys
+	Case: 68
+	
+steam: 7		# This event is executed from within code when an asynchronous Steam event is triggered
+	Name: Steam
+	Mode: Spec-sys
+	Case: 69
+	
+social: 7		# This event is executed from within code when an asynchronous social event is triggered
+	Name: Social
+	Mode: Spec-sys
+	Case: 70
 
 roomstart: 7		# This event is executed from within the code that loads a new room
 	Name: Room Start
@@ -591,4 +636,3 @@ joysticktwobuttoneight: 6
 #gameend
 #
 #parent_endstep
-

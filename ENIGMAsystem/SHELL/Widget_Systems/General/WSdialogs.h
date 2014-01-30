@@ -99,17 +99,5 @@ enum {
 	double get_number(string message, string def, string cap="");
 	int    get_integer(string message, string def, string cap="");
 	bool   get_string_canceled();
-	
-	void show_message_async(string str);
-	void show_question_async(string str);
-	void get_string_async(string message, string def, string cap="");
-	void get_login_async(string message, string def, string cap="");
-	void get_number_async(string message, string def, string cap="");
-	void get_integer_async(string message, string def, string cap="");
-	void get_color_async(int defcol, bool advanced = false);
-	void get_open_filename_async(string filter, string fname, string caption="");
-	void get_save_filename_async(string filter, string fname, string caption="");
-	void get_directory_alt_async(string capt, string root);
-	void get_directory_async(string dname);
 
 }
