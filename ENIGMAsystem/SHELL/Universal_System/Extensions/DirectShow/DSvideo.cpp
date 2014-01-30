@@ -202,7 +202,7 @@ void video_set_scale(int id, bool scale) {
 	if (scale) {
 		GetClientRect(enigma::hWnd, &rc);
 	} else {
-	
+		//TODO: Finish me
 	}
 	pVidWin->SetWindowPosition(0, 0, rc.right, rc.bottom);
 }
@@ -249,7 +249,7 @@ long video_get_width(int id) {
 	videoStruct->pGraph->QueryInterface(IID_IBasicVideo,
 	 (LPVOID *)&pBasicVideo);
 
-	// obtain width and height
+	// obtain width
 	long width;
 	pBasicVideo->get_VideoWidth(&width);
 
@@ -265,7 +265,7 @@ long video_get_height(int id) {
 	videoStruct->pGraph->QueryInterface(IID_IBasicVideo,
 	 (LPVOID *)&pBasicVideo);
 
-	// obtain width and height
+	// obtain height
 	long height;
 	pBasicVideo->get_VideoHeight(&height);
 
@@ -273,6 +273,38 @@ long video_get_height(int id) {
 	pBasicVideo->Release();
 	
 	return height;
+}
+
+double video_get_frame_time(int id) {
+	get_videor(videoStruct, id, -1);
+	IBasicVideo *pBasicVideo;
+	videoStruct->pGraph->QueryInterface(IID_IBasicVideo,
+	 (LPVOID *)&pBasicVideo);
+
+	// obtain average time between frames
+	REFTIME frametime;
+	pBasicVideo->get_AvgTimePerFrame(&frametime);
+
+	// release
+	pBasicVideo->Release();
+	
+	return frametime;
+}
+
+int video_get_frame_rate(int id) {
+	get_videor(videoStruct, id, -1);
+	IQualProp *pQualProp;
+	videoStruct->pGraph->QueryInterface(IID_IQualProp,
+	 (LPVOID *)&pQualProp);
+
+	// obtain average frame rate
+	int framerate;
+	pQualProp->get_AvgFrameRate(&framerate);
+
+	// release
+	pQualProp->Release();
+	
+	return framerate;
 }
 
 }

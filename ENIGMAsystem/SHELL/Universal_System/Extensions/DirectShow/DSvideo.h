@@ -37,4 +37,6 @@ namespace enigma_user {
 	long video_get_duration(int id);
 	long video_get_width(int id);
 	long video_get_height(int id);
+	double video_get_frame_time(int id);
+	int video_get_frame_rate(int id);
 }
