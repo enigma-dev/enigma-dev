@@ -48,7 +48,7 @@ int script_thread(int scr,variant arg0, variant arg1, variant arg2, variant arg3
   //an unsigned integer, but Microsoft says to for some reason. See their documentation here.
   //http://msdn.microsoft.com/en-us/library/kdzttdcb.aspx
   //NOTE: Same issue is in Universal_Systems/Extensions/Asynchronous/ASYNCdialog.cpp
-  if (ret == -1L || ret == NULL) {
+  if (ret == NULL) {
 #else
   if (pthread_create(&newthread->me, NULL, thread_script_func, sd)) {
 #endif
