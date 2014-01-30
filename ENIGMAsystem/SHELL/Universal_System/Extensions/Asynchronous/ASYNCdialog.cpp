@@ -107,7 +107,7 @@ static int createThread(void (*fnc)(void*), MessageData* md) {
 }
 
 namespace enigma_user {
-	int async_load = ds_map_create();
+	unsigned async_load = ds_map_create();
 	
 	int show_message_async(string str) {
 		MessageData* md = new MessageData(str, "", "");
