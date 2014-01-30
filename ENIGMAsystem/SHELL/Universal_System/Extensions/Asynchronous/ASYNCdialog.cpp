@@ -48,8 +48,8 @@ static void* showMessageAsync(void* data) {
 	const MessageData* const md = (MessageData*)data;
 	threads[md->id]->ret = show_message(md->text1);
 	threads[md->id]->active = false;
-	ds_map_replace(async_load, "id", md->id);
-	ds_map_replace(async_load, "status", true); //TODO: Stupido is so god damn retarded, it gives a cancel operation for a rhetorical message according to the manual
+	ds_map_replaceanyway(async_load, "id", md->id);
+	ds_map_replaceanyway(async_load, "status", true); //TODO: Stupido is so god damn retarded, it gives a cancel operation for a rhetorical message according to the manual
 	fireAsyncDialogEvent();
 	return NULL;
 }
@@ -58,8 +58,8 @@ static void* showQuestionAsync(void* data) {
 	const MessageData* const md = (MessageData*)data;
 	threads[md->id]->ret = show_question(md->text1);
 	threads[md->id]->active = false;
-	ds_map_replace(async_load, "id", md->id);
-	ds_map_replace(async_load, "status", threads[md->id]->ret);
+	ds_map_replaceanyway(async_load, "id", md->id);
+	ds_map_replaceanyway(async_load, "status", threads[md->id]->ret);
 	fireAsyncDialogEvent();
 	return NULL;
 }
@@ -68,9 +68,9 @@ static void* getStringAsync(void* data) {
 	const MessageData* const md = (MessageData*)data;
 	threads[md->id]->ret = get_string(md->text1, md->text2, md->text3);
 	threads[md->id]->active = false;
-	ds_map_replace(async_load, "id", md->id);
-	ds_map_replace(async_load, "status", true);
-	ds_map_replace(async_load, "result", threads[md->id]->ret);
+	ds_map_replaceanyway(async_load, "id", md->id);
+	ds_map_replaceanyway(async_load, "status", true);
+	ds_map_replaceanyway(async_load, "result", threads[md->id]->ret);
 	fireAsyncDialogEvent();
 	return NULL;
 }
@@ -79,9 +79,9 @@ static void* getIntegerAsync(void* data) {
 	const MessageData* const md = (MessageData*)data;
 	threads[md->id]->ret = get_integer(md->text1, md->text2, md->text3);
 	threads[md->id]->active = false;
-	ds_map_replace(async_load, "id", md->id);
-	ds_map_replace(async_load, "status", true);
-	ds_map_replace(async_load, "result", threads[md->id]->ret);
+	ds_map_replaceanyway(async_load, "id", md->id);
+	ds_map_replaceanyway(async_load, "status", true);
+	ds_map_replaceanyway(async_load, "result", threads[md->id]->ret);
 	fireAsyncDialogEvent();
 	return NULL;
 }
