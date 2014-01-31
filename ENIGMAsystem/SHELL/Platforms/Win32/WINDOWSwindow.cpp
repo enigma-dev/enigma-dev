@@ -287,6 +287,15 @@ void window_set_fullscreen(bool full)
     enigma::setchildsize(true);
 }
 
+void window_set_alpha(char alpha) {
+	// Set WS_EX_LAYERED on this window 
+	SetWindowLong(enigma::hWndParent, GWL_EXSTYLE,
+        GetWindowLong(enigma::hWndParent, GWL_EXSTYLE) | WS_EX_LAYERED);
+	// Make this window transparent
+	SetLayeredWindowAttributes(enigma::hWndParent, 0, alpha, LWA_ALPHA);
+
+}
+
 int window_get_fullscreen()
 {
     return enigma::isFullScreen;
