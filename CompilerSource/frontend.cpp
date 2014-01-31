@@ -69,7 +69,7 @@ using namespace dll_ext_iteration;
 dllexport const char* next_available_resource();
 dllexport const char* first_available_resource() //Returns the name of the first resource on the list, or "" otherwise.
 {
-  searching_in = main_context->get_global();
+  searching_in = (jdi::definition_scope*)main_context->get_global()->look_up("enigma_user");
   rit = searching_in->members.begin();
   return next_available_resource();
 }
