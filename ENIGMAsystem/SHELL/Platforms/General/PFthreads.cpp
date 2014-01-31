@@ -59,7 +59,7 @@ int script_thread(int scr,variant arg0, variant arg1, variant arg2, variant arg3
   return threads.size() - 1;
 }
 
-bool thread_finished(int thread) {
+bool thread_get_finished(int thread) {
   return !threads[thread]->active;
 }
 
