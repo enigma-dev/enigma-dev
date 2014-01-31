@@ -37,22 +37,12 @@ static const char ldgrs[256] = {
   1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0
 };
 
-#include <stdint.h>
-#include <stdlib.h>
-
-
-#include <iostream>
-
 static const std::string base64_chars = 
              "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
              "abcdefghijklmnopqrstuvwxyz"
              "0123456789+/";
 
-
-
-
-namespace enigma_user
-{
+namespace enigma_user {
 
 bool is_base64(unsigned char c) {
   return (isalnum(c) || (c == '+') || (c == '/'));
