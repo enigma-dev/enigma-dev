@@ -557,17 +557,19 @@ class Mesh
   {
 	if (!GetStride()) { return; }
 
-    //Calculate matrices and pass to GL (THIS IS STILL FFP)
-    mv_matrix = view_matrix * model_matrix;
-    mvp_matrix = projection_matrix * mv_matrix;
+    if (enigma::transformation_update == true){
+        //Calculate matrices and pass to GL (THIS IS STILL FFP)
+        enigma::mv_matrix = enigma::view_matrix * enigma::model_matrix;
+        enigma::mvp_matrix = enigma::projection_matrix * enigma::mv_matrix;
 
-    glMatrixMode(GL_PROJECTION);
-    glLoadMatrix(projection_matrix);
+        glMatrixMode(GL_PROJECTION);
+        glLoadMatrix(enigma::projection_matrix);
 
-    glMatrixMode(GL_MODELVIEW);
-    glLoadMatrix(mv_matrix);
+        glMatrixMode(GL_MODELVIEW);
+        glLoadMatrix(enigma::mv_matrix);
 
-    enigma::d3d_light_update_positions();
+        enigma::transformation_update = false;
+    }
 
     if (!vbogenerated || !vbobuffered) {
 	  vbobuffered = true;

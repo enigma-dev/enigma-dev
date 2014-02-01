@@ -27,10 +27,6 @@
 
 using namespace std;
 
-#define __GETR(x) ((x & 0x0000FF))/255.0
-#define __GETG(x) ((x & 0x00FF00)>>8)/255.0
-#define __GETB(x) ((x & 0xFF0000)>>16)/255.0
-
 #include <iostream>
 #include <map>
 #include <list>
@@ -310,9 +306,9 @@ void d3d_model_part_draw(int id, int vertex_start, int vertex_count) // overload
 
 void d3d_model_part_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z, int vertex_start, int vertex_count) // overload for no additional texture call's
 {
-    model_matrix.translate(x, y, z);
+    d3d_transform_add_translation(x,y,z);
     meshes[id]->Draw(vertex_start, vertex_count);
-    model_matrix.translate(-x, -y, -z);
+    d3d_transform_add_translation(-x,-y,-z);
 }
 
 void d3d_model_part_draw(int id, int texId, int vertex_start, int vertex_count)
@@ -324,9 +320,9 @@ void d3d_model_part_draw(int id, int texId, int vertex_start, int vertex_count)
 void d3d_model_part_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z, int texId, int vertex_start, int vertex_count)
 {
     texture_set(get_texture(texId));
-    model_matrix.translate(x, y, z);
+    d3d_transform_add_translation(x,y,z);
     meshes[id]->Draw(vertex_start, vertex_count);
-    model_matrix.translate(-x, -y, -z);
+    d3d_transform_add_translation(-x,-y,-z);
 }
 
 void d3d_model_draw(int id) // overload for no additional texture or transformation call's
@@ -336,9 +332,9 @@ void d3d_model_draw(int id) // overload for no additional texture or transformat
 
 void d3d_model_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z) // overload for no additional texture call's
 {
-    model_matrix.translate(x, y, z);
+    d3d_transform_add_translation(x,y,z);
     meshes[id]->Draw();
-    model_matrix.translate(-x, -y, -z);
+    d3d_transform_add_translation(-x,-y,-z);
 }
 
 void d3d_model_draw(int id, int texId)
@@ -350,9 +346,9 @@ void d3d_model_draw(int id, int texId)
 void d3d_model_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z, int texId)
 {
     texture_set(get_texture(texId));
-    model_matrix.translate(x, y, z);
+    d3d_transform_add_translation(x,y,z);
     meshes[id]->Draw();
-    model_matrix.translate(-x, -y, -z);
+    d3d_transform_add_translation(-x,-y,-z);
 }
 
 void d3d_model_primitive_begin(int id, int kind)
