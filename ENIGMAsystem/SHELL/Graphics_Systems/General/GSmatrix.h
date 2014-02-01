@@ -23,8 +23,12 @@
 #include "../General/GSmath.h"
 #include <string>
 
-extern enigma::Matrix4f projection_matrix, view_matrix, model_matrix;
-extern enigma::Matrix4f mv_matrix, mvp_matrix;
+namespace enigma
+{
+    extern Matrix4f projection_matrix, view_matrix, model_matrix;
+    extern Matrix4f mv_matrix, mvp_matrix;
+    extern bool transformation_update;
+}
 
 namespace enigma_user
 {
