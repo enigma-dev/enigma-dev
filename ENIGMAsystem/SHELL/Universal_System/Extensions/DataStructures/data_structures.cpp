@@ -893,24 +893,24 @@ void ds_map_replace(const unsigned int id, const variant key, const variant val)
 	//If this function is changed to behave this way, please fix it in the Asynchronous dialog 
 	//extension which had to create a special function to replace a value adding it if it does
 	//not exist in the global async_load map.
-    //Replaces the value corresponding with the key with a new value
-    multimap<variant, variant>::iterator it = ds_maps[id].find(key);
-    if (it != ds_maps[id].end())
-    {
-        ds_maps[id].erase(it);
-        ds_maps[id].insert(pair<variant, variant>(key, val));
-    }
+	//Replaces the value corresponding with the key with a new value
+	multimap<variant, variant>::iterator it = ds_maps[id].find(key);
+	if (it != ds_maps[id].end())
+	{
+		ds_maps[id].erase(it);
+		ds_maps[id].insert(pair<variant, variant>(key, val));
+	}
 }
 
 //NOTE: Special function, see todo comment above.
 void ds_map_replaceanyway(const unsigned int id, const variant key, const variant val)
 {
-    //Replaces the value corresponding with the key with a new value, adding it if it was not found in the map.
-    multimap<variant, variant>::iterator it = ds_maps[id].find(key);
-    if (it != ds_maps[id].end())
-    {
-        ds_maps[id].erase(it);
-    }
+	//Replaces the value corresponding with the key with a new value, adding it if it was not found in the map.
+	multimap<variant, variant>::iterator it = ds_maps[id].find(key);
+	if (it != ds_maps[id].end())
+	{
+		ds_maps[id].erase(it);
+	}
 	ds_maps[id].insert(pair<variant, variant>(key, val));
 }
 
