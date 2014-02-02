@@ -210,16 +210,27 @@ public:
     Matrix4f& Inverse();
 
     void InitScaleTransform(gs_scalar ScaleX, gs_scalar ScaleY, gs_scalar ScaleZ);
+
     void InitRotateTransform(gs_scalar RotateX, gs_scalar RotateY, gs_scalar RotateZ);
-    void InitRotateVectorTransform(gs_scalar angle, const Vector3f& vect);
+    //void InitRotateVectorTransform(gs_scalar angle, const Vector3f& vect);
+    void InitRotateAxisTransform(gs_scalar angle, gs_scalar RotateX, gs_scalar RotateY, gs_scalar RotateZ);
+    void InitRotateXTransform(gs_scalar angle);
+    void InitRotateYTransform(gs_scalar angle);
+    void InitRotateZTransform(gs_scalar angle);
+
     void InitTranslationTransform(gs_scalar x, gs_scalar y, gs_scalar z);
     void InitCameraTransform(const Vector3f& from, const Vector3f& to, const Vector3f& up);
     void InitPersProjTransform(gs_scalar fovy, gs_scalar aspect_ratio, gs_scalar znear, gs_scalar zfar);
     void InitOtrhoProjTransform(gs_scalar left, gs_scalar right, gs_scalar bottom, gs_scalar top, gs_scalar znear, gs_scalar zfar);
 
     void scale(gs_scalar ScaleX, gs_scalar ScaleY, gs_scalar ScaleZ);
+
     void rotate(gs_scalar RotateX, gs_scalar RotateY, gs_scalar RotateZ);
     void rotate(gs_scalar angle, gs_scalar x, gs_scalar y, gs_scalar z);
+    void rotateX(gs_scalar angle);
+    void rotateY(gs_scalar angle);
+    void rotateZ(gs_scalar angle);
+
     void translate(gs_scalar x, gs_scalar y, gs_scalar z);
 };
 
