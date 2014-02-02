@@ -14,11 +14,11 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
-
 #include "GLModelStruct.h"
 #include "../General/OpenGLHeaders.h"
 #include "../General/GSd3d.h"
 #include "../General/GStextures.h"
+#include "../General/GSmatrix.h" //For d3d_transform_add_translation
 #include "GLshapes.h"
 #include "../General/GSmodel.h"
 #include "Universal_System/var4.h"
