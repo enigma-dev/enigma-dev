@@ -18,7 +18,9 @@
 
 #include "Universal_System/var4.h"
 #include "Universal_System/resource_data.h"
-#include "PFthreads.h"
+#include "../General/PFthreads.h"
+
+#include <process.h>
 
 struct scrtdata {
   int scr;
@@ -42,16 +44,12 @@ int script_thread(int scr,variant arg0, variant arg1, variant arg2, variant arg3
   ethread* newthread = new ethread();
   variant args[] = {arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7};
   scrtdata *sd = new scrtdata(scr, args, newthread);
-#if CURRENT_PLATFORM_ID == OS_WINDOWS
   uintptr_t ret = _beginthread((void (*)(void*))thread_script_func, 0, sd);
   //TODO: May need to check if ret is -1L, and yes it is quite obvious the return value is
   //an unsigned integer, but Microsoft says to for some reason. See their documentation here.
   //http://msdn.microsoft.com/en-us/library/kdzttdcb.aspx
   //NOTE: Same issue is in Universal_Systems/Extensions/Asynchronous/ASYNCdialog.cpp
   if (ret == NULL) {
-#else
-  if (pthread_create(&newthread->me, NULL, thread_script_func, sd)) {
-#endif
     delete sd; delete newthread;
     return -1;
   }
