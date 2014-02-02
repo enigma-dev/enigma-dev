@@ -72,9 +72,9 @@ void Vector3f::Rotate(gs_scalar Angle, const Vector3f& Axe)
 //This 3 could techincally be expanded like others - It would of be faster
 void Matrix4f::scale(gs_scalar ScaleX, gs_scalar ScaleY, gs_scalar ScaleZ)
 {
-    Matrix4f sm;
-    sm.InitScaleTransform(ScaleX, ScaleY, ScaleZ);
-    *this = sm*(*this);
+    m[0][0] = m[0][0]*ScaleX;  m[0][1] = m[0][1]*ScaleX;  m[0][2] = m[0][2]*ScaleX;  m[0][3] = m[0][3]*ScaleX;
+    m[1][0] = m[1][0]*ScaleY;  m[1][1] = m[1][1]*ScaleY;  m[1][2] = m[1][2]*ScaleY;  m[1][3] = m[1][3]*ScaleY;
+    m[2][0] = m[2][0]*ScaleZ;  m[2][1] = m[2][1]*ScaleZ;  m[2][2] = m[2][2]*ScaleZ;  m[2][3] = m[2][3]*ScaleZ;
 }
 
 //By a vector
@@ -89,16 +89,66 @@ void Matrix4f::rotate(gs_scalar RotateX, gs_scalar RotateY, gs_scalar RotateZ)
 void Matrix4f::rotate(gs_scalar angle, gs_scalar x, gs_scalar y, gs_scalar z)
 {
     Matrix4f sm;
-    Vector3f V(x,y,z);
-    sm.InitRotateVectorTransform(angle, V);
+    sm.InitRotateAxisTransform(angle, x, y, z);
     *this = sm*(*this);
+}
+
+void Matrix4f::rotateX(gs_scalar angle)
+{
+    gs_scalar c = cosd(angle);
+    gs_scalar s = sind(angle);
+    gs_scalar m10 = m[1][0], m11 = m[1][1], m12 = m[1][2], m13 = m[1][3],
+              m20 = m[2][0], m21 = m[2][1], m22 = m[2][2], m23 = m[2][3];
+
+    m[1][0] = m10 * c + m20 *-s;
+    m[1][1] = m11 * c + m21 *-s;
+    m[1][2] = m12 * c + m22 *-s;
+    m[1][3] = m13 * c + m23 *-s;
+    m[2][0] = m10 * s + m20 * c;
+    m[2][1] = m11 * s + m21 * c;
+    m[2][2] = m12 * s + m22 * c;
+    m[2][3] = m13 * s + m23 * c;
+}
+
+void Matrix4f::rotateY(gs_scalar angle)
+{
+    gs_scalar c = cosd(angle);
+    gs_scalar s = sind(angle);
+    gs_scalar m00 = m[0][0], m01 = m[0][1], m02 = m[0][2], m03 = m[0][3],
+              m20 = m[2][0], m21 = m[2][1], m22 = m[2][2], m23 = m[2][3];
+
+    m[0][0] = m00 * c + m20 * s;
+    m[0][1] = m01 * c + m21 * s;
+    m[0][2] = m02 * c + m22 * s;
+    m[0][3] = m03 * c + m23 * s;
+    m[2][0] = m00 *-s + m20 * c;
+    m[2][1] = m01 *-s + m21 * c;
+    m[2][2] = m02 *-s + m22 * c;
+    m[2][3] = m03 *-s + m23 * c;
+}
+
+void Matrix4f::rotateZ(gs_scalar angle)
+{
+    gs_scalar c = cosd(angle);
+    gs_scalar s = sind(angle);
+    gs_scalar m00 = m[0][0], m01 = m[0][1], m02 = m[0][2], m03 = m[0][3],
+              m10 = m[1][0], m11 = m[1][1], m12 = m[1][2], m13 = m[1][3];
+
+    m[0][0] = m00 * c + m10 *-s;
+    m[0][1] = m01 * c + m11 *-s;
+    m[0][2] = m02 * c + m12 *-s;
+    m[0][3] = m03 * c + m13 *-s;
+    m[1][0] = m00 * s + m10 * c;
+    m[1][1] = m01 * s + m11 * c;
+    m[1][2] = m02 * s + m12 * c;
+    m[1][3] = m03 * s + m13 * c;
 }
 
 void Matrix4f::translate(gs_scalar x, gs_scalar y, gs_scalar z)
 {
-    Matrix4f sm;
-    sm.InitTranslationTransform(x, y, z);
-    *this = sm*(*this);
+    m[0][0] += m[3][0]*x; m[0][1] += m[3][1]*x; m[0][2] += m[3][2]*x; m[0][3] += m[3][3]*x;
+    m[1][0] += m[3][0]*y; m[1][1] += m[3][1]*y; m[1][2] += m[3][2]*y; m[1][3] += m[3][3]*y;
+    m[2][0] += m[3][0]*z; m[2][1] += m[3][1]*z; m[2][2] += m[3][2]*z; m[2][3] += m[3][3]*z;
 }
 
 void Matrix4f::InitScaleTransform(gs_scalar ScaleX, gs_scalar ScaleY, gs_scalar ScaleZ)
@@ -142,7 +192,7 @@ void Matrix4f::InitRotateTransform(gs_scalar RotateX, gs_scalar RotateY, gs_scal
     *this = rz * ry * rx;
 }
 
-void Matrix4f::InitRotateVectorTransform(gs_scalar angle, const Vector3f& vect)
+/*void Matrix4f::InitRotateVectorTransform(gs_scalar angle, const Vector3f& vect)
 {
     Vector3f V = vect;
     V.Normalize();
@@ -154,8 +204,58 @@ void Matrix4f::InitRotateVectorTransform(gs_scalar angle, const Vector3f& vect)
 
     m[0][0] = x*x*(1-c)+c;    m[0][1] = x*y*(1-c)-z*s; m[0][2] = x*z*(1-c)+y*s; m[0][3] = 0.0f;
     m[1][0] = y*x*(1-c)+z*s;  m[1][1] = y*y*(1-c)+c;   m[1][2] = y*z*(1-c)-x*s; m[1][3] = 0.0f;
-    m[2][0] = x*z*(1-c)-y*s; m[2][1] = y*z*(1-c)+x*s; m[2][2] = z*z*(1-c)+c;   m[2][3] = 0.0f;
-    m[3][0] = 0.0f;          m[3][1] = 0.0f;          m[3][2] = 0.0f;          m[3][3] = 1.0f;
+    m[2][0] = x*z*(1-c)-y*s;  m[2][1] = y*z*(1-c)+x*s; m[2][2] = z*z*(1-c)+c;   m[2][3] = 0.0f;
+    m[3][0] = 0.0f;           m[3][1] = 0.0f;          m[3][2] = 0.0f;          m[3][3] = 1.0f;
+}*/
+
+void Matrix4f::InitRotateAxisTransform(gs_scalar angle, gs_scalar RotateX, gs_scalar RotateY, gs_scalar RotateZ)
+{
+    const gs_scalar x = RotateX;
+    const gs_scalar y = RotateY;
+    const gs_scalar z = RotateZ;
+    const gs_scalar xy = x*y;
+    const gs_scalar xz = x*z;
+    const gs_scalar yz = y*z;
+    const gs_scalar c = cosd(angle);
+    const gs_scalar s = sind(angle);
+
+    m[0][0] = x*x*(1-c)+c;    m[0][1] = xy*(1-c)-z*s;  m[0][2] = xz*(1-c)+y*s;  m[0][3] = 0.0f;
+    m[1][0] = xy*(1-c)+z*s;   m[1][1] = y*y*(1-c)+c;   m[1][2] = yz*(1-c)-x*s;  m[1][3] = 0.0f;
+    m[2][0] = xz*(1-c)-y*s;   m[2][1] = yz*(1-c)+x*s;  m[2][2] = z*z*(1-c)+c;   m[2][3] = 0.0f;
+    m[3][0] = 0.0f;           m[3][1] = 0.0f;          m[3][2] = 0.0f;          m[3][3] = 1.0f;
+}
+
+void Matrix4f::InitRotateXTransform(gs_scalar angle)
+{
+    const gs_scalar c = cosd(angle);
+    const gs_scalar s = sind(angle);
+
+    m[0][0] = 1.0f; m[0][1] = 0.0f; m[0][2] = 0.0f; m[0][3] = 0.0f;
+    m[1][0] = 0.0f; m[1][1] = c;    m[1][2] = s;    m[1][3] = 0.0f;
+    m[2][0] = 0.0f; m[2][1] = s;    m[2][2] = c;    m[2][3] = 0.0f;
+    m[3][0] = 0.0f; m[3][1] = 0.0f; m[3][2] = 0.0f; m[3][3] = 1.0f;
+}
+
+void Matrix4f::InitRotateYTransform(gs_scalar angle)
+{
+    const gs_scalar c = cosd(angle);
+    const gs_scalar s = sind(angle);
+
+    m[0][0] = c;    m[0][1] = 0.0f;  m[0][2] = s;    m[0][3] = 0.0f;
+    m[1][0] = 0.0f; m[1][1] = 1.0f;  m[1][2] = 0.0f; m[1][3] = 0.0f;
+    m[2][0] = s;    m[2][1] = 0.0f;  m[2][2] = c;    m[2][3] = 0.0f;
+    m[3][0] = 0.0f; m[3][1] = 0.0f;  m[3][2] = 0.0f; m[3][3] = 1.0f;
+}
+
+void Matrix4f::InitRotateZTransform(gs_scalar angle)
+{
+    const gs_scalar c = cosd(angle);
+    const gs_scalar s = sind(angle);
+
+    m[0][0] = c;    m[0][1] = s;    m[0][2] = 0.0f;  m[0][3] = 0.0f;
+    m[1][0] = s;    m[1][1] = c;    m[1][2] = 0.0f;  m[1][3] = 0.0f;
+    m[2][0] = 0.0f; m[2][1] = 0.0f; m[2][2] = 1.0f;  m[2][3] = 0.0f;
+    m[3][0] = 0.0f; m[3][1] = 0.0f; m[3][2] = 0.0f;  m[3][3] = 1.0f;
 }
 
 void Matrix4f::InitTranslationTransform(gs_scalar x, gs_scalar y, gs_scalar z)

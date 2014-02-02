@@ -112,7 +112,7 @@ void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scal
 void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, gs_scalar angle)
 {
     oglmgr->Transformation();
-    enigma::projection_matrix.InitRotateVectorTransform(angle, enigma::Vector3f(0,0,1));
+    enigma::projection_matrix.InitRotateZTransform(angle);
 
     enigma::Matrix4f persp, orhto;
     persp.InitPersProjTransform(60, 1, 0.1,32000);
@@ -145,19 +145,19 @@ void d3d_transform_add_scaling(gs_scalar xs, gs_scalar ys, gs_scalar zs)
 void d3d_transform_add_rotation_x(gs_scalar angle)
 {
     oglmgr->Transformation();
-    enigma::model_matrix.rotate(-angle,1,0,0);
+    enigma::model_matrix.rotateX(-angle);
     enigma::transformation_update = true;
 }
 void d3d_transform_add_rotation_y(gs_scalar angle)
 {
     oglmgr->Transformation();
-    enigma::model_matrix.rotate(-angle,0,1,0);
+    enigma::model_matrix.rotateY(-angle);
     enigma::transformation_update = true;
 }
 void d3d_transform_add_rotation_z(gs_scalar angle)
 {
     oglmgr->Transformation();
-    enigma::model_matrix.rotate(-angle,0,0,1);
+    enigma::model_matrix.rotateZ(-angle);
     enigma::transformation_update = true;
 }
 void d3d_transform_add_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar angle)
@@ -170,36 +170,31 @@ void d3d_transform_add_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, gs_s
 void d3d_transform_set_translation(gs_scalar xt, gs_scalar yt, gs_scalar zt)
 {
     oglmgr->Transformation();
-    enigma::model_matrix.InitIdentity();
-    enigma::model_matrix.translate(xt, yt, zt);
+    enigma::model_matrix.InitTranslationTransform(xt, yt, zt);
     enigma::transformation_update = true;
 }
 void d3d_transform_set_scaling(gs_scalar xs, gs_scalar ys, gs_scalar zs)
 {
     oglmgr->Transformation();
-    enigma::model_matrix.InitIdentity();
-    enigma::model_matrix.scale(xs, ys, zs);
+    enigma::model_matrix.InitScaleTransform(xs, ys, zs);
     enigma::transformation_update = true;
 }
 void d3d_transform_set_rotation_x(gs_scalar angle)
 {
     oglmgr->Transformation();
-    enigma::model_matrix.InitIdentity();
-    enigma::model_matrix.rotate(-angle, 1, 0, 0);
+    enigma::model_matrix.InitRotateXTransform(-angle);
     enigma::transformation_update = true;
 }
 void d3d_transform_set_rotation_y(gs_scalar angle)
 {
     oglmgr->Transformation();
-    enigma::model_matrix.InitIdentity();
-    enigma::model_matrix.rotate(-angle, 0, 1, 0);
+    enigma::model_matrix.InitRotateYTransform(-angle);
     enigma::transformation_update = true;
 }
 void d3d_transform_set_rotation_z(gs_scalar angle)
 {
     oglmgr->Transformation();
-    enigma::model_matrix.InitIdentity();
-    enigma::model_matrix.rotate(-angle, 0, 0, 1);
+    enigma::model_matrix.InitRotateZTransform(-angle);
     enigma::transformation_update = true;
 }
 void d3d_transform_set_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar angle)
