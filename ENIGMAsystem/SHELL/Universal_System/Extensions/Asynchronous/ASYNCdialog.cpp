@@ -16,8 +16,6 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <process.h>
-
 #include "ASYNCdialog.h"
 #include "Platforms/General/PFthreads.h"
 #include "Widget_Systems/General/WSdialogs.h"
@@ -25,6 +23,12 @@
 #include "Universal_System/Extensions/DataStructures/include.h"
 #include "Universal_System/instance_system.h"
 #include "Universal_System/instance.h"
+
+#if defined(_WIN32) || defined(__WIN32__) || defined(_WIN64) || defined(__WIN64__)
+	#include <process.h>
+#else
+	#include <pthread.h> // use POSIX threads
+#endif
 
 struct MessageData {
 	unsigned id;
@@ -89,7 +93,7 @@ static void* getIntegerAsync(void* data) {
 static int createThread(void (*fnc)(void*), MessageData* md) {
 	  ethread* newthread = new ethread();
 	  md->id = threads.size();
-#if CURRENT_PLATFORM_ID == OS_WINDOWS
+#if defined(_WIN32) || defined(__WIN32__) || defined(_WIN64) || defined(__WIN64__)
 	  uintptr_t ret = _beginthread(fnc, 0, md);
 	  //TODO: May need to check if ret is -1L, and yes it is quite obvious the return value is
 	  //an unsigned integer, but Microsoft says to for some reason. See their documentation here.
