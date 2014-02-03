@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton
+/** Copyright (C) 2008-2014 Josh Ventura, Robert B. Colton, Harijs Grinbergs
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -35,104 +35,183 @@ ContextManager* oglmgr = NULL;
 namespace enigma
 {
   unsigned bound_texture=0;
+  unsigned default_shader=0;
   unsigned char currentcolor[4] = {0,0,0,255};
   bool glew_isgo;
   bool pbo_isgo;
 
-  void graphicssystem_initialize()
-  {
-	oglmgr = new ContextManager();
-    GLenum err = glewInit();
-
-    #ifdef DEBUG_MODE
-    if (GLEW_OK != err)
+    void graphicssystem_initialize()
     {
-      std::cout<<"GLEW ERROR!"<<std::endl;
+        oglmgr = new ContextManager();
+        GLenum err = glewInit();
+
+        #ifdef DEBUG_MODE
+        if (GLEW_OK != err)
+        {
+          std::cout<<"GLEW ERROR!"<<std::endl;
+        }
+        #endif
+
+        //enigma::pbo_isgo=GL_ARB_pixel_buffer_object;
+        glMatrixMode(GL_PROJECTION);
+        glClearColor(0,0,0,0);
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+
+        using enigma_user::room_width;
+        using enigma_user::room_height;
+        glViewport(0,0,(int)room_width,(int)room_height);
+        glOrtho(0,(int)room_width,0,(int)room_height,0,1);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        glDisable(GL_DEPTH_TEST);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        glEnable(GL_BLEND);
+        glEnable(GL_ALPHA_TEST);
+        glEnable(GL_TEXTURE_2D);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glAlphaFunc(GL_ALWAYS,0);
+
+        glColor4f(0,0,0,1);
+        glBindTexture(GL_TEXTURE_2D,bound_texture=0);
+
+        init_shaders();
+        // read shaders into graphics system structure and compile and link them if needed
+        for (size_t i = 0; i < shader_idmax; ++i) {
+            ShaderStruct* shaderstruct = shaderdata[i];
+
+            //if (string(shaderstruct->type) != string("GLSL")) { continue; }
+
+            Shader* vshader = new Shader(enigma_user::sh_vertex);
+            shaders.push_back(vshader);
+            glShaderSource(vshader->shader, 1, (const GLchar**)&shaderstruct->vertex, NULL);
+
+            Shader* fshader = new Shader(enigma_user::sh_fragment);
+            shaders.push_back(fshader);
+            glShaderSource(fshader->shader, 1, (const GLchar**)&shaderstruct->fragment, NULL);
+
+            ShaderProgram* program = new ShaderProgram();
+            shaderprograms.push_back(program);
+
+            if (shaderstruct->precompile) {
+                glCompileShader(vshader->shader);
+                glCompileShader(fshader->shader);
+
+                GLint blen = 0;
+                GLsizei slen = 0;
+
+                glGetShaderiv(vshader->shader, GL_INFO_LOG_LENGTH , &blen);
+
+                if (blen > 1)
+                {
+                    GLchar* compiler_log = (GLchar*)malloc(blen);
+
+                    glGetInfoLogARB(vshader->shader, blen, &slen, compiler_log);
+                    std::cout << compiler_log << std::endl;
+                } else {
+                    std::cout << "Vertex shader compile log empty" << std::endl;
+                }
+
+                glGetShaderiv(fshader->shader, GL_INFO_LOG_LENGTH , &blen);
+
+                if (blen > 1)
+                {
+                    GLchar* compiler_log = (GLchar*)malloc(blen);
+
+                    glGetInfoLogARB(fshader->shader, blen, &slen, compiler_log);
+                    std::cout << compiler_log << std::endl;
+                } else {
+                    std::cout << "Fragment shader compile log empty" << std::endl;
+                }
+
+            }
+
+            glAttachShader(program->shaderprogram, vshader->shader);
+            glAttachShader(program->shaderprogram, fshader->shader);
+
+            glLinkProgram(program->shaderprogram);
+            glValidateProgram(program->shaderprogram);
+        }
+
+        //ADD DEFAULT SHADER (emulates FFP)
+        Shader* vshader = new Shader(enigma_user::sh_vertex);
+        shaders.push_back(vshader);
+        const char *versource_str = getDefaultVertexShader().c_str();
+        glShaderSource(vshader->shader, 1, &versource_str, NULL);
+
+        Shader* fshader = new Shader(enigma_user::sh_fragment);
+        shaders.push_back(fshader);
+        const char *fragsource_str = getDefaultFragmentShader().c_str();
+        glShaderSource(fshader->shader, 1, &fragsource_str, NULL);
+
+        ShaderProgram* program = new ShaderProgram();
+        shaderprograms.push_back(program);
+
+        glCompileShader(vshader->shader);
+        glCompileShader(fshader->shader);
+
+        GLint blen = 0;
+        GLsizei slen = 0;
+
+        glGetShaderiv(vshader->shader, GL_INFO_LOG_LENGTH , &blen);
+
+        if (blen > 1)
+        {
+            GLchar* compiler_log = (GLchar*)malloc(blen);
+
+            glGetInfoLogARB(vshader->shader, blen, &slen, compiler_log);
+            std::cout << compiler_log << std::endl;
+        } else {
+            std::cout << "Vertex shader compile log empty" << std::endl;
+        }
+
+        glGetShaderiv(fshader->shader, GL_INFO_LOG_LENGTH , &blen);
+
+        if (blen > 1)
+        {
+            GLchar* compiler_log = (GLchar*)malloc(blen);
+
+            glGetInfoLogARB(fshader->shader, blen, &slen, compiler_log);
+            std::cout << compiler_log << std::endl;
+        } else {
+            std::cout << "Fragment shader compile log empty" << std::endl;
+        }
+
+        glAttachShader(program->shaderprogram, vshader->shader);
+        glAttachShader(program->shaderprogram, fshader->shader);
+
+        glLinkProgram(program->shaderprogram);
+
+        glGetProgramiv(vshader->shader, GL_INFO_LOG_LENGTH , &blen);
+
+        if (blen > 1)
+        {
+            GLchar* compiler_log = (GLchar*)malloc(blen);
+
+            glGetProgramInfoLog(vshader->shader, blen, &slen, compiler_log);
+            std::cout << compiler_log << std::endl;
+        } else {
+            std::cout << "Program link log empty" << std::endl;
+        }
+
+        glValidateProgram(program->shaderprogram);
+
+        glGetProgramiv(vshader->shader, GL_INFO_LOG_LENGTH , &blen);
+
+        if (blen > 1)
+        {
+            GLchar* compiler_log = (GLchar*)malloc(blen);
+
+            glGetProgramInfoLog(vshader->shader, blen, &slen, compiler_log);
+            std::cout << compiler_log << std::endl;
+        } else {
+            std::cout << "Program validation log empty" << std::endl;
+        }
+
+        default_shader = program->shaderprogram;
+        //END DEFAULT SHADER
     }
-    #endif
-
-    //enigma::pbo_isgo=GL_ARB_pixel_buffer_object;
-    glMatrixMode(GL_PROJECTION);
-      glClearColor(0,0,0,0);
-    glMatrixMode(GL_MODELVIEW);
-      glLoadIdentity();
-
-      using enigma_user::room_width;
-      using enigma_user::room_height;
-      glViewport(0,0,(int)room_width,(int)room_height);
-      glOrtho(0,(int)room_width,0,(int)room_height,0,1);
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-      glDisable(GL_DEPTH_TEST);
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-      glEnable(GL_BLEND);
-      glEnable(GL_ALPHA_TEST);
-      glEnable(GL_TEXTURE_2D);
-      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-      glAlphaFunc(GL_ALWAYS,0);
-
-      glColor4f(0,0,0,1);
-      glBindTexture(GL_TEXTURE_2D,bound_texture=0);
-
-	  init_shaders();
-	  // read shaders into graphics system structure and compile and link them if needed
-	  for (size_t i = 0; i < shader_idmax; i++) {
-	    ShaderStruct* shaderstruct = shaderdata[i];
-
-		//if (string(shaderstruct->type) != string("GLSL")) { continue; }
-
-		Shader* vshader = new Shader(enigma_user::sh_vertex);
-		shaders.push_back(vshader);
-		glShaderSource(vshader->shader, 1, (const GLchar**)&shaderstruct->vertex, NULL);
-
-		Shader* fshader = new Shader(enigma_user::sh_fragment);
-		shaders.push_back(fshader);
-		glShaderSource(fshader->shader, 1, (const GLchar**)&shaderstruct->fragment, NULL);
-
-		ShaderProgram* program = new ShaderProgram();
-		shaderprograms.push_back(program);
-
-		if (shaderstruct->precompile) {
-			glCompileShader(vshader->shader);
-			glCompileShader(fshader->shader);
-
-			GLint blen = 0;
-			GLsizei slen = 0;
-
-			glGetShaderiv(vshader->shader, GL_INFO_LOG_LENGTH , &blen);
-
-			if (blen > 1)
-			{
-				GLchar* compiler_log = (GLchar*)malloc(blen);
-
-				glGetInfoLogARB(vshader->shader, blen, &slen, compiler_log);
-				std::cout << compiler_log << std::endl;
-			} else {
-				std::cout << "Vertex shader compile log empty" << std::endl;
-			}
-
-			glGetShaderiv(fshader->shader, GL_INFO_LOG_LENGTH , &blen);
-
-			if (blen > 1)
-			{
-				GLchar* compiler_log = (GLchar*)malloc(blen);
-
-				glGetInfoLogARB(fshader->shader, blen, &slen, compiler_log);
-				std::cout << compiler_log << std::endl;
-			} else {
-				std::cout << "Fragment shader compile log empty" << std::endl;
-			}
-
-		}
-
-		glAttachShader(program->shaderprogram, vshader->shader);
-		glAttachShader(program->shaderprogram, fshader->shader);
-
-		glLinkProgram(program->shaderprogram);
-		glValidateProgram(program->shaderprogram);
-	  }
-  }
 }
 
 namespace enigma_user {
