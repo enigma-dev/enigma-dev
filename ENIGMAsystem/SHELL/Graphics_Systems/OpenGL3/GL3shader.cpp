@@ -1,4 +1,4 @@
-/** Copyright (C) 2013 Robert B. Colton
+/** Copyright (C) 2013-2014 Robert B. Colton, Harijs Grinbergs
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -31,12 +31,86 @@ using namespace std;
 #include <vector>
 using std::vector;
 
-extern GLenum shadertypes[5] = {   
+extern GLenum shadertypes[5] = {
   GL_VERTEX_SHADER, GL_FRAGMENT_SHADER, GL_TESS_CONTROL_SHADER, GL_TESS_EVALUATION_SHADER, GL_GEOMETRY_SHADER
-}; 
+};
 
 vector<Shader*> shaders(0);
 vector<ShaderProgram*> shaderprograms(0);
+
+namespace enigma
+{
+    string getDefaultVertexShader(){
+        return "#version 140\n"
+                "#define MATRIX_VIEW                                    0\n"
+                "#define MATRIX_PROJECTION                              1\n"
+                "#define MATRIX_WORLD                                   2\n"
+                "#define MATRIX_WORLD_VIEW                              3\n"
+                "#define MATRIX_WORLD_VIEW_PROJECTION                   4\n"
+                "#define MATRICES_MAX                                   5\n"
+
+                "uniform mat4 transform_matrix[MATRICES_MAX];           \n"
+                "#define gm_Matrices transform_matrix \n"
+                "#define modelMatrix transform_matrix[MATRIX_WORLD] \n"
+                "#define modelViewMatrix transform_matrix[MATRIX_WORLD_VIEW] \n"
+                "#define projectionMatrix transform_matrix[MATRIX_PROJECTION] \n"
+                "#define viewMatrix transform_matrix[MATRIX_VIEW] \n"
+                "#define modelViewProjectionMatrix transform_matrix[MATRIX_WORLD_VIEW_PROJECTION] \n"
+
+                "uniform bool en_LightingEnabled;\n"
+                "uniform bool en_VS_FogEnabled;\n"
+                "uniform float en_FogStart;\n"
+                "uniform float en_RcpFogRange;\n"
+
+                "#define MAX_VS_LIGHTS   8\n"
+                "#define MIRROR_WIN32_LIGHTING_EQUATION\n"
+
+                "uniform vec4   en_AmbientColour;                                // rgb=colour, a=1\n"
+                "uniform vec4   en_Lights_Direction[MAX_VS_LIGHTS];              // normalised direction\n"
+                "uniform vec4   en_Lights_PosRange[MAX_VS_LIGHTS];               // X,Y,Z position,  W range\n"
+                "uniform vec4   en_Lights_Colour[MAX_VS_LIGHTS];                 // rgb=colour, a=1\n"
+
+                "in vec3 in_Position;                 // (x,y,z)\n"
+                "in vec4 in_Color;                    // (r,g,b,a)\n"
+                "in vec2 in_TextureCoord;             // (u,v)\n"
+
+                "out vec2 v_TextureCoord;\n"
+                "out vec4 v_Color;\n"
+
+                "void main()\n"
+                "{\n"
+                    "vec4 object_space_pos = vec4( in_Position.x, in_Position.y, in_Position.z, 1.0);\n"
+                    "gl_Position = transform_matrix[MATRIX_WORLD_VIEW_PROJECTION] * object_space_pos;\n"
+
+                    "v_Color = in_Color;\n"
+                    "v_TextureCoord = in_TextureCoord;\n"
+                "}\n";
+    }
+    string getDefaultFragmentShader(){
+        return "#version 140\n"
+                "in vec2 v_TextureCoord;\n"
+                "in vec4 v_Color;\n"
+                "uniform sampler2D TexSampler;\n"
+                "out vec4 out_FragColor;\n"
+
+                "void main()\n"
+                "{\n"
+                    "out_FragColor = texture2D( TexSampler, v_TextureCoord.st ) * v_Color;\n"
+                "}\n";
+    }
+}
+
+unsigned long getFileLength(ifstream& file)
+{
+    if(!file.good()) return 0;
+
+    //unsigned long pos=file.tellg();
+    file.seekg(0,ios::end);
+    unsigned long len = file.tellg();
+    file.seekg(ios::beg);
+
+    return len;
+}
 
 namespace enigma_user
 {
@@ -48,23 +122,6 @@ int glsl_shader_create(int type)
   return id;
 }
 
-}
-
-unsigned long getFileLength(ifstream& file)
-{
-    if(!file.good()) return 0;
-    
-    unsigned long pos=file.tellg();
-    file.seekg(0,ios::end);
-    unsigned long len = file.tellg();
-    file.seekg(ios::beg);
-    
-    return len;
-}
-
-namespace enigma_user
-{
-
 int glsl_shader_load(int id, string fname)
 {
   ifstream file;
@@ -72,8 +129,8 @@ int glsl_shader_load(int id, string fname)
   if (!file.is_open()) return 1; // Error: File could not be oppenned
 
   unsigned long len = getFileLength(file);
-  if (len == 0) return 2;   // Error: Empty File 
-  
+  if (len == 0) return 2;   // Error: Empty File
+
   GLchar* ShaderSource;
   ShaderSource = (GLchar*) new char[len+1];
 
@@ -86,7 +143,7 @@ int glsl_shader_load(int id, string fname)
     if (!file.eof())
     i++;
   }
-    
+
   ShaderSource[i] = 0;  // 0-terminate it at the correct position
 
   glShaderSource(shaders[id]->shader, 1, (const GLchar**)&ShaderSource, NULL);
@@ -99,10 +156,10 @@ bool glsl_shader_compile(int id)
 {
   glCompileShader(shaders[id]->shader);
 
-  GLint blen = 0;	
+  GLint blen = 0;
   GLsizei slen = 0;
 
-  glGetShaderiv(shaders[id]->shader, GL_INFO_LOG_LENGTH , &blen);       
+  glGetShaderiv(shaders[id]->shader, GL_INFO_LOG_LENGTH , &blen);
 
   if (blen > 1)
   {
@@ -113,7 +170,7 @@ bool glsl_shader_compile(int id)
   } else {
     shaders[id]->log = "Shader compile log empty";
   }
-  
+
   GLint compiled;
   glGetProgramiv(shaders[id]->shader, GL_COMPILE_STATUS, &compiled);
   if (compiled)

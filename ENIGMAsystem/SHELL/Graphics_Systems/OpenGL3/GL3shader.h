@@ -21,6 +21,12 @@
 #include <string>
 using std::string;
 
+namespace enigma
+{
+    string getDefaultFragmentShader();
+    string getDefaultVertexShader();
+}
+
 namespace enigma_user
 {
 
@@ -65,7 +71,7 @@ void glsl_uniformui(int location, unsigned v0, unsigned v1);
 void glsl_uniformui(int location, unsigned v0, unsigned v1, unsigned v2);
 void glsl_uniformui(int location, unsigned v0, unsigned v1, unsigned v2, unsigned v3);
 
-// Wrap our abstracted version to the useless GayMaker version
+// Wrap our abstracted version to the useless GameMaker version
 #define shader_set            glsl_program_set
 #define shader_reset          glsl_program_reset
 #define shader_get_uniform    glsl_get_uniform_location

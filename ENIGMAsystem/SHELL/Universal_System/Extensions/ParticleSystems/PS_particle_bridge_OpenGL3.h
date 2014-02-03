@@ -402,18 +402,11 @@ namespace enigma {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eab);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint)*indices.size(), indices.data(), GL_STATIC_DRAW);
 
-        GLfloat trans_mat[16];
-        GLfloat proj_mat[16];
-        for (unsigned i = 0; i < 16; i++) {
-          trans_mat[i] = (GLfloat)(model_matrix[i]);
-          proj_mat[i] = (GLfloat)(projection_matrix[i]);
-        }
-
         GLint transform_matrix_location = glGetUniformLocation(shader_program, "trans_mat");
-        glUniformMatrix4fv(transform_matrix_location, 1, GL_FALSE, trans_mat);
+        glUniformMatrix4fv(transform_matrix_location, 1, GL_FALSE, mv_matrix.Transpose());
 
         GLint projection_matrix_location = glGetUniformLocation(shader_program, "proj_mat");
-        glUniformMatrix4fv(projection_matrix_location, 1, GL_FALSE, proj_mat);
+        glUniformMatrix4fv(projection_matrix_location, 1, GL_FALSE, projection_matrix.Transpose());
 
         // Draw.
 
