@@ -196,6 +196,13 @@ int window_get_color()
     return enigma::windowcolor;
 }
 
+unsigned char window_get_alpha() {
+	unsigned char alpha;
+	// Make this window transparent
+	GetLayeredWindowAttributes(enigma::hWndParent, 0, &alpha, 0);
+	return alpha;
+}
+
 void window_set_position(int x, int y)
 {
     enigma::windowX = x;
