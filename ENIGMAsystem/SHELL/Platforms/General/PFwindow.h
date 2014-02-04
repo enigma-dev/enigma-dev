@@ -75,7 +75,6 @@ int window_get_height();
 void window_set_caption(string caption);
 string window_get_caption();
 void window_set_color(int color);
-void window_set_alpha(unsigned char alpha);
 int window_get_color();
 unsigned char window_get_alpha();
 double window_get_region_scale();
