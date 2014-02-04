@@ -191,14 +191,6 @@ void window_set_color(int color)
     enigma::windowcolor = color;
 }
 
-void window_set_alpha(unsigned char alpha) {
-	// Set WS_EX_LAYERED on this window 
-	SetWindowLong(enigma::hWndParent, GWL_EXSTYLE,
-        GetWindowLong(enigma::hWndParent, GWL_EXSTYLE) | WS_EX_LAYERED);
-	// Make this window transparent
-	SetLayeredWindowAttributes(enigma::hWndParent, 0, alpha, LWA_ALPHA);
-}
-
 int window_get_color()
 {
     return enigma::windowcolor;
