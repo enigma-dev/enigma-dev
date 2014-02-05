@@ -427,14 +427,21 @@ void execute_shell(std::string fname, std::string args)
 	ShellExecute(enigma::hWndParent, NULL, fname.c_str(), args.c_str(), cDir, SW_SHOW);
 }
 
-void execute_program(std::string fname, std::string args, bool wait)
+void execute_shell(std::string operation, std::string fname, std::string args)
+{
+    TCHAR cDir[MAX_PATH];
+    GetCurrentDirectory(MAX_PATH, cDir);
+	ShellExecute(enigma::hWndParent, operation.c_str(), fname.c_str(), args.c_str(), cDir, SW_SHOW);
+}
+
+void execute_program(std::string operation, std::string fname, std::string args, bool wait)
 {
     SHELLEXECUTEINFO lpExecInfo;
       lpExecInfo.cbSize  = sizeof(SHELLEXECUTEINFO);
       lpExecInfo.lpFile = fname.c_str();
       lpExecInfo.fMask=SEE_MASK_DOENVSUBST|SEE_MASK_NOCLOSEPROCESS;
       lpExecInfo.hwnd = enigma::hWndParent;
-      lpExecInfo.lpVerb = "open";
+      lpExecInfo.lpVerb = operation.c_str();
       lpExecInfo.lpParameters = args.c_str();
       TCHAR cDir[MAX_PATH];
       GetCurrentDirectory(MAX_PATH, cDir);
@@ -449,6 +456,11 @@ void execute_program(std::string fname, std::string args, bool wait)
         ::WaitForSingleObject(lpExecInfo.hProcess, INFINITE);
         ::CloseHandle(lpExecInfo.hProcess);
       }
+}
+
+void execute_program(std::string fname, std::string args, bool wait)
+{
+	execute_program("open", fname, args, wait);
 }
 
 std::string environment_get_variable(std::string name)

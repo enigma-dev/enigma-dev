@@ -18,7 +18,7 @@
 
 #include "Universal_System/var4.h"
 #include "Universal_System/resource_data.h"
-#include "POSIXthreads.h"
+#include "PFthreads.h"
 #include <pthread.h> // use POSIX threads
 
 struct scrtdata {
