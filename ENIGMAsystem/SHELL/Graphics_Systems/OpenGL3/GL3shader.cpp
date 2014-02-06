@@ -35,12 +35,13 @@ extern GLenum shadertypes[5] = {
   GL_VERTEX_SHADER, GL_FRAGMENT_SHADER, GL_TESS_CONTROL_SHADER, GL_TESS_EVALUATION_SHADER, GL_GEOMETRY_SHADER
 };
 
-vector<Shader*> shaders(0);
-vector<ShaderProgram*> shaderprograms(0);
+vector<enigma::Shader*> shaders(0);
+vector<enigma::ShaderProgram*> shaderprograms(0);
 
 namespace enigma
 {
-    string getDefaultVertexShader(){
+    extern ShaderProgram* default_shader;
+    string getVertexShaderPrefix(){
         return "#version 140\n"
                 "#define MATRIX_VIEW                                    0\n"
                 "#define MATRIX_PROJECTION                              1\n"
@@ -72,11 +73,18 @@ namespace enigma
 
                 "in vec3 in_Position;                 // (x,y,z)\n"
                 "in vec4 in_Color;                    // (r,g,b,a)\n"
-                "in vec2 in_TextureCoord;             // (u,v)\n"
-
-                "out vec2 v_TextureCoord;\n"
+                "in vec2 in_TextureCoord;             // (u,v)\n";
+    }
+    string getFragmentShaderPrefix(){
+        return "#version 140\n"
+                "uniform sampler2D TexSampler;\n"
+                "uniform bool en_Texturing;\n"
+                "uniform bool en_Color;\n"
+                "uniform vec4 en_bound_color;\n";
+    }
+    string getDefaultVertexShader(){
+        return  "out vec2 v_TextureCoord;\n"
                 "out vec4 v_Color;\n"
-
                 "void main()\n"
                 "{\n"
                     "vec4 object_space_pos = vec4( in_Position.x, in_Position.y, in_Position.z, 1.0);\n"
@@ -87,15 +95,21 @@ namespace enigma
                 "}\n";
     }
     string getDefaultFragmentShader(){
-        return "#version 140\n"
-                "in vec2 v_TextureCoord;\n"
+        return  "in vec2 v_TextureCoord;\n"
                 "in vec4 v_Color;\n"
-                "uniform sampler2D TexSampler;\n"
                 "out vec4 out_FragColor;\n"
 
                 "void main()\n"
                 "{\n"
-                    "out_FragColor = texture2D( TexSampler, v_TextureCoord.st ) * v_Color;\n"
+                    "if (en_Texturing == true && en_Color == true){\n"
+                        "out_FragColor = texture2D( TexSampler, v_TextureCoord.st ) * v_Color;\n"
+                    "}else if (en_Color == true){\n"
+                        "out_FragColor = v_Color;\n"
+                    "}else if (en_Texturing == true){\n"
+                        "out_FragColor = texture2D( TexSampler, v_TextureCoord.st );\n"
+                    "}else{\n"
+                        "out_FragColor = en_bound_color;\n"
+                    "}\n"
                 "}\n";
     }
 }
@@ -118,7 +132,7 @@ namespace enigma_user
 int glsl_shader_create(int type)
 {
   unsigned int id = shaders.size();
-  shaders.push_back(new Shader(type));
+  shaders.push_back(new enigma::Shader(type));
   return id;
 }
 
@@ -205,7 +219,7 @@ void glsl_shader_free(int id)
 int glsl_program_create()
 {
   unsigned int id = shaderprograms.size();
-  shaderprograms.push_back(new ShaderProgram());
+  shaderprograms.push_back(new enigma::ShaderProgram());
   return id;
 }
 
@@ -256,7 +270,7 @@ void glsl_program_reset()
 {
   //NOTE: Texture must be reset first so the Global VBO can draw and let people use shaders on text.
   texture_reset();
-  glUseProgram(0);
+  glUseProgram(enigma::default_shader->shaderprogram);
 }
 
 void glsl_program_free(int id)

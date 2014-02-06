@@ -1,5 +1,5 @@
 /** Copyright (C) 2013 Robert B. Colton, Adriano Tumminelli
-*** Copyright (C) 2014 Josh Ventura
+*** Copyright (C) 2014 Josh Ventura, Harijs Grinbergs
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -19,6 +19,8 @@
 #include "../General/GSd3d.h"
 #include "../General/GSprimitives.h"
 #include "../General/GSmatrix.h"
+#include "Bridges/General/GL3Context.h" //Needed to get if bound texture == -1
+#include "GLSLshader.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
 #include <math.h>
@@ -46,7 +48,7 @@ unsigned get_texture(int texid);
 extern GLenum ptypes_by_id[16];
 namespace enigma {
   extern unsigned char currentcolor[4];
-  extern unsigned default_shader;
+  extern ShaderProgram* default_shader;
 
   //split a string and convert to float
   vector<float> float_split(const string& str, const char& ch) {
@@ -554,8 +556,6 @@ class Mesh
       BufferGenerate();
     }
 
-    glUseProgram(enigma::default_shader);
-
     if (enigma::transformation_update == true){
         //Recalculate matrices
         enigma::mv_matrix = enigma::view_matrix * enigma::model_matrix;
@@ -564,30 +564,15 @@ class Mesh
         enigma::transformation_update = false;
     }
 
-    GLuint viewMatrixLoc = glGetUniformLocation(enigma::default_shader, "transform_matrix[0]");
-    GLuint projectionMatrixLoc = glGetUniformLocation(enigma::default_shader, "transform_matrix[1]");
-    GLuint modelMatrixLoc = glGetUniformLocation(enigma::default_shader, "transform_matrix[2]");
-    GLuint mvMatrixLoc = glGetUniformLocation(enigma::default_shader, "transform_matrix[3]");
-    GLuint mvpMatrixLoc = glGetUniformLocation(enigma::default_shader, "transform_matrix[4]");
-    GLuint texSamplerLoc = glGetUniformLocation(enigma::default_shader, "TexSampler");
-
-    //printf("vml = %i\n pml = %i\n mml = %i\n mvml = %i\n mvpml = %i\n tsl = %i\n", viewMatrixLoc, projectionMatrixLoc, modelMatrixLoc, mvMatrixLoc, mvpMatrixLoc, texSamplerLoc);
-
     //Send transposed (done by GL because of "true" in the function below) matrices to shader
-    glUniformMatrix4fv(viewMatrixLoc,  1, true, enigma::view_matrix);
-    glUniformMatrix4fv(projectionMatrixLoc,  1, true, enigma::projection_matrix);
-    glUniformMatrix4fv(modelMatrixLoc,  1, true, enigma::model_matrix);
-    glUniformMatrix4fv(mvMatrixLoc,  1, true, enigma::mv_matrix);
-    glUniformMatrix4fv(mvpMatrixLoc,  1, true, enigma::mvp_matrix);
+    glUniformMatrix4fv(enigma::default_shader->uni_viewMatrix,  1, true, enigma::view_matrix);
+    glUniformMatrix4fv(enigma::default_shader->uni_projectionMatrix,  1, true, enigma::projection_matrix);
+    glUniformMatrix4fv(enigma::default_shader->uni_modelMatrix,  1, true, enigma::model_matrix);
+    glUniformMatrix4fv(enigma::default_shader->uni_mvMatrix,  1, true, enigma::mv_matrix);
+    glUniformMatrix4fv(enigma::default_shader->uni_mvpMatrix,  1, true, enigma::mvp_matrix);
 
     //Bind texture
-    glUniform1i(texSamplerLoc, 0);
-
-    GLuint vertexLoc = glGetAttribLocation(enigma::default_shader,"in_Position");
-    GLuint colorLoc = glGetAttribLocation(enigma::default_shader, "in_Color");
-    GLuint textureLoc = glGetAttribLocation(enigma::default_shader, "in_TextureCoord");
-
-    //printf("vl = %i\n cl = %i\n tl = %i\n", vertexLoc, colorLoc, textureLoc);
+    glUniform1i(enigma::default_shader->uni_texSampler, 0);
 
 	GLsizei stride = GetStride();
 
@@ -602,8 +587,8 @@ class Mesh
 
 	//glEnableClientState(GL_VERTEX_ARRAY);
 	unsigned offset = 0;
-	glEnableVertexAttribArray(vertexLoc);
-	glVertexAttribPointer(vertexLoc, vertexStride, GL_FLOAT, 0, STRIDE, OFFSET(offset));
+	glEnableVertexAttribArray(enigma::default_shader->att_vertex);
+	glVertexAttribPointer(enigma::default_shader->att_vertex, vertexStride, GL_FLOAT, 0, STRIDE, OFFSET(offset));
 	//glVertexPointer( vertexStride, GL_FLOAT, STRIDE, OFFSET(offset) ); // Set the vertex pointer to the offset in the buffer
 	offset += vertexStride;
 
@@ -613,19 +598,29 @@ class Mesh
 		offset += 3;
     }
 
-	if (useTextures){
-		//glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-		//glTexCoordPointer( 2, GL_FLOAT, STRIDE, OFFSET(offset) ); // Set the texture pointer to the offset in the buffer
-        glEnableVertexAttribArray(textureLoc);
-		glVertexAttribPointer(textureLoc, 2, GL_FLOAT, 0, STRIDE, OFFSET(offset));
+    glUniform4f( enigma::default_shader->uni_color, (float)enigma::currentcolor[0]/255.0, (float)enigma::currentcolor[1]/255.0, (float)enigma::currentcolor[2]/255.0, (float)enigma::currentcolor[3]/255.0 );
+
+    if (useTextures){
+         //This part sucks, but is required because models can be drawn without textures even if coordinates are provided
+         //like in the case of d3d_model_block
+        if (oglmgr->GetBoundTexture() != 0){
+            glEnableVertexAttribArray(enigma::default_shader->att_texture);
+            glVertexAttribPointer(enigma::default_shader->att_texture, 2, GL_FLOAT, 0, STRIDE, OFFSET(offset));
+            glUniform1i(enigma::default_shader->uni_textureEnable, 1);
+        }else{
+            glUniform1i(enigma::default_shader->uni_textureEnable, 0);
+        }
 		offset += 2;
+	}else{
+        glUniform1i(enigma::default_shader->uni_textureEnable, 0);
 	}
 
     if (useColors){
-		//glEnableClientState(GL_COLOR_ARRAY);
-        //glColorPointer( 4, GL_UNSIGNED_BYTE, STRIDE, OFFSET(offset)); // Set The Color Pointer To The Color Buffer
-        glEnableVertexAttribArray(colorLoc);
-		glVertexAttribPointer(colorLoc, 4, GL_UNSIGNED_BYTE, GL_TRUE, STRIDE, OFFSET(offset)); //Normalization needs to be true, because we pack them as unsigned bytes
+        glEnableVertexAttribArray(enigma::default_shader->att_color);
+        glUniform1i(enigma::default_shader->uni_colorEnable, 1);
+		glVertexAttribPointer(enigma::default_shader->att_color, 4, GL_UNSIGNED_BYTE, GL_TRUE, STRIDE, OFFSET(offset)); //Normalization needs to be true, because we pack them as unsigned bytes
+    }else{
+        glUniform1i(enigma::default_shader->uni_colorEnable, 0);
     }
 
 	#define OFFSETE( P )  ( ( const GLvoid * ) ( sizeof( GLuint ) * ( P         ) ) )
@@ -664,11 +659,11 @@ class Mesh
 		glBindBufferARB( GL_ELEMENT_ARRAY_BUFFER, 0 );
 	}
 
-    glDisableVertexAttribArray(vertexLoc);
+    glDisableVertexAttribArray(enigma::default_shader->att_vertex);
 	//glDisableClientState(GL_VERTEX_ARRAY);
-    if (useTextures) glDisableVertexAttribArray(textureLoc); //glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+    if (useTextures) glDisableVertexAttribArray(enigma::default_shader->att_texture); //glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     //if (useNormals) glDisableClientState(GL_NORMAL_ARRAY);
-    if (useColors) glDisableVertexAttribArray(colorLoc); //glDisableClientState(GL_COLOR_ARRAY);
+    if (useColors) glDisableVertexAttribArray(enigma::default_shader->att_color); //glDisableClientState(GL_COLOR_ARRAY);
   }
 };
 
