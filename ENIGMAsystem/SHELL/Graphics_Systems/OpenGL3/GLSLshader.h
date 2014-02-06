@@ -27,35 +27,54 @@ using std::vector;
 
 extern GLenum shadertypes[];
 
-struct Shader{
-  string log;
-  GLuint shader;
-  Shader(int type) 
-  {
-    shader = glCreateShader(shadertypes[type]);
-  }
- 
-  ~Shader()
-  {
-    glDeleteShader(shader);
-  }
-};
+namespace enigma
+{
+    struct Shader{
+        string log;
+        GLuint shader;
+        Shader(int type)
+        {
+            shader = glCreateShader(shadertypes[type]);
+        }
 
-struct ShaderProgram{
-  GLuint shaderprogram;
+        ~Shader()
+        {
+            glDeleteShader(shader);
+        }
+    };
 
-  ShaderProgram()
-  {
-    shaderprogram = glCreateProgram();
-  }
+    struct ShaderProgram{
+        GLuint shaderprogram;
 
-  ~ShaderProgram()
-  {
-    glDeleteProgram(shaderprogram);
-  }
-};
+        GLuint uni_viewMatrix;
+        GLuint uni_projectionMatrix;
+        GLuint uni_modelMatrix;
+        GLuint uni_mvMatrix;
+        GLuint uni_mvpMatrix;
+        GLuint uni_texSampler;
 
-extern vector<Shader*> shaders;
-extern vector<ShaderProgram*> shaderprograms;
+        GLuint uni_textureEnable;
+        GLuint uni_colorEnable;
+
+        GLuint uni_color;
+
+        GLuint att_vertex;
+        GLuint att_color;
+        GLuint att_texture;
+
+        ShaderProgram()
+        {
+            shaderprogram = glCreateProgram();
+        }
+
+        ~ShaderProgram()
+        {
+            glDeleteProgram(shaderprogram);
+        }
+    };
+}
+
+extern vector<enigma::Shader*> shaders;
+extern vector<enigma::ShaderProgram*> shaderprograms;
 
 #endif

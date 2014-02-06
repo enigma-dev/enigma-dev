@@ -23,6 +23,8 @@ using std::string;
 
 namespace enigma
 {
+    string getVertexShaderPrefix();
+    string getFragmentShaderPrefix();
     string getDefaultFragmentShader();
     string getDefaultVertexShader();
 }
