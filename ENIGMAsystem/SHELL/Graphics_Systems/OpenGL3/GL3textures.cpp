@@ -64,7 +64,7 @@ TextureStruct::~TextureStruct()
 unsigned get_texture(int texid)
 {
 	if (texid < 0 || texid >= textureStructs.size()) {
-		return -1;
+		return 0;
 	} else {
 		return textureStructs[texid]->gltex;
 	}

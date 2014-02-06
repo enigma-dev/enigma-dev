@@ -21,6 +21,7 @@
 
 #include "Bridges/General/GL3Context.h"
 #include "../General/OpenGLHeaders.h"
+#include "../General/GSmatrix.h" //For d3d_set_projection_ortho
 using namespace std;
 #include "OPENGL3Std.h"
 #include "GL3shader.h"
@@ -35,7 +36,7 @@ ContextManager* oglmgr = NULL;
 namespace enigma
 {
   unsigned bound_texture=0;
-  unsigned default_shader=0;
+  ShaderProgram* default_shader;
   unsigned char currentcolor[4] = {0,0,0,255};
   bool glew_isgo;
   bool pbo_isgo;
@@ -53,15 +54,12 @@ namespace enigma
         #endif
 
         //enigma::pbo_isgo=GL_ARB_pixel_buffer_object;
-        glMatrixMode(GL_PROJECTION);
-        glClearColor(0,0,0,0);
-        glMatrixMode(GL_MODELVIEW);
-        glLoadIdentity();
-
         using enigma_user::room_width;
         using enigma_user::room_height;
+
         glViewport(0,0,(int)room_width,(int)room_height);
-        glOrtho(0,(int)room_width,0,(int)room_height,0,1);
+        d3d_set_projection_ortho(0,(int)room_width,0,(int)room_height, 0);
+
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glDisable(GL_DEPTH_TEST);
@@ -73,7 +71,6 @@ namespace enigma
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glAlphaFunc(GL_ALWAYS,0);
 
-        glColor4f(0,0,0,1);
         glBindTexture(GL_TEXTURE_2D,bound_texture=0);
 
         init_shaders();
@@ -137,12 +134,12 @@ namespace enigma
         //ADD DEFAULT SHADER (emulates FFP)
         Shader* vshader = new Shader(enigma_user::sh_vertex);
         shaders.push_back(vshader);
-        const char *versource_str = getDefaultVertexShader().c_str();
+        const char *versource_str = (getVertexShaderPrefix()+getDefaultVertexShader()).c_str();
         glShaderSource(vshader->shader, 1, &versource_str, NULL);
 
         Shader* fshader = new Shader(enigma_user::sh_fragment);
         shaders.push_back(fshader);
-        const char *fragsource_str = getDefaultFragmentShader().c_str();
+        const char *fragsource_str = (getFragmentShaderPrefix()+getDefaultFragmentShader()).c_str();
         glShaderSource(fshader->shader, 1, &fragsource_str, NULL);
 
         ShaderProgram* program = new ShaderProgram();
@@ -209,7 +206,25 @@ namespace enigma
             std::cout << "Program validation log empty" << std::endl;
         }
 
-        default_shader = program->shaderprogram;
+        program->uni_viewMatrix = glGetUniformLocation(program->shaderprogram, "transform_matrix[0]");
+        program->uni_projectionMatrix = glGetUniformLocation(program->shaderprogram, "transform_matrix[1]");
+        program->uni_modelMatrix = glGetUniformLocation(program->shaderprogram, "transform_matrix[2]");
+        program->uni_mvMatrix = glGetUniformLocation(program->shaderprogram, "transform_matrix[3]");
+        program->uni_mvpMatrix = glGetUniformLocation(program->shaderprogram, "transform_matrix[4]");
+        program->uni_texSampler = glGetUniformLocation(program->shaderprogram, "TexSampler");
+
+        program->uni_textureEnable = glGetUniformLocation(program->shaderprogram, "en_Texturing");
+        program->uni_colorEnable = glGetUniformLocation(program->shaderprogram, "en_Color");
+
+        program->uni_color = glGetUniformLocation(program->shaderprogram, "en_bound_color");
+
+        program->att_vertex = glGetAttribLocation(program->shaderprogram, "in_Position");
+        program->att_color = glGetAttribLocation(program->shaderprogram, "in_Color");
+        program->att_texture = glGetAttribLocation(program->shaderprogram, "in_TextureCoord");
+
+        default_shader = program;
+
+        glsl_program_reset(); //Set the default program
         //END DEFAULT SHADER
     }
 }

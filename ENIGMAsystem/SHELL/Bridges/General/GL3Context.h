@@ -27,11 +27,9 @@ using namespace enigma_user;
 using std::vector;
 using std::map;
 
-//TODO: Replace the fixed function pipeline with shaders
-
 class ContextManager {
 private:
-GLint bound_tex;
+GLuint bound_tex;
 
 protected:
   map< GLenum, GLuint > cacheTextureStates;    /// cached texture stages
@@ -50,7 +48,7 @@ ContextManager() {
 	shapes_d3d_texture = -1;
 	last_stride = -1;
 	last_depth = 0.0f;
-	bound_tex = -1;
+	bound_tex = 0;
 }
 
 ~ContextManager() {
@@ -108,6 +106,7 @@ void EndShapesBatching() {
 	hasdrawn = true;
 	d3d_model_draw(shapes_d3d_model, shapes_d3d_texture);
 	d3d_model_clear(shapes_d3d_model);
+
 	shapes_d3d_texture = -1;
 	last_stride = -1;
 }
@@ -174,6 +173,10 @@ void Transformation() { //Used when calling 3d transformations (translation, sca
 
 void BlendFunc() {
 	EndShapesBatching();
+}
+
+GLuint GetBoundTexture() { //This is used for cases when there are texture coordintates provided, but texture is 0 (like d3d_model_block)
+	return bound_tex;
 }
 
 };

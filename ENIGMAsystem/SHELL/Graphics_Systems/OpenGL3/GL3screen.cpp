@@ -309,7 +309,7 @@ void screen_redraw()
       screen_set_viewport(1, 1, window_get_region_width_scaled()+1, window_get_region_height_scaled()+1);
     else
       screen_set_viewport(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled());
-    
+
     clear_view(0, 0, room_width, room_height, background_showcolor);
     draw_back();
     draw_insts();
@@ -326,7 +326,7 @@ void screen_redraw()
       int vc = (int)view_current;
       if (!view_visible[vc])
         continue;
-      
+
       int vob = (int)view_object[vc];
       if (vob != -1)
         follow_object(vob, vc);
@@ -334,16 +334,15 @@ void screen_redraw()
       if (bound_framebuffer != 0) //This fixes off-by-one error when rendering on surfaces. This should be checked to see if other GPU's have the same effect
         screen_set_viewport(view_xport[vc]+1, view_yport[vc]+1, view_wport[vc], view_hport[vc]);
       else
-        printf("%d %d %d %d\n", (int)view_xport[vc], (int)view_yport[vc], (int)view_wport[vc], (int)view_hport[vc]),
         screen_set_viewport(view_xport[vc], view_yport[vc], view_wport[vc], view_hport[vc]);
-	  
+
       clear_view(view_xview[vc], view_yview[vc], view_wview[vc], view_hview[vc], background_showcolor && draw_backs);
 
       if (draw_backs)
         draw_back();
-      
+
       draw_insts();
-      
+
       if (draw_tiles())
         break;
       draw_backs = background_allviews;
@@ -357,7 +356,7 @@ void screen_redraw()
   {
     screen_set_viewport(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled());
 	d3d_set_projection_ortho(0, 0, enigma::gui_width, enigma::gui_height, 0);
-	
+
     // Clear the depth buffer if hidden surface removal is on at the beginning of the draw step.
     if (enigma::d3dMode)
       glClear(GL_DEPTH_BUFFER_BIT);
