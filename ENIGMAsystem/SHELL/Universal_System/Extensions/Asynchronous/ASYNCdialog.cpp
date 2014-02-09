@@ -101,7 +101,8 @@ static int createThread(void (*fnc)(void*), MessageData* md) {
 	  //NOTE: Same issue is in Platforms/General/PFthreads.cpp
 	  if (ret == NULL) {
 #else
-	  if (pthread_create(&newthread->me, NULL, fnc, md)) {
+	  pthread_t me;
+	  if (pthread_create(&me, NULL, fnc, md)) {
 #endif
 		delete md; delete newthread;
 		return -1;
