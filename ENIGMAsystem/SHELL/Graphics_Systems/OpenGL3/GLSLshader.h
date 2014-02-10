@@ -46,21 +46,37 @@ namespace enigma
     struct ShaderProgram{
         GLuint shaderprogram;
 
-        GLuint uni_viewMatrix;
-        GLuint uni_projectionMatrix;
-        GLuint uni_modelMatrix;
-        GLuint uni_mvMatrix;
-        GLuint uni_mvpMatrix;
-        GLuint uni_texSampler;
+        GLint uni_viewMatrix;
+        GLint uni_projectionMatrix;
+        GLint uni_modelMatrix;
+        GLint uni_mvMatrix;
+        GLint uni_mvpMatrix;
+        GLint uni_normalMatrix;
+        GLint uni_texSampler;
 
-        GLuint uni_textureEnable;
-        GLuint uni_colorEnable;
+        GLint uni_textureEnable;
+        GLint uni_colorEnable;
+        GLint uni_lightEnable;
 
-        GLuint uni_color;
+        GLint uni_color;
 
-        GLuint att_vertex;
-        GLuint att_color;
-        GLuint att_texture;
+        //3D lights
+        GLint uni_ambient_color;
+        GLint uni_material_ambient;
+        GLint uni_material_diffuse;
+        GLint uni_material_specular;
+        GLint uni_material_shininess;
+
+        GLint uni_light_position[8];
+        GLint uni_light_ambient[8];
+        GLint uni_light_diffuse[8];
+        GLint uni_light_specular[8];
+        //lights ned
+
+        GLint att_vertex;
+        GLint att_color;
+        GLint att_texture;
+        GLint att_normal;
 
         ShaderProgram()
         {

@@ -1,5 +1,5 @@
 /** Copyright (C) 2008-2012 Josh Ventura
-*** Copyright (C) 2013-2014 Robert B. Colton
+*** Copyright (C) 2013-2014 Robert B. Colton, Harijs Grinbergs
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -25,8 +25,9 @@
 
 namespace enigma
 {
-    extern Matrix4f projection_matrix, view_matrix, model_matrix;
-    extern Matrix4f mv_matrix, mvp_matrix;
+    extern Matrix4 projection_matrix, view_matrix, model_matrix;
+    extern Matrix4 mv_matrix, mvp_matrix;
+    extern Matrix3 normal_matrix;
     extern bool transformation_update;
 }
 
