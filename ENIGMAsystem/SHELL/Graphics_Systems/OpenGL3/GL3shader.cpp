@@ -58,39 +58,90 @@ namespace enigma
                 "#define viewMatrix transform_matrix[MATRIX_VIEW] \n"
                 "#define modelViewProjectionMatrix transform_matrix[MATRIX_WORLD_VIEW_PROJECTION] \n"
 
+                "uniform mat3 normalMatrix;     \n"
                 "uniform bool en_LightingEnabled;\n"
                 "uniform bool en_VS_FogEnabled;\n"
                 "uniform float en_FogStart;\n"
                 "uniform float en_RcpFogRange;\n"
 
-                "#define MAX_VS_LIGHTS   8\n"
-                "#define MIRROR_WIN32_LIGHTING_EQUATION\n"
+                "#define MAX_LIGHTS   8\n"
 
-                "uniform vec4   en_AmbientColour;                                // rgb=colour, a=1\n"
-                "uniform vec4   en_Lights_Direction[MAX_VS_LIGHTS];              // normalised direction\n"
-                "uniform vec4   en_Lights_PosRange[MAX_VS_LIGHTS];               // X,Y,Z position,  W range\n"
-                "uniform vec4   en_Lights_Colour[MAX_VS_LIGHTS];                 // rgb=colour, a=1\n"
+                "uniform vec4   en_AmbientColor;                              // rgba=color\n"
+                //"uniform vec4   en_Lights_Direction[MAX_LIGHTS];              // normalised direction\n"
+                //"uniform vec4   en_Lights_PositionRange[MAX_LIGHTS];          // X,Y,Z position,  W range\n"
+                //"uniform vec4   en_Lights_Color[MAX_LIGHTS];                  // rgba=color\n"
 
                 "in vec3 in_Position;                 // (x,y,z)\n"
+                "in vec3 in_Normal;                  // (x,y,z)\n"
                 "in vec4 in_Color;                    // (r,g,b,a)\n"
                 "in vec2 in_TextureCoord;             // (u,v)\n";
     }
     string getFragmentShaderPrefix(){
         return "#version 140\n"
                 "uniform sampler2D TexSampler;\n"
-                "uniform bool en_Texturing;\n"
-                "uniform bool en_Color;\n"
+                "uniform bool en_TexturingEnabled;\n"
+                "uniform bool en_ColorEnabled;\n"
                 "uniform vec4 en_bound_color;\n";
     }
     string getDefaultVertexShader(){
         return  "out vec2 v_TextureCoord;\n"
                 "out vec4 v_Color;\n"
+                "out vec3 v_lightIntensity;\n"
+
+                "struct LightInfo {\n"
+                  "vec4 Position; // Light position in eye coords\n"
+                  "vec4 La; // Ambient light intensity\n"
+                  "vec4 Ld; // Diffuse light intensity\n"
+                  "vec4 Ls; // Specular light intensity\n"
+                  //"bool type; //Type - directional or point"
+                "};\n"
+                "uniform LightInfo Light[MAX_LIGHTS];\n"
+
+                "struct MaterialInfo {"
+                    "vec4 Ka; // Ambient reflectivity\n"
+                    "vec4 Kd; // Diffuse reflectivity\n"
+                    "vec4 Ks; // Specular reflectivity\n"
+                    "float Shininess; // Specular shininess factor\n"
+                "};\n"
+                "uniform MaterialInfo Material;\n"
+
+                "void getEyeSpace( out vec3 norm, out vec4 position )\n"
+                "{\n"
+                    "norm = normalize( normalMatrix * in_Normal );\n"
+                    "position = modelViewMatrix * vec4(in_Position,1.0);\n"
+                "}\n"
+
+                "vec4 phongModel( vec4 position, vec3 norm, bool type )\n"
+                "{\n"
+                  "vec3 s;\n"
+                  "if (type == true){ //Directional light\n"
+                    "s = Light[0].Position.xyz;\n"
+                  "}else{ //Point light\n"
+                    "s = normalize(vec3((Light[0].Position - position).xyz));\n"
+                  "}\n"
+                  "vec3 v = normalize(-position.xyz);\n"
+                  "vec3 r = reflect( -s, norm );\n"
+                  "vec4 ambient = Light[0].La * Material.Ka;\n"
+                  "float sDotN = max( dot(s,norm), 0.0 );\n"
+                  "vec4 diffuse = Light[0].Ld * Material.Kd * sDotN;\n"
+                  "vec4 spec = vec4(0.0);\n"
+                  "if( sDotN > 0.0 )\n"
+                      "spec = Light[0].Ls * Material.Ks * pow( max( dot(r,v), 0.0 ), Material.Shininess );\n"
+                  "return ambient + diffuse + spec;\n"
+                "}\n"
+
                 "void main()\n"
                 "{\n"
-                    "vec4 object_space_pos = vec4( in_Position.x, in_Position.y, in_Position.z, 1.0);\n"
-                    "gl_Position = transform_matrix[MATRIX_WORLD_VIEW_PROJECTION] * object_space_pos;\n"
+                    "if (en_LightingEnabled == true){\n"
+                        "vec3 eyeNorm;\n"
+                        "vec4 eyePosition;\n"
+                        "getEyeSpace(eyeNorm, eyePosition);\n"
+                        "v_Color = en_AmbientColor + phongModel( eyePosition, eyeNorm, false ) * in_Color;\n"
+                    "}else{\n"
+                        "v_Color = in_Color;\n"
+                    "}\n"
+                    "gl_Position = modelViewProjectionMatrix * vec4( in_Position.xyz, 1.0);\n"
 
-                    "v_Color = in_Color;\n"
                     "v_TextureCoord = in_TextureCoord;\n"
                 "}\n";
     }
@@ -101,15 +152,19 @@ namespace enigma
 
                 "void main()\n"
                 "{\n"
-                    "if (en_Texturing == true && en_Color == true){\n"
-                        "out_FragColor = texture2D( TexSampler, v_TextureCoord.st ) * v_Color;\n"
-                    "}else if (en_Color == true){\n"
-                        "out_FragColor = v_Color;\n"
-                    "}else if (en_Texturing == true){\n"
-                        "out_FragColor = texture2D( TexSampler, v_TextureCoord.st );\n"
+                    //"vec3 normal = normalize(v_Normal);\n"
+                    //"vec4 LightColor = CalculateLighting(normal);\n"
+                    "vec4 TexColor;"
+                    "if (en_TexturingEnabled == true && en_ColorEnabled == true){\n"
+                        "TexColor = texture2D( TexSampler, v_TextureCoord.st ) * v_Color;\n"
+                    "}else if (en_ColorEnabled == true){\n"
+                        "TexColor = v_Color;\n"
+                    "}else if (en_TexturingEnabled == true){\n"
+                        "TexColor = texture2D( TexSampler, v_TextureCoord.st );\n"
                     "}else{\n"
-                        "out_FragColor = en_bound_color;\n"
+                        "TexColor = en_bound_color;\n"
                     "}\n"
+                    "out_FragColor = TexColor;"// * LightColor;"
                 "}\n";
     }
 }
@@ -279,7 +334,11 @@ void glsl_program_free(int id)
 }
 
 int glsl_get_uniform_location(int program, string name) {
-	return glGetUniformLocation(shaderprograms[program]->shaderprogram, name.c_str());
+	int uni = glGetUniformLocation(shaderprograms[program]->shaderprogram, name.c_str());
+    if (uni == -1){
+        printf("Error: Uniform %s not found!\n", name.c_str());
+    }
+    return uni;
 }
 
 void glsl_uniformf(int location, float v0) {
