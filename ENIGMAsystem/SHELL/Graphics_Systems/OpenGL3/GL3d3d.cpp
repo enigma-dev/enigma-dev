@@ -19,6 +19,8 @@
 #include "../General/GSd3d.h"
 #include "../General/GStextures.h"
 #include "../General/GLTextureStruct.h"
+#include "../General/GSmatrix.h"
+#include "GLSLshader.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
 #include "Bridges/General/GL3Context.h"
@@ -37,6 +39,7 @@ namespace enigma {
   bool d3dHidden = false;
   bool d3dZWriteEnable = true;
   int d3dCulling = 0;
+  extern ShaderProgram* default_shader;
 }
 
 GLenum renderstates[6] = {
@@ -87,19 +90,15 @@ void d3d_start()
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_ALPHA_TEST);
   glAlphaFunc(GL_NOTEQUAL, 0);
-  glEnable(GL_NORMALIZE);
-  glEnable(GL_COLOR_MATERIAL);
 
   // Set up projection matrix
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  gluPerspective(45, -view_wview[view_current] / (double)view_hview[view_current], 1, 32000);
+  d3d_set_projection_perspective(0, 0, view_wview[view_current], view_hview[view_current], 0);
+  //enigma::projection_matrix.InitPersProjTransform(45, -view_wview[view_current] / (double)view_hview[view_current], 1, 32000);
 
   // Set up modelview matrix
-  glMatrixMode(GL_MODELVIEW);
+  d3d_transform_set_identity();
   glClearColor(0,0,0,1);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  glLoadIdentity();
 }
 
 void d3d_end()
@@ -111,12 +110,8 @@ void d3d_end()
   glDepthMask(false);
   glDisable(GL_DEPTH_TEST);
   glDisable(GL_ALPHA_TEST);
-  glDisable(GL_NORMALIZE);
-  glDisable(GL_COLOR_MATERIAL);
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  gluPerspective(0, 1, 0, 1);
-  glMatrixMode(GL_MODELVIEW);
+  d3d_set_projection_ortho(0, 0, view_wview[view_current], view_hview[view_current], 0); //This should probably be changed not to use views
+  //enigma::projection_matrix.InitIdentity();
 }
 
 // disabling hidden surface removal in means there is no depth buffer
@@ -242,155 +237,171 @@ void d3d_set_shading(bool smooth)
 #include <list>
 #include "Universal_System/fileio.h"
 
-struct posi { // Homogenous point.
-    gs_scalar x;
-    gs_scalar y;
-    gs_scalar z;
-    gs_scalar w;
-    posi(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar w1) : x(x1), y(y1), z(z1), w(w1){}
+struct light3D {
+    int type; //0 - directional, 1 - positional
+    bool enabled;
+    gs_scalar position[3];
+    float diffuse[4];
+    float specular[4];
+    float ambient[4];
+    float constant_attenuation;
+    float linear_attenuation;
+    float quadratic_attenuation;
+
+    light3D()
+    {
+        type = 0;
+        enabled = false;
+        position[0]=0, position[1]=0, position[2]=0, position[3]=0;
+        diffuse[0]=0, diffuse[1]=0, diffuse[2]=0, diffuse[3]=0;
+        specular[0]=0, specular[1]=0, specular[2]=0, specular[3]=0;
+        ambient[0]=0, ambient[1]=0, ambient[2]=0, ambient[3]=0;
+        constant_attenuation = 0;
+        linear_attenuation = 0;
+        quadratic_attenuation = 0;
+    };
+};
+
+struct material3D {
+    float ambient[4];
+    float diffuse[4];
+    float specular[4];
+    float shininess;
+
+    material3D()
+    {
+        ambient[0] = 0.2, ambient[1] = 0.2, ambient[2] = 0.2, ambient[3] = 1.0;
+        diffuse[0] = 0.8, diffuse[1] = 0.8, diffuse[2] = 0.8, diffuse[3] = 1.0;
+        specular[0] = 0.0, specular[1] = 0.0, specular[2] = 0.0, specular[3] = 0.0;
+        shininess = 0.0;
+    }
 };
 
 class d3d_lights
 {
-    map<int,int> light_ind;
-    map<int,posi> ind_pos; // Internal index to position.
+    vector<light3D> lights;
+    material3D material;
+    bool lights_enabled;
 
     public:
-    d3d_lights() {}
-    ~d3d_lights() {}
+    float global_ambient_color[4];
+    d3d_lights() {
+        lights_enabled = false;
+        global_ambient_color[0] = global_ambient_color[1] = global_ambient_color[2] = 0.2f;
+        global_ambient_color[3] = 1.0f;
+    }
+    //~d3d_lights() {}
 
-    void light_update_positions()
+    void light_update()
     {
-        map<int, posi>::iterator end = ind_pos.end();
-        for (map<int, posi>::iterator it = ind_pos.begin(); it != end; it++) {
-            const posi pos1 = (*it).second;
-            const float pos[4] = {pos1.x, pos1.y, pos1.z, pos1.w};
-            glLightfv(GL_LIGHT0+(*it).first, GL_POSITION, pos);
+        glUniform1i(enigma::default_shader->uni_lightEnable, lights_enabled);
+        glUniform4fv(enigma::default_shader->uni_ambient_color, 1, global_ambient_color);
+        glUniform4fv(enigma::default_shader->uni_material_ambient, 1, material.ambient);
+        glUniform4fv(enigma::default_shader->uni_material_diffuse, 1, material.diffuse);
+        glUniform4fv(enigma::default_shader->uni_material_specular, 1, material.specular);
+        glUniform1f(enigma::default_shader->uni_material_shininess, material.shininess);
+        for (unsigned int i=0; i<lights.size(); ++i){
+            glUniform4fv(enigma::default_shader->uni_light_position[i], 1, lights[i].position);
+            glUniform4fv(enigma::default_shader->uni_light_ambient[i], 1, lights[i].ambient);
+            glUniform4fv(enigma::default_shader->uni_light_diffuse[i], 1, lights[i].diffuse);
+            glUniform4fv(enigma::default_shader->uni_light_specular[i], 1, lights[i].specular);
         }
     }
 
-    bool light_define_direction(int id, gs_scalar dx, gs_scalar dy, gs_scalar dz, int col)
+    bool light_define_direction(unsigned int id, gs_scalar dx, gs_scalar dy, gs_scalar dz, int col)
     {
-        int ms;
-        if (light_ind.find(id) != light_ind.end())
-        {
-            ms = (*light_ind.find(id)).second;
-            multimap<int,posi>::iterator it = ind_pos.find(ms);
-            if (it != ind_pos.end())
-                ind_pos.erase(it);
-            ind_pos.insert(pair<int,posi>(ms, posi(-dx, -dy, -dz, 0.0f)));
+        if (id<lights.size()){
+            lights[id].type = 0;
+            lights[id].position[0] = -dx;
+            lights[id].position[1] = -dy;
+            lights[id].position[2] = -dz;
+            lights[id].diffuse[0] = __GETR(col);
+            lights[id].diffuse[1] = __GETG(col);
+            lights[id].diffuse[2] = __GETB(col);
+            lights[id].diffuse[3] = 1.0f;
+            return true;
         }
-        else
-        {
-            ms = light_ind.size();
-            int MAX_LIGHTS;
-            glGetIntegerv(GL_MAX_LIGHTS, &MAX_LIGHTS);
-            if (ms >= MAX_LIGHTS)
-                return false;
-
-            light_ind.insert(pair<int,int>(id, ms));
-            ind_pos.insert(pair<int,posi>(ms, posi(-dx, -dy, -dz, 0.0f)));
-        }
-
-        const float dir[4] = {-dx, -dy, -dz, 0.0f}, color[4] = {__GETR(col), __GETG(col), __GETB(col), 1};
-        glLightfv(GL_LIGHT0+ms, GL_POSITION, dir);
-        glLightfv(GL_LIGHT0+ms, GL_DIFFUSE, color);
-        light_update_positions();
-        return true;
+        return false;
     }
 
-    bool light_define_point(int id, gs_scalar x, gs_scalar y, gs_scalar z, double range, int col)
+    bool light_define_point(unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z, double range, int col)
     {
         if (range <= 0.0) {
             return false;
         }
-        int ms;
-        if (light_ind.find(id) != light_ind.end())
-        {
-            ms = (*light_ind.find(id)).second;
-            multimap<int,posi>::iterator it = ind_pos.find(ms);
-            if (it != ind_pos.end())
-                ind_pos.erase(it);
-            ind_pos.insert(pair<int,posi>(ms, posi(x, y, z, 1)));
+        if (id<lights.size()){
+            lights[id].type = 1;
+            lights[id].position[0] = x;
+            lights[id].position[1] = y;
+            lights[id].position[2] = z;
+            lights[id].diffuse[0] = __GETR(col);
+            lights[id].diffuse[1] = __GETG(col);
+            lights[id].diffuse[2] = __GETB(col);
+            lights[id].diffuse[3] = 1.0f;
+            lights[id].specular[0] = 0.0f;
+            lights[id].specular[1] = 0.0f;
+            lights[id].specular[2] = 0.0f;
+            lights[id].specular[3] = 0.0f;
+            lights[id].ambient[0] = 0.0f;
+            lights[id].ambient[1] = 0.0f;
+            lights[id].ambient[2] = 0.0f;
+            lights[id].ambient[3] = 0.0f;
+            lights[id].constant_attenuation = 1.0f;
+            lights[id].linear_attenuation = 0.0f;
+            lights[id].quadratic_attenuation = 8.0f/(range*range);
+            return true;
         }
-        else
-        {
-            ms = light_ind.size();
-            int MAX_LIGHTS;
-            glGetIntegerv(GL_MAX_LIGHTS, &MAX_LIGHTS);
-            if (ms >= MAX_LIGHTS)
-                return false;
-
-            light_ind.insert(pair<int,int>(id, ms));
-            ind_pos.insert(pair<int,posi>(ms, posi(x, y, z, 1)));
-        }
-        const float pos[4] = {x, y, z, 1}, color[4] = {__GETR(col), __GETG(col), __GETB(col), 1},
-            specular[4] = {0, 0, 0, 0}, ambient[4] = {0, 0, 0, 0};
-        glLightfv(GL_LIGHT0+ms, GL_POSITION, pos);
-        glLightfv(GL_LIGHT0+ms, GL_DIFFUSE, color);
-        glLightfv(GL_LIGHT0+ms, GL_SPECULAR, specular);
-        glLightfv(GL_LIGHT0+ms, GL_AMBIENT, ambient);
-        // Limit the range of the light through attenuation.
-        glLightf(GL_LIGHT0+ms, GL_CONSTANT_ATTENUATION, 1.0);
-        glLightf(GL_LIGHT0+ms, GL_LINEAR_ATTENUATION, 0.0);
-        // 48 is a number gotten through manual calibration. Make it lower to increase the light power.
-        const float attenuation_calibration = 8.0;
-        glLightf(GL_LIGHT0+ms, GL_QUADRATIC_ATTENUATION, attenuation_calibration/(range*range));
-        return true;
+        return false;
     }
 
-    bool light_define_specularity(int id, int r, int g, int b, double a)
+    bool light_set_specularity(unsigned int id, gs_scalar r, gs_scalar g, gs_scalar b, gs_scalar a)
     {
-        int ms;
-        if (light_ind.find(id) != light_ind.end())
-        {
-            ms = (*light_ind.find(id)).second;
+        if (id<lights.size()){
+            lights[id].specular[0] = r;
+            lights[id].specular[1] = g;
+            lights[id].specular[2] = b;
+            lights[id].specular[3] = a;
+            return true;
         }
-        else
-        {
-            ms = light_ind.size();
-            int MAX_LIGHTS;
-            glGetIntegerv(GL_MAX_LIGHTS, &MAX_LIGHTS);
-            if (ms >= MAX_LIGHTS)
-                return false;
-        }
-        float specular[4] = {r, g, b, a};
-        glLightfv(GL_LIGHT0+ms, GL_SPECULAR, specular);
-        return true;
+        return false;
     }
 
-    bool light_enable(int id)
+    bool light_set_ambient(unsigned int id, gs_scalar r, gs_scalar g, gs_scalar b, gs_scalar a)
     {
-        map<int, int>::iterator it = light_ind.find(id);
-        if (it == light_ind.end())
-        {
-            const int ms = light_ind.size();
-            int MAX_LIGHTS;
-            glGetIntegerv(GL_MAX_LIGHTS, &MAX_LIGHTS);
-            if (ms >= MAX_LIGHTS)
-                return false;
-            light_ind.insert(pair<int,int>(id, ms));
-            glEnable(GL_LIGHT0+ms);
+        if (id<lights.size()){
+            lights[id].ambient[0] = r;
+            lights[id].ambient[1] = g;
+            lights[id].ambient[2] = b;
+            lights[id].ambient[3] = a;
+            return true;
         }
-        else
-        {
-            glEnable(GL_LIGHT0+(*it).second);
-        }
-        return true;
+        return false;
     }
 
-    bool light_disable(int id)
+
+    bool light_enable(unsigned int id)
     {
-        map<int, int>::iterator it = light_ind.find(id);
-        if (it == light_ind.end())
-        {
-            return false;
+        if (id<lights.size()){
+            lights[id].enabled = true;
+            lights_enabled = true;
+            return true;
         }
-        else
-        {
-            glDisable(GL_LIGHT0+(*it).second);
+        return false;
+    }
+
+    bool light_disable(unsigned int id)
+    {
+        if (id<lights.size()){
+            lights[id].enabled = false;
+            for (unsigned int i=0; i<lights.size(); ++i){
+                if (lights[i].enabled == true){
+                    return true;
+                }
+            }
+            lights_enabled = false;
+            return true;
         }
-        return true;
+        return false;
     }
 } d3d_lighting;
 
@@ -407,26 +418,21 @@ bool d3d_light_define_point(int id, gs_scalar x, gs_scalar y, gs_scalar z, doubl
     return d3d_lighting.light_define_point(id, x, y, z, range, col);
 }
 
-bool d3d_light_define_specularity(int id, int r, int g, int b, double a)
+bool d3d_light_set_specularity(int id, int r, int g, int b, double a)
 {
-    return d3d_lighting.light_define_specularity(id, r, g, b, a);
+    return d3d_lighting.light_set_specularity(id, (gs_scalar)r/255.0, (gs_scalar)g/255.0, (gs_scalar)b/255.0, a);
 }
 
-void d3d_light_specularity(int facemode, int r, int g, int b, double a)
+bool d3d_light_set_ambient(int id, int r, int g, int b, double a)
 {
-  float specular[4] = {r, g, b, a};
-  glMaterialfv(renderstates[facemode], GL_SPECULAR, specular);
-}
-
-void d3d_light_shininess(int facemode, int shine)
-{
-  glMateriali(renderstates[facemode], GL_SHININESS, shine);
+    return d3d_lighting.light_set_ambient(id, (gs_scalar)r/255.0, (gs_scalar)g/255.0, (gs_scalar)b/255.0, a);
 }
 
 void d3d_light_define_ambient(int col)
 {
-    const float color[4] = {__GETR(col), __GETG(col), __GETB(col), 1};
-    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, color);
+    d3d_lighting.global_ambient_color[0] = __GETR(col);
+    d3d_lighting.global_ambient_color[1] = __GETG(col);
+    d3d_lighting.global_ambient_color[2] = __GETB(col);
 }
 
 bool d3d_light_enable(int id, bool enable)
@@ -437,8 +443,8 @@ bool d3d_light_enable(int id, bool enable)
 }
 
 namespace enigma {
-    void d3d_light_update_positions()
+    void d3d_light_update()
     {
-        d3d_lighting.light_update_positions();
+        d3d_lighting.light_update();
     }
 }

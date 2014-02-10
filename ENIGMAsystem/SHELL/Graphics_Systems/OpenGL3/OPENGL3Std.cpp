@@ -211,12 +211,32 @@ namespace enigma
         program->uni_modelMatrix = glGetUniformLocation(program->shaderprogram, "transform_matrix[2]");
         program->uni_mvMatrix = glGetUniformLocation(program->shaderprogram, "transform_matrix[3]");
         program->uni_mvpMatrix = glGetUniformLocation(program->shaderprogram, "transform_matrix[4]");
+        program->uni_normalMatrix = glGetUniformLocation(program->shaderprogram, "normalMatrix");
         program->uni_texSampler = glGetUniformLocation(program->shaderprogram, "TexSampler");
 
-        program->uni_textureEnable = glGetUniformLocation(program->shaderprogram, "en_Texturing");
-        program->uni_colorEnable = glGetUniformLocation(program->shaderprogram, "en_Color");
+        program->uni_textureEnable = glGetUniformLocation(program->shaderprogram, "en_TexturingEnabled");
+        program->uni_colorEnable = glGetUniformLocation(program->shaderprogram, "en_ColorEnabled");
+        program->uni_lightEnable = glGetUniformLocation(program->shaderprogram, "en_LightingEnabled");
 
         program->uni_color = glGetUniformLocation(program->shaderprogram, "en_bound_color");
+        program->uni_ambient_color = glGetUniformLocation(program->shaderprogram, "en_AmbientColor");
+
+        char tchars[64];
+        for (unsigned int i=0; i<8; ++i){
+            sprintf(tchars, "Light[%d].Position", i);
+            program->uni_light_position[i] = glGetUniformLocation(program->shaderprogram, tchars);
+            sprintf(tchars, "Light[%d].La", i);
+            program->uni_light_ambient[i] = glGetUniformLocation(program->shaderprogram, tchars);
+            sprintf(tchars, "Light[%d].Ld", i);
+            program->uni_light_diffuse[i] = glGetUniformLocation(program->shaderprogram, tchars);
+            sprintf(tchars, "Light[%d].Ls", i);
+            program->uni_light_specular[i] = glGetUniformLocation(program->shaderprogram, tchars);
+        }
+
+        program->uni_material_ambient = glGetUniformLocation(program->shaderprogram, "Material.Ka");
+        program->uni_material_diffuse = glGetUniformLocation(program->shaderprogram, "Material.Kd");
+        program->uni_material_specular = glGetUniformLocation(program->shaderprogram, "Material.Ks");
+        program->uni_material_shininess = glGetUniformLocation(program->shaderprogram, "Material.Shininess");
 
         program->att_vertex = glGetAttribLocation(program->shaderprogram, "in_Position");
         program->att_color = glGetAttribLocation(program->shaderprogram, "in_Color");

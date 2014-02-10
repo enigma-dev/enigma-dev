@@ -561,6 +561,10 @@ class Mesh
         enigma::mv_matrix = enigma::view_matrix * enigma::model_matrix;
         enigma::mvp_matrix = enigma::projection_matrix * enigma::mv_matrix;
 
+        //normal_matrix = invert(transpose(mv_submatrix)), where mv_submatrix is modelview top-left 3x3 matrix
+        enigma::normal_matrix = enigma::Matrix3(enigma::mv_matrix(0,0),enigma::mv_matrix(1,0),enigma::mv_matrix(2,0),
+                                                enigma::mv_matrix(0,1),enigma::mv_matrix(1,1),enigma::mv_matrix(2,1),
+                                                enigma::mv_matrix(0,2),enigma::mv_matrix(1,2),enigma::mv_matrix(2,2)).Inverse();
         enigma::transformation_update = false;
     }
 
@@ -570,6 +574,7 @@ class Mesh
     glUniformMatrix4fv(enigma::default_shader->uni_modelMatrix,  1, true, enigma::model_matrix);
     glUniformMatrix4fv(enigma::default_shader->uni_mvMatrix,  1, true, enigma::mv_matrix);
     glUniformMatrix4fv(enigma::default_shader->uni_mvpMatrix,  1, true, enigma::mvp_matrix);
+    glUniformMatrix4fv(enigma::default_shader->uni_normalMatrix,  1, true, enigma::normal_matrix);
 
     //Bind texture
     glUniform1i(enigma::default_shader->uni_texSampler, 0);
