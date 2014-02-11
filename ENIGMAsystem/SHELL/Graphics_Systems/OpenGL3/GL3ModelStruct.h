@@ -562,9 +562,14 @@ class Mesh
         enigma::mvp_matrix = enigma::projection_matrix * enigma::mv_matrix;
 
         //normal_matrix = invert(transpose(mv_submatrix)), where mv_submatrix is modelview top-left 3x3 matrix
-        enigma::normal_matrix = enigma::Matrix3(enigma::mv_matrix(0,0),enigma::mv_matrix(1,0),enigma::mv_matrix(2,0),
+        /*enigma::normal_matrix = enigma::Matrix3(enigma::mv_matrix(0,0),enigma::mv_matrix(1,0),enigma::mv_matrix(2,0),
                                                 enigma::mv_matrix(0,1),enigma::mv_matrix(1,1),enigma::mv_matrix(2,1),
-                                                enigma::mv_matrix(0,2),enigma::mv_matrix(1,2),enigma::mv_matrix(2,2)).Inverse();
+                                                enigma::mv_matrix(0,2),enigma::mv_matrix(1,2),enigma::mv_matrix(2,2)).Inverse();*/
+        enigma::Matrix4 tmpNorm = enigma::mv_matrix.Transpose().Inverse();
+        enigma::normal_matrix = enigma::Matrix3(tmpNorm(0,0),tmpNorm(0,1),tmpNorm(0,2),
+                                                tmpNorm(1,0),tmpNorm(1,1),tmpNorm(1,2),
+                                                tmpNorm(2,0),tmpNorm(2,1),tmpNorm(2,2));
+        enigma::d3d_light_update_positions();
         enigma::transformation_update = false;
     }
 
@@ -574,7 +579,7 @@ class Mesh
     glUniformMatrix4fv(enigma::default_shader->uni_modelMatrix,  1, true, enigma::model_matrix);
     glUniformMatrix4fv(enigma::default_shader->uni_mvMatrix,  1, true, enigma::mv_matrix);
     glUniformMatrix4fv(enigma::default_shader->uni_mvpMatrix,  1, true, enigma::mvp_matrix);
-    glUniformMatrix4fv(enigma::default_shader->uni_normalMatrix,  1, true, enigma::normal_matrix);
+    glUniformMatrix3fv(enigma::default_shader->uni_normalMatrix,  1, true, enigma::normal_matrix);
 
     //Bind texture
     glUniform1i(enigma::default_shader->uni_texSampler, 0);
@@ -598,8 +603,8 @@ class Mesh
 	offset += vertexStride;
 
     if (useNormals){
-		//glEnableClientState(GL_NORMAL_ARRAY);
-		//glNormalPointer( GL_FLOAT, STRIDE, OFFSET(offset) ); // Set the normal pointer to the offset in the buffer
+        glEnableVertexAttribArray(enigma::default_shader->att_normal);
+		glVertexAttribPointer(enigma::default_shader->att_normal, 3, GL_FLOAT, 0, STRIDE, OFFSET(offset));
 		offset += 3;
     }
 
@@ -667,7 +672,7 @@ class Mesh
     glDisableVertexAttribArray(enigma::default_shader->att_vertex);
 	//glDisableClientState(GL_VERTEX_ARRAY);
     if (useTextures) glDisableVertexAttribArray(enigma::default_shader->att_texture); //glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-    //if (useNormals) glDisableClientState(GL_NORMAL_ARRAY);
+    if (useNormals) glDisableVertexAttribArray(enigma::default_shader->att_normal); //glDisableClientState(GL_NORMAL_ARRAY);
     if (useColors) glDisableVertexAttribArray(enigma::default_shader->att_color); //glDisableClientState(GL_COLOR_ARRAY);
   }
 };

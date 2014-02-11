@@ -67,6 +67,7 @@ namespace enigma
         GLint uni_material_specular;
         GLint uni_material_shininess;
 
+        GLint uni_light_active;
         GLint uni_light_position[8];
         GLint uni_light_ambient[8];
         GLint uni_light_diffuse[8];

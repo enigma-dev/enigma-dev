@@ -101,6 +101,7 @@ Matrix3& Matrix3::Inverse()
     determinant = m[0][0] * tmp[0] + m[0][1] * tmp[3] + m[0][2] * tmp[6];
     if(fabs(determinant) <= 0.00001f)  //THIS SHOULD PROBABLY ERROR OUT
     {
+        printf("Cannot do inverse for the 3x3 matrix!\n");
         return *this;
     }
 
@@ -380,6 +381,7 @@ Matrix4& Matrix4::Inverse()
 	gs_scalar det = Determinant();
 	if(det == 0.0f) //THIS SHOULD PROBABLY ERROR OUT
 	{
+	    printf("Cannot do inverse for the 4x4 matrix!\n");
 		return *this;
 	}
 

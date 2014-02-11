@@ -144,6 +144,7 @@ namespace enigma
 
         ShaderProgram* program = new ShaderProgram();
         shaderprograms.push_back(program);
+        int prog_id = shaderprograms.size()-1;
 
         glCompileShader(vshader->shader);
         glCompileShader(fshader->shader);
@@ -206,41 +207,42 @@ namespace enigma
             std::cout << "Program validation log empty" << std::endl;
         }
 
-        program->uni_viewMatrix = glGetUniformLocation(program->shaderprogram, "transform_matrix[0]");
-        program->uni_projectionMatrix = glGetUniformLocation(program->shaderprogram, "transform_matrix[1]");
-        program->uni_modelMatrix = glGetUniformLocation(program->shaderprogram, "transform_matrix[2]");
-        program->uni_mvMatrix = glGetUniformLocation(program->shaderprogram, "transform_matrix[3]");
-        program->uni_mvpMatrix = glGetUniformLocation(program->shaderprogram, "transform_matrix[4]");
-        program->uni_normalMatrix = glGetUniformLocation(program->shaderprogram, "normalMatrix");
-        program->uni_texSampler = glGetUniformLocation(program->shaderprogram, "TexSampler");
+        program->uni_viewMatrix = glsl_get_uniform_location(prog_id, "transform_matrix[0]");
+        program->uni_projectionMatrix = glsl_get_uniform_location(prog_id, "transform_matrix[1]");
+        program->uni_modelMatrix = glsl_get_uniform_location(prog_id, "transform_matrix[2]");
+        program->uni_mvMatrix = glsl_get_uniform_location(prog_id, "transform_matrix[3]");
+        program->uni_mvpMatrix = glsl_get_uniform_location(prog_id, "transform_matrix[4]");
+        program->uni_normalMatrix = glsl_get_uniform_location(prog_id, "normalMatrix");
+        program->uni_texSampler = glsl_get_uniform_location(prog_id, "TexSampler");
 
-        program->uni_textureEnable = glGetUniformLocation(program->shaderprogram, "en_TexturingEnabled");
-        program->uni_colorEnable = glGetUniformLocation(program->shaderprogram, "en_ColorEnabled");
-        program->uni_lightEnable = glGetUniformLocation(program->shaderprogram, "en_LightingEnabled");
+        program->uni_textureEnable = glsl_get_uniform_location(prog_id, "en_TexturingEnabled");
+        program->uni_colorEnable = glsl_get_uniform_location(prog_id, "en_ColorEnabled");
+        program->uni_lightEnable = glsl_get_uniform_location(prog_id, "en_LightingEnabled");
 
-        program->uni_color = glGetUniformLocation(program->shaderprogram, "en_bound_color");
-        program->uni_ambient_color = glGetUniformLocation(program->shaderprogram, "en_AmbientColor");
+        program->uni_color = glsl_get_uniform_location(prog_id, "en_bound_color");
+        program->uni_ambient_color = glsl_get_uniform_location(prog_id, "en_AmbientColor");
+        program->uni_light_active = glsl_get_uniform_location(prog_id, "en_ActiveLights");
 
         char tchars[64];
         for (unsigned int i=0; i<8; ++i){
             sprintf(tchars, "Light[%d].Position", i);
-            program->uni_light_position[i] = glGetUniformLocation(program->shaderprogram, tchars);
+            program->uni_light_position[i] = glsl_get_uniform_location(prog_id, tchars);
             sprintf(tchars, "Light[%d].La", i);
-            program->uni_light_ambient[i] = glGetUniformLocation(program->shaderprogram, tchars);
+            program->uni_light_ambient[i] = glsl_get_uniform_location(prog_id, tchars);
             sprintf(tchars, "Light[%d].Ld", i);
-            program->uni_light_diffuse[i] = glGetUniformLocation(program->shaderprogram, tchars);
+            program->uni_light_diffuse[i] = glsl_get_uniform_location(prog_id, tchars);
             sprintf(tchars, "Light[%d].Ls", i);
-            program->uni_light_specular[i] = glGetUniformLocation(program->shaderprogram, tchars);
+            program->uni_light_specular[i] = glsl_get_uniform_location(prog_id, tchars);
         }
-
-        program->uni_material_ambient = glGetUniformLocation(program->shaderprogram, "Material.Ka");
-        program->uni_material_diffuse = glGetUniformLocation(program->shaderprogram, "Material.Kd");
-        program->uni_material_specular = glGetUniformLocation(program->shaderprogram, "Material.Ks");
-        program->uni_material_shininess = glGetUniformLocation(program->shaderprogram, "Material.Shininess");
+        program->uni_material_ambient = glsl_get_uniform_location(prog_id, "Material.Ka");
+        program->uni_material_diffuse = glsl_get_uniform_location(prog_id, "Material.Kd");
+        program->uni_material_specular = glsl_get_uniform_location(prog_id, "Material.Ks");
+        program->uni_material_shininess = glsl_get_uniform_location(prog_id, "Material.Shininess");
 
         program->att_vertex = glGetAttribLocation(program->shaderprogram, "in_Position");
         program->att_color = glGetAttribLocation(program->shaderprogram, "in_Color");
         program->att_texture = glGetAttribLocation(program->shaderprogram, "in_TextureCoord");
+        program->att_normal = glGetAttribLocation(program->shaderprogram, "in_Normal");
 
         default_shader = program;
 
