@@ -36,7 +36,8 @@ ContextManager* oglmgr = NULL;
 namespace enigma
 {
   unsigned bound_texture=0;
-  ShaderProgram* default_shader;
+  unsigned default_shader;
+  unsigned bound_shader;
   unsigned char currentcolor[4] = {0,0,0,255};
   bool glew_isgo;
   bool pbo_isgo;
@@ -78,173 +79,49 @@ namespace enigma
         for (size_t i = 0; i < shader_idmax; ++i) {
             ShaderStruct* shaderstruct = shaderdata[i];
 
-            //if (string(shaderstruct->type) != string("GLSL")) { continue; }
+            int vshader_id = glsl_shader_create(enigma_user::sh_vertex);
+            glsl_shader_load_string(vshader_id, shaderstruct->vertex);
 
-            Shader* vshader = new Shader(enigma_user::sh_vertex);
-            shaders.push_back(vshader);
-            glShaderSource(vshader->shader, 1, (const GLchar**)&shaderstruct->vertex, NULL);
+            int fshader_id = glsl_shader_create(enigma_user::sh_fragment);
+            glsl_shader_load_string(fshader_id, shaderstruct->fragment);
 
-            Shader* fshader = new Shader(enigma_user::sh_fragment);
-            shaders.push_back(fshader);
-            glShaderSource(fshader->shader, 1, (const GLchar**)&shaderstruct->fragment, NULL);
-
-            ShaderProgram* program = new ShaderProgram();
-            shaderprograms.push_back(program);
+            int prog_id = glsl_program_create();
 
             if (shaderstruct->precompile) {
-                glCompileShader(vshader->shader);
-                glCompileShader(fshader->shader);
+                glsl_shader_compile(vshader_id);
+                glsl_shader_compile(fshader_id);
 
-                GLint blen = 0;
-                GLsizei slen = 0;
-
-                glGetShaderiv(vshader->shader, GL_INFO_LOG_LENGTH , &blen);
-
-                if (blen > 1)
-                {
-                    GLchar* compiler_log = (GLchar*)malloc(blen);
-
-                    glGetInfoLogARB(vshader->shader, blen, &slen, compiler_log);
-                    std::cout << compiler_log << std::endl;
-                } else {
-                    std::cout << "Vertex shader compile log empty" << std::endl;
-                }
-
-                glGetShaderiv(fshader->shader, GL_INFO_LOG_LENGTH , &blen);
-
-                if (blen > 1)
-                {
-                    GLchar* compiler_log = (GLchar*)malloc(blen);
-
-                    glGetInfoLogARB(fshader->shader, blen, &slen, compiler_log);
-                    std::cout << compiler_log << std::endl;
-                } else {
-                    std::cout << "Fragment shader compile log empty" << std::endl;
-                }
-
+                printf("Precompiling!\n");
             }
 
-            glAttachShader(program->shaderprogram, vshader->shader);
-            glAttachShader(program->shaderprogram, fshader->shader);
-
-            glLinkProgram(program->shaderprogram);
-            glValidateProgram(program->shaderprogram);
+            glsl_program_attach(prog_id, vshader_id);
+            glsl_program_attach(prog_id, fshader_id);
+            glsl_program_link(prog_id);
+            glsl_program_validate(prog_id);
+            getDefaultUniforms(prog_id);
+            getDefaultAttributes(prog_id);
         }
 
         //ADD DEFAULT SHADER (emulates FFP)
-        Shader* vshader = new Shader(enigma_user::sh_vertex);
-        shaders.push_back(vshader);
-        const char *versource_str = (getVertexShaderPrefix()+getDefaultVertexShader()).c_str();
-        glShaderSource(vshader->shader, 1, &versource_str, NULL);
+        int vshader_id = glsl_shader_create(enigma_user::sh_vertex);
+        glsl_shader_load_string(vshader_id, getDefaultVertexShader());
 
-        Shader* fshader = new Shader(enigma_user::sh_fragment);
-        shaders.push_back(fshader);
-        const char *fragsource_str = (getFragmentShaderPrefix()+getDefaultFragmentShader()).c_str();
-        glShaderSource(fshader->shader, 1, &fragsource_str, NULL);
+        int fshader_id = glsl_shader_create(enigma_user::sh_fragment);
+        glsl_shader_load_string(fshader_id, getDefaultFragmentShader());
 
-        ShaderProgram* program = new ShaderProgram();
-        shaderprograms.push_back(program);
-        int prog_id = shaderprograms.size()-1;
+        int prog_id = glsl_program_create();
 
-        glCompileShader(vshader->shader);
-        glCompileShader(fshader->shader);
+        glsl_shader_compile(vshader_id);
+        glsl_shader_compile(fshader_id);
+        glsl_program_attach(prog_id, vshader_id);
+        glsl_program_attach(prog_id, fshader_id);
+        glsl_program_link(prog_id);
+        glsl_program_validate(prog_id);
 
-        GLint blen = 0;
-        GLsizei slen = 0;
+        getDefaultUniforms(prog_id);
+        getDefaultAttributes(prog_id);
 
-        glGetShaderiv(vshader->shader, GL_INFO_LOG_LENGTH , &blen);
-
-        if (blen > 1)
-        {
-            GLchar* compiler_log = (GLchar*)malloc(blen);
-
-            glGetInfoLogARB(vshader->shader, blen, &slen, compiler_log);
-            std::cout << compiler_log << std::endl;
-        } else {
-            std::cout << "Vertex shader compile log empty" << std::endl;
-        }
-
-        glGetShaderiv(fshader->shader, GL_INFO_LOG_LENGTH , &blen);
-
-        if (blen > 1)
-        {
-            GLchar* compiler_log = (GLchar*)malloc(blen);
-
-            glGetInfoLogARB(fshader->shader, blen, &slen, compiler_log);
-            std::cout << compiler_log << std::endl;
-        } else {
-            std::cout << "Fragment shader compile log empty" << std::endl;
-        }
-
-        glAttachShader(program->shaderprogram, vshader->shader);
-        glAttachShader(program->shaderprogram, fshader->shader);
-
-        glLinkProgram(program->shaderprogram);
-
-        glGetProgramiv(vshader->shader, GL_INFO_LOG_LENGTH , &blen);
-
-        if (blen > 1)
-        {
-            GLchar* compiler_log = (GLchar*)malloc(blen);
-
-            glGetProgramInfoLog(vshader->shader, blen, &slen, compiler_log);
-            std::cout << compiler_log << std::endl;
-        } else {
-            std::cout << "Program link log empty" << std::endl;
-        }
-
-        glValidateProgram(program->shaderprogram);
-
-        glGetProgramiv(vshader->shader, GL_INFO_LOG_LENGTH , &blen);
-
-        if (blen > 1)
-        {
-            GLchar* compiler_log = (GLchar*)malloc(blen);
-
-            glGetProgramInfoLog(vshader->shader, blen, &slen, compiler_log);
-            std::cout << compiler_log << std::endl;
-        } else {
-            std::cout << "Program validation log empty" << std::endl;
-        }
-
-        program->uni_viewMatrix = glsl_get_uniform_location(prog_id, "transform_matrix[0]");
-        program->uni_projectionMatrix = glsl_get_uniform_location(prog_id, "transform_matrix[1]");
-        program->uni_modelMatrix = glsl_get_uniform_location(prog_id, "transform_matrix[2]");
-        program->uni_mvMatrix = glsl_get_uniform_location(prog_id, "transform_matrix[3]");
-        program->uni_mvpMatrix = glsl_get_uniform_location(prog_id, "transform_matrix[4]");
-        program->uni_normalMatrix = glsl_get_uniform_location(prog_id, "normalMatrix");
-        program->uni_texSampler = glsl_get_uniform_location(prog_id, "TexSampler");
-
-        program->uni_textureEnable = glsl_get_uniform_location(prog_id, "en_TexturingEnabled");
-        program->uni_colorEnable = glsl_get_uniform_location(prog_id, "en_ColorEnabled");
-        program->uni_lightEnable = glsl_get_uniform_location(prog_id, "en_LightingEnabled");
-
-        program->uni_color = glsl_get_uniform_location(prog_id, "en_bound_color");
-        program->uni_ambient_color = glsl_get_uniform_location(prog_id, "en_AmbientColor");
-        program->uni_light_active = glsl_get_uniform_location(prog_id, "en_ActiveLights");
-
-        char tchars[64];
-        for (unsigned int i=0; i<8; ++i){
-            sprintf(tchars, "Light[%d].Position", i);
-            program->uni_light_position[i] = glsl_get_uniform_location(prog_id, tchars);
-            sprintf(tchars, "Light[%d].La", i);
-            program->uni_light_ambient[i] = glsl_get_uniform_location(prog_id, tchars);
-            sprintf(tchars, "Light[%d].Ld", i);
-            program->uni_light_diffuse[i] = glsl_get_uniform_location(prog_id, tchars);
-            sprintf(tchars, "Light[%d].Ls", i);
-            program->uni_light_specular[i] = glsl_get_uniform_location(prog_id, tchars);
-        }
-        program->uni_material_ambient = glsl_get_uniform_location(prog_id, "Material.Ka");
-        program->uni_material_diffuse = glsl_get_uniform_location(prog_id, "Material.Kd");
-        program->uni_material_specular = glsl_get_uniform_location(prog_id, "Material.Ks");
-        program->uni_material_shininess = glsl_get_uniform_location(prog_id, "Material.Shininess");
-
-        program->att_vertex = glGetAttribLocation(program->shaderprogram, "in_Position");
-        program->att_color = glGetAttribLocation(program->shaderprogram, "in_Color");
-        program->att_texture = glGetAttribLocation(program->shaderprogram, "in_TextureCoord");
-        program->att_normal = glGetAttribLocation(program->shaderprogram, "in_Normal");
-
-        default_shader = program;
+        default_shader = prog_id;
 
         glsl_program_reset(); //Set the default program
         //END DEFAULT SHADER
