@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Robert B. Colton
+/** Copyright (C) 2008-2013 Robert B. Colton, 2014 Harijs Grinbergs
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -32,7 +32,8 @@ namespace enigma
     struct Shader{
         string log;
         GLuint shader;
-        Shader(int type)
+        int type;
+        Shader(int type) : type(type)
         {
             shader = glCreateShader(shadertypes[type]);
         }
@@ -44,6 +45,7 @@ namespace enigma
     };
 
     struct ShaderProgram{
+        string log;
         GLuint shaderprogram;
 
         GLint uni_viewMatrix;

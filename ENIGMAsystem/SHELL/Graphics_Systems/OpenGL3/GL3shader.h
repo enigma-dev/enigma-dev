@@ -27,6 +27,8 @@ namespace enigma
     string getFragmentShaderPrefix();
     string getDefaultFragmentShader();
     string getDefaultVertexShader();
+    void getDefaultUniforms(int prog_id);
+    void getDefaultAttributes(int prog_id);
 }
 
 namespace enigma_user
@@ -41,24 +43,29 @@ enum {
 };
 
 int glsl_shader_create(int type);
-int glsl_shader_load(int id, string fname);
+bool glsl_shader_load(int id, string fname);
+bool glsl_shader_load_string(int id, string shaderSource);
 bool glsl_shader_compile(int id);
 bool glsl_shader_get_compiled(int id);
-string glsl_shader_get_infolog(int id);
 void glsl_shader_free(int id);
+string glsl_shader_get_infolog(int id);
+
+void glsl_program_print_infolog(int id);
+void glsl_shader_print_infolog(int id);
 
 int glsl_program_create();
 bool glsl_program_link(int id);
 bool glsl_program_validate(int id);
 void glsl_program_attach(int id, int sid);
 void glsl_program_detach(int id, int sid);
-void glsl_program_bind_frag_data(int id, string name);
+string glsl_program_get_infolog(int id);
 
 void glsl_program_set(int id);
 void glsl_program_reset();
 void glsl_program_free(int id);
 
 int glsl_get_uniform_location(int program, string name);
+int glsl_get_attribute_location(int program, string name);
 
 void glsl_uniformf(int location, float v0);
 void glsl_uniformf(int location, float v0, float v1);
@@ -73,13 +80,14 @@ void glsl_uniformui(int location, unsigned v0, unsigned v1);
 void glsl_uniformui(int location, unsigned v0, unsigned v1, unsigned v2);
 void glsl_uniformui(int location, unsigned v0, unsigned v1, unsigned v2, unsigned v3);
 
-// Wrap our abstracted version to the useless GameMaker version
+// Wrap our abstracted version to the GameMaker version
 #define shader_set            glsl_program_set
 #define shader_reset          glsl_program_reset
 #define shader_get_uniform    glsl_get_uniform_location
 #define shader_get_sampler_index glsl_get_uniform_location
 #define shader_set_uniform_f  glsl_uniformf
 #define shader_set_uniform_i  glsl_uniformi
+#define shader_is_compiled    glsl_shader_get_compiled
 
 }
 
