@@ -33,10 +33,10 @@
 namespace enigma
 {
     //These are going to be modified by the user via functions
-    enigma::Matrix4f projection_matrix(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1), view_matrix(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1), model_matrix(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1);
+    enigma::Matrix4 projection_matrix(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1), view_matrix(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1), model_matrix(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1);
 
     //This is for GL1
-    enigma::Matrix4f mv_matrix(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1);
+    enigma::Matrix4 mv_matrix(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1);
 }
 
 //NOTE: THIS IS STILL FFP
@@ -72,7 +72,7 @@ void d3d_set_projection(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom, gs_sc
 {
     (enigma::d3dHidden?glEnable:glDisable)(GL_DEPTH_TEST);
     enigma::projection_matrix.InitPersProjTransform(45, -view_wview[view_current] / (gs_scalar)view_hview[view_current], 1, 32000);
-    enigma::view_matrix.InitCameraTransform(enigma::Vector3f(xfrom,yfrom,zfrom),enigma::Vector3f(xto,yto,zto),enigma::Vector3f(xup,yup,zup));
+    enigma::view_matrix.InitCameraTransform(enigma::Vector3(xfrom,yfrom,zfrom),enigma::Vector3(xto,yto,zto),enigma::Vector3(xup,yup,zup));
 
     enigma::mv_matrix = enigma::view_matrix * enigma::model_matrix;
 
@@ -92,7 +92,7 @@ void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom, g
 
     enigma::projection_matrix.InitPersProjTransform(angle, -aspect, znear, zfar);
 
-    enigma::view_matrix.InitCameraTransform(enigma::Vector3f(xfrom,yfrom,zfrom),enigma::Vector3f(xto,yto,zto),enigma::Vector3f(xup,yup,zup));
+    enigma::view_matrix.InitCameraTransform(enigma::Vector3(xfrom,yfrom,zfrom),enigma::Vector3(xto,yto,zto),enigma::Vector3(xup,yup,zup));
 
     enigma::mv_matrix = enigma::view_matrix * enigma::model_matrix;
 
@@ -110,7 +110,7 @@ void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scal
     enigma::projection_matrix.InitScaleTransform(1, -1, 1);
     enigma::projection_matrix.rotateZ(angle);
 
-    enigma::Matrix4f orhto;
+    enigma::Matrix4 orhto;
     orhto.InitOtrhoProjTransform(x-0.5,x + width,y-0.5,y + height,32000,-32000);
 
     enigma::projection_matrix = enigma::projection_matrix * orhto;
@@ -131,7 +131,7 @@ void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, g
 {
     enigma::projection_matrix.InitRotateZTransform(angle);
 
-    enigma::Matrix4f persp, orhto;
+    enigma::Matrix4 persp, orhto;
     persp.InitPersProjTransform(60, 1, 0.1,32000);
     orhto.InitOtrhoProjTransform(x,x + width,y,y + height,0.1,32000);
 
@@ -229,7 +229,7 @@ void d3d_transform_set_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, gs_s
 }
 
 #include <stack>
-std::stack<enigma::Matrix4f> trans_stack;
+std::stack<enigma::Matrix4> trans_stack;
 int trans_stack_size = 0;
 
 namespace enigma_user
