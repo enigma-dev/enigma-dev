@@ -16,7 +16,7 @@
 **/
 
 #ifndef ENIGMA_GSD3D_H
-#define ENIGMA_GSD3D_H 
+#define ENIGMA_GSD3D_H
 
 #include "Universal_System/scalar.h"
 #include <string>
@@ -35,7 +35,7 @@ enum {
   rs_front,
   rs_back,
   rs_front_back,
-  
+
   rs_nicest,
   rs_fastest,
   rs_dontcare,
@@ -58,10 +58,10 @@ enum {
   rs_always     // Always True             D3DCMP_ALWAYS           GL_ALWAYS
 };
 
-// NOTE: Game Maker uses clockwise culling to define the front face, 
+// NOTE: Game Maker uses clockwise culling to define the front face,
 // OpenGL's mode sets what defines the front face, Direct3D's mode sets what defines the back face
 enum {
-  rs_none, // No culling 
+  rs_none, // No culling
   rs_cw, // Clockwise culling
   rs_ccw // Counter-clockwise culling
 };
@@ -109,8 +109,9 @@ bool d3d_get_hidden();
 // ***** LIGHTS BEGIN *****
 bool d3d_light_define_direction(int id, gs_scalar dx, gs_scalar dy, gs_scalar dz, int col);
 bool d3d_light_define_point(int id, gs_scalar x, gs_scalar y, gs_scalar z, double range, int col);
-bool d3d_light_define_specularity(int id, int r, int g, int b, double a);
 void d3d_light_specularity(int facemode, int r, int g, int b, double a);
+bool d3d_light_set_ambient(int id, int r, int g, int b, double a);
+bool d3d_light_set_specularity(int id, int r, int g, int b, double a);
 void d3d_light_shininess(int facemode, int shine);
 void d3d_light_define_ambient(int col);
 bool d3d_light_enable(int id, bool enable);
@@ -118,4 +119,4 @@ bool d3d_light_enable(int id, bool enable);
 
 }
 
-#endif // ENIGMA_GL3D3D_H 
+#endif // ENIGMA_GL3D3D_H
