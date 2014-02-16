@@ -300,7 +300,7 @@ void screen_redraw()
   if (!view_enabled)
   {
     if (bound_framebuffer != 0) //This fixes off-by-one error when rendering on surfaces. This should be checked to see if other GPU's have the same effect
-      screen_set_viewport(1, 1, window_get_region_width_scaled()+1, window_get_region_height_scaled()+1);
+      screen_set_viewport(1, 1, window_get_region_width_scaled(), window_get_region_height_scaled());
     else
       screen_set_viewport(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled());
     
