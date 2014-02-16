@@ -65,7 +65,7 @@ void d3d_set_projection(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs_sca
 	d3dmgr->SetTransform( D3DTS_PROJECTION, &matProj );
 }
 
-void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs_scalar xto, gs_scalar yto, gs_scalar zto,gs_scalar xup, gs_scalar yup, gs_scalar zup,double angle,double aspect,double znear,double zfar)
+void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs_scalar xto, gs_scalar yto, gs_scalar zto,gs_scalar xup, gs_scalar yup, gs_scalar zup, gs_scalar angle, gs_scalar aspect, gs_scalar znear, gs_scalar zfar)
 {
 	D3DXVECTOR3 vEyePt( xfrom, yfrom, zfrom );
 	D3DXVECTOR3 vLookatPt( xto, yto, zto );
@@ -84,7 +84,7 @@ void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs
 	d3dmgr->SetTransform( D3DTS_PROJECTION, &matProj );
 }
 
-void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, double angle)
+void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, gs_scalar angle)
 {
 	
 	D3DXMATRIX matRotZ, matTrans, matScale;
@@ -115,7 +115,7 @@ void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scal
 	d3dmgr->SetTransform(D3DTS_PROJECTION, &matProjection);    // set the projection transform
 }
 
-void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, double angle)
+void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, gs_scalar angle)
 {
 	D3DXMATRIX matRotZ, matTrans, matScale;
 
@@ -190,7 +190,7 @@ void d3d_transform_add_scaling(gs_scalar xs, gs_scalar ys, gs_scalar zs)
 	d3dmgr->SetTransform(D3DTS_WORLD, &matWorld);
 }
 
-void d3d_transform_add_rotation_x(double angle)
+void d3d_transform_add_rotation_x(gs_scalar angle)
 {
 	D3DXMATRIX matRot;
 
@@ -203,7 +203,7 @@ void d3d_transform_add_rotation_x(double angle)
 	d3dmgr->SetTransform(D3DTS_WORLD, &matWorld);
 }
 
-void d3d_transform_add_rotation_y(double angle)
+void d3d_transform_add_rotation_y(gs_scalar angle)
 {
 //D3DXMatrixIdentity( &matWorld );
 	D3DXMATRIX matRot;
@@ -217,7 +217,7 @@ void d3d_transform_add_rotation_y(double angle)
 	d3dmgr->SetTransform(D3DTS_WORLD, &matWorld);
 }
 
-void d3d_transform_add_rotation_z(double angle)
+void d3d_transform_add_rotation_z(gs_scalar angle)
 {
 	D3DXMATRIX matRot;
 	
@@ -230,7 +230,7 @@ void d3d_transform_add_rotation_z(double angle)
 	d3dmgr->SetTransform(D3DTS_WORLD, &matWorld);
 }
 
-void d3d_transform_add_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, double angle)
+void d3d_transform_add_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar angle)
 {
 	D3DXMATRIX matRot;
 	
@@ -273,7 +273,7 @@ void d3d_transform_set_rotation_x(double angle)
 	d3dmgr->SetTransform(D3DTS_WORLD, &matWorld);
 }
 
-void d3d_transform_set_rotation_y(double angle)
+void d3d_transform_set_rotation_y(gs_scalar angle)
 {
 	// build a matrix to rotate the model by so many radians
 	D3DXMatrixRotationY(&matWorld, gs_angle_to_radians(-angle));
@@ -282,7 +282,7 @@ void d3d_transform_set_rotation_y(double angle)
 	d3dmgr->SetTransform(D3DTS_WORLD, &matWorld);
 }
 
-void d3d_transform_set_rotation_z(double angle)
+void d3d_transform_set_rotation_z(gs_scalar angle)
 {
 	D3DXMatrixIdentity( &matWorld );
 	// build a matrix to rotate the model by so many radians
@@ -292,7 +292,7 @@ void d3d_transform_set_rotation_z(double angle)
 	d3dmgr->SetTransform(D3DTS_WORLD, &matWorld);
 }
 
-void d3d_transform_set_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, double angle)
+void d3d_transform_set_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar angle)
 {
 	// build a matrix to rotate the model by so many radians
 	angle = gs_angle_to_radians(-angle);
