@@ -36,17 +36,17 @@ void d3d_set_projection(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs_sca
 
 }
 
-void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs_scalar xto, gs_scalar yto, gs_scalar zto,gs_scalar xup, gs_scalar yup, gs_scalar zup,double angle,double aspect,double znear,double zfar)
+void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs_scalar xto, gs_scalar yto, gs_scalar zto,gs_scalar xup, gs_scalar yup, gs_scalar zup, gs_scalar angle, gs_scalar aspect, gs_scalar znear, gs_scalar zfar)
 {
 
 }
 
-void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, double angle)
+void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, gs_scalar angle)
 {
 	
 }
 
-void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, double angle)
+void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, gs_scalar angle)
 {
 
 }
@@ -68,22 +68,22 @@ void d3d_transform_add_scaling(gs_scalar xs, gs_scalar ys, gs_scalar zs)
 
 }
 
-void d3d_transform_add_rotation_x(double angle)
+void d3d_transform_add_rotation_x(gs_scalar angle)
 {
 
 }
 
-void d3d_transform_add_rotation_y(double angle)
+void d3d_transform_add_rotation_y(gs_scalar angle)
 {
 
 }
 
-void d3d_transform_add_rotation_z(double angle)
+void d3d_transform_add_rotation_z(gs_scalar angle)
 {
 
 }
 
-void d3d_transform_add_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, double angle)
+void d3d_transform_add_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar angle)
 {
 
 }
@@ -98,22 +98,22 @@ void d3d_transform_set_scaling(gs_scalar xs, gs_scalar ys, gs_scalar zs)
 
 }
 
-void d3d_transform_set_rotation_x(double angle)
+void d3d_transform_set_rotation_x(gs_scalar angle)
 {
 
 }
 
-void d3d_transform_set_rotation_y(double angle)
+void d3d_transform_set_rotation_y(gs_scalar angle)
 {
 
 }
 
-void d3d_transform_set_rotation_z(double angle)
+void d3d_transform_set_rotation_z(gs_scalar angle)
 {
 
 }
 
-void d3d_transform_set_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, double angle)
+void d3d_transform_set_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar angle)
 {
 
 }
