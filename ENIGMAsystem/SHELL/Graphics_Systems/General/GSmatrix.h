@@ -40,6 +40,8 @@ enum {
 	matrix_world
 };
 
+//TODO: Transformation functions should probably not use gs_scalar as the angular type but implement their own scalar to avoid
+//losing precision with math functions.
 void d3d_set_perspective(bool enable);
 void d3d_set_projection(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs_scalar xto, gs_scalar yto, gs_scalar zto,gs_scalar xup, gs_scalar yup, gs_scalar zup);
 void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs_scalar xto, gs_scalar yto, gs_scalar zto, gs_scalar xup, gs_scalar yup, gs_scalar zup, gs_scalar angle, gs_scalar aspect, gs_scalar znear, gs_scalar zfar);
