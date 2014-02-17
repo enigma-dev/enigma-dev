@@ -131,7 +131,7 @@ unsigned int string_width_line(variant vstr, int line)
       len = 0;
     } else if (str[i] == ' ')
       len += fnt->height/3; // FIXME: what's GM do about this?
-    else {
+    else if (str[i] > fnt->glyphstart and str[i] < fnt->glyphstart + fnt->glyphcount) {
       len += fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart)].xs;
     }
   }
@@ -160,8 +160,9 @@ unsigned int string_width_ext_line(variant vstr, gs_scalar w, int line)
       }
       if (width+tw >= unsigned(w) && w != -1)
         if (cl == line) return width; else width = 0, cl +=1; else;
-    } else
+    } else if (str[i] > fnt->glyphstart and str[i] < fnt->glyphstart + fnt->glyphcount) {
       width += fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart)].xs;
+	}
   }
   return width;
 }
@@ -188,8 +189,9 @@ unsigned int string_width_ext_line_count(variant vstr, gs_scalar w)
       }
       if (width+tw >= unsigned(w) && w != -1)
         width = 0, cl +=1;
-    } else
+    } else if (str[i] > fnt->glyphstart and str[i] < fnt->glyphstart + fnt->glyphcount) {
       width += fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart)].xs;
+	}
   }
   return cl;
 }
@@ -205,7 +207,7 @@ unsigned int string_width(variant vstr)
       tlen = 0;
     else if (str[i] == ' ')
       tlen += fnt->height/3; // FIXME: what's GM do about this?
-    else {
+    else if (str[i] > fnt->glyphstart and str[i] < fnt->glyphstart + fnt->glyphcount) {
       tlen += fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart)].xs;
       if (tlen > mlen) mlen = tlen;
     }
@@ -237,7 +239,7 @@ unsigned int string_width_ext(variant vstr, gs_scalar sep, gs_scalar w) //here s
             (width>maxwidth ? maxwidth=width, width = 0 : width = 0);
         else
             width += fnt->height/3; // FIXME: what's GM do about this?
-    } else {
+    } else if (str[i] > fnt->glyphstart and str[i] < fnt->glyphstart + fnt->glyphcount) {
         fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart)];
         width += g.xs;
     }
@@ -268,7 +270,7 @@ unsigned int string_height_ext(variant vstr, gs_scalar sep, gs_scalar w)
 
       if (width+tw >= unsigned(w) && w != -1)
         height += (sep==-1 ? fnt->height : sep), width = 0, tw = 0;
-    } else {
+    } else if (str[i] > fnt->glyphstart and str[i] < fnt->glyphstart + fnt->glyphcount) {
         fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart)];
         width += g.xs;
     }
