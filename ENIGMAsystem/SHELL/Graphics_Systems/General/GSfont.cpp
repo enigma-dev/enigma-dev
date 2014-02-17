@@ -298,7 +298,7 @@ void draw_text(gs_scalar x, gs_scalar y, variant vstr)
           xx = x, yy += fnt->height;
         else if (str[i] == ' ')
           xx += get_space_width(fnt);
-        else
+        else if (str[i] > fnt->glyphstart and str[i] < fnt->glyphstart + fnt->glyphcount)
         {
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
 			draw_primitive_begin_texture(pr_trianglestrip, fnt->texture);
@@ -322,7 +322,7 @@ void draw_text(gs_scalar x, gs_scalar y, variant vstr)
           xx = halign == fa_center ? x-float(string_width_line(str,line)/2) : x-float(string_width_line(str,line));
         } else if (str[i] == ' ')
           xx += get_space_width(fnt);
-        else
+        else if (str[i] > fnt->glyphstart and str[i] < fnt->glyphstart + fnt->glyphcount)
         {
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
 			draw_primitive_begin_texture(pr_trianglestrip, fnt->texture);
@@ -412,7 +412,7 @@ void draw_text_skewed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar top, gs_
           xx = x, yy += fnt->height;
         else if (str[i] == ' ')
           xx += get_space_width(fnt);
-        else
+        else if (str[i] > fnt->glyphstart and str[i] < fnt->glyphstart + fnt->glyphcount)
         {
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
 		  
@@ -438,7 +438,7 @@ void draw_text_skewed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar top, gs_
           xx = halign == fa_center ? x-gs_scalar(string_width_line(str,line)/2) : x-gs_scalar(string_width_line(str,line));
         } else if (str[i] == ' ')
           xx += get_space_width(fnt);
-        else
+        else if (str[i] > fnt->glyphstart and str[i] < fnt->glyphstart + fnt->glyphcount)
         {
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
 			draw_primitive_begin_texture(pr_trianglestrip, fnt->texture);
@@ -480,7 +480,7 @@ void draw_text_ext(gs_scalar x, gs_scalar y, variant vstr, gs_scalar sep, gs_sca
 
           if (width+tw >= w && w != -1)
             xx = x, yy += (sep==-1 ? fnt->height : sep), width = 0, tw = 0;
-        } else {
+        } else if (str[i] > fnt->glyphstart and str[i] < fnt->glyphstart + fnt->glyphcount) {
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
 			draw_primitive_begin_texture(pr_trianglestrip, fnt->texture);
 			draw_vertex_texture(xx + g.x,  yy + g.y, g.tx, g.ty);
@@ -511,7 +511,7 @@ void draw_text_ext(gs_scalar x, gs_scalar y, variant vstr, gs_scalar sep, gs_sca
 
           if (width+tw >= w && w != -1)
             line += 1, xx = halign == fa_center ? x-gs_scalar(string_width_ext_line(str,w,line)/2) : x-gs_scalar(string_width_ext_line(str,w,line)), yy += (sep==-1 ? fnt->height : sep), width = 0, tw = 0;
-        } else {
+        } else if (str[i] > fnt->glyphstart and str[i] < fnt->glyphstart + fnt->glyphcount) {
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
 			draw_primitive_begin_texture(pr_trianglestrip, fnt->texture);
 			draw_vertex_texture(xx + g.x,  yy + g.y, g.tx, g.ty);
@@ -557,7 +557,7 @@ void draw_text_transformed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar xsc
         else if (str[i] == ' ')
           xx += sw,
           yy -= sh;
-        else
+        else if (str[i] > fnt->glyphstart and str[i] < fnt->glyphstart + fnt->glyphcount)
         {
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
           w = g.x2-g.x;
@@ -599,7 +599,7 @@ void draw_text_transformed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar xsc
         } else if (str[i] == ' ')
           xx += sw,
           yy -= sh;
-        else
+        else if (str[i] > fnt->glyphstart and str[i] < fnt->glyphstart + fnt->glyphcount)
         {
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
           w = g.x2-g.x;
@@ -665,7 +665,7 @@ void draw_text_ext_transformed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar
 
           if (width+tw >= w && w != -1)
             lines += 1, xx = tmpx + lines * shi, yy = tmpy + lines * chi, width = 0, tw = 0;
-        } else {
+        } else if (str[i] > fnt->glyphstart and str[i] < fnt->glyphstart + fnt->glyphcount) {
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
           wi = g.x2-g.x;
             const gs_scalar lx = xx + g.y * svy;
@@ -726,7 +726,7 @@ void draw_text_ext_transformed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar
                 xx = tmpx-tmpsize * cvx + lines * shi, yy = tmpy+tmpsize * svx + lines * chi;
             width = 0, tw = 0;
           }
-        } else {
+        } else if (str[i] > fnt->glyphstart and str[i] < fnt->glyphstart + fnt->glyphcount) {
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
           wi = g.x2-g.x;
             const gs_scalar lx = xx + g.y * svy;
@@ -780,7 +780,7 @@ void draw_text_transformed_color(gs_scalar x, gs_scalar y, variant vstr, gs_scal
         else if (str[i] == ' ')
           xx += sw, yy -= sh,
           width += get_space_width(fnt);
-        else
+        else if (str[i] > fnt->glyphstart and str[i] < fnt->glyphstart + fnt->glyphcount)
         {
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
           w = g.x2-g.x;
@@ -827,7 +827,7 @@ void draw_text_transformed_color(gs_scalar x, gs_scalar y, variant vstr, gs_scal
         } else if (str[i] == ' ')
           xx += sw, yy -= sh,
           width += get_space_width(fnt);
-        else
+        else if (str[i] > fnt->glyphstart and str[i] < fnt->glyphstart + fnt->glyphcount)
         {
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
           w = g.x2-g.x;
@@ -897,7 +897,7 @@ void draw_text_ext_transformed_color(gs_scalar x, gs_scalar y, variant vstr, gs_
 
           if (width+tw >= w && w != -1)
             lines += 1, xx = tmpx + lines * shi, yy = tmpy + lines * chi, width = 0, tmpsize = string_width_ext_line(str,w,lines);
-        } else {
+        } else if (str[i] > fnt->glyphstart and str[i] < fnt->glyphstart + fnt->glyphcount) {
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
           wi = g.x2-g.x;
             const gs_scalar lx = xx + g.y * svy;
@@ -961,7 +961,7 @@ void draw_text_ext_transformed_color(gs_scalar x, gs_scalar y, variant vstr, gs_
                 xx = tmpx-tmpsize * cvx + lines * shi, yy = tmpy+tmpsize * svx + lines * chi;
             width = 0;
           }
-        } else {
+        } else if (str[i] > fnt->glyphstart and str[i] < fnt->glyphstart + fnt->glyphcount) {
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
           wi = g.x2-g.x;
             const gs_scalar lx = xx + g.y * svy;
@@ -1008,7 +1008,7 @@ void draw_text_color(gs_scalar x, gs_scalar y,variant vstr,int c1,int c2,int c3,
           sw = (gs_scalar)string_width_line(str, line);
         } else if (str[i] == ' ')
           xx += get_space_width(fnt);
-        else
+        else if (str[i] > fnt->glyphstart and str[i] < fnt->glyphstart + fnt->glyphcount)
         {
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
           tx1 = (xx-x)/sw, tx2 = (xx+g.xs-x)/sw;
@@ -1039,7 +1039,7 @@ void draw_text_color(gs_scalar x, gs_scalar y,variant vstr,int c1,int c2,int c3,
           xx = halign == fa_center ? x-sw/2 : x-sw, tmpx = xx;
         } else if (str[i] == ' ')
           xx += get_space_width(fnt);
-        else
+        else if (str[i] > fnt->glyphstart and str[i] < fnt->glyphstart + fnt->glyphcount)
         {
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
           tx1 = (xx-tmpx)/sw, tx2 = (xx+g.xs-tmpx)/sw;
@@ -1091,7 +1091,7 @@ void draw_text_ext_color(gs_scalar x, gs_scalar y,variant vstr,gs_scalar sep, gs
 
           if (width+tw >= w && w != -1)
             xx = x, yy += (sep==-1 ? fnt->height : sep), width = 0, line += 1, sw = string_width_ext_line(str, w, line);
-        } else {
+        } else if (str[i] > fnt->glyphstart and str[i] < fnt->glyphstart + fnt->glyphcount) {
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
           hcol1 = merge_color(c1,c2,(gs_scalar)(width)/sw);
           hcol2 = merge_color(c1,c2,(gs_scalar)(width+g.xs)/sw);
@@ -1129,7 +1129,7 @@ void draw_text_ext_color(gs_scalar x, gs_scalar y,variant vstr,gs_scalar sep, gs
 
           if (width+tw >= w && w != -1)
             yy += (sep==-1 ? fnt->height : sep), width = 0, line += 1, sw = string_width_ext_line(str, w, line), xx = halign == fa_center ? x-sw/2 : x-sw, tmpx = xx;
-        } else {
+        } else if (str[i] > fnt->glyphstart and str[i] < fnt->glyphstart + fnt->glyphcount) {
           fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart) % fnt->glyphcount];
           hcol1 = merge_color(c1,c2,(gs_scalar)(width)/sw);
           hcol2 = merge_color(c1,c2,(gs_scalar)(width+g.xs)/sw);
