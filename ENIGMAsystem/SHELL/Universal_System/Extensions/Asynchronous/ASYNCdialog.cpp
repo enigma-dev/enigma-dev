@@ -42,6 +42,21 @@ struct MessageData {
 
 using namespace enigma_user;
 
+static std::vector<std::string> &string_split(const std::string &s, char delim, std::vector<std::string> &elems) {
+    std::stringstream ss(s);
+    std::string item;
+    while (std::getline(ss, item, delim)) {
+        elems.push_back(item);
+    }
+    return elems;
+}
+
+static std::vector<std::string> string_split(const std::string &s, char delim) {
+    std::vector<std::string> elems;
+    string_split(s, delim, elems);
+    return elems;
+}
+
 static void fireAsyncDialogEvent() {
 	enigma::instance_event_iterator = new enigma::inst_iter(NULL,NULL,NULL);
 	for (enigma::iterator it = enigma::instance_list_first(); it; ++it)
@@ -92,31 +107,17 @@ static void* getIntegerAsync(void* data) {
 	return NULL;
 }
 
-static std::vector<std::string> &string_split(const std::string &s, char delim, std::vector<std::string> &elems) {
-    std::stringstream ss(s);
-    std::string item;
-    while (std::getline(ss, item, delim)) {
-        elems.push_back(item);
-    }
-    return elems;
-}
-
-
-static std::vector<std::string> string_split(const std::string &s, char delim) {
-    std::vector<std::string> elems;
-    string_split(s, delim, elems);
-    return elems;
-}
-
-
 static void* getLoginAsync(void* data) {
 	const MessageData* const md = (MessageData*)data;
 	threads[md->id]->ret = get_login(md->text1, md->text2, md->text3);
 	threads[md->id]->active = false;
 	ds_map_replaceanyway(async_load, "id", md->id);
-	vector<string> split = string_split(threads[md->id]->ret,'|');
-	ds_map_replaceanyway(async_load, "username", split[0]);
-	ds_map_replaceanyway(async_load, "password", split[1]);
+	string ret = threads[md->id]->ret;
+	if (ret.find('|', 0) != std::string::npos) {
+		vector<string> split = string_split(ret,'|');
+		ds_map_replaceanyway(async_load, "username", split[0]);
+		ds_map_replaceanyway(async_load, "password", split[1]);
+	}
 	fireAsyncDialogEvent();
 	return NULL;
 }

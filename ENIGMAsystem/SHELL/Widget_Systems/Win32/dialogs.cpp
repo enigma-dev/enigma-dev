@@ -109,9 +109,9 @@ static INT_PTR CALLBACK GetLoginProc(HWND hwndDlg,UINT uMsg,WPARAM wParam,LPARAM
     {
       char strget[1024];
       GetDlgItemText(hwndDlg,14,strget,1024);
-	  char strget2[1024];
-      GetDlgItemText(hwndDlg,15,strget2,1024);
-      gs_str_submitted=string(strget) + string("|") + string(strget2);
+	  gs_str_submitted = strget;
+      GetDlgItemText(hwndDlg,15,strget,1024);
+      gs_str_submitted += string("|") + string(strget);
       gs_form_canceled=0;
       EndDialog(hwndDlg,2);
     }
