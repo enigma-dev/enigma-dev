@@ -231,13 +231,12 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
         int screen_width = GetSystemMetrics(SM_CXSCREEN);
         int screen_height = GetSystemMetrics(SM_CYSCREEN);
 		// By default if the room is too big instead of creating a gigantic ass window
-		// make it a little smaller than the screen when views are disabled to keep it from
-		// becoming full screen, this is what 8.1 and Studio do, if the user wants to 
-		// manually override this they can using views/screen_set_viewport or 
-		// window_set_size/window_set_region_size 
+		// make it not bigger than the screen to full screen it, this is what 8.1 and Studio 
+		// do, if the user wants to manually override this they can using 
+		// views/screen_set_viewport or window_set_size/window_set_region_size 
 		// We won't limit those functions like GM, just the default.
-		if (xm > screen_width) xm = screen_width-30;
-		if (ym > screen_height) ym = screen_height-50;
+		if (xm > screen_width) xm = screen_width;
+		if (ym > screen_height) ym = screen_height;
         // TODO: Implement minimize button on both windows like GM
          enigma::hWndParent = CreateWindow ("TMain", "", WS_CAPTION | WS_POPUPWINDOW | WS_VISIBLE | WS_MINIMIZEBOX, (screen_width-wid)/2, (screen_height-hgt)/2, wid, hgt, NULL, NULL, hInstance, NULL);
 
