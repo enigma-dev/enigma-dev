@@ -16,6 +16,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include <sstream>      // std::stringstream, std::stringbuf
+
 #include "ASYNCdialog.h"
 #include "Platforms/General/PFthreads.h"
 #include "Widget_Systems/General/WSdialogs.h"
@@ -90,6 +92,35 @@ static void* getIntegerAsync(void* data) {
 	return NULL;
 }
 
+static std::vector<std::string> &string_split(const std::string &s, char delim, std::vector<std::string> &elems) {
+    std::stringstream ss(s);
+    std::string item;
+    while (std::getline(ss, item, delim)) {
+        elems.push_back(item);
+    }
+    return elems;
+}
+
+
+static std::vector<std::string> string_split(const std::string &s, char delim) {
+    std::vector<std::string> elems;
+    string_split(s, delim, elems);
+    return elems;
+}
+
+
+static void* getLoginAsync(void* data) {
+	const MessageData* const md = (MessageData*)data;
+	threads[md->id]->ret = get_login(md->text1, md->text2, md->text3);
+	threads[md->id]->active = false;
+	ds_map_replaceanyway(async_load, "id", md->id);
+	vector<string> split = string_split(threads[md->id]->ret,'|');
+	ds_map_replaceanyway(async_load, "username", split[0]);
+	ds_map_replaceanyway(async_load, "password", split[1]);
+	fireAsyncDialogEvent();
+	return NULL;
+}
+
 static int createThread(void (*fnc)(void*), MessageData* md) {
 	  ethread* newthread = new ethread();
 	  md->id = threads.size();
@@ -112,6 +143,10 @@ static int createThread(void (*fnc)(void*), MessageData* md) {
 }
 
 namespace enigma_user {
+	//TODO: According to Studio's manual each time these async functions are called
+	//they get their own map and async_load is only set that map when the async dialog
+	//event is fired.
+	//This is inferred from the get_login_async documentation.
 	unsigned async_load = ds_map_create();
 	
 	int show_message_async(string str) {
@@ -135,7 +170,7 @@ namespace enigma_user {
 	}
 	
 	int get_login_async(string username, string password, string cap) {
-		//TODO: Needs a custom dialog.
-		return 0;
+		MessageData* md = new MessageData(username, password, cap);
+		return createThread((void (*)(void*))getLoginAsync, md);
 	}
 }
