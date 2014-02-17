@@ -77,10 +77,15 @@ namespace enigma
                   int len = XLookupString(&e.xkey, str, 1, NULL, NULL);
                   if (len > 0) {
                       enigma_user::keyboard_lastchar = string(1,str[0]);
+					  enigma_user::keyboard_string += enigma_user::keyboard_lastchar;
+					  if (enigma_user::keyboard_lastkey == enigma_user::vk_backspace) {
+						enigma_user::keyboard_string = enigma_user::keyboard_string.substr(0, enigma_user::keyboard_string.length() - 2);
+					  } else {
+						enigma_user::keyboard_string += enigma_user::keyboard_lastchar;
+					  }
                   }
               }
 	      enigma_user::keyboard_lastkey = actualKey;
-	      enigma_user::keyboard_string += enigma_user::keyboard_lastchar;
               if (enigma::last_keybdstatus[actualKey]==1 && enigma::keybdstatus[actualKey]==0) {
                 enigma::keybdstatus[actualKey]=1;
                 return 0;
