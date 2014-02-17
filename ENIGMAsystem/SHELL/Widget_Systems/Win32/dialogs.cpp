@@ -51,6 +51,8 @@ void show_error(string errortext,const bool fatal)
 static string gs_cap;
 static string gs_def;
 static string gs_message;
+static string gs_username;
+static string gs_password;
 static bool   gs_form_canceled;
 static string gs_str_submitted;
 
@@ -80,6 +82,36 @@ static INT_PTR CALLBACK GetStrProc(HWND hwndDlg,UINT uMsg,WPARAM wParam,LPARAM l
       char strget[1024];
       GetDlgItemText(hwndDlg,12,strget,1024);
       gs_str_submitted=strget;
+      gs_form_canceled=0;
+      EndDialog(hwndDlg,2);
+    }
+  }
+  return 0;
+}
+
+static INT_PTR CALLBACK GetLoginProc(HWND hwndDlg,UINT uMsg,WPARAM wParam,LPARAM lParam)
+{
+  if (uMsg==WM_INITDIALOG)
+  {
+    SetDlgItemText(hwndDlg,1,gs_cap.c_str());
+    SetDlgItemText(hwndDlg,14,gs_username.c_str());
+    SetDlgItemText(hwndDlg,15,gs_password.c_str());
+  }
+  if (uMsg==WM_COMMAND)
+  {
+    if (wParam==2 || wParam==11)
+    {
+      gs_str_submitted="";
+      gs_form_canceled=1;
+      EndDialog(hwndDlg,1);
+    }
+    else if (wParam==10)
+    {
+      char strget[1024];
+      GetDlgItemText(hwndDlg,14,strget,1024);
+	  char strget2[1024];
+      GetDlgItemText(hwndDlg,15,strget2,1024);
+      gs_str_submitted=string(strget) + string("|") + string(strget2);
       gs_form_canceled=0;
       EndDialog(hwndDlg,2);
     }
@@ -161,9 +193,17 @@ bool show_question(string str)
     return false;
 }
 
+string get_login(string username, string password, string cap)
+{
+  gs_cap = cap;
+  gs_username = username; gs_password = password;
+  DialogBox(enigma::hInstance,"getlogindialog",enigma::hWnd,GetLoginProc);
+  return gs_str_submitted;
+}
+
 string get_string(string message,string def,string cap)
 {
-  gs_cap="";
+  gs_cap = cap;
   gs_message=message; gs_def=def;
   DialogBox(enigma::hInstance,"getstringdialog",enigma::hWnd,GetStrProc);
   return gs_str_submitted;
@@ -171,7 +211,7 @@ string get_string(string message,string def,string cap)
 
 int get_integer(string message,string def,string cap)
 {
-  gs_cap="";
+  gs_cap = cap;
   gs_message=message; gs_def=def;
   DialogBox(enigma::hInstance,"getstringdialog",enigma::hWnd,GetStrProc);
   if (gs_str_submitted == "") return 0;

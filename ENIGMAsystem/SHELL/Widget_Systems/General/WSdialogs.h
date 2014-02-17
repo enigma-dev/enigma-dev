@@ -95,6 +95,7 @@ enum {
 	string get_directory_alt(string capt, string root);
 	string get_directory(string dname);
 
+	string get_login(string username, string password, string cap="");
 	string get_string(string message, string def, string cap="");
 	double get_number(string message, string def, string cap="");
 	int    get_integer(string message, string def, string cap="");
