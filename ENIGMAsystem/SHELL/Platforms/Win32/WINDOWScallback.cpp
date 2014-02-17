@@ -150,7 +150,7 @@ namespace enigma
         case WM_CHAR:
             keyboard_lastchar = string(1,wParam);
 			if (keyboard_lastkey == enigma_user::vk_backspace) {
-				keyboard_string = keyboard_string.substr(0, keyboard_string.length() - 2);
+				keyboard_string = keyboard_string.substr(0, keyboard_string.length() - 1);
 			} else {
 				keyboard_string += keyboard_lastchar;
 			}

@@ -79,7 +79,7 @@ namespace enigma
                       enigma_user::keyboard_lastchar = string(1,str[0]);
 					  enigma_user::keyboard_string += enigma_user::keyboard_lastchar;
 					  if (enigma_user::keyboard_lastkey == enigma_user::vk_backspace) {
-						enigma_user::keyboard_string = enigma_user::keyboard_string.substr(0, enigma_user::keyboard_string.length() - 2);
+						enigma_user::keyboard_string = enigma_user::keyboard_string.substr(0, enigma_user::keyboard_string.length() - 1);
 					  } else {
 						enigma_user::keyboard_string += enigma_user::keyboard_lastchar;
 					  }
