@@ -70,7 +70,7 @@ void draw_sprite(int spr,int subimg, gs_scalar x, gs_scalar y, int color, gs_sca
     get_spritev(spr2d,spr);
     const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
 
-	const float tbx = spr2d->texbordxarray[usi], tby = spr2d->texbordyarray[usi],
+	const gs_scalar tbx = spr2d->texbordxarray[usi], tby = spr2d->texbordyarray[usi],
 			xvert1 = x-spr2d->xoffset, xvert2 = xvert1 + spr2d->width,
 			yvert1 = y-spr2d->yoffset, yvert2 = yvert1 + spr2d->height;
 
@@ -89,13 +89,13 @@ void draw_sprite_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar xs
 
 	rot *= M_PI/180;
 
-    const float
+    const gs_scalar
     w = spr2d->width*xscale, h = spr2d->height*yscale,
     tbx = spr2d->texbordxarray[usi], tby = spr2d->texbordyarray[usi],
     wsinrot = w*sin(rot), wcosrot = w*cos(rot);
 
 	draw_primitive_begin_texture(pr_trianglestrip, spr2d->texturearray[usi]);
-	float
+	gs_scalar
 		ulcx = x - xscale * spr2d->xoffset * cos(rot) + yscale * spr2d->yoffset * cos(M_PI/2+rot),
 		ulcy = y + xscale * spr2d->xoffset * sin(rot) - yscale * spr2d->yoffset * sin(M_PI/2+rot);
 	draw_vertex_texture_color(ulcx,ulcy, 0,0, color, alpha);
@@ -113,7 +113,7 @@ void draw_sprite_pos(int spr, int subimg, gs_scalar x1, gs_scalar y1, gs_scalar 
     get_spritev(spr2d,spr);
     const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
 
-    const float tbx = spr2d->texbordxarray[usi], tby = spr2d->texbordyarray[usi];
+    const gs_scalar tbx = spr2d->texbordxarray[usi], tby = spr2d->texbordyarray[usi];
 
 	draw_primitive_begin_texture(pr_trianglestrip, spr2d->texturearray[usi]);
 	draw_vertex_texture_color(x1,y1,0,0,draw_get_color(),alpha);
@@ -128,7 +128,7 @@ void draw_sprite_part(int spr, int subimg, gs_scalar left, gs_scalar top, gs_sca
     get_spritev(spr2d,spr);
     const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
 
-	float tbw = spr2d->width/(float)spr2d->texbordxarray[usi], tbh = spr2d->height/(float)spr2d->texbordyarray[usi],
+	gs_scalar tbw = spr2d->width/(gs_scalar)spr2d->texbordxarray[usi], tbh = spr2d->height/(gs_scalar)spr2d->texbordyarray[usi],
 	  tbx1 = left/tbw, tbx2 = tbx1 + width/tbw,
 	  tby1 = top/tbh, tby2 = tby1 + height/tbh;
 
@@ -145,7 +145,7 @@ void draw_sprite_part_offset(int spr, int subimg, gs_scalar left, gs_scalar top,
     get_spritev(spr2d,spr);
     const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
 
-	float tbw = spr2d->width/spr2d->texbordxarray[usi], tbh = spr2d->height/spr2d->texbordyarray[usi],
+	gs_scalar tbw = spr2d->width/spr2d->texbordxarray[usi], tbh = spr2d->height/spr2d->texbordyarray[usi],
 	  xvert1 = x-spr2d->xoffset, xvert2 = xvert1 + spr2d->width,
 	  yvert1 = y-spr2d->yoffset, yvert2 = yvert1 + spr2d->height,
 	  tbx1 = left/tbw, tbx2 = tbx1 + width/tbw,
@@ -164,7 +164,7 @@ void draw_sprite_part_ext(int spr, int subimg, gs_scalar left, gs_scalar top, gs
     get_spritev(spr2d,spr);
     const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
 
-	float tbw = spr2d->width/(float)spr2d->texbordxarray[usi], tbh = spr2d->height/(float)spr2d->texbordyarray[usi],
+	gs_scalar tbw = spr2d->width/(gs_scalar)spr2d->texbordxarray[usi], tbh = spr2d->height/(gs_scalar)spr2d->texbordyarray[usi],
 	  xvert1 = x, xvert2 = xvert1 + width*xscale,
 	  yvert1 = y, yvert2 = yvert1 + height*yscale,
 	  tbx1 = left/tbw, tbx2 = tbx1 + width/tbw,
@@ -183,17 +183,17 @@ void draw_sprite_general(int spr, int subimg, gs_scalar left, gs_scalar top, gs_
     get_spritev(spr2d,spr);
     const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
 
-	const float
+	const gs_scalar
 	  tbx = spr2d->texbordxarray[usi],  tby = spr2d->texbordyarray[usi],
 	  tbw = spr2d->width/tbx, tbh = spr2d->height/tby,
 	  w = width*xscale, h = height*yscale;
 
     rot *= M_PI/180;
-    const float wcosrot = w*cos(rot), wsinrot = w*sin(rot);
+    const gs_scalar wcosrot = w*cos(rot), wsinrot = w*sin(rot);
 
     draw_primitive_begin_texture(pr_trianglestrip, spr2d->texturearray[usi]);
 
-    float
+    gs_scalar
     ulcx = x + xscale * cos(M_PI+rot) + yscale * cos(M_PI/2+rot),
     ulcy = y - yscale * sin(M_PI+rot) - yscale * sin(M_PI/2+rot);
 
@@ -214,7 +214,7 @@ void draw_sprite_stretched(int spr, int subimg, gs_scalar x, gs_scalar y, gs_sca
     get_spritev(spr2d,spr);
     const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
 
-    const float tbx = spr2d->texbordxarray[usi], tby = spr2d->texbordyarray[usi],
+    const gs_scalar tbx = spr2d->texbordxarray[usi], tby = spr2d->texbordyarray[usi],
                 xvert1 = x-spr2d->xoffset, xvert2 = xvert1 + width,
                 yvert1 = y-spr2d->yoffset, yvert2 = yvert1 + height;
 
@@ -231,7 +231,7 @@ void draw_sprite_stretched_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs
     get_spritev(spr2d,spr);
     const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
 
-    const float tbx = spr2d->texbordxarray[usi], tby = spr2d->texbordyarray[usi],
+    const gs_scalar tbx = spr2d->texbordxarray[usi], tby = spr2d->texbordyarray[usi],
                 xvert1 = x-spr2d->xoffset, xvert2 = xvert1 + width,
                 yvert1 = y-spr2d->yoffset, yvert2 = yvert1 + height;
 
@@ -248,7 +248,7 @@ void d3d_draw_sprite(int spr,int subimg, gs_scalar x, gs_scalar y, gs_scalar z)
     get_spritev(spr2d,spr);
     const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
 
-	const float tbx = spr2d->texbordxarray[usi], tby = spr2d->texbordyarray[usi],
+	const gs_scalar tbx = spr2d->texbordxarray[usi], tby = spr2d->texbordyarray[usi],
 			xvert1 = x-spr2d->xoffset, xvert2 = xvert1 + spr2d->width,
 			yvert1 = y-spr2d->yoffset, yvert2 = yvert1 + spr2d->height;
 
@@ -278,25 +278,26 @@ void draw_sprite_tiled(int spr, int subimg, gs_scalar x, gs_scalar y, int color,
     get_spritev(spr2d,spr);
     const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
 
-    const float
-    tbx  = spr2d->texbordxarray[usi], tby  = spr2d->texbordyarray[usi],
-    xoff = fmod(spr2d->xoffset+x,spr2d->width)-spr2d->width, yoff = fmod(spr2d->yoffset+y,spr2d->height)-spr2d->height;
+    x = ((spr2d->xoffset+x)<0?0:spr2d->width)-fmod(spr2d->xoffset+x,spr2d->width);
+    y = ((spr2d->yoffset+y)<0?0:spr2d->height)-fmod(spr2d->yoffset+y,spr2d->height);
+
+    const gs_scalar tbx  = spr2d->texbordxarray[usi], tby  = spr2d->texbordyarray[usi];
 
     const int
-    hortil = int(ceil((view_enabled ? int(view_xview[view_current] + view_wview[view_current]) : room_width) / (spr2d->width*tbx))) + 1,
-    vertil = int(ceil((view_enabled ? int(view_yview[view_current] + view_hview[view_current]) : room_height) / (spr2d->height*tby))) + 1;
+    hortil = int(ceil((view_enabled ? (gs_scalar)(view_xview[view_current] + view_wview[view_current]) : (gs_scalar)room_width) / ((gs_scalar)spr2d->width))) + 1,
+    vertil = int(ceil((view_enabled ? (gs_scalar)(view_yview[view_current] + view_hview[view_current]) : (gs_scalar)room_height) / ((gs_scalar)spr2d->height))) + 1;
 
-    float xvert1 = xoff, xvert2 = xvert1 + spr2d->width, yvert1, yvert2;
-    for (int i=0; i<hortil; i++)
+    gs_scalar xvert1 = -x, xvert2 = xvert1 + spr2d->width, yvert1, yvert2;
+    for (int i=0; i<hortil; ++i)
     {
-        yvert1 = yoff; yvert2 = yvert1 + spr2d->height;
-        for (int c=0; c<vertil; c++)
+        yvert1 = -y; yvert2 = yvert1 + spr2d->height;
+        for (int c=0; c<vertil; ++c)
         {
 			draw_primitive_begin_texture(pr_trianglestrip, spr2d->texturearray[usi]);
 			draw_vertex_texture_color(xvert1,yvert1,0,0,color,alpha);
 			draw_vertex_texture_color(xvert2,yvert1,tbx,0,color,alpha);
-			draw_vertex_texture_color(xvert1,yvert2, 0,tby,color,alpha);
-			draw_vertex_texture_color(xvert2,yvert2, tbx,tby,color,alpha);
+			draw_vertex_texture_color(xvert1,yvert2,0,tby,color,alpha);
+			draw_vertex_texture_color(xvert2,yvert2,tbx,tby,color,alpha);
 			draw_primitive_end();
             yvert1 = yvert2;
             yvert2 += spr2d->height;
@@ -311,20 +312,22 @@ void draw_sprite_tiled_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_sca
     get_spritev(spr2d,spr);
     const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
 
-    const float
+    const gs_scalar
     tbx  = spr2d->texbordxarray[usi], tby  = spr2d->texbordyarray[usi],
-    width_scaled = spr2d->width*xscale, height_scaled = spr2d->height*yscale,
-    xoff = fmod(spr2d->xoffset*xscale+x,width_scaled)-width_scaled, yoff = fmod(spr2d->yoffset*yscale+y,height_scaled)-height_scaled;
+    width_scaled = spr2d->width*xscale, height_scaled = spr2d->height*yscale;
+
+    x = ((spr2d->xoffset*xscale+x)<0?0:width_scaled)-fmod(spr2d->xoffset*xscale+x,width_scaled);
+    y = ((spr2d->yoffset*yscale+y)<0?0:height_scaled)-fmod(spr2d->yoffset*yscale+y,height_scaled);
 
     const int
-    hortil = int(ceil((view_enabled ? int(view_xview[view_current] + view_wview[view_current]) : room_width) / (width_scaled*tbx))) + 1,
-    vertil = int(ceil((view_enabled ? int(view_yview[view_current] + view_hview[view_current]) : room_height) / (height_scaled*tby))) + 1;
+    hortil = int(ceil((view_enabled ? (gs_scalar)(view_xview[view_current] + view_wview[view_current]) : (gs_scalar)room_width) / (width_scaled))) + 1,
+    vertil = int(ceil((view_enabled ? (gs_scalar)(view_yview[view_current] + view_hview[view_current]) : (gs_scalar)room_height) / (height_scaled))) + 1;
 
-    float xvert1 = xoff, xvert2 = xvert1 + width_scaled, yvert1, yvert2;
-    for (int i=0; i<hortil; i++)
+    gs_scalar xvert1 = -x, xvert2 = xvert1 + width_scaled, yvert1, yvert2;
+    for (int i=0; i<hortil; ++i)
     {
-        yvert1 = yoff; yvert2 = yvert1 + height_scaled;
-        for (int c=0; c<vertil; c++)
+        yvert1 = -y; yvert2 = yvert1 + height_scaled;
+        for (int c=0; c<vertil; ++c)
         {
 			draw_primitive_begin_texture(pr_trianglestrip, spr2d->texturearray[usi]);
 			draw_vertex_texture_color(xvert1,yvert1,0,0,color,alpha);
