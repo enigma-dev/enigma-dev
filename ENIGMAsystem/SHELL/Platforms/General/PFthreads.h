@@ -20,7 +20,9 @@
 
 #include <deque>
 #include <stdio.h>
-using namespace std;
+//NOTICE: do not add using namespace std; here or you will create conflicts with min/max functions until we finish the
+//enigma_user namespace movement.
+using std::deque;
 
 #include "Universal_System/var4.h"
 
