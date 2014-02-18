@@ -248,14 +248,21 @@ int main(int argc,char** argv)
 	swa.event_mask = ExposureMask | KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask | FocusChangeMask;// | StructureNotifyMask;
 	unsigned long valmask = CWColormap | CWEventMask; //  | CWBackPixel | CWBorderPixel;
 
+	//prepare window for display (center, caption, etc)
+	screen = DefaultScreenOfDisplay(disp);
 	//default window size
 	int winw = enigma_user::room_width;
 	int winh = enigma_user::room_height;
+	// By default if the room is too big instead of creating a gigantic ass window
+	// make it not bigger than the screen to full screen it, this is what 8.1 and Studio 
+	// do, if the user wants to manually override this they can using 
+	// views/screen_set_viewport or window_set_size/window_set_region_size 
+	// We won't limit those functions like GM, just the default.
+	if (winw > screen->width) winw = screen->width;
+	if (winh > screen->height) winh = screen->height;
 	win = XCreateWindow(disp,root,0,0,winw,winh,0,vi->depth,InputOutput,vi->visual,valmask,&swa);
 	XMapRaised(disp,win); //request visible
 
-	//prepare window for display (center, caption, etc)
-	screen = DefaultScreenOfDisplay(disp);
 	//printf("Screen: %d %d %d %d\n",s->width/2,s->height/2,winw,winh);
 	XMoveWindow(disp,win,(screen->width-winw)/2,(screen->height-winh)/2);
 
