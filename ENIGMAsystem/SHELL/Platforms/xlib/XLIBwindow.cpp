@@ -169,7 +169,16 @@ void window_default()
         }
       if (tx and ty)
         xm = tx, ym = ty;
-    }
+    } else {
+		// By default if the room is too big instead of creating a gigantic ass window
+		// make it not bigger than the screen to full screen it, this is what 8.1 and Studio 
+		// do, if the user wants to manually override this they can using 
+		// views/screen_set_viewport or window_set_size/window_set_region_size 
+		// We won't limit those functions like GM, just the default.
+		//TODO: Finish the implementation, can't test from Windus look at XLIBmain.cpp and WINDOWSmain.cpp
+		//if (xm > screen->width) xm = screen->width;
+		//if (ym > screen->height) ym = screen->height;
+	}
     window_set_size(xm, ym);
 }
 
