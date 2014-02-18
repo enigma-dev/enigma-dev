@@ -20,7 +20,7 @@
 
 #include <deque>
 #include <stdio.h>
-using namespace std;
+//using namespace std;
 
 #include "Universal_System/var4.h"
 
@@ -32,7 +32,7 @@ struct ethread
   ethread(): active(true), ret(0) {};
 };
 
-static deque<ethread*> threads;
+static std::deque<ethread*> threads;
 
 namespace enigma_user {
 	int script_thread(int scr, variant arg0 = 0, variant arg1 = 0, variant arg2 = 0, variant arg3 = 0, variant arg4 = 0, variant arg5 = 0, variant arg6 = 0, variant arg7 = 0);
