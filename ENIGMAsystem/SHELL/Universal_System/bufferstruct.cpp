@@ -16,9 +16,12 @@
 **/
 
 #include <iostream>
-using namespace std;
+using std::string;
+using std::cout;
 #include <cstring>
 #include <fstream>
+using std::ofstream;
+using std::ifstream;
 
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "libEGMstd.h"
@@ -37,9 +40,9 @@ namespace enigma
 		return buffers.size();
 	}
 
-	std::vector<unsigned char> valToBytes(variant value, unsigned count)
+	vector<unsigned char> valToBytes(variant value, unsigned count)
 	{
-		std::vector<unsigned char> result(0);
+		vector<unsigned char> result(0);
 		for (unsigned i = 0; i < count; i++) {
 			result.push_back(value >> ((i) * 8));
 		}

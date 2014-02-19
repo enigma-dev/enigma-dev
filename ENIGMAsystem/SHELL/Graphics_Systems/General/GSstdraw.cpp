@@ -29,6 +29,7 @@ using std::vector;
 
 namespace enigma {
   float circleprecision=24;
+  extern unsigned char currentcolor[4];
 
   //List of vertices we are buffering to draw.
   std::list<PolyVertex> currComplexPoly;
@@ -382,14 +383,137 @@ void draw_triangle_color(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, 
     }
 }
 
-void draw_roundrect(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, float rad, bool outline)
-{
-	//TODO: Needs rewritten to use circle precision for the corners
+void draw_roundrect(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, float rad, bool outline) {
+	//TODO: Needs written to use circle precision for the corners
 }
 
-void draw_roundrect_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, float rad, int col1, int col2, bool outline)
+void draw_roundrect_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, float rad, int col1, int col2, bool outline) {
+	//TODO: Needs written to use circle precision for the corners
+}
+
+void draw_roundrect_precise(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, float rad, bool outline)
 {
-	//TODO: Needs rewritten to use circle precision for the corners
+  if (x1>x2) {
+    float t=x2;
+    x2=x1;
+    x1=t;
+  }
+  if (y1>y2) {
+    float t=y2;
+    y2=y1;
+    y1=t;
+  }
+  if (x2-x1<rad*2){rad=(x2-x1)/2;}
+  if (y2-y1<rad*2){rad=(y2-y1)/2;}
+  if (rad<0){rad=0;}
+  float r2=rad*rad,r12=rad*M_SQRT1_2,
+      bx1=x1+rad,by1=y1+rad,
+      bx2=x2-rad,by2=y2-rad;
+  if (outline) {
+	draw_primitive_begin(pr_linelist);
+    draw_vertex(x1,by1);draw_vertex(x1,by2);
+    draw_vertex(x2,by1);draw_vertex(x2,by2);
+    draw_vertex(bx1,y1);draw_vertex(bx2,y1);
+    draw_vertex(bx1,y2);draw_vertex(bx2,y2);
+    draw_primitive_end();
+	draw_primitive_begin(pr_pointlist);
+    for(float xc=0,yc=rad;xc<=r12;xc++) {
+        if (xc*xc+yc*yc>r2) yc--;
+        draw_vertex(bx2+xc,by2+yc);
+        draw_vertex(bx2+xc,by1-yc);
+        draw_vertex(bx1-xc,by2+yc);
+        draw_vertex(bx1-xc,by1-yc);
+        draw_vertex(bx2+yc,by2+xc);
+        draw_vertex(bx2+yc,by1-xc);
+        draw_vertex(bx1-yc,by2+xc);
+        draw_vertex(bx1-yc,by1-xc);
+    }
+    draw_primitive_end();
+  } else {
+	draw_primitive_begin(pr_linelist);
+    for(float xc=0,yc=rad;xc<=r12;xc++) {
+      if (xc*xc+yc*yc>r2) yc--;
+      draw_vertex(bx2+xc,by2+yc);
+      draw_vertex(bx2+xc,by1-yc);
+      draw_vertex(bx1-xc,by2+yc);
+      draw_vertex(bx1-xc,by1-yc);
+      draw_vertex(bx2+yc,by2+xc);
+      draw_vertex(bx2+yc,by1-xc);
+      draw_vertex(bx1-yc,by2+xc);
+      draw_vertex(bx1-yc,by1-xc);
+    }
+    draw_primitive_end();
+    draw_rectangle(bx1,y1,bx2,y2,false);
+  }
+}
+
+void draw_roundrect_precise_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, float rad, int col1, int col2, bool outline)
+{
+  if (x1>x2) {
+    float t=x2;
+    x2=x1;
+    x1=t;
+  }
+  if (y1>y2) {
+    float t=y2;
+    y2=y1;
+    y1=t;
+  }
+  if (x2-x1<rad*2){rad=(x2-x1)/2;}
+  if (y2-y1<rad*2){rad=(y2-y1)/2;}
+  if (rad<0){rad=0;}
+  gs_scalar alpha = draw_get_alpha();
+  float r2=rad*rad,r12=rad*M_SQRT1_2,
+      bx1=x1+rad,by1=y1+rad,
+      bx2=x2-rad,by2=y2-rad;
+  draw_primitive_begin(pr_linelist);
+  if (outline)
+  {
+    draw_vertex_color(x1,by1,col2,alpha);draw_vertex_color(x1,by2,col2,alpha);
+    draw_vertex_color(x2,by1,col2,alpha);draw_vertex_color(x2,by2,col2,alpha);
+    draw_vertex_color(bx1,y1,col2,alpha);draw_vertex_color(bx2,y1,col2,alpha);
+    draw_vertex_color(bx1,y2,col2,alpha);draw_vertex_color(bx2,y2,col2,alpha);
+    draw_primitive_end();
+	draw_primitive_begin(pr_pointlist);
+    for (float xc=0,yc=rad;xc<=r12;xc++)
+    {
+      if (xc*xc+yc*yc>r2) yc--;
+      draw_vertex_color(bx2+xc,by2+yc,col2,alpha);
+      draw_vertex_color(bx2+xc,by1-yc,col2,alpha);
+      draw_vertex_color(bx1-xc,by2+yc,col2,alpha);
+      draw_vertex_color(bx1-xc,by1-yc,col2,alpha);
+      draw_vertex_color(bx2+yc,by2+xc,col2,alpha);
+      draw_vertex_color(bx2+yc,by1-xc,col2,alpha);
+      draw_vertex_color(bx1-yc,by2+xc,col2,alpha);
+      draw_vertex_color(bx1-yc,by1-xc,col2,alpha);
+    }
+    draw_primitive_end();
+  } else {
+    for (float xc=0,yc=rad;xc<=r12;xc++) {
+      if (xc*xc+yc*yc>r2) yc--;
+      draw_vertex_color(bx2+xc,by2+yc,col2,alpha);
+      draw_vertex_color(bx2+xc,by1-yc,col2,alpha);
+      draw_vertex_color(bx1-xc,by2+yc,col2,alpha);
+      draw_vertex_color(bx1-xc,by1-yc,col2,alpha);
+      draw_vertex_color(bx2+yc,by2+xc,col2,alpha);
+      draw_vertex_color(bx2+yc,by1-xc,col2,alpha);
+      draw_vertex_color(bx1-yc,by2+xc,col2,alpha);
+      draw_vertex_color(bx1-yc,by1-xc,col2,alpha);
+    }
+    draw_primitive_end();
+	draw_primitive_begin(pr_trianglefan);
+    draw_vertex_color(x1+(x2-x1)/2,y1+(y2-y1)/2,col1,alpha);
+    draw_vertex_color(x1,by1,col2,alpha);
+    draw_vertex_color(bx1,y1,col2,alpha);
+    draw_vertex_color(bx2,y1,col2,alpha);
+    draw_vertex_color(x2,by1,col2,alpha);
+    draw_vertex_color(x2,by2,col2,alpha);
+    draw_vertex_color(bx2,y2,col2,alpha);
+    draw_vertex_color(bx1,y2,col2,alpha);
+    draw_vertex_color(x1,by2,col2,alpha);
+    draw_vertex_color(x1,by1,col2,alpha);
+    draw_primitive_end();
+  }
 }
 
 void draw_arrow(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, gs_scalar arrow_size, gs_scalar line_size, bool outline)
