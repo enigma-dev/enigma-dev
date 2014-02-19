@@ -53,7 +53,26 @@ void draw_ellipse_perfect(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2
 void draw_triangle(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, bool outline);
 void draw_triangle_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, int col1, int col2, int col3, bool outline = false);
 void draw_roundrect(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, float rad, bool outline);
-void draw_roundrect_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, float rad, int col1, int col2, bool outline = false);
+void draw_roundrect_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, float rad, int col1, int col2, bool outline);
+void draw_roundrect_precise(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, float rad, bool outline);
+void draw_roundrect_precise_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, float rad, int col1, int col2, bool outline);
+
+inline void draw_roundrect(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, bool outline) { 
+	draw_roundrect(x1, y1, x2, y2, 10, false); 
+}
+
+inline void draw_roundrect_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, int col1, int col2, bool outline) { 
+	draw_roundrect_color(x1, y1, x2, y2, 10, col1, col2, false); 
+}
+
+inline void draw_roundrect_precise(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, bool outline) { 
+	draw_roundrect_precise(x1, y1, x2, y2, 10, false); 
+}
+
+inline void draw_roundrect_precise_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, int col1, int col2, bool outline) { 
+	draw_roundrect_precise_color(x1, y1, x2, y2, 10, col1, col2, false); 
+}
+
 void draw_healthbar(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, float amount, int backcol, int mincol, int maxcol, int direction, bool showback, bool showborder);
 void draw_mandelbrot(gs_scalar x, gs_scalar y, float w, double Zx, double Zy, double Zw, unsigned iter);
 void draw_arrow(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, float arrow_size, float line_size = 1, bool outline = false);
