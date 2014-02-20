@@ -70,7 +70,7 @@ void d3d_start()
 	enigma::d3dCulling =  rs_none;
 	d3dmgr->device->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
 	d3d_set_hidden(false);
-	
+
 	// Enable texture repetition by default
 	d3dmgr->SetSamplerState( 0, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP );
 	d3dmgr->SetSamplerState( 0, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP );
@@ -93,7 +93,7 @@ void d3d_set_hidden(bool enable)
 	//d3d_set_zwriteenable(enable);
 	d3dmgr->SetRenderState(D3DRS_ZENABLE, enable); // enable/disable the z-buffer
     enigma::d3dHidden = enable;
-}   
+}
 
 void d3d_set_zwriteenable(bool enable)
 {
@@ -186,7 +186,7 @@ void d3d_set_line_width(float value) {
 
 void d3d_set_point_size(float value) {
 	d3dmgr->SetRenderState(D3DRS_POINTSIZE, value);
-} 
+}
 
 void d3d_set_depth_operator(int mode) {
 	d3dmgr->SetRenderState(D3DRS_ZFUNC, depthoperators[mode]);
@@ -200,6 +200,11 @@ void d3d_set_depth(double dep)
 void d3d_set_shading(bool smooth)
 {
 	d3dmgr->SetRenderState(D3DRS_SHADEMODE, smooth?D3DSHADE_GOURAUD:D3DSHADE_FLAT);
+}
+
+void d3d_set_clip_plane(bool enable)
+{
+   ///TODO: Code this
 }
 
 }
@@ -262,7 +267,7 @@ class d3d_lights
             light_ind.insert(pair<int,int>(id, ms));
             ind_pos.insert(pair<int,posi>(ms, posi(-dx, -dy, -dz, 0.0f)));
         }
-		
+
 		D3DLIGHT9 light;    // create the light struct
 
 		ZeroMemory(&light, sizeof(light));    // clear out the light struct for use
@@ -270,15 +275,15 @@ class d3d_lights
 		light.Diffuse = D3DXCOLOR(__GETR(col), __GETR(col), __GETB(col), 1.0f);    // set the light's color
 		light.Direction = D3DXVECTOR3(dx, dy, dz);
 
-		d3dmgr->SetLight(ms, &light);    // send the light struct properties to nth light 
-		
+		d3dmgr->SetLight(ms, &light);    // send the light struct properties to nth light
+
 		D3DMATERIAL9 material;
 		ZeroMemory(&material, sizeof(D3DMATERIAL9));
 		material.Diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
 		material.Ambient = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
 
 		d3dmgr->SetMaterial(&material);
-		
+
 		light_update_positions();
         return true;
     }
@@ -321,20 +326,20 @@ class d3d_lights
 	    //light.Phi = D3DXToRadian(360.0f);    // set the outer cone to 360 degrees
 		//light.Theta = D3DXToRadian(360.0f);    // set the inner cone to 360 degrees
 		light.Falloff = 1.0f;    // use the typical falloff
-	
-		d3dmgr->SetLight(ms, &light);    // send the light struct properties to nth light 
-		
+
+		d3dmgr->SetLight(ms, &light);    // send the light struct properties to nth light
+
 		D3DMATERIAL9 material;
 		ZeroMemory(&material, sizeof(D3DMATERIAL9));
 		material.Diffuse = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
 		material.Ambient = D3DXCOLOR(1.0f, 1.0f, 1.0f, 1.0f);
 
 		d3dmgr->SetMaterial(&material);
-	
+
 		return true;
     }
 
-    bool light_define_specularity(int id, int r, int g, int b, double a) 
+    bool light_define_specularity(int id, int r, int g, int b, double a)
     {
         int ms;
         if (light_ind.find(id) != light_ind.end())
@@ -349,7 +354,7 @@ class d3d_lights
             if (ms >= caps.MaxActiveLights)
                 return false;
         }
-		
+
 		return true;
     }
 
@@ -379,7 +384,7 @@ class d3d_lights
 			d3dmgr->LightEnable((*it).second, FALSE);
         }
         return true;
-		
+
     }
 } d3d_lighting;
 
@@ -396,7 +401,7 @@ bool d3d_light_define_point(int id, gs_scalar x, gs_scalar y, gs_scalar z, doubl
     return d3d_lighting.light_define_point(id, x, y, z, range, col);
 }
 
-bool d3d_light_define_specularity(int id, int r, int g, int b, double a) 
+bool d3d_light_define_specularity(int id, int r, int g, int b, double a)
 {
     return d3d_lighting.light_define_specularity(id, r, g, b, a);
 }
@@ -404,7 +409,7 @@ bool d3d_light_define_specularity(int id, int r, int g, int b, double a)
 void d3d_light_specularity(int facemode, int r, int g, int b, double a)
 {
   float specular[4] = {r, g, b, a};
-  
+
 }
 
 void d3d_light_shininess(int facemode, int shine)
@@ -414,7 +419,7 @@ void d3d_light_shininess(int facemode, int shine)
 
 void d3d_light_define_ambient(int col)
 {
-	d3dmgr->SetRenderState(D3DRS_AMBIENT, D3DCOLOR_COLORVALUE(__GETR(col), __GETG(col), __GETB(col), 1));  
+	d3dmgr->SetRenderState(D3DRS_AMBIENT, D3DCOLOR_COLORVALUE(__GETR(col), __GETG(col), __GETB(col), 1));
 }
 
 bool d3d_light_enable(int id, bool enable)

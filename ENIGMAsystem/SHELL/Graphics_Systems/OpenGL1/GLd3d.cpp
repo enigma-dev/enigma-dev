@@ -235,6 +235,12 @@ void d3d_set_shading(bool smooth)
     glShadeModel(smooth?GL_SMOOTH:GL_FLAT);
 }
 
+void d3d_set_clip_plane(bool enable)
+{
+    //GL1 doesn't really support clip planes. There could be ways around that though
+    printf("warning: d3d_set_clip_plane(bool enable) called even though GL1 doesn't support this!\n");
+}
+
 }
 
 #include <map>
