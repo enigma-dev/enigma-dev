@@ -39,7 +39,8 @@ namespace enigma {
   bool d3dHidden = false;
   bool d3dZWriteEnable = true;
   int d3dCulling = 0;
-  extern ShaderProgram* default_shader;
+  extern unsigned bound_shader;
+  extern vector<enigma::ShaderProgram*> shaderprograms;
 }
 
 GLenum renderstates[6] = {
@@ -226,6 +227,11 @@ void d3d_set_shading(bool smooth)
     glShadeModel(smooth?GL_SMOOTH:GL_FLAT);
 }
 
+void d3d_set_clip_plane(bool enable)
+{
+    (enable?glEnable:glDisable)(GL_CLIP_DISTANCE0);
+}
+
 }
 
 #include <map>
@@ -276,10 +282,10 @@ class d3d_lights
 {
     vector<light3D> lights;
     material3D material;
+    bool lights_enabled;
 
     public:
     float global_ambient_color[4];
-    bool lights_enabled;
     d3d_lights() {
         lights_enabled = false;
         global_ambient_color[0] = global_ambient_color[1] = global_ambient_color[2] = 0.2f;
@@ -290,30 +296,36 @@ class d3d_lights
     }
     //~d3d_lights() {}
 
+    void lights_enable(bool enable){
+        lights_enabled = enable;
+    }
+
     void light_update()
     {
-        glUniform1i(enigma::default_shader->uni_lightEnable, lights_enabled);
-        glUniform4fv(enigma::default_shader->uni_ambient_color, 1, global_ambient_color);
-        glUniform4fv(enigma::default_shader->uni_material_ambient, 1, material.ambient);
-        glUniform4fv(enigma::default_shader->uni_material_diffuse, 1, material.diffuse);
-        glUniform4fv(enigma::default_shader->uni_material_specular, 1, material.specular);
-        glUniform1f(enigma::default_shader->uni_material_shininess, material.shininess);
-        unsigned int al = 0; //Active lights
-        for (unsigned int i=0; i<lights.size(); ++i){
-            if (lights[i].enabled == true){
-                enigma::mv_matrix.Print();
-                enigma::Vector4 lpos_eyespace = enigma::mv_matrix * enigma::Vector4(lights[i].position[0],lights[i].position[1],lights[i].position[2],1.0);
-                gs_scalar tmp_pos[4] = {lpos_eyespace.x,lpos_eyespace.y,lpos_eyespace.z,lights[i].position[3]};
-                printf("Light position after:\nx = %f; y = %f; z = %f;\n", lpos_eyespace.x,lpos_eyespace.y,lpos_eyespace.z);
+        glUniform1i(enigma::shaderprograms[enigma::bound_shader]->uni_lightEnable, lights_enabled);
+        if (lights_enabled == true){
+            glUniform4fv(enigma::shaderprograms[enigma::bound_shader]->uni_ambient_color, 1, global_ambient_color);
+            glUniform4fv(enigma::shaderprograms[enigma::bound_shader]->uni_material_ambient, 1, material.ambient);
+            glUniform4fv(enigma::shaderprograms[enigma::bound_shader]->uni_material_diffuse, 1, material.diffuse);
+            glUniform4fv(enigma::shaderprograms[enigma::bound_shader]->uni_material_specular, 1, material.specular);
+            glUniform1f(enigma::shaderprograms[enigma::bound_shader]->uni_material_shininess, material.shininess);
+            unsigned int al = 0; //Active lights
+            for (unsigned int i=0; i<lights.size(); ++i){
+                if (lights[i].enabled == true){
+                    enigma::mv_matrix.Print();
+                    enigma::Vector4 lpos_eyespace = enigma::mv_matrix * enigma::Vector4(lights[i].position[0],lights[i].position[1],lights[i].position[2],1.0);
+                    gs_scalar tmp_pos[4] = {lpos_eyespace.x,lpos_eyespace.y,lpos_eyespace.z,lights[i].position[3]};
+                    //printf("Light position after:\nx = %f; y = %f; z = %f;\n", lpos_eyespace.x,lpos_eyespace.y,lpos_eyespace.z);
 
-                glUniform4fv(enigma::default_shader->uni_light_position[i], 1, tmp_pos);
-                glUniform4fv(enigma::default_shader->uni_light_ambient[i], 1, lights[i].ambient);
-                glUniform4fv(enigma::default_shader->uni_light_diffuse[i], 1, lights[i].diffuse);
-                glUniform4fv(enigma::default_shader->uni_light_specular[i], 1, lights[i].specular);
-                ++al;
+                    glUniform4fv(enigma::shaderprograms[enigma::bound_shader]->uni_light_position[i], 1, tmp_pos);
+                    glUniform4fv(enigma::shaderprograms[enigma::bound_shader]->uni_light_ambient[i], 1, lights[i].ambient);
+                    glUniform4fv(enigma::shaderprograms[enigma::bound_shader]->uni_light_diffuse[i], 1, lights[i].diffuse);
+                    glUniform4fv(enigma::shaderprograms[enigma::bound_shader]->uni_light_specular[i], 1, lights[i].specular);
+                    ++al;
+                }
             }
+            glUniform1i(enigma::shaderprograms[enigma::bound_shader]->uni_light_active, al);
         }
-        glUniform1i(enigma::default_shader->uni_light_active, al);
     }
 
     void light_update_positions()
@@ -327,7 +339,7 @@ class d3d_lights
                 enigma::Vector4 lpos_eyespace = enigma::mv_matrix * enigma::Vector4(lights[i].position[0],lights[i].position[1],lights[i].position[2],1.0);
                 //printf("Light position after:\nx = %f; y = %f; z = %f;\n", lpos_eyespace.x,lpos_eyespace.y,lpos_eyespace.z);
                 gs_scalar tmp_pos[4] = {lpos_eyespace.x,lpos_eyespace.y,lpos_eyespace.z,lights[i].position[3]};
-                glUniform4fv(enigma::default_shader->uni_light_position[i], 1, tmp_pos);
+                glUniform4fv(enigma::shaderprograms[enigma::bound_shader]->uni_light_position[i], 1, tmp_pos);
             }
         }
     }
@@ -468,10 +480,9 @@ bool d3d_light_enable(int id, bool enable)
 
 void d3d_set_lighting(bool enable)
 {
-    d3d_lighting.lights_enabled = enable;
+    d3d_lighting.lights_enable(enable);
     d3d_lighting.light_update();
 }
-
 }
 
 namespace enigma {

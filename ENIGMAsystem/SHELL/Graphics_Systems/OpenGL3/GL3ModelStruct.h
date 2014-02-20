@@ -585,8 +585,6 @@ class Mesh
     //Bind texture
     glUniform1i(enigma::shaderprograms[enigma::bound_shader]->uni_texSampler, 0);
 
-    std::cout << "Bound program: \n" << enigma::bound_shader << std::endl;
-
 	GLsizei stride = GetStride();
 
 	#define OFFSET( P )  ( ( const GLvoid * ) ( sizeof( gs_scalar ) * ( P         ) ) )

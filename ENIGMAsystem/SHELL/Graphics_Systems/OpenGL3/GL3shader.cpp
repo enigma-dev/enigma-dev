@@ -58,21 +58,9 @@ namespace enigma
                 "#define projectionMatrix transform_matrix[MATRIX_PROJECTION] \n"
                 "#define viewMatrix transform_matrix[MATRIX_VIEW] \n"
                 "#define modelViewProjectionMatrix transform_matrix[MATRIX_WORLD_VIEW_PROJECTION] \n"
-
                 "#define in_Colour in_Color \n"
 
-                "uniform mat3 normalMatrix;     \n"
-                "uniform bool en_LightingEnabled;\n"
-                "uniform bool en_VS_FogEnabled;\n"
-                "uniform float en_FogStart;\n"
-                "uniform float en_RcpFogRange;\n"
-
-                "#define MAX_LIGHTS   8\n"
-
-                "uniform vec4   en_AmbientColor;                              // rgba=color\n";
-                //"uniform vec4   en_Lights_Direction[MAX_LIGHTS];              // normalised direction\n"
-                //"uniform vec4   en_Lights_PositionRange[MAX_LIGHTS];          // X,Y,Z position,  W range\n"
-                //"uniform vec4   en_Lights_Color[MAX_LIGHTS];                  // rgba=color\n"
+                "uniform mat3 normalMatrix;     \n";
     }
     string getFragmentShaderPrefix(){
         return "#version 140\n"
@@ -91,7 +79,16 @@ namespace enigma
                 "out vec2 v_TextureCoord;\n"
                 "out vec4 v_Color;\n"
                 "out vec3 v_lightIntensity;\n"
-                "uniform int en_ActiveLights;"
+                "uniform int en_ActiveLights;\n"
+
+                "uniform bool en_LightingEnabled;\n"
+                "uniform bool en_VS_FogEnabled;\n"
+                "uniform float en_FogStart;\n"
+                "uniform float en_RcpFogRange;\n"
+
+                "#define MAX_LIGHTS   8\n"
+
+                "uniform vec4   en_AmbientColor;                              // rgba=color\n"
 
                 "struct LightInfo {\n"
                   "vec4 Position; // Light position in eye coords\n"
