@@ -65,7 +65,7 @@ void d3d_set_hidden(bool enable)
 {
 
     enigma::d3dHidden = enable;
-}   
+}
 
 void d3d_set_zwriteenable(bool enable)
 {
@@ -153,7 +153,7 @@ void d3d_set_line_width(float value) {
 
 void d3d_set_point_size(float value) {
 
-} 
+}
 
 void d3d_set_depth_operator(int mode) {
 
@@ -167,6 +167,11 @@ void d3d_set_depth(double dep)
 void d3d_set_shading(bool smooth)
 {
 
+}
+
+void d3d_set_clip_plane(bool enable)
+{
+   ///TODO: Code this
 }
 
 }
@@ -208,7 +213,7 @@ class d3d_lights
 
     }
 
-    bool light_define_specularity(int id, int r, int g, int b, double a) 
+    bool light_define_specularity(int id, int r, int g, int b, double a)
     {
 
     }
@@ -220,7 +225,7 @@ class d3d_lights
 
     bool light_disable(int id)
     {
-		
+
     }
 } d3d_lighting;
 
@@ -237,7 +242,7 @@ bool d3d_light_define_point(int id, gs_scalar x, gs_scalar y, gs_scalar z, doubl
     return d3d_lighting.light_define_point(id, x, y, z, range, col);
 }
 
-bool d3d_light_define_specularity(int id, int r, int g, int b, double a) 
+bool d3d_light_define_specularity(int id, int r, int g, int b, double a)
 {
     return d3d_lighting.light_define_specularity(id, r, g, b, a);
 }
@@ -245,7 +250,7 @@ bool d3d_light_define_specularity(int id, int r, int g, int b, double a)
 void d3d_light_specularity(int facemode, int r, int g, int b, double a)
 {
   float specular[4] = {r, g, b, a};
-  
+
 }
 
 void d3d_light_shininess(int facemode, int shine)

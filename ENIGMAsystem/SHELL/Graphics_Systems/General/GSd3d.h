@@ -82,6 +82,7 @@ void d3d_depth_clear_value(float value);
 void d3d_start();
 void d3d_end();
 void d3d_set_hidden(bool enable);
+void d3d_set_clip_plane(bool enable);
 void d3d_set_zwriteenable(bool enable);
 void d3d_set_lighting(bool enable);
 
