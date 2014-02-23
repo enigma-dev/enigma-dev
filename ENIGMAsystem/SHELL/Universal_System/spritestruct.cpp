@@ -264,13 +264,13 @@ namespace enigma
         // If sprite transparent, set the alpha to zero for pixels that should be transparent from lower left pixel color
         if (pxdata && transparent)
         {
-          int t_pixel_r = pxdata[(height-1)*width*4]; 
-          int t_pixel_g = pxdata[(height-1)*width*4+1]; 
-          int t_pixel_b = pxdata[(height-1)*width*4+2];
+          int t_pixel_r = pxdata[(height-1)*fullwidth*4]; 
+          int t_pixel_g = pxdata[(height-1)*fullwidth*4+1]; 
+          int t_pixel_b = pxdata[(height-1)*fullwidth*4+2];
           unsigned int ih, iw;
           for (ih = 0; ih < height; ih++)
           {
-            int tmp = ih*width*4;
+            int tmp = ih*fullwidth*4;
             for (iw = 0; iw < width; iw++)
             {
               if (pxdata[tmp] == t_pixel_r && pxdata[tmp+1] == t_pixel_g && pxdata[tmp+2] == t_pixel_b)
