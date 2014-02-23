@@ -146,7 +146,7 @@ unsigned char* image_load_bmp(string filename, unsigned int* width, unsigned int
 	for (ih = 0; ih < bmpheight; ih++)
 	{
 	  unsigned tmp = 0;
-	  if (!flipped) {
+	  if (flipped) {
 		tmp = ih*widfull*4;
 	  } else {
 		tmp = (bmpheight - ih)*widfull*4;
