@@ -18,6 +18,7 @@
 #ifndef ENIGMA_GSSURFACE_H
 #define ENIGMA_GSSURFACE_H
 #include "Universal_System/scalar.h"
+#include "GScolors.h"
 
 namespace enigma_user
 {
@@ -28,11 +29,11 @@ void surface_set_target(int id);
 void surface_reset_target();
 void surface_free(int id);
 bool surface_exists(int id);
-void draw_surface(int id, gs_scalar x, gs_scalar y);
-void draw_surface_stretched(int id, gs_scalar x, gs_scalar y, gs_scalar wid, gs_scalar hei);
-void draw_surface_part(int id, gs_scalar left, gs_scalar top, gs_scalar wid, gs_scalar hei, gs_scalar x, gs_scalar y);
-void draw_surface_tiled(int id, gs_scalar x, gs_scalar y);
-void draw_surface_tiled_area(int id, gs_scalar x, gs_scalar y, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2);
+void draw_surface(int id, gs_scalar x, gs_scalar y, int color=c_white, gs_scalar alpha=1.0);
+void draw_surface_stretched(int id, gs_scalar x, gs_scalar y, gs_scalar wid, gs_scalar hei, int color=c_white, gs_scalar alpha=1.0);
+void draw_surface_part(int id, gs_scalar left, gs_scalar top, gs_scalar wid, gs_scalar hei, gs_scalar x, gs_scalar y, int color=c_white, gs_scalar alpha=1.0);
+void draw_surface_tiled(int id, gs_scalar x, gs_scalar y, int color=c_white, gs_scalar alpha=1.0);
+void draw_surface_tiled_area(int id, gs_scalar x, gs_scalar y, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, int color=c_white, gs_scalar alpha=1.0);
 void draw_surface_ext(int id,gs_scalar x, gs_scalar y,gs_scalar xscale, gs_scalar yscale, double rot, int color, gs_scalar alpha);
 void draw_surface_stretched_ext(int id, gs_scalar x, gs_scalar y, gs_scalar wid, gs_scalar hei, int color, gs_scalar alpha);
 void draw_surface_part_ext(int id, gs_scalar left, gs_scalar top, gs_scalar wid, gs_scalar hei, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, gs_scalar alpha);
