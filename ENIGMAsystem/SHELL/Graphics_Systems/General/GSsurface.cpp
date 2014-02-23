@@ -42,16 +42,16 @@ extern int room_width, room_height/*, sprite_idmax*/;
 namespace enigma_user
 {
 
-void draw_surface(int id, gs_scalar x, gs_scalar y)
+void draw_surface(int id, gs_scalar x, gs_scalar y, int color, gs_scalar alpha)
 {
 	int w=surface_get_width(id);
 	int h=surface_get_height(id);
   
 	draw_primitive_begin_texture(pr_trianglestrip, surface_get_texture(id));
-	draw_vertex_texture(x,y,0,0);
-	draw_vertex_texture(x+w,y,1,0);
-	draw_vertex_texture(x,y+h,0,1);
-	draw_vertex_texture(x+w,y+h,1,1);
+	draw_vertex_texture_color(x,y,0,0,color,alpha);
+	draw_vertex_texture_color(x+w,y,1,0,color,alpha);
+	draw_vertex_texture_color(x,y+h,0,1,color,alpha);
+	draw_vertex_texture_color(x+w,y+h,1,1,color,alpha);
 	draw_primitive_end();
 }
 
@@ -73,13 +73,13 @@ void draw_surface_ext(int id,gs_scalar x, gs_scalar y,gs_scalar xscale, gs_scala
 	draw_primitive_end();
 }
 
-void draw_surface_stretched(int id, gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h)
+void draw_surface_stretched(int id, gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h, int color, gs_scalar alpha)
 {
 	draw_primitive_begin_texture(pr_trianglestrip, surface_get_texture(id));
-	draw_vertex_texture(x,y,0,0);
-	draw_vertex_texture(x+w,y,1,0);
-	draw_vertex_texture(x,y+h,0,1);
-	draw_vertex_texture(x+w,y+h,1,1);
+	draw_vertex_texture_color(x,y,0,0,color,alpha);
+	draw_vertex_texture_color(x+w,y,1,0,color,alpha);
+	draw_vertex_texture_color(x,y+h,0,1,color,alpha);
+	draw_vertex_texture_color(x+w,y+h,1,1,color,alpha);
 	draw_primitive_end();
 }
 
@@ -93,15 +93,15 @@ void draw_surface_stretched_ext(int id, gs_scalar x, gs_scalar y, gs_scalar w, g
 	draw_primitive_end();
 }
 
-void draw_surface_part(int id, gs_scalar left, gs_scalar top, gs_scalar w, gs_scalar h, gs_scalar x, gs_scalar y)
+void draw_surface_part(int id, gs_scalar left, gs_scalar top, gs_scalar w, gs_scalar h, gs_scalar x, gs_scalar y, int color, gs_scalar alpha)
 {
 	const gs_scalar tbw=surface_get_width(id),tbh=surface_get_height(id);
 	
 	draw_primitive_begin_texture(pr_trianglestrip, surface_get_texture(id));
-	draw_vertex_texture(x,y,left/tbw,top/tbh);
-	draw_vertex_texture(x+w,y,(left+w)/tbw,top/tbh);
-	draw_vertex_texture(x,y+h,left/tbw,(top+h)/tbh);
-	draw_vertex_texture(x+w,y+h,(left+w)/tbw,(top+h)/tbh);
+	draw_vertex_texture_color(x,y,left/tbw,top/tbh,color,alpha);
+	draw_vertex_texture_color(x+w,y,(left+w)/tbw,top/tbh,color,alpha);
+	draw_vertex_texture_color(x,y+h,left/tbw,(top+h)/tbh,color,alpha);
+	draw_vertex_texture_color(x+w,y+h,(left+w)/tbw,(top+h)/tbh,color,alpha);
 	draw_primitive_end();
 }
 
@@ -138,7 +138,7 @@ void draw_surface_general(int id, gs_scalar left, gs_scalar top, gs_scalar width
     draw_primitive_end();
 }
 
-void draw_surface_tiled(int id, gs_scalar x, gs_scalar y)
+void draw_surface_tiled(int id, gs_scalar x, gs_scalar y, int color, gs_scalar alpha)
 {
 	const gs_scalar tbw = surface_get_width(id), tbh = surface_get_height(id);
 	x=surface_get_width(id)-fmod(x,surface_get_width(id));
@@ -152,10 +152,10 @@ void draw_surface_tiled(int id, gs_scalar x, gs_scalar y)
 		for (int c=0; c<vertil; c++)
 		{
 			draw_primitive_begin_texture(pr_trianglestrip, surface_get_texture(id));
-			draw_vertex_texture(i*tbw-x,c*tbh-y,0,0);
-			draw_vertex_texture((i+1)*tbw-x,c*tbh-y,1,0);
-			draw_vertex_texture(i*tbw-x,(c+1)*tbh-y,0,1);
-			draw_vertex_texture((i+1)*tbw-x,(c+1)*tbh-y,1,1);
+			draw_vertex_texture_color(i*tbw-x,c*tbh-y,0,0,color,alpha);
+			draw_vertex_texture_color((i+1)*tbw-x,c*tbh-y,1,0,color,alpha);
+			draw_vertex_texture_color(i*tbw-x,(c+1)*tbh-y,0,1,color,alpha);
+			draw_vertex_texture_color((i+1)*tbw-x,(c+1)*tbh-y,1,1,color,alpha);
 			draw_primitive_end();
 		}
 	}
@@ -183,7 +183,7 @@ void draw_surface_tiled_ext(int id, gs_scalar x, gs_scalar y, gs_scalar xscale, 
     }
 }
 
-void draw_surface_tiled_area(int id, gs_scalar x, gs_scalar y, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2)
+void draw_surface_tiled_area(int id, gs_scalar x, gs_scalar y, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, int color, gs_scalar alpha)
 {
     gs_scalar sw,sh,i,j,jj,left,top,width,height,X,Y;
     sw = surface_get_width(id);
@@ -212,10 +212,10 @@ void draw_surface_tiled_area(int id, gs_scalar x, gs_scalar y, gs_scalar x1, gs_
         else height = sh-top;
 		  
 		draw_primitive_begin_texture(pr_trianglestrip, surface_get_texture(id));
-		draw_vertex_texture(X,Y,left/sw,top/sh);
-		draw_vertex_texture(X+width,Y,(left+width)/sw,top/sh);
-		draw_vertex_texture(X,Y+height,left/sw,(top+height)/sh);
-		draw_vertex_texture(X+width,Y+height,(left+width)/sw,(top+height)/sh);
+		draw_vertex_texture_color(X,Y,left/sw,top/sh,color,alpha);
+		draw_vertex_texture_color(X+width,Y,(left+width)/sw,top/sh,color,alpha);
+		draw_vertex_texture_color(X,Y+height,left/sw,(top+height)/sh,color,alpha);
+		draw_vertex_texture_color(X+width,Y+height,(left+width)/sw,(top+height)/sh,color,alpha);
 		draw_primitive_end();
       }
       j = jj;
