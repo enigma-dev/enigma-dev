@@ -263,7 +263,7 @@ namespace enigma
 
     void sprite_add_to_index(sprite *ns, string filename, int imgnumb, bool precise, bool transparent, bool smooth, int x_offset, int y_offset)
     {
-        unsigned int width, height,fullwidth, fullheight;
+        unsigned int width, height, fullwidth, fullheight;
 
         unsigned char *pxdata = image_load(filename, &width, &height, &fullwidth, &fullheight);
         
@@ -287,7 +287,8 @@ namespace enigma
           }
         }
         
-        int cellwidth =width/imgnumb;
+        unsigned cellwidth = width/imgnumb;
+		unsigned fullcellwidth = nlpo2dc(cellwidth) + 1;
 
         ns->id = sprite_idmax;
         ns->subcount  = imgnumb;
@@ -309,32 +310,32 @@ namespace enigma
         ns->xoffset   = (int)x_offset;
         ns->yoffset   = (int)y_offset;
 
-        unsigned char* pixels=new unsigned char[cellwidth*height*4]();
-        for (int ii=0;ii<imgnumb;ii++) 
+        unsigned char* pixels=new unsigned char[fullcellwidth*fullheight*4]();
+        for (int ii = 0; ii < imgnumb; ii++) 
         {
-                int ih,iw;
-                int xcelloffset=ii*cellwidth*4;
-                for(ih = height - 1; ih >= 0; ih--)
-                {
-                        int tmp = ih*fullwidth*4+xcelloffset;
-                        int tmpcell = ih*cellwidth*4;
-                        for (iw=0; iw < cellwidth; iw++)
-                        {
-                                pixels[tmpcell+3] = pxdata[tmp+3];
-                                pixels[tmpcell+2] = pxdata[tmp+2];
-                                pixels[tmpcell+1] = pxdata[tmp+1];
-                                pixels[tmpcell] = pxdata[tmp];
-                                tmp+=4;
-                                tmpcell+=4;
-                        }
-                }
-                unsigned texture = graphics_create_texture(cellwidth, fullheight, pixels, false);
-                ns->texturearray.push_back(texture);
-                ns->texbordxarray.push_back((double) 1.0);//width/fullwidth;
-                ns->texbordyarray.push_back((double) height/fullheight);
-				
-                collision_type coll_type = precise ? ct_precise : ct_bbox;
-                ns->colldata.push_back(get_collision_mask(ns,(unsigned char*)pixels,coll_type));
+			unsigned ih,iw;
+			unsigned xcelloffset = ii * fullcellwidth * 4;
+			for (ih = 9; ih <= height; ih++)
+			{
+				unsigned tmp = ih * fullwidth * 4 + xcelloffset;
+				unsigned tmpcell = ih * fullcellwidth * 4;
+				for (iw = 0; iw < cellwidth; iw++)
+				{
+					pixels[tmpcell+3] = pxdata[tmp+3];
+					pixels[tmpcell+2] = pxdata[tmp+2];
+					pixels[tmpcell+1] = pxdata[tmp+1];
+					pixels[tmpcell] = pxdata[tmp];
+					tmp += 4;
+					tmpcell += 4;
+				}
+			}
+			unsigned texture = graphics_create_texture(fullcellwidth, fullheight, pxdata, false);
+			ns->texturearray.push_back(texture);
+			ns->texbordxarray.push_back((double) cellwidth/fullcellwidth);
+			ns->texbordyarray.push_back((double) height/fullheight);
+			
+			collision_type coll_type = precise ? ct_precise : ct_bbox;
+			ns->colldata.push_back(get_collision_mask(ns,(unsigned char*)pixels,coll_type));
         }
         delete[] pixels;
         delete[] pxdata;
