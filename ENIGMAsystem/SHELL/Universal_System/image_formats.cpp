@@ -40,8 +40,8 @@ inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect 
 namespace enigma
 {
 
-unsigned char* image_reverse_scanlines(const unsigned char* data, unsigned width, unsigned height, unsigned bytes) {
-	//Flip upside down
+unsigned char* image_flip(const unsigned char* data, unsigned width, unsigned height, unsigned bytes) {
+	//flipped upside down
 	unsigned sz = width * height;
 	unsigned char* rgbdata = new unsigned char[sz * bytes];
 	for (unsigned int i = 0; i < height; i++) { // Doesn't matter the order now
@@ -64,47 +64,47 @@ string image_get_format(string filename) {
 }
 
 /// Generic all-purpose image loading call.
-unsigned char* image_load(string filename, string format, unsigned int* width, unsigned int* height, unsigned int* fullwidth, unsigned int* fullheight) {
+unsigned char* image_load(string filename, string format, unsigned int* width, unsigned int* height, unsigned int* fullwidth, unsigned int* fullheight, bool flipped) {
 	if (format.compare(".png") == 0) {
-		return image_load_png(filename, width, height, fullwidth, fullheight);
+		return image_load_png(filename, width, height, fullwidth, fullheight, flipped);
 	} else if (format.compare(".bmp") == 0) {
-		return image_load_bmp(filename, width, height, fullwidth, fullheight);
+		return image_load_bmp(filename, width, height, fullwidth, fullheight, flipped);
 	} else {
-		return image_load_bmp(filename, width, height, fullwidth, fullheight);
+		return image_load_bmp(filename, width, height, fullwidth, fullheight, flipped);
 	}
 }
 
 
 /// Generic all-purpose image loading call that will regexp the filename for the format and call the appropriate function.
-unsigned char* image_load(string filename, unsigned int* width, unsigned int* height, unsigned int* fullwidth, unsigned int* fullheight) {
+unsigned char* image_load(string filename, unsigned int* width, unsigned int* height, unsigned int* fullwidth, unsigned int* fullheight, bool flipped) {
 	string format = image_get_format(filename);
 	if (format.empty()) {
 		format = ".bmp";
 	}
-	return image_load(filename, format, width, height, fullwidth, fullheight);
+	return image_load(filename, format, width, height, fullwidth, fullheight, flipped);
 }
 
 /// Generic all-purpose image saving call.
-int image_save(string filename, const unsigned char* data, string format, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight) {
+int image_save(string filename, const unsigned char* data, string format, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped) {
 	if (format.compare(".png") == 0) {
-		return image_save_png(filename, data, width, height, fullwidth, fullheight);
+		return image_save_png(filename, data, width, height, fullwidth, fullheight, flipped);
 	} else if (format.compare(".bmp") == 0) {
-		return image_save_bmp(filename, data, width, height, fullwidth, fullheight);
+		return image_save_bmp(filename, data, width, height, fullwidth, fullheight, flipped);
 	} else {
-		return image_save_bmp(filename, data, width, height, fullwidth, fullheight);
+		return image_save_bmp(filename, data, width, height, fullwidth, fullheight, flipped);
 	}
 }
 
 /// Generic all-purpose image saving call that will regexp the filename for the format and call the appropriate function.
-int image_save(string filename, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight) {
+int image_save(string filename, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped) {
 	string format = image_get_format(filename);
 	if (format.empty()) {
 		format = ".bmp";
 	}
-	return image_save(filename, data, format, width, height, fullwidth, fullheight);
+	return image_save(filename, data, format, width, height, fullwidth, fullheight, flipped);
 }
 
-unsigned char* image_load_bmp(string filename, unsigned int* width, unsigned int* height, unsigned int* fullwidth, unsigned int* fullheight) {
+unsigned char* image_load_bmp(string filename, unsigned int* width, unsigned int* height, unsigned int* fullwidth, unsigned int* fullheight, bool flipped) {
 	FILE *imgfile;
 	int bmpstart,bmpwidth,bmpheight;
 	if(!(imgfile=fopen(filename.c_str(),"rb"))) return 0;
@@ -113,7 +113,7 @@ unsigned char* image_load_bmp(string filename, unsigned int* width, unsigned int
 	if (fgetc(imgfile)!=0x42 && fgetc(imgfile)!=0x4D) // Not a BMP
 	{
 	  fclose(imgfile);
-	  return image_load_png(filename,width,height,fullwidth,fullheight);
+	  return image_load_png(filename,width,height,fullwidth,fullheight,flipped);
 	}
 	fseek(imgfile,10,SEEK_SET);
 	if (fread(&bmpstart,1,4,imgfile) != 4)
@@ -183,7 +183,7 @@ unsigned char* image_load_bmp(string filename, unsigned int* width, unsigned int
 	return bitmap;
 }
 
-unsigned char* image_load_png(string filename, unsigned int* width, unsigned int* height, unsigned int* fullwidth, unsigned int* fullheight) {
+unsigned char* image_load_png(string filename, unsigned int* width, unsigned int* height, unsigned int* fullwidth, unsigned int* fullheight, bool flipped) {
 	unsigned error;
 	unsigned char* image;
 	unsigned bmpwidth, bmpheight;
@@ -221,7 +221,7 @@ unsigned char* image_load_png(string filename, unsigned int* width, unsigned int
 	return bitmap;
 }
 
-int image_save_bmp(string filename, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight) {
+int image_save_bmp(string filename, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped) {
 	unsigned sz = width * height;
 	FILE *bmp = fopen(filename.c_str(), "wb");
 	if (!bmp) return -1;
@@ -234,18 +234,30 @@ int image_save_bmp(string filename, const unsigned char* data, unsigned width, u
 	fwrite(&height,4,1,bmp);
 	//NOTE: x20 = 32bit full color, x18 = 24bit no alpha
 	fwrite("\1\0\x20\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0",28,1,bmp);
-
-	//NOTE: Full color BGRA
+	
 	unsigned bytes = 4;
 	
 	width *= bytes;
-	sz -= sz >> 2;
-	for (unsigned i = 0; i < width * height; i += width) {
-		for (unsigned ii = 0; ii < width; ii += bytes) {
-			fwrite(&data[i + ii + 2],sizeof(char),1,bmp);
-			fwrite(&data[i + ii + 1],sizeof(char),1,bmp);
-			fwrite(&data[i + ii + 0],sizeof(char),1,bmp);
-			fwrite(&data[i + ii + 3],sizeof(char),1,bmp);
+	fullwidth *= bytes;
+	unsigned lastbyte = fullwidth * height;
+	
+	if (flipped) {
+		for (unsigned i = 0; i < lastbyte; i += fullwidth) {
+			for (unsigned ii = 0; ii < width; ii += bytes) {
+				fwrite(&data[i + ii + 2],sizeof(char),1,bmp);
+				fwrite(&data[i + ii + 1],sizeof(char),1,bmp);
+				fwrite(&data[i + ii + 0],sizeof(char),1,bmp);
+				fwrite(&data[i + ii + 3],sizeof(char),1,bmp);
+			}
+		}
+	} else {
+		for (unsigned i = 0; i < lastbyte; i += fullwidth) {
+			for (unsigned ii = 0; ii < width; ii += bytes) {
+				fwrite(&data[lastbyte - i + ii + 2],sizeof(char),1,bmp);
+				fwrite(&data[lastbyte - i + ii + 1],sizeof(char),1,bmp);
+				fwrite(&data[lastbyte - i + ii + 0],sizeof(char),1,bmp);
+				fwrite(&data[lastbyte - i + ii + 3],sizeof(char),1,bmp);
+			}
 		}
 	}
 
@@ -253,43 +265,12 @@ int image_save_bmp(string filename, const unsigned char* data, unsigned width, u
 	return 0;
 }
 
-// Just a back up if ever needed for 24bit bmp
-int image_save_bmp24(string filename, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight) {
-	unsigned sz = width * height;
-	FILE *bmp = fopen(filename.c_str(), "wb");
-	if (!bmp) return -1;
-	fwrite("BM", 2, 1, bmp);
-	
-	sz <<= 2;
-	fwrite(&sz,4,1,bmp);
-	fwrite("\0\0\0\0\x36\0\0\0\x28\0\0",12,1,bmp);
-	fwrite(&width,4,1,bmp);
-	fwrite(&height,4,1,bmp);
-	//NOTE: x20 = 32bit full color, x18 = 24bit no alpha
-	fwrite("\1\0\x18\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0",28,1,bmp);
-
-	//NOTE: 24bit BGR
-	unsigned bytes = 3;
-	
-	if (width & bytes) {
-		width *= bytes;
-		size_t pad = width & bytes;
-		sz -= sz >> 2;
-		for (unsigned i = 0; i < sz; i += width) {
-			fwrite(&data[i],sizeof(char),width,bmp);
-			fwrite("\0\0\0\0",sizeof(char),pad,bmp);
-		}
-	} else { fwrite(&data[0],sizeof(char),width*height*bytes,bmp); }
-
-	fclose(bmp);
-	return 0;
-}
-
-int image_save_png(string filename, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight)
+int image_save_png(string filename, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped)
 {
     unsigned char* buffer;
     size_t buffersize;
-    unsigned error = lodepng_encode_memory(&buffer, &buffersize, data, width, height, LCT_RGBA, 8);
+	//TODO: Use width/height instead of full size, unfortunately lodepng don't support this apparantly
+    unsigned error = lodepng_encode_memory(&buffer, &buffersize, data, fullwidth, fullheight, LCT_RGBA, 8);
     if(!error){
         std::ofstream file(filename.c_str(), std::ios::out|std::ios::binary);
         file.write(reinterpret_cast<const char*>(buffer), std::streamsize(buffersize));
