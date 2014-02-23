@@ -16,6 +16,9 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#ifndef ENIGMA_IMAGEFORMATS_H
+#define ENIGMA_IMAGEFORMATS_H
+
 #include <string>
 using std::string;
 
@@ -50,3 +53,4 @@ namespace enigma {
 	int image_save_png(string filename, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped);
 }
 
+#endif //ENIGMA_IMAGEFORMATS_H

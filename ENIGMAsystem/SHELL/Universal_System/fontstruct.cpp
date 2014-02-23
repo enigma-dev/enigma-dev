@@ -28,6 +28,7 @@ using namespace std;
 #include "spritestruct.h"
 #include "fontstruct.h"
 #include "rectpack.h"
+#include "image_formats.h"
 
 namespace enigma
 {
@@ -73,9 +74,11 @@ namespace enigma
 
       for (int i = 0; i < gcount; i++)
       {
-        gtw =  int((double)sspr->width / sspr->texbordyarray[i]);
-		unsigned w, h;
-        unsigned char* data = enigma::graphics_get_texture_rgba(sspr->texturearray[i], &w, &h);
+		unsigned fw, fh;
+        unsigned char* data = enigma::graphics_get_texture_rgba(sspr->texturearray[i], &fw, &fh);
+		//NOTE: Following line replaced gtw = int((double)sspr->width / sspr->texbordyarray[i]);
+		//this was to fix non-power of two subimages
+        gtw = fw;
         glyphdata[i] = data;
 
         // Here we calculate the bbox
@@ -120,7 +123,7 @@ namespace enigma
       boxes.sort();
 
 	  //NOTE: This was hardcoded with 64x64 now it starts with the size of the first glyph, maybe should be fixed properly?
-      int w = glyphmetrics[0].w, h = glyphmetrics[0].h ;
+      unsigned w = glyphmetrics[0].w, h = glyphmetrics[0].h;
       enigma::rect_packer::rectpnode *rectplane = new enigma::rect_packer::rectpnode(0,0,w,h);
       for (list<unsigned int>::reverse_iterator i = boxes.rbegin(); i != boxes.rend() and w and h; )
       {
@@ -141,9 +144,11 @@ namespace enigma
       for (int i = 0; i < gcount; i++)
       {
         // Copy the font glyph image into the big texture we just allocated
-        for (int yy = 0; yy < glyphmetrics[i].h; yy++)
-          for (int xx = 0; xx < glyphmetrics[i].w; xx++)
+        for (int yy = 0; yy < glyphmetrics[i].h; yy++) {
+          for (int xx = 0; xx < glyphmetrics[i].w; xx++) {
             bigtex[w*(glyphmetrics[i].y + yy) + glyphmetrics[i].x + xx] = ((unsigned int*)glyphdata[i])[gtw*(glyphy[i] + yy) + xx + glyphx[i]];
+		  }
+		}
         delete[] glyphdata[i]; // Delete the image data we just copied
 
         font->glyphs[i].tx = glyphmetrics[i].x / double(w);
@@ -151,7 +156,7 @@ namespace enigma
         font->glyphs[i].tx2 = (glyphmetrics[i].x + glyphmetrics[i].w) / double(w);
         font->glyphs[i].ty2 = (glyphmetrics[i].y + glyphmetrics[i].h) / double(h);
       }
-
+	  
       font->texture = enigma::graphics_create_texture(w,h,w,h,bigtex,true);
       font->twid = w;
       font->thgt = h;
