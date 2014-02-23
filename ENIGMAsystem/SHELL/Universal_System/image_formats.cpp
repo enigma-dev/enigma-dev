@@ -145,7 +145,12 @@ unsigned char* image_load_bmp(string filename, unsigned int* width, unsigned int
 
 	for (ih = 0; ih < bmpheight; ih++)
 	{
-	  unsigned tmp = ih*widfull*4;
+	  unsigned tmp = 0;
+	  if (!flipped) {
+		tmp = ih*widfull*4;
+	  } else {
+		tmp = (bmpheight - ih)*widfull*4;
+	  }
 	  for (iw = 0; iw < bmpwidth; iw++){
 		if (bitdepth == 24)
 		{
