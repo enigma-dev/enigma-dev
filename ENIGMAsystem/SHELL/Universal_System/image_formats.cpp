@@ -208,7 +208,12 @@ unsigned char* image_load_png(string filename, unsigned int* width, unsigned int
 	unsigned char* bitmap = new unsigned char[bitmap_size](); // Initialize to zero.
   
 	for (ih = 0; ih < pngheight; ih++) {
-	  unsigned tmp = ih*widfull*4;
+	  unsigned tmp = 0;
+	  if (!flipped) {
+		tmp = ih*widfull*4;
+	  } else {
+		tmp = (pngheight - 1 - ih)*widfull*4;
+	  }
 	  for (iw = 0; iw < pngwidth; iw++) {
 		bitmap[tmp+3] = image[4*pngwidth*ih+iw*4+3];
 		bitmap[tmp+2] = image[4*pngwidth*ih+iw*4+2];
@@ -246,23 +251,16 @@ int image_save_bmp(string filename, const unsigned char* data, unsigned width, u
 	fullwidth *= bytes;
 	unsigned lastbyte = fullwidth * height;
 	
-	if (flipped) {
-		for (unsigned i = 0; i < lastbyte; i += fullwidth) {
-			for (unsigned ii = 0; ii < width; ii += bytes) {
-				fwrite(&data[i + ii + 2],sizeof(char),1,bmp);
-				fwrite(&data[i + ii + 1],sizeof(char),1,bmp);
-				fwrite(&data[i + ii + 0],sizeof(char),1,bmp);
-				fwrite(&data[i + ii + 3],sizeof(char),1,bmp);
-			}
+	for (unsigned i = 0; i < lastbyte; i += fullwidth) {
+		unsigned tmp = i;
+		if (flipped) {
+			tmp = lastbyte - i;
 		}
-	} else {
-		for (unsigned i = 0; i < lastbyte; i += fullwidth) {
-			for (unsigned ii = 0; ii < width; ii += bytes) {
-				fwrite(&data[lastbyte - i + ii + 2],sizeof(char),1,bmp);
-				fwrite(&data[lastbyte - i + ii + 1],sizeof(char),1,bmp);
-				fwrite(&data[lastbyte - i + ii + 0],sizeof(char),1,bmp);
-				fwrite(&data[lastbyte - i + ii + 3],sizeof(char),1,bmp);
-			}
+		for (unsigned ii = 0; ii < width; ii += bytes) {
+			fwrite(&data[tmp + ii + 2],sizeof(char),1,bmp);
+			fwrite(&data[tmp + ii + 1],sizeof(char),1,bmp);
+			fwrite(&data[tmp + ii + 0],sizeof(char),1,bmp);
+			fwrite(&data[tmp + ii + 3],sizeof(char),1,bmp);
 		}
 	}
 
