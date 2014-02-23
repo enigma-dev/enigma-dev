@@ -143,13 +143,13 @@ unsigned char* image_load_bmp(string filename, unsigned int* width, unsigned int
 	long int pad=bmpwidth & 3; //This is that set of nulls that follows each line
 	  fseek(imgfile,bmpstart,SEEK_SET);
 
-	for (ih = 0; ih < bmpheight; ih++)
+	for (ih = 0; ih < bmpheight - 1; ih++)
 	{
 	  unsigned tmp = 0;
 	  if (flipped) {
 		tmp = ih*widfull*4;
 	  } else {
-		tmp = (bmpheight - ih)*widfull*4;
+		tmp = (bmpheight - 1 - ih)*widfull*4;
 	  }
 	  for (iw = 0; iw < bmpwidth; iw++){
 		if (bitdepth == 24)
