@@ -143,7 +143,7 @@ unsigned char* image_load_bmp(string filename, unsigned int* width, unsigned int
 	long int pad=bmpwidth & 3; //This is that set of nulls that follows each line
 	  fseek(imgfile,bmpstart,SEEK_SET);
 
-	for (ih = 0; ih < bmpheight - 1; ih++)
+	for (ih = 0; ih < bmpheight; ih++)
 	{
 	  unsigned tmp = 0;
 	  if (flipped) {
