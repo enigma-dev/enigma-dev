@@ -26,7 +26,6 @@
 #include "Universal_System/spritestruct.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 
-
 vector<TextureStruct*> textureStructs(0);
 
 namespace enigma_user {
@@ -51,7 +50,7 @@ inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect 
 
 namespace enigma
 {
-  int graphics_create_texture(int fullwidth, int fullheight, void* pxdata, bool isfont)
+  int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool isfont)
   {
     LPDIRECT3DTEXTURE9 texture = NULL;
 
@@ -73,6 +72,10 @@ namespace enigma
 
 	TextureStruct* textureStruct = new TextureStruct(texture);
 	textureStruct->isFont = isfont;
+	textureStruct->width = width;
+	textureStruct->height = height;
+	textureStruct->fullwidth = fullwidth;
+	textureStruct->fullheight = fullheight;
     textureStructs.push_back(textureStruct);
     return textureStructs.size()-1;
   }
@@ -92,7 +95,7 @@ namespace enigma
 	 textureStructs.erase(textureStructs.begin() + tex);
   }
 
-  unsigned char* graphics_get_texture_rgba(unsigned texture)
+  unsigned char* graphics_get_texture_rgba(unsigned texture, unsigned* fullwidth, unsigned* fullheight)
   {
 
   }
@@ -124,24 +127,23 @@ void texture_set_blending(bool enable)
 
 }
 
-gs_scalar texture_get_width(int texid)
-{
-
+gs_scalar texture_get_width(int texid) {
+	return textureStructs[texid]->width / textureStructs[texid]->fullwidth;
 }
 
 gs_scalar texture_get_height(int texid)
 {
-
+	return textureStructs[texid]->fullheight / textureStructs[texid]->fullheight;
 }
 
-int texture_get_texel_width(int texid)
+unsigned texture_get_texel_width(int texid)
 {
-
+	return textureStructs[texid]->width;
 }
 
-int texture_get_texel_height(int texid)
+unsigned texture_get_texel_height(int texid)
 {
-
+	return textureStructs[texid]->height;
 }
 
 void texture_set(int texid) {

@@ -115,9 +115,9 @@ namespace enigma
   };
 
   // Assumes fullwidth == fullheight == 2^n for some n>0.
-  static void create_particle_sprite(int fullwidth, int fullheight, char* imgpxdata, pt_shape pt_sh)
+  static void create_particle_sprite(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, char* imgpxdata, pt_shape pt_sh)
   {
-    unsigned texture = graphics_create_texture(fullwidth,fullheight,imgpxdata);
+    unsigned texture = graphics_create_texture(width, height, fullwidth, fullheight, imgpxdata);
 
     particle_sprite* p_sprite = new particle_sprite();
     p_sprite->texture = texture;
@@ -150,7 +150,7 @@ namespace enigma
         imgpxdata[4*(x + y*fullwidth)+3] = alpha;
       }
     }
-    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_sh_pixel);
+    create_particle_sprite(fullwidth, fullheight, fullwidth, fullheight, imgpxdata, pt_sh_pixel);
     delete[] imgpxdata;
   }
   static void generate_disk()
@@ -179,7 +179,7 @@ namespace enigma
         imgpxdata[4*(x + y*fullwidth)+3] = alpha;
       }
     }
-    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_sh_disk);
+    create_particle_sprite(fullwidth, fullheight, fullwidth, fullheight, imgpxdata, pt_sh_disk);
     delete[] imgpxdata;
   }
   static void generate_square()
@@ -208,7 +208,7 @@ namespace enigma
         imgpxdata[4*(x + y*fullwidth)+3] = alpha;
       }
     }
-    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_sh_square);
+    create_particle_sprite(fullwidth, fullheight, fullwidth, fullheight, imgpxdata, pt_sh_square);
     delete[] imgpxdata;
   }
   static void generate_line()
@@ -240,7 +240,7 @@ namespace enigma
         imgpxdata[4*(x + y*fullwidth)+3] = alpha;
       }
     }
-    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_sh_line);
+    create_particle_sprite(fullwidth, fullheight, fullwidth, fullheight, imgpxdata, pt_sh_line);
     delete[] imgpxdata;
   }
   static void generate_star()
@@ -337,7 +337,7 @@ namespace enigma
         imgpxdata[4*(x + y*fullwidth)+3] = alpha;
       }
     }
-    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_sh_star);
+    create_particle_sprite(fullwidth, fullheight, fullwidth, fullheight, imgpxdata, pt_sh_star);
     delete[] imgpxdata;
   }
   static void generate_circle()
@@ -365,7 +365,7 @@ namespace enigma
         imgpxdata[4*(x + y*fullwidth)+3] = alpha;
       }
     }
-    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_sh_circle);
+    create_particle_sprite(fullwidth, fullheight, fullwidth, fullheight, imgpxdata, pt_sh_circle);
     delete[] imgpxdata;
   }
   static void generate_ring()
@@ -399,7 +399,7 @@ namespace enigma
         imgpxdata[4*(x + y*fullwidth)+3] = alpha;
       }
     }
-    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_sh_ring);
+    create_particle_sprite(fullwidth, fullheight, fullwidth, fullheight, imgpxdata, pt_sh_ring);
     delete[] imgpxdata;
   }
   static void generate_sphere()
@@ -424,7 +424,7 @@ namespace enigma
         imgpxdata[4*(x + y*fullwidth)+3] = alpha;
       }
     }
-    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_sh_sphere);
+    create_particle_sprite(fullwidth, fullheight, fullwidth, fullheight, imgpxdata, pt_sh_sphere);
     delete[] imgpxdata;
   }
   static void generate_flare()
@@ -479,7 +479,7 @@ namespace enigma
         imgpxdata[4*(x + y*fullwidth)+3] = alpha;
       }
     }
-    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_sh_flare);
+    create_particle_sprite(fullwidth, fullheight, fullwidth, fullheight, imgpxdata, pt_sh_flare);
     delete[] imgpxdata;
   }
   static void generate_spark()
@@ -567,7 +567,7 @@ namespace enigma
         imgpxdata[4*(x + y*fullwidth)+3] = alpha;
       }
     }
-    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_sh_spark);
+    create_particle_sprite(fullwidth, fullheight, fullwidth, fullheight, imgpxdata, pt_sh_spark);
     delete[] imgpxdata;
   }
   static void generate_explosion()
@@ -643,7 +643,7 @@ namespace enigma
         imgpxdata[4*(x + y*fullwidth)+3] = alpha;
       }
     }
-    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_sh_explosion);
+    create_particle_sprite(fullwidth, fullheight, fullwidth, fullheight, imgpxdata, pt_sh_explosion);
     delete[] imgpxdata;
   }
   static void generate_cloud()
@@ -719,7 +719,7 @@ namespace enigma
         imgpxdata[4*(x + y*fullwidth)+3] = alpha;
       }
     }
-    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_sh_cloud);
+    create_particle_sprite(fullwidth, fullheight, fullwidth, fullheight, imgpxdata, pt_sh_cloud);
     delete[] imgpxdata;
   }
   static void generate_smoke()
@@ -794,7 +794,7 @@ namespace enigma
         imgpxdata[4*(x + y*fullwidth)+3] = alpha;
       }
     }
-    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_sh_smoke);
+    create_particle_sprite(fullwidth, fullheight, fullwidth, fullheight, imgpxdata, pt_sh_smoke);
     delete[] imgpxdata;
   }
   static void generate_snow()
@@ -900,7 +900,7 @@ namespace enigma
         imgpxdata[4*(x + y*fullwidth)+3] = alpha;
       }
     }
-    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_sh_snow);
+    create_particle_sprite(fullwidth, fullheight, fullwidth, fullheight, imgpxdata, pt_sh_snow);
     delete[] imgpxdata;
   }
   particle_sprite* get_particle_sprite(pt_shape particle_shape)

@@ -47,7 +47,7 @@ inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect 
 
 namespace enigma
 {
-  int graphics_create_texture(int fullwidth, int fullheight, void* pxdata, bool isfont)
+  int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool isfont)
   {
 
   }
@@ -67,7 +67,7 @@ namespace enigma
 
   }
 
-  unsigned char* graphics_get_texture_rgba(unsigned texture)
+  unsigned char* graphics_get_texture_rgba(unsigned texture, unsigned* fillwidth, unsigned* fullheight)
   {
 
   }
@@ -106,12 +106,12 @@ gs_scalar texture_get_height(int texid)
 
 }
 
-int texture_get_texel_width(int texid)
+unsigned texture_get_texel_width(int texid)
 {
 
 }
 
-int texture_get_texel_height(int texid)
+unsigned texture_get_texel_height(int texid)
 {
 
 }
