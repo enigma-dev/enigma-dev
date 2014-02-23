@@ -79,7 +79,7 @@ int background_create_from_screen(int x, int y, int w, int h, bool removeback, b
 	glReadPixels(x, h-y,w,h,GL_RGBA, GL_UNSIGNED_BYTE, &rgbdata[0]);
 	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, prevFbo);
 	
-	unsigned char* data = enigma::image_reverse_scanlines(&rgbdata[0], w, h, 4);
+	unsigned char* data = enigma::image_flip(&rgbdata[0], w, h, 4);
 	
 	enigma::backgroundstructarray_reallocate();
     int bckid=enigma::background_idmax;

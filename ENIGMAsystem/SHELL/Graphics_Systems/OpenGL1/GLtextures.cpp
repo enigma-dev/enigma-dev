@@ -64,7 +64,7 @@ inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect 
 
 namespace enigma
 {
-  int graphics_create_texture(int fullwidth, int fullheight, void* pxdata, bool isfont)
+  int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool isfont)
   {
     GLuint texture;
     glGenTextures(1, &texture);
@@ -76,6 +76,10 @@ namespace enigma
     glBindTexture(GL_TEXTURE_2D, 0);
 
 	TextureStruct* textureStruct = new TextureStruct(texture);
+	textureStruct->width = width;
+	textureStruct->height = height;
+	textureStruct->fullwidth = fullwidth;
+	textureStruct->fullheight = fullheight;
 	textureStruct->isFont = isfont;
     textureStructs.push_back(textureStruct);
     return textureStructs.size()-1;
@@ -85,15 +89,17 @@ namespace enigma
   {
     GLuint texture = textureStructs[tex]->gltex;
     glBindTexture(GL_TEXTURE_2D, texture);
-    int w, h;
+    unsigned w, h, fw, fh;
 	bool interpolate = (interpolate_textures && !textureStructs[tex]->isFont);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,interpolate?GL_LINEAR:GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,interpolate?GL_LINEAR:GL_NEAREST);
-    glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_WIDTH, &w);
-    glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_HEIGHT, &h);
-    char* bitmap = new char[(h<<(lgpp2(w)+2))|2];
+	w = textureStructs[tex]->width;
+	h = textureStructs[tex]->height;
+	fw = textureStructs[tex]->fullwidth;
+	fh = textureStructs[tex]->fullheight;
+    char* bitmap = new char[(fh<<(lgpp2(fw)+2))|2];
     glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, bitmap);
-    unsigned dup_tex = graphics_create_texture(w, h, bitmap, textureStructs[tex]->isFont);
+    unsigned dup_tex = graphics_create_texture(w, h, fw, fh, bitmap, textureStructs[tex]->isFont);
     delete[] bitmap;
     glPopAttrib();
     return dup_tex;
@@ -104,11 +110,13 @@ namespace enigma
     GLuint texture = textureStructs[tex]->gltex;
     GLuint copy_texture = textureStructs[copy_tex]->gltex;
 
-    int w, h, size;
+    unsigned w, h, fw, fh, size;
     glBindTexture(GL_TEXTURE_2D, texture);
-    glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_WIDTH, &w);
-    glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_HEIGHT, &h);
-    size = (h<<(lgpp2(w)+2))|2;
+	w = textureStructs[tex]->width;
+	h = textureStructs[tex]->height;
+	fw = textureStructs[tex]->fullwidth;
+	fh = textureStructs[tex]->fullheight;
+    size = (fh<<(lgpp2(fw)+2))|2;
     char* bitmap = new char[size];
     char* bitmap2 = new char[size];
     glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, bitmap);
@@ -119,7 +127,7 @@ namespace enigma
         bitmap[i] = (bitmap2[i-3] + bitmap2[i-2] + bitmap2[i-1])/3;
 
     glBindTexture(GL_TEXTURE_2D, texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, 4, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, bitmap);
+    glTexImage2D(GL_TEXTURE_2D, 0, 4, fw, fh, 0, GL_RGBA, GL_UNSIGNED_BYTE, bitmap);
 	bool interpolate = (interpolate_textures && !textureStructs[tex]->isFont);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,interpolate?GL_LINEAR:GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,interpolate?GL_LINEAR:GL_NEAREST);
@@ -137,17 +145,15 @@ namespace enigma
     textureStructs.erase(textureStructs.begin() + tex);
   }
 
-  unsigned char* graphics_get_texture_rgba(unsigned texture)
+  unsigned char* graphics_get_texture_rgba(unsigned texture, unsigned* fullwidth, unsigned* fullheight)
   {
     enigma_user::texture_set(texture);
 
-    int w,h;
-    glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_WIDTH, &w);
-    glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_HEIGHT,&h);
+    *fullwidth = textureStructs[texture]->fullwidth;
+	*fullheight = textureStructs[texture]->fullheight;
 
-    unsigned char* ret = new unsigned char[(w*h*4)];
+    unsigned char* ret = new unsigned char[((*fullwidth)*(*fullheight)*4)];
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
-	// The following line does not work when the texture is non power of two.
     glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, ret);
 
     return ret;
@@ -185,40 +191,23 @@ void texture_set_blending(bool enable)
     (enable?glEnable:glDisable)(GL_BLEND);
 }
 
-gs_scalar texture_get_width(int texid)
-{
-  // returns the actual number of pixels in the texture across the xaxis
-  GLint width = 0;
-  glBindTexture(GL_TEXTURE_2D, texid);
-  glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width);
-  return width;
+gs_scalar texture_get_width(int texid) {
+	return textureStructs[texid]->width / textureStructs[texid]->fullwidth;
 }
 
 gs_scalar texture_get_height(int texid)
 {
-  // returns the actual number of pixels in the tex across the yaxis
-  GLint height = 0;
-  glBindTexture(GL_TEXTURE_2D, texid);
-  glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &height);
-  return height;
+	return textureStructs[texid]->fullheight / textureStructs[texid]->fullheight;
 }
 
-int texture_get_texel_width(int texid)
+unsigned texture_get_texel_width(int texid)
 {
-  // returns the actual number of pixels in the texture across the xaxis
-  GLint width = 0;
-  glBindTexture(GL_TEXTURE_2D, texid);
-  glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width);
-  return width;
+	return textureStructs[texid]->width;
 }
 
-int texture_get_texel_height(int texid)
+unsigned texture_get_texel_height(int texid)
 {
-  // returns the actual number of pixels in the tex across the yaxis
-  GLint height = 0;
-  glBindTexture(GL_TEXTURE_2D, texid);
-  glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &height);
-  return height;
+	return textureStructs[texid]->height;
 }
 
 void texture_set(int texid) {
@@ -324,7 +313,7 @@ void texture_mipmapping_generate(int texid, int levels)
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, levels);
 }
 
-bool  texture_anisotropy_supported()
+bool texture_anisotropy_supported()
 {
   return strstr((char*)glGetString(GL_EXTENSIONS),
            "GL_EXT_texture_filter_anisotropic");

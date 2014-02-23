@@ -74,7 +74,8 @@ namespace enigma
       for (int i = 0; i < gcount; i++)
       {
         gtw =  int((double)sspr->width / sspr->texbordyarray[i]);
-        unsigned char* data = enigma::graphics_get_texture_rgba(sspr->texturearray[i]);
+		unsigned w, h;
+        unsigned char* data = enigma::graphics_get_texture_rgba(sspr->texturearray[i], &w, &h);
         glyphdata[i] = data;
 
         // Here we calculate the bbox
@@ -151,7 +152,7 @@ namespace enigma
         font->glyphs[i].ty2 = (glyphmetrics[i].y + glyphmetrics[i].h) / double(h);
       }
 
-      font->texture = enigma::graphics_create_texture(w,h,bigtex,true);
+      font->texture = enigma::graphics_create_texture(w,h,w,h,bigtex,true);
       font->twid = w;
       font->thgt = h;
       font->yoffset = 0;

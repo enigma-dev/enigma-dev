@@ -109,7 +109,7 @@ namespace enigma
     }
     memset(imgpxptr,0,(fullheight-h) * fullwidth);
 
-    int texture = graphics_create_texture(fullwidth,fullheight,imgpxdata,false);
+    int texture = graphics_create_texture(w, h, fullwidth,fullheight,imgpxdata,false);
     delete[] imgpxdata;
 
     backgroundstructarray[bkgid] = useAsTileset ? new background(w,h,texture,transparent,smoothEdges,preload) : new background_tileset(w,h,texture,transparent,smoothEdges,preload,tileWidth, tileHeight, hOffset, vOffset, hSep, vSep);
@@ -122,8 +122,8 @@ namespace enigma
   {
     unsigned int w, h, fullwidth, fullheight;
 
-    unsigned char *pxdata = image_load(filename,&w,&h,&fullwidth,&fullheight);
-    unsigned texture = graphics_create_texture(fullwidth, fullheight, pxdata, false);
+    unsigned char *pxdata = image_load(filename,&w,&h,&fullwidth,&fullheight,false);
+    unsigned texture = graphics_create_texture(w, h, fullwidth, fullheight, pxdata, false);
     delete[] pxdata;
 
     bak->width = w;
@@ -212,17 +212,12 @@ namespace enigma_user
   
   void background_save(int back, string fname) {
 	get_background(bck,back);
-	unsigned char* rgbdata = enigma::graphics_get_texture_rgba(bck->texture);
+	unsigned w, h;
+	unsigned char* rgbdata = enigma::graphics_get_texture_rgba(bck->texture, &w, &h);
 	
     string ext = enigma::image_get_format(fname);
 	
-	if (ext == ".bmp") {
-		unsigned char* data = enigma::image_reverse_scanlines(rgbdata, bck->width, bck->height, 4);
-		enigma::image_save(fname, data, bck->width, bck->height, bck->width, bck->height);
-		delete[] data;
-	} else {
-		enigma::image_save(fname, rgbdata, bck->width, bck->height, bck->width, bck->height);
-	}
+	enigma::image_save(fname, rgbdata, bck->width, bck->height, w, h, false);
 	
 	delete[] rgbdata;
   }

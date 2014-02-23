@@ -29,7 +29,7 @@ namespace enigma
   void graphicssystem_initialize(); /// This function can be implemented as an empty call if it is not needed.
 
   /// Generate a texture from image data. Preserves input pixbuf.
-  int graphics_create_texture(int fullwidth, int fullheight, void* pxdata, bool isfont = false);
+  int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool isfont = false);
   int graphics_duplicate_texture(int tex);
   void graphics_replace_texture_alpha_from_texture(int tex, int copy_tex);
   void graphics_delete_texture(int tex);
@@ -37,7 +37,7 @@ namespace enigma
   /// Retrieve image data from a texture, in unsigned char, RGBA format.
   /// This data will be allocated afresh; the pointer and data are yours to manipulate
   /// and must be freed once you are done.
-  unsigned char* graphics_get_texture_rgba(unsigned texture);
+  unsigned char* graphics_get_texture_rgba(unsigned texture, unsigned* fullwidth, unsigned* fullheight);
 
   struct particles_implementation
   {
