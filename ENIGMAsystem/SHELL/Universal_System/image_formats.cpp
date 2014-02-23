@@ -24,8 +24,6 @@
 #include <cstring>
 #include "lodepng.h"
 #include <stdlib.h>
-#include <windows.h>
-
 using namespace std;
 #include "image_formats.h"
 
