@@ -84,7 +84,7 @@ int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool 
 	glReadPixels(x, h-y,w,h,GL_RGBA, GL_UNSIGNED_BYTE, &rgbdata[0]);
 	glBindFramebuffer(GL_FRAMEBUFFER_EXT, prevFbo);
 	
-	unsigned char* data = enigma::image_reverse_scanlines(&rgbdata[0], w, h, 4);
+	unsigned char* data = enigma::image_flip(&rgbdata[0], w, h, 4);
 	
 	enigma::spritestructarray_reallocate();
     int sprid=enigma::sprite_idmax;
@@ -109,7 +109,7 @@ void sprite_add_from_screen(int id, int x, int y, int w, int h, bool removeback,
 	glReadPixels(x, h-y,w,h,GL_RGBA, GL_UNSIGNED_BYTE, &rgbdata[0]);
 	glBindFramebuffer(GL_FRAMEBUFFER_EXT, prevFbo);
 	
-	unsigned char* data = enigma::image_reverse_scanlines(&rgbdata[0], w, h, 4);
+	unsigned char* data = enigma::image_flip(&rgbdata[0], w, h, 4);
 
 	enigma::sprite_add_subimage(id, w, h, &data[0], &data[0], enigma::ct_precise); //TODO: Support toggling of precise.
 	delete[] data;

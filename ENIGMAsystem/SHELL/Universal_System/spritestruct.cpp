@@ -105,17 +105,11 @@ void sprite_save(int ind, unsigned subimg, string fname) {
     if (!get_sprite_mtx(spr, ind))
         return;
 
-	unsigned char* rgbdata = enigma::graphics_get_texture_rgba(spr->texturearray[subimg]);
+	unsigned w, h;
+	unsigned char* rgbdata = enigma::graphics_get_texture_rgba(spr->texturearray[subimg], &w, &h);
 	
-    string ext = enigma::image_get_format(fname);
-	if (ext == ".bmp") {
-		unsigned char* data = enigma::image_reverse_scanlines(rgbdata, spr->width, spr->height, 4);
-		enigma::image_save(fname, data, spr->width, spr->height, spr->width, spr->height);
-		delete[] data;
-	} else {
-		enigma::image_save(fname, rgbdata, spr->width, spr->height, spr->width, spr->height);
-	}
-	
+	enigma::image_save(fname, rgbdata, spr->width, spr->height, w, h, false);
+
 	delete[] rgbdata;
 }
 
@@ -263,21 +257,21 @@ namespace enigma
 
     void sprite_add_to_index(sprite *ns, string filename, int imgnumb, bool precise, bool transparent, bool smooth, int x_offset, int y_offset)
     {
-        unsigned int width, height,fullwidth, fullheight;
+        unsigned int width, height, fullwidth, fullheight;
 
-        unsigned char *pxdata = image_load(filename, &width, &height, &fullwidth, &fullheight);
+        unsigned char *pxdata = image_load(filename, &width, &height, &fullwidth, &fullheight, false);
         
         // If sprite transparent, set the alpha to zero for pixels that should be transparent from lower left pixel color
         if (pxdata && transparent)
         {
-          int t_pixel_r = pxdata[(height-1)*width*4]; 
-          int t_pixel_g = pxdata[(height-1)*width*4+1]; 
-          int t_pixel_b = pxdata[(height-1)*width*4+2];
+          int t_pixel_r = pxdata[(height-1)*fullwidth*4]; 
+          int t_pixel_g = pxdata[(height-1)*fullwidth*4+1]; 
+          int t_pixel_b = pxdata[(height-1)*fullwidth*4+2];
           unsigned int ih, iw;
-          for (ih = 0; ih <= height - 1; ih++)
+          for (ih = 0; ih < height; ih++)
           {
-            int tmp = ih*width*4;
-            for (iw=0; iw < width; iw++)
+            int tmp = ih*fullwidth*4;
+            for (iw = 0; iw < width; iw++)
             {
               if (pxdata[tmp] == t_pixel_r && pxdata[tmp+1] == t_pixel_g && pxdata[tmp+2] == t_pixel_b)
                 pxdata[tmp+3] = 0;
@@ -287,7 +281,8 @@ namespace enigma
           }
         }
         
-        int cellwidth =width/imgnumb;
+        unsigned cellwidth = width/imgnumb;
+		unsigned fullcellwidth = nlpo2dc(cellwidth) + 1;
 
         ns->id = sprite_idmax;
         ns->subcount  = imgnumb;
@@ -309,32 +304,32 @@ namespace enigma
         ns->xoffset   = (int)x_offset;
         ns->yoffset   = (int)y_offset;
 
-        unsigned char* pixels=new unsigned char[cellwidth*height*4]();
-        for (int ii=0;ii<imgnumb;ii++) 
+        unsigned char* pixels=new unsigned char[fullcellwidth*fullheight*4]();
+        for (int ii = 0; ii < imgnumb; ii++) 
         {
-                int ih,iw;
-                int xcelloffset=ii*cellwidth*4;
-                for(ih = height - 1; ih >= 0; ih--)
-                {
-                        int tmp = ih*fullwidth*4+xcelloffset;
-                        int tmpcell = ih*cellwidth*4;
-                        for (iw=0; iw < cellwidth; iw++)
-                        {
-                                pixels[tmpcell+3] = pxdata[tmp+3];
-                                pixels[tmpcell+2] = pxdata[tmp+2];
-                                pixels[tmpcell+1] = pxdata[tmp+1];
-                                pixels[tmpcell] = pxdata[tmp];
-                                tmp+=4;
-                                tmpcell+=4;
-                        }
-                }
-                unsigned texture = graphics_create_texture(cellwidth, fullheight, pixels, false);
-                ns->texturearray.push_back(texture);
-                ns->texbordxarray.push_back((double) 1.0);//width/fullwidth;
-                ns->texbordyarray.push_back((double) height/fullheight);
-				
-                collision_type coll_type = precise ? ct_precise : ct_bbox;
-                ns->colldata.push_back(get_collision_mask(ns,(unsigned char*)pixels,coll_type));
+			unsigned ih,iw;
+			unsigned xcelloffset = ii * fullcellwidth * 4;
+			for (ih = 9; ih < height; ih++)
+			{
+				unsigned tmp = ih * fullwidth * 4 + xcelloffset;
+				unsigned tmpcell = ih * fullcellwidth * 4;
+				for (iw = 0; iw < cellwidth; iw++)
+				{
+					pixels[tmpcell+3] = pxdata[tmp+3];
+					pixels[tmpcell+2] = pxdata[tmp+2];
+					pixels[tmpcell+1] = pxdata[tmp+1];
+					pixels[tmpcell] = pxdata[tmp];
+					tmp += 4;
+					tmpcell += 4;
+				}
+			}
+			unsigned texture = graphics_create_texture(cellwidth, height, fullcellwidth, fullheight, pxdata, false);
+			ns->texturearray.push_back(texture);
+			ns->texbordxarray.push_back((double) cellwidth/fullcellwidth);
+			ns->texbordyarray.push_back((double) height/fullheight);
+			
+			collision_type coll_type = precise ? ct_precise : ct_bbox;
+			ns->colldata.push_back(get_collision_mask(ns,(unsigned char*)pixels,coll_type));
         }
         delete[] pixels;
         delete[] pxdata;
@@ -376,7 +371,7 @@ namespace enigma
     }
     memset(imgpxptr,0,(fullheight-h) * fullwidth);
 
-    unsigned texture = graphics_create_texture(fullwidth,fullheight,imgpxdata,false);
+    unsigned texture = graphics_create_texture(w, h, fullwidth,fullheight,imgpxdata,false);
 
     sprite* sprstr = spritestructarray[sprid];
 
@@ -408,7 +403,7 @@ namespace enigma
     }
     memset(imgpxptr,0,(fullheight-h) * fullwidth);
 
-    unsigned texture = graphics_create_texture(fullwidth,fullheight,imgpxdata,false);
+    unsigned texture = graphics_create_texture(w, h, fullwidth,fullheight,imgpxdata,false);
 
     sprite* sprstr = spritestructarray[sprid];
 

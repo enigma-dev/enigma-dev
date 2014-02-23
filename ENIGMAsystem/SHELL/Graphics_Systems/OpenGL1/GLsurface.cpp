@@ -125,7 +125,7 @@ int surface_create(int width, int height)
   enigma::surface_array[id]->height = h;
 
   glGenFramebuffers(1, &fbo);
-  int texture = enigma::graphics_create_texture(w,h,0,false);
+  int texture = enigma::graphics_create_texture(w,h,w,h,0,false);
 
   glPushAttrib(GL_TEXTURE_BIT);
 
@@ -184,7 +184,7 @@ int surface_create_msaa(int width, int height, int samples)
   enigma::surface_array[id]->width = w;
   enigma::surface_array[id]->height = h;
 
-  int texture = enigma::graphics_create_texture(w,h,0,false);
+  int texture = enigma::graphics_create_texture(w,h,w,h,0,false);
   glGenFramebuffers(1, &fbo);
   glPushAttrib(GL_TEXTURE_BIT);
   glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, textureStructs[texture]->gltex);
@@ -337,14 +337,7 @@ int surface_save(int id, string filename)
 	glReadPixels(0,0,w,h,GL_RGBA,GL_UNSIGNED_BYTE,rgbdata);
     glBindFramebuffer(GL_FRAMEBUFFER_EXT, prevFbo);
 
-	int ret;
-	if (ext == ".bmp") {
-		unsigned char* data = enigma::image_reverse_scanlines(rgbdata, w, h, 4);
-		ret = enigma::image_save(filename, data, w, h, w, h);
-		delete[] data;
-	} else {
-		ret = enigma::image_save(filename, rgbdata, w, h, w, h);
-	}
+	int ret = enigma::image_save(filename, rgbdata, w, h, w, h, false);
 	
 	delete[] rgbdata;
 	return ret;
@@ -366,14 +359,7 @@ int surface_save_part(int id, string filename, unsigned x, unsigned y, unsigned 
 	glReadPixels(x,y,w,h,GL_RGBA,GL_UNSIGNED_BYTE,rgbdata);
     glBindFramebuffer(GL_FRAMEBUFFER_EXT, prevFbo);
 
-	int ret;
-	if (ext == ".bmp") {
-		unsigned char* data = enigma::image_reverse_scanlines(rgbdata, w, h, 4);
-		ret = enigma::image_save(filename, data, w, h, w, h);
-		delete[] data;
-	} else {
-		ret = enigma::image_save(filename, rgbdata, w, h, w, h);
-	}
+	int ret = enigma::image_save(filename, rgbdata, w, h, w, h, false);
 	
 	delete[] rgbdata;
 	return ret;
