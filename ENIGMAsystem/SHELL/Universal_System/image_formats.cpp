@@ -253,7 +253,7 @@ int image_save_bmp(string filename, const unsigned char* data, unsigned width, u
 	
 	for (unsigned i = 0; i < lastbyte; i += fullwidth) {
 		unsigned tmp = i;
-		if (flipped) {
+		if (!flipped) {
 			tmp = lastbyte - i;
 		}
 		for (unsigned ii = 0; ii < width; ii += bytes) {
@@ -273,8 +273,9 @@ int image_save_png(string filename, const unsigned char* data, unsigned width, u
     unsigned char* buffer;
     size_t buffersize;
 	//TODO: Use width/height instead of full size, unfortunately lodepng don't support this apparantly
+	//TODO: Faggot ass lodepng also doesn't let us specify if our image data is flipped
     unsigned error = lodepng_encode_memory(&buffer, &buffersize, data, fullwidth, fullheight, LCT_RGBA, 8);
-    if(!error){
+    if (!error) {
         std::ofstream file(filename.c_str(), std::ios::out|std::ios::binary);
         file.write(reinterpret_cast<const char*>(buffer), std::streamsize(buffersize));
         file.close();
