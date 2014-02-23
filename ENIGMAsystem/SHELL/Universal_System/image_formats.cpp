@@ -24,6 +24,8 @@
 #include <cstring>
 #include "lodepng.h"
 #include <stdlib.h>
+#include <windows.h>
+
 using namespace std;
 #include "image_formats.h"
 
@@ -106,7 +108,7 @@ int image_save(string filename, const unsigned char* data, unsigned width, unsig
 
 unsigned char* image_load_bmp(string filename, unsigned int* width, unsigned int* height, unsigned int* fullwidth, unsigned int* fullheight, bool flipped) {
 	FILE *imgfile;
-	int bmpstart,bmpwidth,bmpheight;
+	unsigned bmpstart,bmpwidth,bmpheight;
 	if(!(imgfile=fopen(filename.c_str(),"rb"))) return 0;
 	fseek(imgfile,0,SEEK_END);
 	fseek(imgfile,0,SEEK_SET);
@@ -134,42 +136,42 @@ unsigned char* image_load_bmp(string filename, unsigned int* width, unsigned int
 	fseek(imgfile,69,SEEK_SET); // Alpha in last byte
 	int bgramask=fgetc(imgfile);
 
-	int
+	unsigned
 	  widfull = nlpo2dc(bmpwidth) + 1,
 	  hgtfull = nlpo2dc(bmpheight) + 1,
 	  ih,iw;
-	const int bitmap_size = widfull*hgtfull*4;
+	const unsigned bitmap_size = widfull*hgtfull*4;
 	unsigned char* bitmap = new unsigned char[bitmap_size](); // Initialize to zero.
 	long int pad=bmpwidth & 3; //This is that set of nulls that follows each line
 	  fseek(imgfile,bmpstart,SEEK_SET);
 
-	for(ih = bmpheight - 1; ih >= 0; ih--)
+	for (ih = 0; ih < bmpheight; ih++)
 	{
-	  int tmp = ih*widfull*4;
-	  for (iw=0; iw < bmpwidth; iw++){
-		if(bitdepth == 24)
+	  unsigned tmp = ih*widfull*4;
+	  for (iw = 0; iw < bmpwidth; iw++){
+		if (bitdepth == 24)
 		{
-				bitmap[tmp+3] = (char)0xFF;
+			bitmap[tmp+3] = (char)0xFF;
+			bitmap[tmp+2] = fgetc(imgfile);
+			bitmap[tmp+1] = fgetc(imgfile);
+			bitmap[tmp]   = fgetc(imgfile);
+		}
+		if (bitdepth == 32)
+		{
+			if (bgramask) //BGRA
+			{
+				bitmap[tmp+2] = fgetc(imgfile);
+				bitmap[tmp+1] = fgetc(imgfile);
+				bitmap[tmp] = fgetc(imgfile);
+				bitmap[tmp+3]   = fgetc(imgfile);
+			}
+			else //ABGR
+			{
+				bitmap[tmp+3] = fgetc(imgfile);
 				bitmap[tmp+2] = fgetc(imgfile);
 				bitmap[tmp+1] = fgetc(imgfile);
 				bitmap[tmp]   = fgetc(imgfile);
-		}
-		if(bitdepth == 32)
-		{
-				if (bgramask) //BGRA
-				{
-						bitmap[tmp+2] = fgetc(imgfile);
-						bitmap[tmp+1] = fgetc(imgfile);
-						bitmap[tmp] = fgetc(imgfile);
-						bitmap[tmp+3]   = fgetc(imgfile);
-				}
-				else //ABGR
-				{
-						bitmap[tmp+3] = fgetc(imgfile);
-						bitmap[tmp+2] = fgetc(imgfile);
-						bitmap[tmp+1] = fgetc(imgfile);
-						bitmap[tmp]   = fgetc(imgfile);
-				}
+			}
 		}
 		tmp+=4;
 	  }
@@ -186,36 +188,36 @@ unsigned char* image_load_bmp(string filename, unsigned int* width, unsigned int
 unsigned char* image_load_png(string filename, unsigned int* width, unsigned int* height, unsigned int* fullwidth, unsigned int* fullheight, bool flipped) {
 	unsigned error;
 	unsigned char* image;
-	unsigned bmpwidth, bmpheight;
+	unsigned pngwidth, pngheight;
 
-	error = lodepng_decode32_file(&image, &bmpwidth, &bmpheight, filename.c_str());
-	if(error)
+	error = lodepng_decode32_file(&image, &pngwidth, &pngheight, filename.c_str());
+	if (error)
 	{
 	  printf("error %u: %s\n", error, lodepng_error_text(error));
 	  return NULL;
 	}
 
 	unsigned
-	  widfull = nlpo2dc(bmpwidth) + 1,
-	  hgtfull = nlpo2dc(bmpheight) + 1,
+	  widfull = nlpo2dc(pngwidth) + 1,
+	  hgtfull = nlpo2dc(pngheight) + 1,
 	  ih,iw;
 	const int bitmap_size = widfull*hgtfull*4;
 	unsigned char* bitmap = new unsigned char[bitmap_size](); // Initialize to zero.
   
-	for (ih = 0; ih < bmpheight; ih++) {
-	  int tmp = ih*widfull*4;
-	  for (iw=0; iw < bmpwidth; iw++) {
-		bitmap[tmp+3] = image[4*bmpwidth*ih+iw*4+3];
-		bitmap[tmp+2] = image[4*bmpwidth*ih+iw*4+2];
-		bitmap[tmp+1] = image[4*bmpwidth*ih+iw*4+1];
-		bitmap[tmp]   = image[4*bmpwidth*ih+iw*4];
+	for (ih = 0; ih < pngheight; ih++) {
+	  unsigned tmp = ih*widfull*4;
+	  for (iw = 0; iw < pngwidth; iw++) {
+		bitmap[tmp+3] = image[4*pngwidth*ih+iw*4+3];
+		bitmap[tmp+2] = image[4*pngwidth*ih+iw*4+2];
+		bitmap[tmp+1] = image[4*pngwidth*ih+iw*4+1];
+		bitmap[tmp]   = image[4*pngwidth*ih+iw*4];
 		tmp+=4;
 	  }
 	}
 
 	free(image);
-	*width  = bmpwidth;
-	*height = bmpheight;
+	*width  = pngwidth;
+	*height = pngheight;
 	*fullwidth  = widfull;
 	*fullheight = hgtfull;
 	return bitmap;
