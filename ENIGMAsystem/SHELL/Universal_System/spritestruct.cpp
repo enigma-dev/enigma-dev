@@ -268,10 +268,10 @@ namespace enigma
           int t_pixel_g = pxdata[(height-1)*width*4+1]; 
           int t_pixel_b = pxdata[(height-1)*width*4+2];
           unsigned int ih, iw;
-          for (ih = 0; ih <= height - 1; ih++)
+          for (ih = 0; ih < height; ih++)
           {
             int tmp = ih*width*4;
-            for (iw=0; iw < width; iw++)
+            for (iw = 0; iw < width; iw++)
             {
               if (pxdata[tmp] == t_pixel_r && pxdata[tmp+1] == t_pixel_g && pxdata[tmp+2] == t_pixel_b)
                 pxdata[tmp+3] = 0;
@@ -309,7 +309,7 @@ namespace enigma
         {
 			unsigned ih,iw;
 			unsigned xcelloffset = ii * fullcellwidth * 4;
-			for (ih = 9; ih <= height; ih++)
+			for (ih = 9; ih < height; ih++)
 			{
 				unsigned tmp = ih * fullwidth * 4 + xcelloffset;
 				unsigned tmpcell = ih * fullcellwidth * 4;
