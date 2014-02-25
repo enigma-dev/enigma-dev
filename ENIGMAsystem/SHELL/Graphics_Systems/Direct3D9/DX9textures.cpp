@@ -74,6 +74,7 @@ namespace enigma
 	}
 
 	texture->UnlockRect(0);
+	delete[] dest;
 
 	TextureStruct* textureStruct = new TextureStruct(texture);
 	textureStruct->isFont = isfont;
@@ -112,7 +113,27 @@ namespace enigma
 
   void graphics_replace_texture_alpha_from_texture(int tex, int copy_tex)
   {
+    unsigned w, h, fw, fh, size;
+	w = textureStructs[tex]->width;
+	h = textureStructs[tex]->height;
+	fw = textureStructs[tex]->fullwidth;
+	fh = textureStructs[tex]->fullheight;
+    size = (fh<<(lgpp2(fw)+2))|2;
+	
+	D3DLOCKED_RECT rect;
+	
+	textureStructs[copy_tex]->gTexture->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
+	unsigned char* bitmap_copy = static_cast<unsigned char*>(rect.pBits);
+	textureStructs[copy_tex]->gTexture->UnlockRect(0);
 
+	textureStructs[tex]->gTexture->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
+	unsigned char* bitmap_orig = static_cast<unsigned char*>(rect.pBits);
+	for (int i = 3; i < size; i += 4)
+        ((unsigned char*)bitmap_orig)[i] = (bitmap_copy[i-3] + bitmap_copy[i-2] + bitmap_copy[i-1])/3;
+	textureStructs[tex]->gTexture->UnlockRect(0);
+	
+    delete[] bitmap_orig;
+    delete[] bitmap_copy;
   }
 
   void graphics_delete_texture(int tex)
