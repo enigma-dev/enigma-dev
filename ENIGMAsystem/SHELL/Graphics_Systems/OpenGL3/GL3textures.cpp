@@ -77,7 +77,7 @@ namespace enigma
     GLuint texture;
     glGenTextures(1, &texture);
     oglmgr->BindTexture(GL_TEXTURE_2D, texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, 4, fullwidth, fullheight, 0, GL_RGBA, GL_UNSIGNED_BYTE, pxdata);
+    glTexImage2D(GL_TEXTURE_2D, 0, 4, fullwidth, fullheight, 0, GL_BGRA, GL_UNSIGNED_BYTE, pxdata);
 	bool interpolate = (interpolate_textures && !isfont);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,interpolate?GL_LINEAR:GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,interpolate?GL_LINEAR:GL_NEAREST);
@@ -106,7 +106,7 @@ namespace enigma
 	fw = textureStructs[tex]->fullwidth;
 	fh = textureStructs[tex]->fullheight;
     char* bitmap = new char[(fh<<(lgpp2(fw)+2))|2];
-    glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, bitmap);
+    glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_BYTE, bitmap);
     unsigned dup_tex = graphics_create_texture(w, h, fw, fh, bitmap, textureStructs[tex]->isFont);
     delete[] bitmap;
     oglmgr->ResetTextureStates();
@@ -128,15 +128,15 @@ namespace enigma
     size = (fh<<(lgpp2(fw)+2))|2;
     char* bitmap = new char[size];
     char* bitmap2 = new char[size];
-    glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, bitmap);
+    glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_BYTE, bitmap);
     oglmgr->BindTexture(GL_TEXTURE_2D, copy_texture);
-    glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, bitmap2);
+    glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_BYTE, bitmap2);
 
     for (int i = 3; i < size; i += 4)
         bitmap[i] = (bitmap2[i-1] + bitmap2[i-2] + bitmap2[i-3])/3;
 
     oglmgr->BindTexture(GL_TEXTURE_2D, texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, 4, fw, fh, 0, GL_RGBA, GL_UNSIGNED_BYTE, bitmap);
+    glTexImage2D(GL_TEXTURE_2D, 0, 4, fw, fh, 0, GL_BGRA, GL_UNSIGNED_BYTE, bitmap);
 	bool interpolate = (interpolate_textures && !textureStructs[tex]->isFont);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,interpolate?GL_LINEAR:GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,interpolate?GL_LINEAR:GL_NEAREST);
@@ -153,7 +153,7 @@ namespace enigma
     textureStructs.erase(textureStructs.begin() + tex);
   }
 
-  unsigned char* graphics_get_texture_rgba(unsigned texture, unsigned* fullwidth, unsigned* fullheight)
+  unsigned char* graphics_get_texture_pixeldata(unsigned texture, unsigned* fullwidth, unsigned* fullheight)
   {
     //enigma_user::texture_set(texture); Wtf? This don't work anymore? - Robert
 	oglmgr->BindTexture(GL_TEXTURE_2D, textureStructs[texture]->gltex);
@@ -163,7 +163,7 @@ namespace enigma
 
     unsigned char* ret = new unsigned char[((*fullwidth)*(*fullheight)*4)];
 	glPixelStorei(GL_PACK_ALIGNMENT, 1);
-    glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, ret);
+    glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_BYTE, ret);
 
     return ret;
   }
