@@ -48,11 +48,6 @@ inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect 
 	return (x + (x >> 16)) & 63;
 }
 
-//NOTE: We should probably consider switching to BGRA internally since this is what most image formats utilize, including
-//bmp,jpg,tga, and optimized PNG. Most x86 graphics hardware and API's also use BGRA internally making it much more optimal
-//and it would also clean up our code below by keeping us from having to reorder the bytes. This exposes a major inefficiency
-//in our code and it also applies to OpenGL. - Robert B. Colton
-
 namespace enigma
 {
   int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool isfont)
