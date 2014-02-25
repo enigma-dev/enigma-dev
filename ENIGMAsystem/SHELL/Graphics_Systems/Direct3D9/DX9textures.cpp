@@ -64,17 +64,8 @@ namespace enigma
 	D3DLOCKED_RECT rect;
 
 	texture->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
-
-	unsigned char* dest = static_cast<unsigned char*>(rect.pBits);
-	for (unsigned x = 0; x < fullwidth * fullheight * 4; x += 4) {
-		((unsigned char*)dest)[x]  =((unsigned char*)pxdata)[x + 2];   //A
-		((unsigned char*)dest)[x+1]=((unsigned char*)pxdata)[x + 1];   //R
-		((unsigned char*)dest)[x+2]=((unsigned char*)pxdata)[x];       //G
-		((unsigned char*)dest)[x+3]=((unsigned char*)pxdata)[x + 3];   //B
-	}
-
+	memcpy(rect.pBits, pxdata, fullwidth * fullheight * 4);
 	texture->UnlockRect(0);
-	delete[] dest;
 
 	TextureStruct* textureStruct = new TextureStruct(texture);
 	textureStruct->isFont = isfont;
@@ -141,7 +132,7 @@ namespace enigma
 	 textureStructs.erase(textureStructs.begin() + tex);
   }
 
-  unsigned char* graphics_get_texture_rgba(unsigned texture, unsigned* fullwidth, unsigned* fullheight)
+  unsigned char* graphics_get_texture_pixeldata(unsigned texture, unsigned* fullwidth, unsigned* fullheight)
   {
     *fullwidth = textureStructs[texture]->fullwidth;
 	*fullheight = textureStructs[texture]->fullheight;

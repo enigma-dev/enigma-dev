@@ -144,9 +144,9 @@ namespace enigma
         int grayvalue = 255;
         int alpha = dfm > 2 ? 0 : (dfm == 2 ? 60 : (dfm == 1 ? 140 : 255));
         if ((x_d == 0 && y_d == 2) || (x_d == 2 && y_d == 0)) alpha = 36;
-        imgpxdata[4*(x + y*fullwidth)] = grayvalue;
-        imgpxdata[4*(x + y*fullwidth)+1] = grayvalue;
         imgpxdata[4*(x + y*fullwidth)+2] = grayvalue;
+        imgpxdata[4*(x + y*fullwidth)+1] = grayvalue;
+        imgpxdata[4*(x + y*fullwidth)+0] = grayvalue;
         imgpxdata[4*(x + y*fullwidth)+3] = alpha;
       }
     }
@@ -173,9 +173,9 @@ namespace enigma
         if (dfm >= halfwidth-in_r && dfm <= halfwidth-out_r) {
           alpha = int(255*((halfwidth-out_r) - dfm)/(in_r-out_r));
         }
-        imgpxdata[4*(x + y*fullwidth)] = grayvalue;
-        imgpxdata[4*(x + y*fullwidth)+1] = grayvalue;
         imgpxdata[4*(x + y*fullwidth)+2] = grayvalue;
+        imgpxdata[4*(x + y*fullwidth)+1] = grayvalue;
+        imgpxdata[4*(x + y*fullwidth)+0] = grayvalue;
         imgpxdata[4*(x + y*fullwidth)+3] = alpha;
       }
     }
@@ -202,9 +202,9 @@ namespace enigma
         if (dfm >= halfwidth-in_r && dfm <= halfwidth-out_r) {
           alpha = int(255*((halfwidth-out_r) - dfm)/(in_r-out_r));
         }
-        imgpxdata[4*(x + y*fullwidth)] = grayvalue;
-        imgpxdata[4*(x + y*fullwidth)+1] = grayvalue;
         imgpxdata[4*(x + y*fullwidth)+2] = grayvalue;
+        imgpxdata[4*(x + y*fullwidth)+1] = grayvalue;
+        imgpxdata[4*(x + y*fullwidth)+0] = grayvalue;
         imgpxdata[4*(x + y*fullwidth)+3] = alpha;
       }
     }
@@ -234,9 +234,9 @@ namespace enigma
           dfm = sqrt(x_d*x_d + y_d*y_d);
           alpha = dfm > (in_r-out_r) ? 0 : int(255*((in_r-out_r) - dfm)/(in_r-out_r));
         }
-        imgpxdata[4*(x + y*fullwidth)] = grayvalue;
-        imgpxdata[4*(x + y*fullwidth)+1] = grayvalue;
         imgpxdata[4*(x + y*fullwidth)+2] = grayvalue;
+        imgpxdata[4*(x + y*fullwidth)+1] = grayvalue;
+        imgpxdata[4*(x + y*fullwidth)+0] = grayvalue;
         imgpxdata[4*(x + y*fullwidth)+3] = alpha;
       }
     }
@@ -331,9 +331,9 @@ namespace enigma
             }
           }
         }
-        imgpxdata[4*(x + y*fullwidth)]   = grayvalue;
+        imgpxdata[4*(x + y*fullwidth)+2]   = grayvalue;
         imgpxdata[4*(x + y*fullwidth)+1] = grayvalue;
-        imgpxdata[4*(x + y*fullwidth)+2] = grayvalue;
+        imgpxdata[4*(x + y*fullwidth)+0] = grayvalue;
         imgpxdata[4*(x + y*fullwidth)+3] = alpha;
       }
     }
@@ -359,9 +359,9 @@ namespace enigma
         double dfm = sqrt(x_d*x_d + y_d*y_d); // Distance from middle.
         double diff = fabs(dfm - rad);
         int alpha = std::max(0, int(alpha_max*(ring_size - diff)/ring_size));
-        imgpxdata[4*(x + y*fullwidth)] = grayvalue;
-        imgpxdata[4*(x + y*fullwidth)+1] = grayvalue;
         imgpxdata[4*(x + y*fullwidth)+2] = grayvalue;
+        imgpxdata[4*(x + y*fullwidth)+1] = grayvalue;
+        imgpxdata[4*(x + y*fullwidth)+0] = grayvalue;
         imgpxdata[4*(x + y*fullwidth)+3] = alpha;
       }
     }
@@ -393,9 +393,9 @@ namespace enigma
         else if (dfm >= in_r) {
           alpha = int(alpha_max*pow(dfm-in_r, 2)/pow(out_r - in_r, 2));
         }
-        imgpxdata[4*(x + y*fullwidth)] = grayvalue;
-        imgpxdata[4*(x + y*fullwidth)+1] = grayvalue;
         imgpxdata[4*(x + y*fullwidth)+2] = grayvalue;
+        imgpxdata[4*(x + y*fullwidth)+1] = grayvalue;
+        imgpxdata[4*(x + y*fullwidth)+0] = grayvalue;
         imgpxdata[4*(x + y*fullwidth)+3] = alpha;
       }
     }
@@ -418,9 +418,9 @@ namespace enigma
         double dfm = sqrt(x_d*x_d + y_d*y_d); // Distance from middle.
         int grayvalue = 255;
         int alpha = dfm > halfwidth ? 0 : int(255*(halfwidth - dfm)/halfwidth);
-        imgpxdata[4*(x + y*fullwidth)] = grayvalue;
-        imgpxdata[4*(x + y*fullwidth)+1] = grayvalue;
         imgpxdata[4*(x + y*fullwidth)+2] = grayvalue;
+        imgpxdata[4*(x + y*fullwidth)+1] = grayvalue;
+        imgpxdata[4*(x + y*fullwidth)+0] = grayvalue;
         imgpxdata[4*(x + y*fullwidth)+3] = alpha;
       }
     }
@@ -473,9 +473,9 @@ namespace enigma
           alpha = int(alpha_min + part*(alpha_max-alpha_min));
           if (alpha > 255) alpha = 255;
         }
-        imgpxdata[4*(x + y*fullwidth)] = grayvalue;
-        imgpxdata[4*(x + y*fullwidth)+1] = grayvalue;
         imgpxdata[4*(x + y*fullwidth)+2] = grayvalue;
+        imgpxdata[4*(x + y*fullwidth)+1] = grayvalue;
+        imgpxdata[4*(x + y*fullwidth)+0] = grayvalue;
         imgpxdata[4*(x + y*fullwidth)+3] = alpha;
       }
     }
@@ -561,9 +561,9 @@ namespace enigma
           if (alpha > 255) alpha = 255;
           if (alpha < 0) alpha = 0;
         }
-        imgpxdata[4*(x + y*fullwidth)] = grayvalue;
-        imgpxdata[4*(x + y*fullwidth)+1] = grayvalue;
         imgpxdata[4*(x + y*fullwidth)+2] = grayvalue;
+        imgpxdata[4*(x + y*fullwidth)+1] = grayvalue;
+        imgpxdata[4*(x + y*fullwidth)+0] = grayvalue;
         imgpxdata[4*(x + y*fullwidth)+3] = alpha;
       }
     }
@@ -637,9 +637,9 @@ namespace enigma
         if (alpha != 0) alpha = bounds(alpha + (get_next_random() % 14) - 7, 0, 255); // Add noise.
 
         int grayvalue = 255;
-        imgpxdata[4*(x + y*fullwidth)] = grayvalue;
-        imgpxdata[4*(x + y*fullwidth)+1] = grayvalue;
         imgpxdata[4*(x + y*fullwidth)+2] = grayvalue;
+        imgpxdata[4*(x + y*fullwidth)+1] = grayvalue;
+        imgpxdata[4*(x + y*fullwidth)+0] = grayvalue;
         imgpxdata[4*(x + y*fullwidth)+3] = alpha;
       }
     }
@@ -713,9 +713,9 @@ namespace enigma
         if (alpha != 0) alpha = bounds(alpha + (get_next_random() % 14) - 7, 0, 255); // Add noise.
 
         int grayvalue = 255;
-        imgpxdata[4*(x + y*fullwidth)] = grayvalue;
-        imgpxdata[4*(x + y*fullwidth)+1] = grayvalue;
         imgpxdata[4*(x + y*fullwidth)+2] = grayvalue;
+        imgpxdata[4*(x + y*fullwidth)+1] = grayvalue;
+        imgpxdata[4*(x + y*fullwidth)+0] = grayvalue;
         imgpxdata[4*(x + y*fullwidth)+3] = alpha;
       }
     }
@@ -788,9 +788,9 @@ namespace enigma
         int alpha = sum/count;
 
         int grayvalue = 255;
-        imgpxdata[4*(x + y*fullwidth)] = grayvalue;
-        imgpxdata[4*(x + y*fullwidth)+1] = grayvalue;
         imgpxdata[4*(x + y*fullwidth)+2] = grayvalue;
+        imgpxdata[4*(x + y*fullwidth)+1] = grayvalue;
+        imgpxdata[4*(x + y*fullwidth)+0] = grayvalue;
         imgpxdata[4*(x + y*fullwidth)+3] = alpha;
       }
     }
@@ -894,9 +894,9 @@ namespace enigma
             alpha = bounds(int(255*(1.0 - min_dist/fade_dist)), 0, 255);
           }
         }
-        imgpxdata[4*(x + y*fullwidth)] = grayvalue;
-        imgpxdata[4*(x + y*fullwidth)+1] = grayvalue;
         imgpxdata[4*(x + y*fullwidth)+2] = grayvalue;
+        imgpxdata[4*(x + y*fullwidth)+1] = grayvalue;
+        imgpxdata[4*(x + y*fullwidth)+0] = grayvalue;
         imgpxdata[4*(x + y*fullwidth)+3] = alpha;
       }
     }

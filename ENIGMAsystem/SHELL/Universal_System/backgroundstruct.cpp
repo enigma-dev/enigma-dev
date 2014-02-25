@@ -213,7 +213,7 @@ namespace enigma_user
   void background_save(int back, string fname) {
 	get_background(bck,back);
 	unsigned w, h;
-	unsigned char* rgbdata = enigma::graphics_get_texture_rgba(bck->texture, &w, &h);
+	unsigned char* rgbdata = enigma::graphics_get_texture_pixeldata(bck->texture, &w, &h);
 	
     string ext = enigma::image_get_format(fname);
 	

@@ -154,26 +154,26 @@ unsigned char* image_load_bmp(string filename, unsigned int* width, unsigned int
 	  for (iw = 0; iw < bmpwidth; iw++){
 		if (bitdepth == 24)
 		{
-			bitmap[tmp+3] = (char)0xFF;
-			bitmap[tmp+2] = fgetc(imgfile);
+			bitmap[tmp+0] = fgetc(imgfile);
 			bitmap[tmp+1] = fgetc(imgfile);
-			bitmap[tmp]   = fgetc(imgfile);
+			bitmap[tmp+2] = fgetc(imgfile);
+			bitmap[tmp+3] = (char)0xFF;
 		}
 		if (bitdepth == 32)
 		{
 			if (bgramask) //BGRA
 			{
-				bitmap[tmp+2] = fgetc(imgfile);
+				bitmap[tmp+0] = fgetc(imgfile);
 				bitmap[tmp+1] = fgetc(imgfile);
-				bitmap[tmp] = fgetc(imgfile);
-				bitmap[tmp+3]   = fgetc(imgfile);
+				bitmap[tmp+2] = fgetc(imgfile);
+				bitmap[tmp+3] = fgetc(imgfile);
 			}
 			else //ABGR
 			{
 				bitmap[tmp+3] = fgetc(imgfile);
-				bitmap[tmp+2] = fgetc(imgfile);
+				bitmap[tmp+0] = fgetc(imgfile);
 				bitmap[tmp+1] = fgetc(imgfile);
-				bitmap[tmp]   = fgetc(imgfile);
+				bitmap[tmp+2]   = fgetc(imgfile);
 			}
 		}
 		tmp+=4;
@@ -215,10 +215,10 @@ unsigned char* image_load_png(string filename, unsigned int* width, unsigned int
 		tmp = (pngheight - 1 - ih)*widfull*4;
 	  }
 	  for (iw = 0; iw < pngwidth; iw++) {
-		bitmap[tmp+3] = image[4*pngwidth*ih+iw*4+3];
-		bitmap[tmp+2] = image[4*pngwidth*ih+iw*4+2];
+		bitmap[tmp+0] = image[4*pngwidth*ih+iw*4+2];
 		bitmap[tmp+1] = image[4*pngwidth*ih+iw*4+1];
-		bitmap[tmp]   = image[4*pngwidth*ih+iw*4];
+		bitmap[tmp+2] = image[4*pngwidth*ih+iw*4+0];
+		bitmap[tmp+3]   = image[4*pngwidth*ih+iw*4+3];
 		tmp+=4;
 	  }
 	}
@@ -257,9 +257,9 @@ int image_save_bmp(string filename, const unsigned char* data, unsigned width, u
 			tmp = lastbyte - i;
 		}
 		for (unsigned ii = 0; ii < width; ii += bytes) {
-			fwrite(&data[tmp + ii + 2],sizeof(char),1,bmp);
-			fwrite(&data[tmp + ii + 1],sizeof(char),1,bmp);
 			fwrite(&data[tmp + ii + 0],sizeof(char),1,bmp);
+			fwrite(&data[tmp + ii + 1],sizeof(char),1,bmp);
+			fwrite(&data[tmp + ii + 2],sizeof(char),1,bmp);
 			fwrite(&data[tmp + ii + 3],sizeof(char),1,bmp);
 		}
 	}

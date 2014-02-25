@@ -75,7 +75,7 @@ namespace enigma
       for (int i = 0; i < gcount; i++)
       {
 		unsigned fw, fh;
-        unsigned char* data = enigma::graphics_get_texture_rgba(sspr->texturearray[i], &fw, &fh);
+        unsigned char* data = enigma::graphics_get_texture_pixeldata(sspr->texturearray[i], &fw, &fh);
 		//NOTE: Following line replaced gtw = int((double)sspr->width / sspr->texbordyarray[i]);
 		//this was to fix non-power of two subimages
         gtw = fw;
