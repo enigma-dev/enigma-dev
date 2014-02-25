@@ -48,6 +48,11 @@ inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect 
 	return (x + (x >> 16)) & 63;
 }
 
+//NOTE: We should probably consider switching to BGRA internally since this is what most image formats utilize, including
+//bmp,jpg,tga, and optimized PNG. Most x86 graphics hardware and API's also use BGRA internally making it much more optimal
+//and it would also clean up our code below by keeping us from having to reorder the bytes. This exposes a major inefficiency
+//in our code and it also applies to OpenGL. - Robert B. Colton
+
 namespace enigma
 {
   int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool isfont)
@@ -61,7 +66,7 @@ namespace enigma
 	texture->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
 
 	unsigned char* dest = static_cast<unsigned char*>(rect.pBits);
-	for(int x = 0; x < fullwidth * fullheight * 4; x += 4){
+	for (unsigned x = 0; x < fullwidth * fullheight * 4; x += 4) {
 		((unsigned char*)dest)[x]  =((unsigned char*)pxdata)[x + 2];   //A
 		((unsigned char*)dest)[x+1]=((unsigned char*)pxdata)[x + 1];   //R
 		((unsigned char*)dest)[x+2]=((unsigned char*)pxdata)[x];       //G
@@ -82,7 +87,27 @@ namespace enigma
 
   int graphics_duplicate_texture(int tex)
   {
+    unsigned w, h, fw, fh;
+	w = textureStructs[tex]->width;
+	h = textureStructs[tex]->height;
+	fw = textureStructs[tex]->fullwidth;
+	fh = textureStructs[tex]->fullheight;
+	
+	D3DLOCKED_RECT rect;
 
+	textureStructs[tex]->gTexture->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
+	unsigned char* bitmap = new unsigned char[(fw*fh*4)];
+	for (unsigned x = 0; x < fw * fh * 4; x += 4){
+		bitmap[x]   = ((unsigned char*)rect.pBits)[x + 2];   //R B
+		bitmap[x+1] = ((unsigned char*)rect.pBits)[x + 1];   //G G
+		bitmap[x+2] = ((unsigned char*)rect.pBits)[x];       //B R
+		bitmap[x+3] = ((unsigned char*)rect.pBits)[x + 3];   //A A
+	}
+	textureStructs[tex]->gTexture->UnlockRect(0);
+	
+    unsigned dup_tex = graphics_create_texture(w, h, fw, fh, bitmap, textureStructs[tex]->isFont);
+    delete[] bitmap;
+    return dup_tex;
   }
 
   void graphics_replace_texture_alpha_from_texture(int tex, int copy_tex)
@@ -104,17 +129,17 @@ namespace enigma
 
 	textureStructs[texture]->gTexture->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
 
-	unsigned char* dest = new unsigned char[((*fullwidth)*(*fullheight)*4)];
+	unsigned char* bitmap = new unsigned char[((*fullwidth)*(*fullheight)*4)];
 	for (unsigned x = 0; x < (*fullwidth) * (*fullheight) * 4; x += 4){
-		dest[x]   = ((unsigned char*)rect.pBits)[x + 2];   //R B
-		dest[x+1] = ((unsigned char*)rect.pBits)[x + 1];   //G G
-		dest[x+2] = ((unsigned char*)rect.pBits)[x];       //B R
-		dest[x+3] = ((unsigned char*)rect.pBits)[x + 3];   //A A
+		bitmap[x]   = ((unsigned char*)rect.pBits)[x + 2];   //R B
+		bitmap[x+1] = ((unsigned char*)rect.pBits)[x + 1];   //G G
+		bitmap[x+2] = ((unsigned char*)rect.pBits)[x];       //B R
+		bitmap[x+3] = ((unsigned char*)rect.pBits)[x + 3];   //A A
 	}
 
 	textureStructs[texture]->gTexture->UnlockRect(0);
 
-    return dest;
+    return bitmap;
   }
 }
 
