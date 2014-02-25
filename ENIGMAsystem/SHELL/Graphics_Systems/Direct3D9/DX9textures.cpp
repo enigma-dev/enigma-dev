@@ -88,13 +88,7 @@ namespace enigma
 	D3DLOCKED_RECT rect;
 
 	textureStructs[tex]->gTexture->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
-	unsigned char* bitmap = new unsigned char[(fw*fh*4)];
-	for (unsigned x = 0; x < fw * fh * 4; x += 4){
-		bitmap[x]   = ((unsigned char*)rect.pBits)[x + 2];   //R B
-		bitmap[x+1] = ((unsigned char*)rect.pBits)[x + 1];   //G G
-		bitmap[x+2] = ((unsigned char*)rect.pBits)[x];       //B R
-		bitmap[x+3] = ((unsigned char*)rect.pBits)[x + 3];   //A A
-	}
+	unsigned char* bitmap = static_cast<unsigned char*>(rect.pBits);
 	textureStructs[tex]->gTexture->UnlockRect(0);
 	
     unsigned dup_tex = graphics_create_texture(w, h, fw, fh, bitmap, textureStructs[tex]->isFont);
@@ -118,12 +112,10 @@ namespace enigma
 	textureStructs[copy_tex]->gTexture->UnlockRect(0);
 
 	textureStructs[tex]->gTexture->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
-	unsigned char* bitmap_orig = static_cast<unsigned char*>(rect.pBits);
 	for (int i = 3; i < size; i += 4)
-        ((unsigned char*)bitmap_orig)[i] = (bitmap_copy[i-3] + bitmap_copy[i-2] + bitmap_copy[i-1])/3;
+        ((unsigned char*)rect.pBits)[i] = (bitmap_copy[i-3] + bitmap_copy[i-2] + bitmap_copy[i-1])/3;
 	textureStructs[tex]->gTexture->UnlockRect(0);
 	
-    delete[] bitmap_orig;
     delete[] bitmap_copy;
   }
 
@@ -139,16 +131,8 @@ namespace enigma
 
 	D3DLOCKED_RECT rect;
 
-	textureStructs[texture]->gTexture->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
-
-	unsigned char* bitmap = new unsigned char[((*fullwidth)*(*fullheight)*4)];
-	for (unsigned x = 0; x < (*fullwidth) * (*fullheight) * 4; x += 4){
-		bitmap[x]   = ((unsigned char*)rect.pBits)[x + 2];   //R B
-		bitmap[x+1] = ((unsigned char*)rect.pBits)[x + 1];   //G G
-		bitmap[x+2] = ((unsigned char*)rect.pBits)[x];       //B R
-		bitmap[x+3] = ((unsigned char*)rect.pBits)[x + 3];   //A A
-	}
-
+	textureStructs[texture]->gTexture->LockRect( 0, &rect, NULL, D3DLOCK_READONLY);
+	unsigned char* bitmap = static_cast<unsigned char*>(rect.pBits);
 	textureStructs[texture]->gTexture->UnlockRect(0);
 
     return bitmap;
