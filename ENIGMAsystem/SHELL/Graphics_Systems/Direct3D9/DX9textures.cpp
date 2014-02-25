@@ -97,7 +97,24 @@ namespace enigma
 
   unsigned char* graphics_get_texture_rgba(unsigned texture, unsigned* fullwidth, unsigned* fullheight)
   {
+    *fullwidth = textureStructs[texture]->fullwidth;
+	*fullheight = textureStructs[texture]->fullheight;
 
+	D3DLOCKED_RECT rect;
+
+	textureStructs[texture]->gTexture->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
+
+	unsigned char* dest = new unsigned char[((*fullwidth)*(*fullheight)*4)];
+	for (unsigned x = 0; x < (*fullwidth) * (*fullheight) * 4; x += 4){
+		dest[x]   = ((unsigned char*)rect.pBits)[x + 2];   //R B
+		dest[x+1] = ((unsigned char*)rect.pBits)[x + 1];   //G G
+		dest[x+2] = ((unsigned char*)rect.pBits)[x];       //B R
+		dest[x+3] = ((unsigned char*)rect.pBits)[x + 3];   //A A
+	}
+
+	textureStructs[texture]->gTexture->UnlockRect(0);
+
+    return dest;
   }
 }
 
