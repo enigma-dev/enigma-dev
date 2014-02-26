@@ -1,5 +1,5 @@
 /** Copyright (C) 2008 Josh Ventura
-*** Copyright (C) 2013 Robert B. Colton
+*** Copyright (C) 2013-2014 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -22,7 +22,7 @@
 #include <string>
 using std::string;
 
-/// NOTE: These image formats expect the data to be un-aligned and always reads and writes with RGBA full color
+/// NOTE: These image formats expect the data to be un-aligned and always reads and writes with BGRA full color
 
 namespace enigma {
 	/// Color formats

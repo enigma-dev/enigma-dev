@@ -398,6 +398,10 @@ void SetRenderState(D3DRENDERSTATETYPE State, DWORD Value) {
     device->SetRenderState( State, Value );
 }
 
+void GetBackBuffer(UINT  iSwapChain, UINT BackBuffer, D3DBACKBUFFER_TYPE Type, IDirect3DSurface9 **ppBackBuffer) {
+	device->GetBackBuffer(iSwapChain, BackBuffer, Type, ppBackBuffer);
+}
+
 void SetRenderTarget(DWORD RenderTargetIndex, IDirect3DSurface9 *pTarget) {
 	device->GetRenderTarget(0, &pBackBuffer);
 	if (pBackBuffer == pTarget) { return; }
