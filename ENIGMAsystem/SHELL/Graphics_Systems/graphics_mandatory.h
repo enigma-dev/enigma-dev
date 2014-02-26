@@ -34,10 +34,10 @@ namespace enigma
   void graphics_replace_texture_alpha_from_texture(int tex, int copy_tex);
   void graphics_delete_texture(int tex);
 
-  /// Retrieve image data from a texture, in unsigned char, RGBA format.
+  /// Retrieve image data from a texture, in unsigned char, BGRA format.
   /// This data will be allocated afresh; the pointer and data are yours to manipulate
   /// and must be freed once you are done.
-  unsigned char* graphics_get_texture_rgba(unsigned texture, unsigned* fullwidth, unsigned* fullheight);
+  unsigned char* graphics_get_texture_pixeldata(unsigned texture, unsigned* fullwidth, unsigned* fullheight);
 
   struct particles_implementation
   {

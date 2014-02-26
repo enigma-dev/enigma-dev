@@ -1,6 +1,6 @@
 /** Copyright (C) 2008-2011 Josh Ventura
 *** Copyright (C) 2010 Alasdair Morrison <tgmg@g-java.com>
-*** Copyright (C) 2013 Robert B. Colton
+*** Copyright (C) 2013-2014 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -213,7 +213,7 @@ namespace enigma_user
   void background_save(int back, string fname) {
 	get_background(bck,back);
 	unsigned w, h;
-	unsigned char* rgbdata = enigma::graphics_get_texture_rgba(bck->texture, &w, &h);
+	unsigned char* rgbdata = enigma::graphics_get_texture_pixeldata(bck->texture, &w, &h);
 	
     string ext = enigma::image_get_format(fname);
 	
