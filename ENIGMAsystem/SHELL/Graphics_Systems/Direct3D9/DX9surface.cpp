@@ -142,17 +142,77 @@ int surface_get_height(int id)
 
 int surface_getpixel(int id, int x, int y)
 {
+	get_surfacev(surface,id,-1);
+    if (x < 0) x = 0;
+    if (y < 0) y = 0;
+    if (x > surface->width || y > surface->height) return 0;
 
+	d3dmgr->EndShapesBatching();
+	LPDIRECT3DSURFACE9 pBuffer = surface->surf;
+	d3dmgr->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer);
+	D3DSURFACE_DESC desc;
+	pBackBuffer->GetDesc(&desc);
+	
+	D3DLOCKED_RECT rect;
+
+	pBuffer->LockRect(&rect, NULL, D3DLOCK_READONLY);
+	unsigned char* bitmap = static_cast<unsigned char*>(rect.pBits);
+	unsigned offset = y * rect.Pitch + x * 4;
+	int ret = bitmap[offset + 1] | (bitmap[offset + 2] << 8) | (bitmap[offset + 3] << 16);
+	pBuffer->UnlockRect();
+	delete[] bitmap;
+	
+	return ret;
 }
 
 int surface_getpixel_ext(int id, int x, int y)
 {
+	get_surfacev(surface,id,-1);
+    if (x < 0) x = 0;
+    if (y < 0) y = 0;
+    if (x > surface->width || y > surface->height) return 0;
 
+	d3dmgr->EndShapesBatching();
+	LPDIRECT3DSURFACE9 pBuffer = surface->surf;
+	d3dmgr->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer);
+	D3DSURFACE_DESC desc;
+	pBackBuffer->GetDesc(&desc);
+	
+	D3DLOCKED_RECT rect;
+
+	pBuffer->LockRect(&rect, NULL, D3DLOCK_READONLY);
+	unsigned char* bitmap = static_cast<unsigned char*>(rect.pBits);
+	unsigned offset = y * rect.Pitch + x * 4;
+	int ret = bitmap[offset + 0] | (bitmap[offset + 1] << 8) | (bitmap[offset + 2] << 16) | (bitmap[offset + 3] << 24);
+	pBuffer->UnlockRect();
+	delete[] bitmap;
+	
+	return ret;
 }
 
 int surface_getpixel_alpha(int id, int x, int y)
 {
+	get_surfacev(surface,id,-1);
+    if (x < 0) x = 0;
+    if (y < 0) y = 0;
+    if (x > surface->width || y > surface->height) return 0;
 
+	d3dmgr->EndShapesBatching();
+	LPDIRECT3DSURFACE9 pBuffer = surface->surf;
+	d3dmgr->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer);
+	D3DSURFACE_DESC desc;
+	pBackBuffer->GetDesc(&desc);
+	
+	D3DLOCKED_RECT rect;
+
+	pBuffer->LockRect(&rect, NULL, D3DLOCK_READONLY);
+	unsigned char* bitmap = static_cast<unsigned char*>(rect.pBits);
+	unsigned offset = y * rect.Pitch + x * 4;
+	int ret = bitmap[offset];
+	pBuffer->UnlockRect();
+	delete[] bitmap;
+	
+	return ret;
 }
 
 int surface_get_bound()
