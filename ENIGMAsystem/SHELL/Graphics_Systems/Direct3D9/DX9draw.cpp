@@ -116,6 +116,7 @@ int draw_getpixel(int x, int y)
 	d3dmgr->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer);
 	D3DSURFACE_DESC desc;
 	pBackBuffer->GetDesc(&desc);
+	
 	d3dmgr->device->CreateOffscreenPlainSurface( desc.Width, desc.Height, desc.Format, D3DPOOL_SYSTEMMEM, &pDestBuffer, NULL );
 	d3dmgr->device->GetRenderTargetData(pBackBuffer, pDestBuffer);
 	
@@ -129,6 +130,7 @@ int draw_getpixel(int x, int y)
 	delete[] bitmap;
 	pBackBuffer->Release();
 	pDestBuffer->Release();
+	
 	return ret;
 }
 
