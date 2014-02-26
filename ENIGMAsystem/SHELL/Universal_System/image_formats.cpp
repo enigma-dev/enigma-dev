@@ -270,18 +270,41 @@ int image_save_bmp(string filename, const unsigned char* data, unsigned width, u
 
 int image_save_png(string filename, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped)
 {
-    unsigned char* buffer;
-    size_t buffersize;
 	//TODO: Use width/height instead of full size, unfortunately lodepng don't support this apparently
 	//TODO: Faggot ass lodepng also doesn't let us specify if our image data is flipped
 	//TODO: Faggot ass lodepng also doesn't support BGRA
-    unsigned error = lodepng_encode_memory(&buffer, &buffersize, data, fullwidth, fullheight, LCT_RGBA, 8);
+	unsigned bytes = 4;
+	
+	unsigned char* bitmap = new unsigned char[width*height*bytes]();
+	
+	for (unsigned i = 0; i < height; i++) {
+		unsigned tmp = i;
+		unsigned bmp = i;
+		if (!flipped) {
+			tmp = height - 1 - tmp;
+			bmp = height - 1 - bmp;
+		}
+		tmp *= bytes * fullwidth;
+		bmp *= bytes * width;
+		for (unsigned ii = 0; ii < width*bytes; ii += bytes) {
+			bitmap[bmp + ii + 2] = data[tmp + ii + 0];
+			bitmap[bmp + ii + 1] = data[tmp + ii + 1];
+			bitmap[bmp + ii + 0] = data[tmp + ii + 2];
+			bitmap[bmp + ii + 3] = data[tmp + ii + 3];
+		}
+	}
+	
+	unsigned char* buffer;
+    size_t buffersize;
+	
+    unsigned error = lodepng_encode_memory(&buffer, &buffersize, bitmap, width, height, LCT_RGBA, 8);
     if (!error) {
         std::ofstream file(filename.c_str(), std::ios::out|std::ios::binary);
         file.write(reinterpret_cast<const char*>(buffer), std::streamsize(buffersize));
         file.close();
     }
     free(buffer);
+	free(bitmap);
 
     if (error) return -1; else return 1;
 }
