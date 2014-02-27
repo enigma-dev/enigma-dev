@@ -29,10 +29,13 @@
 #include "file_manip.h"
 using std::string;
 
+//TODO: Remove all this shit in this header that is in Platforms/General/PFwindow.h since these
+//functions should be the same for all platforms, and just include the general header.
+//Leave what is not defined in general headers, possibly the cursor constants.
+
 void gmw_init();
 
 namespace enigma_user {
-    
     void sleep(int ms);
 
 void window_set_position(int x,int y);
@@ -82,7 +85,7 @@ int window_center();
 ////////////////
 // FULLSCREEN //
 ////////////////
-int window_get_fullscreen();
+bool window_get_fullscreen();
 
 ////////////
 // CURSOR //

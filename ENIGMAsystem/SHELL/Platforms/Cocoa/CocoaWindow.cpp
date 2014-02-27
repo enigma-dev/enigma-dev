@@ -175,7 +175,7 @@ void window_set_fullscreen(bool full)
 	xev.xclient.data.l[2] = 0;
 	XSendEvent(disp,DefaultRootWindow(disp),False,SubstructureRedirectMask|SubstructureNotifyMask,&xev);*/
 }
-int window_get_fullscreen()
+bool window_get_fullscreen()
 {
 	/*Atom aFullScreen = XInternAtom(disp,"_NET_WM_STATE_FULLSCREEN",False);
 	Atom ra;
