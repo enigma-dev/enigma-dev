@@ -98,10 +98,11 @@ int display_mouse_get_y() { return getMouse(1); }
 int window_mouse_get_x()  { return getMouse(2); }
 int window_mouse_get_y()  { return getMouse(3); }
 
-void window_mouse_set(double x,double y) {
+void window_mouse_set(int x, int y) {
 	//XWarpPointer(disp,None,win,0,0,0,0,(int)x,(int)y);
 }
-void display_mouse_set(double x,double y) {
+
+void display_mouse_set(int x, int y) {
 	//XWarpPointer(disp,None,DefaultRootWindow(disp),0,0,0,0,(int)x,(int)y);
 }
 
@@ -240,6 +241,7 @@ void window_default()
     window_set_size(xm, ym);
 }
 
+//TODO: Move OpenGL shit to graphics bridges for Cocoa, screen refresh is a platform and graphics system specific function
 void screen_refresh() {
 	cocoa_screen_refresh();
     cocoa_flush_opengl();
