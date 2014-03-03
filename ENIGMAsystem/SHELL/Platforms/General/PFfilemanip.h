@@ -15,27 +15,10 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "../General/PFini.h"
-
 namespace enigma_user
 {
 
-long long file_size(std::string fname);
-time_t file_access_time(std::string fname);
-time_t file_modified_time(std::string fname);
-/* OS Specific; should be moved */
-
-int file_exists(std::string fname);
-int file_delete(std::string fname);
-int file_rename(std::string oldname,std::string newname);
-int file_copy(std::string fname,std::string newname);
-int directory_exists(std::string dname);
-int directory_create(std::string dname);
-
-
-
-std::string file_find_first(std::string mask,int attr);
-
+// File attribute constants
 enum {
   fa_readonly  = 1,
   fa_hidden    = 2,
@@ -45,8 +28,21 @@ enum {
   fa_archive   = 32
 };
 
+long long file_size(std::string fname);
+time_t file_access_time(std::string fname);
+time_t file_modified_time(std::string fname);
+
+int file_exists(std::string fname);
+int file_delete(std::string fname);
+int file_rename(std::string oldname,std::string newname);
+int file_copy(std::string fname,std::string newname);
+int directory_exists(std::string dname);
+int directory_create(std::string dname);
+
 std::string file_find_next();
 void file_find_close();
+std::string file_find_first(std::string mask,int attr);
+
 bool file_attributes(std::string fname,int attributes);
 
 void export_include_file(std::string fname);
