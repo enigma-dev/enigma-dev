@@ -30,11 +30,17 @@ namespace enigma //TODO: Find where this belongs
   extern HDC window_hDC;
 }
 
+void windowsystem_write_exename(char* exenamehere);
+
 namespace enigma_user
 {
 
 unsigned long long window_handle();
+int sleep(int millis);
 
 }
+
+void enigma_catchmouse_backend(bool x);
+#define enigmacatchmouse() enigma_catchmouse_backend(enigma::mousestatus[0]==1 && enigma::last_mousestatus[0]==1)
 
 #endif //ENIGMA_WINDOWS_MAIN
