@@ -197,12 +197,26 @@ void message_text_charset(int type, int charset) {
 
 void show_info(string info, string caption) {
 	LoadLibrary(TEXT("Riched32.dll"));
+	
+	WNDCLASS wc = {CS_VREDRAW|CS_HREDRAW,(WNDPROC)DefWindowProc,0,0,enigma::hInstance,0,
+		0,GetSysColorBrush(COLOR_WINDOW),0,"showinfo"};
+	RegisterClass(&wc);
+	
+	HWND main=CreateWindow("showinfo",TEXT(caption.c_str()),
+		WS_SIZEBOX|DS_3DLOOK|DS_CENTER|DS_MODALFRAME|DS_FIXEDSYS|WS_VISIBLE|WS_BORDER|WS_POPUP|WS_CAPTION|WS_DLGFRAME|WS_SYSMENU|WS_TABSTOP,
+		CW_USEDEFAULT, CW_USEDEFAULT,500,400,enigma::hWnd,0,enigma::hInstance,0);
+	HWND re=CreateWindow("RICHEDIT",TEXT(info.c_str()),
+		WS_CHILD|WS_VISIBLE|ES_MULTILINE|ES_READONLY|ES_AUTOVSCROLL,
+		0,0,500,400,main,0,enigma::hInstance,0);
+	ShowWindow(main,SW_SHOWDEFAULT);
+	
+	/*
 	HWND hwndEdit = CreateWindow("RICHEDIT", TEXT(info.c_str()),
         ES_LEFT | ES_MULTILINE | DS_3DLOOK | DS_CENTER | DS_MODALFRAME | DS_FIXEDSYS | WS_VISIBLE | WS_BORDER | WS_CAPTION | WS_DLGFRAME | WS_SYSMENU | WS_TABSTOP | WS_VSCROLL | 
                 ES_AUTOVSCROLL | WS_HSCROLL | ES_AUTOHSCROLL, 
         CW_USEDEFAULT, CW_USEDEFAULT, 500, 400, 
         enigma::hWnd, NULL, enigma::hInstance, NULL);
-	
+	*/
 	
   //gs_cap = caption;
   //gs_message = info;
