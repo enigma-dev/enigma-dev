@@ -27,7 +27,7 @@
 
 #include <string>
 #include "../General/PFwindow.h"
-#include "file_manip.h"
+#include "../General/PFfilemanip.h"
 using std::string;
 
 //TODO: Move all this shit to a general header, along with the sleep shit in Win32 and XLIB as well so platforms are consistent.
