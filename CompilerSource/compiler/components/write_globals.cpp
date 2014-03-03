@@ -77,6 +77,7 @@ int lang_CPP::compile_writeGlobals(EnigmaStruct* es, parsed_object* global)
     wto << "  bool freezeOnLoseFocus = " << es->gameSettings.freezeOnLoseFocus << ";" << endl;
 	wto << "  bool treatCloseAsEscape = " << es->gameSettings.treatCloseAsEscape << ";" << endl;
     wto << "  bool isFullScreen = " << es->gameSettings.startFullscreen << ";" << endl;
+	//wto << "  string gameInformation = " << es->gameInformation << ";" << endl;
     wto << "  int viewScale = " << es->gameSettings.scaling << ";" << endl;
     wto << "}" << endl;
 
