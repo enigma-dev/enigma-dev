@@ -19,8 +19,13 @@
  *      You should have received a copy of the GNU General Public License
  *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
-#include "inifilesystem.h"
 #include <cstdio>
+#include "Platforms/General/PFini.h"
+#include "Universal_System/estring.h"
+
+#ifndef ENIGMA_INI_BUFFER_SIZE
+#define ENIGMA_INI_BUFFER_SIZE 512
+#endif
 
 static int section;
 static FILE *enigma_ini_file;
