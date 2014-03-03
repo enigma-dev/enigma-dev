@@ -45,7 +45,6 @@ int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
   ofstream wto((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_evparent.h").c_str());
   wto << license;
 
-
   /* Generate a new list of events used by the objects in
   ** this game. Only events on this list will be exported.
   ***********************************************************/
@@ -87,6 +86,12 @@ int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
   ** that defines default behavior for any obect's unused events.
   *****************************************************************/
   wto << "namespace enigma" << endl << "{" << endl;
+
+  //Forward declarations
+  wto <<"int timeline_calc_new_moment(int timeline_index, gs_scalar& timeline_position, gs_scalar timeline_speed, bool timeline_loop);\n";
+  wto <<"void timeline_call_moment_script(int timeline_index, int moment_index);\n";
+  wto <<"\n";
+
   wto << "  struct event_parent: " << system_get_uppermost_tier() << endl;
   wto << "  {" << endl;
             for (evfit it = used_events.begin(); it != used_events.end(); it++)
