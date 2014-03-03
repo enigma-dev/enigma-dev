@@ -59,6 +59,16 @@ namespace enigma
   }
   depthv::~depthv() {}
 
+  void object_graphics::update_timelines() {
+/*    if (timeline_running && timeline_speed!=0) {
+      int nextMoment = enigma::timeline_calc_new_moment(timeline_index, timeline_position, timeline_speed, timeline_loop);
+      if (nextMoment != -1) {
+        enigma::timeline_call_moment_script(timeline_index, nextMoment);
+      }
+    }*/
+  }
+
+
   int object_graphics::$sprite_width()  const { return sprite_index == -1? 0 : enigma_user::sprite_get_width(sprite_index)*image_xscale; }
   int object_graphics::$sprite_height() const { return sprite_index == -1? 0 : enigma_user::sprite_get_height(sprite_index)*image_yscale; }
   int object_graphics::$sprite_xoffset() const { return sprite_index == -1? 0 : enigma_user::sprite_get_xoffset(sprite_index)*image_xscale; }

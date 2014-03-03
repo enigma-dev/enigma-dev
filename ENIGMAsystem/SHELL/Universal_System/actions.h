@@ -36,6 +36,52 @@ extern bool argument_relative;
 namespace enigma_user
 {
 
+//TODO: Confirm timeline mechanics (e.g., stopping resets position?)
+inline void action_set_timeline(int timeline, double position) 
+{
+  ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->timeline_index=timeline;
+  ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->timeline_position=position;
+  ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->timeline_running = true;
+}
+
+inline void action_set_timeline_position(double position) 
+{
+  ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->timeline_position=position;
+}
+
+inline void action_set_timeline_speed(double speed)
+{
+  ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->timeline_speed=speed;
+}
+
+inline void action_timeline_pause()
+{
+  ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->timeline_running = false;
+}
+
+inline void action_timeline_start()
+{
+  ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->timeline_running = true;
+}
+
+inline void action_timeline_stop()
+{
+  ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->timeline_running = false;
+  ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->timeline_position=0;
+}
+
+
+
+
+void action_webpage(const std::string &url)
+{
+	//TODO: Look for cross-platform method.
+	#ifdef _WIN32
+		ShellExecute (NULL, "open", url.c_str(), NULL, NULL, SW_SHOWNORMAL);
+	#endif
+}
+
+
 inline bool action_if_variable(const variant& variable, const variant& value, int operation) {
     switch (operation)
     {
