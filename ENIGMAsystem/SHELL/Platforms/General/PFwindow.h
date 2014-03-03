@@ -122,9 +122,6 @@ int window_mouse_get_y();
 int window_view_mouse_get_x(int id);
 int window_view_mouse_get_y(int id);
 
-void game_end();
-void action_end_game();
-
 string clipboard_get_text();
 void clipboard_set_text(string text);
 bool clipboard_has_text();

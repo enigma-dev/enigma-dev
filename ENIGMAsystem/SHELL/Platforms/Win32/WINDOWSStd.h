@@ -32,7 +32,6 @@ namespace enigma_user
 {
 
 int sleep(int millis);
-void set_synchronization(bool enable);
 
 }
 

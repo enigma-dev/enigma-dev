@@ -817,7 +817,13 @@ int window_get_curor()
 }
 
 void game_end() { PostQuitMessage(0); }
+
 void action_end_game() { game_end(); }
+
+void action_webpage(const std::string &url)
+{
+	ShellExecute (NULL, "open", url.c_str(), NULL, NULL, SW_SHOWNORMAL);
+}
 
 void io_handle()
 {
