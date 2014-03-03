@@ -18,13 +18,9 @@
 
 #include <string>
 #include <sstream>
-#include <algorithm>
 using std::string;
 
 #include "WINDOWScallback.h"
-#include "Universal_System/var4.h"
-#include "Universal_System/roomsystem.h"
-#include "Universal_System/estring.h"
 #include "../General/PFregistry.h"
 
 #include "Platforms/platforms_mandatory.h"
