@@ -59,6 +59,7 @@ void show_error(string errortext,const bool fatal)
 namespace enigma {
   extern HINSTANCE hInstance;
   extern HWND hWnd;
+  extern string gameInformation;
 }
 
 static INT_PTR CALLBACK ShowInfoProc(HWND hwndDlg,UINT uMsg,WPARAM wParam,LPARAM lParam)
@@ -224,7 +225,7 @@ void show_info(string info, string caption) {
 }
 
 void show_info(string caption) {
-  show_info("Game Information needs added to the plugin and EnigmaStruct", caption);
+  show_info(enigma::gameInformation, caption);
 }
 
 int show_message(string str)
