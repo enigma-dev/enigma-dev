@@ -88,8 +88,7 @@ int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
   wto << "namespace enigma" << endl << "{" << endl;
 
   //Forward declarations
-  wto <<"int timeline_calc_new_moment(int timeline_index, gs_scalar& timeline_position, gs_scalar timeline_speed, bool timeline_loop);\n";
-  wto <<"void timeline_call_moment_script(int timeline_index, int moment_index);\n";
+  wto <<"void advance_curr_timeline(gs_scalar& timeline_position, gs_scalar timeline_speed, int timeline_index, bool timeline_loop);\n\n";
   wto <<"\n";
 
   wto << "  struct event_parent: " << system_get_uppermost_tier() << endl;

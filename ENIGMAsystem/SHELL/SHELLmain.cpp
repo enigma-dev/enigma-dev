@@ -101,7 +101,7 @@ using namespace enigma_user;
   #include "Preprocessor_Environment_Editable/IDE_EDIT_evparent.h"
   #include "Preprocessor_Environment_Editable/IDE_EDIT_events.h"
   #include "Preprocessor_Environment_Editable/IDE_EDIT_objectdeclarations.h"
-  #include "Preprocessor_Environment_Editable/IDE_EDIT_timelinecontrol.h"
+  #include "Preprocessor_Environment_Editable/IDE_EDIT_timelines.h"
   #include "Preprocessor_Environment_Editable/IDE_EDIT_globals.h"
   #include "Preprocessor_Environment_Editable/IDE_EDIT_objectaccess.h"
   #include "Preprocessor_Environment_Editable/IDE_EDIT_objectfunctionality.h"

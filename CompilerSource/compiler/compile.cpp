@@ -37,6 +37,7 @@
   ide_dia_progress_text(x); \
   ide_dia_progress(y);
 
+#include <map>
 #include <string>
 #include <vector>
 #include <iostream>
@@ -522,75 +523,36 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
 
 
   //NEXT FILE ----------------------------------------
-  //Timeline control: Defines "moment" lookup functionality for timelines.
+  //Timelines: Defines "moment" lookup structures for timelines.
   edbg << "Writing timeline control information" << flushl;
-  wto.open((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_timelinecontrol.h").c_str(),ios_base::out);
+  wto.open((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_timelines.h").c_str(),ios_base::out);
   {
     wto << license;
-
-    //Every timeline has a "positive" and a "negative" directional lookup, based on timeline_speed.
-    //(timeline_speed of 0 can be either, so we artibrarily consider it positive.)
-    //Thus, we identify the next moment in the positive or negative direction, add/subtract the 
-    //  timeline_speed, and then consider whether or not we've passed into the next moment.
+//    wto <<"#include <map>\n";
+//    wto <<"#include <vector>\n";
+//    wto <<"#include <cmath>\n\n";
     wto <<"namespace enigma {\n\n";
-    wto <<"//Return the new moment (-1 means \"no change\")\n";
-    wto <<"int timeline_calc_new_moment_positive(int timeline_index, gs_scalar& timeline_position, gs_scalar timeline_speed, bool timeline_loop) {\n";
 
-    //Temporaries.
-    wto <<"  int nextMomentStep = -1;\n";
-    wto <<"  int maxMomentStep = -1;\n"; //Equal to the max "stepNo" for the moment.
-    wto <<"  int nextMomentID = -1;\n";
-
-    //Each timeline ID gets a case statement. Unfortunately, a branching if-else tree is needed to determine moment data
-    //  within the case. NOTE: Assumes moments are listed in increasing order (we can always sort the array, I suppose...)
-    wto <<"  switch (timeline_index) {\n";
+    //Each timeline has a lookup structure (in this case, a map) which allows easy forward/backward lookup.
+    //This is currently constructed rather manually; there are probably more efficient 
+    // construction techniques, but none come to mind.
+    wto <<"std::vector< std::map<int, int> > build_moments_map() {\n";
+    wto <<"  std::vector< std::map<int, int> > res;\n";
+    wto <<"  res.reserve(" <<es->timelineCount <<");\n";
+    wto <<"  std::map<int, int> curr;\n\n";
     for (int i=0; i<es->timelineCount; i++) {
-      int momentCount = es->timelines[i].momentCount;
-      wto <<"    case " <<es->timelines[i].id <<": {\n";
-      wto <<"      maxMomentStep = " <<es->timelines[i].moments[momentCount-1].stepNo <<";\n";
-      for (int j=0; j<momentCount; j++) {
-        wto <<"      if (timeline_position<" <<es->timelines[i].moments[j].stepNo <<") {";
-        wto <<" nextMomentStep = " <<es->timelines[i].moments[j].stepNo <<";";
-        wto <<" nextMomentID = " <<((j+1) % momentCount) <<";";
-        wto <<" break;";
-        wto <<" }\n";
+      wto <<"  curr.clear();\n";
+      for (int j=0; j<es->timelines[i].momentCount; j++) {
+        wto <<"  curr[" <<es->timelines[i].moments[j].stepNo <<"] = " <<j <<";\n";
       }
-      wto <<"      break;\n";
-      wto <<"    }\n";
+      wto <<"  res.push_back(curr);\n\n";
     }
-    wto <<"  }\n";
-
-    //Moment logic.
-    wto <<"  if (nextMomentStep>=0 && nextMomentID>=0 && maxMomentStep>=0) {\n";
-    wto <<"    gs_scalar prev_position = timeline_position;\n";
-    wto <<"    timeline_position += timeline_speed;\n";
-    wto <<"    if (timeline_position >= maxMomentStep) {\n"; //Out of bounds?
-    wto <<"      if (timeline_loop) {\n";
-    wto <<"        timeline_position -= maxMomentStep;\n"; //TODO: This will not trigger scripts that loop ALL the way (or mult. times) in one turn.
-    wto <<"      } else {\n";
-    wto <<"        timeline_position = maxMomentStep;\n";
-    wto <<"        nextMomentStep = maxMomentStep+1;\n"; //Avoid constantly triggering.
-    wto <<"      }\n";
-    wto <<"    }\n";
-    wto <<"    if (timeline_position >= nextMomentStep) {\n"; //Passed the next boundary? //TODO: Won't trigger multiple boundaries in the same tick.
-    wto <<"      return nextMomentID;\n";
-    wto <<"    }\n";
-    wto <<"  }\n";
-
-    //Default
-    wto <<"  return -1;\n";
+    wto <<"  return res;\n";
     wto <<"}\n\n";
 
-
-    //Split to positive or negative.
-    wto <<"int timeline_calc_new_moment(int timeline_index, gs_scalar& timeline_position, gs_scalar timeline_speed, bool timeline_loop) {\n";
-    wto <<"  if (timeline_speed>=0) {\n";
-    wto <<"    return timeline_calc_new_moment_positive(timeline_index, timeline_position, timeline_speed, timeline_loop);\n";
-    wto <<"  } else {\n";
-    wto <<"    //TODO: Not implemented yet.\n";
-    wto <<"    return -1;\n";
-    wto <<"  }\n";
-    wto <<"}\n\n";
+    //Now call it.
+    wto <<"//vector is indexed by timeline_id. map::key is moment_time; map::value is moment_id\n";
+    wto <<"std::vector< std::map<int, int> > timeline_moments_maps = build_moments_map();\n\n";
 
     //Actually call timeline moment scripts based on ID/Moment.
     wto <<"void timeline_call_moment_script(int timeline_index, int moment_index) {\n";
@@ -601,16 +563,42 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
       for (int j=0; j<es->timelines[i].momentCount; j++) {
         wto <<"        case " <<j <<": {\n";
         wto <<"          ::TLINE_" <<es->timelines[i].name <<"_MOMENT_" <<es->timelines[i].moments[j].stepNo <<"();\n";
+        wto <<"          break;\n";
         wto <<"        }\n";
       }
       wto <<"      }\n";
       wto <<"      break;\n";
       wto <<"    }\n";
     }
-
     wto <<"  }\n";
     wto <<"}\n\n";
 
+    //Function to advance the current timeline variables, calling moments as appropriate. This assumes timeline_running is true.
+    wto <<"void advance_curr_timeline(gs_scalar& timeline_position, gs_scalar timeline_speed, int timeline_index, bool timeline_loop) {\n";
+    wto <<"  //Find the next instant (it may be right now).\n";
+    wto <<"  //Note: If a map lookup each tick is a performance hit, this value can be cached in the object itself with a tuple <timeline_id, timeline_pos, next_moment_iterator>\n";
+    wto <<"  if (timeline_index<0 || timeline_index>=(int)timeline_moments_maps.size()) { return; }\n";
+    wto <<"  std::map<int, int>::const_iterator next = timeline_moments_maps[timeline_index].lower_bound(ceil(timeline_position));\n\n";
+    wto <<"  //We now advance the timeline_position by timeline_speed, saving event information on the way. Note that we *cannot* call these\n";
+    wto <<"  // events as they are found, because they might change timeline_position (and GM does not work that way).\n";
+    wto <<"  //TODO: Timeline looping not implemented yet.\n";
+    wto <<"  std::vector<int> moment_ids;\n";
+    wto <<"  while (timeline_speed>0) { //TODO: Negative speeds not implemented yet.\n";
+    wto <<"    //Landing *exactly* on the next moment will actually trigger it *next* turn.\n";
+    wto <<"    if (next==timeline_moments_maps[timeline_index].end() || timeline_position+timeline_speed<=next->first) {\n";
+    wto <<"       timeline_position += timeline_speed;\n";
+    wto <<"       break;\n";
+    wto <<"    }\n";
+    wto <<"    timeline_speed -= next->first - timeline_position;\n";
+    wto <<"    timeline_position = next->first;\n";
+    wto <<"    moment_ids.push_back(next->second);\n";
+    wto <<"    next++;\n";
+    wto <<"  }\n\n";
+    wto <<"  //Now, trigger each moment that we've passed.\n";
+    wto <<"  for (std::vector<int>::iterator it=moment_ids.begin(); it!=moment_ids.end(); it++) {\n";
+    wto <<"    timeline_call_moment_script(timeline_index, *it);\n";
+    wto <<"  }\n";
+    wto <<"}\n\n";
 
     wto <<"}\n"; //namespace 
   }
