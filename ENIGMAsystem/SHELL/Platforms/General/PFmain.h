@@ -16,25 +16,29 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef ENIGMA_WINDOWS_MAIN
-#define ENIGMA_WINDOWS_MAIN
-
-#include "../General/PFmain.h"
-#include <windows.h>
-
-namespace enigma //TODO: Find where this belongs
-{
-  extern HINSTANCE hInstance;
-  extern HWND hWndParent;
-  extern HWND hWnd;
-  extern HDC window_hDC;
-}
+#ifndef ENIGMA_PLATFORM_MAIN
+#define ENIGMA_PLATFORM_MAIN
 
 namespace enigma_user
 {
 
-unsigned long long window_handle();
+void game_end();
+void action_end_game();
+void action_webpage(const std::string &url);
+
+string parameter_string(int x);
+int parameter_count();
+unsigned long long disk_size(std::string drive);
+unsigned long long disk_free(std::string drive);
+
+void set_program_priority(int value);
+void execute_shell(std::string fname, std::string args);
+void execute_shell(std::string operation, std::string fname, std::string args);
+void execute_program(std::string fname, std::string args, bool wait);
+void execute_program(std::string operation, std::string fname, std::string args, bool wait);
+
+std::string environment_get_variable(std::string name);
 
 }
 
-#endif //ENIGMA_WINDOWS_MAIN
+#endif //ENIGMA_PLATFORM_MAIN
