@@ -1,4 +1,5 @@
 #include "WINDOWSmain.h"
+#include "Platforms/General/PFjoystick.h"  
 #include "../General/PFthreads.h"
 #include "../General/PFini.h"
 #include "../General/PFfilemanip.h"
