@@ -32,6 +32,8 @@
 #include <time.h>
 #include <sys/stat.h>
 
+#include "../General/PFini.h"
+
 using namespace std;
 
 static std::string iniFilename = "";
