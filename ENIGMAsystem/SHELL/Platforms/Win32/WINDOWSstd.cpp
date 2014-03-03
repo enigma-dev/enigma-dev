@@ -30,6 +30,8 @@
 using namespace std;
 
 #include "libEGMstd.h"
+#include "../General/PFwindow.h"
+#include "../General/PFexternals.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
