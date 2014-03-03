@@ -39,7 +39,7 @@
 
 #include "Platforms/platforms_mandatory.h"
 #include "Widget_Systems/widgets_mandatory.h"
-#include "externals.h"
+#include "Platforms/General/PFexternals.h"
 
 #include <cstdio>
 
