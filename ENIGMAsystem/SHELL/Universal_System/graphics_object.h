@@ -52,6 +52,16 @@ namespace enigma
       gs_scalar image_index;
       gs_scalar image_speed;
 
+      //Timeline properties. (TODO: these may belong higher up the inheritance chart)
+      int timeline_index;    //-1 means "no timeline running"
+      bool timeline_running; //True if running, False if not. Setting to True again will continue execution; it's more like a "pause" button.
+      gs_scalar timeline_speed; //Can be set to fractions, negative, zero, etc. Defaults to 1.
+      gs_scalar timeline_position; //How far along "time" is in this timeline. Bounded by [0,lastMoment)
+      bool timeline_loop; //Allows looping from lastMoment->0 and vice versa. 
+
+      //TEMP: Not sure where to put this.
+      void update_timelines(); 
+
       //Depth
       enigma::depthv  depth;
       bool visible;

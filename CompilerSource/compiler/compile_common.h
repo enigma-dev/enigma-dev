@@ -29,6 +29,7 @@
 #define _COMPILE_COMMON__H
 
 #include <map>
+#include <vector>
 #include "compile_organization.h"
 #include "parser/object_storage.h"
 
@@ -38,6 +39,8 @@ namespace used_funcs
   void zero();
 }
 extern std::map<string,parsed_script*> scr_lookup;
+extern std::map<string, std::vector<parsed_script*> > tline_lookup;
+
 
 extern const char* license;
 

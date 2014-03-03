@@ -40,7 +40,7 @@ using namespace std;
 #include "compiler/event_reader/event_parser.h"
 
 #include "languages/lang_CPP.h"
-int lang_CPP::compile_parseSecondary(map<int,parsed_object*> &parsed_objects, parsed_script* scripts[], int scrcount, map<int,parsed_room*> &parsed_rooms, parsed_object* EGMglobal)
+int lang_CPP::compile_parseSecondary(map<int,parsed_object*> &parsed_objects, parsed_script* scripts[], int scrcount, vector<parsed_script*>& tlines, map<int,parsed_room*> &parsed_rooms, parsed_object* EGMglobal)
 {
   // Dump our list of dot-accessed locals
   dot_accessed_locals.clear();
@@ -58,6 +58,13 @@ int lang_CPP::compile_parseSecondary(map<int,parsed_object*> &parsed_objects, pa
     parser_secondary(scripts[i]->pev.code,scripts[i]->pev.synt,EGMglobal,&scripts[i]->obj,&scripts[i]->pev);
     if (scripts[i]->pev_global)
       parser_secondary(scripts[i]->pev_global->code,scripts[i]->pev_global->synt,EGMglobal,&scripts[i]->obj,scripts[i]->pev_global);
+  }
+
+  //Give all timelines a second pass
+  for (int i=0; i<int(tlines.size()); i++) {
+    parser_secondary(tlines[i]->pev.code,tlines[i]->pev.synt,EGMglobal,&tlines[i]->obj,&tlines[i]->pev);
+    if (tlines[i]->pev_global)
+      parser_secondary(tlines[i]->pev_global->code,tlines[i]->pev_global->synt,EGMglobal,&tlines[i]->obj,tlines[i]->pev_global);
   }
   
   // Give all room creation codes a second pass

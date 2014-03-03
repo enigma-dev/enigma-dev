@@ -38,6 +38,7 @@
   ide_dia_progress(y);
 
 #include <string>
+#include <vector>
 #include <iostream>
 #include <sstream>
 #include <fstream>
@@ -271,7 +272,7 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   edbg << "Copying script names [" << es->scriptCount << "]" << flushl;
   for (int i = 0; i < es->scriptCount; i++)
     quickmember_script(&globals_scope,es->scripts[i].name);
-	
+
   edbg << "Copying shader names [" << es->shaderCount << "]" << flushl;
   for (int i = 0; i < es->shaderCount; i++)
     quickmember_variable(&globals_scope,jdi::builtin_type__int,es->shaders[i].name);
@@ -280,7 +281,7 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   for (int i = 0; i < es->fontCount; i++)
     quickmember_variable(&globals_scope,jdi::builtin_type__int,es->fonts[i].name);
 
-  edbg << "Copying timeline names [kidding, these are totally not implemented :P] [" << es->timelineCount << "]" << flushl;
+  edbg << "Copying timeline names [" << es->timelineCount << "]" << flushl;
   for (int i = 0; i < es->timelineCount; i++)
     quickmember_variable(&globals_scope,jdi::builtin_type__int,es->timelines[i].name);
 
@@ -302,13 +303,16 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   edbg << es->scriptCount << " Scripts:" << flushl;
   parsed_script *parsed_scripts[es->scriptCount];
 
+  //parsed timelines involve N timelines with M moments each. So we just store them in a large vector rather than a messy 2-D array of pointers.
+  vector<parsed_script*> parsed_tlines;
+
   scr_lookup.clear();
   used_funcs::zero();
 
   int res;
   #define irrr() if (res) { idpr("Error occurred; see scrollback for details.",-1); return res; }
 
-  res = current_language->compile_parseAndLink(es,parsed_scripts);
+  res = current_language->compile_parseAndLink(es,parsed_scripts, parsed_tlines);
   irrr();
 
 
@@ -516,6 +520,103 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
     wto << "};}\nnamespace enigma { size_t room_idmax = " <<max << "; }\n\n";
   wto.close();
 
+
+  //NEXT FILE ----------------------------------------
+  //Timeline control: Defines "moment" lookup functionality for timelines.
+  edbg << "Writing timeline control information" << flushl;
+  wto.open((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_timelinecontrol.h").c_str(),ios_base::out);
+  {
+    wto << license;
+
+    //Every timeline has a "positive" and a "negative" directional lookup, based on timeline_speed.
+    //(timeline_speed of 0 can be either, so we artibrarily consider it positive.)
+    //Thus, we identify the next moment in the positive or negative direction, add/subtract the 
+    //  timeline_speed, and then consider whether or not we've passed into the next moment.
+    wto <<"namespace enigma {\n\n";
+    wto <<"//Return the new moment (-1 means \"no change\")\n";
+    wto <<"int timeline_calc_new_moment_positive(int timeline_index, gs_scalar& timeline_position, gs_scalar timeline_speed, bool timeline_loop) {\n";
+
+    //Temporaries.
+    wto <<"  int nextMomentStep = -1;\n";
+    wto <<"  int maxMomentStep = -1;\n"; //Equal to the max "stepNo" for the moment.
+    wto <<"  int nextMomentID = -1;\n";
+
+    //Each timeline ID gets a case statement. Unfortunately, a branching if-else tree is needed to determine moment data
+    //  within the case. NOTE: Assumes moments are listed in increasing order (we can always sort the array, I suppose...)
+    wto <<"  switch (timeline_index) {\n";
+    for (int i=0; i<es->timelineCount; i++) {
+      int momentCount = es->timelines[i].momentCount;
+      wto <<"    case " <<es->timelines[i].id <<": {\n";
+      wto <<"      maxMomentStep = " <<es->timelines[i].moments[momentCount-1].stepNo <<";\n";
+      for (int j=0; j<momentCount; j++) {
+        wto <<"      if (timeline_position<" <<es->timelines[i].moments[j].stepNo <<") {";
+        wto <<" nextMomentStep = " <<es->timelines[i].moments[j].stepNo <<";";
+        wto <<" nextMomentID = " <<((j+1) % momentCount) <<";";
+        wto <<" break;";
+        wto <<" }\n";
+      }
+      wto <<"      break;\n";
+      wto <<"    }\n";
+    }
+    wto <<"  }\n";
+
+    //Moment logic.
+    wto <<"  if (nextMomentStep>=0 && nextMomentID>=0 && maxMomentStep>=0) {\n";
+    wto <<"    gs_scalar prev_position = timeline_position;\n";
+    wto <<"    timeline_position += timeline_speed;\n";
+    wto <<"    if (timeline_position >= maxMomentStep) {\n"; //Out of bounds?
+    wto <<"      if (timeline_loop) {\n";
+    wto <<"        timeline_position -= maxMomentStep;\n"; //TODO: This will not trigger scripts that loop ALL the way (or mult. times) in one turn.
+    wto <<"      } else {\n";
+    wto <<"        timeline_position = maxMomentStep;\n";
+    wto <<"        nextMomentStep = maxMomentStep+1;\n"; //Avoid constantly triggering.
+    wto <<"      }\n";
+    wto <<"    }\n";
+    wto <<"    if (timeline_position >= nextMomentStep) {\n"; //Passed the next boundary? //TODO: Won't trigger multiple boundaries in the same tick.
+    wto <<"      return nextMomentID;\n";
+    wto <<"    }\n";
+    wto <<"  }\n";
+
+    //Default
+    wto <<"  return -1;\n";
+    wto <<"}\n\n";
+
+
+    //Split to positive or negative.
+    wto <<"int timeline_calc_new_moment(int timeline_index, gs_scalar& timeline_position, gs_scalar timeline_speed, bool timeline_loop) {\n";
+    wto <<"  if (timeline_speed>=0) {\n";
+    wto <<"    return timeline_calc_new_moment_positive(timeline_index, timeline_position, timeline_speed, timeline_loop);\n";
+    wto <<"  } else {\n";
+    wto <<"    //TODO: Not implemented yet.\n";
+    wto <<"    return -1;\n";
+    wto <<"  }\n";
+    wto <<"}\n\n";
+
+    //Actually call timeline moment scripts based on ID/Moment.
+    wto <<"void timeline_call_moment_script(int timeline_index, int moment_index) {\n";
+    wto <<"  switch (timeline_index) {\n";
+    for (int i=0; i<es->timelineCount; i++) {
+      wto <<"    case " <<es->timelines[i].id <<": {\n";
+      wto <<"      switch (moment_index) {\n";
+      for (int j=0; j<es->timelines[i].momentCount; j++) {
+        wto <<"        case " <<j <<": {\n";
+        wto <<"          ::TLINE_" <<es->timelines[i].name <<"_MOMENT_" <<es->timelines[i].moments[j].stepNo <<"();\n";
+        wto <<"        }\n";
+      }
+      wto <<"      }\n";
+      wto <<"      break;\n";
+      wto <<"    }\n";
+    }
+
+    wto <<"  }\n";
+    wto <<"}\n\n";
+
+
+    wto <<"}\n"; //namespace 
+  }
+  wto.close();
+
+
   idpr("Performing Secondary Parsing and Writing Globals",25);
 
   // Defragged events must be written before object data, or object data cannot determine which events were used.
@@ -526,11 +627,11 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
   parsed_object EGMglobal;
 
   edbg << "Linking globals" << flushl;
-  res = current_language->link_globals(&EGMglobal,es,parsed_scripts);
+  res = current_language->link_globals(&EGMglobal,es,parsed_scripts, parsed_tlines);
   irrr();
 
   edbg << "Running Secondary Parse Passes" << flushl;
-  res = current_language->compile_parseSecondary(parsed_objects,parsed_scripts,es->scriptCount,parsed_rooms,&EGMglobal);
+  res = current_language->compile_parseSecondary(parsed_objects,parsed_scripts,es->scriptCount, parsed_tlines, parsed_rooms,&EGMglobal);
 
   edbg << "Writing object data" << flushl;
   res = current_language->compile_writeObjectData(es,&EGMglobal,mode);
@@ -767,3 +868,4 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
   idpr("Done.", 100);
   return 0;
 };
+
