@@ -15,4 +15,4 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "DIjoystick.h"
+#include "Platforms/General/PFjoystick.h"
