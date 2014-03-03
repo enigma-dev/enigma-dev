@@ -1,4 +1,4 @@
-/** Copyright (C) 2013 Robert B. Colton
+/** Copyright (C) 2013-2014 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -17,7 +17,10 @@
 
 #include <windows.h>
 #include <dinput.h>
-#include "DIjoystick.h"  
+#include <string>
+using std::string;
+
+#include "Platforms/General/PFjoystick.h"  
 #include "Platforms/Win32/WINDOWSmain.h"
 
 namespace enigma_user
