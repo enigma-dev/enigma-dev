@@ -16,7 +16,6 @@
 **/
 
 #include <windows.h>
-#include <dinput.h>
 #include <string>
 using std::string;
 
