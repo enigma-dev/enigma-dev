@@ -59,9 +59,6 @@ namespace enigma
       gs_scalar timeline_position; //How far along "time" is in this timeline. Bounded by [0,lastMoment)
       bool timeline_loop; //Allows looping from lastMoment->0 and vice versa. 
 
-      //TEMP: Not sure where to put this.
-      void update_timelines(); 
-
       //Depth
       enigma::depthv  depth;
       bool visible;

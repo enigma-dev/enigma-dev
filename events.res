@@ -87,7 +87,7 @@ beginstep: 3
 	Name: Begin Step
 	Mode: Special
 	Case: 1
-	Constant: {xprevious = x; yprevious = y; if (sprite_index != -1) image_index = fmod((image_speed < 0)?(sprite_get_number(sprite_index) + image_index - fmod(abs(image_speed),sprite_get_number(sprite_index))):(image_index + image_speed), sprite_get_number(sprite_index));  if (timeline_running && timeline_speed!=0) { int nextMoment = enigma::timeline_calc_new_moment(timeline_index, timeline_position, timeline_speed, timeline_loop); if (nextMoment != -1) { enigma::timeline_call_moment_script(timeline_index, nextMoment); } } }
+	Constant: {xprevious = x; yprevious = y; if (sprite_index != -1) image_index = fmod((image_speed < 0)?(sprite_get_number(sprite_index) + image_index - fmod(abs(image_speed),sprite_get_number(sprite_index))):(image_index + image_speed), sprite_get_number(sprite_index));  if (timeline_running && timeline_speed!=0) { enigma::advance_curr_timeline(timeline_position, timeline_speed, timeline_index, timeline_loop); } }
 
 alarm: 2
 	Group: Alarm
