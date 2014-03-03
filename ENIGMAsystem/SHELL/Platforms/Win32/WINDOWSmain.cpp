@@ -54,6 +54,15 @@ namespace enigma //TODO: Find where this belongs
 
   void EnableDrawing (HGLRC *hRC);
   void DisableDrawing (HWND hWnd, HDC hDC, HGLRC hRC);
+  
+  void windowsystem_write_exename(char* exenamehere)
+  {
+	GetModuleFileName(NULL, exenamehere, 1024);
+  }
+}
+
+void enigma_catchmouse_backend(bool x) {
+  if (x) SetCapture(enigma::hWnd); else ReleaseCapture();
 }
 
 namespace enigma {
@@ -352,6 +361,12 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
 
 namespace enigma_user
 {
+
+int sleep(int millis)
+{
+  Sleep(millis);
+  return 0;
+}
 
 string parameter_string(int x)
 {
