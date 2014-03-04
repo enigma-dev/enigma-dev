@@ -36,12 +36,18 @@
 #include "instance_system.h"
 #include "instance.h"
 
+#include <stdio.h>
+
 namespace enigma
 {
   int destroycalls = 0, createcalls = 0;
 }
 
 typedef std::pair<int,enigma::inst_iter*> inode_pair;
+
+namespace enigma_user
+{
+
 void instance_deactivate_all(bool notme) {
     for (enigma::iterator it = enigma::instance_list_first(); it; ++it) {
         if (notme && (*it)->id == enigma::instance_event_iterator->inst->id) continue;
@@ -50,7 +56,6 @@ void instance_deactivate_all(bool notme) {
         enigma::instance_deactivated_list.insert(inode_pair((*it)->id,it.it));
     }
 }
-
 
 void instance_activate_all() {
 
@@ -72,7 +77,7 @@ void instance_activate_object(int obj) {
     std::map<int,enigma::inst_iter*>::iterator iter = enigma::instance_deactivated_list.begin();
     while (iter != enigma::instance_deactivated_list.end()) {
         enigma::object_basic* const inst = ((enigma::object_basic*)(iter->second->inst));
-        if (obj==all ||(obj<100000 && inst->object_index==obj)|| (obj>100000 && inst->id == obj)) {
+        if (obj == all || (obj < 100000? inst->object_index == obj : inst->id == unsigned(obj))) {
             inst->activate();
             enigma::instance_deactivated_list.erase(iter++);
         }
@@ -92,7 +97,7 @@ void instance_destroy(int id, bool dest_ev)
         who->unlink();
   }
 }
-#include <stdio.h>
+
 void instance_destroy()
 {
   enigma::object_basic* const a = enigma::instance_event_iterator->inst;
@@ -101,9 +106,9 @@ void instance_destroy()
     if (enigma::cleanups.find(a) == enigma::cleanups.end())
         enigma::instance_event_iterator->inst->unlink();
     if (enigma::cleanups.find(a) == enigma::cleanups.end())
-    printf("FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK!\nFFFFFFFFFFFFFFFFFFFFFUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUCK!\nFUCK! %p ISN'T ON THE GOD DAMNED MOTHER FUCKING STACK!",a);
+    printf("FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK! FUCK!\nFFFFFFFFFFFFFFFFFFFFFUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUCK!\nFUCK! %p ISN'T ON THE GOD DAMNED MOTHER FUCKING STACK!", (void*)a);
     if (a != (enigma::object_basic*)enigma::instance_event_iterator->inst)
-    printf("FUCKING DAMN IT! THE ITERATOR CHANGED FROM POINTING TO %p TO POINTING TO %p\n",a,(enigma::object_basic*)enigma::instance_event_iterator->inst);
+    printf("FUCKING DAMN IT! THE ITERATOR CHANGED FROM POINTING TO %p TO POINTING TO %p\n", (void*)a, (void*)(enigma::object_basic*)enigma::instance_event_iterator->inst);
   }
 }
 
@@ -123,9 +128,14 @@ int instance_find(int obj, int num)
   }
   return noone;
 }
+enigma::instance_t instance_last(int obj) {
+  return (enigma::objects[obj].count > 0)? enigma::objects[obj].prev->inst->id : noone;
+}
 
 int instance_number(int obj)
 {
   return enigma::objects[obj].count;
+}
+
 }
 

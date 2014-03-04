@@ -4,7 +4,7 @@
          font glyphs and metrics to the engine file.
   
   @section License
-    Copyright (C) 2008-2013 Josh Ventura
+    Copyright (C) 2008-2014 Josh Ventura
     This file is a part of the ENIGMA Development Environment.
 
     ENIGMA is free software: you can redistribute it and/or modify it under the
@@ -29,7 +29,7 @@ using namespace std;
 
 
 #include "languages/lang_CPP.h"
-int lang_CPP::compile_writeFontInfo(compile_context &ctex)
+int lang_CPP::compile_write_font_info(compile_context &ctex)
 {
   ofstream wto("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_fontinfo.h",ios_base::out);
   wto << gen_license << "#include \"Universal_System/fontstruct.h\"" << endl
@@ -46,8 +46,8 @@ int lang_CPP::compile_writeFontInfo(compile_context &ctex)
       
       ctex.es->fonts[i].fontName << "\", " << // string fontName;
       ctex.es->fonts[i].size     <<   ", " << // int size;
-      ctex.es->fonts[i].bold     <<   ", " << // bool bold;
-      ctex.es->fonts[i].italic   <<   ", " << // bool italic;
+(bool)ctex.es->fonts[i].bold     <<   ", " << // bool bold;
+(bool)ctex.es->fonts[i].italic   <<   ", " << // bool italic;
       ctex.es->fonts[i].rangeMin <<   ", " << // int rangeMin;
       ctex.es->fonts[i].rangeMax - ctex.es->fonts[i].rangeMin + 1 //  int rangeMax;
       << "}," << endl;

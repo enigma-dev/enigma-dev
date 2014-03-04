@@ -50,6 +50,7 @@ int lang_CPP::compile_handle_templates(compile_context &ctex)
   values["gameid"]      = gs.gameId;
 	values["fullscreen"]  = gs.startFullscreen;
 	values["interpolate"] = gs.interpolate;
+	values["forcesoftwarevertexprocessing"] = gs.forceSoftwareVertexProcessing;
 	values["drawborder"]  =!gs.dontDrawBorder;
 	values["showcursor"]  = gs.displayCursor;
 	values["scaling"]     = gs.scaling;

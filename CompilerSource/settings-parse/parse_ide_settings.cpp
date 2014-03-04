@@ -35,6 +35,9 @@ using namespace std;
 #include "eyaml.h"
 
 #include "parse_ide_settings.h"
+#include "makedir.h"
+
+string makedir = "";
 
 static inline vector<string> explode(string n) {
   vector<string> ret;
@@ -69,15 +72,30 @@ void parse_ide_settings(const char* eyaml)
   ey_data settree = parse_eyaml_str(eyaml);
   eyit it;
   
+  // Read settings info
+  setting::use_cpp_strings   = settree.get("inherit-strings-from").toInt();
+  setting::use_cpp_escapes   = settree.get("inherit-escapes-from").toInt();
+  setting::use_incrementals  = settree.get("inherit-increment-from").toInt();
+  setting::use_gml_equals    = !settree.get("inherit-equivalence-from").toInt();
+  setting::literal_autocast  = settree.get("treat-literals-as").toInt();
+  setting::inherit_objects   = settree.get("inherit-objects").toBool();
+  setting::make_directory = settree.get("make-directory").toString();
+
+#if CURRENT_PLATFORM_ID == OS_WINDOWS
+	setMakeDirectory(myReplace(escapeEnv(setting::make_directory), "\\","/"));
+#else
+	setMakeDirectory(escapeEnv(setting::make_directory));
+#endif
+
   //ide_dia_open();
-  
+
   #define ey_cp(v,x,y) \
   it = settree.find("target-" #x); \
   if (it == settree.end()) { \
      user << "ERROR! IDE has not specified a target " #x " " #y "!" << flushl; \
      extensions::targetAPI.v ## Sys = "None"; \
   } else  extensions::targetAPI.v ## Sys = eyscalar(it);
-  
+
   // Get target's windowing api
   ey_cp(window,    windowing,api)
   // Get requested graphics system
@@ -88,9 +106,9 @@ void parse_ide_settings(const char* eyaml)
   ey_cp(collision, collision,system)
   // Get requested widget system
   ey_cp(widget,    widget,system)
-  // Get requested networking library
-  ey_cp(network,   networking,library)
-  
+  // Get requested networking system
+  ey_cp(network,   networking,system)
+
   ifstream ifs; string eyname;
   ifs.open((eyname = "ENIGMAsystem/SHELL/Platforms/" + extensions::targetAPI.windowSys + "/Info/About.ey").c_str());
   if (ifs.is_open())
@@ -102,9 +120,9 @@ void parse_ide_settings(const char* eyaml)
     ifs.close();
   }
   string platn = tolower(extensions::targetAPI.windowSys);
-  
-  #define eygl(fn,v) \
-  {\
+
+  #define eygl(fn,v) {};
+  /*{\
     ifs.open((eyname = "ENIGMAsystem/SHELL/" #fn "/" + extensions::targetAPI.v ## Sys + "/Config/" + platn + ".ey").c_str()); \
     if (ifs.is_open()) \
     { \
@@ -117,18 +135,19 @@ void parse_ide_settings(const char* eyaml)
       ifs.close(); \
     } \
     else user << "Could not open " << eyname << ".\n"; \
-  }
-  
+  }*/
+
   eygl(Graphics_Systems, graphics);
   eygl(Widget_Systems, widget);
   eygl(Audio_Systems, audio);
-  
+  eygl(Networking_Systems, network);
+
   string cinffile = settree.get("target-compiler");
   cinffile = "Compilers/" CURRENT_PLATFORM_NAME "/" + cinffile + ".ey";
-  
+
   const char *a = current_language->establish_bearings(cinffile.c_str());
   if (a) cout << "Parse fail: " << a << endl;
-  
+
   // Read info about the compiler
   ifstream cinfstream(cinffile.c_str());
   ey_data cinfo = parse_eyaml(cinfstream,cinffile);
@@ -138,14 +157,7 @@ void parse_ide_settings(const char* eyaml)
   extensions::targetOS.runprog   = cinfo.get("run-program");
   extensions::targetOS.runparam  = cinfo.get("run-params");
   extensions::targetOS.identifier = cinfo.get("target-platform");
-  
-  // Read settings info
-  setting::use_cpp_strings  = settree.get("inherit-strings-from").toInt();
-  setting::use_cpp_escapes  = settree.get("inherit-escapes-from").toInt();
-  setting::use_incrementals = settree.get("inherit-increment-from").toInt();
-  setting::use_gml_equals   =!settree.get("inherit-equivalence-from").toInt();
-  setting::literal_autocast = settree.get("treat-literals-as").toInt();
-  
+
   cout << "Setting up IDE editables... " << endl;
   current_language->requested_extensions.clear();
   current_language->requested_extensions = explode((string)settree.get("extensions"));

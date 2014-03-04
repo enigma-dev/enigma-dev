@@ -16,6 +16,7 @@ searchdirs: gcc -E -x c++ -v $blank -I./ENIGMAsystem/SHELL/
 searchdirs-start: "#include <...> search starts here:"
 searchdirs-end: "End of search list."
 resources: ./MacOS/build/Release/EnigmaXcode.app/Contents/MacOS/EnigmaXcode.res
+cxxflags: -I/opt/X11/include/
 cppflags:
 cflags:
 links: -lz -framework Cocoa

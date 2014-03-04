@@ -28,7 +28,10 @@
 //#include "Universal_System/instance_system.h"
 #include <cmath>
 
-void mp_potential_settings(double maxrot, double rotstep, double ahead, double onspot);
+namespace enigma_user
+{
+
+void mp_potential_settings(double maxrot, double rotstep, double ahead, bool onspot);
 bool mp_potential_step_object(const double x, const double y, const double stepsize, const int object, const bool solid_only = false);
 
 inline bool mp_potential_step(const double x, const double y, const double stepsize, const bool checkall) {
@@ -52,3 +55,6 @@ bool mp_linear_path_object(int path, const double x, const double y, const doubl
 inline bool mp_linear_path(int path, const double x, const double y, const double stepsize, const bool checkall) {
     return mp_linear_path_object(path, x, y, stepsize, all, !checkall);
 }
+
+}
+

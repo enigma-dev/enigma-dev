@@ -1,0 +1,13 @@
+%e-yaml
+---
+
+Name: SFML
+Identifier: SFML
+Description: SFML is a portable and easy to use multimedia API written in C++. You can see it as a modern, object-oriented alternative to SDL.
+Author: Cheeseboy and Robert
+
+Depends:
+	Build-platforms: None
+Represents:
+	Build-platforms: None
+

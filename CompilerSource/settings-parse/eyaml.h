@@ -43,6 +43,7 @@ struct ey_base { // A very vague container, representing something
 struct ey_string: ey_base { // If it doesn't contain more named members, it's a scalar
   string value; // Scalars have a single value
   operator string&(); // Implicitly behave as a string
+  bool toBool();
   int toInt(); double toDouble(); // Offer methods to convert to reals
   string toString(); // Offer a method to parse the string
   long toLong(); // Offer a method to convert to large reals

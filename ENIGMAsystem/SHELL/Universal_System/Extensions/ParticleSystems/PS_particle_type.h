@@ -50,7 +50,7 @@ namespace enigma
 
     // Shape.
     bool is_particle_sprite; // Whether an internal particle sprite is used or not.
-    enigma::particle_sprite* part_sprite;
+    particle_sprite* part_sprite;
     int sprite_id;
     bool sprite_animated, sprite_stretched, sprite_random;
     double size_min, size_max;
@@ -98,7 +98,7 @@ namespace enigma
   extern particle_type_manager pt_manager;
   particle_type* get_particletype(int id); // Null if not found.
 
-  void initialize_particle_type(enigma::particle_type* pt);
+  void initialize_particle_type(particle_type* pt);
 }
 
 #endif // ENIGMA_PS_PARTICLETYPE

@@ -34,7 +34,11 @@ namespace settings {
 }
 
 bool pedantic_warn(token_t &token, error_handler *herr, string w) {
-  //settings::pedantic_errors? token.report_error(herr, w) : token.report_warning(herr, w);
+  settings::pedantic_errors? token.report_error(herr, w) : token.report_warning(herr, w);
+  return settings::pedantic_errors;
+}
+bool EDL_AST::pedantic_warn(token_t &token, string w) {
+  settings::pedantic_errors? report_error(token, w) : report_warning(token, w);
   return settings::pedantic_errors;
 }
 
@@ -65,47 +69,60 @@ struct stacked_statement {
 // Constructor and destructor implementations --------------------------
 // ---------------------------------------------------------------------
 
-EDL_AST::AST_Node_Statement::AST_Node_Statement(): AST_Node() {}
+EDL_AST::AST_Node_Statement::AST_Node_Statement(EDL_AST_TYPE eat): AST_Node((AST_TYPE)eat) {}
 EDL_AST::AST_Node_Statement::~AST_Node_Statement() {}
 
-EDL_AST::AST_Node_Block::AST_Node_Block() {}
+EDL_AST::AST_Node_Statement_Standard::AST_Node_Statement_Standard(): AST_Node_Statement(EAT_STATEMENT) {}
+EDL_AST::AST_Node_Statement_Standard::~AST_Node_Statement_Standard() {}
+
+EDL_AST::AST_Node_Block::AST_Node_Block(): AST_Node_Statement(EAT_BLOCK) {}
 EDL_AST::AST_Node_Block::~AST_Node_Block() {}
 
-EDL_AST::AST_Node_Declaration::AST_Node_Declaration(const full_type &ft): base_type(ft) {}
+EDL_AST::AST_Node_Declaration::AST_Node_Declaration(const full_type &ft): AST_Node_Statement(EAT_DECLARATION), base_type(ft) {}
 
 EDL_AST::AST_Node_Statement_case::AST_Node_Statement_case(AST_Node_Statement_switch *sw, AST_Node *cv): AST_Node_Statement_default(sw), value(cv) {}
-EDL_AST::AST_Node_Statement_default::AST_Node_Statement_default(AST_Node_Statement_switch *sw): st_switch(sw) {}
+EDL_AST::AST_Node_Statement_default::AST_Node_Statement_default(AST_Node_Statement_switch *sw): AST_Node_Statement(EAT_STATE_SWITCH), st_switch(sw) {}
 EDL_AST::AST_Node_Statement_case::~AST_Node_Statement_case() { delete value; }
+EDL_AST::AST_Node_Statement_default::~AST_Node_Statement_default() { }
 
-EDL_AST::AST_Node_Statement_if::AST_Node_Statement_if(AST_Node *cd, AST_Node_Statement *doif, AST_Node_Statement *doelse): condition(cd), do_if(doif), do_else(doelse) {}
+EDL_AST::AST_Node_Statement_if::AST_Node_Statement_if(AST_Node *cd, AST_Node_Statement *doif, AST_Node_Statement *doelse): AST_Node_Statement(EAT_STATE_IF), condition(cd), do_if(doif), do_else(doelse) {}
 EDL_AST::AST_Node_Statement_if::~AST_Node_Statement_if() { delete condition; delete do_if; delete do_else; }
 
-EDL_AST::AST_Node_Statement_repeat::AST_Node_Statement_repeat(AST_Node *cond, AST_Node_Statement *c): condition(cond), code(c) {}
+EDL_AST::AST_Node_Statement_repeat::AST_Node_Statement_repeat(AST_Node *cond, AST_Node_Statement *c): AST_Node_Statement(EAT_STATE_REPEAT), condition(cond), code(c) {}
 EDL_AST::AST_Node_Statement_repeat::~AST_Node_Statement_repeat() { delete condition; delete code; }
 
-EDL_AST::AST_Node_Statement_do::AST_Node_Statement_do(AST_Node_Statement *loop, AST_Node *cond, bool n): code(loop), condition(cond), negate(n) {}
+EDL_AST::AST_Node_Statement_do::AST_Node_Statement_do(AST_Node_Statement *loop, AST_Node *cond, bool n): AST_Node_Statement(EAT_STATE_DO), code(loop), condition(cond), negate(n) {}
 EDL_AST::AST_Node_Statement_do::~AST_Node_Statement_do() { delete code; delete condition; }
 
-EDL_AST::AST_Node_Statement_for::AST_Node_Statement_for(AST_Node_Statement* stpre, AST_Node* c, AST_Node_Statement *stpost, AST_Node_Statement *cd): operand_pre(stpre), condition(c), operand_post(stpost), code(cd) {}
+EDL_AST::AST_Node_Statement_for::AST_Node_Statement_for(AST_Node_Statement* stpre, AST_Node* c, AST_Node_Statement *stpost, AST_Node_Statement *cd): AST_Node_Statement(EAT_STATE_FOR), operand_pre(stpre), condition(c), operand_post(stpost), code(cd) {}
 EDL_AST::AST_Node_Statement_for::~AST_Node_Statement_for() { delete operand_pre; delete condition; delete operand_post; delete code; }
 
-EDL_AST::AST_Node_Statement_while::AST_Node_Statement_while(AST_Node *cond, AST_Node_Statement *wcode, bool neg): condition(cond), code(wcode), negate(neg) {}
+EDL_AST::AST_Node_Statement_while::AST_Node_Statement_while(AST_Node *cond, AST_Node_Statement *wcode, bool neg): AST_Node_Statement(EAT_STATE_WHILE), condition(cond), code(wcode), negate(neg) {}
 EDL_AST::AST_Node_Statement_while::~AST_Node_Statement_while() { delete condition; delete code; }
 
-EDL_AST::AST_Node_Statement_with::AST_Node_Statement_with(AST_Node *whom, AST_Node_Statement *wcode): instances(whom), code(wcode) {}
+EDL_AST::AST_Node_Statement_with::AST_Node_Statement_with(AST_Node *whom, AST_Node_Statement *wcode): AST_Node_Statement(EAT_STATE_WITH), instances(whom), code(wcode) {}
 EDL_AST::AST_Node_Statement_with::~AST_Node_Statement_with() { delete instances; delete code; }
 
-EDL_AST::AST_Node_Statement_trycatch::AST_Node_Statement_trycatch(AST_Node_Statement *c): code_try(c) {}
+EDL_AST::AST_Node_Statement_trycatch::AST_Node_Statement_trycatch(AST_Node_Statement *c): AST_Node_Statement(EAT_STATE_TRYCATCH), code_try(c) {}
 EDL_AST::AST_Node_Statement_trycatch::~AST_Node_Statement_trycatch() { delete code_try; }
 
-EDL_AST::AST_Node_Statement_switch::AST_Node_Statement_switch(AST_Node *swv, AST_Node_Statement *swb): expression(swv), code(swb) {}
+EDL_AST::AST_Node_Statement_switch::AST_Node_Statement_switch(AST_Node *swv, AST_Node_Statement *swb): AST_Node_Statement(EAT_STATE_SWITCH), expression(swv), code(swb) {}
 EDL_AST::AST_Node_Statement_switch::~AST_Node_Statement_switch() {}
 
-EDL_AST::AST_Node_Statement_break::AST_Node_Statement_break(AST_Node_Statement *loop, int dep): depth(dep), target(loop) {}
+EDL_AST::AST_Node_Structdef::AST_Node_Structdef(): AST_Node_Statement(EAT_STRUCT) {}
+EDL_AST::AST_Node_Structdef::~AST_Node_Structdef() {}
+EDL_AST::AST_Node_Enumdef::AST_Node_Enumdef(): AST_Node_Statement(EAT_ENUM) {}
+EDL_AST::AST_Node_Enumdef::~AST_Node_Enumdef() {}
+
+EDL_AST::AST_Node_Statement_break::AST_Node_Statement_break(AST_Node_Statement *loop, int dep): AST_Node_Statement(EAT_STATE_BREAK), depth(dep), target(loop) {}
+EDL_AST::AST_Node_Statement_break::AST_Node_Statement_break(EDL_AST_TYPE eat, AST_Node_Statement *loop, int dep): AST_Node_Statement(eat), depth(dep), target(loop) {}
 EDL_AST::AST_Node_Statement_break::~AST_Node_Statement_break() {}
 
-EDL_AST::AST_Node_Statement_continue::AST_Node_Statement_continue(AST_Node_Statement *loop, int dep): AST_Node_Statement_break(loop, dep) {}
+EDL_AST::AST_Node_Statement_continue::AST_Node_Statement_continue(AST_Node_Statement *loop, int dep): AST_Node_Statement_break(EAT_STATE_CONTINUE, loop, dep) {}
 EDL_AST::AST_Node_Statement_continue::~AST_Node_Statement_continue() {}
+
+EDL_AST::AST_Node_Statement_return::AST_Node_Statement_return(): AST_Node_Statement(EAT_STATE_RETURN) {}
+EDL_AST::AST_Node_Statement_return::~AST_Node_Statement_return() {}
 
 //===========================================================================================================================
 //=: ASTOperator Class :=====================================================================================================
@@ -283,35 +300,35 @@ EDL_AST::AST_Node_Declaration *EDL_AST::handle_declaration(token_t &token)
     dscope = object_scope, token = get_next_token();
   else if (token.type == TT_GLOBAL)
     dscope = global_scope, token = get_next_token(), isglobal = true;
-  full_type base_type = read_type(lex, token, search_scope, (context_parser*)main_context, herr);
+  full_type base_type = cparse->read_type(token, search_scope);
   if (base_type.def == NULL)
     return NULL;
   AST_Node_Declaration *res = new AST_Node_Declaration(base_type);
   for (;;)
   {
     full_type nt(base_type);
-    read_referencers(nt.refs, nt, lex, token, search_scope, (context_parser*)main_context, herr);
+    cparse->read_referencers(nt.refs, nt, token, search_scope);
     if (nt.refs.name.empty()) {
-      token.report_errorf(herr, "Variable name to declare expected before %s");
+      report_errorf(token, "Variable name to declare expected before %s");
       delete res;
       return NULL;
     }
-    definition_typed *decdef = new definition_typed(nt.refs.name, dscope, nt.def, nt.flags);
+    definition_typed *decdef = new definition_typed(nt.refs.name, dscope, nt.def, nt.flags, 0);
     dscope->declare(decdef->name, decdef);
     res->declarations.push_back(decdef);
 
     // Read initialization
     if (token.type == TT_OPERATOR and token.content.len == 1 and *token.content.str == '=') {
-      AST *ast = new AST();
+      AST *ast = new AST(main_context);
       token = get_next_token();
-      ast->parse_expression(token, lex, precedence::comma + 1, herr);
+      ast->parse_expression(token, search_scope, precedence::comma + 1);
       res->declarations.rbegin()->initialization = ast;
       if (isglobal) {
         declaration &d = global_grabbag[decdef->name];
         if (d.def != decdef) { cerr << "LOGIC HAS FAILED US" << endl; abort(); }
         if (decdef->flags & builtin_flag__const) {
           if (d.initialization/* and (*d.initialization != *ast)*/) { // TODO: AST <=> AST comparison operators
-            token.report_error(herr, "Redefinition of global constant `" + decdef->name + "' in this code; TODO: Give previous definition");
+            report_error(token, "Redefinition of global constant `" + decdef->name + "' in this code; TODO: Give previous definition");
           }
         }
       }
@@ -324,7 +341,7 @@ EDL_AST::AST_Node_Declaration *EDL_AST::handle_declaration(token_t &token)
   if (token.type == TT_SEMICOLON)
     token = get_next_token();
   else if (settings::pedantic_edl)
-    pedantic_warn(token, herr, "Semicolon expected here following declaration");
+    pedantic_warn(token, "Semicolon expected here following declaration");
   return res;
 }
 
@@ -347,10 +364,10 @@ EDL_AST::AST_Node_Statement* EDL_AST::handle_statement(token_t &token) {
         return handle_declaration(token);
 
       case TT_NAMESPACE:
-        token.report_error(herr, "Keyword `namespace' out of nowhere; did you mean `using namespace'? (Namespace declarations not valid in a function)");
+        report_error(token, "Keyword `namespace' out of nowhere; did you mean `using namespace'? (Namespace declarations not valid in a function)");
         return NULL;
       case TT_USING:
-        token.report_error(herr, "FIXME: Unimplemented! This feature is coming soon.");
+        report_error(token, "FIXME: Unimplemented! This feature is coming soon.");
         return NULL;
         break;
 
@@ -379,7 +396,7 @@ EDL_AST::AST_Node_Statement* EDL_AST::handle_statement(token_t &token) {
           if (not(res->statement = parse_expression(token, precedence::all)))
             { delete res; return NULL; }
           if (token.type == TT_SEMICOLON) token = get_next_token();
-          else if (settings::pedantic_edl) pedantic_warn(token, herr, "Semicolon should follow statement at this point");
+          else if (settings::pedantic_edl) pedantic_warn(token, "Semicolon should follow statement at this point");
         return res;
       };
 
@@ -388,7 +405,7 @@ EDL_AST::AST_Node_Statement* EDL_AST::handle_statement(token_t &token) {
         AST_Node_Block *res = handle_block(token);
         if (!res) return NULL;
         if (token.type != TT_RIGHTBRACE) {
-          token.report_errorf(herr, "Expected closing brace before %s");
+          report_errorf(token, "Expected closing brace before %s");
           delete res; return NULL;
         }
         token = get_next_token();
@@ -396,20 +413,20 @@ EDL_AST::AST_Node_Statement* EDL_AST::handle_statement(token_t &token) {
       }
 
       case TT_ELLIPSIS:
-        token.report_error(herr, "Elipsis not valid here; did you forget to fill something in?");
+          report_error(token, "Elipsis not valid here; did you forget to fill something in?");
         return NULL;
 
-      case TT_THEN: token.report_errorf(herr, "Unexpected `then' keyword here: `then' should only follow `if'");
+      case TT_THEN: report_errorf(token, "Unexpected `then' keyword here: `then' should only follow `if'");
         return NULL;
-      case TT_ELSE: token.report_errorf(herr, "Unexpected `else' clause here: no corresponding `if' block");
+      case TT_ELSE: report_errorf(token, "Unexpected `else' clause here: no corresponding `if' block");
         return NULL;
-      case TT_CATCH: token.report_errorf(herr, "Unexpected `catch' clause here: no corresponding `try' block");
+      case TT_CATCH: report_errorf(token, "Unexpected `catch' clause here: no corresponding `try' block");
         return NULL;
 
-      case TT_RIGHTPARENTH: token.report_errorf(herr, "Unexpected closing parenthesis here: none open"); return NULL;
-      case TT_RIGHTBRACKET: token.report_errorf(herr, "Unexpected closing bracket here: none open"); return NULL;
-      case TT_COLON: token.report_error(herr, "Unexpected colon here: No label given"); return NULL;
-      case TT_LESSTHAN: case TT_GREATERTHAN: case TT_COMMA: token.report_errorf(herr, "Unexpected %s here: No label given"); return NULL;
+      case TT_RIGHTPARENTH: report_errorf(token, "Unexpected closing parenthesis here: none open"); return NULL;
+      case TT_RIGHTBRACKET: report_errorf(token, "Unexpected closing bracket here: none open"); return NULL;
+      case TT_COLON: report_errorf(token, "Unexpected colon here: No label given"); return NULL;
+      case TT_LESSTHAN: case TT_GREATERTHAN: case TT_COMMA: report_errorf(token, "Unexpected %s here: No label given"); return NULL;
 
       case TT_SEMICOLON:
         token = get_next_token();
@@ -425,7 +442,7 @@ EDL_AST::AST_Node_Statement* EDL_AST::handle_statement(token_t &token) {
 
         statement_ref *const sref = loops_get_kind(SK_SWITCH);
         if (!sref) {
-          token.report_errorf(herr, "%s can only appear in `switch' statements");
+          report_errorf(token, "%s can only appear in `switch' statements");
           return NULL;
         }
         AST_Node_Statement_switch *const sw = (AST_Node_Statement_switch*)sref->statement;
@@ -442,7 +459,7 @@ EDL_AST::AST_Node_Statement* EDL_AST::handle_statement(token_t &token) {
         if (token.type == TT_COLON)
           token = get_next_token();
         else if (settings::pedantic_edl)
-          if (pedantic_warn(token, herr, token.type == TT_SEMICOLON?
+          if (pedantic_warn(token, token.type == TT_SEMICOLON?
             "A colon should follow case labels rather than a semicolon" : "A colon should follow `case' and `default' labels"))
             { delete res; return NULL; }
         return res;
@@ -462,15 +479,20 @@ EDL_AST::AST_Node_Statement* EDL_AST::handle_statement(token_t &token) {
       case TT_WITH:   return handle_with(token);
       case TT_TRY:    return handle_trycatch(token);
 
+      case TT_ALIGNAS: case TT_ALIGNOF: case TT_AUTO: case TT_MEMBEROF: // TODO: Support these eventually?
+
       case TT_TEMPLATE: // Scrapped since ENIGMA's dynamic enough as it is
       case TT_CLASS: // Scrapped from the spec for simplicity
-      case TT_PUBLIC: case TT_PRIVATE: case TT_PROTECTED: // Scrapped along with classes
+      case TT_PUBLIC: case TT_PRIVATE: case TT_PROTECTED: case TT_FRIEND: // Scrapped along with classes
+      case TT_STATIC_ASSERT: // Scrapped because ENIGMA's preprocessors are powerful enough to do this
+      case TT_TYPEID: case TT_CONSTEXPR: case TT_NOEXCEPT:
+      case TT_CONST_CAST: case TT_STATIC_CAST: case TT_DYNAMIC_CAST: case TT_REINTERPRET_CAST:
       case TT_EXTERN: case TT_ASM: case TT_OPERATORKW: case TT_TYPENAME: case TTM_CONCAT: case TTM_TOSTRING:
-        token.report_errorf(herr, "Lexer has honored C++ %s: this should not happen.");
+        report_errorf(token, "Lexer has honored C++ %s: this should not happen.");
         return NULL;
 
       case TT_INVALID: default:
-        token.report_error(herr, "Invalid token read at this point; lex failed");
+        report_error(token, "Invalid token read at this point; lex failed");
 
       case TT_ENDOFCODE: case TT_RIGHTBRACE:
         return NULL;
@@ -492,7 +514,7 @@ EDL_AST::AST_Node_Block* EDL_AST::handle_block(token_t &token) {
 EDL_AST::AST_Node_Statement_repeat* EDL_AST::handle_repeat(token_t &token) {
   token = get_next_token();
   AST_Node_Statement_repeat* res = new AST_Node_Statement_repeat();
-  stacked_statement ss(loops, SK_LOOP, res, token, herr);
+  stacked_statement ss(loops, SK_LOOP, res, token, cparse->get_herr());
   if (not(res->condition = parse_expression(token, precedence::all)))
     { delete res; return NULL; }
   res->code = handle_statement(token);
@@ -507,7 +529,7 @@ EDL_AST::AST_Node_Statement_return* EDL_AST::handle_return(token_t &token) {
   if (token.type == TT_SEMICOLON)
     token = get_next_token();
   else if (settings::pedantic_edl)
-    pedantic_warn(token, herr, "Semicolon expected following return statement");
+    pedantic_warn(token, "Semicolon expected following return statement");
   return res;
 }
 EDL_AST::AST_Node_Statement_if*       EDL_AST::handle_if      (token_t &token) {
@@ -535,18 +557,18 @@ EDL_AST::AST_Node_Statement_for*      EDL_AST::handle_for     (token_t &token) {
     expect_rightp = true;
   else {
     if (settings::pedantic_edl)
-      if (pedantic_warn(token, herr, "Expected () around parameters to `for' loop"))
+      if (pedantic_warn(token, "Expected () around parameters to `for' loop"))
         return NULL;
     expect_rightp = false;
   }
 
   // Handle the A in for(A; B; C) { D }
   if (token.type == TT_LEFTBRACE and settings::pedantic_edl)
-    if (pedantic_warn(token, herr, "Blocks not actually allowed in `for' parameters"))
+    if (pedantic_warn(token, "Blocks not actually allowed in `for' parameters"))
       return NULL;
 
   AST_Node_Statement_for *res = new AST_Node_Statement_for();
-  stacked_statement ss(loops, SK_LOOP, res, token, herr);
+  stacked_statement ss(loops, SK_LOOP, res, token, cparse->get_herr());
   res->operand_pre = handle_statement(token);
   if (!res->operand_pre) { delete res; return NULL; }
 
@@ -555,12 +577,12 @@ EDL_AST::AST_Node_Statement_for*      EDL_AST::handle_for     (token_t &token) {
   if (!res->condition) { delete res; return NULL; }
   if (token.type == TT_SEMICOLON) token = get_next_token();
   else if (settings::pedantic_edl)
-    if (pedantic_warn(token, herr, "Semicolon expected after `for' condition"))
+    if (pedantic_warn(token, "Semicolon expected after `for' condition"))
       { delete res; return NULL; }
 
   // Handle the C in for(A; B; C) { D }
   if (token.type == TT_LEFTBRACE and settings::pedantic_edl)
-    if (pedantic_warn(token, herr, "Blocks not actually allowed in `for' parameters"))
+    if (pedantic_warn(token, "Blocks not actually allowed in `for' parameters"))
       return NULL;
 
   res->operand_post = handle_statement(token);
@@ -568,7 +590,7 @@ EDL_AST::AST_Node_Statement_for*      EDL_AST::handle_for     (token_t &token) {
 
   if (expect_rightp) {
     if (token.type != TT_RIGHTPARENTH) {
-      token.report_errorf(herr, "Expected closing parenthesis to `for' parameters before %s");
+      report_errorf(token, "Expected closing parenthesis to `for' parameters before %s");
       delete res; return NULL;
     }
     token = get_next_token();
@@ -582,7 +604,7 @@ EDL_AST::AST_Node_Statement_for*      EDL_AST::handle_for     (token_t &token) {
 EDL_AST::AST_Node_Statement_do*       EDL_AST::handle_do      (token_t &token) {
   token = get_next_token();
   AST_Node_Statement_do *res = new AST_Node_Statement_do();
-  stacked_statement ss(loops, SK_LOOP, res, token, herr);
+  stacked_statement ss(loops, SK_LOOP, res, token, cparse->get_herr());
 
   res->code = handle_statement(token);
   if (!res->code) { delete res; return NULL; }
@@ -590,7 +612,7 @@ EDL_AST::AST_Node_Statement_do*       EDL_AST::handle_do      (token_t &token) {
   if (token.type == TT_UNTIL) res->negate = true;
   else if (token.type == TT_WHILE) res->negate = false;
   else {
-    token.report_error(herr, "Expected `until' or `while' clause to complete `do' statement");
+    report_error(token, "Expected `until' or `while' clause to complete `do' statement");
     delete res; return NULL;
   }
 
@@ -598,9 +620,11 @@ EDL_AST::AST_Node_Statement_do*       EDL_AST::handle_do      (token_t &token) {
   res->condition = parse_expression(token, precedence::all);
   if (!res->condition) { delete res; return NULL; }
 
-  if (token.type == TT_SEMICOLON) token = get_next_token();
-  else if (settings::pedantic_edl) if (pedantic_warn(token, herr, "ISO C++ requires a semicolon after a do-while statement; EDL follows suit"))
-    { delete res; return NULL; }
+  if (token.type == TT_SEMICOLON)
+    token = get_next_token();
+  else if (settings::pedantic_edl)
+    if (pedantic_warn(token, "ISO C++ requires a semicolon after a do-while statement; EDL follows suit"))
+      { delete res; return NULL; }
 
   return res;
 }
@@ -609,14 +633,14 @@ EDL_AST::AST_Node_Statement_while*    EDL_AST::handle_while   (token_t &token) {
   bool negate;
   if (token.type == TT_WHILE) negate = false;
   else if (token.type == TT_UNTIL) negate = true;
-  else negate = false, token.report_error(herr, "Parse error: `until' or `while' clause expected here. This is a bug; please report it and the code that caused it.");
+  else negate = false, report_error(token, "Parse error: `until' or `while' clause expected here. This is a bug; please report it and the code that caused it.");
 
   token = get_next_token();
   AST_Node* cond = parse_expression(token, precedence::all);
   if (!cond) { return NULL; }
 
   AST_Node_Statement_while *res = new AST_Node_Statement_while(cond, NULL, negate);
-  stacked_statement ss(loops, SK_LOOP, res, token, herr);
+  stacked_statement ss(loops, SK_LOOP, res, token, cparse->get_herr());
   AST_Node_Statement *code = handle_statement(token);
   if (!code) { delete res; return NULL; }
 
@@ -630,7 +654,7 @@ EDL_AST::AST_Node_Statement_with*     EDL_AST::handle_with    (token_t &token) {
   if (!whom) { return NULL; }
 
   AST_Node_Statement_with *res = new AST_Node_Statement_with(whom);
-  stacked_statement ss(loops, SK_LOOP, res, token, herr);
+  stacked_statement ss(loops, SK_LOOP, res, token, cparse->get_herr());
   AST_Node_Statement *code = handle_statement(token);
   if (!code) { delete res; return NULL; }
 
@@ -643,7 +667,7 @@ EDL_AST::AST_Node_Statement_trycatch* EDL_AST::handle_trycatch(token_t &token) {
   if (!tcode) return NULL;
 
   if (token.type != TT_CATCH) {
-    token.report_errorf(herr, "Expected `catch' clause to complete `try' statement here before %s");
+    report_errorf(token, "Expected `catch' clause to complete `try' statement here before %s");
     delete tcode; return NULL;
   }
 
@@ -651,7 +675,7 @@ EDL_AST::AST_Node_Statement_trycatch* EDL_AST::handle_trycatch(token_t &token) {
 
   do {
     token = get_next_token();
-    full_type ctype = read_fulltype(lex, token, search_scope, (context_parser*)main_context, herr);
+    full_type ctype = cparse->read_fulltype(token, search_scope);
     if (!ctype.def) { delete res; return NULL; }
 
     AST_Node_Statement *ccode = handle_statement(token);
@@ -668,12 +692,12 @@ EDL_AST::AST_Node_Statement_switch*   EDL_AST::handle_switch  (token_t &token) {
   if (!swval) return NULL;
 
   if (token.type != TT_LEFTBRACE) {
-    token.report_error(herr, "Expected block for `switch' statement");
+    report_error(token, "Expected block for `switch' statement");
     return NULL;
   }
 
   AST_Node_Statement_switch *res = new AST_Node_Statement_switch(swval);
-  stacked_statement ss(loops, SK_SWITCH, res, token, herr);
+  stacked_statement ss(loops, SK_SWITCH, res, token, cparse->get_herr());
   AST_Node_Statement *swblock = handle_statement(token);
 
   if (!swblock) { delete res; return NULL; }
@@ -693,31 +717,36 @@ EDL_AST::AST_Node_Statement *EDL_AST::handle_break(token_t &token, bool h_contin
     AST_Node *a = parse_expression(token, precedence::all);
     if (!a) return NULL;
 
-    break_depth = a->eval();
+    break_depth = a->eval(jdi::error_context(cparse->get_herr(), token));
     delete a;
 
     if (break_depth < 1) {
-      bt.report_errorf(herr, "Invalid loop depth given for %s; should be a constant expression with a positive result");
+      report_errorf(bt, "Invalid loop depth given for %s; should be a constant expression with a positive result");
       return NULL;
     }
     if (break_depth == 1)
-      bt.report_warning(herr, "Specified loop depth of 1: This depth is the default");
+      report_warning(bt, "Specified loop depth of 1: This depth is the default");
   }
   // Regardless of whether it was specified, break_depth should be at least 1 from here.
   int vd = break_depth;
   AST_Node_Statement *target = NULL;
   int mask = h_continue? SK_CONTINUABLE : SK_BREAKABLE;
   for (loopstack::reverse_iterator it = loops.rbegin(); it != loops.rend(); ++it)
-    if (it->kind & mask) if (!--vd) { target = it->statement; break; }
+    if ((it->kind & mask) && !--vd) {
+      target = it->statement;
+      break;
+    }
   if (vd or !target) {
-    if (break_depth == 1 or (break_depth - vd <= 0)) bt.report_errorf(herr, "Unexpected %s at this point; no loops to " + bc);
-    else bt.report_errorf(herr, "Insufficient nested loops to " + bc + ": Requested " + tostring(break_depth) + ", " + tostring(break_depth - vd) + " available");
+    if (break_depth == 1 or (break_depth - vd <= 0))
+      report_errorf(bt, "Unexpected %s at this point; no loops to " + bc);
+    else
+      report_errorf(bt, "Insufficient nested loops to " + bc + ": Requested " + tostring(break_depth) + ", " + tostring(break_depth - vd) + " available");
     return NULL;
   }
 
   if (token.type == TT_SEMICOLON)
     token = get_next_token();
-  else if (settings::pedantic_edl and pedantic_warn(token, herr, "Expected semicolon following control statement"))
+  else if (settings::pedantic_edl and pedantic_warn(token, "Expected semicolon following control statement"))
     return NULL;
 
   return h_continue? new AST_Node_Statement_continue(target, break_depth) : new AST_Node_Statement_break(target, break_depth);
@@ -726,20 +755,18 @@ EDL_AST::AST_Node_Statement *EDL_AST::handle_break(token_t &token, bool h_contin
 bool EDL_AST::parse_edl(string code) {
   llreader codereader;
   codereader.encapsulate(code);
-  lex = new lexer_edl(codereader, (macro_map&)main_context->get_macros(), "Code");
-  herr = def_error_handler;
-  token_t token = lex->get_token(herr);
+  token_t token = get_next_token();
   root = handle_block(token);
-  if (token.type == TT_ENDOFCODE) {
+  if (token.type != TT_ENDOFCODE) {
     if (token.type == TT_RIGHTBRACE)
-      token.report_error(herr, "Unexpected closing brace at this point: none open");
+      report_error(token, "Unexpected closing brace at this point: none open");
     return false;
   }
   return root != NULL;
 }
 
-EDL_AST::EDL_AST(definition_scope *myscope, definition_scope *objscope, definition_scope *globscope):
-  AST(), object_scope(objscope), global_scope(globscope) { search_scope = myscope; }
+EDL_AST::EDL_AST(context* ctx, definition_scope *myscope, definition_scope *objscope, definition_scope *globscope):
+  AST(ctx), object_scope(objscope), global_scope(globscope) { search_scope = myscope; }
 EDL_AST::~EDL_AST() {
   // FIXME: Delete anything here?
 }

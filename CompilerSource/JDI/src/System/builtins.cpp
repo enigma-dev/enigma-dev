@@ -51,6 +51,7 @@ namespace jdi {
   unsigned long builtin_flag__volatile;
   unsigned long builtin_flag__static;
   unsigned long builtin_flag__const;
+  unsigned long builtin_flag__mutable;
   unsigned long builtin_flag__register;
   unsigned long builtin_flag__inline;
   unsigned long builtin_flag__Complex;
@@ -137,9 +138,10 @@ namespace jdi {
     builtin_flag__volatile = add_declarator("volatile", UF_FLAG).flag;
     builtin_flag__static   = add_declarator("static",   UF_FLAG).flag;
     builtin_flag__const    = add_declarator("const",    UF_FLAG).flag;
+    builtin_flag__mutable  = add_declarator("mutable",  UF_FLAG).flag;
     builtin_flag__register = add_declarator("register", UF_FLAG).flag;
     builtin_flag__inline   = add_declarator("inline",   UF_FLAG).flag;
-    builtin_flag__Complex  = add_declarator("_Complex",   UF_FLAG).flag;
+    builtin_flag__Complex  = add_declarator("_Complex", UF_FLAG).flag;
     
     builtin_typeflag__throw = add_declarator("throw", UF_FLAG).tf_struct;
     builtin_flag__restrict = add_declarator("__restrict", UF_FLAG).flag;
@@ -162,6 +164,7 @@ namespace jdi {
     builtin_type__double = add_declarator("double",  UF_PRIMITIVE, 8).def;
     
     builtin_type__wchar_t = add_declarator("wchar_t",   UF_PRIMITIVE, 2).def;
+    builtin_type__va_list = add_declarator("__int128",  UF_PRIMITIVE, 8).def; // GCC extension
     builtin_type__va_list = add_declarator("__builtin_va_list",   UF_PRIMITIVE, 8).def;
     
     builtin_flag__virtual = add_declarator("virtual", UF_FLAG).flag;

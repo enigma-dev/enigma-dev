@@ -1,0 +1,13 @@
+%e-yaml
+---
+
+Name: iOSOpenAL
+Identifier: iOSOpenAL
+Description: Play sounds using OpenAL, on the iPhone
+Author: Alasdair Morrison
+
+Depends:
+	Build-platforms: iPhone
+Represents:
+	Build-platforms: iPhone
+

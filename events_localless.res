@@ -16,7 +16,7 @@
 ### - image_index setting
 ### - drawing an object by default when no draw code is used
 ### - movement to previous location on collision with solid instances
-### - any automatic position change from path_start, gravity, friction, direction, speed, hspeed or vspeed
+### - any automatic position change from path_start, particle update, box2d collision handling, gravity, friction, direction, speed, hspeed or vspeed
 
 
 # These events are executed outside the main event source at special moments
@@ -25,6 +25,11 @@ gamestart: 7		# This event is executed from within code at the start of the game
 	Name: Game Start
 	Mode: Spec-sys
 	Case: 2
+
+closebutton: 7		# This event is executed from within code when the game window close button is hit
+	Name: Close Button
+	Mode: Spec-sys
+	Case: 30
 
 roomstart: 7		# This event is executed from within the code that loads a new room
 	Name: Room Start
@@ -86,83 +91,83 @@ leftbutton: 6
 	Mode: Special
 	Case: 0
 	Super Check: mouse_check_button(mb_left)
-	Sub Check:   mouse_x > bbox_left and mouse_x < bbox_right and mouse_y > bbox_top and mouse_y < bbox_bottom
+	Sub Check:   position_meeting(mouse_x, mouse_y, id)
 
 rightbutton: 6
 	Name: Right Button
 	Mode: Special
 	Case: 1
 	Super Check: mouse_check_button(mb_right)
-	Sub Check:   mouse_x > bbox_left and mouse_x < bbox_right and mouse_y > bbox_top and mouse_y < bbox_bottom
+	Sub Check:   position_meeting(mouse_x, mouse_y, id)
 
 middlebutton: 6
 	Name: Middle Button
 	Mode: Special
 	Case: 2
 	Super Check: mouse_check_button(mb_middle)
-	Sub Check:   mouse_x > bbox_left and mouse_x < bbox_right and mouse_y > bbox_top and mouse_y < bbox_bottom
+	Sub Check:   position_meeting(mouse_x, mouse_y, id)
 
 nobutton: 6
 	Name: No Button
 	Mode: Special
 	Case: 3
-	Sub Check:   mouse_check_button(mb_none) && !(mouse_x > bbox_left and mouse_x < bbox_right and mouse_y > bbox_top and mouse_y < bbox_bottom)
+	Sub Check:   mouse_check_button(mb_none)
 
 leftpress: 6
 	Name: Left Press
 	Mode: Special
 	Case: 4
 	Super Check: mouse_check_button_pressed(mb_left)
-	Sub Check:   mouse_x > bbox_left and mouse_x < bbox_right and mouse_y > bbox_top and mouse_y < bbox_bottom
+	Sub Check:   position_meeting(mouse_x, mouse_y, id)
 
 rightpress: 6
 	Name: Right Press
 	Mode: Special
 	Case: 5
 	Super Check: mouse_check_button_pressed(mb_right)
-	Sub Check:   mouse_x > bbox_left and mouse_x < bbox_right and mouse_y > bbox_top and mouse_y < bbox_bottom
+	Sub Check:   position_meeting(mouse_x, mouse_y, id)
 
 middlepress: 6
 	Name: Middle Press
 	Mode: Special
 	Case: 6
 	Super Check: mouse_check_button_pressed(mb_middle)
-	Sub Check:   mouse_x > bbox_left and mouse_x < bbox_right and mouse_y > bbox_top and mouse_y < bbox_bottom
+	Sub Check:   position_meeting(mouse_x, mouse_y, id)
 
 leftrelease: 6
 	Name: Left Release
 	Mode: Special
 	Case: 7
 	Super Check: mouse_check_button_released(mb_left)
-	Sub Check:   mouse_x > bbox_left and mouse_x < bbox_right and mouse_y > bbox_top and mouse_y < bbox_bottom
+	Sub Check:   position_meeting(mouse_x, mouse_y, id)
 
 rightrelease: 6
 	Name: Right Release
 	Mode: Special
 	Case: 8
 	Super Check: mouse_check_button_released(mb_right)
-	Sub Check:   mouse_x > bbox_left and mouse_x < bbox_right and mouse_y > bbox_top and mouse_y < bbox_bottom
+	Sub Check:   position_meeting(mouse_x, mouse_y, id)
 
 middlerelease: 6
 	Name: Middle Release
 	Mode: Special
 	Case: 9
 	Super Check: mouse_check_button_released(mb_middle)
-	Sub Check:   mouse_x > bbox_left and mouse_x < bbox_right and mouse_y > bbox_top and mouse_y < bbox_bottom
+	Sub Check:   position_meeting(mouse_x, mouse_y, id)
 
 mouseenter: 6
 	Name: Mouse Enter
 	Mode: Special
 	Case: 10
 	Locals: bool $innowEnter = false;
-	Sub Check: { const bool wasin = $innowEnter; $innowEnter = mouse_x > bbox_left and mouse_x < bbox_right and mouse_y > bbox_top and mouse_y < bbox_bottom; if (!$innowEnter or wasin) return 0; }
+	Sub Check: { const bool wasin = $innowEnter; $innowEnter = position_meeting(mouse_x, mouse_y, id); if (!$innowEnter or wasin) return 0; }
 
 mouseleave: 6
 	Name: Mouse Leave
 	Mode: Special
 	Case: 11
 	Locals: bool $innowLeave = false;
-	Sub Check: { const bool wasin = $innowLeave; $innowLeave = mouse_x > bbox_left and mouse_x < bbox_right and mouse_y > bbox_top and mouse_y < bbox_bottom; if ($innowLeave or !wasin) return 0; }
+	Sub Check: { const bool wasin = $innowLeave; $innowLeave = position_meeting(mouse_x, mouse_y, id); if ($innowLeave or !wasin) return 0; }
 
 mouseunknown: 6
 	Name: Mouse Unknown (old? LGM doesn't even know!)
@@ -277,15 +282,15 @@ collision: 4
 	Mode: Stacked
 	Super Check: instance_number(%1)
 	Sub Check: (instance_other = enigma::place_meeting_inst(x,y,%1)) # Parenthesize assignment used as truth
-	prefix: for (enigma::iterator it = enigma::fetch_inst_iter_by_int(%1); it; ++it) {instance_other = *it; if (enigma::place_meeting_inst(x,y,instance_other->id)) {
-	suffix: }}
+	prefix: for (enigma::iterator it = enigma::fetch_inst_iter_by_int(%1); it; ++it) {int $$$internal$$$ = %1; instance_other = *it; if (enigma::place_meeting_inst(x,y,instance_other->id)) {if(enigma::glaccess(int(other))->solid && enigma::place_meeting_inst(x,y,instance_other->id)) x = xprevious, y = yprevious;
+	suffix: if (enigma::glaccess(int(other))->solid) {x += hspeed; y += vspeed; if (enigma::place_meeting_inst(x, y, $$$internal$$$)) {x = xprevious; y = yprevious;}}}}
 # Check for detriment from collision events above
 
 nomorelives: 7
 	Name: No More Lives
 	Mode: Special
 	Case: 6
-	Sub Check: lives <= 0
+	Super Check: enigma::update_lives_status_and_return_zeroless()
 nomorehealth: 7
 	Name: No More Health
 	Mode: Special
@@ -310,7 +315,23 @@ draw: 8
 	Iterator-initialize: /* Draw is initialized in the constructor */
 	Iterator-remove: depth.remove();
 	Iterator-delete: /* Draw will destruct with this */
-	Instead: if (automatic_redraw) screen_redraw(); screen_refresh(); # We never want to iterate draw; we let screen_redraw() handle it.
+	Default: /* Not drawing the sprite in localless */
+	Instead: if (automatic_redraw) screen_redraw(); # We never want to iterate draw; we let screen_redraw() handle it.
+
+#Draw GUI event is processed after all draw events iterating objects by depth and first resetting the projection to orthographic, ignoring views
+drawgui: 8
+	Name: Draw GUI
+	Mode: Special
+	Case: 64
+	Sub Check: visible
+
+#Draw Resize event is processed whenever a resize to the game window occurs, basically so you can resize the GUI layer and shit,
+#why is it not under other along with the removed close button event? Good fucking question, well, it goes like this young Timmy,
+#there once was a man named Yolo, who came the fuck out of nowhere and destroyed Game Maker with evil capitalism, the fucking end, now go to bed.
+drawresize: 8
+	Name: Draw Resize
+	Mode: Spec-sys
+	Case: 65
 
 
 # Why this comes after "end step," I do not know. One would think it'd be back there with pathend.

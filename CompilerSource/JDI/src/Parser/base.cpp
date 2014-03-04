@@ -28,7 +28,6 @@
 #include <System/lex_cpp.h>
 #include <System/token.h>
 #include <General/debug_macros.h>
-#include "parse_context.h"
 #include "bodies.h"
 using namespace std;
 using namespace jdip;
@@ -38,7 +37,9 @@ using namespace jdip;
   new instance of the C++ lexer that ships with JDI, \c lex_cpp.
 **/
 int jdi::context::parse_C_stream(llreader &cfile, const char* fname, error_handler *errhandl) {
-  return parse_stream(fname? new lexer_cpp(cfile, macros, fname) : new lexer_cpp(cfile, macros), errhandl); // Invoke our common method with it
+  delete _lex;
+  _lex = (fname? new lexer_cpp(cfile, macros, fname) : new lexer_cpp(cfile, macros));
+  return parse_stream(_lex, errhandl); // Invoke our common method with it
 }
 
 /** @section Implementation
@@ -59,11 +60,15 @@ int jdi::context::parse_stream(lexer *lang_lexer, error_handler *errhandl)
     return -1;
   }
   
-  if (lang_lexer) { delete lex; lex = lang_lexer; }
-  else if (!lex) { // Make sure we're not still parsing anything
-    herr->error("Attempted to invoke parser without a lexer");
-    errhandl->error("NO LEXER");
-    return -1;
+  if (lang_lexer)
+    lex = lang_lexer;
+  else if (!lex) {
+    if (!_lex) {
+      herr->error("Attempted to invoke parser without a lexer");
+      errhandl->error("NO LEXER");
+      return -1;
+    }
+    lex = _lex;
   }
   
   parse_open = true;

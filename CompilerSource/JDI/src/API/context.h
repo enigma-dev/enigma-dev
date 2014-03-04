@@ -15,7 +15,7 @@
  * 
  * @section License
  * 
- * Copyright (C) 2011 Josh Ventura
+ * Copyright (C) 2011-2014 Josh Ventura
  * This file is part of JustDefineIt.
  * 
  * JustDefineIt is free software: you can redistribute it and/or modify it under
@@ -50,7 +50,6 @@ namespace jdip {
 #include <System/type_usage_flags.h>
 #include <Storage/definition.h>
 #include <General/llreader.h>
-#include <Parser/parse_context.h>
 #include <API/error_reporting.h>
 #include <API/lexer_interface.h>
 
@@ -61,6 +60,7 @@ namespace jdi
   using std::vector;
   using std::ostream;
   using std::cout;
+  using std::set;
   
   typedef map<string,const jdip::macro_type*> macro_map; ///< Map type used for storing macros
   typedef macro_map::iterator macro_iter; ///< Iterator type for macro maps.
@@ -79,9 +79,11 @@ namespace jdi
   class context
   {
     bool parse_open; ///< True if we're already parsing something
+    friend class jdi::AST;
     
     protected: // Make sure our method-packing child can use these.
     lexer *lex; ///< The lexer which all methods and all calls therefrom will poll for tokens.
+    lexer *_lex; ///< The lexer we allocated to handle a given stream.
     error_handler *herr; ///< The error handler to which errors and warnings will be reported.
     
     macro_map macros; ///< A map of macros defined in this context.
@@ -91,15 +93,10 @@ namespace jdi
   public:
     set<definition*> variadics; ///< Set of variadic types.
     
-    /// This is a map of structures which conflict with other declarations, which is allowed by the rules of C.
-    map<string, definition*> c_structs;
-    /** Function to insert into c_structs by the rules of definition_scope::declare.
-        @param name  The name of the definition to declare.
-        @param def   Pointer to the definition being declared, if one is presently available.
-    */
-    decpair declare_c_struct(string name, definition* def = NULL);
-    
-    definition_scope* get_global(); ///< Return the global scope.
+    /// Return the global scope.
+    inline definition_scope* get_global() { return global; }
+    /// Return the error handler.
+    inline error_handler* get_herr() { return herr; }
     
     size_t search_dir_count(); ///< Return the number of search directories
     string search_dir(size_t index); ///< Return the search directory with the given index, in [0, search_dir_count).
@@ -156,6 +153,9 @@ namespace jdi
     **/
     void load_gnu_builtins();
     
+    /// Change the lexer and error handler, if it is valid to do so now.
+    bool change_lexer(lexer *nlex, error_handler *nherr = NULL);
+    
     void output_types(ostream &out = cout); ///< Print a list of scoped-in types.
     void output_macro(string macroname, ostream &out = cout); ///< Print a single macro to a given stream.
     void output_macros(ostream &out = cout); ///< Print a list of scoped-in macros.
@@ -190,7 +190,7 @@ namespace jdi
     **/
     context();
     
-    /** Integer constructor. This constructor circumvents the copy process. It has
+    /** Construct with lexer and error handler. This constructor circumvents the copy process. It has
         no purpose other than and is not to be used except in allocating the builtin scope.
         While it is not necessary under common circumstances to avoid copying from the
         global scope into itself on construct, should the scope ever be populated before
@@ -202,7 +202,7 @@ namespace jdi
         
         @param disregarded  Disregarded. The parameter is there only to distinguish this constructor.
     **/
-    context(int disregarded);
+    context(lexer *lex, error_handler *herr);
     
     /** Copy constructor.
         Overrides the C++ default copy constructor with a version meant to simplify

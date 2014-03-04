@@ -7,7 +7,7 @@
  * 
  * @section License
  * 
- * Copyright (C) 2011-2012 Josh Ventura
+ * Copyright (C) 2011-2014 Josh Ventura
  * This file is part of JustDefineIt.
  * 
  * JustDefineIt is free software: you can redistribute it and/or modify it under
@@ -60,195 +60,226 @@
 #include <API/lexer_interface.h>
 #include <Storage/definition.h>
 #include <Storage/value.h>
-#include "parse_context.h"
 
 namespace jdip {
-  /**
-    Read a complete type from the given input stream.
-    
-    This function is a reader. Many inputs are liable to be modified in some form or another.
-    See \section Readers for details.
-    
-    When the read_fulltype function is invoked, the passed token must be a declarator of some sort.
-    It is up to the calling method to ensure this.
-    
-    When the read_fulltype function terminates, the passed token will have been set to the first
-    unhandled token, meaning it will NOT have the types \c TT_DECLARATOR, \c TT_DECFLAG, \c
-    TT_LEFTBRACKET, \c TT_LEFTPARENTH, or \c TT_IDENTIFIER. Each of those is handled before
-    the termination of this function, either in the function itself or in a call to
-    \c read_referencers. If a name is specified along with the type, it will be copied into
-    the `referencers` member of the resulting \c full_type.
-    
-    @param  lex    The lexer to be polled for tokens. [in-out]
-    @param  token  The token for which this function was invoked.
-                   The type of this token must be either \c TT_DECLARATOR or \c TT_DECFLAG. [in-out]
-    @param  scope  The scope used to resolve identifiers. [in]
-    @param  herr   The error handler which will be used to report errors. [in]
-    
-    @return Returns the \c full_type read from the stream. Leaves \p token indicating the
-            first unhandled token.
-  **/
-  full_type read_fulltype(lexer *lex, token_t &token, definition_scope *scope, context_parser *cp, error_handler *herr = def_error_handler);
-  /**
-    Read a complete type from the given input stream.
-    
-    This function is a reader. Many inputs are liable to be modified in some form or another.
-    See \section Readers for details.
-    
-    When the read_fulltype function is invoked, the passed token must be a declarator of some sort.
-    It is up to the calling method to ensure this.
-    
-    When the read_fulltype function terminates, the passed token will have been set to the first
-    unhandled token, meaning it will NOT have the types \c TT_DECLARATOR or \c TT_DECFLAG. 
-    Each of those is handled before the termination of this function. No referencers are read,
-    no name is read. Only flags and type specifiers.
-    
-    @param  lex    The lexer to be polled for tokens. [in-out]
-    @param  token  The token for which this function was invoked.
-                   The type of this token must be either \c TT_DECLARATOR or \c TT_DECFLAG. [in-out]
-    @param  scope  The scope used to resolve identifiers. [in]
-    @param  herr   The error handler which will be used to report errors. [in]
-    
-    @return Returns the \c full_type read from the stream. Leaves \p token indicating the
-            first unhandled token.
-  **/
-  full_type read_type(lexer *lex, token_t &token, definition_scope *scope, context_parser *cp, error_handler *herr = def_error_handler);
-  /**
-    Read a series of referencers from the given input stream.
-    
-    This function is a reader. Many inputs are liable to be modified in some form or another.
-    See \section Readers for details.
-    
-    This method will read a complete rf_stack from the given input stream. This includes pointer-to asterisks (*),
-    reference ampersands (&), array bounds in square brackets [], and function parameters in parentheses (). Parentheses
-    used for the purpose of putting precedence on a given referencer will be handled, but will not be literally denoted
-    in the returned stack.
-    
-    @param  refs   The ref_stack onto which referencers should be pushed. [out]
-    @param  ft     The type which was read before asking for a reference stack. Used to
-                   distinguish constructors from ugly definitions. [in]
-    @param  lex    The lexer to be polled for tokens. [in-out]
-    @param  token  The token for which this function was invoked. If the given token is a
-                   type, it will be part of the return \c full_type, otherwise it will
-                   just be overwritten. [in-out]
-    @param  scope  The scope used to resolve identifiers. [in]
-    @param  cp     The context parser to be polled for any additional information. [in]
-    @param  herr   The error handler which will be used to report errors. [in]
-    @return  Returns 0 on success, or a non-zero error state otherwise. You do not need to act on this
-             error state, as the error will have already been reported to the given error handler.
-  **/
-  int read_referencers(ref_stack& refs, const full_type &ft, lexer *lex, token_t &token, definition_scope *scope, context_parser *cp, error_handler *herr = def_error_handler);
-  /**
-    Read function parameters into a \c ref_stack from an input stream. This function should be invoked with the first
-    token following the opening parentheses, and will terminate with the first token after the closing parentheses.
-     
-    This function is a reader. Many inputs are liable to be modified in some form or another.
-    See \section Readers for details.
-    
-    This method will read a complete rf_stack from the given input stream. This includes pointer-to asterisks (*),
-    reference ampersands (&), array bounds in square brackets [], and function parameters in parentheses (). Parentheses
-    used for the purpose of putting precedence on a given referencer will be handled, but will not be literally denoted
-    in the returned stack.
-    
-    @param  refs   The ref_stack onto which referencers should be pushed. [out]
-    @param  lex    The lexer to be polled for tokens. [in-out]
-    @param  token  The token for which this function was invoked. If the given token is a
-                   type, it will be part of the return \c full_type, otherwise it will
-                   just be overwritten. [in-out]
-    @param  scope  The scope used to resolve identifiers. [in]
-    @param  cp     The context parser to be polled for any additional information. [in]
-    @param  herr   The error handler which will be used to report errors. [in]
-    @return  Returns 0 on success, or a non-zero error state otherwise. You do not need to act on this
-             error state, as the error will have already been reported to the given error handler.
-  **/
-  int read_function_params(ref_stack& refs, lexer *lex, token_t &token, definition_scope *scope, context_parser *cp, error_handler *herr = def_error_handler);
-  /**
-    Read the latter half of referencers, as handled in read_referencers.
-    
-    @param  refs   The ref_stack onto which referencers should be pushed. [out]
-    @param  lex    The lexer to be polled for tokens. [in-out]
-    @param  token  The token for which this function was invoked. If the given token is a
-                   type, it will be part of the return \c full_type, otherwise it will
-                   just be overwritten. [in-out]
-    @param  scope  The scope used to resolve identifiers. [in]
-    @param  cp     The context parser to be polled for any additional information. [in]
-    @param  herr   The error handler which will be used to report errors. [in]
-    @return  Returns 0 on success, or a non-zero error state otherwise. You do not need to act on this
-             error state, as the error will have already been reported to the given error handler.
-  **/
-  int read_referencers_post(ref_stack& refs, lexer *lex, token_t &token, definition_scope *scope, context_parser *cp, error_handler *herr = def_error_handler);
-  /**
-    Read a list of template parameters from the given input stream.
-    
-    This function is a reader. Many inputs are liable to be modified in some form or another.
-    See \section Readers for details.
-    
-    This method will read from the opening '<' token (which must be the active token passed)
-    to the corresponding '>' token, populating the given arg_key structure.
-    
-    @param  argk   The arg_key into which the parameters will be copied. The
-                   key must be initialized with the parameter count of the given template. [in-out]
-    @param  temp   The template definition for which argument data will be read.
-    @param  lex    The lexer to be polled for tokens. [in-out]
-    @param  token  The token for which this function was invoked. If the given token is a
-                   type, it will be part of the return \c full_type, otherwise it will
-                   just be overwritten. [in-out]
-    @param  scope  The scope used to resolve identifiers. [in]
-    @param  cp     The context parser to be polled for any additional information. [in]
-    @param  herr   The error handler which will be used to report errors. [in]
-    @return  Returns 0 on success, or a non-zero error state otherwise. You do not need to act on this
-             error state, as the error will have already been reported to the given error handler.
-  **/
-  int read_template_parameters(arg_key &argk, definition_template *temp, lexer *lex, token_t &token, definition_scope *scope, context_parser *cp, error_handler *herr = def_error_handler);
-  
-  /**
-    Handle accessing dependent types and members. Shoves the definitions into the
-    template for fix later.
-    
-    This function is a complete handler. All inputs are liable to be modified.
-    See \section Handlers for details.
-    
-    @param  lex    The lexer to poll for tokens. [in-out]
-    @param  scope  The scope from which the member is being accessed. [in-out]
-    @param  token  The first token to handle, and the token structure into which the next unhandled token will be placed. [in-out]
-    @param  flags  Flags known about this hypothetical type. [in]
-    @param  herr   Error handler to which errors will be reported. [in-out]
-    
-    @return A representation of the dependent member, or NULL if an error occurred.
-  **/
-  definition_hypothetical* handle_hypothetical(lexer *lex, definition_scope *scope, token_t& token, unsigned flags, error_handler *herr);
-  
-  /**
-    Read a string from code containing the name of an operator function, eg, `operator*', `operator[]', `operator.', `operator new[]'.
-    @param  lex   The lexer to poll for tokens.
-    @param token  The token which sparked this function call. Should be TT_OPERATORKW.
-    @param scope  The scope from which class names will be read for class casts.
-    @param herr   An error handler to receive any error reports.
-    @return The string containing the legible name of the operator function.
-  */
-  string read_operatorkw_name(lexer* lex, token_t &token, definition_scope *scope, error_handler *herr);
-  
-  /**
-    Read a definition from a string of scope qualifiers.
-    @param lex    The lexer to poll for tokens.
-    @param scope  The scope from which class names will be read for class casts.
-    @param token  The token which sparked this function call. Should be TT_OPERATORKW.
-    @param cp     The context parser to be polled for any additional information.
-    @param herr   An error handler to receive any error reports.
-    @return The string containing the legible name of the operator function.
-  */
-  definition* read_qualified_definition(lexer *lex, definition_scope* scope, token_t &token, context_parser *cp, error_handler *herr);
-  
+  /// Never use this pointer; it gets written to frequently and is never set to NULL.
   extern definition* dangling_pointer;
+  
+  /**
+    Check an \c arg_key of template parameters against a template definition, and
+    add in any missing parameters with default values.
+    @param argk    The key that was read in.
+    @param argnum  The number of parameters that were read; this is less than or equal to the given key's size.
+    @param temp    The template to check the parameters against and read defaults from.
+    @param token   A token used for error reporting.
+    @param herr    The error handler to receive errors.
+  */
+  int check_read_template_parameters(arg_key &argk, size_t argnum, definition_template *temp, const token_t &token, error_handler *herr);
+  
   /**
     @class context_parser
     @brief A field-free utility class extending \c context, implementing the
            recursive-descent functions needed by the parser.
     
-    This is some heavy shit.
+    Since context_parser contains no members and context is not virtual, a cast to jdip::context_parser
+    from an allocated jdi::context is valid.
   **/
   struct context_parser: jdi::context
   {
+    /**
+      Read a complete type from the given input stream.
+      
+      This function is a reader. Many inputs are liable to be modified in some form or another.
+      See \section Readers for details.
+      
+      When the read_fulltype function is invoked, the passed token must be a declarator of some sort.
+      It is up to the calling method to ensure this.
+      
+      When the read_fulltype function terminates, the passed token will have been set to the first
+      unhandled token, meaning it will NOT have the types \c TT_DECLARATOR, \c TT_DECFLAG, \c
+      TT_LEFTBRACKET, \c TT_LEFTPARENTH, or \c TT_IDENTIFIER. Each of those is handled before
+      the termination of this function, either in the function itself or in a call to
+      \c read_referencers. If a name is specified along with the type, it will be copied into
+      the `referencers` member of the resulting \c full_type.
+      
+      @param  token  The token for which this function was invoked.
+                     The type of this token must be either \c TT_DECLARATOR or \c TT_DECFLAG. [in-out]
+      @param  scope  The scope used to resolve identifiers. [in]
+      
+      @return Returns the \c full_type read from the stream. Leaves \p token indicating the
+              first unhandled token.
+    **/
+    full_type read_fulltype(token_t &token, definition_scope *scope);
+    /**
+      Read a complete type from the given input stream.
+      
+      This function is a reader. Many inputs are liable to be modified in some form or another.
+      See \section Readers for details.
+      
+      When the read_fulltype function is invoked, the passed token must be a declarator of some sort.
+      It is up to the calling method to ensure this.
+      
+      When the read_fulltype function terminates, the passed token will have been set to the first
+      unhandled token, meaning it will NOT have the types \c TT_DECLARATOR or \c TT_DECFLAG. 
+      Each of those is handled before the termination of this function. No referencers are read,
+      no name is read. Only flags and type specifiers.
+      
+      @param  token  The token for which this function was invoked.
+                     The type of this token must be either \c TT_DECLARATOR or \c TT_DECFLAG. [in-out]
+      @param  scope  The scope used to resolve identifiers. [in]
+      
+      @return Returns the \c full_type read from the stream. Leaves \p token indicating the
+              first unhandled token.
+    **/
+    full_type read_type(token_t &token, definition_scope *scope);
+    /**
+      Read a series of referencers from the given input stream.
+      
+      This function is a reader. Many inputs are liable to be modified in some form or another.
+      See \section Readers for details.
+      
+      This method will read a complete rf_stack from the given input stream. This includes pointer-to asterisks (*),
+      reference ampersands (&), array bounds in square brackets [], and function parameters in parentheses (). Parentheses
+      used for the purpose of putting precedence on a given referencer will be handled, but will not be literally denoted
+      in the returned stack.
+      
+      @param  refs   The ref_stack onto which referencers should be pushed. [out]
+      @param  ft     The type which was read before asking for a reference stack. Used to
+                     distinguish constructors from ugly definitions. [in]
+      @param  token  The token for which this function was invoked. If the given token is a
+                     type, it will be part of the return \c full_type, otherwise it will
+                     just be overwritten. [in-out]
+      @param  scope  The scope used to resolve identifiers. [in]
+      @return  Returns 0 on success, or a non-zero error state otherwise. You do not need to act on this
+               error state, as the error will have already been reported to the given error handler.
+    **/
+    int read_referencers(ref_stack& refs, const full_type &ft, token_t &token, definition_scope *scope);
+    /**
+      Read function parameters into a \c ref_stack from an input stream. This function should be invoked with the first
+      token following the opening parentheses, and will terminate with the first token after the closing parentheses.
+       
+      This function is a reader. Many inputs are liable to be modified in some form or another.
+      See \section Readers for details.
+      
+      This method will read a complete rf_stack from the given input stream. This includes pointer-to asterisks (*),
+      reference ampersands (&), array bounds in square brackets [], and function parameters in parentheses (). Parentheses
+      used for the purpose of putting precedence on a given referencer will be handled, but will not be literally denoted
+      in the returned stack.
+      
+      @param  refs   The ref_stack onto which referencers should be pushed. [out]
+      @param  token  The token for which this function was invoked. If the given token is a
+                     type, it will be part of the return \c full_type, otherwise it will
+                     just be overwritten. [in-out]
+      @param  scope  The scope used to resolve identifiers. [in]
+      @return  Returns 0 on success, or a non-zero error state otherwise. You do not need to act on this
+               error state, as the error will have already been reported to the given error handler.
+    **/
+    int read_function_params(ref_stack& refs, token_t &token, definition_scope *scope);
+    /**
+      Read the latter half of referencers, as handled in read_referencers.
+      
+      @param  refs   The ref_stack onto which referencers should be pushed. [out]
+      @param  token  The token for which this function was invoked. If the given token is a
+                     type, it will be part of the return \c full_type, otherwise it will
+                     just be overwritten. [in-out]
+      @param  scope  The scope used to resolve identifiers. [in]
+      @return  Returns 0 on success, or a non-zero error state otherwise. You do not need to act on this
+               error state, as the error will have already been reported to the given error handler.
+    **/
+    int read_referencers_post(ref_stack& refs, token_t &token, definition_scope *scope);
+    /**
+      Read a list of template parameters from the given input stream.
+      
+      This function is a reader. Many inputs are liable to be modified in some form or another.
+      See \section Readers for details.
+      
+      This method will read from the opening '<' token (which must be the active token passed)
+      to the corresponding '>' token, populating the given arg_key structure.
+      
+      @param  argk   The arg_key into which the parameters will be copied. The
+                     key must be initialized with the parameter count of the given template. [in-out]
+      @param  temp   The template definition for which argument data will be read.
+      @param  token  The token for which this function was invoked. If the given token is a
+                     type, it will be part of the return \c full_type, otherwise it will
+                     just be overwritten. [in-out]
+      @param  scope  The scope used to resolve identifiers. [in]
+      @return  Returns 0 on success, or a non-zero error state otherwise. You do not need to act on this
+               error state, as the error will have already been reported to the given error handler.
+    **/
+    int read_template_parameters(arg_key &argk, definition_template *temp, token_t &token, definition_scope *scope);
+    
+    
+    int read_template_parameter(arg_key &argk, size_t argnum, definition_template *temp, token_t &token, definition_scope *scope);
+    
+    /**
+      Handle accessing dependent types and members. Shoves the definitions into the
+      template for fix later.
+      
+      This function is a complete handler. All inputs are liable to be modified.
+      See \section Handlers for details.
+      
+      @param  scope  The scope from which the member is being accessed. [in-out]
+      @param  token  The first token to handle, and the token structure into which the next unhandled token will be placed. [in-out]
+      @param  flags  Flags known about this hypothetical type. [in]
+      
+      @return A representation of the dependent member, or NULL if an error occurred.
+    **/
+    definition_hypothetical* handle_hypothetical(definition_scope *scope, token_t& token, unsigned flags);
+    
+    /**
+      Handle accessing dependent types and members. Shoves the definitions into the
+      template for fix later.
+      
+      This function is a complete handler. All inputs are liable to be modified.
+      See \section Handlers for details.
+      
+      @param  scope  The scope from which the member is being accessed. [in-out]
+      @param  token  The first token to handle, and the token structure into which the next unhandled token will be placed. [in-out]
+      @param  temp   The template to be instantiated, later. [in]
+      @param  key    The key that will be remapped and used to instantiate the template, later. [in]
+      @param  flags  Flags known about this hypothetical type. [in]
+      
+      @return A representation of the dependent member, or NULL if an error occurred.
+    **/
+    definition* handle_dependent_tempinst(definition_scope *scope, token_t& token, definition_template *temp, const arg_key &key, unsigned flags);
+    
+    /**
+      Handle symple nested hypothetical access.
+      
+      This function is a complete handler. All inputs are liable to be modified.
+      See \section Handlers for details.
+      
+      @param  scope  The scope from which the name is being read.
+      @param  scope  The identifier being read.
+      
+      @return A representation of the dependent member being accessed, or NULL if an error occurred.
+    **/
+    definition_hypothetical* handle_hypothetical_access(definition_hypothetical *scope, string id);
+    
+    /**
+      Read a string from code containing the name of an operator function, eg, `operator*', `operator[]', `operator.', `operator new[]'.
+      @param token  The token which sparked this function call. Should be TT_OPERATORKW.
+      @param scope  The scope from which class names will be read for class casts.
+      @return The string containing the legible name of the operator function.
+    */
+    string read_operatorkw_name(token_t &token, definition_scope *scope);
+    
+    /**
+      Parse a cast operator, eg, operator int().
+      @param token  The token which sparked this function call. Should be TT_OPERATORKW.
+      @param scope  The scope from which class names will be read for class casts.
+      @return The string containing the legible name of the operator function.
+    */
+    full_type read_operatorkw_cast_type(token_t &token, definition_scope *scope);
+    
+    /**
+      Read a definition from a string of scope qualifiers.
+      @param token  The token which sparked this function call.
+      @param scope  The scope from which class names will be read for class casts.
+      @return The string containing the legible name of the operator function.
+    */
+    definition* read_qualified_definition(token_t &token, definition_scope* scope);
+    
     /**
       Read in the next token, handling any preprocessing.
       
@@ -334,6 +365,42 @@ namespace jdip {
     definition_class* handle_class(definition_scope *scope, token_t& token, int inherited_flags);
     
     /**
+      Parse a class or struct inheritance list, from the colon.
+      
+      This function is a complete handler. All inputs are liable to be modified.
+      See \section Handlers for details.
+      
+      @param  scope   The scope in which declarations will be stored. [in-out]
+      
+      @param  token   The token that was read before this function was invoked.
+                      At the start of this call, the type of this token must be
+                      either TT_CLASS or TT_STRUCT. Upon termination, the type
+                      of this token will be TT_DECLARATOR with extra info set to
+                      the new definition unless an error occurs. [in-out]
+      
+      @param recipient  The default protection level for inherited classes; eg, DEF_PUBLIC or DEF_PRIVATE.
+      
+      @param default_protection  The default protection level for inherited classes; eg, DEF_PUBLIC or DEF_PRIVATE.
+      
+      @return  Zero if and only if no error occurred.
+    **/
+    int handle_class_inheritance(definition_scope *scope, token_t& token, definition_class *recipient, unsigned default_protection);
+    
+    /**
+      Parse a friend directive.
+      @param  scope    The scope in which declarations will be stored. [in-out]
+      @param  token    The token that was read before this function was invoked.
+                       At the start of this call, the type of this token must be
+                       either TT_CLASS or TT_STRUCT. Upon termination, the type
+                       of this token will be TT_DECLARATOR with extra info set to
+                       the new definition unless an error occurs. [in-out]
+      @param recipient The default protection level for inherited classes; eg,
+                       DEF_PUBLIC or DEF_PRIVATE.
+      @return Zero if and only if successful.
+    */
+    int handle_friend(definition_scope *scope, token_t& token, definition_class *recipient);
+    
+    /**
       Parse a union definition.
       
       This function is a complete handler. All inputs are liable to be modified.
@@ -400,6 +467,20 @@ namespace jdip {
       @return Zero if no error occurred, a non-zero exit status otherwise.
     **/
     int handle_template(definition_scope *scope, token_t& token, unsigned inherited_flags = 0);
+    
+    /**
+      Handle parsing an extern template specialization.
+      
+      This function is a complete handler. All inputs are liable to be modified.
+      See \section Handlers for details.
+      
+      @param  scope  The scope into which declarations will be stored. [in-out]
+      @param  token  The token structure into which the next unhandled token will be placed. [out]
+      @param  inherited_flags  Any flags which must be given to all members of this scope. [in]
+      
+      @return Zero if no error occurred, a non-zero exit status otherwise.
+    **/
+    int handle_template_extern(definition_scope *scope, token_t& token, unsigned inherited_flags = 0);
     
     /**
       Read an expression from the given input stream, evaluating it for a value.

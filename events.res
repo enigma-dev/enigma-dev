@@ -15,12 +15,63 @@ gamestart: 7		# This event is executed from within code at the start of the game
 	Name: Game Start
 	Mode: Spec-sys
 	Case: 2
+	
+closebutton: 7		# This event is executed from within code when the game window close button is hit
+	Name: Close Button
+	Mode: Spec-sys
+	Case: 30
+	
+imageloaded: 7		# This event is executed from within code when an image finishes loading
+	Name: Image Loaded
+	Mode: Spec-sys
+	Case: 60
+	
+soundloaded: 7		# This event is executed from within code when a sound finishes loading
+	Name: Sound Loaded
+	Mode: Spec-sys
+	Case: 61
+	
+http: 7			# This event is executed from within code when an asynchronous http event is triggered
+	Name: HTTP
+	Mode: Spec-sys
+	Case: 62
+	
+dialog: 7		# This event is executed from within code when an asynchronous dialog is resolved
+	Name: Dialog
+	Mode: Spec-sys
+	Case: 63
+	
+inapp: 7		# This event is executed from within code when an asynchronous In-App purchase is triggered
+	Name: IAP
+	Mode: Spec-sys
+	Case: 66
+	
+cloud: 7		# This event is executed from within code when an asynchronous cloud event is triggered
+	Name: Cloud
+	Mode: Spec-sys
+	Case: 67
+	
+networking: 7	# This event is executed from within code when an asynchronous networking event is triggered
+	Name: Networking
+	Mode: Spec-sys
+	Case: 68
+	
+steam: 7		# This event is executed from within code when an asynchronous Steam event is triggered
+	Name: Steam
+	Mode: Spec-sys
+	Case: 69
+	
+social: 7		# This event is executed from within code when an asynchronous social event is triggered
+	Name: Social
+	Mode: Spec-sys
+	Case: 70
 
 roomstart: 7		# This event is executed from within the code that loads a new room
 	Name: Room Start
 	Mode: Spec-sys
 	Case: 4
-create: 0			# This event is performed as a ctor: immedaitely as the instance is created
+	
+create: 0			# This event is performed as a ctor: immediately as the instance is created
 	Name: Create
 	Mode: System
 
@@ -36,7 +87,7 @@ beginstep: 3
 	Name: Begin Step
 	Mode: Special
 	Case: 1
-	Constant: {xprevious = x; yprevious = y; if (sprite_index != -1) image_index = fmod(image_index + image_speed, sprite_get_number(sprite_index));}
+	Constant: {xprevious = x; yprevious = y; if (sprite_index != -1) image_index = fmod((image_speed < 0)?(sprite_get_number(sprite_index) + image_index - fmod(abs(image_speed),sprite_get_number(sprite_index))):(image_index + image_speed), sprite_get_number(sprite_index));}
 
 alarm: 2
 	Group: Alarm
@@ -77,83 +128,83 @@ leftbutton: 6
 	Mode: Special
 	Case: 0
 	Super Check: mouse_check_button(mb_left)
-	Sub Check:   mouse_x > bbox_left and mouse_x < bbox_right and mouse_y > bbox_top and mouse_y < bbox_bottom
+	Sub Check:   position_meeting(mouse_x, mouse_y, id)
 
 rightbutton: 6
 	Name: Right Button
 	Mode: Special
 	Case: 1
 	Super Check: mouse_check_button(mb_right)
-	Sub Check:   mouse_x > bbox_left and mouse_x < bbox_right and mouse_y > bbox_top and mouse_y < bbox_bottom
+	Sub Check:   position_meeting(mouse_x, mouse_y, id)
 
 middlebutton: 6
 	Name: Middle Button
 	Mode: Special
 	Case: 2
 	Super Check: mouse_check_button(mb_middle)
-	Sub Check:   mouse_x > bbox_left and mouse_x < bbox_right and mouse_y > bbox_top and mouse_y < bbox_bottom
+	Sub Check:   position_meeting(mouse_x, mouse_y, id)
 
 nobutton: 6
 	Name: No Button
 	Mode: Special
 	Case: 3
-	Sub Check:   mouse_check_button(mb_none) && !(mouse_x > bbox_left and mouse_x < bbox_right and mouse_y > bbox_top and mouse_y < bbox_bottom)
+	Sub Check:   mouse_check_button(mb_none)
 
 leftpress: 6
 	Name: Left Press
 	Mode: Special
 	Case: 4
 	Super Check: mouse_check_button_pressed(mb_left)
-	Sub Check:   mouse_x > bbox_left and mouse_x < bbox_right and mouse_y > bbox_top and mouse_y < bbox_bottom
+	Sub Check:   position_meeting(mouse_x, mouse_y, id)
 
 rightpress: 6
 	Name: Right Press
 	Mode: Special
 	Case: 5
 	Super Check: mouse_check_button_pressed(mb_right)
-	Sub Check:   mouse_x > bbox_left and mouse_x < bbox_right and mouse_y > bbox_top and mouse_y < bbox_bottom
+	Sub Check:   position_meeting(mouse_x, mouse_y, id)
 
 middlepress: 6
 	Name: Middle Press
 	Mode: Special
 	Case: 6
 	Super Check: mouse_check_button_pressed(mb_middle)
-	Sub Check:   mouse_x > bbox_left and mouse_x < bbox_right and mouse_y > bbox_top and mouse_y < bbox_bottom
+	Sub Check:   position_meeting(mouse_x, mouse_y, id)
 
 leftrelease: 6
 	Name: Left Release
 	Mode: Special
 	Case: 7
 	Super Check: mouse_check_button_released(mb_left)
-	Sub Check:   mouse_x > bbox_left and mouse_x < bbox_right and mouse_y > bbox_top and mouse_y < bbox_bottom
+	Sub Check:   position_meeting(mouse_x, mouse_y, id)
 
 rightrelease: 6
 	Name: Right Release
 	Mode: Special
 	Case: 8
 	Super Check: mouse_check_button_released(mb_right)
-	Sub Check:   mouse_x > bbox_left and mouse_x < bbox_right and mouse_y > bbox_top and mouse_y < bbox_bottom
+	Sub Check:   position_meeting(mouse_x, mouse_y, id)
 
 middlerelease: 6
 	Name: Middle Release
 	Mode: Special
 	Case: 9
 	Super Check: mouse_check_button_released(mb_middle)
-	Sub Check:   mouse_x > bbox_left and mouse_x < bbox_right and mouse_y > bbox_top and mouse_y < bbox_bottom
+	Sub Check:   position_meeting(mouse_x, mouse_y, id)
 
 mouseenter: 6
 	Name: Mouse Enter
 	Mode: Special
 	Case: 10
 	Locals: bool $innowEnter = false;
-	Sub Check: { const bool wasin = $innowEnter; $innowEnter = mouse_x > bbox_left and mouse_x < bbox_right and mouse_y > bbox_top and mouse_y < bbox_bottom; if (!$innowEnter or wasin) return 0; }
+	Sub Check: { const bool wasin = $innowEnter; $innowEnter = position_meeting(mouse_x, mouse_y, id); if (!$innowEnter or wasin) return 0; }
 
 mouseleave: 6
 	Name: Mouse Leave
 	Mode: Special
 	Case: 11
 	Locals: bool $innowLeave = false;
-	Sub Check: { const bool wasin = $innowLeave; $innowLeave = mouse_x > bbox_left and mouse_x < bbox_right and mouse_y > bbox_top and mouse_y < bbox_bottom; if ($innowLeave or !wasin) return 0; }
+	Sub Check: { const bool wasin = $innowLeave; $innowLeave = position_meeting(mouse_x, mouse_y, id); if ($innowLeave or !wasin) return 0; }
 
 mouseunknown: 6
 	Name: Mouse Unknown (old? LGM doesn't even know!)
@@ -242,7 +293,7 @@ step: 3
 localsweep: 100000 
 	Name: Locals sweep 
 	Mode: Inline
-	Constant: if (path_update()) {speed = 0; return 0;} enigma::propagate_locals(this);
+	Constant: enigma::propagate_locals(this);
 
 
 # Lump of "Other" events.
@@ -271,7 +322,7 @@ beforecollisionautomaticcollisionhandling: 100000
 	Name: Before collision automatic collision handling
 	Mode: None
 	Default: ;
-	Instead: enigma::perform_automatic_collision_handling_before_collision_event();
+	Instead: enigma::perform_callbacks_before_collision_event();
 
 collision: 4
 	Group: Collision
@@ -308,20 +359,36 @@ particlesystemsupdate: 100000
 	Name: Particle Systems Update
 	Mode: None
 	Default: ;
-	Instead: enigma::update_particlesystems();
+	Instead: enigma::perform_callbacks_particle_updating();
 
 
 # Fun fact: Draw comes after End Step.
 draw: 8
 	Name: Draw
-	Mode: Inline
+	Mode: Special
+	Case: 0
 	Sub Check: visible
 	Iterator-declare: /* Draw is handled by depth */
 	Iterator-initialize: /* Draw is initialized in the constructor */
 	Iterator-remove: depth.remove();
 	Iterator-delete: /* Draw will destruct with this */
 	Default: if (visible && sprite_index != -1) draw_sprite_ext(sprite_index,image_index,x,y,image_xscale,image_yscale,image_angle,image_blend,image_alpha);
-	Instead: if (automatic_redraw) screen_redraw(); screen_refresh(); # We never want to iterate draw; we let screen_redraw() handle it.
+	Instead: if (automatic_redraw) screen_redraw(); # We never want to iterate draw; we let screen_redraw() handle it.
+	
+#Draw GUI event is processed after all draw events iterating objects by depth and first resetting the projection to orthographic, ignoring views
+drawgui: 8
+	Name: Draw GUI
+	Mode: Special
+	Case: 64
+	Sub Check: visible
+	
+#Draw Resize event is processed whenever a resize to the game window occurs, basically so you can resize the GUI layer and shit,
+#why is it not under other along with the removed close button event? Good fucking question, well, it goes like this young Timmy,
+#there once was a man named Yolo, who came the fuck out of nowhere and destroyed Game Maker with evil capitalism, the fucking end, now go to bed.
+drawresize: 8
+	Name: Draw Resize
+	Mode: Spec-sys
+	Case: 65
 
 
 # Why this comes after "end step," I do not know. One would think it'd be back there with pathend.
@@ -408,6 +475,10 @@ userfourteen: 7
 	Name: User defined 14
 	Mode: Special
 	Case: 24
+userfifteen: 7
+	Name: User defined 15
+	Mode: Special
+	Case: 25
 
 #other mouse events
 joystickoneleft: 6
@@ -565,4 +636,3 @@ joysticktwobuttoneight: 6
 #gameend
 #
 #parent_endstep
-

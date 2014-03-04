@@ -24,15 +24,16 @@
  **  or programs made in the environment.                                        **
  **                                                                              **
  \********************************************************************************/
+
 #include <string>
-
 #include "file_manip.h"
-
 using std::string;
 
 void gmw_init();
 
-void Sleep(int ms);
+namespace enigma_user {
+    
+    void sleep(int ms);
 
 void window_set_position(int x,int y);
 
@@ -81,7 +82,6 @@ int window_center();
 ////////////////
 // FULLSCREEN //
 ////////////////
-int window_set_fullscreen(const bool full);
 int window_get_fullscreen();
 
 ////////////
@@ -110,27 +110,20 @@ int window_get_fullscreen();
 #define cr_handpoint -21
 #define cr_size_all -22
 
-int window_set_cursor(double c);
+int window_set_cursor(int c);
 
 void window_set_color(int color);
 
 int window_view_mouse_get_x(int wid);
 int window_view_mouse_get_y(int wid);
 void window_view_mouse_set(int wid, int x, int y);
-int window_views_mouse_get_x();
-int window_views_mouse_get_y();
-void window_views_mouse_set(int x, int y);
 
 int window_get_region_width();
 int window_get_region_height();
 
-void window_set_stayontop(bool stay);
 bool window_get_stayontop();
-void window_set_sizeable(bool sizeable);
 bool window_get_sizeable();
-void window_set_showborder(bool show);
 bool window_get_showborder();
-void window_set_showicons(bool show);
 bool window_get_showicons();
 
 /*
@@ -169,20 +162,21 @@ void io_handle();
 void io_clear();
 void keyboard_wait();
 
-void window_set_region_scale(double scale, bool adaptwindow);
 bool window_get_region_scale();
 void window_set_region_size(int w, int h, bool adaptwindow);
 void window_default();
 int window_get_region_width_scaled();
 int window_get_region_height_scaled();
 
+#define enigmacatchmouse() //Linux should hopefully do that automatically.
+
+void game_end();
+void action_end_game();
+
+}
+
 namespace enigma {
 	extern char** parameters;
 	//void writename(char* x);
     long int current_time();
 }
-
-#define enigmacatchmouse() //Linux should hopefully do that automatically.
-
-void game_end();
-void action_end_game();

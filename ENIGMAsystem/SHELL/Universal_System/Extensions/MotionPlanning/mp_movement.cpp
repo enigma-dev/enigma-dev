@@ -24,16 +24,22 @@
 **  or programs made in the environment.                                        **
 **                                                                              **
 \********************************************************************************/
+
+#include "Universal_System/scalar.h"
 #include "Universal_System/collisions_object.h"
 #include <cmath>
 #include "Universal_System/instance_system.h"
 #include "mp_movement.h"
-#include "Universal_System/pathstruct.h"
-#include "Universal_System/path_functions.h"
+#include "../Paths/pathstruct.h"
+#include "../Paths/path_functions.h"
+#include <floatcomp.h>
 
 // FIXME: NONSTANDARD
-extern bool place_meeting(double x, double y, int object);
-extern bool place_free(double x, double y);
+
+namespace enigma_user {
+extern bool place_meeting(cs_scalar x, cs_scalar y, int object);
+extern bool place_free(cs_scalar x, cs_scalar y);
+}
 
 static inline double min(double x, double y) { return x<y?x:y; }
 static inline double max(double x, double y) { return x>y?x:y; }
@@ -44,7 +50,10 @@ namespace mp_potential
     bool onspot = true;
 }
 
-void mp_potential_settings(double maxrot, double rotstep, double ahead, double onspot)
+namespace enigma_user
+{
+
+void mp_potential_settings(double maxrot, double rotstep, double ahead, bool onspot)
 {
     mp_potential::maxrot = max(0, min(180, maxrot));
     mp_potential::rotstep = rotstep;
@@ -55,7 +64,7 @@ void mp_potential_settings(double maxrot, double rotstep, double ahead, double o
 bool mp_potential_step_object(const double x, const double y, const double stepsize, const int object, const bool solid_only)
 {
     enigma::object_collisions* const inst = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
-    if (inst->x == x && inst->y == y)
+    if (fequal(inst->x, x) && fequal(inst->y, y))
         return true;
 
     double dir, xstep, ystep, goaldir;
@@ -137,7 +146,7 @@ bool mp_potential_path_object(int path, const double x, const double y, const do
     double pathpx = inst->x, pathpy = inst->y, pathpdir = inst->direction;
     path_clear_points(path);
     path_add_point(path, pathpx, pathpy, 100);
-    if (pathpx == x && pathpy == y)
+    if (fequal(pathpx, x) && fequal(pathpy, y))
         return true;
 
     if (factor < 1)
@@ -225,7 +234,7 @@ bool mp_potential_path_object(int path, const double x, const double y, const do
 bool mp_linear_step_object(const double x, const double y, const double stepsize, const int object, const bool solid_only)
 {
     enigma::object_collisions* const inst = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
-    if (inst->x == x && inst->y == y)
+    if (fequal(inst->x, x) && fequal(inst->y, y))
         return true;
 
     inst->direction = atan2(inst->y - y, x - inst->x)*(180/M_PI);
@@ -258,7 +267,7 @@ bool mp_linear_path_object(int path, const double x, const double y, const doubl
     double pathpx = inst->x, pathpy = inst->y, pathpdir = atan2(pathpy - y, x - pathpx)*(180/M_PI);
     path_clear_points(path);
     path_add_point(path, pathpx, pathpy, 100);
-    if (pathpx == x && pathpy == y)
+    if (fequal(pathpx, x) && fequal(pathpy, y))
         return true;
 
     double xstep, ystep;
@@ -291,3 +300,6 @@ bool mp_linear_path_object(int path, const double x, const double y, const doubl
     }
     return false;
 }
+
+}
+

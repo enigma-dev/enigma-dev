@@ -15,6 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "Universal_System/scalar.h"
 #include "Universal_System/spritestruct.h"
 #include "Collision_Systems/collision_types.h"
 
@@ -34,16 +35,11 @@ namespace enigma
   // It is used to clean up on game termination.
   void free_collision_mask(void* mask);
 
-  // This function is called once per iteration of the event loop, just before the collision
-  // event and the objects with collision events (if any) are stepped through.
-  // It is useful for things like automatic updating of collision state.
-  void perform_automatic_collision_handling_before_collision_event();
-
   #ifdef _COLLISIONS_OBJECT_H
     // This function will be invoked each collision event to obtain a pointer to any
     // instance being collided with. It is expected to return NULL for no collision, or
     // an object_basic* pointing to the first instance found.
-    object_basic *place_meeting_inst(double x, double y, int object);
+    object_basic *place_meeting_inst(cs_scalar x, cs_scalar y, int object);
   #endif
 }
 

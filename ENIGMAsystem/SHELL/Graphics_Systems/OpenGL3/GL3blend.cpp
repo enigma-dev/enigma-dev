@@ -16,9 +16,14 @@
 **/
 
 #include "../General/OpenGLHeaders.h"
-#include "../General/GLblend.h"
+#include "../General/GSblend.h"
+#include "Bridges/General/GL3Context.h"
+
+namespace enigma_user
+{
 
 int draw_set_blend_mode(int mode){
+    oglmgr->BlendFunc();
 	switch (mode)
 	{
     case bm_add:
@@ -36,12 +41,16 @@ int draw_set_blend_mode(int mode){
   }
 }
 
-int draw_set_blend_mode_ext(double src,double dest){
+int draw_set_blend_mode_ext(int src, int dest){
+    oglmgr->BlendFunc();
 	const static GLenum blendequivs[11] = {
 	  GL_ZERO, GL_ONE, GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR, GL_SRC_ALPHA,
 	  GL_ONE_MINUS_SRC_ALPHA, GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA, GL_DST_COLOR,
 	  GL_ONE_MINUS_DST_COLOR, GL_SRC_ALPHA_SATURATE
   };
-	glBlendFunc(blendequivs[((int)src-1)%10],blendequivs[((int)dest-1)%10]);
+	glBlendFunc(blendequivs[(src-1)%10],blendequivs[(dest-1)%10]);
 	return 0;
 }
+
+}
+

@@ -96,7 +96,7 @@ struct parsed_code {
   definition_scope code_scope; ///< The main scope of this code.
   EDL_AST ast; ///< An abstract syntax tree generated from the code.
   int parse(string code); ///< Parse the given code into this object
-  parsed_code(definition_scope *object_scope, definition_scope *global_scope); ///< Construct with axiliary scopes
+  parsed_code(jdi::context *ctex, definition_scope *object_scope, definition_scope *global_scope); ///< Construct with auxiliary scopes, and the main context.
 };
 
 /// Structure containing details about an event
@@ -107,7 +107,7 @@ struct parsed_event
   const char *origcode; ///< The original code.
   parsed_code code; ///< The parsed code in this event
   parsed_object *my_obj; ///< The object which contains this event
-  parsed_event(int mid, int id, parsed_object *owner, definition_scope *global_scope, const char *code); ///< Construct with full details
+  parsed_event(jdi::context *ctex, int mid, int id, parsed_object *owner, definition_scope *global_scope, const char *code); ///< Construct with full details
   int parse(); ///< Parse the code contained 
 };
 
@@ -140,7 +140,7 @@ struct parsed_script: parsed_object //Script will pretend to be an object, havin
   
   int parse(); ///< Parse the code contained in this script's properties.
   
-  parsed_script(Script *src, definition_scope *global); ///< Construct with global scope reference
+  parsed_script(jdi::context *ctex, Script *src, definition_scope *global); ///< Construct with global scope reference and main context reference
 };
 
 /// Structure containing codes parsed in a room
@@ -152,7 +152,7 @@ struct parsed_room {
     parsed_code code; ///< The actual code contained here
     scope_harvest sh; ///< Information about stuff used in this code.
     int parse(string code); ///< Parse the given creation code into this
-    parsed_icreatecode(parsed_object *obj, definition_scope *global); ///< Construct with a source object and a global scope
+    parsed_icreatecode(jdi::context *ctex, parsed_object *obj, definition_scope *global); ///< Construct with a source object, a global scope, and a JDI context (main_context)
   };
   
   map<int, parsed_icreatecode*> instance_create_codes; ///< Map of instance creation codes by ID
@@ -194,6 +194,11 @@ struct compile_context {
   dal_map dot_accessed_locals;
   /// Other scope harvest data, such as used functions, constants, etc...
   scope_harvest sh;
+  
+  /// Construct with an EnigmaStruct*, an error_handler, and a mode.
+  compile_context(EnigmaStruct *es, error_handler *herr, compile_mode mode);
+  /// Destruct, freeing the global scope.
+  ~compile_context();
 };
 
 #endif

@@ -48,20 +48,21 @@ namespace enigma
   };
   inline ef_effect get_ef(int effect)
   {
+    using namespace enigma_user;
     switch (effect) {
-    case ef_explosion : return enigma::ef_effects_explosion;
-    case ef_ring : return enigma::ef_effects_ring;
-    case ef_ellipse : return enigma::ef_effects_ellipse;
-    case ef_firework : return enigma::ef_effects_firework;
-    case ef_smoke : return enigma::ef_effects_smoke;
-    case ef_smokeup : return enigma::ef_effects_smokeup;
-    case ef_star : return enigma::ef_effects_star;
-    case ef_spark : return enigma::ef_effects_spark;
-    case ef_flare : return enigma::ef_effects_flare;
-    case ef_cloud : return enigma::ef_effects_cloud;
-    case ef_rain : return enigma::ef_effects_rain;
-    case ef_snow : return enigma::ef_effects_snow;
-    default : return enigma::ef_effects_explosion;
+    case ef_explosion : return ef_effects_explosion;
+    case ef_ring : return ef_effects_ring;
+    case ef_ellipse : return ef_effects_ellipse;
+    case ef_firework : return ef_effects_firework;
+    case ef_smoke : return ef_effects_smoke;
+    case ef_smokeup : return ef_effects_smokeup;
+    case ef_star : return ef_effects_star;
+    case ef_spark : return ef_effects_spark;
+    case ef_flare : return ef_effects_flare;
+    case ef_cloud : return ef_effects_cloud;
+    case ef_rain : return ef_effects_rain;
+    case ef_snow : return ef_effects_snow;
+    default : return ef_effects_explosion;
     }
   }
 
@@ -72,11 +73,12 @@ namespace enigma
   };
   inline ef_size get_ef_size(int size_kind)
   {
+    using namespace enigma_user;
     switch (size_kind) {
-    case ef_size_small : return enigma::ef_si_small;
-    case ef_size_medium : return enigma::ef_si_medium;
-    case ef_size_large : return enigma::ef_si_large;
-    default : return enigma::ef_si_medium;
+    case ef_size_small : return ef_si_small;
+    case ef_size_medium : return ef_si_medium;
+    case ef_size_large : return ef_si_large;
+    default : return ef_si_medium;
     }
   }
 }

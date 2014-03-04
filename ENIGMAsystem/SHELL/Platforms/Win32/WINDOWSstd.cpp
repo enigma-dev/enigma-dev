@@ -31,57 +31,29 @@ using namespace std;
 
 #include "libEGMstd.h"
 #include "Widget_Systems/widgets_mandatory.h"
+#include "Universal_System/var4.h"
+#include "Universal_System/roomsystem.h"
 
 namespace enigma
 {
     extern HWND hWnd;
     extern HDC window_hDC;
-
     void windowsystem_write_exename(char* exenamehere)
     {
       GetModuleFileName(NULL, exenamehere, 1024);
     }
-
-    #ifndef NOT_ENIGMA_GS_OPENGL // FIXME: This shit needs moved, as you can plainly see.
-    void EnableDrawing (HGLRC *hRC)
-    {
-        PIXELFORMATDESCRIPTOR pfd;
-        int iFormat;
-
-        enigma::window_hDC = GetDC (hWnd);
-        ZeroMemory (&pfd, sizeof (pfd));
-        pfd.nSize = sizeof (pfd);
-        pfd.nVersion = 1;
-        pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
-        pfd.iPixelType = PFD_TYPE_RGBA;
-        pfd.cColorBits = 24;
-        pfd.cDepthBits = 16;
-        pfd.iLayerType = PFD_MAIN_PLANE;
-        iFormat = ChoosePixelFormat (enigma::window_hDC, &pfd);
-
-        if (iFormat==0) { show_error("Total failure. Abort.",1); }
-
-        SetPixelFormat (enigma::window_hDC, iFormat, &pfd);
-        *hRC = wglCreateContext( enigma::window_hDC );
-        wglMakeCurrent( enigma::window_hDC, *hRC );
-    }
-
-    void DisableDrawing (HWND hWnd, HDC hDC, HGLRC hRC)
-    {
-        wglMakeCurrent (NULL, NULL);
-        wglDeleteContext (hRC);
-        ReleaseDC (hWnd, hDC);
-    }
-    #endif
 }
 
-void screen_refresh() {
-    SwapBuffers(enigma::window_hDC);
+namespace enigma_user {
+extern var room_caption;
 }
 
 void enigma_catchmouse_backend(bool x) {
   if (x) SetCapture(enigma::hWnd); else ReleaseCapture();
 }
+
+namespace enigma_user
+{
 
 int sleep(int millis)
 {
@@ -89,11 +61,5 @@ int sleep(int millis)
   return 0;
 }
 
-void set_synchronization(bool enable)
-{
- /*   typedef BOOL (APIENTRY *fp)( int );
-    fp f = 0;
-    const char *extensions = (char*)glGetString(GL_EXTENSIONS);
-    if (strstr(extensions, "WGL_EXT_swap_control") and (f = (fp)wglGetProcAddress( "wglSwapIntervalEXT" )))
-        f(enable);*/
-}  //TODO: Needs to be rewritten
+}
+

@@ -36,12 +36,14 @@ namespace extensions
 
 namespace setting
 {
-  //Compatibility / Progess options
+  // Compatibility / Progess options
   bool use_cpp_strings = 0;  // Defines what language strings are inherited from.    0 = GML,               1 = C++
   bool use_cpp_escapes = 0;  // Defines what language strings are inherited from.    0 = GML,               1 = C++
   bool use_gml_equals = 0;   // Defines what language operator= is inherited from.   0 = C++,               1 = GML
   bool use_incrementals = 0; // Defines how operators ++ and -- are treated.         0 = GML,               1 = C++
   bool literal_autocast = 0; // Determines how literals are treated.                 0 = enigma::variant,   1 = C++ scalars
+  bool inherit_objects = 0;  // Determines whether objects should automatically inherit locals and events from their parents
+  string make_directory = ""; // TODO: NEWCOMPILER: MOVEME: This does NOT belong here.
 }
 
 

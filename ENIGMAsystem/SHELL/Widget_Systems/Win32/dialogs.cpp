@@ -32,11 +32,11 @@ using namespace std;
 #include "Widget_Systems/widgets_mandatory.h"
 #include "GameSettings.h"
 
-#include "dialogs.h"
+#include "../General/WSdialogs.h"
 
 void show_error(string errortext,const bool fatal)
 {
-  if (MessageBox(NULL,("Error in some event or another for some object I'm too lazy to look up: \r\n"+errortext).c_str(),"Error",MB_ABORTRETRYIGNORE | MB_ICONERROR)==IDABORT)
+  if (MessageBox(NULL,("Error in some event or another for some object: \r\n"+errortext).c_str(),"Error",MB_ABORTRETRYIGNORE | MB_ICONERROR)==IDABORT)
     exit(0);
 
   if (fatal)
@@ -51,12 +51,14 @@ void show_error(string errortext,const bool fatal)
 static string gs_cap;
 static string gs_def;
 static string gs_message;
+static string gs_username;
+static string gs_password;
 static bool   gs_form_canceled;
 static string gs_str_submitted;
 
 namespace enigma {
   extern HINSTANCE hInstance;
-  extern HWND hWndParent;
+  extern HWND hWnd;
 }
 
 static INT_PTR CALLBACK GetStrProc(HWND hwndDlg,UINT uMsg,WPARAM wParam,LPARAM lParam)
@@ -87,19 +89,131 @@ static INT_PTR CALLBACK GetStrProc(HWND hwndDlg,UINT uMsg,WPARAM wParam,LPARAM l
   return 0;
 }
 
+static INT_PTR CALLBACK GetLoginProc(HWND hwndDlg,UINT uMsg,WPARAM wParam,LPARAM lParam)
+{
+  if (uMsg==WM_INITDIALOG)
+  {
+    SetDlgItemText(hwndDlg,1,gs_cap.c_str());
+    SetDlgItemText(hwndDlg,14,gs_username.c_str());
+    SetDlgItemText(hwndDlg,15,gs_password.c_str());
+  }
+  if (uMsg==WM_COMMAND)
+  {
+    if (wParam==2 || wParam==11)
+    {
+      gs_str_submitted="";
+      gs_form_canceled=1;
+      EndDialog(hwndDlg,1);
+    }
+    else if (wParam==10)
+    {
+      char strget[1024];
+      GetDlgItemText(hwndDlg,14,strget,1024);
+	  gs_str_submitted = strget;
+      GetDlgItemText(hwndDlg,15,strget,1024);
+      gs_str_submitted += string("|") + string(strget);
+      gs_form_canceled=0;
+      EndDialog(hwndDlg,2);
+    }
+  }
+  return 0;
+}
+
+namespace enigma_user {
+
+extern string window_get_caption();
+
+void message_alpha(double alpha) {
+
+}
+
+void message_background(int back) {
+
+}
+
+void message_button(int spr) {
+
+}
+
+void message_button_font(string name, int size, int color, int style) {
+
+}
+
+void message_caption(bool show, string str) {
+
+}
+
+void message_input_color(int col) {
+
+}
+
+void message_input_font(string name, int size, int color, int style) {
+
+}
+
+void message_mouse_color(int col) {
+
+}
+
+void message_position(int x, int y) {
+
+}
+
+void message_size(int w, int h) {
+
+}
+
+void message_text_font(string name, int size, int color, int style) {
+
+} 
+
+void message_text_charset(int type, int charset) {
+
+} 
+
+int show_message(string str)
+{
+    MessageBox(enigma::hWnd, str.c_str(), window_get_caption().c_str(), MB_OK);
+    return 0;
+}
+
+// TODO There's no easy way to do this. Creating a custom form is the only
+// solution I could find.
+int show_message_ext(string msg, string but1, string but2, string but3)
+{
+    return 1;
+}
+
+bool show_question(string str)
+{
+    if(MessageBox(enigma::hWnd, str.c_str(), window_get_caption().c_str(), MB_YESNO) == IDYES)
+    {
+        return true;
+    }
+    return false;
+}
+
+string get_login(string username, string password, string cap)
+{
+  gs_cap = cap;
+  gs_username = username; gs_password = password;
+  DialogBox(enigma::hInstance,"getlogindialog",enigma::hWnd,GetLoginProc);
+  return gs_str_submitted;
+}
+
 string get_string(string message,string def,string cap)
 {
-  gs_cap="";
+  gs_cap = cap;
   gs_message=message; gs_def=def;
-  DialogBox(enigma::hInstance,"getstringdialog",enigma::hWndParent,GetStrProc);
+  DialogBox(enigma::hInstance,"getstringdialog",enigma::hWnd,GetStrProc);
   return gs_str_submitted;
 }
 
 int get_integer(string message,string def,string cap)
 {
-  gs_cap="";
+  gs_cap = cap;
   gs_message=message; gs_def=def;
-  DialogBox(enigma::hInstance,"getstringdialog",enigma::hWndParent,GetStrProc);
+  DialogBox(enigma::hInstance,"getstringdialog",enigma::hWnd,GetStrProc);
   if (gs_str_submitted == "") return 0;
   puts(gs_str_submitted.c_str());
   return atol(gs_str_submitted.c_str());
@@ -109,7 +223,7 @@ double get_number(string message,string def,string cap)
 {
   gs_cap = cap;
   gs_message=message; gs_def=def;
-  DialogBox(enigma::hInstance,"getstringdialog",enigma::hWndParent,GetStrProc);
+  DialogBox(enigma::hInstance,"getstringdialog",enigma::hWnd,GetStrProc);
   if (gs_str_submitted == "") return 0;
   puts(gs_str_submitted.c_str());
   return atof(gs_str_submitted.c_str());
@@ -130,7 +244,7 @@ string get_open_filename(string filter,string filename,string caption)
   strcpy(fn,filename.c_str());
 
   OPENFILENAME ofn;
-  ofn.lStructSize=sizeof(ofn); ofn.hwndOwner=enigma::hWndParent; ofn.hInstance=NULL;
+  ofn.lStructSize=sizeof(ofn); ofn.hwndOwner=enigma::hWnd; ofn.hInstance=NULL;
   ofn.lpstrFilter=filter.c_str(); ofn.lpstrCustomFilter=NULL;
   ofn.nMaxCustFilter=0; ofn.nFilterIndex=0;
   ofn.lpstrFile=fn; ofn.nMaxFile=MAX_PATH;
@@ -144,7 +258,8 @@ string get_open_filename(string filter,string filename,string caption)
   bool ret=GetOpenFileName(&ofn);
   return ret==0?"-1":fn;
 }
-string get_save_filename(string filter,string filename,string caption)
+
+string get_save_filename(string filter, string filename, string caption)
 {
   filter.append("||");
   const unsigned int l=filter.length();
@@ -155,7 +270,7 @@ string get_save_filename(string filter,string filename,string caption)
   strcpy(fn,filename.c_str());
 
   OPENFILENAME ofn;
-  ofn.lStructSize=sizeof(ofn); ofn.hwndOwner=enigma::hWndParent; ofn.hInstance=NULL;
+  ofn.lStructSize=sizeof(ofn); ofn.hwndOwner=enigma::hWnd; ofn.hInstance=NULL;
   ofn.lpstrFilter=filter.c_str(); ofn.lpstrCustomFilter=NULL;
   ofn.nMaxCustFilter=0; ofn.nFilterIndex=0;
   ofn.lpstrFile=fn; ofn.nMaxFile=MAX_PATH;
@@ -170,20 +285,26 @@ string get_save_filename(string filter,string filename,string caption)
   return ret==0?"-1":fn;
 }
 
-int get_color(int defcolor)
+int get_color(int defcolor, bool advanced)
 {
     COLORREF defc=(int)defcolor;
     static COLORREF custcs[16];
 
     CHOOSECOLOR gcol;
     gcol.lStructSize=sizeof(CHOOSECOLOR);
-    gcol.hwndOwner=enigma::hWndParent;
+    gcol.hwndOwner=enigma::hWnd;
     gcol.rgbResult=defc;
     gcol.lpCustColors=custcs;
-    gcol.Flags=CC_RGBINIT;
+	if (advanced) {
+		gcol.Flags= CC_FULLOPEN | CC_RGBINIT;
+	} else {
+		gcol.Flags= CC_RGBINIT;
+	}
     gcol.lpTemplateName="";
 
     if (ChooseColor(&gcol))
       return (int)gcol.rgbResult;
     else return defc;
+}
+
 }

@@ -48,7 +48,7 @@ inline bool iscomment(const string &n) {
 }
 
 struct cspair { string c, s; };
-int lang_CPP::compile_writeObjectData(compile_context &ctex)
+int lang_CPP::compile_write_object_data(compile_context &ctex)
 {
   //NEXT FILE ----------------------------------------
   //Object declarations: object classes/names and locals.
@@ -100,7 +100,7 @@ int lang_CPP::compile_writeObjectData(compile_context &ctex)
           string addls = event_get_locals(i->second->events[ii]->main_id,i->second->events[ii]->id);
           if (addls != "") additional_local_code += addls;
         }
-        EDL_AST elocals_ast(&i->second->self, &i->second->self, ctex.global);
+        EDL_AST elocals_ast(main_context, &i->second->self, &i->second->self, ctex.global);
         elocals_ast.parse_edl(additional_local_code);
 
         wto << "\n    //Locals to instances of this object\n";

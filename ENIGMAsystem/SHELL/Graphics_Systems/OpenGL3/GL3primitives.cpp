@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton
+/** Copyright (C) 2008-2013 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,190 +15,157 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "../General/OpenGLHeaders.h"
-#include "GL3primitives.h"
-#include "../General/GLtextures.h"
-#include "GL3mesh.h"
-#include "../General/GLbinding.h"
+#include "Bridges/General/GL3Context.h"
+#include "../General/GScolors.h"
+#include "../General/GSprimitives.h"
+#include "../General/GStextures.h"
+#include "../General/GSmodel.h"
+
+#include <stdio.h>
 
 #include <string>
 #include "Widget_Systems/widgets_mandatory.h"
 
-#if PRIMBUFFER
-GLenum __primitivetype[PRIMDEPTH2];
-int __primitivelength[PRIMDEPTH2];
-float __primitivecolor[PRIMBUFFER][PRIMDEPTH2][4];
-float __primitivexy[PRIMBUFFER][PRIMDEPTH2][2];
-int __currentpcount[PRIMDEPTH2];
-int __currentpdepth;
-#endif
+namespace enigma_user
+{
 
-#define __GETR(x) ((x & 0x0000FF))/255.0
-#define __GETG(x) ((x & 0x00FF00)>>8)/255.0
-#define __GETB(x) ((x & 0xFF0000)>>16)/255.0
-
-GLenum ptypes_by_id[16] = {
-  GL_POINTS, GL_POINTS, GL_LINES, GL_LINE_STRIP, GL_TRIANGLES,
-  GL_TRIANGLE_STRIP, GL_TRIANGLE_FAN, GL_LINE_LOOP, GL_QUADS,
-  GL_QUAD_STRIP, GL_POLYGON,
-
-  //These are padding.
-  GL_POINTS, GL_POINTS, GL_POINTS, GL_POINTS, GL_POINTS
-};
-
-namespace enigma {
-  extern unsigned char currentcolor[4];
+void draw_primitive_begin(int kind)
+{
+  oglmgr->BeginShapesBatching(-1);
+  d3d_model_primitive_begin(oglmgr->GetShapesModel(), kind);
 }
 
-int prim_draw_model = -1;
-int prim_draw_texture = -1;
-int prim_d3d_model = -1;
-int prim_d3d_texture = -1;
-
-int draw_primitive_begin(int kind)
+void draw_primitive_begin_texture(int kind, int texId)
 {
-  prim_draw_texture = -1;
-  if (prim_draw_model == -1) {
-    prim_draw_model = d3d_model_create();
-  }
-  d3d_model_primitive_begin(prim_draw_model, kind);
-  return 0;
+  oglmgr->BeginShapesBatching(texId);
+  d3d_model_primitive_begin(oglmgr->GetShapesModel(), kind);
 }
 
-int draw_primitive_begin_texture(int kind,unsigned tex)
+void draw_primitive_end()
 {
-  if (prim_draw_model == -1) {
-    prim_draw_model = d3d_model_create();
-  }
-  prim_draw_texture = tex;
-  d3d_model_primitive_begin(prim_draw_model, kind);
-  return 0;
+  d3d_model_primitive_end(oglmgr->GetShapesModel());
 }
 
-int draw_vertex(double x, double y)
+void draw_vertex(gs_scalar x, gs_scalar y)
 {
-  d3d_model_vertex(prim_draw_model, x, y, 0);
-  return 0;
+  d3d_model_vertex_color(oglmgr->GetShapesModel(), x, y, draw_get_color(), draw_get_alpha());
 }
 
-int draw_vertex_color(float x, float y, int col, float alpha)
+void draw_vertex_color(gs_scalar x, gs_scalar y, int col, float alpha)
 {
-  d3d_model_vertex_color(prim_draw_model, x, y, 0, col, alpha);
-  return 0;
+  d3d_model_vertex_color(oglmgr->GetShapesModel(), x, y, col, alpha);
 }
 
-int draw_vertex_texture(float x, float y, float tx, float ty)
+void draw_vertex_texture(gs_scalar x, gs_scalar y, gs_scalar tx, gs_scalar ty)
 {
-  d3d_model_vertex_texture(prim_draw_model, x, y, 0, tx, ty);
-  return 0;
+  d3d_model_vertex_texture_color(oglmgr->GetShapesModel(), x, y, tx, ty, draw_get_color(), draw_get_alpha());
 }
 
-int draw_vertex_texture_color(float x, float y, float tx, float ty, int col, float alpha)
+void draw_vertex_texture_color(gs_scalar x, gs_scalar y, gs_scalar tx, gs_scalar ty, int col, float alpha)
 {
-  d3d_model_vertex_texture_color(prim_draw_model, x, y, 0, tx, ty, col, alpha);
-  return 0;
-}
-
-int draw_primitive_end()
-{
-  if (prim_draw_texture != -1) {
-    texture_use(prim_draw_texture);
-  } else {
-    texture_reset();
-  }
-  prim_draw_texture = -1;
-  d3d_model_draw(prim_draw_model);
-  d3d_model_clear(prim_draw_model);
-  return 0;
+  d3d_model_vertex_texture_color(oglmgr->GetShapesModel(), x, y, tx, ty, col, alpha);
 }
 
 void d3d_primitive_begin(int kind)
 {
-  prim_draw_texture == -1;
-  if (prim_d3d_model = -1) {
-    prim_d3d_model = d3d_model_create();
-  }
-  d3d_model_primitive_begin(prim_d3d_model, kind);
-  return;
+  oglmgr->BeginShapesBatching(-1);
+  d3d_model_primitive_begin(oglmgr->GetShapesModel(), kind);
 }
 
 void d3d_primitive_begin_texture(int kind, int texId)
 {
-  if (prim_d3d_model == -1) {
-    prim_d3d_model = d3d_model_create();
-  }
-  prim_d3d_texture = texId;
-  d3d_model_primitive_begin(prim_d3d_model, kind);
+  oglmgr->BeginShapesBatching(texId);
+  d3d_model_primitive_begin(oglmgr->GetShapesModel(), kind);
 }
 
 void d3d_primitive_end()
 {
-  if (prim_d3d_texture != -1) {
-    texture_use(prim_d3d_texture);
-  } else {
-    texture_reset();
-  }
-  prim_d3d_texture = -1;
-  d3d_model_draw(prim_d3d_model);
-  d3d_model_clear(prim_d3d_model);
+  d3d_model_primitive_end(oglmgr->GetShapesModel());
 }
 
-void d3d_vertex(double x, double y, double z)
+void d3d_vertex(gs_scalar x, gs_scalar y, gs_scalar z)
 {
-  d3d_model_vertex(prim_d3d_model, x, y, z);
+  d3d_model_vertex_color(oglmgr->GetShapesModel(), x, y, z, draw_get_color(), draw_get_alpha());
 }
 
-void d3d_normal(double nx, double ny, double nz)
+void d3d_vertex_color(gs_scalar x, gs_scalar y, gs_scalar z, int color, double alpha)
 {
-  d3d_model_normal(prim_d3d_model, nx, ny, nz);
+  d3d_model_vertex_color(oglmgr->GetShapesModel(), x, y, z, color, alpha);
 }
 
-void d3d_texture(double tx, double ty)
+void d3d_vertex_texture(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar tx, gs_scalar ty)
 {
-  d3d_model_texture(prim_d3d_model, tx, ty);
+  d3d_model_vertex_texture_color(oglmgr->GetShapesModel(), x, y, z, tx, ty, draw_get_color(), draw_get_alpha());
 }
 
-void d3d_color(int col, double alpha)
+void d3d_vertex_texture_color(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar tx, gs_scalar ty, int color, double alpha)
 {
-  d3d_model_color(prim_d3d_model, col, alpha);
+  d3d_model_vertex_texture_color(oglmgr->GetShapesModel(), x, y, z, tx, ty, color, alpha);
 }
 
-void d3d_index(int in)
+void d3d_vertex_normal(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz)
 {
-  d3d_model_index(prim_d3d_model, in);
+  d3d_model_vertex_normal_color(oglmgr->GetShapesModel(), x, y, z, nx, ny, nz, draw_get_color(), draw_get_alpha());
 }
 
-void d3d_vertex_color(double x, double y, double z, int color, double alpha)
+void d3d_vertex_normal_color(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, int color, double alpha)
 {
-  d3d_model_vertex_color(prim_d3d_model, x, y, z, color, alpha);
+  d3d_model_vertex_normal_color(oglmgr->GetShapesModel(), x, y, z, nx, ny, nz, color, alpha);
 }
 
-void d3d_vertex_texture(double x, double y, double z, double tx, double ty)
+void d3d_vertex_normal_texture(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, gs_scalar tx, gs_scalar ty)
 {
-  d3d_model_vertex_texture(prim_d3d_model, x, y, z, tx, ty);
+  d3d_model_vertex_normal_texture_color(oglmgr->GetShapesModel(), x, y, z, nx, ny, nz, tx, ty, draw_get_color(), draw_get_alpha());
 }
 
-void d3d_vertex_texture_color(double x, double y, double z, double tx, double ty, int color, double alpha)
+void d3d_vertex_normal_texture_color(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, gs_scalar tx, gs_scalar ty, int color, double alpha)
 {
-  d3d_model_vertex_texture_color(prim_d3d_model, x, y, z, tx, ty, color, alpha);
+  d3d_model_vertex_normal_texture_color(oglmgr->GetShapesModel(), x, y, z, nx, ny, nz, tx, ty, color, alpha);
 }
 
-void d3d_vertex_normal(double x, double y, double z, double nx, double ny, double nz)
+void d3d_draw_floor(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep)
 {
-  d3d_model_vertex_normal(prim_d3d_model, x, y, z, nx, ny, nz);
+	oglmgr->BeginShapesBatching(texId);
+	d3d_model_floor(oglmgr->GetShapesModel(), x1, y1, z1, x2, y2, z2, hrep, vrep);
 }
 
-void d3d_vertex_normal_color(double x, double y, double z, double nx, double ny, double nz, int color, double alpha)
+void d3d_draw_wall(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep)
 {
-  d3d_model_vertex_normal_color(prim_d3d_model, x, y, z, nx, ny, nz, color, alpha);
+	oglmgr->BeginShapesBatching(texId);
+	d3d_model_wall(oglmgr->GetShapesModel(), x1, y1, z1, x2, y2, z2, hrep, vrep);
 }
 
-void d3d_vertex_normal_texture(double x, double y, double z, double nx, double ny, double nz, double tx, double ty)
+void d3d_draw_block(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, bool closed)
 {
-  d3d_model_vertex_normal_texture(prim_d3d_model, x, y, z, nx, ny, nz, tx, ty);
+	oglmgr->BeginShapesBatching(texId);
+	d3d_model_block(oglmgr->GetShapesModel(), x1, y1, z1, x2, y2, z2, hrep, vrep, closed);
 }
 
-void d3d_vertex_normal_texture_color(double x, double y, double z, double nx, double ny, double nz, double tx, double ty, int color, double alpha)
+void d3d_draw_cylinder(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, bool closed, int steps)
 {
-  d3d_model_vertex_normal_texture_color(prim_d3d_model, x, y, z, nx, ny, nz, tx, ty, color, alpha);
+	oglmgr->BeginShapesBatching(texId);
+	d3d_model_cylinder(oglmgr->GetShapesModel(), x1, y1, z1, x2, y2, z2, hrep, vrep, closed, steps);
 }
+
+void d3d_draw_cone(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, bool closed, int steps)
+{
+	oglmgr->BeginShapesBatching(texId);
+	d3d_model_cone(oglmgr->GetShapesModel(), x1, y1, z1, x2, y2, z2, hrep, vrep, closed, steps);
+}
+
+void d3d_draw_ellipsoid(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, int steps)
+{
+	oglmgr->BeginShapesBatching(texId);
+	d3d_model_ellipsoid(oglmgr->GetShapesModel(), x1, y1, z1, x2, y2, z2, hrep, vrep, steps);
+}
+
+void d3d_draw_icosahedron(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, int texId, gs_scalar hrep, gs_scalar vrep, int steps) {
+}
+
+void d3d_draw_torus(gs_scalar x1, gs_scalar y1, gs_scalar z1, int texId, gs_scalar hrep, gs_scalar vrep, int csteps, int tsteps, double radius, double tradius) {
+	oglmgr->BeginShapesBatching(texId);
+	d3d_model_torus(oglmgr->GetShapesModel(), x1, y1, z1, hrep, vrep, csteps, tsteps, radius, tradius);
+}
+
+}
+

@@ -4,7 +4,7 @@
          everything, parsing it.
   
   @section License
-    Copyright (C) 2008-2013 Josh Ventura
+    Copyright (C) 2008-2014 Josh Ventura
     This file is a part of the ENIGMA Development Environment.
 
     ENIGMA is free software: you can redistribute it and/or modify it under the
@@ -61,7 +61,7 @@ int compile_parseAndLink(compile_context &ctex)
   for (int i = 0; i < ctex.es->scriptCount; i++)
   {
     // Keep a record of this script
-    parsed_script *cur_scr = ctex.parsed_scripts[ctex.es->scripts[i].name] = new parsed_script(ctex.es->scripts + i, ctex.global);
+    parsed_script *cur_scr = ctex.parsed_scripts[ctex.es->scripts[i].name] = new parsed_script(main_context, ctex.es->scripts + i, ctex.global);
     if (!cur_scr->parse())
       return 1;
     edbg << "Parsed `" << ctex.es->scripts[i].name << "': " << cur_scr->locals.members.size() << " locals" << flushl;
@@ -118,7 +118,7 @@ int compile_parseAndLink(compile_context &ctex)
       {
         //For each individual event (like begin_step) in the main event (Step), parse the code
         const int ev_id = ctex.es->gmObjects[i].mainEvents[ii].events[iii].id;
-        parsed_event *p_ev = new parsed_event(mev_id, ev_id, p_obj, ctex.global, ctex.es->gmObjects[i].mainEvents[ii].events[iii].code);
+        parsed_event *p_ev = new parsed_event(main_context, mev_id, ev_id, p_obj, ctex.global, ctex.es->gmObjects[i].mainEvents[ii].events[iii].code);
         p_obj->events.push_back(p_ev); // Make sure each sub event knows its main event's event ID.
         
         // Parse the code
@@ -136,7 +136,7 @@ int compile_parseAndLink(compile_context &ctex)
   {
     parsed_room *p_room = ctex.parsed_rooms[ctex.es->rooms[i].id] = new parsed_room(ctex.es->rooms + i);
     if (ctex.es->rooms[i].creationCode and *ctex.es->rooms[i].creationCode) {
-      p_room->creation_code = new parsed_code(NULL, ctex.global);
+      p_room->creation_code = new parsed_code(main_context, NULL, ctex.global);
       int pres = p_room->creation_code->parse(ctex.es->rooms[i].creationCode);
       if (!pres) return E_ERROR_SYNTAX;
     }
@@ -146,8 +146,9 @@ int compile_parseAndLink(compile_context &ctex)
       const char *const ccode = ctex.es->rooms[i].instances[ii].creationCode;
       if (ccode and *ccode)
       {
+        // TODO: NEWCOMPILER: Make sure this is wrapped in with(). Parse room creation code, parse instance creation codes.
         parsed_room::parsed_icreatecode *picc = p_room->instance_create_codes[ctex.es->rooms[i].instances[ii].id]
-          = new parsed_room::parsed_icreatecode(ctex.parsed_objects[ctex.es->rooms[i].instances[ii].objectId], ctex.global);
+          = new parsed_room::parsed_icreatecode(main_context, ctex.parsed_objects[ctex.es->rooms[i].instances[ii].objectId], ctex.global);
         int pres = picc->parse(ccode);
         if (pres) return E_ERROR_SYNTAX;
       }

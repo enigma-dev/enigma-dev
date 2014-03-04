@@ -30,12 +30,15 @@
 
 #include "Universal_System/mathnc.h"
 #include "Universal_System/estring.h"
+#include "Universal_System/bufferstruct.h"
 #include "Universal_System/fileio.h"
 #include "Universal_System/terminal_io.h"
 
 #include "Universal_System/backgroundstruct.h"
 #include "Universal_System/spritestruct.h"
 #include "Universal_System/fontstruct.h"
+
+#include "Universal_System/callbacks_events.h"
 
 #include "GameSettings.h"
 #include "Preprocessor_Environment_Editable/LIBINCLUDE.h"
@@ -62,7 +65,7 @@
 
 extern int amain();
 
-#include "Universal_System/IMGloading.h"
+#include "Universal_System/image_formats.h"
 
 #include "Universal_System/object.h"
 #include "Universal_System/instance.h"
@@ -74,16 +77,14 @@ extern int amain();
 
 #include "Universal_System/resource_data.h"
 #include "Universal_System/highscore_functions.h"
-#include "Universal_System/path_functions.h"
-//#include "Universal_System/motion_planning.h"
-//#include "Universal_System/mp_movement.h"
 
 #include "Universal_System/move_functions.h"
-
 #include "Universal_System/actions.h"
-
 #include "Universal_System/lives.h"
 
+namespace enigma_user {}
+
+using namespace enigma_user;
 
 #ifndef JUST_DEFINE_IT_RUN
   #include "Preprocessor_Environment_Editable/IDE_EDIT_resourcenames.h"
@@ -101,9 +102,10 @@ extern int amain();
   #include "Preprocessor_Environment_Editable/IDE_EDIT_objectfunctionality.h"
   #include "Preprocessor_Environment_Editable/IDE_EDIT_roomcreates.h"
   #include "Preprocessor_Environment_Editable/IDE_EDIT_roomarrays.h"
+  #include "Preprocessor_Environment_Editable/IDE_EDIT_shaderarrays.h"
   #include "Preprocessor_Environment_Editable/IDE_EDIT_fontinfo.h"
 
-  #if BUILDMODE
+  #if defined(BUILDMODE) && BUILDMODE
     #include "Modes/buildmode.h"
   #endif
 

@@ -7,7 +7,7 @@
   engine source.
   
   @section License
-    Copyright (C) 2008-2013 Josh Ventura
+    Copyright (C) 2008-2014 Josh Ventura
     This file is a part of the ENIGMA Development Environment.
 
     ENIGMA is free software: you can redistribute it and/or modify it under the
@@ -22,6 +22,7 @@
     with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "makedir.h"
 #include <time.h>
 #include <string>
 #include <iostream>
@@ -86,7 +87,7 @@ inline int rdir_system(string x, string y)
 // This function parses one command line specified to the eYAML into a filename string and a parameter string,
 // then returns whether or not the output from this call must be manually redirected to the output file ofile.
 static inline bool toolchain_parseout(string line, string &exename, string &command, string ofile = "")
-{
+{ 
   pt pos = 0, spos;
 
   /* Isolate the executable path and filename
@@ -126,12 +127,12 @@ static inline bool toolchain_parseout(string line, string &exename, string &comm
     bool mblank = false;
     srp = command.find("$blank");
     while (srp != string::npos) {
-      command.replace(srp,6,"blank.txt");
+      command.replace(srp,6,("\"" + makedir + "enigma_blank.txt\"").c_str());
       srp = command.find("$blank");
       mblank = true;
     }
     if (mblank)
-      fclose(fopen("blank.txt","wb"));
+      fclose(fopen((makedir + "enigma_blank.txt").c_str(),"wb"));
 
   /* Return whether or not to redirect */
   return redir;
@@ -179,9 +180,9 @@ const char* lang_CPP::establish_bearings(const char *compiler)
   ***********************************************************/
   if ((cmd = compey.get("defines")) == "")
     return (build_error = "Compiler descriptor file `" + compfq + "' does not specify 'defines' executable.\n").c_str();
-  redir = toolchain_parseout(cmd, toolchainexec,parameters,"defines.txt");
+  redir = toolchain_parseout(cmd, toolchainexec,parameters, ("\"" + makedir + "enigma_defines.txt\""));
   cout << "Read key `defines` as `" << cmd << "`\nParsed `" << toolchainexec << "` `" << parameters << "`: redirect=" << (redir?"yes":"no") << "\n";
-  got_success = !(redir? e_execsp(toolchainexec, parameters, "> defines.txt",MAKE_paths) : e_execsp(toolchainexec, parameters, MAKE_paths));
+  got_success = !(redir? e_execsp(toolchainexec, parameters, ("> \"" + makedir + "enigma_defines.txt\""),MAKE_paths) : e_execsp(toolchainexec, parameters, MAKE_paths));
   if (!got_success) return "Call to 'defines' toolchain executable returned non-zero!\n";
   else cout << "Call succeeded" << endl;
 
@@ -190,15 +191,15 @@ const char* lang_CPP::establish_bearings(const char *compiler)
   ****************************************************/
   if ((cmd = compey.get("searchdirs")) == "")
     return (build_error = "Compiler descriptor file `" + compfq + "' does not specify 'searchdirs' executable.").c_str();
-  redir = toolchain_parseout(cmd, toolchainexec,parameters,"searchdirs.txt");
+  redir = toolchain_parseout(cmd, toolchainexec,parameters, ("\"" + makedir + "enigma_searchdirs.txt\""));
   cout << "Read key `searchdirs` as `" << cmd << "`\nParsed `" << toolchainexec << "` `" << parameters << "`: redirect=" << (redir?"yes":"no") << "\n";
-  got_success = !(redir? e_execsp(toolchainexec, parameters, "&> searchdirs.txt", MAKE_paths) : e_execsp(toolchainexec, parameters, MAKE_paths));
+  got_success = !(redir? e_execsp(toolchainexec, parameters, ("&> \"" + makedir + "enigma_searchdirs.txt\""), MAKE_paths) : e_execsp(toolchainexec, parameters, MAKE_paths));
   if (!got_success) return "Call to 'searchdirs' toolchain executable returned non-zero!";
   else cout << "Call succeeded" << endl;
 
   /* Parse include directories
   ****************************************/
-    string idirs = fc("searchdirs.txt");
+    string idirs = fc((makedir + "enigma_searchdirs.txt").c_str());
     if (idirs == "")
       return "Invalid search directories returned. Error 6.";
 
@@ -214,6 +215,7 @@ const char* lang_CPP::establish_bearings(const char *compiler)
       pos += idirstart.length();
     }
     jdi::builtin->add_search_directory("ENIGMAsystem/SHELL/");
+    jdi::builtin->add_search_directory(makedir.c_str());
 
     while (is_useless(idirs[++pos]));
 
@@ -236,11 +238,11 @@ const char* lang_CPP::establish_bearings(const char *compiler)
 
   /* Parse built-in #defines
   ****************************/
-    llreader macro_reader("defines.txt");
+    llreader macro_reader((makedir + "enigma_defines.txt").c_str());
     if (!macro_reader.is_open())
       return "Call to `defines' toolchain executable returned no data.\n";
 
-    int res = jdi::builtin->parse_C_stream(macro_reader, "defines.txt");
+    int res = jdi::builtin->parse_C_stream(macro_reader, (makedir + "enigma_defines.txt").c_str());
     if (res)
       return "Highly unlikely error: Compiler builtins failed to parse. But stupid things can happen when working with files.";
 

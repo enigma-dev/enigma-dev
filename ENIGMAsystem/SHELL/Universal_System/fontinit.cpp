@@ -77,8 +77,10 @@ namespace enigma
 		  int* pixels=new int[size+1]; //FYI: This variable was once called "cpixels." When you do compress them, change it back.
 
 		  unsigned int sz2;
-		  for (sz2 = 0; !feof(exe) and sz2 < size; sz2++)
-		    pixels[sz2] = 0x00FFFFFF | ((unsigned char)fgetc(exe) << 24);
+		  for (sz2 = 0; !feof(exe) and sz2 < size; sz2++){
+            pixels[sz2] = 0x00FFFFFF | ((unsigned char)fgetc(exe) << 24);
+		    if (pixels[sz2] == 0x00FFFFFF) pixels[sz2] = 0;
+		  }
 
 		  if (size!=sz2) {
 			  show_error("Failed to load font: Data is truncated before exe end. Read "+toString(sz2)+" out of expected "+toString(size),0);
@@ -100,7 +102,7 @@ namespace enigma
 		  delete[] cpixels;*/
 
 		  int ymin=100, ymax=-100;
-		  for (int gi = 0; gi < enigma::fontstructarray[i]->glyphcount; gi++)
+		  for (unsigned gi = 0; gi < enigma::fontstructarray[i]->glyphcount; gi++)
 		  {
 		    if (!fread(&advance,4,1,exe)) return;
         if (!fread(&baseline,4,1,exe)) return;
@@ -131,7 +133,7 @@ namespace enigma
 		  fontstructarray[i]->height = ymax - ymin + 2;
 		  fontstructarray[i]->yoffset = - ymin + 1;
 
-		  fontstructarray[i]->texture = graphics_create_texture(twid,thgt,pixels);
+		  fontstructarray[i]->texture = graphics_create_texture(twid,thgt,twid,thgt,pixels,true);
 		  fontstructarray[i]->twid = twid;
 		  fontstructarray[i]->thgt = thgt;
 

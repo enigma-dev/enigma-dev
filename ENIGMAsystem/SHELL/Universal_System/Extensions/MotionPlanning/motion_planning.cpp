@@ -1,6 +1,7 @@
 /********************************************************************************\
 **                                                                              **
 **  Copyright (C) 2011 Harijs Grînbergs                                         **
+**  Modified 2013 by Josh Ventura                                               **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -31,17 +32,23 @@
 using namespace std;
 
 //#include "Graphics_Systems/OpenGL/OpenGLHeaders.h" //For drawing straight lines
-#include "Universal_System/pathstruct.h"
+#include "../Paths/pathstruct.h"
 #include "libEGMstd.h"
 #include "motion_planning_struct.h"
 #include "motion_planning.h"
+#include "Universal_System/scalar.h"
 
-int collision_rectangle(double x1, double y1, double x2, double y2, int obj, bool prec /*ignored*/, bool notme);
+namespace enigma_user {
+int collision_rectangle(cs_scalar x1, cs_scalar y1, cs_scalar x2, cs_scalar y2, int obj, bool prec /*ignored*/, bool notme);
+}
 
 namespace enigma {
 	extern size_t grid_idmax;
 	extern unsigned bound_texture;
 }
+
+namespace enigma_user
+{
 
 unsigned mp_grid_create(int left,int top,int hcells,int vcells,int cellwidth,int cellheight, double speed_modifier)
 {
@@ -79,7 +86,7 @@ void mp_grid_copy(unsigned id, unsigned srcid)
     grid->top = sgrid->top;
     for (unsigned int i = 0; i < sgrid->hcells*sgrid->vcells; i++)
     {
-        enigma::node node={floor(i / sgrid->vcells),i % sgrid->vcells,0,0,0,sgrid->nodearray[i].cost};
+        enigma::node node(floor(i / sgrid->vcells),i % sgrid->vcells,0,0,0,sgrid->nodearray[i].cost);
         grid->nodearray.push_back(node);
     }
 
@@ -217,127 +224,97 @@ bool mp_grid_path(unsigned id,unsigned pathid,double xstart,double ystart,double
     path->pointarray.clear();
 
     //push the very first point
-    enigma::path_point point={xstart,ystart,gr->speed_modifier/double(gr->nodearray[xs*vc+ys].cost)};
+    enigma::path_point point(xstart,ystart,gr->speed_modifier/double(gr->nodearray[xs*vc+ys].cost));
     path->pointarray.push_back(point);
     multimap<unsigned,enigma::node*>::reverse_iterator it;
     for (it=nodelist.rbegin(); it != nodelist.rend(); it++)
     {
-            point=(enigma::path_point){gr->left+((*it).second->x+0.5)*gr->cellwidth,gr->top+((*it).second->y+0.5)*gr->cellheight,gr->speed_modifier/double((*it).second->cost)};
+            point = enigma::path_point(gr->left+((*it).second->x+0.5)*gr->cellwidth,gr->top+((*it).second->y+0.5)*gr->cellheight,gr->speed_modifier/double((*it).second->cost));
             path->pointarray.push_back(point);
     }
 
     //push the very last point if we can reach the destination
     if (status == true){
-        point=(enigma::path_point){xgoal,ygoal,gr->speed_modifier/double(gr->nodearray[xg*vc+yg].cost)};
+        point = enigma::path_point(xgoal,ygoal,gr->speed_modifier/double(gr->nodearray[xg*vc+yg].cost));
         path->pointarray.push_back(point);
-    }else if (path->pointarray.size()==1){
-        point=(enigma::path_point){path->pointarray.back().x,path->pointarray.back().y,gr->speed_modifier/double(gr->nodearray[xg*vc+yg].cost)};
+    } else if (path->pointarray.size()==1) {
+        point = enigma::path_point(path->pointarray.back().x,path->pointarray.back().y,gr->speed_modifier/double(gr->nodearray[xg*vc+yg].cost));
         path->pointarray.push_back(point);
     }
     enigma::path_recalculate(pathid);
     return true;
 }
 
+}
+
 #include "Universal_System/var4.h"
-//#include "GScolors.h"
 #define __GETR(x) (((x & 0x0000FF)))
 #define __GETG(x) (((x & 0x00FF00)>>8))
 #define __GETB(x) (((x & 0xFF0000)>>16))
-void draw_text(int x,int y,variant str);
+
+namespace enigma_user
+{
+
+void draw_text(gs_scalar x,gs_scalar y,variant str);
 int merge_color(int c1,int c2,double amount);
 int draw_primitive_begin(int kind);
-int draw_vertex(double x, double y);
+int draw_vertex_color(gs_scalar x, gs_scalar y, int color, float alpha);
 int draw_primitive_end();
 int draw_set_color_rgba(unsigned char red, unsigned char green, unsigned char blue, float alpha);
-double draw_get_color();
+int draw_get_color();
 int draw_set_color(int col);
-/*void draw_set_halign(int align);
-int draw_get_halign();
-void draw_set_valign(int align);
-int draw_get_valign();
-void draw_set_font(int fnt);
-int draw_get_font();*/
 
 void mp_grid_draw_neighbours(unsigned int id, unsigned int h, unsigned int v, unsigned int mode)
 {
-    //if(enigma::bound_texture) glBindTexture(GL_TEXTURE_2D,enigma::bound_texture = 0);
     enigma::grid *grid = enigma::gridstructarray[id];
-    //if (h<0) return; // FIX ME: Always false
     if (h>grid->hcells-1) return;
-    //if (v<0) return; // FIX ME: Always false
     if (v>grid->vcells-1) return;
-    //glPushAttrib(GL_CURRENT_BIT);
-    //glBegin(GL_QUADS);
-    double tc=draw_get_color();
     draw_primitive_begin(8);
-    //glColor4f(0,0,1,mode==0?0.5:1);
-    draw_set_color_rgba(0,0,255,mode==0?0.5:1);
     unsigned int vc = enigma::gridstructarray[id]->vcells;
     for (vector<enigma::node*>::iterator it = enigma::gridstructarray[id]->nodearray[h*vc+v].neighbor_nodes.begin(); it!=enigma::gridstructarray[id]->nodearray[h*vc+v].neighbor_nodes.end(); ++it){
-        /*glVertex2f(grid->left+(*it)->x*grid->cellwidth,grid->top+(*it)->y*grid->cellheight);
-        glVertex2f(grid->left+((*it)->x+1)*grid->cellwidth,grid->top+(*it)->y*grid->cellheight);
-        glVertex2f(grid->left+((*it)->x+1)*grid->cellwidth,grid->top+((*it)->y+1)*grid->cellheight);
-        glVertex2f(grid->left+(*it)->x*grid->cellwidth,grid->top+((*it)->y+1)*grid->cellheight);*/
-        draw_vertex(grid->left+(*it)->x*grid->cellwidth,grid->top+(*it)->y*grid->cellheight);
-        draw_vertex(grid->left+((*it)->x+1)*grid->cellwidth,grid->top+(*it)->y*grid->cellheight);
-        draw_vertex(grid->left+((*it)->x+1)*grid->cellwidth,grid->top+((*it)->y+1)*grid->cellheight);
-        draw_vertex(grid->left+(*it)->x*grid->cellwidth,grid->top+((*it)->y+1)*grid->cellheight);
+        draw_vertex_color(grid->left+(*it)->x*grid->cellwidth,grid->top+(*it)->y*grid->cellheight,0x0000FF,(mode==0?0.5:1.0));
+        draw_vertex_color(grid->left+((*it)->x+1)*grid->cellwidth,grid->top+(*it)->y*grid->cellheight,0x0000FF,(mode==0?0.5:1.0));
+        draw_vertex_color(grid->left+((*it)->x+1)*grid->cellwidth,grid->top+((*it)->y+1)*grid->cellheight,0x0000FF,(mode==0?0.5:1.0));
+        draw_vertex_color(grid->left+(*it)->x*grid->cellwidth,grid->top+((*it)->y+1)*grid->cellheight,0x0000FF,(mode==0?0.5:1.0));
     }
-    //glEnd();
-    //glPopAttrib();
-    draw_set_color_rgba(255,255,255,1);
     draw_primitive_end();
     if (mode==1){
+        int tc = draw_get_color();
+        draw_set_color_rgba(255,255,255,1);
         for (vector<enigma::node*>::iterator it = enigma::gridstructarray[id]->nodearray[h*vc+v].neighbor_nodes.begin(); it!=enigma::gridstructarray[id]->nodearray[h*vc+v].neighbor_nodes.end(); ++it){
             draw_text(((*it)->x+0.5)*grid->cellwidth,((*it)->y+0.5)*grid->cellheight,(*it)->x*grid->vcells+(*it)->y);
         }
+        draw_set_color(tc);
     }
-    draw_set_color(tc);
 }
 
 void mp_grid_draw(unsigned int id, unsigned int mode, unsigned int color_mode)
 {
-    //if(enigma::bound_texture) glBindTexture(GL_TEXTURE_2D,enigma::bound_texture = 0);
     enigma::grid *grid = enigma::gridstructarray[id];
-    //glPushAttrib(GL_CURRENT_BIT);
-    //glBegin(GL_QUADS);
-    double tc=draw_get_color();
     draw_primitive_begin(8);
     int x=grid->left, y=grid->top;
     for (unsigned int i=0; i<grid->hcells; i++){
         for (unsigned int c=0; c<grid->vcells; c++){
+            int col;
             if (color_mode==0){
                 if (grid->nodearray[i*grid->vcells+c].cost < grid->threshold)
-                    //glColor4f(0,1,0,1);
-                    draw_set_color_rgba(0,255,0,1);
+                    col = 0x008000;
                 else
-                    //glColor4f(1,0,0,1);
-                    draw_set_color_rgba(255,0,0,1);
+                    col = 0x0000FF;
             }else{
-                int col = merge_color(0x008000, 0x0000FF, (float)grid->nodearray[i*grid->vcells+c].cost/(float)color_mode);
-                //glColor4f(__GETR(col),__GETG(col),__GETB(col),1);
-                draw_set_color_rgba(__GETR(col),__GETG(col),__GETB(col),1);
+                col = merge_color(0x008000, 0x0000FF, (float)grid->nodearray[i*grid->vcells+c].cost/(float)color_mode);
             }
 
-            /*glVertex2f(x+i*grid->cellwidth,y+c*grid->cellheight);
-            glVertex2f(x+(i+1)*grid->cellwidth,y+c*grid->cellheight);
-            glVertex2f(x+(i+1)*grid->cellwidth,y+(c+1)*grid->cellheight);
-            glVertex2f(x+i*grid->cellwidth,y+(c+1)*grid->cellheight);*/
-            draw_vertex(x+i*grid->cellwidth,y+c*grid->cellheight);
-            draw_vertex(x+(i+1)*grid->cellwidth,y+c*grid->cellheight);
-            draw_vertex(x+(i+1)*grid->cellwidth,y+(c+1)*grid->cellheight);
-            draw_vertex(x+i*grid->cellwidth,y+(c+1)*grid->cellheight);
+            draw_vertex_color(x+i*grid->cellwidth,y+c*grid->cellheight,col,1.0);
+            draw_vertex_color(x+(i+1)*grid->cellwidth,y+c*grid->cellheight,col,1.0);
+            draw_vertex_color(x+(i+1)*grid->cellwidth,y+(c+1)*grid->cellheight,col,1.0);
+            draw_vertex_color(x+i*grid->cellwidth,y+(c+1)*grid->cellheight,col,1.0);
         }
     }
-    //glEnd();
-    //glPopAttrib();
     draw_primitive_end();
 
     if (mode){
-        /*int temph, tempv, tempf;
-        temph = draw_get_halign(), draw_set_halign(1);*/
-        /*tempv = draw_get_valign(), draw_set_valign(1);*/
-        /*tempf = draw_get_font(), draw_set_font(0);*/
+        int tc = draw_get_color();
         draw_set_color_rgba(255,255,255,1);
         if (mode==1){ //draw cost
             for (unsigned int i=0; i<grid->hcells; i++){
@@ -348,13 +325,13 @@ void mp_grid_draw(unsigned int id, unsigned int mode, unsigned int color_mode)
         }else{ //draw coords
             for (unsigned int i=0; i<grid->hcells; i++){
                 for (unsigned int c=0; c<grid->vcells; c++){
-                    draw_text(x+(i+0.5)*grid->cellwidth,y+(c+0.5)*grid->cellheight,string(variant(grid->nodearray[i*grid->vcells+c].x)) + ":" + string(variant(grid->nodearray[i*grid->vcells+c].y)));
+                    draw_text(x+(i+0.5)*grid->cellwidth,y+(c+0.5)*grid->cellheight,toString(variant(grid->nodearray[i*grid->vcells+c].x)) + ":" + toString(variant(grid->nodearray[i*grid->vcells+c].y)));
                 }
             }
         }
-        /*draw_set_halign(temph);
-        draw_set_valign(tempv);
-        draw_set_font(tempf);*/
+        draw_set_color(tc);
     }
-    draw_set_color(tc);
 }
+
+}
+

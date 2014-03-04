@@ -1,4 +1,5 @@
 /** Copyright (C) 2008-2011 IsmAvatar <cmagicj@nni.com>, Josh Ventura
+*** Copyright (C) 2013 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -37,16 +38,19 @@
 
 #include <time.h>
 
-const int os_type = os_linux;
-
-extern string keyboard_lastchar;
+namespace enigma_user {
+  const int os_type = os_linux;
+  extern int keyboard_lastkey;
+}
 
 namespace enigma
 {
-  extern char keymap[256];
-  extern char usermap[256];
+  extern char keymap[512];
+  //extern char usermap[256];
   void ENIGMA_events(void); //TODO: Synchronize this with Windows by putting these two in a single header.
-
+  bool gameFroze = false;
+  extern bool freezeOnLoseFocus;
+ 
   namespace x11
   {
     Display *disp;
@@ -66,15 +70,22 @@ namespace enigma
               if (gk==NoSymbol)
                 return 0;
 
-              if (!(gk & 0xFF00)) actualKey = enigma::usermap[gk];
-              else actualKey = enigma::usermap[(int)enigma::keymap[gk & 0xFF]];
+              if (!(gk & 0xFF00)) actualKey = enigma_user::keyboard_get_map((int)enigma::keymap[gk & 0xFF]);
+              else actualKey = enigma_user::keyboard_get_map((int)enigma::keymap[gk & 0x1FF]);
               { // Set keyboard_lastchar. Seems to work without 
                   char str[1];
                   int len = XLookupString(&e.xkey, str, 1, NULL, NULL);
                   if (len > 0) {
-                      keyboard_lastchar = string(1,str[0]);
+                      enigma_user::keyboard_lastchar = string(1,str[0]);
+					  enigma_user::keyboard_string += enigma_user::keyboard_lastchar;
+					  if (enigma_user::keyboard_lastkey == enigma_user::vk_backspace) {
+						enigma_user::keyboard_string = enigma_user::keyboard_string.substr(0, enigma_user::keyboard_string.length() - 1);
+					  } else {
+						enigma_user::keyboard_string += enigma_user::keyboard_lastchar;
+					  }
                   }
               }
+	      enigma_user::keyboard_lastkey = actualKey;
               if (enigma::last_keybdstatus[actualKey]==1 && enigma::keybdstatus[actualKey]==0) {
                 enigma::keybdstatus[actualKey]=1;
                 return 0;
@@ -88,8 +99,8 @@ namespace enigma
             if (gk == NoSymbol)
               return 0;
 
-            if (!(gk & 0xFF00)) actualKey = enigma::usermap[gk];
-            else actualKey = enigma::usermap[(int)enigma::keymap[gk & 0xFF]];
+            if (!(gk & 0xFF00)) actualKey = enigma_user::keyboard_get_map((int)enigma::keymap[gk & 0xFF]);
+            else actualKey = enigma_user::keyboard_get_map((int)enigma::keymap[gk & 0x1FF]);
 
             enigma::last_keybdstatus[actualKey]=enigma::keybdstatus[actualKey];
             enigma::keybdstatus[actualKey]=0;
@@ -102,6 +113,7 @@ namespace enigma
               case 5: mouse_vscrolls--; break;
               case 6: mouse_hscrolls++; break;
               case 7: mouse_hscrolls--; break;
+              default: ;
             }
           return 0;
         }
@@ -112,6 +124,7 @@ namespace enigma
               case 5: mouse_vscrolls--; break;
               case 6: mouse_hscrolls++; break;
               case 7: mouse_hscrolls--; break;
+              default: ;
             }
           return 0;
         }
@@ -119,6 +132,15 @@ namespace enigma
             //screen_refresh();
           return 0;
         }
+        case FocusIn:
+          gameFroze = false;
+          return 0;
+        case FocusOut:
+          if (enigma::freezeOnLoseFocus) {
+			//TODO: Application hangs and then crashes and will not unfreeze when the form regains focus, needs fixed.
+            //gameFroze = true;
+          }
+          return 0;
         case ClientMessage:
           if ((unsigned)e.xclient.data.l[0] == (unsigned)wm_delwin) //For some reason, this line warns whether we cast to unsigned or not.
             return 1;
@@ -167,15 +189,23 @@ namespace enigma
   int game_ending();
 }
 
-extern double fps;
-long clamp(long value, long min, long max)
+//TODO: Implement pause events
+unsigned long current_time_mcs = 0; // microseconds since the start of the game
+
+namespace enigma_user {
+  extern double fps;
+  unsigned long current_time = 0; // milliseconds since the start of the game
+  unsigned long delta_time = 0; // microseconds since the last step event
+  
+  unsigned long get_timer() {  // microseconds since the start of the game
+	return current_time_mcs;
+  }
+}
+
+static inline long clamp(long value, long min, long max)
 {
-  if (value < min) {
-    return min;
-  }
-  if (value > max) {
-    return max;
-  }
+  if (value < min) return min;
+  if (value > max) return max;
   return value;
 }
 
@@ -215,17 +245,24 @@ int main(int argc,char** argv)
 	swa.border_pixel = 0;
 	swa.background_pixel = 0;
 	swa.colormap = XCreateColormap(disp,root,vi->visual,AllocNone);
-	swa.event_mask = ExposureMask | KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask;// | StructureNotifyMask;
+	swa.event_mask = ExposureMask | KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask | FocusChangeMask;// | StructureNotifyMask;
 	unsigned long valmask = CWColormap | CWEventMask; //  | CWBackPixel | CWBorderPixel;
-
-	//default window size
-	int winw = room_width;
-	int winh = room_height;
-	win = XCreateWindow(disp,root,0,0,winw,winh,0,vi->depth,InputOutput,vi->visual,valmask,&swa);
-	XMapRaised(disp,win); //request visible
 
 	//prepare window for display (center, caption, etc)
 	screen = DefaultScreenOfDisplay(disp);
+	//default window size
+	int winw = enigma_user::room_width;
+	int winh = enigma_user::room_height;
+	// By default if the room is too big instead of creating a gigantic ass window
+	// make it not bigger than the screen to full screen it, this is what 8.1 and Studio 
+	// do, if the user wants to manually override this they can using 
+	// views/screen_set_viewport or window_set_size/window_set_region_size 
+	// We won't limit those functions like GM, just the default.
+	if (winw > screen->width) winw = screen->width;
+	if (winh > screen->height) winh = screen->height;
+	win = XCreateWindow(disp,root,0,0,winw,winh,0,vi->depth,InputOutput,vi->visual,valmask,&swa);
+	XMapRaised(disp,win); //request visible
+
 	//printf("Screen: %d %d %d %d\n",s->width/2,s->height/2,winw,winh);
 	XMoveWindow(disp,win,(screen->width-winw)/2,(screen->height-winh)/2);
 
@@ -283,16 +320,18 @@ int main(int argc,char** argv)
 			long passed_mcs = (time_current.tv_sec - time_offset.tv_sec)*1000000 + (time_current.tv_nsec/1000 - + time_offset.tv_nsec/1000);
 			passed_mcs = clamp(passed_mcs, 0, 1000000);
 			if (passed_mcs >= 1000000) { // Handle resetting.
-				fps = frames_count;
+				
+				enigma_user::fps = frames_count;
 				frames_count = 0;
 				time_offset.tv_sec += passed_mcs/1000000;
 				time_offset_slowing.tv_sec = time_offset.tv_sec;
 				time_offset_slowing.tv_nsec = time_offset.tv_nsec;
 			}
 		}
-
+		long spent_mcs = 0;
+		long last_mcs = 0;
 		if (current_room_speed > 0) {
-			long spent_mcs = (time_current.tv_sec - time_offset_slowing.tv_sec)*1000000 + (time_current.tv_nsec/1000 - time_offset_slowing.tv_nsec/1000);
+			spent_mcs = (time_current.tv_sec - time_offset_slowing.tv_sec)*1000000 + (time_current.tv_nsec/1000 - time_offset_slowing.tv_nsec/1000);
 			spent_mcs = clamp(spent_mcs, 0, 1000000);
 			long remaining_mcs = 1000000 - spent_mcs;
 			long needed_mcs = long((1.0 - 1.0*frames_count/current_room_speed)*1e6);
@@ -310,15 +349,30 @@ int main(int argc,char** argv)
 				needed_mcs = long((1.0 - 1.0*frames_count/current_room_speed)*1e6);
 			}
 			if (remaining_mcs > needed_mcs) {
-				usleep(1);
+				const long sleeping_time = std::min((remaining_mcs - needed_mcs)/5, long(999999));
+				usleep(std::max(long(1), sleeping_time));
 				continue;
 			}
 		}
-
+		
+		unsigned long dt = 0;
+		if (spent_mcs > last_mcs) {
+			dt = (spent_mcs - last_mcs);
+		} else {
+			//TODO: figure out what to do here this happens when the fps is reached and the timers start over
+			dt = enigma_user::delta_time;
+		}
+		last_mcs = spent_mcs;
+		enigma_user::delta_time = dt;
+		current_time_mcs += enigma_user::delta_time;
+		enigma_user::current_time += enigma_user::delta_time / 1000;
+				
 		while(XQLength(disp))
 			if(handleEvents() > 0)
 				goto end;
-
+				
+		if (enigma::gameFroze) { continue; }
+		
 		enigma::handle_joysticks();
 		enigma::ENIGMA_events();
 		enigma::input_push();
@@ -333,6 +387,9 @@ int main(int argc,char** argv)
 	return 0;
 }
 
+namespace enigma_user
+{
+
 void game_end() {
   game_isending = true;
 }
@@ -342,4 +399,6 @@ void action_end_game() {
 
 int display_get_width() { return XWidthOfScreen(screen); }
 int display_get_height() { return XHeightOfScreen(screen); }
+
+}
 

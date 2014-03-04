@@ -1,6 +1,7 @@
 /********************************************************************************\
 **                                                                              **
 **  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2013 Robert B. Colton                                         **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -35,7 +36,7 @@ using namespace std;
 #include "Universal_System/CallbackArrays.h" // For those damn vk_ constants.
 
 #include "Widget_Systems/widgets_mandatory.h"
-#include "WINDOWSwindow.h"
+#include "../General/PFwindow.h"
 
 #include "Universal_System/globalupdate.h"
 #include "WINDOWScallback.h"
@@ -47,10 +48,12 @@ static int displayInitialResolutionWidth = 0, displayInitialResolutionHeight = 0
 namespace enigma
 {
     extern HWND hWnd,hWndParent;
-    bool isSizeable = false, isVisible = true, showBorder = true, showIcons = true, windowIsTop = false;
-    int windowcolor = 0, isFullScreen = 0, cursorInt = 0, viewScale = -1, regionWidth = 0, regionHeight = 0, windowWidth = 0, windowHeight = 0, windowX = 0, windowY = 0;
+    bool isVisible = true, windowIsTop = false, gameFroze = false;
+    int windowcolor = 0, cursorInt = 0, regionWidth = 0, regionHeight = 0, windowWidth = 0, windowHeight = 0, windowX = 0, windowY = 0;
     double scaledWidth = 0, scaledHeight = 0;
     char* currentCursor = IDC_ARROW;
+    extern bool isSizeable, showBorder, showIcons, freezeOnLoseFocus, isFullScreen;
+    extern int viewScale;
 
     LONG_PTR getparentstyle()
     {
@@ -89,6 +92,9 @@ namespace enigma
 
     void setchildsize(bool adapt)
     {
+        if (!regionWidth)
+            return;
+
         int parWidth = isFullScreen?GetSystemMetrics(SM_CXSCREEN):windowWidth, parHeight = isFullScreen?GetSystemMetrics(SM_CYSCREEN):windowHeight;
 
         if (viewScale > 0)  //Fixed Scale
@@ -139,27 +145,8 @@ namespace enigma
     }
 }
 
-int show_message(string str)
+namespace enigma_user
 {
-    MessageBox(enigma::hWnd,str.c_str(), window_get_caption().c_str(), MB_OK);
-    return 0;
-}
-
-// TODO There's no easy way to do this. Creating a custom form is the only
-// solution I could find.
-int show_message_ext(string msg, string but1, string but2, string but3)
-{
-    return 1;
-}
-
-bool show_question(string str)
-{
-    if(MessageBox(enigma::hWnd, str.c_str(), window_get_caption().c_str(), MB_YESNO) == IDYES)
-    {
-        return true;
-    }
-    return false;
-}
 
 int window_get_x()
 {
@@ -181,21 +168,22 @@ int window_get_height()
     return enigma::windowHeight;
 }
 
-void window_set_caption(char* caption)
-{
-  SetWindowText(enigma::hWnd,caption);
-}
-
 void window_set_caption(string caption)
 {
-  SetWindowText(enigma::hWndParent,(char*) caption.c_str());
+/*  if (caption == "")
+      if (score != 0)
+        caption = "Score: " + string(score);  //GM does this but it's rather fucktarded */
+
+    if (caption != current_caption)
+    {
+        SetWindowText(enigma::hWndParent,(char*) caption.c_str());
+        current_caption = caption;
+    }
 }
 
 string window_get_caption()
 {
-  char text_buffer[513];
-  GetWindowText(enigma::hWnd, text_buffer, 512);
-  return text_buffer;
+  return current_caption;
 }
 
 void window_set_color(int color)
@@ -206,6 +194,22 @@ void window_set_color(int color)
 int window_get_color()
 {
     return enigma::windowcolor;
+}
+
+void window_set_alpha(double alpha) {
+  // Set WS_EX_LAYERED on this window 
+  SetWindowLong(enigma::hWndParent, GWL_EXSTYLE,
+  GetWindowLong(enigma::hWndParent, GWL_EXSTYLE) | WS_EX_LAYERED);
+
+  // Make this window transparent
+  SetLayeredWindowAttributes(enigma::hWndParent, 0, (unsigned char)(alpha*255), LWA_ALPHA);
+}
+
+double window_get_alpha() {
+	unsigned char alpha;
+	// Make this window transparent
+	GetLayeredWindowAttributes(enigma::hWndParent, 0, &alpha, 0);
+	return alpha/255;
 }
 
 void window_set_position(int x, int y)
@@ -240,8 +244,8 @@ void window_center()
 {
     int screen_width = GetSystemMetrics(SM_CXSCREEN);
     int screen_height = GetSystemMetrics(SM_CYSCREEN);
-    enigma::windowX = (screen_width - enigma::windowWidth)/2;
-    enigma::windowY = (screen_height - enigma::windowHeight)/2;
+    enigma::windowX = (screen_width - enigma::scaledWidth)/2;
+    enigma::windowY = (screen_height - enigma::scaledHeight)/2;
     enigma::clampparent();
     enigma::centerchild();
 }
@@ -262,30 +266,51 @@ void window_default()
         }
       if (tx and ty)
         xm = tx, ym = ty;
-    }
-    enigma::windowWidth = xm;
-    enigma::windowHeight = ym;
-    window_set_region_size(xm, ym, true);
+    } else {
+		int screen_width = GetSystemMetrics(SM_CXSCREEN);
+		int screen_height = GetSystemMetrics(SM_CYSCREEN);
+		// By default if the room is too big instead of creating a gigantic ass window
+		// make it not bigger than the screen to full screen it, this is what 8.1 and Studio 
+		// do, if the user wants to manually override this they can using 
+		// views/screen_set_viewport or window_set_size/window_set_region_size 
+		// We won't limit those functions like GM, just the default.
+		if (xm > screen_width) xm = screen_width;
+		if (ym > screen_height) ym = screen_height;
+	}
+
+    enigma::windowWidth = enigma::regionWidth = xm;
+    enigma::windowHeight = enigma::regionHeight = ym;
+    enigma::setchildsize(true);
     window_center();
-}
-
-void window_set_fullscreen(const bool full)
-{
-    if (enigma::isFullScreen == full)
-        return;
-
-    if (enigma::isFullScreen = full)
+    if (enigma::isFullScreen)
     {
         SetWindowLongPtr(enigma::hWndParent,GWL_STYLE,WS_POPUP);
         ShowWindow(enigma::hWndParent,SW_MAXIMIZE);
-        enigma::setchildsize(false);
     }
     else
     {
         enigma::setparentstyle();
         ShowWindow(enigma::hWndParent,SW_RESTORE);
     }
-    enigma::setchildsize(false);
+    enigma::setchildsize(true);
+}
+
+void window_set_fullscreen(bool full)
+{
+    if (enigma::isFullScreen == full)
+        return;
+
+    if ((enigma::isFullScreen = full))
+    {
+        SetWindowLongPtr(enigma::hWndParent,GWL_STYLE,WS_POPUP);
+        ShowWindow(enigma::hWndParent,SW_MAXIMIZE);
+    }
+    else
+    {
+        enigma::setparentstyle();
+        ShowWindow(enigma::hWndParent,SW_RESTORE);
+    }
+    enigma::setchildsize(true);
 }
 
 int window_get_fullscreen()
@@ -354,7 +379,7 @@ void window_set_stayontop(bool stay)
     if (enigma::windowIsTop == stay)
         return;
 
-    if (enigma::windowIsTop = stay)
+    if ((enigma::windowIsTop = stay))
     {
         SetWindowPos(enigma::hWnd,HWND_TOPMOST,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE);
     }
@@ -363,6 +388,16 @@ void window_set_stayontop(bool stay)
         SetWindowPos(enigma::hWnd,HWND_BOTTOM,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE|SWP_NOACTIVATE);
         SetWindowPos(enigma::hWnd,HWND_TOP,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE);
     }
+}
+
+void window_set_freezeonlosefocus(bool freeze)
+{
+    enigma::freezeOnLoseFocus = freeze;
+}
+
+bool window_get_freezeonlosefocus()
+{
+    return enigma::freezeOnLoseFocus;
 }
 
 bool window_get_stayontop()
@@ -374,6 +409,7 @@ void window_set_region_scale(double scale, bool adaptwindow)
 {
     enigma::viewScale = int(scale*100);
     enigma::setchildsize(adaptwindow);
+    window_center();
 }
 
 double window_get_region_scale()
@@ -388,6 +424,7 @@ void window_set_region_size(int w, int h, bool adaptwindow)
     enigma::regionWidth = w;
     enigma::regionHeight = h;
     enigma::setchildsize(adaptwindow);
+    window_center();
 }
 
 int window_get_region_width()
@@ -445,6 +482,16 @@ int display_get_frequency()
 	return GetDeviceCaps(GetDC(enigma::hWnd), VREFRESH);
 }
 
+unsigned display_get_dpi_x()
+{
+	return GetDeviceCaps(GetDC(enigma::hWnd), LOGPIXELSX);
+}
+
+unsigned display_get_dpi_y()
+{
+	return GetDeviceCaps(GetDC(enigma::hWnd), LOGPIXELSY);
+}
+
 void display_reset()
 {
 	DEVMODE devMode;
@@ -479,28 +526,12 @@ void display_reset()
 	ChangeDisplaySettings(&devMode, 0);
 }
 
-void display_set_colordepth(int depth)
+bool display_set_size(int w, int h)
 {
 	DEVMODE devMode;
 
 	if (!EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &devMode))
-		return;
-
-	if (displayInitialBitdepth == 0)
-		displayInitialBitdepth = devMode.dmBitsPerPel;
-
-	devMode.dmFields = DM_BITSPERPEL;
-	devMode.dmBitsPerPel = depth;
-
-	ChangeDisplaySettings(&devMode, 0);
-}
-
-void display_set_size(int w, int h)
-{
-	DEVMODE devMode;
-
-	if (!EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &devMode))
-		return;
+		return false;
 
 	if (displayInitialResolutionWidth == 0)
 		displayInitialResolutionWidth = devMode.dmPelsWidth;
@@ -513,14 +544,15 @@ void display_set_size(int w, int h)
 	devMode.dmPelsHeight = h;
 
 	ChangeDisplaySettings(&devMode, 0);
+	return true;
 }
 
-void display_set_frequency(int freq)
+bool display_set_frequency(int freq)
 {
 	DEVMODE devMode;
 
 	if (!EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &devMode))
-		return;
+		return false;
 
 	if (displayInitialFrequency == 0)
 		displayInitialFrequency = devMode.dmBitsPerPel;
@@ -529,6 +561,24 @@ void display_set_frequency(int freq)
 	devMode.dmDisplayFrequency = freq;
 
 	ChangeDisplaySettings(&devMode, 0);
+	return true;
+}
+
+bool display_set_colordepth(int depth)
+{
+	DEVMODE devMode;
+
+	if (!EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &devMode))
+		return true;
+
+	if (displayInitialBitdepth == 0)
+		displayInitialBitdepth = devMode.dmBitsPerPel;
+
+	devMode.dmFields = DM_BITSPERPEL;
+	devMode.dmBitsPerPel = depth;
+
+	ChangeDisplaySettings(&devMode, 0);
+	return true;
 }
 
 bool display_set_all(int w, int h, int freq, int bitdepth)
@@ -632,6 +682,7 @@ int window_mouse_get_x()
 
 	return mouse.x-window.left;
 }
+
 int window_mouse_get_y()
 {
     RECT window;
@@ -641,6 +692,7 @@ int window_mouse_get_y()
 
 	return mouse.y-window.top;
 }
+
 void window_mouse_set(int x, int y)
 {
     RECT window;
@@ -675,131 +727,16 @@ void window_view_mouse_set(int id, int x, int y)
     SetCursorPos(window.left + x + view_xview[id],window.top + y + view_yview[id]);
 }
 
-/*
-int window_views_mouse_get_x()   //NOTE: mousex/y should be set to these so they are relative to the view
-{
-    RECT window;
-    GetWindowRect(enigma::hWnd,&window);
-    POINT mouse;
-	GetCursorPos(&mouse);
-    if (!view_enabled)
-    {
-        return mouse.x-window.left;
-    }
-    else
-    {
-        int mp = -1, vp;
-        for (int v = 6; v >= 0; v--)
-        {
-            if (!view_visible[v])
-                continue;
-            if (view_xview[v] < mp || mp == -1)
-                mp = view_xview[v];
-        }
-        double xpos = mouse.x - window.left;
-        if (xpos < 0)
-        {
-            return mp + xpos;
-        }
-        if (mouse.x > window.right)
-        {
-            mp = room_width;
-            for (int v = 6; v >= 0; v--)
-            {
-                if (!view_visible[v])
-                    continue;
-                vp = view_xview[v] + view_wview[v];
-                if (vp > mp)
-                    mp = vp;
-            }
-            return mp + (mouse.x - window.right);
-        }
-        for (int v = 6; v >= 0; v--)
-        {
-            if (!view_visible[v])
-                continue;
-            vp = xpos + view_xview[v] - mp;
-            if (vp >= 0)
-            {
-                return vp;
-            }
-        }
-        return mouse.x-window.left;
-    }
 }
 
-int window_views_mouse_get_y()
+namespace enigma_user
 {
-    RECT window;
-    GetWindowRect(enigma::hWnd,&window);
-    POINT mouse;
-	GetCursorPos(&mouse);
 
-    if (!view_enabled)
-    {
-        return mouse.y-window.top;
-    }
-    else
-    {
-        int mp = -1, vp;
-        for (int v = 6; v >= 0; v--)
-        {
-            if (!view_visible[v])
-                continue;
-            if (view_yview[v] < mp || mp == -1)
-                mp = view_yview[v];
-        }
-        double ypos = mouse.y - window.top;
-        if (ypos < 0)
-        {
-            return mp + ypos;
-        }
-        if (mouse.y > window.bottom)
-        {
-            mp = room_height;
-            for (int v = 6; v >= 0; v--)
-            {
-                if (!view_visible[v])
-                    continue;
-                vp = view_yview[v] + view_hview[v];
-                if (vp > mp)
-                    mp = vp;
-            }
-            return mp + (mouse.y - window.bottom);
-        }
-        for (int v = 6; v >= 0; v--)
-        {
-            if (!view_visible[v])
-                continue;
-            vp = ypos + view_yview[v] - mp;
-            if (vp >= 0)
-            {
-                return vp;
-            }
-        }
-        return mouse.y-window.top;
-    }
-}
-void window_views_mouse_set(int x, int y)
+int window_set_cursor(int c)
 {
-    RECT window;
-    GetWindowRect(enigma::hWnd,&window);
-
-    if (!view_enabled)
+    switch (c)
     {
-        SetCursorPos(window.left + x,window.top + y);
-    }
-    else
-    {
-        SetCursorPos(window.left + x,window.top + y);
-    }
-}*/
-
-int window_set_cursor(int curs)
-{
-    switch (curs)
-    {
-        enigma::cursorInt = curs;
+        enigma::cursorInt = c;
         case cr_default:
             enigma::currentCursor= IDC_ARROW; return 1;
             break;
@@ -891,7 +828,7 @@ void io_handle()
     TranslateMessage (&msg);
     DispatchMessage (&msg);
   }
-  enigma::update_globals();
+  enigma::update_mouse_variables();
 }
 
 void keyboard_wait()
@@ -902,7 +839,10 @@ void keyboard_wait()
     io_handle();
     for (int i = 0; i < 255; i++)
       if (enigma::keybdstatus[i])
+      {
+        io_clear();
         return;
+      }
     usleep(10000); // Sleep 1/100 second
   }
 }
@@ -922,6 +862,134 @@ void mouse_wait()
 void keyboard_clear(const int key)
 {
     enigma::keybdstatus[key] = enigma::last_keybdstatus[key] = 0;
+}
+
+bool keyboard_check_direct(int key)
+{
+   BYTE keyState[256];
+
+   if ( GetKeyboardState( keyState ) )  {
+	  for (int x = 0; x < 256; x++)
+		keyState[x] = (char) (GetKeyState(x) >> 8);
+   } else {
+      //TODO: print error message.
+	  return 0;
+   }
+
+  if (key == vk_anykey) {
+    for(int i = 0; i < 256; i++)
+      if (keyState[i] == 1) return 1;
+    return 0;
+  }
+  if (key == vk_nokey) {
+    for(int i = 0; i < 256; i++)
+      if (keyState[i] == 1) return 0;
+    return 1;
+  }
+  return keyState[key & 0xFF];
+}
+
+void keyboard_key_press(int key) {
+    BYTE keyState[256];
+
+    GetKeyboardState((LPBYTE)&keyState);
+
+	// Simulate a key press
+	 keybd_event( key,
+				  keyState[key],
+				  KEYEVENTF_EXTENDEDKEY | 0,
+				  0 );
+}
+
+void keyboard_key_release(int key) {
+    BYTE keyState[256];
+
+    GetKeyboardState((LPBYTE)&keyState);
+
+	// Simulate a key release
+	keybd_event( key, keyState[key], KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
+}
+
+bool keyboard_get_capital() {
+	return (((unsigned short)GetKeyState(0x14)) & 0xffff) != 0;
+}
+
+bool keyboard_get_numlock() {
+	return (((unsigned short)GetKeyState(0x90)) & 0xffff) != 0;
+}
+
+bool keyboard_get_scroll() {
+	return (((unsigned short)GetKeyState(0x91)) & 0xffff) != 0;
+}
+
+void keyboard_set_capital(bool on) {
+    BYTE keyState[256];
+
+    GetKeyboardState((LPBYTE)&keyState);
+
+	if( (on && !(keyState[VK_CAPITAL] & 1)) ||
+	  (!on && (keyState[VK_CAPITAL] & 1)) )
+	{
+	// Simulate a key press
+	 keybd_event( VK_CAPITAL, 0x14, KEYEVENTF_EXTENDEDKEY | 0, 0 );
+
+	// Simulate a key release
+	 keybd_event( VK_CAPITAL, 0x14, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
+	}
+}
+
+void keyboard_set_numlock(bool on) {
+    BYTE keyState[256];
+
+    GetKeyboardState((LPBYTE)&keyState);
+
+	if( (on && !(keyState[VK_NUMLOCK] & 1)) ||
+	  (!on && (keyState[VK_NUMLOCK] & 1)) )
+	{
+	// Simulate a key press
+	 keybd_event( VK_NUMLOCK, 0x45, KEYEVENTF_EXTENDEDKEY | 0, 0 );
+
+	// Simulate a key release
+	 keybd_event( VK_NUMLOCK, 0x45, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
+	}
+}
+
+void keyboard_set_scroll(bool on) {
+    BYTE keyState[256];
+
+    GetKeyboardState((LPBYTE)&keyState);
+
+	if( (on && !(keyState[VK_SCROLL] & 1)) ||
+	  (!on && (keyState[VK_SCROLL] & 1)) )
+	{
+	// Simulate a key press
+	 keybd_event( VK_SCROLL, 0x91, KEYEVENTF_EXTENDEDKEY | 0, 0 );
+
+	// Simulate a key release
+	 keybd_event( VK_SCROLL, 0x91, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
+	}
+}
+
+void keyboard_set_map(int key1, int key2) {
+	map< int, int >::iterator it = enigma::keybdmap.find( key1 );
+    if ( enigma::keybdmap.end() != it ) {
+		it->second = key2;
+    } else {
+		enigma::keybdmap.insert( map< int, int >::value_type(key1, key2) );
+	}
+}
+
+int keyboard_get_map(int key) {
+	map< int, int >::iterator it = enigma::keybdmap.find( key );
+    if ( enigma::keybdmap.end() != it ) {
+		return it->second;
+    } else {
+		return key;
+	}
+}
+
+void keyboard_unset_map() {
+	enigma::keybdmap.clear();
 }
 
 void mouse_clear(const int button)
@@ -975,3 +1043,6 @@ bool clipboard_has_text()
     CloseClipboard();
     return value;
 }
+
+}
+

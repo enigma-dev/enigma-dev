@@ -17,10 +17,14 @@
 
 #include <iostream>
 #include <string>
+#include <stdlib.h>     /* malloc, free, rand */
 
 #include "../General/OpenGLHeaders.h"
 using namespace std;
 #include "OPENGLStd.h"
+#include "GLshader.h"
+#include "GLSLshader.h"
+#include "Universal_System/shaderstruct.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h" // Room dimensions.
 #include "Graphics_Systems/graphics_mandatory.h" // Room dimensions.
@@ -33,13 +37,14 @@ namespace enigma
 
   void graphicssystem_initialize()
   {
-    GLenum err = glewInit();
-    
     #ifdef DEBUG_MODE
+    GLenum err = glewInit();
     if (GLEW_OK != err)
     {
       std::cout<<"GLEW ERROR!"<<std::endl;
     }
+	#else
+	glewInit();
     #endif
 
     //enigma::pbo_isgo=GL_ARB_pixel_buffer_object;
@@ -48,6 +53,8 @@ namespace enigma
     glMatrixMode(GL_MODELVIEW);
       glLoadIdentity();
 
+      using enigma_user::room_width;
+      using enigma_user::room_height;
       glViewport(0,0,(int)room_width,(int)room_height);
       glOrtho(-1,(int)room_width,-1,(int)room_height,0,1);
       glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -61,15 +68,71 @@ namespace enigma
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
       glAlphaFunc(GL_ALWAYS,0);
 
-      // enable vertex array's for fast vertex processing
-      glEnableClientState(GL_VERTEX_ARRAY);
-      glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-      glEnableClientState(GL_NORMAL_ARRAY);
-
       glColor4f(0,0,0,1);
       glBindTexture(GL_TEXTURE_2D,0);
+
+	  init_shaders();
+	  // read shaders into graphics system structure and compile and link them if needed
+	  for (size_t i = 0; i < shader_idmax; i++) {
+	    ShaderStruct* shaderstruct = shaderdata[i];
+
+		//if (string(shaderstruct->type) != string("GLSL")) { continue; }
+
+		Shader* vshader = new Shader(enigma_user::sh_vertex);
+		shaders.push_back(vshader);
+		glShaderSource(vshader->shader, 1, (const GLchar**)&shaderstruct->vertex, NULL);
+
+		Shader* fshader = new Shader(enigma_user::sh_fragment);
+		shaders.push_back(fshader);
+		glShaderSource(fshader->shader, 1, (const GLchar**)&shaderstruct->fragment, NULL);
+
+		ShaderProgram* program = new ShaderProgram();
+		shaderprograms.push_back(program);
+
+		if (shaderstruct->precompile) {
+			glCompileShader(vshader->shader);
+			glCompileShader(fshader->shader);
+			
+			GLint blen = 0;
+			GLsizei slen = 0;
+
+			glGetShaderiv(vshader->shader, GL_INFO_LOG_LENGTH , &blen);       
+
+			if (blen > 1)
+			{
+				GLchar* compiler_log = (GLchar*)malloc(blen);
+
+				glGetInfoLogARB(vshader->shader, blen, &slen, compiler_log);
+				std::cout << compiler_log;
+			} else {
+				std::cout << "Vertex shader compile log empty";
+			}
+			
+			glGetShaderiv(fshader->shader, GL_INFO_LOG_LENGTH , &blen);       
+
+			if (blen > 1)
+			{
+				GLchar* compiler_log = (GLchar*)malloc(blen);
+
+				glGetInfoLogARB(fshader->shader, blen, &slen, compiler_log);
+				std::cout << compiler_log;
+			} else {
+				std::cout << "Fragment shader compile log empty";
+			}
+  
+		}
+
+		glAttachShader(program->shaderprogram, vshader->shader);
+		glAttachShader(program->shaderprogram, fshader->shader);
+
+		glLinkProgram(program->shaderprogram);
+		glValidateProgram(program->shaderprogram);
+	  }
   }
 }
+
+namespace enigma_user
+{
 
 // Stolen entirely from the documentation and thrown into a switch() structure.
 string draw_get_graphics_error()
@@ -85,6 +148,9 @@ string draw_get_graphics_error()
     case GL_STACK_UNDERFLOW:  return "This command would cause a stack underflow. The offending command is ignored and has no other side effect than to set the error flag.";
     case GL_OUT_OF_MEMORY:    return "There is not enough memory left to execute the command. The state of the GL is undefined, except for the state of the error flags, after this error is recorded.";
     //case GL_TABLE_TOO_LARGE:  return "The specified table exceeds the implementation's maximum supported table size. The offending command is ignored and has no other side effect than to set the error flag.";
+    default: return "Unspecified error.";
   }
-  return "Unspecified error.";
 }
+
+}
+

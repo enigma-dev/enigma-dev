@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2011 Josh Ventura
+/** Copyright (C) 2008-2013 Josh Ventura
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -37,13 +37,114 @@ static const char ldgrs[256] = {
   1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0
 };
 
+static const std::string base64_chars = 
+             "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+             "abcdefghijklmnopqrstuvwxyz"
+             "0123456789+/";
+
+namespace enigma_user {
+
+bool is_base64(unsigned char c) {
+  return (isalnum(c) || (c == '+') || (c == '/'));
+}
+
+string base64_encode(string const& str) {
+  unsigned in_len = str.size();
+  string ret;
+  int i = 0;
+  int j = 0;
+  int in_ = 0;
+  unsigned char char_array_3[3];
+  unsigned char char_array_4[4];
+  
+  while (in_len--) {
+    char_array_3[i++] = str[in_]; in_++;
+    if (i == 3) {
+      char_array_4[0] = (char_array_3[0] & 0xfc) >> 2;
+      char_array_4[1] = ((char_array_3[0] & 0x03) << 4) + ((char_array_3[1] & 0xf0) >> 4);
+      char_array_4[2] = ((char_array_3[1] & 0x0f) << 2) + ((char_array_3[2] & 0xc0) >> 6);
+      char_array_4[3] = char_array_3[2] & 0x3f;
+
+      for(i = 0; (i <4) ; i++)
+        ret += base64_chars[char_array_4[i]];
+      i = 0;
+    }
+  }
+
+  if (i)
+  {
+    for(j = i; j < 3; j++)
+      char_array_3[j] = '\0';
+
+    char_array_4[0] = (char_array_3[0] & 0xfc) >> 2;
+    char_array_4[1] = ((char_array_3[0] & 0x03) << 4) + ((char_array_3[1] & 0xf0) >> 4);
+    char_array_4[2] = ((char_array_3[1] & 0x0f) << 2) + ((char_array_3[2] & 0xc0) >> 6);
+    char_array_4[3] = char_array_3[2] & 0x3f;
+
+    for (j = 0; (j < i + 1); j++)
+      ret += base64_chars[char_array_4[j]];
+
+    while((i++ < 3))
+      ret += '=';
+
+  }
+
+  return ret;
+
+}
+
+string base64_decode(string const& str) {
+  unsigned in_len = str.size();
+  int i = 0;
+  int j = 0;
+  int in_ = 0;
+  unsigned char char_array_4[4], char_array_3[3];
+  string ret;
+
+  while (in_len-- && ( str[in_] != '=') && is_base64(str[in_])) {
+    char_array_4[i++] = str[in_]; in_++;
+    if (i ==4) {
+      for (i = 0; i <4; i++)
+        char_array_4[i] = base64_chars.find(char_array_4[i]);
+
+      char_array_3[0] = (char_array_4[0] << 2) + ((char_array_4[1] & 0x30) >> 4);
+      char_array_3[1] = ((char_array_4[1] & 0xf) << 4) + ((char_array_4[2] & 0x3c) >> 2);
+      char_array_3[2] = ((char_array_4[2] & 0x3) << 6) + char_array_4[3];
+
+      for (i = 0; (i < 3); i++)
+        ret += char_array_3[i];
+      i = 0;
+    }
+  }
+
+  if (i) {
+    for (j = i; j <4; j++)
+      char_array_4[j] = 0;
+
+    for (j = 0; j <4; j++)
+      char_array_4[j] = base64_chars.find(char_array_4[j]);
+
+    char_array_3[0] = (char_array_4[0] << 2) + ((char_array_4[1] & 0x30) >> 4);
+    char_array_3[1] = ((char_array_4[1] & 0xf) << 4) + ((char_array_4[2] & 0x3c) >> 2);
+    char_array_3[2] = ((char_array_4[2] & 0x3) << 6) + char_array_4[3];
+
+    for (j = 0; (j < i - 1); j++) ret += char_array_3[j];
+  }
+
+  return ret;
+}
+
 bool is_string(variant val) { return val.type;  }
 bool is_real(variant val)   { return !val.type; }
+string ansi_char(char byte) { return string(1,byte); }
 string chr(char val) { return string(1,val); }
 int ord(string str)  { return str[0]; }
 
 double real(variant str) { return str.type ? atof(((string)str).c_str()) : (double) str; }
 
+size_t string_byte_length(string str) {
+	return str.size();
+}
 size_t string_length(string str) { return str.length(); }
 size_t string_length(const char* str)
 {
@@ -68,6 +169,21 @@ string string_format(double val, unsigned tot, unsigned dec)
 string string_copy(string str, int index, int count) {
 	index = index < 0 ? 0 : index;
 	return (size_t)index > str.length()? "": str.substr(index < 2? 0: index-1, count < 1? 0: count);
+}
+
+string string_set_byte_at(string str, int index, char byte) {
+	if (index<=1) return str + byte;
+	const size_t x = index-1;
+	return x>str.length()? str + byte: str.replace(x, 1, 1, byte);
+}
+
+char string_byte_at(string str, int index) {
+	unsigned int n = index <= 1? 0: (unsigned int)index-1;
+	#ifdef DEBUG_MODE
+	  if (n > str.length())
+	    show_error("Index " + toString(index) + " is outside range " + toString(str.length()) + " in the following string:\n\"" + str + "\".", false);
+  #endif
+	return str[n];
 }
 
 string string_char_at(string str,int index) {
@@ -107,7 +223,8 @@ string string_replace_all(string str,string substr,string newstr) {
 int string_count(string substr,string str) {
 	size_t pos = 0, occ = 0;
 	const size_t sublen = substr.length();
-  while((pos=str.find(substr,pos))!=-1) occ++, pos += sublen;
+  while((pos=str.find(substr,pos)) != string::npos)
+    occ++, pos += sublen;
   return occ;
 }
 
@@ -193,7 +310,7 @@ string filename_dir(string fname)
     size_t fp = fname.find_last_of("/\\");
     if (fp == string::npos)
         return "";
-    return fname.substr(fp);
+    return fname.substr(0, fp);
 }
 
 string filename_drive(string fname)
@@ -217,3 +334,6 @@ string filename_change_ext(string fname, string newext)
         return fname + newext;
     return fname.replace(fp,fname.length(),newext);
 }
+
+}
+

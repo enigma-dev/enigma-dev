@@ -37,14 +37,16 @@ struct language_adapter {
   vector<parsed_extension> parsed_extensions; ///< Extensions which have been loaded
   
   // IDE_EDITABLEs added before compile
+  virtual int compile_write_settings      (compile_context &ctex) = 0;
   virtual int compile_write_resource_names(compile_context &ctex) = 0;
-  virtual int compile_writeGlobals(compile_context &ctex) = 0;
-  virtual int compile_writeObjectData(compile_context &ctex) = 0;
-  virtual int compile_writeObjAccess(compile_context &ctex) = 0;
-  virtual int compile_writeFontInfo(compile_context &ctex) = 0;
-  virtual int compile_writeRoomData(compile_context &ctex) = 0;
-  virtual int compile_writeDefraggedEvents(compile_context &ctex) = 0;
-  virtual int compile_handle_templates(compile_context &ctex) = 0;
+  virtual int compile_write_globals       (compile_context &ctex) = 0;
+  virtual int compile_write_object_data   (compile_context &ctex) = 0;
+  virtual int compile_write_obj_access    (compile_context &ctex) = 0;
+  virtual int compile_write_font_info     (compile_context &ctex) = 0;
+  virtual int compile_write_room_data     (compile_context &ctex) = 0;
+  virtual int compile_write_defragd_events(compile_context &ctex) = 0;
+  virtual int compile_write_shader_data   (compile_context &ctex) = 0;
+  virtual int compile_handle_templates    (compile_context &ctex) = 0;
 
   /// Abstract structure for storing a game module and writing resources to it; its
   /// implementation depends on the language plugin. It may in fact represent a directory!

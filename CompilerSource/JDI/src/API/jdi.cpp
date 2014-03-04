@@ -26,7 +26,7 @@
 
 namespace jdi {
   void initialize() {
-    builtin = new context(0);
+    builtin = new context(NULL, def_error_handler);
     add_gnu_declarators();
     builtin->load_standard_builtins();
     builtin->output_types();

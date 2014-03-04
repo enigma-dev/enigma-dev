@@ -38,7 +38,7 @@ namespace enigma
   {
     FILE *f;      //FILE we opened, or NULL if it has been closed.
     string sdata; //Use varies depending on type.
-    int spos;      //position in sdata string
+    unsigned spos;      //position in sdata string
     bool eof;
 
     openFile(): f(NULL), sdata(), spos(0), eof(false) {};
@@ -53,6 +53,10 @@ namespace enigma
 // Uses enigma::files[] for storage, treats sdata as last read string.
 
 #include "estring.h"
+
+namespace enigma_user
+{
+
 int file_text_open_read(string fname) // Opens the file with the indicated name for reading. The function returns the id of the file that must be used in the other functions. You can open multiple files at the same time (32 max). Don't forget to close them once you are finished with them.
 {
   FILE *a = fopen(fname.c_str(),"rt"); //Read as text file
@@ -113,7 +117,7 @@ string file_text_read_string(int fileid) { // Reads a string from the file with 
 bool file_text_eoln(int fileid)
 {
     enigma::openFile &mf = enigma::files[fileid];
-    return (mf.spos >= (int)mf.sdata.length());
+    return (mf.spos >= mf.sdata.length());
 }
 
 inline bool is_whitespace(char x) { return x == ' ' or x == '\t' or x == '\r' or x == '\n'; }
@@ -122,12 +126,14 @@ double file_text_read_real(int fileid) { // Reads a real value from the file and
   enigma::openFile &mf = enigma::files[fileid];
   double r1;
   int apos;
-  if (!mf.sdata[mf.spos]) return -1;
-  while (is_whitespace(mf.sdata[mf.spos]))
+  if (mf.spos >= mf.sdata.length()) return -1;
+  while (is_whitespace(mf.sdata[mf.spos])) {
     mf.spos++;
+    if (mf.spos >= mf.sdata.length()) return -1;
+  }
   if (sscanf(mf.sdata.substr(mf.spos).c_str(),"%lf%n",&r1,&apos),apos)
     mf.spos += apos;
-  if (mf.spos >= (int)mf.sdata.length() && feof(mf.f))
+  if (mf.spos >= mf.sdata.length() && feof(mf.f))
     mf.eof = true;
   return r1;
 }
@@ -155,7 +161,12 @@ bool file_text_eof(int fileid) { // Returns whether we reached the end of the fi
   return (enigma::files[fileid].eof);
 }
 
+}
+
 // Binary file manipulation
+
+namespace enigma_user
+{
 
 int file_bin_open(string fname,int mode) // Opens the file with the indicated name. The mode indicates what can be done with the file: 0 = reading, 1 = writing, 2 = both reading and writing). When the file does not exist it is created. The function returns the id of the file that must be used in the other functions.
 {
@@ -214,3 +225,6 @@ void file_bin_write_byte(int fileid,unsigned char byte) { // Writes a byte of da
 int file_bin_read_byte(int fileid) { // Reads a byte of data from the file and returns this.
   return fgetc(enigma::files[fileid].f);
 }
+
+}
+

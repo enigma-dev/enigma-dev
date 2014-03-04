@@ -22,6 +22,7 @@
 #include <languages/lang_CPP.h>
 #include <settings-parse/crawler.h>
 #include <settings-parse/eyaml.h>
+#include <makedir.h> // FIXME: This is ludicrous
 
 inline string fc(const char* fn)
 {
@@ -43,13 +44,14 @@ inline string fc(const char* fn)
 void lang_CPP::clear_ide_editables()
 {
   ofstream wto;
-  string f2comp = fc("ENIGMAsystem/SHELL/API_Switchboard.h");
+  string f2comp = fc((makedir + "API_Switchboard.h").c_str());
   string f2write = gen_license;
     string inc = "/include.h\"\n";
     f2write += "#include \"Platforms/" + (extensions::targetAPI.windowSys)            + "/include.h\"\n"
                "#include \"Graphics_Systems/" + (extensions::targetAPI.graphicsSys)   + "/include.h\"\n"
                "#include \"Audio_Systems/" + (extensions::targetAPI.audioSys)         + "/include.h\"\n"
                "#include \"Collision_Systems/" + (extensions::targetAPI.collisionSys) + "/include.h\"\n"
+               "#include \"Networking_Systems/" + (extensions::targetAPI.networkSys) + "/include.h\"\n"
                "#include \"Widget_Systems/" + (extensions::targetAPI.widgetSys)       + inc;
 
     const string incg = "#include \"", impl = "/implement.h\"\n";
@@ -57,7 +59,7 @@ void lang_CPP::clear_ide_editables()
     for (unsigned i = 0; i < parsed_extensions.size(); i++)
     {
       ifstream ifabout((parsed_extensions[i].pathname + "/About.ey").c_str());
-      ey_data about = parse_eyaml(ifabout, parsed_extensions[i].path + parsed_extensions[i].name + "/About.ey");
+      ey_data about = parse_eyaml(ifabout,parsed_extensions[i].path + parsed_extensions[i].name + "/About.ey");
       f2write += incg + parsed_extensions[i].pathname + inc;
       if (parsed_extensions[i].implements != "")
         f2write += incg + parsed_extensions[i].pathname + impl;
@@ -65,9 +67,27 @@ void lang_CPP::clear_ide_editables()
 
   if (f2comp != f2write)
   {
-    wto.open("ENIGMAsystem/SHELL/API_Switchboard.h",ios_base::out);
+    wto.open((makedir +"API_Switchboard.h").c_str(),ios_base::out);
       wto << f2write << endl;
     wto.close();
   }
+
+  wto.open((makedir +"Preprocessor_Environment_Editable/LIBINCLUDE.h").c_str());
+    wto << gen_license;
+    wto << "/*************************************************************\nOptionally included libraries\n****************************/\n";
+    wto << "#define STRINGLIB 1\n#define COLORSLIB 1\n#define STDRAWLIB 1\n#define PRIMTVLIB 1\n#define WINDOWLIB 1\n"
+           "#define STDDRWLIB 1\n#define GMSURFACE 0\n#define BLENDMODE 1\n";
+    wto << "/***************\nEnd optional libs\n ***************/\n";
+  wto.close();
+
+  wto.open((makedir +"Preprocessor_Environment_Editable/GAME_SETTINGS.h").c_str(),ios_base::out);
+    wto << gen_license;
+    wto << "#define ASSUMEZERO 0\n";
+    wto << "#define PRIMBUFFER 0\n";
+    wto << "#define PRIMDEPTH2 6\n";
+    wto << "#define AUTOLOCALS 0\n";
+    wto << "#define MODE3DVARS 0\n";
+    wto << "void ABORT_ON_ALL_ERRORS() { }\n";
+    wto << '\n';
   wto.close();
 }

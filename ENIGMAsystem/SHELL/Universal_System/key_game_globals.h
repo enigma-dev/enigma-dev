@@ -64,7 +64,12 @@ extern global:     event_action
 extern global:     event_number
 extern global:     event_object
 extern global:     event_type*/
-extern double      fps;/*
+
+namespace enigma_user {
+  extern double      fps;
+}
+
+/*
 extern global:     game_id
 extern global:     health
 extern global:     instance_id

@@ -66,6 +66,7 @@ namespace settings {
   extern bool pedantic_errors;
 }
 
+/// Warn or error, depending on whether pedantic EDL is in warning or error mode.
 bool pedantic_warn(token_t &token, error_handler *herr, string w);
 
 struct declaration {
@@ -75,6 +76,29 @@ struct declaration {
 };
 
 struct EDL_AST: AST {
+  bool pedantic_warn(token_t &token, string w);
+  
+  enum EDL_AST_TYPE {
+    EAT_STATEMENT = AT_USERBEGIN, ///< A generic statement, such as an assignment.
+    EAT_BLOCK,          ///< A block of statements; this node contains other statements.
+    EAT_DECLARATION,    ///< A declaration, which is distinct from C++ declarations and not a member of JDI.
+    EAT_STRUCT,         ///< A structure or class declaration.
+    EAT_ENUM,           ///< An enumeration declaration.
+    EAT_STATE_IF,       ///< An if statement, which may contain an else block.
+    EAT_STATE_FOR,      ///< A for statement.
+    EAT_STATE_REPEAT,   ///< A repeat statement.
+    EAT_STATE_WHILE,    ///< A while statement or until statement.
+    EAT_STATE_WITH,     ///< A with statement.
+    EAT_STATE_SWITCH,   ///< A switch statement.
+    EAT_STATE_TRYCATCH, ///< A try statement, which can contain one or more catch blocks.
+    EAT_STATE_DO,       ///< A do statement, which always contains a while statement.
+    EAT_STATE_RETURN,   ///< A return statement.
+    EAT_STATE_BREAK,    ///< A break statement.
+    EAT_STATE_CONTINUE, ///< A continue statement.
+    EAT_STATE_CASE,     ///< A case statement.
+    EAT_STATE_DEFAULT   ///< A default statement.
+  };
+  
   /// General parent
   struct AST_Node_Statement: AST::AST_Node {
     virtual void operate(ASTOperator *aop, void *p); ///< Perform some externally defined recursive operation on this AST.
@@ -82,7 +106,7 @@ struct EDL_AST: AST {
     virtual string toString() const; ///< Renders this node and its children as a string, recursively.
     virtual string toString(int indent) const = 0; ///< Renders this node and its children as a string, recursively.
 
-    AST_Node_Statement();
+    AST_Node_Statement(EDL_AST_TYPE ptp); ///< Construct with some type
     virtual ~AST_Node_Statement();
   };
 
@@ -91,6 +115,9 @@ struct EDL_AST: AST {
     virtual void operate(ASTOperator *aop, void *p); ///< Perform some externally defined recursive operation on this AST.
     virtual void operate(ConstASTOperator *caop, void *p) const; ///< Perform some externally defined constant recursive operation on this AST.
     string toString(int indent) const;
+    
+    AST_Node_Statement_Standard();
+    ~AST_Node_Statement_Standard();
   };
 
   /// AST node representing a block of code, which is just a statement composed of other statements.
@@ -126,6 +153,9 @@ struct EDL_AST: AST {
     virtual void operate(ASTOperator *aop, void *p); ///< Perform some externally defined recursive operation on this AST.
     virtual void operate(ConstASTOperator *caop, void *p) const; ///< Perform some externally defined constant recursive operation on this AST.
     string toString(int) const;
+    
+    AST_Node_Structdef();
+    ~AST_Node_Structdef();
   };
 
   struct AST_Node_Enumdef: AST_Node_Statement {
@@ -135,6 +165,9 @@ struct EDL_AST: AST {
     virtual void operate(ASTOperator *aop, void *p); ///< Perform some externally defined recursive operation on this AST.
     virtual void operate(ConstASTOperator *caop, void *p) const; ///< Perform some externally defined constant recursive operation on this AST.
     string toString(int) const;
+    
+    AST_Node_Enumdef();
+    ~AST_Node_Enumdef();
   };
 
   /// AST Node specifically representing an if statement.
@@ -296,6 +329,9 @@ struct EDL_AST: AST {
     void toSVG(int x, int y, SVGrenderInfo* svg); ///< Renders this node and its children as an SVG.
     int width(); ///< Returns the width which will be used to render this node and all its children.
     int height(); ///< Returns the height which will be used to render this node and all its children.
+    
+    AST_Node_Statement_return();
+    ~AST_Node_Statement_return();
   };
 
   /// AST Node specifically representing a default label.
@@ -310,6 +346,7 @@ struct EDL_AST: AST {
     virtual int height(); ///< Returns the height which will be used to render this node and all its children.
 
     AST_Node_Statement_default(AST_Node_Statement_switch *st_switch);
+    ~AST_Node_Statement_default();
   };
 
   /// AST Node specifically representing a case label.
@@ -360,6 +397,9 @@ struct EDL_AST: AST {
 
     AST_Node_Statement_break(AST_Node_Statement *loop, int depth);
     virtual ~AST_Node_Statement_break();
+    
+    protected:
+    AST_Node_Statement_break(EDL_AST_TYPE eat, AST_Node_Statement *loop, int depth);
   };
 
   struct AST_Node_Statement_continue: AST_Node_Statement_break {
@@ -386,7 +426,7 @@ struct EDL_AST: AST {
   definition_scope *global_scope;
 
   bool own_object_scope, own_global_scope, own_local_scope, studmuffin;
-  EDL_AST(definition_scope *myscope, definition_scope *objectscope, definition_scope *globalscope);
+  EDL_AST(jdi::context *ctex, definition_scope *myscope, definition_scope *objectscope, definition_scope *globalscope);
 
   /**
     Handle parsing a structure or union, per EDL specification. Upon invocation, the given

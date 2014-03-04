@@ -23,11 +23,14 @@
 namespace enigma
 {
   struct livesv: multifunction_variant {
-    INHERIT_OPERATORS(livesv);
+    INHERIT_OPERATORS(livesv)
     void function(variant oldval);
   };
 }
-extern enigma::livesv lives;
+namespace enigma_user
+{
+  extern enigma::livesv lives;
+}
 namespace enigma
 {
   void reset_lives();

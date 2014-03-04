@@ -30,6 +30,9 @@
 
 #include "var4.h"
 
+namespace enigma_user
+{
+
 int room_goto(int roomind);
 int room_restart();
 string room_get_name(int index);
@@ -39,7 +42,7 @@ int room_goto_previous();
 int room_goto_next();
 int room_next(int num);
 int room_previous(int num);
-bool room_exists(unsigned roomid);
+bool room_exists(int roomid);
 int room_set_width(int indx, int wid);
 int room_set_height(int indx, int hei);
 int room_set_background(int indx, int bind, bool vis, bool fore, bool back, double x, double y, bool htiled, bool vtiled, double hspeed, double vspeed, double alpha = 1, int color = 0xFFFFFF);
@@ -64,6 +67,9 @@ inline int room_assign(int indx, int roomindx)
 }
 
 int view_set(int vind, int vis, int xview, int yview, int wview, int hview, int xport, int yport, int wport, int hport, int hborder, int vborder, int hspeed, int vspeed, int obj);
+int window_views_mouse_get_x(); // same as mouse_x variable, with respect to all views
+int window_views_mouse_get_y(); // same as mouse_y variable, with respect to all views
+void window_views_mouse_set(int x, int y); // with respect to first visible view
 
 extern int background_color;
 extern int background_showcolor;
@@ -77,6 +83,7 @@ extern int room_speed;
 extern int room_width;
 
 extern var room_caption;
+extern var current_caption;
 
 int room_count();
 #define room_count room_count()
@@ -84,9 +91,15 @@ int room_count();
 
 extern int view_current;
 extern int view_enabled;
+
+}
+
 typedef var rvt;
+
+namespace enigma_user {
 extern rvt view_hborder, view_hport, view_hspeed, view_hview, view_object, view_vborder, view_visible,
            view_vspeed, view_wport, view_wview, view_xport, view_xview, view_yport, view_yview,view_angle;
+}
 
 
 namespace enigma
@@ -95,8 +108,8 @@ namespace enigma
     int id,obj,x,y;
   };
     struct tile {
-        int id,bckid,bgx,bgy,depth,height,width,roomX,roomY,xscale,yscale;
-        double alpha;
+        int id,bckid,bgx,bgy,depth,height,width,roomX,roomY;
+        double alpha, xscale, yscale;
         int color;
     };
   struct viewstruct
@@ -138,7 +151,7 @@ namespace enigma
 
     void gotome(bool=false);
   };
-  void room_update();
+  void update_mouse_variables();
   extern int maxid, maxtileid;
   extern int room_switching_id; // -1 indicates no room set.
   void rooms_switch();
@@ -150,8 +163,18 @@ namespace enigma
 
 #include "multifunction_variant.h"
 namespace enigma { struct roomv: multifunction_variant {
-  INHERIT_OPERATORS(roomv);
+  INHERIT_OPERATORS(roomv)
   void function(variant oldval);
 }; }
-extern enigma::roomv room;
+namespace enigma_user {
+  extern enigma::roomv room;
+
+  inline void game_restart() {
+      room_goto_first(true);
+  }
+}
+
+#define action_restart_game game_restart
+
 #endif
+

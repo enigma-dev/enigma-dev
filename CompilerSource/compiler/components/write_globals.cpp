@@ -4,7 +4,7 @@
          and constants to the engine.
   
   @section License
-    Copyright (C) 2008-2013 Josh Ventura
+    Copyright (C) 2008-2014 Josh Ventura
     This file is a part of the ENIGMA Development Environment.
 
     ENIGMA is free software: you can redistribute it and/or modify it under the
@@ -19,6 +19,7 @@
     with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "makedir.h"
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
@@ -45,13 +46,11 @@ int global_script_argument_count = 0;
 *** From there, we also create a "global" object, representing the special EDL object `global'.
 *** This object contains a copy of all dot-accessed variables which could not be resolved to a
 *** specific instance, as well as all variables explicitly accessed as `global.variable'.
-*** 
-*** F
 **/
-int lang_CPP::compile_writeGlobals(compile_context &ctex)
+int lang_CPP::compile_write_globals(compile_context &ctex)
 {
   ofstream wto;
-  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_globals.h",ios_base::out);
+  wto.open((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_globals.h").c_str(),ios_base::out);
     wto << gen_license;
 
     global_script_argument_count = 16; // Write all 16 arguments
@@ -63,10 +62,33 @@ int lang_CPP::compile_writeGlobals(compile_context &ctex)
       wto << ";\n\n";
     }
     
-    wto << "unsigned int game_id = " << ctex.es->gameSettings.gameId << ";" << endl;
+    wto << "namespace enigma_user { " << endl;
+    wto << "  unsigned int game_id = " << ctex.es->gameSettings.gameId << ";" << endl;
+    wto << "}" << endl <<endl;
 
-    // NEWPARSER: TODO: FIXME: WRITE GLOBALS HERE
-     
+    wto << "//Default variable type: \"undefined\" or \"real\"" <<endl;
+    wto << "const int variant::default_type = " <<(ctex.es->gameSettings.treatUninitializedAs0 ? "enigma::vt_real" : "-1") << ";" << endl << endl;
+
+    wto << "namespace enigma {" << endl;
+    wto << "  bool interpolate_textures = " << ctex.es->gameSettings.interpolate << ";" << endl;
+    wto << "  bool forceSoftwareVertexProcessing = " << ctex.es->gameSettings.forceSoftwareVertexProcessing << ";" << endl;
+    wto << "  bool isSizeable = " <<  ctex.es->gameSettings.allowWindowResize << ";" << endl;
+    wto << "  bool showBorder = " << !ctex.es->gameSettings.dontDrawBorder    << ";" << endl;
+    wto << "  bool showIcons = "  << !ctex.es->gameSettings.dontShowButtons   << ";" << endl;
+    wto << "  bool freezeOnLoseFocus = " << ctex.es->gameSettings.freezeOnLoseFocus << ";" << endl;
+    wto << "  bool treatCloseAsEscape = " << ctex.es->gameSettings.treatCloseAsEscape << ";" << endl;
+    wto << "  bool isFullScreen = " << ctex.es->gameSettings.startFullscreen << ";" << endl;
+    wto << "  int viewScale = " << ctex.es->gameSettings.scaling << ";" << endl;
+    wto << "}" << endl;
+
+    // TODO: NEWPARSER: Actual global iteration here.
+    //for (parsed_script::globit i = ctex.global->globals.begin(); i != ctex.global->globals.end(); i++)
+    //  wto << i->second.type << " " << i->second.prefix << i->first << i->second.suffix << ";" << endl;
+    
+    //This part needs written into a global object_parent class instance elsewhere.
+    //for (globit i = global->dots.begin(); i != global->globals.end(); i++)
+    //  wto << i->second->type << " " << i->second->prefixes << i->second->name << i->second->suffixes << ";" << endl;
+    
     wto << endl;
     wto << "namespace enigma" << endl
         << "{" << endl

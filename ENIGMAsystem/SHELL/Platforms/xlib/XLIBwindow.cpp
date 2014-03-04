@@ -1,3 +1,5 @@
+
+
 /** Copyright (C) 2008-2011 IsmAvatar <cmagicj@nni.com>, Josh Ventura
 ***
 *** This file is a part of the ENIGMA Development Environment.
@@ -23,6 +25,7 @@
 #include <unistd.h> //usleep
 #include <time.h> //clock
 #include <string> //Return strings without needing a GC
+#include <map>
 #include <X11/Xlib.h>
 //#include <X11/Xutil.h>
 //#include <X11/Xos.h>
@@ -34,9 +37,10 @@
 
 using namespace std;
 
-#include "Universal_System/CallbackArrays.h" // For those damn vk_ constants.
+#include "Universal_System/CallbackArrays.h" // For those damn vk_ constants, and io_clear().
 #include "Universal_System/roomsystem.h"
 #include "Platforms/platforms_mandatory.h" // For type insurance
+#include "XLIBwindow.h" // Type insurance for non-mandatory functions
 #include "GameSettings.h" // ABORT_ON_ALL_ERRORS (MOVEME: this shouldn't be needed here)
 #include "XLIBwindow.h"
 #include "XLIBmain.h"
@@ -46,6 +50,10 @@ using namespace std;
 #define uint unsigned int
 
 using namespace enigma::x11;
+
+namespace enigma {
+	extern bool freezeOnLoseFocus;
+}
 
 //////////
 // INIT //
@@ -76,7 +84,10 @@ void Sleep(int ms)
 
 int visx = -1, visy = -1;
 
-int window_set_visible(bool visible)
+namespace enigma_user
+{
+
+void window_set_visible(bool visible)
 {
 	if(visible)
 	{
@@ -88,7 +99,6 @@ int window_set_visible(bool visible)
 	}
 	else
 	  XUnmapWindow(disp, win);
-	return 0;
 }
 int window_get_visible()
 {
@@ -108,6 +118,8 @@ string window_get_caption()
 	return r;
 }
 
+}
+
 inline int getMouse(int i)
 {
 	Window r1,r2;
@@ -123,6 +135,9 @@ inline int getMouse(int i)
     default: return -1;
 	}
 }
+
+namespace enigma_user
+{
 
 int display_mouse_get_x() { return getMouse(0); }
 int display_mouse_get_y() { return getMouse(1); }
@@ -154,15 +169,31 @@ void window_default()
         }
       if (tx and ty)
         xm = tx, ym = ty;
-    }
+    } else {
+		// By default if the room is too big instead of creating a gigantic ass window
+		// make it not bigger than the screen to full screen it, this is what 8.1 and Studio 
+		// do, if the user wants to manually override this they can using 
+		// views/screen_set_viewport or window_set_size/window_set_region_size 
+		// We won't limit those functions like GM, just the default.
+		//TODO: Finish the implementation, can't test from Windus look at XLIBmain.cpp and WINDOWSmain.cpp
+		//if (xm > screen->width) xm = screen->width;
+		//if (ym > screen->height) ym = screen->height;
+	}
     window_set_size(xm, ym);
 }
 
-void window_mouse_set(double x,double y) {
+void window_mouse_set(int x,int y) {
 	XWarpPointer(disp,None,win,0,0,0,0,(int)x,(int)y);
 }
+
+void window_view_mouse_set(int id, int x,int y) {
+	XWarpPointer(disp,None,win,0,0,0,0,(int)(view_xview[id] + x),(int)(view_yview[id] + y));
+}
+
 void display_mouse_set(double x,double y) {
 	XWarpPointer(disp,None,DefaultRootWindow(disp),0,0,0,0,(int)x,(int)y);
+}
+
 }
 
 ////////////
@@ -182,6 +213,9 @@ static int getWindowDimension(int i)
 	XGetWindowAttributes(disp,parent,&pwa);
 	return i?(i==1?pwa.y+wa.y:-1):pwa.x+wa.x;
 }
+
+namespace enigma_user
+{
 
 //Getters
 int window_get_x()      { return getWindowDimension(0); }
@@ -214,14 +248,30 @@ void window_center()
 	XMoveWindow(disp,win,s->width/2-w/2,s->height/2-h/2);
 }
 
+}
+
 ////////////////
 // FULLSCREEN //
 ////////////////
+
 enum {
   _NET_WM_STATE_REMOVE,
   _NET_WM_STATE_ADD,
   _NET_WM_STATE_TOGGLE
 };
+
+namespace enigma_user
+{
+
+void window_set_freezeonlosefocus(bool freeze)
+{
+    enigma::freezeOnLoseFocus = freeze;
+}
+
+bool window_get_freezeonlosefocus()
+{
+    return enigma::freezeOnLoseFocus;
+}
 
 void window_set_fullscreen(bool full)
 {
@@ -258,92 +308,94 @@ bool window_get_fullscreen()
 	return 0;
 }
 
-                 //default    +   -5   I    \    |    /    -    ^   ...  drg  no  -    |  drg3 ...  X  ...  ?   url  +
-short curs[] = { 68, 68, 68, 130, 52, 152, 135, 116, 136, 108, 114, 150, 90, 68, 108, 116, 90, 150, 0, 150, 92, 60, 52};
-void window_set_cursor(int c)
-{
-	XUndefineCursor(disp,win);
-	XDefineCursor(disp, win, (c == -1) ? NoCursor : XCreateFontCursor(disp,curs[-c]));
 }
 
-// FIXME: MOVEME: I can't decide where the hell to put this.
-void screen_refresh() {
-	glXSwapBuffers(disp,win);
-}
+                 //default    +   -5   I    \    |    /    -    ^   ...  drg  no  -    |  drg3 ...  X  ...  ?   url  +
+short curs[] = { 68, 68, 68, 130, 52, 152, 135, 116, 136, 108, 114, 150, 90, 68, 108, 116, 90, 150, 0, 150, 92, 60, 52};
 
 namespace enigma
 {
-  char keymap[256];
-  char usermap[256];
+  //Replacing usermap array with keybdmap map, to align code with Windows implementation.
+  std::map<int,int> keybdmap;
+  //unsigned char usermap[256];
+
+  unsigned char keymap[512];
   void initkeymap()
   {
+    using namespace enigma_user;
     // Pretend this part doesn't exist
-    keymap[0x51] = vk_left;
-    keymap[0x53] = vk_right;
-    keymap[0x52] = vk_up;
-    keymap[0x54] = vk_down;
-    keymap[0xE3] = vk_control;
-    keymap[0xE4] = vk_control;
-    keymap[0xE9] = vk_alt;
-    keymap[0xEA] = vk_alt;
-    keymap[0xE1] = vk_shift;
-    keymap[0xE2] = vk_shift;
-    keymap[0x0D] = vk_enter;
-    keymap[0x85] = vk_lsuper;
-    keymap[0x86] = vk_rsuper;
-    keymap[0x17] = vk_tab;
-    keymap[0x42] = vk_caps;
-    keymap[0x4E] = vk_scroll;
-    keymap[0x7F] = vk_pause;
-    keymap[0x9E] = vk_numpad0;
-    keymap[0x9C] = vk_numpad1;
-    keymap[0x99] = vk_numpad2;
-    keymap[0x9B] = vk_numpad3;
-    keymap[0x96] = vk_numpad4;
-    keymap[0x9D] = vk_numpad5;
-    keymap[0x98] = vk_numpad6;
-    keymap[0x95] = vk_numpad7;
-    keymap[0x97] = vk_numpad8;
-    keymap[0x9A] = vk_numpad9;
-    keymap[0xAF] = vk_divide;
-    keymap[0xAA] = vk_multiply;
-    keymap[0xAD] = vk_subtract;
-    keymap[0xAB] = vk_add;
-    keymap[0x9F] = vk_decimal;
-    keymap[0xBE] = vk_f1;
-    keymap[0xBF] = vk_f2;
-    keymap[0xC0] = vk_f3;
-    keymap[0xC1] = vk_f4;
-    keymap[0xC2] = vk_f5;
-    keymap[0xC3] = vk_f6;
-    keymap[0xC4] = vk_f7;
-    keymap[0xC5] = vk_f8;
-    keymap[0xC6] = vk_f9;
-    keymap[0xC7] = vk_f10;
-    keymap[0xC8] = vk_f11;
-    keymap[0xC9] = vk_f12;
-    keymap[0x08] = vk_backspace;
-    keymap[0x1B] = vk_escape;
-    keymap[0x50] = vk_home;
-    keymap[0x57] = vk_end;
-    keymap[0x55] = vk_pageup;
-    keymap[0x56] = vk_pagedown;
-    keymap[0xFF] = vk_delete;
-    keymap[0x63] = vk_insert;
+    keymap[0x151] = vk_left;
+    keymap[0x153] = vk_right;
+    keymap[0x152] = vk_up;
+    keymap[0x154] = vk_down;
+    keymap[0x1E3] = vk_control;
+    keymap[0x1E4] = vk_control;
+    keymap[0x1E9] = vk_alt;
+    keymap[0x1EA] = vk_alt;
+    keymap[0x1E1] = vk_shift;
+    keymap[0x1E2] = vk_shift;
+    keymap[0x10D] = vk_enter;
+    keymap[0x185] = vk_lsuper;
+    keymap[0x186] = vk_rsuper;
+    keymap[0x117] = vk_tab;
+    keymap[0x142] = vk_caps;
+    keymap[0x14E] = vk_scroll;
+    keymap[0x17F] = vk_pause;
+    keymap[0x19E] = vk_numpad0;
+    keymap[0x19C] = vk_numpad1;
+    keymap[0x199] = vk_numpad2;
+    keymap[0x19B] = vk_numpad3;
+    keymap[0x196] = vk_numpad4;
+    keymap[0x19D] = vk_numpad5;
+    keymap[0x198] = vk_numpad6;
+    keymap[0x195] = vk_numpad7;
+    keymap[0x197] = vk_numpad8;
+    keymap[0x19A] = vk_numpad9;
+    keymap[0x1AF] = vk_divide;
+    keymap[0x1AA] = vk_multiply;
+    keymap[0x1AD] = vk_subtract;
+    keymap[0x1AB] = vk_add;
+    keymap[0x19F] = vk_decimal;
+    keymap[0x1BE] = vk_f1;
+    keymap[0x1BF] = vk_f2;
+    keymap[0x1C0] = vk_f3;
+    keymap[0x1C1] = vk_f4;
+    keymap[0x1C2] = vk_f5;
+    keymap[0x1C3] = vk_f6;
+    keymap[0x1C4] = vk_f7;
+    keymap[0x1C5] = vk_f8;
+    keymap[0x1C6] = vk_f9;
+    keymap[0x1C7] = vk_f10;
+    keymap[0x1C8] = vk_f11;
+    keymap[0x1C9] = vk_f12;
+    keymap[0x108] = vk_backspace;
+    keymap[0x11B] = vk_escape;
+    keymap[0x150] = vk_home;
+    keymap[0x157] = vk_end;
+    keymap[0x155] = vk_pageup;
+    keymap[0x156] = vk_pagedown;
+    keymap[0x1FF] = vk_delete;
+    keymap[0x163] = vk_insert;
 
     // Set up identity map...
-    for (int i = 0; i < 'a'; i++)
-      usermap[i] = i;
+    //for (int i = 0; i < 255; i++)
+    //  usermap[i] = i;
+
+    for (int i = 0; i < 255; i++)
+      keymap[i] = i;
     for (int i = 'a'; i <= 'z'; i++) // 'a' to 'z' wrap to 'A' to 'Z'
-      usermap[i] = i + 'A' - 'a';
+      keymap[i] = i + 'A' - 'a';
     for (int i = 'z'+1; i < 255; i++)
-      usermap[i] = i;
+      keymap[i] = i;
    }
 }
 
 #include <sys/time.h>
 
-extern double fps;
+namespace enigma_user {
+  extern double fps;
+}
+
 namespace enigma {
   string* parameters;
   unsigned int parameterc;
@@ -357,14 +409,17 @@ namespace enigma {
     x[irx] = 0;
   }
   #define hielem 9
-  static int last_second[hielem+1] = {0},last_microsecond[hielem+1] = {0};
-  void sleep_for_framerate(int rs)
+  void set_room_speed(int rs)
   {
     current_room_speed = rs;
   }
 }
 
 #include "Universal_System/globalupdate.h"
+
+namespace enigma_user
+{
+
 void io_handle()
 {
   enigma::input_push();
@@ -373,8 +428,16 @@ void io_handle()
     if(handleEvents() > 0)
       exit(0);
   }
-  enigma::update_globals();
+  enigma::update_mouse_variables();
 }
+
+int window_set_cursor(int c)
+{
+	XUndefineCursor(disp,win);
+	XDefineCursor(disp, win, (c == -1) ? NoCursor : XCreateFontCursor(disp,curs[-c]));
+	return 0;
+}
+
 void keyboard_wait()
 {
   io_clear();
@@ -388,8 +451,39 @@ void keyboard_wait()
   }
 }
 
+void keyboard_set_map(int key1, int key2) 
+{
+  std::map< int, int >::iterator it = enigma::keybdmap.find( key1 );
+  if ( enigma::keybdmap.end() != it ) {
+    it->second = key2;
+  } else {
+    enigma::keybdmap.insert( map< int, int >::value_type(key1, key2) );
+  }
+}
+
+int keyboard_get_map(int key) 
+{
+  std::map< int, int >::iterator it = enigma::keybdmap.find( key );
+  if ( enigma::keybdmap.end() != it ) {
+    return it->second;
+  } else {
+    return key;
+  }
+}
+
+void keyboard_unset_map() 
+{
+  enigma::keybdmap.clear();
+}
+
+void keyboard_clear(const int key)
+{
+  enigma::keybdstatus[key] = enigma::last_keybdstatus[key] = 0;
+}
+
+
 void window_set_region_scale(double scale, bool adaptwindow) {}
-bool window_get_region_scale() {return 1;}
+double window_get_region_scale() {return 1;}
 void window_set_region_size(int w, int h, bool adaptwindow) {}
 
 int window_get_region_width()
@@ -417,6 +511,8 @@ string parameter_string(unsigned num) {
 }
 int parameter_count() {
   return enigma::parameterc;
+}
+
 }
 /*
 display_get_width() // Returns the width of the display in pixels.

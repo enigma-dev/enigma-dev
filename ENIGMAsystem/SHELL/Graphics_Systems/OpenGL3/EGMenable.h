@@ -31,6 +31,8 @@ int enable_texture(double enable)
 
 \******************************************************************************/
 
+namespace enigma_user
+{
 
 int enable_alpha(double enable)
 {
@@ -135,5 +137,7 @@ int enable_texture(double enable)
   glEnable(GL_TEXTURE_2D);
   else
   glDisable(GL_TEXTURE_2D);
+}
+
 }
 

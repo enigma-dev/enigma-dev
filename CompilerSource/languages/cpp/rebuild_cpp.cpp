@@ -24,17 +24,28 @@
 #include <backend/ideprint.h>
 #include <OS_Switchboard.h>
 
+#include <makedir.h> // FIXME: This is ludicrous
+#include <backend/JavaCallbacks.h> // TODO: RENAMEME
+
+// TODO: Move this out into a header
+#define idpr(x,y) \
+  ide_dia_progress_text(x); \
+  ide_dia_progress(y);
+
 int lang_CPP::rebuild()
 {
   edbg << "Cleaning..." << flushl;
-
+  
   string make = "clean-game ";
-  make += "COMPILEPATH=" CURRENT_PLATFORM_NAME "/" + extensions::targetOS.identifier + " ";
+  string compilepath = CURRENT_PLATFORM_NAME "/" + extensions::targetOS.identifier;
+  make += "COMPILEPATH=\"" + compilepath + "\" ";
+  make += "WORKDIR=\"" + makedir + "\" ";
   make += "eTCpath=\"" + MAKE_tcpaths + "\"";
-
+  
   edbg << "Full command line: " << MAKE_location << " " << make << flushl;
   e_execs(MAKE_location,make);
-
+  
   edbg << "Done.\n" << flushl;
+  idpr("Done.", 100);
   return 0;
 }

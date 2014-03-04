@@ -27,12 +27,17 @@
 #define _LEX_EDL__H
 
 #include <System/lex_cpp.h>
+#include <string>
+using std::string;
 
 /**
   @brief An implementation of \c jdi::lexer for lexing EDL. Handles preprocessing
          seamlessly, returning only relevant tokens.
 **/
 struct lexer_edl: jdip::lexer_cpp {
+  /// This is the context parser that was used to 
+  jdi::context *ctex;
+  
   jdip::token_t get_token(jdi::error_handler *herr);
   
   /**
@@ -50,7 +55,14 @@ struct lexer_edl: jdip::lexer_cpp {
   /// Function used by the preprocessor to navigate to terminating double braces.
   string read_preprocessor_args(jdi::error_handler *herr);
   
-  lexer_edl(llreader &input, jdi::macro_map &pmacros, const char *fname);
+  /**
+   * Construct with all needed info.
+   * @param ctex    The JDI context which contains the definitions used during preprocessing.
+   * @param input   The input code stream.
+   * @param pmacros The map of macros to use during preprocessing (this is available from the JDI context)
+   * @param fname   The name of the file being processed, used for constructing tokens and ultimately for error reporting.
+  */
+  lexer_edl(jdi::context *ctex, llreader &input, jdi::macro_map &pmacros, const char *fname);
   ~lexer_edl();
 };
 

@@ -40,6 +40,7 @@ namespace enigma {
     double d;
     void * p;
     rvt(double x): d(x) {}
+    #define var_e 1e-12
   };
 }
 
@@ -47,6 +48,10 @@ struct var;
 
 struct variant
 {
+  //Default type (-1 or real), changes based on "assume_uninitialized_is_zero" flag.
+  //This variable is defined in a compiler-generated class.
+  static const int default_type;
+
   enigma::rvt rval;
   string sval;
   int type;
@@ -202,7 +207,7 @@ struct var
   
   var();
   var(const var&);
-  types_extrapolate_alldec(var);
+  types_extrapolate_alldec(var)
   
   types_extrapolate_alldec(variant& operator=)
   var& operator= (const var&);

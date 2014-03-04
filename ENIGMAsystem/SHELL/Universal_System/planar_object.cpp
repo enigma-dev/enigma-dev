@@ -1,4 +1,6 @@
-/** Copyright (C) 2008-2013 Josh Ventura/Robert B. Colton
+/** Copyright (C) 2008-2011 Josh Ventura
+*** Copyright (C) 2011-2012 polygone
+*** Copyright (C) 2013 Robert B Colton, canthelp
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -27,6 +29,12 @@
 #include "reflexive_types.h"
 
 #include "planar_object.h"
+
+#include <floatcomp.h>
+
+#ifdef PATH_EXT_SET
+    #include "Universal_System/Extensions/Paths/path_functions.h"
+#endif
 
 namespace enigma
 {
@@ -66,7 +74,11 @@ namespace enigma
 
   void propagate_locals(object_planar* instance)
   {
-    if(instance->gravity || instance->friction)
+    #ifdef PATH_EXT_SET
+        if (enigma_user::path_update()) {instance->speed = 0; return;}
+    #endif
+
+    if (fnzero(instance->gravity) || fnzero(instance->friction))
     {
       double
         hb4 = instance->hspeed.rval.d,
@@ -81,19 +93,19 @@ namespace enigma
       if ((vb4>0 && instance->vspeed.rval.d<0) || (vb4<0 && instance->vspeed.rval.d>0))
         instance->vspeed.rval.d=0;
 
-      if (instance->gravity_direction == 270)
+      if (fequal(instance->gravity_direction, 270))
       {
         instance->vspeed.rval.d += (instance->gravity);
       }
-      else if (instance->gravity_direction == 180)
+      else if (fequal(instance->gravity_direction, 180))
       {
         instance->hspeed.rval.d -= (instance->gravity);
       }
-      else if (instance->gravity_direction == 90)
+      else if (fequal(instance->gravity_direction, 90))
       {
         instance->vspeed.rval.d -= (instance->gravity);
       }
-      else if (instance->gravity_direction == 0)
+      else if (fequal(instance->gravity_direction, 0))
       {
         instance->hspeed.rval.d += (instance->gravity);
       }
@@ -113,10 +125,10 @@ namespace enigma
       if(instance->direction.rval.d < 0)
         instance->direction.rval.d += 360;*/
 
-      instance->speed.rval.d = instance->speed.rval.d < 0? -hypot(instance->hspeed.rval.d, instance->vspeed.rval.d) : 
+      instance->speed.rval.d = instance->speed.rval.d < 0? -hypot(instance->hspeed.rval.d, instance->vspeed.rval.d) :
       hypot(instance->hspeed.rval.d, instance->vspeed.rval.d);
-      if (fabs(instance->speed.rval.d) > 1e-20)
-      instance->direction.rval.d = fmod((atan2(-instance->vspeed.rval.d, instance->hspeed.rval.d) * (180/M_PI)) 
+      if (fabs(instance->speed.rval.d) > 1e-12)
+      instance->direction.rval.d = fmod((atan2(-instance->vspeed.rval.d, instance->hspeed.rval.d) * (180/M_PI))
       + (instance->speed.rval.d < 0?  180 : 360), 360);
 
     }

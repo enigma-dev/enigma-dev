@@ -23,6 +23,6 @@
 #include <languages/lang_CPP.h>
 
 int lang_CPP::resource_writer_cpp::module_write_extensions(compile_context &ctex) {
-  // TODO: WRITEME
+  // TODO: NEWPARSER: WRITEME
   return 0;
 }

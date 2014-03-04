@@ -25,6 +25,9 @@
 **                                                                              **
 \********************************************************************************/
 
+namespace enigma_user
+{
+
 unsigned int ds_grid_create(const unsigned int w, const unsigned int h);
 void ds_grid_destroy(const unsigned int id);
 void ds_grid_clear(const unsigned int id, const variant val);
@@ -73,6 +76,7 @@ unsigned int ds_map_size(const unsigned int id);
 bool ds_map_empty(const unsigned int id);
 void ds_map_add(const unsigned int id, const variant key, const variant val);
 void ds_map_replace(const unsigned int id, const variant key, const variant val);
+void ds_map_replaceanyway(const unsigned int id, const variant key, const variant val);
 void ds_map_delete(const unsigned int id, const variant key);
 void ds_map_delete(const unsigned int id, const variant first, const variant last);
 bool ds_map_exists(const unsigned int id, const variant key);
@@ -154,3 +158,6 @@ bool ds_stack_exists(const unsigned int id);
 unsigned int ds_stack_duplicate(const unsigned int source);
 std::string ds_stack_write(const unsigned int id);
 void ds_stack_read(const unsigned int id, std::string value);
+
+}
+

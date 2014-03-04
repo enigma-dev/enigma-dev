@@ -43,6 +43,9 @@ namespace enigma
   }
 }
 
+namespace enigma_user
+{
+
 int resource_get_id(string name)
 {
   return -1;
@@ -70,11 +73,14 @@ variant script_execute(int scr, variant arg0, variant arg1, variant arg2, varian
     case 14: return ((variant(*)(variant,variant,variant,variant,variant,variant,variant,variant,variant,variant,variant,variant,variant,variant))i.base)                   (arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10,arg11,arg12,arg13);
     case 15: return ((variant(*)(variant,variant,variant,variant,variant,variant,variant,variant,variant,variant,variant,variant,variant,variant,variant))i.base)           (arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10,arg11,arg12,arg13,arg14);
     case 16: return ((variant(*)(variant,variant,variant,variant,variant,variant,variant,variant,variant,variant,variant,variant,variant,variant,variant,variant))i.base)   (arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10,arg11,arg12,arg13,arg14,arg15);
+    default: return 0;
   }
-  return 0;
 }
 
 bool script_exists(int script)
 {
-    return (unsigned(script) < enigma::script_idmax) and bool(enigma::callable_scripts[script].base);
+    return (script >= 0 && script < enigma::script_idmax && bool(enigma::callable_scripts[script].base));
 }
+
+}
+

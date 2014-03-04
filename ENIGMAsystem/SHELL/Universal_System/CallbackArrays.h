@@ -25,15 +25,8 @@
 **                                                                              **
 \********************************************************************************/
 
-/*
-bool mouse_check_button(double button)
-bool mouse_check_button_pressed(double button)
-bool mouse_check_button_released(double button)
-bool keyboard_check(double key)
-bool keyboard_check_pressed(double key)
-bool keyboard_check_released(double key)
-*/
-
+#ifndef _CALLBACK_ARRAYS__H
+#define _CALLBACK_ARRAYS__H
 
 namespace enigma
 {
@@ -42,6 +35,9 @@ namespace enigma
   extern char last_keybdstatus[256];
   extern char keybdstatus[256];
 }
+
+namespace enigma_user
+{
 
 enum {
   mb_any    = -1,
@@ -107,6 +103,8 @@ enum {
   vk_delete    = 46,
 
   // These are for check_direct only
+  vk_lshift   = 160,
+  vk_rshift   = 161,
   vk_lcontrol = 162,
   vk_rcontrol = 163,
   vk_lalt     = 164,
@@ -127,13 +125,19 @@ enum {
 extern double mouse_x, mouse_y;
 extern int mouse_button, mouse_lastbutton;
 extern string keyboard_lastchar;
+extern int keyboard_lastkey;
 
 bool mouse_check_button(int button);
 bool mouse_check_button_pressed(int button);
 bool mouse_check_button_released(int button);
 
+}
+
 extern short mouse_hscrolls;
 extern short mouse_vscrolls;
+
+namespace enigma_user
+{
 
 bool keyboard_check(int key);
 bool keyboard_check_pressed(int key);
@@ -142,3 +146,6 @@ bool mouse_wheel_up();
 bool mouse_wheel_down();
 
 void io_clear();
+}
+
+#endif

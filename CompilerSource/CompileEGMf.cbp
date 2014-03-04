@@ -17,6 +17,7 @@
 				<Option compiler="gcc" />
 				<Option parameters="-jar lgm16b4.jar" />
 				<Option host_application="java" />
+				<Option run_host_application_in_terminal="0" />
 				<Compiler>
 					<Add option="-O3" />
 					<Add option="-O2" />
@@ -36,6 +37,7 @@
 				<Option compiler="gcc" />
 				<Option parameters="-jar lgm16b4.jar" />
 				<Option host_application="java" />
+				<Option run_host_application_in_terminal="0" />
 				<Compiler>
 					<Add option="-Wall" />
 					<Add option="-g" />
@@ -50,6 +52,7 @@
 				<Option compiler="gcc" />
 				<Option parameters='-e &quot;java -jar lgm16b4.jar&quot;' />
 				<Option host_application="xterm" />
+				<Option run_host_application_in_terminal="0" />
 				<Compiler>
 					<Add option="-O3" />
 					<Add option="-O2" />
@@ -68,6 +71,7 @@
 				<Option compiler="gcc" />
 				<Option parameters='-e &quot;java -jar lgm16b4.jar&quot;' />
 				<Option host_application="xterm" />
+				<Option run_host_application_in_terminal="0" />
 				<Compiler>
 					<Add option="-Wall" />
 					<Add option="-g" />
@@ -122,11 +126,13 @@
 		<Unit filename="JDI/src/API/AST.cpp" />
 		<Unit filename="JDI/src/API/AST.h" />
 		<Unit filename="JDI/src/API/AST_Export.cpp" />
+		<Unit filename="JDI/src/API/AST_forward.h" />
 		<Unit filename="JDI/src/API/AST_operator.cpp" />
 		<Unit filename="JDI/src/API/AST_operator.h" />
 		<Unit filename="JDI/src/API/compile_settings.h" />
 		<Unit filename="JDI/src/API/context.cpp" />
 		<Unit filename="JDI/src/API/context.h" />
+		<Unit filename="JDI/src/API/error_context.h" />
 		<Unit filename="JDI/src/API/error_reporting.cpp" />
 		<Unit filename="JDI/src/API/error_reporting.h" />
 		<Unit filename="JDI/src/API/jdi.cpp" />
@@ -142,32 +148,40 @@
 		<Unit filename="JDI/src/General/llreader.h" />
 		<Unit filename="JDI/src/General/parse_basics.cpp" />
 		<Unit filename="JDI/src/General/parse_basics.h" />
+		<Unit filename="JDI/src/General/quickreference.h" />
 		<Unit filename="JDI/src/General/quickstack.h" />
 		<Unit filename="JDI/src/General/quickvector.h" />
 		<Unit filename="JDI/src/General/svg_simple.cpp" />
 		<Unit filename="JDI/src/General/svg_simple.h" />
 		<Unit filename="JDI/src/Parser/base.cpp" />
 		<Unit filename="JDI/src/Parser/bodies.h" />
+		<Unit filename="JDI/src/Parser/cclass_base.h" />
 		<Unit filename="JDI/src/Parser/handlers/handle_class.cpp" />
 		<Unit filename="JDI/src/Parser/handlers/handle_declarators.cpp" />
 		<Unit filename="JDI/src/Parser/handlers/handle_enum.cpp" />
+		<Unit filename="JDI/src/Parser/handlers/handle_friend.cpp" />
 		<Unit filename="JDI/src/Parser/handlers/handle_function_impl.cpp" />
 		<Unit filename="JDI/src/Parser/handlers/handle_function_impl.h" />
 		<Unit filename="JDI/src/Parser/handlers/handle_hypothetical.cpp" />
 		<Unit filename="JDI/src/Parser/handlers/handle_namespace.cpp" />
+		<Unit filename="JDI/src/Parser/handlers/handle_operatorkw_cast.cpp" />
 		<Unit filename="JDI/src/Parser/handlers/handle_scope.cpp" />
 		<Unit filename="JDI/src/Parser/handlers/handle_templates.cpp" />
 		<Unit filename="JDI/src/Parser/handlers/handle_union.cpp" />
+		<Unit filename="JDI/src/Parser/is_potential_constructor.h" />
 		<Unit filename="JDI/src/Parser/parse_context.cpp" />
-		<Unit filename="JDI/src/Parser/parse_context.h" />
 		<Unit filename="JDI/src/Parser/readers/read_expression.cpp" />
 		<Unit filename="JDI/src/Parser/readers/read_next_token.cpp" />
 		<Unit filename="JDI/src/Parser/readers/read_operatorkw_name.cpp" />
 		<Unit filename="JDI/src/Parser/readers/read_qualified_definition.cpp" />
 		<Unit filename="JDI/src/Parser/readers/read_template_parameters.cpp" />
 		<Unit filename="JDI/src/Parser/readers/read_type.cpp" />
+		<Unit filename="JDI/src/Storage/arg_key.cpp" />
+		<Unit filename="JDI/src/Storage/arg_key.h" />
 		<Unit filename="JDI/src/Storage/definition.cpp" />
 		<Unit filename="JDI/src/Storage/definition.h" />
+		<Unit filename="JDI/src/Storage/definition_duplicate.cpp" />
+		<Unit filename="JDI/src/Storage/definition_forward.h" />
 		<Unit filename="JDI/src/Storage/full_type.cpp" />
 		<Unit filename="JDI/src/Storage/full_type.h" />
 		<Unit filename="JDI/src/Storage/references.cpp" />
@@ -191,7 +205,6 @@
 		<Unit filename="JDI/src/System/type_usage_flags.h" />
 		<Unit filename="JDI/src/User/token_cases.h" />
 		<Unit filename="JDI/src/User/token_types.h" />
-		<Unit filename="JDI/test/debug_lexer.h" />
 		<Unit filename="OS_Switchboard.h" />
 		<Unit filename="backend/EnigmaStruct.h" />
 		<Unit filename="backend/JavaCallbacks.cpp" />
@@ -246,6 +259,8 @@
 		<Unit filename="compiler/components/write_object_access.cpp" />
 		<Unit filename="compiler/components/write_object_data.cpp" />
 		<Unit filename="compiler/components/write_room_data.cpp" />
+		<Unit filename="compiler/components/write_settings.cpp" />
+		<Unit filename="compiler/components/write_shader_data.cpp" />
 		<Unit filename="compiler/event_ids.h" />
 		<Unit filename="compiler/event_reader/event_parser.cpp" />
 		<Unit filename="compiler/event_reader/event_parser.h" />

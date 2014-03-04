@@ -20,30 +20,13 @@
 
 #include <ctime>
 #include <cstdio>
-#include "languages/lang_CPP.h"
+
+#include <makedir.h> // FIXME: This is ludicrous
+
+#include <languages/lang_CPP.h>
+#include <backend/ideprint.h>
 
 string lang_CPP::get_name() { return "C++"; }
-
-const char* heaping_pile_of_dog_shit = "\
-             /\n\
-            |    |\n\
-             \\    \\\n\
-      |       |    |\n\
-       \\     /    /     \\\n\
-    \\   |   |    |      |\n\
-     | /     /\\   \\    /\n\
-    / |     /# \\   |  |\n\
-   |   \\   *    `      \\\n\
-    \\    /   =  # `     |\n\
-     |  | #     ___/   /\n\
-    /   _`---^^^   `. |\n\
-   |  .*     #  =    | \\\n\
-     |  =   #      __/\n\
-    .\\____-------^^  `.\n\
-   /      #         #  \\\n\
-  |   =          =     |\n\
-  \\___    #     #___--^\n\
-      ^^^^^^^^^^^\n\n";
 
 #ifdef _WIN32
  #include <windows.h>
@@ -72,20 +55,19 @@ extern jdi::definition *enigma_type__var, *enigma_type__variant, *enigma_type__v
 
 syntax_error *lang_CPP::definitionsModified(const char* wscode, const char* targetYaml)
 {
-  cout << "Parsing settings..." << endl;
+  edbg<< "Parsing settings..." << flushl;
     parse_ide_settings(targetYaml);
   
-  cout << targetYaml << endl;
+  edbg << targetYaml << flushl;
   
-  cout << "Creating swap." << endl;
   jdi::context *oldglobal = main_context;
   main_context = new jdi::context();
   
-  cout << "Dumping whiteSpace definitions...";
+  edbg << "Dumping whiteSpace definitions..." << flushl;
   FILE *of = wscode ? fopen("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_whitespace.h","wb") : NULL;
-  if (of) fputs(wscode,of), fclose(of);
+  if (of) fputs(wscode, of), fclose(of);
   
-  cout << "Opening ENIGMA for parse..." << endl;
+  edbg << "Opening ENIGMA for parse..." << flushl;
   
   llreader f("ENIGMAsystem/SHELL/SHELLmain.cpp");
   int res = 1;
@@ -96,22 +78,20 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode, const char* targ
     STOP_TIME();
   }
   
-  static int successful_prior = false;
-  
   jdi::definition *d;
   if ((d = main_context->get_global()->look_up("variant"))) {
     enigma_type__variant = d;   
     if (!(d->flags & jdi::DEF_TYPENAME))
       cerr << "ERROR! ENIGMA's variant is not a type!" << endl;
     else
-      cout << "Successfully loaded builtin variant type" << endl;
+      edbg << "Successfully loaded builtin variant type" << flushl;
   } else cerr << "ERROR! No variant type found!" << endl;
   if ((d = main_context->get_global()->look_up("var"))) {
     enigma_type__var = d;
     if (!(d->flags & jdi::DEF_TYPENAME))
       cerr << "ERROR! ENIGMA's var is not a type!" << endl;
     else
-      cout << "Successfully loaded builtin var type" << endl;
+      edbg << "Successfully loaded builtin var type" << flushl;
   } else cerr << "ERROR! No var type found!" << endl;
   if ((d = main_context->get_global()->look_up("enigma"))) {
     if (d->flags & jdi::DEF_NAMESPACE) {
@@ -120,44 +100,33 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode, const char* targ
         if (!(d->flags & jdi::DEF_TYPENAME))
           cerr << "ERROR! ENIGMA's varargs is not a type!" << endl;
         else
-          cout << "Successfully loaded builtin varargs type" << endl;
+          edbg << "Successfully loaded builtin varargs type" << flushl;
       } else cerr << "ERROR! No varargs type found!" << endl;
     } else cerr << "ERROR! Namespace enigma is... not a namespace!" << endl;
   } else cerr << "ERROR! Namespace enigma not found!" << endl;
   
   if (res) {
-    cout << "ERROR in parsing engine file: The parser isn't happy. Don't worry, it's never fucking happy. Have a turd.\n";
-    cout << heaping_pile_of_dog_shit;
+    edbg << "ERROR in parsing engine file: The parser isn't happy. This might be worth reporting." << flushl;
     
-    ide_passback_error.set(0,0,0,"Parse failed; details in stdout. Bite me.");
-    if (successful_prior) {
-      delete main_context;
-      main_context = oldglobal;
-      oldglobal = NULL;
-    }
-    else
-      delete oldglobal;
-    cout << "Continuing anyway." << endl;
+    ide_passback_error.set(0, 0, 0, "Engine parse failed; details in printout.");
+    edbg << "Continuing anyway." << flushl;
     // return &ide_passback_error;
-  } else {
-    successful_prior = true;
-    
-    cout << "Successfully parsed ENIGMA's engine (" << PRINT_TIME() << "ms)\n"
-    << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
+  } else {    
+    edbg << "Successfully parsed ENIGMA's engine (" << PRINT_TIME() << "ms)" << flushl
+    << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << flushl;
     //cout << "Namespace std contains " << global_scope.members["std"]->members.size() << " items.\n";
-    delete oldglobal;
   }
   
-  cout << "Creating dummy primitives for old ENIGMA" << endl;
+  edbg << "Creating dummy primitives for old ENIGMA" << flushl;
   for (jdip::tf_iter it = jdip::builtin_declarators.begin(); it != jdip::builtin_declarators.end(); ++it) {
     main_context->get_global()->members[it->first] = new jdi::definition(it->first, main_context->get_global(), jdi::DEF_TYPENAME);
   }
   
-  cout << "Grabbing locals...\n";
+  edbg << "Grabbing locals..." << flushl;
   
   load_shared_locals();
   
-  cout << "Determining build target...\n";
+  edbg << "Determining build target..." << flushl;
   
   extensions::determine_target();
   

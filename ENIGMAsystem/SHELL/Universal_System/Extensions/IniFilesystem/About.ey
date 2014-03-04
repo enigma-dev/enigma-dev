@@ -1,0 +1,13 @@
+%e-yaml
+---
+
+Name: IniFilesystem
+ID: IniFilesystem
+Author: Daniel Hrabovcak
+Description: Adds support for loading ini files for platforms other than Windows.
+Default: false
+Icon: inifilesystem.png
+
+Depends: None
+Dependencies: None
+Implement: extension_ini

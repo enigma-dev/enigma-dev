@@ -25,17 +25,10 @@
 **                                                                              **
 \********************************************************************************/
 
+#include "../General/PFini.h"
 
-void ini_open(std::string fname);
-void ini_close();
-std::string ini_read_string(std::string section, std::string key, string defaultValue);
-int ini_read_real(std::string section, std::string key, int defaultValue);
-void ini_write_string(std::string section, std::string key, string value);
-void ini_write_real(std::string section, std::string key, int value);
-bool ini_key_exists(std::string section, std::string key);
-bool ini_section_exists(std::string section);
-void ini_key_delete(std::string section, std::string key);
-void ini_section_delete(std::string section);
+namespace enigma_user
+{
 
 long long file_size(std::string fname);
 time_t file_access_time(std::string fname);
@@ -80,3 +73,6 @@ int parameter_count();
 std::string parameter_string(int n);
 
 std::string environment_get_variable(std::string name);
+
+}
+

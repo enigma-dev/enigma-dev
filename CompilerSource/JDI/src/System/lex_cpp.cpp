@@ -8,7 +8,7 @@
  * 
  * @section License
  * 
- * Copyright (C) 2011-2012 Josh Ventura
+ * Copyright (C) 2011-2014 Josh Ventura
  * This file is part of JustDefineIt.
  * 
  * JustDefineIt is free software: you can redistribute it and/or modify it under
@@ -27,15 +27,17 @@
 #include <General/debug_macros.h>
 #include <General/parse_basics.h>
 #include <General/debug_macros.h>
-#include <Parser/parse_context.h>
 #include <System/builtins.h>
 #include <API/context.h>
 #include <API/AST.h>
+#include <cstring>
+#include <csignal>
 
 #include <API/compile_settings.h>
 
 using namespace jdi;
 using namespace jdip;
+using namespace std;
 
 #define cfile data //I'm sorry, but I can't spend the whole function calling the file buffer "data."
 
@@ -160,7 +162,7 @@ static inline void skip_whitespace(const char* cfile, size_t &pos, size_t length
 void lexer_cpp::enter_macro(macro_scalar* ms)
 {
   if (ms->value.empty()) return;
-  openfile of(filename, line, lpos, *this);
+  openfile of(filename, sdir, line, lpos, *this);
   files.enswap(of);
   filename = ms->name.c_str();
   this->encapsulate(ms->value);
@@ -268,15 +270,19 @@ bool lexer_cpp::parse_macro_params(const macro_function* mf, vector<string>& des
 
 bool lexer_cpp::parse_macro_function(const macro_function* mf, error_handler *herr)
 {
-  const size_t spos = pos, slpos = lpos, sline = line;
+  size_t spos = pos, slpos = lpos, sline = line;
   skip_whitespace(); // Move to the next "token"
   if (pos >= length or cfile[pos] != '(') { pos = spos, lpos = slpos, line = sline; return false; }
   
   vector<string> params;
+  spos = pos;
   parse_macro_params(mf, params, herr);
+  while (++spos < pos)
+    if (cfile[spos] == '\n' or (cfile[spos] == '\r' and (spos + 1 >= pos or cfile[spos] != '\n')))
+      lpos = spos, ++line;
   
   // Enter the macro
-  openfile of(filename, line, lpos, *this);
+  openfile of(filename, sdir, line, lpos, *this);
   files.enswap(of);
   alias(files.top().file);
   char *buf, *bufe;
@@ -331,6 +337,11 @@ string lexer_cpp::read_preprocessor_args(error_handler *herr)
   return res;
 }
 
+#ifdef DEBUG_MODE
+/// This function will be passed signals
+static void donothing(int) {}
+#endif
+
 /// Optional AST rendering
 #include <General/debug_macros.h>
 
@@ -355,7 +366,7 @@ void lexer_cpp::handle_preprocessor(error_handler *herr)
     case 'd':
       if (strbw(cfile+pos, "efine")) { pos += 5; goto case_define; }
       goto failout;
-	  case 'e':
+    case 'e':
       if (cfile[pos] == 'n') { if (strbw(cfile+pos+1, "dif")) { pos += 4; goto case_endif; } goto failout; }
       if (cfile[pos] == 'l')
       { 
@@ -370,7 +381,7 @@ void lexer_cpp::handle_preprocessor(error_handler *herr)
       }
       if (strbw(cfile+pos, "rror")) { pos += 4; goto case_error; }
       goto failout;
-	  case 'i':
+    case 'i':
       if (cfile[pos] == 'f')
       {
         if (strbw(cfile[++pos])) goto case_if;
@@ -385,13 +396,13 @@ void lexer_cpp::handle_preprocessor(error_handler *herr)
       }
       if (cfile[pos] == 'm') { if (strbw(cfile+pos+1, "port"))  { pos += 5; goto case_import;  } goto failout; }
       goto failout;
-	  case 'l':
+    case 'l':
       if (strbw(cfile+pos, "ine")) { pos += 3; goto case_line; }
       goto failout;
-	  case 'p':
+    case 'p':
       if (strbw(cfile+pos, "ragma")) { pos += 5; goto case_pragma; }
       goto failout;
-	  case 'u':
+    case 'u':
       if (strbw(cfile+pos, "ndef")) { pos += 4; goto case_undef; }
       if (strbw(cfile+pos, "sing")) { pos += 4; goto case_using; }
       goto failout;
@@ -541,8 +552,8 @@ void lexer_cpp::handle_preprocessor(error_handler *herr)
         if (conditionals.empty() or conditionals.top().is_true) {
           mlex->update();
           
-          AST a;
-          if (a.parse_expression(mlex, herr) or !a.eval()) {
+          AST a(&mctex);
+          if (a.parse_expression() or !a.eval(error_context(herr, filename, line, pos-lpos))) {
             token_t res;
             render_ast(a, "if_directives");
             conditionals.push(condition(0,1));
@@ -617,18 +628,21 @@ void lexer_cpp::handle_preprocessor(error_handler *herr)
         for (size_t i = 0; i < fnfind.length(); ++i)
           if (fnfind[i] == match) { fnfind.erase(i); break; }
         
-        string incfn;
+        if (files.size() > 9000) {
+          herr->error("Nested include count is OVER NINE THOUSAAAAAAAAND. Not including another.");
+          break;
+        }
+        
+        string incfn, fdir = sdir;
         llreader incfile;
         if (chklocal)
           incfile.open((incfn = path + fnfind).c_str());
         for (size_t i = 0; i < builtin->search_dir_count(); ++i) {
-          if (incfile.is_open()) {
-            if (incnext) {
-              incnext = incfn != filename;
-              incfile.close();
-            } else break;
-          }
-          incfile.open((incfn = builtin->search_dir(i) + fnfind).c_str());
+          if (incfile.is_open()) break;
+          if (!incnext)
+            incfile.open((incfn = (fdir = builtin->search_dir(i)) + fnfind).c_str());
+          else
+            incnext = sdir != builtin->search_dir(i);
         }
         if (!incfile.is_open()) {
           herr->error("Could not find " + fnfind.substr(1), filename, line, pos-lpos);
@@ -638,7 +652,7 @@ void lexer_cpp::handle_preprocessor(error_handler *herr)
           break;
         }
         
-        openfile of(filename, line, lpos, *this);
+        openfile of(filename, sdir = fdir, line, lpos, *this);
         files.enswap(of);
         pair<set<string>::iterator, bool> fi = visited_files.insert(incfn);
         filename = fi.first->c_str();
@@ -651,8 +665,11 @@ void lexer_cpp::handle_preprocessor(error_handler *herr)
         #ifdef DEBUG_MODE
         {
           string n = read_preprocessor_args(herr);
-          if (n == "DEBUG_ENTRY_POINT" and (conditionals.empty() or conditionals.top().is_true))
+          if (n == "DEBUG_ENTRY_POINT" and (conditionals.empty() or conditionals.top().is_true)) {
+            signal(SIGTRAP, donothing); // Try not to die when we raise hell in the interrupt handler briefly
+            asm("INT3;"); // Raise hell in the interrupt handler; the debugger will grab us from here
             cout << "* Debug entry point" << endl;
+          }
         }
         #else
           read_preprocessor_args(herr);
@@ -887,9 +904,9 @@ token_t lexer_cpp::get_token(error_handler *herr)
           pos += cfile[pos] == '*';
         return token_t(token_basics(TT_OPERATOR,filename,line,spos-lpos), cfile+spos, pos-spos);
       
-      case '(': return token_t(token_basics(TT_LEFTPARENTH,filename,line,spos-lpos));
-      case '[': return token_t(token_basics(TT_LEFTBRACKET,filename,line,spos-lpos));
-      case '{': return token_t(token_basics(TT_LEFTBRACE,  filename,line,spos-lpos));
+      case '(': return token_t(token_basics(TT_LEFTPARENTH, filename,line,spos-lpos));
+      case '[': return token_t(token_basics(TT_LEFTBRACKET, filename,line,spos-lpos));
+      case '{': return token_t(token_basics(TT_LEFTBRACE,   filename,line,spos-lpos));
       case '}': return token_t(token_basics(TT_RIGHTBRACE,  filename,line,spos-lpos));
       case ']': return token_t(token_basics(TT_RIGHTBRACKET,filename,line,spos-lpos));
       case ')': return token_t(token_basics(TT_RIGHTPARENTH,filename,line,spos-lpos));
@@ -959,7 +976,7 @@ bool lexer_cpp::pop_file() {
 
 macro_map lexer_cpp::kludge_map;
 lexer_cpp::keyword_map lexer_cpp::keywords;
-lexer_cpp::lexer_cpp(llreader &input, macro_map &pmacros, const char *fname): macros(pmacros), filename(fname), line(1), lpos(0), open_macro_count(0), mlex(new lexer_macro(this))
+lexer_cpp::lexer_cpp(llreader &input, macro_map &pmacros, const char *fname): macros(pmacros), filename(fname), line(1), lpos(0), open_macro_count(0), mlex(new lexer_macro(this)), mctex(mlex, def_error_handler)
 {
   consume(input); // We are also an llreader. Consume the given one using the inherited method.
   if (keywords.empty()) {
@@ -968,6 +985,7 @@ lexer_cpp::lexer_cpp(llreader &input, macro_map &pmacros, const char *fname): ma
     keywords["__asm__"] = TT_ASM;
     keywords["class"] = TT_CLASS;
     keywords["decltype"] = TT_DECLTYPE;
+    keywords["typeid"] = TT_TYPEID;
     keywords["enum"] = TT_ENUM;
     keywords["extern"] = TT_EXTERN;
     keywords["namespace"] = TT_NAMESPACE;
@@ -975,8 +993,10 @@ lexer_cpp::lexer_cpp(llreader &input, macro_map &pmacros, const char *fname): ma
     keywords["private"] = TT_PRIVATE;
     keywords["protected"] = TT_PROTECTED;
     keywords["public"] = TT_PUBLIC;
+    keywords["friend"] = TT_FRIEND;
     keywords["sizeof"] = TT_SIZEOF;
     keywords["__is_empty"] = TT_ISEMPTY;
+    keywords["__is_pod"] = TT_ISEMPTY; // FIXME: yeah, this is a hack
     keywords["struct"] = TT_STRUCT;
     keywords["template"] = TT_TEMPLATE;
     keywords["typedef"] = TT_TYPEDEF;
@@ -985,6 +1005,18 @@ lexer_cpp::lexer_cpp(llreader &input, macro_map &pmacros, const char *fname): ma
     keywords["using"] = TT_USING;
     keywords["new"] = TT_NEW;
     keywords["delete"] = TT_DELETE;
+    
+    keywords["const_cast"] = TT_CONST_CAST;
+    keywords["static_cast"] = TT_STATIC_CAST;
+    keywords["dynamic_cast"] = TT_DYNAMIC_CAST;
+    keywords["reinterpret_cast"] = TT_REINTERPRET_CAST;
+    
+    keywords["auto"] = TT_AUTO;
+    keywords["alignas"] = TT_ALIGNAS;
+    keywords["alignof"] = TT_ALIGNOF;
+    keywords["constexpr"] = TT_CONSTEXPR;
+    keywords["noexcept"] = TT_NOEXCEPT;
+    keywords["static_assert"] = TT_STATIC_ASSERT;
     
     // GNU Extensions
     keywords["__attribute__"] = TT_INVALID;
@@ -1026,10 +1058,11 @@ void lexer_cpp::cleanup() {
 
 openfile::openfile() {}
 openfile::openfile(const char* fname): filename(fname), line(0), lpos(0) {}
-openfile::openfile(const char* fname, size_t line_num, size_t line_pos, llreader &consume): filename(fname), line(line_num), lpos(line_pos) { file.consume(consume); }
+openfile::openfile(const char* fname, string sdir, size_t line_num, size_t line_pos, llreader &consume): filename(fname), searchdir(sdir), line(line_num), lpos(line_pos) { file.consume(consume); }
 void openfile::swap(openfile &f) {
   { register const char* tmpl = filename;
   filename = f.filename, f.filename = tmpl; }
+  searchdir.swap(f.searchdir);
   register size_t tmpl = line;
   line = f.line, f.line = tmpl;
   tmpl = lpos, lpos = f.lpos, f.lpos = tmpl;

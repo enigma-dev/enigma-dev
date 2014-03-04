@@ -36,12 +36,22 @@
 #include <sstream>
 #include <string>
 
+#include <floatcomp.h>
+
 using namespace std;
 
 #include "include.h"
 
-double maxv(double a, double b) {return (a > b) ? a : b;}
-double minv(double a, double b) {return (a < b) ? a : b;}
+static inline double maxv(double a, double b) { return (a > b) ? a : b; }
+static inline double minv(double a, double b) { return (a < b) ? a : b; }
+static inline unsigned maxv(unsigned a, unsigned b) { return (a > b) ? a : b; }
+static inline unsigned minv(unsigned a, unsigned b) { return (a < b) ? a : b; }
+static inline int maxv(int a, int b) { return (a > b) ? a : b; }
+static inline int minv(int a, int b) { return (a < b) ? a : b; }
+
+template<typename t> bool tequal(t v1, t v2) { return v1 == v2; }
+template<> bool tequal(float v1, float v2)   { return fequal(v1, v2); }
+template<> bool tequal(double v1, double v2) { return fequal(v1, v2); }
 
 template <typename t>
 class grid
@@ -51,7 +61,9 @@ class grid
 
     public:
     grid() {}
-    grid(const unsigned int w, const unsigned int h) {ygrid = h; xgrid = w; grid_array = new t[h*w];}
+    grid(const unsigned int w, const unsigned int h) {
+		ygrid = h; xgrid = w; grid_array = new t[w*h];
+	}
     ~grid() {}
 
     void destroy()
@@ -82,7 +94,7 @@ class grid
         ygrid = copy_id.ygrid;
         for (unsigned i = 0; i < ygrid; i++)
             for (unsigned ii = 0; ii < xgrid; ii++)
-                grid_array[i * xgrid + ii] = grid_array[i * copy_id.xgrid + ii];
+                grid_array[i * xgrid + ii] = copy_id.grid_array[i * copy_id.xgrid + ii];
     }
     unsigned int width()
     {
@@ -112,7 +124,7 @@ class grid
        const int tx1 = minv(x1, x2),  ty1 = minv(y1, y2), tx2 = maxv(x1, x2), ty2 = maxv(y1, y2), xd = xgrid - tx1, yd = ygrid - ty1;
        if (xd > 0 && yd > 0)
        {
-           const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2 + 1, xgrid), py2 = minv(ty2 + 1, ygrid);
+           const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2 + 1, (int)xgrid), py2 = minv(ty2 + 1, (int)ygrid);
            for (int i = py1; i < py2; i++)
                for (int ii = px1; ii < px2; ii++)
                    grid_array[i * xgrid + ii] = val;
@@ -123,7 +135,7 @@ class grid
        const int tx1 = minv(x1, x2),  ty1 = minv(y1, y2), tx2 = maxv(x1, x2), ty2 = maxv(y1, y2), xd = xgrid - tx1, yd = ygrid - ty1;
        if (xd > 0 && yd > 0)
        {
-           const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2 + 1, xgrid), py2 = minv(ty2 + 1, ygrid);
+           const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2 + 1, (int)xgrid), py2 = minv(ty2 + 1, (int)ygrid);
            for (int i = py1; i < py2; i++)
                for (int ii = px1; ii < px2; ii++)
                    grid_array[i * xgrid + ii] += val;
@@ -134,7 +146,7 @@ class grid
        const int tx1 = minv(x1, x2),  ty1 = minv(y1, y2), tx2 = maxv(x1, x2), ty2 = maxv(y1, y2), xd = xgrid - tx1, yd = ygrid - ty1;
        if (xd > 0 && yd > 0)
        {
-           const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2 + 1, xgrid), py2 = minv(ty2 + 1, ygrid);
+           const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2 + 1, (int)xgrid), py2 = minv(ty2 + 1, (int)ygrid);
            for (int i = py1; i < py2; i++)
                for (int ii = px1; ii < px2; ii++)
                    grid_array[i * xgrid + ii] *= val;
@@ -146,7 +158,7 @@ class grid
         const int tx1 = int(x - r), ty1 = int(y - r), tx2 = int(x + r + 1), ty2 = int(y + r + 1);
         if (tx2 >= 0 && ty2 >=0 && tx1 < int(xgrid) && ty1 < int(ygrid))
         {
-            const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2, xgrid), py2 = minv(ty2, ygrid);
+            const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2, (int)xgrid), py2 = minv(ty2, (int)ygrid);
             for (int i = py1; i < py2; i++)
                 for (int ii = px1; ii < px2; ii++)
                     if ((x - ii)*(x - ii) + (y - i)*(y - i) <= rr)
@@ -159,7 +171,7 @@ class grid
         const int tx1 = int(x - r), ty1 = int(y - r), tx2 = int(x + r + 1), ty2 = int(y + r + 1);
         if (tx2 >= 0 && ty2 >=0 && tx1 < int(xgrid) && ty1 < int(ygrid))
         {
-            const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2, xgrid), py2 = minv(ty2, ygrid);
+            const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2, (int)xgrid), py2 = minv(ty2, (int)ygrid);
             for (int i = py1; i < py2; i++)
                 for (int ii = px1; ii < px2; ii++)
                     if ((x - ii)*(x - ii) + (y - i)*(y - i) <= rr)
@@ -172,7 +184,7 @@ class grid
         const int tx1 = int(x - r), ty1 = int(y - r), tx2 = int(x + r + 1), ty2 = int(y + r + 1);
         if (tx2 >= 0 && ty2 >=0 && tx1 < int(xgrid) && ty1 < int(ygrid))
         {
-            const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2, xgrid), py2 = minv(ty2, ygrid);
+            const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2, (int)xgrid), py2 = minv(ty2, (int)ygrid);
             for (int i = py1; i < py2; i++)
                 for (int ii = px1; ii < px2; ii++)
                     if ((x - ii)*(x - ii) + (y - i)*(y - i) <= rr)
@@ -186,10 +198,10 @@ class grid
             const int tx1 = minv(sx1, sx2),  ty1 = minv(sy1, sy2), tx2 = maxv(sx1, sx2), ty2 = maxv(sy1, sy2), xd = source_id.xgrid - tx1, yd = source_id.ygrid - ty1;
             if (xd > 0 && yd > 0)
             {
-                const int upx = minv(tx2 - tx1 + 1, minv(xgrid - x, xd)), upy = minv(ty2 - ty1 + 1, minv(ygrid - y, yd));
+                const int upx = minv(tx2 - tx1 + 1, minv(int(xgrid - x), xd)), upy = minv(ty2 - ty1 + 1, minv(int(ygrid - y), yd));
                 for (int i = 0; i < upy; i++)
                     for (int ii = 0; ii < upx; ii++)
-                        grid_array[(x + i)*xgrid + (y + ii)] = source_id.grid_array[(tx1 + i)*source_id.xgrid + (ty1 + ii)];
+                        grid_array[(y + i)*xgrid + (x + ii)] = source_id.grid_array[(ty1 + i)*source_id.xgrid + (tx1 + ii)];
             }
         }
     }
@@ -200,10 +212,10 @@ class grid
             const int tx1 = minv(sx1, sx2),  ty1 = minv(sy1, sy2), tx2 = maxv(sx1, sx2), ty2 = maxv(sy1, sy2), xd = source_id.xgrid - tx1, yd = source_id.ygrid - ty1;
             if (xd > 0 && yd > 0)
             {
-                const int upx = minv(tx2 - tx1 + 1, minv(xgrid - x, xd)), upy = minv(ty2 - ty1 + 1, minv(ygrid - y, yd));
+                const int upx = minv(tx2 - tx1 + 1, minv(int(xgrid - x), xd)), upy = minv(ty2 - ty1 + 1, minv(int(ygrid - y), yd));
                 for (int i = 0; i < upy; i++)
                     for (int ii = 0; ii < upx; ii++)
-                        grid_array[(x + i)*xgrid + (y + ii)] += source_id.grid_array[(tx1 + i)*source_id.xgrid + (ty1 + ii)];
+                        grid_array[(y + i)*xgrid + (x + ii)] += source_id.grid_array[(ty1 + i)*source_id.xgrid + (tx1 + ii)];
             }
         }
     }
@@ -214,10 +226,10 @@ class grid
             const int tx1 = minv(sx1, sx2),  ty1 = minv(sy1, sy2), tx2 = maxv(sx1, sx2), ty2 = maxv(sy1, sy2), xd = source_id.xgrid - tx1, yd = source_id.ygrid - ty1;
             if (xd > 0 && yd > 0)
             {
-                const int upx = minv(tx2 - tx1 + 1, minv(xgrid - x, xd)), upy = minv(ty2 - ty1 + 1, minv(ygrid - y, yd));
+                const int upx = minv(tx2 - tx1 + 1, minv(int(xgrid - x), xd)), upy = minv(ty2 - ty1 + 1, minv(int(ygrid - y), yd));
                 for (int i = 0; i < upy; i++)
                     for (int ii = 0; ii < upx; ii++)
-                        grid_array[(x + i)*xgrid + (y + ii)] *= source_id.grid_array[(tx1 + i)*source_id.xgrid + (ty1 + ii)];
+                        grid_array[(y + i)*xgrid + (x + ii)] *= source_id.grid_array[(ty1 + i)*source_id.xgrid + (tx1 + ii)];
             }
         }
     }
@@ -231,23 +243,23 @@ class grid
        const int tx1 = minv(x1, x2),  ty1 = minv(y1, y2), tx2 = maxv(x1, x2), ty2 = maxv(y1, y2), xd = xgrid - tx1, yd = ygrid - ty1;
        if (xd > 0 && yd > 0)
        {
-           const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2 + 1, xgrid), py2 = minv(ty2 + 1, ygrid);
+           const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2 + 1, (int)xgrid), py2 = minv(ty2 + 1, (int)ygrid);
            variant sum = 0;
            for (int i = py1; i < py2; i++)
                for (int ii = px1; ii < px2; ii++)
                    sum += grid_array[i * xgrid + ii];
            return sum;
        }
-       return variant(0);
+       return t();
     }
     t find_region_max(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2)
     {
        const int tx1 = minv(x1, x2),  ty1 = minv(y1, y2), tx2 = maxv(x1, x2), ty2 = maxv(y1, y2), xd = xgrid - tx1, yd = ygrid - ty1;
-       double val_check;
+       t val_check;
        if (xd > 0 && yd > 0)
        {
-           const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2 + 1, xgrid), py2 = minv(ty2 + 1, ygrid);
-           double max_check = DBL_MIN;
+           const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2 + 1, (int)xgrid), py2 = minv(ty2 + 1, (int)ygrid);
+           t max_check = grid_array[py1 * xgrid + px1];
            for (int i = py1; i < py2; i++)
                for (int ii = px1; ii < px2; ii++)
                {
@@ -255,18 +267,18 @@ class grid
                    if (val_check > max_check)
                        max_check = val_check;
                }
-           return ((max_check == DBL_MIN) ? variant(0) : variant(max_check));
+           return max_check;
        }
-       return variant(0);
+       return t();
     }
     t find_region_min(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2)
     {
        const int tx1 = minv(x1, x2),  ty1 = minv(y1, y2), tx2 = maxv(x1, x2), ty2 = maxv(y1, y2), xd = xgrid - tx1, yd = ygrid - ty1;
-       double val_check;
+       t val_check;
        if (xd > 0 && yd > 0)
        {
-           const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2 + 1, xgrid), py2 = minv(ty2 + 1, ygrid);
-           double min_check = DBL_MAX;
+           const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2 + 1, (int)xgrid), py2 = minv(ty2 + 1, (int)ygrid);
+           t min_check = grid_array[py1 * xgrid + px1];
            for (int i = py1; i < py2; i++)
                for (int ii = px1; ii < px2; ii++)
                {
@@ -274,24 +286,24 @@ class grid
                    if (val_check < min_check)
                        min_check = val_check;
                }
-           return ((min_check == DBL_MAX) ? variant(0) : variant(min_check));
+           return min_check;
        }
-       return variant(0);
+       return t();
     }
     t find_region_mean(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2)
     {
        const int tx1 = minv(x1, x2),  ty1 = minv(y1, y2), tx2 = maxv(x1, x2), ty2 = maxv(y1, y2), xd = xgrid - tx1, yd = ygrid - ty1;
        if (xd > 0 && yd > 0)
        {
-           const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2 + 1, xgrid), py2 = minv(ty2 + 1, ygrid);
-           double sum = 0;
+           const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2 + 1, (int)xgrid), py2 = minv(ty2 + 1, (int)ygrid);
+           t sum = 0;
            for (int i = py1; i < py2; i++)
                for (int ii = px1; ii < px2; ii++)
                    sum += grid_array[i * xgrid + ii];
            const double region_size = (py2 - py1)*(px2 - px1);
-           return ((region_size == 0) ? variant(0) : variant(sum/region_size));
+           return sum/region_size;
        }
-       return variant(0);
+       return t();
     }
     t find_disk_sum(const double x, const double y, const double r)
     {
@@ -299,15 +311,15 @@ class grid
         const int tx1 = int(x - r), ty1 = int(y - r), tx2 = int(x + r + 1), ty2 = int(y + r + 1);
         if (tx2 >= 0 && ty2 >=0 && tx1 < int(xgrid) && ty1 < int(ygrid))
         {
-            const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2, xgrid), py2 = minv(ty2, ygrid);
-            variant sum = 0;
+            const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2, (int)xgrid), py2 = minv(ty2, (int)ygrid);
+            t sum = t();
             for (int i = py1; i < py2; i++)
                 for (int ii = px1; ii < px2; ii++)
                     if ((x - ii)*(x - ii) + (y - i)*(y - i) <= rr)
                         sum += grid_array[i * xgrid + ii];
             return sum;
         }
-        return variant(0);
+        return t();
     }
     t find_disk_max(const double x, const double y, const double r)
     {
@@ -315,8 +327,8 @@ class grid
         const int tx1 = int(x - r), ty1 = int(y - r), tx2 = int(x + r + 1), ty2 = int(y + r + 1);
         if (tx2 >= 0 && ty2 >=0 && tx1 < int(xgrid) && ty1 < int(ygrid))
         {
-            const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2, xgrid), py2 = minv(ty2, ygrid);
-            double max_check = DBL_MIN;
+            const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2, (int)xgrid), py2 = minv(ty2, (int)ygrid);
+            t max_check = grid_array[py1 * xgrid + px1];
             for (int i = py1; i < py2; i++)
                 for (int ii = px1; ii < px2; ii++)
                     if ((x - ii)*(x - ii) + (y - i)*(y - i) <= rr)
@@ -325,9 +337,9 @@ class grid
                         if (val_check > max_check)
                             max_check = val_check;
                     }
-            return ((max_check == DBL_MIN) ? variant(0) : variant(max_check));
+            return max_check;
         }
-        return variant(0);
+        return t();
     }
     t find_disk_min(const double x, const double y, const double r)
     {
@@ -335,8 +347,8 @@ class grid
         const int tx1 = int(x - r), ty1 = int(y - r), tx2 = int(x + r + 1), ty2 = int(y + r + 1);
         if (tx2 >= 0 && ty2 >=0 && tx1 < int(xgrid) && ty1 < int(ygrid))
         {
-            const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2, xgrid), py2 = minv(ty2, ygrid);
-            double min_check = DBL_MAX;
+            const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2, (int)xgrid), py2 = minv(ty2, (int)ygrid);
+            t min_check = grid_array[lrint(y) * xgrid + lrint(x)];
             for (int i = py1; i < py2; i++)
                 for (int ii = px1; ii < px2; ii++)
                     if ((x - ii)*(x - ii) + (y - i)*(y - i) <= rr)
@@ -345,9 +357,9 @@ class grid
                         if (val_check < min_check)
                             min_check = val_check;
                     }
-            return ((min_check == DBL_MAX) ? variant(0) : variant(min_check));
+            return min_check;
         }
-        return variant(0);
+        return t();
     }
     t find_disk_mean(const double x, const double y, const double r)
     {
@@ -355,99 +367,100 @@ class grid
         const int tx1 = int(x - r), ty1 = int(y - r), tx2 = int(x + r + 1), ty2 = int(y + r + 1);
         if (tx2 >= 0 && ty2 >=0 && tx1 < int(xgrid) && ty1 < int(ygrid))
         {
-            const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2, xgrid), py2 = minv(ty2, ygrid);
-            double sum = 0, region_size = 0;
+            const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2, (int)xgrid), py2 = minv(ty2, (int)ygrid);
+            t sum = t();
+            double region_size = 0;
             for (int i = py1; i < py2; i++)
                 for (int ii = px1; ii < px2; ii++)
                     if ((x - ii)*(x - ii) + (y - i)*(y - i) <= rr)
                     {
                         sum += grid_array[i * xgrid + ii];
-                        region_size++;
+                        ++region_size;
                     }
-           return ((region_size == 0) ? variant(0) : variant(sum/region_size));
+           return sum/region_size;
         }
-        return variant(0);
+        return t();
     }
-    bool value_region_exists(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, const variant val)
+    bool value_region_exists(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, const t val)
     {
        const int tx1 = minv(x1, x2),  ty1 = minv(y1, y2), tx2 = maxv(x1, x2), ty2 = maxv(y1, y2), xd = xgrid - tx1, yd = ygrid - ty1;
        if (xd > 0 && yd > 0)
        {
-           const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2 + 1, xgrid), py2 = minv(ty2 + 1, ygrid);
+           const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2 + 1, (int)xgrid), py2 = minv(ty2 + 1, (int)ygrid);
            for (int i = py1; i < py2; i++)
                for (int ii = px1; ii < px2; ii++)
-                   if (double(grid_array[i * xgrid + ii]) == double(val))
+                   if (tequal(grid_array[i * xgrid + ii], val))
                        return true;
        }
        return false;
     }
-    int value_region_x(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, const variant val)
-    { int ab;
+    int value_region_x(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, const t val)
+    {
        const int tx1 = minv(x1, x2),  ty1 = minv(y1, y2), tx2 = maxv(x1, x2), ty2 = maxv(y1, y2), xd = xgrid - tx1, yd = ygrid - ty1;
        if (xd > 0 && yd > 0)
        {
-           const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2 + 1, xgrid), py2 = minv(ty2 + 1, ygrid);
+           const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2 + 1, (int)xgrid), py2 = minv(ty2 + 1, (int)ygrid);
            for (int i = py1; i < py2; i++)
                for (int ii = px1; ii < px2; ii++)
-                   if (double(grid_array[i * xgrid + ii]) == double(val))
+                   if (tequal(grid_array[i * xgrid + ii], val))
                       return ii;
        }
        return 0;
     }
-    int value_region_y(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, const variant val)
+    int value_region_y(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, const t val)
     {
        const int tx1 = minv(x1, x2),  ty1 = minv(y1, y2), tx2 = maxv(x1, x2), ty2 = maxv(y1, y2), xd = xgrid - tx1, yd = ygrid - ty1;
        if (xd > 0 && yd > 0)
        {
-           const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2 + 1, xgrid), py2 = minv(ty2 + 1, ygrid);
+           const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2 + 1, (int)xgrid), py2 = minv(ty2 + 1, (int)ygrid);
            for (int i = py1; i < py2; i++)
                for (int ii = px1; ii < px2; ii++)
-                   if (double(grid_array[i * xgrid + ii]) == double(val))
+                   if (tequal(grid_array[i * xgrid + ii], val))
                        return i;
        }
        return 0;
     }
-    bool value_disk_exists(const double x, const double y, const double r, const variant val)
+    bool value_disk_exists(const double x, const double y, const double r, const t val)
     {
         const double rr = r*r;
         const int tx1 = int(x - r), ty1 = int(y - r), tx2 = int(x + r + 1), ty2 = int(y + r + 1);
         if (tx2 >= 0 && ty2 >=0 && tx1 < int(xgrid) && ty1 < int(ygrid))
         {
-            const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2, xgrid), py2 = minv(ty2, ygrid);
+            const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2, (int)xgrid), py2 = minv(ty2, (int)ygrid);
             for (int i = py1; i < py2; i++)
                 for (int ii = px1; ii < px2; ii++)
                     if ((x - ii)*(x - ii) + (y - i)*(y - i) <= rr)
-                        if (double(grid_array[i * xgrid + ii]) == double(val))
+                        if (tequal(grid_array[i * xgrid + ii], val))
                             return true;
         }
         return false;
     }
-    int value_disk_x(const double x, const double y, const double r, const variant val)
+    int value_disk_x(const double x, const double y, const double r, const t val)
     {
         const double rr = r*r;
         const int tx1 = int(x - r), ty1 = int(y - r), tx2 = int(x + r + 1), ty2 = int(y + r + 1);
         if (tx2 >= 0 && ty2 >=0 && tx1 < int(xgrid) && ty1 < int(ygrid))
         {
-            const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2, xgrid), py2 = minv(ty2, ygrid);
+            const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2, (int)xgrid), py2 = minv(ty2, (int)ygrid);
             for (int i = py1; i < py2; i++)
                 for (int ii = px1; ii < px2; ii++)
                     if ((x - ii)*(x - ii) + (y - i)*(y - i) <= rr)
-                        if (double(grid_array[i * xgrid + ii]) == double(val))
+                        if (tequal(grid_array[i * xgrid + ii], val))
                             return i;
         }
         return 0;
     }
-    int value_disk_y(const double x, const double y, const double r, const variant val)
+    int value_disk_y(const double x, const double y, const double r, const t val)
     {
         const double rr = r*r;
         const int tx1 = int(x - r), ty1 = int(y - r), tx2 = int(x + r + 1), ty2 = int(y + r + 1);
         if (tx2 >= 0 && ty2 >=0 && tx1 < int(xgrid) && ty1 < int(ygrid))
         {
-            const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2, xgrid), py2 = minv(ty2, ygrid);
+            const int px1 = maxv(tx1, 0), py1 = maxv(ty1, 0), px2 = minv(tx2, (int)xgrid), py2 = minv(ty2, (int)ygrid);
             for (int i = py1; i < py2; i++)
                 for (int ii = px1; ii < px2; ii++)
                     if ((x - ii)*(x - ii) + (y - i)*(y - i) <= rr)
-                        if (double(grid_array[i * xgrid + ii]) == double(val))
+                        if (tequal(grid_array[i * xgrid + ii], val))
                             return ii;
         }
         return 0;
@@ -463,10 +476,14 @@ class grid
 static map<unsigned int, grid<variant> > ds_grids;
 static unsigned int ds_grids_maxid = 0;
 
+namespace enigma_user
+{
+
 unsigned int ds_grid_create(const unsigned int w, const unsigned int h)
 {
     //Creates a new grid. The function returns an integer as an id that must be used in all other functions to access the particular grid.
-    ds_grids.insert(pair<unsigned int, grid<variant> >(ds_grids_maxid++, grid<variant>(w, h)));
+    pair<map<unsigned int, grid<variant> >::iterator, bool> ins = ds_grids.insert(pair<unsigned int, grid<variant> >(ds_grids_maxid++, grid<variant>(w, h)));
+	ins.first->second.clear(0);
     return ds_grids_maxid-1;
 }
 
@@ -582,31 +599,31 @@ void ds_grid_multiply_grid_region(const unsigned int id, const unsigned int sour
 variant ds_grid_get(const unsigned int id, const unsigned int x, const unsigned int y)
 {
     //Returns the value of the indicated cell in the grid with the given id
-    return ((x < ds_grids[id].width() && y < ds_grids[id].height()) ? ds_grids[id].find(x, y) : variant(0));
+    return ((x < ds_grids[id].width() && y < ds_grids[id].height()) ? ds_grids[id].find(x, y) : variant());
 }
 
 variant ds_grid_get_sum(const unsigned int id, const unsigned int x1, const unsigned int y1, const unsigned int x2, const unsigned int y2)
 {
     //Returns the sum of the values of the cells in the region in the grid with the given id
-    return (((x1 < ds_grids[id].width() || x2 < ds_grids[id].width()) && (y1 < ds_grids[id].height() || y2 < ds_grids[id].height())) ? ds_grids[id].find_region_sum(x1, y1, x2, y2) : variant(0));
+    return (((x1 < ds_grids[id].width() || x2 < ds_grids[id].width()) && (y1 < ds_grids[id].height() || y2 < ds_grids[id].height())) ? ds_grids[id].find_region_sum(x1, y1, x2, y2) : variant());
 }
 
 variant ds_grid_get_max(const unsigned int id, const unsigned int x1, const unsigned int y1, const unsigned int x2, const unsigned int y2)
 {
     //Returns the max of the values of the cells in the region in the grid with the given id
-    return (((x1 < ds_grids[id].width() || x2 < ds_grids[id].width()) && (y1 < ds_grids[id].height() || y2 < ds_grids[id].height())) ? ds_grids[id].find_region_max(x1, y1, x2, y2) : variant(0));
+    return (((x1 < ds_grids[id].width() || x2 < ds_grids[id].width()) && (y1 < ds_grids[id].height() || y2 < ds_grids[id].height())) ? ds_grids[id].find_region_max(x1, y1, x2, y2) : variant());
 }
 
 variant ds_grid_get_min(const unsigned int id, const unsigned int x1, const unsigned int y1, const unsigned int x2, const unsigned int y2)
 {
     //Returns the min of the values of the cells in the region in the grid with the given id
-    return (((x1 < ds_grids[id].width() || x2 < ds_grids[id].width()) && (y1 < ds_grids[id].height() || y2 < ds_grids[id].height())) ? ds_grids[id].find_region_min(x1, y1, x2, y2) : variant(0));
+    return (((x1 < ds_grids[id].width() || x2 < ds_grids[id].width()) && (y1 < ds_grids[id].height() || y2 < ds_grids[id].height())) ? ds_grids[id].find_region_min(x1, y1, x2, y2) : variant());
 }
 
 variant ds_grid_get_mean(const unsigned int id, const unsigned int x1, const unsigned int y1, const unsigned int x2, const unsigned int y2)
 {
     //Returns the mean of the values of the cells in the region in the grid with the given id
-    return (((x1 < ds_grids[id].width() || x2 < ds_grids[id].width()) && (y1 < ds_grids[id].height() || y2 < ds_grids[id].height())) ? ds_grids[id].find_region_mean(x1, y1, x2, y2) : variant(0));
+    return (((x1 < ds_grids[id].width() || x2 < ds_grids[id].width()) && (y1 < ds_grids[id].height() || y2 < ds_grids[id].height())) ? ds_grids[id].find_region_mean(x1, y1, x2, y2) : variant());
 }
 
 variant ds_grid_get_disk_sum(const unsigned int id, const double x, const double y, const double r)
@@ -704,27 +721,28 @@ std::string ds_grid_write(const unsigned int id)
 
 	//ds_grids[id].find(x, y)
 
-	for(int y = 0; y < dsGrid.height(); ++y)
+	for(unsigned y = 0; y < dsGrid.height(); ++y)
 	{
-		for(int x = 0; x < dsGrid.width(); ++x)
+		for(unsigned x = 0; x < dsGrid.width(); ++x)
 		{
 			// Write coords
-			ss.width(4); ss << (unsigned int)x;
-			ss.width(4); ss << (unsigned int)y;
+			ss.width(4); ss << x;
+			ss.width(4); ss << y;
 
 			variant vari = dsGrid.find(x, y);
 
 			// Write type
 			ss.width(2);
 			ss << (unsigned int)((vari.type == enigma::vt_real) ? 0x00 : 0x01);
-			ss.width(16);
-			ss << *(unsigned long long*)&vari.rval.d;
 
 			// Write data
 			if (vari.type == enigma::vt_real)
 			{
-				ss.width(16);
-				ss << *(unsigned long long*)&vari.rval.d;
+                ss.width(16);
+                char* b = (char*)&vari.rval.d;
+                for (unsigned i = 0; i < sizeof(double); ++i)
+                    ss << b[i];
+
 			}
 			else
 			{
@@ -780,13 +798,15 @@ void ds_grid_read(const unsigned int id, std::string value)
 				variant vari;
 				vari.type = enigma::vt_real;
 
-				double d;
+                string b;
 				ss << std::hex << value.substr(i, 16);
-				ss >> *(unsigned long long*)&d;
+				ss >> b;
+                double d = atof(b.c_str());
+
 				ss.clear();
 				i += 16;
 
-				vari.rval = d;
+				vari.rval.d = d;
 				ds_grids[id].add(xx, yy, vari);
 			}
 			else
@@ -810,10 +830,15 @@ void ds_grid_read(const unsigned int id, std::string value)
 	}
 }
 
+}
+
 /* ds_maps */
 
 static map<unsigned int, multimap<variant, variant> > ds_maps;
 static unsigned int ds_maps_maxid = 0;
+
+namespace enigma_user
+{
 
 unsigned int ds_map_create()
 {
@@ -860,13 +885,33 @@ void ds_map_add(const unsigned int id, const variant key, const variant val)
 
 void ds_map_replace(const unsigned int id, const variant key, const variant val)
 {
-    //Replaces the value corresponding with the key with a new value
-    multimap<variant, variant>::iterator it = ds_maps[id].find(key);
-    if (it != ds_maps[id].end())
-    {
-        ds_maps[id].erase(it);
-        ds_maps[id].insert(pair<variant, variant>(key, val));
-    }
+	//TODO: Studio made it so this function will add the value if it is not in the map.
+	//GM 8.1 does not have this behaviour. This has also been tested.
+	//We will probably not add support for that, but it may cause issues down the road.
+	//If a decision is made, you should probably ask Josh for clarification, but when the
+	//decision is made, please replace my comment here whether or not we support it.
+	//If this function is changed to behave this way, please fix it in the Asynchronous dialog 
+	//extension which had to create a special function to replace a value adding it if it does
+	//not exist in the global async_load map.
+	//Replaces the value corresponding with the key with a new value
+	multimap<variant, variant>::iterator it = ds_maps[id].find(key);
+	if (it != ds_maps[id].end())
+	{
+		ds_maps[id].erase(it);
+		ds_maps[id].insert(pair<variant, variant>(key, val));
+	}
+}
+
+//NOTE: Special function, see todo comment above.
+void ds_map_replaceanyway(const unsigned int id, const variant key, const variant val)
+{
+	//Replaces the value corresponding with the key with a new value, adding it if it was not found in the map.
+	multimap<variant, variant>::iterator it = ds_maps[id].find(key);
+	if (it != ds_maps[id].end())
+	{
+		ds_maps[id].erase(it);
+	}
+	ds_maps[id].insert(pair<variant, variant>(key, val));
 }
 
 void ds_map_delete(const unsigned int id, const variant key)
@@ -899,7 +944,7 @@ variant ds_map_find_value(const unsigned int id, const variant key)
 {
     //Returns the value corresponding to the key in the map
     multimap<variant, variant>::iterator it = ds_maps[id].find(key);
-    return ((it == ds_maps[id].end()) ? variant(0) : (*it).second);
+    return ((it == ds_maps[id].end()) ? variant() : (*it).second);
 }
 
 variant ds_map_find_previous(const unsigned int id, const variant key)
@@ -936,14 +981,14 @@ variant ds_map_find_first(const unsigned int id)
 {
     //Returns the smallest key in the map
     multimap<variant, variant>::iterator it = ds_maps[id].begin();
-    return (it == ds_maps[id].end()) ? variant(0) : (*it).first;
+    return (it == ds_maps[id].end()) ? variant() : (*it).first;
 }
 
 variant ds_map_find_last(const unsigned int id)
 {
     //Returns the largest key in the map
     multimap<variant, variant>::reverse_iterator rit = ds_maps[id].rbegin();
-    return ((rit == ds_maps[id].rend()) ? variant(0) : (*rit).first);
+    return ((rit == ds_maps[id].rend()) ? variant() : (*rit).first);
 }
 
 bool ds_map_exists(const unsigned int id)
@@ -983,7 +1028,9 @@ std::string ds_map_write(const unsigned int id)
 		if ((*it).first.type == enigma::vt_real)
 		{
 			ss.width(16);
-			ss << *(unsigned long long*)&(*it).first.rval.d;
+            char* b = (char*)&(*it).first.rval.d;
+            for (unsigned i = 0; i < sizeof(double); ++i)
+            ss << b[i];
 		}
 		else
 		{
@@ -1001,8 +1048,9 @@ std::string ds_map_write(const unsigned int id)
 		if ((*it).second.type == enigma::vt_real)
 		{
 			ss.width(16);
-			ss << *(unsigned long long*)&(*it).second.rval.d;
-		}
+            char* b = (char*)&(*it).second.rval.d;
+            for (unsigned i = 0; i < sizeof(double); ++i)
+            ss << b[i];		}
 		else
 		{
 			ss.width(4); ss << (*it).second.sval.length();
@@ -1041,14 +1089,16 @@ void ds_map_read(const unsigned int id, std::string value)
 
 		if (type == 0)
 		{
-			double d;
-			ss << std::hex << value.substr(i, 16);
-			ss >> *(unsigned long long*)&d;
-			ss.clear();
-			i += 16;
+            string b;
+            ss << std::hex << value.substr(i, 16);
+            ss >> b;
+            double d = atof(b.c_str());
 
+            ss.clear();
+            i += 16;
+
+            variKey.rval.d = d;
 			variKey.type = enigma::vt_real;
-			variKey.rval = d;
 		}
 		else
 		{
@@ -1073,14 +1123,16 @@ void ds_map_read(const unsigned int id, std::string value)
 
 		if (type == 0)
 		{
-			double d;
-			ss << std::hex << value.substr(i, 16);
-			ss >> *(unsigned long long*)&d;
-			ss.clear();
-			i += 16;
+            string b;
+            ss << std::hex << value.substr(i, 16);
+            ss >> b;
+            double d = atof(b.c_str());
 
+            ss.clear();
+            i += 16;
+
+            variValue.rval.d = d;
 			variValue.type = enigma::vt_real;
-			variValue.rval = d;
 		}
 		else
 		{
@@ -1102,10 +1154,15 @@ void ds_map_read(const unsigned int id, std::string value)
 	}
 }
 
+}
+
 /* ds_lists */
 
 static map<unsigned int, vector<variant> > ds_lists;
 static unsigned int ds_lists_maxid = 0;
+
+namespace enigma_user
+{
 
 unsigned int ds_list_create()
 {
@@ -1204,7 +1261,7 @@ variant ds_list_find_value(const unsigned int id, const unsigned int pos)
 {
     //Returns the value stored at the indicated position in the list
     vector<variant>::iterator it = ds_lists[id].begin() + pos;
-    return ((it == ds_lists[id].end()) ? variant(0) : (*it));
+    return ((it == ds_lists[id].end()) ? variant() : (*it));
 }
 
 void ds_list_sort(const unsigned int id, const bool ascend)
@@ -1261,7 +1318,9 @@ std::string ds_list_write(const unsigned int id)
 		if (dsList[i].type == enigma::vt_real)
 		{
 			ss.width(16);
-			ss << *(unsigned long long*)&dsList[i].rval.d;
+            char* b = (char*)&dsList[i].rval.d;
+            for (unsigned i = 0; i < sizeof(double); ++i)
+                ss << b[i];
 		}
 		else
 		{
@@ -1301,13 +1360,15 @@ void ds_list_read(const unsigned int id, std::string value)
 			variant vari;
 			vari.type = enigma::vt_real;
 
-			double d;
-			ss << std::hex << value.substr(i, 16);
-			ss >> *(unsigned long long*)&d;
-			ss.clear();
-			i += 16;
+            string b;
+            ss << std::hex << value.substr(i, 16);
+            ss >> b;
+            double d = atof(b.c_str());
 
-			vari.rval = d;
+            ss.clear();
+            i += 16;
+
+            vari.rval.d = d;
 			ds_lists[id].push_back(vari);
 		}
 		else
@@ -1330,10 +1391,15 @@ void ds_list_read(const unsigned int id, std::string value)
 	}
 }
 
+}
+
 /* ds_prioritys */
 
 static map<unsigned int, multimap<variant, variant> > ds_prioritys;
 static unsigned int ds_prioritys_maxid = 0;
+
+namespace enigma_user
+{
 
 unsigned int ds_priority_create()
 {
@@ -1393,7 +1459,7 @@ variant ds_priority_find_priority(const unsigned int id, const variant val)
 {
     //Returns the priority of the given value in the priority queue
     multimap<variant, variant>::iterator it = ds_prioritys[id].find(val);
-    return ((it == ds_prioritys[id].end()) ? variant(0) : (*it).second);
+    return ((it == ds_prioritys[id].end()) ? variant() : (*it).second);
 }
 
 void ds_priority_delete_value(const unsigned int id, const variant val)
@@ -1505,13 +1571,17 @@ std::string ds_priority_write(const unsigned int id)
 		ss.width(2);
 		ss << (unsigned int)(((*it).first.type == enigma::vt_real) ? 0x00 : 0x01);
 		ss.width(16);
-		ss << *(unsigned long long*)&(*it).second.rval.d;
+        char* b = (char*)&(*it).second.rval.d;
+        for (unsigned i = 0; i < sizeof(double); ++i)
+            ss << b[i];
 
 		// Write data
 		if ((*it).first.type == enigma::vt_real)
 		{
 			ss.width(16);
-			ss << *(unsigned long long*)&(*it).first.rval.d;
+            char* b = (char*)&(*it).first.rval.d;
+            for (unsigned i = 0; i < sizeof(double); ++i)
+                ss << b[i];
 		}
 		else
 		{
@@ -1551,22 +1621,28 @@ void ds_priority_read(const unsigned int id, std::string value)
 		ss.clear();
 		i += 2;
 
-		// Read priority
-		ss << std::hex << value.substr(i, 16);
-		ss >> *(unsigned long long*)&prio.rval.d;
-		ss.clear();
-		i += 16;
+    // Read priority
+        string b;
+        ss << std::hex << value.substr(i, 16);
+        ss >> b;
+        double d = atof(b.c_str());
+        ss.clear();
+        i += 16;
+
+        prio = d;
 
 		if (type == 0)
 		{
-			double d;
-			ss << std::hex << value.substr(i, 16);
-			ss >> *(unsigned long long*)&d;
-			ss.clear();
-			i += 16;
+            string b;
+            ss << std::hex << value.substr(i, 16);
+            ss >> b;
+            double d = atof(b.c_str());
 
+            ss.clear();
+            i += 16;
+
+            vari.rval.d = d;
 			vari.type = enigma::vt_real;
-			vari.rval = d;
 		}
 		else
 		{
@@ -1588,10 +1664,15 @@ void ds_priority_read(const unsigned int id, std::string value)
 	}
 }
 
+}
+
 /* ds_queues */
 
 static map<unsigned int, deque<variant> > ds_queues;
 static unsigned int ds_queues_maxid = 0;
+
+namespace enigma_user
+{
 
 unsigned int ds_queue_create()
 {
@@ -1650,14 +1731,14 @@ variant ds_queue_head(const unsigned int id)
 {
    //Returns the value at the front of the queue
    deque<variant>::iterator it = ds_queues[id].begin();
-   return ((it == ds_queues[id].end()) ? variant(0) : (*it));
+   return ((it == ds_queues[id].end()) ? variant() : (*it));
 }
 
 variant ds_queue_tail(const unsigned int id)
 {
    //Returns the value on the back of the queue
    deque<variant>::reverse_iterator rit = ds_queues[id].rbegin();
-   return ((rit == ds_queues[id].rend()) ? variant(0) : (*rit));
+   return ((rit == ds_queues[id].rend()) ? variant() : (*rit));
 }
 
 bool ds_queue_exists(const unsigned int id)
@@ -1696,7 +1777,9 @@ std::string ds_queue_write(const unsigned int id)
 		if (dsQueue[i].type == enigma::vt_real)
 		{
 			ss.width(16);
-			ss << *(unsigned long long*)&dsQueue[i].rval.d;
+            char* b = (char*)&dsQueue[i].rval.d;
+            for (unsigned i = 0; i < sizeof(double); ++i)
+                ss << b[i];
 		}
 		else
 		{
@@ -1734,14 +1817,16 @@ void ds_queue_read(const unsigned int id, std::string value)
 
 		if (type == 0)
 		{
-			double d;
-			ss << std::hex << value.substr(i, 16);
-			ss >> *(unsigned long long*)&d;
-			ss.clear();
-			i += 16;
+            string b;
+            ss << std::hex << value.substr(i, 16);
+            ss >> b;
+            double d = atof(b.c_str());
 
+            ss.clear();
+            i += 16;
+
+            vari.rval.d = d;
 			vari.type = enigma::vt_real;
-			vari.rval = d;
 		}
 		else
 		{
@@ -1763,10 +1848,15 @@ void ds_queue_read(const unsigned int id, std::string value)
 	}
 }
 
+}
+
 /* ds_stacks */
 
 static map<unsigned int, deque<variant> > ds_stacks;
 static unsigned int ds_stacks_maxid = 0;
+
+namespace enigma_user
+{
 
 unsigned int ds_stack_create()
 {
@@ -1825,7 +1915,7 @@ variant ds_stack_top(const unsigned int id)
 {
    //Returns the value on the top of the stack
    deque<variant>::iterator it = ds_stacks[id].begin();
-   return ((it == ds_stacks[id].end()) ? variant(0) : (*it));
+   return ((it == ds_stacks[id].end()) ? variant() : (*it));
 }
 
 bool ds_stack_exists(const unsigned int id)
@@ -1864,7 +1954,9 @@ std::string ds_stack_write(const unsigned int id)
 		if (dsStack[i].type == enigma::vt_real)
 		{
 			ss.width(16);
-			ss << *(unsigned long long*)&dsStack[i].rval.d;
+            char* b = (char*)&dsStack[i].rval.d;
+            for (unsigned i = 0; i < sizeof(double); ++i)
+                ss << b[i];
 		}
 		else
 		{
@@ -1902,14 +1994,16 @@ void ds_stack_read(const unsigned int id, std::string value)
 
 		if (type == 0)
 		{
-			double d;
-			ss << std::hex << value.substr(i, 16);
-			ss >> *(unsigned long long*)&d;
-			ss.clear();
-			i += 16;
+            string b;
+            ss << std::hex << value.substr(i, 16);
+            ss >> b;
+            double d = atof(b.c_str());
 
+            ss.clear();
+            i += 16;
+
+            vari.rval.d = d;
 			vari.type = enigma::vt_real;
-			vari.rval = d;
 		}
 		else
 		{
@@ -1929,5 +2023,7 @@ void ds_stack_read(const unsigned int id, std::string value)
 		// Push value
 		ds_stacks[id].push_back(vari);
 	}
+}
+
 }
 

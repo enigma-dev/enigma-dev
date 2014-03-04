@@ -27,7 +27,6 @@
 #include <General/debug_macros.h>
 #include <General/parse_basics.h>
 #include <General/debug_macros.h>
-#include <Parser/parse_context.h>
 #include <Storage/value_funcs.h>
 #include <System/builtins.h>
 #include <API/context.h>
@@ -37,6 +36,7 @@
 
 using namespace jdi;
 using namespace jdip;
+using namespace std;
 
 #define code data //I'm sorry, but I can't spend the whole file calling the file buffer "data."
 
@@ -130,11 +130,7 @@ void lexer_edl::handle_preprocessor(error_handler *herr)
       if (strbw(code+pos, "arning")) { pos += 6; goto case_warning; }
       goto failout;
     default: goto failout;
-  }
-  
-  for (;;)
-  {
-    break;
+    
     case_define: {
       string argstrs = read_preprocessor_args(herr);
       const char* argstr = argstrs.c_str();
@@ -272,8 +268,8 @@ void lexer_edl::handle_preprocessor(error_handler *herr)
         if (conditionals.empty() or conditionals.top().is_true) {
           mlex->update();
           
-          AST a;
-          if (a.parse_expression(mlex, herr) or !a.eval()) {
+          AST a(ctex);
+          if (a.parse_expression() or !a.eval(jdi::error_context(herr, filename, line, pos-lpos))) {
             token_t res;
             render_ast(a, "if_directives");
             conditionals.push(condition(0,1));
@@ -607,7 +603,7 @@ token_t lexer_edl::get_token(error_handler *herr)
   return get_token(herr);
 }
 
-lexer_edl::lexer_edl(llreader &input, macro_map &pmacros, const char *fname): lexer_cpp(input, pmacros, fname)
+lexer_edl::lexer_edl(context *ctexi, llreader &input, macro_map &pmacros, const char *fname): lexer_cpp(input, pmacros, fname), ctex(ctexi)
 {
   pair<map<string, TOKEN_TYPE>::iterator, bool> ins = keywords.insert(pair<string, TOKEN_TYPE>("with", TT_WITH));
   if (ins.second) {

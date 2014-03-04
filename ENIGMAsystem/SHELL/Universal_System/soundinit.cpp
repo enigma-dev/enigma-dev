@@ -25,7 +25,9 @@ using namespace std;
 #include "resinit.h"
 #include "zlib.h"
 
-void sound_play(int sound);
+namespace enigma_user {
+  void sound_play(int sound);
+}
 
 namespace enigma
 {
@@ -63,7 +65,7 @@ namespace enigma
       
       int e = sound_add_from_buffer(id,fdata,size);
       if (e) printf("Failed to load sound %d; error %d\n",i,e);
-      delete fdata;
+      delete[] fdata;
     }
   }
 }

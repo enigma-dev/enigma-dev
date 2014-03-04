@@ -33,12 +33,16 @@
 #ifndef _object_h
 #define _object_h
 
-const int self =   -1;
-const int other =  -2;
-const int all =    -3;
-const int noone =  -4;
-const int global = -5;
-const int local =  -7;
+namespace enigma_user {
+  enum {
+    self =   -1,
+    other =  -2,
+    all =    -3,
+    noone =  -4,
+    global = -5,
+    local =  -7
+  };
+}
 
 #include "var4.h"
 
@@ -62,7 +66,12 @@ namespace enigma
       virtual void activate();
       virtual variant myevent_create();
       virtual variant myevent_gamestart();
+	  virtual variant myevent_closebutton();
+	  virtual variant myevent_dialog();
       virtual variant myevent_draw();
+	  virtual variant myevent_drawgui();
+	  virtual variant myevent_drawresize();
+	  virtual variant myevent_roomstart();
       virtual variant myevent_roomend();
       virtual variant myevent_destroy();
 
@@ -85,6 +94,7 @@ namespace enigma
     void constructor(object_basic* instance);
 }
 
+namespace enigma_user {
 bool object_exists(int objid);
 void object_set_depth(int objid, int val);
 void object_set_mask(int objid, int val);
@@ -100,5 +110,6 @@ bool object_get_solid(int objid);
 int object_get_sprite(int objid);
 bool object_get_visible(int objid);
 bool object_is_ancestor(int objid, int acid);
+}
 
 #endif //_object_h

@@ -126,6 +126,7 @@ dllexport void libFree() {
 #include "settings-parse/crawler.h"
 #include "settings-parse/parse_ide_settings.h"
 #include "parser/object_storage.h"
+#include "compiler/jdi_utility.h"
 
 extern void print_definition(string n);
 
@@ -137,7 +138,6 @@ dllexport syntax_error *definitionsModified(const char* wscode, const char* targ
   return &ide_passback_error;
 }
 
-void quickmember_script(jdi::definition_scope* scope, string name);
 dllexport syntax_error *syntaxCheck(int script_count, const char* *script_names, const char* code)
 {
   cout << "Well, shucks; started." << endl;
@@ -147,11 +147,11 @@ dllexport syntax_error *syntaxCheck(int script_count, const char* *script_names,
   
   cout << "Checkpoint." << endl;
   for (int i = 0; i < script_count; i++)
-    quickmember_script(&globals_scope,script_names[i]);
+    quickmember_script(main_context, &globals_scope,script_names[i]);
   
   cout << "Starting syntax check." << endl;
   definition_scope fakecode, fakelocal, fakeglobal;
-  EDL_AST ast(&fakecode, &fakelocal, &fakeglobal);
+  EDL_AST ast(main_context, &fakecode, &fakelocal, &fakeglobal);
   bool serr = ast.parse_edl(code);
   // NEWPARSER: TODO: FIXME: Give a list of errors, somehow
   return &ide_passback_error;

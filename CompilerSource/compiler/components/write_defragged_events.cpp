@@ -4,7 +4,7 @@
          to the engine.
   
   @section License
-    Copyright (C) 2008-2013 Josh Ventura
+    Copyright (C) 2008-2014 Josh Ventura
     This file is a part of the ENIGMA Development Environment.
 
     ENIGMA is free software: you can redistribute it and/or modify it under the
@@ -19,6 +19,7 @@
     with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "makedir.h"
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
@@ -43,11 +44,10 @@ struct foundevent { int mid, id, count; foundevent(): mid(0),id(0),count(0) {} v
 map<string,foundevent> used_events;
 typedef map<string,foundevent>::iterator evfit;
 
-int lang_CPP::compile_writeDefraggedEvents(compile_context &ctex)
+int lang_CPP::compile_write_defragd_events(compile_context &ctex)
 {
-  ofstream wto("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_evparent.h");
+  ofstream wto((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_evparent.h").c_str());
   wto << gen_license;
-
 
   /* Generate a new list of events used by the objects in
   ** this game. Only events on this list will be exported.
@@ -82,7 +82,7 @@ int lang_CPP::compile_writeDefraggedEvents(compile_context &ctex)
           if (it->second->events[j]->main_id == mid and it->second->events[j]->id == id)
             { exists = true; break; }
         if (!exists)
-          it->second->events.push_back(new parsed_event(mid, id, it->second, ctex.global, ""));
+          it->second->events.push_back(new parsed_event(main_context, mid, id, it->second, ctex.global, ""));
       }
     }
   }
@@ -102,7 +102,7 @@ int lang_CPP::compile_writeDefraggedEvents(compile_context &ctex)
               else wto << (e_is_inst ? " { } // No default " : " { return 0; } // No default ") << event_get_human_name(it->second.mid,it->second.id) << " code." << endl;
             }
   wto << "    //virtual void unlink() {} // This is already declared at the super level." << endl;
-  wto << "    virtual variant myevents_perf(int type, int numb) {}" << endl;
+  wto << "    virtual variant myevents_perf(int type, int numb) {return 0;}" << endl;
   wto << "    event_parent() {}" << endl;
   wto << "    event_parent(unsigned _x, int _y): " << system_get_uppermost_tier() << "(_x,_y) {}" << endl;
   wto << "  };" << endl;
@@ -113,7 +113,7 @@ int lang_CPP::compile_writeDefraggedEvents(compile_context &ctex)
   /* Now we write the actual event sequence code, as
   ** well as an initializer function for the whole system.
   ***************************************************************/
-  wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_events.h");
+  wto.open((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_events.h").c_str());
   wto << gen_license;
   wto << "namespace enigma" << endl << "{" << endl;
 
@@ -136,16 +136,17 @@ int lang_CPP::compile_writeDefraggedEvents(compile_context &ctex)
     // Game setting initaliser
   wto << "  int game_settings_initialize()" << endl << "  {" << endl;
 /*    wto  << "    window_set_fullscreen(" << ctex.es->gameSettings.startFullscreen << ");" << endl;
+    // This should only affect texture interpolation if it has not already been enabled
     wto  << "    texture_set_interpolation(" << ctex.es->gameSettings.interpolate << "); " << endl;
-    if (ctex.es->gameSettings.displayCursor)
-        wto  << "    window_set_cursor(cr_default);" << endl;
-    else
+    if (!ctex.es->gameSettings.displayCursor)
         wto  << "    window_set_cursor(cr_none);" << endl;
     wto  << "    window_set_region_scale(" << ctex.es->gameSettings.scaling/100.0 << ", 0);" << endl;
     wto  << "    window_set_sizeable(" << ctex.es->gameSettings.allowWindowResize << ");" << endl;
-    wto  << "    window_set_stayontop(" << ctex.es->gameSettings.alwaysOnTop << ");" << endl;
+    if (ctex.es->gameSettings.alwaysOnTop)
+        wto  << "    window_set_stayontop(true);" << endl;
     wto  << "    window_set_showborder(" << !ctex.es->gameSettings.dontDrawBorder << ");" << endl;
     wto  << "    window_set_showicons(" << !ctex.es->gameSettings.dontShowButtons << ");" << endl;*/  //TODO: LGM needs settings sorted before reenabling
+
     wto << "    return 0;" << endl;
   wto << "  }" << endl;
 
@@ -156,6 +157,7 @@ int lang_CPP::compile_writeDefraggedEvents(compile_context &ctex)
     wto << event_get_super_check_function(it->second.mid, it->second.id);
 
   /* Now the event sequence */
+  bool using_gui = false;
   wto << "  int ENIGMA_events()" << endl << "  {" << endl;
     for (size_t i=0; i<event_sequence.size(); i++)
     {
@@ -164,6 +166,14 @@ int lang_CPP::compile_writeDefraggedEvents(compile_context &ctex)
       evfit it = used_events.find(event_is_instance(mid,id) ? event_stacked_get_root_name(mid) : event_get_function_name(mid,id));
       if (it == used_events.end()) continue;
       if (mid == 7 && (id >= 10 && id <= 25)) continue;   //User events, don't want to be run in the event sequence. TODO: Remove hard-coded values.
+      if (mid == 8 && id == 64)
+      {
+          string seqcode = event_forge_sequence_code(mid,id,it->first);
+          if (seqcode != "")
+            using_gui = true;
+
+          continue;       // Don't want gui loop to be added
+      }
 
       string seqcode = event_forge_sequence_code(mid,id,it->first);
       if (seqcode != "")
@@ -173,7 +183,6 @@ int lang_CPP::compile_writeDefraggedEvents(compile_context &ctex)
         wto << "    " << endl;
     }
     wto << "    after_events:" << endl;
-    wto << "    enigma::update_globals();" << endl;
     if (ctex.es->gameSettings.letEscEndGame)
         wto << "    if (keyboard_check_pressed(vk_escape)) game_end();" << endl;
     if (ctex.es->gameSettings.letF4SwitchFullscreen)
@@ -190,11 +199,12 @@ int lang_CPP::compile_writeDefraggedEvents(compile_context &ctex)
     // Handle room switching/game restart.
     wto << "    enigma::dispose_destroyed_instances();" << endl;
     wto << "    enigma::rooms_switch();" << endl;
-    wto << "    enigma::sleep_for_framerate(room_speed);" << endl;
+    wto << "    enigma::set_room_speed(room_speed);" << endl;
     wto << "    " << endl;
     wto << "    return 0;" << endl;
   wto << "  } // event function" << endl;
 
+  wto << "  bool gui_used = " << using_gui << ";" << endl;
   // Done, end the namespace
   wto << "} // namespace enigma" << endl;
   wto.close();

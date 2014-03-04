@@ -1,6 +1,7 @@
 /********************************************************************************\
 **                                                                              **
 **  Copyright (C) 2011 Harijs Grînbergs                                         **
+**  Modified 2013 by Josh Ventura                                               **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -25,6 +26,7 @@
 **                                                                              **
 \********************************************************************************/
 #include <vector>
+#include <cstdlib>
 #include <map>
 using std::vector;
 using std::multimap;
@@ -40,6 +42,8 @@ namespace enigma
     unsigned x, y, F, H, G, cost;
     node* came_from;
     vector<node*> neighbor_nodes;
+    node(unsigned X = 0, unsigned Y = 0, unsigned f = 0, unsigned h = 0, unsigned g = 0, unsigned Cost = 0, node* CameFrom = NULL):
+      x(X), y(Y), F(f), H(h), G(g), cost(Cost), came_from(CameFrom) {}
   };
   struct grid
   {

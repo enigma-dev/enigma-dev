@@ -35,8 +35,9 @@
 
 #include "Widget_Systems/widgets_mandatory.h" // show_error
 
-
+namespace enigma_user {
 extern double score;
+}
 
 namespace enigma {
 
@@ -73,20 +74,22 @@ static bool cmp_highscore( const playerScore& a, const playerScore& b ) {
         highscore_caption="Top Ten Players";
         highscore_nobody="<nobody>";
         highscore_escape="press <Escape> to close";
-        highscore_clear();
+        enigma_user::highscore_clear();
 
     }
 
 }
 
+#include <Universal_System/roomsystem.h>
+#include <Universal_System/CallbackArrays.h>
+#include <Graphics_Systems/graphics_mandatory.h>
+
+namespace enigma_user
+{
+
 extern int room_width;
 extern int room_height;
-void screen_refresh();
-
-void io_handle();
-bool keyboard_check(int i);
-void screen_redraw();
-void keyboard_wait();
+extern void io_handle(); // FIXME: This might not exist! It should be determined whether this function belongs in widgets_mandatory or if it shouldn't be used on a whim.
 
 void highscore_show(int numb) {
     highscore_add("player name",numb);
@@ -152,21 +155,23 @@ void highscore_add_current() {
 }
 
 int highscore_value(int place) {
-    try {
     return enigma::highscore_list.at(place).player_score;
-    } catch (...) {
-        return 0;
-    }
 }
 
 std::string highscore_name(int place) {
     return enigma::highscore_list[place].player_name;
 }
 
-#include "var4.h"
-void draw_text(int x,int y,variant str);
-int string_width(variant str);
+}
 
+#include "var4.h"
+#include "Universal_System/scalar.h"
+
+namespace enigma_user
+{
+
+void draw_text(gs_scalar x, gs_scalar y,variant str); // TODO: Holy shit.
+int string_width(variant str);
 
 void draw_highscore(int x1, int y1, int x2, int y2) {
 
@@ -176,7 +181,5 @@ void draw_highscore(int x1, int y1, int x2, int y2) {
     }
 }
 
-
-
-
+}
 

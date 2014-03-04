@@ -30,9 +30,10 @@ namespace jdi {
   **/
   enum VT {
     VT_NONE, ///< No value has been assigned to this structure.
-    VT_DOUBLE, ///< The value stored is a double.
+    VT_DEPENDENT, ///< The value stored depends on template parameters or other matters of context; a new value should be constructed ASAP.
+    VT_DOUBLE,   ///< The value stored is a double.
     VT_INTEGER, ///< The value stored is an integer.
-    VT_STRING ///< The value stored is a string.
+    VT_STRING  ///< The value stored is a string.
   };
 
   /**
@@ -64,9 +65,10 @@ namespace jdi {
     value(const char* v); ///< Construct a new value consuming and representing a const char*. Once you pass a const char*, it belongs to this class.
     value(std::string v); ///< Construct a new value representing a copy of the passed string. This operates in O(N).
     value(const value& v); ///< Copy a value. Handles allocation issues.
+    value(const VT& t); ///< Construct with only a value type
     ~value(); ///< Default destructor; handles freeing any strings.
     
-    std::string toString(); ///< Convert to a string, whatever the value is
+    std::string toString() const; ///< Convert to a string, whatever the value is
     
     operator int() const; ///< Cast to an int, returning zero if no valid cast exists.
     operator long() const; ///< Cast to a long int, returning zero if no valid cast exists.

@@ -16,7 +16,7 @@
 **/
 
 #include "../General/OpenGLHeaders.h"
-#include "../General/GLcolors.h"
+#include "../General/GScolors.h"
 #include <math.h>
 
 #define __GETR(x) ((x & 0x0000FF))
@@ -31,6 +31,9 @@
 namespace enigma {
   extern unsigned char currentcolor[4];
 }
+
+namespace enigma_user
+{
 
 void draw_unbind_all() {
   glBindTexture(GL_TEXTURE_2D, 0);
@@ -63,6 +66,7 @@ void draw_set_color(int color)
 	enigma::currentcolor[2] = __GETB(color);
 	glColor4ubv(enigma::currentcolor);
 }
+
 void draw_set_color_rgb(unsigned char red,unsigned char green,unsigned char blue)
 {
 	enigma::currentcolor[0] = red;
@@ -70,11 +74,13 @@ void draw_set_color_rgb(unsigned char red,unsigned char green,unsigned char blue
 	enigma::currentcolor[2] = blue;
 	glColor4ubv(enigma::currentcolor);
 }
+
 void draw_set_alpha(float alpha)
 {
 	enigma::currentcolor[3] = bind_alpha(alpha);
 	glColor4ubv(enigma::currentcolor);
 }
+
 void draw_set_color_rgba(unsigned char red,unsigned char green,unsigned char blue,float alpha)
 {
 	enigma::currentcolor[0] = red;
@@ -82,6 +88,11 @@ void draw_set_color_rgba(unsigned char red,unsigned char green,unsigned char blu
 	enigma::currentcolor[2] = blue;
 	enigma::currentcolor[3] = bind_alpha(alpha);
 	glColor4ubv(enigma::currentcolor);
+}
+
+void draw_set_color_write_enable(bool red, bool green, bool blue, bool alpha)
+{
+	glColorMask(red, green, blue, alpha);
 }
 
 int draw_get_color() {
@@ -93,9 +104,6 @@ int draw_get_blue()  { return enigma::currentcolor[2]; }
 
 float draw_get_alpha() {
   return enigma::currentcolor[3] / 255.0;
-}
-int make_color_rgb(unsigned char r, unsigned char g, unsigned char b) {
-  return r + (g << 8) + (b << 16);
 }
 
 int color_get_red  (int c) { return __GETR(c); }
@@ -124,9 +132,22 @@ int color_get_saturation(int color)
 	return cmpmax  ?  255 - int(255 * (r<g ? (r<b?r:b) : (g<b?g:b)) / double(cmpmax))  :  0;
 }
 
+}
+
 static inline int min(int x,int y) { return x<y ? x:y; }
 static inline int max(int x,int y) { return x>y ? x:y; }
 static inline int bclamp(int x)    { return x > 255 ? 255 : x < 0 ? 0 : x; }
+
+namespace enigma_user
+{
+
+int make_color_rgb(unsigned char r, unsigned char g, unsigned char b) {
+  return r | (g << 8) | (b << 16);
+}
+
+int make_color_rgba(unsigned char r, unsigned char g, unsigned char b, unsigned char a) {
+  return r | (g << 8) | (b << 16) | (a << 24);
+}
 
 int make_color_hsv(int hue,int saturation,int value)
 {
@@ -147,3 +168,6 @@ int make_color_hsv(int hue,int saturation,int value)
 
   return (redr>0 ? redr : 0) | (greenr>0 ? (greenr<<8) : 0) | (bluer>0 ? (bluer<<16) : 0);
 }
+
+}
+

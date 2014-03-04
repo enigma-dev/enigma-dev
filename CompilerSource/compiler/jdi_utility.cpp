@@ -22,12 +22,33 @@
 **/
 
 #include "jdi_utility.h"
+#include <backend/ideprint.h>
 
 using namespace jdip;
 
 definition* enigma_type__var;
 definition* enigma_type__variant;
 definition* enigma_type__varargs;
+
+
+// Compile-time error reporting
+
+void compile_error_handler::basic(const char* level, string msg, string file, int l, int p)
+{
+  user << level;
+  if (!file.empty()) {
+    user << "(" << file;
+    if (l != -1) {
+      user << ":" << l;
+      if (p != -1)
+        user << ":" << p;
+    }
+    user << ")";
+  }
+  user << ": " << msg << flushl;
+}
+void compile_error_handler::error  (string err,  string file, int l, int p) { basic("ERROR: ",   err,  file, l, p); }
+void compile_error_handler::warning(string warn, string file, int l, int p) { basic("Warning: ", warn, file, l, p); }
 
 int referencers_varargs_at(ref_stack &refs) {
   if (refs.top().type != ref_stack::RT_FUNCTION)
@@ -42,10 +63,12 @@ int referencers_varargs_at(ref_stack &refs) {
 /* Iterate over function overloads and change minimum argument count and maximum
    argument count based on the number of arguments in the overload. */
 static void iterate_overloads(definition_function* d, unsigned &min, unsigned &max) {
-    bool variadic = false;
-    unsigned int local_min = 0, local_max = 0;
-    
-    const ref_stack &refs = ((definition_function*)d)->referencers;
+  bool variadic = false;
+  unsigned int local_min = 0, local_max = 0;
+  
+  for (definition_function::overload_iter ovi = d->overloads.begin(); ovi != d->overloads.end(); ++ovi) {
+    definition_overload* ov = ovi->second;
+    const ref_stack &refs = ov->referencers;
     const ref_stack::parameter_ct& params = ((ref_stack::node_func*)&refs.top())->params;
     for (size_t i = 0; i < params.size(); ++i)
         if (params[i].variadic or params[i].def == enigma_type__varargs) variadic = true;
@@ -53,17 +76,18 @@ static void iterate_overloads(definition_function* d, unsigned &min, unsigned &m
     if (variadic) max = -1;
     if (min > local_min) min = local_min;
     if (max < local_max) max = local_max;
+  }
 }
 
 void definition_parameter_bounds(definition *d, unsigned &min, unsigned &max) {
   min = max = 0;
   
-  if (!(d->flags & DEF_FUNCTION)) { cout << "Attempt to use " << d->toString() << " as function" << endl; return; }
-    
-  map<arg_key, definition_function*>::iterator iter=((definition_function*)d)->overloads.begin();
-  for (; iter!=((definition_function*)d)->overloads.end(); iter++) {
-        iterate_overloads(iter->second,min,max);
+  if (!(d->flags & DEF_FUNCTION)) {
+    std::cerr << "Internal error: Attempt to use " << d->toString() << " as function" << std::endl;
+    return;
   }
+    
+  iterate_overloads((definition_function*)d, min, max);
 }
 
 
@@ -82,15 +106,15 @@ bool lang_CPP::global_exists(string n) {
 
 
 void quickmember_variable(jdi::definition_scope* scope, jdi::definition* type, string name) {
-  scope->members[name] = new jdi::definition_typed(name,scope,type,0);
+  scope->members[name] = new jdi::definition_typed(name, scope, type, 0, 0);
 }
-void quickmember_script(jdi::definition_scope* scope, string name) {
+void quickmember_script(jdi::context *pctex, jdi::definition_scope* scope, string name) {
   jdi::ref_stack rfs;
   jdi::ref_stack::parameter_ct params;
   for (int i = 0; i < 16; ++i) {
     jdi::ref_stack::parameter p;
     p.def = enigma_type__variant;
-    p.default_value = new jdi::AST();
+    p.default_value = new jdi::AST(pctex);
     params.throw_on(p);
   }
   rfs.push_func(params);

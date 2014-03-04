@@ -28,7 +28,7 @@ namespace jdi {
 
 #endif
 
-#include <Storage/definition.h>
+#include <Storage/definition_forward.h>
 #include <Storage/references.h>
 
 #ifndef _FULL_TYPE__H__DETAIL
@@ -51,6 +51,7 @@ namespace jdi {
     void copy(const full_type& ft); ///< Copy a full_type without warning; this is for when copy is inevitable.
     
     std::string toString() const; ///< Represent as a string.
+    std::string toEnglish() const; ///< Represent as a string giving a plain-English description.
     
     bool operator==(const full_type& other) const; ///< Compare for STRICT equality across all three attributes; to factor in synonyms, use \c synonymous_with.
     bool operator!=(const full_type& other) const; ///< Compare against equality across all three attributes.

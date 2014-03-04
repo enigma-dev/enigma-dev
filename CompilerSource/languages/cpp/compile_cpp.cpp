@@ -26,6 +26,8 @@
 #include <OS_Switchboard.h>
 #include <cstdio>
 
+#include <makedir.h> // FIXME: This is ludicrous
+
 language_adapter::resource_writer *lang_CPP::compile(compile_context &ctex, const char* exe_filename)
 {
   string desstr = "./ENIGMAsystem/SHELL/design_game" + extensions::targetOS.buildext;
@@ -33,22 +35,24 @@ language_adapter::resource_writer *lang_CPP::compile(compile_context &ctex, cons
 
   string make = "Game ";
 
-  make += ctex.mode == emode_debug? "GMODE=Debug ": ctex.mode == emode_design? "GMODE=Design ": ctex.mode == emode_compile?"GMODE=Compile ": "GMODE=Run ";
+  make += "WORKDIR=\"" + makedir + "\" ";
+  make += ctex.mode == emode_debug? "GMODE=Debug ": ctex.mode == emode_design? "GMODE=Design ": ctex.mode == emode_compile? "GMODE=Compile ": "GMODE=Run ";
   make += "GRAPHICS=" + extensions::targetAPI.graphicsSys + " ";
   make += "AUDIO=" + extensions::targetAPI.audioSys + " ";
   make += "COLLISION=" + extensions::targetAPI.collisionSys + " ";
   make += "WIDGETS="  + extensions::targetAPI.widgetSys + " ";
+  make += "NETWORKING="  + extensions::targetAPI.networkSys + " ";
   make += "PLATFORM=" + extensions::targetAPI.windowSys + " ";
 
   if (CXX_override.length()) make += "CXX=" + CXX_override + " ";
-  if (CC_override.length())    make += "CC=" + CC_override + " ";
+  if (CC_override.length()) make += "CC=" + CC_override + " ";
   if (WINDRES_location.length()) make += "WINDRES=" + WINDRES_location + " ";
 
   if (ctex.mode != emode_debug) {
-    if (TOPLEVEL_cflags.length())   make += "CFLAGS=\"" + TOPLEVEL_cflags + "\" ";
+    if (TOPLEVEL_cflags.length()) make += "CFLAGS=\"" + TOPLEVEL_cflags + "\" ";
     if (TOPLEVEL_cppflags.length()) make += "CPPFLAGS=\"" + TOPLEVEL_cppflags + "\" ";
     if (TOPLEVEL_cxxflags.length()) make += "CXXFLAGS=\"" + TOPLEVEL_cxxflags + "\" ";
-    if (TOPLEVEL_ldflags.length())  make += "LDFLAGS=\"" + TOPLEVEL_ldflags + "\" ";
+    if (TOPLEVEL_ldflags.length()) make += "LDFLAGS=\"" + TOPLEVEL_ldflags + "\" ";
   }
   else {
     if (TOPLEVEL_cflags.length())   make += "CFLAGS=\"" + TOPLEVEL_cflags + " -g -DDEBUG_MODE\" ";
@@ -56,9 +60,9 @@ language_adapter::resource_writer *lang_CPP::compile(compile_context &ctex, cons
     if (TOPLEVEL_cxxflags.length()) make += "CXXFLAGS=\"" + TOPLEVEL_cxxflags + " -g -DDEBUG_MODE\" ";
     if (TOPLEVEL_ldflags.length())  make += "LDFLAGS=\"" + TOPLEVEL_ldflags + "\" ";
   }
-
+  
   string compilepath = CURRENT_PLATFORM_NAME "/" + extensions::targetOS.identifier;
-  make += "COMPILEPATH=" + compilepath + " ";
+  make += "COMPILEPATH=\"" + compilepath + "\" ";
 
   string extstr = "EXTENSIONS=\"";
   for (unsigned i = 0; i < parsed_extensions.size(); i++)
@@ -73,14 +77,14 @@ language_adapter::resource_writer *lang_CPP::compile(compile_context &ctex, cons
 
   edbg << "Running make from `" << MAKE_location << "'" << flushl;
   edbg << "Full command line: " << MAKE_location << " " << make << flushl;
-
+  
   // Pick a file and flush it
-  const char* redirfile = "redirfile.txt";
-  fclose(fopen(redirfile,"wb"));
+  const string redirfile = (makedir + "enigma_compile.log");
+  fclose(fopen(redirfile.c_str(),"wb"));
 
   // Redirect it
-  ide_output_redirect_file(redirfile);
-  int makeres = e_execs(MAKE_location,make,"&>",redirfile);
+  ide_output_redirect_file(redirfile.c_str()); //TODO: If you pass this function the address it will screw up the value; most likely a JNA/Plugin bug.
+  int makeres = e_execs(MAKE_location,make,"&> \"" + redirfile + "\"");
 
   // Stop redirecting GCC output
   ide_output_redirect_reset();

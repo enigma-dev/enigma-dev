@@ -28,6 +28,7 @@ using namespace std;
 #include "spritestruct.h"
 #include "fontstruct.h"
 #include "rectpack.h"
+#include "image_formats.h"
 
 namespace enigma
 {
@@ -47,7 +48,7 @@ namespace enigma
     if (fontstructarray and fold) {
       for (unsigned i = 0; i <= font_idmax; i++)
         fsan[i] = fold[i];
-      delete fold;
+      delete[] fold;
     }
     fontstructarray = fsan + 1;
     fontstructarray[font_idmax] = ret;
@@ -67,14 +68,17 @@ namespace enigma
 
       int gwm = sspr->width, // Glyph width max: sprite width
           ghm = sspr->height, // Glyph height max: sprite height
-          gtw;
+          gtw = 0;
 
       font->height = ghm;
 
       for (int i = 0; i < gcount; i++)
       {
-        gtw =  int((double)sspr->width / sspr->texbordyarray[i]);
-        unsigned char* data = enigma::graphics_get_texture_rgba(sspr->texturearray[i]);
+		unsigned fw, fh;
+        unsigned char* data = enigma::graphics_get_texture_rgba(sspr->texturearray[i], &fw, &fh);
+		//NOTE: Following line replaced gtw = int((double)sspr->width / sspr->texbordyarray[i]);
+		//this was to fix non-power of two subimages
+        gtw = fw;
         glyphdata[i] = data;
 
         // Here we calculate the bbox
@@ -118,7 +122,8 @@ namespace enigma
         boxes.push_back((glyphmetrics[i].w * glyphmetrics[i].h << 8) + i);
       boxes.sort();
 
-      int w = 64, h = 64;
+	  //NOTE: This was hardcoded with 64x64 now it starts with the size of the first glyph, maybe should be fixed properly?
+      unsigned w = glyphmetrics[0].w, h = glyphmetrics[0].h;
       enigma::rect_packer::rectpnode *rectplane = new enigma::rect_packer::rectpnode(0,0,w,h);
       for (list<unsigned int>::reverse_iterator i = boxes.rbegin(); i != boxes.rend() and w and h; )
       {
@@ -139,9 +144,11 @@ namespace enigma
       for (int i = 0; i < gcount; i++)
       {
         // Copy the font glyph image into the big texture we just allocated
-        for (int yy = 0; yy < glyphmetrics[i].h; yy++)
-          for (int xx = 0; xx < glyphmetrics[i].w; xx++)
+        for (int yy = 0; yy < glyphmetrics[i].h; yy++) {
+          for (int xx = 0; xx < glyphmetrics[i].w; xx++) {
             bigtex[w*(glyphmetrics[i].y + yy) + glyphmetrics[i].x + xx] = ((unsigned int*)glyphdata[i])[gtw*(glyphy[i] + yy) + xx + glyphx[i]];
+		  }
+		}
         delete[] glyphdata[i]; // Delete the image data we just copied
 
         font->glyphs[i].tx = glyphmetrics[i].x / double(w);
@@ -149,8 +156,8 @@ namespace enigma
         font->glyphs[i].tx2 = (glyphmetrics[i].x + glyphmetrics[i].w) / double(w);
         font->glyphs[i].ty2 = (glyphmetrics[i].y + glyphmetrics[i].h) / double(h);
       }
-
-      font->texture = enigma::graphics_create_texture(w,h,bigtex);
+	  
+      font->texture = enigma::graphics_create_texture(w,h,w,h,bigtex,true);
       font->twid = w;
       font->thgt = h;
       font->yoffset = 0;
@@ -158,6 +165,9 @@ namespace enigma
       return true;
   }
 }
+
+namespace enigma_user
+{
 
 bool font_get_bold(int fnt)
 {
@@ -197,24 +207,27 @@ bool font_exists(int fnt)
 
 int font_add(string name, int size, bool bold, bool italic, unsigned char first, unsigned char last)
 {
-    enigma::font *fnt = enigma::fontstructarray[enigma::font_new(first, last-first)];
-    fnt->name = name;
-    fnt->fontsize = size;
-    fnt->bold = bold;
-    fnt->italic = italic;
-    fnt->glyphstart = first;
-    fnt->glyphcount = last-first;
+  int res = enigma::font_new(first, last-first);
+  enigma::font *fnt = enigma::fontstructarray[res];
+  fnt->name = name;
+  fnt->fontsize = size;
+  fnt->bold = bold;
+  fnt->italic = italic;
+  fnt->glyphstart = first;
+  fnt->glyphcount = last-first;
+  return res;
 }
 
 bool font_replace(int ind, string name, int size, bool bold, bool italic, unsigned char first, unsigned char last)
 {
-    enigma::font *fnt = enigma::fontstructarray[ind];
-    fnt->name = name;
-    fnt->fontsize = size;
-    fnt->bold = bold;
-    fnt->italic = italic;
-    fnt->glyphstart = first;
-    fnt->glyphcount = last-first;
+  enigma::font *fnt = enigma::fontstructarray[ind];
+  fnt->name = name;
+  fnt->fontsize = size;
+  fnt->bold = bold;
+  fnt->italic = italic;
+  fnt->glyphstart = first;
+  fnt->glyphcount = last-first;
+  return true;
 }
 
 bool font_replace_sprite(int ind, int spr, unsigned char first, bool prop, int sep)
@@ -242,3 +255,6 @@ int font_add_sprite(int spr, unsigned char first, bool prop, int sep)
   if (!enigma::font_pack(font, spr, gcount, prop, sep)) return -1;
   return idfont;
 }
+
+}
+

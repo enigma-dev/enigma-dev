@@ -73,7 +73,6 @@ static bool precise_collision_single(int intersection_left, int intersection_rig
     if (xscale1 != 0.0 && yscale1 != 0.0) {
 
         const double pi_half = M_PI/2.0;
-        const double arad = M_PI/180.0;
 
         const double arad1 = ia1*M_PI/180.0;
 
@@ -115,7 +114,6 @@ static bool precise_collision_pair(int intersection_left, int intersection_right
     if (xscale1 != 0.0 && yscale1 != 0.0 && xscale2 != 0.0 && yscale2 != 0.0) {
 
         const double pi_half = M_PI/2.0;
-        const double arad = M_PI/180.0;
 
         const double arad1 = ia1*M_PI/180.0;
         const double arad2 = ia2*M_PI/180.0;
@@ -172,7 +170,6 @@ static bool precise_collision_line(int intersection_left, int intersection_right
     if (xscale1 != 0.0 && yscale1 != 0.0) {
 
         const double pi_half = M_PI/2.0;
-        const double arad = M_PI/180.0;
 
         const double arad1 = ia1*M_PI/180.0;
 
@@ -245,7 +242,6 @@ static bool precise_collision_ellipse(int intersection_left, int intersection_ri
     if (xscale1 != 0.0 && yscale1 != 0.0) {
 
         const double pi_half = M_PI/2.0;
-        const double arad = M_PI/180.0;
 
         const double arad1 = ia1*M_PI/180.0;
 
@@ -395,17 +391,17 @@ enigma::object_collisions* const collide_inst_inst(int object, bool solid_only, 
                 }
             }
         }
-            
+
     }
     return NULL;
 }
 
 enigma::object_collisions* const collide_inst_rect(int object, bool solid_only, bool prec, bool notme, int x1, int y1, int x2, int y2)
 {
-
-    if (x1 > x2 || y1 > y2) {
-        return NULL;
-    }
+    if (x1 > x2)
+        x1 ^= (x2 ^= (x1 ^= x2));
+    if (y1 > y2)
+        y1 ^= (y2 ^= (y1 ^= y2));
 
     for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)
     {
@@ -479,9 +475,9 @@ enigma::object_collisions* const collide_inst_rect(int object, bool solid_only, 
 enigma::object_collisions* const collide_inst_line(int object, bool solid_only, bool prec, bool notme, int x1, int y1, int x2, int y2)
 {
     // Ensure x1 != x2 || y1 != y2.
-    if (x1 == x2 && y1 == y2) {
+    if (x1 == x2 && y1 == y2)
         return collide_inst_point(object, solid_only, prec, notme, x1, y1);
-    }
+
     for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)
     {
         enigma::object_collisions* const inst = (enigma::object_collisions*)*it;
@@ -783,7 +779,7 @@ void destroy_inst_point(int object, bool solid_only, int x1, int y1)
             unsigned char* pixels = (unsigned char*) (sprite->colldata[usi]);
 
             if (pixels == 0) { //bbox.
-                instance_destroy(inst->id);
+                enigma_user::instance_destroy(inst->id);
             }
             else { //precise.
                 //Intersection.
@@ -811,7 +807,7 @@ void destroy_inst_point(int object, bool solid_only, int x1, int y1)
                 );
 
                 if (coll_result) {
-                    instance_destroy(inst->id);
+                    enigma_user::instance_destroy(inst->id);
                 }
             }
         }
@@ -820,7 +816,7 @@ void destroy_inst_point(int object, bool solid_only, int x1, int y1)
 
 void change_inst_point(int obj, bool perf, int x1, int y1)
 {
-    for (enigma::iterator it = enigma::fetch_inst_iter_by_int(all); it; ++it)
+    for (enigma::iterator it = enigma::fetch_inst_iter_by_int(enigma_user::all); it; ++it)
     {
         enigma::object_collisions* const inst = (enigma::object_collisions*)*it;
         if (inst->sprite_index == -1 && inst->mask_index == -1) //no sprite/mask then no collision
@@ -844,7 +840,7 @@ void change_inst_point(int obj, bool perf, int x1, int y1)
             unsigned char* pixels = (unsigned char*) (sprite->colldata[usi]);
 
             if (pixels == 0) { //bbox.
-                instance_change(obj, perf);
+                enigma::instance_change_inst(obj, perf, inst);
             }
             else { //precise.
                 //Intersection.

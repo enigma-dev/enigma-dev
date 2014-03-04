@@ -8,16 +8,16 @@ Target-platform: iPhone
 # Some info about it
 path:
 make: make
-gcc: /Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin/llvm-gcc-4.2
-g++: /Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin/llvm-g++-4.2
-cxx: /Developer/Platforms/iPhoneSimulator.platform/Developer/usr/bin/llvm-g++-4.2
+gcc: /Applications/Xcode5-DP3.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++
+g++: /Applications/Xcode5-DP3.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++
+cxx: /Applications/Xcode5-DP3.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++
 defines: gcc -dM -x c++ -E $blank
 searchdirs: gcc -E -x c++ -v $blank -I./ENIGMAsystem/SHELL/
 searchdirs-start: "#include <...> search starts here:"
 searchdirs-end: "End of search list."
 resources: /MacOS/build/Release/EnigmaIPhone.app/Contents/MacOS/EnigmaXcode.res
-cppflags: -w -arch i386 -fmessage-length=0 -pipe -fpascal-strings -O0 -DDEBUG=1 -isysroot /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.3.sdk -fexceptions -fasm-blocks -mmacosx-version-min=10.6 -gdwarf-2 -fvisibility-inlines-hidden -D__IPHONE_OS_VERSION_MIN_REQUIRED=40300 -fobjc-abi-version=2 -fobjc-legacy-dispatch
-cflags: -w -arch i386 -fmessage-length=0 -pipe -fpascal-strings -O0 -DDEBUG=1 -isysroot /Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator4.3.sdk -fexceptions -fasm-blocks -mmacosx-version-min=10.6 -gdwarf-2 -fvisibility-inlines-hidden -D__IPHONE_OS_VERSION_MIN_REQUIRED=40300 -fobjc-abi-version=2 -fobjc-legacy-dispatch
+cppflags: -w -triple thumbv7-apple-ios4.3.0 -arch i386 -fmessage-length=0 -pipe -fpascal-strings -O0 -DDEBUG=1 -resource-dir /Applications/Xcode5-DP3.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../lib/clang/5.0 -isysroot /Applications/Xcode5-DP3.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.0.sdk -fexceptions -fasm-blocks -mmacosx-version-min=10.6 -gdwarf-2 -fvisibility-inlines-hidden -D__IPHONE_OS_VERSION_MIN_REQUIRED=40300 -fobjc-abi-version=2 -fobjc-legacy-dispatch
+cflags: -w -arch i386 -fmessage-length=0 -pipe -fpascal-strings -O0 -DDEBUG=1 -resource-dir /Applications/Xcode5-DP3.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../lib/clang/5.0 -isysroot /Applications/Xcode5-DP3.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS7.0.sdk -fexceptions -fasm-blocks -mmacosx-version-min=10.6 -gdwarf-2 -fvisibility-inlines-hidden -D__IPHONE_OS_VERSION_MIN_REQUIRED=40300 -fobjc-abi-version=2 -fobjc-legacy-dispatch
 links: -lz -framework Cocoa
 
 Build-Extension: .app

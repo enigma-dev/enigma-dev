@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton
+/** Copyright (C) 2008-2014 Josh Ventura, Robert B. Colton, Harijs Grinbergs
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -17,60 +17,118 @@
 
 #include <iostream>
 #include <string>
+#include <stdlib.h>     /* malloc, free, rand */
 
+#include "Bridges/General/GL3Context.h"
 #include "../General/OpenGLHeaders.h"
+#include "../General/GSmatrix.h" //For d3d_set_projection_ortho
 using namespace std;
 #include "OPENGL3Std.h"
+#include "GL3shader.h"
+#include "GLSLshader.h"
+#include "Universal_System/shaderstruct.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h" // Room dimensions.
 #include "Graphics_Systems/graphics_mandatory.h" // Room dimensions.
+
+ContextManager* oglmgr = NULL;
+
 namespace enigma
 {
   unsigned bound_texture=0;
+  unsigned default_shader;
+  unsigned bound_shader;
   unsigned char currentcolor[4] = {0,0,0,255};
   bool glew_isgo;
   bool pbo_isgo;
 
-  void graphicssystem_initialize()
-  {
-    GLenum err = glewInit();
-    
-    #ifdef DEBUG_MODE
-    if (GLEW_OK != err)
+    void graphicssystem_initialize()
     {
-      std::cout<<"GLEW ERROR!"<<std::endl;
+        oglmgr = new ContextManager();
+        GLenum err = glewInit();
+
+        #ifdef DEBUG_MODE
+        if (GLEW_OK != err)
+        {
+          std::cout<<"GLEW ERROR!"<<std::endl;
+        }
+        #endif
+
+        //enigma::pbo_isgo=GL_ARB_pixel_buffer_object;
+        using enigma_user::room_width;
+        using enigma_user::room_height;
+
+        glViewport(0,0,(int)room_width,(int)room_height);
+        d3d_set_projection_ortho(0,(int)room_width,0,(int)room_height, 0);
+
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        glDisable(GL_DEPTH_TEST);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        glEnable(GL_BLEND);
+        glEnable(GL_ALPHA_TEST);
+        glEnable(GL_TEXTURE_2D);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glAlphaFunc(GL_ALWAYS,0);
+
+        glBindTexture(GL_TEXTURE_2D,bound_texture=0);
+
+        init_shaders();
+        // read shaders into graphics system structure and compile and link them if needed
+        for (size_t i = 0; i < shader_idmax; ++i) {
+            ShaderStruct* shaderstruct = shaderdata[i];
+
+            int vshader_id = glsl_shader_create(enigma_user::sh_vertex);
+            glsl_shader_load_string(vshader_id, shaderstruct->vertex);
+
+            int fshader_id = glsl_shader_create(enigma_user::sh_fragment);
+            glsl_shader_load_string(fshader_id, shaderstruct->fragment);
+
+            int prog_id = glsl_program_create();
+
+            if (shaderstruct->precompile) {
+                glsl_shader_compile(vshader_id);
+                glsl_shader_compile(fshader_id);
+
+                printf("Precompiling!\n");
+            }
+
+            glsl_program_attach(prog_id, vshader_id);
+            glsl_program_attach(prog_id, fshader_id);
+            glsl_program_link(prog_id);
+            glsl_program_validate(prog_id);
+            getDefaultUniforms(prog_id);
+            getDefaultAttributes(prog_id);
+        }
+
+        //ADD DEFAULT SHADER (emulates FFP)
+        int vshader_id = glsl_shader_create(enigma_user::sh_vertex);
+        glsl_shader_load_string(vshader_id, getDefaultVertexShader());
+
+        int fshader_id = glsl_shader_create(enigma_user::sh_fragment);
+        glsl_shader_load_string(fshader_id, getDefaultFragmentShader());
+
+        int prog_id = glsl_program_create();
+
+        glsl_shader_compile(vshader_id);
+        glsl_shader_compile(fshader_id);
+        glsl_program_attach(prog_id, vshader_id);
+        glsl_program_attach(prog_id, fshader_id);
+        glsl_program_link(prog_id);
+        glsl_program_validate(prog_id);
+
+        getDefaultUniforms(prog_id);
+        getDefaultAttributes(prog_id);
+
+        default_shader = prog_id;
+
+        glsl_program_reset(); //Set the default program
+        //END DEFAULT SHADER
     }
-    #endif
-
-    //enigma::pbo_isgo=GL_ARB_pixel_buffer_object;
-    glMatrixMode(GL_PROJECTION);
-      glClearColor(0,0,0,0);
-    glMatrixMode(GL_MODELVIEW);
-      glLoadIdentity();
-
-      glViewport(0,0,(int)room_width,(int)room_height);
-      glOrtho(-1,(int)room_width,-1,(int)room_height,0,1);
-      glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-      glDisable(GL_DEPTH_TEST);
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-      glEnable(GL_BLEND);
-      glEnable(GL_ALPHA_TEST);
-      glEnable(GL_TEXTURE_2D);
-      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-      glAlphaFunc(GL_ALWAYS,0);
-
-      // enable vertex array's for fast vertex processing
-      glEnableClientState(GL_VERTEX_ARRAY);
-      glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-      glEnableClientState(GL_NORMAL_ARRAY);
-
-      glColor4f(0,0,0,1);
-      glBindTexture(GL_TEXTURE_2D,0);
-  }
 }
 
+namespace enigma_user {
 // Stolen entirely from the documentation and thrown into a switch() structure.
 string draw_get_graphics_error()
 {
@@ -88,3 +146,5 @@ string draw_get_graphics_error()
   }
   return "Unspecified error.";
 }
+}
+

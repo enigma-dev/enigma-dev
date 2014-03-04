@@ -22,6 +22,7 @@
 
 #include "resinit.h"
 #include "spritestruct.h"
+#include "backgroundstruct.h"
 #include "Platforms/platforms_mandatory.h"
 #include "Audio_Systems/audio_mandatory.h"
 #include "Widget_Systems/widgets_mandatory.h"
@@ -37,8 +38,10 @@ namespace enigma {
   extern int event_system_initialize(); //Leave this here until you can find a more brilliant way to include it; it's pretty much not-optional.
   extern int game_settings_initialize();
 }
-extern int random_set_seed(int ss);
-extern int mtrandom_seed(int ss);
+namespace enigma_user {
+  extern int random_set_seed(int ss);
+  extern int mtrandom_seed(int ss);
+}
 
 //This is like main(), only cross-api
 namespace enigma
@@ -46,20 +49,23 @@ namespace enigma
   int initialize_everything()
   {
     time_t ss = time(0);
-    random_set_seed(ss);
-    mtrandom_seed(ss);
+    enigma_user::random_set_seed(ss);
+    enigma_user::mtrandom_seed(ss);
+
+	// must occur before the create/room start/game start events so that it does not override the user setting them in code
+	enigma::game_settings_initialize();
 
     graphicssystem_initialize();
     audiosystem_initialize();
 
-    #if BUILDMODE
+    #if defined(BUILDMODE) && BUILDMODE
       buildmode::buildinit();
     #endif
 
     event_system_initialize();
     input_initialize();
     sprites_init();
-    //backgrounds_init();
+    backgrounds_init();
     widget_system_initialize();
 
     // Open the exe for resource load
@@ -92,7 +98,9 @@ namespace enigma
       enigma::exe_loadsounds(exe);
       enigma::exe_loadbackgrounds(exe);
       enigma::exe_loadfonts(exe);
-      enigma::exe_loadpaths(exe);
+  //    #ifdef PATH_EXT_SET
+		enigma::exe_loadpaths(exe);
+	//  #endif
 
       fclose(exe);
     }
@@ -105,10 +113,11 @@ namespace enigma
     enigma::rooms_load();
 
     //Go to the first room
-    if (room_count)
+    if (enigma_user::room_count)
       enigma::game_start();
+    else
+        enigma_user::window_default();
 
-    enigma::game_settings_initialize();
     return 0;
   }
 }

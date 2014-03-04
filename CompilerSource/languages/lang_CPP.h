@@ -39,14 +39,16 @@ struct lang_CPP: language_adapter {
   int link_globals(parsed_object*, EnigmaStruct*, compile_context &ctex);
 
   // IDE_EDITABLEs added before compile
-  int compile_writeGlobals(compile_context &ctex);
+  int compile_write_globals       (compile_context &ctex);
+  int compile_write_settings      (compile_context &ctex);
   int compile_write_resource_names(compile_context &ctex);
-  int compile_writeObjectData(compile_context &ctex);
-  int compile_writeObjAccess(compile_context &ctex);
-  int compile_writeFontInfo(compile_context &ctex);
-  int compile_writeRoomData(compile_context &ctex);
-  int compile_writeDefraggedEvents(compile_context &ctex);
-  int compile_handle_templates(compile_context &ctex);
+  int compile_write_object_data   (compile_context &ctex);
+  int compile_write_obj_access    (compile_context &ctex);
+  int compile_write_font_info     (compile_context &ctex);
+  int compile_write_room_data     (compile_context &ctex);
+  int compile_write_defragd_events(compile_context &ctex);
+  int compile_write_shader_data   (compile_context &ctex);
+  int compile_handle_templates    (compile_context &ctex);
   
   struct resource_writer_cpp: resource_writer {
     FILE *gameModule; ///< The executable built by the C++ compiler
@@ -68,11 +70,11 @@ struct lang_CPP: language_adapter {
   typedef map<string, definition*> sol_map; ///< Shared Object Locals Map. lol sol
   sol_map shared_object_locals;
   
-  const char* establish_bearings(const char *compiler);
-  syntax_error* definitionsModified(const char*, const char*);
-  resource_writer *compile(compile_context &ctex, const char* filename);
-  void run_game(compile_context &ctex, resource_writer *resw);
-  int rebuild();
+  const char*      establish_bearings (const char *compiler);
+  syntax_error*    definitionsModified(const char*, const char*);
+  resource_writer* compile (compile_context &ctex, const char* filename);
+  void             run_game(compile_context &ctex, resource_writer *resw);
+  int              rebuild ();
   
   bool global_exists(string name);
   jdi::definition* find_typename(string name);

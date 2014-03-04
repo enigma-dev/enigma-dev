@@ -34,18 +34,22 @@ using namespace std;
 
 #include "languages/lang_CPP.h"
 
-parsed_code::parsed_code(definition_scope *oscp, definition_scope *gscp): code_scope(), ast(&code_scope, oscp, gscp) {}
-parsed_event::parsed_event(int m, int s, parsed_object* po, definition_scope *global, const char *oc): id(s), main_id(m), origcode(oc), code(&po->self, global), my_obj(po) {}
+parsed_code::parsed_code(jdi::context *ctex, definition_scope *oscp, definition_scope *gscp): code_scope(), ast(ctex, &code_scope, oscp, gscp) {}
+parsed_event::parsed_event(jdi::context *ctex, int m, int s, parsed_object* po, definition_scope *global, const char *oc): id(s), main_id(m), origcode(oc), code(ctex, &po->self, global), my_obj(po) {}
 parsed_object::parsed_object(string cn, GmObject *gmo): properties(gmo), class_name(cn) { self.name = class_name; }
 parsed_object::parsed_object(const parsed_object& other): properties(other.properties), class_name(other.class_name) {}
-parsed_script::parsed_script(Script *scr, definition_scope *global): properties(scr), locals(), code(&locals, global) {}
-parsed_room::parsed_icreatecode::parsed_icreatecode(parsed_object *obj, definition_scope *gscp): my_obj(obj), code(&obj->self, gscp) {}
+parsed_script::parsed_script(jdi::context *ctex, Script *scr, definition_scope *global): properties(scr), locals(), code(ctex, &locals, global) {}
+parsed_room::parsed_icreatecode::parsed_icreatecode(jdi::context *ctex, parsed_object *obj, definition_scope *gscp): my_obj(obj), code(ctex, &obj->self, gscp) {}
 parsed_room::parsed_room(Room *rm): properties(rm), creation_code(NULL) {}
 
 int parsed_script::parse() { return code.parse(properties->code); }
 int parsed_event::parse() { return code.parse(origcode); }
 int parsed_code::parse(string code) { return ast.parse_edl(code); }
 int parsed_room::parsed_icreatecode::parse(string c) { return code.parse(c); }
+
+compile_context::compile_context(EnigmaStruct *es1, error_handler *herr1, compile_mode mode1): es(es1), herr(herr1), mode(mode1), global(new definition_scope("global", NULL, 0)) {}
+/// Construct with everything but maps of parsed data.
+compile_context::~compile_context() { delete global; }
 
 void scrcall::consolidate(const scrcall &x) {
   arg_max = max(arg_max, x.arg_max);

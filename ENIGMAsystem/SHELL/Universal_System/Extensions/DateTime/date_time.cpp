@@ -28,6 +28,10 @@
 #include <string>
 using std::string;
 
+#include "include.h"
+
+namespace enigma_user
+{
 time_t date_current_datetime()
 {
     return time(NULL);
@@ -455,3 +459,5 @@ string date_datetime_stringf(time_t date,string format)
     strftime(buffer,80,format.c_str(),localtime(&date));
     return string(buffer);
 }
+}
+

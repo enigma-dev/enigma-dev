@@ -1,48 +1,48 @@
-/********************************************************************************\
-**                                                                              **
-**  Copyright (C) 2008-2011 Josh Ventura                                        **
-**                                                                              **
-**  This file is a part of the ENIGMA Development Environment.                  **
-**                                                                              **
-**                                                                              **
-**  ENIGMA is free software: you can redistribute it and/or modify it under the **
-**  terms of the GNU General Public License as published by the Free Software   **
-**  Foundation, version 3 of the license or any later version.                  **
-**                                                                              **
-**  This application and its source code is distributed AS-IS, WITHOUT ANY      **
-**  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS   **
-**  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more       **
-**  details.                                                                    **
-**                                                                              **
-**  You should have received a copy of the GNU General Public License along     **
-**  with this code. If not, see <http://www.gnu.org/licenses/>                  **
-**                                                                              **
-**  ENIGMA is an environment designed to create games and other programs with a **
-**  high-level, fully compilable language. Developers of ENIGMA or anything     **
-**  associated with ENIGMA are in no way responsible for its users or           **
-**  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **
-**                                                                              **
-\********************************************************************************/
-#include <windows.h>
+/** Copyright (C) 2008-2011 Josh Ventura
+*** Copyright (C) 2013-2014 Robert B. Colton
+***
+*** This file is a part of the ENIGMA Development Environment.
+***
+*** ENIGMA is free software: you can redistribute it and/or modify it under the
+*** terms of the GNU General Public License as published by the Free Software
+*** Foundation, version 3 of the license or any later version.
+***
+*** This application and its source code is distributed AS-IS, WITHOUT ANY
+*** WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+*** FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+*** details.
+***
+*** You should have received a copy of the GNU General Public License along
+*** with this code. If not, see <http://www.gnu.org/licenses/>
+**/
+
 #include <time.h>
 #include <string>
 #include <sstream>
 #include <algorithm>
+#include <unistd.h>
+#include <vector>
 using std::string;
+using std::vector;
 
 #include "WINDOWScallback.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
 #include "Universal_System/estring.h"
-#include "WINDOWSwindow.h"
+#include "../General/PFwindow.h"
 #include "WINDOWSmain.h"
 
 #include "Platforms/platforms_mandatory.h"
 
+namespace enigma_user
+{
+
 const int os_type = os_windows;
 
 extern unsigned int game_id;
+
+}
+
 static HKEY registryCurrentRoot = HKEY_CURRENT_USER;
 
 namespace enigma //TODO: Find where this belongs
@@ -52,8 +52,9 @@ namespace enigma //TODO: Find where this belongs
   HWND hWnd;
   LRESULT CALLBACK WndProc (HWND hWnd, UINT message,WPARAM wParam, LPARAM lParam);
   HDC window_hDC;
+  extern bool gameFroze;
 
-  char** main_argv;
+  vector<string> main_argv;
   int main_argc;
 
   void EnableDrawing (HGLRC *hRC);
@@ -65,7 +66,19 @@ namespace enigma {
   int ENIGMA_events();
 } // TODO: synchronize with XLib by moving these declarations to a platform_includes header in the root.
 
-extern double fps;
+//TODO: Implement pause events
+unsigned long current_time_mcs = 0; // microseconds since the start of the game
+
+namespace enigma_user {
+  extern double fps;
+  unsigned long current_time = 0; // milliseconds since the start of the game
+  unsigned long delta_time = 0; // microseconds since the last step event
+  
+  unsigned long get_timer() {  // microseconds since the start of the game
+	return current_time_mcs;
+  }
+}
+
 namespace enigma {
   int current_room_speed;
   bool use_pc;
@@ -89,10 +102,11 @@ namespace enigma {
     }
     return long(value);
   }
-  void sleep_for_framerate(int rs)
+  void set_room_speed(int rs)
   {
     current_room_speed = rs;
   }
+
   void initialize_timing()
   {
     use_pc = QueryPerformanceFrequency(&frequency_pc);
@@ -165,10 +179,21 @@ namespace enigma {
 #include <mmsystem.h>
 int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,int iCmdShow)
 {
-    int wid = (int)room_width, hgt = (int)room_height;
+    int wid = (int)enigma_user::room_width, hgt = (int)enigma_user::room_height;
+    if (!wid || !hgt) wid = 640, hgt = 480;
     enigma::hInstance = hInstance;
-    //enigma::main_argc = argc;
-    //enigma::main_argv = argv;
+
+    LPWSTR *argv;
+    if ((argv = CommandLineToArgvW(GetCommandLineW(), &enigma::main_argc)))
+    {
+        for (int i = 0; i < enigma::main_argc; i++){
+            char buffer[256];
+            snprintf( buffer, 256, "%ls", argv[i]); //Maybe we should check and show some warning if the argument was longer than 256
+            string param = buffer;
+            enigma::main_argv.push_back(param);
+        }
+        LocalFree(argv);
+    }
 
     //Create the window
         WNDCLASS wcontainer,wmain;
@@ -181,7 +206,7 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
         wcontainer.cbClsExtra = 0;
         wcontainer.cbWndExtra = 0;
         wcontainer.hInstance = hInstance;
-        wcontainer.hIcon = LoadIcon (NULL, IDI_APPLICATION);
+        wcontainer.hIcon = LoadIcon (hInstance, "IDI_MAIN_ICON");
         wcontainer.hCursor = LoadCursor (NULL, IDC_ARROW);
         wcontainer.hbrBackground = (HBRUSH) GetStockObject (BLACK_BRUSH);
         wcontainer.lpszMenuName = NULL;
@@ -205,6 +230,13 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
         //Create the parent window
         int screen_width = GetSystemMetrics(SM_CXSCREEN);
         int screen_height = GetSystemMetrics(SM_CYSCREEN);
+		// By default if the room is too big instead of creating a gigantic ass window
+		// make it not bigger than the screen to full screen it, this is what 8.1 and Studio 
+		// do, if the user wants to manually override this they can using 
+		// views/screen_set_viewport or window_set_size/window_set_region_size 
+		// We won't limit those functions like GM, just the default.
+		if (wid > screen_width) wid = screen_width;
+		if (hgt > screen_height) hgt = screen_height;
         // TODO: Implement minimize button on both windows like GM
          enigma::hWndParent = CreateWindow ("TMain", "", WS_CAPTION | WS_POPUPWINDOW | WS_VISIBLE | WS_MINIMIZEBOX, (screen_width-wid)/2, (screen_height-hgt)/2, wid, hgt, NULL, NULL, hInstance, NULL);
 
@@ -224,26 +256,29 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
       minimum_resolution = timer_resolution_info.wPeriodMin;
     }
     timeBeginPeriod(minimum_resolution);
-    long speed_error_mcs = 0;
     enigma::initialize_timing();
     int frames_count = 0;
 
-      char bQuit=0;
-      long spent_mcs;
-      long remaining_mcs;
-      long needed_mcs;
+      char bQuit = 0;
+	  long last_mcs = 0;
+      long spent_mcs = 0;
+      long remaining_mcs = 0;
+      long needed_mcs = 0;
       while (!bQuit)
       {
           using enigma::current_room_speed;
+		 
           // Update current time.
           enigma::update_current_time();
           {
               // Find diff between current and offset.
+			  
               long passed_mcs = enigma::get_current_offset_difference_mcs();
               if (passed_mcs >= 1000000) { // Handle resetting.
                   // If more than one second has passed, update fps variable, reset frames count,
                   // and advance offset by difference in seconds, rounded down.
-                  fps = frames_count;
+				  
+                  enigma_user::fps = frames_count;
                   frames_count = 0;
                   enigma::offset_modulus_one_second();
               }
@@ -251,6 +286,7 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
 
           if (current_room_speed > 0) {
               spent_mcs = enigma::get_current_offset_slowing_difference_mcs();
+			  
               remaining_mcs = 1000000 - spent_mcs;
               needed_mcs = long((1.0 - 1.0*frames_count/current_room_speed)*1e6);
               const int catchup_limit_ms = 50;
@@ -261,12 +297,14 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
                 // without any sleep.
                 // And if there is very heavy load once in a while, the game will only run too fast for catchup_limit ms.
                 enigma::increase_offset_slowing(needed_mcs - (remaining_mcs + catchup_limit_ms*1000));
+
                 spent_mcs = enigma::get_current_offset_slowing_difference_mcs();
                 remaining_mcs = 1000000 - spent_mcs;
                 needed_mcs = long((1.0 - 1.0*frames_count/current_room_speed)*1e6);
               }
               if (remaining_mcs > needed_mcs) {
-                  Sleep(1);
+                  const long sleeping_time = std::min((remaining_mcs - needed_mcs)/5, long(999999));
+                  usleep(std::max(long(1), sleeping_time));
                   continue;
               }
           }
@@ -285,6 +323,20 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
           }
           else
           {
+              if (enigma::gameFroze)  continue;
+				  
+			  unsigned long dt = 0;
+			  if (spent_mcs > last_mcs) {
+				dt = (spent_mcs - last_mcs);
+			  } else {
+				//TODO: figure out what to do here this happens when the fps is reached and the timers start over
+				dt = enigma_user::delta_time;
+			  }
+			  last_mcs = spent_mcs;
+			  enigma_user::delta_time = dt;
+			  current_time_mcs += enigma_user::delta_time;
+			  enigma_user::current_time += enigma_user::delta_time / 1000;
+
               enigma::ENIGMA_events();
               enigma::input_push();
 
@@ -303,6 +355,9 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
     return 0;
 }
 
+namespace enigma_user
+{
+
 string parameter_string(int x)
 {
   if (x < enigma::main_argc)
@@ -317,9 +372,12 @@ int parameter_count()
 }
 
 extern string working_directory;
-bool set_working_directory()
+bool set_working_directory(string dir)
 {
-    SetCurrentDirectory(working_directory.c_str());
+    if (dir == "")
+        SetCurrentDirectory(working_directory.c_str());
+    else
+        SetCurrentDirectory(working_directory.c_str());   //Change to working_directory + dir/
     return 1;
 }
 
@@ -376,14 +434,21 @@ void execute_shell(std::string fname, std::string args)
 	ShellExecute(enigma::hWndParent, NULL, fname.c_str(), args.c_str(), cDir, SW_SHOW);
 }
 
-void execute_program(std::string fname, std::string args, bool wait)
+void execute_shell(std::string operation, std::string fname, std::string args)
+{
+    TCHAR cDir[MAX_PATH];
+    GetCurrentDirectory(MAX_PATH, cDir);
+	ShellExecute(enigma::hWndParent, operation.c_str(), fname.c_str(), args.c_str(), cDir, SW_SHOW);
+}
+
+void execute_program(std::string operation, std::string fname, std::string args, bool wait)
 {
     SHELLEXECUTEINFO lpExecInfo;
       lpExecInfo.cbSize  = sizeof(SHELLEXECUTEINFO);
       lpExecInfo.lpFile = fname.c_str();
       lpExecInfo.fMask=SEE_MASK_DOENVSUBST|SEE_MASK_NOCLOSEPROCESS;
       lpExecInfo.hwnd = enigma::hWndParent;
-      lpExecInfo.lpVerb = "open";
+      lpExecInfo.lpVerb = operation.c_str();
       lpExecInfo.lpParameters = args.c_str();
       TCHAR cDir[MAX_PATH];
       GetCurrentDirectory(MAX_PATH, cDir);
@@ -398,6 +463,11 @@ void execute_program(std::string fname, std::string args, bool wait)
         ::WaitForSingleObject(lpExecInfo.hProcess, INFINITE);
         ::CloseHandle(lpExecInfo.hProcess);
       }
+}
+
+void execute_program(std::string fname, std::string args, bool wait)
+{
+	execute_program("open", fname, args, wait);
 }
 
 std::string environment_get_variable(std::string name)
@@ -539,3 +609,6 @@ unsigned long long window_handle()
 {
     return (unsigned long long)enigma::hWnd;
 }
+
+}
+

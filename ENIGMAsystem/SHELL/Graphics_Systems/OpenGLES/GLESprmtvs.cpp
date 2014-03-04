@@ -15,6 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "../General/GSprimitives.h"
 #include "OpenGLHeaders.h"
 #if PRIMBUFFER
 GLenum __primitivetype[PRIMDEPTH2];
@@ -38,6 +39,8 @@ GLenum ptypes_by_id[16] = {
   GL_POINTS, GL_POINTS, GL_POINTS, GL_POINTS, GL_POINTS
 }; //OPENGLES replaced GL_QUADS, GL_QUAD_STRIP, GL_POLYGON, with GL_TRIANGLE_STRIP's
 
+namespace enigma_user {
+
 void draw_set_primitive_aa(bool enable, int quality)
 {
     if (enable==1){
@@ -48,10 +51,10 @@ void draw_set_primitive_aa(bool enable, int quality)
     }
 }
 
-int draw_primitive_begin(int dink)
+int draw_primitive_begin(int kind)
 {
 	untexture();
-	GLenum kind = ptypes_by_id[ dink & 15 ];
+	GLenum dink = ptypes_by_id[ kind & 15 ];
 	#if !PRIMBUFFER
 	  //glBegin(kind); OPENGLES
 	#else
@@ -60,18 +63,18 @@ int draw_primitive_begin(int dink)
       show_error("Max open primitive count exceeded. Disable the limit via the buffer option, or increase buffer depth",0);
       return -1;
     }
-    __currentpcount[__currentpdepth]=0;
-    __primitivetype[__currentpdepth]=kind;
+    __currentpcount[__currentpdepth]= 0;
+    __primitivetype[__currentpdepth]= dink;
   #endif
   return 0;
 }
 
 
-int draw_primitive_begin_texture(int dink,unsigned tex)
+int draw_primitive_begin_texture(int kind, unsigned tex)
 {
     if (enigma::bound_texture != tex)
         glBindTexture(GL_TEXTURE_2D, enigma::bound_texture = tex);
-	GLenum kind = ptypes_by_id[ dink & 15 ];
+	GLenum dink = ptypes_by_id[ kind & 15 ];
 #if !PRIMBUFFER
    // glBegin(kind);
 #else
@@ -80,13 +83,13 @@ int draw_primitive_begin_texture(int dink,unsigned tex)
         show_error("Max open primitive count exceeded. Disable the limit via the buffer option, or increase buffer depth",0);
         return -1;
     }
-    __currentpcount[__currentpdepth]=0;
-    __primitivetype[__currentpdepth]=kind;
+    __currentpcount[__currentpdepth]= 0;
+    __primitivetype[__currentpdepth]= dink;
 #endif
     return 0;
 }
 
-int draw_vertex(double x, double y)
+int draw_vertex(gs_scalar x, gs_scalar y)
 {
 	#if !PRIMBUFFER
 	//glVertex2f(x,y); OPENGLES
@@ -102,7 +105,7 @@ int draw_vertex(double x, double y)
 	return 0;
 }
 
-int draw_vertex_color(float x, float y, int color, float alpha)
+int draw_vertex_color(gs_scalar x, gs_scalar y, int color, float alpha)
 {
 	unsigned int col=color;
 	#if !PRIMBUFFER
@@ -130,7 +133,7 @@ int draw_vertex_color(float x, float y, int color, float alpha)
 	return 0;
 }
 
-int draw_vertex_texture(float x, float y, float tx, float ty)
+int draw_vertex_texture(gs_scalar x, gs_scalar y, gs_scalar tx, gs_scalar ty)
 {
 #if !PRIMBUFFER
    /* glPushAttrib(GL_CURRENT_BIT);
@@ -152,7 +155,7 @@ int draw_vertex_texture(float x, float y, float tx, float ty)
 #endif
 	return 0;
 }
-int draw_vertex_texture_color(float x, float y, float tx, float ty, int col, float alpha)
+int draw_vertex_texture_color(gs_scalar x, gs_scalar y, gs_scalar tx, gs_scalar ty, int col, float alpha)
 {
 #if !PRIMBUFFER
    /* glPushAttrib(GL_CURRENT_BIT);
@@ -202,4 +205,6 @@ int draw_primitive_end()
 	#endif
 	//glEnd(); OPENGLES
 	return 0;
+}
+
 }

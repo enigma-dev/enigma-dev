@@ -156,10 +156,5 @@ namespace enigma
       delete[] (unsigned char*)mask;
     }
   }
-
-  void perform_automatic_collision_handling_before_collision_event()
-  {
-    // Do nothing.
-  }
 };
 

@@ -27,10 +27,11 @@
 #include "coll_util.h"
 #include "coll_impl.h"
 #include <cmath>
+#include <floatcomp.h>
 
 static inline void get_border(int *leftv, int *rightv, int *topv, int *bottomv, int left, int top, int right, int bottom, double x, double y, double xscale, double yscale, double angle)
 {
-    if (angle == 0)
+    if (fzero(angle))
     {
         const bool xsp = (xscale >= 0), ysp = (yscale >= 0);
         const double lsc = left*xscale, rsc = (right+1)*xscale-1, tsc = top*yscale, bsc = (bottom+1)*yscale-1;
@@ -103,6 +104,17 @@ enigma::object_collisions* const collide_inst_inst(int object, bool solid_only, 
 
 enigma::object_collisions* const collide_inst_rect(int object, bool solid_only, bool notme, int x1, int y1, int x2, int y2)
 {
+    if (x1 > x2) {
+        int x3 = x1;
+        x2 = x1;
+        x1 = x3;
+    }
+    if (y1 > y2) {
+        int y3 = y1;
+        y2 = y1;
+        y1 = y3;
+    }
+
     for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)
     {
         enigma::object_collisions* const inst = (enigma::object_collisions*)*it;
@@ -128,6 +140,10 @@ enigma::object_collisions* const collide_inst_rect(int object, bool solid_only, 
 
 enigma::object_collisions* const collide_inst_line(int object, bool solid_only, bool notme, int x1, int y1, int x2, int y2)
 {
+    // Ensure x1 != x2 || y1 != y2.
+    if (x1 == x2 && y1 == y2)
+        return collide_inst_point(object, solid_only, notme, x1, y1);
+
     for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)
     {
         enigma::object_collisions* const inst = (enigma::object_collisions*)*it;
@@ -156,7 +172,7 @@ enigma::object_collisions* const collide_inst_line(int object, bool solid_only, 
         double dx = x2 - x1;
 
         //do slope check of non vertical lines (dx != 0)
-        if ((float)dx)
+        if (fnzero(dx))
         {
             double a = (y2 - y1) / dx;
             double b = y1 - a * x1;
@@ -230,7 +246,7 @@ static bool line_ellipse_intersects(double rx, double ry, double x, double ly1, 
 
 enigma::object_collisions* const collide_inst_ellipse(int object, bool solid_only, bool notme, int x1, int y1, double rx, double ry)
 {
-    if (rx == 0 || ry == 0)
+    if (fzero(rx) || fzero(ry))
         return 0;
 
     for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)
@@ -281,6 +297,6 @@ void destroy_inst_point(int object, bool solid_only, int x1, int y1)
         get_border(&left, &right, &top, &bottom, box.left, box.top, box.right, box.bottom, x, y, xscale, yscale, ia);
 
         if (x1 >= left && x1 <= right && y1 >= top && y1 <= bottom)
-            instance_destroy(inst->id);
+            enigma_user::instance_destroy(inst->id);
     }
 }

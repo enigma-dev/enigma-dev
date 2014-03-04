@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton, DatZach, Polygone
+/** Copyright (C) 2008-2014 Josh Ventura, Robert B. Colton, DatZach, Polygone, Harijs Grinbergs
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -16,15 +16,15 @@
 **/
 
 #include "../General/OpenGLHeaders.h"
-#include "GL3d3d.h"
-#include "GL3vertexbuffer.h"
-#include "../General/GLtextures.h"
-#include "GL3mesh.h"
-#include "GL3shapes.h"
+#include "../General/GSd3d.h"
+#include "../General/GStextures.h"
+#include "../General/GLTextureStruct.h"
+#include "../General/GSmatrix.h"
+#include "GLSLshader.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
+#include "Bridges/General/GL3Context.h"
 #include <math.h>
-#include "../General/GLbinding.h"
 
 using namespace std;
 
@@ -32,18 +32,49 @@ using namespace std;
 #define __GETG(x) ((x & 0x00FF00)>>8)/255.0
 #define __GETB(x) ((x & 0xFF0000)>>16)/255.0
 
-bool d3dMode = false;
-bool d3dHidden = false;
-bool d3dZWriteEnable = true;
-double projection_matrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1}, transformation_matrix[16] = {1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1};
+#include <floatcomp.h>
 
-GLenum renderstates[22] = {
-  GL_FILL, GL_LINE, GL_POINT, GL_FRONT, GL_BACK,
-  GL_FRONT_AND_BACK, GL_CW, GL_CCW,
-  GL_NICEST, GL_FASTEST, GL_DONT_CARE, GL_EXP, GL_EXP2,
-  GL_LINEAR, GL_NEVER, GL_LESS, GL_EQUAL, GL_LEQUAL,
-  GL_GREATER, GL_NOTEQUAL, GL_GEQUAL, GL_ALWAYS
+namespace enigma {
+  bool d3dMode = false;
+  bool d3dHidden = false;
+  bool d3dZWriteEnable = true;
+  int d3dCulling = 0;
+  extern unsigned bound_shader;
+  extern vector<enigma::ShaderProgram*> shaderprograms;
+}
+
+GLenum renderstates[6] = {
+  GL_FRONT, GL_BACK, GL_FRONT_AND_BACK,
+  GL_NICEST, GL_FASTEST, GL_DONT_CARE
 };
+
+GLenum fogmodes[3] = {
+  GL_EXP, GL_EXP2, GL_LINEAR
+};
+
+GLenum depthoperators[8] = {
+  GL_NEVER, GL_LESS, GL_EQUAL, GL_LEQUAL, GL_GREATER, GL_NOTEQUAL,
+  GL_GEQUAL, GL_ALWAYS
+};
+
+GLenum fillmodes[3] = {
+  GL_POINT, GL_LINE, GL_FILL
+};
+
+GLenum cullingstates[3] = {
+  0, GL_CW, GL_CCW
+};
+
+namespace enigma_user
+{
+
+void d3d_depth_clear() {
+  d3d_depth_clear_value(1.0f);
+}
+
+void d3d_depth_clear_value(float value) {
+  glClearDepthf(value);
+}
 
 void d3d_start()
 {
@@ -52,59 +83,53 @@ void d3d_start()
   glLightModelfv(GL_LIGHT_MODEL_AMBIENT, global_ambient);
 
   // Enable depth buffering
-  d3dMode = true;
-  d3dHidden = false;
-  d3dZWriteEnable = true;
+  enigma::d3dMode = true;
+  enigma::d3dHidden = true;
+  enigma::d3dZWriteEnable = true;
+  enigma::d3dCulling = rs_none;
+  glDepthMask(true);
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_ALPHA_TEST);
   glAlphaFunc(GL_NOTEQUAL, 0);
-  glEnable(GL_NORMALIZE);
-  glEnable(GL_COLOR_MATERIAL);
 
   // Set up projection matrix
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  gluPerspective(45, -view_wview[view_current] / (double)view_hview[view_current], 1, 32000);
+  d3d_set_projection_perspective(0, 0, view_wview[view_current], view_hview[view_current], 0);
+  //enigma::projection_matrix.InitPersProjTransform(45, -view_wview[view_current] / (double)view_hview[view_current], 1, 32000);
 
   // Set up modelview matrix
-  glMatrixMode(GL_MODELVIEW);
+  d3d_transform_set_identity();
   glClearColor(0,0,0,1);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  glLoadIdentity();
 }
 
 void d3d_end()
 {
-  d3dMode = false;
+  enigma::d3dMode = false;
+  enigma::d3dHidden = false;
+  enigma::d3dZWriteEnable = false;
+  enigma::d3dCulling = rs_none;
+  glDepthMask(false);
   glDisable(GL_DEPTH_TEST);
   glDisable(GL_ALPHA_TEST);
-  glDisable(GL_NORMALIZE);
-  glDisable(GL_COLOR_MATERIAL);
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  gluPerspective(0, 1, 0, 1);
-  glMatrixMode(GL_MODELVIEW);
+  d3d_set_projection_ortho(0, 0, view_wview[view_current], view_hview[view_current], 0); //This should probably be changed not to use views
+  //enigma::projection_matrix.InitIdentity();
 }
 
-bool d3d_get_mode()
-{
-    return d3dMode;
-}
-
+// disabling hidden surface removal in means there is no depth buffer
 void d3d_set_hidden(bool enable)
 {
-    d3dHidden = enable;
-}   // TODO: Write function
-
-void d3d_set_zwriteenable(bool enable)
-{
     (enable?glEnable:glDisable)(GL_DEPTH_TEST);
-    d3dZWriteEnable = enable;
+    enigma::d3dHidden = enable;
+	d3d_set_zwriteenable(enable);
 }
 
-void d3d_set_lighting(bool enable)
+// disabling zwriting can let you turn off testing for a single model, for instance
+// to fix cutout billboards such as trees the alpha pixels on their edges may not depth sort
+// properly particle effects are usually drawn with zwriting disabled because of this as well
+void d3d_set_zwriteenable(bool enable)
 {
-    (enable?glEnable:glDisable)(GL_LIGHTING);
+	glDepthMask(enable);
+	enigma::d3dZWriteEnable = enable;
 }
 
 void d3d_set_fog(bool enable, int color, double start, double end)
@@ -124,7 +149,7 @@ void d3d_set_fog_enabled(bool enable)
 
 void d3d_set_fog_mode(int mode)
 {
-  glFogi(GL_FOG_MODE, renderstates[mode]);
+  glFogi(GL_FOG_MODE, fogmodes[mode]);
 }
 
 void d3d_set_fog_hint(int mode) {
@@ -155,24 +180,31 @@ void d3d_set_fog_density(double density)
   glFogf(GL_FOG_DENSITY, density);
 }
 
-void d3d_set_culling(bool enable)
+void d3d_set_culling(int mode)
 {
-  (enable?glEnable:glDisable)(GL_CULL_FACE);
-  glFrontFace(GL_CW);
+  enigma::d3dCulling = mode;
+  oglmgr->SetEnabled(GL_CULL_FACE, mode > 0);
+  glFrontFace(cullingstates[mode]);
 }
 
-void d3d_set_culling_mode(int mode) {
-  glCullFace(renderstates[mode]);
-}
-
-void d3d_set_culling_orientation(int mode) {
-  glFrontFace(renderstates[mode]);
-}
-
-void d3d_set_render_mode(int face, int fill)
+bool d3d_get_mode()
 {
-  glPolygonMode(renderstates[face], renderstates[fill]);
+    return enigma::d3dMode;
 }
+
+bool d3d_get_hidden() {
+	return enigma::d3dHidden;
+}
+
+int d3d_get_culling() {
+	return enigma::d3dCulling;
+}
+
+void d3d_set_fill_mode(int fill)
+{
+  glPolygonMode(GL_FRONT_AND_BACK, fillmodes[fill]);
+}
+
 void d3d_set_line_width(float value) {
   glLineWidth(value);
 }
@@ -181,34 +213,8 @@ void d3d_set_point_size(float value) {
   glPointSize(value);
 }
 
-void d3d_depth_clear() {
-  d3d_depth_clear_value(1.0f);
-}
-
-void d3d_depth_clear_value(float value) {
-  glClearDepthf(value);
-}
-
-void d3d_depth_operator(int mode) {
-  glDepthFunc(renderstates[mode]);
-}
-
-void d3d_set_perspective(bool enable)
-{
-  if (enable)
-  {
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluPerspective(45, -view_wview[view_current] / (double)view_hview[view_current], 1, 32000);
-    glMatrixMode(GL_MODELVIEW);
-  }
-  else
-  {
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluPerspective(0, 1, 0, 1);
-    glMatrixMode(GL_MODELVIEW);
-  } //Perspective not the same as in GM when turning off perspective and using d3d projection
+void d3d_set_depth_operator(int mode) {
+  glDepthFunc(depthoperators[mode]);
 }
 
 void d3d_set_depth(double dep)
@@ -221,726 +227,262 @@ void d3d_set_shading(bool smooth)
     glShadeModel(smooth?GL_SMOOTH:GL_FLAT);
 }
 
-extern GLenum ptypes_by_id[16];
-namespace enigma {
-  extern unsigned char currentcolor[4];
-}
-
-void d3d_set_projection(double xfrom,double yfrom,double zfrom,double xto,double yto,double zto,double xup,double yup,double zup)
+void d3d_set_clip_plane(bool enable)
 {
-  (d3dZWriteEnable?glEnable:glDisable)(GL_DEPTH_TEST);
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  gluPerspective(45, -view_wview[view_current] / (double)view_hview[view_current], 1, 32000);
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
-  gluLookAt(xfrom, yfrom, zfrom, xto, yto, zto, xup, yup, zup);
-  glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
-  glMultMatrixd(transformation_matrix);
-  enigma::d3d_light_update_positions();
+    (enable?glEnable:glDisable)(GL_CLIP_DISTANCE0);
 }
 
-void d3d_set_projection_ext(double xfrom,double yfrom,double zfrom,double xto,double yto,double zto,double xup,double yup,double zup,double angle,double aspect,double znear,double zfar)
-{
-  (d3dZWriteEnable?glEnable:glDisable)(GL_DEPTH_TEST);
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  gluPerspective(angle, -aspect, znear, zfar);
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
-  gluLookAt(xfrom, yfrom, zfrom, xto, yto, zto, xup, yup, zup);
-  glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
-  glMultMatrixd(transformation_matrix);
-  enigma::d3d_light_update_positions();
 }
 
-void d3d_set_projection_ortho(double x, double y, double width, double height, double angle)
-{
-  glDisable(GL_DEPTH_TEST);
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  gluPerspective(angle, 1, 0, 1);
-  glMatrixMode(GL_MODELVIEW);
-  glLoadIdentity();
-  glScalef(1, -1, 1);
-  glOrtho(x-1,x + width,y-1,y + height,0,1);
-  glRotatef(angle,0,0,1);
-  glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
-  glMultMatrixd(transformation_matrix);
-  enigma::d3d_light_update_positions();
-}
-
-void d3d_set_projection_perspective(double x, double y, double width, double height, double angle)
-{
-  glDisable(GL_DEPTH_TEST);
-  glMatrixMode(GL_PROJECTION);
-  glLoadIdentity();
-  gluPerspective(45, -view_wview[view_current] / (double)view_hview[view_current], 1, 32000);
-  glMatrixMode(GL_MODELVIEW);
-  glScalef(1, -1, 1);
-  glOrtho(x-1,x + width,y-1,y + height,0,1);
-  glRotatef(angle,0,0,1);
-  glGetDoublev(GL_MODELVIEW_MATRIX,projection_matrix);
-  glMultMatrixd(transformation_matrix);
-  enigma::d3d_light_update_positions();
-}
-
-void d3d_draw_wall(double x1, double y1, double z1, double x2, double y2, double z2, int texId, double hrep, double vrep)
-{
-  if ((x1 == x2 && y1 == y2) || z1 == z2) {
-    return;
-  }
-
-  float xd = x2-x1, yd = y2-y1, zd = z2-z1;
-  float normal[3] = {xd*zd, zd*yd, 0};
-  float mag = hypot(normal[0], normal[1]);
-  normal[0] /= mag;
-  normal[1] /= mag;
-  if (x2 < x1) {
-    normal[0]=-normal[0]; }
-  if (y2 < y1) {
-    normal[1]=-normal[1]; }
-
-  GLfloat verts[] = {x1, y1, z1, x2, y2, z1, x1, y1, z2, x2, y2, z2},
-          texts[] = {0, 0, hrep, 0, 0, vrep, hrep, vrep},
-          norms[] = {normal[0], normal[1], normal[2], normal[0], normal[1], normal[2],
-                     normal[0], normal[1], normal[2], normal[0], normal[1], normal[2]};
-
-  GLubyte indices[] = {0, 1, 2, 3};
-
-  if (x2>x1 || y2>y1) {
-    indices[0] = 0;
-  } else {
-    indices[0] = 3;
-  }
-
-  if (x2<x1 || y2<y1) {
-    indices[1] = 2;
-  } else {
-    indices[1] = 1;
-  }
-
-  if (x2<x1 || y2<y1) {
-    indices[2] = 1;
-  } else {
-    indices[2] = 2;
-  }
-
-  if (x2>x1 || y2>y1) {
-    indices[3] = 3;
-  } else {
-    indices[3] = 0;
-  }
-
-  glVertexPointer(3, GL_FLOAT, 0, verts);
-  glNormalPointer(GL_FLOAT, 0, norms);
-  glTexCoordPointer(2, GL_FLOAT, 0, texts);
-  texture_use(get_texture(texId));
-  glDrawRangeElements(GL_TRIANGLE_STRIP, 0, 4, 4, GL_UNSIGNED_BYTE, indices);
-}
-
-void d3d_draw_floor(double x1, double y1, double z1, double x2, double y2, double z2, int texId, double hrep, double vrep)
-{
-  GLfloat verts[] = {x1, y1, z1, x2, y1, z2, x1, y2, z1, x2, y2, z2},
-          texts[] = {0, 0, 0, vrep, hrep, 0, hrep, vrep},
-          norms[] = {0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1};
-  GLubyte ceil_indices[] = {0, 2, 1, 3};
-  GLubyte floor_indices[] = {3, 1, 2, 0};
-
-  glBindBuffer( GL_ARRAY_BUFFER, 0 );
-  glVertexPointer(3, GL_FLOAT, 0, verts);
-  glNormalPointer(GL_FLOAT, 0, norms);
-  glTexCoordPointer(2, GL_FLOAT, 0, texts);
-  texture_use(get_texture(texId));
-  if (x2>x1 || y2>y1) {
-    glDrawRangeElements(GL_TRIANGLE_STRIP, 0, 4, 4, GL_UNSIGNED_BYTE, ceil_indices);
-  } else {
-    glDrawRangeElements(GL_TRIANGLE_STRIP, 0, 4, 4, GL_UNSIGNED_BYTE, floor_indices);
-  }
-}
-
-void d3d_draw_block(double x1, double y1, double z1, double x2, double y2, double z2, int texId, double hrep, double vrep, bool closed)
-{
-  GLfloat* verts = block_vertices(x1,y1,z1,x2,y2,z2);
-  GLfloat texts[] = {0, vrep, hrep, vrep, 0, 0, hrep, 0,
-		     0, vrep, hrep, vrep, 0, 0, hrep, 0},
-	  norms[] = {-0.5, -0.5, -0.5, -0.5, -0.5, 0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0.5,
-                     0.5, 0.5, -0.5, 0.5, 0.5, 0.5, 0.5, -0.5, -0.5, 0.5, -0.5, 0.5};
-  GLubyte indices[] = {0, 1, 2, 3, 4, 5, 6, 7, 0, 1, // sides
-                       0, 2, 6, 4, 1, 7, 3, 5}; // top and bottom
-
-  glVertexPointer(3, GL_FLOAT, 0, verts);
-  glNormalPointer(GL_FLOAT, 0, norms);
-  glTexCoordPointer(2, GL_FLOAT, 0, texts);
-  texture_use(get_texture(texId));
-  if (closed) {
-    glDrawRangeElements(GL_TRIANGLE_STRIP, 0, 8, 18, GL_UNSIGNED_BYTE, indices);
-  } else {
-    glDrawRangeElements(GL_TRIANGLE_STRIP, 0, 8, 10, GL_UNSIGNED_BYTE, indices);
-  }
-}
-
-void d3d_draw_cylinder(double x1, double y1, double z1, double x2, double y2, double z2, int texId, double hrep, double vrep, bool closed, int steps)
-{
-    float v[100][3];
-    float t[100][3];
-    steps = min(max(steps, 3), 48);
-    const double cx = (x1+x2)/2, cy = (y1+y2)/2, rx = (x2-x1)/2, ry = (y2-y1)/2, invstep = (1.0/steps)*hrep, pr = 2*M_PI/steps;
-    double a, px, py, tp;
-    int k;
-    texture_use(get_texture(texId));
-    glBegin(GL_TRIANGLE_STRIP);
-    a = 0; px = cx+rx; py = cy; tp = 0; k = 0;
-    for (int i = 0; i <= steps; i++)
-    {
-        v[k][0] = px; v[k][1] = py; v[k][2] = z2;
-        t[k][0] = tp; t[k][1] = 0;
-        glTexCoord2fv(t[k]);
-          glVertex3fv(v[k]);
-        k++;
-        v[k][0] = px; v[k][1] = py; v[k][2] = z1;
-        t[k][0] = tp; t[k][1] = vrep;
-        glTexCoord2fv(t[k]);
-          glVertex3fv(v[k]);
-        k++; a += pr; px = cx+cos(a)*rx; py = cy+sin(a)*ry; tp += invstep;
-    }
-    glEnd();
-    if (closed)
-    {
-        glBegin(GL_TRIANGLE_FAN);
-        v[k][0] = cx; v[k][1] = cy; v[k][2] = z1;
-        t[k][0] = 0; t[k][1] = vrep;
-        glTexCoord2fv(t[k]);
-          glVertex3fv(v[k]);
-        k++;
-        for (int i = 0; i <= steps*2; i+=2)
-        {
-            glTexCoord2fv(t[i]);
-              glVertex3fv(v[i+1]);
-        }
-        glEnd();
-
-        glBegin(GL_TRIANGLE_FAN);
-        v[k][0] = cx; v[k][1] = cy; v[k][2] = z2;
-        t[k][0] = 0; t[k][1] = vrep;
-        glTexCoord2fv(t[k]);
-          glVertex3fv(v[k]);
-        k++;
-        for (int i = 0; i <= steps*2; i+=2)
-        {
-            glTexCoord2fv(t[i]);
-              glVertex3fv(v[i]);
-        }
-        glEnd();
-    }
-}
-
-void d3d_draw_cone(double x1, double y1, double z1, double x2, double y2, double z2, int texId, double hrep, double vrep, bool closed, int steps)
-{
-    steps = min(max(steps, 3), 48);
-    const double cx = (x1+x2)/2, cy = (y1+y2)/2, rx = (x2-x1)/2, ry = (y2-y1)/2, invstep = (1.0/steps)*hrep, pr = 2*M_PI/steps;
-    float v[(steps + 1)*3 + 1][3];
-    float t[(steps + 1)*3 + 1][2];
-    double a, px, py, tp;
-    int k = 0;
-    texture_use(get_texture(texId));
-    glBegin(GL_TRIANGLE_STRIP);
-    a = 0; px = cx+rx; py = cy; tp = 0;
-    for (int i = 0; i <= steps; i++)
-    {
-        v[k][0] = cx; v[k][1] = cy; v[k][2] = z2;
-        t[k][0] = tp; t[k][1] = vrep;
-        glTexCoord2fv(t[k]);
-        glVertex3fv(v[k]);
-        k += steps + 1;
-        v[k][0] = px; v[k][1] = py; v[k][2] = z1;
-        t[k][0] = tp; t[k][1] = 0;
-        glTexCoord2fv(t[k]);
-        glVertex3fv(v[k]);
-        k -= steps + 1;
-        k++; a += pr; px = cx+cos(a)*rx; py = cy+sin(a)*ry; tp += invstep;
-    }
-    k += steps + 1;
-    glEnd();
-    if (closed)
-    {
-        glBegin(GL_TRIANGLE_FAN);
-        v[k][0] = cx; v[k][1] = cy; v[k][2] = z1;
-        t[k][0] = 0; t[k][1] = 0;
-        glTexCoord2fv(t[k]);
-        glVertex3fv(v[k]);
-        k++;
-        tp = 0;
-        for (int i = 0; i <= steps; i++)
-        {
-            v[k][0] = v[i + steps + 1][0]; v[k][1] = v[i + steps + 1][1]; v[k][2] = v[i + steps + 1][2];
-            t[k][0] = 0; t[k][1] = 0;
-            glTexCoord2fv(t[k]);
-            glVertex3fv(v[k]);
-            k++; tp += invstep;
-        }
-        glEnd();
-    }
-}
-
-void d3d_draw_ellipsoid(double x1, double y1, double z1, double x2, double y2, double z2, int texId, double hrep, double vrep, int steps)
-{
-    steps = min(max(steps, 3), 24);
-    const int zsteps = ceil(steps/2.0);
-    const double cx = (x1+x2)/2, cy = (y1+y2)/2, cz = (z1+z2)/2, rx = (x2-x1)/2, ry = (y2-y1)/2, rz = (z2-z1)/2, invstep = (1.0/steps)*hrep, invstep2 = (1.0/zsteps)*vrep, pr = 2*M_PI/steps, qr = M_PI/zsteps;
-    float v[(steps+2)*(zsteps+2)][3];
-    float t[(steps+2)*(zsteps+2)][2];
-    double a, b, px, py, pz, tp, tzp, cosb;
-    double cosx[steps+1], siny[steps+1], txp[steps+1];
-    a = M_PI; tp = 0;
-    texture_use(get_texture(texId));
-    for (int i = 0; i <= steps; i++)
-    {
-        cosx[i] = cos(a)*rx; siny[i] = sin(a)*ry;
-        txp[i] = tp;
-        a += pr; tp += invstep;
-    }
-    int k = 0, kk;
-    b = M_PI/2;
-    cosb = cos(b);
-    pz = rz*sin(b);
-    tzp = 0.0;
-    for (int i = 0; i <= steps; i++)
-    {
-        px = cx+cosx[i]*cosb; py = cy+siny[i]*cosb;
-        v[k][0] = px; v[k][1] = py; v[k][2] = cz + pz;
-        t[k][0] = txp[i]; t[k][1] = tzp;
-        k++;
-    }
-    for (int ii = 0; ii < zsteps; ii++)
-    {
-        b += qr;
-        cosb = cos(b);
-        pz = rz*sin(b);
-        tzp += invstep2;
-        glBegin(GL_TRIANGLE_STRIP);
-        for (int i = 0; i <= steps; i++)
-        {
-            px = cx+cosx[i]*cosb; py = cy+siny[i]*cosb;
-            kk = k - steps - 1;
-            glTexCoord2fv(t[kk]);
-            glVertex3fv(v[kk]);
-            v[k][0] = px; v[k][1] = py; v[k][2] = cz + pz;
-            t[k][0] = txp[i]; t[k][1] = tzp;
-            glTexCoord2fv(t[k]);
-            glVertex3fv(v[k]);
-            k++;
-        }
-        glEnd();
-    }
-}
-
-void d3d_draw_icosahedron(int texId) {
-    texture_use(get_texture(texId));
-}
-
-void d3d_draw_torus(double x1, double y1, double z1, int texId, double hrep, double vrep, int csteps, int tsteps, double radius, double tradius, double TWOPI) {
-        int numc = csteps, numt = tsteps;
-        for (int i = 0; i < numc; i++) {
-            glBegin(GL_QUAD_STRIP);
-	    texture_use(get_texture(texId));
-            for (int j = 0; j <= numt; j++) {
-                for (int k = 1; k >= 0; k--) {
-
-                    double s = (i + k) % numc + 0.5;
-                    double t = j % numt;
-
-                    double x = (radius + tradius * cos(s * TWOPI / numc)) * cos(t * TWOPI / numt);
-                    double y = (radius + tradius * cos(s * TWOPI / numc)) * sin(t * TWOPI / numt);
-                    double z = tradius * sin(s * TWOPI / numc);
-		    double u = (i + k) / (float)numc;
-		    double v = t / (float)numt;
-
-		    glTexCoord2f(v, u);
-                    glVertex3f(x1 + x, y1 + y, z1 + z);
-                }
-            }
-	    glEnd();
-        }
-}
-
-// ***** TRANSFORMATIONS BEGIN *****
-void d3d_transform_set_identity()
-{
-  transformation_matrix[0] = 1;
-  transformation_matrix[1] = 0;
-  transformation_matrix[2] = 0;
-  transformation_matrix[3] = 0;
-  transformation_matrix[4] = 0;
-  transformation_matrix[5] = 1;
-  transformation_matrix[6] = 0;
-  transformation_matrix[7] = 0;
-  transformation_matrix[8] = 0;
-  transformation_matrix[9] = 0;
-  transformation_matrix[10] = 1;
-  transformation_matrix[11] = 0;
-  transformation_matrix[12] = 0;
-  transformation_matrix[13] = 0;
-  transformation_matrix[14] = 0;
-  transformation_matrix[15] = 1;
-  glLoadMatrixd(projection_matrix);
-}
-
-void d3d_transform_add_translation(double xt,double yt,double zt)
-{
-  glLoadIdentity();
-  glTranslatef(xt, yt, zt);
-  glMultMatrixd(transformation_matrix);
-  glGetDoublev(GL_MODELVIEW_MATRIX,transformation_matrix);
-  glLoadMatrixd(projection_matrix);
-  glMultMatrixd(transformation_matrix);
-}
-void d3d_transform_add_scaling(double xs,double ys,double zs)
-{
-  glLoadIdentity();
-  glScalef(xs, ys, zs);
-  glMultMatrixd(transformation_matrix);
-  glGetDoublev(GL_MODELVIEW_MATRIX,transformation_matrix);
-  glLoadMatrixd(projection_matrix);
-  glMultMatrixd(transformation_matrix);
-}
-void d3d_transform_add_rotation_x(double angle)
-{
-  glLoadIdentity();
-  glRotatef(-angle,1,0,0);
-  glMultMatrixd(transformation_matrix);
-  glGetDoublev(GL_MODELVIEW_MATRIX,transformation_matrix);
-  glLoadMatrixd(projection_matrix);
-  glMultMatrixd(transformation_matrix);
-}
-void d3d_transform_add_rotation_y(double angle)
-{
-  glLoadIdentity();
-  glRotatef(-angle,0,1,0);
-  glMultMatrixd(transformation_matrix);
-  glGetDoublev(GL_MODELVIEW_MATRIX,transformation_matrix);
-  glLoadMatrixd(projection_matrix);
-  glMultMatrixd(transformation_matrix);
-}
-void d3d_transform_add_rotation_z(double angle)
-{
-  glLoadIdentity();
-  glRotatef(-angle,0,0,1);
-  glMultMatrixd(transformation_matrix);
-  glGetDoublev(GL_MODELVIEW_MATRIX,transformation_matrix);
-  glLoadMatrixd(projection_matrix);
-  glMultMatrixd(transformation_matrix);
-}
-void d3d_transform_add_rotation_axis(double x, double y, double z, double angle)
-{
-  glLoadIdentity();
-  glRotatef(-angle,x,y,z);
-  glMultMatrixd(transformation_matrix);
-  glGetDoublev(GL_MODELVIEW_MATRIX,transformation_matrix);
-  glLoadMatrixd(projection_matrix);
-  glMultMatrixd(transformation_matrix);
-}
-
-void d3d_transform_set_translation(double xt,double yt,double zt)
-{
-  glLoadIdentity();
-  glTranslatef(xt, yt, zt);
-  glGetDoublev(GL_MODELVIEW_MATRIX,transformation_matrix);
-  glLoadMatrixd(projection_matrix);
-  glMultMatrixd(transformation_matrix);
-}
-void d3d_transform_set_scaling(double xs,double ys,double zs)
-{
-  glLoadIdentity();
-  glScalef(xs, ys, zs);
-  glGetDoublev(GL_MODELVIEW_MATRIX,transformation_matrix);
-  glLoadMatrixd(projection_matrix);
-  glMultMatrixd(transformation_matrix);
-}
-void d3d_transform_set_rotation_x(double angle)
-{
-  glLoadIdentity();
-  glRotatef(-angle,1,0,0);
-  glGetDoublev(GL_MODELVIEW_MATRIX,transformation_matrix);
-  glLoadMatrixd(projection_matrix);
-  glMultMatrixd(transformation_matrix);
-}
-void d3d_transform_set_rotation_y(double angle)
-{
-  glLoadIdentity();
-  glRotatef(-angle,0,1,0);
-  glGetDoublev(GL_MODELVIEW_MATRIX,transformation_matrix);
-  glLoadMatrixd(projection_matrix);
-  glMultMatrixd(transformation_matrix);
-}
-void d3d_transform_set_rotation_z(double angle)
-{
-  glLoadIdentity();
-  glRotatef(-angle,0,0,1);
-  glGetDoublev(GL_MODELVIEW_MATRIX,transformation_matrix);
-  glLoadMatrixd(projection_matrix);
-  glMultMatrixd(transformation_matrix);
-}
-void d3d_transform_set_rotation_axis(double x, double y, double z, double angle)
-{
-  glLoadIdentity();
-  glRotatef(-angle,x,y,z);
-  glGetDoublev(GL_MODELVIEW_MATRIX,transformation_matrix);
-  glLoadMatrixd(projection_matrix);
-  glMultMatrixd(transformation_matrix);
-}
-
-#include <stack>
-stack<bool> trans_stack;
-int trans_stack_size = 0;
-
-bool d3d_transform_stack_push()
-{
-    if (trans_stack_size == 31) return false;
-    glPushMatrix();
-    trans_stack.push(1);
-    trans_stack_size++;
-    return true;
-}
-
-bool d3d_transform_stack_pop()
-{
-    if (trans_stack_size == 0) return false;
-    while (trans_stack.top() == 0)
-    {
-        glPopMatrix();
-        trans_stack.pop();
-    }
-    if (trans_stack_size > 0) trans_stack_size--;
-    return true;
-}
-
-void d3d_transform_stack_clear()
-{
-    do
-      glPopMatrix();
-    while (trans_stack_size--);
-    glLoadIdentity();
-}
-
-bool d3d_transform_stack_empty()
-{
-    return (trans_stack_size == 0);
-}
-
-bool d3d_transform_stack_top()
-{
-    if (trans_stack_size == 0) return false;
-    while (trans_stack.top() == 0)
-    {
-        glPopMatrix();
-        trans_stack.pop();
-    }
-    glPushMatrix();
-    return true;
-}
-
-bool d3d_transform_stack_disgard()
-{
-    if (trans_stack_size == 0) return false;
-    trans_stack.push(0);
-    trans_stack_size--;
-    return true;
-}
-// ***** TRANSFORMATIONS END *****
-
-// ***** LIGHTS BEGIN *****
 #include <map>
 #include <list>
 #include "Universal_System/fileio.h"
 
-struct posi { // Homogenous point.
-    double x;
-    double y;
-    double z;
-    double w;
-    posi(double x1, double y1, double z1, double w1) : x(x1), y(y1), z(z1), w(w1){}
+struct light3D {
+    int type; //0 - directional, 1 - positional
+    bool enabled;
+    gs_scalar position[4];
+    float diffuse[4];
+    float specular[4];
+    float ambient[4];
+    float constant_attenuation;
+    float linear_attenuation;
+    float quadratic_attenuation;
+
+    light3D()
+    {
+        type = 0;
+        enabled = false;
+        position[0]=0, position[1]=0, position[2]=0, position[3]=0;
+        diffuse[0]=0, diffuse[1]=0, diffuse[2]=0, diffuse[3]=0;
+        specular[0]=0, specular[1]=0, specular[2]=0, specular[3]=0;
+        ambient[0]=0, ambient[1]=0, ambient[2]=0, ambient[3]=0;
+        constant_attenuation = 0;
+        linear_attenuation = 0;
+        quadratic_attenuation = 0;
+    };
+};
+
+struct material3D {
+    float ambient[4];
+    float diffuse[4];
+    float specular[4];
+    float shininess;
+
+    material3D()
+    {
+        ambient[0] = 0.2, ambient[1] = 0.2, ambient[2] = 0.2, ambient[3] = 1.0;
+        diffuse[0] = 0.8, diffuse[1] = 0.8, diffuse[2] = 0.8, diffuse[3] = 1.0;
+        specular[0] = 0.0, specular[1] = 0.0, specular[2] = 0.0, specular[3] = 0.0;
+        shininess = 0.0;
+    }
 };
 
 class d3d_lights
 {
-    map<int,int> light_ind;
-    map<int,posi> ind_pos; // Internal index to position.
+    vector<light3D> lights;
+    material3D material;
+    bool lights_enabled;
 
     public:
-    d3d_lights() {}
-    ~d3d_lights() {}
+    float global_ambient_color[4];
+    d3d_lights() {
+        lights_enabled = false;
+        global_ambient_color[0] = global_ambient_color[1] = global_ambient_color[2] = 0.2f;
+        global_ambient_color[3] = 1.0f;
+        for (unsigned int i=0; i<8; ++i){
+            lights.push_back(light3D());
+        }
+    }
+    //~d3d_lights() {}
+
+    void lights_enable(bool enable){
+        lights_enabled = enable;
+    }
+
+    void light_update()
+    {
+        glUniform1i(enigma::shaderprograms[enigma::bound_shader]->uni_lightEnable, lights_enabled);
+        if (lights_enabled == true){
+            glUniform4fv(enigma::shaderprograms[enigma::bound_shader]->uni_ambient_color, 1, global_ambient_color);
+            glUniform4fv(enigma::shaderprograms[enigma::bound_shader]->uni_material_ambient, 1, material.ambient);
+            glUniform4fv(enigma::shaderprograms[enigma::bound_shader]->uni_material_diffuse, 1, material.diffuse);
+            glUniform4fv(enigma::shaderprograms[enigma::bound_shader]->uni_material_specular, 1, material.specular);
+            glUniform1f(enigma::shaderprograms[enigma::bound_shader]->uni_material_shininess, material.shininess);
+            unsigned int al = 0; //Active lights
+            for (unsigned int i=0; i<lights.size(); ++i){
+                if (lights[i].enabled == true){
+                    enigma::mv_matrix.Print();
+                    enigma::Vector4 lpos_eyespace = enigma::mv_matrix * enigma::Vector4(lights[i].position[0],lights[i].position[1],lights[i].position[2],1.0);
+                    gs_scalar tmp_pos[4] = {lpos_eyespace.x,lpos_eyespace.y,lpos_eyespace.z,lights[i].position[3]};
+                    //printf("Light position after:\nx = %f; y = %f; z = %f;\n", lpos_eyespace.x,lpos_eyespace.y,lpos_eyespace.z);
+
+                    glUniform4fv(enigma::shaderprograms[enigma::bound_shader]->uni_light_position[i], 1, tmp_pos);
+                    glUniform4fv(enigma::shaderprograms[enigma::bound_shader]->uni_light_ambient[i], 1, lights[i].ambient);
+                    glUniform4fv(enigma::shaderprograms[enigma::bound_shader]->uni_light_diffuse[i], 1, lights[i].diffuse);
+                    glUniform4fv(enigma::shaderprograms[enigma::bound_shader]->uni_light_specular[i], 1, lights[i].specular);
+                    ++al;
+                }
+            }
+            glUniform1i(enigma::shaderprograms[enigma::bound_shader]->uni_light_active, al);
+        }
+    }
 
     void light_update_positions()
     {
-        map<int, posi>::iterator end = ind_pos.end();
-        for (map<int, posi>::iterator it = ind_pos.begin(); it != end; it++) {
-            const posi pos1 = (*it).second;
-            const float pos[4] = {pos1.x, pos1.y, pos1.z, pos1.w};
-            glLightfv(GL_LIGHT0+(*it).first, GL_POSITION, pos);
+        for (unsigned int i=0; i<lights.size(); ++i){
+            if (lights[i].enabled == true){
+                //printf("model_view matrix:\n");
+                //enigma::mv_matrix.Print();
+                //printf("Light position before:\n");
+                //printf("x = %f; y = %f; z = %f;\n", lights[i].position[0],lights[i].position[1],lights[i].position[2]);
+                enigma::Vector4 lpos_eyespace = enigma::mv_matrix * enigma::Vector4(lights[i].position[0],lights[i].position[1],lights[i].position[2],1.0);
+                //printf("Light position after:\nx = %f; y = %f; z = %f;\n", lpos_eyespace.x,lpos_eyespace.y,lpos_eyespace.z);
+                gs_scalar tmp_pos[4] = {lpos_eyespace.x,lpos_eyespace.y,lpos_eyespace.z,lights[i].position[3]};
+                glUniform4fv(enigma::shaderprograms[enigma::bound_shader]->uni_light_position[i], 1, tmp_pos);
+            }
         }
     }
 
-    bool light_define_direction(int id, double dx, double dy, double dz, int col)
+    bool light_define_direction(unsigned int id, gs_scalar dx, gs_scalar dy, gs_scalar dz, int col)
     {
-        int ms;
-        if (light_ind.find(id) != light_ind.end())
-        {
-            ms = (*light_ind.find(id)).second;
-            multimap<int,posi>::iterator it = ind_pos.find(ms);
-            if (it != ind_pos.end())
-                ind_pos.erase(it); 
-            ind_pos.insert(pair<int,posi>(ms, posi(-dx, -dy, -dz, 0.0f)));
+        if (id<lights.size()){
+            lights[id].type = 0;
+            lights[id].position[0] = -dx;
+            lights[id].position[1] = -dy;
+            lights[id].position[2] = -dz;
+            lights[id].position[3] = 0.0;
+            lights[id].diffuse[0] = __GETR(col);
+            lights[id].diffuse[1] = __GETG(col);
+            lights[id].diffuse[2] = __GETB(col);
+            lights[id].diffuse[3] = 1.0f;
+            light_update();
+            return true;
         }
-        else
-        {
-            ms = light_ind.size();
-            int MAX_LIGHTS;
-            glGetIntegerv(GL_MAX_LIGHTS, &MAX_LIGHTS);
-            if (ms >= MAX_LIGHTS)
-                return false;
-
-            light_ind.insert(pair<int,int>(id, ms));
-            ind_pos.insert(pair<int,posi>(ms, posi(-dx, -dy, -dz, 0.0f)));
-        }
-
-        const float dir[4] = {-dx, -dy, -dz, 0.0f}, color[4] = {__GETR(col), __GETG(col), __GETB(col), 1};
-        glLightfv(GL_LIGHT0+ms, GL_POSITION, dir);
-        glLightfv(GL_LIGHT0+ms, GL_DIFFUSE, color);
-        light_update_positions();
-        return true;
+        return false;
     }
 
-    bool light_define_point(int id, double x, double y, double z, double range, int col)
+    bool light_define_point(unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar range, int col)
     {
         if (range <= 0.0) {
             return false;
         }
-        int ms;
-        if (light_ind.find(id) != light_ind.end())
-        {
-            ms = (*light_ind.find(id)).second;
-            multimap<int,posi>::iterator it = ind_pos.find(ms);
- 	    if (it != ind_pos.end())
-                ind_pos.erase(it); 
-            ind_pos.insert(pair<int,posi>(ms, posi(x, y, z, 1)));
+        if (id<lights.size()){
+            lights[id].type = 1;
+            lights[id].position[0] = x;
+            lights[id].position[1] = y;
+            lights[id].position[2] = z;
+            lights[id].position[3] = range;
+            lights[id].diffuse[0] = __GETR(col);
+            lights[id].diffuse[1] = __GETG(col);
+            lights[id].diffuse[2] = __GETB(col);
+            lights[id].diffuse[3] = 1.0f;
+            lights[id].specular[0] = 0.0f;
+            lights[id].specular[1] = 0.0f;
+            lights[id].specular[2] = 0.0f;
+            lights[id].specular[3] = 0.0f;
+            lights[id].ambient[0] = 0.0f;
+            lights[id].ambient[1] = 0.0f;
+            lights[id].ambient[2] = 0.0f;
+            lights[id].ambient[3] = 0.0f;
+            lights[id].constant_attenuation = 1.0f;
+            lights[id].linear_attenuation = 0.0f;
+            lights[id].quadratic_attenuation = 8.0f/(range*range);
+            light_update();
+            return true;
         }
-        else
-        {
-            ms = light_ind.size();
-            int MAX_LIGHTS;
-            glGetIntegerv(GL_MAX_LIGHTS, &MAX_LIGHTS);
-            if (ms >= MAX_LIGHTS)
-                return false;
-
-            light_ind.insert(pair<int,int>(id, ms));
-            ind_pos.insert(pair<int,posi>(ms, posi(x, y, z, 1)));
-        }
-        const float pos[4] = {x, y, z, 1}, color[4] = {__GETR(col), __GETG(col), __GETB(col), 1},
-            specular[4] = {0, 0, 0, 0}, ambient[4] = {0, 0, 0, 0};
-        glLightfv(GL_LIGHT0+ms, GL_POSITION, pos);
-        glLightfv(GL_LIGHT0+ms, GL_DIFFUSE, color);
-        glLightfv(GL_LIGHT0+ms, GL_SPECULAR, specular);
-        glLightfv(GL_LIGHT0+ms, GL_AMBIENT, ambient);
-        // Limit the range of the light through attenuation.
-        glLightf(GL_LIGHT0+ms, GL_CONSTANT_ATTENUATION, 1.0);
-        glLightf(GL_LIGHT0+ms, GL_LINEAR_ATTENUATION, 0.0);
-        // 48 is a number gotten through manual calibration. Make it lower to increase the light power.
-        const double attenuation_calibration = 48.0;
-        glLightf(GL_LIGHT0+ms, GL_QUADRATIC_ATTENUATION, attenuation_calibration/(range*range));
-        return true;
+        return false;
     }
 
-    bool light_define_specularity(int id, int r, int g, int b, double a) 
+    bool light_set_specularity(unsigned int id, gs_scalar r, gs_scalar g, gs_scalar b, gs_scalar a)
     {
-        int ms;
-        if (light_ind.find(id) != light_ind.end())
-        {
-            ms = (*light_ind.find(id)).second;
+        if (id<lights.size()){
+            lights[id].specular[0] = r;
+            lights[id].specular[1] = g;
+            lights[id].specular[2] = b;
+            lights[id].specular[3] = a;
+            light_update();
+            return true;
         }
-        else
-        {
-            ms = light_ind.size();
-            int MAX_LIGHTS;
-            glGetIntegerv(GL_MAX_LIGHTS, &MAX_LIGHTS);
-            if (ms >= MAX_LIGHTS)
-                return false;
-        }
-        float specular[4] = {r, g, b, a};
-        glLightfv(GL_LIGHT0+ms, GL_SPECULAR, specular);
-        return true;
+        return false;
     }
 
-    bool light_enable(int id)
+    bool light_set_ambient(unsigned int id, gs_scalar r, gs_scalar g, gs_scalar b, gs_scalar a)
     {
-        map<int, int>::iterator it = light_ind.find(id);
-        if (it == light_ind.end())
-        {
-            const int ms = light_ind.size();
-            int MAX_LIGHTS;
-            glGetIntegerv(GL_MAX_LIGHTS, &MAX_LIGHTS);
-            if (ms >= MAX_LIGHTS)
-                return false;
-            light_ind.insert(pair<int,int>(id, ms));
-            glEnable(GL_LIGHT0+ms);
+        if (id<lights.size()){
+            lights[id].ambient[0] = r;
+            lights[id].ambient[1] = g;
+            lights[id].ambient[2] = b;
+            lights[id].ambient[3] = a;
+            light_update();
+            return true;
         }
-        else
-        {
-            glEnable(GL_LIGHT0+(*it).second);
-        }
-        return true;
+        return false;
     }
 
-    bool light_disable(int id)
+
+    bool light_enable(unsigned int id)
     {
-        map<int, int>::iterator it = light_ind.find(id);
-        if (it == light_ind.end())
-        {
-            return false;
+        if (id<lights.size()){
+            lights[id].enabled = true;
+            light_update();
+            return true;
         }
-        else
-        {
-            glDisable(GL_LIGHT0+(*it).second);
+        return false;
+    }
+
+    bool light_disable(unsigned int id)
+    {
+        if (id<lights.size()){
+            lights[id].enabled = false;
+            light_update();
+            return true;
         }
-        return true;
+        return false;
     }
 } d3d_lighting;
 
-bool d3d_light_define_direction(int id, double dx, double dy, double dz, int col)
+namespace enigma_user
+{
+
+bool d3d_light_define_direction(int id, gs_scalar dx, gs_scalar dy, gs_scalar dz, int col)
 {
     return d3d_lighting.light_define_direction(id, dx, dy, dz, col);
 }
 
-bool d3d_light_define_point(int id, double x, double y, double z, double range, int col)
+bool d3d_light_define_point(int id, gs_scalar x, gs_scalar y, gs_scalar z, double range, int col)
 {
     return d3d_lighting.light_define_point(id, x, y, z, range, col);
 }
 
-bool d3d_light_define_specularity(int id, int r, int g, int b, double a) 
+bool d3d_light_set_specularity(int id, int r, int g, int b, double a)
 {
-    return d3d_lighting.light_define_specularity(id, r, g, b, a);
+    return d3d_lighting.light_set_specularity(id, (gs_scalar)r/255.0, (gs_scalar)g/255.0, (gs_scalar)b/255.0, a);
 }
 
-void d3d_light_specularity(int facemode, int r, int g, int b, double a)
+bool d3d_light_set_ambient(int id, int r, int g, int b, double a)
 {
-  float specular[4] = {r, g, b, a};
-  glMaterialfv(renderstates[facemode], GL_SPECULAR, specular);
-}
-
-void d3d_light_shininess(int facemode, int shine)
-{
-  glMateriali(renderstates[facemode], GL_SHININESS, shine);
+    return d3d_lighting.light_set_ambient(id, (gs_scalar)r/255.0, (gs_scalar)g/255.0, (gs_scalar)b/255.0, a);
 }
 
 void d3d_light_define_ambient(int col)
 {
-    const float color[4] = {__GETR(col), __GETG(col), __GETB(col), 1};
-    glLightModelfv(GL_LIGHT_MODEL_AMBIENT, color);
+    d3d_lighting.global_ambient_color[0] = __GETR(col);
+    d3d_lighting.global_ambient_color[1] = __GETG(col);
+    d3d_lighting.global_ambient_color[2] = __GETB(col);
+    d3d_lighting.light_update();
 }
 
 bool d3d_light_enable(int id, bool enable)
 {
     return enable?d3d_lighting.light_enable(id):d3d_lighting.light_disable(id);
+}
+
+void d3d_set_lighting(bool enable)
+{
+    d3d_lighting.lights_enable(enable);
+    d3d_lighting.light_update();
+}
 }
 
 namespace enigma {
@@ -949,5 +491,3 @@ namespace enigma {
         d3d_lighting.light_update_positions();
     }
 }
-
-// ***** LIGHTS END *****

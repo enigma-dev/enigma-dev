@@ -28,21 +28,37 @@
 #include "PS_particle_sprites.h"
 #include "PS_particle_enums.h"
 #include "Graphics_Systems/graphics_mandatory.h"
+#include "Universal_System/spritestruct.h"
+#include "Collision_Systems/collision_mandatory.h"
+#include "Widget_Systems/widgets_mandatory.h" // show_error
 #include <map>
 #include <cmath>
 #include <cstdlib>
 
+#include <floatcomp.h>
+
+#ifdef CODEBLOX
+#  define codebloxt(x, y) (x)
+#else
+#  define codebloxt(x, y) (y)
+#endif
+
 namespace enigma
 {
   std::map<pt_shape,particle_sprite*> shape_to_sprite;
+  std::map<pt_shape,int> shape_to_actual_sprite;
 
-  int bounds(int value, int low, int high)
+  // Reduce compiler warnings on floats by checking them here; a value of -1 is used to indicate uninitialized indices.
+  inline bool negativeone(double x) { return codebloxt((x <= -1 && x >= -1), x == -1); }
+  inline bool notnegativeone(double x) { return codebloxt(x < -1 || x > -1,  x != -1); }
+  
+  static inline int bounds(int value, int low, int high)
   {
     if (value < low) return low;
     if (value > high) return high;
     return value;
   }
-  double fbounds(double value, double low, double high)
+  static inline double fbounds(double value, double low, double high)
   {
     if (value < low) return low;
     if (value > high) return high;
@@ -51,7 +67,7 @@ namespace enigma
   static inline double direction_difference(double dir1, double dir2) {return fmod((fmod((dir1 - dir2),2*M_PI) + 3*M_PI), 2*M_PI) - M_PI;}
   long random_seed = 0;
   const long M = 2393*12413;
-  long get_next_random() // NOTE: Remember to set seed before using.
+  static long get_next_random() // NOTE: Remember to set seed before using.
   {
     random_seed = (random_seed*random_seed + 1) % M;
     return random_seed;
@@ -99,19 +115,20 @@ namespace enigma
   };
 
   // Assumes fullwidth == fullheight == 2^n for some n>0.
-  void create_particle_sprite(int fullwidth, int fullheight, char* imgpxdata, pt_shape pt_sh)
+  static void create_particle_sprite(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, char* imgpxdata, pt_shape pt_sh)
   {
-    unsigned texture = graphics_create_texture(fullwidth,fullheight,imgpxdata);
+    unsigned texture = graphics_create_texture(width, height, fullwidth, fullheight, imgpxdata);
 
     particle_sprite* p_sprite = new particle_sprite();
     p_sprite->texture = texture;
     p_sprite->width = fullwidth;
     p_sprite->height = fullheight;
+    p_sprite->shape = pt_sh;
 
     shape_to_sprite.insert(std::pair<pt_shape,particle_sprite*>(pt_sh,p_sprite));
   }
 
-  void generate_pixel()
+  static void generate_pixel()
   {
     const int fullwidth = 8, fullheight = 8;
     char *imgpxdata = new char[4*fullwidth*fullheight+1];
@@ -133,10 +150,10 @@ namespace enigma
         imgpxdata[4*(x + y*fullwidth)+3] = alpha;
       }
     }
-    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_sh_pixel);
+    create_particle_sprite(fullwidth, fullheight, fullwidth, fullheight, imgpxdata, pt_sh_pixel);
     delete[] imgpxdata;
   }
-  void generate_disk()
+  static void generate_disk()
   {
     const int fullwidth = 64, fullheight = 64;
     char *imgpxdata = new char[4*fullwidth*fullheight+1];
@@ -162,10 +179,10 @@ namespace enigma
         imgpxdata[4*(x + y*fullwidth)+3] = alpha;
       }
     }
-    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_sh_disk);
+    create_particle_sprite(fullwidth, fullheight, fullwidth, fullheight, imgpxdata, pt_sh_disk);
     delete[] imgpxdata;
   }
-  void generate_square()
+  static void generate_square()
   {
     const int fullwidth = 64, fullheight = 64;
     char *imgpxdata = new char[4*fullwidth*fullheight+1];
@@ -191,10 +208,10 @@ namespace enigma
         imgpxdata[4*(x + y*fullwidth)+3] = alpha;
       }
     }
-    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_sh_square);
+    create_particle_sprite(fullwidth, fullheight, fullwidth, fullheight, imgpxdata, pt_sh_square);
     delete[] imgpxdata;
   }
-  void generate_line()
+  static void generate_line()
   {
     const int fullwidth = 64, fullheight = 64;
     char *imgpxdata = new char[4*fullwidth*fullheight+1];
@@ -223,10 +240,10 @@ namespace enigma
         imgpxdata[4*(x + y*fullwidth)+3] = alpha;
       }
     }
-    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_sh_line);
+    create_particle_sprite(fullwidth, fullheight, fullwidth, fullheight, imgpxdata, pt_sh_line);
     delete[] imgpxdata;
   }
-  void generate_star()
+  static void generate_star()
   {
     const int fullwidth = 64, fullheight = 64;
     char *imgpxdata = new char[4*fullwidth*fullheight+1];
@@ -243,7 +260,7 @@ namespace enigma
       );
     }
     const double border_size = 2.0;
-    const int grayvalue = 255;
+    const char grayvalue = (char)255;
     const int alpha_max = 190;
     for (int x = 0; x < fullwidth; x++)
     {
@@ -314,16 +331,16 @@ namespace enigma
             }
           }
         }
-        imgpxdata[4*(x + y*fullwidth)] = grayvalue;
+        imgpxdata[4*(x + y*fullwidth)]   = grayvalue;
         imgpxdata[4*(x + y*fullwidth)+1] = grayvalue;
         imgpxdata[4*(x + y*fullwidth)+2] = grayvalue;
         imgpxdata[4*(x + y*fullwidth)+3] = alpha;
       }
     }
-    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_sh_star);
+    create_particle_sprite(fullwidth, fullheight, fullwidth, fullheight, imgpxdata, pt_sh_star);
     delete[] imgpxdata;
   }
-  void generate_circle()
+  static void generate_circle()
   {
     const int fullwidth = 64, fullheight = 64;
     char *imgpxdata = new char[4*fullwidth*fullheight+1];
@@ -332,7 +349,7 @@ namespace enigma
     const int rad = 26;
     const double ring_size = 2.5;
     const int alpha_max = 220;
-    const int grayvalue = 255;
+    const char grayvalue = (char)255;
     for (int x = 0; x < fullwidth; x++)
     {
       for (int y = 0; y < fullheight; y++)
@@ -348,10 +365,10 @@ namespace enigma
         imgpxdata[4*(x + y*fullwidth)+3] = alpha;
       }
     }
-    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_sh_circle);
+    create_particle_sprite(fullwidth, fullheight, fullwidth, fullheight, imgpxdata, pt_sh_circle);
     delete[] imgpxdata;
   }
-  void generate_ring()
+  static void generate_ring()
   {
     const int fullwidth = 64, fullheight = 64;
     char *imgpxdata = new char[4*fullwidth*fullheight+1];
@@ -361,7 +378,7 @@ namespace enigma
     const int in_r = 6;
     const double ring_size = 2.5;
     const int alpha_max = 220;
-    const int grayvalue = 255;
+    const char grayvalue = (char)255;
     for (int x = 0; x < fullwidth; x++)
     {
       for (int y = 0; y < fullheight; y++)
@@ -382,10 +399,10 @@ namespace enigma
         imgpxdata[4*(x + y*fullwidth)+3] = alpha;
       }
     }
-    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_sh_ring);
+    create_particle_sprite(fullwidth, fullheight, fullwidth, fullheight, imgpxdata, pt_sh_ring);
     delete[] imgpxdata;
   }
-  void generate_sphere()
+  static void generate_sphere()
   {
     const int fullwidth = 64, fullheight = 64;
     char *imgpxdata = new char[4*fullwidth*fullheight+1];
@@ -407,10 +424,10 @@ namespace enigma
         imgpxdata[4*(x + y*fullwidth)+3] = alpha;
       }
     }
-    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_sh_sphere);
+    create_particle_sprite(fullwidth, fullheight, fullwidth, fullheight, imgpxdata, pt_sh_sphere);
     delete[] imgpxdata;
   }
-  void generate_flare()
+  static void generate_flare()
   {
     const int fullwidth = 64, fullheight = 64;
     char *imgpxdata = new char[4*fullwidth*fullheight+1];
@@ -435,7 +452,7 @@ namespace enigma
 
     int alpha_max = 255;
     int alpha_min = 0;
-    const int grayvalue = 255;
+    const char grayvalue = (char)255;
     const double dist_max = 29.0;
 
     for (int x = 0; x < fullwidth; x++)
@@ -462,10 +479,10 @@ namespace enigma
         imgpxdata[4*(x + y*fullwidth)+3] = alpha;
       }
     }
-    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_sh_flare);
+    create_particle_sprite(fullwidth, fullheight, fullwidth, fullheight, imgpxdata, pt_sh_flare);
     delete[] imgpxdata;
   }
-  void generate_spark()
+  static void generate_spark()
   {
     const int fullwidth = 64, fullheight = 64;
     char *imgpxdata = new char[4*fullwidth*fullheight+1];
@@ -491,7 +508,7 @@ namespace enigma
 
     int alpha_max = 255;
     int alpha_min = 20;
-    const int grayvalue = 255;
+    const char grayvalue = (char)255;
     const double line_half_width = 1.5;
 
     for (int x = 0; x < fullwidth; x++)
@@ -507,13 +524,13 @@ namespace enigma
         int line_index_high = line_index;
         while (true)
         {
-          if (line_lengths[line_index_low] == -1) {
+          if (negativeone(line_lengths[line_index_low])) {
             line_index_low = (line_index_low-1) % line_count;
           }
-          if (line_lengths[line_index_high] == -1) {
+          if (negativeone(line_lengths[line_index_high])) {
             line_index_high = (line_index_high+1) % line_count;
           }
-          if (line_lengths[line_index_low] != -1 && line_lengths[line_index_high] != -1) {
+          if (notnegativeone(line_lengths[line_index_low]) && notnegativeone(line_lengths[line_index_high])) {
             break;
           }
         }
@@ -531,13 +548,13 @@ namespace enigma
           double dfm_mod1 = dfm*line_length_max/line_lengths[line_index_low];
           double part1 = pow(fbounds(1.1 - dfm_mod1/line_length_max, 0.0, 1.0), 2);
           double s1 = line_strengths[line_index_low]*part1*(alpha_max-alpha_min);
-          s1 = s1 == 0 ? 0 : s1 + alpha_min;
+          s1 = fzero(s1) ? 0 : s1 + alpha_min;
           int alpha1 = int(distance_part1*s1);
 
           double dfm_mod2 = dfm*line_length_max/line_lengths[line_index_high];
           double part2 = pow(fbounds(1.1 - dfm_mod2/line_length_max, 0.0, 1.0), 2);
           double s2 = line_strengths[line_index_high]*part2*(alpha_max-alpha_min);
-          s2 = s2 == 0 ? 0 : s2 + alpha_min;
+          s2 = fzero(s2) ? 0 : s2 + alpha_min;
           int alpha2 = int(distance_part2*s2);
 
           alpha = std::max(alpha1, alpha2);
@@ -550,10 +567,10 @@ namespace enigma
         imgpxdata[4*(x + y*fullwidth)+3] = alpha;
       }
     }
-    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_sh_spark);
+    create_particle_sprite(fullwidth, fullheight, fullwidth, fullheight, imgpxdata, pt_sh_spark);
     delete[] imgpxdata;
   }
-  void generate_explosion()
+  static void generate_explosion()
   {
     const int fullwidth = 64, fullheight = 64;
     char *imgpxdata = new char[4*fullwidth*fullheight+1];
@@ -626,10 +643,10 @@ namespace enigma
         imgpxdata[4*(x + y*fullwidth)+3] = alpha;
       }
     }
-    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_sh_explosion);
+    create_particle_sprite(fullwidth, fullheight, fullwidth, fullheight, imgpxdata, pt_sh_explosion);
     delete[] imgpxdata;
   }
-  void generate_cloud()
+  static void generate_cloud()
   {
     const int fullwidth = 64, fullheight = 64;
     char *imgpxdata = new char[4*fullwidth*fullheight+1];
@@ -702,10 +719,10 @@ namespace enigma
         imgpxdata[4*(x + y*fullwidth)+3] = alpha;
       }
     }
-    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_sh_cloud);
+    create_particle_sprite(fullwidth, fullheight, fullwidth, fullheight, imgpxdata, pt_sh_cloud);
     delete[] imgpxdata;
   }
-  void generate_smoke()
+  static void generate_smoke()
   {
     const int fullwidth = 64, fullheight = 64;
     char *imgpxdata = new char[4*fullwidth*fullheight+1];
@@ -777,10 +794,10 @@ namespace enigma
         imgpxdata[4*(x + y*fullwidth)+3] = alpha;
       }
     }
-    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_sh_smoke);
+    create_particle_sprite(fullwidth, fullheight, fullwidth, fullheight, imgpxdata, pt_sh_smoke);
     delete[] imgpxdata;
   }
-  void generate_snow()
+  static void generate_snow()
   {
     const int fullwidth = 64, fullheight = 64;
     char *imgpxdata = new char[4*fullwidth*fullheight+1];
@@ -794,7 +811,7 @@ namespace enigma
       ss[i] = V2(center_x + radius*cos(i*M_PI*2/6 + M_PI/2), center_y - radius*sin(i*M_PI*2/6 + M_PI/2));
     }
 
-    int triangle_count = 8;
+    const int triangle_count = 8;
     V2 cs[triangle_count][3];
     cs[0][0] = ss[0], cs[0][1] = ss[2], cs[0][2] = ss[4];
     cs[1][0] = ss[1], cs[1][1] = ss[3], cs[1][2] = ss[5];
@@ -883,7 +900,7 @@ namespace enigma
         imgpxdata[4*(x + y*fullwidth)+3] = alpha;
       }
     }
-    create_particle_sprite(fullwidth, fullheight, imgpxdata, pt_sh_snow);
+    create_particle_sprite(fullwidth, fullheight, fullwidth, fullheight, imgpxdata, pt_sh_snow);
     delete[] imgpxdata;
   }
   particle_sprite* get_particle_sprite(pt_shape particle_shape)
@@ -911,6 +928,11 @@ namespace enigma
     case pt_sh_cloud: {generate_cloud(); break;}
     case pt_sh_smoke: {generate_smoke(); break;}
     case pt_sh_snow: {generate_snow(); break;}
+    default:
+      #if DEBUG_MODE
+        show_error("No such particle type", false);
+      #endif
+      ;
     }
 
     std::map<pt_shape,enigma::particle_sprite*>::iterator it_shape = enigma::shape_to_sprite.find(particle_shape);
@@ -918,6 +940,31 @@ namespace enigma
       return (*it_shape).second;
     }
     return 0;
+  }
+  int get_particle_actual_sprite(pt_shape particle_shape)
+  {
+    {
+      std::map<pt_shape,int>::iterator it_shape = enigma::shape_to_actual_sprite.find(particle_shape);
+      if (it_shape != enigma::shape_to_actual_sprite.end()) {
+        return (*it_shape).second;
+      }
+    }
+    particle_sprite* ps = get_particle_sprite(particle_shape);
+    if (ps == 0) {
+      return -1;
+    }
+    enigma::spritestructarray_reallocate();
+    int sprid = enigma::sprite_idmax;
+    sprite_new_empty(sprid, 1, ps->width, ps->height, ps->width/2.0, ps->height/2.0, 0, ps->height, 0, ps->width, true, false);
+
+    sprite* sprstr = spritestructarray[sprid];
+    sprstr->texturearray[0] = ps->texture;
+    sprstr->texbordxarray[0] = 1.0; // Assumes multiple of 2.
+    sprstr->texbordyarray[0] = 1.0; // Assumes multiple of 2.
+    sprstr->colldata[0] = get_collision_mask(sprstr,0,ct_bbox);
+
+    shape_to_actual_sprite.insert(std::pair<pt_shape,int>(particle_shape,sprid));
+    return sprid;
   }
 }
 

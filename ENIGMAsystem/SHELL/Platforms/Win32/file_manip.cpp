@@ -36,6 +36,9 @@ using namespace std;
 
 static std::string iniFilename = "";
 
+namespace enigma_user
+{
+
 void ini_open(std::string fname)
 {
 	iniFilename = fname;
@@ -150,7 +153,12 @@ int file_copy(std::string fname, std::string newname) {
     }
 }
 
-int directory_exists(std::string dname);
+int directory_exists(std::string dname) {
+  DWORD dwAttrib = GetFileAttributes(dname.c_str());
+
+  return (dwAttrib != INVALID_FILE_ATTRIBUTES && 
+         (dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
+}
 
 // NOTICE: May behave differently than GM. May fail if there are
 // directories in the path missing, whereas GM would create them all
@@ -185,10 +193,14 @@ enum {
   fa_archive   = FILE_ATTRIBUTE_ARCHIVE
 };
 
+}
 
 static int ff_attribs = 0;
 static HANDLE current_find = INVALID_HANDLE_VALUE;
 static WIN32_FIND_DATA found;
+
+namespace enigma_user
+{
 
 string file_find_first(string name,int attributes)
 {
@@ -275,3 +287,6 @@ time_t file_modified_time(std::string fname)
     }
     return sb.st_mtime;
 }
+
+}
+

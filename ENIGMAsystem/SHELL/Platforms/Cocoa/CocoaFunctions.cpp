@@ -38,10 +38,6 @@ namespace enigma
 	extern int initialize_everything();
 }
 
-int handleEvents()
-{
-}
-
 namespace enigma
 {
 	void initkeymap();
@@ -124,37 +120,37 @@ void key_release(int keycode) {
 	cocoa_keybdstatus[actualKey]=0;
 }
 
-extern int mouse_button;
+extern int enigma_user::mouse_button;
 
 void mouse_press(int x, int y) {
     
-    if (cocoa_mousestatus[mb_left-1]==1) {
-		cocoa_last_mousestatus[mb_left-1]=1; //its already handeled the mouse press
+    if (cocoa_mousestatus[enigma_user::mb_left-1]==1) {
+		cocoa_last_mousestatus[enigma_user::mb_left-1]=1; //its already handeled the mouse press
 		
 	} else {
-		cocoa_mousestatus[mb_left-1]=1;
-        cocoa_last_mousestatus[mb_left-1]=0; //handle mouse press
+		cocoa_mousestatus[enigma_user::mb_left-1]=1;
+        cocoa_last_mousestatus[enigma_user::mb_left-1]=0; //handle mouse press
 		
 	}
-    mouse_button=mb_left;
+    enigma_user::mouse_button=enigma_user::mb_left;
     
 }
 
 
 
 void mouse_release(int x, int y) {
-	cocoa_mousestatus[mb_left-1]=0;
-    mouse_button=mb_none;
+	cocoa_mousestatus[enigma_user::mb_left-1]=0;
+    enigma_user::mouse_button=enigma_user::mb_none;
 }
 
 void mouse_right_press(int x, int y) {
-	cocoa_mousestatus[mb_right-1]=1;
-    mouse_button=mb_right;
+	cocoa_mousestatus[enigma_user::mb_right-1]=1;
+    enigma_user::mouse_button=enigma_user::mb_right;
 }
 
 void mouse_right_release(int x, int y) {
-	cocoa_mousestatus[mb_right-1]=0;
-    mouse_button=mb_none;
+	cocoa_mousestatus[enigma_user::mb_right-1]=0;
+    enigma_user::mouse_button=enigma_user::mb_none;
 }
 
 void cocoa_io_handle() {
@@ -184,7 +180,6 @@ void cocoa_io_handle() {
     memcpy(enigma::mousestatus, cocoa_mousestatus, sizeof(enigma::mousestatus));
 	memcpy(enigma::last_mousestatus, cocoa_last_mousestatus, sizeof(enigma::last_mousestatus));
 }
-
 
 
 

@@ -3,6 +3,8 @@ searchdirs.txt
 redirfile.txt
 definitions.h
 defines.txt
+debug.txt
+output_log.txt
 blank.txt
 *.class
 *.o
@@ -14,6 +16,7 @@ blank.txt
 *.exe
 *.jar
 *.log
+*.ini
 *~
 .DS_Store
 .eobjs/
@@ -30,6 +33,12 @@ CompilerSource/bin/
 CompilerSource/JDI/dox/
 CompilerSource/JDI/test/defines_linux.txt
 CompilerSource/JDI/test/defines_mingw.txt
+CompilerSource/stupidity-buffer/obj
 Compilers/Windows/gcc.ey
+CompilerSource/us.stackdump
 ENIGMAsystem/SHELL/ENIGMAengine
 *.cbTemp
+ENIGMAsystem/SHELL/.objs
+enigma_blank.txt
+enigma_defines.txt
+enigma_searchdirs.txt

@@ -19,6 +19,7 @@
     with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "makedir.h"
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
@@ -40,9 +41,9 @@ using namespace std;
 
 #include "languages/lang_CPP.h"
 
-int lang_CPP::compile_writeRoomData(compile_context &ctex)
+int lang_CPP::compile_write_room_data(compile_context &ctex)
 {
-  ofstream wto("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_roomarrays.h",ios_base::out);
+  ofstream wto((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_roomarrays.h").c_str(),ios_base::out);
 
   wto << gen_license << "namespace enigma {\n"
   << "  int room_loadtimecount = " << ctex.es->roomCount << ";\n";
@@ -100,21 +101,20 @@ int lang_CPP::compile_writeRoomData(compile_context &ctex)
     << i << ", \"" // The tree order index of this room
     << ctex.es->rooms[i].name << "\",  \""  // The name of this room
     << ctex.es->rooms[i].caption << "\",\n      " // The caption of this room
-
+    
     << lgmRoomBGColor(ctex.es->rooms[i].backgroundColor) << ", "//Background color
-    << ctex.es->rooms[i].drawBackgroundColor
+    << (ctex.es->rooms[i].drawBackgroundColor? "true" : "false") // Draw background? (boolean)
     << ", roomcreate" << ctex.es->rooms[i].id << ",\n      " // Creation code
 
     << ctex.es->rooms[i].width << ", " << ctex.es->rooms[i].height << ", " // Width and Height
     << ctex.es->rooms[i].speed << ",  "  // Speed
-    << ctex.es->rooms[i].persistent << ",  "  // Persistent
-
-    << (ctex.es->rooms[i].enableViews ? "true" : "false") << ", {\n"; // Views Enabled
+    << (ctex.es->rooms[i].persistent?  "true" : "false") << ",  "  // Persistent (boolean)
+    << (ctex.es->rooms[i].enableViews? "true" : "false") << ", {\n"; // Views Enabled (boolean)
 
     for (int ii = 0; ii < ctex.es->rooms[i].viewCount; ii++) // For each view
     {
       wto << "      { "
-      << ctex.es->rooms[i].views[ii].visible << ",   " // Visible
+      << (ctex.es->rooms[i].views[ii].visible? "true" : "false") << ",   " // Visible
 
       << ctex.es->rooms[i].views[ii].viewX << ", " << ctex.es->rooms[i].views[ii].viewY << ", "   // Xview and Yview
       << ctex.es->rooms[i].views[ii].viewW << ", " << ctex.es->rooms[i].views[ii].viewH << ",   " // Wview and Hview
@@ -176,10 +176,10 @@ int lang_CPP::compile_writeRoomData(compile_context &ctex)
     wto << "int room_first = " << ctex.es->rooms[0].id << ";\n";
     wto << "int room_last = " << ctex.es->rooms[ctex.es->roomCount-1].id << ";\n";
   }
-wto.close();
+  wto.close();
 
 
-wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_roomcreates.h",ios_base::out);
+  wto.open((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_roomcreates.h").c_str(),ios_base::out);
   wto << gen_license;
   for (int i = 0; i < ctex.es->roomCount; i++)
   {
@@ -206,7 +206,7 @@ wto.open("ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/IDE_EDIT_roomcrea
       wto << "\n}\n";
     }
   }
-wto.close();
+  wto.close();
 
   return 0;
 }

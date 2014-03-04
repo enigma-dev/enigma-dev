@@ -30,10 +30,12 @@
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "PS_particle_type.h"
 #include "Universal_System/spritestruct.h"
+#include "Widget_Systems/widgets_mandatory.h" // show_error
 #include <cmath>
 #include <cstdlib>
 #include <vector>
 #include <algorithm>
+#include <floatcomp.h>
 
 inline int bounds(int value, int low, int high)
 {
@@ -41,6 +43,9 @@ inline int bounds(int value, int low, int high)
   if (value > high) return high;
   return value;
 }
+
+#include "PS_particle_instance.h"
+#include "PS_particle_sprites.h"
 
 using enigma::pt_manager;
 
@@ -53,13 +58,18 @@ namespace enigma
     int number;
     particle_type* pt;
   };
-  double particle_system::get_wiggle_result(double wiggle_offset)
+  
+  double particle_system::get_wiggle_result(double wiggle_offset) {
+    return get_wiggle_result(wiggle_offset, wiggle);
+  }
+  double particle_system::get_wiggle_result(double wiggle_offset, double wiggle_amount)
   {
-    double result_wiggle = wiggle + wiggle_offset;
+    double result_wiggle = wiggle_amount + wiggle_offset;
     result_wiggle = result_wiggle > 1.0 ? result_wiggle - 1.0 : result_wiggle;
     if (result_wiggle < 0.5) return -1.0 + 4*result_wiggle;
     else return 3.0 - 4.0*result_wiggle;
   }
+  
   void particle_system::initialize()
   {
     wiggle = 0;
@@ -80,10 +90,11 @@ namespace enigma
     changer_max_id = 0;
     hidden = false;
   }
-  bool is_dead_from_old_age(particle_instance& pi)
-  {
+  
+  static inline bool is_dead_from_old_age(particle_instance& pi) {
     return pi.life_current <= 0;
   }
+  
   void particle_system::update_particlesystem()
   {
     // Increase wiggle.
@@ -122,9 +133,9 @@ namespace enigma
           pt->particle_count--;
           if (pt->particle_count <= 0 && !pt->alive) {
             // Particle type is no longer used, delete it.
-            int id = pt->id;
+            int pid = pt->id;
             delete pt;
-            enigma::pt_manager.id_to_particletype.erase(id);
+            enigma::pt_manager.id_to_particletype.erase(pid);
           }
         }
       }
@@ -150,6 +161,7 @@ namespace enigma
         particle_type* pt = it->pt;
         // Color.
         switch(pt->c_mode) {
+        default:
         case one_color : {break;}
         case two_color : {
           if (pt->alive) {
@@ -194,6 +206,7 @@ namespace enigma
         }
         // Alpha.
         switch(pt->a_mode) {
+        default:
         case one_alpha : {break;}
         case two_alpha : {
           if (pt->alive) {
@@ -267,7 +280,7 @@ namespace enigma
           const double vx = speed*cos(direction*M_PI/180.0) + grav_amount*cos(grav_dir*M_PI/180.0);
           const double vy = -(speed*sin(direction*M_PI/180.0) + grav_amount*sin(grav_dir*M_PI/180.0));
           it->speed = sqrt(vx*vx + vy*vy);
-          it->direction = vx == 0 && vy == 0 ? direction : -atan2(vy,vx)*180.0/M_PI;
+          it->direction = fzero(vx) && fzero(vy) ? direction : -atan2(vy,vx)*180.0/M_PI;
         }
         double speed = it->speed, direction = it->direction;
         if (pt->alive) {
@@ -280,8 +293,8 @@ namespace enigma
     }
     // Changers.
     {
-      std::map<int,particle_changer*>::iterator end = id_to_changer.end();
-      for (std::map<int,particle_changer*>::iterator ch_it = id_to_changer.begin(); ch_it != end; ch_it++)
+      std::map<int,particle_changer*>::iterator end1 = id_to_changer.end();
+      for (std::map<int,particle_changer*>::iterator ch_it = id_to_changer.begin(); ch_it != end1; ch_it++)
       {
         particle_changer* p_ch = (*ch_it).second;
         particle_type* pt1;
@@ -297,8 +310,8 @@ namespace enigma
         pt1 = (*pt_it1).second;
         pt2 = (*pt_it2).second;
 
-        std::vector<particle_instance>::iterator end = pi_list.end();
-        for (std::vector<particle_instance>::iterator it = pi_list.begin(); it !=end; it++)
+        std::vector<particle_instance>::iterator end2 = pi_list.end();
+        for (std::vector<particle_instance>::iterator it = pi_list.begin(); it != end2; it++)
         {
           if (p_ch->is_inside(it->x, it->y) && it->pt->id == pt1->id && it->life_current > 0) { // Skip particles with life_current <= 0.
             // Store position of old particle.
@@ -308,9 +321,9 @@ namespace enigma
             pt1->particle_count--;
             if (pt1->particle_count <= 0 && !pt1->alive) {
               // Particle type is no longer used, delete it.
-              int id = pt1->id;
+              int pid = pt1->id;
               delete pt1;
-              enigma::pt_manager.id_to_particletype.erase(id);
+              enigma::pt_manager.id_to_particletype.erase(pid);
             }
             // Internally when handling changers, setting life_current to 0 indicates that the particle has been removed.
             it->life_current = 0;
@@ -362,8 +375,8 @@ namespace enigma
       for (std::map<int,particle_attractor*>::iterator at_it = id_to_attractor.begin(); at_it != end; at_it++)
       {
         particle_attractor* p_a = (*at_it).second;
-        std::vector<particle_instance>::iterator end = pi_list.end();
-        for (std::vector<particle_instance>::iterator it = pi_list.begin(); it !=end; it++)
+        std::vector<particle_instance>::iterator end1 = pi_list.end();
+        for (std::vector<particle_instance>::iterator it = pi_list.begin(); it != end1; it++)
         {
           // If the particle is not inside the attractor range of influence,
           // or is at the attractor's exact position,
@@ -371,7 +384,7 @@ namespace enigma
           const double dx = it->x - p_a->x;
           const double dy = it->y - p_a->y;
           const double relative_distance = sqrt(dx*dx + dy*dy)/std::max(1.0, p_a->dist_effect);
-          if (relative_distance > 1.0 || (dx == 0 && dy == 0)) {
+          if (relative_distance > 1.0 || (fzero(dx) && fzero(dy))) {
             continue;
           }
           const double direction_radians = atan2(-(p_a->y - it->y), p_a->x - it->x);
@@ -389,7 +402,7 @@ namespace enigma
             const double vy = -it->speed*sin(it->direction*M_PI/180.0) - force_effective_strength*sin(direction_radians);
             it->speed = sqrt(vx*vx + vy*vy);
             const double direction = it->direction;
-            it->direction = vx == 0.0 && vy == 0.0 ? direction : -atan2(vy,vx)*180.0/M_PI;
+            it->direction = fzero(vx) && fzero(vy) ? direction : -atan2(vy,vx)*180.0/M_PI;
           }
           else {
             it->x += force_effective_strength*cos(direction_radians);
@@ -400,12 +413,12 @@ namespace enigma
     }
     // Destroyers.
     {
-      std::map<int,particle_destroyer*>::iterator end = id_to_destroyer.end();
-      for (std::map<int,particle_destroyer*>::iterator ds_it = id_to_destroyer.begin(); ds_it != end; ds_it++)
+      std::map<int,particle_destroyer*>::iterator end1 = id_to_destroyer.end();
+      for (std::map<int,particle_destroyer*>::iterator ds_it = id_to_destroyer.begin(); ds_it != end1; ds_it++)
       {
         particle_destroyer* p_ds = (*ds_it).second;
-        std::vector<particle_instance>::iterator end = pi_list.end();
-        for (std::vector<particle_instance>::iterator it = pi_list.begin(); it !=end; it++)
+        std::vector<particle_instance>::iterator end2 = pi_list.end();
+        for (std::vector<particle_instance>::iterator it = pi_list.begin(); it != end2; it++)
         {
           if (p_ds->is_inside(it->x, it->y) && it->life_current > 0) { // Skip particles with life_current <= 0.
             particle_type* pt = it->pt;
@@ -415,9 +428,9 @@ namespace enigma
             pt->particle_count--;
             if (pt->particle_count <= 0 && !pt->alive) {
               // Particle type is no longer used, delete it.
-              int id = pt->id;
+              int pid = pt->id;
               delete pt;
-              enigma::pt_manager.id_to_particletype.erase(id);
+              enigma::pt_manager.id_to_particletype.erase(pid);
             }
             // Internally when handling destroyers, setting life_current to 0 indicates that the particle has been removed.
             it->life_current = 0;
@@ -433,8 +446,8 @@ namespace enigma
       for (std::map<int,particle_deflector*>::iterator df_it = id_to_deflector.begin(); df_it != end; df_it++)
       {
         particle_deflector* p_df = (*df_it).second;
-        std::vector<particle_instance>::iterator end = pi_list.end();
-        for (std::vector<particle_instance>::iterator it = pi_list.begin(); it !=end; it++)
+        std::vector<particle_instance>::iterator end2 = pi_list.end();
+        for (std::vector<particle_instance>::iterator it = pi_list.begin(); it != end2; it++)
         {
           if (p_df->is_inside(it->x, it->y)) {
             // Direction changing.
@@ -466,7 +479,7 @@ namespace enigma
   }
   void particle_system::draw_particlesystem()
   {
-    draw_particles(pi_list, oldtonew, wiggle, subimage_index, x_offset, y_offset, &get_particle_sprite);
+    particle_bridge::draw_particles(pi_list, oldtonew, wiggle, subimage_index, x_offset, y_offset);
   }
   void particle_system::create_particles(double x, double y, particle_type* pt, int number, bool use_color, int given_color)
   {
@@ -543,6 +556,11 @@ namespace enigma
         pi.color = make_color_hsv(h, s, v);
         break;
       }
+      default:
+        #if DEBUG_MODE
+          show_error("Interal error: particle color type not known", false)
+        #endif
+        ;
       }
       pi.alpha = pt->alpha1;
       // Life and death.
