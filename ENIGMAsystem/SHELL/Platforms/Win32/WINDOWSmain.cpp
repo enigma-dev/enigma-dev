@@ -77,7 +77,7 @@ namespace enigma_user {
   extern double fps;
   unsigned long current_time = 0; // milliseconds since the start of the game
   unsigned long delta_time = 0; // microseconds since the last step event
-  
+
   unsigned long get_timer() {  // microseconds since the start of the game
 	return current_time_mcs;
   }
@@ -235,9 +235,9 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
         int screen_width = GetSystemMetrics(SM_CXSCREEN);
         int screen_height = GetSystemMetrics(SM_CYSCREEN);
 		// By default if the room is too big instead of creating a gigantic ass window
-		// make it not bigger than the screen to full screen it, this is what 8.1 and Studio 
-		// do, if the user wants to manually override this they can using 
-		// views/screen_set_viewport or window_set_size/window_set_region_size 
+		// make it not bigger than the screen to full screen it, this is what 8.1 and Studio
+		// do, if the user wants to manually override this they can using
+		// views/screen_set_viewport or window_set_size/window_set_region_size
 		// We won't limit those functions like GM, just the default.
 		if (wid > screen_width) wid = screen_width;
 		if (hgt > screen_height) hgt = screen_height;
@@ -271,17 +271,17 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
       while (!bQuit)
       {
           using enigma::current_room_speed;
-		 
+
           // Update current time.
           enigma::update_current_time();
           {
               // Find diff between current and offset.
-			  
+
               long passed_mcs = enigma::get_current_offset_difference_mcs();
               if (passed_mcs >= 1000000) { // Handle resetting.
                   // If more than one second has passed, update fps variable, reset frames count,
                   // and advance offset by difference in seconds, rounded down.
-				  
+
                   enigma_user::fps = frames_count;
                   frames_count = 0;
                   enigma::offset_modulus_one_second();
@@ -290,7 +290,7 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
 
           if (current_room_speed > 0) {
               spent_mcs = enigma::get_current_offset_slowing_difference_mcs();
-			  
+
               remaining_mcs = 1000000 - spent_mcs;
               needed_mcs = long((1.0 - 1.0*frames_count/current_room_speed)*1e6);
               const int catchup_limit_ms = 50;
@@ -327,8 +327,8 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
           }
           else
           {
-              if (enigma::gameFroze)  continue;
-				  
+              if (enigma::gameFroze){ usleep(100000); continue; }
+
 			  unsigned long dt = 0;
 			  if (spent_mcs > last_mcs) {
 				dt = (spent_mcs - last_mcs);

@@ -50,7 +50,7 @@ namespace enigma
   void ENIGMA_events(void); //TODO: Synchronize this with Windows by putting these two in a single header.
   bool gameFroze = false;
   extern bool freezeOnLoseFocus;
- 
+
   namespace x11
   {
     Display *disp;
@@ -72,7 +72,7 @@ namespace enigma
 
               if (!(gk & 0xFF00)) actualKey = enigma_user::keyboard_get_map((int)enigma::keymap[gk & 0xFF]);
               else actualKey = enigma_user::keyboard_get_map((int)enigma::keymap[gk & 0x1FF]);
-              { // Set keyboard_lastchar. Seems to work without 
+              { // Set keyboard_lastchar. Seems to work without
                   char str[1];
                   int len = XLookupString(&e.xkey, str, 1, NULL, NULL);
                   if (len > 0) {
@@ -196,7 +196,7 @@ namespace enigma_user {
   extern double fps;
   unsigned long current_time = 0; // milliseconds since the start of the game
   unsigned long delta_time = 0; // microseconds since the last step event
-  
+
   unsigned long get_timer() {  // microseconds since the start of the game
 	return current_time_mcs;
   }
@@ -254,9 +254,9 @@ int main(int argc,char** argv)
 	int winw = enigma_user::room_width;
 	int winh = enigma_user::room_height;
 	// By default if the room is too big instead of creating a gigantic ass window
-	// make it not bigger than the screen to full screen it, this is what 8.1 and Studio 
-	// do, if the user wants to manually override this they can using 
-	// views/screen_set_viewport or window_set_size/window_set_region_size 
+	// make it not bigger than the screen to full screen it, this is what 8.1 and Studio
+	// do, if the user wants to manually override this they can using
+	// views/screen_set_viewport or window_set_size/window_set_region_size
 	// We won't limit those functions like GM, just the default.
 	if (winw > screen->width) winw = screen->width;
 	if (winh > screen->height) winh = screen->height;
@@ -320,7 +320,7 @@ int main(int argc,char** argv)
 			long passed_mcs = (time_current.tv_sec - time_offset.tv_sec)*1000000 + (time_current.tv_nsec/1000 - + time_offset.tv_nsec/1000);
 			passed_mcs = clamp(passed_mcs, 0, 1000000);
 			if (passed_mcs >= 1000000) { // Handle resetting.
-				
+
 				enigma_user::fps = frames_count;
 				frames_count = 0;
 				time_offset.tv_sec += passed_mcs/1000000;
@@ -354,7 +354,7 @@ int main(int argc,char** argv)
 				continue;
 			}
 		}
-		
+
 		unsigned long dt = 0;
 		if (spent_mcs > last_mcs) {
 			dt = (spent_mcs - last_mcs);
@@ -366,13 +366,13 @@ int main(int argc,char** argv)
 		enigma_user::delta_time = dt;
 		current_time_mcs += enigma_user::delta_time;
 		enigma_user::current_time += enigma_user::delta_time / 1000;
-				
+
 		while(XQLength(disp))
 			if(handleEvents() > 0)
 				goto end;
-				
-		if (enigma::gameFroze) { continue; }
-		
+
+		if (enigma::gameFroze){ usleep(100000); continue; }
+
 		enigma::handle_joysticks();
 		enigma::ENIGMA_events();
 		enigma::input_push();
