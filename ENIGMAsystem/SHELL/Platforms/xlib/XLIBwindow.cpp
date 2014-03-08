@@ -153,6 +153,9 @@ bool window_get_showborder() {return true;}
 void window_set_showicons(bool show) {}
 bool window_get_showicons() {return true;}
 
+void window_set_minimized(bool minimized) {}
+bool window_get_minimized(){ return false; };
+
 void window_default()
 {
     unsigned int xm = room_width, ym = room_height;
@@ -171,9 +174,9 @@ void window_default()
         xm = tx, ym = ty;
     } else {
 		// By default if the room is too big instead of creating a gigantic ass window
-		// make it not bigger than the screen to full screen it, this is what 8.1 and Studio 
-		// do, if the user wants to manually override this they can using 
-		// views/screen_set_viewport or window_set_size/window_set_region_size 
+		// make it not bigger than the screen to full screen it, this is what 8.1 and Studio
+		// do, if the user wants to manually override this they can using
+		// views/screen_set_viewport or window_set_size/window_set_region_size
 		// We won't limit those functions like GM, just the default.
 		//TODO: Finish the implementation, can't test from Windus look at XLIBmain.cpp and WINDOWSmain.cpp
 		//if (xm > screen->width) xm = screen->width;
@@ -451,7 +454,7 @@ void keyboard_wait()
   }
 }
 
-void keyboard_set_map(int key1, int key2) 
+void keyboard_set_map(int key1, int key2)
 {
   std::map< int, int >::iterator it = enigma::keybdmap.find( key1 );
   if ( enigma::keybdmap.end() != it ) {
@@ -461,7 +464,7 @@ void keyboard_set_map(int key1, int key2)
   }
 }
 
-int keyboard_get_map(int key) 
+int keyboard_get_map(int key)
 {
   std::map< int, int >::iterator it = enigma::keybdmap.find( key );
   if ( enigma::keybdmap.end() != it ) {
@@ -471,7 +474,7 @@ int keyboard_get_map(int key)
   }
 }
 
-void keyboard_unset_map() 
+void keyboard_unset_map()
 {
   enigma::keybdmap.clear();
 }

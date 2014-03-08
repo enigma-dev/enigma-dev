@@ -91,6 +91,7 @@ int window_get_region_height();
 int window_get_region_width_scaled();
 int window_get_region_height_scaled();
 
+void window_set_minimized(bool minimized);
 void window_set_visible(bool visible);
 int window_get_visible();
 bool window_get_stayontop();
@@ -98,6 +99,7 @@ bool window_get_sizeable();
 bool window_get_showborder();
 bool window_get_showicons();
 bool window_get_freezeonlosefocus();
+bool window_get_minimized();
 
 int display_mouse_get_x();
 int display_mouse_get_y();
