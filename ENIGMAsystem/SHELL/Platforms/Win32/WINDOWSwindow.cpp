@@ -197,7 +197,7 @@ int window_get_color()
 }
 
 void window_set_alpha(double alpha) {
-  // Set WS_EX_LAYERED on this window 
+  // Set WS_EX_LAYERED on this window
   SetWindowLong(enigma::hWndParent, GWL_EXSTYLE,
   GetWindowLong(enigma::hWndParent, GWL_EXSTYLE) | WS_EX_LAYERED);
 
@@ -216,7 +216,7 @@ void window_set_position(int x, int y)
 {
     enigma::windowX = x;
     enigma::windowY = y;
-    SetWindowPos(enigma::hWnd, HWND_TOP, enigma::windowX, enigma::windowY, 0, 0, SWP_NOSIZE|SWP_NOACTIVATE);
+    SetWindowPos(enigma::hWndParent, HWND_TOP, enigma::windowX, enigma::windowY, 0, 0, SWP_NOSIZE|SWP_NOACTIVATE);
     enigma::centerchild();
 }
 
@@ -270,9 +270,9 @@ void window_default()
 		int screen_width = GetSystemMetrics(SM_CXSCREEN);
 		int screen_height = GetSystemMetrics(SM_CYSCREEN);
 		// By default if the room is too big instead of creating a gigantic ass window
-		// make it not bigger than the screen to full screen it, this is what 8.1 and Studio 
-		// do, if the user wants to manually override this they can using 
-		// views/screen_set_viewport or window_set_size/window_set_region_size 
+		// make it not bigger than the screen to full screen it, this is what 8.1 and Studio
+		// do, if the user wants to manually override this they can using
+		// views/screen_set_viewport or window_set_size/window_set_region_size
 		// We won't limit those functions like GM, just the default.
 		if (xm > screen_width) xm = screen_width;
 		if (ym > screen_height) ym = screen_height;
@@ -372,6 +372,16 @@ void window_set_visible(bool visible)
 int window_get_visible()
 {
     return enigma::isVisible;
+}
+
+void window_set_minimized(bool minimized)
+{
+    ShowWindow(enigma::hWndParent,(minimized?SW_MINIMIZE:SW_RESTORE));
+}
+
+bool window_get_minimized()
+{
+    return IsIconic(enigma::hWndParent);
 }
 
 void window_set_stayontop(bool stay)
