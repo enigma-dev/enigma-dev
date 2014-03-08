@@ -37,11 +37,12 @@ namespace enigma_user
 {
 
 //TODO: Confirm timeline mechanics (e.g., stopping resets position?)
-inline void action_set_timeline(int timeline, double position) 
+inline void action_set_timeline(int timeline, double position, int startImmediately=0, int loop=0)
 {
   ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->timeline_index=timeline;
   ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->timeline_position=position;
-  ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->timeline_running = true;
+  ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->timeline_running = (startImmediately==0);
+  ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->timeline_loop = (loop==1);
 }
 
 inline void action_set_timeline_position(double position) 
