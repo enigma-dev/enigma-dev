@@ -573,7 +573,7 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
     wto <<"  }\n";
     wto <<"}\n\n";
 
-    //Function to advance the current timeline variables, calling moments as appropriate. This assumes timeline_running is true.
+    //Function to advance the current timeline variables, calling moments as appropriate. This assumes timeline_running is true and timeline_speed !=0
     wto <<"void advance_curr_timeline(gs_scalar& timeline_position, gs_scalar timeline_speed, int timeline_index, bool timeline_loop) {\n";
     wto <<"  //Find the next instant (it may be right now).\n";
     wto <<"  //Note: If a map lookup each tick is a performance hit, this value can be cached in the object itself with a tuple <timeline_id, timeline_pos, next_moment_iterator>\n";
@@ -597,6 +597,15 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
     wto <<"  //Now, trigger each moment that we've passed.\n";
     wto <<"  for (std::vector<int>::iterator it=moment_ids.begin(); it!=moment_ids.end(); it++) {\n";
     wto <<"    timeline_call_moment_script(timeline_index, *it);\n";
+    wto <<"  }\n";
+    wto <<"}\n\n";
+
+    //Function to loop the current timeline. This assumes timeline_loop is true, timeline_running is true, and timeline_speed is !=0
+    wto <<"void loop_curr_timeline(gs_scalar& timeline_position, gs_scalar timeline_speed, int timeline_index) {\n";
+    wto <<"  //Determine if we're past the last event. Note that no residual movement carries over; this effectively \"resets to 0\".\n";
+    wto <<"  if (timeline_index<0 || timeline_index>=(int)timeline_moments_maps.size()) { return; }\n";
+    wto <<"  if (timeline_position > timeline_moments_maps[timeline_index].rbegin()->first) { //If ==, it will trigger on the next time tick.\n";
+    wto <<"    timeline_position = 0;\n";
     wto <<"  }\n";
     wto <<"}\n\n";
 
