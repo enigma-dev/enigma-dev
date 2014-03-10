@@ -488,10 +488,15 @@ std::string environment_get_variable(std::string name)
 	return value;
 }
 
-unsigned long long window_handle()
+void game_end() { PostQuitMessage(0); }
+
+void action_end_game() { game_end(); }
+
+void action_webpage(const std::string &url)
 {
-    return (unsigned long long)enigma::hWnd;
+	ShellExecute (NULL, "open", url.c_str(), NULL, NULL, SW_SHOWNORMAL);
 }
+
 
 }
 
