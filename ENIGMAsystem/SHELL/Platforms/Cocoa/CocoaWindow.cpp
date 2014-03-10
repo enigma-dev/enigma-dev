@@ -57,11 +57,6 @@ namespace enigma {
 
 namespace enigma_user {
 
-  void sleep(int ms) {
-    if (ms > 1000) ::sleep(ms/1000);
-    usleep((ms % 1000) *1000);
-  };
-
   int visx = -1, visy = -1;
 
   int window_set_visible(int visible) {
@@ -447,14 +442,4 @@ namespace enigma_user {
   void window_set_region_scale(double scale, bool adaptwindow) {}
   bool window_get_region_scale() {return 1;}
   void window_set_region_size(int w, int h, bool adaptwindow) {}
-
-  void game_end() {
-    //audiosystem_cleanup();
-    exit(0);
-  }
-
-  void action_end_game()
-  {
-    game_end();
-  }
 }

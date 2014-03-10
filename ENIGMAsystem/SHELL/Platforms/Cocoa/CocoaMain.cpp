@@ -19,7 +19,7 @@
  */
 
 #include <stdio.h>
-#include "CocoaWindow.h"
+#include "CocoaMain.h"
 #include "ObjectiveC.h"
 
 #include "Universal_System/CallbackArrays.h"
@@ -33,4 +33,23 @@ int main(int argc,char** argv)
 		enigma::parameters[i]=argv[i];
 
 	return mainO(argc, argv);
+}
+
+namespace enigma_user {
+
+  void sleep(int ms) {
+    if (ms > 1000) ::sleep(ms/1000);
+    usleep((ms % 1000) *1000);
+  };
+  
+  void game_end() {
+    //audiosystem_cleanup();
+    exit(0);
+  }
+
+  void action_end_game()
+  {
+    game_end();
+  }
+
 }
