@@ -25,23 +25,24 @@
  **                                                                              **
  \********************************************************************************/
 
-#include "../General/PFwindow.h"
- 
 #include <string>
+#include "../General/PFwindow.h"
+#include "../General/PFfilemanip.h"
 using std::string;
+
+//TODO: Move all this shit to a general header, along with the sleep shit in Win32 and XLIB as well so platforms are consistent.
 
 void gmw_init();
 
-void Sleep(int ms);
+namespace enigma_user {
+void sleep(int ms);
 
-int show_message(string str);
+#define enigmacatchmouse() //Linux should hopefully do that automatically.
 
+}
 
 namespace enigma {
 	extern char** parameters;
 	//void writename(char* x);
+    long int current_time();
 }
-
-void io_clear();
-
-#define enigmacatchmouse() //Linux should hopefully do that automatically.
