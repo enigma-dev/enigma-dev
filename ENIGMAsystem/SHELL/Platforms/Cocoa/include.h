@@ -1,2 +1,2 @@
-#include "CocoaWindow.h"
+#include "CocoaMain.h"
 #include "../General/PFwindow.h"
