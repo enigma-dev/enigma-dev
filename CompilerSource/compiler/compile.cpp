@@ -38,6 +38,7 @@
   ide_dia_progress(y);
 
 #include <map>
+#include <set>
 #include <string>
 #include <vector>
 #include <iostream>
@@ -647,7 +648,13 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
   irrr();
 
   edbg << "Running Secondary Parse Passes" << flushl;
-  res = current_language->compile_parseSecondary(parsed_objects,parsed_scripts,es->scriptCount, parsed_tlines, parsed_rooms,&EGMglobal);
+
+  //Parser needs some knowledge of script names. 
+  std::set<std::string> script_names;
+  for (int i = 0; i < es->scriptCount; i++)
+    script_names.insert(es->scripts[i].name);
+
+  res = current_language->compile_parseSecondary(parsed_objects,parsed_scripts,es->scriptCount, parsed_tlines, parsed_rooms,&EGMglobal, script_names);
 
   edbg << "Writing object data" << flushl;
   res = current_language->compile_writeObjectData(es,&EGMglobal,mode);
