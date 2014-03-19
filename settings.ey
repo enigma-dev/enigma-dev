@@ -16,6 +16,7 @@
         Type: Radio-1
         Label: Inherit ++/-- from: 
         Options: "GML (+), C++ (+=1/-=1)"
+        Default: 1
     -inherit-equivalence-from:
         Type: Radio-1
         Label: Inherit a=b=c from: 

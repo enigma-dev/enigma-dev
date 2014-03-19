@@ -34,6 +34,14 @@ using namespace std;
 
 #include "../General/WSdialogs.h"
 
+static string gs_cap;
+static string gs_def;
+static string gs_message;
+static string gs_username;
+static string gs_password;
+static bool   gs_form_canceled;
+static string gs_str_submitted;
+
 void show_error(string errortext,const bool fatal)
 {
   if (MessageBox(NULL,("Error in some event or another for some object: \r\n"+errortext).c_str(),"Error",MB_ABORTRETRYIGNORE | MB_ICONERROR)==IDABORT)
@@ -48,17 +56,34 @@ void show_error(string errortext,const bool fatal)
   //ABORT_ON_ALL_ERRORS();
 }
 
-static string gs_cap;
-static string gs_def;
-static string gs_message;
-static string gs_username;
-static string gs_password;
-static bool   gs_form_canceled;
-static string gs_str_submitted;
-
 namespace enigma {
   extern HINSTANCE hInstance;
   extern HWND hWnd;
+  extern string gameInformation;
+}
+
+static INT_PTR CALLBACK ShowInfoProc(HWND hwndDlg,UINT uMsg,WPARAM wParam,LPARAM lParam)
+{
+  if (uMsg==WM_INITDIALOG)
+  {
+    SetDlgItemText(hwndDlg,1,gs_cap.c_str());
+    SetDlgItemText(hwndDlg,10,gs_message.c_str());
+  }
+  if (uMsg==WM_COMMAND)
+  {
+    if (wParam==2 || wParam==11)
+    {
+      gs_str_submitted="";
+      gs_form_canceled=1;
+      EndDialog(hwndDlg,1);
+    }
+    else if (wParam==10)
+    {
+      gs_form_canceled=0;
+      EndDialog(hwndDlg,2);
+    }
+  }
+  return 0;
 }
 
 static INT_PTR CALLBACK GetStrProc(HWND hwndDlg,UINT uMsg,WPARAM wParam,LPARAM lParam)
@@ -170,6 +195,38 @@ void message_text_font(string name, int size, int color, int style) {
 void message_text_charset(int type, int charset) {
 
 } 
+
+void show_info(string info, string caption) {
+	LoadLibrary(TEXT("Riched32.dll"));
+	
+	WNDCLASS wc = {CS_VREDRAW|CS_HREDRAW,(WNDPROC)DefWindowProc,0,0,enigma::hInstance,0,
+		0,GetSysColorBrush(COLOR_WINDOW),0,"showinfo"};
+	RegisterClass(&wc);
+	
+	HWND main=CreateWindow("showinfo",TEXT(caption.c_str()),
+		WS_SIZEBOX|DS_3DLOOK|DS_CENTER|DS_MODALFRAME|DS_FIXEDSYS|WS_VISIBLE|WS_BORDER|WS_POPUP|WS_CAPTION|WS_DLGFRAME|WS_SYSMENU|WS_TABSTOP,
+		CW_USEDEFAULT, CW_USEDEFAULT,500,400,enigma::hWnd,0,enigma::hInstance,0);
+	HWND re=CreateWindow("RICHEDIT",TEXT(info.c_str()),
+		WS_CHILD|WS_VISIBLE|ES_MULTILINE|ES_READONLY|ES_AUTOVSCROLL,
+		0,0,500,400,main,0,enigma::hInstance,0);
+	ShowWindow(main,SW_SHOWDEFAULT);
+	
+	/*
+	HWND hwndEdit = CreateWindow("RICHEDIT", TEXT(info.c_str()),
+        ES_LEFT | ES_MULTILINE | DS_3DLOOK | DS_CENTER | DS_MODALFRAME | DS_FIXEDSYS | WS_VISIBLE | WS_BORDER | WS_CAPTION | WS_DLGFRAME | WS_SYSMENU | WS_TABSTOP | WS_VSCROLL | 
+                ES_AUTOVSCROLL | WS_HSCROLL | ES_AUTOHSCROLL, 
+        CW_USEDEFAULT, CW_USEDEFAULT, 500, 400, 
+        enigma::hWnd, NULL, enigma::hInstance, NULL);
+	*/
+	
+  //gs_cap = caption;
+  //gs_message = info;
+  //DialogBox(enigma::hInstance,"showinfodialog",enigma::hWnd,ShowInfoProc);
+}
+
+void show_info(string caption) {
+  show_info(enigma::gameInformation, caption);
+}
 
 int show_message(string str)
 {

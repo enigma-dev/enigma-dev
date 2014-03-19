@@ -239,9 +239,6 @@ inline void action_set_motion(const double dir, const double nspeed) {
     }
 }
 
-static void show_info() {}  //TEMPORARY FILLER, RELOCATE ME
-static inline void action_show_info() {show_info();}
-
 #define action_message(message) show_message(message)
 #define action_if_sound sound_isplaying
 #define action_end_sound sound_stop

@@ -16,31 +16,26 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef ENIGMA_WINDOWS_MAIN
-#define ENIGMA_WINDOWS_MAIN
+#ifndef ENIGMA_PLATFORM_REGISTRY
+#define ENIGMA_PLATFORM_REGISTRY
 
-#include "../General/PFmain.h"
 #include <windows.h>
-
-namespace enigma //TODO: Find where this belongs
-{
-  extern HINSTANCE hInstance;
-  extern HWND hWndParent;
-  extern HWND hWnd;
-  extern HDC window_hDC;
-}
-
-void windowsystem_write_exename(char* exenamehere);
 
 namespace enigma_user
 {
 
-unsigned long long window_handle();
-int sleep(int millis);
+void registry_write_string(std::string name, std::string str);
+void registry_write_real(std::string name, int x);
+std::string registry_read_string(std::string name);
+int registry_read_real(std::string name);
+bool registry_exists(std::string name);
+void registry_write_string_ext(std::string key, std::string name, std::string str);
+void registry_write_real_ext(std::string key, std::string name, int x);
+std::string registry_read_string_ext(std::string key, std::string name);
+int registry_read_real_ext(std::string key, std::string name);
+bool registry_exists_ext(std::string key, std::string name);
+void registry_set_root(int root);
 
 }
 
-void enigma_catchmouse_backend(bool x);
-#define enigmacatchmouse() enigma_catchmouse_backend(enigma::mousestatus[0]==1 && enigma::last_mousestatus[0]==1)
-
-#endif //ENIGMA_WINDOWS_MAIN
+#endif //ENIGMA_PLATFORM_REGISTRY

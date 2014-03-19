@@ -19,6 +19,7 @@
 #define _XLIB_WINDOW__H
 
 #include "../General/PFwindow.h"
+#include "../General/PFmain.h"
 
 #include <string>
 using std::string;
@@ -41,11 +42,6 @@ namespace enigma {
   extern int current_room_speed;
   //void writename(char* x);
   void initkeymap();
-}
-
-namespace enigma_user {
-  string parameter_string(unsigned num);
-  int parameter_count();
 }
 
 #endif

@@ -1,4 +1,5 @@
-/** Copyright (C) 2013 Robert B. Colton
+/** Copyright (C) 2008 Josh Ventura
+*** Copyright (C) 2013-2014 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -14,9 +15,6 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
-
-#include <string>
-using std::string;
 
 namespace enigma_user
 {
@@ -40,5 +38,9 @@ double joystick_pov(int id);
 double joystick_axis(int id, int axis);
 bool joystick_button(int id, int button);
 
-}
+void joystick_map_button(int id, int butnum, char key);
+void joystick_map_axis(int id, int axisnum, char keyneg, char keypos);
 
+extern int joystick_lastbutton;
+
+}
