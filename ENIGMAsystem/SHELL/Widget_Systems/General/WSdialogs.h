@@ -85,6 +85,10 @@ enum {
 		return show_question(str);
 	}
 	
+	void show_info(string caption="Game Information");
+	void show_info(string info,string caption="Information");
+	static inline void action_show_info() { show_info(); }
+	
 	// IMPLEMENTS from widgets_mandatory:
 	// void show_error(string errortext, const bool fatal);
 

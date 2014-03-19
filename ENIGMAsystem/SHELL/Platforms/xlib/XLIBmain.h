@@ -43,6 +43,5 @@ namespace enigma {
 
 namespace enigma_user {
   extern string keyboard_string;
-  void set_synchronization(bool enable);
 }
 

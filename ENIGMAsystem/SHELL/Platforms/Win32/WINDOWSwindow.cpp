@@ -826,8 +826,10 @@ int window_get_curor()
     return enigma::cursorInt;
 }
 
-void game_end() { PostQuitMessage(0); }
-void action_end_game() { game_end(); }
+unsigned long long window_handle()
+{
+    return (unsigned long long)enigma::hWnd;
+}
 
 void io_handle()
 {

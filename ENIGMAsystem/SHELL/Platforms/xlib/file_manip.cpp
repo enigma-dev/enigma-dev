@@ -21,7 +21,7 @@
 #include <sys/stat.h>
 
 #include <string>
-#include "file_manip.h"
+#include "../General/PFfilemanip.h"
 using namespace std;
 
 /* UNIX-ready port of file manipulation */
