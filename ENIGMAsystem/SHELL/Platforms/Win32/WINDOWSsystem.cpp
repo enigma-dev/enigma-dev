@@ -19,7 +19,7 @@
 #include "../General/PFsystem.h"
 
 namespace enigma {
-	extern bool gameFroze;
+	extern bool gameWindowFocused;
 }
 
 namespace enigma_user {
@@ -46,7 +46,7 @@ bool os_is_network_connected() {
 }
 
 bool os_is_paused() {
-	return enigma::gameFroze;
+	return !enigma::gameWindowFocused;
 }
 
 void os_lock_orientation(bool enable) {
