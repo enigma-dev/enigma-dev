@@ -14,7 +14,13 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include <windows.h>
+#include <wininet.h>
 #include "../General/PFsystem.h"
+
+namespace enigma {
+	extern bool gameFroze;
+}
 
 namespace enigma_user {
 
@@ -35,11 +41,12 @@ string os_get_region() {
 }
 
 bool os_is_network_connected() {
-
+	DWORD dwFlags;
+	return InternetGetConnectedState( &dwFlags, NULL );
 }
 
 bool os_is_paused() {
-
+	return enigma::gameFroze;
 }
 
 void os_lock_orientation(bool enable) {
