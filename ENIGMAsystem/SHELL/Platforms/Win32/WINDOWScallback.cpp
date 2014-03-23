@@ -54,6 +54,7 @@ namespace enigma
     extern HWND hWnd,hWndParent;
     extern void setchildsize(bool adapt);
 	extern void WindowResized();
+	extern unsigned int pausedSteps;
     extern bool gameWindowFocused, treatCloseAsEscape;
     static short hdeltadelta = 0, vdeltadelta = 0;
     int tempLeft = 0, tempTop = 0, tempRight = 0, tempBottom = 0, tempWidth, tempHeight;
@@ -94,6 +95,7 @@ namespace enigma
         case WM_SETFOCUS:
             input_initialize();
             gameWindowFocused = true;
+			pausedSteps = 0;
             return 0;
 
         case WM_KILLFOCUS:
@@ -108,6 +110,7 @@ namespace enigma
                 mousestatus[i] = 0;
             }
             gameWindowFocused = false;
+			pausedSteps += 1;
             return 0;
 
         case WM_ENTERSIZEMOVE:
