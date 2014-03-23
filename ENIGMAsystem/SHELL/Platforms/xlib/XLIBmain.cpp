@@ -50,6 +50,7 @@ namespace enigma
   void ENIGMA_events(void); //TODO: Synchronize this with Windows by putting these two in a single header.
   bool gameWindowFocused = false;
   extern bool freezeOnLoseFocus;
+  unsigned int pausedSteps = 0;
 
   namespace x11
   {
@@ -134,6 +135,7 @@ namespace enigma
         }
         case FocusIn:
           gameWindowFocused = true;
+		  pausedSteps = 0;
           return 0;
         case FocusOut:
 		  gameWindowFocused = false;
@@ -368,7 +370,13 @@ int main(int argc,char** argv)
 			if(handleEvents() > 0)
 				goto end;
 
-		if (!enigma::gameWindowFocused && enigma::freezeOnLoseFocus) { usleep(100000); continue; }
+		  if (!enigma::gameWindowFocused && enigma::freezeOnLoseFocus) { 
+			if (enigma::pausedSteps < 1) {
+				enigma::pausedSteps += 1;
+			} else {
+				usleep(100000); continue; 
+			}
+		  }
 
 		enigma::handle_joysticks();
 		enigma::ENIGMA_events();
