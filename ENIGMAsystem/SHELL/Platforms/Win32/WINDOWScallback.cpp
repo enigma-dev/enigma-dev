@@ -110,7 +110,6 @@ namespace enigma
                 mousestatus[i] = 0;
             }
             gameWindowFocused = false;
-			pausedSteps += 1;
             return 0;
 
         case WM_ENTERSIZEMOVE:
