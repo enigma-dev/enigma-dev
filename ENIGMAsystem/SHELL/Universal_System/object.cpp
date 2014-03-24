@@ -65,7 +65,16 @@ namespace enigma
     variant object_basic::myevent_create()    { return 0; }
     variant object_basic::myevent_gamestart() { return 0; }
 	variant object_basic::myevent_closebutton() { return 0; }
-	variant object_basic::myevent_dialog() { return 0; }
+	variant object_basic::myevent_asyncdialog() { return 0; }
+	variant object_basic::myevent_asynchttp() { return 0; }
+	variant object_basic::myevent_asyncimageloaded() { return 0; }
+	variant object_basic::myevent_asyncsoundloaded() { return 0; }
+	variant object_basic::myevent_asyncnetworking() { return 0; }
+	variant object_basic::myevent_asynciap() { return 0; }
+	variant object_basic::myevent_asynccloud() { return 0; }
+	variant object_basic::myevent_asyncsteam() { return 0; }
+	variant object_basic::myevent_asyncsocial() { return 0; }
+	variant object_basic::myevent_asyncpushnotification() { return 0; }
     variant object_basic::myevent_draw()      { return 0; }
 	variant object_basic::myevent_drawgui()   { return 0; }
 	variant object_basic::myevent_drawresize()   { return 0; }
