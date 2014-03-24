@@ -1,4 +1,4 @@
-/** Copyright (C) 2013-2014 Robert B. Colton
+/** Copyright (C) 2014 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,25 +15,18 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef ENIGMA_NSNETWORK_H
-#define ENIGMA_NSNETWORK_H
+#ifndef ENIGMA_NSHTTP_H
+#define ENIGMA_NSHTTP_H
 
 #include <string>
 using std::string;
 
 namespace enigma_user {
 
-int network_connect(int socket, string url, int port);
-int network_conenct_raw(int socket, string url, int port);
-int network_create_server(int type, int port, int clients);
-int network_create_socket(int type);
-void network_destroy(int socket);
-string network_resolve(string url);
-unsigned network_send_broadcast(int socket, int port, int buffer, unsigned size);
-unsigned network_send_packet(int socket, int buffer, unsigned size);
-unsigned network_send_raw(int socket, int buffer, unsigned size);
-unsigned network_send_udp(int socket, string url, int port, int buffer, unsigned size);
-void network_set_timeout(int socket, long read, long write);
+void http_get(string url);
+void http_get_file(string url, string directory);
+void http_post_string(string url, string str);
+void http_request(string url, string method, unsigned header, unsigned body);
 
 }
 
