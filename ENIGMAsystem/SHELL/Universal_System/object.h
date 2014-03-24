@@ -67,7 +67,16 @@ namespace enigma
       virtual variant myevent_create();
       virtual variant myevent_gamestart();
 	  virtual variant myevent_closebutton();
-	  virtual variant myevent_dialog();
+	  virtual variant myevent_asyncdialog();
+	  virtual variant myevent_asynchttp();
+	  virtual variant myevent_asyncimageloaded();
+	  virtual variant myevent_asyncsoundloaded();
+	  virtual variant myevent_asyncnetworking();
+	  virtual variant myevent_asynciap();
+	  virtual variant myevent_asynccloud();
+	  virtual variant myevent_asyncsteam();
+	  virtual variant myevent_asyncsocial();
+	  virtual variant myevent_asyncpushnotification();
       virtual variant myevent_draw();
 	  virtual variant myevent_drawgui();
 	  virtual variant myevent_drawresize();
