@@ -61,7 +61,7 @@ static void fireAsyncDialogEvent() {
 	enigma::instance_event_iterator = new enigma::inst_iter(NULL,NULL,NULL);
 	for (enigma::iterator it = enigma::instance_list_first(); it; ++it)
 	{
-	  it->myevent_dialog();
+	  it->myevent_asyncdialog();
 	}
 }
 
