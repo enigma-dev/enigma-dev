@@ -3,7 +3,7 @@
 
 Name: Berkeley Sockets
 Identifier: BerkeleySockets
-Description: Utilization of the Berkley Sockets library for networking with HTTP, FTP, TCP-IP and UDP.
+Description: Utilization of the Berkeley Sockets library for networking with HTTP, FTP, TCP-IP and UDP.
 Author: IsmAvatar and Robert B. Colton
 
 Depends: None
