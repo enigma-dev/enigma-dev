@@ -30,9 +30,8 @@ RFC 2616 (very difficult to read)
 http://www.ietf.org/rfc/rfc2616.txt
 */
 
-#include "BSnet.h"
-#include <stdarg.h>
-#include <stdlib.h>
+#include <string>
+using std::string;
 
 void die(const char *e, int n, ...);
 int prepare(char **ret, const char *cmd, int argc, ...);
