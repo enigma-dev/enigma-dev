@@ -20,8 +20,10 @@
 
 #include <vector>
 #include <string>
+#include <map>
 using std::string;
 using std::vector;
+using std::map;
 
 #include "../General/OpenGLHeaders.h"
 
@@ -44,9 +46,39 @@ namespace enigma
         }
     };
 
+    union UAType{
+        bool b;
+        int i;
+        float f;
+    };
+
+    struct Uniform{
+        string name;
+        GLint location;
+        GLenum type;
+        GLint arraySize;
+        int size;
+        vector<UAType> data;
+    };
+
+    struct Attribute{
+        string name;
+        GLint location;
+        GLenum type;
+        GLint arraySize;
+        int size;
+    };
+
     struct ShaderProgram{
+        //These should be unordered maps, but they are only Cx11
+        map<string,GLint> uniform_names;
+        map<string,GLint> attribute_names;
+        map<GLint,Uniform> uniforms;
+        map<GLint,Attribute> attributes;
         string log;
         GLuint shaderprogram;
+        int uniform_count;
+        int attribute_count;
 
         GLint uni_viewMatrix;
         GLint uni_projectionMatrix;
@@ -69,12 +101,12 @@ namespace enigma
         GLint uni_material_specular;
         GLint uni_material_shininess;
 
-        GLint uni_light_active;
+        GLint uni_lights_active;
         GLint uni_light_position[8];
         GLint uni_light_ambient[8];
         GLint uni_light_diffuse[8];
         GLint uni_light_specular[8];
-        //lights ned
+        //lights end
 
         GLint att_vertex;
         GLint att_color;
@@ -93,7 +125,7 @@ namespace enigma
     };
 }
 
-extern vector<enigma::Shader*> shaders;
-extern vector<enigma::ShaderProgram*> shaderprograms;
+//extern vector<enigma::Shader*> shaders;
+//extern vector<enigma::ShaderProgram*> shaderprograms;
 
 #endif
