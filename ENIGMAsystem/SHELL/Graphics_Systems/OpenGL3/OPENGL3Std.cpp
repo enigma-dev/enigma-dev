@@ -92,8 +92,6 @@ namespace enigma
             if (shaderstruct->precompile) {
                 glsl_shader_compile(vshader_id);
                 glsl_shader_compile(fshader_id);
-
-                printf("Precompiling!\n");
             }
 
             glsl_program_attach(prog_id, vshader_id);
@@ -120,6 +118,8 @@ namespace enigma
         glsl_program_link(prog_id);
         glsl_program_validate(prog_id);
 
+        getUniforms(prog_id);
+        getAttributes(prog_id);
         getDefaultUniforms(prog_id);
         getDefaultAttributes(prog_id);
 

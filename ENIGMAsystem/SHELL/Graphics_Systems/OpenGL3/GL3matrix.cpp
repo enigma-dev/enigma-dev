@@ -67,7 +67,6 @@ void d3d_set_perspective(bool enable)
       //projection_matrix.InitPersProjTransform(0, 1, 0, 1); //they cannot be zeroes!
     }
     enigma::transformation_update = true;
-  //glMatrixMode(GL_MODELVIEW);
   // Unverified note: Perspective not the same as in GM when turning off perspective and using d3d projection
   // Unverified note: GM has some sort of dodgy behaviour where this function doesn't affect anything when calling after d3d_set_projection_ext
   // See also OpenGL3/GL3d3d.cpp Direct3D9/DX9d3d.cpp OpenGL1/GLd3d.cpp
@@ -79,7 +78,7 @@ void d3d_set_projection(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom, gs_sc
     (enigma::d3dHidden?glEnable:glDisable)(GL_DEPTH_TEST);
     enigma::projection_matrix.InitPersProjTransform(45, -view_wview[view_current] / (gs_scalar)view_hview[view_current], 1, 32000);
     enigma::view_matrix.InitCameraTransform(enigma::Vector3(xfrom,yfrom,zfrom),enigma::Vector3(xto,yto,zto),enigma::Vector3(xup,yup,zup));
-
+    enigma::d3d_light_update_positions();
     enigma::transformation_update = true;
 }
 
@@ -92,7 +91,7 @@ void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom, g
     enigma::projection_matrix.InitPersProjTransform(angle, -aspect, znear, zfar);
 
     enigma::view_matrix.InitCameraTransform(enigma::Vector3(xfrom,yfrom,zfrom),enigma::Vector3(xto,yto,zto),enigma::Vector3(xup,yup,zup));
-
+    enigma::d3d_light_update_positions();
     enigma::transformation_update = true;
 }
 
@@ -104,15 +103,14 @@ void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scal
     // and fractional coordinates. 
     x = round(x) + 0.01f; y = round(y) + 0.01f;
     oglmgr->Transformation();
-    enigma::projection_matrix.InitScaleTransform(1, -1, 1);
-    enigma::projection_matrix.rotateZ(angle);
+    enigma::projection_matrix.InitRotateZTransform(angle);
 
     enigma::Matrix4 ortho;
-    ortho.InitOtrhoProjTransform(x,x + width,y,y + height,32000,-32000);
+    ortho.InitOrthoProjTransform(x-0.5,x + width,y + height,y-0.5,32000,-32000);
 
     enigma::projection_matrix = enigma::projection_matrix * ortho;
     enigma::view_matrix.InitIdentity();
-
+    enigma::d3d_light_update_positions();
     enigma::transformation_update = true;
 }
 
@@ -121,12 +119,12 @@ void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, g
     oglmgr->Transformation();
     enigma::projection_matrix.InitRotateZTransform(angle);
 
-    enigma::Matrix4 persp, orhto;
+    enigma::Matrix4 persp, ortho;
     persp.InitPersProjTransform(60, 1, 0.1,32000);
-    orhto.InitOtrhoProjTransform(x,x + width,y,y + height,0.1,32000);
+    ortho.InitOrthoProjTransform(x,x + width,y,y + height,0.1,32000);
 
-    enigma::projection_matrix = enigma::projection_matrix * persp * orhto;
-
+    enigma::projection_matrix = enigma::projection_matrix * persp * ortho;
+    enigma::d3d_light_update_positions();
     enigma::transformation_update = true;
 }
 

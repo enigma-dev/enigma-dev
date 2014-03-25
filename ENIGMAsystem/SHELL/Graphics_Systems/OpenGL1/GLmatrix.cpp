@@ -107,16 +107,10 @@ void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom, g
 
 void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, gs_scalar angle)
 {
-    // This fixes font glyph edge artifacting and vertical scroll gaps
-    // seen by mostly NVIDIA GPU users.  Rounds x and y and adds +0.01 offset.
-    // This will prevent the fix from being negated through moving projections
-    // and fractional coordinates.
-    x = round(x) + 0.01f; y = round(y) + 0.01f;
-    enigma::projection_matrix.InitScaleTransform(1, -1, 1);
-    enigma::projection_matrix.rotateZ(angle);
+    enigma::projection_matrix.InitRotateZTransform(angle);
 
     enigma::Matrix4 ortho;
-    ortho.InitOtrhoProjTransform(x,x + width,y,y + height,32000,-32000);
+    ortho.InitOrthoProjTransform(x-0.5,x + width,y + height,y-0.5,32000,-32000);
 
     enigma::projection_matrix = enigma::projection_matrix * ortho;
     enigma::view_matrix.InitIdentity();
@@ -136,11 +130,11 @@ void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, g
 {
     enigma::projection_matrix.InitRotateZTransform(angle);
 
-    enigma::Matrix4 persp, orhto;
+    enigma::Matrix4 persp, ortho;
     persp.InitPersProjTransform(60, 1, 0.1,32000);
-    orhto.InitOtrhoProjTransform(x,x + width,y,y + height,0.1,32000);
+    ortho.InitOrthoProjTransform(x,x + width,y,y + height,0.1,32000);
 
-    enigma::projection_matrix = enigma::projection_matrix * persp * orhto;
+    enigma::projection_matrix = enigma::projection_matrix * persp * ortho;
 
     glMatrixMode(GL_PROJECTION);
     glLoadMatrix(enigma::projection_matrix);
