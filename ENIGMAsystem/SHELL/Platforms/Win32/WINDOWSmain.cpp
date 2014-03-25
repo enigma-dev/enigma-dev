@@ -47,7 +47,8 @@ namespace enigma //TODO: Find where this belongs
   HWND hWnd;
   LRESULT CALLBACK WndProc (HWND hWnd, UINT message,WPARAM wParam, LPARAM lParam);
   HDC window_hDC;
-  extern bool gameFroze;
+  extern bool gameWindowFocused, freezeOnLoseFocus;
+  unsigned int pausedSteps = 0;
 
   vector<string> main_argv;
   int main_argc;
@@ -327,7 +328,13 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
           }
           else
           {
-              if (enigma::gameFroze){ usleep(100000); continue; }
+              if (!enigma::gameWindowFocused && enigma::freezeOnLoseFocus) { 
+				if (enigma::pausedSteps < 1) {
+					enigma::pausedSteps += 1;
+				} else {
+					usleep(100000); continue; 
+				}
+			  }
 
 			  unsigned long dt = 0;
 			  if (spent_mcs > last_mcs) {
