@@ -26,10 +26,32 @@
 
 #include <iostream>
 #include <fstream>
-using namespace std;
+#include <sstream>
+//using namespace std;
 
 #include <vector>
-using std::vector;
+
+#ifdef DEBUG_MODE
+  #include <string>
+  #include "libEGMstd.h"
+  #include "Widget_Systems/widgets_mandatory.h"
+  #define get_uniform(uniter,location,usize)\
+    if (location == -1) { printf("Program[%i] - Uniform location -1 given!\n", enigma::bound_shader); return; }\
+    std::map<GLint,enigma::Uniform>::iterator uniter = enigma::shaderprograms[enigma::bound_shader]->uniforms.find(location);\
+    if (uniter == enigma::shaderprograms[enigma::bound_shader]->uniforms.end()){\
+        printf("Program[%i] - Uniform at location %i not found!\n", enigma::bound_shader, location);\
+        return;\
+    }else if ( uniter->second.size != usize ){\
+        printf("Program[%i] - Uniform at location %i of size %i is accesed by glUniform1f!\n", enigma::bound_shader, location, uniter->second.size);\
+    }
+#else
+    #define get_uniform(uniter,location,usize)\
+    if (location == -1) return; \
+    std::map<GLint,enigma::Uniform>::iterator uniter = enigma::shaderprograms[enigma::bound_shader]->uniforms.find(location);\
+    if (uniter == enigma::shaderprograms[enigma::bound_shader]->uniforms.end()){\
+        return;\
+    }
+#endif
 
 extern GLenum shadertypes[5] = {
   GL_VERTEX_SHADER, GL_FRAGMENT_SHADER, GL_TESS_CONTROL_SHADER, GL_TESS_EVALUATION_SHADER, GL_GEOMETRY_SHADER
@@ -37,8 +59,8 @@ extern GLenum shadertypes[5] = {
 
 namespace enigma
 {
-    vector<enigma::Shader*> shaders(0);
-    vector<enigma::ShaderProgram*> shaderprograms(0);
+    std::vector<enigma::Shader*> shaders(0);
+    std::vector<enigma::ShaderProgram*> shaderprograms(0);
 
     extern unsigned default_shader;
     extern unsigned bound_shader;
@@ -78,8 +100,8 @@ namespace enigma
 
                 "out vec2 v_TextureCoord;\n"
                 "out vec4 v_Color;\n"
-                "out vec3 v_lightIntensity;\n"
                 "uniform int en_ActiveLights;\n"
+                "uniform bool en_ColorEnabled;\n"
 
                 "uniform bool en_LightingEnabled;\n"
                 "uniform bool en_VS_FogEnabled;\n"
@@ -144,7 +166,11 @@ namespace enigma
                         "getEyeSpace(eyeNorm, eyePosition);\n"
                         "v_Color = en_AmbientColor * Material.Ka + phongModel( eyeNorm, eyePosition ) * in_Color;\n"
                     "}else{\n"
-                        "v_Color = in_Color;\n"
+                        "if (en_ColorEnabled == true){\n"
+                            "v_Color = in_Color;\n"
+                        "}else{\n"
+                            "v_Color = vec4(1.0);\n"
+                        "}\n"
                     "}\n"
                     "gl_Position = modelViewProjectionMatrix * vec4( in_Position.xyz, 1.0);\n"
 
@@ -161,17 +187,95 @@ namespace enigma
                     //"vec3 normal = normalize(v_Normal);\n"
                     //"vec4 LightColor = CalculateLighting(normal);\n"
                     "vec4 TexColor;"
-                    "if (en_TexturingEnabled == true && en_ColorEnabled == true){\n"
+                    "if (en_TexturingEnabled == true){\n"
                         "TexColor = texture2D( en_TexSampler, v_TextureCoord.st ) * v_Color;\n"
                     "}else if (en_ColorEnabled == true){\n"
                         "TexColor = v_Color;\n"
-                    "}else if (en_TexturingEnabled == true){\n"
-                        "TexColor = texture2D( en_TexSampler, v_TextureCoord.st );\n"
                     "}else{\n"
                         "TexColor = en_bound_color;\n"
                     "}\n"
                     "out_FragColor = TexColor;\n"// * LightColor;"
                 "}\n";
+    }
+    void getUniforms(int prog_id){
+        int uniform_count, max_length, uniform_count_arr = 0;
+        glGetProgramiv(enigma::shaderprograms[prog_id]->shaderprogram, GL_ACTIVE_UNIFORMS, &uniform_count);
+        glGetProgramiv(enigma::shaderprograms[prog_id]->shaderprogram, GL_ACTIVE_UNIFORM_MAX_LENGTH, &max_length);
+        for (int i = 0; i < uniform_count; ++i)
+        {
+            Uniform uniform;
+            char uniformName[max_length];
+
+            glGetActiveUniform(enigma::shaderprograms[prog_id]->shaderprogram, GLuint(i), max_length, NULL, &uniform.arraySize, &uniform.type, uniformName);
+
+            uniform.name = uniformName;
+            uniform.size = getGLTypeSize(uniform.type);
+            uniform.data.resize(uniform.size);
+            uniform.location = glGetUniformLocation(enigma::shaderprograms[prog_id]->shaderprogram, uniformName);
+            enigma::shaderprograms[prog_id]->uniform_names[uniform.name] = uniform.location;
+            enigma::shaderprograms[prog_id]->uniforms[uniform.location] = uniform;
+            //printf("Program - %i - found uniform - %s - with size - %i\n", prog_id, uniform.name.c_str(), uniform.size);
+
+            if (uniform.arraySize>1){ //It's an array
+                string basename(uniform.name, 0, uniform.name.length()-3);
+                //This should always work, because in case of an array glGetActiveUniform returns uniform_name[0] (so the first index)
+                for (int c = 1; c < uniform.arraySize; ++c){
+                    Uniform suniform;
+                    suniform.arraySize = uniform.arraySize;
+                    suniform.size = uniform.size;
+                    suniform.data.resize(uniform.size);
+                    suniform.type = uniform.type;
+                    std::ostringstream oss;
+                    oss << basename << "[" << c << "]";
+                    suniform.name = oss.str();
+                    suniform.location = glGetUniformLocation(enigma::shaderprograms[prog_id]->shaderprogram, suniform.name.c_str());
+                    enigma::shaderprograms[prog_id]->uniform_names[suniform.name] = suniform.location;
+                    enigma::shaderprograms[prog_id]->uniforms[suniform.location] = suniform;
+                    //printf("Program - %i - found uniform - %s - with size - %i\n", prog_id, suniform.name.c_str(), suniform.size);
+                }
+                uniform_count_arr += uniform.arraySize;
+            }
+        }
+        shaderprograms[prog_id]->uniform_count = uniform_count+uniform_count_arr;
+    }
+    void getAttributes(int prog_id){
+        int attribute_count, max_length, attribute_count_arr = 0;
+        glGetProgramiv(enigma::shaderprograms[prog_id]->shaderprogram, GL_ACTIVE_ATTRIBUTES, &attribute_count);
+        glGetProgramiv(enigma::shaderprograms[prog_id]->shaderprogram, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, &max_length);
+        for (int i = 0; i < attribute_count; ++i)
+        {
+            Attribute attribute;
+            char attributeName[max_length];
+
+            glGetActiveAttrib(enigma::shaderprograms[prog_id]->shaderprogram, GLuint(i), max_length, NULL, &attribute.arraySize, &attribute.type, attributeName);
+
+            attribute.name = attributeName;
+            attribute.size = getGLTypeSize(attribute.type);
+            attribute.location = glGetAttribLocation(enigma::shaderprograms[prog_id]->shaderprogram, attributeName);
+            enigma::shaderprograms[prog_id]->attribute_names[attribute.name] = attribute.location;
+            enigma::shaderprograms[prog_id]->attributes[attribute.location] = attribute;
+            //printf("Program - %i - found attribute - %s - with size - %i\n", prog_id, attribute.name.c_str(), attribute.size);
+
+            if (attribute.arraySize>1){ //It's an array
+                string basename(attribute.name, 0, attribute.name.length()-3);
+                //This should always work, because in case of an array glGetActiveAttrib returns attribute_name[0] (so the first index)
+                for (int c = 1; c < attribute.arraySize; ++c){
+                    Attribute sattribute;
+                    sattribute.arraySize = attribute.arraySize;
+                    sattribute.size = attribute.size;
+                    sattribute.type = attribute.type;
+                    std::ostringstream oss;
+                    oss << basename << "[" << c << "]";
+                    sattribute.name = oss.str();
+                    sattribute.location = glGetAttribLocation(enigma::shaderprograms[prog_id]->shaderprogram, sattribute.name.c_str());
+                    enigma::shaderprograms[prog_id]->attribute_names[sattribute.name] = sattribute.location;
+                    enigma::shaderprograms[prog_id]->attributes[sattribute.location] = sattribute;
+                    //printf("Program - %i - found attribute - %s - with size - %i\n", prog_id, sattribute.name.c_str(), sattribute.size);
+                }
+                attribute_count_arr += attribute.arraySize;
+            }
+        }
+        shaderprograms[prog_id]->attribute_count = attribute_count+attribute_count_arr;
     }
     void getDefaultUniforms(int prog_id){
         shaderprograms[prog_id]->uni_viewMatrix = enigma_user::glsl_get_uniform_location(prog_id, "transform_matrix[0]");
@@ -188,7 +292,7 @@ namespace enigma
 
         shaderprograms[prog_id]->uni_color = enigma_user::glsl_get_uniform_location(prog_id, "en_bound_color");
         shaderprograms[prog_id]->uni_ambient_color = enigma_user::glsl_get_uniform_location(prog_id, "en_AmbientColor");
-        shaderprograms[prog_id]->uni_light_active = enigma_user::glsl_get_uniform_location(prog_id, "en_ActiveLights");
+        shaderprograms[prog_id]->uni_lights_active = enigma_user::glsl_get_uniform_location(prog_id, "en_ActiveLights");
 
         char tchars[64];
         for (unsigned int i=0; i<8; ++i){
@@ -212,16 +316,52 @@ namespace enigma
         shaderprograms[prog_id]->att_texture = enigma_user::glsl_get_attribute_location(prog_id, "in_TextureCoord");
         shaderprograms[prog_id]->att_normal = enigma_user::glsl_get_attribute_location(prog_id, "in_Normal");
     }
+
+    int getGLTypeSize(GLuint type){
+        switch (type){
+            case GL_FLOAT: return 1;
+            case GL_FLOAT_VEC2: return 2;
+            case GL_FLOAT_VEC3: return 3;
+            case GL_FLOAT_VEC4: return 4;
+            case GL_INT: return 1;
+            case GL_INT_VEC2: return 2;
+            case GL_INT_VEC3: return 3;
+            case GL_INT_VEC4: return 4;
+            case GL_UNSIGNED_INT: return 1;
+            case GL_UNSIGNED_INT_VEC2: return 2;
+            case GL_UNSIGNED_INT_VEC3: return 3;
+            case GL_UNSIGNED_INT_VEC4: return 4;
+            case GL_BOOL: return 1;
+            case GL_BOOL_VEC2: return 2;
+            case GL_BOOL_VEC3: return 3;
+            case GL_BOOL_VEC4: return 4;
+            case GL_FLOAT_MAT2: return 4;
+            case GL_FLOAT_MAT3: return 9;
+            case GL_FLOAT_MAT4: return 16;
+            case GL_FLOAT_MAT2x3: return 6;
+            case GL_FLOAT_MAT2x4: return 8;
+            case GL_FLOAT_MAT3x2: return 6;
+            case GL_FLOAT_MAT3x4: return 12;
+            case GL_FLOAT_MAT4x2: return 8;
+            case GL_FLOAT_MAT4x3: return 12;
+
+            case GL_SAMPLER_1D: return 1;
+            case GL_SAMPLER_2D: return 1;
+            case GL_SAMPLER_3D: return 1;
+
+            default: { printf("getGLTypeSize Asking size for unknown type - %i!\n", type); return 1; }
+        }
+    }
 }
 
-unsigned long getFileLength(ifstream& file)
+unsigned long getFileLength(std::ifstream& file)
 {
     if(!file.good()) return 0;
 
     //unsigned long pos=file.tellg();
-    file.seekg(0,ios::end);
+    file.seekg(0,std::ios::end);
     unsigned long len = file.tellg();
-    file.seekg(ios::beg);
+    file.seekg(std::ios::beg);
 
     return len;
 }
@@ -405,51 +545,89 @@ void glsl_program_free(int id)
 }
 
 int glsl_get_uniform_location(int program, string name) {
-	int uni = glGetUniformLocation(enigma::shaderprograms[program]->shaderprogram, name.c_str());
-    if (uni == -1){
+	//int uni = glGetUniformLocation(enigma::shaderprograms[program]->shaderprogram, name.c_str());
+	std::map<string,GLint>::iterator it = enigma::shaderprograms[program]->uniform_names.find(name);
+    if (it == enigma::shaderprograms[program]->uniform_names.end()){
         printf("Program[%i] - Uniform %s not found!\n", program, name.c_str());
+        return -1;
+    }else{
+        return it->second;
     }
-    return uni;
 }
 
 int glsl_get_attribute_location(int program, string name) {
-	int uni = glGetAttribLocation(enigma::shaderprograms[program]->shaderprogram, name.c_str());
-    if (uni == -1){
+	//int uni = glGetAttribLocation(enigma::shaderprograms[program]->shaderprogram, name.c_str());
+    std::map<string,GLint>::iterator it = enigma::shaderprograms[program]->attribute_names.find(name);
+    if (it == enigma::shaderprograms[program]->attribute_names.end()){
         printf("Program[%i] - Attribute %s not found!\n", program, name.c_str());
+        return -1;
+    }else{
+        return it->second;
     }
-    return uni;
 }
 
 void glsl_uniformf(int location, float v0) {
-	glUniform1f(location, v0);
+    get_uniform(it,location,1);
+    if (it->second.data[0].f != v0){
+        glUniform1f(location, v0);
+        it->second.data[0].f = v0;
+    }
 }
 
 void glsl_uniformf(int location, float v0, float v1) {
-	glUniform2f(location, v0, v1);
+    get_uniform(it,location,2);
+    if (it->second.data[0].f != v0 || it->second.data[1].f != v1){
+        glUniform2f(location, v0, v1);
+        it->second.data[0].f = v0, it->second.data[1].f = v1;
+	}
 }
 
 void glsl_uniformf(int location, float v0, float v1, float v2) {
-	glUniform3f(location, v0, v1, v2);
+    get_uniform(it,location,3);
+    if (it->second.data[0].f != v0 || it->second.data[1].f != v1 || it->second.data[2].f != v2){
+        glUniform3f(location, v0, v1, v2);
+        it->second.data[0].f = v0, it->second.data[1].f = v1, it->second.data[2].f = v2;
+	}
 }
 
 void glsl_uniformf(int location, float v0, float v1, float v2, float v3) {
-	glUniform4f(location, v0, v1, v2, v3);
+    get_uniform(it,location,4);
+    if (it->second.data[0].f != v0 || it->second.data[1].f != v1 || it->second.data[2].f != v2 || it->second.data[3].f != v3){
+        glUniform4f(location, v0, v1, v2, v3);
+        it->second.data[0].f = v0, it->second.data[1].f = v1, it->second.data[2].f = v2, it->second.data[3].f = v3;
+	}
 }
 
 void glsl_uniformi(int location, int v0) {
-	glUniform1i(location, v0);
+    get_uniform(it,location,1);
+    if (it->second.data[0].i != v0){
+        glUniform1i(location, v0);
+        it->second.data[0].i = v0;
+    }
 }
 
 void glsl_uniformi(int location, int v0, int v1) {
-	glUniform2i(location, v0, v1);
+    get_uniform(it,location,2);
+    if (it->second.data[0].i != v0 || it->second.data[1].i != v1){
+        glUniform2i(location, v0, v1);
+        it->second.data[0].i = v0, it->second.data[1].i = v1;
+    }
 }
 
 void glsl_uniformi(int location, int v0, int v1, int v2) {
-	glUniform3i(location, v0, v1, v2);
+    get_uniform(it,location,3);
+    if (it->second.data[0].i != v0 || it->second.data[1].i != v1 || it->second.data[2].i != v2){
+        glUniform3i(location, v0, v1, v2);
+        it->second.data[0].i = v0, it->second.data[1].i = v1, it->second.data[2].i = v2;
+    }
 }
 
 void glsl_uniformi(int location, int v0, int v1, int v2, int v3) {
-	glUniform4i(location, v0, v1, v2, v3);
+    get_uniform(it,location,4);
+    if (it->second.data[0].i != v0 || it->second.data[1].i != v1 || it->second.data[2].i != v2 || it->second.data[3].i != v3){
+        glUniform4i(location, v0, v1, v2, v3);
+        it->second.data[0].i = v0, it->second.data[1].i = v1, it->second.data[2].i = v2, it->second.data[3].i = v3;
+    }
 }
 
 void glsl_uniformui(int location, unsigned v0) {

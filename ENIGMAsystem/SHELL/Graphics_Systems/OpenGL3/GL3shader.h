@@ -18,6 +18,7 @@
 #ifndef _GLSHADER__H
 #define _GLSHADER__H
 
+#include "../General/OpenGLHeaders.h"
 #include <string>
 using std::string;
 
@@ -29,6 +30,9 @@ namespace enigma
     string getDefaultVertexShader();
     void getDefaultUniforms(int prog_id);
     void getDefaultAttributes(int prog_id);
+    void getUniforms(int prog_id);
+    void getAttributes(int prog_id);
+    int getGLTypeSize(GLuint type);
 }
 
 namespace enigma_user
