@@ -308,7 +308,7 @@ public:
     void InitTranslationTransform(gs_scalar x, gs_scalar y, gs_scalar z);
     void InitCameraTransform(const Vector3& from, const Vector3& to, const Vector3& up);
     void InitPersProjTransform(gs_scalar fovy, gs_scalar aspect_ratio, gs_scalar znear, gs_scalar zfar);
-    void InitOtrhoProjTransform(gs_scalar left, gs_scalar right, gs_scalar bottom, gs_scalar top, gs_scalar znear, gs_scalar zfar);
+    void InitOrthoProjTransform(gs_scalar left, gs_scalar right, gs_scalar bottom, gs_scalar top, gs_scalar znear, gs_scalar zfar);
 
     void scale(gs_scalar ScaleX, gs_scalar ScaleY, gs_scalar ScaleZ);
 
