@@ -117,6 +117,7 @@ namespace enigma
                   "vec4 La; // Ambient light intensity\n"
                   "vec4 Ld; // Diffuse light intensity\n"
                   "vec4 Ls; // Specular light intensity\n"
+                  "float cA, lA, qA; // Attenuation for point lights\n"
                   //"bool type; //Type - directional or point"
                 "};\n"
                 "uniform LightInfo Light[MAX_LIGHTS];\n"
@@ -138,21 +139,26 @@ namespace enigma
                 "vec4 phongModel( vec3 norm, vec4 position )\n"
                 "{\n"
                   "vec4 total_light = vec4(0.0);"
+                  "vec3 v = normalize(-position.xyz);\n"
+                  "float attenuation;\n"
                   "for (int index = 0; index < en_ActiveLights; ++index){\n"
                       "vec3 L;\n"
-                      "if (Light[index].Position.w == 0){ //Directional light\n"
-                        "L = -normalize(Light[index].Position.xyz);\n"
+                      "if (Light[index].Position.w == 0.0){ //Directional light\n"
+                        "L = normalize(Light[index].Position.xyz);\n"
+                        "attenuation = 1.0;\n"
                       "}else{ //Point light\n"
-                        "L = -normalize(vec3((Light[index].Position.xyz - position.xyz).xyz));\n"
+                        "vec3 positionToLightSource = vec3(Light[index].Position.xyz - position.xyz);\n"
+                        "float distance = length(positionToLightSource);\n"
+                        "L = normalize(positionToLightSource);\n"
+                        "attenuation = 1.0 / (Light[index].cA + Light[index].lA * distance + Light[index].qA * distance * distance);\n"
                       "}\n"
-                      "vec3 v = normalize(-position.xyz);\n"
                       "vec3 r = reflect( -L, norm );\n"
                       "vec4 ambient = Light[index].La * Material.Ka;\n"
-                      "float LdotN = max( dot(norm,L), 0.0 );\n"
-                      "vec4 diffuse = Light[index].Ld * Material.Kd * LdotN;\n"
+                      "float LdotN = max( dot(L,norm), 0.0 );\n"
+                      "vec4 diffuse = vec4(attenuation * vec3(Light[index].Ld) * vec3(Material.Kd) * LdotN,1.0);\n"
                       "vec4 spec = vec4(0.0);\n"
                       "if( LdotN > 0.0 )\n"
-                          "spec = Light[index].Ls * Material.Ks * pow( max( dot(r,v), 0.0 ), Material.Shininess );\n"
+                          "spec = vec4(attenuation * vec3(Light[index].Ls) * vec3(Material.Ks) * pow( max( dot(r,v), 0.0 ), Material.Shininess ),1.0);\n"
                       "total_light += diffuse + ambient;\n"
                   "}\n"
                   "return total_light;\n"
@@ -160,17 +166,19 @@ namespace enigma
 
                 "void main()\n"
                 "{\n"
+                    "vec4 iColor;\n"
+                    "if (en_ColorEnabled == true){\n"
+                        "iColor = in_Color;\n"
+                    "}else{\n"
+                        "iColor = vec4(1.0);\n"
+                    "}\n"
                     "if (en_LightingEnabled == true){\n"
                         "vec3 eyeNorm;\n"
                         "vec4 eyePosition;\n"
                         "getEyeSpace(eyeNorm, eyePosition);\n"
-                        "v_Color = en_AmbientColor * Material.Ka + phongModel( eyeNorm, eyePosition ) * in_Color;\n"
+                        "v_Color = en_AmbientColor * Material.Ka + phongModel( eyeNorm, eyePosition ) * iColor;\n"
                     "}else{\n"
-                        "if (en_ColorEnabled == true){\n"
-                            "v_Color = in_Color;\n"
-                        "}else{\n"
-                            "v_Color = vec4(1.0);\n"
-                        "}\n"
+                        "v_Color = iColor;\n"
                     "}\n"
                     "gl_Position = modelViewProjectionMatrix * vec4( in_Position.xyz, 1.0);\n"
 
@@ -304,6 +312,12 @@ namespace enigma
             shaderprograms[prog_id]->uni_light_diffuse[i] = enigma_user::glsl_get_uniform_location(prog_id, tchars);
             sprintf(tchars, "Light[%d].Ls", i);
             shaderprograms[prog_id]->uni_light_specular[i] = enigma_user::glsl_get_uniform_location(prog_id, tchars);
+            sprintf(tchars, "Light[%d].cA", i);
+            shaderprograms[prog_id]->uni_light_cAttenuation[i] = enigma_user::glsl_get_uniform_location(prog_id, tchars);
+            sprintf(tchars, "Light[%d].lA", i);
+            shaderprograms[prog_id]->uni_light_lAttenuation[i] = enigma_user::glsl_get_uniform_location(prog_id, tchars);
+            sprintf(tchars, "Light[%d].qA", i);
+            shaderprograms[prog_id]->uni_light_qAttenuation[i] = enigma_user::glsl_get_uniform_location(prog_id, tchars);
         }
         shaderprograms[prog_id]->uni_material_ambient = enigma_user::glsl_get_uniform_location(prog_id, "Material.Ka");
         shaderprograms[prog_id]->uni_material_diffuse = enigma_user::glsl_get_uniform_location(prog_id, "Material.Kd");
