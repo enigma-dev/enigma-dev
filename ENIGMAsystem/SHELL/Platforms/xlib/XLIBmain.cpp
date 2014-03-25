@@ -48,8 +48,9 @@ namespace enigma
   extern char keymap[512];
   //extern char usermap[256];
   void ENIGMA_events(void); //TODO: Synchronize this with Windows by putting these two in a single header.
-  bool gameFroze = false;
+  bool gameWindowFocused = false;
   extern bool freezeOnLoseFocus;
+  unsigned int pausedSteps = 0;
 
   namespace x11
   {
@@ -133,13 +134,11 @@ namespace enigma
           return 0;
         }
         case FocusIn:
-          gameFroze = false;
+          gameWindowFocused = true;
+		  pausedSteps = 0;
           return 0;
         case FocusOut:
-          if (enigma::freezeOnLoseFocus) {
-			//TODO: Application hangs and then crashes and will not unfreeze when the form regains focus, needs fixed.
-            //gameFroze = true;
-          }
+		  gameWindowFocused = false;
           return 0;
         case ClientMessage:
           if ((unsigned)e.xclient.data.l[0] == (unsigned)wm_delwin) //For some reason, this line warns whether we cast to unsigned or not.
@@ -371,7 +370,13 @@ int main(int argc,char** argv)
 			if(handleEvents() > 0)
 				goto end;
 
-		if (enigma::gameFroze){ usleep(100000); continue; }
+		  if (!enigma::gameWindowFocused && enigma::freezeOnLoseFocus) { 
+			if (enigma::pausedSteps < 1) {
+				enigma::pausedSteps += 1;
+			} else {
+				usleep(100000); continue; 
+			}
+		  }
 
 		enigma::handle_joysticks();
 		enigma::ENIGMA_events();
