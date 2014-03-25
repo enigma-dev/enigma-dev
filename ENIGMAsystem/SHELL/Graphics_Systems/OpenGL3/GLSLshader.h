@@ -106,6 +106,9 @@ namespace enigma
         GLint uni_light_ambient[8];
         GLint uni_light_diffuse[8];
         GLint uni_light_specular[8];
+        GLint uni_light_cAttenuation[8];
+        GLint uni_light_lAttenuation[8];
+        GLint uni_light_qAttenuation[8];
         //lights end
 
         GLint att_vertex;

@@ -23,6 +23,7 @@
 #include "GLSLshader.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
+#include "GL3shader.h"
 #include <math.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -567,6 +568,9 @@ class Mesh
       BufferGenerate();
     }
 
+    //If there is nothing to render, then there is no need for all the rest
+    if (triangleIndexedCount == 0 && lineIndexedCount == 0 && pointIndexedCount == 0 && triangleCount == 0 && lineCount == 0 && pointCount == 0) return;
+
     if (enigma::transformation_update == true){
         //Recalculate matrices
         enigma::mv_matrix = enigma::view_matrix * enigma::model_matrix;
@@ -580,7 +584,6 @@ class Mesh
         enigma::normal_matrix = enigma::Matrix3(tmpNorm(0,0),tmpNorm(0,1),tmpNorm(0,2),
                                                 tmpNorm(1,0),tmpNorm(1,1),tmpNorm(1,2),
                                                 tmpNorm(2,0),tmpNorm(2,1),tmpNorm(2,2));
-        enigma::d3d_light_update_positions();
         enigma::transformation_update = false;
     }
 
@@ -593,7 +596,7 @@ class Mesh
     glUniformMatrix3fv(enigma::shaderprograms[enigma::bound_shader]->uni_normalMatrix,  1, true, enigma::normal_matrix);
 
     //Bind texture
-    glUniform1i(enigma::shaderprograms[enigma::bound_shader]->uni_texSampler, 0);
+    glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_texSampler, 0);
 
 	GLsizei stride = GetStride();
 
@@ -619,7 +622,7 @@ class Mesh
 		offset += 3;
     }
 
-    glUniform4f( enigma::shaderprograms[enigma::bound_shader]->uni_color, (float)enigma::currentcolor[0]/255.0, (float)enigma::currentcolor[1]/255.0, (float)enigma::currentcolor[2]/255.0, (float)enigma::currentcolor[3]/255.0 );
+    glsl_uniformf( enigma::shaderprograms[enigma::bound_shader]->uni_color, (float)enigma::currentcolor[0]/255.0f, (float)enigma::currentcolor[1]/255.0f, (float)enigma::currentcolor[2]/255.0f, (float)enigma::currentcolor[3]/255.0f );
 
     if (useTextures){
          //This part sucks, but is required because models can be drawn without textures even if coordinates are provided
@@ -627,21 +630,21 @@ class Mesh
         if (oglmgr->GetBoundTexture() != 0){
             glEnableVertexAttribArray(enigma::shaderprograms[enigma::bound_shader]->att_texture);
             glVertexAttribPointer(enigma::shaderprograms[enigma::bound_shader]->att_texture, 2, GL_FLOAT, 0, STRIDE, OFFSET(offset));
-            glUniform1i(enigma::shaderprograms[enigma::bound_shader]->uni_textureEnable, 1);
+            glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_textureEnable, 1);
         }else{
-            glUniform1i(enigma::shaderprograms[enigma::bound_shader]->uni_textureEnable, 0);
+            glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_textureEnable, 0);
         }
 		offset += 2;
 	}else{
-        glUniform1i(enigma::shaderprograms[enigma::bound_shader]->uni_textureEnable, 0);
+        glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_textureEnable, 0);
 	}
 
     if (useColors){
         glEnableVertexAttribArray(enigma::shaderprograms[enigma::bound_shader]->att_color);
-        glUniform1i(enigma::shaderprograms[enigma::bound_shader]->uni_colorEnable, 1);
+        glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_colorEnable, 1);
 		glVertexAttribPointer(enigma::shaderprograms[enigma::bound_shader]->att_color, 4, GL_UNSIGNED_BYTE, GL_TRUE, STRIDE, OFFSET(offset)); //Normalization needs to be true, because we pack them as unsigned bytes
     }else{
-        glUniform1i(enigma::shaderprograms[enigma::bound_shader]->uni_colorEnable, 0);
+        glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_colorEnable, 0);
     }
 
 	#define OFFSETE( P )  ( ( const GLvoid * ) ( sizeof( GLuint ) * ( P         ) ) )

@@ -241,6 +241,7 @@ void d3d_set_clip_plane(bool enable)
 struct light3D {
     int type; //0 - directional, 1 - positional
     bool enabled;
+    bool update;
     gs_scalar position[4];
     float diffuse[4];
     float specular[4];
@@ -249,15 +250,21 @@ struct light3D {
     float linear_attenuation;
     float quadratic_attenuation;
 
-    light3D()
+    light3D(bool first = false)
     {
         type = 0;
         enabled = false;
-        position[0]=0, position[1]=0, position[2]=0, position[3]=0;
-        diffuse[0]=0, diffuse[1]=0, diffuse[2]=0, diffuse[3]=0;
-        specular[0]=0, specular[1]=0, specular[2]=0, specular[3]=0;
-        ambient[0]=0, ambient[1]=0, ambient[2]=0, ambient[3]=0;
-        constant_attenuation = 0;
+        update = false;
+        position[0]=0, position[1]=0, position[2]=1, position[3]=0;
+        if (first == true){ //By GL1 spec, the first light is different
+            diffuse[0]=1, diffuse[1]=1, diffuse[2]=1, diffuse[3]=1;
+            specular[0]=1, specular[1]=1, specular[2]=1, specular[3]=1;
+        }else{
+            diffuse[0]=0, diffuse[1]=0, diffuse[2]=0, diffuse[3]=0;
+            specular[0]=0, specular[1]=0, specular[2]=0, specular[3]=0;
+        }
+        ambient[0]=0, ambient[1]=0, ambient[2]=0, ambient[3]=1.0;
+        constant_attenuation = 1.0;
         linear_attenuation = 0;
         quadratic_attenuation = 0;
     };
@@ -290,7 +297,8 @@ class d3d_lights
         lights_enabled = false;
         global_ambient_color[0] = global_ambient_color[1] = global_ambient_color[2] = 0.2f;
         global_ambient_color[3] = 1.0f;
-        for (unsigned int i=0; i<8; ++i){
+        lights.push_back(light3D(true));
+        for (unsigned int i=0; i<7; ++i){
             lights.push_back(light3D());
         }
     }
@@ -309,37 +317,42 @@ class d3d_lights
             glUniform4fv(enigma::shaderprograms[enigma::bound_shader]->uni_material_diffuse, 1, material.diffuse);
             glUniform4fv(enigma::shaderprograms[enigma::bound_shader]->uni_material_specular, 1, material.specular);
             glUniform1f(enigma::shaderprograms[enigma::bound_shader]->uni_material_shininess, material.shininess);
+        }
+    }
+
+    void lightsource_update()
+    {
+        if (lights_enabled == true){
             unsigned int al = 0; //Active lights
             for (unsigned int i=0; i<lights.size(); ++i){
                 if (lights[i].enabled == true){
-                    enigma::mv_matrix.Print();
-                    enigma::Vector4 lpos_eyespace = enigma::mv_matrix * enigma::Vector4(lights[i].position[0],lights[i].position[1],lights[i].position[2],1.0);
-                    gs_scalar tmp_pos[4] = {lpos_eyespace.x,lpos_eyespace.y,lpos_eyespace.z,lights[i].position[3]};
-                    //printf("Light position after:\nx = %f; y = %f; z = %f;\n", lpos_eyespace.x,lpos_eyespace.y,lpos_eyespace.z);
-
-                    glUniform4fv(enigma::shaderprograms[enigma::bound_shader]->uni_light_position[i], 1, tmp_pos);
-                    glUniform4fv(enigma::shaderprograms[enigma::bound_shader]->uni_light_ambient[i], 1, lights[i].ambient);
-                    glUniform4fv(enigma::shaderprograms[enigma::bound_shader]->uni_light_diffuse[i], 1, lights[i].diffuse);
-                    glUniform4fv(enigma::shaderprograms[enigma::bound_shader]->uni_light_specular[i], 1, lights[i].specular);
+                    if (lights[i].update == true){
+                        glUniform4fv(enigma::shaderprograms[enigma::bound_shader]->uni_light_ambient[al], 1, lights[i].ambient);
+                        glUniform4fv(enigma::shaderprograms[enigma::bound_shader]->uni_light_diffuse[al], 1, lights[i].diffuse);
+                        glUniform4fv(enigma::shaderprograms[enigma::bound_shader]->uni_light_specular[al], 1, lights[i].specular);
+                        if (lights[i].position[3] != 0.0){ //Light is a point light
+                            glUniform1f(enigma::shaderprograms[enigma::bound_shader]->uni_light_cAttenuation[al], lights[i].constant_attenuation);
+                            glUniform1f(enigma::shaderprograms[enigma::bound_shader]->uni_light_lAttenuation[al], lights[i].linear_attenuation);
+                            glUniform1f(enigma::shaderprograms[enigma::bound_shader]->uni_light_qAttenuation[al], lights[i].quadratic_attenuation);
+                        }
+                        lights[i].update = false;
+                    }
                     ++al;
                 }
             }
-            glUniform1i(enigma::shaderprograms[enigma::bound_shader]->uni_light_active, al);
+            glUniform1i(enigma::shaderprograms[enigma::bound_shader]->uni_lights_active, al);
         }
     }
 
     void light_update_positions()
     {
+        unsigned int al = 0; //Active lights
         for (unsigned int i=0; i<lights.size(); ++i){
             if (lights[i].enabled == true){
-                //printf("model_view matrix:\n");
-                //enigma::mv_matrix.Print();
-                //printf("Light position before:\n");
-                //printf("x = %f; y = %f; z = %f;\n", lights[i].position[0],lights[i].position[1],lights[i].position[2]);
                 enigma::Vector4 lpos_eyespace = enigma::mv_matrix * enigma::Vector4(lights[i].position[0],lights[i].position[1],lights[i].position[2],1.0);
-                //printf("Light position after:\nx = %f; y = %f; z = %f;\n", lpos_eyespace.x,lpos_eyespace.y,lpos_eyespace.z);
                 gs_scalar tmp_pos[4] = {lpos_eyespace.x,lpos_eyespace.y,lpos_eyespace.z,lights[i].position[3]};
-                glUniform4fv(enigma::shaderprograms[enigma::bound_shader]->uni_light_position[i], 1, tmp_pos);
+                glUniform4fv(enigma::shaderprograms[enigma::bound_shader]->uni_light_position[al], 1, tmp_pos);
+                ++al;
             }
         }
     }
@@ -356,7 +369,9 @@ class d3d_lights
             lights[id].diffuse[1] = __GETG(col);
             lights[id].diffuse[2] = __GETB(col);
             lights[id].diffuse[3] = 1.0f;
-            light_update();
+            lights[id].update = true;
+            lightsource_update();
+            light_update_positions();
             return true;
         }
         return false;
@@ -388,7 +403,9 @@ class d3d_lights
             lights[id].constant_attenuation = 1.0f;
             lights[id].linear_attenuation = 0.0f;
             lights[id].quadratic_attenuation = 8.0f/(range*range);
-            light_update();
+            lights[id].update = true;
+            lightsource_update();
+            light_update_positions();
             return true;
         }
         return false;
@@ -401,7 +418,8 @@ class d3d_lights
             lights[id].specular[1] = g;
             lights[id].specular[2] = b;
             lights[id].specular[3] = a;
-            light_update();
+            lights[id].update = true;
+            lightsource_update();
             return true;
         }
         return false;
@@ -414,7 +432,8 @@ class d3d_lights
             lights[id].ambient[1] = g;
             lights[id].ambient[2] = b;
             lights[id].ambient[3] = a;
-            light_update();
+            lights[id].update = true;
+            lightsource_update();
             return true;
         }
         return false;
@@ -425,7 +444,8 @@ class d3d_lights
     {
         if (id<lights.size()){
             lights[id].enabled = true;
-            light_update();
+            lights[id].update = true;
+            lightsource_update();
             return true;
         }
         return false;
@@ -435,7 +455,7 @@ class d3d_lights
     {
         if (id<lights.size()){
             lights[id].enabled = false;
-            light_update();
+            lightsource_update();
             return true;
         }
         return false;
@@ -482,6 +502,9 @@ void d3d_set_lighting(bool enable)
 {
     d3d_lighting.lights_enable(enable);
     d3d_lighting.light_update();
+    if (enable == true){
+        d3d_lighting.lightsource_update();
+    }
 }
 }
 
