@@ -98,7 +98,7 @@ int lang_CPP::compile_writeGlobals(EnigmaStruct* es, parsed_object* global)
 	wto << "  int gameInfoTop = " << es->gameInfo.top << ";" << endl;
 	wto << "  int gameInfoWidth = " << es->gameInfo.width << ";" << endl;
 	wto << "  int gameInfoHeight = " << es->gameInfo.height << ";" << endl;
-	wto << "  bool gameInfoMimicGameWindow = " << es->gameInfo.mimicGameWindow << ";" << endl;
+	wto << "  bool gameInfoEmbedGameWindow = " << es->gameInfo.embedGameWindow << ";" << endl;
 	wto << "  bool gameInfoShowBorder = " << es->gameInfo.showBorder << ";" << endl;
 	wto << "  bool gameInfoAllowResize = " << es->gameInfo.allowResize << ";" << endl;
 	wto << "  bool gameInfoStayOnTop = " << es->gameInfo.stayOnTop << ";" << endl;

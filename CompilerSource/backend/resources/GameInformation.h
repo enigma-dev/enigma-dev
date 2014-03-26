@@ -14,7 +14,7 @@
 struct GameInformation
 {
   int backgroundColor = 0xFFFFE100; //GM color
-  boolean mimicGameWindow = false;
+  boolean embedGameWindow = false;
   String formCaption = "";
   int left;
   int top;
