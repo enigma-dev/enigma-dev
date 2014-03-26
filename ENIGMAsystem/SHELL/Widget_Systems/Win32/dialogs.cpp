@@ -58,30 +58,26 @@ namespace enigma {
   extern string gameInfoText, gameInfoCaption;
   extern int gameInfoBackgroundColor, gameInfoLeft, gameInfoTop, gameInfoWidth, gameInfoHeight;
   extern bool gameInfoMimicGameWindow, gameInfoShowBorder, gameInfoAllowResize, gameInfoStayOnTop, gameInfoPauseGame;
+  HWND infore;
 }
 
-static INT_PTR CALLBACK ShowInfoProc(HWND hwndDlg,UINT uMsg,WPARAM wParam,LPARAM lParam)
+static INT_PTR CALLBACK ShowInfoProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
   if (uMsg==WM_INITDIALOG)
   {
-    SetDlgItemText(hwndDlg,1,gs_cap.c_str());
-    SetDlgItemText(hwndDlg,10,gs_message.c_str());
+   // SetDlgItemText(hwndDlg,1,gs_cap.c_str());
+   // SetDlgItemText(hwndDlg,10,gs_message.c_str());
   }
   if (uMsg==WM_COMMAND)
   {
-    if (wParam==2 || wParam==11)
-    {
-      gs_str_submitted="";
-      gs_form_canceled=1;
-      EndDialog(hwndDlg,1);
-    }
-    else if (wParam==10)
-    {
-      gs_form_canceled=0;
-      EndDialog(hwndDlg,2);
-    }
+      //EndDialog(hwndDlg,2);
   }
-  return 0;
+  if (uMsg==WM_SIZE) {
+	RECT rectParent;
+	GetClientRect(hwndDlg, &rectParent);
+	MoveWindow(enigma::infore, rectParent.top, rectParent.left, rectParent.right, rectParent.bottom, TRUE); 
+  }
+  return DefWindowProc(hwndDlg, uMsg, wParam, lParam);
 }
 
 static INT_PTR CALLBACK GetStrProc(HWND hwndDlg,UINT uMsg,WPARAM wParam,LPARAM lParam)
@@ -197,8 +193,8 @@ void message_text_charset(int type, int charset) {
 void show_info(string info, int bgcolor, int left, int top, int width, int height, bool mimicGameWindow, bool showBorder, bool allowResize, bool stayOnTop, bool pauseGame, string caption) {
 	LoadLibrary(TEXT("Riched32.dll"));
 	
-	WNDCLASS wc = {CS_VREDRAW|CS_HREDRAW,(WNDPROC)DefWindowProc,0,0,enigma::hInstance,0,
-		0,GetSysColorBrush(COLOR_WINDOW),0,"showinfo"};
+	WNDCLASS wc = {CS_VREDRAW|CS_HREDRAW,(WNDPROC)ShowInfoProc,0,0,enigma::hInstance,0,
+		0,GetSysColorBrush(COLOR_WINDOW),0,"infodialog"};
 	RegisterClass(&wc);
 	
 	DWORD flags = WS_VISIBLE|WS_POPUP|WS_SYSMENU|WS_TABSTOP; // DS_3DLOOK|DS_CENTER|DS_FIXEDSYS
@@ -220,7 +216,7 @@ void show_info(string info, int bgcolor, int left, int top, int width, int heigh
 		top = (GetSystemMetrics(SM_CYSCREEN) - height)/2;
 	}
 	
-	HWND main=CreateWindowA("showinfo", TEXT(caption.c_str()),
+	HWND main=CreateWindowA("infodialog", TEXT(caption.c_str()),
 		flags, left, top, width, height, enigma::hWnd, 0, enigma::hInstance, 0);
 		
 	if (showBorder) {
@@ -232,18 +228,18 @@ void show_info(string info, int bgcolor, int left, int top, int width, int heigh
 		}
 	}
 		
-	HWND re=CreateWindowA("RICHEDIT",TEXT("information text"),
+	enigma::infore=CreateWindowA("RICHEDIT",TEXT("information text"),
 		ES_LEFT | ES_MULTILINE | ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_WANTRETURN | WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP,
 		0,0,width,height,main,0,enigma::hInstance,0);
 	
 	// Set RTF Editor Background Color
-	SendMessage(re, EM_SETBKGNDCOLOR, (WPARAM)0, (LPARAM)RGB(__GETR(bgcolor), __GETG(bgcolor), __GETB(bgcolor)));
+	SendMessage(enigma::infore, EM_SETBKGNDCOLOR, (WPARAM)0, (LPARAM)RGB(__GETR(bgcolor), __GETG(bgcolor), __GETB(bgcolor)));
 	
 	// Set RTF Information Text
 	SETTEXTEX se;
 	se.codepage = CP_ACP;
 	se.flags = ST_DEFAULT;		//inSelection ? ST_SELECTION : 
-	SendMessage(re, EM_SETTEXTEX, (WPARAM)&se, (LPARAM)info.c_str());
+	SendMessage(enigma::infore, EM_SETTEXTEX, (WPARAM)&se, (LPARAM)info.c_str());
 		
 	ShowWindow(main,SW_SHOWDEFAULT);
 }

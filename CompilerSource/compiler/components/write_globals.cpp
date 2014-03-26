@@ -93,7 +93,7 @@ int lang_CPP::compile_writeGlobals(EnigmaStruct* es, parsed_object* global)
     wto << "  bool isFullScreen = " << es->gameSettings.startFullscreen << ";" << endl;
 	wto << "  string gameInfoText = \"" << esc(es->gameInfo.gameInfoStr) << "\";" << endl;
 	wto << "  string gameInfoCaption = \"" << es->gameInfo.formCaption << "\";" << endl;
-	wto << "  int gameInfoBackgroundColor = " << es->gameInfo.backgroundColor << ";" << endl;
+	wto << "  int gameInfoBackgroundColor = " << javaColor(es->gameInfo.backgroundColor) << ";" << endl;
 	wto << "  int gameInfoLeft = " << es->gameInfo.left << ";" << endl;
 	wto << "  int gameInfoTop = " << es->gameInfo.top << ";" << endl;
 	wto << "  int gameInfoWidth = " << es->gameInfo.width << ";" << endl;
