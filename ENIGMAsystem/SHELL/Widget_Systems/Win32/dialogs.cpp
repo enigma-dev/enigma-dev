@@ -70,7 +70,14 @@ static INT_PTR CALLBACK ShowInfoProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPA
   }
   if (uMsg==WM_COMMAND)
   {
-      //EndDialog(hwndDlg,2);
+	switch(LOWORD(wParam))
+	  {
+	  case IDCANCEL:
+		enigma_user::show_message("fakkk u");
+		//SendMessage(hwndDlg, WM_CLOSE, 0, 0);
+		DestroyWindow(hwndDlg);
+		return TRUE;
+	  }
   }
   if (uMsg==WM_SIZE) {
 	RECT rectParent;
@@ -197,7 +204,7 @@ void show_info(string info, int bgcolor, int left, int top, int width, int heigh
 		0,GetSysColorBrush(COLOR_WINDOW),0,"infodialog"};
 	RegisterClass(&wc);
 	
-	DWORD flags = WS_VISIBLE|WS_POPUP|WS_SYSMENU|WS_TABSTOP; // DS_3DLOOK|DS_CENTER|DS_FIXEDSYS
+	DWORD flags = WS_VISIBLE|WS_POPUP|WS_SYSMENU|WS_TABSTOP|WS_CLIPCHILDREN; // DS_3DLOOK|DS_CENTER|DS_FIXEDSYS
 	if (showBorder) {
 		flags |= WS_BORDER | WS_DLGFRAME | WS_CAPTION;
 	}
@@ -229,8 +236,13 @@ void show_info(string info, int bgcolor, int left, int top, int width, int heigh
 	}
 		
 	enigma::infore=CreateWindowA("RICHEDIT",TEXT("information text"),
-		ES_LEFT | ES_MULTILINE | ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_WANTRETURN | WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP,
+		ES_LEFT | ES_MULTILINE | ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_WANTRETURN | ES_READONLY | WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP,
 		0,0,width,height,main,0,enigma::hInstance,0);
+		
+	// Size the RTF Component to the Window
+	RECT rectParent;
+	GetClientRect(main, &rectParent);
+	MoveWindow(enigma::infore, rectParent.top, rectParent.left, rectParent.right, rectParent.bottom, TRUE); 
 	
 	// Set RTF Editor Background Color
 	SendMessage(enigma::infore, EM_SETBKGNDCOLOR, (WPARAM)0, (LPARAM)RGB(__GETR(bgcolor), __GETG(bgcolor), __GETB(bgcolor)));
@@ -238,10 +250,28 @@ void show_info(string info, int bgcolor, int left, int top, int width, int heigh
 	// Set RTF Information Text
 	SETTEXTEX se;
 	se.codepage = CP_ACP;
-	se.flags = ST_DEFAULT;		//inSelection ? ST_SELECTION : 
+	se.flags = ST_DEFAULT;
 	SendMessage(enigma::infore, EM_SETTEXTEX, (WPARAM)&se, (LPARAM)info.c_str());
 		
 	ShowWindow(main,SW_SHOWDEFAULT);
+	
+	/*
+	MSG msg;
+	BOOL bRet;
+
+	bool bQuit = false;
+	while (!bQuit)
+	{ 
+		bRet = PeekMessage(&msg, main, 0, 0, PM_REMOVE);
+		if (bRet == -1) {
+			// handle the error and possibly exit
+		} else if (msg.message == WM_CLOSE) {
+			bQuit = true;
+		} else {
+			TranslateMessage(&msg); 
+			DispatchMessage(&msg); 
+		}
+	}*/
 }
 
 void show_info() {
