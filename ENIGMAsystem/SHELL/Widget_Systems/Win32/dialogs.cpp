@@ -190,7 +190,7 @@ void message_text_charset(int type, int charset) {
 
 } 
 
-void show_info(string info, int bgcolor, int left, int top, int width, int height, bool mimicGameWindow, bool showBorder, bool allowResize, bool stayOnTop, bool pauseGame, string caption) {
+void show_info(string info, int bgcolor, int left, int top, int width, int height, bool embedGameWindow, bool showBorder, bool allowResize, bool stayOnTop, bool pauseGame, string caption) {
 	LoadLibrary(TEXT("Riched32.dll"));
 	
 	WNDCLASS wc = {CS_VREDRAW|CS_HREDRAW,(WNDPROC)ShowInfoProc,0,0,enigma::hInstance,0,
@@ -228,6 +228,7 @@ void show_info(string info, int bgcolor, int left, int top, int width, int heigh
 		}
 	}
 		
+	//TODO: Implement embedding to the game window
 	enigma::infore=CreateWindowA("RICHEDIT",TEXT("information text"),
 		ES_LEFT | ES_MULTILINE | ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_WANTRETURN | ES_READONLY | WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP,
 		0,0,width,height,main,0,enigma::hInstance,0);
@@ -246,6 +247,7 @@ void show_info(string info, int bgcolor, int left, int top, int width, int heigh
 	se.flags = ST_DEFAULT;
 	SendMessage(enigma::infore, EM_SETTEXTEX, (WPARAM)&se, (LPARAM)info.c_str());
 		
+	//TODO: Figure out how to block if we need to pause the game, otherwise ShowWindowAsync
 	ShowWindow(main,SW_SHOWDEFAULT);
 	
 	/*
