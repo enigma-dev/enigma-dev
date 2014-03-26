@@ -63,19 +63,12 @@ namespace enigma {
 
 static INT_PTR CALLBACK ShowInfoProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-  if (uMsg==WM_INITDIALOG)
+  if (uMsg==WM_KEYUP)
   {
-   // SetDlgItemText(hwndDlg,1,gs_cap.c_str());
-   // SetDlgItemText(hwndDlg,10,gs_message.c_str());
-  }
-  if (uMsg==WM_COMMAND)
-  {
-	switch(LOWORD(wParam))
+	switch(wParam)
 	  {
-	  case IDCANCEL:
-		enigma_user::show_message("fakkk u");
-		//SendMessage(hwndDlg, WM_CLOSE, 0, 0);
-		DestroyWindow(hwndDlg);
+	  case VK_ESCAPE:
+		PostMessage(hwndDlg, WM_CLOSE, 0, 0);
 		return TRUE;
 	  }
   }
