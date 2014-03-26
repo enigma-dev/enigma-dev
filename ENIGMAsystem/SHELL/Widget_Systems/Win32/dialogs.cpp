@@ -193,21 +193,6 @@ void message_text_charset(int type, int charset) {
 void show_info(string info, int bgcolor, int left, int top, int width, int height, bool embedGameWindow, bool showBorder, bool allowResize, bool stayOnTop, bool pauseGame, string caption) {
 	LoadLibrary(TEXT("Riched32.dll"));
 	
-	WNDCLASS wc = {CS_VREDRAW|CS_HREDRAW,(WNDPROC)ShowInfoProc,0,0,enigma::hInstance,0,
-		0,GetSysColorBrush(COLOR_WINDOW),0,"infodialog"};
-	RegisterClass(&wc);
-	
-	DWORD flags = WS_VISIBLE|WS_POPUP|WS_SYSMENU|WS_TABSTOP|WS_CLIPCHILDREN; // DS_3DLOOK|DS_CENTER|DS_FIXEDSYS
-	if (showBorder) {
-		flags |= WS_BORDER | WS_DLGFRAME | WS_CAPTION;
-	}
-	if (stayOnTop) {
-		flags |= DS_MODALFRAME; // Same as WS_EX_TOPMOST
-	}
-	if (allowResize) {
-		flags |= WS_SIZEBOX;
-	}
-	
 	// Center Information Window to the Middle of the Screen
 	if (left < 0) {
 		left = (GetSystemMetrics(SM_CXSCREEN) - width)/2;
@@ -216,20 +201,41 @@ void show_info(string info, int bgcolor, int left, int top, int width, int heigh
 		top = (GetSystemMetrics(SM_CYSCREEN) - height)/2;
 	}
 	
-	HWND main=CreateWindowA("infodialog", TEXT(caption.c_str()),
-		flags, left, top, width, height, enigma::hWnd, 0, enigma::hInstance, 0);
+	HWND main;
+	//TODO: Fix me
+	embedGameWindow = false;
+	if (embedGameWindow) {
+		main = enigma::hWnd;
+	} else {
+		WNDCLASS wc = {CS_VREDRAW|CS_HREDRAW,(WNDPROC)ShowInfoProc,0,0,enigma::hInstance,0,
+			0,GetSysColorBrush(COLOR_WINDOW),0,"infodialog"};
+		RegisterClass(&wc);
 		
-	if (showBorder) {
-		// Set Window Information Icon
-		HICON hIcon = LoadIcon(enigma::hInstance, MAKEINTRESOURCE(3));
-		if (hIcon) {
-			SendMessage(main, WM_SETICON, ICON_SMALL,(LPARAM)hIcon);
-			SendMessage(main, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
+		DWORD flags = WS_VISIBLE|WS_POPUP|WS_SYSMENU|WS_TABSTOP|WS_CLIPCHILDREN; // DS_3DLOOK|DS_CENTER|DS_FIXEDSYS
+		if (showBorder) {
+			flags |= WS_BORDER | WS_DLGFRAME | WS_CAPTION;
+		}
+		if (stayOnTop) {
+			flags |= DS_MODALFRAME; // Same as WS_EX_TOPMOST
+		}
+		if (allowResize) {
+			flags |= WS_SIZEBOX;
+		}
+	
+		main = CreateWindow("infodialog", TEXT(caption.c_str()),
+			flags, left, top, width, height, enigma::hWnd, 0, enigma::hInstance, 0);
+			
+		if (showBorder) {
+			// Set Window Information Icon
+			HICON hIcon = LoadIcon(enigma::hInstance, MAKEINTRESOURCE(3));
+			if (hIcon) {
+				SendMessage(main, WM_SETICON, ICON_SMALL,(LPARAM)hIcon);
+				SendMessage(main, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
+			}
 		}
 	}
 		
-	//TODO: Implement embedding to the game window
-	enigma::infore=CreateWindowA("RICHEDIT",TEXT("information text"),
+	enigma::infore=CreateWindowEx(WS_EX_TOPMOST,"RICHEDIT",TEXT("information text"),
 		ES_LEFT | ES_MULTILINE | ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_WANTRETURN | ES_READONLY | WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP,
 		0,0,width,height,main,0,enigma::hInstance,0);
 		
@@ -249,6 +255,9 @@ void show_info(string info, int bgcolor, int left, int top, int width, int heigh
 		
 	//TODO: Figure out how to block if we need to pause the game, otherwise ShowWindowAsync
 	ShowWindow(main,SW_SHOWDEFAULT);
+	if (!embedGameWindow) {
+		SetFocus(enigma::infore);
+	}
 	
 	/*
 	MSG msg;
