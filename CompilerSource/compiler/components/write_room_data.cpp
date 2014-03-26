@@ -108,7 +108,7 @@ int lang_CPP::compile_writeRoomData(EnigmaStruct* es, parsed_object *EGMglobal)
     << es->rooms[i].name << "\",  \""  // The name of this room
     << es->rooms[i].caption << "\",\n      " // The caption of this room
 
-    << lgmRoomBGColor(es->rooms[i].backgroundColor) << ", "//Background color
+    << javaColor(es->rooms[i].backgroundColor) << ", "//Background color
     << (es->rooms[i].drawBackgroundColor ? "true" : "false")
     << ", roomcreate" << es->rooms[i].id << ",\n      " // Creation code
 
