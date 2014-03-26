@@ -31,7 +31,9 @@ namespace enigma
   {
     return 0;
   }
-  extern string gameInformation;
+  extern string gameInfoText, gameInfoCaption;
+  extern int gameInfoBackgroundColor, gameInfoLeft, gameInfoTop, gameInfoWidth, gameInfoHeight;
+  extern bool gameInfoEmbedGameWindow, gameInfoShowBorder, gameInfoAllowResize, gameInfoStayOnTop, gameInfoPauseGame;
 }
 
 void show_error(string err, const bool fatal)
@@ -52,12 +54,13 @@ void show_error(string err, const bool fatal)
 
 namespace enigma_user {
 
-void show_info(string info, string caption) {
+void show_info(string info, int bgcolor, int left, int top, int width, int height, bool embedGameWindow, bool showBorder, bool allowResize, bool stayOnTop, bool pauseGame, string caption) {
 
 }
 
-void show_info(string caption) {
-  show_info(enigma::gameInformation, caption);
+void show_info() {
+  show_info(enigma::gameInfoText, enigma::gameInfoBackgroundColor, enigma::gameInfoLeft, enigma::gameInfoTop, enigma::gameInfoWidth, enigma::gameInfoHeight, enigma::gameInfoEmbedGameWindow, enigma::gameInfoShowBorder,
+	enigma::gameInfoAllowResize, enigma::gameInfoStayOnTop, enigma::gameInfoPauseGame, enigma::gameInfoCaption);
 }
 
 }
