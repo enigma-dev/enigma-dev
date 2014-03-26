@@ -212,8 +212,16 @@ void show_info(string info, int bgcolor, int left, int top, int width, int heigh
 		flags |= WS_SIZEBOX;
 	}
 	
-	HWND main=CreateWindowA("showinfo",TEXT(caption.c_str()),
-		flags, CW_USEDEFAULT, CW_USEDEFAULT,width,height,enigma::hWnd,0,enigma::hInstance,0);
+	// Center Information Window to the Middle of the Screen
+	if (left < 0) {
+		left = (GetSystemMetrics(SM_CXSCREEN) - width)/2;
+	}
+	if (top < 0) {
+		top = (GetSystemMetrics(SM_CYSCREEN) - height)/2;
+	}
+	
+	HWND main=CreateWindowA("showinfo", TEXT(caption.c_str()),
+		flags, left, top, width, height, enigma::hWnd, 0, enigma::hInstance, 0);
 		
 	if (showBorder) {
 		// Set Window Information Icon
