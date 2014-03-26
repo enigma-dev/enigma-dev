@@ -10,6 +10,7 @@
 #define _ENIGMASTRUCT__H
 
 #include "JavaStruct.h"
+#include "resources/GameInformation.h"
 #include "resources/GameSettings.h"
 #include "resources/Sprite.h"
 #include "resources/Sound.h"
@@ -67,7 +68,7 @@ struct EnigmaStruct
 	Extension *extensions;
 	int extensionCount;
 
-	//GameInformation gameInfo;
+	GameInformation gameInfo;
 	GameSettings gameSettings;
 	int lastInstanceId;
 	int lastTileId;

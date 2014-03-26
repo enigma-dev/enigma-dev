@@ -6,7 +6,8 @@
  * See LICENSE for details.
  */
 
-
+#ifndef _GAMEINFORMATION__H
+#define _GAMEINFORMATION__H
 
 #include "backend/JavaStruct.h"
 
@@ -19,9 +20,11 @@ struct GameInformation
   int top;
   int width;
   int height;
-  boolean showBorder ;
+  boolean showBorder;
   boolean allowResize;
   boolean stayOnTop;
   boolean pauseGame;
   String gameInfoStr;
 };
+
+#endif

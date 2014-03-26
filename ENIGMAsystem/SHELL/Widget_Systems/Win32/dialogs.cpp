@@ -18,12 +18,17 @@
 
 #include <string>
 #include <windows.h>
+#include <richedit.h>
 #include <stdio.h>
 using namespace std;
 #include "Widget_Systems/widgets_mandatory.h"
 #include "GameSettings.h"
 
 #include "../General/WSdialogs.h"
+
+#define __GETR(x) ((x & 0x0000FF))
+#define __GETG(x) ((x & 0x00FF00)>>8)
+#define __GETB(x) ((x & 0xFF0000)>>16)
 
 static string gs_cap;
 static string gs_def;
@@ -50,7 +55,9 @@ void show_error(string errortext,const bool fatal)
 namespace enigma {
   extern HINSTANCE hInstance;
   extern HWND hWnd;
-  extern string gameInformation;
+  extern string gameInfoText, gameInfoCaption;
+  extern int gameInfoBackgroundColor, gameInfoLeft, gameInfoTop, gameInfoWidth, gameInfoHeight;
+  extern bool gameInfoMimicGameWindow, gameInfoShowBorder, gameInfoAllowResize, gameInfoStayOnTop, gameInfoPauseGame;
 }
 
 static INT_PTR CALLBACK ShowInfoProc(HWND hwndDlg,UINT uMsg,WPARAM wParam,LPARAM lParam)
@@ -187,36 +194,55 @@ void message_text_charset(int type, int charset) {
 
 } 
 
-void show_info(string info, string caption) {
+void show_info(string info, int bgcolor, int left, int top, int width, int height, bool mimicGameWindow, bool showBorder, bool allowResize, bool stayOnTop, bool pauseGame, string caption) {
 	LoadLibrary(TEXT("Riched32.dll"));
 	
 	WNDCLASS wc = {CS_VREDRAW|CS_HREDRAW,(WNDPROC)DefWindowProc,0,0,enigma::hInstance,0,
 		0,GetSysColorBrush(COLOR_WINDOW),0,"showinfo"};
 	RegisterClass(&wc);
 	
-	HWND main=CreateWindow("showinfo",TEXT(caption.c_str()),
-		WS_SIZEBOX|DS_3DLOOK|DS_CENTER|DS_MODALFRAME|DS_FIXEDSYS|WS_VISIBLE|WS_BORDER|WS_POPUP|WS_CAPTION|WS_DLGFRAME|WS_SYSMENU|WS_TABSTOP,
-		CW_USEDEFAULT, CW_USEDEFAULT,500,400,enigma::hWnd,0,enigma::hInstance,0);
-	HWND re=CreateWindow("RICHEDIT",TEXT(info.c_str()),
-		WS_CHILD|WS_VISIBLE|ES_MULTILINE|ES_READONLY|ES_AUTOVSCROLL,
-		0,0,500,400,main,0,enigma::hInstance,0);
+	DWORD flags = WS_VISIBLE|WS_POPUP|WS_SYSMENU|WS_TABSTOP; // DS_3DLOOK|DS_CENTER|DS_FIXEDSYS
+	if (showBorder) {
+		flags |= WS_BORDER | WS_DLGFRAME | WS_CAPTION;
+	}
+	if (stayOnTop) {
+		flags |= DS_MODALFRAME; // Same as WS_EX_TOPMOST
+	}
+	if (allowResize) {
+		flags |= WS_SIZEBOX;
+	}
+	
+	HWND main=CreateWindowA("showinfo",TEXT(caption.c_str()),
+		flags, CW_USEDEFAULT, CW_USEDEFAULT,width,height,enigma::hWnd,0,enigma::hInstance,0);
+		
+	if (showBorder) {
+		// Set Window Information Icon
+		HICON hIcon = LoadIcon(enigma::hInstance, MAKEINTRESOURCE(3));
+		if (hIcon) {
+			SendMessage(main, WM_SETICON, ICON_SMALL,(LPARAM)hIcon);
+			SendMessage(main, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
+		}
+	}
+		
+	HWND re=CreateWindowA("RICHEDIT",TEXT("information text"),
+		ES_LEFT | ES_MULTILINE | ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_WANTRETURN | WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP,
+		0,0,width,height,main,0,enigma::hInstance,0);
+	
+	// Set RTF Editor Background Color
+	SendMessage(re, EM_SETBKGNDCOLOR, (WPARAM)0, (LPARAM)RGB(__GETR(bgcolor), __GETG(bgcolor), __GETB(bgcolor)));
+	
+	// Set RTF Information Text
+	SETTEXTEX se;
+	se.codepage = CP_ACP;
+	se.flags = ST_DEFAULT;		//inSelection ? ST_SELECTION : 
+	SendMessage(re, EM_SETTEXTEX, (WPARAM)&se, (LPARAM)info.c_str());
+		
 	ShowWindow(main,SW_SHOWDEFAULT);
-	
-	/*
-	HWND hwndEdit = CreateWindow("RICHEDIT", TEXT(info.c_str()),
-        ES_LEFT | ES_MULTILINE | DS_3DLOOK | DS_CENTER | DS_MODALFRAME | DS_FIXEDSYS | WS_VISIBLE | WS_BORDER | WS_CAPTION | WS_DLGFRAME | WS_SYSMENU | WS_TABSTOP | WS_VSCROLL | 
-                ES_AUTOVSCROLL | WS_HSCROLL | ES_AUTOHSCROLL, 
-        CW_USEDEFAULT, CW_USEDEFAULT, 500, 400, 
-        enigma::hWnd, NULL, enigma::hInstance, NULL);
-	*/
-	
-  //gs_cap = caption;
-  //gs_message = info;
-  //DialogBox(enigma::hInstance,"showinfodialog",enigma::hWnd,ShowInfoProc);
 }
 
-void show_info(string caption) {
-  show_info(enigma::gameInformation, caption);
+void show_info() {
+  show_info(enigma::gameInfoText, enigma::gameInfoBackgroundColor, enigma::gameInfoLeft, enigma::gameInfoTop, enigma::gameInfoWidth, enigma::gameInfoHeight, enigma::gameInfoMimicGameWindow, enigma::gameInfoShowBorder,
+	enigma::gameInfoAllowResize, enigma::gameInfoStayOnTop, enigma::gameInfoPauseGame, enigma::gameInfoCaption);
 }
 
 int show_message(string str)

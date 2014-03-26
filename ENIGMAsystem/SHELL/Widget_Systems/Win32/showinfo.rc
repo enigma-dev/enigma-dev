@@ -1,12 +1,12 @@
 #include <windows.h>
-//3 ICON "C:/Users/Owner/Desktop/ENIGMA/enigma-dev/ENIGMAsystem/SHELL/Widget_Systems/Win32/info.ico"
+3 ICON "C:/Users/Owner/Desktop/ENIGMA/enigma-dev/ENIGMAsystem/SHELL/Widget_Systems/Win32/info.ico"
 1 24 "Widget_Systems/Win32/manifest.xml"
 
-showinfodialog DIALOG 0, 0, 500, 400
+showinfo DIALOG 0, 0, 500, 400
 
 STYLE DS_3DLOOK | DS_CENTER | DS_MODALFRAME | DS_FIXEDSYS | WS_VISIBLE | WS_BORDER | WS_CAPTION | WS_DLGFRAME | WS_POPUP | WS_SYSMENU
 CAPTION "Information"
 FONT 8, "Ms Shell Dlg 2"
 {
-	EDITTEXT        10, 0, 0, 400, 500, ES_AUTOHSCROLL
+
 }

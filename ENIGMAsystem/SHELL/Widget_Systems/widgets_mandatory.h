@@ -34,8 +34,8 @@ void show_error(std::string msg, const bool fatal);
 
 namespace enigma_user {
 
-void show_info(string caption="Game Information");
-void show_info(string info,string caption="Information");
+void show_info();
+void show_info(string text, int bgcolor, int left, int top, int width, int height, bool mimicGameWindow, bool showBorder, bool allowResize, bool stayOnTop, bool pauseGame, string caption);
 static inline void action_show_info() { show_info(); }
 
 }
