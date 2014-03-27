@@ -140,6 +140,13 @@ static INT_PTR CALLBACK GetLoginProc(HWND hwndDlg,UINT uMsg,WPARAM wParam,LPARAM
   return 0;
 }
 
+static INT_PTR CALLBACK GetDirectoryAltProc(HWND hwnd, UINT uMsg, LPARAM lp, LPARAM pData)
+{
+	if (uMsg == BFFM_INITIALIZED) 
+		SetWindowText(hwnd, gs_cap.c_str());
+	return 0;
+}
+
 namespace enigma_user {
 
 extern string window_get_caption();
@@ -506,8 +513,9 @@ string get_directory_alt(string message, string root, bool modern, string captio
 	  if (modern) {
 		bi.ulFlags |= BIF_EDITBOX | BIF_NEWDIALOGSTYLE;
 	  }
-	  bi.lpfn = NULL;      //no customization function
-	  bi.lParam = (LPARAM)root.c_str();    //no parameters to the customization function
+	  gs_cap = caption;
+	  bi.lpfn =  GetDirectoryAltProc;      //callback to set window caption
+	  bi.lParam = (LPARAM)root.c_str();    //start in root directory
 
 	  pidl = ::SHBrowseForFolder(&bi);           
 	  if (pidl)
