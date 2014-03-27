@@ -1,5 +1,10 @@
-#include "XLIBwindow.h"
-#include "../General/PFthreads.h"
 #include "XLIBmain.h"
-#include "LINUXjoystick.h"
+#include "XLIBwindow.h"
+#include "LINUXjoystick.h" 
+#include "../General/PFthreads.h"
+#include "../General/PFini.h"
 #include "../General/PFfilemanip.h"
+#include "../General/PFwindow.h"
+#include "../General/PFexternals.h"
+#include "../General/PFsystem.h"
+
