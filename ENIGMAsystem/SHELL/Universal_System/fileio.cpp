@@ -1,5 +1,5 @@
 /** Copyright (C) 2008-2011 Josh Ventura
-***
+*** Copyright (C) 2014 Robert B. Colton
 *** This file is a part of the ENIGMA Development Environment.
 ***
 *** ENIGMA is free software: you can redistribute it and/or modify it under the
@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-// Simple, untuitive, integer based file I/O
+// Simple, intuitive, integer based file I/O
 
 #include <stdio.h> //fstream can get staked
 #include <string> //We will use string, though
@@ -261,4 +261,3 @@ int file_bin_read_byte(int fileid) { // Reads a byte of data from the file and r
 }
 
 }
-
