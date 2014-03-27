@@ -276,6 +276,65 @@ void show_info(string info, int bgcolor, int left, int top, int width, int heigh
 			DispatchMessage(&msg); 
 		}
 	}*/
+	
+	/* Round two...
+		MSG msg;
+	BOOL bRet;
+
+	bool bQuit = false;
+	while (!bQuit)
+	{
+		// Check RTF Control Messages
+		bRet = PeekMessage(&msg, infore, 0, 0, PM_REMOVE);
+		if (bRet == -1) {
+			// handle the error and possibly exit
+			PostMessage(embedGameWindow ? infore : main, WM_CLOSE, 0, 0);
+			bQuit = true;
+		} else { 
+			if (msg.message == WM_KEYUP) {
+				switch(msg.wParam)
+				  {
+				  case VK_ESCAPE:
+					PostMessage(embedGameWindow ? infore : main, WM_CLOSE, 0, 0);
+					bQuit = true;
+					break;
+				  }
+			} else {
+				TranslateMessage(&msg); 
+				DispatchMessage(&msg); 
+			}
+		}
+		
+		// If game information was showed in a separate window, then handle the messages for sizing and stuff
+		if (!embedGameWindow) {
+			bRet = PeekMessage(&msg, main, 0, 0, PM_REMOVE);
+			if (bRet == -1) {
+				// handle the error and possibly exit
+				PostMessage(main, WM_CLOSE, 0, 0);
+				bQuit = true;
+			} else { 
+				if (msg.message == WM_KEYUP) {
+					switch(msg.wParam)
+					  {
+					  case VK_ESCAPE:
+						PostMessage(main, WM_CLOSE, 0, 0);
+						bQuit = true;
+						break;
+					  }
+				} else if (msg.message == WM_SIZE) {
+					RECT rectParent;
+					GetClientRect(main, &rectParent);
+					MoveWindow(infore, rectParent.top, rectParent.left, rectParent.right, rectParent.bottom, TRUE); 
+				} else {
+					TranslateMessage(&msg); 
+					DispatchMessage(&msg); 
+				}
+			}
+		}
+		
+
+	}
+	*/
 }
 
 void show_info() {
