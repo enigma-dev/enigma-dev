@@ -22,6 +22,9 @@
 #include "CocoaMain.h"
 #include "ObjectiveC.h"
 
+#include "../General/PFwindow.h"
+#include "../General/PFfilemanip.h"
+
 #include "Universal_System/CallbackArrays.h"
 #include "Universal_System/roomsystem.h"
 
