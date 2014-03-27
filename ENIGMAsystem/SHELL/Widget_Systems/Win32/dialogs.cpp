@@ -62,7 +62,6 @@ namespace enigma {
   extern int gameInfoBackgroundColor, gameInfoLeft, gameInfoTop, gameInfoWidth, gameInfoHeight;
   extern bool gameInfoEmbedGameWindow, gameInfoShowBorder, gameInfoAllowResize, gameInfoStayOnTop, gameInfoPauseGame;
   HWND infore;
-  HHOOK hhk;
 }
 
 static INT_PTR CALLBACK ShowInfoProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -142,45 +141,47 @@ static INT_PTR CALLBACK GetLoginProc(HWND hwndDlg,UINT uMsg,WPARAM wParam,LPARAM
   return 0;
 }
 
-static LRESULT CALLBACK ShowMessageExtProc(INT nCode, WPARAM wParam, LPARAM lParam)
+static INT_PTR CALLBACK ShowMessageExtProc(HWND hwndDlg,UINT uMsg,WPARAM wParam,LPARAM lParam)
 {
-	HWND hChildWnd, hItemWnd; // msgbox is "child"
-	// notification that a window is about to be activated
-	// window handle is wParam
-	if (nCode == HCBT_ACTIVATE)
-	{
-		// set window handles
-		hChildWnd = (HWND)wParam;
-		//to get the text of the Yes button
-		UINT result;
-		if ((hItemWnd = GetDlgItem(hChildWnd, IDCANCEL)) != NULL) {
-			if (gs_but1.length()) {
-				result = SetDlgItemText(hChildWnd, IDCANCEL, gs_but1.c_str());
-			} else {
-				ShowWindow( hItemWnd, SW_HIDE );
-			}
-		}
-		if ((hItemWnd = GetDlgItem(hChildWnd, IDTRYAGAIN)) != NULL) {
-			if (gs_but2.length()) {
-				result = SetDlgItemText(hChildWnd, IDTRYAGAIN, gs_but2.c_str());
-			} else {
-				ShowWindow( hItemWnd, SW_HIDE );
-			}
-		}
-		if ((hItemWnd = GetDlgItem(hChildWnd, IDCONTINUE)) != NULL) {
-			if (gs_but3.length()) {
-				result = SetDlgItemText(hChildWnd, IDCONTINUE, gs_but3.c_str());
-			} else {
-				ShowWindow( hItemWnd, SW_HIDE );
-			}
-		}
-		 
-		// exit CBT hook
-		UnhookWindowsHookEx(enigma::hhk);
-	}
-	// otherwise, continue with any possible chained hooks
-	else CallNextHookEx(enigma::hhk, nCode, wParam, lParam);
-	return 0;
+  if (uMsg==WM_INITDIALOG)
+  {
+    SetDlgItemText(hwndDlg,1,gs_cap.c_str());
+	SetDlgItemText(hwndDlg,10,gs_message.c_str());
+    SetDlgItemText(hwndDlg,11,gs_but1.c_str());
+    SetDlgItemText(hwndDlg,12,gs_but2.c_str());
+	SetDlgItemText(hwndDlg,13,gs_but3.c_str());
+  }
+  if (uMsg==WM_COMMAND)
+  {
+	if (wParam==2) {
+      gs_str_submitted="";
+      gs_form_canceled=1;
+      EndDialog(hwndDlg,0);
+    } else if (wParam==11) {
+      gs_str_submitted="";
+      gs_form_canceled=0;
+      EndDialog(hwndDlg,1);
+    } else if (wParam==12) {
+      gs_str_submitted="";
+      gs_form_canceled=0;
+      EndDialog(hwndDlg,2);
+    } else if (wParam==13) {
+      gs_str_submitted="";
+      gs_form_canceled=0;
+      EndDialog(hwndDlg,3);
+    }
+  }
+  if (uMsg==WM_KEYUP) {
+	switch(wParam)
+	  {
+	  case VK_ESCAPE:
+		  gs_str_submitted="";
+		  gs_form_canceled=1;
+		  EndDialog(hwndDlg,0);
+		break;
+	  }
+  }
+  return 0;
 }
 
 static INT_PTR CALLBACK GetDirectoryAltProc(HWND hwnd, UINT uMsg, LPARAM lp, LPARAM pData)
@@ -402,18 +403,10 @@ int show_message(string str)
 
 int show_message_ext(string msg, string but1, string but2, string but3)
 {
+	gs_cap = window_get_caption();
+	gs_message = msg;
 	gs_but1 = but1; gs_but2 = but2; gs_but3 = but3;
-	enigma::hhk = SetWindowsHookEx(WH_CBT, &ShowMessageExtProc, 0, GetCurrentThreadId());
-	switch (MessageBox(enigma::hWnd, msg.c_str(), window_get_caption().c_str(), MB_CANCELTRYCONTINUE)) {
-		case IDCANCEL:
-			return 1;
-		case IDTRYAGAIN:
-			return 2;
-		case IDCONTINUE:
-			return 3;
-		default:
-			return 0;
-	}
+	return DialogBox(enigma::hInstance,"showmessageext",enigma::hWnd,ShowMessageExtProc);
 }
 
 bool show_question(string str)
