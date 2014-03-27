@@ -153,23 +153,23 @@ static LRESULT CALLBACK ShowMessageExtProc(INT nCode, WPARAM wParam, LPARAM lPar
 		hChildWnd = (HWND)wParam;
 		//to get the text of the Yes button
 		UINT result;
-		if ((hItemWnd = GetDlgItem(hChildWnd, IDABORT)) != NULL) {
+		if ((hItemWnd = GetDlgItem(hChildWnd, IDCANCEL)) != NULL) {
 			if (gs_but1.length()) {
-				result = SetDlgItemText(hChildWnd, IDABORT, gs_but1.c_str());
+				result = SetDlgItemText(hChildWnd, IDCANCEL, gs_but1.c_str());
 			} else {
 				ShowWindow( hItemWnd, SW_HIDE );
 			}
 		}
-		if ((hItemWnd = GetDlgItem(hChildWnd, IDRETRY)) != NULL) {
+		if ((hItemWnd = GetDlgItem(hChildWnd, IDTRYAGAIN)) != NULL) {
 			if (gs_but2.length()) {
-				result = SetDlgItemText(hChildWnd, IDRETRY, gs_but2.c_str());
+				result = SetDlgItemText(hChildWnd, IDTRYAGAIN, gs_but2.c_str());
 			} else {
 				ShowWindow( hItemWnd, SW_HIDE );
 			}
 		}
-		if ((hItemWnd = GetDlgItem(hChildWnd, IDIGNORE)) != NULL) {
+		if ((hItemWnd = GetDlgItem(hChildWnd, IDCONTINUE)) != NULL) {
 			if (gs_but3.length()) {
-				result = SetDlgItemText(hChildWnd, IDIGNORE, gs_but3.c_str());
+				result = SetDlgItemText(hChildWnd, IDCONTINUE, gs_but3.c_str());
 			} else {
 				ShowWindow( hItemWnd, SW_HIDE );
 			}
@@ -404,12 +404,12 @@ int show_message_ext(string msg, string but1, string but2, string but3)
 {
 	gs_but1 = but1; gs_but2 = but2; gs_but3 = but3;
 	enigma::hhk = SetWindowsHookEx(WH_CBT, &ShowMessageExtProc, 0, GetCurrentThreadId());
-	switch (MessageBox(enigma::hWnd, msg.c_str(), window_get_caption().c_str(), MB_ABORTRETRYIGNORE)) {
-		case IDABORT:
+	switch (MessageBox(enigma::hWnd, msg.c_str(), window_get_caption().c_str(), MB_CANCELTRYCONTINUE)) {
+		case IDCANCEL:
 			return 1;
-		case IDRETRY:
+		case IDTRYAGAIN:
 			return 2;
-		case IDIGNORE:
+		case IDCONTINUE:
 			return 3;
 		default:
 			return 0;
