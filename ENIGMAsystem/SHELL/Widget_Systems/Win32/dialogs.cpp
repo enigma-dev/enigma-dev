@@ -39,6 +39,7 @@ static string gs_username;
 static string gs_password;
 static bool   gs_form_canceled;
 static string gs_str_submitted;
+static string gs_but1, gs_but2, gs_but3;
 
 void show_error(string errortext,const bool fatal)
 {
@@ -61,6 +62,7 @@ namespace enigma {
   extern int gameInfoBackgroundColor, gameInfoLeft, gameInfoTop, gameInfoWidth, gameInfoHeight;
   extern bool gameInfoEmbedGameWindow, gameInfoShowBorder, gameInfoAllowResize, gameInfoStayOnTop, gameInfoPauseGame;
   HWND infore;
+  HHOOK hhk;
 }
 
 static INT_PTR CALLBACK ShowInfoProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -138,6 +140,47 @@ static INT_PTR CALLBACK GetLoginProc(HWND hwndDlg,UINT uMsg,WPARAM wParam,LPARAM
     }
   }
   return 0;
+}
+
+static LRESULT CALLBACK ShowMessageExtProc(INT nCode, WPARAM wParam, LPARAM lParam)
+{
+	HWND hChildWnd, hItemWnd; // msgbox is "child"
+	// notification that a window is about to be activated
+	// window handle is wParam
+	if (nCode == HCBT_ACTIVATE)
+	{
+		// set window handles
+		hChildWnd = (HWND)wParam;
+		//to get the text of the Yes button
+		UINT result;
+		if ((hItemWnd = GetDlgItem(hChildWnd, IDABORT)) != NULL) {
+			if (gs_but1.length()) {
+				result = SetDlgItemText(hChildWnd, IDABORT, gs_but1.c_str());
+			} else {
+				ShowWindow( hItemWnd, SW_HIDE );
+			}
+		}
+		if ((hItemWnd = GetDlgItem(hChildWnd, IDRETRY)) != NULL) {
+			if (gs_but2.length()) {
+				result = SetDlgItemText(hChildWnd, IDRETRY, gs_but2.c_str());
+			} else {
+				ShowWindow( hItemWnd, SW_HIDE );
+			}
+		}
+		if ((hItemWnd = GetDlgItem(hChildWnd, IDIGNORE)) != NULL) {
+			if (gs_but3.length()) {
+				result = SetDlgItemText(hChildWnd, IDIGNORE, gs_but3.c_str());
+			} else {
+				ShowWindow( hItemWnd, SW_HIDE );
+			}
+		}
+		 
+		// exit CBT hook
+		UnhookWindowsHookEx(enigma::hhk);
+	}
+	// otherwise, continue with any possible chained hooks
+	else CallNextHookEx(enigma::hhk, nCode, wParam, lParam);
+	return 0;
 }
 
 static INT_PTR CALLBACK GetDirectoryAltProc(HWND hwnd, UINT uMsg, LPARAM lp, LPARAM pData)
@@ -357,11 +400,20 @@ int show_message(string str)
     return 0;
 }
 
-// TODO There's no easy way to do this. Creating a custom form is the only
-// solution I could find.
 int show_message_ext(string msg, string but1, string but2, string but3)
 {
-    return 1;
+	gs_but1 = but1; gs_but2 = but2; gs_but3 = but3;
+	enigma::hhk = SetWindowsHookEx(WH_CBT, &ShowMessageExtProc, 0, GetCurrentThreadId());
+	switch (MessageBox(enigma::hWnd, msg.c_str(), window_get_caption().c_str(), MB_ABORTRETRYIGNORE)) {
+		case IDABORT:
+			return 1;
+		case IDRETRY:
+			return 2;
+		case IDIGNORE:
+			return 3;
+		default:
+			return 0;
+	}
 }
 
 bool show_question(string str)
