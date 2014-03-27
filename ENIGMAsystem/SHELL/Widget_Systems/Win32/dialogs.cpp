@@ -87,7 +87,7 @@ static INT_PTR CALLBACK GetStrProc(HWND hwndDlg,UINT uMsg,WPARAM wParam,LPARAM l
 {
   if (uMsg==WM_INITDIALOG)
   {
-    SetDlgItemText(hwndDlg,1,gs_cap.c_str());
+    SetWindowText(hwndDlg,gs_cap.c_str());
     SetDlgItemText(hwndDlg,12,gs_def.c_str());
     SetDlgItemText(hwndDlg,13,gs_message.c_str());
   }
@@ -115,7 +115,7 @@ static INT_PTR CALLBACK GetLoginProc(HWND hwndDlg,UINT uMsg,WPARAM wParam,LPARAM
 {
   if (uMsg==WM_INITDIALOG)
   {
-    SetDlgItemText(hwndDlg,1,gs_cap.c_str());
+    SetWindowText(hwndDlg,gs_cap.c_str());
     SetDlgItemText(hwndDlg,14,gs_username.c_str());
     SetDlgItemText(hwndDlg,15,gs_password.c_str());
   }
@@ -145,7 +145,7 @@ static INT_PTR CALLBACK ShowMessageExtProc(HWND hwndDlg,UINT uMsg,WPARAM wParam,
 {
   if (uMsg==WM_INITDIALOG)
   {
-    SetDlgItemText(hwndDlg,1,gs_cap.c_str());
+    SetWindowText(hwndDlg,gs_cap.c_str());
 	SetDlgItemText(hwndDlg,10,gs_message.c_str());
     SetDlgItemText(hwndDlg,11,gs_but1.c_str());
     SetDlgItemText(hwndDlg,12,gs_but2.c_str());
@@ -403,7 +403,7 @@ int show_message(string str)
 
 int show_message_ext(string msg, string but1, string but2, string but3)
 {
-	gs_cap = window_get_caption();
+	gs_cap = "fakkk uuu";
 	gs_message = msg;
 	gs_but1 = but1; gs_but2 = but2; gs_but3 = but3;
 	return DialogBox(enigma::hInstance,"showmessageext",enigma::hWnd,ShowMessageExtProc);
