@@ -18,6 +18,8 @@
 
 #include <string>
 #include <windows.h>
+#include <shlobj.h> //for Shell API
+#include <Shlwapi.h> //for Shell API
 #include <richedit.h>
 #include <stdio.h>
 using namespace std;
@@ -476,6 +478,55 @@ int get_color(int defcolor, bool advanced)
     if (ChooseColor(&gcol))
       return (int)gcol.rgbResult;
     else return defc;
+}
+
+string get_directory(string dname, string caption)
+{
+
+}
+
+string get_directory_alt(string message, string root, bool modern, string caption) {
+	//standard use of the Shell API to browse for folders
+	bool f_selected = false;
+
+	char szDir [MAX_PATH];
+	BROWSEINFO bi;        
+	LPITEMIDLIST pidl;        
+	LPMALLOC pMalloc;
+
+	if (SUCCEEDED (::SHGetMalloc (&pMalloc)))
+	{
+	  ::ZeroMemory (&bi,sizeof(bi)); 
+
+	  bi.lpszTitle = message.c_str();
+	  bi.hwndOwner = enigma::hWnd;
+	  bi.pszDisplayName = 0;           
+	  bi.pidlRoot = 0;
+	  bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_STATUSTEXT;
+	  if (modern) {
+		bi.ulFlags |= BIF_EDITBOX | BIF_NEWDIALOGSTYLE;
+	  }
+	  bi.lpfn = NULL;      //no customization function
+	  bi.lParam = (LPARAM)root.c_str();    //no parameters to the customization function
+
+	  pidl = ::SHBrowseForFolder(&bi);           
+	  if (pidl)
+	  {
+		 if (::SHGetPathFromIDList(pidl, szDir))
+		 {
+			f_selected = true;
+		 }
+
+		 pMalloc->Free(pidl);
+		 pMalloc->Release();
+	  }     
+	}
+
+	if (f_selected) {
+		return szDir;
+	} else {
+		return "";
+	}
 }
 
 }
