@@ -38,10 +38,12 @@ void    file_text_write_string(int fileid, string str);
 void    file_text_write_real(int fileid, double x);
 void    file_text_writeln(int fileid);
 string file_text_read_string(int fileid);
+string file_text_read_all(int fileid);
 double  file_text_read_real(int fileid);
 void    file_text_readln(int fileid);
 bool    file_text_eof(int fileid);
 bool file_text_eoln(int fileid);
+void load_info(string fname); // game information function
 
 int     file_bin_open(string fname,int mode);
 bool    file_bin_rewrite(int fileid);
