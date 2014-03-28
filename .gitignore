@@ -9,6 +9,7 @@ blank.txt
 *.class
 *.o
 *.d
+*.db
 *.depend
 *.so
 *.dll
