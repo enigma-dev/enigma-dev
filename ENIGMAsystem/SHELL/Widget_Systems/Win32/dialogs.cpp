@@ -18,8 +18,9 @@
 
 #include <string>
 #include <windows.h>
+#include <shobjidl.h> //for IFileDialog
+#include <shlwapi.h> //for Shell API
 #include <shlobj.h> //for Shell API
-#include <Shlwapi.h> //for Shell API
 #include <richedit.h>
 #include <stdio.h>
 using namespace std;
@@ -31,6 +32,7 @@ using namespace std;
 #define __GETR(x) ((x & 0x0000FF))
 #define __GETG(x) ((x & 0x00FF00)>>8)
 #define __GETB(x) ((x & 0xFF0000)>>16)
+
 
 static string gs_cap;
 static string gs_def;
@@ -534,7 +536,21 @@ int get_color(int defcolor, bool advanced)
 
 string get_directory(string dname, string caption)
 {
-	return "";
+	string res = "";
+    IFileDialog *pfd = NULL;
+	/*
+    HRESULT hr = CoCreateInstance(CLSID_FileOpenDialog, 
+                      NULL, 
+                      CLSCTX_INPROC_SERVER, 
+                      IID_PPV_ARGS(&pfd));
+
+        // Create an event handling object, and hook it up to the dialog.
+        IFileDialogEvents *pfde = NULL;
+        hr = CDialogEventHandler_CreateInstance(IID_PPV_ARGS(&pfde));
+
+            hr = pfd->Advise(pfde, &dwCookie);
+*/
+	return res;
 }
 
 string get_directory_alt(string message, string root, bool modern, string caption) {
