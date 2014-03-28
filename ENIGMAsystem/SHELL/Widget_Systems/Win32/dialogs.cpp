@@ -534,7 +534,7 @@ int get_color(int defcolor, bool advanced)
 
 string get_directory(string dname, string caption)
 {
-
+	return "";
 }
 
 string get_directory_alt(string message, string root, bool modern, string caption) {
