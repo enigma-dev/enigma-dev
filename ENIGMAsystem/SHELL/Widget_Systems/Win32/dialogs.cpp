@@ -212,7 +212,7 @@ void message_button_font(string name, int size, int color, int style) {
 }
 
 void message_caption(bool show, string str) {
-
+	gs_cap = str;
 }
 
 void message_input_color(int col) {
@@ -231,7 +231,7 @@ void message_position(int x, int y) {
 
 }
 
-void message_size(int w, int h) {
+void message_size(int w, int h) { 
 
 }
 
