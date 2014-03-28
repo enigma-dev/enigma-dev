@@ -65,11 +65,11 @@ enum {
     void message_text_font(string name, int size, int color, int style); 
 	void message_text_charset(int type, int charset); 
 	int show_message(string str);
+	int show_message_ext(string str, string but1, string but2, string but3);
 	inline int action_show_message(string str)
 	{
 		return show_message(str);
 	}
-	int show_message_ext(string str, string but1, string but2, string but3);
 	bool show_question(string str);
 	inline bool action_if_question(string str)
 	{

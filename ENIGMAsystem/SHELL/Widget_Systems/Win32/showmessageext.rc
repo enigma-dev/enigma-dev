@@ -9,7 +9,7 @@ CAPTION "Prompt"
 FONT 8, "Ms Shell Dlg 2"
 {
 	LTEXT           "Message", 10, 5, 7, 175, 30
-	DEFPUSHBUTTON   	"but1", 11, 5, 44, 50, 14, BS_DEFPUSHBUTTON
+	DEFPUSHBUTTON  	"but1", 11, 5, 44, 50, 14, BS_DEFPUSHBUTTON
     PUSHBUTTON      "but2", 12, 60, 44, 50, 14, BS_PUSHBUTTON
 	PUSHBUTTON      "but3", 13, 115, 44, 50, 14, BS_PUSHBUTTON
 }
