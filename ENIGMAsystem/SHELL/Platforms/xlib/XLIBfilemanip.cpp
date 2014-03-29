@@ -28,41 +28,6 @@ using namespace std;
 
 /* UNIX-ready port of file manipulation */
 
-namespace enigma_user
-{
-
-int file_exists(string fname)
-{
-  struct stat st;
-  return (stat(fname.c_str(),&st) == 0) and !(S_ISDIR(st.st_mode));
-}
-int file_delete(string fname)
-{
-  return remove(fname.c_str());
-}
-int file_rename(string oldname,string newname)
-{
-  return rename(oldname.c_str(),newname.c_str());
-}
-int file_copy(string fname,string newname)
-{
-  return system(("cp "+fname+" "+newname).c_str()); // Hackish, but there's no good implementation on Linux
-}
-int directory_exists(string dname)
-{
-  struct stat st;
-  return (stat(dname.c_str(),&st) == 0) and (S_ISDIR(st.st_mode));
-}
-int directory_create(string dname) {
-  return mkdir(dname.c_str(),S_IRUSR|S_IWUSR|S_IXUSR);
-}
-
-bool set_working_directory(string dir) {
-  return !chdir(dir.c_str());
-}
-
-}
-
 // File iteration functions and environment functions
 
 #include <sys/types.h>
