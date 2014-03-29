@@ -1,5 +1,5 @@
 /** Copyright (C) 2014 Robert B. Colton
-*** Copyright (C) 2013 forthevin
+***
 *** This file is a part of the ENIGMA Development Environment.
 ***
 *** ENIGMA is free software: you can redistribute it and/or modify it under the
@@ -15,38 +15,31 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef ENIGMA_PLATFORM_SYSTEM_H
-#define ENIGMA_PLATFORM_SYSTEM_H
 
 #include <string>
 using std::string;
 
 namespace enigma_user {
 
-enum {
-	os_unknown = -1,
-	os_windows = 0,
-	os_win32 = 0,
-	os_macosx = 1,
-	os_psp = 2,
-	os_ios = 3,
-	os_android = 4,
-	os_symbian = 5,
-	os_linux = 6,
-	os_winphone = 7,
-	os_tizen = 8,
-	os_win8native = 9,
-};
+void splash_show_video(string fname, bool loop);
+void splash_show_text(string fname, long delay);
+void splash_show_image(string fname, long delay);
+void splash_show_web(string url, long delay);
 
-string os_get_config();
-int os_get_info();
-string os_get_language();
-string os_get_region();
-bool os_is_network_connected();
-bool os_is_paused();
-void os_lock_orientation(bool enable);
-void os_powersave_enable(bool enable);
+void splash_set_main(bool main);
+void splash_set_scale(bool scale);
+void splash_set_cursor(bool visible);
+void splash_set_color(int col);
+void splash_set_caption(string cap);
+void splash_set_fullscreen(bool full);
+void splash_set_border(bool border);
+void splash_set_size(unsigned width, unsigned height);
+void splash_set_position(int x, int y);
+void splash_set_adapt(bool adapt);
+void splash_set_top(bool top);
+void splash_set_interrupt(bool interrupt);
+void splash_set_stop_key(bool stop);
+void splash_set_stop_mouse(bool stop);
+void splash_set_close_button(bool show);
 
 }
-
-#endif //ENIGMA_PLATFORM_SYSTEM_H
