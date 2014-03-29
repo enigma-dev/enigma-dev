@@ -566,9 +566,7 @@ string get_directory(string dname, string caption)
 		
 		//TODO: Fuck Microsoft with a wooden spoon
 		std::wstring wtf = wideres;
-		for (size_t i = 0; i < wtf.length(); i++) {
-			res += wtf[i];
-		}
+		res = string(wtf.begin(), wtf.end());
 	}
 	
 	return res;
