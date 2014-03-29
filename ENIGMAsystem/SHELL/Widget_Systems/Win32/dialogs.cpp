@@ -542,8 +542,6 @@ string get_directory(string dname, string caption)
 //because I could not find out which one it uses, since IFileDialog is used by both wxWidgets and QtFramework
 //and there doesn't appear to be a standard file picker for XP or lower in the Windows API except SHBrowseForFolder that is
 //used by Game Maker for get_directory_alt
-/* TODO: Fixed undefined reference
-	string res = "";
 	IFileDialog* fileDialog;
 	CoCreateInstance(CLSID_FileOpenDialog, NULL, CLSCTX_INPROC_SERVER, 
 		IID_PPV_ARGS(&fileDialog));
@@ -556,9 +554,21 @@ string get_directory(string dname, string caption)
 	fileDialog->SetOptions(options | FOS_PICKFOLDERS);
 
 	fileDialog->Show(enigma::hWnd);
+	
+	IShellItem *psi;
+	LPWSTR wideres;
+	fileDialog->GetResult(&psi);
+	psi->GetDisplayName(SIGDN_DESKTOPABSOLUTEPARSING, &wideres);
+	psi->Release();
+	
+	//TODO: Fuck Microsoft with a wooden spoon
+	string res = "";
+	std::wstring wtf = wideres;
+	for (size_t i = 0; i < wtf.length(); i++) {
+		res += wtf[i];
+	}
 
 	return res;
-*/
 }
 
 string get_directory_alt(string message, string root, bool modern, string caption) {
