@@ -83,7 +83,7 @@ enum {
 	
 	string get_open_filename(string filter, string fname, string caption="");
 	string get_save_filename(string filter, string fname, string caption="");
-	string get_directory(string dname, string caption="");
+	string get_directory(string dname, string caption="Select Folder");
 	string get_directory_alt(string message, string root, bool modern=false, string caption="Browse for Folder");
 
 	string get_login(string username, string password, string cap="");
