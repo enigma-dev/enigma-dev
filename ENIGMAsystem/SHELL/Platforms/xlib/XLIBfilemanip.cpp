@@ -15,6 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+//TODO: Move most of this duplicate code into a Platforms/General/ source to reduce duplicate code for Mac/Linux/UNIX
+
 #include <cstdio>
 #include <cstdlib>
 #include <unistd.h>
