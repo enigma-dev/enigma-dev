@@ -54,6 +54,12 @@ void show_error(string err, const bool fatal)
 
 namespace enigma_user {
 
+int show_message(string message)
+{
+  printf("show_message: %s\n",message.c_str());
+  return 0;
+}
+
 void show_info(string info, int bgcolor, int left, int top, int width, int height, bool embedGameWindow, bool showBorder, bool allowResize, bool stayOnTop, bool pauseGame, string caption) {
 
 }
