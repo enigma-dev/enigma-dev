@@ -552,22 +552,25 @@ string get_directory(string dname, string caption)
 	options &= ~FOS_FILEMUSTEXIST;  
 	options &= ~FOS_PATHMUSTEXIST;
 	fileDialog->SetOptions(options | FOS_PICKFOLDERS);
-
+	fileDialog->SetTitle(std::wstring(caption.begin(), caption.end()).c_str());
+	
 	fileDialog->Show(enigma::hWnd);
 	
-	IShellItem *psi;
-	LPWSTR wideres;
-	fileDialog->GetResult(&psi);
-	psi->GetDisplayName(SIGDN_DESKTOPABSOLUTEPARSING, &wideres);
-	psi->Release();
-	
-	//TODO: Fuck Microsoft with a wooden spoon
 	string res = "";
-	std::wstring wtf = wideres;
-	for (size_t i = 0; i < wtf.length(); i++) {
-		res += wtf[i];
+	IShellItem *psi;
+	
+	if (SUCCEEDED(fileDialog->GetResult(&psi))) {
+		LPWSTR wideres;
+		psi->GetDisplayName(SIGDN_DESKTOPABSOLUTEPARSING, &wideres);
+		psi->Release();
+		
+		//TODO: Fuck Microsoft with a wooden spoon
+		std::wstring wtf = wideres;
+		for (size_t i = 0; i < wtf.length(); i++) {
+			res += wtf[i];
+		}
 	}
-
+	
 	return res;
 }
 
