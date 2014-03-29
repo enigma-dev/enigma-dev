@@ -17,6 +17,9 @@
 **/
 
 #include <string>
+// Windows Vista or later for IFileDialog
+#define NTDDI_VERSION NTDDI_VISTA
+#define _WIN32_WINNT _WIN32_WINNT_VISTA
 #include <windows.h>
 #include <shobjidl.h> //for IFileDialog
 #include <shlwapi.h> //for Shell API
@@ -32,7 +35,6 @@ using namespace std;
 #define __GETR(x) ((x & 0x0000FF))
 #define __GETG(x) ((x & 0x00FF00)>>8)
 #define __GETB(x) ((x & 0xFF0000)>>16)
-
 
 static string gs_cap;
 static string gs_def;
@@ -536,21 +538,27 @@ int get_color(int defcolor, bool advanced)
 
 string get_directory(string dname, string caption)
 {
+//NOTE: This uses the Windows Vista or later file chooser, which is different than the one used by GM8 and lower
+//because I could not find out which one it uses, since IFileDialog is used by both wxWidgets and QtFramework
+//and there doesn't appear to be a standard file picker for XP or lower in the Windows API except SHBrowseForFolder that is
+//used by Game Maker for get_directory_alt
+/* TODO: Fixed undefined reference
 	string res = "";
-    IFileDialog *pfd = NULL;
-	/*
-    HRESULT hr = CoCreateInstance(CLSID_FileOpenDialog, 
-                      NULL, 
-                      CLSCTX_INPROC_SERVER, 
-                      IID_PPV_ARGS(&pfd));
+	IFileDialog* fileDialog;
+	CoCreateInstance(CLSID_FileOpenDialog, NULL, CLSCTX_INPROC_SERVER, 
+		IID_PPV_ARGS(&fileDialog));
 
-        // Create an event handling object, and hook it up to the dialog.
-        IFileDialogEvents *pfde = NULL;
-        hr = CDialogEventHandler_CreateInstance(IID_PPV_ARGS(&pfde));
+	DWORD options;
+	fileDialog->GetOptions(&options);
 
-            hr = pfd->Advise(pfde, &dwCookie);
-*/
+	options &= ~FOS_FILEMUSTEXIST;  
+	options &= ~FOS_PATHMUSTEXIST;
+	fileDialog->SetOptions(options | FOS_PICKFOLDERS);
+
+	fileDialog->Show(enigma::hWnd);
+
 	return res;
+*/
 }
 
 string get_directory_alt(string message, string root, bool modern, string caption) {
