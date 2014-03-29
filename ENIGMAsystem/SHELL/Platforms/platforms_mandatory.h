@@ -23,7 +23,7 @@
 // under this directory, /Platforms/. They are not required to do anything at all
 // if the platform in question lacks support for them entirely.
 
-#include "os_types.h"
+#include "Platforms/General/PFsystem.h"
 
 namespace enigma_user {
   extern const int os_type;
