@@ -32,10 +32,6 @@ namespace enigma_user {
   static inline void sleep(int ms) { Sleep(ms); }
 }
 
-namespace enigma_user {
-int show_message(string str);
-}
-
 namespace enigma {
   extern string*  parameters;
   extern unsigned parameterc;

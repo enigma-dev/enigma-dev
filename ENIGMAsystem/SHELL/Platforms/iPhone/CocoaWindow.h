@@ -34,9 +34,6 @@ void gmw_init();
 
 void Sleep(int ms);
 
-int show_message(string str);
-
-
 namespace enigma {
 	extern char** parameters;
 	//void writename(char* x);

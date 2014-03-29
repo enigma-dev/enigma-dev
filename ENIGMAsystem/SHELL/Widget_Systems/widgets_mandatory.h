@@ -26,6 +26,9 @@ namespace enigma
 {
   // This function is called at the beginning of the game to allow the widget system to load.
   bool widget_system_initialize();
+  extern string gameInfoText, gameInfoCaption;
+  extern int gameInfoBackgroundColor, gameInfoLeft, gameInfoTop, gameInfoWidth, gameInfoHeight;
+  extern bool gameInfoEmbedGameWindow, gameInfoShowBorder, gameInfoAllowResize, gameInfoStayOnTop, gameInfoPauseGame;
 }
 
 // This obviously displays an error message.
@@ -34,8 +37,10 @@ void show_error(std::string msg, const bool fatal);
 
 namespace enigma_user {
 
-void show_info();
-void show_info(string text, int bgcolor, int left, int top, int width, int height, bool embedGameWindow, bool showBorder, bool allowResize, bool stayOnTop, bool pauseGame, string caption);
+int show_message(string str);
+void show_info(string text=enigma::gameInfoText, int bgcolor=enigma::gameInfoBackgroundColor, int left=enigma::gameInfoLeft, int top=enigma::gameInfoTop, int width=enigma::gameInfoWidth, int height=enigma::gameInfoHeight, 
+	bool embedGameWindow=enigma::gameInfoEmbedGameWindow, bool showBorder=enigma::gameInfoShowBorder, bool allowResize=enigma::gameInfoAllowResize, bool stayOnTop=enigma::gameInfoStayOnTop, 
+	bool pauseGame=enigma::gameInfoPauseGame, string caption=enigma::gameInfoCaption);
 static inline void action_show_info() { show_info(); }
 
 }
