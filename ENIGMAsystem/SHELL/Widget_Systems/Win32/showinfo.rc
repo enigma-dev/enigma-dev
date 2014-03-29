@@ -1,5 +1,5 @@
 #include <windows.h>
-3 ICON "C:/Users/Owner/Desktop/ENIGMA/enigma-dev/ENIGMAsystem/SHELL/Widget_Systems/Win32/info.ico"
+3 ICON "Widget_Systems/Win32/info.ico"
 1 24 "Widget_Systems/Win32/manifest.xml"
 
 showinfo DIALOG 0, 0, 500, 400
