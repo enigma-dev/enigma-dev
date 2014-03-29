@@ -6,22 +6,25 @@
  * See LICENSE for details.
  */
 
-
+#ifndef _GAMEINFORMATION__H
+#define _GAMEINFORMATION__H
 
 #include "backend/JavaStruct.h"
 
 struct GameInformation
 {
   int backgroundColor = 0xFFFFE100; //GM color
-  boolean mimicGameWindow = false;
+  boolean embedGameWindow = false;
   String formCaption = "";
   int left;
   int top;
   int width;
   int height;
-  boolean showBorder ;
+  boolean showBorder;
   boolean allowResize;
   boolean stayOnTop;
   boolean pauseGame;
   String gameInfoStr;
 };
+
+#endif
