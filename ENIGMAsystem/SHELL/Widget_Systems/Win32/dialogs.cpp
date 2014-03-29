@@ -552,6 +552,7 @@ string get_directory(string dname, string caption)
 	options &= ~FOS_FILEMUSTEXIST;  
 	options &= ~FOS_PATHMUSTEXIST;
 	fileDialog->SetOptions(options | FOS_PICKFOLDERS);
+	//TODO: Set default directory to dname
 	fileDialog->SetTitle(std::wstring(caption.begin(), caption.end()).c_str());
 	
 	fileDialog->Show(enigma::hWnd);
