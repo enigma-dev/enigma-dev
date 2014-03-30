@@ -13,9 +13,9 @@
 
 struct GameInformation
 {
-  int backgroundColor = 0xFFFFE100; //GM color
-  boolean embedGameWindow = false;
-  String formCaption = "";
+  int backgroundColor;
+  boolean embedGameWindow;
+  String formCaption;
   int left;
   int top;
   int width;
@@ -25,6 +25,12 @@ struct GameInformation
   boolean stayOnTop;
   boolean pauseGame;
   String gameInfoStr;
+  
+  // Default backgroundColor is the same as Game Maker
+  GameInformation(): backgroundColor(0xFFFFE100), embedGameWindow(false), formCaption("") {
+  
+  }
+  
 };
 
 #endif
