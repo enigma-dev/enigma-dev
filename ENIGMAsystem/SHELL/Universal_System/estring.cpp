@@ -16,7 +16,7 @@
 **/
 
 #include <stdio.h>
-#include <string>
+#include <string.h>
 #include <cstdlib>
 #include "var4.h"
 #include "estring.h"
@@ -148,9 +148,7 @@ size_t string_byte_length(string str) {
 size_t string_length(string str) { return str.length(); }
 size_t string_length(const char* str)
 {
-	const char* s = str;
-	while (*s++);
-	return str - s;
+	return strlen(str);
 }
 
 int string_pos(string substr,string str) {
