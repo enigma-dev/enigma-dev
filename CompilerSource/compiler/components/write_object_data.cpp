@@ -378,16 +378,18 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
         * @ *   Automatic constructor:  The constructor generates the ID from a global maximum and links by that alias.
         *////   Directed constructor:   Meant for use by the room system, the constructor uses a specified ID alias assumed to have been checked for conflict.
         wto <<   "\n    OBJ_" <<  i->second->name << "(int enigma_genericconstructor_newinst_x = 0, int enigma_genericconstructor_newinst_y = 0, const int id = (enigma::maxid++)" 
-			<< ", const int enigma_genericobjid = " << i->second->id << ")";
-         
-		 if (setting::inherit_objects && parsed_objects.find(i->second->parent) != parsed_objects.end()) { 
-			wto << ": OBJ_" << parsed_objects.find(i->second->parent)->second->name << "(enigma_genericconstructor_newinst_x,enigma_genericconstructor_newinst_y,id,enigma_genericobjid)";
+			<< ", const int enigma_genericobjid = " << i->second->id << ", bool handle = true)";
+			
+		if (setting::inherit_objects && parsed_objects.find(i->second->parent) != parsed_objects.end()) { 
+			wto << ": OBJ_" << parsed_objects.find(i->second->parent)->second->name << "(enigma_genericconstructor_newinst_x,enigma_genericconstructor_newinst_y,id,enigma_genericobjid,false)";
 		 } else {
 			wto << ": object_locals(id,enigma_genericobjid) ";
 		 }
+			
           for (size_t ii = 0; ii < i->second->initializers.size(); ii++)
             wto << ", " << i->second->initializers[ii].first << "(" << i->second->initializers[ii].second << ")";
           wto << "\n    {\n";
+		  wto << "      if (!handle) return;\n";
             // Sprite index
               if (used_funcs::object_set_sprite) //We want to initialize
                 wto << "      sprite_index = enigma::object_table[" << i->second->id << "].->sprite;\n"
@@ -410,6 +412,7 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
 		
           wto << "    void activate()\n    {\n";
 			if (setting::inherit_objects && has_parent) {
+				wto << "      OBJ_" << parsed_objects.find(i->second->parent)->second->name << "::activate();\n";
 				// Have to remove the one the parent added so we can add our own
 				wto << "      depth.remove();\n";
 			}
