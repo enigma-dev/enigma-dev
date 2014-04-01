@@ -69,6 +69,35 @@ namespace enigma_user
   ma_scalar point_distance(ma_scalar x1,ma_scalar y1,ma_scalar x2,ma_scalar y2)  { return ::hypot(x2-x1,y2-y1); }
   ma_scalar point_distance_3d(ma_scalar x1,ma_scalar y1,ma_scalar z1,ma_scalar x2,
   ma_scalar y2,ma_scalar z2)  { return ::sqrt(sqr(x1-x2) + sqr(y1-y2) + sqr(z1-z2)); }
+  
+  bool point_in_circle(ma_scalar px, ma_scalar py, ma_scalar x1, ma_scalar y1, ma_scalar rad) {
+	return (point_distance(x1, y1, px, py) < rad);
+  }
+  
+  bool point_in_rectangle(ma_scalar px, ma_scalar py, ma_scalar x1, ma_scalar y1, ma_scalar x2, ma_scalar y2) {
+	return px > x1 && px < x2 && py > y1 && py < y2; 
+  }
+  
+  bool point_in_triangle(ma_scalar px, ma_scalar py, ma_scalar x1, ma_scalar y1, ma_scalar x2, ma_scalar y2, ma_scalar x3, ma_scalar y3) {
+	return false;
+  }
+  
+  int rectangle_in_circles(ma_scalar x1, ma_scalar sy1, ma_scalar sx2, ma_scalar sy2, ma_scalar x, ma_scalar y, ma_scalar rad) {
+	return false;
+  }
+  
+  int rectangle_in_rectangle(ma_scalar sx1, ma_scalar sy1, ma_scalar sx2, ma_scalar sy2, ma_scalar dx1, ma_scalar dy1, ma_scalar dx2, ma_scalar dy2) {
+	return !( dx1 > sx2
+        || dx2 < sx1
+        || dy1 > sy2
+        || dy2 < sy1
+        );
+  }
+  
+  int rectangle_in_triangle(ma_scalar sx1, ma_scalar sy1, ma_scalar sx2, ma_scalar sy2, ma_scalar dx1, ma_scalar dy1, ma_scalar dx2, ma_scalar dy2, ma_scalar dx3, ma_scalar dy3) {
+	return false;
+  }
+  
   ma_scalar dot_product(ma_scalar x1,ma_scalar y1,ma_scalar x2,ma_scalar y2) { return (x1 * x2 + y1 * y2); }
   ma_scalar dot_product_3d(ma_scalar x1,ma_scalar y1,ma_scalar z1,ma_scalar x2,ma_scalar y2, ma_scalar z2) { return (x1 * x2 + y1 * y2 + z1 * z2); }
   ma_scalar dot_product_normalised(ma_scalar x1,ma_scalar y1,ma_scalar x2,ma_scalar y2) { 
