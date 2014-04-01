@@ -109,7 +109,7 @@ namespace enigma_user
 
   ma_scalar lengthdir_x(ma_scalar len,ma_scalar dir);
   ma_scalar lengthdir_y(ma_scalar len,ma_scalar dir);
-  ma_scalar direction_difference(ma_scalar dir1,ma_scalar dir2);
+  ma_scalar angle_difference(ma_scalar dir1,ma_scalar dir2);
   ma_scalar point_direction(ma_scalar x1,ma_scalar y1,ma_scalar x2,ma_scalar y2);
   ma_scalar point_distance(ma_scalar x1, ma_scalar y1, ma_scalar x2, ma_scalar y2);
   ma_scalar point_distance_3d(ma_scalar x1, ma_scalar y1, ma_scalar z1, ma_scalar x2,
