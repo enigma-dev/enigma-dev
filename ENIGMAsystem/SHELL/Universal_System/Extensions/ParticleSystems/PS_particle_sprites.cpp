@@ -64,7 +64,7 @@ namespace enigma
     if (value > high) return high;
     return value;
   }
-  static inline double direction_difference(double dir1, double dir2) {return fmod((fmod((dir1 - dir2),2*M_PI) + 3*M_PI), 2*M_PI) - M_PI;}
+  static inline double angle_difference(double dir1, double dir2) {return fmod((fmod((dir1 - dir2),2*M_PI) + 3*M_PI), 2*M_PI) - M_PI;}
   long random_seed = 0;
   const long M = 2393*12413;
   static long get_next_random() // NOTE: Remember to set seed before using.
@@ -535,8 +535,8 @@ namespace enigma
           }
         }
         double dfm = sqrt(x_d*x_d + y_d*y_d); // Distance from middle.
-        double angle_diff1 = fabs(direction_difference(2*M_PI*line_index_low/line_count, angle));
-        double angle_diff2 = fabs(direction_difference(2*M_PI*line_index_high/line_count, angle));
+        double angle_diff1 = fabs(angle_difference(2*M_PI*line_index_low/line_count, angle));
+        double angle_diff2 = fabs(angle_difference(2*M_PI*line_index_high/line_count, angle));
         double distance_to_line1 = sin(angle_diff1) * dfm * (1 + 2*pow(dfm/line_length_max, 5));
         double distance_to_line2 = sin(angle_diff2) * dfm * (1 + 2*pow(dfm/line_length_max, 5));
         double distance_part1 = fbounds(1.2*(line_half_width - distance_to_line1) / line_half_width, 0.0, 1.0);

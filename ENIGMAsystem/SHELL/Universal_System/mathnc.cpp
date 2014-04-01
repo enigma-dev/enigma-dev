@@ -62,7 +62,7 @@ namespace enigma_user
   ma_scalar lengthdir_x(ma_scalar len,ma_scalar dir) { return len *  cosd(dir); }
   ma_scalar lengthdir_y(ma_scalar len,ma_scalar dir) { return len * -sind(dir); }
 
-  ma_scalar direction_difference(ma_scalar dir1,ma_scalar dir2) {
+  ma_scalar angle_difference(ma_scalar dir1,ma_scalar dir2) {
 	  return fmod((fmod((dir1 - dir2),360) + 540), 360) - 180;
   }
   ma_scalar point_direction(ma_scalar x1,ma_scalar y1,ma_scalar x2,ma_scalar y2) { return ::fmod((::atan2(y1-y2,x2-x1)*(180/M_PI))+360,360); }

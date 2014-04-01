@@ -62,7 +62,7 @@ static inline int min(int x, int y) { return x<y? x : y; }
 static inline double min(double x, double y) { return x<y? x : y; }
 static inline int max(int x, int y) { return x>y? x : y; }
 static inline double max(double x, double y) { return x>y? x : y; }
-static inline double direction_difference(double dir1, double dir2) {return fmod((fmod((dir1 - dir2),360) + 540), 360) - 180;}
+static inline double angle_difference(double dir1, double dir2) {return fmod((fmod((dir1 - dir2),360) + 540), 360) - 180;}
 static inline double point_direction(cs_scalar x1, cs_scalar y1,cs_scalar x2, cs_scalar y2) {return fmod((atan2(y1-y2,x2-x1)*(180/M_PI))+360,360);}
 
 namespace enigma_user
@@ -293,10 +293,10 @@ double move_contact_object(int object, double angle, double max_dist, bool solid
         {
             case 0:
                 if ((left2 > right1 || top1 > bottom2) &&
-                direction_difference(point_direction(right1, bottom1, left2, top2),angle) >= 0  &&
-                direction_difference(point_direction(left1, top1, right2, bottom2),angle) <= 0)
+                angle_difference(point_direction(right1, bottom1, left2, top2),angle) >= 0  &&
+                angle_difference(point_direction(left1, top1, right2, bottom2),angle) <= 0)
                 {
-                    if (direction_difference(point_direction(right1, top1, left2, bottom2),angle) > 0)
+                    if (angle_difference(point_direction(right1, top1, left2, bottom2),angle) > 0)
                     {
                         mid_dist = min(mid_dist, (top1 - bottom2 - contact_distance)/sin_angle);
                     }
@@ -308,10 +308,10 @@ double move_contact_object(int object, double angle, double max_dist, bool solid
             break;
             case 1:
                 if ((left1 > right2 || top1 > bottom2) &&
-                direction_difference(point_direction(left1, bottom1, right2, top2),angle) <= 0  &&
-                direction_difference(point_direction(right1, top1, left2, bottom2),angle) >= 0)
+                angle_difference(point_direction(left1, bottom1, right2, top2),angle) <= 0  &&
+                angle_difference(point_direction(right1, top1, left2, bottom2),angle) >= 0)
                 {
-                    if (direction_difference(point_direction(left1, top1, right2, bottom2),angle) > 0)
+                    if (angle_difference(point_direction(left1, top1, right2, bottom2),angle) > 0)
                     {
                         mid_dist = min(mid_dist, (right2 - left1 + contact_distance)/cos_angle);
                     }
@@ -323,10 +323,10 @@ double move_contact_object(int object, double angle, double max_dist, bool solid
             break;
             case 2:
                 if ((left1 > right2 || top2 > bottom1) &&
-                direction_difference(point_direction(right1, bottom1, left2, top2),angle) <= 0  &&
-                direction_difference(point_direction(left1, top1, right2, bottom2),angle) >= 0)
+                angle_difference(point_direction(right1, bottom1, left2, top2),angle) <= 0  &&
+                angle_difference(point_direction(left1, top1, right2, bottom2),angle) >= 0)
                 {
-                    if (direction_difference(point_direction(left1, bottom1, right2, top2),angle) > 0)
+                    if (angle_difference(point_direction(left1, bottom1, right2, top2),angle) > 0)
                     {
                         mid_dist = min(mid_dist, (bottom1 - top2 + contact_distance)/sin_angle);
                     }
@@ -338,10 +338,10 @@ double move_contact_object(int object, double angle, double max_dist, bool solid
             break;
             case 3:
                 if ((left2 > right1 || top2 > bottom1) &&
-                direction_difference(point_direction(right1, top1, left2, bottom2),angle) <= 0  &&
-                direction_difference(point_direction(left1, bottom1, right2, top2),angle) >= 0)
+                angle_difference(point_direction(right1, top1, left2, bottom2),angle) <= 0  &&
+                angle_difference(point_direction(left1, bottom1, right2, top2),angle) >= 0)
                 {
-                    if (direction_difference(point_direction(right1, bottom1, left2, top2),angle) > 0)
+                    if (angle_difference(point_direction(right1, bottom1, left2, top2),angle) > 0)
                     {
                         mid_dist = min(mid_dist, (left2 - right1 - contact_distance)/cos_angle);
                     }
