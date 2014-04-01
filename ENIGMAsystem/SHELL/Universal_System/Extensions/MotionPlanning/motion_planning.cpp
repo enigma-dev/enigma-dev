@@ -201,7 +201,7 @@ double mp_grid_get_speed_modifier(unsigned id)
     return enigma::gridstructarray[id]->speed_modifier;
 }
 
-void mp_grid_get_speed_modifier(unsigned id, double value)
+void mp_grid_set_speed_modifier(unsigned id, double value)
 {
     enigma::gridstructarray[id]->speed_modifier = value;
 }
