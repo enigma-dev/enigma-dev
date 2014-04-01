@@ -64,7 +64,7 @@ static inline int min(int x, int y) { return x<y? x : y; }
 static inline double min(double x, double y) { return x<y? x : y; }
 static inline int max(int x, int y) { return x>y? x : y; }
 static inline double max(double x, double y) { return x>y? x : y; }
-static inline double direction_difference(double dir1, double dir2) {return fmod((fmod((dir1 - dir2),360) + 540), 360) - 180;}
+static inline double angle_difference(double dir1, double dir2) {return fmod((fmod((dir1 - dir2),360) + 540), 360) - 180;}
 static inline double point_direction(double x1, double y1, double x2, double y2) {return fmod((atan2(y1-y2,x2-x1)*(180/M_PI))+360,360);}
 
 namespace enigma_user
@@ -293,10 +293,10 @@ double move_contact_object(int object, double angle, double max_dist, bool solid
         {
             case 0: default: // Default case prevents warnings; value can never be outside this range
                 if ((left2 > right1 || top1 > bottom2) &&
-                direction_difference(point_direction(right1, bottom1, left2, top2),angle) >= 0  &&
-                direction_difference(point_direction(left1, top1, right2, bottom2),angle) <= 0)
+                angle_difference(point_direction(right1, bottom1, left2, top2),angle) >= 0  &&
+                angle_difference(point_direction(left1, top1, right2, bottom2),angle) <= 0)
                 {
-                    if (direction_difference(point_direction(right1, top1, left2, bottom2),angle) > 0)
+                    if (angle_difference(point_direction(right1, top1, left2, bottom2),angle) > 0)
                     {
                         max_dist = min(max_dist, (top1 - bottom2 - contact_distance)/sin_angle);
                     }
@@ -308,10 +308,10 @@ double move_contact_object(int object, double angle, double max_dist, bool solid
             break;
             case 1:
                 if ((left1 > right2 || top1 > bottom2) &&
-                direction_difference(point_direction(left1, bottom1, right2, top2),angle) <= 0  &&
-                direction_difference(point_direction(right1, top1, left2, bottom2),angle) >= 0)
+                angle_difference(point_direction(left1, bottom1, right2, top2),angle) <= 0  &&
+                angle_difference(point_direction(right1, top1, left2, bottom2),angle) >= 0)
                 {
-                    if (direction_difference(point_direction(left1, top1, right2, bottom2),angle) > 0)
+                    if (angle_difference(point_direction(left1, top1, right2, bottom2),angle) > 0)
                     {
                         max_dist = min(max_dist, (right2 - left1 + contact_distance)/cos_angle);
                     }
@@ -323,10 +323,10 @@ double move_contact_object(int object, double angle, double max_dist, bool solid
             break;
             case 2:
                 if ((left1 > right2 || top2 > bottom1) &&
-                direction_difference(point_direction(right1, bottom1, left2, top2),angle) <= 0  &&
-                direction_difference(point_direction(left1, top1, right2, bottom2),angle) >= 0)
+                angle_difference(point_direction(right1, bottom1, left2, top2),angle) <= 0  &&
+                angle_difference(point_direction(left1, top1, right2, bottom2),angle) >= 0)
                 {
-                    if (direction_difference(point_direction(left1, bottom1, right2, top2),angle) > 0)
+                    if (angle_difference(point_direction(left1, bottom1, right2, top2),angle) > 0)
                     {
                         max_dist = min(max_dist, (bottom1 - top2 + contact_distance)/sin_angle);
                     }
@@ -338,10 +338,10 @@ double move_contact_object(int object, double angle, double max_dist, bool solid
             break;
             case 3:
                 if ((left2 > right1 || top2 > bottom1) &&
-                direction_difference(point_direction(right1, top1, left2, bottom2),angle) <= 0  &&
-                direction_difference(point_direction(left1, bottom1, right2, top2),angle) >= 0)
+                angle_difference(point_direction(right1, top1, left2, bottom2),angle) <= 0  &&
+                angle_difference(point_direction(left1, bottom1, right2, top2),angle) >= 0)
                 {
-                    if (direction_difference(point_direction(right1, bottom1, left2, top2),angle) > 0)
+                    if (angle_difference(point_direction(right1, bottom1, left2, top2),angle) > 0)
                     {
                         max_dist = min(max_dist, (left2 - right1 - contact_distance)/cos_angle);
                     }
@@ -415,7 +415,7 @@ double move_outside_object(int object, double angle, double max_dist, bool solid
             switch (quad & 3)
             {
                 case 0: default: // Default case prevents warnings; value can never be outside this range
-                    if (direction_difference(point_direction(left1, bottom1, right2, top2),angle) < 0)
+                    if (angle_difference(point_direction(left1, bottom1, right2, top2),angle) < 0)
                     {
                         dist += ((bottom1) - (top2))/sin_angle;
                     }
@@ -425,7 +425,7 @@ double move_outside_object(int object, double angle, double max_dist, bool solid
                     }
                 break;
                 case 1:
-                    if (direction_difference(point_direction(right1, bottom1, left2, top2),angle) < 0)
+                    if (angle_difference(point_direction(right1, bottom1, left2, top2),angle) < 0)
                     {
                         dist += ((left2) - (right1))/cos_angle;
                     }
@@ -435,7 +435,7 @@ double move_outside_object(int object, double angle, double max_dist, bool solid
                     }
                 break;
                 case 2:
-                if (direction_difference(point_direction(right1, top1, left2, bottom2),angle) < 0)
+                if (angle_difference(point_direction(right1, top1, left2, bottom2),angle) < 0)
                 {
                     dist += ((top1) - (bottom2))/sin_angle;
                 }
@@ -445,7 +445,7 @@ double move_outside_object(int object, double angle, double max_dist, bool solid
                 }
                 break;
                 case 3:
-                    if (direction_difference(point_direction(left1, top1, right2, bottom2),angle) < 0)
+                    if (angle_difference(point_direction(left1, top1, right2, bottom2),angle) < 0)
                     {
                         dist += ((right2) - (left1))/cos_angle;
                     }
@@ -525,10 +525,10 @@ bool move_bounce_object(int object, bool adv, bool solid_only)
         {
             case 0: default: // Default case prevents warnings; value can never be outside this range
                 if ((left2 > right1 || top1 > bottom2) &&
-                direction_difference(point_direction(right1, bottom1, left2, top2),angle) >= 0  &&
-                direction_difference(point_direction(left1, top1, right2, bottom2),angle) <= 0)
+                angle_difference(point_direction(right1, bottom1, left2, top2),angle) >= 0  &&
+                angle_difference(point_direction(left1, top1, right2, bottom2),angle) <= 0)
                 {
-                    pc_corner = direction_difference(point_direction(right1, top1, left2, bottom2),angle);
+                    pc_corner = angle_difference(point_direction(right1, top1, left2, bottom2),angle);
                     if (fabs(pc_corner) < DBL_EPSILON)
                     {
                         pc_dist = (left2 - right1)/cos_angle;
@@ -574,10 +574,10 @@ bool move_bounce_object(int object, bool adv, bool solid_only)
             break;
             case 1:
                 if ((left1 > right2 || top1 > bottom2) &&
-                direction_difference(point_direction(left1, bottom1, right2, top2),angle) <= 0  &&
-                direction_difference(point_direction(right1, top1, left2, bottom2),angle) >= 0)
+                angle_difference(point_direction(left1, bottom1, right2, top2),angle) <= 0  &&
+                angle_difference(point_direction(right1, top1, left2, bottom2),angle) >= 0)
                 {
-                    pc_corner = direction_difference(point_direction(left1, top1, right2, bottom2),angle);
+                    pc_corner = angle_difference(point_direction(left1, top1, right2, bottom2),angle);
 
                     if (fabs(pc_corner) < DBL_EPSILON)
                     {
@@ -624,10 +624,10 @@ bool move_bounce_object(int object, bool adv, bool solid_only)
             break;
             case 2:
                 if ((left1 > right2 || top2 > bottom1) &&
-                direction_difference(point_direction(right1, bottom1, left2, top2),angle) <= 0  &&
-                direction_difference(point_direction(left1, top1, right2, bottom2),angle) >= 0)
+                angle_difference(point_direction(right1, bottom1, left2, top2),angle) <= 0  &&
+                angle_difference(point_direction(left1, top1, right2, bottom2),angle) >= 0)
                 {
-                    pc_corner = direction_difference(point_direction(left1, bottom1, right2, top2),angle);
+                    pc_corner = angle_difference(point_direction(left1, bottom1, right2, top2),angle);
                     if (fabs(pc_corner) < DBL_EPSILON)
                     {
                         pc_dist = (right2 - left1)/cos_angle;
@@ -673,10 +673,10 @@ bool move_bounce_object(int object, bool adv, bool solid_only)
             break;
             case 3:
                 if ((left2 > right1 || top2 > bottom1) &&
-                direction_difference(point_direction(right1, top1, left2, bottom2),angle) <= 0  &&
-                direction_difference(point_direction(left1, bottom1, right2, top2),angle) >= 0)
+                angle_difference(point_direction(right1, top1, left2, bottom2),angle) <= 0  &&
+                angle_difference(point_direction(left1, bottom1, right2, top2),angle) >= 0)
                 {
-                    pc_corner = direction_difference(point_direction(right1, bottom1, left2, top2),angle);
+                    pc_corner = angle_difference(point_direction(right1, bottom1, left2, top2),angle);
                     if (fabs(pc_corner) < DBL_EPSILON)
                     {
                         pc_dist = (bottom1 - top2)/sin_angle;
