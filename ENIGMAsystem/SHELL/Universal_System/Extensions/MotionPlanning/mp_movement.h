@@ -41,7 +41,7 @@ inline bool mp_potential_step(const double x, const double y, const double steps
 bool mp_potential_path_object(int path, const double x, const double y, const double stepsize, double factor, const int object, const bool solid_only = false);
 
 inline bool mp_potential_path(int path, const double x, const double y, const double stepsize, double factor, const bool checkall, const bool solid_only = false) {
-    return mp_potential_path_object(path, x, y, stepsize, factor, all, checkall ? false : true);
+    return mp_potential_path_object(path, x, y, stepsize, factor, all, !checkall);
 }
 
 bool mp_linear_step_object(const double x, const double y, const double stepsize, const int object, const bool solid_only = false);
