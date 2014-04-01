@@ -44,6 +44,6 @@ unsigned mp_grid_get_threshold(unsigned id);
 void mp_grid_set_threshold(unsigned id, unsigned threshold = 1);
 void mp_grid_reset_threshold(unsigned id);
 double mp_grid_get_speed_modifier(unsigned id);
-void mp_grid_get_speed_modifier(unsigned id, double value);
+void mp_grid_set_speed_modifier(unsigned id, double value);
 }
 
