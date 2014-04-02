@@ -70,13 +70,8 @@ namespace enigma_user
   ma_scalar point_distance_3d(ma_scalar x1,ma_scalar y1,ma_scalar z1,ma_scalar x2,
   ma_scalar y2,ma_scalar z2)  { return ::sqrt(sqr(x1-x2) + sqr(y1-y2) + sqr(z1-z2)); }
   
-  	ma_scalar triangle_area(ma_scalar x1, ma_scalar y1, ma_scalar x2, ma_scalar y2, ma_scalar x3, ma_scalar y3)
-	{
-	   return abs((x1*(y2-y3) + x2*(y3-y1)+ x3*(y1-y2))/2.0);
-	}
-  
   bool point_in_circle(ma_scalar px, ma_scalar py, ma_scalar x1, ma_scalar y1, ma_scalar rad) {
-	return (((px-x1)(px-x1)+(py-y1)(py-y1))<rad*rad);
+	return (((px-x1)*(px-x1)+(py-y1)*(py-y1))<rad*rad);
   }
   
   bool point_in_rectangle(ma_scalar px, ma_scalar py, ma_scalar x1, ma_scalar y1, ma_scalar x2, ma_scalar y2) {
@@ -84,20 +79,10 @@ namespace enigma_user
   }
   
   bool point_in_triangle(ma_scalar px, ma_scalar py, ma_scalar x1, ma_scalar y1, ma_scalar x2, ma_scalar y2, ma_scalar x3, ma_scalar y3) {
-	/* Calculate area of triangle ABC */
-	float A = triangle_area(x1, y1, x2, y2, x3, y3);
-
-	/* Calculate area of triangle PBC */  
-	float A1 = triangle_area(px, py, x2, y2, x3, y3);
-
-	/* Calculate area of triangle PAC */  
-	float A2 = triangle_area(x1, y1, px, py, x3, y3);
-
-	/* Calculate area of triangle PAB */   
-	float A3 = triangle_area(x1, y1, x2, y2, px, py);
-
-	/* Check if sum of A1, A2 and A3 is same as A */
-	return (A == A1 + A2 + A3);
+    ma_scalar a = (x1 - px)*(y2 - py) - (x2 - px)*(y1 - py);
+    ma_scalar b = (x2 - px)*(y3 - py) - (x3 - px)*(y2 - py);
+    ma_scalar c = (x3 - px)*(y1 - py) - (x1 - px)*(y3 - py);
+    return (sign(a) == sign(b) && sign(b) == sign(c));
   }
   
   int rectangle_in_circle(ma_scalar x1, ma_scalar sy1, ma_scalar sx2, ma_scalar sy2, ma_scalar x, ma_scalar y, ma_scalar rad) {
