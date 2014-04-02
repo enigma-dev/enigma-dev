@@ -25,7 +25,7 @@ string joystick_name(int id);
 int joystick_axes(int id);
 int joystick_buttons(int id);
 bool joystick_has_pov(int id);
-int joystick_direction(int id); // Numpad key style. WTF.
+int joystick_direction(int id, int axis1=0, int axis2=1); // Numpad key style. WTF.
 #define joystick_check_button(id, numb) joystick_button(id, numb)
 #define joystick_xpos(id) joystick_axis(id,1)
 #define joystick_ypos(id) joystick_axis(id,2)
@@ -34,6 +34,7 @@ int joystick_direction(int id); // Numpad key style. WTF.
 #define joystick_upos(id) joystick_axis(id,5)
 #define joystick_vpos(id) joystick_axis(id,6)
 double joystick_pov(int id);
+double joystick_pov(int id, int axis1, int axis2);
 
 double joystick_axis(int id, int axis);
 bool joystick_button(int id, int button);
