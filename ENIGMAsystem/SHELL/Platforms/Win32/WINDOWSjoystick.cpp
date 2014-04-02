@@ -15,12 +15,15 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include <math.h>
 #include <windows.h>
 #include <string>
 using std::string;
 
 #include "Platforms/General/PFjoystick.h"  
 #include "Platforms/Win32/WINDOWSmain.h"
+
+#include "Universal_System/scalar.h"
 
 namespace enigma_user
 {
@@ -159,9 +162,10 @@ double joystick_pov(int id, int axis1, int axis2) {
 	a2 = joystick_axis(id, axis2);
 	if (a1 == 0 && a2 == 0) {
 		return -1.f;
-	} 
-	
-	return 0;
+	}
+	// in C, atan2 is y,x not x,y
+	double res = atan2(-a1, a2);
+	return ma_angle_from_radians((res + M_PI));
 }
 
 }
