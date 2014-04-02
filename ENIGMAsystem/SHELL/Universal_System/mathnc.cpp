@@ -1,4 +1,5 @@
 /** Copyright (C) 2008-2012 Josh Ventura
+*** Copyright (C) 2014 Robert B. Colton, TheExDeus
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -84,9 +85,32 @@ namespace enigma_user
     ma_scalar c = (x3 - px)*(y1 - py) - (x1 - px)*(y3 - py);
     return (sign(a) == sign(b) && sign(b) == sign(c));
   }
-  
-  int rectangle_in_circle(ma_scalar x1, ma_scalar sy1, ma_scalar sx2, ma_scalar sy2, ma_scalar x, ma_scalar y, ma_scalar rad) {
-	return false;
+
+  int rectangle_in_circle(ma_scalar sx1, ma_scalar sy1, ma_scalar sx2, ma_scalar sy2, ma_scalar x, ma_scalar y, ma_scalar rad){
+	ma_scalar rw2 = (sx2-sx1)/2.0;
+	ma_scalar rh2 = (sy2-sy1)/2.0;
+ 
+	ma_scalar cDx = fabs(x - (sx1+rw2));
+	ma_scalar cDy = fabs(y - (sy1+rh2));
+ 
+	rw2 = fabs(rw2);
+	rh2 = fabs(rh2);
+ 
+	//Check no intersection
+	if (cDx > (rw2 + rad)) return 0;
+	if (cDy > (rh2 + rad)) return 0;
+ 
+	//Check if totally inside
+	ma_scalar cpx = fmax(fabs(x-sx1),fabs(x-sx2));
+	ma_scalar cpy = fmax(fabs(y-sy1),fabs(y-sy2));
+	if (cpx*cpx + cpy*cpy <= rad*rad) return 1;
+ 
+	//Check partial overlap
+	if (cDx <= rw2 ) return 2;
+	if (cDy <= rh2 ) return 2;
+	//Check corner case
+	ma_scalar csq = (cDx - rw2)*(cDx - rw2) + (cDy - rh2)*(cDy - rh2);
+	return ((csq <= (rad*rad))?2:0);
   }
   
   int rectangle_in_rectangle(ma_scalar sx1, ma_scalar sy1, ma_scalar sx2, ma_scalar sy2, ma_scalar dx1, ma_scalar dy1, ma_scalar dx2, ma_scalar dy2) {
