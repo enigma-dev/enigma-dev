@@ -16,6 +16,7 @@
 **/
 
 #include <linux/joystick.h>
+#include <math.h>
 #include <stropts.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -29,6 +30,7 @@ using namespace std;
 
 #include "LINUXjoystick.h"  
 #include "Universal_System/CallbackArrays.h"  
+#include "Universal_System/scalar.h"
 
 
 namespace enigma
@@ -235,9 +237,10 @@ namespace enigma_user
 	a2 = joystick_axis(id, axis2);
 	if (a1 == 0 && a2 == 0) {
 		return -1.f;
-	} 
-	
-	return 0;
+	}
+	// in C, atan2 is y,x not x,y
+	double res = atan2(-a1, a2);
+	return ma_angle_from_radians((res + M_PI));
   }
   
   double joystick_pov(int id) {
