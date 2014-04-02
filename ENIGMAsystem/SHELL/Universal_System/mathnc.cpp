@@ -76,7 +76,7 @@ namespace enigma_user
 	}
   
   bool point_in_circle(ma_scalar px, ma_scalar py, ma_scalar x1, ma_scalar y1, ma_scalar rad) {
-	return (point_distance(x1, y1, px, py) < rad);
+	return (((px-x1)(px-x1)+(py-y1)(py-y1))<rad*rad);
   }
   
   bool point_in_rectangle(ma_scalar px, ma_scalar py, ma_scalar x1, ma_scalar y1, ma_scalar x2, ma_scalar y2) {
@@ -100,7 +100,7 @@ namespace enigma_user
 	return (A == A1 + A2 + A3);
   }
   
-  int rectangle_in_circles(ma_scalar x1, ma_scalar sy1, ma_scalar sx2, ma_scalar sy2, ma_scalar x, ma_scalar y, ma_scalar rad) {
+  int rectangle_in_circle(ma_scalar x1, ma_scalar sy1, ma_scalar sx2, ma_scalar sy2, ma_scalar x, ma_scalar y, ma_scalar rad) {
 	return false;
   }
   
