@@ -51,25 +51,38 @@ bool joystick_load(int id)
 
 double joystick_axis(int id, int axisnum) {
 	JOYINFOEX joyinfo; 
-    joyGetPosEx(JOYSTICKID1 + id, &joyinfo); 
+	JOYCAPS joycaps; 
+    joyGetDevCaps(JOYSTICKID1 + id, &joycaps, sizeof(joycaps)); 
 	switch (axisnum) {
 		case 1:
-			return joyinfo.dwXpos;
+			joyinfo.dwFlags = JOY_RETURNX | JOY_RETURNCENTERED;
+			joyGetPosEx(JOYSTICKID1 + id, &joyinfo);
+			return (joyinfo.dwXpos - (joycaps.wXmax + joycaps.wXmin) / 2.f) / ((joycaps.wXmax - joycaps.wXmin)/ 2.f);
 			break;
 		case 2:
-			return joyinfo.dwYpos;
+			joyinfo.dwFlags = JOY_RETURNY | JOY_RETURNCENTERED;
+			joyGetPosEx(JOYSTICKID1 + id, &joyinfo);
+			return (joyinfo.dwYpos - (joycaps.wYmax + joycaps.wYmin) / 2.f) / ((joycaps.wYmax - joycaps.wYmin)/ 2.f);
 			break;
 		case 3: 
-			return joyinfo.dwZpos;
+			joyinfo.dwFlags = JOY_RETURNZ | JOY_RETURNCENTERED;
+			joyGetPosEx(JOYSTICKID1 + id, &joyinfo);
+			return (joyinfo.dwZpos - (joycaps.wZmax + joycaps.wZmin) / 2.f) / ((joycaps.wZmax - joycaps.wZmin)/ 2.f);
 			break;
 		case 4:
-			return joyinfo.dwRpos;
+			joyinfo.dwFlags = JOY_RETURNR | JOY_RETURNCENTERED;
+			joyGetPosEx(JOYSTICKID1 + id, &joyinfo);
+			return (joyinfo.dwRpos - (joycaps.wRmax + joycaps.wRmin) / 2.f) / ((joycaps.wRmax - joycaps.wRmin)/ 2.f);
 			break;
 		case 5:
-			return joyinfo.dwUpos;
+			joyinfo.dwFlags = JOY_RETURNU | JOY_RETURNCENTERED;
+			joyGetPosEx(JOYSTICKID1 + id, &joyinfo);
+			return (joyinfo.dwUpos - (joycaps.wUmax + joycaps.wUmin) / 2.f) / ((joycaps.wUmax - joycaps.wUmin)/ 2.f);
 			break;
 		case 6: 
-			return joyinfo.dwVpos;
+			joyinfo.dwFlags = JOY_RETURNV | JOY_RETURNCENTERED;
+			joyGetPosEx(JOYSTICKID1 + id, &joyinfo);
+			return (joyinfo.dwVpos - (joycaps.wVmax + joycaps.wVmin) / 2.f) / ((joycaps.wVmax - joycaps.wVmin)/ 2.f);
 			break;
 		default:
 			return 0;
