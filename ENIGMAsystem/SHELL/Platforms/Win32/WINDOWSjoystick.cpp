@@ -131,19 +131,37 @@ bool joystick_has_pov(int id) {
 	return (joycaps.wCaps & JOYCAPS_HASPOV);
 }
 
-int joystick_direction(int id)
+int joystick_direction(int id, int axis1, int axis2)
 {
   JOYINFOEX joyinfo; 
-  joyGetPosEx(JOYSTICKID1 + id, &joyinfo); 		
-  const int x = joyinfo.dwXpos < -.5 ? 0 : joyinfo.dwXpos > .5 ? 2 : 1;
-  const int y = joyinfo.dwYpos < -.5 ? 0 : joyinfo.dwYpos > .5 ? 6 : 3;
+  joyGetPosEx(JOYSTICKID1 + id, &joyinfo);
+  double a1, a2;
+  a1 = joystick_axis(id, axis1);
+  a2 = joystick_axis(id, axis2);
+  const int x = a1 < -.5 ? 0 : a1 > .5 ? 2 : 1;
+  const int y = a2 < -.5 ? 0 : a2 > .5 ? 6 : 3;
   return 97 + x + y;
 }
 
 double joystick_pov(int id) {
-	JOYINFOEX joyinfo; 
+	JOYINFOEX joyinfo;
+	joyinfo.dwFlags = JOY_RETURNPOV;
     joyGetPosEx(JOYSTICKID1 + id, &joyinfo); 
-	return joyinfo.dwPOV / 100;
+	if (joyinfo.dwPOV != 0xFFFF)
+		return joyinfo.dwPOV / 100.f;
+	else
+		return -1.f;
+}
+
+double joystick_pov(int id, int axis1, int axis2) {
+	double a1, a2;
+	a1 = joystick_axis(id, axis1);
+	a2 = joystick_axis(id, axis2);
+	if (a1 == 0 && a2 == 0) {
+		return -1.f;
+	} 
+	
+	return 0;
 }
 
 }
