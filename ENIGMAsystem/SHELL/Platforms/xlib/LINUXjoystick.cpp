@@ -239,8 +239,7 @@ namespace enigma_user
 		return -1.f;
 	}
 	// in C, atan2 is y,x not x,y
-	double res = atan2(-a1, a2);
-	return ma_angle_from_radians((res + M_PI));
+	return ma_angle_from_radians((atan2(-a1, a2) + M_PI));
   }
   
   double joystick_pov(int id) {
