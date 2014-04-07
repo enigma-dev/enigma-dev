@@ -68,7 +68,7 @@ namespace enigma_user
 void draw_sprite(int spr,int subimg, gs_scalar x, gs_scalar y, int color, gs_scalar alpha)
 {
     get_spritev(spr2d,spr);
-    const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
+    const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->get_image_index()) % spr2d->subcount;
 
 	const gs_scalar tbx = spr2d->texbordxarray[usi], tby = spr2d->texbordyarray[usi],
 			xvert1 = x-spr2d->xoffset, xvert2 = xvert1 + spr2d->width,
@@ -85,7 +85,7 @@ void draw_sprite(int spr,int subimg, gs_scalar x, gs_scalar y, int color, gs_sca
 void draw_sprite_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int color, gs_scalar alpha)
 {
     get_spritev(spr2d,spr);
-    const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
+    const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->get_image_index()) % spr2d->subcount;
 
 	rot *= M_PI/180;
 
@@ -111,7 +111,7 @@ void draw_sprite_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar xs
 void draw_sprite_pos(int spr, int subimg, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, gs_scalar x4, gs_scalar y4, gs_scalar alpha)
 {
     get_spritev(spr2d,spr);
-    const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
+    const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->get_image_index()) % spr2d->subcount;
 
     const gs_scalar tbx = spr2d->texbordxarray[usi], tby = spr2d->texbordyarray[usi];
 
@@ -126,7 +126,7 @@ void draw_sprite_pos(int spr, int subimg, gs_scalar x1, gs_scalar y1, gs_scalar 
 void draw_sprite_part(int spr, int subimg, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, int color, gs_scalar alpha)
 {
     get_spritev(spr2d,spr);
-    const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
+    const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->get_image_index()) % spr2d->subcount;
 
 	gs_scalar tbw = spr2d->width/(gs_scalar)spr2d->texbordxarray[usi], tbh = spr2d->height/(gs_scalar)spr2d->texbordyarray[usi],
 	  tbx1 = left/tbw, tbx2 = tbx1 + width/tbw,
@@ -143,7 +143,7 @@ void draw_sprite_part(int spr, int subimg, gs_scalar left, gs_scalar top, gs_sca
 void draw_sprite_part_offset(int spr, int subimg, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, int color, gs_scalar alpha)
 {
     get_spritev(spr2d,spr);
-    const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
+    const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->get_image_index()) % spr2d->subcount;
 
 	gs_scalar tbw = spr2d->width/spr2d->texbordxarray[usi], tbh = spr2d->height/spr2d->texbordyarray[usi],
 	  xvert1 = x-spr2d->xoffset, xvert2 = xvert1 + spr2d->width,
@@ -162,7 +162,7 @@ void draw_sprite_part_offset(int spr, int subimg, gs_scalar left, gs_scalar top,
 void draw_sprite_part_ext(int spr, int subimg, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, gs_scalar alpha)
 {
     get_spritev(spr2d,spr);
-    const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
+    const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->get_image_index()) % spr2d->subcount;
 
 	gs_scalar tbw = spr2d->width/(gs_scalar)spr2d->texbordxarray[usi], tbh = spr2d->height/(gs_scalar)spr2d->texbordyarray[usi],
 	  xvert1 = x, xvert2 = xvert1 + width*xscale,
@@ -181,7 +181,7 @@ void draw_sprite_part_ext(int spr, int subimg, gs_scalar left, gs_scalar top, gs
 void draw_sprite_general(int spr, int subimg, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, gs_scalar alpha)
 {
     get_spritev(spr2d,spr);
-    const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
+    const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->get_image_index()) % spr2d->subcount;
 
 	const gs_scalar
 	  tbx = spr2d->texbordxarray[usi],  tby = spr2d->texbordyarray[usi],
@@ -212,7 +212,7 @@ void draw_sprite_general(int spr, int subimg, gs_scalar left, gs_scalar top, gs_
 void draw_sprite_stretched(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, int color, gs_scalar alpha)
 {
     get_spritev(spr2d,spr);
-    const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
+    const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->get_image_index()) % spr2d->subcount;
 
     const gs_scalar tbx = spr2d->texbordxarray[usi], tby = spr2d->texbordyarray[usi],
                 xvert1 = x-spr2d->xoffset, xvert2 = xvert1 + width,
@@ -229,7 +229,7 @@ void draw_sprite_stretched(int spr, int subimg, gs_scalar x, gs_scalar y, gs_sca
 void draw_sprite_stretched_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, int color, gs_scalar alpha)
 {
     get_spritev(spr2d,spr);
-    const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
+    const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->get_image_index()) % spr2d->subcount;
 
     const gs_scalar tbx = spr2d->texbordxarray[usi], tby = spr2d->texbordyarray[usi],
                 xvert1 = x-spr2d->xoffset, xvert2 = xvert1 + width,
@@ -246,7 +246,7 @@ void draw_sprite_stretched_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs
 void d3d_draw_sprite(int spr,int subimg, gs_scalar x, gs_scalar y, gs_scalar z)
 {
     get_spritev(spr2d,spr);
-    const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
+    const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->get_image_index()) % spr2d->subcount;
 
 	const gs_scalar tbx = spr2d->texbordxarray[usi], tby = spr2d->texbordyarray[usi],
 			xvert1 = x-spr2d->xoffset, xvert2 = xvert1 + spr2d->width,
@@ -276,7 +276,7 @@ namespace enigma_user
 void draw_sprite_tiled(int spr, int subimg, gs_scalar x, gs_scalar y, int color, gs_scalar alpha)
 {
     get_spritev(spr2d,spr);
-    const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
+    const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->get_image_index()) % spr2d->subcount;
 
     x = ((spr2d->xoffset+x)<0?0:spr2d->width)-fmod(spr2d->xoffset+x,spr2d->width);
     y = ((spr2d->yoffset+y)<0?0:spr2d->height)-fmod(spr2d->yoffset+y,spr2d->height);
@@ -310,7 +310,7 @@ void draw_sprite_tiled(int spr, int subimg, gs_scalar x, gs_scalar y, int color,
 void draw_sprite_tiled_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, gs_scalar alpha)
 {
     get_spritev(spr2d,spr);
-    const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
+    const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->get_image_index()) % spr2d->subcount;
 
     const gs_scalar
     tbx  = spr2d->texbordxarray[usi], tby  = spr2d->texbordyarray[usi],

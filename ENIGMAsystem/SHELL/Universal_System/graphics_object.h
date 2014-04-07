@@ -52,6 +52,9 @@ namespace enigma
       gs_scalar image_index;
       gs_scalar image_speed;
 
+      //Older combination of image_index and image_speed. DO NOT USE for new games.
+      int image_single;
+
       //Depth
       enigma::depthv  depth;
       bool visible;
@@ -60,6 +63,9 @@ namespace enigma
       gs_scalar image_xscale;
       gs_scalar image_yscale;
       gs_scalar image_angle;
+
+      //Helper: Retrieve the image_index taking image_single into account.
+      int get_image_index() const;
 
     //Accessors
       #ifdef JUST_DEFINE_IT_RUN

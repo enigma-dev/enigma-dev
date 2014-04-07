@@ -609,7 +609,7 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
     "    instance->gravity=0;\n    instance->gravity_direction=270;\n    instance->friction=0;\n    \n"
     "    \n"
     "    instance->image_alpha = 1.0;\n    instance->image_angle = 0;\n    instance->image_blend = 0xFFFFFF;\n    instance->image_index = 0;\n"
-    "    instance->image_speed  = 1;\n    instance->image_xscale = 1;\n    instance->image_yscale = 1;\n    \n"
+    "    instance->image_speed  = 1;\n    instance->image_single = -1;\n    instance->image_xscale = 1;\n    instance->image_yscale = 1;\n    \n"
     "instancecount++;\n    instance_count++;\n  }\n}\n";
   wto.close();
 
