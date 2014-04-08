@@ -114,13 +114,14 @@ namespace enigma_user
   }
   
   int rectangle_in_rectangle(ma_scalar sx1, ma_scalar sy1, ma_scalar sx2, ma_scalar sy2, ma_scalar dx1, ma_scalar dy1, ma_scalar dx2, ma_scalar dy2) {
-	return !( dx1 > sx2
-        || dx2 < sx1
-        || dy1 > sy2
-        || dy2 < sy1
-        );
+	if (dx2 > sx1 && dx1 < sx2 && dy2 > sy1 && dy1 < sy2) {
+		ma_scalar iw = std::min(sx2, dx2) - std::max(sx1, dx1);
+		ma_scalar ih = std::min(sy2, dy2) - std::max(sy1, dy1);
+		return (iw*ih==std::abs((sx2-sx1)*(sy2-sy1))?1:2);
+	}
+	return 0;
   }
-  
+
   int rectangle_in_triangle(ma_scalar sx1, ma_scalar sy1, ma_scalar sx2, ma_scalar sy2, ma_scalar dx1, ma_scalar dy1, ma_scalar dx2, ma_scalar dy2, ma_scalar dx3, ma_scalar dy3) {
 	return false;
   }
