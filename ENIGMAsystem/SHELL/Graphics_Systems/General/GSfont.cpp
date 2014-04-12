@@ -308,13 +308,6 @@ unsigned int string_height_ext(variant vstr, gs_scalar sep, gs_scalar w)
 
 namespace enigma_user
 {
-size_t string_length_utf8(string str) { 
-	size_t res = 0; 
-	for (size_t i = 0; i < str.length(); ++i) 
-		if ((str[i] & 0xC0) != 0x80) 
-			++res; 
-	return res; 
-}
 
 void draw_text(gs_scalar x, gs_scalar y, variant vstr)
 {
@@ -351,7 +344,7 @@ void draw_text(gs_scalar x, gs_scalar y, variant vstr)
       {
 		uint32_t character = getUnicodeCharacter(str, i);
 		
-        if (character == '\r'){
+        if (character == '\r') {
           line +=1, yy += fnt->height, i += str[i+1] == '\n';
           xx = halign == fa_center ? x-float(string_width_line(str,line)/2) : x-float(string_width_line(str,line));
         } else if (character == '\n'){
