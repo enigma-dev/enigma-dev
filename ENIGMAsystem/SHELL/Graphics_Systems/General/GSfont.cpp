@@ -17,6 +17,7 @@
 
 #include <math.h>
 #include <string>
+#include <stdint.h>
 #include "Universal_System/var4.h"
 #include "libEGMstd.h"
 #include "../General/GScolors.h"
@@ -48,6 +49,20 @@ const int fa_bottom = 2;*/
 
 unsigned halign = enigma_user::fa_left; //default alignment
 unsigned valign = enigma_user::fa_top; //default alignment
+
+static uint32_t getUnicodeCharacter(const string str, size_t& pos) {
+	uint32_t character = 0;
+	if (str[pos] & 0xC0) {
+		character = (((uint32_t)str[pos] & 0x1F) << 6);
+		for (size_t ii = 1; ii <= 6; ii++) {
+			if ((str[pos + ii] & 0xC0) != 0x80) { pos += ii - 1; break; }
+			character |= (str[pos + ii] & 0x3F);
+		}
+	} else {
+		character = (uint32_t)str[pos];
+	}
+	return character;
+}
 
 namespace enigma_user
 {
@@ -116,23 +131,24 @@ unsigned int string_width_line(variant vstr, int line)
   string str = toString(vstr);
   get_font(fnt,currentfont,0);
   int len = 0, cl = 0;
-  for (unsigned i = 0; i < str.length(); i++)
+  for (size_t i = 0; i < str.length(); i++)
   {
-    if (str[i] == '\r'){
+	uint32_t character = getUnicodeCharacter(str, i);
+    if (character == '\r'){
       if (cl == line)
         return len;
       cl += 1;
       len = 0;
       i += str[i+1] == '\n';
-    } else if (str[i] == '\n'){
+    } else if (character == '\n'){
       if (cl == line)
         return len;
       cl += 1;
       len = 0;
-    } else if (str[i] == ' ' or str[i] < fnt->glyphstart or str[i] > fnt->glyphstart + fnt->glyphcount)
+    } else if (character == ' ' or character < fnt->glyphstart or character > fnt->glyphstart + fnt->glyphcount)
       len += fnt->height/3; // FIXME: what's GM do about this?
     else {
-      len += fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart)].xs;
+      len += fnt->glyphs[character - fnt->glyphstart].xs;
     }
   }
   return len;
@@ -144,24 +160,26 @@ unsigned int string_width_ext_line(variant vstr, gs_scalar w, int line)
   get_font(fnt,currentfont,0);
 
   unsigned int width = 0, tw = 0; int cl = 0;
-  for (unsigned i = 0; i < str.length(); i++)
+  for (size_t i = 0; i < str.length(); i++)
   {
-    if (str[i] == '\r')
+	uint32_t character = getUnicodeCharacter(str, i);
+    if (character == '\r')
       if (cl == line) return width; else width = 0, cl +=1, i += str[i+1] == '\n';
-    else if (str[i] == '\n')
+    else if (character == '\n')
       if (cl == line) return width; else width = 0, cl +=1;
-    else if (str[i] == ' ' or str[i] < fnt->glyphstart or str[i] > fnt->glyphstart + fnt->glyphcount){
+    else if (character == ' ' or character < fnt->glyphstart or character > fnt->glyphstart + fnt->glyphcount){
       width += fnt->height/3, tw = 0;
-      for (unsigned c = i+1; c < str.length(); c++)
+      for (size_t c = i+1; c < str.length(); c++)
       {
-        if (str[c] == ' ' or str[c] == '\r' or str[c] == '\n')
+		character = getUnicodeCharacter(str, c);
+        if (character == ' ' or character == '\r' or character == '\n')
           break;
-        tw += fnt->glyphs[(unsigned char)(str[c] - fnt->glyphstart) % fnt->glyphcount].xs;
+        tw += fnt->glyphs[character - fnt->glyphstart].xs;
       }
       if (width+tw >= unsigned(w) && w != -1)
         if (cl == line) return width; else width = 0, cl +=1; else;
     } else {
-      width += fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart)].xs;
+      width += fnt->glyphs[character - fnt->glyphstart].xs;
 	}
   }
   return width;
@@ -173,24 +191,26 @@ unsigned int string_width_ext_line_count(variant vstr, gs_scalar w)
   get_font(fnt,currentfont,0);
 
   unsigned int width = 0, tw = 0, cl = 1;
-  for (unsigned i = 0; i < str.length(); i++)
+  for (size_t i = 0; i < str.length(); i++)
   {
-    if (str[i] == '\r')
+	uint32_t character = getUnicodeCharacter(str, i);
+    if (character == '\r')
       width = 0, cl +=1, i += str[i+1] == '\n';
-    else if (str[i] == '\n')
+    else if (character == '\n')
       width = 0, cl +=1;
-    else if (str[i] == ' ' or str[i] < fnt->glyphstart or str[i] > fnt->glyphstart + fnt->glyphcount){
+    else if (character == ' ' or character < fnt->glyphstart or character > fnt->glyphstart + fnt->glyphcount){
       width += fnt->height/3, tw = 0;
-      for (unsigned c = i+1; c < str.length(); c++)
+      for (size_t c = i+1; c < str.length(); c++)
       {
-        if (str[c] == ' ' or str[c] == '\r' or str[c] == '\n')
+		character = getUnicodeCharacter(str, c);
+        if (character == ' ' or character == '\r' or character == '\n')
           break;
-        tw += fnt->glyphs[(unsigned char)(str[c] - fnt->glyphstart) % fnt->glyphcount].xs;
+        tw += fnt->glyphs[character - fnt->glyphstart].xs;
       }
       if (width+tw >= unsigned(w) && w != -1)
         width = 0, cl +=1;
     } else {
-      width += fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart)].xs;
+      width += fnt->glyphs[character - fnt->glyphstart].xs;
 	}
   }
   return cl;
@@ -201,14 +221,15 @@ unsigned int string_width(variant vstr)
   string str = toString(vstr);
   get_font(fnt,currentfont,0);
   int mlen = 0, tlen = 0;
-  for (unsigned i = 0; i < str.length(); i++)
+  for (size_t i = 0; i < str.length(); i++)
   {
-    if (str[i] == '\r' or str[i] == '\n')
+	uint32_t character = getUnicodeCharacter(str, i);
+    if (character == '\r' or character == '\n')
       tlen = 0;
-    else if (str[i] == ' ' or str[i] < fnt->glyphstart or str[i] > fnt->glyphstart + fnt->glyphcount)
+    else if (character == ' ' or character < fnt->glyphstart or character > fnt->glyphstart + fnt->glyphcount)
       tlen += fnt->height/3; // FIXME: what's GM do about this?
     else {
-      tlen += fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart)].xs;
+      tlen += fnt->glyphs[character - fnt->glyphstart].xs;
       if (tlen > mlen) mlen = tlen;
     }
   }
@@ -220,7 +241,7 @@ unsigned int string_height(variant vstr)
   string str = toString(vstr);
   get_font(fnt,currentfont,0);
   float hgt = fnt->height;
-  for (unsigned i = 0; i < str.length(); i++)
+  for (size_t i = 0; i < str.length(); i++)
     if (str[i] == '\r' or str[i] == '\n')
       hgt += fnt->height;
   return hgt;
@@ -232,15 +253,16 @@ unsigned int string_width_ext(variant vstr, gs_scalar sep, gs_scalar w) //here s
   get_font(fnt,currentfont,0);
 
   unsigned int width = 0, maxwidth = 0;
-  for (unsigned i = 0; i < str.length(); i++)
+  for (size_t i = 0; i < str.length(); i++)
   {
-    if (str[i] == ' ' or str[i] < fnt->glyphstart or str[i] > fnt->glyphstart + fnt->glyphcount){
+	uint32_t character = getUnicodeCharacter(str, i);
+    if (character == ' ' or character < fnt->glyphstart or character > fnt->glyphstart + fnt->glyphcount){
         if (width >= unsigned(w) && w!=-1)
             (width>maxwidth ? maxwidth=width, width = 0 : width = 0);
         else
             width += fnt->height/3; // FIXME: what's GM do about this?
     } else {
-        fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart)];
+        fontglyph &g = fnt->glyphs[character - fnt->glyphstart];
         width += g.xs;
     }
   }
@@ -253,25 +275,27 @@ unsigned int string_height_ext(variant vstr, gs_scalar sep, gs_scalar w)
   get_font(fnt,currentfont,0);
 
   unsigned int width = 0, tw = 0, height = fnt->height;
-  for (unsigned i = 0; i < str.length(); i++)
+  for (size_t i = 0; i < str.length(); i++)
   {
-    if (str[i] == '\r' or str[i] == '\n')
+	uint32_t character = getUnicodeCharacter(str, i);
+    if (character == '\r' or character == '\n')
       width = 0, height +=  (sep+2 ? fnt->height : sep);
-    else if (str[i] == ' ' or str[i] < fnt->glyphstart or str[i] > fnt->glyphstart + fnt->glyphcount){
+    else if (character == ' ' or character < fnt->glyphstart or character > fnt->glyphstart + fnt->glyphcount){
       width += fnt->height/3;
       tw = 0;
-      for (unsigned c = i+1; c < str.length(); c++)
+      for (size_t c = i+1; c < str.length(); c++)
       {
-        if (str[c] == ' ' or str[i] == '\r' or str[i] == '\n')
+		character = getUnicodeCharacter(str, c);
+        if (character == ' ' or character == '\r' or character == '\n')
           break;
-        fontglyph &g = fnt->glyphs[(unsigned char)(str[c] - fnt->glyphstart) % fnt->glyphcount];
+        fontglyph &g = fnt->glyphs[character - fnt->glyphstart];
         tw += g.xs;
       }
 
       if (width+tw >= unsigned(w) && w != -1)
         height += (sep==-1 ? fnt->height : sep), width = 0, tw = 0;
     } else {
-        fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart)];
+        fontglyph &g = fnt->glyphs[character - fnt->glyphstart];
         width += g.xs;
     }
   }
@@ -284,6 +308,13 @@ unsigned int string_height_ext(variant vstr, gs_scalar sep, gs_scalar w)
 
 namespace enigma_user
 {
+size_t string_length_utf8(string str) { 
+	size_t res = 0; 
+	for (size_t i = 0; i < str.length(); ++i) 
+		if ((str[i] & 0xC0) != 0x80) 
+			++res; 
+	return res; 
+}
 
 void draw_text(gs_scalar x, gs_scalar y, variant vstr)
 {
@@ -292,17 +323,19 @@ void draw_text(gs_scalar x, gs_scalar y, variant vstr)
   float yy = valign == fa_top ? y+fnt->yoffset : valign == fa_middle ? y +fnt->yoffset - string_height(str)/2 : y + fnt->yoffset - string_height(str);
   if (halign == fa_left){
       float xx = x;
-      for (unsigned i = 0; i < str.length(); i++)
+      for (size_t i = 0; i < str.length() - 1; i++)
       {
-        if (str[i] == '\r')
+		uint32_t character = getUnicodeCharacter(str, i);
+
+        if (character == '\r')
           xx = x, yy += fnt->height, i += str[i+1] == '\n';
-        else if (str[i] == '\n')
+        else if (character == '\n')
           xx = x, yy += fnt->height;
-        else if (str[i] == ' ' or str[i] < fnt->glyphstart or str[i] > fnt->glyphstart + fnt->glyphcount)
+        else if (character == ' ' or character < fnt->glyphstart or character > fnt->glyphstart + fnt->glyphcount)
           xx += get_space_width(fnt);
         else
         {
-          fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart)];
+          fontglyph &g = fnt->glyphs[(character - fnt->glyphstart)];
 			draw_primitive_begin_texture(pr_trianglestrip, fnt->texture);
 			draw_vertex_texture(xx + g.x,  yy + g.y, g.tx, g.ty);
 			draw_vertex_texture(xx + g.x2, yy + g.y, g.tx2, g.ty);
@@ -314,19 +347,21 @@ void draw_text(gs_scalar x, gs_scalar y, variant vstr)
       }
   } else {
       float xx = halign == fa_center ? x-float(string_width_line(str,0)/2) : x-float(string_width_line(str,0)), line = 0;
-      for (unsigned i = 0; i < str.length(); i++)
+      for (size_t i = 0; i < str.length(); i++)
       {
-        if (str[i] == '\r'){
+		uint32_t character = getUnicodeCharacter(str, i);
+		
+        if (character == '\r'){
           line +=1, yy += fnt->height, i += str[i+1] == '\n';
           xx = halign == fa_center ? x-float(string_width_line(str,line)/2) : x-float(string_width_line(str,line));
-        } else if (str[i] == '\n'){
+        } else if (character == '\n'){
           line +=1, yy += fnt->height;
           xx = halign == fa_center ? x-float(string_width_line(str,line)/2) : x-float(string_width_line(str,line));
-        } else if (str[i] == ' ' or str[i] < fnt->glyphstart or str[i] > fnt->glyphstart + fnt->glyphcount)
+        } else if (character == ' ' or character < fnt->glyphstart or character > fnt->glyphstart + fnt->glyphcount)
           xx += get_space_width(fnt);
         else
         {
-          fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart)];
+          fontglyph &g = fnt->glyphs[(character - fnt->glyphstart)];
 			draw_primitive_begin_texture(pr_trianglestrip, fnt->texture);
 			draw_vertex_texture(xx + g.x,  yy + g.y, g.tx, g.ty);
 			draw_vertex_texture(xx + g.x2, yy + g.y, g.tx2, g.ty);
@@ -361,9 +396,9 @@ void draw_text_sprite(gs_scalar x, gs_scalar y, variant vstr, int sep, int lineW
   int offX = 0;
   int offY = 0;
   char prev_c = '\0'; //Most recent character drawn.
-  for (size_t i=0; i<str.length(); i++) {
+  for (size_t i = 0; i<str.length(); i++) {
     //Fetch the next character to be drawn.
-    char c = str[i];
+    uint32_t c = getUnicodeCharacter(str, i);
 
     //A line break can occur here if we are starting a new word that won't fit.
     if (lineWidth!=-1 && prev_c==' ' && c!= ' ') {
@@ -374,7 +409,7 @@ void draw_text_sprite(gs_scalar x, gs_scalar y, variant vstr, int sep, int lineW
       }
 
       //Break if the next word is too long.
-      if (offX + w*(word_len-i)  > lineWidth) {
+      if (offX + w * (word_len-i) > lineWidth) {
         offX = 0;
         offY += sep;
       }
@@ -386,7 +421,7 @@ void draw_text_sprite(gs_scalar x, gs_scalar y, variant vstr, int sep, int lineW
     offX += w;
 
     //Wrap if we've passed a wrappable character. 
-    if (lineWidth!=-1 && c==' ') {
+    if (lineWidth != -1 && c == ' ') {
       if (offX+w  > lineWidth) {
         offX = 0;
         offY += sep;
@@ -406,17 +441,18 @@ void draw_text_skewed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar top, gs_
   gs_scalar yy = valign == fa_top ? y+fnt->yoffset : valign == fa_middle ? y +fnt->yoffset - string_height(str)/2 : y + fnt->yoffset - string_height(str);
   if (halign == fa_left){
       gs_scalar xx = x;
-      for (unsigned i = 0; i < str.length(); i++)
+      for (size_t i = 0; i < str.length(); i++)
       {
-        if (str[i] == '\r')
+		uint32_t character = getUnicodeCharacter(str, i);
+        if (character == '\r')
           xx = x, yy += fnt->height, i += str[i+1] == '\n';
-        else if (str[i] == '\n')
+        else if (character == '\n')
           xx = x, yy += fnt->height;
-        else if (str[i] == ' ' or str[i] < fnt->glyphstart or str[i] > fnt->glyphstart + fnt->glyphcount)
+        else if (character == ' ' or character < fnt->glyphstart or character > fnt->glyphstart + fnt->glyphcount)
           xx += get_space_width(fnt);
         else
         {
-          fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart)];
+          fontglyph &g = fnt->glyphs[(character - fnt->glyphstart)];
 		  
 			draw_primitive_begin_texture(pr_trianglestrip, fnt->texture);
 			draw_vertex_texture(xx + g.x + top,     yy + g.y + top, g.tx, g.ty);
@@ -430,19 +466,20 @@ void draw_text_skewed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar top, gs_
       }
   } else {
       gs_scalar xx = halign == fa_center ? x-gs_scalar(string_width_line(str,0)/2) : x-gs_scalar(string_width_line(str,0)), line = 0;
-      for (unsigned i = 0; i < str.length(); i++)
+      for (size_t i = 0; i < str.length(); i++)
       {
-        if (str[i] == '\r'){
+		uint32_t character = getUnicodeCharacter(str, i);
+        if (character == '\r'){
           line +=1, yy += fnt->height, i += str[i+1] == '\n';
           xx = halign == fa_center ? x-gs_scalar(string_width_line(str,line)/2) : x-gs_scalar(string_width_line(str,line));
-        } else if (str[i] == '\n'){
+        } else if (character == '\n'){
           line +=1, yy += fnt->height;
           xx = halign == fa_center ? x-gs_scalar(string_width_line(str,line)/2) : x-gs_scalar(string_width_line(str,line));
-        } else if (str[i] == ' ' or str[i] < fnt->glyphstart or str[i] > fnt->glyphstart + fnt->glyphcount)
+        } else if (character == ' ' or character < fnt->glyphstart or character > fnt->glyphstart + fnt->glyphcount)
           xx += get_space_width(fnt);
         else
         {
-          fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart)];
+          fontglyph &g = fnt->glyphs[(character - fnt->glyphstart)];
 			draw_primitive_begin_texture(pr_trianglestrip, fnt->texture);
 			draw_vertex_texture(xx + g.x + top,     yy + g.y + top, g.tx, g.ty);
 			draw_vertex_texture(xx + g.x2 + top,    yy + g.y + top, g.tx2, g.ty);
@@ -463,27 +500,29 @@ void draw_text_ext(gs_scalar x, gs_scalar y, variant vstr, gs_scalar sep, gs_sca
   gs_scalar yy = valign == fa_top ? y+fnt->yoffset : valign == fa_middle ? y + fnt->yoffset - string_height_ext(str,sep,w)/2 : y + fnt->yoffset - string_height_ext(str,sep,w);
   if (halign == fa_left){
       gs_scalar xx = x, width = 0, tw = 0;
-      for (unsigned i = 0; i < str.length(); i++)
+      for (size_t i = 0; i < str.length(); i++)
       {
-        if (str[i] == '\r')
+		uint32_t character = getUnicodeCharacter(str, i);
+        if (character == '\r')
           xx = x, yy += (sep+2 ? fnt->height : sep), i += str[i+1] == '\n';
-        else if (str[i] == '\n')
+        else if (character == '\n')
           xx = x, yy += (sep+2 ? fnt->height : sep);
-        else if (str[i] == ' ' or str[i] < fnt->glyphstart or str[i] > fnt->glyphstart + fnt->glyphcount){
+        else if (character == ' ' or character < fnt->glyphstart or character > fnt->glyphstart + fnt->glyphcount){
           xx += get_space_width(fnt), width = xx-x;
           tw = 0;
-          for (unsigned c = i+1; c < str.length(); c++)
+          for (size_t c = i+1; c < str.length(); c++)
           {
-            if (str[c] == ' ' or str[c] == '\r' or str[c] == '\n')
+			character = getUnicodeCharacter(str, c);
+            if (character == ' ' or character == '\r' or character == '\n')
               break;
-            fontglyph &g = fnt->glyphs[(unsigned char)(str[c] - fnt->glyphstart) % fnt->glyphcount];
+            fontglyph &g = fnt->glyphs[character - fnt->glyphstart];
             tw += g.xs;
           }
 
           if (width+tw >= w && w != -1)
             xx = x, yy += (sep==-1 ? fnt->height : sep), width = 0, tw = 0;
         } else {
-          fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart)];
+          fontglyph &g = fnt->glyphs[character - fnt->glyphstart];
 			draw_primitive_begin_texture(pr_trianglestrip, fnt->texture);
 			draw_vertex_texture(xx + g.x,  yy + g.y, g.tx, g.ty);
 			draw_vertex_texture(xx + g.x2, yy + g.y, g.tx2, g.ty);
@@ -495,26 +534,28 @@ void draw_text_ext(gs_scalar x, gs_scalar y, variant vstr, gs_scalar sep, gs_sca
       }
   } else {
       gs_scalar xx = halign == fa_center ? x-gs_scalar(string_width_ext_line(str,w,0)/2) : x-gs_scalar(string_width_ext_line(str,w,0)), line = 0, width = 0, tw = 0;
-      for (unsigned i = 0; i < str.length(); i++)
+      for (size_t i = 0; i < str.length(); i++)
       {
-        if (str[i] == '\r')
+		uint32_t character = getUnicodeCharacter(str, i);
+        if (character == '\r')
           line += 1, xx = halign == fa_center ? x-gs_scalar(string_width_ext_line(str,w,line)/2) : x-gs_scalar(string_width_ext_line(str,w,line)), yy += (sep+2 ? fnt->height : sep), i += str[i+1] == '\n', width = 0;
-        else if (str[i] == '\n')
+        else if (character == '\n')
           line += 1, xx = halign == fa_center ? x-gs_scalar(string_width_ext_line(str,w,line)/2) : x-gs_scalar(string_width_ext_line(str,w,line)), yy += (sep+2 ? fnt->height : sep), width = 0;
-        else if (str[i] == ' ' or str[i] < fnt->glyphstart or str[i] > fnt->glyphstart + fnt->glyphcount){
+        else if (character == ' ' or character < fnt->glyphstart or character > fnt->glyphstart + fnt->glyphcount){
           xx += get_space_width(fnt), width += get_space_width(fnt), tw = 0;
-          for (unsigned c = i+1; c < str.length(); c++)
+          for (size_t c = i+1; c < str.length(); c++)
           {
-            if (str[c] == ' ' or str[c] == '\r' or str[c] == '\n')
+			character = getUnicodeCharacter(str, c);
+            if (character == ' ' or character == '\r' or character == '\n')
               break;
-            fontglyph &g = fnt->glyphs[(unsigned char)(str[c] - fnt->glyphstart) % fnt->glyphcount];
+            fontglyph &g = fnt->glyphs[character - fnt->glyphstart];
             tw += g.xs;
           }
 
           if (width+tw >= w && w != -1)
             line += 1, xx = halign == fa_center ? x-gs_scalar(string_width_ext_line(str,w,line)/2) : x-gs_scalar(string_width_ext_line(str,w,line)), yy += (sep==-1 ? fnt->height : sep), width = 0, tw = 0;
         } else {
-          fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart)];
+          fontglyph &g = fnt->glyphs[character - fnt->glyphstart];
 			draw_primitive_begin_texture(pr_trianglestrip, fnt->texture);
 			draw_vertex_texture(xx + g.x,  yy + g.y, g.tx, g.ty);
 			draw_vertex_texture(xx + g.x2, yy + g.y, g.tx2, g.ty);
@@ -550,18 +591,19 @@ void draw_text_transformed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar xsc
   tmpx = xx, tmpy = yy;
   if (halign == fa_left){
       int lines = 0, w;
-      for (unsigned i = 0; i < str.length(); i++)
+      for (size_t i = 0; i < str.length(); i++)
       {
-        if (str[i] == '\r')
+		uint32_t character = getUnicodeCharacter(str, i);
+        if (character == '\r')
           lines += 1, xx = tmpx + lines * shi, yy = tmpy + lines * chi, i += str[i+1] == '\n';
-        else if (str[i] == '\n')
+        else if (character == '\n')
           lines += 1, xx = tmpx + lines * shi, yy = tmpy + lines * chi;
-        else if (str[i] == ' ' or str[i] < fnt->glyphstart or str[i] > fnt->glyphstart + fnt->glyphcount)
+        else if (character == ' ' or character < fnt->glyphstart or character > fnt->glyphstart + fnt->glyphcount)
           xx += sw,
           yy -= sh;
         else
         {
-          fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart)];
+          fontglyph &g = fnt->glyphs[character - fnt->glyphstart];
           w = g.x2-g.x;
             const gs_scalar lx = xx + g.y * svy;
             const gs_scalar ly = yy + g.y * cvy;
@@ -584,26 +626,27 @@ void draw_text_transformed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar xsc
       else
         xx = tmpx-tmpsize * cvx, yy = tmpy+tmpsize * svx;
       int lines = 0, w;
-      for (unsigned i = 0; i < str.length(); i++)
+      for (size_t i = 0; i < str.length(); i++)
       {
-        if (str[i] == '\r'){
+		uint32_t character = getUnicodeCharacter(str, i);
+        if (character == '\r'){
           lines += 1, tmpsize = string_width_line(str,lines), i += str[i+1] == '\n';
           if (halign == fa_center)
             xx = tmpx-tmpsize/2 * cvx + lines * shi, yy = tmpy+tmpsize/2 * svx + lines * chi;
           else
             xx = tmpx-tmpsize * cvx + lines * shi, yy = tmpy+tmpsize * svx + lines * chi;
-        } else if (str[i] == '\n') {
+        } else if (character == '\n') {
           lines += 1, tmpsize = string_width_line(str,lines);
           if (halign == fa_center)
             xx = tmpx-tmpsize/2 * cvx + lines * shi, yy = tmpy+tmpsize/2 * svx + lines * chi;
           else
             xx = tmpx-tmpsize * cvx + lines * shi, yy = tmpy+tmpsize * svx + lines * chi;
-        } else if (str[i] == ' ' or str[i] < fnt->glyphstart or str[i] > fnt->glyphstart + fnt->glyphcount)
+        } else if (character == ' ' or character < fnt->glyphstart or character > fnt->glyphstart + fnt->glyphcount)
           xx += sw,
           yy -= sh;
         else
         {
-          fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart)];
+          fontglyph &g = fnt->glyphs[character - fnt->glyphstart];
           w = g.x2-g.x;
             const gs_scalar lx = xx + g.y * svy;
             const gs_scalar ly = yy + g.y * cvy;
@@ -645,30 +688,32 @@ void draw_text_ext_transformed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar
 
   if (halign == fa_left){
       int lines = 0,width = 0, tw = 0;
-      for (unsigned i = 0; i < str.length(); i++)
+      for (size_t i = 0; i < str.length(); i++)
       {
-        if (str[i] == '\r')
+		uint32_t character = getUnicodeCharacter(str, i);
+        if (character == '\r')
           lines += 1, xx = tmpx + lines * shi, width = 0, yy = tmpy + lines * chi, i += str[i+1] == '\n';
-        else if (str[i] == '\n')
+        else if (character == '\n')
           lines += 1, xx = tmpx + lines * shi, width = 0, yy = tmpy + lines * chi;
-        else if (str[i] == ' ' or str[i] < fnt->glyphstart or str[i] > fnt->glyphstart + fnt->glyphcount){
+        else if (character == ' ' or character < fnt->glyphstart or character > fnt->glyphstart + fnt->glyphcount){
           xx += sw,
           yy -= sh;
 
           width += get_space_width(fnt);
           tw = 0;
-          for (unsigned c = i+1; c < str.length(); c++)
+          for (size_t c = i+1; c < str.length(); c++)
           {
-            if (str[c] == ' ' or str[c] == '\r' or str[c] == '\n')
+			character = getUnicodeCharacter(str, c);
+            if (character == ' ' or character == '\r' or character == '\n')
               break;
-            fontglyph &g = fnt->glyphs[(unsigned char)(str[c] - fnt->glyphstart) % fnt->glyphcount];
+            fontglyph &g = fnt->glyphs[character - fnt->glyphstart];
             tw += g.xs;
           }
 
           if (width+tw >= w && w != -1)
             lines += 1, xx = tmpx + lines * shi, yy = tmpy + lines * chi, width = 0, tw = 0;
         } else {
-          fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart)];
+          fontglyph &g = fnt->glyphs[character - fnt->glyphstart];
           wi = g.x2-g.x;
             const gs_scalar lx = xx + g.y * svy;
             const gs_scalar ly = yy + g.y * cvy;
@@ -692,31 +737,33 @@ void draw_text_ext_transformed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar
         xx = tmpx-tmpsize/2 * cvx, yy = tmpy+tmpsize/2 * svx;
       else
         xx = tmpx-tmpsize * cvx, yy = tmpy+tmpsize * svx;
-      for (unsigned i = 0; i < str.length(); i++)
+      for (size_t i = 0; i < str.length(); i++)
       {
-        if (str[i] == '\r'){
+		uint32_t character = getUnicodeCharacter(str, i);
+        if (character == '\r'){
           lines += 1, tmpsize = string_width_ext_line(str,w,lines), width = 0, i += str[i+1] == '\n';
           if (halign == fa_center)
             xx = tmpx-tmpsize/2 * cvx + lines * shi, yy = tmpy+tmpsize/2 * svx + lines * chi;
           else
             xx = tmpx-tmpsize * cvx + lines * shi, yy = tmpy+tmpsize * svx + lines * chi;
-        } else if (str[i] == '\n'){
+        } else if (character == '\n'){
           lines += 1, tmpsize = string_width_ext_line(str,w,lines), width = 0;
           if (halign == fa_center)
             xx = tmpx-tmpsize/2 * cvx + lines * shi, yy = tmpy+tmpsize/2 * svx + lines * chi;
           else
             xx = tmpx-tmpsize * cvx + lines * shi, yy = tmpy+tmpsize * svx + lines * chi;
-        } else if (str[i] == ' ' or str[i] < fnt->glyphstart or str[i] > fnt->glyphstart + fnt->glyphcount){
+        } else if (character == ' ' or character < fnt->glyphstart or character > fnt->glyphstart + fnt->glyphcount){
           xx += sw,
           yy -= sh;
 
           width += get_space_width(fnt);
           tw = 0;
-          for (unsigned c = i+1; c < str.length(); c++)
+          for (size_t c = i+1; c < str.length(); c++)
           {
-            if (str[c] == ' ' or str[c] == '\r' or str[c] == '\n')
+			character = getUnicodeCharacter(str, c);
+            if (character == ' ' or character == '\r' or character == '\n')
               break;
-            fontglyph &g = fnt->glyphs[(unsigned char)(str[c] - fnt->glyphstart) % fnt->glyphcount];
+            fontglyph &g = fnt->glyphs[character - fnt->glyphstart];
             tw += g.xs;
           }
 
@@ -729,7 +776,7 @@ void draw_text_ext_transformed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar
             width = 0, tw = 0;
           }
         } else {
-          fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart)];
+          fontglyph &g = fnt->glyphs[character - fnt->glyphstart];
           wi = g.x2-g.x;
             const gs_scalar lx = xx + g.y * svy;
             const gs_scalar ly = yy + g.y * cvy;
@@ -773,18 +820,19 @@ void draw_text_transformed_color(gs_scalar x, gs_scalar y, variant vstr, gs_scal
   if (halign == fa_left){
       int lines = 0, w;
       tmpsize = string_width_line(str,0);
-      for (unsigned i = 0; i < str.length(); i++)
+      for (size_t i = 0; i < str.length(); i++)
       {
-        if (str[i] == '\r')
+		uint32_t character = getUnicodeCharacter(str, i);
+        if (character == '\r')
           lines += 1, width = 0, xx = tmpx + lines * shi, yy = tmpy + lines * chi, i += str[i+1] == '\n', tmpsize = string_width_line(str,lines);
-        else if (str[i] == '\n')
+        else if (character == '\n')
           lines += 1, width = 0, xx = tmpx + lines * shi, yy = tmpy + lines * chi, tmpsize = string_width_line(str,lines);
-        else if (str[i] == ' ' or str[i] < fnt->glyphstart or str[i] > fnt->glyphstart + fnt->glyphcount)
+        else if (character == ' ' or character < fnt->glyphstart or character > fnt->glyphstart + fnt->glyphcount)
           xx += sw, yy -= sh,
           width += get_space_width(fnt);
         else
         {
-          fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart)];
+          fontglyph &g = fnt->glyphs[character - fnt->glyphstart];
           w = g.x2-g.x;
           const gs_scalar lx = xx + g.y * svy;
           const gs_scalar ly = yy + g.y * cvy;
@@ -812,26 +860,27 @@ void draw_text_transformed_color(gs_scalar x, gs_scalar y, variant vstr, gs_scal
       else
         xx = tmpx-tmpsize * cvx, yy = tmpy+tmpsize * svx;
       int lines = 0, w;
-      for (unsigned i = 0; i < str.length(); i++)
+      for (size_t i = 0; i < str.length(); i++)
       {
-        if (str[i] == '\r'){
+		uint32_t character = getUnicodeCharacter(str, i);
+        if (character == '\r'){
           lines += 1, tmpsize = string_width_line(str,lines), i += str[i+1] == '\n', width = 0;
           if (halign == fa_center)
             xx = tmpx-tmpsize/2 * cvx + lines * shi, yy = tmpy+tmpsize/2 * svx + lines * chi;
           else
             xx = tmpx-tmpsize * cvx + lines * shi, yy = tmpy+tmpsize * svx + lines * chi;
-        } else if (str[i] == '\n'){
+        } else if (character == '\n'){
           lines += 1, tmpsize = string_width_line(str,lines), width = 0;
           if (halign == fa_center)
             xx = tmpx-tmpsize/2 * cvx + lines * shi, yy = tmpy+tmpsize/2 * svx + lines * chi;
           else
             xx = tmpx-tmpsize * cvx + lines * shi, yy = tmpy+tmpsize * svx + lines * chi;
-        } else if (str[i] == ' ' or str[i] < fnt->glyphstart or str[i] > fnt->glyphstart + fnt->glyphcount)
+        } else if (character == ' ' or character < fnt->glyphstart or character > fnt->glyphstart + fnt->glyphcount)
           xx += sw, yy -= sh,
           width += get_space_width(fnt);
         else
         {
-          fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart)];
+          fontglyph &g = fnt->glyphs[character - fnt->glyphstart];
           w = g.x2-g.x;
             const gs_scalar lx = xx + g.y * svy;
             const gs_scalar ly = yy + g.y * cvy;
@@ -879,28 +928,30 @@ void draw_text_ext_transformed_color(gs_scalar x, gs_scalar y, variant vstr, gs_
   if (halign == fa_left){
       int lines = 0, tw = 0, wi;
       tmpsize = string_width_ext_line(str,w,0);
-      for (unsigned i = 0; i < str.length(); i++)
+      for (size_t i = 0; i < str.length(); i++)
       {
-        if (str[i] == '\r')
+		uint32_t character = getUnicodeCharacter(str, i);
+        if (character == '\r')
           lines += 1, width = 0, xx = tmpx + lines * shi, yy = tmpy + lines * chi, i += str[i+1] == '\n', tmpsize = string_width_ext_line(str,w,lines);
-        else if (str[i] == '\n')
+        else if (character == '\n')
           lines += 1, width = 0, xx = tmpx + lines * shi, yy = tmpy + lines * chi, tmpsize = string_width_ext_line(str,w,lines);
-        else if (str[i] == ' ' or str[i] < fnt->glyphstart or str[i] > fnt->glyphstart + fnt->glyphcount){
+        else if (character == ' ' or character < fnt->glyphstart or character > fnt->glyphstart + fnt->glyphcount){
           xx += sw, yy -= sh,
           width += get_space_width(fnt);
           tw = 0;
-          for (unsigned c = i+1; c < str.length(); c++)
+          for (size_t c = i+1; c < str.length(); c++)
           {
-            if (str[c] == ' ' or str[c] == '\r' or str[c] == '\n')
+			character = getUnicodeCharacter(str, c);
+            if (character == ' ' or character == '\r' or character == '\n')
               break;
-            fontglyph &g = fnt->glyphs[(unsigned char)(str[c] - fnt->glyphstart) % fnt->glyphcount];
+            fontglyph &g = fnt->glyphs[character - fnt->glyphstart];
             tw += g.xs;
           }
 
           if (width+tw >= w && w != -1)
             lines += 1, xx = tmpx + lines * shi, yy = tmpy + lines * chi, width = 0, tmpsize = string_width_ext_line(str,w,lines);
         } else {
-          fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart)];
+          fontglyph &g = fnt->glyphs[character - fnt->glyphstart];
           wi = g.x2-g.x;
             const gs_scalar lx = xx + g.y * svy;
             const gs_scalar ly = yy + g.y * cvy;
@@ -929,29 +980,31 @@ void draw_text_ext_transformed_color(gs_scalar x, gs_scalar y, variant vstr, gs_
       else
         xx = tmpx-tmpsize * cvx, yy = tmpy+tmpsize * svx;
       int lines = 0, wi, tw = 0;
-      for (unsigned i = 0; i < str.length(); i++)
+      for (size_t i = 0; i < str.length(); i++)
       {
-        if (str[i] == '\r'){
+		uint32_t character = getUnicodeCharacter(str, i);
+        if (character == '\r'){
           lines += 1, tmpsize = string_width_ext_line(str,w,lines), i += str[i+1] == '\n', width = 0;
           if (halign == fa_center)
             xx = tmpx-tmpsize/2 * cvx + lines * shi, yy = tmpy+tmpsize/2 * svx + lines * chi;
           else
             xx = tmpx-tmpsize * cvx + lines * shi, yy = tmpy+tmpsize * svx + lines * chi;
-        } else if (str[i] == '\n'){
+        } else if (character == '\n'){
           lines += 1, tmpsize = string_width_ext_line(str,w,lines), width = 0;
           if (halign == fa_center)
             xx = tmpx-tmpsize/2 * cvx + lines * shi, yy = tmpy+tmpsize/2 * svx + lines * chi;
           else
             xx = tmpx-tmpsize * cvx + lines * shi, yy = tmpy+tmpsize * svx + lines * chi;
-        } else if (str[i] == ' ' or str[i] < fnt->glyphstart or str[i] > fnt->glyphstart + fnt->glyphcount){
+        } else if (character == ' ' or character < fnt->glyphstart or character > fnt->glyphstart + fnt->glyphcount){
           xx += sw, yy -= sh,
           width += get_space_width(fnt);
           tw = 0;
-          for (unsigned c = i+1; c < str.length(); c++)
+          for (size_t c = i+1; c < str.length(); c++)
           {
-            if (str[c] == ' ' or str[c] == '\r' or str[c] == '\n')
+			character = getUnicodeCharacter(str, c);
+            if (character == ' ' or character == '\r' or character == '\n')
               break;
-            fontglyph &g = fnt->glyphs[(unsigned char)(str[c] - fnt->glyphstart) % fnt->glyphcount];
+            fontglyph &g = fnt->glyphs[character - fnt->glyphstart];
             tw += g.xs;
           }
 
@@ -964,7 +1017,7 @@ void draw_text_ext_transformed_color(gs_scalar x, gs_scalar y, variant vstr, gs_
             width = 0;
           }
         } else {
-          fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart)];
+          fontglyph &g = fnt->glyphs[character - fnt->glyphstart];
           wi = g.x2-g.x;
             const gs_scalar lx = xx + g.y * svy;
             const gs_scalar ly = yy + g.y * cvy;
@@ -998,21 +1051,22 @@ void draw_text_color(gs_scalar x, gs_scalar y,variant vstr,int c1,int c2,int c3,
   gs_scalar tx1, tx2, sw = (gs_scalar)string_width_line(str, line);
   if (halign == fa_left){
       gs_scalar xx = x;
-      for (unsigned i = 0; i < str.length(); i++)
+      for (size_t i = 0; i < str.length(); i++)
       {
-        if (str[i] == '\r'){
+		uint32_t character = getUnicodeCharacter(str, i);
+        if (character == '\r'){
           xx = x, yy += fnt->height, i += str[i+1] == '\n';
           line += 1;
           sw = (gs_scalar)string_width_line(str, line);
-        } else if (str[i] == '\n'){
+        } else if (character == '\n'){
           xx = x, yy += fnt->height;
           line += 1;
           sw = (gs_scalar)string_width_line(str, line);
-        } else if (str[i] == ' ' or str[i] < fnt->glyphstart or str[i] > fnt->glyphstart + fnt->glyphcount)
+        } else if (character == ' ' or character < fnt->glyphstart or character > fnt->glyphstart + fnt->glyphcount)
           xx += get_space_width(fnt);
         else
         {
-          fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart)];
+          fontglyph &g = fnt->glyphs[character - fnt->glyphstart];
           tx1 = (xx-x)/sw, tx2 = (xx+g.xs-x)/sw;
           hcol1 = merge_color(c1,c2,tx1);
           hcol2 = merge_color(c1,c2,tx2);
@@ -1031,19 +1085,20 @@ void draw_text_color(gs_scalar x, gs_scalar y,variant vstr,int c1,int c2,int c3,
       }
   } else {
       gs_scalar xx = halign == fa_center ? x-sw/2 : x-sw, tmpx = xx;
-      for (unsigned i = 0; i < str.length(); i++)
+      for (size_t i = 0; i < str.length(); i++)
       {
-        if (str[i] == '\r'){
+		uint32_t character = getUnicodeCharacter(str, i);
+        if (character == '\r'){
           yy += fnt->height, i += str[i+1] == '\n', line += 1,
           sw = (gs_scalar)string_width_line(str, line), xx = halign == fa_center ? x-sw/2 : x-sw, tmpx = xx;
-        } else if (str[i] == '\n'){
+        } else if (character == '\n') {
           yy += fnt->height, line += 1, sw = (gs_scalar)string_width_line(str, line),
           xx = halign == fa_center ? x-sw/2 : x-sw, tmpx = xx;
-        } else if (str[i] == ' ' or str[i] < fnt->glyphstart or str[i] > fnt->glyphstart + fnt->glyphcount)
+        } else if (character == ' ' or character < fnt->glyphstart or character > fnt->glyphstart + fnt->glyphcount)
           xx += get_space_width(fnt);
         else
         {
-          fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart)];
+          fontglyph &g = fnt->glyphs[character - fnt->glyphstart];
           tx1 = (xx-tmpx)/sw, tx2 = (xx+g.xs-tmpx)/sw;
           hcol1 = merge_color(c1,c2,tx1);
           hcol2 = merge_color(c1,c2,tx2);
@@ -1073,28 +1128,30 @@ void draw_text_ext_color(gs_scalar x, gs_scalar y,variant vstr,gs_scalar sep, gs
   int hcol1 = c1, hcol2 = c1, hcol3 = c3, hcol4 = c4;
   if (halign == fa_left){
       gs_scalar xx = x;
-      for (unsigned i = 0; i < str.length(); i++)
+      for (size_t i = 0; i < str.length(); i++)
       {
-        if (str[i] == '\r')
+		uint32_t character = getUnicodeCharacter(str, i);
+        if (character == '\r')
           xx = x, yy +=  (sep+2 ? fnt->height : sep), i += str[i+1] == '\n',  width = 0, line += 1, sw = string_width_ext_line(str, w, line);
-        else if (str[i] == '\n')
+        else if (character == '\n')
           xx = x, yy += (sep+2 ? fnt->height : sep), width = 0, line += 1, sw = string_width_ext_line(str, w, line);
-        else if (str[i] == ' ' or str[i] < fnt->glyphstart or str[i] > fnt->glyphstart + fnt->glyphcount){
+        else if (character == ' ' or character < fnt->glyphstart or character > fnt->glyphstart + fnt->glyphcount){
           xx += get_space_width(fnt);
           width = xx-x;
           tw = 0;
-          for (unsigned c = i+1; c < str.length(); c++)
+          for (size_t c = i+1; c < str.length(); c++)
           {
-            if (str[c] == ' ' or str[c] == '\r' or str[c] == '\n')
+			character = getUnicodeCharacter(str, c);
+            if (character == ' ' or character == '\r' or character == '\n')
               break;
-            fontglyph &g = fnt->glyphs[(unsigned char)(str[c] - fnt->glyphstart) % fnt->glyphcount];
+            fontglyph &g = fnt->glyphs[character - fnt->glyphstart];
             tw += g.xs;
           }
 
           if (width+tw >= w && w != -1)
             xx = x, yy += (sep==-1 ? fnt->height : sep), width = 0, line += 1, sw = string_width_ext_line(str, w, line);
         } else {
-          fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart)];
+          fontglyph &g = fnt->glyphs[character - fnt->glyphstart];
           hcol1 = merge_color(c1,c2,(gs_scalar)(width)/sw);
           hcol2 = merge_color(c1,c2,(gs_scalar)(width+g.xs)/sw);
           hcol3 = merge_color(c4,c3,(gs_scalar)(width)/sw);
@@ -1113,26 +1170,28 @@ void draw_text_ext_color(gs_scalar x, gs_scalar y,variant vstr,gs_scalar sep, gs
       }
   } else {
       gs_scalar xx = halign == fa_center ? x-sw/2 : x-sw, tmpx = xx;
-      for (unsigned i = 0; i < str.length(); i++)
+      for (size_t i = 0; i < str.length(); i++)
       {
-        if (str[i] == '\r')
+		uint32_t character = getUnicodeCharacter(str, i);
+        if (character == '\r')
           yy +=  (sep+2 ? fnt->height : sep), i += str[i+1] == '\n',  width = 0, line += 1, sw = string_width_ext_line(str, w, line), xx = halign == fa_center ? x-sw/2 : x-sw, tmpx = xx;
-        else if (str[i] == '\n')
+        else if (character == '\n')
           yy += (sep+2 ? fnt->height : sep), width = 0, line += 1, sw = string_width_ext_line(str, w, line), xx = halign == fa_center ? x-sw/2 : x-sw, tmpx = xx;
-        else if (str[i] == ' ' or str[i] < fnt->glyphstart or str[i] > fnt->glyphstart + fnt->glyphcount){
+        else if (character == ' ' or character < fnt->glyphstart or character > fnt->glyphstart + fnt->glyphcount){
           xx += get_space_width(fnt), width = xx-tmpx, tw = 0;
-          for (unsigned c = i+1; c < str.length(); c++)
+          for (size_t c = i+1; c < str.length(); c++)
           {
-            if (str[c] == ' ' or str[c] == '\r' or str[c] == '\n')
+			character = getUnicodeCharacter(str, c);
+            if (character == ' ' or character == '\r' or character == '\n')
               break;
-            fontglyph &g = fnt->glyphs[(unsigned char)(str[c] - fnt->glyphstart) % fnt->glyphcount];
+            fontglyph &g = fnt->glyphs[character - fnt->glyphstart];
             tw += g.xs;
           }
 
           if (width+tw >= w && w != -1)
             yy += (sep==-1 ? fnt->height : sep), width = 0, line += 1, sw = string_width_ext_line(str, w, line), xx = halign == fa_center ? x-sw/2 : x-sw, tmpx = xx;
         } else {
-          fontglyph &g = fnt->glyphs[(unsigned char)(str[i] - fnt->glyphstart)];
+          fontglyph &g = fnt->glyphs[character - fnt->glyphstart];
           hcol1 = merge_color(c1,c2,(gs_scalar)(width)/sw);
           hcol2 = merge_color(c1,c2,(gs_scalar)(width+g.xs)/sw);
           hcol3 = merge_color(c4,c3,(gs_scalar)(width)/sw);
