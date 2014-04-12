@@ -146,9 +146,26 @@ size_t string_byte_length(string str) {
 	return str.size();
 }
 size_t string_length(string str) { return str.length(); }
+
 size_t string_length(const char* str)
 {
 	return strlen(str);
+}
+
+size_t string_length_utf8(string str) { 
+	size_t res = 0; 
+	for (size_t i = 0; i < str.length(); ++i) 
+		if ((str[i] & 0xC0) != 0x80) 
+			++res; 
+	return res; 
+}
+
+size_t string_length_utf8(const char* str) { 
+	size_t res = 0; 
+	for (size_t i = 0; str[i]; ++i) 
+		if ((str[i] & 0xC0) != 0x80) 
+			++res; 
+	return res; 
 }
 
 int string_pos(string substr,string str) {
