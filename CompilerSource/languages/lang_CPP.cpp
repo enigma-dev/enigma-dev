@@ -140,7 +140,7 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode, const char* targ
   } else cerr << "ERROR! Namespace enigma not found!" << endl;
   
   if (res) {
-    cout << "ERROR in parsing engine file: The parser isn't happy. Don't worry, it's never fucking happy. Have a turd.\n";
+    cout << "ERROR in parsing engine file: The parser isn't happy. Don't worry, it's never happy.\n";
     cout << heaping_pile_of_dog_shit;
     
     ide_passback_error.set(0,0,0,"Parse failed; details in stdout. Bite me.");

@@ -20,6 +20,7 @@
 #ifndef _FONTSTRUCT__H
 #define _FONTSTRUCT__H
 
+#include <vector>
 #include <stdint.h>
 
 namespace enigma
@@ -32,7 +33,7 @@ namespace enigma
   };
   struct fontglyphrange {
     unsigned int glyphstart, glyphcount;
-    fontglyph *glyphs;
+    std::vector<fontglyph*> glyphs;
   };
   struct font
   {
@@ -42,7 +43,7 @@ namespace enigma
 
     // Metrics and such
 	unsigned glyphRangeCount;
-    fontglyphrange *glyphRanges;
+    std::vector<fontglyphrange*> glyphRanges;
     unsigned int height, yoffset;
 
     // Texture layer

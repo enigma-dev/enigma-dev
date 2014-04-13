@@ -19,6 +19,7 @@
 
 #include <string>
 #include <stdio.h>
+#include <sstream>
 #include <windows.h>
 using namespace std;
 
@@ -70,7 +71,9 @@ namespace enigma
 	  fontstructarray[i]->height = 0;
 
 	  fontstructarray[i]->glyphRangeCount = rawfontdata[rf].glyphRangeCount;
-	  fontstructarray[i]->glyphRanges = new fontglyphrange[fontstructarray[i]->glyphRangeCount];
+	  if (fontstructarray[i]->glyphRangeCount > 1) {
+	  MessageBox(NULL, "why so big?", "goodbye", MB_OK);
+	  }
 
 	  const unsigned int size = twid*thgt;
 
@@ -100,21 +103,24 @@ namespace enigma
 		  continue;
 	  }
 	  delete[] cpixels;*/
-	
+	MessageBox(NULL, "hello", "goodbye", MB_OK);
 	  int ymin=100, ymax=-100;
 	  for (size_t gri = 0; gri < enigma::fontstructarray[i]->glyphRangeCount; gri++) {
-		  fontglyphrange fgr = fontstructarray[i]->glyphRanges[gri];
+			fontglyphrange* fgr = new fontglyphrange;
+			fontstructarray[i]->glyphRanges.push_back(fgr);
 		  
+		  //if (fgr == NULL)
+			MessageBox(NULL, "hello", "goodbye", MB_OK);
+			
 		  unsigned strt, cnt;
 		  if (!fread(&strt,4,1,exe)) return;
 		  if (!fread(&cnt,4,1,exe)) return;
 		  
-		  fgr.glyphstart = strt;
-		  fgr.glyphcount = cnt;
-			MessageBox(NULL, "hello", "goodbye", MB_OK);
-		  fgr.glyphs = new fontglyph[fgr.glyphcount];
+		  fgr->glyphstart = strt;
+		  fgr->glyphcount = cnt;
+		  
 		  MessageBox(NULL, "sssssss", "goodbye", MB_OK);
-		  for (unsigned gi = 0; gi < fgr.glyphcount; gi++)
+		  for (unsigned gi = 0; gi < 1; gi++)
 		  {
 			if (!fread(&advance,4,1,exe)) return;
 			if (!fread(&baseline,4,1,exe)) return;
@@ -126,20 +132,23 @@ namespace enigma
 			if (!fread(&gtx2,4,1,exe)) return;
 			if (!fread(&gty2,4,1,exe)) return;
 
-			fgr.glyphs[gi].x = int(origin + .5);
-			fgr.glyphs[gi].y = int(baseline + .5);
-			fgr.glyphs[gi].x2 = int(origin + .5) + gwid;
-			fgr.glyphs[gi].y2 = int(baseline + .5) + ghgt;
-			fgr.glyphs[gi].tx = gtx;
-			fgr.glyphs[gi].ty = gty;
-			fgr.glyphs[gi].tx2 = gtx2;
-			fgr.glyphs[gi].ty2 = gty2;
-			fgr.glyphs[gi].xs = advance + .5;
+			fontglyph* fg = new fontglyph;
+			fgr->glyphs.push_back(fg);
+			
+			fg->x = int(origin + .5);
+			fg->y = int(baseline + .5);
+			fg->x2 = int(origin + .5) + gwid;
+			fg->y2 = int(baseline + .5) + ghgt;
+			fg->tx = gtx;
+			fg->ty = gty;
+			fg->tx2 = gtx2;
+			fg->ty2 = gty2;
+			fg->xs = advance + .5;
 
-			if (fgr.glyphs[gi].y < ymin)
-			  ymin = fgr.glyphs[gi].y;
-			if (fgr.glyphs[gi].y2 > ymax)
-			  ymax = fgr.glyphs[gi].y2;
+			if (fg->y < ymin)
+			  ymin = fg->y;
+			if (fg->y2 > ymax)
+			  ymax = fg->y2;
 			//printf("fntid%d, twid%d, thgt%d, advance%f, baseline%f, origin%f, gwid%d, ghgt%d, gtx%f, gty%f, gtx2%f, gty2%f\n", fntid, twid, thgt, advance, baseline, origin, gwid, ghgt, gtx, gty, gtx2, gty2);
 		  }
 	  }
@@ -150,7 +159,7 @@ namespace enigma
 	  fontstructarray[i]->texture = graphics_create_texture(twid,thgt,twid,thgt,pixels,true);
 	  fontstructarray[i]->twid = twid;
 	  fontstructarray[i]->thgt = thgt;
-
+MessageBox(NULL, "asshole", "hai", MB_OK);
       /*int sss = 'A' - fontstructarray[i]->glyphstart;
       fontstructarray[i]->glyphs[sss].x = 0;
       fontstructarray[i]->glyphs[sss].y = 0;
