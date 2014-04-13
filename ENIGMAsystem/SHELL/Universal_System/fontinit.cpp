@@ -54,6 +54,14 @@ namespace enigma
 
 	for (int rf = 0; rf < rawfontcount; rf++)
 	{
+	
+			std::stringstream ss;
+	  ss << rawfontcount;
+	  MessageBox(NULL, ss.str().c_str(), "yes hello sailor", MB_OK);
+	 // if (fontstructarray[i]->glyphRangeCount > 1) {
+	  //MessageBox(NULL, "why so big?", "goodbye", MB_OK);
+	  //}
+	  
 	  // int unpacked;
 	  if (!fread(&fntid, 4,1,exe)) return;
 	  if (!fread(&twid, 4,1,exe)) return;
@@ -71,9 +79,7 @@ namespace enigma
 	  fontstructarray[i]->height = 0;
 
 	  fontstructarray[i]->glyphRangeCount = rawfontdata[rf].glyphRangeCount;
-	  if (fontstructarray[i]->glyphRangeCount > 1) {
-	  MessageBox(NULL, "why so big?", "goodbye", MB_OK);
-	  }
+
 
 	  const unsigned int size = twid*thgt;
 
@@ -103,14 +109,12 @@ namespace enigma
 		  continue;
 	  }
 	  delete[] cpixels;*/
-	MessageBox(NULL, "hello", "goodbye", MB_OK);
 	  int ymin=100, ymax=-100;
 	  for (size_t gri = 0; gri < enigma::fontstructarray[i]->glyphRangeCount; gri++) {
 			fontglyphrange* fgr = new fontglyphrange;
 			fontstructarray[i]->glyphRanges.push_back(fgr);
 		  
 		  //if (fgr == NULL)
-			MessageBox(NULL, "hello", "goodbye", MB_OK);
 			
 		  unsigned strt, cnt;
 		  if (!fread(&strt,4,1,exe)) return;
@@ -119,8 +123,7 @@ namespace enigma
 		  fgr->glyphstart = strt;
 		  fgr->glyphcount = cnt;
 		  
-		  MessageBox(NULL, "sssssss", "goodbye", MB_OK);
-		  for (unsigned gi = 0; gi < 1; gi++)
+		  for (unsigned gi = 0; gi < fgr->glyphcount; gi++)
 		  {
 			if (!fread(&advance,4,1,exe)) return;
 			if (!fread(&baseline,4,1,exe)) return;
@@ -131,7 +134,6 @@ namespace enigma
 			if (!fread(&gty,4,1,exe)) return;
 			if (!fread(&gtx2,4,1,exe)) return;
 			if (!fread(&gty2,4,1,exe)) return;
-
 			fontglyph* fg = new fontglyph;
 			fgr->glyphs.push_back(fg);
 			
@@ -152,14 +154,13 @@ namespace enigma
 			//printf("fntid%d, twid%d, thgt%d, advance%f, baseline%f, origin%f, gwid%d, ghgt%d, gtx%f, gty%f, gtx2%f, gty2%f\n", fntid, twid, thgt, advance, baseline, origin, gwid, ghgt, gtx, gty, gtx2, gty2);
 		  }
 	  }
-	      MessageBox(NULL, "wtf", "hai", MB_OK);
+
 	  fontstructarray[i]->height = ymax - ymin + 2;
 	  fontstructarray[i]->yoffset = - ymin + 1;
 
 	  fontstructarray[i]->texture = graphics_create_texture(twid,thgt,twid,thgt,pixels,true);
 	  fontstructarray[i]->twid = twid;
 	  fontstructarray[i]->thgt = thgt;
-MessageBox(NULL, "asshole", "hai", MB_OK);
 
 	  delete[] pixels;
 
