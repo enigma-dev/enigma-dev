@@ -1,5 +1,6 @@
 /** Copyright (C) 2008-2011 Josh Ventura
 *** Copyright (C) 2010 Alasdair Morrison <tgmg@g-java.com>
+*** Copyright (C) 2014 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -18,6 +19,7 @@
 
 #include <string>
 #include <stdio.h>
+#include <windows.h>
 using namespace std;
 
 #include "backgroundstruct.h"
@@ -49,93 +51,105 @@ namespace enigma
 
 	  fontstructarray = (new font*[rawfontmaxid + 2]) + 1;
 
-	  for (int rf = 0; rf < rawfontcount; rf++)
+	for (int rf = 0; rf < rawfontcount; rf++)
+	{
+	  // int unpacked;
+	  if (!fread(&fntid, 4,1,exe)) return;
+	  if (!fread(&twid, 4,1,exe)) return;
+	  if (!fread(&thgt,4,1,exe)) return;
+	  const int i = fntid;
+
+	  fontstructarray[i] = new font;
+
+	  fontstructarray[i]->name = rawfontdata[rf].name;
+	  fontstructarray[i]->fontname = rawfontdata[rf].fontname;
+	  fontstructarray[i]->fontsize = rawfontdata[rf].fontsize;
+	  fontstructarray[i]->bold = rawfontdata[rf].bold;
+	  fontstructarray[i]->italic = rawfontdata[rf].italic;
+
+	  fontstructarray[i]->height = 0;
+
+	  fontstructarray[i]->glyphRangeCount = rawfontdata[rf].glyphRangeCount;
+	  fontstructarray[i]->glyphRanges = new fontglyphrange[fontstructarray[i]->glyphRangeCount];
+
+	  const unsigned int size = twid*thgt;
+
+	  int* pixels=new int[size+1]; //FYI: This variable was once called "cpixels." When you do compress them, change it back.
+
+	  unsigned int sz2;
+	  for (sz2 = 0; !feof(exe) and sz2 < size; sz2++){
+		pixels[sz2] = 0x00FFFFFF | ((unsigned char)fgetc(exe) << 24);
+		if (pixels[sz2] == 0x00FFFFFF) pixels[sz2] = 0;
+	  }
+
+	  if (size!=sz2) {
+		  show_error("Failed to load font: Data is truncated before exe end. Read "+toString(sz2)+" out of expected "+toString(size),0);
+		  return;
+	  }
+	  if (!fread(&nullhere,4,1,exe)) return;
+	  if (nullhere != *(int*)"done")
 	  {
-		  // int unpacked;
-		  if (!fread(&fntid, 4,1,exe)) return;
-		  if (!fread(&twid, 4,1,exe)) return;
-		  if (!fread(&thgt,4,1,exe)) return;
-		  const int i = fntid;
-
-		  fontstructarray[i] = new font;
-
-		  fontstructarray[i]->name = rawfontdata[rf].name;
-		  fontstructarray[i]->fontname = rawfontdata[rf].fontname;
-		  fontstructarray[i]->fontsize = rawfontdata[rf].fontsize;
-		  fontstructarray[i]->bold = rawfontdata[rf].bold;
-		  fontstructarray[i]->italic = rawfontdata[rf].italic;
-
-		  fontstructarray[i]->glyphstart = rawfontdata[rf].glyphstart;
-		  fontstructarray[i]->glyphcount = rawfontdata[rf].glyphcount;
-
-		  fontstructarray[i]->height = 0;
-
-		  fontstructarray[i]->glyphs = new fontglyph[fontstructarray[i]->glyphcount];
-
-		  const unsigned int size = twid*thgt;
-
-		  int* pixels=new int[size+1]; //FYI: This variable was once called "cpixels." When you do compress them, change it back.
-
-		  unsigned int sz2;
-		  for (sz2 = 0; !feof(exe) and sz2 < size; sz2++){
-            pixels[sz2] = 0x00FFFFFF | ((unsigned char)fgetc(exe) << 24);
-		    if (pixels[sz2] == 0x00FFFFFF) pixels[sz2] = 0;
-		  }
-
-		  if (size!=sz2) {
-			  show_error("Failed to load font: Data is truncated before exe end. Read "+toString(sz2)+" out of expected "+toString(size),0);
-			  return;
-		  }
-      if (!fread(&nullhere,4,1,exe)) return;
-      if (nullhere != *(int*)"done")
-      {
-        printf("Unexpected end; eof:%s\n",feof(exe)?"true":"false");
-        return;
-      }
-		  //unpacked = width*height*4;
-		  /*unsigned char* pixels=new unsigned char[unpacked+1];
-		  if (zlib_decompress(cpixels,size,unpacked,pixels) != unpacked)
+		printf("Unexpected end; eof:%s\n",feof(exe)?"true":"false");
+		return;
+	  }
+	  //unpacked = width*height*4;
+	  /*unsigned char* pixels=new unsigned char[unpacked+1];
+	  if (zlib_decompress(cpixels,size,unpacked,pixels) != unpacked)
+	  {
+		  show_error("Background load error: Background does not match expected size",0);
+		  continue;
+	  }
+	  delete[] cpixels;*/
+	
+	  int ymin=100, ymax=-100;
+	  for (size_t gri = 0; gri < enigma::fontstructarray[i]->glyphRangeCount; gri++) {
+		  fontglyphrange fgr = fontstructarray[i]->glyphRanges[gri];
+		  
+		  unsigned strt, cnt;
+		  if (!fread(&strt,4,1,exe)) return;
+		  if (!fread(&cnt,4,1,exe)) return;
+		  
+		  fgr.glyphstart = strt;
+		  fgr.glyphcount = cnt;
+			MessageBox(NULL, "hello", "goodbye", MB_OK);
+		  fgr.glyphs = new fontglyph[fgr.glyphcount];
+		  MessageBox(NULL, "sssssss", "goodbye", MB_OK);
+		  for (unsigned gi = 0; gi < fgr.glyphcount; gi++)
 		  {
-			  show_error("Background load error: Background does not match expected size",0);
-			  continue;
+			if (!fread(&advance,4,1,exe)) return;
+			if (!fread(&baseline,4,1,exe)) return;
+			if (!fread(&origin,4,1,exe)) return;
+			if (!fread(&gwid,4,1,exe)) return;
+			if (!fread(&ghgt,4,1,exe)) return;
+			if (!fread(&gtx,4,1,exe)) return;
+			if (!fread(&gty,4,1,exe)) return;
+			if (!fread(&gtx2,4,1,exe)) return;
+			if (!fread(&gty2,4,1,exe)) return;
+
+			fgr.glyphs[gi].x = int(origin + .5);
+			fgr.glyphs[gi].y = int(baseline + .5);
+			fgr.glyphs[gi].x2 = int(origin + .5) + gwid;
+			fgr.glyphs[gi].y2 = int(baseline + .5) + ghgt;
+			fgr.glyphs[gi].tx = gtx;
+			fgr.glyphs[gi].ty = gty;
+			fgr.glyphs[gi].tx2 = gtx2;
+			fgr.glyphs[gi].ty2 = gty2;
+			fgr.glyphs[gi].xs = advance + .5;
+
+			if (fgr.glyphs[gi].y < ymin)
+			  ymin = fgr.glyphs[gi].y;
+			if (fgr.glyphs[gi].y2 > ymax)
+			  ymax = fgr.glyphs[gi].y2;
+			//printf("fntid%d, twid%d, thgt%d, advance%f, baseline%f, origin%f, gwid%d, ghgt%d, gtx%f, gty%f, gtx2%f, gty2%f\n", fntid, twid, thgt, advance, baseline, origin, gwid, ghgt, gtx, gty, gtx2, gty2);
 		  }
-		  delete[] cpixels;*/
+	  }
+	      MessageBox(NULL, "wtf", "hai", MB_OK);
+	  fontstructarray[i]->height = ymax - ymin + 2;
+	  fontstructarray[i]->yoffset = - ymin + 1;
 
-		  int ymin=100, ymax=-100;
-		  for (unsigned gi = 0; gi < enigma::fontstructarray[i]->glyphcount; gi++)
-		  {
-		    if (!fread(&advance,4,1,exe)) return;
-        if (!fread(&baseline,4,1,exe)) return;
-        if (!fread(&origin,4,1,exe)) return;
-        if (!fread(&gwid,4,1,exe)) return;
-        if (!fread(&ghgt,4,1,exe)) return;
-        if (!fread(&gtx,4,1,exe)) return;
-        if (!fread(&gty,4,1,exe)) return;
-        if (!fread(&gtx2,4,1,exe)) return;
-        if (!fread(&gty2,4,1,exe)) return;
-
-        fontstructarray[i]->glyphs[gi].x = int(origin + .5);
-        fontstructarray[i]->glyphs[gi].y = int(baseline + .5);
-        fontstructarray[i]->glyphs[gi].x2 = int(origin + .5) + gwid;
-        fontstructarray[i]->glyphs[gi].y2 = int(baseline + .5) + ghgt;
-        fontstructarray[i]->glyphs[gi].tx = gtx;
-        fontstructarray[i]->glyphs[gi].ty = gty;
-        fontstructarray[i]->glyphs[gi].tx2 = gtx2;
-        fontstructarray[i]->glyphs[gi].ty2 = gty2;
-        fontstructarray[i]->glyphs[gi].xs = advance + .5;
-
-        if (fontstructarray[i]->glyphs[gi].y < ymin)
-          ymin = fontstructarray[i]->glyphs[gi].y;
-        if (fontstructarray[i]->glyphs[gi].y2 > ymax)
-          ymax = fontstructarray[i]->glyphs[gi].y2;
-        //printf("fntid%d, twid%d, thgt%d, advance%f, baseline%f, origin%f, gwid%d, ghgt%d, gtx%f, gty%f, gtx2%f, gty2%f\n", fntid, twid, thgt, advance, baseline, origin, gwid, ghgt, gtx, gty, gtx2, gty2);
-		  }
-		  fontstructarray[i]->height = ymax - ymin + 2;
-		  fontstructarray[i]->yoffset = - ymin + 1;
-
-		  fontstructarray[i]->texture = graphics_create_texture(twid,thgt,twid,thgt,pixels,true);
-		  fontstructarray[i]->twid = twid;
-		  fontstructarray[i]->thgt = thgt;
+	  fontstructarray[i]->texture = graphics_create_texture(twid,thgt,twid,thgt,pixels,true);
+	  fontstructarray[i]->twid = twid;
+	  fontstructarray[i]->thgt = thgt;
 
       /*int sss = 'A' - fontstructarray[i]->glyphstart;
       fontstructarray[i]->glyphs[sss].x = 0;
@@ -147,11 +161,11 @@ namespace enigma
       fontstructarray[i]->glyphs[sss].tx2 = 1;
       fontstructarray[i]->glyphs[sss].ty2 = 1;*/
 
-		  delete[] pixels;
+	  delete[] pixels;
 
       if (!fread(&nullhere,4,1,exe)) return;
       if (nullhere != *(int*)"endf")
         return;
-	  }
+	}
   }
 }

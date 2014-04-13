@@ -1,29 +1,20 @@
-/********************************************************************************\
-**                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
-**                                                                              **
-**  This file is a part of the ENIGMA Development Environment.                  **
-**                                                                              **
-**                                                                              **
-**  ENIGMA is free software: you can redistribute it and/or modify it under the **
-**  terms of the GNU General Public License as published by the Free Software   **
-**  Foundation, version 3 of the license or any later version.                  **
-**                                                                              **
-**  This application and its source code is distributed AS-IS, WITHOUT ANY      **
-**  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS   **
-**  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more       **
-**  details.                                                                    **
-**                                                                              **
-**  You should have recieved a copy of the GNU General Public License along     **
-**  with this code. If not, see <http://www.gnu.org/licenses/>                  **
-**                                                                              **
-**  ENIGMA is an environment designed to create games and other programs with a **
-**  high-level, fully compilable language. Developers of ENIGMA or anything     **
-**  associated with ENIGMA are in no way responsible for its users or           **
-**  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **
-**                                                                              **
-\********************************************************************************/
+/** Copyright (C) 2008 Josh Ventura
+*** Copyright (C) 2014 Robert B. Colton
+***
+*** This file is a part of the ENIGMA Development Environment.
+***
+*** ENIGMA is free software: you can redistribute it and/or modify it under the
+*** terms of the GNU General Public License as published by the Free Software
+*** Foundation, version 3 of the license or any later version.
+***
+*** This application and its source code is distributed AS-IS, WITHOUT ANY
+*** WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+*** FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+*** details.
+***
+*** You should have received a copy of the GNU General Public License along
+*** with this code. If not, see <http://www.gnu.org/licenses/>
+**/
 
 #include <stdio.h>
 #include <iostream>
@@ -96,7 +87,7 @@ int lang_CPP::module_write_fonts(EnigmaStruct *es, FILE *gameModule)
 
     // Copy our glyph metrics into it
 	size_t ib = 0;
-	for (int ii = 0; ii < es->fonts[i].glyphRangeCount; i++) {
+	for (int ii = 0; ii < es->fonts[i].glyphRangeCount; ii++) {
 		GlyphRange glyphRange = es->fonts[i].glyphRanges[ii];
 		for (int ig = 0; ig < glyphRange.rangeMax - glyphRange.rangeMin; ig++) {
 			Glyph glyph = es->fonts[i].glyphRanges[ii].glyphs[ig];
@@ -108,11 +99,13 @@ int lang_CPP::module_write_fonts(EnigmaStruct *es, FILE *gameModule)
     cout << "Copied metrics" << endl;
 
     // Sort our boxes from largest to smallest in area.
-	for (int ii = 0; ii < es->fonts[i].glyphRangeCount; i++) {
+	size_t bo = 0;
+	for (int ii = 0; ii < es->fonts[i].glyphRangeCount; ii++) {
 		GlyphRange glyphRange = es->fonts[i].glyphRanges[ii];
 		for (int ig = 0; ig < glyphRange.rangeMax - glyphRange.rangeMin; ig++) {
 			Glyph glyph = es->fonts[i].glyphRanges[ii].glyphs[ig];
-			box_order.push_back((glyph.width * glyph.height << 8) + ii); // This reserves only eight bits for the glyph id; unicode will break a little.
+			box_order.push_back((glyph.width * glyph.height << 8) + bo); // This reserves only eight bits for the glyph id; unicode will break a little.
+			bo++;
 		}
 	}
     box_order.sort(); // In actuality, unicode will only cause the area sort to be inaccurate, leading to an inefficient pack.
@@ -145,7 +138,7 @@ int lang_CPP::module_write_fonts(EnigmaStruct *es, FILE *gameModule)
 
     cout << "Allocated a big texture. Moving font into it..." << endl;
 	size_t igt = 0;
-	for (int ii = 0; ii < es->fonts[i].glyphRangeCount; i++) {
+	for (int ii = 0; ii < es->fonts[i].glyphRangeCount; ii++) {
 		GlyphRange glyphRange = es->fonts[i].glyphRanges[ii];
 		for (int ig = 0; ig < glyphRange.rangeMax - glyphRange.rangeMin; ig++) {
 			Glyph glyph = es->fonts[i].glyphRanges[ii].glyphs[ig];
@@ -179,10 +172,10 @@ int lang_CPP::module_write_fonts(EnigmaStruct *es, FILE *gameModule)
     fwrite("done",1,4,gameModule);
 	
 	igt = 0;
-	for (int ii = 0; ii < es->fonts[i].glyphRangeCount; i++) {
+	for (int ii = 0; ii < es->fonts[i].glyphRangeCount; ii++) {
 		GlyphRange glyphRange = es->fonts[i].glyphRanges[ii];
 		writef(glyphRange.rangeMin, gameModule);
-		writef(glyphRange.rangeMax, gameModule);
+		writef(glyphRange.rangeMax - glyphRange.rangeMin, gameModule);
 		for (int ig = 0; ig < glyphRange.rangeMax - glyphRange.rangeMin; ig++) {
 			Glyph glyph = glyphRange.glyphs[ig];
 			writef(glyph.advance, gameModule);
