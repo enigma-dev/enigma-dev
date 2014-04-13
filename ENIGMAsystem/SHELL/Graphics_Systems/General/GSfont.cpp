@@ -67,11 +67,20 @@ static uint32_t getUnicodeCharacter(const string str, size_t& pos) {
 #include <sstream>
 
 static fontglyph* findGlyph(const font *const fnt, uint32_t character) {
-	for (size_t i = 0; i < fnt->glyphRangeCount; i++) {
-	MessageBox(NULL, "hellococky","wtf",MB_OK);
 
+	for (size_t i = 0; i < fnt->glyphRangeCount; i++) {
+	//
+		fontglyphrange* fgr = fnt->glyphRanges[i];
+			std::stringstream ss;
+			ss << fgr->glyphstart;
+			MessageBox(NULL, ss.str().c_str(),"wtf",MB_OK);
+		MessageBox(NULL, "hellococky","wtf",MB_OK);
+		if (character > fgr->glyphstart && character < fgr->glyphstart + fgr->glyphcount) {
+		
+
+			return fgr->glyphs[character - fgr->glyphstart];
+		}
 	}
-	MessageBox(NULL, "hellobooboboboobo","wtf",MB_OK);
 	return NULL;
 }
 
