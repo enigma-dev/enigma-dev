@@ -55,7 +55,7 @@ int lang_CPP::compile_writeFontInfo(EnigmaStruct* es)
       es->fonts[i].size     <<   ", " << // int size;
       bool(es->fonts[i].bold)     <<   ", " << // bool bold;
       bool(es->fonts[i].italic)   <<   ", " << // bool italic;
-      es->fonts[i].glyphRangeCount <<   ", " // int rangeMin;
+      es->fonts[i].glyphRangeCount // int glyphRangeCount;
       << "}," << endl;
 
       if (es->fonts[i].id > maxid)

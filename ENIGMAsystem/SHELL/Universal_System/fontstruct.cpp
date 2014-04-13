@@ -1,4 +1,6 @@
 /** Copyright (C) 2008-2011 Josh Ventura
+*** Copyright (C) 2010 Alasdair Morrison <tgmg@g-java.com>
+*** Copyright (C) 2014 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -35,12 +37,15 @@ namespace enigma
   font **fontstructarray = NULL;
   extern size_t font_idmax;
 
-  int font_new(unsigned char gs, unsigned char gc) // Creates a new font, allocating 'gc' glyphs
+  int font_new(uint32_t gs, uint32_t gc) // Creates a new font, allocating 'gc' glyphs
   {
     font *ret = new font;
-    ret->glyphstart = gs;
-    ret->glyphcount = gc;
-    ret->glyphs = new fontglyph[gc];
+	
+	ret->glyphRangeCount = 1;
+	ret->glyphRanges = new fontglyphrange[1];
+	ret->glyphRanges[0].glyphstart = gs;
+	ret->glyphRanges[0].glyphcount = gc;
+    ret->glyphRanges[0].glyphs = new fontglyph[gc];
     ret->height = 0;
 
     font **fsan = new font*[font_idmax+2];
@@ -55,8 +60,10 @@ namespace enigma
     return font_idmax++;
   }
 
-  int font_pack(enigma::font *font , int spr, unsigned char gcount, bool prop, int sep)
+  int font_pack(enigma::font *font, int spr, uint32_t gcount, bool prop, int sep)
   {
+
+  /*
       // Implement packing algorithm.
       // This algorithm will try to fit as many glyphs as possible into
       // a square space based on the max height of the font.
@@ -163,6 +170,7 @@ namespace enigma
       font->yoffset = 0;
 
       return true;
+	 */
   }
 }
 
@@ -179,14 +187,18 @@ bool font_get_italic(int fnt)
     return enigma::fontstructarray[fnt]->italic;
 }
 
-unsigned char font_get_first(int fnt)
+uint32_t font_get_first(int fnt, int range)
 {
-    return enigma::fontstructarray[fnt]->glyphstart;
+    return enigma::fontstructarray[fnt]->glyphRanges[range].glyphstart;
 }
 
-unsigned char font_get_last(int fnt)
+uint32_t font_get_last(int fnt, int range)
 {
-    return enigma::fontstructarray[fnt]->glyphstart + enigma::fontstructarray[fnt]->glyphcount;
+    return enigma::fontstructarray[fnt]->glyphRanges[range].glyphstart + enigma::fontstructarray[fnt]->glyphRanges[range].glyphcount;
+}
+
+int font_get_range_count(int fnt) {
+	return enigma::fontstructarray[fnt]->glyphRangeCount;
 }
 
 string font_get_fontname(int fnt)
@@ -205,7 +217,7 @@ bool font_exists(int fnt)
     return unsigned(fnt) < enigma::font_idmax && bool(enigma::fontstructarray[fnt]);
 }
 
-int font_add(string name, int size, bool bold, bool italic, unsigned char first, unsigned char last)
+int font_add(string name, int size, bool bold, bool italic, uint32_t first, uint32_t last)
 {
   int res = enigma::font_new(first, last-first);
   enigma::font *fnt = enigma::fontstructarray[res];
@@ -213,38 +225,44 @@ int font_add(string name, int size, bool bold, bool italic, unsigned char first,
   fnt->fontsize = size;
   fnt->bold = bold;
   fnt->italic = italic;
-  fnt->glyphstart = first;
-  fnt->glyphcount = last-first;
+  fnt->glyphRangeCount = 1;
+  fnt->glyphRanges = new enigma::fontglyphrange[1];
+  fnt->glyphRanges[0].glyphstart = first;
+  fnt->glyphRanges[0].glyphcount = last-first;
   return res;
 }
 
-bool font_replace(int ind, string name, int size, bool bold, bool italic, unsigned char first, unsigned char last)
+bool font_replace(int ind, string name, int size, bool bold, bool italic, uint32_t first, uint32_t last)
 {
   enigma::font *fnt = enigma::fontstructarray[ind];
   fnt->name = name;
   fnt->fontsize = size;
   fnt->bold = bold;
   fnt->italic = italic;
-  fnt->glyphstart = first;
-  fnt->glyphcount = last-first;
+  fnt->glyphRangeCount = 1;
+  fnt->glyphRanges = new enigma::fontglyphrange[1];
+  fnt->glyphRanges[0].glyphstart = first;
+  fnt->glyphRanges[0].glyphcount = last-first;
   return true;
 }
 
-bool font_replace_sprite(int ind, int spr, unsigned char first, bool prop, int sep)
+bool font_replace_sprite(int ind, int spr, uint32_t first, bool prop, int sep)
 {
   enigma::sprite *sspr = enigma::spritestructarray[spr];
   if (!sspr) return false;
 
   unsigned char gcount = sspr->subcount;
-  enigma::font *font = enigma::fontstructarray[ind];
-  delete[] font->glyphs;
-  font->glyphstart = first;
-  font->glyphcount = gcount;
-  font->glyphs = new enigma::fontglyph[gcount];
-  return enigma::font_pack(font, spr, gcount, prop, sep);
+  enigma::font *fnt = enigma::fontstructarray[ind];
+  delete[] fnt->glyphRanges; //TODO: Delete glyphs for each range or add it to the destructor?
+  fnt->glyphRangeCount = 1;
+  fnt->glyphRanges = new enigma::fontglyphrange[1];
+  fnt->glyphRanges[0].glyphstart = first;
+  fnt->glyphRanges[0].glyphcount = gcount;
+  fnt->glyphRanges[0].glyphs = new enigma::fontglyph[gcount];
+  return enigma::font_pack(fnt, spr, gcount, prop, sep);
 }
 
-int font_add_sprite(int spr, unsigned char first, bool prop, int sep)
+int font_add_sprite(int spr, uint32_t first, bool prop, int sep)
 {
   enigma::sprite *sspr = enigma::spritestructarray[spr];
   if (!sspr) return -1;
