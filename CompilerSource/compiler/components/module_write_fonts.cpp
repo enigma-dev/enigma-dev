@@ -63,7 +63,7 @@ int lang_CPP::module_write_fonts(EnigmaStruct *es, FILE *gameModule)
     // Simple allocations and initializations
 	size_t gc = 0;
 	for (int ii = 0; ii < es->fonts[i].glyphRangeCount; ii++) {
-		GlyphRange glyphRange = es->fonts[i].glyphRanges[ii];
+		GlyphRange &glyphRange = es->fonts[i].glyphRanges[ii];
 		gc += glyphRange.rangeMax - glyphRange.rangeMin + 1;
 	}
     pvrect* boxes = new pvrect[gc];
@@ -88,9 +88,9 @@ int lang_CPP::module_write_fonts(EnigmaStruct *es, FILE *gameModule)
     // Copy our glyph metrics into it
 	size_t ib = 0;
 	for (int ii = 0; ii < es->fonts[i].glyphRangeCount; ii++) {
-		GlyphRange glyphRange = es->fonts[i].glyphRanges[ii];
+		GlyphRange &glyphRange = es->fonts[i].glyphRanges[ii];
 		for (int ig = 0; ig < glyphRange.rangeMax - glyphRange.rangeMin; ig++) {
-			Glyph glyph = es->fonts[i].glyphRanges[ii].glyphs[ig];
+			Glyph &glyph = es->fonts[i].glyphRanges[ii].glyphs[ig];
 			boxes[ib].w = glyph.width,
 			boxes[ib].h = glyph.height;
 			ib++;
@@ -101,9 +101,9 @@ int lang_CPP::module_write_fonts(EnigmaStruct *es, FILE *gameModule)
     // Sort our boxes from largest to smallest in area.
 	size_t bo = 0;
 	for (int ii = 0; ii < es->fonts[i].glyphRangeCount; ii++) {
-		GlyphRange glyphRange = es->fonts[i].glyphRanges[ii];
+		GlyphRange &glyphRange = es->fonts[i].glyphRanges[ii];
 		for (int ig = 0; ig < glyphRange.rangeMax - glyphRange.rangeMin; ig++) {
-			Glyph glyph = es->fonts[i].glyphRanges[ii].glyphs[ig];
+			Glyph &glyph = es->fonts[i].glyphRanges[ii].glyphs[ig];
 			box_order.push_back((glyph.width * glyph.height << 8) + bo); // This reserves only eight bits for the glyph id; unicode will break a little.
 			bo++;
 		}
@@ -139,9 +139,9 @@ int lang_CPP::module_write_fonts(EnigmaStruct *es, FILE *gameModule)
     cout << "Allocated a big texture. Moving font into it..." << endl;
 	size_t igt = 0;
 	for (int ii = 0; ii < es->fonts[i].glyphRangeCount; ii++) {
-		GlyphRange glyphRange = es->fonts[i].glyphRanges[ii];
+		GlyphRange &glyphRange = es->fonts[i].glyphRanges[ii];
 		for (int ig = 0; ig < glyphRange.rangeMax - glyphRange.rangeMin; ig++) {
-			Glyph glyph = es->fonts[i].glyphRanges[ii].glyphs[ig];
+			Glyph &glyph = es->fonts[i].glyphRanges[ii].glyphs[ig];
 			
 			for (int yy = 0; yy < glyph.height; yy++)
 				for (int xx = 0; xx < glyph.width; xx++)
@@ -173,11 +173,11 @@ int lang_CPP::module_write_fonts(EnigmaStruct *es, FILE *gameModule)
 	
 	igt = 0;
 	for (int ii = 0; ii < es->fonts[i].glyphRangeCount; ii++) {
-		GlyphRange glyphRange = es->fonts[i].glyphRanges[ii];
-		writef(glyphRange.rangeMin, gameModule);
-		writef(glyphRange.rangeMax - glyphRange.rangeMin, gameModule);
+		GlyphRange &glyphRange = es->fonts[i].glyphRanges[ii];
+		writei(glyphRange.rangeMin, gameModule);
+		writei(glyphRange.rangeMax - glyphRange.rangeMin, gameModule);
 		for (int ig = 0; ig < glyphRange.rangeMax - glyphRange.rangeMin; ig++) {
-			Glyph glyph = glyphRange.glyphs[ig];
+			Glyph &glyph = glyphRange.glyphs[ig];
 			writef(glyph.advance, gameModule);
 			writef(glyph.baseline,gameModule);
 			writef(glyph.origin, gameModule);
