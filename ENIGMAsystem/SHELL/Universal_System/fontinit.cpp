@@ -19,8 +19,6 @@
 
 #include <string>
 #include <stdio.h>
-#include <sstream>
-#include <windows.h>
 using namespace std;
 
 #include "backgroundstruct.h"
@@ -54,14 +52,6 @@ namespace enigma
 
 	for (int rf = 0; rf < rawfontcount; rf++)
 	{
-	
-			std::stringstream ss;
-	  ss << rawfontcount;
-	  MessageBox(NULL, ss.str().c_str(), "yes hello sailor", MB_OK);
-	 // if (fontstructarray[i]->glyphRangeCount > 1) {
-	  //MessageBox(NULL, "why so big?", "goodbye", MB_OK);
-	  //}
-	  
 	  // int unpacked;
 	  if (!fread(&fntid, 4,1,exe)) return;
 	  if (!fread(&twid, 4,1,exe)) return;
@@ -79,7 +69,6 @@ namespace enigma
 	  fontstructarray[i]->height = 0;
 
 	  fontstructarray[i]->glyphRangeCount = rawfontdata[rf].glyphRangeCount;
-
 
 	  const unsigned int size = twid*thgt;
 

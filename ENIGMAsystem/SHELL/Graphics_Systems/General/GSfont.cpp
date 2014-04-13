@@ -26,7 +26,6 @@
 #include "../General/GSprimitives.h"
 #include "../General/GSsprite.h"
 
-
 using namespace std;
 #include "Universal_System/fontstruct.h"
 
@@ -52,7 +51,7 @@ unsigned valign = enigma_user::fa_top; //default alignment
 
 static uint32_t getUnicodeCharacter(const string str, size_t& pos) {
 	uint32_t character = 0;
-	if (str[pos] & 0xC0) {
+	if (str[pos] & 0x80) {
 		character = (((uint32_t)str[pos] & 0x1F) << 6);
 		for (size_t ii = 1; ii <= 6; ii++) {
 			if ((str[pos + ii] & 0xC0) != 0x80) { pos += ii - 1; break; }
@@ -63,21 +62,11 @@ static uint32_t getUnicodeCharacter(const string str, size_t& pos) {
 	}
 	return character;
 }
-#include <windows.h>
-#include <sstream>
 
 static fontglyph* findGlyph(const font *const fnt, uint32_t character) {
-
 	for (size_t i = 0; i < fnt->glyphRangeCount; i++) {
-	//
 		fontglyphrange* fgr = fnt->glyphRanges[i];
-			std::stringstream ss;
-			ss << fgr->glyphstart;
-			MessageBox(NULL, ss.str().c_str(),"wtf",MB_OK);
-		MessageBox(NULL, "hellococky","wtf",MB_OK);
 		if (character > fgr->glyphstart && character < fgr->glyphstart + fgr->glyphcount) {
-		
-
 			return fgr->glyphs[character - fgr->glyphstart];
 		}
 	}
@@ -137,7 +126,11 @@ namespace enigma
     // Use the width of the space glyph when available,
     // else use the backup.
     // FIXME: Find out why the width is not available on Linux.
-    return g->xs > 1 ? g->xs : fnt->height/3;
+	if (g != NULL) {
+		return g->xs > 1 ? g->xs : fnt->height/3;
+	} else {
+		return fnt->height/3;
+	}
   }
 }
 
