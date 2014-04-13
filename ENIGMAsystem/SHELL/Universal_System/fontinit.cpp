@@ -160,15 +160,6 @@ namespace enigma
 	  fontstructarray[i]->twid = twid;
 	  fontstructarray[i]->thgt = thgt;
 MessageBox(NULL, "asshole", "hai", MB_OK);
-      /*int sss = 'A' - fontstructarray[i]->glyphstart;
-      fontstructarray[i]->glyphs[sss].x = 0;
-      fontstructarray[i]->glyphs[sss].y = 0;
-      fontstructarray[i]->glyphs[sss].x2 = twid;
-      fontstructarray[i]->glyphs[sss].y2 = thgt;
-      fontstructarray[i]->glyphs[sss].tx = 0;
-      fontstructarray[i]->glyphs[sss].ty = 0;
-      fontstructarray[i]->glyphs[sss].tx2 = 1;
-      fontstructarray[i]->glyphs[sss].ty2 = 1;*/
 
 	  delete[] pixels;
 
