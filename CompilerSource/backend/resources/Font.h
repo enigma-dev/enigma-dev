@@ -10,7 +10,7 @@
 #define _FONT__H
 
 #include "backend/JavaStruct.h"
-#include "backend/sub/Glyph.h"
+#include "backend/sub/GlyphRange.h"
 
 struct Font
 {
@@ -21,10 +21,9 @@ struct Font
 	int size;
 	boolean bold;
 	boolean italic;
-	int rangeMin;
-	int rangeMax;
 
-	Glyph *glyphs; //count = rangeMax - rangeMin
+	int glyphRangeCount;
+	GlyphRange *glyphRanges;
 };
 
 #endif
