@@ -66,7 +66,7 @@ static uint32_t getUnicodeCharacter(const string str, size_t& pos) {
 static fontglyph* findGlyph(const font *const fnt, uint32_t character) {
 	for (size_t i = 0; i < fnt->glyphRangeCount; i++) {
 		fontglyphrange* fgr = fnt->glyphRanges[i];
-		if (character > fgr->glyphstart && character < fgr->glyphstart + fgr->glyphcount) {
+		if (character >= fgr->glyphstart && character < fgr->glyphstart + fgr->glyphcount) {
 			return fgr->glyphs[character - fgr->glyphstart];
 		}
 	}
