@@ -45,6 +45,7 @@ namespace enigma_user {
 
 namespace enigma
 {
+  int game_return = 0;
   extern char keymap[512];
   //extern char usermap[256];
   void ENIGMA_events(void); //TODO: Synchronize this with Windows by putting these two in a single header.
@@ -74,19 +75,19 @@ namespace enigma
               if (!(gk & 0xFF00)) actualKey = enigma_user::keyboard_get_map((int)enigma::keymap[gk & 0xFF]);
               else actualKey = enigma_user::keyboard_get_map((int)enigma::keymap[gk & 0x1FF]);
               { // Set keyboard_lastchar. Seems to work without
-                  char str[1];
-                  int len = XLookupString(&e.xkey, str, 1, NULL, NULL);
-                  if (len > 0) {
-                      enigma_user::keyboard_lastchar = string(1,str[0]);
-					  enigma_user::keyboard_string += enigma_user::keyboard_lastchar;
-					  if (enigma_user::keyboard_lastkey == enigma_user::vk_backspace) {
-						enigma_user::keyboard_string = enigma_user::keyboard_string.substr(0, enigma_user::keyboard_string.length() - 1);
-					  } else {
-						enigma_user::keyboard_string += enigma_user::keyboard_lastchar;
-					  }
+                char str[1];
+                int len = XLookupString(&e.xkey, str, 1, NULL, NULL);
+                if (len > 0) {
+                  enigma_user::keyboard_lastchar = string(1,str[0]);
+                  enigma_user::keyboard_string += enigma_user::keyboard_lastchar;
+                  if (enigma_user::keyboard_lastkey == enigma_user::vk_backspace) {
+                    enigma_user::keyboard_string = enigma_user::keyboard_string.substr(0, enigma_user::keyboard_string.length() - 1);
+                  } else {
+                    enigma_user::keyboard_string += enigma_user::keyboard_lastchar;
                   }
+                }
               }
-	      enigma_user::keyboard_lastkey = actualKey;
+              enigma_user::keyboard_lastkey = actualKey;
               if (enigma::last_keybdstatus[actualKey]==1 && enigma::keybdstatus[actualKey]==0) {
                 enigma::keybdstatus[actualKey]=1;
                 return 0;
@@ -135,10 +136,10 @@ namespace enigma
         }
         case FocusIn:
           gameWindowFocused = true;
-		  pausedSteps = 0;
+          pausedSteps = 0;
           return 0;
         case FocusOut:
-		  gameWindowFocused = false;
+          gameWindowFocused = false;
           return 0;
         case ClientMessage:
           if ((unsigned)e.xclient.data.l[0] == (unsigned)wm_delwin) //For some reason, this line warns whether we cast to unsigned or not.
@@ -389,15 +390,17 @@ int main(int argc,char** argv)
 	enigma::game_ending();
   glXDestroyContext(disp,glxc);
   XCloseDisplay(disp);
-	return 0;
+	return enigma::game_return;
 }
 
 namespace enigma_user
 {
 
-void game_end() {
+void game_end(int ret) {
   game_isending = true;
+  enigma::game_return = ret;
 }
+
 void action_end_game() {
   game_end();
 }

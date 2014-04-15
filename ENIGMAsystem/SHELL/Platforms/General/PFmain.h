@@ -22,7 +22,7 @@
 namespace enigma_user
 {
 
-void game_end();
+void game_end(int ret=0);
 void action_end_game();
 void action_webpage(const std::string &url);
 

@@ -86,6 +86,7 @@ namespace enigma_user {
 
 namespace enigma {
   int current_room_speed;
+  int game_return = 0;
   bool use_pc;
   // Filetime.
   ULARGE_INTEGER time_offset_ft;
@@ -317,6 +318,7 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
           {
               if (msg.message == WM_QUIT)
               {
+                  enigma::game_return = msg.wParam;
                   bQuit=1;
                   break;
               }
@@ -363,7 +365,7 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
     buildmode::finishup();
     #endif
 
-    return 0;
+    return enigma::game_return;
 }
 
 namespace enigma_user
@@ -495,7 +497,7 @@ std::string environment_get_variable(std::string name)
 	return value;
 }
 
-void game_end() { PostQuitMessage(0); }
+void game_end(int ret) { PostQuitMessage(ret); }
 
 void action_end_game() { game_end(); }
 

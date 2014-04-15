@@ -45,9 +45,9 @@ namespace enigma_user {
     usleep((ms % 1000) *1000);
   };
   
-  void game_end() {
+  void game_end(int ret) {
     //audiosystem_cleanup();
-    exit(0);
+    exit(ret);
   }
 
   void action_end_game()
