@@ -52,10 +52,11 @@ unsigned valign = enigma_user::fa_top; //default alignment
 static uint32_t getUnicodeCharacter(const string str, size_t& pos) {
 	uint32_t character = 0;
 	if (str[pos] & 0x80) {
-		character = (((uint32_t)str[pos] & 0x1F) << 6);
+		character = (((uint32_t)str[pos] & 0x1F));
 		for (size_t ii = 1; ii <= 6; ii++) {
-			if ((str[pos + ii] & 0xC0) != 0x80) { pos += ii - 1; break; }
-			character |= (str[pos + ii] & 0x3F);
+      if ((str[pos + ii] & 0xC0) != 0x80) { pos += ii - 1; break; }
+      character <<= 6;
+      character |= (str[pos + ii] & 0x3F);
 		}
 	} else {
 		character = (uint32_t)str[pos];
