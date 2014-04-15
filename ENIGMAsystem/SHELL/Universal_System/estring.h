@@ -34,6 +34,7 @@ int ord(string str);
 double real(variant str);
 
 size_t string_byte_length(string str);
+size_t string_byte_length(const char* str);
 size_t string_length(string str);
 size_t string_length(const char* str);
 size_t string_length_utf8(string str);
