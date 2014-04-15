@@ -43,18 +43,18 @@ extern string keyboard_string;
 
 namespace enigma
 {
-	using enigma_user::keyboard_lastkey;
+    using enigma_user::keyboard_lastkey;
     using enigma_user::keyboard_lastchar;
-	using enigma_user::keyboard_string;
+    using enigma_user::keyboard_string;
     extern char mousestatus[3],last_mousestatus[3],keybdstatus[256],last_keybdstatus[256];
-	map<int,int> keybdmap;
+    map<int,int> keybdmap;
     extern int windowX, windowY, windowWidth, windowHeight;
     extern double  scaledWidth, scaledHeight;
     extern char* currentCursor;
     extern HWND hWnd,hWndParent;
     extern void setchildsize(bool adapt);
-	extern void WindowResized();
-	extern unsigned int pausedSteps;
+    extern void WindowResized();
+    extern unsigned int pausedSteps;
     extern bool gameWindowFocused, treatCloseAsEscape;
     static short hdeltadelta = 0, vdeltadelta = 0;
     int tempLeft = 0, tempTop = 0, tempRight = 0, tempBottom = 0, tempWidth, tempHeight;
@@ -65,146 +65,146 @@ namespace enigma
       switch (message)
       {
         case WM_CREATE:
-            return 0;
+          return 0;
         case WM_CLOSE:
-			instance_event_iterator = new inst_iter(NULL,NULL,NULL);
-			for (enigma::iterator it = enigma::instance_list_first(); it; ++it)
-			{
-			  it->myevent_closebutton();
-			}
-			// Game Maker actually checks this first I am making the decision to check if after, since that is how it is expected to work
-			// so the user can execute something before the escape is processed, no sense in an override if user is going to call game_end() anyway.
-			// - Robert
-			if (treatCloseAsEscape) {
-				PostQuitMessage (0);
-			}
-            return 0;
+          instance_event_iterator = new inst_iter(NULL,NULL,NULL);
+          for (enigma::iterator it = enigma::instance_list_first(); it; ++it)
+          {
+            it->myevent_closebutton();
+          }
+          // Game Maker actually checks this first I am making the decision to check if after, since that is how it is expected to work
+          // so the user can execute something before the escape is processed, no sense in an override if user is going to call game_end() anyway.
+          // - Robert
+          if (treatCloseAsEscape) {
+            PostQuitMessage (0);
+          }
+          return 0;
 
         case WM_DESTROY:
-            return 0;
+          return 0;
 
         case WM_SIZE:
-			instance_event_iterator = new inst_iter(NULL,NULL,NULL);
-			for (enigma::iterator it = enigma::instance_list_first(); it; ++it)
-			{
-			  it->myevent_drawresize();
-			}
-			WindowResized();
-            return 0;
+          instance_event_iterator = new inst_iter(NULL,NULL,NULL);
+          for (enigma::iterator it = enigma::instance_list_first(); it; ++it)
+          {
+            it->myevent_drawresize();
+          }
+          WindowResized();
+          return 0;
 
         case WM_SETFOCUS:
-            input_initialize();
-            gameWindowFocused = true;
-			pausedSteps = 0;
-            return 0;
+          input_initialize();
+          gameWindowFocused = true;
+          pausedSteps = 0;
+          return 0;
 
         case WM_KILLFOCUS:
-            for (int i = 0; i < 255; i++)
-            {
-                last_keybdstatus[i] = keybdstatus[i];
-                keybdstatus[i] = 0;
-            }
-            for(int i=0; i < 3; i++)
-            {
-                last_mousestatus[i] = mousestatus[i];
-                mousestatus[i] = 0;
-            }
-            gameWindowFocused = false;
-            return 0;
+          for (int i = 0; i < 255; i++)
+          {
+              last_keybdstatus[i] = keybdstatus[i];
+              keybdstatus[i] = 0;
+          }
+          for(int i=0; i < 3; i++)
+          {
+              last_mousestatus[i] = mousestatus[i];
+              mousestatus[i] = 0;
+          }
+          gameWindowFocused = false;
+          return 0;
 
         case WM_ENTERSIZEMOVE:
-            GetWindowRect(hWnd,&tempWindow);
-            tempLeft = tempWindow.left;
-            tempTop = tempWindow.top;
-            tempRight = tempWindow.right;
-            tempBottom = tempWindow.bottom;
-            return 0;
+          GetWindowRect(hWnd,&tempWindow);
+          tempLeft = tempWindow.left;
+          tempTop = tempWindow.top;
+          tempRight = tempWindow.right;
+          tempBottom = tempWindow.bottom;
+          return 0;
 
         case WM_EXITSIZEMOVE:
-            GetWindowRect(hWnd,&tempWindow);
-            tempWidth = windowWidth + (tempWindow.right - tempWindow.left) - (tempRight - tempLeft);
-            tempHeight = windowHeight + (tempWindow.bottom - tempWindow.top) - (tempBottom - tempTop);
-            if (tempWidth < scaledWidth)
-                tempWidth = scaledWidth;
-            if (tempHeight < scaledHeight)
-                tempHeight = scaledHeight;
+          GetWindowRect(hWnd,&tempWindow);
+          tempWidth = windowWidth + (tempWindow.right - tempWindow.left) - (tempRight - tempLeft);
+          tempHeight = windowHeight + (tempWindow.bottom - tempWindow.top) - (tempBottom - tempTop);
+          if (tempWidth < scaledWidth)
+              tempWidth = scaledWidth;
+          if (tempHeight < scaledHeight)
+              tempHeight = scaledHeight;
 
-            windowX += tempWindow.left - tempLeft;
-            windowY += tempWindow.top - tempTop;
-            windowWidth = tempWidth;
-            windowHeight = tempHeight;
-            setchildsize(false);
-            return 0;
+          windowX += tempWindow.left - tempLeft;
+          windowY += tempWindow.top - tempTop;
+          windowWidth = tempWidth;
+          windowHeight = tempHeight;
+          setchildsize(false);
+          return 0;
 
         case WM_SETCURSOR:
-			// Set the user cursor if the mouse is in the client area of the window, otherwise let Windows handle setting the cursor
-			// since it knows how to set the gripper cursor for window resizing. This is exactly how GM handles it.
-			if (LOWORD(lParam) == HTCLIENT) {
-				SetCursor(LoadCursor(NULL, currentCursor));
-			} else {
-				DefWindowProc(hWnd, message, wParam, lParam);
-			}
-            return 0;
+          // Set the user cursor if the mouse is in the client area of the window, otherwise let Windows handle setting the cursor
+          // since it knows how to set the gripper cursor for window resizing. This is exactly how GM handles it.
+          if (LOWORD(lParam) == HTCLIENT) {
+            SetCursor(LoadCursor(NULL, currentCursor));
+          } else {
+            DefWindowProc(hWnd, message, wParam, lParam);
+          }
+          return 0;
         case WM_CHAR:
-            keyboard_lastchar = string(1,wParam);
-			if (keyboard_lastkey == enigma_user::vk_backspace) {
-				keyboard_string = keyboard_string.substr(0, keyboard_string.length() - 1);
-			} else {
-				keyboard_string += keyboard_lastchar;
-			}
-            return 0;
+          keyboard_lastchar = string(1,wParam);
+          if (keyboard_lastkey == enigma_user::vk_backspace) {
+            keyboard_string = keyboard_string.substr(0, keyboard_string.length() - 1);
+          } else {
+            keyboard_string += keyboard_lastchar;
+          }
+          return 0;
 
         case WM_KEYDOWN: {
-			int key = enigma_user::keyboard_get_map(wParam);
-			keyboard_lastkey = key;
-            last_keybdstatus[key]=keybdstatus[key];
-            keybdstatus[key]=1;
-            return 0;
-		}
+          int key = enigma_user::keyboard_get_map(wParam);
+          keyboard_lastkey = key;
+          last_keybdstatus[key]=keybdstatus[key];
+          keybdstatus[key]=1;
+          return 0;
+        }
         case WM_KEYUP: {
-			int key = enigma_user::keyboard_get_map(wParam);
-			keyboard_lastkey = key;
-            last_keybdstatus[key]=keybdstatus[key];
-            keybdstatus[key]=0;
-            return 0;
-		}
+          int key = enigma_user::keyboard_get_map(wParam);
+          keyboard_lastkey = key;
+          last_keybdstatus[key]=keybdstatus[key];
+          keybdstatus[key]=0;
+          return 0;
+        }
         case WM_SYSKEYDOWN: {
-			int key = enigma_user::keyboard_get_map(wParam);
-			keyboard_lastkey = key;
-            last_keybdstatus[key]=keybdstatus[key];
-            keybdstatus[key]=1;
-            if (key!=18)
-            {
-              if ((lParam&(1<<29))>0)
-                   last_keybdstatus[18]=keybdstatus[18], keybdstatus[18]=1;
-              else last_keybdstatus[18]=keybdstatus[18], keybdstatus[18]=0;
-            }
-            return 0;
-		}
+          int key = enigma_user::keyboard_get_map(wParam);
+          keyboard_lastkey = key;
+          last_keybdstatus[key]=keybdstatus[key];
+          keybdstatus[key]=1;
+          if (key!=18)
+          {
+            if ((lParam&(1<<29))>0)
+                 last_keybdstatus[18]=keybdstatus[18], keybdstatus[18]=1;
+            else last_keybdstatus[18]=keybdstatus[18], keybdstatus[18]=0;
+          }
+          return 0;
+        }
         case WM_SYSKEYUP: {
-			int key = enigma_user::keyboard_get_map(wParam);
-			keyboard_lastkey = key;
-            last_keybdstatus[key]=keybdstatus[key];
-            keybdstatus[key]=0;
-            if (key!=(unsigned int)18)
-            {
-              if ((lParam&(1<<29))>0)
-                   last_keybdstatus[18]=keybdstatus[18], keybdstatus[18]=0;
-              else last_keybdstatus[18]=keybdstatus[18], keybdstatus[18]=1;
-            }
-            return 0;
-		}
+          int key = enigma_user::keyboard_get_map(wParam);
+          keyboard_lastkey = key;
+          last_keybdstatus[key]=keybdstatus[key];
+          keybdstatus[key]=0;
+          if (key!=(unsigned int)18)
+          {
+            if ((lParam&(1<<29))>0)
+                 last_keybdstatus[18]=keybdstatus[18], keybdstatus[18]=0;
+            else last_keybdstatus[18]=keybdstatus[18], keybdstatus[18]=1;
+          }
+          return 0;
+        }
         case WM_MOUSEWHEEL:
-             vdeltadelta += (int)HIWORD(wParam);
-             mouse_vscrolls += vdeltadelta / WHEEL_DELTA;
-             vdeltadelta %= WHEEL_DELTA;
-             return 0;
+           vdeltadelta += (int)HIWORD(wParam);
+           mouse_vscrolls += vdeltadelta / WHEEL_DELTA;
+           vdeltadelta %= WHEEL_DELTA;
+           return 0;
 
         case WM_MOUSEHWHEEL:
-             hdeltadelta += (int)HIWORD(wParam);
-             mouse_hscrolls += hdeltadelta / WHEEL_DELTA;
-             hdeltadelta %= WHEEL_DELTA;
-             return 0;
+           hdeltadelta += (int)HIWORD(wParam);
+           mouse_hscrolls += hdeltadelta / WHEEL_DELTA;
+           hdeltadelta %= WHEEL_DELTA;
+           return 0;
 
         case WM_LBUTTONUP:   mousestatus[0]=0; return 0;
         case WM_LBUTTONDOWN: mousestatus[0]=1; return 0;
