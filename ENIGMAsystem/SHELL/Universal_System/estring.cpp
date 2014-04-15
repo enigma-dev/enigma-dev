@@ -142,15 +142,6 @@ int ord(string str)  { return str[0]; }
 
 double real(variant str) { return str.type ? atof(((string)str).c_str()) : (double) str; }
 
-size_t string_byte_length(string str) {
-	return str.length();
-}
-
-size_t string_byte_length(const char* str)
-{
-	return strlen(str);
-}
-
 size_t string_length(string str) { return str.length(); }
 
 size_t string_length(const char* str)
