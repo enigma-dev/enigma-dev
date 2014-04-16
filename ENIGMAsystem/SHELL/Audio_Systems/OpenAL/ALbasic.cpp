@@ -138,8 +138,8 @@ void sound_pan(int sound, float value) {
   snd->pan = value;
   for (size_t i = 0; i < sound_channels.size(); i++) {
     if (sound_channels[i]->soundIndex == sound) {
-		float sourcePosAL[] = { value, 0.0f, 0.0f};
-		alSourcefv(sound_channels[i]->source, AL_POSITION, sourcePosAL);
+      float sourcePosAL[] = { value, 0.0f, 0.0f};
+      alSourcefv(sound_channels[i]->source, AL_POSITION, sourcePosAL);
     }
   }
 }

@@ -59,13 +59,13 @@ bool audio_exists(int sound)
 
 bool audio_is_playing(int index) {
   if (index >= 200000) {
-	if (sound_channels[index - 200000]->soundIndex == index) {
-      ALint state;
-      alGetSourcei(sound_channels[index - 200000]->source, AL_SOURCE_STATE, &state);
-      if (state == AL_PLAYING)
-      {
-        return true;
-      }
+    if (sound_channels[index - 200000]->soundIndex == index) {
+        ALint state;
+        alGetSourcei(sound_channels[index - 200000]->source, AL_SOURCE_STATE, &state);
+        if (state == AL_PLAYING)
+        {
+          return true;
+        }
     }
   }
   // test for channels playing the sound
@@ -85,13 +85,13 @@ bool audio_is_playing(int index) {
 
 bool audio_is_paused(int index) {
   if (index >= 200000) {
-	if (sound_channels[index - 200000]->soundIndex == index) {
-      ALint state;
-      alGetSourcei(sound_channels[index - 200000]->source, AL_SOURCE_STATE, &state);
-      if (state == AL_PAUSED)
-      {
-        return true;
-      }
+    if (sound_channels[index - 200000]->soundIndex == index) {
+        ALint state;
+        alGetSourcei(sound_channels[index - 200000]->source, AL_SOURCE_STATE, &state);
+        if (state == AL_PAUSED)
+        {
+          return true;
+        }
     }
   }
   // test for channels with the sound paused
@@ -210,21 +210,21 @@ void audio_resume_sound(int index)
 void audio_stop_all()
 {
   for (size_t i = 0; i < sound_channels.size(); i++) {
-      alureStopSource(sound_channels[i]->source, AL_TRUE);
+    alureStopSource(sound_channels[i]->source, AL_TRUE);
   }
 }
 
 void audio_pause_all()
 {
   for (size_t i = 0; i < sound_channels.size(); i++) {
-      alurePauseSource(sound_channels[i]->source);
+    alurePauseSource(sound_channels[i]->source);
   }
 }
 
 void audio_resume_all()
 {
   for (size_t i = 0; i < sound_channels.size(); i++) {
-      alureResumeSource(sound_channels[i]->source);
+    alureResumeSource(sound_channels[i]->source);
   }
 }
 
@@ -244,10 +244,10 @@ int audio_sound_length(int index)
 {
   ALint buffer;
   if (index >= 200000) {
-	alGetSourcei(sound_channels[index - 200000]->source, AL_BUFFER, &buffer);
+    alGetSourcei(sound_channels[index - 200000]->source, AL_BUFFER, &buffer);
   } else {
-	get_sound(snd,index,-1);
-	buffer = snd->buf[0];
+    get_sound(snd,index,-1);
+    buffer = snd->buf[0];
   }
   ALint size, bits, channels, freq;
 
@@ -262,26 +262,26 @@ int audio_sound_length(int index)
 void audio_sound_gain(int index, float volume, double time)
 {
   if (index >= 200000) {
-	alSourcef(sound_channels[index - 200000]->source, AL_GAIN, volume);
+    alSourcef(sound_channels[index - 200000]->source, AL_GAIN, volume);
   } else {
-	for (size_t i = 0; i < sound_channels.size(); i++) {
-		if (sound_channels[i]->soundIndex == index) {
-		  alSourcef(sound_channels[i]->source, AL_GAIN, volume);
-		}
-	}
+    for (size_t i = 0; i < sound_channels.size(); i++) {
+      if (sound_channels[i]->soundIndex == index) {
+        alSourcef(sound_channels[i]->source, AL_GAIN, volume);
+      }
+    }
   }
 }
 
 void audio_sound_pitch(int index, float pitch)
 {
   if (index >= 200000) {
-	alSourcef(sound_channels[index - 200000]->source, AL_PITCH, pitch);
+    alSourcef(sound_channels[index - 200000]->source, AL_PITCH, pitch);
   } else {
-	for (size_t i = 0; i < sound_channels.size(); i++) {
-		if (sound_channels[i]->soundIndex == index) {
-		  alSourcef(sound_channels[i]->source, AL_PITCH, pitch);
-		}
-	}
+    for (size_t i = 0; i < sound_channels.size(); i++) {
+      if (sound_channels[i]->soundIndex == index) {
+        alSourcef(sound_channels[i]->source, AL_PITCH, pitch);
+      }
+    }
   }
 }
 
