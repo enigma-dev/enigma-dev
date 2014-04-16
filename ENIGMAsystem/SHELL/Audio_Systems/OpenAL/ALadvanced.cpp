@@ -171,7 +171,7 @@ int audio_play_sound_on(int emitter, int sound, bool loop, double priority)
 void audio_stop_sound(int index)
 {
   if (index >= 200000) {
-    alureStopSource(sound_channels[index - 200000]->source);
+    alureStopSource(sound_channels[index - 200000]->source, AL_TRUE);
   } else {
 	  for (size_t i = 0; i < sound_channels.size(); i++) {
       if (sound_channels[i]->soundIndex == index) {
