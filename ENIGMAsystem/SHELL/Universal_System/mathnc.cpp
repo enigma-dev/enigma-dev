@@ -121,9 +121,82 @@ namespace enigma_user
 	}
 	return 0;
   }
-
-  int rectangle_in_triangle(ma_scalar sx1, ma_scalar sy1, ma_scalar sx2, ma_scalar sy2, ma_scalar dx1, ma_scalar dy1, ma_scalar dx2, ma_scalar dy2, ma_scalar dx3, ma_scalar dy3) {
-	return false;
+	
+  //Based on GMLscripts.com
+  ma_scalar lines_intersect(ma_scalar x1, ma_scalar y1, ma_scalar x2, ma_scalar y2, ma_scalar x3, ma_scalar y3, ma_scalar x4, ma_scalar y4, bool segment) {
+    ma_scalar ud, ua = 0;
+    ud = (y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1);
+    if (ud != 0) {
+        ua = ((x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3)) / ud;
+        if (segment) {
+            ma_scalar ub = ((x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3)) / ud;
+            if (ua < 0 || ua > 1 || ub < 0 || ub > 1) ua = 0;
+        }
+    }
+    return ua;
+  }
+ 
+  //Based on discussion here in http://seb.ly/2009/05/super-fast-trianglerectangle-intersection-test/
+  int rectangle_in_triangle(ma_scalar sx1, ma_scalar sy1, ma_scalar sx2, ma_scalar sy2, ma_scalar x1, ma_scalar y1, ma_scalar x2, ma_scalar y2, ma_scalar x3, ma_scalar y3){
+    //Check if all points of the triangle are on one side of the rectangle
+    if ((sx1>x1 && sx1>x2 && sx1>x3) || (sx2<x1 && sx2<x2 && sx2<x3) || (sy1>y1 && sy1>y2 && sy1>y3) || (sy2<y1 && sy2<y2 && sy2<y3)){
+         return 0;
+    }
+ 
+    //Check partial collision with lines
+    int b1 = ((x1 > sx1) ? 1 : 0) | (((y1 > sy1) ? 1 : 0) << 1) |
+        (((x1 > sx2) ? 1 : 0) << 2) | (((y1 > sy2) ? 1 : 0) << 3);
+    if (b1 == 3) return 2;
+ 
+    int b2 = ((x2 > sx1) ? 1 : 0) | (((y2 > sy1) ? 1 : 0) << 1) |
+        (((x2 > sx2) ? 1 : 0) << 2) | (((y2 > sy2) ? 1 : 0) << 3);
+    if (b2 == 3) return 2;
+ 
+    int b3 = ((x3 > sx1) ? 1 : 0) | (((y3 > sy1) ? 1 : 0) << 1) |
+        (((x3 > sx2) ? 1 : 0) << 2) | (((y3 > sy2) ? 1 : 0) << 3);
+    if (b3 == 3) return 2;
+ 
+    //Check partial collision with points
+    int i = b1 ^ b2;
+    if (i != 0)
+    {
+        ma_scalar c, m, s;
+        m = (y2-y1) / (x2-x1);
+        c = y1 -(m * x1);
+        if (i & 1) { s = m * sx1 + c; if ( s > sy1 && s < sy2) return 2; }
+        if (i & 2) { s = (sy1 - c) / m; if ( s > sx1 && s < sx2) return 2; }
+        if (i & 4) { s = m * sx2 + c; if ( s > sy1 && s < sy2) return 2; }
+        if (i & 8) { s = (sy2 - c) / m; if ( s > sx1 && s < sx2) return 2; }
+    }
+ 
+    i = b2 ^ b3;
+    if (i != 0)
+    {
+        ma_scalar c, m, s;
+        m = (y3-y2) / (x3-x2);
+        c = y2 -(m * x2);
+        if (i & 1) { s = m * sx1 + c; if ( s > sy1 && s < sy2) return 2; }
+        if (i & 2) { s = (sy1 - c) / m; if ( s > sx1 && s < sx2) return 2; }
+        if (i & 4) { s = m * sx2 + c; if ( s > sy1 && s < sy2) return 2; }
+        if (i & 8) { s = (sy2 - c) / m; if ( s > sx1 && s < sx2) return 2; }
+    }
+ 
+    i = b1 ^ b3;
+    if (i != 0)
+    {
+        ma_scalar c, m, s;
+        m = (y3-y1) / (x3-x1);
+        c = y1 -(m * x1);
+        if (i & 1) { s = m * sx1 + c; if ( s > sy1 && s < sy2) return 2; }
+        if (i & 2) { s = (sy1 - c) / m; if ( s > sx1 && s < sx2) return 2; }
+        if (i & 4) { s = m * sx2 + c; if ( s > sy1 && s < sy2) return 2; }
+        if (i & 8) { s = (sy2 - c) / m; if ( s > sx1 && s < sx2) return 2; }
+    }
+ 
+    //Check if totally overlapped (at this point can be done by checking if the rectangle center is inside the triangle)
+    if (point_in_triangle(sx1+(sx2-sx1)/2.0, sy1+(sy2-sy1)/2.0,x1,y1,x2,y2,x3,y3)) return 1;
+ 
+    return 0;
   }
   
   ma_scalar dot_product(ma_scalar x1,ma_scalar y1,ma_scalar x2,ma_scalar y2) { return (x1 * x2 + y1 * y2); }
