@@ -59,13 +59,13 @@ bool audio_exists(int sound)
 
 bool audio_is_playing(int index) {
   if (index >= 200000) {
-	if (sound_channels[index - 200000]->soundIndex == index) {
-      ALint state;
-      alGetSourcei(sound_channels[index - 200000]->source, AL_SOURCE_STATE, &state);
-      if (state == AL_PLAYING)
-      {
-        return true;
-      }
+    if (sound_channels[index - 200000]->soundIndex == index) {
+        ALint state;
+        alGetSourcei(sound_channels[index - 200000]->source, AL_SOURCE_STATE, &state);
+        if (state == AL_PLAYING)
+        {
+          return true;
+        }
     }
   }
   // test for channels playing the sound
@@ -85,13 +85,13 @@ bool audio_is_playing(int index) {
 
 bool audio_is_paused(int index) {
   if (index >= 200000) {
-	if (sound_channels[index - 200000]->soundIndex == index) {
-      ALint state;
-      alGetSourcei(sound_channels[index - 200000]->source, AL_SOURCE_STATE, &state);
-      if (state == AL_PAUSED)
-      {
-        return true;
-      }
+    if (sound_channels[index - 200000]->soundIndex == index) {
+        ALint state;
+        alGetSourcei(sound_channels[index - 200000]->source, AL_SOURCE_STATE, &state);
+        if (state == AL_PAUSED)
+        {
+          return true;
+        }
     }
   }
   // test for channels with the sound paused
@@ -118,8 +118,8 @@ int audio_play_sound(int sound, double priority, bool loop)
     alSourcei(sound_channels[src]->source, AL_SOURCE_RELATIVE, AL_TRUE);
     alSourcei(sound_channels[src]->source, AL_REFERENCE_DISTANCE, 1);
     alSourcei(sound_channels[src]->source, AL_LOOPING, loop?AL_TRUE:AL_FALSE);
-	alSourcef(sound_channels[src]->source, AL_PITCH, snd->pitch);
-	alSourcef(sound_channels[src]->source, AL_GAIN, snd->volume);
+    alSourcef(sound_channels[src]->source, AL_PITCH, snd->pitch);
+    alSourcef(sound_channels[src]->source, AL_GAIN, snd->volume);
     sound_channels[src]->priority = priority;
     sound_channels[src]->soundIndex = sound;
     !(snd->idle = !(snd->playing = !snd->stream ?
@@ -141,10 +141,10 @@ int audio_play_sound_at(int sound, as_scalar x, as_scalar y, as_scalar z, as_sca
     ALfloat soundPos[3] = { x, y, z };
     alSourcefv(sound_channels[src]->source, AL_POSITION, soundPos);
     alSourcef(sound_channels[src]->source, AL_REFERENCE_DISTANCE, falloff_ref);
-	alSourcef(sound_channels[src]->source, AL_MAX_DISTANCE, falloff_max);
-	alSourcef(sound_channels[src]->source, AL_ROLLOFF_FACTOR, falloff_factor);
-	alSourcef(sound_channels[src]->source, AL_PITCH, snd->pitch);
-	alSourcef(sound_channels[src]->source, AL_GAIN, snd->volume);
+    alSourcef(sound_channels[src]->source, AL_MAX_DISTANCE, falloff_max);
+    alSourcef(sound_channels[src]->source, AL_ROLLOFF_FACTOR, falloff_factor);
+    alSourcef(sound_channels[src]->source, AL_PITCH, snd->pitch);
+    alSourcef(sound_channels[src]->source, AL_GAIN, snd->volume);
     sound_channels[src]->priority = priority;
     sound_channels[src]->soundIndex = sound;
     !(snd->idle = !(snd->playing = !snd->stream ?
@@ -168,15 +168,28 @@ int audio_play_sound_on(int emitter, int sound, bool loop, double priority)
 	return src + 200000;
 }
 
+void audio_stop_sound(int index)
+{
+  if (index >= 200000) {
+    alureStopSource(sound_channels[index - 200000]->source, AL_TRUE);
+  } else {
+	  for (size_t i = 0; i < sound_channels.size(); i++) {
+      if (sound_channels[i]->soundIndex == index) {
+        alureStopSource(sound_channels[i]->source, AL_TRUE);
+      }
+	  }
+  }
+}
+
 void audio_pause_sound(int index)
 {
   if (index >= 200000) {
-	alurePauseSource(sound_channels[index - 200000]->source);
+    alurePauseSource(sound_channels[index - 200000]->source);
   } else {
 	  for (size_t i = 0; i < sound_channels.size(); i++) {
-		if (sound_channels[i]->soundIndex == index) {
-		  alurePauseSource(sound_channels[i]->source);
-		}
+      if (sound_channels[i]->soundIndex == index) {
+        alurePauseSource(sound_channels[i]->source);
+      }
 	  }
   }
 }
@@ -184,25 +197,12 @@ void audio_pause_sound(int index)
 void audio_resume_sound(int index)
 {
   if (index >= 200000) {
-	alureResumeSource(sound_channels[index - 200000]->source);
+    alureResumeSource(sound_channels[index - 200000]->source);
   } else {
 	  for (size_t i = 0; i < sound_channels.size(); i++) {
-		if (sound_channels[i]->soundIndex == index) {
-		  alureResumeSource(sound_channels[i]->source);
-		}
-	  }
-  }
-}
-
-void audio_stop_sound(int index)
-{
-  if (index >= 200000) {
-	alureResumeSource(sound_channels[index - 200000]->source);
-  } else {
-	  for (size_t i = 0; i < sound_channels.size(); i++) {
-		if (sound_channels[i]->soundIndex == index) {
-		  alureStopSource(sound_channels[i]->source, AL_TRUE);
-		}
+      if (sound_channels[i]->soundIndex == index) {
+        alureResumeSource(sound_channels[i]->source);
+      }
 	  }
   }
 }
@@ -210,21 +210,21 @@ void audio_stop_sound(int index)
 void audio_stop_all()
 {
   for (size_t i = 0; i < sound_channels.size(); i++) {
-      alureStopSource(sound_channels[i]->source, AL_TRUE);
+    alureStopSource(sound_channels[i]->source, AL_TRUE);
   }
 }
 
 void audio_pause_all()
 {
   for (size_t i = 0; i < sound_channels.size(); i++) {
-      alurePauseSource(sound_channels[i]->source);
+    alurePauseSource(sound_channels[i]->source);
   }
 }
 
 void audio_resume_all()
 {
   for (size_t i = 0; i < sound_channels.size(); i++) {
-      alureResumeSource(sound_channels[i]->source);
+    alureResumeSource(sound_channels[i]->source);
   }
 }
 
@@ -244,10 +244,10 @@ int audio_sound_length(int index)
 {
   ALint buffer;
   if (index >= 200000) {
-	alGetSourcei(sound_channels[index - 200000]->source, AL_BUFFER, &buffer);
+    alGetSourcei(sound_channels[index - 200000]->source, AL_BUFFER, &buffer);
   } else {
-	get_sound(snd,index,-1);
-	buffer = snd->buf[0];
+    get_sound(snd,index,-1);
+    buffer = snd->buf[0];
   }
   ALint size, bits, channels, freq;
 
@@ -262,26 +262,26 @@ int audio_sound_length(int index)
 void audio_sound_gain(int index, float volume, double time)
 {
   if (index >= 200000) {
-	alSourcef(sound_channels[index - 200000]->source, AL_GAIN, volume);
+    alSourcef(sound_channels[index - 200000]->source, AL_GAIN, volume);
   } else {
-	for (size_t i = 0; i < sound_channels.size(); i++) {
-		if (sound_channels[i]->soundIndex == index) {
-		  alSourcef(sound_channels[i]->source, AL_GAIN, volume);
-		}
-	}
+    for (size_t i = 0; i < sound_channels.size(); i++) {
+      if (sound_channels[i]->soundIndex == index) {
+        alSourcef(sound_channels[i]->source, AL_GAIN, volume);
+      }
+    }
   }
 }
 
 void audio_sound_pitch(int index, float pitch)
 {
   if (index >= 200000) {
-	alSourcef(sound_channels[index - 200000]->source, AL_PITCH, pitch);
+    alSourcef(sound_channels[index - 200000]->source, AL_PITCH, pitch);
   } else {
-	for (size_t i = 0; i < sound_channels.size(); i++) {
-		if (sound_channels[i]->soundIndex == index) {
-		  alSourcef(sound_channels[i]->source, AL_PITCH, pitch);
-		}
-	}
+    for (size_t i = 0; i < sound_channels.size(); i++) {
+      if (sound_channels[i]->soundIndex == index) {
+        alSourcef(sound_channels[i]->source, AL_PITCH, pitch);
+      }
+    }
   }
 }
 
