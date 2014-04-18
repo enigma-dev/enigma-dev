@@ -33,9 +33,11 @@ int ord(string str);
 
 double real(variant str);
 
-size_t string_byte_length(string str);
 size_t string_length(string str);
 size_t string_length(const char* str);
+#define string_byte_length(x) string_length(x)
+size_t string_length_utf8(string str);
+size_t string_length_utf8(const char* str);
 int string_pos(string substr,string str);
 
 string string_format(double val, unsigned tot, unsigned dec);

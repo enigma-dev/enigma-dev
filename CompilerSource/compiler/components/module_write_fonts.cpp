@@ -1,29 +1,20 @@
-/********************************************************************************\
-**                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
-**                                                                              **
-**  This file is a part of the ENIGMA Development Environment.                  **
-**                                                                              **
-**                                                                              **
-**  ENIGMA is free software: you can redistribute it and/or modify it under the **
-**  terms of the GNU General Public License as published by the Free Software   **
-**  Foundation, version 3 of the license or any later version.                  **
-**                                                                              **
-**  This application and its source code is distributed AS-IS, WITHOUT ANY      **
-**  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS   **
-**  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more       **
-**  details.                                                                    **
-**                                                                              **
-**  You should have recieved a copy of the GNU General Public License along     **
-**  with this code. If not, see <http://www.gnu.org/licenses/>                  **
-**                                                                              **
-**  ENIGMA is an environment designed to create games and other programs with a **
-**  high-level, fully compilable language. Developers of ENIGMA or anything     **
-**  associated with ENIGMA are in no way responsible for its users or           **
-**  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **
-**                                                                              **
-\********************************************************************************/
+/** Copyright (C) 2008 Josh Ventura
+*** Copyright (C) 2014 Robert B. Colton
+***
+*** This file is a part of the ENIGMA Development Environment.
+***
+*** ENIGMA is free software: you can redistribute it and/or modify it under the
+*** terms of the GNU General Public License as published by the Free Software
+*** Foundation, version 3 of the license or any later version.
+***
+*** This application and its source code is distributed AS-IS, WITHOUT ANY
+*** WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+*** FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+*** details.
+***
+*** You should have received a copy of the GNU General Public License along
+*** with this code. If not, see <http://www.gnu.org/licenses/>
+**/
 
 #include <stdio.h>
 #include <iostream>
@@ -70,7 +61,11 @@ int lang_CPP::module_write_fonts(EnigmaStruct *es, FILE *gameModule)
   {
     cout << "Iterating included fonts..." << endl;
     // Simple allocations and initializations
-    const int gc = es->fonts[i].rangeMax - es->fonts[i].rangeMin + 1;
+	size_t gc = 0;
+	for (int ii = 0; ii < es->fonts[i].glyphRangeCount; ii++) {
+		GlyphRange &glyphRange = es->fonts[i].glyphRanges[ii];
+		gc += glyphRange.rangeMax - glyphRange.rangeMin + 1 + 1;
+	}
     pvrect* boxes = new pvrect[gc];
     list<unsigned int> box_order;
     cout << "Allocated some font stuff" << endl;
@@ -87,17 +82,32 @@ int lang_CPP::module_write_fonts(EnigmaStruct *es, FILE *gameModule)
     for (int ii = 0; ii < gc; ii++)
     cout << "The dimensions of glyph " << ii << "are " << flush << es->fonts[i].glyphs[ii].width << "x" << es->fonts[i].glyphs[ii].height << "." << endl;
     cout << "End of list." << endl;*/
+	
+	
 
     // Copy our glyph metrics into it
-    for (int ii = 0; ii < gc; ii++)
-    //cout << "The dimensions of glyph " << ii << "are " << flush, cout << es->fonts[i].glyphs[ii].width << "x" << es->fonts[i].glyphs[ii].height << "." << endl,
-      boxes[ii].w = es->fonts[i].glyphs[ii].width,
-      boxes[ii].h = es->fonts[i].glyphs[ii].height;
+	size_t ib = 0;
+	for (int ii = 0; ii < es->fonts[i].glyphRangeCount; ii++) {
+		GlyphRange &glyphRange = es->fonts[i].glyphRanges[ii];
+		for (int ig = 0; ig < glyphRange.rangeMax - glyphRange.rangeMin + 1; ig++) {
+			Glyph &glyph = es->fonts[i].glyphRanges[ii].glyphs[ig];
+			boxes[ib].w = glyph.width,
+			boxes[ib].h = glyph.height;
+			ib++;
+		}
+	}
     cout << "Copied metrics" << endl;
 
     // Sort our boxes from largest to smallest in area.
-    for (int ii = 0; ii < gc; ii++)
-      box_order.push_back((es->fonts[i].glyphs[ii].width * es->fonts[i].glyphs[ii].height << 8) + ii); // This reserves only eight bits for the glyph id; unicode will break a little.
+	size_t bo = 0;
+	for (int ii = 0; ii < es->fonts[i].glyphRangeCount; ii++) {
+		GlyphRange &glyphRange = es->fonts[i].glyphRanges[ii];
+		for (int ig = 0; ig < glyphRange.rangeMax - glyphRange.rangeMin + 1; ig++) {
+			Glyph &glyph = es->fonts[i].glyphRanges[ii].glyphs[ig];
+			box_order.push_back((glyph.width * glyph.height << 8) + bo); // This reserves only eight bits for the glyph id; unicode will break a little.
+			bo++;
+		}
+	}
     box_order.sort(); // In actuality, unicode will only cause the area sort to be inaccurate, leading to an inefficient pack.
     cout << "Sorted out some font stuff" << endl;
 
@@ -127,17 +137,23 @@ int lang_CPP::module_write_fonts(EnigmaStruct *es, FILE *gameModule)
     struct { float x,y,x2,y2; } glyphtexc[gc];
 
     cout << "Allocated a big texture. Moving font into it..." << endl;
-    for (int ii = 0; ii < gc; ii++)
-    {
-      for (int yy = 0; yy < es->fonts[i].glyphs[ii].height; yy++)
-        for (int xx = 0; xx < es->fonts[i].glyphs[ii].width; xx++)
-          bigtex[w*(boxes[ii].y + yy) + boxes[ii].x + xx] = es->fonts[i].glyphs[ii].data[yy*es->fonts[i].glyphs[ii].width + xx];
+	size_t igt = 0;
+	for (int ii = 0; ii < es->fonts[i].glyphRangeCount; ii++) {
+		GlyphRange &glyphRange = es->fonts[i].glyphRanges[ii];
+		for (int ig = 0; ig < glyphRange.rangeMax - glyphRange.rangeMin + 1; ig++) {
+			Glyph &glyph = es->fonts[i].glyphRanges[ii].glyphs[ig];
+			
+			for (int yy = 0; yy < glyph.height; yy++)
+				for (int xx = 0; xx < glyph.width; xx++)
+					bigtex[w*(boxes[igt].y + yy) + boxes[igt].x + xx] = glyph.data[yy * glyph.width + xx];
 
-      glyphtexc[ii].x  = boxes[ii].x / double(w);
-      glyphtexc[ii].y  = boxes[ii].y / double(h);
-      glyphtexc[ii].x2 = (boxes[ii].x + es->fonts[i].glyphs[ii].width) / double(w);
-      glyphtexc[ii].y2 = (boxes[ii].y + es->fonts[i].glyphs[ii].height) / double(h);
-    }
+			glyphtexc[igt].x  = boxes[igt].x / double(w);
+			glyphtexc[igt].y  = boxes[igt].y / double(h);
+			glyphtexc[igt].x2 = (boxes[igt].x + glyph.width) / double(w);
+			glyphtexc[igt].y2 = (boxes[igt].y + glyph.height) / double(h);
+			igt++;
+		}
+	}
 
     /*cout << "Populated. Debugging..." << endl;
     FILE* sex = fopen("/home/josh/Desktop/lol.txt","wb");
@@ -154,17 +170,29 @@ int lang_CPP::module_write_fonts(EnigmaStruct *es, FILE *gameModule)
     writei(w,gameModule), writei(h,gameModule);
     fwrite(bigtex,1,w*h,gameModule);
     fwrite("done",1,4,gameModule);
+	
+	igt = 0;
+	for (int ii = 0; ii < es->fonts[i].glyphRangeCount; ii++) {
+		GlyphRange &glyphRange = es->fonts[i].glyphRanges[ii];
+		writei(glyphRange.rangeMin, gameModule);
+		unsigned gc = glyphRange.rangeMax - glyphRange.rangeMin + 1;
+		writei(gc, gameModule);
+		for (int ig = 0; ig < gc; ig++) {
+			Glyph &glyph = glyphRange.glyphs[ig];
+			writef(glyph.advance, gameModule);
+			writef(glyph.baseline,gameModule);
+			writef(glyph.origin, gameModule);
+			writei(glyph.width,  gameModule);
+			writei(glyph.height, gameModule);
+			
+			writef(glyphtexc[igt].x,  gameModule),
+			writef(glyphtexc[igt].y,  gameModule),
+			writef(glyphtexc[igt].x2, gameModule),
+			writef(glyphtexc[igt].y2, gameModule);
+			igt++;
+		}
+	}
 
-    for (int ii = 0; ii < gc; ii++)
-      writef(es->fonts[i].glyphs[ii].advance, gameModule),
-      writef(es->fonts[i].glyphs[ii].baseline,gameModule),
-      writef(es->fonts[i].glyphs[ii].origin, gameModule),
-      writei(es->fonts[i].glyphs[ii].width,  gameModule),
-      writei(es->fonts[i].glyphs[ii].height, gameModule),
-      writef(glyphtexc[ii].x,  gameModule),
-      writef(glyphtexc[ii].y,  gameModule),
-      writef(glyphtexc[ii].x2, gameModule),
-      writef(glyphtexc[ii].y2, gameModule);
 
     fwrite("endf",1,4,gameModule);
     cout << "Wrote all data for font " << i << endl;

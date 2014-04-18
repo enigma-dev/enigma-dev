@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010 IsmAvatar <IsmAvatar@gmail.com>
+ * Copyright (C) 2014 Robert B. Colton
  * 
  * This file is part of Enigma Plugin.
  * Enigma Plugin is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -10,7 +11,7 @@
 #define _FONT__H
 
 #include "backend/JavaStruct.h"
-#include "backend/sub/Glyph.h"
+#include "backend/sub/GlyphRange.h"
 
 struct Font
 {
@@ -21,10 +22,9 @@ struct Font
 	int size;
 	boolean bold;
 	boolean italic;
-	int rangeMin;
-	int rangeMax;
 
-	Glyph *glyphs; //count = rangeMax - rangeMin
+	int glyphRangeCount;
+	GlyphRange *glyphRanges;
 };
 
 #endif
