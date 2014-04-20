@@ -25,6 +25,8 @@ int draw_set_blend_mode(ARG mode)
 int draw_set_blend_mode_ext(ARG src,ARG2 dest)
 
 \******************************************************************************/
+#ifndef ENIGMA_GSBLEND_H
+#define ENIGMA_GSBLEND_H
 
 namespace enigma_user
 {
@@ -35,7 +37,7 @@ enum {
   bm_max      = 2,
   bm_subtract = 3
 };
-  
+
 enum {
   bm_zero             =  1,  // GL_ZERO                  D3DBLEND_ZERO
   bm_one              =  2,  // GL_ONE                   D3DBLEND_ONE
@@ -53,5 +55,11 @@ enum {
 int draw_set_blend_mode(int mode);
 int draw_set_blend_mode_ext(int src,int dest);
 
+int draw_get_blend_mode();
+int draw_get_blend_mode_ext(bool src);
+int draw_get_blend_mode_type();
+
 }
+
+#endif // ENIGMA_GSBLEND_H
 

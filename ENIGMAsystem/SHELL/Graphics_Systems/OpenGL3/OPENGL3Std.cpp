@@ -39,6 +39,8 @@ namespace enigma
   unsigned default_shader;
   unsigned bound_shader;
   unsigned char currentcolor[4] = {0,0,0,255};
+  int currentblendmode[2] = {0,0};
+  int currentblendtype = 0;
   bool glew_isgo;
   bool pbo_isgo;
 

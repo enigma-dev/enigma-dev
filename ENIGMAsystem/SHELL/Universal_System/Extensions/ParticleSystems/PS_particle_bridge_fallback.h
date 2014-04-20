@@ -23,7 +23,7 @@
 #include <vector>
 #include <cmath>
 #include <algorithm>
-#include <GL/gl.h>
+//#include <GL/gl.h>
 
 #include "PS_particle_system.h"
 #include "PS_particle.h"
@@ -82,14 +82,14 @@ namespace enigma {
           const double xscale = pt->xscale*size, yscale = pt->yscale*size;
 
           // NOTE: Do not comment this in until blending mode is reset to what it was before particle drawing.
-          /*if (pt->blend_additive) {
+          if (pt->blend_additive) {
             draw_set_blend_mode(enigma_user::bm_add);
           }
           else {
             draw_set_blend_mode(enigma_user::bm_normal);
-          }*/
+          }
 
-          enigma_user::draw_sprite_ext(sprite_id, subimg, x + x_offset, y + y_offset, xscale, yscale, rot_degrees, color, alpha/255.0);
+          enigma_user::draw_sprite_ext(sprite_id, subimg, x + x_offset, y + y_offset, xscale, yscale, rot_degrees, color, (double)alpha/255.0);
         }
         else { // Draw particle sprite.
 
@@ -101,14 +101,14 @@ namespace enigma {
           int sprite_id = get_particle_actual_sprite(ps->shape);
 
           // NOTE: Do not comment this in until blending mode is reset to what it was before particle drawing.
-          /*if (pt->blend_additive) {
+          if (pt->blend_additive) {
             draw_set_blend_mode(enigma_user::bm_add);
           }
           else {
             draw_set_blend_mode(enigma_user::bm_normal);
-          }*/
+          }
 
-          enigma_user::draw_sprite_ext(sprite_id, 0, x + x_offset, y + y_offset, xscale, yscale, rot_degrees, color, alpha/255.0);
+          enigma_user::draw_sprite_ext(sprite_id, 0, x + x_offset, y + y_offset, xscale, yscale, rot_degrees, color, (double)alpha/255.0);
         }
       }
       else { // Draw particle in a limited way if particle type not alive.
@@ -120,43 +120,51 @@ namespace enigma {
         if (ps == NULL) return; // NOTE: Skip to next particle.
 
         // NOTE: Do not comment this in until blending mode is reset to what it was before particle drawing.
-        //draw_set_blend_mode(enigma_user::bm_normal);
+        draw_set_blend_mode(enigma_user::bm_normal);
 
         const double x = round(it->x), y = round(it->y);
         const double xscale = size, yscale = size;
 
         int sprite_id = get_particle_actual_sprite(ps->shape);
 
-        enigma_user::draw_sprite_ext(sprite_id, 0, x + x_offset, y + y_offset, xscale, yscale, rot_degrees, color, alpha/255.0);
+        enigma_user::draw_sprite_ext(sprite_id, 0, x + x_offset, y + y_offset, xscale, yscale, rot_degrees, color, (double)alpha/255.0);
       }
     }
-  }
-  void draw_particles(std::vector<particle_instance>& pi_list, bool oldtonew, double a_wiggle, int a_subimage_index,
+    void draw_particles(std::vector<particle_instance>& pi_list, bool oldtonew, double a_wiggle, int a_subimage_index,
       double a_x_offset, double a_y_offset)
-  {
-    using namespace enigma::particle_bridge;
-    wiggle = a_wiggle;
-    subimage_index = a_subimage_index;
-    x_offset = a_x_offset;
-    y_offset = a_y_offset;
+    {
+        using namespace enigma::particle_bridge;
+        wiggle = a_wiggle;
+        subimage_index = a_subimage_index;
+        x_offset = a_x_offset;
+        y_offset = a_y_offset;
 
-    // Draw the particle system either from oldest to youngest or reverse.
-    if (oldtonew) {
-      const std::vector<particle_instance>::iterator end = pi_list.end();
-      for (std::vector<particle_instance>::iterator it = pi_list.begin(); it != end; it++)
-      {
-        draw_particle(&(*it));
-      }
-    }
-    else {
-      const std::vector<particle_instance>::reverse_iterator rend = pi_list.rend();
-      for (std::vector<particle_instance>::reverse_iterator it = pi_list.rbegin(); it != rend; it++)
-      {
-        draw_particle(&(*it));
-      }
-    }
+        // Draw the particle system either from oldest to youngest or reverse.
+        int blend_type = enigma::currentblendtype;
+        int blend_src  = enigma::currentblendmode[0];
+        int blend_dest = enigma::currentblendmode[1];
 
-    // TODO: Implement blending mode such that it is set to what it was before particle drawing.
+        if (oldtonew) {
+          const std::vector<particle_instance>::iterator end = pi_list.end();
+          for (std::vector<particle_instance>::iterator it = pi_list.begin(); it != end; it++)
+          {
+            draw_particle(&(*it));
+          }
+        }
+        else {
+          const std::vector<particle_instance>::reverse_iterator rend = pi_list.rend();
+          for (std::vector<particle_instance>::reverse_iterator it = pi_list.rbegin(); it != rend; it++)
+          {
+            draw_particle(&(*it));
+          }
+        }
+
+        if (blend_type == 0){
+            enigma_user::draw_set_blend_mode(blend_src);
+        }else{
+            enigma_user::draw_set_blend_mode_ext(blend_src, blend_dest);
+        }
+    }
   }
 }
 

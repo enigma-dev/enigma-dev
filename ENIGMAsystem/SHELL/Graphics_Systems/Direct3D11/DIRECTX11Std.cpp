@@ -28,6 +28,8 @@ namespace enigma
 {
   unsigned bound_texture=0;
   unsigned char currentcolor[4] = {0,0,0,255};
+  int currentblendmode[2] = {0,0};
+  int currentblendtype = 0;
   bool pbo_isgo;
 
   void graphicssystem_initialize()
