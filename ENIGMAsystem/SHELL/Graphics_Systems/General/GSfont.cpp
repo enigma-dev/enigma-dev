@@ -155,7 +155,7 @@ unsigned int string_width_line(variant vstr, int line)
         return len;
       cl += 1;
       len = 0;
-      i += str[i+1] == '\n';
+      i += (str[i+1] == '\n');
     } else if (character == '\n') {
       if (cl == line)
         return len;
@@ -173,6 +173,7 @@ unsigned int string_width_line(variant vstr, int line)
   return len;
 }
 
+//TODO: These next functions can be rewritten to get rid of Schlemiel the Painter's algorithm happening in the second for loop
 unsigned int string_width_ext_line(variant vstr, gs_scalar w, int line)
 {
   string str = toString(vstr);
@@ -183,26 +184,28 @@ unsigned int string_width_ext_line(variant vstr, gs_scalar w, int line)
   {
 	uint32_t character = getUnicodeCharacter(str, i);
     if (character == '\r') {
-      if (cl == line) return width; else width = 0, cl +=1, i += str[i+1] == '\n';
+      if (cl == line) return width; else {width = 0; cl +=1; i += str[i+1] == '\n';}
     } else if (character == '\n') {
       if (cl == line) return width; else width = 0, cl +=1;
 	} else {
 		fontglyph* g = findGlyph(fnt, character);
-		if (character == ' ' or g == NULL) {
+		if ((character == ' ' or g == NULL) && w != -1) {
 		  width += fnt->height/3, tw = 0;
 		  for (size_t c = i+1; c < str.length(); c++)
 		  {
-			character = getUnicodeCharacter(str, c);
-			if (character == ' ' or character == '\r' or character == '\n')
+			uint32_t ct = getUnicodeCharacter(str, c);
+			if (ct == ' ' or ct == '\r' or ct == '\n')
 			  break;
-			tw += g->xs;
+            fontglyph* gt = findGlyph(fnt, ct);
+			tw += gt->xs;
 		  }
-		  if (width+tw >= unsigned(w) && w != -1)
-			if (cl == line) return width; else width = 0, cl +=1; else;
+		  if (width+tw >= unsigned(w)){
+			if (cl == line) { return width; } else {width = 0; cl +=1;}
+		  }
 		} else {
 		  width += g->xs;
 		}
-	}
+	 }
   }
   return width;
 }
@@ -222,21 +225,22 @@ unsigned int string_width_ext_line_count(variant vstr, gs_scalar w)
       width = 0, cl +=1;
 	} else {
 		fontglyph* g = findGlyph(fnt, character);
-		if (character == ' ' or g == NULL)
+		if ((character == ' ' or g == NULL) && w != -1){
 		  width += fnt->height/3, tw = 0;
 		  for (size_t c = i+1; c < str.length(); c++)
 		  {
-			character = getUnicodeCharacter(str, c);
-			if (character == ' ' or character == '\r' or character == '\n')
+			uint32_t ct = getUnicodeCharacter(str, c);
+			if (ct == ' ' or ct == '\r' or ct == '\n')
 			  break;
-			tw += g->xs;
+            fontglyph* gt = findGlyph(fnt, ct);
+			tw += gt->xs;
 		  }
-		  if (width+tw >= unsigned(w) && w != -1)
+		  if (width+tw >= unsigned(w))
 			width = 0, cl +=1;
-		else {
+		} else {
 		  width += g->xs;
 		}
-	}
+	 }
   }
   return cl;
 }
@@ -284,7 +288,7 @@ unsigned int string_width_ext(variant vstr, gs_scalar sep, gs_scalar w) //here s
   for (size_t i = 0; i < str.length(); i++)
   {
 	uint32_t character = getUnicodeCharacter(str, i);
-	
+
 	fontglyph* g = findGlyph(fnt, character);
 	if (character == ' ' or g == NULL)
         if (width >= unsigned(w) && w!=-1)
@@ -310,7 +314,7 @@ unsigned int string_height_ext(variant vstr, gs_scalar sep, gs_scalar w)
 	uint32_t character = getUnicodeCharacter(str, i);
     if (character == '\r' or character == '\n') {
       width = 0, height +=  (sep+2 ? fnt->height : sep);
-	  
+
 	} else {
 		fontglyph* g = findGlyph(fnt, character);
 		if (character == ' ' or g == NULL)
@@ -345,10 +349,10 @@ void draw_text(gs_scalar x, gs_scalar y, variant vstr)
 {
   string str = toString(vstr);
   get_fontv(fnt,currentfont);
-  float yy = valign == fa_top ? y+fnt->yoffset : valign == fa_middle ? y +fnt->yoffset - string_height(str)/2 : y + fnt->yoffset - string_height(str);
+  gs_scalar yy = valign == fa_top ? y+fnt->yoffset : valign == fa_middle ? y +fnt->yoffset - string_height(str)/2 : y + fnt->yoffset - string_height(str);
   if (halign == fa_left){
-      float xx = x;
-      for (size_t i = 0; i < str.length() - 1; i++)
+      gs_scalar xx = x;
+      for (size_t i = 0; i < str.length(); i++)
       {
 		uint32_t character = getUnicodeCharacter(str, i);
 
@@ -367,22 +371,22 @@ void draw_text(gs_scalar x, gs_scalar y, variant vstr)
 				draw_vertex_texture(xx + g->x,  yy + g->y2, g->tx,  g->ty2);
 				draw_vertex_texture(xx + g->x2, yy + g->y2, g->tx2, g->ty2);
 				draw_primitive_end();
-			  xx += int(g->xs);
+			  xx += gs_scalar(g->xs);
 			}
 		}
       }
   } else {
-      float xx = halign == fa_center ? x-float(string_width_line(str,0)/2) : x-float(string_width_line(str,0)), line = 0;
+      gs_scalar xx = halign == fa_center ? x-gs_scalar(string_width_line(str,0)/2) : x-gs_scalar(string_width_line(str,0)), line = 0;
       for (size_t i = 0; i < str.length(); i++)
       {
 		uint32_t character = getUnicodeCharacter(str, i);
-		
+
         if (character == '\r') {
           line +=1, yy += fnt->height, i += str[i+1] == '\n';
-          xx = halign == fa_center ? x-float(string_width_line(str,line)/2) : x-float(string_width_line(str,line));
+          xx = halign == fa_center ? x-gs_scalar(string_width_line(str,line)/2) : x-gs_scalar(string_width_line(str,line));
         } else if (character == '\n') {
           line +=1, yy += fnt->height;
-          xx = halign == fa_center ? x-float(string_width_line(str,line)/2) : x-float(string_width_line(str,line));
+          xx = halign == fa_center ? x-gs_scalar(string_width_line(str,line)/2) : x-gs_scalar(string_width_line(str,line));
 		} else {
 			fontglyph* g = findGlyph(fnt, character);
 			if (character == ' ' or g == NULL) {
@@ -394,7 +398,7 @@ void draw_text(gs_scalar x, gs_scalar y, variant vstr)
 				draw_vertex_texture(xx + g->x,  yy + g->y2, g->tx,  g->ty2);
 				draw_vertex_texture(xx + g->x2, yy + g->y2, g->tx2, g->ty2);
 				draw_primitive_end();
-			  xx += float(g->xs);
+			  xx += gs_scalar(g->xs);
 			}
 		}
       }
@@ -415,10 +419,10 @@ void draw_text_sprite(gs_scalar x, gs_scalar y, variant vstr, int sep, int lineW
     sep = h;
   }
 
-  //Now, simply draw each letter via sub-images, accounting for the width if required. 
-  //Line breaking can occur either before the current word (if it won't fit) or after the 
+  //Now, simply draw each letter via sub-images, accounting for the width if required.
+  //Line breaking can occur either before the current word (if it won't fit) or after the
   // current character (if it's a space).
-  //Note that, contrary to GM5's documentation, line-wrapping for text_sprites does NOT occur 
+  //Note that, contrary to GM5's documentation, line-wrapping for text_sprites does NOT occur
   // after hyphens. Only spaces break the line.
   int offX = 0;
   int offY = 0;
@@ -447,7 +451,7 @@ void draw_text_sprite(gs_scalar x, gs_scalar y, variant vstr, int sep, int lineW
     draw_sprite_stretched(sprite, subIndex, x+offX, y+offY, w, h);
     offX += w;
 
-    //Wrap if we've passed a wrappable character. 
+    //Wrap if we've passed a wrappable character.
     if (lineWidth != -1 && c == ' ') {
       if (offX+w  > lineWidth) {
         offX = 0;
@@ -486,7 +490,7 @@ void draw_text_skewed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar top, gs_
 				draw_vertex_texture(xx + g->x + bottom,  yy + g->y2 + bottom, g->tx,  g->ty2);
 				draw_vertex_texture(xx + g->x2 + bottom, yy + g->y2 + bottom, g->tx2, g->ty2);
 				draw_primitive_end();
-			  
+
 				xx += gs_scalar(g->xs);
 			}
 		}
@@ -638,14 +642,14 @@ void draw_text_transformed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar xsc
 			  w = g->x2-g->x;
 				const gs_scalar lx = xx + g->y * svy;
 				const gs_scalar ly = yy + g->y * cvy;
-			  
+
 				draw_primitive_begin_texture(pr_trianglestrip, fnt->texture);
 				draw_vertex_texture(lx, ly, g->tx, g->ty);
 				draw_vertex_texture(lx + w * cvx, ly - w * svx, g->tx2, g->ty);
 				draw_vertex_texture(xx + g->y2 * svy,  yy + g->y2 * cvy, g->tx,  g->ty2);
 				draw_vertex_texture(xx + w * cvx + g->y2 * svy, yy - w * svx + g->y2 * cvy, g->tx2, g->ty2);
 				draw_primitive_end();
-			  
+
 			  xx += gs_scalar(g->xs) * cvx;
 			  yy -= gs_scalar(g->xs) * svx;
 			}
@@ -682,14 +686,14 @@ void draw_text_transformed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar xsc
 			  w = g->x2-g->x;
 				const gs_scalar lx = xx + g->y * svy;
 				const gs_scalar ly = yy + g->y * cvy;
-			  
+
 				draw_primitive_begin_texture(pr_trianglestrip, fnt->texture);
 				draw_vertex_texture(lx, ly, g->tx, g->ty);
 				draw_vertex_texture(lx + w * cvx, ly - w * svx, g->tx2, g->ty);
 				draw_vertex_texture(xx + g->y2 * svy,  yy + g->y2 * cvy, g->tx,  g->ty2);
 				draw_vertex_texture(xx + w * cvx + g->y2 * svy, yy - w * svx + g->y2 * cvy, g->tx2, g->ty2);
 				draw_primitive_end();
-			  
+
 			  xx += gs_scalar(g->xs) * cvx;
 			  yy -= gs_scalar(g->xs) * svx;
 			}
@@ -751,14 +755,14 @@ void draw_text_ext_transformed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar
 			  wi = g->x2-g->x;
 				const gs_scalar lx = xx + g->y * svy;
 				const gs_scalar ly = yy + g->y * cvy;
-			  
+
 				draw_primitive_begin_texture(pr_trianglestrip, fnt->texture);
 				draw_vertex_texture(lx, ly, g->tx,  g->ty);
 				draw_vertex_texture(lx + wi * cvx, ly - wi * svx, g->tx2, g->ty);
 				draw_vertex_texture(xx + g->y2 * svy,  yy + g->y2 * cvy, g->tx,  g->ty2);
 				draw_vertex_texture(xx + wi * cvx + g->y2 * svy, yy - wi * svx + g->y2 * cvy, g->tx2, g->ty2);
 				draw_primitive_end();
-			  
+
 			  xx += gs_scalar(g->xs) * cvx;
 			  yy -= gs_scalar(g->xs) * svx;
 			  width += gs_scalar(g->xs);
@@ -823,7 +827,7 @@ void draw_text_ext_transformed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar
 				draw_vertex_texture(xx + g->y2 * svy,  yy + g->y2 * cvy, g->tx,  g->ty2);
 				draw_vertex_texture(xx + wi * cvx + g->y2 * svy, yy - wi * svx + g->y2 * cvy, g->tx2, g->ty2);
 				draw_primitive_end();
-				
+
 			  xx += gs_scalar(g->xs) * cvx;
 			  yy -= gs_scalar(g->xs) * svx;
 			  width += gs_scalar(g->xs);
@@ -877,14 +881,14 @@ void draw_text_transformed_color(gs_scalar x, gs_scalar y, variant vstr, gs_scal
 			  hcol2 = merge_color(c1,c2,(gs_scalar)(width+g->xs)/tmpsize);
 			  hcol3 = merge_color(c4,c3,(gs_scalar)(width)/tmpsize);
 			  hcol4 = merge_color(c4,c3,(gs_scalar)(width+g->xs)/tmpsize);
-			  
+
 				draw_primitive_begin_texture(pr_trianglestrip, fnt->texture);
 				draw_vertex_texture_color(lx, ly, g->tx,  g->ty, hcol1, a);
 				draw_vertex_texture_color(lx + w * cvx, ly - w * svx, g->tx2, g->ty, hcol2, a);
 				draw_vertex_texture_color(xx + g->y2 * svy,  yy + g->y2 * cvy, g->tx, g->ty2, hcol4, a);
 				draw_vertex_texture_color(xx + w * cvx + g->y2 * svy, yy - w * svx + g->y2 * cvy, g->tx2, g->ty2, hcol3, a);
 				draw_primitive_end();
-			  
+
 			  xx += gs_scalar(g->xs) * cvx;
 			  yy -= gs_scalar(g->xs) * svx;
 			  width += gs_scalar(g->xs);
@@ -926,14 +930,14 @@ void draw_text_transformed_color(gs_scalar x, gs_scalar y, variant vstr, gs_scal
 				hcol2 = merge_color(c1,c2,(gs_scalar)(width+g->xs)/tmpsize);
 				hcol3 = merge_color(c4,c3,(gs_scalar)(width)/tmpsize);
 				hcol4 = merge_color(c4,c3,(gs_scalar)(width+g->xs)/tmpsize);
-			  
+
 				draw_primitive_begin_texture(pr_trianglestrip, fnt->texture);
 				draw_vertex_texture_color(lx, ly, g->tx,  g->ty, hcol1, a);
 				draw_vertex_texture_color(lx + w * cvx, ly - w * svx, g->tx2, g->ty, hcol2, a);
 				draw_vertex_texture_color(xx + g->y2 * svy,  yy + g->y2 * cvy, g->tx, g->ty2, hcol4, a);
 				draw_vertex_texture_color(xx + w * cvx + g->y2 * svy, yy - w * svx + g->y2 * cvy, g->tx2, g->ty2, hcol3, a);
 				draw_primitive_end();
-			  
+
 			  xx += gs_scalar(g->xs) * cvx;
 			  yy -= gs_scalar(g->xs) * svx;
 			  width += gs_scalar(g->xs);
@@ -999,15 +1003,15 @@ void draw_text_ext_transformed_color(gs_scalar x, gs_scalar y, variant vstr, gs_
 				hcol2 = merge_color(c1,c2,(gs_scalar)(width+g->xs)/tmpsize);
 				hcol3 = merge_color(c4,c3,(gs_scalar)(width)/tmpsize);
 				hcol4 = merge_color(c4,c3,(gs_scalar)(width+g->xs)/tmpsize);
-			  
+
 				draw_primitive_begin_texture(pr_trianglestrip, fnt->texture);
 				draw_vertex_texture_color(lx, ly, g->tx,  g->ty, hcol1, a);
 				draw_vertex_texture_color(lx + wi * cvx, ly - wi * svx, g->tx2, g->ty, hcol2, a);
 				draw_vertex_texture_color(xx + g->y2 * svy,  yy + g->y2 * cvy, g->tx,  g->ty2, hcol4, a);
 				draw_vertex_texture_color(xx + wi * cvx + g->y2 * svy, yy - wi * svx + g->y2 * cvy, g->tx2, g->ty2, hcol3, a);
 				draw_primitive_end();
-			  
-			  
+
+
 			  xx += gs_scalar(g->xs) * cvx;
 			  yy -= gs_scalar(g->xs) * svx;
 			  width += gs_scalar(g->xs);
@@ -1122,7 +1126,7 @@ void draw_text_color(gs_scalar x, gs_scalar y,variant vstr,int c1,int c2,int c3,
 				draw_vertex_texture_color(xx + g->x,  yy + g->y2, g->tx,  g->ty2, hcol4, a);
 				draw_vertex_texture_color(xx + g->x2, yy + g->y2, g->tx2, g->ty2, hcol3, a);
 				draw_primitive_end();
-				
+
 			  xx += gs_scalar(g->xs);
 			}
 		}
@@ -1148,14 +1152,14 @@ void draw_text_color(gs_scalar x, gs_scalar y,variant vstr,int c1,int c2,int c3,
 			  hcol2 = merge_color(c1,c2,tx2);
 			  hcol3 = merge_color(c4,c3,tx1);
 			  hcol4 = merge_color(c4,c3,tx2);
-			  
+
 				draw_primitive_begin_texture(pr_trianglestrip, fnt->texture);
 				draw_vertex_texture_color(xx + g->x,  yy + g->y, g->tx, g->ty, hcol1, a);
 				draw_vertex_texture_color(xx + g->x2, yy + g->y, g->tx2, g->ty, hcol2, a);
 				draw_vertex_texture_color(xx + g->x,  yy + g->y2, g->tx,  g->ty2, hcol4, a);
 				draw_vertex_texture_color(xx + g->x2, yy + g->y2, g->tx2, g->ty2, hcol3, a);
 				draw_primitive_end();
-			  
+
 			  xx += gs_scalar(g->xs);
 			}
 		}
@@ -1209,7 +1213,7 @@ void draw_text_ext_color(gs_scalar x, gs_scalar y,variant vstr,gs_scalar sep, gs
 				draw_vertex_texture_color(xx + g->x,  yy + g->y2, g->tx,  g->ty2, hcol4, a);
 				draw_vertex_texture_color(xx + g->x2, yy + g->y2, g->tx2, g->ty2, hcol3, a);
 				draw_primitive_end();
-				
+
 			  xx += gs_scalar(g->xs);
 			  width = xx-x;
 			}
@@ -1250,7 +1254,7 @@ void draw_text_ext_color(gs_scalar x, gs_scalar y,variant vstr,gs_scalar sep, gs
 				draw_vertex_texture_color(xx + g->x,  yy + g->y2, g->tx,  g->ty2, hcol4, a);
 				draw_vertex_texture_color(xx + g->x2, yy + g->y2, g->tx2, g->ty2, hcol3, a);
 				draw_primitive_end();
-				
+
 			  xx += gs_scalar(g->xs);
 			  width = xx-tmpx;
 			}
