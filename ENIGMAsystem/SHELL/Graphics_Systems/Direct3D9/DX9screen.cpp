@@ -245,9 +245,9 @@ static inline int draw_tiles()
   return 0;
 }
 
-void clear_view(float x, float y, float w, float h, bool showcolor)
+void clear_view(float x, float y, float w, float h, float angle, bool showcolor)
 {
-	d3d_set_projection_ortho(x, y, w, h, 0);
+	d3d_set_projection_ortho(x, y, w, h, angle);
 	
 	if (background_showcolor)
 	{
@@ -306,7 +306,7 @@ void screen_redraw()
   {
     screen_set_viewport(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled());
     
-    clear_view(0, 0, room_width, room_height, background_showcolor);
+    clear_view(0, 0, room_width, room_height, 0, background_showcolor);
     draw_back();
     draw_insts();
     draw_tiles();
@@ -329,7 +329,7 @@ void screen_redraw()
 
       screen_set_viewport(view_xport[vc], view_yport[vc], view_wport[vc], view_hport[vc]);
 	  
-      clear_view(view_xview[vc], view_yview[vc], view_wview[vc], view_hview[vc], background_showcolor && draw_backs);
+      clear_view(view_xview[vc], view_yview[vc], view_wview[vc], view_hview[vc], view_angle[vc], background_showcolor && draw_backs);
 
       if (draw_backs)
         draw_back();
@@ -348,7 +348,7 @@ void screen_redraw()
   if (enigma::gui_used)
   {
     screen_set_viewport(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled());
-	d3d_set_projection_ortho(0, 0, enigma::gui_width, enigma::gui_height, 0);
+    d3d_set_projection_ortho(0, 0, enigma::gui_width, enigma::gui_height, 0);
 	
     // Clear the depth buffer if hidden surface removal is on at the beginning of the draw step.
     if (enigma::d3dMode)
@@ -373,23 +373,23 @@ void screen_init()
 	
     if (!view_enabled)
     {
-		d3dmgr->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
+      d3dmgr->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
 
-		screen_set_viewport(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled());
-		d3d_set_projection_ortho(0, 0, room_width, room_height, 0);
+      screen_set_viewport(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled());
+      d3d_set_projection_ortho(0, 0, room_width, room_height, 0);
     } else {
-		for (view_current = 0; view_current < 7; view_current++)
+      for (view_current = 0; view_current < 7; view_current++)
+      {
+        if (view_visible[(int)view_current])
         {
-            if (view_visible[(int)view_current])
-            {
-                int vc = (int)view_current;
+          int vc = (int)view_current;
 
-				screen_set_viewport(view_xport[vc], view_yport[vc],
-					(window_get_region_width_scaled() - view_xport[vc]), (window_get_region_height_scaled() - view_yport[vc]));
-				d3d_set_projection_ortho(view_xview[vc], view_wview[vc] + view_xview[vc], view_yview[vc], view_hview[vc] + view_yview[vc], 0);
-                break;
-            }
+          screen_set_viewport(view_xport[vc], view_yport[vc],
+            (window_get_region_width_scaled() - view_xport[vc]), (window_get_region_height_scaled() - view_yport[vc]));
+          d3d_set_projection_ortho(view_xview[vc], view_wview[vc] + view_xview[vc], view_yview[vc], view_hview[vc] + view_yview[vc], view_angle[vc]);
+          break;
         }
+      }
     }
 
 	d3dmgr->SetRenderState(D3DRS_LIGHTING, FALSE);
