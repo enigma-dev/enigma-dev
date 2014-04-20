@@ -51,7 +51,7 @@ namespace enigma
   // Reduce compiler warnings on floats by checking them here; a value of -1 is used to indicate uninitialized indices.
   inline bool negativeone(double x) { return codebloxt((x <= -1 && x >= -1), x == -1); }
   inline bool notnegativeone(double x) { return codebloxt(x < -1 || x > -1,  x != -1); }
-  
+
   static inline int bounds(int value, int low, int high)
   {
     if (value < low) return low;
@@ -117,7 +117,7 @@ namespace enigma
   // Assumes fullwidth == fullheight == 2^n for some n>0.
   static void create_particle_sprite(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, char* imgpxdata, pt_shape pt_sh)
   {
-    unsigned texture = graphics_create_texture(width, height, fullwidth, fullheight, imgpxdata);
+    unsigned texture = graphics_create_texture(width, height, fullwidth, fullheight, imgpxdata, false);
 
     particle_sprite* p_sprite = new particle_sprite();
     p_sprite->texture = texture;
@@ -957,11 +957,11 @@ namespace enigma
     int sprid = enigma::sprite_idmax;
     sprite_new_empty(sprid, 1, ps->width, ps->height, ps->width/2.0, ps->height/2.0, 0, ps->height, 0, ps->width, true, false);
 
-    sprite* sprstr = spritestructarray[sprid];
-    sprstr->texturearray[0] = ps->texture;
-    sprstr->texbordxarray[0] = 1.0; // Assumes multiple of 2.
-    sprstr->texbordyarray[0] = 1.0; // Assumes multiple of 2.
-    sprstr->colldata[0] = get_collision_mask(sprstr,0,ct_bbox);
+    sprite* sprstr = enigma::spritestructarray[sprid];
+    sprstr->texturearray.push_back(ps->texture);
+    sprstr->texbordxarray.push_back(1.0); // Assumes multiple of 2.
+    sprstr->texbordyarray.push_back(1.0); // Assumes multiple of 2.
+    sprstr->colldata.push_back(get_collision_mask(sprstr,0,ct_bbox));
 
     shape_to_actual_sprite.insert(std::pair<pt_shape,int>(particle_shape,sprid));
     return sprid;

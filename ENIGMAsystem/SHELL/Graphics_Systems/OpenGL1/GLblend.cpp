@@ -17,11 +17,18 @@
 
 #include "../General/OpenGLHeaders.h"
 #include "../General/GSblend.h"
+namespace enigma
+{
+  extern int currentblendmode[2];
+  extern int currentblendtype;
+}
 
 namespace enigma_user
 {
 
 int draw_set_blend_mode(int mode){
+    enigma::currentblendmode[0] = mode;
+    enigma::currentblendtype = 0;
 	switch (mode)
 	{
     case bm_add:
@@ -45,8 +52,23 @@ int draw_set_blend_mode_ext(int src,int dest){
 	  GL_ONE_MINUS_SRC_ALPHA, GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA, GL_DST_COLOR,
 	  GL_ONE_MINUS_DST_COLOR, GL_SRC_ALPHA_SATURATE
     };
+    enigma::currentblendtype = 1;
+    enigma::currentblendmode[0] = src;
+    enigma::currentblendmode[1] = dest;
 	glBlendFunc(blendequivs[(src-1)%10],blendequivs[(dest-1)%10]);
 	return 0;
+}
+
+int draw_get_blend_mode(){
+    return enigma::currentblendmode[0];
+}
+
+int draw_get_blend_mode_ext(bool src){
+    return enigma::currentblendmode[(src==true?0:1)];
+}
+
+int draw_get_blend_mode_type(){
+    return enigma::currentblendtype;
 }
 
 }
