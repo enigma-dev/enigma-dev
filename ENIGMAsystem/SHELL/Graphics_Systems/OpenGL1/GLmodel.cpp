@@ -69,10 +69,10 @@ unsigned int split(const std::string &txt, std::vector<std::string> &strs, char 
 namespace enigma_user
 {
 
-unsigned d3d_model_create(bool dynamic)
+unsigned d3d_model_create(int type)
 {
   unsigned id = meshes.size();
-  meshes.push_back(new Mesh(dynamic));
+  meshes.push_back(new Mesh(type));
   return id;
 }
 
