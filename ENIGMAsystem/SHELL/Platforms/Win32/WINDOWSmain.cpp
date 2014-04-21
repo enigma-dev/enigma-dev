@@ -330,12 +330,12 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
           }
           else
           {
-              if (!enigma::gameWindowFocused && enigma::freezeOnLoseFocus) { 
-				if (enigma::pausedSteps < 1) {
-					enigma::pausedSteps += 1;
-				} else {
-					usleep(100000); continue; 
-				}
+        if (!enigma::gameWindowFocused && enigma::freezeOnLoseFocus) { 
+          if (enigma::pausedSteps < 1) {
+            enigma::pausedSteps += 1;
+          } else {
+            usleep(100000); continue; 
+          }
 			  }
 
 			  unsigned long dt = 0;

@@ -371,13 +371,16 @@ int main(int argc,char** argv)
 			if(handleEvents() > 0)
 				goto end;
 
-		  if (!enigma::gameWindowFocused && enigma::freezeOnLoseFocus) { 
-			if (enigma::pausedSteps < 1) {
-				enigma::pausedSteps += 1;
-			} else {
-				usleep(100000); continue; 
-			}
-		  }
+    if (!enigma::gameWindowFocused && enigma::freezeOnLoseFocus) { 
+      if (enigma::pausedSteps < 1) {
+        enigma::pausedSteps += 1;
+      } else {
+        usleep(100000); 
+        //FIXME: For some reason without this call here the X server will process a focus out event but will not send the focus in.
+        enigma::update_mouse_variables();
+        continue; 
+      }
+    }
 
 		enigma::handle_joysticks();
 		enigma::ENIGMA_events();
