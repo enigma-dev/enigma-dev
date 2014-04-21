@@ -28,6 +28,7 @@ namespace enigma_user
 {
 
 int draw_set_blend_mode(int mode){
+    if (enigma::currentblendmode[0] == mode && enigma::currentblendtype == 0) return 0;
     enigma::currentblendmode[0] = mode;
     enigma::currentblendtype = 0;
 	switch (mode)
@@ -57,6 +58,7 @@ int draw_set_blend_mode(int mode){
 }
 
 int draw_set_blend_mode_ext(int src, int dest){
+  if (enigma::currentblendmode[0] == src && enigma::currentblendmode[1] == dest && enigma::currentblendtype == 1) return 0;
   const static D3DBLEND blendequivs[11] = {
 	  D3DBLEND_ZERO, D3DBLEND_ONE, D3DBLEND_SRCCOLOR, D3DBLEND_INVSRCCOLOR, D3DBLEND_SRCALPHA,
 	  D3DBLEND_INVSRCALPHA, D3DBLEND_DESTALPHA, D3DBLEND_INVDESTALPHA, D3DBLEND_DESTCOLOR,

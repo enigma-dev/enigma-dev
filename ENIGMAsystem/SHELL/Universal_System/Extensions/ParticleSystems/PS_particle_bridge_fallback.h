@@ -81,12 +81,13 @@ namespace enigma {
           const double x = it->x, y = it->y;
           const double xscale = pt->xscale*size, yscale = pt->yscale*size;
 
-          // NOTE: Do not comment this in until blending mode is reset to what it was before particle drawing.
-          if (pt->blend_additive) {
-            draw_set_blend_mode(enigma_user::bm_add);
-          }
-          else {
-            draw_set_blend_mode(enigma_user::bm_normal);
+          if (pt->blend_additive != enigma::currentblendmode[0]){
+              if (pt->blend_additive) {
+                enigma_user::draw_set_blend_mode(enigma_user::bm_add);
+              }
+              else {
+                enigma_user::draw_set_blend_mode(enigma_user::bm_normal);
+              }
           }
 
           enigma_user::draw_sprite_ext(sprite_id, subimg, x + x_offset, y + y_offset, xscale, yscale, rot_degrees, color, (double)alpha/255.0);
@@ -100,12 +101,12 @@ namespace enigma {
 
           int sprite_id = get_particle_actual_sprite(ps->shape);
 
-          // NOTE: Do not comment this in until blending mode is reset to what it was before particle drawing.
-          if (pt->blend_additive) {
-            draw_set_blend_mode(enigma_user::bm_add);
-          }
-          else {
-            draw_set_blend_mode(enigma_user::bm_normal);
+          if (pt->blend_additive != enigma::currentblendmode[0]){
+              if (pt->blend_additive) {
+                draw_set_blend_mode(enigma_user::bm_add);
+              } else {
+                draw_set_blend_mode(enigma_user::bm_normal);
+              }
           }
 
           enigma_user::draw_sprite_ext(sprite_id, 0, x + x_offset, y + y_offset, xscale, yscale, rot_degrees, color, (double)alpha/255.0);
@@ -119,8 +120,9 @@ namespace enigma {
         particle_sprite* ps = get_particle_sprite(pt_sh_pixel);
         if (ps == NULL) return; // NOTE: Skip to next particle.
 
-        // NOTE: Do not comment this in until blending mode is reset to what it was before particle drawing.
-        draw_set_blend_mode(enigma_user::bm_normal);
+        if (enigma::currentblendmode[0] != 0){
+            draw_set_blend_mode(enigma_user::bm_normal);
+        }
 
         const double x = round(it->x), y = round(it->y);
         const double xscale = size, yscale = size;
@@ -150,8 +152,7 @@ namespace enigma {
           {
             draw_particle(&(*it));
           }
-        }
-        else {
+        } else {
           const std::vector<particle_instance>::reverse_iterator rend = pi_list.rend();
           for (std::vector<particle_instance>::reverse_iterator it = pi_list.rbegin(); it != rend; it++)
           {
@@ -159,10 +160,12 @@ namespace enigma {
           }
         }
 
-        if (blend_type == 0){
-            enigma_user::draw_set_blend_mode(blend_src);
-        }else{
-            enigma_user::draw_set_blend_mode_ext(blend_src, blend_dest);
+        if (enigma::currentblendtype != blend_type || enigma::currentblendmode[0] != blend_src || enigma::currentblendmode[1] != blend_dest){
+            if (blend_type == 0){
+                enigma_user::draw_set_blend_mode(blend_src);
+            }else{
+                enigma_user::draw_set_blend_mode_ext(blend_src, blend_dest);
+            }
         }
     }
   }

@@ -169,7 +169,7 @@ class Mesh
   unsigned lineIndexedCount; // The number of line indices
 
   //NOTE: OpenGL 1.1 models are always dynamic since they utilize vertex arrays for software vertex processing and backwards compatibility.
-  Mesh (bool dynamic) {
+  Mesh (int type) {
 	vertexStride = 0;
     useColors = false;
     useTextures = false;
