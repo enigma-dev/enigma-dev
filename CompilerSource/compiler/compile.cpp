@@ -197,14 +197,18 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   }
   edbg << "Building for mode (" << mode << ")" << flushl;
   
+  //TODO: This is parsing a Java URI, it should support regular file paths as well.
     string s;
     if (!es->filename || mode == emode_compile) {
         s = ".";
     } else {
         s = es->filename;
         s = s.substr(0, s.find_last_of("/"));
+        #if CURRENT_PLATFORM_ID == OS_WINDOWS
         s = s.substr(s.find("file:/",0) + 6);
-        s = string_replace_all(s, "/", "\\\\");
+        #else
+        s = s.substr(s.find("file:/",0) + 5);
+        #endif
         s = string_replace_all(s, "%20", " ");
     }
 	
