@@ -376,8 +376,8 @@ int main(int argc,char** argv)
         enigma::pausedSteps += 1;
       } else {
         usleep(100000); 
-        //FIXME: For some reason without this call here the X server will process a focus out event but will not send the focus in.
-        enigma::update_mouse_variables();
+        // Flush the display or else it will not be able to regain focus, and we aren't using any of the events sent during sleep anyway.
+        XFlush(disp);
         continue; 
       }
     }
