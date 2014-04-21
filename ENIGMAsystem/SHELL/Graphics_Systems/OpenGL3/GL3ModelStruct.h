@@ -185,18 +185,21 @@ class Mesh
   unsigned triangleIndexedCount; // The number of triangle indices
   unsigned lineIndexedCount; // The number of line indices
 
+  unsigned vbufferSize; //Current VBO size
+  unsigned ibufferSize; //Current index buffer size
+
   // Indexed primitives are first since the indices must be offset, and keeps them as small as possible.
   // INDEXEDTRIANGLES|INDEXEDLINES|INDEXEDPOINTS|TRIANGLES|LINES|POINTS
   GLuint vertexBuffer; // Interleaved vertex buffer object with triangles first since they are most likely to be used
   GLuint indexBuffer; // Interleaved index buffer object with triangles first since they are most likely to be used
 
-  bool vbodynamic; // Whether or not the buffer should be prepared for dynamic memory usage, eg. constantly changing vertex data
+  int vbotype; // Can be static = GL_STATIC_DRAW, dynamic = GL_DYNAMIC_DRAW or stream GL_STREAM_DRAW
   bool ibogenerated;
   bool vbogenerated;
   bool vbobuffered; // Whether or not the buffer objects have been generated
   bool vboindexed; // Whether or not the model contains any indexed primitives or just regular lists
 
-  Mesh (bool dynamic)
+  Mesh (int type)
   {
 	triangleIndexedVertices.reserve(64000);
 	pointIndexedVertices.reserve(64000);
@@ -210,7 +213,12 @@ class Mesh
 	vertices.reserve(64000);
 	indices.reserve(64000);
 
-	vbodynamic = false;
+    switch (type){
+        case model_static: vbotype = GL_STATIC_DRAW; break;
+        case model_dynamic: vbotype = GL_DYNAMIC_DRAW; break;
+        case model_stream: vbotype = GL_STREAM_DRAW; break;
+    }
+
 	ibogenerated = false;
 	vbogenerated = false;
     vbobuffered = false;
@@ -231,12 +239,14 @@ class Mesh
 	lineIndexedCount = 0;
 
     currentPrimitive = 0;
+    vbufferSize = 0;
+    ibufferSize = 0;
   }
 
   ~Mesh()
   {
-	glDeleteBuffersARB(1, &vertexBuffer);
-	glDeleteBuffersARB(1, &indexBuffer);
+	glDeleteBuffers(1, &vertexBuffer);
+	glDeleteBuffers(1, &indexBuffer);
   }
 
   void ClearData()
@@ -486,24 +496,24 @@ class Mesh
 		indexedoffset += vdata.size();
 
 		if (!ibogenerated) {
-			glGenBuffersARB( 1, &indexBuffer );
+			glGenBuffers( 1, &indexBuffer );
 			ibogenerated = true;
-			glBindBufferARB( GL_ELEMENT_ARRAY_BUFFER, indexBuffer );
-			glBufferDataARB( GL_ELEMENT_ARRAY_BUFFER, idata.size() * sizeof(GLuint), &idata[0], vbodynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW );
+            ibufferSize = idata.size() * sizeof(GLuint);
+			glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indexBuffer );
+			glBufferData( GL_ELEMENT_ARRAY_BUFFER, ibufferSize, &idata[0], vbotype );
 		} else {
-			glBindBufferARB( GL_ELEMENT_ARRAY_BUFFER, indexBuffer );
+			glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indexBuffer );
 
-			GLint nBufferSize = 0;
-			glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &nBufferSize);
-			if (idata.size() * sizeof(GLuint) / nBufferSize > 0.5 ) {
-				glBufferDataARB( GL_ELEMENT_ARRAY_BUFFER, idata.size() * sizeof(GLuint), &idata[0], vbodynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW );
+			if ((double)(idata.size() * sizeof(GLuint)) / (double)ibufferSize > 0.5 ) {
+				glBufferData( GL_ELEMENT_ARRAY_BUFFER, idata.size() * sizeof(GLuint), &idata[0], vbotype );
 			} else {
-				glBufferSubDataARB( GL_ELEMENT_ARRAY_BUFFER, 0, idata.size() * sizeof(GLuint), &idata[0]);
+				glBufferSubData( GL_ELEMENT_ARRAY_BUFFER, 0, idata.size() * sizeof(GLuint), &idata[0]);
 			}
+			ibufferSize = idata.size() * sizeof(GLuint);
 		}
 
 		// Unbind the buffer we do not need anymore
-		glBindBufferARB( GL_ELEMENT_ARRAY_BUFFER, 0 );
+		glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
 		// Clean up temporary interleaved data
 		idata.clear();
 	} else {
@@ -523,24 +533,24 @@ class Mesh
 	}
 
 	if (!vbogenerated) {
-		glGenBuffersARB( 1, &vertexBuffer );
+		glGenBuffers( 1, &vertexBuffer );
 		vbogenerated = true;
-		glBindBufferARB( GL_ARRAY_BUFFER, vertexBuffer );
-		glBufferDataARB( GL_ARRAY_BUFFER, vdata.size() * sizeof(gs_scalar), &vdata[0], vbodynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW );
+        vbufferSize = vdata.size() * sizeof(gs_scalar);
+		glBindBuffer( GL_ARRAY_BUFFER, vertexBuffer );
+		glBufferData( GL_ARRAY_BUFFER, vbufferSize, &vdata[0], vbotype );
 	} else {
-		glBindBufferARB( GL_ARRAY_BUFFER, vertexBuffer );
+		glBindBuffer( GL_ARRAY_BUFFER, vertexBuffer );
 
-		GLint nBufferSize = 0;
-		glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &nBufferSize);
-		if (vdata.size() * sizeof(gs_scalar) / nBufferSize > 0.5 ) {
-			glBufferDataARB( GL_ARRAY_BUFFER, vdata.size() * sizeof(gs_scalar), &vdata[0], vbodynamic ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW );
+		if ((double)(vdata.size() * sizeof(gs_scalar)) / (double)vbufferSize > 0.5 ) {
+			glBufferData( GL_ARRAY_BUFFER, vdata.size() * sizeof(gs_scalar), &vdata[0], vbotype );
 		} else {
-			glBufferSubDataARB( GL_ARRAY_BUFFER, 0, vdata.size() * sizeof(gs_scalar), &vdata[0]);
+			glBufferSubData( GL_ARRAY_BUFFER, 0, vdata.size() * sizeof(gs_scalar), &vdata[0]);
 		}
+		vbufferSize = vdata.size() * sizeof(gs_scalar);
 	}
 
 	// Unbind the buffer we do not need anymore
-	glBindBufferARB( GL_ARRAY_BUFFER, 0 );
+	glBindBuffer( GL_ARRAY_BUFFER, 0 );
 	// Clean up temporary interleaved data
 	vdata.clear();
 
@@ -591,9 +601,9 @@ class Mesh
 	GLsizei STRIDE = stride * sizeof( gs_scalar );
 
 	// Enable vertex array's for fast vertex processing
-	glBindBufferARB( GL_ARRAY_BUFFER, vertexBuffer );
+	glBindBuffer( GL_ARRAY_BUFFER, vertexBuffer );
 	if (vboindexed) {
-		glBindBufferARB( GL_ELEMENT_ARRAY_BUFFER, indexBuffer );
+		glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indexBuffer );
 	}
 
 	//glEnableClientState(GL_VERTEX_ARRAY);
@@ -665,9 +675,9 @@ class Mesh
 		glDrawArrays(GL_POINTS, offset, pointCount);
 	}
 
-	glBindBufferARB( GL_ARRAY_BUFFER, 0 );
+	glBindBuffer( GL_ARRAY_BUFFER, 0 );
 	if (vboindexed) {
-		glBindBufferARB( GL_ELEMENT_ARRAY_BUFFER, 0 );
+		glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
 	}
 
     glDisableVertexAttribArray(enigma::shaderprograms[enigma::bound_shader]->att_vertex);

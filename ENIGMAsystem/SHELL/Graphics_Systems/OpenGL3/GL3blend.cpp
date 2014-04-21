@@ -28,6 +28,7 @@ namespace enigma_user
 {
 
 int draw_set_blend_mode(int mode){
+    if (enigma::currentblendmode[0] == mode && enigma::currentblendtype == 0) return 0;
     oglmgr->BlendFunc();
     enigma::currentblendmode[0] = mode;
     enigma::currentblendtype = 0;
@@ -49,6 +50,7 @@ int draw_set_blend_mode(int mode){
 }
 
 int draw_set_blend_mode_ext(int src, int dest){
+    if (enigma::currentblendmode[0] == src && enigma::currentblendmode[1] == dest && enigma::currentblendtype == 1) return 0;
     oglmgr->BlendFunc();
 	const static GLenum blendequivs[11] = {
 	  GL_ZERO, GL_ONE, GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR, GL_SRC_ALPHA,

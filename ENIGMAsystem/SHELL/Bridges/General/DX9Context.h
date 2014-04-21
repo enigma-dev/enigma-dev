@@ -67,7 +67,7 @@ protected:
    map< DWORD, map< D3DSAMPLERSTATETYPE, DWORD > > cacheSamplerStates;  /// cached Sampler States
    map< DWORD, D3DLIGHT9 > cacheLightStates;                            /// cached Light States
    map< DWORD, BOOL > cacheLightEnable;                                 /// cached Light States
-  
+
 public:
 LPDIRECT3DDEVICE9 device;    // the pointer to the device class
 
@@ -112,17 +112,17 @@ void RestoreState() {
 		device->SetTexture(tit->first, tit->second);
 		tit++;
 	}
-	
+
 	device->SetVertexShader(vertexShader);
 	device->SetPixelShader(pixelShader);
-	
+
 	// Cached Render States
 	map< D3DRENDERSTATETYPE, DWORD >::iterator it = cacheRenderStates.begin();
     while (it != cacheRenderStates.end()) {
 		device->SetRenderState(it->first, it->second);
 		it++;
 	}
-	
+
 	// Cached Sampler States
 	map< DWORD, map< D3DSAMPLERSTATETYPE, DWORD > >::iterator sit = cacheSamplerStates.begin();
     while (sit != cacheSamplerStates.end()) {
@@ -155,11 +155,11 @@ void EndSpriteBatch() {
 	device->GetSamplerState( 0, D3DSAMP_ADDRESSU, &wrapu );
 	device->GetSamplerState( 0, D3DSAMP_ADDRESSV, &wrapv );
 	device->GetSamplerState( 0, D3DSAMP_ADDRESSW, &wrapw );
-	
+
 	device->SetSamplerState( 0, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP );
 	device->SetSamplerState( 0, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP );
 	device->SetSamplerState( 0, D3DSAMP_ADDRESSW, D3DTADDRESS_CLAMP );
-	// The D3D sprite batcher uses clockwise face culling which is default but can't tell if 
+	// The D3D sprite batcher uses clockwise face culling which is default but can't tell if
 	// this here should memorize it and force it to CW all the time and then reset what the user had
 	// or not.
 	DWORD cullmode;
@@ -170,7 +170,7 @@ void EndSpriteBatch() {
 	device->SetSamplerState( 0, D3DSAMP_ADDRESSU, wrapu );
 	device->SetSamplerState( 0, D3DSAMP_ADDRESSV, wrapv );
 	device->SetSamplerState( 0, D3DSAMP_ADDRESSW, wrapw );
-	
+
 	// reset the culling
 	device->SetRenderState(D3DRS_CULLMODE, cullmode);
 }
@@ -182,7 +182,7 @@ int GetShapesModel() {
 
 void BeginShapesBatching(int texId) {
 	if (shapes_d3d_model == -1) {
-		shapes_d3d_model = d3d_model_create(true);
+		shapes_d3d_model = d3d_model_create(model_dynamic);
 		last_stride = -1;
 	} else if (texId != shapes_d3d_texture || (d3d_model_get_stride(shapes_d3d_model) != last_stride && last_stride != -1)) {
 		last_stride = -1;
@@ -287,7 +287,7 @@ void CreateTexture(UINT Width, UINT Height, UINT Levels, DWORD Usage, D3DFORMAT 
 	device->CreateTexture(Width, Height, Levels, Usage, Format, Pool, ppTexture, pSharedHandle);
 }
 
-void CreateRenderTarget(UINT Width,  UINT Height,  D3DFORMAT Format,  D3DMULTISAMPLE_TYPE MultiSample,  
+void CreateRenderTarget(UINT Width,  UINT Height,  D3DFORMAT Format,  D3DMULTISAMPLE_TYPE MultiSample,
 DWORD MultisampleQuality,  BOOL Lockable, IDirect3DSurface9 **ppSurface, HANDLE *pSharedHandle) {
 	device->CreateRenderTarget(Width, Height, Format, MultiSample, MultisampleQuality, Lockable, ppSurface, pSharedHandle);
 }
@@ -481,14 +481,14 @@ void SetPixelShader(LPDIRECT3DPIXELSHADER9 shader)
 	//Nothing to do, return
 	if (shader == pixelShader) return;
 	EndShapesBatching();
-	pixelShader = shader;	
+	pixelShader = shader;
 	device->SetPixelShader(shader);
 }
 
 void SetVertexShader(LPDIRECT3DVERTEXSHADER9 shader)
 {
 	//Nothing to do, return
-	if (shader == vertexShader) return;	
+	if (shader == vertexShader) return;
 	EndShapesBatching();
 	vertexShader = shader;
 	device->SetVertexShader(shader);
