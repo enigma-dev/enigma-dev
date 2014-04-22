@@ -82,7 +82,6 @@ int transition_steps=80;
 global:  working_directory*/
 namespace enigma_user {
 bool automatic_redraw = true;
-string program_directory="";
 int gamemaker_version=0;
 }
 //int transition_steps;
