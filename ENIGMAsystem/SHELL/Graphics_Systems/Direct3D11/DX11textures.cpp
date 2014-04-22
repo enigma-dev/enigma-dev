@@ -67,7 +67,7 @@ namespace enigma
 
   }
 
-  unsigned char* graphics_get_texture_rgba(unsigned texture, unsigned* fillwidth, unsigned* fullheight)
+  unsigned char* graphics_get_texture_pixeldata(unsigned texture, unsigned* fullwidth, unsigned* fullheight)
   {
 
   }
