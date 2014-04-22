@@ -30,7 +30,7 @@
 #include "Universal_System/roomsystem.h"
 
 namespace enigma_user {
-  extern string working_directory;
+  std::string working_directory = "";
 }
 
 int main(int argc,char** argv)

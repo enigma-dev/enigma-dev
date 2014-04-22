@@ -75,7 +75,7 @@ namespace enigma {
 unsigned long current_time_mcs = 0; // microseconds since the start of the game
 
 namespace enigma_user {
-  extern string working_directory;
+  std::string working_directory = "";
   extern double fps;
   unsigned long current_time = 0; // milliseconds since the start of the game
   unsigned long delta_time = 0; // microseconds since the last step event

@@ -162,13 +162,6 @@ void clear_ide_editables()
 // modes: 0=run, 1=debug, 2=design, 3=compile
 enum { emode_run, emode_debug, emode_design, emode_compile, emode_rebuild };
 
-// The games working directory, in run/debug it is the GMK/GMX location where the IDE is working with the project,
-// in compile mode it is the same as program_directory, or where the (*.exe executable) is located.
-// If you have not saved your file in the IDE or the mode is set to regular compile mode, the working directory is set
-// using the platform specific function in the platforms main() when working_directory is of 0 length
-// This the exact behaviour of GM8.1
-string working_directory = "";
-
 dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode) {
   return current_language->compile(es, exe_filename, mode);
 }
@@ -735,8 +728,11 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
   // Run the game if requested
   if (mode == emode_run or mode == emode_debug or mode == emode_design)
   {
-    //This is required so that if the game was run from the IDE without being saved, it will end up with the correct working directory, otherwise 
-    //it would be set to the ENIGMA compilers working directory, which is incorrect.
+    // The games working directory, in run/debug it is the GMK/GMX location where the IDE is working with the project,
+    // in compile mode it is the same as program_directory, or where the (*.exe executable) is located.
+    // If you have not saved your file in the IDE or the mode is set to regular compile mode, the working directory is set
+    // using the platform specific function in the platforms main() when working_directory is of 0 length
+    // This the exact behaviour of GM8.1
     char prevdir[4096];
     string newdir = (es->filename != NULL && strlen(es->filename) > 0) ? string(es->filename) : string( exe_filename );
     #if CURRENT_PLATFORM_ID == OS_WINDOWS
