@@ -177,7 +177,8 @@ class Mesh
   ID3D11Buffer* vertexbuffer;    // Interleaved vertex buffer object TRIANGLES|LINES|POINTS with triangles first since they are most likely to be used
   ID3D11Buffer* indexbuffer;    // Interleaved index buffer object TRIANGLES|LINES|POINTS with triangles first since they are most likely to be used
 
-  bool vbodynamic; // Whether the buffer is dynamically allocated in system memory, should be true for simple primitive calls
+
+  int vbotype; // Can be static = 0 or dynamic > 0
   bool vbobuffered; // Whether or not the buffer objects have been generated
   bool vboindexed; // Whether or not the model contains any indexed primitives or just regular lists
 
@@ -186,7 +187,7 @@ class Mesh
 	currentPrimitive = pr;
   }
 
-  Mesh (bool dynamic)
+  Mesh (int type)
   {
 	triangleIndexedVertices.reserve(64000);
 	pointIndexedVertices.reserve(64000);
@@ -204,7 +205,11 @@ class Mesh
 	indexbuffer = NULL;    // the pointer to the index buffer
 
     vbobuffered = false;
-	vbodynamic = dynamic;
+	if (type == model_static){
+        vbotype = 0;
+	}else{
+        vbotype = 1;
+    }
 
 	vertexStride = 0;
 	useDepth = false;
