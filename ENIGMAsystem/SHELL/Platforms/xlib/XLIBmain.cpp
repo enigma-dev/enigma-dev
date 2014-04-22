@@ -378,7 +378,7 @@ int main(int argc,char** argv)
 		current_time_mcs += enigma_user::delta_time;
 		enigma_user::current_time += enigma_user::delta_time / 1000;
 
-		while(XPending(disp))
+		while (XQLength(disp) || XPending(disp))
 			if(handleEvents() > 0)
 				goto end;
 
