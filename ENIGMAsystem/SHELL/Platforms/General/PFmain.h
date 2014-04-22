@@ -23,6 +23,7 @@ namespace enigma_user
 {
 
 extern std::string working_directory;
+extern std::string program_directory;
 
 void game_end(int ret=0);
 void action_end_game();

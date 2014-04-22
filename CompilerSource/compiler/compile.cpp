@@ -730,8 +730,7 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
   {
     // The games working directory, in run/debug it is the GMK/GMX location where the IDE is working with the project,
     // in compile mode it is the same as program_directory, or where the (*.exe executable) is located.
-    // If you have not saved your file in the IDE or the mode is set to regular compile mode, the working directory is set
-    // using the platform specific function in the platforms main() when working_directory is of 0 length
+    // The working_directory global is set in the main() of each platform using the platform specific function.
     // This the exact behaviour of GM8.1
     char prevdir[4096];
     string newdir = (es->filename != NULL && strlen(es->filename) > 0) ? string(es->filename) : string( exe_filename );
