@@ -76,6 +76,7 @@ unsigned long current_time_mcs = 0; // microseconds since the start of the game
 
 namespace enigma_user {
   std::string working_directory = "";
+  std::string program_directory = "";
   extern double fps;
   unsigned long current_time = 0; // milliseconds since the start of the game
   unsigned long delta_time = 0; // microseconds since the last step event
@@ -195,6 +196,12 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
     char buffer[MAX_PATH];
     GetCurrentDirectory( MAX_PATH, buffer );
     enigma_user::working_directory = string( buffer );
+    
+    // Set the program_directory
+    memset(&buffer[0], 0, MAX_PATH); 
+    GetModuleFileName( NULL, buffer, MAX_PATH );
+    enigma_user::program_directory = string( buffer );
+    enigma_user::program_directory = enigma_user::program_directory.substr( 0, enigma_user::program_directory.find_last_of( "\\/" ));
 
     LPWSTR *argv;
     if ((argv = CommandLineToArgvW(GetCommandLineW(), &enigma::main_argc)))

@@ -47,8 +47,6 @@ void export_include_file_location(string fname,string location);
 void discard_include_file(string fname);
 
 extern unsigned game_id;
-extern string working_directory;
-extern string program_directory;
 extern string temp_directory;
 
 
