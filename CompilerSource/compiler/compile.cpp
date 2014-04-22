@@ -746,12 +746,33 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
   // Run the game if requested
   if (mode == emode_run or mode == emode_debug or mode == emode_design)
   {
+    //This is required so that if the game was run from the IDE without being saved, it will end up with the correct working directory, otherwise 
+    //it will be set to the ENIGMA compilers working directory.
+    char prevdir[4096];
+    string newdir = string( exe_filename );
+    newdir = newdir.substr( 0, newdir.find_last_of( "\\/" ));
+
+    #if CURRENT_PLATFORM_ID == OS_WINDOWS
+    GetCurrentDirectory( 4096, prevdir );
+    SetCurrentDirectory(newdir.c_str());
+    #else
+    getcwd (prevdir, 4096);
+    chdir(newdir.c_str());
+    #endif
+    
     string rprog = extensions::targetOS.runprog, rparam = extensions::targetOS.runparam;
     rprog = string_replace_all(rprog,"$game",gameFname);
     rparam = string_replace_all(rparam,"$game",gameFname);
     user << "Running \"" << rprog << "\" " << rparam << flushl;
     int gameres = e_execs(rprog, rparam);
     user << "\n\nGame returned " << gameres << "\n";
+    
+    // Restore the compilers original working directory.
+    #if CURRENT_PLATFORM_ID == OS_WINDOWS
+    SetCurrentDirectory(prevdir);
+    #else
+    chdir(prevdir);
+    #endif
   }
 
   idpr("Done.", 100);

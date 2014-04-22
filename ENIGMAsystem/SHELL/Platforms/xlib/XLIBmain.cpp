@@ -221,8 +221,7 @@ int main(int argc,char** argv)
        fprintf(stdout, "Current working dir: %s\n", buffer);
     else
        perror("getcwd() error");
-    string::size_type pos = string( buffer ).find_last_of( "\\/" );
-    enigma_user::working_directory = string( buffer ).substr( 0, pos);
+    enigma_user::working_directory = string( buffer );
   }
 
   // Copy our parameters
