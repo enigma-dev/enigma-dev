@@ -215,14 +215,13 @@ static bool game_isending = false;
 int main(int argc,char** argv)
 {
 
-  if (enigma_user::working_directory.length() == 0) {
-    char buffer[1024];
-    if (getcwd(buffer, sizeof(buffer)) != NULL)
-       fprintf(stdout, "Current working dir: %s\n", buffer);
-    else
-       perror("getcwd() error");
-    enigma_user::working_directory = string( buffer );
-  }
+  // Set the working_directory
+  char buffer[1024];
+  if (getcwd(buffer, sizeof(buffer)) != NULL)
+     fprintf(stdout, "Current working dir: %s\n", buffer);
+  else
+     perror("getcwd() error");
+  enigma_user::working_directory = string( buffer );
 
   // Copy our parameters
 	enigma::parameters = new string[argc];

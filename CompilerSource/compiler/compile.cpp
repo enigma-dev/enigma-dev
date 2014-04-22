@@ -199,18 +199,7 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
 	return 0;
   }
   edbg << "Building for mode (" << mode << ")" << flushl;
-  
-  if (es->filename != NULL && strlen(es->filename) > 0 && mode != emode_compile) {
-      std::string s = es->filename;
-      #if CURRENT_PLATFORM_ID == OS_WINDOWS
-      if (s[0] == '/' || s[0] == '\\') {
-        s = s.substr(1, s.size());
-      }
-      #endif
-      s = s.substr(0, s.find_last_of("/"));
-      working_directory = s;
-  }
-
+ 
   // CLean up from any previous executions.
 
   edbg << "Cleaning up from previous executions" << flushl;
@@ -747,9 +736,14 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
   if (mode == emode_run or mode == emode_debug or mode == emode_design)
   {
     //This is required so that if the game was run from the IDE without being saved, it will end up with the correct working directory, otherwise 
-    //it will be set to the ENIGMA compilers working directory.
+    //it would be set to the ENIGMA compilers working directory, which is incorrect.
     char prevdir[4096];
-    string newdir = string( exe_filename );
+    string newdir = (es->filename != NULL && strlen(es->filename) > 0) ? string(es->filename) : string( exe_filename );
+    #if CURRENT_PLATFORM_ID == OS_WINDOWS
+      if (newdir[0] == '/' || newdir[0] == '\\') {
+        newdir = newdir.substr(1, newdir.size());
+      }
+    #endif
     newdir = newdir.substr( 0, newdir.find_last_of( "\\/" ));
 
     #if CURRENT_PLATFORM_ID == OS_WINDOWS

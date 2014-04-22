@@ -190,12 +190,11 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
     int wid = (int)enigma_user::room_width, hgt = (int)enigma_user::room_height;
     if (!wid || !hgt) wid = 640, hgt = 480;
     enigma::hInstance = hInstance;
-    
-    if (enigma_user::working_directory.length() == 0) {
-      char buffer[MAX_PATH];
-      GetCurrentDirectory( MAX_PATH, buffer );
-      enigma_user::working_directory = string( buffer );
-    }
+
+    // Set the working_directory
+    char buffer[MAX_PATH];
+    GetCurrentDirectory( MAX_PATH, buffer );
+    enigma_user::working_directory = string( buffer );
 
     LPWSTR *argv;
     if ((argv = CommandLineToArgvW(GetCommandLineW(), &enigma::main_argc)))
