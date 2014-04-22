@@ -22,6 +22,8 @@
 namespace enigma_user
 {
 
+extern std::string working_directory;
+
 void game_end(int ret=0);
 void action_end_game();
 void action_webpage(const std::string &url);
