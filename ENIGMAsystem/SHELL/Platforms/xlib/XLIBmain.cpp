@@ -378,7 +378,7 @@ int main(int argc,char** argv)
 		current_time_mcs += enigma_user::delta_time;
 		enigma_user::current_time += enigma_user::delta_time / 1000;
 
-		while(XQLength(disp))
+		while(XPending(disp))
 			if(handleEvents() > 0)
 				goto end;
 
@@ -387,8 +387,6 @@ int main(int argc,char** argv)
         enigma::pausedSteps += 1;
       } else {
         usleep(100000); 
-        // Flush the display or else it will not be able to regain focus, and we aren't using any of the events sent during sleep anyway.
-        XFlush(disp);
         continue; 
       }
     }
