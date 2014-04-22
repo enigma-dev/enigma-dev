@@ -177,7 +177,7 @@ class Mesh
   LPDIRECT3DVERTEXBUFFER9 vertexbuffer;    // Interleaved vertex buffer object TRIANGLES|LINES|POINTS with triangles first since they are most likely to be used
   LPDIRECT3DINDEXBUFFER9 indexbuffer;    // Interleaved index buffer object TRIANGLES|LINES|POINTS with triangles first since they are most likely to be used
 
-  bool vbodynamic; // Whether the buffer is dynamically allocated in system memory, should be true for simple primitive calls
+  int vbotype; // Can be static = 0 or dynamic > 0
   bool vbobuffered; // Whether or not the buffer objects have been generated
   bool vboindexed; // Whether or not the model contains any indexed primitives or just regular lists
 
@@ -186,7 +186,7 @@ class Mesh
 	currentPrimitive = pr;
   }
 
-  Mesh (bool dynamic)
+  Mesh (int type)
   {
 	triangleIndexedVertices.reserve(64000);
 	pointIndexedVertices.reserve(64000);
@@ -204,7 +204,11 @@ class Mesh
 	indexbuffer = NULL;    // the pointer to the index buffer
 
     vbobuffered = false;
-	vbodynamic = dynamic;
+    if (type == model_static){
+        vbotype = 0;
+	}else{
+        vbotype = 1;
+    }
 
 	vertexStride = 0;
 	useDepth = false;
@@ -509,7 +513,7 @@ class Mesh
 		indexedoffset += vdata.size();
 		// create a index buffer interface
 		if (indexbuffer == NULL) {
-			if (vbodynamic) {
+			if (vbotype == 1) {
 				d3dmgr->CreateIndexBuffer(idata.size() * sizeof(unsigned), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, D3DFMT_INDEX32, D3DPOOL_SYSTEMMEM, &indexbuffer, NULL);
 			} else {
 				d3dmgr->CreateIndexBuffer(idata.size() * sizeof(unsigned), D3DUSAGE_WRITEONLY, D3DFMT_INDEX32, D3DPOOL_MANAGED, &indexbuffer, NULL);
@@ -552,7 +556,7 @@ class Mesh
 	}
 	// create a vertex buffer interface
 	if (vertexbuffer == NULL) {
-		if (vbodynamic) {
+		if (vbotype == 1) {
 			d3dmgr->CreateVertexBuffer(vdata.size() * sizeof( gs_scalar ), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, GetFVF(), D3DPOOL_SYSTEMMEM, &vertexbuffer, NULL);
 		} else {
 			d3dmgr->CreateVertexBuffer(vdata.size() * sizeof( gs_scalar ), D3DUSAGE_WRITEONLY, GetFVF(), D3DPOOL_MANAGED, &vertexbuffer, NULL);

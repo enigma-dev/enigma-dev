@@ -19,6 +19,8 @@ namespace enigma
 {
   extern unsigned bound_texture;
   extern unsigned char currentcolor[4];
+  extern int currentblendmode[2];
+  extern int currentblendtype;
   extern bool pbo_isgo;
 }
 

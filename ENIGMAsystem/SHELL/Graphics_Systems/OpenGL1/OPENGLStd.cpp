@@ -32,6 +32,8 @@ namespace enigma
 {
   unsigned bound_texture=0;
   unsigned char currentcolor[4] = {0,0,0,255};
+  int currentblendmode[2] = {0,0};
+  int currentblendtype = 0;
   bool glew_isgo;
   bool pbo_isgo;
 
@@ -92,11 +94,11 @@ namespace enigma
 		if (shaderstruct->precompile) {
 			glCompileShader(vshader->shader);
 			glCompileShader(fshader->shader);
-			
+
 			GLint blen = 0;
 			GLsizei slen = 0;
 
-			glGetShaderiv(vshader->shader, GL_INFO_LOG_LENGTH , &blen);       
+			glGetShaderiv(vshader->shader, GL_INFO_LOG_LENGTH , &blen);
 
 			if (blen > 1)
 			{
@@ -107,8 +109,8 @@ namespace enigma
 			} else {
 				std::cout << "Vertex shader compile log empty";
 			}
-			
-			glGetShaderiv(fshader->shader, GL_INFO_LOG_LENGTH , &blen);       
+
+			glGetShaderiv(fshader->shader, GL_INFO_LOG_LENGTH , &blen);
 
 			if (blen > 1)
 			{
@@ -119,7 +121,7 @@ namespace enigma
 			} else {
 				std::cout << "Fragment shader compile log empty";
 			}
-  
+
 		}
 
 		glAttachShader(program->shaderprogram, vshader->shader);
