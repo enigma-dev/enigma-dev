@@ -43,8 +43,6 @@ using namespace std;
 
 int global_script_argument_count = 0;
 
-extern string working_directory;
-
 static string esc(string str) {
   string res;
   res.reserve(str.length());
@@ -75,7 +73,7 @@ int lang_CPP::compile_writeGlobals(EnigmaStruct* es, parsed_object* global)
     }
 	
     wto << "namespace enigma_user { " << endl;
-    wto << "  string working_directory = \"" << working_directory << "\";" << endl;
+    //wto << "  string working_directory = \"\";" << endl; // moved over to PFmain.h
     wto << "  unsigned int game_id = " << es->gameSettings.gameId << ";" << endl;
     wto << "}" << endl <<endl;
 

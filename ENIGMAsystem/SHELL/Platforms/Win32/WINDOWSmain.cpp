@@ -75,6 +75,7 @@ namespace enigma {
 unsigned long current_time_mcs = 0; // microseconds since the start of the game
 
 namespace enigma_user {
+  std::string working_directory = "";
   extern double fps;
   unsigned long current_time = 0; // milliseconds since the start of the game
   unsigned long delta_time = 0; // microseconds since the last step event
@@ -181,6 +182,7 @@ namespace enigma {
     }
   }
 }
+
 #include <cstdio>
 #include <mmsystem.h>
 int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,int iCmdShow)
@@ -188,6 +190,11 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
     int wid = (int)enigma_user::room_width, hgt = (int)enigma_user::room_height;
     if (!wid || !hgt) wid = 640, hgt = 480;
     enigma::hInstance = hInstance;
+
+    // Set the working_directory
+    char buffer[MAX_PATH];
+    GetCurrentDirectory( MAX_PATH, buffer );
+    enigma_user::working_directory = string( buffer );
 
     LPWSTR *argv;
     if ((argv = CommandLineToArgvW(GetCommandLineW(), &enigma::main_argc)))
@@ -330,12 +337,12 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
           }
           else
           {
-              if (!enigma::gameWindowFocused && enigma::freezeOnLoseFocus) { 
-				if (enigma::pausedSteps < 1) {
-					enigma::pausedSteps += 1;
-				} else {
-					usleep(100000); continue; 
-				}
+        if (!enigma::gameWindowFocused && enigma::freezeOnLoseFocus) { 
+          if (enigma::pausedSteps < 1) {
+            enigma::pausedSteps += 1;
+          } else {
+            usleep(100000); continue; 
+          }
 			  }
 
 			  unsigned long dt = 0;
@@ -388,16 +395,6 @@ string parameter_string(int x)
 int parameter_count()
 {
   return enigma::main_argc;
-}
-
-extern string working_directory;
-bool set_working_directory(string dir)
-{
-    if (dir == "")
-        SetCurrentDirectory(working_directory.c_str());
-    else
-        SetCurrentDirectory(working_directory.c_str());   //Change to working_directory + dir/
-    return 1;
 }
 
 unsigned long long disk_size(std::string drive)
