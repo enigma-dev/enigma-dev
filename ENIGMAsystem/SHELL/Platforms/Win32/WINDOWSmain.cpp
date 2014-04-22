@@ -75,6 +75,7 @@ namespace enigma {
 unsigned long current_time_mcs = 0; // microseconds since the start of the game
 
 namespace enigma_user {
+  extern string working_directory;
   extern double fps;
   unsigned long current_time = 0; // milliseconds since the start of the game
   unsigned long delta_time = 0; // microseconds since the last step event
@@ -188,6 +189,13 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
     int wid = (int)enigma_user::room_width, hgt = (int)enigma_user::room_height;
     if (!wid || !hgt) wid = 640, hgt = 480;
     enigma::hInstance = hInstance;
+    
+    if (enigma_user::working_directory.length() == 0) {
+      char buffer[MAX_PATH];
+      GetModuleFileName( NULL, buffer, MAX_PATH );
+      string::size_type pos = string( buffer ).find_last_of( "\\/" );
+      enigma_user::working_directory = string( buffer ).substr( 0, pos);
+    }
 
     LPWSTR *argv;
     if ((argv = CommandLineToArgvW(GetCommandLineW(), &enigma::main_argc)))
@@ -390,9 +398,9 @@ int parameter_count()
   return enigma::main_argc;
 }
 
-extern string working_directory;
 bool set_working_directory(string dir)
 {
+  working_directory = dir;
     if (dir == "")
         SetCurrentDirectory(working_directory.c_str());
     else
