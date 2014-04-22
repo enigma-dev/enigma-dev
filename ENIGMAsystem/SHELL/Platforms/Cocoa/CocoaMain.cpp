@@ -18,6 +18,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <unistd.h>
 #include <stdio.h>
 #include "CocoaMain.h"
 #include "ObjectiveC.h"
@@ -28,9 +29,20 @@
 #include "Universal_System/CallbackArrays.h"
 #include "Universal_System/roomsystem.h"
 
+namespace enigma_user {
+  std::string working_directory = "";
+}
 
 int main(int argc,char** argv)
 {
+  // Set the working_directory
+  char buffer[1024];
+  if (getcwd(buffer, sizeof(buffer)) != NULL)
+     fprintf(stdout, "Current working dir: %s\n", buffer);
+  else
+     perror("getcwd() error");
+  enigma_user::working_directory = string( buffer );
+  
 	enigma::parameters=new char* [argc];
 	for (int i=0; i<argc; i++)
 		enigma::parameters[i]=argv[i];

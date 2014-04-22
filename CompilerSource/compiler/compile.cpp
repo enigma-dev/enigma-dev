@@ -162,10 +162,6 @@ void clear_ide_editables()
 // modes: 0=run, 1=debug, 2=design, 3=compile
 enum { emode_run, emode_debug, emode_design, emode_compile, emode_rebuild };
 
-// The games working directory, in run/debug it is the GMK/GMX location where the IDE is working with the project,
-// in compile mode it is the same as program_directory, or where the (*.exe executable) is located.
-string working_directory = "";
-
 dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode) {
   return current_language->compile(es, exe_filename, mode);
 }
@@ -196,20 +192,7 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
 	return 0;
   }
   edbg << "Building for mode (" << mode << ")" << flushl;
-  
-    string s;
-    if (!es->filename || mode == emode_compile) {
-        s = ".";
-    } else {
-        s = es->filename;
-        s = s.substr(0, s.find_last_of("/"));
-        s = s.substr(s.find("file:/",0) + 6);
-        s = string_replace_all(s, "/", "\\\\");
-        s = string_replace_all(s, "%20", " ");
-    }
-	
-	working_directory = s;
-
+ 
   // CLean up from any previous executions.
 
   edbg << "Cleaning up from previous executions" << flushl;
@@ -745,12 +728,41 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
   // Run the game if requested
   if (mode == emode_run or mode == emode_debug or mode == emode_design)
   {
+    // The games working directory, in run/debug it is the GMK/GMX location where the IDE is working with the project,
+    // in compile mode it is the same as program_directory, or where the (*.exe executable) is located.
+    // If you have not saved your file in the IDE or the mode is set to regular compile mode, the working directory is set
+    // using the platform specific function in the platforms main() when working_directory is of 0 length
+    // This the exact behaviour of GM8.1
+    char prevdir[4096];
+    string newdir = (es->filename != NULL && strlen(es->filename) > 0) ? string(es->filename) : string( exe_filename );
+    #if CURRENT_PLATFORM_ID == OS_WINDOWS
+      if (newdir[0] == '/' || newdir[0] == '\\') {
+        newdir = newdir.substr(1, newdir.size());
+      }
+    #endif
+    newdir = newdir.substr( 0, newdir.find_last_of( "\\/" ));
+
+    #if CURRENT_PLATFORM_ID == OS_WINDOWS
+    GetCurrentDirectory( 4096, prevdir );
+    SetCurrentDirectory(newdir.c_str());
+    #else
+    getcwd (prevdir, 4096);
+    chdir(newdir.c_str());
+    #endif
+    
     string rprog = extensions::targetOS.runprog, rparam = extensions::targetOS.runparam;
     rprog = string_replace_all(rprog,"$game",gameFname);
     rparam = string_replace_all(rparam,"$game",gameFname);
     user << "Running \"" << rprog << "\" " << rparam << flushl;
     int gameres = e_execs(rprog, rparam);
     user << "\n\nGame returned " << gameres << "\n";
+    
+    // Restore the compilers original working directory.
+    #if CURRENT_PLATFORM_ID == OS_WINDOWS
+    SetCurrentDirectory(prevdir);
+    #else
+    chdir(prevdir);
+    #endif
   }
 
   idpr("Done.", 100);
