@@ -193,6 +193,7 @@ namespace enigma
 unsigned long current_time_mcs = 0; // microseconds since the start of the game
 
 namespace enigma_user {
+  extern string working_directory;
   extern double fps;
   unsigned long current_time = 0; // milliseconds since the start of the game
   unsigned long delta_time = 0; // microseconds since the last step event
@@ -209,9 +210,21 @@ static inline long clamp(long value, long min, long max)
   return value;
 }
 
+#include <unistd.h>
 static bool game_isending = false;
 int main(int argc,char** argv)
 {
+
+  if (enigma_user::working_directory.length() == 0) {
+    char buffer[1024];
+    if (getcwd(buffer, sizeof(buffer)) != NULL)
+       fprintf(stdout, "Current working dir: %s\n", buffer);
+    else
+       perror("getcwd() error");
+    string::size_type pos = string( buffer ).find_last_of( "\\/" );
+    enigma_user::working_directory = string( buffer ).substr( 0, pos);
+  }
+
   // Copy our parameters
 	enigma::parameters = new string[argc];
 	enigma::parameterc = argc;
