@@ -164,6 +164,9 @@ enum { emode_run, emode_debug, emode_design, emode_compile, emode_rebuild };
 
 // The games working directory, in run/debug it is the GMK/GMX location where the IDE is working with the project,
 // in compile mode it is the same as program_directory, or where the (*.exe executable) is located.
+// If you have not saved your file in the IDE or the mode is set to regular compile mode, the working directory is set
+// using the platform specific function in the platforms main() when working_directory is of 0 length
+// This the exact behaviour of GM8.1
 string working_directory = "";
 
 dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode) {
@@ -197,22 +200,16 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   }
   edbg << "Building for mode (" << mode << ")" << flushl;
   
-  //TODO: This is parsing a Java URI, it should support regular file paths as well.
-    string s;
-    if (!es->filename || mode == emode_compile) {
-        s = ".";
-    } else {
-        s = es->filename;
-        s = s.substr(0, s.find_last_of("/"));
-        #if CURRENT_PLATFORM_ID == OS_WINDOWS
-        s = s.substr(s.find("file:/",0) + 6);
-        #else
-        s = s.substr(s.find("file:/",0) + 5);
-        #endif
-        s = string_replace_all(s, "%20", " ");
-    }
-	
-	working_directory = s;
+  if (es->filename != NULL && strlen(es->filename) > 0 && mode != emode_compile) {
+      std::string s = es->filename;
+      #if CURRENT_PLATFORM_ID == OS_WINDOWS
+      if (s[0] == '/' || s[0] == '\\') {
+        s = s.substr(1, s.size());
+      }
+      #endif
+      s = s.substr(0, s.find_last_of("/"));
+      working_directory = s;
+  }
 
   // CLean up from any previous executions.
 
