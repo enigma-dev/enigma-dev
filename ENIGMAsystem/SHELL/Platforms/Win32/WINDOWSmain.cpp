@@ -399,16 +399,6 @@ int parameter_count()
   return enigma::main_argc;
 }
 
-bool set_working_directory(string dir)
-{
-  working_directory = dir;
-    if (dir == "")
-        SetCurrentDirectory(working_directory.c_str());
-    else
-        SetCurrentDirectory(working_directory.c_str());   //Change to working_directory + dir/
-    return 1;
-}
-
 unsigned long long disk_size(std::string drive)
 {
 	DWORD sectorsPerCluster, bytesPerSector, totalClusters, freeClusters;
