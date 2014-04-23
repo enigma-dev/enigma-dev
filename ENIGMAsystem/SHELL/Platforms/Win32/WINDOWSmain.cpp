@@ -352,6 +352,7 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
           }
 			  }
 
+        //TODO: The placement of this code is inconsistent with XLIB because events are handled before, ask Josh.
 			  unsigned long dt = 0;
 			  if (spent_mcs > last_mcs) {
 				dt = (spent_mcs - last_mcs);
@@ -495,10 +496,10 @@ void execute_program(std::string fname, std::string args, bool wait)
 
 std::string environment_get_variable(std::string name)
 {
-	std::string value(1024, '\x00');
-	GetEnvironmentVariable((LPCTSTR)name.c_str(), (LPTSTR)value.data(), 1024);
+	char buffer[1024];
+	GetEnvironmentVariable(name.c_str(), (LPTSTR)&buffer, 1024);
 
-	return value;
+	return buffer;
 }
 
 void game_end(int ret) { PostQuitMessage(ret); }
