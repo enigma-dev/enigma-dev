@@ -366,6 +366,7 @@ int main(int argc,char** argv)
             }
         }
 
+        //TODO: The placement of this code is inconsistent with Win32 because events are handled after, ask Josh.
         unsigned long dt = 0;
         if (spent_mcs > last_mcs) {
             dt = (spent_mcs - last_mcs);
