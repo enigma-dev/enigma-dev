@@ -65,13 +65,13 @@ var current_caption = "";
 int background_color = 0xFFFFFF;
 int background_showcolor=1;
 
-var background_visible, background_foreground, background_index, background_x, background_y, background_htiled,
-background_vtiled, background_hspeed, background_vspeed,background_alpha,background_coloring,background_width,background_height,background_xscale,background_yscale;
+var background_visible(false, 8), background_foreground(0, 8), background_index(0, 8), background_x(0, 8), background_y(0, 8), background_htiled(0, 8),
+background_vtiled(0, 8), background_hspeed(0, 8), background_vspeed(0, 8), background_alpha(0, 8), background_coloring(0, 8), background_width(0, 8), background_height(0, 8), background_xscale(0, 8), background_yscale(0, 8);
 
 int view_current = 0;
 int view_enabled = 0;
-rvt view_hborder, view_hport, view_hspeed, view_hview, view_object, view_vborder,
-    view_visible, view_vspeed, view_wport, view_wview, view_xport, view_xview, view_yport, view_yview,view_angle;
+rvt view_hborder(0, 8), view_hport(0, 8), view_hspeed(0, 8), view_hview(0, 8), view_object(0, 8), view_vborder(0, 8),
+    view_visible(false, 8), view_vspeed(0, 8), view_wport(0, 8), view_wview(0, 8), view_xport(0, 8), view_xview(0, 8), view_yport(0, 8), view_yview(0, 8), view_angle(0, 8);
 
 }
 
@@ -83,7 +83,6 @@ namespace enigma
   void roomstruct::gotome(bool gamestart)
   {
     using namespace enigma_user;
-
     // Destroy all objects
     for (enigma::iterator it = enigma::instance_list_first(); it; ++it)
     {
