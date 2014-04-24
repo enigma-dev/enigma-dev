@@ -28,7 +28,7 @@ using namespace std;
 #ifdef DEBUG_MODE
 #include "Widget_Systems/widgets_mandatory.h"
   #define ccast(tpc) { if (type != tpc) \
-    { if (type==-1) show_error("Accessing uninitialized variable",0); \
+    { if (type==-1) show_error("Accessing uninitialized variable asshole",0); \
       else show_error(string("Attempting to access ") + (type==0?"real":type==1?"string":"pointer")\
                       + " variable as " + (tpc==0?"real":tpc==1?"string":"pointer"),0); } }
 #else
@@ -253,8 +253,6 @@ variant::~variant() { }
 #undef EVCONST
 #define EVCONST
 
-
-
 /*
  * Var implementation
  */
@@ -264,6 +262,16 @@ var::operator const variant&() const { return **this; }
 
 var::var() { initialize(); }
 var::var(variant x) { initialize(); **this = x; }
+//TODO: Overload var for std::array
+var::var(variant x, size_t length, size_t length2) {
+  initialize();
+  //asm("int3");//this is not being executed because i removed all that shit since they are initialized in the room start w/e
+  for (size_t j = 0; j < length2; ++j) {
+    for (size_t i = 0; i < length; ++i) {
+      (*this)(i, j) = x; 
+    }
+  }
+}
 types_extrapolate_real_p  (var::var, { initialize(); **this = x; })
 types_extrapolate_string_p(var::var, { initialize(); **this = x; })
 
