@@ -287,20 +287,25 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
 
         /* Event Perform Code */
         wto << "\n      //Event Perform Code\n      variant myevents_perf(int type, int numb)\n      {\n";
-		
-		if (setting::inherit_objects && parent != parsed_objects.end()) {
-			wto << "        OBJ_" << parent->second->name << "::myevents_perf(type,numb);\n";
-		}
+        bool containsif;
         for (unsigned ii = 0; ii < i->second->events.size; ii++) {
-		  if (setting::inherit_objects && find(parent_defined.begin(), parent_defined.end(), ii) != parent_defined.end()) { continue; }
+          //if (setting::inherit_objects && find(parent_defined.begin(), parent_defined.end(), ii) != parent_defined.end()) { continue; }
           if  (i->second->events[ii].code != "")
           {
             //Look up the event name
             string evname = event_get_function_name(i->second->events[ii].mainId,i->second->events[ii].id);
             wto << "        if (type == " << i->second->events[ii].mainId << " && numb == " << i->second->events[ii].id << ")\n";
             wto << "          return myevent_" << evname << "();\n";
+            containsif = true;
           }
-		}
+        }
+
+        if (setting::inherit_objects && parent != parsed_objects.end()) {
+          if (containsif) {
+            wto << "        else\n";
+          }
+          wto << "          return OBJ_" << parent->second->name << "::myevents_perf(type,numb);\n";
+        }
 
         wto << "\n        return 0;\n      }\n";
 
