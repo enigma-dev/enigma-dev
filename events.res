@@ -197,14 +197,14 @@ mouseenter: 6
 	Mode: Special
 	Case: 10
 	Locals: bool $innowEnter = false;
-	Sub Check: { const bool wasin = $innowEnter; $innowEnter = position_meeting(mouse_x, mouse_y, id); return !(!$innowEnter or wasin) }
+	Sub Check: { const bool wasin = $innowEnter; $innowEnter = position_meeting(mouse_x, mouse_y, id); return !(!$innowEnter or wasin); }
 
 mouseleave: 6
 	Name: Mouse Leave
 	Mode: Special
 	Case: 11
 	Locals: bool $innowLeave = false;
-	Sub Check: { const bool wasin = $innowLeave; $innowLeave = position_meeting(mouse_x, mouse_y, id); return !($innowLeave or !wasin) }
+	Sub Check: { const bool wasin = $innowLeave; $innowLeave = position_meeting(mouse_x, mouse_y, id); return !($innowLeave or !wasin); }
 
 mouseunknown: 6
 	Name: Mouse Unknown (old? LGM doesn't even know!)
@@ -396,7 +396,7 @@ animationend: 7
 	Name: Animation End
 	Mode: Special
 	Case: 7
-	Sub Check: {return !(image_index + image_speed < sprite_get_number(sprite_index)) }
+	Sub Check: {return !(image_index + image_speed < sprite_get_number(sprite_index)); }
 
 
 # End of in-linked events
