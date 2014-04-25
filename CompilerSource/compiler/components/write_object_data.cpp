@@ -287,9 +287,8 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
 
         /* Event Perform Code */
         wto << "\n      //Event Perform Code\n      variant myevents_perf(int type, int numb)\n      {\n";
-        bool containsif;
+        bool containsif = false;
         for (unsigned ii = 0; ii < i->second->events.size; ii++) {
-          //if (setting::inherit_objects && find(parent_defined.begin(), parent_defined.end(), ii) != parent_defined.end()) { continue; }
           if  (i->second->events[ii].code != "")
           {
             //Look up the event name
