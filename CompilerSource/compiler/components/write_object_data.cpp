@@ -188,20 +188,20 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
         for (deciter ii =  i->second->locals.begin(); ii != i->second->locals.end(); ii++)
         {
           bool writeit = true; //Whether this "local" should be declared such
-		  if (setting::inherit_objects) {
-			  bool foundmatch = false;
-			  // Look to see if the parent declares this local otherwise we don't need to or it will get overridden and screwed up, eg. nulled
-			  for (po_i her = parsed_objects.find(i->second->parent); her != parsed_objects.end(); her = parsed_objects.find(her->second->parent)) {
-				for (deciter it =  her->second->locals.begin(); it != her->second->locals.end(); it++)
-				{
-					if (it->first == ii->first && it->second.prefix == ii->second.prefix && it->second.type == ii->second.type && it->second.suffix == ii->second.suffix) {
-						foundmatch = true; break;
-					}
-				}
-				if (foundmatch) { break; }
-			  }
-			  if (foundmatch) { continue; }
-		  }
+          if (setting::inherit_objects) {
+            bool foundmatch = false;
+            // Look to see if the parent declares this local otherwise we don't need to or it will get overridden and screwed up, eg. nulled
+            for (po_i her = parsed_objects.find(i->second->parent); her != parsed_objects.end(); her = parsed_objects.find(her->second->parent)) {
+              for (deciter it =  her->second->locals.begin(); it != her->second->locals.end(); it++)
+              {
+                if (it->first == ii->first && it->second.prefix == ii->second.prefix && it->second.type == ii->second.type && it->second.suffix == ii->second.suffix) {
+                  foundmatch = true; break;
+                }
+              }
+              if (foundmatch) { break; }
+            }
+            if (foundmatch) { continue; }
+          }
 		
           // If it's not explicitely defined, we must question whether it should be given a unique presence in this scope
           if (!ii->second.defined())
@@ -303,7 +303,6 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
         
         if (evmap.size())
         {
- 
           vector<int> parentremains;
           for (map<int, vector<int> >::iterator it = evgroup.begin(); it != evgroup.end(); it++) {
             int mid = it->first;
