@@ -534,7 +534,7 @@ string event_get_super_check_function(int mid, int id) {
 string event_get_sub_check_condition(int mid, int id) {
   event_info* ei = event_access(mid,id);
   const string res = evres_code_substitute(ei->sub, id, ei->par2type);
-  return res[0] == '{' ? res : "if (!(" + res + ")) return 0;";
+  return res[0] == '{' ? res : "return (" + res + ");";
 }
 
 // Does this event belong on the list of events to execute?
