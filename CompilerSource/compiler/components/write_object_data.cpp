@@ -316,12 +316,10 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
                 if (tt == evmap.end()) continue;
                 for (map<int, vector<int> >::iterator pit = tt->second.begin(); pit != tt->second.end(); pit++) {
                   int pmid = pit->first;
-                  for (vector<int>::iterator pvit = pit->second.begin(); pvit != pit->second.end(); pvit++) {
-                    int pid = her->second->events[*pvit].id;
-                    if (pmid == mid) {
+                  if (pmid == mid) {
+                    for (vector<int>::iterator pvit = pit->second.begin(); pvit != pit->second.end(); pvit++) {
+                      int pid = her->second->events[*pvit].id;
                       wto << event_forge_group_code(pmid, pid) << "\n";
-                    } else {
-                      //parentremains.push_back(*et);
                     }
                   }
                 }
@@ -329,14 +327,6 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
             }
             wto << "      }\n    ";
           }
-          /*
-          for (vector<int>::iterator it = parentremains.begin(); it != parentremains.end(); it++) {
-            int mid = her->second->events[it].mainId,
-                 id = her->second->events[it].id;
-            wto << "  void myevent_" << event_stacked_get_root_name(mid) << "()\n      {\n";
-            wto << event_forge_group_code(mid, id);
-            wto << "      }\n    ";
-          }*/
         }
 		
         /**** Now we write the callable unlinker. Its job is to disconnect the instance for destroy.
