@@ -58,6 +58,7 @@ inline bool iscomment(const string &n) {
 }
 
 struct cspair { string c, s; };
+typedef map<int, map<int, cspair> > cspairmap;
 int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
 {
   //NEXT FILE ----------------------------------------
@@ -104,6 +105,7 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
 	  vector<int> parsed(0);
 	  // Hold an iterator for our parent for later usage
 	  po_i parent = parsed_objects.find(i->second->parent);
+    cspairmap nemap; // Keep track of events that need added to honor et_stacked
 	  // Hold a map of all the
 	  map<int, vector<unsigned> > parent_definitions;
 	  vector<unsigned> parent_defined;
@@ -245,19 +247,18 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
 
         // Now we output all the events this object uses
         // Defaulted events were already added into this array.
-        map<int, cspair> nemap; // Keep track of events that need added to honor et_stacked
-        map<int, cspair> semap; // Keep track of events that need added to honor et_stacked
+        map<int, cspair> nepairs;
         for (unsigned ii = 0; ii < i->second->events.size; ii++) {
           // If the parent also wrote this grouped event for instance some input events in the parent and some in the child, then we need to call the super method
           bool found = false;
           if (setting::inherit_objects) {
             for (po_i her = parsed_objects.find(i->second->parent); her != parsed_objects.end(); her = parsed_objects.find(her->second->parent)) {
               for (unsigned xx = 0; xx < her->second->events.size; xx++) {
-                if (her->second->events[xx].mainId == i->second->events[ii].mainId && her->second->events[xx].code != "") {
+                if (her->second->events[xx].mainId == i->second->events[ii].mainId && her->second->events[xx].id == i->second->events[ii].id && her->second->events[xx].code != "") {
                    found = true; break;
                 }
               }
-              if (found) { break; }
+              if (found) break;
             }
           }
 		
@@ -266,17 +267,13 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
             //Look up the event name
             string evname = event_get_function_name(i->second->events[ii].mainId,i->second->events[ii].id);
             if (event_is_instance(i->second->events[ii].mainId,i->second->events[ii].id)) {
-              if (!found) {
-                nemap[i->second->events[ii].mainId].c += (event_has_super_check(i->second->events[ii].mainId,i->second->events[ii].id) ?
+              if (!found || !setting::inherit_objects || parent == parsed_objects.end()) {
+                nepairs[i->second->events[ii].mainId].s = event_stacked_get_root_name(i->second->events[ii].mainId);
+                nepairs[i->second->events[ii].mainId].c += event_has_sub_check(i->second->events[ii].mainId, i->second->events[ii].id) ? "          if (myevent_" + evname + "_subcheck()) {\n" : "";
+                nepairs[i->second->events[ii].mainId].c += (event_has_super_check(i->second->events[ii].mainId,i->second->events[ii].id) ?
                   "        if (" + event_get_super_check_condition(i->second->events[ii].mainId,i->second->events[ii].id) + ") myevent_" : "            myevent_") + evname + "();\n",
-                nemap[i->second->events[ii].mainId].s = event_stacked_get_root_name(i->second->events[ii].mainId);
+                nepairs[i->second->events[ii].mainId].c += event_has_sub_check(i->second->events[ii].mainId, i->second->events[ii].id) ? "          }\n" : "";
               }
-
-              semap[i->second->events[ii].mainId].c += event_has_sub_check(i->second->events[ii].mainId, i->second->events[ii].id) ? "          if (myevent_" + evname + "_subcheck()) {\n" : "";
-              semap[i->second->events[ii].mainId].c += (event_has_super_check(i->second->events[ii].mainId,i->second->events[ii].id) ?
-                "        if (" + event_get_super_check_condition(i->second->events[ii].mainId,i->second->events[ii].id) + ") myevent_" : "            myevent_") + evname + "();\n",
-              semap[i->second->events[ii].mainId].c += event_has_sub_check(i->second->events[ii].mainId, i->second->events[ii].id) ? "          }\n" : "";
-              semap[i->second->events[ii].mainId].s = event_stacked_get_root_name(i->second->events[ii].mainId);
             }
             wto << "    variant myevent_" << evname << "();\n    ";
             if (event_has_sub_check(i->second->events[ii].mainId, i->second->events[ii].id)) {
@@ -284,6 +281,7 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
             }
           }
         }
+        nemap[i->second->id] = nepairs;
 
         /* Event Perform Code */
         wto << "\n      //Event Perform Code\n      variant myevents_perf(int type, int numb)\n      {\n";
@@ -311,14 +309,25 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
         wto << "\n    //Locals to instances of this object\n    ";
 
         wto << "\n    \n    // Grouped event bases\n    ";
-        if (semap.size())
+        
+        if (nemap.size())
         {
-          for (map<int,cspair>::iterator it = semap.begin(); it != semap.end(); it++) {
+          for (map<int, cspair>::iterator it = nepairs.begin(); it != nepairs.end(); it++) {
             wto << "  void myevent_" << it->second.s << "()\n      {\n";
-            wto << it->second.c << "      }\n    ";
+            wto << it->second.c << "\n";
+              
+            for (po_i her = parsed_objects.find(i->second->parent); her != parsed_objects.end(); her = parsed_objects.find(her->second->parent)) {
+              cspairmap::iterator tt = nemap.find(her->second->id);
+              if (tt == nemap.end()) continue;
+              map<int, cspair>::iterator et = tt->second.find(it->first);
+              if (et == tt->second.end()) continue;
+              wto << et->second.c << "\n";
+          
+            }
+            wto << "      }\n    ";
           }
+
         }
-		
 		
         /**** Now we write the callable unlinker. Its job is to disconnect the instance for destroy.
         * @ * This is an important component that tracks multiple pieces of the instance. These pieces
@@ -347,8 +356,8 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
                 wto << "      enigma::inst_iter *ENOBJ_ITER_myevent_" << event_get_function_name(i->second->events[ii].mainId,i->second->events[ii].id) << ";\n";
             }
 		  }
-          for (map<int,cspair>::iterator it = nemap.begin(); it != nemap.end(); it++) // The stacked ones should have their root exported
-            wto << "      enigma::inst_iter *ENOBJ_ITER_myevent_" << it->second.s << ";\n";
+          for (map<int, cspair>::iterator it = nepairs.begin(); it != nepairs.end(); it++) // The stacked ones should have their root exported
+           wto << "      enigma::inst_iter *ENOBJ_ITER_myevent_" << it->second.s << ";\n";
 
         //This is the actual call to remove the current instance from all linked records before destroying it.
         wto << "\n    void unlink()\n    {\n";
@@ -373,7 +382,8 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
                 wto << "      enigma::event_" << evname << "->unlink(ENOBJ_ITER_myevent_" << evname << ");\n";
             }
 		  }
-          for (map<int,cspair>::iterator it = nemap.begin(); it != nemap.end(); it++) // The stacked ones should have their root exported
+
+          for (map<int, cspair>::iterator it = nepairs.begin(); it != nepairs.end(); it++) // The stacked ones should have their root exported
             wto << "      enigma::event_" << it->second.s << "->unlink(ENOBJ_ITER_myevent_" << it->second.s << ");\n";
           wto << "    }\n    ";
 
@@ -443,8 +453,8 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
 				  }
                 }
 			  }
-              for (map<int,cspair>::iterator it = nemap.begin(); it != nemap.end(); it++)
-                wto << "      ENOBJ_ITER_myevent_" << it->second.s << " = enigma::event_" << it->second.s << "->add_inst(this);\n";
+          for (map<int, cspair>::iterator it = nepairs.begin(); it != nepairs.end(); it++) // The stacked ones should have their root exported
+              wto << "      ENOBJ_ITER_myevent_" << it->second.s << " = enigma::event_" << it->second.s << "->add_inst(this);\n";
 				
           wto << "    }\n";
 
@@ -470,7 +480,7 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
                   wto << "      delete ENOBJ_ITER_myevent_" << event_get_function_name(i->second->events[ii].mainId,i->second->events[ii].id) << ";\n";
               }
 			}
-            for (map<int,cspair>::iterator it = nemap.begin(); it != nemap.end(); it++) // The stacked ones should have their root exported
+          for (map<int, cspair>::iterator it = nepairs.begin(); it != nepairs.end(); it++) // The stacked ones should have their root exported
               wto << "      delete ENOBJ_ITER_myevent_" << it->second.s << ";\n";
           wto << "    }\n";
 
