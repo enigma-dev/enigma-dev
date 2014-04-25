@@ -169,16 +169,15 @@ int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
       evfit it = used_events.find(event_is_instance(mid,id) ? event_stacked_get_root_name(mid) : event_get_function_name(mid,id));
       if (it == used_events.end()) continue;
       if (mid == 7 && (id >= 10 && id <= 25)) continue;   //User events, don't want to be run in the event sequence. TODO: Remove hard-coded values.
+      string seqcode = event_forge_sequence_code(mid,id,it->first);
       if (mid == 8 && id == 64)
       {
-          string seqcode = event_forge_sequence_code(mid,id,it->first);
           if (seqcode != "")
             using_gui = true;
 
           continue;       // Don't want gui loop to be added
       }
 
-      string seqcode = event_forge_sequence_code(mid,id,it->first);
       if (seqcode != "")
         wto << seqcode,
         wto << "    " << endl,
