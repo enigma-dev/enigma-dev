@@ -310,15 +310,17 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
             for (vector<int>::iterator vit = it->second.begin(); vit != it->second.end(); vit++) {
               int id = i->second->events[*vit].id;
               wto << event_forge_group_code(mid, id);
-              for (po_i her = parsed_objects.find(i->second->parent); her != parsed_objects.end(); her = parsed_objects.find(her->second->parent)) {
-                evpairmap::iterator tt = evmap.find(her->second->id);
-                if (tt == evmap.end()) continue;
-                for (map<int, vector<int> >::iterator pit = tt->second.begin(); pit != tt->second.end(); pit++) {
-                  int pmid = pit->first;
-                  if (pmid == mid) {
-                    for (vector<int>::iterator pvit = pit->second.begin(); pvit != pit->second.end(); pvit++) {
-                      int pid = her->second->events[*pvit].id;
-                      wto << event_forge_group_code(pmid, pid) << "\n";
+              if (setting::inherit_objects && parent != parsed_objects.end()) {
+                for (po_i her = parsed_objects.find(i->second->parent); her != parsed_objects.end(); her = parsed_objects.find(her->second->parent)) {
+                  evpairmap::iterator tt = evmap.find(her->second->id);
+                  if (tt == evmap.end()) continue;
+                  for (map<int, vector<int> >::iterator pit = tt->second.begin(); pit != tt->second.end(); pit++) {
+                    int pmid = pit->first;
+                    if (pmid == mid) {
+                      for (vector<int>::iterator pvit = pit->second.begin(); pvit != pit->second.end(); pvit++) {
+                        int pid = her->second->events[*pvit].id;
+                        wto << event_forge_group_code(pmid, pid) << "\n";
+                      }
                     }
                   }
                 }
