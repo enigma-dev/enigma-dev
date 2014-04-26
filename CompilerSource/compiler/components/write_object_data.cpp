@@ -250,7 +250,9 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
                 int mid = i->second->events[ii].mainId,
                     sid = i->second->events[ii].id;
                 if (her->second->events[xx].mainId == mid && her->second->events[xx].id == sid && (her->second->events[xx].code.length() > 0
-                || event_has_suffix_code(mid, sid) || event_has_prefix_code(mid, sid) || event_has_const_code(mid, sid))) {
+                || event_has_suffix_code(mid, sid) || event_has_prefix_code(mid, sid) || event_has_const_code(mid, sid) || event_has_default_code(mid,sid)
+                || event_has_iterator_unlink_code(mid,sid) || event_has_iterator_delete_code(mid,sid) || event_has_iterator_declare_code(mid,sid) ||
+                event_has_iterator_initialize_code(mid,sid))) {
                     found = true;
                 }
               }
