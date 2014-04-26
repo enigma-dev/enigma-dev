@@ -247,8 +247,10 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
           if (setting::inherit_objects && parent != parsed_objects.end()) {
             for (po_i her = parsed_objects.find(i->second->parent); her != parsed_objects.end(); her = parsed_objects.find(her->second->parent)) {
               for (unsigned xx = 0; xx < her->second->events.size; xx++) {
-                //NOTE: This really should be checking && her->second->events[xx].code.length() > 0 but I don't know it breaks begin step and will cause children to get two begin steps.
-                if (her->second->events[xx].mainId == i->second->events[ii].mainId && her->second->events[xx].id == i->second->events[ii].id) {
+                int mid = i->second->events[ii].mainId,
+                    sid = i->second->events[ii].id;
+                if (her->second->events[xx].mainId == mid && her->second->events[xx].id == sid && (her->second->events[xx].code.length() > 0
+                || event_has_suffix_code(mid, sid) || event_has_prefix_code(mid, sid) || event_has_const_code(mid, sid))) {
                     found = true;
                 }
               }
@@ -545,7 +547,7 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
           bool defined_inherited = false;
           if (setting::inherit_objects) {
             parent = parsed_objects.find(i->second->parent);
-            if (parent != parsed_objects.end() && std::find(parent_undefined.begin(), parent_undefined.end(), ii) != parent_undefined.end()) {
+            if (parent != parsed_objects.end() && std::find(parent_undefined.begin(), parent_undefined.end(), ii) == parent_undefined.end()) {
                 wto << "#define event_inherited OBJ_" + parent->second->name + "::myevent_" + evname + "\n";
                   defined_inherited = true;
             }
