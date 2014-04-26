@@ -165,8 +165,16 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
                   if (addls[pos] == '[' or addls[pos] == '(') cnt++;
                   else if (addls[pos] == ')' or addls[pos] == ']') cnt--;
                 bool redundant = false;
-                for (size_t j = 0; j < i->second->initializers.size(); j++)
-                  if (i->second->initializers[j].first == name) { redundant = true; break; }
+                if (setting::inherit_objects && parent != parsed_objects.end()) {
+                  for (po_i her = i; her != parsed_objects.end(); her = parsed_objects.find(her->second->parent)) {
+                    for (size_t j = 0; j < her->second->initializers.size(); j++)
+                      if (her->second->initializers[j].first == name) { redundant = true; break; }
+                    if (redundant) { break; }
+                  }
+                } else {
+                    for (size_t j = 0; j < i->second->initializers.size(); j++)
+                      if (i->second->initializers[j].first == name) { redundant = true; break; }
+                }
                 if (!redundant)
                   i->second->initializers.push_back(initpair(name,addls.substr(spos,pos-spos)));
                 pos--; continue;
