@@ -344,7 +344,9 @@ nomorehealth: 7
 	Name: No More Health
 	Mode: Special
 	Case: 9
-	Sub Check: health <= 0
+  Locals: bool $out_of_health = 0;
+	Sub Check: { bool OoH = $out_of_health; if (health <= 0) { $out_of_health = true; return !OoH; } $out_of_health = false; return false; }
+  Suffix: if (health > 0) { $out_of_health = 0; }
 
 
 # General purpose once again!
