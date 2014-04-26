@@ -1,29 +1,19 @@
-/********************************************************************************\
-**                                                                              **
-**  Copyright (C) 2008-2011 Josh Ventura                                        **
-**                                                                              **
-**  This file is a part of the ENIGMA Development Environment.                  **
-**                                                                              **
-**                                                                              **
-**  ENIGMA is free software: you can redistribute it and/or modify it under the **
-**  terms of the GNU General Public License as published by the Free Software   **
-**  Foundation, version 3 of the license or any later version.                  **
-**                                                                              **
-**  This application and its source code is distributed AS-IS, WITHOUT ANY      **
-**  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS   **
-**  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more       **
-**  details.                                                                    **
-**                                                                              **
-**  You should have recieved a copy of the GNU General Public License along     **
-**  with this code. If not, see <http://www.gnu.org/licenses/>                  **
-**                                                                              **
-**  ENIGMA is an environment designed to create games and other programs with a **
-**  high-level, fully compilable language. Developers of ENIGMA or anything     **
-**  associated with ENIGMA are in no way responsible for its users or           **
-**  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **
-**                                                                              **
-\********************************************************************************/
+/** Copyright (C) 2008-2011 Josh Ventura
+***
+*** This file is a part of the ENIGMA Development Environment.
+***
+*** ENIGMA is free software: you can redistribute it and/or modify it under the
+*** terms of the GNU General Public License as published by the Free Software
+*** Foundation, version 3 of the license or any later version.
+***
+*** This application and its source code is distributed AS-IS, WITHOUT ANY
+*** WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+*** FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+*** details.
+***
+*** You should have received a copy of the GNU General Public License along
+*** with this code. If not, see <http://www.gnu.org/licenses/>
+**/
 
 #include <map>
 #include <math.h>
@@ -71,7 +61,7 @@ background_vtiled, background_hspeed, background_vspeed,background_alpha,backgro
 int view_current = 0;
 int view_enabled = 0;
 rvt view_hborder, view_hport, view_hspeed, view_hview, view_object, view_vborder,
-    view_visible, view_vspeed, view_wport, view_wview, view_xport, view_xview, view_yport, view_yview,view_angle;
+    view_visible, view_vspeed, view_wport, view_wview, view_xport, view_xview, view_yport, view_yview, view_angle;
 
 }
 
@@ -83,14 +73,13 @@ namespace enigma
   void roomstruct::gotome(bool gamestart)
   {
     using namespace enigma_user;
-
     // Destroy all objects
     for (enigma::iterator it = enigma::instance_list_first(); it; ++it)
     {
       it->myevent_roomend();
-	  // Destroy the object if it is not persistent
+    // Destroy the object if it is not persistent
       if (!((object_planar*)*it)->persistent)
-		instance_destroy(it->id, false);
+    instance_destroy(it->id, false);
     }
     perform_callbacks_clean_up_roomend();
 
@@ -109,7 +98,7 @@ namespace enigma
     }
 
     //Backgrounds start
-    for (int i=0;i<8;i++)
+    for (unsigned i=0;i<8;i++)
     {
       background_visible[i] = backs[i].visible;
       background_foreground[i] = backs[i].foreground;
@@ -136,7 +125,7 @@ namespace enigma
 
     view_enabled = views_enabled;
 
-    for (int i=0;i<8;i++)
+    for (unsigned i=0;i<8;i++)
     {
       view_xview[i] = views[i].area_x; view_yview[i] = views[i].area_y; view_wview[i] = views[i].area_w; view_hview[i] = views[i].area_h;
       view_xport[i] = views[i].port_x; view_yport[i] = views[i].port_y; view_wport[i] = views[i].port_w; view_hport[i] = views[i].port_h;
@@ -172,26 +161,26 @@ namespace enigma
 
     instance_event_iterator = new inst_iter(NULL,NULL,NULL);
 
-	// Fire the create event of all the new instances
+  // Fire the create event of all the new instances
     for (int i = 0; i < instancecount; i++)
       is[i]->myevent_create();
 
-	// instance create code should be added here or occur at this exact moment in time, but guess what the code
-	// isn't here, so where the fuck is it? and no not the create event, the instance create code from the room editor
-	// WHERE THE FUCK IS IT?
+  // instance create code should be added here or occur at this exact moment in time, but guess what the code
+  // isn't here, so where the fuck is it? and no not the create event, the instance create code from the room editor
+  // WHERE THE FUCK IS IT?
 
-	// Fire the game start event for all the new instances, persistent objects don't matter since this is the first time
-	// the game ran they won't even exist yet
+  // Fire the game start event for all the new instances, persistent objects don't matter since this is the first time
+  // the game ran they won't even exist yet
     if (gamestart)
     for (int i = 0; i < instancecount; i++)
       is[i]->myevent_gamestart();
 
-	// Fire the rooms creation code
-	if (createcode)
+  // Fire the rooms creation code
+  if (createcode)
        createcode();
 
-	// Fire the room start event for all persistent objects still kept alive and all the new instances
-	for (enigma::iterator it = enigma::instance_list_first(); it; ++it)
+  // Fire the room start event for all persistent objects still kept alive and all the new instances
+  for (enigma::iterator it = enigma::instance_list_first(); it; ++it)
     {
       it->myevent_roomstart();
     }
@@ -226,11 +215,11 @@ namespace enigma_user {
 
 #if DEBUG_MODE || (defined(SHOW_ERRORS) && SHOW_ERRORS)
   #define errcheck(indx,err,v) \
-	if (unsigned(indx) >= unsigned(enigma::room_idmax) or !enigma::roomdata[indx]) \
-		return (show_error(err,0), (v))
+  if (unsigned(indx) >= unsigned(enigma::room_idmax) or !enigma::roomdata[indx]) \
+    return (show_error(err,0), (v))
   #define errcheck_o(indx,err) \
-	if (unsigned(indx) >= unsigned(enigma::room_loadtimecount)) \
-		return (show_error(err,0), 0)
+  if (unsigned(indx) >= unsigned(enigma::room_loadtimecount)) \
+    return (show_error(err,0), 0)
 #else
   #define errcheck(indx,err,v)
   #define errcheck_o(indx,err)
@@ -241,36 +230,36 @@ namespace enigma_user
 
 int room_goto(int indx)
 {
-	errcheck(indx,"Attempting to go to nonexisting room", 0);
-	enigma::room_switching_id = indx;
-	enigma::room_switching_restartgame = false;
-	return 1;
+  errcheck(indx,"Attempting to go to nonexisting room", 0);
+  enigma::room_switching_id = indx;
+  enigma::room_switching_restartgame = false;
+  return 1;
 }
 
 int room_restart()
 {
-	int indx=(int)room.rval.d;
-	errcheck(indx, "Is this some kind of joke?", 0);
-	enigma::room_switching_id = indx;
-	enigma::room_switching_restartgame = false;
-	return 1;
+  int indx=(int)room.rval.d;
+  errcheck(indx, "Is this some kind of joke?", 0);
+  enigma::room_switching_id = indx;
+  enigma::room_switching_restartgame = false;
+  return 1;
 }
 
 string room_get_name(int indx)
 {
-	errcheck(indx,"Room index out of range", "");
-	return enigma::roomdata[indx]->name;
+  errcheck(indx,"Room index out of range", "");
+  return enigma::roomdata[indx]->name;
 }
 
 int room_goto_absolute(int indx)
 {
-	errcheck_o(indx,"Room index out of range");
-	enigma::roomstruct *rit = enigma::roomorder[indx];
-	int index = rit->id;
+  errcheck_o(indx,"Room index out of range");
+  enigma::roomstruct *rit = enigma::roomorder[indx];
+  int index = rit->id;
 
-	enigma::room_switching_id = index;
-	enigma::room_switching_restartgame = false;
-	return 1;
+  enigma::room_switching_id = index;
+  enigma::room_switching_restartgame = false;
+  return 1;
 }
 
 #undef room_count
@@ -689,32 +678,38 @@ int view_set(int vind, int vis, int xview, int yview, int wview, int hview, int 
 }
 
 int window_views_mouse_get_x() {
-	for (int i = 0; i < 8; i++) {
-		if (view_visible[i]) {
-			return window_mouse_get_x() + view_xview[i];
-		}
-	}
-	return window_mouse_get_x();
+  if (view_enabled) {
+    for (int i = 0; i < 8; i++) {
+      if (view_visible[i]) {
+        return window_mouse_get_x() + view_xview[i];
+      }
+    } 
+  }
+  return window_mouse_get_x();
 }
 
 int window_views_mouse_get_y() {
-	for (int i = 0; i < 8; i++) {
-		if (view_visible[i]) {
-			return window_mouse_get_y() + view_yview[i];
-		}
-	}
-	return window_mouse_get_y();
+  if (view_enabled) {
+    for (int i = 0; i < 8; i++) {
+      if (view_visible[i]) {
+        return window_mouse_get_y() + view_yview[i];
+      }
+    }
+  }
+  return window_mouse_get_y();
 }
 
 void window_views_mouse_set(int x, int y) {
-	for (int i = 0; i < 8; i++) {
-		if (view_visible[i]) {
-			window_view_mouse_set(i, x, y);
-			return;
-		}
-	}
-	window_mouse_set(x, y);
-	return;
+  if (view_enabled) {
+    for (int i = 0; i < 8; i++) {
+      if (view_visible[i]) {
+        window_view_mouse_set(i, x, y);
+        return;
+      }
+    }
+  }
+  window_mouse_set(x, y);
+  return;
 }
 
 }
@@ -727,12 +722,12 @@ namespace enigma
     using namespace enigma_user;
     mouse_xprevious = mouse_x;
     mouse_yprevious = mouse_y;
-	//NOTE: The way these functions are above they allow the mouse_x and mouse_y to go outside of the room like it did in game maker 8.1, Studio
-	//will now stop updating the cursor if it goes outside the window, I really see no reason why they did that and ENIGMA used to it too in the old version
-	//of this code that was broken and did not work properly, if someone complains it will be readded but for now it makes no sense to do it that way so I won't. - Robert B. Colton
+  //NOTE: The way these functions are above they allow the mouse_x and mouse_y to go outside of the room like it did in game maker 8.1, Studio
+  //will now stop updating the cursor if it goes outside the window, I really see no reason why they did that and ENIGMA used to it too in the old version
+  //of this code that was broken and did not work properly, if someone complains it will be readded but for now it makes no sense to do it that way so I won't. - Robert B. Colton
     mouse_x = window_views_mouse_get_x();
     mouse_y = window_views_mouse_get_y();
-	/* This is part of the old code that was used to set mouse_x and mouse_y before I added the actual function from game maker 8.1, it may need factored in above
+  /* This is part of the old code that was used to set mouse_x and mouse_y before I added the actual function from game maker 8.1, it may need factored in above
 but this code also didn't work and caused the mouse coordinate to go all over the place, the current version above works best so far.
     if (view_enabled) {
       for (int i = 0; i < 8; i++) {
@@ -743,8 +738,8 @@ but this code also didn't work and caused the mouse coordinate to go all over th
             break;
           }
         }
-	  }
-	}
+    }
+  }
 */
   }
   void rooms_switch()
@@ -754,7 +749,7 @@ but this code also didn't work and caused the mouse coordinate to go all over th
       bool local_room_switching_restartgame = room_switching_restartgame;
       room_switching_id = -1;
       room_switching_restartgame = false;
-    	enigma::roomdata[local_room_switching_id]->gotome(local_room_switching_restartgame);
+      enigma::roomdata[local_room_switching_id]->gotome(local_room_switching_restartgame);
     }
   }
   void game_start() {
