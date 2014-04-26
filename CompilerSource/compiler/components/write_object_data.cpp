@@ -247,13 +247,14 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
           if (setting::inherit_objects && parent != parsed_objects.end()) {
             for (po_i her = parsed_objects.find(i->second->parent); her != parsed_objects.end(); her = parsed_objects.find(her->second->parent)) {
               for (unsigned xx = 0; xx < her->second->events.size; xx++) {
-                if (her->second->events[xx].mainId == i->second->events[ii].mainId && her->second->events[xx].id == i->second->events[ii].id && her->second->events[xx].code != "") {
+                //NOTE: This really should be checking && her->second->events[xx].code.length() > 0 but I don't know it breaks begin step and will cause children to get two begin steps.
+                if (her->second->events[xx].mainId == i->second->events[ii].mainId && her->second->events[xx].id == i->second->events[ii].id) {
                     found = true;
                 }
               }
               if (found) break;
             }
-            if (found) parent_undefined.push_back(ii);
+            if (!found) parent_undefined.push_back(ii);
           } else {
             parent_undefined.push_back(ii);
           }
@@ -556,10 +557,6 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
                 cout << "DBGMSG 4-3" << endl;
                   if (event_has_sub_check(mid, id))
                     wto << event_get_sub_check_condition(mid, id) << endl;
-                  if (event_has_const_code(mid, id))
-                    wto << event_get_const_code(mid, id) << endl;
-                  if (event_has_prefix_code(mid, id))
-                    wto << event_get_prefix_code(mid, id) << endl;
             wto << "\n}\n";
           }
                         
@@ -568,7 +565,10 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
               wto << "variant enigma::OBJ_" << i->second->name << "::myevent_" << evname << "()\n{\n  ";
                 if (!event_execution_uses_default(i->second->events[ii].mainId,i->second->events[ii].id))
                   wto << "enigma::temp_event_scope ENIGMA_PUSH_ITERATOR_AND_VALIDATE(this);\n  ";
-
+                  if (event_has_const_code(mid, id))
+                    wto << event_get_const_code(mid, id) << endl;
+                  if (event_has_prefix_code(mid, id))
+                    wto << event_get_prefix_code(mid, id) << endl;
           cout << "DBGMSG 4-4" << endl;
                 print_to_file(i->second->events[ii].code,i->second->events[ii].synt,i->second->events[ii].strc,i->second->events[ii].strs,2,wto);
                 if (event_has_suffix_code(mid, id))

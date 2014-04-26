@@ -396,7 +396,7 @@ animationend: 7
 	Name: Animation End
 	Mode: Special
 	Case: 7
-	Sub Check: {return !(image_index + image_speed < sprite_get_number(sprite_index)); }
+	Sub Check: { return !(image_index + image_speed < sprite_get_number(sprite_index)); }
 
 
 # End of in-linked events
