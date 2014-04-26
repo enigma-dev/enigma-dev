@@ -677,11 +677,14 @@ int view_set(int vind, int vis, int xview, int yview, int wview, int hview, int 
     return 1;
 }
 
+//NOTE: The way these functions are above they allow the mouse_x and mouse_y to go outside of the room like it did in game maker 8.1, Studio
+//will now stop updating the cursor if it goes outside the window, I really see no reason why they did that and ENIGMA used to do it too in the old version
+//of this code that was broken and did not work properly, if someone complains it will be readded but for now it makes no sense to do it that way so I won't. - Robert B. Colton
 int window_views_mouse_get_x() {
   if (view_enabled) {
     for (int i = 0; i < 8; i++) {
       if (view_visible[i]) {
-        return window_mouse_get_x() + view_xview[i];
+        return view_xview[i]+((window_mouse_get_x()-view_xport[i])/(double)view_wport[i])*view_wview[i];
       }
     } 
   }
@@ -692,7 +695,7 @@ int window_views_mouse_get_y() {
   if (view_enabled) {
     for (int i = 0; i < 8; i++) {
       if (view_visible[i]) {
-        return window_mouse_get_y() + view_yview[i];
+        return view_yview[i]+((window_mouse_get_y()-view_yport[i])/(double)view_hport[i])*view_hview[i];
       }
     }
   }
@@ -722,25 +725,9 @@ namespace enigma
     using namespace enigma_user;
     mouse_xprevious = mouse_x;
     mouse_yprevious = mouse_y;
-  //NOTE: The way these functions are above they allow the mouse_x and mouse_y to go outside of the room like it did in game maker 8.1, Studio
-  //will now stop updating the cursor if it goes outside the window, I really see no reason why they did that and ENIGMA used to it too in the old version
-  //of this code that was broken and did not work properly, if someone complains it will be readded but for now it makes no sense to do it that way so I won't. - Robert B. Colton
+
     mouse_x = window_views_mouse_get_x();
     mouse_y = window_views_mouse_get_y();
-  /* This is part of the old code that was used to set mouse_x and mouse_y before I added the actual function from game maker 8.1, it may need factored in above
-but this code also didn't work and caused the mouse coordinate to go all over the place, the current version above works best so far.
-    if (view_enabled) {
-      for (int i = 0; i < 8; i++) {
-        if (view_visible[i]) {
-          if (mouse_x >= view_xport[i] && mouse_x < view_xport[i]+view_wport[i] &&  mouse_y >= view_yport[i] && mouse_y < view_yport[i]+view_hport[i]) {
-           // mouse_x = view_xview[i]+((mouse_x-view_xport[i])/(double)view_wport[i])*view_wview[i];
-           // mouse_y = view_yview[i]+((mouse_y-view_yport[i])/(double)view_hport[i])*view_hview[i];
-            break;
-          }
-        }
-    }
-  }
-*/
   }
   void rooms_switch()
   {
