@@ -117,7 +117,7 @@ std::string registry_read_string_ext(std::string key, std::string name)
 		return "";
 
 	// Read value and close key
-	RegQueryValueEx(hKey, (LPCTSTR)name.c_str(), 0, &type, buffer, &len);
+	RegQueryValueEx(hKey, (LPCTSTR)name.c_str(), 0, &type, (LPBYTE)buffer, &len);
 	RegCloseKey(hKey);
 
 	return buffer;

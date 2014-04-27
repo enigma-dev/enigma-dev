@@ -91,12 +91,12 @@ bool ini_section_exists(std::string section)
 
 void ini_key_delete(std::string section, std::string key)
 {
-
+	WritePrivateProfileString(section.c_str(), key.c_str(), NULL, iniFilename.c_str());
 }
 
 void ini_section_delete(std::string section)
 {
-
+  WritePrivateProfileString(section.c_str(), NULL, NULL, iniFilename.c_str());
 }
 
 /* OS Specific; should be moved */
