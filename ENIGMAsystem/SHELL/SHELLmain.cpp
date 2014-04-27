@@ -28,6 +28,10 @@
 #include "Universal_System/var4.h"
 #include "Universal_System/dynamic_args.h"
 
+#ifdef DEBUG_MODE
+#include "Universal_System/debugscope.h"
+#endif
+
 #include "Universal_System/mathnc.h"
 #include "Universal_System/estring.h"
 #include "Universal_System/bufferstruct.h"

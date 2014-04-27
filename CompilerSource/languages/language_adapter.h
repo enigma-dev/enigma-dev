@@ -37,8 +37,8 @@ struct language_adapter {
   virtual int compile_parseAndLink(EnigmaStruct*,parsed_script*[]) = 0;
   virtual int compile_parseSecondary(map<int,parsed_object*>&,parsed_script*[],int scrcount,map<int,parsed_room*>&,parsed_object*) = 0;
   virtual int compile_writeGlobals(EnigmaStruct*,parsed_object*) = 0;
-  virtual int compile_writeObjectData(EnigmaStruct*,parsed_object*) = 0;
-  virtual int compile_writeObjAccess(map<int,parsed_object*>&,parsed_object*) = 0;
+  virtual int compile_writeObjectData(EnigmaStruct*,parsed_object*,int mode) = 0;
+  virtual int compile_writeObjAccess(map<int,parsed_object*>&,parsed_object*,int mode) = 0;
   virtual int compile_writeFontInfo(EnigmaStruct* es) = 0;
   virtual int compile_writeRoomData(EnigmaStruct* es,parsed_object *EGMglobal) = 0;
   virtual int compile_writeShaderData(EnigmaStruct* es,parsed_object *EGMglobal) = 0;

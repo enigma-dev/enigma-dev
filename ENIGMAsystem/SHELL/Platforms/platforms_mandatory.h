@@ -52,7 +52,7 @@ namespace enigma_user
 // This is used with roomsystem
 void window_default();
 
-// These two are a surprisingly integral part of the system
+// These four are a surprisingly integral part of the system
 int window_mouse_get_x();
 int window_mouse_get_y();
 void window_view_mouse_set(int id, int x, int y);

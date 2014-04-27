@@ -45,10 +45,22 @@ static bool   gs_form_canceled;
 static string gs_str_submitted;
 static string gs_but1, gs_but2, gs_but3;
 
+#ifdef DEBUG_MODE
+#include "Universal_System/var4.h"
+#include "Universal_System/resource_data.h"
+#include "Universal_System/object.h"
+#include "Universal_System/debugscope.h"
+#endif
+
 void show_error(string errortext,const bool fatal)
 {
+  #ifdef DEBUG_MODE
+  if (MessageBox(NULL,("Error in scope: " + enigma::scope_name + " for object '" + enigma_user::object_get_name(enigma::id_current) + "': \r\n"+errortext).c_str(),"Error",MB_ABORTRETRYIGNORE | MB_ICONERROR)==IDABORT)
+    exit(0);
+  #else
   if (MessageBox(NULL,("Error in some event or another for some object: \r\n"+errortext).c_str(),"Error",MB_ABORTRETRYIGNORE | MB_ICONERROR)==IDABORT)
     exit(0);
+  #endif
 
   if (fatal)
     printf("FATAL ERROR: %s\n",errortext.c_str()),
