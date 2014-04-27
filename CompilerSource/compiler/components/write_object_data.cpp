@@ -56,8 +56,11 @@ inline string event_forge_group_code(int mainId, int id) {
   return ret;
 }
 
+// modes: 0=run, 1=debug, 2=design, 3=compile
+enum { emode_run, emode_debug, emode_design, emode_compile, emode_rebuild };
+
 typedef map<int, map<int, vector<int> > > evpairmap;
-int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
+int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, int mode)
 {
   //NEXT FILE ----------------------------------------
   //Object declarations: object classes/names and locals.
@@ -527,6 +530,9 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
         comma = ", ";
       }
       wto << ")\n{\n  ";
+      if (mode == emode_debug) {
+        wto << "enigma::debug_scope $current_scope(\"script '" << es->scripts[i].name << "'\");\n";
+      }
       parsed_event& upev = scr->pev_global?*scr->pev_global:scr->pev;
       print_to_file(upev.code,upev.synt,upev.strc,upev.strs,2,wto);
       wto << "\n  return 0;\n}\n\n";
@@ -565,6 +571,9 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global)
           // Write event code
           cout << "DBGMSG 4-2" << endl;
               wto << "variant enigma::OBJ_" << i->second->name << "::myevent_" << evname << "()\n{\n  ";
+              if (mode == emode_debug) {
+                wto << "enigma::debug_scope $current_scope(\"event '" << evname << "'\");\n";
+              }
                 if (!event_execution_uses_default(i->second->events[ii].mainId,i->second->events[ii].id))
                   wto << "enigma::temp_event_scope ENIGMA_PUSH_ITERATOR_AND_VALIDATE(this);\n  ";
                   if (event_has_const_code(mid, id))
