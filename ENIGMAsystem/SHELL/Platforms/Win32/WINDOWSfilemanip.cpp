@@ -53,10 +53,10 @@ void ini_close()
 
 std::string ini_read_string(std::string section, std::string key, std::string defaultValue)
 {
-	string value(1024, '\x00');
-	GetPrivateProfileString(section.c_str(), key.c_str(), defaultValue.c_str(), (LPSTR)value.data(), 1024, iniFilename.c_str());
+	char buffer[1024];
+	GetPrivateProfileString(section.c_str(), key.c_str(), defaultValue.c_str(), buffer, 1024, iniFilename.c_str());
 
-	return value;
+	return buffer;
 }
 
 int ini_read_real(std::string section, std::string key, int defaultValue)
@@ -79,14 +79,14 @@ void ini_write_real(std::string section, std::string key, int value)
 
 bool ini_key_exists(std::string section, std::string key)
 {
-	string value(1024, '\x00');
-	return GetPrivateProfileString(section.c_str(), key.c_str(), "", (LPSTR)value.data(), 1024, iniFilename.c_str()) != 0;
+	char buffer[1024];
+	return GetPrivateProfileString(section.c_str(), key.c_str(), "", buffer, 1024, iniFilename.c_str()) != 0;
 }
 
 bool ini_section_exists(std::string section)
 {
-	string value(1024, '\x00');
-	return GetPrivateProfileSection(section.c_str(), (LPTSTR)value.data(), 1024, iniFilename.c_str()) != 0;
+	char buffer[1024];
+	return GetPrivateProfileSection(section.c_str(), buffer, 1024, iniFilename.c_str()) != 0;
 }
 
 void ini_key_delete(std::string section, std::string key)
