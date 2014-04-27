@@ -677,29 +677,38 @@ int view_set(int vind, int vis, int xview, int yview, int wview, int hview, int 
     return 1;
 }
 
-//NOTE: The way these functions are above they allow the mouse_x and mouse_y to go outside of the room like it did in game maker 8.1, Studio
-//will now stop updating the cursor if it goes outside the window, I really see no reason why they did that and ENIGMA used to do it too in the old version
-//of this code that was broken and did not work properly, if someone complains it will be readded but for now it makes no sense to do it that way so I won't. - Robert B. Colton
+//NOTE: GM8.1 allowed the mouse to go outside the window, for basically all mouse functions and constants, Studio however
+//now wraps the mouse not allowing it to go out of bounds, so it will never report a negative mouse position for constants or functions.
+//On top of this, it not only appears that they have wrapped it, but it appears that they in fact stop updating the mouse altogether in Studio
+//because moving the mouse outside the window will sometimes freeze at a positive number, so it appears to be a bug in their window manager.
 int window_views_mouse_get_x() {
+  int x = window_mouse_get_x();
+  int y = window_mouse_get_y();
   if (view_enabled) {
     for (int i = 0; i < 8; i++) {
       if (view_visible[i]) {
-        return view_xview[i]+((window_mouse_get_x()-view_xport[i])/(double)view_wport[i])*view_wview[i];
+        if (x >= view_xport[i] && x < view_xport[i]+view_wport[i] &&  y >= view_yport[i] && y < view_yport[i]+view_hport[i]) {
+          return view_xview[i]+((x-view_xport[i])/(double)view_wport[i])*view_wview[i];
+        }
       }
     } 
   }
-  return window_mouse_get_x();
+  return x;
 }
 
 int window_views_mouse_get_y() {
+  int x = window_mouse_get_x();
+  int y = window_mouse_get_y();
   if (view_enabled) {
     for (int i = 0; i < 8; i++) {
       if (view_visible[i]) {
-        return view_yview[i]+((window_mouse_get_y()-view_yport[i])/(double)view_hport[i])*view_hview[i];
+        if (x >= view_xport[i] && x < view_xport[i]+view_wport[i] &&  y >= view_yport[i] && y < view_yport[i]+view_hport[i]) {
+          return view_yview[i]+((y-view_yport[i])/(double)view_hport[i])*view_hview[i];
+        }
       }
     }
   }
-  return window_mouse_get_y();
+  return y;
 }
 
 void window_views_mouse_set(int x, int y) {
@@ -726,8 +735,19 @@ namespace enigma
     mouse_xprevious = mouse_x;
     mouse_yprevious = mouse_y;
 
-    mouse_x = window_views_mouse_get_x();
-    mouse_y = window_views_mouse_get_y();
+    mouse_x = window_mouse_get_x();
+    mouse_y = window_mouse_get_y();
+    if (view_enabled) {
+      for (int i = 0; i < 8; i++) {
+        if (view_visible[i]) {
+          if (mouse_x >= view_xport[i] && mouse_x < view_xport[i]+view_wport[i] &&  mouse_y >= view_yport[i] && mouse_y < view_yport[i]+view_hport[i]) {
+            mouse_x = view_xview[i]+((mouse_x-view_xport[i])/(double)view_wport[i])*view_wview[i];
+            mouse_y = view_yview[i]+((mouse_y-view_yport[i])/(double)view_hport[i])*view_hview[i];
+            break;
+          }
+        }
+      } 
+    }
   }
   void rooms_switch()
   {
