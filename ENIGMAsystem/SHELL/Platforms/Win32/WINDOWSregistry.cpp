@@ -108,7 +108,7 @@ void registry_write_real_ext(std::string key, std::string name, int x)
 
 std::string registry_read_string_ext(std::string key, std::string name)
 {
-	std::string value(1024, '\x00');
+	char buffer[1024];
 	DWORD type = REG_SZ, len = 1024;
 	HKEY hKey;
 
@@ -117,10 +117,10 @@ std::string registry_read_string_ext(std::string key, std::string name)
 		return "";
 
 	// Read value and close key
-	RegQueryValueEx(hKey, (LPCTSTR)name.c_str(), 0, &type, (LPBYTE)value.data(), &len);
+	RegQueryValueEx(hKey, (LPCTSTR)name.c_str(), 0, &type, buffer, &len);
 	RegCloseKey(hKey);
 
-	return value;
+	return buffer;
 }
 
 int registry_read_real_ext(std::string key, std::string name)
