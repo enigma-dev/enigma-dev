@@ -681,7 +681,15 @@ int view_set(int vind, int vis, int xview, int yview, int wview, int hview, int 
 //now wraps the mouse not allowing it to go out of bounds, so it will never report a negative mouse position for constants or functions.
 //On top of this, it not only appears that they have wrapped it, but it appears that they in fact stop updating the mouse altogether in Studio
 //because moving the mouse outside the window will sometimes freeze at a positive number, so it appears to be a bug in their window manager.
+//ENIGMA's behaviour is a modified version of GM8.1, it uses the current view to obtain these positions so that it will work correctly
+//for overlapped views while being backwards compatible.
 int window_views_mouse_get_x() {
+  int x = window_mouse_get_x();
+  if (view_enabled) {
+    x = view_xview[view_current]+((x-view_xport[view_current])/(double)view_wport[view_current])*view_wview[view_current];
+  }
+  return x;
+/* This code replicates GM8.1's broken mouse_x/y
   int x = window_mouse_get_x();
   int y = window_mouse_get_y();
   if (view_enabled) {
@@ -694,9 +702,16 @@ int window_views_mouse_get_x() {
     } 
   }
   return x;
+*/
 }
 
 int window_views_mouse_get_y() {
+  int y = window_mouse_get_y();
+  if (view_enabled) {
+    y = view_yview[view_current]+((y-view_yport[view_current])/(double)view_hport[view_current])*view_hview[view_current];
+  }
+  return y;
+/*
   int x = window_mouse_get_x();
   int y = window_mouse_get_y();
   if (view_enabled) {
@@ -709,6 +724,7 @@ int window_views_mouse_get_y() {
     }
   }
   return y;
+*/
 }
 
 void window_views_mouse_set(int x, int y) {
@@ -738,16 +754,22 @@ namespace enigma
     mouse_x = window_mouse_get_x();
     mouse_y = window_mouse_get_y();
     if (view_enabled) {
+      mouse_x = view_xview[view_current]+((mouse_x-view_xport[view_current])/(double)view_wport[view_current])*view_wview[view_current];
+      mouse_y = view_yview[view_current]+((mouse_y-view_yport[view_current])/(double)view_hport[view_current])*view_hview[view_current];
+    }
+            
+    /* This is the exact GM8.1 behavior, ENIGMA's version above however will work with overlapped views and is fully backwards compatible.
+    if (view_enabled) {
       for (int i = 0; i < 8; i++) {
         if (view_visible[i]) {
           if (mouse_x >= view_xport[i] && mouse_x < view_xport[i]+view_wport[i] &&  mouse_y >= view_yport[i] && mouse_y < view_yport[i]+view_hport[i]) {
-            mouse_x = view_xview[i]+((mouse_x-view_xport[i])/(double)view_wport[i])*view_wview[i];
-            mouse_y = view_yview[i]+((mouse_y-view_yport[i])/(double)view_hport[i])*view_hview[i];
+            mouse_x = view_xview[view_current]+((mouse_x-view_xport[view_current])/(double)view_wport[view_current])*view_wview[i];
+            mouse_y = view_yview[view_current]+((mouse_y-view_yport[view_current])/(double)view_hport[view_current])*view_hview[i];
             break;
           }
         }
       } 
-    }
+    } */
   }
   void rooms_switch()
   {
