@@ -20,7 +20,7 @@
 
 namespace enigma {
 
-  string scope_name = "Unknown Source";
+  vector<string> scope_stack;
 
 }
 #endif
