@@ -20,22 +20,24 @@
 #define DEBUG_SCOPE_H
 
 #include <string>
+#include <vector>
 using std::string;
+using std::vector;
 
 namespace enigma {
 
-extern string scope_name;
+extern vector<string> scope_stack;
 
 struct debug_scope { 
-  string o; 
+  vector<string>::iterator it;
+  
   debug_scope(string x) 
   { 
-    o = enigma::scope_name; 
-    enigma::scope_name = x; 
+    it = scope_stack.insert(scope_stack.end(), x);
   } 
   
   ~debug_scope() { 
-    enigma::scope_name = o; 
+    scope_stack.erase(it);
   } 
    
 };

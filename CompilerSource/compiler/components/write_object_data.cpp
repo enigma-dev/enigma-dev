@@ -572,7 +572,7 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, i
           cout << "DBGMSG 4-2" << endl;
               wto << "variant enigma::OBJ_" << i->second->name << "::myevent_" << evname << "()\n{\n  ";
               if (mode == emode_debug) {
-                wto << "enigma::debug_scope $current_scope(\"event '" << evname << "'\");\n";
+                wto << "enigma::debug_scope $current_scope(\"event '" << evname << "' for object '" << i->second->name << "'\");\n";
               }
                 if (!event_execution_uses_default(i->second->events[ii].mainId,i->second->events[ii].id))
                   wto << "enigma::temp_event_scope ENIGMA_PUSH_ITERATOR_AND_VALIDATE(this);\n  ";

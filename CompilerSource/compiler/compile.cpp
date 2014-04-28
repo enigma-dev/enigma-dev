@@ -545,7 +545,7 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
   irrr();
 
   edbg << "Writing room data" << flushl;
-  res = current_language->compile_writeRoomData(es,&EGMglobal);
+  res = current_language->compile_writeRoomData(es,&EGMglobal,mode);
   irrr();
 
   edbg << "Writing shader data" << flushl;
