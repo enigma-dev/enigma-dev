@@ -134,7 +134,7 @@ void position_destroy(cs_scalar x, cs_scalar y)
 
 int instance_position(cs_scalar x, cs_scalar y, int object)
 {
-  const enigma::object_collisions* r = collide_inst_point(object,false,true,x+.5,y+.5);
+  const enigma::object_collisions* r = collide_inst_point(object,false,false,x+.5,y+.5);
   return r == NULL ? noone : r->id;
 }
 
