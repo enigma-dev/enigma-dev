@@ -54,13 +54,17 @@ static string gs_but1, gs_but2, gs_but3;
 
 void show_error(string errortext,const bool fatal)
 {
+
   #ifdef DEBUG_MODE
-  if (MessageBox(NULL,("Error in scope: " + enigma::scope_name + " for object '" + enigma_user::object_get_name(enigma::id_current) + "': \r\n"+errortext).c_str(),"Error",MB_ABORTRETRYIGNORE | MB_ICONERROR)==IDABORT)
-    exit(0);
+  for (vector<string>::reverse_iterator it = enigma::scope_stack.rbegin(); it != enigma::scope_stack.rend(); it++) {
+    errortext += "\n" + *it;
+  }
   #else
-  if (MessageBox(NULL,("Error in some event or another for some object: \r\n"+errortext).c_str(),"Error",MB_ABORTRETRYIGNORE | MB_ICONERROR)==IDABORT)
-    exit(0);
+  errortext = "Error in some event or another for some object: \r\n" + errortext;
   #endif
+  
+  if (MessageBox(NULL,errortext.c_str(),"Error",MB_ABORTRETRYIGNORE | MB_ICONERROR)==IDABORT)
+    exit(0);
 
   if (fatal)
     printf("FATAL ERROR: %s\n",errortext.c_str()),
