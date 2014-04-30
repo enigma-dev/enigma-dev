@@ -537,7 +537,7 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
   irrr();
 
   edbg << "Writing local accessors" << flushl;
-  res = current_language->compile_writeObjAccess(parsed_objects, &EGMglobal,mode);
+  res = current_language->compile_writeObjAccess(parsed_objects, &EGMglobal);
   irrr();
 
   edbg << "Writing font data" << flushl;
