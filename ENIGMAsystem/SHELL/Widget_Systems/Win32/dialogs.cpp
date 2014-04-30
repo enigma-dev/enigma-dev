@@ -45,9 +45,25 @@ static bool   gs_form_canceled;
 static string gs_str_submitted;
 static string gs_but1, gs_but2, gs_but3;
 
+#ifdef DEBUG_MODE
+#include "Universal_System/var4.h"
+#include "Universal_System/resource_data.h"
+#include "Universal_System/object.h"
+#include "Universal_System/debugscope.h"
+#endif
+
 void show_error(string errortext,const bool fatal)
 {
-  if (MessageBox(NULL,("Error in some event or another for some object: \r\n"+errortext).c_str(),"Error",MB_ABORTRETRYIGNORE | MB_ICONERROR)==IDABORT)
+
+  #ifdef DEBUG_MODE
+  for (vector<string>::reverse_iterator it = enigma::scope_stack.rbegin(); it != enigma::scope_stack.rend(); it++) {
+    errortext += "\n" + *it;
+  }
+  #else
+  errortext = "Error in some event or another for some object: \r\n" + errortext;
+  #endif
+  
+  if (MessageBox(NULL,errortext.c_str(),"Error",MB_ABORTRETRYIGNORE | MB_ICONERROR)==IDABORT)
     exit(0);
 
   if (fatal)

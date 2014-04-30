@@ -677,26 +677,54 @@ int view_set(int vind, int vis, int xview, int yview, int wview, int hview, int 
     return 1;
 }
 
+//NOTE: GM8.1 allowed the mouse to go outside the window, for basically all mouse functions and constants, Studio however
+//now wraps the mouse not allowing it to go out of bounds, so it will never report a negative mouse position for constants or functions.
+//On top of this, it not only appears that they have wrapped it, but it appears that they in fact stop updating the mouse altogether in Studio
+//because moving the mouse outside the window will sometimes freeze at a positive number, so it appears to be a bug in their window manager.
+//ENIGMA's behaviour is a modified version of GM8.1, it uses the current view to obtain these positions so that it will work correctly
+//for overlapped views while being backwards compatible.
 int window_views_mouse_get_x() {
+  int x = window_mouse_get_x();
+  if (view_enabled) {
+    x = view_xview[view_current]+((x-view_xport[view_current])/(double)view_wport[view_current])*view_wview[view_current];
+  }
+  return x;
+/* This code replicates GM8.1's broken mouse_x/y
+  int x = window_mouse_get_x();
+  int y = window_mouse_get_y();
   if (view_enabled) {
     for (int i = 0; i < 8; i++) {
       if (view_visible[i]) {
-        return window_mouse_get_x() + view_xview[i];
+        if (x >= view_xport[i] && x < view_xport[i]+view_wport[i] &&  y >= view_yport[i] && y < view_yport[i]+view_hport[i]) {
+          return view_xview[i]+((x-view_xport[i])/(double)view_wport[i])*view_wview[i];
+        }
       }
     } 
   }
-  return window_mouse_get_x();
+  return x;
+*/
 }
 
 int window_views_mouse_get_y() {
+  int y = window_mouse_get_y();
+  if (view_enabled) {
+    y = view_yview[view_current]+((y-view_yport[view_current])/(double)view_hport[view_current])*view_hview[view_current];
+  }
+  return y;
+/*
+  int x = window_mouse_get_x();
+  int y = window_mouse_get_y();
   if (view_enabled) {
     for (int i = 0; i < 8; i++) {
       if (view_visible[i]) {
-        return window_mouse_get_y() + view_yview[i];
+        if (x >= view_xport[i] && x < view_xport[i]+view_wport[i] &&  y >= view_yport[i] && y < view_yport[i]+view_hport[i]) {
+          return view_yview[i]+((y-view_yport[i])/(double)view_hport[i])*view_hview[i];
+        }
       }
     }
   }
-  return window_mouse_get_y();
+  return y;
+*/
 }
 
 void window_views_mouse_set(int x, int y) {
@@ -722,25 +750,23 @@ namespace enigma
     using namespace enigma_user;
     mouse_xprevious = mouse_x;
     mouse_yprevious = mouse_y;
-  //NOTE: The way these functions are above they allow the mouse_x and mouse_y to go outside of the room like it did in game maker 8.1, Studio
-  //will now stop updating the cursor if it goes outside the window, I really see no reason why they did that and ENIGMA used to it too in the old version
-  //of this code that was broken and did not work properly, if someone complains it will be readded but for now it makes no sense to do it that way so I won't. - Robert B. Colton
-    mouse_x = window_views_mouse_get_x();
-    mouse_y = window_views_mouse_get_y();
-  /* This is part of the old code that was used to set mouse_x and mouse_y before I added the actual function from game maker 8.1, it may need factored in above
-but this code also didn't work and caused the mouse coordinate to go all over the place, the current version above works best so far.
+
+    mouse_x = window_mouse_get_x();
+    mouse_y = window_mouse_get_y();
+
     if (view_enabled) {
       for (int i = 0; i < 8; i++) {
         if (view_visible[i]) {
           if (mouse_x >= view_xport[i] && mouse_x < view_xport[i]+view_wport[i] &&  mouse_y >= view_yport[i] && mouse_y < view_yport[i]+view_hport[i]) {
-           // mouse_x = view_xview[i]+((mouse_x-view_xport[i])/(double)view_wport[i])*view_wview[i];
-           // mouse_y = view_yview[i]+((mouse_y-view_yport[i])/(double)view_hport[i])*view_hview[i];
-            break;
+            mouse_x = view_xview[view_current]+((mouse_x-view_xport[view_current])/(double)view_wport[view_current])*view_wview[i];
+            mouse_y = view_yview[view_current]+((mouse_y-view_yport[view_current])/(double)view_hport[view_current])*view_hview[i];
+            return;
           }
         }
+      } 
+      mouse_x = view_xview[view_current]+((mouse_x-view_xport[view_current])/(double)view_wport[view_current])*view_wview[view_current];
+      mouse_y = view_yview[view_current]+((mouse_y-view_yport[view_current])/(double)view_hport[view_current])*view_hview[view_current];
     }
-  }
-*/
   }
   void rooms_switch()
   {

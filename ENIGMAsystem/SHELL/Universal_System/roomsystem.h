@@ -67,8 +67,8 @@ inline int room_assign(int indx, int roomindx)
 }
 
 int view_set(int vind, int vis, int xview, int yview, int wview, int hview, int xport, int yport, int wport, int hport, int hborder, int vborder, int hspeed, int vspeed, int obj);
-int window_views_mouse_get_x(); // same as mouse_x variable, with respect to all views
-int window_views_mouse_get_y(); // same as mouse_y variable, with respect to all views
+int window_views_mouse_get_x(); // same as mouse_x variable, with respect to the view the mouse intersects
+int window_views_mouse_get_y(); // same as mouse_y variable, with respect to the view the mouse intersects
 void window_views_mouse_set(int x, int y); // with respect to first visible view
 
 extern int background_color;
