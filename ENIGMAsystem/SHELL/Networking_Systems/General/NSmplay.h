@@ -30,6 +30,7 @@ namespace enigma_user {
 	string mplay_ipaddress(); 
 	unsigned mplay_player_find(); 
 	int mplay_player_id(unsigned numb); 
+	int mplay_player_id(string name);
 	string mplay_player_name(unsigned numb); 
 	bool mplay_session_create(string sesname, unsigned playnumb, string playername); 
 	void mplay_session_end(); 
@@ -41,13 +42,17 @@ namespace enigma_user {
 	void mplay_data_mode(bool guar); 
 	variant mplay_data_read(unsigned ind); 
 	void mplay_data_write(unsigned ind, variant val); 
-	void mplay_message_clear();
+	void mplay_message_clear(); 
+	unsigned mplay_message_count(string player);
 	unsigned mplay_message_count(unsigned player);
 	unsigned mplay_message_id();
 	string mplay_message_name(); 
 	variant mplay_message_value(); 
 	unsigned mplay_message_player(); 
+	bool mplay_message_receive(string player); 
 	bool mplay_message_receive(unsigned player); 
+	bool mplay_message_send(string player, unsigned id, variant val);
 	bool mplay_message_send(unsigned player, unsigned id, variant val); 
+	bool mplay_message_send_guaranteed(string player, unsigned id, variant val); 
 	bool mplay_message_send_guaranteed(unsigned player, unsigned id, variant val); 
 }
