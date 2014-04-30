@@ -177,7 +177,7 @@ int lang_CPP::module_write_fonts(EnigmaStruct *es, FILE *gameModule)
 		writei(glyphRange.rangeMin, gameModule);
 		unsigned gc = glyphRange.rangeMax - glyphRange.rangeMin + 1;
 		writei(gc, gameModule);
-		for (int ig = 0; ig < gc; ig++) {
+		for (unsigned ig = 0; ig < gc; ig++) {
 			Glyph &glyph = glyphRange.glyphs[ig];
 			writef(glyph.advance, gameModule);
 			writef(glyph.baseline,gameModule);
