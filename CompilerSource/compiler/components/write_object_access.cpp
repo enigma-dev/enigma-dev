@@ -64,11 +64,8 @@ string REFERENCE_POSTFIX(string ref) {
 }
 #include "languages/lang_CPP.h"
 
-// modes: 0=run, 1=debug, 2=design, 3=compile
-enum { emode_run, emode_debug, emode_design, emode_compile, emode_rebuild };
-
 struct usedtype { int uc; dectrip original; usedtype(): uc(0) {} }; // uc is the use count, then after polling, the dummy number.
-int lang_CPP::compile_writeObjAccess(map<int,parsed_object*> &parsed_objects, parsed_object* global,int mode)
+int lang_CPP::compile_writeObjAccess(map<int,parsed_object*> &parsed_objects, parsed_object* global)
 {
   ofstream wto;
   wto.open((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_objectaccess.h").c_str(),ios_base::out);
@@ -111,10 +108,6 @@ int lang_CPP::compile_writeObjAccess(map<int,parsed_object*> &parsed_objects, pa
       const string& pmember = dait->first;
       wto << "  " << dait->second.type << " " << dait->second.prefix << REFERENCE_POSTFIX(dait->second.suffix) << " &varaccess_" << pmember << "(int x)" << endl;
       wto << "  {" << endl;
-
-      if (mode == emode_debug) {
-        wto << "enigma::debug_scope $current_scope = enigma::debug_scope(\"var access '" << pmember << "'\");\n";
-      }
               
       wto << "    object_basic *inst = fetch_instance_by_int(x);" << endl;
       wto << "    if (inst) switch (inst->object_index)" << endl << "    {" << endl;
