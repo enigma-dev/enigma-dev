@@ -753,23 +753,20 @@ namespace enigma
 
     mouse_x = window_mouse_get_x();
     mouse_y = window_mouse_get_y();
-    if (view_enabled) {
-      mouse_x = view_xview[view_current]+((mouse_x-view_xport[view_current])/(double)view_wport[view_current])*view_wview[view_current];
-      mouse_y = view_yview[view_current]+((mouse_y-view_yport[view_current])/(double)view_hport[view_current])*view_hview[view_current];
-    }
-            
-    /* This is the exact GM8.1 behavior, ENIGMA's version above however will work with overlapped views and is fully backwards compatible.
+
     if (view_enabled) {
       for (int i = 0; i < 8; i++) {
         if (view_visible[i]) {
           if (mouse_x >= view_xport[i] && mouse_x < view_xport[i]+view_wport[i] &&  mouse_y >= view_yport[i] && mouse_y < view_yport[i]+view_hport[i]) {
             mouse_x = view_xview[view_current]+((mouse_x-view_xport[view_current])/(double)view_wport[view_current])*view_wview[i];
             mouse_y = view_yview[view_current]+((mouse_y-view_yport[view_current])/(double)view_hport[view_current])*view_hview[i];
-            break;
+            return;
           }
         }
       } 
-    } */
+      mouse_x = view_xview[view_current]+((mouse_x-view_xport[view_current])/(double)view_wport[view_current])*view_wview[view_current];
+      mouse_y = view_yview[view_current]+((mouse_y-view_yport[view_current])/(double)view_hport[view_current])*view_hview[view_current];
+    }
   }
   void rooms_switch()
   {
