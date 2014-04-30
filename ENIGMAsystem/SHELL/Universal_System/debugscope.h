@@ -29,15 +29,14 @@ namespace enigma {
 extern vector<string> scope_stack;
 
 struct debug_scope { 
-  vector<string>::iterator it;
-  
+
   debug_scope(string x) 
   { 
-    it = scope_stack.insert(scope_stack.end(), x);
+    scope_stack.push_back(x);
   } 
   
   ~debug_scope() { 
-    scope_stack.erase(it);
+    scope_stack.pop_back();
   } 
    
 };
