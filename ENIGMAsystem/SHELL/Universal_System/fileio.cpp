@@ -88,6 +88,13 @@ int file_text_open_append(string fname) // Opens the indicated file for appendin
 
 void file_text_close(int fileid) // Closes the file with the given file id.
 {
+   if(fileid == -1) {
+    #ifdef DEBUG_MODE
+      show_error("Cannot close an unopened file.",false);
+    #endif
+    return;
+  }
+  
   fclose(enigma::files[fileid].f);
   enigma::files[fileid].f = NULL;
 
