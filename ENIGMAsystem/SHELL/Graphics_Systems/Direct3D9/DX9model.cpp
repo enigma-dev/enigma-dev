@@ -43,6 +43,9 @@ using namespace std;
 
 vector<Mesh*> meshes(0);
 
+vector<gs_scalar> current_model_matrix;
+int current_model_id = 0;
+
 namespace enigma {
 
 unsigned int split(const std::string &txt, std::vector<std::string> &strs, char ch)
@@ -307,11 +310,44 @@ void d3d_model_draw(int id) // overload for no additional texture or transformat
     meshes[id]->Draw();
 }
 
+const D3DVERTEXELEMENT9 instance_geometry_vertex_decl[] =
+{
+{1, 0,  D3DDECLTYPE_FLOAT4,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,  1},
+{1, 16, D3DDECLTYPE_FLOAT4,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,  2},
+{1, 32, D3DDECLTYPE_FLOAT4,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,  3},
+{1, 48, D3DDECLTYPE_FLOAT4,   D3DDECLMETHOD_DEFAULT, D3DDECLUSAGE_TEXCOORD,  4},
+D3DDECL_END()
+};
+
 void d3d_model_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z) // overload for no additional texture call's
 {
-    d3d_transform_add_translation(x, y, z);
-    meshes[id]->Draw();
-    d3d_transform_add_translation(-x, -y, -z);
+  if (id != current_model_id) {
+    LPDIRECT3DVERTEXBUFFER9 instancebuffer;
+    d3dmgr->CreateVertexBuffer(current_model_matrix.size() * sizeof(gs_scalar), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, NULL, D3DPOOL_DEFAULT, &instancebuffer, NULL);
+    IDirect3DVertexDeclaration9* instancedeclaration;
+    d3dmgr->device->CreateVertexDeclaration(instance_geometry_vertex_decl, &instancedeclaration);
+    
+    void* pData = 0;
+    instancebuffer->Lock(0, 0, (LPVOID*)&pData, D3DLOCK_DISCARD);
+    memcpy(pData, &current_model_matrix[0], current_model_matrix.size() * sizeof(gs_scalar));
+    instancebuffer->Unlock();
+    
+    d3dmgr->device->SetVertexDeclaration(instancedeclaration);
+    d3dmgr->device->SetStreamSourceFreq(0, D3DSTREAMSOURCE_INDEXEDDATA | 1);
+    d3dmgr->device->SetStreamSourceFreq(1, D3DSTREAMSOURCE_INSTANCEDATA | (current_model_matrix.size() / 16));
+    d3dmgr->SetStreamSource(1, instancebuffer, 0, 16 * sizeof(gs_scalar));
+    meshes[current_model_id]->Draw();
+    d3dmgr->device->SetStreamSourceFreq(0, 1);
+    d3dmgr->device->SetStreamSourceFreq(1, 1);
+    instancebuffer->Release();
+    instancedeclaration->Release();
+    current_model_matrix.clear();
+  }
+  current_model_id = id;
+  current_model_matrix.push_back(0); current_model_matrix.push_back(0); current_model_matrix.push_back(0);  current_model_matrix.push_back(0);
+  current_model_matrix.push_back(0); current_model_matrix.push_back(0); current_model_matrix.push_back(0);  current_model_matrix.push_back(0);
+  current_model_matrix.push_back(0); current_model_matrix.push_back(0); current_model_matrix.push_back(0);  current_model_matrix.push_back(0);
+  current_model_matrix.push_back(0); current_model_matrix.push_back(0); current_model_matrix.push_back(0);  current_model_matrix.push_back(0);
 }
 
 void d3d_model_draw(int id, int texId)
