@@ -97,7 +97,7 @@ namespace enigma
       reset_lives();
     }
 
-    //Backgrounds start
+    // Initialize background variants so they do not throw uninitialized variable access errors.
     for (unsigned i=0;i<8;i++)
     {
       background_visible[i] = backs[i].visible;
@@ -125,6 +125,7 @@ namespace enigma
 
     view_enabled = views_enabled;
 
+    // Initialize view variants so they do not throw uninitialized variable access errors.
     for (unsigned i=0;i<8;i++)
     {
       view_xview[i] = views[i].area_x; view_yview[i] = views[i].area_y; view_wview[i] = views[i].area_w; view_hview[i] = views[i].area_h;
@@ -132,6 +133,7 @@ namespace enigma
       view_object[i] = views[i].object2follow;
       view_hborder[i] = views[i].hborder; view_vborder[i] = views[i].vborder; view_hspeed[i] = views[i].hspd; view_vspeed[i] = views[i].vspd;
       view_visible[i] = (bool)views[i].start_vis;
+      view_angle[i] = 0;
     }
 
     enigma_user::window_default();
