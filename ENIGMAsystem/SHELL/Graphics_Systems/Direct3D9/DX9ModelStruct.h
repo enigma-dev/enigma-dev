@@ -610,7 +610,7 @@ class Mesh
 			base += lineVertCount/stride;
 	}
 	if (pointIndexedCount > 0) {
-		d3dmgr->DrawIndexedPrimitive(D3DPT_TRIANGLELIST, base, 0,
+		d3dmgr->DrawIndexedPrimitive(D3DPT_POINTLIST, base, 0,
 			pointCount, offset, pointIndexedCount);
 	}
 
@@ -626,7 +626,7 @@ class Mesh
 		offset += lineCount / 2;
 	}
 	if (pointCount > 0) {
-		d3dmgr->DrawPrimitive(D3DPT_TRIANGLELIST, offset, pointCount);
+		d3dmgr->DrawPrimitive(D3DPT_POINTLIST, offset, pointCount);
 	}
   }
 };
