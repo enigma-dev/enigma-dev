@@ -435,21 +435,21 @@ bool date_valid_time(int hour,int minute,int second)
 string date_datetime_string(time_t date)
 {
     char buffer[80];
-    strftime(buffer,80,"%m/%d/%Y %H:%M:%S",localtime(&date));
+    strftime(buffer,80,"%x %X",localtime(&date));
     return string(buffer);
 }
 
 string date_date_string(time_t date)
 {
     char buffer[80];
-    strftime(buffer,80,"%m/%d/%Y",localtime(&date));
+    strftime(buffer,80,"%x",localtime(&date));
     return string(buffer);
 }
 
 string date_time_string(time_t date)
 {
     char buffer[80];
-    strftime(buffer,80,"%H:%M:%S",localtime(&date));
+    strftime(buffer,80,"%X",localtime(&date));
     return string(buffer);
 }
 
