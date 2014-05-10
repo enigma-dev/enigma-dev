@@ -214,7 +214,7 @@ void draw_circle_color(gs_scalar x, gs_scalar y, float rad,int c1, int c2,bool o
     }
 	float pr=2*M_PI/enigma::circleprecision;
 	for(float i=0;i<=2*M_PI;i+=pr)
-		draw_vertex_color(x+rad*cos(i),y-rad*sin(i), c2, alpha);
+		draw_vertex_color(x+rad*cos(i),y+rad*sin(i), c2, alpha);
     draw_primitive_end();
 }
 
