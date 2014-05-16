@@ -145,9 +145,8 @@ void texture_set_enabled(bool enable)
 void texture_set_interpolation(int enable)
 {
 	enigma::interpolate_textures = enable;
-	d3dmgr->SetSamplerState( 0, D3DSAMP_MINFILTER, D3DTEXF_LINEAR );
-	d3dmgr->SetSamplerState( 0, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR );
-	d3dmgr->SetSamplerState( 0, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR );
+	d3dmgr->SetSamplerState( 0, D3DSAMP_MINFILTER, enable ? D3DTEXF_LINEAR : D3DTEXF_POINT );
+	d3dmgr->SetSamplerState( 0, D3DSAMP_MAGFILTER, enable ? D3DTEXF_LINEAR : D3DTEXF_POINT );
 }
 
 bool texture_get_interpolation()
