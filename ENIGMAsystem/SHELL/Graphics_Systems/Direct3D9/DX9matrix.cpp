@@ -90,7 +90,7 @@ void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scal
 	D3DXMATRIX matRotZ, matTrans, matScale;
 
 	// Calculate rotation matrix
-	D3DXMatrixRotationZ( &matRotZ, angle );        // Roll
+	D3DXMatrixRotationZ( &matRotZ, D3DXToRadian(angle) );        // Roll
 
 	// Calculate a translation matrix
 	D3DXMatrixTranslation(&matTrans, -x - 0.25, -y - height - 0.25, 0);
@@ -98,10 +98,10 @@ void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scal
 	D3DXMatrixScaling(&matScale, 1, -1, 1);
 
 	// Calculate our world matrix by multiplying the above (in the correct order)
-	D3DXMATRIX matWorld=matRotZ*matTrans*matScale;
+	D3DXMATRIX matView=matRotZ*matTrans*matScale;
 
 	// Set the matrix to be applied to anything we render from now on
-	d3dmgr->SetTransform( D3DTS_VIEW, &matWorld);
+	d3dmgr->SetTransform( D3DTS_VIEW, &matView);
 	
 	D3DXMATRIX matProjection;    // the projection transform matrix
 	D3DXMatrixOrthoOffCenterLH(&matProjection,
@@ -117,31 +117,22 @@ void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scal
 
 void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, gs_scalar angle)
 {
-	D3DXMATRIX matRotZ, matTrans, matScale;
-
-	// Calculate rotation matrix
-	D3DXMatrixRotationZ( &matRotZ, angle );        // Roll
-
-	// Calculate a translation matrix
-	D3DXMatrixTranslation(&matTrans, -x, -y, 0);
-
-	D3DXMatrixScaling(&matScale, 1, 1, 1);
-
-	// Calculate our world matrix by multiplying the above (in the correct order)
-	D3DXMATRIX matWorld=matRotZ*matTrans*matScale;
-
-	
-			D3DXMATRIX matProjection;    // the projection transform matrix
-	D3DXMatrixOrthoOffCenterLH(&matProjection,
-							0,
-							(FLOAT)width,   
-							0,
-							(FLOAT)height,   
+	D3DXMATRIX matView, matRotZ;    // the projection transform matrix
+  
+	D3DXMatrixOrthoOffCenterLH(&matView,
+							(FLOAT)x,
+							(FLOAT)x+width,   
+							(FLOAT)y,
+							(FLOAT)y+height,   
 							-32000.0f,    // the near view-plane
 							32000.0f);    // the far view-plane
-	
+              
+  // Initialize rotation matrix
+	D3DXMatrixRotationZ( &matRotZ, D3DXToRadian(angle) );
+  matView *= matRotZ;
+  
 	// Set the matrix to be applied to anything we render from now on
-	d3dmgr->SetTransform( D3DTS_VIEW, &matProjection);
+	d3dmgr->SetTransform( D3DTS_VIEW, &matView);
 	
 	D3DXMATRIX matProj;    // the projection transform matrix
 	D3DXMatrixPerspectiveFovLH(&matProj,
