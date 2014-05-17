@@ -86,7 +86,6 @@ void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs
 
 void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, gs_scalar angle)
 {
-	
 	D3DXMATRIX matRotZ, matTrans, matScale;
 
 	// Calculate rotation matrix
@@ -117,28 +116,28 @@ void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scal
 
 void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, gs_scalar angle)
 {
-	D3DXMATRIX matView, matRotZ;    // the projection transform matrix
-  
-	D3DXMatrixOrthoOffCenterLH(&matView,
-							(FLOAT)x,
-							(FLOAT)x+width,   
-							(FLOAT)y,
-							(FLOAT)y+height,   
-							-32000.0f,    // the near view-plane
-							32000.0f);    // the far view-plane
-              
+  D3DXMATRIX matView, matRotZ;    // the projection transform matrix
+
+  D3DXMatrixOrthoOffCenterLH(&matView,
+    (FLOAT)x,
+    (FLOAT)x+width,   
+    (FLOAT)y,
+    (FLOAT)y+height,   
+    -32000.0f,    // the near view-plane
+    32000.0f);    // the far view-plane
+    
   // Initialize rotation matrix
-	D3DXMatrixRotationZ( &matRotZ, gs_angle_to_radians(angle) );
+  D3DXMatrixRotationZ( &matRotZ, gs_angle_to_radians(angle) );
   matView *= matRotZ;
-  
-	// Set the matrix to be applied to anything we render from now on
-	d3dmgr->SetTransform( D3DTS_VIEW, &matView);
-	
-	D3DXMATRIX matProj;    // the projection transform matrix
-	D3DXMatrixPerspectiveFovLH(&matProj,
-							D3DXToRadian(60), width/height, 0.1, 32000);    // the far view-plane
-					
-	d3dmgr->SetTransform(D3DTS_PROJECTION, &matProj);    // set the projection transform
+
+  // Set the matrix to be applied to anything we render from now on
+  d3dmgr->SetTransform( D3DTS_VIEW, &matView);
+
+  D3DXMATRIX matProj;    // the projection transform matrix
+  D3DXMatrixPerspectiveFovLH(&matProj,
+    D3DXToRadian(60), width/height, 0.1, 32000);    // the far view-plane
+
+  d3dmgr->SetTransform(D3DTS_PROJECTION, &matProj);    // set the projection transform
 }
 
 D3DXMATRIX matWorld; 
