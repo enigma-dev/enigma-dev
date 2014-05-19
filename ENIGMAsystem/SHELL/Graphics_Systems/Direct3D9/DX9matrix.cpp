@@ -86,6 +86,8 @@ void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs
 
 void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, gs_scalar angle)
 {
+  // This is half-pixel alignment, 0.5 only works for some graphics cards, 0.25 works best for Nvidia, AMD, and other common graphics cards and drivers.
+  x += 0.25f; y += 0.25f;
 	D3DXMATRIX matRotZ, matTrans, matScale;
 
 	// Calculate rotation matrix
