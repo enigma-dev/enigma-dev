@@ -170,8 +170,8 @@ void draw_rectangle_color(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2,
 		draw_primitive_begin(pr_trianglestrip);
 		draw_vertex_color(x1, y1, c1, alpha);
 		draw_vertex_color(x2, y1, c2, alpha);
-		draw_vertex_color(x1, y2, c3, alpha);
-		draw_vertex_color(x2, y2, c4, alpha);
+		draw_vertex_color(x1, y2, c4, alpha);
+		draw_vertex_color(x2, y2, c3, alpha);
 		draw_primitive_end();
     }
 }
