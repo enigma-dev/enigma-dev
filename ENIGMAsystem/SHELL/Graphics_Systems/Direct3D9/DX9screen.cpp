@@ -414,8 +414,6 @@ int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h
 }
 
 void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height) {
-  // This is half-pixel alignment, 0.5 only works for some graphics cards, 0.25 works best for Nvidia, AMD, and other common graphics cards and drivers.
-  x -= 0.25f; y -= 0.25f; width -= 0.25f; height -= 0.25f;
 	D3DVIEWPORT9 pViewport = { x, y, width, height, 0, 1.0f };
 	d3dmgr->SetViewport(&pViewport);
 }
