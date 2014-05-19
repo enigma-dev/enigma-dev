@@ -89,31 +89,31 @@ void draw_line_width_color(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2
     double cv = cos(dir-M_PI/2.0), sv = -sin(dir-M_PI/2.0);
     double dw = width/2.0;
     draw_primitive_begin(pr_trianglestrip);
-	draw_vertex_color(x1+dw*cv, y1+dw*sv, c1, alpha);
-	draw_vertex_color(x1-dw*cv, y1-dw*sv, c1, alpha);
+    draw_vertex_color(x1+dw*cv, y1+dw*sv, c1, alpha);
+    draw_vertex_color(x1-dw*cv, y1-dw*sv, c1, alpha);
     draw_vertex_color(x2+dw*cv, y2+dw*sv, c2, alpha);
     draw_vertex_color(x2-dw*cv, y2-dw*sv, c2, alpha);
-	draw_primitive_end();
+    draw_primitive_end();
 }
 
 void draw_rectangle(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, bool outline)
 {
-    if (outline) {
-		draw_primitive_begin(pr_linestrip);
-		draw_vertex(x1, y1);
-		draw_vertex(x2, y1);
-		draw_vertex(x2, y2);
-		draw_vertex(x1, y2);
-		draw_vertex(x1, y1);
-		draw_primitive_end();
-    } else {
-		draw_primitive_begin(pr_trianglestrip);
-		draw_vertex(x1, y1);
-		draw_vertex(x2, y1);
-		draw_vertex(x1, y2);
-		draw_vertex(x2, y2);
-		draw_primitive_end();
-    }
+  if (outline) {
+    draw_primitive_begin(pr_linestrip);
+    draw_vertex(x1, y1);
+    draw_vertex(x2, y1);
+    draw_vertex(x2, y2);
+    draw_vertex(x1, y2);
+    draw_vertex(x1, y1);
+    draw_primitive_end();
+  } else {
+    draw_primitive_begin(pr_trianglestrip);
+    draw_vertex(x1, y1);
+    draw_vertex(x2, y1);
+    draw_vertex(x1, y2);
+    draw_vertex(x2, y2);
+    draw_primitive_end();
+  }
 }
 
 void draw_rectangle_angle(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, float angle, bool outline)
@@ -137,43 +137,43 @@ void draw_rectangle_angle(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2,
     ldx2 = len*cos(dir),
     ldy2 = len*sin(dir);
 
-    if (outline) {
-		draw_primitive_begin(pr_linestrip);
-		draw_vertex(xm+ldx1, ym-ldy1);
-		draw_vertex(xm+ldx2, ym-ldy2);
-		draw_vertex(xm-ldx1, ym+ldy1);
-		draw_vertex(xm-ldx2, ym+ldy2);
-		draw_vertex(xm+ldx1, ym-ldy1);
-		draw_primitive_end();
-    } else {
-		draw_primitive_begin(pr_trianglestrip);
-		draw_vertex(xm+ldx2, ym-ldy2);
-		draw_vertex(xm+ldx1, ym-ldy1);
-		draw_vertex(xm-ldx1, ym+ldy1);
-		draw_vertex(xm-ldx2, ym+ldy2);
-		draw_primitive_end();
-    }
+  if (outline) {
+    draw_primitive_begin(pr_linestrip);
+    draw_vertex(xm+ldx1, ym-ldy1);
+    draw_vertex(xm+ldx2, ym-ldy2);
+    draw_vertex(xm-ldx1, ym+ldy1);
+    draw_vertex(xm-ldx2, ym+ldy2);
+    draw_vertex(xm+ldx1, ym-ldy1);
+    draw_primitive_end();
+  } else {
+    draw_primitive_begin(pr_trianglestrip);
+    draw_vertex(xm+ldx2, ym-ldy2);
+    draw_vertex(xm+ldx1, ym-ldy1);
+    draw_vertex(xm-ldx1, ym+ldy1);
+    draw_vertex(xm-ldx2, ym+ldy2);
+    draw_primitive_end();
+  }
 }
 
 void draw_rectangle_color(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, int c1, int c2, int c3, int c4, bool outline)
 {
-    gs_scalar alpha = draw_get_alpha();
-    if (outline) {
-		draw_primitive_begin(pr_linestrip);
-		draw_vertex_color(x1, y1, c1, alpha);
-		draw_vertex_color(x2, y1, c2, alpha);
-		draw_vertex_color(x2, y2, c3, alpha);
-		draw_vertex_color(x1, y2, c4, alpha);
-		draw_vertex_color(x1, y1, c1, alpha);
-		draw_primitive_end();
-    } else {
-		draw_primitive_begin(pr_trianglestrip);
-		draw_vertex_color(x1, y1, c1, alpha);
-		draw_vertex_color(x2, y1, c2, alpha);
-		draw_vertex_color(x1, y2, c4, alpha);
-		draw_vertex_color(x2, y2, c3, alpha);
-		draw_primitive_end();
-    }
+  gs_scalar alpha = draw_get_alpha();
+  if (outline) {
+    draw_primitive_begin(pr_linestrip);
+    draw_vertex_color(x1, y1, c1, alpha);
+    draw_vertex_color(x2, y1, c2, alpha);
+    draw_vertex_color(x2, y2, c3, alpha);
+    draw_vertex_color(x1, y2, c4, alpha);
+    draw_vertex_color(x1, y1, c1, alpha);
+    draw_primitive_end();
+  } else {
+    draw_primitive_begin(pr_trianglestrip);
+    draw_vertex_color(x2, y1, c2, alpha);
+    draw_vertex_color(x2, y2, c3, alpha);
+    draw_vertex_color(x1, y1, c1, alpha);
+    draw_vertex_color(x1, y2, c4, alpha);
+    draw_primitive_end();
+  }
 }
 
 void draw_set_circle_precision(float pr) {
