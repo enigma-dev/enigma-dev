@@ -92,7 +92,7 @@ void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scal
 	D3DXMatrixRotationZ( &matRotZ, gs_angle_to_radians(angle) );        // Roll
 
 	// Calculate a translation matrix
-	D3DXMatrixTranslation(&matTrans, -x - 0.25, -y - height - 0.25, 0);
+	D3DXMatrixTranslation(&matTrans, -x, -y - height, 0);
 
 	D3DXMatrixScaling(&matScale, 1, -1, 1);
 
