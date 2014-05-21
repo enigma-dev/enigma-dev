@@ -48,6 +48,7 @@ namespace enigma
   int game_return = 0;
   extern char keymap[512];
   //extern char usermap[256];
+  extern roomstruct** roomdata;
   void ENIGMA_events(void); //TODO: Synchronize this with Windows by putting these two in a single header.
   bool gameWindowFocused = false;
   extern bool freezeOnLoseFocus;
