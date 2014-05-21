@@ -400,9 +400,13 @@ int main(int argc,char** argv)
     }
 
     end:
+    enigma::roomdata[enigma::room_switching_id]->end(true);
+    //When the current room calls end it iterates the instances to call room end/game end events
+    //for some reason Win32 does not call game_ending(); if it should be then perhaps that
+    //function can be merged with the room end one to avoid recursive iterations of the instances.
     enigma::game_ending();
-  glXDestroyContext(disp,glxc);
-  XCloseDisplay(disp);
+    glXDestroyContext(disp,glxc);
+    XCloseDisplay(disp);
     return enigma::game_return;
 }
 
