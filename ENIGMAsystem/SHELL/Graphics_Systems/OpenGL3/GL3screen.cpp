@@ -225,7 +225,8 @@ static inline int draw_tiles()
     enigma::inst_iter* push_it = enigma::instance_event_iterator;
     //loop instances
     for (enigma::instance_event_iterator = dit->second.draw_events->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next) {
-      enigma::instance_event_iterator->inst->myevent_draw();
+      if (enigma::instance_event_iterator->inst->myevent_draw_subcheck())
+        enigma::instance_event_iterator->inst->myevent_draw();
       if (enigma::room_switching_id != -1)
         return 1;
     }
@@ -276,7 +277,8 @@ static inline void draw_gui()
     enigma::inst_iter* push_it = enigma::instance_event_iterator;
     //loop instances
     for (enigma::instance_event_iterator = dit->second.draw_events->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next) {
-      enigma::instance_event_iterator->inst->myevent_drawgui();
+      if (enigma::instance_event_iterator->inst->myevent_drawgui_subcheck())
+      `enigma::instance_event_iterator->inst->myevent_drawgui();
       if (enigma::room_switching_id != -1) {
         stop_loop = true;
         break;
