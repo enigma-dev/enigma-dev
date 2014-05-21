@@ -64,6 +64,7 @@ namespace enigma
     void object_basic::activate()   {}
     variant object_basic::myevent_create()    { return 0; }
     variant object_basic::myevent_gamestart() { return 0; }
+    variant object_basic::myevent_gameend() { return 0; }
 	variant object_basic::myevent_closebutton() { return 0; }
 	variant object_basic::myevent_asyncdialog() { return 0; }
 	variant object_basic::myevent_asynchttp() { return 0; }
