@@ -47,6 +47,7 @@ namespace enigma //TODO: Find where this belongs
   HWND hWnd;
   LRESULT CALLBACK WndProc (HWND hWnd, UINT message,WPARAM wParam, LPARAM lParam);
   HDC window_hDC;
+  extern roomstruct** roomdata;
   extern bool gameWindowFocused, freezeOnLoseFocus;
   unsigned int pausedSteps = 0;
 
@@ -371,7 +372,8 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
               frames_count++;
           }
       }
-
+      
+    enigma::roomdata[0]->end(true);
     timeEndPeriod(minimum_resolution);
     enigma::DisableDrawing (enigma::hWnd, enigma::window_hDC, hRC);
     DestroyWindow (enigma::hWnd);
