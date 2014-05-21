@@ -76,7 +76,9 @@ namespace enigma
 	variant object_basic::myevent_asyncsocial() { return 0; }
 	variant object_basic::myevent_asyncpushnotification() { return 0; }
     variant object_basic::myevent_draw()      { return 0; }
+    bool object_basic::myevent_draw_subcheck() { return 0; }
 	variant object_basic::myevent_drawgui()   { return 0; }
+  bool object_basic::myevent_drawgui_subcheck() { return 0; }
 	variant object_basic::myevent_drawresize()   { return 0; }
 	variant object_basic::myevent_roomstart()   { return 0; }
     variant object_basic::myevent_roomend()   { return 0; }
