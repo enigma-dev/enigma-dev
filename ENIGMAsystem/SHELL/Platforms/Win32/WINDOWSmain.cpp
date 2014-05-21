@@ -373,7 +373,7 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
           }
       }
       
-    enigma::roomdata[0]->end(true);
+    enigma::roomdata[enigma::room_switching_id]->end(true);
     timeEndPeriod(minimum_resolution);
     enigma::DisableDrawing (enigma::hWnd, enigma::window_hDC, hRC);
     DestroyWindow (enigma::hWnd);
