@@ -278,7 +278,7 @@ static inline void draw_gui()
     //loop instances
     for (enigma::instance_event_iterator = dit->second.draw_events->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next) {
       if (enigma::instance_event_iterator->inst->myevent_drawgui_subcheck())
-      `enigma::instance_event_iterator->inst->myevent_drawgui();
+        enigma::instance_event_iterator->inst->myevent_drawgui();
       if (enigma::room_switching_id != -1) {
         stop_loop = true;
         break;
