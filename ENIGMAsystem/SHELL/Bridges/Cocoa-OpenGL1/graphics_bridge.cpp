@@ -28,7 +28,7 @@ namespace enigma {
   GLuint msaa_fbo = 0;
 }
 
-#include "Platforms/Cocoa/CocoaWindow.h" // window_set_caption
+#include "Platforms/General/PFwindow.h" // window_set_caption
 #include "Universal_System/roomsystem.h" // room_caption, update_mouse_variables
 
 namespace enigma_user {
