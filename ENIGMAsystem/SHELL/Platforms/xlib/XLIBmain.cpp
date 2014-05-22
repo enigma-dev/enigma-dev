@@ -142,7 +142,7 @@ namespace enigma
           gameWindowFocused = false;
           return 0;
         case ClientMessage:
-          if ((unsigned)e.xclient.data.l[0] == (unsigned)wm_delwin) //For some reason, this line warns whether we cast to unsigned or not.
+          if ((Atom)e.xclient.data.l[0] == wm_delwin) //For some reason, this line warns whether we cast to unsigned or not.
             return 1;
           //else fall through
         default:
