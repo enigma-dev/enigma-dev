@@ -121,8 +121,18 @@ namespace enigma
   int game_ending();
   int game_ending()
   {
-    for (enigma::iterator i = instance_list_first(); i; ++i)
-      { i->unlink(); delete *i; }
+    // Fire Room End then Game End events in that order.
+    // NOTE: This must be two loops because room/game end event for some object may try accessing another instance.
+    for (enigma::iterator it = enigma::instance_list_first(); it; ++it) {
+      it->myevent_roomend();
+      it->myevent_gameend();
+    }
+    
+    // Now clean up instances and free them from memory.
+    for (enigma::iterator it = instance_list_first(); it; ++it)
+    { 
+        it->unlink(); delete *it; 
+    }
     return 0;
   }
 }

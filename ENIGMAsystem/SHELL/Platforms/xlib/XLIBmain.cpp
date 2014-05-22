@@ -48,7 +48,6 @@ namespace enigma
   int game_return = 0;
   extern char keymap[512];
   //extern char usermap[256];
-  extern roomstruct** roomdata;
   void ENIGMA_events(void); //TODO: Synchronize this with Windows by putting these two in a single header.
   bool gameWindowFocused = false;
   extern bool freezeOnLoseFocus;
@@ -401,10 +400,6 @@ int main(int argc,char** argv)
     }
 
     end:
-    enigma::roomdata[enigma::room_switching_id]->end(true);
-    //When the current room calls end it iterates the instances to call room end/game end events
-    //for some reason Win32 does not call game_ending(); if it should be then perhaps that
-    //function can be merged with the room end one to avoid recursive iterations of the instances.
     enigma::game_ending();
     glXDestroyContext(disp,glxc);
     XCloseDisplay(disp);

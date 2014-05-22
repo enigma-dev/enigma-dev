@@ -149,7 +149,7 @@ namespace enigma
     int tilecount;
     tile *tiles;
 
-    void end(bool gameend = false);
+    void end();
     void gotome(bool gamestart = false);
   };
   void update_mouse_variables();

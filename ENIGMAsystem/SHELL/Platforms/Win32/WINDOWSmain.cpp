@@ -47,7 +47,6 @@ namespace enigma //TODO: Find where this belongs
   HWND hWnd;
   LRESULT CALLBACK WndProc (HWND hWnd, UINT message,WPARAM wParam, LPARAM lParam);
   HDC window_hDC;
-  extern roomstruct** roomdata;
   extern bool gameWindowFocused, freezeOnLoseFocus;
   unsigned int pausedSteps = 0;
 
@@ -70,6 +69,7 @@ void enigma_catchmouse_backend(bool x) {
 namespace enigma {
   int initialize_everything();
   int ENIGMA_events();
+  int game_ending();
 } // TODO: synchronize with XLib by moving these declarations to a platform_includes header in the root.
 
 //TODO: Implement pause events
@@ -373,7 +373,7 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
           }
       }
       
-    enigma::roomdata[enigma::room_switching_id]->end(true);
+    enigma::game_ending();
     timeEndPeriod(minimum_resolution);
     enigma::DisableDrawing (enigma::hWnd, enigma::window_hDC, hRC);
     DestroyWindow (enigma::hWnd);
