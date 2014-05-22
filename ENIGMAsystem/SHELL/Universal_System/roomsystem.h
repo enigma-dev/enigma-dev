@@ -149,7 +149,8 @@ namespace enigma
     int tilecount;
     tile *tiles;
 
-    void gotome(bool=false);
+    void end();
+    void gotome(bool gamestart = false);
   };
   void update_mouse_variables();
   extern int maxid, maxtileid;

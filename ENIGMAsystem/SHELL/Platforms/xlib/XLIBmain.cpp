@@ -401,8 +401,8 @@ int main(int argc,char** argv)
 
     end:
     enigma::game_ending();
-  glXDestroyContext(disp,glxc);
-  XCloseDisplay(disp);
+    glXDestroyContext(disp,glxc);
+    XCloseDisplay(disp);
     return enigma::game_return;
 }
 

@@ -69,18 +69,27 @@ namespace enigma
 {
   roomstruct** roomdata;
   roomstruct** roomorder;
+  
+  void roomstruct::end() {
+    // Fire the Room End event.
+    for (enigma::iterator it = enigma::instance_list_first(); it; ++it) {
+      it->myevent_roomend();
+    }
+    // This needs to be a separate loop because the room end event for some object may
+    // access another instance.
+    for (enigma::iterator it = enigma::instance_list_first(); it; ++it) {
+      // Destroy the object if it is not persistent
+      if (!((object_planar*)*it)->persistent)
+        enigma_user::instance_destroy(it->id, false);
+    }
+  }
 
   void roomstruct::gotome(bool gamestart)
   {
     using namespace enigma_user;
-    // Destroy all objects
-    for (enigma::iterator it = enigma::instance_list_first(); it; ++it)
-    {
-      it->myevent_roomend();
-    // Destroy the object if it is not persistent
-      if (!((object_planar*)*it)->persistent)
-    instance_destroy(it->id, false);
-    }
+
+    this->end();
+    
     perform_callbacks_clean_up_roomend();
 
     // Set the index to self
@@ -173,7 +182,7 @@ namespace enigma
 
   // Fire the game start event for all the new instances, persistent objects don't matter since this is the first time
   // the game ran they won't even exist yet
-    if (gamestart)
+  if (gamestart)
     for (int i = 0; i < instancecount; i++)
       is[i]->myevent_gamestart();
 

@@ -69,6 +69,7 @@ void enigma_catchmouse_backend(bool x) {
 namespace enigma {
   int initialize_everything();
   int ENIGMA_events();
+  int game_ending();
 } // TODO: synchronize with XLib by moving these declarations to a platform_includes header in the root.
 
 //TODO: Implement pause events
@@ -371,7 +372,8 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
               frames_count++;
           }
       }
-
+      
+    enigma::game_ending();
     timeEndPeriod(minimum_resolution);
     enigma::DisableDrawing (enigma::hWnd, enigma::window_hDC, hRC);
     DestroyWindow (enigma::hWnd);
