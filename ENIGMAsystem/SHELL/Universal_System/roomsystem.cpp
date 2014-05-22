@@ -72,6 +72,7 @@ namespace enigma
   
   void roomstruct::end() {
     // Fire the Room End event.
+    instance_event_iterator = new inst_iter(NULL,NULL,NULL);
     for (enigma::iterator it = enigma::instance_list_first(); it; ++it) {
       it->myevent_roomend();
     }
