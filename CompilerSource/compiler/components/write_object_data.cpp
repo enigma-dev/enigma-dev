@@ -562,9 +562,9 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, i
           // Write event sub check code
           if (event_has_sub_check(mid, id)) {
             wto << "inline bool enigma::OBJ_" << i->second->name << "::myevent_" << evname << "_subcheck()\n{\n  ";
-                cout << "DBGMSG 4-3" << endl;
-                  if (event_has_sub_check(mid, id))
-                    wto << event_get_sub_check_condition(mid, id) << endl;
+            cout << "DBGMSG 4-3" << endl;
+            //if (event_has_sub_check(mid, id))
+              wto << event_get_sub_check_condition(mid, id) << endl;
             wto << "\n}\n";
           }
                         
