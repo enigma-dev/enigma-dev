@@ -27,6 +27,7 @@ using namespace std;
 
 #include "Widget_Systems/widgets_mandatory.h"
 #include "../General/PFwindow.h"
+#include "Graphics_Systems/General/GSscreen.h"
 
 #include "Universal_System/globalupdate.h"
 #include "WINDOWScallback.h"
@@ -107,7 +108,7 @@ namespace enigma
             }
         }
 
-        SetWindowPos(hWnd, NULL, 0, 0, scaledWidth, scaledHeight, SWP_NOMOVE|SWP_NOACTIVATE);
+        //
         
         if (!isFullScreen)
         {
@@ -124,8 +125,11 @@ namespace enigma
                     { windowHeight = scaledHeight; enigma_user::window_center(); }
             }
             clampparent();
+            SetWindowPos(hWnd, NULL, 0, 0, windowWidth, windowHeight, SWP_NOMOVE|SWP_NOACTIVATE);
+            enigma_user::screen_set_viewport(0, 0, scaledWidth, scaledHeight);
         } else {
-          SetWindowPos(hWnd, HWND_TOP, (parWidth - scaledWidth)/2, (parHeight - scaledHeight)/2, 0, 0, SWP_NOSIZE|SWP_NOACTIVATE);
+            enigma_user::screen_set_viewport((parWidth - scaledWidth)/2, (parHeight - scaledHeight)/2, scaledWidth, scaledHeight);
+         // SetWindowPos(hWnd, HWND_TOP, (parWidth - scaledWidth)/2, (parHeight - scaledHeight)/2, 0, 0, SWP_NOSIZE|SWP_NOACTIVATE);
         }
     }
     
