@@ -217,22 +217,22 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
     }
 
     //Create the window
-    WNDCLASS wcontainer,wmain;
+    WNDCLASS wc;
     HGLRC hRC;
     MSG msg;
 
     //Register window class
-    wcontainer.style = CS_OWNDC;
-    wcontainer.lpfnWndProc = enigma::WndProc;
-    wcontainer.cbClsExtra = 0;
-    wcontainer.cbWndExtra = 0;
-    wcontainer.hInstance = hInstance;
-    wcontainer.hIcon = LoadIcon (hInstance, "IDI_MAIN_ICON");
-    wcontainer.hCursor = LoadCursor (NULL, IDC_ARROW);
-    wcontainer.hbrBackground = (HBRUSH) GetStockObject (BLACK_BRUSH);
-    wcontainer.lpszMenuName = NULL;
-    wcontainer.lpszClassName = "TMain";
-    RegisterClass (&wcontainer);
+    wc.style = CS_OWNDC;
+    wc.lpfnWndProc = enigma::WndProc;
+    wc.cbClsExtra = 0;
+    wc.cbWndExtra = 0;
+    wc.hInstance = hInstance;
+    wc.hIcon = LoadIcon (hInstance, "IDI_MAIN_ICON");
+    wc.hCursor = LoadCursor (NULL, IDC_ARROW);
+    wc.hbrBackground = (HBRUSH) GetStockObject (BLACK_BRUSH);
+    wc.lpszMenuName = NULL;
+    wc.lpszClassName = "TMain";
+    RegisterClass (&wc);
 
     //Create the parent window
     int screen_width = GetSystemMetrics(SM_CXSCREEN);
@@ -245,10 +245,11 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
     if (wid > screen_width) wid = screen_width;
     if (hgt > screen_height) hgt = screen_height;
     // TODO: Implement minimize button on both windows like GM
-    enigma::hWnd = CreateWindow ("TMain", "", WS_CAPTION | WS_POPUPWINDOW | WS_MINIMIZEBOX, (screen_width-wid)/2, (screen_height-hgt)/2, wid, hgt, NULL, NULL, hInstance, NULL);
+    enigma::hWnd = CreateWindow ("TMain", "", WS_VISIBLE | WS_CAPTION | WS_POPUPWINDOW | WS_MINIMIZEBOX, (screen_width-wid)/2, (screen_height-hgt)/2, wid, hgt, NULL, NULL, hInstance, NULL);
     enigma::EnableDrawing (&hRC);
     enigma_user::window_default();
     enigma::initialize_everything();
+    ShowWindow(enigma::hWnd, SW_SHOWNORMAL);
 
     //Main loop
 
