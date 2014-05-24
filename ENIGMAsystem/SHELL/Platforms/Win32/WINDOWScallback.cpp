@@ -51,7 +51,7 @@ namespace enigma
     extern int windowX, windowY, windowWidth, windowHeight;
     extern double  scaledWidth, scaledHeight;
     extern char* currentCursor;
-    extern HWND hWnd,hWndParent;
+    extern HWND hWnd;
     extern void setchildsize(bool adapt);
     extern void WindowResized();
     extern unsigned int pausedSteps;
