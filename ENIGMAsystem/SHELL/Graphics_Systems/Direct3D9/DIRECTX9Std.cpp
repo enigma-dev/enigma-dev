@@ -35,7 +35,6 @@ namespace enigma
 
   void graphicssystem_initialize()
   {
-    d3dmgr->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(255, 0, 0), 1.0f, 0);
   }
 }
 
