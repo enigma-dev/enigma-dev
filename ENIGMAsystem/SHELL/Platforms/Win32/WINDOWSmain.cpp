@@ -69,6 +69,7 @@ namespace enigma {
   int initialize_everything();
   int ENIGMA_events();
   int game_ending();
+  void setparentstyle();
 } // TODO: synchronize with XLib by moving these declarations to a platform_includes header in the root.
 
 //TODO: Implement pause events
@@ -245,6 +246,8 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
     if (hgt > screen_height) hgt = screen_height;
     // TODO: Implement minimize button on both windows like GM
     enigma::hWnd = CreateWindow ("TMain", "", WS_CAPTION | WS_POPUPWINDOW | WS_VISIBLE | WS_MINIMIZEBOX, (screen_width-wid)/2, (screen_height-hgt)/2, wid, hgt, NULL, NULL, hInstance, NULL);
+    //enigma::setparentstyle();
+    enigma_user::window_default();
     enigma::EnableDrawing (&hRC);
     enigma::initialize_everything();
 
