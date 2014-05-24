@@ -402,7 +402,6 @@ void screen_init()
 	d3dmgr->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
 	d3dmgr->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
 	draw_set_color(c_white);
-  d3dmgr->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(255, 0, 0), 1.0f, 0);
 }
 
 int screen_save(string filename) //Assumes native integers are little endian
