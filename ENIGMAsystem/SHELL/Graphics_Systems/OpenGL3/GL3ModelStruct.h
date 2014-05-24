@@ -570,6 +570,8 @@ class Mesh
     if (enigma::transformation_update == true){
         //Recalculate matrices
         enigma::mv_matrix = enigma::view_matrix * enigma::model_matrix;
+        // We must half-pixel align the model view matrix as well for full screen games.
+        enigma::mv_matrix.translate(0.25f, 0.25f, 0.0f);
         enigma::mvp_matrix = enigma::projection_matrix * enigma::mv_matrix;
 
         //normal_matrix = invert(transpose(mv_submatrix)), where mv_submatrix is modelview top-left 3x3 matrix
