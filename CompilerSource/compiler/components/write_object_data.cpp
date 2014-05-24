@@ -263,14 +263,17 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, i
           } else {
             parent_undefined.push_back(ii);
           }
-		
+          string evname = event_get_function_name(i->second->events[ii].mainId,i->second->events[ii].id);
           if  (i->second->events[ii].code != "")
           {
             if (event_is_instance(i->second->events[ii].mainId,i->second->events[ii].id)) {
                 evgroup[i->second->events[ii].mainId].push_back(ii);
             }
-            string evname = event_get_function_name(i->second->events[ii].mainId,i->second->events[ii].id);
             wto << "    variant myevent_" << evname << "();\n    ";
+          }
+           
+          if  (i->second->events[ii].code != "" || event_has_default_code(i->second->events[ii].mainId,i->second->events[ii].id))
+          {
             if (event_has_sub_check(i->second->events[ii].mainId, i->second->events[ii].id)) {
               wto << "    inline bool myevent_" << evname << "_subcheck();\n    ";
             }
@@ -544,54 +547,59 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, i
     {
       cout << "DBGMSG 4" << endl;
       parent_undefined = parent_undefinitions.find(i->first)->second;
-      for (unsigned ii = 0; ii < i->second->events.size; ii++)
+      for (unsigned ii = 0; ii < i->second->events.size; ii++) {
+        const int mid = i->second->events[ii].mainId, id = i->second->events[ii].id;
+        string evname = event_get_function_name(mid,id);
         if  (i->second->events[ii].code != "")
         {
           cout << "DBGMSG 4-1" << endl;
-          const int mid = i->second->events[ii].mainId, id = i->second->events[ii].id;
-          string evname = event_get_function_name(mid,id);
+          
           bool defined_inherited = false;
           if (setting::inherit_objects) {
             parent = parsed_objects.find(i->second->parent);
             if (parent != parsed_objects.end() && std::find(parent_undefined.begin(), parent_undefined.end(), ii) == parent_undefined.end()) {
-                wto << "#define event_inherited OBJ_" + parent->second->name + "::myevent_" + evname + "\n";
-                  defined_inherited = true;
+              wto << "#define event_inherited OBJ_" + parent->second->name + "::myevent_" + evname + "\n";
+              defined_inherited = true;
             }
           }
-	  
-          // Write event sub check code
-          if (event_has_sub_check(mid, id)) {
-            wto << "inline bool enigma::OBJ_" << i->second->name << "::myevent_" << evname << "_subcheck()\n{\n  ";
-            cout << "DBGMSG 4-3" << endl;
-            //if (event_has_sub_check(mid, id))
-              wto << event_get_sub_check_condition(mid, id) << endl;
-            wto << "\n}\n";
-          }
-                        
+
           // Write event code
           cout << "DBGMSG 4-2" << endl;
-              wto << "variant enigma::OBJ_" << i->second->name << "::myevent_" << evname << "()\n{\n  ";
-              if (mode == emode_debug) {
-                wto << "enigma::debug_scope $current_scope(\"event '" << evname << "' for object '" << i->second->name << "'\");\n";
-              }
-                if (!event_execution_uses_default(i->second->events[ii].mainId,i->second->events[ii].id))
-                  wto << "enigma::temp_event_scope ENIGMA_PUSH_ITERATOR_AND_VALIDATE(this);\n  ";
-                  if (event_has_const_code(mid, id))
-                    wto << event_get_const_code(mid, id) << endl;
-                  if (event_has_prefix_code(mid, id))
-                    wto << event_get_prefix_code(mid, id) << endl;
+          wto << "variant enigma::OBJ_" << i->second->name << "::myevent_" << evname << "()\n{\n  ";
+          if (mode == emode_debug) {
+            wto << "enigma::debug_scope $current_scope(\"event '" << evname << "' for object '" << i->second->name << "'\");\n";
+          }
+          if (!event_execution_uses_default(i->second->events[ii].mainId,i->second->events[ii].id))
+            wto << "enigma::temp_event_scope ENIGMA_PUSH_ITERATOR_AND_VALIDATE(this);\n  ";
+          if (event_has_const_code(mid, id))
+            wto << event_get_const_code(mid, id) << endl;
+          if (event_has_prefix_code(mid, id))
+            wto << event_get_prefix_code(mid, id) << endl;
           cout << "DBGMSG 4-4" << endl;
-                print_to_file(i->second->events[ii].code,i->second->events[ii].synt,i->second->events[ii].strc,i->second->events[ii].strs,2,wto);
-                if (event_has_suffix_code(mid, id))
-                  wto << event_get_suffix_code(mid, id) << endl;
+          print_to_file(i->second->events[ii].code,i->second->events[ii].synt,i->second->events[ii].strc,i->second->events[ii].strs,2,wto);
+          if (event_has_suffix_code(mid, id))
+            wto << event_get_suffix_code(mid, id) << endl;
           cout << "DBGMSG 4-5" << endl;
-              wto << "\n  return 0;\n}\n";
-        
+          wto << "\n  return 0;\n}\n";
+
           if (defined_inherited) {
             wto << "#undef event_inherited\n";
           }
         }
-    cout << "DBGMSG 5" << endl;
+        
+        if  (i->second->events[ii].code != "" || event_has_default_code(mid,id))
+        {
+          // Write event sub check code
+          if (event_has_sub_check(mid, id)) {
+            wto << "inline bool enigma::OBJ_" << i->second->name << "::myevent_" << evname << "_subcheck()\n{\n  ";
+            cout << "DBGMSG 4-3" << endl;
+            wto << event_get_sub_check_condition(mid, id) << endl;
+            wto << "\n}\n";
+          }
+        }
+      }
+        
+      cout << "DBGMSG 5" << endl;
 
 	
       parsed_object* t = i->second;
