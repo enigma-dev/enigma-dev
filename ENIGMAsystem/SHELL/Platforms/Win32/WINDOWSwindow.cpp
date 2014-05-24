@@ -124,8 +124,8 @@ namespace enigma
                 if (scaledHeight > windowHeight)
                     { windowHeight = scaledHeight; enigma_user::window_center(); }
             }
+            
             clampparent();
-            SetWindowPos(hWnd, NULL, 0, 0, windowWidth, windowHeight, SWP_NOMOVE|SWP_NOACTIVATE);
             enigma_user::screen_set_viewport(0, 0, scaledWidth, scaledHeight);
         } else {
             enigma_user::screen_set_viewport((parWidth - scaledWidth)/2, (parHeight - scaledHeight)/2, scaledWidth, scaledHeight);
