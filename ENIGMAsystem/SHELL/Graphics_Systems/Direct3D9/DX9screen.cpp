@@ -61,15 +61,14 @@ namespace enigma_user {
 
 namespace enigma
 {
-	extern bool d3dMode;
-    extern bool d3dHidden;
-	extern int d3dCulling;
-    extern std::map<int,roomstruct*> roomdata;
-    particles_implementation* particles_impl;
-    void set_particles_implementation(particles_implementation* part_impl)
-    {
-        particles_impl = part_impl;
-    }
+  extern bool d3dMode;
+  extern bool d3dHidden;
+  extern int d3dCulling;
+  particles_implementation* particles_impl;
+  void set_particles_implementation(particles_implementation* part_impl)
+  {
+      particles_impl = part_impl;
+  }
 
 	unsigned gui_width;
 	unsigned gui_height;
