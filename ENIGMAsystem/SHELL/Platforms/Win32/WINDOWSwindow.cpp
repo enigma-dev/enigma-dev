@@ -301,7 +301,7 @@ void window_set_fullscreen(bool full)
         enigma::setparentstyle();
         ShowWindow(enigma::hWnd,SW_RESTORE);
     }
-    //enigma::setchildsize(true);
+    enigma::setchildsize(true);
 }
 
 int window_get_fullscreen()
