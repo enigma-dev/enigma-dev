@@ -65,7 +65,7 @@ namespace enigma
         RECT c;
         c.left = enigma::windowX; c.top = enigma::windowY; c.right = enigma::windowX + enigma::windowWidth; c.bottom = enigma::windowY + enigma::windowHeight;
         AdjustWindowRect(&c, getparentstyle(), false);
-        SetWindowPos(enigma::hWnd, HWND_TOP, c.left, c.top, c.right-c.left, c.bottom-c.top, SWP_NOZORDER|SWP_FRAMECHANGED);
+        SetWindowPos(enigma::hWnd, NULL, c.left, c.top, c.right-c.left, c.bottom-c.top, SWP_NOZORDER|SWP_FRAMECHANGED);
     }
 
     void setparentstyle()
@@ -73,16 +73,9 @@ namespace enigma
         SetWindowLongPtr(enigma::hWnd,GWL_STYLE,getparentstyle());
         clampparent();
     }
-
-    void centerchild()
-    {
-        int parWidth = isFullScreen?GetSystemMetrics(SM_CXSCREEN):windowWidth, parHeight = isFullScreen?GetSystemMetrics(SM_CYSCREEN):windowHeight;
-        SetWindowPos(hWnd, HWND_TOP, (parWidth - scaledWidth)/2, (parHeight - scaledHeight)/2, 0, 0, SWP_NOSIZE|SWP_NOACTIVATE);
-    }
-
+    
     void setchildsize(bool adapt)
     {
-      //return;
         if (!regionWidth)
             return;
 
@@ -114,7 +107,8 @@ namespace enigma
             }
         }
 
-        SetWindowPos(hWnd, NULL, 0, 0, scaledWidth, scaledHeight, SWP_NOACTIVATE);
+        SetWindowPos(hWnd, NULL, 0, 0, scaledWidth, scaledHeight, SWP_NOMOVE|SWP_NOACTIVATE);
+        
         if (!isFullScreen)
         {
             if (adapt)
@@ -125,14 +119,52 @@ namespace enigma
             else
             {
                 if (scaledWidth > windowWidth)
-                    windowWidth = scaledWidth;
+                    { windowWidth = scaledWidth; enigma_user::window_center(); }
                 if (scaledHeight > windowHeight)
-                    windowHeight = scaledHeight;
+                    { windowHeight = scaledHeight; enigma_user::window_center(); }
             }
             clampparent();
         }
+        
+        //SetWindowPos(hWnd, HWND_TOP, (parWidth - scaledWidth)/2, (parHeight - scaledHeight)/2, 0, 0, SWP_NOSIZE|SWP_NOACTIVATE);  //center child
+    }
+    
+    void setroomsize() {
+      int xm = int(enigma_user::room_width), ym = int(enigma_user::room_height);
+      if (enigma_user::view_enabled)
+      {
+        int tx = 0, ty = 0;
+        for (int i = 0; i < 8; i++)
+          if (enigma_user::view_visible[i])
+          {
+            if (enigma_user::view_xport[i]+enigma_user::view_wport[i] > tx)
+              tx = (int)(enigma_user::view_xport[i]+enigma_user::view_wport[i]);
+            if (enigma_user::view_yport[i]+enigma_user::view_hport[i] > ty)
+              ty = (int)(enigma_user::view_yport[i]+enigma_user::view_hport[i]);
+          }
+        if (tx and ty)
+          xm = tx, ym = ty;
+      } else {
+        int screen_width = GetSystemMetrics(SM_CXSCREEN);
+        int screen_height = GetSystemMetrics(SM_CYSCREEN);
+        // By default if the room is too big instead of creating a gigantic ass window
+        // make it not bigger than the screen to full screen it, this is what 8.1 and Studio
+        // do, if the user wants to manually override this they can using
+        // views/screen_set_viewport or window_set_size/window_set_region_size
+        // We won't limit those functions like GM, just the default.
+        if (xm > screen_width) xm = screen_width;
+        if (ym > screen_height) ym = screen_height;
+      }
+      
+      bool center = (xm != enigma::regionWidth || ym != enigma::regionHeight);
+      
+      enigma::windowWidth = enigma::regionWidth = xm;
+      enigma::windowHeight = enigma::regionHeight = ym;
+      enigma::setchildsize(false);
+      
+      if (center)
+        enigma_user::window_center();
 
-       // SetWindowPos(hWnd, HWND_TOP, (parWidth - scaledWidth)/2, (parHeight - scaledHeight)/2, 0, 0, SWP_NOSIZE|SWP_NOACTIVATE);  //center child
     }
 }
 
@@ -208,7 +240,6 @@ void window_set_position(int x, int y)
     enigma::windowX = x;
     enigma::windowY = y;
     SetWindowPos(enigma::hWnd, HWND_TOP, enigma::windowX, enigma::windowY, 0, 0, SWP_NOSIZE|SWP_NOACTIVATE);
-    enigma::centerchild();
 }
 
 void window_set_size(unsigned int width, unsigned int height)
@@ -218,7 +249,6 @@ void window_set_size(unsigned int width, unsigned int height)
     if (height > enigma::scaledHeight)
         enigma::windowHeight = height;
     enigma::clampparent();
-    enigma::centerchild();
 }
 
 void window_set_rectangle(int x, int y, int width, int height)
@@ -228,7 +258,6 @@ void window_set_rectangle(int x, int y, int width, int height)
     enigma::windowWidth = width;
     enigma::windowHeight = height;
     enigma::clampparent();
-    enigma::centerchild();
 }
 
 void window_center()
@@ -238,40 +267,11 @@ void window_center()
     enigma::windowX = (screen_width - enigma::scaledWidth)/2;
     enigma::windowY = (screen_height - enigma::scaledHeight)/2;
     enigma::clampparent();
-    enigma::centerchild();
 }
 
 void window_default()
 {
-    int xm = int(room_width), ym = int(room_height);
-    if (view_enabled)
-    {
-      int tx = 0, ty = 0;
-      for (int i = 0; i < 8; i++)
-        if (view_visible[i])
-        {
-          if (view_xport[i]+view_wport[i] > tx)
-            tx = (int)(view_xport[i]+view_wport[i]);
-          if (view_yport[i]+view_hport[i] > ty)
-            ty = (int)(view_yport[i]+view_hport[i]);
-        }
-      if (tx and ty)
-        xm = tx, ym = ty;
-    } else {
-		int screen_width = GetSystemMetrics(SM_CXSCREEN);
-		int screen_height = GetSystemMetrics(SM_CYSCREEN);
-		// By default if the room is too big instead of creating a gigantic ass window
-		// make it not bigger than the screen to full screen it, this is what 8.1 and Studio
-		// do, if the user wants to manually override this they can using
-		// views/screen_set_viewport or window_set_size/window_set_region_size
-		// We won't limit those functions like GM, just the default.
-		if (xm > screen_width) xm = screen_width;
-		if (ym > screen_height) ym = screen_height;
-	}
-
-    enigma::windowWidth = enigma::regionWidth = xm;
-    enigma::windowHeight = enigma::regionHeight = ym;
-    enigma::setchildsize(true);
+    enigma::setroomsize();
     window_center();
     if (enigma::isFullScreen)
     {
@@ -283,7 +283,6 @@ void window_default()
         enigma::setparentstyle();
         ShowWindow(enigma::hWnd,SW_RESTORE);
     }
-    enigma::setchildsize(true);
 }
 
 void window_set_fullscreen(bool full)

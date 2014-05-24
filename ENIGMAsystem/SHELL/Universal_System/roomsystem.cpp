@@ -67,7 +67,7 @@ rvt view_hborder, view_hport, view_hspeed, view_hview, view_object, view_vborder
 
 namespace enigma
 {
-  void setchildsize(bool adapt);
+  void setroomsize();
   roomstruct** roomdata;
   roomstruct** roomorder;
   
@@ -147,7 +147,7 @@ namespace enigma
       view_angle[i] = 0;
     }
 
-    enigma::setchildsize(true);
+    enigma::setroomsize();
     enigma_user::io_clear();
     screen_init();
     screen_refresh();
