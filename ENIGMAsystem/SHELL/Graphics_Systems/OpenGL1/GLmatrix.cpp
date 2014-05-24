@@ -119,11 +119,13 @@ void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scal
     enigma::view_matrix.InitIdentity();
 
     enigma::mv_matrix = enigma::view_matrix * enigma::model_matrix;
-
+    
     glMatrixMode(GL_PROJECTION);
     glLoadMatrix(enigma::projection_matrix);
 
     glMatrixMode(GL_MODELVIEW);
+    // We must half-pixel align the model view matrix as well for full screen games.
+    enigma::mv_matrix.translate(0.25f, 0.25f, 0.0f);
     glLoadMatrix(enigma::mv_matrix);
 
     enigma::d3d_light_update_positions();
