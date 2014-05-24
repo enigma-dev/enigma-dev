@@ -245,11 +245,10 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
     if (wid > screen_width) wid = screen_width;
     if (hgt > screen_height) hgt = screen_height;
     // TODO: Implement minimize button on both windows like GM
-    enigma::hWnd = CreateWindow ("TMain", "", WS_CAPTION | WS_POPUPWINDOW | WS_VISIBLE | WS_MINIMIZEBOX, (screen_width-wid)/2, (screen_height-hgt)/2, wid, hgt, NULL, NULL, hInstance, NULL);
-    //enigma::setparentstyle();
-    enigma_user::window_default();
+    enigma::hWnd = CreateWindow ("TMain", "", WS_CAPTION | WS_POPUPWINDOW | WS_MINIMIZEBOX, (screen_width-wid)/2, (screen_height-hgt)/2, wid, hgt, NULL, NULL, hInstance, NULL);
     enigma::EnableDrawing (&hRC);
     enigma::initialize_everything();
+    enigma_user::window_default();
 
     //Main loop
 
