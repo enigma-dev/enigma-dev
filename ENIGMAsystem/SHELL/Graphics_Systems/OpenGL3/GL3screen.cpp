@@ -61,7 +61,6 @@ namespace enigma
   extern bool d3dMode;
   extern bool d3dZWriteEnable;
   extern int d3dCulling;
-  extern std::map<int,roomstruct*> roomdata;
   particles_implementation* particles_impl;
   void set_particles_implementation(particles_implementation* part_impl) {
     particles_impl = part_impl;

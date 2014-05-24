@@ -69,8 +69,8 @@ static inline void draw_back()
     using enigma_user::background_yscale;
     using enigma_user::background_htiled;
     using enigma_user::background_vtiled;
-	using enigma_user::background_hspeed;
-	using enigma_user::background_vspeed;
+    using enigma_user::background_hspeed;
+    using enigma_user::background_vspeed;
     using enigma_user::background_index;
     using enigma_user::background_coloring;
     using enigma_user::draw_background_tiled_ext;
@@ -95,15 +95,14 @@ static inline void draw_back()
 
 namespace enigma
 {
-	extern bool d3dMode;
-    extern bool d3dHidden;
-	extern int d3dCulling;
-    extern std::map<int,roomstruct*> roomdata;
-    particles_implementation* particles_impl;
-    void set_particles_implementation(particles_implementation* part_impl)
-    {
-        particles_impl = part_impl;
-    }
+  extern bool d3dMode;
+  extern bool d3dHidden;
+  extern int d3dCulling;
+  particles_implementation* particles_impl;
+  void set_particles_implementation(particles_implementation* part_impl)
+  {
+      particles_impl = part_impl;
+  }
 
 	unsigned gui_width;
 	unsigned gui_height;
