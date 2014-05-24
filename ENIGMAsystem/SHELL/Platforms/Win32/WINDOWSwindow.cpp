@@ -160,7 +160,7 @@ namespace enigma
       
       enigma::windowWidth = enigma::regionWidth = xm;
       enigma::windowHeight = enigma::regionHeight = ym;
-      enigma::setchildsize(false);
+      enigma::setchildsize(true);
       
       if (center)
         enigma_user::window_center();
