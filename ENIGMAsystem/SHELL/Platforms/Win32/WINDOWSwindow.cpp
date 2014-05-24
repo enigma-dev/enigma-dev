@@ -124,9 +124,9 @@ namespace enigma
                     { windowHeight = scaledHeight; enigma_user::window_center(); }
             }
             clampparent();
+        } else {
+          SetWindowPos(hWnd, HWND_TOP, (parWidth - scaledWidth)/2, (parHeight - scaledHeight)/2, 0, 0, SWP_NOSIZE|SWP_NOACTIVATE);
         }
-        
-        //SetWindowPos(hWnd, HWND_TOP, (parWidth - scaledWidth)/2, (parHeight - scaledHeight)/2, 0, 0, SWP_NOSIZE|SWP_NOACTIVATE);  //center child
     }
     
     void setroomsize() {
