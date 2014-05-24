@@ -18,6 +18,7 @@
 #include <iostream>
 #include <string>
 
+#include "Bridges/General/DX9Context.h"
 #include "Direct3D9Headers.h"
 using namespace std;
 #include "DIRECTX9Std.h"
@@ -34,7 +35,7 @@ namespace enigma
 
   void graphicssystem_initialize()
   {
-
+    d3dmgr->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(255, 0, 0), 1.0f, 0);
   }
 }
 
