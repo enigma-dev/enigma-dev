@@ -37,7 +37,7 @@ static int displayInitialResolutionWidth = 0, displayInitialResolutionHeight = 0
 
 namespace enigma
 {
-    extern HWND hWnd,hWndParent;
+    extern HWND hWnd;
     bool isVisible = true, windowIsTop = false, gameWindowFocused = false;
     int windowcolor = 0, cursorInt = 0, regionWidth = 0, regionHeight = 0, windowWidth = 0, windowHeight = 0, windowX = 0, windowY = 0;
     double scaledWidth = 0, scaledHeight = 0;
@@ -65,12 +65,12 @@ namespace enigma
         RECT c;
         c.left = enigma::windowX; c.top = enigma::windowY; c.right = enigma::windowX + enigma::windowWidth; c.bottom = enigma::windowY + enigma::windowHeight;
         AdjustWindowRect(&c, getparentstyle(), false);
-        SetWindowPos(enigma::hWndParent, HWND_TOP, c.left, c.top, c.right-c.left, c.bottom-c.top, SWP_NOZORDER|SWP_FRAMECHANGED);
+        SetWindowPos(enigma::hWnd, HWND_TOP, c.left, c.top, c.right-c.left, c.bottom-c.top, SWP_NOZORDER|SWP_FRAMECHANGED);
     }
 
     void setparentstyle()
     {
-        SetWindowLongPtr(enigma::hWndParent,GWL_STYLE,getparentstyle());
+        SetWindowLongPtr(enigma::hWnd,GWL_STYLE,getparentstyle());
         clampparent();
     }
 
@@ -82,6 +82,7 @@ namespace enigma
 
     void setchildsize(bool adapt)
     {
+      //return;
         if (!regionWidth)
             return;
 
@@ -131,7 +132,7 @@ namespace enigma
             clampparent();
         }
 
-        SetWindowPos(hWnd, HWND_TOP, (parWidth - scaledWidth)/2, (parHeight - scaledHeight)/2, 0, 0, SWP_NOSIZE|SWP_NOACTIVATE);  //center child
+       // SetWindowPos(hWnd, HWND_TOP, (parWidth - scaledWidth)/2, (parHeight - scaledHeight)/2, 0, 0, SWP_NOSIZE|SWP_NOACTIVATE);  //center child
     }
 }
 
@@ -166,7 +167,7 @@ void window_set_caption(string caption)
 
     if (caption != current_caption)
     {
-        SetWindowText(enigma::hWndParent,(char*) caption.c_str());
+        SetWindowText(enigma::hWnd,(char*) caption.c_str());
         current_caption = caption;
     }
 }
@@ -188,17 +189,17 @@ int window_get_color()
 
 void window_set_alpha(double alpha) {
   // Set WS_EX_LAYERED on this window
-  SetWindowLong(enigma::hWndParent, GWL_EXSTYLE,
-  GetWindowLong(enigma::hWndParent, GWL_EXSTYLE) | WS_EX_LAYERED);
+  SetWindowLong(enigma::hWnd, GWL_EXSTYLE,
+  GetWindowLong(enigma::hWnd, GWL_EXSTYLE) | WS_EX_LAYERED);
 
   // Make this window transparent
-  SetLayeredWindowAttributes(enigma::hWndParent, 0, (unsigned char)(alpha*255), LWA_ALPHA);
+  SetLayeredWindowAttributes(enigma::hWnd, 0, (unsigned char)(alpha*255), LWA_ALPHA);
 }
 
 double window_get_alpha() {
 	unsigned char alpha;
 	// Make this window transparent
-	GetLayeredWindowAttributes(enigma::hWndParent, 0, &alpha, 0);
+	GetLayeredWindowAttributes(enigma::hWnd, 0, &alpha, 0);
 	return alpha/255;
 }
 
@@ -206,7 +207,7 @@ void window_set_position(int x, int y)
 {
     enigma::windowX = x;
     enigma::windowY = y;
-    SetWindowPos(enigma::hWndParent, HWND_TOP, enigma::windowX, enigma::windowY, 0, 0, SWP_NOSIZE|SWP_NOACTIVATE);
+    SetWindowPos(enigma::hWnd, HWND_TOP, enigma::windowX, enigma::windowY, 0, 0, SWP_NOSIZE|SWP_NOACTIVATE);
     enigma::centerchild();
 }
 
@@ -274,13 +275,13 @@ void window_default()
     window_center();
     if (enigma::isFullScreen)
     {
-        SetWindowLongPtr(enigma::hWndParent,GWL_STYLE,WS_POPUP);
-        ShowWindow(enigma::hWndParent,SW_MAXIMIZE);
+        SetWindowLongPtr(enigma::hWnd,GWL_STYLE,WS_POPUP);
+        ShowWindow(enigma::hWnd,SW_MAXIMIZE);
     }
     else
     {
         enigma::setparentstyle();
-        ShowWindow(enigma::hWndParent,SW_RESTORE);
+        ShowWindow(enigma::hWnd,SW_RESTORE);
     }
     enigma::setchildsize(true);
 }
@@ -292,15 +293,15 @@ void window_set_fullscreen(bool full)
 
     if ((enigma::isFullScreen = full))
     {
-        SetWindowLongPtr(enigma::hWndParent,GWL_STYLE,WS_POPUP);
-        ShowWindow(enigma::hWndParent,SW_MAXIMIZE);
+        SetWindowLongPtr(enigma::hWnd,GWL_STYLE,WS_POPUP);
+        ShowWindow(enigma::hWnd,SW_MAXIMIZE);
     }
     else
     {
         enigma::setparentstyle();
-        ShowWindow(enigma::hWndParent,SW_RESTORE);
+        ShowWindow(enigma::hWnd,SW_RESTORE);
     }
-    enigma::setchildsize(true);
+    //enigma::setchildsize(true);
 }
 
 int window_get_fullscreen()
@@ -366,12 +367,12 @@ int window_get_visible()
 
 void window_set_minimized(bool minimized)
 {
-    ShowWindow(enigma::hWndParent,(minimized?SW_MINIMIZE:SW_RESTORE));
+    ShowWindow(enigma::hWnd,(minimized?SW_MINIMIZE:SW_RESTORE));
 }
 
 bool window_get_minimized()
 {
-    return IsIconic(enigma::hWndParent);
+    return IsIconic(enigma::hWnd);
 }
 
 void window_set_stayontop(bool stay)
@@ -1001,7 +1002,7 @@ void mouse_clear(const int button)
 
 string clipboard_get_text()
 {
-  if (!OpenClipboard(enigma::hWndParent)) return "";
+  if (!OpenClipboard(enigma::hWnd)) return "";
   unsigned int format=EnumClipboardFormats(0);
   string res = "";
   while (format) {
@@ -1026,7 +1027,7 @@ string clipboard_get_text()
 void clipboard_set_text(string text)
 {
 	HGLOBAL hGlobal, hgBuffer;
-	if (!OpenClipboard(enigma::hWndParent)) return;
+	if (!OpenClipboard(enigma::hWnd)) return;
 	EmptyClipboard();
 	hGlobal = GlobalAlloc(GMEM_DDESHARE, text.length() + 1);
 	hgBuffer = GlobalLock(hGlobal);
@@ -1038,7 +1039,7 @@ void clipboard_set_text(string text)
 
 bool clipboard_has_text()
 {
-    if (!OpenClipboard(enigma::hWndParent))
+    if (!OpenClipboard(enigma::hWnd))
         return false;
 
     bool value = GetClipboardData(CF_TEXT);

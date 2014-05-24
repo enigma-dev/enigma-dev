@@ -73,7 +73,7 @@ static bool menu_add_item_ext(HMENU menu,int iid,int id,string str,unsigned int 
   return InsertMenuItem(menu,iid,0,&mii);
 }
 namespace enigma {
-  extern HWND hWndParent;
+  extern HWND hWnd;
 }
 int show_menu(int x, int y, string text)
 {
@@ -99,8 +99,8 @@ int show_menu(int x, int y, string text)
     i++;
   }
 
-  int rv = TrackPopupMenuEx(menu,TPM_LEFTBUTTON|TPM_RETURNCMD|TPM_LEFTALIGN|TPM_TOPALIGN,x,y,enigma::hWndParent,NULL);
-  SendMessage(enigma::hWndParent, WM_NULL, 0, 0);
+  int rv = TrackPopupMenuEx(menu,TPM_LEFTBUTTON|TPM_RETURNCMD|TPM_LEFTALIGN|TPM_TOPALIGN,x,y,enigma::hWnd,NULL);
+  SendMessage(enigma::hWnd, WM_NULL, 0, 0);
   DestroyMenu(menu);
   return rv;
 }
@@ -170,8 +170,8 @@ int show_menu_ext(int x, int y, string text)
 
   while (ms->prev) ms=ms->pop();
 
-  int rv = TrackPopupMenuEx(ms->menu,TPM_LEFTBUTTON|TPM_RETURNCMD|TPM_LEFTALIGN|TPM_TOPALIGN,x,y,enigma::hWndParent,NULL);
-  SendMessage(enigma::hWndParent, WM_NULL, 0, 0);
+  int rv = TrackPopupMenuEx(ms->menu,TPM_LEFTBUTTON|TPM_RETURNCMD|TPM_LEFTALIGN|TPM_TOPALIGN,x,y,enigma::hWnd,NULL);
+  SendMessage(enigma::hWnd, WM_NULL, 0, 0);
   delete ms;
   return rv;
 }
@@ -240,8 +240,8 @@ int show_menu_ext_nl(int x, int y, string text)
 
   while (ms->prev) ms=ms->pop();
 
-  int rv = TrackPopupMenuEx(ms->menu,TPM_LEFTBUTTON|TPM_RETURNCMD|TPM_LEFTALIGN|TPM_TOPALIGN,x,y,enigma::hWndParent,NULL);
-  SendMessage(enigma::hWndParent, WM_NULL, 0, 0);
+  int rv = TrackPopupMenuEx(ms->menu,TPM_LEFTBUTTON|TPM_RETURNCMD|TPM_LEFTALIGN|TPM_TOPALIGN,x,y,enigma::hWnd,NULL);
+  SendMessage(enigma::hWnd, WM_NULL, 0, 0);
   delete ms;
   return rv;
 }

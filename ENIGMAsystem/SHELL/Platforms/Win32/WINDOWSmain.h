@@ -25,7 +25,6 @@
 namespace enigma //TODO: Find where this belongs
 {
   extern HINSTANCE hInstance;
-  extern HWND hWndParent;
   extern HWND hWnd;
   extern HDC window_hDC;
 }
