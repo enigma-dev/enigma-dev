@@ -156,33 +156,40 @@ bool window_get_showicons() {return true;}
 void window_set_minimized(bool minimized) {}
 bool window_get_minimized(){ return false; };
 
-void window_default()
+void window_default(bool center_size)
 {
-    unsigned int xm = room_width, ym = room_height;
-    if (view_enabled)
-    {
-      int tx = 0, ty = 0;
-      for (int i = 0; i < 8; i++)
-        if (view_visible[i])
-        {
-          if (view_xport[i]+view_wport[i] > tx)
-            tx = (int)(view_xport[i]+view_wport[i]);
-          if (view_yport[i]+view_hport[i] > ty)
-            ty = (int)(view_yport[i]+view_hport[i]);
-        }
-      if (tx and ty)
-        xm = tx, ym = ty;
-    } else {
-		// By default if the room is too big instead of creating a gigantic ass window
-		// make it not bigger than the screen to full screen it, this is what 8.1 and Studio
-		// do, if the user wants to manually override this they can using
-		// views/screen_set_viewport or window_set_size/window_set_region_size
-		// We won't limit those functions like GM, just the default.
-		//TODO: Finish the implementation, can't test from Windus look at XLIBmain.cpp and WINDOWSmain.cpp
-		//if (xm > screen->width) xm = screen->width;
-		//if (ym > screen->height) ym = screen->height;
-	}
-    window_set_size(xm, ym);
+  unsigned int xm = room_width, ym = room_height;
+  if (view_enabled)
+  {
+    int tx = 0, ty = 0;
+    for (int i = 0; i < 8; i++)
+      if (view_visible[i])
+      {
+        if (view_xport[i]+view_wport[i] > tx)
+          tx = (int)(view_xport[i]+view_wport[i]);
+        if (view_yport[i]+view_hport[i] > ty)
+          ty = (int)(view_yport[i]+view_hport[i]);
+      }
+    if (tx and ty)
+      xm = tx, ym = ty;
+  } else {
+    // By default if the room is too big instead of creating a gigantic ass window
+    // make it not bigger than the screen to full screen it, this is what 8.1 and Studio
+    // do, if the user wants to manually override this they can using
+    // views/screen_set_viewport or window_set_size/window_set_region_size
+    // We won't limit those functions like GM, just the default.
+    //TODO: Finish the implementation, can't test from Windus look at XLIBmain.cpp and WINDOWSmain.cpp
+    if (xm > screen->width) xm = screen->width;
+    if (ym > screen->height) ym = screen->height;
+  }
+  bool center = true;
+  if (center_size) {
+    center = (xm != window_get_width() || ym != window_get_height());
+  }
+  window_set_size(xm, ym);
+  if (center) {
+    window_center();
+  }
 }
 
 void window_mouse_set(int x,int y) {

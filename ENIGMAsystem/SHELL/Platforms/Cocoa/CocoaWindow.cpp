@@ -216,24 +216,31 @@ bool window_get_showborder() {return true;}
 void window_set_showicons(bool show) {}
 bool window_get_showicons() {return true;}
 
-void window_default()
+void window_default(bool center_size)
 {
-    int xm = int(enigma_user::room_width), ym = int(enigma_user::room_height);
-    if (enigma_user::view_enabled)
-    {
-      int tx = 0, ty = 0;
-      for (int i = 0; i < 8; i++)
-        if (enigma_user::view_visible[i])
-        {
-          if (enigma_user::view_xport[i] + enigma_user::view_wport[i] > tx)
-            tx = (int)(enigma_user::view_xport[i] + enigma_user::view_wport[i]);
-          if (enigma_user::view_yport[i] + enigma_user::view_hport[i] > ty)
-            ty = (int)(enigma_user::view_yport[i] + enigma_user::view_hport[i]);
-        }
-      if (tx and ty)
-        xm = tx, ym = ty;
-    }
-    window_set_size(xm, ym);
+  int xm = int(enigma_user::room_width), ym = int(enigma_user::room_height);
+  if (enigma_user::view_enabled)
+  {
+    int tx = 0, ty = 0;
+    for (int i = 0; i < 8; i++)
+      if (enigma_user::view_visible[i])
+      {
+        if (enigma_user::view_xport[i] + enigma_user::view_wport[i] > tx)
+          tx = (int)(enigma_user::view_xport[i] + enigma_user::view_wport[i]);
+        if (enigma_user::view_yport[i] + enigma_user::view_hport[i] > ty)
+          ty = (int)(enigma_user::view_yport[i] + enigma_user::view_hport[i]);
+      }
+    if (tx and ty)
+      xm = tx, ym = ty;
+  }
+  bool center = true;
+  if (center_size) {
+    center = (xm != window_get_width() || ym != window_get_height());
+  }
+  window_set_size(xm, ym);
+  if (center) {
+    window_center();
+  }
 }
 
 //TODO: Move OpenGL shit to graphics bridges for Cocoa, screen refresh is a platform and graphics system specific function

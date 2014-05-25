@@ -67,7 +67,6 @@ rvt view_hborder, view_hport, view_hspeed, view_hview, view_object, view_vborder
 
 namespace enigma
 {
-  void setroomsize();
   roomstruct** roomdata;
   roomstruct** roomorder;
   
@@ -147,7 +146,9 @@ namespace enigma
       view_angle[i] = 0;
     }
 
-    enigma::setroomsize();
+    //NOTE: window_default() always centers the Window, GM8 only recenters the window when switching rooms
+    //if the window size changes.
+    enigma_user::window_default(true);
     enigma_user::io_clear();
     screen_init();
     screen_refresh();
