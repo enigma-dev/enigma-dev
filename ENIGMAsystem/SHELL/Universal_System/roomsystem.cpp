@@ -72,6 +72,7 @@ namespace enigma
   
   void roomstruct::end() {
     // Fire the Room End event.
+    instance_event_iterator = new inst_iter(NULL,NULL,NULL);
     for (enigma::iterator it = enigma::instance_list_first(); it; ++it) {
       it->myevent_roomend();
     }
@@ -145,7 +146,9 @@ namespace enigma
       view_angle[i] = 0;
     }
 
-    enigma_user::window_default();
+    //NOTE: window_default() always centers the Window, GM8 only recenters the window when switching rooms
+    //if the window size changes.
+    enigma_user::window_default(true);
     enigma_user::io_clear();
     screen_init();
     screen_refresh();

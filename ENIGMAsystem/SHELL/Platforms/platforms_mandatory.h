@@ -50,7 +50,7 @@ namespace enigma_user
 // Each instance must implement these, even if they are unable to do anything on the target platform.
 
 // This is used with roomsystem
-void window_default();
+void window_default(bool center_size = false);
 
 // These four are a surprisingly integral part of the system
 int window_mouse_get_x();
