@@ -300,10 +300,10 @@ void screen_redraw()
   d3d_set_zwriteenable(true);
   if (!view_enabled)
   {
-    //if (bound_framebuffer != 0) //This fixes off-by-one error when rendering on surfaces. This should be checked to see if other GPU's have the same effect
-     // screen_set_viewport(1, 1, window_get_region_width_scaled(), window_get_region_height_scaled());
-    //else
-     // screen_set_viewport(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled());
+    if (bound_framebuffer != 0) //This fixes off-by-one error when rendering on surfaces. This should be checked to see if other GPU's have the same effect
+      screen_set_viewport(1, 1, window_get_region_width_scaled(), window_get_region_height_scaled());
+    else
+      screen_set_viewport(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled());
     
     clear_view(0, 0, room_width, room_height, 0, background_showcolor);
     draw_back();
