@@ -240,49 +240,56 @@ void window_center()
     enigma::centerchild();
 }
 
-void window_default()
+void window_default(bool center_size)
 {
-    int xm = int(room_width), ym = int(room_height);
-    if (view_enabled)
-    {
-      int tx = 0, ty = 0;
-      for (int i = 0; i < 8; i++)
-        if (view_visible[i])
-        {
-          if (view_xport[i]+view_wport[i] > tx)
-            tx = (int)(view_xport[i]+view_wport[i]);
-          if (view_yport[i]+view_hport[i] > ty)
-            ty = (int)(view_yport[i]+view_hport[i]);
-        }
-      if (tx and ty)
-        xm = tx, ym = ty;
-    } else {
-		int screen_width = GetSystemMetrics(SM_CXSCREEN);
-		int screen_height = GetSystemMetrics(SM_CYSCREEN);
-		// By default if the room is too big instead of creating a gigantic ass window
-		// make it not bigger than the screen to full screen it, this is what 8.1 and Studio
-		// do, if the user wants to manually override this they can using
-		// views/screen_set_viewport or window_set_size/window_set_region_size
-		// We won't limit those functions like GM, just the default.
-		if (xm > screen_width) xm = screen_width;
-		if (ym > screen_height) ym = screen_height;
-	}
+  int xm = int(room_width), ym = int(room_height);
+  if (view_enabled)
+  {
+    int tx = 0, ty = 0;
+    for (int i = 0; i < 8; i++)
+      if (view_visible[i])
+      {
+        if (view_xport[i]+view_wport[i] > tx)
+          tx = (int)(view_xport[i]+view_wport[i]);
+        if (view_yport[i]+view_hport[i] > ty)
+          ty = (int)(view_yport[i]+view_hport[i]);
+      }
+    if (tx and ty)
+      xm = tx, ym = ty;
+  } else {
+    int screen_width = GetSystemMetrics(SM_CXSCREEN);
+    int screen_height = GetSystemMetrics(SM_CYSCREEN);
+    // By default if the room is too big instead of creating a gigantic ass window
+    // make it not bigger than the screen to full screen it, this is what 8.1 and Studio
+    // do, if the user wants to manually override this they can using
+    // views/screen_set_viewport or window_set_size/window_set_region_size
+    // We won't limit those functions like GM, just the default.
+    if (xm > screen_width) xm = screen_width;
+    if (ym > screen_height) ym = screen_height;
+  }
+  bool center = true;
+  if (center_size) {
+    center = (xm != enigma::windowWidth || ym != enigma::windowHeight);
+  }
+  
+  enigma::windowWidth = enigma::regionWidth = xm;
+  enigma::windowHeight = enigma::regionHeight = ym;
 
-    enigma::windowWidth = enigma::regionWidth = xm;
-    enigma::windowHeight = enigma::regionHeight = ym;
-    enigma::setchildsize(true);
+  //enigma::setchildsize(true);
+
+  if (enigma::isFullScreen)
+  {
+      SetWindowLongPtr(enigma::hWndParent,GWL_STYLE,WS_POPUP);
+      ShowWindow(enigma::hWndParent,SW_MAXIMIZE);
+  }
+  else
+  {
+      enigma::setparentstyle();
+      ShowWindow(enigma::hWndParent,SW_RESTORE);
+  }
+  enigma::setchildsize(true);
+  if (center)
     window_center();
-    if (enigma::isFullScreen)
-    {
-        SetWindowLongPtr(enigma::hWndParent,GWL_STYLE,WS_POPUP);
-        ShowWindow(enigma::hWndParent,SW_MAXIMIZE);
-    }
-    else
-    {
-        enigma::setparentstyle();
-        ShowWindow(enigma::hWndParent,SW_RESTORE);
-    }
-    enigma::setchildsize(true);
 }
 
 void window_set_fullscreen(bool full)

@@ -217,54 +217,54 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
     }
 
     //Create the window
-        WNDCLASS wcontainer,wmain;
-        HGLRC hRC;
-        MSG msg;
+    WNDCLASS wcontainer,wmain;
+    HGLRC hRC;
+    MSG msg;
 
-        //Register window class
-        wcontainer.style = CS_OWNDC;
-        wcontainer.lpfnWndProc = enigma::WndProc;
-        wcontainer.cbClsExtra = 0;
-        wcontainer.cbWndExtra = 0;
-        wcontainer.hInstance = hInstance;
-        wcontainer.hIcon = LoadIcon (hInstance, "IDI_MAIN_ICON");
-        wcontainer.hCursor = LoadCursor (NULL, IDC_ARROW);
-        wcontainer.hbrBackground = (HBRUSH) GetStockObject (BLACK_BRUSH);
-        wcontainer.lpszMenuName = NULL;
-        wcontainer.lpszClassName = "TMain";
-        RegisterClass (&wcontainer);
+    //Register window class
+    wcontainer.style = CS_OWNDC;
+    wcontainer.lpfnWndProc = enigma::WndProc;
+    wcontainer.cbClsExtra = 0;
+    wcontainer.cbWndExtra = 0;
+    wcontainer.hInstance = hInstance;
+    wcontainer.hIcon = LoadIcon (hInstance, "IDI_MAIN_ICON");
+    wcontainer.hCursor = LoadCursor (NULL, IDC_ARROW);
+    wcontainer.hbrBackground = (HBRUSH) GetStockObject (BLACK_BRUSH);
+    wcontainer.lpszMenuName = NULL;
+    wcontainer.lpszClassName = "TMain";
+    RegisterClass (&wcontainer);
 
-        //Register other window class
-        wmain.style = 0;
-        wmain.lpfnWndProc = enigma::WndProc;
-        wmain.cbClsExtra = 0;
-        wmain.cbWndExtra = 0;
-        wmain.hInstance = hInstance;
-        wmain.hIcon = LoadIcon (NULL, IDI_APPLICATION);
-        wmain.hCursor = LoadCursor (NULL, IDC_ARROW);
-        wmain.hbrBackground = (HBRUSH) GetStockObject (BLACK_BRUSH);
-        wmain.lpszMenuName = NULL;
-        wmain.lpszClassName = "TSub";
-        RegisterClass (&wmain);
+    //Register other window class
+    wmain.style = 0;
+    wmain.lpfnWndProc = enigma::WndProc;
+    wmain.cbClsExtra = 0;
+    wmain.cbWndExtra = 0;
+    wmain.hInstance = hInstance;
+    wmain.hIcon = LoadIcon (NULL, IDI_APPLICATION);
+    wmain.hCursor = LoadCursor (NULL, IDC_ARROW);
+    wmain.hbrBackground = (HBRUSH) GetStockObject (BLACK_BRUSH);
+    wmain.lpszMenuName = NULL;
+    wmain.lpszClassName = "TSub";
+    RegisterClass (&wmain);
 
+    //Create the parent window
+    int screen_width = GetSystemMetrics(SM_CXSCREEN);
+    int screen_height = GetSystemMetrics(SM_CYSCREEN);
+    // By default if the room is too big instead of creating a gigantic ass window
+    // make it not bigger than the screen to full screen it, this is what 8.1 and Studio
+    // do, if the user wants to manually override this they can using
+    // views/screen_set_viewport or window_set_size/window_set_region_size
+    // We won't limit those functions like GM, just the default.
+    if (wid > screen_width) wid = screen_width;
+    if (hgt > screen_height) hgt = screen_height;
+    // TODO: Implement minimize button on both windows like GM
+     enigma::hWndParent = CreateWindow ("TMain", "", WS_CAPTION | WS_POPUPWINDOW | WS_MINIMIZEBOX, (screen_width-wid)/2, (screen_height-hgt)/2, wid, hgt, NULL, NULL, hInstance, NULL);
 
-        //Create the parent window
-        int screen_width = GetSystemMetrics(SM_CXSCREEN);
-        int screen_height = GetSystemMetrics(SM_CYSCREEN);
-		// By default if the room is too big instead of creating a gigantic ass window
-		// make it not bigger than the screen to full screen it, this is what 8.1 and Studio
-		// do, if the user wants to manually override this they can using
-		// views/screen_set_viewport or window_set_size/window_set_region_size
-		// We won't limit those functions like GM, just the default.
-		if (wid > screen_width) wid = screen_width;
-		if (hgt > screen_height) hgt = screen_height;
-        // TODO: Implement minimize button on both windows like GM
-         enigma::hWndParent = CreateWindow ("TMain", "", WS_CAPTION | WS_POPUPWINDOW | WS_VISIBLE | WS_MINIMIZEBOX, (screen_width-wid)/2, (screen_height-hgt)/2, wid, hgt, NULL, NULL, hInstance, NULL);
-
-        //Create a child window to put into that
-        enigma::hWnd = CreateWindow ("TSub", NULL, WS_VISIBLE | WS_CHILD,0, 0, wid, hgt,enigma::hWndParent, NULL, hInstance, NULL);
-
+    //Create a child window to put into that
+    enigma::hWnd = CreateWindow ("TSub", NULL, WS_VISIBLE | WS_CHILD,0, 0, wid, hgt,enigma::hWndParent, NULL, hInstance, NULL);
     enigma::EnableDrawing (&hRC);
+    //Do not set the parent window visible until we have initialized the graphics context.
+    ShowWindow(enigma::hWndParent, iCmdShow);
     enigma::initialize_everything();
 
     //Main loop
