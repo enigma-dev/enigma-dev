@@ -275,7 +275,7 @@ void window_default(bool center_size)
   enigma::windowWidth = enigma::regionWidth = xm;
   enigma::windowHeight = enigma::regionHeight = ym;
 
-  //enigma::setchildsize(true);
+  enigma::setchildsize(true);
 
   if (enigma::isFullScreen)
   {
