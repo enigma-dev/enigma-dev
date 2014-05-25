@@ -178,7 +178,7 @@ void window_default(bool center_size)
     // do, if the user wants to manually override this they can using
     // views/screen_set_viewport or window_set_size/window_set_region_size
     // We won't limit those functions like GM, just the default.
-    //TODO: Finish the implementation, can't test from Windus look at XLIBmain.cpp and WINDOWSmain.cpp
+    Screen *screen = DefaultScreenOfDisplay(disp);
     if (xm > screen->width) xm = screen->width;
     if (ym > screen->height) ym = screen->height;
   }
