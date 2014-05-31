@@ -570,8 +570,10 @@ class Mesh
     if (enigma::transformation_update == true){
         //Recalculate matrices
         enigma::mv_matrix = enigma::view_matrix * enigma::model_matrix;
-        // We must half-pixel align the model view matrix as well for full screen games.
-        enigma::mv_matrix.translate(0.25f, 0.25f, 0.0f);
+        // This is half-pixel alignment, the values used for the model view matrix in conjunction with the ortho projection have been tested on Nvidia and AMD graphics cards.
+        // 0.375,0.375 is suggested by Microsoft, however we have discovered the offsets 0.375,0.375 and 0.175,0.175 combined between the projection and model view matrix
+        // yields the best results.
+        enigma::mv_matrix.translate(0.175f, 0.175f, 0.0f);
         enigma::mvp_matrix = enigma::projection_matrix * enigma::mv_matrix;
 
         //normal_matrix = invert(transpose(mv_submatrix)), where mv_submatrix is modelview top-left 3x3 matrix
