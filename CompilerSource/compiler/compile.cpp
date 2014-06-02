@@ -528,9 +528,6 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
   wto.open((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_timelines.h").c_str(),ios_base::out);
   {
     wto << license;
-//    wto <<"#include <map>\n";
-//    wto <<"#include <vector>\n";
-//    wto <<"#include <cmath>\n\n";
     wto <<"namespace enigma {\n\n";
 
     //Each timeline has a lookup structure (in this case, a map) which allows easy forward/backward lookup.
