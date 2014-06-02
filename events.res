@@ -87,7 +87,7 @@ beginstep: 3
 	Name: Begin Step
 	Mode: Special
 	Case: 1
-	Constant: {xprevious = x; yprevious = y; if (sprite_index != -1) image_index = fmod((image_speed < 0)?(sprite_get_number(sprite_index) + image_index - fmod(abs(image_speed),sprite_get_number(sprite_index))):(image_index + image_speed), sprite_get_number(sprite_index));  if (timeline_running && timeline_speed!=0) { enigma::advance_curr_timeline(timeline_position, timeline_speed, timeline_index, timeline_loop); } }
+	Constant: {xprevious = x; yprevious = y; if (sprite_index != -1) image_index = fmod((image_speed < 0)?(sprite_get_number(sprite_index) + image_index - fmod(abs(image_speed),sprite_get_number(sprite_index))):(image_index + image_speed), sprite_get_number(sprite_index)); }
 
 alarm: 2
 	Group: Alarm
@@ -289,6 +289,7 @@ step: 3
 	Name: Step
 	Mode: Special
 	Case: 0
+	Constant: { if (timeline_running && timeline_speed!=0) enigma::advance_curr_timeline(timeline_position, timeline_speed, timeline_index, timeline_loop); }
 
 localsweep: 100000 
 	Name: Locals sweep 
