@@ -46,8 +46,8 @@ namespace enigma {
 
 unsigned int split(const std::string &txt, std::vector<std::string> &strs, char ch)
 {
-	unsigned int pos = txt.find( ch );
-	unsigned int initialPos = 0;
+	size_t pos = txt.find( ch );
+	size_t initialPos = 0;
 	strs.clear();
 
 	// Decompose statement
@@ -59,7 +59,7 @@ unsigned int split(const std::string &txt, std::vector<std::string> &strs, char 
 	}
 
 	// Add the last one
-	strs.push_back( txt.substr( initialPos, std::min( pos, (unsigned)txt.size() ) - initialPos + 1 ) );
+	strs.push_back( txt.substr( initialPos, std::min( pos, txt.size() ) - initialPos + 1 ) );
 
 	return strs.size();
 }
