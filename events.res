@@ -289,6 +289,7 @@ step: 3
 	Name: Step
 	Mode: Special
 	Case: 0
+	Constant: { if (timeline_running && timeline_speed!=0) enigma::advance_curr_timeline(timeline_position, timeline_speed, timeline_index, timeline_loop); }
 
 localsweep: 100000 
 	Name: Locals sweep 
@@ -435,7 +436,7 @@ endstep: 3
 	Name: End Step
 	Mode: Special
 	Case: 2
-
+	Constant: { if (timeline_running && timeline_loop && timeline_speed!=0) enigma::loop_curr_timeline(timeline_position, timeline_speed, timeline_index); }
 
 particlesystemsupdate: 100000
 	Name: Particle Systems Update

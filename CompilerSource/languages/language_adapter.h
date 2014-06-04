@@ -22,6 +22,7 @@
 #define _LANGUAGE_ADAPTER__H
 
 #include <string>
+#include <vector>
 using namespace std;
 #include "parser/object_storage.h"
 #include "backend/EnigmaStruct.h"
@@ -31,11 +32,11 @@ struct language_adapter {
   virtual string get_name() = 0;
   
   // Sizable utilities
-  virtual int link_globals(parsed_object*, EnigmaStruct*, parsed_script*[]) = 0;
+  virtual int link_globals(parsed_object*, EnigmaStruct*, parsed_script*[], vector<parsed_script*>& tlines) = 0;
 
   // IDE_EDITABLEs added before compile
-  virtual int compile_parseAndLink(EnigmaStruct*,parsed_script*[]) = 0;
-  virtual int compile_parseSecondary(map<int,parsed_object*>&,parsed_script*[],int scrcount,map<int,parsed_room*>&,parsed_object*) = 0;
+  virtual int compile_parseAndLink(EnigmaStruct*,parsed_script*[], vector<parsed_script*>& tlines) = 0;
+  virtual int compile_parseSecondary(map<int,parsed_object*>&,parsed_script*[],int scrcount, vector<parsed_script*>& tlines, map<int,parsed_room*>&,parsed_object*) = 0;
   virtual int compile_writeGlobals(EnigmaStruct*,parsed_object*) = 0;
   virtual int compile_writeObjectData(EnigmaStruct*,parsed_object*,int mode) = 0;
   virtual int compile_writeObjAccess(map<int,parsed_object*>&,parsed_object*) = 0;
