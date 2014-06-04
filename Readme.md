@@ -9,7 +9,7 @@ Like Game Maker, ENIGMA comprises both an easy to use Drag & Drop system as well
 Although EDL adopts GML's very lax syntax in its scripting, the inputted code is actually parsed and translated into valid C++. This compilation improves size and performance of the language by incredible amounts, while almost magically maintaining its simplicity of use.
 
 ## Install
-In order to keep the ENIGMA repository small and fast binary files are excluded. To install you will need to obtain the binary files for your chosen platform. Please read the `building.txt` file for more information.
+In order to keep the ENIGMA repository small and fast binary files are excluded. To install you will need to obtain the binary files for your chosen platform. Please read the `building.md` file for more information.
 
 ### MACOSX
 After cloning the repository run the following command in terminal to install the main binary files
