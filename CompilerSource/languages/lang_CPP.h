@@ -38,11 +38,11 @@ struct lang_CPP: language_adapter {
   string get_name();
   
   // Sizable utilities
-  int link_globals(parsed_object*, EnigmaStruct*,parsed_script*[]);
+  int link_globals(parsed_object*, EnigmaStruct*,parsed_script*[], vector<parsed_script*>& tlines);
 
   // IDE_EDITABLEs added before compile
-  int compile_parseAndLink(EnigmaStruct*,parsed_script*[]);
-  int compile_parseSecondary(map<int,parsed_object*>&,parsed_script*[],int scrcount,map<int,parsed_room*>&,parsed_object*);
+  int compile_parseAndLink(EnigmaStruct*,parsed_script*[], vector<parsed_script*>& tlines);
+  int compile_parseSecondary(map<int,parsed_object*>&,parsed_script*[],int scrcount, vector<parsed_script*>& tlines, map<int,parsed_room*>&,parsed_object*);
   int compile_writeGlobals(EnigmaStruct*,parsed_object*);
   int compile_writeObjectData(EnigmaStruct*,parsed_object*,int mode);
   int compile_writeObjAccess(map<int,parsed_object*>&,parsed_object*);

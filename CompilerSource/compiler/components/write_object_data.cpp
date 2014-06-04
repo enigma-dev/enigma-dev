@@ -90,6 +90,15 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, i
       wto << ");\n";
     }
     wto << "\n";
+
+    //Write timeline/moment names. Timelines are like scripts, but we don't have to worry about arguments or return types.
+    for (int i=0; i<es->timelineCount; i++) {
+      for (int j=0; j<es->timelines[i].momentCount; j++) {
+        wto << "void TLINE_" <<es->timelines[i].name <<"_MOMENT_" <<es->timelines[i].moments[j].stepNo <<"();\n";
+      }
+    }
+
+    wto << "\n";
     wto << "namespace enigma\n{\n";
     wto << "  extern objectstruct** objectdata;\n";
       wto << "  struct object_locals: event_parent";
@@ -541,6 +550,20 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, i
       wto << "\n  return 0;\n}\n\n";
     }
 
+    // Export globalized timelines.
+    // TODO: Is there such a thing as a localized timeline?
+    for (int i=0; i<es->timelineCount; i++)
+    {
+      for (int j=0; j<es->timelines[i].momentCount; j++)
+      {
+        parsed_script* scr = tline_lookup[es->timelines[i].name][j];
+        wto << "void TLINE_" <<es->timelines[i].name <<"_MOMENT_" <<es->timelines[i].moments[j].stepNo <<"()\n{\n";
+        parsed_event& upev = scr->pev_global?*scr->pev_global:scr->pev;
+        print_to_file(upev.code,upev.synt,upev.strc,upev.strs,2,wto);
+        wto << "\n}\n\n";
+      }
+    }
+
     cout << "DBGMSG 3" << endl;
     // Export everything else
     for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
@@ -648,6 +671,9 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, i
     "    //This is the universal create event code\n    object_locals* instance = (object_locals*)instance_b;\n    \n"
     "    instance->xstart = instance->x;\n    instance->ystart = instance->y;\n    instance->xprevious = instance->x;\n    instance->yprevious = instance->y;\n\n"
     "    instance->gravity=0;\n    instance->gravity_direction=270;\n    instance->friction=0;\n    \n"
+    "    \n"
+    "    instance->timeline_index = -1;\n    instance->timeline_running = false;\n    instance->timeline_speed = 1;\n    instance->timeline_position = 0;\n"
+    "    instance->timeline_loop = false;\n    \n"
     "    \n"
     "    instance->image_alpha = 1.0;\n    instance->image_angle = 0;\n    instance->image_blend = 0xFFFFFF;\n    instance->image_index = 0;\n"
     "    instance->image_speed  = 1;\n    instance->image_xscale = 1;\n    instance->image_yscale = 1;\n    \n"
