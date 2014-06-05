@@ -71,18 +71,6 @@ inline void action_timeline_stop()
   ((enigma::object_basic*)enigma::instance_event_iterator->inst)->timeline_position=0;
 }
 
-
-
-
-void action_webpage(const std::string &url)
-{
-	//TODO: Look for cross-platform method.
-	#ifdef _WIN32
-		ShellExecute (NULL, "open", url.c_str(), NULL, NULL, SW_SHOWNORMAL);
-	#endif
-}
-
-
 inline bool action_if_variable(const variant& variable, const variant& value, int operation) {
     switch (operation)
     {
