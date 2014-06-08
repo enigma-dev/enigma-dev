@@ -234,8 +234,8 @@ void window_center()
 {
     int screen_width = GetSystemMetrics(SM_CXSCREEN);
     int screen_height = GetSystemMetrics(SM_CYSCREEN);
-    enigma::windowX = (screen_width - enigma::regionWidth)/2;
-    enigma::windowY = (screen_height - enigma::regionHeight)/2;
+    enigma::windowX = (screen_width - enigma::scaledWidth)/2;
+    enigma::windowY = (screen_height - enigma::scaledHeight)/2;
     enigma::clampparent();
     enigma::centerchild();
 }

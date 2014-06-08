@@ -41,7 +41,3 @@ namespace enigma {
   }
 }
 
-namespace enigma_user {
-  extern string keyboard_string;
-}
-
