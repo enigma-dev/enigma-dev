@@ -261,17 +261,19 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
       a = b;
 
       struct stat st;
-      for (char* c = b; *b; b++) if (*b == ':')
+      const char delim[] = ":";
+      char *c = strtok(b, delim);
+      while(c)
       {
-        *b = 0;
         string fn = string(c) + "/" + ename;
         if (!stat(fn.c_str(), &st))
         {
           ename = fn;
           break;
         }
-        c = b + 1;
+        c = strtok(NULL, delim);
       }
+
       free(a);
     }
 
