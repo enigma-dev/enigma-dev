@@ -40,7 +40,10 @@
 
 namespace enigma_user {
   const int os_type = os_linux;
+  extern int keyboard_key;
   extern int keyboard_lastkey;
+  extern string keyboard_lastchar;
+  extern string keyboard_string;
 }
 
 namespace enigma
@@ -88,6 +91,7 @@ namespace enigma
                 }
               }
               enigma_user::keyboard_lastkey = actualKey;
+              enigma_user::keyboard_key = actualKey;
               if (enigma::last_keybdstatus[actualKey]==1 && enigma::keybdstatus[actualKey]==0) {
                 enigma::keybdstatus[actualKey]=1;
                 return 0;
@@ -97,6 +101,7 @@ namespace enigma
               return 0;
         }
         case KeyRelease: {
+            enigma_user::keyboard_key = 0;
             gk=XLookupKeysym(&e.xkey,0);
             if (gk == NoSymbol)
               return 0;
