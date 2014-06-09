@@ -147,7 +147,7 @@ template<> struct uintmatch<8>  { typedef uint64_t type; };
 typedef uintmatch<sizeof(gs_scalar)>::type color_t;
 union VertexElement {
 	color_t d;
-	gs_scalar 
+	gs_scalar f;
 
 	VertexElement(gs_scalar v): f(v) {}
 	VertexElement(color_t v): d(v) {}
