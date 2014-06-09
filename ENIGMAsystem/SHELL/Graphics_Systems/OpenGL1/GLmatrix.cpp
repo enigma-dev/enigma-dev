@@ -111,7 +111,7 @@ void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scal
     // issues experienced by many users of NVIDIA cards.  This fix should
     // not have any negative effects on anything else and should work for
     // every type of GPU.  
-    x += 0.01f; y += 0.01f;
+    x += 0.01f; y += 0.01
     enigma::projection_matrix.InitScaleTransform(1, -1, 1);
     enigma::projection_matrix.rotateZ(angle);
 
@@ -127,8 +127,6 @@ void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scal
     glLoadMatrix(enigma::projection_matrix);
 
     glMatrixMode(GL_MODELVIEW);
-//  After many tests, it was shown this part is not necessary.
-//  enigma::mv_matrix.translate(0.00f, 0.00f, 0.0f);
     glLoadMatrix(enigma::mv_matrix);
 
     enigma::d3d_light_update_positions();
