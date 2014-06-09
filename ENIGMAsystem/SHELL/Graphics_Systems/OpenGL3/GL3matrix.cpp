@@ -98,10 +98,11 @@ void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom, g
 
 void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, gs_scalar angle)
 {
-    // This is half-pixel alignment, the values used for the model view matrix in conjunction with the ortho projection have been tested on Nvidia and AMD graphics cards.
-    // 0.375,0.375 is suggested by Microsoft, however we have discovered the offsets 0.375,0.375 and 0.175,0.175 combined between the projection and model view matrix
-    // yields the best results.
-    x += 0.375f; y += 0.375f;
+    // This .01 offset is a quick fix for the fonts artifacts and scrolling
+    // issues experienced by many users of NVIDIA cards.  This fix should
+    // not have any negative effects on anything else and should work for
+    // every type of GPU.  
+    x += 0.01f; y += 0.01f;
     oglmgr->Transformation();
     enigma::projection_matrix.InitScaleTransform(1, -1, 1);
     enigma::projection_matrix.rotateZ(angle);
