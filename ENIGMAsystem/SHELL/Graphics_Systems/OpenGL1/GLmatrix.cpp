@@ -107,11 +107,10 @@ void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom, g
 
 void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, gs_scalar angle)
 {
-    // This .01 offset is a quick fix for the fonts artifacts and scrolling
-    // issues experienced by many users of NVIDIA cards.  This fix should
-    // not have any negative effects on anything else and should work for
-    // every type of GPU.  
-    x += 0.01f; y += 0.01f;
+    // This fixes font glyph edge artifacting and vertical scroll gaps
+    // seen by mostly NVIDIA GPU users.  Rounds x and y and adds +0.01 offset.
+    // This will prevent the fix from being negated. 
+    x = round(x) + 0.01f; y = round(y) + 0.01f;
     enigma::projection_matrix.InitScaleTransform(1, -1, 1);
     enigma::projection_matrix.rotateZ(angle);
 
