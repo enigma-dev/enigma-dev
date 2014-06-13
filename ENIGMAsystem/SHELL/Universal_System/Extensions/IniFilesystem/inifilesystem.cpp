@@ -59,7 +59,7 @@ namespace enigma_user
 #endif
 	}
 
-	string ini_close()
+	void ini_close()
 	{
 #ifdef DEBUG_MODE
 		if (enigma_ini_file == NULL)
@@ -68,17 +68,8 @@ namespace enigma_user
 			return;
 		}
 #endif
-		fseek(enigma_ini_file, 0, SEEK_END);
-		string str;
-		str.reserve(ftell(enigma_ini_file));
-		rewind(enigma_ini_file);
-
-		while (!feof(enigma_ini_file))
-		{
-			str.push_back(fgetc(enigma_ini_file));
-		}
 		fclose(enigma_ini_file);
-		return str;
+		enigma_ini_file = NULL;
 	}
 
 	/*void finsert(FILE *file, char *buffer, const size_t buffsize, const char *insert, const size_t size)
