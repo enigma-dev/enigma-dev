@@ -20,6 +20,7 @@
  *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
 #include <cstdio>
+#include <cstdlib>
 #include "Platforms/General/PFini.h"
 #include "Universal_System/estring.h"
 
@@ -205,7 +206,7 @@ namespace enigma_user
 		}
 	}
 	
-	variant ini_read_real(string section, string key, variant def)
+	int ini_read_real(string section, string key, int def)
 	{
 		int cur, pos = ftell(enigma_ini_file);
 
@@ -244,7 +245,7 @@ namespace enigma_user
 							str.push_back(c);
 						}
 						fseek(enigma_ini_file, cur, SEEK_SET);
-						return variant(str);
+						return atoi(str.c_str());
 					}
 
 					while (fgetc(enigma_ini_file) != '\n');
