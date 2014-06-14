@@ -23,6 +23,7 @@
 #include <cstdlib>
 #include "Platforms/General/PFini.h"
 #include "Universal_System/estring.h"
+#include "Widget_Systems/widgets_mandatory.h"
 
 #ifndef ENIGMA_INI_BUFFER_SIZE
 #define ENIGMA_INI_BUFFER_SIZE 512
@@ -39,7 +40,7 @@ namespace enigma_user
 #ifdef DEBUG_MODE
 		if (enigma_ini_file != NULL)
 		{
-			show_error("An ini file is already opened.");
+			show_error("An ini file is already opened.", true);
 			return;
 		}
 #endif
@@ -47,7 +48,7 @@ namespace enigma_user
 		if (fgetc(enigma_ini_file) != '[')
 		{
 #ifdef DEBUG_MODE
-			show_error("File is not an ini file.");
+			show_error("File is not an ini file.", true);
 #endif
 			fclose(enigma_ini_file);
 			return;
@@ -55,7 +56,7 @@ namespace enigma_user
 #ifdef DEBUG_MODE
 		if (ferror(enigma_ini_file))
 		{
-			show_error("Unable to open the indicated ini file.");
+			show_error("Unable to open the indicated ini file.", true);
 		}
 #endif
 	}
@@ -65,7 +66,7 @@ namespace enigma_user
 #ifdef DEBUG_MODE
 		if (enigma_ini_file == NULL)
 		{
-			show_error("Cannot close an ini file before it is not open.");
+			show_error("Cannot close an ini file before it is not open.", true);
 			return;
 		}
 #endif
