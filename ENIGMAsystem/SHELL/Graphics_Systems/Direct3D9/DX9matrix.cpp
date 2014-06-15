@@ -80,28 +80,32 @@ void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs
 	
 	D3DXMATRIX matProj;
 
-	D3DXMatrixPerspectiveFovLH( &matProj, D3DXToRadian(angle), aspect, znear, zfar );
+	D3DXMatrixPerspectiveFovLH( &matProj, gs_angle_to_radians(angle), aspect, znear, zfar );
 	d3dmgr->SetTransform( D3DTS_PROJECTION, &matProj );
 }
 
 void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, gs_scalar angle)
 {
-	
-	D3DXMATRIX matRotZ, matTrans, matScale;
+     // This fixes font glyph edge artifacting and vertical scroll gaps
+     // seen by mostly NVIDIA GPU users.  Rounds x and y and adds +0.01 offset.
+     // This will prevent the fix from being negated through moving projections
+     // and fractional coordinates. 
+     x = round(x) + 0.01f; y = round(y) + 0.01f;
+     D3DXMATRIX matRotZ, matTrans, matScale;
 
 	// Calculate rotation matrix
-	D3DXMatrixRotationZ( &matRotZ, angle );        // Roll
+	D3DXMatrixRotationZ( &matRotZ, gs_angle_to_radians(angle) );        // Roll
 
 	// Calculate a translation matrix
-	D3DXMatrixTranslation(&matTrans, -x - 0.5, -y - height - 0.5, 0);
+	D3DXMatrixTranslation(&matTrans, -x, -y - height, 0);
 
 	D3DXMatrixScaling(&matScale, 1, -1, 1);
 
 	// Calculate our world matrix by multiplying the above (in the correct order)
-	D3DXMATRIX matWorld=matRotZ*matTrans*matScale;
+	D3DXMATRIX matView=matRotZ*matTrans*matScale;
 
 	// Set the matrix to be applied to anything we render from now on
-	d3dmgr->SetTransform( D3DTS_VIEW, &matWorld);
+	d3dmgr->SetTransform( D3DTS_VIEW, &matView);
 	
 	D3DXMATRIX matProjection;    // the projection transform matrix
 	D3DXMatrixOrthoOffCenterLH(&matProjection,
@@ -117,37 +121,28 @@ void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scal
 
 void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, gs_scalar angle)
 {
-	D3DXMATRIX matRotZ, matTrans, matScale;
+  D3DXMATRIX matView, matRotZ;    // the projection transform matrix
 
-	// Calculate rotation matrix
-	D3DXMatrixRotationZ( &matRotZ, angle );        // Roll
+  D3DXMatrixOrthoOffCenterLH(&matView,
+    (FLOAT)x,
+    (FLOAT)x+width,   
+    (FLOAT)y,
+    (FLOAT)y+height,   
+    -32000.0f,    // the near view-plane
+    32000.0f);    // the far view-plane
+    
+  // Initialize rotation matrix
+  D3DXMatrixRotationZ( &matRotZ, gs_angle_to_radians(angle) );
+  matView *= matRotZ;
 
-	// Calculate a translation matrix
-	D3DXMatrixTranslation(&matTrans, -x, -y, 0);
+  // Set the matrix to be applied to anything we render from now on
+  d3dmgr->SetTransform( D3DTS_VIEW, &matView);
 
-	D3DXMatrixScaling(&matScale, 1, 1, 1);
+  D3DXMATRIX matProj;    // the projection transform matrix
+  D3DXMatrixPerspectiveFovLH(&matProj,
+    D3DXToRadian(60), width/height, 0.1, 32000);    // the far view-plane
 
-	// Calculate our world matrix by multiplying the above (in the correct order)
-	D3DXMATRIX matWorld=matRotZ*matTrans*matScale;
-
-	
-			D3DXMATRIX matProjection;    // the projection transform matrix
-	D3DXMatrixOrthoOffCenterLH(&matProjection,
-							0,
-							(FLOAT)width,   
-							0,
-							(FLOAT)height,   
-							-32000.0f,    // the near view-plane
-							32000.0f);    // the far view-plane
-	
-	// Set the matrix to be applied to anything we render from now on
-	d3dmgr->SetTransform( D3DTS_VIEW, &matProjection);
-	
-	D3DXMATRIX matProj;    // the projection transform matrix
-	D3DXMatrixPerspectiveFovLH(&matProj,
-							D3DXToRadian(60), width/height, 0.1, 32000);    // the far view-plane
-					
-	d3dmgr->SetTransform(D3DTS_PROJECTION, &matProj);    // set the projection transform
+  d3dmgr->SetTransform(D3DTS_PROJECTION, &matProj);    // set the projection transform
 }
 
 D3DXMATRIX matWorld; 

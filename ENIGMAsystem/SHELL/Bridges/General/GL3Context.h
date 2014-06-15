@@ -85,7 +85,7 @@ void RestoreState() {
 
 void BeginShapesBatching(int texId) {
 	if (shapes_d3d_model == -1) {
-		shapes_d3d_model = d3d_model_create(true);
+		shapes_d3d_model = d3d_model_create(model_dynamic);
 		last_stride = -1;
 	} else if (texId != shapes_d3d_texture || (d3d_model_get_stride(shapes_d3d_model) != last_stride && last_stride != -1)) {
 		last_stride = -1;

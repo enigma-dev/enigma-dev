@@ -43,7 +43,19 @@ using namespace std;
 
 int global_script_argument_count = 0;
 
-extern string working_directory;
+static string esc(string str) {
+  string res;
+  res.reserve(str.length());
+  for (size_t i = 0; i < str.length(); ++i) {
+    char c = str[i];
+    if (c == '\n') { res += "\\n"; continue; }
+    if (c == '\r') { res += "\\r"; continue; }
+    if (c == '\\') { res += "\\\\"; continue; }
+	if (c == '\"') { res += "\\\""; continue; }
+    res.append(1, c);
+  }
+  return res;
+}
 
 int lang_CPP::compile_writeGlobals(EnigmaStruct* es, parsed_object* global)
 {
@@ -61,7 +73,7 @@ int lang_CPP::compile_writeGlobals(EnigmaStruct* es, parsed_object* global)
     }
 	
     wto << "namespace enigma_user { " << endl;
-    wto << "  string working_directory = \"" << working_directory << "\";" << endl;
+    //wto << "  string working_directory = \"\";" << endl; // moved over to PFmain.h
     wto << "  unsigned int game_id = " << es->gameSettings.gameId << ";" << endl;
     wto << "}" << endl <<endl;
 
@@ -77,7 +89,18 @@ int lang_CPP::compile_writeGlobals(EnigmaStruct* es, parsed_object* global)
     wto << "  bool freezeOnLoseFocus = " << es->gameSettings.freezeOnLoseFocus << ";" << endl;
 	wto << "  bool treatCloseAsEscape = " << es->gameSettings.treatCloseAsEscape << ";" << endl;
     wto << "  bool isFullScreen = " << es->gameSettings.startFullscreen << ";" << endl;
-	wto << "  string gameInformation = " << "\"TODO: Add Game Information to Enigma Struct\"" << ";" << endl;
+	wto << "  string gameInfoText = \"" << esc(es->gameInfo.gameInfoStr) << "\";" << endl;
+	wto << "  string gameInfoCaption = \"" << es->gameInfo.formCaption << "\";" << endl;
+	wto << "  int gameInfoBackgroundColor = " << javaColor(es->gameInfo.backgroundColor) << ";" << endl;
+	wto << "  int gameInfoLeft = " << es->gameInfo.left << ";" << endl;
+	wto << "  int gameInfoTop = " << es->gameInfo.top << ";" << endl;
+	wto << "  int gameInfoWidth = " << es->gameInfo.width << ";" << endl;
+	wto << "  int gameInfoHeight = " << es->gameInfo.height << ";" << endl;
+	wto << "  bool gameInfoEmbedGameWindow = " << es->gameInfo.embedGameWindow << ";" << endl;
+	wto << "  bool gameInfoShowBorder = " << es->gameInfo.showBorder << ";" << endl;
+	wto << "  bool gameInfoAllowResize = " << es->gameInfo.allowResize << ";" << endl;
+	wto << "  bool gameInfoStayOnTop = " << es->gameInfo.stayOnTop << ";" << endl;
+	wto << "  bool gameInfoPauseGame = " << es->gameInfo.pauseGame << ";" << endl;
     wto << "  int viewScale = " << es->gameSettings.scaling << ";" << endl;
     wto << "}" << endl;
 

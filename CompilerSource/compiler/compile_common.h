@@ -29,6 +29,7 @@
 #define _COMPILE_COMMON__H
 
 #include <map>
+#include <vector>
 #include "compile_organization.h"
 #include "parser/object_storage.h"
 
@@ -38,6 +39,8 @@ namespace used_funcs
   void zero();
 }
 extern std::map<string,parsed_script*> scr_lookup;
+extern std::map<string, std::vector<parsed_script*> > tline_lookup;
+
 
 extern const char* license;
 
@@ -45,7 +48,7 @@ extern const char* license;
 inline string tdefault(string t) {
   return (t != "" ? t : "var");
 }
-inline void* lgmRoomBGColor(int c) {
+inline void* javaColor(int c) {
   return reinterpret_cast<void*>((c & 0xFF)?(((c & 0x00FF0000) >> 8) | ((c & 0x0000FF00) << 8) | ((c & 0xFF000000) >> 24)):0xFFFFFFFF);
 }
 

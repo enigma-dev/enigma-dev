@@ -1,29 +1,19 @@
-/********************************************************************************\
-**                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
-**                                                                              **
-**  This file is a part of the ENIGMA Development Environment.                  **
-**                                                                              **
-**                                                                              **
-**  ENIGMA is free software: you can redistribute it and/or modify it under the **
-**  terms of the GNU General Public License as published by the Free Software   **
-**  Foundation, version 3 of the license or any later version.                  **
-**                                                                              **
-**  This application and its source code is distributed AS-IS, WITHOUT ANY      **
-**  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS   **
-**  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more       **
-**  details.                                                                    **
-**                                                                              **
-**  You should have recieved a copy of the GNU General Public License along     **
-**  with this code. If not, see <http://www.gnu.org/licenses/>                  **
-**                                                                              **
-**  ENIGMA is an environment designed to create games and other programs with a **
-**  high-level, fully compilable language. Developers of ENIGMA or anything     **
-**  associated with ENIGMA are in no way responsible for its users or           **
-**  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **
-**                                                                              **
-\********************************************************************************/
+/** Copyright (C) 2008 Josh Ventura
+***
+*** This file is a part of the ENIGMA Development Environment.
+***
+*** ENIGMA is free software: you can redistribute it and/or modify it under the
+*** terms of the GNU General Public License as published by the Free Software
+*** Foundation, version 3 of the license or any later version.
+***
+*** This application and its source code is distributed AS-IS, WITHOUT ANY
+*** WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+*** FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+*** details.
+***
+*** You should have received a copy of the GNU General Public License along
+*** with this code. If not, see <http://www.gnu.org/licenses/>
+**/
 
 
 #include <stdio.h>
@@ -534,7 +524,7 @@ string event_get_super_check_function(int mid, int id) {
 string event_get_sub_check_condition(int mid, int id) {
   event_info* ei = event_access(mid,id);
   const string res = evres_code_substitute(ei->sub, id, ei->par2type);
-  return res[0] == '{' ? res : "if (!(" + res + ")) return 0;";
+  return res[0] == '{' ? res : "return (" + res + ");";
 }
 
 // Does this event belong on the list of events to execute?
@@ -568,17 +558,25 @@ string event_forge_sequence_code(int mid, int id, string preferred_name)
   else
     if (event_execution_uses_default(mid,id))
     {
-      if (event_has_super_check(mid,id) and !event_is_instance(mid,id))
-        return base_indent + "if (" + event_get_super_check_condition(mid,id) + ")\n" +
-               base_indent + "  for (instance_event_iterator = event_" + preferred_name + "->next; instance_event_iterator != NULL; instance_event_iterator = instance_event_iterator->next) {\n" +
-               base_indent + "    ((enigma::event_parent*)(instance_event_iterator->inst))->myevent_" + preferred_name + "();\n" +
-               base_indent + "    if (enigma::room_switching_id != -1) goto after_events;\n" +
-               base_indent + "  }\n";
-      else
-         return base_indent + "for (instance_event_iterator = event_" + preferred_name + "->next; instance_event_iterator != NULL; instance_event_iterator = instance_event_iterator->next) {\n"
-              + base_indent + "  ((enigma::event_parent*)(instance_event_iterator->inst))->myevent_" + preferred_name + "();\n"
-              + base_indent + "  if (enigma::room_switching_id != -1) goto after_events;\n"
-              + base_indent + "}\n";
+      string ret = "";
+      bool perfsubcheck = event_has_sub_check(mid, id) && !event_is_instance(mid, id);
+      if (event_has_super_check(mid,id) and !event_is_instance(mid,id)) {
+        ret =        base_indent + "if (" + event_get_super_check_condition(mid,id) + ")\n" +
+                     base_indent + "  for (instance_event_iterator = event_" + preferred_name + "->next; instance_event_iterator != NULL; instance_event_iterator = instance_event_iterator->next) {\n";
+        if (perfsubcheck) { ret += "    if (((enigma::event_parent*)(instance_event_iterator->inst))->myevent_" + preferred_name + "_subcheck()) {\n"; }
+        ret +=       base_indent + "      ((enigma::event_parent*)(instance_event_iterator->inst))->myevent_" + preferred_name + "();\n";
+        if (perfsubcheck) { ret += "    }\n"; }
+        ret +=       base_indent + "    if (enigma::room_switching_id != -1) goto after_events;\n" +
+                     base_indent + "  }\n";
+      } else {
+         ret =  base_indent + "for (instance_event_iterator = event_" + preferred_name + "->next; instance_event_iterator != NULL; instance_event_iterator = instance_event_iterator->next) {\n";
+         if (perfsubcheck) { ret += "    if (((enigma::event_parent*)(instance_event_iterator->inst))->myevent_" + preferred_name + "_subcheck()) {\n"; }
+         ret += base_indent + "  ((enigma::event_parent*)(instance_event_iterator->inst))->myevent_" + preferred_name + "();\n";
+         if (perfsubcheck) { ret += "    }\n"; }
+         ret += base_indent + "  if (enigma::room_switching_id != -1) goto after_events;\n" +
+                base_indent + "}\n";
+      }
+      return ret;
     }
   return "";
 }

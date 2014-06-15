@@ -69,12 +69,15 @@ void enigma_catchmouse_backend(bool x) {
 namespace enigma {
   int initialize_everything();
   int ENIGMA_events();
+  int game_ending();
 } // TODO: synchronize with XLib by moving these declarations to a platform_includes header in the root.
 
 //TODO: Implement pause events
 unsigned long current_time_mcs = 0; // microseconds since the start of the game
 
 namespace enigma_user {
+  std::string working_directory = "";
+  std::string program_directory = "";
   extern double fps;
   unsigned long current_time = 0; // milliseconds since the start of the game
   unsigned long delta_time = 0; // microseconds since the last step event
@@ -95,6 +98,7 @@ namespace enigma_user {
 
 namespace enigma {
   int current_room_speed;
+  int game_return = 0;
   bool use_pc;
   // Filetime.
   ULARGE_INTEGER time_offset_ft;
@@ -189,6 +193,7 @@ namespace enigma {
     }
   }
 }
+
 #include <cstdio>
 #include <mmsystem.h>
 int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,int iCmdShow)
@@ -196,6 +201,17 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
     int wid = (int)enigma_user::room_width, hgt = (int)enigma_user::room_height;
     if (!wid || !hgt) wid = 640, hgt = 480;
     enigma::hInstance = hInstance;
+
+    // Set the working_directory
+    char buffer[MAX_PATH];
+    GetCurrentDirectory( MAX_PATH, buffer );
+    enigma_user::working_directory = string( buffer );
+    
+    // Set the program_directory
+    memset(&buffer[0], 0, MAX_PATH); 
+    GetModuleFileName( NULL, buffer, MAX_PATH );
+    enigma_user::program_directory = string( buffer );
+    enigma_user::program_directory = enigma_user::program_directory.substr( 0, enigma_user::program_directory.find_last_of( "\\/" ));
 
     LPWSTR *argv;
     if ((argv = CommandLineToArgvW(GetCommandLineW(), &enigma::main_argc)))
@@ -210,54 +226,54 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
     }
 
     //Create the window
-        WNDCLASS wcontainer,wmain;
-        HGLRC hRC;
-        MSG msg;
+    WNDCLASS wcontainer,wmain;
+    HGLRC hRC;
+    MSG msg;
 
-        //Register window class
-        wcontainer.style = CS_OWNDC;
-        wcontainer.lpfnWndProc = enigma::WndProc;
-        wcontainer.cbClsExtra = 0;
-        wcontainer.cbWndExtra = 0;
-        wcontainer.hInstance = hInstance;
-        wcontainer.hIcon = LoadIcon (hInstance, "IDI_MAIN_ICON");
-        wcontainer.hCursor = LoadCursor (NULL, IDC_ARROW);
-        wcontainer.hbrBackground = (HBRUSH) GetStockObject (BLACK_BRUSH);
-        wcontainer.lpszMenuName = NULL;
-        wcontainer.lpszClassName = "TMain";
-        RegisterClass (&wcontainer);
+    //Register window class
+    wcontainer.style = CS_OWNDC;
+    wcontainer.lpfnWndProc = enigma::WndProc;
+    wcontainer.cbClsExtra = 0;
+    wcontainer.cbWndExtra = 0;
+    wcontainer.hInstance = hInstance;
+    wcontainer.hIcon = LoadIcon (hInstance, "IDI_MAIN_ICON");
+    wcontainer.hCursor = LoadCursor (NULL, IDC_ARROW);
+    wcontainer.hbrBackground = (HBRUSH) GetStockObject (BLACK_BRUSH);
+    wcontainer.lpszMenuName = NULL;
+    wcontainer.lpszClassName = "TMain";
+    RegisterClass (&wcontainer);
 
-        //Register other window class
-        wmain.style = 0;
-        wmain.lpfnWndProc = enigma::WndProc;
-        wmain.cbClsExtra = 0;
-        wmain.cbWndExtra = 0;
-        wmain.hInstance = hInstance;
-        wmain.hIcon = LoadIcon (NULL, IDI_APPLICATION);
-        wmain.hCursor = LoadCursor (NULL, IDC_ARROW);
-        wmain.hbrBackground = (HBRUSH) GetStockObject (BLACK_BRUSH);
-        wmain.lpszMenuName = NULL;
-        wmain.lpszClassName = "TSub";
-        RegisterClass (&wmain);
+    //Register other window class
+    wmain.style = 0;
+    wmain.lpfnWndProc = enigma::WndProc;
+    wmain.cbClsExtra = 0;
+    wmain.cbWndExtra = 0;
+    wmain.hInstance = hInstance;
+    wmain.hIcon = LoadIcon (NULL, IDI_APPLICATION);
+    wmain.hCursor = LoadCursor (NULL, IDC_ARROW);
+    wmain.hbrBackground = (HBRUSH) GetStockObject (BLACK_BRUSH);
+    wmain.lpszMenuName = NULL;
+    wmain.lpszClassName = "TSub";
+    RegisterClass (&wmain);
 
+    //Create the parent window
+    int screen_width = GetSystemMetrics(SM_CXSCREEN);
+    int screen_height = GetSystemMetrics(SM_CYSCREEN);
+    // By default if the room is too big instead of creating a gigantic ass window
+    // make it not bigger than the screen to full screen it, this is what 8.1 and Studio
+    // do, if the user wants to manually override this they can using
+    // views/screen_set_viewport or window_set_size/window_set_region_size
+    // We won't limit those functions like GM, just the default.
+    if (wid > screen_width) wid = screen_width;
+    if (hgt > screen_height) hgt = screen_height;
+    // TODO: Implement minimize button on both windows like GM
+     enigma::hWndParent = CreateWindow ("TMain", "", WS_CAPTION | WS_POPUPWINDOW | WS_MINIMIZEBOX, (screen_width-wid)/2, (screen_height-hgt)/2, wid, hgt, NULL, NULL, hInstance, NULL);
 
-        //Create the parent window
-        int screen_width = GetSystemMetrics(SM_CXSCREEN);
-        int screen_height = GetSystemMetrics(SM_CYSCREEN);
-		// By default if the room is too big instead of creating a gigantic ass window
-		// make it not bigger than the screen to full screen it, this is what 8.1 and Studio
-		// do, if the user wants to manually override this they can using
-		// views/screen_set_viewport or window_set_size/window_set_region_size
-		// We won't limit those functions like GM, just the default.
-		if (wid > screen_width) wid = screen_width;
-		if (hgt > screen_height) hgt = screen_height;
-        // TODO: Implement minimize button on both windows like GM
-         enigma::hWndParent = CreateWindow ("TMain", "", WS_CAPTION | WS_POPUPWINDOW | WS_VISIBLE | WS_MINIMIZEBOX, (screen_width-wid)/2, (screen_height-hgt)/2, wid, hgt, NULL, NULL, hInstance, NULL);
-
-        //Create a child window to put into that
-        enigma::hWnd = CreateWindow ("TSub", NULL, WS_VISIBLE | WS_CHILD,0, 0, wid, hgt,enigma::hWndParent, NULL, hInstance, NULL);
-
+    //Create a child window to put into that
+    enigma::hWnd = CreateWindow ("TSub", NULL, WS_VISIBLE | WS_CHILD,0, 0, wid, hgt,enigma::hWndParent, NULL, hInstance, NULL);
     enigma::EnableDrawing (&hRC);
+    //Do not set the parent window visible until we have initialized the graphics context.
+    ShowWindow(enigma::hWndParent, iCmdShow);
     enigma::initialize_everything();
 
     //Main loop
@@ -326,6 +342,7 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
           {
               if (msg.message == WM_QUIT)
               {
+                  enigma::game_return = msg.wParam;
                   bQuit=1;
                   break;
               }
@@ -337,14 +354,15 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
           }
           else
           {
-              if (!enigma::gameWindowFocused && enigma::freezeOnLoseFocus) {
-				if (enigma::pausedSteps < 1) {
-					enigma::pausedSteps += 1;
-				} else {
-					usleep(100000); continue;
-				}
+        if (!enigma::gameWindowFocused && enigma::freezeOnLoseFocus) { 
+          if (enigma::pausedSteps < 1) {
+            enigma::pausedSteps += 1;
+          } else {
+            usleep(100000); continue; 
+          }
 			  }
 
+        //TODO: The placement of this code is inconsistent with XLIB because events are handled before, ask Josh.
 			  unsigned long dt = 0;
 			  if (spent_mcs > last_mcs) {
 				dt = (spent_mcs - last_mcs);
@@ -363,7 +381,8 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
               frames_count++;
           }
       }
-
+      
+    enigma::game_ending();
     timeEndPeriod(minimum_resolution);
     enigma::DisableDrawing (enigma::hWnd, enigma::window_hDC, hRC);
     DestroyWindow (enigma::hWnd);
@@ -372,7 +391,7 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
     buildmode::finishup();
     #endif
 
-    return 0;
+    return enigma::game_return;
 }
 
 namespace enigma_user
@@ -395,16 +414,6 @@ string parameter_string(int x)
 int parameter_count()
 {
   return enigma::main_argc;
-}
-
-extern string working_directory;
-bool set_working_directory(string dir)
-{
-    if (dir == "")
-        SetCurrentDirectory(working_directory.c_str());
-    else
-        SetCurrentDirectory(working_directory.c_str());   //Change to working_directory + dir/
-    return 1;
 }
 
 unsigned long long disk_size(std::string drive)
@@ -498,13 +507,13 @@ void execute_program(std::string fname, std::string args, bool wait)
 
 std::string environment_get_variable(std::string name)
 {
-	std::string value(1024, '\x00');
-	GetEnvironmentVariable((LPCTSTR)name.c_str(), (LPTSTR)value.data(), 1024);
+	char buffer[1024];
+	GetEnvironmentVariable(name.c_str(), (LPTSTR)&buffer, 1024);
 
-	return value;
+	return buffer;
 }
 
-void game_end() { PostQuitMessage(0); }
+void game_end(int ret) { PostQuitMessage(ret); }
 
 void action_end_game() { game_end(); }
 

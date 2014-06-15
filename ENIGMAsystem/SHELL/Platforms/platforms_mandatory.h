@@ -23,7 +23,7 @@
 // under this directory, /Platforms/. They are not required to do anything at all
 // if the platform in question lacks support for them entirely.
 
-#include "os_types.h"
+#include "Platforms/General/PFsystem.h"
 
 namespace enigma_user {
   extern const int os_type;
@@ -50,9 +50,9 @@ namespace enigma_user
 // Each instance must implement these, even if they are unable to do anything on the target platform.
 
 // This is used with roomsystem
-void window_default();
+void window_default(bool center_size = false);
 
-// These two are a surprisingly integral part of the system
+// These four are a surprisingly integral part of the system
 int window_mouse_get_x();
 int window_mouse_get_y();
 void window_view_mouse_set(int id, int x, int y);
@@ -82,7 +82,6 @@ void window_set_sizeable(bool sizeable);
 void window_set_showborder(bool show);
 void window_set_showicons(bool show);
 void window_set_freezeonlosefocus(bool freeze);
-bool set_working_directory(std::string dir = "");
 unsigned long get_timer(); // number of microseconds since the game started
 }
 

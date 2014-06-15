@@ -16,6 +16,7 @@
 **/
 
 #include <linux/joystick.h>
+#include <math.h>
 #include <stropts.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -29,6 +30,7 @@ using namespace std;
 
 #include "LINUXjoystick.h"  
 #include "Universal_System/CallbackArrays.h"  
+#include "Universal_System/scalar.h"
 
 
 namespace enigma
@@ -217,18 +219,32 @@ namespace enigma_user
     checkId(false);
     return false;
   }
-  int joystick_direction(int id)
+  
+  int joystick_direction(int id, int axis1, int axis2)
   {
     checkId(0);
     enigma::e_joystick * const js = enigma::joysticks[id];
     if (js->axiscount < 2) return 0;
-    const int x = js->axis[0] < -.5 ? 0 : js->axis[0] > .5 ? 2 : 1;
-    const int y = js->axis[1] < -.5 ? 0 : js->axis[1] > .5 ? 6 : 3;
+    const int x = js->axis[axis1] < -.5 ? 0 : js->axis[axis1] > .5 ? 2 : 1;
+    const int y = js->axis[axis2] < -.5 ? 0 : js->axis[axis2] > .5 ? 6 : 3;
     return 97 + x + y;
   }
+  
+  double joystick_pov(int id, int axis1, int axis2) {
+	checkId(0);
+	double a1, a2;
+	a1 = joystick_axis(id, axis1);
+	a2 = joystick_axis(id, axis2);
+	if (a1 == 0 && a2 == 0) {
+		return -1.f;
+	}
+	// in C, atan2 is y,x not x,y
+	return ma_angle_from_radians((atan2(-a1, a2) + M_PI));
+  }
+  
   double joystick_pov(int id) {
     checkId(0);
-    return 0;
+    return joystick_pov(id, 0, 1);
   }
   
   int joystick_lastbutton = -1;

@@ -21,47 +21,47 @@ closebutton: 7		# This event is executed from within code when the game window c
 	Mode: Spec-sys
 	Case: 30
 	
-imageloaded: 7		# This event is executed from within code when an image finishes loading
+asyncimageloaded: 7		# This event is executed from within code when an image finishes loading
 	Name: Image Loaded
 	Mode: Spec-sys
 	Case: 60
 	
-soundloaded: 7		# This event is executed from within code when a sound finishes loading
+asyncsoundloaded: 7		# This event is executed from within code when a sound finishes loading
 	Name: Sound Loaded
 	Mode: Spec-sys
 	Case: 61
 	
-http: 7			# This event is executed from within code when an asynchronous http event is triggered
+asynchttp: 7			# This event is executed from within code when an asynchronous http event is triggered
 	Name: HTTP
 	Mode: Spec-sys
 	Case: 62
 	
-dialog: 7		# This event is executed from within code when an asynchronous dialog is resolved
+asyncdialog: 7		# This event is executed from within code when an asynchronous dialog is resolved
 	Name: Dialog
 	Mode: Spec-sys
 	Case: 63
 	
-inapp: 7		# This event is executed from within code when an asynchronous In-App purchase is triggered
+asynciap: 7		# This event is executed from within code when an asynchronous In-App purchase is triggered
 	Name: IAP
 	Mode: Spec-sys
 	Case: 66
 	
-cloud: 7		# This event is executed from within code when an asynchronous cloud event is triggered
+asynccloud: 7		# This event is executed from within code when an asynchronous cloud event is triggered
 	Name: Cloud
 	Mode: Spec-sys
 	Case: 67
 	
-networking: 7	# This event is executed from within code when an asynchronous networking event is triggered
+asyncnetworking: 7	# This event is executed from within code when an asynchronous networking event is triggered
 	Name: Networking
 	Mode: Spec-sys
 	Case: 68
 	
-steam: 7		# This event is executed from within code when an asynchronous Steam event is triggered
+asyncsteam: 7		# This event is executed from within code when an asynchronous Steam event is triggered
 	Name: Steam
 	Mode: Spec-sys
 	Case: 69
 	
-social: 7		# This event is executed from within code when an asynchronous social event is triggered
+asyncsocial: 7		# This event is executed from within code when an asynchronous social event is triggered
 	Name: Social
 	Mode: Spec-sys
 	Case: 70
@@ -93,7 +93,7 @@ alarm: 2
 	Group: Alarm
 	Name: Alarm %1
 	Mode: Stacked
-	Sub Check: {alarm[%1] = (int)alarm[%1]; if ((alarm[%1] == -1) or (alarm[%1]--)) return 0; }
+	Sub Check: { alarm[%1] = (int)alarm[%1]; return !((alarm[%1] == -1) or (alarm[%1]--)); }
 
 
 # Keyboard events. These are simple enough.
@@ -197,14 +197,14 @@ mouseenter: 6
 	Mode: Special
 	Case: 10
 	Locals: bool $innowEnter = false;
-	Sub Check: { const bool wasin = $innowEnter; $innowEnter = position_meeting(mouse_x, mouse_y, id); if (!$innowEnter or wasin) return 0; }
+	Sub Check: { const bool wasin = $innowEnter; $innowEnter = position_meeting(mouse_x, mouse_y, id); return !(!$innowEnter or wasin); }
 
 mouseleave: 6
 	Name: Mouse Leave
 	Mode: Special
 	Case: 11
 	Locals: bool $innowLeave = false;
-	Sub Check: { const bool wasin = $innowLeave; $innowLeave = position_meeting(mouse_x, mouse_y, id); if ($innowLeave or !wasin) return 0; }
+	Sub Check: { const bool wasin = $innowLeave; $innowLeave = position_meeting(mouse_x, mouse_y, id); return !($innowLeave or !wasin); }
 
 mouseunknown: 6
 	Name: Mouse Unknown (old? LGM doesn't even know!)
@@ -289,6 +289,7 @@ step: 3
 	Name: Step
 	Mode: Special
 	Case: 0
+	Constant: { if (timeline_running && timeline_speed!=0) enigma::advance_curr_timeline(timeline_position, timeline_speed, timeline_index, timeline_loop); }
 
 localsweep: 100000 
 	Name: Locals sweep 
@@ -312,8 +313,88 @@ boundary: 7
 	Name: Intersect Boundary
 	Mode: Special
 	Case: 1
-	Sub Check: (bbox_left < 0) or (bbox_right > room_width) or (bbox_top < 0) or (bbox_bottom > room_height)
+	Sub Check: (bbox_left < 0) || (bbox_right > room_width) || (bbox_top < 0) || (bbox_bottom > room_height)
+outsideviewzero: 7
+	Name: Outside View 0
+	Mode: Special
+	Case: 40
+	Sub Check: (!view_enabled || !view_visible[0]) ? false : (bbox_right < view_xview[0]) || (bbox_left > view_xview[0] + view_wview[0]) || (bbox_bottom < view_yview[0]) || (bbox_top > view_yview[0] + view_hview[0])
+outsideviewone: 7
+	Name: Outside View 1
+	Mode: Special
+	Case: 41
+	Sub Check: (!view_enabled || !view_visible[1]) ? false : (bbox_right < view_xview[1]) || (bbox_left > view_xview[1] + view_wview[1]) || (bbox_bottom < view_yview[1]) || (bbox_top > view_yview[1] + view_hview[1])
+outsideviewtwo: 7
+	Name: Outside View 2
+	Mode: Special
+	Case: 42
+	Sub Check: (!view_enabled || !view_visible[2]) ? false : (bbox_right < view_xview[2]) || (bbox_left > view_xview[2] + view_wview[2]) || (bbox_bottom < view_yview[2]) || (bbox_top > view_yview[2] + view_hview[2])
+outsideviewthree: 7
+	Name: Outside View 3
+	Mode: Special
+	Case: 43
+	Sub Check: (!view_enabled || !view_visible[3]) ? false : (bbox_right < view_xview[3]) || (bbox_left > view_xview[3] + view_wview[3]) || (bbox_bottom < view_yview[3]) || (bbox_top > view_yview[3] + view_hview[3])
+outsideviewfour: 7
+	Name: Outside View 4
+	Mode: Special
+	Case: 44
+	Sub Check: (!view_enabled || !view_visible[4]) ? false : (bbox_right < view_xview[4]) || (bbox_left > view_xview[4] + view_wview[4]) || (bbox_bottom < view_yview[4]) || (bbox_top > view_yview[4] + view_hview[4])
+outsideviewfive: 7
+	Name: Outside View 5
+	Mode: Special
+	Case: 45
+	Sub Check: (!view_enabled || !view_visible[5]) ? false : (bbox_right < view_xview[5]) || (bbox_left > view_xview[5] + view_wview[5]) || (bbox_bottom < view_yview[5]) || (bbox_top > view_yview[5] + view_hview[5])
+outsideviewsix: 7
+	Name: Outside View 6
+	Mode: Special
+	Case: 46
+	Sub Check: (!view_enabled || !view_visible[6]) ? false : (bbox_right < view_xview[6]) || (bbox_left > view_xview[6] + view_wview[6]) || (bbox_bottom < view_yview[6]) || (bbox_top > view_yview[6] + view_hview[6])
+outsideviewseven: 7
+	Name: Outside View 7
+	Mode: Special
+	Case: 47
+	Sub Check: (!view_enabled || !view_visible[7]) ? false : (bbox_right < view_xview[7]) || (bbox_left > view_xview[7] + view_wview[7]) || (bbox_bottom < view_yview[7]) || (bbox_top > view_yview[7] + view_hview[7])
 
+boundaryviewzero: 7
+	Name: Boundary View 0
+	Mode: Special
+	Case: 50
+	Sub Check: (!view_enabled || !view_visible[0]) ? false : (bbox_left < view_xview[0]) || (bbox_right > view_xview[0] + view_wview[0]) || (bbox_top < view_yview[0]) || (bbox_bottom > view_yview[0] + view_hview[0])
+boundaryviewone: 7
+	Name: Boundary View 1
+	Mode: Special
+	Case: 51
+	Sub Check: (!view_enabled || !view_visible[1]) ? false : (bbox_left < view_xview[1]) || (bbox_right > view_xview[1] + view_wview[1]) || (bbox_top < view_yview[1]) || (bbox_bottom > view_yview[1] + view_hview[1])
+boundaryviewtwo: 7
+	Name: Boundary View 2
+	Mode: Special
+	Case: 52
+	Sub Check: (!view_enabled || !view_visible[2]) ? false : (bbox_left < view_xview[2]) || (bbox_right > view_xview[2] + view_wview[2]) || (bbox_top < view_yview[2]) || (bbox_bottom > view_yview[2] + view_hview[2])
+boundaryviewthree: 7
+	Name: Boundary View 3
+	Mode: Special
+	Case: 53
+	Sub Check: (!view_enabled || !view_visible[3]) ? false : (bbox_left < view_xview[3]) || (bbox_right > view_xview[3] + view_wview[3]) || (bbox_top < view_yview[3]) || (bbox_bottom > view_yview[3] + view_hview[3])
+boundaryviewfour: 7
+	Name: Boundary View 4
+	Mode: Special
+	Case: 54
+	Sub Check: (!view_enabled || !view_visible[4]) ? false : (bbox_left < view_xview[4]) || (bbox_right > view_xview[4] + view_wview[4]) || (bbox_top < view_yview[4]) || (bbox_bottom > view_yview[4] + view_hview[4])
+boundaryviewfive: 7
+	Name: Boundary View 5
+	Mode: Special
+	Case: 55
+	Sub Check: (!view_enabled || !view_visible[5]) ? false : (bbox_left < view_xview[5]) || (bbox_right > view_xview[5] + view_wview[5]) || (bbox_top < view_yview[5]) || (bbox_bottom > view_yview[5] + view_hview[5])
+boundaryviewsix: 7
+	Name: Boundary View 6
+	Mode: Special
+	Case: 56
+	Sub Check: (!view_enabled || !view_visible[6]) ? false : (bbox_left < view_xview[6]) || (bbox_right > view_xview[6] + view_wview[6]) || (bbox_top < view_yview[6]) || (bbox_bottom > view_yview[6] + view_hview[6])
+boundaryviewseven: 7
+	Name: Boundary View 7
+	Mode: Special
+	Case: 57
+	Sub Check: (!view_enabled || !view_visible[7]) ? false : (bbox_left < view_xview[7]) || (bbox_right > view_xview[7] + view_wview[7]) || (bbox_top < view_yview[7]) || (bbox_bottom > view_yview[7] + view_hview[7])
 
 # Collisions stuck here for some reason, possibly so that you
 # can deduct lives/health right before the "No more Lives" event
@@ -344,7 +425,9 @@ nomorehealth: 7
 	Name: No More Health
 	Mode: Special
 	Case: 9
-	Sub Check: health <= 0
+  Locals: bool $out_of_health = 0;
+	Sub Check: { bool OoH = $out_of_health; if (health <= 0) { $out_of_health = true; return !OoH; } $out_of_health = false; return false; }
+  Suffix: if (health > 0) { $out_of_health = 0; }
 
 
 # General purpose once again!
@@ -353,7 +436,7 @@ endstep: 3
 	Name: End Step
 	Mode: Special
 	Case: 2
-
+	Constant: { if (timeline_running && timeline_loop && timeline_speed!=0) enigma::loop_curr_timeline(timeline_position, timeline_speed, timeline_index); }
 
 particlesystemsupdate: 100000
 	Name: Particle Systems Update
@@ -396,7 +479,7 @@ animationend: 7
 	Name: Animation End
 	Mode: Special
 	Case: 7
-	Sub Check: {if (image_index + image_speed < sprite_get_number(sprite_index)) return 0; }
+	Sub Check: { return !(image_index + image_speed < sprite_get_number(sprite_index)); }
 
 
 # End of in-linked events

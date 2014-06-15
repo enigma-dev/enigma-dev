@@ -37,7 +37,9 @@
   ide_dia_progress_text(x); \
   ide_dia_progress(y);
 
+#include <map>
 #include <string>
+#include <vector>
 #include <iostream>
 #include <sstream>
 #include <fstream>
@@ -162,10 +164,6 @@ void clear_ide_editables()
 // modes: 0=run, 1=debug, 2=design, 3=compile
 enum { emode_run, emode_debug, emode_design, emode_compile, emode_rebuild };
 
-// The games working directory, in run/debug it is the GMK/GMX location where the IDE is working with the project,
-// in compile mode it is the same as program_directory, or where the (*.exe executable) is located.
-string working_directory = "";
-
 dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode) {
   return current_language->compile(es, exe_filename, mode);
 }
@@ -196,20 +194,7 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
 	return 0;
   }
   edbg << "Building for mode (" << mode << ")" << flushl;
-  
-    string s;
-    if (!es->filename || mode == emode_compile) {
-        s = ".";
-    } else {
-        s = es->filename;
-        s = s.substr(0, s.find_last_of("/"));
-        s = s.substr(s.find("file:/",0) + 6);
-        s = string_replace_all(s, "/", "\\\\");
-        s = string_replace_all(s, "%20", " ");
-    }
-	
-	working_directory = s;
-
+ 
   // CLean up from any previous executions.
 
   edbg << "Cleaning up from previous executions" << flushl;
@@ -288,7 +273,7 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   edbg << "Copying script names [" << es->scriptCount << "]" << flushl;
   for (int i = 0; i < es->scriptCount; i++)
     quickmember_script(&globals_scope,es->scripts[i].name);
-	
+
   edbg << "Copying shader names [" << es->shaderCount << "]" << flushl;
   for (int i = 0; i < es->shaderCount; i++)
     quickmember_variable(&globals_scope,jdi::builtin_type__int,es->shaders[i].name);
@@ -297,7 +282,7 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   for (int i = 0; i < es->fontCount; i++)
     quickmember_variable(&globals_scope,jdi::builtin_type__int,es->fonts[i].name);
 
-  edbg << "Copying timeline names [kidding, these are totally not implemented :P] [" << es->timelineCount << "]" << flushl;
+  edbg << "Copying timeline names [" << es->timelineCount << "]" << flushl;
   for (int i = 0; i < es->timelineCount; i++)
     quickmember_variable(&globals_scope,jdi::builtin_type__int,es->timelines[i].name);
 
@@ -319,13 +304,16 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   edbg << es->scriptCount << " Scripts:" << flushl;
   parsed_script *parsed_scripts[es->scriptCount];
 
+  //parsed timelines involve N timelines with M moments each. So we just store them in a large vector rather than a messy 2-D array of pointers.
+  vector<parsed_script*> parsed_tlines;
+
   scr_lookup.clear();
   used_funcs::zero();
 
   int res;
   #define irrr() if (res) { idpr("Error occurred; see scrollback for details.",-1); return res; }
 
-  res = current_language->compile_parseAndLink(es,parsed_scripts);
+  res = current_language->compile_parseAndLink(es,parsed_scripts, parsed_tlines);
   irrr();
 
 
@@ -533,6 +521,120 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
     wto << "};}\nnamespace enigma { size_t room_idmax = " <<max << "; }\n\n";
   wto.close();
 
+
+  //NEXT FILE ----------------------------------------
+  //Timelines: Defines "moment" lookup structures for timelines.
+  edbg << "Writing timeline control information" << flushl;
+  wto.open((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_timelines.h").c_str(),ios_base::out);
+  {
+    wto << license;
+    wto <<"namespace enigma {\n\n";
+
+    //Each timeline has a lookup structure (in this case, a map) which allows easy forward/backward lookup.
+    //This is currently constructed rather manually; there are probably more efficient 
+    // construction techniques, but none come to mind.
+    wto <<"std::vector< std::map<int, int> > build_moments_map() {\n";
+    wto <<"  std::vector< std::map<int, int> > res;\n";
+    wto <<"  res.reserve(" <<es->timelineCount <<");\n";
+    wto <<"  std::map<int, int> curr;\n\n";
+    for (int i=0; i<es->timelineCount; i++) {
+      wto <<"  curr.clear();\n";
+      for (int j=0; j<es->timelines[i].momentCount; j++) {
+        wto <<"  curr[" <<es->timelines[i].moments[j].stepNo <<"] = " <<j <<";\n";
+      }
+      wto <<"  res.push_back(curr);\n\n";
+    }
+    wto <<"  return res;\n";
+    wto <<"}\n\n";
+
+    //Now call it.
+    wto <<"//vector is indexed by timeline_id. map::key is moment_time; map::value is moment_id\n";
+    wto <<"std::vector< std::map<int, int> > timeline_moments_maps = build_moments_map();\n\n";
+
+    //Actually call timeline moment scripts based on ID/Moment.
+    wto <<"void timeline_call_moment_script(int timeline_index, int moment_index) {\n";
+    wto <<"  switch (timeline_index) {\n";
+    for (int i=0; i<es->timelineCount; i++) {
+      wto <<"    case " <<es->timelines[i].id <<": {\n";
+      wto <<"      switch (moment_index) {\n";
+      for (int j=0; j<es->timelines[i].momentCount; j++) {
+        wto <<"        case " <<j <<": {\n";
+        wto <<"          ::TLINE_" <<es->timelines[i].name <<"_MOMENT_" <<es->timelines[i].moments[j].stepNo <<"();\n";
+        wto <<"          break;\n";
+        wto <<"        }\n";
+      }
+      wto <<"      }\n";
+      wto <<"      break;\n";
+      wto <<"    }\n";
+    }
+    wto <<"  }\n";
+    wto <<"}\n\n";
+
+    //Function to advance the current timeline variables, calling moments as appropriate. This assumes timeline_running is true and timeline_speed !=0
+    wto <<"void advance_curr_timeline(gs_scalar& timeline_position, gs_scalar timeline_speed, int timeline_index, bool timeline_loop) {\n";
+    wto <<"  //Find the next instant (it may be right now).\n";
+    wto <<"  //Note: If a map lookup each tick is a performance hit, this value can be cached in the object itself with a tuple <timeline_id, timeline_pos, next_moment_iterator>\n";
+    wto <<"  if (timeline_index<0 || timeline_index>=(int)timeline_moments_maps.size()) { return; }\n\n";
+    wto <<"  //Algorithm varies for +/- speed. Assume zero is positive (just for consistency).\n";
+    wto <<"  //Note that we *cannot* call these events as they are found, because they might change timeline_position (and GM does not work that way).\n";
+    wto <<"  std::vector<int> moment_ids;\n";
+    wto <<"  if (timeline_speed>=0) { //Positive\n";
+    wto <<"    std::map<int, int>::const_iterator next = timeline_moments_maps[timeline_index].lower_bound(ceil(timeline_position));\n\n";
+    wto <<"    //We now advance the timeline_position by timeline_speed, saving event information on the way.\n";
+    wto <<"    while (timeline_speed!=0) {\n";
+    wto <<"      //Landing *exactly* on the next moment will actually trigger it *next* turn.\n";
+    wto <<"      if (next==timeline_moments_maps[timeline_index].end() || timeline_position+timeline_speed<=next->first) {\n";
+    wto <<"         timeline_position += timeline_speed;\n";
+    wto <<"         break;\n";
+    wto <<"      }\n";
+    wto <<"      timeline_speed -= next->first - timeline_position;\n";
+    wto <<"      timeline_position = next->first;\n";
+    wto <<"      moment_ids.push_back(next->second);\n";
+    wto <<"      next++;\n";
+    wto <<"    }\n\n";
+    wto <<"  } else { //Negative\n";
+    wto <<"    //This will put us one ahead. The reverse_iterator will reverse it.\n";
+    wto <<"    std::map<int, int>::const_iterator nextTEMP = timeline_moments_maps[timeline_index].upper_bound(floor(timeline_position));\n";
+    wto <<"    std::map<int, int>::const_reverse_iterator next = std::reverse_iterator<std::map<int, int>::const_iterator>(nextTEMP);\n\n";
+    wto <<"    //The algorithm proceeds as in FWD, but with rev_iterators (so it's hard to share code).\n";
+    wto <<"    while (timeline_speed!=0) {\n";
+    wto <<"      //Landing *exactly* on the next moment will actually trigger it *next* turn.\n";
+    wto <<"      if (next==timeline_moments_maps[timeline_index].rend() || timeline_position+timeline_speed>=next->first) {\n";
+    wto <<"         timeline_position += timeline_speed;\n";
+    wto <<"         break;\n";
+    wto <<"      }\n";
+    wto <<"      timeline_speed += timeline_position - next->first;\n";
+    wto <<"      timeline_position = next->first;\n";
+    wto <<"      moment_ids.push_back(next->second);\n";
+    wto <<"      next++;\n";
+    wto <<"    }\n\n";
+    wto <<"  }\n\n";
+    wto <<"  //Now, trigger each moment that we've passed.\n";
+    wto <<"  for (std::vector<int>::iterator it=moment_ids.begin(); it!=moment_ids.end(); it++) {\n";
+    wto <<"    timeline_call_moment_script(timeline_index, *it);\n";
+    wto <<"  }\n";
+    wto <<"}\n\n";
+
+    //Function to loop the current timeline. This assumes timeline_loop is true, timeline_running is true, and timeline_speed is !=0
+    wto <<"void loop_curr_timeline(gs_scalar& timeline_position, gs_scalar timeline_speed, int timeline_index) {\n";
+    wto <<"  //Determine if we're past the last event. Note that no residual movement carries over; this effectively \"resets to 0\".\n";
+    wto <<"  if (timeline_index<0 || timeline_index>=(int)timeline_moments_maps.size()) { return; }\n";
+    wto <<"  if (timeline_speed>=0) { //Positive\n";
+    wto <<"    if (timeline_position > timeline_moments_maps[timeline_index].rbegin()->first) { //If ==, it will trigger on the next time tick.\n";
+    wto <<"      timeline_position = 0;\n";
+    wto <<"    }\n";
+    wto <<"  } else { //Negative\n";
+    wto <<"    if (timeline_position < 0) { //If ==, it will trigger on the next time tick.\n";
+    wto <<"      timeline_position = timeline_moments_maps[timeline_index].rbegin()->first;\n";
+    wto <<"    }\n";
+    wto <<"  }\n";
+    wto <<"}\n\n";
+
+    wto <<"}\n"; //namespace 
+  }
+  wto.close();
+
+
   idpr("Performing Secondary Parsing and Writing Globals",25);
 
   // Defragged events must be written before object data, or object data cannot determine which events were used.
@@ -543,14 +645,14 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
   parsed_object EGMglobal;
 
   edbg << "Linking globals" << flushl;
-  res = current_language->link_globals(&EGMglobal,es,parsed_scripts);
+  res = current_language->link_globals(&EGMglobal,es,parsed_scripts, parsed_tlines);
   irrr();
 
   edbg << "Running Secondary Parse Passes" << flushl;
-  res = current_language->compile_parseSecondary(parsed_objects,parsed_scripts,es->scriptCount,parsed_rooms,&EGMglobal);
+  res = current_language->compile_parseSecondary(parsed_objects,parsed_scripts,es->scriptCount, parsed_tlines, parsed_rooms,&EGMglobal);
 
   edbg << "Writing object data" << flushl;
-  res = current_language->compile_writeObjectData(es,&EGMglobal);
+  res = current_language->compile_writeObjectData(es,&EGMglobal,mode);
   irrr();
 
   edbg << "Writing local accessors" << flushl;
@@ -562,7 +664,7 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
   irrr();
 
   edbg << "Writing room data" << flushl;
-  res = current_language->compile_writeRoomData(es,&EGMglobal);
+  res = current_language->compile_writeRoomData(es,&EGMglobal,mode);
   irrr();
 
   edbg << "Writing shader data" << flushl;
@@ -745,14 +847,43 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
   // Run the game if requested
   if (mode == emode_run or mode == emode_debug or mode == emode_design)
   {
+    // The games working directory, in run/debug it is the GMK/GMX location where the IDE is working with the project,
+    // in compile mode it is the same as program_directory, or where the (*.exe executable) is located.
+    // The working_directory global is set in the main() of each platform using the platform specific function.
+    // This the exact behaviour of GM8.1
+    char prevdir[4096];
+    string newdir = (es->filename != NULL && strlen(es->filename) > 0) ? string(es->filename) : string( exe_filename );
+    #if CURRENT_PLATFORM_ID == OS_WINDOWS
+      if (newdir[0] == '/' || newdir[0] == '\\') {
+        newdir = newdir.substr(1, newdir.size());
+      }
+    #endif
+    newdir = newdir.substr( 0, newdir.find_last_of( "\\/" ));
+
+    #if CURRENT_PLATFORM_ID == OS_WINDOWS
+    GetCurrentDirectory( 4096, prevdir );
+    SetCurrentDirectory(newdir.c_str());
+    #else
+    getcwd (prevdir, 4096);
+    chdir(newdir.c_str());
+    #endif
+    
     string rprog = extensions::targetOS.runprog, rparam = extensions::targetOS.runparam;
     rprog = string_replace_all(rprog,"$game",gameFname);
     rparam = string_replace_all(rparam,"$game",gameFname);
     user << "Running \"" << rprog << "\" " << rparam << flushl;
     int gameres = e_execs(rprog, rparam);
     user << "\n\nGame returned " << gameres << "\n";
+    
+    // Restore the compilers original working directory.
+    #if CURRENT_PLATFORM_ID == OS_WINDOWS
+    SetCurrentDirectory(prevdir);
+    #else
+    chdir(prevdir);
+    #endif
   }
 
   idpr("Done.", 100);
   return 0;
 };
+

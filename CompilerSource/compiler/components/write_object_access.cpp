@@ -108,7 +108,7 @@ int lang_CPP::compile_writeObjAccess(map<int,parsed_object*> &parsed_objects, pa
       const string& pmember = dait->first;
       wto << "  " << dait->second.type << " " << dait->second.prefix << REFERENCE_POSTFIX(dait->second.suffix) << " &varaccess_" << pmember << "(int x)" << endl;
       wto << "  {" << endl;
-
+              
       wto << "    object_basic *inst = fetch_instance_by_int(x);" << endl;
       wto << "    if (inst) switch (inst->object_index)" << endl << "    {" << endl;
 

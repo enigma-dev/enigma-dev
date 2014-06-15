@@ -45,6 +45,7 @@ namespace enigma_user {
 }
 
 #include "var4.h"
+#include "scalar.h"
 
 namespace enigma
 {
@@ -61,11 +62,19 @@ namespace enigma
       const unsigned id;
       const int object_index;
 
+      //Timeline properties.
+      int timeline_index;    //-1 means "no timeline running"
+      bool timeline_running; //True if running, False if not. Setting to True again will continue execution; it's more like a "pause" button.
+      gs_scalar timeline_speed; //Can be set to fractions, negative, zero, etc. Defaults to 1.
+      gs_scalar timeline_position; //How far along "time" is in this timeline. Bounded by [0,lastMoment)
+      bool timeline_loop; //Allows looping from lastMoment->0 and vice versa. 
+
       virtual void unlink();
       virtual void deactivate();
       virtual void activate();
       virtual variant myevent_create();
       virtual variant myevent_gamestart();
+      virtual variant myevent_gameend();
 	  virtual variant myevent_closebutton();
 	  virtual variant myevent_asyncdialog();
 	  virtual variant myevent_asynchttp();
@@ -78,7 +87,9 @@ namespace enigma
 	  virtual variant myevent_asyncsocial();
 	  virtual variant myevent_asyncpushnotification();
       virtual variant myevent_draw();
+      virtual bool myevent_draw_subcheck();
 	  virtual variant myevent_drawgui();
+    virtual bool myevent_drawgui_subcheck();
 	  virtual variant myevent_drawresize();
 	  virtual variant myevent_roomstart();
       virtual variant myevent_roomend();

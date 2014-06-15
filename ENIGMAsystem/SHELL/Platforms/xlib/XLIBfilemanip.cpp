@@ -15,6 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+//TODO: Move most of this duplicate code into a Platforms/General/ source to reduce duplicate code for Mac/Linux/UNIX
+
 #include <cstdio>
 #include <cstdlib>
 #include <unistd.h>
@@ -25,41 +27,6 @@
 using namespace std;
 
 /* UNIX-ready port of file manipulation */
-
-namespace enigma_user
-{
-
-int file_exists(string fname)
-{
-  struct stat st;
-  return (stat(fname.c_str(),&st) == 0) and !(S_ISDIR(st.st_mode));
-}
-int file_delete(string fname)
-{
-  return remove(fname.c_str());
-}
-int file_rename(string oldname,string newname)
-{
-  return rename(oldname.c_str(),newname.c_str());
-}
-int file_copy(string fname,string newname)
-{
-  return system(("cp "+fname+" "+newname).c_str()); // Hackish, but there's no good implementation on Linux
-}
-int directory_exists(string dname)
-{
-  struct stat st;
-  return (stat(dname.c_str(),&st) == 0) and (S_ISDIR(st.st_mode));
-}
-int directory_create(string dname) {
-  return mkdir(dname.c_str(),S_IRUSR|S_IWUSR|S_IXUSR);
-}
-
-bool set_working_directory(string dir) {
-  return !chdir(dir.c_str());
-}
-
-}
 
 // File iteration functions and environment functions
 
@@ -145,8 +112,6 @@ void export_include_file_location(string fname,string location);
 void discard_include_file(string fname);
 
 extern unsigned game_id;
-extern string working_directory;
-extern string program_directory;
 extern string temp_directory;
 
 

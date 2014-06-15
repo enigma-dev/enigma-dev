@@ -300,7 +300,7 @@ void physics_fixture_add_point(int id, double x, double y)
 void physics_fixture_set_transform(int id, double x, double y, double angle)
 {
   get_fixture(sb2dfixture, id);
-  sb2dfixture->body->SetTransform(b2Vec2(x, y), cs_angular_degrees(angle));
+  sb2dfixture->body->SetTransform(b2Vec2(x, y), cs_angle_to_radians(angle));
 }
 
 void physics_fixture_set_position(int id, double x, double y)
@@ -312,7 +312,7 @@ void physics_fixture_set_position(int id, double x, double y)
 void physics_fixture_set_angle(int id, double angle)
 {
   get_fixture(sb2dfixture, id);
-  sb2dfixture->body->SetTransform(sb2dfixture->body->GetPosition(), cs_angular_degrees(angle));
+  sb2dfixture->body->SetTransform(sb2dfixture->body->GetPosition(), cs_angle_to_radians(angle));
 }
 
 void physics_fixture_set_density(int id, double density)
@@ -405,7 +405,7 @@ void physics_fixture_set_dynamic(int id)
 double physics_fixture_get_angle(int id)
 {
   get_fixturer(sb2dfixture, id, -1);
-  return -cs_angular_radians(sb2dfixture->body->GetAngle());
+  return -cs_angle_from_radians(sb2dfixture->body->GetAngle());
 }
 
 double physics_fixture_get_x(int id)

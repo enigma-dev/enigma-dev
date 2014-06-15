@@ -1,30 +1,20 @@
-/********************************************************************************\
-**                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
-**  Copyright (C) 2013 Robert B. Colton                                         **
-**                                                                              **
-**  This file is a part of the ENIGMA Development Environment.                  **
-**                                                                              **
-**                                                                              **
-**  ENIGMA is free software: you can redistribute it and/or modify it under the **
-**  terms of the GNU General Public License as published by the Free Software   **
-**  Foundation, version 3 of the license or any later version.                  **
-**                                                                              **
-**  This application and its source code is distributed AS-IS, WITHOUT ANY      **
-**  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS   **
-**  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more       **
-**  details.                                                                    **
-**                                                                              **
-**  You should have recieved a copy of the GNU General Public License along     **
-**  with this code. If not, see <http://www.gnu.org/licenses/>                  **
-**                                                                              **
-**  ENIGMA is an environment designed to create games and other programs with a **
-**  high-level, fully compilable language. Developers of ENIGMA or anything     **
-**  associated with ENIGMA are in no way responsible for its users or           **
-**  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **
-**                                                                              **
-\********************************************************************************/
+/** Copyright (C) 2008 Josh Ventura
+*** Copyright (C) 2013 Robert B. Colton
+***
+*** This file is a part of the ENIGMA Development Environment.
+***
+*** ENIGMA is free software: you can redistribute it and/or modify it under the
+*** terms of the GNU General Public License as published by the Free Software
+*** Foundation, version 3 of the license or any later version.
+***
+*** This application and its source code is distributed AS-IS, WITHOUT ANY
+*** WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+*** FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+*** details.
+***
+*** You should have received a copy of the GNU General Public License along
+*** with this code. If not, see <http://www.gnu.org/licenses/>
+**/
 
 #include <string>
 #include <windows.h>
@@ -250,49 +240,56 @@ void window_center()
     enigma::centerchild();
 }
 
-void window_default()
+void window_default(bool center_size)
 {
-    int xm = int(room_width), ym = int(room_height);
-    if (view_enabled)
-    {
-      int tx = 0, ty = 0;
-      for (int i = 0; i < 8; i++)
-        if (view_visible[i])
-        {
-          if (view_xport[i]+view_wport[i] > tx)
-            tx = (int)(view_xport[i]+view_wport[i]);
-          if (view_yport[i]+view_hport[i] > ty)
-            ty = (int)(view_yport[i]+view_hport[i]);
-        }
-      if (tx and ty)
-        xm = tx, ym = ty;
-    } else {
-		int screen_width = GetSystemMetrics(SM_CXSCREEN);
-		int screen_height = GetSystemMetrics(SM_CYSCREEN);
-		// By default if the room is too big instead of creating a gigantic ass window
-		// make it not bigger than the screen to full screen it, this is what 8.1 and Studio
-		// do, if the user wants to manually override this they can using
-		// views/screen_set_viewport or window_set_size/window_set_region_size
-		// We won't limit those functions like GM, just the default.
-		if (xm > screen_width) xm = screen_width;
-		if (ym > screen_height) ym = screen_height;
-	}
-
-    enigma::windowWidth = enigma::regionWidth = xm;
-    enigma::windowHeight = enigma::regionHeight = ym;
-    enigma::setchildsize(true);
+  int xm = int(room_width), ym = int(room_height);
+  if (view_enabled)
+  {
+    int tx = 0, ty = 0;
+    for (int i = 0; i < 8; i++)
+      if (view_visible[i])
+      {
+        if (view_xport[i]+view_wport[i] > tx)
+          tx = (int)(view_xport[i]+view_wport[i]);
+        if (view_yport[i]+view_hport[i] > ty)
+          ty = (int)(view_yport[i]+view_hport[i]);
+      }
+    if (tx and ty)
+      xm = tx, ym = ty;
+  } else {
+    int screen_width = GetSystemMetrics(SM_CXSCREEN);
+    int screen_height = GetSystemMetrics(SM_CYSCREEN);
+    // By default if the room is too big instead of creating a gigantic ass window
+    // make it not bigger than the screen to full screen it, this is what 8.1 and Studio
+    // do, if the user wants to manually override this they can using
+    // views/screen_set_viewport or window_set_size/window_set_region_size
+    // We won't limit those functions like GM, just the default.
+    if (xm > screen_width) xm = screen_width;
+    if (ym > screen_height) ym = screen_height;
+  }
+  bool center = true;
+  if (center_size) {
+    center = (xm != enigma::windowWidth || ym != enigma::windowHeight);
+  }
+  
+  enigma::windowWidth = enigma::regionWidth = xm;
+  enigma::windowHeight = enigma::regionHeight = ym;
+  enigma::setchildsize(true);
+  if (center)
     window_center();
-    if (enigma::isFullScreen)
-    {
-        SetWindowLongPtr(enigma::hWndParent,GWL_STYLE,WS_POPUP);
-        ShowWindow(enigma::hWndParent,SW_MAXIMIZE);
-    }
-    else
-    {
-        enigma::setparentstyle();
-        ShowWindow(enigma::hWndParent,SW_RESTORE);
-    }
-    enigma::setchildsize(true);
+
+  if (enigma::isFullScreen)
+  {
+      SetWindowLongPtr(enigma::hWndParent,GWL_STYLE,WS_POPUP);
+      ShowWindow(enigma::hWndParent,SW_MAXIMIZE);
+  }
+  else
+  {
+      enigma::setparentstyle();
+      ShowWindow(enigma::hWndParent,SW_RESTORE);
+  }
+
+  enigma::setchildsize(true);
 }
 
 void window_set_fullscreen(bool full)

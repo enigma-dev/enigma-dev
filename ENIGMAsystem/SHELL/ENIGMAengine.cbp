@@ -595,6 +595,7 @@
 		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_objectdeclarations.h" />
 		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_objectfunctionality.h" />
 		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_resourcenames.h" />
+		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_timelines.h" />
 		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_roomarrays.h" />
 		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_roomcreates.h" />
 		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_whitespace.h" />
