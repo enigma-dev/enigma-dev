@@ -84,6 +84,11 @@ void glsl_uniformui(int location, unsigned v0, unsigned v1);
 void glsl_uniformui(int location, unsigned v0, unsigned v1, unsigned v2);
 void glsl_uniformui(int location, unsigned v0, unsigned v1, unsigned v2, unsigned v3);
 
+/*void glsl_uniform1fv(int location, int size, const float *value);
+void glsl_uniform2fv(int location, int size, const float *value);
+void glsl_uniform3fv(int location, int size, const float *value);
+void glsl_uniform4fv(int location, int size, const float *value);*/
+
 // Wrap our abstracted version to the GameMaker version
 #define shader_set            glsl_program_set
 #define shader_reset          glsl_program_reset

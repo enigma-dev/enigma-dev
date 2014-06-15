@@ -107,7 +107,7 @@ void sprite_save(int ind, unsigned subimg, string fname) {
 
 	unsigned w, h;
 	unsigned char* rgbdata = enigma::graphics_get_texture_pixeldata(spr->texturearray[subimg], &w, &h);
-	
+
 	enigma::image_save(fname, rgbdata, spr->width, spr->height, w, h, false);
 
 	delete[] rgbdata;
@@ -260,12 +260,13 @@ namespace enigma
         unsigned int width, height, fullwidth, fullheight;
 
         unsigned char *pxdata = image_load(filename, &width, &height, &fullwidth, &fullheight, false);
-        
+        if (pxdata == NULL) { printf("ERROR - Failed to append sprite to index!\n"); return; }
+
         // If sprite transparent, set the alpha to zero for pixels that should be transparent from lower left pixel color
         if (pxdata && transparent)
         {
-          int t_pixel_b = pxdata[(height-1)*fullwidth*4]; 
-          int t_pixel_g = pxdata[(height-1)*fullwidth*4+1]; 
+          int t_pixel_b = pxdata[(height-1)*fullwidth*4];
+          int t_pixel_g = pxdata[(height-1)*fullwidth*4+1];
           int t_pixel_r = pxdata[(height-1)*fullwidth*4+2];
           unsigned int ih, iw;
           for (ih = 0; ih < height; ih++)
@@ -275,12 +276,12 @@ namespace enigma
             {
               if (pxdata[tmp] == t_pixel_r && pxdata[tmp+1] == t_pixel_g && pxdata[tmp+2] == t_pixel_b)
                 pxdata[tmp+3] = 0;
-              
+
               tmp+=4;
             }
           }
         }
-        
+
         unsigned cellwidth = width/imgnumb;
 		unsigned fullcellwidth = nlpo2dc(cellwidth) + 1;
 
@@ -305,7 +306,7 @@ namespace enigma
         ns->yoffset   = (int)y_offset;
 
         unsigned char* pixels=new unsigned char[fullcellwidth*fullheight*4]();
-        for (int ii = 0; ii < imgnumb; ii++) 
+        for (int ii = 0; ii < imgnumb; ii++)
         {
 			unsigned ih,iw;
 			unsigned xcelloffset = ii * fullcellwidth * 4;
@@ -327,7 +328,7 @@ namespace enigma
 			ns->texturearray.push_back(texture);
 			ns->texbordxarray.push_back((double) cellwidth/fullcellwidth);
 			ns->texbordyarray.push_back((double) height/fullheight);
-			
+
 			collision_type coll_type = precise ? ct_precise : ct_bbox;
 			ns->colldata.push_back(get_collision_mask(ns,(unsigned char*)pixels,coll_type));
         }
@@ -382,7 +383,7 @@ namespace enigma
 
     delete[] imgpxdata;
   }
-  
+
   //Appends a subimage
   void sprite_add_subimage(int sprid, unsigned int w, unsigned int h, unsigned char* chunk, unsigned char* collision_data, collision_type ct)
   {
@@ -411,7 +412,7 @@ namespace enigma
     sprstr->texbordxarray.push_back((double) w/fullwidth);
     sprstr->texbordyarray.push_back((double) h/fullheight);
     sprstr->colldata.push_back(get_collision_mask(sprstr,collision_data,ct));
-	
+
 	sprstr->subcount += 1;
 
     delete[] imgpxdata;
@@ -435,7 +436,7 @@ int sprite_get_height(int sprite)
     enigma::sprite *spr;
     if (!get_sprite(spr,sprite))
         return 32;
-    
+
     return spr->height;
 }
 
