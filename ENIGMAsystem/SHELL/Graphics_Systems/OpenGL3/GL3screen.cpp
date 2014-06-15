@@ -61,7 +61,6 @@ namespace enigma
   extern bool d3dMode;
   extern bool d3dZWriteEnable;
   extern int d3dCulling;
-  extern std::map<int,roomstruct*> roomdata;
   particles_implementation* particles_impl;
   void set_particles_implementation(particles_implementation* part_impl) {
     particles_impl = part_impl;
@@ -225,7 +224,8 @@ static inline int draw_tiles()
     enigma::inst_iter* push_it = enigma::instance_event_iterator;
     //loop instances
     for (enigma::instance_event_iterator = dit->second.draw_events->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next) {
-      enigma::instance_event_iterator->inst->myevent_draw();
+      if (enigma::instance_event_iterator->inst->myevent_draw_subcheck())
+        enigma::instance_event_iterator->inst->myevent_draw();
       if (enigma::room_switching_id != -1)
         return 1;
     }
@@ -242,9 +242,9 @@ static inline int draw_tiles()
   return 0;
 }
 
-void clear_view(float x, float y, float w, float h, bool showcolor)
+void clear_view(float x, float y, float w, float h, float angle, bool showcolor)
 {
-  d3d_set_projection_ortho(x, y, w, h, 0);
+  d3d_set_projection_ortho(x, y, w, h, angle);
 
   int clear_bits = 0;
   if (showcolor)
@@ -276,7 +276,8 @@ static inline void draw_gui()
     enigma::inst_iter* push_it = enigma::instance_event_iterator;
     //loop instances
     for (enigma::instance_event_iterator = dit->second.draw_events->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next) {
-      enigma::instance_event_iterator->inst->myevent_drawgui();
+      if (enigma::instance_event_iterator->inst->myevent_drawgui_subcheck())
+        enigma::instance_event_iterator->inst->myevent_drawgui();
       if (enigma::room_switching_id != -1) {
         stop_loop = true;
         break;
@@ -310,7 +311,7 @@ void screen_redraw()
     else
       screen_set_viewport(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled());
 
-    clear_view(0, 0, room_width, room_height, background_showcolor);
+    clear_view(0, 0, room_width, room_height, 0, background_showcolor);
     draw_back();
     draw_insts();
     draw_tiles();
@@ -336,7 +337,7 @@ void screen_redraw()
       else
         screen_set_viewport(view_xport[vc], view_yport[vc], view_wport[vc], view_hport[vc]);
 
-      clear_view(view_xview[vc], view_yview[vc], view_wview[vc], view_hview[vc], background_showcolor && draw_backs);
+      clear_view(view_xview[vc], view_yview[vc], view_wview[vc], view_hview[vc], view_angle[vc], background_showcolor && draw_backs);
 
       if (draw_backs)
         draw_back();
@@ -355,7 +356,7 @@ void screen_redraw()
   if (enigma::gui_used)
   {
     screen_set_viewport(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled());
-	d3d_set_projection_ortho(0, 0, enigma::gui_width, enigma::gui_height, 0);
+    d3d_set_projection_ortho(0, 0, enigma::gui_width, enigma::gui_height, 0);
 
     // Clear the depth buffer if hidden surface removal is on at the beginning of the draw step.
     if (enigma::d3dMode)
@@ -393,7 +394,7 @@ void screen_init()
   {
     glClearColor(0,0,0,0);
     screen_set_viewport(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled());
-	d3d_set_projection_ortho(0, 0, room_width, room_height, 0);
+    d3d_set_projection_ortho(0, 0, room_width, room_height, 0);
   } else {
     for (view_current = 0; view_current < 7; view_current++)
     {
@@ -401,10 +402,10 @@ void screen_init()
       {
         int vc = (int)view_current;
 
-          glClearColor(0,0,0,0);
+        glClearColor(0,0,0,0);
 
-          screen_set_viewport(view_xport[vc], view_yport[vc], view_wport[vc], view_hport[vc]);
-		  d3d_set_projection_ortho(view_xview[vc], view_yview[vc], view_wview[vc], view_hview[vc], 0);
+        screen_set_viewport(view_xport[vc], view_yport[vc], view_wport[vc], view_hport[vc]);
+        d3d_set_projection_ortho(view_xview[vc], view_yview[vc], view_wview[vc], view_hview[vc], view_angle[vc]);
         break;
       }
     }

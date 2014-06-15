@@ -23,8 +23,13 @@
 #include <string>
 
 namespace enigma_user {
+  enum {
+      model_static   = 0,
+      model_dynamic  = 1,
+      model_stream   = 2
+  };
 
-  unsigned d3d_model_create(bool dynamic = false);
+  unsigned d3d_model_create(int type = model_static);
   void d3d_model_destroy(int id);
   bool d3d_model_exists(int id);
   void d3d_model_clear(int id);

@@ -19,6 +19,12 @@
 #include "Direct3D11Headers.h"
 #include "Graphics_Systems/General/GSblend.h"
 
+namespace enigma
+{
+  extern int currentblendmode[2];
+  extern int currentblendtype;
+}
+
 namespace enigma_user
 {
 
@@ -28,6 +34,18 @@ int draw_set_blend_mode(int mode){
 
 int draw_set_blend_mode_ext(int src, int dest){
 
+}
+
+int draw_get_blend_mode(){
+    return enigma::currentblendmode[0];
+}
+
+int draw_get_blend_mode_ext(bool src){
+    return enigma::currentblendmode[(src==true?0:1)];
+}
+
+int draw_get_blend_mode_type(){
+    return enigma::currentblendtype;
 }
 
 }

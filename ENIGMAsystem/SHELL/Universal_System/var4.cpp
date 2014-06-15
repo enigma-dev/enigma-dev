@@ -253,8 +253,6 @@ variant::~variant() { }
 #undef EVCONST
 #define EVCONST
 
-
-
 /*
  * Var implementation
  */
@@ -264,6 +262,15 @@ var::operator const variant&() const { return **this; }
 
 var::var() { initialize(); }
 var::var(variant x) { initialize(); **this = x; }
+//TODO: Overload var for std::array
+var::var(variant x, size_t length, size_t length2) {
+  initialize();
+  for (size_t j = 0; j < length2; ++j) {
+    for (size_t i = 0; i < length; ++i) {
+      (*this)(i, j) = x; 
+    }
+  }
+}
 types_extrapolate_real_p  (var::var, { initialize(); **this = x; })
 types_extrapolate_string_p(var::var, { initialize(); **this = x; })
 

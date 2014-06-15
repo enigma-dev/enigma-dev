@@ -65,30 +65,30 @@ typedef float cs_scalar;
 #define ma_angle_from_radians(radians) (radians)
 #define ma_angle_to_radians(degrees) (degrees)
 #else
-#define ma_angle_from_radians(radians) (radians * 180 / M_PI)
-#define ma_angle_to_radians(degrees) (degrees / 180 * M_PI)
+#define ma_angle_from_radians(radians) ((radians) * 180 / M_PI)
+#define ma_angle_to_radians(degrees) ((degrees) / 180 * M_PI)
 #endif
 
 #ifdef GS_ANGULAR_UNIT_RADIANS
 #define gs_angle_from_radians(radians) (radians)
 #define gs_angle_to_radians(degrees) (degrees)
 #else
-#define gs_angle_from_radians(radians) (radians * 180 / M_PI)
-#define gs_angle_to_radians(degrees) (degrees / 180 * M_PI)
+#define gs_angle_from_radians(radians) ((radians) * 180 / M_PI)
+#define gs_angle_to_radians(degrees) ((degrees) / 180 * M_PI)
 #endif
 
 #ifdef AS_ANGULAR_UNIT_RADIANS
 #define as_angle_from_radians(radians) (radians)
 #define as_angle_to_radians(degrees) (degrees)
 #else
-#define as_angle_from_radians(radians) (radians * 180 / M_PI)
-#define as_angle_to_radians(degrees) (degrees / 180 * M_PI)
+#define as_angle_from_radians(radians) ((radians) * 180 / M_PI)
+#define as_angle_to_radians(degrees) ((degrees) / 180 * M_PI)
 #endif 
 
 #ifdef CS_ANGULAR_UNIT_RADIANS
 #define cs_angle_from_radians(radians) (radians)
 #define cs_angle_to_radians(degrees) (degrees)
 #else
-#define cs_angle_from_radians(radians) (radians * 180 / M_PI)
-#define cs_angle_to_radians(degrees) (degrees / 180 * M_PI)
+#define cs_angle_from_radians(radians) ((radians) * 180 / M_PI)
+#define cs_angle_to_radians(degrees) ((degrees) / 180 * M_PI)
 #endif

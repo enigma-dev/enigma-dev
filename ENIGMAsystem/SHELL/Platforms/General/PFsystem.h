@@ -1,4 +1,5 @@
 /** Copyright (C) 2014 Robert B. Colton
+*** Copyright (C) 2013 forthevin
 *** This file is a part of the ENIGMA Development Environment.
 ***
 *** ENIGMA is free software: you can redistribute it and/or modify it under the
@@ -21,6 +22,21 @@
 using std::string;
 
 namespace enigma_user {
+
+enum {
+	os_unknown = -1,
+	os_windows = 0,
+	os_win32 = 0,
+	os_macosx = 1,
+	os_psp = 2,
+	os_ios = 3,
+	os_android = 4,
+	os_symbian = 5,
+	os_linux = 6,
+	os_winphone = 7,
+	os_tizen = 8,
+	os_win8native = 9,
+};
 
 string os_get_config();
 int os_get_info();

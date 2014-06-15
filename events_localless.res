@@ -56,7 +56,7 @@ alarm: 2
 	Group: Alarm
 	Name: Alarm %1
 	Mode: Stacked
-	Sub Check: {alarm[%1] = (int)alarm[%1]; if ((alarm[%1] == -1) or (alarm[%1]--)) return 0; }
+	Sub Check: {alarm[%1] = (int)alarm[%1]; return !((alarm[%1] == -1) or (alarm[%1]--)); }
 
 
 # Keyboard events. These are simple enough.
@@ -160,14 +160,14 @@ mouseenter: 6
 	Mode: Special
 	Case: 10
 	Locals: bool $innowEnter = false;
-	Sub Check: { const bool wasin = $innowEnter; $innowEnter = position_meeting(mouse_x, mouse_y, id); if (!$innowEnter or wasin) return 0; }
+	Sub Check: { const bool wasin = $innowEnter; $innowEnter = position_meeting(mouse_x, mouse_y, id); return !(!$innowEnter or wasin); }
 
 mouseleave: 6
 	Name: Mouse Leave
 	Mode: Special
 	Case: 11
 	Locals: bool $innowLeave = false;
-	Sub Check: { const bool wasin = $innowLeave; $innowLeave = position_meeting(mouse_x, mouse_y, id); if ($innowLeave or !wasin) return 0; }
+	Sub Check: { const bool wasin = $innowLeave; $innowLeave = position_meeting(mouse_x, mouse_y, id); return !($innowLeave or !wasin); }
 
 mouseunknown: 6
 	Name: Mouse Unknown (old? LGM doesn't even know!)
@@ -270,7 +270,87 @@ boundary: 7
 	Mode: Special
 	Case: 1
 	Sub Check: (bbox_left < 0) or (bbox_right > room_width) or (bbox_top < 0) or (bbox_bottom > room_height)
+outsideviewzero: 7
+	Name: Outside View 0
+	Mode: Special
+	Case: 40
+	Sub Check: (!view_enabled || !view_visible[0]) ? false : (bbox_right < view_xview[0]) || (bbox_left > view_xview[0] + view_wview[0]) || (bbox_bottom < view_yview[0]) || (bbox_top > view_yview[0] + view_hview[0])
+outsideviewone: 7
+	Name: Outside View 1
+	Mode: Special
+	Case: 41
+	Sub Check: (!view_enabled || !view_visible[1]) ? false : (bbox_right < view_xview[1]) || (bbox_left > view_xview[1] + view_wview[1]) || (bbox_bottom < view_yview[1]) || (bbox_top > view_yview[1] + view_hview[1])
+outsideviewtwo: 7
+	Name: Outside View 2
+	Mode: Special
+	Case: 42
+	Sub Check: (!view_enabled || !view_visible[2]) ? false : (bbox_right < view_xview[2]) || (bbox_left > view_xview[2] + view_wview[2]) || (bbox_bottom < view_yview[2]) || (bbox_top > view_yview[2] + view_hview[2])
+outsideviewthree: 7
+	Name: Outside View 3
+	Mode: Special
+	Case: 43
+	Sub Check: (!view_enabled || !view_visible[3]) ? false : (bbox_right < view_xview[3]) || (bbox_left > view_xview[3] + view_wview[3]) || (bbox_bottom < view_yview[3]) || (bbox_top > view_yview[3] + view_hview[3])
+outsideviewfour: 7
+	Name: Outside View 4
+	Mode: Special
+	Case: 44
+	Sub Check: (!view_enabled || !view_visible[4]) ? false : (bbox_right < view_xview[4]) || (bbox_left > view_xview[4] + view_wview[4]) || (bbox_bottom < view_yview[4]) || (bbox_top > view_yview[4] + view_hview[4])
+outsideviewfive: 7
+	Name: Outside View 5
+	Mode: Special
+	Case: 45
+	Sub Check: (!view_enabled || !view_visible[5]) ? false : (bbox_right < view_xview[5]) || (bbox_left > view_xview[5] + view_wview[5]) || (bbox_bottom < view_yview[5]) || (bbox_top > view_yview[5] + view_hview[5])
+outsideviewsix: 7
+	Name: Outside View 6
+	Mode: Special
+	Case: 46
+	Sub Check: (!view_enabled || !view_visible[6]) ? false : (bbox_right < view_xview[6]) || (bbox_left > view_xview[6] + view_wview[6]) || (bbox_bottom < view_yview[6]) || (bbox_top > view_yview[6] + view_hview[6])
+outsideviewseven: 7
+	Name: Outside View 7
+	Mode: Special
+	Case: 47
+	Sub Check: (!view_enabled || !view_visible[7]) ? false : (bbox_right < view_xview[7]) || (bbox_left > view_xview[7] + view_wview[7]) || (bbox_bottom < view_yview[7]) || (bbox_top > view_yview[7] + view_hview[7])
 
+boundaryviewzero: 7
+	Name: Boundary View 0
+	Mode: Special
+	Case: 50
+	Sub Check: (!view_enabled || !view_visible[0]) ? false : (bbox_left < view_xview[0]) || (bbox_right > view_xview[0] + view_wview[0]) || (bbox_top < view_yview[0]) || (bbox_bottom > view_yview[0] + view_hview[0])
+boundaryviewone: 7
+	Name: Boundary View 1
+	Mode: Special
+	Case: 51
+	Sub Check: (!view_enabled || !view_visible[1]) ? false : (bbox_left < view_xview[1]) || (bbox_right > view_xview[1] + view_wview[1]) || (bbox_top < view_yview[1]) || (bbox_bottom > view_yview[1] + view_hview[1])
+boundaryviewtwo: 7
+	Name: Boundary View 2
+	Mode: Special
+	Case: 52
+	Sub Check: (!view_enabled || !view_visible[2]) ? false : (bbox_left < view_xview[2]) || (bbox_right > view_xview[2] + view_wview[2]) || (bbox_top < view_yview[2]) || (bbox_bottom > view_yview[2] + view_hview[2])
+boundaryviewthree: 7
+	Name: Boundary View 3
+	Mode: Special
+	Case: 53
+	Sub Check: (!view_enabled || !view_visible[3]) ? false : (bbox_left < view_xview[3]) || (bbox_right > view_xview[3] + view_wview[3]) || (bbox_top < view_yview[3]) || (bbox_bottom > view_yview[3] + view_hview[3])
+boundaryviewfour: 7
+	Name: Boundary View 4
+	Mode: Special
+	Case: 54
+	Sub Check: (!view_enabled || !view_visible[4]) ? false : (bbox_left < view_xview[4]) || (bbox_right > view_xview[4] + view_wview[4]) || (bbox_top < view_yview[4]) || (bbox_bottom > view_yview[4] + view_hview[4])
+boundaryviewfive: 7
+	Name: Boundary View 5
+	Mode: Special
+	Case: 55
+	Sub Check: (!view_enabled || !view_visible[5]) ? false : (bbox_left < view_xview[5]) || (bbox_right > view_xview[5] + view_wview[5]) || (bbox_top < view_yview[5]) || (bbox_bottom > view_yview[5] + view_hview[5])
+boundaryviewsix: 7
+	Name: Boundary View 6
+	Mode: Special
+	Case: 56
+	Sub Check: (!view_enabled || !view_visible[6]) ? false : (bbox_left < view_xview[6]) || (bbox_right > view_xview[6] + view_wview[6]) || (bbox_top < view_yview[6]) || (bbox_bottom > view_yview[6] + view_hview[6])
+boundaryviewseven: 7
+	Name: Boundary View 7
+	Mode: Special
+	Case: 57
+	Sub Check: (!view_enabled || !view_visible[7]) ? false : (bbox_left < view_xview[7]) || (bbox_right > view_xview[7] + view_wview[7]) || (bbox_top < view_yview[7]) || (bbox_bottom > view_yview[7] + view_hview[7])
 
 # Collisions stuck here for some reason, possibly so that you
 # can deduct lives/health right before the "No more Lives" event
@@ -295,7 +375,9 @@ nomorehealth: 7
 	Name: No More Health
 	Mode: Special
 	Case: 9
-	Sub Check: health <= 0
+  Locals: bool $out_of_health = 0;
+	Sub Check: { bool OoH = $out_of_health; if (health <= 0) { $out_of_health = true; return !OoH; } $out_of_health = false; return false; }
+  Suffix: if (health > 0) { $out_of_health = 0; }
 
 
 # General purpose once again!
@@ -339,7 +421,7 @@ animationend: 7
 	Name: Animation End
 	Mode: Special
 	Case: 7
-	Sub Check: {if (image_index + image_speed < sprite_get_number(sprite_index)) return 0; }
+	Sub Check: { return !(image_index + image_speed < sprite_get_number(sprite_index)); }
 
 
 # End of in-linked events

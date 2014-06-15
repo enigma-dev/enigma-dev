@@ -15,19 +15,40 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <string>
 #include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+
+#include <string>
 using namespace std;
-#include "XLIBwindow.h"
 
-namespace enigma_user
-{
+/* UNIX-ready port of file manipulation */
 
-// FIXME: MOVEME
-int show_message(string message)
-{
-  printf("show_message: %s\n",message.c_str());
-  return 0;
-}
+string file_find_first(string mask,int attr);
 
-}
+enum {
+  fa_readonly  = 1,
+  fa_hidden    = 2,
+  fa_sysfile   = 4,
+  fa_volumeid  = 8,
+  fa_directory = 16,
+  fa_archive   = 32
+};
+
+string file_find_next();
+void file_find_close();
+bool file_attributes(string fname,int attr);
+
+void export_include_file(string fname);
+void export_include_file_location(string fname,string location);
+void discard_include_file(string fname);
+
+extern unsigned game_id;
+extern string temp_directory;
+
+
+int parameter_count();
+string parameter_string(int n);
+
+string environment_get_variable(string name);

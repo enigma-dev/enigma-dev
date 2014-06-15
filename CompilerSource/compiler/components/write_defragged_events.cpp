@@ -1,29 +1,19 @@
-/********************************************************************************\
-**                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
-**                                                                              **
-**  This file is a part of the ENIGMA Development Environment.                  **
-**                                                                              **
-**                                                                              **
-**  ENIGMA is free software: you can redistribute it and/or modify it under the **
-**  terms of the GNU General Public License as published by the Free Software   **
-**  Foundation, version 3 of the license or any later version.                  **
-**                                                                              **
-**  This application and its source code is distributed AS-IS, WITHOUT ANY      **
-**  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS   **
-**  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more       **
-**  details.                                                                    **
-**                                                                              **
-**  You should have recieved a copy of the GNU General Public License along     **
-**  with this code. If not, see <http://www.gnu.org/licenses/>                  **
-**                                                                              **
-**  ENIGMA is an environment designed to create games and other programs with a **
-**  high-level, fully compilable language. Developers of ENIGMA or anything     **
-**  associated with ENIGMA are in no way responsible for its users or           **
-**  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **
-**                                                                              **
-\********************************************************************************/
+/** Copyright (C) 2008 Josh Ventura
+***
+*** This file is a part of the ENIGMA Development Environment.
+***
+*** ENIGMA is free software: you can redistribute it and/or modify it under the
+*** terms of the GNU General Public License as published by the Free Software
+*** Foundation, version 3 of the license or any later version.
+***
+*** This application and its source code is distributed AS-IS, WITHOUT ANY
+*** WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+*** FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+*** details.
+***
+*** You should have received a copy of the GNU General Public License along
+*** with this code. If not, see <http://www.gnu.org/licenses/>
+**/
 
 #include "makedir.h"
 #include <stdio.h>
@@ -54,7 +44,6 @@ int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
 {
   ofstream wto((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_evparent.h").c_str());
   wto << license;
-
 
   /* Generate a new list of events used by the objects in
   ** this game. Only events on this list will be exported.
@@ -97,11 +86,20 @@ int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
   ** that defines default behavior for any obect's unused events.
   *****************************************************************/
   wto << "namespace enigma" << endl << "{" << endl;
+
+  //Forward declarations
+  wto <<"void advance_curr_timeline(gs_scalar& timeline_position, gs_scalar timeline_speed, int timeline_index, bool timeline_loop);\n";
+  wto <<"void loop_curr_timeline(gs_scalar& timeline_position, gs_scalar timeline_speed, int timeline_index);\n\n";
+  wto <<"\n";
+
   wto << "  struct event_parent: " << system_get_uppermost_tier() << endl;
   wto << "  {" << endl;
             for (evfit it = used_events.begin(); it != used_events.end(); it++)
             {
               const bool e_is_inst = event_is_instance(it->second.mid, it->second.id);
+              if (event_has_sub_check(it->second.mid, it->second.id) && !e_is_inst) {
+                wto << "    inline virtual bool myevent_" << it->first << "_subcheck() { return false; }\n";
+              } 
               wto << (e_is_inst ? "    virtual void    myevent_" : "    virtual variant myevent_") << it->first << "()";
               if (event_has_default_code(it->second.mid,it->second.id))
                 wto << endl << "    {" << endl << "  " << event_get_default_code(it->second.mid,it->second.id) << endl << (e_is_inst ? "    }" : "    return 0;\n    }") << endl;
@@ -167,16 +165,15 @@ int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
       evfit it = used_events.find(event_is_instance(mid,id) ? event_stacked_get_root_name(mid) : event_get_function_name(mid,id));
       if (it == used_events.end()) continue;
       if (mid == 7 && (id >= 10 && id <= 25)) continue;   //User events, don't want to be run in the event sequence. TODO: Remove hard-coded values.
+      string seqcode = event_forge_sequence_code(mid,id,it->first);
       if (mid == 8 && id == 64)
       {
-          string seqcode = event_forge_sequence_code(mid,id,it->first);
           if (seqcode != "")
             using_gui = true;
 
           continue;       // Don't want gui loop to be added
       }
 
-      string seqcode = event_forge_sequence_code(mid,id,it->first);
       if (seqcode != "")
         wto << seqcode,
         wto << "    " << endl,
