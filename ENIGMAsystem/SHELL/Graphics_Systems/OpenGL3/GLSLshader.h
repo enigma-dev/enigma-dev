@@ -47,10 +47,21 @@ namespace enigma
     };
 
     union UAType{
-        bool b;
+        unsigned int ui;
         int i;
         float f;
     };
+
+    //This seems very stupid for me, but I don't know any more "elegant" way - Harijs G.
+    bool UATypeUIComp(UAType i, unsigned int j){
+        return (i.ui == j);
+    }
+    bool UATypeIComp(UAType i, int j){
+        return (i.i == j);
+    }
+    bool UATypeFComp(UAType i, float j){
+        return (i.f == j);
+    }
 
     struct Uniform{
         string name;

@@ -42,7 +42,7 @@
         printf("Program[%i] - Uniform at location %i not found!\n", enigma::bound_shader, location);\
         return;\
     }else if ( uniter->second.size != usize ){\
-        printf("Program[%i] - Uniform at location %i of size %i is accesed by glUniform1f!\n", enigma::bound_shader, location, uniter->second.size);\
+        printf("Program[%i] - Uniform at location %i with %i arguments is accesed by a function with %i arguments!\n", enigma::bound_shader, location, uniter->second.size, usize);\
     }
 #else
     #define get_uniform(uniter,location,usize)\
@@ -645,20 +645,48 @@ void glsl_uniformi(int location, int v0, int v1, int v2, int v3) {
 }
 
 void glsl_uniformui(int location, unsigned v0) {
-	glUniform1ui(location, v0);
+    get_uniform(it,location,1);
+    if (it->second.data[0].ui != v0){
+        glUniform1ui(location, v0);
+        it->second.data[0].ui = v0;
+    }
 }
 
 void glsl_uniformui(int location, unsigned v0, unsigned v1) {
-	glUniform2ui(location, v0, v1);
+    get_uniform(it,location,2);
+    if (it->second.data[0].ui != v0 || it->second.data[1].ui != v1){
+        glUniform2ui(location, v0, v1);
+        it->second.data[0].ui = v0, it->second.data[1].ui = v1;
+    }
 }
 
 void glsl_uniformui(int location, unsigned v0, unsigned v1, unsigned v2) {
-	glUniform3ui(location, v0, v1, v2);
+    get_uniform(it,location,3);
+    if (it->second.data[0].ui != v0 || it->second.data[1].ui != v1 || it->second.data[2].ui != v2){
+        glUniform3ui(location, v0, v1, v2);
+        it->second.data[0].ui = v0, it->second.data[1].ui = v1, it->second.data[2].ui = v2;
+    }
 }
 
 void glsl_uniformui(int location, unsigned v0, unsigned v1, unsigned v2, unsigned v3) {
-	glUniform4ui(location, v0, v1, v2, v3);
+    get_uniform(it,location,4);
+    if (it->second.data[0].ui != v0 || it->second.data[1].ui != v1 || it->second.data[2].ui != v2 || it->second.data[3].ui != v3){
+        glUniform3ui(location, v0, v1, v2, v3);
+        it->second.data[0].ui = v0, it->second.data[1].ui = v1, it->second.data[2].ui = v2, it->second.data[3].ui = v3;
+    }
 }
+
+/*void glsl_uniform1fv(int location, int size, const float *value){
+    get_uniform(it,location,1);
+    if ( std::equal (it->second.data.begin(), it->second.data.end(), value, UATypeFComp) == false ){
+        glUniform4fv(location, size, value);
+        it->second.data.assign(value, value+1);
+    }
+}
+
+void glsl_uniform2fv(int location, int size, const float *value);
+void glsl_uniform3fv(int location, int size, const float *value);
+void glsl_uniform4fv(int location, int size, const float *value);*/
 
 }
 
