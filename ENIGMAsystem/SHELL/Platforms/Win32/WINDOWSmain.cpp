@@ -55,7 +55,7 @@ namespace enigma //TODO: Find where this belongs
 
   void EnableDrawing (HGLRC *hRC);
   void DisableDrawing (HWND hWnd, HDC hDC, HGLRC hRC);
-  
+
   void windowsystem_write_exename(char* exenamehere)
   {
 	GetModuleFileName(NULL, exenamehere, 1024);
@@ -83,7 +83,16 @@ namespace enigma_user {
   unsigned long delta_time = 0; // microseconds since the last step event
 
   unsigned long get_timer() {  // microseconds since the start of the game
-	return current_time_mcs;
+    enigma::update_current_time();
+
+    LARGE_INTEGER time;
+    if (use_pc) {
+        time.QuadPart = time_current_pc.QuadPart*1000000/frequency_pc.QuadPart;
+    } else {
+        time.QuadPart = time_current_ft.QuadPart/10;
+    }
+
+	return time.QuadPart;
   }
 }
 
@@ -345,12 +354,12 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
           }
           else
           {
-        if (!enigma::gameWindowFocused && enigma::freezeOnLoseFocus) { 
-          if (enigma::pausedSteps < 1) {
-            enigma::pausedSteps += 1;
-          } else {
-            usleep(100000); continue; 
-          }
+              if (!enigma::gameWindowFocused && enigma::freezeOnLoseFocus) {
+				if (enigma::pausedSteps < 1) {
+					enigma::pausedSteps += 1;
+				} else {
+					usleep(100000); continue;
+				}
 			  }
 
         //TODO: The placement of this code is inconsistent with XLIB because events are handled before, ask Josh.
