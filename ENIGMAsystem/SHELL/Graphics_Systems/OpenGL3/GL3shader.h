@@ -67,6 +67,8 @@ string glsl_program_get_infolog(int id);
 void glsl_program_set(int id);
 void glsl_program_reset();
 void glsl_program_free(int id);
+void glsl_program_default_set(int id); //Override default shader
+void glsl_program_default_reset(); //Reset back the default shader
 
 int glsl_get_uniform_location(int program, string name);
 int glsl_get_attribute_location(int program, string name);
@@ -84,10 +86,20 @@ void glsl_uniformui(int location, unsigned v0, unsigned v1);
 void glsl_uniformui(int location, unsigned v0, unsigned v1, unsigned v2);
 void glsl_uniformui(int location, unsigned v0, unsigned v1, unsigned v2, unsigned v3);
 
-/*void glsl_uniform1fv(int location, int size, const float *value);
+void glsl_uniform1fv(int location, int size, const float *value);
 void glsl_uniform2fv(int location, int size, const float *value);
 void glsl_uniform3fv(int location, int size, const float *value);
-void glsl_uniform4fv(int location, int size, const float *value);*/
+void glsl_uniform4fv(int location, int size, const float *value);
+
+void glsl_uniform1iv(int location, int size, const float *value);
+void glsl_uniform2iv(int location, int size, const float *value);
+void glsl_uniform3iv(int location, int size, const float *value);
+void glsl_uniform4iv(int location, int size, const float *value);
+
+void glsl_uniform1uiv(int location, int size, const float *value);
+void glsl_uniform2uiv(int location, int size, const float *value);
+void glsl_uniform3uiv(int location, int size, const float *value);
+void glsl_uniform4uiv(int location, int size, const float *value);
 
 // Wrap our abstracted version to the GameMaker version
 #define shader_set            glsl_program_set
