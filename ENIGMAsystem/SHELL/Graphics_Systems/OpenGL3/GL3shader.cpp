@@ -36,7 +36,7 @@
   #include "libEGMstd.h"
   #include "Widget_Systems/widgets_mandatory.h"
   #define get_uniform(uniter,location,usize)\
-    if (location == -1) { printf("Program[%i] - Uniform location -1 given!\n", enigma::bound_shader); return; }\
+    if (location < 0) { printf("Program[%i] - Uniform location < 0 given!\n", enigma::bound_shader); return; }\
     std::map<GLint,enigma::Uniform>::iterator uniter = enigma::shaderprograms[enigma::bound_shader]->uniforms.find(location);\
     if (uniter == enigma::shaderprograms[enigma::bound_shader]->uniforms.end()){\
         printf("Program[%i] - Uniform at location %i not found!\n", enigma::bound_shader, location);\
@@ -46,7 +46,7 @@
     }
 #else
     #define get_uniform(uniter,location,usize)\
-    if (location == -1) return; \
+    if (location < 0) return; \
     std::map<GLint,enigma::Uniform>::iterator uniter = enigma::shaderprograms[enigma::bound_shader]->uniforms.find(location);\
     if (uniter == enigma::shaderprograms[enigma::bound_shader]->uniforms.end()){\
         return;\
@@ -63,6 +63,7 @@ namespace enigma
     std::vector<enigma::ShaderProgram*> shaderprograms(0);
 
     extern unsigned default_shader;
+    extern unsigned main_shader;
     extern unsigned bound_shader;
     string getVertexShaderPrefix(){
         return "#version 140\n"
@@ -158,8 +159,8 @@ namespace enigma
                       "vec4 diffuse = vec4(attenuation * vec3(Light[index].Ld) * vec3(Material.Kd) * LdotN,1.0);\n"
                       "vec4 spec = vec4(0.0);\n"
                       "if( LdotN > 0.0 )\n"
-                          "spec = vec4(attenuation * vec3(Light[index].Ls) * vec3(Material.Ks) * pow( max( dot(r,v), 0.0 ), Material.Shininess ),1.0);\n"
-                      "total_light += diffuse + ambient;\n"
+                          "spec = max(min(vec4(attenuation * vec3(Light[index].Ls) * vec3(Material.Ks) * pow( max( dot(r,v), 0.0 ), Material.Shininess ),1.0),1.0),0.0);\n"
+                      "total_light += diffuse + ambient + spec;\n"
                   "}\n"
                   "return total_light;\n"
                 "}\n"
@@ -366,6 +367,17 @@ namespace enigma
             default: { printf("getGLTypeSize Asking size for unknown type - %i!\n", type); return 1; }
         }
     }
+
+    //This seems very stupid for me, but I don't know any more "elegant" way - Harijs G.
+    bool UATypeUIComp(UAType i, unsigned int j){
+        return (i.ui == j);
+    }
+    bool UATypeIComp(UAType i, int j){
+        return (i.i == j);
+    }
+    bool UATypeFComp(UAType i, float j){
+        return (i.f == j);
+    }
 }
 
 unsigned long getFileLength(std::ifstream& file)
@@ -540,17 +552,29 @@ void glsl_program_detach(int id, int sid)
 
 void glsl_program_set(int id)
 {
-    texture_reset();
-    enigma::bound_shader = id;
-    glUseProgram(enigma::shaderprograms[id]->shaderprogram);
+    if (enigma::bound_shader != id){
+        texture_reset();
+        enigma::bound_shader = id;
+        glUseProgram(enigma::shaderprograms[id]->shaderprogram);
+    }
 }
 
 void glsl_program_reset()
 {
-    //NOTE: Texture must be reset first so the Global VBO can draw and let people use shaders on text.
-    texture_reset();
-    enigma::bound_shader = enigma::default_shader;
-    glUseProgram(enigma::shaderprograms[enigma::default_shader]->shaderprogram);
+    //if (enigma::bound_shader != enigma::main_shader){ //This doesn't work because enigma::bound_shader is the same as enigma::main_shader at start
+        //NOTE: Texture must be reset first so the Global VBO can draw and let people use shaders on text.
+        texture_reset();
+        enigma::bound_shader = enigma::main_shader;
+        glUseProgram(enigma::shaderprograms[enigma::main_shader]->shaderprogram);
+    //}
+}
+
+void glsl_program_default_set(int id){
+    enigma::main_shader = id;
+}
+
+void glsl_program_default_reset(){
+    enigma::main_shader = enigma::default_shader;
 }
 
 void glsl_program_free(int id)
@@ -671,22 +695,133 @@ void glsl_uniformui(int location, unsigned v0, unsigned v1, unsigned v2) {
 void glsl_uniformui(int location, unsigned v0, unsigned v1, unsigned v2, unsigned v3) {
     get_uniform(it,location,4);
     if (it->second.data[0].ui != v0 || it->second.data[1].ui != v1 || it->second.data[2].ui != v2 || it->second.data[3].ui != v3){
-        glUniform3ui(location, v0, v1, v2, v3);
+        glUniform4ui(location, v0, v1, v2, v3);
         it->second.data[0].ui = v0, it->second.data[1].ui = v1, it->second.data[2].ui = v2, it->second.data[3].ui = v3;
     }
 }
 
-/*void glsl_uniform1fv(int location, int size, const float *value){
+////////////////////////VECTOR FUNCTIONS FOR FLOAT UNIFORMS/////////////////
+void glsl_uniform1fv(int location, int size, const float *value){
     get_uniform(it,location,1);
-    if ( std::equal (it->second.data.begin(), it->second.data.end(), value, UATypeFComp) == false ){
-        glUniform4fv(location, size, value);
-        it->second.data.assign(value, value+1);
+    if (std::equal(it->second.data.begin(), it->second.data.end(), value, enigma::UATypeFComp) == false){
+        glUniform1fv(location, size, value);
+        for (size_t i=0; i<it->second.data.size(); ++i){
+            it->second.data[i].f = value[i];
+        }
     }
 }
 
-void glsl_uniform2fv(int location, int size, const float *value);
-void glsl_uniform3fv(int location, int size, const float *value);
-void glsl_uniform4fv(int location, int size, const float *value);*/
+void glsl_uniform2fv(int location, int size, const float *value){
+    get_uniform(it,location,2);
+    if (std::equal(it->second.data.begin(), it->second.data.end(), value, enigma::UATypeFComp) == false){
+        glUniform2fv(location, size, value);
+        for (size_t i=0; i<it->second.data.size(); ++i){
+            it->second.data[i].f = value[i];
+        }
+    }
+}
+
+void glsl_uniform3fv(int location, int size, const float *value){
+    get_uniform(it,location,3);
+    if (std::equal(it->second.data.begin(), it->second.data.end(), value, enigma::UATypeFComp) == false){
+        glUniform3fv(location, size, value);
+        for (size_t i=0; i<it->second.data.size(); ++i){
+            it->second.data[i].f = value[i];
+        }
+    }
+}
+
+void glsl_uniform4fv(int location, int size, const float *value){
+    get_uniform(it,location,4);
+    if (std::equal(it->second.data.begin(), it->second.data.end(), value, enigma::UATypeFComp) == false){
+        glUniform4fv(location, size, value);
+        for (size_t i=0; i<it->second.data.size(); ++i){
+            it->second.data[i].f = value[i];
+        }
+    }
+}
+
+////////////////////////VECTOR FUNCTIONS FOR INT UNIFORMS/////////////////
+void glsl_uniform1iv(int location, int size, const int *value){
+    get_uniform(it,location,1);
+    if (std::equal(it->second.data.begin(), it->second.data.end(), value, enigma::UATypeIComp) == false){
+        glUniform1iv(location, size, value);
+        for (size_t i=0; i<it->second.data.size(); ++i){
+            it->second.data[i].i = value[i];
+        }
+    }
+}
+
+void glsl_uniform2iv(int location, int size, const int *value){
+    get_uniform(it,location,2);
+    if (std::equal(it->second.data.begin(), it->second.data.end(), value, enigma::UATypeIComp) == false){
+        glUniform2iv(location, size, value);
+        for (size_t i=0; i<it->second.data.size(); ++i){
+            it->second.data[i].i = value[i];
+        }
+    }
+}
+
+void glsl_uniform3iv(int location, int size, const int *value){
+    get_uniform(it,location,3);
+    if (std::equal(it->second.data.begin(), it->second.data.end(), value, enigma::UATypeIComp) == false){
+        glUniform3iv(location, size, value);
+        for (size_t i=0; i<it->second.data.size(); ++i){
+            it->second.data[i].i = value[i];
+        }
+    }
+}
+
+void glsl_uniform4iv(int location, int size, const int *value){
+    get_uniform(it,location,4);
+    if (std::equal(it->second.data.begin(), it->second.data.end(), value, enigma::UATypeIComp) == false){
+        glUniform4iv(location, size, value);
+        for (size_t i=0; i<it->second.data.size(); ++i){
+            it->second.data[i].i = value[i];
+        }
+    }
+}
+
+////////////////////////VECTOR FUNCTIONS FOR UNSIGNED INT UNIFORMS/////////////////
+void glsl_uniform1uiv(int location, int size, const unsigned int *value){
+    get_uniform(it,location,1);
+    if (std::equal(it->second.data.begin(), it->second.data.end(), value, enigma::UATypeUIComp) == false){
+        glUniform1uiv(location, size, value);
+        for (size_t i=0; i<it->second.data.size(); ++i){
+            it->second.data[i].ui = value[i];
+        }
+    }
+}
+
+void glsl_uniform2uiv(int location, int size, const unsigned int *value){
+    get_uniform(it,location,2);
+    if (std::equal(it->second.data.begin(), it->second.data.end(), value, enigma::UATypeUIComp) == false){
+        glUniform2uiv(location, size, value);
+        for (size_t i=0; i<it->second.data.size(); ++i){
+            it->second.data[i].ui = value[i];
+        }
+    }
+}
+
+void glsl_uniform3uiv(int location, int size, const unsigned int *value){
+    get_uniform(it,location,3);
+    if (std::equal(it->second.data.begin(), it->second.data.end(), value, enigma::UATypeUIComp) == false){
+        glUniform3uiv(location, size, value);
+        for (size_t i=0; i<it->second.data.size(); ++i){
+            it->second.data[i].ui = value[i];
+        }
+    }
+}
+
+void glsl_uniform4uiv(int location, int size, const unsigned int *value){
+    get_uniform(it,location,4);
+    if (std::equal(it->second.data.begin(), it->second.data.end(), value, enigma::UATypeUIComp) == false){
+        glUniform4uiv(location, size, value);
+        for (size_t i=0; i<it->second.data.size(); ++i){
+            it->second.data[i].ui = value[i];
+        }
+    }
+}
 
 }
 
