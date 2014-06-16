@@ -81,19 +81,6 @@ namespace enigma_user {
   extern double fps;
   unsigned long current_time = 0; // milliseconds since the start of the game
   unsigned long delta_time = 0; // microseconds since the last step event
-
-  unsigned long get_timer() {  // microseconds since the start of the game
-    enigma::update_current_time();
-
-    LARGE_INTEGER time;
-    if (use_pc) {
-        time.QuadPart = time_current_pc.QuadPart*1000000/frequency_pc.QuadPart;
-    } else {
-        time.QuadPart = time_current_ft.QuadPart/10;
-    }
-
-	return time.QuadPart;
-  }
 }
 
 namespace enigma {
@@ -206,9 +193,9 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
     char buffer[MAX_PATH];
     GetCurrentDirectory( MAX_PATH, buffer );
     enigma_user::working_directory = string( buffer );
-    
+
     // Set the program_directory
-    memset(&buffer[0], 0, MAX_PATH); 
+    memset(&buffer[0], 0, MAX_PATH);
     GetModuleFileName( NULL, buffer, MAX_PATH );
     enigma_user::program_directory = string( buffer );
     enigma_user::program_directory = enigma_user::program_directory.substr( 0, enigma_user::program_directory.find_last_of( "\\/" ));
@@ -354,12 +341,12 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
           }
           else
           {
-              if (!enigma::gameWindowFocused && enigma::freezeOnLoseFocus) {
-				if (enigma::pausedSteps < 1) {
-					enigma::pausedSteps += 1;
-				} else {
-					usleep(100000); continue;
-				}
+        if (!enigma::gameWindowFocused && enigma::freezeOnLoseFocus) {
+          if (enigma::pausedSteps < 1) {
+            enigma::pausedSteps += 1;
+          } else {
+            usleep(100000); continue;
+          }
 			  }
 
         //TODO: The placement of this code is inconsistent with XLIB because events are handled before, ask Josh.
@@ -381,7 +368,7 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
               frames_count++;
           }
       }
-      
+
     enigma::game_ending();
     timeEndPeriod(minimum_resolution);
     enigma::DisableDrawing (enigma::hWnd, enigma::window_hDC, hRC);
@@ -396,6 +383,18 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
 
 namespace enigma_user
 {
+unsigned long get_timer() {  // microseconds since the start of the game
+    enigma::update_current_time();
+
+    LARGE_INTEGER time;
+    if (enigma::use_pc) {
+        time.QuadPart = enigma::time_current_pc.QuadPart*1000000/enigma::frequency_pc.QuadPart;
+    } else {
+    time.QuadPart = enigma::time_current_ft.QuadPart/10;
+    }
+
+    return time.QuadPart;
+}
 
 int sleep(int millis)
 {

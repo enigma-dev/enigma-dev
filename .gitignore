@@ -40,3 +40,4 @@ CompilerSource/us.stackdump
 ENIGMAsystem/SHELL/ENIGMAengine
 *.cbTemp
 ENIGMAsystem/SHELL/.objs
+*.res
