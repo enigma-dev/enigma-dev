@@ -20,8 +20,10 @@
  *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
 #include <cstdio>
+#include <cstdlib>
 #include "Platforms/General/PFini.h"
 #include "Universal_System/estring.h"
+#include "Widget_Systems/widgets_mandatory.h"
 
 #ifndef ENIGMA_INI_BUFFER_SIZE
 #define ENIGMA_INI_BUFFER_SIZE 512
@@ -38,7 +40,7 @@ namespace enigma_user
 #ifdef DEBUG_MODE
 		if (enigma_ini_file != NULL)
 		{
-			show_error("An ini file is already opened.");
+			show_error("An ini file is already opened.", true);
 			return;
 		}
 #endif
@@ -46,7 +48,7 @@ namespace enigma_user
 		if (fgetc(enigma_ini_file) != '[')
 		{
 #ifdef DEBUG_MODE
-			show_error("File is not an ini file.");
+			show_error("File is not an ini file.", true);
 #endif
 			fclose(enigma_ini_file);
 			return;
@@ -54,31 +56,22 @@ namespace enigma_user
 #ifdef DEBUG_MODE
 		if (ferror(enigma_ini_file))
 		{
-			show_error("Unable to open the indicated ini file.");
+			show_error("Unable to open the indicated ini file.", true);
 		}
 #endif
 	}
 
-	string ini_close()
+	void ini_close()
 	{
 #ifdef DEBUG_MODE
 		if (enigma_ini_file == NULL)
 		{
-			show_error("Cannot close an ini file before it is not open.");
+			show_error("Cannot close an ini file before it is not open.", true);
 			return;
 		}
 #endif
-		fseek(enigma_ini_file, 0, SEEK_END);
-		string str;
-		str.reserve(ftell(enigma_ini_file));
-		rewind(enigma_ini_file);
-
-		while (!feof(enigma_ini_file))
-		{
-			str.push_back(fgetc(enigma_ini_file));
-		}
 		fclose(enigma_ini_file);
-		return str;
+		enigma_ini_file = NULL;
 	}
 
 	/*void finsert(FILE *file, char *buffer, const size_t buffsize, const char *insert, const size_t size)
@@ -138,18 +131,18 @@ namespace enigma_user
 		string str;
 		str.reserve(section.size() > key.size() ? section.size() : key.size());
 
-		char c;
+		int c;
 
 		while(true)
 		{
 			cur = ftell(enigma_ini_file);
-			while ((c = fgetc(enigma_ini_file)) && c != ']')
+			while ((c = fgetc(enigma_ini_file) != EOF) && char(c) != ']')
 			{
-				str.push_back(c);
+				str.push_back(char(c));
 			}
 
 			// Whitespace and Windows carriage return fix.
-			while (fgetc(enigma_ini_file) != '\n');
+			while (char(fgetc(enigma_ini_file)) != '\n');
 
 			// Check if the section is correct.
 			if (str == section)
@@ -157,24 +150,24 @@ namespace enigma_user
 				str.clear();
 				while(true)
 				{
-					while ((c = fgetc(enigma_ini_file)) && c != '=')
+					while ((c = fgetc(enigma_ini_file) != EOF) && char(c) != '=')
 					{
-						str.push_back(c);
+						str.push_back(char(c));
 					}
 
 					if (str == key)
 					{
 						str.clear();
-						while ((c = fgetc(enigma_ini_file)) && c != '\n')
+						while ((c = fgetc(enigma_ini_file) != EOF) && char(c) != '\n')
 						{
-							str.push_back(c);
+							str.push_back(char(c));
 						}
 						fseek(enigma_ini_file, cur, SEEK_SET);
 						return str;
 					}
 
-					while (fgetc(enigma_ini_file) != '\n');
-					if (fgetc(enigma_ini_file) == '[')
+					while (char(fgetc(enigma_ini_file)) != '\n');
+					if (char(fgetc(enigma_ini_file)) == '[')
 					{
 						// Section does not exist.
 						fseek(enigma_ini_file, cur, SEEK_SET);
@@ -186,9 +179,9 @@ namespace enigma_user
 			str.clear();
 			while(true)
 			{
-				if (fgetc(enigma_ini_file) == '\n')
+				if (char(fgetc(enigma_ini_file)) == '\n')
 				{
-					if (fgetc(enigma_ini_file) == '[')
+					if (char(fgetc(enigma_ini_file)) == '[')
 					{
 						// If we've looped through the whole file, it's not there.
 						if (ftell(enigma_ini_file) == pos)
@@ -214,25 +207,25 @@ namespace enigma_user
 		}
 	}
 	
-	variant ini_read_real(string section, string key, variant def)
+	int ini_read_real(string section, string key, int def)
 	{
 		int cur, pos = ftell(enigma_ini_file);
 
 		string str;
 		str.reserve(section.size() > key.size() ? section.size() : key.size());
 
-		char c;
+		int c;
 
 		while(true)
 		{
 			cur = ftell(enigma_ini_file);
-			while ((c = fgetc(enigma_ini_file)) && c != ']')
+			while ((c = fgetc(enigma_ini_file) != EOF) && char(c) != ']')
 			{
-				str.push_back(c);
+				str.push_back(char(c));
 			}
 
 			// Whitespace and Windows carriage return fix.
-			while (fgetc(enigma_ini_file) != '\n');
+			while ((c = fgetc(enigma_ini_file) != EOF) && char(c) != '\n')
 
 			// Check if the section is correct.
 			if (str == section)
@@ -240,24 +233,24 @@ namespace enigma_user
 				str.clear();
 				while(true)
 				{
-					while ((c = fgetc(enigma_ini_file)) && c != '=')
+					while ((c = fgetc(enigma_ini_file) != EOF) && char(c) != '=')
 					{
-						str.push_back(c);
+						str.push_back(char(c));
 					}
 
 					if (str == key)
 					{
 						str.clear();
-						while ((c = fgetc(enigma_ini_file)) && c != '\n')
+						while ((c = fgetc(enigma_ini_file) != EOF) && char(c) != '\n')
 						{
-							str.push_back(c);
+							str.push_back(char(c));
 						}
 						fseek(enigma_ini_file, cur, SEEK_SET);
-						return variant(str);
+						return atoi(str.c_str());
 					}
 
-					while (fgetc(enigma_ini_file) != '\n');
-					if (fgetc(enigma_ini_file) == '[')
+					while ((c = fgetc(enigma_ini_file) != EOF) && char(c) != '\n')
+					if (char(fgetc(enigma_ini_file)) == '[')
 					{
 						// Section does not exist.
 						fseek(enigma_ini_file, cur, SEEK_SET);
@@ -269,9 +262,9 @@ namespace enigma_user
 			str.clear();
 			while(true)
 			{
-				if (fgetc(enigma_ini_file) == '\n')
+				if (char(fgetc(enigma_ini_file)) == '\n')
 				{
-					if (fgetc(enigma_ini_file) == '[')
+					if (char(fgetc(enigma_ini_file)) == '[')
 					{
 						// If we've looped through the whole file, it's not there.
 						if (ftell(enigma_ini_file) == pos)
