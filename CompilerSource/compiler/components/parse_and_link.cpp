@@ -118,6 +118,7 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
   //Treat timelines similarly to scripts.
 
   //First we just parse the timeline scripts to add semicolons and collect variable names
+  tline_lookup.clear();
   for (int i=0; i<es->timelineCount; i++) 
   {
     for (int j=0; j<es->timelines[i].momentCount; j++) 
