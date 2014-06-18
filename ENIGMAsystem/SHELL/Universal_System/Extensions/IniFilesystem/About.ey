@@ -3,8 +3,8 @@
 
 Name: IniFilesystem
 ID: IniFilesystem
-Author: Daniel Hrabovcak
-Description: Adds support for loading ini files for platforms other than Windows.
+Author: Seth N. Hetu
+Description: Provides a consistent, performant, cross-platform, GM-compliant API for manipulating INI files.
 Default: false
 Icon: inifilesystem.png
 
