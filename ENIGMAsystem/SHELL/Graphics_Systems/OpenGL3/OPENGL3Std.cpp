@@ -99,6 +99,9 @@ namespace enigma
             glsl_program_attach(prog_id, fshader_id);
             glsl_program_link(prog_id);
             glsl_program_validate(prog_id);
+
+            getUniforms(prog_id);
+            getAttributes(prog_id);
             getDefaultUniforms(prog_id);
             getDefaultAttributes(prog_id);
         }

@@ -87,6 +87,23 @@ namespace enigma
     }
     string getFragmentShaderPrefix(){
         return "#version 140\n"
+                "#define MATRIX_VIEW                                    0\n"
+                "#define MATRIX_PROJECTION                              1\n"
+                "#define MATRIX_WORLD                                   2\n"
+                "#define MATRIX_WORLD_VIEW                              3\n"
+                "#define MATRIX_WORLD_VIEW_PROJECTION                   4\n"
+                "#define MATRICES_MAX                                   5\n"
+
+                "uniform mat4 transform_matrix[MATRICES_MAX];           \n"
+                "#define gm_Matrices transform_matrix \n"
+                "#define modelMatrix transform_matrix[MATRIX_WORLD] \n"
+                "#define modelViewMatrix transform_matrix[MATRIX_WORLD_VIEW] \n"
+                "#define projectionMatrix transform_matrix[MATRIX_PROJECTION] \n"
+                "#define viewMatrix transform_matrix[MATRIX_VIEW] \n"
+                "#define modelViewProjectionMatrix transform_matrix[MATRIX_WORLD_VIEW_PROJECTION] \n"
+
+                "uniform mat3 normalMatrix;     \n"
+
                 "uniform sampler2D en_TexSampler;\n"
                 "#define gm_BaseTexture en_TexSampler\n"
                 "uniform bool en_TexturingEnabled;\n"
@@ -138,7 +155,7 @@ namespace enigma
 
                 "vec4 phongModel( in vec3 norm, in vec4 position )\n"
                 "{\n"
-                  "vec4 total_light = vec4(0.0,0.0,0.0,1.0);\n"
+                  "vec4 total_light = vec4(0.0);\n"
                   "vec3 v = normalize(-position.xyz);\n"
                   "float attenuation;\n"
                   "for (int index = 0; index < en_ActiveLights; ++index){\n"
@@ -156,7 +173,7 @@ namespace enigma
                       "vec4 ambient = Light[index].La * Material.Ka;\n"
                       "float LdotN = max( dot(L,norm), 0.0 );\n"
                       "vec4 diffuse = vec4(attenuation * vec3(Light[index].Ld) * vec3(Material.Kd) * LdotN,1.0);\n"
-                      "vec4 spec = vec4(0.0,0.0,0.0,1.0);\n"
+                      "vec4 spec = vec4(0.0);\n"
                       "if( LdotN > 0.0 )\n"
                           "spec = clamp(vec4(attenuation * vec3(Light[index].Ls) * vec3(Material.Ks) * pow( max( dot(r,v), 0.0 ), Material.Shininess ),1.0),0.0,1.0);\n"
                       "total_light += diffuse + ambient + spec;\n"
@@ -166,7 +183,7 @@ namespace enigma
 
                 "void main()\n"
                 "{\n"
-                    "vec4 iColor = vec4(1.0,1.0,1.0,1.0);\n"
+                    "vec4 iColor = vec4(1.0);\n"
                     "if (en_ColorEnabled == true){\n"
                         "iColor = in_Color;\n"
 					"}\n"
@@ -190,7 +207,7 @@ namespace enigma
 
                 "void main()\n"
                 "{\n"
-                    "vec4 TexColor;"
+                    "vec4 TexColor;\n"
                     "if (en_TexturingEnabled == true){\n"
                         "TexColor = texture2D( en_TexSampler, v_TextureCoord.st ) * v_Color;\n"
                     "}else if (en_ColorEnabled == true){\n"
@@ -465,7 +482,7 @@ bool glsl_shader_compile(int id)
     if (compiled){
         return true;
     } else {
-        std::cout << "Shader[" << id << "] - Compilation failed - Info log: " << std::endl;
+        std::cout << "Shader[" << id << "] " << (enigma::shaders[id]->type == sh_vertex?"Vertex shader":"Pixel shader") << " - Compilation failed - Info log: " << std::endl;
         glsl_shader_print_infolog(id);
         return false;
     }
