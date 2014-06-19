@@ -640,12 +640,12 @@ class Mesh
 	}
 
     if (useColors){
-        glEnableVertexAttribArray(enigma::shaderprograms[enigma::bound_shader]->att_color);
-        glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_colorEnable, 1);
-		glVertexAttribPointer(enigma::shaderprograms[enigma::bound_shader]->att_color, 4, GL_UNSIGNED_BYTE, GL_TRUE, STRIDE, OFFSET(offset)); //Normalization needs to be true, because we pack them as unsigned bytes
-    }else{
-        glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_colorEnable, 0);
-    }
+		glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_colorEnable,1);
+	}else{
+		glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_colorEnable,0);
+	}
+	glEnableVertexAttribArray(enigma::shaderprograms[enigma::bound_shader]->att_color);
+	glVertexAttribPointer(enigma::shaderprograms[enigma::bound_shader]->att_color, 4, GL_UNSIGNED_BYTE, GL_TRUE, STRIDE, OFFSET(offset)); //Normalization needs to be true, because we pack them as unsigned bytes
 
 	#define OFFSETE( P )  ( ( const GLvoid * ) ( sizeof( GLuint ) * ( P         ) ) )
 	offset = vertex_start;

@@ -119,7 +119,6 @@ namespace enigma
                   "vec4 Ld; // Diffuse light intensity\n"
                   "vec4 Ls; // Specular light intensity\n"
                   "float cA, lA, qA; // Attenuation for point lights\n"
-                  //"bool type; //Type - directional or point"
                 "};\n"
                 "uniform LightInfo Light[MAX_LIGHTS];\n"
 
@@ -131,15 +130,15 @@ namespace enigma
                 "};\n"
                 "uniform MaterialInfo Material;\n"
 
-                "void getEyeSpace( out vec3 norm, out vec4 position )\n"
+                "void getEyeSpace( inout vec3 norm, inout vec4 position )\n"
                 "{\n"
                     "norm = normalize( normalMatrix * in_Normal );\n"
-                    "position = modelViewMatrix * vec4(in_Position,1.0);\n"
+                    "position = modelViewMatrix * vec4(in_Position, 1.0);\n"
                 "}\n"
 
-                "vec4 phongModel( vec3 norm, vec4 position )\n"
+                "vec4 phongModel( in vec3 norm, in vec4 position )\n"
                 "{\n"
-                  "vec4 total_light = vec4(0.0);"
+                  "vec4 total_light = vec4(0.0,0.0,0.0,1.0);\n"
                   "vec3 v = normalize(-position.xyz);\n"
                   "float attenuation;\n"
                   "for (int index = 0; index < en_ActiveLights; ++index){\n"
@@ -157,9 +156,9 @@ namespace enigma
                       "vec4 ambient = Light[index].La * Material.Ka;\n"
                       "float LdotN = max( dot(L,norm), 0.0 );\n"
                       "vec4 diffuse = vec4(attenuation * vec3(Light[index].Ld) * vec3(Material.Kd) * LdotN,1.0);\n"
-                      "vec4 spec = vec4(0.0);\n"
+                      "vec4 spec = vec4(0.0,0.0,0.0,1.0);\n"
                       "if( LdotN > 0.0 )\n"
-                          "spec = max(min(vec4(attenuation * vec3(Light[index].Ls) * vec3(Material.Ks) * pow( max( dot(r,v), 0.0 ), Material.Shininess ),1.0),1.0),0.0);\n"
+                          "spec = clamp(vec4(attenuation * vec3(Light[index].Ls) * vec3(Material.Ks) * pow( max( dot(r,v), 0.0 ), Material.Shininess ),1.0),0.0,1.0);\n"
                       "total_light += diffuse + ambient + spec;\n"
                   "}\n"
                   "return total_light;\n"
@@ -167,19 +166,17 @@ namespace enigma
 
                 "void main()\n"
                 "{\n"
-                    "vec4 iColor;\n"
+                    "vec4 iColor = vec4(1.0,1.0,1.0,1.0);\n"
                     "if (en_ColorEnabled == true){\n"
                         "iColor = in_Color;\n"
-                    "}else{\n"
-                        "iColor = vec4(1.0);\n"
-                    "}\n"
+					"}\n"
                     "if (en_LightingEnabled == true){\n"
                         "vec3 eyeNorm;\n"
                         "vec4 eyePosition;\n"
                         "getEyeSpace(eyeNorm, eyePosition);\n"
-                        "v_Color = en_AmbientColor * Material.Ka + phongModel( eyeNorm, eyePosition ) * iColor;\n"
+                        "v_Color = clamp(en_AmbientColor * Material.Ka + phongModel( eyeNorm, eyePosition ),0.0,1.0) * iColor;\n"
                     "}else{\n"
-                        "v_Color = iColor;\n"
+						"v_Color = iColor;\n"
                     "}\n"
                     "gl_Position = modelViewProjectionMatrix * vec4( in_Position.xyz, 1.0);\n"
 
@@ -193,8 +190,6 @@ namespace enigma
 
                 "void main()\n"
                 "{\n"
-                    //"vec3 normal = normalize(v_Normal);\n"
-                    //"vec4 LightColor = CalculateLighting(normal);\n"
                     "vec4 TexColor;"
                     "if (en_TexturingEnabled == true){\n"
                         "TexColor = texture2D( en_TexSampler, v_TextureCoord.st ) * v_Color;\n"
@@ -203,7 +198,7 @@ namespace enigma
                     "}else{\n"
                         "TexColor = en_bound_color;\n"
                     "}\n"
-                    "out_FragColor = TexColor;\n"// * LightColor;"
+                    "out_FragColor = TexColor;\n"
                 "}\n";
     }
     void getUniforms(int prog_id){
@@ -467,8 +462,7 @@ bool glsl_shader_compile(int id)
 
     GLint compiled;
     glGetProgramiv(enigma::shaders[id]->shader, GL_COMPILE_STATUS, &compiled);
-    if (compiled)
-    {
+    if (compiled){
         return true;
     } else {
         std::cout << "Shader[" << id << "] - Compilation failed - Info log: " << std::endl;
@@ -480,8 +474,7 @@ bool glsl_shader_compile(int id)
 bool glsl_shader_get_compiled(int id) {
     GLint compiled;
     glGetProgramiv(enigma::shaders[id]->shader, GL_COMPILE_STATUS, &compiled);
-    if (compiled)
-    {
+    if (compiled){
         return true;
     } else {
         return false;
@@ -515,8 +508,7 @@ bool glsl_program_link(int id)
     glLinkProgram(enigma::shaderprograms[id]->shaderprogram);
     GLint linked;
     glGetProgramiv(enigma::shaderprograms[id]->shaderprogram, GL_LINK_STATUS, &linked);
-    if (linked)
-    {
+    if (linked){
         return true;
     } else {
         std::cout << "Shader program[" << id << "] - Linking failed - Info log: " << std::endl;
@@ -530,8 +522,7 @@ bool glsl_program_validate(int id)
     glValidateProgram(enigma::shaderprograms[id]->shaderprogram);
     GLint validated;
     glGetProgramiv(enigma::shaderprograms[id]->shaderprogram, GL_VALIDATE_STATUS, &validated);
-    if (validated)
-    {
+    if (validated){
         return true;
     } else {
         std::cout << "Shader program[" << id << "] - Validation failed - Info log: " << std::endl;
