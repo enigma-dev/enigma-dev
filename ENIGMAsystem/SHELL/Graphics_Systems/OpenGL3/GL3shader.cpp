@@ -210,10 +210,8 @@ namespace enigma
                     "vec4 TexColor;\n"
                     "if (en_TexturingEnabled == true){\n"
                         "TexColor = texture2D( en_TexSampler, v_TextureCoord.st ) * v_Color;\n"
-                    "}else if (en_ColorEnabled == true){\n"
-                        "TexColor = v_Color;\n"
                     "}else{\n"
-                        "TexColor = en_bound_color;\n"
+                        "TexColor = en_bound_color * v_Color;\n"
                     "}\n"
                     "out_FragColor = TexColor;\n"
                 "}\n";
