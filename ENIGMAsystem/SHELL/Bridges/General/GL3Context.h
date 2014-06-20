@@ -1,4 +1,4 @@
-/** Copyright (C) 2013 Robert B. Colton
+/** Copyright (C) 2013-2014 Robert B. Colton, Harijs Grinbergs
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -171,7 +171,19 @@ void Transformation() { //Used when calling 3d transformations (translation, sca
 	EndShapesBatching();
 }
 
-void BlendFunc() {
+void BlendFunc() { //Used when calling blend functions
+	EndShapesBatching();
+}
+
+void ColorFunc() { //Used when calling color functions
+	if (shapes_d3d_model != -1){
+		if (d3d_model_has_color(shapes_d3d_model) == false){
+			EndShapesBatching();
+		}
+	}
+}
+
+void Lighting() { //Used when lighting is enabled/disabled
 	EndShapesBatching();
 }
 
