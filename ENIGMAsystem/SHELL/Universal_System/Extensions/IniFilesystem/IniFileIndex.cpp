@@ -45,7 +45,7 @@ std::string trim(const std::string& str) {
 }
 
 std::string optional_quote(const std::string& str) {
-	if (!str.empty() && (str[0]==' ' || str[0]=='\t' || str[str.size()-1]==' ' || str[str.size()-1]=='\t')) {
+	if (!str.empty() && (str[0]==' ' || str[0]=='\t' || str[str.size()-1]==' ' || str[str.size()-1]=='\t' || str.find(';')!=std::string::npos || str.find('#')!=std::string::npos)) {
 		return std::string("\"") + str + "\"";
 	}
 	return str;
@@ -122,15 +122,15 @@ void enigma::IniFileIndex::load(std::istream& input)
 				} else {
 					//Non-quoted string.
 					std::stringstream temp;
-					size_t i=1;
+					size_t i=0;
 					for (;i<rhs.size(); i++) {
 						if (rhs[i]==';' || rhs[i]=='#') {
-							value = temp.str();
 							i++;
 							break;
 						}
 						temp <<rhs[i];
 					}
+					value = temp.str();
 
 					//Trim.
 					if (i<rhs.size()) {
@@ -181,7 +181,7 @@ void enigma::IniFileIndex::clear()
 	postComment.clear();
 }
 
-std::string enigma::IniFileIndex::read(const std::string& section, const std::string& key, const std::string& def) const
+std::string enigma::IniFileIndex::read(const std::string& section, const std::string& key, std::string def) const
 {
 	std::map<std::string, IniFileSection>::const_iterator secIt = sections.find(section);
 	if (secIt==sections.end()) { return def; }
@@ -255,6 +255,7 @@ std::string enigma::IniFileIndex::toString() const
 	for (std::vector<std::string>::const_iterator secIt=secNameOrder.begin(); secIt!=secNameOrder.end(); secIt++) {
 		const IniFileSection& sec = sections.find(*secIt)->second;
 		res <<sec.prefix;
+		res <<"[" <<(*secIt) <<"]\n";
 		for (std::vector<std::string>::const_iterator keyIt=sec.propKeyOrder.begin(); keyIt!=sec.propKeyOrder.end(); keyIt++) {
 			const IniValue& val = sec.props.find(*keyIt)->second;
 			res <<val.prefix;

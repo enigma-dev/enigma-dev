@@ -131,6 +131,7 @@ namespace enigma_user
 		if (!currIniFile.empty()) {
 			return currIni.read(section, key, def);
 		}
+		return def;
 	}
 	
 	//TODO: GM reads floats (or maybe doubles); Enigma uses ints.
@@ -139,6 +140,7 @@ namespace enigma_user
 		if (!currIniFile.empty()) {
 			return currIni.read(section, key, def);
 		}
+		return def;
 	}
 }
 

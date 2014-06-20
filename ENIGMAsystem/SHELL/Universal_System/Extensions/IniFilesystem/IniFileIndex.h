@@ -34,7 +34,7 @@ public:
 	void write(const std::string& section, const std::string& key, const std::string& value);
 	void write(const std::string& section, const std::string& key, float value);
 
-	std::string read(const std::string& section, const std::string& key, const std::string& def) const;
+	std::string read(const std::string& section, const std::string& key, std::string def) const;
 	float read(const std::string& section, const std::string& key, float def) const;
 
 	void saveToFile(const std::string& fname) const;
