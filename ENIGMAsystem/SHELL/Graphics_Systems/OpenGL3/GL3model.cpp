@@ -443,6 +443,19 @@ void d3d_model_vertex_normal_texture_color(int id, gs_scalar x, gs_scalar y, gs_
   meshes[id]->AddColor(col, alpha);
 }
 
+//Getters
+bool d3d_model_has_color(int id){
+  return meshes[id]->useColors;
+}
+
+bool d3d_model_has_texture(int id){
+  return meshes[id]->useTextures;
+}
+
+bool d3d_model_has_normals(int id){
+  return meshes[id]->useNormals;
+}
+
 void d3d_model_floor(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, gs_scalar hrep, gs_scalar vrep)
 {
   gs_scalar nX = (y2-y1)*(z2-z1)*(z2-z1);
