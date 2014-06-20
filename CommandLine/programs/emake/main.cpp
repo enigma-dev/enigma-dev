@@ -22,8 +22,11 @@
 #include <unistd.h>
 #include <iostream>
 #include <string>
-//#include "gmk.hpp"
 #include "library.h"
+
+#include "rapidxml-1.13/rapidxml.hpp"
+
+//#include "gmk.hpp"
 
 using namespace std;
 
@@ -32,11 +35,74 @@ unsigned long RGBA2DWORD(int iR, int iG, int iB, int iA)
   return (((((iR << 8) + iG) << 8) + iB) << 8) + iA;
 }
 
+void buildtestproject() {
+    EnigmaStruct* es = new EnigmaStruct();
+    es->gameSettings.gameIcon = "../../Resources/joshcontroller.ico";
+    es->gameSettings.letEscEndGame = true;
+    es->gameSettings.treatCloseAsEscape = true;
+    es->gameSettings.alwaysOnTop = true;
+    es->gameSettings.gameId = 03434534;
+    es->gameSettings.company = "";
+    es->gameSettings.description = "";
+    es->gameSettings.version = "";
+    es->gameSettings.product = "";
+    es->gameSettings.version = "";
+    es->gameSettings.copyright = "";
+    es->gameInfo.gameInfoStr = "";
+    es->gameInfo.formCaption = "";
+    es->filename = "exampleproject";
+    Room rms[1];
+    rms[0] = Room();
+    rms[0].drawBackgroundColor = true;
+    rms[0].width = 500;
+    rms[0].height = 500;
+    rms[0].creationCode = "";
+    rms[0].name = "exampleroom";
+    rms[0].id = 0;
+    rms[0].speed = 30;
+    rms[0].caption = "Example Game Room Caption";
+    rms[0].instanceCount = 0;
+    rms[0].backgroundColor = RGBA2DWORD(3, 149, 255, 255);
+    
+    GmObject obj[10];
+    obj[0] = GmObject();
+    //obj[0].name="pissmonkey";
+    obj[0].id = 0;
+    // Sprite spr[0];
+    // Font fnt[0];
+    // Timeline tln[0];
+    // Script scr[0];
+    // Path pth[0];
+    // Background bgd[0];
+
+    es->rooms = rms;
+    es->roomCount = 1;
+    //es->gmObjects = obj;
+    //es->gmObjectCount = 1;
+    // es->scripts = scr;
+    // es->fonts = fnt;
+    // es->sprites = spr;
+    // es->timelines = tln;
+    // es->backgrounds = bgd;
+    cout << compileEGMf(es, "C:/Users/Owner/Desktop/wtf.exe", emode_run) << endl;
+}
+
+void buildgmx() {
+
+}
+
+void buildgmk() {
+    //Gmk::GmkFile* gmk = new Gmk::GmkFile();
+    //gmk->Load(argv[1]);
+    
+    // copy gmk to enigma resources and call compile
+    
+    //delete gmk;
+}
+
 int main(int argc, char* argv[])
 {
     cout << "ENIGMA Make" << endl;
-    //Gmk::GmkFile* gmk = new Gmk::GmkFile();
-    //gmk->Load(argv[1]);
     
     chdir("../../");
     
@@ -77,65 +143,27 @@ int main(int argc, char* argv[])
     "target-networking: None\n"
     "extensions: Universal_System/Extensions/Paths\n"
     ));
-    cout << "\nPress any key to continue";
-    cin.ignore(1);
+
+    // obtain keywords
     const char* currentResource = (const char*) first_available_resource();
     while (!resources_atEnd())
     {
         currentResource = next_available_resource();
     }
 
-    // copy gmk to enigma resources and call compile
-    
-    EnigmaStruct* es = new EnigmaStruct();
-    es->gameSettings.alwaysOnTop = true;
-    es->gameSettings.gameId = 03434534;
-    es->gameSettings.company = "";
-    es->gameSettings.description = "";
-    es->gameSettings.version = "";
-    es->gameSettings.product = "";
-    es->gameSettings.version = "";
-    es->gameSettings.copyright = "";
-    es->gameInfo.gameInfoStr = "";
-    es->gameInfo.formCaption = "";
-    es->filename = "wtf";
-    Room rms[1];
-    rms[0] = Room();
-    rms[0].drawBackgroundColor = true;
-    rms[0].width = 500;
-    rms[0].height = 500;
-    rms[0].creationCode = "";
-    rms[0].name = "exampleroom";
-    rms[0].id = 0;
-    rms[0].speed = 30;
-    rms[0].caption = "Example Game Room Caption";
-    rms[0].instanceCount = 0;
-    rms[0].backgroundColor = RGBA2DWORD(3, 149, 255, 255);
-    
-    GmObject obj[10];
-    obj[0] = GmObject();
-    //obj[0].name="pissmonkey";
-    obj[0].id = 0;
-    // Sprite spr[0];
-    // Font fnt[0];
-    // Timeline tln[0];
-    // Script scr[0];
-    // Path pth[0];
-    // Background bgd[0];
+    bool closing = false;
+    string input = "";
+    while (!closing) {
+      cout << "What would you like to do?" << endl;
+      getline(cin, input);
+      if (strcmp(input.c_str(), "quit") == 0) {
+         closing = true;
+      } else if (strcmp(input.c_str(), "test") == 0) {
+        buildtestproject();
+      } else if (strcmp(input.c_str(), "gmx") == 0) {
+        buildgmx();
+      }
+    }
 
-    es->rooms = rms;
-    es->roomCount = 1;
-    //es->gmObjects = obj;
-    //es->gmObjectCount = 1;
-    // es->scripts = scr;
-    // es->fonts = fnt;
-    // es->sprites = spr;
-    // es->timelines = tln;
-    // es->backgrounds = bgd;
-    cout << compileEGMf(es, "C:/Users/Owner/Desktop/wtf.exe", emode_run);
-    cout << "\nPress any key to continue";
-    cin.ignore(1);
-
-    //delete gmk;
     return 0;
 }
