@@ -332,8 +332,6 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
     wto << "#include <windows.h>\n";
 	if (gameSet.gameIcon != NULL && strlen(gameSet.gameIcon) > 0) {
 		wto << "IDI_MAIN_ICON ICON          \"" << string_replace_all(gameSet.gameIcon,"\\","/")  << "\"\n";
-	} else {
-		wto << "IDI_MAIN_ICON ICON          \"\"\n";
 	}
 	wto << "VS_VERSION_INFO VERSIONINFO\n";
 	wto << "FILEVERSION " << gameSet.versionMajor << "," << gameSet.versionMinor << "," << gameSet.versionRelease << "," << gameSet.versionBuild << "\n";

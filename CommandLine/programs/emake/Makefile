@@ -18,10 +18,10 @@ endif
 ###########
 
 CXX := g++
-CXXFLAGS += -Wall -g -I. -I../CompilerSource -IGmk/src/include/
-LDFLAGS += -shared -L./Gmk/bin/linux/libgmk.a
+CXXFLAGS += -Wall -g -I. -I../../../CompilerSource
+LDFLAGS +=
 
-SOURCES := $(shell find programs/ -name "*.cpp")
+SOURCES := $(shell find ./ -name "*.cpp")
 OBJECTS := $(addprefix .eobjs/,$(SOURCES:.cpp=.o))
 DEPENDS := $(OBJECTS:.o=.d)
 

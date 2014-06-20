@@ -20,6 +20,12 @@
 **/
 
 #include "link.h"
+#include <iostream>
+
+void dummy_setMakeDirectory(const char* dir)
+{
+    // show error
+}
 
 int dummy_compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode)
 {
@@ -111,6 +117,7 @@ syntax_error *dummy_syntaxCheck(int script_count, const char* *script_names, con
     return &dummy_syerr;
 }
 
+void (*libSetMakeDirectory)(const char* dir) = dummy_setMakeDirectory;
 int (*compileEGMf)(EnigmaStruct *es, const char* exe_filename, int mode) = dummy_compileEGMf;
 const char* (*next_available_resource)() = dummy_next_available_resource;
 const char* (*first_available_resource)() = dummy_first_available_resource;

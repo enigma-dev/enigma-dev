@@ -37,6 +37,7 @@ using namespace std;
 
 #endif
 
+extern void (*libSetMakeDirectory)(const char* dir);
 extern int (*compileEGMf)(EnigmaStruct *es, const char* exe_filename, int mode);
 extern const char* (*next_available_resource)();
 extern const char* (*first_available_resource)();
