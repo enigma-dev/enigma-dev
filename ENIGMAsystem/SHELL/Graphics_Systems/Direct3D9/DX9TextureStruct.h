@@ -15,8 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef _DXTEXTURESTRUCT__H
-#define _DXTEXTURESTRUCT__H
+#ifndef DX9_TEXTURESTRUCT__H
+#define DX9_TEXTURESTRUCT__H
 
 #include "Direct3D9Headers.h"
 
@@ -31,13 +31,28 @@ struct TextureStruct {
 	TextureStruct(LPDIRECT3DTEXTURE9 gTex) {
 		gTexture = gTex;
 	}
+  
+  void Release() {
+    if (gTexture != NULL) {
+      gTexture->Release();
+      gTexture = NULL;
+    }
+  }
 	
 	~TextureStruct() {
-		
+		Release();
 	}
+  
+  void OnDeviceLost() {
+    Release();
+  }
+  
+  void OnDeviceReset() {
+  
+  }
 };
 extern vector<TextureStruct*> textureStructs;
 
 LPDIRECT3DTEXTURE9 get_texture(int texid);
 
-#endif
+#endif // DX9_TEXTURESTRUCT__H

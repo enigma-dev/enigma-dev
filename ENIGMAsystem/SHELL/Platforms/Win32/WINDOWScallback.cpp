@@ -62,7 +62,7 @@ namespace enigma
     int tempLeft = 0, tempTop = 0, tempRight = 0, tempBottom = 0, tempWidth, tempHeight;
     RECT tempWindow;
 
-    LRESULT CALLBACK WndProc (HWND hWnd, UINT message,WPARAM wParam, LPARAM lParam)
+    LRESULT CALLBACK WndProc (HWND hWndParameter, UINT message,WPARAM wParam, LPARAM lParam)
     {
       switch (message)
       {
@@ -86,12 +86,17 @@ namespace enigma
           return 0;
 
         case WM_SIZE:
-          instance_event_iterator = new inst_iter(NULL,NULL,NULL);
-          for (enigma::iterator it = enigma::instance_list_first(); it; ++it)
-          {
-            it->myevent_drawresize();
+          // make sure window resized is only processed once per resize because we have a parent and a child window
+          if (hWndParameter == hWnd) {
+            WindowResized();
+            instance_event_iterator = new inst_iter(NULL,NULL,NULL);
+            for (enigma::iterator it = enigma::instance_list_first(); it; ++it)
+            {
+              it->myevent_drawresize();
+            }
+          } else {
+            DefWindowProc(hWndParameter, message, wParam, lParam);
           }
-          WindowResized();
           return 0;
 
         case WM_SETFOCUS:
@@ -115,7 +120,7 @@ namespace enigma
           return 0;
 
         case WM_ENTERSIZEMOVE:
-          GetWindowRect(hWnd,&tempWindow);
+          GetWindowRect(hWndParameter,&tempWindow);
           tempLeft = tempWindow.left;
           tempTop = tempWindow.top;
           tempRight = tempWindow.right;
@@ -123,7 +128,7 @@ namespace enigma
           return 0;
 
         case WM_EXITSIZEMOVE:
-          GetWindowRect(hWnd,&tempWindow);
+          GetWindowRect(hWndParameter,&tempWindow);
           tempWidth = windowWidth + (tempWindow.right - tempWindow.left) - (tempRight - tempLeft);
           tempHeight = windowHeight + (tempWindow.bottom - tempWindow.top) - (tempBottom - tempTop);
           if (tempWidth < scaledWidth)
@@ -144,7 +149,7 @@ namespace enigma
           if (LOWORD(lParam) == HTCLIENT) {
             SetCursor(LoadCursor(NULL, currentCursor));
           } else {
-            DefWindowProc(hWnd, message, wParam, lParam);
+            DefWindowProc(hWndParameter, message, wParam, lParam);
           }
           return 0;
         case WM_CHAR:
@@ -228,7 +233,7 @@ namespace enigma
 		//return 0;
 
         default:
-            return DefWindowProc (hWnd, message, wParam, lParam);
+            return DefWindowProc (hWndParameter, message, wParam, lParam);
       }
     }
 
