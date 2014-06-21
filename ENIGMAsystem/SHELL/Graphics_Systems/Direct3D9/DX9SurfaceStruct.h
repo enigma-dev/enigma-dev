@@ -15,11 +15,12 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef _SURFSTRUCT__H
-#define _SURFSTRUCT__H
-
+#ifndef DX9_SURFSTRUCT__H
+#define DX9_SURFSTRUCT__H
+#include <windows.h>
 #include <string>
 #include "Direct3D9Headers.h"
+#include "DX9TextureStruct.h"
 using std::string;
 
 #include <vector>
@@ -31,19 +32,33 @@ namespace enigma
   {
     LPDIRECT3DSURFACE9 surf;
     int tex, width, height;
-	Surface() {
-		tex = 0;
-		width = 0;
-		height = 0;
-		surf = NULL;
-	};
-	
-	~Surface() {
-		if (surf != NULL) {
-			surf->Release();
-			surf = NULL;
-		}
-	};
+    Surface() {
+      tex = 0;
+      width = 0;
+      height = 0;
+      surf = NULL;
+    };
+    
+    void Release() {
+      textureStructs[tex]->Release();
+      if (surf != NULL) {
+        surf->Release();
+        surf = NULL;
+      }
+    }
+    
+    ~Surface() {
+      Release();
+    };
+    
+    void OnDeviceLost() {
+      Release();
+      
+    }
+    
+    void OnDeviceReset() {
+    
+    }
   };
   
   extern vector<Surface*> Surfaces;
@@ -72,4 +87,4 @@ namespace enigma
     enigma::Surface* surf = enigma::Surfaces[id];
 #endif
 
-#endif
+#endif // DX9_SURFSTRUCT__H

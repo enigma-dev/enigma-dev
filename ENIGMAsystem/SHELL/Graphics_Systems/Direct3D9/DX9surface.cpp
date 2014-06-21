@@ -95,7 +95,7 @@ LPDIRECT3DSURFACE9 pBackBuffer;
 void surface_set_target(int id)
 {
 	get_surface(surface,id);
-d3dmgr->device->GetRenderTarget(0, &pBackBuffer);
+  d3dmgr->device->GetRenderTarget(0, &pBackBuffer);
 	d3dmgr->device->SetRenderTarget(0, surface->surf);
 	
 	D3DXMATRIX matProjection;
@@ -109,6 +109,8 @@ void surface_reset_target()
 	//d3dmgr->ResetRenderTarget();
 	d3dmgr->EndShapesBatching();
 	d3dmgr->device->SetRenderTarget(0, pBackBuffer);
+  pBackBuffer->Release();
+  pBackBuffer = NULL;
 }
 
 void surface_free(int id)
