@@ -19,9 +19,15 @@
 * ENIGMA. If not, see <http://www.gnu.org/licenses/>.
 **/
 
+#include <windows.h>
+
 #include <unistd.h>
 #include <iostream>
+#include <fstream>
 #include <string>
+#include <vector>
+#include <sstream>
+using std::vector;
 #include "library.h"
 
 #include "rapidxml-1.13/rapidxml.hpp"
@@ -29,13 +35,14 @@
 //#include "gmk.hpp"
 
 using namespace std;
+using namespace rapidxml;
 
 unsigned long RGBA2DWORD(int iR, int iG, int iB, int iA)
 {
   return (((((iR << 8) + iG) << 8) + iB) << 8) + iA;
 }
 
-void buildtestproject() {
+void buildtestproject(const char* output) {
     EnigmaStruct* es = new EnigmaStruct();
     es->gameSettings.gameIcon = "../../Resources/joshcontroller.ico";
     es->gameSettings.letEscEndGame = true;
@@ -84,11 +91,81 @@ void buildtestproject() {
     // es->sprites = spr;
     // es->timelines = tln;
     // es->backgrounds = bgd;
-    cout << compileEGMf(es, "C:/Users/Owner/Desktop/wtf.exe", emode_run) << endl;
+    cout << compileEGMf(es, output, emode_run) << endl;
 }
 
-void buildgmx() {
+void buildgmx(const char* input, const char* output) {
+    xml_document<> doc;    // character type defaults to char
+    std::ifstream filestream(input);
+    std::stringstream buffer;
+    buffer << filestream.rdbuf();
+    filestream.close();
+    std::string content(buffer.str());
+    doc.parse<0>(&content[0]);    // 0 means default parse flags
+    xml_node<> *pRoot = doc.first_node();
 
+    EnigmaStruct* es = new EnigmaStruct();
+    es->gameSettings.gameIcon = "../../Resources/joshcontroller.ico";
+    es->gameSettings.letEscEndGame = true;
+    es->gameSettings.treatCloseAsEscape = true;
+    es->gameSettings.alwaysOnTop = true;
+    es->gameSettings.gameId = 03434534;
+    es->gameSettings.company = "";
+    es->gameSettings.description = "";
+    es->gameSettings.version = "";
+    es->gameSettings.product = "";
+    es->gameSettings.version = "";
+    es->gameSettings.copyright = "";
+    es->gameInfo.gameInfoStr = "";
+    es->gameInfo.formCaption = "";
+    es->filename = "exampleproject";
+    
+    vector<Room*> rooms;
+    vector<GmObject*> objects;
+    vector<Script*> scripts;
+    vector<Sprite*> sprites;
+    vector<Shader*> shaders;
+    vector<Font*> fonts;
+    vector<Timeline*> timelines;
+    vector<Background*> backgrounds;
+    vector<Path*> paths;
+    
+    cout << pRoot->name();
+    
+    for (xml_node<> *node = pRoot->first_node("room"); node; node = node->next_sibling())
+    {
+      MessageBox(NULL, "wtf", "ass", MB_OK);
+      Room* rm = new Room();
+      rm->drawBackgroundColor = true;
+      rm->width = 500;
+      rm->height = 500;
+      rm->creationCode = "";
+      rm->name = "exampleroom";
+      rm->id = 0;
+      rm->speed = 30;
+      rm->caption = "Example Game Room Caption";
+      rm->instanceCount = 0;
+      rm->backgroundColor = RGBA2DWORD(3, 149, 255, 255);
+      rooms.push_back(rm);
+    }
+    
+    es->rooms = rooms.size() > 0 ? rooms[0] : NULL;
+    es->roomCount = rooms.size();
+    es->gmObjects =  objects.size() > 0 ? objects[0] : NULL;
+    es->gmObjectCount = objects.size();
+    es->scripts = objects.size() > 0 ? scripts[0] : NULL;
+    es->scriptCount = scripts.size();
+    es->shaders = shaders.size() > 0 ? shaders[0] : NULL;
+    es->shaderCount = shaders.size();
+    es->fonts = fonts.size() > 0 ? fonts[0] : NULL;
+    es->fontCount = fonts.size();
+    es->sprites = sprites.size() > 0 ? sprites[0] : NULL;
+    es->spriteCount = sprites.size();
+    es->timelines = timelines.size() > 0 ? timelines[0] : NULL;
+    es->timelineCount = timelines.size();
+    es->backgrounds = backgrounds.size() > 0 ? backgrounds[0] : NULL;
+    es->backgroundCount = backgrounds.size();
+    cout << compileEGMf(es, output, emode_run) << endl;
 }
 
 void buildgmk() {
@@ -159,9 +236,9 @@ int main(int argc, char* argv[])
       if (strcmp(input.c_str(), "quit") == 0) {
          closing = true;
       } else if (strcmp(input.c_str(), "test") == 0) {
-        buildtestproject();
+        buildtestproject("C:/Users/Owner/Desktop/wtf.exe");
       } else if (strcmp(input.c_str(), "gmx") == 0) {
-        buildgmx();
+        buildgmx("C:/Users/Owner/Desktop/test.gmx/test.project.gmx", "C:/Users/Owner/Desktop/wtf.exe");
       }
     }
 
