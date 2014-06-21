@@ -37,6 +37,7 @@ namespace enigma
 {
   unsigned bound_texture=0;
   unsigned default_shader;
+  unsigned main_shader;
   unsigned bound_shader;
   unsigned char currentcolor[4] = {0,0,0,255};
   int currentblendmode[2] = {0,0};
@@ -92,14 +93,15 @@ namespace enigma
             if (shaderstruct->precompile) {
                 glsl_shader_compile(vshader_id);
                 glsl_shader_compile(fshader_id);
-
-                printf("Precompiling!\n");
             }
 
             glsl_program_attach(prog_id, vshader_id);
             glsl_program_attach(prog_id, fshader_id);
             glsl_program_link(prog_id);
             glsl_program_validate(prog_id);
+
+            getUniforms(prog_id);
+            getAttributes(prog_id);
             getDefaultUniforms(prog_id);
             getDefaultAttributes(prog_id);
         }
@@ -120,10 +122,13 @@ namespace enigma
         glsl_program_link(prog_id);
         glsl_program_validate(prog_id);
 
+        getUniforms(prog_id);
+        getAttributes(prog_id);
         getDefaultUniforms(prog_id);
         getDefaultAttributes(prog_id);
 
-        default_shader = prog_id;
+        default_shader = prog_id; //Default shader for FFP
+        main_shader = default_shader; //Main shader used to override the default one
 
         glsl_program_reset(); //Set the default program
         //END DEFAULT SHADER
