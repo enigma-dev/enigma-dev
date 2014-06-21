@@ -42,6 +42,17 @@ unsigned long RGBA2DWORD(int iR, int iG, int iB, int iA)
   return (((((iR << 8) + iG) << 8) + iB) << 8) + iA;
 }
 
+inline string string_replace_all(string str,string substr,string nstr)
+{
+  size_t pos=0;
+  while ((pos=str.find(substr,pos)) != string::npos)
+  {
+    str.replace(pos,substr.length(),nstr);
+    pos+=nstr.length();
+  }
+  return str;
+}
+
 void buildtestproject(const char* output) {
     EnigmaStruct* es = new EnigmaStruct();
     es->gameSettings.gameIcon = "../../Resources/joshcontroller.ico";
@@ -94,6 +105,77 @@ void buildtestproject(const char* output) {
     cout << compileEGMf(es, output, emode_run) << endl;
 }
 
+vector<Room*> rooms;
+vector<GmObject*> objects;
+vector<Script*> scripts;
+vector<Sprite*> sprites;
+vector<Shader*> shaders;
+vector<Font*> fonts;
+vector<Timeline*> timelines;
+vector<Background*> backgrounds;
+vector<Path*> paths;
+
+Room* readGMXRoom(const char* path) {
+    string filepath = path;
+    string name = filepath.substr(filepath.find_last_of('/') + 1, filepath.length());
+    MessageBox(NULL, name.c_str(), "wtf", MB_OK);
+    
+    
+  Room* rm = new Room();
+  rm->drawBackgroundColor = true;
+  rm->width = 500;
+  rm->height = 500;
+  rm->creationCode = "";
+  rm->name = name.c_str();
+  rm->id = rooms.size();
+  
+  stringstream ss;
+  ss << rm->id;
+  MessageBox(NULL, ss.str().c_str(), "wtf", MB_OK);
+  
+  rm->speed = 30;
+  rm->caption = "Example Game Room Caption";
+  rm->instanceCount = 0;
+  rm->backgroundColor = RGBA2DWORD(3, 149, 255, 255);
+  return rm;
+}
+
+Sprite* readGMXSprite(const char* path) {
+
+}
+
+GmObject* readGMXObject(const char* path) {
+
+}
+
+Timeline* readGMXTimeline(const char* path) {
+
+}
+
+Sound* readGMXSound(const char* path) {
+
+}
+
+Font* readGMXFont(const char* path) {
+
+}
+
+Script* readGMXScript(const char* path) {
+
+}
+
+Shader* readGMXShader(const char* path) {
+
+}
+
+Path* readGMXPath(const char* path) {
+
+}
+
+Background* readGMXBackground(const char* path) {
+
+}
+
 void buildgmx(const char* input, const char* output) {
     xml_document<> doc;    // character type defaults to char
     std::ifstream filestream(input);
@@ -103,6 +185,10 @@ void buildgmx(const char* input, const char* output) {
     std::string content(buffer.str());
     doc.parse<0>(&content[0]);    // 0 means default parse flags
     xml_node<> *pRoot = doc.first_node();
+    
+    string filepath = input;
+    string folder = filepath.substr(0, filepath.find_last_of('/') + 1);
+    MessageBox(NULL, folder.c_str(), "wtf", MB_OK);
 
     EnigmaStruct* es = new EnigmaStruct();
     es->gameSettings.gameIcon = "../../Resources/joshcontroller.ico";
@@ -120,36 +206,64 @@ void buildgmx(const char* input, const char* output) {
     es->gameInfo.formCaption = "";
     es->filename = "exampleproject";
     
-    vector<Room*> rooms;
-    vector<GmObject*> objects;
-    vector<Script*> scripts;
-    vector<Sprite*> sprites;
-    vector<Shader*> shaders;
-    vector<Font*> fonts;
-    vector<Timeline*> timelines;
-    vector<Background*> backgrounds;
-    vector<Path*> paths;
-    
-    cout << pRoot->name();
-    
-    for (xml_node<> *node = pRoot->first_node("room"); node; node = node->next_sibling())
+    for (xml_node<> *node = pRoot->first_node(); node; node = node->next_sibling())
     {
-      MessageBox(NULL, "wtf", "ass", MB_OK);
-      Room* rm = new Room();
-      rm->drawBackgroundColor = true;
-      rm->width = 500;
-      rm->height = 500;
-      rm->creationCode = "";
-      rm->name = "exampleroom";
-      rm->id = 0;
-      rm->speed = 30;
-      rm->caption = "Example Game Room Caption";
-      rm->instanceCount = 0;
-      rm->backgroundColor = RGBA2DWORD(3, 149, 255, 255);
-      rooms.push_back(rm);
+      if (strcmp(node->name(), "sprites") == 0) {
+        for (xml_node<> *resnode = node->first_node(); resnode; resnode = resnode->next_sibling())
+        {
+          //sprites.push_back(readGMXSprite());
+        }
+      } else if (strcmp(node->name(), "sounds") == 0) {
+        for (xml_node<> *resnode = node->first_node(); resnode; resnode = resnode->next_sibling())
+        {
+          //sounds.push_back(readGMXSound());
+        }
+      } else if (strcmp(node->name(), "backgrounds") == 0) {
+        for (xml_node<> *resnode = node->first_node(); resnode; resnode = resnode->next_sibling())
+        {
+          //backgrounds.push_back(readGMXBackground());
+        }
+      } else if (strcmp(node->name(), "objects") == 0) {
+        for (xml_node<> *resnode = node->first_node(); resnode; resnode = resnode->next_sibling())
+        {
+          //objects.push_back(readGMXObject());
+        }
+      } else if (strcmp(node->name(), "timelines") == 0) {
+        for (xml_node<> *resnode = node->first_node(); resnode; resnode = resnode->next_sibling())
+        {
+          //timelines.push_back(readGMXTimeline());
+        }
+      } else if (strcmp(node->name(), "paths") == 0) {
+        for (xml_node<> *resnode = node->first_node(); resnode; resnode = resnode->next_sibling())
+        {
+         // paths.push_back(readGMXPath());
+        }
+      } else if (strcmp(node->name(), "scripts") == 0) {
+        for (xml_node<> *resnode = node->first_node(); resnode; resnode = resnode->next_sibling())
+        {
+          //scripts.push_back(readGMXScript());
+        }
+      } else if (strcmp(node->name(), "shaders") == 0) {
+        for (xml_node<> *resnode = node->first_node(); resnode; resnode = resnode->next_sibling())
+        {
+          //shaders.push_back(readGMXShader());
+        }
+      } else if (strcmp(node->name(), "fonts") == 0) {
+        for (xml_node<> *resnode = node->first_node(); resnode; resnode = resnode->next_sibling())
+        {
+         // fonts.push_back(readGMXFont());
+        }
+      } else if (strcmp(node->name(), "rooms") == 0) {
+        for (xml_node<> *resnode = node->first_node(); resnode; resnode = resnode->next_sibling())
+        {
+          rooms.push_back(readGMXRoom( (folder + string_replace_all(resnode->value(), "\\", "/")).c_str() ));
+        }
+      }
     }
     
+    MessageBox(NULL, rooms[0]->name, "wtf donkey", MB_OK);
     es->rooms = rooms.size() > 0 ? rooms[0] : NULL;
+    MessageBox(NULL, es->rooms[0].name, "wtf nigger", MB_OK);
     es->roomCount = rooms.size();
     es->gmObjects =  objects.size() > 0 ? objects[0] : NULL;
     es->gmObjectCount = objects.size();
