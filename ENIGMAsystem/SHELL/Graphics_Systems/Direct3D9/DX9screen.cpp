@@ -398,6 +398,9 @@ void screen_init()
 
 	d3dmgr->SetRenderState(D3DRS_LIGHTING, FALSE);
 	d3dmgr->SetRenderState(D3DRS_ZENABLE, FALSE);
+  // make the same default as GL, keep in mind GM uses reverse depth ordering for ortho projections, where the higher the z value the further into the screen you are
+  // but that is currently taken care of by using 32000/-32000 for znear/zfar respectively
+  d3dmgr->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESS);
 	d3dmgr->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
 	d3dmgr->SetRenderState(D3DRS_ALPHAREF, (DWORD)0x00000001);
 	d3dmgr->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE); 

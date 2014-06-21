@@ -108,7 +108,7 @@ void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scal
     enigma::projection_matrix.rotateZ(angle);
 
     enigma::Matrix4 ortho;
-    ortho.InitOtrhoProjTransform(x,x + width,y,y + height,-32000,32000);
+    ortho.InitOtrhoProjTransform(x,x + width,y,y + height,32000,-32000);
 
     enigma::projection_matrix = enigma::projection_matrix * ortho;
     enigma::view_matrix.InitIdentity();
@@ -122,8 +122,8 @@ void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, g
     enigma::projection_matrix.InitRotateZTransform(angle);
 
     enigma::Matrix4 persp, orhto;
-    persp.InitPersProjTransform(60, 1, 0.1,32000);
-    orhto.InitOtrhoProjTransform(x,x + width,y,y + height,0.1,32000);
+    persp.InitPersProjTransform(60, 1, 0.1,-32000);
+    orhto.InitOtrhoProjTransform(x,x + width,y,y + height,0.1,-32000);
 
     enigma::projection_matrix = enigma::projection_matrix * persp * orhto;
 
