@@ -29,6 +29,7 @@ using namespace std;
 #include "Platforms/platforms_mandatory.h"
 #include "Universal_System/roomsystem.h"
 #include "Graphics_Systems/graphics_mandatory.h"
+#include "Graphics_Systems/Direct3D9/DX9SurfaceStruct.h"
 #include "Bridges/General/DX9Context.h"
 
 // global declarations
@@ -95,6 +96,18 @@ namespace enigma
 		}
 		
     }
+    
+  void OnDeviceLost() {
+    for (vector<Surface*>::iterator it = Surfaces.begin(); it != Surfaces.end(); it++) {
+      (*it)->OnDeviceLost();
+    }
+  }
+  
+  void OnDeviceReset() {
+    for (vector<Surface*>::iterator it = Surfaces.begin(); it != Surfaces.end(); it++) {
+      (*it)->OnDeviceReset();
+    }
+  }
 	
 	void WindowResized() {
 		if (d3dmgr == NULL) { return; }
@@ -105,8 +118,9 @@ namespace enigma
 		d3dpp.BackBufferWidth = enigma_user::window_get_region_width_scaled();
 		d3dpp.BackBufferHeight = enigma_user::window_get_region_height_scaled();
 		sc->Release();
-		
+    OnDeviceLost();
 		d3dmgr->Reset(&d3dpp);
+    OnDeviceReset();
 	}
 
     void DisableDrawing (HWND hWnd, HDC hDC, HGLRC hRC)
@@ -142,8 +156,9 @@ void display_reset(int samples, bool vsync) {
 	}
 	sc->Release();
 
+  enigma::OnDeviceLost();
 	d3dmgr->Reset(&d3dpp);
-
+  enigma::OnDeviceReset();
 }
 
 void screen_refresh() {
