@@ -741,80 +741,82 @@ namespace enigma_user
 
 int window_set_cursor(int c)
 {
+    // this switch statement could be replaced with an array aligned to the constants
     switch (c)
     {
         enigma::cursorInt = c;
         case cr_default:
-            enigma::currentCursor= IDC_ARROW; return 1;
+            enigma::currentCursor= IDC_ARROW;
             break;
         case cr_none:
-            enigma::currentCursor = NULL; return 1;
+            enigma::currentCursor = NULL;
             break;
         case cr_arrow:
-            enigma::currentCursor = IDC_ARROW; return 1;
+            enigma::currentCursor = IDC_ARROW;
             break;
         case cr_cross:
-            enigma::currentCursor = IDC_CROSS; return 1;
+            enigma::currentCursor = IDC_CROSS;
             break;
         case cr_beam:
-            enigma::currentCursor = IDC_IBEAM; return 1;
+            enigma::currentCursor = IDC_IBEAM;
             break;
         case cr_size_nesw:
-            enigma::currentCursor = IDC_SIZENESW; return 1;
+            enigma::currentCursor = IDC_SIZENESW;
             break;
         case cr_size_ns:
-            enigma::currentCursor = IDC_SIZENS; return 1;
+            enigma::currentCursor = IDC_SIZENS;
             break;
         case cr_size_nwse:
-            enigma::currentCursor = IDC_SIZENWSE; return 1;
+            enigma::currentCursor = IDC_SIZENWSE;
             break;
         case cr_size_we:
-            enigma::currentCursor = IDC_SIZEWE; return 1;
+            enigma::currentCursor = IDC_SIZEWE;
             break;
         case cr_uparrow:
-            enigma::currentCursor = IDC_UPARROW; return 1;
+            enigma::currentCursor = IDC_UPARROW;
             break;
         case cr_hourglass:
-            enigma::currentCursor = IDC_WAIT; return 1;
+            enigma::currentCursor = IDC_WAIT;
             break;
         case cr_drag:
             // Delphi-made?
             break;
         case cr_nodrop:
-            enigma::currentCursor = IDC_NO; return 1;
+            enigma::currentCursor = IDC_NO;
             break;
         case cr_hsplit:
             // Delphi-made?
-            enigma::currentCursor = IDC_SIZENS; return 1;
+            enigma::currentCursor = IDC_SIZENS;
             break;
         case cr_vsplit:
             // Delphi-made?
-            enigma::currentCursor = IDC_SIZEWE; return 1;
+            enigma::currentCursor = IDC_SIZEWE;
             break;
         case cr_multidrag:
-            enigma::currentCursor = IDC_SIZEALL; return 1;
+            enigma::currentCursor = IDC_SIZEALL;
             break;
         case cr_sqlwait:
             // DEAR GOD WHY
-            enigma::currentCursor = IDC_WAIT; return 1;
+            enigma::currentCursor = IDC_WAIT;
             break;
         case cr_no:
-            enigma::currentCursor = IDC_NO; return 1;
+            enigma::currentCursor = IDC_NO;
             break;
         case cr_appstart:
-            enigma::currentCursor = IDC_APPSTARTING; return 1;
+            enigma::currentCursor = IDC_APPSTARTING;
             break;
         case cr_help:
-            enigma::currentCursor = IDC_HELP; return 1;
+            enigma::currentCursor = IDC_HELP;
             break;
         case cr_handpoint:
-            enigma::currentCursor = IDC_HAND; return 1;
+            enigma::currentCursor = IDC_HAND;
             break;
         case cr_size_all:
-            enigma::currentCursor = IDC_SIZEALL; return 1;
+            enigma::currentCursor = IDC_SIZEALL;
             break;
     }
-    return 0;
+    
+    return SendMessage(enigma::hWnd, WM_SETCURSOR, (WPARAM)enigma::hWnd, MAKELPARAM(HTCLIENT, WM_MOUSEMOVE));
 }
 
 
