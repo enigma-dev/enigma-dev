@@ -19,8 +19,6 @@
 * ENIGMA. If not, see <http://www.gnu.org/licenses/>.
 **/
 
-#include <windows.h>
-
 #include <unistd.h>
 #include <iostream>
 #include <fstream>
@@ -105,38 +103,32 @@ void buildtestproject(const char* output) {
     cout << compileEGMf(es, output, emode_run) << endl;
 }
 
-vector<Room*> rooms;
-vector<GmObject*> objects;
-vector<Script*> scripts;
-vector<Sprite*> sprites;
-vector<Shader*> shaders;
-vector<Font*> fonts;
-vector<Timeline*> timelines;
-vector<Background*> backgrounds;
-vector<Path*> paths;
+vector<Room> rooms;
+vector<GmObject> objects;
+vector<Script> scripts;
+vector<Sprite> sprites;
+vector<Shader> shaders;
+vector<Font> fonts;
+vector<Timeline> timelines;
+vector<Background> backgrounds;
+vector<Path> paths;
 
-Room* readGMXRoom(const char* path) {
-    string filepath = path;
-    string name = filepath.substr(filepath.find_last_of('/') + 1, filepath.length());
-    MessageBox(NULL, name.c_str(), "wtf", MB_OK);
-    
-    
-  Room* rm = new Room();
-  rm->drawBackgroundColor = true;
-  rm->width = 500;
-  rm->height = 500;
-  rm->creationCode = "";
-  rm->name = name.c_str();
-  rm->id = rooms.size();
-  
-  stringstream ss;
-  ss << rm->id;
-  MessageBox(NULL, ss.str().c_str(), "wtf", MB_OK);
-  
-  rm->speed = 30;
-  rm->caption = "Example Game Room Caption";
-  rm->instanceCount = 0;
-  rm->backgroundColor = RGBA2DWORD(3, 149, 255, 255);
+Room readGMXRoom(const char* path) {
+  string filepath = path;
+  string name = filepath.substr(filepath.find_last_of('/') + 1, filepath.length());
+
+  Room rm = Room();
+  rm.drawBackgroundColor = true;
+  rm.width = 500;
+  rm.height = 500;
+  rm.creationCode = "";
+  char *buffer = new char[name.size() + 1];
+  rm.name = strcpy(buffer,name.c_str());
+  rm.id = rooms.size();
+  rm.speed = 30;
+  rm.caption = "Example Game Room Caption";
+  rm.instanceCount = 0;
+  rm.backgroundColor = RGBA2DWORD(3, 149, 255, 255);
   return rm;
 }
 
@@ -188,7 +180,6 @@ void buildgmx(const char* input, const char* output) {
     
     string filepath = input;
     string folder = filepath.substr(0, filepath.find_last_of('/') + 1);
-    MessageBox(NULL, folder.c_str(), "wtf", MB_OK);
 
     EnigmaStruct* es = new EnigmaStruct();
     es->gameSettings.gameIcon = "../../Resources/joshcontroller.ico";
@@ -261,25 +252,22 @@ void buildgmx(const char* input, const char* output) {
       }
     }
     
-    MessageBox(NULL, rooms[0]->name, "wtf donkey", MB_OK);
-    es->rooms = rooms.size() > 0 ? rooms[0] : NULL;
-    
+    es->rooms = &rooms[0];
     es->roomCount = rooms.size();
-    es->gmObjects =  objects.size() > 0 ? objects[0] : NULL;
+    es->gmObjects =  &objects[0];
     es->gmObjectCount = objects.size();
-    es->scripts = objects.size() > 0 ? scripts[0] : NULL;
+    es->scripts = &scripts[0];
     es->scriptCount = scripts.size();
-    es->shaders = shaders.size() > 0 ? shaders[0] : NULL;
+    es->shaders = &shaders[0];
     es->shaderCount = shaders.size();
-    es->fonts = fonts.size() > 0 ? fonts[0] : NULL;
+    es->fonts = &fonts[0];
     es->fontCount = fonts.size();
-    es->sprites = sprites.size() > 0 ? sprites[0] : NULL;
+    es->sprites = &sprites[0];
     es->spriteCount = sprites.size();
-    es->timelines = timelines.size() > 0 ? timelines[0] : NULL;
+    es->timelines = &timelines[0];
     es->timelineCount = timelines.size();
-    es->backgrounds = backgrounds.size() > 0 ? backgrounds[0] : NULL;
+    es->backgrounds = &backgrounds[0];
     es->backgroundCount = backgrounds.size();
-    MessageBox(NULL, es->rooms[0].name, "wtf nigger", MB_OK);
     cout << compileEGMf(es, output, emode_run) << endl;
 }
 
