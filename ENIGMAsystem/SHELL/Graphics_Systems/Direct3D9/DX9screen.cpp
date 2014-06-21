@@ -249,17 +249,20 @@ void clear_view(float x, float y, float w, float h, float angle, bool showcolor)
 {
 	d3d_set_projection_ortho(x, y, w, h, angle);
 	
+  DWORD clearflags = 0;
+  int clearcolor = 0;
 	if (background_showcolor)
 	{
-		int clearcolor = ((int)background_color) & 0x00FFFFFF;
+		clearcolor = ((int)background_color) & 0x00FFFFFF;
 		// clear the window to the background color
-		d3dmgr->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(__GETR(clearcolor), __GETG(clearcolor), __GETB(clearcolor)), 1.0f, 0);
+    clearflags |= D3DCLEAR_TARGET;
 	}
 
 	// Clear the depth buffer if 3d mode is on at the beginning of the draw step.
 	if (enigma::d3dMode)
-		d3dmgr->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
-
+		clearflags |= D3DCLEAR_ZBUFFER;
+  
+  d3dmgr->Clear(0, NULL, clearflags, D3DCOLOR_XRGB(__GETR(clearcolor), __GETG(clearcolor), __GETB(clearcolor)), 1.0f, 0);
 }
 
 static inline void draw_gui()
@@ -394,7 +397,7 @@ void screen_init()
     }
 
 	d3dmgr->SetRenderState(D3DRS_LIGHTING, FALSE);
-	d3dmgr->SetRenderState(D3DRS_ZENABLE, TRUE);
+	d3dmgr->SetRenderState(D3DRS_ZENABLE, FALSE);
 	d3dmgr->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
 	d3dmgr->SetRenderState(D3DRS_ALPHAREF, (DWORD)0x00000001);
 	d3dmgr->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE); 
