@@ -125,8 +125,8 @@ namespace enigma
 
     void DisableDrawing (HWND hWnd, HDC hDC, HGLRC hRC)
     {
-		d3dmgr->Release();    // close and release the 3D device
-		d3dobj->Release();    // close and release Direct3D
+      d3dmgr->Release();    // close and release the 3D device
+      d3dobj->Release();    // close and release Direct3D
     }
 }
 
