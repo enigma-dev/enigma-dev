@@ -40,7 +40,6 @@ namespace enigma
     };
     
     void Release() {
-      textureStructs[tex]->Release();
       if (surf != NULL) {
         surf->Release();
         surf = NULL;
@@ -53,11 +52,12 @@ namespace enigma
     
     void OnDeviceLost() {
       Release();
-      
+      textureStructs[tex]->OnDeviceLost();
     }
     
     void OnDeviceReset() {
-    
+      textureStructs[tex]->OnDeviceReset();
+      textureStructs[tex]->gTexture->GetSurfaceLevel(0,&surf);
     }
   };
   

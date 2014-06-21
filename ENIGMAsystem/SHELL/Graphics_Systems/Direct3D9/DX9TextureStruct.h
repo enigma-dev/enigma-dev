@@ -18,6 +18,7 @@
 #ifndef DX9_TEXTURESTRUCT__H
 #define DX9_TEXTURESTRUCT__H
 
+#include "Bridges/General/DX9Context.h"
 #include "Direct3D9Headers.h"
 
 #include <vector>
@@ -28,6 +29,10 @@ struct TextureStruct {
 	bool isFont;
 	unsigned width,height;
 	unsigned fullwidth,fullheight;
+  
+  // for the purpose of restoring the texture
+  D3DSURFACE_DESC backupdesc;
+  
 	TextureStruct(LPDIRECT3DTEXTURE9 gTex) {
 		gTexture = gTex;
 	}
@@ -44,11 +49,15 @@ struct TextureStruct {
 	}
   
   void OnDeviceLost() {
+    // backup texture data
+    gTexture->GetLevelDesc(0, &backupdesc);
     Release();
   }
   
   void OnDeviceReset() {
-  
+    // restore texture data
+    d3dmgr->CreateTexture(backupdesc.Width, backupdesc.Height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &gTexture, NULL);
+   // delete &backupdesc;
   }
 };
 extern vector<TextureStruct*> textureStructs;
