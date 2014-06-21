@@ -291,9 +291,10 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
     quickmember_variable(&globals_scope,jdi::builtin_type__int,es->gmObjects[i].name);
 
   edbg << "Copying room names [" << es->roomCount << "]" << flushl;
-  for (int i = 0; i < es->roomCount; i++)
+  for (int i = 0; i < es->roomCount; i++) {
+    MessageBox(NULL, es->rooms[i].name, "jigaboo", MB_OK);
     quickmember_variable(&globals_scope,jdi::builtin_type__int,es->rooms[i].name);
-
+}
 
   /// Next we do a simple parse of the code, scouting for some variable names and adding semicolons.
 
