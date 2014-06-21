@@ -79,7 +79,7 @@ namespace enigma
     background(true, w, h, tex, trans, smth, prel), tileWidth(tw), tileHeight(th), hOffset(ho), vOffset(vo), hSep(hs), vSep(vs) {}
 
   size_t backgroundstructarray_actualsize = 0; // INVARIANT: Should always be equal to the actual size of spritestructarray.
-	
+
   //Allocates and zero-fills the array at game start
   void backgrounds_init()
   {
@@ -88,7 +88,7 @@ namespace enigma
     for (unsigned i = 0; i < background_idmax; i++)
       backgroundstructarray[i] = NULL;
   }
-	
+
   //Adds a subimage to an existing sprite from the exe
   void background_new(int bkgid, unsigned w, unsigned h, unsigned char* chunk, bool transparent, bool smoothEdges, bool preload, bool useAsTileset, int tileWidth, int tileHeight, int hOffset, int vOffset, int hSep, int vSep)
   {
@@ -123,6 +123,7 @@ namespace enigma
     unsigned int w, h, fullwidth, fullheight;
 
     unsigned char *pxdata = image_load(filename,&w,&h,&fullwidth,&fullheight,false);
+    if (pxdata == NULL) { printf("ERROR - Failed to append sprite to index!\n"); return; }
     unsigned texture = graphics_create_texture(w, h, fullwidth, fullheight, pxdata, false);
     delete[] pxdata;
 
@@ -149,7 +150,7 @@ namespace enigma
     bak->texbordy = bck_copy->texbordy;
     bak->texture = graphics_duplicate_texture(bck_copy->texture);
   }
-  
+
   void backgroundstructarray_reallocate()
   {
 	if (backgroundstructarray_actualsize > background_idmax + 2) { // Ignore reallocation request if array is big enough.
@@ -177,11 +178,11 @@ namespace enigma_user
     enigma::background_add_to_index(bck, filename, transparent, smooth, preload);
     return enigma::background_idmax++;
   }
-  
+
   int background_create_color(unsigned w, unsigned h, int col, bool preload)
   {
     int full_width=nlpo2dc(w)+1, full_height=nlpo2dc(h)+1;
-    
+
     unsigned sz=full_width*full_height;
     unsigned char *surfbuf=new unsigned char[sz*4];
 
@@ -191,7 +192,7 @@ namespace enigma_user
 		surfbuf[i+2] = __GETB(col);
 		surfbuf[i+3] = 255;
 	}
-	
+
 	enigma::backgroundstructarray_reallocate();
     int bckid=enigma::background_idmax;
 	enigma::background_new(bckid, w, h, surfbuf, false, false, preload, false, 0, 0, 0, 0, 0, 0);
@@ -199,7 +200,7 @@ namespace enigma_user
 	enigma::background_idmax++;
     return bckid;
   }
-  
+
   bool background_replace(int back, string filename, bool transparent, bool smooth, bool preload, bool free_texture)
   {
     get_backgroundnv(bck,back,false);
@@ -209,16 +210,16 @@ namespace enigma_user
     enigma::background_add_to_index(bck, filename, transparent, smooth, preload);
     return true;
   }
-  
+
   void background_save(int back, string fname) {
 	get_background(bck,back);
 	unsigned w, h;
 	unsigned char* rgbdata = enigma::graphics_get_texture_pixeldata(bck->texture, &w, &h);
-	
+
     string ext = enigma::image_get_format(fname);
-	
+
 	enigma::image_save(fname, rgbdata, bck->width, bck->height, w, h, false);
-	
+
 	delete[] rgbdata;
   }
 
@@ -258,7 +259,7 @@ namespace enigma_user
     get_background(bck_copy,copy_background);
     enigma::graphics_replace_texture_alpha_from_texture(bck->texture, bck_copy->texture);
   }
-  
+
   int background_get_texture(int backId) {
     get_backgroundnv(bck2d,backId,-1);
     return bck2d->texture;
