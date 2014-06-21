@@ -263,7 +263,7 @@ void buildgmx(const char* input, const char* output) {
     
     MessageBox(NULL, rooms[0]->name, "wtf donkey", MB_OK);
     es->rooms = rooms.size() > 0 ? rooms[0] : NULL;
-    MessageBox(NULL, es->rooms[0].name, "wtf nigger", MB_OK);
+    
     es->roomCount = rooms.size();
     es->gmObjects =  objects.size() > 0 ? objects[0] : NULL;
     es->gmObjectCount = objects.size();
@@ -279,6 +279,7 @@ void buildgmx(const char* input, const char* output) {
     es->timelineCount = timelines.size();
     es->backgrounds = backgrounds.size() > 0 ? backgrounds[0] : NULL;
     es->backgroundCount = backgrounds.size();
+    MessageBox(NULL, es->rooms[0].name, "wtf nigger", MB_OK);
     cout << compileEGMf(es, output, emode_run) << endl;
 }
 
