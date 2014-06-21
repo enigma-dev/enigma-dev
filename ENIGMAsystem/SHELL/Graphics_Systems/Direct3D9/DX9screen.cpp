@@ -430,23 +430,42 @@ int screen_save(string filename) //Assumes native integers are little endian
 	pDestBuffer->LockRect(&rect, NULL, D3DLOCK_READONLY);
 	unsigned char* bitmap = static_cast<unsigned char*>(rect.pBits);
 	pDestBuffer->UnlockRect();
-
-  stringstream ss;
-  ss << rect.Pitch;
-    MessageBox(NULL, ss.str().c_str(), "ok", MB_OK);
   
 	int ret = image_save(filename, bitmap, desc.Width, desc.Height, desc.Width, desc.Height, false);
 
   pBackBuffer->Release();
 	pDestBuffer->Release();
   
-	//delete[] bitmap;
-	return 0;
+	//delete[] bitmap; <- no need cause RAII
+	return ret;
 }
 
 int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h) //Assumes native integers are little endian
 {
+	string ext = enigma::image_get_format(filename);
+  
+	d3dmgr->EndShapesBatching();
+	LPDIRECT3DSURFACE9 pBackBuffer;
+	LPDIRECT3DSURFACE9 pDestBuffer;
+	d3dmgr->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer);
+	D3DSURFACE_DESC desc;
+	pBackBuffer->GetDesc(&desc);
+	
+	d3dmgr->device->CreateOffscreenPlainSurface( desc.Width, desc.Height, desc.Format, D3DPOOL_SYSTEMMEM, &pDestBuffer, NULL );
+	d3dmgr->device->GetRenderTargetData(pBackBuffer, pDestBuffer);
+	
+	D3DLOCKED_RECT rect;
 
+	pDestBuffer->LockRect(&rect, NULL, D3DLOCK_READONLY);
+	unsigned char* bitmap = static_cast<unsigned char*>(rect.pBits);
+	pDestBuffer->UnlockRect();
+  
+	int ret = image_save(filename, bitmap, w, h, desc.Width, desc.Height, false);
+
+  pBackBuffer->Release();
+	pDestBuffer->Release();
+  
+  return ret;
 }
 
 void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height) {
