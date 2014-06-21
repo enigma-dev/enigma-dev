@@ -231,13 +231,35 @@ int surface_get_bound()
 #endif
 
 #include "Universal_System/estring.h"
+#include "Universal_System/image_formats.h"
 
 namespace enigma_user
 {
 
 int surface_save(int id, string filename)
 {
+  get_surfacev(surface,id,-1);
+	string ext = enigma::image_get_format(filename);
+  
+	d3dmgr->EndShapesBatching();
+	LPDIRECT3DSURFACE9 pDestBuffer;
+	D3DSURFACE_DESC desc;
+	surface->surf->GetDesc(&desc);
+	
+	d3dmgr->device->CreateOffscreenPlainSurface( desc.Width, desc.Height, desc.Format, D3DPOOL_SYSTEMMEM, &pDestBuffer, NULL );
+	d3dmgr->device->GetRenderTargetData(surface->surf, pDestBuffer);
+	
+	D3DLOCKED_RECT rect;
 
+	pDestBuffer->LockRect(&rect, NULL, D3DLOCK_READONLY);
+	unsigned char* bitmap = static_cast<unsigned char*>(rect.pBits);
+	pDestBuffer->UnlockRect();
+  
+	int ret = enigma::image_save(filename, bitmap, desc.Width, desc.Height, desc.Width, desc.Height, false);
+
+	pDestBuffer->Release();
+  
+  return ret;
 }
 
 int surface_save_part(int id, string filename, unsigned x, unsigned y, unsigned w, unsigned h)
