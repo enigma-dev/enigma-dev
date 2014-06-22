@@ -209,10 +209,10 @@ void surface_set_target(int id)
   get_surface(surf,id);
   texture_reset();
   //This fixes several consecutive surface_set_target() calls without surface_reset_target.
-  if (enigma::bound_framebuffer != 0) glPopAttrib(); glPopMatrix();
+  if (enigma::bound_framebuffer != 0) { glPopAttrib(); d3d_transform_stack_pop(); }
   enigma::bound_framebuffer = surf->fbo;
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, surf->fbo); //bind it
-  glPushMatrix(); //So you can pop it in the reset
+  d3d_transform_stack_push();
   glPushAttrib(GL_VIEWPORT_BIT); //same
   screen_set_viewport(0, 0, surf->width, surf->height);
   d3d_set_projection_ortho(0, 0, surf->width, surf->height, 0);
@@ -224,7 +224,7 @@ void surface_reset_target(void)
   enigma::bound_framebuffer = 0;
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
   glPopAttrib();
-  glPopMatrix();
+  d3d_transform_stack_pop();
 }
 
 void surface_free(int id)

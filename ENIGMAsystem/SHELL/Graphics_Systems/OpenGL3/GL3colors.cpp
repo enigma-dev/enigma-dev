@@ -18,6 +18,8 @@
 #include "../General/OpenGLHeaders.h"
 #include "../General/GScolors.h"
 #include "../General/GStextures.h"
+#include "Bridges/General/GL3Context.h"
+
 #include <math.h>
 
 #define __GETR(x) ((x & 0x0000FF))
@@ -62,6 +64,8 @@ int merge_color(int c1,int c2,double amount)
 
 void draw_set_color(int color)
 {
+	if (enigma::currentcolor[0] == __GETR(color) && enigma::currentcolor[1] == __GETG(color) && enigma::currentcolor[2] == __GETB(color)) return;
+	oglmgr->ColorFunc();
 	enigma::currentcolor[0] = __GETR(color);
 	enigma::currentcolor[1] = __GETG(color);
 	enigma::currentcolor[2] = __GETB(color);
@@ -69,6 +73,8 @@ void draw_set_color(int color)
 
 void draw_set_color_rgb(unsigned char red,unsigned char green,unsigned char blue)
 {
+	if (enigma::currentcolor[0] == red && enigma::currentcolor[1] == green && enigma::currentcolor[2] == blue) return;
+	oglmgr->ColorFunc();
 	enigma::currentcolor[0] = red;
 	enigma::currentcolor[1] = green;
 	enigma::currentcolor[2] = blue;
@@ -76,11 +82,15 @@ void draw_set_color_rgb(unsigned char red,unsigned char green,unsigned char blue
 
 void draw_set_alpha(float alpha)
 {
+	if (enigma::currentcolor[3] == bind_alpha(alpha)) return;
+	oglmgr->ColorFunc();
 	enigma::currentcolor[3] = bind_alpha(alpha);
 }
 
 void draw_set_color_rgba(unsigned char red,unsigned char green,unsigned char blue,float alpha)
 {
+	if (enigma::currentcolor[0] == red && enigma::currentcolor[1] == green && enigma::currentcolor[2] == blue && enigma::currentcolor[3] == bind_alpha(alpha)) return;
+	oglmgr->ColorFunc();
 	enigma::currentcolor[0] = red;
 	enigma::currentcolor[1] = green;
 	enigma::currentcolor[2] = blue;

@@ -355,7 +355,7 @@ void Matrix4::InitPersProjTransform(gs_scalar fovy, gs_scalar aspect_ratio, gs_s
     m[3][0] = 0.0f;             m[3][1] = 0.0f; m[3][2] = -1.0f;               m[3][3] = 0.0f;
 }
 
-void Matrix4::InitOtrhoProjTransform(gs_scalar left, gs_scalar right, gs_scalar bottom, gs_scalar top, gs_scalar znear, gs_scalar zfar)
+void Matrix4::InitOrthoProjTransform(gs_scalar left, gs_scalar right, gs_scalar bottom, gs_scalar top, gs_scalar znear, gs_scalar zfar)
 {
     m[0][0] = 2.0f/(right - left);    m[0][1] = 0.0f;                m[0][2] = 0.0f;                m[0][3] = -(right+left)/(right-left);
     m[1][0] = 0.0f;                   m[1][1] = 2.0f/(top - bottom); m[1][2] = 0.0f;                m[1][3] = -(top+bottom)/(top-bottom);
