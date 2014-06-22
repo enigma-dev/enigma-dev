@@ -38,6 +38,7 @@ enum {
 
 typedef void(*GenericFunction)();
 void* LoadPluginLib();
+void InitializePluginLib();
 void* FreePluginLib();
 GenericFunction LoadPluginFnc(void *library, string funcname);
 

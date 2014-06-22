@@ -28,6 +28,7 @@
 
 using namespace std;
 
+#include "Universal_System/image_formats.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/estring.h"
 
@@ -249,17 +250,20 @@ void clear_view(float x, float y, float w, float h, float angle, bool showcolor)
 {
 	d3d_set_projection_ortho(x, y, w, h, angle);
 	
+  DWORD clearflags = 0;
+  int clearcolor = 0;
 	if (background_showcolor)
 	{
-		int clearcolor = ((int)background_color) & 0x00FFFFFF;
+		clearcolor = ((int)background_color) & 0x00FFFFFF;
 		// clear the window to the background color
-		d3dmgr->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(__GETR(clearcolor), __GETG(clearcolor), __GETB(clearcolor)), 1.0f, 0);
+    clearflags |= D3DCLEAR_TARGET;
 	}
 
 	// Clear the depth buffer if 3d mode is on at the beginning of the draw step.
 	if (enigma::d3dMode)
-		d3dmgr->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
-
+		clearflags |= D3DCLEAR_ZBUFFER;
+  
+  d3dmgr->Clear(0, NULL, clearflags, D3DCOLOR_XRGB(__GETR(clearcolor), __GETG(clearcolor), __GETB(clearcolor)), 1.0f, 0);
 }
 
 static inline void draw_gui()
@@ -394,7 +398,10 @@ void screen_init()
     }
 
 	d3dmgr->SetRenderState(D3DRS_LIGHTING, FALSE);
-	d3dmgr->SetRenderState(D3DRS_ZENABLE, TRUE);
+	d3dmgr->SetRenderState(D3DRS_ZENABLE, FALSE);
+  // make the same default as GL, keep in mind GM uses reverse depth ordering for ortho projections, where the higher the z value the further into the screen you are
+  // but that is currently taken care of by using 32000/-32000 for znear/zfar respectively
+  d3dmgr->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESS);
 	d3dmgr->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
 	d3dmgr->SetRenderState(D3DRS_ALPHAREF, (DWORD)0x00000001);
 	d3dmgr->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE); 
@@ -406,12 +413,59 @@ void screen_init()
 
 int screen_save(string filename) //Assumes native integers are little endian
 {
+	string ext = enigma::image_get_format(filename);
+  
+	d3dmgr->EndShapesBatching();
+	LPDIRECT3DSURFACE9 pBackBuffer;
+	LPDIRECT3DSURFACE9 pDestBuffer;
+	d3dmgr->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer);
+	D3DSURFACE_DESC desc;
+	pBackBuffer->GetDesc(&desc);
+	
+	d3dmgr->device->CreateOffscreenPlainSurface( desc.Width, desc.Height, desc.Format, D3DPOOL_SYSTEMMEM, &pDestBuffer, NULL );
+	d3dmgr->device->GetRenderTargetData(pBackBuffer, pDestBuffer);
+	
+	D3DLOCKED_RECT rect;
 
+	pDestBuffer->LockRect(&rect, NULL, D3DLOCK_READONLY);
+	unsigned char* bitmap = static_cast<unsigned char*>(rect.pBits);
+	pDestBuffer->UnlockRect();
+  
+	int ret = image_save(filename, bitmap, desc.Width, desc.Height, desc.Width, desc.Height, false);
+
+  pBackBuffer->Release();
+	pDestBuffer->Release();
+  
+	//delete[] bitmap; <- no need cause RAII
+	return ret;
 }
 
 int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h) //Assumes native integers are little endian
 {
+	string ext = enigma::image_get_format(filename);
+  
+	d3dmgr->EndShapesBatching();
+	LPDIRECT3DSURFACE9 pBackBuffer;
+	LPDIRECT3DSURFACE9 pDestBuffer;
+	d3dmgr->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer);
+	D3DSURFACE_DESC desc;
+	pBackBuffer->GetDesc(&desc);
+	
+	d3dmgr->device->CreateOffscreenPlainSurface( desc.Width, desc.Height, desc.Format, D3DPOOL_SYSTEMMEM, &pDestBuffer, NULL );
+	d3dmgr->device->GetRenderTargetData(pBackBuffer, pDestBuffer);
+	
+	D3DLOCKED_RECT rect;
 
+	pDestBuffer->LockRect(&rect, NULL, D3DLOCK_READONLY);
+	unsigned char* bitmap = static_cast<unsigned char*>(rect.pBits);
+	pDestBuffer->UnlockRect();
+  
+	int ret = image_save(filename, bitmap, w, h, desc.Width, desc.Height, false);
+
+  pBackBuffer->Release();
+	pDestBuffer->Release();
+  
+  return ret;
 }
 
 void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height) {
