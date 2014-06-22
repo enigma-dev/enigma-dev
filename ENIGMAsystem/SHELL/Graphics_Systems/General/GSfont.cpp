@@ -155,7 +155,7 @@ unsigned int string_width(variant vstr)
     } else {
       fontglyph* g = findGlyph(fnt, character);
       if (character == ' ' or g == NULL)
-        tlen += get_space_width(fnt); // FIXME: what's GM do about this?
+        tlen += get_space_width(fnt);
       else {
         tlen += g->xs;
         if (tlen > mlen) mlen = tlen;
@@ -191,7 +191,7 @@ unsigned int string_width_ext(variant vstr, gs_scalar sep, gs_scalar w) //here s
           if (width >= w && w!=-1)
               (width>maxwidth ? maxwidth=width, width = 0 : width = 0);
           else
-              width += fnt->height/3; // FIXME: what's GM do about this?
+              width += get_space_width(fnt);
     else {
           width += g->xs;
     }
@@ -256,7 +256,7 @@ unsigned int string_width_line(variant vstr, int line)
     } else {
       fontglyph* g = findGlyph(fnt, character);
       if (character == ' ' or g == NULL)
-        len += fnt->height/3; // FIXME: what's GM do about this?
+        len += get_space_width(fnt);
       else {
         len += g->xs;
       }
