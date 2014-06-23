@@ -20,6 +20,8 @@
 #include <windows.h>
 using namespace std;
 
+#define bind_alpha(alpha) (alpha>1?255:(alpha<0?0:(unsigned char)(alpha*255)))
+
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
 #include <unistd.h> //usleep
@@ -192,7 +194,7 @@ void window_set_alpha(double alpha) {
   GetWindowLong(enigma::hWndParent, GWL_EXSTYLE) | WS_EX_LAYERED);
 
   // Make this window transparent
-  SetLayeredWindowAttributes(enigma::hWndParent, 0, (unsigned char)(alpha*255), LWA_ALPHA);
+  SetLayeredWindowAttributes(enigma::hWndParent, 0, bind_alpha(alpha), LWA_ALPHA);
 }
 
 double window_get_alpha() {
@@ -1054,4 +1056,3 @@ bool clipboard_has_text()
 }
 
 }
-
