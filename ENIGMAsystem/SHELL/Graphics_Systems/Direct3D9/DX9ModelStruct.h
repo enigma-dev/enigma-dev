@@ -32,6 +32,7 @@ using namespace std;
 #define __GETRf(x) fmod(__GETR(x),256)
 #define __GETGf(x) fmod(x/256,256)
 #define __GETBf(x) fmod(x/65536,256)*
+#define bind_alpha(alpha) (alpha>1?255:(alpha<0?0:(unsigned char)(alpha*255)))
 
 #include <iostream>
 #include <map>
@@ -344,7 +345,7 @@ class Mesh
 
   void AddColor(int col, double alpha)
   {
-	DWORD final = D3DCOLOR_ARGB( (unsigned char)(alpha*255), __GETR(col), __GETG(col), __GETB(col) );
+	DWORD final = D3DCOLOR_ARGB( bind_alpha(alpha), __GETR(col), __GETG(col), __GETB(col) );
 	vertices.push_back(final);
 	useColors = true;
   }
