@@ -31,6 +31,7 @@ using namespace std;
 #define __GETR(x) ((x & 0x0000FF))/255.0
 #define __GETG(x) ((x & 0x00FF00)>>8)/255.0
 #define __GETB(x) ((x & 0xFF0000)>>16)/255.0
+#define bind_alpha(alpha) (alpha>1?255:(alpha<0?0:(unsigned char)(alpha*255)))
 
 #include <iostream>
 #include <map>
@@ -286,7 +287,7 @@ class Mesh
 
   void AddColor(int col, double alpha)
   {
-	unsigned long final = col + ((unsigned char)alpha*255 << 24);
+	unsigned long final = col + (bind_alpha(alpha) << 24);
 	vertices.push_back(final);
 	useColors = true;
   }
