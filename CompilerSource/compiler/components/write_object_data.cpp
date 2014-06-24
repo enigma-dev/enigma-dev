@@ -672,7 +672,7 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, i
     "    instance->xstart = instance->x;\n    instance->ystart = instance->y;\n    instance->xprevious = instance->x;\n    instance->yprevious = instance->y;\n\n"
     "    instance->gravity=0;\n    instance->gravity_direction=270;\n    instance->friction=0;\n    \n"
     "    \n"
-    "    instance->timeline_index = -1;\n    instance->timeline_running = false;\n    instance->timeline_speed = 1;\n    instance->timeline_position = 0;\n"
+    "    instance->timeline_index = -1;\n    instance->timeline_running = " <<(setting::compliance_mode=="GM5"?"true":"false") <<";\n    instance->timeline_speed = 1;\n    instance->timeline_position = 0;\n"
     "    instance->timeline_loop = false;\n    \n"
     "    \n"
     "    instance->image_alpha = 1.0;\n    instance->image_angle = 0;\n    instance->image_blend = 0xFFFFFF;\n    instance->image_index = 0;\n"
