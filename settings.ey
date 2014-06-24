@@ -29,6 +29,11 @@
         Type: Radio-1
         Label: Treat negatives as: 
         Options: "GML (true > 0), C++ (true != 0)"
+    -compliance-mode:
+        Type: Combobox
+        Label: Compliance Mode: 
+        Options: "Standard, GM5"
+
 		
 
 -Build Options:
