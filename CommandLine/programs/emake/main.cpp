@@ -19,6 +19,8 @@
 * ENIGMA. If not, see <http://www.gnu.org/licenses/>.
 **/
 
+#include <windows.h>
+
 #include <unistd.h>
 #include <iostream>
 #include <fstream>
@@ -49,6 +51,14 @@ inline string string_replace_all(string str,string substr,string nstr)
     pos+=nstr.length();
   }
   return str;
+}
+
+std::string readtxtfile(const char* filepath) {
+    std::ifstream filestream(filepath);
+    std::stringstream buffer;
+    buffer << filestream.rdbuf();
+    filestream.close();
+    return buffer.str();
 }
 
 void buildtestproject(const char* output) {
@@ -116,19 +126,28 @@ vector<Path> paths;
 Room readGMXRoom(const char* path) {
   string filepath = path;
   string name = filepath.substr(filepath.find_last_of('/') + 1, filepath.length());
+  xml_document<> doc;    // character type defaults to char
+  string content = readtxtfile((string(path) + ".room.gmx").c_str());
+  doc.parse<0>(&content[0]);    // 0 means default parse flags
+  xml_node<> *pRoot = doc.first_node();
+  xml_node<> *pCurrentNode;
 
   Room rm = Room();
-  rm.drawBackgroundColor = true;
-  rm.width = 500;
-  rm.height = 500;
-  rm.creationCode = "";
-  char *buffer = new char[name.size() + 1];
-  rm.name = strcpy(buffer,name.c_str());
+  rm.drawBackgroundColor = atoi(pRoot->first_node("showcolour")->value()) < 0;
+  rm.width = atoi(pRoot->first_node("width")->value());
+  rm.height = atoi(pRoot->first_node("height")->value());
+  pCurrentNode = pRoot->first_node("code");
+  rm.creationCode = strcpy(new char[pCurrentNode->value_size() + 1],pCurrentNode->value());
+  rm.name = strcpy(new char[name.size() + 1],name.c_str());
   rm.id = rooms.size();
-  rm.speed = 30;
-  rm.caption = "Example Game Room Caption";
+  rm.speed = atoi(pRoot->first_node("speed")->value());
+  pCurrentNode = pRoot->first_node("caption");
+  rm.caption = strcpy(new char[pCurrentNode->value_size() + 1],pCurrentNode->value());
   rm.instanceCount = 0;
-  rm.backgroundColor = RGBA2DWORD(3, 149, 255, 255);
+  rm.backgroundColor = atoi(pRoot->first_node("colour")->value());//RGBA2DWORD(3, 149, 255, 255);
+  
+  doc.clear();
+  
   return rm;
 }
 
@@ -170,11 +189,7 @@ Background* readGMXBackground(const char* path) {
 
 void buildgmx(const char* input, const char* output) {
     xml_document<> doc;    // character type defaults to char
-    std::ifstream filestream(input);
-    std::stringstream buffer;
-    buffer << filestream.rdbuf();
-    filestream.close();
-    std::string content(buffer.str());
+    string content = readtxtfile(input);
     doc.parse<0>(&content[0]);    // 0 means default parse flags
     xml_node<> *pRoot = doc.first_node();
     
