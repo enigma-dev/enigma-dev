@@ -123,28 +123,28 @@ vector<Timeline> timelines;
 vector<Background> backgrounds;
 vector<Path> paths;
 
-Room readGMXRoom(const char* path) {
+Room* readGMXRoom(const char* path) {
   string filepath = path;
   string name = filepath.substr(filepath.find_last_of('/') + 1, filepath.length());
-  xml_document<> doc;    // character type defaults to char
   string content = readtxtfile((string(path) + ".room.gmx").c_str());
+  xml_document<> doc;    // character type defaults to char
   doc.parse<0>(&content[0]);    // 0 means default parse flags
   xml_node<> *pRoot = doc.first_node();
   xml_node<> *pCurrentNode;
 
-  Room rm = Room();
-  rm.drawBackgroundColor = atoi(pRoot->first_node("showcolour")->value()) < 0;
-  rm.width = atoi(pRoot->first_node("width")->value());
-  rm.height = atoi(pRoot->first_node("height")->value());
+  Room* rm = new Room();
+  rm->drawBackgroundColor = atoi(pRoot->first_node("showcolour")->value()) < 0;
+  rm->width = atoi(pRoot->first_node("width")->value());
+  rm->height = atoi(pRoot->first_node("height")->value());
   pCurrentNode = pRoot->first_node("code");
-  rm.creationCode = strcpy(new char[pCurrentNode->value_size() + 1],pCurrentNode->value());
-  rm.name = strcpy(new char[name.size() + 1],name.c_str());
-  rm.id = rooms.size();
-  rm.speed = atoi(pRoot->first_node("speed")->value());
+  rm->creationCode = strcpy(new char[pCurrentNode->value_size() + 1],pCurrentNode->value());
+  rm->name = strcpy(new char[name.size() + 1],name.c_str());
+  rm->id = rooms.size();
+  rm->speed = atoi(pRoot->first_node("speed")->value());
   pCurrentNode = pRoot->first_node("caption");
-  rm.caption = strcpy(new char[pCurrentNode->value_size() + 1],pCurrentNode->value());
-  rm.instanceCount = 0;
-  rm.backgroundColor = atoi(pRoot->first_node("colour")->value());//RGBA2DWORD(3, 149, 255, 255);
+  rm->caption = strcpy(new char[pCurrentNode->value_size() + 1],pCurrentNode->value());
+  rm->instanceCount = 0;
+  rm->backgroundColor = atoi(pRoot->first_node("colour")->value());//RGBA2DWORD(3, 149, 255, 255);
   
   doc.clear();
   
@@ -172,11 +172,32 @@ Font* readGMXFont(const char* path) {
 }
 
 Script* readGMXScript(const char* path) {
+  string filepath = path;
+  string name = filepath.substr(filepath.find_last_of('/') + 1, filepath.length());
+  string content = readtxtfile((string(path) + ".gml").c_str());
 
+  Script* scr = new Script();
+  scr->name = strcpy(new char[name.size() + 1],name.c_str());
+  scr->id = scripts.size();
+  scr->code = strcpy(new char[content.size() + 1],content.c_str());
+
+  return scr;
 }
 
 Shader* readGMXShader(const char* path) {
+  string filepath = path;
+  string name = filepath.substr(filepath.find_last_of('/') + 1, filepath.length());
+  string content = readtxtfile((string(path) + ".gml").c_str());
 
+  Shader* shr = new Shader();
+  shr->name = strcpy(new char[name.size() + 1],name.c_str());
+  shr->id = scripts.size();
+  shr->vertex = strcpy(new char[content.size() + 1],content.c_str());
+  shr->fragment = strcpy(new char[content.size() + 1],content.c_str());
+  shr->precompile = true;
+  //shr->type = ;
+  
+  return shr;
 }
 
 Path* readGMXPath(const char* path) {
@@ -247,12 +268,16 @@ void buildgmx(const char* input, const char* output) {
       } else if (strcmp(node->name(), "scripts") == 0) {
         for (xml_node<> *resnode = node->first_node(); resnode; resnode = resnode->next_sibling())
         {
-          //scripts.push_back(readGMXScript());
+          Script* script = readGMXScript( (folder + string_replace_all(resnode->value(), "\\", "/")).c_str() );
+          scripts.push_back(*script);
+          delete script;
         }
       } else if (strcmp(node->name(), "shaders") == 0) {
         for (xml_node<> *resnode = node->first_node(); resnode; resnode = resnode->next_sibling())
         {
-          //shaders.push_back(readGMXShader());
+          Shader* shader = readGMXShader( (folder + string_replace_all(resnode->value(), "\\", "/")).c_str() );
+          shaders.push_back(*shader);
+          delete shader;
         }
       } else if (strcmp(node->name(), "fonts") == 0) {
         for (xml_node<> *resnode = node->first_node(); resnode; resnode = resnode->next_sibling())
@@ -262,7 +287,9 @@ void buildgmx(const char* input, const char* output) {
       } else if (strcmp(node->name(), "rooms") == 0) {
         for (xml_node<> *resnode = node->first_node(); resnode; resnode = resnode->next_sibling())
         {
-          rooms.push_back(readGMXRoom( (folder + string_replace_all(resnode->value(), "\\", "/")).c_str() ));
+          Room* room = readGMXRoom( (folder + string_replace_all(resnode->value(), "\\", "/")).c_str() );
+          rooms.push_back(*room);
+          delete room;
         }
       }
     }
