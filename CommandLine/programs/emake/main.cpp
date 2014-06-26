@@ -118,6 +118,7 @@ vector<GmObject> objects;
 vector<Script> scripts;
 vector<Sprite> sprites;
 vector<Shader> shaders;
+vector<Sound> sounds;
 vector<Font> fonts;
 vector<Timeline> timelines;
 vector<Background> backgrounds;
@@ -133,13 +134,14 @@ Room* readGMXRoom(const char* path) {
   xml_node<> *pCurrentNode;
 
   Room* rm = new Room();
+  rm->name = strcpy(new char[name.size() + 1],name.c_str());
+  rm->id = rooms.size();
+  
   rm->drawBackgroundColor = atoi(pRoot->first_node("showcolour")->value()) < 0;
   rm->width = atoi(pRoot->first_node("width")->value());
   rm->height = atoi(pRoot->first_node("height")->value());
   pCurrentNode = pRoot->first_node("code");
   rm->creationCode = strcpy(new char[pCurrentNode->value_size() + 1],pCurrentNode->value());
-  rm->name = strcpy(new char[name.size() + 1],name.c_str());
-  rm->id = rooms.size();
   rm->speed = atoi(pRoot->first_node("speed")->value());
   pCurrentNode = pRoot->first_node("caption");
   rm->caption = strcpy(new char[pCurrentNode->value_size() + 1],pCurrentNode->value());
@@ -164,11 +166,69 @@ Timeline* readGMXTimeline(const char* path) {
 }
 
 Sound* readGMXSound(const char* path) {
+  string filepath = path;
+  string name = filepath.substr(filepath.find_last_of('/') + 1, filepath.length());
+  string content = readtxtfile((string(path) + ".sound.gmx").c_str());
+  xml_document<> doc;    // character type defaults to char
+  doc.parse<0>(&content[0]);    // 0 means default parse flags
+  xml_node<> *pRoot = doc.first_node();
+  xml_node<> *pCurrentNode;
 
+  Sound* snd = new Sound();
+  snd->name = strcpy(new char[name.size() + 1],name.c_str());
+  snd->id = sounds.size();
+  
+  snd->preload = atoi(pRoot->first_node("preload")->value()) < 0;
+  snd->kind = atoi(pRoot->first_node("kind")->value());
+  snd->pan = atoi(pRoot->first_node("pan")->value());
+  // yes GMX double nests the volume tag
+  snd->volume = atoi(pRoot->first_node("volume")->first_node("volume")->value());
+  MessageBox(NULL, (filepath.substr(0, filepath.find_last_of('/')) + "/audio/" + pRoot->first_node("data")->value()).c_str(), "wtf", MB_OK);
+  // Open sound
+  FILE *afile = fopen((filepath.substr(0, filepath.find_last_of('/')) + "/audio/" + pRoot->first_node("data")->value()).c_str(),"rb");
+  if (!afile)
+    return NULL;
+
+  // Buffer sound
+  fseek(afile,0,SEEK_END);
+  const size_t flen = ftell(afile);
+  unsigned char *fdata = new unsigned char[flen];
+  fseek(afile,0,SEEK_SET);
+  if (fread(fdata,1,flen,afile) != flen)
+    puts("WARNING: Resource stream cut short while loading sound data");
+  
+  snd->data = fdata;
+  snd->size = flen;
+  
+  doc.clear();
+  
+  return snd;
 }
 
 Font* readGMXFont(const char* path) {
+  string filepath = path;
+  string name = filepath.substr(filepath.find_last_of('/') + 1, filepath.length());
+  string content = readtxtfile((string(path) + ".font.gmx").c_str());
+  xml_document<> doc;    // character type defaults to char
+  doc.parse<0>(&content[0]);    // 0 means default parse flags
+  xml_node<> *pRoot = doc.first_node();
+  xml_node<> *pCurrentNode;
 
+  Font* fnt = new Font();
+  fnt->name = strcpy(new char[name.size() + 1],name.c_str());
+  fnt->id = fonts.size();
+  
+  pCurrentNode = pRoot->first_node("fontName");
+  fnt->fontName = strcpy(new char[pCurrentNode->value_size() + 1],pCurrentNode->value());
+  fnt->size = atoi(pRoot->first_node("size")->value());
+  fnt->bold = atoi(pRoot->first_node("bold")->value()) < 0;
+  fnt->italic = atoi(pRoot->first_node("italic")->value()) < 0;
+  
+  //TODO: Read glyphs and ranges.
+  
+  doc.clear();
+  
+  return fnt;
 }
 
 Script* readGMXScript(const char* path) {
@@ -179,6 +239,7 @@ Script* readGMXScript(const char* path) {
   Script* scr = new Script();
   scr->name = strcpy(new char[name.size() + 1],name.c_str());
   scr->id = scripts.size();
+  
   scr->code = strcpy(new char[content.size() + 1],content.c_str());
 
   return scr;
@@ -191,7 +252,8 @@ Shader* readGMXShader(const char* path) {
 
   Shader* shr = new Shader();
   shr->name = strcpy(new char[name.size() + 1],name.c_str());
-  shr->id = scripts.size();
+  shr->id = shaders.size();
+  
   shr->vertex = strcpy(new char[content.size() + 1],content.c_str());
   shr->fragment = strcpy(new char[content.size() + 1],content.c_str());
   shr->precompile = true;
@@ -243,7 +305,9 @@ void buildgmx(const char* input, const char* output) {
       } else if (strcmp(node->name(), "sounds") == 0) {
         for (xml_node<> *resnode = node->first_node(); resnode; resnode = resnode->next_sibling())
         {
-          //sounds.push_back(readGMXSound());
+          Sound* sound = readGMXSound( (folder + string_replace_all(resnode->value(), "\\", "/")).c_str() );
+          sounds.push_back(*sound);
+          delete sound;
         }
       } else if (strcmp(node->name(), "backgrounds") == 0) {
         for (xml_node<> *resnode = node->first_node(); resnode; resnode = resnode->next_sibling())
@@ -282,7 +346,9 @@ void buildgmx(const char* input, const char* output) {
       } else if (strcmp(node->name(), "fonts") == 0) {
         for (xml_node<> *resnode = node->first_node(); resnode; resnode = resnode->next_sibling())
         {
-         // fonts.push_back(readGMXFont());
+          Font* font = readGMXFont( (folder + string_replace_all(resnode->value(), "\\", "/")).c_str() );
+          fonts.push_back(*font);
+          delete font;
         }
       } else if (strcmp(node->name(), "rooms") == 0) {
         for (xml_node<> *resnode = node->first_node(); resnode; resnode = resnode->next_sibling())
