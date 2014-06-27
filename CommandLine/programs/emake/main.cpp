@@ -323,15 +323,57 @@ Shader* readGMXShader(const char* path) {
 }
 
 Path* readGMXPath(const char* path) {
+  string filepath = path;
+  string name = filepath.substr(filepath.find_last_of('/') + 1, filepath.length());
+  string content = readtxtfile((string(path) + ".path.gmx").c_str());
+  xml_document<> doc;    // character type defaults to char
+  doc.parse<0>(&content[0]);    // 0 means default parse flags
+  xml_node<> *pRoot = doc.first_node();
+  xml_node<> *pCurrentNode;
 
-}
-
-GmObject* readGMXObject(const char* path) {
-
+  Path* pth = new Path();
+  pth->name = strcpy(new char[name.size() + 1],name.c_str());
+  pth->id = paths.size();
+  
+  doc.clear();
+  
+  return pth;
 }
 
 Timeline* readGMXTimeline(const char* path) {
+  string filepath = path;
+  string name = filepath.substr(filepath.find_last_of('/') + 1, filepath.length());
+  string content = readtxtfile((string(path) + ".timeline.gmx").c_str());
+  xml_document<> doc;    // character type defaults to char
+  doc.parse<0>(&content[0]);    // 0 means default parse flags
+  xml_node<> *pRoot = doc.first_node();
+  xml_node<> *pCurrentNode;
 
+  Timeline* tml = new Timeline();
+  tml->name = strcpy(new char[name.size() + 1],name.c_str());
+  tml->id = timelines.size();
+  
+  doc.clear();
+  
+  return tml;
+}
+
+GmObject* readGMXObject(const char* path) {
+  string filepath = path;
+  string name = filepath.substr(filepath.find_last_of('/') + 1, filepath.length());
+  string content = readtxtfile((string(path) + ".object.gmx").c_str());
+  xml_document<> doc;    // character type defaults to char
+  doc.parse<0>(&content[0]);    // 0 means default parse flags
+  xml_node<> *pRoot = doc.first_node();
+  xml_node<> *pCurrentNode;
+
+  GmObject* obj = new GmObject();
+  obj->name = strcpy(new char[name.size() + 1],name.c_str());
+  obj->id = objects.size();
+  
+  doc.clear();
+  
+  return obj;
 }
 
 Room* readGMXRoom(const char* path) {
@@ -379,7 +421,9 @@ void iterateGMXTree(xml_node<> *root, const std::string& folder) {
       backgrounds.push_back(*background);
       delete background;
     } else if (strcmp(node->name(), "path") == 0) {
-
+      Path* path = readGMXPath( (folder + string_replace_all(node->value(), "\\", "/")).c_str() );
+      paths.push_back(*path);
+      delete path;
     } else if (strcmp(node->name(), "script") == 0) {
       Script* script = readGMXScript( (folder + string_replace_all(node->value(), "\\", "/")).c_str() );
       scripts.push_back(*script);
@@ -392,11 +436,15 @@ void iterateGMXTree(xml_node<> *root, const std::string& folder) {
       Font* font = readGMXFont( (folder + string_replace_all(node->value(), "\\", "/")).c_str() );
       fonts.push_back(*font);
       delete font;
-    //NOTE: Read objects and timelines last because their actions refer to other resources, and ultimately rooms finally because they place objects.
+    //NOTE: Read timelines followed by objects followed by rooms, because each can refer to each other in that order and it cuts down on unnecessary postponed references.
     } else if (strcmp(node->name(), "timeline") == 0) {
-
+      Timeline* timeline = readGMXTimeline( (folder + string_replace_all(node->value(), "\\", "/")).c_str() );
+      timelines.push_back(*timeline);
+      delete timeline;
     } else if (strcmp(node->name(), "object") == 0) {
-    
+      GmObject* object = readGMXObject( (folder + string_replace_all(node->value(), "\\", "/")).c_str() );
+      objects.push_back(*object);
+      delete object;
     } else if (strcmp(node->name(), "room") == 0) {
       Room* room = readGMXRoom( (folder + string_replace_all(node->value(), "\\", "/")).c_str() );
       rooms.push_back(*room);
