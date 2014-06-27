@@ -384,6 +384,21 @@ Timeline* readGMXTimeline(const char* path) {
   tml->name = strcpy(new char[name.size() + 1],name.c_str());
   tml->id = timelines.size();
   
+  vector<Moment> moments;
+  for (xml_node<> *momnode = pRoot->first_node("entry"); momnode; momnode = momnode->next_sibling())
+  {
+    unsigned int stepnum = atoi(momnode->first_node("step")->value());
+    
+    Moment moment;
+    moment.stepNo = stepnum;
+    moment.code = "";
+    moments.push_back(moment);
+  }
+  
+  tml->moments = new Moment[moments.size()];
+  copy(moments.begin(), moments.end(), tml->moments);
+  tml->momentCount = moments.size();
+  
   doc.clear();
   
   return tml;
@@ -412,10 +427,10 @@ GmObject* readGMXObject(const char* path) {
   obj->depth = atoi(pRoot->first_node("depth")->value());
   
   map< int, vector<Event> > events;
-  for (xml_node<> *imgnode = pRoot->first_node("events")->first_node("event"); imgnode; imgnode = imgnode->next_sibling())
+  for (xml_node<> *evtnode = pRoot->first_node("events")->first_node("event"); evtnode; evtnode = evtnode->next_sibling())
   {
-    unsigned int mid = atoi(imgnode->first_attribute("eventtype")->value()),
-                 sid = atoi(imgnode->first_attribute("enumb")->value());
+    unsigned int mid = atoi(evtnode->first_attribute("eventtype")->value()),
+                 sid = atoi(evtnode->first_attribute("enumb")->value());
     Event event;
     event.id = sid;
     event.code = "";
