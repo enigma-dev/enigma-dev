@@ -30,8 +30,10 @@
 using std::vector;
 #include "library.h"
 
-#include "rapidxml-1.13/rapidxml.hpp"
+#include "Universal_System/zlib.h"
+#include "Universal_System/lodepng.h"
 
+#include "rapidxml-1.13/rapidxml.hpp"
 //#include "gmk.hpp"
 
 using namespace std;
@@ -59,6 +61,45 @@ std::string readtxtfile(const char* filepath) {
     buffer << filestream.rdbuf();
     filestream.close();
     return buffer.str();
+}
+
+unsigned char* readpngimg(string filename, unsigned int* width, unsigned int* height, unsigned int* datasize, bool flipped) {
+	unsigned error;
+	unsigned char* image;
+	unsigned pngwidth, pngheight;
+
+	error = lodepng_decode32_file(&image, &pngwidth, &pngheight, filename.c_str());
+	if (error)
+	{
+	  printf("error %u: %s\n", error, lodepng_error_text(error));
+	  return NULL;
+	}
+
+	unsigned ih,iw;
+	const unsigned int bitmap_size = pngwidth*pngheight*4;
+	unsigned char* bitmap = new unsigned char[bitmap_size](); // Initialize to zero.
+  
+	for (ih = 0; ih < pngheight; ih++) {
+	  unsigned tmp = 0;
+	  if (!flipped) {
+      tmp = ih*pngwidth*4;
+	  } else {
+      tmp = (pngheight - 1 - ih)*pngwidth*4;
+	  }
+	  for (iw = 0; iw < pngwidth; iw++) {
+      bitmap[tmp+0] = image[4*pngwidth*ih+iw*4+2];
+      bitmap[tmp+1] = image[4*pngwidth*ih+iw*4+1];
+      bitmap[tmp+2] = image[4*pngwidth*ih+iw*4+0];
+      bitmap[tmp+3] = image[4*pngwidth*ih+iw*4+3];
+      tmp+=4;
+	  }
+	}
+
+	free(image);
+	*width  = pngwidth;
+	*height = pngheight;
+  *datasize = bitmap_size;
+	return bitmap;
 }
 
 void buildtestproject(const char* output) {
@@ -150,30 +191,22 @@ Sprite* readGMXSprite(const char* path) {
   vector<SubImage> subimages;
   for (xml_node<> *imgnode = pRoot->first_node("frames")->first_node("frame"); imgnode; imgnode = imgnode->next_sibling())
   {
-    // Open sprite
-    FILE *afile = fopen((filepath.substr(0, filepath.find_last_of('/') + 1) + string_replace_all(imgnode->value(), "\\", "/")).c_str(),"rb");
-    if (!afile)
+    unsigned int imgw, imgh, imgs;
+    unsigned char* imgdata = readpngimg(filepath.substr(0, filepath.find_last_of('/') + 1) + string_replace_all(imgnode->value(), "\\", "/"), &imgw, &imgh, &imgs, false);
+    if (imgdata == NULL) {
       return NULL;
-
-    // Buffer sprite
-    fseek(afile,0,SEEK_END);
-    const size_t flen = ftell(afile);
-    char *fdata = new char[flen];
-    fseek(afile,0,SEEK_SET);
-    if (fread(fdata,1,flen,afile) != flen)
-      puts("WARNING: Resource stream cut short while loading sprite data");
-    
+    }
+  
     SubImage subimg;
     subimg.image.width = width;
     subimg.image.height = height;
-    subimg.image.data = fdata;
-    subimg.image.dataSize = flen;
+    subimg.image.data = reinterpret_cast<char*>(zlib_compress(imgdata, imgs));
+    subimg.image.dataSize = width*height*4;
     subimages.push_back(subimg);
-    
-    MessageBox(NULL, pRoot->first_node("width")->value(), "wtf", MB_OK);
   }
-  
-  spr->subImages = &subimages[0];
+
+  spr->subImages = new SubImage[subimages.size()];
+  copy(subimages.begin(), subimages.end(), spr->subImages);
   spr->subImageCount = subimages.size();
   
   doc.clear();
@@ -201,24 +234,20 @@ Background* readGMXBackground(const char* path) {
   bkg->tileWidth = atoi(pRoot->first_node("tilewidth")->value());
   bkg->tileHeight = atoi(pRoot->first_node("tileheight")->value());
   bkg->useAsTileset = atoi(pRoot->first_node("istileset")->value()) < 0;
-
-  // Open background
-  FILE *afile = fopen((filepath.substr(0, filepath.find_last_of('/') + 1) + string_replace_all(pRoot->first_node("data")->value(), "\\", "/")).c_str(),"rb");
-  if (!afile)
+  bkg->transparent = 0;
+  bkg->smoothEdges = 0;
+  bkg->preload = 0;
+  
+  unsigned int imgw, imgh, imgs;
+  unsigned char* imgdata = readpngimg(filepath.substr(0, filepath.find_last_of('/') + 1) + string_replace_all(pRoot->first_node("data")->value(), "\\", "/"), &imgw, &imgh, &imgs, false);
+  if (imgdata == NULL) {
     return NULL;
-
-  // Buffer background
-  fseek(afile,0,SEEK_END);
-  const size_t flen = ftell(afile);
-  char *fdata = new char[flen];
-  fseek(afile,0,SEEK_SET);
-  if (fread(fdata,1,flen,afile) != flen)
-    puts("WARNING: Resource stream cut short while loading background data");
+  }
   
   bkg->backgroundImage.width = atoi(pRoot->first_node("width")->value());
   bkg->backgroundImage.height = atoi(pRoot->first_node("height")->value());
-  bkg->backgroundImage.data = fdata;
-  bkg->backgroundImage.dataSize = flen;
+  bkg->backgroundImage.data = reinterpret_cast<char*>(zlib_compress(imgdata, imgs));
+  bkg->backgroundImage.dataSize = imgs;
   
   doc.clear();
   
@@ -442,9 +471,9 @@ void iterateGMXTree(xml_node<> *root, const std::string& folder) {
       timelines.push_back(*timeline);
       delete timeline;
     } else if (strcmp(node->name(), "object") == 0) {
-      GmObject* object = readGMXObject( (folder + string_replace_all(node->value(), "\\", "/")).c_str() );
-      objects.push_back(*object);
-      delete object;
+      //GmObject* object = readGMXObject( (folder + string_replace_all(node->value(), "\\", "/")).c_str() );
+      //objects.push_back(*object);
+      //delete object;
     } else if (strcmp(node->name(), "room") == 0) {
       Room* room = readGMXRoom( (folder + string_replace_all(node->value(), "\\", "/")).c_str() );
       rooms.push_back(*room);
