@@ -24,10 +24,12 @@
 #include <unistd.h>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <string>
 #include <vector>
-#include <sstream>
+#include <map>
 using std::vector;
+using std::map;
 #include "library.h"
 
 #include "Universal_System/zlib.h"
@@ -400,6 +402,40 @@ GmObject* readGMXObject(const char* path) {
   obj->name = strcpy(new char[name.size() + 1],name.c_str());
   obj->id = objects.size();
   
+  //TODO: Find these, use postponed reference for parent.
+  obj->spriteId = -1;
+  obj->maskId = -1;
+  obj->parentId = -100;
+  obj->solid = atoi(pRoot->first_node("solid")->value()) < 0;
+  obj->visible = atoi(pRoot->first_node("visible")->value()) < 0;
+  obj->persistent = atoi(pRoot->first_node("persistent")->value()) < 0;
+  obj->depth = atoi(pRoot->first_node("depth")->value());
+  
+  map< int, vector<Event> > events;
+  for (xml_node<> *imgnode = pRoot->first_node("events")->first_node("event"); imgnode; imgnode = imgnode->next_sibling())
+  {
+    unsigned int mid = atoi(imgnode->first_attribute("eventtype")->value()),
+                 sid = atoi(imgnode->first_attribute("enumb")->value());
+    Event event;
+    event.id = sid;
+    event.code = "";
+    events[mid].push_back(event);
+  }
+  
+  vector<MainEvent> mainevents;
+  for (map< int, vector<Event> >::iterator it = events.begin(); it != events.end(); it++) {
+    MainEvent mainevent;
+    mainevent.id = it->first;
+    mainevent.events = new Event[it->second.size()];
+    copy(it->second.begin(), it->second.end(), mainevent.events);
+    mainevent.eventCount = it->second.size();
+    mainevents.push_back(mainevent);
+  }
+
+  obj->mainEvents = new MainEvent[mainevents.size()];
+  copy(mainevents.begin(), mainevents.end(), obj->mainEvents);
+  obj->mainEventCount = mainevents.size();
+  
   doc.clear();
   
   return obj;
@@ -471,9 +507,9 @@ void iterateGMXTree(xml_node<> *root, const std::string& folder) {
       timelines.push_back(*timeline);
       delete timeline;
     } else if (strcmp(node->name(), "object") == 0) {
-      //GmObject* object = readGMXObject( (folder + string_replace_all(node->value(), "\\", "/")).c_str() );
-      //objects.push_back(*object);
-      //delete object;
+      GmObject* object = readGMXObject( (folder + string_replace_all(node->value(), "\\", "/")).c_str() );
+      objects.push_back(*object);
+      delete object;
     } else if (strcmp(node->name(), "room") == 0) {
       Room* room = readGMXRoom( (folder + string_replace_all(node->value(), "\\", "/")).c_str() );
       rooms.push_back(*room);
