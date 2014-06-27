@@ -18,10 +18,11 @@ endif
 ###########
 
 CXX := g++
-CXXFLAGS += -Wall -g -I. -I../../../CompilerSource
-LDFLAGS +=
+CXXFLAGS += -Wall -g -I. -I../../../CompilerSource -I../../../ENIGMAsystem/SHELL -I../../../ENIGMAsystem/Additional/i686-w64-mingw32/include -I../../../ENIGMAsystem/SHELL/Universal_System
+LDFLAGS += -L../../../ENIGMAsystem/Additional/i686-w64-mingw32/lib
+LDLIBS += -lz
 
-SOURCES := $(shell find ./ -name "*.cpp")
+SOURCES := $(shell find ./ -name "*.cpp") ../../../ENIGMAsystem/SHELL/Universal_System/lodepng.cpp ../../../ENIGMAsystem/SHELL/Universal_System/zlib.cpp
 OBJECTS := $(addprefix .eobjs/,$(SOURCES:.cpp=.o))
 DEPENDS := $(OBJECTS:.o=.d)
 
