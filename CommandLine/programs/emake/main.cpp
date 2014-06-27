@@ -157,6 +157,50 @@ Sprite* readGMXSprite(const char* path) {
 
 }
 
+Background* readGMXBackground(const char* path) {
+  string filepath = path;
+  string name = filepath.substr(filepath.find_last_of('/') + 1, filepath.length());
+  string content = readtxtfile((string(path) + ".background.gmx").c_str());
+  xml_document<> doc;    // character type defaults to char
+  doc.parse<0>(&content[0]);    // 0 means default parse flags
+  xml_node<> *pRoot = doc.first_node();
+  xml_node<> *pCurrentNode;
+
+  Background* bkg = new Background();
+  bkg->name = strcpy(new char[name.size() + 1],name.c_str());
+  bkg->id = backgrounds.size();
+  
+  bkg->hOffset = atoi(pRoot->first_node("tilexoff")->value());
+  bkg->vOffset = atoi(pRoot->first_node("tileyoff")->value());
+  bkg->hSep = atoi(pRoot->first_node("tilehsep")->value());
+  bkg->vSep = atoi(pRoot->first_node("tilevsep")->value());
+  bkg->tileWidth = atoi(pRoot->first_node("tilewidth")->value());
+  bkg->tileHeight = atoi(pRoot->first_node("tileheight")->value());
+  bkg->useAsTileset = atoi(pRoot->first_node("istileset")->value()) < 0;
+
+  // Open sound
+  FILE *afile = fopen((filepath.substr(0, filepath.find_last_of('/') + 1) + string_replace_all(pRoot->first_node("data")->value(), "\\", "/")).c_str(),"rb");
+  if (!afile)
+    return NULL;
+
+  // Buffer sound
+  fseek(afile,0,SEEK_END);
+  const size_t flen = ftell(afile);
+  char *fdata = new char[flen];
+  fseek(afile,0,SEEK_SET);
+  if (fread(fdata,1,flen,afile) != flen)
+    puts("WARNING: Resource stream cut short while loading sound data");
+  
+  bkg->backgroundImage.width = atoi(pRoot->first_node("width")->value());
+  bkg->backgroundImage.height = atoi(pRoot->first_node("height")->value());
+  bkg->backgroundImage.data = fdata;
+  bkg->backgroundImage.dataSize = flen;
+  
+  doc.clear();
+  
+  return bkg;
+}
+
 GmObject* readGMXObject(const char* path) {
 
 }
@@ -183,7 +227,7 @@ Sound* readGMXSound(const char* path) {
   snd->pan = atoi(pRoot->first_node("pan")->value());
   // yes GMX double nests the volume tag
   snd->volume = atoi(pRoot->first_node("volume")->first_node("volume")->value());
-  MessageBox(NULL, (filepath.substr(0, filepath.find_last_of('/')) + "/audio/" + pRoot->first_node("data")->value()).c_str(), "wtf", MB_OK);
+
   // Open sound
   FILE *afile = fopen((filepath.substr(0, filepath.find_last_of('/')) + "/audio/" + pRoot->first_node("data")->value()).c_str(),"rb");
   if (!afile)
@@ -266,10 +310,6 @@ Path* readGMXPath(const char* path) {
 
 }
 
-Background* readGMXBackground(const char* path) {
-
-}
-
 void buildgmx(const char* input, const char* output) {
     xml_document<> doc;    // character type defaults to char
     string content = readtxtfile(input);
@@ -312,7 +352,9 @@ void buildgmx(const char* input, const char* output) {
       } else if (strcmp(node->name(), "backgrounds") == 0) {
         for (xml_node<> *resnode = node->first_node(); resnode; resnode = resnode->next_sibling())
         {
-          //backgrounds.push_back(readGMXBackground());
+          Background* background = readGMXBackground( (folder + string_replace_all(resnode->value(), "\\", "/")).c_str() );
+          backgrounds.push_back(*background);
+          delete background;
         }
       } else if (strcmp(node->name(), "objects") == 0) {
         for (xml_node<> *resnode = node->first_node(); resnode; resnode = resnode->next_sibling())
@@ -364,8 +406,12 @@ void buildgmx(const char* input, const char* output) {
     es->roomCount = rooms.size();
     es->gmObjects =  &objects[0];
     es->gmObjectCount = objects.size();
+    es->sprites = &sprites[0];
+    es->spriteCount = sprites.size();
     es->scripts = &scripts[0];
     es->scriptCount = scripts.size();
+    es->sounds = &sounds[0];
+    es->soundCount = sounds.size();
     es->shaders = &shaders[0];
     es->shaderCount = shaders.size();
     es->fonts = &fonts[0];
