@@ -113,45 +113,16 @@ void buildtestproject(const char* output) {
     cout << compileEGMf(es, output, emode_run) << endl;
 }
 
-vector<Room> rooms;
-vector<GmObject> objects;
 vector<Script> scripts;
 vector<Sprite> sprites;
 vector<Shader> shaders;
 vector<Sound> sounds;
 vector<Font> fonts;
-vector<Timeline> timelines;
 vector<Background> backgrounds;
 vector<Path> paths;
-
-Room* readGMXRoom(const char* path) {
-  string filepath = path;
-  string name = filepath.substr(filepath.find_last_of('/') + 1, filepath.length());
-  string content = readtxtfile((string(path) + ".room.gmx").c_str());
-  xml_document<> doc;    // character type defaults to char
-  doc.parse<0>(&content[0]);    // 0 means default parse flags
-  xml_node<> *pRoot = doc.first_node();
-  xml_node<> *pCurrentNode;
-
-  Room* rm = new Room();
-  rm->name = strcpy(new char[name.size() + 1],name.c_str());
-  rm->id = rooms.size();
-  
-  rm->drawBackgroundColor = atoi(pRoot->first_node("showcolour")->value()) < 0;
-  rm->width = atoi(pRoot->first_node("width")->value());
-  rm->height = atoi(pRoot->first_node("height")->value());
-  pCurrentNode = pRoot->first_node("code");
-  rm->creationCode = strcpy(new char[pCurrentNode->value_size() + 1],pCurrentNode->value());
-  rm->speed = atoi(pRoot->first_node("speed")->value());
-  pCurrentNode = pRoot->first_node("caption");
-  rm->caption = strcpy(new char[pCurrentNode->value_size() + 1],pCurrentNode->value());
-  rm->instanceCount = 0;
-  rm->backgroundColor = atoi(pRoot->first_node("colour")->value());//RGBA2DWORD(3, 149, 255, 255);
-  
-  doc.clear();
-  
-  return rm;
-}
+vector<Timeline> timelines;
+vector<GmObject> objects;
+vector<Room> rooms;
 
 Sprite* readGMXSprite(const char* path) {
   string filepath = path;
@@ -252,14 +223,6 @@ Background* readGMXBackground(const char* path) {
   doc.clear();
   
   return bkg;
-}
-
-GmObject* readGMXObject(const char* path) {
-
-}
-
-Timeline* readGMXTimeline(const char* path) {
-
 }
 
 Sound* readGMXSound(const char* path) {
@@ -363,6 +326,43 @@ Path* readGMXPath(const char* path) {
 
 }
 
+GmObject* readGMXObject(const char* path) {
+
+}
+
+Timeline* readGMXTimeline(const char* path) {
+
+}
+
+Room* readGMXRoom(const char* path) {
+  string filepath = path;
+  string name = filepath.substr(filepath.find_last_of('/') + 1, filepath.length());
+  string content = readtxtfile((string(path) + ".room.gmx").c_str());
+  xml_document<> doc;    // character type defaults to char
+  doc.parse<0>(&content[0]);    // 0 means default parse flags
+  xml_node<> *pRoot = doc.first_node();
+  xml_node<> *pCurrentNode;
+
+  Room* rm = new Room();
+  rm->name = strcpy(new char[name.size() + 1],name.c_str());
+  rm->id = rooms.size();
+  
+  rm->drawBackgroundColor = atoi(pRoot->first_node("showcolour")->value()) < 0;
+  rm->width = atoi(pRoot->first_node("width")->value());
+  rm->height = atoi(pRoot->first_node("height")->value());
+  pCurrentNode = pRoot->first_node("code");
+  rm->creationCode = strcpy(new char[pCurrentNode->value_size() + 1],pCurrentNode->value());
+  rm->speed = atoi(pRoot->first_node("speed")->value());
+  pCurrentNode = pRoot->first_node("caption");
+  rm->caption = strcpy(new char[pCurrentNode->value_size() + 1],pCurrentNode->value());
+  rm->instanceCount = 0;
+  rm->backgroundColor = atoi(pRoot->first_node("colour")->value());//RGBA2DWORD(3, 149, 255, 255);
+  
+  doc.clear();
+  
+  return rm;
+}
+
 void iterateGMXTree(xml_node<> *root, const std::string& folder) {
   for (xml_node<> *node = root->first_node(); node; node = node->next_sibling())
   {
@@ -378,10 +378,6 @@ void iterateGMXTree(xml_node<> *root, const std::string& folder) {
       Background* background = readGMXBackground( (folder + string_replace_all(node->value(), "\\", "/")).c_str() );
       backgrounds.push_back(*background);
       delete background;
-    } else if (strcmp(node->name(), "object") == 0) {
-    
-    } else if (strcmp(node->name(), "timeline") == 0) {
-
     } else if (strcmp(node->name(), "path") == 0) {
 
     } else if (strcmp(node->name(), "script") == 0) {
@@ -396,6 +392,11 @@ void iterateGMXTree(xml_node<> *root, const std::string& folder) {
       Font* font = readGMXFont( (folder + string_replace_all(node->value(), "\\", "/")).c_str() );
       fonts.push_back(*font);
       delete font;
+    //NOTE: Read objects and timelines last because their actions refer to other resources, and ultimately rooms finally because they place objects.
+    } else if (strcmp(node->name(), "timeline") == 0) {
+
+    } else if (strcmp(node->name(), "object") == 0) {
+    
     } else if (strcmp(node->name(), "room") == 0) {
       Room* room = readGMXRoom( (folder + string_replace_all(node->value(), "\\", "/")).c_str() );
       rooms.push_back(*room);
