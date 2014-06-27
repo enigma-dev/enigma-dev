@@ -154,7 +154,60 @@ Room* readGMXRoom(const char* path) {
 }
 
 Sprite* readGMXSprite(const char* path) {
+  string filepath = path;
+  string name = filepath.substr(filepath.find_last_of('/') + 1, filepath.length());
+  string content = readtxtfile((string(path) + ".sprite.gmx").c_str());
+  xml_document<> doc;    // character type defaults to char
+  doc.parse<0>(&content[0]);    // 0 means default parse flags
+  xml_node<> *pRoot = doc.first_node();
+  xml_node<> *pCurrentNode;
 
+  Sprite* spr = new Sprite();
+  spr->name = strcpy(new char[name.size() + 1],name.c_str());
+  spr->id = sprites.size();
+  
+  spr->bbMode = atoi(pRoot->first_node("bboxmode")->value());
+  spr->bbLeft = atoi(pRoot->first_node("bbox_left")->value());
+  spr->bbRight = atoi(pRoot->first_node("bbox_right")->value());
+  spr->bbTop = atoi(pRoot->first_node("bbox_top")->value());
+  spr->bbBottom = atoi(pRoot->first_node("bbox_bottom")->value());
+  spr->separateMask = atoi(pRoot->first_node("sepmasks")->value()) < 0;
+
+  int width = atoi(pRoot->first_node("width")->value()),
+      height =  atoi(pRoot->first_node("height")->value());
+
+  vector<SubImage> subimages;
+  for (xml_node<> *imgnode = pRoot->first_node("frames")->first_node("frame"); imgnode; imgnode = imgnode->next_sibling())
+  {
+    // Open sprite
+    FILE *afile = fopen((filepath.substr(0, filepath.find_last_of('/') + 1) + string_replace_all(imgnode->value(), "\\", "/")).c_str(),"rb");
+    if (!afile)
+      return NULL;
+
+    // Buffer sprite
+    fseek(afile,0,SEEK_END);
+    const size_t flen = ftell(afile);
+    char *fdata = new char[flen];
+    fseek(afile,0,SEEK_SET);
+    if (fread(fdata,1,flen,afile) != flen)
+      puts("WARNING: Resource stream cut short while loading sprite data");
+    
+    SubImage subimg;
+    subimg.image.width = width;
+    subimg.image.height = height;
+    subimg.image.data = fdata;
+    subimg.image.dataSize = flen;
+    subimages.push_back(subimg);
+    
+    MessageBox(NULL, pRoot->first_node("width")->value(), "wtf", MB_OK);
+  }
+  
+  spr->subImages = &subimages[0];
+  spr->subImageCount = subimages.size();
+  
+  doc.clear();
+
+  return spr;
 }
 
 Background* readGMXBackground(const char* path) {
@@ -178,18 +231,18 @@ Background* readGMXBackground(const char* path) {
   bkg->tileHeight = atoi(pRoot->first_node("tileheight")->value());
   bkg->useAsTileset = atoi(pRoot->first_node("istileset")->value()) < 0;
 
-  // Open sound
+  // Open background
   FILE *afile = fopen((filepath.substr(0, filepath.find_last_of('/') + 1) + string_replace_all(pRoot->first_node("data")->value(), "\\", "/")).c_str(),"rb");
   if (!afile)
     return NULL;
 
-  // Buffer sound
+  // Buffer background
   fseek(afile,0,SEEK_END);
   const size_t flen = ftell(afile);
   char *fdata = new char[flen];
   fseek(afile,0,SEEK_SET);
   if (fread(fdata,1,flen,afile) != flen)
-    puts("WARNING: Resource stream cut short while loading sound data");
+    puts("WARNING: Resource stream cut short while loading background data");
   
   bkg->backgroundImage.width = atoi(pRoot->first_node("width")->value());
   bkg->backgroundImage.height = atoi(pRoot->first_node("height")->value());
@@ -310,6 +363,49 @@ Path* readGMXPath(const char* path) {
 
 }
 
+void iterateGMXTree(xml_node<> *root, const std::string& folder) {
+  for (xml_node<> *node = root->first_node(); node; node = node->next_sibling())
+  {
+    if (strcmp(node->name(), "sprite") == 0) {
+      Sprite* sprite = readGMXSprite( (folder + string_replace_all(node->value(), "\\", "/")).c_str() );
+      sprites.push_back(*sprite);
+      delete sprite;
+    } else if (strcmp(node->name(), "sound") == 0) {
+      Sound* sound = readGMXSound( (folder + string_replace_all(node->value(), "\\", "/")).c_str() );
+      sounds.push_back(*sound);
+      delete sound;
+    } else if (strcmp(node->name(), "background") == 0) {
+      Background* background = readGMXBackground( (folder + string_replace_all(node->value(), "\\", "/")).c_str() );
+      backgrounds.push_back(*background);
+      delete background;
+    } else if (strcmp(node->name(), "object") == 0) {
+    
+    } else if (strcmp(node->name(), "timeline") == 0) {
+
+    } else if (strcmp(node->name(), "path") == 0) {
+
+    } else if (strcmp(node->name(), "script") == 0) {
+      Script* script = readGMXScript( (folder + string_replace_all(node->value(), "\\", "/")).c_str() );
+      scripts.push_back(*script);
+      delete script;
+    } else if (strcmp(node->name(), "shader") == 0) {
+      Shader* shader = readGMXShader( (folder + string_replace_all(node->value(), "\\", "/")).c_str() );
+      shaders.push_back(*shader);
+      delete shader;
+    } else if (strcmp(node->name(), "font") == 0) {
+      Font* font = readGMXFont( (folder + string_replace_all(node->value(), "\\", "/")).c_str() );
+      fonts.push_back(*font);
+      delete font;
+    } else if (strcmp(node->name(), "room") == 0) {
+      Room* room = readGMXRoom( (folder + string_replace_all(node->value(), "\\", "/")).c_str() );
+      rooms.push_back(*room);
+      delete room;
+    } else {
+      iterateGMXTree(node, folder);
+    }
+  }
+}
+
 void buildgmx(const char* input, const char* output) {
     xml_document<> doc;    // character type defaults to char
     string content = readtxtfile(input);
@@ -335,72 +431,7 @@ void buildgmx(const char* input, const char* output) {
     es->gameInfo.formCaption = "";
     es->filename = "exampleproject";
     
-    for (xml_node<> *node = pRoot->first_node(); node; node = node->next_sibling())
-    {
-      if (strcmp(node->name(), "sprites") == 0) {
-        for (xml_node<> *resnode = node->first_node(); resnode; resnode = resnode->next_sibling())
-        {
-          //sprites.push_back(readGMXSprite());
-        }
-      } else if (strcmp(node->name(), "sounds") == 0) {
-        for (xml_node<> *resnode = node->first_node(); resnode; resnode = resnode->next_sibling())
-        {
-          Sound* sound = readGMXSound( (folder + string_replace_all(resnode->value(), "\\", "/")).c_str() );
-          sounds.push_back(*sound);
-          delete sound;
-        }
-      } else if (strcmp(node->name(), "backgrounds") == 0) {
-        for (xml_node<> *resnode = node->first_node(); resnode; resnode = resnode->next_sibling())
-        {
-          Background* background = readGMXBackground( (folder + string_replace_all(resnode->value(), "\\", "/")).c_str() );
-          backgrounds.push_back(*background);
-          delete background;
-        }
-      } else if (strcmp(node->name(), "objects") == 0) {
-        for (xml_node<> *resnode = node->first_node(); resnode; resnode = resnode->next_sibling())
-        {
-          //objects.push_back(readGMXObject());
-        }
-      } else if (strcmp(node->name(), "timelines") == 0) {
-        for (xml_node<> *resnode = node->first_node(); resnode; resnode = resnode->next_sibling())
-        {
-          //timelines.push_back(readGMXTimeline());
-        }
-      } else if (strcmp(node->name(), "paths") == 0) {
-        for (xml_node<> *resnode = node->first_node(); resnode; resnode = resnode->next_sibling())
-        {
-         // paths.push_back(readGMXPath());
-        }
-      } else if (strcmp(node->name(), "scripts") == 0) {
-        for (xml_node<> *resnode = node->first_node(); resnode; resnode = resnode->next_sibling())
-        {
-          Script* script = readGMXScript( (folder + string_replace_all(resnode->value(), "\\", "/")).c_str() );
-          scripts.push_back(*script);
-          delete script;
-        }
-      } else if (strcmp(node->name(), "shaders") == 0) {
-        for (xml_node<> *resnode = node->first_node(); resnode; resnode = resnode->next_sibling())
-        {
-          Shader* shader = readGMXShader( (folder + string_replace_all(resnode->value(), "\\", "/")).c_str() );
-          shaders.push_back(*shader);
-          delete shader;
-        }
-      } else if (strcmp(node->name(), "fonts") == 0) {
-        for (xml_node<> *resnode = node->first_node(); resnode; resnode = resnode->next_sibling())
-        {
-          Font* font = readGMXFont( (folder + string_replace_all(resnode->value(), "\\", "/")).c_str() );
-          fonts.push_back(*font);
-          delete font;
-        }
-      } else if (strcmp(node->name(), "rooms") == 0) {
-        for (xml_node<> *resnode = node->first_node(); resnode; resnode = resnode->next_sibling())
-        {
-          Room* room = readGMXRoom( (folder + string_replace_all(resnode->value(), "\\", "/")).c_str() );
-          rooms.push_back(*room);
-          delete room;
-        }
-      }
-    }
+    iterateGMXTree(pRoot, folder);
     
     es->rooms = &rooms[0];
     es->roomCount = rooms.size();
