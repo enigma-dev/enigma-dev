@@ -589,7 +589,7 @@ string readGMXActionSequence(xml_node<> *root) {
       code.append("\n}"); //$NON-NLS-1$
     }
     
-    MessageBox(NULL, code.c_str(), "wtf", MB_OK);
+    ///MessageBox(NULL, code.c_str(), "wtf", MB_OK);
   return code;
 }
 
@@ -713,6 +713,47 @@ Room* readGMXRoom(const char* path) {
   rm->caption = strcpy(new char[pCurrentNode->value_size() + 1],pCurrentNode->value());
   rm->instanceCount = 0;
   rm->backgroundColor = atoi(pRoot->first_node("colour")->value());//RGBA2DWORD(3, 149, 255, 255);
+  
+  vector<Instance> instances;
+  
+  for (xml_node<> *instnode = pRoot->first_node("instances")->first_node("instance"); instnode; instnode = instnode->next_sibling())
+  {
+    Instance instance;
+    
+    char* objectname = instnode->first_attribute("objName")->value();
+    for (size_t i = 0; i < objects.size(); i++) {
+      if (strcmp(objects[i].name,objectname) == 0) {
+        instance.objectId = i; break;
+      }
+    }
+    
+    instance.id = instances.size();
+    instance.x = atoi(instnode->first_attribute("x")->value());
+    instance.y = atoi(instnode->first_attribute("y")->value());
+    instance.locked = atoi(instnode->first_attribute("locked")->value()) < 0;
+    string createCode = instnode->first_attribute("code")->value();
+    instance.creationCode = strcpy(new char[createCode.size() + 1], createCode.c_str());
+    instances.push_back(instance);
+  }
+
+  rm->instances = new Instance[instances.size()];
+  copy(instances.begin(), instances.end(), rm->instances);
+  rm->instanceCount = instances.size();
+  
+  vector<View> views;
+  rm->views = new View[views.size()];
+  copy(views.begin(), views.end(), rm->views);
+  rm->viewCount = views.size();
+  
+  vector<Tile> tiles;
+  rm->tiles = new Tile[tiles.size()];
+  copy(tiles.begin(), tiles.end(), rm->tiles);
+  rm->tileCount = tiles.size();
+  
+  vector<BackgroundDef> backgrounddefs;
+  rm->backgroundDefs = new BackgroundDef[backgrounddefs.size()];
+  copy(backgrounddefs.begin(), backgrounddefs.end(), rm->backgroundDefs);
+  rm->backgroundDefCount = backgrounddefs.size();
   
   doc.clear();
   
