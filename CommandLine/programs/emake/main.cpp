@@ -46,6 +46,10 @@ unsigned long RGBA2DWORD(int iR, int iG, int iB, int iA)
   return (((((iR << 8) + iG) << 8) + iB) << 8) + iA;
 }
 
+unsigned int BGR2RGBA(unsigned int x) {
+  return (((x & 0xFF0000) >> 16) | (x & 0xFF00) | ((x & 0xFF) << 16)) << 8 | 0xFF;
+}
+
 inline string string_replace_all(string str,string substr,string nstr)
 {
   size_t pos=0;
@@ -180,6 +184,8 @@ Sprite* readGMXSprite(const char* path) {
   spr->name = strcpy(new char[name.size() + 1],name.c_str());
   spr->id = sprites.size();
   
+  spr->originX = atoi(pRoot->first_node("xorig")->value());
+  spr->originY = atoi(pRoot->first_node("yorigin")->value());
   spr->bbMode = atoi(pRoot->first_node("bboxmode")->value());
   spr->bbLeft = atoi(pRoot->first_node("bbox_left")->value());
   spr->bbRight = atoi(pRoot->first_node("bbox_right")->value());
@@ -712,7 +718,7 @@ Room* readGMXRoom(const char* path) {
   pCurrentNode = pRoot->first_node("caption");
   rm->caption = strcpy(new char[pCurrentNode->value_size() + 1],pCurrentNode->value());
   rm->instanceCount = 0;
-  rm->backgroundColor = atoi(pRoot->first_node("colour")->value());//RGBA2DWORD(3, 149, 255, 255);
+  rm->backgroundColor = BGR2RGBA(atol(pRoot->first_node("colour")->value()));//RGBA2DWORD(3, 149, 255, 255);
   
   vector<Instance> instances;
   
