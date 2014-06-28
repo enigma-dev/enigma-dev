@@ -61,6 +61,24 @@ inline string string_replace_all(string str,string substr,string nstr)
   return str;
 }
 
+static void string_split(std::vector<std::string>& lst, const std::string& input, const std::string& separators, bool remove_empty = true)
+{
+    std::ostringstream word;
+    for (size_t n = 0; n < input.size(); ++n)
+    {
+        if (std::string::npos == separators.find(input[n]))
+            word << input[n];
+        else
+        {
+            if (!word.str().empty() || !remove_empty)
+                lst.push_back(word.str());
+            word.str("");
+        }
+    }
+    if (!word.str().empty() || !remove_empty)
+        lst.push_back(word.str());
+}
+
 std::string readtxtfile(const char* filepath) {
     std::ifstream filestream(filepath);
     std::stringstream buffer;
@@ -344,17 +362,21 @@ Script* readGMXScript(const char* path) {
 
 Shader* readGMXShader(const char* path) {
   string filepath = path;
-  string name = filepath.substr(filepath.find_last_of('/') + 1, filepath.length());
-  string content = readtxtfile((string(path) + ".gml").c_str());
+  size_t start = filepath.find_last_of('/') + 1;
+  size_t end = filepath.find_last_of('.');
+  string name = filepath.substr(start, end - start);
+  string content = readtxtfile((string(path)).c_str()); // extension is sent in the path
 
   Shader* shr = new Shader();
   shr->name = strcpy(new char[name.size() + 1],name.c_str());
   shr->id = shaders.size();
   
-  shr->vertex = strcpy(new char[content.size() + 1],content.c_str());
-  shr->fragment = strcpy(new char[content.size() + 1],content.c_str());
+  vector<string> split;
+  string_split(split, content, "//######################_==_YOYO_SHADER_MARKER_==_######################@~", true);
+  
+  shr->vertex = strcpy(new char[split[0].size() + 1],split[0].c_str());
+  shr->fragment = strcpy(new char[split[1].size() + 1],split[1].c_str());
   shr->precompile = true;
-  //shr->type = ;
   
   return shr;
 }
@@ -371,6 +393,26 @@ Path* readGMXPath(const char* path) {
   Path* pth = new Path();
   pth->name = strcpy(new char[name.size() + 1],name.c_str());
   pth->id = paths.size();
+  
+  pth->precision = atoi(pRoot->first_node("precision")->value());
+  pth->closed = atoi(pRoot->first_node("closed")->value());
+  
+  vector<PathPoint> points;
+  for (xml_node<> *pntnode = pRoot->first_node("points")->first_node("point"); pntnode; pntnode = pntnode->next_sibling())
+  {
+    vector<string> split;
+    string_split(split, pntnode->value(), ",", true);
+
+    PathPoint point;
+    point.x = atoi(split[0].c_str());
+    point.y = atoi(split[1].c_str());
+    point.speed = atoi(split[2].c_str());
+    points.push_back(point);
+  }
+
+  pth->points = new PathPoint[points.size()];
+  copy(points.begin(), points.end(), pth->points);
+  pth->pointCount = points.size();
   
   doc.clear();
   
@@ -791,6 +833,8 @@ void iterateGMXTree(xml_node<> *root, const std::string& folder) {
       delete script;
     } else if (strcmp(node->name(), "shader") == 0) {
       Shader* shader = readGMXShader( (folder + string_replace_all(node->value(), "\\", "/")).c_str() );
+      string type = node->first_attribute("type")->value();
+      shader->type = strcpy(new char[type.size() + 1], type.c_str());
       shaders.push_back(*shader);
       delete shader;
     } else if (strcmp(node->name(), "font") == 0) {
