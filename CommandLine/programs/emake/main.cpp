@@ -209,7 +209,7 @@ Sprite* readGMXSprite(const char* path) {
   spr->bbRight = atoi(pRoot->first_node("bbox_right")->value());
   spr->bbTop = atoi(pRoot->first_node("bbox_top")->value());
   spr->bbBottom = atoi(pRoot->first_node("bbox_bottom")->value());
-  spr->separateMask = atoi(pRoot->first_node("sepmasks")->value()) < 0;
+  spr->separateMask = atoi(pRoot->first_node("sepmasks")->value());
 
   int width = atoi(pRoot->first_node("width")->value()),
       height =  atoi(pRoot->first_node("height")->value());
@@ -259,7 +259,7 @@ Background* readGMXBackground(const char* path) {
   bkg->vSep = atoi(pRoot->first_node("tilevsep")->value());
   bkg->tileWidth = atoi(pRoot->first_node("tilewidth")->value());
   bkg->tileHeight = atoi(pRoot->first_node("tileheight")->value());
-  bkg->useAsTileset = atoi(pRoot->first_node("istileset")->value()) < 0;
+  bkg->useAsTileset = atoi(pRoot->first_node("istileset")->value());
   bkg->transparent = 0;
   bkg->smoothEdges = 0;
   bkg->preload = 0;
@@ -293,7 +293,7 @@ Sound* readGMXSound(const char* path) {
   snd->name = strcpy(new char[name.size() + 1],name.c_str());
   snd->id = sounds.size();
   
-  snd->preload = atoi(pRoot->first_node("preload")->value()) < 0;
+  snd->preload = atoi(pRoot->first_node("preload")->value());
   snd->kind = atoi(pRoot->first_node("kind")->value());
   snd->pan = atoi(pRoot->first_node("pan")->value());
   // yes GMX double nests the volume tag
@@ -336,8 +336,8 @@ Font* readGMXFont(const char* path) {
   pCurrentNode = pRoot->first_node("fontName");
   fnt->fontName = strcpy(new char[pCurrentNode->value_size() + 1],pCurrentNode->value());
   fnt->size = atoi(pRoot->first_node("size")->value());
-  fnt->bold = atoi(pRoot->first_node("bold")->value()) < 0;
-  fnt->italic = atoi(pRoot->first_node("italic")->value()) < 0;
+  fnt->bold = atoi(pRoot->first_node("bold")->value());
+  fnt->italic = atoi(pRoot->first_node("italic")->value());
   
   //TODO: Read glyphs and ranges.
   
@@ -503,11 +503,11 @@ string readGMXActionSequence(xml_node<> *root) {
   {
     unsigned int actkind = atoi(actnode->first_node("kind")->value());
     unsigned int actexectype = atoi(actnode->first_node("exetype")->value());
-    bool actuserelative = atoi(actnode->first_node("userelative")->value()) < 0;
-    bool actuseapplyto = atoi(actnode->first_node("useapplyto")->value()) < 0;
-    bool actisquestion = atoi(actnode->first_node("isquestion")->value()) < 0;
-    bool actrelative = atoi(actnode->first_node("relative")->value()) < 0;
-    bool actisnot = atoi(actnode->first_node("isnot")->value()) < 0;
+    bool actuserelative = atoi(actnode->first_node("userelative")->value());
+    bool actuseapplyto = atoi(actnode->first_node("useapplyto")->value());
+    bool actisquestion = atoi(actnode->first_node("isquestion")->value());
+    bool actrelative = atoi(actnode->first_node("relative")->value());
+    bool actisnot = atoi(actnode->first_node("isnot")->value());
     
     vector<Argument> args;
     for (xml_node<> *argnode = actnode->first_node("arguments")->first_node("argument"); argnode; argnode = argnode->next_sibling())
@@ -702,9 +702,9 @@ GmObject* readGMXObject(const char* path) {
   
   char* parentname = pRoot->first_node("parentName")->value();
   obj->parentId = -100; // TODO: Needs postponed reference
-  obj->solid = atoi(pRoot->first_node("solid")->value()) < 0;
-  obj->visible = atoi(pRoot->first_node("visible")->value()) < 0;
-  obj->persistent = atoi(pRoot->first_node("persistent")->value()) < 0;
+  obj->solid = atoi(pRoot->first_node("solid")->value());
+  obj->visible = atoi(pRoot->first_node("visible")->value());
+  obj->persistent = atoi(pRoot->first_node("persistent")->value());
   obj->depth = atoi(pRoot->first_node("depth")->value());
   
   map< int, vector<Event> > events;
@@ -751,7 +751,7 @@ Room* readGMXRoom(const char* path) {
   rm->name = strcpy(new char[name.size() + 1],name.c_str());
   rm->id = rooms.size();
   
-  rm->drawBackgroundColor = atoi(pRoot->first_node("showcolour")->value()) < 0;
+  rm->drawBackgroundColor = atoi(pRoot->first_node("showcolour")->value());
   rm->width = atoi(pRoot->first_node("width")->value());
   rm->height = atoi(pRoot->first_node("height")->value());
   pCurrentNode = pRoot->first_node("code");
@@ -835,7 +835,7 @@ Room* readGMXRoom(const char* path) {
     instance.id = instances.size();
     instance.x = atoi(instnode->first_attribute("x")->value());
     instance.y = atoi(instnode->first_attribute("y")->value());
-    instance.locked = atoi(instnode->first_attribute("locked")->value()) < 0;
+    instance.locked = atoi(instnode->first_attribute("locked")->value());
     string createCode = instnode->first_attribute("code")->value();
     instance.creationCode = strcpy(new char[createCode.size() + 1], createCode.c_str());
     instances.push_back(instance);
