@@ -762,8 +762,65 @@ Room* readGMXRoom(const char* path) {
   rm->instanceCount = 0;
   rm->backgroundColor = BGR2RGBA(atol(pRoot->first_node("colour")->value()));//RGBA2DWORD(3, 149, 255, 255);
   
-  vector<Instance> instances;
+  vector<BackgroundDef> backgrounddefs;
+  for (xml_node<> *bnode = pRoot->first_node("backgrounds")->first_node("background"); bnode; bnode = bnode->next_sibling())
+  {
+    BackgroundDef backgrounddef;
+    
+    char* backgroundname = bnode->first_attribute("name")->value();
+    for (size_t i = 0; i < backgrounds.size(); i++) {
+      if (strcmp(backgrounds[i].name,backgroundname) == 0) {
+        backgrounddef.backgroundId = i; break;
+      }
+    }
+
+    backgrounddef.visible = atoi(bnode->first_attribute("visible")->value());
+    backgrounddef.foreground = atoi(bnode->first_attribute("foreground")->value());
+    backgrounddef.x = atoi(bnode->first_attribute("x")->value());
+    backgrounddef.y = atoi(bnode->first_attribute("y")->value());
+    backgrounddef.tileHoriz = atoi(bnode->first_attribute("htiled")->value());
+    backgrounddef.tileVert = atoi(bnode->first_attribute("vtiled")->value());
+    backgrounddef.hSpeed = atoi(bnode->first_attribute("hspeed")->value());
+    backgrounddef.vSpeed = atoi(bnode->first_attribute("vspeed")->value());
+    backgrounddef.stretch = atoi(bnode->first_attribute("stretch")->value());
+
+    backgrounddefs.push_back(backgrounddef);
+  }
+  rm->backgroundDefs = new BackgroundDef[backgrounddefs.size()];
+  copy(backgrounddefs.begin(), backgrounddefs.end(), rm->backgroundDefs);
+  rm->backgroundDefCount = backgrounddefs.size();
   
+  vector<View> views;
+  for (xml_node<> *vnode = pRoot->first_node("views")->first_node("view"); vnode; vnode = vnode->next_sibling())
+  {
+    View view;
+    
+    char* objectname = vnode->first_attribute("objName")->value();
+    for (size_t i = 0; i < objects.size(); i++) {
+      if (strcmp(objects[i].name,objectname) == 0) {
+        view.objectId = i; break;
+      }
+    }
+
+    view.viewX = atoi(vnode->first_attribute("xview")->value());
+    view.viewY = atoi(vnode->first_attribute("yview")->value());
+    view.viewW = atoi(vnode->first_attribute("wview")->value());
+    view.viewH = atoi(vnode->first_attribute("hview")->value());
+    view.portX = atoi(vnode->first_attribute("xport")->value());
+    view.portY = atoi(vnode->first_attribute("yport")->value());
+    view.portW = atoi(vnode->first_attribute("wport")->value());
+    view.portH = atoi(vnode->first_attribute("hport")->value());
+    view.borderH = atoi(vnode->first_attribute("hborder")->value());
+    view.borderV = atoi(vnode->first_attribute("vborder")->value());
+    view.speedH = atoi(vnode->first_attribute("hspeed")->value());
+    view.speedV = atoi(vnode->first_attribute("vspeed")->value());
+    views.push_back(view);
+  }
+  rm->views = new View[views.size()];
+  copy(views.begin(), views.end(), rm->views);
+  rm->viewCount = views.size();
+  
+  vector<Instance> instances;
   for (xml_node<> *instnode = pRoot->first_node("instances")->first_node("instance"); instnode; instnode = instnode->next_sibling())
   {
     Instance instance;
@@ -783,25 +840,14 @@ Room* readGMXRoom(const char* path) {
     instance.creationCode = strcpy(new char[createCode.size() + 1], createCode.c_str());
     instances.push_back(instance);
   }
-
   rm->instances = new Instance[instances.size()];
   copy(instances.begin(), instances.end(), rm->instances);
   rm->instanceCount = instances.size();
-  
-  vector<View> views;
-  rm->views = new View[views.size()];
-  copy(views.begin(), views.end(), rm->views);
-  rm->viewCount = views.size();
   
   vector<Tile> tiles;
   rm->tiles = new Tile[tiles.size()];
   copy(tiles.begin(), tiles.end(), rm->tiles);
   rm->tileCount = tiles.size();
-  
-  vector<BackgroundDef> backgrounddefs;
-  rm->backgroundDefs = new BackgroundDef[backgrounddefs.size()];
-  copy(backgrounddefs.begin(), backgrounddefs.end(), rm->backgroundDefs);
-  rm->backgroundDefCount = backgrounddefs.size();
   
   doc.clear();
   
