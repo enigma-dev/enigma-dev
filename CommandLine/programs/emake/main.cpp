@@ -188,6 +188,9 @@ vector<Path> paths;
 vector<Timeline> timelines;
 vector<GmObject> objects;
 vector<Room> rooms;
+vector<GameSettings> gamesettings;
+
+map<size_t, string> postponed_parents;
 
 Sprite* readGMXSprite(const char* path) {
   string filepath = path;
@@ -448,6 +451,11 @@ enum ExecutionType {
   EXEC_CODE = 2
 };
 
+enum AppliesTo {
+  OBJECT_SELF = -1,
+  OBJECT_OTHER = -2,
+};
+
 struct Argument {
   unsigned int kind;
   string val;
@@ -461,30 +469,30 @@ struct Argument {
   }
 };
 
-string argumentToString(Argument* arg) {
-  if (arg->val.length() == 0) {
+string argumentToString(const Argument& arg) {
+  if (arg.val.length() == 0) {
     return "0";
   }
   
-  switch (arg->kind)
+  switch (arg.kind)
   {
     case ARG_BOTH:
       //treat as literal if starts with quote (")
-      if (arg->val[0] == '\"' || arg->val[0] == '\'') return arg->val;
+      if (arg.val[0] == '\"' || arg.val[0] == '\'') return arg.val;
       //else fall through
     case ARG_STRING:
-      return "\"" + string_replace_all(string_replace_all(arg->val,"\\","\\\\"),"\"","\"+'\"'+\"") + "\"";
+      return "\"" + string_replace_all(string_replace_all(arg.val,"\\","\\\\"),"\"","\"+'\"'+\"") + "\"";
     case ARG_BOOLEAN:
-      return (strcmp(arg->val.c_str(), "0") != 0) ? "true":"false";
+      return (strcmp(arg.val.c_str(), "0") != 0) ? "true":"false";
     case ARG_MENU:
-      return arg->val;
+      return arg.val;
     case ARG_COLOR: {
       char buf[32]; 
-      sprintf(buf,"%06X", atoi(arg->val.c_str()));
+      sprintf(buf,"%06X", atoi(arg.val.c_str()));
       return buf;
     }
     default:
-      return arg->val;
+      return arg.val;
   }
 }
 
@@ -501,6 +509,8 @@ string readGMXActionSequence(xml_node<> *root) {
   
   for (xml_node<> *actnode = root->first_node("action"); actnode; actnode = actnode->next_sibling())
   {
+    unsigned int actlibid = atoi(actnode->first_node("libid")->value());
+    unsigned int actid = atoi(actnode->first_node("id")->value());
     unsigned int actkind = atoi(actnode->first_node("kind")->value());
     unsigned int actexectype = atoi(actnode->first_node("exetype")->value());
     bool actuserelative = atoi(actnode->first_node("userelative")->value());
@@ -508,6 +518,12 @@ string readGMXActionSequence(xml_node<> *root) {
     bool actisquestion = atoi(actnode->first_node("isquestion")->value());
     bool actrelative = atoi(actnode->first_node("relative")->value());
     bool actisnot = atoi(actnode->first_node("isnot")->value());
+    
+    string actexecinfo = "";
+    if (actexectype == EXEC_FUNCTION)
+      actexecinfo = actnode->first_node("functionname")->value();
+    if (actexectype == EXEC_CODE)
+      actexecinfo = actnode->first_node("codestring")->value();
     
     vector<Argument> args;
     for (xml_node<> *argnode = actnode->first_node("arguments")->first_node("argument"); argnode; argnode = argnode->next_sibling())
@@ -526,107 +542,125 @@ string readGMXActionSequence(xml_node<> *root) {
       args.push_back(arg);
     }
     
-    switch (actkind)
-    {
-      case ACT_BEGIN:
-        code.append("{");
-        numberOfBraces++;
-        break;
-      case ACT_CODE:
-        //surround with brackets (e.g. for if conditions before it) and terminate dangling comments
-        code.append("{").append(args[0].val).append("/**/\n}").append(nl); //$NON-NLS-1$
-        break;
-      case ACT_ELSE:
-        {
-        if (numberOfIfs > 0)
+      switch (actkind)
+      {
+        case ACT_BEGIN:
+          code.append("{");
+          numberOfBraces++;
+          break;
+        case ACT_CODE:
+          //surround with brackets (e.g. for if conditions before it) and terminate dangling comments
+          code.append("{").append(args[0].val).append("/**/\n}").append(nl); //$NON-NLS-1$
+          break;
+        case ACT_ELSE:
           {
-          code.append("else "); //$NON-NLS-1$
-          numberOfIfs--;
+          if (numberOfIfs > 0)
+            {
+            code.append("else "); //$NON-NLS-1$
+            numberOfIfs--;
+            }
           }
-        }
-        break;
-      case ACT_END:
-        if (numberOfBraces > 0)
+          break;
+        case ACT_END:
+          if (numberOfBraces > 0)
+            {
+            code.append("}");
+            numberOfBraces--;
+            }
+          break;
+        case ACT_EXIT:
+          code.append("exit "); //$NON-NLS-1$
+          break;
+        case ACT_REPEAT:
+          code.append("repeat (").append(args[0].val).append(") "); //$NON-NLS-1$ //$NON-NLS-2$
+          break;
+        case ACT_VARIABLE:
+          if (actrelative)
+            code.append(args[0].val).append(" += ").append(args[1].val).append(nl); //$NON-NLS-1$
+          else
+            code.append(args[0].val).append(" = ").append(args[1].val).append(nl); //$NON-NLS-1$
+          break;
+        case ACT_NORMAL:
           {
-          code.append("}");
-          numberOfBraces--;
+          if (actexectype == EXEC_NONE) break;
+          const char* appliesto = actnode->first_node("whoName")->value();
+          int apto = -3;
+          if (strcmp(appliesto, "self") == 0) {
+            apto = OBJECT_SELF; 
+          } else if (strcmp(appliesto, "other") == 0) {
+            apto = OBJECT_OTHER;
+          } else {
+            for (size_t i = 0; i < objects.size(); i++) {
+              if (strcmp(objects[i].name,appliesto) == 0) {
+                apto = i; break; //TODO: Needs postponed
+              }
+            }
           }
-        break;
-      case ACT_EXIT:
-        code.append("exit "); //$NON-NLS-1$
-        break;
-      case ACT_REPEAT:
-        code.append("repeat (").append(args[0].val).append(") "); //$NON-NLS-1$ //$NON-NLS-2$
-        break;
-      case ACT_VARIABLE:
-        if (actrelative)
-          code.append(args[0].val).append(" += ").append(args[1].val).append(nl); //$NON-NLS-1$
-        else
-          code.append(args[0].val).append(" = ").append(args[1].val).append(nl); //$NON-NLS-1$
-        break;
-#ifdef ONE_BIG_ASS_MOTHER_FUCKING_COMMENT // TODO: Fix this.
-      case ACT_NORMAL:
-        {
-        if (actexectype == EXEC_NONE) break;
-        ResourceReference<org.lateralgm.resources.GmObject> apto = act.getAppliesTo();
-        if (apto != org.lateralgm.resources.GmObject.OBJECT_SELF)
-          {
+          if (apto != OBJECT_SELF)
+            {
+            if (actisquestion)
+              {
+              /* Question action using with statement */
+              if (apto == OBJECT_OTHER) {
+                code.append("with (other) "); //$NON-NLS-1$
+              } else if (apto != -3) {
+                stringstream ss;
+                ss << "with (" << apto << ") "; 
+                code.append(ss.str()); //$NON-NLS-1$ //$NON-NLS-2$
+              } else {
+                code.append("/*null with!*/"); //$NON-NLS-1$
+              }
+              }
+            else
+              {
+              if (apto == OBJECT_OTHER) {
+                code.append("with (other) {"); //$NON-NLS-1$
+              } else if (apto != -3) {
+                stringstream ss;
+                ss << "with (" << apto << ") {";
+                code.append(ss.str()); //$NON-NLS-1$ //$NON-NLS-2$
+              } else {
+                code.append("/*null with!*/{"); //$NON-NLS-1$
+              }
+            }
           if (actisquestion)
             {
-            /* Question action using with statement */
-            if (apto == org.lateralgm.resources.GmObject.OBJECT_OTHER)
-              code.append("with (other) "); //$NON-NLS-1$
-            else if (apto.get() != null)
-              code.append("with (").append(org.lateralgm.resources.GmObject.refAsInt(apto)).append(") "); //$NON-NLS-1$ //$NON-NLS-2$
-            else
-              code.append("/*null with!*/"); //$NON-NLS-1$
-
+            code.append("if "); //$NON-NLS-1$
+            numberOfIfs++;
             }
-          else
+          if (actisnot) code.append("!");
+          if (actuserelative)
             {
-            if (apto == org.lateralgm.resources.GmObject.OBJECT_OTHER)
-              code.append("with (other) {"); //$NON-NLS-1$
-            else if (apto.get() != null)
-              code.append("with (").append(org.lateralgm.resources.GmObject.refAsInt(apto)).append(") {"); //$NON-NLS-1$ //$NON-NLS-2$
+            if (actisquestion)
+              code.append("(argument_relative := ").append(actrelative ? "true" : "false").append(", "); //$NON-NLS-1$ //$NON-NLS-2$
             else
-              code.append("/*null with!*/{"); //$NON-NLS-1$
+              code.append("{argument_relative := ").append(actrelative ? "true" : "false").append("; "); //$NON-NLS-1$ //$NON-NLS-2$
             }
+          if (actisquestion && actexectype == EXEC_CODE) {
+            stringstream ss;
+            ss << "lib" << actlibid << "_action" << actid;
+            code.append(ss.str()); //$NON-NLS-1$ //$NON-NLS-2$
+          } else {
+            code.append(actexecinfo); 
           }
-        if (actisquestion)
-          {
-          code.append("if "); //$NON-NLS-1$
-          numberOfIfs++;
-          }
-        if (act.isNot()) code.append('!');
-        if (actuserelative)
-          {
-          if (actisquestion)
-            code.append("(argument_relative := ").append(actrelative).append(", "); //$NON-NLS-1$ //$NON-NLS-2$
-          else
-            code.append("{argument_relative := ").append(actrelative).append("; "); //$NON-NLS-1$ //$NON-NLS-2$
-          }
-        if (actisquestion && actexectype == EXEC_CODE)
-          code.append("lib").append(la.parentId).append("_action").append(la.id); //$NON-NLS-1$ //$NON-NLS-2$
-        else
-          code.append(la.execInfo);
-        if (actexectype == Action.EXEC_FUNCTION)
-          {
-          code.append('(');
-          for (int i = 0; i < args.size(); i++)
+          if (actexectype == EXEC_FUNCTION)
             {
-            if (i != 0) code.append(',');
-            code.append(toString(args.get(i)));
+            code.append("(");
+            for (int i = 0; i < args.size(); i++)
+              {
+              if (i != 0) code.append(",");
+              code.append(argumentToString(args[i]));
+              }
+            code.append(")");
             }
-          code.append(')');
-          }
-        if (actuserelative) code.append(actisquestion ? ')' : "\n}"); //$NON-NLS-1$
-        code.append(nl);
+          if (actuserelative) code.append(actisquestion ? ")" : "\n}"); //$NON-NLS-1$
+          code.append(nl);
 
-        if (apto != org.lateralgm.resources.GmObject.OBJECT_SELF && (!actisquestion))
-          code.append("\n}"); //$NON-NLS-1$
-        }
-        break;
-#endif        
+          if (apto != OBJECT_SELF && (!actisquestion))
+            code.append("\n}"); //$NON-NLS-1$
+          }
+          break;   
+      }
     }
   }
   
@@ -701,7 +735,8 @@ GmObject* readGMXObject(const char* path) {
   }
   
   char* parentname = pRoot->first_node("parentName")->value();
-  obj->parentId = -100; // TODO: Needs postponed reference
+  obj->parentId = -100;
+  postponed_parents[obj->id] = string(parentname);
   obj->solid = atoi(pRoot->first_node("solid")->value());
   obj->visible = atoi(pRoot->first_node("visible")->value());
   obj->persistent = atoi(pRoot->first_node("persistent")->value());
@@ -712,6 +747,7 @@ GmObject* readGMXObject(const char* path) {
   {
     unsigned int mid = atoi(evtnode->first_attribute("eventtype")->value()),
                  sid = atoi(evtnode->first_attribute("enumb")->value());
+                  //TODO: ename
     Event event;
     event.id = sid;
     string code = readGMXActionSequence(evtnode);
@@ -845,6 +881,29 @@ Room* readGMXRoom(const char* path) {
   rm->instanceCount = instances.size();
   
   vector<Tile> tiles;
+  for (xml_node<> *tnode = pRoot->first_node("tiles")->first_node("tile"); tnode; tnode = tnode->next_sibling())
+  {
+    Tile tile;
+    
+    char* backgroundname = tnode->first_attribute("name")->value();
+    for (size_t i = 0; i < backgrounds.size(); i++) {
+      if (strcmp(backgrounds[i].name,backgroundname) == 0) {
+        tile.backgroundId = i; break;
+      }
+    }
+
+    tile.bgX = atoi(tnode->first_attribute("xo")->value());
+    tile.bgY = atoi(tnode->first_attribute("yo")->value());
+    tile.roomX = atoi(tnode->first_attribute("x")->value());
+    tile.roomY = atoi(tnode->first_attribute("y")->value());
+    tile.width = atoi(tnode->first_attribute("w")->value());
+    tile.height = atoi(tnode->first_attribute("h")->value());
+    tile.depth = atoi(tnode->first_attribute("depth")->value());
+    tile.locked = atoi(tnode->first_attribute("locked")->value());
+    tile.id = atoi(tnode->first_attribute("id")->value());
+    
+    tiles.push_back(tile);
+  }
   rm->tiles = new Tile[tiles.size()];
   copy(tiles.begin(), tiles.end(), rm->tiles);
   rm->tileCount = tiles.size();
@@ -852,6 +911,52 @@ Room* readGMXRoom(const char* path) {
   doc.clear();
   
   return rm;
+}
+
+GameSettings* readGMXSettings(const char* path) {
+  string filepath = path;
+  string name = filepath.substr(filepath.find_last_of('/') + 1, filepath.length());
+  string content = readtxtfile((string(path) + ".config.gmx").c_str());
+  xml_document<> doc;    // character type defaults to char
+  doc.parse<0>(&content[0]);    // 0 means default parse flags
+  xml_node<> *pRoot = doc.first_node()->first_node("Options");
+  
+  GameSettings* gs = new GameSettings();
+  string icopath = filepath.append("/windows/runner_icon.ico");
+  gs->gameIcon = strcpy(new char[icopath.size() + 1], icopath.c_str());
+  gs->letEscEndGame = strcmp(pRoot->first_node("option_closeesc")->value(), "true") == 0;
+  gs->treatCloseAsEscape = strcmp(pRoot->first_node("option_closeesc")->value(), "true") == 0;
+  gs->alwaysOnTop = strcmp(pRoot->first_node("option_stayontop")->value(), "true") == 0;
+  gs->abortOnError = strcmp(pRoot->first_node("option_aborterrors")->value(), "true") == 0;
+  gs->allowWindowResize = strcmp(pRoot->first_node("option_sizeable")->value(), "true") == 0;
+  gs->freezeOnLoseFocus = strcmp(pRoot->first_node("option_freeze")->value(), "true") == 0;
+  gs->setResolution = strcmp(pRoot->first_node("option_changeresolution")->value(), "true") == 0;
+  gs->dontDrawBorder = strcmp(pRoot->first_node("option_noborder")->value(), "true") == 0;
+  gs->dontShowButtons = strcmp(pRoot->first_node("option_nobuttons")->value(), "true") == 0;
+  gs->displayCursor = strcmp(pRoot->first_node("option_showcursor")->value(), "true") == 0;
+  gs->interpolate = strcmp(pRoot->first_node("option_interpolate")->value(), "true") == 0;
+  gs->disableScreensavers = strcmp(pRoot->first_node("option_noscreensaver")->value(), "true") == 0;
+  
+  gs->gameId = atoi(pRoot->first_node("option_gameid")->value());
+  
+  gs->versionMajor = atoi(pRoot->first_node("option_version_major")->value());
+	gs->versionMinor = atoi(pRoot->first_node("option_version_minor")->value());
+	gs->versionRelease = atoi(pRoot->first_node("option_version_release")->value());
+	gs->versionBuild = atoi(pRoot->first_node("option_version_build")->value());
+  
+  string author = pRoot->first_node("option_author")->value();
+  gs->author = strcpy(new char[author.size() + 1], author.c_str());
+  string company = pRoot->first_node("option_version_company")->value();
+  gs->company = strcpy(new char[company.size() + 1], company.c_str());
+  string description = pRoot->first_node("option_version_description")->value();
+  gs->description = strcpy(new char[description.size() + 1], description.c_str());
+  //string version = pRoot->first_node("option_version")->value();
+  gs->version = "";
+  string product = pRoot->first_node("option_version_product")->value();
+  gs->product = strcpy(new char[product.size() + 1], product.c_str());
+  string copyright = pRoot->first_node("option_version_copyright")->value();
+  gs->copyright = strcpy(new char[copyright.size() + 1], copyright.c_str());
+  return gs;
 }
 
 void iterateGMXTree(xml_node<> *root, const std::string& folder) {
@@ -900,6 +1005,10 @@ void iterateGMXTree(xml_node<> *root, const std::string& folder) {
       Room* room = readGMXRoom( (folder + string_replace_all(node->value(), "\\", "/")).c_str() );
       rooms.push_back(*room);
       delete room;
+    } else if (strcmp(node->name(), "Config") == 0) {
+      GameSettings* gs = readGMXSettings( (folder + string_replace_all(node->value(), "\\", "/")).c_str() );
+      gamesettings.push_back(*gs);
+      delete gs;
     } else {
       iterateGMXTree(node, folder);
     }
@@ -916,23 +1025,13 @@ void buildgmx(const char* input, const char* output) {
     string folder = filepath.substr(0, filepath.find_last_of('/') + 1);
 
     EnigmaStruct* es = new EnigmaStruct();
-    es->gameSettings.gameIcon = "../../Resources/joshcontroller.ico";
-    es->gameSettings.letEscEndGame = true;
-    es->gameSettings.treatCloseAsEscape = true;
-    es->gameSettings.alwaysOnTop = true;
-    es->gameSettings.gameId = 03434534;
-    es->gameSettings.company = "";
-    es->gameSettings.description = "";
-    es->gameSettings.version = "";
-    es->gameSettings.product = "";
-    es->gameSettings.version = "";
-    es->gameSettings.copyright = "";
+    es->filename = input; // NOTE: This is what LGM does; emulates GM8.1
     es->gameInfo.gameInfoStr = "";
     es->gameInfo.formCaption = "";
-    es->filename = "exampleproject";
     
     iterateGMXTree(pRoot, folder);
     
+    es->gameSettings = gamesettings[0];
     es->rooms = &rooms[0];
     es->roomCount = rooms.size();
     es->gmObjects =  &objects[0];
