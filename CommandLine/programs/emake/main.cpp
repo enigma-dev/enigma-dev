@@ -352,7 +352,7 @@ Script* readGMXScript(const char* path) {
   size_t start = filepath.find_last_of('/') + 1;
   size_t end = filepath.find_last_of('.');
   string name = filepath.substr(start, end - start);
-  string content = readtxtfile((string(path) + ".gml").c_str());
+  string content = readtxtfile((string(path)).c_str());
   
   Script* scr = new Script();
   scr->name = strcpy(new char[name.size() + 1],name.c_str());
