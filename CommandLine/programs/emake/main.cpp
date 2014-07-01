@@ -18,7 +18,6 @@
 * You should have received a copy of the GNU General Public License along with
 * ENIGMA. If not, see <http://www.gnu.org/licenses/>.
 **/
-
 #include <unistd.h>
 #include <iostream>
 #include <fstream>
@@ -335,7 +334,7 @@ Font* readGMXFont(const char* path) {
   fnt->name = strcpy(new char[name.size() + 1],name.c_str());
   fnt->id = fonts.size();
   
-  pCurrentNode = pRoot->first_node("fontName");
+  pCurrentNode = pRoot->first_node("name");
   fnt->fontName = strcpy(new char[pCurrentNode->value_size() + 1],pCurrentNode->value());
   fnt->size = atoi(pRoot->first_node("size")->value());
   fnt->bold = atoi(pRoot->first_node("bold")->value());
@@ -350,9 +349,11 @@ Font* readGMXFont(const char* path) {
 
 Script* readGMXScript(const char* path) {
   string filepath = path;
-  string name = filepath.substr(filepath.find_last_of('/') + 1, filepath.length());
+  size_t start = filepath.find_last_of('/') + 1;
+  size_t end = filepath.find_last_of('.');
+  string name = filepath.substr(start, end - start);
   string content = readtxtfile((string(path) + ".gml").c_str());
-
+  
   Script* scr = new Script();
   scr->name = strcpy(new char[name.size() + 1],name.c_str());
   scr->id = scripts.size();
@@ -670,8 +671,7 @@ string readGMXActionSequence(xml_node<> *root) {
     for (int i = 0; i < numberOfBraces; i++)
       code.append("\n}");
   }
-    
-  ///MessageBox(NULL, code.c_str(), "wtf", MB_OK);
+
   return code;
 }
 
@@ -1160,10 +1160,10 @@ int main(int argc, char* argv[])
     "target-windowing: Win32\n"
     "target-compiler: gcc\n"
     "target-graphics: OpenGL1\n"
-    "target-widget: None\n"
+    "target-widget: Win32\n"
     "target-collision: Precise\n"
     "target-networking: None\n"
-    "extensions: Universal_System/Extensions/Alarms,Universal_System/Extensions/Paths,Universal_System/Extensions/DataStructures\n"
+    "extensions: Universal_System/Extensions/Alarms,Universal_System/Extensions/DataStructures,Universal_System/Extensions/MotionPlanning,Universal_System/Extensions/Paths\n"
     ));
 
     // obtain keywords
