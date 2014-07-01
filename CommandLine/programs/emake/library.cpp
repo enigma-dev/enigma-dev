@@ -22,6 +22,9 @@
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
 #include <windows.h>
 #include <process.h>
+#else
+#include <pthread.h> // use POSIX threads
+#include <unistd.h>
 #endif
 
 #include "library.h"
@@ -65,42 +68,34 @@ static void ede_dia_progress_text(const char* caption)
 
 bool isoutputting;
 FILE* outputfile;
-string fuckpath;
 static void* OutputThread() {
-  while (isoutputting) {
-   // if (!feof(outputfile)) {
-    /*
+  while (isoutputting || !feof(outputfile)) {
+    if (!feof(outputfile)) {
       long int pos = ftell(outputfile);
-      fpos_t* realpos;
-      fgetpos(outputfile, realpos);
+      fpos_t realpos;
+      fgetpos(outputfile, &realpos);
    
       // seek to the end
       fseek(outputfile, 0, SEEK_END);
 
       // get current position
-      long int size = ftell(outputfile);
+      long int size = ftell(outputfile) - pos;
       
-      fsetpos(outputfile, realpos);
-      */
-      //char* buffer;
-      //fread(buffer, 1, 1,outputfile);
-      //cout << "f";
-   // } else {
-     // Sleep(1000);
-    //}
-  }
-  outputfile = fopen(fuckpath.c_str(),"r");
-      // seek to the end
-      fseek(outputfile, 0, SEEK_END);
-
-      // get current position
-      long int size = ftell(outputfile);
+      fsetpos(outputfile, &realpos);
       
-      fseek(outputfile, 0, SEEK_SET);
- 
-      char* buffer = (char*)calloc(size, sizeof(char));
-      fread(buffer, sizeof(char), size,outputfile);
+      char* buffer = (char*) malloc (sizeof(char)*size);
+      fread(buffer, 1, size, outputfile);
       cout << buffer;
+      delete buffer;
+    } else {
+      #if CURRENT_PLATFORM_ID == OS_WINDOWS
+      Sleep(1000);
+      #else
+      usleep(1000);
+      #endif
+    }
+  }
+
   fclose(outputfile);
   return 0;
 }
@@ -108,17 +103,20 @@ static void* OutputThread() {
 //Sets the file from which data is redirected to frame log
 static void ede_output_redirect_file(const char* filepath)
 {
-cout << "fuck";
-fuckpath = filepath;
   outputfile = fopen(filepath,"r");
-  isoutputting = true;
-  uintptr_t ret = _beginthread((void (*)(void*))OutputThread, 0, 0);
-  cout << "fucker";
+
 }
 
 //Indicates file completion, dumps remainder to frame log
 static void ede_output_redirect_reset()
 {
+  isoutputting = true;
+  #if CURRENT_PLATFORM_ID == OS_WINDOWS // move this shit back to the function above once we've worked out the mutex
+  uintptr_t ret = _beginthread((void (*)(void*))OutputThread, 0, 0); 
+  #else
+  pthread_t me;
+  pthread_create(&me, NULL, OutputThread, NULL);
+  #endif
   isoutputting = false;
 }
 
