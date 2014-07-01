@@ -19,8 +19,6 @@
 * ENIGMA. If not, see <http://www.gnu.org/licenses/>.
 **/
 
-#include <windows.h>
-
 #include <unistd.h>
 #include <iostream>
 #include <fstream>
@@ -190,7 +188,8 @@ vector<GmObject> objects;
 vector<Room> rooms;
 vector<GameSettings> gamesettings;
 
-map<size_t, string> postponed_parents;
+unsigned lastInstanceId = 100000,
+         lastTileId = 10000000;
 
 Sprite* readGMXSprite(const char* path) {
   string filepath = path;
@@ -520,10 +519,11 @@ string readGMXActionSequence(xml_node<> *root) {
     bool actisnot = atoi(actnode->first_node("isnot")->value());
     
     string actexecinfo = "";
-    if (actexectype == EXEC_FUNCTION)
+    if (actexectype == EXEC_FUNCTION) {
       actexecinfo = actnode->first_node("functionname")->value();
-    if (actexectype == EXEC_CODE)
+    } if (actexectype == EXEC_CODE) {
       actexecinfo = actnode->first_node("codestring")->value();
+    }
     
     vector<Argument> args;
     for (xml_node<> *argnode = actnode->first_node("arguments")->first_node("argument"); argnode; argnode = argnode->next_sibling())
@@ -536,7 +536,7 @@ string readGMXActionSequence(xml_node<> *root) {
         } else if (strcmp(argpnode->name(), "string") == 0) {
           arg.val = string(argpnode->value());
         } else {
-          arg.val = string(argpnode->value());
+          arg.val = string(argpnode->value()); //TODO: Get the id, Josh said to avoid resources of different types with the same name switch(arg.kind)
         }
       }
       args.push_back(arg);
@@ -550,13 +550,13 @@ string readGMXActionSequence(xml_node<> *root) {
           break;
         case ACT_CODE:
           //surround with brackets (e.g. for if conditions before it) and terminate dangling comments
-          code.append("{").append(args[0].val).append("/**/\n}").append(nl); //$NON-NLS-1$
+          code.append("{").append(args[0].val).append("/**/\n}").append(nl);
           break;
         case ACT_ELSE:
           {
           if (numberOfIfs > 0)
             {
-            code.append("else "); //$NON-NLS-1$
+            code.append("else ");
             numberOfIfs--;
             }
           }
@@ -569,16 +569,16 @@ string readGMXActionSequence(xml_node<> *root) {
             }
           break;
         case ACT_EXIT:
-          code.append("exit "); //$NON-NLS-1$
+          code.append("exit ");
           break;
         case ACT_REPEAT:
-          code.append("repeat (").append(args[0].val).append(") "); //$NON-NLS-1$ //$NON-NLS-2$
+          code.append("repeat (").append(args[0].val).append(") ");
           break;
         case ACT_VARIABLE:
           if (actrelative)
-            code.append(args[0].val).append(" += ").append(args[1].val).append(nl); //$NON-NLS-1$
+            code.append(args[0].val).append(" += ").append(args[1].val).append(nl);
           else
-            code.append(args[0].val).append(" = ").append(args[1].val).append(nl); //$NON-NLS-1$
+            code.append(args[0].val).append(" = ").append(args[1].val).append(nl);
           break;
         case ACT_NORMAL:
           {
@@ -592,54 +592,55 @@ string readGMXActionSequence(xml_node<> *root) {
           } else {
             for (size_t i = 0; i < objects.size(); i++) {
               if (strcmp(objects[i].name,appliesto) == 0) {
-                apto = i; break; //TODO: Needs postponed
+                apto = i; break;
               }
             }
           }
           if (apto != OBJECT_SELF)
-            {
+          {
             if (actisquestion)
-              {
+            {
               /* Question action using with statement */
               if (apto == OBJECT_OTHER) {
-                code.append("with (other) "); //$NON-NLS-1$
+                code.append("with (other) ");
               } else if (apto != -3) {
                 stringstream ss;
                 ss << "with (" << apto << ") "; 
-                code.append(ss.str()); //$NON-NLS-1$ //$NON-NLS-2$
+                code.append(ss.str());
               } else {
-                code.append("/*null with!*/"); //$NON-NLS-1$
+                code.append("/*null with!*/");
               }
-              }
+            }
             else
-              {
+            {
               if (apto == OBJECT_OTHER) {
-                code.append("with (other) {"); //$NON-NLS-1$
+                code.append("with (other) {");
               } else if (apto != -3) {
                 stringstream ss;
                 ss << "with (" << apto << ") {";
-                code.append(ss.str()); //$NON-NLS-1$ //$NON-NLS-2$
+                code.append(ss.str());
               } else {
-                code.append("/*null with!*/{"); //$NON-NLS-1$
+                code.append("/*null with!*/{");
               }
             }
+          }
           if (actisquestion)
-            {
-            code.append("if "); //$NON-NLS-1$
+          {
+            code.append("if ");
             numberOfIfs++;
-            }
+          }
           if (actisnot) code.append("!");
           if (actuserelative)
-            {
+          {
             if (actisquestion)
-              code.append("(argument_relative := ").append(actrelative ? "true" : "false").append(", "); //$NON-NLS-1$ //$NON-NLS-2$
+              code.append("(argument_relative := ").append(actrelative ? "true" : "false").append(", ");
             else
-              code.append("{argument_relative := ").append(actrelative ? "true" : "false").append("; "); //$NON-NLS-1$ //$NON-NLS-2$
-            }
+              code.append("{argument_relative := ").append(actrelative ? "true" : "false").append("; ");
+          }
           if (actisquestion && actexectype == EXEC_CODE) {
             stringstream ss;
             ss << "lib" << actlibid << "_action" << actid;
-            code.append(ss.str()); //$NON-NLS-1$ //$NON-NLS-2$
+            code.append(ss.str());
           } else {
             code.append(actexecinfo); 
           }
@@ -653,29 +654,28 @@ string readGMXActionSequence(xml_node<> *root) {
               }
             code.append(")");
             }
-          if (actuserelative) code.append(actisquestion ? ")" : "\n}"); //$NON-NLS-1$
+          if (actuserelative) code.append(actisquestion ? ")" : "\n}");
           code.append(nl);
 
           if (apto != OBJECT_SELF && (!actisquestion))
-            code.append("\n}"); //$NON-NLS-1$
+            code.append("\n}");
           }
           break;   
       }
     }
-  }
   
   if (numberOfBraces > 0)
-    {
+  {
     //someone forgot the closing block action
     for (int i = 0; i < numberOfBraces; i++)
-      code.append("\n}"); //$NON-NLS-1$
-    }
+      code.append("\n}");
+  }
     
-    ///MessageBox(NULL, code.c_str(), "wtf", MB_OK);
+  ///MessageBox(NULL, code.c_str(), "wtf", MB_OK);
   return code;
 }
 
-Timeline* readGMXTimeline(const char* path) {
+Timeline* readGMXTimeline(const char* path, size_t id) {
   string filepath = path;
   string name = filepath.substr(filepath.find_last_of('/') + 1, filepath.length());
   string content = readtxtfile((string(path) + ".timeline.gmx").c_str());
@@ -684,9 +684,9 @@ Timeline* readGMXTimeline(const char* path) {
   xml_node<> *pRoot = doc.first_node();
   xml_node<> *pCurrentNode;
 
-  Timeline* tml = new Timeline();
-  tml->name = strcpy(new char[name.size() + 1],name.c_str());
-  tml->id = timelines.size();
+  Timeline* tml = &timelines[id];
+  //tml->name = strcpy(new char[name.size() + 1],name.c_str());
+  //tml->id = timelines.size();
   
   vector<Moment> moments;
   for (xml_node<> *momnode = pRoot->first_node("entry"); momnode; momnode = momnode->next_sibling())
@@ -709,7 +709,7 @@ Timeline* readGMXTimeline(const char* path) {
   return tml;
 }
 
-GmObject* readGMXObject(const char* path) {
+GmObject* readGMXObject(const char* path, size_t id) {
   string filepath = path;
   string name = filepath.substr(filepath.find_last_of('/') + 1, filepath.length());
   string content = readtxtfile((string(path) + ".object.gmx").c_str());
@@ -718,25 +718,37 @@ GmObject* readGMXObject(const char* path) {
   xml_node<> *pRoot = doc.first_node();
   xml_node<> *pCurrentNode;
 
-  GmObject* obj = new GmObject();
-  obj->name = strcpy(new char[name.size() + 1],name.c_str());
-  obj->id = objects.size();
+  GmObject* obj = &objects[id];
+  //obj->name = strcpy(new char[name.size() + 1],name.c_str());
+  //obj->id = objects.size();
+  obj->spriteId = -1;
   char* spritename = pRoot->first_node("spriteName")->value();
-  for (size_t i = 0; i < sprites.size(); i++) {
-    if (strcmp(sprites[i].name,spritename) == 0) {
-      obj->spriteId = i; break;
+  if (strcmp(spritename, "<undefined>") != 0) {
+    for (size_t i = 0; i < sprites.size(); i++) {
+      if (strcmp(sprites[i].name,spritename) == 0) {
+        obj->spriteId = i; break;
+      }
     }
   }
+  obj->maskId = -1;
   char* maskname = pRoot->first_node("maskName")->value();
-  for (size_t i = 0; i < sprites.size(); i++) {
-    if (strcmp(sprites[i].name,maskname) == 0) {
-      obj->maskId = i; break;
+  if (strcmp(maskname, "<undefined>") != 0) {
+    for (size_t i = 0; i < sprites.size(); i++) {
+      if (strcmp(sprites[i].name,maskname) == 0) {
+        obj->maskId = i; break;
+      }
     }
   }
   
-  char* parentname = pRoot->first_node("parentName")->value();
   obj->parentId = -100;
-  postponed_parents[obj->id] = string(parentname);
+  char* parentname = pRoot->first_node("parentName")->value();
+  if (strcmp(parentname, "<undefined>") != 0) {
+    for (size_t i = 0; i < objects.size(); i++) {
+      if (strcmp(objects[i].name,parentname) == 0) {
+        obj->parentId = i; break;
+      }
+    }
+  }
   obj->solid = atoi(pRoot->first_node("solid")->value());
   obj->visible = atoi(pRoot->first_node("visible")->value());
   obj->persistent = atoi(pRoot->first_node("persistent")->value());
@@ -746,8 +758,22 @@ GmObject* readGMXObject(const char* path) {
   for (xml_node<> *evtnode = pRoot->first_node("events")->first_node("event"); evtnode; evtnode = evtnode->next_sibling())
   {
     unsigned int mid = atoi(evtnode->first_attribute("eventtype")->value()),
-                 sid = atoi(evtnode->first_attribute("enumb")->value());
-                  //TODO: ename
+                 sid = -1;
+    xml_attribute<>* enameattr = evtnode->first_attribute("ename");
+    if (enameattr != NULL) {
+      //continue;
+      char* ename = enameattr->value();
+      if (strcmp(ename, "<undefined>") != 0) {
+        for (size_t i = 0; i < objects.size(); i++) {
+          if (strcmp(objects[i].name,ename) == 0) {
+            sid = i; break;
+          }
+        }
+      }
+    } else {
+      sid = atoi(evtnode->first_attribute("enumb")->value());
+    }
+
     Event event;
     event.id = sid;
     string code = readGMXActionSequence(evtnode);
@@ -788,6 +814,7 @@ Room* readGMXRoom(const char* path) {
   rm->id = rooms.size();
   
   rm->drawBackgroundColor = atoi(pRoot->first_node("showcolour")->value());
+  rm->enableViews = atoi(pRoot->first_node("enableViews")->value());
   rm->width = atoi(pRoot->first_node("width")->value());
   rm->height = atoi(pRoot->first_node("height")->value());
   pCurrentNode = pRoot->first_node("code");
@@ -803,10 +830,13 @@ Room* readGMXRoom(const char* path) {
   {
     BackgroundDef backgrounddef;
     
+    backgrounddef.backgroundId = -1;
     char* backgroundname = bnode->first_attribute("name")->value();
-    for (size_t i = 0; i < backgrounds.size(); i++) {
-      if (strcmp(backgrounds[i].name,backgroundname) == 0) {
-        backgrounddef.backgroundId = i; break;
+    if (strcmp(backgroundname, "<undefined>") != 0) {
+      for (size_t i = 0; i < backgrounds.size(); i++) {
+        if (strcmp(backgrounds[i].name,backgroundname) == 0) {
+          backgrounddef.backgroundId = i; break;
+        }
       }
     }
 
@@ -831,10 +861,13 @@ Room* readGMXRoom(const char* path) {
   {
     View view;
     
+    view.objectId = -1;
     char* objectname = vnode->first_attribute("objName")->value();
-    for (size_t i = 0; i < objects.size(); i++) {
-      if (strcmp(objects[i].name,objectname) == 0) {
-        view.objectId = i; break;
+    if (strcmp(objectname, "<undefined>") != 0) {
+      for (size_t i = 0; i < objects.size(); i++) {
+        if (strcmp(objects[i].name,objectname) == 0) {
+          view.objectId = i; break;
+        }
       }
     }
 
@@ -850,6 +883,7 @@ Room* readGMXRoom(const char* path) {
     view.borderV = atoi(vnode->first_attribute("vborder")->value());
     view.speedH = atoi(vnode->first_attribute("hspeed")->value());
     view.speedV = atoi(vnode->first_attribute("vspeed")->value());
+    view.visible = atoi(vnode->first_attribute("visible")->value());
     views.push_back(view);
   }
   rm->views = new View[views.size()];
@@ -861,14 +895,17 @@ Room* readGMXRoom(const char* path) {
   {
     Instance instance;
     
+    instance.objectId = -1;
     char* objectname = instnode->first_attribute("objName")->value();
-    for (size_t i = 0; i < objects.size(); i++) {
-      if (strcmp(objects[i].name,objectname) == 0) {
-        instance.objectId = i; break;
+    if (strcmp(objectname, "<undefined>") != 0) {
+      for (size_t i = 0; i < objects.size(); i++) {
+        if (strcmp(objects[i].name,objectname) == 0) {
+          instance.objectId = i; break;
+        }
       }
     }
     
-    instance.id = instances.size();
+    instance.id = lastInstanceId++;
     instance.x = atoi(instnode->first_attribute("x")->value());
     instance.y = atoi(instnode->first_attribute("y")->value());
     instance.locked = atoi(instnode->first_attribute("locked")->value());
@@ -885,10 +922,13 @@ Room* readGMXRoom(const char* path) {
   {
     Tile tile;
     
+    tile.backgroundId = -1;
     char* backgroundname = tnode->first_attribute("name")->value();
-    for (size_t i = 0; i < backgrounds.size(); i++) {
-      if (strcmp(backgrounds[i].name,backgroundname) == 0) {
-        tile.backgroundId = i; break;
+    if (strcmp(backgroundname, "<undefined>") != 0) {
+      for (size_t i = 0; i < backgrounds.size(); i++) {
+        if (strcmp(backgrounds[i].name,backgroundname) == 0) {
+          tile.backgroundId = i; break;
+        }
       }
     }
 
@@ -900,7 +940,7 @@ Room* readGMXRoom(const char* path) {
     tile.height = atoi(tnode->first_attribute("h")->value());
     tile.depth = atoi(tnode->first_attribute("depth")->value());
     tile.locked = atoi(tnode->first_attribute("locked")->value());
-    tile.id = atoi(tnode->first_attribute("id")->value());
+    tile.id = lastTileId++;// atoi(tnode->first_attribute("id")->value()); <---- TODO: GMX does store the id, but for the purpose of obtaining the last tile id a local was used
     
     tiles.push_back(tile);
   }
@@ -994,11 +1034,19 @@ void iterateGMXTree(xml_node<> *root, const std::string& folder) {
       delete font;
     //NOTE: Read timelines followed by objects followed by rooms, because each can refer to each other in that order and it cuts down on unnecessary postponed references.
     } else if (strcmp(node->name(), "timeline") == 0) {
-      Timeline* timeline = readGMXTimeline( (folder + string_replace_all(node->value(), "\\", "/")).c_str() );
+      string name = string_replace_all(node->value(), "\\", "/");
+      name = name.substr(name.find_last_of("/") + 1, name.length());
+      Timeline* timeline = new Timeline();
+      timeline->name = strcpy(new char[name.size() + 1], name.c_str());
+      timeline->id = timelines.size();
       timelines.push_back(*timeline);
       delete timeline;
     } else if (strcmp(node->name(), "object") == 0) {
-      GmObject* object = readGMXObject( (folder + string_replace_all(node->value(), "\\", "/")).c_str() );
+      string name = string_replace_all(node->value(), "\\", "/");
+      name = name.substr(name.find_last_of("/") + 1, name.length());
+      GmObject* object = new GmObject();
+      object->name = strcpy(new char[name.size() + 1], name.c_str());
+      object->id = objects.size();
       objects.push_back(*object);
       delete object;
     } else if (strcmp(node->name(), "room") == 0) {
@@ -1031,6 +1079,14 @@ void buildgmx(const char* input, const char* output) {
     
     iterateGMXTree(pRoot, folder);
     
+    // Handle postponed resources.
+    for (size_t i = 0; i < objects.size(); i++) {
+      readGMXObject((folder + "objects/" + objects[i].name).c_str(), i);
+    }
+    for (size_t i = 0; i < timelines.size(); i++) {
+      readGMXTimeline((folder + "timelines/" + timelines[i].name).c_str(), i);
+    }
+    
     es->gameSettings = gamesettings[0];
     es->rooms = &rooms[0];
     es->roomCount = rooms.size();
@@ -1052,6 +1108,8 @@ void buildgmx(const char* input, const char* output) {
     es->timelineCount = timelines.size();
     es->backgrounds = &backgrounds[0];
     es->backgroundCount = backgrounds.size();
+    es->lastTileId = lastTileId;
+    es->lastInstanceId = lastInstanceId;
     cout << compileEGMf(es, output, emode_run) << endl;
 }
 
@@ -1103,9 +1161,9 @@ int main(int argc, char* argv[])
     "target-compiler: gcc\n"
     "target-graphics: OpenGL1\n"
     "target-widget: None\n"
-    "target-collision: BBox\n"
+    "target-collision: Precise\n"
     "target-networking: None\n"
-    "extensions: Universal_System/Extensions/Paths\n"
+    "extensions: Universal_System/Extensions/Alarms,Universal_System/Extensions/Paths,Universal_System/Extensions/DataStructures\n"
     ));
 
     // obtain keywords
@@ -1123,9 +1181,17 @@ int main(int argc, char* argv[])
       if (strcmp(input.c_str(), "quit") == 0) {
          closing = true;
       } else if (strcmp(input.c_str(), "test") == 0) {
-        buildtestproject("C:/Users/Owner/Desktop/wtf.exe");
+        cout << "Enter the location to output the executable:" << endl;
+        getline(cin, input);
+        buildtestproject(input.c_str());
       } else if (strcmp(input.c_str(), "gmx") == 0) {
-        buildgmx("C:/Users/Owner/Desktop/test.gmx/test.project.gmx", "C:/Users/Owner/Desktop/wtf.exe");
+        cout << "Enter the file path to the GMX:" << endl;
+        getline(cin, input);
+        string outputpath;
+        cout << "Enter the location to output the executable:" << endl;
+        getline(cin, outputpath);
+        buildgmx(input.c_str(), outputpath.c_str());
+        //buildgmx("C:/Users/Owner/Desktop/test2.gmx/test2.project.gmx", "C:/Users/Owner/Desktop/wtf.exe");
       }
     }
 
