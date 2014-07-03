@@ -61,9 +61,6 @@ namespace enigma
         using enigma_user::room_width;
         using enigma_user::room_height;
 
-        glViewport(0,0,(int)room_width,(int)room_height);
-        d3d_set_projection_ortho(0,(int)room_width,0,(int)room_height, 0);
-
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glDisable(GL_DEPTH_TEST);
@@ -99,11 +96,6 @@ namespace enigma
             glsl_program_attach(prog_id, fshader_id);
             glsl_program_link(prog_id);
             glsl_program_validate(prog_id);
-
-            getUniforms(prog_id);
-            getAttributes(prog_id);
-            getDefaultUniforms(prog_id);
-            getDefaultAttributes(prog_id);
         }
 
         //ADD DEFAULT SHADER (emulates FFP)
@@ -132,6 +124,9 @@ namespace enigma
 
         glsl_program_reset(); //Set the default program
         //END DEFAULT SHADER
+
+        glViewport(0,0,(int)room_width,(int)room_height);
+        d3d_set_projection_ortho(0,(int)room_width,0,(int)room_height, 0);
     }
 }
 

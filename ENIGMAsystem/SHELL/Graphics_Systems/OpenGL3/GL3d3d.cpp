@@ -350,11 +350,20 @@ class d3d_lights
 
     void light_update_positions()
     {
+        enigma::transformation_update();
         unsigned int al = 0; //Active lights
         for (unsigned int i=0; i<lights.size(); ++i){
             if (lights[i].enabled == true){
-                enigma::Vector4 lpos_eyespace = enigma::mv_matrix * enigma::Vector4(lights[i].position[0],lights[i].position[1],lights[i].position[2],1.0);
-                gs_scalar tmp_pos[4] = {lpos_eyespace.x,lpos_eyespace.y,lpos_eyespace.z,lights[i].position[3]};
+                gs_scalar tmp_pos[4];
+                if (lights[i].type == 0){ //Directional light
+                    enigma::Vector3 lpos_eyespace;
+                    lpos_eyespace = enigma::normal_matrix * enigma::Vector3(lights[i].position[0],lights[i].position[1],lights[i].position[2]);
+                    tmp_pos[0] = lpos_eyespace.x, tmp_pos[1] = lpos_eyespace.y, tmp_pos[2] = lpos_eyespace.z, tmp_pos[3] = lights[i].position[3];
+                }else{ //Point lights
+                    enigma::Vector4 lpos_eyespace;
+                    lpos_eyespace = enigma::mv_matrix  * enigma::Vector4(lights[i].position[0],lights[i].position[1],lights[i].position[2],1.0);
+                    tmp_pos[0] = lpos_eyespace.x, tmp_pos[1] = lpos_eyespace.y, tmp_pos[2] = lpos_eyespace.z, tmp_pos[3] = lights[i].position[3];
+                }
                 enigma_user::glsl_uniform4fv(enigma::shaderprograms[enigma::bound_shader]->uni_light_position[al], 1, tmp_pos);
                 ++al;
             }
