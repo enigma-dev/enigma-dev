@@ -28,7 +28,8 @@ namespace enigma
     extern Matrix4 projection_matrix, view_matrix, model_matrix;
     extern Matrix4 mv_matrix, mvp_matrix;
     extern Matrix3 normal_matrix;
-    extern bool transformation_update;
+    extern bool transform_needs_update;
+    extern void transformation_update();
 }
 
 namespace enigma_user

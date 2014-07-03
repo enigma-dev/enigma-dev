@@ -170,13 +170,13 @@ namespace enigma
                         "attenuation = 1.0 / (Light[index].cA + Light[index].lA * distance + Light[index].qA * distance * distance);\n"
                       "}\n"
                       "vec3 r = reflect( -L, norm );\n"
-                      "vec4 ambient = Light[index].La * Material.Ka;\n"
-                      "float LdotN = max( dot(L,norm), 0.0 );\n"
+                      "total_light += Light[index].La * Material.Ka;\n"
+                      "float LdotN = max( dot(norm, L), 0.0 );\n"
                       "vec4 diffuse = vec4(attenuation * vec3(Light[index].Ld) * vec3(Material.Kd) * LdotN,1.0);\n"
                       "vec4 spec = vec4(0.0);\n"
                       "if( LdotN > 0.0 )\n"
                           "spec = clamp(vec4(attenuation * vec3(Light[index].Ls) * vec3(Material.Ks) * pow( max( dot(r,v), 0.0 ), Material.Shininess ),1.0),0.0,1.0);\n"
-                      "total_light += diffuse + ambient + spec;\n"
+                      "total_light += diffuse + spec;\n"
                   "}\n"
                   "return total_light;\n"
                 "}\n"
@@ -191,7 +191,7 @@ namespace enigma
                         "vec3 eyeNorm;\n"
                         "vec4 eyePosition;\n"
                         "getEyeSpace(eyeNorm, eyePosition);\n"
-                        "v_Color = clamp(en_AmbientColor * Material.Ka + phongModel( eyeNorm, eyePosition ),0.0,1.0) * iColor;\n"
+                        "v_Color = clamp(en_AmbientColor + phongModel( eyeNorm, eyePosition ),0.0,1.0) * iColor;\n"
                     "}else{\n"
 						"v_Color = iColor;\n"
                     "}\n"
@@ -456,6 +456,7 @@ bool glsl_shader_load(int id, string fname)
     if (enigma::shaders[id]->type == sh_fragment) source = enigma::getFragmentShaderPrefix() + shaderSource;
 
     const char *ShaderSource = source.c_str();
+    //std::cout << ShaderSource << std::endl;
     glShaderSource(enigma::shaders[id]->shader, 1, &ShaderSource, NULL);
     return true; // No Error
 }
@@ -524,6 +525,10 @@ bool glsl_program_link(int id)
     GLint linked;
     glGetProgramiv(enigma::shaderprograms[id]->shaderprogram, GL_LINK_STATUS, &linked);
     if (linked){
+        enigma::getUniforms(id);
+        enigma::getAttributes(id);
+        enigma::getDefaultUniforms(id);
+        enigma::getDefaultAttributes(id);
         return true;
     } else {
         std::cout << "Shader program[" << id << "] - Linking failed - Info log: " << std::endl;

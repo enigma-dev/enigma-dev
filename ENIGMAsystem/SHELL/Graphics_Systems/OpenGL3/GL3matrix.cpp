@@ -41,7 +41,22 @@ namespace enigma
 
     enigma::Matrix3 normal_matrix(1,0,0,0,1,0,0,0,1);
 
-    bool transformation_update = false;
+    bool transform_needs_update = false;
+
+    void transformation_update(){
+        if (enigma::transform_needs_update == true){
+            //Recalculate matrices
+            enigma::mv_matrix = enigma::view_matrix * enigma::model_matrix;
+            enigma::mvp_matrix = enigma::projection_matrix * enigma::mv_matrix;
+
+            //normal_matrix = invert(transpose(mv_submatrix)), where mv_submatrix is modelview top-left 3x3 matrix
+            enigma::Matrix4 tmpNorm = enigma::mv_matrix.Transpose().Inverse();
+            enigma::normal_matrix = enigma::Matrix3(tmpNorm(0,0),tmpNorm(0,1),tmpNorm(0,2),
+                                                    tmpNorm(1,0),tmpNorm(1,1),tmpNorm(1,2),
+                                                    tmpNorm(2,0),tmpNorm(2,1),tmpNorm(2,2));
+            enigma::transform_needs_update = false;
+        }
+    }
 }
 
 //NOTE: THIS IS STILL FFP
@@ -66,7 +81,7 @@ void d3d_set_perspective(bool enable)
     } else {
       //projection_matrix.InitPersProjTransform(0, 1, 0, 1); //they cannot be zeroes!
     }
-    enigma::transformation_update = true;
+    enigma::transform_needs_update = true;
   // Unverified note: Perspective not the same as in GM when turning off perspective and using d3d projection
   // Unverified note: GM has some sort of dodgy behaviour where this function doesn't affect anything when calling after d3d_set_projection_ext
   // See also OpenGL3/GL3d3d.cpp Direct3D9/DX9d3d.cpp OpenGL1/GLd3d.cpp
@@ -78,8 +93,8 @@ void d3d_set_projection(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom, gs_sc
     (enigma::d3dHidden?glEnable:glDisable)(GL_DEPTH_TEST);
     enigma::projection_matrix.InitPersProjTransform(45, -view_wview[view_current] / (gs_scalar)view_hview[view_current], 1, 32000);
     enigma::view_matrix.InitCameraTransform(enigma::Vector3(xfrom,yfrom,zfrom),enigma::Vector3(xto,yto,zto),enigma::Vector3(xup,yup,zup));
-    enigma::d3d_light_update_positions();
-    enigma::transformation_update = true;
+    enigma::transform_needs_update = true;
+    //enigma::d3d_light_update_positions();
 }
 
 void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom, gs_scalar xto, gs_scalar yto, gs_scalar zto, gs_scalar xup, gs_scalar yup, gs_scalar zup, gs_scalar angle, gs_scalar aspect, gs_scalar znear, gs_scalar zfar)
@@ -91,8 +106,8 @@ void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom, g
     enigma::projection_matrix.InitPersProjTransform(angle, -aspect, znear, zfar);
 
     enigma::view_matrix.InitCameraTransform(enigma::Vector3(xfrom,yfrom,zfrom),enigma::Vector3(xto,yto,zto),enigma::Vector3(xup,yup,zup));
-    enigma::d3d_light_update_positions();
-    enigma::transformation_update = true;
+    enigma::transform_needs_update = true;
+    //enigma::d3d_light_update_positions();
 }
 
 void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, gs_scalar angle)
@@ -110,8 +125,8 @@ void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scal
 
     enigma::projection_matrix = enigma::projection_matrix * ortho;
     enigma::view_matrix.InitIdentity();
-    enigma::d3d_light_update_positions();
-    enigma::transformation_update = true;
+    enigma::transform_needs_update = true;
+    //enigma::d3d_light_update_positions();
 }
 
 void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, gs_scalar angle)
@@ -124,90 +139,90 @@ void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, g
     ortho.InitOrthoProjTransform(x,x + width,y,y + height,0.1,32000);
 
     enigma::projection_matrix = enigma::projection_matrix * persp * ortho;
-    enigma::d3d_light_update_positions();
-    enigma::transformation_update = true;
+    enigma::transform_needs_update = true;
+    //enigma::d3d_light_update_positions();
 }
 
 void d3d_transform_set_identity()
 {
     oglmgr->Transformation();
     enigma::model_matrix.InitIdentity();
-    enigma::transformation_update = true;
+    enigma::transform_needs_update = true;
 }
 
 void d3d_transform_add_translation(gs_scalar xt, gs_scalar yt, gs_scalar zt)
 {
     oglmgr->Transformation();
     enigma::model_matrix.translate(xt, yt, zt);
-    enigma::transformation_update = true;
+    enigma::transform_needs_update = true;
 }
 void d3d_transform_add_scaling(gs_scalar xs, gs_scalar ys, gs_scalar zs)
 {
     oglmgr->Transformation();
     enigma::model_matrix.scale(xs, ys, zs);
-    enigma::transformation_update = true;
+    enigma::transform_needs_update = true;
 }
 void d3d_transform_add_rotation_x(gs_scalar angle)
 {
     oglmgr->Transformation();
     enigma::model_matrix.rotateX(-angle);
-    enigma::transformation_update = true;
+    enigma::transform_needs_update = true;
 }
 void d3d_transform_add_rotation_y(gs_scalar angle)
 {
     oglmgr->Transformation();
     enigma::model_matrix.rotateY(-angle);
-    enigma::transformation_update = true;
+    enigma::transform_needs_update = true;
 }
 void d3d_transform_add_rotation_z(gs_scalar angle)
 {
     oglmgr->Transformation();
     enigma::model_matrix.rotateZ(-angle);
-    enigma::transformation_update = true;
+    enigma::transform_needs_update = true;
 }
 void d3d_transform_add_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar angle)
 {
     oglmgr->Transformation();
     enigma::model_matrix.rotate(-angle,x,y,z);
-    enigma::transformation_update = true;
+    enigma::transform_needs_update = true;
 }
 
 void d3d_transform_set_translation(gs_scalar xt, gs_scalar yt, gs_scalar zt)
 {
     oglmgr->Transformation();
     enigma::model_matrix.InitTranslationTransform(xt, yt, zt);
-    enigma::transformation_update = true;
+    enigma::transform_needs_update = true;
 }
 void d3d_transform_set_scaling(gs_scalar xs, gs_scalar ys, gs_scalar zs)
 {
     oglmgr->Transformation();
     enigma::model_matrix.InitScaleTransform(xs, ys, zs);
-    enigma::transformation_update = true;
+    enigma::transform_needs_update = true;
 }
 void d3d_transform_set_rotation_x(gs_scalar angle)
 {
     oglmgr->Transformation();
     enigma::model_matrix.InitRotateXTransform(-angle);
-    enigma::transformation_update = true;
+    enigma::transform_needs_update = true;
 }
 void d3d_transform_set_rotation_y(gs_scalar angle)
 {
     oglmgr->Transformation();
     enigma::model_matrix.InitRotateYTransform(-angle);
-    enigma::transformation_update = true;
+    enigma::transform_needs_update = true;
 }
 void d3d_transform_set_rotation_z(gs_scalar angle)
 {
     oglmgr->Transformation();
     enigma::model_matrix.InitRotateZTransform(-angle);
-    enigma::transformation_update = true;
+    enigma::transform_needs_update = true;
 }
 void d3d_transform_set_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar angle)
 {
     oglmgr->Transformation();
     enigma::model_matrix.InitIdentity();
     enigma::model_matrix.rotate(-angle, x, y, z);
-    enigma::transformation_update = true;
+    enigma::transform_needs_update = true;
 }
 
 }
@@ -235,7 +250,7 @@ bool d3d_transform_stack_pop()
     enigma::model_matrix = trans_stack.top();
     trans_stack.pop();
     if (trans_stack_size > 0) trans_stack_size--;
-    enigma::transformation_update = true;
+    enigma::transform_needs_update = true;
     return true;
 }
 
@@ -246,7 +261,7 @@ void d3d_transform_stack_clear()
       trans_stack.pop();
     while (trans_stack_size--);
     enigma::model_matrix.InitIdentity();
-    enigma::transformation_update = true;
+    enigma::transform_needs_update = true;
 }
 
 bool d3d_transform_stack_empty()
@@ -259,7 +274,7 @@ bool d3d_transform_stack_top()
     if (trans_stack_size == 0) return false;
     oglmgr->Transformation();
     enigma::model_matrix = trans_stack.top();
-    enigma::transformation_update = true;
+    enigma::transform_needs_update = true;
     return true;
 }
 
