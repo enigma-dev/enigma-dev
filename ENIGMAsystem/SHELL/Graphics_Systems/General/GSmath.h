@@ -171,6 +171,17 @@ public:
         return &(m[0][0]);
     }
 
+    Vector3 operator*(const Vector3& v) const
+    {
+        Vector3 r;
+
+        r.x = m[0][0]* v.x + m[0][1]* v.y + m[0][2]* v.z;
+        r.y = m[1][0]* v.x + m[1][1]* v.y + m[1][2]* v.z;
+        r.z = m[2][0]* v.x + m[2][1]* v.y + m[2][2]* v.z;
+
+        return r;
+    }
+
     inline Matrix3 operator*(const Matrix3& Right) const
     {
         Matrix3 Ret;
