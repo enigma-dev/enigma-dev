@@ -28,6 +28,7 @@ ENIGMAsystem/SHELL/API_Switchboard.h
 LinuxExtra/
 *.epackage
 ENIGMAsystem/additional/
+ENIGMAsystem/Additional/
 unimplementedfunctionnames.txt
 ValgrindOut.xml
 CompilerSource/bin/

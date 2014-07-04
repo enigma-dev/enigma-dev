@@ -76,6 +76,7 @@ namespace enigma
         map<GLint,Uniform> uniforms;
         map<GLint,Attribute> attributes;
         string log;
+		string name;
         GLuint shaderprogram;
         int uniform_count;
         int attribute_count;
@@ -119,6 +120,7 @@ namespace enigma
         ShaderProgram()
         {
             shaderprogram = glCreateProgram();
+			name = "";
         }
 
         ~ShaderProgram()
