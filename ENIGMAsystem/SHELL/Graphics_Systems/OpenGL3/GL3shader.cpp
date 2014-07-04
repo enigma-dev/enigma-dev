@@ -83,7 +83,8 @@ namespace enigma
                 "#define modelViewProjectionMatrix transform_matrix[MATRIX_WORLD_VIEW_PROJECTION] \n"
                 "#define in_Colour in_Color \n"
 
-                "uniform mat3 normalMatrix;     \n";
+                "uniform mat3 normalMatrix;     \n"
+				"#line 0 \n";
     }
     string getFragmentShaderPrefix(){
         return "#version 140\n"
@@ -108,7 +109,8 @@ namespace enigma
                 "#define gm_BaseTexture en_TexSampler\n"
                 "uniform bool en_TexturingEnabled;\n"
                 "uniform bool en_ColorEnabled;\n"
-                "uniform vec4 en_bound_color;\n";
+                "uniform vec4 en_bound_color;\n"
+				"#line 0 \n";
     }
     string getDefaultVertexShader(){
         return  "in vec3 in_Position;                 // (x,y,z)\n"
@@ -593,11 +595,19 @@ void glsl_program_free(int id)
     delete enigma::shaderprograms[id];
 }
 
+void glsl_program_set_name(int id, string name){
+	enigma::shaderprograms[id]->name = name;
+}
+
 int glsl_get_uniform_location(int program, string name) {
 	//int uni = glGetUniformLocation(enigma::shaderprograms[program]->shaderprogram, name.c_str());
 	std::map<string,GLint>::iterator it = enigma::shaderprograms[program]->uniform_names.find(name);
     if (it == enigma::shaderprograms[program]->uniform_names.end()){
-        printf("Program[%i] - Uniform %s not found!\n", program, name.c_str());
+		if (enigma::shaderprograms[program]->name == ""){
+			printf("Program[%i] - Uniform %s not found!\n", program, name.c_str());
+		}else{
+			printf("Program[%s = %i] - Uniform %s not found!\n", enigma::shaderprograms[program]->name.c_str(), program, name.c_str());
+		}
         return -1;
     }else{
         return it->second;
@@ -608,7 +618,11 @@ int glsl_get_attribute_location(int program, string name) {
 	//int uni = glGetAttribLocation(enigma::shaderprograms[program]->shaderprogram, name.c_str());
     std::map<string,GLint>::iterator it = enigma::shaderprograms[program]->attribute_names.find(name);
     if (it == enigma::shaderprograms[program]->attribute_names.end()){
-        printf("Program[%i] - Attribute %s not found!\n", program, name.c_str());
+		if (enigma::shaderprograms[program]->name == ""){
+			printf("Program[%i] - Attribute %s not found!\n", program, name.c_str());
+		}else{
+			printf("Program[%s = %i] - Attribute %s not found!\n", enigma::shaderprograms[program]->name.c_str(), program, name.c_str());
+		}
         return -1;
     }else{
         return it->second;

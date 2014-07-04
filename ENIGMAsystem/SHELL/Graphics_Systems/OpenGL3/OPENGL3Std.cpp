@@ -33,6 +33,10 @@ using namespace std;
 
 ContextManager* oglmgr = NULL;
 
+namespace enigma_user{
+	extern string shader_get_name(int i);
+}
+
 namespace enigma
 {
   unsigned bound_texture=0;
@@ -86,6 +90,7 @@ namespace enigma
             glsl_shader_load_string(fshader_id, shaderstruct->fragment);
 
             int prog_id = glsl_program_create();
+			glsl_program_set_name(prog_id, enigma_user::shader_get_name(i));
 
             if (shaderstruct->precompile) {
                 glsl_shader_compile(vshader_id);
