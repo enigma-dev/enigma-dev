@@ -65,6 +65,9 @@ static inline double max(double x, double y) { return x>y? x : y; }
 static inline double angle_difference(double dir1, double dir2) {return fmod((fmod((dir1 - dir2),360) + 540), 360) - 180;}
 static inline double point_direction(cs_scalar x1, cs_scalar y1,cs_scalar x2, cs_scalar y2) {return fmod((atan2(y1-y2,x2-x1)*(180/M_PI))+360,360);}
 
+
+
+
 namespace enigma_user
 {
 
@@ -518,12 +521,25 @@ bool move_bounce_object(int object, bool adv, bool solid_only)
 
 typedef std::pair<int,enigma::inst_iter*> inode_pair;
 
-namespace enigma_user
+static bool line_ellipse_intersects(cs_scalar rx, cs_scalar ry, cs_scalar x, cs_scalar ly1, cs_scalar ly2)
 {
+    // Formula: x^2/a^2 + y^2/b^2 = 1   <=>   y = +/- sqrt(b^2*(1 - x^2/a^2))
 
-void instance_deactivate_region(int rleft, int rtop, int rwidth, int rheight, bool inside, bool notme) {
+    const cs_scalar inner = ry*ry*(1 - x*x/(rx*rx));
+    if (inner < 0) {
+        return false;
+    }
+    else {
+        const cs_scalar y1 = -sqrt(inner), y2 = sqrt(inner);
+        return y1 <= ly2 && ly1 <= y2;
+    }
+}
+
+namespace enigma 
+{
+void instance_deactivate_region_except(int exid, int rleft, int rtop, int rwidth, int rheight, bool inside) {
     for (enigma::iterator it = enigma::instance_list_first(); it; ++it) {
-        if (notme && (*it)->id == enigma::instance_event_iterator->inst->id) continue;
+        if (exid>=0 && (*it)->id == exid) continue;
         enigma::object_collisions* const inst = ((enigma::object_collisions*)*it);
 
         if (inst->sprite_index == -1 && (inst->mask_index == -1)) //no sprite/mask then no collision
@@ -544,56 +560,10 @@ void instance_deactivate_region(int rleft, int rtop, int rwidth, int rheight, bo
     }
 }
 
-void instance_activate_region(int rleft, int rtop, int rwidth, int rheight, bool inside) {
-    for (std::map<int,enigma::inst_iter*>::iterator iter = enigma::instance_deactivated_list.begin();
-         iter != enigma::instance_deactivated_list.end();
-         ++iter) {
-
-        enigma::object_collisions* const inst = ((enigma::object_collisions*)(iter->second->inst));
-
-        if (inst->sprite_index == -1 && (inst->mask_index == -1)) //no sprite/mask then no collision
-            continue;
-
-        const bbox_rect_t &box = inst->$bbox_relative();
-        const double x = inst->x, y = inst->y,
-        xscale = inst->image_xscale, yscale = inst->image_yscale,
-        ia = inst->image_angle;
-
-        int left, top, right, bottom;
-        get_border(&left, &right, &top, &bottom, box.left, box.top, box.right, box.bottom, x, y, xscale, yscale, ia);
-
-        if ((left <= (rleft+rwidth) && rleft <= right && top <= (rtop+rheight) && rtop <= bottom) == inside) {
-            inst->activate();
-            enigma::instance_deactivated_list.erase(iter);
-        }
-    }
-}
-
-}
-
-static bool line_ellipse_intersects(cs_scalar rx, cs_scalar ry, cs_scalar x, cs_scalar ly1, cs_scalar ly2)
-{
-    // Formula: x^2/a^2 + y^2/b^2 = 1   <=>   y = +/- sqrt(b^2*(1 - x^2/a^2))
-
-    const cs_scalar inner = ry*ry*(1 - x*x/(rx*rx));
-    if (inner < 0) {
-        return false;
-    }
-    else {
-        const cs_scalar y1 = -sqrt(inner), y2 = sqrt(inner);
-        return y1 <= ly2 && ly1 <= y2;
-    }
-}
-
-namespace enigma_user
-{
-
-void instance_deactivate_circle(int x, int y, int r, bool inside, bool notme)
-{
+void instance_deactivate_circle_except(int exid, int x, int y, int r, bool inside) {
     for (enigma::iterator it = enigma::instance_list_first(); it; ++it)
     {
-        if (notme && (*it)->id == enigma::instance_event_iterator->inst->id)
-            continue;
+        if (exid>=0 && (*it)->id == exid) continue;
         enigma::object_collisions* const inst = ((enigma::object_collisions*)*it);
 
         if (inst->sprite_index == -1 && (inst->mask_index == -1)) //no sprite/mask then no collision
@@ -631,9 +601,75 @@ void instance_deactivate_circle(int x, int y, int r, bool inside, bool notme)
         }
     }
 }
+}
+
+
+namespace enigma_user
+{
+
+void instance_deactivate_region(int rleft, int rtop, int rwidth, int rheight, bool inside, bool notme) {
+    int exid = notme ? enigma::instance_event_iterator->inst->id : -1;
+    if (enigma::InstDelayCmd::IsDelay) {
+      enigma::instance_delayed_commands.push_back(enigma::InstDelayCmd(enigma::InstDelayCmd::DeactReg, exid, rleft, rtop, rwidth, rheight, inside));
+      return;
+    }
+
+    enigma::instance_deactivate_region_except(exid, rleft, rtop, rwidth, rheight, inside);
+}
+
+void instance_activate_region(int rleft, int rtop, int rwidth, int rheight, bool inside) {
+    if (enigma::InstDelayCmd::IsDelay) {
+      enigma::instance_delayed_commands.push_back(enigma::InstDelayCmd(enigma::InstDelayCmd::ActReg, 0, rleft, rtop, rwidth, rheight, inside));
+      return;
+    }
+
+    for (std::map<int,enigma::inst_iter*>::iterator iter = enigma::instance_deactivated_list.begin();
+         iter != enigma::instance_deactivated_list.end();
+         ++iter) {
+
+        enigma::object_collisions* const inst = ((enigma::object_collisions*)(iter->second->inst));
+
+        if (inst->sprite_index == -1 && (inst->mask_index == -1)) //no sprite/mask then no collision
+            continue;
+
+        const bbox_rect_t &box = inst->$bbox_relative();
+        const double x = inst->x, y = inst->y,
+        xscale = inst->image_xscale, yscale = inst->image_yscale,
+        ia = inst->image_angle;
+
+        int left, top, right, bottom;
+        get_border(&left, &right, &top, &bottom, box.left, box.top, box.right, box.bottom, x, y, xscale, yscale, ia);
+
+        if ((left <= (rleft+rwidth) && rleft <= right && top <= (rtop+rheight) && rtop <= bottom) == inside) {
+            inst->activate();
+            enigma::instance_deactivated_list.erase(iter);
+        }
+    }
+}
+
+}
+
+namespace enigma_user
+{
+
+void instance_deactivate_circle(int x, int y, int r, bool inside, bool notme)
+{
+    int exid = notme ? enigma::instance_event_iterator->inst->id : -1;
+    if (enigma::InstDelayCmd::IsDelay) {
+      enigma::instance_delayed_commands.push_back(enigma::InstDelayCmd(enigma::InstDelayCmd::DeactCirc, exid, x, y, r, inside));
+      return;
+    }
+
+    enigma::instance_deactivate_circle_except(exid, x, y, r, inside);
+}
 
 void instance_activate_circle(int x, int y, int r, bool inside)
 {
+    if (enigma::InstDelayCmd::IsDelay) {
+      enigma::instance_delayed_commands.push_back(enigma::InstDelayCmd(enigma::InstDelayCmd::ActCirc, 0, x, y, r, inside));
+      return;
+    }
+
     std::map<int,enigma::inst_iter*>::iterator iter = enigma::instance_deactivated_list.begin();
     while (iter != enigma::instance_deactivated_list.end()) {
         enigma::object_collisions* const inst = ((enigma::object_collisions*)(iter->second->inst));
