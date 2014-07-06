@@ -284,7 +284,11 @@ void CreateIndexBuffer(UINT Length, DWORD Usage,  D3DFORMAT Format,  D3DPOOL Poo
 }
 
 void CreateTexture(UINT Width, UINT Height, UINT Levels, DWORD Usage, D3DFORMAT Format, D3DPOOL Pool, IDirect3DTexture9 **ppTexture, HANDLE *pSharedHandle) {
-	device->CreateTexture(Width, Height, Levels, Usage, Format, Pool, ppTexture, pSharedHandle);
+	HRESULT hr = device->CreateTexture(Width, Height, Levels, Usage, Format, Pool, ppTexture, pSharedHandle);
+  	if (FAILED(hr)) {
+      MessageBox(NULL, DXGetErrorDescription9(hr), DXGetErrorString9(hr), MB_OK|MB_ICONEXCLAMATION);
+	  return;
+    }
 }
 
 void CreateRenderTarget(UINT Width,  UINT Height,  D3DFORMAT Format,  D3DMULTISAMPLE_TYPE MultiSample,

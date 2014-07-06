@@ -36,7 +36,6 @@ namespace enigma
 
 namespace enigma_user {
 enum {
-  tx_none,
   tx_nearest,
   tx_bilinear,
   tx_trilinear
@@ -45,8 +44,9 @@ enum {
 
 namespace enigma_user
 {
-int texture_add(string fname);
+int texture_add(string fname, bool mipmap=false);
 void texture_save(int texid, string fname);
+void texture_delete(int texid);
 bool texture_exists(int texid);
 void texture_preload(int texid);
 void texture_set_enabled(bool enable);
@@ -55,27 +55,32 @@ gs_scalar texture_get_width(int texid);
 gs_scalar texture_get_height(int texid);
 unsigned texture_get_texel_width(int texid);
 unsigned texture_get_texel_height(int texid);
+void texture_set_priority(int texid, double prio);
 void texture_set(int texid);
-void texture_set_stage(int stage);
 void texture_set_stage(int stage, int texid);
+#define texture_set(texid) texture_set_stage(0, texid)
 void texture_reset();
 void texture_set_blending(bool enable);
 void texture_set_repeat(bool repeat);
 void texture_set_repeat_ext(int sampler, bool repeat);
+#define texture_set_repeat(repeat) texture_set_repeat_ext(0, repeat)
+void texture_set_wrap(bool wrapu, bool wrapv, bool wrapw);
+void texture_set_wrap_ext(int sampler, bool wrapu, bool wrapv, bool wrapw);
+#define texture_set_wrap(wrapu, wrapv, wrapw) texture_set_wrap_ext(0, wrapu, wrapv, wrapw)
+void texture_set_border(int r, int g, int b, double a);
+void texture_set_border_ext(int sampler, int r, int g, int b, double a);
+#define texture_set_border(r, g, b, a) texture_set_border_ext(0, r, g, b, a)
 void texture_set_interpolation(bool enable);
 void texture_set_interpolation_ext(int sampler, bool enable);
-void texture_set_wrap(int sampler, bool wrapr, bool wraps, bool wrapt);
-void texture_set_priority(int texid, double prio);
-void texture_set_border(int texid, int r, int g, int b, double a);
-void texture_set_swizzle(int texid, int r, int g, int b, double a);
+//#define texture_set_interpolation(enable) texture_set_interpolation_ext(0, enable)
+
+void texture_set_filter(int sampler, int filter);
 void texture_set_levelofdetail(int texid, gs_scalar minlod, gs_scalar maxlod, int maxlevel);
-void texture_mipmapping_filter(int texid, int enable);
-void texture_mipmapping_generate(int texid, int levels);
+bool texture_mipmapping_supported();
+void texture_mipmapping_generate(int texid);
 bool  texture_anisotropy_supported();
 float texture_anisotropy_maxlevel();
-void  texture_anisotropy_filter(int samplerid, gs_scalar levels);
-bool texture_multitexture_supported();
-void texture_multitexture_enable(bool enable);
+void  texture_anisotropy_filter(int samplerid, gs_scalar level);
 
 }
 

@@ -66,7 +66,7 @@ inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect 
 
 namespace enigma
 {
-  int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool isfont)
+  int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool isfont, bool mipmap)
   {
     GLuint texture;
     glGenTextures(1, &texture);
@@ -75,6 +75,11 @@ namespace enigma
     bool interpolate = (interpolate_textures && !isfont);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,interpolate?GL_LINEAR:GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,interpolate?GL_LINEAR:GL_NEAREST);
+    // This allows us to control the number of mipmaps generated, but Direct3D does not have an option for it, so for now we'll just go with the defaults.
+    // Honestly not a big deal, Unity3D doesn't allow you to specify either.
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 3);
+    // The user should call texture_mipmapping_generate manually to control when mipmaps are generated.
     glBindTexture(GL_TEXTURE_2D, 0);
 
     TextureStruct* textureStruct = new TextureStruct(texture);
@@ -87,7 +92,7 @@ namespace enigma
     return textureStructs.size()-1;
   }
 
-  int graphics_duplicate_texture(int tex)
+  int graphics_duplicate_texture(int tex, bool mipmap)
   {
     GLuint texture = textureStructs[tex]->gltex;
     glBindTexture(GL_TEXTURE_2D, texture);
@@ -101,7 +106,7 @@ namespace enigma
     fh = textureStructs[tex]->fullheight;
     char* bitmap = new char[(fh<<(lgpp2(fw)+2))|2];
     glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_BYTE, bitmap);
-    unsigned dup_tex = graphics_create_texture(w, h, fw, fh, bitmap, textureStructs[tex]->isFont);
+    unsigned dup_tex = graphics_create_texture(w, h, fw, fh, bitmap, textureStructs[tex]->isFont, mipmap);
     delete[] bitmap;
     glPopAttrib();
     return dup_tex;
@@ -141,10 +146,9 @@ namespace enigma
     glPopAttrib();
   }
 
-  void graphics_delete_texture(int tex)
+  void graphics_delete_texture(int texid)
   {
-    glDeleteTextures(1, &textureStructs[tex]->gltex);
-    textureStructs.erase(textureStructs.begin() + tex);
+    delete textureStructs[texid];
   }
 
   unsigned char* graphics_get_texture_pixeldata(unsigned texture, unsigned* fullwidth, unsigned* fullheight)
@@ -165,12 +169,12 @@ namespace enigma
 namespace enigma_user
 {
 
-int texture_add(string filename) {
+int texture_add(string filename, bool mipmap) {
   unsigned int w, h, fullwidth, fullheight;
 
   unsigned char *pxdata = enigma::image_load(filename,&w,&h,&fullwidth,&fullheight,false);
   if (pxdata == NULL) { printf("ERROR - Failed to append sprite to index!\n"); return -1; }
-  unsigned texture = enigma::graphics_create_texture(w, h, fullwidth, fullheight, pxdata, false);
+  unsigned texture = enigma::graphics_create_texture(w, h, fullwidth, fullheight, pxdata, false, mipmap);
   delete[] pxdata;
     
   return texture;
@@ -187,6 +191,10 @@ void texture_save(int texid, string fname) {
 	delete[] rgbdata;
 }
 
+void texture_delete(int texid) {
+  delete textureStructs[texid];
+}
+
 bool texture_exists(int texid) {
   return textureStructs[texid] != NULL;
 }
@@ -194,19 +202,6 @@ bool texture_exists(int texid) {
 void texture_set_enabled(bool enable)
 {
   (enable?glEnable:glDisable)(GL_TEXTURE_2D);
-}
-
-void texture_set_interpolation(int enable)
-{
-  enigma::interpolate_textures = enable;
-  for (size_t i = 0; i < textureStructs.size(); i++)
-  {
-	if (textureStructs[i]->isFont) { continue; }
-    glBindTexture(GL_TEXTURE_2D, textureStructs[i]->gltex);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,enable?GL_LINEAR:GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,enable?GL_LINEAR:GL_NEAREST);
-  }
-  glBindTexture(GL_TEXTURE_2D, enigma::bound_texture);
 }
 
 bool texture_get_interpolation()
@@ -255,56 +250,65 @@ void texture_reset() {
 	glBindTexture(GL_TEXTURE_2D, enigma::bound_texture = 0);
 }
 
-void texture_set_repeat(bool repeat)
+void texture_set_interpolation_ext(int sampler, bool enable)
 {
-  for (size_t i = 0; i < textureStructs.size(); i++)
-  {
-    glBindTexture(GL_TEXTURE_2D, textureStructs[i]->gltex);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, repeat?GL_REPEAT:GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, repeat?GL_REPEAT:GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, repeat?GL_REPEAT:GL_CLAMP);
-  }
+  enigma::interpolate_textures = enable;
+  glActiveTexture(GL_TEXTURE0 + sampler);
+  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,enable?GL_LINEAR:GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,enable?GL_LINEAR:GL_NEAREST);
 }
 
-void texture_set_repeat(int texid, bool repeat)
+void texture_set_repeat_ext(int sampler, bool repeat)
 {
-  glBindTexture(GL_TEXTURE_2D, textureStructs[texid]->gltex);
+  glActiveTexture(GL_TEXTURE0 + sampler);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, repeat?GL_REPEAT:GL_CLAMP);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, repeat?GL_REPEAT:GL_CLAMP);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, repeat?GL_REPEAT:GL_CLAMP);
 }
 
-void texture_set_wrap(int texid, bool wrapr, bool wraps, bool wrapt)
+void texture_set_wrap_ext(int sampler, bool wrapr, bool wraps, bool wrapt)
 {
-  glBindTexture(GL_TEXTURE_2D, textureStructs[texid]->gltex);
+  glActiveTexture(GL_TEXTURE0 + sampler);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, wrapr?GL_REPEAT:GL_CLAMP);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wraps?GL_REPEAT:GL_CLAMP);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapt?GL_REPEAT:GL_CLAMP);
 }
 
-void texture_preload(int texid)
-{
-
-}//functionality has been removed in ENIGMA, all textures are automatically preloaded
-
-void texture_set_priority(int texid, double prio)
-{
-  glBindTexture(GL_TEXTURE_2D, textureStructs[texid]->gltex);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_PRIORITY, prio);
-}
-
-void texture_set_border(int texid, int r, int g, int b, double a)
+void texture_set_border_ext(int sampler, int r, int g, int b, double a)
 {
   GLint color[4] = {(int)r, (int)g, (int)b, int(a * 255)};
-  glBindTexture(GL_TEXTURE_2D, textureStructs[texid]->gltex);
+  glActiveTexture(GL_TEXTURE0 + sampler);
   glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color);
 }
 
-void texture_set_swizzle(int texid, int r, int g, int b, double a)
+void texture_set_filter_ext(int texid, int filter)
 {
-  GLint color[4] = {(int)r, (int)g, (int)b, int(a * 255)};
+  texture_set(texid);
+  if (filter == tx_trilinear) {
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  } else if (filter == tx_bilinear) {
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  } else if (filter == tx_nearest) {
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  } else {
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  }
+}
+
+void texture_preload(int texid)
+{
+  // Deprecated in ENIGMA and GM: Studio, all textures are automatically preloaded.
+}
+
+void texture_set_priority(int texid, double prio)
+{
+  // Deprecated in ENIGMA and GM: Studio, all textures are automatically preloaded.
   glBindTexture(GL_TEXTURE_2D, textureStructs[texid]->gltex);
-  glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_RGBA, color);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_PRIORITY, prio);
 }
 
 void texture_set_levelofdetail(int texid, double minlod, double maxlod, int maxlevel)
@@ -315,30 +319,20 @@ void texture_set_levelofdetail(int texid, double minlod, double maxlod, int maxl
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, maxlevel);
 }
 
-void texture_mipmapping_filter(int texid, int filter)
+bool texture_mipmapping_supported()
 {
-  glBindTexture(GL_TEXTURE_2D, textureStructs[texid]->gltex);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  if (filter == tx_trilinear) {
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  } else if (filter == tx_bilinear) {
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  } else if (filter == tx_nearest) {
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  }
+  return strstr((char*)glGetString(GL_EXTENSIONS),
+           "glGenerateMipmap");
 }
 
-void texture_mipmapping_generate(int texid, int levels)
+void texture_mipmapping_generate(int texid)
 {
   texture_set(textureStructs[texid]->gltex);
+  // This allows us to control the number of mipmaps generated, but Direct3D does not have an option for it, so for now we'll just go with the defaults.
+  // Honestly not a big deal, Unity3D doesn't allow you to specify either.
+  //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+  //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 3);
   glGenerateMipmap(GL_TEXTURE_2D);
-
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, levels);
 }
 
 bool texture_anisotropy_supported()
@@ -358,17 +352,6 @@ void  texture_anisotropy_filter(int texid, gs_scalar levels)
 {
   glBindTexture(GL_TEXTURE_2D, textureStructs[texid]->gltex);
   glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, levels);
-}
-
-bool  texture_multitexture_supported()
-{
-  return strstr((char*)glGetString(GL_EXTENSIONS),
-           "GL_ARB_multitexture");
-}
-
-void texture_multitexture_enable(bool enable)
-{
-
 }
 
 }

@@ -59,7 +59,7 @@ namespace enigma
   void sprites_init(); /// This should allocate room for sprites and perform any other necessary actions.
 
   int sprite_new_empty(unsigned sprid, unsigned subc, int w, int h, int x, int y, int bbt, int bbb, int bbl, int bbr, bool pl, bool sm);
-  void sprite_add_to_index(sprite *ns, std::string filename, int imgnumb, bool precise, bool transparent, bool smooth, int x_offset, int y_offset);
+  void sprite_add_to_index(sprite *ns, std::string filename, int imgnumb, bool precise, bool transparent, bool smooth, int x_offset, int y_offset, bool mipmap);
   void sprite_add_copy(sprite *spr, sprite *spr_copy);
 
   //Sets the subimage
@@ -101,10 +101,10 @@ extern int sprite_get_texture (int sprite, int subimage);
 extern int sprite_get_xoffset (int sprite);
 extern int sprite_get_yoffset (int sprite);
 
-int sprite_add(std::string filename, int imgnumb, bool precise, bool transparent, bool smooth, bool preload, int x_offset, int y_offset); //GM8+ compatible
-int sprite_add(std::string filename, int imgnumb, bool transparent, bool smooth, int x_offset, int y_offset);  //GM7+ compatible
-bool sprite_replace(int ind, std::string fname, int imgnumb, bool precise, bool transparent, bool smooth, bool preload, int x_offset, int y_offset, bool free_texture = true); //GM8+ compatible
-bool sprite_replace(int ind, std::string fname, int imgnumb, bool transparent, bool smooth, int x_offset, int y_offset, bool free_texture = true);   //GM7+ compatible
+int sprite_add(std::string filename, int imgnumb, bool precise, bool transparent, bool smooth, bool preload, int x_offset, int y_offset, bool mipmap = false); //GM8+ compatible
+int sprite_add(std::string filename, int imgnumb, bool transparent, bool smooth, int x_offset, int y_offset, bool mipmap = false);  //GM7+ compatible
+bool sprite_replace(int ind, std::string fname, int imgnumb, bool precise, bool transparent, bool smooth, bool preload, int x_offset, int y_offset, bool free_texture = true, bool mipmap = false); //GM8+ compatible
+bool sprite_replace(int ind, std::string fname, int imgnumb, bool transparent, bool smooth, int x_offset, int y_offset, bool free_texture = true, bool mipmap = false);   //GM7+ compatible
 bool sprite_exists(int spr);
 void sprite_save(int ind, unsigned subimg, std::string fname);
 void sprite_save_strip(int ind, std::string fname);

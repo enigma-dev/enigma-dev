@@ -61,20 +61,20 @@ namespace enigma {
 namespace enigma_user
 {
 
-int sprite_add(string filename, int imgnumb, bool precise, bool transparent, bool smooth, bool preload, int x_offset, int y_offset)
+int sprite_add(string filename, int imgnumb, bool precise, bool transparent, bool smooth, bool preload, int x_offset, int y_offset, bool mipmap)
 {
     enigma::spritestructarray_reallocate();
     enigma::sprite *spr = enigma::spritestructarray[enigma::sprite_idmax] = new enigma::sprite();
-    enigma::sprite_add_to_index(spr, filename, imgnumb, precise, transparent, smooth, x_offset, y_offset);
+    enigma::sprite_add_to_index(spr, filename, imgnumb, precise, transparent, smooth, x_offset, y_offset, mipmap);
     return enigma::sprite_idmax++;
 }
 
-int sprite_add(string filename, int imgnumb, bool transparent, bool smooth, int x_offset, int y_offset)
+int sprite_add(string filename, int imgnumb, bool transparent, bool smooth, int x_offset, int y_offset, bool mipmap)
 {
-    return sprite_add(filename, imgnumb, false, transparent, smooth, true, x_offset, y_offset);
+    return sprite_add(filename, imgnumb, false, transparent, smooth, true, x_offset, y_offset, mipmap);
 }
 
-bool sprite_replace(int ind, string filename, int imgnumb, bool precise, bool transparent, bool smooth, bool preload, int x_offset, int y_offset, bool free_texture)
+bool sprite_replace(int ind, string filename, int imgnumb, bool precise, bool transparent, bool smooth, bool preload, int x_offset, int y_offset, bool free_texture, bool mipmap)
 {
     enigma::sprite *spr;
     if (!get_sprite_mtx(spr, ind))
@@ -87,13 +87,13 @@ bool sprite_replace(int ind, string filename, int imgnumb, bool precise, bool tr
     spr->texturearray.clear();
     spr->texbordxarray.clear();
     spr->texbordyarray.clear();
-    enigma::sprite_add_to_index(spr, filename, imgnumb, precise, transparent, smooth, x_offset, y_offset);
+    enigma::sprite_add_to_index(spr, filename, imgnumb, precise, transparent, smooth, x_offset, y_offset, mipmap);
     return true;
 }
 
-bool sprite_replace(int ind, string filename, int imgnumb, bool transparent, bool smooth, int x_offset, int y_offset, bool free_texture)
+bool sprite_replace(int ind, string filename, int imgnumb, bool transparent, bool smooth, int x_offset, int y_offset, bool free_texture, bool mipmap)
 {
-    return sprite_replace(ind, filename, imgnumb, false, transparent, smooth, true, x_offset, y_offset, free_texture);
+    return sprite_replace(ind, filename, imgnumb, false, transparent, smooth, true, x_offset, y_offset, free_texture, mipmap);
 }
 
 bool sprite_exists(int spr) {
@@ -255,7 +255,7 @@ namespace enigma
         return sprid;
     }
 
-    void sprite_add_to_index(sprite *ns, string filename, int imgnumb, bool precise, bool transparent, bool smooth, int x_offset, int y_offset)
+    void sprite_add_to_index(sprite *ns, string filename, int imgnumb, bool precise, bool transparent, bool smooth, int x_offset, int y_offset, bool mipmap)
     {
         unsigned int width, height, fullwidth, fullheight;
 
@@ -324,7 +324,7 @@ namespace enigma
 					tmpcell += 4;
 				}
 			}
-			unsigned texture = graphics_create_texture(cellwidth, height, fullcellwidth, fullheight, pxdata, false);
+			unsigned texture = graphics_create_texture(cellwidth, height, fullcellwidth, fullheight, pxdata, false, mipmap);
 			ns->texturearray.push_back(texture);
 			ns->texbordxarray.push_back((double) cellwidth/fullcellwidth);
 			ns->texbordyarray.push_back((double) height/fullheight);

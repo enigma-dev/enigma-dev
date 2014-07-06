@@ -118,13 +118,13 @@ namespace enigma
     bak->texbordy  = (double) h/fullheight;
   }
 
-  void background_add_to_index(background *bak, string filename, bool transparent, bool smoothEdges, bool preload)
+  void background_add_to_index(background *bak, string filename, bool transparent, bool smoothEdges, bool preload, bool mipmap)
   {
     unsigned int w, h, fullwidth, fullheight;
 
     unsigned char *pxdata = image_load(filename,&w,&h,&fullwidth,&fullheight,false);
     if (pxdata == NULL) { printf("ERROR - Failed to append sprite to index!\n"); return; }
-    unsigned texture = graphics_create_texture(w, h, fullwidth, fullheight, pxdata, false);
+    unsigned texture = graphics_create_texture(w, h, fullwidth, fullheight, pxdata, false, mipmap);
     delete[] pxdata;
 
     bak->width = w;
@@ -171,11 +171,11 @@ namespace enigma
 
 namespace enigma_user
 {
-  int background_add(string filename, bool transparent, bool smooth, bool preload)
+  int background_add(string filename, bool transparent, bool smooth, bool preload, bool mipmap)
   {
 	enigma::backgroundstructarray_reallocate();
     enigma::background *bck = enigma::backgroundstructarray[enigma::background_idmax] = new enigma::background;
-    enigma::background_add_to_index(bck, filename, transparent, smooth, preload);
+    enigma::background_add_to_index(bck, filename, transparent, smooth, preload, mipmap);
     return enigma::background_idmax++;
   }
 
@@ -201,13 +201,13 @@ namespace enigma_user
     return bckid;
   }
 
-  bool background_replace(int back, string filename, bool transparent, bool smooth, bool preload, bool free_texture)
+  bool background_replace(int back, string filename, bool transparent, bool smooth, bool preload, bool free_texture, bool mipmap)
   {
     get_backgroundnv(bck,back,false);
     if (free_texture)
         enigma::graphics_delete_texture(bck->texture);
 
-    enigma::background_add_to_index(bck, filename, transparent, smooth, preload);
+    enigma::background_add_to_index(bck, filename, transparent, smooth, preload, mipmap);
     return true;
   }
 
