@@ -38,7 +38,6 @@ extern int room_width, room_height;
 
 namespace enigma {
   extern size_t background_idmax;
-  extern unsigned bound_texture;
 }
 
 TextureStruct::TextureStruct(unsigned gtex)
@@ -164,6 +163,33 @@ namespace enigma
 
     return ret;
   }
+  
+  struct SamplerState {
+    bool wrapu, wrapv, wrapw;
+    GLint bordercolor[4], min, mag;
+    GLfloat anisotropy;
+    unsigned bound_texture;
+    
+    SamplerState(): wrapu(true), wrapv(true), wrapw(true) {
+    
+    }
+    
+    ~SamplerState() {
+    
+    }
+    
+    void ApplyState() {
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, min);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mag);
+    //  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, wrapu?GL_REPEAT:GL_CLAMP);
+     // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapv?GL_REPEAT:GL_CLAMP);
+     // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapw?GL_REPEAT:GL_CLAMP); 
+      //glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, anisotropy);
+      //glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, bordercolor);
+    }
+  };
+  
+  SamplerState samplerstates[8];
 }
 
 namespace enigma_user
@@ -234,69 +260,81 @@ unsigned texture_get_texel_height(int texid)
 }
 
 void texture_set(int texid) {
-	if (enigma::bound_texture != unsigned(get_texture(texid))) {
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, enigma::bound_texture = get_texture(texid));
-	}
+  texture_set_stage(0, texid);
 }
 
 void texture_set_stage(int stage, int texid) {
+  if (enigma::samplerstates[stage].bound_texture != unsigned(get_texture(texid))) {
     glActiveTexture(GL_TEXTURE0 + stage);
-    glBindTexture(GL_TEXTURE_2D, get_texture(texid));
+    glBindTexture(GL_TEXTURE_2D, enigma::samplerstates[stage].bound_texture = get_texture(texid));
+    enigma::samplerstates[stage].ApplyState();
+  }
 }
 
 void texture_reset() {
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, enigma::bound_texture = 0);
+	glBindTexture(GL_TEXTURE_2D, enigma::samplerstates[0].bound_texture = 0);
+}
+
+void texture_set_interpolation(bool enable) {
+  texture_set_interpolation_ext(0, enable);
 }
 
 void texture_set_interpolation_ext(int sampler, bool enable)
 {
   enigma::interpolate_textures = enable;
   glActiveTexture(GL_TEXTURE0 + sampler);
-  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,enable?GL_LINEAR:GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,enable?GL_LINEAR:GL_NEAREST);
+  enigma::samplerstates[sampler].min = enable?GL_LINEAR:GL_NEAREST;
+  enigma::samplerstates[sampler].mag = enable?GL_LINEAR:GL_NEAREST;
+}
+
+void texture_set_repeat(bool repeat) {
+  texture_set_repeat_ext(0, repeat);
 }
 
 void texture_set_repeat_ext(int sampler, bool repeat)
 {
   glActiveTexture(GL_TEXTURE0 + sampler);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, repeat?GL_REPEAT:GL_CLAMP);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, repeat?GL_REPEAT:GL_CLAMP);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, repeat?GL_REPEAT:GL_CLAMP);
+  enigma::samplerstates[sampler].wrapu = repeat;
+  enigma::samplerstates[sampler].wrapu = repeat;
+  enigma::samplerstates[sampler].wrapu = repeat;
 }
 
-void texture_set_wrap_ext(int sampler, bool wrapr, bool wraps, bool wrapt)
+void texture_set_wrap_ext(int sampler, bool wrapu, bool wrapv, bool wrapw)
 {
   glActiveTexture(GL_TEXTURE0 + sampler);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, wrapr?GL_REPEAT:GL_CLAMP);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wraps?GL_REPEAT:GL_CLAMP);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapt?GL_REPEAT:GL_CLAMP);
+  enigma::samplerstates[sampler].wrapu = wrapu;
+  enigma::samplerstates[sampler].wrapu = wrapv;
+  enigma::samplerstates[sampler].wrapu = wrapw;
 }
 
 void texture_set_border_ext(int sampler, int r, int g, int b, double a)
 {
-  GLint color[4] = {(int)r, (int)g, (int)b, int(a * 255)};
+  enigma::samplerstates[sampler].bordercolor[0] = r;
+  enigma::samplerstates[sampler].bordercolor[1] = g;
+  enigma::samplerstates[sampler].bordercolor[2] = b;
+  enigma::samplerstates[sampler].bordercolor[3] = int(a);
   glActiveTexture(GL_TEXTURE0 + sampler);
-  glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color);
+  enigma::samplerstates[sampler].ApplyState();
 }
 
-void texture_set_filter_ext(int texid, int filter)
+void texture_set_filter_ext(int sampler, int filter)
 {
-  texture_set(texid);
+  glActiveTexture(GL_TEXTURE0 + sampler);
   if (filter == tx_trilinear) {
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    enigma::samplerstates[sampler].min = GL_LINEAR_MIPMAP_LINEAR;
+    enigma::samplerstates[sampler].mag = GL_LINEAR;
   } else if (filter == tx_bilinear) {
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    enigma::samplerstates[sampler].min = GL_LINEAR_MIPMAP_NEAREST;
+    enigma::samplerstates[sampler].mag = GL_LINEAR;
   } else if (filter == tx_nearest) {
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    enigma::samplerstates[sampler].min = GL_NEAREST_MIPMAP_NEAREST;
+    enigma::samplerstates[sampler].mag = GL_NEAREST;
   } else {
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    enigma::samplerstates[sampler].min = GL_NEAREST;
+    enigma::samplerstates[sampler].mag = GL_NEAREST;
   }
+  enigma::samplerstates[sampler].ApplyState();
 }
 
 void texture_preload(int texid)
@@ -327,7 +365,7 @@ bool texture_mipmapping_supported()
 
 void texture_mipmapping_generate(int texid)
 {
-  texture_set(textureStructs[texid]->gltex);
+  glBindTexture(GL_TEXTURE_2D, textureStructs[texid]->gltex);
   // This allows us to control the number of mipmaps generated, but Direct3D does not have an option for it, so for now we'll just go with the defaults.
   // Honestly not a big deal, Unity3D doesn't allow you to specify either.
   //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
@@ -348,10 +386,11 @@ float texture_anisotropy_maxlevel()
   return maximumAnisotropy;
 }
 
-void  texture_anisotropy_filter(int texid, gs_scalar levels)
+void  texture_anisotropy_filter(int sampler, gs_scalar levels)
 {
-  glBindTexture(GL_TEXTURE_2D, textureStructs[texid]->gltex);
-  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, levels);
+  glActiveTexture(GL_TEXTURE0 + sampler);
+  enigma::samplerstates[sampler].anisotropy = levels;
+  enigma::samplerstates[sampler].ApplyState();
 }
 
 }
