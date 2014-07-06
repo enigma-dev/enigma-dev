@@ -222,11 +222,19 @@ void texture_set_priority(int texid, double prio)
   // Deprecated in ENIGMA and GM: Studio
 }
 
+void texture_set_interpolation(bool enable) {
+  texture_set_interpolation_ext(0, enable);
+}
+
 void texture_set_interpolation_ext(int sampler, bool enable)
 {
 	enigma::interpolate_textures = enable;
 	d3dmgr->SetSamplerState( sampler, D3DSAMP_MINFILTER, enable ? D3DTEXF_LINEAR : D3DTEXF_POINT );
 	d3dmgr->SetSamplerState( sampler, D3DSAMP_MAGFILTER, enable ? D3DTEXF_LINEAR : D3DTEXF_POINT );
+}
+
+void texture_set_repeat(bool repeat) {
+  texture_set_repeat_ext(0, repeat);
 }
 
 void texture_set_repeat_ext(int sampler, bool repeat)
@@ -236,6 +244,10 @@ void texture_set_repeat_ext(int sampler, bool repeat)
 	d3dmgr->SetSamplerState( sampler, D3DSAMP_ADDRESSW, repeat?D3DTADDRESS_WRAP:D3DTADDRESS_CLAMP );
 }
 
+void texture_set_wrap(bool wrapu, bool wrapv, bool wrapw) {
+  texture_set_wrap_ext(0, wrapu, wrapv, wrapw);
+}
+
 void texture_set_wrap_ext(int sampler, bool wrapu, bool wrapv, bool wrapw)
 {
 	d3dmgr->SetSamplerState( sampler, D3DSAMP_ADDRESSU, wrapu?D3DTADDRESS_WRAP:D3DTADDRESS_CLAMP );
@@ -243,12 +255,21 @@ void texture_set_wrap_ext(int sampler, bool wrapu, bool wrapv, bool wrapw)
 	d3dmgr->SetSamplerState( sampler, D3DSAMP_ADDRESSW, wrapw?D3DTADDRESS_WRAP:D3DTADDRESS_CLAMP );
 }
 
+void texture_set_border(int r, int g, int b, double a) {
+  texture_set_border_ext(0, r, g, b, a);
+}
+
 void texture_set_border_ext(int sampler, int r, int g, int b, double a)
 {
   d3dmgr->SetSamplerState( sampler, D3DSAMP_BORDERCOLOR, D3DCOLOR_RGBA(r, g, b, (unsigned)(a * 255)) );
 }
 
-void texture_set_filter(int sampler, int filter)
+void texture_set_filter(int filter)
+{
+  texture_set_filter_ext(0, filter);
+}
+
+void texture_set_filter_ext(int sampler, int filter)
 {
   if (filter == tx_trilinear) {
     d3dmgr->SetSamplerState( sampler, D3DSAMP_MINFILTER, D3DTEXF_LINEAR );
@@ -263,8 +284,8 @@ void texture_set_filter(int sampler, int filter)
     d3dmgr->SetSamplerState( sampler, D3DSAMP_MAGFILTER, D3DTEXF_POINT );
     d3dmgr->SetSamplerState( sampler, D3DSAMP_MIPFILTER, D3DTEXF_POINT );
   } else {
-    d3dmgr->SetSamplerState( sampler, D3DSAMP_MINFILTER, D3DTEXF_NONE );
-    d3dmgr->SetSamplerState( sampler, D3DSAMP_MAGFILTER, D3DTEXF_NONE );
+    d3dmgr->SetSamplerState( sampler, D3DSAMP_MINFILTER, D3DTEXF_POINT );
+    d3dmgr->SetSamplerState( sampler, D3DSAMP_MAGFILTER, D3DTEXF_POINT  );
     d3dmgr->SetSamplerState( sampler, D3DSAMP_MIPFILTER, D3DTEXF_NONE );
   }
 }
@@ -300,7 +321,7 @@ float texture_anisotropy_maxlevel()
   return caps.MaxAnisotropy;
 }
 
-void  texture_anisotropy_filter(int sampler, gs_scalar level)
+void texture_anisotropy_filter(int sampler, gs_scalar level)
 {
   d3dmgr->SetSamplerState( sampler, D3DSAMP_MAXANISOTROPY, level );
 }
