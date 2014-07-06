@@ -22,6 +22,7 @@
 //using std::string;
 #include "../General/GStextures.h"
 #include "../General/GLTextureStruct.h"
+#include "Universal_System/image_formats.h"
 #include "Universal_System/backgroundstruct.h"
 #include "Universal_System/spritestruct.h"
 #include "Graphics_Systems/graphics_mandatory.h"
@@ -172,6 +173,32 @@ namespace enigma
 
 namespace enigma_user
 {
+
+int texture_add(string filename) {
+  unsigned int w, h, fullwidth, fullheight;
+
+  unsigned char *pxdata = enigma::image_load(filename,&w,&h,&fullwidth,&fullheight,false);
+  if (pxdata == NULL) { printf("ERROR - Failed to append sprite to index!\n"); return -1; }
+  unsigned texture = enigma::graphics_create_texture(w, h, fullwidth, fullheight, pxdata, false);
+  delete[] pxdata;
+    
+  return texture;
+}
+
+void texture_save(int texid, string fname) {
+	unsigned w, h;
+	unsigned char* rgbdata = enigma::graphics_get_texture_pixeldata(texid, &w, &h);
+
+  string ext = enigma::image_get_format(fname);
+
+	enigma::image_save(fname, rgbdata, w, h, w, h, false);
+
+	delete[] rgbdata;
+}
+
+bool texture_exists(int texid) {
+  return textureStructs[texid] != NULL;
+}
 
 void texture_set_enabled(bool enable)
 {
