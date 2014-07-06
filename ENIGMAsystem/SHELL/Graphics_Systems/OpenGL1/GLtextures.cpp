@@ -71,17 +71,17 @@ namespace enigma
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexImage2D(GL_TEXTURE_2D, 0, 4, fullwidth, fullheight, 0, GL_BGRA, GL_UNSIGNED_BYTE, pxdata);
-	bool interpolate = (interpolate_textures && !isfont);
+    bool interpolate = (interpolate_textures && !isfont);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,interpolate?GL_LINEAR:GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,interpolate?GL_LINEAR:GL_NEAREST);
     glBindTexture(GL_TEXTURE_2D, 0);
 
-	TextureStruct* textureStruct = new TextureStruct(texture);
-	textureStruct->width = width;
-	textureStruct->height = height;
-	textureStruct->fullwidth = fullwidth;
-	textureStruct->fullheight = fullheight;
-	textureStruct->isFont = isfont;
+    TextureStruct* textureStruct = new TextureStruct(texture);
+    textureStruct->width = width;
+    textureStruct->height = height;
+    textureStruct->fullwidth = fullwidth;
+    textureStruct->fullheight = fullheight;
+    textureStruct->isFont = isfont;
     textureStructs.push_back(textureStruct);
     return textureStructs.size()-1;
   }
@@ -91,13 +91,13 @@ namespace enigma
     GLuint texture = textureStructs[tex]->gltex;
     glBindTexture(GL_TEXTURE_2D, texture);
     unsigned w, h, fw, fh;
-	bool interpolate = (interpolate_textures && !textureStructs[tex]->isFont);
+    bool interpolate = (interpolate_textures && !textureStructs[tex]->isFont);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,interpolate?GL_LINEAR:GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,interpolate?GL_LINEAR:GL_NEAREST);
-	w = textureStructs[tex]->width;
-	h = textureStructs[tex]->height;
-	fw = textureStructs[tex]->fullwidth;
-	fh = textureStructs[tex]->fullheight;
+    w = textureStructs[tex]->width;
+    h = textureStructs[tex]->height;
+    fw = textureStructs[tex]->fullwidth;
+    fh = textureStructs[tex]->fullheight;
     char* bitmap = new char[(fh<<(lgpp2(fw)+2))|2];
     glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_BYTE, bitmap);
     unsigned dup_tex = graphics_create_texture(w, h, fw, fh, bitmap, textureStructs[tex]->isFont);
@@ -113,10 +113,10 @@ namespace enigma
 
     unsigned w, h, fw, fh, size;
     glBindTexture(GL_TEXTURE_2D, texture);
-	w = textureStructs[tex]->width;
-	h = textureStructs[tex]->height;
-	fw = textureStructs[tex]->fullwidth;
-	fh = textureStructs[tex]->fullheight;
+    w = textureStructs[tex]->width;
+    h = textureStructs[tex]->height;
+    fw = textureStructs[tex]->fullwidth;
+    fh = textureStructs[tex]->fullheight;
     size = (fh<<(lgpp2(fw)+2))|2;
     char* bitmap = new char[size];
     char* bitmap2 = new char[size];
@@ -129,7 +129,7 @@ namespace enigma
 
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexImage2D(GL_TEXTURE_2D, 0, 4, fw, fh, 0, GL_BGRA, GL_UNSIGNED_BYTE, bitmap);
-	bool interpolate = (interpolate_textures && !textureStructs[tex]->isFont);
+    bool interpolate = (interpolate_textures && !textureStructs[tex]->isFont);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,interpolate?GL_LINEAR:GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,interpolate?GL_LINEAR:GL_NEAREST);
 
@@ -151,10 +151,10 @@ namespace enigma
     enigma_user::texture_set(texture);
 
     *fullwidth = textureStructs[texture]->fullwidth;
-	*fullheight = textureStructs[texture]->fullheight;
+    *fullheight = textureStructs[texture]->fullheight;
 
     unsigned char* ret = new unsigned char[((*fullwidth)*(*fullheight)*4)];
-	glPixelStorei(GL_PACK_ALIGNMENT, 1);
+    glPixelStorei(GL_PACK_ALIGNMENT, 1);
     glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_BYTE, ret);
 
     return ret;

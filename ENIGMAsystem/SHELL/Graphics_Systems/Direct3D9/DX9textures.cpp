@@ -54,20 +54,20 @@ namespace enigma
   {
     LPDIRECT3DTEXTURE9 texture = NULL;
 
-	d3dmgr->CreateTexture(fullwidth, fullheight, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &texture, 0);
+    d3dmgr->CreateTexture(fullwidth, fullheight, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &texture, 0);
 
-	D3DLOCKED_RECT rect;
+    D3DLOCKED_RECT rect;
 
-	texture->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
-	memcpy(rect.pBits, pxdata, fullwidth * fullheight * 4);
-	texture->UnlockRect(0);
+    texture->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
+    memcpy(rect.pBits, pxdata, fullwidth * fullheight * 4);
+    texture->UnlockRect(0);
 
-	TextureStruct* textureStruct = new TextureStruct(texture);
-	textureStruct->isFont = isfont;
-	textureStruct->width = width;
-	textureStruct->height = height;
-	textureStruct->fullwidth = fullwidth;
-	textureStruct->fullheight = fullheight;
+    TextureStruct* textureStruct = new TextureStruct(texture);
+    textureStruct->isFont = isfont;
+    textureStruct->width = width;
+    textureStruct->height = height;
+    textureStruct->fullwidth = fullwidth;
+    textureStruct->fullheight = fullheight;
     textureStructs.push_back(textureStruct);
     return textureStructs.size()-1;
   }
@@ -75,17 +75,17 @@ namespace enigma
   int graphics_duplicate_texture(int tex)
   {
     unsigned w, h, fw, fh;
-	w = textureStructs[tex]->width;
-	h = textureStructs[tex]->height;
-	fw = textureStructs[tex]->fullwidth;
-	fh = textureStructs[tex]->fullheight;
-	
-	D3DLOCKED_RECT rect;
+    w = textureStructs[tex]->width;
+    h = textureStructs[tex]->height;
+    fw = textureStructs[tex]->fullwidth;
+    fh = textureStructs[tex]->fullheight;
 
-	textureStructs[tex]->gTexture->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
-	unsigned char* bitmap = static_cast<unsigned char*>(rect.pBits);
-	textureStructs[tex]->gTexture->UnlockRect(0);
-	
+    D3DLOCKED_RECT rect;
+
+    textureStructs[tex]->gTexture->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
+    unsigned char* bitmap = static_cast<unsigned char*>(rect.pBits);
+    textureStructs[tex]->gTexture->UnlockRect(0);
+
     unsigned dup_tex = graphics_create_texture(w, h, fw, fh, bitmap, textureStructs[tex]->isFont);
     delete[] bitmap;
     return dup_tex;
@@ -94,23 +94,23 @@ namespace enigma
   void graphics_replace_texture_alpha_from_texture(int tex, int copy_tex)
   {
     unsigned w, h, fw, fh, size;
-	w = textureStructs[tex]->width;
-	h = textureStructs[tex]->height;
-	fw = textureStructs[tex]->fullwidth;
-	fh = textureStructs[tex]->fullheight;
+    w = textureStructs[tex]->width;
+    h = textureStructs[tex]->height;
+    fw = textureStructs[tex]->fullwidth;
+    fh = textureStructs[tex]->fullheight;
     size = (fh<<(lgpp2(fw)+2))|2;
-	
-	D3DLOCKED_RECT rect;
-	
-	textureStructs[copy_tex]->gTexture->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
-	unsigned char* bitmap_copy = static_cast<unsigned char*>(rect.pBits);
-	textureStructs[copy_tex]->gTexture->UnlockRect(0);
 
-	textureStructs[tex]->gTexture->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
-	for (int i = 3; i < size; i += 4)
+    D3DLOCKED_RECT rect;
+
+    textureStructs[copy_tex]->gTexture->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
+    unsigned char* bitmap_copy = static_cast<unsigned char*>(rect.pBits);
+    textureStructs[copy_tex]->gTexture->UnlockRect(0);
+
+    textureStructs[tex]->gTexture->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
+    for (int i = 3; i < size; i += 4)
         ((unsigned char*)rect.pBits)[i] = (bitmap_copy[i-3] + bitmap_copy[i-2] + bitmap_copy[i-1])/3;
-	textureStructs[tex]->gTexture->UnlockRect(0);
-	
+    textureStructs[tex]->gTexture->UnlockRect(0);
+
     delete[] bitmap_copy;
   }
 
@@ -122,13 +122,13 @@ namespace enigma
   unsigned char* graphics_get_texture_pixeldata(unsigned texture, unsigned* fullwidth, unsigned* fullheight)
   {
     *fullwidth = textureStructs[texture]->fullwidth;
-	*fullheight = textureStructs[texture]->fullheight;
+    *fullheight = textureStructs[texture]->fullheight;
 
-	D3DLOCKED_RECT rect;
+    D3DLOCKED_RECT rect;
 
-	textureStructs[texture]->gTexture->LockRect( 0, &rect, NULL, D3DLOCK_READONLY);
-	unsigned char* bitmap = static_cast<unsigned char*>(rect.pBits);
-	textureStructs[texture]->gTexture->UnlockRect(0);
+    textureStructs[texture]->gTexture->LockRect( 0, &rect, NULL, D3DLOCK_READONLY);
+    unsigned char* bitmap = static_cast<unsigned char*>(rect.pBits);
+    textureStructs[texture]->gTexture->UnlockRect(0);
 
     return bitmap;
   }
@@ -137,26 +137,21 @@ namespace enigma
 namespace enigma_user
 {
 
-void texture_set_enabled(bool enable)
-{
+int texture_add(string fname) {
 
 }
 
-void texture_set_interpolation(int enable)
-{
-	enigma::interpolate_textures = enable;
-	d3dmgr->SetSamplerState( 0, D3DSAMP_MINFILTER, enable ? D3DTEXF_LINEAR : D3DTEXF_POINT );
-	d3dmgr->SetSamplerState( 0, D3DSAMP_MAGFILTER, enable ? D3DTEXF_LINEAR : D3DTEXF_POINT );
+void texture_save(int texid, string fname) {
+
+}
+
+bool texture_exists(int texid) {
+
 }
 
 bool texture_get_interpolation()
 {
     return enigma::interpolate_textures;
-}
-
-void texture_set_blending(bool enable)
-{
-
 }
 
 gs_scalar texture_get_width(int texid) {
@@ -193,6 +188,30 @@ void texture_reset() {
 	d3dmgr->SetTexture(0, NULL);
 }
 
+void texture_set_blending(bool enable)
+{
+
+}
+
+void texture_set_enabled(bool enable)
+{
+
+}
+
+void texture_set_interpolation(int enable)
+{
+	enigma::interpolate_textures = enable;
+	d3dmgr->SetSamplerState( 0, D3DSAMP_MINFILTER, enable ? D3DTEXF_LINEAR : D3DTEXF_POINT );
+	d3dmgr->SetSamplerState( 0, D3DSAMP_MAGFILTER, enable ? D3DTEXF_LINEAR : D3DTEXF_POINT );
+}
+
+void texture_set_interpolation_ext(int sampler, int enable)
+{
+	enigma::interpolate_textures = enable;
+	d3dmgr->SetSamplerState( sampler, D3DSAMP_MINFILTER, enable ? D3DTEXF_LINEAR : D3DTEXF_POINT );
+	d3dmgr->SetSamplerState( sampler, D3DSAMP_MAGFILTER, enable ? D3DTEXF_LINEAR : D3DTEXF_POINT );
+}
+
 void texture_set_repeat(bool repeat)
 {
 	d3dmgr->SetSamplerState( 0, D3DSAMP_ADDRESSU, repeat?D3DTADDRESS_WRAP:D3DTADDRESS_CLAMP );
@@ -200,14 +219,18 @@ void texture_set_repeat(bool repeat)
 	d3dmgr->SetSamplerState( 0, D3DSAMP_ADDRESSW, repeat?D3DTADDRESS_WRAP:D3DTADDRESS_CLAMP );
 }
 
-void texture_set_repeat(int texid, bool repeat)
+void texture_set_repeat_ext(int sampler, bool repeat)
 {
-
+	d3dmgr->SetSamplerState( sampler, D3DSAMP_ADDRESSU, repeat?D3DTADDRESS_WRAP:D3DTADDRESS_CLAMP );
+	d3dmgr->SetSamplerState( sampler, D3DSAMP_ADDRESSV, repeat?D3DTADDRESS_WRAP:D3DTADDRESS_CLAMP );
+	d3dmgr->SetSamplerState( sampler, D3DSAMP_ADDRESSW, repeat?D3DTADDRESS_WRAP:D3DTADDRESS_CLAMP );
 }
 
-void texture_set_wrap(int texid, bool wrapr, bool wraps, bool wrapt)
+void texture_set_wrap(int sampler, bool wrapu, bool wrapv, bool wrapw)
 {
-
+	d3dmgr->SetSamplerState( sampler, D3DSAMP_ADDRESSU, wrapu?D3DTADDRESS_WRAP:D3DTADDRESS_CLAMP );
+	d3dmgr->SetSamplerState( sampler, D3DSAMP_ADDRESSV, wrapv?D3DTADDRESS_WRAP:D3DTADDRESS_CLAMP );
+	d3dmgr->SetSamplerState( sampler, D3DSAMP_ADDRESSW, wrapw?D3DTADDRESS_WRAP:D3DTADDRESS_CLAMP );
 }
 
 void texture_preload(int texid)
@@ -255,7 +278,7 @@ float texture_anisotropy_maxlevel()
 
 }
 
-void  texture_anisotropy_filter(int texid, gs_scalar levels)
+void  texture_anisotropy_filter(int sampler, gs_scalar levels)
 {
 
 }
