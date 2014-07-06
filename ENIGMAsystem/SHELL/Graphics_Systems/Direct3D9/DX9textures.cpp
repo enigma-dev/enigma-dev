@@ -51,12 +51,12 @@ inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect 
 
 namespace enigma
 {
-  int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool isfont)
+
+  int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool isfont, bool mipmap)
   {
     LPDIRECT3DTEXTURE9 texture = NULL;
-
-    d3dmgr->CreateTexture(fullwidth, fullheight, 1, 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &texture, 0);
-
+    
+    d3dmgr->CreateTexture(fullwidth, fullheight, 1, mipmap ? D3DUSAGE_AUTOGENMIPMAP : 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &texture, 0);
     D3DLOCKED_RECT rect;
 
     texture->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
@@ -73,7 +73,7 @@ namespace enigma
     return textureStructs.size()-1;
   }
 
-  int graphics_duplicate_texture(int tex)
+  int graphics_duplicate_texture(int tex, bool mipmap)
   {
     unsigned w, h, fw, fh;
     w = textureStructs[tex]->width;
@@ -87,7 +87,7 @@ namespace enigma
     unsigned char* bitmap = static_cast<unsigned char*>(rect.pBits);
     textureStructs[tex]->gTexture->UnlockRect(0);
 
-    unsigned dup_tex = graphics_create_texture(w, h, fw, fh, bitmap, textureStructs[tex]->isFont);
+    unsigned dup_tex = graphics_create_texture(w, h, fw, fh, bitmap, textureStructs[tex]->isFont, mipmap);
     delete[] bitmap;
     return dup_tex;
   }
@@ -115,9 +115,9 @@ namespace enigma
     delete[] bitmap_copy;
   }
 
-  void graphics_delete_texture(int tex)
+  void graphics_delete_texture(int texid)
   {
-	 textureStructs.erase(textureStructs.begin() + tex);
+	 delete textureStructs[texid];
   }
 
   unsigned char* graphics_get_texture_pixeldata(unsigned texture, unsigned* fullwidth, unsigned* fullheight)
@@ -138,12 +138,12 @@ namespace enigma
 namespace enigma_user
 {
 
-int texture_add(string filename) {
+int texture_add(string filename, bool mipmap) {
   unsigned int w, h, fullwidth, fullheight;
 
   unsigned char *pxdata = enigma::image_load(filename,&w,&h,&fullwidth,&fullheight,false);
   if (pxdata == NULL) { printf("ERROR - Failed to append sprite to index!\n"); return -1; }
-  unsigned texture = enigma::graphics_create_texture(w, h, fullwidth, fullheight, pxdata, false);
+  unsigned texture = enigma::graphics_create_texture(w, h, fullwidth, fullheight, pxdata, false, mipmap);
   delete[] pxdata;
     
   return texture;
@@ -158,6 +158,10 @@ void texture_save(int texid, string fname) {
 	enigma::image_save(fname, rgbdata, w, h, w, h, false);
 
 	delete[] rgbdata;
+}
+
+void texture_delete(int texid) {
+  delete textureStructs[texid];
 }
 
 bool texture_exists(int texid) {
@@ -188,13 +192,8 @@ unsigned texture_get_texel_height(int texid)
 	return textureStructs[texid]->height;
 }
 
-void texture_set(int texid) {
-	if (texid == -1) { d3dmgr->SetTexture(0, NULL); return; }
-	d3dmgr->SetTexture(0, get_texture(texid));
-	d3dmgr->SetTextureStageState(0,D3DTSS_ALPHAOP, D3DTOP_MODULATE);
-}
-
 void texture_set_stage(int stage, int texid) {
+  if (texid == -1) { d3dmgr->SetTexture(0, NULL); return; }
 	d3dmgr->SetTexture(stage, get_texture(texid));
 	d3dmgr->SetTextureStageState(stage,D3DTSS_ALPHAOP, D3DTOP_MODULATE);
 }
@@ -213,25 +212,21 @@ void texture_set_enabled(bool enable)
 
 }
 
-void texture_set_interpolation(int enable)
+void texture_preload(int texid)
 {
-	enigma::interpolate_textures = enable;
-	d3dmgr->SetSamplerState( 0, D3DSAMP_MINFILTER, enable ? D3DTEXF_LINEAR : D3DTEXF_POINT );
-	d3dmgr->SetSamplerState( 0, D3DSAMP_MAGFILTER, enable ? D3DTEXF_LINEAR : D3DTEXF_POINT );
+  // Deprecated in ENIGMA and GM: Studio, all textures are automatically preloaded.
 }
 
-void texture_set_interpolation_ext(int sampler, int enable)
+void texture_set_priority(int texid, double prio)
+{
+  // Deprecated in ENIGMA and GM: Studio
+}
+
+void texture_set_interpolation_ext(int sampler, bool enable)
 {
 	enigma::interpolate_textures = enable;
 	d3dmgr->SetSamplerState( sampler, D3DSAMP_MINFILTER, enable ? D3DTEXF_LINEAR : D3DTEXF_POINT );
 	d3dmgr->SetSamplerState( sampler, D3DSAMP_MAGFILTER, enable ? D3DTEXF_LINEAR : D3DTEXF_POINT );
-}
-
-void texture_set_repeat(bool repeat)
-{
-	d3dmgr->SetSamplerState( 0, D3DSAMP_ADDRESSU, repeat?D3DTADDRESS_WRAP:D3DTADDRESS_CLAMP );
-	d3dmgr->SetSamplerState( 0, D3DSAMP_ADDRESSV, repeat?D3DTADDRESS_WRAP:D3DTADDRESS_CLAMP );
-	d3dmgr->SetSamplerState( 0, D3DSAMP_ADDRESSW, repeat?D3DTADDRESS_WRAP:D3DTADDRESS_CLAMP );
 }
 
 void texture_set_repeat_ext(int sampler, bool repeat)
@@ -241,31 +236,37 @@ void texture_set_repeat_ext(int sampler, bool repeat)
 	d3dmgr->SetSamplerState( sampler, D3DSAMP_ADDRESSW, repeat?D3DTADDRESS_WRAP:D3DTADDRESS_CLAMP );
 }
 
-void texture_set_wrap(int sampler, bool wrapu, bool wrapv, bool wrapw)
+void texture_set_wrap_ext(int sampler, bool wrapu, bool wrapv, bool wrapw)
 {
 	d3dmgr->SetSamplerState( sampler, D3DSAMP_ADDRESSU, wrapu?D3DTADDRESS_WRAP:D3DTADDRESS_CLAMP );
 	d3dmgr->SetSamplerState( sampler, D3DSAMP_ADDRESSV, wrapv?D3DTADDRESS_WRAP:D3DTADDRESS_CLAMP );
 	d3dmgr->SetSamplerState( sampler, D3DSAMP_ADDRESSW, wrapw?D3DTADDRESS_WRAP:D3DTADDRESS_CLAMP );
 }
 
-void texture_preload(int texid)
+void texture_set_border_ext(int sampler, int r, int g, int b, double a)
 {
-
-}//functionality has been removed in ENIGMA, all textures are automatically preloaded
-
-void texture_set_priority(int texid, double prio)
-{
-
+  d3dmgr->SetSamplerState( sampler, D3DSAMP_BORDERCOLOR, D3DCOLOR_RGBA(r, g, b, (unsigned)(a * 255)) );
 }
 
-void texture_set_border(int texid, int r, int g, int b, double a)
+void texture_set_filter(int sampler, int filter)
 {
-
-}
-
-void texture_set_swizzle(int texid, int r, int g, int b, double a)
-{
-
+  if (filter == tx_trilinear) {
+    d3dmgr->SetSamplerState( sampler, D3DSAMP_MINFILTER, D3DTEXF_LINEAR );
+    d3dmgr->SetSamplerState( sampler, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR );
+    d3dmgr->SetSamplerState( sampler, D3DSAMP_MIPFILTER, D3DTEXF_LINEAR );
+  } else if (filter == tx_bilinear) {
+    d3dmgr->SetSamplerState( sampler, D3DSAMP_MINFILTER, D3DTEXF_LINEAR );
+    d3dmgr->SetSamplerState( sampler, D3DSAMP_MAGFILTER, D3DTEXF_LINEAR );
+    d3dmgr->SetSamplerState( sampler, D3DSAMP_MIPFILTER, D3DTEXF_POINT );
+  } else if (filter == tx_nearest) {
+    d3dmgr->SetSamplerState( sampler, D3DSAMP_MINFILTER, D3DTEXF_POINT );
+    d3dmgr->SetSamplerState( sampler, D3DSAMP_MAGFILTER, D3DTEXF_POINT );
+    d3dmgr->SetSamplerState( sampler, D3DSAMP_MIPFILTER, D3DTEXF_POINT );
+  } else {
+    d3dmgr->SetSamplerState( sampler, D3DSAMP_MINFILTER, D3DTEXF_NONE );
+    d3dmgr->SetSamplerState( sampler, D3DSAMP_MAGFILTER, D3DTEXF_NONE );
+    d3dmgr->SetSamplerState( sampler, D3DSAMP_MIPFILTER, D3DTEXF_NONE );
+  }
 }
 
 void texture_set_levelofdetail(int texid, double minlod, double maxlod, int maxlevel)
@@ -273,39 +274,35 @@ void texture_set_levelofdetail(int texid, double minlod, double maxlod, int maxl
 
 }
 
-void texture_mipmapping_filter(int texid, int filter)
+bool texture_mipmapping_supported()
 {
-
+  D3DCAPS9 caps;
+  d3dmgr->GetDeviceCaps(&caps);
+  return caps.TextureCaps & D3DPTEXTURECAPS_MIPMAP;
 }
 
-void texture_mipmapping_generate(int texid, int levels)
+void texture_mipmapping_generate(int texid)
 {
-
+  textureStructs[texid]->gTexture->GenerateMipSubLevels();
 }
 
-bool  texture_anisotropy_supported()
+bool texture_anisotropy_supported()
 {
-
+  D3DCAPS9 caps;
+  d3dmgr->GetDeviceCaps(&caps);
+  return caps.RasterCaps & D3DPRASTERCAPS_ANISOTROPY;
 }
 
 float texture_anisotropy_maxlevel()
 {
-
+  D3DCAPS9 caps;
+  d3dmgr->GetDeviceCaps(&caps);
+  return caps.MaxAnisotropy;
 }
 
-void  texture_anisotropy_filter(int sampler, gs_scalar levels)
+void  texture_anisotropy_filter(int sampler, gs_scalar level)
 {
-
-}
-
-bool  texture_multitexture_supported()
-{
-
-}
-
-void texture_multitexture_enable(bool enable)
-{
-
+  d3dmgr->SetSamplerState( sampler, D3DSAMP_MAXANISOTROPY, level );
 }
 
 }
