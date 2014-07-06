@@ -26,6 +26,9 @@
 #ifndef GSTEXTURES__H
 #define GSTEXTURES__H
 
+#include <string>
+using std::string;
+
 namespace enigma
 {
     extern bool interpolate_textures;
@@ -42,7 +45,10 @@ enum {
 
 namespace enigma_user
 {
-
+int texture_add(string fname);
+void texture_save(int texid, string fname);
+bool texture_exists(int texid);
+void texture_preload(int texid);
 void texture_set_enabled(bool enable);
 bool texture_get_interpolation();
 gs_scalar texture_get_width(int texid);
@@ -55,9 +61,10 @@ void texture_set_stage(int stage, int texid);
 void texture_reset();
 void texture_set_blending(bool enable);
 void texture_set_repeat(bool repeat);
-void texture_set_repeat(int texid, bool repeat);
-void texture_set_wrap(int texid, bool wrapr, bool wraps, bool wrapt);
-void texture_preload(int texid);
+void texture_set_repeat_ext(int sampler, bool repeat);
+void texture_set_interpolation(bool enable);
+void texture_set_interpolation_ext(int sampler, bool enable);
+void texture_set_wrap(int sampler, bool wrapr, bool wraps, bool wrapt);
 void texture_set_priority(int texid, double prio);
 void texture_set_border(int texid, int r, int g, int b, double a);
 void texture_set_swizzle(int texid, int r, int g, int b, double a);
@@ -66,7 +73,7 @@ void texture_mipmapping_filter(int texid, int enable);
 void texture_mipmapping_generate(int texid, int levels);
 bool  texture_anisotropy_supported();
 float texture_anisotropy_maxlevel();
-void  texture_anisotropy_filter(int texid, gs_scalar levels);
+void  texture_anisotropy_filter(int samplerid, gs_scalar levels);
 bool texture_multitexture_supported();
 void texture_multitexture_enable(bool enable);
 
