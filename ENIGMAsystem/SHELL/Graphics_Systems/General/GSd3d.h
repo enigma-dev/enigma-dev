@@ -101,6 +101,7 @@ void d3d_set_fog_start(double start);
 void d3d_set_fog_end(double end);
 void d3d_set_fog_density(double density);
 void d3d_set_depth(double dep);
+void d3d_clear_depth();
 void d3d_set_shading(bool smooth);
 
 bool d3d_get_mode();

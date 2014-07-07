@@ -82,7 +82,7 @@ bool surface_is_supported()
     return GLEW_ARB_framebuffer_object;
 }
 
-int surface_create(int width, int height)
+int surface_create(int width, int height, bool depthbuffer)
 {
     if (GLEW_ARB_framebuffer_object)
     {
@@ -118,16 +118,31 @@ int surface_create(int width, int height)
       enigma::surface_array[id]->height = h;
 
       glGenFramebuffers(1, &fbo);
-      int texture = enigma::graphics_create_texture(w,h,w,h,0,false);
+      int texture;
+      //if (type == 0){
+        texture = enigma::graphics_create_texture(w,h,w,h,0,false);
+      /*}else{
+        texture = enigma::graphics_create_texture_custom(w,h,w,h,0,GL_FLOAT,false);
+        printf("CREATED A FLOAT SURFACE!\n");
+      }*/
 
       glPushAttrib(GL_TEXTURE_BIT);
 
       glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
       glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureStructs[texture]->gltex, 0);
-      glDrawBuffer(GL_COLOR_ATTACHMENT0);
-      glReadBuffer(GL_COLOR_ATTACHMENT0);
+
+      if (depthbuffer == 1){
+        GLuint depthBuffer;
+        glGenRenderbuffers(1, &depthBuffer);
+        glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, w, h);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      }else{
+        glClear(GL_COLOR_BUFFER_BIT);
+      }
       glClearColor(1,1,1,0);
-      glClear(GL_COLOR_BUFFER_BIT);
+
       glBindFramebuffer(GL_DRAW_FRAMEBUFFER, enigma::bound_framebuffer);
 
       enigma::surface_array[id]->tex = texture;

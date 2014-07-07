@@ -36,13 +36,20 @@
   #include "libEGMstd.h"
   #include "Widget_Systems/widgets_mandatory.h"
   #define get_uniform(uniter,location,usize)\
-    if (location < 0) { printf("Program[%i] - Uniform location < 0 given!\n", enigma::bound_shader); return; }\
+    string name = enigma::shaderprograms[enigma::bound_shader]->name;\
+    char str[128];\
+    if (name == ""){\
+        sprintf(str, "Program[%i]", enigma::bound_shader);\
+    }else{\
+        sprintf(str, "Program[%s = %i]", name.c_str(), enigma::bound_shader);\
+    }\
+    if (location < 0) { printf("%s - Uniform location < 0 given (%i)!\n", str, location); return; }\
     std::map<GLint,enigma::Uniform>::iterator uniter = enigma::shaderprograms[enigma::bound_shader]->uniforms.find(location);\
     if (uniter == enigma::shaderprograms[enigma::bound_shader]->uniforms.end()){\
-        printf("Program[%i] - Uniform at location %i not found!\n", enigma::bound_shader, location);\
+        printf("%s - Uniform at location %i not found!\n", str, location);\
         return;\
     }else if ( uniter->second.size != usize ){\
-        printf("Program[%i] - Uniform at location %i with %i arguments is accesed by a function with %i arguments!\n", enigma::bound_shader, location, uniter->second.size, usize);\
+        printf("%s - Uniform at location %i with %i arguments is accesed by a function with %i arguments!\n", str, location, uniter->second.size, usize);\
     }
 #else
     #define get_uniform(uniter,location,usize)\
@@ -193,7 +200,7 @@ namespace enigma
                         "vec3 eyeNorm;\n"
                         "vec4 eyePosition;\n"
                         "getEyeSpace(eyeNorm, eyePosition);\n"
-                        "v_Color = clamp(en_AmbientColor + phongModel( eyeNorm, eyePosition ),0.0,1.0) * iColor;\n"
+                        "v_Color = (en_AmbientColor + phongModel( eyeNorm, eyePosition )) * iColor;\n"
                     "}else{\n"
 						"v_Color = iColor;\n"
                     "}\n"
