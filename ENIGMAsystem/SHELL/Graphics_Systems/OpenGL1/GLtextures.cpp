@@ -71,9 +71,6 @@ namespace enigma
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexImage2D(GL_TEXTURE_2D, 0, 4, fullwidth, fullheight, 0, GL_BGRA, GL_UNSIGNED_BYTE, pxdata);
-    bool interpolate = (interpolate_textures && !isfont);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,interpolate?GL_LINEAR:GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,interpolate?GL_LINEAR:GL_NEAREST);
     // This allows us to control the number of mipmaps generated, but Direct3D does not have an option for it, so for now we'll just go with the defaults.
     // Honestly not a big deal, Unity3D doesn't allow you to specify either.
     //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
@@ -96,9 +93,6 @@ namespace enigma
     GLuint texture = textureStructs[tex]->gltex;
     glBindTexture(GL_TEXTURE_2D, texture);
     unsigned w, h, fw, fh;
-    bool interpolate = (interpolate_textures && !textureStructs[tex]->isFont);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,interpolate?GL_LINEAR:GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,interpolate?GL_LINEAR:GL_NEAREST);
     w = textureStructs[tex]->width;
     h = textureStructs[tex]->height;
     fw = textureStructs[tex]->fullwidth;
@@ -134,9 +128,6 @@ namespace enigma
 
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexImage2D(GL_TEXTURE_2D, 0, 4, fw, fh, 0, GL_BGRA, GL_UNSIGNED_BYTE, bitmap);
-    bool interpolate = (interpolate_textures && !textureStructs[tex]->isFont);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,interpolate?GL_LINEAR:GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,interpolate?GL_LINEAR:GL_NEAREST);
 
     glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -164,6 +155,8 @@ namespace enigma
     return ret;
   }
   
+  //NOTE: OpenGL 1 hardware does not support sampler objects, some versions of 2 and usually over 3 do. We use this class
+  //to emulate the Direct3D behavior.
   struct SamplerState {
     bool wrapu, wrapv, wrapw;
     GLint bordercolor[4], min, mag;
@@ -178,14 +171,30 @@ namespace enigma
     
     }
     
-    void ApplyState() {
+    void ApplyWrap() {
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, wrapu?GL_REPEAT:GL_CLAMP);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapv?GL_REPEAT:GL_CLAMP);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapw?GL_REPEAT:GL_CLAMP); 
+    }
+    
+    void ApplyAnisotropy() {
+      glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, anisotropy);
+    }
+    
+    void ApplyBorderColor() {
+      glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, bordercolor);
+    }
+    
+    void ApplyFilter() {
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, min);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mag);
-    //  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, wrapu?GL_REPEAT:GL_CLAMP);
-     // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapv?GL_REPEAT:GL_CLAMP);
-     // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapw?GL_REPEAT:GL_CLAMP); 
-      //glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, anisotropy);
-      //glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, bordercolor);
+    }
+    
+    void ApplyState() {
+      ApplyWrap();
+      ApplyAnisotropy();
+      ApplyFilter();
+      ApplyBorderColor();
     }
   };
   
@@ -230,11 +239,6 @@ void texture_set_enabled(bool enable)
   (enable?glEnable:glDisable)(GL_TEXTURE_2D);
 }
 
-bool texture_get_interpolation()
-{
-    return enigma::interpolate_textures;
-}
-
 void texture_set_blending(bool enable)
 {
     (enable?glEnable:glDisable)(GL_BLEND);
@@ -274,6 +278,7 @@ void texture_set_stage(int stage, int texid) {
 void texture_reset() {
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, enigma::samplerstates[0].bound_texture = 0);
+  enigma::samplerstates[0].ApplyState();
 }
 
 void texture_set_interpolation(bool enable) {
@@ -282,10 +287,10 @@ void texture_set_interpolation(bool enable) {
 
 void texture_set_interpolation_ext(int sampler, bool enable)
 {
-  enigma::interpolate_textures = enable;
   glActiveTexture(GL_TEXTURE0 + sampler);
   enigma::samplerstates[sampler].min = enable?GL_LINEAR:GL_NEAREST;
   enigma::samplerstates[sampler].mag = enable?GL_LINEAR:GL_NEAREST;
+  enigma::samplerstates[sampler].ApplyFilter();
 }
 
 void texture_set_repeat(bool repeat) {
@@ -298,6 +303,7 @@ void texture_set_repeat_ext(int sampler, bool repeat)
   enigma::samplerstates[sampler].wrapu = repeat;
   enigma::samplerstates[sampler].wrapu = repeat;
   enigma::samplerstates[sampler].wrapu = repeat;
+  enigma::samplerstates[sampler].ApplyWrap();
 }
 
 void texture_set_wrap_ext(int sampler, bool wrapu, bool wrapv, bool wrapw)
@@ -306,6 +312,7 @@ void texture_set_wrap_ext(int sampler, bool wrapu, bool wrapv, bool wrapw)
   enigma::samplerstates[sampler].wrapu = wrapu;
   enigma::samplerstates[sampler].wrapu = wrapv;
   enigma::samplerstates[sampler].wrapu = wrapw;
+  enigma::samplerstates[sampler].ApplyWrap();
 }
 
 void texture_set_border_ext(int sampler, int r, int g, int b, double a)
@@ -315,7 +322,7 @@ void texture_set_border_ext(int sampler, int r, int g, int b, double a)
   enigma::samplerstates[sampler].bordercolor[2] = b;
   enigma::samplerstates[sampler].bordercolor[3] = int(a);
   glActiveTexture(GL_TEXTURE0 + sampler);
-  enigma::samplerstates[sampler].ApplyState();
+  enigma::samplerstates[sampler].ApplyBorderColor();
 }
 
 void texture_set_filter_ext(int sampler, int filter)
@@ -334,7 +341,7 @@ void texture_set_filter_ext(int sampler, int filter)
     enigma::samplerstates[sampler].min = GL_NEAREST;
     enigma::samplerstates[sampler].mag = GL_NEAREST;
   }
-  enigma::samplerstates[sampler].ApplyState();
+  enigma::samplerstates[sampler].ApplyFilter();
 }
 
 void texture_preload(int texid)
@@ -365,7 +372,8 @@ bool texture_mipmapping_supported()
 
 void texture_mipmapping_generate(int texid)
 {
-  glBindTexture(GL_TEXTURE_2D, textureStructs[texid]->gltex);
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, enigma::samplerstates[0].bound_texture = textureStructs[texid]->gltex);
   // This allows us to control the number of mipmaps generated, but Direct3D does not have an option for it, so for now we'll just go with the defaults.
   // Honestly not a big deal, Unity3D doesn't allow you to specify either.
   //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
