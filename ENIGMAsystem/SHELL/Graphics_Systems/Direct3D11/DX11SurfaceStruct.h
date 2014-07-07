@@ -29,14 +29,19 @@ namespace enigma
 {
   struct Surface
   {
+    ID3D11RenderTargetView* renderTargetView;
+    int tex, width, height;
+    
+    Surface() {
 
-	Surface() {
-
-	};
-	
-	~Surface() {
-
-	};
+    };
+    
+    ~Surface() {
+      if (renderTargetView != NULL) {
+        renderTargetView->Release();
+        renderTargetView = NULL;
+      }
+    };
   };
   
   extern vector<Surface*> Surfaces;

@@ -111,6 +111,11 @@ void surface_reset_target()
   pBackBuffer = NULL;
 }
 
+int surface_get_target()
+{
+
+}
+
 void surface_free(int id)
 {
 	get_surface(surf, id);
@@ -213,11 +218,6 @@ int surface_getpixel_alpha(int id, int x, int y)
 	delete[] bitmap;
 	
 	return ret;
-}
-
-int surface_get_bound()
-{
-
 }
 
 }

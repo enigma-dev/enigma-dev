@@ -230,6 +230,13 @@ void surface_reset_target(void)
   glPopMatrix();
 }
 
+int surface_get_target()
+{
+    int prevFbo;
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
+    return prevFbo;
+}
+
 void surface_free(int id)
 {
   get_surface(surf,id);
@@ -299,13 +306,6 @@ int surface_getpixel_alpha(int id, int x, int y)
 	glReadPixels(x,y,1,1,GL_ALPHA,GL_UNSIGNED_BYTE,pixelbuf);
 	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, prevFbo);
     return pixelbuf[0];
-}
-
-int surface_get_bound()
-{
-    int prevFbo;
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
-    return prevFbo;
 }
 
 }

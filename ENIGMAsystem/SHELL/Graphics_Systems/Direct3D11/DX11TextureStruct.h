@@ -32,6 +32,13 @@ struct TextureStruct {
   
   }
   
+  ~TextureStruct() {
+    if (texture != NULL) {
+      texture->Release();
+      texture = NULL;
+    }
+  }
+  
 };
 extern vector<TextureStruct*> textureStructs;
 
