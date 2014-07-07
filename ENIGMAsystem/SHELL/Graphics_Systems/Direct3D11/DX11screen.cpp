@@ -419,7 +419,15 @@ int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h
 }
 
 void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height) {
+    D3D11_VIEWPORT viewport;
+    ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
 
+    viewport.TopLeftX = x;
+    viewport.TopLeftY = y;
+    viewport.Width = width;
+    viewport.Height = height;
+
+    m_deviceContext->RSSetViewports(1, &viewport);
 }
 
 void display_set_gui_size(unsigned width, unsigned height) {
