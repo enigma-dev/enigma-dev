@@ -193,7 +193,7 @@ int texture_add(string filename, bool mipmap) {
 
   unsigned char *pxdata = enigma::image_load(filename,&w,&h,&fullwidth,&fullheight,false);
   if (pxdata == NULL) { printf("ERROR - Failed to append sprite to index!\n"); return -1; }
-  unsigned texture = enigma::graphics_create_texture(w, h, fullwidth, fullheight, pxdata, false, mipmap);
+  unsigned texture = enigma::graphics_create_texture(w, h, fullwidth, fullheight, pxdata, mipmap);
   delete[] pxdata;
     
   return texture;

@@ -124,7 +124,7 @@ namespace enigma
 
     unsigned char *pxdata = image_load(filename,&w,&h,&fullwidth,&fullheight,false);
     if (pxdata == NULL) { printf("ERROR - Failed to append sprite to index!\n"); return; }
-    unsigned texture = graphics_create_texture(w, h, fullwidth, fullheight, pxdata, false, mipmap);
+    unsigned texture = graphics_create_texture(w, h, fullwidth, fullheight, pxdata, mipmap);
     delete[] pxdata;
 
     bak->width = w;

@@ -119,7 +119,7 @@ void surface_free(int id)
 
 bool surface_exists(int id)
 {
-    return !((id < 0) or (id > enigma::Surfaces.size()) or (enigma::Surfaces[id] == NULL));
+  return !((id < 0) or (id > enigma::Surfaces.size()) or (enigma::Surfaces[id] == NULL));
 }
 
 int surface_get_texture(int id)
@@ -130,14 +130,14 @@ int surface_get_texture(int id)
 
 int surface_get_width(int id)
 {
-    get_surfacev(surf,id,-1);
-    return (surf->width);
+  get_surfacev(surf,id,-1);
+  return (surf->width);
 }
 
 int surface_get_height(int id)
 {
-    get_surfacev(surf,id,-1);
-    return (surf->height);
+  get_surfacev(surf,id,-1);
+  return (surf->height);
 }
 
 int surface_getpixel(int id, int x, int y)
@@ -192,7 +192,7 @@ int surface_getpixel_ext(int id, int x, int y)
 
 int surface_getpixel_alpha(int id, int x, int y)
 {
-  get_surfacev(surface,id,-1);
+	get_surfacev(surface,id,-1);
   if (x < 0) x = 0;
   if (y < 0) y = 0;
   if (x > surface->width || y > surface->height) return 0;

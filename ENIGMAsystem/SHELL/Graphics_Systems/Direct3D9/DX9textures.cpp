@@ -142,7 +142,7 @@ int texture_add(string filename, bool mipmap) {
 
   unsigned char *pxdata = enigma::image_load(filename,&w,&h,&fullwidth,&fullheight,false);
   if (pxdata == NULL) { printf("ERROR - Failed to append sprite to index!\n"); return -1; }
-  unsigned texture = enigma::graphics_create_texture(w, h, fullwidth, fullheight, pxdata, false, mipmap);
+  unsigned texture = enigma::graphics_create_texture(w, h, fullwidth, fullheight, pxdata, mipmap);
   delete[] pxdata;
     
   return texture;
@@ -184,6 +184,10 @@ unsigned texture_get_texel_width(int texid)
 unsigned texture_get_texel_height(int texid)
 {
 	return textureStructs[texid]->height;
+}
+
+void texture_set(int texid) {
+  texture_set_stage(0, texid);
 }
 
 void texture_set_stage(int stage, int texid) {
