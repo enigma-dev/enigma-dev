@@ -44,6 +44,8 @@ namespace enigma
   int currentblendtype = 0;
   bool glew_isgo;
   bool pbo_isgo;
+  
+  void graphics_initialize_samplers();
 
     void graphicssystem_initialize()
     {
@@ -132,6 +134,8 @@ namespace enigma
 
         glsl_program_reset(); //Set the default program
         //END DEFAULT SHADER
+        
+        graphics_initialize_samplers();
     }
 }
 

@@ -169,10 +169,6 @@ namespace enigma
     unsigned bound_texture;
     
     SamplerState(): sampler_index(0) {
-     // MessageBox(NULL, "wtf", "ok", MB_OK);
-     GLuint sampler_index2 = 0;
-      glGenSamplers(1, &sampler_index2);
-      sampler_index = sampler_index2;
     }
     
     ~SamplerState() {
@@ -182,6 +178,12 @@ namespace enigma
   };
   
   SamplerState samplerstates[8];
+  
+  void graphics_initialize_samplers() {
+    for (size_t i = 0; i < 8; i++) {
+      glGenSamplers(1, &samplerstates[i].sampler_index);
+    }
+  }
 }
 
 namespace enigma_user
