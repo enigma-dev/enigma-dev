@@ -168,11 +168,6 @@ bool texture_exists(int texid) {
   return textureStructs[texid] != NULL;
 }
 
-bool texture_get_interpolation()
-{
-  return enigma::interpolate_textures;
-}
-
 gs_scalar texture_get_width(int texid) {
 	return textureStructs[texid]->width / textureStructs[texid]->fullwidth;
 }
@@ -228,7 +223,6 @@ void texture_set_interpolation(bool enable) {
 
 void texture_set_interpolation_ext(int sampler, bool enable)
 {
-	enigma::interpolate_textures = enable;
 	d3dmgr->SetSamplerState( sampler, D3DSAMP_MINFILTER, enable ? D3DTEXF_LINEAR : D3DTEXF_POINT );
 	d3dmgr->SetSamplerState( sampler, D3DSAMP_MAGFILTER, enable ? D3DTEXF_LINEAR : D3DTEXF_POINT );
 }

@@ -164,15 +164,15 @@ namespace enigma
     return ret;
   }
   
-  //NOTE: OpenGL 1 hardware does not support sampler objects, some versions of 2 and usually over 3 do. We use this class
-  //to emulate the Direct3D behavior.
   struct SamplerState {
     GLuint sampler_index;
     unsigned bound_texture;
     
-    SamplerState() {
+    SamplerState(): sampler_index(0) {
      // MessageBox(NULL, "wtf", "ok", MB_OK);
-      glGenSamplers(1, &sampler_index);
+     GLuint sampler_index2 = 0;
+      glGenSamplers(1, &sampler_index2);
+      sampler_index = sampler_index2;
     }
     
     ~SamplerState() {
@@ -253,6 +253,7 @@ void texture_set(int texid) {
 void texture_set_stage(int stage, int texid) {
   //if (enigma::samplerstates[stage].bound_texture != unsigned(get_texture(texid))) {
     glActiveTexture(GL_TEXTURE0 + stage);
+    glBindSampler(stage, enigma::samplerstates[stage].sampler_index);
     oglmgr->BindTexture(GL_TEXTURE_2D, enigma::samplerstates[stage].bound_texture = get_texture(texid));
     //oglmgr->ResetTextureStates();
   //}
@@ -270,8 +271,8 @@ void texture_set_interpolation(bool enable) {
 
 void texture_set_interpolation_ext(int sampler, bool enable)
 {
-  glSamplerParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, enable?GL_LINEAR:GL_NEAREST);
-  glSamplerParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, enable?GL_LINEAR:GL_NEAREST);
+  glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_MIN_FILTER, enable?GL_LINEAR:GL_NEAREST);
+  glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_MAG_FILTER, enable?GL_LINEAR:GL_NEAREST);
 }
 
 void texture_set_repeat(bool repeat) {
@@ -281,22 +282,22 @@ void texture_set_repeat(bool repeat) {
 
 void texture_set_repeat_ext(int sampler, bool repeat)
 {
-  glSamplerParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, repeat?GL_REPEAT:GL_CLAMP);
-  glSamplerParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, repeat?GL_REPEAT:GL_CLAMP);
-  glSamplerParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, repeat?GL_REPEAT:GL_CLAMP); 
+  glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_WRAP_R, repeat?GL_REPEAT:GL_CLAMP);
+  glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_WRAP_S, repeat?GL_REPEAT:GL_CLAMP);
+  glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_WRAP_T, repeat?GL_REPEAT:GL_CLAMP); 
 }
 
 void texture_set_wrap_ext(int sampler, bool wrapu, bool wrapv, bool wrapw)
 {
-  glSamplerParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, wrapu?GL_REPEAT:GL_CLAMP);
-  glSamplerParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapv?GL_REPEAT:GL_CLAMP);
-  glSamplerParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapw?GL_REPEAT:GL_CLAMP); 
+  glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_WRAP_R, wrapu?GL_REPEAT:GL_CLAMP);
+  glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_WRAP_S, wrapv?GL_REPEAT:GL_CLAMP);
+  glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_WRAP_T, wrapw?GL_REPEAT:GL_CLAMP); 
 }
 
 void texture_set_border_ext(int sampler, int r, int g, int b, double a)
 {
   GLint bordercolor[4] = { r, g, b, int(a * 255) };
-  glSamplerParameteriv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, bordercolor);
+  glSamplerParameteriv(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_BORDER_COLOR, bordercolor);
 }
 
 void texture_set_filter_ext(int sampler, int filter)
@@ -315,8 +316,8 @@ void texture_set_filter_ext(int sampler, int filter)
     min = GL_NEAREST;
     mag = GL_NEAREST;
   }
-  glSamplerParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, min);
-  glSamplerParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mag);
+  glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_MIN_FILTER, min);
+  glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_MAG_FILTER, mag);
 }
 
 void texture_preload(int texid)
@@ -371,7 +372,7 @@ float texture_anisotropy_maxlevel()
 
 void  texture_anisotropy_filter(int sampler, gs_scalar levels)
 {
-  glSamplerParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, levels);
+  glSamplerParameterf(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_MAX_ANISOTROPY_EXT, levels);
 }
 
 }
