@@ -14,7 +14,7 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
-
+#include <windows.h>
 #include <iostream>
 #include <string>
 #include <stdlib.h>     /* malloc, free, rand */
@@ -35,7 +35,7 @@ namespace enigma
   int currentblendtype = 0;
   bool glew_isgo;
   bool pbo_isgo;
-
+  
   void graphicssystem_initialize()
   {
     #ifdef DEBUG_MODE
@@ -44,90 +44,90 @@ namespace enigma
     {
       std::cout<<"GLEW ERROR!"<<std::endl;
     }
-	#else
-	glewInit();
+    #else
+    glewInit();
     #endif
 
     //enigma::pbo_isgo=GL_ARB_pixel_buffer_object;
     glMatrixMode(GL_PROJECTION);
-      glClearColor(0,0,0,0);
+    glClearColor(0,0,0,0);
     glMatrixMode(GL_MODELVIEW);
-      glLoadIdentity();
+    glLoadIdentity();
 
-      using enigma_user::room_width;
-      using enigma_user::room_height;
-      glViewport(0,0,(int)room_width,(int)room_height);
-      glOrtho(-1,(int)room_width,-1,(int)room_height,0,1);
-      glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    using enigma_user::room_width;
+    using enigma_user::room_height;
+    glViewport(0,0,(int)room_width,(int)room_height);
+    glOrtho(-1,(int)room_width,-1,(int)room_height,0,1);
+    glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-      glDisable(GL_DEPTH_TEST);
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glDisable(GL_DEPTH_TEST);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-      glEnable(GL_BLEND);
-      glEnable(GL_ALPHA_TEST);
-      glEnable(GL_TEXTURE_2D);
-      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-      glAlphaFunc(GL_ALWAYS,0);
+    glEnable(GL_BLEND);
+    glEnable(GL_ALPHA_TEST);
+    glEnable(GL_TEXTURE_2D);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glAlphaFunc(GL_ALWAYS,0);
 
-      glColor4f(0,0,0,1);
-      glBindTexture(GL_TEXTURE_2D,0);
+    glColor4f(0,0,0,1);
+    glBindTexture(GL_TEXTURE_2D,0);
 
 	  init_shaders();
 	  // read shaders into graphics system structure and compile and link them if needed
 	  for (size_t i = 0; i < shader_idmax; i++) {
 	    ShaderStruct* shaderstruct = shaderdata[i];
 
-		//if (string(shaderstruct->type) != string("GLSL")) { continue; }
+      //if (string(shaderstruct->type) != string("GLSL")) { continue; }
 
-		Shader* vshader = new Shader(enigma_user::sh_vertex);
-		shaders.push_back(vshader);
-		glShaderSource(vshader->shader, 1, (const GLchar**)&shaderstruct->vertex, NULL);
+      Shader* vshader = new Shader(enigma_user::sh_vertex);
+      shaders.push_back(vshader);
+      glShaderSource(vshader->shader, 1, (const GLchar**)&shaderstruct->vertex, NULL);
 
-		Shader* fshader = new Shader(enigma_user::sh_fragment);
-		shaders.push_back(fshader);
-		glShaderSource(fshader->shader, 1, (const GLchar**)&shaderstruct->fragment, NULL);
+      Shader* fshader = new Shader(enigma_user::sh_fragment);
+      shaders.push_back(fshader);
+      glShaderSource(fshader->shader, 1, (const GLchar**)&shaderstruct->fragment, NULL);
 
-		ShaderProgram* program = new ShaderProgram();
-		shaderprograms.push_back(program);
+      ShaderProgram* program = new ShaderProgram();
+      shaderprograms.push_back(program);
 
-		if (shaderstruct->precompile) {
-			glCompileShader(vshader->shader);
-			glCompileShader(fshader->shader);
+      if (shaderstruct->precompile) {
+        glCompileShader(vshader->shader);
+        glCompileShader(fshader->shader);
 
-			GLint blen = 0;
-			GLsizei slen = 0;
+        GLint blen = 0;
+        GLsizei slen = 0;
 
-			glGetShaderiv(vshader->shader, GL_INFO_LOG_LENGTH , &blen);
+        glGetShaderiv(vshader->shader, GL_INFO_LOG_LENGTH , &blen);
 
-			if (blen > 1)
-			{
-				GLchar* compiler_log = (GLchar*)malloc(blen);
+        if (blen > 1)
+        {
+          GLchar* compiler_log = (GLchar*)malloc(blen);
 
-				glGetInfoLogARB(vshader->shader, blen, &slen, compiler_log);
-				std::cout << compiler_log;
-			} else {
-				std::cout << "Vertex shader compile log empty";
-			}
+          glGetInfoLogARB(vshader->shader, blen, &slen, compiler_log);
+          std::cout << compiler_log;
+        } else {
+          std::cout << "Vertex shader compile log empty";
+        }
 
-			glGetShaderiv(fshader->shader, GL_INFO_LOG_LENGTH , &blen);
+        glGetShaderiv(fshader->shader, GL_INFO_LOG_LENGTH , &blen);
 
-			if (blen > 1)
-			{
-				GLchar* compiler_log = (GLchar*)malloc(blen);
+        if (blen > 1)
+        {
+          GLchar* compiler_log = (GLchar*)malloc(blen);
 
-				glGetInfoLogARB(fshader->shader, blen, &slen, compiler_log);
-				std::cout << compiler_log;
-			} else {
-				std::cout << "Fragment shader compile log empty";
-			}
+          glGetInfoLogARB(fshader->shader, blen, &slen, compiler_log);
+          std::cout << compiler_log;
+        } else {
+          std::cout << "Fragment shader compile log empty";
+        }
 
-		}
+      }
 
-		glAttachShader(program->shaderprogram, vshader->shader);
-		glAttachShader(program->shaderprogram, fshader->shader);
+      glAttachShader(program->shaderprogram, vshader->shader);
+      glAttachShader(program->shaderprogram, fshader->shader);
 
-		glLinkProgram(program->shaderprogram);
-		glValidateProgram(program->shaderprogram);
+      glLinkProgram(program->shaderprogram);
+      glValidateProgram(program->shaderprogram);
 	  }
   }
 }

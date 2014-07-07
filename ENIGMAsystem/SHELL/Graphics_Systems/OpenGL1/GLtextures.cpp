@@ -401,4 +401,3 @@ void  texture_anisotropy_filter(int sampler, gs_scalar levels)
 }
 
 }
-

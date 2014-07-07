@@ -54,13 +54,14 @@ namespace enigma
     void graphicssystem_initialize()
     {
         oglmgr = new ContextManager();
-        GLenum err = glewInit();
-
         #ifdef DEBUG_MODE
+        GLenum err = glewInit();
         if (GLEW_OK != err)
         {
           std::cout<<"GLEW ERROR!"<<std::endl;
         }
+        #else
+        glewInit();
         #endif
 
         //enigma::pbo_isgo=GL_ARB_pixel_buffer_object;

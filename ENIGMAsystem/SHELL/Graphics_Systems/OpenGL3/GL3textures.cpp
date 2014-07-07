@@ -15,7 +15,6 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
-#include <windows.h>
 #include <stdio.h>
 #include "../General/OpenGLHeaders.h"
 #include <string.h>
@@ -255,7 +254,7 @@ void texture_set_stage(int stage, int texid) {
   if (enigma::samplerstates[stage].bound_texture != unsigned(get_texture(texid))) {
     glActiveTexture(GL_TEXTURE0 + stage);
     glBindTexture(GL_TEXTURE_2D, get_texture(texid));
-    glBindSampler(stage, samplerstates[stage].sampler_index);
+    glBindSampler(stage, enigma::samplerstates[stage].sampler_index);
     //oglmgr->ResetTextureStates();
   }
 }
