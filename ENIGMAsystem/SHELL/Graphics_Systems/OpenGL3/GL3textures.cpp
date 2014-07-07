@@ -256,7 +256,6 @@ void texture_set(int texid) {
 void texture_set_stage(int stage, int texid) {
   //if (enigma::samplerstates[stage].bound_texture != unsigned(get_texture(texid))) {
     glActiveTexture(GL_TEXTURE0 + stage);
-    
     oglmgr->BindTexture(GL_TEXTURE_2D, enigma::samplerstates[stage].bound_texture = get_texture(texid));
     //oglmgr->ResetTextureStates();
   //}
