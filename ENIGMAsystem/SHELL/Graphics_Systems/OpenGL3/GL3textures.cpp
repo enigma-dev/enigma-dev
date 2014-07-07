@@ -74,7 +74,7 @@ unsigned get_texture(int texid)
 
 namespace enigma
 {
-  int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool isfont, bool mipmap)
+  int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool mipmap)
   {
     GLuint texture;
     glGenTextures(1, &texture);
@@ -92,7 +92,6 @@ namespace enigma
     textureStruct->height = height;
     textureStruct->fullwidth = fullwidth;
     textureStruct->fullheight = fullheight;
-    textureStruct->isFont = isfont;
     textureStructs.push_back(textureStruct);
     return textureStructs.size()-1;
   }
@@ -108,7 +107,7 @@ namespace enigma
     fh = textureStructs[tex]->fullheight;
     char* bitmap = new char[(fh<<(lgpp2(fw)+2))|2];
     glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_BYTE, bitmap);
-    unsigned dup_tex = graphics_create_texture(w, h, fw, fh, bitmap, textureStructs[tex]->isFont, mipmap);
+    unsigned dup_tex = graphics_create_texture(w, h, fw, fh, bitmap, mipmap);
     delete[] bitmap;
     glPopAttrib();
     return dup_tex;
@@ -182,7 +181,6 @@ namespace enigma
   void graphics_initialize_samplers() {
     for (size_t i = 0; i < 8; i++) {
       glGenSamplers(1, &samplerstates[i].sampler_index);
-      glBindSampler(i, samplerstates[i].sampler_index);
     }
   }
 }
@@ -254,11 +252,12 @@ void texture_set(int texid) {
 }
 
 void texture_set_stage(int stage, int texid) {
-  //if (enigma::samplerstates[stage].bound_texture != unsigned(get_texture(texid))) {
+  if (enigma::samplerstates[stage].bound_texture != unsigned(get_texture(texid))) {
     glActiveTexture(GL_TEXTURE0 + stage);
-    oglmgr->BindTexture(GL_TEXTURE_2D, enigma::samplerstates[stage].bound_texture = get_texture(texid));
+    glBindTexture(GL_TEXTURE_2D, get_texture(texid));
+    glBindSampler(stage, samplerstates[stage].sampler_index);
     //oglmgr->ResetTextureStates();
-  //}
+  }
 }
 
 void texture_reset() {

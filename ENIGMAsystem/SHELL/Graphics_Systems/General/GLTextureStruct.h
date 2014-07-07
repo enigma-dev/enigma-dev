@@ -25,7 +25,6 @@ using std::vector;
 
 struct TextureStruct {
 	unsigned gltex;
-	bool isFont;
 	unsigned width,height;
 	unsigned fullwidth,fullheight;
 	TextureStruct(unsigned gtex);
