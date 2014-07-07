@@ -117,7 +117,14 @@ int surface_create(int width, int height)
 		return false;
 	}
 
-	return true;
+	enigma::Surface* surface = new enigma::Surface();	 
+	TextureStruct* gmTexture = new TextureStruct(renderTargetTexture);
+  textureStructs.push_back(gmTexture);
+  surface->renderTargetView = renderTargetView;
+  surface->tex = textureStructs.size() - 1;
+	surface->width = width; surface->height = height;
+	enigma::Surfaces.push_back(surface);
+	return enigma::Surfaces.size() - 1;
 }
 
 int surface_create_msaa(int width, int height, int levels)
