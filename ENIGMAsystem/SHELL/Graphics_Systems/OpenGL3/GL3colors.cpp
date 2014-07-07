@@ -38,10 +38,6 @@ namespace enigma {
 namespace enigma_user
 {
 
-void draw_unbind_all() {
-  texture_reset();
-}
-
 void draw_clear_alpha(int col,float alpha)
 {
   //Unfortunately, we lack a 255-based method for setting ClearColor.

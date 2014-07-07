@@ -15,7 +15,7 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
-
+#include <windows.h>
 #include <stdio.h>
 #include "../General/OpenGLHeaders.h"
 #include <string.h>
@@ -74,44 +74,42 @@ unsigned get_texture(int texid)
 
 namespace enigma
 {
-  int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool isfont)
+  int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool isfont, bool mipmap)
   {
     GLuint texture;
     glGenTextures(1, &texture);
     oglmgr->BindTexture(GL_TEXTURE_2D, texture);
     glTexImage2D(GL_TEXTURE_2D, 0, 4, fullwidth, fullheight, 0, GL_BGRA, GL_UNSIGNED_BYTE, pxdata);
-    bool interpolate = (interpolate_textures && !isfont);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,interpolate?GL_LINEAR:GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,interpolate?GL_LINEAR:GL_NEAREST);
-    oglmgr->ResetTextureStates();
+    // This allows us to control the number of mipmaps generated, but Direct3D does not have an option for it, so for now we'll just go with the defaults.
+    // Honestly not a big deal, Unity3D doesn't allow you to specify either.
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 3);
+    // The user should call texture_mipmapping_generate manually to control when mipmaps are generated.
+    oglmgr->BindTexture(GL_TEXTURE_2D, 0);
 
     TextureStruct* textureStruct = new TextureStruct(texture);
-    textureStruct->isFont = isfont;
     textureStruct->width = width;
     textureStruct->height = height;
     textureStruct->fullwidth = fullwidth;
     textureStruct->fullheight = fullheight;
+    textureStruct->isFont = isfont;
     textureStructs.push_back(textureStruct);
     return textureStructs.size()-1;
   }
 
-  int graphics_duplicate_texture(int tex)
+  int graphics_duplicate_texture(int tex, bool mipmap)
   {
     GLuint texture = textureStructs[tex]->gltex;
     oglmgr->BindTexture(GL_TEXTURE_2D, texture);
     unsigned w, h, fw, fh;
-    bool interpolate = (interpolate_textures && !textureStructs[tex]->isFont);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,interpolate?GL_LINEAR:GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,interpolate?GL_LINEAR:GL_NEAREST);
     w = textureStructs[tex]->width;
     h = textureStructs[tex]->height;
     fw = textureStructs[tex]->fullwidth;
     fh = textureStructs[tex]->fullheight;
     char* bitmap = new char[(fh<<(lgpp2(fw)+2))|2];
     glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_BYTE, bitmap);
-    unsigned dup_tex = graphics_create_texture(w, h, fw, fh, bitmap, textureStructs[tex]->isFont);
+    unsigned dup_tex = graphics_create_texture(w, h, fw, fh, bitmap, textureStructs[tex]->isFont, mipmap);
     delete[] bitmap;
-    oglmgr->ResetTextureStates();
     glPopAttrib();
     return dup_tex;
   }
@@ -135,14 +133,12 @@ namespace enigma
     glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_BYTE, bitmap2);
 
     for (int i = 3; i < size; i += 4)
-        bitmap[i] = (bitmap2[i-1] + bitmap2[i-2] + bitmap2[i-3])/3;
+        bitmap[i] = (bitmap2[i-3] + bitmap2[i-2] + bitmap2[i-1])/3;
 
     oglmgr->BindTexture(GL_TEXTURE_2D, texture);
     glTexImage2D(GL_TEXTURE_2D, 0, 4, fw, fh, 0, GL_BGRA, GL_UNSIGNED_BYTE, bitmap);
-    bool interpolate = (interpolate_textures && !textureStructs[tex]->isFont);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,interpolate?GL_LINEAR:GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,interpolate?GL_LINEAR:GL_NEAREST);
-    oglmgr->ResetTextureStates();
+
+    oglmgr->BindTexture(GL_TEXTURE_2D, 0);
 
     delete[] bitmap;
     delete[] bitmap2;
@@ -156,8 +152,7 @@ namespace enigma
 
   unsigned char* graphics_get_texture_pixeldata(unsigned texture, unsigned* fullwidth, unsigned* fullheight)
   {
-    //enigma_user::texture_set(texture); Wtf? This don't work anymore? - Robert
-    oglmgr->BindTexture(GL_TEXTURE_2D, textureStructs[texture]->gltex);
+    enigma_user::texture_set(texture);
 
     *fullwidth = textureStructs[texture]->fullwidth;
     *fullheight = textureStructs[texture]->fullheight;
@@ -168,6 +163,25 @@ namespace enigma
 
     return ret;
   }
+  
+  //NOTE: OpenGL 1 hardware does not support sampler objects, some versions of 2 and usually over 3 do. We use this class
+  //to emulate the Direct3D behavior.
+  struct SamplerState {
+    GLuint sampler_index;
+    unsigned bound_texture;
+    
+    SamplerState() {
+     // MessageBox(NULL, "wtf", "ok", MB_OK);
+      glGenSamplers(1, &sampler_index);
+    }
+    
+    ~SamplerState() {
+      glDeleteSamplers(1, &sampler_index);
+    }
+    
+  };
+  
+  SamplerState samplerstates[8];
 }
 
 namespace enigma_user
@@ -208,24 +222,6 @@ void texture_set_enabled(bool enable)
   (enable?glEnable:glDisable)(GL_TEXTURE_2D);
 }
 
-void texture_set_interpolation(bool enable)
-{
-  enigma::interpolate_textures = enable;
-  for (unsigned i = 0; i < textureStructs.size(); i++)
-  {
-	if (textureStructs[i]->isFont) { continue; }
-    oglmgr->BindTexture(GL_TEXTURE_2D, textureStructs[i]->gltex);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,enable?GL_LINEAR:GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,enable?GL_LINEAR:GL_NEAREST);
-  }
-  oglmgr->ResetTextureStates();
-}
-
-bool texture_get_interpolation()
-{
-    return enigma::interpolate_textures;
-}
-
 void texture_set_blending(bool enable)
 {
     (enable?glEnable:glDisable)(GL_BLEND);
@@ -251,46 +247,76 @@ unsigned texture_get_texel_height(int texid)
 }
 
 void texture_set(int texid) {
-	glActiveTexture(GL_TEXTURE0);
-	oglmgr->BindTexture(GL_TEXTURE_2D, texid);
+  texture_set_stage(0, texid);
 }
 
 void texture_set_stage(int stage, int texid) {
-	glActiveTexture(GL_TEXTURE0 + stage);
-	oglmgr->BindTexture(GL_TEXTURE_2D, get_texture(texid));
+  //if (enigma::samplerstates[stage].bound_texture != unsigned(get_texture(texid))) {
+    glActiveTexture(GL_TEXTURE0 + stage);
+    oglmgr->BindTexture(GL_TEXTURE_2D, enigma::samplerstates[stage].bound_texture = get_texture(texid));
+    //oglmgr->ResetTextureStates();
+  //}
 }
 
 void texture_reset() {
 	glActiveTexture(GL_TEXTURE0);
-	oglmgr->BindTexture(GL_TEXTURE_2D, 0);
-	oglmgr->EndShapesBatching();
+	oglmgr->BindTexture(GL_TEXTURE_2D, enigma::samplerstates[0].bound_texture = 0);
+  oglmgr->EndShapesBatching();
 }
 
-void texture_set_repeat(bool repeat)
+void texture_set_interpolation(bool enable) {
+  texture_set_interpolation_ext(0, enable);
+}
+
+void texture_set_interpolation_ext(int sampler, bool enable)
 {
-  for (unsigned i = 0; i < textureStructs.size(); i++) {
-    glBindTexture(GL_TEXTURE_2D, textureStructs[i]->gltex);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, repeat?GL_REPEAT:GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, repeat?GL_REPEAT:GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, repeat?GL_REPEAT:GL_CLAMP);
-  }
+  glSamplerParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, enable?GL_LINEAR:GL_NEAREST);
+  glSamplerParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, enable?GL_LINEAR:GL_NEAREST);
+}
+
+void texture_set_repeat(bool repeat) {
+  texture_set_repeat_ext(0, repeat);
   oglmgr->ResetTextureStates();
 }
 
-void texture_set_repeat(int texid, bool repeat)
+void texture_set_repeat_ext(int sampler, bool repeat)
 {
-  texture_set(textureStructs[texid]->gltex);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, repeat?GL_REPEAT:GL_CLAMP);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, repeat?GL_REPEAT:GL_CLAMP);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, repeat?GL_REPEAT:GL_CLAMP);
+  glSamplerParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, repeat?GL_REPEAT:GL_CLAMP);
+  glSamplerParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, repeat?GL_REPEAT:GL_CLAMP);
+  glSamplerParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, repeat?GL_REPEAT:GL_CLAMP); 
 }
 
-void texture_set_wrap(int texid, bool wrapr, bool wraps, bool wrapt)
+void texture_set_wrap_ext(int sampler, bool wrapu, bool wrapv, bool wrapw)
 {
-  texture_set(textureStructs[texid]->gltex);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, wrapr?GL_REPEAT:GL_CLAMP);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wraps?GL_REPEAT:GL_CLAMP);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapt?GL_REPEAT:GL_CLAMP);
+  glSamplerParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, wrapu?GL_REPEAT:GL_CLAMP);
+  glSamplerParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapv?GL_REPEAT:GL_CLAMP);
+  glSamplerParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapw?GL_REPEAT:GL_CLAMP); 
+}
+
+void texture_set_border_ext(int sampler, int r, int g, int b, double a)
+{
+  GLint bordercolor[4] = { r, g, b, int(a * 255) };
+  glSamplerParameteriv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, bordercolor);
+}
+
+void texture_set_filter_ext(int sampler, int filter)
+{
+  GLint min, mag;
+  if (filter == tx_trilinear) {
+    min = GL_LINEAR_MIPMAP_LINEAR;
+    mag = GL_LINEAR;
+  } else if (filter == tx_bilinear) {
+    min = GL_LINEAR_MIPMAP_NEAREST;
+    mag = GL_LINEAR;
+  } else if (filter == tx_nearest) {
+    min = GL_NEAREST_MIPMAP_NEAREST;
+    mag = GL_NEAREST;
+  } else {
+    min = GL_NEAREST;
+    mag = GL_NEAREST;
+  }
+  glSamplerParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, min);
+  glSamplerParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mag);
 }
 
 void texture_preload(int texid)
@@ -301,40 +327,16 @@ void texture_preload(int texid)
 void texture_set_priority(int texid, double prio)
 {
   // Deprecated in ENIGMA and GM: Studio, all textures are automatically preloaded.
-  texture_set(textureStructs[texid]->gltex);
+  oglmgr->BindTexture(GL_TEXTURE_2D, textureStructs[texid]->gltex);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_PRIORITY, prio);
-}
-
-void texture_set_border(int texid, int r, int g, int b, double a)
-{
-  GLint color[4] = {r, g, b, (int)a * 255};
-  texture_set(textureStructs[texid]->gltex);
-  glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color);
 }
 
 void texture_set_levelofdetail(int texid, double minlod, double maxlod, int maxlevel)
 {
-  texture_set(textureStructs[texid]->gltex);
+  oglmgr->BindTexture(GL_TEXTURE_2D, textureStructs[texid]->gltex);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_LOD, minlod);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LOD, maxlod);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, maxlevel);
-}
-
-void texture_set_filter(int texid, int filter)
-{
-  texture_set(textureStructs[texid]->gltex);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  if (filter == tx_trilinear) {
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  } else if (filter == tx_bilinear) {
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  } else if (filter == tx_nearest) {
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  }
 }
 
 bool texture_mipmapping_supported()
@@ -345,7 +347,8 @@ bool texture_mipmapping_supported()
 
 void texture_mipmapping_generate(int texid)
 {
-  texture_set(textureStructs[texid]->gltex);
+  glActiveTexture(GL_TEXTURE0);
+  oglmgr->BindTexture(GL_TEXTURE_2D, enigma::samplerstates[0].bound_texture = textureStructs[texid]->gltex);
   // This allows us to control the number of mipmaps generated, but Direct3D does not have an option for it, so for now we'll just go with the defaults.
   // Honestly not a big deal, Unity3D doesn't allow you to specify either.
   //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
@@ -353,7 +356,7 @@ void texture_mipmapping_generate(int texid)
   glGenerateMipmap(GL_TEXTURE_2D);
 }
 
-bool  texture_anisotropy_supported()
+bool texture_anisotropy_supported()
 {
   return strstr((char*)glGetString(GL_EXTENSIONS),
            "GL_EXT_texture_filter_anisotropic");
@@ -366,11 +369,9 @@ float texture_anisotropy_maxlevel()
   return maximumAnisotropy;
 }
 
-void  texture_anisotropy_filter(int texid, gs_scalar levels)
+void  texture_anisotropy_filter(int sampler, gs_scalar levels)
 {
-  texture_set(textureStructs[texid]->gltex);
-  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, levels);
+  glSamplerParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, levels);
 }
 
 }
-

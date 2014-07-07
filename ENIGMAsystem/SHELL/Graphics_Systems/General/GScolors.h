@@ -76,8 +76,6 @@ int color_get_saturation(int color);
 
 int make_color_hsv(int hue,int saturation,int value);
 
-void draw_unbind_all();
-
 }
 
 #endif // ENIGMA_GLCOLORS_H

@@ -51,7 +51,6 @@ void texture_delete(int texid);
 bool texture_exists(int texid);
 void texture_preload(int texid);
 void texture_set_enabled(bool enable);
-bool texture_get_interpolation();
 gs_scalar texture_get_width(int texid);
 gs_scalar texture_get_height(int texid);
 unsigned texture_get_texel_width(int texid);
