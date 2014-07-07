@@ -182,6 +182,7 @@ namespace enigma
   void graphics_initialize_samplers() {
     for (size_t i = 0; i < 8; i++) {
       glGenSamplers(1, &samplerstates[i].sampler_index);
+      glBindSampler(i, samplerstates[i].sampler_index);
     }
   }
 }
@@ -255,7 +256,7 @@ void texture_set(int texid) {
 void texture_set_stage(int stage, int texid) {
   //if (enigma::samplerstates[stage].bound_texture != unsigned(get_texture(texid))) {
     glActiveTexture(GL_TEXTURE0 + stage);
-    glBindSampler(stage, enigma::samplerstates[stage].sampler_index);
+    
     oglmgr->BindTexture(GL_TEXTURE_2D, enigma::samplerstates[stage].bound_texture = get_texture(texid));
     //oglmgr->ResetTextureStates();
   //}
