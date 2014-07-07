@@ -36,10 +36,6 @@ namespace enigma {
 namespace enigma_user
 {
 
-void draw_unbind_all() {
-
-}
-
 void draw_clear_alpha(int col, float alpha)
 {
 	float color[4];
