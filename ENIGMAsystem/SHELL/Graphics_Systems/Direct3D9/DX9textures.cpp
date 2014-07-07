@@ -52,7 +52,7 @@ inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect 
 namespace enigma
 {
 
-  int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool isfont, bool mipmap)
+  int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool mipmap)
   {
     LPDIRECT3DTEXTURE9 texture = NULL;
     
@@ -64,7 +64,6 @@ namespace enigma
     texture->UnlockRect(0);
 
     TextureStruct* textureStruct = new TextureStruct(texture);
-    textureStruct->isFont = isfont;
     textureStruct->width = width;
     textureStruct->height = height;
     textureStruct->fullwidth = fullwidth;
@@ -87,7 +86,7 @@ namespace enigma
     unsigned char* bitmap = static_cast<unsigned char*>(rect.pBits);
     textureStructs[tex]->gTexture->UnlockRect(0);
 
-    unsigned dup_tex = graphics_create_texture(w, h, fw, fh, bitmap, textureStructs[tex]->isFont, mipmap);
+    unsigned dup_tex = graphics_create_texture(w, h, fw, fh, bitmap, mipmap);
     delete[] bitmap;
     return dup_tex;
   }

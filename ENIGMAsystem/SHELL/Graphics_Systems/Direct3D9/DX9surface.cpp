@@ -65,11 +65,10 @@ int surface_create(int width, int height)
 	d3dmgr->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &texture, NULL);			 
 	enigma::Surface* surface = new enigma::Surface();	 
 	TextureStruct* gmTexture = new TextureStruct(texture);
-	gmTexture->isFont = false;
-    textureStructs.push_back(gmTexture);
+  textureStructs.push_back(gmTexture);
 	//d3dmgr->CreateRenderTarget(width, height, D3DFMT_A8R8G8B8, D3DMULTISAMPLE_2_SAMPLES, 2, false, &surface->surf, NULL);
 	texture->GetSurfaceLevel(0,&surface->surf);
-    surface->tex = textureStructs.size() - 1;
+  surface->tex = textureStructs.size() - 1;
 	surface->width = width; surface->height = height;
 	enigma::Surfaces.push_back(surface);
 	return enigma::Surfaces.size() - 1;
@@ -81,10 +80,9 @@ int surface_create_msaa(int width, int height, int levels)
 	d3dmgr->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &texture, NULL);			 
 	enigma::Surface* surface = new enigma::Surface();	 
 	TextureStruct* gmTexture = new TextureStruct(texture);
-	gmTexture->isFont = false;
-    textureStructs.push_back(gmTexture);
+  textureStructs.push_back(gmTexture);
 	d3dmgr->CreateRenderTarget(width, height, D3DFMT_A8R8G8B8, D3DMULTISAMPLE_2_SAMPLES, 2, false, &surface->surf, NULL);
-    surface->tex = textureStructs.size() - 1;
+  surface->tex = textureStructs.size() - 1;
 	surface->width = width; surface->height = height;
 	enigma::Surfaces.push_back(surface);
 	return enigma::Surfaces.size() - 1;
@@ -145,9 +143,9 @@ int surface_get_height(int id)
 int surface_getpixel(int id, int x, int y)
 {
 	get_surfacev(surface,id,-1);
-    if (x < 0) x = 0;
-    if (y < 0) y = 0;
-    if (x > surface->width || y > surface->height) return 0;
+  if (x < 0) x = 0;
+  if (y < 0) y = 0;
+  if (x > surface->width || y > surface->height) return 0;
 
 	d3dmgr->EndShapesBatching();
 	LPDIRECT3DSURFACE9 pBuffer = surface->surf;
@@ -170,9 +168,9 @@ int surface_getpixel(int id, int x, int y)
 int surface_getpixel_ext(int id, int x, int y)
 {
 	get_surfacev(surface,id,-1);
-    if (x < 0) x = 0;
-    if (y < 0) y = 0;
-    if (x > surface->width || y > surface->height) return 0;
+  if (x < 0) x = 0;
+  if (y < 0) y = 0;
+  if (x > surface->width || y > surface->height) return 0;
 
 	d3dmgr->EndShapesBatching();
 	LPDIRECT3DSURFACE9 pBuffer = surface->surf;
@@ -194,10 +192,10 @@ int surface_getpixel_ext(int id, int x, int y)
 
 int surface_getpixel_alpha(int id, int x, int y)
 {
-	get_surfacev(surface,id,-1);
-    if (x < 0) x = 0;
-    if (y < 0) y = 0;
-    if (x > surface->width || y > surface->height) return 0;
+  get_surfacev(surface,id,-1);
+  if (x < 0) x = 0;
+  if (y < 0) y = 0;
+  if (x > surface->width || y > surface->height) return 0;
 
 	d3dmgr->EndShapesBatching();
 	LPDIRECT3DSURFACE9 pBuffer = surface->surf;

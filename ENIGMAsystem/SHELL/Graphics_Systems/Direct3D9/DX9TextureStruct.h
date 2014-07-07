@@ -26,7 +26,6 @@ using std::vector;
 
 struct TextureStruct {
 	LPDIRECT3DTEXTURE9 gTexture;
-	bool isFont;
 	unsigned width,height;
 	unsigned fullwidth,fullheight;
   

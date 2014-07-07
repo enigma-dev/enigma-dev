@@ -47,7 +47,7 @@ inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect 
 
 namespace enigma
 {
-  int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool isfont)
+  int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata)
   {
 
   }
