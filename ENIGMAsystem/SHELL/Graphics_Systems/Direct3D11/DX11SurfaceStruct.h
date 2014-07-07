@@ -32,7 +32,7 @@ namespace enigma
     ID3D11RenderTargetView* renderTargetView;
     int tex, width, height;
     
-    Surface() {
+    Surface(): renderTargetView(NULL), tex(0), width(0), height(0) {
 
     };
     
