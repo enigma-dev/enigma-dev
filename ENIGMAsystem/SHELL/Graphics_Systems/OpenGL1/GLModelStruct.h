@@ -371,9 +371,15 @@ class Mesh
 				for (unsigned i = 0; i < indices.size() - 2; i++) {
 					// check for and continue if indexed triangle is degenerate, because the GPU won't render it anyway
 					if (indices[i] == indices[i + 1] || indices[i] == indices[i + 2]  || indices[i + 1] == indices[i + 2] ) { continue; }
-					triangleIndices.push_back(indices[i]);
-					triangleIndices.push_back(indices[i+1]);
-					triangleIndices.push_back(indices[i+2]);
+					if (i % 2) {
+                        triangleIndices.push_back(indices[i+1]);
+                        triangleIndices.push_back(indices[i]);
+                        triangleIndices.push_back(indices[i+2]);
+					}else{
+                        triangleIndices.push_back(indices[i]);
+                        triangleIndices.push_back(indices[i+1]);
+                        triangleIndices.push_back(indices[i+2]);
+					}
 				}
 			} else {
 				for (unsigned i = 0; i < vertices.size() / stride - 2; i++) {
