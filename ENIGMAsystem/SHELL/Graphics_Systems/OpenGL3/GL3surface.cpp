@@ -118,13 +118,7 @@ int surface_create(int width, int height, bool depthbuffer)
       enigma::surface_array[id]->height = h;
 
       glGenFramebuffers(1, &fbo);
-      int texture;
-      //if (type == 0){
-        texture = enigma::graphics_create_texture(w,h,w,h,0,false);
-      /*}else{
-        texture = enigma::graphics_create_texture_custom(w,h,w,h,0,GL_FLOAT,false);
-        printf("CREATED A FLOAT SURFACE!\n");
-      }*/
+      int texture = enigma::graphics_create_texture(w,h,w,h,0,false);
 
       glPushAttrib(GL_TEXTURE_BIT);
 

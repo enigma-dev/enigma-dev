@@ -228,6 +228,10 @@ void d3d_set_depth(double dep)
 
 }//TODO: Write function
 
+void d3d_clear_depth(){
+  glClear(GL_DEPTH_BUFFER_BIT);
+}
+
 void d3d_set_shading(bool smooth)
 {
     glShadeModel(smooth?GL_SMOOTH:GL_FLAT);
