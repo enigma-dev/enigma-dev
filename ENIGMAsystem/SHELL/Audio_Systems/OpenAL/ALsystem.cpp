@@ -167,7 +167,7 @@ namespace enigma {
   {
     int id = -1;
     for (unsigned i = 0; i < sound_resources.size(); i++) {
-      if (sound_resources[id] == NULL) {
+      if (sound_resources[i] == NULL) {
         id = i;
       }
     }
