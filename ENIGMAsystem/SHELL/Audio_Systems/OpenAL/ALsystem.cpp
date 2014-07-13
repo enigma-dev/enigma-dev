@@ -15,6 +15,10 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 #include <stdio.h>
+#include <vector>
+#include <map>
+using std::vector;
+using std::map;
 
 #include "ALsystem.h"
 #include "SoundChannel.h"
@@ -34,10 +38,15 @@ ALfloat listenerVel[] = {0.0f,0.0f,0.0f};
 ALfloat listenerOri[] = {0.0f,0.0f,1.0f, 0.0f,1.0f,0.0f};
 
 vector<SoundChannel*> sound_channels(0);
-vector<SoundResource*> sound_resources(0);
+map<int, SoundResource*> sound_resources;
 vector<SoundEmitter*> sound_emitters(0);
 
 #include "Widget_Systems/widgets_mandatory.h" // show_error
+
+namespace {
+int next_sound_id = 0; //ID of the next sound to allocate (GM does not actually re-use sound IDs).
+}
+
 
 namespace enigma {
 
@@ -117,11 +126,13 @@ namespace enigma {
 
   int sound_add_from_buffer(int id, void* buffer, size_t bufsize)
   {
-    SoundResource *snd = sound_new_with_source();
-    if (unsigned(id) > sound_resources.size()) {
-      sound_resources.resize(id + 1);
+    if (sound_resources.find(id)!=sound_resources.end() && sound_resources[id]) {
+      fprintf(stderr, "Sound id %d collides with existing id (for internally-managed ids).\n", id);
+      return 3;
     }
-    sound_resources.insert(sound_resources.begin() + id, snd);
+
+    SoundResource *snd = sound_new_with_source();
+    sound_resources[id] = snd;
 
     if (snd->loaded != LOADSTATE_SOURCED) {
       fprintf(stderr, "Could not load sound %d: %s\n", id, alureGetErrorString());
@@ -141,11 +152,13 @@ namespace enigma {
 
   int sound_add_from_stream(int id, size_t (*callback)(void *userdata, void *buffer, size_t size), void (*seek)(void *userdata, float position), void (*cleanup)(void *userdata), void *userdata)
   {
-    SoundResource *snd = sound_new_with_source();
-    if (unsigned(id) > sound_resources.size()) {
-      sound_resources.resize(id + 1);
+    if (sound_resources.find(id)!=sound_resources.end() && sound_resources[id]) {
+      fprintf(stderr, "Sound id %d collides with existing id (for internally-managed ids).\n", id);
+      return 3;
     }
-    sound_resources.insert(sound_resources.begin() + id, snd);
+
+    SoundResource *snd = sound_new_with_source();
+    sound_resources[id] = snd;
 
     if (snd->loaded != LOADSTATE_SOURCED)
       return 1;
@@ -165,19 +178,8 @@ namespace enigma {
 
   int sound_allocate()
   {
-    int id = -1;
-    for (unsigned i = 0; i < sound_resources.size(); i++) {
-      if (sound_resources[i] == NULL) {
-        id = i;
-      }
-    }
-    if (id < 0) {
-      id = sound_resources.size();
-    }
-    else if (unsigned(id) > sound_resources.size()) {
-      sound_resources.resize(id + 1);
-    }
-    sound_resources.insert(sound_resources.begin() + id, new SoundResource());
+    int id = next_sound_id++;
+    sound_resources[id] = NULL;
     return id;
   }
 
@@ -188,25 +190,26 @@ namespace enigma {
 
   void audiosystem_cleanup()
   {
-    for (size_t i = 0; i < sound_resources.size(); i++)
-    if (sound_resources[i])
+    for (std::map<int, SoundResource*>::iterator it=sound_resources.begin(); it!=sound_resources.end(); it++) 
     {
-      switch (sound_resources[i]->loaded)
+      SoundResource* sr = it->second;
+      if (!sr) { continue; }
+      switch (sr->loaded)
       {
         case LOADSTATE_COMPLETE:
-          alDeleteBuffers(sound_resources[i]->stream ? 3 : 1, sound_resources[i]->buf);
-          if (sound_resources[i]->stream) {
-            alureDestroyStream(sound_resources[i]->stream, 0, 0);
-            if (sound_resources[i]->cleanup) sound_resources[i]->cleanup(sound_resources[i]->userdata);
+          alDeleteBuffers(sr->stream ? 3 : 1, sr->buf);
+          if (sr->stream) {
+            alureDestroyStream(sr->stream, 0, 0);
+            if (sr->cleanup) sr->cleanup(sr->userdata);
           }
           // fallthrough
         case LOADSTATE_SOURCED:
           for (size_t j = 0; j < sound_channels.size(); j++) {
-            alureStopSource(sound_channels[i]->source, true);
+            alureStopSource(sound_channels[j]->source, true);
             alDeleteSources(1, &sound_channels[j]->source);
           }
           break;
-
+  
         case LOADSTATE_INDICATED:
         case LOADSTATE_NONE:
         default: ;
