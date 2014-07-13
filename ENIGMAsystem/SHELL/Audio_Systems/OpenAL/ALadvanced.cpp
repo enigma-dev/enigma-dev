@@ -54,7 +54,7 @@ namespace enigma_user
 
 bool audio_exists(int sound)
 {
-  return unsigned(sound) < sound_resources.size() && bool(sound_resources[sound]);
+  return sound_resources.find(sound)!=sound_resources.end() && sound_resources[sound];
 }
 
 bool audio_is_playing(int index) {
@@ -353,17 +353,21 @@ int audio_add(string fname)
 
 void audio_delete(int sound)
 {
-  get_sound(snd,sound,);
-  alureDestroyStream(snd->stream, 0, 0);
-  for(size_t i = 0; i < sound_channels.size(); i++) {
-    if (sound_channels[i]->soundIndex == sound) {
-      alDeleteSources(1, &sound_channels[i]->source);
-      sound_channels[i]->soundIndex=-1;
-      audio_stop_sound(i);
+  if (sound_resources.find(sound)!=sound_resources.end()) {
+    if (sound_resources[sound]) {
+      get_sound(snd,sound,);
+      alureDestroyStream(snd->stream, 0, 0);
+      for(size_t i = 0; i < sound_channels.size(); i++) {
+        if (sound_channels[i]->soundIndex == sound) {
+          alDeleteSources(1, &sound_channels[i]->source);
+          sound_channels[i]->soundIndex=-1;
+          audio_stop_sound(i);
+        }
+      }
+      delete sound_resources[sound];
     }
+    sound_resources.erase(sound);
   }
-  delete sound_resources[sound];
-  sound_resources[sound] = NULL;
 }
 
 void audio_falloff_set_model(int model)
