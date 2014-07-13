@@ -51,11 +51,33 @@
     }else if ( uniter->second.size != usize ){\
         printf("%s - Uniform at location %i with %i arguments is accesed by a function with %i arguments!\n", str, location, uniter->second.size, usize);\
     }
+
+  #define get_attribute(atiter,location)\
+    string name = enigma::shaderprograms[enigma::bound_shader]->name;\
+    char str[128];\
+    if (name == ""){\
+        sprintf(str, "Program[%i]", enigma::bound_shader);\
+    }else{\
+        sprintf(str, "Program[%s = %i]", name.c_str(), enigma::bound_shader);\
+    }\
+    if (location < 0) { printf("%s - Attribute location < 0 given (%i)!\n", str, location); return; }\
+    std::map<GLint,enigma::Attribute>::iterator atiter = enigma::shaderprograms[enigma::bound_shader]->attributes.find(location);\
+    if (atiter == enigma::shaderprograms[enigma::bound_shader]->attributes.end()){\
+        printf("%s - Attribute at location %i not found!\n", str, location);\
+        return;\
+    }
 #else
     #define get_uniform(uniter,location,usize)\
     if (location < 0) return; \
     std::map<GLint,enigma::Uniform>::iterator uniter = enigma::shaderprograms[enigma::bound_shader]->uniforms.find(location);\
     if (uniter == enigma::shaderprograms[enigma::bound_shader]->uniforms.end()){\
+        return;\
+    }
+
+    #define get_attribute(atiter,location)\
+    if (location < 0) return; \
+    std::map<GLint,enigma::Attribute>::iterator atiter = enigma::shaderprograms[enigma::bound_shader]->attributes.find(location);\
+    if (atiter == enigma::shaderprograms[enigma::bound_shader]->attributes.end()){\
         return;\
     }
 #endif
@@ -280,6 +302,8 @@ namespace enigma
             attribute.name = attributeName;
             attribute.size = getGLTypeSize(attribute.type);
             attribute.location = glGetAttribLocation(enigma::shaderprograms[prog_id]->shaderprogram, attributeName);
+            attribute.enabled = false;
+            glDisableVertexAttribArray(attribute.location);
             enigma::shaderprograms[prog_id]->attribute_names[attribute.name] = attribute.location;
             enigma::shaderprograms[prog_id]->attributes[attribute.location] = attribute;
             //printf("Program - %i - found attribute - %s - with size - %i\n", prog_id, attribute.name.c_str(), attribute.size);
@@ -621,21 +645,6 @@ int glsl_get_uniform_location(int program, string name) {
     }
 }
 
-int glsl_get_attribute_location(int program, string name) {
-	//int uni = glGetAttribLocation(enigma::shaderprograms[program]->shaderprogram, name.c_str());
-    std::map<string,GLint>::iterator it = enigma::shaderprograms[program]->attribute_names.find(name);
-    if (it == enigma::shaderprograms[program]->attribute_names.end()){
-		if (enigma::shaderprograms[program]->name == ""){
-			printf("Program[%i] - Attribute %s not found!\n", program, name.c_str());
-		}else{
-			printf("Program[%s = %i] - Attribute %s not found!\n", enigma::shaderprograms[program]->name.c_str(), program, name.c_str());
-		}
-        return -1;
-    }else{
-        return it->second;
-    }
-}
-
 void glsl_uniformf(int location, float v0) {
     get_uniform(it,location,1);
     if (it->second.data[0].f != v0){
@@ -852,6 +861,59 @@ void glsl_uniform4uiv(int location, int size, const unsigned int *value){
         for (size_t i=0; i<it->second.data.size(); ++i){
             it->second.data[i].ui = value[i];
         }
+    }
+}
+
+////////////////////////MATRIX FUNCTIONS FOR FLOAT UNIFORMS/////////////////
+void glsl_uniform_matrix2fv(int location, int size, const float *matrix){
+    get_uniform(it,location,2);
+    if (std::equal(it->second.data.begin(), it->second.data.end(), matrix, enigma::UATypeFComp) == false){
+        glUniformMatrix2fv(location, size, true, matrix);
+        memcpy(&it->second.data[0], &matrix[0], it->second.data.size() * sizeof(enigma::UAType));
+    }
+}
+
+void glsl_uniform_matrix3fv(int location, int size, const float *matrix){
+    get_uniform(it,location,3);
+    if (std::equal(it->second.data.begin(), it->second.data.end(), matrix, enigma::UATypeFComp) == false){
+        glUniformMatrix3fv(location, size, true, matrix);
+        memcpy(&it->second.data[0], &matrix[0], it->second.data.size() * sizeof(enigma::UAType));
+    }
+}
+
+void glsl_uniform_matrix4fv(int location, int size, const float *matrix){
+    get_uniform(it,location,4);
+    if (std::equal(it->second.data.begin(), it->second.data.end(), matrix, enigma::UATypeFComp) == false){
+        glUniformMatrix4fv(location, size, true, matrix);
+        memcpy(&it->second.data[0], &matrix[0], it->second.data.size() * sizeof(enigma::UAType));
+    }
+}
+
+//Attributes
+int glsl_get_attribute_location(int program, string name) {
+	//int uni = glGetAttribLocation(enigma::shaderprograms[program]->shaderprogram, name.c_str());
+    std::map<string,GLint>::iterator it = enigma::shaderprograms[program]->attribute_names.find(name);
+    if (it == enigma::shaderprograms[program]->attribute_names.end()){
+		if (enigma::shaderprograms[program]->name == ""){
+			printf("Program[%i] - Attribute %s not found!\n", program, name.c_str());
+		}else{
+			printf("Program[%s = %i] - Attribute %s not found!\n", enigma::shaderprograms[program]->name.c_str(), program, name.c_str());
+		}
+        return -1;
+    }else{
+        return it->second;
+    }
+}
+
+void glsl_enable_attribute(int location, bool enable){
+    get_attribute(it,location);
+    if (enable != it->second.enabled){
+        if (enable == true){
+            glEnableVertexAttribArray(location);
+        }else{
+            glDisableVertexAttribArray(location);
+        }
+        it->second.enabled = enable;
     }
 }
 
