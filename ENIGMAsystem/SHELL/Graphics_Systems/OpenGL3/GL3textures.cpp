@@ -111,7 +111,6 @@ namespace enigma
     unsigned dup_tex = graphics_create_texture(w, h, fw, fh, bitmap, textureStructs[tex]->isFont);
     delete[] bitmap;
     oglmgr->ResetTextureStates();
-    glPopAttrib();
     return dup_tex;
   }
 
@@ -145,7 +144,6 @@ namespace enigma
 
     delete[] bitmap;
     delete[] bitmap2;
-    glPopAttrib();
   }
 
   void graphics_delete_texture(int tex)
