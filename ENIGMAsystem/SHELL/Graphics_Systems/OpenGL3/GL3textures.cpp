@@ -105,7 +105,7 @@ namespace enigma
     glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_BYTE, bitmap);
     unsigned dup_tex = graphics_create_texture(w, h, fw, fh, bitmap, mipmap);
     delete[] bitmap;
-    glPopAttrib();
+    oglmgr->ResetTextureStates();
     return dup_tex;
   }
 
@@ -137,7 +137,6 @@ namespace enigma
 
     delete[] bitmap;
     delete[] bitmap2;
-    glPopAttrib();
   }
 
   void graphics_delete_texture(int texid)

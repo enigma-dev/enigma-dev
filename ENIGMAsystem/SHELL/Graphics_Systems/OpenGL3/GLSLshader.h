@@ -67,6 +67,7 @@ namespace enigma
         GLenum type;
         GLint arraySize;
         int size;
+        bool enabled;
     };
 
     struct ShaderProgram{

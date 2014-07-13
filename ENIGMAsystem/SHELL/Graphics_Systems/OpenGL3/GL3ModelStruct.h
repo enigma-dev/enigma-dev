@@ -574,12 +574,12 @@ class Mesh
     }
 
     //Send transposed (done by GL because of "true" in the function below) matrices to shader
-    glUniformMatrix4fv(enigma::shaderprograms[enigma::bound_shader]->uni_viewMatrix,  1, true, enigma::view_matrix);
-    glUniformMatrix4fv(enigma::shaderprograms[enigma::bound_shader]->uni_projectionMatrix,  1, true, enigma::projection_matrix);
-    glUniformMatrix4fv(enigma::shaderprograms[enigma::bound_shader]->uni_modelMatrix,  1, true, enigma::model_matrix);
-    glUniformMatrix4fv(enigma::shaderprograms[enigma::bound_shader]->uni_mvMatrix,  1, true, enigma::mv_matrix);
-    glUniformMatrix4fv(enigma::shaderprograms[enigma::bound_shader]->uni_mvpMatrix,  1, true, enigma::mvp_matrix);
-    glUniformMatrix3fv(enigma::shaderprograms[enigma::bound_shader]->uni_normalMatrix,  1, true, enigma::normal_matrix);
+    glsl_uniform_matrix4fv(enigma::shaderprograms[enigma::bound_shader]->uni_viewMatrix,  1, enigma::view_matrix);
+    glsl_uniform_matrix4fv(enigma::shaderprograms[enigma::bound_shader]->uni_projectionMatrix,  1, enigma::projection_matrix);
+    glsl_uniform_matrix4fv(enigma::shaderprograms[enigma::bound_shader]->uni_modelMatrix,  1, enigma::model_matrix);
+    glsl_uniform_matrix4fv(enigma::shaderprograms[enigma::bound_shader]->uni_mvMatrix,  1, enigma::mv_matrix);
+    glsl_uniform_matrix4fv(enigma::shaderprograms[enigma::bound_shader]->uni_mvpMatrix,  1, enigma::mvp_matrix);
+    glsl_uniform_matrix3fv(enigma::shaderprograms[enigma::bound_shader]->uni_normalMatrix,  1, enigma::normal_matrix);
 
     //Bind texture
     glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_texSampler, 0);
@@ -595,17 +595,18 @@ class Mesh
       glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indexBuffer );
     }
 
-    //glEnableClientState(GL_VERTEX_ARRAY);
-    unsigned offset = 0;
-    glEnableVertexAttribArray(enigma::shaderprograms[enigma::bound_shader]->att_vertex);
-    glVertexAttribPointer(enigma::shaderprograms[enigma::bound_shader]->att_vertex, vertexStride, GL_FLOAT, 0, STRIDE, OFFSET(offset));
-    //glVertexPointer( vertexStride, GL_FLOAT, STRIDE, OFFSET(offset) ); // Set the vertex pointer to the offset in the buffer
-    offset += vertexStride;
+	//glEnableClientState(GL_VERTEX_ARRAY);
+	unsigned offset = 0;
+	glsl_enable_attribute(enigma::shaderprograms[enigma::bound_shader]->att_vertex,true);
+	glEnableVertexAttribArray(enigma::shaderprograms[enigma::bound_shader]->att_vertex);
+	glVertexAttribPointer(enigma::shaderprograms[enigma::bound_shader]->att_vertex, vertexStride, GL_FLOAT, 0, STRIDE, OFFSET(offset));
+	offset += vertexStride;
 
     if (useNormals){
-      glEnableVertexAttribArray(enigma::shaderprograms[enigma::bound_shader]->att_normal);
-      glVertexAttribPointer(enigma::shaderprograms[enigma::bound_shader]->att_normal, 3, GL_FLOAT, 0, STRIDE, OFFSET(offset));
-      offset += 3;
+        //glsl_enable_attribute(enigma::shaderprograms[enigma::bound_shader]->att_normal, true);
+        glEnableVertexAttribArray(enigma::shaderprograms[enigma::bound_shader]->att_normal);
+		glVertexAttribPointer(enigma::shaderprograms[enigma::bound_shader]->att_normal, 3, GL_FLOAT, 0, STRIDE, OFFSET(offset));
+		offset += 3;
     }
 
     glsl_uniformf( enigma::shaderprograms[enigma::bound_shader]->uni_color, (float)enigma::currentcolor[0]/255.0f, (float)enigma::currentcolor[1]/255.0f, (float)enigma::currentcolor[2]/255.0f, (float)enigma::currentcolor[3]/255.0f );
@@ -613,10 +614,9 @@ class Mesh
     if (useTextures){
          //This part sucks, but is required because models can be drawn without textures even if coordinates are provided
          //like in the case of d3d_model_block
-         // Robert: I had to comment out this check due to the change in sampler management, you will need to check all 8 sampler stages if you want to reimplement this check
-         // because this model class handles multi-texturing.
-        //if (oglmgr->GetBoundTexture() != 0){
-            glEnableVertexAttribArray(enigma::shaderprograms[enigma::bound_shader]->att_texture);
+        if (oglmgr->GetBoundTexture() != 0){
+            //glsl_enable_attribute(enigma::shaderprograms[enigma::bound_shader]->att_texture,true);
+            glsl_enable_attribute(enigma::shaderprograms[enigma::bound_shader]->att_texture, true);
             glVertexAttribPointer(enigma::shaderprograms[enigma::bound_shader]->att_texture, 2, GL_FLOAT, 0, STRIDE, OFFSET(offset));
             glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_textureEnable, 1);
         //} else {
@@ -627,13 +627,14 @@ class Mesh
           glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_textureEnable, 0);
     }
 
-    if (useColors) {
-      glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_colorEnable,1);
-    } else {
-      glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_colorEnable,0);
-    }
-    glEnableVertexAttribArray(enigma::shaderprograms[enigma::bound_shader]->att_color);
-    glVertexAttribPointer(enigma::shaderprograms[enigma::bound_shader]->att_color, 4, GL_UNSIGNED_BYTE, GL_TRUE, STRIDE, OFFSET(offset)); //Normalization needs to be true, because we pack them as unsigned bytes
+    if (useColors){
+		glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_colorEnable,1);
+	}else{
+		glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_colorEnable,0);
+	}
+	//glEnableVertexAttribArray(enigma::shaderprograms[enigma::bound_shader]->att_color);
+	glsl_enable_attribute(enigma::shaderprograms[enigma::bound_shader]->att_color, true);
+	glVertexAttribPointer(enigma::shaderprograms[enigma::bound_shader]->att_color, 4, GL_UNSIGNED_BYTE, GL_TRUE, STRIDE, OFFSET(offset)); //Normalization needs to be true, because we pack them as unsigned bytes
 
     #define OFFSETE( P )  ( ( const GLvoid * ) ( sizeof( GLuint ) * ( P         ) ) )
     offset = vertex_start;
@@ -671,11 +672,11 @@ class Mesh
       glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
     }
 
-    glDisableVertexAttribArray(enigma::shaderprograms[enigma::bound_shader]->att_vertex);
-    //glDisableClientState(GL_VERTEX_ARRAY);
-    if (useTextures) glDisableVertexAttribArray(enigma::shaderprograms[enigma::bound_shader]->att_texture); //glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-    if (useNormals) glDisableVertexAttribArray(enigma::shaderprograms[enigma::bound_shader]->att_normal); //glDisableClientState(GL_NORMAL_ARRAY);
-    if (useColors) glDisableVertexAttribArray(enigma::shaderprograms[enigma::bound_shader]->att_color); //glDisableClientState(GL_COLOR_ARRAY);
+    glsl_enable_attribute(enigma::shaderprograms[enigma::bound_shader]->att_vertex,false);
+	//glDisableClientState(GL_VERTEX_ARRAY);
+    if (useTextures) glsl_enable_attribute(enigma::shaderprograms[enigma::bound_shader]->att_texture,false);
+    if (useNormals) glsl_enable_attribute(enigma::shaderprograms[enigma::bound_shader]->att_normal,false);
+    if (useColors) glsl_enable_attribute(enigma::shaderprograms[enigma::bound_shader]->att_color,false);
   }
 };
 

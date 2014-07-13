@@ -1,4 +1,5 @@
 /** Copyright (C) 2013 Robert B. Colton
+***               2014 Harijs Grinbergs
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -101,6 +102,12 @@ void glsl_uniform1uiv(int location, int size, const float *value);
 void glsl_uniform2uiv(int location, int size, const float *value);
 void glsl_uniform3uiv(int location, int size, const float *value);
 void glsl_uniform4uiv(int location, int size, const float *value);
+
+void glsl_uniform_matrix2fv(int location, int size, const float *matrix);
+void glsl_uniform_matrix3fv(int location, int size, const float *matrix);
+void glsl_uniform_matrix4fv(int location, int size, const float *matrix);
+
+void glsl_enable_attribute(int location, bool enable);
 
 // Wrap our abstracted version to the GameMaker version
 #define shader_set            glsl_program_set
