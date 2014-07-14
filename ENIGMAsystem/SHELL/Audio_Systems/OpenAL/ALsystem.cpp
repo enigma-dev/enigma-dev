@@ -133,6 +133,7 @@ namespace enigma {
 
     SoundResource *snd = sound_new_with_source();
     sound_resources[id] = snd;
+    if (id>=next_sound_id) { next_sound_id=id+1; }
 
     if (snd->loaded != LOADSTATE_SOURCED) {
       fprintf(stderr, "Could not load sound %d: %s\n", id, alureGetErrorString());
@@ -159,6 +160,7 @@ namespace enigma {
 
     SoundResource *snd = sound_new_with_source();
     sound_resources[id] = snd;
+    if (id>=next_sound_id) { next_sound_id=id+1; }
 
     if (snd->loaded != LOADSTATE_SOURCED)
       return 1;
