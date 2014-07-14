@@ -36,6 +36,7 @@
 
 namespace enigma {
   extern int event_system_initialize(); //Leave this here until you can find a more brilliant way to include it; it's pretty much not-optional.
+  extern void timeline_system_initialize();
   extern int game_settings_initialize();
 }
 namespace enigma_user {
@@ -63,6 +64,7 @@ namespace enigma
     #endif
 
     event_system_initialize();
+    timeline_system_initialize();
     input_initialize();
     sprites_init();
     backgrounds_init();
