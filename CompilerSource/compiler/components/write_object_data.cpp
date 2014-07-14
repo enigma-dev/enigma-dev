@@ -99,9 +99,17 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, i
     }
 
     wto << "\n";
-    wto << "namespace enigma\n{\n";
+    wto << "namespace enigma\n{\n\n";
+
+    // Declaration (but not specification) for timelines.
+    wto <<"  struct tlines_parent : event_parent {\n";
+    wto <<"    tlines_parent(){}\n";
+    wto <<"    tlines_parent(unsigned _x, int _y): event_parent(_x,_y) {}\n";
+    wto <<"    virtual void timeline_call_moment_script(int timeline_index, int moment_index);\n";
+    wto <<"  };\n\n";
+
     wto << "  extern objectstruct** objectdata;\n";
-      wto << "  struct object_locals: event_parent";
+      wto << "  struct object_locals: tlines_parent";
         for (unsigned i = 0; i < parsed_extensions.size(); i++)
           if (parsed_extensions[i].implements != "")
             wto << ", virtual " << parsed_extensions[i].implements;
@@ -110,7 +118,7 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, i
         wto << "    #include \"Preprocessor_Environment_Editable/IDE_EDIT_inherited_locals.h\"\n\n";
         wto << "    std::map<string, var> *vmap;\n";
         wto << "    object_locals() {vmap = NULL;}\n";
-        wto << "    object_locals(unsigned _x, int _y): event_parent(_x,_y) {vmap = NULL;}\n  };\n";
+        wto << "    object_locals(unsigned _x, int _y): tlines_parent(_x,_y) {vmap = NULL;}\n  };\n";
       po_i i = parsed_objects.begin();
 	  vector<int> parsed(0);
 	  // Hold an iterator for our parent for later usage

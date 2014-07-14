@@ -39,36 +39,36 @@ namespace enigma_user
 //TODO: Confirm timeline mechanics (e.g., stopping resets position?)
 inline void action_set_timeline(int timeline, double position, int startImmediately=0, int loop=0)
 {
-  ((enigma::object_basic*)enigma::instance_event_iterator->inst)->timeline_index=timeline;
-  ((enigma::object_basic*)enigma::instance_event_iterator->inst)->timeline_position=position;
-  ((enigma::object_basic*)enigma::instance_event_iterator->inst)->timeline_running = (startImmediately==0);
-  ((enigma::object_basic*)enigma::instance_event_iterator->inst)->timeline_loop = (loop==1);
+  ((enigma::object_timelines*)enigma::instance_event_iterator->inst)->timeline_index=timeline;
+  ((enigma::object_timelines*)enigma::instance_event_iterator->inst)->timeline_position=position;
+  ((enigma::object_timelines*)enigma::instance_event_iterator->inst)->timeline_running = (startImmediately==0);
+  ((enigma::object_timelines*)enigma::instance_event_iterator->inst)->timeline_loop = (loop==1);
 }
 
 inline void action_set_timeline_position(double position) 
 {
-  ((enigma::object_basic*)enigma::instance_event_iterator->inst)->timeline_position=position;
+  ((enigma::object_timelines*)enigma::instance_event_iterator->inst)->timeline_position=position;
 }
 
 inline void action_set_timeline_speed(double speed)
 {
-  ((enigma::object_basic*)enigma::instance_event_iterator->inst)->timeline_speed=speed;
+  ((enigma::object_timelines*)enigma::instance_event_iterator->inst)->timeline_speed=speed;
 }
 
 inline void action_timeline_pause()
 {
-  ((enigma::object_basic*)enigma::instance_event_iterator->inst)->timeline_running = false;
+  ((enigma::object_timelines*)enigma::instance_event_iterator->inst)->timeline_running = false;
 }
 
 inline void action_timeline_start()
 {
-  ((enigma::object_basic*)enigma::instance_event_iterator->inst)->timeline_running = true;
+  ((enigma::object_timelines*)enigma::instance_event_iterator->inst)->timeline_running = true;
 }
 
 inline void action_timeline_stop()
 {
-  ((enigma::object_basic*)enigma::instance_event_iterator->inst)->timeline_running = false;
-  ((enigma::object_basic*)enigma::instance_event_iterator->inst)->timeline_position=0;
+  ((enigma::object_timelines*)enigma::instance_event_iterator->inst)->timeline_running = false;
+  ((enigma::object_timelines*)enigma::instance_event_iterator->inst)->timeline_position=0;
 }
 
 inline bool action_if_variable(const variant& variable, const variant& value, int operation) {

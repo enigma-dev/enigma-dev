@@ -714,6 +714,8 @@
 		<Unit filename="Universal_System/globalupdate.h" />
 		<Unit filename="Universal_System/graphics_object.cpp" />
 		<Unit filename="Universal_System/graphics_object.h" />
+		<Unit filename="Universal_System/timelines_object.cpp" />
+		<Unit filename="Universal_System/timelines_object.h" />
 		<Unit filename="Universal_System/highscore_functions.cpp" />
 		<Unit filename="Universal_System/highscore_functions.h" />
 		<Unit filename="Universal_System/instance.cpp" />
