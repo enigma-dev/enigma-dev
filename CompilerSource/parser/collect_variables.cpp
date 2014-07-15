@@ -80,7 +80,7 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
   {
     //Stop grabbing the timeline index?
     if (grab_tline_index) {
-      grab_tline_index = (synt[pos]=='n') || (synt[pos]=='=');
+      grab_tline_index = (synt[pos]=='n') || (synt[pos]=='=') || (synt[pos]=='(');
     }
 
     if (synt[pos] == '{') {
@@ -333,6 +333,16 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
       {
         bool contented = false;
         unsigned pars = 1, args = 0;
+
+        //If this is a specific action, we can actually grab timeline indices.
+        if (nname == "action_set_timeline") {
+            size_t nextSep = code.find_first_of(",)", pos+2);
+            if (nextSep != std::string::npos) {
+              const string pname = code.substr(pos+2,nextSep-(pos+2));
+              cout << "  Potentially calls timeline `" << pname << "'\n";
+              pev->myObj->tlines.insert(pair<string,int>(pname,1));
+            }
+        }
         
         for (pt i = pos+2; pars; i++) //Start after parenthesis at pos+1, loop until that parenthesis is closed
         {
