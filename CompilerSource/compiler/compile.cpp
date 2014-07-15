@@ -544,25 +544,6 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
     }
     wto <<"}\n\n";
 
-    //Actually call timeline moment scripts based on ID/Moment.
-    wto <<"void tlines_parent::timeline_call_moment_script(int timeline_index, int moment_index) {\n";
-    wto <<"  switch (timeline_index) {\n";
-    for (int i=0; i<es->timelineCount; i++) {
-      wto <<"    case " <<es->timelines[i].id <<": {\n";
-      wto <<"      switch (moment_index) {\n";
-      for (int j=0; j<es->timelines[i].momentCount; j++) {
-        wto <<"        case " <<j <<": {\n";
-        wto <<"          TLINE_" <<es->timelines[i].name <<"_MOMENT_" <<es->timelines[i].moments[j].stepNo <<"();\n";
-        wto <<"          break;\n";
-        wto <<"        }\n";
-      }
-      wto <<"      }\n";
-      wto <<"      break;\n";
-      wto <<"    }\n";
-    }
-    wto <<"  }\n";
-    wto <<"}\n\n";
-
     wto <<"}\n"; //namespace 
   }
   wto.close();
