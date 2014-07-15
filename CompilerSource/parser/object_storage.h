@@ -94,6 +94,7 @@ struct parsed_object
   map<string,decquad> consts;   // Any variable KEY declared as constant VALUE.
   map<string,int> globallocals; // Any shared local variable KEY used.
   map<string,int> funcs;        // Any function KEY called with at most VALUE parameters.
+  map<string,int> tlines;       // Any timeline KEY set (or possibly set) by this object.
   map<string,int> dots;         // Any attribute KEY accessed via a dot, as in a.KEY
 
   vector<initpair> initializers; // Variables that need initialized in the constructor for this object
@@ -102,6 +103,7 @@ struct parsed_object
   typedef map<string,dectrip>::iterator globit;
   typedef map<string,decquad>::iterator constit;
   typedef map<string,int>::iterator funcit;
+  typedef map<string,int>::iterator tlineit;
   typedef map<string,int>::iterator dotit;
 
   void copy_from(parsed_object&, string, string);
