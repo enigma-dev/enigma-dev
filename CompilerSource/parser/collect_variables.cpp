@@ -73,9 +73,16 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
   
   int  with_after_parenths = 0;
   bool with_until_semi = false;
+
+  bool grab_tline_index = false; //Are we currently trying to stockpile a list of known timeline indices?
   
   for (pt pos = 0; pos < code.length(); pos++)
   {
+    //Stop grabbing the timeline index?
+    if (grab_tline_index) {
+      grab_tline_index = (synt[pos]=='n') || (synt[pos]=='=');
+    }
+
     if (synt[pos] == '{') {
       bool isw = igstack[igpos]->is_with | with_until_semi; with_until_semi = 0;
       igstack[++igpos] = new scope_ignore(isw);
@@ -256,6 +263,18 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
             dec_name_givn = true;
             dec_name = nname;
           } continue;
+        }
+
+        //If we're currently looking for a timeline variable, check if this is it.
+        if (grab_tline_index) {
+          cout << "  Potentially calls timeline `" << nname << "'\n";
+          pev->myObj->tlines.insert(pair<string,int>(nname,1));
+          grab_tline_index = false;
+        }
+
+        //Before ignoring globals/locals, check if we're setting the timeline index.
+        if (nname == "timeline_index") {
+          grab_tline_index = true;
         }
         
         //First, check shared locals to see if we already have one
