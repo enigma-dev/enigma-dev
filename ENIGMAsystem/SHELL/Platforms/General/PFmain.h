@@ -29,7 +29,12 @@ void game_end(int ret=0);
 void action_end_game();
 void action_webpage(const std::string &url);
 
+// Data type could be unsigned for the paramter since the collection is size_t, however this would make the function not behave as GM.
+// show_message(parameter_string(-1)); in GM8.1 will show an empty string, if this function cast the parameter to unsigned that won't be the behavior.
 string parameter_string(int x);
+// This function does not work the same as GM8.1, while it returns the native argument count, GM8.1 reports an argument count of 0 for an empty game, even
+// though the first parameter which is the filename is successfully returned from parameter_string. So the assumption is GM8.1's version always reports 1 less
+// than the ENIGMA version.
 int parameter_count();
 unsigned long long disk_size(std::string drive);
 unsigned long long disk_free(std::string drive);

@@ -414,7 +414,7 @@ int main(int argc,char** argv)
 namespace enigma_user
 {
 
-string parameter_string(unsigned num) {
+string parameter_string(int num) {
   return num < enigma::parameterc ? enigma::parameters[num] : "";
 }
 
