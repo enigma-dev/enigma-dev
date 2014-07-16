@@ -173,7 +173,7 @@ gs_scalar texture_get_width(int texid) {
 
 gs_scalar texture_get_height(int texid)
 {
-	return textureStructs[texid]->fullheight / textureStructs[texid]->fullheight;
+	return textureStructs[texid]->height / textureStructs[texid]->fullheight;
 }
 
 unsigned texture_get_texel_width(int texid)

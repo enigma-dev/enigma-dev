@@ -39,7 +39,6 @@ namespace enigma_user{
 
 namespace enigma
 {
-  unsigned bound_texture=0;
   unsigned default_shader;
   unsigned main_shader;
   unsigned bound_shader;
@@ -79,7 +78,7 @@ namespace enigma
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glAlphaFunc(GL_ALWAYS,0);
 
-        glBindTexture(GL_TEXTURE_2D,bound_texture=0);
+        glBindTexture(GL_TEXTURE_2D,0);
 
         init_shaders();
         // read shaders into graphics system structure and compile and link them if needed
