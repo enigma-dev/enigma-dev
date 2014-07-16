@@ -51,7 +51,7 @@ namespace enigma_user
 
 bool sound_exists(int sound)
 {
-    return unsigned(sound) < sound_resources.size() && bool(sound_resources[sound]);
+  return sound_resources.find(sound)!=sound_resources.end() && sound_resources[sound];
 }
 
 bool sound_play(int sound) { // Returns whether sound is playing
@@ -120,17 +120,21 @@ void sound_stop_all() {
 }
 
 void sound_delete(int sound) {
-  sound_stop(sound);
-  get_sound(snd,sound,);
-  alureDestroyStream(snd->stream, 0, 0);
-  for (size_t i = 0; i < sound_channels.size(); i++) {
-    if (sound_channels[i]->soundIndex == sound) {
-      alDeleteSources(1, &sound_channels[i]->source);
-      sound_channels[i]->soundIndex=-1;
+  if (sound_resources.find(sound)!=sound_resources.end()) {
+    if (sound_resources[sound]) {
+      sound_stop(sound);
+      get_sound(snd,sound,);
+      alureDestroyStream(snd->stream, 0, 0);
+      for (size_t i = 0; i < sound_channels.size(); i++) {
+        if (sound_channels[i]->soundIndex == sound) {
+          alDeleteSources(1, &sound_channels[i]->source);
+          sound_channels[i]->soundIndex=-1;
+        }
+      }
+      delete sound_resources[sound];
     }
+    sound_resources.erase(sound);
   }
-  delete sound_resources[sound];
-  sound_resources[sound] = NULL;
 }
 
 void sound_pan(int sound, float value) {
@@ -237,9 +241,10 @@ void sound_seek(int sound, float position) {
 }
 
 void sound_seek_all(float position) {
-  for (size_t i = 0;i < sound_resources.size();i++) {
-    if(sound_resources[i]) {
-      if (sound_resources[i]->seek) sound_resources[i]->seek(sound_resources[i]->userdata, position); // Streams
+  for (std::map<int, SoundResource*>::iterator it=sound_resources.begin(); it!=sound_resources.end(); it++) {
+    SoundResource* sr = it->second;
+    if(sr) {
+      if (sr->seek) sr->seek(sr->userdata, position); // Streams
     }
   }
 
@@ -293,12 +298,14 @@ int sound_add(string fname, int kind, bool preload) //At the moment, the latter 
 
 bool sound_replace(int sound, string fname, int kind, bool preload)
 {
-  get_sound(snd,sound,false);
-  alureDestroyStream(snd->stream, 0, 0);
-  for(size_t i = 0; i < sound_channels.size(); i++) {
-    if (sound_channels[i]->soundIndex == sound)
-    {
-      alDeleteSources(1, &sound_channels[i]->source);
+  if (sound_resources.find(sound)!=sound_resources.end() && sound_resources[sound]) {
+    get_sound(snd,sound,false);
+    alureDestroyStream(snd->stream, 0, 0);
+    for(size_t i = 0; i < sound_channels.size(); i++) {
+      if (sound_channels[i]->soundIndex == sound)
+      {
+        alDeleteSources(1, &sound_channels[i]->source);
+      }
     }
   }
   sound_resources[sound] = enigma::sound_new_with_source();
