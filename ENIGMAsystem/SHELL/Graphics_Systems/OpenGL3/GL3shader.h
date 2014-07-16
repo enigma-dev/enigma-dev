@@ -69,6 +69,7 @@ void glsl_program_reset();
 void glsl_program_free(int id);
 void glsl_program_default_set(int id); //Override default shader
 void glsl_program_default_reset(); //Reset back the default shader
+void glsl_program_set_name(int id, string name); //Useful for debug
 
 int glsl_get_uniform_location(int program, string name);
 int glsl_get_attribute_location(int program, string name);

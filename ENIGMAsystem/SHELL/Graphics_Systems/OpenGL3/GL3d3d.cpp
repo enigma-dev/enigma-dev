@@ -247,6 +247,7 @@ struct light3D {
     bool enabled;
     bool update;
     gs_scalar position[4];
+    gs_scalar transformed_position[4];
     float diffuse[4];
     float specular[4];
     float ambient[4];
@@ -260,6 +261,7 @@ struct light3D {
         enabled = false;
         update = false;
         position[0]=0, position[1]=0, position[2]=1, position[3]=0;
+        transformed_position[0]=0, transformed_position[1]=0, transformed_position[2]=0, transformed_position[3]=0;
         if (first == true){ //By GL1 spec, the first light is different
             diffuse[0]=1, diffuse[1]=1, diffuse[2]=1, diffuse[3]=1;
             specular[0]=1, specular[1]=1, specular[2]=1, specular[3]=1;
@@ -339,6 +341,7 @@ class d3d_lights
                             enigma_user::glsl_uniformf(enigma::shaderprograms[enigma::bound_shader]->uni_light_lAttenuation[al], lights[i].linear_attenuation);
                             enigma_user::glsl_uniformf(enigma::shaderprograms[enigma::bound_shader]->uni_light_qAttenuation[al], lights[i].quadratic_attenuation);
                         }
+                        enigma_user::glsl_uniform4fv(enigma::shaderprograms[enigma::bound_shader]->uni_light_position[al], 1, lights[i].transformed_position);
                         lights[i].update = false;
                     }
                     ++al;
@@ -350,12 +353,20 @@ class d3d_lights
 
     void light_update_positions()
     {
+        enigma::transformation_update();
         unsigned int al = 0; //Active lights
         for (unsigned int i=0; i<lights.size(); ++i){
+            if (lights[i].type == 0){ //Directional light
+                enigma::Vector3 lpos_eyespace;
+                lpos_eyespace = enigma::normal_matrix * enigma::Vector3(lights[i].position[0],lights[i].position[1],lights[i].position[2]);
+                lights[i].transformed_position[0] = lpos_eyespace.x, lights[i].transformed_position[1] = lpos_eyespace.y, lights[i].transformed_position[2] = lpos_eyespace.z, lights[i].transformed_position[3] = lights[i].position[3];
+            }else{ //Point lights
+                enigma::Vector4 lpos_eyespace;
+                lpos_eyespace = enigma::mv_matrix  * enigma::Vector4(lights[i].position[0],lights[i].position[1],lights[i].position[2],1.0);
+                lights[i].transformed_position[0] = lpos_eyespace.x, lights[i].transformed_position[1] = lpos_eyespace.y, lights[i].transformed_position[2] = lpos_eyespace.z, lights[i].transformed_position[3] = lights[i].position[3];
+            }
             if (lights[i].enabled == true){
-                enigma::Vector4 lpos_eyespace = enigma::mv_matrix * enigma::Vector4(lights[i].position[0],lights[i].position[1],lights[i].position[2],1.0);
-                gs_scalar tmp_pos[4] = {lpos_eyespace.x,lpos_eyespace.y,lpos_eyespace.z,lights[i].position[3]};
-                enigma_user::glsl_uniform4fv(enigma::shaderprograms[enigma::bound_shader]->uni_light_position[al], 1, tmp_pos);
+                enigma_user::glsl_uniform4fv(enigma::shaderprograms[enigma::bound_shader]->uni_light_position[al], 1, lights[i].transformed_position);
                 ++al;
             }
         }
