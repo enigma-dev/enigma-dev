@@ -61,6 +61,7 @@ void texture_set_stage(int stage, int texid);
 //#define texture_set(texid) texture_set_stage(0, texid)
 void texture_reset();
 void texture_set_blending(bool enable);
+
 void texture_set_repeat(bool repeat);
 void texture_set_repeat_ext(int sampler, bool repeat);
 //#define texture_set_repeat(repeat) texture_set_repeat_ext(0, repeat)
@@ -73,13 +74,12 @@ void texture_set_border_ext(int sampler, int r, int g, int b, double a);
 void texture_set_interpolation(bool enable);
 void texture_set_interpolation_ext(int sampler, bool enable);
 //#define texture_set_interpolation(enable) texture_set_interpolation_ext(0, enable)
-
 void texture_set_filter(int filter);
 void texture_set_filter_ext(int sampler, int filter);
 //#define texture_set_filter(filter) texture_set_filter_ext(0, filter)
-
 void texture_set_lod(gs_scalar minlod, gs_scalar maxlod, int maxlevel);
 void texture_set_lod_ext(int sampler, gs_scalar minlod, gs_scalar maxlod, int maxlevel);
+//#define texture_set_lod(minlod, maxlod, maxlevel) texture_set_lod_ext(0, minlod, maxlod, maxlevel)
 
 bool texture_mipmapping_supported();
 void texture_mipmapping_generate(int texid);
