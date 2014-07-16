@@ -264,7 +264,6 @@ void texture_set_stage(int stage, int texid) {
     oglmgr->EndShapesBatching();
     glActiveTexture(GL_TEXTURE0 + stage);
     glBindTexture(GL_TEXTURE_2D, enigma::samplerstates[stage].bound_texture = get_texture(texid));
-    //oglmgr->EndShapesBatching();
     //oglmgr->ResetTextureStates();
   }
 }

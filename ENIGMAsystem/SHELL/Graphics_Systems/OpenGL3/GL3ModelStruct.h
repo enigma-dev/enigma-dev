@@ -613,6 +613,8 @@ class Mesh
     if (useTextures){
          //This part sucks, but is required because models can be drawn without textures even if coordinates are provided
          //like in the case of d3d_model_block
+         // Robert: I had to comment out this check due to the change in sampler management, you will need to check all 8 sampler stages if you want to reimplement this check
+         // because this model class handles multi-texturing.
         //if (oglmgr->GetBoundTexture() != 0){
             glEnableVertexAttribArray(enigma::shaderprograms[enigma::bound_shader]->att_texture);
             glVertexAttribPointer(enigma::shaderprograms[enigma::bound_shader]->att_texture, 2, GL_FLOAT, 0, STRIDE, OFFSET(offset));
