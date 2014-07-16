@@ -95,11 +95,7 @@ namespace enigma_user
       closedir(fff_dir_open);
     fff_dir_open = NULL;
   }
-  
-  string environment_get_variable(string name) {
-    char *ev = getenv(name.c_str());
-    return ev? ev : "";
-  }
+
 }
 
 

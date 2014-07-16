@@ -39,3 +39,15 @@ int main(int argc,char** argv)
 	
 	return mainO(argc, argv);
 }
+
+int parameter_count(){
+
+}
+
+string parameter_string(int n) {
+
+}
+
+string environment_get_variable(string name) {
+
+}
