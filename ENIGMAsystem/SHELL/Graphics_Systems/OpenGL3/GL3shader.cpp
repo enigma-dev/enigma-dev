@@ -83,7 +83,8 @@ namespace enigma
                 "#define modelViewProjectionMatrix transform_matrix[MATRIX_WORLD_VIEW_PROJECTION] \n"
                 "#define in_Colour in_Color \n"
 
-                "uniform mat3 normalMatrix;     \n";
+                "uniform mat3 normalMatrix;     \n"
+				"#line 0 \n";
     }
     string getFragmentShaderPrefix(){
         return "#version 140\n"
@@ -108,7 +109,8 @@ namespace enigma
                 "#define gm_BaseTexture en_TexSampler\n"
                 "uniform bool en_TexturingEnabled;\n"
                 "uniform bool en_ColorEnabled;\n"
-                "uniform vec4 en_bound_color;\n";
+                "uniform vec4 en_bound_color;\n"
+				"#line 0 \n";
     }
     string getDefaultVertexShader(){
         return  "in vec3 in_Position;                 // (x,y,z)\n"
@@ -170,13 +172,13 @@ namespace enigma
                         "attenuation = 1.0 / (Light[index].cA + Light[index].lA * distance + Light[index].qA * distance * distance);\n"
                       "}\n"
                       "vec3 r = reflect( -L, norm );\n"
-                      "vec4 ambient = Light[index].La * Material.Ka;\n"
-                      "float LdotN = max( dot(L,norm), 0.0 );\n"
+                      "total_light += Light[index].La * Material.Ka;\n"
+                      "float LdotN = max( dot(norm, L), 0.0 );\n"
                       "vec4 diffuse = vec4(attenuation * vec3(Light[index].Ld) * vec3(Material.Kd) * LdotN,1.0);\n"
                       "vec4 spec = vec4(0.0);\n"
                       "if( LdotN > 0.0 )\n"
                           "spec = clamp(vec4(attenuation * vec3(Light[index].Ls) * vec3(Material.Ks) * pow( max( dot(r,v), 0.0 ), Material.Shininess ),1.0),0.0,1.0);\n"
-                      "total_light += diffuse + ambient + spec;\n"
+                      "total_light += diffuse + spec;\n"
                   "}\n"
                   "return total_light;\n"
                 "}\n"
@@ -191,7 +193,7 @@ namespace enigma
                         "vec3 eyeNorm;\n"
                         "vec4 eyePosition;\n"
                         "getEyeSpace(eyeNorm, eyePosition);\n"
-                        "v_Color = clamp(en_AmbientColor * Material.Ka + phongModel( eyeNorm, eyePosition ),0.0,1.0) * iColor;\n"
+                        "v_Color = clamp(en_AmbientColor + phongModel( eyeNorm, eyePosition ),0.0,1.0) * iColor;\n"
                     "}else{\n"
 						"v_Color = iColor;\n"
                     "}\n"
@@ -456,6 +458,7 @@ bool glsl_shader_load(int id, string fname)
     if (enigma::shaders[id]->type == sh_fragment) source = enigma::getFragmentShaderPrefix() + shaderSource;
 
     const char *ShaderSource = source.c_str();
+    //std::cout << ShaderSource << std::endl;
     glShaderSource(enigma::shaders[id]->shader, 1, &ShaderSource, NULL);
     return true; // No Error
 }
@@ -524,6 +527,10 @@ bool glsl_program_link(int id)
     GLint linked;
     glGetProgramiv(enigma::shaderprograms[id]->shaderprogram, GL_LINK_STATUS, &linked);
     if (linked){
+        enigma::getUniforms(id);
+        enigma::getAttributes(id);
+        enigma::getDefaultUniforms(id);
+        enigma::getDefaultAttributes(id);
         return true;
     } else {
         std::cout << "Shader program[" << id << "] - Linking failed - Info log: " << std::endl;
@@ -588,11 +595,19 @@ void glsl_program_free(int id)
     delete enigma::shaderprograms[id];
 }
 
+void glsl_program_set_name(int id, string name){
+	enigma::shaderprograms[id]->name = name;
+}
+
 int glsl_get_uniform_location(int program, string name) {
 	//int uni = glGetUniformLocation(enigma::shaderprograms[program]->shaderprogram, name.c_str());
 	std::map<string,GLint>::iterator it = enigma::shaderprograms[program]->uniform_names.find(name);
     if (it == enigma::shaderprograms[program]->uniform_names.end()){
-        printf("Program[%i] - Uniform %s not found!\n", program, name.c_str());
+		if (enigma::shaderprograms[program]->name == ""){
+			printf("Program[%i] - Uniform %s not found!\n", program, name.c_str());
+		}else{
+			printf("Program[%s = %i] - Uniform %s not found!\n", enigma::shaderprograms[program]->name.c_str(), program, name.c_str());
+		}
         return -1;
     }else{
         return it->second;
@@ -603,7 +618,11 @@ int glsl_get_attribute_location(int program, string name) {
 	//int uni = glGetAttribLocation(enigma::shaderprograms[program]->shaderprogram, name.c_str());
     std::map<string,GLint>::iterator it = enigma::shaderprograms[program]->attribute_names.find(name);
     if (it == enigma::shaderprograms[program]->attribute_names.end()){
-        printf("Program[%i] - Attribute %s not found!\n", program, name.c_str());
+		if (enigma::shaderprograms[program]->name == ""){
+			printf("Program[%i] - Attribute %s not found!\n", program, name.c_str());
+		}else{
+			printf("Program[%s = %i] - Attribute %s not found!\n", enigma::shaderprograms[program]->name.c_str(), program, name.c_str());
+		}
         return -1;
     }else{
         return it->second;

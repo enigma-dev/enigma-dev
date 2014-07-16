@@ -33,6 +33,10 @@ using namespace std;
 
 ContextManager* oglmgr = NULL;
 
+namespace enigma_user{
+	extern string shader_get_name(int i);
+}
+
 namespace enigma
 {
   unsigned bound_texture=0;
@@ -64,9 +68,6 @@ namespace enigma
         using enigma_user::room_width;
         using enigma_user::room_height;
 
-        glViewport(0,0,(int)room_width,(int)room_height);
-        d3d_set_projection_ortho(0,(int)room_width,0,(int)room_height, 0);
-
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glDisable(GL_DEPTH_TEST);
@@ -92,6 +93,7 @@ namespace enigma
             glsl_shader_load_string(fshader_id, shaderstruct->fragment);
 
             int prog_id = glsl_program_create();
+			glsl_program_set_name(prog_id, enigma_user::shader_get_name(i));
 
             if (shaderstruct->precompile) {
                 glsl_shader_compile(vshader_id);
@@ -102,11 +104,6 @@ namespace enigma
             glsl_program_attach(prog_id, fshader_id);
             glsl_program_link(prog_id);
             glsl_program_validate(prog_id);
-
-            getUniforms(prog_id);
-            getAttributes(prog_id);
-            getDefaultUniforms(prog_id);
-            getDefaultAttributes(prog_id);
         }
 
         //ADD DEFAULT SHADER (emulates FFP)
@@ -137,6 +134,9 @@ namespace enigma
         //END DEFAULT SHADER
         
         graphics_initialize_samplers();
+        
+        glViewport(0,0,(int)room_width,(int)room_height);
+        d3d_set_projection_ortho(0,(int)room_width,0,(int)room_height, 0);
     }
 }
 

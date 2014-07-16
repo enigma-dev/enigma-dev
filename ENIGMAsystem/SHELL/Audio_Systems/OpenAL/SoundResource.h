@@ -30,8 +30,7 @@
 #include "Widget_Systems/widgets_mandatory.h" // show_error
 #endif
 
-#include <vector>
-using std::vector;
+#include <map>
 
 enum load_state {
     LOADSTATE_NONE,
@@ -65,6 +64,6 @@ struct SoundResource
 	}
 };
 
-extern vector<SoundResource*> sound_resources;
+extern std::map<int, SoundResource*> sound_resources;
 
 #endif
