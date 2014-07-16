@@ -44,8 +44,6 @@ using namespace std;
 #include <vector>
 using std::vector;
 
-unsigned get_texture(int texid);
-
 extern GLenum ptypes_by_id[16];
 namespace enigma {
   extern unsigned char currentcolor[4];
@@ -615,13 +613,13 @@ class Mesh
     if (useTextures){
          //This part sucks, but is required because models can be drawn without textures even if coordinates are provided
          //like in the case of d3d_model_block
-        if (oglmgr->GetBoundTexture() != 0){
+        //if (oglmgr->GetBoundTexture() != 0){
             glEnableVertexAttribArray(enigma::shaderprograms[enigma::bound_shader]->att_texture);
             glVertexAttribPointer(enigma::shaderprograms[enigma::bound_shader]->att_texture, 2, GL_FLOAT, 0, STRIDE, OFFSET(offset));
             glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_textureEnable, 1);
-        } else {
-            glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_textureEnable, 0);
-        }
+        //} else {
+          //  glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_textureEnable, 0);
+        //}
       offset += 2;
     } else {
           glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_textureEnable, 0);

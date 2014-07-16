@@ -74,7 +74,7 @@ namespace enigma
     // This allows us to control the number of mipmaps generated, but Direct3D does not have an option for it, so for now we'll just go with the defaults.
     // Honestly not a big deal, Unity3D doesn't allow you to specify either.
     //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 3);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 2);
     // The user should call texture_mipmapping_generate manually to control when mipmaps are generated.
     glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -157,10 +157,10 @@ namespace enigma
   //NOTE: OpenGL 1 hardware does not support sampler objects, some versions of 2 and usually over 3 do. We use this class
   //to emulate the Direct3D behavior.
   struct SamplerState {
-    bool wrapu, wrapv, wrapw;
-    GLint bordercolor[4], min, mag;
-    GLfloat anisotropy;
     unsigned bound_texture;
+    bool wrapu, wrapv, wrapw;
+    GLint bordercolor[4], min, mag, maxlevel;
+    GLfloat anisotropy, minlod, maxlod;
     
     SamplerState(): wrapu(true), wrapv(true), wrapw(true) {
     
@@ -189,11 +189,18 @@ namespace enigma
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mag);
     }
     
+    void ApplyLod() {
+     // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_LOD, minlod);
+     // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LOD, maxlod);
+      //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, maxlevel);
+    }
+    
     void ApplyState() {
       ApplyWrap();
       ApplyAnisotropy();
       ApplyFilter();
       ApplyBorderColor();
+      ApplyLod();
     }
   };
   
@@ -231,6 +238,18 @@ void texture_delete(int texid) {
 
 bool texture_exists(int texid) {
   return textureStructs[texid] != NULL;
+}
+
+void texture_preload(int texid)
+{
+  // Deprecated in ENIGMA and GM: Studio, all textures are automatically preloaded.
+}
+
+void texture_set_priority(int texid, double prio)
+{
+  // Deprecated in ENIGMA and GM: Studio, all textures are automatically preloaded.
+  glBindTexture(GL_TEXTURE_2D, textureStructs[texid]->gltex);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_PRIORITY, prio);
 }
 
 void texture_set_enabled(bool enable)
@@ -343,24 +362,13 @@ void texture_set_filter_ext(int sampler, int filter)
   enigma::samplerstates[sampler].ApplyFilter();
 }
 
-void texture_preload(int texid)
+void texture_set_lod_ext(int sampler, double minlod, double maxlod, int maxlevel)
 {
-  // Deprecated in ENIGMA and GM: Studio, all textures are automatically preloaded.
-}
-
-void texture_set_priority(int texid, double prio)
-{
-  // Deprecated in ENIGMA and GM: Studio, all textures are automatically preloaded.
-  glBindTexture(GL_TEXTURE_2D, textureStructs[texid]->gltex);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_PRIORITY, prio);
-}
-
-void texture_set_levelofdetail(int texid, double minlod, double maxlod, int maxlevel)
-{
-  glBindTexture(GL_TEXTURE_2D, textureStructs[texid]->gltex);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_LOD, minlod);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LOD, maxlod);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, maxlevel);
+  glActiveTexture(GL_TEXTURE0 + sampler);
+  enigma::samplerstates[sampler].minlod = minlod;
+  enigma::samplerstates[sampler].maxlod = maxlod;
+  enigma::samplerstates[sampler].maxlevel = maxlevel;
+  enigma::samplerstates[sampler].ApplyLod();
 }
 
 bool texture_mipmapping_supported()

@@ -153,6 +153,16 @@ bool texture_exists(int texid) {
   return textureStructs[texid] != NULL;
 }
 
+void texture_preload(int texid)
+{
+  // Deprecated in ENIGMA and GM: Studio, all textures are automatically preloaded.
+}
+
+void texture_set_priority(int texid, double prio)
+{
+  // Deprecated in ENIGMA and GM: Studio, all textures are automatically preloaded.
+}
+
 gs_scalar texture_get_width(int texid) {
 	return textureStructs[texid]->width / textureStructs[texid]->fullwidth;
 }
@@ -227,17 +237,7 @@ void texture_set_filter_ext(int sampler, int filter)
 
 }
 
-void texture_preload(int texid)
-{
-  // Deprecated in ENIGMA and GM: Studio, all textures are automatically preloaded.
-}
-
-void texture_set_priority(int texid, double prio)
-{
-  // Deprecated in ENIGMA and GM: Studio, all textures are automatically preloaded.
-}
-
-void texture_set_levelofdetail(int texid, double minlod, double maxlod, int maxlevel)
+void texture_set_lod_ext(int sampler, double minlod, double maxlod, int maxlevel)
 {
 
 }

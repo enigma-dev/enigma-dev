@@ -41,8 +41,6 @@ using namespace std;
 #include <vector>
 using std::vector;
 
-unsigned get_texture(int texid);
-
 extern GLenum ptypes_by_id[16];
 namespace enigma {
   extern unsigned char currentcolor[4];

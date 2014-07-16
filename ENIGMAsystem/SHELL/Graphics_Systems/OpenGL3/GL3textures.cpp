@@ -62,13 +62,8 @@ TextureStruct::~TextureStruct()
 	glDeleteTextures(1, &gltex);
 }
 
-unsigned get_texture(int texid)
-{
-	if (texid < 0 || texid >= textureStructs.size()) {
-		return 0;
-	} else {
-		return textureStructs[texid]->gltex;
-	}
+unsigned get_texture(int texid) {
+	return (size_t(texid) >= textureStructs.size())? -1 : textureStructs[texid]->gltex;
 }
 
 namespace enigma
@@ -218,6 +213,18 @@ bool texture_exists(int texid) {
   return textureStructs[texid] != NULL;
 }
 
+void texture_preload(int texid)
+{
+  // Deprecated in ENIGMA and GM: Studio, all textures are automatically preloaded.
+}
+
+void texture_set_priority(int texid, double prio)
+{
+  // Deprecated in ENIGMA and GM: Studio, all textures are automatically preloaded.
+  oglmgr->BindTexture(GL_TEXTURE_2D, textureStructs[texid]->gltex);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_PRIORITY, prio);
+}
+
 void texture_set_enabled(bool enable)
 {
   (enable?glEnable:glDisable)(GL_TEXTURE_2D);
@@ -251,12 +258,13 @@ void texture_set(int texid) {
   texture_set_stage(0, texid);
 }
 
+
 void texture_set_stage(int stage, int texid) {
-  if (enigma::samplerstates[stage].bound_texture != texid) {
-    //oglmgr->EndShapesBatching();
+  if (enigma::samplerstates[stage].bound_texture != get_texture(texid)) {
+    oglmgr->EndShapesBatching();
     glActiveTexture(GL_TEXTURE0 + stage);
-    oglmgr->BindTexture(GL_TEXTURE_2D, texid);
-    
+    glBindTexture(GL_TEXTURE_2D, enigma::samplerstates[stage].bound_texture = get_texture(texid));
+    //oglmgr->EndShapesBatching();
     //oglmgr->ResetTextureStates();
   }
 }
@@ -322,24 +330,11 @@ void texture_set_filter_ext(int sampler, int filter)
   glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_MAG_FILTER, mag);
 }
 
-void texture_preload(int texid)
+void texture_set_lod_ext(int sampler, double minlod, double maxlod, int maxlevel)
 {
-  // Deprecated in ENIGMA and GM: Studio, all textures are automatically preloaded.
-}
-
-void texture_set_priority(int texid, double prio)
-{
-  // Deprecated in ENIGMA and GM: Studio, all textures are automatically preloaded.
-  oglmgr->BindTexture(GL_TEXTURE_2D, textureStructs[texid]->gltex);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_PRIORITY, prio);
-}
-
-void texture_set_levelofdetail(int texid, double minlod, double maxlod, int maxlevel)
-{
-  oglmgr->BindTexture(GL_TEXTURE_2D, textureStructs[texid]->gltex);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_LOD, minlod);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LOD, maxlod);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, maxlevel);
+  glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_MIN_LOD, minlod);
+  glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_MAX_LOD, maxlod);
+  glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_MAX_LEVEL, maxlevel);
 }
 
 bool texture_mipmapping_supported()

@@ -78,7 +78,9 @@ void texture_set_filter(int filter);
 void texture_set_filter_ext(int sampler, int filter);
 //#define texture_set_filter(filter) texture_set_filter_ext(0, filter)
 
-void texture_set_levelofdetail(int texid, gs_scalar minlod, gs_scalar maxlod, int maxlevel);
+void texture_set_lod(gs_scalar minlod, gs_scalar maxlod, int maxlevel);
+void texture_set_lod_ext(int sampler, gs_scalar minlod, gs_scalar maxlod, int maxlevel);
+
 bool texture_mipmapping_supported();
 void texture_mipmapping_generate(int texid);
 bool  texture_anisotropy_supported();

@@ -141,7 +141,7 @@ void ReadPixels() {
 // Function no longer used since introduction of sampler states for compatibility with Studio.
 void BindTexture(GLenum target,  GLuint texture) {
     if (bound_tex != texture) {
-        EndShapesBatching();
+        //EndShapesBatching();
         glBindTexture(target, bound_tex = texture);
     }
     return;
