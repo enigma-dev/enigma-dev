@@ -24,6 +24,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <string>
+#include <cstdlib>
 
 #include "Platforms/platforms_mandatory.h"
 
