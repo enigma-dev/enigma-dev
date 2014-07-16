@@ -48,18 +48,3 @@ extern unsigned game_id;
 extern string working_directory;
 extern string program_directory;
 extern string temp_directory;
-
-int parameter_count(){
-  // TODO
-  return 0;
-}
-
-string parameter_string(int n) {
-  // TODO
-  return string("");
-}
-
-string environment_get_variable(string name) {
-  // TODO
-  return string("");
-}

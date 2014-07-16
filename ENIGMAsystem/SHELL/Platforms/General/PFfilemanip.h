@@ -54,10 +54,4 @@ extern std::string working_directory;
 extern std::string program_directory;
 extern std::string temp_directory;
 
-
-int parameter_count();
-std::string parameter_string(int n);
-
-std::string environment_get_variable(std::string name);
-
 }

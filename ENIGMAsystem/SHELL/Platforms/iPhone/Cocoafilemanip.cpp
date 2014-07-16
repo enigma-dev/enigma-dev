@@ -48,15 +48,3 @@ void discard_include_file(string fname);
 
 extern unsigned game_id;
 extern string temp_directory;
-
-
-int parameter_count(){
-
-}
-string parameter_string(int n) {
-
-}
-
-string environment_get_variable(string name) {
-
-}

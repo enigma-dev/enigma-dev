@@ -257,12 +257,6 @@ extern std::string working_directory;
 extern std::string program_directory;
 extern std::string temp_directory;
 
-
-int parameter_count();
-string parameter_string(int n);
-
-string environment_get_variable(std::string name);
-
 long long file_size(std::string fname)
 {
     struct stat sb;
