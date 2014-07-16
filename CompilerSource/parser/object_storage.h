@@ -108,6 +108,7 @@ struct parsed_object
 
   void copy_from(parsed_object&, string, string);
   void copy_calls_from(parsed_object&);
+  void copy_tlines_from(parsed_object&);
 
   parsed_object();
   parsed_object(string,int,int,int,int,bool,bool,double,bool);

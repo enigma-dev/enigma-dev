@@ -164,6 +164,15 @@ void parsed_object::copy_calls_from(parsed_object& source)
   }
 }
 
+void parsed_object::copy_tlines_from(parsed_object& source)
+{
+  for (parsed_object::tlineit sit = source.tlines.begin(); sit != source.tlines.end(); sit++)
+  {
+    tlines[sit->first] = 1;
+  }
+}
+
+
 #include <vector>
 #include "backend/ideprint.h"
 
