@@ -408,7 +408,7 @@ namespace enigma_user {
 
 namespace enigma {
   string* parameters;
-  unsigned int parameterc;
+  int parameterc;
   int current_room_speed;
   void windowsystem_write_exename(char* x)
   {
