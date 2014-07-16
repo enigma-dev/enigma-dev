@@ -414,6 +414,14 @@ int main(int argc,char** argv)
 namespace enigma_user
 {
 
+string parameter_string(unsigned num) {
+  return num < enigma::parameterc ? enigma::parameters[num] : "";
+}
+
+int parameter_count() {
+  return enigma::parameterc;
+}
+
 void game_end(int ret) {
   game_isending = true;
   enigma::game_return = ret;
@@ -425,6 +433,11 @@ void action_end_game() {
 
 int display_get_width() { return XWidthOfScreen(screen); }
 int display_get_height() { return XHeightOfScreen(screen); }
+
+string environment_get_variable(string name) {
+  char *ev = getenv(name.c_str());
+  return ev? ev : "";
+}
 
 }
 
