@@ -16,7 +16,28 @@
 // with this code. If not, see <http://www.gnu.org/licenses/>
 //
 
-#include "GM5Placebo.h"
-#include "GM5Drawing.h"
-#include "GM5Sound.h"
+
+#ifndef ENIGMA_GM5COMPAT_SOUND__H
+#define ENIGMA_GM5COMPAT_SOUND__H
+
+
+///This file contains audio functions in the GM5 style. 
+
+
+#include "Universal_System/var4.h"
+#include "Universal_System/scalar.h"
+
+
+namespace enigma_user
+{
+
+//Add a sound (the other parameters are ignored).
+int sound_add(string fName, int buffers, bool useEffects, bool loadOnUse);
+
+//Modify the sound's frequency (approximated with pitch).
+void sound_frequency(int sound, float value);
+
+}
+
+#endif // ENIGMA_GM5COMPAT_SOUND__H
 
