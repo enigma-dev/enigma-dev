@@ -48,7 +48,7 @@ using namespace std;
 
 extern string tostring(int);
 
-int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], vector<parsed_script*>& tlines)
+int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], vector<parsed_script*>& tlines, const std::set<std::string>& script_names)
 {
   //First we just parse the scripts to add semicolons and collect variable names
   for (int i = 0; i < es->scriptCount; i++)
@@ -60,14 +60,14 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
     }
     // Keep a parsed record of this script
     scr_lookup[es->scripts[i].name] = scripts[i] = new parsed_script;
-    parser_main(es->scripts[i].code,&scripts[i]->pev);
+    parser_main(es->scripts[i].code,&scripts[i]->pev, script_names);
     edbg << "Parsed `" << es->scripts[i].name << "': " << scripts[i]->obj.locals.size() << " locals, " << scripts[i]->obj.globals.size() << " globals" << flushl;
     
     // If the script accesses variables from outside its scope implicitly
     if (scripts[i]->obj.locals.size() or scripts[i]->obj.globallocals.size()) {
       parsed_object temporary_object = *scripts[i]->pev.myObj;
       scripts[i]->pev_global = new parsed_event(&temporary_object);
-      parser_main(string("with (self) {\n") + es->scripts[i].code + "\n/* */}",scripts[i]->pev_global);
+      parser_main(string("with (self) {\n") + es->scripts[i].code + "\n/* */}",scripts[i]->pev_global, script_names);
       scripts[i]->pev_global->myObj = NULL;
     }
     fflush(stdout);
@@ -90,14 +90,14 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
 
       // Keep a parsed record of this timeline
       tline_lookup[es->timelines[i].name].push_back(tlines.back());
-      parser_main(es->timelines[i].moments[j].code, &tlines.back()->pev);
+      parser_main(es->timelines[i].moments[j].code, &tlines.back()->pev, script_names);
       edbg << "Parsed `" << es->timelines[i].name <<", moment: " <<es->timelines[i].moments[j].stepNo << "': " << tlines.back()->obj.locals.size() << " locals, " << tlines.back()->obj.globals.size() << " globals" << flushl;
 
       // If the timeline accesses variables from outside its scope implicitly
       if (tlines.back()->obj.locals.size() or tlines.back()->obj.globallocals.size()) {
         parsed_object temporary_object = *tlines.back()->pev.myObj;
         tlines.back()->pev_global = new parsed_event(&temporary_object);
-        parser_main(string("with (self) {\n") + es->timelines[i].moments[j].code + "\n/* */}",tlines.back()->pev_global);
+        parser_main(string("with (self) {\n") + es->timelines[i].moments[j].code + "\n/* */}",tlines.back()->pev_global, script_names);
         tlines.back()->pev_global->myObj = NULL;
       }
       fflush(stdout);
@@ -270,7 +270,7 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
         
         //Add this to our objects map
         pev.myObj = pob; //Link to its calling object.
-        parser_main(code,&pev); //Format it to C++
+        parser_main(code,&pev,script_names); //Format it to C++
         
         edbg << " Done." << flushl;
       }
@@ -290,7 +290,7 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
       cout << "Syntax error in room creation code for room " << es->rooms[i].id << " (`" << es->rooms[i].name << "'):" << endl << syncheck::syerr << flushl;
       return E_ERROR_SYNTAX;
     }
-    parser_main(es->rooms[i].creationCode,&pev);
+    parser_main(es->rooms[i].creationCode,&pev,script_names);
     
     for (int ii = 0; ii < es->rooms[i].instanceCount; ii++)
     {
@@ -304,7 +304,7 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
         
         pr->instance_create_codes[es->rooms[i].instances[ii].id].object_index = es->rooms[i].instances[ii].objectId;
         parsed_event* icce = pr->instance_create_codes[es->rooms[i].instances[ii].id].pe = new parsed_event(-1,-1,parsed_objects[es->rooms[i].instances[ii].objectId]);
-        parser_main(string("with (") + tostring(es->rooms[i].instances[ii].id) + ") {" + es->rooms[i].instances[ii].creationCode + "\n/* */}", icce);
+        parser_main(string("with (") + tostring(es->rooms[i].instances[ii].id) + ") {" + es->rooms[i].instances[ii].creationCode + "\n/* */}", icce, script_names);
       }
     }
   }

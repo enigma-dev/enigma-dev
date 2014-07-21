@@ -155,7 +155,7 @@ void parser_init()
 
 
 
-string parser_main(string code, parsed_event* pev)
+string parser_main(string code, parsed_event* pev, const std::set<std::string>& script_names)
 {
   //Converting EDL to C++ is still relatively simple.
   //It can be done, for the most part, using only find and replace.
@@ -197,7 +197,7 @@ string parser_main(string code, parsed_event* pev)
   //cout << code << endl;
 
   if (pev) { cout << "collecting variables..."; fflush(stdout);
-    collect_variables(current_language, code,synt,pev); cout << " done>"; fflush(stdout);
+    collect_variables(current_language, code,synt,pev, script_names); cout << " done>"; fflush(stdout);
 
   }
 

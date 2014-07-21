@@ -314,7 +314,12 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   int res;
   #define irrr() if (res) { idpr("Error occurred; see scrollback for details.",-1); return res; }
 
-  res = current_language->compile_parseAndLink(es,parsed_scripts, parsed_tlines);
+  //The parser (and, to some extent, the compiler) needs knowledge of script names for various optimizations.
+  std::set<std::string> script_names;
+  for (int i = 0; i < es->scriptCount; i++)
+    script_names.insert(es->scripts[i].name);
+
+  res = current_language->compile_parseAndLink(es,parsed_scripts, parsed_tlines, script_names);
   irrr();
 
 
@@ -564,12 +569,6 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
   irrr();
 
   edbg << "Running Secondary Parse Passes" << flushl;
-
-  //Parser needs some knowledge of script names. 
-  std::set<std::string> script_names;
-  for (int i = 0; i < es->scriptCount; i++)
-    script_names.insert(es->scripts[i].name);
-
   res = current_language->compile_parseSecondary(parsed_objects,parsed_scripts,es->scriptCount, parsed_tlines, parsed_rooms,&EGMglobal, script_names);
 
   edbg << "Writing object data" << flushl;
