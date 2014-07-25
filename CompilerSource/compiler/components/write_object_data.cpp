@@ -571,7 +571,21 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, i
         wto << "enigma::debug_scope $current_scope(\"script '" << es->scripts[i].name << "'\");\n";
       }
       parsed_event& upev = scr->pev_global?*scr->pev_global:scr->pev;
-      print_to_file(upev.code,upev.synt,upev.strc,upev.strs,2,wto);
+
+      //Super-hacky
+      std::string override_code = "";
+      std::string override_synt = "";
+      if (upev.code.find("with((self)){")==0 && upev.code.find("};")==upev.code.size()-2) {
+        override_code = upev.code.substr(13, upev.code.size()-13-2);
+        override_synt = upev.synt.substr(13, upev.synt.size()-13-2);
+      }
+      print_to_file(
+        override_code.empty() ? upev.code : override_code,
+        override_synt.empty() ? upev.synt : override_synt,
+        upev.strc,
+        upev.strs,
+        2,wto
+      );
       wto << "\n  return 0;\n}\n\n";
     }
 
