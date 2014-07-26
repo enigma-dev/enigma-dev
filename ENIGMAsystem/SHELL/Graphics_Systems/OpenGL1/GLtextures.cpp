@@ -281,10 +281,6 @@ unsigned texture_get_texel_height(int texid)
 	return textureStructs[texid]->height;
 }
 
-void texture_set(int texid) {
-  texture_set_stage(0, texid);
-}
-
 void texture_set_stage(int stage, int texid) {
   if (enigma::samplerstates[stage].bound_texture != unsigned(get_texture(texid))) {
     glActiveTexture(GL_TEXTURE0 + stage);
@@ -299,20 +295,12 @@ void texture_reset() {
   enigma::samplerstates[0].ApplyState();
 }
 
-void texture_set_interpolation(bool enable) {
-  texture_set_interpolation_ext(0, enable);
-}
-
 void texture_set_interpolation_ext(int sampler, bool enable)
 {
   glActiveTexture(GL_TEXTURE0 + sampler);
   enigma::samplerstates[sampler].min = enable?GL_LINEAR:GL_NEAREST;
   enigma::samplerstates[sampler].mag = enable?GL_LINEAR:GL_NEAREST;
   enigma::samplerstates[sampler].ApplyFilter();
-}
-
-void texture_set_repeat(bool repeat) {
-  texture_set_repeat_ext(0, repeat);
 }
 
 void texture_set_repeat_ext(int sampler, bool repeat)

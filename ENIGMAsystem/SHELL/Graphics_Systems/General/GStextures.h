@@ -59,28 +59,25 @@ unsigned texture_get_texel_height(int texid);
 void texture_set_priority(int texid, double prio);
 void texture_set(int texid);
 void texture_set_stage(int stage, int texid);
-//#define texture_set(texid) texture_set_stage(0, texid)
+#define texture_set(texid) texture_set_stage(0, texid)
 void texture_reset();
 void texture_set_blending(bool enable);
 
 void texture_set_repeat(bool repeat);
 void texture_set_repeat_ext(int sampler, bool repeat);
-//#define texture_set_repeat(repeat) texture_set_repeat_ext(0, repeat)
+#define texture_set_repeat(repeat) texture_set_repeat_ext(0, repeat)
 void texture_set_wrap(bool wrapu, bool wrapv, bool wrapw);
 void texture_set_wrap_ext(int sampler, bool wrapu, bool wrapv, bool wrapw);
-//#define texture_set_wrap(wrapu, wrapv, wrapw) texture_set_wrap_ext(0, wrapu, wrapv, wrapw)
+#define texture_set_wrap(wrapu, wrapv, wrapw) texture_set_wrap_ext(0, wrapu, wrapv, wrapw)
 void texture_set_border(int r, int g, int b, double a);
 void texture_set_border_ext(int sampler, int r, int g, int b, double a);
-//#define texture_set_border(r, g, b, a) texture_set_border_ext(0, r, g, b, a)
-void texture_set_interpolation(bool enable);
-void texture_set_interpolation_ext(int sampler, bool enable);
-//#define texture_set_interpolation(enable) texture_set_interpolation_ext(0, enable)
+#define texture_set_border(r, g, b, a) texture_set_border_ext(0, r, g, b, a)
 void texture_set_filter(int filter);
 void texture_set_filter_ext(int sampler, int filter);
-//#define texture_set_filter(filter) texture_set_filter_ext(0, filter)
+#define texture_set_filter(filter) texture_set_filter_ext(0, filter)
 void texture_set_lod(gs_scalar minlod, gs_scalar maxlod, int maxlevel);
 void texture_set_lod_ext(int sampler, gs_scalar minlod, gs_scalar maxlod, int maxlevel);
-//#define texture_set_lod(minlod, maxlod, maxlevel) texture_set_lod_ext(0, minlod, maxlod, maxlevel)
+#define texture_set_lod(minlod, maxlod, maxlevel) texture_set_lod_ext(0, minlod, maxlod, maxlevel)
 
 bool texture_mipmapping_supported();
 void texture_mipmapping_generate(int texid);
