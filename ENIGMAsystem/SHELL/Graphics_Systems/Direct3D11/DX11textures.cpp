@@ -192,10 +192,6 @@ void texture_set_blending(bool enable)
 
 }
 
-void texture_set(int texid) {
-
-}
-
 void texture_set_stage(int stage, int texid) {
 
 }
@@ -204,16 +200,8 @@ void texture_reset() {
 
 }
 
-void texture_set_interpolation(bool enable) {
-
-}
-
 void texture_set_interpolation_ext(int sampler, bool enable)
 {
-
-}
-
-void texture_set_repeat(bool repeat) {
 
 }
 

@@ -254,11 +254,6 @@ unsigned texture_get_texel_height(int texid)
 	return textureStructs[texid]->height;
 }
 
-void texture_set(int texid) {
-  texture_set_stage(0, texid);
-}
-
-
 void texture_set_stage(int stage, int texid) {
   if (enigma::samplerstates[stage].bound_texture != get_texture(texid)) {
     oglmgr->EndShapesBatching();
@@ -274,19 +269,10 @@ void texture_reset() {
   oglmgr->EndShapesBatching();
 }
 
-void texture_set_interpolation(bool enable) {
-  texture_set_interpolation_ext(0, enable);
-}
-
 void texture_set_interpolation_ext(int sampler, bool enable)
 {
   glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_MIN_FILTER, enable?GL_LINEAR:GL_NEAREST);
   glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_MAG_FILTER, enable?GL_LINEAR:GL_NEAREST);
-}
-
-void texture_set_repeat(bool repeat) {
-  texture_set_repeat_ext(0, repeat);
-  oglmgr->ResetTextureStates();
 }
 
 void texture_set_repeat_ext(int sampler, bool repeat)
