@@ -62,6 +62,10 @@ namespace enigma
     texture->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
     memcpy(rect.pBits, pxdata, fullwidth * fullheight * 4);
     texture->UnlockRect(0);
+    
+    if (mipmap) {
+      texture->GenerateMipSubLevels();
+    }
 
     TextureStruct* textureStruct = new TextureStruct(texture);
     textureStruct->width = width;
@@ -272,11 +276,6 @@ bool texture_mipmapping_supported()
   D3DCAPS9 caps;
   d3dmgr->GetDeviceCaps(&caps);
   return caps.TextureCaps & D3DPTEXTURECAPS_MIPMAP;
-}
-
-void texture_mipmapping_generate(int texid)
-{
-  textureStructs[texid]->gTexture->GenerateMipSubLevels();
 }
 
 bool texture_anisotropy_supported()

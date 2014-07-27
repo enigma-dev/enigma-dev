@@ -74,11 +74,13 @@ namespace enigma
     glGenTextures(1, &texture);
     oglmgr->BindTexture(GL_TEXTURE_2D, texture);
     glTexImage2D(GL_TEXTURE_2D, 0, 4, fullwidth, fullheight, 0, GL_BGRA, GL_UNSIGNED_BYTE, pxdata);
-    // This allows us to control the number of mipmaps generated, but Direct3D does not have an option for it, so for now we'll just go with the defaults.
-    // Honestly not a big deal, Unity3D doesn't allow you to specify either.
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 3);
-    // The user should call texture_mipmapping_generate manually to control when mipmaps are generated.
+    if (mipmap) {
+      // This allows us to control the number of mipmaps generated, but Direct3D does not have an option for it, so for now we'll just go with the defaults.
+      // Honestly not a big deal, Unity3D doesn't allow you to specify either.
+      //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+      //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 3);
+      glGenerateMipmap(GL_TEXTURE_2D);
+    }
     oglmgr->BindTexture(GL_TEXTURE_2D, 0);
 
     TextureStruct* textureStruct = new TextureStruct(texture);
@@ -326,17 +328,6 @@ bool texture_mipmapping_supported()
 {
   return strstr((char*)glGetString(GL_EXTENSIONS),
            "glGenerateMipmap");
-}
-
-void texture_mipmapping_generate(int texid)
-{
-  glActiveTexture(GL_TEXTURE0);
-  oglmgr->BindTexture(GL_TEXTURE_2D, enigma::samplerstates[0].bound_texture = textureStructs[texid]->gltex);
-  // This allows us to control the number of mipmaps generated, but Direct3D does not have an option for it, so for now we'll just go with the defaults.
-  // Honestly not a big deal, Unity3D doesn't allow you to specify either.
-  //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
-  //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 3);
-  glGenerateMipmap(GL_TEXTURE_2D);
 }
 
 bool texture_anisotropy_supported()

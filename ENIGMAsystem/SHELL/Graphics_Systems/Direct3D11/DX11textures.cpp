@@ -235,11 +235,6 @@ bool texture_mipmapping_supported()
 
 }
 
-void texture_mipmapping_generate(int texid)
-{
-
-}
-
 bool texture_anisotropy_supported()
 {
 
