@@ -78,7 +78,7 @@ namespace enigma
 
     iterator::iterator(inst_iter*_it, bool tmp): it(_it), temp(tmp) { addme(); }
     iterator::iterator(const iterator&other): it(other.it?new inst_iter(*other.it):NULL), temp(true) { addme(); }
-    iterator::iterator(iterator&other): it(other.it), temp(other.temp) { other.temp = NULL; }
+    iterator::iterator(iterator&other): it(other.it), temp(other.temp) { other.temp = false; }
     iterator::iterator(object_basic*ob): it(new inst_iter(ob,NULL,NULL)), temp(true) { }
     iterator::iterator(): it(NULL), temp(true) { }
     iterator:: ~iterator() {

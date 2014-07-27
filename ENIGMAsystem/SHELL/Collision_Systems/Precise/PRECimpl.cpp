@@ -26,6 +26,7 @@
 
 #include "PRECimpl.h"
 #include <cmath>
+#include <utility>
 
 static inline void get_border(int *leftv, int *rightv, int *topv, int *bottomv, int left, int top, int right, int bottom, double x, double y, double xscale, double yscale, double angle)
 {
@@ -399,9 +400,9 @@ enigma::object_collisions* const collide_inst_inst(int object, bool solid_only, 
 enigma::object_collisions* const collide_inst_rect(int object, bool solid_only, bool prec, bool notme, int x1, int y1, int x2, int y2)
 {
     if (x1 > x2)
-        x1 ^= (x2 ^= (x1 ^= x2));
+        std::swap(x1, x2);
     if (y1 > y2)
-        y1 ^= (y2 ^= (y1 ^= y2));
+        std::swap(y1, y2);
 
     for (enigma::iterator it = enigma::fetch_inst_iter_by_int(object); it; ++it)
     {

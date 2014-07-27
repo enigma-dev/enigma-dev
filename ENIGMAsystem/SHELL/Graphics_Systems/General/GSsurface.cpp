@@ -15,11 +15,11 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-using namespace std;
 #include <cstddef>
 #include <iostream>
 #include <math.h>
 
+using namespace std;
 
 #include <stdio.h> //for file writing (surface_save)
 #include "Universal_System/nlpo2.h"

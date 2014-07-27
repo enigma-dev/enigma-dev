@@ -289,7 +289,7 @@ int sound_add(string fname, int kind, bool preload) //At the moment, the latter 
   // Decode sound
   int rid = enigma::sound_allocate();
   bool fail = enigma::sound_add_from_buffer(rid,fdata,flen);
-  delete fdata;
+  delete [] fdata;
 
   if (fail)
     return -1;
@@ -325,7 +325,7 @@ bool sound_replace(int sound, string fname, int kind, bool preload)
   
   // Decode sound
   bool fail = enigma::sound_add_from_buffer(sound,fdata,flen);
-  delete fdata;
+  delete [] fdata;
   return fail;
 }
 

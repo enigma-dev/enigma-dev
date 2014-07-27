@@ -122,10 +122,10 @@ int audio_play_sound(int sound, double priority, bool loop)
     alSourcef(sound_channels[src]->source, AL_GAIN, snd->volume);
     sound_channels[src]->priority = priority;
     sound_channels[src]->soundIndex = sound;
-    !(snd->idle = !(snd->playing = !snd->stream ?
+    snd->idle = !(snd->playing = !snd->stream ?
       alurePlaySource(sound_channels[src]->source, enigma::eos_callback, (void*)(ptrdiff_t)sound) != AL_FALSE :
       alurePlaySourceStream(sound_channels[src]->source, snd->stream, 3, -1, enigma::eos_callback,
-        (void*)(ptrdiff_t)sound) != AL_FALSE));
+        (void*)(ptrdiff_t)sound) != AL_FALSE);
     return src + 200000;
   } else {
     return -1;
@@ -147,10 +147,10 @@ int audio_play_sound_at(int sound, as_scalar x, as_scalar y, as_scalar z, as_sca
     alSourcef(sound_channels[src]->source, AL_GAIN, snd->volume);
     sound_channels[src]->priority = priority;
     sound_channels[src]->soundIndex = sound;
-    !(snd->idle = !(snd->playing = !snd->stream ?
+    snd->idle = !(snd->playing = !snd->stream ?
       alurePlaySource(sound_channels[src]->source, enigma::eos_callback, (void*)(ptrdiff_t)sound) != AL_FALSE :
       alurePlaySourceStream(sound_channels[src]->source, snd->stream, 3, -1, enigma::eos_callback,
-        (void*)(ptrdiff_t)sound) != AL_FALSE));
+        (void*)(ptrdiff_t)sound) != AL_FALSE);
     return src + 200000;
   } else {
     return -1;
@@ -344,7 +344,7 @@ int audio_add(string fname)
   // Decode sound
   int rid = enigma::sound_allocate();
   bool fail = enigma::sound_add_from_buffer(rid,fdata,flen);
-  delete fdata;
+  delete [] fdata;
   
   if (fail)
     return -1;
