@@ -80,7 +80,6 @@ void texture_set_lod_ext(int sampler, gs_scalar minlod, gs_scalar maxlod, int ma
 #define texture_set_lod(minlod, maxlod, maxlevel) texture_set_lod_ext(0, minlod, maxlod, maxlevel)
 
 bool texture_mipmapping_supported();
-void texture_mipmapping_generate(int texid);
 bool  texture_anisotropy_supported();
 float texture_anisotropy_maxlevel();
 void  texture_anisotropy_filter(int samplerid, gs_scalar level);
