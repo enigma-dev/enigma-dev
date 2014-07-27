@@ -545,14 +545,15 @@ void instance_deactivate_region(int rleft, int rtop, int rwidth, int rheight, bo
 }
 
 void instance_activate_region(int rleft, int rtop, int rwidth, int rheight, bool inside) {
-    for (std::map<int,enigma::inst_iter*>::iterator iter = enigma::instance_deactivated_list.begin();
-         iter != enigma::instance_deactivated_list.end();
-         ++iter) {
+    std::map<int,enigma::inst_iter*>::iterator iter = enigma::instance_deactivated_list.begin();
+    while (iter != enigma::instance_deactivated_list.end()) {
 
         enigma::object_collisions* const inst = ((enigma::object_collisions*)(iter->second->inst));
 
-        if (inst->sprite_index == -1 && (inst->mask_index == -1)) //no sprite/mask then no collision
+        if (inst->sprite_index == -1 && (inst->mask_index == -1)) {//no sprite/mask then no collision
+            ++iter;
             continue;
+        }
 
         const bbox_rect_t &box = inst->$bbox_relative();
         const double x = inst->x, y = inst->y,
@@ -564,7 +565,9 @@ void instance_activate_region(int rleft, int rtop, int rwidth, int rheight, bool
 
         if ((left <= (rleft+rwidth) && rleft <= right && top <= (rtop+rheight) && rtop <= bottom) == inside) {
             inst->activate();
-            enigma::instance_deactivated_list.erase(iter);
+            enigma::instance_deactivated_list.erase(iter++);
+        } else {
+            ++iter;
         }
     }
 }
