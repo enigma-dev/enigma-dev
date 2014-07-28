@@ -120,6 +120,7 @@ namespace enigma
         glsl_program_attach(prog_id, fshader_id);
         glsl_program_link(prog_id);
         glsl_program_validate(prog_id);
+		glsl_program_set_name(prog_id, "DEFAULT_SHADER");
 
         getUniforms(prog_id);
         getAttributes(prog_id);
@@ -134,25 +135,5 @@ namespace enigma
         
         graphics_initialize_samplers();
     }
-}
-
-namespace enigma_user {
-// Stolen entirely from the documentation and thrown into a switch() structure.
-string draw_get_graphics_error()
-{
-  GLenum err = glGetError();
-  switch (err)
-  {
-    case GL_NO_ERROR:         return "";
-    case GL_INVALID_ENUM:     return "An unacceptable value is specified for an enumerated argument. The offending command is ignored and has no other side effect than to set the error flag.";
-    case GL_INVALID_VALUE:    return "A numeric argument is out of range. The offending command is ignored and has no other side effect than to set the error flag.";
-    case GL_INVALID_OPERATION:return "The specified operation is not allowed in the current state. The offending command is ignored and has no other side effect than to set the error flag.";
-    case GL_STACK_OVERFLOW:   return "This command would cause a stack overflow. The offending command is ignored and has no other side effect than to set the error flag.";
-    case GL_STACK_UNDERFLOW:  return "This command would cause a stack underflow. The offending command is ignored and has no other side effect than to set the error flag.";
-    case GL_OUT_OF_MEMORY:    return "There is not enough memory left to execute the command. The state of the GL is undefined, except for the state of the error flags, after this error is recorded.";
-    //case GL_TABLE_TOO_LARGE:  return "The specified table exceeds the implementation's maximum supported table size. The offending command is ignored and has no other side effect than to set the error flag.";
-  }
-  return "Unspecified error.";
-}
 }
 
