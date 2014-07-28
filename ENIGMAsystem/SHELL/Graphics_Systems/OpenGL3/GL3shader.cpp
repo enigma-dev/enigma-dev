@@ -214,7 +214,7 @@ namespace enigma
 
                 "void main()\n"
                 "{\n"
-                    "vec4 iColor = vec4(1.0);\n"
+                    "vec4 iColor = vec4(1.0,1.0,1.0,1.0);\n"
                     "if (en_ColorEnabled == true){\n"
                         "iColor = in_Color;\n"
 					"}\n"
@@ -251,7 +251,7 @@ namespace enigma
         int uniform_count, max_length, uniform_count_arr = 0;
         glGetProgramiv(enigma::shaderprograms[prog_id]->shaderprogram, GL_ACTIVE_UNIFORMS, &uniform_count);
         glGetProgramiv(enigma::shaderprograms[prog_id]->shaderprogram, GL_ACTIVE_UNIFORM_MAX_LENGTH, &max_length);
-        for (int i = 0; i < uniform_count; ++i)
+		for (int i = 0; i < uniform_count; ++i)
         {
             Uniform uniform;
             char uniformName[max_length];
@@ -292,7 +292,7 @@ namespace enigma
         int attribute_count, max_length, attribute_count_arr = 0;
         glGetProgramiv(enigma::shaderprograms[prog_id]->shaderprogram, GL_ACTIVE_ATTRIBUTES, &attribute_count);
         glGetProgramiv(enigma::shaderprograms[prog_id]->shaderprogram, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, &max_length);
-        for (int i = 0; i < attribute_count; ++i)
+		for (int i = 0; i < attribute_count; ++i)
         {
             Attribute attribute;
             char attributeName[max_length];
@@ -460,6 +460,7 @@ void glsl_program_print_infolog(int id)
     GLint blen = 0;
     GLsizei slen = 0;
     glGetProgramiv(enigma::shaderprograms[id]->shaderprogram, GL_INFO_LOG_LENGTH , &blen);
+
     if (blen > 1)
     {
         GLchar* compiler_log = (GLchar*)malloc(blen);
@@ -510,8 +511,8 @@ bool glsl_shader_compile(int id)
     glCompileShader(enigma::shaders[id]->shader);
 
     GLint compiled;
-    glGetProgramiv(enigma::shaders[id]->shader, GL_COMPILE_STATUS, &compiled);
-    if (compiled){
+    glGetShaderiv(enigma::shaders[id]->shader, GL_COMPILE_STATUS, &compiled);
+	if (compiled){
         return true;
     } else {
         std::cout << "Shader[" << id << "] " << (enigma::shaders[id]->type == sh_vertex?"Vertex shader":"Pixel shader") << " - Compilation failed - Info log: " << std::endl;
@@ -522,8 +523,8 @@ bool glsl_shader_compile(int id)
 
 bool glsl_shader_get_compiled(int id) {
     GLint compiled;
-    glGetProgramiv(enigma::shaders[id]->shader, GL_COMPILE_STATUS, &compiled);
-    if (compiled){
+    glGetShaderiv(enigma::shaders[id]->shader, GL_COMPILE_STATUS, &compiled);
+	if (compiled){
         return true;
     } else {
         return false;
@@ -557,7 +558,8 @@ bool glsl_program_link(int id)
     glLinkProgram(enigma::shaderprograms[id]->shaderprogram);
     GLint linked;
     glGetProgramiv(enigma::shaderprograms[id]->shaderprogram, GL_LINK_STATUS, &linked);
-    if (linked){
+
+	if (linked){
         enigma::getUniforms(id);
         enigma::getAttributes(id);
         enigma::getDefaultUniforms(id);
@@ -575,7 +577,8 @@ bool glsl_program_validate(int id)
     glValidateProgram(enigma::shaderprograms[id]->shaderprogram);
     GLint validated;
     glGetProgramiv(enigma::shaderprograms[id]->shaderprogram, GL_VALIDATE_STATUS, &validated);
-    if (validated){
+
+	if (validated){
         return true;
     } else {
         std::cout << "Shader program[" << id << "] - Validation failed - Info log: " << std::endl;
@@ -866,7 +869,7 @@ void glsl_uniform4uiv(int location, int size, const unsigned int *value){
 
 ////////////////////////MATRIX FUNCTIONS FOR FLOAT UNIFORMS/////////////////
 void glsl_uniform_matrix2fv(int location, int size, const float *matrix){
-    get_uniform(it,location,2);
+    get_uniform(it,location,4);
     if (std::equal(it->second.data.begin(), it->second.data.end(), matrix, enigma::UATypeFComp) == false){
         glUniformMatrix2fv(location, size, true, matrix);
         memcpy(&it->second.data[0], &matrix[0], it->second.data.size() * sizeof(enigma::UAType));
@@ -874,7 +877,7 @@ void glsl_uniform_matrix2fv(int location, int size, const float *matrix){
 }
 
 void glsl_uniform_matrix3fv(int location, int size, const float *matrix){
-    get_uniform(it,location,3);
+    get_uniform(it,location,9);
     if (std::equal(it->second.data.begin(), it->second.data.end(), matrix, enigma::UATypeFComp) == false){
         glUniformMatrix3fv(location, size, true, matrix);
         memcpy(&it->second.data[0], &matrix[0], it->second.data.size() * sizeof(enigma::UAType));
@@ -882,7 +885,7 @@ void glsl_uniform_matrix3fv(int location, int size, const float *matrix){
 }
 
 void glsl_uniform_matrix4fv(int location, int size, const float *matrix){
-    get_uniform(it,location,4);
+    get_uniform(it,location,16);
     if (std::equal(it->second.data.begin(), it->second.data.end(), matrix, enigma::UATypeFComp) == false){
         glUniformMatrix4fv(location, size, true, matrix);
         memcpy(&it->second.data[0], &matrix[0], it->second.data.size() * sizeof(enigma::UAType));

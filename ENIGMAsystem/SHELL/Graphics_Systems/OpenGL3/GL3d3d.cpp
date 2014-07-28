@@ -60,8 +60,8 @@ GLenum fillmodes[3] = {
   GL_POINT, GL_LINE, GL_FILL
 };
 
-GLenum cullingstates[3] = {
-  0, GL_CW, GL_CCW
+GLenum cullingstates[2] = {
+  GL_CCW, GL_CW
 };
 
 namespace enigma_user
@@ -148,35 +148,30 @@ void d3d_set_fog_enabled(bool enable)
 
 void d3d_set_fog_mode(int mode)
 {
-  glFogi(GL_FOG_MODE, fogmodes[mode]);
 }
 
 void d3d_set_fog_hint(int mode) {
-  glHint(GL_FOG_HINT, mode);
+
 }
 
 void d3d_set_fog_color(int color)
 {
-   GLfloat fog_color[3];
-   fog_color[0] = __GETR(color);
-   fog_color[1] = __GETG(color);
-   fog_color[2] = __GETB(color);
-   glFogfv(GL_FOG_COLOR, fog_color);
+
 }
 
 void d3d_set_fog_start(double start)
 {
-  glFogf(GL_FOG_START, start);
+
 }
 
 void d3d_set_fog_end(double end)
 {
-  glFogf(GL_FOG_END, end);
+
 }
 
 void d3d_set_fog_density(double density)
 {
-  glFogf(GL_FOG_DENSITY, density);
+
 }
 
 void d3d_set_culling(int mode)
