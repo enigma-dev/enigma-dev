@@ -16,16 +16,15 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <stdio.h>
 #include "../General/OpenGLHeaders.h"
 #include <string.h>
-//using std::string;
 #include "../General/GStextures.h"
 #include "../General/GLTextureStruct.h"
 #include "Universal_System/backgroundstruct.h"
 #include "Universal_System/spritestruct.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Bridges/General/GL3Context.h"
+#include "GL3aux.h" //glExtension_supported
 
 #define GL_TEXTURE_MAX_ANISOTROPY_EXT 0x84FE
 #define GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT 0x84FF
@@ -322,8 +321,7 @@ void texture_mipmapping_generate(int texid, int levels)
 
 bool  texture_anisotropy_supported()
 {
-  return strstr((char*)glGetString(GL_EXTENSIONS),
-           "GL_EXT_texture_filter_anisotropic");
+  return enigma::gl_extension_supported("GL_EXT_texture_filter_anisotropic");
 }
 
 float texture_anisotropy_maxlevel()
@@ -341,8 +339,7 @@ void  texture_anisotropy_filter(int texid, gs_scalar levels)
 
 bool  texture_multitexture_supported()
 {
-  return strstr((char*)glGetString(GL_EXTENSIONS),
-           "GL_ARB_multitexture");
+  return enigma::gl_extension_supported("GL_ARB_multitexture");
 }
 
 void texture_multitexture_enable(bool enable)
