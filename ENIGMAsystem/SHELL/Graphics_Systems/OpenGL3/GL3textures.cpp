@@ -15,10 +15,9 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
-#include <stdio.h>
+
 #include "../General/OpenGLHeaders.h"
 #include <string.h>
-//using std::string;
 #include "../General/GStextures.h"
 #include "GL3TextureStruct.h"
 #include "Universal_System/image_formats.h"
@@ -26,6 +25,7 @@
 #include "Universal_System/spritestruct.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Bridges/General/GL3Context.h"
+#include "GL3aux.h" //glExtension_supported
 
 #define GL_TEXTURE_MAX_ANISOTROPY_EXT 0x84FE
 #define GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT 0x84FF
@@ -334,8 +334,7 @@ bool texture_mipmapping_supported()
 
 bool texture_anisotropy_supported()
 {
-  return strstr((char*)glGetString(GL_EXTENSIONS),
-           "GL_EXT_texture_filter_anisotropic");
+  return enigma::gl_extension_supported("GL_EXT_texture_filter_anisotropic");
 }
 
 float texture_anisotropy_maxlevel()
@@ -350,4 +349,7 @@ void  texture_anisotropy_filter(int sampler, gs_scalar levels)
   glSamplerParameterf(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_MAX_ANISOTROPY_EXT, levels);
 }
 
+bool  texture_multitexture_supported()
+{
+  return enigma::gl_extension_supported("GL_ARB_multitexture");
 }
