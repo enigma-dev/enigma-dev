@@ -32,10 +32,6 @@ namespace enigma {
 // ***** RENDER STATE CONSTANTS *****
 namespace enigma_user {
 enum {
-  rs_front,
-  rs_back,
-  rs_front_back,
-
   rs_nicest,
   rs_fastest,
   rs_dontcare,
@@ -67,6 +63,12 @@ enum {
 };
 
 enum {
+  rs_front,
+  rs_back,
+  rs_front_back
+};
+
+enum {
   rs_point, // Render vertices as points
   rs_line,  // Render in wireframe mode
   rs_solid  // Normal render mode
@@ -87,7 +89,10 @@ void d3d_set_zwriteenable(bool enable);
 void d3d_set_lighting(bool enable);
 
 void d3d_set_software_vertex_processing(bool software);
-void d3d_set_culling(int mode);
+void d3d_set_culling(bool mode);
+void d3d_set_culling_mode(int mode);
+void d3d_set_front_face(int mode);
+
 void d3d_set_fill_mode(int fill);
 void d3d_set_line_width(float value);
 void d3d_set_point_size(float value);
