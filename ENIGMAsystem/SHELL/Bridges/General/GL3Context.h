@@ -20,7 +20,7 @@
 
 #include "Graphics_Systems/General/OpenGLHeaders.h"
 #include "Graphics_Systems/General/GSmodel.h"
-using namespace enigma_user;
+#include "Graphics_Systems/OpenGL3/GL3profiler.h"
 
 #include <vector>
 #include <map>
@@ -41,6 +41,7 @@ int last_stride;
 bool hasdrawn;
 int shapes_d3d_model;
 int shapes_d3d_texture;
+enigma::GPUProfiler gpuprof;
 
 ContextManager() {
 	hasdrawn = false;
@@ -85,16 +86,16 @@ void RestoreState() {
 
 void BeginShapesBatching(int texId) {
 	if (shapes_d3d_model == -1) {
-		shapes_d3d_model = d3d_model_create(model_dynamic);
+		shapes_d3d_model = enigma_user::d3d_model_create(enigma_user::model_dynamic);
 		last_stride = -1;
-	} else if (texId != shapes_d3d_texture || (d3d_model_get_stride(shapes_d3d_model) != last_stride && last_stride != -1)) {
+	} else if (texId != shapes_d3d_texture || (enigma_user::d3d_model_get_stride(shapes_d3d_model) != last_stride && last_stride != -1)) {
 		last_stride = -1;
 		if (!hasdrawn) {
-			d3d_model_draw(shapes_d3d_model, shapes_d3d_texture);
-			d3d_model_clear(shapes_d3d_model);
+			enigma_user::d3d_model_draw(shapes_d3d_model, shapes_d3d_texture);
+			enigma_user::d3d_model_clear(shapes_d3d_model);
 		}
 	} else {
-		last_stride = d3d_model_get_stride(shapes_d3d_model);
+		last_stride = enigma_user::d3d_model_get_stride(shapes_d3d_model);
 	}
 	hasdrawn = false;
 	shapes_d3d_texture = texId;
@@ -104,8 +105,8 @@ void EndShapesBatching() {
 	last_depth -= 1;
 	if (hasdrawn || shapes_d3d_model == -1) { return; }
 	hasdrawn = true;
-	d3d_model_draw(shapes_d3d_model, shapes_d3d_texture);
-	d3d_model_clear(shapes_d3d_model);
+	enigma_user::d3d_model_draw(shapes_d3d_model, shapes_d3d_texture);
+	enigma_user::d3d_model_clear(shapes_d3d_model);
 
 	shapes_d3d_texture = -1;
 	last_stride = -1;
@@ -113,6 +114,7 @@ void EndShapesBatching() {
 
 void BeginScene() {
 	last_depth = 0;
+	gpuprof.reset_frame();
 	// Reapply the stored render states and what not
 	RestoreState();
 }
@@ -178,7 +180,7 @@ void BlendFunc() { //Used when calling blend functions
 
 void ColorFunc() { //Used when calling color functions
 	if (shapes_d3d_model != -1){
-		if (d3d_model_has_color(shapes_d3d_model) == false){
+		if (enigma_user::d3d_model_has_color(shapes_d3d_model) == false){
 			EndShapesBatching();
 		}
 	}
@@ -188,7 +190,7 @@ void Lighting() { //Used when lighting is enabled/disabled
 	EndShapesBatching();
 }
 
-GLuint GetBoundTexture() { //This is used for cases when there are texture coordintates provided, but texture is 0 (like d3d_model_block)
+GLuint GetBoundTexture() { //This is used for cases when there are texture coordinates provided, but texture is 0 (like d3d_model_block)
 	return bound_tex;
 }
 

@@ -63,8 +63,8 @@ enum {
 };
 
 enum {
-  rs_front,
   rs_back,
+  rs_front,
   rs_front_back
 };
 

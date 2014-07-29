@@ -213,9 +213,9 @@ class Mesh
     indices.reserve(64000);
 
     switch (type){
-      case model_static: vbotype = GL_STATIC_DRAW; break;
-      case model_dynamic: vbotype = GL_DYNAMIC_DRAW; break;
-      case model_stream: vbotype = GL_STREAM_DRAW; break;
+        case enigma_user::model_static: vbotype = GL_STATIC_DRAW; break;
+        case enigma_user::model_dynamic: vbotype = GL_DYNAMIC_DRAW; break;
+        case enigma_user::model_stream: vbotype = GL_STREAM_DRAW; break;
     }
 
     ibogenerated = false;
@@ -574,15 +574,15 @@ class Mesh
     }
 
     //Send transposed (done by GL because of "true" in the function below) matrices to shader
-    glsl_uniform_matrix4fv(enigma::shaderprograms[enigma::bound_shader]->uni_viewMatrix,  1, enigma::view_matrix);
-    glsl_uniform_matrix4fv(enigma::shaderprograms[enigma::bound_shader]->uni_projectionMatrix,  1, enigma::projection_matrix);
-    glsl_uniform_matrix4fv(enigma::shaderprograms[enigma::bound_shader]->uni_modelMatrix,  1, enigma::model_matrix);
-    glsl_uniform_matrix4fv(enigma::shaderprograms[enigma::bound_shader]->uni_mvMatrix,  1, enigma::mv_matrix);
-    glsl_uniform_matrix4fv(enigma::shaderprograms[enigma::bound_shader]->uni_mvpMatrix,  1, enigma::mvp_matrix);
-    glsl_uniform_matrix3fv(enigma::shaderprograms[enigma::bound_shader]->uni_normalMatrix,  1, enigma::normal_matrix);
+    enigma_user::glsl_uniform_matrix4fv(enigma::shaderprograms[enigma::bound_shader]->uni_viewMatrix,  1, enigma::view_matrix);
+    enigma_user::glsl_uniform_matrix4fv(enigma::shaderprograms[enigma::bound_shader]->uni_projectionMatrix,  1, enigma::projection_matrix);
+    enigma_user::glsl_uniform_matrix4fv(enigma::shaderprograms[enigma::bound_shader]->uni_modelMatrix,  1, enigma::model_matrix);
+    enigma_user::glsl_uniform_matrix4fv(enigma::shaderprograms[enigma::bound_shader]->uni_mvMatrix,  1, enigma::mv_matrix);
+    enigma_user::glsl_uniform_matrix4fv(enigma::shaderprograms[enigma::bound_shader]->uni_mvpMatrix,  1, enigma::mvp_matrix);
+    enigma_user::glsl_uniform_matrix3fv(enigma::shaderprograms[enigma::bound_shader]->uni_normalMatrix,  1, enigma::normal_matrix);
 
     //Bind texture
-    glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_texSampler, 0);
+    enigma_user::glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_texSampler, 0);
 
     GLsizei stride = GetStride();
 
@@ -596,85 +596,111 @@ class Mesh
     }
 
 	unsigned offset = 0;
-	glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_vertex,true);
-	glsl_attribute_set(enigma::shaderprograms[enigma::bound_shader]->att_vertex, vertexStride, GL_FLOAT, 0, STRIDE, offset);
-	//glVertexAttribPointer(enigma::shaderprograms[enigma::bound_shader]->att_vertex, vertexStride, GL_FLOAT, 0, STRIDE, OFFSET(offset));
+	enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_vertex,true);
+	enigma_user::glsl_attribute_set(enigma::shaderprograms[enigma::bound_shader]->att_vertex, vertexStride, GL_FLOAT, 0, STRIDE, offset);
 	offset += vertexStride;
 
     if (useNormals){
-        glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_normal, true);
-		glsl_attribute_set(enigma::shaderprograms[enigma::bound_shader]->att_normal, 3, GL_FLOAT, 0, STRIDE, offset);
-		//glVertexAttribPointer(enigma::shaderprograms[enigma::bound_shader]->att_normal, 3, GL_FLOAT, 0, STRIDE, OFFSET(offset));
+        enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_normal, true);
+		enigma_user::glsl_attribute_set(enigma::shaderprograms[enigma::bound_shader]->att_normal, 3, GL_FLOAT, 0, STRIDE, offset);
 		offset += 3;
     }else{
-        glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_normal, false);
+        enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_normal, false);
     }
 
-    glsl_uniformf( enigma::shaderprograms[enigma::bound_shader]->uni_color, (float)enigma::currentcolor[0]/255.0f, (float)enigma::currentcolor[1]/255.0f, (float)enigma::currentcolor[2]/255.0f, (float)enigma::currentcolor[3]/255.0f );
+    enigma_user::glsl_uniformf( enigma::shaderprograms[enigma::bound_shader]->uni_color, (float)enigma::currentcolor[0]/255.0f, (float)enigma::currentcolor[1]/255.0f, (float)enigma::currentcolor[2]/255.0f, (float)enigma::currentcolor[3]/255.0f );
 
     if (useTextures){
          //This part sucks, but is required because models can be drawn without textures even if coordinates are provided
          //like in the case of d3d_model_block
         if (oglmgr->GetBoundTexture() != 0){
-            glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_texture, true);
-			glsl_attribute_set(enigma::shaderprograms[enigma::bound_shader]->att_texture, 2, GL_FLOAT, 0, STRIDE, offset);
-            //glVertexAttribPointer(enigma::shaderprograms[enigma::bound_shader]->att_texture, 2, GL_FLOAT, 0, STRIDE, OFFSET(offset));
-            glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_textureEnable, 1);
+            enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_texture, true);
+			enigma_user::glsl_attribute_set(enigma::shaderprograms[enigma::bound_shader]->att_texture, 2, GL_FLOAT, 0, STRIDE, offset);
+            enigma_user::glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_textureEnable, 1);
         }else{
-            glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_textureEnable, 0);
-            glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_texture, false);
+            enigma_user::glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_textureEnable, 0);
+            enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_texture, false);
         }
 		offset += 2;
 	}else{
-        glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_textureEnable, 0);
-        glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_texture, false);
+        enigma_user::glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_textureEnable, 0);
+        enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_texture, false);
 	}
 
     if (useColors){
-		glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_colorEnable,1);
-        glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_color, true);
-		glsl_attribute_set(enigma::shaderprograms[enigma::bound_shader]->att_color, 4, GL_UNSIGNED_BYTE, true, STRIDE, offset);
-        //glVertexAttribPointer(enigma::shaderprograms[enigma::bound_shader]->att_color, 4, GL_UNSIGNED_BYTE, GL_TRUE, STRIDE, OFFSET(offset)); //Normalization needs to be true, because we pack them as unsigned bytes
+		enigma_user::glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_colorEnable,1);
+        enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_color, true);
+		enigma_user::glsl_attribute_set(enigma::shaderprograms[enigma::bound_shader]->att_color, 4, GL_UNSIGNED_BYTE, true, STRIDE, offset);
 	}else{
-		glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_colorEnable,0);
-		glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_color, false);
+		enigma_user::glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_colorEnable,0);
+		enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_color, false);
 	}
 
     #define OFFSETE( P )  ( ( const GLvoid * ) ( sizeof( GLuint ) * ( P         ) ) )
     offset = vertex_start;
 
-    // Draw the indexed primitives
-    if (triangleIndexedCount > 0) {
-      glDrawElements(GL_TRIANGLES, (vertex_count==-1?triangleIndexedCount:vertex_count), GL_UNSIGNED_INT, OFFSETE(offset));
-      offset += triangleIndexedCount;
-    }
-    if (lineIndexedCount > 0) {
-      glDrawElements(GL_LINES, lineIndexedCount, GL_UNSIGNED_INT, OFFSETE(offset));
-      offset += lineIndexedCount;
-    }
-    if (pointIndexedCount > 0) {
-      glDrawElements(GL_POINTS, pointIndexedCount, GL_UNSIGNED_INT, OFFSETE(offset));
-    }
+	// Draw the indexed primitives
+	if (triangleIndexedCount > 0) {
+		#ifdef DEBUG_MODE
+		oglmgr->gpuprof.drawn_drawcall_number+=1;
+		oglmgr->gpuprof.drawn_vertex_number+=(vertex_count==-1?triangleIndexedCount:vertex_count);
+		#endif
+		
+		glDrawElements(GL_TRIANGLES, (vertex_count==-1?triangleIndexedCount:vertex_count), GL_UNSIGNED_INT, OFFSETE(offset));
+		offset += triangleIndexedCount;
+	}
+	if (lineIndexedCount > 0) {
+		#ifdef DEBUG_MODE
+		oglmgr->gpuprof.drawn_drawcall_number+=1;
+		oglmgr->gpuprof.drawn_vertex_number+=lineIndexedCount;
+		#endif
+		
+		glDrawElements(GL_LINES, lineIndexedCount, GL_UNSIGNED_INT, OFFSETE(offset));
+		offset += lineIndexedCount;
+	}
+	if (pointIndexedCount > 0) {
+		#ifdef DEBUG_MODE
+		oglmgr->gpuprof.drawn_drawcall_number+=1;
+		oglmgr->gpuprof.drawn_vertex_number+=pointIndexedCount;
+		#endif
+	
+		glDrawElements(GL_POINTS, pointIndexedCount, GL_UNSIGNED_INT, OFFSETE(offset));
+	}
 
     offset = indexedoffset/stride;
 
-    // Draw the unindexed primitives
-    if (triangleCount > 0) {
-      glDrawArrays(GL_TRIANGLES, (vertex_start==0?offset:vertex_start), (vertex_count==-1?triangleCount:vertex_count));
-      offset += triangleCount;
-    }
-    if (lineCount > 0) {
-      glDrawArrays(GL_LINES, offset, lineCount);
-      offset += lineCount;
-    }
-    if (pointCount > 0) {
-      glDrawArrays(GL_POINTS, offset, pointCount);
-    }
+	// Draw the unindexed primitives
+	if (triangleCount > 0) {
+		#ifdef DEBUG_MODE
+		oglmgr->gpuprof.drawn_drawcall_number+=1;
+		oglmgr->gpuprof.drawn_vertex_number+=(vertex_count==-1?triangleCount:vertex_count);
+		#endif
+	
+		glDrawArrays(GL_TRIANGLES, (vertex_start==0?offset:vertex_start), (vertex_count==-1?triangleCount:vertex_count));
+		offset += triangleCount;
+	}
+	if (lineCount > 0) {
+		#ifdef DEBUG_MODE
+		oglmgr->gpuprof.drawn_drawcall_number+=1;
+		oglmgr->gpuprof.drawn_vertex_number+=lineCount;
+		#endif
+	
+		glDrawArrays(GL_LINES, offset, lineCount);
+		offset += lineCount;
+	}
+	if (pointCount > 0) {
+		#ifdef DEBUG_MODE
+		oglmgr->gpuprof.drawn_drawcall_number+=1;
+		oglmgr->gpuprof.drawn_vertex_number+=pointCount;
+		#endif
+	
+		glDrawArrays(GL_POINTS, offset, pointCount);
+	}
 
-    glBindBuffer( GL_ARRAY_BUFFER, 0 );
-    if (vboindexed) {
-      glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
-    }
+	/*glBindBuffer( GL_ARRAY_BUFFER, 0 );
+	if (vboindexed) {
+		glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
+	}*/
 
     //glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_vertex,false);
   }
