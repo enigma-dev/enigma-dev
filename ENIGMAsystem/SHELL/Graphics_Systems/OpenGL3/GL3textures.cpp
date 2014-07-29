@@ -73,21 +73,18 @@ namespace enigma
     GLuint texture;
     glGenTextures(1, &texture);
     oglmgr->BindTexture(GL_TEXTURE_2D, texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, 4, fullwidth, fullheight, 0, GL_BGRA, GL_UNSIGNED_BYTE, pxdata);
-    if (mipmap) {
-      // This allows us to control the number of mipmaps generated, but Direct3D does not have an option for it, so for now we'll just go with the defaults.
-      // Honestly not a big deal, Unity3D doesn't allow you to specify either.
-      //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
-      //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 3);
-      glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    oglmgr->BindTexture(GL_TEXTURE_2D, 0);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, fullwidth, fullheight, 0, GL_BGRA, GL_UNSIGNED_BYTE, pxdata);
+	bool interpolate = (interpolate_textures && !isfont);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,interpolate?GL_LINEAR:GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,interpolate?GL_LINEAR:GL_NEAREST);
+    oglmgr->ResetTextureStates();
 
-    TextureStruct* textureStruct = new TextureStruct(texture);
-    textureStruct->width = width;
-    textureStruct->height = height;
-    textureStruct->fullwidth = fullwidth;
-    textureStruct->fullheight = fullheight;
+	TextureStruct* textureStruct = new TextureStruct(texture);
+	textureStruct->isFont = isfont;
+	textureStruct->width = width;
+	textureStruct->height = height;
+	textureStruct->fullwidth = fullwidth;
+	textureStruct->fullheight = fullheight;
     textureStructs.push_back(textureStruct);
     return textureStructs.size()-1;
   }
@@ -131,9 +128,11 @@ namespace enigma
         bitmap[i] = (bitmap2[i-3] + bitmap2[i-2] + bitmap2[i-1])/3;
 
     oglmgr->BindTexture(GL_TEXTURE_2D, texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, 4, fw, fh, 0, GL_BGRA, GL_UNSIGNED_BYTE, bitmap);
-
-    oglmgr->BindTexture(GL_TEXTURE_2D, 0);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, fw, fh, 0, GL_BGRA, GL_UNSIGNED_BYTE, bitmap);
+	bool interpolate = (interpolate_textures && !textureStructs[tex]->isFont);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,interpolate?GL_LINEAR:GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,interpolate?GL_LINEAR:GL_NEAREST);
+    oglmgr->ResetTextureStates();
 
     delete[] bitmap;
     delete[] bitmap2;

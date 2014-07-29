@@ -15,13 +15,16 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include <stdio.h>
 #include <math.h>
+
 #include "../General/OpenGLHeaders.h"
 #include "../General/GSstdraw.h"
 #include "../General/GStextures.h"
-#include <stdio.h>
 #include "Universal_System/roomsystem.h"
 #include "Bridges/General/GL3Context.h"
+#include "GLSLshader.h"
+#include "GL3shader.h"
 
 #define __GETR(x) ((x & 0x0000FF))
 #define __GETG(x) ((x & 0x00FF00) >> 8)
@@ -29,6 +32,8 @@
 
 namespace enigma {
   extern unsigned char currentcolor[4];
+  extern unsigned bound_shader;
+  extern vector<enigma::ShaderProgram*> shaderprograms;
 }
 
 namespace enigma_user

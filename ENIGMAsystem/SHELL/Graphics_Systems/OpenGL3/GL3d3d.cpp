@@ -77,10 +77,6 @@ void d3d_depth_clear_value(float value) {
 
 void d3d_start()
 {
-  // Set global ambient lighting to nothing.
-  float global_ambient[] = { 0.0f, 0.0f, 0.0f, 0.0f };
-  glLightModelfv(GL_LIGHT_MODEL_AMBIENT, global_ambient);
-
   // Enable depth buffering
   enigma::d3dMode = true;
   enigma::d3dHidden = true;
@@ -278,7 +274,8 @@ struct material3D {
 
     material3D()
     {
-        ambient[0] = 0.2, ambient[1] = 0.2, ambient[2] = 0.2, ambient[3] = 1.0;
+        //ambient[0] = 0.2, ambient[1] = 0.2, ambient[2] = 0.2, ambient[3] = 1.0; //This is default in GL1.1
+	    ambient[0] = 0.0, ambient[1] = 0.0, ambient[2] = 0.0, ambient[3] = 1.0; //This is default in GM
         diffuse[0] = 0.8, diffuse[1] = 0.8, diffuse[2] = 0.8, diffuse[3] = 1.0;
         specular[0] = 0.0, specular[1] = 0.0, specular[2] = 0.0, specular[3] = 0.0;
         shininess = 0.0;

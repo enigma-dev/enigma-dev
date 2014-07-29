@@ -248,7 +248,7 @@ namespace enigma
                         "TexColor = en_BoundColor * v_Color;\n"
                     "}\n"
 					"if (en_AlphaTestEnabled == true){\n"
-						"if (TexColor<=en_AlphaTestValue) discard;"
+						"if (TexColor.a<=en_AlphaTestValue) discard;\n"
 					"}\n"
                     "out_FragColor = TexColor;\n"
                 "}\n";

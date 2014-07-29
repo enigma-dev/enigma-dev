@@ -569,6 +569,9 @@ class Mesh
     //If there is nothing to render, then there is no need for all the rest
     if (triangleIndexedCount == 0 && lineIndexedCount == 0 && pointIndexedCount == 0 && triangleCount == 0 && lineCount == 0 && pointCount == 0) return;
 
+	//printf("Calling draw with vertex stride = %i and vertexcount = %i, indexcount = %i!\n", vertexStride, triangleCount, triangleIndexedCount);
+	//printf("total stride = %i and color = %i, normals = %i, textures = %i\n",GetStride(),useColors,useNormals,useTextures);
+	
     if (enigma::transform_needs_update == true){
         enigma::transformation_update();
     }
@@ -595,7 +598,6 @@ class Mesh
       glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indexBuffer );
     }
 
-	//glEnableClientState(GL_VERTEX_ARRAY);
 	unsigned offset = 0;
 	glsl_enable_attribute(enigma::shaderprograms[enigma::bound_shader]->att_vertex,true);
 	glVertexAttribPointer(enigma::shaderprograms[enigma::bound_shader]->att_vertex, vertexStride, GL_FLOAT, 0, STRIDE, OFFSET(offset));
@@ -603,7 +605,6 @@ class Mesh
 
     if (useNormals){
         glsl_enable_attribute(enigma::shaderprograms[enigma::bound_shader]->att_normal, true);
-        //glEnableVertexAttribArray(enigma::shaderprograms[enigma::bound_shader]->att_normal);
 		glVertexAttribPointer(enigma::shaderprograms[enigma::bound_shader]->att_normal, 3, GL_FLOAT, 0, STRIDE, OFFSET(offset));
 		offset += 3;
     }else{
@@ -675,9 +676,6 @@ class Mesh
     }
 
     //glsl_enable_attribute(enigma::shaderprograms[enigma::bound_shader]->att_vertex,false);
-    //if (useTextures) glsl_enable_attribute(enigma::shaderprograms[enigma::bound_shader]->att_texture,false);
-    //if (useNormals) glsl_enable_attribute(enigma::shaderprograms[enigma::bound_shader]->att_normal,false);
-    //if (useColors) glsl_enable_attribute(enigma::shaderprograms[enigma::bound_shader]->att_color,false);
   }
 };
 
