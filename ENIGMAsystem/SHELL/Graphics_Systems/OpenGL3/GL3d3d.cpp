@@ -42,8 +42,7 @@ namespace enigma {
   extern vector<enigma::ShaderProgram*> shaderprograms;
 }
 
-GLenum renderstates[6] = {
-  GL_FRONT, GL_BACK, GL_FRONT_AND_BACK,
+GLenum renderstates[3] = {
   GL_NICEST, GL_FASTEST, GL_DONT_CARE
 };
 
@@ -60,8 +59,12 @@ GLenum fillmodes[3] = {
   GL_POINT, GL_LINE, GL_FILL
 };
 
-GLenum cullingstates[2] = {
+GLenum windingstates[2] = {
   GL_CCW, GL_CW
+};
+
+GLenum cullingstates[3] = {
+  GL_BACK, GL_FRONT, GL_FRONT_AND_BACK
 };
 
 namespace enigma_user
@@ -167,11 +170,20 @@ void d3d_set_fog_density(double density)
 
 }
 
-void d3d_set_culling(int mode)
+void d3d_set_culling(bool enable)
 {
-  enigma::d3dCulling = mode;
-  oglmgr->SetEnabled(GL_CULL_FACE, mode > 0);
-  glFrontFace(cullingstates[mode]);
+	enigma::d3dCulling = enable;
+	oglmgr->SetEnabled(GL_CULL_FACE, enable);
+}
+
+void d3d_set_culling_mode(int mode){
+	oglmgr->EndShapesBatching();
+	glCullFace(cullingstates[mode]);
+}
+
+void d3d_set_front_face(int mode){
+	oglmgr->EndShapesBatching();
+	glFrontFace(windingstates[mode]);
 }
 
 bool d3d_get_mode()
@@ -215,7 +227,7 @@ void d3d_set_depth(double dep)
 
 void d3d_set_shading(bool smooth)
 {
-    glShadeModel(smooth?GL_SMOOTH:GL_FLAT);
+
 }
 
 void d3d_set_clip_plane(bool enable)

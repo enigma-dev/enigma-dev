@@ -107,7 +107,8 @@ void glsl_uniform_matrix2fv(int location, int size, const float *matrix);
 void glsl_uniform_matrix3fv(int location, int size, const float *matrix);
 void glsl_uniform_matrix4fv(int location, int size, const float *matrix);
 
-void glsl_enable_attribute(int location, bool enable);
+void glsl_attribute_enable(int location, bool enable);
+void glsl_attribute_set(int location, int size, int type, bool normalize, int stride, int offset);
 
 // Wrap our abstracted version to the GameMaker version
 #define shader_set            glsl_program_set
