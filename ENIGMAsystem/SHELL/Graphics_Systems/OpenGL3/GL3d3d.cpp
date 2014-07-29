@@ -88,8 +88,7 @@ void d3d_start()
   enigma::d3dCulling = rs_none;
   glDepthMask(true);
   glEnable(GL_DEPTH_TEST);
-  glEnable(GL_ALPHA_TEST);
-  glAlphaFunc(GL_NOTEQUAL, 0);
+  //glAlphaFunc(GL_NOTEQUAL, 0); // Why was this needed? It's the same as glAlphaFunc(GL_GREATER, 0);
 
   // Set up projection matrix
   d3d_set_projection_perspective(0, 0, view_wview[view_current], view_hview[view_current], 0);
@@ -109,9 +108,7 @@ void d3d_end()
   enigma::d3dCulling = rs_none;
   glDepthMask(false);
   glDisable(GL_DEPTH_TEST);
-  glDisable(GL_ALPHA_TEST);
   d3d_set_projection_ortho(0, 0, view_wview[view_current], view_hview[view_current], 0); //This should probably be changed not to use views
-  //enigma::projection_matrix.InitIdentity();
 }
 
 // disabling hidden surface removal in means there is no depth buffer
@@ -143,7 +140,7 @@ void d3d_set_fog(bool enable, int color, double start, double end)
 
 void d3d_set_fog_enabled(bool enable)
 {
-  (enable?glEnable:glDisable)(GL_FOG);
+
 }
 
 void d3d_set_fog_mode(int mode)

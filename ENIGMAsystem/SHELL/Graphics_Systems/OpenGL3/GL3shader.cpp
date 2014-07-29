@@ -138,7 +138,10 @@ namespace enigma
                 "#define gm_BaseTexture en_TexSampler\n"
                 "uniform bool en_TexturingEnabled;\n"
                 "uniform bool en_ColorEnabled;\n"
-                "uniform vec4 en_bound_color;\n"
+				"uniform bool en_AlphaTestEnabled;\n"
+				
+				"uniform float en_AlphaTestValue;\n"
+                "uniform vec4 en_BoundColor;\n"
 				"#line 0 \n";
     }
     string getDefaultVertexShader(){
@@ -242,8 +245,11 @@ namespace enigma
                     "if (en_TexturingEnabled == true){\n"
                         "TexColor = texture2D( en_TexSampler, v_TextureCoord.st ) * v_Color;\n"
                     "}else{\n"
-                        "TexColor = en_bound_color * v_Color;\n"
+                        "TexColor = en_BoundColor * v_Color;\n"
                     "}\n"
+					"if (en_AlphaTestEnabled == true){\n"
+						"if (TexColor<=en_AlphaTestValue) discard;"
+					"}\n"
                     "out_FragColor = TexColor;\n"
                 "}\n";
     }
@@ -341,8 +347,10 @@ namespace enigma
         shaderprograms[prog_id]->uni_textureEnable = enigma_user::glsl_get_uniform_location(prog_id, "en_TexturingEnabled");
         shaderprograms[prog_id]->uni_colorEnable = enigma_user::glsl_get_uniform_location(prog_id, "en_ColorEnabled");
         shaderprograms[prog_id]->uni_lightEnable = enigma_user::glsl_get_uniform_location(prog_id, "en_LightingEnabled");
+		shaderprograms[prog_id]->uni_alphaTestEnable = enigma_user::glsl_get_uniform_location(prog_id, "en_AlphaTestEnabled");
 
-        shaderprograms[prog_id]->uni_color = enigma_user::glsl_get_uniform_location(prog_id, "en_bound_color");
+		shaderprograms[prog_id]->uni_alphaTest = enigma_user::glsl_get_uniform_location(prog_id, "en_AlphaTestValue");
+        shaderprograms[prog_id]->uni_color = enigma_user::glsl_get_uniform_location(prog_id, "en_BoundColor");
         shaderprograms[prog_id]->uni_ambient_color = enigma_user::glsl_get_uniform_location(prog_id, "en_AmbientColor");
         shaderprograms[prog_id]->uni_lights_active = enigma_user::glsl_get_uniform_location(prog_id, "en_ActiveLights");
 

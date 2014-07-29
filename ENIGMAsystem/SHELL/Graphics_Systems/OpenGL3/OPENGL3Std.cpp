@@ -73,10 +73,7 @@ namespace enigma
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glEnable(GL_BLEND);
-        glEnable(GL_ALPHA_TEST);
-        glEnable(GL_TEXTURE_2D);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glAlphaFunc(GL_ALWAYS,0);
 
         glBindTexture(GL_TEXTURE_2D,0);
 
