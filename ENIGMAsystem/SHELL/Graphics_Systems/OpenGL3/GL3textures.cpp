@@ -77,7 +77,7 @@ namespace enigma
     GLuint texture;
     glGenTextures(1, &texture);
     oglmgr->BindTexture(GL_TEXTURE_2D, texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, 4, fullwidth, fullheight, 0, GL_BGRA, GL_UNSIGNED_BYTE, pxdata);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, fullwidth, fullheight, 0, GL_BGRA, GL_UNSIGNED_BYTE, pxdata);
 	bool interpolate = (interpolate_textures && !isfont);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,interpolate?GL_LINEAR:GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,interpolate?GL_LINEAR:GL_NEAREST);
@@ -135,7 +135,7 @@ namespace enigma
         bitmap[i] = (bitmap2[i-1] + bitmap2[i-2] + bitmap2[i-3])/3;
 
     oglmgr->BindTexture(GL_TEXTURE_2D, texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, 4, fw, fh, 0, GL_BGRA, GL_UNSIGNED_BYTE, bitmap);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, fw, fh, 0, GL_BGRA, GL_UNSIGNED_BYTE, bitmap);
 	bool interpolate = (interpolate_textures && !textureStructs[tex]->isFont);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,interpolate?GL_LINEAR:GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,interpolate?GL_LINEAR:GL_NEAREST);
