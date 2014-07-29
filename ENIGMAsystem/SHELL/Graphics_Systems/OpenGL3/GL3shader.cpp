@@ -916,7 +916,7 @@ int glsl_get_attribute_location(int program, string name) {
     }
 }
 
-void glsl_enable_attribute(int location, bool enable){
+void glsl_attribute_enable(int location, bool enable){
     get_attribute(it,location);
     if (enable != it->second.enabled){
         if (enable == true){
@@ -925,6 +925,13 @@ void glsl_enable_attribute(int location, bool enable){
             glDisableVertexAttribArray(location);
         }
         it->second.enabled = enable;
+    }
+}
+
+void glsl_attribute_set(int location, int size, int type, bool normalize, int stride, int offset){
+    get_attribute(it,location);
+    if (it->second.enabled == true){
+        glVertexAttribPointer(location, size, type, normalize, stride, ( ( const GLvoid * ) ( sizeof( gs_scalar ) * ( offset ) ) ));
     }
 }
 
