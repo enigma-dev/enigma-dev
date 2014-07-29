@@ -49,7 +49,10 @@ using namespace std;
   #define GL_BGR 0x80E0
 #endif
 
+//WE SHOULDN'T DO THIS! Don't specify namespaces like this - Harijs
 using namespace enigma;
+using namespace enigma_user;
+
 namespace enigma_user {
   extern int window_get_width();
   extern int window_get_height();

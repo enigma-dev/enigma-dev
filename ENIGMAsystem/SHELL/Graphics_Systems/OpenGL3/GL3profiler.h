@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton
+/** Copyright (C) 2014 Harijs Grinbergs
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,10 +15,32 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-// For querying the graphic's output for debugging purposes, eg. triangles rendered, VRAM usage, and VBO's, etc.
+#ifndef GL3_PROFILER_H
+#define GL3_PROFILER_H
 
-#ifndef __GLPROFILERH_
-#define __GLPROFILERH_
-#include "../General/OpenGLHeaders.h"
+namespace enigma{
+
+	class GPUProfiler {
+		public:
+			int drawn_vertex_number;
+			int drawn_drawcall_number;
+			int drawn_vbo_number;
+			
+			void reset_frame() { 
+				drawn_vertex_number = 0;
+				drawn_drawcall_number = 0;
+				drawn_vbo_number = 0;
+			}
+			
+			GPUProfiler() : drawn_vertex_number(0), drawn_drawcall_number(0), drawn_vbo_number(0){}
+	};
+
+}
+
+namespace enigma_user{
+	int profiler_get_vertex_count();
+	int profiler_get_drawcall_count();
+	int profiler_get_vbo_count();
+}
 
 #endif
