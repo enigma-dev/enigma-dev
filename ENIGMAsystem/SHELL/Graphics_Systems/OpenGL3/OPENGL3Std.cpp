@@ -61,10 +61,6 @@ namespace enigma
         }
         #endif
 
-        //enigma::pbo_isgo=GL_ARB_pixel_buffer_object;
-        using enigma_user::room_width;
-        using enigma_user::room_height;
-
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glDisable(GL_DEPTH_TEST);
@@ -80,42 +76,42 @@ namespace enigma
         for (size_t i = 0; i < shader_idmax; ++i) {
             ShaderStruct* shaderstruct = shaderdata[i];
 
-            int vshader_id = glsl_shader_create(enigma_user::sh_vertex);
-            glsl_shader_load_string(vshader_id, shaderstruct->vertex);
+            int vshader_id = enigma_user::glsl_shader_create(enigma_user::sh_vertex);
+            enigma_user::glsl_shader_load_string(vshader_id, shaderstruct->vertex);
 
-            int fshader_id = glsl_shader_create(enigma_user::sh_fragment);
-            glsl_shader_load_string(fshader_id, shaderstruct->fragment);
+            int fshader_id = enigma_user::glsl_shader_create(enigma_user::sh_fragment);
+            enigma_user::glsl_shader_load_string(fshader_id, shaderstruct->fragment);
 
-            int prog_id = glsl_program_create();
-			glsl_program_set_name(prog_id, enigma_user::shader_get_name(i));
+            int prog_id = enigma_user::glsl_program_create();
+			enigma_user::glsl_program_set_name(prog_id, enigma_user::shader_get_name(i));
 
             if (shaderstruct->precompile) {
-                glsl_shader_compile(vshader_id);
-                glsl_shader_compile(fshader_id);
+                enigma_user::glsl_shader_compile(vshader_id);
+                enigma_user::glsl_shader_compile(fshader_id);
             }
 
-            glsl_program_attach(prog_id, vshader_id);
-            glsl_program_attach(prog_id, fshader_id);
-            glsl_program_link(prog_id);
-            glsl_program_validate(prog_id);
+            enigma_user::glsl_program_attach(prog_id, vshader_id);
+            enigma_user::glsl_program_attach(prog_id, fshader_id);
+            enigma_user::glsl_program_link(prog_id);
+            enigma_user::glsl_program_validate(prog_id);
         }
 
         //ADD DEFAULT SHADER (emulates FFP)
-        int vshader_id = glsl_shader_create(enigma_user::sh_vertex);
-        glsl_shader_load_string(vshader_id, getDefaultVertexShader());
+        int vshader_id = enigma_user::glsl_shader_create(enigma_user::sh_vertex);
+        enigma_user::glsl_shader_load_string(vshader_id, getDefaultVertexShader());
 
-        int fshader_id = glsl_shader_create(enigma_user::sh_fragment);
-        glsl_shader_load_string(fshader_id, getDefaultFragmentShader());
+        int fshader_id = enigma_user::glsl_shader_create(enigma_user::sh_fragment);
+        enigma_user::glsl_shader_load_string(fshader_id, getDefaultFragmentShader());
 
-        int prog_id = glsl_program_create();
+        int prog_id = enigma_user::glsl_program_create();
 
-        glsl_shader_compile(vshader_id);
-        glsl_shader_compile(fshader_id);
-        glsl_program_attach(prog_id, vshader_id);
-        glsl_program_attach(prog_id, fshader_id);
-        glsl_program_link(prog_id);
-        glsl_program_validate(prog_id);
-		glsl_program_set_name(prog_id, "DEFAULT_SHADER");
+        enigma_user::glsl_shader_compile(vshader_id);
+        enigma_user::glsl_shader_compile(fshader_id);
+        enigma_user::glsl_program_attach(prog_id, vshader_id);
+        enigma_user::glsl_program_attach(prog_id, fshader_id);
+        enigma_user::glsl_program_link(prog_id);
+        enigma_user::glsl_program_validate(prog_id);
+		enigma_user::glsl_program_set_name(prog_id, "DEFAULT_SHADER");
 
         getUniforms(prog_id);
         getAttributes(prog_id);
@@ -125,11 +121,14 @@ namespace enigma
         default_shader = prog_id; //Default shader for FFP
         main_shader = default_shader; //Main shader used to override the default one
 
-        glsl_program_reset(); //Set the default program
+        enigma_user::glsl_program_reset(); //Set the default program
         //END DEFAULT SHADER
 
+        using enigma_user::room_width;
+        using enigma_user::room_height;
+
         glViewport(0,0,(int)room_width,(int)room_height);
-        d3d_set_projection_ortho(0,(int)room_width,0,(int)room_height, 0);
+        enigma_user::d3d_set_projection_ortho(0,(int)room_width,0,(int)room_height, 0);
     }
 }
 
