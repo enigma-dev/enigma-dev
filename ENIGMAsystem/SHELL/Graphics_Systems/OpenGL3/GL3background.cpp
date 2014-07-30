@@ -19,7 +19,6 @@
 #include <math.h>
 #include "../General/OpenGLHeaders.h"
 #include "../General/GSbackground.h"
-#include "../General/GLTextureStruct.h"
 
 #include "Universal_System/image_formats.h"
 #include "Universal_System/nlpo2.h"
@@ -33,7 +32,6 @@
 #define __GETG(x) (gs_scalar)(((x & 0x00FF00) >> 8)/255.0)
 #define __GETB(x) (gs_scalar)(((x & 0xFF0000) >> 16)/255.0)
 
-#include "../General/GStextures.h"
 #ifdef DEBUG_MODE
   #include <string>
   #include "libEGMstd.h"
