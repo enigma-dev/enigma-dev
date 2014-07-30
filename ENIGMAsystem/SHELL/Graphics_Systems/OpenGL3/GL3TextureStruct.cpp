@@ -15,10 +15,10 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "OpenGLHeaders.h"
+/*
+#include "../General/OpenGLHeaders.h"
 #include "GLTextureStruct.h"
 
-/*
 TextureStruct::TextureStruct(unsigned gtex): gltex(gtex) {
 
 }

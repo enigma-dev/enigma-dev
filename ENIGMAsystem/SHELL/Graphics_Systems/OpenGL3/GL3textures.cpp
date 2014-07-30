@@ -20,7 +20,7 @@
 #include <string.h>
 //using std::string;
 #include "../General/GStextures.h"
-#include "../General/GLTextureStruct.h"
+#include "GL3TextureStruct.h"
 #include "Universal_System/image_formats.h"
 #include "Universal_System/backgroundstruct.h"
 #include "Universal_System/spritestruct.h"

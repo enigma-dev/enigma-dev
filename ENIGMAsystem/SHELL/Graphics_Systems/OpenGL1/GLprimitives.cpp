@@ -17,8 +17,8 @@
 
 #include "../General/OpenGLHeaders.h"
 #include "../General/GStextures.h"
-#include "../General/GLTextureStruct.h"
 #include "../General/GSprimitives.h"
+#include "GLTextureStruct.h"
 
 #include <string>
 #include "Widget_Systems/widgets_mandatory.h"

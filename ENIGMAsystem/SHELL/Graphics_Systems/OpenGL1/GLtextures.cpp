@@ -21,11 +21,11 @@
 #include <string.h>
 //using std::string;
 #include "../General/GStextures.h"
-#include "../General/GLTextureStruct.h"
 #include "Universal_System/image_formats.h"
 #include "Universal_System/backgroundstruct.h"
 #include "Universal_System/spritestruct.h"
 #include "Graphics_Systems/graphics_mandatory.h"
+#include "GLTextureStruct.h"
 
 #define GL_TEXTURE_MAX_ANISOTROPY_EXT 0x84FE
 #define GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT 0x84FF
@@ -42,6 +42,7 @@ namespace enigma {
 
 TextureStruct::TextureStruct(unsigned gtex)
 {
+  sampler = new enigma::SamplerState();
 	gltex = gtex;
 }
 
@@ -155,39 +156,7 @@ namespace enigma
 
     return ret;
   }
-  
-  //NOTE: OpenGL 1 hardware does not support sampler objects, some versions of 2 and usually over 3 do. We use this class
-  //to emulate the Direct3D behavior.
-  struct SamplerState {
-    unsigned bound_texture;
-    bool wrapu, wrapv, wrapw;
-    GLint bordercolor[4], min, mag, maxlevel;
-    GLfloat anisotropy, minlod, maxlod;
-    
-    SamplerState(): wrapu(true), wrapv(true), wrapw(true) {
-    
-    }
-    
-    ~SamplerState() {
-    
-    }
-    
-    void ApplyState() {
-      //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_LOD, minlod);
-      //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LOD, maxlod);
-      //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, maxlevel);
 
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, min);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, mag);
-
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, wrapu?GL_REPEAT:GL_CLAMP);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapv?GL_REPEAT:GL_CLAMP);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapw?GL_REPEAT:GL_CLAMP); 
-      glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, anisotropy);
-      glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, bordercolor);
-    }
-  };
-  
   SamplerState samplerstates[8];
 }
 
@@ -271,13 +240,15 @@ void texture_set_stage(int stage, int texid) {
     glBindTexture(GL_TEXTURE_2D, enigma::samplerstates[stage].bound_texture = get_texture(texid));
   }
   // Must be applied regardless of whether the texture is already bound because the sampler state could have been changed.
-  enigma::samplerstates[stage].ApplyState();
+  enigma::samplerstates[stage].CompareAndApply(textureStructs[texid]->sampler);
 }
 
 void texture_reset() {
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, enigma::samplerstates[0].bound_texture = 0);
-  enigma::samplerstates[0].ApplyState();
+  //Should only rarely apply the full state, I believe it is unnecessary to do it when we set no texture and it does not appear
+  //to cause any issues so leave it commented.
+  //enigma::samplerstates[0].ApplyState();
 }
 
 void texture_set_interpolation_ext(int sampler, bool enable)
