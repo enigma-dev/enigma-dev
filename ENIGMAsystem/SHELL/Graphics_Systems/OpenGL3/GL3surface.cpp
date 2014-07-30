@@ -17,7 +17,6 @@
 **/
 
 #include "../General/OpenGLHeaders.h"
-#include "../General/GLTextureStruct.h"
 #include "../General/GSscreen.h"
 #include "../General/GSmatrix.h"
 #include "Graphics_Systems/graphics_mandatory.h"
@@ -43,6 +42,7 @@ namespace enigma_user {
 #include "../General/GSsurface.h"
 #include "../General/GLSurfaceStruct.h"
 #include "../General/GStextures.h"
+#include "GL3TextureStruct.h"
 
 #ifdef DEBUG_MODE
   #include <string>
