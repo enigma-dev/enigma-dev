@@ -44,6 +44,7 @@ namespace setting
   bool literal_autocast = 0; // Determines how literals are treated.                 0 = enigma::variant,   1 = C++ scalars
   bool inherit_objects = 0;  // Determines whether objects should automatically inherit locals and events from their parents
   string make_directory = "";
+  COMPLIANCE_LVL compliance_mode = COMPL_STANDARD;
 };
 
 
