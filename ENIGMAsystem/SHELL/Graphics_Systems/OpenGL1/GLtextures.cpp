@@ -253,14 +253,12 @@ void texture_reset() {
 
 void texture_set_interpolation_ext(int sampler, bool enable)
 {
-  glActiveTexture(GL_TEXTURE0 + sampler);
   enigma::samplerstates[sampler].min = enable?GL_LINEAR:GL_NEAREST;
   enigma::samplerstates[sampler].mag = enable?GL_LINEAR:GL_NEAREST;
 }
 
 void texture_set_repeat_ext(int sampler, bool repeat)
 {
-  glActiveTexture(GL_TEXTURE0 + sampler);
   enigma::samplerstates[sampler].wrapu = repeat;
   enigma::samplerstates[sampler].wrapv = repeat;
   enigma::samplerstates[sampler].wrapw = repeat;
@@ -268,7 +266,6 @@ void texture_set_repeat_ext(int sampler, bool repeat)
 
 void texture_set_wrap_ext(int sampler, bool wrapu, bool wrapv, bool wrapw)
 {
-  glActiveTexture(GL_TEXTURE0 + sampler);
   enigma::samplerstates[sampler].wrapu = wrapu;
   enigma::samplerstates[sampler].wrapv = wrapv;
   enigma::samplerstates[sampler].wrapw = wrapw;
@@ -280,12 +277,10 @@ void texture_set_border_ext(int sampler, int r, int g, int b, double a)
   enigma::samplerstates[sampler].bordercolor[1] = g;
   enigma::samplerstates[sampler].bordercolor[2] = b;
   enigma::samplerstates[sampler].bordercolor[3] = int(a);
-  glActiveTexture(GL_TEXTURE0 + sampler);
 }
 
 void texture_set_filter_ext(int sampler, int filter)
 {
-  glActiveTexture(GL_TEXTURE0 + sampler);
   if (filter == tx_trilinear) {
     enigma::samplerstates[sampler].min = GL_LINEAR_MIPMAP_LINEAR;
     enigma::samplerstates[sampler].mag = GL_LINEAR;
@@ -303,7 +298,6 @@ void texture_set_filter_ext(int sampler, int filter)
 
 void texture_set_lod_ext(int sampler, double minlod, double maxlod, int maxlevel)
 {
-  glActiveTexture(GL_TEXTURE0 + sampler);
   enigma::samplerstates[sampler].minlod = minlod;
   enigma::samplerstates[sampler].maxlod = maxlod;
   enigma::samplerstates[sampler].maxlevel = maxlevel;
@@ -330,7 +324,6 @@ float texture_anisotropy_maxlevel()
 
 void  texture_anisotropy_filter(int sampler, gs_scalar levels)
 {
-  glActiveTexture(GL_TEXTURE0 + sampler);
   enigma::samplerstates[sampler].anisotropy = levels;
 }
 
