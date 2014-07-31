@@ -52,6 +52,13 @@ namespace extensions
 
 namespace setting
 {
+  //Compliance levels. These enforce various settings specific to certain versions of GM.
+  //Prefer generalized solutions; use these for direct incompatibilities. (Add other GM versions as needed).
+  enum COMPLIANCE_LVL {
+    COMPL_STANDARD = 0,  //Standard (enigma) compliance. Default and recommended.
+    COMPL_GM5 = 1,       //GM5 compliance. timeline_running will default to "true".
+  };
+
   //Compatibility / Progess options
   extern bool use_cpp_strings;  // Defines what language strings are inherited from.    0 = GML,               1 = C++
   extern bool use_cpp_escapes;  // Defines what language strings are inherited from.    0 = GML,               1 = C++
@@ -60,6 +67,7 @@ namespace setting
   extern bool literal_autocast; // Determines how literals are treated.                 0 = enigma::variant,   1 = C++ scalars
   extern bool inherit_objects;  // Determines whether objects should automatically inherit locals and events from their parents
   extern string make_directory; // Where to output make objects and preprocessor.
+  extern COMPLIANCE_LVL compliance_mode; // How to resolve differences between GM versions.
 }
 
 #endif
