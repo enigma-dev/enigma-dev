@@ -531,8 +531,8 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
     //Each timeline has a lookup structure (in this case, a map) which allows easy forward/backward lookup.
     //This is currently constructed rather manually; there are probably more efficient 
     // construction techniques, but none come to mind.
-    wto <<"std::vector< std::map<int, int> > build_moments_map() {\n";
-    wto <<"  std::vector< std::map<int, int> > res;\n";
+    wto <<"void timeline_system_initialize() {\n";
+    wto <<"  std::vector< std::map<int, int> >& res = object_timelines::timeline_moments_maps;\n";
     wto <<"  res.reserve(" <<es->timelineCount <<");\n";
     wto <<"  std::map<int, int> curr;\n\n";
     for (int i=0; i<es->timelineCount; i++) {
@@ -542,90 +542,6 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
       }
       wto <<"  res.push_back(curr);\n\n";
     }
-    wto <<"  return res;\n";
-    wto <<"}\n\n";
-
-    //Now call it.
-    wto <<"//vector is indexed by timeline_id. map::key is moment_time; map::value is moment_id\n";
-    wto <<"std::vector< std::map<int, int> > timeline_moments_maps = build_moments_map();\n\n";
-
-    //Actually call timeline moment scripts based on ID/Moment.
-    wto <<"void timeline_call_moment_script(int timeline_index, int moment_index) {\n";
-    wto <<"  switch (timeline_index) {\n";
-    for (int i=0; i<es->timelineCount; i++) {
-      wto <<"    case " <<es->timelines[i].id <<": {\n";
-      wto <<"      switch (moment_index) {\n";
-      for (int j=0; j<es->timelines[i].momentCount; j++) {
-        wto <<"        case " <<j <<": {\n";
-        wto <<"          ::TLINE_" <<es->timelines[i].name <<"_MOMENT_" <<es->timelines[i].moments[j].stepNo <<"();\n";
-        wto <<"          break;\n";
-        wto <<"        }\n";
-      }
-      wto <<"      }\n";
-      wto <<"      break;\n";
-      wto <<"    }\n";
-    }
-    wto <<"  }\n";
-    wto <<"}\n\n";
-
-    //Function to advance the current timeline variables, calling moments as appropriate. This assumes timeline_running is true and timeline_speed !=0
-    wto <<"void advance_curr_timeline(gs_scalar& timeline_position, gs_scalar timeline_speed, int timeline_index, bool timeline_loop) {\n";
-    wto <<"  //Find the next instant (it may be right now).\n";
-    wto <<"  //Note: If a map lookup each tick is a performance hit, this value can be cached in the object itself with a tuple <timeline_id, timeline_pos, next_moment_iterator>\n";
-    wto <<"  if (timeline_index<0 || timeline_index>=(int)timeline_moments_maps.size()) { return; }\n\n";
-    wto <<"  //Algorithm varies for +/- speed. Assume zero is positive (just for consistency).\n";
-    wto <<"  //Note that we *cannot* call these events as they are found, because they might change timeline_position (and GM does not work that way).\n";
-    wto <<"  std::vector<int> moment_ids;\n";
-    wto <<"  if (timeline_speed>=0) { //Positive\n";
-    wto <<"    std::map<int, int>::const_iterator next = timeline_moments_maps[timeline_index].lower_bound(ceil(timeline_position));\n\n";
-    wto <<"    //We now advance the timeline_position by timeline_speed, saving event information on the way.\n";
-    wto <<"    while (timeline_speed!=0) {\n";
-    wto <<"      //Landing *exactly* on the next moment will actually trigger it *next* turn.\n";
-    wto <<"      if (next==timeline_moments_maps[timeline_index].end() || timeline_position+timeline_speed<=next->first) {\n";
-    wto <<"         timeline_position += timeline_speed;\n";
-    wto <<"         break;\n";
-    wto <<"      }\n";
-    wto <<"      timeline_speed -= next->first - timeline_position;\n";
-    wto <<"      timeline_position = next->first;\n";
-    wto <<"      moment_ids.push_back(next->second);\n";
-    wto <<"      next++;\n";
-    wto <<"    }\n\n";
-    wto <<"  } else { //Negative\n";
-    wto <<"    //This will put us one ahead. The reverse_iterator will reverse it.\n";
-    wto <<"    std::map<int, int>::const_iterator nextTEMP = timeline_moments_maps[timeline_index].upper_bound(floor(timeline_position));\n";
-    wto <<"    std::map<int, int>::const_reverse_iterator next = std::reverse_iterator<std::map<int, int>::const_iterator>(nextTEMP);\n\n";
-    wto <<"    //The algorithm proceeds as in FWD, but with rev_iterators (so it's hard to share code).\n";
-    wto <<"    while (timeline_speed!=0) {\n";
-    wto <<"      //Landing *exactly* on the next moment will actually trigger it *next* turn.\n";
-    wto <<"      if (next==timeline_moments_maps[timeline_index].rend() || timeline_position+timeline_speed>=next->first) {\n";
-    wto <<"         timeline_position += timeline_speed;\n";
-    wto <<"         break;\n";
-    wto <<"      }\n";
-    wto <<"      timeline_speed += timeline_position - next->first;\n";
-    wto <<"      timeline_position = next->first;\n";
-    wto <<"      moment_ids.push_back(next->second);\n";
-    wto <<"      next++;\n";
-    wto <<"    }\n\n";
-    wto <<"  }\n\n";
-    wto <<"  //Now, trigger each moment that we've passed.\n";
-    wto <<"  for (std::vector<int>::iterator it=moment_ids.begin(); it!=moment_ids.end(); it++) {\n";
-    wto <<"    timeline_call_moment_script(timeline_index, *it);\n";
-    wto <<"  }\n";
-    wto <<"}\n\n";
-
-    //Function to loop the current timeline. This assumes timeline_loop is true, timeline_running is true, and timeline_speed is !=0
-    wto <<"void loop_curr_timeline(gs_scalar& timeline_position, gs_scalar timeline_speed, int timeline_index) {\n";
-    wto <<"  //Determine if we're past the last event. Note that no residual movement carries over; this effectively \"resets to 0\".\n";
-    wto <<"  if (timeline_index<0 || timeline_index>=(int)timeline_moments_maps.size()) { return; }\n";
-    wto <<"  if (timeline_speed>=0) { //Positive\n";
-    wto <<"    if (timeline_position > timeline_moments_maps[timeline_index].rbegin()->first) { //If ==, it will trigger on the next time tick.\n";
-    wto <<"      timeline_position = 0;\n";
-    wto <<"    }\n";
-    wto <<"  } else { //Negative\n";
-    wto <<"    if (timeline_position < 0) { //If ==, it will trigger on the next time tick.\n";
-    wto <<"      timeline_position = timeline_moments_maps[timeline_index].rbegin()->first;\n";
-    wto <<"    }\n";
-    wto <<"  }\n";
     wto <<"}\n\n";
 
     wto <<"}\n"; //namespace 
