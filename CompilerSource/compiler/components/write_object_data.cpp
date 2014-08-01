@@ -92,14 +92,16 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, i
     wto << "\n";
 
     //Write timeline/moment names. Timelines are like scripts, but we don't have to worry about arguments or return types.
+    map<string, int> revTlineLookup; //We'll need this lookup later.
     for (int i=0; i<es->timelineCount; i++) {
+      revTlineLookup[es->timelines[i].name] = es->timelines[i].id;
       for (int j=0; j<es->timelines[i].momentCount; j++) {
         wto << "void TLINE_" <<es->timelines[i].name <<"_MOMENT_" <<es->timelines[i].moments[j].stepNo <<"();\n";
       }
     }
 
     wto << "\n";
-    wto << "namespace enigma\n{\n";
+    wto << "namespace enigma\n{\n\n";
     wto << "  extern objectstruct** objectdata;\n";
       wto << "  struct object_locals: event_parent";
         for (unsigned i = 0; i < parsed_extensions.size(); i++)
@@ -246,6 +248,29 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, i
             wto << ");";
           }
         } wto << "\n    ";
+
+
+        // Next, we write the list of all the timelines this object will hoard a copy of for itself.
+        wto << "\n    //Timelines called by this object\n    ";
+        bool hasTlines = false;
+        for (parsed_object::tlineit it = t->tlines.begin(); it != t->tlines.end(); it++) //For each timeline potentially set by this object.
+        {
+          map<string, int>::iterator timit = revTlineLookup.find(it->first); //Check if it's a timeline
+          if (timit != revTlineLookup.end()) // If we've got ourselves a script
+          //and subscr->second->pev_global) // And it has distinct code for use at the global scope (meaning it's more efficient locally) //NOTE: It seems all timeline MUST be copied locally.
+          {
+            hasTlines = true;
+            for (int j=0; j<es->timelines[timit->second].momentCount; j++) {
+              wto << "void TLINE_" <<es->timelines[timit->second].name <<"_MOMENT_" <<es->timelines[timit->second].moments[j].stepNo <<"();\n    ";
+            }
+          }
+        } wto << "\n    ";
+
+        //If at least one timeline is called by this object, override timeline_call_moment_script() to properly dispatch it.
+        if (hasTlines) {
+          wto <<"//Dispatch timelines properly for this object..\n    ";
+          wto <<"virtual void timeline_call_moment_script(int timeline_index, int moment_index);\n\n    ";
+        }
 
         // Now we output all the events this object uses
         // Defaulted events were already added into this array.
@@ -625,6 +650,7 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, i
       cout << "DBGMSG 5" << endl;
 
 	
+      //Write local object copies of scripts
       parsed_object* t = i->second;
       for (parsed_object::funcit it = t->funcs.begin(); it != t->funcs.end(); it++) //For each function called by this object
       {
@@ -644,6 +670,50 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, i
           wto << "\n  return 0;\n}\n\n";
         }
       }
+
+
+      //Write local object copies of timelines
+      bool hasTlines = false;
+      for (parsed_object::tlineit it = t->tlines.begin(); it != t->tlines.end(); it++) //For each timeline potentially set by this object
+      {
+        map<string, int>::iterator timit = revTlineLookup.find(it->first); //Check if it's a timeline
+        if (timit != revTlineLookup.end()) // If we've got ourselves a script
+        //and subscr->second->pev_global) // And it has distinct code for use at the global scope (meaning it's more efficient locally) //NOTE: It seems all timeline MUST be copied locally.
+        {
+          hasTlines = true;
+          for (int j=0; j<es->timelines[timit->second].momentCount; j++) {
+            parsed_script* scr = tline_lookup[timit->first][j];
+            wto << "void enigma::OBJ_" <<i->second->name <<"::TLINE_" <<es->timelines[timit->second].name <<"_MOMENT_" <<es->timelines[timit->second].moments[j].stepNo <<"() {\n    ";
+            print_to_file(scr->pev.code, scr->pev.synt, scr->pev.strc, scr->pev.strs, 2, wto);
+            wto <<"}\n";
+          }
+        } wto << "\n";
+      }
+
+      //If no timelines are ever used by this script, it has no use for a lookup table.
+      if (hasTlines) {
+        wto <<"void enigma::OBJ_" <<i->second->name <<"::timeline_call_moment_script(int timeline_index, int moment_index) {\n";
+        wto <<"  switch (timeline_index) {\n";
+        for (parsed_object::tlineit it = t->tlines.begin(); it != t->tlines.end(); it++) {
+          map<string, int>::iterator timit = revTlineLookup.find(it->first);
+          if (timit != revTlineLookup.end()) {
+            wto <<"    case " <<es->timelines[timit->second].id <<": {\n";
+            wto <<"      switch (moment_index) {\n";
+            for (int j=0; j<es->timelines[timit->second].momentCount; j++) {
+              wto <<"        case " <<j <<": {\n";
+              wto <<"          TLINE_" <<es->timelines[timit->second].name <<"_MOMENT_" <<es->timelines[timit->second].moments[j].stepNo <<"();\n";
+              wto <<"          break;\n";
+              wto <<"        }\n";
+            }
+            wto <<"      }\n";
+            wto <<"      break;\n";
+            wto <<"    }\n";
+          }
+        }
+        wto <<"  }\n";
+        wto <<"}\n\n";
+      }
+
     cout << "DBGMSG 6" << endl;
     }
     cout << "DBGMSG 7" << endl;

@@ -87,11 +87,6 @@ int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
   *****************************************************************/
   wto << "namespace enigma" << endl << "{" << endl;
 
-  //Forward declarations
-  wto <<"void advance_curr_timeline(gs_scalar& timeline_position, gs_scalar timeline_speed, int timeline_index, bool timeline_loop);\n";
-  wto <<"void loop_curr_timeline(gs_scalar& timeline_position, gs_scalar timeline_speed, int timeline_index);\n\n";
-  wto <<"\n";
-
   wto << "  struct event_parent: " << system_get_uppermost_tier() << endl;
   wto << "  {" << endl;
             for (evfit it = used_events.begin(); it != used_events.end(); it++)

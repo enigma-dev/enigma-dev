@@ -72,52 +72,8 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
     }
     fflush(stdout);
   }
-  
-  edbg << "\"Linking\" scripts" << flushl;
 
-  //Next we traverse the scripts for dependencies.
-  unsigned nec_iters = 0;
-  if (es->scriptCount > 0)
-    nec_iters = lrint(ceilf(log2(es->scriptCount)));
-  edbg << "`Linking' " << es->scriptCount << " scripts in " << nec_iters << " passes...\n";
-  for (unsigned _necit = 0; _necit < nec_iters; _necit++) //We will iterate the list of scripts just enough times to copy everything
-  {
-    for (int _im = 0; _im < es->scriptCount; _im++) //For each script
-    {
-      parsed_script* curscript = scripts[_im]; //At this point, what we have is this:     for each script as curscript
-      for (parsed_object::funcit it = curscript->obj.funcs.begin(); it != curscript->obj.funcs.end(); it++) //For each function called by each script
-      {
-        map<string,parsed_script*>::iterator subscr = scr_lookup.find(it->first); //Check if it's a script
-        if (subscr != scr_lookup.end()) //At this point, what we have is this:     for each script called by curscript
-          curscript->obj.copy_calls_from(subscr->second->obj);
-      }
-    }
-  }
-
-  edbg << "Completing script \"Link\"" << flushl;
-  
-  for (int _im = 0; _im < es->scriptCount; _im++) //For each script
-  {
-    string curscrname = es->scripts[_im].name;
-    parsed_script* curscript = scripts[_im]; //At this point, what we have is this:     for each script as curscript
-    edbg << "Linking `" << curscrname << "':\n";
-    for (parsed_object::funcit it = curscript->obj.funcs.begin(); it != curscript->obj.funcs.end(); it++) //For each function called by each script
-    {
-      cout << string(it->first) << "::";
-      map<string,parsed_script*>::iterator subscr = scr_lookup.find(it->first); //Check if it's a script
-      if (subscr != scr_lookup.end()) //At this point, what we have is this:     for each script called by curscript
-      {
-        cout << "is_script::";
-        curscript->obj.copy_from(subscr->second->obj,  "script `"+it->first+"'",  "script `"+curscrname + "'");
-      }
-    }
-    cout << endl;
-  }
-  edbg << "Done." << flushl;
-
-  //Treat timelines similarly to scripts.
-
-  //First we just parse the timeline scripts to add semicolons and collect variable names
+  //Next we just parse the timeline scripts to add semicolons and collect variable names
   tline_lookup.clear();
   for (int i=0; i<es->timelineCount; i++) 
   {
@@ -148,33 +104,93 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
     }
   }
 
-  edbg << "\"Linking\" timelines" << flushl;
-  
-  //Next we traverse the timelines for dependencies.
-  nec_iters = 0;
-  if (es->timelineCount > 0)
-    nec_iters = lrint(ceilf(log2(es->timelineCount)));
-  edbg << "`Linking' " << es->timelineCount << " timelines in " << nec_iters << " passes...\n";
+  edbg << "\"Linking\" scripts" << flushl;
+
+  //Next we traverse the scripts for dependencies.
+  //The problem is, script0 may call script1, etc., which is complicated by timelines (which may also call scripts). 
+  //For now, we simply perform log2(|scripts|+|timelines|) passes, which ensures that all mult-level scripts bubble to the top.
+  const unsigned nec_iters = es->scriptCount+es->timelineCount > 0 ? lrint(ceilf(log2(es->scriptCount+es->timelineCount))) : 0;
+
+  edbg << "`Linking' " << es->scriptCount << " scripts and " <<es->timelineCount <<" timelines in " << nec_iters << " passes...\n";
   for (unsigned _necit = 0; _necit < nec_iters; _necit++) //We will iterate the list of scripts just enough times to copy everything
   {
+    for (int _im = 0; _im < es->scriptCount; _im++) //For each script
+    {
+      parsed_script* curscript = scripts[_im]; //At this point, what we have is this:     for each script as curscript
+      for (parsed_object::funcit it = curscript->obj.funcs.begin(); it != curscript->obj.funcs.end(); it++) //For each function called by each script
+      {
+        map<string,parsed_script*>::iterator subscr = scr_lookup.find(it->first); //Check if it's a script
+        if (subscr != scr_lookup.end()) { //At this point, what we have is this:     for each script called by curscript
+          curscript->obj.copy_calls_from(subscr->second->obj);
+          curscript->obj.copy_tlines_from(subscr->second->obj);
+        }
+      }
+
+      for (parsed_object::tlineit it = curscript->obj.tlines.begin(); it != curscript->obj.tlines.end(); it++) //For each tline called by each script
+      {
+        map<string, vector<parsed_script*> >::iterator timit = tline_lookup.find(it->first); //Check if it's a timeline.
+        if (timit != tline_lookup.end()) { //If we've got ourselves a timeline
+          for (vector<parsed_script*>::iterator momit = timit->second.begin(); momit!=timit->second.end(); momit++) {
+            curscript->obj.copy_calls_from((*momit)->obj);
+            curscript->obj.copy_tlines_from((*momit)->obj);
+          }
+        }
+      }
+    }
+
     int lookup_id = 0;
-    for (int _im = 0; _im < es->timelineCount; _im++) //For each script
+    for (int _im = 0; _im < es->timelineCount; _im++) //For each timeline-script
     {
       for (int j=0; j<es->timelines[_im].momentCount; j++,lookup_id++) 
       {
         parsed_script* curscript = tlines[lookup_id]; //At this point, what we have is this:     for each script as curscript
-        for (parsed_object::funcit it = curscript->obj.funcs.begin(); it != curscript->obj.funcs.end(); it++) //For each function called by each script
+        for (parsed_object::funcit it = curscript->obj.funcs.begin(); it != curscript->obj.funcs.end(); it++) //For each function called by each timeline
         {
           map<string,parsed_script*>::iterator subscr = scr_lookup.find(it->first); //Check if it's a script
-          if (subscr != scr_lookup.end()) //At this point, what we have is this:     for each script called by curscript
+          if (subscr != scr_lookup.end()) { //At this point, what we have is this:     for each script called by curscript
             curscript->obj.copy_calls_from(subscr->second->obj);
+          }
+        }
+
+        for (parsed_object::tlineit it = curscript->obj.tlines.begin(); it != curscript->obj.tlines.end(); it++) //For each tline called by each tline
+        {
+          map<string, vector<parsed_script*> >::iterator timit = tline_lookup.find(it->first); //Check if it's a timeline.
+          if (timit != tline_lookup.end()) { //If we've got ourselves a timeline
+            for (vector<parsed_script*>::iterator momit = timit->second.begin(); momit!=timit->second.end(); momit++) {
+              curscript->obj.copy_calls_from((*momit)->obj);
+              curscript->obj.copy_tlines_from((*momit)->obj);
+            }
+          }
         }
       }
     }
   }
 
+  edbg << "Completing script \"Link\"" << flushl;
+  
+  for (int _im = 0; _im < es->scriptCount; _im++) //For each script
+  {
+    string curscrname = es->scripts[_im].name;
+    parsed_script* curscript = scripts[_im]; //At this point, what we have is this:     for each script as curscript
+    edbg << "Linking `" << curscrname << "':\n";
+    for (parsed_object::funcit it = curscript->obj.funcs.begin(); it != curscript->obj.funcs.end(); it++) //For each function called by each script
+    {
+      cout << string(it->first) << "::";
+      map<string,parsed_script*>::iterator subscr = scr_lookup.find(it->first); //Check if it's a script
+      if (subscr != scr_lookup.end()) //At this point, what we have is this:     for each script called by curscript
+      {
+        cout << "is_script::";
+        curscript->obj.copy_from(subscr->second->obj,  "script `"+it->first+"'",  "script `"+curscrname + "'");
+      }
+    }
+    cout << endl;
+  }
+  edbg << "Done." << flushl;
+
+
   edbg << "Completing timeline \"Link\"" << flushl;
   
+  //TODO: Linking timelines might not be strictly necessary, because scripts can now find their children through the timelines they call.
   int lookup_id = 0;
   for (int _im = 0; _im < es->timelineCount; _im++) //For each script
   {
@@ -198,7 +214,7 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
   }
   edbg << "Done." << flushl;
 
-  //Done with timelines (TODO: do we have to link these into objects? Seems un-necessary)
+  //Done with scripts and timelines.
 
 
   edbg << es->gmObjectCount << " Objects:\n";
@@ -300,14 +316,44 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
     for (parsed_object::funcit it = t->funcs.begin(); it != t->funcs.end(); it++) //For each function called by each script
     {
       map<string,parsed_script*>::iterator subscr = scr_lookup.find(it->first); //Check if it's a script
-      if (subscr != scr_lookup.end()) //If we've got ourselves a script
+      if (subscr != scr_lookup.end()) { //If we've got ourselves a script
         t->copy_calls_from(subscr->second->obj);
+        t->copy_tlines_from(subscr->second->obj);
+      }
     }
     for (parsed_object::funcit it = t->funcs.begin(); it != t->funcs.end(); it++) //For each function called by each script
     {
       map<string,parsed_script*>::iterator subscr = scr_lookup.find(it->first); //Check if it's a script
       if (subscr != scr_lookup.end()) //If we've got ourselves a script
         t->copy_from(subscr->second->obj,  "script `"+it->first+"'",  "object `"+i->second->name+"'");
+    }
+  }
+
+  //Next we link the timelines into the objects that might call them.
+  edbg << "\"Linking\" timelines into the objects..." << flushl;
+  for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
+  {
+    parsed_object* t = i->second;
+    for (parsed_object::tlineit it = t->tlines.begin(); it != t->tlines.end(); it++) //For each function called by each timeline
+    {
+      map<string, vector<parsed_script*> >::iterator timit = tline_lookup.find(it->first); //Check if it's a timeline.
+      if (timit != tline_lookup.end()) { //If we've got ourselves a timeline
+        //Iterate through its moments:
+        for (vector<parsed_script*>::iterator momit = timit->second.begin(); momit!=timit->second.end(); momit++) {
+          t->copy_calls_from((*momit)->obj);
+          t->copy_tlines_from((*momit)->obj);
+        }
+      }
+    }
+    for (parsed_object::tlineit it = t->tlines.begin(); it != t->tlines.end(); it++) //For each function called by each timeline
+    {
+      map<string, vector<parsed_script*> >::iterator timit = tline_lookup.find(it->first); //Check if it's a timeline.
+      if (timit != tline_lookup.end()) { //If we've got ourselves a timeline
+        //Iterate through its moments:
+        for (vector<parsed_script*>::iterator momit = timit->second.begin(); momit!=timit->second.end(); momit++) {
+          t->copy_from((*momit)->obj,  "script `"+it->first+"'",  "object `"+i->second->name+"'");
+        }
+      }
     }
   }
   edbg << "\"Link\" complete." << flushl;

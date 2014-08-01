@@ -17,7 +17,7 @@
 
 /**
   @file    graphics_object.h
-  @summary Adds a graphics-related tier following the planar tier.
+  @summary Adds a graphics-related tier following the timelines tier.
 */
 
 #ifndef _GRAPHICS_OBJECT_H
@@ -31,7 +31,7 @@
 #endif
 
 #include "scalar.h"
-#include "planar_object.h"
+#include "timelines_object.h"
 #include "multifunction_variant.h"
 
 namespace enigma
@@ -45,7 +45,7 @@ namespace enigma
     void remove();
     ~depthv();
   };
-  struct object_graphics: object_planar
+  struct object_graphics: object_timelines
   {
     //Sprites: these are mostly for higher tiers...
       int sprite_index;
