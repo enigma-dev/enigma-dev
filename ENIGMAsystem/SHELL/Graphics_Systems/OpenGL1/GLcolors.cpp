@@ -35,10 +35,6 @@ namespace enigma {
 namespace enigma_user
 {
 
-void draw_unbind_all() {
-  glBindTexture(GL_TEXTURE_2D, 0);
-}
-
 void draw_clear_alpha(int col,float alpha)
 {
   //Unfortunately, we lack a 255-based method for setting ClearColor.

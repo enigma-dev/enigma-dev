@@ -19,8 +19,6 @@
 #include <math.h>
 #include "../General/OpenGLHeaders.h"
 #include "../General/GSbackground.h"
-#include "../General/GStextures.h"
-#include "../General/GLTextureStruct.h"
 
 #include "Universal_System/image_formats.h"
 #include "Universal_System/nlpo2.h"
@@ -32,7 +30,6 @@
 #define __GETG(x) ((x & 0x00FF00) >> 8)
 #define __GETB(x) ((x & 0xFF0000) >> 16)
 
-#include "../General/GStextures.h"
 #ifdef DEBUG_MODE
   #include <string>
   #include "libEGMstd.h"
