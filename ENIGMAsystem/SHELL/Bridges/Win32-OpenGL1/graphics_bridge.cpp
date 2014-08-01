@@ -37,7 +37,7 @@ using namespace std;
 
 namespace enigma
 {
-	GLuint msaa_fbo = 0;
+    GLuint msaa_fbo = 0;
 		
     void EnableDrawing (HGLRC *hRC)
     {
@@ -61,13 +61,13 @@ namespace enigma
         *hRC = wglCreateContext( enigma::window_hDC );
         wglMakeCurrent( enigma::window_hDC, *hRC );
 		
-		//TODO: This never reports higher than 8, but display_aa should be 14 if 2,4,and 8 are supported and 8 only when only 8 is supported
-		glGetIntegerv(GL_MAX_SAMPLES_EXT, &enigma_user::display_aa);
+      //TODO: This never reports higher than 8, but display_aa should be 14 if 2,4,and 8 are supported and 8 only when only 8 is supported
+      glGetIntegerv(GL_MAX_SAMPLES_EXT, &enigma_user::display_aa);
     }
 	
-	void WindowResized() {
+    void WindowResized() {
 
-	}
+    }
 
     void DisableDrawing (HWND hWnd, HDC hDC, HGLRC hRC)
     {
@@ -152,7 +152,7 @@ namespace enigma_user {
   void screen_refresh() {
     window_set_caption(room_caption);
     enigma::update_mouse_variables();
-	SwapBuffers(enigma::window_hDC);
+    SwapBuffers(enigma::window_hDC);
   }
 
   void set_synchronization(bool enable) {
