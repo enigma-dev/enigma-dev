@@ -179,6 +179,7 @@ void texture_preload(int texid)
 void texture_set_priority(int texid, double prio)
 {
   // Deprecated in ENIGMA and GM: Studio
+  textureStructs[texid]->gTexture->SetPriority(prio);
 }
 
 gs_scalar texture_get_width(int texid) {
