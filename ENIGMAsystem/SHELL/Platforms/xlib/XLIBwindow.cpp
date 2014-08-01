@@ -408,7 +408,7 @@ namespace enigma_user {
 
 namespace enigma {
   string* parameters;
-  unsigned int parameterc;
+  int parameterc;
   int current_room_speed;
   void windowsystem_write_exename(char* x)
   {
@@ -514,13 +514,6 @@ int window_get_region_width_scaled()
 int window_get_region_height_scaled()
 {
     return window_get_height();
-}
-
-string parameter_string(unsigned num) {
-  return num < enigma::parameterc ? enigma::parameters[num] : "";
-}
-int parameter_count() {
-  return enigma::parameterc;
 }
 
 }

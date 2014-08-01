@@ -17,8 +17,6 @@
 
 #include "../General/OpenGLHeaders.h"
 #include "../General/GSd3d.h"
-#include "../General/GStextures.h"
-#include "../General/GLTextureStruct.h"
 #include "../General/GSmatrix.h"
 #include "GLSLshader.h"
 #include "Universal_System/var4.h"
