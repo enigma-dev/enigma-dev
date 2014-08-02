@@ -52,7 +52,7 @@ struct scope_ignore {
 #include "collect_variables.h"
 #include "languages/language_adapter.h"
 
-void collect_variables(language_adapter *lang, string &code, string &synt, parsed_event* pev)
+void collect_variables(language_adapter *lang, string &code, string &synt, parsed_event* pev, const std::set<std::string>& script_names)
 {
   int igpos = 0;
   darray<scope_ignore*> igstack;
@@ -249,7 +249,7 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
       while (synt[++pos] == 'n');
       
       //Looking at a straight identifier. Make sure it actually needs declared.
-      const string nname = code.substr(spos,pos-spos);
+      string nname = code.substr(spos,pos-spos);
       
       if (!nts)
         { pos--; continue; }
@@ -341,6 +341,22 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
               const string pname = code.substr(pos+2,nextSep-(pos+2));
               cout << "  Potentially calls timeline `" << pname << "'\n";
               pev->myObj->tlines.insert(pair<string,int>(pname,1));
+            }
+        }
+
+        //Another special case: try to inline script_execute().
+        if (nname == "script_execute") {
+            size_t nextSep = code.find_first_of(",)", pos+2);
+            if (nextSep != std::string::npos) {
+              const string pname = code.substr(pos+2,nextSep-(pos+2));
+              if (script_names.find(pname)!=script_names.end()) {
+                cout << "  script_execute() inlining `" << pname << "'\n";
+                int off = code[nextSep]==')' ? 0 : 1;
+                code.replace(spos, nextSep-spos+off, pname+"(");
+                synt.replace(spos, nextSep-spos+off, std::string(pname.size(),'n')+"(");
+                pos = spos + pname.size() - 1;
+                nname = pname;
+              }
             }
         }
         

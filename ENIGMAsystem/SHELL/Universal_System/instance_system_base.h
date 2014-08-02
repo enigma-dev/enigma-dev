@@ -48,6 +48,7 @@ namespace enigma
   {
     object_basic *oinst;
     inst_iter *oiter;
+    object_basic* prev_other; //Should always be NULL, but just in case...
     
     public:
     temp_event_scope(object_basic*);
