@@ -178,6 +178,9 @@ namespace enigma
     for (size_t i = 0; i < 8; i++) {
       glGenSamplers(1, &samplerstates[i].sampler_index);
       glBindSampler(i, samplerstates[i].sampler_index);
+      // Default to interpolation disabled, for some reason textures do that by default but not samplers.
+      glSamplerParameteri(samplerstates[i].sampler_index, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+      glSamplerParameteri(samplerstates[i].sampler_index, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     }
   }
 }
