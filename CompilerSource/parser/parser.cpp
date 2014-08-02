@@ -464,7 +464,7 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
 
         //Some functions inside "with" need to call the global version, not the object-local one.
         if (ctrlType == "with") {
-          //This does not apply for with(self)
+          //Get the name of the current "with" item. We'll need this (eventually) to call the localized version of a script.
           std::string withItem;
           if (!skip_paren(withItem, pos, code, synt, 'n')) { //Slightly less unlikely.
             std::cout <<"ERROR: Parentheses don't match on \"" <<ctrlType <<"\" statement.\n";
@@ -472,88 +472,88 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
             break;
           }
 
-          //with(something_besides_self) means no object-local. Modify all function calls.
+          //with(anything) means no object-local. Modify all function calls.
+          //Tehnically with(self) *might* be able to use default scoping, but since that's almost never used, we don't bother.
           //NOTE: Really weird bracketing may throw this function off, but I suspect that's true of other code here as well.
-          if (withItem!="self") {
-            int singleLineScope = 1; //How many scopes will a single line (;) close?
+          //TODO: Re-write this function to properly track depth, and cast to the current opject type's localized method if one exists.
+          int singleLineScope = 1; //How many scopes will a single line (;) close?
 
-            //The first character matters somewhat.
-            if (synt[pos] == '{') {
-              singleLineScope = 0;
-              pos++;
+          //The first character matters somewhat.
+          if (synt[pos] == '{') {
+            singleLineScope = 0;
+            pos++;
+          }
+
+          for (int scope=1; scope>0; pos++) {
+            if (pos>=synt.size()) {
+              std::cout <<"ERROR: with-statement runs to end of code.\n";
+              break;
             }
 
-            for (int scope=1; scope>0; pos++) {
-              if (pos>=synt.size()) {
-                std::cout <<"ERROR: with-statement runs to end of code.\n";
+            char c = synt[pos];
+            if (c=='n') {
+              //Match the name
+              string funcName;
+              pt oldPos = pos;
+              if (!scan_token(funcName, pos, code, synt, 'n')) {
+                std::cout <<"ERROR: function-name match runs to end of code [1].\n";
+                break; 
+              }
+
+              //Are we calling a function?
+              if (synt[pos]=='(') {
+                //Are we calling a valid script?
+                if (script_names.find(funcName)!=script_names.end()) {
+                  //This needs to be globally scoped, unless we've done this already (with inside with)
+                  if (code[oldPos-1] != ':') { //TODO: We could presumably fix nested "with (x) { with(self) {}}" here, if it occurs often in practice.
+                    code.insert(oldPos, "::");
+                    synt.insert(oldPos, "XX"); //TODO: I have no idea what syntax to use here.
+                    pos += 2;
+                  }
+                }
+              }
+            } else if (c=='s') { //These can create single-line scope.
+              //Get the name, get the item in parentheses.
+              string ctrlType;
+              if (!scan_token(ctrlType, pos, code, synt, 's')) {
+                std::cout <<"ERROR: function-name match runs to end of code [2].\n";
+                break; 
+              }
+              string innerName;
+              if (!skip_paren(innerName, pos, code, synt, 'n')) {
+                std::cout <<"ERROR: Parentheses don't match on \"" <<ctrlType <<"\" statement.\n";
                 break;
               }
 
-              char c = synt[pos];
-              if (c=='n') {
-                //Match the name
-                string funcName;
-                pt oldPos = pos;
-                if (!scan_token(funcName, pos, code, synt, 'n')) {
-                  std::cout <<"ERROR: function-name match runs to end of code [1].\n";
-                  break; 
-                }
-
-                //Are we calling a function?
-                if (synt[pos]=='(') {
-                  //Are we calling a valid script?
-                  if (script_names.find(funcName)!=script_names.end()) {
-                    //This needs to be globally scoped, unless we've done this already (with inside with)
-                    if (code[oldPos-1] != ':') { //TODO: We could presumably fix nested "with (x) { with(self) {}}" here, if it occurs often in practice.
-                      code.insert(oldPos, "::");
-                      synt.insert(oldPos, "XX"); //TODO: I have no idea what syntax to use here.
-                      pos += 2;
-                    }
-                  }
-                }
-              } else if (c=='s') { //These can create single-line scope.
-                //Get the name, get the item in parentheses.
-                string ctrlType;
-                if (!scan_token(ctrlType, pos, code, synt, 's')) {
-                  std::cout <<"ERROR: function-name match runs to end of code [2].\n";
-                  break; 
-                }
-                string innerName;
-                if (!skip_paren(innerName, pos, code, synt, 'n')) {
-                  std::cout <<"ERROR: Parentheses don't match on \"" <<ctrlType <<"\" statement.\n";
-                  break;
-                }
-
-                //If the control type is "with", we can only proceed if it doesn't use "self"
-                if (ctrlType=="with") { 
-                 if (innerName=="self") { //Now this *might* actually happen!
-                    std::cout <<"ERROR: with inside with can't be handled yet when self is involved.\n";
-                    //break; //Don't break; this will replace object-local with global scripts, but that *should* be harmless (and we might have a nested script).
-                 }
-                }
-
-                //The next character determines how much scope we are searching for.
-                scope++;
-                if (synt[pos]=='{') {
-//                  singleLineScope++;
-                } else {
-                  singleLineScope++;
-                  pos--;
-                }
-              } else if (c==';') { //This can sometimes close a level of scope if it's what we're waiting for.
-                if (singleLineScope>0) {
-                  scope -= singleLineScope;
-                  singleLineScope = 0;
-                }
-              } else if (c=='{') {
-                if (singleLineScope>0) { //Probably wouldn't have parsed anyway.
-                  std::cout <<"ERROR: single-line scope calls a multi-line scope (unsupported).\n";
-                  break;
-                }
-                scope++;
-              } else if (c=='}') {
-                scope--;
+              //If the control type is "with", we can only proceed if it doesn't use "self"
+              if (ctrlType=="with") { 
+               if (innerName=="self") { //Now this *might* actually happen!
+                  std::cout <<"ERROR: with inside with can't be handled yet when self is involved.\n";
+                  //break; //Don't break; this will replace object-local with global scripts, but that *should* be harmless (and we might have a nested script).
+               }
               }
+
+              //The next character determines how much scope we are searching for.
+              scope++;
+              if (synt[pos]=='{') {
+//                singleLineScope++;
+              } else {
+                singleLineScope++;
+                pos--;
+              }
+            } else if (c==';') { //This can sometimes close a level of scope if it's what we're waiting for.
+              if (singleLineScope>0) {
+                scope -= singleLineScope;
+                singleLineScope = 0;
+              }
+            } else if (c=='{') {
+              if (singleLineScope>0) { //Probably wouldn't have parsed anyway.
+                std::cout <<"ERROR: single-line scope calls a multi-line scope (unsupported).\n";
+                break;
+              }
+              scope++;
+            } else if (c=='}') {
+              scope--;
             }
           }
         }
