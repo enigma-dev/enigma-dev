@@ -59,7 +59,6 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
   igstack[igpos] = new scope_ignore(0);
   
   cout << "\nCollecting some variables...\n";
-  
   pt dec_start_pos = 0;
   
   int in_decl = 0, dec_out_of_scope = 0; //Not declaring, not declaring outside this scope via global or local
@@ -334,14 +333,24 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
         bool contented = false;
         unsigned pars = 1, args = 0;
 
+        //If this is a specific action, we can actually grab timeline indices.
+        if (nname == "action_set_timeline") {
+            size_t nextSep = synt.find_first_not_of("n", pos+2);
+            if (nextSep != std::string::npos) {
+              const string pname = code.substr(pos+2,nextSep-(pos+2));
+              cout << "  Potentially calls timeline `" << pname << "'\n";
+              pev->myObj->tlines.insert(pair<string,int>(pname,1));
+            }
+        }
+
         //Another special case: try to inline script_execute().
         if (nname == "script_execute") {
-            size_t nextSep = code.find_first_of(",)", pos+2);
+            size_t nextSep = synt.find_first_not_of("n", pos+2);
             if (nextSep != std::string::npos) {
               const string pname = code.substr(pos+2,nextSep-(pos+2));
               if (script_names.find(pname)!=script_names.end()) {
                 cout << "  script_execute() inlining `" << pname << "'\n";
-                int off = code[nextSep]==')' ? 0 : 1;
+                int off = synt[nextSep]==')' ? 0 : 1;
                 code.replace(spos, nextSep-spos+off, pname+"(");
                 synt.replace(spos, nextSep-spos+off, std::string(pname.size(),'n')+"(");
                 pos = spos + pname.size() - 1;
