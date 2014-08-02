@@ -29,7 +29,7 @@ namespace enigma {
     GLint bordercolor[4], min, mag, maxlevel;
     GLfloat anisotropy, minlod, maxlod;
     
-    SamplerState(): wrapu(true), wrapv(true), wrapw(true) {
+    SamplerState(): wrapu(true), wrapv(true), wrapw(true), min(GL_NEAREST), mag(GL_NEAREST), anisotropy(1), minlod(-1000), maxlod(1000), maxlevel(1000) {
       bordercolor[0] = 0;
       bordercolor[1] = 0;
       bordercolor[2] = 0;

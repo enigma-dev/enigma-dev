@@ -43,6 +43,8 @@ namespace enigma {
 TextureStruct::TextureStruct(unsigned gtex)
 {
   sampler = new enigma::SamplerState();
+  // Apply the full state so the sampler matches what is on the GPU initially.
+  sampler->ApplyState();
 	gltex = gtex;
 }
 
@@ -79,14 +81,16 @@ namespace enigma
       //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 3);
       glGenerateMipmap(GL_TEXTURE_2D);
     }
-    glBindTexture(GL_TEXTURE_2D, 0);
-
     TextureStruct* textureStruct = new TextureStruct(texture);
     textureStruct->width = width;
     textureStruct->height = height;
     textureStruct->fullwidth = fullwidth;
     textureStruct->fullheight = fullheight;
     textureStructs.push_back(textureStruct);
+    
+    //texture must be constructed before unbinding the texture so that it can apply its initial sampler state
+    glBindTexture(GL_TEXTURE_2D, 0);
+    
     return textureStructs.size()-1;
   }
 
@@ -101,6 +105,8 @@ namespace enigma
     fh = textureStructs[tex]->fullheight;
     char* bitmap = new char[(fh<<(lgpp2(fw)+2))|2];
     glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_BYTE, bitmap);
+    // apply the initial sampler state of the texture, since this texture is just rebuffered and not recreated this may not be necessary, someone should find out
+    textureStructs[tex]->sampler->ApplyState();
     unsigned dup_tex = graphics_create_texture(w, h, fw, fh, bitmap, mipmap);
     delete[] bitmap;
     glPopAttrib();
@@ -130,7 +136,8 @@ namespace enigma
 
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexImage2D(GL_TEXTURE_2D, 0, 4, fw, fh, 0, GL_BGRA, GL_UNSIGNED_BYTE, bitmap);
-
+    // apply the initial sampler state of the texture, since this texture is just rebuffered and not recreated this may not be necessary, someone should find out
+    textureStructs[tex]->sampler->ApplyState();
     glBindTexture(GL_TEXTURE_2D, 0);
 
     delete[] bitmap;
