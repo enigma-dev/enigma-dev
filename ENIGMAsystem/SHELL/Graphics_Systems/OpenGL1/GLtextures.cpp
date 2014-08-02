@@ -45,7 +45,7 @@ TextureStruct::TextureStruct(unsigned gtex)
   sampler = new enigma::SamplerState();
   // Apply the full state so the sampler matches what is on the GPU initially.
   sampler->ApplyState();
-	gltex = gtex;
+  gltex = gtex;
 }
 
 TextureStruct::~TextureStruct()
