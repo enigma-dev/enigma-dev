@@ -167,6 +167,9 @@ namespace enigma
     load_tiles();
     //Tiles end
 
+    //Delay deactivation/activation events.
+    enigma::instance_flag_delay_deact();
+
     object_basic* is[instancecount];
     for (int i = 0; i < instancecount; i++) {
       inst *obj = &instances[i];
@@ -192,6 +195,9 @@ namespace enigma
   // Fire the rooms creation code
   if (createcode)
        createcode();
+
+  //Fire off any saved instance events. (NOTE: The roomstart event below does *not* fire for these).
+  enigma::instance_flag_clear_and_run();
 
   // Fire the room start event for all persistent objects still kept alive and all the new instances
   for (enigma::iterator it = enigma::instance_list_first(); it; ++it)

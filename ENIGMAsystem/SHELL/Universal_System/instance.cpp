@@ -27,6 +27,7 @@
 \********************************************************************************/
 
 #include <map>
+#include <vector>
 #include <math.h>
 #include <string>
 //#include "reflexive_types.h"
@@ -35,6 +36,7 @@
 
 #include "instance_system.h"
 #include "instance.h"
+#include "Collision_Systems/General/CSfuncs.h"
 
 #include <stdio.h>
 
@@ -45,19 +47,63 @@ namespace enigma
 
 typedef std::pair<int,enigma::inst_iter*> inode_pair;
 
-namespace enigma_user
-{
 
-void instance_deactivate_all(bool notme) {
+namespace enigma 
+{
+  bool InstDelayCmd::IsDelay = false;
+
+  //Delete all except a given id. (-1 means "delete all")
+  void instance_deactivate_all_except(int exid) {
     for (enigma::iterator it = enigma::instance_list_first(); it; ++it) {
-        if (notme && (*it)->id == enigma::instance_event_iterator->inst->id) continue;
+        if (exid>=0 && (*it)->id == exid) continue;
 
         ((enigma::object_basic*)*it)->deactivate();
         enigma::instance_deactivated_list.insert(inode_pair((*it)->id,it.it));
     }
+  }
+
+
+  void instance_flag_delay_deact() {
+    InstDelayCmd::IsDelay = true;
+    instance_delayed_commands.clear();
+  }
+  void instance_flag_clear_and_run() {
+    InstDelayCmd::IsDelay = false;
+    for (std::vector<InstDelayCmd>::const_iterator it=instance_delayed_commands.begin(); it!=instance_delayed_commands.end(); it++) {
+      switch (it->cmd) {
+        case InstDelayCmd::DeactObj: enigma_user::instance_deactivate_object(it->id); break;
+        case InstDelayCmd::DeactAll: instance_deactivate_all_except(it->id); break;
+        case InstDelayCmd::DeactReg: instance_deactivate_region_except(it->id, it->left, it->top, it->width, it->height, it->inside); break;
+        case InstDelayCmd::DeactCirc: instance_deactivate_circle_except(it->id, it->x, it->y, it->r, it->inside); break;
+        case InstDelayCmd::ActObj: enigma_user::instance_activate_object(it->id); break;
+        case InstDelayCmd::ActAll: enigma_user::instance_activate_all(); break;
+        case InstDelayCmd::ActReg: enigma_user::instance_activate_region(it->left, it->top, it->width, it->height, it->inside); break;
+        case InstDelayCmd::ActCirc: enigma_user::instance_activate_circle(it->x, it->y, it->r, it->inside); break;
+      }
+    }
+    instance_delayed_commands.clear();
+  }
+}
+
+
+namespace enigma_user
+{
+
+void instance_deactivate_all(bool notme) {
+    int exid = notme ? enigma::instance_event_iterator->inst->id : -1;
+    if (enigma::InstDelayCmd::IsDelay) {
+      enigma::instance_delayed_commands.push_back(enigma::InstDelayCmd(enigma::InstDelayCmd::DeactAll, exid));
+      return;
+    }
+
+    enigma::instance_deactivate_all_except(exid);
 }
 
 void instance_activate_all() {
+    if (enigma::InstDelayCmd::IsDelay) {
+      enigma::instance_delayed_commands.push_back(enigma::InstDelayCmd(enigma::InstDelayCmd::ActAll));
+      return;
+    }
 
     std::map<int,enigma::inst_iter*>::iterator iter = enigma::instance_deactivated_list.begin();
     while (iter != enigma::instance_deactivated_list.end()) {
@@ -67,6 +113,11 @@ void instance_activate_all() {
 }
 
 void instance_deactivate_object(int obj) {
+    if (enigma::InstDelayCmd::IsDelay) {
+      enigma::instance_delayed_commands.push_back(enigma::InstDelayCmd(enigma::InstDelayCmd::DeactObj, obj));
+      return;
+    }
+
     for (enigma::iterator it = enigma::fetch_inst_iter_by_int(obj); it; ++it) {
         ((enigma::object_basic*)*it)->deactivate();
         enigma::instance_deactivated_list.insert(inode_pair((*it)->id,it.it));
@@ -74,6 +125,11 @@ void instance_deactivate_object(int obj) {
 }
 
 void instance_activate_object(int obj) {
+    if (enigma::InstDelayCmd::IsDelay) {
+      enigma::instance_delayed_commands.push_back(enigma::InstDelayCmd(enigma::InstDelayCmd::ActObj, obj));
+      return;
+    }
+
     std::map<int,enigma::inst_iter*>::iterator iter = enigma::instance_deactivated_list.begin();
     while (iter != enigma::instance_deactivated_list.end()) {
         enigma::object_basic* const inst = ((enigma::object_basic*)(iter->second->inst));
