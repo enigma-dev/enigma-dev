@@ -27,15 +27,7 @@ using std::string;
 #include "Universal_System/spritestruct.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 
-
 vector<TextureStruct*> textureStructs(0);
-
-namespace enigma_user {
-  extern int room_width, room_height;
-}
-namespace enigma {
-  extern size_t background_idmax;
-}
 
 inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect powers of two
 	x =  (x & -x) - 1;
