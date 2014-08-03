@@ -445,8 +445,8 @@ class Mesh
     }
 
     if (useColors){
-		glEnableClientState(GL_COLOR_ARRAY);
-        glColorPointer( 4, GL_UNSIGNED_BYTE, STRIDE, OFFSET(offset)); // Set the color pointer to the offset in the array
+      glEnableClientState(GL_COLOR_ARRAY);
+      glColorPointer( 4, GL_UNSIGNED_BYTE, STRIDE, OFFSET(offset)); // Set the color pointer to the offset in the array
     }
 
     glDrawElements(mode, count, GL_UNSIGNED_INT, &inds[vert_start]);
@@ -500,7 +500,7 @@ class Mesh
       DrawElements(GL_LINES, lineIndexedVertices, lineIndices, lineIndices.size());
     }
     if (pointIndexedCount > 0) {
-        DrawElements(GL_POINTS, pointIndexedVertices, pointIndices, pointIndices.size());
+      DrawElements(GL_POINTS, pointIndexedVertices, pointIndices, pointIndices.size());
     }
 
     // Draw the unbatched and unindexed primitives
@@ -511,7 +511,7 @@ class Mesh
       DrawArrays(GL_LINES, lineVertices, lineCount);
     }
     if (pointCount > 0) {
-        DrawArrays(GL_POINTS, pointVertices, pointCount);
+      DrawArrays(GL_POINTS, pointVertices, pointCount);
     }
 
     glDisableClientState(GL_VERTEX_ARRAY);
