@@ -78,7 +78,7 @@ namespace enigma
 
     iterator::iterator(inst_iter*_it, bool tmp): it(_it), temp(tmp) { addme(); }
     iterator::iterator(const iterator&other): it(other.it?new inst_iter(*other.it):NULL), temp(true) { addme(); }
-    iterator::iterator(iterator&other): it(other.it), temp(other.temp) { other.temp = NULL; }
+    iterator::iterator(iterator&other): it(other.it), temp(other.temp) { other.temp = false; }
     iterator::iterator(object_basic*ob): it(new inst_iter(ob,NULL,NULL)), temp(true) { }
     iterator::iterator(): it(NULL), temp(true) { }
     iterator:: ~iterator() {
@@ -170,9 +170,9 @@ namespace enigma
   inst_iter *instance_event_iterator = &dummy_event_iterator; // Not bad for efficiency, either.
   object_basic *instance_other = NULL;
 
-  temp_event_scope::temp_event_scope(object_basic* ninst): oinst(instance_event_iterator->inst), oiter(instance_event_iterator)
-    { instance_event_iterator = &dummy_event_iterator; instance_event_iterator->inst = ninst; }
-  temp_event_scope::~temp_event_scope() { instance_event_iterator = oiter; instance_event_iterator->inst = oinst; }
+  temp_event_scope::temp_event_scope(object_basic* ninst): oinst(instance_event_iterator->inst), oiter(instance_event_iterator), prev_other(instance_other)
+    { instance_event_iterator = &dummy_event_iterator; instance_event_iterator->inst = ninst; instance_other=ninst; }
+  temp_event_scope::~temp_event_scope() { instance_event_iterator = oiter; instance_event_iterator->inst = oinst; instance_other=prev_other; }
 
   /* **  Methods ** */
   // Retrieve the first instance on the complete list.

@@ -15,17 +15,18 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Universal_System/scalar.h"
+#ifndef ENIGMA_GL_TEXTURESTRUCT__H
+#define ENIGMA_GL_TEXTURESTRUCT__H
 
-#ifndef _GLTEXTURESTRUCT__H
-#define _GLTEXTURESTRUCT__H
+#include "Universal_System/scalar.h"
+#include "GLSamplerState.h"
 
 #include <vector>
 using std::vector;
 
 struct TextureStruct {
+  enigma::SamplerState* sampler;
 	unsigned gltex;
-	bool isFont;
 	unsigned width,height;
 	unsigned fullwidth,fullheight;
 	TextureStruct(unsigned gtex);
@@ -35,4 +36,4 @@ extern vector<TextureStruct*> textureStructs;
 
 unsigned get_texture(int texid);
 
-#endif
+#endif // ENIGMA_GL_TEXTURESTRUCT__H

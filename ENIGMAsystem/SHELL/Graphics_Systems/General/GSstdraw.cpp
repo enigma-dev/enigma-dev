@@ -569,8 +569,8 @@ void draw_button(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, gs_scala
 	draw_vertex(x2,y2);
 	draw_primitive_end();
 
-	int color, alpha;
-	alpha = 0.5;
+	int color;
+	float alpha = 0.5;
     if (up == true){ color = make_color_rgb(127,127,127); } else { color = make_color_rgb(255,255,255); }
 
 	draw_primitive_begin(pr_trianglestrip);

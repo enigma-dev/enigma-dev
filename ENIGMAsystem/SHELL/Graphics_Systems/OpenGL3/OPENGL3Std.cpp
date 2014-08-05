@@ -39,7 +39,6 @@ namespace enigma_user{
 
 namespace enigma
 {
-  unsigned bound_texture=0;
   unsigned default_shader;
   unsigned main_shader;
   unsigned bound_shader;
@@ -48,17 +47,20 @@ namespace enigma
   int currentblendtype = 0;
   bool glew_isgo;
   bool pbo_isgo;
+  
+  void graphics_initialize_samplers();
 
     void graphicssystem_initialize()
     {
         oglmgr = new ContextManager();
-        GLenum err = glewInit();
-
         #ifdef DEBUG_MODE
+        GLenum err = glewInit();
         if (GLEW_OK != err)
         {
           std::cout<<"GLEW ERROR!"<<std::endl;
         }
+        #else
+        glewInit();
         #endif
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -69,7 +71,7 @@ namespace enigma
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        glBindTexture(GL_TEXTURE_2D,bound_texture=0);
+        glBindTexture(GL_TEXTURE_2D,0);
 
         init_shaders();
         // read shaders into graphics system structure and compile and link them if needed
@@ -124,9 +126,10 @@ namespace enigma
         enigma_user::glsl_program_reset(); //Set the default program
         //END DEFAULT SHADER
 
-        using enigma_user::room_width;
+        graphics_initialize_samplers();
+        
+		using enigma_user::room_width;
         using enigma_user::room_height;
-
         glViewport(0,0,(int)room_width,(int)room_height);
         enigma_user::d3d_set_projection_ortho(0,(int)room_width,0,(int)room_height, 0);
     }

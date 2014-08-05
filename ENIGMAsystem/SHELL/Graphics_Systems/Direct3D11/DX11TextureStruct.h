@@ -24,7 +24,21 @@
 using std::vector;
 
 struct TextureStruct {
-
+  ID3D11Texture2D *texture;
+  unsigned width,height;
+	unsigned fullwidth,fullheight;
+  
+  TextureStruct(ID3D11Texture2D *ntexture): texture(ntexture) {
+  
+  }
+  
+  ~TextureStruct() {
+    if (texture != NULL) {
+      texture->Release();
+      texture = NULL;
+    }
+  }
+  
 };
 extern vector<TextureStruct*> textureStructs;
 

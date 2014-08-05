@@ -16,7 +16,7 @@
 **/
 
 /**
-  @file  graphics_object.h
+  @file  planar_object.h
   @brief Adds a planar tier following the main tier.
 */
 

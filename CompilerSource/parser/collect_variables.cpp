@@ -52,14 +52,13 @@ struct scope_ignore {
 #include "collect_variables.h"
 #include "languages/language_adapter.h"
 
-void collect_variables(language_adapter *lang, string &code, string &synt, parsed_event* pev)
+void collect_variables(language_adapter *lang, string &code, string &synt, parsed_event* pev, const std::set<std::string>& script_names)
 {
   int igpos = 0;
   darray<scope_ignore*> igstack;
   igstack[igpos] = new scope_ignore(0);
   
   cout << "\nCollecting some variables...\n";
-  
   pt dec_start_pos = 0;
   
   int in_decl = 0, dec_out_of_scope = 0; //Not declaring, not declaring outside this scope via global or local
@@ -73,9 +72,16 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
   
   int  with_after_parenths = 0;
   bool with_until_semi = false;
+
+  bool grab_tline_index = false; //Are we currently trying to stockpile a list of known timeline indices?
   
   for (pt pos = 0; pos < code.length(); pos++)
   {
+    //Stop grabbing the timeline index?
+    if (grab_tline_index) {
+      grab_tline_index = (synt[pos]=='n') || (synt[pos]=='=') || (synt[pos]=='(');
+    }
+
     if (synt[pos] == '{') {
       bool isw = igstack[igpos]->is_with | with_until_semi; with_until_semi = 0;
       igstack[++igpos] = new scope_ignore(isw);
@@ -242,7 +248,7 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
       while (synt[++pos] == 'n');
       
       //Looking at a straight identifier. Make sure it actually needs declared.
-      const string nname = code.substr(spos,pos-spos);
+      string nname = code.substr(spos,pos-spos);
       
       if (!nts)
         { pos--; continue; }
@@ -256,6 +262,18 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
             dec_name_givn = true;
             dec_name = nname;
           } continue;
+        }
+
+        //If we're currently looking for a timeline variable, check if this is it.
+        if (grab_tline_index) {
+          cout << "  Potentially calls timeline `" << nname << "'\n";
+          pev->myObj->tlines.insert(pair<string,int>(nname,1));
+          grab_tline_index = false;
+        }
+
+        //Before ignoring globals/locals, check if we're setting the timeline index.
+        if (nname == "timeline_index") {
+          grab_tline_index = true;
         }
         
         //First, check shared locals to see if we already have one
@@ -314,6 +332,32 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
       {
         bool contented = false;
         unsigned pars = 1, args = 0;
+
+        //If this is a specific action, we can actually grab timeline indices.
+        if (nname == "action_set_timeline") {
+            size_t nextSep = synt.find_first_not_of("n", pos+2);
+            if (nextSep != std::string::npos) {
+              const string pname = code.substr(pos+2,nextSep-(pos+2));
+              cout << "  Potentially calls timeline `" << pname << "'\n";
+              pev->myObj->tlines.insert(pair<string,int>(pname,1));
+            }
+        }
+
+        //Another special case: try to inline script_execute().
+        if (nname == "script_execute") {
+            size_t nextSep = synt.find_first_not_of("n", pos+2);
+            if (nextSep != std::string::npos) {
+              const string pname = code.substr(pos+2,nextSep-(pos+2));
+              if (script_names.find(pname)!=script_names.end()) {
+                cout << "  script_execute() inlining `" << pname << "'\n";
+                int off = synt[nextSep]==')' ? 0 : 1;
+                code.replace(spos, nextSep-spos+off, pname+"(");
+                synt.replace(spos, nextSep-spos+off, std::string(pname.size(),'n')+"(");
+                pos = spos + pname.size() - 1;
+                nname = pname;
+              }
+            }
+        }
         
         for (pt i = pos+2; pars; i++) //Start after parenthesis at pos+1, loop until that parenthesis is closed
         {

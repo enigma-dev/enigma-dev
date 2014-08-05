@@ -44,8 +44,6 @@ using namespace std;
 #include <vector>
 using std::vector;
 
-unsigned get_texture(int texid);
-
 extern GLenum ptypes_by_id[16];
 namespace enigma {
   extern unsigned char currentcolor[4];
@@ -202,42 +200,42 @@ class Mesh
 
   Mesh (int type)
   {
-	triangleIndexedVertices.reserve(64000);
-	pointIndexedVertices.reserve(64000);
-	lineIndexedVertices.reserve(64000);
-	pointVertices.reserve(64000);
-	pointIndices.reserve(64000);
-	lineVertices.reserve(64000);
-	lineIndices.reserve(64000);
-	triangleVertices.reserve(64000);
-	triangleIndices.reserve(64000);
-	vertices.reserve(64000);
-	indices.reserve(64000);
+    triangleIndexedVertices.reserve(64000);
+    pointIndexedVertices.reserve(64000);
+    lineIndexedVertices.reserve(64000);
+    pointVertices.reserve(64000);
+    pointIndices.reserve(64000);
+    lineVertices.reserve(64000);
+    lineIndices.reserve(64000);
+    triangleVertices.reserve(64000);
+    triangleIndices.reserve(64000);
+    vertices.reserve(64000);
+    indices.reserve(64000);
 
     switch (type){
-        case enigma_user::model_static: vbotype = GL_STATIC_DRAW; break;
-        case enigma_user::model_dynamic: vbotype = GL_DYNAMIC_DRAW; break;
-        case enigma_user::model_stream: vbotype = GL_STREAM_DRAW; break;
+      case enigma_user::model_static: vbotype = GL_STATIC_DRAW; break;
+      case enigma_user::model_dynamic: vbotype = GL_DYNAMIC_DRAW; break;
+      case enigma_user::model_stream: vbotype = GL_STREAM_DRAW; break;
     }
 
-	ibogenerated = false;
-	vbogenerated = false;
+    ibogenerated = false;
+    vbogenerated = false;
     vbobuffered = false;
-	vboindexed = false;
+    vboindexed = false;
 
-	vertexStride = 0;
+    vertexStride = 0;
     useColors = false;
     useTextures = false;
     useNormals = false;
 
-	pointCount = 0;
-	triangleCount = 0;
-	lineCount = 0;
+    pointCount = 0;
+    triangleCount = 0;
+    lineCount = 0;
 
-	indexedoffset = 0;
-	pointIndexedCount = 0;
-	triangleIndexedCount = 0;
-	lineIndexedCount = 0;
+    indexedoffset = 0;
+    pointIndexedCount = 0;
+    triangleIndexedCount = 0;
+    lineIndexedCount = 0;
 
     currentPrimitive = 0;
     vbufferSize = 0;
@@ -246,64 +244,64 @@ class Mesh
 
   ~Mesh()
   {
-	glDeleteBuffers(1, &vertexBuffer);
-	glDeleteBuffers(1, &indexBuffer);
+    glDeleteBuffers(1, &vertexBuffer);
+    glDeleteBuffers(1, &indexBuffer);
   }
 
   void ClearData()
   {
     triangleVertices.clear();
-	pointVertices.clear();
-	lineVertices.clear();
-	triangleIndexedVertices.clear();
-	pointIndexedVertices.clear();
-	lineIndexedVertices.clear();
-	triangleIndices.clear();
-	pointIndices.clear();
-	lineIndices.clear();
-	vertices.clear();
-	indices.clear();
+    pointVertices.clear();
+    lineVertices.clear();
+    triangleIndexedVertices.clear();
+    pointIndexedVertices.clear();
+    lineIndexedVertices.clear();
+    triangleIndices.clear();
+    pointIndices.clear();
+    lineIndices.clear();
+    vertices.clear();
+    indices.clear();
   }
 
   void Clear()
   {
     ClearData();
 
-	triangleIndexedVertices.reserve(64000);
-	pointIndexedVertices.reserve(64000);
-	lineIndexedVertices.reserve(64000);
-	pointVertices.reserve(64000);
-	pointIndices.reserve(64000);
-	lineVertices.reserve(64000);
-	lineIndices.reserve(64000);
-	triangleVertices.reserve(64000);
-	triangleIndices.reserve(64000);
-	vertices.reserve(64000);
-	indices.reserve(64000);
+    triangleIndexedVertices.reserve(64000);
+    pointIndexedVertices.reserve(64000);
+    lineIndexedVertices.reserve(64000);
+    pointVertices.reserve(64000);
+    pointIndices.reserve(64000);
+    lineVertices.reserve(64000);
+    lineIndices.reserve(64000);
+    triangleVertices.reserve(64000);
+    triangleIndices.reserve(64000);
+    vertices.reserve(64000);
+    indices.reserve(64000);
 
     vbobuffered = false;
-	vboindexed = false;
+    vboindexed = false;
 
-	vertexStride = 0;
-	useColors = false;
+    vertexStride = 0;
+    useColors = false;
     useTextures = false;
     useNormals = false;
 
-	pointCount = 0;
-	triangleCount = 0;
-	lineCount = 0;
-	indexedoffset = 0;
-	pointIndexedCount = 0;
-	triangleIndexedCount = 0;
-	lineIndexedCount = 0;
+    pointCount = 0;
+    triangleCount = 0;
+    lineCount = 0;
+    indexedoffset = 0;
+    pointIndexedCount = 0;
+    triangleIndexedCount = 0;
+    lineIndexedCount = 0;
   }
 
   unsigned GetStride() {
-  	unsigned stride = vertexStride;
+    unsigned stride = vertexStride;
     if (useNormals) stride += 3;
-	if (useTextures) stride += 2;
+    if (useTextures) stride += 2;
     if (useColors) stride += 1;
-	return stride;
+    return stride;
   }
 
   void Begin(int pt)
@@ -315,13 +313,13 @@ class Mesh
   void AddVertex(gs_scalar x, gs_scalar y)
   {
     vertices.push_back(x); vertices.push_back(y);
-	vertexStride = 2;
+    vertexStride = 2;
   }
 
   void AddVertex(gs_scalar x, gs_scalar y, gs_scalar z)
   {
     vertices.push_back(x); vertices.push_back(y); vertices.push_back(z);
-	vertexStride = 3;
+    vertexStride = 3;
   }
 
   void AddIndex(unsigned ind)
@@ -332,20 +330,20 @@ class Mesh
   void AddNormal(gs_scalar nx, gs_scalar ny, gs_scalar nz)
   {
     vertices.push_back(nx); vertices.push_back(ny); vertices.push_back(nz);
-	useNormals = true;
+    useNormals = true;
   }
 
   void AddTexture(gs_scalar tx, gs_scalar ty)
   {
     vertices.push_back(tx); vertices.push_back(ty);
-	useTextures = true;
+    useTextures = true;
   }
 
   void AddColor(int col, double alpha)
   {
-	color_t finalcol = col + ((unsigned char)(alpha*255) << 24);
-	vertices.push_back(finalcol);
-	useColors = true;
+    color_t finalcol = col + ((unsigned char)(alpha*255) << 24);
+    vertices.push_back(finalcol);
+    useColors = true;
   }
 
   void End()
@@ -461,105 +459,105 @@ class Mesh
 			break;
 	}
 
-	// Clean up the temporary vertex and index containers now that they have been batched efficiently
-	vertices.clear();
-	indices.clear();
+    // Clean up the temporary vertex and index containers now that they have been batched efficiently
+    vertices.clear();
+    indices.clear();
   }
 
   void BufferGenerate()
   {
-	vector<VertexElement> vdata;
-	vector<GLuint> idata;
+    vector<VertexElement> vdata;
+    vector<GLuint> idata;
 
-	vdata.reserve(triangleVertices.size() + lineVertices.size() + pointVertices.size() + triangleIndexedVertices.size() + lineIndexedVertices.size() + pointIndexedVertices.size());
-	idata.reserve(triangleIndices.size() + lineIndices.size() + pointIndices.size());
+    vdata.reserve(triangleVertices.size() + lineVertices.size() + pointVertices.size() + triangleIndexedVertices.size() + lineIndexedVertices.size() + pointIndexedVertices.size());
+    idata.reserve(triangleIndices.size() + lineIndices.size() + pointIndices.size());
 
-	unsigned interleave = 0;
+    unsigned interleave = 0;
 
-	triangleIndexedCount = triangleIndices.size();
-	if (triangleIndexedCount > 0) {
-		vdata.insert(vdata.end(), triangleIndexedVertices.begin(), triangleIndexedVertices.end());
-		idata.insert(idata.end(), triangleIndices.begin(), triangleIndices.end());
-		interleave += triangleIndexedVertices.size()/GetStride();
-	}
+    triangleIndexedCount = triangleIndices.size();
+    if (triangleIndexedCount > 0) {
+      vdata.insert(vdata.end(), triangleIndexedVertices.begin(), triangleIndexedVertices.end());
+      idata.insert(idata.end(), triangleIndices.begin(), triangleIndices.end());
+      interleave += triangleIndexedVertices.size()/GetStride();
+    }
 
-	lineIndexedCount = lineIndices.size();
-	if (lineIndexedCount > 0) {
-		vdata.insert(vdata.end(), lineIndexedVertices.begin(), lineIndexedVertices.end());
-		for (std::vector<GLuint>::iterator it = lineIndices.begin(); it != lineIndices.end(); ++it) { *it += interleave; }
-		idata.insert(idata.end(), lineIndices.begin(), lineIndices.end());
-		interleave += lineIndexedVertices.size()/GetStride();
-	}
+    lineIndexedCount = lineIndices.size();
+    if (lineIndexedCount > 0) {
+      vdata.insert(vdata.end(), lineIndexedVertices.begin(), lineIndexedVertices.end());
+      for (std::vector<GLuint>::iterator it = lineIndices.begin(); it != lineIndices.end(); ++it) { *it += interleave; }
+      idata.insert(idata.end(), lineIndices.begin(), lineIndices.end());
+      interleave += lineIndexedVertices.size()/GetStride();
+    }
 
-	pointIndexedCount = pointIndices.size();
-	if (pointIndexedCount > 0) {
-		vdata.insert(vdata.end(), pointIndexedVertices.begin(), pointIndexedVertices.end());
-		for (std::vector<GLuint>::iterator it = lineIndices.begin(); it != lineIndices.end(); ++it) { *it += interleave; }
-		idata.insert(idata.end(), pointIndices.begin(), pointIndices.end());
-	}
+    pointIndexedCount = pointIndices.size();
+    if (pointIndexedCount > 0) {
+      vdata.insert(vdata.end(), pointIndexedVertices.begin(), pointIndexedVertices.end());
+      for (std::vector<GLuint>::iterator it = lineIndices.begin(); it != lineIndices.end(); ++it) { *it += interleave; }
+      idata.insert(idata.end(), pointIndices.begin(), pointIndices.end());
+    }
 
-	if (idata.size() > 0) {
-		vboindexed = true;
-		indexedoffset += vdata.size();
+    if (idata.size() > 0) {
+      vboindexed = true;
+      indexedoffset += vdata.size();
 
-		if (!ibogenerated) {
-			glGenBuffers( 1, &indexBuffer );
-			ibogenerated = true;
-            ibufferSize = idata.size() * sizeof(GLuint);
-			glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indexBuffer );
-			glBufferData( GL_ELEMENT_ARRAY_BUFFER, ibufferSize, &idata[0], vbotype );
-		} else {
-			glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indexBuffer );
+      if (!ibogenerated) {
+        glGenBuffers( 1, &indexBuffer );
+        ibogenerated = true;
+              ibufferSize = idata.size() * sizeof(GLuint);
+        glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indexBuffer );
+        glBufferData( GL_ELEMENT_ARRAY_BUFFER, ibufferSize, &idata[0], vbotype );
+      } else {
+        glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indexBuffer );
 
-			if ((double)(idata.size() * sizeof(GLuint)) / (double)ibufferSize > 0.5 ) {
-				glBufferData( GL_ELEMENT_ARRAY_BUFFER, idata.size() * sizeof(GLuint), &idata[0], vbotype );
-			} else {
-				glBufferSubData( GL_ELEMENT_ARRAY_BUFFER, 0, idata.size() * sizeof(GLuint), &idata[0]);
-			}
-			ibufferSize = idata.size() * sizeof(GLuint);
-		}
+        if ((double)(idata.size() * sizeof(GLuint)) / (double)ibufferSize > 0.5 ) {
+          glBufferData( GL_ELEMENT_ARRAY_BUFFER, idata.size() * sizeof(GLuint), &idata[0], vbotype );
+        } else {
+          glBufferSubData( GL_ELEMENT_ARRAY_BUFFER, 0, idata.size() * sizeof(GLuint), &idata[0]);
+        }
+        ibufferSize = idata.size() * sizeof(GLuint);
+      }
 
-		// Unbind the buffer we do not need anymore
-		glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
-		// Clean up temporary interleaved data
-		idata.clear();
-	} else {
-		vboindexed = false;
-	}
+      // Unbind the buffer we do not need anymore
+      glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
+      // Clean up temporary interleaved data
+      idata.clear();
+    } else {
+      vboindexed = false;
+    }
 
-	if (triangleCount > 0) {
-		vdata.insert(vdata.end(), triangleVertices.begin(), triangleVertices.end());
-	}
+    if (triangleCount > 0) {
+      vdata.insert(vdata.end(), triangleVertices.begin(), triangleVertices.end());
+    }
 
-	if (lineCount > 0) {
-		vdata.insert(vdata.end(), lineVertices.begin(), lineVertices.end());
-	}
+    if (lineCount > 0) {
+      vdata.insert(vdata.end(), lineVertices.begin(), lineVertices.end());
+    }
 
-	if (pointCount > 0) {
-		vdata.insert(vdata.end(), pointVertices.begin(), pointVertices.end());
-	}
+    if (pointCount > 0) {
+      vdata.insert(vdata.end(), pointVertices.begin(), pointVertices.end());
+    }
 
-	if (!vbogenerated) {
-		glGenBuffers( 1, &vertexBuffer );
-		vbogenerated = true;
-        vbufferSize = vdata.size() * sizeof(gs_scalar);
-		glBindBuffer( GL_ARRAY_BUFFER, vertexBuffer );
-		glBufferData( GL_ARRAY_BUFFER, vbufferSize, &vdata[0], vbotype );
-	} else {
-		glBindBuffer( GL_ARRAY_BUFFER, vertexBuffer );
+    if (!vbogenerated) {
+      glGenBuffers( 1, &vertexBuffer );
+      vbogenerated = true;
+      vbufferSize = vdata.size() * sizeof(gs_scalar);
+      glBindBuffer( GL_ARRAY_BUFFER, vertexBuffer );
+      glBufferData( GL_ARRAY_BUFFER, vbufferSize, &vdata[0], vbotype );
+    } else {
+      glBindBuffer( GL_ARRAY_BUFFER, vertexBuffer );
 
-		if ((double)(vdata.size() * sizeof(gs_scalar)) / (double)vbufferSize > 0.5 ) {
-			glBufferData( GL_ARRAY_BUFFER, vdata.size() * sizeof(gs_scalar), &vdata[0], vbotype );
-		} else {
-			glBufferSubData( GL_ARRAY_BUFFER, 0, vdata.size() * sizeof(gs_scalar), &vdata[0]);
-		}
-		vbufferSize = vdata.size() * sizeof(gs_scalar);
-	}
+      if ((double)(vdata.size() * sizeof(gs_scalar)) / (double)vbufferSize > 0.5 ) {
+        glBufferData( GL_ARRAY_BUFFER, vdata.size() * sizeof(gs_scalar), &vdata[0], vbotype );
+      } else {
+        glBufferSubData( GL_ARRAY_BUFFER, 0, vdata.size() * sizeof(gs_scalar), &vdata[0]);
+      }
+      vbufferSize = vdata.size() * sizeof(gs_scalar);
+    }
 
-	// Unbind the buffer we do not need anymore
-	glBindBuffer( GL_ARRAY_BUFFER, 0 );
-	// Clean up temporary interleaved data
-	vdata.clear();
+    // Unbind the buffer we do not need anymore
+    glBindBuffer( GL_ARRAY_BUFFER, 0 );
+    // Clean up temporary interleaved data
+    vdata.clear();
 
     // Clean up the data from RAM it is now safe on VRAM
     ClearData();
@@ -567,7 +565,7 @@ class Mesh
 
   void Draw(int vertex_start = 0, int vertex_count = -1)
   {
-	if (!GetStride()) { return; }
+    if (!GetStride()) { return; }
 
     if (!vbogenerated || !vbobuffered) {
 	  vbobuffered = true;
@@ -577,9 +575,9 @@ class Mesh
     //If there is nothing to render, then there is no need for all the rest
     if (triangleIndexedCount == 0 && lineIndexedCount == 0 && pointIndexedCount == 0 && triangleCount == 0 && lineCount == 0 && pointCount == 0) return;
 
-	#ifdef DEBUG_MODE
-	enigma::GPUProfilerVBORender vbd = oglmgr->gpuprof.add_drawcall();
-	#endif
+    #ifdef DEBUG_MODE
+    enigma::GPUProfilerVBORender vbd = oglmgr->gpuprof.add_drawcall();
+    #endif
 	
     if (enigma::transform_needs_update == true){
         enigma::transformation_update();
@@ -596,123 +594,124 @@ class Mesh
     //Bind texture
     enigma_user::glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_texSampler, 0);
 
-	GLsizei stride = GetStride();
+    GLsizei stride = GetStride();
 
-	#define OFFSET( P )  ( ( const GLvoid * ) ( sizeof( gs_scalar ) * ( P         ) ) )
-	GLsizei STRIDE = stride * sizeof( gs_scalar );
+    #define OFFSET( P )  ( ( const GLvoid * ) ( sizeof( gs_scalar ) * ( P         ) ) )
+    GLsizei STRIDE = stride * sizeof( gs_scalar );
 
-	// Enable vertex array's for fast vertex processing
-	glBindBuffer( GL_ARRAY_BUFFER, vertexBuffer );
-	if (vboindexed) {
-		glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indexBuffer );
-	}
+    // Enable vertex array's for fast vertex processing
+    glBindBuffer( GL_ARRAY_BUFFER, vertexBuffer );
+    if (vboindexed) {
+      glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indexBuffer );
+    }
 
-	unsigned offset = 0;
-	enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_vertex,true);
-	enigma_user::glsl_attribute_set(enigma::shaderprograms[enigma::bound_shader]->att_vertex, vertexStride, GL_FLOAT, 0, STRIDE, offset);
-	offset += vertexStride;
+
+    unsigned offset = 0;
+    enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_vertex,true);
+    enigma_user::glsl_attribute_set(enigma::shaderprograms[enigma::bound_shader]->att_vertex, vertexStride, GL_FLOAT, 0, STRIDE, offset);
+    offset += vertexStride;
 
     if (useNormals){
-        enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_normal, true);
-		enigma_user::glsl_attribute_set(enigma::shaderprograms[enigma::bound_shader]->att_normal, 3, GL_FLOAT, 0, STRIDE, offset);
-		offset += 3;
+      enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_normal, true);
+      enigma_user::glsl_attribute_set(enigma::shaderprograms[enigma::bound_shader]->att_normal, 3, GL_FLOAT, 0, STRIDE, offset);
+      offset += 3;
     }else{
-        enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_normal, false);
+      enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_normal, false);
     }
 
     enigma_user::glsl_uniformf( enigma::shaderprograms[enigma::bound_shader]->uni_color, (float)enigma::currentcolor[0]/255.0f, (float)enigma::currentcolor[1]/255.0f, (float)enigma::currentcolor[2]/255.0f, (float)enigma::currentcolor[3]/255.0f );
 
     if (useTextures){
-         //This part sucks, but is required because models can be drawn without textures even if coordinates are provided
-         //like in the case of d3d_model_block
-        if (oglmgr->GetBoundTexture() != 0){
-            enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_texture, true);
-			enigma_user::glsl_attribute_set(enigma::shaderprograms[enigma::bound_shader]->att_texture, 2, GL_FLOAT, 0, STRIDE, offset);
-            enigma_user::glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_textureEnable, 1);
-        }else{
-            enigma_user::glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_textureEnable, 0);
-            enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_texture, false);
-        }
-		offset += 2;
-	}else{
+      //This part sucks, but is required because models can be drawn without textures even if coordinates are provided
+      //like in the case of d3d_model_block
+      // Robert: I had to comment out this check due to the change in sampler management, you will need to check all 8 sampler stages if you want to reimplement this check
+      // because this model class handles multi-texturing.
+      // Harijs: No, it doesn't support "multi-texturing" in the regulat sense, because we only bind one texture when drawing by default. This check is to see if this texture is used.
+      if (oglmgr->GetBoundTexture() != 0){
+        enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_texture, true);
+        enigma_user::glsl_attribute_set(enigma::shaderprograms[enigma::bound_shader]->att_texture, 2, GL_FLOAT, 0, STRIDE, offset);
+        enigma_user::glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_textureEnable, 1);
+      }else{
         enigma_user::glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_textureEnable, 0);
         enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_texture, false);
-	}
+      }
+      offset += 2;
+    }
 
     if (useColors){
-		enigma_user::glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_colorEnable,1);
-        enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_color, true);
-		enigma_user::glsl_attribute_set(enigma::shaderprograms[enigma::bound_shader]->att_color, 4, GL_UNSIGNED_BYTE, true, STRIDE, offset);
-	}else{
-		enigma_user::glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_colorEnable,0);
-		enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_color, false);
-	}
+      enigma_user::glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_colorEnable,1);
+      enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_color, true);
+      enigma_user::glsl_attribute_set(enigma::shaderprograms[enigma::bound_shader]->att_color, 4, GL_UNSIGNED_BYTE, true, STRIDE, offset);
+    }else{
+      enigma_user::glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_colorEnable,0);
+      enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_color, false);
+    }
 
-	#define OFFSETE( P )  ( ( const GLvoid * ) ( sizeof( GLuint ) * ( P         ) ) )
-	offset = vertex_start;
+    #define OFFSETE( P )  ( ( const GLvoid * ) ( sizeof( GLuint ) * ( P         ) ) )
+    offset = vertex_start;
 
-	// Draw the indexed primitives
-	if (triangleIndexedCount > 0) {
-		#ifdef DEBUG_MODE
-		oglmgr->gpuprof.drawn_drawcall_number+=1;
-		oglmgr->gpuprof.drawn_vertex_number+=(vertex_count==-1?triangleIndexedCount:vertex_count);
-		#endif
-		
-		glDrawElements(GL_TRIANGLES, (vertex_count==-1?triangleIndexedCount:vertex_count), GL_UNSIGNED_INT, OFFSETE(offset));
-		offset += triangleIndexedCount;
-	}
-	if (lineIndexedCount > 0) {
-		#ifdef DEBUG_MODE
-		oglmgr->gpuprof.drawn_drawcall_number+=1;
-		oglmgr->gpuprof.drawn_vertex_number+=lineIndexedCount;
-		#endif
-		
-		glDrawElements(GL_LINES, lineIndexedCount, GL_UNSIGNED_INT, OFFSETE(offset));
-		offset += lineIndexedCount;
-	}
-	if (pointIndexedCount > 0) {
-		#ifdef DEBUG_MODE
-		oglmgr->gpuprof.drawn_drawcall_number+=1;
-		oglmgr->gpuprof.drawn_vertex_number+=pointIndexedCount;
-		#endif
-	
-		glDrawElements(GL_POINTS, pointIndexedCount, GL_UNSIGNED_INT, OFFSETE(offset));
-	}
+    // Draw the indexed primitives
+    if (triangleIndexedCount > 0) {
+      #ifdef DEBUG_MODE
+      oglmgr->gpuprof.drawn_drawcall_number+=1;
+      oglmgr->gpuprof.drawn_vertex_number+=(vertex_count==-1?triangleIndexedCount:vertex_count);
+      #endif
+      
+      glDrawElements(GL_TRIANGLES, (vertex_count==-1?triangleIndexedCount:vertex_count), GL_UNSIGNED_INT, OFFSETE(offset));
+      offset += triangleIndexedCount;
+    }
+    if (lineIndexedCount > 0) {
+      #ifdef DEBUG_MODE
+      oglmgr->gpuprof.drawn_drawcall_number+=1;
+      oglmgr->gpuprof.drawn_vertex_number+=lineIndexedCount;
+      #endif
+      
+      glDrawElements(GL_LINES, lineIndexedCount, GL_UNSIGNED_INT, OFFSETE(offset));
+      offset += lineIndexedCount;
+    }
+    if (pointIndexedCount > 0) {
+      #ifdef DEBUG_MODE
+      oglmgr->gpuprof.drawn_drawcall_number+=1;
+      oglmgr->gpuprof.drawn_vertex_number+=pointIndexedCount;
+      #endif
+    
+      glDrawElements(GL_POINTS, pointIndexedCount, GL_UNSIGNED_INT, OFFSETE(offset));
+    }
 
-	offset = indexedoffset/stride;
+    offset = indexedoffset/stride;
 
-	// Draw the unindexed primitives
-	if (triangleCount > 0) {
-		#ifdef DEBUG_MODE
-		oglmgr->gpuprof.drawn_drawcall_number+=1;
-		oglmgr->gpuprof.drawn_vertex_number+=(vertex_count==-1?triangleCount:vertex_count);
-		#endif
-	
-		glDrawArrays(GL_TRIANGLES, (vertex_start==0?offset:vertex_start), (vertex_count==-1?triangleCount:vertex_count));
-		offset += triangleCount;
-	}
-	if (lineCount > 0) {
-		#ifdef DEBUG_MODE
-		oglmgr->gpuprof.drawn_drawcall_number+=1;
-		oglmgr->gpuprof.drawn_vertex_number+=lineCount;
-		#endif
-	
-		glDrawArrays(GL_LINES, offset, lineCount);
-		offset += lineCount;
-	}
-	if (pointCount > 0) {
-		#ifdef DEBUG_MODE
-		oglmgr->gpuprof.drawn_drawcall_number+=1;
-		oglmgr->gpuprof.drawn_vertex_number+=pointCount;
-		#endif
-	
-		glDrawArrays(GL_POINTS, offset, pointCount);
-	}
+    // Draw the unindexed primitives
+    if (triangleCount > 0) {
+      #ifdef DEBUG_MODE
+      oglmgr->gpuprof.drawn_drawcall_number+=1;
+      oglmgr->gpuprof.drawn_vertex_number+=(vertex_count==-1?triangleCount:vertex_count);
+      #endif
+    
+      glDrawArrays(GL_TRIANGLES, (vertex_start==0?offset:vertex_start), (vertex_count==-1?triangleCount:vertex_count));
+      offset += triangleCount;
+    }
+    if (lineCount > 0) {
+      #ifdef DEBUG_MODE
+      oglmgr->gpuprof.drawn_drawcall_number+=1;
+      oglmgr->gpuprof.drawn_vertex_number+=lineCount;
+      #endif
+    
+      glDrawArrays(GL_LINES, offset, lineCount);
+      offset += lineCount;
+    }
+    if (pointCount > 0) {
+      #ifdef DEBUG_MODE
+      oglmgr->gpuprof.drawn_drawcall_number+=1;
+      oglmgr->gpuprof.drawn_vertex_number+=pointCount;
+      #endif
+    
+      glDrawArrays(GL_POINTS, offset, pointCount);
+    }
 
-	/*glBindBuffer( GL_ARRAY_BUFFER, 0 );
-	if (vboindexed) {
-		glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
-	}*/
+    /*glBindBuffer( GL_ARRAY_BUFFER, 0 );
+    if (vboindexed) {
+      glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
+    }*/
 
     //glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_vertex,false);
   }

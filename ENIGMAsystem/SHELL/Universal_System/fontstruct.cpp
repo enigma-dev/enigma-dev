@@ -167,7 +167,7 @@ namespace enigma
         fg->ty2 = (glyphmetrics[i].y + glyphmetrics[i].h) / double(h);
       }
 	  
-      font->texture = enigma::graphics_create_texture(w,h,w,h,bigtex,true);
+      font->texture = enigma::graphics_create_texture(w,h,w,h,bigtex,false);
       font->twid = w;
       font->thgt = h;
       font->yoffset = 0;

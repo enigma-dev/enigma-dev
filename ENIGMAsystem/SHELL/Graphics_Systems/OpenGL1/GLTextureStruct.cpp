@@ -16,27 +16,15 @@
 **/
 
 /*
-#ifdef CODEBLOX
-#  include <GL/glee.h>
-#else
-#  include <additional/glee/GLee.h>
-#endif*/
+#include "../General/OpenGLHeaders.h"
+#include "GLTextureStruct.h"
 
-//#include "OpenGLHeaders.h"
-
-namespace enigma
-{
-  extern unsigned char currentcolor[4];
-  extern int currentblendmode[2];
-  extern int currentblendtype;
-  extern bool glew_isgo;
-  extern bool pbo_isgo;
+TextureStruct::TextureStruct(unsigned gtex): gltex(gtex) {
+  sampler = new enigma::SamplerState();
+  gltex = gtex;
 }
 
-#include "../General/GScolors.h"
-#include "../General/GSprimitives.h"
-#include "../General/GSd3d.h"
-#include "../General/GSstdraw.h"
-#include "../General/GSblend.h"
-#include "../General/GSsurface.h"
-#include "../General/GSscreen.h"
+TextureStruct::~TextureStruct() {
+  glDeleteTextures(1, &gltex);
+}
+*/
