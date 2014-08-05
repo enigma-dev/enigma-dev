@@ -60,7 +60,7 @@ GLenum fillmodes[3] = {
 };
 
 GLenum windingstates[2] = {
-  GL_CCW, GL_CW
+  GL_CW, GL_CCW
 };
 
 GLenum cullingstates[3] = {
@@ -87,7 +87,6 @@ void d3d_start()
   enigma::d3dCulling = rs_none;
   glDepthMask(true);
   glEnable(GL_DEPTH_TEST);
-  //glAlphaFunc(GL_NOTEQUAL, 0); // Why was this needed? It's the same as glAlphaFunc(GL_GREATER, 0);
 
   // Set up projection matrix
   d3d_set_projection_perspective(0, 0, view_wview[view_current], view_hview[view_current], 0);
@@ -170,20 +169,13 @@ void d3d_set_fog_density(double density)
 
 }
 
-void d3d_set_culling(bool enable)
+void d3d_set_culling(int mode)
 {
-	enigma::d3dCulling = enable;
-	oglmgr->SetEnabled(GL_CULL_FACE, enable);
-}
-
-void d3d_set_culling_mode(int mode){
-	oglmgr->EndShapesBatching();
-	glCullFace(cullingstates[mode]);
-}
-
-void d3d_set_front_face(int mode){
-	oglmgr->EndShapesBatching();
-	glFrontFace(windingstates[mode]);
+	enigma::d3dCulling = mode;
+	oglmgr->SetEnabled(GL_CULL_FACE, (mode>0));
+	if (mode > 0){
+		glFrontFace(windingstates[mode-1]);
+	}
 }
 
 bool d3d_get_mode()

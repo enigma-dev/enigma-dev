@@ -569,6 +569,10 @@ class Mesh
     //If there is nothing to render, then there is no need for all the rest
     if (triangleIndexedCount == 0 && lineIndexedCount == 0 && pointIndexedCount == 0 && triangleCount == 0 && lineCount == 0 && pointCount == 0) return;
 
+	#ifdef DEBUG_MODE
+	enigma::GPUProfilerVBORender vbd = oglmgr->gpuprof.add_drawcall();
+	#endif
+	
     if (enigma::transform_needs_update == true){
         enigma::transformation_update();
     }

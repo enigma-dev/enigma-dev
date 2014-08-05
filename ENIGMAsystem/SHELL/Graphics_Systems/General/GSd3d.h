@@ -89,9 +89,7 @@ void d3d_set_zwriteenable(bool enable);
 void d3d_set_lighting(bool enable);
 
 void d3d_set_software_vertex_processing(bool software);
-void d3d_set_culling(bool mode);
-void d3d_set_culling_mode(int mode);
-void d3d_set_front_face(int mode);
+void d3d_set_culling(int mode);
 
 void d3d_set_fill_mode(int fill);
 void d3d_set_line_width(float value);

@@ -105,12 +105,23 @@ void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom, g
 
 void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, gs_scalar angle)
 {
-    enigma::projection_matrix.InitRotateZTransform(angle);
+    // This fixes font glyph edge artifacting and vertical scroll gaps
+    // seen by mostly NVIDIA GPU users.  Rounds x and y and adds +0.01 offset.
+    // This will prevent the fix from being negated through moving projections
+    // and fractional coordinates.
+    x = round(x) + 0.01f; y = round(y) + 0.01f;
+	if (angle!=0){
+		enigma::projection_matrix.InitTranslationTransform(-x-width/2.0, -y-height/2.0, 0);
+		enigma::projection_matrix.rotateZ(-angle);
+		enigma::projection_matrix.translate(x+width/2.0, y+height/2.0, 0);
+	}else{
+		enigma::projection_matrix.InitIdentity();
+	}
 
     enigma::Matrix4 ortho;
     ortho.InitOrthoProjTransform(x,x + width,y + height,y,32000,-32000);
 
-    enigma::projection_matrix = enigma::projection_matrix * ortho;
+    enigma::projection_matrix = ortho * enigma::projection_matrix;
     enigma::view_matrix.InitIdentity();
 
     enigma::mv_matrix = enigma::view_matrix * enigma::model_matrix;
