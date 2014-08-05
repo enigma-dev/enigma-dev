@@ -85,7 +85,7 @@ namespace enigma
     variant object_basic::myevent_roomend()   { return 0; }
     variant object_basic::myevent_destroy()   { return 0; }
 
-    object_basic::object_basic(): id(-4), object_index(-4) {}
+    object_basic::object_basic(): id(-4), object_index(-4), is_active_QBwfSd(false) {}
     object_basic::object_basic(int uid, int uoid): id(DEBUG_ID_CHECK(uid, uoid)), object_index(uoid) {}
     object_basic::~object_basic() {}
 

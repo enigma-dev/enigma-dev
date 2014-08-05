@@ -199,7 +199,21 @@ wto.open((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_roomcreates.h").c
       if (mode == emode_debug) {
         wto << "enigma::debug_scope $current_scope(\"'instance creation' for instance '" << it->first << "'\");\n";
       }
-      print_to_file(it->second.pe->code, it->second.pe->synt, it->second.pe->strc, it->second.pe->strs, 2, wto);
+
+      std::string codeOvr;
+      std::string syntOvr;
+      if (it->second.pe->code.find("with((")==0) {
+        //We're basically replacing "with((100002)){" with "with_room_inst((100002)){" (synt: "ssss((000000)){")
+        //This is because room-instance-creation code might need a deactivated instance, which "with" cannot find.
+        codeOvr = "with_room_inst(" + it->second.pe->code.substr(5);
+        syntOvr = "ssssssssssssss(" + it->second.pe->synt.substr(5);
+      }
+
+      print_to_file(
+        codeOvr.empty() ? it->second.pe->code : codeOvr,
+        syntOvr.empty() ? it->second.pe->synt : syntOvr,
+        it->second.pe->strc, it->second.pe->strs, 2, wto
+      );
       wto << "}\n\n";
     }
 
