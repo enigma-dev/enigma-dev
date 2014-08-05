@@ -18,13 +18,37 @@
 #ifndef GL3_PROFILER_H
 #define GL3_PROFILER_H
 
+#include <vector>
+
 namespace enigma{
 
+	struct GPUProfilerVBORender{
+		bool color_enabled;
+		bool texture_enabled;
+		bool normals_enabled;
+		
+		int vertices;
+		
+		int triangles;
+		int triangle_indeces;
+		int lines;
+		int line_indeces;
+		int points;
+		int point_indeces;
+		
+		int drawcalls;
+		int texture;
+	};
+
 	class GPUProfiler {
+		std::vector<GPUProfilerVBORender> VBORenders;
+		
 		public:
 			int drawn_vertex_number;
 			int drawn_drawcall_number;
 			int drawn_vbo_number;
+			
+			int texture_switches;
 			
 			void reset_frame() { 
 				drawn_vertex_number = 0;
@@ -32,7 +56,16 @@ namespace enigma{
 				drawn_vbo_number = 0;
 			}
 			
-			GPUProfiler() : drawn_vertex_number(0), drawn_drawcall_number(0), drawn_vbo_number(0){}
+			GPUProfilerVBORender& add_drawcall(){
+				VBORenders.push_back( GPUProfilerVBORender() );
+				return VBORenders.back();
+			}
+			
+			GPUProfilerVBORender& last_drawcall(){
+				return VBORenders.back();
+			}
+			
+			GPUProfiler() : drawn_vertex_number(0), drawn_drawcall_number(0), drawn_vbo_number(0){ }
 	};
 
 }
