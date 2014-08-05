@@ -242,6 +242,21 @@ namespace enigma
     return a != instance_list.end() ? a->second : NULL;
   }
 
+  iterator fetch_roominst_iter_by_id(int x)
+  {
+    if (x < 100000)
+      return iterator();
+
+    //Check if it's a deactivated instance first.
+    std::map<int,enigma::inst_iter*>::iterator rIt = enigma::instance_deactivated_list.find(x);
+    if (rIt!=enigma::instance_deactivated_list.end()) {
+      return iterator(((enigma::object_basic*)(rIt->second->inst)));
+    }
+
+    //Else, it's still live (or was null). Use normal dispatch.
+    return fetch_inst_iter_by_id(x);
+  }
+
   // Implementation for frontend
   // (Wrapper struct to lower compile time)
   typedef struct winstance_list_iterator {
