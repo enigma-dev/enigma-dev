@@ -21,10 +21,11 @@
 #include <string.h>
 //using std::string;
 #include "../General/GStextures.h"
-#include "../General/GLTextureStruct.h"
+#include "Universal_System/image_formats.h"
 #include "Universal_System/backgroundstruct.h"
 #include "Universal_System/spritestruct.h"
 #include "Graphics_Systems/graphics_mandatory.h"
+#include "GLTextureStruct.h"
 
 #define GL_TEXTURE_MAX_ANISOTROPY_EXT 0x84FE
 #define GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT 0x84FF
@@ -37,12 +38,14 @@ extern int room_width, room_height;
 
 namespace enigma {
   extern size_t background_idmax;
-  extern unsigned bound_texture;
 }
 
 TextureStruct::TextureStruct(unsigned gtex)
 {
-	gltex = gtex;
+  sampler = new enigma::SamplerState();
+  // Apply the full state so the sampler matches what is on the GPU initially.
+  sampler->ApplyState();
+  gltex = gtex;
 }
 
 TextureStruct::~TextureStruct()
@@ -65,42 +68,46 @@ inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect 
 
 namespace enigma
 {
-  int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool isfont)
+  int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool mipmap)
   {
     GLuint texture;
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexImage2D(GL_TEXTURE_2D, 0, 4, fullwidth, fullheight, 0, GL_BGRA, GL_UNSIGNED_BYTE, pxdata);
-	bool interpolate = (interpolate_textures && !isfont);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,interpolate?GL_LINEAR:GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,interpolate?GL_LINEAR:GL_NEAREST);
-    glBindTexture(GL_TEXTURE_2D, 0);
-
-	TextureStruct* textureStruct = new TextureStruct(texture);
-	textureStruct->width = width;
-	textureStruct->height = height;
-	textureStruct->fullwidth = fullwidth;
-	textureStruct->fullheight = fullheight;
-	textureStruct->isFont = isfont;
+    if (mipmap) {
+      // This allows us to control the number of mipmaps generated, but Direct3D does not have an option for it, so for now we'll just go with the defaults.
+      // Honestly not a big deal, Unity3D doesn't allow you to specify either.
+      //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+      //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 3);
+      glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    TextureStruct* textureStruct = new TextureStruct(texture);
+    textureStruct->width = width;
+    textureStruct->height = height;
+    textureStruct->fullwidth = fullwidth;
+    textureStruct->fullheight = fullheight;
     textureStructs.push_back(textureStruct);
+    
+    //texture must be constructed before unbinding the texture so that it can apply its initial sampler state
+    glBindTexture(GL_TEXTURE_2D, 0);
+    
     return textureStructs.size()-1;
   }
 
-  int graphics_duplicate_texture(int tex)
+  int graphics_duplicate_texture(int tex, bool mipmap)
   {
     GLuint texture = textureStructs[tex]->gltex;
     glBindTexture(GL_TEXTURE_2D, texture);
     unsigned w, h, fw, fh;
-	bool interpolate = (interpolate_textures && !textureStructs[tex]->isFont);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,interpolate?GL_LINEAR:GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,interpolate?GL_LINEAR:GL_NEAREST);
-	w = textureStructs[tex]->width;
-	h = textureStructs[tex]->height;
-	fw = textureStructs[tex]->fullwidth;
-	fh = textureStructs[tex]->fullheight;
+    w = textureStructs[tex]->width;
+    h = textureStructs[tex]->height;
+    fw = textureStructs[tex]->fullwidth;
+    fh = textureStructs[tex]->fullheight;
     char* bitmap = new char[(fh<<(lgpp2(fw)+2))|2];
     glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_BYTE, bitmap);
-    unsigned dup_tex = graphics_create_texture(w, h, fw, fh, bitmap, textureStructs[tex]->isFont);
+    // apply the initial sampler state of the texture, since this texture is just rebuffered and not recreated this may not be necessary, someone should find out
+    textureStructs[tex]->sampler->ApplyState();
+    unsigned dup_tex = graphics_create_texture(w, h, fw, fh, bitmap, mipmap);
     delete[] bitmap;
     glPopAttrib();
     return dup_tex;
@@ -113,10 +120,10 @@ namespace enigma
 
     unsigned w, h, fw, fh, size;
     glBindTexture(GL_TEXTURE_2D, texture);
-	w = textureStructs[tex]->width;
-	h = textureStructs[tex]->height;
-	fw = textureStructs[tex]->fullwidth;
-	fh = textureStructs[tex]->fullheight;
+    w = textureStructs[tex]->width;
+    h = textureStructs[tex]->height;
+    fw = textureStructs[tex]->fullwidth;
+    fh = textureStructs[tex]->fullheight;
     size = (fh<<(lgpp2(fw)+2))|2;
     char* bitmap = new char[size];
     char* bitmap2 = new char[size];
@@ -129,10 +136,8 @@ namespace enigma
 
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexImage2D(GL_TEXTURE_2D, 0, 4, fw, fh, 0, GL_BGRA, GL_UNSIGNED_BYTE, bitmap);
-	bool interpolate = (interpolate_textures && !textureStructs[tex]->isFont);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,interpolate?GL_LINEAR:GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,interpolate?GL_LINEAR:GL_NEAREST);
-
+    // apply the initial sampler state of the texture, since this texture is just rebuffered and not recreated this may not be necessary, someone should find out
+    textureStructs[tex]->sampler->ApplyState();
     glBindTexture(GL_TEXTURE_2D, 0);
 
     delete[] bitmap;
@@ -140,10 +145,9 @@ namespace enigma
     glPopAttrib();
   }
 
-  void graphics_delete_texture(int tex)
+  void graphics_delete_texture(int texid)
   {
-    glDeleteTextures(1, &textureStructs[tex]->gltex);
-    textureStructs.erase(textureStructs.begin() + tex);
+    delete textureStructs[texid];
   }
 
   unsigned char* graphics_get_texture_pixeldata(unsigned texture, unsigned* fullwidth, unsigned* fullheight)
@@ -151,40 +155,66 @@ namespace enigma
     enigma_user::texture_set(texture);
 
     *fullwidth = textureStructs[texture]->fullwidth;
-	*fullheight = textureStructs[texture]->fullheight;
+    *fullheight = textureStructs[texture]->fullheight;
 
     unsigned char* ret = new unsigned char[((*fullwidth)*(*fullheight)*4)];
-	glPixelStorei(GL_PACK_ALIGNMENT, 1);
+    glPixelStorei(GL_PACK_ALIGNMENT, 1);
     glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_BYTE, ret);
 
     return ret;
   }
+
+  SamplerState samplerstates[8];
 }
 
 namespace enigma_user
 {
 
+int texture_add(string filename, bool mipmap) {
+  unsigned int w, h, fullwidth, fullheight;
+
+  unsigned char *pxdata = enigma::image_load(filename,&w,&h,&fullwidth,&fullheight,false);
+  if (pxdata == NULL) { printf("ERROR - Failed to append sprite to index!\n"); return -1; }
+  unsigned texture = enigma::graphics_create_texture(w, h, fullwidth, fullheight, pxdata, mipmap);
+  delete[] pxdata;
+    
+  return texture;
+}
+
+void texture_save(int texid, string fname) {
+	unsigned w, h;
+	unsigned char* rgbdata = enigma::graphics_get_texture_pixeldata(texid, &w, &h);
+
+  string ext = enigma::image_get_format(fname);
+
+	enigma::image_save(fname, rgbdata, w, h, w, h, false);
+
+	delete[] rgbdata;
+}
+
+void texture_delete(int texid) {
+  delete textureStructs[texid];
+}
+
+bool texture_exists(int texid) {
+  return textureStructs[texid] != NULL;
+}
+
+void texture_preload(int texid)
+{
+  // Deprecated in ENIGMA and GM: Studio, all textures are automatically preloaded.
+}
+
+void texture_set_priority(int texid, double prio)
+{
+  // Deprecated in ENIGMA and GM: Studio, all textures are automatically preloaded.
+  glBindTexture(GL_TEXTURE_2D, textureStructs[texid]->gltex);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_PRIORITY, prio);
+}
+
 void texture_set_enabled(bool enable)
 {
   (enable?glEnable:glDisable)(GL_TEXTURE_2D);
-}
-
-void texture_set_interpolation(int enable)
-{
-  enigma::interpolate_textures = enable;
-  for (size_t i = 0; i < textureStructs.size(); i++)
-  {
-	if (textureStructs[i]->isFont) { continue; }
-    glBindTexture(GL_TEXTURE_2D, textureStructs[i]->gltex);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,enable?GL_LINEAR:GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,enable?GL_LINEAR:GL_NEAREST);
-  }
-  glBindTexture(GL_TEXTURE_2D, enigma::bound_texture);
-}
-
-bool texture_get_interpolation()
-{
-    return enigma::interpolate_textures;
 }
 
 void texture_set_blending(bool enable)
@@ -198,7 +228,7 @@ gs_scalar texture_get_width(int texid) {
 
 gs_scalar texture_get_height(int texid)
 {
-	return textureStructs[texid]->fullheight / textureStructs[texid]->fullheight;
+	return textureStructs[texid]->height / textureStructs[texid]->fullheight;
 }
 
 unsigned texture_get_texel_width(int texid)
@@ -211,107 +241,79 @@ unsigned texture_get_texel_height(int texid)
 	return textureStructs[texid]->height;
 }
 
-void texture_set(int texid) {
-	if (enigma::bound_texture != unsigned(get_texture(texid))) {
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, enigma::bound_texture = get_texture(texid));
-	}
-}
-
 void texture_set_stage(int stage, int texid) {
+  if (enigma::samplerstates[stage].bound_texture != unsigned(get_texture(texid))) {
     glActiveTexture(GL_TEXTURE0 + stage);
-    glBindTexture(GL_TEXTURE_2D, get_texture(texid));
+    glBindTexture(GL_TEXTURE_2D, enigma::samplerstates[stage].bound_texture = get_texture(texid));
+  }
+  // Must be applied regardless of whether the texture is already bound because the sampler state could have been changed.
+  enigma::samplerstates[stage].CompareAndApply(textureStructs[texid]->sampler);
 }
 
 void texture_reset() {
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, enigma::bound_texture = 0);
+	glBindTexture(GL_TEXTURE_2D, enigma::samplerstates[0].bound_texture = 0);
+  //Should only rarely apply the full state, I believe it is unnecessary to do it when we set no texture and it does not appear
+  //to cause any issues so leave it commented.
+  //enigma::samplerstates[0].ApplyState();
 }
 
-void texture_set_repeat(bool repeat)
+void texture_set_interpolation_ext(int sampler, bool enable)
 {
-  for (size_t i = 0; i < textureStructs.size(); i++)
-  {
-    glBindTexture(GL_TEXTURE_2D, textureStructs[i]->gltex);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, repeat?GL_REPEAT:GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, repeat?GL_REPEAT:GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, repeat?GL_REPEAT:GL_CLAMP);
-  }
+  enigma::samplerstates[sampler].min = enable?GL_LINEAR:GL_NEAREST;
+  enigma::samplerstates[sampler].mag = enable?GL_LINEAR:GL_NEAREST;
 }
 
-void texture_set_repeat(int texid, bool repeat)
+void texture_set_repeat_ext(int sampler, bool repeat)
 {
-  glBindTexture(GL_TEXTURE_2D, textureStructs[texid]->gltex);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, repeat?GL_REPEAT:GL_CLAMP);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, repeat?GL_REPEAT:GL_CLAMP);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, repeat?GL_REPEAT:GL_CLAMP);
+  enigma::samplerstates[sampler].wrapu = repeat;
+  enigma::samplerstates[sampler].wrapv = repeat;
+  enigma::samplerstates[sampler].wrapw = repeat;
 }
 
-void texture_set_wrap(int texid, bool wrapr, bool wraps, bool wrapt)
+void texture_set_wrap_ext(int sampler, bool wrapu, bool wrapv, bool wrapw)
 {
-  glBindTexture(GL_TEXTURE_2D, textureStructs[texid]->gltex);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_R, wrapr?GL_REPEAT:GL_CLAMP);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wraps?GL_REPEAT:GL_CLAMP);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapt?GL_REPEAT:GL_CLAMP);
+  enigma::samplerstates[sampler].wrapu = wrapu;
+  enigma::samplerstates[sampler].wrapv = wrapv;
+  enigma::samplerstates[sampler].wrapw = wrapw;
 }
 
-void texture_preload(int texid)
+void texture_set_border_ext(int sampler, int r, int g, int b, double a)
 {
-
-}//functionality has been removed in ENIGMA, all textures are automatically preloaded
-
-void texture_set_priority(int texid, double prio)
-{
-  glBindTexture(GL_TEXTURE_2D, textureStructs[texid]->gltex);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_PRIORITY, prio);
+  enigma::samplerstates[sampler].bordercolor[0] = r;
+  enigma::samplerstates[sampler].bordercolor[1] = g;
+  enigma::samplerstates[sampler].bordercolor[2] = b;
+  enigma::samplerstates[sampler].bordercolor[3] = int(a);
 }
 
-void texture_set_border(int texid, int r, int g, int b, double a)
+void texture_set_filter_ext(int sampler, int filter)
 {
-  GLint color[4] = {(int)r, (int)g, (int)b, int(a * 255)};
-  glBindTexture(GL_TEXTURE_2D, textureStructs[texid]->gltex);
-  glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, color);
-}
-
-void texture_set_swizzle(int texid, int r, int g, int b, double a)
-{
-  GLint color[4] = {(int)r, (int)g, (int)b, int(a * 255)};
-  glBindTexture(GL_TEXTURE_2D, textureStructs[texid]->gltex);
-  glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_RGBA, color);
-}
-
-void texture_set_levelofdetail(int texid, double minlod, double maxlod, int maxlevel)
-{
-  glBindTexture(GL_TEXTURE_2D, textureStructs[texid]->gltex);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_LOD, minlod);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LOD, maxlod);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, maxlevel);
-}
-
-void texture_mipmapping_filter(int texid, int filter)
-{
-  glBindTexture(GL_TEXTURE_2D, textureStructs[texid]->gltex);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
   if (filter == tx_trilinear) {
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    enigma::samplerstates[sampler].min = GL_LINEAR_MIPMAP_LINEAR;
+    enigma::samplerstates[sampler].mag = GL_LINEAR;
   } else if (filter == tx_bilinear) {
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    enigma::samplerstates[sampler].min = GL_LINEAR_MIPMAP_NEAREST;
+    enigma::samplerstates[sampler].mag = GL_LINEAR;
   } else if (filter == tx_nearest) {
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    enigma::samplerstates[sampler].min = GL_NEAREST_MIPMAP_NEAREST;
+    enigma::samplerstates[sampler].mag = GL_NEAREST;
+  } else {
+    enigma::samplerstates[sampler].min = GL_NEAREST;
+    enigma::samplerstates[sampler].mag = GL_NEAREST;
   }
 }
 
-void texture_mipmapping_generate(int texid, int levels)
+void texture_set_lod_ext(int sampler, double minlod, double maxlod, int maxlevel)
 {
-  texture_set(textureStructs[texid]->gltex);
-  glGenerateMipmap(GL_TEXTURE_2D);
+  enigma::samplerstates[sampler].minlod = minlod;
+  enigma::samplerstates[sampler].maxlod = maxlod;
+  enigma::samplerstates[sampler].maxlevel = maxlevel;
+}
 
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, levels);
+bool texture_mipmapping_supported()
+{
+  return strstr((char*)glGetString(GL_EXTENSIONS),
+           "glGenerateMipmap");
 }
 
 bool texture_anisotropy_supported()
@@ -327,22 +329,9 @@ float texture_anisotropy_maxlevel()
   return maximumAnisotropy;
 }
 
-void  texture_anisotropy_filter(int texid, gs_scalar levels)
+void  texture_anisotropy_filter(int sampler, gs_scalar levels)
 {
-  glBindTexture(GL_TEXTURE_2D, textureStructs[texid]->gltex);
-  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, levels);
-}
-
-bool  texture_multitexture_supported()
-{
-  return strstr((char*)glGetString(GL_EXTENSIONS),
-           "GL_ARB_multitexture");
-}
-
-void texture_multitexture_enable(bool enable)
-{
-
+  enigma::samplerstates[sampler].anisotropy = levels;
 }
 
 }
-

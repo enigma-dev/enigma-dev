@@ -21,7 +21,7 @@
 #include "../General/GSbackground.h"
 #include "Universal_System/backgroundstruct.h"
 #include "../General/GStextures.h"
-#include "../General/GLTextureStruct.h"
+#include "GL3TextureStruct.h"
 #include "../General/GStiles.h"
 #include "../General/GLtilestruct.h"
 #include "../General/OpenGLHeaders.h"

@@ -140,25 +140,26 @@ void ReadPixels() {
 	EndShapesBatching();
 }
 
+// Function no longer used since introduction of sampler states for compatibility with Studio.
 void BindTexture(GLenum target,  GLuint texture) {
-    if (bound_tex != texture) {
-        EndShapesBatching();
-        glBindTexture(target, bound_tex = texture);
-    }
-    return;
-	// Update the texture state cache
-    // If the return value is 'true', the command must be forwarded to OpenGL
-	map< GLenum, GLuint >::iterator it = cacheTextureStates.find( target );
-    if ( cacheTextureStates.end() == it ) {
-        cacheTextureStates.insert( map< GLenum, GLuint >::value_type(target, texture) );
-		EndShapesBatching();
-		glBindTexture(target, texture);
-    }
-    if( it->second == texture )
-        return;
-    it->second = texture;
-	EndShapesBatching();
+  if (bound_tex != texture) {
+      //EndShapesBatching();
+      glBindTexture(target, bound_tex = texture);
+  }
+  return;
+  // Update the texture state cache
+  // If the return value is 'true', the command must be forwarded to OpenGL
+  map< GLenum, GLuint >::iterator it = cacheTextureStates.find( target );
+  if ( cacheTextureStates.end() == it ) {
+    cacheTextureStates.insert( map< GLenum, GLuint >::value_type(target, texture) );
+    EndShapesBatching();
     glBindTexture(target, texture);
+  }
+  if( it->second == texture )
+      return;
+  it->second = texture;
+  EndShapesBatching();
+  glBindTexture(target, texture);
 }
 
 void ResetTextureStates() {

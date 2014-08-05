@@ -15,28 +15,23 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-/*
-#ifdef CODEBLOX
-#  include <GL/glee.h>
-#else
-#  include <additional/glee/GLee.h>
-#endif*/
+#include "Universal_System/scalar.h"
 
-//#include "OpenGLHeaders.h"
+#ifndef ENIGMA_GL3_TEXTURESTRUCT__H
+#define ENIGMA_GL3_TEXTURESTRUCT__H
 
-namespace enigma
-{
-  extern unsigned char currentcolor[4];
-  extern int currentblendmode[2];
-  extern int currentblendtype;
-  extern bool glew_isgo;
-  extern bool pbo_isgo;
-}
+#include <vector>
+using std::vector;
 
-#include "../General/GScolors.h"
-#include "../General/GSprimitives.h"
-#include "../General/GSd3d.h"
-#include "../General/GSstdraw.h"
-#include "../General/GSblend.h"
-#include "../General/GSsurface.h"
-#include "../General/GSscreen.h"
+struct TextureStruct {
+	unsigned gltex;
+	unsigned width,height;
+	unsigned fullwidth,fullheight;
+	TextureStruct(unsigned gtex);
+	~TextureStruct();
+};
+extern vector<TextureStruct*> textureStructs;
+
+unsigned get_texture(int texid);
+
+#endif // ENIGMA_GL3_TEXTURESTRUCT__H

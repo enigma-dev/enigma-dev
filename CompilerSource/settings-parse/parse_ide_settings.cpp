@@ -85,6 +85,7 @@ void parse_ide_settings(const char* eyaml)
   setting::literal_autocast  = settree.get("treat-literals-as").toInt();
   setting::inherit_objects   = settree.get("inherit-objects").toBool();
   setting::make_directory = settree.get("make-directory").toString();
+  setting::compliance_mode = settree.get("compliance-mode").toInt()==1 ? setting::COMPL_GM5 : setting::COMPL_STANDARD;
 
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
 	setMakeDirectory(myReplace(escapeEnv(setting::make_directory), "\\","/"));

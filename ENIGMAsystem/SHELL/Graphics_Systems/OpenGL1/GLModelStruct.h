@@ -41,8 +41,6 @@ using namespace std;
 #include <vector>
 using std::vector;
 
-unsigned get_texture(int texid);
-
 extern GLenum ptypes_by_id[16];
 namespace enigma {
   extern unsigned char currentcolor[4];
@@ -181,32 +179,32 @@ class Mesh
 
   //NOTE: OpenGL 1.1 models are always dynamic since they utilize vertex arrays for software vertex processing and backwards compatibility.
   Mesh (int type) {
-	vertexStride = 0;
+    vertexStride = 0;
     useColors = false;
     useTextures = false;
     useNormals = false;
 
-	pointCount = 0;
-	triangleCount = 0;
-	lineCount = 0;
+    pointCount = 0;
+    triangleCount = 0;
+    lineCount = 0;
 
-	pointIndexedCount = 0;
-	triangleIndexedCount = 0;
-	lineIndexedCount = 0;
+    pointIndexedCount = 0;
+    triangleIndexedCount = 0;
+    lineIndexedCount = 0;
 
     currentPrimitive = 0;
 
-	triangleIndexedVertices.reserve(64000);
-	pointIndexedVertices.reserve(64000);
-	lineIndexedVertices.reserve(64000);
-	pointVertices.reserve(64000);
-	pointIndices.reserve(64000);
-	lineVertices.reserve(64000);
-	lineIndices.reserve(64000);
-	triangleVertices.reserve(64000);
-	triangleIndices.reserve(64000);
-	vertices.reserve(64000);
-	indices.reserve(64000);
+    triangleIndexedVertices.reserve(64000);
+    pointIndexedVertices.reserve(64000);
+    lineIndexedVertices.reserve(64000);
+    pointVertices.reserve(64000);
+    pointIndices.reserve(64000);
+    lineVertices.reserve(64000);
+    lineIndices.reserve(64000);
+    triangleVertices.reserve(64000);
+    triangleIndices.reserve(64000);
+    vertices.reserve(64000);
+    indices.reserve(64000);
   }
 
   ~Mesh() {
@@ -215,50 +213,50 @@ class Mesh
 
   void ClearData() {
     triangleVertices.clear();
-	pointVertices.clear();
-	lineVertices.clear();
-	triangleIndexedVertices.clear();
-	pointIndexedVertices.clear();
-	lineIndexedVertices.clear();
-	triangleIndices.clear();
-	pointIndices.clear();
-	lineIndices.clear();
+    pointVertices.clear();
+    lineVertices.clear();
+    triangleIndexedVertices.clear();
+    pointIndexedVertices.clear();
+    lineIndexedVertices.clear();
+    triangleIndices.clear();
+    pointIndices.clear();
+    lineIndices.clear();
   }
 
   void Clear() {
     ClearData();
 
-	triangleIndexedVertices.reserve(64000);
-	pointIndexedVertices.reserve(64000);
-	lineIndexedVertices.reserve(64000);
-	pointVertices.reserve(64000);
-	pointIndices.reserve(64000);
-	lineVertices.reserve(64000);
-	lineIndices.reserve(64000);
-	triangleVertices.reserve(64000);
-	triangleIndices.reserve(64000);
-	vertices.reserve(64000);
-	indices.reserve(64000);
+    triangleIndexedVertices.reserve(64000);
+    pointIndexedVertices.reserve(64000);
+    lineIndexedVertices.reserve(64000);
+    pointVertices.reserve(64000);
+    pointIndices.reserve(64000);
+    lineVertices.reserve(64000);
+    lineIndices.reserve(64000);
+    triangleVertices.reserve(64000);
+    triangleIndices.reserve(64000);
+    vertices.reserve(64000);
+    indices.reserve(64000);
 
-	vertexStride = 0;
-	useColors = false;
+    vertexStride = 0;
+    useColors = false;
     useTextures = false;
     useNormals = false;
 
-	pointCount = 0;
-	triangleCount = 0;
-	lineCount = 0;
-	pointIndexedCount = 0;
-	triangleIndexedCount = 0;
-	lineIndexedCount = 0;
+    pointCount = 0;
+    triangleCount = 0;
+    lineCount = 0;
+    pointIndexedCount = 0;
+    triangleIndexedCount = 0;
+    lineIndexedCount = 0;
   }
 
   GLsizei GetStride() {
-  	GLsizei stride = vertexStride;
+    GLsizei stride = vertexStride;
     if (useNormals) stride += 3;
-	if (useTextures) stride += 2;
+    if (useTextures) stride += 2;
     if (useColors) stride += 1;
-	return stride;
+    return stride;
   }
 
   void Begin(int pt)
@@ -269,13 +267,13 @@ class Mesh
   void AddVertex(gs_scalar x, gs_scalar y)
   {
     vertices.push_back(x); vertices.push_back(y);
-	vertexStride = 2;
+    vertexStride = 2;
   }
 
   void AddVertex(gs_scalar x, gs_scalar y, gs_scalar z)
   {
     vertices.push_back(x); vertices.push_back(y); vertices.push_back(z);
-	vertexStride = 3;
+    vertexStride = 3;
   }
 
   void AddIndex(unsigned ind)
@@ -286,20 +284,20 @@ class Mesh
   void AddNormal(gs_scalar nx, gs_scalar ny, gs_scalar nz)
   {
     vertices.push_back(nx); vertices.push_back(ny); vertices.push_back(nz);
-	useNormals = true;
+    useNormals = true;
   }
 
   void AddTexture(gs_scalar tx, gs_scalar ty)
   {
     vertices.push_back(tx); vertices.push_back(ty);
-	useTextures = true;
+    useTextures = true;
   }
 
   void AddColor(int col, double alpha)
   {
-	color_t finalcol = col + ((unsigned char)(alpha*255) << 24);
-	vertices.push_back(finalcol);
-	useColors = true;
+    color_t finalcol = col + ((unsigned char)(alpha*255) << 24);
+    vertices.push_back(finalcol);
+    useColors = true;
   }
 
   void End()
@@ -418,111 +416,111 @@ class Mesh
 			break;
 	}
 
-	// Clean up the temporary vertex and index containers now that they have been batched efficiently.
-	vertices.clear();
-	indices.clear();
+    // Clean up the temporary vertex and index containers now that they have been batched efficiently.
+    vertices.clear();
+    indices.clear();
   }
 
   void DrawElements(GLenum mode, vector<VertexElement> &verts, vector<GLuint> &inds, GLsizei count, int vert_start = 0) {
-	if (!count) {
-		return;
-	}
-
-    // Calculate the number of bytes to get to the next vertex
-	GLsizei stride = GetStride() * sizeof( gs_scalar );
-
-	#define OFFSET( P )  ( char* ) ( &verts[0] ) + ( ( sizeof( gs_scalar ) * ( P         ) ) )
-	GLsizei STRIDE = stride;
-
-	// Enable vertex array's for fast vertex processing
-	glEnableClientState(GL_VERTEX_ARRAY);
-	unsigned offset = 0;
-	glVertexPointer( vertexStride, GL_FLOAT, STRIDE, OFFSET(offset) ); // Set the vertex pointer
-	offset += vertexStride;
-
-    if (useNormals){
-		glEnableClientState(GL_NORMAL_ARRAY);
-		glNormalPointer( GL_FLOAT, STRIDE, OFFSET(offset) ); // Set the normal pointer to the offset in the array
-		offset += 3;
+    if (!count) {
+      return;
     }
 
-	if (useTextures){
-		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-		glTexCoordPointer( 2, GL_FLOAT, STRIDE,  OFFSET(offset) ); // Set the texture pointer to the offset in the array
-		offset += 2;
-	}
+      // Calculate the number of bytes to get to the next vertex
+    GLsizei stride = GetStride() * sizeof( gs_scalar );
+
+    #define OFFSET( P )  ( char* ) ( &verts[0] ) + ( ( sizeof( gs_scalar ) * ( P         ) ) )
+    GLsizei STRIDE = stride;
+
+    // Enable vertex array's for fast vertex processing
+    glEnableClientState(GL_VERTEX_ARRAY);
+    unsigned offset = 0;
+    glVertexPointer( vertexStride, GL_FLOAT, STRIDE, OFFSET(offset) ); // Set the vertex pointer
+    offset += vertexStride;
+
+    if (useNormals){
+      glEnableClientState(GL_NORMAL_ARRAY);
+      glNormalPointer( GL_FLOAT, STRIDE, OFFSET(offset) ); // Set the normal pointer to the offset in the array
+      offset += 3;
+    }
+
+    if (useTextures){
+      glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+      glTexCoordPointer( 2, GL_FLOAT, STRIDE,  OFFSET(offset) ); // Set the texture pointer to the offset in the array
+      offset += 2;
+    }
 
     if (useColors){
 		glEnableClientState(GL_COLOR_ARRAY);
         glColorPointer( 4, GL_UNSIGNED_BYTE, STRIDE, OFFSET(offset)); // Set the color pointer to the offset in the array
     }
 
-	glDrawElements(mode, count, GL_UNSIGNED_INT, &inds[vert_start]);
+    glDrawElements(mode, count, GL_UNSIGNED_INT, &inds[vert_start]);
   }
 
   void DrawArrays(GLenum mode, vector<VertexElement> &verts, GLsizei count, int vert_start = 0) {
-	if (!count) {
-		return;
-	}
+    if (!count) {
+      return;
+    }
 
-    // Calculate the number of bytes to get to the next vertex
-	GLsizei stride = GetStride() * sizeof( gs_scalar );
+      // Calculate the number of bytes to get to the next vertex
+    GLsizei stride = GetStride() * sizeof( gs_scalar );
 
-	#define OFFSET( P )  ( char* ) ( &verts[0] ) + ( ( sizeof( gs_scalar ) * ( P         ) ) )
-	GLsizei STRIDE = stride;
+    #define OFFSET( P )  ( char* ) ( &verts[0] ) + ( ( sizeof( gs_scalar ) * ( P         ) ) )
+    GLsizei STRIDE = stride;
 
-	// Enable vertex array's for fast vertex processing
-	glEnableClientState(GL_VERTEX_ARRAY);
-	unsigned offset = 0;
-	glVertexPointer( vertexStride, GL_FLOAT, STRIDE, OFFSET(offset) ); // Set the vertex pointer
-	offset += vertexStride;
+    // Enable vertex array's for fast vertex processing
+    glEnableClientState(GL_VERTEX_ARRAY);
+    unsigned offset = 0;
+    glVertexPointer( vertexStride, GL_FLOAT, STRIDE, OFFSET(offset) ); // Set the vertex pointer
+    offset += vertexStride;
 
     if (useNormals){
-		glEnableClientState(GL_NORMAL_ARRAY);
-		glNormalPointer( GL_FLOAT, STRIDE, OFFSET(offset) ); // Set the normal pointer to the offset in the array
-		offset += 3;
+      glEnableClientState(GL_NORMAL_ARRAY);
+      glNormalPointer( GL_FLOAT, STRIDE, OFFSET(offset) ); // Set the normal pointer to the offset in the array
+      offset += 3;
     }
 
-	if (useTextures){
-		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-		glTexCoordPointer( 2, GL_FLOAT, STRIDE,  OFFSET(offset) ); // Set the texture pointer to the offset in the array
-		offset += 2;
-	}
+    if (useTextures){
+      glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+      glTexCoordPointer( 2, GL_FLOAT, STRIDE,  OFFSET(offset) ); // Set the texture pointer to the offset in the array
+      offset += 2;
+    }
 
     if (useColors){
-		glEnableClientState(GL_COLOR_ARRAY);
-        glColorPointer( 4, GL_UNSIGNED_BYTE, STRIDE, OFFSET(offset)); // Set the color pointer to the offset in the array
+      glEnableClientState(GL_COLOR_ARRAY);
+      glColorPointer( 4, GL_UNSIGNED_BYTE, STRIDE, OFFSET(offset)); // Set the color pointer to the offset in the array
     }
 
-	glDrawArrays(mode, vert_start, count);
+    glDrawArrays(mode, vert_start, count);
   }
 
   void Draw(int vertex_start = 0, int vertex_count = -1)
   {
     //TODO: Right now vertex count override only works with triangles
-	// Draw the batched and indexed primitives
-	if (triangleIndexedCount > 0) {
-		DrawElements(GL_TRIANGLES, triangleIndexedVertices, triangleIndices, (vertex_count==-1?triangleIndices.size():vertex_count), vertex_start);
-	}
-	if (lineIndexedCount > 0) {
-		DrawElements(GL_LINES, lineIndexedVertices, lineIndices, lineIndices.size());
-	}
-	if (pointIndexedCount > 0) {
-	    DrawElements(GL_POINTS, pointIndexedVertices, pointIndices, pointIndices.size());
-	}
+    // Draw the batched and indexed primitives
+    if (triangleIndexedCount > 0) {
+      DrawElements(GL_TRIANGLES, triangleIndexedVertices, triangleIndices, (vertex_count==-1?triangleIndices.size():vertex_count), vertex_start);
+    }
+    if (lineIndexedCount > 0) {
+      DrawElements(GL_LINES, lineIndexedVertices, lineIndices, lineIndices.size());
+    }
+    if (pointIndexedCount > 0) {
+        DrawElements(GL_POINTS, pointIndexedVertices, pointIndices, pointIndices.size());
+    }
 
-	// Draw the unbatched and unindexed primitives
-	if (triangleCount > 0) {
-		DrawArrays(GL_TRIANGLES, triangleVertices, (vertex_count==-1?triangleCount:vertex_count), vertex_start);
-	}
-	if (lineCount > 0) {
-		DrawArrays(GL_LINES, lineVertices, lineCount);
-	}
-	if (pointCount > 0) {
-	    DrawArrays(GL_POINTS, pointVertices, pointCount);
-	}
+    // Draw the unbatched and unindexed primitives
+    if (triangleCount > 0) {
+      DrawArrays(GL_TRIANGLES, triangleVertices, (vertex_count==-1?triangleCount:vertex_count), vertex_start);
+    }
+    if (lineCount > 0) {
+      DrawArrays(GL_LINES, lineVertices, lineCount);
+    }
+    if (pointCount > 0) {
+        DrawArrays(GL_POINTS, pointVertices, pointCount);
+    }
 
-	glDisableClientState(GL_VERTEX_ARRAY);
+    glDisableClientState(GL_VERTEX_ARRAY);
     if (useTextures) glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     if (useNormals) glDisableClientState(GL_NORMAL_ARRAY);
     if (useColors) glDisableClientState(GL_COLOR_ARRAY);

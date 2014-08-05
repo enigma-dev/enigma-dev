@@ -320,13 +320,13 @@ void d3d_model_part_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z, int vert
 
 void d3d_model_part_draw(int id, int texId, int vertex_start, int vertex_count)
 {
-    texture_set(get_texture(texId));
+    texture_set(texId);
     meshes[id]->Draw(vertex_start, vertex_count);
 }
 
 void d3d_model_part_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z, int texId, int vertex_start, int vertex_count)
 {
-    texture_set(get_texture(texId));
+    texture_set(texId);
     d3d_transform_add_translation(x, y, z);
     meshes[id]->Draw(vertex_start, vertex_count);
     d3d_transform_add_translation(-x, -y, -z);

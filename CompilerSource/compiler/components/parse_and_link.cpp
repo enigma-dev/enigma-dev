@@ -48,7 +48,7 @@ using namespace std;
 
 extern string tostring(int);
 
-int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], vector<parsed_script*>& tlines)
+int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], vector<parsed_script*>& tlines, const std::set<std::string>& script_names)
 {
   //First we just parse the scripts to add semicolons and collect variable names
   for (int i = 0; i < es->scriptCount; i++)
@@ -60,26 +60,58 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
     }
     // Keep a parsed record of this script
     scr_lookup[es->scripts[i].name] = scripts[i] = new parsed_script;
-    parser_main(es->scripts[i].code,&scripts[i]->pev);
+    parser_main(es->scripts[i].code,&scripts[i]->pev, script_names);
     edbg << "Parsed `" << es->scripts[i].name << "': " << scripts[i]->obj.locals.size() << " locals, " << scripts[i]->obj.globals.size() << " globals" << flushl;
     
     // If the script accesses variables from outside its scope implicitly
     if (scripts[i]->obj.locals.size() or scripts[i]->obj.globallocals.size()) {
       parsed_object temporary_object = *scripts[i]->pev.myObj;
       scripts[i]->pev_global = new parsed_event(&temporary_object);
-      parser_main(string("with (self) {\n") + es->scripts[i].code + "\n/* */}",scripts[i]->pev_global);
+      parser_main(string("with (self) {\n") + es->scripts[i].code + "\n/* */}",scripts[i]->pev_global, script_names);
       scripts[i]->pev_global->myObj = NULL;
     }
     fflush(stdout);
   }
-  
+
+  //Next we just parse the timeline scripts to add semicolons and collect variable names
+  tline_lookup.clear();
+  for (int i=0; i<es->timelineCount; i++) 
+  {
+    for (int j=0; j<es->timelines[i].momentCount; j++) 
+    {
+      int a = syncheck::syntacheck(es->timelines[i].moments[j].code);
+      if (a != -1) {
+        user << "Syntax error in timeline `" << es->timelines[i].name <<", moment: " <<es->timelines[i].moments[j].stepNo << "'\n" << syncheck::syerr << flushl;
+        return E_ERROR_SYNTAX;
+      }
+
+      //Add a parsed_script record. We can retrieve this later; its order is well-defined (timeline i, moment j) and can be calculated with a global counter.
+      tlines.push_back(new parsed_script());
+
+      // Keep a parsed record of this timeline
+      tline_lookup[es->timelines[i].name].push_back(tlines.back());
+      parser_main(es->timelines[i].moments[j].code, &tlines.back()->pev, script_names);
+      edbg << "Parsed `" << es->timelines[i].name <<", moment: " <<es->timelines[i].moments[j].stepNo << "': " << tlines.back()->obj.locals.size() << " locals, " << tlines.back()->obj.globals.size() << " globals" << flushl;
+
+      // If the timeline accesses variables from outside its scope implicitly
+      if (tlines.back()->obj.locals.size() or tlines.back()->obj.globallocals.size()) {
+        parsed_object temporary_object = *tlines.back()->pev.myObj;
+        tlines.back()->pev_global = new parsed_event(&temporary_object);
+        parser_main(string("with (self) {\n") + es->timelines[i].moments[j].code + "\n/* */}",tlines.back()->pev_global, script_names);
+        tlines.back()->pev_global->myObj = NULL;
+      }
+      fflush(stdout);
+    }
+  }
+
   edbg << "\"Linking\" scripts" << flushl;
 
   //Next we traverse the scripts for dependencies.
-  unsigned nec_iters = 0;
-  if (es->scriptCount > 0)
-    nec_iters = lrint(ceilf(log2(es->scriptCount)));
-  edbg << "`Linking' " << es->scriptCount << " scripts in " << nec_iters << " passes...\n";
+  //The problem is, script0 may call script1, etc., which is complicated by timelines (which may also call scripts). 
+  //For now, we simply perform log2(|scripts|+|timelines|) passes, which ensures that all mult-level scripts bubble to the top.
+  const unsigned nec_iters = es->scriptCount+es->timelineCount > 0 ? lrint(ceilf(log2(es->scriptCount+es->timelineCount))) : 0;
+
+  edbg << "`Linking' " << es->scriptCount << " scripts and " <<es->timelineCount <<" timelines in " << nec_iters << " passes...\n";
   for (unsigned _necit = 0; _necit < nec_iters; _necit++) //We will iterate the list of scripts just enough times to copy everything
   {
     for (int _im = 0; _im < es->scriptCount; _im++) //For each script
@@ -88,8 +120,48 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
       for (parsed_object::funcit it = curscript->obj.funcs.begin(); it != curscript->obj.funcs.end(); it++) //For each function called by each script
       {
         map<string,parsed_script*>::iterator subscr = scr_lookup.find(it->first); //Check if it's a script
-        if (subscr != scr_lookup.end()) //At this point, what we have is this:     for each script called by curscript
+        if (subscr != scr_lookup.end()) { //At this point, what we have is this:     for each script called by curscript
           curscript->obj.copy_calls_from(subscr->second->obj);
+          curscript->obj.copy_tlines_from(subscr->second->obj);
+        }
+      }
+
+      for (parsed_object::tlineit it = curscript->obj.tlines.begin(); it != curscript->obj.tlines.end(); it++) //For each tline called by each script
+      {
+        map<string, vector<parsed_script*> >::iterator timit = tline_lookup.find(it->first); //Check if it's a timeline.
+        if (timit != tline_lookup.end()) { //If we've got ourselves a timeline
+          for (vector<parsed_script*>::iterator momit = timit->second.begin(); momit!=timit->second.end(); momit++) {
+            curscript->obj.copy_calls_from((*momit)->obj);
+            curscript->obj.copy_tlines_from((*momit)->obj);
+          }
+        }
+      }
+    }
+
+    int lookup_id = 0;
+    for (int _im = 0; _im < es->timelineCount; _im++) //For each timeline-script
+    {
+      for (int j=0; j<es->timelines[_im].momentCount; j++,lookup_id++) 
+      {
+        parsed_script* curscript = tlines[lookup_id]; //At this point, what we have is this:     for each script as curscript
+        for (parsed_object::funcit it = curscript->obj.funcs.begin(); it != curscript->obj.funcs.end(); it++) //For each function called by each timeline
+        {
+          map<string,parsed_script*>::iterator subscr = scr_lookup.find(it->first); //Check if it's a script
+          if (subscr != scr_lookup.end()) { //At this point, what we have is this:     for each script called by curscript
+            curscript->obj.copy_calls_from(subscr->second->obj);
+          }
+        }
+
+        for (parsed_object::tlineit it = curscript->obj.tlines.begin(); it != curscript->obj.tlines.end(); it++) //For each tline called by each tline
+        {
+          map<string, vector<parsed_script*> >::iterator timit = tline_lookup.find(it->first); //Check if it's a timeline.
+          if (timit != tline_lookup.end()) { //If we've got ourselves a timeline
+            for (vector<parsed_script*>::iterator momit = timit->second.begin(); momit!=timit->second.end(); momit++) {
+              curscript->obj.copy_calls_from((*momit)->obj);
+              curscript->obj.copy_tlines_from((*momit)->obj);
+            }
+          }
+        }
       }
     }
   }
@@ -115,66 +187,10 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
   }
   edbg << "Done." << flushl;
 
-  //Treat timelines similarly to scripts.
-
-  //First we just parse the timeline scripts to add semicolons and collect variable names
-  tline_lookup.clear();
-  for (int i=0; i<es->timelineCount; i++) 
-  {
-    for (int j=0; j<es->timelines[i].momentCount; j++) 
-    {
-      int a = syncheck::syntacheck(es->timelines[i].moments[j].code);
-      if (a != -1) {
-        user << "Syntax error in timeline `" << es->timelines[i].name <<", moment: " <<es->timelines[i].moments[j].stepNo << "'\n" << syncheck::syerr << flushl;
-        return E_ERROR_SYNTAX;
-      }
-
-      //Add a parsed_script record. We can retrieve this later; its order is well-defined (timeline i, moment j) and can be calculated with a global counter.
-      tlines.push_back(new parsed_script());
-
-      // Keep a parsed record of this timeline
-      tline_lookup[es->timelines[i].name].push_back(tlines.back());
-      parser_main(es->timelines[i].moments[j].code, &tlines.back()->pev);
-      edbg << "Parsed `" << es->timelines[i].name <<", moment: " <<es->timelines[i].moments[j].stepNo << "': " << tlines.back()->obj.locals.size() << " locals, " << tlines.back()->obj.globals.size() << " globals" << flushl;
-
-      // If the timeline accesses variables from outside its scope implicitly
-      if (tlines.back()->obj.locals.size() or tlines.back()->obj.globallocals.size()) {
-        parsed_object temporary_object = *tlines.back()->pev.myObj;
-        tlines.back()->pev_global = new parsed_event(&temporary_object);
-        parser_main(string("with (self) {\n") + es->timelines[i].moments[j].code + "\n/* */}",tlines.back()->pev_global);
-        tlines.back()->pev_global->myObj = NULL;
-      }
-      fflush(stdout);
-    }
-  }
-
-  edbg << "\"Linking\" timelines" << flushl;
-  
-  //Next we traverse the timelines for dependencies.
-  nec_iters = 0;
-  if (es->timelineCount > 0)
-    nec_iters = lrint(ceilf(log2(es->timelineCount)));
-  edbg << "`Linking' " << es->timelineCount << " timelines in " << nec_iters << " passes...\n";
-  for (unsigned _necit = 0; _necit < nec_iters; _necit++) //We will iterate the list of scripts just enough times to copy everything
-  {
-    int lookup_id = 0;
-    for (int _im = 0; _im < es->timelineCount; _im++) //For each script
-    {
-      for (int j=0; j<es->timelines[_im].momentCount; j++,lookup_id++) 
-      {
-        parsed_script* curscript = tlines[lookup_id]; //At this point, what we have is this:     for each script as curscript
-        for (parsed_object::funcit it = curscript->obj.funcs.begin(); it != curscript->obj.funcs.end(); it++) //For each function called by each script
-        {
-          map<string,parsed_script*>::iterator subscr = scr_lookup.find(it->first); //Check if it's a script
-          if (subscr != scr_lookup.end()) //At this point, what we have is this:     for each script called by curscript
-            curscript->obj.copy_calls_from(subscr->second->obj);
-        }
-      }
-    }
-  }
 
   edbg << "Completing timeline \"Link\"" << flushl;
   
+  //TODO: Linking timelines might not be strictly necessary, because scripts can now find their children through the timelines they call.
   int lookup_id = 0;
   for (int _im = 0; _im < es->timelineCount; _im++) //For each script
   {
@@ -198,7 +214,8 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
   }
   edbg << "Done." << flushl;
 
-  //Done with timelines (TODO: do we have to link these into objects? Seems un-necessary)
+  //Done with scripts and timelines.
+
 
 
   edbg << es->gmObjectCount << " Objects:\n";
@@ -253,7 +270,7 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
         
         //Add this to our objects map
         pev.myObj = pob; //Link to its calling object.
-        parser_main(code,&pev); //Format it to C++
+        parser_main(code,&pev,script_names); //Format it to C++
         
         edbg << " Done." << flushl;
       }
@@ -273,7 +290,7 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
       cout << "Syntax error in room creation code for room " << es->rooms[i].id << " (`" << es->rooms[i].name << "'):" << endl << syncheck::syerr << flushl;
       return E_ERROR_SYNTAX;
     }
-    parser_main(es->rooms[i].creationCode,&pev);
+    parser_main(es->rooms[i].creationCode,&pev,script_names);
     
     for (int ii = 0; ii < es->rooms[i].instanceCount; ii++)
     {
@@ -287,10 +304,12 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
         
         pr->instance_create_codes[es->rooms[i].instances[ii].id].object_index = es->rooms[i].instances[ii].objectId;
         parsed_event* icce = pr->instance_create_codes[es->rooms[i].instances[ii].id].pe = new parsed_event(-1,-1,parsed_objects[es->rooms[i].instances[ii].objectId]);
-        parser_main(string("with (") + tostring(es->rooms[i].instances[ii].id) + ") {" + es->rooms[i].instances[ii].creationCode + "\n/* */}", icce);
+        parser_main(string("with (") + tostring(es->rooms[i].instances[ii].id) + ") {" + es->rooms[i].instances[ii].creationCode + "\n/* */}", icce, script_names);
       }
     }
   }
+
+
   
   //Next we link the scripts into the objects.
   edbg << "\"Linking\" scripts into the objects..." << flushl;
@@ -300,16 +319,49 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
     for (parsed_object::funcit it = t->funcs.begin(); it != t->funcs.end(); it++) //For each function called by each script
     {
       map<string,parsed_script*>::iterator subscr = scr_lookup.find(it->first); //Check if it's a script
-      if (subscr != scr_lookup.end()) //If we've got ourselves a script
+      if (subscr != scr_lookup.end()) { //If we've got ourselves a script
         t->copy_calls_from(subscr->second->obj);
+        t->copy_tlines_from(subscr->second->obj);
+      }
     }
     for (parsed_object::funcit it = t->funcs.begin(); it != t->funcs.end(); it++) //For each function called by each script
     {
       map<string,parsed_script*>::iterator subscr = scr_lookup.find(it->first); //Check if it's a script
-      if (subscr != scr_lookup.end()) //If we've got ourselves a script
+      if (subscr != scr_lookup.end()) { //If we've got ourselves a script 
+
         t->copy_from(subscr->second->obj,  "script `"+it->first+"'",  "object `"+i->second->name+"'");
+		}
     }
   }
+
+  //Next we link the timelines into the objects that might call them.
+  edbg << "\"Linking\" timelines into the objects..." << flushl;
+  for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
+  {
+    parsed_object* t = i->second;
+    for (parsed_object::tlineit it = t->tlines.begin(); it != t->tlines.end(); it++) //For each function called by each timeline
+    {
+      map<string, vector<parsed_script*> >::iterator timit = tline_lookup.find(it->first); //Check if it's a timeline.
+      if (timit != tline_lookup.end()) { //If we've got ourselves a timeline
+        //Iterate through its moments:
+        for (vector<parsed_script*>::iterator momit = timit->second.begin(); momit!=timit->second.end(); momit++) {
+          t->copy_calls_from((*momit)->obj);
+          t->copy_tlines_from((*momit)->obj);
+        }
+      }
+    }
+    for (parsed_object::tlineit it = t->tlines.begin(); it != t->tlines.end(); it++) //For each function called by each timeline
+    {
+      map<string, vector<parsed_script*> >::iterator timit = tline_lookup.find(it->first); //Check if it's a timeline.
+      if (timit != tline_lookup.end()) { //If we've got ourselves a timeline
+        //Iterate through its moments:
+        for (vector<parsed_script*>::iterator momit = timit->second.begin(); momit!=timit->second.end(); momit++) {
+          t->copy_from((*momit)->obj,  "script `"+it->first+"'",  "object `"+i->second->name+"'");
+        }
+      }
+    }
+  }
+
   edbg << "\"Link\" complete." << flushl;
   
   // Sort through object calls finding max script arg counts
