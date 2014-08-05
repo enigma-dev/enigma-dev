@@ -102,6 +102,7 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, i
 
     wto << "\n";
     wto << "namespace enigma\n{\n\n";
+    wto << "  extern std::map<int,inst_iter*> instance_deactivated_list;\n";
     wto << "  extern objectstruct** objectdata;\n";
       wto << "  struct object_locals: event_parent";
         for (unsigned i = 0; i < parsed_extensions.size(); i++)
@@ -406,7 +407,18 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, i
           //This is the actual call to remove the current instance from all linked records before destroying it.
           wto << "\n    void unlink()\n    {\n";
           wto << "      instance_iter_queue_for_destroy(ENOBJ_ITER_me); // Queue for delete while we're still valid\n";
-          wto << "      deactivate();\n    }\n\n    void deactivate()\n    {\n";
+          wto << "      if (is_active_QBwfSd) {\n";
+          wto << "        deactivate();\n";
+          wto << "      } else {\n";
+          wto << "        //This instance may be listed as deactivated; we need to remove it from that list.\n";
+          wto << "        std::map<int,enigma::inst_iter*>::iterator it = enigma::instance_deactivated_list.find(id);\n";
+          wto << "        if (it!=enigma::instance_deactivated_list.end()) {\n";
+          wto << "          enigma::instance_deactivated_list.erase(it);\n";
+          wto << "        }\n";
+          wto << "      }\n";
+          wto << "    }\n\n";
+          wto << "    void deactivate()\n    {\n";
+          wto << "      is_active_QBwfSd = false;\n";
           if (!setting::inherit_objects || !has_parent) { 
             wto << "      enigma::unlink_main(ENOBJ_ITER_me); // Remove this instance from the non-redundant, tree-structured list.\n";
             for (po_i her = i; her != parsed_objects.end(); her = parsed_objects.find(her->second->parent))
@@ -469,6 +481,7 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, i
 
 		
           wto << "    void activate()\n    {\n";
+          wto << "      is_active_QBwfSd = true;\n";
 			if (setting::inherit_objects && has_parent) {
 				wto << "      OBJ_" << parsed_objects.find(i->second->parent)->second->name << "::activate();\n";
 				// Have to remove the one the parent added so we can add our own

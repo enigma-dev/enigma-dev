@@ -28,6 +28,12 @@
 #define with(x) for (enigma::with_iter ENIGMA_WITHITER(enigma::fetch_inst_iter_by_int(x),enigma::instance_event_iterator->inst); \
 enigma::instance_event_iterator; enigma::instance_event_iterator = enigma::instance_event_iterator->next)
 
+//NOTE: This macro is ONLY to be used (in place of "with") for "room instance creation" code; that is, code which initializes a single instance
+//      and is defined in the room editor. It does the same thing as "with", but checks instance_deactivated_list first.
+#define with_room_inst(x) for (enigma::with_iter ENIGMA_WITHITER(enigma::fetch_roominst_iter_by_id(x),enigma::instance_event_iterator->inst); \
+enigma::instance_event_iterator; enigma::instance_event_iterator = enigma::instance_event_iterator->next)
+
+
 namespace enigma
 {
   struct with_iter

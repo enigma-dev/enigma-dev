@@ -62,6 +62,7 @@ namespace enigma {
   iterator instance_list_first();
   iterator fetch_inst_iter_by_id(int id);
   iterator fetch_inst_iter_by_int(int x);
+  iterator fetch_roominst_iter_by_id(int x);
 }
 
 #endif

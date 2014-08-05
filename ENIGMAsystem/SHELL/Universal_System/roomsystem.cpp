@@ -175,9 +175,10 @@ namespace enigma
 
     instance_event_iterator = new inst_iter(NULL,NULL,NULL);
 
-  // Fire the create event of all the new instances
-    for (int i = 0; i < instancecount; i++)
+    // Fire the create event of all the new instances.
+    for (int i = 0; i < instancecount; i++) {
       is[i]->myevent_create();
+    }
 
   // instance create code should be added here or occur at this exact moment in time, but guess what the code
   // isn't here, so where the fuck is it? and no not the create event, the instance create code from the room editor
@@ -189,7 +190,8 @@ namespace enigma
     for (int i = 0; i < instancecount; i++)
       is[i]->myevent_gamestart();
 
-  // Fire the rooms creation code
+  // Fire the rooms creation code.
+  // (NOTE: This code uses instance_deactivated_list to look up instances by ID, in addition to the normal lookup approach).
   if (createcode)
        createcode();
 
