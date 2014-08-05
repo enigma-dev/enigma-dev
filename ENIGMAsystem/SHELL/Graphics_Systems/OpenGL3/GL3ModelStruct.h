@@ -568,7 +568,7 @@ class Mesh
     if (!GetStride()) { return; }
 
     if (!vbogenerated || !vbobuffered) {
-	  vbobuffered = true;
+      vbobuffered = true;
       BufferGenerate();
     }
 
@@ -605,7 +605,6 @@ class Mesh
       glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indexBuffer );
     }
 
-
     unsigned offset = 0;
     enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_vertex,true);
     enigma_user::glsl_attribute_set(enigma::shaderprograms[enigma::bound_shader]->att_vertex, vertexStride, GL_FLOAT, 0, STRIDE, offset);
@@ -626,16 +625,19 @@ class Mesh
       //like in the case of d3d_model_block
       // Robert: I had to comment out this check due to the change in sampler management, you will need to check all 8 sampler stages if you want to reimplement this check
       // because this model class handles multi-texturing.
-      // Harijs: No, it doesn't support "multi-texturing" in the regulat sense, because we only bind one texture when drawing by default. This check is to see if this texture is used.
-      if (oglmgr->GetBoundTexture() != 0){
-        enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_texture, true);
-        enigma_user::glsl_attribute_set(enigma::shaderprograms[enigma::bound_shader]->att_texture, 2, GL_FLOAT, 0, STRIDE, offset);
-        enigma_user::glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_textureEnable, 1);
-      }else{
-        enigma_user::glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_textureEnable, 0);
-        enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_texture, false);
-      }
+      // Harijs: No, it doesn't support "multi-texturing" in the regular sense, because we only bind one texture when drawing by default. This check is to see if this texture is used.
+      // The best of both worlds fix is to send the texture coordinates, but disable the use of them in the default shader like so:
+      enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_texture, true);
+      enigma_user::glsl_attribute_set(enigma::shaderprograms[enigma::bound_shader]->att_texture, 2, GL_FLOAT, 0, STRIDE, offset);
+      //if (oglmgr->GetBoundTexture() != 0){
+        enigma_user::glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_textureEnable, 1);       
+      //}else{
+      //  enigma_user::glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_textureEnable, 0);
+      //}
       offset += 2;
+    }else{
+      enigma_user::glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_textureEnable, 0);
+      enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_texture, false);
     }
 
     if (useColors){

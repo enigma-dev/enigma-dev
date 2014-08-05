@@ -25,15 +25,15 @@ using std::string;
 
 namespace enigma
 {
-    string getVertexShaderPrefix();
-    string getFragmentShaderPrefix();
-    string getDefaultFragmentShader();
-    string getDefaultVertexShader();
-    void getDefaultUniforms(int prog_id);
-    void getDefaultAttributes(int prog_id);
-    void getUniforms(int prog_id);
-    void getAttributes(int prog_id);
-    int getGLTypeSize(GLuint type);
+  string getVertexShaderPrefix();
+  string getFragmentShaderPrefix();
+  string getDefaultFragmentShader();
+  string getDefaultVertexShader();
+  void getDefaultUniforms(int prog_id);
+  void getDefaultAttributes(int prog_id);
+  void getUniforms(int prog_id);
+  void getAttributes(int prog_id);
+  int getGLTypeSize(GLuint type);
 }
 
 namespace enigma_user
