@@ -623,11 +623,11 @@ class Mesh
       // The best of both worlds fix is to send the texture coordinates, but disable the use of them in the default shader like so:
       enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_texture, true);
       enigma_user::glsl_attribute_set(enigma::shaderprograms[enigma::bound_shader]->att_texture, 2, GL_FLOAT, 0, STRIDE, offset);
-      //if (oglmgr->GetBoundTexture() != 0){
+      if (oglmgr->GetBoundTexture() != 0){
         enigma_user::glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_textureEnable, 1);       
-      //}else{
-      //  enigma_user::glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_textureEnable, 0);
-      //}
+      }else{
+        enigma_user::glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_textureEnable, 0);
+      }
       offset += 2;
     }else{
       enigma_user::glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_textureEnable, 0);

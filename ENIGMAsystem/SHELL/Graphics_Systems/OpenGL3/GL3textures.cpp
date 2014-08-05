@@ -63,7 +63,7 @@ TextureStruct::~TextureStruct()
 }
 
 unsigned get_texture(int texid) {
-	return (size_t(texid) >= textureStructs.size())? -1 : textureStructs[texid]->gltex;
+	return (size_t(texid) >= textureStructs.size() || texid < 0)? -1 : textureStructs[texid]->gltex;
 }
 
 namespace enigma
@@ -258,11 +258,11 @@ unsigned texture_get_texel_height(int texid)
 }
 
 void texture_set_stage(int stage, int texid) {
-  if (enigma::samplerstates[stage].bound_texture != get_texture(texid)) {
+  int gt = get_texture(texid);
+  if (enigma::samplerstates[stage].bound_texture != gt) {
     oglmgr->EndShapesBatching();
     glActiveTexture(GL_TEXTURE0 + stage);
-    glBindTexture(GL_TEXTURE_2D, enigma::samplerstates[stage].bound_texture = get_texture(texid));
-    //oglmgr->ResetTextureStates();
+    oglmgr->BindTexture(GL_TEXTURE_2D, enigma::samplerstates[stage].bound_texture = (unsigned)(gt >= 0? gt : 0));
   }
 }
 
