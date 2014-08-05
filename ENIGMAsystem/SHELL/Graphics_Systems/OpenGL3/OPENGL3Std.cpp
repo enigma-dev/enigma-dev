@@ -50,87 +50,86 @@ namespace enigma
   
   void graphics_initialize_samplers();
 
-    void graphicssystem_initialize()
+  void graphicssystem_initialize()
+  {
+    oglmgr = new ContextManager();
+    #ifdef DEBUG_MODE
+    GLenum err = glewInit();
+    if (GLEW_OK != err)
     {
-        oglmgr = new ContextManager();
-        #ifdef DEBUG_MODE
-        GLenum err = glewInit();
-        if (GLEW_OK != err)
-        {
-          std::cout<<"GLEW ERROR!"<<std::endl;
-        }
-        #else
-        glewInit();
-        #endif
-
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        glDisable(GL_DEPTH_TEST);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-        glBindTexture(GL_TEXTURE_2D,0);
-
-        init_shaders();
-        // read shaders into graphics system structure and compile and link them if needed
-        for (size_t i = 0; i < shader_idmax; ++i) {
-            ShaderStruct* shaderstruct = shaderdata[i];
-
-            int vshader_id = enigma_user::glsl_shader_create(enigma_user::sh_vertex);
-            enigma_user::glsl_shader_load_string(vshader_id, shaderstruct->vertex);
-
-            int fshader_id = enigma_user::glsl_shader_create(enigma_user::sh_fragment);
-            enigma_user::glsl_shader_load_string(fshader_id, shaderstruct->fragment);
-
-            int prog_id = enigma_user::glsl_program_create();
-			enigma_user::glsl_program_set_name(prog_id, enigma_user::shader_get_name(i));
-
-            if (shaderstruct->precompile) {
-                enigma_user::glsl_shader_compile(vshader_id);
-                enigma_user::glsl_shader_compile(fshader_id);
-            }
-
-            enigma_user::glsl_program_attach(prog_id, vshader_id);
-            enigma_user::glsl_program_attach(prog_id, fshader_id);
-            enigma_user::glsl_program_link(prog_id);
-            enigma_user::glsl_program_validate(prog_id);
-        }
-
-        //ADD DEFAULT SHADER (emulates FFP)
-        int vshader_id = enigma_user::glsl_shader_create(enigma_user::sh_vertex);
-        enigma_user::glsl_shader_load_string(vshader_id, getDefaultVertexShader());
-
-        int fshader_id = enigma_user::glsl_shader_create(enigma_user::sh_fragment);
-        enigma_user::glsl_shader_load_string(fshader_id, getDefaultFragmentShader());
-
-        int prog_id = enigma_user::glsl_program_create();
-
-        enigma_user::glsl_shader_compile(vshader_id);
-        enigma_user::glsl_shader_compile(fshader_id);
-        enigma_user::glsl_program_attach(prog_id, vshader_id);
-        enigma_user::glsl_program_attach(prog_id, fshader_id);
-        enigma_user::glsl_program_link(prog_id);
-        enigma_user::glsl_program_validate(prog_id);
-		enigma_user::glsl_program_set_name(prog_id, "DEFAULT_SHADER");
-
-        getUniforms(prog_id);
-        getAttributes(prog_id);
-        getDefaultUniforms(prog_id);
-        getDefaultAttributes(prog_id);
-
-        default_shader = prog_id; //Default shader for FFP
-        main_shader = default_shader; //Main shader used to override the default one
-
-        enigma_user::glsl_program_reset(); //Set the default program
-        //END DEFAULT SHADER
-
-        using enigma_user::room_width;
-        using enigma_user::room_height;
-
-        glViewport(0,0,(int)room_width,(int)room_height);
-        enigma_user::d3d_set_projection_ortho(0,(int)room_width,0,(int)room_height, 0);
+      std::cout<<"GLEW ERROR!"<<std::endl;
     }
-}
+    #else
+    glewInit();
+    #endif
 
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glDisable(GL_DEPTH_TEST);
+    //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glBindTexture(GL_TEXTURE_2D,0);
+
+    init_shaders();
+    // read shaders into graphics system structure and compile and link them if needed
+    for (size_t i = 0; i < shader_idmax; ++i) {     
+      ShaderStruct* shaderstruct = shaderdata[i];
+      if (shaderstruct->precompile == false) { continue; }
+      
+      int vshader_id = enigma_user::glsl_shader_create(enigma_user::sh_vertex);
+      enigma_user::glsl_shader_load_string(vshader_id, shaderstruct->vertex);
+
+      int fshader_id = enigma_user::glsl_shader_create(enigma_user::sh_fragment);
+      enigma_user::glsl_shader_load_string(fshader_id, shaderstruct->fragment);
+
+      int prog_id = enigma_user::glsl_program_create();
+      enigma_user::glsl_program_set_name(prog_id, enigma_user::shader_get_name(i));
+
+      enigma_user::glsl_shader_compile(vshader_id);
+      enigma_user::glsl_shader_compile(fshader_id);
+
+      enigma_user::glsl_program_attach(prog_id, vshader_id);
+      enigma_user::glsl_program_attach(prog_id, fshader_id);
+      enigma_user::glsl_program_link(prog_id);
+      enigma_user::glsl_program_validate(prog_id);
+    }
+
+    //ADD DEFAULT SHADER (emulates FFP)
+    int vshader_id = enigma_user::glsl_shader_create(enigma_user::sh_vertex);
+    enigma_user::glsl_shader_load_string(vshader_id, getDefaultVertexShader());
+
+    int fshader_id = enigma_user::glsl_shader_create(enigma_user::sh_fragment);
+    enigma_user::glsl_shader_load_string(fshader_id, getDefaultFragmentShader());
+
+    int prog_id = enigma_user::glsl_program_create();
+
+    enigma_user::glsl_shader_compile(vshader_id);
+    enigma_user::glsl_shader_compile(fshader_id);
+    enigma_user::glsl_program_attach(prog_id, vshader_id);
+    enigma_user::glsl_program_attach(prog_id, fshader_id);
+    enigma_user::glsl_program_link(prog_id);
+    enigma_user::glsl_program_validate(prog_id);
+    enigma_user::glsl_program_set_name(prog_id, "DEFAULT_SHADER");
+
+    getUniforms(prog_id);
+    getAttributes(prog_id);
+    getDefaultUniforms(prog_id);
+    getDefaultAttributes(prog_id);
+
+    default_shader = prog_id; //Default shader for FFP
+    main_shader = default_shader; //Main shader used to override the default one
+
+    enigma_user::glsl_program_reset(); //Set the default program
+    //END DEFAULT SHADER
+
+    graphics_initialize_samplers();
+
+    using enigma_user::room_width;
+    using enigma_user::room_height;
+    glViewport(0,0,(int)room_width,(int)room_height);
+    enigma_user::d3d_set_projection_ortho(0,(int)room_width,0,(int)room_height, 0);
+  }
+}

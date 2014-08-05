@@ -327,8 +327,7 @@ void texture_set_lod_ext(int sampler, double minlod, double maxlod, int maxlevel
 
 bool texture_mipmapping_supported()
 {
-  return strstr((char*)glGetString(GL_EXTENSIONS),
-           "glGenerateMipmap");
+  return enigma::gl_extension_supported("glGenerateMipmap");
 }
 
 bool texture_anisotropy_supported()
