@@ -86,23 +86,31 @@ void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs
 
 void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, gs_scalar angle)
 {
-     // This fixes font glyph edge artifacting and vertical scroll gaps
-     // seen by mostly NVIDIA GPU users.  Rounds x and y and adds +0.01 offset.
-     // This will prevent the fix from being negated through moving projections
-     // and fractional coordinates. 
-     x = round(x) + 0.01f; y = round(y) + 0.01f;
-     D3DXMATRIX matRotZ, matTrans, matScale;
+  // This fixes font glyph edge artifacting and vertical scroll gaps
+  // seen by mostly NVIDIA GPU users.  Rounds x and y and adds +0.01 offset.
+  // This will prevent the fix from being negated through moving projections
+  // and fractional coordinates. 
+  x = round(x) + 0.01f; y = round(y) + 0.01f;
+  D3DXMATRIX matRotZ, mat1Trans, mat2Trans, matScale;
 
-	// Calculate rotation matrix
+  // Translate so the center is at 0,0
+  D3DXMatrixTranslation(&mat1Trans, -x-width/2.0, -y-height/2.0, 0); 
+  
+	// Rotate around the center
 	D3DXMatrixRotationZ( &matRotZ, gs_angle_to_radians(angle) );        // Roll
 
-	// Calculate a translation matrix
-	D3DXMatrixTranslation(&matTrans, -x, -y - height, 0);
-
-	D3DXMatrixScaling(&matScale, 1, -1, 1);
+  // Move back
+  //D3DXMatrixTranslation(&mat2Trans, +x+width/2.0, +y+height/2.0, 0); //Offset back
+  //D3DXMatrixTranslation(&mat3Trans, -x, -y-height, 0); //Move the view
+  // Or do both of them together:
+	D3DXMatrixTranslation(&mat2Trans, width/2.0, height/2.0-height, 0);
+  // I don't get why the view moving is done here though. It should be possible in D3DXMatrixOrthoOffCenterLH instead,
+  // like we do in GL - H.G.
+  
+ 	D3DXMatrixScaling(&matScale, 1, -1, 1);
 
 	// Calculate our world matrix by multiplying the above (in the correct order)
-	D3DXMATRIX matView=matRotZ*matTrans*matScale;
+	D3DXMATRIX matView=mat1Trans*matRotZ*mat2Trans*matScale;
 
 	// Set the matrix to be applied to anything we render from now on
 	d3dmgr->SetTransform( D3DTS_VIEW, &matView);
