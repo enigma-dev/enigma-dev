@@ -114,13 +114,13 @@ void EndShapesBatching() {
 
 void BeginScene() {
 	last_depth = 0;
-	gpuprof.reset_frame();
 	// Reapply the stored render states and what not
 	RestoreState();
 }
 
 void EndScene() {
-	EndShapesBatching();
+  gpuprof.end_frame();  
+  EndShapesBatching();
 }
 
 void SetEnabled(GLenum cap, bool enabled) {

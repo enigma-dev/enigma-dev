@@ -576,7 +576,7 @@ class Mesh
     if (triangleIndexedCount == 0 && lineIndexedCount == 0 && pointIndexedCount == 0 && triangleCount == 0 && lineCount == 0 && pointCount == 0) return;
 
     #ifdef DEBUG_MODE
-    enigma::GPUProfilerVBORender vbd = oglmgr->gpuprof.add_drawcall();
+    enigma::GPUProfilerBatch& vbd = oglmgr->gpuprof.add_drawcall();
     #endif
 	
     if (enigma::transform_needs_update == true){
@@ -648,15 +648,15 @@ class Mesh
       enigma_user::glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_colorEnable,0);
       enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_color, false);
     }
-
+    
     #define OFFSETE( P )  ( ( const GLvoid * ) ( sizeof( GLuint ) * ( P         ) ) )
     offset = vertex_start;
 
     // Draw the indexed primitives
     if (triangleIndexedCount > 0) {
       #ifdef DEBUG_MODE
-      oglmgr->gpuprof.drawn_drawcall_number+=1;
-      oglmgr->gpuprof.drawn_vertex_number+=(vertex_count==-1?triangleIndexedCount:vertex_count);
+      vbd.drawcalls+=1;
+      vbd.triangles_indexed+=(vertex_count==-1?triangleIndexedCount:vertex_count);
       #endif
       
       glDrawElements(GL_TRIANGLES, (vertex_count==-1?triangleIndexedCount:vertex_count), GL_UNSIGNED_INT, OFFSETE(offset));
@@ -664,8 +664,8 @@ class Mesh
     }
     if (lineIndexedCount > 0) {
       #ifdef DEBUG_MODE
-      oglmgr->gpuprof.drawn_drawcall_number+=1;
-      oglmgr->gpuprof.drawn_vertex_number+=lineIndexedCount;
+      vbd.drawcalls+=1;
+      vbd.lines_indexed+=lineIndexedCount;
       #endif
       
       glDrawElements(GL_LINES, lineIndexedCount, GL_UNSIGNED_INT, OFFSETE(offset));
@@ -673,8 +673,8 @@ class Mesh
     }
     if (pointIndexedCount > 0) {
       #ifdef DEBUG_MODE
-      oglmgr->gpuprof.drawn_drawcall_number+=1;
-      oglmgr->gpuprof.drawn_vertex_number+=pointIndexedCount;
+      vbd.drawcalls+=1;
+      vbd.points_indexed+=pointIndexedCount;
       #endif
     
       glDrawElements(GL_POINTS, pointIndexedCount, GL_UNSIGNED_INT, OFFSETE(offset));
@@ -685,8 +685,8 @@ class Mesh
     // Draw the unindexed primitives
     if (triangleCount > 0) {
       #ifdef DEBUG_MODE
-      oglmgr->gpuprof.drawn_drawcall_number+=1;
-      oglmgr->gpuprof.drawn_vertex_number+=(vertex_count==-1?triangleCount:vertex_count);
+      vbd.drawcalls+=1;
+      vbd.triangles+=(vertex_count==-1?triangleCount:vertex_count);
       #endif
     
       glDrawArrays(GL_TRIANGLES, (vertex_start==0?offset:vertex_start), (vertex_count==-1?triangleCount:vertex_count));
@@ -694,8 +694,8 @@ class Mesh
     }
     if (lineCount > 0) {
       #ifdef DEBUG_MODE
-      oglmgr->gpuprof.drawn_drawcall_number+=1;
-      oglmgr->gpuprof.drawn_vertex_number+=lineCount;
+      vbd.drawcalls+=1;
+      vbd.lines+=lineCount;
       #endif
     
       glDrawArrays(GL_LINES, offset, lineCount);
@@ -703,13 +703,13 @@ class Mesh
     }
     if (pointCount > 0) {
       #ifdef DEBUG_MODE
-      oglmgr->gpuprof.drawn_drawcall_number+=1;
-      oglmgr->gpuprof.drawn_vertex_number+=pointCount;
+      vbd.drawcalls+=1;
+      vbd.points+=pointCount;
       #endif
     
       glDrawArrays(GL_POINTS, offset, pointCount);
     }
-
+ 
     /*glBindBuffer( GL_ARRAY_BUFFER, 0 );
     if (vboindexed) {
       glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
