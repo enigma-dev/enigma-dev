@@ -22,26 +22,27 @@
 
 namespace enigma{
 
-	struct GPUProfilerVBORender{
+	struct GPUProfilerBatch{
 		bool color_enabled;
 		bool texture_enabled;
 		bool normals_enabled;
-		
-		int vertices;
-		
+			
 		int triangles;
-		int triangle_indeces;
+		int triangles_indexed;
 		int lines;
-		int line_indeces;
+		int lines_indexed;
 		int points;
-		int point_indeces;
+		int points_indexed;
 		
 		int drawcalls;
 		int texture;
+    
+    int vertices() { return triangles+lines+points; }
+    int indecies() { return triangles_indexed+lines_indexed+points_indexed; }
 	};
 
 	class GPUProfiler {
-		std::vector<GPUProfilerVBORender> VBORenders;
+		std::vector<GPUProfilerBatch> BatchesRenders;
 		
 		public:
 			int drawn_vertex_number;
@@ -54,15 +55,25 @@ namespace enigma{
 				drawn_vertex_number = 0;
 				drawn_drawcall_number = 0;
 				drawn_vbo_number = 0;
+        BatchesRenders.clear();
+			}
+      
+      void end_frame() {
+        reset_frame();
+        for (unsigned int i=0; i<BatchesRenders.size(); ++i){
+          drawn_vertex_number += BatchesRenders[i].vertices();
+          drawn_drawcall_number += BatchesRenders[i].drawcalls;
+        }
+        drawn_vbo_number = BatchesRenders.size();
+      }
+			
+			GPUProfilerBatch& add_drawcall(){
+				BatchesRenders.push_back( GPUProfilerBatch() );
+				return BatchesRenders.back();
 			}
 			
-			GPUProfilerVBORender& add_drawcall(){
-				VBORenders.push_back( GPUProfilerVBORender() );
-				return VBORenders.back();
-			}
-			
-			GPUProfilerVBORender& last_drawcall(){
-				return VBORenders.back();
+			GPUProfilerBatch& last_drawcall(){
+				return BatchesRenders.back();
 			}
 			
 			GPUProfiler() : drawn_vertex_number(0), drawn_drawcall_number(0), drawn_vbo_number(0){ }
