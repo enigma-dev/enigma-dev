@@ -62,10 +62,6 @@ namespace enigma
       const unsigned id;
       const int object_index;
 
-      //Is this current instance active?
-      //The QBwfSd is just to (try) to avoid collisions with user-created variable names. (There are other options.)
-      bool is_active_QBwfSd;
-
       virtual void unlink();
       virtual void deactivate();
       virtual void activate();
