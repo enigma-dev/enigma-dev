@@ -97,6 +97,40 @@ public:
 };
 
 
+//A read-write binding for something with a getter/setter (such as draw_get/set_color())
+class BindPropRW {
+public:
+  explicit BindPropRW(int (*get)(), void (*set)(int)) : get(get), set(set) {}
+
+  //Get
+  operator int() const {
+    return get();
+  }
+
+  //set() overrides
+  BindPropRW& operator=(gs_scalar val) {
+    set(static_cast<int>(val)); //Truncate
+    return *this;
+  }
+  BindPropRW& operator=(const BindPropRW& val) {
+    set(static_cast<int>(val));
+    return *this;
+  }
+
+  //Set
+  template <typename T>
+  BindPropRW& operator=(const T& val) {
+    set(val);
+    return *this;
+  }
+
+protected:
+  //Getter/setter function.
+  int (*get)();
+  void (*set)(int);
+};
+
+
 }
 
 
