@@ -39,7 +39,6 @@ void swap(T& val1, T& val2){
 }
 }
 
-
 namespace enigma_user
 {
 
@@ -47,7 +46,7 @@ namespace enigma_user
 gs_scalar pen_size = 1;
 int brush_style = enigma_user::bs_solid; 
 int pen_color = enigma_user::c_black;
-int brush_color = enigma_user::c_black;
+enigma::BindPropRW brush_color(&draw_get_color, &draw_set_color);
 
 
 void draw_rectangle(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2)
@@ -70,18 +69,19 @@ void draw_rectangle(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2)
   //Fill the shape, if we have the correct brush style.
   //Note: At the moment, we treat all unsupported brush styles as "solid"; only "hollow" avoids drawing.
   if (brush_style != bs_hollow) {
-    draw_set_color(brush_color);
     draw_rectangle(x1,y1,x2,y2,false);
   }
 
   //Draw the line (this always happens; a pen_size of 0 still draws a 1px line).
   //Note: So many off-by-one errors worries me; will have to confirm on Windows that this
   //      is not a bug in the OpenGL code.
+  int old_color = draw_get_color();
   draw_set_color(pen_color);
   draw_line_width(x1,           y1-hwid, x1,      y2+hwid, lwid);
   draw_line_width(x1-hwid-shft, y2,      x2+hwid, y2,      lwid);
   draw_line_width(x2,           y2+hwid, x2,      y1-hwid, lwid);
   draw_line_width(x2+hwid,      y1,      x1-hwid, y1,      lwid);
+  draw_set_color(old_color);
 }
 
 
@@ -92,11 +92,11 @@ void draw_triangle(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_sc
   //Fill the shape, if we have the correct brush style.
   //Note: At the moment, we treat all unsupported brush styles as "solid"; only "hollow" avoids drawing.
   if (brush_style != bs_hollow) {
-    draw_set_color(brush_color);
     draw_triangle(x1,y1,x2,y2,x3,y3,false);
   }
 
   //Draw the outline.
+  int old_color = draw_get_color();
   draw_set_color(pen_color);
   draw_line_width(x1,y1, x2,y2, lwid);
   draw_line_width(x2,y2, x3,y3, lwid);
@@ -107,6 +107,7 @@ void draw_triangle(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_sc
   draw_circle(x1,y1,lwid/2.0, false);
   draw_circle(x2,y2,lwid/2.0, false);
   draw_circle(x3,y3,lwid/2.0, false);
+  draw_set_color(old_color);
 }
 
 
@@ -128,11 +129,11 @@ void draw_ellipse(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2)
   //Fill the shape, if we have the correct brush style.
   //Note: At the moment, we treat all unsupported brush styles as "solid"; only "hollow" avoids drawing.
   if (brush_style != bs_hollow) {
-    draw_set_color(brush_color);
     draw_ellipse(x1,y1,x2,y2,false);
   }
 
   //This is borrowed from General drawing code.
+  int old_color = draw_get_color();
   draw_set_color(pen_color);
   gs_scalar x = (x1+x2)/2,y=(y1+y2)/2;
   gs_scalar hr = fabs(x2-x),vr=fabs(y2-y);
@@ -174,6 +175,7 @@ void draw_ellipse(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2)
     draw_line_width(x+xc1,y-yc1  ,  x+xc2,y-yc2  , lwid);
     draw_line_width(x-xc1,y-yc1  ,  x-xc2,y-yc2  , lwid);
   }
+  draw_set_color(old_color);
 }
 
 void draw_circle(gs_scalar x, gs_scalar y, float radius)
@@ -188,11 +190,11 @@ void draw_circle(gs_scalar x, gs_scalar y, float radius)
   //Fill the shape, if we have the correct brush style.
   //Note: At the moment, we treat all unsupported brush styles as "solid"; only "hollow" avoids drawing.
   if (brush_style != bs_hollow) {
-    draw_set_color(brush_color);
     draw_circle(x,y,radius,false);
   }
 
   //This is borrowed from General drawing code.
+  int old_color = draw_get_color();
   draw_set_color(pen_color);
   double pr = 2 * M_PI / draw_get_circle_precision();
   double oldX = 0.0;
@@ -223,6 +225,7 @@ void draw_circle(gs_scalar x, gs_scalar y, float radius)
     oldX = newX;
     oldY = newY;
   }
+  draw_set_color(old_color);
 }
 
 
@@ -237,13 +240,13 @@ void draw_polygon_end()
   //Note: At the moment, we treat all unsupported brush styles as "solid"; only "hollow" avoids drawing.
   //TODO: Test if GM5 actually respects brush_style for polygons.
   if (brush_style != bs_hollow) {
-    draw_set_color(brush_color);
     draw_polygon_end(false); //Dispatch to GSstdraw
   } else {
     enigma::currComplexPoly.clear(); //Just clear it; we're only drawing a line.
   }
 
   //Draw the line around it.
+  int old_color = draw_get_color();
   draw_set_color(pen_color);
   enigma::PolyVertex lastPt = *(--cachedPoly.end());
   for (std::list<enigma::PolyVertex>::iterator it = cachedPoly.begin(); it!=cachedPoly.end(); it++) {
@@ -251,6 +254,7 @@ void draw_polygon_end()
     draw_line_width(lastPt.x,lastPt.y, currPt.x,currPt.y , lwid);
     lastPt = currPt;
   }
+  draw_set_color(old_color);
 }
 
 
