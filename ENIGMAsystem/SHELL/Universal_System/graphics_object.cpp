@@ -33,6 +33,8 @@ namespace enigma
 
   INTERCEPT_DEFAULT_COPY(enigma::depthv)
   void depthv::function(variant oldval) {
+    if (!myiter) { return; }
+
     rval.d = floor(rval.d);
     if (fequal(oldval.rval.d, rval.d)) return;
 
@@ -57,6 +59,8 @@ namespace enigma
     }
     myiter = NULL;
   }
+
+  depthv::depthv() : myiter(0) {}
   depthv::~depthv() {}
 
   int object_graphics::$sprite_width()  const { return sprite_index == -1? 0 : enigma_user::sprite_get_width(sprite_index)*image_xscale; }
