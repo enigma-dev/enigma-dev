@@ -533,6 +533,7 @@ class Mesh
         glNewList(modellist, GL_COMPILE);
           DrawCalls(vertex_start, vertex_count);
         glEndList();
+        ClearData();
       }
       enigma::graphics_samplers_apply();
       glCallList(modellist);
