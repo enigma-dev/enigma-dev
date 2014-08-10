@@ -17,6 +17,7 @@
 
 #include "../General/OpenGLHeaders.h"
 #include "../General/GSd3d.h"
+#include "../General/GSmodel.h"
 #include "GLshapes.h"
 #include "GLTextureStruct.h"
 #include "../General/GSprimitives.h"
@@ -151,6 +152,10 @@ union VertexElement {
 class Mesh
 {
   public:
+  int modeltype; // can be static, dynamic, or stream
+  bool modelbuffered; // whether a call list has been generated if the model type is static
+  GLuint modellist; // call list for static models
+  
   unsigned currentPrimitive; // The type of the current primitive being added to the model
 
   vector<VertexElement> vertices; // Temporary vertices container for the current primitive until they are batched
@@ -180,6 +185,8 @@ class Mesh
 
   //NOTE: OpenGL 1.1 models are always dynamic since they utilize vertex arrays for software vertex processing and backwards compatibility.
   Mesh (int type) {
+    modeltype = type;
+    modelbuffered = false;
     vertexStride = 0;
     useColors = false;
     useTextures = false;
@@ -489,11 +496,8 @@ class Mesh
 
     glDrawArrays(mode, vert_start, count);
   }
-
-  void Draw(int vertex_start = 0, int vertex_count = -1)
-  {
-    enigma::graphics_samplers_apply();
-    
+  
+  void DrawCalls(int vertex_start = 0, int vertex_count = -1) {
     //TODO: Right now vertex count override only works with triangles
     // Draw the batched and indexed primitives
     if (triangleIndexedCount > 0) {
@@ -521,6 +525,24 @@ class Mesh
     if (useTextures) glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     if (useNormals) glDisableClientState(GL_NORMAL_ARRAY);
     if (useColors) glDisableClientState(GL_COLOR_ARRAY);
+  }
+
+  void Draw(int vertex_start = 0, int vertex_count = -1)
+  {
+    if (modeltype == enigma_user::model_static) {
+      if (!modelbuffered) {
+        modelbuffered = true;
+        modellist = glGenLists(1);
+        glNewList(modellist, GL_COMPILE);
+          DrawCalls(vertex_start, vertex_count);
+        glEndList();
+      }
+      enigma::graphics_samplers_apply();
+      glCallList(modellist);
+    } else {
+      enigma::graphics_samplers_apply();
+      DrawCalls(vertex_start, vertex_count);
+    }
   }
 };
 
