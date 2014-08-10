@@ -435,25 +435,21 @@ class Mesh
     GLsizei STRIDE = stride;
 
     // Enable vertex array's for fast vertex processing
-    glEnableClientState(GL_VERTEX_ARRAY);
     unsigned offset = 0;
     glVertexPointer( vertexStride, GL_FLOAT, STRIDE, OFFSET(offset) ); // Set the vertex pointer
     offset += vertexStride;
 
     if (useNormals){
-      glEnableClientState(GL_NORMAL_ARRAY);
       glNormalPointer( GL_FLOAT, STRIDE, OFFSET(offset) ); // Set the normal pointer to the offset in the array
       offset += 3;
     }
 
     if (useTextures){
-      glEnableClientState(GL_TEXTURE_COORD_ARRAY);
       glTexCoordPointer( 2, GL_FLOAT, STRIDE,  OFFSET(offset) ); // Set the texture pointer to the offset in the array
       offset += 2;
     }
 
     if (useColors){
-      glEnableClientState(GL_COLOR_ARRAY);
       glColorPointer( 4, GL_UNSIGNED_BYTE, STRIDE, OFFSET(offset)); // Set the color pointer to the offset in the array
     }
 
@@ -464,33 +460,29 @@ class Mesh
     if (!count) {
       return;
     }
-
-      // Calculate the number of bytes to get to the next vertex
+    
+    // Calculate the number of bytes to get to the next vertex
     GLsizei stride = GetStride() * sizeof( gs_scalar );
 
     #define OFFSET( P )  ( char* ) ( &verts[0] ) + ( ( sizeof( gs_scalar ) * ( P         ) ) )
     GLsizei STRIDE = stride;
 
     // Enable vertex array's for fast vertex processing
-    glEnableClientState(GL_VERTEX_ARRAY);
     unsigned offset = 0;
     glVertexPointer( vertexStride, GL_FLOAT, STRIDE, OFFSET(offset) ); // Set the vertex pointer
     offset += vertexStride;
 
     if (useNormals){
-      glEnableClientState(GL_NORMAL_ARRAY);
       glNormalPointer( GL_FLOAT, STRIDE, OFFSET(offset) ); // Set the normal pointer to the offset in the array
       offset += 3;
     }
 
     if (useTextures){
-      glEnableClientState(GL_TEXTURE_COORD_ARRAY);
       glTexCoordPointer( 2, GL_FLOAT, STRIDE,  OFFSET(offset) ); // Set the texture pointer to the offset in the array
       offset += 2;
     }
 
     if (useColors){
-      glEnableClientState(GL_COLOR_ARRAY);
       glColorPointer( 4, GL_UNSIGNED_BYTE, STRIDE, OFFSET(offset)); // Set the color pointer to the offset in the array
     }
 
@@ -498,6 +490,11 @@ class Mesh
   }
   
   void DrawCalls(int vertex_start = 0, int vertex_count = -1) {
+    glEnableClientState(GL_VERTEX_ARRAY);
+    if (useNormals) glEnableClientState(GL_NORMAL_ARRAY);
+    if (useTextures) glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    if (useColors) glEnableClientState(GL_COLOR_ARRAY);
+  
     //TODO: Right now vertex count override only works with triangles
     // Draw the batched and indexed primitives
     if (triangleIndexedCount > 0) {
