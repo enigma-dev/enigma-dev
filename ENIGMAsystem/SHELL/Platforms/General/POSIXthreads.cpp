@@ -22,6 +22,7 @@
 #include <pthread.h> // use POSIX threads
 
 struct scrtdata {
+  pthread_t handle;
   int scr;
   variant args[8];
   ethread* mt;
@@ -42,14 +43,24 @@ int script_thread(int scr,variant arg0, variant arg1, variant arg2, variant arg3
 {
   ethread* newthread = new ethread();
   variant args[] = {arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7};
-  scrtdata *sd = new scrtdata(scr, args, newthread);
-  pthread_t me;
-  if (pthread_create(&me, NULL, thread_script_func, sd)) {
-    delete sd; delete newthread;
-    return -1;
-  }
+  newthread->sd = new scrtdata(scr, args, newthread);
   threads.push_back(newthread);
   return threads.size() - 1;
+}
+
+int thread_start(int thread) {
+  if (pthread_create(&threads[thread]->sd->handle, NULL, thread_script_func, threads[thread]->sd)) {
+    return -1;
+  }
+  return 0;
+}
+
+void thread_join(int thread) {
+  pthread_join(threads[thread]->sd->handle, NULL);
+}
+
+void thread_delete(int thread) {
+  delete threads[thread];
 }
 
 bool thread_get_finished(int thread) {

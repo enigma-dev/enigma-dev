@@ -20,22 +20,31 @@
 
 #include <deque>
 #include <stdio.h>
-//using namespace std;
 
 #include "Universal_System/var4.h"
 
+struct scrtdata; // forward declaration
+
 struct ethread
 {
-  //pthread_t me; //TODO: Do not uncomment or you will break Windows, handle is defined but not in use anyway.
+  scrtdata *sd;
   bool active;
   variant ret;
   ethread(): active(true), ret(0) {};
+  ~ethread() {
+    if (sd != NULL) {
+      delete sd;
+    }
+  }
 };
 
 static std::deque<ethread*> threads;
 
 namespace enigma_user {
 	int script_thread(int scr, variant arg0 = 0, variant arg1 = 0, variant arg2 = 0, variant arg3 = 0, variant arg4 = 0, variant arg5 = 0, variant arg6 = 0, variant arg7 = 0);
+  int thread_start(int thread);
+  void thread_join(int thread);
+  void thread_delete(int thread);
 	bool thread_get_finished(int thread);
 	variant thread_get_return(int thread);
 }
