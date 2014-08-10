@@ -20,9 +20,11 @@
 #include "Universal_System/resource_data.h"
 #include "../General/PFthreads.h"
 
+#include <windows.h>
 #include <process.h>
 
 struct scrtdata {
+  HANDLE handle;
   int scr;
   variant args[8];
   ethread* mt;
@@ -43,18 +45,30 @@ int script_thread(int scr,variant arg0, variant arg1, variant arg2, variant arg3
 {
   ethread* newthread = new ethread();
   variant args[] = {arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7};
-  scrtdata *sd = new scrtdata(scr, args, newthread);
-  uintptr_t ret = _beginthread((void (*)(void*))thread_script_func, 0, sd);
+  newthread->sd = new scrtdata(scr, args, newthread);
+  threads.push_back(newthread);
+  return threads.size() - 1;
+}
+
+int thread_start(int thread) {
+  DWORD dwThreadId;
+  threads[thread]->sd->handle = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)&thread_script_func, (LPVOID)threads[thread]->sd, 0, &dwThreadId);
   //TODO: May need to check if ret is -1L, and yes it is quite obvious the return value is
   //an unsigned integer, but Microsoft says to for some reason. See their documentation here.
   //http://msdn.microsoft.com/en-us/library/kdzttdcb.aspx
   //NOTE: Same issue is in Universal_Systems/Extensions/Asynchronous/ASYNCdialog.cpp
-  if (ret == NULL) {
-    delete sd; delete newthread;
+  if (threads[thread]->sd->handle == NULL) {
     return -1;
   }
-  threads.push_back(newthread);
-  return threads.size() - 1;
+  return 0;
+}
+
+void thread_join(int thread) {
+  WaitForSingleObject(threads[thread]->sd->handle, INFINITE);
+}
+
+void thread_delete(int thread) {
+  delete threads[thread];
 }
 
 bool thread_get_finished(int thread) {
