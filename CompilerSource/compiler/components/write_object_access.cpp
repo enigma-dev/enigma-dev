@@ -114,12 +114,20 @@ int lang_CPP::compile_writeObjAccess(map<int,parsed_object*> &parsed_objects, pa
 
       for (po_i it = parsed_objects.begin(); it != parsed_objects.end(); it++)
       {
-        map<string,dectrip>::iterator x = it->second->locals.find(pmember);
-        if (x != it->second->locals.end())
+        po_i parent = it;
+        while(parent != parsed_objects.end())
         {
-          string tot = x->second.type != "" ? x->second.type : "var";
-          if (tot == dait->second.type and x->second.prefix == dait->second.prefix and x->second.suffix == dait->second.suffix)
-            wto << "      case " << it->second->name << ": return ((OBJ_" << it->second->name << "*)inst)->" << pmember << ";" << endl;
+          map<string,dectrip>::iterator x = parent->second->locals.find(pmember);
+          if (x != parent->second->locals.end())
+          {
+            string tot = x->second.type != "" ? x->second.type : "var";
+            if (tot == dait->second.type and x->second.prefix == dait->second.prefix and x->second.suffix == dait->second.suffix)
+            {
+              wto << "      case " << it->second->name << ": return ((OBJ_" << it->second->name << "*)inst)->" << pmember << ";" << endl;
+              break;
+            }
+          }
+          parent = parsed_objects.find(parent->second->parent);
         }
       }
 
