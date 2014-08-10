@@ -324,7 +324,7 @@ namespace enigma
 					tmpcell += 4;
 				}
 			}
-			unsigned texture = graphics_create_texture(cellwidth, height, fullcellwidth, fullheight, pxdata, mipmap);
+			unsigned texture = graphics_create_texture(cellwidth, height, fullcellwidth, fullheight, pixels, mipmap);
 			ns->texturearray.push_back(texture);
 			ns->texbordxarray.push_back((double) cellwidth/fullcellwidth);
 			ns->texbordyarray.push_back((double) height/fullheight);
