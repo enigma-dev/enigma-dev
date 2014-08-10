@@ -43,6 +43,7 @@ namespace enigma
     void function(variant oldval);
     void init(gs_scalar depth, object_basic* who);
     void remove();
+    depthv();
     ~depthv();
   };
   struct object_graphics: object_timelines
