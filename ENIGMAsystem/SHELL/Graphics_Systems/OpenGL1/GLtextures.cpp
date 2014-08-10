@@ -242,6 +242,7 @@ unsigned texture_get_texel_height(int texid)
 }
 
 void texture_set_stage(int stage, int texid) {
+  if (texid == -1) { texture_reset(); return; }
   if (enigma::samplerstates[stage].bound_texture != texid) {
     glActiveTexture(GL_TEXTURE0 + stage);
     enigma::samplerstates[stage].bound_texture = texid;
