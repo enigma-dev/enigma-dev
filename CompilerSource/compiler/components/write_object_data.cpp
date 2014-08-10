@@ -537,13 +537,14 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, i
 		parsed.push_back(i->first);
 		i++;
       }
-      wto << "\n  objectstruct objs[] = {\n  ";
+      wto << "\n  objectstruct objs[] = {\n  " <<std::fixed;
       int objcunt = 0, obmx = 0;
       for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++, objcunt++)
       {
         wto << "{" << i->second->sprite_index << "," << i->second->solid << "," << i->second->visible << "," << i->second->depth << "," << i->second->persistent << "," << i->second->mask_index << "," << i->second->parent << "," << i->second->id << "}, ";
         if (i->second->id >= obmx) obmx = i->second->id;
       }
+      wto.unsetf(ios_base::floatfield);
       wto << "  };\n";
       wto << "  int objectcount = " << objcunt << ";\n";
       wto << "  int obj_idmax = " << obmx+1 << ";\n";
