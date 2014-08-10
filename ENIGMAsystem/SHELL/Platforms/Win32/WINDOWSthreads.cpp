@@ -64,7 +64,13 @@ int thread_start(int thread) {
 }
 
 void thread_join(int thread) {
-  WaitForSingleObject(threads[thread]->sd->handle, INFINITE);
+  while (WaitForSingleObject(threads[thread]->sd->handle, 10) == WAIT_TIMEOUT) {
+    MSG msg;
+    while (PeekMessage (&msg, NULL, 0, 0, PM_REMOVE)) { 
+      TranslateMessage (&msg);
+      DispatchMessage (&msg);
+    } 
+  }
 }
 
 void thread_delete(int thread) {
