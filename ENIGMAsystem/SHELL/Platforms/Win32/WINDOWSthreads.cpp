@@ -21,7 +21,6 @@
 #include "../General/PFthreads.h"
 
 #include <windows.h>
-#include <process.h>
 
 struct scrtdata {
   HANDLE handle;
