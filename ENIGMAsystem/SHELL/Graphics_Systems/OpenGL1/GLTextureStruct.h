@@ -34,6 +34,9 @@ struct TextureStruct {
 };
 extern vector<TextureStruct*> textureStructs;
 
+namespace enigma {
 unsigned get_texture(int texid);
+void graphics_samplers_apply();
+}
 
 #endif // ENIGMA_GL_TEXTURESTRUCT__H

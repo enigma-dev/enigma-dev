@@ -18,6 +18,7 @@
 #include "../General/OpenGLHeaders.h"
 #include "../General/GSd3d.h"
 #include "GLshapes.h"
+#include "GLTextureStruct.h"
 #include "../General/GSprimitives.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
@@ -491,6 +492,8 @@ class Mesh
 
   void Draw(int vertex_start = 0, int vertex_count = -1)
   {
+    enigma::graphics_samplers_apply();
+    
     //TODO: Right now vertex count override only works with triangles
     // Draw the batched and indexed primitives
     if (triangleIndexedCount > 0) {

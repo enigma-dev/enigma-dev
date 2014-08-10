@@ -155,6 +155,14 @@ namespace enigma
 
     return ret;
   }
+  
+  void graphics_samplers_apply() {
+    for (unsigned i = 0; i < 8; i++) {
+      if (enigma::samplerstates[i].bound_texture != -1) {
+         enigma::samplerstates[i].CompareAndApply(textureStructs[enigma::samplerstates[i].bound_texture]->sampler);
+      }
+    }
+  }
 
   SamplerState samplerstates[8];
 }
