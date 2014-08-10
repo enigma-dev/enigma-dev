@@ -19,6 +19,7 @@
 #include "Universal_System/var4.h"
 #include "Universal_System/resource_data.h"
 #include "../General/PFthreads.h"
+#include "WINDOWSmain.h"
 
 #include <windows.h>
 
@@ -63,12 +64,16 @@ int thread_start(int thread) {
 }
 
 void thread_join(int thread) {
-  while (WaitForSingleObject(threads[thread]->sd->handle, 10) == WAIT_TIMEOUT) {
-    MSG msg;
-    while (PeekMessage (&msg, NULL, 0, 0, PM_REMOVE)) { 
-      TranslateMessage (&msg);
-      DispatchMessage (&msg);
-    } 
+  if (GetCurrentThread() == enigma::mainthread) {
+    while (WaitForSingleObject(threads[thread]->sd->handle, 10) == WAIT_TIMEOUT) {
+      MSG msg;
+      while (PeekMessage (&msg, NULL, 0, 0, PM_REMOVE)) { 
+        TranslateMessage (&msg);
+        DispatchMessage (&msg);
+      } 
+    }
+  } else {
+    WaitForSingleObject(threads[thread]->sd->handle, INFINITE);
   }
 }
 

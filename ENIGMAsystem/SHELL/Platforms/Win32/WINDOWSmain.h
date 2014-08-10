@@ -28,6 +28,7 @@ namespace enigma //TODO: Find where this belongs
   extern HWND hWnd;
   extern HWND hWndParent;
   extern HDC window_hDC;
+  extern HANDLE mainthread;
 }
 
 void windowsystem_write_exename(char* exenamehere);
