@@ -140,36 +140,34 @@ static int createThread(void (*fnc)(void*), MessageData* md) {
 }
 
 namespace enigma_user {
-	//TODO: According to Studio's manual each time these async functions are called
-	//they get their own map and async_load is only set that map when the async dialog
-	//event is fired.
-	//This is inferred from the get_login_async documentation.
-	unsigned async_load = ds_map_create();
-	
-	int show_message_async(string str) {
-		MessageData* md = new MessageData(str, "", "");
-		int id = createThread((void (*)(void*))showMessageAsync, md);
-    //WaitForSingleObject(threads[id]->handle, INFINITE);
-    return id;
-	}
-	
-	int show_question_async(string str) {
-		MessageData* md = new MessageData(str, "", "");
-		return createThread((void (*)(void*))showQuestionAsync, md);
-	}
-	
-	int get_string_async(string message, string def, string cap) {
-		MessageData* md = new MessageData(message, def, cap);
-		return createThread((void (*)(void*))getStringAsync, md);
-	}
-	
-	int get_integer_async(string message, string def, string cap) {
-		MessageData* md = new MessageData(message, def, cap);
-		return createThread((void (*)(void*))getIntegerAsync, md);
-	}
-	
-	int get_login_async(string username, string password, string cap) {
-		MessageData* md = new MessageData(username, password, cap);
-		return createThread((void (*)(void*))getLoginAsync, md);
-	}
+  //TODO: According to Studio's manual each time these async functions are called
+  //they get their own map and async_load is only set that map when the async dialog
+  //event is fired.
+  //This is inferred from the get_login_async documentation.
+  unsigned async_load = ds_map_create();
+
+  int show_message_async(string str) {
+    MessageData* md = new MessageData(str, "", "");
+    return createThread((void (*)(void*))showMessageAsync, md);
+  }
+
+  int show_question_async(string str) {
+    MessageData* md = new MessageData(str, "", "");
+    return createThread((void (*)(void*))showQuestionAsync, md);
+  }
+
+  int get_string_async(string message, string def, string cap) {
+    MessageData* md = new MessageData(message, def, cap);
+    return createThread((void (*)(void*))getStringAsync, md);
+  }
+
+  int get_integer_async(string message, string def, string cap) {
+    MessageData* md = new MessageData(message, def, cap);
+    return createThread((void (*)(void*))getIntegerAsync, md);
+  }
+
+  int get_login_async(string username, string password, string cap) {
+    MessageData* md = new MessageData(username, password, cap);
+    return createThread((void (*)(void*))getLoginAsync, md);
+  }
 }

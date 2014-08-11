@@ -54,8 +54,6 @@ int thread_start(int thread) {
 }
 
 void thread_join(int thread) {
-  WaitForSingleObject(threads[thread]->handle, INFINITE);
-  
   if (GetCurrentThread() == enigma::mainthread) {
     while (WaitForSingleObject(threads[thread]->handle, 10) == WAIT_TIMEOUT) {
       MSG msg;
