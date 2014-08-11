@@ -148,7 +148,7 @@ static INT_PTR CALLBACK GetLoginProc(HWND hwndDlg,UINT uMsg,WPARAM wParam,LPARAM
     {
       char strget[1024];
       GetDlgItemText(hwndDlg,14,strget,1024);
-	  gs_str_submitted = strget;
+      gs_str_submitted = strget;
       GetDlgItemText(hwndDlg,15,strget,1024);
       gs_str_submitted += string("|") + string(strget);
       gs_form_canceled=0;
@@ -163,14 +163,14 @@ static INT_PTR CALLBACK ShowMessageExtProc(HWND hwndDlg,UINT uMsg,WPARAM wParam,
   if (uMsg==WM_INITDIALOG)
   {
     SetWindowText(hwndDlg,gs_cap.c_str());
-	SetDlgItemText(hwndDlg,10,gs_message.c_str());
+    SetDlgItemText(hwndDlg,10,gs_message.c_str());
     SetDlgItemText(hwndDlg,11,gs_but1.c_str());
     SetDlgItemText(hwndDlg,12,gs_but2.c_str());
-	SetDlgItemText(hwndDlg,13,gs_but3.c_str());
+    SetDlgItemText(hwndDlg,13,gs_but3.c_str());
   }
   if (uMsg==WM_COMMAND)
   {
-	if (wParam==2) {
+    if (wParam==2) {
       gs_str_submitted="";
       gs_form_canceled=1;
       EndDialog(hwndDlg,0);
@@ -189,14 +189,14 @@ static INT_PTR CALLBACK ShowMessageExtProc(HWND hwndDlg,UINT uMsg,WPARAM wParam,
     }
   }
   if (uMsg==WM_KEYUP) {
-	switch(wParam)
-	  {
-	  case VK_ESCAPE:
-		  gs_str_submitted="";
-		  gs_form_canceled=1;
-		  EndDialog(hwndDlg,0);
-		break;
-	  }
+    switch(wParam)
+      {
+      case VK_ESCAPE:
+        gs_str_submitted="";
+        gs_form_canceled=1;
+        EndDialog(hwndDlg,0);
+      break;
+      }
   }
   return 0;
 }
@@ -423,7 +423,7 @@ int show_message_ext(string msg, string but1, string but2, string but3)
 
 bool show_question(string str)
 {
-    if(MessageBox(enigma::hWnd, str.c_str(), window_get_caption().c_str(), MB_YESNO) == IDYES)
+    if (MessageBox(enigma::hWnd, str.c_str(), window_get_caption().c_str(), MB_YESNO) == IDYES)
     {
         return true;
     }
