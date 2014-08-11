@@ -37,7 +37,7 @@ public:
 	std::string read(const std::string& section, const std::string& key, std::string def) const;
 	float read(const std::string& section, const std::string& key, float def) const;
 
-	void saveToFile(const std::string& fname) const;
+	bool saveToFile(const std::string& fname) const; //Returns false if the file could not be opened in write mode.
 	std::string toString() const;
 
 private:

@@ -22,7 +22,7 @@
 
 #include "Platforms/General/PFini.h"
 #include "Universal_System/estring.h"
-#include "Widget_Systems/widgets_mandatory.h"
+#include "Widget_Systems/widgets_mandatory.h" //show_error()
 
 #include "IniFileIndex.h"
 
@@ -52,13 +52,17 @@ namespace enigma_user
 {
 	void ini_open(std::string filename)
 	{
-		//Opening an ini file without closing the previous one is an error.
-		//TODO: Check how GM reports the error; we might have to use #DEBUG_MODE and/or show_error();
-		if (!currIniFile.empty()) { return; }
+		//GM will silently fail to save anything if an invalidly-named file is selected. Since we flush the ini file on close, 
+		// we should try to filter out bad inis as early as possible (the final test will be in ini_close()).
+		if (filename.find_first_of(InvalidFilenameChars)<filename.size()) {
+			show_error("IniFileSystem - cannot open new ini file; filename contains invalid characters.", true);
+			return;
+		}
 
-		//Opening an invalidly-named file is an error.
-		//TODO: Again, check what GM does.
-		if (filename.find_first_of(InvalidFilenameChars)<filename.size()) { return; }
+		//Opening an ini file without closing the previous one will simply call ini_close() first.
+		if (!currIniFile.empty()) {
+			ini_close();
+		}
 
 		//Save it.
 		currIniFile = filename;
@@ -73,9 +77,10 @@ namespace enigma_user
 
 	void ini_open_from_string(std::string inistr) 
 	{
-		//Opening an ini file without closing the previous one is an error.
-		//TODO: Check how GM reports the error; we might have to use #DEBUG_MODE and/or show_error();
-		if (!currIniFile.empty()) { return; }
+		//Opening an ini file without closing the previous one will simply call ini_close() first.
+		if (!currIniFile.empty()) {
+			ini_close();
+		}
 
 		//Save it.
 		currIniFile = IniFromStringFilename;
@@ -87,22 +92,24 @@ namespace enigma_user
 
 	std::string ini_full_file_text()
 	{
-		if (!currIniFile.empty()) {
-			return currIni.toString();
+		if (currIniFile.empty()) {
+			show_error("IniFileSystem - cannot get full ini text, as there is no ini file currently open.", false);
+			return "";
 		}
 
-		//TODO: Consider whether this should be an error.
-		return "";
+		return currIni.toString();
 	}
 
 	//NOTE: In GM, ini_close() returns the entire ini file, but this is almost always a waste. 
 	//Use "ini_full_file_text()" if you really need to retrieve this.
 	void ini_close()
 	{
-		//TODO: Check if GM considers closing a non-opened ini an error.
+		//Only act if we actually have an ini file opened.
 		if (!currIniFile.empty()) {
 			//Non-string-loaded inis are saved back to their original files.
-			currIni.saveToFile(currIniFile);
+			if (!currIni.saveToFile(currIniFile)) {
+				show_error("IniFileSystem - could not save ini file to output; perhaps it's in a protected location?", false);
+			}
 
 			//Now reset.
 			currIniFile = "";
@@ -113,34 +120,45 @@ namespace enigma_user
 	//TODO: GM writes floats (or maybe doubles); Enigma uses ints.
 	void ini_write_real(string section, string key, float value)
 	{
-		//TODO: Check GM's behavior with the read/write functions when no ini has been "opened".
-		if (!currIniFile.empty()) {
+		//GM will err out when trying to read/write an unopened ini file.
+		if (currIniFile.empty()) {
+			show_error("IniFileSystem - cannot write real, as there is no ini file currently open.", true);
+		} else {
 			currIni.write(section, key, value);
 		}
 	}	
 
 	void ini_write_string(string section, string key, string value)
 	{
-		if (!currIniFile.empty()) {
+		//GM will err out when trying to read/write an unopened ini file.
+		if (currIniFile.empty()) {
+			show_error("IniFileSystem - cannot write string, as there is no ini file currently open.", true);
+		} else {
 			currIni.write(section, key, value);
 		}
 	}
 
 	string ini_read_string(string section, string key, string def)
 	{
-		if (!currIniFile.empty()) {
+		//GM will err out when trying to read/write an unopened ini file.
+		if (currIniFile.empty()) {
+			show_error("IniFileSystem - cannot read string, as there is no ini file currently open.", true);
+			return def;
+		} else {
 			return currIni.read(section, key, def);
 		}
-		return def;
 	}
 	
 	//TODO: GM reads floats (or maybe doubles); Enigma uses ints.
 	float ini_read_real(string section, string key, float def)
 	{
-		if (!currIniFile.empty()) {
+		//GM will err out when trying to read/write an unopened ini file.
+		if (currIniFile.empty()) {
+			show_error("IniFileSystem - cannot read real, as there is no ini file currently open.", true);
+			return def;
+		} else {
 			return currIni.read(section, key, def);
 		}
-		return def;
 	}
 }
 
