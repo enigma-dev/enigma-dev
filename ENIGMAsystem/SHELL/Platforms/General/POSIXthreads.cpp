@@ -32,7 +32,16 @@ static void* thread_script_func(void* data) {
 namespace enigma_user
 {
 
-int script_thread(int scr,variant arg0, variant arg1, variant arg2, variant arg3, variant arg4, variant arg5, variant arg6, variant arg7)
+int script_thread(int scr,variant arg0, variant arg1, variant arg2, variant arg3, variant arg4, variant arg5, variant arg6, variant arg7) {
+  int thread = thread_create_script(scr,arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7);
+  int res = thread_start(thread);
+  if (res != 0) {
+    return res;
+  }
+  return thread;
+}
+
+int thread_create_script(int scr,variant arg0, variant arg1, variant arg2, variant arg3, variant arg4, variant arg5, variant arg6, variant arg7)
 {
   ethread* newthread = new ethread();
   variant args[] = {arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7};
@@ -42,9 +51,11 @@ int script_thread(int scr,variant arg0, variant arg1, variant arg2, variant arg3
 }
 
 int thread_start(int thread) {
+  if (threads[thread]->active) { return -1; }
   if (pthread_create(&threads[thread]->handle, NULL, thread_script_func, threads[thread]->sd)) {
-    return -1;
+    return -2;
   }
+  threads[thread]->active = true;
   return 0;
 }
 
@@ -53,7 +64,12 @@ void thread_join(int thread) {
 }
 
 void thread_delete(int thread) {
+  if (threads[thread]->active) { return; }
   delete threads[thread];
+}
+
+bool thread_exists(int thread) {
+  return threads[thread] != NULL;
 }
 
 bool thread_get_finished(int thread) {
