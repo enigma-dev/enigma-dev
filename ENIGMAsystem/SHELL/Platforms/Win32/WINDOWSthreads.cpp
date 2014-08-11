@@ -38,6 +38,7 @@ int script_thread(int scr,variant arg0, variant arg1, variant arg2, variant arg3
   int thread = thread_create_script(scr,arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7);
   int res = thread_start(thread);
   if (res != 0) {
+    thread_delete(thread);
     return res;
   }
   return thread;
