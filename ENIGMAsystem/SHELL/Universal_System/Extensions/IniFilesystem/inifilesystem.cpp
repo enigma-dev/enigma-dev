@@ -58,7 +58,7 @@ namespace enigma_user
 	{
 		//GM will silently fail to save anything if an invalidly-named file is selected. Since we flush the ini file on close, 
 		// we should try to filter out bad inis as early as possible (the final test will be in ini_close()).
-		if (filename.find_first_of(InvalidFilenameChars)<filename.size()) {
+		if (filename.find_first_of(InvalidFilenameChars)!=std::string::npos) {
 			show_error("IniFileSystem - cannot open new ini file; filename contains invalid characters.", true);
 			return;
 		}

@@ -25,7 +25,7 @@
 namespace {
 
 std::string ltrim(const std::string& str) {
-	size_t start = str.find_first_not_of(" \t");
+	size_t start = str.find_first_not_of(" \t\r");
 	if (start != std::string::npos) {
 		return str.substr(start);
 	}
@@ -33,7 +33,7 @@ std::string ltrim(const std::string& str) {
 }
 
 std::string rtrim(const std::string& str) {
-	size_t last = str.find_last_not_of(" \t");
+	size_t last = str.find_last_not_of(" \t\r");
 	if (last != std::string::npos) {
 		return str.substr(0, last+1);
 	}
@@ -45,7 +45,7 @@ std::string trim(const std::string& str) {
 }
 
 std::string optional_quote(const std::string& str, const char commentChar) {
-	if (!str.empty() && (str[0]==' ' || str[0]=='\t' || str[str.size()-1]==' ' || str[str.size()-1]=='\t' || str.find(commentChar)<str.size())) {
+	if (!str.empty() && (str[0]==' ' || str[0]=='\t' || str[str.size()-1]==' ' || str[str.size()-1]=='\t' || str.find(commentChar)!=std::string::npos)) {
 		return std::string("\"") + str + "\"";
 	}
 	return str;
@@ -76,91 +76,69 @@ void enigma::IniFileIndex::load(std::istream& input, char commentChar)
 		if (line.empty() || line[0]==commentChar) {
 			//It's a comment; append it to the current comment string.
 			comment <<origLine <<"\n";
-		} else if (line.size()>=3 && line[0]=='[' && line[line.size()-1]==']') {
-			//It's a section; give it a section name. 
-			secName = line.substr(1, line.size()-2);
+		} else if (line[0]=='[') {
+			//Find the closing bracket.
+			size_t br = line.find(']', 1);
+			if (br != std::string::npos) {
+				//It's a section; give it a section name. 
+				secName = line.substr(1, br-1);
 
-			//Do a quick check for invalid characters
-			if (secName.find_first_of("[]") != std::string::npos) {
-				continue;
+				//Make sure there's no double-open-bracket.
+				if (secName.find('[')==std::string::npos) {
+					//No duplicates
+					if (sections.count(secName)==0) {
+						sections[secName].prefix = comment.str();
+						secNameOrder.push_back(secName);
+					}
+				}
 			}
-
-			//No duplicates
-			if (sections.count(secName)>0) {
-				continue;
-			}
-
-			sections[secName].prefix = comment.str();
-			secNameOrder.push_back(secName);
+			//Either way, clear the comment string (so the user doesn't think a section was read when it actually wasn't).
 			comment.str("");
 		} else {
+			//Comments and empty lines were already taken care of, so all lines should be of the form {K = "V" ;C} with optional comment and quotes.
 			size_t eq = line.find('=');
 			if (eq != std::string::npos) {
-				//It's a key/value pair, consisting of "K = "V" ;C" (with quotes and the comment optional).
 				std::string key = trim(line.substr(0,eq));
 				std::string value;
 
 				//The value is complicated by the fact that there might be a quoted string (with escaped quotes). So we have to scan it.
 				std::string rhs = trim(line.substr(eq+1));
-				if (!rhs.empty() && rhs[0] == '"') {
+				if (!rhs.empty() && rhs[0]=='"') {
 					//Quoted string.
-					std::stringstream temp;
-					size_t i=1;
-					for (;i<rhs.size(); i++) {
-						if (rhs[i]=='"') {
-							value = temp.str();
-							i++;
-							break;
-						}
-						temp <<rhs[i];
-					}
-
-					//Trim.
-					if (i<rhs.size()) {
-						rhs = rhs.substr(i);
+					size_t qt = rhs.find('"', 1);
+					if (qt==std::string::npos) {
+						rhs = ""; //Only occurs if they forgot to close the quote. Kill the value.
 					} else {
-						rhs = "";
+						value = rhs.substr(1,qt-1); //DON'T trim; that's why we have the quote.
+						rhs = trim(rhs.substr(qt+1));
 					}
 				} else {
 					//Non-quoted string.
-					std::stringstream temp;
-					size_t i=0;
-					for (;i<rhs.size(); i++) {
-						if (rhs[i]==commentChar) {
-							i++;
-							break;
-						}
-						temp <<rhs[i];
-					}
-					value = temp.str();
-
-					//Trim.
-					if (i<rhs.size()) {
-						rhs = rhs.substr(i);
-					} else {
+					size_t ct = rhs.find(commentChar, 1);
+					if (ct==std::string::npos) {
+						value = rhs;
 						rhs = "";
+					} else {
+						value = trim(rhs.substr(0,ct));
+						rhs = trim(rhs.substr(ct)); //Keep the comment character.
 					}
 				}
 
 				//rhs must be consumed (or there's a comment)
-				if (!rhs.empty() && !(rhs[0]==commentChar)) {
-					continue;
+				if (rhs.empty() || rhs[0]==commentChar) {
+					//No empty strings.
+					if (!value.empty()) {
+						//No duplicates
+						if (sections[secName].props.count(key)==0) {
+							//Save it.
+							sections[secName].props[key].prefix = comment.str();
+							sections[secName].props[key].value = value;
+							sections[secName].propKeyOrder.push_back(key);
+						}
+					}
 				}
 
-				//No empty strings.
-				if (value.empty()) {
-					continue;
-				}
-
-				//No duplicates
-				if (sections[secName].props.count(key)>0) {
-					continue;
-				}
-
-				//Save it.
-				sections[secName].props[key].prefix = comment.str();
-				sections[secName].props[key].value = value;
-				sections[secName].propKeyOrder.push_back(key);
+				//Either way, reset the comment string (again, to avoid false positives).
 				comment.str("");
 
 				//Now deal with comments.
