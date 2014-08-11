@@ -28,7 +28,9 @@ struct IniFileSection;
 
 class IniFileIndex {
 public:
-	void load(std::istream& input);
+	IniFileIndex() : commentChar(';') {}
+
+	void load(std::istream& input, char commentChar);
 	void clear();
 
 	void write(const std::string& section, const std::string& key, const std::string& value);
@@ -49,6 +51,9 @@ private:
 
 	//Any comments after the last property.
 	std::string postComment;
+
+	//The character we are treating as the comment identifier. ';' by default, but '#' is also common.
+	char commentChar;
 };
 
 

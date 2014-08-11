@@ -41,15 +41,19 @@ std::string currIniFile;
 //Datastructure associated with the currently-open ini file, which is flushed on exit.
 enigma::IniFileIndex currIni;
 
+//Default comment character
+char commentChar = ';';
+
 } //End un-named namespace
 
 
-/*static int section;
-static FILE *enigma_ini_file;
-static char buff[ENIGMA_INI_BUFFER_SIZE];*/
-
 namespace enigma_user
 {
+	void ini_set_comment_char(char ch=';')
+	{
+		commentChar = ch;
+	}
+
 	void ini_open(std::string filename)
 	{
 		//GM will silently fail to save anything if an invalidly-named file is selected. Since we flush the ini file on close, 
@@ -70,8 +74,8 @@ namespace enigma_user
 		//If the file already exists, parse it.
 		//NOTE: Loading the file in its entirety is consistent with how GM handles inis.
 		std::ifstream infile(filename.c_str());
-		if (infile.good()) {
-			currIni.load(infile);
+		if (infile.good()) { //If the file isn't good, it might be because we are creating a new ini file, so it's not an error.
+			currIni.load(infile, commentChar);
 		}
 	}
 
@@ -87,7 +91,7 @@ namespace enigma_user
 
 		//Parse it.
 		std::istringstream str(inistr);
-		currIni.load(str);
+		currIni.load(str, commentChar);
 	}
 
 	std::string ini_full_file_text()
