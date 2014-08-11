@@ -233,20 +233,22 @@ void enigma::IniFileIndex::write(const std::string& section, const std::string& 
 	sections[section].props[key].value = valF.str();
 }
 
-void enigma::IniFileIndex::saveToFile(const std::string& fname) const
+bool enigma::IniFileIndex::saveToFile(const std::string& fname) const
 {
 	//Don't print empty files unless they already exist.
 	if (sections.empty() && postComment.empty()) {
 		std::ifstream file(fname.c_str());
 		if (!file.good()) {
-			return;
+			return true;
 		}
 	}
 
 	std::ofstream out(fname.c_str());
 	if (out.good()) {
 		out <<this->toString();
+		return true;
 	}
+	return false;
 }
 
 std::string enigma::IniFileIndex::toString() const
