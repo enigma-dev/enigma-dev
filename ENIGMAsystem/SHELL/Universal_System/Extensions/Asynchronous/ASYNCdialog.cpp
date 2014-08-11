@@ -148,9 +148,7 @@ namespace enigma_user {
 
   int show_message_async(string str) {
     MessageData* md = new MessageData(str, "", "");
-    int id = createThread((void (*)(void*))showMessageAsync, md);
-    WaitForSingleObject(threads[id]->handle, INFINITE);
-    return id;
+    return createThread((void (*)(void*))showMessageAsync, md);
   }
 
   int show_question_async(string str) {

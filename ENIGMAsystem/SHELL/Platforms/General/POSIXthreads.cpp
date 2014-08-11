@@ -20,6 +20,8 @@
 #include "Universal_System/resource_data.h"
 #include "PFthreads.h"
 
+std::deque<ethread*> threads;
+
 static void* thread_script_func(void* data) {
   const scrtdata* const md = (scrtdata*)data;
   md->mt->ret = enigma_user::script_execute(md->scr,md->args[0],md->args[1],md->args[2],md->args[3],md->args[4],md->args[5],md->args[6],md->args[7]);
