@@ -19,15 +19,6 @@
 #include "Universal_System/var4.h"
 #include "Universal_System/resource_data.h"
 #include "PFthreads.h"
-#include <pthread.h> // use POSIX threads
-
-struct scrtdata {
-  pthread_t handle;
-  int scr;
-  variant args[8];
-  ethread* mt;
-  scrtdata(int s, variant nargs[8], ethread* mythread): scr(s), mt(mythread) { for (int i = 0; i < 8; i++) args[i] = nargs[i]; }
-};
 
 static void* thread_script_func(void* data) {
   const scrtdata* const md = (scrtdata*)data;
@@ -49,14 +40,14 @@ int script_thread(int scr,variant arg0, variant arg1, variant arg2, variant arg3
 }
 
 int thread_start(int thread) {
-  if (pthread_create(&threads[thread]->sd->handle, NULL, thread_script_func, threads[thread]->sd)) {
+  if (pthread_create(&threads[thread]->handle, NULL, thread_script_func, threads[thread]->sd)) {
     return -1;
   }
   return 0;
 }
 
 void thread_join(int thread) {
-  pthread_join(threads[thread]->sd->handle, NULL);
+  pthread_join(threads[thread]->handle, NULL);
 }
 
 void thread_delete(int thread) {

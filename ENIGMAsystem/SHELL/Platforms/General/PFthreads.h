@@ -18,19 +18,38 @@
 #ifndef ENIGMA_PLATFORM_THREADS_H
 #define ENIGMA_PLATFORM_THREADS_H
 
+#if defined(_WIN32) || defined(__WIN32__) || defined(_WIN64) || defined(__WIN64__)
+#include <windows.h>
+#else
+#include <pthread.h> // use POSIX threads
+#endif
+
 #include <deque>
 #include <stdio.h>
 
 #include "Universal_System/var4.h"
 
-struct scrtdata; // forward declaration
+struct ethread;
+
+struct scrtdata {
+  HANDLE handle;
+  int scr;
+  variant args[8];
+  ethread* mt;
+  scrtdata(int s, variant nargs[8], ethread* mythread): scr(s), mt(mythread) { for (int i = 0; i < 8; i++) args[i] = nargs[i]; }
+};
 
 struct ethread
 {
+#if defined(_WIN32) || defined(__WIN32__) || defined(_WIN64) || defined(__WIN64__)
+  HANDLE handle;
+#else
+  pthread_t handle;
+#endif
   scrtdata *sd;
   bool active;
   variant ret;
-  ethread(): active(true), ret(0) {};
+  ethread(): handle(0), sd(NULL), active(true), ret(0) {};
   ~ethread() {
     if (sd != NULL) {
       delete sd;

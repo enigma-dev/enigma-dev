@@ -21,16 +21,6 @@
 #include "../General/PFthreads.h"
 #include "WINDOWSmain.h"
 
-#include <windows.h>
-
-struct scrtdata {
-  HANDLE handle;
-  int scr;
-  variant args[8];
-  ethread* mt;
-  scrtdata(int s, variant nargs[8], ethread* mythread): scr(s), mt(mythread) { for (int i = 0; i < 8; i++) args[i] = nargs[i]; }
-};
-
 static void* thread_script_func(void* data) {
   const scrtdata* const md = (scrtdata*)data;
   md->mt->ret = enigma_user::script_execute(md->scr,md->args[0],md->args[1],md->args[2],md->args[3],md->args[4],md->args[5],md->args[6],md->args[7]);
@@ -52,20 +42,22 @@ int script_thread(int scr,variant arg0, variant arg1, variant arg2, variant arg3
 
 int thread_start(int thread) {
   DWORD dwThreadId;
-  threads[thread]->sd->handle = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)&thread_script_func, (LPVOID)threads[thread]->sd, 0, &dwThreadId);
+  threads[thread]->handle = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)&thread_script_func, (LPVOID)threads[thread]->sd, 0, &dwThreadId);
   //TODO: May need to check if ret is -1L, and yes it is quite obvious the return value is
   //an unsigned integer, but Microsoft says to for some reason. See their documentation here.
   //http://msdn.microsoft.com/en-us/library/kdzttdcb.aspx
   //NOTE: Same issue is in Universal_Systems/Extensions/Asynchronous/ASYNCdialog.cpp
-  if (threads[thread]->sd->handle == NULL) {
+  if (threads[thread]->handle == NULL) {
     return -1;
   }
   return 0;
 }
 
 void thread_join(int thread) {
+  WaitForSingleObject(threads[thread]->handle, INFINITE);
+  
   if (GetCurrentThread() == enigma::mainthread) {
-    while (WaitForSingleObject(threads[thread]->sd->handle, 10) == WAIT_TIMEOUT) {
+    while (WaitForSingleObject(threads[thread]->handle, 10) == WAIT_TIMEOUT) {
       MSG msg;
       while (PeekMessage (&msg, NULL, 0, 0, PM_REMOVE)) { 
         TranslateMessage (&msg);
@@ -73,7 +65,7 @@ void thread_join(int thread) {
       } 
     }
   } else {
-    WaitForSingleObject(threads[thread]->sd->handle, INFINITE);
+    WaitForSingleObject(threads[thread]->handle, INFINITE);
   }
 }
 
