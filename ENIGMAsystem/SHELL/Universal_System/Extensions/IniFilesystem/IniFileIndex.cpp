@@ -44,8 +44,8 @@ std::string trim(const std::string& str) {
 	return rtrim(ltrim(str));
 }
 
-std::string optional_quote(const std::string& str) {
-	if (!str.empty() && (str[0]==' ' || str[0]=='\t' || str[str.size()-1]==' ' || str[str.size()-1]=='\t' || str.find(';')!=std::string::npos || str.find('#')!=std::string::npos)) {
+std::string optional_quote(const std::string& str, const char commentChar) {
+	if (!str.empty() && (str[0]==' ' || str[0]=='\t' || str[str.size()-1]==' ' || str[str.size()-1]=='\t' || str.find(commentChar)<str.size())) {
 		return std::string("\"") + str + "\"";
 	}
 	return str;
@@ -54,9 +54,11 @@ std::string optional_quote(const std::string& str) {
 } //En un-named namespace
 
 
-
-void enigma::IniFileIndex::load(std::istream& input) 
+void enigma::IniFileIndex::load(std::istream& input, char commentChar)
 {
+	//Save the comment char
+	this->commentChar = commentChar;
+
 	//Track the current section.
 	std::string secName;
 
@@ -71,7 +73,7 @@ void enigma::IniFileIndex::load(std::istream& input)
 		line = trim(origLine);
 
 		//Now, dispatch based on the current line type. Invalid lines are pruned and ignored.
-		if (line.empty() || line[0]==';' || line[0]=='#') {
+		if (line.empty() || line[0]==commentChar) {
 			//It's a comment; append it to the current comment string.
 			comment <<origLine <<"\n";
 		} else if (line.size()>=3 && line[0]=='[' && line[line.size()-1]==']') {
@@ -124,7 +126,7 @@ void enigma::IniFileIndex::load(std::istream& input)
 					std::stringstream temp;
 					size_t i=0;
 					for (;i<rhs.size(); i++) {
-						if (rhs[i]==';' || rhs[i]=='#') {
+						if (rhs[i]==commentChar) {
 							i++;
 							break;
 						}
@@ -141,7 +143,7 @@ void enigma::IniFileIndex::load(std::istream& input)
 				}
 
 				//rhs must be consumed (or there's a comment)
-				if (!rhs.empty() && !(rhs[0]==';' || rhs[0]=='#')) {
+				if (!rhs.empty() && !(rhs[0]==commentChar)) {
 					continue;
 				}
 
@@ -162,7 +164,7 @@ void enigma::IniFileIndex::load(std::istream& input)
 				comment.str("");
 
 				//Now deal with comments.
-				if (rhs[0]==';' || rhs[0]=='#') {
+				if (rhs[0]==commentChar) {
 					sections[secName].props[key].postfix = trim(rhs);
 				}
 			}
@@ -244,11 +246,12 @@ bool enigma::IniFileIndex::saveToFile(const std::string& fname) const
 	}
 
 	std::ofstream out(fname.c_str());
-	if (out.good()) {
-		out <<this->toString();
-		return true;
+	if (!out.good()) {
+		return false;
 	}
-	return false;
+	
+	out <<this->toString();
+	return true;
 }
 
 std::string enigma::IniFileIndex::toString() const
@@ -261,7 +264,7 @@ std::string enigma::IniFileIndex::toString() const
 		for (std::vector<std::string>::const_iterator keyIt=sec.propKeyOrder.begin(); keyIt!=sec.propKeyOrder.end(); keyIt++) {
 			const IniValue& val = sec.props.find(*keyIt)->second;
 			res <<val.prefix;
-			res <<*keyIt <<" = " <<optional_quote(val.value) <<(val.postfix.empty()?"":std::string(" ")+val.postfix) <<"\n";
+			res <<*keyIt <<" = " <<optional_quote(val.value, commentChar) <<(val.postfix.empty()?"":std::string(" ")+val.postfix) <<"\n";
 		}
 	}
 	res <<postComment;
