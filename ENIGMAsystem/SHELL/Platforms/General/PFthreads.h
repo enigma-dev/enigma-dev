@@ -32,7 +32,6 @@
 struct ethread;
 
 struct scrtdata {
-  HANDLE handle;
   int scr;
   variant args[8];
   ethread* mt;
