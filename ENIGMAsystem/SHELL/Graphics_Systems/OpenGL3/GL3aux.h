@@ -14,12 +14,13 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
+#ifndef GL3_AUX_H
+#define GL3_AUX_H
 
-#include "Bridges/General/GL3Context.h"
-#include "GL3profiler.h"
+#include <string>
 
-namespace enigma_user{
-	int profiler_get_vertex_count() { return oglmgr->gpuprof.drawn_vertex_number; }
-	int profiler_get_drawcall_count() { return oglmgr->gpuprof.drawn_drawcall_number; }
-	int profiler_get_vbo_count() { return oglmgr->gpuprof.drawn_vbo_number; }
+namespace enigma {
+	bool gl_extension_supported(std::string extension);
 }
+
+#endif
