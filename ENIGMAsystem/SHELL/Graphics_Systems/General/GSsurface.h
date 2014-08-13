@@ -24,7 +24,7 @@ namespace enigma_user
 {
 
 int surface_create_msaa(int width, int height, int samples);
-int surface_create(int width, int height);
+int surface_create(int width, int height, bool depthbuffer = false);
 int surface_get_target();
 void surface_set_target(int id);
 void surface_reset_target();
