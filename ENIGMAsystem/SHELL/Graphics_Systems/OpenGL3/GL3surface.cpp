@@ -82,7 +82,7 @@ bool surface_is_supported()
     return GLEW_ARB_framebuffer_object;
 }
 
-int surface_create(int width, int height, bool depthbuffer)
+int surface_create(int width, int height)
 {
     if (GLEW_ARB_framebuffer_object)
     {
@@ -120,27 +120,22 @@ int surface_create(int width, int height, bool depthbuffer)
       glGenFramebuffers(1, &fbo);
       int texture = enigma::graphics_create_texture(w,h,w,h,0,false);
 
+      glPushAttrib(GL_TEXTURE_BIT);
+
       glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
       glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureStructs[texture]->gltex, 0);
-
-      if (depthbuffer == 1){
-        GLuint depthBuffer;
-        glGenRenderbuffers(1, &depthBuffer);
-        glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, w, h);
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-      }else{
-        glClear(GL_COLOR_BUFFER_BIT);
-      }
+      glDrawBuffer(GL_COLOR_ATTACHMENT0);
+      glReadBuffer(GL_COLOR_ATTACHMENT0);
       glClearColor(1,1,1,0);
-
+      glClear(GL_COLOR_BUFFER_BIT);
       glBindFramebuffer(GL_DRAW_FRAMEBUFFER, enigma::bound_framebuffer);
 
       enigma::surface_array[id]->tex = texture;
       enigma::surface_array[id]->fbo = fbo;
 
       texture_reset();
+
+      glPopAttrib();
 
       return id;
     }
@@ -187,6 +182,7 @@ int surface_create_msaa(int width, int height, int samples)
 
   int texture = enigma::graphics_create_texture(w,h,w,h,0,false);
   glGenFramebuffers(1, &fbo);
+  glPushAttrib(GL_TEXTURE_BIT);
   glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, textureStructs[texture]->gltex);
 
   glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, samples, GL_BGRA, w, h, false);
@@ -200,6 +196,7 @@ int surface_create_msaa(int width, int height, int samples)
   glClearColor(1,1,1,0);
   glClear(GL_COLOR_BUFFER_BIT);
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, enigma::bound_framebuffer);
+  glPopAttrib();
 
   enigma::surface_array[id]->tex = texture;
   enigma::surface_array[id]->fbo = fbo;
@@ -212,11 +209,11 @@ void surface_set_target(int id)
   get_surface(surf,id);
   texture_reset();
   //This fixes several consecutive surface_set_target() calls without surface_reset_target.
-  if (enigma::bound_framebuffer != 0) { d3d_transform_stack_pop(); }
+  if (enigma::bound_framebuffer != 0) { glPopAttrib(); d3d_transform_stack_pop(); }
   enigma::bound_framebuffer = surf->fbo;
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, surf->fbo); //bind it
   d3d_transform_stack_push();
-  //glPushAttrib(GL_VIEWPORT_BIT); //same
+  glPushAttrib(GL_VIEWPORT_BIT); //same
   screen_set_viewport(0, 0, surf->width, surf->height);
   d3d_set_projection_ortho(0, 0, surf->width, surf->height, 0);
 }
@@ -226,7 +223,7 @@ void surface_reset_target(void)
   texture_reset();
   enigma::bound_framebuffer = 0;
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-  //glPopAttrib();
+  glPopAttrib();
   d3d_transform_stack_pop();
 }
 
@@ -411,40 +408,44 @@ void sprite_add_from_surface(int ind, int id, int x, int y, int w, int h, bool r
 
 void surface_copy_part(int destination, float x, float y, int source, int xs, int ys, int ws, int hs)
 {
-    get_surface(ssurf,source);
-    get_surface(dsurf,destination);
-    unsigned char *surfbuf=new unsigned char[ws*hs*4];
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, ssurf->fbo);
-	glReadPixels(xs,ys,ws,hs,GL_BGRA,GL_UNSIGNED_BYTE,surfbuf);
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dsurf->fbo);
-    //glPushAttrib(GL_VIEWPORT_BIT);
-    screen_set_viewport(0, 0, dsurf->width, dsurf->height);
-    d3d_set_projection_ortho(0, 0, dsurf->width, dsurf->height, 0);
-	glRasterPos2d(x, y);
-	glDrawPixels(ws,hs,GL_BGRA,GL_UNSIGNED_BYTE,surfbuf);
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, enigma::bound_framebuffer);
-    //glPopAttrib();
-	glRasterPos2d(0, 0);
-	delete[] surfbuf;
+  get_surface(ssurf,source);
+  get_surface(dsurf,destination);
+  unsigned char *surfbuf=new unsigned char[ws*hs*4];
+  glBindFramebuffer(GL_READ_FRAMEBUFFER, ssurf->fbo);
+  glReadPixels(xs,ys,ws,hs,GL_BGRA,GL_UNSIGNED_BYTE,surfbuf);
+  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dsurf->fbo);
+  glPushMatrix();
+  glPushAttrib(GL_VIEWPORT_BIT);
+  screen_set_viewport(0, 0, dsurf->width, dsurf->height);
+  d3d_set_projection_ortho(0, 0, dsurf->width, dsurf->height, 0);
+  glRasterPos2d(x, y);
+  glDrawPixels(ws,hs,GL_BGRA,GL_UNSIGNED_BYTE,surfbuf);
+  glBindFramebuffer(GL_READ_FRAMEBUFFER, enigma::bound_framebuffer);
+  glPopAttrib();
+  glPopMatrix();
+  glRasterPos2d(0, 0);
+  delete[] surfbuf;
 }
 
 void surface_copy(int destination, float x, float y, int source)
 {
-    get_surface(ssurf,source);
-    get_surface(dsurf,destination);
-    unsigned char *surfbuf=new unsigned char[dsurf->width*dsurf->height*4];
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, ssurf->fbo);
-	glReadPixels(0,0,dsurf->width,dsurf->height,GL_BGRA,GL_UNSIGNED_BYTE,surfbuf);
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dsurf->fbo);
-    //glPushAttrib(GL_VIEWPORT_BIT);
-    screen_set_viewport(0, 0, dsurf->width, dsurf->height);
-    d3d_set_projection_ortho(0, 0, dsurf->width, dsurf->height, 0);
-	glRasterPos2d(x, y);
-	glDrawPixels(dsurf->width,dsurf->height,GL_BGRA,GL_UNSIGNED_BYTE,surfbuf);
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, enigma::bound_framebuffer);
-    //glPopAttrib();
-	glRasterPos2d(0, 0);
-	delete[] surfbuf;
+  get_surface(ssurf,source);
+  get_surface(dsurf,destination);
+  unsigned char *surfbuf=new unsigned char[dsurf->width*dsurf->height*4];
+  glBindFramebuffer(GL_READ_FRAMEBUFFER, ssurf->fbo);
+  glReadPixels(0,0,dsurf->width,dsurf->height,GL_BGRA,GL_UNSIGNED_BYTE,surfbuf);
+  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, dsurf->fbo);
+  glPushMatrix();
+  glPushAttrib(GL_VIEWPORT_BIT);
+  screen_set_viewport(0, 0, dsurf->width, dsurf->height);
+  d3d_set_projection_ortho(0, 0, dsurf->width, dsurf->height, 0);
+  glRasterPos2d(x, y);
+  glDrawPixels(dsurf->width,dsurf->height,GL_BGRA,GL_UNSIGNED_BYTE,surfbuf);
+  glBindFramebuffer(GL_READ_FRAMEBUFFER, enigma::bound_framebuffer);
+  glPopAttrib();
+  glPopMatrix();
+  glRasterPos2d(0, 0);
+  delete[] surfbuf;
 }
 
 }

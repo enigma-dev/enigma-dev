@@ -42,7 +42,8 @@ namespace enigma {
   extern vector<enigma::ShaderProgram*> shaderprograms;
 }
 
-GLenum renderstates[3] = {
+GLenum renderstates[6] = {
+  GL_FRONT, GL_BACK, GL_FRONT_AND_BACK,
   GL_NICEST, GL_FASTEST, GL_DONT_CARE
 };
 
@@ -59,12 +60,8 @@ GLenum fillmodes[3] = {
   GL_POINT, GL_LINE, GL_FILL
 };
 
-GLenum windingstates[2] = {
-  GL_CW, GL_CCW
-};
-
 GLenum cullingstates[3] = {
-  GL_BACK, GL_FRONT, GL_FRONT_AND_BACK
+  0, GL_CW, GL_CCW
 };
 
 namespace enigma_user
@@ -80,6 +77,10 @@ void d3d_depth_clear_value(float value) {
 
 void d3d_start()
 {
+  // Set global ambient lighting to nothing.
+  float global_ambient[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+  glLightModelfv(GL_LIGHT_MODEL_AMBIENT, global_ambient);
+
   // Enable depth buffering
   enigma::d3dMode = true;
   enigma::d3dHidden = true;
@@ -87,6 +88,8 @@ void d3d_start()
   enigma::d3dCulling = rs_none;
   glDepthMask(true);
   glEnable(GL_DEPTH_TEST);
+  glEnable(GL_ALPHA_TEST);
+  glAlphaFunc(GL_NOTEQUAL, 0);
 
   // Set up projection matrix
   d3d_set_projection_perspective(0, 0, view_wview[view_current], view_hview[view_current], 0);
@@ -106,7 +109,9 @@ void d3d_end()
   enigma::d3dCulling = rs_none;
   glDepthMask(false);
   glDisable(GL_DEPTH_TEST);
+  glDisable(GL_ALPHA_TEST);
   d3d_set_projection_ortho(0, 0, view_wview[view_current], view_hview[view_current], 0); //This should probably be changed not to use views
+  //enigma::projection_matrix.InitIdentity();
 }
 
 // disabling hidden surface removal in means there is no depth buffer
@@ -138,44 +143,47 @@ void d3d_set_fog(bool enable, int color, double start, double end)
 
 void d3d_set_fog_enabled(bool enable)
 {
-
+  (enable?glEnable:glDisable)(GL_FOG);
 }
 
 void d3d_set_fog_mode(int mode)
 {
+  glFogi(GL_FOG_MODE, fogmodes[mode]);
 }
 
 void d3d_set_fog_hint(int mode) {
-
+  glHint(GL_FOG_HINT, mode);
 }
 
 void d3d_set_fog_color(int color)
 {
-
+   GLfloat fog_color[3];
+   fog_color[0] = __GETR(color);
+   fog_color[1] = __GETG(color);
+   fog_color[2] = __GETB(color);
+   glFogfv(GL_FOG_COLOR, fog_color);
 }
 
 void d3d_set_fog_start(double start)
 {
-
+  glFogf(GL_FOG_START, start);
 }
 
 void d3d_set_fog_end(double end)
 {
-
+  glFogf(GL_FOG_END, end);
 }
 
 void d3d_set_fog_density(double density)
 {
-
+  glFogf(GL_FOG_DENSITY, density);
 }
 
 void d3d_set_culling(int mode)
 {
-	enigma::d3dCulling = mode;
-	oglmgr->SetEnabled(GL_CULL_FACE, (mode>0));
-	if (mode > 0){
-		glFrontFace(windingstates[mode-1]);
-	}
+  enigma::d3dCulling = mode;
+  oglmgr->SetEnabled(GL_CULL_FACE, mode > 0);
+  glFrontFace(cullingstates[mode]);
 }
 
 bool d3d_get_mode()
@@ -208,10 +216,6 @@ void d3d_set_depth_operator(int mode) {
   glDepthFunc(depthoperators[mode]);
 }
 
-void d3d_clear_depth(){
-  glClear(GL_DEPTH_BUFFER_BIT);
-}
-
 void d3d_set_depth(double dep)
 {
 
@@ -219,7 +223,7 @@ void d3d_set_depth(double dep)
 
 void d3d_set_shading(bool smooth)
 {
-
+    glShadeModel(smooth?GL_SMOOTH:GL_FLAT);
 }
 
 void d3d_set_clip_plane(bool enable)
@@ -278,8 +282,7 @@ struct material3D {
 
     material3D()
     {
-        //ambient[0] = 0.2, ambient[1] = 0.2, ambient[2] = 0.2, ambient[3] = 1.0; //This is default in GL1.1
-	    ambient[0] = 0.0, ambient[1] = 0.0, ambient[2] = 0.0, ambient[3] = 1.0; //This is default in GM
+        ambient[0] = 0.2, ambient[1] = 0.2, ambient[2] = 0.2, ambient[3] = 1.0;
         diffuse[0] = 0.8, diffuse[1] = 0.8, diffuse[2] = 0.8, diffuse[3] = 1.0;
         specular[0] = 0.0, specular[1] = 0.0, specular[2] = 0.0, specular[3] = 0.0;
         shininess = 0.0;
