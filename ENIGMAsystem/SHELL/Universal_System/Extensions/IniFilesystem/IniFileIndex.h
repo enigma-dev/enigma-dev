@@ -33,11 +33,17 @@ public:
 	void load(std::istream& input, char commentChar);
 	void clear();
 
+	bool keyExists(const std::string& section, const std::string& key);
+	bool sectionExists(const std::string& section);
+
 	void write(const std::string& section, const std::string& key, const std::string& value);
 	void write(const std::string& section, const std::string& key, float value);
 
 	std::string read(const std::string& section, const std::string& key, std::string def) const;
 	float read(const std::string& section, const std::string& key, float def) const;
+
+	void delKey(const std::string& section, const std::string& key);
+	void delSection(const std::string& section);
 
 	bool saveToFile(const std::string& fname) const; //Returns false if the file could not be opened in write mode.
 	std::string toString() const;
