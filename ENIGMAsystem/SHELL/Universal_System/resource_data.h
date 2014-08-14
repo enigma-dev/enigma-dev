@@ -25,9 +25,6 @@
 **                                                                              **
 \********************************************************************************/
 
-#ifndef RESOURCE_DATA_H
-#define RESOURCE_DATA_H
-
 namespace enigma {
   struct callable_script {
     variant (*base)();
@@ -60,4 +57,3 @@ string shader_get_name(int i);
 
 }
 
-#endif

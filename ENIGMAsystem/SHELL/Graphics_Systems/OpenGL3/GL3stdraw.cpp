@@ -15,16 +15,13 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <stdio.h>
 #include <math.h>
-
 #include "../General/OpenGLHeaders.h"
 #include "../General/GSstdraw.h"
 #include "../General/GStextures.h"
+#include <stdio.h>
 #include "Universal_System/roomsystem.h"
 #include "Bridges/General/GL3Context.h"
-#include "GLSLshader.h"
-#include "GL3shader.h"
 
 #define __GETR(x) ((x & 0x0000FF))
 #define __GETG(x) ((x & 0x00FF00) >> 8)
@@ -32,8 +29,6 @@
 
 namespace enigma {
   extern unsigned char currentcolor[4];
-  extern unsigned bound_shader;
-  extern vector<enigma::ShaderProgram*> shaderprograms;
 }
 
 namespace enigma_user
@@ -61,24 +56,24 @@ void draw_enable_alphablend(bool enable) {
 }
 
 bool draw_get_alpha_test() {
-  return false;//glIsEnabled(GL_ALPHA_TEST);
+  return glIsEnabled(GL_ALPHA_TEST);
 }
 
 unsigned draw_get_alpha_test_ref_value()
 {
-  //float ref;
-  //glGetFloatv(GL_ALPHA_TEST_REF, &ref);
-  return 0;//ref*256;
+  float ref;
+  glGetFloatv(GL_ALPHA_TEST_REF, &ref);
+  return ref*256;
 }
 
 void draw_set_alpha_test(bool enable)
 {
-    enigma_user::glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_alphaTestEnable, enable);
+	(enable?glEnable:glDisable)(GL_ALPHA_TEST);
 }
 
 void draw_set_alpha_test_ref_value(unsigned val)
 {
-    enigma_user::glsl_uniformf(enigma::shaderprograms[enigma::bound_shader]->uni_alphaTest, (gs_scalar)val/256.0);
+	glAlphaFunc(GL_GREATER, val/256);
 }
 
 void draw_set_line_pattern(unsigned short pattern, int scale)

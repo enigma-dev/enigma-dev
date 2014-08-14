@@ -4,7 +4,6 @@
 #include "../General/GStiles.h"
 #include "../General/GSbackground.h"
 #include "GL3shader.h"
-#include "GL3profiler.h"
 #include "../General/GStextures.h"
 #include "../General/GSmodel.h"
 #include "../General/GSmatrix.h"
