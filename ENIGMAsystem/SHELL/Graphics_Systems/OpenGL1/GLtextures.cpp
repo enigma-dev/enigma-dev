@@ -54,7 +54,7 @@ TextureStruct::~TextureStruct()
 }
 
 unsigned get_texture(int texid) {
-	return (size_t(texid) >= textureStructs.size() || texid < 0)? -1 : textureStructs[texid]->gltex;
+	return (size_t(texid) >= textureStructs.size())? -1 : textureStructs[texid]->gltex;
 }
 
 inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect powers of two
@@ -242,16 +242,12 @@ unsigned texture_get_texel_height(int texid)
 }
 
 void texture_set_stage(int stage, int texid) {
-  //This turned into a clusterfuck, fix it Rob :D - H. G.
-  int gt = get_texture(texid);
-  if (enigma::samplerstates[stage].bound_texture != gt) {
+  if (enigma::samplerstates[stage].bound_texture != unsigned(get_texture(texid))) {
     glActiveTexture(GL_TEXTURE0 + stage);
-    glBindTexture(GL_TEXTURE_2D, enigma::samplerstates[stage].bound_texture = (unsigned)(gt >= 0? gt : 0));
+    glBindTexture(GL_TEXTURE_2D, enigma::samplerstates[stage].bound_texture = get_texture(texid));
   }
-  if (gt != -1){
-    // Must be applied regardless of whether the texture is already bound because the sampler state could have been changed.
-    enigma::samplerstates[stage].CompareAndApply(textureStructs[texid]->sampler);
-  }
+  // Must be applied regardless of whether the texture is already bound because the sampler state could have been changed.
+  enigma::samplerstates[stage].CompareAndApply(textureStructs[texid]->sampler);
 }
 
 void texture_reset() {
