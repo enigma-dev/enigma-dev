@@ -19,6 +19,7 @@
 #include "IniFileIndex.h"
 
 #include <cstdlib>
+#include <algorithm>
 #include <sstream>
 #include <fstream>
 
@@ -161,6 +162,22 @@ void enigma::IniFileIndex::clear()
 	postComment.clear();
 }
 
+bool enigma::IniFileIndex::keyExists(const std::string& section, const std::string& key)
+{
+	std::map<std::string, IniFileSection>::const_iterator secIt = sections.find(section);
+	if (secIt==sections.end()) { return false; }
+	std::map<std::string, IniValue>::const_iterator propIt = secIt->second.props.find(key);
+	if (propIt==secIt->second.props.end()) { return false; }
+	return true;
+}
+
+bool enigma::IniFileIndex::sectionExists(const std::string& section)
+{
+	std::map<std::string, IniFileSection>::const_iterator secIt = sections.find(section);
+	if (secIt==sections.end()) { return false; }
+	return true;
+}
+
 std::string enigma::IniFileIndex::read(const std::string& section, const std::string& key, std::string def) const
 {
 	std::map<std::string, IniFileSection>::const_iterator secIt = sections.find(section);
@@ -212,6 +229,55 @@ void enigma::IniFileIndex::write(const std::string& section, const std::string& 
 	valF<<value;
 	sections[section].props[key].value = valF.str();
 }
+
+void enigma::IniFileIndex::delKey(const std::string& section, const std::string& key)
+{
+	//This silently fails if the section doesn't exist.
+	std::map<std::string, IniFileSection>::iterator secIt = sections.find(section);
+	if (secIt==sections.end()) {
+		return;
+	}
+
+	//..or if the key doesn't exist.
+	std::map<std::string, IniValue>::iterator propIt=secIt->second.props.find(key);
+	if (propIt==secIt->second.props.end()) {
+		return;
+	}
+
+	//Keep our ordering correct.
+	std::vector<std::string>::iterator remIt = std::find(secIt->second.propKeyOrder.begin(), secIt->second.propKeyOrder.end(), key);
+	if (remIt != secIt->second.propKeyOrder.end()) {
+		secIt->second.propKeyOrder.erase(remIt);
+	}
+
+	//Remove the element.
+	secIt->second.props.erase(propIt);
+
+	//Remove the section if empty
+	if (secIt->second.props.empty()) {
+		delSection(section);
+	}
+}
+
+
+void enigma::IniFileIndex::delSection(const std::string& section)
+{
+	//This silently fails if the section doesn't exist.
+	std::map<std::string, IniFileSection>::iterator secIt = sections.find(section);
+	if (secIt==sections.end()) {
+		return;
+	}
+
+	//Keep our ordering correct.
+	std::vector<std::string>::iterator remIt = std::find(secNameOrder.begin(), secNameOrder.end(), section);
+	if (remIt != secNameOrder.end()) {
+		secNameOrder.erase(remIt);
+	}
+
+	//Remove the element
+	sections.erase(secIt);
+}
+
 
 bool enigma::IniFileIndex::saveToFile(const std::string& fname) const
 {
