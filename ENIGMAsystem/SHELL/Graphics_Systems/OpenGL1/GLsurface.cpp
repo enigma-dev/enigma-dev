@@ -84,75 +84,64 @@ bool surface_is_supported()
     return GLEW_EXT_framebuffer_object;
 }
 
-int surface_create(int width, int height, bool depthbuffer)
+int surface_create(int width, int height)
 {
-    if (!GLEW_EXT_framebuffer_object)
-    {
+  if (!GLEW_EXT_framebuffer_object)
+  {
     return -1;
-    }
+  }
 
-    GLuint fbo;
-    int prevFbo;
+  GLuint fbo;
+  int prevFbo;
 
-    size_t id,
-    w = (int)width,
-    h = (int)height; //get the integer width and height, and prepare to search for an id
+  size_t id,
+  w = (int)width,
+  h = (int)height; //get the integer width and height, and prepare to search for an id
 
-    if (enigma::surface_max==0) {
-        enigma::surface_array=new enigma::surface*[1];
-        enigma::surface_max=1;
-    }
+  if (enigma::surface_max==0) {
+    enigma::surface_array=new enigma::surface*[1];
+    enigma::surface_max=1;
+  }
 
-    for (id=0; enigma::surface_array[id]!=NULL; id++)
+  for (id=0; enigma::surface_array[id]!=NULL; id++)
+  {
+    if (id+1 >= enigma::surface_max)
     {
-        if (id+1 >= enigma::surface_max)
-        {
-          enigma::surface **oldarray=enigma::surface_array;
-          enigma::surface_array=new enigma::surface*[enigma::surface_max+1];
+      enigma::surface **oldarray=enigma::surface_array;
+      enigma::surface_array=new enigma::surface*[enigma::surface_max+1];
 
-          for (size_t i=0; i<enigma::surface_max; i++)
-            enigma::surface_array[i]=oldarray[i];
+      for (size_t i=0; i<enigma::surface_max; i++)
+        enigma::surface_array[i]=oldarray[i];
 
-          enigma::surface_array[enigma::surface_max]=NULL;
-          enigma::surface_max++;
-          delete[] oldarray;
-        }
+      enigma::surface_array[enigma::surface_max]=NULL;
+      enigma::surface_max++;
+      delete[] oldarray;
     }
+  }
 
-    enigma::surface_array[id] = new enigma::surface;
-    enigma::surface_array[id]->width = w;
-    enigma::surface_array[id]->height = h;
+  enigma::surface_array[id] = new enigma::surface;
+  enigma::surface_array[id]->width = w;
+  enigma::surface_array[id]->height = h;
 
-    glGenFramebuffers(1, &fbo);
-    int texture = enigma::graphics_create_texture(w,h,w,h,0,false);
+  glGenFramebuffers(1, &fbo);
+  int texture = enigma::graphics_create_texture(w,h,w,h,0,false);
 
-    glPushAttrib(GL_TEXTURE_BIT);
+  glPushAttrib(GL_TEXTURE_BIT);
 
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
-    glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, textureStructs[texture]->gltex, 0);
-    glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
-    glReadBuffer(GL_COLOR_ATTACHMENT0_EXT);
-    glClearColor(1,1,1,0);
+  glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
+  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
+  glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, textureStructs[texture]->gltex, 0);
+  glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
+  glReadBuffer(GL_COLOR_ATTACHMENT0_EXT);
+  glClearColor(1,1,1,0);
+  glClear(GL_COLOR_BUFFER_BIT);
+  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, prevFbo);
+  glPopAttrib();
 
-    if (depthbuffer == true){
-        GLuint depthBuffer;
-        glGenRenderbuffers(1, &depthBuffer);
-        glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer);
-        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, w, h);
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    }else{
-        glClear(GL_COLOR_BUFFER_BIT);
-    }
+  enigma::surface_array[id]->tex = texture;
+  enigma::surface_array[id]->fbo = fbo;
 
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, prevFbo);
-    glPopAttrib();
-
-    enigma::surface_array[id]->tex = texture;
-    enigma::surface_array[id]->fbo = fbo;
-
-    return id;
+  return id;
 }
 
 int surface_create_msaa(int width, int height, int samples)
@@ -250,7 +239,7 @@ int surface_get_target()
 void surface_free(int id)
 {
   get_surface(surf,id);
-  GLint prevFbo; glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
+  GLint prevFbo; glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo); 
   if (prevFbo == surf->fbo) { glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0); }
   enigma::graphics_delete_texture(surf->tex);
   glDeleteFramebuffers(1, &surf->fbo);

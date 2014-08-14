@@ -49,10 +49,7 @@ using namespace std;
   #define GL_BGR 0x80E0
 #endif
 
-//WE SHOULDN'T DO THIS! Don't specify namespaces like this - Harijs
 using namespace enigma;
-using namespace enigma_user;
-
 namespace enigma_user {
   extern int window_get_width();
   extern int window_get_height();
@@ -416,7 +413,10 @@ void screen_init()
 
   glDisable(GL_DEPTH_TEST);
   glEnable(GL_BLEND);
+  glEnable(GL_ALPHA_TEST);
+  glEnable(GL_TEXTURE_2D);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  glAlphaFunc(GL_ALWAYS,0);
   texture_reset();
   draw_set_color(c_white);
 }
