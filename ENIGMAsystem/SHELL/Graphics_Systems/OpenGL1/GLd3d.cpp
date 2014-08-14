@@ -36,7 +36,8 @@ namespace enigma {
   int d3dCulling = 0;
 }
 
-GLenum renderstates[3] = {
+GLenum renderstates[6] = {
+  GL_FRONT, GL_BACK, GL_FRONT_AND_BACK,
   GL_NICEST, GL_FASTEST, GL_DONT_CARE
 };
 
@@ -53,12 +54,8 @@ GLenum fillmodes[3] = {
   GL_POINT, GL_LINE, GL_FILL
 };
 
-GLenum windingstates[2] = {
-  GL_CW, GL_CCW
-};
-
 GLenum cullingstates[3] = {
-  GL_BACK, GL_FRONT, GL_FRONT_AND_BACK
+  0, GL_CW, GL_CCW
 };
 
 namespace enigma_user
@@ -191,11 +188,9 @@ void d3d_set_fog_density(double density)
 
 void d3d_set_culling(int mode)
 {
-	enigma::d3dCulling = mode;
-	(mode>0?glEnable:glDisable)(GL_CULL_FACE);
-	if (mode > 0){
-		glFrontFace(windingstates[mode-1]);
-	}
+  enigma::d3dCulling = mode;
+  ((mode > 0)?glEnable:glDisable)(GL_CULL_FACE);
+  glFrontFace(cullingstates[mode]);
 }
 
 bool d3d_get_mode()
@@ -232,10 +227,6 @@ void d3d_set_depth(double dep)
 {
 
 }//TODO: Write function
-
-void d3d_clear_depth(){
-  glClear(GL_DEPTH_BUFFER_BIT);
-}
 
 void d3d_set_shading(bool smooth)
 {
