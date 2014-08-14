@@ -121,6 +121,52 @@ namespace enigma_user
 		}
 	}
 
+	void ini_key_delete(std::string section, std::string key)
+	{
+		//This won't work if the file isn't open.
+		if (currIniFile.empty()) {
+			show_error("IniFileSystem - cannot delete key, as there is no ini file currently open.", true);
+		} else {
+			currIni.delKey(section, key);
+		}
+	}
+
+
+	void ini_section_delete(std::string section)
+	{
+		//This won't work if the file isn't open.
+		if (currIniFile.empty()) {
+			show_error("IniFileSystem - cannot delete section, as there is no ini file currently open.", true);
+		} else {
+			currIni.delSection(section);
+		}
+	}
+
+
+	bool ini_key_exists(std::string section, std::string key)
+	{
+		//This won't work if the file isn't open.
+		if (currIniFile.empty()) {
+			show_error("IniFileSystem - cannot check key, as there is no ini file currently open.", true);
+			return false;
+		} else {
+			return currIni.keyExists(section, key);
+		}
+	}
+
+
+	bool ini_section_exists(std::string section)
+	{
+		//This won't work if the file isn't open.
+		if (currIniFile.empty()) {
+			show_error("IniFileSystem - cannot check section, as there is no ini file currently open.", true);
+			return false;
+		} else {
+			return currIni.sectionExists(section);
+		}
+	}
+
+
 	//TODO: GM writes floats (or maybe doubles); Enigma uses ints.
 	void ini_write_real(string section, string key, float value)
 	{
