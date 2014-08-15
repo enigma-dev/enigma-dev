@@ -100,17 +100,10 @@ static inline void declare_extension_casts(std::ostream &wto) {
   wto << "  }\n";
 }
 
-static inline void declare_object_locals_class(std::ostream &wto) {
-  wto << "  extern std::map<int,inst_iter*> instance_deactivated_list;\n";
-  wto << "  extern objectstruct** objectdata;\n\n";
-
-  wto << "  struct object_locals: event_parent";
-    for (unsigned i = 0; i < parsed_extensions.size(); i++) {
-      if (parsed_extensions[i].implements != "") {
-        wto << ",\n      virtual " << parsed_extensions[i].implements;
-      } else {
-        wto << " /* " << parsed_extensions[i].name << " */";
-      }
+    //Build a reverse lookup for timeline names.
+    map<string, int> revTlineLookup;
+    for (int i=0; i<es->timelineCount; i++) {
+      revTlineLookup[es->timelines[i].name] = es->timelines[i].id;
     }
   wto << "\n";
     
@@ -214,127 +207,29 @@ static inline bool parent_declares(const po_i parent, const deciter decl) {
   return false;
 }
 
-static inline bool parent_declares_event(const po_i parent, int mid, int sid) {
-  for (po_i her = parent; her != parsed_objects.end(); her = parsed_objects.find(her->second->parent)) {
-    for (unsigned xx = 0; xx < her->second->events.size; xx++) {
-      if (her->second->events[xx].mainId == mid && her->second->events[xx].id == sid && (her->second->events[xx].code.length() > 0
-          || event_has_suffix_code(mid, sid) || event_has_prefix_code(mid, sid) || event_has_const_code(mid, sid) || event_has_default_code(mid,sid)
-          || event_has_iterator_unlink_code(mid,sid) || event_has_iterator_delete_code(mid,sid) || event_has_iterator_declare_code(mid,sid) ||
-      event_has_iterator_initialize_code(mid,sid))) {
-          return true;
-      }
-    }
-  }
-  return false;
-}
+        // Next, we write the list of all the timelines this object will hoard a copy of for itself.
+        // NOTE: See below; we actually need to assume this object has the potential to call any timeline. 
+        //       BUT we only locally-copy the ones we know about for sure here.
+        bool hasKnownTlines = false;
+        wto << "\n    //Timelines called by this object\n    ";
+        for (parsed_object::tlineit it = t->tlines.begin(); it != t->tlines.end(); it++) //For each timeline potentially set by this object.
+        {
+          map<string, int>::iterator timit = revTlineLookup.find(it->first); //Check if it's a timeline
+          if (timit != revTlineLookup.end()) // If we've got ourselves a script
+          //and subscr->second->pev_global) // And it has distinct code for use at the global scope (meaning it's more efficient locally) //NOTE: It seems all timeline MUST be copied locally.
+          {
+            hasKnownTlines = true;
+            for (int j=0; j<es->timelines[timit->second].momentCount; j++) {
+              wto << "void TLINE_" <<es->timelines[timit->second].name <<"_MOMENT_" <<es->timelines[timit->second].moments[j].stepNo <<"();\n    ";
+            }
+          }
+        } wto << "\n    ";
 
-static inline void write_object_locals(lang_CPP *lcpp, std::ostream &wto, parsed_object* global, po_i &object_iter, const po_i parent) {
-  wto << "    // Local variables\n    ";
-  for (unsigned ii = 0; ii < object_iter->second->events.size; ii++) {
-    string addls = event_get_locals(object_iter->second->events[ii].mainId, object_iter->second->events[ii].id);
-    if (addls.length()) {
-      compute_locals(lcpp, object_iter, parent, addls);
-    }
-  }
-
-  for (deciter ii =  object_iter->second->locals.begin(); ii != object_iter->second->locals.end(); ii++) {
-    bool writeit = true; // Whether this "local" should be declared such
-    if (setting::inherit_objects && parent_declares(parent, ii)) {
-      continue;
-    }
-  
-    // If it's not explicitely defined, we must question whether it should be given a unique presence in this scope
-    if (!ii->second.defined()) {
-      parsed_object::globit ve = global->globals.find(ii->first); // So, we look for a global by this name
-      if (ve != global->globals.end()) {  // If a global by this name is indeed found,
-        if (ve->second.defined()) // And this global is explicitely defined, not just accessed with a dot,
-          writeit = false; // We assume that its definition will cover us, and we do not redeclare it as a local.
-        cout << "enigma: scopedebug: variable `" << ii->first << "' from object `" << object_iter->second->name << "' will be used from the " << (writeit ? "object" : "global") << " scope." << endl;
-      }
-    }
-    if (writeit) {
-      wto << tdefault(ii->second.type) << " " << ii->second.prefix << ii->first << ii->second.suffix << ";\n    ";
-    }
-  }
-}
-
-static inline void write_object_scripts(std::ostream &wto, po_i &object_iter) {
-  // Next, we write the list of all the scripts this object will hoard a copy of for itself.
-  wto << "\n    //Scripts called by this object\n    ";
-  parsed_object* t = object_iter->second;
-  for (parsed_object::funcit it = t->funcs.begin(); it != t->funcs.end(); it++) //For each function called by this object
-  {
-    map<string,parsed_script*>::iterator subscr = scr_lookup.find(it->first); //Check if it's a script
-    if (subscr != scr_lookup.end() // If we've got ourselves a script
-    and subscr->second->pev_global) // And it has distinct code for use at the global scope (meaning it's more efficient locally)
-    {
-      const char* comma = "";
-      wto << "\n    variant _SCR_" << it->first << "(";
-      for (int argn = 0; argn < it->second; argn++) //it->second gives max argument count used
-      {
-        wto << comma << "variant argument" << argn << " = 0";
-        comma = ", ";
-      }
-      wto << ");";
-    }
-  } wto << "\n    ";
-}
-
-static inline void write_object_timelines(std::ostream &wto, EnigmaStruct* es, po_i &object_iter, map<string, int> &revTlineLookup) {
-  // Next, we write the list of all the timelines this object will hoard a copy of for itself.
-  wto << "\n    //Timelines called by this object\n";
-  bool hasTlines = false;
-  parsed_object* t = object_iter->second;
-  for (parsed_object::tlineit it = t->tlines.begin(); it != t->tlines.end(); it++) //For each timeline potentially set by this object.
-  {
-    map<string, int>::iterator timit = revTlineLookup.find(it->first); //Check if it's a timeline
-    if (timit != revTlineLookup.end()) // If we've got ourselves a script
-    //and subscr->second->pev_global) // And it has distinct code for use at the global scope (meaning it's more efficient locally) //NOTE: It seems all timeline MUST be copied locally.
-    {
-      hasTlines = true;
-      for (int j=0; j<es->timelines[timit->second].momentCount; j++) {
-        wto << "    void TLINE_" <<es->timelines[timit->second].name <<"_MOMENT_" <<es->timelines[timit->second].moments[j].stepNo <<"();\n";
-      }
-    }
-  } wto << "\n";
-
-  //If at least one timeline is called by this object, override timeline_call_moment_script() to properly dispatch it.
-  if (hasTlines) {
-    wto <<"    // Dispatch timelines properly for this object..\n";
-    wto <<"    virtual void timeline_call_moment_script(int timeline_index, int moment_index);\n\n";
-  }
-}
-
-// TODO(JoshDreamland): What the FUCK are these? Really, burn all five of them.
-typedef vector<unsigned> robertvec;
-typedef map<int, robertvec> robertmap;
-typedef vector<int> event_vec;
-typedef map<int, event_vec> event_map;
-typedef map<int, event_map> evpairmap;
-static inline void write_object_events(std::ostream &wto, po_i &object_iter, const po_i parent, robertvec &parent_undefined, event_map &evgroup) {
-  // Now we output all the events this object uses
-  // Defaulted events were already added into this array.
-  for (unsigned ii = 0; ii < object_iter->second->events.size; ii++) {
-    // If the parent also wrote this grouped event for instance some input events in the parent and some in the child, then we need to call the super method
-    if (!setting::inherit_objects || !parent_declares_event(parent, object_iter->second->events[ii].mainId, object_iter->second->events[ii].id)) {
-      parent_undefined.push_back(ii);
-    }
-    string evname = event_get_function_name(object_iter->second->events[ii].mainId, object_iter->second->events[ii].id);
-    if  (object_iter->second->events[ii].code != "")
-    {
-      if (event_is_instance(object_iter->second->events[ii].mainId, object_iter->second->events[ii].id)) {
-        evgroup[object_iter->second->events[ii].mainId].push_back(ii);
-      }
-      wto << "    variant myevent_" << evname << "();\n";
-    }
-     
-    if  (object_iter->second->events[ii].code != "" || event_has_default_code(object_iter->second->events[ii].mainId, object_iter->second->events[ii].id)) {
-      if (event_has_sub_check(object_iter->second->events[ii].mainId, object_iter->second->events[ii].id)) {
-        wto << "    inline bool myevent_" << evname << "_subcheck();\n";
-      }
-    }
-  }
-}
+        //If at least one timeline is called by this object, override timeline_call_moment_script() to properly dispatch it to the local instance.
+        if (hasKnownTlines) {
+          wto <<"//Dispatch timelines properly for this object..\n    ";
+          wto <<"virtual void timeline_call_moment_script(int timeline_index, int moment_index);\n\n    ";
+        }
 
 // TODO(JoshDreamland): ...
 // It seems to do this in a way that makes crying babies weep. It looks as though this used to be a much simpler block, and Robert tried to make it work with inheritance.
@@ -710,9 +605,9 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, i
       //Super-hacky
       std::string override_code = "";
       std::string override_synt = "";
-      if (upev.code.find("with((self)){")==0 && upev.code.find("};")==upev.code.size()-2) {
-        override_code = upev.code.substr(13, upev.code.size()-13-2);
-        override_synt = upev.synt.substr(13, upev.synt.size()-13-2);
+      if (upev.code.find("with((self))")==0) {
+        override_code = upev.code.substr(12, std::string::npos);
+        override_synt = upev.synt.substr(12, std::string::npos);
       }
       print_to_file(
         override_code.empty() ? upev.code : override_code,
@@ -733,7 +628,21 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, i
         parsed_script* scr = tline_lookup[es->timelines[i].name][j];
         wto << "void TLINE_" <<es->timelines[i].name <<"_MOMENT_" <<es->timelines[i].moments[j].stepNo <<"()\n{\n";
         parsed_event& upev = scr->pev_global?*scr->pev_global:scr->pev;
-        print_to_file(upev.code,upev.synt,upev.strc,upev.strs,2,wto);
+
+        std::string override_code = "";
+        std::string override_synt = "";
+        if (upev.code.find("with((self))")==0) {
+          override_code = upev.code.substr(12, std::string::npos);
+          override_synt = upev.synt.substr(12, std::string::npos);
+        }
+        print_to_file(
+          override_code.empty() ? upev.code : override_code,
+          override_synt.empty() ? upev.synt : override_synt,
+          upev.strc,
+          upev.strs,
+          2,wto
+        );
+
         wto << "\n}\n\n";
       }
     }
@@ -822,14 +731,14 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, i
 
 
       //Write local object copies of timelines
-      bool hasTlines = false;
+      bool hasKnownTlines = false;
       for (parsed_object::tlineit it = t->tlines.begin(); it != t->tlines.end(); it++) //For each timeline potentially set by this object
       {
         map<string, int>::iterator timit = revTlineLookup.find(it->first); //Check if it's a timeline
         if (timit != revTlineLookup.end()) // If we've got ourselves a script
         //and subscr->second->pev_global) // And it has distinct code for use at the global scope (meaning it's more efficient locally) //NOTE: It seems all timeline MUST be copied locally.
         {
-          hasTlines = true;
+          hasKnownTlines = true;
           for (int j=0; j<es->timelines[timit->second].momentCount; j++) {
             parsed_script* scr = tline_lookup[timit->first][j];
             wto << "void enigma::OBJ_" <<i->second->name <<"::TLINE_" <<es->timelines[timit->second].name <<"_MOMENT_" <<es->timelines[timit->second].moments[j].stepNo <<"() {\n    ";
@@ -839,8 +748,9 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, i
         } wto << "\n";
       }
 
-      //If no timelines are ever used by this script, it has no use for a lookup table.
-      if (hasTlines) {
+      //If no timelines are ever used by this script, it can rely on the default lookup table.
+      //NOTE: We have to allow it to fall through to the default in cases where instances (by id) are given a timeline.
+      if (hasKnownTlines) {
         wto <<"void enigma::OBJ_" <<i->second->name <<"::timeline_call_moment_script(int timeline_index, int moment_index) {\n";
         wto <<"  switch (timeline_index) {\n";
         for (parsed_object::tlineit it = t->tlines.begin(); it != t->tlines.end(); it++) {
@@ -856,9 +766,11 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, i
             }
             wto <<"      }\n";
             wto <<"      break;\n";
-            wto <<"    }\n";
+           wto <<"    }\n";
           }
         }
+        //Fall through to the default case.
+        wto <<"    default: event_parent::timeline_call_moment_script(timeline_index, moment_index);\n";
         wto <<"  }\n";
         wto <<"}\n\n";
       }
