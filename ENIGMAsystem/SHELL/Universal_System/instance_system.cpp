@@ -239,7 +239,7 @@ namespace enigma
       return iterator();
 
     iliter a = instance_list.find(x);
-    return a != instance_list.end() ? a->second : NULL;
+    return a != instance_list.end() ? iterator(a->second->inst) : iterator();
   }
 
   iterator fetch_roominst_iter_by_id(int x)
