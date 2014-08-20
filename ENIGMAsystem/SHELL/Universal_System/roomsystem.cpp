@@ -107,6 +107,9 @@ namespace enigma
       reset_lives();
     }
 
+    //We may still be holding on to deactivated instances; they can interact badly with existing instances in certain cases.
+    instance_deactivated_list.clear();
+
     // Initialize background variants so they do not throw uninitialized variable access errors.
     for (unsigned i=0;i<8;i++)
     {
