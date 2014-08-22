@@ -638,7 +638,13 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
 
       case '!':
           goto notAss;
-      case '>': case '<':
+      case '<':
+        if (synt[pos+1] == '>') {
+          code.replace(pos,2,"!=");
+          synt.replace(pos,2,"!=");
+          pos++; break;
+        }
+      case '>':
         if (synt[pos-1] != synt[pos]) // Handles <=, >=, which are not assignment operators!
           goto notAss;
         goto Ass;
