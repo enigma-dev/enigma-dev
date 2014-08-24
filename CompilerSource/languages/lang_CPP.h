@@ -45,7 +45,7 @@ struct lang_CPP: language_adapter {
   int compile_parseSecondary(map<int,parsed_object*>&,parsed_script*[],int scrcount, vector<parsed_script*>& tlines, map<int,parsed_room*>&,parsed_object*, const std::set<std::string>&);
   int compile_writeGlobals(EnigmaStruct*,parsed_object*);
   int compile_writeObjectData(EnigmaStruct*,parsed_object*,int mode);
-  int compile_writeObjAccess(map<int,parsed_object*>&,parsed_object*);
+  int compile_writeObjAccess(map<int,parsed_object*>&,parsed_object*, bool treatUninitAs0);
   int compile_writeFontInfo(EnigmaStruct* es);
   int compile_writeRoomData(EnigmaStruct* es, parsed_object *EGMglobal,int mode);
   int compile_writeShaderData(EnigmaStruct* es, parsed_object *EGMglobal);
