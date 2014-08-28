@@ -175,28 +175,29 @@ namespace enigma
 
     instance_event_iterator = new inst_iter(NULL,NULL,NULL);
 
+    // Fire the rooms preCreation code. This code includes instance sprite transformations added in the room editor.
+    // (NOTE: This code uses instance_deactivated_list to look up instances by ID, in addition to the normal lookup approach).
+    if (precreatecode)
+      precreatecode();
+    
     // Fire the create event of all the new instances.
     for (int i = 0; i < instancecount; i++) {
       is[i]->myevent_create();
     }
 
-  // instance create code should be added here or occur at this exact moment in time, but guess what the code
-  // isn't here, so where the fuck is it? and no not the create event, the instance create code from the room editor
-  // WHERE THE FUCK IS IT?
+    // Fire the game start event for all the new instances, persistent objects don't matter since this is the first time
+    // the game ran they won't even exist yet
+    if (gamestart)
+      for (int i = 0; i < instancecount; i++)
+        is[i]->myevent_gamestart();
 
-  // Fire the game start event for all the new instances, persistent objects don't matter since this is the first time
-  // the game ran they won't even exist yet
-  if (gamestart)
-    for (int i = 0; i < instancecount; i++)
-      is[i]->myevent_gamestart();
+    // Fire the rooms creation code. This includes instance creation code.
+    // (NOTE: This code uses instance_deactivated_list to look up instances by ID, in addition to the normal lookup approach).
+    if (createcode)
+      createcode();
 
-  // Fire the rooms creation code.
-  // (NOTE: This code uses instance_deactivated_list to look up instances by ID, in addition to the normal lookup approach).
-  if (createcode)
-       createcode();
-
-  // Fire the room start event for all persistent objects still kept alive and all the new instances
-  for (enigma::iterator it = enigma::instance_list_first(); it; ++it)
+    // Fire the room start event for all persistent objects still kept alive and all the new instances
+    for (enigma::iterator it = enigma::instance_list_first(); it; ++it)
     {
       it->myevent_roomstart();
     }
@@ -538,6 +539,7 @@ int room_add()
     rm->persistent = false;
     rm->views_enabled = false;
     rm->createcode = NULL;
+    rm->precreatecode = NULL;
 
     enigma::inst *newinst = new enigma::inst[1];
     rm->instances = newinst;
@@ -617,7 +619,8 @@ int room_duplicate(int indx, bool ass, int assroom)
     rm->persistent = copyrm->persistent;
     rm->views_enabled = copyrm->views_enabled;
     rm->createcode = copyrm->createcode;
-
+    rm->precreatecode = copyrm->precreatecode;
+    
     enigma::inst *newinst = new enigma::inst[copyrm->instancecount];
     rm->instances = newinst;
     rm->instancecount = copyrm->instancecount;
