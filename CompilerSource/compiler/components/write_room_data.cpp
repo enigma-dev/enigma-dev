@@ -114,7 +114,8 @@ int lang_CPP::compile_writeRoomData(EnigmaStruct* es, parsed_object *EGMglobal, 
     << javaColor(es->rooms[i].backgroundColor) << ", "//Background color
     << (es->rooms[i].drawBackgroundColor ? "true" : "false")
     << ", roomcreate" << es->rooms[i].id << ",\n      " // Creation code
-
+    << "roomprecreate" << es->rooms[i].id << ",\n      " // PreCreation code
+    
     << es->rooms[i].width << ", " << es->rooms[i].height << ", " // Width and Height
     << es->rooms[i].speed << ",  "  // Speed
     << (es->rooms[i].persistent ? "true" : "false") << ",  "  // Persistent
@@ -216,6 +217,43 @@ wto.open((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_roomcreates.h").c
       );
       wto << "}\n\n";
     }
+    
+    for (map<int,parsed_room::parsed_icreatecode>::iterator it = pr->instance_precreate_codes.begin(); it != pr->instance_precreate_codes.end(); it++)
+    {
+      wto << "void room_"<< es->rooms[i].id <<"_instanceprecreate_" << it->first << "()\n{\n  ";
+      if (mode == emode_debug) {
+        wto << "enigma::debug_scope $current_scope(\"'instance preCreation' for instance '" << it->first << "'\");\n";
+      }
+
+      std::string codeOvr;
+      std::string syntOvr;
+      if (it->second.pe->code.find("with((")==0) {
+        //We're basically replacing "with((100002)){" with "with_room_inst((100002)){" (synt: "ssss((000000)){")
+        //This is because room-instance-precreation code might need a deactivated instance, which "with" cannot find.
+        codeOvr = "with_room_inst(" + it->second.pe->code.substr(5);
+        syntOvr = "ssssssssssssss(" + it->second.pe->synt.substr(5);
+      }
+
+      print_to_file(
+        codeOvr.empty() ? it->second.pe->code : codeOvr,
+        syntOvr.empty() ? it->second.pe->synt : syntOvr,
+        it->second.pe->strc, it->second.pe->strs, 2, wto
+      );
+      wto << "}\n\n";
+    }
+    
+    wto << "void roomprecreate" << es->rooms[i].id << "()\n{\n  ";
+    if (mode == emode_debug) {
+      wto << "enigma::debug_scope $current_scope(\"'room preCreation' for room '" << es->rooms[i].name << "'\");\n";
+    }
+    //LGM doesn't expose a ROOM PreCreation code yet, only the instance one
+    //parsed_event& ev = pr->events[0];
+    //print_to_file(ev.code, ev.synt, ev.strc, ev.strs, 2, wto);
+
+    for (map<int,parsed_room::parsed_icreatecode>::iterator it = pr->instance_precreate_codes.begin(); it != pr->instance_precreate_codes.end(); it++)
+      wto << "\n  room_"<< es->rooms[i].id <<"_instanceprecreate_" << it->first << "();";
+
+    wto << "\n}\n";
 
     wto << "void roomcreate" << es->rooms[i].id << "()\n{\n  ";
     if (mode == emode_debug) {
@@ -226,7 +264,7 @@ wto.open((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_roomcreates.h").c
 
     for (map<int,parsed_room::parsed_icreatecode>::iterator it = pr->instance_create_codes.begin(); it != pr->instance_create_codes.end(); it++)
       wto << "\n  room_"<< es->rooms[i].id <<"_instancecreate_" << it->first << "();";
-
+    
     wto << "\n}\n";
   }
 wto.close();

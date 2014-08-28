@@ -79,6 +79,11 @@ int lang_CPP::compile_parseSecondary(map<int,parsed_object*> &parsed_objects, pa
       oto = parsed_objects[ici->second.object_index];
       parser_secondary(ici->second.pe->code,ici->second.pe->synt,EGMglobal,oto,ici->second.pe, script_names);
     }
+    for (map<int,parsed_room::parsed_icreatecode>::iterator ici = it->second->instance_precreate_codes.begin(); ici != it->second->instance_precreate_codes.end(); ici++)
+    {
+      oto = parsed_objects[ici->second.object_index];
+      parser_secondary(ici->second.pe->code,ici->second.pe->synt,EGMglobal,oto,ici->second.pe, script_names);
+    }
   }
   
   return 0;

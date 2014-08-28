@@ -2,12 +2,13 @@
 #define boolean int
 
 typedef struct {
-	int x;
-	int y;
-	GmObject *object;
-	int id;
-	String creationCode;
-	boolean locked;
+  int x;
+  int y;
+  GmObject *object;
+  int id;
+  String creationCode;
+  String preCreationCode;
+  boolean locked;
 
-	Room *room;
+  Room *room;
 } Instance, *pInstance;
