@@ -200,10 +200,10 @@ void CALLBACK combineCallback(GLdouble coords[3], GLdouble* vertex_data[4], GLfl
     vertex[2] = coords[2];
 
     for (int i = 3; i < 6; i++) {
-      vertex[i] = weight[0] * vertex_data[0][i]
-                + weight[1] * vertex_data[1][i]
-                + weight[2] * vertex_data[2][i]
-                + weight[3] * vertex_data[3][i];
+      vertex[i] = (weight[0] ? weight[0] * vertex_data[0][i] : 0)
+                + (weight[1] ? weight[1] * vertex_data[1][i] : 0)
+                + (weight[2] ? weight[2] * vertex_data[2][i] : 0)
+                + (weight[3] ? weight[3] * vertex_data[3][i] : 0);
     }
   }
 

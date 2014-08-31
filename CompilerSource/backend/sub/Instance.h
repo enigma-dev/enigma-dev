@@ -13,12 +13,13 @@
 
 struct Instance
 {
-	int x;
-	int y;
-	int objectId;
-	int id;
-	String creationCode;
-	boolean locked;
+  int x;
+  int y;
+  int objectId;
+  int id;
+  String creationCode;
+  String preCreationCode;
+  boolean locked;
 };
 
 #endif

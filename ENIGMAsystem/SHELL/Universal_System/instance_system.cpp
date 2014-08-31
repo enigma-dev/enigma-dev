@@ -78,7 +78,7 @@ namespace enigma
 
     iterator::iterator(inst_iter*_it, bool tmp): it(_it), temp(tmp) { addme(); }
     iterator::iterator(const iterator&other): it(other.it?new inst_iter(*other.it):NULL), temp(true) { addme(); }
-    iterator::iterator(iterator&other): it(other.it), temp(other.temp) { other.temp = NULL; }
+    iterator::iterator(iterator&other): it(other.it), temp(other.temp) { other.temp = false; }
     iterator::iterator(object_basic*ob): it(new inst_iter(ob,NULL,NULL)), temp(true) { }
     iterator::iterator(): it(NULL), temp(true) { }
     iterator:: ~iterator() {
@@ -239,7 +239,22 @@ namespace enigma
       return iterator();
 
     iliter a = instance_list.find(x);
-    return a != instance_list.end() ? a->second : NULL;
+    return a != instance_list.end() ? iterator(a->second->inst) : iterator();
+  }
+
+  iterator fetch_roominst_iter_by_id(int x)
+  {
+    if (x < 100000)
+      return iterator();
+
+    //Check if it's a deactivated instance first.
+    std::map<int,enigma::inst_iter*>::iterator rIt = enigma::instance_deactivated_list.find(x);
+    if (rIt!=enigma::instance_deactivated_list.end()) {
+      return iterator(((enigma::object_basic*)(rIt->second->inst)));
+    }
+
+    //Else, it's still live (or was null). Use normal dispatch.
+    return fetch_inst_iter_by_id(x);
   }
 
   // Implementation for frontend
