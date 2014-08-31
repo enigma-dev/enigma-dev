@@ -471,6 +471,9 @@ struct Argument {
 
 string argumentToString(const Argument& arg) {
   if (arg.val.length() == 0) {
+    if (arg.kind == ARG_STRING) {
+      return "\"\"";
+    }
     return "0";
   }
   
