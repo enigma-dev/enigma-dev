@@ -29,13 +29,6 @@
 
 vector<TextureStruct*> textureStructs(0);
 
-namespace enigma_user {
-  extern int room_width, room_height;
-}
-namespace enigma {
-  extern size_t background_idmax;
-}
-
 LPDIRECT3DTEXTURE9 get_texture(int texid) {
   return (size_t(texid) >= textureStructs.size() || texid < 0) ? NULL : textureStructs[texid]->gTexture;
 }
