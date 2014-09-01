@@ -33,7 +33,9 @@ namespace {
 const std::string IniFromStringFilename = "<IniFromString>";
 
 //List of invalid characters on Windows, which is a superset of OSX and Linux's (much smaller) sets.
-const std::string InvalidFilenameChars = "<>:\"/\\|?*\0";
+//NOTE: At the moment, we only ban NULL; there might be cause to ban other characters later.
+//      Don't forget that an absolute path can be sent, so banning "/", "\", etc., won't work.
+const std::string InvalidFilenameChars = "\0";
 
 //The name of the currently-open file. Empty string means "no open file".
 std::string currIniFile;
