@@ -24,6 +24,7 @@
 #include <unistd.h> //usleep
 #include <time.h> //clock
 #include <string> //Return strings without needing a GC
+#include <map>
 
 #include "ObjectiveC.h"
 
@@ -57,7 +58,9 @@ namespace enigma {
     extern char last_mousestatus[3];
     extern char last_keybdstatus[256];
     extern char keybdstatus[256];
-    extern int windowColor;
+
+    //Replacing usermap array with keybdmap map, to align code with Windows implementation.
+    std::map<int,int> keybdmap;
 }
 
 namespace enigma_user {
@@ -426,6 +429,32 @@ namespace enigma_user {
     while(!keyboard_check(1/*vk_anykey*/)) {
         io_handle();
     }
+  }
+
+  void keyboard_clear(const int key) {
+    enigma::keybdstatus[key] = enigma::last_keybdstatus[key] = 0;
+  }
+
+  void keyboard_set_map(int key1, int key2) {
+    std::map< int, int >::iterator it = enigma::keybdmap.find( key1 );
+    if ( enigma::keybdmap.end() != it ) {
+      it->second = key2;
+    } else {
+      enigma::keybdmap.insert( map< int, int >::value_type(key1, key2) );
+    }
+  }
+
+  int keyboard_get_map(int key) {
+    std::map< int, int >::iterator it = enigma::keybdmap.find( key );
+    if ( enigma::keybdmap.end() != it ) {
+      return it->second;
+    } else {
+      return key;
+    }
+  }
+
+  void keyboard_unset_map() {
+    enigma::keybdmap.clear();
   }
 
   void window_set_region_scale(double scale, bool adaptwindow) {}
