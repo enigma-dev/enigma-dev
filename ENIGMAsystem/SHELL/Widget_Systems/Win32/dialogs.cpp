@@ -16,7 +16,6 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <string>
 // Windows Vista or later for IFileDialog
 #define NTDDI_VERSION NTDDI_VISTA
 #define _WIN32_WINNT _WIN32_WINNT_VISTA
@@ -26,6 +25,8 @@
 #include <shlobj.h> //for Shell API
 #include <richedit.h>
 #include <stdio.h>
+#include <string>
+
 using namespace std;
 #include "Widget_Systems/widgets_mandatory.h"
 #include "GameSettings.h"

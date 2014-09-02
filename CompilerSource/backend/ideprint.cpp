@@ -38,14 +38,16 @@ ideprint &ideprint::operator<< (unsigned x) {
 ideprint &ideprint::operator<< (unsigned long x) {
   f(tostring(x).c_str()); return *this;
 }
-#ifdef USE_LONG_LONG
-  ideprint &ideprint::operator<< (long long x) {
-    f(tostring(x).c_str()); return *this;
-  }
-  ideprint &ideprint::operator<< (unsigned long long x) {
-    f(tostring(x).c_str()); return *this;
-  }
+
+#if __cplusplus >= 201100
+ideprint &ideprint::operator<< (long long x) {
+  f(tostring(x).c_str()); return *this;
+}
+ideprint &ideprint::operator<< (unsigned long long x) {
+  f(tostring(x).c_str()); return *this;
+}
 #endif
+
 ideprint &ideprint::operator<< (void *x) {
   f(tostringv(x).c_str()); return *this;
 }
