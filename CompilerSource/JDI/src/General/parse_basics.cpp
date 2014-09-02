@@ -58,6 +58,10 @@ namespace parse_bacics {
     string toString(short n) { char buf[12]; return string(buf,sprintf(buf,"%d", n)); }
     string toString(unsigned n) { char buf[12]; return string(buf,sprintf(buf,"%u", n)); }
     string toString(unsigned long n) { char buf[12]; return string(buf,sprintf(buf,"%lu", n)); }
+#if __cplusplus >= 201100
+    string toString(long long n) { char buf[22]; return string(buf,sprintf(buf,"%lld", n)); }
+    string toString(unsigned long long n) { char buf[22]; return string(buf,sprintf(buf,"%llu", n)); }
+#endif
     string toString(unsigned short n) { char buf[12]; return string(buf,sprintf(buf,"%u", n)); }
     string toString(char n) { char buf[8]; return string(buf,sprintf(buf,"%d", n)); }
     string toString(char* n) { return string(n); }

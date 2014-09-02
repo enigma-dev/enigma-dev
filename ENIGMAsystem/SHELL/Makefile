@@ -58,15 +58,15 @@ CC := gcc
 DEPENDENCIES :=
 
 ifeq ($(GMODE), Debug)
-	CXXFLAGS += -Wall -g -DDEBUG_MODE
-	CFLAGS += -Wall -g -DDEBUG_MODE
+	CXXFLAGS += -Wall -g -DDEBUG_MODE -Ie:/mingw/include/al
+	CFLAGS += -Wall -g -DDEBUG_MODE -Ie:/mingw/include/al
 else ifeq ($(GMODE), Compile)
-	CXXFLAGS += -Wall -s -O3 -fno-rtti -fno-exceptions -flto -fdata-sections -ffunction-sections
-	CFLAGS += -Wall -s -O3 -flto -fno-exceptions -fdata-sections -ffunction-sections
+	CXXFLAGS += -Wall -s -O3 -fno-rtti -fno-exceptions -flto -fdata-sections -ffunction-sections -Ie:/mingw/include/al
+	CFLAGS += -Wall -s -O3 -flto -fno-exceptions -fdata-sections -ffunction-sections -Ie:/mingw/include/al
 	LDFLAGS += -flto -s -O3
 else
-	CXXFLAGS += -Wall -s -O3 -fno-rtti -fno-exceptions
-	CFLAGS += -Wall -s -O3 -fno-exceptions
+	CXXFLAGS += -Wall -s -O3 -fno-rtti -fno-exceptions -Ie:/mingw/include/al
+	CFLAGS += -Wall -s -O3 -fno-exceptions -Ie:/mingw/include/al
 endif
 
 ifeq ($(PLATFORM), Win32)

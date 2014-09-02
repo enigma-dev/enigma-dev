@@ -93,10 +93,10 @@ namespace parse_bacics {
     string toString(short);
     string toString(unsigned);
     string toString(unsigned long);
-  #if __cplusplus >= 201100
+#if __cplusplus >= 201100
     string toString(long long x);
     string toString(unsigned long long x);
-  #endif
+#endif
     string toString(unsigned short);
     string toString(char);
     string toString(char*);

@@ -29,7 +29,7 @@ endif
 ###########
 
 CXX := g++
-CXXFLAGS += -Wall -g -I./JDI/src
+CXXFLAGS += -std=gnu++11 -Wall -g -I./JDI/src
 LDFLAGS += -shared
 
 SOURCES := $(shell find . -name "*.cpp" -and ! -name "standalone_*")
