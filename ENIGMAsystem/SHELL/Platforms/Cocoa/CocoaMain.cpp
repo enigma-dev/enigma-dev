@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include "CocoaMain.h"
 #include "ObjectiveC.h"
+#include <cstdlib>
 
 #include "../General/PFwindow.h"
 #include "../General/PFfilemanip.h"
