@@ -121,8 +121,9 @@ int cocoa_window_get_region_height() {
     return getWindowDimension(3);
 }
 
-const char* cocoa_get_working_directory() {
+//This does not appear to work right.
+/*const char* cocoa_get_working_directory() {
     NSBundle* bundle = [NSBundle mainBundle];
     return [[bundle bundlePath] UTF8String];
-}
+}*/
 
