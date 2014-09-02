@@ -30,6 +30,8 @@
 #include <stdio.h>
 #include "Universal_System/CallbackArrays.h"
 #include "Universal_System/roomsystem.h"
+#include <cstring>
+
 
 namespace enigma
 {
