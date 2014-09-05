@@ -656,9 +656,9 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
         if (synt[pos+1] == '^') {
           int n = 2;
           if (pos+2 < synt.length() && synt[pos+2] == '^') n++;
-          code.replace(pos,n,"!=0==!");
-          synt.replace(pos,n,"^^^^^^");
-          pos += 5; break;
+          code.replace(pos,n,"log_xor");
+          synt.replace(pos,n,"^^^^^^^");
+          pos += 6; break;
         }
       case '&': case '|': case '~': case '/':
           Ass: // Assignment operator
