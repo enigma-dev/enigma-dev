@@ -560,6 +560,11 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, i
   wto.open((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_objectfunctionality.h").c_str(),ios_base::out);
     wto << license;
 
+    wto << endl << "#define log_xor || log_xor_helper() ||" << endl;
+    wto << "struct log_xor_helper { bool value; };" << endl;
+    wto << "template<typename LEFT> log_xor_helper operator ||(const LEFT &left, const log_xor_helper &xorh) { log_xor_helper nxor; nxor.value = (bool)left; return nxor; }" << endl;
+    wto << "template<typename RIGHT> bool operator ||(const log_xor_helper &xorh, const RIGHT &right) { return xorh.value ^ (bool)right; }" << endl << endl;
+    
     cout << "DBGMSG 2" << endl;
     // Export globalized scripts
     for (int i = 0; i < es->scriptCount; i++)
