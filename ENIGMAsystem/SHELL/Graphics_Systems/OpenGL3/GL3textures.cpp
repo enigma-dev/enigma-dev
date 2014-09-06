@@ -32,16 +32,8 @@
 
 vector<TextureStruct*> textureStructs(0);
 
-namespace enigma_user {
-  extern int room_width, room_height;
-}
-
 #include <vector>
 using std::vector;
-
-namespace enigma {
-  extern size_t background_idmax;
-}
 
 inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect powers of two
 	x =  (x & -x) - 1;
@@ -237,7 +229,7 @@ void texture_set_enabled(bool enable)
 
 void texture_set_blending(bool enable)
 {
-    (enable?glEnable:glDisable)(GL_BLEND);
+  (enable?glEnable:glDisable)(GL_BLEND);
 }
 
 gs_scalar texture_get_width(int texid) {
