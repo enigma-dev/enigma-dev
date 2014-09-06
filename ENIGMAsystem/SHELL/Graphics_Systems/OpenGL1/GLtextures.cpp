@@ -32,14 +32,6 @@
 
 vector<TextureStruct*> textureStructs(0);
 
-namespace enigma_user {
-extern int room_width, room_height;
-}
-
-namespace enigma {
-  extern size_t background_idmax;
-}
-
 TextureStruct::TextureStruct(unsigned gtex)
 {
   sampler = new enigma::SamplerState();
@@ -163,6 +155,14 @@ namespace enigma
 
     return ret;
   }
+  
+  void graphics_samplers_apply() {
+    for (unsigned i = 0; i < 8; i++) {
+      if (enigma::samplerstates[i].bound_texture != -1) {
+         enigma::samplerstates[i].CompareAndApply(textureStructs[enigma::samplerstates[i].bound_texture]->sampler);
+      }
+    }
+  }
 
   SamplerState samplerstates[8];
 }
@@ -219,7 +219,7 @@ void texture_set_enabled(bool enable)
 
 void texture_set_blending(bool enable)
 {
-    (enable?glEnable:glDisable)(GL_BLEND);
+  (enable?glEnable:glDisable)(GL_BLEND);
 }
 
 gs_scalar texture_get_width(int texid) {
@@ -242,9 +242,11 @@ unsigned texture_get_texel_height(int texid)
 }
 
 void texture_set_stage(int stage, int texid) {
-  if (enigma::samplerstates[stage].bound_texture != unsigned(get_texture(texid))) {
+  if (texid == -1) { texture_reset(); return; }
+  if (enigma::samplerstates[stage].bound_texture != texid) {
     glActiveTexture(GL_TEXTURE0 + stage);
-    glBindTexture(GL_TEXTURE_2D, enigma::samplerstates[stage].bound_texture = get_texture(texid));
+    enigma::samplerstates[stage].bound_texture = texid;
+    glBindTexture(GL_TEXTURE_2D, get_texture(texid));
   }
   // Must be applied regardless of whether the texture is already bound because the sampler state could have been changed.
   enigma::samplerstates[stage].CompareAndApply(textureStructs[texid]->sampler);
@@ -252,7 +254,8 @@ void texture_set_stage(int stage, int texid) {
 
 void texture_reset() {
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, enigma::samplerstates[0].bound_texture = 0);
+  enigma::samplerstates[0].bound_texture = -1;
+	glBindTexture(GL_TEXTURE_2D, 0);
   //Should only rarely apply the full state, I believe it is unnecessary to do it when we set no texture and it does not appear
   //to cause any issues so leave it commented.
   //enigma::samplerstates[0].ApplyState();
