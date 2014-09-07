@@ -638,7 +638,13 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
 
       case '!':
           goto notAss;
-      case '>': case '<':
+      case '<':
+        if (synt[pos+1] == '>') {
+          code.replace(pos,2,"!=");
+          synt.replace(pos,2,"!=");
+          pos++; break;
+        }
+      case '>':
         if (synt[pos-1] != synt[pos]) // Handles <=, >=, which are not assignment operators!
           goto notAss;
         goto Ass;
@@ -646,7 +652,15 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
       case '+': case '-': 
           if (synt[pos] == synt[pos+1])
           { pos++; continue; }
-      case '&': case '|': case '^': case '~': case '/':
+      case '^':
+        if (synt[pos+1] == '^') {
+          int n = 2;
+          if (pos+2 < synt.length() && synt[pos+2] == '^') n++;
+          code.replace(pos,n,"log_xor");
+          synt.replace(pos,n,"^^^^^^^");
+          pos += 6; break;
+        }
+      case '&': case '|': case '~': case '/':
           Ass: // Assignment operator
           if (synt[pos+1] == '=') {
             deceq |= indecl;
