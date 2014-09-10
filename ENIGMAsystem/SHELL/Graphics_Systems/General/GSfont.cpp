@@ -431,6 +431,14 @@ void draw_text_sprite(gs_scalar x, gs_scalar y, variant vstr, int sep, int lineW
     //Fetch the next character to be drawn.
     uint32_t c = getUnicodeCharacter(str, i);
 
+    //Handle newline wrapping immediately.
+    if (c=='\n') {
+      offX = 0;
+      offY += sep + h;
+      prev_c = c;
+      continue;
+    }
+
     //A line break can occur here if we are starting a new word that won't fit.
     if (lineWidth!=-1 && prev_c==' ' && c!= ' ') {
       //Assume a space at str[str.length()]
