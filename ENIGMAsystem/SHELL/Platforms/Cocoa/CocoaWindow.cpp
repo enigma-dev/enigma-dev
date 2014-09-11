@@ -47,6 +47,10 @@ void gmw_init()
 extern char cocoa_keybdstatus[256];
 extern char cocoa_last_keybdstatus[256];
 
+extern "C" int cocoa_get_screen_size(int getWidth);
+extern "C" void cocoa_window_set_fullscreen(bool full);
+extern "C" int cocoa_window_get_fullscreen();
+
 namespace enigma {
     extern char keybdstatus[256];
     extern char mousestatus[3];
@@ -157,36 +161,11 @@ enum {
 
 void window_set_fullscreen(bool full)
 {
-	/*Atom wmState = XInternAtom(disp, "_NET_WM_STATE", False);
-	Atom aFullScreen = XInternAtom(disp,"_NET_WM_STATE_FULLSCREEN", False);
-	XEvent xev;
-	xev.xclient.type=ClientMessage;
-	xev.xclient.serial = 0;
-	xev.xclient.send_event=True;
-	xev.xclient.window=win;
-	xev.xclient.message_type=wmState;
-	xev.xclient.format=32;
-	xev.xclient.data.l[0] = (full ? _NET_WM_STATE_ADD : _NET_WM_STATE_REMOVE);
-	xev.xclient.data.l[1] = aFullScreen;
-	xev.xclient.data.l[2] = 0;
-	XSendEvent(disp,DefaultRootWindow(disp),False,SubstructureRedirectMask|SubstructureNotifyMask,&xev);*/
+	cocoa_window_set_fullscreen(full);
 }
 bool window_get_fullscreen()
 {
-	/*Atom aFullScreen = XInternAtom(disp,"_NET_WM_STATE_FULLSCREEN",False);
-	Atom ra;
-	int ri;
-	unsigned long nr, bar;
-	unsigned char *data;
-	int stat = XGetWindowProperty(disp,win,aFullScreen,0L,0L,False,AnyPropertyType,&ra,&ri,&nr,&bar,&data);
-	if (stat != Success) {
-		printf("Status: %d\n",stat);
-		//return 0;
-	}*/
-	/*printf("%d %d %d %d\n",ra,ri,nr,bar);
-	 for (int i = 0; i < nr; i++) printf("%02X ",data[i]);
-	 printf("\n");*/
-	return 0;
+	return cocoa_window_get_fullscreen();
 }
 
 //default    +   -5   I    \    |    /    -    ^   ...  drg  no  -    |  drg3 ...  X  ...  ?   url  +
@@ -402,8 +381,6 @@ namespace enigma {
 }
 
 /*
- display_get_width() // Returns the width of the display in pixels.
- display_get_height() // Returns the height of the display in pixels.
  display_set_size(w,h) Sets the width and height of the display in pixels. Returns whether this was
  successful. (Realize that only certain combinations are allowed.)
  display_get_colordepth() Returns the color depth in bits.
@@ -449,4 +426,13 @@ namespace enigma_user {
   void window_set_region_scale(double scale, bool adaptwindow) {}
   bool window_get_region_scale() {return 1;}
   void window_set_region_size(int w, int h, bool adaptwindow) {}
+
+  int display_get_width() {
+    return cocoa_get_screen_size(true);
+  }
+
+  int display_get_height() {
+    return cocoa_get_screen_size(false);
+  }
 }
+
