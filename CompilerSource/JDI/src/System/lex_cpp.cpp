@@ -217,8 +217,8 @@ bool lexer_cpp::parse_macro_params(const macro_function* mf, const macro_map &ma
       pspos = ++pos;
       _skip_noncode(continue);
       continue;
-    } else if (cfile[pos] == ')') { if (--nestcnt) ++pos; continue; }
-      else if (cfile[pos] == '(') ++nestcnt;
+    } else if (cfile[pos] == ')' || cfile[pos] == ']') { if (--nestcnt) ++pos; continue; }
+      else if (cfile[pos] == '(' || cfile[pos] == '[') ++nestcnt;
       else if (cfile[pos] == '"' or cfile[pos] == '\'') 
         ::skip_string(cfile, pos, length);
     ++pos; _skip_noncode(continue);
@@ -249,8 +249,8 @@ bool lexer_cpp::parse_macro_params(const macro_function* mf, vector<string>& des
       pspos = ++pos;
       skip_noncode(continue);
       continue;
-    } else if (cfile[pos] == ')') { if (--nestcnt) ++pos; continue; }
-      else if (cfile[pos] == '(') ++nestcnt;
+    } else if (cfile[pos] == ')' || cfile[pos] == ']') { if (--nestcnt) ++pos; continue; }
+      else if (cfile[pos] == '(' || cfile[pos] == '[') ++nestcnt;
       else if (cfile[pos] == '"' or cfile[pos] == '\'') 
         skip_string(herr);
     ++pos; skip_noncode(continue);
