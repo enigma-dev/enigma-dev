@@ -606,9 +606,11 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
         deceq |= indecl;
         if (setting::use_gml_equals and (level or rhs))
         {
-          if (infor != 3 and infor != 1 and synt[++pos] != '=')
-            code.insert(pos,"="),
+          if (infor != 3 and infor != 1 and synt[pos-1] != '=' and synt[pos+1] != '=') {
+            pos++;
+            code.insert(pos,"=");
             synt.insert(pos,"=");
+          }
         }
         rhs |= !level;
         break;
