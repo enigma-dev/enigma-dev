@@ -24,12 +24,12 @@ namespace enigma {
   //NOTE: OpenGL 1 hardware does not support sampler objects, some versions of 2 and usually over 3 do. We use this class
   //to emulate the Direct3D behavior.
   struct SamplerState {
-    unsigned bound_texture;
+    int bound_texture;
     bool wrapu, wrapv, wrapw;
     GLint bordercolor[4], min, mag, maxlevel;
     GLfloat anisotropy, minlod, maxlod;
     
-    SamplerState(): wrapu(true), wrapv(true), wrapw(true), min(GL_NEAREST), mag(GL_NEAREST), anisotropy(1), minlod(-1000), maxlod(1000), maxlevel(1000) {
+    SamplerState(): bound_texture(-1), wrapu(true), wrapv(true), wrapw(true), min(GL_NEAREST), mag(GL_NEAREST), maxlevel(1000), anisotropy(1), minlod(-1000), maxlod(1000) {
       bordercolor[0] = 0;
       bordercolor[1] = 0;
       bordercolor[2] = 0;

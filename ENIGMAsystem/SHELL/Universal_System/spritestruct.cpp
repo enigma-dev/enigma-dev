@@ -274,7 +274,7 @@ namespace enigma
             int tmp = ih*fullwidth*4;
             for (iw = 0; iw < width; iw++)
             {
-              if (pxdata[tmp] == t_pixel_r && pxdata[tmp+1] == t_pixel_g && pxdata[tmp+2] == t_pixel_b)
+              if (pxdata[tmp] == t_pixel_b && pxdata[tmp+1] == t_pixel_g && pxdata[tmp+2] == t_pixel_r)
                 pxdata[tmp+3] = 0;
 
               tmp+=4;
@@ -324,7 +324,7 @@ namespace enigma
 					tmpcell += 4;
 				}
 			}
-			unsigned texture = graphics_create_texture(cellwidth, height, fullcellwidth, fullheight, pxdata, mipmap);
+			unsigned texture = graphics_create_texture(cellwidth, height, fullcellwidth, fullheight, pixels, mipmap);
 			ns->texturearray.push_back(texture);
 			ns->texbordxarray.push_back((double) cellwidth/fullcellwidth);
 			ns->texbordyarray.push_back((double) height/fullheight);

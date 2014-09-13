@@ -32,16 +32,8 @@
 
 vector<TextureStruct*> textureStructs(0);
 
-namespace enigma_user {
-  extern int room_width, room_height;
-}
-
 #include <vector>
 using std::vector;
-
-namespace enigma {
-  extern size_t background_idmax;
-}
 
 inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect powers of two
 	x =  (x & -x) - 1;
@@ -178,6 +170,9 @@ namespace enigma
     for (size_t i = 0; i < 8; i++) {
       glGenSamplers(1, &samplerstates[i].sampler_index);
       glBindSampler(i, samplerstates[i].sampler_index);
+      // Default to interpolation disabled, for some reason textures do that by default but not samplers.
+      glSamplerParameteri(samplerstates[i].sampler_index, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+      glSamplerParameteri(samplerstates[i].sampler_index, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     }
   }
 }
@@ -234,7 +229,7 @@ void texture_set_enabled(bool enable)
 
 void texture_set_blending(bool enable)
 {
-    (enable?glEnable:glDisable)(GL_BLEND);
+  (enable?glEnable:glDisable)(GL_BLEND);
 }
 
 gs_scalar texture_get_width(int texid) {

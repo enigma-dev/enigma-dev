@@ -192,7 +192,7 @@ class Mesh
   GLuint vertexBuffer; // Interleaved vertex buffer object with triangles first since they are most likely to be used
   GLuint indexBuffer; // Interleaved index buffer object with triangles first since they are most likely to be used
 
-  int vbotype; // Can be static = GL_STATIC_DRAW, dynamic = GL_DYNAMIC_DRAW or stream GL_STREAM_DRAW
+  int vbotype; // can be static, dynamic, or stream
   bool ibogenerated;
   bool vbogenerated;
   bool vbobuffered; // Whether or not the buffer objects have been generated

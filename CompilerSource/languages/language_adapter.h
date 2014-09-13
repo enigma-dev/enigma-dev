@@ -23,6 +23,8 @@
 
 #include <string>
 #include <vector>
+#include <map>
+#include <set>
 using namespace std;
 #include "parser/object_storage.h"
 #include "backend/EnigmaStruct.h"
@@ -35,11 +37,11 @@ struct language_adapter {
   virtual int link_globals(parsed_object*, EnigmaStruct*, parsed_script*[], vector<parsed_script*>& tlines) = 0;
 
   // IDE_EDITABLEs added before compile
-  virtual int compile_parseAndLink(EnigmaStruct*,parsed_script*[], vector<parsed_script*>& tlines) = 0;
-  virtual int compile_parseSecondary(map<int,parsed_object*>&,parsed_script*[],int scrcount, vector<parsed_script*>& tlines, map<int,parsed_room*>&,parsed_object*) = 0;
+  virtual int compile_parseAndLink(EnigmaStruct*,parsed_script*[], vector<parsed_script*>& tlines, const std::set<std::string>& script_names) = 0;
+  virtual int compile_parseSecondary(map<int,parsed_object*>&,parsed_script*[],int scrcount, vector<parsed_script*>& tlines, map<int,parsed_room*>&,parsed_object*, const std::set<std::string>&) = 0;
   virtual int compile_writeGlobals(EnigmaStruct*,parsed_object*) = 0;
   virtual int compile_writeObjectData(EnigmaStruct*,parsed_object*,int mode) = 0;
-  virtual int compile_writeObjAccess(map<int,parsed_object*>&,parsed_object*) = 0;
+  virtual int compile_writeObjAccess(map<int,parsed_object*>&,parsed_object*, bool treatUninitAs0) = 0;
   virtual int compile_writeFontInfo(EnigmaStruct* es) = 0;
   virtual int compile_writeRoomData(EnigmaStruct* es,parsed_object *EGMglobal,int mode) = 0;
   virtual int compile_writeShaderData(EnigmaStruct* es,parsed_object *EGMglobal) = 0;
