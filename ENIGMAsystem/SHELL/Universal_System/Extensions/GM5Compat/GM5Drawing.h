@@ -32,6 +32,8 @@
 #include "Universal_System/var4.h"
 #include "Universal_System/scalar.h"
 
+#include "bind.h"
+
 
 namespace enigma_user
 {
@@ -41,8 +43,8 @@ namespace enigma_user
 //BUG: Invalid statements such as "brush_color = dafadf;" seem to be valid.
 extern gs_scalar pen_size;
 extern int brush_style;
-extern int brush_color;
 extern int pen_color;
+extern enigma::BindPropRW brush_color; //We choose to map the brush color to "draw_get/set_color()".
 
 
 //Brush styles.

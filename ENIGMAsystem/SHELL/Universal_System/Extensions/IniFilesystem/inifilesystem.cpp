@@ -1,292 +1,216 @@
-/**
- *  @file ini-filesystem.cpp
- *  @section License
- *
- *      Copyright (C) 2013 Daniel Hrabovcak
- *
- *      This file is a part of the ENIGMA Development Environment.
- *
- *      This program is free software: you can redistribute it and/or modify
- *      it under the terms of the GNU General Public License as published by
- *      the Free Software Foundation, either version 3 of the License, or
- *      (at your option) any later version.
- *
- *      This program is distributed in the hope that it will be useful,
- *      but WITHOUT ANY WARRANTY; without even the implied warranty of
- *      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *      GNU General Public License for more details.
- *
- *      You should have received a copy of the GNU General Public License
- *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
-**/
-#include <cstdio>
-#include <cstdlib>
+// 
+// Copyright (C) 2014 Seth N. Hetu
+// Copyright (C) 2013 Daniel Hrabovcak
+// 
+// This file is a part of the ENIGMA Development Environment.
+// 
+// ENIGMA is free software: you can redistribute it and/or modify it under the
+// terms of the GNU General Public License as published by the Free Software
+// Foundation, version 3 of the license or any later version.
+// 
+// This application and its source code is distributed AS-IS, WITHOUT ANY
+// WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+// FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+// details.
+// 
+// You should have received a copy of the GNU General Public License along
+// with this code. If not, see <http://www.gnu.org/licenses/>
+//
+
+#include <fstream>
+#include <sstream>
+
 #include "Platforms/General/PFini.h"
 #include "Universal_System/estring.h"
-#include "Widget_Systems/widgets_mandatory.h"
+#include "Widget_Systems/widgets_mandatory.h" //show_error()
 
-#ifndef ENIGMA_INI_BUFFER_SIZE
-#define ENIGMA_INI_BUFFER_SIZE 512
-#endif
+#include "IniFileIndex.h"
 
-static int section;
-static FILE *enigma_ini_file;
-static char buff[ENIGMA_INI_BUFFER_SIZE];
+
+namespace {
+
+//The "name" we give to files loaded from strings. Must be an invalid name for a normal file.
+const std::string IniFromStringFilename = "<IniFromString>";
+
+//List of invalid characters on Windows, which is a superset of OSX and Linux's (much smaller) sets.
+//NOTE: At the moment, we only ban NULL; there might be cause to ban other characters later.
+//      Don't forget that an absolute path can be sent, so banning "/", "\", etc., won't work.
+const std::string InvalidFilenameChars = "\0";
+
+//The name of the currently-open file. Empty string means "no open file".
+std::string currIniFile;
+
+//Datastructure associated with the currently-open ini file, which is flushed on exit.
+enigma::IniFileIndex currIni;
+
+//Default comment character
+char commentChar = ';';
+
+} //End un-named namespace
+
 
 namespace enigma_user
 {
-	void ini_open(string filename)
+	void ini_set_comment_char(char ch=';')
 	{
-#ifdef DEBUG_MODE
-		if (enigma_ini_file != NULL)
-		{
-			show_error("An ini file is already opened.", true);
-			return;
-		}
-#endif
-		enigma_ini_file = fopen(filename.c_str(), "r+");
-		if (fgetc(enigma_ini_file) != '[')
-		{
-#ifdef DEBUG_MODE
-			show_error("File is not an ini file.", true);
-#endif
-			fclose(enigma_ini_file);
-			return;
-		}
-#ifdef DEBUG_MODE
-		if (ferror(enigma_ini_file))
-		{
-			show_error("Unable to open the indicated ini file.", true);
-		}
-#endif
+		commentChar = ch;
 	}
 
+	void ini_open(std::string filename)
+	{
+		//GM will silently fail to save anything if an invalidly-named file is selected. Since we flush the ini file on close, 
+		// we should try to filter out bad inis as early as possible (the final test will be in ini_close()).
+		if (filename.find_first_of(InvalidFilenameChars)!=std::string::npos) {
+			show_error("IniFileSystem - cannot open new ini file; filename contains invalid characters.", true);
+			return;
+		}
+
+		//Opening an ini file without closing the previous one will simply call ini_close() first.
+		if (!currIniFile.empty()) {
+			ini_close();
+		}
+
+		//Save it.
+		currIniFile = filename;
+
+		//If the file already exists, parse it.
+		//NOTE: Loading the file in its entirety is consistent with how GM handles inis.
+		std::ifstream infile(filename.c_str());
+		if (infile.good()) { //If the file isn't good, it might be because we are creating a new ini file, so it's not an error.
+			currIni.load(infile, commentChar);
+		}
+	}
+
+	void ini_open_from_string(std::string inistr) 
+	{
+		//Opening an ini file without closing the previous one will simply call ini_close() first.
+		if (!currIniFile.empty()) {
+			ini_close();
+		}
+
+		//Save it.
+		currIniFile = IniFromStringFilename;
+
+		//Parse it.
+		std::istringstream str(inistr);
+		currIni.load(str, commentChar);
+	}
+
+	std::string ini_full_file_text()
+	{
+		if (currIniFile.empty()) {
+			show_error("IniFileSystem - cannot get full ini text, as there is no ini file currently open.", false);
+			return "";
+		}
+
+		return currIni.toString();
+	}
+
+	//NOTE: In GM, ini_close() returns the entire ini file, but this is almost always a waste. 
+	//Use "ini_full_file_text()" if you really need to retrieve this.
 	void ini_close()
 	{
-#ifdef DEBUG_MODE
-		if (enigma_ini_file == NULL)
-		{
-			show_error("Cannot close an ini file before it is not open.", true);
-			return;
+		//Only act if we actually have an ini file opened.
+		if (!currIniFile.empty()) {
+			//Non-string-loaded inis are saved back to their original files.
+			if (!currIni.saveToFile(currIniFile)) {
+				show_error("IniFileSystem - could not save ini file to output; perhaps it's in a protected location?", false);
+			}
+
+			//Now reset.
+			currIniFile = "";
+			currIni.clear();
 		}
-#endif
-		fclose(enigma_ini_file);
-		enigma_ini_file = NULL;
 	}
 
-	/*void finsert(FILE *file, char *buffer, const size_t buffsize, const char *insert, const size_t size)
+	void ini_key_delete(std::string section, std::string key)
 	{
-#ifdef DEBUG_MODE
-		if (size > buffsize)
-		{
-			show_error("Ini buffer too small.");
-			return;
+		//This won't work if the file isn't open.
+		if (currIniFile.empty()) {
+			show_error("IniFileSystem - cannot delete key, as there is no ini file currently open.", true);
+		} else {
+			currIni.delKey(section, key);
 		}
-#endif
-		size_t pos = ftell(file);
-		fseek(file, 0, SEEK_END);
-		std::cout << "Size: " << ftell(file) << std::endl;
-		std::cout << "Ammount: " << ftell(file)-pos << std::endl;
-		/while(pos+buffsize > ftell(file));
-		{
-			fseek(file, -buffsize, SEEK_CUR);
-			fgets(buff, buffsize, file);
-			fwrite(buff, sizeof(char), buffsize, file);
-			fseek(file, -buffsize, SEEK_CUR);
-		}/
-		long amm = ftell(file)-pos;
-		std::cout << "Ammount: " << -amm << std::endl;
-		fseek(file, -amm, SEEK_CUR);
-		std::cout << "Current: " << ftell(file) << std::endl;
+	}
 
-		// fgets implementation without newline checking.
-		char *c = buffer;
-		for(; amm > 0; --amm)
-		{
-			(*c) = getc(file);
-			++c;
+
+	void ini_section_delete(std::string section)
+	{
+		//This won't work if the file isn't open.
+		if (currIniFile.empty()) {
+			show_error("IniFileSystem - cannot delete section, as there is no ini file currently open.", true);
+		} else {
+			currIni.delSection(section);
 		}
+	}
 
-		std::cout << "Whole: " << buff << std::endl;
-		std::cout << "Current: " << ftell(file) << std::endl;
-		fseek(file, -amm, SEEK_CUR);
-		//fseek(file, size, SEEK_CUR);
-		std::cout << "Current: " << ftell(file) << std::endl;
-		fwrite(buff, sizeof(char), amm, file);
-		fseek(file, -amm, SEEK_CUR);
 
-		//fwrite(insert, sizeof(char), size, file);
-	}*/
+	bool ini_key_exists(std::string section, std::string key)
+	{
+		//This won't work if the file isn't open.
+		if (currIniFile.empty()) {
+			show_error("IniFileSystem - cannot check key, as there is no ini file currently open.", true);
+			return false;
+		} else {
+			return currIni.keyExists(section, key);
+		}
+	}
+
+
+	bool ini_section_exists(std::string section)
+	{
+		//This won't work if the file isn't open.
+		if (currIniFile.empty()) {
+			show_error("IniFileSystem - cannot check section, as there is no ini file currently open.", true);
+			return false;
+		} else {
+			return currIni.sectionExists(section);
+		}
+	}
+
+
+	//TODO: GM writes floats (or maybe doubles); Enigma uses ints.
+	void ini_write_real(string section, string key, float value)
+	{
+		//GM will err out when trying to read/write an unopened ini file.
+		if (currIniFile.empty()) {
+			show_error("IniFileSystem - cannot write real, as there is no ini file currently open.", true);
+		} else {
+			currIni.write(section, key, value);
+		}
+	}	
 
 	void ini_write_string(string section, string key, string value)
 	{
-		//string str = "hello";
-		//finsert(enigma_ini_file, buff, ENIGMA_INI_BUFFER_SIZE, str.c_str(), str.size());
+		//GM will err out when trying to read/write an unopened ini file.
+		if (currIniFile.empty()) {
+			show_error("IniFileSystem - cannot write string, as there is no ini file currently open.", true);
+		} else {
+			currIni.write(section, key, value);
+		}
 	}
 
 	string ini_read_string(string section, string key, string def)
 	{
-		int cur, pos = ftell(enigma_ini_file);
-
-		string str;
-		str.reserve(section.size() > key.size() ? section.size() : key.size());
-
-		int c;
-
-		while(true)
-		{
-			cur = ftell(enigma_ini_file);
-			while ((c = fgetc(enigma_ini_file) != EOF) && char(c) != ']')
-			{
-				str.push_back(char(c));
-			}
-
-			// Whitespace and Windows carriage return fix.
-			while (char(fgetc(enigma_ini_file)) != '\n');
-
-			// Check if the section is correct.
-			if (str == section)
-			{
-				str.clear();
-				while(true)
-				{
-					while ((c = fgetc(enigma_ini_file) != EOF) && char(c) != '=')
-					{
-						str.push_back(char(c));
-					}
-
-					if (str == key)
-					{
-						str.clear();
-						while ((c = fgetc(enigma_ini_file) != EOF) && char(c) != '\n')
-						{
-							str.push_back(char(c));
-						}
-						fseek(enigma_ini_file, cur, SEEK_SET);
-						return str;
-					}
-
-					while (char(fgetc(enigma_ini_file)) != '\n');
-					if (char(fgetc(enigma_ini_file)) == '[')
-					{
-						// Section does not exist.
-						fseek(enigma_ini_file, cur, SEEK_SET);
-						return def;
-					}
-					str.clear();
-				}
-			}
-			str.clear();
-			while(true)
-			{
-				if (char(fgetc(enigma_ini_file)) == '\n')
-				{
-					if (char(fgetc(enigma_ini_file)) == '[')
-					{
-						// If we've looped through the whole file, it's not there.
-						if (ftell(enigma_ini_file) == pos)
-						{
-							return def;
-						}
-						break;
-					}
-
-				}
-				if (feof(enigma_ini_file))
-				{
-					// Start over if we have not found the section yet.
-					rewind(enigma_ini_file);
-					fgetc(enigma_ini_file);
-					if (pos == 1)
-					{
-						return def;
-					}
-					break;
-				}
-			}
+		//GM will err out when trying to read/write an unopened ini file.
+		if (currIniFile.empty()) {
+			show_error("IniFileSystem - cannot read string, as there is no ini file currently open.", true);
+			return def;
+		} else {
+			return currIni.read(section, key, def);
 		}
 	}
 	
-	int ini_read_real(string section, string key, int def)
+	//TODO: GM reads floats (or maybe doubles); Enigma uses ints.
+	float ini_read_real(string section, string key, float def)
 	{
-		int cur, pos = ftell(enigma_ini_file);
-
-		string str;
-		str.reserve(section.size() > key.size() ? section.size() : key.size());
-
-		int c;
-
-		while(true)
-		{
-			cur = ftell(enigma_ini_file);
-			while ((c = fgetc(enigma_ini_file) != EOF) && char(c) != ']')
-			{
-				str.push_back(char(c));
-			}
-
-			// Whitespace and Windows carriage return fix.
-			while ((c = fgetc(enigma_ini_file) != EOF) && char(c) != '\n')
-
-			// Check if the section is correct.
-			if (str == section)
-			{
-				str.clear();
-				while(true)
-				{
-					while ((c = fgetc(enigma_ini_file) != EOF) && char(c) != '=')
-					{
-						str.push_back(char(c));
-					}
-
-					if (str == key)
-					{
-						str.clear();
-						while ((c = fgetc(enigma_ini_file) != EOF) && char(c) != '\n')
-						{
-							str.push_back(char(c));
-						}
-						fseek(enigma_ini_file, cur, SEEK_SET);
-						return atoi(str.c_str());
-					}
-
-					while ((c = fgetc(enigma_ini_file) != EOF) && char(c) != '\n')
-					if (char(fgetc(enigma_ini_file)) == '[')
-					{
-						// Section does not exist.
-						fseek(enigma_ini_file, cur, SEEK_SET);
-						return def;
-					}
-					str.clear();
-				}
-			}
-			str.clear();
-			while(true)
-			{
-				if (char(fgetc(enigma_ini_file)) == '\n')
-				{
-					if (char(fgetc(enigma_ini_file)) == '[')
-					{
-						// If we've looped through the whole file, it's not there.
-						if (ftell(enigma_ini_file) == pos)
-						{
-							return def;
-						}
-						break;
-					}
-
-				}
-				if (feof(enigma_ini_file))
-				{
-					// Start over if we have not found the section yet.
-					rewind(enigma_ini_file);
-					fgetc(enigma_ini_file);
-					if (pos == 1)
-					{
-						return def;
-					}
-					break;
-				}
-			}
+		//GM will err out when trying to read/write an unopened ini file.
+		if (currIniFile.empty()) {
+			show_error("IniFileSystem - cannot read real, as there is no ini file currently open.", true);
+			return def;
+		} else {
+			return currIni.read(section, key, def);
 		}
 	}
 }
+

@@ -102,6 +102,7 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, i
 
     wto << "\n";
     wto << "namespace enigma\n{\n\n";
+    wto << "  extern std::map<int,inst_iter*> instance_deactivated_list;\n";
     wto << "  extern objectstruct** objectdata;\n";
       wto << "  struct object_locals: event_parent";
         for (unsigned i = 0; i < parsed_extensions.size(); i++)
@@ -406,7 +407,12 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, i
           //This is the actual call to remove the current instance from all linked records before destroying it.
           wto << "\n    void unlink()\n    {\n";
           wto << "      instance_iter_queue_for_destroy(ENOBJ_ITER_me); // Queue for delete while we're still valid\n";
-          wto << "      deactivate();\n    }\n\n    void deactivate()\n    {\n";
+          wto << "      if (enigma::instance_deactivated_list.erase(id)==0) {\n";
+          wto << "        //If it's not in the deactivated list, then it's active (so deactivate it).\n";
+          wto << "        deactivate();\n";
+          wto << "      }\n";
+          wto << "    }\n\n";
+          wto << "    void deactivate()\n    {\n";
           if (!setting::inherit_objects || !has_parent) { 
             wto << "      enigma::unlink_main(ENOBJ_ITER_me); // Remove this instance from the non-redundant, tree-structured list.\n";
             for (po_i her = i; her != parsed_objects.end(); her = parsed_objects.find(her->second->parent))
@@ -531,13 +537,14 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, i
 		parsed.push_back(i->first);
 		i++;
       }
-      wto << "\n  objectstruct objs[] = {\n  ";
+      wto << "\n  objectstruct objs[] = {\n  " <<std::fixed;
       int objcunt = 0, obmx = 0;
       for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++, objcunt++)
       {
         wto << "{" << i->second->sprite_index << "," << i->second->solid << "," << i->second->visible << "," << i->second->depth << "," << i->second->persistent << "," << i->second->mask_index << "," << i->second->parent << "," << i->second->id << "}, ";
         if (i->second->id >= obmx) obmx = i->second->id;
       }
+      wto.unsetf(ios_base::floatfield);
       wto << "  };\n";
       wto << "  int objectcount = " << objcunt << ";\n";
       wto << "  int obj_idmax = " << obmx+1 << ";\n";
@@ -554,6 +561,11 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, i
   wto.open((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_objectfunctionality.h").c_str(),ios_base::out);
     wto << license;
 
+    wto << endl << "#define log_xor || log_xor_helper() ||" << endl;
+    wto << "struct log_xor_helper { bool value; };" << endl;
+    wto << "template<typename LEFT> log_xor_helper operator ||(const LEFT &left, const log_xor_helper &xorh) { log_xor_helper nxor; nxor.value = (bool)left; return nxor; }" << endl;
+    wto << "template<typename RIGHT> bool operator ||(const log_xor_helper &xorh, const RIGHT &right) { return xorh.value ^ (bool)right; }" << endl << endl;
+    
     cout << "DBGMSG 2" << endl;
     // Export globalized scripts
     for (int i = 0; i < es->scriptCount; i++)
@@ -571,7 +583,21 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, i
         wto << "enigma::debug_scope $current_scope(\"script '" << es->scripts[i].name << "'\");\n";
       }
       parsed_event& upev = scr->pev_global?*scr->pev_global:scr->pev;
-      print_to_file(upev.code,upev.synt,upev.strc,upev.strs,2,wto);
+
+      //Super-hacky
+      std::string override_code = "";
+      std::string override_synt = "";
+      if (upev.code.find("with((self)){")==0 && upev.code.find("};")==upev.code.size()-2) {
+        override_code = upev.code.substr(13, upev.code.size()-13-2);
+        override_synt = upev.synt.substr(13, upev.synt.size()-13-2);
+      }
+      print_to_file(
+        override_code.empty() ? upev.code : override_code,
+        override_synt.empty() ? upev.synt : override_synt,
+        upev.strc,
+        upev.strs,
+        2,wto
+      );
       wto << "\n  return 0;\n}\n\n";
     }
 
