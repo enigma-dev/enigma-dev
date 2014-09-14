@@ -60,13 +60,16 @@
 					<Add option="-DDEBUG_MODE" />
 				</Compiler>
 				<Linker>
-					<Add library="GL" />
 					<Add library="z" />
-					<Add library="openal" />
-					<Add library="GLU" />
-					<Add library="alure" />
-					<Add library="dumb" />
+					<Add library="pthread" />
 					<Add library="X11" />
+					<Add library="GL" />
+					<Add library="GLU" />
+					<Add library="openal" />
+					<Add library="alure" />
+					<Add library="vorbisfile" />
+					<Add library="vorbis" />
+					<Add library="dumb" />
 				</Linker>
 			</Target>
 			<Target title="lin-profile">
@@ -162,6 +165,7 @@
 			<Add option="-Wno-narrowing" />
 			<Add option="-Wno-variadic-macros" />
 			<Add option="-Wno-vla" />
+			<Add option="-I$(home)/.enigma" />
 			<Add option="-DCODEBLOX" />
 			<Add directory="./" />
 		</Compiler>
@@ -178,6 +182,14 @@
 			<Option target="win-debug" />
 			<Option target="win-build" />
 		</Unit>
+		<Unit filename="Audio_Systems/OpenAL/ALadvanced.cpp" />
+		<Unit filename="Audio_Systems/OpenAL/ALbasic.cpp" />
+		<Unit filename="Audio_Systems/OpenAL/ALsystem.cpp" />
+		<Unit filename="Audio_Systems/OpenAL/ALsystem.h" />
+		<Unit filename="Audio_Systems/OpenAL/Info/audio_info.h" />
+		<Unit filename="Audio_Systems/OpenAL/SoundChannel.h" />
+		<Unit filename="Audio_Systems/OpenAL/SoundEmitter.h" />
+		<Unit filename="Audio_Systems/OpenAL/SoundResource.h" />
 		<Unit filename="Audio_Systems/OpenAL/as_advanced.h">
 			<Option target="win-debug" />
 			<Option target="win-build" />
@@ -187,28 +199,8 @@
 			<Option target="mac-debug" />
 			<Option target="mac-build" />
 		</Unit>
-		<Unit filename="Audio_Systems/OpenAL/as_basic.cpp">
-			<Option target="lin-debug" />
-			<Option target="lin-profile" />
-			<Option target="lin-build" />
-			<Option target="mac-debug" />
-			<Option target="mac-build" />
-			<Option target="iphone-debug" />
-			<Option target="iphone-build" />
-			<Option target="wii-build" />
-		</Unit>
 		<Unit filename="Audio_Systems/OpenAL/as_basic.h" />
 		<Unit filename="Audio_Systems/OpenAL/include.h" />
-		<Unit filename="Audio_Systems/OpenAL/wrap_oal.cpp">
-			<Option target="lin-debug" />
-			<Option target="lin-profile" />
-			<Option target="lin-build" />
-			<Option target="mac-debug" />
-			<Option target="mac-build" />
-			<Option target="iphone-debug" />
-			<Option target="iphone-build" />
-			<Option target="wii-build" />
-		</Unit>
 		<Unit filename="Audio_Systems/OpenAL/wrap_oal.h" />
 		<Unit filename="Audio_Systems/audio_mandatory.h" />
 		<Unit filename="Bridges/xlib-OpenGL1/glxew.h">
@@ -221,16 +213,27 @@
 			<Option target="lin-profile" />
 			<Option target="lin-build" />
 		</Unit>
+		<Unit filename="Collision_Systems/BBox/BBOXfuncs.cpp" />
+		<Unit filename="Collision_Systems/BBox/BBOXimpl.cpp" />
+		<Unit filename="Collision_Systems/BBox/BBOXimpl.h" />
+		<Unit filename="Collision_Systems/BBox/BBOXutil.cpp" />
+		<Unit filename="Collision_Systems/BBox/BBOXutil.h" />
 		<Unit filename="Collision_Systems/BBox/Info/collision_info.h" />
-		<Unit filename="Collision_Systems/BBox/coll_funcs.cpp" />
 		<Unit filename="Collision_Systems/BBox/coll_funcs.h" />
-		<Unit filename="Collision_Systems/BBox/coll_impl.cpp" />
 		<Unit filename="Collision_Systems/BBox/coll_impl.h" />
-		<Unit filename="Collision_Systems/BBox/coll_util.cpp" />
 		<Unit filename="Collision_Systems/BBox/coll_util.h" />
 		<Unit filename="Collision_Systems/BBox/include.h" />
 		<Unit filename="Collision_Systems/BBox/placeholderlinks.cpp" />
 		<Unit filename="Collision_Systems/collision_mandatory.h" />
+		<Unit filename="Graphics_Systems/General/GLSurfaceStruct.h">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+			<Option target="lin-debug" />
+			<Option target="lin-profile" />
+			<Option target="lin-build" />
+			<Option target="mac-debug" />
+			<Option target="mac-build" />
+		</Unit>
 		<Unit filename="Graphics_Systems/General/GLsprite.h">
 			<Option target="win-debug" />
 			<Option target="win-build" />
@@ -240,16 +243,339 @@
 			<Option target="mac-debug" />
 			<Option target="mac-build" />
 		</Unit>
+		<Unit filename="Graphics_Systems/General/GLtilestruct.h">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+			<Option target="lin-debug" />
+			<Option target="lin-profile" />
+			<Option target="lin-build" />
+			<Option target="mac-debug" />
+			<Option target="mac-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/General/GSbackground.cpp">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+			<Option target="lin-debug" />
+			<Option target="lin-profile" />
+			<Option target="lin-build" />
+			<Option target="mac-debug" />
+			<Option target="mac-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/General/GSbackground.h">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+			<Option target="lin-debug" />
+			<Option target="lin-profile" />
+			<Option target="lin-build" />
+			<Option target="mac-debug" />
+			<Option target="mac-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/General/GSblend.h">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+			<Option target="lin-debug" />
+			<Option target="lin-profile" />
+			<Option target="lin-build" />
+			<Option target="mac-debug" />
+			<Option target="mac-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/General/GScolors.h">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+			<Option target="lin-debug" />
+			<Option target="lin-profile" />
+			<Option target="lin-build" />
+			<Option target="mac-debug" />
+			<Option target="mac-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/General/GScurves.cpp">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+			<Option target="lin-debug" />
+			<Option target="lin-profile" />
+			<Option target="lin-build" />
+			<Option target="mac-debug" />
+			<Option target="mac-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/General/GScurves.h">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+			<Option target="lin-debug" />
+			<Option target="lin-profile" />
+			<Option target="lin-build" />
+			<Option target="mac-debug" />
+			<Option target="mac-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/General/GSd3d.h">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+			<Option target="lin-debug" />
+			<Option target="lin-profile" />
+			<Option target="lin-build" />
+			<Option target="mac-debug" />
+			<Option target="mac-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/General/GSenable.h">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+			<Option target="lin-debug" />
+			<Option target="lin-profile" />
+			<Option target="lin-build" />
+			<Option target="mac-debug" />
+			<Option target="mac-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/General/GSfont.cpp">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+			<Option target="lin-debug" />
+			<Option target="lin-profile" />
+			<Option target="lin-build" />
+			<Option target="mac-debug" />
+			<Option target="mac-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/General/GSfont.h">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+			<Option target="lin-debug" />
+			<Option target="lin-profile" />
+			<Option target="lin-build" />
+			<Option target="mac-debug" />
+			<Option target="mac-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/General/GSmath.cpp">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+			<Option target="lin-debug" />
+			<Option target="lin-profile" />
+			<Option target="lin-build" />
+			<Option target="mac-debug" />
+			<Option target="mac-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/General/GSmath.h">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+			<Option target="lin-debug" />
+			<Option target="lin-profile" />
+			<Option target="lin-build" />
+			<Option target="mac-debug" />
+			<Option target="mac-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/General/GSmatrix.h">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+			<Option target="lin-debug" />
+			<Option target="lin-profile" />
+			<Option target="lin-build" />
+			<Option target="mac-debug" />
+			<Option target="mac-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/General/GSmodel.h">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+			<Option target="lin-debug" />
+			<Option target="lin-profile" />
+			<Option target="lin-build" />
+			<Option target="mac-debug" />
+			<Option target="mac-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/General/GSprimitives.h">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+			<Option target="lin-debug" />
+			<Option target="lin-profile" />
+			<Option target="lin-build" />
+			<Option target="mac-debug" />
+			<Option target="mac-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/General/GSscreen.h">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+			<Option target="lin-debug" />
+			<Option target="lin-profile" />
+			<Option target="lin-build" />
+			<Option target="mac-debug" />
+			<Option target="mac-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/General/GSsprite.cpp">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+			<Option target="lin-debug" />
+			<Option target="lin-profile" />
+			<Option target="lin-build" />
+			<Option target="mac-debug" />
+			<Option target="mac-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/General/GSsprite.h">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+			<Option target="lin-debug" />
+			<Option target="lin-profile" />
+			<Option target="lin-build" />
+			<Option target="mac-debug" />
+			<Option target="mac-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/General/GSstdraw.cpp">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+			<Option target="lin-debug" />
+			<Option target="lin-profile" />
+			<Option target="lin-build" />
+			<Option target="mac-debug" />
+			<Option target="mac-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/General/GSstdraw.h">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+			<Option target="lin-debug" />
+			<Option target="lin-profile" />
+			<Option target="lin-build" />
+			<Option target="mac-debug" />
+			<Option target="mac-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/General/GSsurface.cpp">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+			<Option target="lin-debug" />
+			<Option target="lin-profile" />
+			<Option target="lin-build" />
+			<Option target="mac-debug" />
+			<Option target="mac-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/General/GSsurface.h">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+			<Option target="lin-debug" />
+			<Option target="lin-profile" />
+			<Option target="lin-build" />
+			<Option target="mac-debug" />
+			<Option target="mac-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/General/GStextures.h">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+			<Option target="lin-debug" />
+			<Option target="lin-profile" />
+			<Option target="lin-build" />
+			<Option target="mac-debug" />
+			<Option target="mac-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/General/GStiles.h">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+			<Option target="lin-debug" />
+			<Option target="lin-profile" />
+			<Option target="lin-build" />
+			<Option target="mac-debug" />
+			<Option target="mac-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/General/GSvertex.h">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+			<Option target="lin-debug" />
+			<Option target="lin-profile" />
+			<Option target="lin-build" />
+			<Option target="mac-debug" />
+			<Option target="mac-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/General/OpenGLHeaders.h">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+			<Option target="lin-debug" />
+			<Option target="lin-profile" />
+			<Option target="lin-build" />
+			<Option target="mac-debug" />
+			<Option target="mac-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/General/actions.h">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+			<Option target="lin-debug" />
+			<Option target="lin-profile" />
+			<Option target="lin-build" />
+			<Option target="mac-debug" />
+			<Option target="mac-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/General/glew.c">
+			<Option compilerVar="CC" />
+			<Option target="win-debug" />
+			<Option target="win-build" />
+			<Option target="lin-debug" />
+			<Option target="lin-profile" />
+			<Option target="lin-build" />
+			<Option target="mac-debug" />
+			<Option target="mac-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/General/glew.h">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+			<Option target="lin-debug" />
+			<Option target="lin-profile" />
+			<Option target="lin-build" />
+			<Option target="mac-debug" />
+			<Option target="mac-build" />
+		</Unit>
 		<Unit filename="Graphics_Systems/OpenGL1/EGMenable.h" />
+		<Unit filename="Graphics_Systems/OpenGL1/GLModelStruct.h">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+			<Option target="lin-debug" />
+			<Option target="lin-profile" />
+			<Option target="lin-build" />
+			<Option target="mac-debug" />
+			<Option target="mac-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGL1/GLSLshader.h">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+			<Option target="lin-debug" />
+			<Option target="lin-profile" />
+			<Option target="lin-build" />
+			<Option target="mac-debug" />
+			<Option target="mac-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGL1/GLSamplerState.h">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+			<Option target="lin-debug" />
+			<Option target="lin-profile" />
+			<Option target="lin-build" />
+			<Option target="mac-debug" />
+			<Option target="mac-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGL1/GLTextureStruct.cpp">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+			<Option target="lin-debug" />
+			<Option target="lin-profile" />
+			<Option target="lin-build" />
+			<Option target="mac-debug" />
+			<Option target="mac-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGL1/GLTextureStruct.h">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+			<Option target="lin-debug" />
+			<Option target="lin-profile" />
+			<Option target="lin-build" />
+			<Option target="mac-debug" />
+			<Option target="mac-build" />
+		</Unit>
 		<Unit filename="Graphics_Systems/OpenGL1/GLbackground.cpp" />
 		<Unit filename="Graphics_Systems/OpenGL1/GLblend.cpp" />
 		<Unit filename="Graphics_Systems/OpenGL1/GLcolors.cpp" />
-		<Unit filename="Graphics_Systems/OpenGL1/GLcurves.cpp" />
 		<Unit filename="Graphics_Systems/OpenGL1/GLd3d.cpp" />
 		<Unit filename="Graphics_Systems/OpenGL1/GLd3d.h" />
 		<Unit filename="Graphics_Systems/OpenGL1/GLenable.cpp" />
 		<Unit filename="Graphics_Systems/OpenGL1/GLenable.h" />
-		<Unit filename="Graphics_Systems/OpenGL1/GLfont.cpp" />
+		<Unit filename="Graphics_Systems/OpenGL1/GLmatrix.cpp">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+			<Option target="lin-debug" />
+			<Option target="lin-profile" />
+			<Option target="lin-build" />
+			<Option target="mac-debug" />
+			<Option target="mac-build" />
+		</Unit>
 		<Unit filename="Graphics_Systems/OpenGL1/GLmesh.h" />
 		<Unit filename="Graphics_Systems/OpenGL1/GLmiscextra.h" />
 		<Unit filename="Graphics_Systems/OpenGL1/GLmodel.cpp">
@@ -276,6 +602,24 @@
 		<Unit filename="Graphics_Systems/OpenGL1/GLprofiler.h" />
 		<Unit filename="Graphics_Systems/OpenGL1/GLscreen.cpp" />
 		<Unit filename="Graphics_Systems/OpenGL1/GLscreen.h" />
+		<Unit filename="Graphics_Systems/OpenGL1/GLshader.cpp">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+			<Option target="lin-debug" />
+			<Option target="lin-profile" />
+			<Option target="lin-build" />
+			<Option target="mac-debug" />
+			<Option target="mac-build" />
+		</Unit>
+		<Unit filename="Graphics_Systems/OpenGL1/GLshader.h">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+			<Option target="lin-debug" />
+			<Option target="lin-profile" />
+			<Option target="lin-build" />
+			<Option target="mac-debug" />
+			<Option target="mac-build" />
+		</Unit>
 		<Unit filename="Graphics_Systems/OpenGL1/GLshapes.cpp" />
 		<Unit filename="Graphics_Systems/OpenGL1/GLshapes.h" />
 		<Unit filename="Graphics_Systems/OpenGL1/GLsprite.cpp" />
@@ -284,18 +628,20 @@
 		<Unit filename="Graphics_Systems/OpenGL1/GLsurface.cpp" />
 		<Unit filename="Graphics_Systems/OpenGL1/GLtextures.cpp" />
 		<Unit filename="Graphics_Systems/OpenGL1/GLtiles.cpp" />
+		<Unit filename="Graphics_Systems/OpenGL1/GLvertex.cpp">
+			<Option target="win-debug" />
+			<Option target="win-build" />
+			<Option target="lin-debug" />
+			<Option target="lin-profile" />
+			<Option target="lin-build" />
+			<Option target="mac-debug" />
+			<Option target="mac-build" />
+		</Unit>
 		<Unit filename="Graphics_Systems/OpenGL1/Info/graphics_info.h" />
 		<Unit filename="Graphics_Systems/OpenGL1/OPENGLStd.cpp" />
 		<Unit filename="Graphics_Systems/OpenGL1/OPENGLStd.h" />
-		<Unit filename="Graphics_Systems/OpenGL1/glew.c">
-			<Option compilerVar="CC" />
-		</Unit>
 		<Unit filename="Graphics_Systems/OpenGL1/include.h" />
 		<Unit filename="Graphics_Systems/OpenGLES/EGMenable.h">
-			<Option target="iphone-debug" />
-			<Option target="iphone-build" />
-		</Unit>
-		<Unit filename="Graphics_Systems/OpenGLES/GSblend.cpp">
 			<Option target="iphone-debug" />
 			<Option target="iphone-build" />
 		</Unit>
@@ -303,15 +649,7 @@
 			<Option target="iphone-debug" />
 			<Option target="iphone-build" />
 		</Unit>
-		<Unit filename="Graphics_Systems/OpenGLES/GScolors.cpp">
-			<Option target="iphone-debug" />
-			<Option target="iphone-build" />
-		</Unit>
 		<Unit filename="Graphics_Systems/OpenGLES/GScolors.h">
-			<Option target="iphone-debug" />
-			<Option target="iphone-build" />
-		</Unit>
-		<Unit filename="Graphics_Systems/OpenGLES/GSenable.cpp">
 			<Option target="iphone-debug" />
 			<Option target="iphone-build" />
 		</Unit>
@@ -319,15 +657,7 @@
 			<Option target="iphone-debug" />
 			<Option target="iphone-build" />
 		</Unit>
-		<Unit filename="Graphics_Systems/OpenGLES/GSmiscextra.cpp">
-			<Option target="iphone-debug" />
-			<Option target="iphone-build" />
-		</Unit>
 		<Unit filename="Graphics_Systems/OpenGLES/GSmiscextra.h">
-			<Option target="iphone-debug" />
-			<Option target="iphone-build" />
-		</Unit>
-		<Unit filename="Graphics_Systems/OpenGLES/GSprmtvs.cpp">
 			<Option target="iphone-debug" />
 			<Option target="iphone-build" />
 		</Unit>
@@ -335,15 +665,7 @@
 			<Option target="iphone-debug" />
 			<Option target="iphone-build" />
 		</Unit>
-		<Unit filename="Graphics_Systems/OpenGLES/GSscreen.cpp">
-			<Option target="iphone-debug" />
-			<Option target="iphone-build" />
-		</Unit>
 		<Unit filename="Graphics_Systems/OpenGLES/GSscreen.h">
-			<Option target="iphone-debug" />
-			<Option target="iphone-build" />
-		</Unit>
-		<Unit filename="Graphics_Systems/OpenGLES/GSsprite.cpp">
 			<Option target="iphone-debug" />
 			<Option target="iphone-build" />
 		</Unit>
@@ -351,15 +673,7 @@
 			<Option target="iphone-debug" />
 			<Option target="iphone-build" />
 		</Unit>
-		<Unit filename="Graphics_Systems/OpenGLES/GSspriteadd.cpp">
-			<Option target="iphone-debug" />
-			<Option target="iphone-build" />
-		</Unit>
 		<Unit filename="Graphics_Systems/OpenGLES/GSspriteadd.h">
-			<Option target="iphone-debug" />
-			<Option target="iphone-build" />
-		</Unit>
-		<Unit filename="Graphics_Systems/OpenGLES/GSstdraw.cpp">
 			<Option target="iphone-debug" />
 			<Option target="iphone-build" />
 		</Unit>
@@ -367,15 +681,7 @@
 			<Option target="iphone-debug" />
 			<Option target="iphone-build" />
 		</Unit>
-		<Unit filename="Graphics_Systems/OpenGLES/GSsurface.cpp">
-			<Option target="iphone-debug" />
-			<Option target="iphone-build" />
-		</Unit>
 		<Unit filename="Graphics_Systems/OpenGLES/GSsurface.h">
-			<Option target="iphone-debug" />
-			<Option target="iphone-build" />
-		</Unit>
-		<Unit filename="Graphics_Systems/OpenGLES/GStextures.cpp">
 			<Option target="iphone-debug" />
 			<Option target="iphone-build" />
 		</Unit>
@@ -383,15 +689,7 @@
 			<Option target="iphone-debug" />
 			<Option target="iphone-build" />
 		</Unit>
-		<Unit filename="Graphics_Systems/OpenGLES/OPENGLStd.cpp">
-			<Option target="iphone-debug" />
-			<Option target="iphone-build" />
-		</Unit>
 		<Unit filename="Graphics_Systems/OpenGLES/OPENGLStd.h">
-			<Option target="iphone-debug" />
-			<Option target="iphone-build" />
-		</Unit>
-		<Unit filename="Graphics_Systems/OpenGLES/graphics_object.cpp">
 			<Option target="iphone-debug" />
 			<Option target="iphone-build" />
 		</Unit>
@@ -458,9 +756,15 @@
 			<Option target="win-build" />
 		</Unit>
 		<Unit filename="Platforms/platforms_mandatory.h" />
+		<Unit filename="Platforms/xlib/Info/platform_info.h">
+			<Option target="lin-debug" />
+			<Option target="lin-profile" />
+			<Option target="lin-build" />
+		</Unit>
 		<Unit filename="Platforms/xlib/LINUXjoystick.cpp">
 			<Option target="lin-debug" />
 			<Option target="lin-profile" />
+			<Option target="lin-build" />
 		</Unit>
 		<Unit filename="Platforms/xlib/LINUXjoystick.h">
 			<Option target="win-build" />
@@ -473,16 +777,10 @@
 			<Option target="iphone-build" />
 			<Option target="wii-build" />
 		</Unit>
-		<Unit filename="Platforms/xlib/XLIBdialog.cpp">
-			<Option target="win-build" />
+		<Unit filename="Platforms/xlib/XLIBfilemanip.cpp">
 			<Option target="lin-debug" />
 			<Option target="lin-profile" />
 			<Option target="lin-build" />
-			<Option target="mac-debug" />
-			<Option target="mac-build" />
-			<Option target="iphone-debug" />
-			<Option target="iphone-build" />
-			<Option target="wii-build" />
 		</Unit>
 		<Unit filename="Platforms/xlib/XLIBmain.cpp">
 			<Option target="win-build" />
@@ -506,16 +804,10 @@
 			<Option target="iphone-build" />
 			<Option target="wii-build" />
 		</Unit>
-		<Unit filename="Platforms/xlib/XLIBthreads.cpp">
-			<Option target="win-build" />
+		<Unit filename="Platforms/xlib/XLIBsystem.cpp">
 			<Option target="lin-debug" />
 			<Option target="lin-profile" />
 			<Option target="lin-build" />
-			<Option target="mac-debug" />
-			<Option target="mac-build" />
-			<Option target="iphone-debug" />
-			<Option target="iphone-build" />
-			<Option target="wii-build" />
 		</Unit>
 		<Unit filename="Platforms/xlib/XLIBthreads.h">
 			<Option target="win-build" />
@@ -551,17 +843,6 @@
 			<Option target="iphone-build" />
 			<Option target="wii-build" />
 		</Unit>
-		<Unit filename="Platforms/xlib/file_manip.cpp">
-			<Option target="win-build" />
-			<Option target="lin-debug" />
-			<Option target="lin-profile" />
-			<Option target="lin-build" />
-			<Option target="mac-debug" />
-			<Option target="mac-build" />
-			<Option target="iphone-debug" />
-			<Option target="iphone-build" />
-			<Option target="wii-build" />
-		</Unit>
 		<Unit filename="Platforms/xlib/file_manip.h">
 			<Option target="win-build" />
 			<Option target="lin-debug" />
@@ -584,22 +865,6 @@
 			<Option target="iphone-build" />
 			<Option target="wii-build" />
 		</Unit>
-		<Unit filename="Preprocessor_Environment_Editable/GAME_SETTINGS.h" />
-		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_events.h" />
-		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_evparent.h" />
-		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_globals.h" />
-		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_inherited_locals.h" />
-		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_modesenabled.h" />
-		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h" />
-		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_objectaccess.h" />
-		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_objectdeclarations.h" />
-		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_objectfunctionality.h" />
-		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_resourcenames.h" />
-		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_timelines.h" />
-		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_roomarrays.h" />
-		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_roomcreates.h" />
-		<Unit filename="Preprocessor_Environment_Editable/IDE_EDIT_whitespace.h" />
-		<Unit filename="Preprocessor_Environment_Editable/LIBINCLUDE.h" />
 		<Unit filename="SHELLmain.cpp" />
 		<Unit filename="Universal_System/CallbackArrays.cpp" />
 		<Unit filename="Universal_System/CallbackArrays.h" />
@@ -609,19 +874,14 @@
 		<Unit filename="Universal_System/Extensions/Alarms/implement.h" />
 		<Unit filename="Universal_System/Extensions/Alarms/include.h" />
 		<Unit filename="Universal_System/Extensions/Box2D/B2Dfunctions.h" />
-		<Unit filename="Universal_System/Extensions/Box2D/B2Dinstances.h" />
 		<Unit filename="Universal_System/Extensions/Box2D/B2Djoints.h" />
-		<Unit filename="Universal_System/Extensions/Box2D/implement.h" />
 		<Unit filename="Universal_System/Extensions/Box2D/include.h" />
 		<Unit filename="Universal_System/Extensions/DataStructures/data_structures.cpp" />
-		<Unit filename="Universal_System/Extensions/DataStructures/implement.h" />
 		<Unit filename="Universal_System/Extensions/DataStructures/include.h" />
 		<Unit filename="Universal_System/Extensions/DateTime/date_time.cpp" />
-		<Unit filename="Universal_System/Extensions/DateTime/implement.h" />
 		<Unit filename="Universal_System/Extensions/DateTime/include.h" />
 		<Unit filename="Universal_System/Extensions/GME/include.h" />
 		<Unit filename="Universal_System/Extensions/MotionPlanning/actions.h" />
-		<Unit filename="Universal_System/Extensions/MotionPlanning/implement.h" />
 		<Unit filename="Universal_System/Extensions/MotionPlanning/include.h" />
 		<Unit filename="Universal_System/Extensions/MotionPlanning/motion_planning.cpp" />
 		<Unit filename="Universal_System/Extensions/MotionPlanning/motion_planning.h" />
@@ -666,7 +926,6 @@
 		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_type.h" />
 		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_updatedraw.cpp" />
 		<Unit filename="Universal_System/Extensions/ParticleSystems/PS_particle_updatedraw.h" />
-		<Unit filename="Universal_System/Extensions/ParticleSystems/implement.h" />
 		<Unit filename="Universal_System/Extensions/ParticleSystems/include.h" />
 		<Unit filename="Universal_System/Extensions/Paths/actions.h" />
 		<Unit filename="Universal_System/Extensions/Paths/implement.h" />
@@ -679,26 +938,27 @@
 		<Unit filename="Universal_System/Extensions/StudioPhysics/SB2Dfunctions.h" />
 		<Unit filename="Universal_System/Extensions/StudioPhysics/SB2Dinstances.h" />
 		<Unit filename="Universal_System/Extensions/StudioPhysics/SB2Djoints.h" />
-		<Unit filename="Universal_System/Extensions/StudioPhysics/implement.h" />
 		<Unit filename="Universal_System/Extensions/StudioPhysics/include.h" />
 		<Unit filename="Universal_System/Extensions/Timelines/implement.h" />
 		<Unit filename="Universal_System/Extensions/Timelines/include.h" />
 		<Unit filename="Universal_System/Extensions/Timelines/timelines.cpp" />
-		<Unit filename="Universal_System/Extensions/recast.h" />
 		<Unit filename="Universal_System/GAME_GLOBALS.h" />
-		<Unit filename="Universal_System/IMGloading.cpp" />
 		<Unit filename="Universal_System/IMGloading.h" />
 		<Unit filename="Universal_System/Makefile" />
 		<Unit filename="Universal_System/actions.h" />
 		<Unit filename="Universal_System/backgroundinit.cpp" />
 		<Unit filename="Universal_System/backgroundstruct.cpp" />
 		<Unit filename="Universal_System/backgroundstruct.h" />
+		<Unit filename="Universal_System/bufferstruct.cpp" />
+		<Unit filename="Universal_System/bufferstruct.h" />
 		<Unit filename="Universal_System/callbacks_events.cpp" />
 		<Unit filename="Universal_System/callbacks_events.h" />
 		<Unit filename="Universal_System/collisions_object.cpp" />
 		<Unit filename="Universal_System/collisions_object.h" />
 		<Unit filename="Universal_System/darray.cpp" />
 		<Unit filename="Universal_System/darray.h" />
+		<Unit filename="Universal_System/debugscope.cpp" />
+		<Unit filename="Universal_System/debugscope.h" />
 		<Unit filename="Universal_System/depth_draw.cpp" />
 		<Unit filename="Universal_System/depth_draw.h" />
 		<Unit filename="Universal_System/dynamic_args.cpp" />
@@ -714,10 +974,10 @@
 		<Unit filename="Universal_System/globalupdate.h" />
 		<Unit filename="Universal_System/graphics_object.cpp" />
 		<Unit filename="Universal_System/graphics_object.h" />
-		<Unit filename="Universal_System/timelines_object.cpp" />
-		<Unit filename="Universal_System/timelines_object.h" />
 		<Unit filename="Universal_System/highscore_functions.cpp" />
 		<Unit filename="Universal_System/highscore_functions.h" />
+		<Unit filename="Universal_System/image_formats.cpp" />
+		<Unit filename="Universal_System/image_formats.h" />
 		<Unit filename="Universal_System/instance.cpp" />
 		<Unit filename="Universal_System/instance.h" />
 		<Unit filename="Universal_System/instance/GLOBAL_GAME_SETTINGS.h" />
@@ -765,6 +1025,8 @@
 		<Unit filename="Universal_System/roomsystem.cpp" />
 		<Unit filename="Universal_System/roomsystem.h" />
 		<Unit filename="Universal_System/scalar.h" />
+		<Unit filename="Universal_System/shaderstruct.cpp" />
+		<Unit filename="Universal_System/shaderstruct.h" />
 		<Unit filename="Universal_System/simplecollisions.h" />
 		<Unit filename="Universal_System/soundinit.cpp" />
 		<Unit filename="Universal_System/spriteinit.cpp" />
@@ -774,6 +1036,8 @@
 		<Unit filename="Universal_System/syntax_quirks.h" />
 		<Unit filename="Universal_System/terminal_io.cpp" />
 		<Unit filename="Universal_System/terminal_io.h" />
+		<Unit filename="Universal_System/timelines_object.cpp" />
+		<Unit filename="Universal_System/timelines_object.h" />
 		<Unit filename="Universal_System/transform_object.cpp" />
 		<Unit filename="Universal_System/transform_object.h" />
 		<Unit filename="Universal_System/var4.cpp" />
