@@ -10,4 +10,3 @@ Icon: json.png
 
 Depends: DataStructures
 Dependencies: None
-Implement: extension_json

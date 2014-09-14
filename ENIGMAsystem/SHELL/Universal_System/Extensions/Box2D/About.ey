@@ -10,5 +10,5 @@ Icon: b2dlogo.png
 
 Depends: None
 Dependencies: None
-Implement: extension_box2dphysics
+Implement:
 
