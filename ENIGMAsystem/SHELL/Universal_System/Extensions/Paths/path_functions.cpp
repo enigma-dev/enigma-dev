@@ -64,11 +64,19 @@ void path_start(unsigned pathid, cs_scalar speed, unsigned endaction, bool absol
     inst_paths->path_speed = speed;
     inst_paths->path_endaction = endaction;
 
-    if (absolute)
-    {
-        const double x1 = path_get_x(inst_paths->path_index, inst_paths->path_position), y1 = path_get_y(inst_paths->path_index, inst_paths->path_position);
-        inst->x = x1;
-        inst->y = y1;
+    cs_scalar sx, sy;
+    path_getXY_scaled(enigma::pathstructarray[inst_paths->path_index], sx, sy, 0, inst_paths->path_scale);
+
+    inst_paths->path_position = 0;
+
+    if (absolute) {
+      inst_paths->path_xstart = 0;
+      inst_paths->path_ystart = 0;
+      inst->x = sx;
+      inst->y = sy;
+    } else {
+      inst_paths->path_xstart = inst->x - sx;
+      inst_paths->path_ystart = inst->y - sy;
     }
 }
 
@@ -99,12 +107,60 @@ void path_set_speed(cs_scalar speed, bool relative)
 
 bool path_update()
 {
-    enigma::extension_path* const inst_paths = enigma::extension_cast::as_extension_path(enigma::instance_event_iterator->inst);
+  enigma::object_planar*  const inst = (enigma::object_planar*)enigma::instance_event_iterator->inst;
+  enigma::extension_path* const inst_paths = enigma::extension_cast::as_extension_path(inst);
 
-    if (inst_paths->path_index == -1 || fzero(inst_paths->path_speed))
+  if (size_t(inst_paths->path_index) >= enigma::path_idmax || fzero(inst_paths->path_speed))
+      return false;
+
+  enigma::path *path = enigma::pathstructarray[inst_paths->path_index];
+  if (!path)
+    return false;
+  
+  bool at_end = false;
+  cs_scalar pstep = inst_paths->path_speed / path->total_length;
+  if (!inst_paths->path_orientation) {
+    inst_paths->path_positionprevious = inst_paths->path_position;
+    inst_paths->path_position += pstep;
+    if ((at_end = inst_paths->path_position >= 1)) {
+      inst_paths->path_position = 1;
+    }
+  } else {
+    inst_paths->path_positionprevious = inst_paths->path_position;
+    inst_paths->path_position -= pstep;
+    if ((at_end = inst_paths->path_position <= 0)) {
+      inst_paths->path_position = 0;
+    }
+  }
+  
+  cs_scalar ax, ay;
+  path_getXY_scaled(path, ax, ay, inst_paths->path_position, inst_paths->path_scale);
+  inst->x = inst_paths->path_xstart + ax;
+  inst->y = inst_paths->path_ystart + ay;
+  
+  if (at_end) {
+    switch (inst_paths->path_endaction) {
+      case 0: // Stop
+          inst_paths->path_index = -1;
         return false;
-
-    return true;
+      case 1: // Restart
+          inst_paths->path_position = 0;
+        break;
+      case 2: { // Continue
+          cs_scalar sx, sy;
+          path_getXY_scaled(path, sx, sy, 0, inst_paths->path_scale);
+          inst_paths->path_xstart = inst->x - sx;
+          inst_paths->path_ystart = inst->y - sy;
+          inst_paths->path_position = 0;
+        break;
+      }
+      case 3: // Reverse
+          inst_paths->path_orientation ^= true;
+        break;
+    }
+  }
+  
+  return true;
 }
 
 bool path_exists(unsigned pathid)
@@ -126,8 +182,7 @@ void path_delete(unsigned pathid)
 int path_add()
 {
     enigma::pathstructarray_reallocate();
-    new enigma::path(enigma::path_idmax, false, false, 8, 0);
-    return enigma::path_idmax-1;
+    return (new enigma::path(enigma::path_idmax, false, false, 8, 0))->id;
 }
 
 int path_duplicate(unsigned pathid)
