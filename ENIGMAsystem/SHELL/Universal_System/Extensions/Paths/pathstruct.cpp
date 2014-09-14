@@ -94,8 +94,8 @@ namespace enigma
     {
         pathstructarray[pathid] = this;
         pathstructarray[pathid]->pointarray.reserve(pointcount);
-        if (enigma::path_idmax < pathid+1)
-          enigma::path_idmax = pathid+1;
+        if (enigma::path_idmax <= pathid)
+          enigma::path_idmax = pathid + 1;
     }
     path::~path() { pathstructarray[id] = NULL; }
 
@@ -174,7 +174,7 @@ namespace enigma
       if (!pth->pointarray.size()) return;
       if (position < 0)
         position = 1 - fmod(-position, 1);
-      else
+      else if (position > 1)
         position = fmod(position, 1);
       ppi_t ppi = path_point_iterator_at(pth, position);
       double t = position - ppi->first;
@@ -213,6 +213,13 @@ namespace enigma
         x = x1 + (x2-x1) * t;
         y = y1 + (y2-y1) * t;
       }
+    }
+    
+    void path_getXY_scaled(path *pth, cs_scalar &x, cs_scalar &y, cs_scalar position, cs_scalar scale)
+    {
+      path_getXY(pth, x, y, position);
+      x = pth->centerx + (x - pth->centerx) * scale;
+      y = pth->centery + (y - pth->centery) * scale;
     }
 
     void path_getspeed(path *pth, cs_scalar &speed, cs_scalar position)
