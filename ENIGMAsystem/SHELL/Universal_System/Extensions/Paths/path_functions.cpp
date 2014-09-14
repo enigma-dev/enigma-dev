@@ -47,13 +47,19 @@ namespace enigma {
 #include "Universal_System/instance_system.h"
 #include "implement.h"
 
+namespace enigma {
+  namespace extension_cast {
+    extension_path *as_extension_path(object_basic*);
+  }
+}
+
 namespace enigma_user
 {
 
 void path_start(unsigned pathid, cs_scalar speed, unsigned endaction, bool absolute)
 {
     enigma::object_collisions* const inst = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
-    enigma::extension_path* const inst_paths = ((enigma::extension_path*)enigma::instance_event_iterator->inst);
+    enigma::extension_path* const inst_paths = enigma::extension_cast::as_extension_path(enigma::instance_event_iterator->inst);
     inst_paths->path_index = pathid;
     inst_paths->path_speed = speed;
     inst_paths->path_endaction = endaction;
@@ -68,14 +74,14 @@ void path_start(unsigned pathid, cs_scalar speed, unsigned endaction, bool absol
 
 void path_end()
 {
-    enigma::extension_path* const inst_paths = ((enigma::extension_path*)enigma::instance_event_iterator->inst);
+    enigma::extension_path* const inst_paths = enigma::extension_cast::as_extension_path(enigma::instance_event_iterator->inst);
     inst_paths->path_index = -1;
 }
 
 void path_set_position(cs_scalar position, bool relative)
 {
     enigma::object_collisions* const inst = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
-    enigma::extension_path* const inst_paths = ((enigma::extension_path*)enigma::instance_event_iterator->inst);
+    enigma::extension_path* const inst_paths = enigma::extension_cast::as_extension_path(enigma::instance_event_iterator->inst);
     inst_paths->path_position = position;
     if (relative)
     {
@@ -87,13 +93,13 @@ void path_set_position(cs_scalar position, bool relative)
 void path_set_speed(cs_scalar speed, bool relative)
 {
     enigma::object_collisions* const inst = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
-    enigma::extension_path* const inst_paths = ((enigma::extension_path*)enigma::instance_event_iterator->inst);
+    enigma::extension_path* const inst_paths = enigma::extension_cast::as_extension_path(enigma::instance_event_iterator->inst);
     inst_paths->path_speed = relative ? speed : double(inst->speed + speed);
 }
 
 bool path_update()
 {
-    enigma::extension_path* const inst_paths = ((enigma::extension_path*)enigma::instance_event_iterator->inst);
+    enigma::extension_path* const inst_paths = enigma::extension_cast::as_extension_path(enigma::instance_event_iterator->inst);
 
     if (inst_paths->path_index == -1 || fzero(inst_paths->path_speed))
         return false;
