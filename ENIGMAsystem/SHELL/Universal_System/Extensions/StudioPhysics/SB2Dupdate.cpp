@@ -22,13 +22,10 @@
 using std::vector;
 
 namespace enigma {
-  struct extension_studiophysics
-  {
-    void studiophysics_update() {
-      for (std::vector<worldInstance*>::iterator it = worlds.begin(); it != worlds.end(); it++) {
-        (*it)->world_update();
-      }
+  void studiophysics_update() {
+    for (std::vector<worldInstance*>::iterator it = worlds.begin(); it != worlds.end(); it++) {
+      (*it)->world_update();
     }
-  };
+  }
 }
 

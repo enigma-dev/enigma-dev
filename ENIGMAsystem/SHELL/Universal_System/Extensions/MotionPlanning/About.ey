@@ -8,5 +8,4 @@ Icon: mp.png
 
 Depends: None
 Dependencies: Paths
-Implement: extension_mp
 
