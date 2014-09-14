@@ -109,12 +109,26 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, i
           if (parsed_extensions[i].implements != "")
             wto << ", virtual " << parsed_extensions[i].implements;
           else wto << " /*" << parsed_extensions[i].name << "*/";
-        wto << "\n  {\n";
+        wto << "\n";
+        wto << "  {\n";
         wto << "    #include \"Preprocessor_Environment_Editable/IDE_EDIT_inherited_locals.h\"\n\n";
         wto << "    std::map<string, var> *vmap;\n";
         wto << "    object_locals() {vmap = NULL;}\n";
-        wto << "    object_locals(unsigned _x, int _y): event_parent(_x,_y) {vmap = NULL;}\n  };\n";
-      po_i i = parsed_objects.begin();
+        wto << "    object_locals(unsigned _x, int _y): event_parent(_x,_y) {vmap = NULL;}\n";
+        wto << "  };\n";
+    
+    // Write extension cast methods; these are a temporary fix until the new instance system is in place.
+    wto << "  namespace extension_cast {\n";
+    for (unsigned i = 0; i < parsed_extensions.size(); i++) {
+      if (parsed_extensions[i].implements != "") {
+        wto << "    " << parsed_extensions[i].implements << " *as_" << parsed_extensions[i].implements << "(object_basic* x) {\n";
+        wto << "      return (" << parsed_extensions[i].implements << "*)(object_locals*)x;\n";
+        wto << "    }\n";
+      }
+    }
+    wto << "  }";
+    
+    po_i i = parsed_objects.begin();
 	  vector<int> parsed(0);
 	  // Hold an iterator for our parent for later usage
 	  po_i parent = parsed_objects.find(i->second->parent);

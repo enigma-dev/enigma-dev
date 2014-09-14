@@ -2,13 +2,18 @@
 // Copyright 2011 Josh Ventura
 // Licensed under the GNU General Public License, Version 3 or later.
 
-#include "Universal_System/Extensions/recast.h"
+#include "Universal_System/collisions_object.h"
+#include "Universal_System/instance_system.h"
 #include "implement.h"
 #include "include.h"
 
-declare_recast(enigma::extension_alarm)
-
 extern bool argument_relative;
+
+namespace enigma {
+  namespace extension_cast {
+    extension_alarm *as_extension_alarm(object_basic*);
+  }
+}
 
 namespace enigma_user
 {
@@ -16,9 +21,9 @@ namespace enigma_user
 void action_set_alarm(int steps, int alarmno)
 {
   if (argument_relative)
-    recast_current_instance()->alarm[alarmno] += (steps);
+    enigma::extension_cast::as_extension_alarm(enigma::instance_event_iterator->inst)->alarm[alarmno] += (steps);
   else
-    recast_current_instance()->alarm[alarmno] = (steps);
+    enigma::extension_cast::as_extension_alarm(enigma::instance_event_iterator->inst)->alarm[alarmno] = (steps);
 }
 
 }
