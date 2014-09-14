@@ -52,6 +52,12 @@ namespace enigma_user
 
 void path_start(unsigned pathid, cs_scalar speed, unsigned endaction, bool absolute)
 {
+    #ifndef PATH_EXT_SET
+        return;
+    #endif
+
+    return;  //function can cause crashes atm, until extension variables fixed
+
     enigma::object_collisions* const inst = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
     enigma::extension_path* const inst_paths = ((enigma::extension_path*)enigma::instance_event_iterator->inst);
     inst_paths->path_index = pathid;
@@ -68,12 +74,24 @@ void path_start(unsigned pathid, cs_scalar speed, unsigned endaction, bool absol
 
 void path_end()
 {
+    #ifndef PATH_EXT_SET
+        return;
+    #endif
+
+    return;  //function can cause crashes atm, until extension variables fixed
+
     enigma::extension_path* const inst_paths = ((enigma::extension_path*)enigma::instance_event_iterator->inst);
     inst_paths->path_index = -1;
 }
 
 void path_set_position(cs_scalar position, bool relative)
 {
+    #ifndef PATH_EXT_SET
+        return;
+    #endif
+
+    return;  //function can cause crashes atm, until extension variables fixed
+
     enigma::object_collisions* const inst = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
     enigma::extension_path* const inst_paths = ((enigma::extension_path*)enigma::instance_event_iterator->inst);
     inst_paths->path_position = position;
@@ -86,6 +104,12 @@ void path_set_position(cs_scalar position, bool relative)
 
 void path_set_speed(cs_scalar speed, bool relative)
 {
+    #ifndef PATH_EXT_SET
+        return;
+    #endif
+
+    return;  //function can cause crashes atm, until extension variables fixed
+
     enigma::object_collisions* const inst = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
     enigma::extension_path* const inst_paths = ((enigma::extension_path*)enigma::instance_event_iterator->inst);
     inst_paths->path_speed = relative ? speed : double(inst->speed + speed);
@@ -93,6 +117,11 @@ void path_set_speed(cs_scalar speed, bool relative)
 
 bool path_update()
 {
+    #ifndef PATH_EXT_SET
+        return false;
+    #endif
+    return false;  //function can cause crashes atm, until extension variables fixed
+
     enigma::extension_path* const inst_paths = ((enigma::extension_path*)enigma::instance_event_iterator->inst);
 
     if (inst_paths->path_index == -1 || fzero(inst_paths->path_speed))
