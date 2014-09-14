@@ -60,6 +60,7 @@ namespace enigma
   void path_add_point(unsigned pathid, cs_scalar x, cs_scalar y, cs_scalar speed);
   void path_recalculate(unsigned pathid);
   void path_getXY(path *pth, cs_scalar &x, cs_scalar &y, cs_scalar position);
+  void path_getXY_scaled(path *pth, cs_scalar &x, cs_scalar &y, cs_scalar position, cs_scalar scale);
   void path_getspeed(path *pth, cs_scalar &speed, cs_scalar position);
   void pathstructarray_reallocate();
   typedef map<cs_scalar,int>::iterator ppi_t;
