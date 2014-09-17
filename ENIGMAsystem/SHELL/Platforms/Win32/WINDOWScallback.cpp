@@ -51,10 +51,9 @@ namespace enigma
     extern char mousestatus[3],last_mousestatus[3],keybdstatus[256],last_keybdstatus[256];
     map<int,int> keybdmap;
     extern int windowX, windowY, windowWidth, windowHeight;
-    extern double  scaledWidth, scaledHeight;
     extern char* currentCursor;
     extern HWND hWnd,hWndParent;
-    extern void setchildsize(bool adapt);
+    extern void setwindowsize(bool adapt);
     extern void WindowResized();
     extern unsigned int pausedSteps;
     extern bool gameWindowFocused, treatCloseAsEscape;
@@ -86,7 +85,7 @@ namespace enigma
           return 0;
 
         case WM_SIZE:
-          // make sure window resized is only processed once per resize because we have a parent and a child window
+          // make sure window resized is only processed once per resize because there could possibly be child windows and handles, especially with widgets
           if (hWndParameter == hWnd) {
             WindowResized();
             instance_event_iterator = new inst_iter(NULL,NULL,NULL);
@@ -131,16 +130,12 @@ namespace enigma
           GetWindowRect(hWndParameter,&tempWindow);
           tempWidth = windowWidth + (tempWindow.right - tempWindow.left) - (tempRight - tempLeft);
           tempHeight = windowHeight + (tempWindow.bottom - tempWindow.top) - (tempBottom - tempTop);
-          if (tempWidth < scaledWidth)
-              tempWidth = scaledWidth;
-          if (tempHeight < scaledHeight)
-              tempHeight = scaledHeight;
 
           windowX += tempWindow.left - tempLeft;
           windowY += tempWindow.top - tempTop;
           windowWidth = tempWidth;
           windowHeight = tempHeight;
-          setchildsize(false);
+          setwindowsize(false);
           return 0;
 
         case WM_SETCURSOR:
