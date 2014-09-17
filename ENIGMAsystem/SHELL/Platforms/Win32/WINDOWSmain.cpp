@@ -43,7 +43,6 @@ const int os_type = os_windows;
 namespace enigma //TODO: Find where this belongs
 {
   HINSTANCE hInstance;
-  HWND hWndParent;
   HWND hWnd;
   LRESULT CALLBACK WndProc (HWND hWnd, UINT message,WPARAM wParam, LPARAM lParam);
   HDC window_hDC;
@@ -255,14 +254,11 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
     // We won't limit those functions like GM, just the default.
     if (wid > screen_width) wid = screen_width;
     if (hgt > screen_height) hgt = screen_height;
-    // TODO: Implement minimize button on both windows like GM
-     enigma::hWndParent = CreateWindow ("TMain", "", WS_CAPTION | WS_POPUPWINDOW | WS_MINIMIZEBOX, (screen_width-wid)/2, (screen_height-hgt)/2, wid, hgt, NULL, NULL, hInstance, NULL);
+     enigma::hWnd = CreateWindow ("TMain", "", WS_CAPTION | WS_POPUPWINDOW | WS_MINIMIZEBOX, (screen_width-wid)/2, (screen_height-hgt)/2, wid, hgt, NULL, NULL, hInstance, NULL);
 
-    //Create a child window to put into that
-    enigma::hWnd = CreateWindow ("TSub", NULL, WS_VISIBLE | WS_CHILD,0, 0, wid, hgt,enigma::hWndParent, NULL, hInstance, NULL);
     enigma::EnableDrawing (&hRC);
     //Do not set the parent window visible until we have initialized the graphics context.
-    ShowWindow(enigma::hWndParent, iCmdShow);
+    ShowWindow(enigma::hWnd, iCmdShow);
     enigma::initialize_everything();
 
     //Main loop
@@ -278,98 +274,98 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
     enigma::initialize_timing();
     int frames_count = 0;
 
-      char bQuit = 0;
-	  long last_mcs = 0;
-      long spent_mcs = 0;
-      long remaining_mcs = 0;
-      long needed_mcs = 0;
-      while (!bQuit)
-      {
-          using enigma::current_room_speed;
+    char bQuit = 0;
+    long last_mcs = 0;
+    long spent_mcs = 0;
+    long remaining_mcs = 0;
+    long needed_mcs = 0;
+    while (!bQuit)
+    {
+        using enigma::current_room_speed;
 
-          // Update current time.
-          enigma::update_current_time();
-          {
-              // Find diff between current and offset.
+        // Update current time.
+        enigma::update_current_time();
+        {
+            // Find diff between current and offset.
 
-              long passed_mcs = enigma::get_current_offset_difference_mcs();
-              if (passed_mcs >= 1000000) { // Handle resetting.
-                  // If more than one second has passed, update fps variable, reset frames count,
-                  // and advance offset by difference in seconds, rounded down.
+            long passed_mcs = enigma::get_current_offset_difference_mcs();
+            if (passed_mcs >= 1000000) { // Handle resetting.
+                // If more than one second has passed, update fps variable, reset frames count,
+                // and advance offset by difference in seconds, rounded down.
 
-                  enigma_user::fps = frames_count;
-                  frames_count = 0;
-                  enigma::offset_modulus_one_second();
-              }
-          }
+                enigma_user::fps = frames_count;
+                frames_count = 0;
+                enigma::offset_modulus_one_second();
+            }
+        }
 
-          if (current_room_speed > 0) {
+        if (current_room_speed > 0) {
+            spent_mcs = enigma::get_current_offset_slowing_difference_mcs();
+
+            remaining_mcs = 1000000 - spent_mcs;
+            needed_mcs = long((1.0 - 1.0*frames_count/current_room_speed)*1e6);
+            const int catchup_limit_ms = 50;
+            if (needed_mcs > remaining_mcs + catchup_limit_ms*1000) {
+              // If more than catchup_limit ms is needed than is remaining, we risk running too fast to catch up.
+              // In order to avoid running too fast, we advance the offset, such that we are only at most catchup_limit ms behind.
+              // Thus, if the load is consistently making the game slow, the game is still allowed to run as fast as possible
+              // without any sleep.
+              // And if there is very heavy load once in a while, the game will only run too fast for catchup_limit ms.
+              enigma::increase_offset_slowing(needed_mcs - (remaining_mcs + catchup_limit_ms*1000));
+
               spent_mcs = enigma::get_current_offset_slowing_difference_mcs();
-
               remaining_mcs = 1000000 - spent_mcs;
               needed_mcs = long((1.0 - 1.0*frames_count/current_room_speed)*1e6);
-              const int catchup_limit_ms = 50;
-              if (needed_mcs > remaining_mcs + catchup_limit_ms*1000) {
-                // If more than catchup_limit ms is needed than is remaining, we risk running too fast to catch up.
-                // In order to avoid running too fast, we advance the offset, such that we are only at most catchup_limit ms behind.
-                // Thus, if the load is consistently making the game slow, the game is still allowed to run as fast as possible
-                // without any sleep.
-                // And if there is very heavy load once in a while, the game will only run too fast for catchup_limit ms.
-                enigma::increase_offset_slowing(needed_mcs - (remaining_mcs + catchup_limit_ms*1000));
+            }
+            if (remaining_mcs > needed_mcs) {
+                const long sleeping_time = std::min((remaining_mcs - needed_mcs)/5, long(999999));
+                usleep(std::max(long(1), sleeping_time));
+                continue;
+            }
+        }
+        if (PeekMessage (&msg, NULL, 0, 0, PM_REMOVE))
+        {
+            if (msg.message == WM_QUIT)
+            {
+                enigma::game_return = msg.wParam;
+                bQuit=1;
+                break;
+            }
+            else
+            {
+                TranslateMessage (&msg);
+                DispatchMessage (&msg);
+            }
+        }
+        else
+        {
+          if (!enigma::gameWindowFocused && enigma::freezeOnLoseFocus) {
+            if (enigma::pausedSteps < 1) {
+              enigma::pausedSteps += 1;
+            } else {
+              usleep(100000); continue;
+            }
+          }
 
-                spent_mcs = enigma::get_current_offset_slowing_difference_mcs();
-                remaining_mcs = 1000000 - spent_mcs;
-                needed_mcs = long((1.0 - 1.0*frames_count/current_room_speed)*1e6);
-              }
-              if (remaining_mcs > needed_mcs) {
-                  const long sleeping_time = std::min((remaining_mcs - needed_mcs)/5, long(999999));
-                  usleep(std::max(long(1), sleeping_time));
-                  continue;
-              }
-          }
-          if (PeekMessage (&msg, NULL, 0, 0, PM_REMOVE))
-          {
-              if (msg.message == WM_QUIT)
-              {
-                  enigma::game_return = msg.wParam;
-                  bQuit=1;
-                  break;
-              }
-              else
-              {
-                  TranslateMessage (&msg);
-                  DispatchMessage (&msg);
-              }
-          }
-          else
-          {
-        if (!enigma::gameWindowFocused && enigma::freezeOnLoseFocus) {
-          if (enigma::pausedSteps < 1) {
-            enigma::pausedSteps += 1;
+          //TODO: The placement of this code is inconsistent with XLIB because events are handled before, ask Josh.
+          unsigned long dt = 0;
+          if (spent_mcs > last_mcs) {
+          dt = (spent_mcs - last_mcs);
           } else {
-            usleep(100000); continue;
+          //TODO: figure out what to do here this happens when the fps is reached and the timers start over
+          dt = enigma_user::delta_time;
           }
-			  }
+          last_mcs = spent_mcs;
+          enigma_user::delta_time = dt;
+          current_time_mcs += enigma_user::delta_time;
+          enigma_user::current_time += enigma_user::delta_time / 1000;
 
-        //TODO: The placement of this code is inconsistent with XLIB because events are handled before, ask Josh.
-			  unsigned long dt = 0;
-			  if (spent_mcs > last_mcs) {
-				dt = (spent_mcs - last_mcs);
-			  } else {
-				//TODO: figure out what to do here this happens when the fps is reached and the timers start over
-				dt = enigma_user::delta_time;
-			  }
-			  last_mcs = spent_mcs;
-			  enigma_user::delta_time = dt;
-			  current_time_mcs += enigma_user::delta_time;
-			  enigma_user::current_time += enigma_user::delta_time / 1000;
+          enigma::ENIGMA_events();
+          enigma::input_push();
 
-              enigma::ENIGMA_events();
-              enigma::input_push();
-
-              frames_count++;
-          }
-      }
+          frames_count++;
+        }
+    }
 
     enigma::game_ending();
     timeEndPeriod(minimum_resolution);
@@ -465,40 +461,40 @@ void set_program_priority(int value)
 
 void execute_shell(std::string fname, std::string args)
 {
-    TCHAR cDir[MAX_PATH];
-    GetCurrentDirectory(MAX_PATH, cDir);
-	ShellExecute(enigma::hWndParent, NULL, fname.c_str(), args.c_str(), cDir, SW_SHOW);
+  TCHAR cDir[MAX_PATH];
+  GetCurrentDirectory(MAX_PATH, cDir);
+  ShellExecute(enigma::hWnd, NULL, fname.c_str(), args.c_str(), cDir, SW_SHOW);
 }
 
 void execute_shell(std::string operation, std::string fname, std::string args)
 {
-    TCHAR cDir[MAX_PATH];
-    GetCurrentDirectory(MAX_PATH, cDir);
-	ShellExecute(enigma::hWndParent, operation.c_str(), fname.c_str(), args.c_str(), cDir, SW_SHOW);
+  TCHAR cDir[MAX_PATH];
+  GetCurrentDirectory(MAX_PATH, cDir);
+  ShellExecute(enigma::hWnd, operation.c_str(), fname.c_str(), args.c_str(), cDir, SW_SHOW);
 }
 
 void execute_program(std::string operation, std::string fname, std::string args, bool wait)
 {
-    SHELLEXECUTEINFO lpExecInfo;
-      lpExecInfo.cbSize  = sizeof(SHELLEXECUTEINFO);
-      lpExecInfo.lpFile = fname.c_str();
-      lpExecInfo.fMask=SEE_MASK_DOENVSUBST|SEE_MASK_NOCLOSEPROCESS;
-      lpExecInfo.hwnd = enigma::hWndParent;
-      lpExecInfo.lpVerb = operation.c_str();
-      lpExecInfo.lpParameters = args.c_str();
-      TCHAR cDir[MAX_PATH];
-      GetCurrentDirectory(MAX_PATH, cDir);
-      lpExecInfo.lpDirectory = cDir;
-      lpExecInfo.nShow = SW_SHOW;
-      lpExecInfo.hInstApp = (HINSTANCE) SE_ERR_DDEFAIL ;   //WINSHELLAPI BOOL WINAPI result;
-      ShellExecuteEx(&lpExecInfo);
+  SHELLEXECUTEINFO lpExecInfo;
+  lpExecInfo.cbSize  = sizeof(SHELLEXECUTEINFO);
+  lpExecInfo.lpFile = fname.c_str();
+  lpExecInfo.fMask=SEE_MASK_DOENVSUBST|SEE_MASK_NOCLOSEPROCESS;
+  lpExecInfo.hwnd = enigma::hWnd;
+  lpExecInfo.lpVerb = operation.c_str();
+  lpExecInfo.lpParameters = args.c_str();
+  TCHAR cDir[MAX_PATH];
+  GetCurrentDirectory(MAX_PATH, cDir);
+  lpExecInfo.lpDirectory = cDir;
+  lpExecInfo.nShow = SW_SHOW;
+  lpExecInfo.hInstApp = (HINSTANCE) SE_ERR_DDEFAIL ;   //WINSHELLAPI BOOL WINAPI result;
+  ShellExecuteEx(&lpExecInfo);
 
-      //wait until a file is finished printing
-      if (wait && lpExecInfo.hProcess != NULL)
-      {
-        ::WaitForSingleObject(lpExecInfo.hProcess, INFINITE);
-        ::CloseHandle(lpExecInfo.hProcess);
-      }
+  //wait until a file is finished printing
+  if (wait && lpExecInfo.hProcess != NULL)
+  {
+    ::WaitForSingleObject(lpExecInfo.hProcess, INFINITE);
+    ::CloseHandle(lpExecInfo.hProcess);
+  }
 }
 
 void execute_program(std::string fname, std::string args, bool wait)
