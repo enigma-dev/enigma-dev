@@ -17,8 +17,10 @@
 
 #include <X11/Xlib.h>
 #include "../General/glxew.h"
-#include <Platforms/xlib/XLIBmain.h>
-#include <Graphics_Systems/graphics_mandatory.h>
+#include "Platforms/xlib/XLIBmain.h"
+#include "Graphics_Systems/graphics_mandatory.h"
+#include "Platforms/General/PFwindow.h"
+#include "Graphics_Systems/General/GScolors.h"
 
 #include <iostream>
 #include <cstring>
@@ -28,6 +30,11 @@
 namespace enigma {
   GLuint msaa_fbo = 0;
 
+  void WindowResized() {
+    // clear the window color, viewport does not need set because backbuffer was just recreated
+    enigma_user::draw_clear(enigma_user::window_get_color());
+  }
+  
   namespace swaphandling {
     static bool has_checked_extensions = false;
     static bool ext_swapcontrol_supported;
@@ -63,49 +70,49 @@ namespace enigma {
 #include <Universal_System/roomsystem.h> // room_caption, update_mouse_variables
 
 namespace enigma_user {
-// Don't know where to query this on XLIB, just defaulting it to 2,4,and 8 samples all supported, Windows puts it in EnableDrawing
-int display_aa = 14;
+  // Don't know where to query this on XLIB, just defaulting it to 2,4,and 8 samples all supported, Windows puts it in EnableDrawing
+  int display_aa = 14;
 
-void set_synchronization(bool enable) {
-	// General notes:
-	// Setting swapping on and off is platform-dependent and requires platform-specific extensions.
-	// Platform-specific extensions are even more bothersome than regular extensions.
-	// What functions and features to use depends on which version of OpenGL is used.
-	// For more information, see the following pages:
-	// http://www.opengl.org/wiki/Load_OpenGL_Functions
-	// http://www.opengl.org/wiki/OpenGL_Loading_Library
-	// http://www.opengl.org/wiki/Swap_Interval
-	// http://en.wikipedia.org/wiki/GLX
-	// Also note that OpenGL version >= 3.0 does not use glGetString for getting extensions.
+  void set_synchronization(bool enable) {
+    // General notes:
+    // Setting swapping on and off is platform-dependent and requires platform-specific extensions.
+    // Platform-specific extensions are even more bothersome than regular extensions.
+    // What functions and features to use depends on which version of OpenGL is used.
+    // For more information, see the following pages:
+    // http://www.opengl.org/wiki/Load_OpenGL_Functions
+    // http://www.opengl.org/wiki/OpenGL_Loading_Library
+    // http://www.opengl.org/wiki/Swap_Interval
+    // http://en.wikipedia.org/wiki/GLX
+    // Also note that OpenGL version >= 3.0 does not use glGetString for getting extensions.
 
-	if (enigma::x11::disp != 0) {
-	  GLXDrawable drawable = glXGetCurrentDrawable();
+    if (enigma::x11::disp != 0) {
+      GLXDrawable drawable = glXGetCurrentDrawable();
 
-	  int interval = enable ? 1 : 0;
+      int interval = enable ? 1 : 0;
 
-	  if (enigma::is_ext_swapcontrol_supported()) {
-		glXSwapIntervalEXT(enigma::x11::disp, drawable, interval);
-	  }
-	  else if (enigma::is_mesa_swapcontrol_supported()) {
-		glXSwapIntervalMESA(interval);
-	  }
-	  // NOTE: GLX_SGI_swap_control, which is not used here, does not seem
-	  // to support disabling of synchronization, since its argument may not
-	  // be zero or less, so therefore it is not used here.
-	  // See http://www.opengl.org/registry/specs/SGI/swap_control.txt for more information.
-	}
-}
-  
-void display_reset(int samples, bool vsync) {
-	set_synchronization(vsync);
-	//TODO: Copy over from the Win32 bridge
-}
-  
-void screen_refresh() {
-	glXSwapBuffers(enigma::x11::disp, enigma::x11::win);
-	enigma::update_mouse_variables();
-	window_set_caption(room_caption);
-}
+      if (enigma::is_ext_swapcontrol_supported()) {
+      glXSwapIntervalEXT(enigma::x11::disp, drawable, interval);
+      }
+      else if (enigma::is_mesa_swapcontrol_supported()) {
+      glXSwapIntervalMESA(interval);
+      }
+      // NOTE: GLX_SGI_swap_control, which is not used here, does not seem
+      // to support disabling of synchronization, since its argument may not
+      // be zero or less, so therefore it is not used here.
+      // See http://www.opengl.org/registry/specs/SGI/swap_control.txt for more information.
+    }
+  }
+    
+  void display_reset(int samples, bool vsync) {
+    set_synchronization(vsync);
+    //TODO: Copy over from the Win32 bridge
+  }
+    
+  void screen_refresh() {
+    glXSwapBuffers(enigma::x11::disp, enigma::x11::win);
+    enigma::update_mouse_variables();
+    window_set_caption(room_caption);
+  }
 
 }
 

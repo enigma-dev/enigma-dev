@@ -18,6 +18,8 @@
 #include <X11/Xlib.h>
 #include "../General/glxew.h"
 #include "Platforms/xlib/XLIBmain.h"
+#include "Platforms/General/PFwindow.h"
+#include "Graphics_Systems/General/GScolors.h"
 
 #include <iostream>
 #include <cstring>
@@ -26,6 +28,12 @@
 
 namespace enigma {
   GLuint msaa_fbo = 0;
+  
+  void WindowResized() {
+    // clear the window color, viewport does not need set because backbuffer was just recreated
+    enigma_user::draw_clear(enigma_user::window_get_color());
+  }
+  
   namespace swaphandling {
     bool has_checked_extensions = false;
     bool ext_swapcontrol_supported;

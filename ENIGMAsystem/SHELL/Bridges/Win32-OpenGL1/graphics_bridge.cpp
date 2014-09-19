@@ -34,7 +34,6 @@ using namespace std;
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Platforms/Win32/WINDOWSmain.h"
 #include "Platforms/General/PFwindow.h"
-
 #include "Graphics_Systems/General/GScolors.h"
 
 namespace enigma
@@ -141,11 +140,11 @@ namespace enigma_user {
 		// Now make a multi-sample color buffer
 		glGenRenderbuffersEXT(1, &ColorBufferID);
 		glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, ColorBufferID);
-		glRenderbufferStorageMultisampleEXT(GL_RENDERBUFFER_EXT, samples, GL_RGBA8, window_get_region_width_scaled(), window_get_region_height_scaled());
+		glRenderbufferStorageMultisampleEXT(GL_RENDERBUFFER_EXT, samples, GL_RGBA8, window_get_region_width(), window_get_region_height());
 		// We also need a depth buffer
 		glGenRenderbuffersEXT(1, &DepthBufferID);
 		glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, DepthBufferID);
-		glRenderbufferStorageMultisampleEXT(GL_RENDERBUFFER_EXT, samples, GL_DEPTH_COMPONENT24, window_get_region_width_scaled(), window_get_region_height_scaled());
+		glRenderbufferStorageMultisampleEXT(GL_RENDERBUFFER_EXT, samples, GL_DEPTH_COMPONENT24, window_get_region_width(), window_get_region_height());
 		// Attach the render buffers to the multi-sampler fbo
 		glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_RENDERBUFFER_EXT, ColorBufferID);
 		glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, DepthBufferID);

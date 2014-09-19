@@ -31,7 +31,6 @@ using namespace std;
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Graphics_Systems/Direct3D9/DX9SurfaceStruct.h"
 #include "Bridges/General/DX9Context.h"
-
 #include "Graphics_Systems/General/GScolors.h"
 
 // global declarations
