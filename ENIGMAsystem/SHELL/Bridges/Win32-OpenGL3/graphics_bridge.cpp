@@ -25,81 +25,83 @@ using namespace std;
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Platforms/Win32/WINDOWSmain.h"
 #include "Platforms/General/PFwindow.h"
+#include "Graphics_Systems/General/GScolors.h"
 
 namespace enigma
 {
-	GLuint msaa_fbo = 0;
-    void EnableDrawing (HGLRC *hRC)
+  GLuint msaa_fbo = 0;
+  void EnableDrawing (HGLRC *hRC)
+  {
+    /**
+     * Edited by Cool Breeze on 16th October 2013
+     * + Updated the Pixel Format to support 24-bitdepth buffers
+     * + Correctly create a GL 3.x compliant context
+     */
+  
+    HGLRC LegacyRC;
+    PIXELFORMATDESCRIPTOR pfd;
+    int iFormat;
+
+    enigma::window_hDC = GetDC (hWnd);
+    ZeroMemory (&pfd, sizeof (pfd));
+    pfd.nSize = sizeof (pfd);
+    pfd.nVersion = 1;
+    pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+    pfd.iPixelType = PFD_TYPE_RGBA;
+    pfd.cColorBits = 24;
+    pfd.cDepthBits = 24;
+    pfd.iLayerType = PFD_MAIN_PLANE;
+    iFormat = ChoosePixelFormat (enigma::window_hDC, &pfd);
+
+    if (iFormat==0) { show_error("Failed to set the format of the OpenGL graphics device.",1); }
+
+    SetPixelFormat ( enigma::window_hDC, iFormat, &pfd );
+    LegacyRC = wglCreateContext( enigma::window_hDC );
+    wglMakeCurrent( enigma::window_hDC, LegacyRC );
+      
+    // -- Initialise GLEW
+    GLenum err = glewInit();
+    if (GLEW_OK != err)
     {
-		/**
-		 * Edited by Cool Breeze on 16th October 2013
-		 * + Updated the Pixel Format to support 24-bitdepth buffers
-		 * + Correctly create a GL 3.x compliant context
-		 */
-		
-		HGLRC LegacyRC;
-        PIXELFORMATDESCRIPTOR pfd;
-        int iFormat;
-
-        enigma::window_hDC = GetDC (hWnd);
-        ZeroMemory (&pfd, sizeof (pfd));
-        pfd.nSize = sizeof (pfd);
-        pfd.nVersion = 1;
-        pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
-        pfd.iPixelType = PFD_TYPE_RGBA;
-        pfd.cColorBits = 24;
-        pfd.cDepthBits = 24;
-        pfd.iLayerType = PFD_MAIN_PLANE;
-        iFormat = ChoosePixelFormat (enigma::window_hDC, &pfd);
-
-        if (iFormat==0) { show_error("Failed to set the format of the OpenGL graphics device.",1); }
-
-        SetPixelFormat ( enigma::window_hDC, iFormat, &pfd );
-        LegacyRC = wglCreateContext( enigma::window_hDC );
-        wglMakeCurrent( enigma::window_hDC, LegacyRC );
-        
-        // -- Initialise GLEW
-        GLenum err = glewInit();
-        if (GLEW_OK != err)
-        {
-			return;
-        }
- 
-		// -- Define an array of Context Attributes
-        int attribs[] =
-        {
-			WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
-			WGL_CONTEXT_MINOR_VERSION_ARB, 0,
-			WGL_CONTEXT_FLAGS_ARB, 0,
-			0
-        };
- 
-        if ( wglewIsSupported("WGL_ARB_create_context") )
-        {
-                *hRC = wglCreateContextAttribsARB( enigma::window_hDC,0, attribs );
-                wglMakeCurrent( NULL,NULL );
-                wglDeleteContext( LegacyRC );
-                wglMakeCurrent(enigma::window_hDC, *hRC );
-        }
-        else // Unable to get a 3.0 Core Context, use the Legacy 1.x context
-        {
-                *hRC = LegacyRC;
-        }
-		
-		//TODO: This never reports higher than 8, but display_aa should be 14 if 2,4,and 8 are supported and 8 only when only 8 is supported
-		glGetIntegerv(GL_MAX_SAMPLES_EXT, &enigma_user::display_aa);
+      return;
     }
 
-	void WindowResized() {
-
-	}
-	
-    void DisableDrawing (HWND hWnd, HDC hDC, HGLRC hRC)
+    // -- Define an array of Context Attributes
+    int attribs[] =
     {
-        wglMakeCurrent (NULL, NULL);
-        wglDeleteContext (hRC);
-        ReleaseDC (hWnd, hDC);
+      WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
+      WGL_CONTEXT_MINOR_VERSION_ARB, 0,
+      WGL_CONTEXT_FLAGS_ARB, 0,
+      0
+    };
+
+    if ( wglewIsSupported("WGL_ARB_create_context") )
+    {
+            *hRC = wglCreateContextAttribsARB( enigma::window_hDC,0, attribs );
+            wglMakeCurrent( NULL,NULL );
+            wglDeleteContext( LegacyRC );
+            wglMakeCurrent(enigma::window_hDC, *hRC );
     }
+    else // Unable to get a 3.0 Core Context, use the Legacy 1.x context
+    {
+            *hRC = LegacyRC;
+    }
+    
+    //TODO: This never reports higher than 8, but display_aa should be 14 if 2,4,and 8 are supported and 8 only when only 8 is supported
+    glGetIntegerv(GL_MAX_SAMPLES_EXT, &enigma_user::display_aa);
+  }
+
+  void WindowResized() {
+    // clear the window color, viewport does not need set because backbuffer was just recreated
+    enigma_user::draw_clear(enigma_user::window_get_color());
+  }
+
+  void DisableDrawing (HWND hWnd, HDC hDC, HGLRC hRC)
+  {
+      wglMakeCurrent (NULL, NULL);
+      wglDeleteContext (hRC);
+      ReleaseDC (hWnd, hDC);
+  }
 }
 
 // NOTE: Changes/fixes that applies to this likely also applies to the OpenGL1 version.
@@ -162,11 +164,11 @@ namespace enigma_user {
 		// Now make a multi-sample color buffer
 		glGenRenderbuffers(1, &ColorBufferID);
 		glBindRenderbuffer(GL_RENDERBUFFER, ColorBufferID);
-		glRenderbufferStorageMultisampleEXT(GL_RENDERBUFFER, samples, GL_RGBA8, window_get_region_width_scaled(), window_get_region_height_scaled());
+		glRenderbufferStorageMultisampleEXT(GL_RENDERBUFFER, samples, GL_RGBA8, window_get_region_width(), window_get_region_height());
 		// We also need a depth buffer
 		glGenRenderbuffersEXT(1, &DepthBufferID);
 		glBindRenderbufferEXT(GL_RENDERBUFFER, DepthBufferID);
-		glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples, GL_DEPTH_COMPONENT24, window_get_region_width_scaled(), window_get_region_height_scaled());
+		glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples, GL_DEPTH_COMPONENT24, window_get_region_width(), window_get_region_height());
 		// Attach the render buffers to the multi-sampler fbo
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, ColorBufferID);
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, DepthBufferID);
@@ -176,7 +178,7 @@ namespace enigma_user {
   void screen_refresh() {
     window_set_caption(room_caption);
     enigma::update_mouse_variables();
-	SwapBuffers(enigma::window_hDC);
+    SwapBuffers(enigma::window_hDC);
   }
 
   void set_synchronization(bool enable) {
