@@ -39,7 +39,7 @@ namespace enigma
 {
     extern HWND hWnd;
     bool isVisible = true, windowIsTop = false, windowAdapt = true, gameWindowFocused = false;
-    int windowcolor = 0, cursorInt = 0, regionWidth = 0, regionHeight = 0, windowWidth = 0, windowHeight = 0, windowX = 0, windowY = 0, RwindowWidth = 0, RwindowHeight = 0, RwindowX = 0, RwindowY = 0;
+    int windowColor = 0, cursorInt = 0, regionWidth = 0, regionHeight = 0, windowWidth = 0, windowHeight = 0, windowX = 0, windowY = 0, RwindowWidth = 0, RwindowHeight = 0, RwindowX = 0, RwindowY = 0;
     double scaledWidth = 0, scaledHeight = 0;
     char* currentCursor = IDC_ARROW;
     extern bool isSizeable, showBorder, showIcons, freezeOnLoseFocus, isFullScreen;
@@ -177,12 +177,12 @@ string window_get_caption()
 
 void window_set_color(int color)
 {
-    enigma::windowcolor = color;
+    enigma::windowColor = color;
 }
 
 int window_get_color()
 {
-    return enigma::windowcolor;
+    return enigma::windowColor;
 }
 
 void window_set_alpha(double alpha) {

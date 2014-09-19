@@ -32,6 +32,8 @@ using namespace std;
 #include "Graphics_Systems/Direct3D9/DX9SurfaceStruct.h"
 #include "Bridges/General/DX9Context.h"
 
+#include "Graphics_Systems/General/GScolors.h"
+
 // global declarations
 LPDIRECT3D9 d3dobj;    // the pointer to our Direct3D interface
 ContextManager* d3dmgr;    // the pointer to the device class
@@ -54,8 +56,10 @@ namespace enigma
     
     ZeroMemory(&d3dpp, sizeof(d3dpp));    // clear out the struct for use
     d3dpp.Windowed = TRUE;    // program windowed, not fullscreen
-    d3dpp.BackBufferWidth = enigma_user::window_get_region_width_scaled();
-    d3dpp.BackBufferHeight = enigma_user::window_get_region_height_scaled();
+    RECT rc;
+    GetClientRect(hWnd, &rc);
+		d3dpp.BackBufferWidth = rc.right - rc.left;
+		d3dpp.BackBufferHeight = rc.bottom - rc.top;
     d3dpp.MultiSampleType = D3DMULTISAMPLE_NONE; // 0 Levels of multi-sampling
     d3dpp.MultiSampleQuality = 0;                //No multi-sampling
     d3dpp.SwapEffect = D3DSWAPEFFECT_DISCARD;  // Throw away previous frames, we don't need them
@@ -115,12 +119,17 @@ namespace enigma
 		d3dmgr->GetSwapChain(0, &sc);
 		D3DPRESENT_PARAMETERS d3dpp;
 		sc->GetPresentParameters(&d3dpp);
-		d3dpp.BackBufferWidth = enigma_user::window_get_width();
-		d3dpp.BackBufferHeight = enigma_user::window_get_height();
+    RECT rc;
+    GetClientRect(hWnd, &rc);
+		d3dpp.BackBufferWidth = rc.right - rc.left;
+		d3dpp.BackBufferHeight = rc.bottom - rc.top;
 		sc->Release();
     OnDeviceLost();
 		d3dmgr->Reset(&d3dpp);
     OnDeviceReset();
+    
+    // clear the window color, viewport does not need set because backbuffer was just recreated
+    enigma_user::draw_clear(enigma_user::window_get_color());
 	}
 
   void DisableDrawing (HWND hWnd, HDC hDC, HGLRC hRC)
