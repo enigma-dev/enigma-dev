@@ -115,8 +115,8 @@ namespace enigma
 		d3dmgr->GetSwapChain(0, &sc);
 		D3DPRESENT_PARAMETERS d3dpp;
 		sc->GetPresentParameters(&d3dpp);
-		d3dpp.BackBufferWidth = enigma_user::window_get_region_width_scaled();
-		d3dpp.BackBufferHeight = enigma_user::window_get_region_height_scaled();
+		d3dpp.BackBufferWidth = enigma_user::window_get_width();
+		d3dpp.BackBufferHeight = enigma_user::window_get_height();
 		sc->Release();
     OnDeviceLost();
 		d3dmgr->Reset(&d3dpp);

@@ -53,9 +53,12 @@ namespace enigma
     extern char mousestatus[3],last_mousestatus[3],keybdstatus[256],last_keybdstatus[256];
     map<int,int> keybdmap;
     extern int windowX, windowY, windowWidth, windowHeight;
+    extern int viewScale;
+    extern double scaledWidth, scaledHeight;
     extern char* currentCursor;
     extern HWND hWnd,hWndParent;
     extern HDC window_hDC;
+    extern LONG_PTR getwindowstyle();
     extern void setwindowsize();
     extern void WindowResized();
     extern unsigned int pausedSteps;
@@ -140,6 +143,19 @@ namespace enigma
           windowHeight = tempHeight;
           setwindowsize();
           return 0;
+          
+        case WM_GETMINMAXINFO: {
+          if (viewScale > 0) { //Fixed Scale, this is GM8.1 behaviour
+            RECT c;
+            c.left = 0; c.top = 0; c.right = scaledWidth; c.bottom = scaledHeight;
+            AdjustWindowRect(&c, getwindowstyle(), false);
+          
+            LPMINMAXINFO lpMinMaxInfo = (LPMINMAXINFO) lParam;
+            lpMinMaxInfo->ptMinTrackSize.x = c.right-c.left;
+            lpMinMaxInfo->ptMinTrackSize.y = c.bottom-c.top;
+          }
+          break;
+        }
 
         case WM_SETCURSOR:
           // Set the user cursor if the mouse is in the client area of the window, otherwise let Windows handle setting the cursor
@@ -235,10 +251,8 @@ namespace enigma
 		//case WM_GRAPHNOTIFY:
 			//TODO: Handle DirectShow media events
 		//return 0;
-
-        default:
-            return DefWindowProc (hWndParameter, message, wParam, lParam);
       }
+      return DefWindowProc (hWndParameter, message, wParam, lParam);
     }
 
     void input_initialize()

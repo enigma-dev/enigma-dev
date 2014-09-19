@@ -108,7 +108,7 @@ namespace enigma
 
         if (!isFullScreen)
         {
-            if (windowAdapt && viewScale > 0)
+            if (windowAdapt && viewScale > 0) // If the window is to be adapted and Fixed Scale
             {
                 if (scaledWidth > windowWidth)
                     windowWidth = scaledWidth;
@@ -130,7 +130,7 @@ namespace enigma
           windowHeight = parHeight;
           //SetWindowPos(hWnd, NULL, 0, 0, parWidth, parHeight, SWP_NOACTIVATE); 
         }
-        clampwindow();
+       clampwindow();
     }
 }
 
