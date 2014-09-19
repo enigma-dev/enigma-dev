@@ -39,7 +39,7 @@ namespace enigma
 {
     extern HWND hWnd;
     bool isVisible = true, windowIsTop = false, windowAdapt = true, gameWindowFocused = false;
-    int windowColor = 0, cursorInt = 0, regionWidth = 0, regionHeight = 0, windowWidth = 0, windowHeight = 0, windowX = 0, windowY = 0, RwindowWidth = 0, RwindowHeight = 0, RwindowX = 0, RwindowY = 0;
+    int windowColor = 0, cursorInt = 0, regionWidth = 0, regionHeight = 0, windowWidth = 0, windowHeight = 0, windowX = 0, windowY = 0;
     double scaledWidth = 0, scaledHeight = 0;
     char* currentCursor = IDC_ARROW;
     extern bool isSizeable, showBorder, showIcons, freezeOnLoseFocus, isFullScreen;
@@ -58,6 +58,13 @@ namespace enigma
             newlong |= WS_VISIBLE;
 
         return newlong;
+    }
+    
+    void centerwindow() {
+      int screen_width = GetSystemMetrics(SM_CXSCREEN);
+      int screen_height = GetSystemMetrics(SM_CYSCREEN);
+      enigma::windowX = (screen_width - enigma::regionWidth)/2;
+      enigma::windowY = (screen_height - enigma::regionHeight)/2;
     }
 
     void clampwindow()
@@ -115,46 +122,47 @@ namespace enigma
                 if (scaledHeight > windowHeight)
                     windowHeight = scaledHeight;
             }
-            //SetWindowPos(hWnd, NULL, 0, 0, windowWidth, windowHeight, SWP_NOMOVE|SWP_NOACTIVATE); 
+             clampwindow();
         } else {
-          // backup minimized window dimensions
-          // NOTE: We could just use a RECT structure here, doesn't really matter.
-          RwindowX = windowX;
-          RwindowY = windowY;
-          RwindowWidth = windowWidth;
-          RwindowHeight = windowHeight;
-          
-          windowX = 0;
-          windowY = 0;
-          windowWidth = parWidth;
-          windowHeight = parHeight;
-          //SetWindowPos(hWnd, NULL, 0, 0, parWidth, parHeight, SWP_NOACTIVATE); 
+          SetWindowPos(hWnd, NULL, 0, 0, parWidth, parHeight, SWP_NOACTIVATE); 
         }
-       clampwindow();
+      
     }
 }
 
 namespace enigma_user
 {
 
+// GM8.1 Used its own internal variables for these functions and reported the regular window dimensions when minimized,
+// Studio uses the native functions and will tell you the dimensions of the window are 0 when it is minimized,
+// I have decided to go with the Studio method because it is still backwards compatible but also because it saves us some variables.
+// NOTE: X and Y are -32000 when the window is minimized.
 int window_get_x()
 {
-    return enigma::windowX;
+  RECT rc;
+  GetWindowRect(enigma::hWnd, &rc);
+  return rc.left;
 }
 
 int window_get_y()
 {
-    return enigma::windowY;
+  RECT rc;
+  GetWindowRect(enigma::hWnd, &rc);
+  return rc.top;
 }
 
 int window_get_width()
 {
-    return enigma::windowWidth;
+  RECT rc;
+  GetClientRect(enigma::hWnd, &rc);
+  return rc.right-rc.left;
 }
 
 int window_get_height()
 {
-    return enigma::windowHeight;
+  RECT rc;
+  GetClientRect(enigma::hWnd, &rc);
+  return rc.bottom-rc.top;
 }
 
 void window_set_caption(string caption)
@@ -210,11 +218,9 @@ void window_set_position(int x, int y)
 
 void window_set_size(unsigned int width, unsigned int height)
 {
-    //if (width > enigma::scaledWidth)
-        enigma::windowWidth = width;
-    //if (height > enigma::scaledHeight)
-        enigma::windowHeight = height;
-    enigma::clampwindow();
+    enigma::windowWidth = width;
+    enigma::windowHeight = height;
+    enigma::setwindowsize();
 }
 
 void window_set_rectangle(int x, int y, int width, int height)
@@ -223,16 +229,13 @@ void window_set_rectangle(int x, int y, int width, int height)
     enigma::windowY = y;
     enigma::windowWidth = width;
     enigma::windowHeight = height;
-    enigma::clampwindow();
+    enigma::setwindowsize();
 }
 
 void window_center()
 {
-    int screen_width = GetSystemMetrics(SM_CXSCREEN);
-    int screen_height = GetSystemMetrics(SM_CYSCREEN);
-    enigma::windowX = (screen_width - enigma::regionWidth)/2;
-    enigma::windowY = (screen_height - enigma::regionHeight)/2;
-    enigma::clampwindow();
+  enigma::centerwindow();
+  enigma::clampwindow();
 }
 
 void window_default(bool center_size)
@@ -269,9 +272,8 @@ void window_default(bool center_size)
   
   enigma::windowWidth = enigma::regionWidth = xm;
   enigma::windowHeight = enigma::regionHeight = ym;
-  enigma::setwindowsize();
   if (center)
-    window_center();
+    enigma::centerwindow();
 
   if (enigma::isFullScreen)
   {
@@ -301,11 +303,6 @@ void window_set_fullscreen(bool full)
     {
       enigma::setwindowstyle();
       ShowWindow(enigma::hWnd,SW_RESTORE);
-      // restore minimized window dimensions
-      enigma::windowX = enigma::RwindowX;
-      enigma::windowY = enigma::RwindowY;
-      enigma::windowWidth = enigma::RwindowWidth;
-      enigma::windowHeight = enigma::RwindowHeight;
     }
     enigma::setwindowsize();
 }

@@ -56,10 +56,10 @@ namespace enigma
     
     ZeroMemory(&d3dpp, sizeof(d3dpp));    // clear out the struct for use
     d3dpp.Windowed = TRUE;    // program windowed, not fullscreen
-    RECT rc;
-    GetClientRect(hWnd, &rc);
-		d3dpp.BackBufferWidth = rc.right - rc.left;
-		d3dpp.BackBufferHeight = rc.bottom - rc.top;
+    int ww = window_get_width(),
+        wh = window_get_height();
+		d3dpp.BackBufferWidth = ww <= 0 ? 1 : ww;
+		d3dpp.BackBufferHeight = wh <= 0 ? 1 : wh;
     d3dpp.MultiSampleType = D3DMULTISAMPLE_NONE; // 0 Levels of multi-sampling
     d3dpp.MultiSampleQuality = 0;                //No multi-sampling
     d3dpp.SwapEffect = D3DSWAPEFFECT_DISCARD;  // Throw away previous frames, we don't need them
@@ -119,10 +119,10 @@ namespace enigma
 		d3dmgr->GetSwapChain(0, &sc);
 		D3DPRESENT_PARAMETERS d3dpp;
 		sc->GetPresentParameters(&d3dpp);
-    RECT rc;
-    GetClientRect(hWnd, &rc);
-		d3dpp.BackBufferWidth = rc.right - rc.left;
-		d3dpp.BackBufferHeight = rc.bottom - rc.top;
+    int ww = window_get_width(),
+        wh = window_get_height();
+		d3dpp.BackBufferWidth = ww <= 0 ? 1 : ww;
+		d3dpp.BackBufferHeight = wh <= 0 ? 1 : wh;
 		sc->Release();
     OnDeviceLost();
 		d3dmgr->Reset(&d3dpp);
