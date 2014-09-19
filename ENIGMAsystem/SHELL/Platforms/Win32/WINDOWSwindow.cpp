@@ -39,11 +39,11 @@ namespace enigma
 {
     extern HWND hWnd;
     bool isVisible = true, windowIsTop = false, windowAdapt = true, gameWindowFocused = false;
-    int windowColor = 0, cursorInt = 0, regionWidth = 0, regionHeight = 0, windowWidth = 0, windowHeight = 0, windowX = 0, windowY = 0;
+    int cursorInt = 0, regionWidth = 0, regionHeight = 0, windowWidth = 0, windowHeight = 0, windowX = 0, windowY = 0;
     double scaledWidth = 0, scaledHeight = 0;
     char* currentCursor = IDC_ARROW;
     extern bool isSizeable, showBorder, showIcons, freezeOnLoseFocus, isFullScreen;
-    extern int viewScale;
+    extern int viewScale, windowColor;
 
     LONG_PTR getwindowstyle()
     {
