@@ -38,8 +38,9 @@ static int displayInitialResolutionWidth = 0, displayInitialResolutionHeight = 0
 namespace enigma
 {
     extern HWND hWnd;
-    bool isVisible = true, windowIsTop = false, gameWindowFocused = false;
-    int windowcolor = 0, cursorInt = 0, regionWidth = 0, regionHeight = 0, windowWidth = 0, windowHeight = 0, windowX = 0, windowY = 0;
+    bool isVisible = true, windowIsTop = false, windowAdapt = true, gameWindowFocused = false;
+    int windowcolor = 0, cursorInt = 0, regionWidth = 0, regionHeight = 0, windowWidth = 0, windowHeight = 0, windowX = 0, windowY = 0, RwindowWidth = 0, RwindowHeight = 0, RwindowX = 0, RwindowY = 0;
+    double scaledWidth = 0, scaledHeight = 0;
     char* currentCursor = IDC_ARROW;
     extern bool isSizeable, showBorder, showIcons, freezeOnLoseFocus, isFullScreen;
     extern int viewScale;
@@ -73,36 +74,63 @@ namespace enigma
         clampwindow();
     }
 
-    void centerwindow()
-    {
-        int parWidth = isFullScreen?GetSystemMetrics(SM_CXSCREEN):windowWidth, parHeight = isFullScreen?GetSystemMetrics(SM_CYSCREEN):windowHeight;
-        SetWindowPos(hWnd, HWND_TOP, (parWidth - regionWidth)/2, (parHeight - regionHeight)/2, 0, 0, SWP_NOSIZE|SWP_NOACTIVATE);
-    }
-
-    void setwindowsize(bool adapt)
+    void setwindowsize()
     {
         if (!regionWidth)
             return;
 
         int parWidth = isFullScreen?GetSystemMetrics(SM_CXSCREEN):windowWidth, parHeight = isFullScreen?GetSystemMetrics(SM_CYSCREEN):windowHeight;
-
-        SetWindowPos(hWnd, NULL, 0, 0, parWidth, parHeight, SWP_NOMOVE|SWP_NOACTIVATE);
-        if (!isFullScreen)
+        if (viewScale > 0)  //Fixed Scale
         {
-            if (adapt)
+            double viewDouble = viewScale/100.0;
+            scaledWidth = regionWidth*viewDouble;
+            scaledHeight = regionHeight*viewDouble;
+        }
+        else if (viewScale == 0)  //Full Scale
+        {
+            scaledWidth = parWidth;
+            scaledHeight = parHeight;
+        }
+        else  //Keep Aspect Ratio
+        {
+            double fitWidth = parWidth/double(regionWidth), fitHeight = parHeight/double(regionHeight);
+            if (fitWidth < fitHeight)
             {
-                windowWidth = parWidth;
-                windowHeight = parHeight;
+                scaledWidth = parWidth;
+                scaledHeight = regionHeight*fitWidth;
             }
             else
             {
-                if (parWidth > windowWidth)
-                    windowWidth = parWidth;
-                if (parHeight > windowHeight)
-                    windowHeight = parHeight;
+                scaledWidth = regionWidth*fitHeight;
+                scaledHeight = parHeight;
             }
-            clampwindow();
         }
+
+        if (!isFullScreen)
+        {
+            if (windowAdapt && viewScale > 0)
+            {
+                if (scaledWidth > windowWidth)
+                    windowWidth = scaledWidth;
+                if (scaledHeight > windowHeight)
+                    windowHeight = scaledHeight;
+            }
+            //SetWindowPos(hWnd, NULL, 0, 0, windowWidth, windowHeight, SWP_NOMOVE|SWP_NOACTIVATE); 
+        } else {
+          // backup minimized window dimensions
+          // NOTE: We could just use a RECT structure here, doesn't really matter.
+          RwindowX = windowX;
+          RwindowY = windowY;
+          RwindowWidth = windowWidth;
+          RwindowHeight = windowHeight;
+          
+          windowX = 0;
+          windowY = 0;
+          windowWidth = parWidth;
+          windowHeight = parHeight;
+          //SetWindowPos(hWnd, NULL, 0, 0, parWidth, parHeight, SWP_NOACTIVATE); 
+        }
+        clampwindow();
     }
 }
 
@@ -241,7 +269,7 @@ void window_default(bool center_size)
   
   enigma::windowWidth = enigma::regionWidth = xm;
   enigma::windowHeight = enigma::regionHeight = ym;
-  enigma::setwindowsize(true);
+  enigma::setwindowsize();
   if (center)
     window_center();
 
@@ -256,25 +284,30 @@ void window_default(bool center_size)
       ShowWindow(enigma::hWnd,SW_RESTORE);
   }
 
-  enigma::setwindowsize(true);
+  enigma::setwindowsize();
 }
 
 void window_set_fullscreen(bool full)
 {
     if (enigma::isFullScreen == full)
-        return;
+      return;
 
     if ((enigma::isFullScreen = full))
     {
-        SetWindowLongPtr(enigma::hWnd,GWL_STYLE,WS_POPUP);
-        ShowWindow(enigma::hWnd,SW_MAXIMIZE);
+      SetWindowLongPtr(enigma::hWnd,GWL_STYLE,WS_POPUP);
+      ShowWindow(enigma::hWnd,SW_MAXIMIZE);
     }
     else
     {
-        enigma::setwindowstyle();
-        ShowWindow(enigma::hWnd,SW_RESTORE);
+      enigma::setwindowstyle();
+      ShowWindow(enigma::hWnd,SW_RESTORE);
+      // restore minimized window dimensions
+      enigma::windowX = enigma::RwindowX;
+      enigma::windowY = enigma::RwindowY;
+      enigma::windowWidth = enigma::RwindowWidth;
+      enigma::windowHeight = enigma::RwindowHeight;
     }
-    enigma::setwindowsize(true);
+    enigma::setwindowsize();
 }
 
 int window_get_fullscreen()
@@ -382,7 +415,8 @@ bool window_get_stayontop()
 void window_set_region_scale(double scale, bool adaptwindow)
 {
     enigma::viewScale = int(scale*100);
-    enigma::setwindowsize(adaptwindow);
+    enigma::windowAdapt = adaptwindow;
+    enigma::setwindowsize();
 }
 
 double window_get_region_scale()
@@ -396,7 +430,8 @@ void window_set_region_size(int w, int h, bool adaptwindow)
 
     enigma::regionWidth = w;
     enigma::regionHeight = h;
-    enigma::setwindowsize(adaptwindow);
+    enigma::windowAdapt = adaptwindow;
+    enigma::setwindowsize();
     window_center();
 }
 
@@ -412,12 +447,12 @@ int window_get_region_height()
 
 int window_get_region_width_scaled()
 {
-    return enigma::regionWidth * (enigma::viewScale / 100.0);
+    return enigma::scaledWidth;
 }
 
 int window_get_region_height_scaled()
 {
-    return enigma::regionHeight * (enigma::viewScale / 100.0);
+    return enigma::scaledHeight;
 }
 
 int display_mouse_get_x()
