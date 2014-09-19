@@ -230,20 +230,7 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
     wcontainer.lpszMenuName = NULL;
     wcontainer.lpszClassName = "TMain";
     RegisterClass (&wcontainer);
-
-    //Register other window class
-    wmain.style = 0;
-    wmain.lpfnWndProc = enigma::WndProc;
-    wmain.cbClsExtra = 0;
-    wmain.cbWndExtra = 0;
-    wmain.hInstance = hInstance;
-    wmain.hIcon = LoadIcon (NULL, IDI_APPLICATION);
-    wmain.hCursor = LoadCursor (NULL, IDC_ARROW);
-    wmain.hbrBackground = (HBRUSH) GetStockObject (BLACK_BRUSH);
-    wmain.lpszMenuName = NULL;
-    wmain.lpszClassName = "TSub";
-    RegisterClass (&wmain);
-
+    
     //Create the parent window
     int screen_width = GetSystemMetrics(SM_CXSCREEN);
     int screen_height = GetSystemMetrics(SM_CYSCREEN);
