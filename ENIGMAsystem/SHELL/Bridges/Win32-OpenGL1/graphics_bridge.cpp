@@ -35,49 +35,48 @@ using namespace std;
 #include "Platforms/Win32/WINDOWSmain.h"
 #include "Platforms/General/PFwindow.h"
 
+#include "Graphics_Systems/General/GScolors.h"
+
 namespace enigma
 {
     GLuint msaa_fbo = 0;
 		
     void EnableDrawing (HGLRC *hRC)
     {
-        PIXELFORMATDESCRIPTOR pfd;
-        int iFormat;
+      PIXELFORMATDESCRIPTOR pfd;
+      int iFormat;
 
-        enigma::window_hDC = GetDC (hWnd);
-        ZeroMemory (&pfd, sizeof (pfd));
-        pfd.nSize = sizeof (pfd);
-        pfd.nVersion = 1;
-        pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
-        pfd.iPixelType = PFD_TYPE_RGBA;
-        pfd.cColorBits = 24;
-        pfd.cDepthBits = 16;
-        pfd.iLayerType = PFD_MAIN_PLANE;
-        iFormat = ChoosePixelFormat (enigma::window_hDC, &pfd);
+      enigma::window_hDC = GetDC (hWnd);
+      ZeroMemory (&pfd, sizeof (pfd));
+      pfd.nSize = sizeof (pfd);
+      pfd.nVersion = 1;
+      pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
+      pfd.iPixelType = PFD_TYPE_RGBA;
+      pfd.cColorBits = 24;
+      pfd.cDepthBits = 16;
+      pfd.iLayerType = PFD_MAIN_PLANE;
+      iFormat = ChoosePixelFormat (enigma::window_hDC, &pfd);
 
-        if (iFormat==0) { show_error("Failed to set the format of the OpenGL graphics device.",1); }
+      if (iFormat==0) { show_error("Failed to set the format of the OpenGL graphics device.",1); }
 
-        SetPixelFormat (enigma::window_hDC, iFormat, &pfd);
-        *hRC = wglCreateContext( enigma::window_hDC );
-        wglMakeCurrent( enigma::window_hDC, *hRC );
+      SetPixelFormat (enigma::window_hDC, iFormat, &pfd);
+      *hRC = wglCreateContext( enigma::window_hDC );
+      wglMakeCurrent( enigma::window_hDC, *hRC );
 		
       //TODO: This never reports higher than 8, but display_aa should be 14 if 2,4,and 8 are supported and 8 only when only 8 is supported
       glGetIntegerv(GL_MAX_SAMPLES_EXT, &enigma_user::display_aa);
     }
 	
     void WindowResized() {
-    //return;
-      glViewport(0, 0, enigma_user::window_get_region_width(), enigma_user::window_get_region_height());
-      glScissor(0, 0, enigma_user::window_get_region_width(), enigma_user::window_get_region_height());
-      glClearColor(0,0,0,0);
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      // clear the window color, viewport does not need set because backbuffer was just recreated
+      enigma_user::draw_clear(enigma_user::window_get_color());
     }
 
     void DisableDrawing (HWND hWnd, HDC hDC, HGLRC hRC)
     {
-        wglMakeCurrent (NULL, NULL);
-        wglDeleteContext (hRC);
-        ReleaseDC (hWnd, hDC);
+      wglMakeCurrent (NULL, NULL);
+      wglDeleteContext (hRC);
+      ReleaseDC (hWnd, hDC);
     }
 }
 
