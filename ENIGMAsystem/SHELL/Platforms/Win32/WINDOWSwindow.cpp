@@ -684,56 +684,29 @@ bool display_test_all(int w, int h, int freq, int bitdepth)
 
 int window_mouse_get_x()
 {
-  RECT window;
-  GetWindowRect(enigma::hWnd,&window);
   POINT mouse;
   GetCursorPos(&mouse);
+  ScreenToClient(enigma::hWnd, &mouse);
 
-  return mouse.x-window.left;
+  return mouse.x;
 }
 
 int window_mouse_get_y()
 {
-  RECT window;
-  GetWindowRect(enigma::hWnd,&window);
   POINT mouse;
   GetCursorPos(&mouse);
+  ScreenToClient(enigma::hWnd, &mouse);
 
-  return mouse.y-window.top;
+  return mouse.y;
 }
 
 void window_mouse_set(int x, int y)
 {
-  RECT window;
-  GetWindowRect(enigma::hWnd,&window);
-  SetCursorPos(window.left + x,window.top + y);
-}
-
-int window_view_mouse_get_x(int id)
-{
-  RECT window;
-  GetWindowRect(enigma::hWnd,&window);
-  POINT mouse;
-  GetCursorPos(&mouse);
-
-  return mouse.x-window.left+view_xview[id];
-}
-
-int window_view_mouse_get_y(int id)
-{
-  RECT window;
-  GetWindowRect(enigma::hWnd,&window);
-  POINT mouse;
-  GetCursorPos(&mouse);
-
-  return mouse.y-window.top+view_yview[id];
-}
-
-void window_view_mouse_set(int id, int x, int y)
-{
-    RECT window;
-    GetWindowRect(enigma::hWnd,&window);
-    SetCursorPos(window.left + x + view_xview[id],window.top + y + view_yview[id]);
+  POINT pt;
+  pt.x=x;
+  pt.y=y;
+  ClientToScreen(enigma::hWnd, &pt);
+  SetCursorPos(pt.x, pt.y);
 }
 
 }

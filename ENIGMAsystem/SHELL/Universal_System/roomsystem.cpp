@@ -23,6 +23,7 @@
 #include "reflexive_types.h"
 
 #include "Platforms/platforms_mandatory.h"
+#include "Platforms/General/PFwindow.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Universal_System/callbacks_events.h"
@@ -699,6 +700,21 @@ int view_set(int vind, int vis, int xview, int yview, int wview, int hview, int 
     return 1;
 }
 
+int window_view_mouse_get_x(int id)
+{
+  return window_mouse_get_x()+view_xview[id];
+}
+
+int window_view_mouse_get_y(int id)
+{
+  return window_mouse_get_y()+view_yview[id];
+}
+
+void window_view_mouse_set(int id, int x, int y)
+{
+  window_mouse_set(window_get_x() + x + view_xview[id],window_get_y() + y + view_yview[id]);
+}
+
 //NOTE: GM8.1 allowed the mouse to go outside the window, for basically all mouse functions and constants, Studio however
 //now wraps the mouse not allowing it to go out of bounds, so it will never report a negative mouse position for constants or functions.
 //On top of this, it not only appears that they have wrapped it, but it appears that they in fact stop updating the mouse altogether in Studio
@@ -773,11 +789,20 @@ namespace enigma
     mouse_xprevious = mouse_x;
     mouse_yprevious = mouse_y;
 
-    mouse_x = window_mouse_get_x();
-    mouse_y = window_mouse_get_y();
+      //x = (x / window_get_region_width()) * window_get_region_width_scaled();
+  //y = (y / window_get_region_height()) * window_get_region_height_scaled();
+  //width = (width / window_get_region_width()) * window_get_region_width_scaled();
+  //height = (height / window_get_region_height()) * window_get_region_height_scaled();
+    gs_scalar sx, sy, ratio;
+    sx = (window_get_width() - window_get_region_width_scaled()) / 2;
+    sy = (window_get_height() - window_get_region_height_scaled()) / 2;
+    ratio = ((gs_scalar)window_get_region_width() / (gs_scalar)window_get_region_width_scaled());
+    
+    mouse_x = (window_mouse_get_x() - sx) * ratio;
+    mouse_y = (window_mouse_get_y() - sy) * ratio;
 
     if (view_enabled) {
-      for (int i = 0; i < 8; i++) {
+      for (int i = 0; i < 8; i++) { 
         if (view_visible[i]) {
           if (mouse_x >= view_xport[i] && mouse_x < view_xport[i]+view_wport[i] &&  mouse_y >= view_yport[i] && mouse_y < view_yport[i]+view_hport[i]) {
             mouse_x = view_xview[view_current]+((mouse_x-view_xport[view_current])/(double)view_wport[view_current])*view_wview[i];
