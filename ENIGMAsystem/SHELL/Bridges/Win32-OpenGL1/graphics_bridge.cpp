@@ -66,7 +66,11 @@ namespace enigma
     }
 	
     void WindowResized() {
-
+    //return;
+      glViewport(0, 0, enigma_user::window_get_region_width(), enigma_user::window_get_region_height());
+      glScissor(0, 0, enigma_user::window_get_region_width(), enigma_user::window_get_region_height());
+      glClearColor(0,0,0,0);
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     }
 
     void DisableDrawing (HWND hWnd, HDC hDC, HGLRC hRC)

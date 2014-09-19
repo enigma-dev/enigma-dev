@@ -40,6 +40,8 @@ extern int keyboard_key;
 extern int keyboard_lastkey;
 extern string keyboard_lastchar;
 extern string keyboard_string;
+void draw_clear(int col);
+void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height);
 }
 
 namespace enigma
@@ -53,7 +55,8 @@ namespace enigma
     extern int windowX, windowY, windowWidth, windowHeight;
     extern char* currentCursor;
     extern HWND hWnd,hWndParent;
-    extern void setwindowsize(bool adapt);
+    extern HDC window_hDC;
+    extern void setwindowsize();
     extern void WindowResized();
     extern unsigned int pausedSteps;
     extern bool gameWindowFocused, treatCloseAsEscape;
@@ -135,7 +138,7 @@ namespace enigma
           windowY += tempWindow.top - tempTop;
           windowWidth = tempWidth;
           windowHeight = tempHeight;
-          setwindowsize(false);
+          setwindowsize();
           return 0;
 
         case WM_SETCURSOR:
@@ -216,6 +219,12 @@ namespace enigma
         case WM_RBUTTONDOWN: mousestatus[1]=1; return 0;
         case WM_MBUTTONUP:   mousestatus[2]=0; return 0;
         case WM_MBUTTONDOWN: mousestatus[2]=1; return 0;
+        
+        case WM_PAINT:
+          //enigma_user::screen_set_viewport(0, 0, 2000, 2000);
+          //enigma_user::draw_clear(0);
+          DefWindowProc(hWndParameter, message, wParam, lParam);
+          return 0;
 
 		//case WM_TOUCH:
 		//TODO: touchscreen stuff
