@@ -309,7 +309,7 @@ namespace enigma
         for (int ii = 0; ii < imgnumb; ii++)
         {
 			unsigned ih,iw;
-			unsigned xcelloffset = ii * fullcellwidth * 4;
+			unsigned xcelloffset = ii * cellwidth * 4;
 			for (ih = 0; ih < height; ih++)
 			{
 				unsigned tmp = ih * fullwidth * 4 + xcelloffset;
