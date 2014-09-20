@@ -15,12 +15,16 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-namespace enigma {
-  struct extension_dshow
-  {
-    void dshow_update() {
+#include "Box2DWorld.h"
 
+#include <vector>
+using std::vector;
+
+namespace enigma {
+  void box2dphysics_update() {
+    for (std::vector<B2DWorld*>::iterator it = b2dworlds.begin(); it != b2dworlds.end(); it++) {
+      (*it)->world_update();
     }
-  };
+  }
 }
 
