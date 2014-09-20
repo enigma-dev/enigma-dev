@@ -405,6 +405,11 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
           repstr = "enigma::glaccess(int("   + exp +   "))->" + member;
           repsyn = "nnnnnnnnnnnnnnnn(ccc(" + expsynt + "))->" + string(member.length(),'n');
         }
+        else if(glob->globals.find(member) != glob->globals.end()) //Remove object access to globals
+        {
+          repstr = member;
+          repsyn = string(member.length(),'n');
+        }
         else
         {
           repstr = "enigma::varaccess_";
