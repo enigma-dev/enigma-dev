@@ -93,77 +93,23 @@ inline string string_replace_all(string str,string substr,string nstr)
 
 inline string fc(const char* fn)
 {
-  FILE *pt = fopen(fn,"rb");
-  if (pt==NULL) return "";
+  FILE *file = fopen(fn,"rb");
+  if (!file) return "";
 
-  fseek(pt,0,SEEK_END);
-  size_t sz = ftell(pt);
-  fseek(pt,0,SEEK_SET);
+  fseek(file, 0, SEEK_END);
+  size_t sz = ftell(file);
+  fseek(file, 0, SEEK_SET);
 
-  char a[sz+1];
-  sz = fread(a,1,sz,pt);
-  fclose(pt);
+  char *a = new char[sz];
+  sz = fread(a, 1, sz, file);
+  fclose(file);
 
-  a[sz] = 0;
-  return a;
-}
-
-string toUpper(string x) { string res = x; for (size_t i = 0; i < res.length(); i++) res[i] = res[i] >= 'a' and res[i] <= 'z' ? res[i] + 'A' - 'a' : res[i]; return res; }
-void clear_ide_editables()
-{
-  ofstream wto;
-  string f2comp = fc((makedir + "API_Switchboard.h").c_str());
-  string f2write = license;
-    string inc = "/include.h\"\n";
-    f2write += "#include \"Platforms/" + (extensions::targetAPI.windowSys)            + "/include.h\"\n"
-               "#include \"Graphics_Systems/" + (extensions::targetAPI.graphicsSys)   + "/include.h\"\n"
-               "#include \"Audio_Systems/" + (extensions::targetAPI.audioSys)         + "/include.h\"\n"
-               "#include \"Collision_Systems/" + (extensions::targetAPI.collisionSys) + "/include.h\"\n"
-               "#include \"Networking_Systems/" + (extensions::targetAPI.networkSys) + "/include.h\"\n"
-               "#include \"Widget_Systems/" + (extensions::targetAPI.widgetSys)       + inc;
-
-    const string incg = "#include \"", impl = "/implement.h\"\n";
-    f2write += "\n// Extensions selected by user\n";
-    for (unsigned i = 0; i < parsed_extensions.size(); i++)
-    {
-      ifstream ifabout((parsed_extensions[i].pathname + "/About.ey").c_str());
-      ey_data about = parse_eyaml(ifabout,parsed_extensions[i].path + parsed_extensions[i].name + "/About.ey");
-      f2write += incg + parsed_extensions[i].pathname + inc;
-      if (parsed_extensions[i].implements != "")
-        f2write += incg + parsed_extensions[i].pathname + impl;
-    }
-
-  if (f2comp != f2write)
-  {
-    wto.open((makedir +"API_Switchboard.h").c_str(),ios_base::out);
-      wto << f2write << endl;
-    wto.close();
-  }
-
-  wto.open((makedir +"Preprocessor_Environment_Editable/LIBINCLUDE.h").c_str());
-    wto << license;
-    wto << "/*************************************************************\nOptionally included libraries\n****************************/\n";
-    wto << "#define STRINGLIB 1\n#define COLORSLIB 1\n#define STDRAWLIB 1\n#define PRIMTVLIB 1\n#define WINDOWLIB 1\n"
-           "#define STDDRWLIB 1\n#define GMSURFACE 0\n#define BLENDMODE 1\n";
-    wto << "/***************\nEnd optional libs\n ***************/\n";
-  wto.close();
-
-  wto.open((makedir +"Preprocessor_Environment_Editable/GAME_SETTINGS.h").c_str(),ios_base::out);
-    wto << license;
-    wto << "#define ASSUMEZERO 0\n";
-    wto << "#define PRIMBUFFER 0\n";
-    wto << "#define PRIMDEPTH2 6\n";
-    wto << "#define AUTOLOCALS 0\n";
-    wto << "#define MODE3DVARS 0\n";
-    wto << "void ABORT_ON_ALL_ERRORS() { }\n";
-    wto << '\n';
-  wto.close();
+  string res(a, sz);
+  delete[] a;
+  return res;
 }
 
 #include "System/builtins.h"
-
-// modes: 0=run, 1=debug, 2=design, 3=compile
-enum { emode_run, emode_debug, emode_design, emode_compile, emode_rebuild };
 
 dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode) {
   return current_language->compile(es, exe_filename, mode);
@@ -805,5 +751,5 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
 
   idpr("Done.", 100);
   return 0;
-};
+}
 

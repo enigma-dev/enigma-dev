@@ -20,11 +20,11 @@
 #include "util/Image.h"
 
 #define ER_NoIdeFunc "ERROR: Call to IDE-supplied function not substantiated by signaled memory block"
-void javano_signal() { puts(ER_NoIdeFunc); }
-void javano_signal_i(int) { puts(ER_NoIdeFunc); }
-void javano_signal_cstr(const char*) { puts(ER_NoIdeFunc); }
-int javano_signal_exec(String, String *, boolean) { puts(ER_NoIdeFunc); return -1; }
-Image *javano_signal_buffer(char *, int) { puts(ER_NoIdeFunc); return NULL; }
+static void javano_signal() { puts(ER_NoIdeFunc); }
+static void javano_signal_i(int) { puts(ER_NoIdeFunc); }
+static void javano_signal_cstr(const char*) { puts(ER_NoIdeFunc); }
+static int javano_signal_exec(String, String *, boolean) { puts(ER_NoIdeFunc); return -1; }
+static Image *javano_signal_buffer(char *, int) { puts(ER_NoIdeFunc); return NULL; }
 
 //Opens the EnigmaFrame
 void (*ide_dia_open) () = javano_signal;
