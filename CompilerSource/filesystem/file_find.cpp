@@ -29,15 +29,10 @@
 using namespace std;
 
 #include "OS_Switchboard.h"
+#include "file_find.h"
 
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
   #include <windows.h>
-  const int fa_archive   = FILE_ATTRIBUTE_ARCHIVE;   //0x0020
-  const int fa_directory = FILE_ATTRIBUTE_DIRECTORY; //0x0010
-  const int fa_hidden    = FILE_ATTRIBUTE_HIDDEN;    //0x0002
-  const int fa_readonly  = FILE_ATTRIBUTE_READONLY;  //0x0001
-  const int fa_sysfile   = FILE_ATTRIBUTE_SYSTEM;    //0x0004
-  const int fa_volumeid  = 0x0008;
 
   static int ff_attribs=0;
   static HANDLE current_find = INVALID_HANDLE_VALUE;
@@ -89,14 +84,6 @@ using namespace std;
   #include <sys/stat.h>
   #include <dirent.h>
   #include <unistd.h>
-
-  const int fa_archive   = 0x000020; // Does nothing
-  const int fa_directory = 0x000010;
-  const int fa_hidden    = 0x000002;
-  const int fa_readonly  = 0x000001;
-  const int fa_sysfile   = 0x000004;
-  const int fa_volumeid  = 0x000008;
-  const int fa_nofiles   = 0x800000;
 
   static DIR* fff_dir_open = NULL;
   static string fff_mask, fff_path;

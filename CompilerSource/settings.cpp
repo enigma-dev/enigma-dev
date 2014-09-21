@@ -45,6 +45,4 @@ namespace setting
   bool inherit_objects = 0;  // Determines whether objects should automatically inherit locals and events from their parents
   string make_directory = "";
   COMPLIANCE_LVL compliance_mode = COMPL_STANDARD;
-};
-
-
+}

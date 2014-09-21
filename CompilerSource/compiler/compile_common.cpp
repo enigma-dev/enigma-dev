@@ -34,9 +34,10 @@ using namespace std;
 
 namespace used_funcs
 {
+  // TODO(JoshDreamland): This is hideous, and was never implemented.
+  // Replace with map of functions of interest
   bool object_set_sprite = 0;
-  void zero()
-  {
+  void zero() {
     object_set_sprite = 0;
   }
 }
