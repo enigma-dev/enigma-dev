@@ -47,9 +47,6 @@ using namespace std;
 
 #include "languages/lang_CPP.h"
 
-// modes: 0=run, 1=debug, 2=design, 3=compile
-enum { emode_run, emode_debug, emode_design, emode_compile, emode_rebuild };
-
 int lang_CPP::compile_writeRoomData(EnigmaStruct* es, parsed_object *EGMglobal, int mode)
 {
   ofstream wto((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_roomarrays.h").c_str(),ios_base::out);
@@ -169,6 +166,8 @@ int lang_CPP::compile_writeRoomData(EnigmaStruct* es, parsed_object *EGMglobal, 
 
     if (es->rooms[i].id > room_highid)
       room_highid = es->rooms[i].id;
+    
+    (void)EGMglobal; // No need to know globals, here.
   }
 
   wto << "  };\n  \n"; // End of all rooms

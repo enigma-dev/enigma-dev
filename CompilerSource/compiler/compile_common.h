@@ -33,6 +33,15 @@
 #include "compile_organization.h"
 #include "parser/object_storage.h"
 
+// modes: 0=run, 1=debug, 2=design, 3=compile
+enum compile_modes {
+  emode_run,
+  emode_debug,
+  emode_design,
+  emode_compile,
+  emode_rebuild
+};
+
 namespace used_funcs
 {
   extern bool object_set_sprite;

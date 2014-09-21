@@ -56,7 +56,7 @@ namespace setting
   //Prefer generalized solutions; use these for direct incompatibilities. (Add other GM versions as needed).
   enum COMPLIANCE_LVL {
     COMPL_STANDARD = 0,  //Standard (enigma) compliance. Default and recommended.
-    COMPL_GM5 = 1,       //GM5 compliance. timeline_running will default to "true".
+    COMPL_GM5 = 1        //GM5 compliance. timeline_running will default to "true".
   };
 
   //Compatibility / Progess options

@@ -59,15 +59,21 @@ namespace settings
 #include "OS_Switchboard.h"
 #include "languages/language_adapter.h"
 
-extern string toUpper(string);
+static inline string toUpper(string x) {
+  string res = x;
+  for (size_t i = 0; i < res.length(); i++)
+    res[i] = res[i] >= 'a' and res[i] <= 'z' ? res[i] + 'A' - 'a' : res[i];
+  return res;
+}
+
 namespace extensions
 {
   map<string, string> locals;
-  string unmangled_type_pre(string str) { 
+  static inline string unmangled_type_pre(string str) { 
     size_t pm = str.find_first_of(")[");
     return pm == string::npos ? str : str.substr(0,pm);
   }
-  string unmangled_type_suf(string str) {
+  static inline string unmangled_type_suf(string str) {
     size_t pm = str.find_first_of(")[");
     return pm == string::npos ? "" : str.substr(pm);
   }

@@ -32,7 +32,7 @@ using namespace std;
 #include "syntax/syncheck.h"
   #include "parser/parser.h"
   #include "parser/object_storage.h"
-  #include "compiler/compile.h"
+  #include "compiler/compile_common.h"
   #include "syntax/checkfile.h"
 
 
@@ -151,10 +151,7 @@ int main(int argc, char* argv[])
     quickmember_variable(&globals_scope, jdi::builtin_type__int, "sprite0");
   }
 
-  EnigmaStruct es = {
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-  };
+  EnigmaStruct es;
 
   GmObject obj = {0,0,0,0,0,0,0,0,0,0,0};
   MainEvent mev = {0,0,0};
