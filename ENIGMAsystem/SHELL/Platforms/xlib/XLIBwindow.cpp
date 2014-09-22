@@ -549,12 +549,58 @@ void keyboard_clear(const int key)
 
 bool keyboard_check_direct(int key)
 {
- // gk=XLookupKeysym(&e.xkey,0);
- // if (gk==NoSymbol)
-  //  return 0;
+  char keyState[32];
 
- // if (!(gk & 0xFF00)) actualKey = enigma_user::keyboard_get_map((int)enigma::keymap[gk & 0xFF]);
- // else actualKey = enigma_user::keyboard_get_map((int)enigma::keymap[gk & 0x1FF]);
+  if ( XQueryKeymap(enigma::x11::disp, keyState) )  {
+    //for (int x = 0; x < 32; x++)
+    //keyState[x] = 0;
+  } else {
+    //TODO: print error message.
+    return 0;
+  }
+
+  if (key == vk_anykey) {
+    // next go through each member of keyState array
+    for (unsigned i = 0; i < 32; i++ )
+    {
+      const char& currentChar = keyState[i];
+
+      // iterate over each bit and check if the bit is set
+      for (unsigned j = 0; j < 8; j++ )
+      {
+        // AND current char with current bit we're interested in
+        bool isKeyPressed = ((1 << j) & currentChar) != 0;
+
+        if (isKeyPressed )
+        {
+          return 1;
+        }
+      }
+    }
+    return 0;
+  }
+  if (key == vk_anykey) {
+    // next go through each member of keyState array
+    for (unsigned i = 0; i < 32; i++ )
+    {
+      const char& currentChar = keyState[i];
+
+      // iterate over each bit and check if the bit is set
+      for (unsigned j = 0; j < 8; j++ )
+      {
+        // AND current char with current bit we're interested in
+        bool isKeyPressed = ((1 << j) & currentChar) != 0;
+
+        if (isKeyPressed )
+        {
+          return 0;
+        }
+      }
+    }
+    return 1;
+  }
+
+  return ((keyState[key/8] >> (key%8)) & 1);
 }
 
 void window_set_region_scale(double scale, bool adaptwindow)
