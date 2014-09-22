@@ -214,6 +214,7 @@ static int getWindowDimension(int i)
 }
 
 namespace enigma {
+  bool windowAdapt = true;
   int regionWidth = 0, regionHeight = 0, windowWidth = 0, windowHeight = 0, windowX = 0, windowY = 0;
   double scaledWidth = 0, scaledHeight = 0;
   extern bool isFullScreen;
