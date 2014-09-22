@@ -55,7 +55,7 @@ namespace enigma
         if (showIcons)
             newlong |= WS_POPUPWINDOW;
         if (isVisible)
-            newlong |= WS_VISIBLE;
+            newlong |= WS_VISIBLE | WS_EX_APPWINDOW;
 
         return newlong;
     }
@@ -349,6 +349,11 @@ void window_set_visible(bool visible)
     if (enigma::isVisible == visible)
         return;
 
+    if (!visible) {
+      ShowWindow(enigma::hWnd,SW_HIDE);
+    } else {
+      ShowWindow(enigma::hWnd,SW_SHOW);
+    }
     enigma::isVisible = visible;
     enigma::setwindowstyle();
 }
