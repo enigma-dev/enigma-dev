@@ -42,7 +42,6 @@ using namespace enigma::x11;
 
 namespace enigma {
 	extern bool freezeOnLoseFocus;
-   extern int windowColor;
 }
 
 //////////
@@ -287,6 +286,7 @@ void window_set_position(int x,int y)
 }
 void window_set_size(unsigned int w,unsigned int h) {
 	XResizeWindow(disp,win, w, h);
+  enigma::setwindowsize();
 }
 void window_set_rectangle(int x,int y,int w,int h) {
 	XMoveResizeWindow(disp, win, x, y, w, h);
