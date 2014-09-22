@@ -50,6 +50,9 @@ namespace enigma
   extern char keymap[512];
   void ENIGMA_events(void); //TODO: Synchronize this with Windows by putting these two in a single header.
   bool gameWindowFocused = false;
+  extern int windowX, windowY, windowWidth, windowHeight;
+  extern void setwindowsize();
+  extern void WindowResized();
   extern bool freezeOnLoseFocus;
   unsigned int pausedSteps = 0;
   
@@ -138,7 +141,11 @@ namespace enigma
           return 0;
         }
         case Expose: {
-            //screen_refresh();
+          enigma::windowX = e.x;
+          enigma::windowY = e.y;
+          enigma::windowWidth = e.width;
+          enigma::windowHeight = e.height;
+          enigma::setwindowsize();
           return 0;
         }
         case FocusIn:
