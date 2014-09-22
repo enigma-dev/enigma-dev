@@ -73,11 +73,6 @@ namespace enigma {
     enigma_user::draw_clear(enigma_user::window_get_color());
   }
   
-  void WindowResized() {
-    // clear the window color, viewport does not need set because backbuffer was just recreated
-    enigma_user::draw_clear(enigma_user::window_get_color());
-  }
-  
   namespace swaphandling {
     bool has_checked_extensions = false;
     bool ext_swapcontrol_supported;
