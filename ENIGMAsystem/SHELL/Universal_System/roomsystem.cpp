@@ -722,7 +722,9 @@ void window_view_mouse_set(int id, int x, int y)
 //ENIGMA's behaviour is a modified version of GM8.1, it uses the current view to obtain these positions so that it will work correctly
 //for overlapped views while being backwards compatible.
 int window_views_mouse_get_x() {
-  int x = window_mouse_get_x();
+  gs_scalar sx;
+  sx = (window_get_width() - window_get_region_width_scaled()) / 2;
+  int x = (window_mouse_get_x() - sx) * ((gs_scalar)window_get_region_width() / (gs_scalar)window_get_region_height_width());
   if (view_enabled) {
     x = view_xview[view_current]+((x-view_xport[view_current])/(double)view_wport[view_current])*view_wview[view_current];
   }
@@ -744,7 +746,9 @@ int window_views_mouse_get_x() {
 }
 
 int window_views_mouse_get_y() {
-  int y = window_mouse_get_y();
+  gs_scalar sy;
+  sy = (window_get_height() - window_get_region_height_scaled()) / 2;
+  int y = (window_mouse_get_y() - sy) * ((gs_scalar)window_get_region_height() / (gs_scalar)window_get_region_height_scaled());
   if (view_enabled) {
     y = view_yview[view_current]+((y-view_yport[view_current])/(double)view_hport[view_current])*view_hview[view_current];
   }
@@ -789,17 +793,13 @@ namespace enigma
     mouse_xprevious = mouse_x;
     mouse_yprevious = mouse_y;
 
-      //x = (x / window_get_region_width()) * window_get_region_width_scaled();
-  //y = (y / window_get_region_height()) * window_get_region_height_scaled();
-  //width = (width / window_get_region_width()) * window_get_region_width_scaled();
-  //height = (height / window_get_region_height()) * window_get_region_height_scaled();
-    gs_scalar sx, sy, ratio;
+    gs_scalar sx, sy;
     sx = (window_get_width() - window_get_region_width_scaled()) / 2;
     sy = (window_get_height() - window_get_region_height_scaled()) / 2;
-    ratio = ((gs_scalar)window_get_region_width() / (gs_scalar)window_get_region_width_scaled());
-    
-    mouse_x = (window_mouse_get_x() - sx) * ratio;
-    mouse_y = (window_mouse_get_y() - sy) * ratio;
+
+    // scale the mouse positions to the area on screen where we put the scaled viewports for the scaling options
+    mouse_x = (window_mouse_get_x() - sx) * ((gs_scalar)window_get_region_width() / (gs_scalar)window_get_region_width_scaled());
+    mouse_y = (window_mouse_get_y() - sy) * ((gs_scalar)window_get_region_height() / (gs_scalar)window_get_region_height_scaled());
 
     if (view_enabled) {
       for (int i = 0; i < 8; i++) { 
@@ -815,6 +815,7 @@ namespace enigma
       mouse_y = view_yview[view_current]+((mouse_y-view_yport[view_current])/(double)view_hport[view_current])*view_hview[view_current];
     }
   }
+  
   void rooms_switch()
   {
     if (enigma_user::room_exists(room_switching_id)) {
@@ -825,6 +826,7 @@ namespace enigma
       enigma::roomdata[local_room_switching_id]->gotome(local_room_switching_restartgame);
     }
   }
+  
   void game_start() {
     enigma::roomstruct *rit = *enigma::roomorder;
     enigma::roomdata[rit->id]->gotome(true);
