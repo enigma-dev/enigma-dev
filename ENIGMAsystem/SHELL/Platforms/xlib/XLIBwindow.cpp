@@ -571,7 +571,7 @@ bool keyboard_check_direct(int key)
         // AND current char with current bit we're interested in
         bool isKeyPressed = ((1 << j) & currentChar) != 0;
 
-        if (isKeyPressed )
+        if (isKeyPressed)
         {
           return 1;
         }
@@ -591,7 +591,7 @@ bool keyboard_check_direct(int key)
         // AND current char with current bit we're interested in
         bool isKeyPressed = ((1 << j) & currentChar) != 0;
 
-        if (isKeyPressed )
+        if (isKeyPressed)
         {
           return 0;
         }
@@ -600,7 +600,11 @@ bool keyboard_check_direct(int key)
     return 1;
   }
 
+  // enter, backspace and some keys do not map properly but most such as space and A-Z 0-9 do
+  key = XKeysymToKeycode(enigma::x11::disp, key);
+  //return ((keyState[enigma::keymap[key]/8] >> (enigma::keymap[key]%8)) & 1);
   return ((keyState[key/8] >> (key%8)) & 1);
+  //return (keyState[key/8]&(0x1<<(key%8))); //NOTE: Alternative, not really sure which is better.
 }
 
 void window_set_region_scale(double scale, bool adaptwindow)
