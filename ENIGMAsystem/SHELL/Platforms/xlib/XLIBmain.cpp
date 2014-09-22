@@ -41,10 +41,6 @@ namespace enigma_user {
   extern int keyboard_lastkey;
   extern string keyboard_lastchar;
   extern string keyboard_string;
-  
-  void EnableDrawing();
-  void DisableDrawing();
-  void WindowResized();
 }
 
 namespace enigma
@@ -55,6 +51,10 @@ namespace enigma
   bool gameWindowFocused = false;
   extern bool freezeOnLoseFocus;
   unsigned int pausedSteps = 0;
+  
+  void EnableDrawing();
+  void DisableDrawing();
+  void WindowResized();
 
   namespace x11
   {
