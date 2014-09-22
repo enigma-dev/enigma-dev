@@ -22,7 +22,6 @@
 #include <string> //Return strings without needing a GC
 #include <map>
 #include <X11/Xlib.h>
-#include <GL/glx.h>
 
 using namespace std;
 
@@ -82,8 +81,10 @@ void window_set_visible(bool visible)
 	if(visible)
 	{
 		XMapRaised(disp,win);
-		GLXContext glxc = glXGetCurrentContext();
-		glXMakeCurrent(disp,win,glxc);
+    //TODO: Move to bridges or some shit this is the last remaining GL call in XLIB
+    //#include <GL/glx.h>
+		//GLXContext glxc = glXGetCurrentContext();
+		//glXMakeCurrent(disp,win,glxc);
 		if(visx != -1 && visy != -1)
 			window_set_position(visx,visy);
 	}
