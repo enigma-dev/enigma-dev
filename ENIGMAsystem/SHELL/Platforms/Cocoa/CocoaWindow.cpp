@@ -177,8 +177,6 @@ int window_set_cursor(int c)
 	return 0;
 }
 
-void window_set_color(int color) {}
-
 int window_get_region_width() { return cocoa_window_get_region_width();}
 int window_get_region_height() { return cocoa_window_get_region_height();}
 
