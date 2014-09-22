@@ -225,6 +225,7 @@ namespace enigma {
       if (!regionWidth)
           return;
 
+      Screen *screen = DefaultScreenOfDisplay(disp);
       int parWidth = isFullScreen?XWidthOfScreen(screen):windowWidth, parHeight = isFullScreen?XHeightOfScreen(screen):windowHeight;
       if (viewScale > 0)  //Fixed Scale
       {
