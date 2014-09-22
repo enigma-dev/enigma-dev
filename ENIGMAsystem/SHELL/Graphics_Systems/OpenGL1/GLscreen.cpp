@@ -53,6 +53,8 @@ using namespace enigma_user;
 namespace enigma_user {
   extern int window_get_width();
   extern int window_get_height();
+  extern int window_get_region_width();
+  extern int window_get_region_height();
 }
 
 namespace enigma
@@ -301,11 +303,11 @@ void screen_redraw()
   if (!view_enabled)
   {
     if (bound_framebuffer != 0) //This fixes off-by-one error when rendering on surfaces. This should be checked to see if other GPU's have the same effect
-      screen_set_viewport(1, 1, window_get_region_width_scaled(), window_get_region_height_scaled());
+      screen_set_viewport(1, 1, window_get_region_width(), window_get_region_height());
     else
-      screen_set_viewport(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled());
+      screen_set_viewport(0, 0, window_get_region_width(), window_get_region_height());
     
-    clear_view(0, 0, room_width, room_height, 0, background_showcolor);
+    clear_view(0, 0, window_get_region_width(), window_get_region_height(), 0, background_showcolor);
     draw_back();
     draw_insts();
     draw_tiles();
@@ -350,7 +352,7 @@ void screen_redraw()
   // It is for drawing GUI elements without view scaling and transformation
   if (enigma::gui_used)
   {
-    screen_set_viewport(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled());
+    screen_set_viewport(0, 0, window_get_region_width(), window_get_region_height());
     d3d_set_projection_ortho(0, 0, enigma::gui_width, enigma::gui_height, 0);
 	
     // Clear the depth buffer if hidden surface removal is on at the beginning of the draw step.
@@ -377,8 +379,8 @@ void screen_redraw()
 
 void screen_init()
 {
-  enigma::gui_width = window_get_region_width_scaled();
-  enigma::gui_height = window_get_region_height_scaled();
+  enigma::gui_width = window_get_region_width();
+  enigma::gui_height = window_get_region_height();
 
   glClearColor(0,0,0,0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -386,7 +388,7 @@ void screen_init()
   if (!view_enabled)
   {
     glClearColor(0,0,0,0);
-    screen_set_viewport(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled());
+    screen_set_viewport(0, 0, window_get_region_width(), window_get_region_height());
     d3d_set_projection_ortho(0, 0, room_width, room_height, 0);
   } else {
     for (view_current = 0; view_current < 7; view_current++)
@@ -406,6 +408,7 @@ void screen_init()
 
   glDisable(GL_DEPTH_TEST);
   glEnable(GL_BLEND);
+  glEnable(GL_SCISSOR_TEST);
   glEnable(GL_ALPHA_TEST);
   glEnable(GL_TEXTURE_2D);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -453,7 +456,15 @@ int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h
 }
 
 void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height) {
-	glViewport(x, y, width, height);
+  x = (x / window_get_region_width()) * window_get_region_width_scaled();
+  y = (y / window_get_region_height()) * window_get_region_height_scaled();
+  width = (width / window_get_region_width()) * window_get_region_width_scaled();
+  height = (height / window_get_region_height()) * window_get_region_height_scaled();
+  gs_scalar sx, sy;
+  sx = (window_get_width() - window_get_region_width_scaled()) / 2;
+  sy = (window_get_height() - window_get_region_height_scaled()) / 2;
+	glViewport(sx + x, sy + y, width, height);
+  glScissor(sx + x, sy + y, width, height);
 }
 
 void display_set_gui_size(unsigned width, unsigned height) {

@@ -82,26 +82,27 @@ int lang_CPP::compile_writeGlobals(EnigmaStruct* es, parsed_object* global)
 
     wto << "namespace enigma {" << endl;
     wto << "  bool interpolate_textures = " << es->gameSettings.interpolate << ";" << endl;
-	wto << "  bool forceSoftwareVertexProcessing = " << es->gameSettings.forceSoftwareVertexProcessing << ";" << endl;
+    wto << "  bool forceSoftwareVertexProcessing = " << es->gameSettings.forceSoftwareVertexProcessing << ";" << endl;
     wto << "  bool isSizeable = " << es->gameSettings.allowWindowResize << ";" << endl;
     wto << "  bool showBorder = " << !es->gameSettings.dontDrawBorder << ";" << endl;
     wto << "  bool showIcons = " << !es->gameSettings.dontShowButtons << ";" << endl;
     wto << "  bool freezeOnLoseFocus = " << es->gameSettings.freezeOnLoseFocus << ";" << endl;
-	wto << "  bool treatCloseAsEscape = " << es->gameSettings.treatCloseAsEscape << ";" << endl;
+    wto << "  bool treatCloseAsEscape = " << es->gameSettings.treatCloseAsEscape << ";" << endl;
     wto << "  bool isFullScreen = " << es->gameSettings.startFullscreen << ";" << endl;
-	wto << "  string gameInfoText = \"" << esc(es->gameInfo.gameInfoStr) << "\";" << endl;
-	wto << "  string gameInfoCaption = \"" << es->gameInfo.formCaption << "\";" << endl;
-	wto << "  int gameInfoBackgroundColor = " << javaColor(es->gameInfo.backgroundColor) << ";" << endl;
-	wto << "  int gameInfoLeft = " << es->gameInfo.left << ";" << endl;
-	wto << "  int gameInfoTop = " << es->gameInfo.top << ";" << endl;
-	wto << "  int gameInfoWidth = " << es->gameInfo.width << ";" << endl;
-	wto << "  int gameInfoHeight = " << es->gameInfo.height << ";" << endl;
-	wto << "  bool gameInfoEmbedGameWindow = " << es->gameInfo.embedGameWindow << ";" << endl;
-	wto << "  bool gameInfoShowBorder = " << es->gameInfo.showBorder << ";" << endl;
-	wto << "  bool gameInfoAllowResize = " << es->gameInfo.allowResize << ";" << endl;
-	wto << "  bool gameInfoStayOnTop = " << es->gameInfo.stayOnTop << ";" << endl;
-	wto << "  bool gameInfoPauseGame = " << es->gameInfo.pauseGame << ";" << endl;
+    wto << "  string gameInfoText = \"" << esc(es->gameInfo.gameInfoStr) << "\";" << endl;
+    wto << "  string gameInfoCaption = \"" << es->gameInfo.formCaption << "\";" << endl;
+    wto << "  int gameInfoBackgroundColor = " << javaColor(es->gameInfo.backgroundColor) << ";" << endl;
+    wto << "  int gameInfoLeft = " << es->gameInfo.left << ";" << endl;
+    wto << "  int gameInfoTop = " << es->gameInfo.top << ";" << endl;
+    wto << "  int gameInfoWidth = " << es->gameInfo.width << ";" << endl;
+    wto << "  int gameInfoHeight = " << es->gameInfo.height << ";" << endl;
+    wto << "  bool gameInfoEmbedGameWindow = " << es->gameInfo.embedGameWindow << ";" << endl;
+    wto << "  bool gameInfoShowBorder = " << es->gameInfo.showBorder << ";" << endl;
+    wto << "  bool gameInfoAllowResize = " << es->gameInfo.allowResize << ";" << endl;
+    wto << "  bool gameInfoStayOnTop = " << es->gameInfo.stayOnTop << ";" << endl;
+    wto << "  bool gameInfoPauseGame = " << es->gameInfo.pauseGame << ";" << endl;
     wto << "  int viewScale = " << es->gameSettings.scaling << ";" << endl;
+    wto << "  int windowColor = " << javaColor(es->gameSettings.colorOutsideRoom) << ";" << endl;
     wto << "}" << endl;
 
     for (parsed_object::globit i = global->globals.begin(); i != global->globals.end(); i++)
