@@ -43,7 +43,7 @@ namespace enigma
     double scaledWidth = 0, scaledHeight = 0;
     char* currentCursor = IDC_ARROW;
     extern bool isSizeable, showBorder, showIcons, freezeOnLoseFocus, isFullScreen;
-    extern int viewScale;
+    extern int viewScale, windowColor;
 
     LONG_PTR getwindowstyle()
     {
