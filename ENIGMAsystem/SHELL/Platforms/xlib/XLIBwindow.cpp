@@ -17,9 +17,6 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
- //File consists of Ism's code glued together and set to work with ENIGMA
- //(Josh's doing)
-
 #include <stdio.h> //printf, NULL
 #include <stdlib.h> //malloc
 #include <unistd.h> //usleep
@@ -28,13 +25,7 @@
 #include <map>
 #include <climits>
 #include <X11/Xlib.h>
-//#include <X11/Xutil.h>
-//#include <X11/Xos.h>
-//#include <X11/Xatom.h>
-//#include <X11/keysym.h>
 #include <GL/glx.h>
-//#include <GL/gl.h>
-//#include <GL/glu.h>
 
 using namespace std;
 
@@ -540,33 +531,3 @@ int window_get_color()
 }
 
 }
-/*
-display_get_width() // Returns the width of the display in pixels.
-display_get_height() // Returns the height of the display in pixels.
-display_set_size(w,h) Sets the width and height of the display in pixels. Returns whether this was
-successful. (Realize that only certain combinations are allowed.)
-display_get_colordepth() Returns the color depth in bits.
-display_get_frequency() Returns the refresh frequency of the display.
-display_set_colordepth(coldepth) Sets the color depth. In general only 16 and 32 are allowed values. Returns whether successful.
-display_set_frequency(frequency) Sets the refresh frequency for the display. Only few frequencies are allowed. Typically you could set this to 60 with a same room speed to get smooth 60 frames per second motion. Returns whether successful.
-
-display_set_all(w,h,frequency,coldepth) Sets all at once. Use -1 for values you do not want to change. Returns whether successful.
-display_test_all(w,h,frequency,coldepth) Tests whether the indicated settings are allowed. It does not change the settings. Use -1 for values you do not want to change. Returns whether the settings are allowed.
-display_reset() Resets the display settings to the ones when the program was started.
-
-
-window_default()
-window_get_cursor()
-window_set_color(color)
-window_get_color()
-window_set_region_scale(scale,adaptwindow)
-window_get_region_scale()
-window_set_showborder(show)
-window_get_showborder()
-window_set_showicons(show)
-window_get_showicons()
-window_set_stayontop(stay)
-window_get_stayontop()
-window_set_sizeable(sizeable)
-window_get_sizeable()
-*/
