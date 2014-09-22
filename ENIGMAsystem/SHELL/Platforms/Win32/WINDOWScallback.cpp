@@ -40,6 +40,8 @@ extern int keyboard_key;
 extern int keyboard_lastkey;
 extern string keyboard_lastchar;
 extern string keyboard_string;
+void draw_clear(int col);
+void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height);
 }
 
 namespace enigma
@@ -50,11 +52,14 @@ namespace enigma
     using enigma_user::keyboard_string;
     extern char mousestatus[3],last_mousestatus[3],keybdstatus[256],last_keybdstatus[256];
     map<int,int> keybdmap;
-    extern int windowX, windowY, windowWidth, windowHeight;
-    extern double  scaledWidth, scaledHeight;
+    extern int windowX, windowY, windowWidth, windowHeight, windowColor;
+    extern int viewScale;
+    extern double scaledWidth, scaledHeight;
     extern char* currentCursor;
     extern HWND hWnd,hWndParent;
-    extern void setchildsize(bool adapt);
+    extern HDC window_hDC;
+    extern LONG_PTR getwindowstyle();
+    extern void setwindowsize();
     extern void WindowResized();
     extern unsigned int pausedSteps;
     extern bool gameWindowFocused, treatCloseAsEscape;
@@ -85,20 +90,6 @@ namespace enigma
         case WM_DESTROY:
           return 0;
 
-        case WM_SIZE:
-          // make sure window resized is only processed once per resize because we have a parent and a child window
-          if (hWndParameter == hWnd) {
-            WindowResized();
-            instance_event_iterator = new inst_iter(NULL,NULL,NULL);
-            for (enigma::iterator it = enigma::instance_list_first(); it; ++it)
-            {
-              it->myevent_drawresize();
-            }
-          } else {
-            DefWindowProc(hWndParameter, message, wParam, lParam);
-          }
-          return 0;
-
         case WM_SETFOCUS:
           input_initialize();
           gameWindowFocused = true;
@@ -118,6 +109,20 @@ namespace enigma
           }
           gameWindowFocused = false;
           return 0;
+          
+        case WM_SIZE:
+          // make sure window resized is only processed once per resize because there could possibly be child windows and handles, especially with widgets
+          if (hWndParameter == hWnd) {
+            WindowResized();
+            instance_event_iterator = new inst_iter(NULL,NULL,NULL);
+            for (enigma::iterator it = enigma::instance_list_first(); it; ++it)
+            {
+              it->myevent_drawresize();
+            }
+          } else {
+            DefWindowProc(hWndParameter, message, wParam, lParam);
+          }
+          return 0;
 
         case WM_ENTERSIZEMOVE:
           GetWindowRect(hWndParameter,&tempWindow);
@@ -131,17 +136,26 @@ namespace enigma
           GetWindowRect(hWndParameter,&tempWindow);
           tempWidth = windowWidth + (tempWindow.right - tempWindow.left) - (tempRight - tempLeft);
           tempHeight = windowHeight + (tempWindow.bottom - tempWindow.top) - (tempBottom - tempTop);
-          if (tempWidth < scaledWidth)
-              tempWidth = scaledWidth;
-          if (tempHeight < scaledHeight)
-              tempHeight = scaledHeight;
 
           windowX += tempWindow.left - tempLeft;
           windowY += tempWindow.top - tempTop;
           windowWidth = tempWidth;
           windowHeight = tempHeight;
-          setchildsize(false);
+          setwindowsize();
           return 0;
+          
+        case WM_GETMINMAXINFO: {
+          if (viewScale > 0) { //Fixed Scale, this is GM8.1 behaviour
+            RECT c;
+            c.left = 0; c.top = 0; c.right = scaledWidth; c.bottom = scaledHeight;
+            AdjustWindowRect(&c, getwindowstyle(), false);
+          
+            LPMINMAXINFO lpMinMaxInfo = (LPMINMAXINFO) lParam;
+            lpMinMaxInfo->ptMinTrackSize.x = c.right-c.left;
+            lpMinMaxInfo->ptMinTrackSize.y = c.bottom-c.top;
+          }
+          break;
+        }
 
         case WM_SETCURSOR:
           // Set the user cursor if the mouse is in the client area of the window, otherwise let Windows handle setting the cursor
@@ -221,6 +235,17 @@ namespace enigma
         case WM_RBUTTONDOWN: mousestatus[1]=1; return 0;
         case WM_MBUTTONUP:   mousestatus[2]=0; return 0;
         case WM_MBUTTONDOWN: mousestatus[2]=1; return 0;
+        
+        case WM_ERASEBKGND: 
+          RECT rc;
+          GetClientRect(hWnd, &rc); 
+          FillRect((HDC) wParam, &rc, CreateSolidBrush(windowColor)); 
+          return 1L; 
+        
+        case WM_PAINT:
+
+          DefWindowProc(hWndParameter, message, wParam, lParam);
+          return 0;
 
 		//case WM_TOUCH:
 		//TODO: touchscreen stuff
@@ -231,10 +256,8 @@ namespace enigma
 		//case WM_GRAPHNOTIFY:
 			//TODO: Handle DirectShow media events
 		//return 0;
-
-        default:
-            return DefWindowProc (hWndParameter, message, wParam, lParam);
       }
+      return DefWindowProc (hWndParameter, message, wParam, lParam);
     }
 
     void input_initialize()
