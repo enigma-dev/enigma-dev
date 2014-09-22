@@ -409,8 +409,11 @@ void show_info(string info, int bgcolor, int left, int top, int width, int heigh
 
 int show_message(string str)
 {
-    MessageBox(enigma::hWnd, str.c_str(), window_get_caption().c_str(), MB_OK);
-    return 0;
+  //NOTE: This will not work with a fullscreen application, it is an issue with Windows
+  //this could be why GM8.1, unlike Studio, did not use native dialogs and custom 
+  //rendered its own message boxes like most game engines.
+  MessageBox(enigma::hWnd, str.c_str(), window_get_caption().c_str(), MB_OK);
+  return 0;
 }
 
 int show_message_ext(string msg, string but1, string but2, string but3)
