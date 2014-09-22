@@ -717,16 +717,6 @@ void window_view_mouse_set(int id, int x, int y)
   window_mouse_set(window_get_x() + x + view_xview[id],window_get_y() + y + view_yview[id]);
 }
 
-void window_set_color(int color)
-{
-    enigma::windowColor = color;
-}
-
-int window_get_color()
-{
-    return enigma::windowColor;
-}
-
 //NOTE: GM8.1 allowed the mouse to go outside the window, for basically all mouse functions and constants, Studio however
 //now wraps the mouse not allowing it to go out of bounds, so it will never report a negative mouse position for constants or functions.
 //On top of this, it not only appears that they have wrapped it, but it appears that they in fact stop updating the mouse altogether in Studio

@@ -699,6 +699,16 @@ void window_mouse_set(int x, int y)
   SetCursorPos(pt.x, pt.y);
 }
 
+void window_set_color(int color)
+{
+    enigma::windowColor = color;
+}
+
+int window_get_color()
+{
+    return enigma::windowColor;
+}
+
 }
 
 namespace enigma_user

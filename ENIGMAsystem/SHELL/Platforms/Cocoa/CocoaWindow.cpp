@@ -57,6 +57,7 @@ namespace enigma {
     extern char last_mousestatus[3];
     extern char last_keybdstatus[256];
     extern char keybdstatus[256];
+    extern int windowColor;
 }
 
 namespace enigma_user {
@@ -75,9 +76,19 @@ namespace enigma_user {
 	return 1; // TODO
   }
 
-void window_set_freezeonlosefocus(bool freeze)
-{
-}
+  void window_set_color(int color)
+  {
+    enigma::windowColor = color;
+  }
+
+  int window_get_color()
+  {
+    return enigma::windowColor;
+  }
+
+  void window_set_freezeonlosefocus(bool freeze)
+  {
+  }
 
 
   int window_set_caption(string caption)
