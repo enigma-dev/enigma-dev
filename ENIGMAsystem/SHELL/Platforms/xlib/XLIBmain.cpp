@@ -52,6 +52,7 @@ namespace enigma
   extern bool freezeOnLoseFocus;
   unsigned int pausedSteps = 0;
   
+  XVisualInfo* CreateVisualInfo();
   void EnableDrawing();
   void DisableDrawing();
   void WindowResized();
@@ -248,6 +249,8 @@ int main(int argc,char** argv)
     wm_delwin = XInternAtom(disp,"WM_DELETE_WINDOW",False);
     Window root = DefaultRootWindow(disp);
 
+    XVisualInfo* vi = enigma::CreateVisualInfo();
+    
     // Window event listening and coloring
     XSetWindowAttributes swa;
     swa.border_pixel = 0;

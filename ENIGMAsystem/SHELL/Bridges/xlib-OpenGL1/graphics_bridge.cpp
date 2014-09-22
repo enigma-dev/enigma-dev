@@ -24,26 +24,31 @@
 
 #include <iostream>
 #include <cstring>
+#include <stdio.h>
 
 // NOTE: Changes/fixes that applies to this likely also applies to the OpenGL3 version.
 
 namespace enigma {
   GLuint msaa_fbo = 0;
   GLXContext glxc;
-
-  void EnableDrawing() {
+  XVisualInfo *vi;
+  
+  XVisualInfo* CreateVisualInfo() {
     // Prepare openGL
     GLint att[] = { GLX_RGBA, GLX_DOUBLEBUFFER, GLX_DEPTH_SIZE, 24, None };
-    XVisualInfo *vi = glXChooseVisual(enigma::x11::disp,0,att);
+    vi = glXChooseVisual(enigma::x11::disp,0,att);
     if(!vi){
-        printf("GLFail\n");
+        printf("Failed to Obtain GL Visual Info\n");
         return -2;
     }
-    
+    return vi;
+  }
+
+  void EnableDrawing() {
     //give us a GL context
     glxc = glXCreateContext(enigma::x11::disp, vi, NULL, True);
     if (!glxc){
-        printf("NoContext\n");
+        printf("Failed to Create Graphics Context\n");
         return -3;
     }
     
