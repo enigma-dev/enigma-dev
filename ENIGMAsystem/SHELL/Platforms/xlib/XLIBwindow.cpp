@@ -197,10 +197,6 @@ void display_mouse_set(double x,double y) {
 ////////////
 // WINDOW //
 ////////////
-    int regionWidth = 0, regionHeight = 0, windowWidth = 0, windowHeight = 0, windowX = 0, windowY = 0;
-    double scaledWidth = 0, scaledHeight = 0;
-    extern bool isFullScreen;
-    extern int viewScale, windowColor;
 
 static int getWindowDimension(int i)
 {
@@ -217,6 +213,12 @@ static int getWindowDimension(int i)
 	return i?(i==1?pwa.y+wa.y:-1):pwa.x+wa.x;
 }
 
+namespace enigma {
+  int regionWidth = 0, regionHeight = 0, windowWidth = 0, windowHeight = 0, windowX = 0, windowY = 0;
+  double scaledWidth = 0, scaledHeight = 0;
+  extern bool isFullScreen;
+  extern int viewScale, windowColor;
+    
   void setwindowsize()
   {
       if (!regionWidth)
@@ -263,6 +265,7 @@ static int getWindowDimension(int i)
         //SetWindowPos(hWnd, NULL, 0, 0, parWidth, parHeight, SWP_NOACTIVATE); 
       }
   }
+}
 
 namespace enigma_user
 {
