@@ -212,13 +212,24 @@ void window_set_stayontop(bool stay) {
 
 bool window_get_stayontop() {return false;}
 
-void window_set_sizeable(bool sizeable) {}
+void window_set_sizeable(bool sizeable) {
+  XSizeHints hints;
+  hints.min_width = 640;
+  hints.min_height = 480;
+  hints.max_width = 641;
+  hints.max_height = 481;
+  XSetWMNormalHints(disp, win, &hints);
+}
 bool window_get_sizeable() {return false;}
-void window_set_showborder(bool show) {}
+void window_set_showborder(bool show) {
+  XSetWindowAttributes swa;
+  swa.override_redirect = show;
+  XChangeWindowAttributes(disp, win, CWOverrideRedirect, &swa);
+}
 bool window_get_showborder() {return true;}
 void window_set_showicons(bool show) {
-  Atom wmState = XInternAtom(disp, "_NET_WM_ALLOWED_ACTIONS", False);
-  Atom aShow = XInternAtom(disp,"_NET_WM_ACTION_RESIZE", False);
+  Atom wmState = XInternAtom(disp, "_NET_WM_WINDOW_TYPE", False);
+  Atom aShow = XInternAtom(disp,"_NET_WM_WINDOW_TYPE_TOOLBAR", False);
   XEvent xev;
   xev.xclient.type=ClientMessage;
   xev.xclient.serial = 0;
