@@ -53,6 +53,7 @@ using namespace enigma::x11;
 
 namespace enigma {
 	extern bool freezeOnLoseFocus;
+   extern int windowColor;
 }
 
 //////////
@@ -510,6 +511,19 @@ int window_get_region_width_scaled()
 int window_get_region_height_scaled()
 {
     return window_get_height();
+}
+
+void window_set_color(int color)
+{
+    enigma::windowColor = color;
+
+    //Inform xlib (TODO: This is not refreshing for some reason.)
+    XSetWindowBackground(disp, win, color);
+}
+
+int window_get_color()
+{
+    return enigma::windowColor;
 }
 
 }
