@@ -724,7 +724,7 @@ void window_view_mouse_set(int id, int x, int y)
 int window_views_mouse_get_x() {
   gs_scalar sx;
   sx = (window_get_width() - window_get_region_width_scaled()) / 2;
-  int x = (window_mouse_get_x() - sx) * ((gs_scalar)window_get_region_width() / (gs_scalar)window_get_region_height_width());
+  int x = (window_mouse_get_x() - sx) * ((gs_scalar)window_get_region_width() / (gs_scalar)window_get_region_width_scaled());
   if (view_enabled) {
     x = view_xview[view_current]+((x-view_xport[view_current])/(double)view_wport[view_current])*view_wview[view_current];
   }
