@@ -250,6 +250,7 @@ int main(int argc,char** argv)
     wm_delwin = XInternAtom(disp,"WM_DELETE_WINDOW",False);
     Window root = DefaultRootWindow(disp);
 
+    // any normal person would know that this should be deleted but the OpenGL bridge does not want it deleted, please beware
     XVisualInfo* vi = enigma::CreateVisualInfo();
     
     // Window event listening and coloring

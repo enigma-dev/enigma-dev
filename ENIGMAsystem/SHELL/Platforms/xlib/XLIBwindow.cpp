@@ -149,7 +149,7 @@ bool window_get_minimized(){ return false; };
 
 void window_default(bool center_size)
 {
-  unsigned int xm = room_width, ym = room_height;
+  int xm = room_width, ym = room_height;
   if (view_enabled)
   {
     int tx = 0, ty = 0;

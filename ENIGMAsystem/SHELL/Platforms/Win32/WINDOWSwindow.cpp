@@ -230,7 +230,7 @@ void window_center()
 
 void window_default(bool center_size)
 {
-  int xm = int(room_width), ym = int(room_height);
+  int xm = room_width, ym = room_height;
   if (view_enabled)
   {
     int tx = 0, ty = 0;
