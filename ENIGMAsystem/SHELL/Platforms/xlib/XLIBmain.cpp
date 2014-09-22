@@ -17,7 +17,6 @@
 **/
 
 #include <X11/Xlib.h>
-#include <GL/glx.h>
 #include <unistd.h>
 #include <stdio.h>
 #include <string>
@@ -42,13 +41,16 @@ namespace enigma_user {
   extern int keyboard_lastkey;
   extern string keyboard_lastchar;
   extern string keyboard_string;
+  
+  void EnableDrawing();
+  void DisableDrawing();
+  void WindowResized();
 }
 
 namespace enigma
 {
   int game_return = 0;
   extern char keymap[512];
-  //extern char usermap[256];
   void ENIGMA_events(void); //TODO: Synchronize this with Windows by putting these two in a single header.
   bool gameWindowFocused = false;
   extern bool freezeOnLoseFocus;
@@ -246,14 +248,6 @@ int main(int argc,char** argv)
     wm_delwin = XInternAtom(disp,"WM_DELETE_WINDOW",False);
     Window root = DefaultRootWindow(disp);
 
-    // Prepare openGL
-    GLint att[] = { GLX_RGBA, GLX_DOUBLEBUFFER, GLX_DEPTH_SIZE, 24, None };
-    XVisualInfo *vi = glXChooseVisual(disp,0,att);
-    if(!vi){
-        printf("GLFail\n");
-        return -2;
-    }
-
     // Window event listening and coloring
     XSetWindowAttributes swa;
     swa.border_pixel = 0;
@@ -280,17 +274,7 @@ int main(int argc,char** argv)
     //printf("Screen: %d %d %d %d\n",s->width/2,s->height/2,winw,winh);
     XMoveWindow(disp,win,(screen->width-winw)/2,(screen->height-winh)/2);
 
-    //geom();
-    //give us a GL context
-    GLXContext glxc = glXCreateContext(disp, vi, NULL, True);
-    if (!glxc){
-        printf("NoContext\n");
-        return -3;
-    }
-
-    //apply context
-    glXMakeCurrent(disp,win,glxc); //flushes
-    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_ACCUM_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
+    enigma::EnableDrawing();
 
     /* XEvent e;//wait for server to report our display request
     do {
@@ -308,15 +292,6 @@ int main(int argc,char** argv)
 
     //Call ENIGMA system initializers; sprites, audio, and what have you
     enigma::initialize_everything();
-
-    /*
-    for(char q=1;q;ENIGMA_events())
-        while(XQLength(disp))
-            if(handleEvents()>0) q=0;
-    glxc = glXGetCurrentContext();
-    glXDestroyContext(disp,glxc);
-    XCloseDisplay(disp);
-    return 0;*/
 
     struct timespec time_offset;
     struct timespec time_offset_slowing;
@@ -404,7 +379,7 @@ int main(int argc,char** argv)
 
     end:
     enigma::game_ending();
-    glXDestroyContext(disp,glxc);
+    enigma::DisableDrawing();
     XCloseDisplay(disp);
     return enigma::game_return;
 }
