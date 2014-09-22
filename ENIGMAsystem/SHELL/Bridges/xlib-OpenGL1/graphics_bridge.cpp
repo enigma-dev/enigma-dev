@@ -34,26 +34,26 @@ namespace enigma {
   void EnableDrawing() {
     // Prepare openGL
     GLint att[] = { GLX_RGBA, GLX_DOUBLEBUFFER, GLX_DEPTH_SIZE, 24, None };
-    XVisualInfo *vi = glXChooseVisual(disp,0,att);
+    XVisualInfo *vi = glXChooseVisual(enigma::x11::disp,0,att);
     if(!vi){
         printf("GLFail\n");
         return -2;
     }
     
     //give us a GL context
-    glxc = glXCreateContext(disp, vi, NULL, True);
+    glxc = glXCreateContext(enigma::x11::disp, vi, NULL, True);
     if (!glxc){
         printf("NoContext\n");
         return -3;
     }
     
     //apply context
-    glXMakeCurrent(disp,win,glxc); //flushes
+    glXMakeCurrent(enigma::x11::disp,enigma::x11::win,glxc); //flushes
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_ACCUM_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
   }
   
   void DisableDrawing() {
-   glXDestroyContext(disp,glxc);
+   glXDestroyContext(enigma::x11::disp,glxc);
       /*
     for(char q=1;q;ENIGMA_events())
         while(XQLength(disp))
