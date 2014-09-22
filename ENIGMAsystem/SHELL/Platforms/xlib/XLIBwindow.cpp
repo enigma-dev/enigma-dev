@@ -41,7 +41,59 @@ using namespace std;
 using namespace enigma::x11;
 
 namespace enigma {
-	extern bool freezeOnLoseFocus;
+  bool windowAdapt = true;
+  int regionWidth = 0, regionHeight = 0, windowWidth = 0, windowHeight = 0, windowX = 0, windowY = 0;
+  double scaledWidth = 0, scaledHeight = 0;
+  extern bool isFullScreen,freezeOnLoseFocus;
+  extern int viewScale, windowColor;
+    
+  void setwindowsize()
+  {
+      if (!regionWidth)
+          return;
+
+      Screen *screen = DefaultScreenOfDisplay(disp);
+      int parWidth = isFullScreen?XWidthOfScreen(screen):windowWidth, parHeight = isFullScreen?XHeightOfScreen(screen):windowHeight;
+      if (viewScale > 0)  //Fixed Scale
+      {
+          double viewDouble = viewScale/100.0;
+          scaledWidth = regionWidth*viewDouble;
+          scaledHeight = regionHeight*viewDouble;
+      }
+      else if (viewScale == 0)  //Full Scale
+      {
+          scaledWidth = parWidth;
+          scaledHeight = parHeight;
+      }
+      else  //Keep Aspect Ratio
+      {
+          double fitWidth = parWidth/double(regionWidth), fitHeight = parHeight/double(regionHeight);
+          if (fitWidth < fitHeight)
+          {
+              scaledWidth = parWidth;
+              scaledHeight = regionHeight*fitWidth;
+          }
+          else
+          {
+              scaledWidth = regionWidth*fitHeight;
+              scaledHeight = parHeight;
+          }
+      }
+
+      if (!isFullScreen)
+      {
+          if (windowAdapt && viewScale > 0) // If the window is to be adapted and Fixed Scale
+          {
+              if (scaledWidth > windowWidth)
+                  windowWidth = scaledWidth;
+              if (scaledHeight > windowHeight)
+                  windowHeight = scaledHeight;
+          }
+           //clampwindow();
+      } else {
+        //SetWindowPos(hWnd, NULL, 0, 0, parWidth, parHeight, SWP_NOACTIVATE); 
+      }
+  }
 }
 
 //////////
@@ -213,62 +265,6 @@ static int getWindowDimension(int i)
 	XWindowAttributes pwa;
 	XGetWindowAttributes(disp,parent,&pwa);
 	return i?(i==1?pwa.y+wa.y:-1):pwa.x+wa.x;
-}
-
-namespace enigma {
-  bool windowAdapt = true;
-  int regionWidth = 0, regionHeight = 0, windowWidth = 0, windowHeight = 0, windowX = 0, windowY = 0;
-  double scaledWidth = 0, scaledHeight = 0;
-  extern bool isFullScreen;
-  extern int viewScale, windowColor;
-    
-  void setwindowsize()
-  {
-      if (!regionWidth)
-          return;
-
-      Screen *screen = DefaultScreenOfDisplay(disp);
-      int parWidth = isFullScreen?XWidthOfScreen(screen):windowWidth, parHeight = isFullScreen?XHeightOfScreen(screen):windowHeight;
-      if (viewScale > 0)  //Fixed Scale
-      {
-          double viewDouble = viewScale/100.0;
-          scaledWidth = regionWidth*viewDouble;
-          scaledHeight = regionHeight*viewDouble;
-      }
-      else if (viewScale == 0)  //Full Scale
-      {
-          scaledWidth = parWidth;
-          scaledHeight = parHeight;
-      }
-      else  //Keep Aspect Ratio
-      {
-          double fitWidth = parWidth/double(regionWidth), fitHeight = parHeight/double(regionHeight);
-          if (fitWidth < fitHeight)
-          {
-              scaledWidth = parWidth;
-              scaledHeight = regionHeight*fitWidth;
-          }
-          else
-          {
-              scaledWidth = regionWidth*fitHeight;
-              scaledHeight = parHeight;
-          }
-      }
-
-      if (!isFullScreen)
-      {
-          if (windowAdapt && viewScale > 0) // If the window is to be adapted and Fixed Scale
-          {
-              if (scaledWidth > windowWidth)
-                  windowWidth = scaledWidth;
-              if (scaledHeight > windowHeight)
-                  windowHeight = scaledHeight;
-          }
-           //clampwindow();
-      } else {
-        //SetWindowPos(hWnd, NULL, 0, 0, parWidth, parHeight, SWP_NOACTIVATE); 
-      }
-  }
 }
 
 namespace enigma_user
