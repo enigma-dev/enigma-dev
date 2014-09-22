@@ -39,7 +39,7 @@ namespace enigma {
     vi = glXChooseVisual(enigma::x11::disp,0,att);
     if(!vi){
         printf("Failed to Obtain GL Visual Info\n");
-        return -2;
+        return NULL;
     }
     return vi;
   }
@@ -49,7 +49,7 @@ namespace enigma {
     glxc = glXCreateContext(enigma::x11::disp, vi, NULL, True);
     if (!glxc){
         printf("Failed to Create Graphics Context\n");
-        return -3;
+        return;
     }
     
     //apply context
