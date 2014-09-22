@@ -177,10 +177,13 @@ void window_default(bool center_size)
   if (center_size) {
     center = (xm != window_get_width() || ym != window_get_height());
   }
-  window_set_size(xm, ym);
+  enigma::windowWidth = enigma::regionWidth = xm;
+  enigma::windowHeight = enigma::regionHeight = ym;
   if (center) {
     window_center();
   }
+  
+  enigma::setwindowsize();
 }
 
 void window_mouse_set(int x,int y) {
