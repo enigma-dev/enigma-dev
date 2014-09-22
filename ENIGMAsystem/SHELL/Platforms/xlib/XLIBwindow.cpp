@@ -731,7 +731,7 @@ void clipboard_set_text(string text)
 {
   Atom XA_UTF8 = XInternAtom(disp, "UTF8", 0);
   Atom XA_CLIPBOARD = XInternAtom(disp, "CLIPBOARD", False);
-  XChangeProperty(disp, RootWindow(disp, 0), XA_CLIPBOARD, XA_UTF8, 8, PropModeReplace, reinterpret_cast<unsigned char*>(text.c_str()), text.length() + 1);
+  XChangeProperty(disp, RootWindow(disp, 0), XA_CLIPBOARD, XA_UTF8, 8, PropModeReplace, reinterpret_cast<unsigned char*>(const_cast<char*>(text.c_str())), text.length() + 1);
 }
 
 string clipboard_get_text()
