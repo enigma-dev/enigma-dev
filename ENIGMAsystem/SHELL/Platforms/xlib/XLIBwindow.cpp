@@ -216,7 +216,21 @@ void window_set_sizeable(bool sizeable) {}
 bool window_get_sizeable() {return false;}
 void window_set_showborder(bool show) {}
 bool window_get_showborder() {return true;}
-void window_set_showicons(bool show) {}
+void window_set_showicons(bool show) {
+  Atom wmState = XInternAtom(disp, "_NET_WM_ALLOWED_ACTIONS", False);
+  Atom aShow = XInternAtom(disp,"_NET_WM_ACTION_RESIZE", False);
+  XEvent xev;
+  xev.xclient.type=ClientMessage;
+  xev.xclient.serial = 0;
+  xev.xclient.send_event=True;
+  xev.xclient.window=win;
+  xev.xclient.message_type=wmState;
+  xev.xclient.format=32;
+  xev.xclient.data.l[0] = (show ? _NET_WM_STATE_ADD : _NET_WM_STATE_REMOVE);
+  xev.xclient.data.l[1] = aShow;
+  xev.xclient.data.l[2] = 0;
+  XSendEvent(disp,DefaultRootWindow(disp),False,SubstructureRedirectMask|SubstructureNotifyMask,&xev);
+}
 bool window_get_showicons() {return true;}
 
 void window_set_minimized(bool minimized) {
