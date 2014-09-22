@@ -130,7 +130,7 @@ namespace enigma_user
 
 void window_set_visible(bool visible)
 {
-	if (visible) {
+  if (visible) {
     XMapRaised(disp,win);
     //TODO: Move to bridges or some shit this is the last remaining GL call in XLIB
     //#include <GL/glx.h>
@@ -138,7 +138,7 @@ void window_set_visible(bool visible)
     //glXMakeCurrent(disp,win,glxc);
     if(visx != -1 && visy != -1)
       window_set_position(visx,visy);
-	} else {
+  } else {
     XUnmapWindow(disp, win);
   }
 }
@@ -195,19 +195,19 @@ int window_mouse_get_x()  { return getMouse(2); }
 int window_mouse_get_y()  { return getMouse(3); }
 
 void window_set_stayontop(bool stay) {
-	Atom wmState = XInternAtom(disp, "_NET_WM_STATE", False);
-	Atom aStay = XInternAtom(disp,"_NET_WM_STATE_ABOVE", False);
-	XEvent xev;
-	xev.xclient.type=ClientMessage;
-	xev.xclient.serial = 0;
-	xev.xclient.send_event=True;
-	xev.xclient.window=win;
-	xev.xclient.message_type=wmState;
-	xev.xclient.format=32;
-	xev.xclient.data.l[0] = (stay ? _NET_WM_STATE_ADD : _NET_WM_STATE_REMOVE);
-	xev.xclient.data.l[1] = aStay;
-	xev.xclient.data.l[2] = 0;
-	XSendEvent(disp,DefaultRootWindow(disp),False,SubstructureRedirectMask|SubstructureNotifyMask,&xev);
+  Atom wmState = XInternAtom(disp, "_NET_WM_STATE", False);
+  Atom aStay = XInternAtom(disp,"_NET_WM_STATE_ABOVE", False);
+  XEvent xev;
+  xev.xclient.type=ClientMessage;
+  xev.xclient.serial = 0;
+  xev.xclient.send_event=True;
+  xev.xclient.window=win;
+  xev.xclient.message_type=wmState;
+  xev.xclient.format=32;
+  xev.xclient.data.l[0] = (stay ? _NET_WM_STATE_ADD : _NET_WM_STATE_REMOVE);
+  xev.xclient.data.l[1] = aStay;
+  xev.xclient.data.l[2] = 0;
+  XSendEvent(disp,DefaultRootWindow(disp),False,SubstructureRedirectMask|SubstructureNotifyMask,&xev);
 }
 
 bool window_get_stayontop() {return false;}
