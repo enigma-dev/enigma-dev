@@ -412,6 +412,8 @@ int show_message(string str)
   //NOTE: This will not work with a fullscreen application, it is an issue with Windows
   //this could be why GM8.1, unlike Studio, did not use native dialogs and custom 
   //rendered its own message boxes like most game engines.
+  //In Studio this function will cause the window to be minimized and the message shown, fullscreen will not be restored.
+  //A possible alternative is fake fullscreen for Win32, but who knows if we have to do that on XLIB or anywhere else.
   MessageBox(enigma::hWnd, str.c_str(), window_get_caption().c_str(), MB_OK);
   return 0;
 }
