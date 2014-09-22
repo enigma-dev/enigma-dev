@@ -228,16 +228,15 @@ static inline long clamp(long value, long min, long max)
 static bool game_isending = false;
 int main(int argc,char** argv)
 {
+    // Set the working_directory
+    char buffer[1024];
+    if (getcwd(buffer, sizeof(buffer)) != NULL)
+       fprintf(stdout, "Current working dir: %s\n", buffer);
+    else
+       perror("getcwd() error");
+    enigma_user::working_directory = string( buffer );
 
-  // Set the working_directory
-  char buffer[1024];
-  if (getcwd(buffer, sizeof(buffer)) != NULL)
-     fprintf(stdout, "Current working dir: %s\n", buffer);
-  else
-     perror("getcwd() error");
-  enigma_user::working_directory = string( buffer );
-
-  // Copy our parameters
+    // Copy our parameters
     enigma::parameters = new string[argc];
     enigma::parameterc = argc;
     for (int i=0; i<argc; i++)
@@ -251,7 +250,6 @@ int main(int argc,char** argv)
         printf("Display failed\n");
         return -1;
     }
-
 
     // Identify components (close button, root pane)
     wm_delwin = XInternAtom(disp,"WM_DELETE_WINDOW",False);

@@ -179,6 +179,12 @@ inline int getMouse(int i)
 	}
 }
 
+enum {
+  _NET_WM_STATE_REMOVE,
+  _NET_WM_STATE_ADD,
+  _NET_WM_STATE_TOGGLE
+};
+
 namespace enigma_user
 {
 
@@ -196,8 +202,35 @@ bool window_get_showborder() {return true;}
 void window_set_showicons(bool show) {}
 bool window_get_showicons() {return true;}
 
-void window_set_minimized(bool minimized) {}
-bool window_get_minimized(){ return false; };
+void window_set_minimized(bool minimized) {
+  Atom wm_state     =  XInternAtom(disp, "_NET_WM_STATE", False);
+  Atom wm_hide_win  =  XInternAtom(disp, "_NET_WM_STATE_HIDDEN", False);
+  XEvent xev;
+  xev.type = ClientMessage;
+  xev.xclient.window = win;
+  xev.xclient.message_type = wm_state;
+  xev.xclient.format = 32;
+  xev.xclient.data.l[0] = (minimized ? _NET_WM_STATE_ADD : _NET_WM_STATE_REMOVE);
+  xev.xclient.data.l[1] = wm_hide_win;
+
+  XSendEvent(disp, DefaultRootWindow(disp), False, SubstructureNotifyMask, &xev);
+}
+bool window_get_minimized() { 
+	Atom aMinimized = XInternAtom(disp,"_NET_WM_STATE_HIDDEN",False);
+	Atom ra;
+	int ri;
+	unsigned long nr, bar;
+	unsigned char *data;
+	int stat = XGetWindowProperty(disp,win,aMinimized,0L,0L,False,AnyPropertyType,&ra,&ri,&nr,&bar,&data);
+	if (stat != Success) {
+		printf("Status: %d\n",stat);
+		//return 0;
+	}
+	/*printf("%d %d %d %d\n",ra,ri,nr,bar);
+	for (int i = 0; i < nr; i++) printf("%02X ",data[i]);
+	printf("\n");*/
+	return 0;
+};
 
 void window_default(bool center_size)
 {
@@ -309,12 +342,6 @@ void window_center()
 ////////////////
 // FULLSCREEN //
 ////////////////
-
-enum {
-  _NET_WM_STATE_REMOVE,
-  _NET_WM_STATE_ADD,
-  _NET_WM_STATE_TOGGLE
-};
 
 namespace enigma_user
 {
