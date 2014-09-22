@@ -1,5 +1,3 @@
-
-
 /** Copyright (C) 2008-2011 IsmAvatar <cmagicj@nni.com>, Josh Ventura
 ***
 *** This file is a part of the ENIGMA Development Environment.
