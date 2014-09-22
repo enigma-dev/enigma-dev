@@ -286,6 +286,8 @@ void window_set_position(int x,int y)
 }
 void window_set_size(unsigned int w,unsigned int h) {
 	XResizeWindow(disp,win, w, h);
+  enigma::windowWidth = w;
+  enigma::windowHeight = h;
   enigma::setwindowsize();
 }
 void window_set_rectangle(int x,int y,int w,int h) {
