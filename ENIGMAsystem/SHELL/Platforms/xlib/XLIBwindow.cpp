@@ -197,6 +197,11 @@ void display_mouse_set(double x,double y) {
 ////////////
 // WINDOW //
 ////////////
+    int regionWidth = 0, regionHeight = 0, windowWidth = 0, windowHeight = 0, windowX = 0, windowY = 0;
+    double scaledWidth = 0, scaledHeight = 0;
+    extern bool isFullScreen;
+    extern int viewScale, windowColor;
+
 static int getWindowDimension(int i)
 {
 	XFlush(disp);
@@ -211,6 +216,53 @@ static int getWindowDimension(int i)
 	XGetWindowAttributes(disp,parent,&pwa);
 	return i?(i==1?pwa.y+wa.y:-1):pwa.x+wa.x;
 }
+
+  void setwindowsize()
+  {
+      if (!regionWidth)
+          return;
+
+      int parWidth = isFullScreen?GetSystemMetrics(SM_CXSCREEN):windowWidth, parHeight = isFullScreen?GetSystemMetrics(SM_CYSCREEN):windowHeight;
+      if (viewScale > 0)  //Fixed Scale
+      {
+          double viewDouble = viewScale/100.0;
+          scaledWidth = regionWidth*viewDouble;
+          scaledHeight = regionHeight*viewDouble;
+      }
+      else if (viewScale == 0)  //Full Scale
+      {
+          scaledWidth = parWidth;
+          scaledHeight = parHeight;
+      }
+      else  //Keep Aspect Ratio
+      {
+          double fitWidth = parWidth/double(regionWidth), fitHeight = parHeight/double(regionHeight);
+          if (fitWidth < fitHeight)
+          {
+              scaledWidth = parWidth;
+              scaledHeight = regionHeight*fitWidth;
+          }
+          else
+          {
+              scaledWidth = regionWidth*fitHeight;
+              scaledHeight = parHeight;
+          }
+      }
+
+      if (!isFullScreen)
+      {
+          if (windowAdapt && viewScale > 0) // If the window is to be adapted and Fixed Scale
+          {
+              if (scaledWidth > windowWidth)
+                  windowWidth = scaledWidth;
+              if (scaledHeight > windowHeight)
+                  windowHeight = scaledHeight;
+          }
+           //clampwindow();
+      } else {
+        //SetWindowPos(hWnd, NULL, 0, 0, parWidth, parHeight, SWP_NOACTIVATE); 
+      }
+  }
 
 namespace enigma_user
 {
@@ -499,28 +551,47 @@ bool keyboard_check_direct(int key)
  // else actualKey = enigma_user::keyboard_get_map((int)enigma::keymap[gk & 0x1FF]);
 }
 
-void window_set_region_scale(double scale, bool adaptwindow) {}
-double window_get_region_scale() {return 1;}
-void window_set_region_size(int w, int h, bool adaptwindow) {}
+void window_set_region_scale(double scale, bool adaptwindow)
+{
+    enigma::viewScale = int(scale*100);
+    enigma::windowAdapt = adaptwindow;
+    enigma::setwindowsize();
+}
+
+double window_get_region_scale()
+{
+    return enigma::viewScale/100.0;
+}
+
+void window_set_region_size(int w, int h, bool adaptwindow)
+{
+    if (w <= 0 || h <= 0) return;
+
+    enigma::regionWidth = w;
+    enigma::regionHeight = h;
+    enigma::windowAdapt = adaptwindow;
+    enigma::setwindowsize();
+    window_center();
+}
 
 int window_get_region_width()
 {
-    return window_get_width();
+    return enigma::regionWidth;
 }
 
 int window_get_region_height()
 {
-    return window_get_height();
+    return enigma::regionHeight;
 }
 
 int window_get_region_width_scaled()
 {
-    return window_get_width();
+    return enigma::scaledWidth;
 }
 
 int window_get_region_height_scaled()
 {
-    return window_get_height();
+    return enigma::scaledHeight;
 }
 
 void window_set_color(int color)

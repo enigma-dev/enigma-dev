@@ -167,8 +167,10 @@ namespace enigma
   SamplerState samplerstates[8];
   
   void graphics_initialize_samplers() {
+    GLuint sampler_ids[8];
+    glGenSamplers(8, &sampler_ids);
     for (size_t i = 0; i < 8; i++) {
-      glGenSamplers(1, &samplerstates[i].sampler_index);
+      samplerstates[i].sampler_index = sampler_ids[i];
       glBindSampler(i, samplerstates[i].sampler_index);
       // Default to interpolation disabled, for some reason textures do that by default but not samplers.
       glSamplerParameteri(samplerstates[i].sampler_index, GL_TEXTURE_MIN_FILTER, GL_NEAREST);

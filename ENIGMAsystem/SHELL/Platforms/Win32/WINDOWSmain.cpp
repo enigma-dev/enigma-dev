@@ -58,7 +58,7 @@ namespace enigma //TODO: Find where this belongs
 
   void windowsystem_write_exename(char* exenamehere)
   {
-	GetModuleFileName(NULL, exenamehere, 1024);
+    GetModuleFileName(NULL, exenamehere, 1024);
   }
 }
 
