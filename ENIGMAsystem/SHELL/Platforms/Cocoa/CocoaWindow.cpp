@@ -53,6 +53,7 @@ namespace enigma {
     extern char last_mousestatus[3];
     extern char last_keybdstatus[256];
     extern char keybdstatus[256];
+    extern int windowColor;
 }
 
 namespace enigma_user {
@@ -71,9 +72,19 @@ namespace enigma_user {
 	return 1; // TODO
   }
 
-void window_set_freezeonlosefocus(bool freeze)
-{
-}
+  void window_set_color(int color)
+  {
+    enigma::windowColor = color;
+  }
+
+  int window_get_color()
+  {
+    return enigma::windowColor;
+  }
+
+  void window_set_freezeonlosefocus(bool freeze)
+  {
+  }
 
 
   int window_set_caption(string caption)
@@ -197,12 +208,6 @@ int window_set_cursor(int c)
 	XDefineCursor(disp, win, (c == -1) ? NoCursor : XCreateFontCursor(disp,curs[-c]));*/
 	return 0;
 }
-
-void window_set_color(int color) {}
-
-int window_view_mouse_get_x(int wid) { return 0; } // TODO
-int window_view_mouse_get_y(int wid) { return 0; } // TODO
-void window_view_mouse_set(int wid, int x, int y) {}
 
 int window_get_region_width() { return cocoa_window_get_region_width();}
 int window_get_region_height() { return cocoa_window_get_region_height();}

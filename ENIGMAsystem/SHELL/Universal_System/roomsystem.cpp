@@ -68,6 +68,8 @@ rvt view_hborder, view_hport, view_hspeed, view_hview, view_object, view_vborder
 
 namespace enigma
 {
+  extern int windowColor;
+
   roomstruct** roomdata;
   roomstruct** roomorder;
   
