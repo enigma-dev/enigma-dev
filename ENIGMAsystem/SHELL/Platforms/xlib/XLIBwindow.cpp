@@ -22,6 +22,7 @@
 #include <string> //Return strings without needing a GC
 #include <map>
 #include <X11/Xlib.h>
+#include <X11/Xutil.h>
 
 using namespace std;
 
