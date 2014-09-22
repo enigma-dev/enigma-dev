@@ -18,10 +18,10 @@ resources: $exe
 cppflags:
 cxxflags: -I../Additional/Windows/include
 cflags:
-ldflags: -L../Additional/Windows/lib -static-libgcc -static-libstdc++
+ldflags: -L../Additional/Windows/lib
 links:
 
-Build-Extension:
+Build-Extension: .exe
 Run-output: $tempfile
 Run-Program: $game
 Run-Params:
