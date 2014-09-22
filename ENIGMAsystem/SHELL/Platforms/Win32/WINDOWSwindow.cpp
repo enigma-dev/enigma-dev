@@ -16,10 +16,6 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-//#define _WIN32_WINNT 0x0601
-#define WINVER 0x0601
-//#define NTDDI_VERSION 0x06010000
-
 #include <string>
 #include <windows.h>
 using namespace std;
