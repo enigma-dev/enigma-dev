@@ -16,9 +16,6 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-//This file has been modified beyond recognition by Josh @ Dreamland
-//under the pretense that it would be better compatible with ENIGMA
-
 #include <X11/Xlib.h>
 #include <GL/glx.h>
 #include <unistd.h>
