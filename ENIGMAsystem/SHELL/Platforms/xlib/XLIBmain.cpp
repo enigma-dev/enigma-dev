@@ -141,10 +141,10 @@ namespace enigma
           return 0;
         }
         case Expose: {
-          enigma::windowX = e.x;
-          enigma::windowY = e.y;
-          enigma::windowWidth = e.width;
-          enigma::windowHeight = e.height;
+          enigma::windowX = e.xexpose.x;
+          enigma::windowY = e.xexpose.y;
+          enigma::windowWidth = e.xexpose.width;
+          enigma::windowHeight = e.xexpose.height;
           enigma::setwindowsize();
           return 0;
         }
