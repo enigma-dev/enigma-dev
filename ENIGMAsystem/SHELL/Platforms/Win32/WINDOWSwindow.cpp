@@ -43,7 +43,7 @@ namespace enigma
     double scaledWidth = 0, scaledHeight = 0;
     char* currentCursor = IDC_ARROW;
     extern bool isSizeable, showBorder, showIcons, freezeOnLoseFocus, isFullScreen;
-    extern int viewScale, windowColor;
+    extern int viewScale;
 
     LONG_PTR getwindowstyle()
     {
@@ -181,16 +181,6 @@ void window_set_caption(string caption)
 string window_get_caption()
 {
   return current_caption;
-}
-
-void window_set_color(int color)
-{
-    enigma::windowColor = color;
-}
-
-int window_get_color()
-{
-    return enigma::windowColor;
 }
 
 void window_set_alpha(double alpha) {
