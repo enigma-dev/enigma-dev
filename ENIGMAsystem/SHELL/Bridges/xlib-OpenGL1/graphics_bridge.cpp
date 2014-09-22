@@ -14,7 +14,7 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
-
+//#include <GL/glx.h>
 #include <X11/Xlib.h>
 #include "../General/glxew.h"
 #include "Platforms/xlib/XLIBmain.h"
@@ -29,7 +29,41 @@
 
 namespace enigma {
   GLuint msaa_fbo = 0;
+  GLXContext glxc;
 
+  void EnableDrawing() {
+    // Prepare openGL
+    GLint att[] = { GLX_RGBA, GLX_DOUBLEBUFFER, GLX_DEPTH_SIZE, 24, None };
+    XVisualInfo *vi = glXChooseVisual(disp,0,att);
+    if(!vi){
+        printf("GLFail\n");
+        return -2;
+    }
+    
+    //give us a GL context
+    glxc = glXCreateContext(disp, vi, NULL, True);
+    if (!glxc){
+        printf("NoContext\n");
+        return -3;
+    }
+    
+    //apply context
+    glXMakeCurrent(disp,win,glxc); //flushes
+    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_ACCUM_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
+  }
+  
+  void DisableDrawing() {
+   glXDestroyContext(disp,glxc);
+      /*
+    for(char q=1;q;ENIGMA_events())
+        while(XQLength(disp))
+            if(handleEvents()>0) q=0;
+    glxc = glXGetCurrentContext();
+    glXDestroyContext(disp,glxc);
+    XCloseDisplay(disp);
+    return 0;*/
+  }
+  
   void WindowResized() {
     // clear the window color, viewport does not need set because backbuffer was just recreated
     enigma_user::draw_clear(enigma_user::window_get_color());

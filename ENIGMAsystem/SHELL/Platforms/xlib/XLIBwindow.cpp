@@ -324,9 +324,7 @@ short curs[] = { 68, 68, 68, 130, 52, 152, 135, 116, 136, 108, 114, 150, 90, 68,
 
 namespace enigma
 {
-  //Replacing usermap array with keybdmap map, to align code with Windows implementation.
   std::map<int,int> keybdmap;
-  //unsigned char usermap[256];
 
   unsigned char keymap[512];
   void initkeymap()
@@ -490,6 +488,15 @@ void keyboard_clear(const int key)
   enigma::keybdstatus[key] = enigma::last_keybdstatus[key] = 0;
 }
 
+bool keyboard_check_direct(int key)
+{
+ // gk=XLookupKeysym(&e.xkey,0);
+ // if (gk==NoSymbol)
+  //  return 0;
+
+ // if (!(gk & 0xFF00)) actualKey = enigma_user::keyboard_get_map((int)enigma::keymap[gk & 0xFF]);
+ // else actualKey = enigma_user::keyboard_get_map((int)enigma::keymap[gk & 0x1FF]);
+}
 
 void window_set_region_scale(double scale, bool adaptwindow) {}
 double window_get_region_scale() {return 1;}
