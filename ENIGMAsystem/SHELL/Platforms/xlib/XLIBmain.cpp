@@ -140,12 +140,13 @@ namespace enigma
             }
           return 0;
         }
-        case Expose: {
-          enigma::windowX = e.xexpose.x;
-          enigma::windowY = e.xexpose.y;
-          enigma::windowWidth = e.xexpose.width;
-          enigma::windowHeight = e.xexpose.height;
+        case ConfigureNotify: {
+          enigma::windowX = e.xconfigure.x;
+          enigma::windowY = e.xconfigure.y;
+          enigma::windowWidth = e.xconfigure.width;
+          enigma::windowHeight = e.xconfigure.height;
           enigma::setwindowsize();
+          enigma::WindowResized();
           return 0;
         }
         case FocusIn:
@@ -263,7 +264,7 @@ int main(int argc,char** argv)
     swa.border_pixel = 0;
     swa.background_pixel = 0;
     swa.colormap = XCreateColormap(disp,root,vi->visual,AllocNone);
-    swa.event_mask = ExposureMask | KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask | FocusChangeMask;// | StructureNotifyMask;
+    swa.event_mask = ExposureMask | KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask | FocusChangeMask | StructureNotifyMask;
     unsigned long valmask = CWColormap | CWEventMask; //  | CWBackPixel | CWBorderPixel;
 
     //prepare window for display (center, caption, etc)
