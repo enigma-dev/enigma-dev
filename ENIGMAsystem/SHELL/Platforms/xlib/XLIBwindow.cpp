@@ -130,19 +130,19 @@ namespace enigma_user
 
 void window_set_visible(bool visible)
 {
-	if(visible)
-	{
-		XMapRaised(disp,win);
+	if (visible) {
+    XMapRaised(disp,win);
     //TODO: Move to bridges or some shit this is the last remaining GL call in XLIB
     //#include <GL/glx.h>
-		//GLXContext glxc = glXGetCurrentContext();
-		//glXMakeCurrent(disp,win,glxc);
-		if(visx != -1 && visy != -1)
-			window_set_position(visx,visy);
-	}
-	else
-	  XUnmapWindow(disp, win);
+    //GLXContext glxc = glXGetCurrentContext();
+    //glXMakeCurrent(disp,win,glxc);
+    if(visx != -1 && visy != -1)
+      window_set_position(visx,visy);
+	} else {
+    XUnmapWindow(disp, win);
+  }
 }
+
 int window_get_visible()
 {
 	XWindowAttributes wa;
@@ -153,6 +153,7 @@ int window_get_visible()
 void window_set_caption(string caption) {
 	XStoreName(disp,win,caption.c_str());
 }
+
 string window_get_caption()
 {
 	char *caption;
@@ -193,8 +194,24 @@ int display_mouse_get_y() { return getMouse(1); }
 int window_mouse_get_x()  { return getMouse(2); }
 int window_mouse_get_y()  { return getMouse(3); }
 
-void window_set_stayontop(bool stay) {}
+void window_set_stayontop(bool stay) {
+	Atom wmState = XInternAtom(disp, "_NET_WM_STATE", False);
+	Atom aStay = XInternAtom(disp,"_NET_WM_STATE_ABOVE", False);
+	XEvent xev;
+	xev.xclient.type=ClientMessage;
+	xev.xclient.serial = 0;
+	xev.xclient.send_event=True;
+	xev.xclient.window=win;
+	xev.xclient.message_type=wmState;
+	xev.xclient.format=32;
+	xev.xclient.data.l[0] = (stay ? _NET_WM_STATE_ADD : _NET_WM_STATE_REMOVE);
+	xev.xclient.data.l[1] = aStay;
+	xev.xclient.data.l[2] = 0;
+	XSendEvent(disp,DefaultRootWindow(disp),False,SubstructureRedirectMask|SubstructureNotifyMask,&xev);
+}
+
 bool window_get_stayontop() {return false;}
+
 void window_set_sizeable(bool sizeable) {}
 bool window_get_sizeable() {return false;}
 void window_set_showborder(bool show) {}
@@ -203,17 +220,11 @@ void window_set_showicons(bool show) {}
 bool window_get_showicons() {return true;}
 
 void window_set_minimized(bool minimized) {
-  Atom wm_state     =  XInternAtom(disp, "_NET_WM_STATE", False);
-  Atom wm_hide_win  =  XInternAtom(disp, "_NET_WM_STATE_HIDDEN", False);
-  XEvent xev;
-  xev.type = ClientMessage;
-  xev.xclient.window = win;
-  xev.xclient.message_type = wm_state;
-  xev.xclient.format = 32;
-  xev.xclient.data.l[0] = (minimized ? _NET_WM_STATE_ADD : _NET_WM_STATE_REMOVE);
-  xev.xclient.data.l[1] = wm_hide_win;
-
-  XSendEvent(disp, DefaultRootWindow(disp), False, SubstructureNotifyMask, &xev);
+  if (minimized) {
+    XIconifyWindow(disp,win,0);
+  } else {
+    XMapWindow(disp,win);
+  }
 }
 bool window_get_minimized() { 
 	Atom aMinimized = XInternAtom(disp,"_NET_WM_STATE_HIDDEN",False);
