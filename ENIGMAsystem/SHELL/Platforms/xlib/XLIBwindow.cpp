@@ -727,4 +727,30 @@ int window_get_color()
     return enigma::windowColor;
 }
 
+void clipboard_set_text(string text)
+{
+  Atom XA_UTF8 = XInternAtom(disp, "UTF8", 0);
+  Atom XA_CLIPBOARD = XInternAtom(disp, "CLIPBOARD", False);
+  XChangeProperty(disp, RootWindow(disp, 0), XA_CLIPBOARD, XA_UTF8, 8, PropModeReplace, reinterpret_cast<unsigned char*>(text.c_str()), text.length() + 1);
+}
+
+string clipboard_get_text()
+{
+  Atom XA_UTF8 = XInternAtom(disp, "UTF8", 0);
+  Atom XA_CLIPBOARD = XInternAtom(disp, "CLIPBOARD", False);
+  //Atom XA_UNICODE = XInternAtom(disp, "UNICODE", 0);
+  Atom actual_type;
+  int actual_format;
+  unsigned long nitems, leftover;
+  unsigned char* buf;
+
+  if (XGetWindowProperty(disp, RootWindow(disp,0), XA_CLIPBOARD, 0, 10000000L, False, XA_UTF8, &actual_type, &actual_format, &nitems, &leftover, &buf) == Success) {;
+    /* Use buf */
+    //free(buf);
+    return string(reinterpret_cast<char*>(buf));
+  } else {
+    return "";
+  }
+}
+
 }
