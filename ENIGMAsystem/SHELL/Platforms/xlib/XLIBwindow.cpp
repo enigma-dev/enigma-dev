@@ -671,9 +671,8 @@ bool keyboard_check_direct(int key)
     return 1;
   }
 
-  // enter, backspace and some keys do not map properly but most such as space and A-Z 0-9 do
-  key = XKeysymToKeycode(enigma::x11::disp, keyrmap[key]);
-  return (keyState[keyrmap[key] >> 3] & (1 << (keyrmap[key] & 7)));
+  key = XKeysymToKeycode(enigma::x11::disp, enigma::keyrmap[key]);
+  return (keyState[enigma::keyrmap[key] >> 3] & (1 << (enigma::keyrmap[key] & 7)));
 }
 
 void window_set_region_scale(double scale, bool adaptwindow)
