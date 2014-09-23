@@ -16,9 +16,21 @@
 // with this code. If not, see <http://www.gnu.org/licenses/>
 //
 
-namespace enigma {
-  struct extension_gm5compat
-  {
-  };
+
+#ifndef ENIGMA_GM5COMPAT_GRAPHICS__H
+#define ENIGMA_GM5COMPAT_GRAPHICS__H
+
+
+///This file contains graphics-related functionality for GM5.
+
+
+namespace enigma_user
+{
+
+//"exclusive" mode is ignored
+void set_graphics_mode(bool exclusive, int horres, int coldepth, int freq, bool fullscreen, int winscale, int fullscale);
+
 }
+
+#endif // ENIGMA_GM5COMPAT_GRAPHICS__H
 
