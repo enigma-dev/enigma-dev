@@ -726,8 +726,9 @@ void window_set_color(int color)
 {
     enigma::windowColor = color;
 
-    //Inform xlib (TODO: This is not refreshing for some reason.)
-    XSetWindowBackground(disp, win, color);
+    //Inform xlib
+    int revColor = (color & 0xFF000000) | ((color & 0xFF0000) >> 16) | (color & 0xFF00) | ((color & 0xFF) << 16);
+    XSetWindowBackground(disp, win, revColor);
 }
 
 int window_get_color()
