@@ -449,8 +449,12 @@ namespace enigma
 {
   std::map<int,int> keybdmap;
 
+  inline unsigned short highbyte_allornothing(short x) { 
+    return x & 0xFF00? x | 0xFF00 : x; 
+  }
+  
   unsigned char keymap[512];
-  unsigned char keyrmap[256];
+  unsigned short keyrmap[256];
   void initkeymap()
   {
     using namespace enigma_user;
@@ -523,7 +527,7 @@ namespace enigma
     for (int i = 'z'+1; i < 255; i++)
       keymap[i] = i;
       
-    for (size_t i = 0; i < 512; ++i) keyrmap[keymap[i]] = i;
+    for (size_t i = 0; i < 512; ++i) keyrmap[keymap[i]] = highbyte_allornothing(i);
    }
 }
 
@@ -672,7 +676,7 @@ bool keyboard_check_direct(int key)
   }
 
   key = XKeysymToKeycode(enigma::x11::disp, enigma::keyrmap[key]);
-  return (keyState[enigma::keyrmap[key] >> 3] & (1 << (enigma::keyrmap[key] & 7)));
+  return (keyState[key >> 3] & (1 << (key & 7)));
 }
 
 void window_set_region_scale(double scale, bool adaptwindow)
