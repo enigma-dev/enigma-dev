@@ -21,6 +21,7 @@
 #include <time.h> //clock
 #include <string> //Return strings without needing a GC
 #include <map>
+#include <climits>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
@@ -443,10 +444,36 @@ void window_set_fullscreen(bool full)
 	xev.xclient.data.l[2] = 0;
 	XSendEvent(disp,DefaultRootWindow(disp),False,SubstructureRedirectMask|SubstructureNotifyMask,&xev);
 }
-// FIXME: Looks like I gave up on this one
+
 bool window_get_fullscreen()
 {
-	return enigma::isFullScreen;
+	//return enigma::isFullScreen;
+	Atom wmState = XInternAtom(disp, "_NET_WM_STATE", False);
+	Atom aFullScreen = XInternAtom(disp,"_NET_WM_STATE_FULLSCREEN", False);
+	bool res = false;
+
+	//Return types, not really used.
+	Atom actualType;
+	int actualFormat;
+	unsigned long bytesAfterReturn;
+
+	//These are used.
+	unsigned long numItems;
+	unsigned char* data = NULL;
+
+	if (XGetWindowProperty(disp, win, wmState, 0, LONG_MAX, False, AnyPropertyType, &actualType, &actualFormat, &numItems, &bytesAfterReturn, &data) == Success) {
+		for (unsigned long i=0; i<numItems; ++i) {
+			if (aFullScreen == reinterpret_cast<unsigned long *>(data)[i]) {
+				res = true;
+			}
+		}
+	}
+
+	//Reclaim memory.
+	if (data) {
+		XFree(data);
+	}
+	return res;
 }
 
 }

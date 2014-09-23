@@ -101,6 +101,10 @@ void parser_init()
   //These two are... Special.
   edl_tokens["do"]   = 'r';
   edl_tokens["else"] = 'e';
+  
+  //These get translated into other symbols
+  edl_tokens["begin"] = '{';
+  edl_tokens["end"] = '}';
 
   //These must be passed a parameter in parentheses
   //Token is 's'
@@ -602,9 +606,11 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
         deceq |= indecl;
         if (setting::use_gml_equals and (level or rhs))
         {
-          if (infor != 3 and infor != 1 and synt[++pos] != '=')
-            code.insert(pos,"="),
+          if (infor != 3 and infor != 1 and synt[pos-1] != '=' and synt[pos+1] != '=') {
+            pos++;
+            code.insert(pos,"=");
             synt.insert(pos,"=");
+          }
         }
         rhs |= !level;
         break;
@@ -670,6 +676,18 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
           notAss: //Not an assignment operator; !=, >=, <=
             if (synt[pos+1] == '=')
               pos++; // Already know it isn't an assignment; already handled.
+        break;
+      case '{':
+        if(code[pos] == 'b') {
+          code.replace(pos,5,"{");
+          synt.replace(pos,5,"{");
+        }
+        break;
+      case '}':
+        if(code[pos] == 'e') {
+          code.replace(pos,3,"}");
+          synt.replace(pos,3,"}");
+        }
         break;
 
       case 'f': // We need to be aware of for loops.
