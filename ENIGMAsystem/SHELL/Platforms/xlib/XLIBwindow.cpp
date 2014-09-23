@@ -42,7 +42,7 @@ using namespace std;
 using namespace enigma::x11;
 
 namespace enigma {
-  bool isVisible = true, stayOnTop = false, windowAdapt = true;
+  bool isVisible = true, bool isMinimized = false, stayOnTop = false, windowAdapt = true;
   int regionWidth = 0, regionHeight = 0, windowWidth = 0, windowHeight = 0, windowX = 0, windowY = 0;
   double scaledWidth = 0, scaledHeight = 0;
   extern bool isSizeable, showBorder, showIcons, freezeOnLoseFocus, isFullScreen;
