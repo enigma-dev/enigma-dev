@@ -38,10 +38,10 @@ struct ideprint {
   ideprint &operator<< (long x);
   ideprint &operator<< (unsigned x);
   ideprint &operator<< (unsigned long x);
-  #if __cplusplus >= 201100
-    ideprint &operator<< (long long x);
-    ideprint &operator<< (unsigned long long x);
-  #endif
+#if __cplusplus >= 201100
+  ideprint &operator<< (long long x);
+  ideprint &operator<< (unsigned long long x);
+#endif
   ideprint &operator<< (char x);
   ideprint &operator<< (unsigned char x);
   ideprint &operator<< (double x);
