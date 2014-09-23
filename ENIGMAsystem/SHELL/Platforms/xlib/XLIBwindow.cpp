@@ -559,6 +559,7 @@ namespace enigma {
   string* parameters;
   int parameterc;
   int current_room_speed;
+  int cursorInt;
   void windowsystem_write_exename(char* x)
   {
     unsigned irx = 0;
@@ -592,9 +593,15 @@ void io_handle()
 
 int window_set_cursor(int c)
 {
+  enigma::cursorInt = c;
 	XUndefineCursor(disp,win);
 	XDefineCursor(disp, win, (c == -1) ? NoCursor : XCreateFontCursor(disp,curs[-c]));
 	return 0;
+}
+
+int window_get_cursor()
+{
+  return enigma::cursorInt;
 }
 
 void keyboard_wait()

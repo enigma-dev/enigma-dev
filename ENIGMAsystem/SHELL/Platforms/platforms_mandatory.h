@@ -76,6 +76,7 @@ inline void action_set_cursor(int spr, bool c) {
 		window_set_cursor(-1); // default system cursor
 	}
 }
+int window_get_cursor();
 void window_set_region_scale(double scale, bool adaptwindow);
 void window_set_stayontop(bool stay);
 void window_set_sizeable(bool sizeable);
