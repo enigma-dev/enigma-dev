@@ -289,12 +289,20 @@ bool window_get_showicons() {
 void window_set_minimized(bool minimized) {
   if (enigma::isMinimized == minimized) return;
   enigma::isMinimized = minimized;
-  
-  if (minimized) {
-    XIconifyWindow(disp,win,0);
-  } else {
-    XMapWindow(disp,win);
-  }
+
+  XClientMessageEvent ev;
+  Atom prop;
+
+  prop = XInternAtom(disp, "WM_CHANGE_STATE", False);
+  if (prop == None) return;
+
+  // TODO: When restored after a minimize the window may not have focus.
+  ev.type = ClientMessage;
+  ev.window = win;
+  ev.message_type = prop;
+  ev.format = 32;
+  ev.data.l[0] = minimized ? IconicState : NormalState;
+  XSendEvent(disp, RootWindow(disp, 0), False, SubstructureRedirectMask|SubstructureNotifyMask,(XEvent *)&ev);
 }
 
 bool window_get_minimized() { 
