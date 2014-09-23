@@ -18,26 +18,56 @@
 #ifndef ENIGMA_PLATFORM_THREADS_H
 #define ENIGMA_PLATFORM_THREADS_H
 
+#if defined(_WIN32) || defined(__WIN32__) || defined(_WIN64) || defined(__WIN64__)
+#include <windows.h>
+#else
+#include <pthread.h> // use POSIX threads
+#endif
+
 #include <deque>
 #include <stdio.h>
-//using namespace std;
 
 #include "Universal_System/var4.h"
 
-struct ethread
-{
-  //pthread_t me; //TODO: Do not uncomment or you will break Windows, handle is defined but not in use anyway.
-  bool active;
-  variant ret;
-  ethread(): active(true), ret(0) {};
+struct ethread;
+
+struct scrtdata {
+  int scr;
+  variant args[8];
+  ethread* mt;
+  scrtdata(int s, variant nargs[8], ethread* mythread): scr(s), mt(mythread) { for (int i = 0; i < 8; i++) args[i] = nargs[i]; }
 };
 
-static std::deque<ethread*> threads;
+struct ethread
+{
+#if defined(_WIN32) || defined(__WIN32__) || defined(_WIN64) || defined(__WIN64__)
+  HANDLE handle;
+#else
+  pthread_t handle;
+#endif
+  scrtdata *sd;
+  bool active;
+  variant ret;
+  ethread(): handle(0), sd(NULL), active(false), ret(0) {};
+  ~ethread() {
+    if (sd != NULL) {
+      delete sd;
+    }
+  }
+};
+
+extern std::deque<ethread*> threads;
 
 namespace enigma_user {
-	int script_thread(int scr, variant arg0 = 0, variant arg1 = 0, variant arg2 = 0, variant arg3 = 0, variant arg4 = 0, variant arg5 = 0, variant arg6 = 0, variant arg7 = 0);
-	bool thread_get_finished(int thread);
-	variant thread_get_return(int thread);
+  int script_thread(int scr, variant arg0 = 0, variant arg1 = 0, variant arg2 = 0, variant arg3 = 0, variant arg4 = 0, variant arg5 = 0, variant arg6 = 0, variant arg7 = 0);
+  
+  int thread_create_script(int scr, variant arg0 = 0, variant arg1 = 0, variant arg2 = 0, variant arg3 = 0, variant arg4 = 0, variant arg5 = 0, variant arg6 = 0, variant arg7 = 0);
+  int thread_start(int thread);
+  void thread_join(int thread);
+  void thread_delete(int thread);
+  bool thread_exists(int thread);
+  bool thread_get_finished(int thread);
+  variant thread_get_return(int thread);
 }
 
 #endif //ENIGMA_PLATFORM_THREADS_H

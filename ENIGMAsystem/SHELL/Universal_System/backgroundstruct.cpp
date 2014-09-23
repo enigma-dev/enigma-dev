@@ -123,7 +123,28 @@ namespace enigma
     unsigned int w, h, fullwidth, fullheight;
 
     unsigned char *pxdata = image_load(filename,&w,&h,&fullwidth,&fullheight,false);
-    if (pxdata == NULL) { printf("ERROR - Failed to append sprite to index!\n"); return; }
+    if (pxdata == NULL) { printf("ERROR - Failed to append background to index!\n"); return; }
+    
+    // If background is transparent, set the alpha to zero for pixels that should be transparent from lower left pixel color
+    if (pxdata && transparent)
+    {
+      int t_pixel_b = pxdata[(h-1)*fullwidth*4];
+      int t_pixel_g = pxdata[(h-1)*fullwidth*4+1];
+      int t_pixel_r = pxdata[(h-1)*fullwidth*4+2];
+      unsigned int ih, iw;
+      for (ih = 0; ih < h; ih++)
+      {
+        int tmp = ih*fullwidth*4;
+        for (iw = 0; iw < w; iw++)
+        {
+          if (pxdata[tmp] == t_pixel_b && pxdata[tmp+1] == t_pixel_g && pxdata[tmp+2] == t_pixel_r)
+        pxdata[tmp+3] = 0;
+
+          tmp+=4;
+        }
+      }
+    }
+    
     unsigned texture = graphics_create_texture(w, h, fullwidth, fullheight, pxdata, mipmap);
     delete[] pxdata;
 

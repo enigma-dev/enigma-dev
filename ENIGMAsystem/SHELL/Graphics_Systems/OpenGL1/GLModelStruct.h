@@ -17,7 +17,9 @@
 
 #include "../General/OpenGLHeaders.h"
 #include "../General/GSd3d.h"
+#include "../General/GSmodel.h"
 #include "GLshapes.h"
+#include "GLTextureStruct.h"
 #include "../General/GSprimitives.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
@@ -150,6 +152,10 @@ union VertexElement {
 class Mesh
 {
   public:
+  int modeltype; // can be static, dynamic, or stream
+  bool modelbuffered; // whether a call list has been generated if the model type is static
+  GLuint modellist; // call list for static models
+  
   unsigned currentPrimitive; // The type of the current primitive being added to the model
 
   vector<VertexElement> vertices; // Temporary vertices container for the current primitive until they are batched
@@ -179,6 +185,8 @@ class Mesh
 
   //NOTE: OpenGL 1.1 models are always dynamic since they utilize vertex arrays for software vertex processing and backwards compatibility.
   Mesh (int type) {
+    modeltype = type;
+    modelbuffered = false;
     vertexStride = 0;
     useColors = false;
     useTextures = false;
@@ -427,26 +435,22 @@ class Mesh
     GLsizei STRIDE = stride;
 
     // Enable vertex array's for fast vertex processing
-    glEnableClientState(GL_VERTEX_ARRAY);
     unsigned offset = 0;
     glVertexPointer( vertexStride, GL_FLOAT, STRIDE, OFFSET(offset) ); // Set the vertex pointer
     offset += vertexStride;
 
     if (useNormals){
-      glEnableClientState(GL_NORMAL_ARRAY);
       glNormalPointer( GL_FLOAT, STRIDE, OFFSET(offset) ); // Set the normal pointer to the offset in the array
       offset += 3;
     }
 
     if (useTextures){
-      glEnableClientState(GL_TEXTURE_COORD_ARRAY);
       glTexCoordPointer( 2, GL_FLOAT, STRIDE,  OFFSET(offset) ); // Set the texture pointer to the offset in the array
       offset += 2;
     }
 
     if (useColors){
-		glEnableClientState(GL_COLOR_ARRAY);
-        glColorPointer( 4, GL_UNSIGNED_BYTE, STRIDE, OFFSET(offset)); // Set the color pointer to the offset in the array
+      glColorPointer( 4, GL_UNSIGNED_BYTE, STRIDE, OFFSET(offset)); // Set the color pointer to the offset in the array
     }
 
     glDrawElements(mode, count, GL_UNSIGNED_INT, &inds[vert_start]);
@@ -456,41 +460,41 @@ class Mesh
     if (!count) {
       return;
     }
-
-      // Calculate the number of bytes to get to the next vertex
+    
+    // Calculate the number of bytes to get to the next vertex
     GLsizei stride = GetStride() * sizeof( gs_scalar );
 
     #define OFFSET( P )  ( char* ) ( &verts[0] ) + ( ( sizeof( gs_scalar ) * ( P         ) ) )
     GLsizei STRIDE = stride;
 
     // Enable vertex array's for fast vertex processing
-    glEnableClientState(GL_VERTEX_ARRAY);
     unsigned offset = 0;
     glVertexPointer( vertexStride, GL_FLOAT, STRIDE, OFFSET(offset) ); // Set the vertex pointer
     offset += vertexStride;
 
     if (useNormals){
-      glEnableClientState(GL_NORMAL_ARRAY);
       glNormalPointer( GL_FLOAT, STRIDE, OFFSET(offset) ); // Set the normal pointer to the offset in the array
       offset += 3;
     }
 
     if (useTextures){
-      glEnableClientState(GL_TEXTURE_COORD_ARRAY);
       glTexCoordPointer( 2, GL_FLOAT, STRIDE,  OFFSET(offset) ); // Set the texture pointer to the offset in the array
       offset += 2;
     }
 
     if (useColors){
-      glEnableClientState(GL_COLOR_ARRAY);
       glColorPointer( 4, GL_UNSIGNED_BYTE, STRIDE, OFFSET(offset)); // Set the color pointer to the offset in the array
     }
 
     glDrawArrays(mode, vert_start, count);
   }
-
-  void Draw(int vertex_start = 0, int vertex_count = -1)
-  {
+  
+  void DrawCalls(int vertex_start = 0, int vertex_count = -1) {
+    glEnableClientState(GL_VERTEX_ARRAY);
+    if (useNormals) glEnableClientState(GL_NORMAL_ARRAY);
+    if (useTextures) glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    if (useColors) glEnableClientState(GL_COLOR_ARRAY);
+  
     //TODO: Right now vertex count override only works with triangles
     // Draw the batched and indexed primitives
     if (triangleIndexedCount > 0) {
@@ -500,7 +504,7 @@ class Mesh
       DrawElements(GL_LINES, lineIndexedVertices, lineIndices, lineIndices.size());
     }
     if (pointIndexedCount > 0) {
-        DrawElements(GL_POINTS, pointIndexedVertices, pointIndices, pointIndices.size());
+      DrawElements(GL_POINTS, pointIndexedVertices, pointIndices, pointIndices.size());
     }
 
     // Draw the unbatched and unindexed primitives
@@ -511,13 +515,32 @@ class Mesh
       DrawArrays(GL_LINES, lineVertices, lineCount);
     }
     if (pointCount > 0) {
-        DrawArrays(GL_POINTS, pointVertices, pointCount);
+      DrawArrays(GL_POINTS, pointVertices, pointCount);
     }
 
     glDisableClientState(GL_VERTEX_ARRAY);
     if (useTextures) glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     if (useNormals) glDisableClientState(GL_NORMAL_ARRAY);
     if (useColors) glDisableClientState(GL_COLOR_ARRAY);
+  }
+
+  void Draw(int vertex_start = 0, int vertex_count = -1)
+  {
+    if (modeltype == enigma_user::model_static) {
+      if (!modelbuffered) {
+        modelbuffered = true;
+        modellist = glGenLists(1);
+        glNewList(modellist, GL_COMPILE);
+          DrawCalls(vertex_start, vertex_count);
+        glEndList();
+        ClearData();
+      }
+      enigma::graphics_samplers_apply();
+      glCallList(modellist);
+    } else {
+      enigma::graphics_samplers_apply();
+      DrawCalls(vertex_start, vertex_count);
+    }
   }
 };
 
