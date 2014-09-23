@@ -38,7 +38,7 @@ static int displayInitialResolutionWidth = 0, displayInitialResolutionHeight = 0
 namespace enigma
 {
     extern HWND hWnd;
-    bool isVisible = true, windowIsTop = false, windowAdapt = true, gameWindowFocused = false;
+    bool isVisible = true, stayOnTop = false, windowAdapt = true, gameWindowFocused = false;
     int cursorInt = 0, regionWidth = 0, regionHeight = 0, windowWidth = 0, windowHeight = 0, windowX = 0, windowY = 0;
     double scaledWidth = 0, scaledHeight = 0;
     char* currentCursor = IDC_ARROW;
@@ -375,10 +375,10 @@ bool window_get_minimized()
 
 void window_set_stayontop(bool stay)
 {
-    if (enigma::windowIsTop == stay)
+    if (enigma::stayOnTop == stay)
         return;
 
-    if ((enigma::windowIsTop = stay))
+    if ((enigma::stayOnTop = stay))
     {
         SetWindowPos(enigma::hWnd,HWND_TOPMOST,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE);
     }
@@ -401,7 +401,7 @@ bool window_get_freezeonlosefocus()
 
 bool window_get_stayontop()
 {
-    return enigma::windowIsTop;
+    return enigma::stayOnTop;
 }
 
 void window_set_region_scale(double scale, bool adaptwindow)

@@ -45,7 +45,7 @@ namespace enigma {
   bool windowAdapt = true;
   int regionWidth = 0, regionHeight = 0, windowWidth = 0, windowHeight = 0, windowX = 0, windowY = 0;
   double scaledWidth = 0, scaledHeight = 0;
-  extern bool isFullScreen,freezeOnLoseFocus;
+  extern bool isSizeable, showBorder, showIcons, freezeOnLoseFocus, isFullScreen;
   extern int viewScale, windowColor;
     
   void setwindowsize()
@@ -206,6 +206,9 @@ int window_mouse_get_x()  { return getMouse(2); }
 int window_mouse_get_y()  { return getMouse(3); }
 
 void window_set_stayontop(bool stay) {
+  if (enigma::stayOnTop == stay) return;
+  enigma::stayOnTop = stay;
+  
   Atom wmState = XInternAtom(disp, "_NET_WM_STATE", False);
   Atom aStay = XInternAtom(disp,"_NET_WM_STATE_ABOVE", False);
   XEvent xev;
@@ -221,9 +224,14 @@ void window_set_stayontop(bool stay) {
   XSendEvent(disp,DefaultRootWindow(disp),False,SubstructureRedirectMask|SubstructureNotifyMask,&xev);
 }
 
-bool window_get_stayontop() {return false;}
+bool window_get_stayontop() {
+  return enigma::stayOnTop;
+}
 
 void window_set_sizeable(bool sizeable) {
+  if (enigma::isSizeable == sizeable) return;
+  enigma::isSizeable = sizeable;
+  
   XSizeHints hints;
   hints.min_width = 640;
   hints.min_height = 480;
@@ -232,9 +240,14 @@ void window_set_sizeable(bool sizeable) {
   XSetWMNormalHints(disp, win, &hints);
 }
 
-bool window_get_sizeable() {return false;}
+bool window_get_sizeable() {
+  return enigma::isSizeable;
+}
 
 void window_set_showborder(bool show) {
+  if (enigma::showBorder == show) return;
+  enigma::showBorder = show;
+  
   Atom property = XInternAtom(disp,"_MOTIF_WM_HINTS",True);
   if (!show) {
     Hints   hints;
@@ -246,9 +259,14 @@ void window_set_showborder(bool show) {
   }
 }
 
-bool window_get_showborder() {return true;}
+bool window_get_showborder() {
+  return enigma::showBorder;
+}
 
 void window_set_showicons(bool show) {
+  if (enigma::showIcons == show) return;
+  enigma::showIcons = show;
+
   Atom wmState = XInternAtom(disp, "_NET_WM_WINDOW_TYPE", False);
   Atom aShow = XInternAtom(disp,"_NET_WM_WINDOW_TYPE_TOOLBAR", False);
   XEvent xev;
@@ -264,9 +282,14 @@ void window_set_showicons(bool show) {
   XSendEvent(disp,DefaultRootWindow(disp),False,SubstructureRedirectMask|SubstructureNotifyMask,&xev);
 }
 
-bool window_get_showicons() {return true;}
+bool window_get_showicons() {
+  return enigma::showIcons;
+}
 
 void window_set_minimized(bool minimized) {
+  if (enigma::isMinimized == minimized) return;
+  enigma::isMinimized = minimized;
+  
   if (minimized) {
     XIconifyWindow(disp,win,0);
   } else {
@@ -275,20 +298,7 @@ void window_set_minimized(bool minimized) {
 }
 
 bool window_get_minimized() { 
-	Atom aMinimized = XInternAtom(disp,"_NET_WM_STATE_HIDDEN",False);
-	Atom ra;
-	int ri;
-	unsigned long nr, bar;
-	unsigned char *data;
-	int stat = XGetWindowProperty(disp,win,aMinimized,0L,0L,False,AnyPropertyType,&ra,&ri,&nr,&bar,&data);
-	if (stat != Success) {
-		printf("Status: %d\n",stat);
-		//return 0;
-	}
-	/*printf("%d %d %d %d\n",ra,ri,nr,bar);
-	for (int i = 0; i < nr; i++) printf("%02X ",data[i]);
-	printf("\n");*/
-	return 0;
+	return enigma::isMinimized;
 }
 
 void window_default(bool center_size)
@@ -417,6 +427,9 @@ bool window_get_freezeonlosefocus()
 
 void window_set_fullscreen(bool full)
 {
+  if (enigma::isFullScreen == full) return;
+  enigma::isFullScreen = full;
+  
 	Atom wmState = XInternAtom(disp, "_NET_WM_STATE", False);
 	Atom aFullScreen = XInternAtom(disp,"_NET_WM_STATE_FULLSCREEN", False);
 	XEvent xev;
@@ -434,32 +447,7 @@ void window_set_fullscreen(bool full)
 
 bool window_get_fullscreen()
 {
-	Atom wmState = XInternAtom(disp, "_NET_WM_STATE", False);
-	Atom aFullScreen = XInternAtom(disp,"_NET_WM_STATE_FULLSCREEN", False);
-	bool res = false;
-
-	//Return types, not really used.
-	Atom actualType;
-	int actualFormat;
-	unsigned long bytesAfterReturn;
-
-	//These are used.
-	unsigned long numItems;
-	unsigned char* data = NULL;
-
-	if (XGetWindowProperty(disp, win, wmState, 0, LONG_MAX, False, AnyPropertyType, &actualType, &actualFormat, &numItems, &bytesAfterReturn, &data) == Success) {
-		for (unsigned long i=0; i<numItems; ++i) {
-			if (aFullScreen == reinterpret_cast<unsigned long *>(data)[i]) {
-				res = true;
-			}
-		}
-	}
-
-	//Reclaim memory.
-	if (data) {
-		XFree(data);
-	}
-	return res;
+	return enigma::isFullScreen;
 }
 
 }
