@@ -231,16 +231,23 @@ void window_set_sizeable(bool sizeable) {
   hints.max_height = 481;
   XSetWMNormalHints(disp, win, &hints);
 }
+
 bool window_get_sizeable() {return false;}
+
 void window_set_showborder(bool show) {
-  Hints   hints;
-  Atom    property;
-  hints.flags = 2;        // Specify that we're changing the window decorations.
-  hints.decorations = 0;  // 0 (false) means that window decorations should go bye-bye.
-  property = XInternAtom(disp,"_MOTIF_WM_HINTS",True);
-  XChangeProperty(disp,win,property,property,32,PropModeReplace,(unsigned char *)&hints,5);
+  Atom property = XInternAtom(disp,"_MOTIF_WM_HINTS",True);
+  if (!show) {
+    Hints   hints;
+    hints.flags = 2;        // Specify that we're changing the window decorations.
+    hints.decorations = 0;  // 0 (false) means that window decorations should go bye-bye.
+    XChangeProperty(disp,win,property,property,32,PropModeReplace,(unsigned char *)&hints,5);
+  } else {
+    XDeleteProperty(disp,win,property);
+  }
 }
+
 bool window_get_showborder() {return true;}
+
 void window_set_showicons(bool show) {
   Atom wmState = XInternAtom(disp, "_NET_WM_WINDOW_TYPE", False);
   Atom aShow = XInternAtom(disp,"_NET_WM_WINDOW_TYPE_TOOLBAR", False);
@@ -256,6 +263,7 @@ void window_set_showicons(bool show) {
   xev.xclient.data.l[2] = 0;
   XSendEvent(disp,DefaultRootWindow(disp),False,SubstructureRedirectMask|SubstructureNotifyMask,&xev);
 }
+
 bool window_get_showicons() {return true;}
 
 void window_set_minimized(bool minimized) {
@@ -265,6 +273,7 @@ void window_set_minimized(bool minimized) {
     XMapWindow(disp,win);
   }
 }
+
 bool window_get_minimized() { 
 	Atom aMinimized = XInternAtom(disp,"_NET_WM_STATE_HIDDEN",False);
 	Atom ra;
@@ -280,7 +289,7 @@ bool window_get_minimized() {
 	for (int i = 0; i < nr; i++) printf("%02X ",data[i]);
 	printf("\n");*/
 	return 0;
-};
+}
 
 void window_default(bool center_size)
 {
