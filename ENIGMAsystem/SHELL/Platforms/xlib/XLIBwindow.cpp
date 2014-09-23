@@ -187,6 +187,16 @@ enum {
   _NET_WM_STATE_TOGGLE
 };
 
+typedef struct
+            {
+              unsigned long   flags;
+              unsigned long   functions;
+              unsigned long   decorations;
+              long            inputMode;
+              unsigned long   status;
+            } Hints;
+
+
 namespace enigma_user
 {
 
@@ -223,9 +233,12 @@ void window_set_sizeable(bool sizeable) {
 }
 bool window_get_sizeable() {return false;}
 void window_set_showborder(bool show) {
-  XSetWindowAttributes swa;
-  swa.override_redirect = show;
-  XChangeWindowAttributes(disp, win, CWOverrideRedirect, &swa);
+  Hints   hints;
+  Atom    property;
+  hints.flags = 2;        // Specify that we're changing the window decorations.
+  hints.decorations = 0;  // 0 (false) means that window decorations should go bye-bye.
+  property = XInternAtom(disp,"_MOTIF_WM_HINTS",True);
+  XChangeProperty(disp,win,property,property,32,PropModeReplace,(unsigned char *)&hints,5);
 }
 bool window_get_showborder() {return true;}
 void window_set_showicons(bool show) {
