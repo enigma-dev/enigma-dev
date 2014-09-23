@@ -50,12 +50,16 @@ namespace enigma
         LONG_PTR newlong = WS_MINIMIZEBOX;
         if (isSizeable)
             newlong |= WS_SIZEBOX;
+        if (!showBorder)
+            newlong |= WS_POPUP;
         if (showBorder)
             newlong |= WS_CAPTION;
         if (showIcons)
             newlong |= WS_POPUPWINDOW;
         if (isVisible)
-            newlong |= WS_VISIBLE | WS_EX_APPWINDOW;
+            newlong |= WS_VISIBLE;
+        if (isVisible && showBorder)
+            newlong |= WS_EX_APPWINDOW;
 
         return newlong;
     }
