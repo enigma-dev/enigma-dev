@@ -764,11 +764,30 @@ string clipboard_get_text()
   unsigned char* buf;
 
   if (XGetWindowProperty(disp, RootWindow(disp,0), XA_CLIPBOARD, 0, 10000000L, False, XA_UTF8, &actual_type, &actual_format, &nitems, &leftover, &buf) == Success) {;
-    /* Use buf */
-    //free(buf);
-    return string(reinterpret_cast<char*>(buf));
+    if (buf != NULL) {
+      //free(buf);
+      return string(reinterpret_cast<char*>(buf));
+    } else {
+      return "";
+    }
   } else {
     return "";
+  }
+}
+
+bool clipboard_has_text() {
+  Atom XA_UTF8 = XInternAtom(disp, "UTF8", 0);
+  Atom XA_CLIPBOARD = XInternAtom(disp, "CLIPBOARD", False);
+  //Atom XA_UNICODE = XInternAtom(disp, "UNICODE", 0);
+  Atom actual_type;
+  int actual_format;
+  unsigned long nitems, leftover;
+  unsigned char* buf;
+
+  if (XGetWindowProperty(disp, RootWindow(disp,0), XA_CLIPBOARD, 0, 10000000L, False, XA_UTF8, &actual_type, &actual_format, &nitems, &leftover, &buf) == Success) {;
+    return buf != NULL;
+  } else {
+    return false;
   }
 }
 
