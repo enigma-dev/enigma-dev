@@ -450,9 +450,14 @@ namespace enigma
   std::map<int,int> keybdmap;
 
   unsigned char keymap[512];
+  unsigned char keyrmap[256];
   void initkeymap()
   {
     using namespace enigma_user;
+    
+    for (size_t i = 0; i < 512; ++i) keymap[i] = 0;
+    for (size_t i = 0; i < 256; ++i) keyrmap[i] = 0;
+    
     // Pretend this part doesn't exist
     keymap[0x151] = vk_left;
     keymap[0x153] = vk_right;
@@ -511,12 +516,14 @@ namespace enigma
     //for (int i = 0; i < 255; i++)
     //  usermap[i] = i;
 
-    for (int i = 0; i < 255; i++)
+    for (int i = 0; i < 'a'; i++)
       keymap[i] = i;
     for (int i = 'a'; i <= 'z'; i++) // 'a' to 'z' wrap to 'A' to 'Z'
       keymap[i] = i + 'A' - 'a';
     for (int i = 'z'+1; i < 255; i++)
       keymap[i] = i;
+      
+    for (size_t i = 0; i < 512; ++i) keyrmap[keymap[i]] = i;
    }
 }
 
@@ -643,7 +650,7 @@ bool keyboard_check_direct(int key)
     }
     return 0;
   }
-  if (key == vk_anykey) {
+  if (key == vk_nokey) {
     // next go through each member of keyState array
     for (unsigned i = 0; i < 32; i++ )
     {
@@ -665,10 +672,8 @@ bool keyboard_check_direct(int key)
   }
 
   // enter, backspace and some keys do not map properly but most such as space and A-Z 0-9 do
-  key = XKeysymToKeycode(enigma::x11::disp, key);
-  //return ((keyState[enigma::keymap[key]/8] >> (enigma::keymap[key]%8)) & 1);
-  return ((keyState[key/8] >> (key%8)) & 1);
-  //return (keyState[key/8]&(0x1<<(key%8))); //NOTE: Alternative, not really sure which is better.
+  key = XKeysymToKeycode(enigma::x11::disp, keyrmap[key]);
+  return (keyState[keyrmap[key] >> 3] & (1 << (keyrmap[key] & 7)));
 }
 
 void window_set_region_scale(double scale, bool adaptwindow)
