@@ -48,7 +48,7 @@ namespace enigma
     LONG_PTR getwindowstyle()
     {
         LONG_PTR newlong = WS_MINIMIZEBOX;
-        if (isSizeable)
+        if (isSizeable && showBorder)
             newlong |= WS_SIZEBOX;
         if (!showBorder)
             newlong |= WS_POPUP;
@@ -58,8 +58,6 @@ namespace enigma
             newlong |= WS_POPUPWINDOW;
         if (isVisible)
             newlong |= WS_VISIBLE;
-        if (isVisible && showBorder)
-            newlong |= WS_EX_APPWINDOW;
 
         return newlong;
     }

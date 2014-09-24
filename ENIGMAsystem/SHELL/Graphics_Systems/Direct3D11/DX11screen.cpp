@@ -336,6 +336,7 @@ void screen_redraw()
 			view_first = false;
 			if (stop_loop) break;
         }
+        // In Studio this variable is not reset until the next iteration of views as is actually 7 in the draw_gui event, in 8.1 however view_current will always be 0 in the step event.
         view_current = 0;
     }
 
