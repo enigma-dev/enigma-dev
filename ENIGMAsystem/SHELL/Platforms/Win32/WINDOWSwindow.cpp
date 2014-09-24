@@ -45,15 +45,15 @@ namespace enigma
     extern bool isSizeable, showBorder, showIcons, freezeOnLoseFocus, isFullScreen;
     extern int viewScale, windowColor;
 
+    // Tested and confirmed to have the exact behaviour of GM8.1
     LONG_PTR getwindowstyle()
     {
         LONG_PTR newlong = WS_MINIMIZEBOX;
-        if (isSizeable && showBorder)
-            newlong |= WS_SIZEBOX;
-        if (!showBorder)
-            newlong |= WS_POPUP;
-        if (showBorder)
+        if (showBorder) {
             newlong |= WS_CAPTION;
+            if (isSizeable)
+              newlong |= WS_SIZEBOX;
+        }
         if (showIcons)
             newlong |= WS_POPUPWINDOW;
         if (isVisible)
