@@ -30,6 +30,8 @@
 #include <stdio.h>
 #include "Universal_System/CallbackArrays.h"
 #include "Universal_System/roomsystem.h"
+#include <cstring>
+
 
 namespace enigma
 {
@@ -87,10 +89,8 @@ namespace enigma {
     }
 }
 
-  extern string working_directory;
   int init() {
   timeAtStartup=mach_absolute_time();
-  working_directory=cocoa_get_working_directory();
   enigma::initialize_everything();
   enigma::initkeymap();
     
