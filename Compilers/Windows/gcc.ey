@@ -16,13 +16,12 @@ searchdirs-start: "#include <...> search starts here:"
 searchdirs-end: "End of search list."
 resources: $exe
 cppflags:
-cxxflags: -I../Additional/Windows/include
+cxxflags: -I../Additional/i686-w64-mingw32/include
 cflags:
-ldflags: -L../Additional/Windows/lib
+ldflags:
 links:
 
 Build-Extension: .exe
 Run-output: $tempfile
 Run-Program: $game
 Run-Params:
-
