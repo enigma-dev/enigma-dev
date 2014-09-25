@@ -19,6 +19,7 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <unistd.h>
+#include <sys/resource.h>
 #include <stdio.h>
 #include <string>
 #include <cstdlib>
@@ -423,5 +424,8 @@ string environment_get_variable(string name) {
   return ev? ev : "";
 }
 
+void set_program_priority(int value) {
+  setpriority(PRIO_PROCESS, getpid(), value);
 }
 
+}
