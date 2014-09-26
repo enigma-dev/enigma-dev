@@ -1,29 +1,20 @@
-/********************************************************************************\
-**                                                                              **
-**  Copyright (C) 2008-2011 Josh Ventura                                        **
-**                                                                              **
-**  This file is a part of the ENIGMA Development Environment.                  **
-**                                                                              **
-**                                                                              **
-**  ENIGMA is free software: you can redistribute it and/or modify it under the **
-**  terms of the GNU General Public License as published by the Free Software   **
-**  Foundation, version 3 of the license or any later version.                  **
-**                                                                              **
-**  This application and its source code is distributed AS-IS, WITHOUT ANY      **
-**  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS   **
-**  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more       **
-**  details.                                                                    **
-**                                                                              **
-**  You should have recieved a copy of the GNU General Public License along     **
-**  with this code. If not, see <http://www.gnu.org/licenses/>                  **
-**                                                                              **
-**  ENIGMA is an environment designed to create games and other programs with a **
-**  high-level, fully compilable language. Developers of ENIGMA or anything     **
-**  associated with ENIGMA are in no way responsible for its users or           **
-**  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **
-**                                                                              **
-\********************************************************************************/
+/** Copyright (C) 2008-2011 Josh Ventura
+*** Copyright (C) 2014 Josh Ventura, Robert B. Colton
+***
+*** This file is a part of the ENIGMA Development Environment.
+***
+*** ENIGMA is free software: you can redistribute it and/or modify it under the
+*** terms of the GNU General Public License as published by the Free Software
+*** Foundation, version 3 of the license or any later version.
+***
+*** This application and its source code is distributed AS-IS, WITHOUT ANY
+*** WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+*** FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+*** details.
+***
+*** You should have received a copy of the GNU General Public License along
+*** with this code. If not, see <http://www.gnu.org/licenses/>
+**/
 
 #include <map>
 #include <deque>
@@ -49,6 +40,7 @@ extern  deque<int> instance_id; // TODO: Implement and move to enigma_user.
 namespace enigma
 {
   inst_iter::inst_iter(object_basic* i,inst_iter *n = NULL,inst_iter *p = NULL): inst(i), next(n), prev(p) {}
+  inst_iter::inst_iter() {}
   objectid_base::objectid_base(): inst_iter(NULL,NULL,this), count(0) {}
   event_iter::event_iter(string n): inst_iter(NULL,NULL,this), name(n) {}
   event_iter::event_iter(): inst_iter(NULL,NULL,this) {}
@@ -64,26 +56,24 @@ namespace enigma
     object_basic* iterator::operator->() { return it->inst; }
 
     void iterator::addme() { central_iterator_cache.insert(this); }
+    inst_iter* iterator::copy(const iterator& other, inst_iter& temp_iter) { if (other.it == &other.temp_iter) { return &temp_iter; temp_iter = other.temp_iter; } else { return other.it; } };
 
     iterator::operator bool() { return it; }
     iterator &iterator::operator++()    { it = it->next; return *this; }
-    iterator  iterator::operator++(int) { iterator ret(it,temp); it = it->next; return ret; }
+    iterator  iterator::operator++(int) { iterator ret(*this); it = it->next; return ret; }
     iterator &iterator::operator--()    { it = it->prev; return *this; }
-    iterator  iterator::operator--(int) { iterator ret(it,temp); it = it->prev; return ret; }
+    iterator  iterator::operator--(int) { iterator ret(*this); it = it->prev; return ret; }
 
-    const iterator &iterator::operator=(iterator& other)       { if (temp) delete it; it = other.it; temp = other.temp; other.temp = false; return other; }
-    const iterator &iterator::operator=(const iterator& other) { if (temp) delete it; it = other.it; temp = false; return other; }
-    const iterator &iterator::operator=(inst_iter* niter)      { if (temp) delete it; it = niter; temp = false; return *this; }
-    const iterator &iterator::operator=(object_basic* object)  { if (temp) delete it; it = new inst_iter(object,NULL,NULL); temp = true; return *this; }
-
-    iterator::iterator(inst_iter*_it, bool tmp): it(_it), temp(tmp) { addme(); }
-    iterator::iterator(const iterator&other): it(other.it?new inst_iter(*other.it):NULL), temp(true) { addme(); }
-    iterator::iterator(iterator&other): it(other.it), temp(other.temp) { other.temp = false; }
-    iterator::iterator(object_basic*ob): it(new inst_iter(ob,NULL,NULL)), temp(true) { }
-    iterator::iterator(): it(NULL), temp(true) { }
+    iterator &iterator::operator=(const iterator& other) { it = copy(other, temp_iter); return *this; }
+    iterator &iterator::operator=(inst_iter* niter)      { it = niter; return *this; }
+    iterator &iterator::operator=(object_basic* object)  { temp_iter.next = temp_iter.prev = NULL; temp_iter.inst = object; it = &temp_iter; return *this; }
+    
+    iterator::iterator(const iterator& other): temp_iter(NULL), it(copy(other, temp_iter)) { addme(); }
+    iterator::iterator(inst_iter* iter): temp_iter(NULL), it(iter) { addme(); }
+    iterator::iterator(object_basic* ob): temp_iter(ob, NULL, NULL), it(&temp_iter)  { }
+    iterator::iterator(): temp_iter(NULL), it(NULL)  { }
     iterator:: ~iterator() {
       central_iterator_cache.erase(this);
-      if (temp) delete it;
     }
 
     void update_iterators_for_destroy(const inst_iter* dd)
