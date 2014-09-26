@@ -27,7 +27,7 @@
 \********************************************************************************/
 
 #include "Universal_System/graphics_object.h"
-#include "Universal_System/instance_system_base.h"
+#include "Universal_System/instance_iterator.h"
 
 namespace enigma {
   extern int destroycalls, createcalls;
