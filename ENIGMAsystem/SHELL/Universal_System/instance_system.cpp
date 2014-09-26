@@ -68,10 +68,10 @@ namespace enigma
     iterator &iterator::operator=(inst_iter* niter)      { it = niter; return *this; }
     iterator &iterator::operator=(object_basic* object)  { temp_iter.next = temp_iter.prev = NULL; temp_iter.inst = object; it = &temp_iter; return *this; }
     
-    iterator::iterator(const iterator& other): temp_iter(NULL), it(copy(other, temp_iter)) { addme(); }
-    iterator::iterator(inst_iter* iter): temp_iter(NULL), it(iter) { addme(); }
+    iterator::iterator(const iterator& other): it(copy(other, temp_iter)) { addme(); }
+    iterator::iterator(inst_iter* iter): it(iter) { addme(); }
     iterator::iterator(object_basic* ob): temp_iter(ob, NULL, NULL), it(&temp_iter)  { }
-    iterator::iterator(): temp_iter(NULL), it(NULL)  { }
+    iterator::iterator(): it(NULL)  { }
     iterator:: ~iterator() {
       central_iterator_cache.erase(this);
     }
