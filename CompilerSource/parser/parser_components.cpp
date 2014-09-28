@@ -169,7 +169,8 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
       
       if (last_token == c)
       {
-        if (c != 'r' and c != 't')
+        if (c == '&' or c == '^' or c == '|') {} //Ignore these tokens
+        else if (c != 'r' and c != 't' and c != '!')
           codo[bpos] = synt[bpos] = ' ', bpos++;
         else {
           codo[bpos] = ' ';

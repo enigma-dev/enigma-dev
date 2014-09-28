@@ -128,6 +128,8 @@ struct parsed_script
 struct parsed_room: parsed_object {
   struct parsed_icreatecode { parsed_event* pe; int object_index; };
   map<int,parsed_icreatecode> instance_create_codes;
+  //PreCreate code uses the same struct, as nothing is really different 
+  map<int,parsed_icreatecode> instance_precreate_codes;
 };
 extern map<int,parsed_room*> parsed_rooms;
 typedef map<int,parsed_object*> :: iterator po_i;

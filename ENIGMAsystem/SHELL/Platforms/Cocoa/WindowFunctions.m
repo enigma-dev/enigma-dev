@@ -32,9 +32,32 @@
 EnigmaXcodeAppDelegate* delegate;
 NSPoint mouse; 
 
+void cocoa_window_set_fullscreen(bool full) 
+{
+	if (full) {
+		[[delegate enigmaview] enterFullScreenMode:[NSScreen mainScreen] withOptions:nil];
+	} else {
+		[[delegate enigmaview] exitFullScreenModeWithOptions: nil];
+	}
+}
+
+int cocoa_window_get_fullscreen()
+{
+	return [[delegate enigmaview] isInFullScreenMode];
+}
+
 const char* cocoa_window_get_caption()
 {
 	return [[[delegate window] title] UTF8String];	
+}
+
+int cocoa_get_screen_size(int getWidth)
+{
+	if (getWidth) {
+		return [[NSScreen mainScreen] frame].size.width;
+	} else {
+		return [[NSScreen mainScreen] frame].size.height;
+	}
 }
 
 int getWindowDimension(int i)
@@ -121,8 +144,9 @@ int cocoa_window_get_region_height() {
     return getWindowDimension(3);
 }
 
-const char* cocoa_get_working_directory() {
+//This does not appear to work right.
+/*const char* cocoa_get_working_directory() {
     NSBundle* bundle = [NSBundle mainBundle];
     return [[bundle bundlePath] UTF8String];
-}
+}*/
 

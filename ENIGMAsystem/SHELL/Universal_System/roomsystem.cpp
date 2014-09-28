@@ -23,6 +23,7 @@
 #include "reflexive_types.h"
 
 #include "Platforms/platforms_mandatory.h"
+#include "Platforms/General/PFwindow.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Universal_System/callbacks_events.h"
@@ -67,6 +68,8 @@ rvt view_hborder, view_hport, view_hspeed, view_hview, view_object, view_vborder
 
 namespace enigma
 {
+  extern int windowColor;
+
   roomstruct** roomdata;
   roomstruct** roomorder;
   
@@ -106,6 +109,9 @@ namespace enigma
     if (gamestart) {
       reset_lives();
     }
+
+    //We may still be holding on to deactivated instances; they can interact badly with existing instances in certain cases.
+    instance_deactivated_list.clear();
 
     // Initialize background variants so they do not throw uninitialized variable access errors.
     for (unsigned i=0;i<8;i++)
@@ -175,28 +181,29 @@ namespace enigma
 
     instance_event_iterator = new inst_iter(NULL,NULL,NULL);
 
+    // Fire the rooms preCreation code. This code includes instance sprite transformations added in the room editor.
+    // (NOTE: This code uses instance_deactivated_list to look up instances by ID, in addition to the normal lookup approach).
+    if (precreatecode)
+      precreatecode();
+    
     // Fire the create event of all the new instances.
     for (int i = 0; i < instancecount; i++) {
       is[i]->myevent_create();
     }
 
-  // instance create code should be added here or occur at this exact moment in time, but guess what the code
-  // isn't here, so where the fuck is it? and no not the create event, the instance create code from the room editor
-  // WHERE THE FUCK IS IT?
+    // Fire the game start event for all the new instances, persistent objects don't matter since this is the first time
+    // the game ran they won't even exist yet
+    if (gamestart)
+      for (int i = 0; i < instancecount; i++)
+        is[i]->myevent_gamestart();
 
-  // Fire the game start event for all the new instances, persistent objects don't matter since this is the first time
-  // the game ran they won't even exist yet
-  if (gamestart)
-    for (int i = 0; i < instancecount; i++)
-      is[i]->myevent_gamestart();
+    // Fire the rooms creation code. This includes instance creation code.
+    // (NOTE: This code uses instance_deactivated_list to look up instances by ID, in addition to the normal lookup approach).
+    if (createcode)
+      createcode();
 
-  // Fire the rooms creation code.
-  // (NOTE: This code uses instance_deactivated_list to look up instances by ID, in addition to the normal lookup approach).
-  if (createcode)
-       createcode();
-
-  // Fire the room start event for all persistent objects still kept alive and all the new instances
-  for (enigma::iterator it = enigma::instance_list_first(); it; ++it)
+    // Fire the room start event for all persistent objects still kept alive and all the new instances
+    for (enigma::iterator it = enigma::instance_list_first(); it; ++it)
     {
       it->myevent_roomstart();
     }
@@ -538,6 +545,7 @@ int room_add()
     rm->persistent = false;
     rm->views_enabled = false;
     rm->createcode = NULL;
+    rm->precreatecode = NULL;
 
     enigma::inst *newinst = new enigma::inst[1];
     rm->instances = newinst;
@@ -617,7 +625,8 @@ int room_duplicate(int indx, bool ass, int assroom)
     rm->persistent = copyrm->persistent;
     rm->views_enabled = copyrm->views_enabled;
     rm->createcode = copyrm->createcode;
-
+    rm->precreatecode = copyrm->precreatecode;
+    
     enigma::inst *newinst = new enigma::inst[copyrm->instancecount];
     rm->instances = newinst;
     rm->instancecount = copyrm->instancecount;
@@ -693,6 +702,21 @@ int view_set(int vind, int vis, int xview, int yview, int wview, int hview, int 
     return 1;
 }
 
+int window_view_mouse_get_x(int id)
+{
+  return window_mouse_get_x()+view_xview[id];
+}
+
+int window_view_mouse_get_y(int id)
+{
+  return window_mouse_get_y()+view_yview[id];
+}
+
+void window_view_mouse_set(int id, int x, int y)
+{
+  window_mouse_set(window_get_x() + x + view_xview[id],window_get_y() + y + view_yview[id]);
+}
+
 //NOTE: GM8.1 allowed the mouse to go outside the window, for basically all mouse functions and constants, Studio however
 //now wraps the mouse not allowing it to go out of bounds, so it will never report a negative mouse position for constants or functions.
 //On top of this, it not only appears that they have wrapped it, but it appears that they in fact stop updating the mouse altogether in Studio
@@ -700,7 +724,9 @@ int view_set(int vind, int vis, int xview, int yview, int wview, int hview, int 
 //ENIGMA's behaviour is a modified version of GM8.1, it uses the current view to obtain these positions so that it will work correctly
 //for overlapped views while being backwards compatible.
 int window_views_mouse_get_x() {
-  int x = window_mouse_get_x();
+  gs_scalar sx;
+  sx = (window_get_width() - window_get_region_width_scaled()) / 2;
+  int x = (window_mouse_get_x() - sx) * ((gs_scalar)window_get_region_width() / (gs_scalar)window_get_region_width_scaled());
   if (view_enabled) {
     x = view_xview[view_current]+((x-view_xport[view_current])/(double)view_wport[view_current])*view_wview[view_current];
   }
@@ -722,7 +748,9 @@ int window_views_mouse_get_x() {
 }
 
 int window_views_mouse_get_y() {
-  int y = window_mouse_get_y();
+  gs_scalar sy;
+  sy = (window_get_height() - window_get_region_height_scaled()) / 2;
+  int y = (window_mouse_get_y() - sy) * ((gs_scalar)window_get_region_height() / (gs_scalar)window_get_region_height_scaled());
   if (view_enabled) {
     y = view_yview[view_current]+((y-view_yport[view_current])/(double)view_hport[view_current])*view_hview[view_current];
   }
@@ -767,11 +795,16 @@ namespace enigma
     mouse_xprevious = mouse_x;
     mouse_yprevious = mouse_y;
 
-    mouse_x = window_mouse_get_x();
-    mouse_y = window_mouse_get_y();
+    gs_scalar sx, sy;
+    sx = (window_get_width() - window_get_region_width_scaled()) / 2;
+    sy = (window_get_height() - window_get_region_height_scaled()) / 2;
+
+    // scale the mouse positions to the area on screen where we put the scaled viewports for the scaling options
+    mouse_x = (window_mouse_get_x() - sx) * ((gs_scalar)window_get_region_width() / (gs_scalar)window_get_region_width_scaled());
+    mouse_y = (window_mouse_get_y() - sy) * ((gs_scalar)window_get_region_height() / (gs_scalar)window_get_region_height_scaled());
 
     if (view_enabled) {
-      for (int i = 0; i < 8; i++) {
+      for (int i = 0; i < 8; i++) { 
         if (view_visible[i]) {
           if (mouse_x >= view_xport[i] && mouse_x < view_xport[i]+view_wport[i] &&  mouse_y >= view_yport[i] && mouse_y < view_yport[i]+view_hport[i]) {
             mouse_x = view_xview[view_current]+((mouse_x-view_xport[view_current])/(double)view_wport[view_current])*view_wview[i];
@@ -784,6 +817,7 @@ namespace enigma
       mouse_y = view_yview[view_current]+((mouse_y-view_yport[view_current])/(double)view_hport[view_current])*view_hview[view_current];
     }
   }
+  
   void rooms_switch()
   {
     if (enigma_user::room_exists(room_switching_id)) {
@@ -794,6 +828,7 @@ namespace enigma
       enigma::roomdata[local_room_switching_id]->gotome(local_room_switching_restartgame);
     }
   }
+  
   void game_start() {
     enigma::roomstruct *rit = *enigma::roomorder;
     enigma::roomdata[rit->id]->gotome(true);

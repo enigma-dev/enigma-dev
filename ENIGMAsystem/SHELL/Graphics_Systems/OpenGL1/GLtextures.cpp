@@ -32,14 +32,6 @@
 
 vector<TextureStruct*> textureStructs(0);
 
-namespace enigma_user {
-extern int room_width, room_height;
-}
-
-namespace enigma {
-  extern size_t background_idmax;
-}
-
 TextureStruct::TextureStruct(unsigned gtex)
 {
   sampler = new enigma::SamplerState();
@@ -87,10 +79,10 @@ namespace enigma
     textureStruct->fullwidth = fullwidth;
     textureStruct->fullheight = fullheight;
     textureStructs.push_back(textureStruct);
-    
+
     //texture must be constructed before unbinding the texture so that it can apply its initial sampler state
     glBindTexture(GL_TEXTURE_2D, 0);
-    
+
     return textureStructs.size()-1;
   }
 
@@ -164,6 +156,14 @@ namespace enigma
     return ret;
   }
 
+  void graphics_samplers_apply() {
+    for (unsigned i = 0; i < 8; i++) {
+      if (enigma::samplerstates[i].bound_texture != -1) {
+         enigma::samplerstates[i].CompareAndApply(textureStructs[enigma::samplerstates[i].bound_texture]->sampler);
+      }
+    }
+  }
+
   SamplerState samplerstates[8];
 }
 
@@ -177,7 +177,7 @@ int texture_add(string filename, bool mipmap) {
   if (pxdata == NULL) { printf("ERROR - Failed to append sprite to index!\n"); return -1; }
   unsigned texture = enigma::graphics_create_texture(w, h, fullwidth, fullheight, pxdata, mipmap);
   delete[] pxdata;
-    
+
   return texture;
 }
 
@@ -219,7 +219,7 @@ void texture_set_enabled(bool enable)
 
 void texture_set_blending(bool enable)
 {
-    (enable?glEnable:glDisable)(GL_BLEND);
+  (enable?glEnable:glDisable)(GL_BLEND);
 }
 
 gs_scalar texture_get_width(int texid) {
@@ -242,21 +242,18 @@ unsigned texture_get_texel_height(int texid)
 }
 
 void texture_set_stage(int stage, int texid) {
-  //This turned into a clusterfuck, fix it Rob :D - H. G.
-  int gt = get_texture(texid);
-  if (enigma::samplerstates[stage].bound_texture != gt) {
+  if (texid == -1) { texture_reset(); return; }
+  if (enigma::samplerstates[stage].bound_texture != texid) {
     glActiveTexture(GL_TEXTURE0 + stage);
-    glBindTexture(GL_TEXTURE_2D, enigma::samplerstates[stage].bound_texture = (unsigned)(gt >= 0? gt : 0));
-  }
-  if (gt != -1){
-    // Must be applied regardless of whether the texture is already bound because the sampler state could have been changed.
-    enigma::samplerstates[stage].CompareAndApply(textureStructs[texid]->sampler);
+    enigma::samplerstates[stage].bound_texture = texid;
+    glBindTexture(GL_TEXTURE_2D, get_texture(texid));
   }
 }
 
 void texture_reset() {
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, enigma::samplerstates[0].bound_texture = 0);
+  enigma::samplerstates[0].bound_texture = -1;
+	glBindTexture(GL_TEXTURE_2D, 0);
   //Should only rarely apply the full state, I believe it is unnecessary to do it when we set no texture and it does not appear
   //to cause any issues so leave it commented.
   //enigma::samplerstates[0].ApplyState();

@@ -18,3 +18,7 @@
 #include "SB2Dfunctions.h"
 #include "SB2Djoints.h"
 #include "SB2Dinstances.h"
+
+namespace enigma {
+  void studiophysics_update();
+}

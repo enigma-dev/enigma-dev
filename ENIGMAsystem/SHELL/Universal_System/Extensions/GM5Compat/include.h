@@ -18,6 +18,7 @@
 
 #include "GM5Placebo.h"
 #include "GM5Drawing.h"
+#include "GM5Graphics.h"
 #include "GM5Sound.h"
 #include "GM5Views.h"
 

@@ -16,12 +16,10 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-//This file has been modified beyond recognition by Josh @ Dreamland
-//under the pretense that it would be better compatible with ENIGMA
-
 #include <X11/Xlib.h>
-#include <GL/glx.h>
+#include <X11/Xutil.h>
 #include <unistd.h>
+#include <sys/resource.h>
 #include <stdio.h>
 #include <string>
 #include <cstdlib>
@@ -51,11 +49,18 @@ namespace enigma
 {
   int game_return = 0;
   extern char keymap[512];
-  //extern char usermap[256];
   void ENIGMA_events(void); //TODO: Synchronize this with Windows by putting these two in a single header.
   bool gameWindowFocused = false;
+  extern int windowX, windowY, windowWidth, windowHeight;
+  extern void setwindowsize();
+  extern void WindowResized();
   extern bool freezeOnLoseFocus;
   unsigned int pausedSteps = 0;
+  
+  XVisualInfo* CreateVisualInfo();
+  void EnableDrawing();
+  void DisableDrawing();
+  void WindowResized();
 
   namespace x11
   {
@@ -136,8 +141,13 @@ namespace enigma
             }
           return 0;
         }
-        case Expose: {
-            //screen_refresh();
+        case ConfigureNotify: {
+          enigma::windowX = e.xconfigure.x;
+          enigma::windowY = e.xconfigure.y;
+          enigma::windowWidth = e.xconfigure.width;
+          enigma::windowHeight = e.xconfigure.height;
+          enigma::setwindowsize();
+          enigma::WindowResized();
           return 0;
         }
         case FocusIn:
@@ -220,16 +230,15 @@ static inline long clamp(long value, long min, long max)
 static bool game_isending = false;
 int main(int argc,char** argv)
 {
+    // Set the working_directory
+    char buffer[1024];
+    if (getcwd(buffer, sizeof(buffer)) != NULL)
+       fprintf(stdout, "Current working dir: %s\n", buffer);
+    else
+       perror("getcwd() error");
+    enigma_user::working_directory = string( buffer );
 
-  // Set the working_directory
-  char buffer[1024];
-  if (getcwd(buffer, sizeof(buffer)) != NULL)
-     fprintf(stdout, "Current working dir: %s\n", buffer);
-  else
-     perror("getcwd() error");
-  enigma_user::working_directory = string( buffer );
-
-  // Copy our parameters
+    // Copy our parameters
     enigma::parameters = new string[argc];
     enigma::parameterc = argc;
     for (int i=0; i<argc; i++)
@@ -244,25 +253,19 @@ int main(int argc,char** argv)
         return -1;
     }
 
-
     // Identify components (close button, root pane)
     wm_delwin = XInternAtom(disp,"WM_DELETE_WINDOW",False);
     Window root = DefaultRootWindow(disp);
 
-    // Prepare openGL
-    GLint att[] = { GLX_RGBA, GLX_DOUBLEBUFFER, GLX_DEPTH_SIZE, 24, None };
-    XVisualInfo *vi = glXChooseVisual(disp,0,att);
-    if(!vi){
-        printf("GLFail\n");
-        return -2;
-    }
-
+    // any normal person would know that this should be deleted but the OpenGL bridge does not want it deleted, please beware
+    XVisualInfo* vi = enigma::CreateVisualInfo();
+    
     // Window event listening and coloring
     XSetWindowAttributes swa;
     swa.border_pixel = 0;
     swa.background_pixel = 0;
     swa.colormap = XCreateColormap(disp,root,vi->visual,AllocNone);
-    swa.event_mask = ExposureMask | KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask | FocusChangeMask;// | StructureNotifyMask;
+    swa.event_mask = ExposureMask | KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask | FocusChangeMask | StructureNotifyMask;
     unsigned long valmask = CWColormap | CWEventMask; //  | CWBackPixel | CWBorderPixel;
 
     //prepare window for display (center, caption, etc)
@@ -283,17 +286,7 @@ int main(int argc,char** argv)
     //printf("Screen: %d %d %d %d\n",s->width/2,s->height/2,winw,winh);
     XMoveWindow(disp,win,(screen->width-winw)/2,(screen->height-winh)/2);
 
-    //geom();
-    //give us a GL context
-    GLXContext glxc = glXCreateContext(disp, vi, NULL, True);
-    if (!glxc){
-        printf("NoContext\n");
-        return -3;
-    }
-
-    //apply context
-    glXMakeCurrent(disp,win,glxc); //flushes
-    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_ACCUM_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
+    enigma::EnableDrawing();
 
     /* XEvent e;//wait for server to report our display request
     do {
@@ -311,15 +304,6 @@ int main(int argc,char** argv)
 
     //Call ENIGMA system initializers; sprites, audio, and what have you
     enigma::initialize_everything();
-
-    /*
-    for(char q=1;q;ENIGMA_events())
-        while(XQLength(disp))
-            if(handleEvents()>0) q=0;
-    glxc = glXGetCurrentContext();
-    glXDestroyContext(disp,glxc);
-    XCloseDisplay(disp);
-    return 0;*/
 
     struct timespec time_offset;
     struct timespec time_offset_slowing;
@@ -407,7 +391,7 @@ int main(int argc,char** argv)
 
     end:
     enigma::game_ending();
-    glXDestroyContext(disp,glxc);
+    enigma::DisableDrawing();
     XCloseDisplay(disp);
     return enigma::game_return;
 }
@@ -440,5 +424,8 @@ string environment_get_variable(string name) {
   return ev? ev : "";
 }
 
+void set_program_priority(int value) {
+  setpriority(PRIO_PROCESS, getpid(), value);
 }
 
+}

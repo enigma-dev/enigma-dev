@@ -65,7 +65,7 @@ string REFERENCE_POSTFIX(string ref) {
 #include "languages/lang_CPP.h"
 
 struct usedtype { int uc; dectrip original; usedtype(): uc(0) {} }; // uc is the use count, then after polling, the dummy number.
-int lang_CPP::compile_writeObjAccess(map<int,parsed_object*> &parsed_objects, parsed_object* global)
+int lang_CPP::compile_writeObjAccess(map<int,parsed_object*> &parsed_objects, parsed_object* global, bool treatUninitAs0)
 {
   ofstream wto;
   wto.open((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_objectaccess.h").c_str(),ios_base::out);
@@ -135,6 +135,9 @@ int lang_CPP::compile_writeObjAccess(map<int,parsed_object*> &parsed_objects, pa
       if (dait->second.type == "var")
         wto << "      default: return map_var(&(((enigma::object_locals*)inst)->vmap), \"" << pmember << "\");"  << endl;
       wto << "    }" << endl;
+      if (treatUninitAs0) { //Can't keep re-using the same dummy variable.
+        wto << "    dummy_" <<(usedtypes[dait->second.type + " " + dait->second.prefix + dait->second.suffix].uc) <<" = var();" << endl;
+      }
       wto << "    return dummy_" << usedtypes[dait->second.type + " " + dait->second.prefix + dait->second.suffix].uc << ";" << endl;
       wto << "  }" << endl;
     }
