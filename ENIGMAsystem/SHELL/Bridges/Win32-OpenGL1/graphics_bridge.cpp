@@ -48,8 +48,6 @@ namespace enigma
     
     void EnableDrawing (HGLRC *hRC)
     {
-      WindowResizedCallback = &WindowResized;
-      
       PIXELFORMATDESCRIPTOR pfd;
       int iFormat;
 
@@ -74,6 +72,11 @@ namespace enigma
       glGetIntegerv(GL_MAX_SAMPLES_EXT, &enigma_user::display_aa);
     }
 	
+    void WindowResized() {
+      // clear the window color, viewport does not need set because backbuffer was just recreated
+      enigma_user::draw_clear(enigma_user::window_get_color());
+    }
+
     void DisableDrawing (HWND hWnd, HDC hDC, HGLRC hRC)
     {
       wglMakeCurrent (NULL, NULL);

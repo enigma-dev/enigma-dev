@@ -44,42 +44,8 @@ namespace enigma
 {
 	extern bool forceSoftwareVertexProcessing;
 	
-  void OnDeviceLost() {
-    for (vector<Surface*>::iterator it = Surfaces.begin(); it != Surfaces.end(); it++) {
-      (*it)->OnDeviceLost();
-    }
-  }
-  
-  void OnDeviceReset() {
-    for (vector<Surface*>::iterator it = Surfaces.begin(); it != Surfaces.end(); it++) {
-      (*it)->OnDeviceReset();
-    }
-  }
-  
-  extern void (*WindowResizedCallback)();
-  void WindowResized() {
-    if (d3dmgr == NULL) { return; }
-    IDirect3DSwapChain9 *sc;
-    d3dmgr->GetSwapChain(0, &sc);
-    D3DPRESENT_PARAMETERS d3dpp;
-    sc->GetPresentParameters(&d3dpp);
-    int ww = window_get_width(),
-        wh = window_get_height();
-    d3dpp.BackBufferWidth = ww <= 0 ? 1 : ww;
-    d3dpp.BackBufferHeight = wh <= 0 ? 1 : wh;
-    sc->Release();
-    OnDeviceLost();
-    d3dmgr->Reset(&d3dpp);
-    OnDeviceReset();
-
-    // clear the window color, viewport does not need set because backbuffer was just recreated
-    enigma_user::draw_clear(enigma_user::window_get_color());
-  }
-  
   void EnableDrawing (HGLRC *hRC)
   {
-    WindowResizedCallback = &WindowResized;
-    
     d3dmgr = new ContextManager();
     HRESULT hr;
     
@@ -133,6 +99,37 @@ namespace enigma
 		}
 		
   }
+    
+  void OnDeviceLost() {
+    for (vector<Surface*>::iterator it = Surfaces.begin(); it != Surfaces.end(); it++) {
+      (*it)->OnDeviceLost();
+    }
+  }
+  
+  void OnDeviceReset() {
+    for (vector<Surface*>::iterator it = Surfaces.begin(); it != Surfaces.end(); it++) {
+      (*it)->OnDeviceReset();
+    }
+  }
+	
+	void WindowResized() {
+		if (d3dmgr == NULL) { return; }
+		IDirect3DSwapChain9 *sc;
+		d3dmgr->GetSwapChain(0, &sc);
+		D3DPRESENT_PARAMETERS d3dpp;
+		sc->GetPresentParameters(&d3dpp);
+    int ww = window_get_width(),
+        wh = window_get_height();
+		d3dpp.BackBufferWidth = ww <= 0 ? 1 : ww;
+		d3dpp.BackBufferHeight = wh <= 0 ? 1 : wh;
+		sc->Release();
+    OnDeviceLost();
+		d3dmgr->Reset(&d3dpp);
+    OnDeviceReset();
+    
+    // clear the window color, viewport does not need set because backbuffer was just recreated
+    enigma_user::draw_clear(enigma_user::window_get_color());
+	}
 
   void DisableDrawing (HWND hWnd, HDC hDC, HGLRC hRC)
   {

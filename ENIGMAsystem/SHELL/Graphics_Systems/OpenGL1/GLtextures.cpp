@@ -79,10 +79,10 @@ namespace enigma
     textureStruct->fullwidth = fullwidth;
     textureStruct->fullheight = fullheight;
     textureStructs.push_back(textureStruct);
-    
+
     //texture must be constructed before unbinding the texture so that it can apply its initial sampler state
     glBindTexture(GL_TEXTURE_2D, 0);
-    
+
     return textureStructs.size()-1;
   }
 
@@ -164,6 +164,14 @@ namespace enigma
     }
   }
 
+  void graphics_samplers_apply() {
+    for (unsigned i = 0; i < 8; i++) {
+      if (enigma::samplerstates[i].bound_texture != -1) {
+         enigma::samplerstates[i].CompareAndApply(textureStructs[enigma::samplerstates[i].bound_texture]->sampler);
+      }
+    }
+  }
+
   SamplerState samplerstates[8];
 }
 
@@ -177,7 +185,7 @@ int texture_add(string filename, bool mipmap) {
   if (pxdata == NULL) { printf("ERROR - Failed to append sprite to index!\n"); return -1; }
   unsigned texture = enigma::graphics_create_texture(w, h, fullwidth, fullheight, pxdata, mipmap);
   delete[] pxdata;
-    
+
   return texture;
 }
 
@@ -242,15 +250,11 @@ unsigned texture_get_texel_height(int texid)
 }
 
 void texture_set_stage(int stage, int texid) {
-  //This turned into a clusterfuck, fix it Rob :D - H. G.
-  int gt = get_texture(texid);
-  if (enigma::samplerstates[stage].bound_texture != gt) {
+  if (texid == -1) { texture_reset(); return; }
+  if (enigma::samplerstates[stage].bound_texture != texid) {
     glActiveTexture(GL_TEXTURE0 + stage);
-    glBindTexture(GL_TEXTURE_2D, enigma::samplerstates[stage].bound_texture = (unsigned)(gt >= 0? gt : 0));
-  }
-  if (gt != -1){
-    // Must be applied regardless of whether the texture is already bound because the sampler state could have been changed.
-    enigma::samplerstates[stage].CompareAndApply(textureStructs[texid]->sampler);
+    enigma::samplerstates[stage].bound_texture = texid;
+    glBindTexture(GL_TEXTURE_2D, get_texture(texid));
   }
 }
 

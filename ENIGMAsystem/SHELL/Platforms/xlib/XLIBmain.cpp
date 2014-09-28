@@ -54,10 +54,10 @@ namespace enigma
   bool gameWindowFocused = false;
   extern int windowX, windowY, windowWidth, windowHeight;
   extern void setwindowsize();
+  extern void WindowResized();
   extern bool freezeOnLoseFocus;
   unsigned int pausedSteps = 0;
   
-  void (*WindowResizedCallback)();
   XVisualInfo* CreateVisualInfo();
   void EnableDrawing();
   void DisableDrawing();
@@ -146,13 +146,8 @@ namespace enigma
           enigma::windowY = e.xconfigure.y;
           enigma::windowWidth = e.xconfigure.width;
           enigma::windowHeight = e.xconfigure.height;
-
-          //NOTE: This will lead to a loop, and it seems superfluous.
-          //enigma::setwindowsize();
-          
-          if (WindowResizedCallback != NULL) {
-            WindowResizedCallback();
-          }
+          enigma::setwindowsize();
+          enigma::WindowResized();
           return 0;
         }
         case FocusIn:
@@ -273,7 +268,7 @@ int main(int argc,char** argv)
     swa.background_pixel = (enigma::windowColor & 0xFF000000) | ((enigma::windowColor & 0xFF0000) >> 16) | (enigma::windowColor & 0xFF00) | ((enigma::windowColor & 0xFF) << 16);
     swa.colormap = XCreateColormap(disp,root,vi->visual,AllocNone);
     swa.event_mask = ExposureMask | KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask | FocusChangeMask | StructureNotifyMask;
-    unsigned long valmask = CWColormap | CWEventMask | CWBackPixel; // | CWBorderPixel;
+    unsigned long valmask = CWColormap | CWEventMask; //  | CWBackPixel | CWBorderPixel;
 
     //prepare window for display (center, caption, etc)
     screen = DefaultScreenOfDisplay(disp);

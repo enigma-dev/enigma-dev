@@ -91,11 +91,9 @@ namespace enigma {
               if (scaledHeight > windowHeight)
                   windowHeight = scaledHeight;
           }
-
-          //Now actually set the window's position and size:
-          enigma_user::window_set_rectangle(windowX, windowY, windowWidth, windowHeight);
+           //clampwindow();
       } else {
-          enigma_user::window_set_rectangle(0, 0, windowWidth, windowHeight);
+        //SetWindowPos(hWnd, NULL, 0, 0, parWidth, parHeight, SWP_NOACTIVATE); 
       }
   }
 }
@@ -344,7 +342,6 @@ void window_default(bool center_size)
   }
   enigma::windowWidth = enigma::regionWidth = xm;
   enigma::windowHeight = enigma::regionHeight = ym;
-
   if (center) {
     enigma::windowX = display_get_width()/2 - enigma::windowWidth/2;
     enigma::windowY = display_get_height()/2 - enigma::windowHeight/2;
@@ -358,7 +355,7 @@ void window_mouse_set(int x,int y) {
 	XWarpPointer(disp,None,win,0,0,0,0,(int)x,(int)y);
 }
 
-void display_mouse_set(int x,int y) {
+void display_mouse_set(double x,double y) {
 	XWarpPointer(disp,None,DefaultRootWindow(disp),0,0,0,0,(int)x,(int)y);
 }
 
@@ -403,7 +400,7 @@ void window_set_size(unsigned int w,unsigned int h) {
 	XResizeWindow(disp,win, w, h);
   enigma::windowWidth = w;
   enigma::windowHeight = h;
-  //enigma::setwindowsize(); //NOTE: I think this will also infinitely loop.
+  enigma::setwindowsize();
 }
 void window_set_rectangle(int x,int y,int w,int h) {
 	XMoveResizeWindow(disp, win, x, y, w, h);
@@ -465,7 +462,33 @@ void window_set_fullscreen(bool full)
 
 bool window_get_fullscreen()
 {
-	return enigma::isFullScreen;
+	//return enigma::isFullScreen;
+	Atom wmState = XInternAtom(disp, "_NET_WM_STATE", False);
+	Atom aFullScreen = XInternAtom(disp,"_NET_WM_STATE_FULLSCREEN", False);
+	bool res = false;
+
+	//Return types, not really used.
+	Atom actualType;
+	int actualFormat;
+	unsigned long bytesAfterReturn;
+
+	//These are used.
+	unsigned long numItems;
+	unsigned char* data = NULL;
+
+	if (XGetWindowProperty(disp, win, wmState, 0, LONG_MAX, False, AnyPropertyType, &actualType, &actualFormat, &numItems, &bytesAfterReturn, &data) == Success) {
+		for (unsigned long i=0; i<numItems; ++i) {
+			if (aFullScreen == reinterpret_cast<unsigned long *>(data)[i]) {
+				res = true;
+			}
+		}
+	}
+
+	//Reclaim memory.
+	if (data) {
+		XFree(data);
+	}
+	return res;
 }
 
 }

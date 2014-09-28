@@ -32,13 +32,6 @@ namespace enigma {
   GLXContext glxc;
   XVisualInfo *vi;
   
-  extern void (*WindowResizedCallback)();
-  void WindowResized() {
-    glViewport(0,0,enigma_user::window_get_width(),enigma_user::window_get_height());
-    glScissor(0,0,enigma_user::window_get_width(),enigma_user::window_get_height());
-    enigma_user::draw_clear(enigma_user::window_get_color());
-  }
-  
   XVisualInfo* CreateVisualInfo() {
     // Prepare openGL
     GLint att[] = { GLX_RGBA, GLX_DOUBLEBUFFER, GLX_DEPTH_SIZE, 24, None };
@@ -51,8 +44,6 @@ namespace enigma {
   }
 
   void EnableDrawing() {
-    WindowResizedCallback = &WindowResized;
-    
     //give us a GL context
     glxc = glXCreateContext(enigma::x11::disp, vi, NULL, True);
     if (!glxc){
@@ -75,6 +66,12 @@ namespace enigma {
     glXDestroyContext(disp,glxc);
     XCloseDisplay(disp);
     return 0;*/
+  }
+  
+  void WindowResized() {
+    glViewport(0,0,enigma_user::window_get_width(),enigma_user::window_get_height());
+    glScissor(0,0,enigma_user::window_get_width(),enigma_user::window_get_height());
+    enigma_user::draw_clear(enigma_user::window_get_color());
   }
   
   namespace swaphandling {

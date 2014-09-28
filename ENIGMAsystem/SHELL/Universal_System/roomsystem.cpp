@@ -69,6 +69,8 @@ rvt view_hborder, view_hport, view_hspeed, view_hview, view_object, view_vborder
 
 namespace enigma
 {
+  extern int windowColor;
+
   roomstruct** roomdata;
   roomstruct** roomorder;
   
@@ -183,9 +185,8 @@ namespace enigma
 
     // Fire the rooms preCreation code. This code includes instance sprite transformations added in the room editor.
     // (NOTE: This code uses instance_deactivated_list to look up instances by ID, in addition to the normal lookup approach).
-    if (precreatecode) {
+    if (precreatecode)
       precreatecode();
-    }
     
     // Fire the create event of all the new instances.
     for (int i = 0; i < instancecount; i++) {
@@ -196,22 +197,18 @@ namespace enigma
 
     // Fire the game start event for all the new instances, persistent objects don't matter since this is the first time
     // the game ran they won't even exist yet
-    if (gamestart) {
-      for (int i = 0; i < instancecount; i++) {
-        if (is[i]) {
-          is[i]->myevent_gamestart();
-        }
-      }
-    }
+    if (gamestart)
+      for (int i = 0; i < instancecount; i++)
+        is[i]->myevent_gamestart();
 
     // Fire the rooms creation code. This includes instance creation code.
     // (NOTE: This code uses instance_deactivated_list to look up instances by ID, in addition to the normal lookup approach).
-    if (createcode) {
+    if (createcode)
       createcode();
-    }
 
     // Fire the room start event for all persistent objects still kept alive and all the new instances
-    for (enigma::iterator it = enigma::instance_list_first(); it; ++it) {
+    for (enigma::iterator it = enigma::instance_list_first(); it; ++it)
+    {
       it->myevent_roomstart();
     }
   }

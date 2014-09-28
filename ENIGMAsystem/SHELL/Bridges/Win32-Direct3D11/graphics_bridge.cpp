@@ -52,15 +52,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 namespace enigma
 {
 	
-  extern void (*WindowResizedCallback)();
-  void WindowResized() {
-    // clear the window color, viewport does not need set because backbuffer was just recreated
-    enigma_user::draw_clear(enigma_user::window_get_color());
-  }
-  
   void EnableDrawing (HGLRC *hRC) {
-    WindowResizedCallback = &WindowResized;
-  
     d3dmgr = new ContextManager();
       int screenWidth = window_get_width(),
           screenHeight = window_get_height();
@@ -373,6 +365,11 @@ namespace enigma
 
     // Create the viewport.
     m_deviceContext->RSSetViewports(1, &viewport);
+  }
+	
+  void WindowResized() {
+    // clear the window color, viewport does not need set because backbuffer was just recreated
+    enigma_user::draw_clear(enigma_user::window_get_color());
   }
 
   void DisableDrawing (HWND hWnd, HDC hDC, HGLRC hRC)

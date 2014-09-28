@@ -42,6 +42,17 @@ typedef map<string,foundevent>::iterator evfit;
 
 int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
 {
+  ofstream wto((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_evparent.h").c_str());
+  wto << license;
+
+  //Write timeline/moment names. Timelines are like scripts, but we don't have to worry about arguments or return types.
+  for (int i=0; i<es->timelineCount; i++) {
+    for (int j=0; j<es->timelines[i].momentCount; j++) {
+      wto << "void TLINE_" <<es->timelines[i].name <<"_MOMENT_" <<es->timelines[i].moments[j].stepNo <<"();\n";
+    }
+  }
+  wto <<"\n";
+
   /* Generate a new list of events used by the objects in
   ** this game. Only events on this list will be exported.
   ***********************************************************/
