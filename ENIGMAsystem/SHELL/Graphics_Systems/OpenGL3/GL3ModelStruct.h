@@ -572,7 +572,7 @@ class Mesh
     #ifdef DEBUG_MODE
     enigma::GPUProfilerBatch& vbd = oglmgr->gpuprof.add_drawcall();
     #endif
-	
+
     if (enigma::transform_needs_update == true){
         enigma::transformation_update();
     }
@@ -595,13 +595,14 @@ class Mesh
 
     // Enable vertex array's for fast vertex processing
     glBindBuffer( GL_ARRAY_BUFFER, vertexBuffer );
+    printf("Bound  GL_ARRAY_BUFFER to %i\n", vertexBuffer);
     if (vboindexed) {
       glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indexBuffer );
     }
 
     unsigned offset = 0;
     enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_vertex,true);
-    enigma_user::glsl_attribute_set(enigma::shaderprograms[enigma::bound_shader]->att_vertex, vertexStride, GL_FLOAT, 0, STRIDE, offset);
+    enigma_user::glsl_attribute_set(enigma::shaderprograms[enigma::bound_shader]->att_vertex, vertexStride, GL_FLOAT, GL_FALSE, STRIDE, offset);
     offset += vertexStride;
 
     if (useNormals){
@@ -624,7 +625,7 @@ class Mesh
       enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_texture, true);
       enigma_user::glsl_attribute_set(enigma::shaderprograms[enigma::bound_shader]->att_texture, 2, GL_FLOAT, 0, STRIDE, offset);
       if (oglmgr->GetBoundTexture() != 0){
-        enigma_user::glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_textureEnable, 1);       
+        enigma_user::glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_textureEnable, 1);
       }else{
         enigma_user::glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_textureEnable, 0);
       }
@@ -642,7 +643,7 @@ class Mesh
       enigma_user::glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_colorEnable,0);
       enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_color, false);
     }
-    
+
     #define OFFSETE( P )  ( ( const GLvoid * ) ( sizeof( GLuint ) * ( P         ) ) )
     offset = vertex_start;
 
@@ -652,7 +653,7 @@ class Mesh
       vbd.drawcalls+=1;
       vbd.triangles_indexed+=(vertex_count==-1?triangleIndexedCount:vertex_count);
       #endif
-      
+
       glDrawElements(GL_TRIANGLES, (vertex_count==-1?triangleIndexedCount:vertex_count), GL_UNSIGNED_INT, OFFSETE(offset));
       offset += triangleIndexedCount;
     }
@@ -661,7 +662,7 @@ class Mesh
       vbd.drawcalls+=1;
       vbd.lines_indexed+=lineIndexedCount;
       #endif
-      
+
       glDrawElements(GL_LINES, lineIndexedCount, GL_UNSIGNED_INT, OFFSETE(offset));
       offset += lineIndexedCount;
     }
@@ -670,7 +671,7 @@ class Mesh
       vbd.drawcalls+=1;
       vbd.points_indexed+=pointIndexedCount;
       #endif
-    
+
       glDrawElements(GL_POINTS, pointIndexedCount, GL_UNSIGNED_INT, OFFSETE(offset));
     }
 
@@ -682,7 +683,7 @@ class Mesh
       vbd.drawcalls+=1;
       vbd.triangles+=(vertex_count==-1?triangleCount:vertex_count);
       #endif
-    
+
       glDrawArrays(GL_TRIANGLES, (vertex_start==0?offset:vertex_start), (vertex_count==-1?triangleCount:vertex_count));
       offset += triangleCount;
     }
@@ -691,7 +692,7 @@ class Mesh
       vbd.drawcalls+=1;
       vbd.lines+=lineCount;
       #endif
-    
+
       glDrawArrays(GL_LINES, offset, lineCount);
       offset += lineCount;
     }
@@ -700,10 +701,10 @@ class Mesh
       vbd.drawcalls+=1;
       vbd.points+=pointCount;
       #endif
-    
+
       glDrawArrays(GL_POINTS, offset, pointCount);
     }
- 
+
     /*glBindBuffer( GL_ARRAY_BUFFER, 0 );
     if (vboindexed) {
       glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
