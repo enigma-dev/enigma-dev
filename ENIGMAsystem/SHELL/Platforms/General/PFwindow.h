@@ -47,6 +47,13 @@ enum {
   cr_size_all   = -22
 };
 
+enum {
+  display_landscape,
+  display_landscape_flipped,
+  display_portrait,
+  display_portrait_flipped
+};
+
 void io_handle();
 void io_clear();
 void keyboard_wait();
@@ -73,6 +80,7 @@ int display_get_width();
 int display_get_height();
 int display_get_colordepth();
 int display_get_frequency();
+int display_get_orientation();
 unsigned display_get_dpi_x();
 unsigned display_get_dpi_y();
 extern int display_aa;

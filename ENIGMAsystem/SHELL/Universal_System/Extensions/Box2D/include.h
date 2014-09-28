@@ -29,3 +29,8 @@
 #include "B2Dfunctions.h"
 #include "B2Djoints.h"
 #include "B2Dshapes.h"
+
+namespace enigma {
+  void box2dphysics_update();
+}
+

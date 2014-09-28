@@ -16,7 +16,6 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <string>
 // Windows Vista or later for IFileDialog
 #define NTDDI_VERSION NTDDI_VISTA
 #define _WIN32_WINNT _WIN32_WINNT_VISTA
@@ -26,6 +25,8 @@
 #include <shlobj.h> //for Shell API
 #include <richedit.h>
 #include <stdio.h>
+#include <string>
+
 using namespace std;
 #include "Widget_Systems/widgets_mandatory.h"
 #include "GameSettings.h"
@@ -148,7 +149,7 @@ static INT_PTR CALLBACK GetLoginProc(HWND hwndDlg,UINT uMsg,WPARAM wParam,LPARAM
     {
       char strget[1024];
       GetDlgItemText(hwndDlg,14,strget,1024);
-	  gs_str_submitted = strget;
+      gs_str_submitted = strget;
       GetDlgItemText(hwndDlg,15,strget,1024);
       gs_str_submitted += string("|") + string(strget);
       gs_form_canceled=0;
@@ -163,14 +164,14 @@ static INT_PTR CALLBACK ShowMessageExtProc(HWND hwndDlg,UINT uMsg,WPARAM wParam,
   if (uMsg==WM_INITDIALOG)
   {
     SetWindowText(hwndDlg,gs_cap.c_str());
-	SetDlgItemText(hwndDlg,10,gs_message.c_str());
+    SetDlgItemText(hwndDlg,10,gs_message.c_str());
     SetDlgItemText(hwndDlg,11,gs_but1.c_str());
     SetDlgItemText(hwndDlg,12,gs_but2.c_str());
-	SetDlgItemText(hwndDlg,13,gs_but3.c_str());
+    SetDlgItemText(hwndDlg,13,gs_but3.c_str());
   }
   if (uMsg==WM_COMMAND)
   {
-	if (wParam==2) {
+    if (wParam==2) {
       gs_str_submitted="";
       gs_form_canceled=1;
       EndDialog(hwndDlg,0);
@@ -189,14 +190,14 @@ static INT_PTR CALLBACK ShowMessageExtProc(HWND hwndDlg,UINT uMsg,WPARAM wParam,
     }
   }
   if (uMsg==WM_KEYUP) {
-	switch(wParam)
-	  {
-	  case VK_ESCAPE:
-		  gs_str_submitted="";
-		  gs_form_canceled=1;
-		  EndDialog(hwndDlg,0);
-		break;
-	  }
+    switch(wParam)
+      {
+      case VK_ESCAPE:
+        gs_str_submitted="";
+        gs_form_canceled=1;
+        EndDialog(hwndDlg,0);
+      break;
+      }
   }
   return 0;
 }
@@ -409,8 +410,13 @@ void show_info(string info, int bgcolor, int left, int top, int width, int heigh
 
 int show_message(string str)
 {
-    MessageBox(enigma::hWnd, str.c_str(), window_get_caption().c_str(), MB_OK);
-    return 0;
+  //NOTE: This will not work with a fullscreen application, it is an issue with Windows
+  //this could be why GM8.1, unlike Studio, did not use native dialogs and custom 
+  //rendered its own message boxes like most game engines.
+  //In Studio this function will cause the window to be minimized and the message shown, fullscreen will not be restored.
+  //A possible alternative is fake fullscreen for Win32, but who knows if we have to do that on XLIB or anywhere else.
+  MessageBox(enigma::hWnd, str.c_str(), window_get_caption().c_str(), MB_OK);
+  return 0;
 }
 
 int show_message_ext(string msg, string but1, string but2, string but3)
@@ -423,7 +429,7 @@ int show_message_ext(string msg, string but1, string but2, string but3)
 
 bool show_question(string str)
 {
-    if(MessageBox(enigma::hWnd, str.c_str(), window_get_caption().c_str(), MB_YESNO) == IDYES)
+    if (MessageBox(enigma::hWnd, str.c_str(), window_get_caption().c_str(), MB_YESNO) == IDYES)
     {
         return true;
     }

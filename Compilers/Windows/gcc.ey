@@ -25,4 +25,3 @@ Build-Extension: .exe
 Run-output: $tempfile
 Run-Program: $game
 Run-Params:
-

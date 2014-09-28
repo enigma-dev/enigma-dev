@@ -59,9 +59,14 @@ std::string ini_read_string(std::string section, std::string key, std::string de
 	return buffer;
 }
 
-int ini_read_real(std::string section, std::string key, int defaultValue)
+float ini_read_real(std::string section, std::string key, float defaultValue)
 {
-	return GetPrivateProfileInt(section.c_str(), key.c_str(), defaultValue, iniFilename.c_str());
+	char res[255];
+	char def[255];
+	sprintf(def, "%f", defaultValue);
+	GetPrivateProfileString(section.c_str(), key.c_str(), def, res, 255, iniFilename.c_str()); 
+	return atof(res);
+	//return GetPrivateProfileInt(section.c_str(), key.c_str(), defaultValue, iniFilename.c_str());
 }
 
 void ini_write_string(std::string section, std::string key, std::string value)
@@ -69,7 +74,7 @@ void ini_write_string(std::string section, std::string key, std::string value)
 	WritePrivateProfileString(section.c_str(), key.c_str(), value.c_str(), iniFilename.c_str());
 }
 
-void ini_write_real(std::string section, std::string key, int value)
+void ini_write_real(std::string section, std::string key, float value)
 {
 	std::stringstream ss;
 	ss << value;

@@ -24,6 +24,7 @@
 #include <unistd.h> //usleep
 #include <time.h> //clock
 #include <string> //Return strings without needing a GC
+#include <map>
 
 #include "ObjectiveC.h"
 
@@ -47,12 +48,20 @@ void gmw_init()
 extern char cocoa_keybdstatus[256];
 extern char cocoa_last_keybdstatus[256];
 
+extern "C" int cocoa_get_screen_size(int getWidth);
+extern "C" void cocoa_window_set_fullscreen(bool full);
+extern "C" int cocoa_window_get_fullscreen();
+
 namespace enigma {
     extern char keybdstatus[256];
     extern char mousestatus[3];
     extern char last_mousestatus[3];
     extern char last_keybdstatus[256];
     extern char keybdstatus[256];
+
+    //Replacing usermap array with keybdmap map, to align code with Windows implementation.
+    std::map<int,int> keybdmap;
+    extern int windowColor;
 }
 
 namespace enigma_user {
@@ -71,9 +80,19 @@ namespace enigma_user {
 	return 1; // TODO
   }
 
-void window_set_freezeonlosefocus(bool freeze)
-{
-}
+  void window_set_color(int color)
+  {
+    enigma::windowColor = color;
+  }
+
+  int window_get_color()
+  {
+    return enigma::windowColor;
+  }
+
+  void window_set_freezeonlosefocus(bool freeze)
+  {
+  }
 
 
   int window_set_caption(string caption)
@@ -157,36 +176,11 @@ enum {
 
 void window_set_fullscreen(bool full)
 {
-	/*Atom wmState = XInternAtom(disp, "_NET_WM_STATE", False);
-	Atom aFullScreen = XInternAtom(disp,"_NET_WM_STATE_FULLSCREEN", False);
-	XEvent xev;
-	xev.xclient.type=ClientMessage;
-	xev.xclient.serial = 0;
-	xev.xclient.send_event=True;
-	xev.xclient.window=win;
-	xev.xclient.message_type=wmState;
-	xev.xclient.format=32;
-	xev.xclient.data.l[0] = (full ? _NET_WM_STATE_ADD : _NET_WM_STATE_REMOVE);
-	xev.xclient.data.l[1] = aFullScreen;
-	xev.xclient.data.l[2] = 0;
-	XSendEvent(disp,DefaultRootWindow(disp),False,SubstructureRedirectMask|SubstructureNotifyMask,&xev);*/
+	cocoa_window_set_fullscreen(full);
 }
 bool window_get_fullscreen()
 {
-	/*Atom aFullScreen = XInternAtom(disp,"_NET_WM_STATE_FULLSCREEN",False);
-	Atom ra;
-	int ri;
-	unsigned long nr, bar;
-	unsigned char *data;
-	int stat = XGetWindowProperty(disp,win,aFullScreen,0L,0L,False,AnyPropertyType,&ra,&ri,&nr,&bar,&data);
-	if (stat != Success) {
-		printf("Status: %d\n",stat);
-		//return 0;
-	}*/
-	/*printf("%d %d %d %d\n",ra,ri,nr,bar);
-	 for (int i = 0; i < nr; i++) printf("%02X ",data[i]);
-	 printf("\n");*/
-	return 0;
+	return cocoa_window_get_fullscreen();
 }
 
 //default    +   -5   I    \    |    /    -    ^   ...  drg  no  -    |  drg3 ...  X  ...  ?   url  +
@@ -197,12 +191,6 @@ int window_set_cursor(int c)
 	XDefineCursor(disp, win, (c == -1) ? NoCursor : XCreateFontCursor(disp,curs[-c]));*/
 	return 0;
 }
-
-void window_set_color(int color) {}
-
-int window_view_mouse_get_x(int wid) { return 0; } // TODO
-int window_view_mouse_get_y(int wid) { return 0; } // TODO
-void window_view_mouse_set(int wid, int x, int y) {}
 
 int window_get_region_width() { return cocoa_window_get_region_width();}
 int window_get_region_height() { return cocoa_window_get_region_height();}
@@ -402,8 +390,6 @@ namespace enigma {
 }
 
 /*
- display_get_width() // Returns the width of the display in pixels.
- display_get_height() // Returns the height of the display in pixels.
  display_set_size(w,h) Sets the width and height of the display in pixels. Returns whether this was
  successful. (Realize that only certain combinations are allowed.)
  display_get_colordepth() Returns the color depth in bits.
@@ -446,7 +432,42 @@ namespace enigma_user {
     }
   }
 
+  void keyboard_clear(const int key) {
+    enigma::keybdstatus[key] = enigma::last_keybdstatus[key] = 0;
+  }
+
+  void keyboard_set_map(int key1, int key2) {
+    std::map< int, int >::iterator it = enigma::keybdmap.find( key1 );
+    if ( enigma::keybdmap.end() != it ) {
+      it->second = key2;
+    } else {
+      enigma::keybdmap.insert( map< int, int >::value_type(key1, key2) );
+    }
+  }
+
+  int keyboard_get_map(int key) {
+    std::map< int, int >::iterator it = enigma::keybdmap.find( key );
+    if ( enigma::keybdmap.end() != it ) {
+      return it->second;
+    } else {
+      return key;
+    }
+  }
+
+  void keyboard_unset_map() {
+    enigma::keybdmap.clear();
+  }
+
   void window_set_region_scale(double scale, bool adaptwindow) {}
   bool window_get_region_scale() {return 1;}
   void window_set_region_size(int w, int h, bool adaptwindow) {}
+
+  int display_get_width() {
+    return cocoa_get_screen_size(true);
+  }
+
+  int display_get_height() {
+    return cocoa_get_screen_size(false);
+  }
 }
+

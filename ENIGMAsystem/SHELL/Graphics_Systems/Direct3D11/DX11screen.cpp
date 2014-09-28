@@ -57,6 +57,8 @@ using namespace enigma;
 namespace enigma_user {
   extern int window_get_width();
   extern int window_get_height();
+  extern int window_get_region_width();
+  extern int window_get_region_height();
 }
 
 static inline void draw_back()
@@ -118,8 +120,8 @@ void screen_redraw()
 
 	if (!view_enabled)
     {
-		screen_set_viewport(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled());
-		d3d_set_projection_ortho(0, 0, room_width, room_height, 0);
+		screen_set_viewport(0, 0, window_get_region_width(), window_get_region_height());
+		d3d_set_projection_ortho(0, 0, window_get_region_width(), window_get_region_height(), 0);
 	
 		if (background_showcolor)
 		{
@@ -334,6 +336,7 @@ void screen_redraw()
 			view_first = false;
 			if (stop_loop) break;
         }
+        // In Studio this variable is not reset until the next iteration of views as is actually 7 in the draw_gui event, in 8.1 however view_current will always be 0 in the step event.
         view_current = 0;
     }
 
@@ -346,7 +349,7 @@ void screen_redraw()
     {
 		// Now process the sub event of draw called draw gui
 		// It is for drawing GUI elements without view scaling and transformation
-		screen_set_viewport(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled());
+		screen_set_viewport(0, 0, window_get_region_width(), window_get_region_height());
 		d3d_set_projection_ortho(0, 0, enigma::gui_width, enigma::gui_height, 0);
 
 		// Clear the depth buffer if 3d mode is on at the beginning of the draw step.
@@ -380,8 +383,8 @@ void screen_redraw()
 
 void screen_init()
 {
-	enigma::gui_width = window_get_region_width_scaled();
-	enigma::gui_height = window_get_region_height_scaled();
+	enigma::gui_width = window_get_region_width();
+	enigma::gui_height = window_get_region_height();
 	
 	//d3dmgr->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
 	//d3dmgr->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
@@ -390,8 +393,8 @@ void screen_init()
     {
 		//d3dmgr->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
 
-		screen_set_viewport(0, 0, (DWORD)window_get_region_width_scaled(), (DWORD)window_get_region_height_scaled());
-		d3d_set_projection_ortho(0, 0, room_width, room_height, 0);
+		screen_set_viewport(0, 0, window_get_region_width(), window_get_region_height());
+		d3d_set_projection_ortho(0, 0, window_get_region_width(), window_get_region_height(), 0);
     } else {
 		for (view_current = 0; view_current < 7; view_current++)
         {
@@ -419,11 +422,19 @@ int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h
 }
 
 void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height) {
+    x = (x / window_get_region_width()) * window_get_region_width_scaled();
+    y = (y / window_get_region_height()) * window_get_region_height_scaled();
+    width = (width / window_get_region_width()) * window_get_region_width_scaled();
+    height = (height / window_get_region_height()) * window_get_region_height_scaled();
+    gs_scalar sx, sy;
+    sx = (window_get_width() - window_get_region_width_scaled()) / 2;
+    sy = (window_get_height() - window_get_region_height_scaled()) / 2;
+
     D3D11_VIEWPORT viewport;
     ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
 
-    viewport.TopLeftX = x;
-    viewport.TopLeftY = y;
+    viewport.TopLeftX = sx + x;
+    viewport.TopLeftY = sy + y;
     viewport.Width = width;
     viewport.Height = height;
 

@@ -3,7 +3,7 @@
 
 Name: OpenGL 1.1
 Identifier: OpenGL1
-Description: Rendering which targets OpenGL 1.1 capable graphics hardware, offering high portability but requiring specific graphics card features to run. May not work on never graphics hardware.
+Description: Rendering which targets OpenGL 1.1 capable graphics hardware, offering high portability but requiring specific graphics card features to run. May not work on newer graphics hardware.
 Author: Josh Ventura, serprex
 
 Depends:

@@ -23,9 +23,9 @@ namespace enigma_user
 void ini_open(std::string fname);
 void ini_close();
 std::string ini_read_string(std::string section, std::string key, std::string defaultValue);
-int ini_read_real(std::string section, std::string key, int defaultValue);
+float ini_read_real(std::string section, std::string key, float defaultValue);
 void ini_write_string(std::string section, std::string key, std::string value);
-void ini_write_real(std::string section, std::string key, int value);
+void ini_write_real(std::string section, std::string key, float value);
 bool ini_key_exists(std::string section, std::string key);
 bool ini_section_exists(std::string section);
 void ini_key_delete(std::string section, std::string key);
