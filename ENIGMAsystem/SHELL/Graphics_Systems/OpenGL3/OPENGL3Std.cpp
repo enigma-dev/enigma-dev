@@ -47,7 +47,7 @@ namespace enigma
   int currentblendtype = 0;
   bool glew_isgo;
   bool pbo_isgo;
-  
+
   void graphics_initialize_samplers();
 
   void graphicssystem_initialize()
@@ -75,10 +75,10 @@ namespace enigma
 
     init_shaders();
     // read shaders into graphics system structure and compile and link them if needed
-    for (size_t i = 0; i < shader_idmax; ++i) {     
+    for (size_t i = 0; i < shader_idmax; ++i) {
       ShaderStruct* shaderstruct = shaderdata[i];
       if (shaderstruct->precompile == false) { continue; }
-      
+
       int vshader_id = enigma_user::glsl_shader_create(enigma_user::sh_vertex);
       enigma_user::glsl_shader_load_string(vshader_id, shaderstruct->vertex);
 
@@ -113,11 +113,6 @@ namespace enigma
     enigma_user::glsl_program_link(prog_id);
     enigma_user::glsl_program_validate(prog_id);
     enigma_user::glsl_program_set_name(prog_id, "DEFAULT_SHADER");
-
-    getUniforms(prog_id);
-    getAttributes(prog_id);
-    getDefaultUniforms(prog_id);
-    getDefaultAttributes(prog_id);
 
     default_shader = prog_id; //Default shader for FFP
     main_shader = default_shader; //Main shader used to override the default one
