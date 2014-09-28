@@ -139,7 +139,7 @@ namespace enigma
             "uniform bool en_TexturingEnabled;\n"
             "uniform bool en_ColorEnabled;\n"
     "uniform bool en_AlphaTestEnabled;\n"
-    
+
     "uniform float en_AlphaTestValue;\n"
             "uniform vec4 en_BoundColor;\n"
     "#line 0 \n";
@@ -910,7 +910,7 @@ int glsl_get_attribute_location(int program, string name) {
     }else{
       printf("Program[%s = %i] - Attribute %s not found!\n", enigma::shaderprograms[program]->name.c_str(), program, name.c_str());
     }
-      return -1;
+    return -1;
   }else{
     return it->second;
   }
@@ -931,7 +931,9 @@ void glsl_attribute_enable(int location, bool enable){
 void glsl_attribute_set(int location, int size, int type, bool normalize, int stride, int offset){
   get_attribute(it,location);
   if (it->second.enabled == true){
-      glVertexAttribPointer(location, size, type, normalize, stride, ( ( const GLvoid * ) ( sizeof( gs_scalar ) * ( offset ) ) ));
+      printf("Size = %i, type = %i, normalize = %i, stride = %i, offset =%i\n", size, GL_FLOAT, normalize, stride, ( sizeof( gs_scalar ) * ( offset ) ));
+      glVertexAttribPointer(location, size, GL_FLOAT, normalize, stride, ( ( const GLvoid * ) ( sizeof( gs_scalar ) * ( offset ) ) ));
+      printf("Got over it!\n");
   }
 }
 
