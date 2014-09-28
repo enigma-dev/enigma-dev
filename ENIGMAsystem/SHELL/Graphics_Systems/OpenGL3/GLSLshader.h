@@ -67,6 +67,7 @@ namespace enigma
         GLenum type;
         GLint arraySize;
         int size;
+        bool enabled;
     };
 
     struct ShaderProgram{
@@ -92,8 +93,10 @@ namespace enigma
         GLint uni_textureEnable;
         GLint uni_colorEnable;
         GLint uni_lightEnable;
+		GLint uni_alphaTestEnable;
 
         GLint uni_color;
+		GLint uni_alphaTest;
 
         //3D lights
         GLint uni_ambient_color;
