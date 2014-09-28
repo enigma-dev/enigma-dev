@@ -29,7 +29,6 @@ using namespace std;
 
 namespace enigma
 {
-
 	#ifdef DEBUG_MODE
 	//Based on code from Cort Stratton (http://www.altdev.co/2011/06/23/improving-opengl-error-messages/)
 	void FormatDebugOutputARB(char outStr[], size_t outStrSize, GLenum source, GLenum type, GLuint id, GLenum severity, const char *msg) {
@@ -82,7 +81,6 @@ namespace enigma
      * + Updated the Pixel Format to support 24-bitdepth buffers
      * + Correctly create a GL 3.x compliant context
      */
-
     HGLRC LegacyRC;
     PIXELFORMATDESCRIPTOR pfd;
     int iFormat;
@@ -150,7 +148,6 @@ namespace enigma
     glDebugMessageControlARB(GL_DEBUG_SOURCE_API_ARB, GL_DEBUG_TYPE_OTHER_ARB, GL_DONT_CARE, 1, ids, GL_FALSE); //Disable notification about rendering HINTS like so:
     //OpenGL: Buffer detailed info: Buffer object 1 (bound to GL_ELEMENT_ARRAY_BUFFER_ARB, usage hint is GL_STATIC_DRAW) will use VIDEO memory as the source for buffer object operations. [source=API type=OTHER severity=UNDEFINED (33387) id=131185]
   }
-
 
   void WindowResized() {
     // clear the window color, viewport does not need set because backbuffer was just recreated
