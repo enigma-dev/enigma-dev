@@ -1,6 +1,7 @@
 /********************************************************************************\
  **                                                                              **
  **  Copyright (C) 2010 Alasdair Morrison <tgmg@g-java.com>                      **
+ **  Copyright (C) 2014 Seth N. Hetu                                             **
  **                                                                              **
  **  This file is a part of the ENIGMA Development Environment.                  **
  **                                                                              **

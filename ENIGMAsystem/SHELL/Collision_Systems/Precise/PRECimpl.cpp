@@ -1,4 +1,5 @@
 /** Copyright (C) 2008-2013 IsmAvatar <ismavatar@gmail.com>
+*** Copyright (C) 2014 Seth N. Hetu
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***

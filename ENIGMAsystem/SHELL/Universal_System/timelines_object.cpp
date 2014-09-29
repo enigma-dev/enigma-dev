@@ -1,6 +1,7 @@
 /** Copyright (C) 2008-2011 Josh Ventura
 *** Copyright (C) 2011-2012 polygone
 *** Copyright (C) 2014 Robert B Colton, canthelp
+*** Copyright (C) 2014 Seth N. Hetu
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
