@@ -328,7 +328,7 @@ namespace enigma
           sattribute.location = glGetAttribLocation(enigma::shaderprograms[prog_id]->shaderprogram, sattribute.name.c_str());
           enigma::shaderprograms[prog_id]->attribute_names[sattribute.name] = sattribute.location;
           enigma::shaderprograms[prog_id]->attributes[sattribute.location] = sattribute;
-          //printf("Program - %i - found attribute - %s - with size - %i\n", prog_id, sattribute.name.c_str(), sattribute.size);
+          //printf("Array: Program - %i - found attribute - %s - with size - %i\n", prog_id, sattribute.name.c_str(), sattribute.size);
         }
         attribute_count_arr += attribute.arraySize;
       }
@@ -931,9 +931,7 @@ void glsl_attribute_enable(int location, bool enable){
 void glsl_attribute_set(int location, int size, int type, bool normalize, int stride, int offset){
   get_attribute(it,location);
   if (it->second.enabled == true){
-      printf("Size = %i, type = %i, normalize = %i, stride = %i, offset =%i\n", size, GL_FLOAT, normalize, stride, ( sizeof( gs_scalar ) * ( offset ) ));
-      glVertexAttribPointer(location, size, GL_FLOAT, normalize, stride, ( ( const GLvoid * ) ( sizeof( gs_scalar ) * ( offset ) ) ));
-      printf("Got over it!\n");
+      glVertexAttribPointer(location, size, type, normalize, stride, ( ( const GLvoid * ) ( sizeof( gs_scalar ) * ( offset ) ) ));
   }
 }
 

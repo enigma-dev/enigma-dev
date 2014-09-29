@@ -191,6 +191,7 @@ class Mesh
   // INDEXEDTRIANGLES|INDEXEDLINES|INDEXEDPOINTS|TRIANGLES|LINES|POINTS
   GLuint vertexBuffer; // Interleaved vertex buffer object with triangles first since they are most likely to be used
   GLuint indexBuffer; // Interleaved index buffer object with triangles first since they are most likely to be used
+  GLuint vertexArrayObject; // VAO for the use of core context and faster binds
 
   int vbotype; // can be static, dynamic, or stream
   bool ibogenerated;
@@ -246,6 +247,7 @@ class Mesh
   {
     glDeleteBuffers(1, &vertexBuffer);
     glDeleteBuffers(1, &indexBuffer);
+    glDeleteVertexArrays(1, &vertexArrayObject);
   }
 
   void ClearData()
@@ -537,6 +539,8 @@ class Mesh
       vbufferSize = vdata.size() * sizeof(gs_scalar);
       glBindBuffer( GL_ARRAY_BUFFER, vertexBuffer );
       glBufferData( GL_ARRAY_BUFFER, vbufferSize, &vdata[0], vbotype );
+
+      glGenVertexArrays(1, &vertexArrayObject);
     } else {
       glBindBuffer( GL_ARRAY_BUFFER, vertexBuffer );
 
@@ -546,6 +550,44 @@ class Mesh
         glBufferSubData( GL_ARRAY_BUFFER, 0, vdata.size() * sizeof(gs_scalar), &vdata[0]);
       }
       vbufferSize = vdata.size() * sizeof(gs_scalar);
+
+      // Bind all necessary attributes
+      glBindVertexArray(vertexArrayObject);
+
+      GLsizei stride = GetStride();
+
+      #define OFFSET( P )  ( ( const GLvoid * ) ( sizeof( gs_scalar ) * ( P         ) ) )
+      GLsizei STRIDE = stride * sizeof( gs_scalar );
+
+      unsigned offset = 0;
+      enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_vertex,true);
+      enigma_user::glsl_attribute_set(enigma::shaderprograms[enigma::bound_shader]->att_vertex, vertexStride, GL_FLOAT, GL_FALSE, STRIDE, offset);
+      offset += vertexStride;
+
+      printf("Use normals %i, use textures %i, use colors %i\n", useNormals, useTextures, useColors);
+      if (useNormals){
+        enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_normal, true);
+        enigma_user::glsl_attribute_set(enigma::shaderprograms[enigma::bound_shader]->att_normal, 3, GL_FLOAT, GL_FALSE, STRIDE, offset);
+        offset += 3;
+      }else{
+        enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_normal, false);
+      }
+
+      if (useTextures){
+        enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_texture, true);
+        enigma_user::glsl_attribute_set(enigma::shaderprograms[enigma::bound_shader]->att_texture, 2, GL_FLOAT, GL_FALSE, STRIDE, offset);
+        offset += 2;
+      }else{
+        enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_texture, false);
+      }
+
+      if (useColors){
+        enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_color, true);
+        enigma_user::glsl_attribute_set(enigma::shaderprograms[enigma::bound_shader]->att_color, 4, GL_UNSIGNED_BYTE, GL_TRUE, STRIDE, offset);
+      }else{
+        enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_color, false);
+      }
+
     }
 
     // Unbind the buffer we do not need anymore
@@ -588,31 +630,15 @@ class Mesh
     //Bind texture
     enigma_user::glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_texSampler, 0);
 
-    GLsizei stride = GetStride();
-
-    #define OFFSET( P )  ( ( const GLvoid * ) ( sizeof( gs_scalar ) * ( P         ) ) )
-    GLsizei STRIDE = stride * sizeof( gs_scalar );
-
     // Enable vertex array's for fast vertex processing
     glBindBuffer( GL_ARRAY_BUFFER, vertexBuffer );
-    printf("Bound  GL_ARRAY_BUFFER to %i\n", vertexBuffer);
+    glBindVertexArray(vertexArrayObject);
+
     if (vboindexed) {
       glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indexBuffer );
     }
 
     unsigned offset = 0;
-    enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_vertex,true);
-    enigma_user::glsl_attribute_set(enigma::shaderprograms[enigma::bound_shader]->att_vertex, vertexStride, GL_FLOAT, GL_FALSE, STRIDE, offset);
-    offset += vertexStride;
-
-    if (useNormals){
-      enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_normal, true);
-      enigma_user::glsl_attribute_set(enigma::shaderprograms[enigma::bound_shader]->att_normal, 3, GL_FLOAT, 0, STRIDE, offset);
-      offset += 3;
-    }else{
-      enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_normal, false);
-    }
-
     enigma_user::glsl_uniformf( enigma::shaderprograms[enigma::bound_shader]->uni_color, (float)enigma::currentcolor[0]/255.0f, (float)enigma::currentcolor[1]/255.0f, (float)enigma::currentcolor[2]/255.0f, (float)enigma::currentcolor[3]/255.0f );
 
     if (useTextures){
@@ -622,27 +648,18 @@ class Mesh
       // because this model class handles multi-texturing.
       // Harijs: No, it doesn't support "multi-texturing" in the regular sense, because we only bind one texture when drawing by default. This check is to see if this texture is used.
       // The best of both worlds fix is to send the texture coordinates, but disable the use of them in the default shader like so:
-      enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_texture, true);
-      enigma_user::glsl_attribute_set(enigma::shaderprograms[enigma::bound_shader]->att_texture, 2, GL_FLOAT, 0, STRIDE, offset);
       if (oglmgr->GetBoundTexture() != 0){
         enigma_user::glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_textureEnable, 1);
       }else{
         enigma_user::glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_textureEnable, 0);
       }
-      offset += 2;
     }else{
       enigma_user::glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_textureEnable, 0);
-      enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_texture, false);
     }
 
-    if (useColors){
-      enigma_user::glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_colorEnable,1);
-      enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_color, true);
-      enigma_user::glsl_attribute_set(enigma::shaderprograms[enigma::bound_shader]->att_color, 4, GL_UNSIGNED_BYTE, true, STRIDE, offset);
-    }else{
-      enigma_user::glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_colorEnable,0);
-      enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_color, false);
-    }
+    enigma_user::glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_colorEnable,useColors);
+
+    printf("11Use normals %i, use textures %i, use colors %i\n", useNormals, useTextures, useColors);
 
     #define OFFSETE( P )  ( ( const GLvoid * ) ( sizeof( GLuint ) * ( P         ) ) )
     offset = vertex_start;
@@ -675,6 +692,7 @@ class Mesh
       glDrawElements(GL_POINTS, pointIndexedCount, GL_UNSIGNED_INT, OFFSETE(offset));
     }
 
+    GLsizei stride = GetStride();
     offset = indexedoffset/stride;
 
     // Draw the unindexed primitives
@@ -704,6 +722,8 @@ class Mesh
 
       glDrawArrays(GL_POINTS, offset, pointCount);
     }
+
+    glBindVertexArray(0);
 
     /*glBindBuffer( GL_ARRAY_BUFFER, 0 );
     if (vboindexed) {
