@@ -318,6 +318,12 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
         
         //Of course, we also don't want to risk overwriting a typed version
         if (pev->myObj->locals.find(nname) != pev->myObj->locals.end()) {
+          if (with_until_semi or igstack[igpos]->is_with) {
+            pos += 5;
+            cout << "Add a self. before " << nname;
+            code.insert(spos,"self.");
+            synt.insert(spos,"nnnn.");
+          }
           cout << "Ignoring `" << nname << "' because it's already a local.\n"; continue;
         }
         
