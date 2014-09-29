@@ -2,6 +2,7 @@
  * Copyright (C) 2008 IsmAvatar <ismavatar@gmail.com>
  * Copyright (C) 2010 Alasdair Morrison <ali@alasdairmorrison.com>
  * Copyright (C) 2013 Josh Ventura <JoshV10@gmail.com>
+ * Copyright (C) 2014 Seth N. Hetu
  *
  * This file is part of ENIGMA.
  *
