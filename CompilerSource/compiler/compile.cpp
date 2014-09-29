@@ -511,8 +511,9 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
 
   parsed_object EGMglobal;
 
-  edbg << "Linking globals" << flushl;
+  edbg << "Linking globals and ambiguous variables" << flushl;
   res = current_language->link_globals(&EGMglobal,es,parsed_scripts, parsed_tlines);
+  res = current_language->link_ambiguous(&EGMglobal,es,parsed_scripts, parsed_tlines);
   irrr();
 
   edbg << "Running Secondary Parse Passes" << flushl;

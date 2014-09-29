@@ -65,7 +65,7 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
     edbg << "Parsed `" << es->scripts[i].name << "': " << scripts[i]->obj.locals.size() << " locals, " << scripts[i]->obj.globals.size() << " globals" << flushl;
     
     // If the script accesses variables from outside its scope implicitly
-    if (scripts[i]->obj.locals.size() or scripts[i]->obj.globallocals.size()) {
+    if (scripts[i]->obj.locals.size() or scripts[i]->obj.globallocals.size() or scripts[i]->obj.ambiguous.size()) {
       parsed_object temporary_object = *scripts[i]->pev.myObj;
       scripts[i]->pev_global = new parsed_event(&temporary_object);
       parser_main(string("with (self) {\n") + es->scripts[i].code + "\n/* */}",scripts[i]->pev_global, script_names);
@@ -95,7 +95,7 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
       edbg << "Parsed `" << es->timelines[i].name <<", moment: " <<es->timelines[i].moments[j].stepNo << "': " << tlines.back()->obj.locals.size() << " locals, " << tlines.back()->obj.globals.size() << " globals" << flushl;
 
       // If the timeline accesses variables from outside its scope implicitly
-      if (tlines.back()->obj.locals.size() or tlines.back()->obj.globallocals.size()) {
+      if (tlines.back()->obj.locals.size() or tlines.back()->obj.globallocals.size() or tlines.back()->obj.ambiguous.size()) {
         parsed_object temporary_object = *tlines.back()->pev.myObj;
         tlines.back()->pev_global = new parsed_event(&temporary_object);
         parser_main(string("with (self) {\n") + es->timelines[i].moments[j].code + "\n/* */}",tlines.back()->pev_global, script_names);
@@ -380,5 +380,60 @@ int lang_CPP::link_globals(parsed_object *global, EnigmaStruct *es,parsed_script
     global->copy_from(scripts[i]->obj,"script `"+scripts[i]->obj.name+"'","the Global Scope");
   for (int i = 0; i < int(tlines.size()); i++)
     global->copy_from(tlines[i]->obj,"script `"+tlines[i]->obj.name+"'","the Global Scope");
+  return 0;
+}
+
+//Converts ambiguous types to locals if the globalvar does not exist
+int lang_CPP::link_ambiguous(parsed_object *global, EnigmaStruct *es,parsed_script *scripts[], vector<parsed_script*>& tlines)
+{
+  for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
+  {
+    parsed_object* t = i->second;
+    for (parsed_object::ambit it = t->ambiguous.begin(); it != t->ambiguous.end(); it++)
+    {
+      parsed_object::globit g = global->globals.find(it->first);
+      if (g == global->globals.end())
+        t->locals[it->first] = it->second, cout << "Determined `" << it->first << "' to be local for object `" << t->name << "'" << endl;
+      else
+        cout << "Determined `" << it->first << "' to be global for object `" << t->name << "'" << endl;
+    }
+  }
+  for (pr_i i = parsed_rooms.begin(); i != parsed_rooms.end(); i++)
+  {
+    parsed_object* t = i->second;
+    for (parsed_object::ambit it = t->ambiguous.begin(); it != t->ambiguous.end(); it++)
+    {
+      parsed_object::globit g = global->globals.find(it->first);
+      if (g == global->globals.end())
+        t->locals[it->first] = it->second, cout << "Determined `" << it->first << "' to be local for object `" << t->name << "'" << endl;
+      else
+        cout << "Determined `" << it->first << "' to be global for object `" << t->name << "'" << endl;
+    }
+  }
+  for (int i = 0; i < es->scriptCount; i++)
+  {
+    parsed_object &t = scripts[i]->obj;
+    for (parsed_object::ambit it = t.ambiguous.begin(); it != t.ambiguous.end(); it++)
+    {
+      parsed_object::globit g = global->globals.find(it->first);
+      if (g == global->globals.end())
+        t.locals[it->first] = it->second, cout << "Determined `" << it->first << "' to be local for script `" << es->scripts[i].name << "'" << endl;
+      else
+        cout << "Determined `" << it->first << "' to be global for script `" << es->scripts[i].name << "'" << endl;
+    }
+  }
+  for (int i = 0; i < int(tlines.size()); i++)
+  {
+    parsed_object &t = tlines[i]->obj;
+    for (parsed_object::ambit it = t.ambiguous.begin(); it != t.ambiguous.end(); it++)
+    {
+      parsed_object::globit g = global->globals.find(it->first);
+      if (g == global->globals.end())
+        t.locals[it->first] = it->second, cout << "Determined `" << it->first << "' to be local for script `" << es->timelines[i].name << "'" << endl;
+      else
+        cout << "Determined `" << it->first << "' to be global for script `" << es->timelines[i].name << "'" << endl;
+    }
+  }
+  
   return 0;
 }

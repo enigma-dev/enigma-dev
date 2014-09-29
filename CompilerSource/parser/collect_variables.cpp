@@ -67,6 +67,7 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
   int dec_initializing = false; //This tells us we've passed an = in our initialization
   pt dec_equals_at = 0;
   int bracklevel = 0; //This will help us make sure not to add unwanted unary symbols or miss variables/scripts.
+  int parenlevel = 0; //Prevent inner vars from being ignored
   
   bool dec_name_givn = false; //Has an identifier been named in this declaration?
   string dec_name; //Identifier being declared
@@ -99,7 +100,10 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
     
     with_until_semi &= (synt[pos] != ';');
     
-    if (bracklevel == 0 and in_decl)
+    if (synt[pos] == '(' and dec_initializing) parenlevel++;
+    if (synt[pos] == ')' and dec_initializing) parenlevel--;
+    
+    if (bracklevel == 0 and parenlevel == 0 and in_decl)
     {
       if (synt[pos] == ';' or synt[pos] == ',')
       {
@@ -165,7 +169,7 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
           ((dec_name_givn)?dec_suffixes:dec_prefixes) += '(';
           continue;
         }
-        if (synt[pos] == '(') {
+        if (synt[pos] == ')') {
           ((dec_name_givn)?dec_suffixes:dec_prefixes) += ')';
           continue;
         }
@@ -290,7 +294,7 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
         }
         
         //Second, check that it's not a global
-        if (lang->global_exists(nname)) {
+        if (lang->global_exists(nname) or pev->myObj->globals.find(nname) != pev->myObj->globals.end()) {
           cout << "Ignoring `" << nname << "' because it's a global.\n";
           continue;
         }
@@ -312,21 +316,26 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
           continue;
         }
         
-        //Last, make sure we're not in a with.
-        if (with_until_semi or igstack[igpos]->is_with)
-        {
-          pos += 5;
-          code.insert(spos,"self.");
-          synt.insert(spos,"nnnn.");
-        }
-        
         //Of course, we also don't want to risk overwriting a typed version
         if (pev->myObj->locals.find(nname) != pev->myObj->locals.end()) {
           cout << "Ignoring `" << nname << "' because it's already a local.\n"; continue;
         }
         
-        cout << "Adding `" << nname << "' because that's just what I do.\n";
-        pev->myObj->locals[nname] = dectrip();
+        //We want to add "amb." before every ambiguous reference, not just new references
+        if (with_until_semi or igstack[igpos]->is_with)
+        {
+          pos += 4;
+          code.insert(spos,"amb.");
+          synt.insert(spos,"aaa.");
+        }
+        
+        //Make sure it's not already an ambiguous usage
+        if (pev->myObj->ambiguous.find(nname) != pev->myObj->ambiguous.end()) {
+          cout << "Ignoring `" << nname << "' because it's already ambiguous.\n"; continue;
+        }
+        
+        cout << "Delaying `" << nname << "' because it's either a local or a global.\n";
+        pev->myObj->ambiguous[nname] = dectrip();
         continue_2: continue;
       }
       else //Since a syntax check already completed, we assume this is a valid function
