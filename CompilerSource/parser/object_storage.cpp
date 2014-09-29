@@ -138,6 +138,14 @@ void parsed_object::copy_from(parsed_object& source, string sourcename, string d
     else if (vit->second.defined() and vit->second != t)
       cout << "***ENIGMA: WARNING: Conflicting types `" << vit->second.type << vit->second.prefix << vit->second.suffix << "' and `" << t.type << t.prefix << t.suffix << "' to variable `" << vit->first << "' in " << destname;
   }
+  for (parsed_object::ambit vit = source.ambiguous.begin(); vit != source.ambiguous.end(); vit++)
+  {
+    dectrip &t = dest.ambiguous[vit->first];
+    if (!t.defined())
+      t = vit->second, cout << "Copied `" << vit->first << "' from " << sourcename << " to " << destname;
+    else if (vit->second.defined() and vit->second != t)
+      cout << "***ENIGMA: WARNING: Conflicting types `" << vit->second.type << vit->second.prefix << vit->second.suffix << "' and `" << t.type << t.prefix << t.suffix << "' to variable `" << vit->first << "' in " << destname;
+  }
   for (parsed_object::globit vit = source.globals.begin(); vit != source.globals.end(); vit++)
   {
     dectrip &t = dest.globals[vit->first];
