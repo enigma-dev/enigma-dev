@@ -95,7 +95,7 @@ namespace enigma
   extern unsigned main_shader;
   extern unsigned bound_shader;
   string getVertexShaderPrefix(){
-    return "#version 140\n"
+    return "#version 330\n"
             "#define MATRIX_VIEW                                    0\n"
             "#define MATRIX_PROJECTION                              1\n"
             "#define MATRIX_WORLD                                   2\n"
@@ -116,7 +116,7 @@ namespace enigma
     "#line 0 \n";
   }
   string getFragmentShaderPrefix(){
-    return "#version 140\n"
+    return "#version 330\n"
             "#define MATRIX_VIEW                                    0\n"
             "#define MATRIX_PROJECTION                              1\n"
             "#define MATRIX_WORLD                                   2\n"
@@ -138,11 +138,11 @@ namespace enigma
             "#define gm_BaseTexture en_TexSampler\n"
             "uniform bool en_TexturingEnabled;\n"
             "uniform bool en_ColorEnabled;\n"
-    "uniform bool en_AlphaTestEnabled;\n"
+            "uniform bool en_AlphaTestEnabled;\n"
 
-    "uniform float en_AlphaTestValue;\n"
+            "uniform float en_AlphaTestValue;\n"
             "uniform vec4 en_BoundColor;\n"
-    "#line 0 \n";
+            "#line 0 \n";
   }
   string getDefaultVertexShader(){
     return  "in vec3 in_Position;                 // (x,y,z)\n"
@@ -159,6 +159,8 @@ namespace enigma
             "uniform bool en_VS_FogEnabled;\n"
             "uniform float en_FogStart;\n"
             "uniform float en_RcpFogRange;\n"
+
+            "uniform vec4 en_BoundColor;\n"
 
             "#define MAX_LIGHTS   8\n"
 
@@ -217,17 +219,17 @@ namespace enigma
 
             "void main()\n"
             "{\n"
-                "vec4 iColor = vec4(1.0,1.0,1.0,1.0);\n"
+                "vec4 iColor = en_BoundColor;\n"
                 "if (en_ColorEnabled == true){\n"
                     "iColor = in_Color;\n"
-      "}\n"
+                "}\n"
                 "if (en_LightingEnabled == true){\n"
                     "vec3 eyeNorm;\n"
                     "vec4 eyePosition;\n"
                     "getEyeSpace(eyeNorm, eyePosition);\n"
                     "v_Color = (en_AmbientColor + phongModel( eyeNorm, eyePosition )) * iColor;\n"
                 "}else{\n"
-        "v_Color = iColor;\n"
+                  "v_Color = iColor;\n"
                 "}\n"
                 "gl_Position = modelViewProjectionMatrix * vec4( in_Position.xyz, 1.0);\n"
 
@@ -245,13 +247,13 @@ namespace enigma
                 "if (en_TexturingEnabled == true){\n"
                     "TexColor = texture2D( en_TexSampler, v_TextureCoord.st ) * v_Color;\n"
                 "}else{\n"
-                    "TexColor = en_BoundColor * v_Color;\n"
+                    "TexColor = v_Color;\n"
                 "}\n"
-      "if (en_AlphaTestEnabled == true){\n"
-        "if (TexColor.a<=en_AlphaTestValue) discard;\n"
-      "}\n"
+                "if (en_AlphaTestEnabled == true){\n"
+                    "if (TexColor.a<=en_AlphaTestValue) discard;\n"
+                "}\n"
                 "out_FragColor = TexColor;\n"
-      "}\n";
+            "}\n";
   }
   void getUniforms(int prog_id){
     int uniform_count, max_length, uniform_count_arr = 0;

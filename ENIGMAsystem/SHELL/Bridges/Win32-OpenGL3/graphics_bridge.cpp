@@ -31,6 +31,7 @@ namespace enigma
 {
 
 	#ifdef DEBUG_MODE
+	#include "Widget_Systems/widgets_mandatory.h"
 	//Based on code from Cort Stratton (http://www.altdev.co/2011/06/23/improving-opengl-error-messages/)
 	void FormatDebugOutputARB(char outStr[], size_t outStrSize, GLenum source, GLenum type, GLuint id, GLenum severity, const char *msg) {
 		char sourceStr[32]; const char *sourceFmt = "UNDEFINED(0x%04X)";
@@ -70,6 +71,7 @@ namespace enigma
 		char finalMessage[256];
 		FormatDebugOutputARB(finalMessage, 256, source, type, id, severity, message);
 		printf("%s\n", finalMessage);
+    show_error(toString(finalMessage), false);
 	}
 	#endif
 
