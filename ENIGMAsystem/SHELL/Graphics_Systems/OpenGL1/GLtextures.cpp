@@ -155,14 +155,6 @@ namespace enigma
 
     return ret;
   }
-  
-  void graphics_samplers_apply() {
-    for (unsigned i = 0; i < 8; i++) {
-      if (enigma::samplerstates[i].bound_texture != -1) {
-         enigma::samplerstates[i].CompareAndApply(textureStructs[enigma::samplerstates[i].bound_texture]->sampler);
-      }
-    }
-  }
 
   void graphics_samplers_apply() {
     for (unsigned i = 0; i < 8; i++) {
@@ -256,6 +248,8 @@ void texture_set_stage(int stage, int texid) {
     enigma::samplerstates[stage].bound_texture = texid;
     glBindTexture(GL_TEXTURE_2D, get_texture(texid));
   }
+  // Must be applied regardless of whether the texture is already bound because the sampler state could have been changed.
+  enigma::samplerstates[stage].CompareAndApply(textureStructs[texid]->sampler);
 }
 
 void texture_reset() {
