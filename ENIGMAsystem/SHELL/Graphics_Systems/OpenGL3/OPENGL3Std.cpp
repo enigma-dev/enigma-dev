@@ -126,5 +126,10 @@ namespace enigma
     using enigma_user::room_height;
     glViewport(0,0,(int)room_width,(int)room_height);
     enigma_user::d3d_set_projection_ortho(0,(int)room_width,0,(int)room_height, 0);
+
+    //In GL3.3 Core VAO is mandatory. So we create one and never change it
+    GLuint vertexArrayObject;
+    glGenVertexArrays(1, &vertexArrayObject);
+    glBindVertexArray(vertexArrayObject);
   }
 }
