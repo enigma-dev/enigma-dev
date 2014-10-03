@@ -156,7 +156,7 @@ class Mesh
   int modeltype; // can be static, dynamic, or stream
   bool modelbuffered; // whether a call list has been generated if the model type is static
   GLuint modellist; // call list for static models
-  
+
   unsigned currentPrimitive; // The type of the current primitive being added to the model
 
   vector<VertexElement> vertices; // Temporary vertices container for the current primitive until they are batched
@@ -248,6 +248,7 @@ class Mesh
     indices.reserve(64000);
 
     vertexStride = 0;
+    modelbuffered = false;
     useColors = false;
     useTextures = false;
     useNormals = false;
@@ -467,7 +468,7 @@ class Mesh
     if (!count) {
       return;
     }
-    
+
     // Calculate the number of bytes to get to the next vertex
     GLsizei stride = GetStride() * sizeof( gs_scalar );
 
@@ -495,13 +496,13 @@ class Mesh
 
     glDrawArrays(mode, vert_start, count);
   }
-  
+
   void DrawCalls(int vertex_start = 0, int vertex_count = -1) {
     glEnableClientState(GL_VERTEX_ARRAY);
     if (useNormals) glEnableClientState(GL_NORMAL_ARRAY);
     if (useTextures) glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     if (useColors) glEnableClientState(GL_COLOR_ARRAY);
-  
+
     //TODO: Right now vertex count override only works with triangles
     // Draw the batched and indexed primitives
     if (triangleIndexedCount > 0) {
