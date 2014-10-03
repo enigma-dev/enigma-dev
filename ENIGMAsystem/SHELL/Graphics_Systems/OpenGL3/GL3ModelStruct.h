@@ -191,7 +191,7 @@ class Mesh
   // INDEXEDTRIANGLES|INDEXEDLINES|INDEXEDPOINTS|TRIANGLES|LINES|POINTS
   GLuint vertexBuffer; // Interleaved vertex buffer object with triangles first since they are most likely to be used
   GLuint indexBuffer; // Interleaved index buffer object with triangles first since they are most likely to be used
-  GLuint vertexArrayObject; // VAO for the use of core context and faster binds
+  //GLuint vertexArrayObject; // VAO for the use of core context and faster binds
 
   int vbotype; // can be static, dynamic, or stream
   bool ibogenerated;
@@ -241,13 +241,17 @@ class Mesh
     currentPrimitive = 0;
     vbufferSize = 0;
     ibufferSize = 0;
+
+    glGenBuffers( 1, &vertexBuffer );
+    glGenBuffers( 1, &indexBuffer );
+    //glGenVertexArrays(1, &vertexArrayObject);
   }
 
   ~Mesh()
   {
     glDeleteBuffers(1, &vertexBuffer);
     glDeleteBuffers(1, &indexBuffer);
-    glDeleteVertexArrays(1, &vertexArrayObject);
+    //glDeleteVertexArrays(1, &vertexArrayObject);
   }
 
   void ClearData()
@@ -492,9 +496,29 @@ class Mesh
       idata.insert(idata.end(), pointIndices.begin(), pointIndices.end());
     }
 
-    if (idata.size() > 0) {
+    if (idata.size() > 0){
       vboindexed = true;
       indexedoffset += vdata.size();
+
+      glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indexBuffer );
+      if (!ibogenerated) {
+        ibogenerated = true;
+        ibufferSize = idata.size() * sizeof(GLuint);
+        glBufferData( GL_ELEMENT_ARRAY_BUFFER, ibufferSize, &idata[0], vbotype );
+      } else {
+        if ((double)(idata.size() * sizeof(GLuint)) / (double)ibufferSize > 0.5 ) {
+          glBufferData( GL_ELEMENT_ARRAY_BUFFER, idata.size() * sizeof(GLuint), &idata[0], vbotype );
+        } else {
+          glBufferSubData( GL_ELEMENT_ARRAY_BUFFER, 0, idata.size() * sizeof(GLuint), &idata[0]);
+        }
+        ibufferSize = idata.size() * sizeof(GLuint);
+      }
+      // Unbind the buffer we do not need anymore
+      glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
+      // Clean up temporary interleaved data
+      idata.clear();
+    } else {
+      vboindexed = false;
     }
 
     if (triangleCount > 0) {
@@ -509,18 +533,14 @@ class Mesh
       vdata.insert(vdata.end(), pointVertices.begin(), pointVertices.end());
     }
 
-    if (!vbogenerated) {
-      glGenBuffers( 1, &vertexBuffer );
-      glGenVertexArrays(1, &vertexArrayObject);
+    //glBindVertexArray(vertexArrayObject);
+    glBindBuffer( GL_ARRAY_BUFFER, vertexBuffer );
 
+    if (!vbogenerated) {
       vbogenerated = true;
       vbufferSize = vdata.size() * sizeof(gs_scalar);
-      glBindBuffer( GL_ARRAY_BUFFER, vertexBuffer );
       glBufferData( GL_ARRAY_BUFFER, vbufferSize, &vdata[0], vbotype );
-
     } else {
-      glBindBuffer( GL_ARRAY_BUFFER, vertexBuffer );
-
       if ((double)(vdata.size() * sizeof(gs_scalar)) / (double)vbufferSize > 0.5 ) {
         glBufferData( GL_ARRAY_BUFFER, vdata.size() * sizeof(gs_scalar), &vdata[0], vbotype );
       } else {
@@ -529,10 +549,8 @@ class Mesh
       vbufferSize = vdata.size() * sizeof(gs_scalar);
     }
 
-    glBindVertexArray(vertexArrayObject);
-
     // Bind all necessary attributes
-    GLsizei stride = GetStride();
+    /*GLsizei stride = GetStride();
 
     #define OFFSET( P )  ( ( const GLvoid * ) ( sizeof( gs_scalar ) * ( P         ) ) )
     GLsizei STRIDE = stride * sizeof( gs_scalar );
@@ -564,36 +582,11 @@ class Mesh
       enigma_user::glsl_attribute_set(enigma::shaderprograms[enigma::bound_shader]->att_color, 4, GL_UNSIGNED_BYTE, true, STRIDE, offset);
     }else{
       enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_color, false);
-    }
+    }*/
 
-    if (idata.size() > 0) {
-      if (!ibogenerated) {
-        glGenBuffers( 1, &indexBuffer );
-        ibogenerated = true;
-        ibufferSize = idata.size() * sizeof(GLuint);
-        glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indexBuffer );
-        glBufferData( GL_ELEMENT_ARRAY_BUFFER, ibufferSize, &idata[0], vbotype );
-      } else {
-        glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indexBuffer );
-
-        if ((double)(idata.size() * sizeof(GLuint)) / (double)ibufferSize > 0.5 ) {
-          glBufferData( GL_ELEMENT_ARRAY_BUFFER, idata.size() * sizeof(GLuint), &idata[0], vbotype );
-        } else {
-          glBufferSubData( GL_ELEMENT_ARRAY_BUFFER, 0, idata.size() * sizeof(GLuint), &idata[0]);
-        }
-        ibufferSize = idata.size() * sizeof(GLuint);
-      }
-      // Unbind the buffer we do not need anymore
-      //glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
-      // Clean up temporary interleaved data
-      idata.clear();
-    } else {
-      vboindexed = false;
-    }
-
-    glBindVertexArray(0);
+    //glBindVertexArray(0);
     // Unbind the buffer we do not need anymore
-    //glBindBuffer( GL_ARRAY_BUFFER, 0 );
+    glBindBuffer( GL_ARRAY_BUFFER, 0 );
     // Clean up temporary interleaved data
     vdata.clear();
 
@@ -633,15 +626,52 @@ class Mesh
     enigma_user::glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_texSampler, 0);
 
     // Enable vertex array's for fast vertex processing
-    glBindVertexArray(vertexArrayObject);
+    //glBindVertexArray(vertexArrayObject);
     //printf("Vertex array object bound = %i\n", vertexArrayObject);
-    //glBindBuffer( GL_ARRAY_BUFFER, vertexBuffer );
+    glBindBuffer( GL_ARRAY_BUFFER, vertexBuffer );
 
     if (vboindexed) {
-      //glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indexBuffer );
+      glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indexBuffer );
     }
 
+    // Bind all necessary attributes
+    GLsizei stride = GetStride();
+
+    #define OFFSET( P )  ( ( const GLvoid * ) ( sizeof( gs_scalar ) * ( P         ) ) )
+    GLsizei STRIDE = stride * sizeof( gs_scalar );
+
     unsigned offset = 0;
+    enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_vertex,true);
+    enigma_user::glsl_attribute_set(enigma::shaderprograms[enigma::bound_shader]->att_vertex, vertexStride, GL_FLOAT, false, STRIDE, offset);
+    offset += vertexStride;
+
+    //printf("VAO %i - Use normals %i, use textures %i, use colors %i\n", vertexArrayObject, useNormals, useTextures, useColors);
+    if (useNormals){
+      enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_normal, true);
+      enigma_user::glsl_attribute_set(enigma::shaderprograms[enigma::bound_shader]->att_normal, 3, GL_FLOAT, false, STRIDE, offset);
+      offset += 3;
+    }else{
+      enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_normal, false);
+    }
+
+    if (useTextures){
+      enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_texture, true);
+      enigma_user::glsl_attribute_set(enigma::shaderprograms[enigma::bound_shader]->att_texture, 2, GL_FLOAT, false, STRIDE, offset);
+      offset += 2;
+    }else{
+      enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_texture, false);
+    }
+
+    if (useColors){
+      enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_color, true);
+      enigma_user::glsl_attribute_set(enigma::shaderprograms[enigma::bound_shader]->att_color, 4, GL_UNSIGNED_BYTE, true, STRIDE, offset);
+    }else{
+      enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_color, false);
+    }
+
+
+    //unsigned offset = 0;
+    offset = 0;
     enigma_user::glsl_uniformf( enigma::shaderprograms[enigma::bound_shader]->uni_color, (float)enigma::currentcolor[0]/255.0f, (float)enigma::currentcolor[1]/255.0f, (float)enigma::currentcolor[2]/255.0f, (float)enigma::currentcolor[3]/255.0f );
 
     if (useTextures){
@@ -694,7 +724,7 @@ class Mesh
       glDrawElements(GL_POINTS, pointIndexedCount, GL_UNSIGNED_INT, OFFSETE(offset));
     }
 
-    GLsizei stride = GetStride();
+    //GLsizei stride = GetStride();
     offset = indexedoffset/stride;
 
     // Draw the unindexed primitives
@@ -725,7 +755,7 @@ class Mesh
       glDrawArrays(GL_POINTS, offset, pointCount);
     }
 
-    glBindVertexArray(0);
+    //glBindVertexArray(0);
 
     /*glBindBuffer( GL_ARRAY_BUFFER, 0 );
     if (vboindexed) {

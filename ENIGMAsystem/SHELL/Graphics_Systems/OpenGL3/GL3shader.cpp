@@ -933,6 +933,7 @@ void glsl_attribute_enable(int location, bool enable){
 void glsl_attribute_set(int location, int size, int type, bool normalize, int stride, int offset){
   get_attribute(it,location);
   if (it->second.enabled == true){
+      //printf("Setting glsl attribute loc %i, size %i, stride %i, offset %i\n", location, size, stride, offset);
       glVertexAttribPointer(location, size, type, normalize, stride, ( ( const GLvoid * ) ( sizeof( gs_scalar ) * ( offset ) ) ));
   }
 }
