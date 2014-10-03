@@ -1,5 +1,5 @@
 /** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton, Dave "biggoron", Harijs Grinbergs
-*** Copyright (C) 2014 Robert B. Colton
+*** Copyright (C) 2014 Robert B. Colton, Harijs Grinbergs
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -216,8 +216,8 @@ void surface_set_target(int id)
   enigma::bound_framebuffer = surf->fbo;
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, surf->fbo); //bind it
   d3d_transform_stack_push();
-  //glPushAttrib(GL_VIEWPORT_BIT); //same
-  screen_set_viewport(0, 0, surf->width, surf->height);
+  glViewport(0, 0, surf->width, surf->height);
+  glScissor(0, 0, surf->width, surf->height);
   d3d_set_projection_ortho(0, 0, surf->width, surf->height, 0);
 }
 
@@ -226,7 +226,6 @@ void surface_reset_target(void)
   texture_reset();
   enigma::bound_framebuffer = 0;
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-  //glPopAttrib();
   d3d_transform_stack_pop();
 }
 
