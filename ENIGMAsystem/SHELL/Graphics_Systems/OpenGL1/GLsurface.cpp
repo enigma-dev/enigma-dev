@@ -1,5 +1,5 @@
 /** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton, Dave "biggoron", Harijs Grinbergs
-*** Copyright (C) 2014 Robert B. Colton
+*** Copyright (C) 2014 Robert B. Colton, Harijs Grinbergs
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -229,7 +229,8 @@ void surface_set_target(int id)
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, surf->fbo); //bind it
   glPushMatrix(); //So you can pop it in the reset
   glPushAttrib(GL_VIEWPORT_BIT); //same
-  screen_set_viewport(0, 0, surf->width, surf->height);
+  glViewport(0, 0, surf->width, surf->height);
+  glScissor(0, 0, surf->width, surf->height);
   d3d_set_projection_ortho(0, 0, surf->width, surf->height, 0);
 }
 
