@@ -214,10 +214,13 @@ class Mesh
     triangleIndices.reserve(64000);
     vertices.reserve(64000);
     indices.reserve(64000);
+
+    //It might not be used if model is not static, but at least we can be consistent
+    modellist = glGenLists(1);
   }
 
   ~Mesh() {
-
+    glDeleteLists(modellist, 1);
   }
 
   void ClearData() {
@@ -537,7 +540,6 @@ class Mesh
     if (modeltype == enigma_user::model_static) {
       if (!modelbuffered) {
         modelbuffered = true;
-        modellist = glGenLists(1);
         glNewList(modellist, GL_COMPILE);
           DrawCalls(vertex_start, vertex_count);
         glEndList();
