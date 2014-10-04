@@ -86,7 +86,7 @@ void RestoreState() {
 
 void BeginShapesBatching(int texId) {
 	if (shapes_d3d_model == -1) {
-		shapes_d3d_model = enigma_user::d3d_model_create(enigma_user::model_dynamic);
+		shapes_d3d_model = enigma_user::d3d_model_create(enigma_user::model_stream);
 		last_stride = -1;
 	} else if (texId != shapes_d3d_texture || (enigma_user::d3d_model_get_stride(shapes_d3d_model) != last_stride && last_stride != -1)) {
 		last_stride = -1;
@@ -119,7 +119,7 @@ void BeginScene() {
 }
 
 void EndScene() {
-  gpuprof.end_frame();  
+  gpuprof.end_frame();
   EndShapesBatching();
 }
 

@@ -1,4 +1,5 @@
 /** Copyright (C) 2013 forthevin
+***               2014 Harijs Grinbergs
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -21,6 +22,7 @@
 #include "Platforms/General/PFwindow.h"
 #include "Graphics_Systems/General/GScolors.h"
 
+#include "libEGMstd.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include <string>
 #include <iostream>
@@ -102,17 +104,26 @@ namespace enigma {
     };
 
     int fbcount;
-    *fbc = glXChooseFBConfig(enigma::x11::disp, DefaultScreen(enigma::x11::disp), visual_attribs, &fbcount);
+    fbc = glXChooseFBConfig(enigma::x11::disp, DefaultScreen(enigma::x11::disp), visual_attribs, &fbcount);
 
     if(!fbc){
         printf("Failed to Obtain GL Config\n");
         return NULL;
     }
-    *vi = glXGetVisualFromFBConfig( enigma::x11::disp, fbc[0] );
+    vi = glXGetVisualFromFBConfig( enigma::x11::disp, fbc[0] );
     return vi;
   }
 
   void EnableDrawing() {
+
+    // -- Initialise GLEW
+    GLenum err = glewInit();
+    if (GLEW_OK != err)
+    {
+      return;
+    }
+
+
     static int attribs[] =
     {
       GLX_CONTEXT_MAJOR_VERSION_ARB, 3,
