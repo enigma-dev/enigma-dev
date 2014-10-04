@@ -1,0 +1,13 @@
+%E-YAML
+---
+
+Name: WindowsTouch
+ID: Windows Touch
+Description: Touch support for Windows based environments.
+Default: false
+Build-date: 10/04/2014
+Icon: touchlogo.png
+
+Depends: None
+Dependencies: None
+

@@ -30,8 +30,16 @@ using namespace std;
 namespace enigma
 {
   GLuint msaa_fbo = 0;
+  
+  extern void (*WindowResizedCallback)();
+  void WindowResized() {
+    // clear the window color, viewport does not need set because backbuffer was just recreated
+    enigma_user::draw_clear(enigma_user::window_get_color());
+  }
+  
   void EnableDrawing (HGLRC *hRC)
   {
+    WindowResizedCallback = &WindowResized;
     /**
      * Edited by Cool Breeze on 16th October 2013
      * + Updated the Pixel Format to support 24-bitdepth buffers
@@ -89,11 +97,6 @@ namespace enigma
     
     //TODO: This never reports higher than 8, but display_aa should be 14 if 2,4,and 8 are supported and 8 only when only 8 is supported
     glGetIntegerv(GL_MAX_SAMPLES_EXT, &enigma_user::display_aa);
-  }
-
-  void WindowResized() {
-    // clear the window color, viewport does not need set because backbuffer was just recreated
-    enigma_user::draw_clear(enigma_user::window_get_color());
   }
 
   void DisableDrawing (HWND hWnd, HDC hDC, HGLRC hRC)

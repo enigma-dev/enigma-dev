@@ -21,6 +21,7 @@
 using std::string;
 using std::map;
 #include <windows.h>
+//#include <winuser.h> // includes windows.h
 
 #include "../General/PFwindow.h"
 #include "WINDOWScallback.h"
@@ -60,13 +61,15 @@ namespace enigma
     extern HDC window_hDC;
     extern LONG_PTR getwindowstyle();
     extern void setwindowsize();
-    extern void WindowResized();
     extern unsigned int pausedSteps;
     extern bool gameWindowFocused, treatCloseAsEscape;
     static short hdeltadelta = 0, vdeltadelta = 0;
     int tempLeft = 0, tempTop = 0, tempRight = 0, tempBottom = 0, tempWidth, tempHeight;
     RECT tempWindow;
 
+    LRESULT CALLBACK (*touch_extension_callback)(HWND hWndParameter, UINT message, WPARAM wParam, LPARAM lParam);
+    void (*WindowResizedCallback)();
+    
     LRESULT CALLBACK WndProc (HWND hWndParameter, UINT message,WPARAM wParam, LPARAM lParam)
     {
       switch (message)
@@ -113,7 +116,9 @@ namespace enigma
         case WM_SIZE:
           // make sure window resized is only processed once per resize because there could possibly be child windows and handles, especially with widgets
           if (hWndParameter == hWnd) {
-            WindowResized();
+            if (WindowResizedCallback != NULL) {
+              WindowResizedCallback();
+            }
             instance_event_iterator = new inst_iter(NULL,NULL,NULL);
             for (enigma::iterator it = enigma::instance_list_first(); it; ++it)
             {
@@ -247,10 +252,13 @@ namespace enigma
           DefWindowProc(hWndParameter, message, wParam, lParam);
           return 0;
 
-		//case WM_TOUCH:
-		//TODO: touchscreen stuff
-		//return 0;
-
+          /*
+        case WM_TOUCH:
+        if (touch_extension_callback != NULL) {
+          return touch_extension_callback(hWndParameter, message, wParam, lParam);
+        }
+        return 0;
+  */
 		//#ifdef DSHOW_EXT
 		//#include <dshow.h>
 		//case WM_GRAPHNOTIFY:
