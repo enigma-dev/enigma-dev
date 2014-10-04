@@ -21,6 +21,8 @@
 #include "Platforms/General/PFwindow.h"
 #include "Graphics_Systems/General/GScolors.h"
 
+#include "Widget_Systems/widgets_mandatory.h"
+#include <string>
 #include <iostream>
 #include <cstring>
 #include <stdio.h>
@@ -28,34 +30,137 @@
 // NOTE: Changes/fixes that applies to this likely also applies to the OpenGL1 version.
 
 namespace enigma {
+  #ifdef DEBUG_MODE
+	#include "Widget_Systems/widgets_mandatory.h"
+	//Based on code from Cort Stratton (http://www.altdev.co/2011/06/23/improving-opengl-error-messages/)
+	void FormatDebugOutputARB(char outStr[], size_t outStrSize, GLenum source, GLenum type, GLuint id, GLenum severity, const char *msg) {
+		char sourceStr[32]; const char *sourceFmt = "UNDEFINED(0x%04X)";
+		switch(source) {
+			case GL_DEBUG_SOURCE_API_ARB: sourceFmt = "API"; break;
+			case GL_DEBUG_SOURCE_WINDOW_SYSTEM_ARB: sourceFmt = "WINDOW_SYSTEM"; break;
+			case GL_DEBUG_SOURCE_SHADER_COMPILER_ARB: sourceFmt = "SHADER_COMPILER"; break;
+			case GL_DEBUG_SOURCE_THIRD_PARTY_ARB: sourceFmt = "THIRD_PARTY"; break;
+			case GL_DEBUG_SOURCE_APPLICATION_ARB: sourceFmt = "APPLICATION"; break;
+			case GL_DEBUG_SOURCE_OTHER_ARB: sourceFmt = "OTHER"; break;
+		}
+		snprintf(sourceStr, 32, sourceFmt, source);
+		char typeStr[32];
+		const char *typeFmt = "UNDEFINED(0x%04X)";
+		switch(type) {
+			case GL_DEBUG_TYPE_ERROR_ARB: typeFmt = "ERROR"; break;
+			case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR_ARB: typeFmt = "DEPRECATED_BEHAVIOR"; break;
+			case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR_ARB: typeFmt = "UNDEFINED_BEHAVIOR"; break;
+			case GL_DEBUG_TYPE_PORTABILITY_ARB: typeFmt = "PORTABILITY"; break;
+			case GL_DEBUG_TYPE_PERFORMANCE_ARB: typeFmt = "PERFORMANCE"; break;
+			case GL_DEBUG_TYPE_OTHER_ARB: typeFmt = "OTHER"; break;
+		}
+		snprintf(typeStr, 32, typeFmt, type);
+		char severityStr[32];
+		const char *severityFmt = "UNDEFINED(%i)";
+		switch(severity) {
+			case GL_DEBUG_SEVERITY_HIGH_ARB: severityFmt = "HIGH"; break;
+			case GL_DEBUG_SEVERITY_MEDIUM_ARB: severityFmt = "MEDIUM"; break;
+			case GL_DEBUG_SEVERITY_LOW_ARB: severityFmt = "LOW"; break;
+		}
+		snprintf(severityStr, 32, severityFmt, severity);
+		snprintf(outStr, outStrSize, "OpenGL: %s [source=%s type=%s severity=%s id=%d]", msg, sourceStr, typeStr, severityStr, id);
+	}
+
+	void DebugCallbackARB(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, GLvoid* userParam) {
+		(void)length;
+		char finalMessage[256];
+		FormatDebugOutputARB(finalMessage, 256, source, type, id, severity, message);
+		printf("%s\n", finalMessage);
+    show_error(toString(finalMessage), false);
+	}
+	#endif
+
   GLuint msaa_fbo = 0;
   GLXContext glxc;
+  GLXFBConfig *fbc;
   XVisualInfo *vi;
-  
+
   XVisualInfo* CreateVisualInfo() {
     // Prepare openGL
-    GLint att[] = { GLX_RGBA, GLX_DOUBLEBUFFER, GLX_DEPTH_SIZE, 24, None };
-    vi = glXChooseVisual(enigma::x11::disp,0,att);
-    if(!vi){
-        printf("Failed to Obtain GL Visual Info\n");
+    // Get a matching FB config
+    static int visual_attribs[] =
+    {
+      GLX_X_RENDERABLE    , True,
+      GLX_DRAWABLE_TYPE   , GLX_WINDOW_BIT,
+      GLX_RENDER_TYPE     , GLX_RGBA_BIT,
+      GLX_X_VISUAL_TYPE   , GLX_TRUE_COLOR,
+      GLX_RED_SIZE        , 8,
+      GLX_GREEN_SIZE      , 8,
+      GLX_BLUE_SIZE       , 8,
+      GLX_ALPHA_SIZE      , 8,
+      GLX_DEPTH_SIZE      , 24,
+      GLX_STENCIL_SIZE    , 8,
+      GLX_DOUBLEBUFFER    , True,
+      //GLX_SAMPLE_BUFFERS  , 1,
+      //GLX_SAMPLES         , 4,
+      None
+    };
+
+    int fbcount;
+    *fbc = glXChooseFBConfig(enigma::x11::disp, DefaultScreen(enigma::x11::disp), visual_attribs, &fbcount);
+
+    if(!fbc){
+        printf("Failed to Obtain GL Config\n");
         return NULL;
     }
+    *vi = glXGetVisualFromFBConfig( enigma::x11::disp, fbc[0] );
     return vi;
   }
 
   void EnableDrawing() {
-    //give us a GL context
-    glxc = glXCreateContext(enigma::x11::disp, vi, NULL, True);
-    if (!glxc){
-        printf("Failed to Create Graphics Context\n");
+    static int attribs[] =
+    {
+      GLX_CONTEXT_MAJOR_VERSION_ARB, 3,
+      GLX_CONTEXT_MINOR_VERSION_ARB, 3,
+      //GLX_CONTEXT_PROFILE_MASK_ARB, GLX_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB,
+      #ifdef DEBUG_MODE
+        GLX_CONTEXT_FLAGS_ARB, GLX_CONTEXT_DEBUG_BIT_ARB,
+      #else
+        GLX_CONTEXT_FLAGS_ARB, 0,
+      #endif
+      0
+    };
+
+    glxc = glXCreateContextAttribsARB( enigma::x11::disp, fbc[0], NULL, True, attribs );
+
+    // Sync to ensure any errors generated are processed.
+    XSync( enigma::x11::disp, False );
+    if (!glxc)
+    {
+      // GLX_CONTEXT_MAJOR_VERSION_ARB = 1
+      attribs[1] = 1;
+      // GLX_CONTEXT_MINOR_VERSION_ARB = 0
+      attribs[3] = 0;
+
+      printf( "Failed to create GL 3.0 context. Using fallback GLX context\n" );
+      glxc = glXCreateContextAttribsARB( enigma::x11::disp, fbc[0], NULL,
+                                        True, attribs );
+      if (!glxc) {
+        printf("Failed to create fallback context\n");
         return;
+      }
     }
-    
+
+    #ifdef DEBUG_MODE
+    glDebugMessageCallbackARB((GLDEBUGPROCARB)&DebugCallbackARB, 0);
+    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
+    printf("OpenGL version supported by this platform (%s): \n", glGetString(GL_VERSION));
+
+    GLuint ids[] = { 131185 };
+    glDebugMessageControlARB(GL_DEBUG_SOURCE_API_ARB, GL_DEBUG_TYPE_OTHER_ARB, GL_DONT_CARE, 1, ids, GL_FALSE); //Disable notification about rendering HINTS like so:
+    //OpenGL: Buffer detailed info: Buffer object 1 (bound to GL_ELEMENT_ARRAY_BUFFER_ARB, usage hint is GL_STATIC_DRAW) will use VIDEO memory as the source for buffer object operations. [source=API type=OTHER severity=UNDEFINED (33387) id=131185]
+    #endif
+
     //apply context
     glXMakeCurrent(enigma::x11::disp,enigma::x11::win,glxc); //flushes
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_ACCUM_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
   }
-  
+
   void DisableDrawing() {
    glXDestroyContext(enigma::x11::disp,glxc);
       /*
@@ -67,13 +172,13 @@ namespace enigma {
     XCloseDisplay(disp);
     return 0;*/
   }
-  
+
   void WindowResized() {
     glViewport(0,0,enigma_user::window_get_width(),enigma_user::window_get_height());
     glScissor(0,0,enigma_user::window_get_width(),enigma_user::window_get_height());
     enigma_user::draw_clear(enigma_user::window_get_color());
   }
-  
+
   namespace swaphandling {
     bool has_checked_extensions = false;
     bool ext_swapcontrol_supported;
@@ -142,12 +247,12 @@ void set_synchronization(bool enable) {
 	  // See http://www.opengl.org/registry/specs/SGI/swap_control.txt for more information.
 	}
 }
-	
+
 void display_reset(int samples, bool vsync) {
 	set_synchronization(vsync);
 	//TODO: Copy over from the Win32 bridge
 }
-  
+
 void screen_refresh() {
 	glXSwapBuffers(enigma::x11::disp, enigma::x11::win);
 	enigma::update_mouse_variables();
