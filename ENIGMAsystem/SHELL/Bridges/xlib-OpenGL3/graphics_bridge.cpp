@@ -129,12 +129,6 @@ namespace enigma {
       return;
     }
 
-    err = glxewInit();
-    if (GLEW_OK != err)
-    {
-      return;
-    }
-
     static int attribs[] =
     {
       GLX_CONTEXT_MAJOR_VERSION_ARB, 3,
