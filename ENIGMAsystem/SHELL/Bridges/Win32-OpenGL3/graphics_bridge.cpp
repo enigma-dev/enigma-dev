@@ -143,14 +143,14 @@ namespace enigma
     glDebugMessageCallbackARB((GLDEBUGPROCARB)&DebugCallbackARB, 0);
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
     printf("OpenGL version supported by this platform (%s): \n", glGetString(GL_VERSION));
-    #endif
-
-    //TODO: This never reports higher than 8, but display_aa should be 14 if 2,4,and 8 are supported and 8 only when only 8 is supported
-    glGetIntegerv(GL_MAX_SAMPLES_EXT, &enigma_user::display_aa);
 
     GLuint ids[] = { 131185 };
     glDebugMessageControlARB(GL_DEBUG_SOURCE_API_ARB, GL_DEBUG_TYPE_OTHER_ARB, GL_DONT_CARE, 1, ids, GL_FALSE); //Disable notification about rendering HINTS like so:
     //OpenGL: Buffer detailed info: Buffer object 1 (bound to GL_ELEMENT_ARRAY_BUFFER_ARB, usage hint is GL_STATIC_DRAW) will use VIDEO memory as the source for buffer object operations. [source=API type=OTHER severity=UNDEFINED (33387) id=131185]
+    #endif
+
+    //TODO: This never reports higher than 8, but display_aa should be 14 if 2,4,and 8 are supported and 8 only when only 8 is supported
+    glGetIntegerv(GL_MAX_SAMPLES_EXT, &enigma_user::display_aa);
   }
 
 
