@@ -239,8 +239,8 @@ class Mesh
     lineIndexedCount = 0;
 
     currentPrimitive = 0;
-    vbufferSize = 0;
-    ibufferSize = 0;
+    vbufferSize = 1.0;
+    ibufferSize = 1.0;
 
     glGenBuffers( 1, &vertexBuffer );
     glGenBuffers( 1, &indexBuffer );
@@ -292,6 +292,9 @@ class Mesh
     useColors = false;
     useTextures = false;
     useNormals = false;
+
+    vbufferSize = 1.0;
+    ibufferSize = 1.0;
 
     pointCount = 0;
     triangleCount = 0;
@@ -496,27 +499,30 @@ class Mesh
       idata.insert(idata.end(), pointIndices.begin(), pointIndices.end());
     }
 
+    //printf("Updating index buffer = %i, and vertex buffer = %i\n", indexBuffer,vertexBuffer);
+
     if (idata.size() > 0){
       vboindexed = true;
       indexedoffset += vdata.size();
 
       glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indexBuffer );
-      if (!ibogenerated) {
-        ibogenerated = true;
-        ibufferSize = idata.size() * sizeof(GLuint);
-        glBufferData( GL_ELEMENT_ARRAY_BUFFER, ibufferSize, &idata[0], vbotype );
-      } else {
-        if ((double)(idata.size() * sizeof(GLuint)) / (double)ibufferSize > 0.5 ) {
+      if (!ibogenerated){
+          ibogenerated = true;
           glBufferData( GL_ELEMENT_ARRAY_BUFFER, idata.size() * sizeof(GLuint), &idata[0], vbotype );
+      }else{
+        if ((double)(idata.size() * sizeof(GLuint)) / (double)ibufferSize > 0.5 ) {
+          glBufferData( GL_ELEMENT_ARRAY_BUFFER, idata.size() * sizeof(GLuint), NULL, vbotype);
+          glBufferSubData( GL_ELEMENT_ARRAY_BUFFER, 0, idata.size() * sizeof(GLuint), &idata[0]);
         } else {
           glBufferSubData( GL_ELEMENT_ARRAY_BUFFER, 0, idata.size() * sizeof(GLuint), &idata[0]);
         }
-        ibufferSize = idata.size() * sizeof(GLuint);
       }
+      ibufferSize = idata.size() * sizeof(GLuint);
+
       // Unbind the buffer we do not need anymore
       glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
       // Clean up temporary interleaved data
-      idata.clear();
+      //idata.clear();
     } else {
       vboindexed = false;
     }
@@ -536,18 +542,21 @@ class Mesh
     //glBindVertexArray(vertexArrayObject);
     glBindBuffer( GL_ARRAY_BUFFER, vertexBuffer );
 
-    if (!vbogenerated) {
+    if (!vbogenerated){
       vbogenerated = true;
-      vbufferSize = vdata.size() * sizeof(gs_scalar);
-      glBufferData( GL_ARRAY_BUFFER, vbufferSize, &vdata[0], vbotype );
-    } else {
-      if ((double)(vdata.size() * sizeof(gs_scalar)) / (double)vbufferSize > 0.5 ) {
-        glBufferData( GL_ARRAY_BUFFER, vdata.size() * sizeof(gs_scalar), &vdata[0], vbotype );
+      glBufferData( GL_ARRAY_BUFFER, vdata.size() * sizeof(gs_scalar), &vdata[0], vbotype );
+      //printf("GENERATING!\n");
+    }else{
+      if ((double)(vdata.size() * sizeof(gs_scalar)) / (double)vbufferSize > 0.5) {
+        //printf("UPDATING TOTAL BUFFER!\n");
+        glBufferData( GL_ARRAY_BUFFER, vdata.size() * sizeof(gs_scalar), NULL, vbotype);
+        glBufferSubData( GL_ARRAY_BUFFER, 0, vdata.size() * sizeof(gs_scalar), &vdata[0]);
       } else {
+        //printf("UPDATING PART BUFFER!\n");
         glBufferSubData( GL_ARRAY_BUFFER, 0, vdata.size() * sizeof(gs_scalar), &vdata[0]);
       }
-      vbufferSize = vdata.size() * sizeof(gs_scalar);
     }
+    vbufferSize = vdata.size() * sizeof(gs_scalar);
 
     // Bind all necessary attributes
     /*GLsizei stride = GetStride();
@@ -588,7 +597,7 @@ class Mesh
     // Unbind the buffer we do not need anymore
     glBindBuffer( GL_ARRAY_BUFFER, 0 );
     // Clean up temporary interleaved data
-    vdata.clear();
+    //vdata.clear();
 
     // Clean up the data from RAM it is now safe on VRAM
     ClearData();
