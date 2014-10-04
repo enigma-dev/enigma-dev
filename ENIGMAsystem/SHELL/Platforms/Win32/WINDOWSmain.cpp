@@ -55,6 +55,8 @@ namespace enigma //TODO: Find where this belongs
 
   void EnableDrawing (HGLRC *hRC);
   void DisableDrawing (HWND hWnd, HDC hDC, HGLRC hRC);
+  
+  void (*touch_extension_register)(HWND hWnd);
 
   void windowsystem_write_exename(char* exenamehere)
   {
@@ -244,6 +246,9 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
     if (hgt > screen_height) hgt = screen_height;
      enigma::hWnd = CreateWindow ("TMain", "", (enigma::getwindowstyle() & ~(WS_VISIBLE)), (screen_width-wid)/2, (screen_height-hgt)/2, wid, hgt, NULL, NULL, hInstance, NULL);
 
+    if (enigma::touch_extension_register != NULL) {
+      enigma::touch_extension_register(enigma::hWnd);
+    }
     enigma::EnableDrawing (&hRC);
     //Do not set the parent window visible until we have initialized the graphics context.
     ShowWindow(enigma::hWnd, iCmdShow);
