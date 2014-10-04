@@ -77,12 +77,6 @@ namespace enigma {
     return 0;*/
   }
   
-  void WindowResized() {
-    glViewport(0,0,enigma_user::window_get_width(),enigma_user::window_get_height());
-    glScissor(0,0,enigma_user::window_get_width(),enigma_user::window_get_height());
-    enigma_user::draw_clear(enigma_user::window_get_color());
-  }
-  
   namespace swaphandling {
     bool has_checked_extensions = false;
     bool ext_swapcontrol_supported;
