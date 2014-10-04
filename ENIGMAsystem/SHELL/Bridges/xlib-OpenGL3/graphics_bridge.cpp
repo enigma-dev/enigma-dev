@@ -116,6 +116,12 @@ namespace enigma {
 
   void EnableDrawing() {
 
+    GLXContext glxtc = glXCreateContext(enigma::x11::disp, vi, NULL, True);
+    if (!glxc){
+      printf("Failed to Create Temporary Graphics Context\n");
+      return;
+    }
+
     // -- Initialise GLEW
     GLenum err = glewInit();
     if (GLEW_OK != err)
@@ -123,6 +129,11 @@ namespace enigma {
       return;
     }
 
+    err = glxewInit();
+    if (GLEW_OK != err)
+    {
+      return;
+    }
 
     static int attribs[] =
     {
@@ -170,6 +181,8 @@ namespace enigma {
     //apply context
     glXMakeCurrent(enigma::x11::disp,enigma::x11::win,glxc); //flushes
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_ACCUM_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
+
+    glXDestroyContext(enigma::x11::disp,glxtc);
   }
 
   void DisableDrawing() {
