@@ -69,6 +69,7 @@ namespace setting
   extern bool inherit_objects;  // Determines whether objects should automatically inherit locals and events from their parents
   extern string make_directory; // Where to output make objects and preprocessor.
   extern COMPLIANCE_LVL compliance_mode; // How to resolve differences between GM versions.
+  extern string keyword_blacklist; //Words to blacklist from user scripts, separated by commas.
 }
 
 #endif

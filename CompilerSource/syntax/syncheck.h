@@ -31,7 +31,7 @@
 namespace syncheck
 {
   extern string syerr;
-  int syntacheck(string code);
+  int syntacheck(string code, string& newcode);
   void addscr(string name);
 }
 
