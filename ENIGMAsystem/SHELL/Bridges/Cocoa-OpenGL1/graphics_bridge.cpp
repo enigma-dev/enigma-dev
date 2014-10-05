@@ -32,9 +32,14 @@ namespace enigma {
   extern void (*WindowResizedCallback)();
   void WindowResized() {
     // clear the window color, viewport does not need set because backbuffer was just recreated
+    glViewport(0,0,enigma_user::window_get_width(),enigma_user::window_get_height());
+    glScissor(0,0,enigma_user::window_get_width(),enigma_user::window_get_height());
     enigma_user::draw_clear(enigma_user::window_get_color());
   }
-    
+
+  void SetResizeFptr() {
+    WindowResizedCallback = &WindowResized;
+  }
 }
 
 #include "Platforms/General/PFwindow.h" // window_set_caption
