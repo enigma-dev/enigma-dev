@@ -137,13 +137,23 @@ void parse_ide_settings(const char* eyaml)
   setting::use_gml_equals    = !settree.get("inherit-equivalence-from").toInt();
   setting::literal_autocast  = settree.get("treat-literals-as").toInt();
   setting::inherit_objects   = settree.get("inherit-objects").toBool();
-  setting::make_directory = settree.get("make-directory").toString();
   setting::compliance_mode = settree.get("compliance-mode").toInt()==1 ? setting::COMPL_GM5 : setting::COMPL_STANDARD;
 
+  // Use a platform-specific make directory.
+  std::string make_directory = "./ENIGMA/";
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
-	setMakeDirectory(myReplace(escapeEnv(setting::make_directory), "\\","/"));
+  make_directory = "%PROGRAMDATA%/ENIGMA/";
+#elif CURRENT_PLATFORM_ID == OS_LINUX
+  make_directory = "%HOME%/.enigma/";
+#elif CURRENT_PLATFORM_ID == OS_MACOSX
+  make_directory = "./ENIGMA/";
+#endif
+
+  //Now actually set it, taking backslashes into account.
+#if CURRENT_PLATFORM_ID == OS_WINDOWS
+	setMakeDirectory(myReplace(escapeEnv(make_directory), "\\","/"));
 #else
-	setMakeDirectory(escapeEnv(setting::make_directory));
+	setMakeDirectory(escapeEnv(make_directory));
 #endif
 
   //ide_dia_open();

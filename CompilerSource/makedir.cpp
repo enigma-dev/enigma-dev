@@ -82,4 +82,6 @@ void setMakeDirectory(string dir) {
 	  std::cout << "Created make directory: \"" << makedir << "\"" << endl;
 	}
 #endif
+
+	std::cout << "Make directory is: \"" << makedir << "\"" << endl;
 }
