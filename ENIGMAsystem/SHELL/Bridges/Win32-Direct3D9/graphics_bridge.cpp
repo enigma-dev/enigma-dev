@@ -58,20 +58,20 @@ namespace enigma
   
   extern void (*WindowResizedCallback)();
   void WindowResized() {
-		if (d3dmgr == NULL) { return; }
-		IDirect3DSwapChain9 *sc;
-		d3dmgr->GetSwapChain(0, &sc);
-		D3DPRESENT_PARAMETERS d3dpp;
-		sc->GetPresentParameters(&d3dpp);
+    if (d3dmgr == NULL) { return; }
+    IDirect3DSwapChain9 *sc;
+    d3dmgr->GetSwapChain(0, &sc);
+    D3DPRESENT_PARAMETERS d3dpp;
+    sc->GetPresentParameters(&d3dpp);
     int ww = window_get_width(),
         wh = window_get_height();
-		d3dpp.BackBufferWidth = ww <= 0 ? 1 : ww;
-		d3dpp.BackBufferHeight = wh <= 0 ? 1 : wh;
-		sc->Release();
+    d3dpp.BackBufferWidth = ww <= 0 ? 1 : ww;
+    d3dpp.BackBufferHeight = wh <= 0 ? 1 : wh;
+    sc->Release();
     OnDeviceLost();
-		d3dmgr->Reset(&d3dpp);
+    d3dmgr->Reset(&d3dpp);
     OnDeviceReset();
-    
+
     // clear the window color, viewport does not need set because backbuffer was just recreated
     enigma_user::draw_clear(enigma_user::window_get_color());
   }
