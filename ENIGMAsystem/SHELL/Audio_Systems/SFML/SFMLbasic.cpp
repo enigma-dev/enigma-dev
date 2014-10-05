@@ -80,7 +80,7 @@ struct PlayableSound {
     }
 	virtual bool play() = 0;
 	virtual bool pause() = 0;
-    virtual void stop() = 0;
+   virtual void stop() = 0;
 	virtual sf::SoundSource::Status getStatus() = 0;
 	virtual sf::Time getPlayingOffset() = 0;
 	virtual sf::Time getDuration() = 0;
@@ -95,7 +95,7 @@ struct PlayableSound {
 	virtual float getY() = 0;
 	virtual float getZ() = 0;
 	virtual bool setLoop(bool loop) = 0;
-    virtual void setVolume(float volume) = 0;
+   virtual void setVolume(float volume) = 0;
 	virtual void setPlayingOffset(sf::Time offset) = 0;
 	virtual void setPosition(float x, float y, float z) = 0;
 	virtual void setPitch(float pitch) = 0;
@@ -328,7 +328,9 @@ namespace enigma
     sf::SoundBuffer *buf = new sf::SoundBuffer();
     sf::Sound *snd;
 
-    buf->loadFromMemory(buffer, size);
+    if (!buf->loadFromMemory(buffer, size)) {
+        return -1;
+    }
 		
     snd = new sf::Sound();
     snd->setBuffer(*buf);
@@ -364,6 +366,10 @@ int sound_add(std::string fname, int kind, bool preload)
   int i = (int)sounds.size();
   sf::SoundBuffer *buffer = new sf::SoundBuffer();
   sf::Sound *snd;
+
+  if (!buffer->loadFromFile(fname)) {
+    return -1;
+  }
   
   snd = new sf::Sound();
   snd->setBuffer(*buffer);
@@ -452,7 +458,13 @@ void sound_global_volume(float volume)
 	sf::Listener::setGlobalVolume(volume);
 }
 
-void sound_set_volume(int sound, float volume)
+void sound_pan(int sound, float pan) 
+{
+	//TODO: SFML does not offer an easy way to pan audio. You will have to do spatialization:
+	//      http://blog.tbam.com.ar/2009/05/sound-spatiaiization-for-2d-games-in.html
+}
+
+void sound_volume(int sound, float volume)
 {
 	sounds[sound]->setVolume(volume);
 }
@@ -470,7 +482,7 @@ void sound_seek_all(float position)
 	}
 }
 
-void sound_set_pitch(int sound, float pitch)
+void sound_pitch(int sound, float pitch)
 {
 	sounds[sound]->setPitch(pitch);
 }
