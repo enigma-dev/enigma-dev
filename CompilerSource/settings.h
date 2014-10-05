@@ -68,6 +68,7 @@ namespace setting
   extern bool literal_autocast; // Determines how literals are treated.                 0 = enigma::variant,   1 = C++ scalars
   extern bool inherit_objects;  // Determines whether objects should automatically inherit locals and events from their parents
   extern COMPLIANCE_LVL compliance_mode; // How to resolve differences between GM versions.
+  extern string keyword_blacklist; //Words to blacklist from user scripts, separated by commas.
 }
 
 #endif
