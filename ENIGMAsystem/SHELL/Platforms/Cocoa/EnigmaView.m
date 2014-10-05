@@ -31,6 +31,7 @@
 #import <Cocoa/Cocoa.h>
 #import "WindowFunctions.h"
 
+void enigma_WindowResized();
 
 
 @implementation EnigmaView
@@ -71,6 +72,11 @@
    
     
     return self;
+}
+
+- (void)viewDidEndLiveResize
+{
+    enigma_WindowResized();
 }
 
 

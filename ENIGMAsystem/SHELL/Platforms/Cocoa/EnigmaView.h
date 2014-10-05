@@ -53,5 +53,6 @@
 -(void) startTimer;
 -(void) startTimerThread;
 -(void) terminateEnigma;
+-(void) viewDidEndLiveResize;
 
 @end

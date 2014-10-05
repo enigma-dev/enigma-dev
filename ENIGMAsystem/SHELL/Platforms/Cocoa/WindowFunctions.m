@@ -93,6 +93,11 @@ int getMouse(int i)
 	
 }
 
+void cocoa_window_set_color(int bgrColor) 
+{
+	[[delegate window] setBackgroundColor: [NSColor colorWithRed:(bgrColor&0xFF)  green:((bgrColor&0xFF00)>>8)  blue:((bgrColor&0xFF0000)>>16)  alpha:1.0]];
+}
+
 void cocoa_window_set_caption(const char* caption)
 {
 	[[delegate window] setTitle:[NSString stringWithCString:caption length:strlen(caption)]];
