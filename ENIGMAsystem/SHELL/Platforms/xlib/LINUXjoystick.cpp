@@ -121,7 +121,7 @@ namespace enigma_user
 {
   
   #ifdef DEBUG_MODE
-  #  define checkId(failv) { if (size_t(id) > enigma::joysticks.size()) { return (failv); } }
+  #  define checkId(failv) { if (size_t(id) >= enigma::joysticks.size()) { return (failv); } }
   #  define checkPositiveId(failv) { if (id < 0) return (failv); }
   #else
   #  define checkId(failv)
@@ -191,7 +191,7 @@ namespace enigma_user
   }
 
   bool joystick_exists(int id) {
-    if (size_t(id) > enigma::joysticks.size())
+    if (size_t(id) >= enigma::joysticks.size())
       return false;
     const enigma::e_joystick * const js = enigma::joysticks[id];
     return js && js->device != -1;
