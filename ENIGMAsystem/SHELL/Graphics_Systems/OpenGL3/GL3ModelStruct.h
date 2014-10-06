@@ -198,6 +198,11 @@ class Mesh
   bool vbogenerated;
   bool vbobuffered; // Whether or not the buffer objects have been generated
   bool vboindexed; // Whether or not the model contains any indexed primitives or just regular lists
+  
+  //This is for STREAMING data (ring buffer)
+  unsigned int ringBufferSize;
+  unsigned int ringBufferHead;
+  unsigned int ringBufferDrawOffset;
 
   Mesh (int type)
   {
@@ -243,6 +248,16 @@ class Mesh
     ibufferSize = 1.0;
 
     glGenBuffers( 1, &vertexBuffer );
+    if (vbotype == GL_STREAM_DRAW){
+      printf("Creating stream buffer! %i\n", vertexBuffer);
+      //Allocate space for max stride (9) * sizeof(float) (4) * 128000 vertices. This is going to be a ring buffer. 
+      ringBufferSize = 9 * sizeof(gs_scalar) * 128000;
+      ringBufferHead = 0;
+      glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+      glBufferData(GL_ARRAY_BUFFER, ringBufferSize, NULL, vbotype);
+    }
+    ringBufferDrawOffset = 0;
+    
     glGenBuffers( 1, &indexBuffer );
     //glGenVertexArrays(1, &vertexArrayObject);
   }
@@ -503,13 +518,13 @@ class Mesh
 
     if (idata.size() > 0){
       vboindexed = true;
-      indexedoffset += vdata.size();
+      indexedoffset = vdata.size();
 
       glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indexBuffer );
       if (!ibogenerated){
           ibogenerated = true;
           glBufferData( GL_ELEMENT_ARRAY_BUFFER, idata.size() * sizeof(GLuint), &idata[0], vbotype );
-      }else{
+      }else{        
         if ((double)(idata.size() * sizeof(GLuint)) / (double)ibufferSize > 0.5 ) {
           glBufferData( GL_ELEMENT_ARRAY_BUFFER, idata.size() * sizeof(GLuint), NULL, vbotype);
           glBufferSubData( GL_ELEMENT_ARRAY_BUFFER, 0, idata.size() * sizeof(GLuint), &idata[0]);
@@ -542,21 +557,31 @@ class Mesh
     //glBindVertexArray(vertexArrayObject);
     glBindBuffer( GL_ARRAY_BUFFER, vertexBuffer );
 
-    if (!vbogenerated){
-      vbogenerated = true;
-      glBufferData( GL_ARRAY_BUFFER, vdata.size() * sizeof(gs_scalar), &vdata[0], vbotype );
-      //printf("GENERATING!\n");
+    
+    if (vbotype == GL_STREAM_DRAW){
+        unsigned int vsize = vdata.size() * sizeof(gs_scalar);
+        printf("Updating stream buffer! %i, head = %i, size = %i, index triangles %i\n", vertexBuffer, ringBufferHead, vsize,triangleIndexedCount);
+        if ((ringBufferHead + vsize) >= ringBufferSize){ ringBufferHead = 0; }
+        glBufferSubData( GL_ARRAY_BUFFER, ringBufferHead, vsize, &vdata[0]);
+        ringBufferDrawOffset = 0; //ringBufferHead;
+        //ringBufferHead += vsize;
     }else{
-      if ((double)(vdata.size() * sizeof(gs_scalar)) / (double)vbufferSize > 0.5) {
-        //printf("UPDATING TOTAL BUFFER!\n");
-        glBufferData( GL_ARRAY_BUFFER, vdata.size() * sizeof(gs_scalar), NULL, vbotype);
-        glBufferSubData( GL_ARRAY_BUFFER, 0, vdata.size() * sizeof(gs_scalar), &vdata[0]);
-      } else {
-        //printf("UPDATING PART BUFFER!\n");
-        glBufferSubData( GL_ARRAY_BUFFER, 0, vdata.size() * sizeof(gs_scalar), &vdata[0]);
+      if (!vbogenerated){
+        vbogenerated = true;
+        glBufferData( GL_ARRAY_BUFFER, vdata.size() * sizeof(gs_scalar), &vdata[0], vbotype );
+        //printf("GENERATING!\n");
+      }else{
+        if ((double)(vdata.size() * sizeof(gs_scalar)) / (double)vbufferSize > 0.5) {
+          //printf("UPDATING TOTAL BUFFER!\n");
+          glBufferData( GL_ARRAY_BUFFER, vdata.size() * sizeof(gs_scalar), NULL, vbotype);
+          glBufferSubData( GL_ARRAY_BUFFER, 0, vdata.size() * sizeof(gs_scalar), &vdata[0]);
+        } else {
+          //printf("UPDATING PART BUFFER!\n");
+          glBufferSubData( GL_ARRAY_BUFFER, 0, vdata.size() * sizeof(gs_scalar), &vdata[0]);
+        }
+        vbufferSize = vdata.size() * sizeof(gs_scalar);
       }
     }
-    vbufferSize = vdata.size() * sizeof(gs_scalar);
 
     // Bind all necessary attributes
     /*GLsizei stride = GetStride();
@@ -673,6 +698,7 @@ class Mesh
 
     if (useColors){
       enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_color, true);
+      printf("Color offset = %i\n", offset);
       enigma_user::glsl_attribute_set(enigma::shaderprograms[enigma::bound_shader]->att_color, 4, GL_UNSIGNED_BYTE, true, STRIDE, offset);
     }else{
       enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_color, false);
@@ -704,7 +730,7 @@ class Mesh
 
     #define OFFSETE( P )  ( ( const GLvoid * ) ( sizeof( GLuint ) * ( P         ) ) )
     offset = vertex_start;
-
+   
     // Draw the indexed primitives
     if (triangleIndexedCount > 0) {
       #ifdef DEBUG_MODE
@@ -712,7 +738,11 @@ class Mesh
       vbd.triangles_indexed+=(vertex_count==-1?triangleIndexedCount:vertex_count);
       #endif
 
+      if (vbotype == GL_STREAM_DRAW){
+        printf("Drawing indexed stream buffer! %i, indexedoffset = %i, drawoffset = %i, triangelIndexecCount = %i\n", vertexBuffer, offset, ringBufferDrawOffset, (vertex_count==-1?triangleIndexedCount:vertex_count));
+      }
       glDrawElements(GL_TRIANGLES, (vertex_count==-1?triangleIndexedCount:vertex_count), GL_UNSIGNED_INT, OFFSETE(offset));
+      //glDrawElementsBaseVertex (GL_TRIANGLES, (vertex_count==-1?triangleIndexedCount:vertex_count), GL_UNSIGNED_INT, OFFSETE(offset), ringBufferDrawOffset);
       offset += triangleIndexedCount;
     }
     if (lineIndexedCount > 0) {
@@ -721,7 +751,7 @@ class Mesh
       vbd.lines_indexed+=lineIndexedCount;
       #endif
 
-      glDrawElements(GL_LINES, lineIndexedCount, GL_UNSIGNED_INT, OFFSETE(offset));
+      glDrawElementsBaseVertex (GL_LINES, lineIndexedCount, GL_UNSIGNED_INT, OFFSETE(offset), ringBufferDrawOffset);
       offset += lineIndexedCount;
     }
     if (pointIndexedCount > 0) {
@@ -730,11 +760,11 @@ class Mesh
       vbd.points_indexed+=pointIndexedCount;
       #endif
 
-      glDrawElements(GL_POINTS, pointIndexedCount, GL_UNSIGNED_INT, OFFSETE(offset));
+      glDrawElementsBaseVertex (GL_POINTS, pointIndexedCount, GL_UNSIGNED_INT, OFFSETE(offset), ringBufferDrawOffset);
     }
 
     //GLsizei stride = GetStride();
-    offset = indexedoffset/stride;
+    offset = ringBufferDrawOffset + indexedoffset/stride;
 
     // Draw the unindexed primitives
     if (triangleCount > 0) {
@@ -742,7 +772,9 @@ class Mesh
       vbd.drawcalls+=1;
       vbd.triangles+=(vertex_count==-1?triangleCount:vertex_count);
       #endif
-
+      if (vbotype == GL_STREAM_DRAW){
+        printf("Drawing unindexed stream buffer! %i, indexedoffset = %i, drawoffset = %i\n", vertexBuffer, indexedoffset, ringBufferDrawOffset);
+      }
       glDrawArrays(GL_TRIANGLES, (vertex_start==0?offset:vertex_start), (vertex_count==-1?triangleCount:vertex_count));
       offset += triangleCount;
     }
