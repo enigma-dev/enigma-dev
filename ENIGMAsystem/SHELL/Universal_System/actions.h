@@ -78,6 +78,8 @@ inline bool action_if_variable(const variant& variable, const variant& value, in
         case 0: return (variable==value); break;
         case 1: return (variable<value); break;
         case 2: return (variable>value); break;
+        case 3: return (variable<=value); break;
+        case 4: return (variable>=value); break;
         default: return false; //invalid operation
     }
 }
