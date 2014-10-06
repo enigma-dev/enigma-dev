@@ -120,6 +120,8 @@ inline bool action_if_number(const int object, const double number, const int op
 	    case 0: return (instance_number(object) == lrint(number)); break;
 	    case 1:	return (instance_number(object) < number); break;
 	    case 2: return (instance_number(object) > number); break;
+      case 3: return (instance_number(object) <= number); break;
+      case 4: return (instance_number(object) >= number); break;
 	    default: return false; //invalid operation
   }
 }
@@ -329,6 +331,8 @@ inline bool action_if_health(const double value, const int operation)
 	    case 0: return (fabs(health - value) < _V_EPSILON); break;
 	    case 1:	return (health < value); break;
 	    case 2: return (health > value); break;
+      case 3: return (health <= value); break;
+      case 4: return (health >= value); break;
 	    default: return false; //invalid operation
   }
 }
@@ -340,6 +344,8 @@ inline bool action_if_life(const double value, const int operation)
 	    case 0: return (fabs(lives - value) < _V_EPSILON); break;
 	    case 1:	return (lives < value); break;
 	    case 2: return (lives > value); break;
+      case 3: return (lives <= value); break;
+      case 4: return (lives >= value); break;
 	    default: return false; //invalid operation
     }
 }
@@ -351,6 +357,8 @@ inline bool action_if_score(const double value, const int operation)
 	    case 0: return (fabs(score - value) < _V_EPSILON); break;
 	    case 1:	return (score < value); break;
 	    case 2: return (score > value); break;
+      case 3: return (score <= value); break;
+      case 4: return (score >= value); break;
 	    default: return false; //invalid operation
   }
 }
