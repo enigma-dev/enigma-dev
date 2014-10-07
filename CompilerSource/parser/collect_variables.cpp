@@ -327,12 +327,12 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
           cout << "Ignoring `" << nname << "' because it's already a local.\n"; continue;
         }
         
-        //We want to add "amb." before every ambiguous reference, not just new references
+        //We want to add "ambi." before every ambiguous reference, not just new references
         if (with_until_semi or igstack[igpos]->is_with)
         {
-          pos += 4;
-          code.insert(spos,"amb.");
-          synt.insert(spos,"aaa.");
+          pos += 5;
+          code.insert(spos,"ambi.");
+          synt.insert(spos,"aaaa.");
         }
         
         //Make sure it's not already an ambiguous usage
