@@ -67,7 +67,6 @@ namespace setting
   extern bool use_incrementals; // Defines how operators ++ and -- are treated.         0 = GML,               1 = C++
   extern bool literal_autocast; // Determines how literals are treated.                 0 = enigma::variant,   1 = C++ scalars
   extern bool inherit_objects;  // Determines whether objects should automatically inherit locals and events from their parents
-  extern string make_directory; // Where to output make objects and preprocessor.
   extern COMPLIANCE_LVL compliance_mode; // How to resolve differences between GM versions.
 }
 
