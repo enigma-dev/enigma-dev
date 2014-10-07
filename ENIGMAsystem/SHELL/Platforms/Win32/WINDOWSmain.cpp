@@ -217,7 +217,7 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
     }
 
     //Create the window
-    WNDCLASS wcontainer,wmain;
+    WNDCLASS wcontainer;
     HGLRC hRC;
     MSG msg;
 
