@@ -55,6 +55,8 @@ namespace enigma //TODO: Find where this belongs
 
   void EnableDrawing (HGLRC *hRC);
   void DisableDrawing (HWND hWnd, HDC hDC, HGLRC hRC);
+  
+  void (*touch_extension_register)(HWND hWnd);
 
   void windowsystem_write_exename(char* exenamehere)
   {
@@ -215,7 +217,7 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
     }
 
     //Create the window
-    WNDCLASS wcontainer,wmain;
+    WNDCLASS wcontainer;
     HGLRC hRC;
     MSG msg;
 
@@ -229,7 +231,7 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
     wcontainer.hCursor = LoadCursor (NULL, IDC_ARROW);
     wcontainer.hbrBackground = (HBRUSH) GetStockObject (BLACK_BRUSH);
     wcontainer.lpszMenuName = NULL;
-    wcontainer.lpszClassName = "TMain";
+    wcontainer.lpszClassName = "EnigmaDevGameMainWindow";
     RegisterClass (&wcontainer);
     
     //Create the parent window
@@ -242,8 +244,11 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
     // We won't limit those functions like GM, just the default.
     if (wid > screen_width) wid = screen_width;
     if (hgt > screen_height) hgt = screen_height;
-     enigma::hWnd = CreateWindow ("TMain", "", (enigma::getwindowstyle() & ~(WS_VISIBLE)), (screen_width-wid)/2, (screen_height-hgt)/2, wid, hgt, NULL, NULL, hInstance, NULL);
+     enigma::hWnd = CreateWindow ("EnigmaDevGameMainWindow", "", (enigma::getwindowstyle() & ~(WS_VISIBLE)), (screen_width-wid)/2, (screen_height-hgt)/2, wid, hgt, NULL, NULL, hInstance, NULL);
 
+    if (enigma::touch_extension_register != NULL) {
+      enigma::touch_extension_register(enigma::hWnd);
+    }
     enigma::EnableDrawing (&hRC);
     //Do not set the parent window visible until we have initialized the graphics context.
     ShowWindow(enigma::hWnd, iCmdShow);

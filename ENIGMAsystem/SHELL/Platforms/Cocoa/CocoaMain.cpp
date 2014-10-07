@@ -31,6 +31,10 @@
 #include "Universal_System/CallbackArrays.h"
 #include "Universal_System/roomsystem.h"
 
+namespace enigma {
+  void SetResizeFptr();
+}
+
 namespace enigma_user {
   std::string working_directory = "";
 }
@@ -51,6 +55,8 @@ int main(int argc,char** argv)
 	enigma::parameters=new char* [argc];
 	for (int i=0; i<argc; i++)
 		enigma::parameters[i]=argv[i];
+
+   enigma::SetResizeFptr();
 
 	return mainO(argc, argv);
 }
