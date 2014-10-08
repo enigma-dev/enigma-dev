@@ -132,7 +132,10 @@ int lang_CPP::compile_writeObjAccess(map<int,parsed_object*> &parsed_objects, pa
         }
       }
 
-      wto << "      case global: return ((ENIGMA_global_structure*)ENIGMA_global_instance)->" << pmember << ";" << endl;
+      if (global->globals.find(pmember) != global->globals.end())
+        wto << "      case global: return " << pmember << ";" << endl; 
+      else
+        wto << "      case global: return ((ENIGMA_global_structure*)ENIGMA_global_instance)->" << pmember << ";" << endl;
       if (dait->second.type == "var")
         wto << "      default: return map_var(&(((enigma::object_locals*)inst)->vmap), \"" << pmember << "\");"  << endl;
       wto << "    }" << endl;

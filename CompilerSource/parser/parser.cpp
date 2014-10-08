@@ -400,6 +400,23 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
       {
         string repstr;
         string repsyn;
+        if (synt[ebp] == 'a') //Access type is "ambi"
+        {
+          if(glob->globals.find(member) != glob->globals.end())
+          {
+            code.erase(ebp, 5);
+            synt.erase(ebp, 5);
+            pos = ebp - 1;
+            continue;
+          }
+          else
+          {
+            code.replace(ebp, 4, "self");
+            synt.replace(ebp, 4, "nnnn");
+            exp = "self";
+            expsynt = "nnnn";
+          }
+        }
         if (shared_object_locals.find(member) != shared_object_locals.end())
         {
           repstr = "enigma::glaccess(int("   + exp +   "))->" + member;
