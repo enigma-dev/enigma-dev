@@ -15,6 +15,7 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
+#define GLEW_MX
 //#include <GL/glx.h>
 #include <X11/Xlib.h>
 #include "../General/glxew.h"
@@ -117,13 +118,20 @@ namespace enigma {
   void EnableDrawing() {
 
     GLXContext glxtc = glXCreateContext(enigma::x11::disp, vi, NULL, True);
-    if (!glxc){
+    if (!glxtc){
       printf("Failed to Create Temporary Graphics Context\n");
       return;
     }
+    glXMakeCurrent(enigma::x11::disp,enigma::x11::win,glxtc);
 
     // -- Initialise GLEW
     GLenum err = glewInit();
+    if (GLEW_OK != err)
+    {
+      return;
+    }
+
+    GLenum err = glxewInit();
     if (GLEW_OK != err)
     {
       return;
