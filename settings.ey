@@ -33,6 +33,10 @@
         Type: Combobox
         Label: Compliance Mode: 
         Options: "Standard, GM5"
+    -keyword-blacklist:
+        Type: Textfield
+        Label: Keyword Blacklist: 
+        Default: ""
 
 		
 
