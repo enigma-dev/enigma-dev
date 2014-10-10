@@ -152,7 +152,8 @@ dllexport syntax_error *syntaxCheck(int script_count, const char* *script_names,
     quickmember_script(&globals_scope,script_names[i]);
   
   cout << "Starting syntax check." << endl;
-  ide_passback_error.absolute_index = syncheck::syntacheck(code);
+  std::string newcode;
+  ide_passback_error.absolute_index = syncheck::syntacheck(code, newcode);
   cout << "Syntax checking complete." << endl;
   error_sstring = syncheck::syerr;
   
