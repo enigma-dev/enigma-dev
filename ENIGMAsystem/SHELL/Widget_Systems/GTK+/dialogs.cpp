@@ -416,6 +416,8 @@ namespace enigma_user {
 
 string get_string(string message, string def, string cap)
 {
+	// FIXME: Race condition
+	// TODO: OK on Enter
 	GtkWidget *dialog = gtk_dialog_new();
 	gtk_dialog_add_button(GTK_DIALOG(dialog), "OK", 0);
 	gtk_dialog_add_button(GTK_DIALOG(dialog), "CANCEL", 1);
@@ -425,8 +427,12 @@ string get_string(string message, string def, string cap)
 	gtk_container_add(GTK_CONTAINER(content_area), entry);
 	gtk_widget_show_all(dialog);
 	gint result = gtk_dialog_run(GTK_DIALOG(dialog));
-	if (result == 1) return def;
+
 	string out = gtk_entry_get_text(GTK_ENTRY(entry));
+	gtk_widget_hide(dialog);
+	gtk_widget_destroy(dialog);
+
+	if (result == 1) return def;
 	return out;
 }
 
