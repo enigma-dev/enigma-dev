@@ -27,6 +27,7 @@
 ///////////////////////////////
 
 #include "Universal_System/var4.h"
+#include "Universal_System/var_array.h"
 #include "Universal_System/dynamic_args.h"
 
 #ifdef DEBUG_MODE
