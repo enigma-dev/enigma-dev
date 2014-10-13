@@ -48,128 +48,107 @@
   is that the dense segment can be dereferenced without additional arithmetic (by unary
   operator*), while the map section requires taking dense[-sizeof(map)],  where `dense`
   has been cast to char*, then casting back to maptype*.
+
+  NOTE: Memory layout is something like this:
+    <sparse_map><dense_length><max_elem+1><dense_elem[0],dense_elem[1],...>
 */
+
+namespace {
+template <typename T>
+T my_max(const T& lhs, const T& rhs) {
+  return lhs>rhs ? lhs : rhs;
+}
+}
+
 
 template <class T> struct lua_table
 {
   // This is what kind of sparse container we'll be using
   typedef std::map<size_t,T> lua_map_type;
-  typedef typename lua_map_type::iterator shiterator;
 
-  // These are size calculations for the buffer we'll keep
-  #define base_size (sizeof(lua_map_type) + sizeof(size_t))
-  #define base_length(x) (*(size_t*)((char*)(x) + sizeof(lua_map_type)))
-  #define base_map(x)    (*(lua_map_type*)((char*)(x)))
-  #define base_to_TA(x) ((T*)((char*)(x) + base_size))
-
-  #define TA_map(x)      (*(lua_map_type*)((char*)(x) - base_size))
-  #define TA_length(x)   (*((size_t*)(x) - 1))
-  #define TA_start(x)    ((char*)(x) - base_size)
-  
+private:
+  //Stuff relating to dense storage.
   T* dense;
-  void initialize()
-  {
-    // Create our chunk of memory.
-    char* databuf = (char*)malloc(base_size + sizeof(T));
-    
-    // Construct a map for sparse indexes.
-    new(databuf) lua_map_type;
-    
-    base_length(databuf) = 1;  // We'll only allocate one object for now.
-    dense = base_to_TA(databuf); // This is where we'll look for it.
-    new(dense) T[1]; // Construct it there.
-  }
-  void move_from_map()
-  {
-    const size_t clen = TA_length(dense);
-    for (shiterator it = TA_map(dense).begin(); it != TA_map(dense).end(); it++)
-    {
-      if (it->first > clen) break;
-      dense[it->first] = it->second;
-      TA_map(dense).erase(it++);
-    }
-  }
-  inline void destroy()
-  {
-    // Iterate the dense part, destroying everything.
-    const size_t dlen = TA_length(dense);
-    for (size_t i = 0; i < dlen; i++)
-      dense[i].~T();
-    
-    // Destroy the map.
-    TA_map(dense).~lua_map_type();
-    
-    // Give back the memory.
-    free(TA_start(dense));
-    dense = NULL;
-  }
-  
+  size_t dn_reserve; //Total available units.
+
+  //Sparse storage is easier.
+  lua_map_type sparse;
+
+  //Our one item of book-keeping
+  size_t mx_size; //Actual max_element+1
+
+
   void pick_up(const lua_table<T>& who)
   {
-    const size_t len = TA_length(who.dense);
-    
-    // Create a new chunk, base and all. We'll be moving here.
-    char* databuf = (char*)malloc(base_size + len*sizeof(T));
-    
-    // Call map copy constructor.
-    new(databuf) lua_map_type(TA_map(who.dense));
-    
-    base_length(databuf) = len;   // We share a length in common, though.... 
-    T* ndense = base_to_TA(databuf); // Re-establish our array's location.
-    for (size_t i=0; i<len; i++) // Copy the array elements
-      new(ndense+i) T(who.dense[i]);
-    if (dense) destroy();
-    dense = ndense;
+    dn_reserve = who.dn_reserve;
+    mx_size = who.mx_size;
+
+    //Free old memory?
+    if (dense) { 
+      delete [] dense;
+      dense = NULL;
+    }
+
+    //Create a new dense chunk, copy over values.
+    dense = new T[dn_reserve];
+    for (size_t i=0; i<dn_reserve; i++) {
+      dense[i] = who.dense[i];
+    }
+
+    //Copy the sparse map
+    sparse = who.sparse;
   }
+
   void upsize(const size_t c)
   {
-    const size_t dense_size = TA_length(dense);
-    
-    // Preserve our map
-    lua_map_type tmp; // Create a temporary map
-    tmp.swap(TA_map(dense)); // Move our old map into it
-    TA_map(dense).~lua_map_type(); // Destroy our old map
-    
-    char* databuf = TA_start(dense); // Get the beginning of the data chunk
-    databuf = (char*)realloc(databuf,base_size + c*sizeof(T));   // Ask system to give us more memory and maybe move us
-    
-    // Restore our map
-    new(databuf) lua_map_type(); // Recreate our map
-    lua_map_type& nmap = base_map(databuf); // Reference our new map
-    nmap.swap(tmp); // Move our old content into it
-    // I know this looks like tail-chasing, but map<> WILL segfault otherwise. I can't tell why.
-    
-    // Finish our move
-    dense = base_to_TA(databuf);   // Get back our array pointer
-    new(dense + dense_size) T[c - dense_size]; // Construct new array elements
-    
-    for (shiterator i = nmap.begin(); i != nmap.end(); ) {
-      if (i->first >= c) break;
-      dense[i->first] = i->second;
-      nmap.erase(i++);
+    //Create a new dense section and copy over values; free old memory.
+    T* new_dense = new T[c];
+    if (dense) { 
+      for (size_t i=0; i<dn_reserve; i++) {
+        new_dense[i] = dense[i];
+      }
+      delete [] dense;
     }
-    TA_length(dense) = c;    // Store new alloc size for dense array
+    dense = new_dense;
+    dn_reserve = c;
+
+    //Copy sparse array values that are now within this reserve space.
+    for (typename lua_map_type::iterator it=sparse.begin(); it!=sparse.end();) {
+      if (it->first >= c) {
+        break;
+      }
+      dense[it->first] = it->second;
+      sparse.erase(it++);
+    }
   }
   
+
+public:
   T& operator[] (size_t ind) 
   { 
-    const size_t dense_size = TA_length(dense);
-    if (ind >= dense_size)
+    mx_size = my_max(ind+1, mx_size);
+    if (ind >= dn_reserve)
     {
       // Calculate tolerable size increase
-      const size_t c = (dense_size < 4) ? 4 : dense_size << 1;
+      const size_t c = (dn_reserve < 4) ? 4 : dn_reserve << 1;
       
       // If we're far out of range of the currently allocated dense array
       if (ind >= c) // Default to the map and return a sparse node
-        return TA_map(dense)[ind];
+        return sparse[ind];
       
       // Otherwise, resize and reconstruct
       upsize(c);
     }
+
     return dense[ind];
   }
+
   T& operator*() {
-    return *dense;
+    return dense[0];
+  }
+
+  int max_index() const {
+    return mx_size;
   }
   
   lua_table<T>& operator= (const lua_table<T>& x)
@@ -178,14 +157,13 @@ template <class T> struct lua_table
     return *this;
   }
   
-  lua_table<T>() {
-    initialize();
+  lua_table<T>() : dense(new T[1]), mx_size(1), dn_reserve(1) {
   }
-  lua_table<T>(const lua_table<T> &x): dense(NULL) {
+  lua_table<T>(const lua_table<T> &x): dense(NULL), mx_size(0), dn_reserve(0) {
     pick_up(x);
   }
   ~lua_table<T>() {
-    destroy();
+    if (dense) { delete [] dense; }
   }
 };
 
