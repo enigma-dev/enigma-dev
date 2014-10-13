@@ -261,10 +261,10 @@ variant::~variant() { }
 var::operator variant&() { return **this; }
 var::operator const variant&() const { return **this; }
 
-var::var() { initialize(); }
-var::var(variant x) { initialize(); **this = x; }
+var::var() : values(NULL) { initialize(); }
+var::var(variant x) : values(NULL) { initialize(); **this = x; }
 //TODO: Overload var for std::array
-var::var(variant x, size_t length, size_t length2) {
+var::var(variant x, size_t length, size_t length2) : values(NULL) {
   initialize();
   for (size_t j = 0; j < length2; ++j) {
     for (size_t i = 0; i < length; ++i) {
@@ -272,8 +272,8 @@ var::var(variant x, size_t length, size_t length2) {
     }
   }
 }
-types_extrapolate_real_p  (var::var, { initialize(); **this = x; })
-types_extrapolate_string_p(var::var, { initialize(); **this = x; })
+types_extrapolate_real_p  (var::var,  : values(NULL) { initialize(); **this = x; })
+types_extrapolate_string_p(var::var,  : values(NULL) { initialize(); **this = x; })
 
 
 
