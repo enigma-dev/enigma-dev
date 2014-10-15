@@ -203,6 +203,7 @@ class Mesh
   unsigned int ringBufferVSize;
   unsigned int ringBufferVHead;
   unsigned int ringBufferVDrawOffset;
+  unsigned int ringBufferVDrawOffsetDouble;
 
   unsigned int ringBufferISize;
   unsigned int ringBufferIHead;
@@ -268,6 +269,7 @@ class Mesh
       glBufferData(GL_ELEMENT_ARRAY_BUFFER, ringBufferISize, NULL, vbotype);
     }
     ringBufferVDrawOffset = 0;
+    ringBufferVDrawOffsetDouble = 0;
     ringBufferIDrawOffset = 0;
   }
 
@@ -535,7 +537,7 @@ class Mesh
         printf("Updating stream index buffer! %i, head = %i, size = %i, index triangles %i\n", indexBuffer, ringBufferIHead, isize,triangleIndexedCount);
         if ((ringBufferIHead + isize) >= ringBufferISize){ ringBufferIHead = 0; }
         glBufferSubData( GL_ELEMENT_ARRAY_BUFFER, ringBufferIHead, isize, &idata[0]);
-        ringBufferIDrawOffset = ringBufferIHead;
+        ringBufferIDrawOffset = ringBufferIHead / sizeof(GLuint);
         ringBufferIHead += isize;
       }else{
         if (!ibogenerated){
@@ -574,12 +576,16 @@ class Mesh
     //glBindVertexArray(vertexArrayObject);
     glBindBuffer( GL_ARRAY_BUFFER, vertexBuffer );
 
+    // Bind all necessary attributes
+    GLsizei stride = GetStride();
+
     if (vbotype == GL_STREAM_DRAW){
         unsigned int vsize = vdata.size() * sizeof(gs_scalar);
         printf("Updating stream buffer! %i, head = %i, size = %i, index triangles %i\n", vertexBuffer, ringBufferVHead, vsize,triangleIndexedCount);
         if ((ringBufferVHead + vsize) >= ringBufferVSize){ ringBufferVHead = 0; }
         glBufferSubData( GL_ARRAY_BUFFER, ringBufferVHead, vsize, &vdata[0]);
-        ringBufferVDrawOffset = ringBufferVHead;
+        ringBufferVDrawOffset = ringBufferVDrawOffsetDouble;
+        ringBufferVDrawOffsetDouble += vdata.size(); //ringBufferVHead / sizeof(gs_scalar);
         ringBufferVHead += vsize;
     }else{
       if (!vbogenerated){
