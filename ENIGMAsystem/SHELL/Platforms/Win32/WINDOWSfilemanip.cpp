@@ -189,6 +189,13 @@ int directory_create(std::string dname) {
     }
 }
 
+int directory_delete(std::string dname) {
+  BOOL result = RemoveDirectory(dname.c_str());
+  if (result) return 1;
+  else return 0;
+}
+
+
 // Maintainer: If this segment errors, it is an error of philosophy.
 // The Game Maker constants do not have a standard, but line up with
 // their Windows equivalents. Should either change, we have an issue.

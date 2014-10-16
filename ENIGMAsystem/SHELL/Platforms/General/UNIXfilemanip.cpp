@@ -60,4 +60,8 @@ int directory_create(string dname) {
   return mkdir(dname.c_str(),S_IRUSR|S_IWUSR|S_IXUSR);
 }
 
+int directory_delete(string dname) {
+  return rmdir(dname.c_str());
+}
+
 }
