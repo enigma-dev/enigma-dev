@@ -264,7 +264,7 @@ class Mesh
       glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
       glBufferData(GL_ARRAY_BUFFER, ringBufferVSize, NULL, vbotype);
 
-      ringBufferISize = sizeof(gs_scalar) * 256000; //256k indicies
+      ringBufferISize = sizeof(GLuint) * 256000; //256k indicies
       glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
       glBufferData(GL_ELEMENT_ARRAY_BUFFER, ringBufferISize, NULL, vbotype);
     }
@@ -584,7 +584,7 @@ class Mesh
         printf("Updating stream buffer! %i, head = %i, size = %i, index triangles %i\n", vertexBuffer, ringBufferVHead, vsize,triangleIndexedCount);
         if ((ringBufferVHead + vsize) >= ringBufferVSize){ ringBufferVHead = 0; }
         glBufferSubData( GL_ARRAY_BUFFER, ringBufferVHead, vsize, &vdata[0]);
-        ringBufferVDrawOffset = ringBufferVDrawOffsetDouble;
+        ringBufferVDrawOffset = ringBufferVDrawOffsetDouble / stride;
         ringBufferVDrawOffsetDouble += vdata.size(); //ringBufferVHead / sizeof(gs_scalar);
         ringBufferVHead += vsize;
     }else{
