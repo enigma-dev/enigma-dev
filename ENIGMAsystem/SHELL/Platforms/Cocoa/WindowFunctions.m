@@ -1,6 +1,7 @@
 /********************************************************************************\
  **                                                                              **
  **  Copyright (C) 2010 Alasdair Morrison <tgmg@g-java.com>                      **
+ **  Copyright (C) 2014 Seth N. Hetu                                             **
  **                                                                              **
  **  This file is a part of the ENIGMA Development Environment.                  **
  **                                                                              **
@@ -92,6 +93,11 @@ int getMouse(int i)
 	
 }
 
+void cocoa_window_set_color(int bgrColor) 
+{
+	[[delegate window] setBackgroundColor: [NSColor colorWithRed:(bgrColor&0xFF)  green:((bgrColor&0xFF00)>>8)  blue:((bgrColor&0xFF0000)>>16)  alpha:1.0]];
+}
+
 void cocoa_window_set_caption(const char* caption)
 {
 	[[delegate window] setTitle:[NSString stringWithCString:caption length:strlen(caption)]];
@@ -144,8 +150,9 @@ int cocoa_window_get_region_height() {
     return getWindowDimension(3);
 }
 
-const char* cocoa_get_working_directory() {
+//This does not appear to work right.
+/*const char* cocoa_get_working_directory() {
     NSBundle* bundle = [NSBundle mainBundle];
     return [[bundle bundlePath] UTF8String];
-}
+}*/
 

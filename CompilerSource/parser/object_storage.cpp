@@ -1,6 +1,7 @@
 /********************************************************************************\
 **                                                                              **
 **  Copyright (C) 2008-2011 Josh Ventura                                        **
+**  Copyright (C) 2014 Seth N. Hetu                                             **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -132,6 +133,14 @@ void parsed_object::copy_from(parsed_object& source, string sourcename, string d
   for (parsed_object::locit vit = source.locals.begin(); vit != source.locals.end(); vit++)
   {
     dectrip &t = dest.locals[vit->first];
+    if (!t.defined())
+      t = vit->second, cout << "Copied `" << vit->first << "' from " << sourcename << " to " << destname;
+    else if (vit->second.defined() and vit->second != t)
+      cout << "***ENIGMA: WARNING: Conflicting types `" << vit->second.type << vit->second.prefix << vit->second.suffix << "' and `" << t.type << t.prefix << t.suffix << "' to variable `" << vit->first << "' in " << destname;
+  }
+  for (parsed_object::ambit vit = source.ambiguous.begin(); vit != source.ambiguous.end(); vit++)
+  {
+    dectrip &t = dest.ambiguous[vit->first];
     if (!t.defined())
       t = vit->second, cout << "Copied `" << vit->first << "' from " << sourcename << " to " << destname;
     else if (vit->second.defined() and vit->second != t)

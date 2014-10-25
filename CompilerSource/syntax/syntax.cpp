@@ -27,6 +27,7 @@
 
 #include <map>
 #include <string>
+#include <sstream>
 #include <cstdio>
 #include <cstdlib>
 #include <vector>
@@ -52,6 +53,10 @@ extern std::map <string, char> unimplemented_function_list;
 using namespace std;
 
 extern string tostring(int);
+
+namespace {
+  std::set<std::string> blacklist;
+}
 
 namespace syncheck
 {
@@ -202,8 +207,28 @@ namespace syncheck
   #define superPos (mymacroind ? mymacrostack[0].pos : pos)
   #define ptrace() for (unsigned i = 0; i < lex.size(); i++) cout << (string)lex[i] << "\t\t" << endl
   #define lexlast (lex.size()-1)
-  int syntacheck(string code)
+  int syntacheck(string code, string& newcode)
   {
+    //Build our blacklist.
+    if (blacklist.empty()) {
+      std::stringstream keyword;
+      for (std::string::const_iterator it=setting::keyword_blacklist.begin(); it!=setting::keyword_blacklist.end(); it++) {
+        char c = *it;
+        if (c==',') {
+          if (!keyword.str().empty()) {
+            blacklist.insert(keyword.str());
+            keyword.str("");
+          }
+        } else {
+          keyword <<c;
+        }
+      }
+      if (!keyword.str().empty()) {
+        blacklist.insert(keyword.str());
+      }
+    }
+
+
     pt pos = 0;
     unsigned mymacroind = 0;
     macro_stack_t mymacrostack;
@@ -234,7 +259,15 @@ namespace syncheck
       {
         const pt spos = pos;
         while (is_letterd(code[++pos]));
-        const string name = code.substr(spos,pos-spos);
+        string name = code.substr(spos,pos-spos);
+
+        //Is this in our blacklist?
+        if (blacklist.find(name) != blacklist.end()) {
+          const string newname = name + "__________"; //There's better ways of doing this.
+          code.replace(spos, pos-spos, newname);
+          pos += newname.size() - name.size();
+          name = newname;
+        }
         
         // First, check if it's a macro.
         jdi::macro_iter_c itm = main_context->get_macros().find(name);
@@ -637,6 +670,7 @@ namespace syncheck
       }
     }
     
+    newcode = code;
     return -1;
   }
 }

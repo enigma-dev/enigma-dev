@@ -16,7 +16,6 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <string>
 // Windows Vista or later for IFileDialog
 #define NTDDI_VERSION NTDDI_VISTA
 #define _WIN32_WINNT _WIN32_WINNT_VISTA
@@ -26,6 +25,8 @@
 #include <shlobj.h> //for Shell API
 #include <richedit.h>
 #include <stdio.h>
+#include <string>
+
 using namespace std;
 #include "Widget_Systems/widgets_mandatory.h"
 #include "GameSettings.h"
@@ -409,8 +410,13 @@ void show_info(string info, int bgcolor, int left, int top, int width, int heigh
 
 int show_message(string str)
 {
-    MessageBox(enigma::hWnd, str.c_str(), window_get_caption().c_str(), MB_OK);
-    return 0;
+  //NOTE: This will not work with a fullscreen application, it is an issue with Windows
+  //this could be why GM8.1, unlike Studio, did not use native dialogs and custom 
+  //rendered its own message boxes like most game engines.
+  //In Studio this function will cause the window to be minimized and the message shown, fullscreen will not be restored.
+  //A possible alternative is fake fullscreen for Win32, but who knows if we have to do that on XLIB or anywhere else.
+  MessageBox(enigma::hWnd, str.c_str(), window_get_caption().c_str(), MB_OK);
+  return 0;
 }
 
 int show_message_ext(string msg, string but1, string but2, string but3)

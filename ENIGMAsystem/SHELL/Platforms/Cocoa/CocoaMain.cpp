@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2008 IsmAvatar <cmagicj@nni.com>
  * Copyright (C) 2010 Alasdair Morrison <tgmg@g-java.com>
+ * Copyright (C) 2014 Seth N. Hetu
  *
  * This file is part of ENIGMA.
  *
@@ -22,6 +23,7 @@
 #include <stdio.h>
 #include "CocoaMain.h"
 #include "ObjectiveC.h"
+#include <cstdlib>
 
 #include "../General/PFwindow.h"
 #include "../General/PFfilemanip.h"
@@ -29,23 +31,32 @@
 #include "Universal_System/CallbackArrays.h"
 #include "Universal_System/roomsystem.h"
 
+namespace enigma {
+  void SetResizeFptr();
+}
+
 namespace enigma_user {
   std::string working_directory = "";
 }
 
+extern "C" void copy_bundle_cwd(char* res);
+
 int main(int argc,char** argv)
 {
-  // Set the working_directory
-  char buffer[1024];
-  if (getcwd(buffer, sizeof(buffer)) != NULL)
-     fprintf(stdout, "Current working dir: %s\n", buffer);
+  // Set the working_directory (from the bundle's location; using cwd won't work right on OS-X).
+  char buffer[1024] = {0};
+  copy_bundle_cwd(&buffer[0]);
+  if (buffer[0])
+    fprintf(stdout, "Current working dir: %s\n", buffer);
   else
-     perror("getcwd() error");
+    perror("copy_bundle_cwd() error");
   enigma_user::working_directory = string( buffer );
   
 	enigma::parameters=new char* [argc];
 	for (int i=0; i<argc; i++)
 		enigma::parameters[i]=argv[i];
+
+   enigma::SetResizeFptr();
 
 	return mainO(argc, argv);
 }

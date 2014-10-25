@@ -1,6 +1,7 @@
 /********************************************************************************\
  **                                                                              **
  **  Copyright (C) 2010 Alasdair Morrison <tgmg@g-java.com>                      **
+ **  Copyright (C) 2014 Seth N. Hetu                                             **
  **                                                                              **
  **  This file is a part of the ENIGMA Development Environment.                  **
  **                                                                              **
@@ -27,8 +28,29 @@
 
 #import <Cocoa/Cocoa.h>
 
+//Retrieve the working directory of the bundle (the .app). 
+//Using cwd won't work, since it'll return / if you double-click on the app.
+void copy_bundle_cwd(char* res)
+{
+  //Get the application bundle. OS-X will try to make a bundle if it doesn't exist, so this call should rarely fail.
+  CFBundleRef mainBundle = CFBundleGetMainBundle();
+  if (!mainBundle) { return; }
+
+  CFURLRef resourcesURL = CFBundleCopyBundleURL(mainBundle);
+  CFStringRef str = CFURLCopyFileSystemPath( resourcesURL, kCFURLPOSIXPathStyle );
+  CFRelease(resourcesURL);
+  char path[PATH_MAX];
+	
+  bool ok = CFStringGetCString( str, path, FILENAME_MAX, kCFStringEncodingUTF8 );
+  CFRelease(str);
+
+  if (ok) {
+    strcpy(res, path);
+  }
+}
 
 int mainO(int argc, char *argv[])
 {
     return NSApplicationMain(argc,  (const char **) argv);
 }
+
