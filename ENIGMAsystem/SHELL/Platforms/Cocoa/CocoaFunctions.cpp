@@ -1,6 +1,7 @@
 /********************************************************************************\
  **                                                                              **
  **  Copyright (C) 2010 Alasdair Morrison <tgmg@g-java.com>                      **
+ **  Copyright (C) 2014 Seth N. Hetu                                             **
  **                                                                              **
  **  This file is a part of the ENIGMA Development Environment.                  **
  **                                                                              **
@@ -30,6 +31,8 @@
 #include <stdio.h>
 #include "Universal_System/CallbackArrays.h"
 #include "Universal_System/roomsystem.h"
+#include <cstring>
+
 
 namespace enigma
 {
@@ -87,10 +90,8 @@ namespace enigma {
     }
 }
 
-  extern string working_directory;
   int init() {
   timeAtStartup=mach_absolute_time();
-  working_directory=cocoa_get_working_directory();
   enigma::initialize_everything();
   enigma::initkeymap();
     

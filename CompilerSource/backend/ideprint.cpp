@@ -1,4 +1,5 @@
 /** Copyright (C) 2008 Josh Ventura
+*** Copyright (C) 2014 Seth N. Hetu
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -38,14 +39,16 @@ ideprint &ideprint::operator<< (unsigned x) {
 ideprint &ideprint::operator<< (unsigned long x) {
   f(tostring(x).c_str()); return *this;
 }
-#ifdef USE_LONG_LONG
-  ideprint &ideprint::operator<< (long long x) {
-    f(tostring(x).c_str()); return *this;
-  }
-  ideprint &ideprint::operator<< (unsigned long long x) {
-    f(tostring(x).c_str()); return *this;
-  }
+
+#if __cplusplus >= 201100
+ideprint &ideprint::operator<< (long long x) {
+  f(tostring(x).c_str()); return *this;
+}
+ideprint &ideprint::operator<< (unsigned long long x) {
+  f(tostring(x).c_str()); return *this;
+}
 #endif
+
 ideprint &ideprint::operator<< (void *x) {
   f(tostringv(x).c_str()); return *this;
 }

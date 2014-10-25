@@ -2,6 +2,7 @@
  * Copyright (C) 2008 IsmAvatar <ismavatar@gmail.com>
  * Copyright (C) 2010 Alasdair Morrison <ali@alasdairmorrison.com>
  * Copyright (C) 2013 Josh Ventura <JoshV10@gmail.com>
+ * Copyright (C) 2014 Seth N. Hetu
  *
  * This file is part of ENIGMA.
  *
@@ -24,6 +25,7 @@
 #include <unistd.h> //usleep
 #include <time.h> //clock
 #include <string> //Return strings without needing a GC
+#include <map>
 
 #include "ObjectiveC.h"
 
@@ -50,6 +52,7 @@ extern char cocoa_last_keybdstatus[256];
 extern "C" int cocoa_get_screen_size(int getWidth);
 extern "C" void cocoa_window_set_fullscreen(bool full);
 extern "C" int cocoa_window_get_fullscreen();
+extern "C" void cocoa_window_set_color(int bgrColor);
 
 namespace enigma {
     extern char keybdstatus[256];
@@ -57,6 +60,19 @@ namespace enigma {
     extern char last_mousestatus[3];
     extern char last_keybdstatus[256];
     extern char keybdstatus[256];
+
+    void (*WindowResizedCallback)();
+
+    //Replacing usermap array with keybdmap map, to align code with Windows implementation.
+    std::map<int,int> keybdmap;
+    extern int windowColor;
+}
+
+//Callback from ObjC
+extern "C" void enigma_WindowResized() {
+  if (enigma::WindowResizedCallback) {
+    enigma::WindowResizedCallback();
+  }
 }
 
 namespace enigma_user {
@@ -75,9 +91,22 @@ namespace enigma_user {
 	return 1; // TODO
   }
 
-void window_set_freezeonlosefocus(bool freeze)
-{
-}
+  void window_set_color(int color)
+  {
+    enigma::windowColor = color;
+
+    //Inform Cocoa
+    cocoa_window_set_color(color);
+  }
+
+  int window_get_color()
+  {
+    return enigma::windowColor;
+  }
+
+  void window_set_freezeonlosefocus(bool freeze)
+  {
+  }
 
 
   int window_set_caption(string caption)
@@ -176,12 +205,6 @@ int window_set_cursor(int c)
 	XDefineCursor(disp, win, (c == -1) ? NoCursor : XCreateFontCursor(disp,curs[-c]));*/
 	return 0;
 }
-
-void window_set_color(int color) {}
-
-int window_view_mouse_get_x(int wid) { return 0; } // TODO
-int window_view_mouse_get_y(int wid) { return 0; } // TODO
-void window_view_mouse_set(int wid, int x, int y) {}
 
 int window_get_region_width() { return cocoa_window_get_region_width();}
 int window_get_region_height() { return cocoa_window_get_region_height();}
@@ -421,6 +444,32 @@ namespace enigma_user {
     while(!keyboard_check(1/*vk_anykey*/)) {
         io_handle();
     }
+  }
+
+  void keyboard_clear(const int key) {
+    enigma::keybdstatus[key] = enigma::last_keybdstatus[key] = 0;
+  }
+
+  void keyboard_set_map(int key1, int key2) {
+    std::map< int, int >::iterator it = enigma::keybdmap.find( key1 );
+    if ( enigma::keybdmap.end() != it ) {
+      it->second = key2;
+    } else {
+      enigma::keybdmap.insert( map< int, int >::value_type(key1, key2) );
+    }
+  }
+
+  int keyboard_get_map(int key) {
+    std::map< int, int >::iterator it = enigma::keybdmap.find( key );
+    if ( enigma::keybdmap.end() != it ) {
+      return it->second;
+    } else {
+      return key;
+    }
+  }
+
+  void keyboard_unset_map() {
+    enigma::keybdmap.clear();
   }
 
   void window_set_region_scale(double scale, bool adaptwindow) {}
