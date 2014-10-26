@@ -91,6 +91,7 @@ namespace enigma
 {
   std::vector<enigma::Shader*> shaders(0);
   std::vector<enigma::ShaderProgram*> shaderprograms(0);
+  std::vector<enigma::AttributeObject*> attributeobjects(0);
 
   extern unsigned default_shader;
   extern unsigned main_shader;
@@ -933,9 +934,14 @@ void glsl_attribute_enable(int location, bool enable){
 
 void glsl_attribute_set(int location, int size, int type, bool normalize, int stride, int offset){
   get_attribute(it,location);
-  if (it->second.enabled == true){
+  if (it->second.enabled == true && (it->second.datatype != type || it->second.size != size || it->second.normalize != normalize || it->second.stride != stride || it->second.offset != offset)){
       //printf("Setting glsl attribute loc %i, size %i, stride %i, offset %i\n", location, size, stride, offset);
       glVertexAttribPointer(location, size, type, normalize, stride, ( ( const GLvoid * ) ( sizeof( gs_scalar ) * ( offset ) ) ));
+      it->second.datatype = type;
+      it->second.size = size;
+      it->second.normalize = normalize;
+      it->second.stride = stride;
+      it->second.offset = offset;
   }
 }
 

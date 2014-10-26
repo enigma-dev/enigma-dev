@@ -42,6 +42,8 @@ namespace enigma
   unsigned default_shader;
   unsigned main_shader;
   unsigned bound_shader;
+  unsigned bound_vbo;
+  unsigned bound_vboi;
   unsigned char currentcolor[4] = {0,0,0,255};
   int currentblendmode[2] = {0,0};
   int currentblendtype = 0;

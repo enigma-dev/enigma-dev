@@ -41,6 +41,9 @@ using namespace std;
 #include "Universal_System/fileio.h"
 #include "Universal_System/estring.h"
 
+#define bind_array_buffer(vbo) if (enigma::bound_vbo != vbo) glBindBuffer( GL_ARRAY_BUFFER, enigma::bound_vbo = vbo );
+#define bind_element_buffer(vboi) if (enigma::bound_vboi != vboi) glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, enigma::bound_vboi = vboi );
+
 #include <vector>
 using std::vector;
 
@@ -48,7 +51,10 @@ extern GLenum ptypes_by_id[16];
 namespace enigma {
   extern unsigned char currentcolor[4];
   extern unsigned bound_shader;
+  extern unsigned bound_vbo;
+  extern unsigned bound_vboi;
   extern vector<enigma::ShaderProgram*> shaderprograms;
+  extern vector<enigma::AttributeObject*> attributeobjects;
 
   //split a string and convert to float
   vector<float> float_split(const string& str, const char& ch) {
@@ -261,11 +267,11 @@ class Mesh
       //Allocate space for max stride (9) * sizeof(float) (4) * 128000 vertices. This is going to be a ring buffer.
       ringBufferVSize = 9 * sizeof(gs_scalar) * 128000;
       ringBufferVHead = 0;
-      glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+      bind_array_buffer(vertexBuffer);
       glBufferData(GL_ARRAY_BUFFER, ringBufferVSize, NULL, vbotype);
 
       ringBufferISize = sizeof(GLuint) * 256000; //256k indicies
-      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
+      bind_element_buffer(indexBuffer);
       glBufferData(GL_ELEMENT_ARRAY_BUFFER, ringBufferISize, NULL, vbotype);
     }
     ringBufferVDrawOffset = 0;
@@ -495,6 +501,47 @@ class Mesh
 
   void BufferGenerate()
   {
+    //This deals with VAO's. When a new format is used, then it creates it, otherwise it binds an old one
+    //THIS IS RUDAMENTARY AND BAD - THIS NEEDS HASH MAPS
+    GLsizei stride = GetStride();
+
+    #define OFFSET( P )  ( ( const GLvoid * ) ( sizeof( gs_scalar ) * ( P         ) ) )
+    GLsizei STRIDE = stride * sizeof( gs_scalar );
+    if (STRIDE != oglmgr->last_stride) { ringBufferVHead = 0, ringBufferVDrawOffset = 0, ringBufferVDrawOffsetDouble = 0; }
+    /*unsigned offset = 0;
+    bool genVAO = true;
+    for (unsigned int i=0; i<enigma::attributeobjects.size(); ++i){
+      //Check vertex attribute
+      std::map<GLint,enigma::Attribute>::iterator it = enigma::attributeobjects->attributes.find(enigma::shaderprograms[enigma::bound_shader]->att_vertex);
+      if (it == enigma::shaderprograms[enigma::bound_shader]->attributes.end() || (it->second.datatype != GL_FLOAT || it->second.size != vertexStride || it->second.normalize != false || it->second.stride != STRIDE || it->second.offset != offset)){
+        break;
+      }
+      offset += vertexStride;
+
+      it = enigma::attributeobjects->attributes.find(enigma::shaderprograms[enigma::bound_shader]->att_normal);
+      if ((it == enigma::shaderprograms[enigma::bound_shader]->attributes.end() && useNormals == false) || (it->second.datatype != GL_FLOAT || it->second.size != 3 || it->second.normalize != false || it->second.stride != STRIDE || it->second.offset != offset)){
+        break;
+      }
+      offset += 3;
+
+      it = enigma::attributeobjects->attributes.find(enigma::shaderprograms[enigma::bound_shader]->att_texture);
+      if ((it == enigma::shaderprograms[enigma::bound_shader]->attributes.end() && useTextures == false) || (it->second.datatype != GL_FLOAT || it->second.size != 2 || it->second.normalize != false || it->second.stride != STRIDE || it->second.offset != offset)){
+        break;
+      }
+      offset += 2;
+
+      it = enigma::attributeobjects->attributes.find(enigma::shaderprograms[enigma::bound_shader]->att_color);
+      if ((it == enigma::shaderprograms[enigma::bound_shader]->attributes.end() && useColors = false) || (it->second.datatype != GL_UNSIGNED_BYTE || it->second.size != 4 || it->second.normalize != true || it->second.stride != STRIDE || it->second.offset != offset)){
+        break;
+      }
+      genVAO = false;
+    }
+    if (genVAO == true){
+      enigma::attributeobjects.push_back(new enigma::AttributeObject());
+      enigma::attributeobjects.back()->attributes.push_back();
+    }*/
+    //VAO stuff ends here
+
     vector<VertexElement> vdata;
     vector<GLuint> idata;
 
@@ -528,13 +575,13 @@ class Mesh
     //printf("Updating index buffer = %i, and vertex buffer = %i\n", indexBuffer,vertexBuffer);
 
     if (idata.size() > 0){
-      glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indexBuffer );
+      bind_element_buffer( indexBuffer );
       vboindexed = true;
       indexedoffset = vdata.size();
 
       if (vbotype == GL_STREAM_DRAW){
         unsigned int isize = idata.size() * sizeof(GLuint);
-        printf("Updating stream index buffer! %i, head = %i, size = %i, index triangles %i\n", indexBuffer, ringBufferIHead, isize,triangleIndexedCount);
+        //printf("Updating stream index buffer! %i, head = %i, size = %i, index triangles %i\n", indexBuffer, ringBufferIHead, isize,triangleIndexedCount);
         if ((ringBufferIHead + isize) >= ringBufferISize){ ringBufferIHead = 0; }
         glBufferSubData( GL_ELEMENT_ARRAY_BUFFER, ringBufferIHead, isize, &idata[0]);
         ringBufferIDrawOffset = ringBufferIHead / sizeof(GLuint);
@@ -554,7 +601,7 @@ class Mesh
         ibufferSize = idata.size() * sizeof(GLuint);
       }
       // Unbind the buffer we do not need anymore
-      glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
+      //glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
       // Clean up temporary interleaved data
       //idata.clear();
     } else {
@@ -574,18 +621,15 @@ class Mesh
     }
 
     //glBindVertexArray(vertexArrayObject);
-    glBindBuffer( GL_ARRAY_BUFFER, vertexBuffer );
-
-    // Bind all necessary attributes
-    GLsizei stride = GetStride();
+    bind_array_buffer( vertexBuffer );
 
     if (vbotype == GL_STREAM_DRAW){
         unsigned int vsize = vdata.size() * sizeof(gs_scalar);
-        printf("Updating stream buffer! %i, head = %i, size = %i, index triangles %i\n", vertexBuffer, ringBufferVHead, vsize,triangleIndexedCount);
-        if ((ringBufferVHead + vsize) >= ringBufferVSize){ ringBufferVHead = 0; }
+        //printf("Updating stream buffer! %i, head = %i, size = %i, index triangles %i\n", vertexBuffer, ringBufferVHead, vsize,triangleIndexedCount);
+        if ((ringBufferVHead + vsize) >= ringBufferVSize){ ringBufferVHead = 0, ringBufferVDrawOffset = 0, ringBufferVDrawOffsetDouble = 0; }
         glBufferSubData( GL_ARRAY_BUFFER, ringBufferVHead, vsize, &vdata[0]);
-        ringBufferVDrawOffset = ringBufferVDrawOffsetDouble / stride;
-        ringBufferVDrawOffsetDouble += vdata.size(); //ringBufferVHead / sizeof(gs_scalar);
+        ringBufferVDrawOffset = ringBufferVDrawOffsetDouble;
+        ringBufferVDrawOffsetDouble += vdata.size() / stride; //ringBufferVHead / sizeof(gs_scalar);
         ringBufferVHead += vsize;
     }else{
       if (!vbogenerated){
@@ -642,7 +686,7 @@ class Mesh
 
     //glBindVertexArray(0);
     // Unbind the buffer we do not need anymore
-    glBindBuffer( GL_ARRAY_BUFFER, 0 );
+    //glBindBuffer( GL_ARRAY_BUFFER, 0 );
     // Clean up temporary interleaved data
     //vdata.clear();
 
@@ -684,10 +728,10 @@ class Mesh
     // Enable vertex array's for fast vertex processing
     //glBindVertexArray(vertexArrayObject);
     //printf("Vertex array object bound = %i\n", vertexArrayObject);
-    glBindBuffer( GL_ARRAY_BUFFER, vertexBuffer );
+    bind_array_buffer( vertexBuffer );
 
     if (vboindexed) {
-      glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, indexBuffer );
+      bind_element_buffer( indexBuffer );
     }
 
     // Bind all necessary attributes
@@ -720,7 +764,7 @@ class Mesh
 
     if (useColors){
       enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_color, true);
-      printf("Color offset = %i\n", offset);
+      //printf("Color offset = %i\n", offset);
       enigma_user::glsl_attribute_set(enigma::shaderprograms[enigma::bound_shader]->att_color, 4, GL_UNSIGNED_BYTE, true, STRIDE, offset);
     }else{
       enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_color, false);
@@ -761,7 +805,7 @@ class Mesh
       #endif
 
       if (vbotype == GL_STREAM_DRAW){
-        printf("Drawing indexed stream buffer! %i, indexedoffset = %i, drawoffset = %i, triangelIndexecCount = %i\n", vertexBuffer, offset, ringBufferVDrawOffset, (vertex_count==-1?triangleIndexedCount:vertex_count));
+        //printf("Drawing indexed stream buffer! %i, indexedoffset = %i, drawoffset = %i, triangelIndexecCount = %i\n", vertexBuffer, offset, ringBufferVDrawOffset, (vertex_count==-1?triangleIndexedCount:vertex_count));
       }
       //glDrawElements(GL_TRIANGLES, (vertex_count==-1?triangleIndexedCount:vertex_count), GL_UNSIGNED_INT, OFFSETE(offset));
       glDrawElementsBaseVertex (GL_TRIANGLES, (vertex_count==-1?triangleIndexedCount:vertex_count), GL_UNSIGNED_INT, OFFSETE(offset), ringBufferVDrawOffset);
@@ -795,7 +839,7 @@ class Mesh
       vbd.triangles+=(vertex_count==-1?triangleCount:vertex_count);
       #endif
       if (vbotype == GL_STREAM_DRAW){
-        printf("Drawing unindexed stream buffer! %i, indexedoffset = %i, drawoffset = %i\n", vertexBuffer, indexedoffset, ringBufferVDrawOffset);
+        //printf("Drawing unindexed stream buffer! %i, indexedoffset = %i, drawoffset = %i\n", vertexBuffer, indexedoffset, ringBufferVDrawOffset);
       }
       glDrawArrays(GL_TRIANGLES, (vertex_start==0?offset:vertex_start), (vertex_count==-1?triangleCount:vertex_count));
       offset += triangleCount;
