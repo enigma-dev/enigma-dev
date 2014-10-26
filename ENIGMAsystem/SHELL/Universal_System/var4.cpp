@@ -517,6 +517,7 @@ double    var::operator+ () const { return +(double)(**this); }
 
 
 #include <stdio.h>
+#include <sstream>
 #include "libEGMstd.h"
 string toString(const variant &a)
 {
@@ -533,6 +534,68 @@ string toString(const variant &a)
   return a.sval;
 }
 string toString(const var &a) {
-  return toString(*a);
+  //Arrays (2D and linear) are printed differently.
+  if (a.array_height() > 1) {
+    std::stringstream res;
+    res <<"<";
+    for (int i=0; i<a.array_height(); i++) {
+      for (int j=0; j<a.array_len(i); j++) {
+        res <<toString(const_cast<var&>(a)[i][j]);
+        if (j+1<a.array_len(i)) { res <<" ; "; }
+      }
+      if (i+1<a.array_height()) { res <<" ; "; }
+    }
+    res <<">";
+    return res.str();
+  } else if (a.array_len() > 1) {
+    std::stringstream res;
+    res <<"[";
+    for (int i=0; i<a.array_len(); i++) {
+      res <<toString(const_cast<var&>(a)[i]);
+      if (i+1<a.array_len()) { res <<" , "; }
+    }
+    res <<"]";
+    return res.str();
+  } else {
+    return toString(*a);
+  }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
