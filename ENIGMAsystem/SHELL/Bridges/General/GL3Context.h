@@ -102,7 +102,6 @@ void BeginShapesBatching(int texId) {
 }
 
 void EndShapesBatching() {
-	last_depth -= 1;
 	if (hasdrawn || shapes_d3d_model == -1) { return; }
 	hasdrawn = true;
 	enigma_user::d3d_model_draw(shapes_d3d_model, shapes_d3d_texture);
@@ -110,6 +109,7 @@ void EndShapesBatching() {
 
 	shapes_d3d_texture = -1;
 	last_stride = -1;
+  last_depth -= 1;
 }
 
 void BeginScene() {
