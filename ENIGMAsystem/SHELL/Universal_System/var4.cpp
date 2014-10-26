@@ -540,8 +540,8 @@ string toString(const var &a) {
     res <<"<";
     for (int i=0; i<a.array_height(); i++) {
       for (int j=0; j<a.array_len(i); j++) {
-        res <<toString(const_cast<var&>(a)[i][j]);
-        if (j+1<a.array_len(i)) { res <<" ; "; }
+        res <<toString(const_cast<var&>(a)(i,j));
+        if (j+1<a.array_len(i)) { res <<" , "; }
       }
       if (i+1<a.array_height()) { res <<" ; "; }
     }
@@ -560,42 +560,5 @@ string toString(const var &a) {
     return toString(*a);
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
