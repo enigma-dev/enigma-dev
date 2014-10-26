@@ -65,7 +65,7 @@ variant& var::operator() (int ind)
 }
 variant& var::operator() (int ind1,int ind2)
 {
-  return as_lua(values)[size_t(ind2)][size_t(ind1)];
+  return as_lua(values)[size_t(ind1)][size_t(ind2)];
 }
 
 const variant& var::operator*  () const
@@ -86,7 +86,7 @@ const variant& var::operator() (int ind) const
 }
 const variant& var::operator() (int ind1,int ind2) const
 {
-  return as_lua(values)[size_t(ind2)][size_t(ind1)];
+  return as_lua(values)[size_t(ind1)][size_t(ind2)];
 }
 
 int var::array_len() const
