@@ -68,6 +68,20 @@ namespace enigma
         GLint arraySize;
         int size;
         bool enabled;
+        bool normalize;
+        int stride;
+        int offset;
+        int datatype; //Difference is that "type" is the type inside the shader (like float for color), but "datatype" is the type for data (unsigned int for color)
+    };
+
+    //This holds attribute parameters and works as a OpenGL VAO
+    struct AttributeObject{
+        GLuint vertexArrayObject;
+
+        AttributeObject(){ glGenVertexArrays(1, &vertexArrayObject); }
+        ~AttributeObject(){ glDeleteBuffers(1, &vertexArrayObject); }
+        map<string,GLint> attribute_names;
+        map<GLint,Attribute> attributes;
     };
 
     struct ShaderProgram{
@@ -77,7 +91,7 @@ namespace enigma
         map<GLint,Uniform> uniforms;
         map<GLint,Attribute> attributes;
         string log;
-		string name;
+        string name;
         GLuint shaderprogram;
         int uniform_count;
         int attribute_count;
@@ -93,10 +107,10 @@ namespace enigma
         GLint uni_textureEnable;
         GLint uni_colorEnable;
         GLint uni_lightEnable;
-		GLint uni_alphaTestEnable;
+        GLint uni_alphaTestEnable;
 
         GLint uni_color;
-		GLint uni_alphaTest;
+        GLint uni_alphaTest;
 
         //3D lights
         GLint uni_ambient_color;
@@ -123,7 +137,7 @@ namespace enigma
         ShaderProgram()
         {
             shaderprogram = glCreateProgram();
-			name = "";
+            name = "";
         }
 
         ~ShaderProgram()
