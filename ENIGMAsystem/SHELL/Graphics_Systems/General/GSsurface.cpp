@@ -31,6 +31,8 @@ using namespace std;
 #define __GETG(x) ((x & 0x00FF00) >> 8)
 #define __GETB(x) ((x & 0xFF0000) >> 16)
 
+#define M_PI		3.14159265358979323846
+
 namespace enigma_user {
 extern int room_width, room_height/*, sprite_idmax*/;
 }
@@ -46,7 +48,7 @@ void draw_surface(int id, gs_scalar x, gs_scalar y, int color, gs_scalar alpha)
 {
 	int w=surface_get_width(id);
 	int h=surface_get_height(id);
-  
+
 	draw_primitive_begin_texture(pr_trianglestrip, surface_get_texture(id));
 	draw_vertex_texture_color(x,y,0,0,color,alpha);
 	draw_vertex_texture_color(x+w,y,1,0,color,alpha);
@@ -96,7 +98,7 @@ void draw_surface_stretched_ext(int id, gs_scalar x, gs_scalar y, gs_scalar w, g
 void draw_surface_part(int id, gs_scalar left, gs_scalar top, gs_scalar w, gs_scalar h, gs_scalar x, gs_scalar y, int color, gs_scalar alpha)
 {
 	const gs_scalar tbw=surface_get_width(id),tbh=surface_get_height(id);
-	
+
 	draw_primitive_begin_texture(pr_trianglestrip, surface_get_texture(id));
 	draw_vertex_texture_color(x,y,left/tbw,top/tbh,color,alpha);
 	draw_vertex_texture_color(x+w,y,(left+w)/tbw,top/tbh,color,alpha);
@@ -129,10 +131,10 @@ void draw_surface_general(int id, gs_scalar left, gs_scalar top, gs_scalar width
     draw_primitive_begin_texture(pr_trianglestrip, surface_get_texture(id));
 	draw_vertex_texture_color(ulcx,ulcy,left/tbw,top/tbh,c1,alpha);
 	draw_vertex_texture_color((ulcx + w*cos(rot)), (ulcy - w*sin(rot)), (left+width)/tbw,top/tbh, c2, alpha);
-		
+
       ulcx += h * cos(3*M_PI/2 + rot);
       ulcy -= h * sin(3*M_PI/2 + rot);
-	  
+
 	draw_vertex_texture_color((ulcx + w*cos(rot)), (ulcy - w*sin(rot)), (left+width)/tbw,(top+height)/tbh, c4, alpha);
 	draw_vertex_texture_color(ulcx, ulcy, left/tbw, (top+height)/tbh, c3, alpha);
     draw_primitive_end();
@@ -146,7 +148,7 @@ void draw_surface_tiled(int id, gs_scalar x, gs_scalar y, int color, gs_scalar a
 	const int hortil= int (ceil(room_width/(surface_get_width(id)))),
 			  vertil= int (ceil(room_height/(surface_get_height(id))));
 
-    
+
 	for (int i=0; i<hortil; i++)
 	{
 		for (int c=0; c<vertil; c++)
@@ -168,11 +170,11 @@ void draw_surface_tiled_ext(int id, gs_scalar x, gs_scalar y, gs_scalar xscale, 
         vertil= int (ceil(room_height/(surface_get_height(id))));
     x=w-fmod(x,w);
     y=h-fmod(y,h);
- 
+
     for (int i=0; i<hortil; i++)
     {
       for (int c=0; c<vertil; c++)
-      {		  
+      {
 		draw_primitive_begin_texture(pr_trianglestrip, surface_get_texture(id));
 		draw_vertex_texture_color(i*w-x,c*h-y,0,0,color,alpha);
 		draw_vertex_texture_color((i+1)*w-x,c*h-y,1,0,color,alpha);
@@ -210,7 +212,7 @@ void draw_surface_tiled_area(int id, gs_scalar x, gs_scalar y, gs_scalar x1, gs_
 
         if(y2 <= j+sh) height = ((sh)-(j+sh-y2)+1)-top;
         else height = sh-top;
-		  
+
 		draw_primitive_begin_texture(pr_trianglestrip, surface_get_texture(id));
 		draw_vertex_texture_color(X,Y,left/sw,top/sh,color,alpha);
 		draw_vertex_texture_color(X+width,Y,(left+width)/sw,top/sh,color,alpha);
@@ -249,7 +251,7 @@ void draw_surface_tiled_area_ext(int id, gs_scalar x, gs_scalar y, gs_scalar x1,
 
         if(y2 <= j+sh) height = ((sh)-(j+sh-y2)+1)-top;
         else height = sh-top;
-		  
+
 		draw_primitive_begin_texture(pr_trianglestrip, surface_get_texture(id));
 		draw_vertex_texture_color(X,Y,left/sw,top/sh,color,alpha);
 		draw_vertex_texture_color(X+width,Y,(left+width)/sw,top/sh,color,alpha);

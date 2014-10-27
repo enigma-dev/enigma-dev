@@ -45,7 +45,7 @@
         sprintf(str, "Program[%s = %i]", name.c_str(), enigma::bound_shader);\
     }\
     if (location < 0) { printf("%s - Uniform location < 0 given (%i)!\n", str, location); return; }\
-    std::map<GLint,enigma::Uniform>::iterator uniter = enigma::shaderprograms[enigma::bound_shader]->uniforms.find(location);\
+    std::unordered_map<GLint,enigma::Uniform>::iterator uniter = enigma::shaderprograms[enigma::bound_shader]->uniforms.find(location);\
     if (uniter == enigma::shaderprograms[enigma::bound_shader]->uniforms.end()){\
         printf("%s - Uniform at location %i not found!\n", str, location);\
         return;\
@@ -62,7 +62,7 @@
         sprintf(str, "Program[%s = %i]", name.c_str(), enigma::bound_shader);\
     }\
     if (location < 0) { printf("%s - Attribute location < 0 given (%i)!\n", str, location); return; }\
-    std::map<GLint,enigma::Attribute>::iterator atiter = enigma::shaderprograms[enigma::bound_shader]->attributes.find(location);\
+    std::unordered_map<GLint,enigma::Attribute>::iterator atiter = enigma::shaderprograms[enigma::bound_shader]->attributes.find(location);\
     if (atiter == enigma::shaderprograms[enigma::bound_shader]->attributes.end()){\
         printf("%s - Attribute at location %i not found!\n", str, location);\
         return;\
@@ -70,14 +70,14 @@
 #else
     #define get_uniform(uniter,location,usize)\
     if (location < 0) return; \
-    std::map<GLint,enigma::Uniform>::iterator uniter = enigma::shaderprograms[enigma::bound_shader]->uniforms.find(location);\
+    std::unordered_map<GLint,enigma::Uniform>::iterator uniter = enigma::shaderprograms[enigma::bound_shader]->uniforms.find(location);\
     if (uniter == enigma::shaderprograms[enigma::bound_shader]->uniforms.end()){\
         return;\
     }
 
     #define get_attribute(atiter,location)\
     if (location < 0) return; \
-    std::map<GLint,enigma::Attribute>::iterator atiter = enigma::shaderprograms[enigma::bound_shader]->attributes.find(location);\
+    std::unordered_map<GLint,enigma::Attribute>::iterator atiter = enigma::shaderprograms[enigma::bound_shader]->attributes.find(location);\
     if (atiter == enigma::shaderprograms[enigma::bound_shader]->attributes.end()){\
         return;\
     }
@@ -647,7 +647,7 @@ void glsl_program_set_name(int id, string name){
 
 int glsl_get_uniform_location(int program, string name) {
 	//int uni = glGetUniformLocation(enigma::shaderprograms[program]->shaderprogram, name.c_str());
-	std::map<string,GLint>::iterator it = enigma::shaderprograms[program]->uniform_names.find(name);
+	std::unordered_map<string,GLint>::iterator it = enigma::shaderprograms[program]->uniform_names.find(name);
   if (it == enigma::shaderprograms[program]->uniform_names.end()){
     if (enigma::shaderprograms[program]->name == ""){
       printf("Program[%i] - Uniform %s not found!\n", program, name.c_str());
@@ -906,8 +906,7 @@ void glsl_uniform_matrix4fv(int location, int size, const float *matrix){
 
 //Attributes
 int glsl_get_attribute_location(int program, string name) {
-	//int uni = glGetAttribLocation(enigma::shaderprograms[program]->shaderprogram, name.c_str());
-  std::map<string,GLint>::iterator it = enigma::shaderprograms[program]->attribute_names.find(name);
+  std::unordered_map<string,GLint>::iterator it = enigma::shaderprograms[program]->attribute_names.find(name);
   if (it == enigma::shaderprograms[program]->attribute_names.end()){
     if (enigma::shaderprograms[program]->name == ""){
       printf("Program[%i] - Attribute %s not found!\n", program, name.c_str());
