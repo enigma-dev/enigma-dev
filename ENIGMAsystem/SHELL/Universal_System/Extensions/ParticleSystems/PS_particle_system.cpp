@@ -37,6 +37,8 @@
 #include <algorithm>
 #include <floatcomp.h>
 
+#define M_PI		3.14159265358979323846
+
 inline int bounds(int value, int low, int high)
 {
   if (value < low) return low;
@@ -58,7 +60,7 @@ namespace enigma
     int number;
     particle_type* pt;
   };
-  
+
   double particle_system::get_wiggle_result(double wiggle_offset) {
     return get_wiggle_result(wiggle_offset, wiggle);
   }
@@ -69,7 +71,7 @@ namespace enigma
     if (result_wiggle < 0.5) return -1.0 + 4*result_wiggle;
     else return 3.0 - 4.0*result_wiggle;
   }
-  
+
   void particle_system::initialize()
   {
     wiggle = 0;
@@ -90,11 +92,11 @@ namespace enigma
     changer_max_id = 0;
     hidden = false;
   }
-  
+
   static inline bool is_dead_from_old_age(particle_instance& pi) {
     return pi.life_current <= 0;
   }
-  
+
   void particle_system::update_particlesystem()
   {
     // Increase wiggle.
@@ -380,7 +382,7 @@ namespace enigma
         {
           // If the particle is not inside the attractor range of influence,
           // or is at the attractor's exact position,
-          // skip to next attractor. 
+          // skip to next attractor.
           const double dx = it->x - p_a->x;
           const double dy = it->y - p_a->y;
           const double relative_distance = sqrt(dx*dx + dy*dy)/std::max(1.0, p_a->dist_effect);
