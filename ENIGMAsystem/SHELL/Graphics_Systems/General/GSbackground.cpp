@@ -25,6 +25,8 @@
 #include "Universal_System/backgroundstruct.h"
 #include "Universal_System/spritestruct.h"
 
+#define M_PI		3.14159265358979323846
+
 #ifdef DEBUG_MODE
   #include <string>
   #include "libEGMstd.h"

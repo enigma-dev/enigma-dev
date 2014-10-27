@@ -18,12 +18,13 @@
 #ifndef _GLSLSHADER__H
 #define _GLSLSHADER__H
 
+//#include <functional> //For std::hash
 #include <vector>
 #include <string>
-#include <map>
+#include <unordered_map>
 using std::string;
 using std::vector;
-using std::map;
+using std::unordered_map;
 
 #include "../General/OpenGLHeaders.h"
 
@@ -86,11 +87,10 @@ namespace enigma
     };*/
 
     struct ShaderProgram{
-        //These should be unordered maps, but they are only Cx11
-        map<string,GLint> uniform_names;
-        map<string,GLint> attribute_names;
-        map<GLint,Uniform> uniforms;
-        map<GLint,Attribute> attributes;
+        unordered_map<string,GLint> uniform_names;
+        unordered_map<string,GLint> attribute_names;
+        unordered_map<GLint,Uniform> uniforms;
+        unordered_map<GLint,Attribute> attributes;
         string log;
         string name;
         GLuint shaderprogram;
@@ -147,6 +147,24 @@ namespace enigma
         }
     };
 }
+
+//Specialize std::hash for attribute hashing
+/*namespace std
+{
+    template<>
+    struct hash<Attribute>
+    {
+        typedef Attribute argument_type;
+        typedef std::size_t result_type;
+
+        result_type operator()(argument_type const& s) const
+        {
+            result_type const h1 ( std::hash<std::string>()(s.name) );
+            result_type const h2 ( std::hash<std::string>()(s.location) );
+            return h1 ^ (h2 << 1);
+        }
+    };
+}*/
 
 //extern vector<enigma::Shader*> shaders;
 //extern vector<enigma::ShaderProgram*> shaderprograms;

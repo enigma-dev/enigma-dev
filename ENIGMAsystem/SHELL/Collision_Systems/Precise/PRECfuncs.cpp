@@ -30,6 +30,8 @@
 #include <cmath>
 #include "Universal_System/instance.h"
 
+#define M_PI		3.14159265358979323846
+
 static inline void get_border(int *leftv, int *rightv, int *topv, int *bottomv, int left, int top, int right, int bottom, cs_scalar x, cs_scalar y, double xscale, double yscale, double angle)
 {
     if (angle == 0)

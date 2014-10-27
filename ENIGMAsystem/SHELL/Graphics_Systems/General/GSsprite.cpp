@@ -34,6 +34,7 @@ using std::string;
 #define __GETG(x) ((x & 0x00FF00) >> 8)
 #define __GETB(x) ((x & 0xFF0000) >> 16)
 
+#define M_PI		3.14159265358979323846
 
 #ifdef DEBUG_MODE
   #include "libEGMstd.h"
@@ -274,7 +275,7 @@ void draw_sprite_padded(int spr, int subimg, gs_scalar left, gs_scalar top, gs_s
 	gs_scalar w = x2-x1, h = y2-y1;
 	if (w<left+right) x2 = x1+left+right, w = x2-x1;
 	if (h<top+bottom) y2 = y1+top+bottom, h = y2-y1;
-	
+
 	const gs_scalar midw = w-left-right, midh = h-top-bottom;
 	const gs_scalar midtw = spr2d->width-left-right, midth = spr2d->height-bottom-top;
 	const gs_scalar tbw = spr2d->width/(gs_scalar)spr2d->texbordxarray[usi], tbh = spr2d->height/(gs_scalar)spr2d->texbordyarray[usi];
@@ -289,7 +290,7 @@ void draw_sprite_padded(int spr, int subimg, gs_scalar left, gs_scalar top, gs_s
 	draw_vertex_texture_color(xvert2,yvert1,tbl,0.0,color,alpha);
 	draw_vertex_texture_color(xvert1,yvert2,0.0,tbt,color,alpha);
 	draw_vertex_texture_color(xvert2,yvert2,tbl,tbt,color,alpha);
-	
+
 	//Draw left side
 	xvert1 = x1, xvert2 = xvert1 + left,
 	yvert1 = y1 + top, yvert2 = yvert1 + midh;
@@ -298,7 +299,7 @@ void draw_sprite_padded(int spr, int subimg, gs_scalar left, gs_scalar top, gs_s
 	draw_vertex_texture_color(xvert2,yvert1,tbl,tbt,color,alpha);
 	draw_vertex_texture_color(xvert1,yvert2,0.0,tbt+tbmh,color,alpha);
 	draw_vertex_texture_color(xvert2,yvert2,tbl,tbt+tbmh,color,alpha);
-	
+
 	//Draw bottom-left corner
 	xvert1 = x1, xvert2 = xvert1 + left,
 	yvert1 = y1 + top + midh, yvert2 = yvert1 + bottom;
@@ -308,7 +309,7 @@ void draw_sprite_padded(int spr, int subimg, gs_scalar left, gs_scalar top, gs_s
 	draw_vertex_texture_color(xvert1,yvert2,0.0,tbt+tbmh+tbb,color,alpha);
 	draw_vertex_texture_color(xvert2,yvert2,tbl,tbt+tbmh+tbb,color,alpha);
 	draw_primitive_end();
-	
+
 	//Draw top
   xvert1 = x1 + left, xvert2 = xvert1 + midw,
   yvert1 = y1, yvert2 = yvert1 + top;
@@ -318,7 +319,7 @@ void draw_sprite_padded(int spr, int subimg, gs_scalar left, gs_scalar top, gs_s
 	draw_vertex_texture_color(xvert2,yvert1,tbl+tbmw,0.0,color,alpha);
 	draw_vertex_texture_color(xvert1,yvert2,tbl,tbt,color,alpha);
 	draw_vertex_texture_color(xvert2,yvert2,tbl+tbmw,tbt,color,alpha);
-  
+
   //Draw middle
   xvert1 = x1 + left, xvert2 = xvert1 + midw,
   yvert1 = y1 + top, yvert2 = yvert1 + midh;
@@ -327,7 +328,7 @@ void draw_sprite_padded(int spr, int subimg, gs_scalar left, gs_scalar top, gs_s
 	draw_vertex_texture_color(xvert2,yvert1,tbl+tbmw,tbt,color,alpha);
 	draw_vertex_texture_color(xvert1,yvert2,tbl,tbt+tbmh,color,alpha);
 	draw_vertex_texture_color(xvert2,yvert2,tbl+tbmw,tbt+tbmh,color,alpha);
-	
+
 	//Draw bottom
   xvert1 = x1 + left, xvert2 = xvert1 + midw,
   yvert1 = y1 + midh + top, yvert2 = yvert1 + bottom;
@@ -337,7 +338,7 @@ void draw_sprite_padded(int spr, int subimg, gs_scalar left, gs_scalar top, gs_s
 	draw_vertex_texture_color(xvert1,yvert2,tbl,tbt+tbmh+tbb,color,alpha);
 	draw_vertex_texture_color(xvert2,yvert2,tbl+tbmw,tbt+tbmh+tbb,color,alpha);
 	draw_primitive_end();
-  
+
 	//Draw top-right corner
   xvert1 = x1 + midw + left, xvert2 = xvert1 + right,
   yvert1 = y1, yvert2 = yvert1 + top;
@@ -347,7 +348,7 @@ void draw_sprite_padded(int spr, int subimg, gs_scalar left, gs_scalar top, gs_s
 	draw_vertex_texture_color(xvert2,yvert1,tbl+tbmw+tbr,0.0,color,alpha);
 	draw_vertex_texture_color(xvert1,yvert2,tbl+tbmw,tbt,color,alpha);
 	draw_vertex_texture_color(xvert2,yvert2,tbl+tbmw+tbr,tbt,color,alpha);
-	
+
 	//Draw right side
 	xvert1 = x1 + midw + left, xvert2 = xvert1 + right,
 	yvert1 = y1 + top, yvert2 = yvert1 + midh;
@@ -356,7 +357,7 @@ void draw_sprite_padded(int spr, int subimg, gs_scalar left, gs_scalar top, gs_s
 	draw_vertex_texture_color(xvert2,yvert1,tbl+tbmw+tbr,tbt,color,alpha);
 	draw_vertex_texture_color(xvert1,yvert2,tbl+tbmw,tbt+tbmh,color,alpha);
 	draw_vertex_texture_color(xvert2,yvert2,tbl+tbmw+tbr,tbt+tbmh,color,alpha);
-	
+
 	//Draw bottom-right corner
     xvert1 = x1 + midw + left, xvert2 = xvert1 + right,
     yvert1 = y1 + top + midh, yvert2 = yvert1 + bottom;

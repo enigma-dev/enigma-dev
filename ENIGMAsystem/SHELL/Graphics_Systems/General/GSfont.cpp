@@ -27,6 +27,8 @@
 #include "../General/GSprimitives.h"
 #include "../General/GSsprite.h"
 
+#define M_PI		3.14159265358979323846
+
 using namespace std;
 #include "Universal_System/fontstruct.h"
 
@@ -1103,7 +1105,7 @@ void draw_text_color(gs_scalar x, gs_scalar y,variant vstr,int c1,int c2,int c3,
 {
   string str = toString(vstr);
   get_fontv(fnt,currentfont);
-  
+
   float slen = get_space_width(fnt);
   gs_scalar yy = valign == fa_top ? y+fnt->yoffset : valign == fa_middle ? y +fnt->yoffset - string_height(str)/2 : y + fnt->yoffset - string_height(str);
   int hcol1 = c1, hcol2 = c1, hcol3 = c3, hcol4 = c4,  line = 0;
