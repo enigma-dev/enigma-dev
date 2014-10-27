@@ -32,6 +32,8 @@
 
 #include <floatcomp.h>
 
+#define M_PI		3.14159265358979323846
+
 #ifdef PATH_EXT_SET
     #include "Universal_System/Extensions/Paths/path_functions.h"
 #endif
