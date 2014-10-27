@@ -54,7 +54,7 @@ namespace enigma {
   extern unsigned bound_vbo;
   extern unsigned bound_vboi;
   extern vector<enigma::ShaderProgram*> shaderprograms;
-  extern vector<enigma::AttributeObject*> attributeobjects;
+  //extern vector<enigma::AttributeObject*> attributeobjects;
 
   //split a string and convert to float
   vector<float> float_split(const string& str, const char& ch) {
@@ -454,13 +454,13 @@ class Mesh
 					// check for and continue if indexed triangle is degenerate, because the GPU won't render it anyway
 					if (indices[i] == indices[i + 1] || indices[i] == indices[i + 2]  || indices[i + 1] == indices[i + 2] ) { continue; }
 					if (i % 2) {
-                        triangleIndices.push_back(indices[i+1]);
-                        triangleIndices.push_back(indices[i]);
-                        triangleIndices.push_back(indices[i+2]);
+            triangleIndices.push_back(indices[i+1]);
+            triangleIndices.push_back(indices[i]);
+            triangleIndices.push_back(indices[i+2]);
 					}else{
-                        triangleIndices.push_back(indices[i]);
-                        triangleIndices.push_back(indices[i+1]);
-                        triangleIndices.push_back(indices[i+2]);
+            triangleIndices.push_back(indices[i]);
+            triangleIndices.push_back(indices[i+1]);
+            triangleIndices.push_back(indices[i+2]);
 					}
 				}
 			} else {

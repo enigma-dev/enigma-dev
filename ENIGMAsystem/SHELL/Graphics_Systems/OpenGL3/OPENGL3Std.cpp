@@ -42,8 +42,9 @@ namespace enigma
   unsigned default_shader;
   unsigned main_shader;
   unsigned bound_shader;
-  unsigned bound_vbo;
-  unsigned bound_vboi;
+  unsigned bound_vbo = -1; //This means it's max-1, just so it wouldn't randomly be 0 at first render call.
+  unsigned bound_vboi = -1; //This means it's max-1
+  int bound_texture_stage = -1;
   unsigned char currentcolor[4] = {0,0,0,255};
   int currentblendmode[2] = {0,0};
   int currentblendtype = 0;
