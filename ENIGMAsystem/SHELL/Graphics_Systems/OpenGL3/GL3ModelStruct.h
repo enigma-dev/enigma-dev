@@ -263,7 +263,6 @@ class Mesh
     //glGenVertexArrays(1, &vertexArrayObject);
 
     if (vbotype == GL_STREAM_DRAW){
-      printf("Creating stream buffer! %i\n", vertexBuffer);
       //Allocate space for max stride (9) * sizeof(float) (4) * 128000 vertices. This is going to be a ring buffer.
       ringBufferVSize = 9 * sizeof(gs_scalar) * 128000;
       ringBufferVHead = 0;
@@ -606,10 +605,6 @@ class Mesh
         }
         ibufferSize = idata.size() * sizeof(GLuint);
       }
-      // Unbind the buffer we do not need anymore
-      //glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
-      // Clean up temporary interleaved data
-      //idata.clear();
     } else {
       vboindexed = false;
     }
@@ -626,7 +621,6 @@ class Mesh
       vdata.insert(vdata.end(), pointVertices.begin(), pointVertices.end());
     }
 
-    //glBindVertexArray(vertexArrayObject);
     bind_array_buffer( vertexBuffer );
 
     if (vbotype == GL_STREAM_DRAW){
@@ -641,60 +635,16 @@ class Mesh
       if (!vbogenerated){
         vbogenerated = true;
         glBufferData( GL_ARRAY_BUFFER, vdata.size() * sizeof(gs_scalar), &vdata[0], vbotype );
-        //printf("GENERATING!\n");
       }else{
         if ((double)(vdata.size() * sizeof(gs_scalar)) / (double)vbufferSize > 0.5) {
-          //printf("UPDATING TOTAL BUFFER!\n");
           glBufferData( GL_ARRAY_BUFFER, vdata.size() * sizeof(gs_scalar), NULL, vbotype);
           glBufferSubData( GL_ARRAY_BUFFER, 0, vdata.size() * sizeof(gs_scalar), &vdata[0]);
         } else {
-          //printf("UPDATING PART BUFFER!\n");
           glBufferSubData( GL_ARRAY_BUFFER, 0, vdata.size() * sizeof(gs_scalar), &vdata[0]);
         }
         vbufferSize = vdata.size() * sizeof(gs_scalar);
       }
     }
-
-    // Bind all necessary attributes
-    /*GLsizei stride = GetStride();
-
-    #define OFFSET( P )  ( ( const GLvoid * ) ( sizeof( gs_scalar ) * ( P         ) ) )
-    GLsizei STRIDE = stride * sizeof( gs_scalar );
-
-    unsigned offset = 0;
-    enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_vertex,true);
-    enigma_user::glsl_attribute_set(enigma::shaderprograms[enigma::bound_shader]->att_vertex, vertexStride, GL_FLOAT, false, STRIDE, offset);
-    offset += vertexStride;
-
-    printf("VAO %i - Use normals %i, use textures %i, use colors %i\n", vertexArrayObject, useNormals, useTextures, useColors);
-    if (useNormals){
-      enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_normal, true);
-      enigma_user::glsl_attribute_set(enigma::shaderprograms[enigma::bound_shader]->att_normal, 3, GL_FLOAT, false, STRIDE, offset);
-      offset += 3;
-    }else{
-      enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_normal, false);
-    }
-
-    if (useTextures){
-      enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_texture, true);
-      enigma_user::glsl_attribute_set(enigma::shaderprograms[enigma::bound_shader]->att_texture, 2, GL_FLOAT, false, STRIDE, offset);
-      offset += 2;
-    }else{
-      enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_texture, false);
-    }
-
-    if (useColors){
-      enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_color, true);
-      enigma_user::glsl_attribute_set(enigma::shaderprograms[enigma::bound_shader]->att_color, 4, GL_UNSIGNED_BYTE, true, STRIDE, offset);
-    }else{
-      enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_color, false);
-    }*/
-
-    //glBindVertexArray(0);
-    // Unbind the buffer we do not need anymore
-    //glBindBuffer( GL_ARRAY_BUFFER, 0 );
-    // Clean up temporary interleaved data
-    //vdata.clear();
 
     // Clean up the data from RAM it is now safe on VRAM
     ClearData();
@@ -732,8 +682,6 @@ class Mesh
     enigma_user::glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_texSampler, 0);
 
     // Enable vertex array's for fast vertex processing
-    //glBindVertexArray(vertexArrayObject);
-    //printf("Vertex array object bound = %i\n", vertexArrayObject);
     bind_array_buffer( vertexBuffer );
 
     if (vboindexed) {
@@ -751,7 +699,6 @@ class Mesh
     enigma_user::glsl_attribute_set(enigma::shaderprograms[enigma::bound_shader]->att_vertex, vertexStride, GL_FLOAT, false, STRIDE, offset);
     offset += vertexStride;
 
-    //printf("VAO %i - Use normals %i, use textures %i, use colors %i\n", vertexArrayObject, useNormals, useTextures, useColors);
     if (useNormals){
       enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_normal, true);
       enigma_user::glsl_attribute_set(enigma::shaderprograms[enigma::bound_shader]->att_normal, 3, GL_FLOAT, false, STRIDE, offset);
@@ -770,14 +717,11 @@ class Mesh
 
     if (useColors){
       enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_color, true);
-      //printf("Color offset = %i\n", offset);
       enigma_user::glsl_attribute_set(enigma::shaderprograms[enigma::bound_shader]->att_color, 4, GL_UNSIGNED_BYTE, true, STRIDE, offset);
     }else{
       enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_color, false);
     }
 
-
-    //unsigned offset = 0;
     offset = 0;
     enigma_user::glsl_uniformf( enigma::shaderprograms[enigma::bound_shader]->uni_color, (float)enigma::currentcolor[0]/255.0f, (float)enigma::currentcolor[1]/255.0f, (float)enigma::currentcolor[2]/255.0f, (float)enigma::currentcolor[3]/255.0f );
 
@@ -798,8 +742,6 @@ class Mesh
     }
     enigma_user::glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_colorEnable,useColors);
 
-    //printf("11Use normals %i, use textures %i, use colors %i\n", useNormals, useTextures, useColors);
-
     #define OFFSETE( P )  ( ( const GLvoid * ) ( sizeof( GLuint ) * ( P         ) ) )
     offset = ringBufferIDrawOffset+vertex_start;
 
@@ -810,10 +752,6 @@ class Mesh
       vbd.triangles_indexed+=(vertex_count==-1?triangleIndexedCount:vertex_count);
       #endif
 
-      if (vbotype == GL_STREAM_DRAW){
-        //printf("Drawing indexed stream buffer! %i, indexedoffset = %i, drawoffset = %i, triangelIndexecCount = %i\n", vertexBuffer, offset, ringBufferVDrawOffset, (vertex_count==-1?triangleIndexedCount:vertex_count));
-      }
-      //glDrawElements(GL_TRIANGLES, (vertex_count==-1?triangleIndexedCount:vertex_count), GL_UNSIGNED_INT, OFFSETE(offset));
       glDrawElementsBaseVertex (GL_TRIANGLES, (vertex_count==-1?triangleIndexedCount:vertex_count), GL_UNSIGNED_INT, OFFSETE(offset), ringBufferVDrawOffset);
       offset += triangleIndexedCount;
     }
@@ -835,7 +773,6 @@ class Mesh
       glDrawElementsBaseVertex (GL_POINTS, pointIndexedCount, GL_UNSIGNED_INT, OFFSETE(offset), ringBufferVDrawOffset);
     }
 
-    //GLsizei stride = GetStride();
     offset = ringBufferVDrawOffset + indexedoffset/stride;
 
     // Draw the unindexed primitives
@@ -844,9 +781,6 @@ class Mesh
       vbd.drawcalls+=1;
       vbd.triangles+=(vertex_count==-1?triangleCount:vertex_count);
       #endif
-      if (vbotype == GL_STREAM_DRAW){
-        //printf("Drawing unindexed stream buffer! %i, indexedoffset = %i, drawoffset = %i\n", vertexBuffer, indexedoffset, ringBufferVDrawOffset);
-      }
       glDrawArrays(GL_TRIANGLES, (vertex_start==0?offset:vertex_start), (vertex_count==-1?triangleCount:vertex_count));
       offset += triangleCount;
     }
@@ -867,15 +801,6 @@ class Mesh
 
       glDrawArrays(GL_POINTS, offset, pointCount);
     }
-
-    //glBindVertexArray(0);
-
-    /*glBindBuffer( GL_ARRAY_BUFFER, 0 );
-    if (vboindexed) {
-      glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, 0 );
-    }*/
-
-    //glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_vertex,false);
   }
 };
 
