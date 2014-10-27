@@ -61,6 +61,8 @@ unsigned get_texture(int texid) {
 
 namespace enigma
 {
+  extern int bound_texture_stage;
+
   int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool mipmap)
   {
     GLuint texture;
@@ -150,22 +152,22 @@ namespace enigma
 
     return ret;
   }
-  
+
   struct SamplerState {
     GLuint sampler_index;
     unsigned bound_texture;
-    
+
     SamplerState(): sampler_index(0) {
     }
-    
+
     ~SamplerState() {
       glDeleteSamplers(1, &sampler_index);
     }
-    
+
   };
-  
+
   SamplerState samplerstates[8];
-  
+
   void graphics_initialize_samplers() {
     GLuint sampler_ids[8];
     glGenSamplers(8, sampler_ids);
@@ -189,7 +191,7 @@ int texture_add(string filename, bool mipmap) {
   if (pxdata == NULL) { printf("ERROR - Failed to append sprite to index!\n"); return -1; }
   unsigned texture = enigma::graphics_create_texture(w, h, fullwidth, fullheight, pxdata, mipmap);
   delete[] pxdata;
-    
+
   return texture;
 }
 
@@ -257,13 +259,13 @@ void texture_set_stage(int stage, int texid) {
   int gt = get_texture(texid);
   if (enigma::samplerstates[stage].bound_texture != gt) {
     oglmgr->EndShapesBatching();
-    glActiveTexture(GL_TEXTURE0 + stage);
+    if (enigma::bound_texture_stage != GL_TEXTURE0 + stage) { glActiveTexture(enigma::bound_texture_stage = (GL_TEXTURE0 + stage)); }
     oglmgr->BindTexture(GL_TEXTURE_2D, enigma::samplerstates[stage].bound_texture = (unsigned)(gt >= 0? gt : 0));
   }
 }
 
 void texture_reset() {
-	glActiveTexture(GL_TEXTURE0);
+	if (enigma::bound_texture_stage != GL_TEXTURE0) { glActiveTexture(enigma::bound_texture_stage = GL_TEXTURE0); }
 	oglmgr->BindTexture(GL_TEXTURE_2D, enigma::samplerstates[0].bound_texture = 0);
   oglmgr->EndShapesBatching();
 }
@@ -278,14 +280,14 @@ void texture_set_repeat_ext(int sampler, bool repeat)
 {
   glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_WRAP_R, repeat?GL_REPEAT:GL_CLAMP);
   glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_WRAP_S, repeat?GL_REPEAT:GL_CLAMP);
-  glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_WRAP_T, repeat?GL_REPEAT:GL_CLAMP); 
+  glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_WRAP_T, repeat?GL_REPEAT:GL_CLAMP);
 }
 
 void texture_set_wrap_ext(int sampler, bool wrapu, bool wrapv, bool wrapw)
 {
   glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_WRAP_R, wrapu?GL_REPEAT:GL_CLAMP);
   glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_WRAP_S, wrapv?GL_REPEAT:GL_CLAMP);
-  glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_WRAP_T, wrapw?GL_REPEAT:GL_CLAMP); 
+  glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_WRAP_T, wrapw?GL_REPEAT:GL_CLAMP);
 }
 
 void texture_set_border_ext(int sampler, int r, int g, int b, double a)
