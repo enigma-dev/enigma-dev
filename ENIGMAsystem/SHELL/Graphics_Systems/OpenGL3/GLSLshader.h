@@ -72,17 +72,18 @@ namespace enigma
         int stride;
         int offset;
         int datatype; //Difference is that "type" is the type inside the shader (like float for color), but "datatype" is the type for data (unsigned int for color)
+        int datasize;
     };
 
     //This holds attribute parameters and works as a OpenGL VAO
-    struct AttributeObject{
+    /*struct AttributeObject{
         GLuint vertexArrayObject;
 
         AttributeObject(){ glGenVertexArrays(1, &vertexArrayObject); }
         ~AttributeObject(){ glDeleteBuffers(1, &vertexArrayObject); }
         map<string,GLint> attribute_names;
         map<GLint,Attribute> attributes;
-    };
+    };*/
 
     struct ShaderProgram{
         //These should be unordered maps, but they are only Cx11
