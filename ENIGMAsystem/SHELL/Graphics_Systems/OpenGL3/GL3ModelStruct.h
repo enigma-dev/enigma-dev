@@ -587,7 +587,11 @@ class Mesh
       if (vbotype == GL_STREAM_DRAW){
         unsigned int isize = idata.size() * sizeof(GLuint);
         //printf("Updating stream index buffer! %i, head = %i, size = %i, index triangles %i\n", indexBuffer, ringBufferIHead, isize,triangleIndexedCount);
-        if ((ringBufferIHead + isize) >= ringBufferISize){ ringBufferIHead = 0; }
+        if (isize > ringBufferISize){  //The data wont fit in the ring buffer even if the buffer was empty, so resize
+          ringBufferISize = isize;
+          glBufferData(GL_ELEMENT_ARRAY_BUFFER, ringBufferISize, NULL, vbotype);
+        }
+        if ((ringBufferIHead + isize) >= ringBufferISize){ ringBufferIHead = 0; } //Loop around the buffer
         glBufferSubData( GL_ELEMENT_ARRAY_BUFFER, ringBufferIHead, isize, &idata[0]);
         ringBufferIDrawOffset = ringBufferIHead / sizeof(GLuint);
         ringBufferIHead += isize;
@@ -626,7 +630,11 @@ class Mesh
     if (vbotype == GL_STREAM_DRAW){
         unsigned int vsize = vdata.size() * sizeof(gs_scalar);
         //printf("Updating stream buffer! %i, head = %i, size = %i, index triangles %i\n", vertexBuffer, ringBufferVHead, vsize,triangleIndexedCount);
-        if ((ringBufferVHead + vsize) >= ringBufferVSize){ ringBufferVHead = 0, ringBufferVDrawOffset = 0, ringBufferVDrawOffsetDouble = 0; }
+        if (vsize > ringBufferVSize){ //The data wont fit in the ring buffer even if the buffer was empty, so resize
+          ringBufferVSize = vsize;
+          glBufferData(GL_ARRAY_BUFFER, ringBufferVSize, NULL, vbotype);
+        }
+        if ((ringBufferVHead + vsize) >= ringBufferVSize){ ringBufferVHead = 0, ringBufferVDrawOffset = 0, ringBufferVDrawOffsetDouble = 0; } //Loop around the buffer
         glBufferSubData( GL_ARRAY_BUFFER, ringBufferVHead, vsize, &vdata[0]);
         ringBufferVDrawOffset = ringBufferVDrawOffsetDouble;
         ringBufferVDrawOffsetDouble += vdata.size() / stride; //ringBufferVHead / sizeof(gs_scalar);
