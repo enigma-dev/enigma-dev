@@ -74,6 +74,7 @@ namespace enigma
         int offset;
         int datatype; //Difference is that "type" is the type inside the shader (like float for color), but "datatype" is the type for data (unsigned int for color)
         int datasize;
+        int vao;
     };
 
     //This holds attribute parameters and works as a OpenGL VAO
