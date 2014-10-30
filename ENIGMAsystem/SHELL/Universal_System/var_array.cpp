@@ -42,3 +42,10 @@ int enigma_user::array_height_2d(const var& v)
 {
   return v.array_height();
 }
+
+bool enigma_user::is_array(const var& v)
+{
+  //There is no way (currently) to downsize an array from >1 element, so this might not be accurate.
+  return (v.array_height() > 1) || (v.array_len() > 1);
+}
+
