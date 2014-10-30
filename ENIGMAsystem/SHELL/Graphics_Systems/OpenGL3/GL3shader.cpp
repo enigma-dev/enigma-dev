@@ -935,7 +935,7 @@ void glsl_attribute_enable(int location, bool enable){
 
 void glsl_attribute_set(int location, int size, int type, bool normalize, int stride, int offset){
   get_attribute(it,location);
-  if (/*it->second.enabled == true*/ (it->second.vao != enigma::bound_vbo || it->second.datatype != type || it->second.datasize != size || it->second.normalize != normalize || it->second.stride != stride || it->second.offset != offset)){
+  //if (/*it->second.enabled == true*/ (it->second.vao != enigma::bound_vbo || it->second.datatype != type || it->second.datasize != size || it->second.normalize != normalize || it->second.stride != stride || it->second.offset != offset)){
     glVertexAttribPointer(location, size, type, normalize, stride, ( ( const GLvoid * ) ( sizeof( gs_scalar ) * ( offset ) ) ));
     it->second.datatype = type;
     it->second.datasize = size;
@@ -943,7 +943,7 @@ void glsl_attribute_set(int location, int size, int type, bool normalize, int st
     it->second.stride = stride;
     it->second.offset = offset;
     it->second.vao = enigma::bound_vbo;
-  }
+  //}
 }
 
 }
