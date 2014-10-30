@@ -1,6 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2011 Josh Ventura                                             **
+**  Copyright (C) 2014 Seth N. Hetu                                             **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -25,97 +25,27 @@
 **                                                                              **
 \********************************************************************************/
 
-#include <string>
-using std::string;
+#include "var_array.h"
+#include "var4.h"
 
-#include "var4.h"      // Var stuff
-#include "lua_table.h" // The Lua part
-
-#define vararray lua_table<lua_table<variant> >
-#define as_lua(x) (*((vararray*)x))
-
-//#define as_lua(x) (*(vararray*)(&(x)))
-//typedef lua_table<lua_table<variant> > vararray;
-
-void var::initialize() {
-  values = new vararray();
-}
-void var::cleanup() {
-  if (values) { 
-    delete ((vararray*)values);
-    values = NULL; 
-  }
+int enigma_user::array_length_1d(const var& v)
+{
+  return v.array_len();
 }
 
-variant& var::operator*  ()
+int enigma_user::array_length_2d(const var& v, int n)
 {
-  return **as_lua(values);
-}
-variant& var::operator() ()
-{
-  return **as_lua(values);
-}
-variant& var::operator[] (int ind)
-{
-  return (*as_lua(values))[size_t(ind)];
-}
-variant& var::operator() (int ind)
-{
-  return (*as_lua(values))[size_t(ind)];
-}
-variant& var::operator() (int ind1,int ind2)
-{
-  return as_lua(values)[size_t(ind1)][size_t(ind2)];
+  return v.array_len(n);
 }
 
-const variant& var::operator*  () const
+int enigma_user::array_height_2d(const var& v)
 {
-  return **as_lua(values);
-}
-const variant& var::operator() () const
-{
-  return **as_lua(values);
-}
-const variant& var::operator[] (int ind) const
-{
-  return (*as_lua(values))[size_t(ind)];
-}
-const variant& var::operator() (int ind) const
-{
-  return (*as_lua(values))[size_t(ind)];
-}
-const variant& var::operator() (int ind1,int ind2) const
-{
-  return as_lua(values)[size_t(ind1)][size_t(ind2)];
+  return v.array_height();
 }
 
-int var::array_len() const
+bool enigma_user::is_array(const var& v)
 {
-  return (*as_lua(values)).max_index();
+  //There is no way (currently) to downsize an array from >1 element, so this might not be accurate.
+  return (v.array_height() > 1) || (v.array_len() > 1);
 }
 
-int var::array_height() const
-{
-  return as_lua(values).max_index();
-}
-
-int var::array_len(int row) const
-{
-  return row>=array_height() ? 0 : as_lua(values)[size_t(row)].max_index();
-}
-
-var::var(const var& x) {
-  values = new vararray();
-  as_lua(values) = as_lua(x.values);
-  //new(&values) vararray(*(vararray*)&(x.values));
-}
-var& var::operator= (const var& x) {
-  if (values) {
-    delete ((vararray*)values);
-  }
-
-  values = new vararray();
-  as_lua(values) = as_lua(x.values);
-  //*(vararray*)&(values) = *(vararray*)&(x.values);
-  return *this;
-}
