@@ -38,6 +38,8 @@ int array_length_2d(const var& v, int n);
 
 int array_height_2d(const var& v);
 
+bool is_array(const var& v);
+
 }
 
 #endif //_H_VAR_ARRAY

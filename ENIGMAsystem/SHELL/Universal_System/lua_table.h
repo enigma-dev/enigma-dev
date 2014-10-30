@@ -157,9 +157,9 @@ public:
     return *this;
   }
   
-  lua_table<T>() : dense(new T[1]), mx_size(1), dn_reserve(1) {
+  lua_table<T>() : dense(new T[1]), dn_reserve(1), mx_size(1) {
   }
-  lua_table<T>(const lua_table<T> &x): dense(NULL), mx_size(0), dn_reserve(0) {
+  lua_table<T>(const lua_table<T> &x): dense(NULL), dn_reserve(0), mx_size(0) {
     pick_up(x);
   }
   ~lua_table<T>() {
