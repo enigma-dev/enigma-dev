@@ -37,7 +37,7 @@ extern ALfloat listenerOri[];
 
 #include "SoundResource.h"
 
-namespace enigma { 
+namespace enigma {
   extern size_t sound_idmax;
 
   int get_free_channel(double priority);
@@ -50,6 +50,7 @@ namespace enigma {
       } SoundResource *const snd = sound_resources[id];
   #else
     #define get_sound(snd,id,failure)\
+      if (id < 0) return failure;\
       SoundResource *const snd = sound_resources[id];
   #endif
 
