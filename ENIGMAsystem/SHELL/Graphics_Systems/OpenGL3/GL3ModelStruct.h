@@ -270,6 +270,7 @@ class Mesh
       glBufferData(GL_ARRAY_BUFFER, ringBufferVSize, NULL, vbotype);
 
       ringBufferISize = sizeof(GLuint) * 256000; //256k indicies
+      ringBufferIHead = 0;
       bind_element_buffer(indexBuffer);
       glBufferData(GL_ELEMENT_ARRAY_BUFFER, ringBufferISize, NULL, vbotype);
     }

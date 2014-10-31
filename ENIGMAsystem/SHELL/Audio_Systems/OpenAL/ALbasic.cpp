@@ -58,7 +58,7 @@ bool sound_exists(int sound)
 bool sound_play(int sound) { // Returns whether sound is playing
   int src = enigma::get_free_channel(1);
   if (src == -1) { return false; }
-  get_sound(snd,sound,-1);
+  get_sound(snd,sound,false);
   alSourcei(sound_channels[src]->source, AL_BUFFER, snd->buf[0]);
   alSourcei(sound_channels[src]->source, AL_SOURCE_RELATIVE, AL_TRUE);
   alSourcei(sound_channels[src]->source, AL_REFERENCE_DISTANCE, 1);
@@ -76,7 +76,7 @@ bool sound_play(int sound) { // Returns whether sound is playing
 bool sound_loop(int sound) { // Returns whether sound is playing
   int src = enigma::get_free_channel(1);
   if (src == -1) { return false; }
-  get_sound(snd,sound,-1);
+  get_sound(snd,sound,false);
   alSourcei(sound_channels[src]->source, AL_BUFFER, snd->buf[0]);
   alSourcei(sound_channels[src]->source, AL_SOURCE_RELATIVE, AL_TRUE);
   alSourcei(sound_channels[src]->source, AL_REFERENCE_DISTANCE, 1);
@@ -211,7 +211,7 @@ bool sound_ispaused(int sound) {
 }
 
 float sound_get_length(int sound) { // Not for Streams
-  get_sound(snd,sound,0);
+  get_sound(snd,sound,0.0);
   ALint size, bits, channels, freq;
 
   alGetBufferi(snd->buf[0], AL_SIZE, &size);
@@ -310,7 +310,7 @@ bool sound_replace(int sound, string fname, int kind, bool preload)
     }
   }
   sound_resources[sound] = enigma::sound_new_with_source();
-  
+
   // Open sound
   FILE *afile = fopen(fname.c_str(),"rb");
   if (!afile)
@@ -323,7 +323,7 @@ bool sound_replace(int sound, string fname, int kind, bool preload)
   fseek(afile,0,SEEK_SET);
   if (fread(fdata,1,flen,afile) != flen)
     puts("WARNING: Resource stream cut short while loading sound data");
-  
+
   // Decode sound
   bool fail = enigma::sound_add_from_buffer(sound,fdata,flen);
   delete [] fdata;
