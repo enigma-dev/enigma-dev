@@ -119,6 +119,7 @@ void draw_rectangle(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, bool 
 
 void draw_rectangle_angle(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, float angle, bool outline)
 {
+  // TODO(JoshDreamland): Replace with settings macro to get from preferred unit to radians
   angle *= M_PI/180;
 
   float
@@ -272,7 +273,7 @@ void draw_circle_color_perfect(gs_scalar x, gs_scalar y, float rad, int c1, int 
     draw_primitive_end();
 }
 
-void draw_ellipse(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, bool outline)
+void draw_ellipse(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, bool outline)
 {
   gs_scalar
       x=(x1+x2)/2,y=(y1+y2)/2,
@@ -308,7 +309,7 @@ void draw_ellipse(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, bool ou
   }
 }
 
-void draw_ellipse_color(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, int c1, int c2, bool outline)
+void draw_ellipse_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, int c1, int c2, bool outline)
 {
     float
         x=(x1+x2)/2,y=(y1+y2)/2,
@@ -330,7 +331,7 @@ void draw_ellipse_color(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, i
     draw_primitive_end();
 }
 
-void draw_ellipse_perfect(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, bool outline)
+void draw_ellipse_perfect(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, bool outline)
 {
   float
     x=(x1+x2)/2,y=(y1+y2)/2,
@@ -347,22 +348,53 @@ void draw_ellipse_perfect(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2,
   draw_primitive_end();
 }
 
+void draw_sector(gs_scalar x, gs_scalar y, gs_scalar r, float a1, float a2, bool outline) {
+  return draw_sector(x, y, r, r, a1, a2, outline);
+}
+
+void draw_sector(gs_scalar x, gs_scalar y, gs_scalar rx, gs_scalar ry, float a1, float a2, bool outline)
+{
+  // TODO(JoshDreamland): Replace with settings macro to get from preferred unit to radians
+  a1 *= M_PI/180;
+  a2 *= M_PI/180;
+  
+  gs_scalar pr = 2*M_PI/enigma::circleprecision;
+  
+  if (outline) {
+    draw_primitive_begin(pr_linestrip);
+    draw_vertex(x, y);
+    for (float a = a1; a < a2; a += pr) {
+      draw_vertex(x + rx * cos(a), y - ry * sin(a));
+    }
+    draw_vertex(x + rx * cos(a2), y - ry * sin(a2));
+    draw_vertex(x, y);
+    draw_primitive_end();
+  } else {
+    draw_primitive_begin(pr_trianglefan);
+    draw_vertex(x, y);
+    for (float a = a1; a < a2; a += pr) {
+      draw_vertex(x + rx * cos(a), y - ry * sin(a));
+    }
+    draw_primitive_end();
+  }
+}
+
 void draw_triangle(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, bool outline)
 {
-    if (outline) {
-		draw_primitive_begin(pr_linestrip);
-		draw_vertex(x1, y1);
-		draw_vertex(x2, y2);
-		draw_vertex(x3, y3);
-		draw_vertex(x1, y1);
-		draw_primitive_end();
-    } else {
-		draw_primitive_begin(pr_trianglestrip);
-		draw_vertex(x1, y1);
-		draw_vertex(x2, y2);
-		draw_vertex(x3, y3);
-		draw_primitive_end();
-    }
+  if (outline) {
+    draw_primitive_begin(pr_linestrip);
+    draw_vertex(x1, y1);
+    draw_vertex(x2, y2);
+    draw_vertex(x3, y3);
+    draw_vertex(x1, y1);
+    draw_primitive_end();
+  } else {
+    draw_primitive_begin(pr_trianglestrip);
+    draw_vertex(x1, y1);
+    draw_vertex(x2, y2);
+    draw_vertex(x3, y3);
+    draw_primitive_end();
+  }
 }
 
 void draw_triangle_color(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, int col1, int col2, int col3, bool outline)
