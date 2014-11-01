@@ -51,9 +51,11 @@ void draw_circle_color_perfect(gs_scalar x, gs_scalar y, float rad, int color1, 
 void draw_ellipse(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, bool outline);
 void draw_ellipse_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, int col1, int col2, bool outline = false);
 void draw_ellipse_perfect(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, bool outline);
+void draw_sector(gs_scalar x, gs_scalar y, gs_scalar r, float start_angle, float end_angle, bool outline = false);
+void draw_sector(gs_scalar x, gs_scalar y, gs_scalar rx, gs_scalar ry, float start_angle, float end_angle, bool outline = false);
 void draw_triangle(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, bool outline);
 void draw_triangle_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, int col1, int col2, int col3, bool outline = false);
-void draw_roundrect(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, float rad, bool outline);
+void draw_roundrect(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, float rad, bool outline);
 void draw_roundrect_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, float rad, int col1, int col2, bool outline);
 void draw_roundrect_ext(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, float xrad, float yrad, bool outline);
 void draw_roundrect_color_ext(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, float xrad, float yrad, int col1, int col2, bool outline);
