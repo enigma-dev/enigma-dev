@@ -147,7 +147,9 @@ namespace enigma
           enigma::windowY = e.xconfigure.y;
           enigma::windowWidth = e.xconfigure.width;
           enigma::windowHeight = e.xconfigure.height;
-          enigma::setwindowsize();
+
+          //NOTE: This will lead to a loop, and it seems superfluous.
+          //enigma::setwindowsize();
           
           if (WindowResizedCallback != NULL) {
             WindowResizedCallback();
