@@ -182,6 +182,8 @@ using namespace enigma::x11;
 
 namespace enigma
 {
+  extern int windowColor;
+
   void input_initialize()
   {
     //Clear the input arrays
@@ -269,10 +271,10 @@ int main(int argc,char** argv)
     // Window event listening and coloring
     XSetWindowAttributes swa;
     swa.border_pixel = 0;
-    swa.background_pixel = 0;
+    swa.background_pixel = (enigma::windowColor & 0xFF000000) | ((enigma::windowColor & 0xFF0000) >> 16) | (enigma::windowColor & 0xFF00) | ((enigma::windowColor & 0xFF) << 16);
     swa.colormap = XCreateColormap(disp,root,vi->visual,AllocNone);
     swa.event_mask = ExposureMask | KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask | FocusChangeMask | StructureNotifyMask;
-    unsigned long valmask = CWColormap | CWEventMask; //  | CWBackPixel | CWBorderPixel;
+    unsigned long valmask = CWColormap | CWEventMask | CWBackPixel; // | CWBorderPixel;
 
     //prepare window for display (center, caption, etc)
     screen = DefaultScreenOfDisplay(disp);
@@ -286,6 +288,8 @@ int main(int argc,char** argv)
     // We won't limit those functions like GM, just the default.
     if (winw > screen->width) winw = screen->width;
     if (winh > screen->height) winh = screen->height;
+
+    //Make the window
     win = XCreateWindow(disp,root,0,0,winw,winh,0,vi->depth,InputOutput,vi->visual,valmask,&swa);
     XMapRaised(disp,win); //request visible
 
