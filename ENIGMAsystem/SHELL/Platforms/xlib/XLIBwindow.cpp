@@ -459,6 +459,8 @@ void window_set_fullscreen(bool full)
 	xev.xclient.data.l[1] = aFullScreen;
 	xev.xclient.data.l[2] = 0;
 	XSendEvent(disp,DefaultRootWindow(disp),False,SubstructureRedirectMask|SubstructureNotifyMask,&xev);
+
+	enigma::setwindowsize();
 }
 
 bool window_get_fullscreen()
