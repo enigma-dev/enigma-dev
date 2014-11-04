@@ -1,5 +1,6 @@
 /** Copyright (C) 2008-2011 IsmAvatar <cmagicj@nni.com>, Josh Ventura
 *** Copyright (C) 2013 Robert B. Colton
+*** Copyright (C) 2014 Seth N. Hetu
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -53,10 +54,10 @@ namespace enigma
   bool gameWindowFocused = false;
   extern int windowX, windowY, windowWidth, windowHeight;
   extern void setwindowsize();
-  extern void WindowResized();
   extern bool freezeOnLoseFocus;
   unsigned int pausedSteps = 0;
   
+  void (*WindowResizedCallback)();
   XVisualInfo* CreateVisualInfo();
   void EnableDrawing();
   void DisableDrawing();
@@ -147,7 +148,10 @@ namespace enigma
           enigma::windowWidth = e.xconfigure.width;
           enigma::windowHeight = e.xconfigure.height;
           enigma::setwindowsize();
-          enigma::WindowResized();
+          
+          if (WindowResizedCallback != NULL) {
+            WindowResizedCallback();
+          }
           return 0;
         }
         case FocusIn:
@@ -429,3 +433,4 @@ void set_program_priority(int value) {
 }
 
 }
+
