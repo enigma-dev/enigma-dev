@@ -161,7 +161,7 @@ int highscore_value(int place) {
 
 std::string highscore_name(int place) {
     size_t act = static_cast<size_t>(place) - 1;
-    return act<enigma::highscore_list.size() ? enigma::highscore_list[act].player_name : "Unknown";
+    return act<enigma::highscore_list.size() ? enigma::highscore_list[act].player_name : "";
 }
 
 }
