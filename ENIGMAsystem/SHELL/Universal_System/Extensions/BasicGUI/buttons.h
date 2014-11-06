@@ -38,7 +38,7 @@ namespace gui
 			bool togglable; //Is button a toggle button
 			int callback; //Script to run when clicked
 
-			bool child; //Is this button a child of something (probably a window). It won't render with gui_draw_buttons() if it is.
+			int parent_id; //ID of the parent of some kind (probably a window). It won't render with gui_draw_buttons() if it is.
 
 			font_style font_styles[5]; //0 - default, 1 - hover, 2 - active, 3 - on, 4 - on hover (this is based on enums)
 
