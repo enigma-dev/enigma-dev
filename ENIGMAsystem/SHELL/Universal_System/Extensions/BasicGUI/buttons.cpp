@@ -36,6 +36,15 @@ using std::pair;
 
 namespace gui
 {
+  unordered_map<unsigned int, gui_button> gui_buttons;
+	unsigned int gui_buttons_maxid = 0;
+
+	extern int gui_bound_skin;
+	extern unordered_map<unsigned int, gui_skin> gui_skins;
+	extern unsigned int gui_skins_maxid;
+
+	extern bool windowStopPropagation;
+
 	//Implements button class
 	void gui_button::reset(){
 		text = "", state = 0, sprite = sprite_hover = sprite_active = sprite_on = sprite_on_hover = -1;
@@ -48,13 +57,14 @@ namespace gui
 	}
 
 	gui_button::gui_button(){
-	  child = false;
+	  parent_id = -1;
 		reset();
 	}
 
 	//Update all possible button states (hover, click, toggle etc.)
 	void gui_button::update(gs_scalar ox, gs_scalar oy, gs_scalar tx, gs_scalar ty){
 		if (box.point_inside(tx-ox,ty-oy)){
+      gui::windowStopPropagation = true;
 			if (enigma_user::mouse_check_button_pressed(enigma_user::mb_left)){
 				state = enigma_user::gui_state_active;
 			}else{
@@ -158,12 +168,6 @@ namespace gui
 			style->texty = box.y+box.h-padding.bottom;
 		}
 	}
-	unordered_map<unsigned int, gui_button> gui_buttons;
-	unsigned int gui_buttons_maxid = 0;
-
-	extern int gui_bound_skin;
-	extern unordered_map<unsigned int, gui_skin> gui_skins;
-	extern unsigned int gui_skins_maxid;
 }
 
 namespace enigma_user
@@ -338,7 +342,7 @@ namespace enigma_user
 		gs_scalar palpha = enigma_user::draw_get_alpha();
 		for (unsigned int i=0; i<gui::gui_buttons_maxid; ++i){
 			//if (gui::gui_buttons.find(i) !=  gui::gui_buttons.end()){
-			if (gui::gui_buttons[i].visible == true && gui::gui_buttons[i].child == false){
+			if (gui::gui_buttons[i].visible == true && gui::gui_buttons[i].parent_id == -1){
       	gui::gui_buttons[i].update();
 				gui::gui_buttons[i].draw();
 			}

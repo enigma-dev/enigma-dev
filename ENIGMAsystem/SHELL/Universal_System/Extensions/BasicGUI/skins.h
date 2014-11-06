@@ -25,6 +25,7 @@ namespace gui
 			unsigned int id;
 			int button_style;
 			int window_style;
+			int toggle_style;
 
 			gui_skin();
 	};

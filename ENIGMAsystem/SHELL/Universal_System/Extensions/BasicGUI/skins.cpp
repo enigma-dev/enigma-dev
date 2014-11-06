@@ -36,10 +36,14 @@ namespace gui{
 		//Create invisible dummy button to use as style for them all
 		button_style = (enigma_user::gui_button_create());
 		enigma_user::gui_button_set_visible(button_style,false);
-		
+
 		//Create invisible dummy window to use as style for them all
 		window_style = (enigma_user::gui_window_create());
 		enigma_user::gui_window_set_visible(window_style,false);
+
+    //Create invisible dummy toggle to use as style for them all
+		toggle_style = (enigma_user::gui_toggle_create());
+		enigma_user::gui_toggle_set_visible(toggle_style,false);
 	}
 
 	int gui_bound_skin = -1;
@@ -54,20 +58,24 @@ namespace enigma_user
 		gui::gui_skins[gui::gui_skins_maxid].id = gui::gui_skins_maxid;
 		return gui::gui_skins_maxid++;
 	}
-	
+
 	void gui_skin_destroy(int id){
 		gui::gui_skins.erase(gui::gui_skins.find(id));
 	}
-	
+
 	void gui_skin_set(int id){
 		gui::gui_bound_skin = id;
 	}
-	
+
 	int gui_skin_get_button(int id){
 		return (gui::gui_skins[id].button_style);
 	}
-  
+
   int gui_skin_get_window(int id){
 		return (gui::gui_skins[id].window_style);
+	}
+
+  int gui_skin_get_toggle(int id){
+		return (gui::gui_skins[id].toggle_style);
 	}
 }

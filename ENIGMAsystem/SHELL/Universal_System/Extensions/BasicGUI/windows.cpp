@@ -36,9 +36,20 @@ using std::pair;
 
 //Children
 #include "buttons.h"
+#include "toggles.h"
 
 namespace gui
 {
+  bool windowStopPropagation = false; //Stop event propagation in windows and between
+	unordered_map<unsigned int, gui_window> gui_windows;
+	unsigned int gui_windows_maxid = 0;
+
+	extern int gui_bound_skin;
+	extern unordered_map<unsigned int, gui_skin> gui_skins;
+	extern unordered_map<unsigned int, gui_button> gui_buttons;
+	extern unordered_map<unsigned int, gui_toggle> gui_toggles;
+	extern unsigned int gui_skins_maxid;
+
 	//Implements button class
 	void gui_window::reset(){
 		text = "", state = 0, sprite = sprite_on = -1;
@@ -57,17 +68,23 @@ namespace gui
 
 	//Update all possible button states (hover, click, toggle etc.)
 	void gui_window::update(gs_scalar tx, gs_scalar ty){
-		if (enigma_user::mouse_check_button_pressed(enigma_user::mb_left)){
-			if (box.point_inside(tx,ty)){
-				state = enigma_user::gui_state_on;
-				drag = true;
-				drag_xoffset = tx-box.x;
-				drag_yoffset = ty-box.y;
-			}else{
-				state = enigma_user::gui_state_default;
-			}
-		}
+    if (box.point_inside(tx,ty)){ //Hover
+        windowStopPropagation = true;
+    }
+
+    if (enigma_user::mouse_check_button_pressed(enigma_user::mb_left)){ //Press
+      if(box.point_inside(tx,ty)){
+        state = enigma_user::gui_state_on;
+        drag = true;
+        drag_xoffset = tx-box.x;
+        drag_yoffset = ty-box.y;
+      }else{
+      state = enigma_user::gui_state_default;
+      }
+    }
+
 		if (drag == true){
+      windowStopPropagation = true;
 			box.x = tx-drag_xoffset;
 			box.y = ty-drag_yoffset;
 			if (enigma_user::mouse_check_button_released(enigma_user::mb_left)){
@@ -121,13 +138,6 @@ namespace gui
 			style->texty = box.y+padding.top*2.0;
 		}
 	}
-	unordered_map<unsigned int, gui_window> gui_windows;
-	unsigned int gui_windows_maxid = 0;
-
-	extern int gui_bound_skin;
-	extern unordered_map<unsigned int, gui_skin> gui_skins;
-	extern unordered_map<unsigned int, gui_button> gui_buttons;
-	extern unsigned int gui_skins_maxid;
 }
 
 namespace enigma_user
@@ -281,15 +291,39 @@ namespace enigma_user
 		unsigned int pvalign = enigma_user::draw_get_valign();
 		int pcolor = enigma_user::draw_get_color();
 		gs_scalar palpha = enigma_user::draw_get_alpha();
-		for (unsigned int i=0; i<gui::gui_windows_maxid; ++i){
-			if (gui::gui_windows[i].visible == true){
-      	gui::gui_windows[i].update();
+		gui::windowStopPropagation = false;
+
+    //Update loop in reverse direction
+    for (int i=gui::gui_windows_maxid-1; i>=0; --i){
+      if (gui::gui_windows[i].visible == true){
+        //Update children
+        if (gui::gui_windows[i].child_buttons.empty() == false){
+          for (int b=gui::gui_windows[i].child_buttons.size()-1; b>=0; --b){
+            if (gui::gui_buttons[gui::gui_windows[i].child_buttons[b]].visible == false) continue; //Skip invisible objects
+            if (gui::windowStopPropagation == false){ gui::gui_buttons[gui::gui_windows[i].child_buttons[b]].update(gui::gui_windows[i].box.x,gui::gui_windows[i].box.y); } else { break; } //Stop propagation
+          }
+          for (int b=gui::gui_windows[i].child_toggles.size()-1; b>=0; --b){
+            if (gui::gui_toggles[gui::gui_windows[i].child_toggles[b]].visible == false) continue; //Skip invisible objects
+            if (gui::windowStopPropagation == false){ gui::gui_toggles[gui::gui_windows[i].child_toggles[b]].update(gui::gui_windows[i].box.x,gui::gui_windows[i].box.y); } else { break; } //Stop propagation
+          }
+        }
+        if (gui::windowStopPropagation == false){ gui::gui_windows[i].update(); } else { break; } //Stop propagation
+			}
+		}
+
+    //Draw loop
+    for (unsigned int i=0; i<gui::gui_windows_maxid; ++i){
+      if (gui::gui_windows[i].visible == true){
 				gui::gui_windows[i].draw();
         //Draw children
         if (gui::gui_windows[i].child_buttons.empty() == false){
           for (unsigned int b=0; b<gui::gui_windows[i].child_buttons.size(); ++b){
-            gui::gui_buttons[gui::gui_windows[i].child_buttons[b]].update(gui::gui_windows[i].box.x,gui::gui_windows[i].box.y);
-            gui::gui_buttons[gui::gui_windows[i].child_buttons[b]].draw(gui::gui_windows[i].box.x,gui::gui_windows[i].box.y);
+            if (gui::gui_buttons[gui::gui_windows[i].child_buttons[b]].visible == true) gui::gui_buttons[gui::gui_windows[i].child_buttons[b]].draw(gui::gui_windows[i].box.x,gui::gui_windows[i].box.y);
+          }
+        }
+        if (gui::gui_windows[i].child_toggles.empty() == false){
+          for (unsigned int b=0; b<gui::gui_windows[i].child_toggles.size(); ++b){
+            if (gui::gui_toggles[gui::gui_windows[i].child_toggles[b]].visible == true) gui::gui_toggles[gui::gui_windows[i].child_toggles[b]].draw(gui::gui_windows[i].box.x,gui::gui_windows[i].box.y);
           }
         }
 			}
@@ -302,6 +336,11 @@ namespace enigma_user
 
   void gui_window_add_button(int id, int bid){
     gui::gui_windows[id].child_buttons.push_back(bid);
-    gui::gui_buttons[bid].child = true;
+    gui::gui_buttons[bid].parent_id = id;
+  }
+
+  void gui_window_add_toggle(int id, int tid){
+    gui::gui_windows[id].child_toggles.push_back(tid);
+    gui::gui_toggles[tid].parent_id = id;
   }
 }
