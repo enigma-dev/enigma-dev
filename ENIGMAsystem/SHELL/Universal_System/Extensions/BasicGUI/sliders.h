@@ -15,12 +15,10 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef BGUI_WINDOWS_H
-#define BGUI_WINDOWS_H
+#ifndef BGUI_SLIDER_H
+#define BGUI_SLIDER_H
 
 #include "common.h"
-#include <vector>
-using std::vector;
 
 namespace enigma_user
 {
@@ -29,37 +27,41 @@ namespace enigma_user
 
 namespace gui
 {
-	class gui_window{
+	class gui_slider{
 		public:
-			int id;
-
+			unsigned int id;
 			rect box;
 			string text;
 			int state;
 			bool visible;
-			bool drag;
-			gs_scalar drag_xoffset;
-			gs_scalar drag_yoffset;
-			int callback;
+			bool active; //Is slider pressed
+			int callback; //Script to run when clicked
 
-			font_style font_styles[2]; //0 - default, 1 - on (this is based based on enums)
+      double value; //Slider return value
+      double minValue;
+      double maxValue;
+      double incValue;
+
+			int parent_id; //ID of some kind of parent (probably a window). It won't render with gui_draw_sliders() if it is not -1.
+
+			font_style font_styles[6]; //0 - default, 1 - hover, 2 - active, 3 - on, 4 - on hover, 5 - on active (this is based on enums)
 
 			int sprite;
+			int sprite_hover;
+			int sprite_active;
 			int sprite_on;
+			int sprite_on_hover;
+      int sprite_on_active;
 
 			rect_offset border;
 			rect_offset padding;
 
 			void reset();
-			gui_window();
-			//Update all possible window states (focus and unfocused)
-			void update(gs_scalar tx = enigma_user::mouse_x, gs_scalar ty = enigma_user::mouse_y);
-			void draw();
+			gui_slider();
+			//Update all possible slider states (hover, click etc.)
+			void update(gs_scalar ox = 0, gs_scalar oy = 0, gs_scalar tx = enigma_user::mouse_x, gs_scalar ty = enigma_user::mouse_y);
+			void draw(gs_scalar ox = 0, gs_scalar oy = 0);
 			void update_text_pos(int state = -1);
-
-      vector<unsigned int> child_buttons;
-      vector<unsigned int> child_toggles;
-      vector<unsigned int> child_sliders;
 	};
 }
 
