@@ -37,6 +37,7 @@ using std::pair;
 //Children
 #include "buttons.h"
 #include "toggles.h"
+#include "sliders.h"
 
 namespace gui
 {
@@ -48,6 +49,7 @@ namespace gui
 	extern unordered_map<unsigned int, gui_skin> gui_skins;
 	extern unordered_map<unsigned int, gui_button> gui_buttons;
 	extern unordered_map<unsigned int, gui_toggle> gui_toggles;
+  extern unordered_map<unsigned int, gui_slider> gui_sliders;
 	extern unsigned int gui_skins_maxid;
 
 	//Implements button class
@@ -342,5 +344,10 @@ namespace enigma_user
   void gui_window_add_toggle(int id, int tid){
     gui::gui_windows[id].child_toggles.push_back(tid);
     gui::gui_toggles[tid].parent_id = id;
+  }
+
+  void gui_window_add_slider(int id, int sid){
+    gui::gui_windows[id].child_sliders.push_back(sid);
+    gui::gui_sliders[sid].parent_id = id;
   }
 }

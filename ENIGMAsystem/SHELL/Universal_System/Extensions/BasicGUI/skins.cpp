@@ -33,17 +33,19 @@ using std::pair;
 
 namespace gui{
 	gui_skin::gui_skin(){
-		//Create invisible dummy button to use as style for them all
+		//Create invisible dummy elements to use as styles for them all
 		button_style = (enigma_user::gui_button_create());
 		enigma_user::gui_button_set_visible(button_style,false);
 
-		//Create invisible dummy window to use as style for them all
 		window_style = (enigma_user::gui_window_create());
 		enigma_user::gui_window_set_visible(window_style,false);
 
-    //Create invisible dummy toggle to use as style for them all
 		toggle_style = (enigma_user::gui_toggle_create());
 		enigma_user::gui_toggle_set_visible(toggle_style,false);
+
+		slider_style = (enigma_user::gui_slider_create());
+		enigma_user::gui_slider_set_visible(slider_style,false);
+
 	}
 
 	int gui_bound_skin = -1;
@@ -77,5 +79,9 @@ namespace enigma_user
 
   int gui_skin_get_toggle(int id){
 		return (gui::gui_skins[id].toggle_style);
+	}
+
+	int gui_skin_get_slider(int id){
+    return (gui::gui_skins[id].slider_style);
 	}
 }
