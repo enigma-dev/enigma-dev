@@ -40,13 +40,14 @@ namespace gui
 
 			int parent_id; //ID of the parent of some kind (probably a window). It won't render with gui_draw_buttons() if it is.
 
-			font_style font_styles[5]; //0 - default, 1 - hover, 2 - active, 3 - on, 4 - on hover (this is based on enums)
+			font_style font_styles[6]; //0 - default, 1 - hover, 2 - active, 3 - on, 4 - on hover, 5 - on active (this is based on enums)
 
 			int sprite;
 			int sprite_hover;
 			int sprite_active;
 			int sprite_on;
 			int sprite_on_hover;
+			int sprite_on_active;
 
 			rect_offset border;
 			rect_offset padding;

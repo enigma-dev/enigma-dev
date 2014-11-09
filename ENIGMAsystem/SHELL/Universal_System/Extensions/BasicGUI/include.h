@@ -20,8 +20,6 @@
 
 #include "Universal_System/scalar.h"
 #include "Universal_System/var4.h"
-#include "buttons.h"
-#include "skins.h"
 
 #include <unordered_map>
 using std::unordered_map;
@@ -35,6 +33,7 @@ namespace enigma_user
 	  gui_state_hover,
 	  gui_state_active,
 	  gui_state_on_hover,
+	  gui_state_on_active,
 	  gui_state_all
 	};
 
@@ -95,7 +94,36 @@ namespace enigma_user
 	int gui_toggle_get_state(int id);
 	bool gui_toggle_get_active(int id);
 	void gui_toggle_draw(int id);
-	void gui_toggle_draw();
+	void gui_toggles_draw();
+
+  ///SLIDERS
+	int gui_slider_create(gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h, string text);
+	int gui_slider_create();
+
+	void gui_slider_destroy(int id);
+	void gui_slider_set_text(int id, string text);
+	void gui_slider_set_position(int id, gs_scalar x, gs_scalar y);
+
+	//Font Style changes
+	void gui_slider_set_font(int id, int state, int font);
+	void gui_slider_set_font_color(int id, int state, int color);
+	void gui_slider_set_font_alpha(int id, int state, gs_scalar alpha);
+	void gui_slider_set_font_halign(int id, int state, unsigned int halign);
+	void gui_slider_set_font_valign(int id, int state, unsigned int valign);
+
+	void gui_slider_set_sprite(int id, int state, int sprid);
+
+	void gui_slider_set_padding(int id, gs_scalar left, gs_scalar top, gs_scalar right, gs_scalar bottom);
+	void gui_slider_set_border(int id, gs_scalar left, gs_scalar top, gs_scalar right, gs_scalar bottom);
+	void gui_slider_set_size(int id, gs_scalar w, gs_scalar h);
+
+	void gui_slider_set_callback(int id, int script_id);
+	void gui_slider_set_visible(int id, bool visible);
+
+	int gui_slider_get_state(int id);
+	bool gui_slider_get_active(int id);
+	void gui_slider_draw(int id);
+	void gui_sliders_draw();
 
 
 	///Windows
@@ -128,6 +156,8 @@ namespace enigma_user
 
   //Window parenting
   void gui_window_add_button(int id, int bid);
+  void gui_window_add_toggle(int id, int tid);
+  void gui_window_add_slider(int id, int sid);
 
 	//Skins
 	int gui_skin_create();
