@@ -113,8 +113,7 @@ namespace enigma
     instance_deactivated_list.clear();
 
     // Initialize background variants so they do not throw uninitialized variable access errors.
-    for (unsigned i=0;i<8;i++)
-    {
+    for (unsigned i=0;i<8;i++) {
       background_visible[i] = backs[i].visible;
       background_foreground[i] = backs[i].foreground;
       background_index[i] = backs[i].background;
@@ -123,14 +122,12 @@ namespace enigma
       background_htiled[i] = backs[i].tileHor; background_vtiled[i] = backs[i].tileVert;
       background_alpha[i] = backs[i].alpha;
       background_coloring[i] = backs[i].color;
-      if (enigma_user::background_exists(background_index[i]))
-      {
+      if (enigma_user::background_exists(background_index[i])) {
         background_width[i] = background_get_width(background_index[i]); background_height[i] = background_get_height(background_index[i]);
         background_xscale[i] = (backs[i].stretch) ? room_width/background_width[i] : 1;
         background_yscale[i] = (backs[i].stretch) ? room_height/background_height[i] : 1;
       }
-      else
-      {
+      else {
         background_width[i] = 0; background_height[i] = 0;
         background_xscale[i] = 1;
         background_yscale[i] = 1;
@@ -141,8 +138,7 @@ namespace enigma
     view_enabled = views_enabled;
 
     // Initialize view variants so they do not throw uninitialized variable access errors.
-    for (unsigned i=0;i<8;i++)
-    {
+    for (unsigned i=0;i<8;i++) {
       view_xview[i] = views[i].area_x; view_yview[i] = views[i].area_y; view_wview[i] = views[i].area_w; view_hview[i] = views[i].area_h;
       view_xport[i] = views[i].port_x; view_yport[i] = views[i].port_y; view_wport[i] = views[i].port_w; view_hport[i] = views[i].port_h;
       view_object[i] = views[i].object2follow;
@@ -161,13 +157,13 @@ namespace enigma
     //Load tiles
     delete_tiles();
     for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++){
-        if (dit->second.tiles.size()){
-            dit->second.tiles.clear();
-        }
+      if (dit->second.tiles.size()){
+        dit->second.tiles.clear();
+      }
     }
     for (int i = 0; i < tilecount; i++) {
-        tile t = tiles[i];
-        drawing_depths[t.depth].tiles.push_back(t);
+      tile t = tiles[i];
+      drawing_depths[t.depth].tiles.push_back(t);
     }
     load_tiles();
     //Tiles end
@@ -175,35 +171,47 @@ namespace enigma
     object_basic* is[instancecount];
     for (int i = 0; i < instancecount; i++) {
       inst *obj = &instances[i];
-      is[i] = instance_create_id(obj->x,obj->y,obj->obj,obj->id);
+      object_basic *existing;
+      if ((existing = enigma::fetch_instance_by_id(obj->id))) {
+        is[i] = NULL;
+      } else {
+        is[i] = instance_create_id(obj->x,obj->y,obj->obj,obj->id);
+      }
     }
 
     instance_event_iterator = new inst_iter(NULL,NULL,NULL);
 
     // Fire the rooms preCreation code. This code includes instance sprite transformations added in the room editor.
     // (NOTE: This code uses instance_deactivated_list to look up instances by ID, in addition to the normal lookup approach).
-    if (precreatecode)
+    if (precreatecode) {
       precreatecode();
+    }
     
     // Fire the create event of all the new instances.
     for (int i = 0; i < instancecount; i++) {
-      is[i]->myevent_create();
+      if (is[i]) {
+        is[i]->myevent_create();
+      }
     }
 
     // Fire the game start event for all the new instances, persistent objects don't matter since this is the first time
     // the game ran they won't even exist yet
-    if (gamestart)
-      for (int i = 0; i < instancecount; i++)
-        is[i]->myevent_gamestart();
+    if (gamestart) {
+      for (int i = 0; i < instancecount; i++) {
+        if (is[i]) {
+          is[i]->myevent_gamestart();
+        }
+      }
+    }
 
     // Fire the rooms creation code. This includes instance creation code.
     // (NOTE: This code uses instance_deactivated_list to look up instances by ID, in addition to the normal lookup approach).
-    if (createcode)
+    if (createcode) {
       createcode();
+    }
 
     // Fire the room start event for all persistent objects still kept alive and all the new instances
-    for (enigma::iterator it = enigma::instance_list_first(); it; ++it)
-    {
+    for (enigma::iterator it = enigma::instance_list_first(); it; ++it) {
       it->myevent_roomstart();
     }
   }
