@@ -426,16 +426,22 @@ int lang_CPP::link_ambiguous(parsed_object *global, EnigmaStruct *es,parsed_scri
         cout << "Determined `" << it->first << "' to be global for script `" << es->scripts[i].name << "'" << endl;
     }
   }
-  for (int i = 0; i < int(tlines.size()); i++)
+
+
+  int tlineID = 0;
+  for (int i=0; i<es->timelineCount; i++) 
   {
-    parsed_object &t = tlines[i]->obj;
-    for (parsed_object::ambit it = t.ambiguous.begin(); it != t.ambiguous.end(); it++)
+    for (int j=0; j<es->timelines[i].momentCount; j++) 
     {
-      parsed_object::globit g = global->globals.find(it->first);
-      if (g == global->globals.end())
-        t.locals[it->first] = it->second, cout << "Determined `" << it->first << "' to be local for script `" << es->timelines[i].name << "'" << endl;
-      else
-        cout << "Determined `" << it->first << "' to be global for script `" << es->timelines[i].name << "'" << endl;
+      parsed_object &t = tlines[tlineID++]->obj;
+      for (parsed_object::ambit it = t.ambiguous.begin(); it != t.ambiguous.end(); it++)
+      {
+        parsed_object::globit g = global->globals.find(it->first);
+        if (g == global->globals.end())
+          t.locals[it->first] = it->second, cout << "Determined `" << it->first << "' to be local for timeline `" << es->timelines[i].name << "', moment `" <<j <<"'" << endl;
+        else
+          cout << "Determined `" << it->first << "' to be global for timeline `" << es->timelines[i].name << "', moment `" <<j <<"'" << endl;
+      }
     }
   }
   
