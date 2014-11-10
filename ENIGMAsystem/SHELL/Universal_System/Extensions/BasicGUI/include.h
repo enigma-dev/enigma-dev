@@ -97,7 +97,7 @@ namespace enigma_user
 	void gui_toggles_draw();
 
   ///SLIDERS
-	int gui_slider_create(gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h, string text);
+	int gui_slider_create(gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h, gs_scalar ind_w, gs_scalar ind_h, double val, double minVal, double maxVal, double incrVal, string text);
 	int gui_slider_create();
 
 	void gui_slider_destroy(int id);
@@ -122,6 +122,7 @@ namespace enigma_user
 
 	int gui_slider_get_state(int id);
 	bool gui_slider_get_active(int id);
+  double gui_slider_get_value(int id);
 	void gui_slider_draw(int id);
 	void gui_sliders_draw();
 
@@ -149,6 +150,7 @@ namespace enigma_user
 
 	void gui_window_set_callback(int id, int script_id);
 	void gui_window_set_visible(int id, bool visible);
+  void gui_window_set_draggable(int id, bool draggable);
 
 	int gui_window_get_state(int id);
 	void gui_window_draw(int id);

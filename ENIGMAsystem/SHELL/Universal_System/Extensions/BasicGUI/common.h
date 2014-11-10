@@ -21,23 +21,20 @@
 namespace gui
 {
 	struct rect_offset{
-		gs_scalar top, left, bottom, right;
-		rect_offset(){ top = 0, left = 0, bottom = 0, right = 0; }
+		gs_scalar top = 0.0, left = 0.0, bottom = 0.0, right = 0.0;
 		void set(gs_scalar l, gs_scalar t, gs_scalar r, gs_scalar b) { left = l, top = t, right = r, bottom = b; }
 	};
 	struct rect{
-		gs_scalar x, y, w, h;
-		rect(){ x = 0, y = 0, w = 0, h = 0; }
+		gs_scalar x = 0.0, y = 0.0, w = 0.0, h = 0.0;
 		bool point_inside(gs_scalar tx, gs_scalar ty){ return (tx>x && tx<x+w && ty>y && ty<y+h); }
 	};
 	struct font_style{
-		int font;
-		unsigned int halign;
-		unsigned int valign;
-		int color;
-		gs_scalar alpha;
-		gs_scalar textx, texty;
-		font_style(){ font = -1, halign = enigma_user::fa_left, valign = enigma_user::fa_top, color = enigma_user::c_white, alpha = 1.0;  }
+		int font = -1;
+		unsigned int halign = enigma_user::fa_left;
+		unsigned int valign = enigma_user::fa_top;
+		int color = enigma_user::c_white;
+		gs_scalar alpha = 1.0;
+		gs_scalar textx = 0.0, texty = 0.0;
 		void use(){
 			enigma_user::draw_set_halign(halign);
 			enigma_user::draw_set_valign(valign);

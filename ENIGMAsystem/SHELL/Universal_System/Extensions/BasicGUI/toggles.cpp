@@ -46,18 +46,9 @@ namespace gui
 	extern bool windowStopPropagation;
 
 	//Implements toggle class
-	void gui_toggle::reset(){
-		text = "", state = 0, sprite = sprite_hover = sprite_active = sprite_on = sprite_on_hover = sprite_on_active = -1;
-		active = false;
-		callback = -1;
-		visible = true;
+	gui_toggle::gui_toggle(){
 		font_styles[0].halign = font_styles[1].halign = font_styles[2].halign = font_styles[3].halign = font_styles[4].halign = font_styles[5].halign = enigma_user::fa_left;
 		font_styles[0].valign = font_styles[1].valign = font_styles[2].valign = font_styles[3].valign = font_styles[4].valign = font_styles[5].valign = enigma_user::fa_middle;
-	}
-
-	gui_toggle::gui_toggle(){
-	  parent_id = -1;
-		reset();
 	}
 
 	//Update all possible toggle states (hover, click, toggle etc.)
@@ -144,11 +135,12 @@ namespace gui
 	void gui_toggle::update_text_pos(int state){
 		if (state == -1){
 			update_text_pos(enigma_user::gui_state_default);
+      update_text_pos(enigma_user::gui_state_on);
 			update_text_pos(enigma_user::gui_state_hover);
 			update_text_pos(enigma_user::gui_state_active);
-			update_text_pos(enigma_user::gui_state_on);
 			update_text_pos(enigma_user::gui_state_on_hover);
-			update_text_pos(enigma_user::gui_state_on_active);
+      update_text_pos(enigma_user::gui_state_on_active);
+      return;
 		}
 
 		font_style* style = &font_styles[state];
