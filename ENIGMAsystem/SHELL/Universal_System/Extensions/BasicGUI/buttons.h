@@ -17,6 +17,8 @@
 
 #ifndef BGUI_BUTTONS_H
 #define BGUI_BUTTONS_H
+#include <array>
+using std::array;
 
 #include "common.h"
 
@@ -31,28 +33,27 @@ namespace gui
 		public:
 			unsigned int id;
 			rect box;
-			string text;
-			int state;
-			bool visible;
-			bool active; //Is button pressed
-			bool togglable; //Is button a toggle button
-			int callback; //Script to run when clicked
+			string text = "";
+			int state = 0;
+			bool visible = true;
+			bool active = false; //Is button pressed
+			bool togglable = false; //Is button a toggle button
+			int callback = -1; //Script to run when clicked
 
-			int parent_id; //ID of the parent of some kind (probably a window). It won't render with gui_draw_buttons() if it is.
+			int parent_id = -1; //ID of the parent of some kind (probably a window). It won't render with gui_draw_buttons() if it is.
 
-			font_style font_styles[6]; //0 - default, 1 - hover, 2 - active, 3 - on, 4 - on hover, 5 - on active (this is based on enums)
+			array<font_style,6> font_styles; //0 - default, 1 - hover, 2 - active, 3 - on, 4 - on hover, 5 - on active (this is based on enums)
 
-			int sprite;
-			int sprite_hover;
-			int sprite_active;
-			int sprite_on;
-			int sprite_on_hover;
-			int sprite_on_active;
+			int sprite = -1;
+			int sprite_hover = -1;
+			int sprite_active = -1;
+			int sprite_on = -1;
+			int sprite_on_hover = -1;
+			int sprite_on_active = -1;
 
 			rect_offset border;
 			rect_offset padding;
 
-			void reset();
 			gui_button();
 			//Update all possible button states (hover, click, toggle etc.)
 			void update(gs_scalar ox = 0, gs_scalar oy = 0, gs_scalar tx = enigma_user::mouse_x, gs_scalar ty = enigma_user::mouse_y);

@@ -45,7 +45,6 @@ namespace gui{
 
 		slider_style = (enigma_user::gui_slider_create());
 		enigma_user::gui_slider_set_visible(slider_style,false);
-
 	}
 
 	int gui_bound_skin = -1;

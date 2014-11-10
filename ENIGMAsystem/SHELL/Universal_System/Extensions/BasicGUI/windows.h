@@ -17,10 +17,13 @@
 
 #ifndef BGUI_WINDOWS_H
 #define BGUI_WINDOWS_H
+#include <array>
+#include <vector>
+
+using std::array;
+using std::vector;
 
 #include "common.h"
-#include <vector>
-using std::vector;
 
 namespace enigma_user
 {
@@ -34,23 +37,23 @@ namespace gui
 			int id;
 
 			rect box;
-			string text;
-			int state;
-			bool visible;
-			bool drag;
-			gs_scalar drag_xoffset;
-			gs_scalar drag_yoffset;
-			int callback;
+			string text = "";
+			int state = 0;
+			bool visible = true;
+			bool drag = false;
+      bool draggable = true; //Specifies if the window can be moved
+			gs_scalar drag_xoffset = 0.0;
+			gs_scalar drag_yoffset = 0.0;
+			int callback = -1;
 
-			font_style font_styles[2]; //0 - default, 1 - on (this is based based on enums)
+			array<font_style,2> font_styles; //0 - default, 1 - on (this is based based on enums)
 
-			int sprite;
-			int sprite_on;
+			int sprite = -1;
+			int sprite_on = -1;
 
 			rect_offset border;
 			rect_offset padding;
 
-			void reset();
 			gui_window();
 			//Update all possible window states (focus and unfocused)
 			void update(gs_scalar tx = enigma_user::mouse_x, gs_scalar ty = enigma_user::mouse_y);
