@@ -53,19 +53,9 @@ namespace gui
 	extern unsigned int gui_skins_maxid;
 
 	//Implements button class
-	void gui_window::reset(){
-		text = "", state = 0, sprite = sprite_on = -1;
-		callback = -1;
-		visible = true;
-    drag = false;
+	gui_window::gui_window(){
 		font_styles[0].halign = font_styles[1].halign = enigma_user::fa_center;
 		font_styles[0].valign = font_styles[1].valign = enigma_user::fa_top;
-	}
-
-	gui_window::gui_window(){
-    drag_xoffset = 0;
-    drag_yoffset = 0;
-		reset();
 	}
 
 	//Update all possible button states (hover, click, toggle etc.)
@@ -77,9 +67,11 @@ namespace gui
     if (enigma_user::mouse_check_button_pressed(enigma_user::mb_left)){ //Press
       if(box.point_inside(tx,ty)){
         state = enigma_user::gui_state_on;
-        drag = true;
-        drag_xoffset = tx-box.x;
-        drag_yoffset = ty-box.y;
+        if (draggable == true){
+          drag = true;
+          drag_xoffset = tx-box.x;
+          drag_yoffset = ty-box.y;
+        }
       }else{
       state = enigma_user::gui_state_default;
       }
@@ -120,7 +112,9 @@ namespace gui
 		if (state == -1){
 			update_text_pos(enigma_user::gui_state_default);
 			update_text_pos(enigma_user::gui_state_on);
+      return;
 		}
+    if (state != enigma_user::gui_state_default && state != enigma_user::gui_state_on) return;
 
 		font_style* style = &font_styles[state];
 
@@ -266,6 +260,10 @@ namespace enigma_user
 
 	void gui_window_set_visible(int id, bool visible){
 		gui::gui_windows[id].visible = visible;
+	}
+  
+  void gui_window_set_draggable(int id, bool draggable){
+		gui::gui_windows[id].draggable = draggable;
 	}
 
 	void gui_window_draw(int id){
