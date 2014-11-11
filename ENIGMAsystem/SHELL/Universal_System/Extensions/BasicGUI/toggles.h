@@ -41,17 +41,7 @@ namespace gui
 
 			int parent_id = -1; //ID of some kind of parent (probably a window). It won't render with gui_draw_toggles() if it is not -1.
 
-			array<font_style,6> font_styles; //0 - default, 1 - hover, 2 - active, 3 - on, 4 - on hover, 5 - on active (this is based on enums)
-
-			int sprite = -1;
-			int sprite_hover = -1;
-			int sprite_active = -1;
-			int sprite_on = -1;
-			int sprite_on_hover = -1;
-      int sprite_on_active = -1;
-
-			rect_offset border;
-			rect_offset padding;
+      int style_id = -1; //The style we use
 
 			gui_toggle();
 			//Update all possible button states (hover, click, toggle etc.)

@@ -53,27 +53,8 @@ namespace gui
 
 			int parent_id = -1; //ID of some kind of parent (probably a window). It won't render with gui_draw_sliders() if it is not -1.
 
-			array<font_style,6> font_styles; //0 - default, 1 - hover, 2 - active, 3 - on, 4 - on hover, 5 - on active (this is based on enums)
-
-      array<int,6> sprites;
-      array<int,6> sprites_indicator;
-			/*int sprite = -1;
-			int sprite_hover = -1;
-			int sprite_active = -1;
-			int sprite_on = -1;
-			int sprite_on_hover = -1;
-      int sprite_on_active = -1;*/
-
-     	/*int sprite_indicator = -1;
-			int sprite_indicator_hover = -1;
-			int sprite_indicator_active = -1;
-			int sprite_indicator_on = -1;
-			int sprite_indicator_on_hover = -1;
-      int sprite_indicator_on_active = -1;*/
-
-			rect_offset border;
-      rect_offset indicator_border;
-			rect_offset padding;
+      int style_id = -1;
+      int indicator_style_id = -1;
 
 			gui_slider();
 			//Update all possible slider states (hover, click etc.)

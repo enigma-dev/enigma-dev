@@ -29,6 +29,7 @@ using std::pair;
 #include "Graphics_Systems/General/GSfont.h"
 #include "Graphics_Systems/General/GScolors.h"
 
+#include "styles.h"
 #include "skins.h"
 #include "sliders.h"
 #include "include.h"
@@ -41,16 +42,17 @@ namespace gui
 
 	extern int gui_bound_skin;
 	extern unordered_map<unsigned int, gui_skin> gui_skins;
+  extern unordered_map<unsigned int, gui_style> gui_styles;
 	extern unsigned int gui_skins_maxid;
+  extern unsigned int gui_style_slider;
 
 	extern bool windowStopPropagation; //This stops event propagation between window elements
 
 	//Implements slider class
 	gui_slider::gui_slider(){
-		font_styles[0].halign = font_styles[1].halign = font_styles[2].halign = font_styles[3].halign = font_styles[4].halign = font_styles[5].halign = enigma_user::fa_left;
-		font_styles[0].valign = font_styles[1].valign = font_styles[2].valign = font_styles[3].valign = font_styles[4].valign = font_styles[5].valign = enigma_user::fa_middle;
-		sprites.fill(-1);
-		sprites_indicator.fill(-1);
+    style_id = gui_style_slider; //Default style
+	  enigma_user::gui_style_set_font_halign(style_id, enigma_user::gui_state_all, enigma_user::fa_left);
+    enigma_user::gui_style_set_font_valign(style_id, enigma_user::gui_state_all, enigma_user::fa_middle);
 	}
 
 	//Update all possible slider states (hover, click etc.)
@@ -97,8 +99,8 @@ namespace gui
 
 	void gui_slider::draw(gs_scalar ox, gs_scalar oy){
 		//Draw slider and indicator
-		if (sprites[state] != -1){
-      enigma_user::draw_sprite_padded(sprites[state],-1,border.left,border.top,border.right,border.bottom,ox + box.x,oy + box.y,ox + box.x+box.w,oy + box.y+box.h);
+    if (gui::gui_styles[style_id].sprites[state] != -1){
+      enigma_user::draw_sprite_padded(gui::gui_styles[style_id].sprites[state],-1,gui::gui_styles[style_id].border.left,gui::gui_styles[style_id].border.top,gui::gui_styles[style_id].border.right,gui::gui_styles[style_id].border.bottom,ox + box.x,oy + box.y,ox + box.x+box.w,oy + box.y+box.h);
 		}
     if (sprites_indicator[state] != -1){
       enigma_user::draw_sprite_padded(sprites_indicator[state],-1,indicator_border.left,indicator_border.top,indicator_border.right,indicator_border.bottom,ox + box.x + slider_offset,oy + box.y,ox + box.x + indicator_box.w + slider_offset,oy + box.y+indicator_box.h);
@@ -110,33 +112,6 @@ namespace gui
 	}
 
 	void gui_slider::update_text_pos(int state){
-		if (state == -1){
-			update_text_pos(enigma_user::gui_state_default);
-      update_text_pos(enigma_user::gui_state_on);
-			update_text_pos(enigma_user::gui_state_hover);
-			update_text_pos(enigma_user::gui_state_active);
-			update_text_pos(enigma_user::gui_state_on_hover);
-      update_text_pos(enigma_user::gui_state_on_active);
-      return;
-		}
-
-		font_style* style = &font_styles[state];
-
-		if (style->halign == enigma_user::fa_left){
-			style->textx = box.x+padding.left;
-		}else if (style->halign == enigma_user::fa_center){
-			style->textx = box.x+box.w/2.0;
-		}else if (style->halign == enigma_user::fa_right){
-			style->textx = box.x+box.w-padding.right;
-		}
-
-		if (style->valign == enigma_user::fa_top){
-			style->texty = box.y+padding.top;
-		}else if (style->valign == enigma_user::fa_middle){
-			style->texty = box.y+box.h/2.0;
-		}else if (style->valign == enigma_user::fa_bottom){
-			style->texty = box.y+box.h-padding.bottom;
-		}
 	}
 }
 
@@ -190,109 +165,23 @@ namespace enigma_user
 		gui::gui_sliders[id].box.y = y;
 	}
 
-	void gui_slider_set_font(int id, int state, int font){
-		if (state == enigma_user::gui_state_all){
-			gui::gui_sliders[id].font_styles[enigma_user::gui_state_default].font = font;
-			gui::gui_sliders[id].font_styles[enigma_user::gui_state_hover].font = font;
-			gui::gui_sliders[id].font_styles[enigma_user::gui_state_active].font = font;
-			gui::gui_sliders[id].font_styles[enigma_user::gui_state_on].font = font;
-			gui::gui_sliders[id].font_styles[enigma_user::gui_state_on_hover].font = font;
-      gui::gui_sliders[id].font_styles[enigma_user::gui_state_on_active].font = font;
-		}else{
-			gui::gui_sliders[id].font_styles[state].font = font;
-		}
-	}
-
-	void gui_slider_set_font_halign(int id, int state, unsigned int halign){
-		if (state == enigma_user::gui_state_all){
-			gui::gui_sliders[id].font_styles[enigma_user::gui_state_default].halign = halign;
-			gui::gui_sliders[id].font_styles[enigma_user::gui_state_hover].halign = halign;
-			gui::gui_sliders[id].font_styles[enigma_user::gui_state_active].halign = halign;
-			gui::gui_sliders[id].font_styles[enigma_user::gui_state_on].halign = halign;
-			gui::gui_sliders[id].font_styles[enigma_user::gui_state_on_hover].halign = halign;
-      gui::gui_sliders[id].font_styles[enigma_user::gui_state_on_active].halign = halign;
-			gui::gui_sliders[id].update_text_pos();
-		}else{
-			gui::gui_sliders[id].font_styles[state].halign = halign;
-			gui::gui_sliders[id].update_text_pos(state);
-		}
-	}
-
-	void gui_slider_set_font_valign(int id, int state, unsigned int valign){
-		if (state == enigma_user::gui_state_all){
-			gui::gui_sliders[id].font_styles[enigma_user::gui_state_default].valign = valign;
-			gui::gui_sliders[id].font_styles[enigma_user::gui_state_hover].valign = valign;
-			gui::gui_sliders[id].font_styles[enigma_user::gui_state_active].valign = valign;
-			gui::gui_sliders[id].font_styles[enigma_user::gui_state_on].valign = valign;
-			gui::gui_sliders[id].font_styles[enigma_user::gui_state_on_hover].valign = valign;
-      gui::gui_sliders[id].font_styles[enigma_user::gui_state_on_active].valign = valign;
-			gui::gui_sliders[id].update_text_pos();
-		}else{
-			gui::gui_sliders[id].font_styles[state].valign = valign;
-			gui::gui_sliders[id].update_text_pos(state);
-		}
-	}
-
-	void gui_slider_set_font_color(int id, int state, int color){
-		if (state == enigma_user::gui_state_all){
-			gui::gui_sliders[id].font_styles[enigma_user::gui_state_default].color = color;
-			gui::gui_sliders[id].font_styles[enigma_user::gui_state_hover].color = color;
-			gui::gui_sliders[id].font_styles[enigma_user::gui_state_active].color = color;
-			gui::gui_sliders[id].font_styles[enigma_user::gui_state_on].color = color;
-			gui::gui_sliders[id].font_styles[enigma_user::gui_state_on_hover].color = color;
-      gui::gui_sliders[id].font_styles[enigma_user::gui_state_on_active].color = color;
-		}else{
-			gui::gui_sliders[id].font_styles[state].color = color;
-		}
-	}
-
-	void gui_slider_set_font_alpha(int id, int state, gs_scalar alpha){
-		if (state == enigma_user::gui_state_all){
-			gui::gui_sliders[id].font_styles[enigma_user::gui_state_default].alpha = alpha;
-			gui::gui_sliders[id].font_styles[enigma_user::gui_state_hover].alpha = alpha;
-			gui::gui_sliders[id].font_styles[enigma_user::gui_state_active].alpha = alpha;
-			gui::gui_sliders[id].font_styles[enigma_user::gui_state_on].alpha = alpha;
-			gui::gui_sliders[id].font_styles[enigma_user::gui_state_on_hover].alpha = alpha;
-      gui::gui_sliders[id].font_styles[enigma_user::gui_state_on_active].alpha = alpha;
-		}else{
-			gui::gui_sliders[id].font_styles[state].alpha = alpha;
-		}
-	}
-
-	void gui_slider_set_sprite(int id, int state, int sprid){
-	  if (state == enigma_user::gui_state_all){
-      gui::gui_sliders[id].sprites.fill(sprid);
-	  }else{
-      gui::gui_sliders[id].sprites[state] = sprid;
-	  }
-	}
-
-  void gui_slider_set_indicator_sprite(int id, int state, int sprid){
-	  if (state == enigma_user::gui_state_all){
-      gui::gui_sliders[id].sprites_indicator.fill(sprid);
-	  }else{
-      gui::gui_sliders[id].sprites_indicator[state] = sprid;
-	  }
-  }
-
 	void gui_slider_set_size(int id, gs_scalar w, gs_scalar h){
 		gui::gui_sliders[id].box.w = w;
 		gui::gui_sliders[id].box.h = h;
 		gui::gui_sliders[id].update_text_pos();
 	}
 
-	void gui_slider_set_padding(int id, gs_scalar left, gs_scalar top, gs_scalar right, gs_scalar bottom){
-		gui::gui_sliders[id].padding.set(left,top,right,bottom);
-		gui::gui_sliders[id].update_text_pos();
-	}
-
-	void gui_slider_set_border(int id, gs_scalar left, gs_scalar top, gs_scalar right, gs_scalar bottom){
-		gui::gui_sliders[id].border.set(left,top,right,bottom);
-	}
-
 	void gui_slider_set_callback(int id, int script_id){
 		gui::gui_sliders[id].callback = script_id;
 	}
+
+  void gui_toggle_set_style(int id, int style_id){
+    gui::gui_toggles[id].style_id = (style_id != -1? style_id : gui::gui_style_slider);
+  }
+
+  void gui_toggle_set_indicator_style(int id, int style_id){
+    gui::gui_toggles[id].indicator_style_id = (style_id != -1? style_id : gui::gui_style_slider);
+  }
 
 	int gui_slider_get_state(int id){
 		return gui::gui_sliders[id].state;

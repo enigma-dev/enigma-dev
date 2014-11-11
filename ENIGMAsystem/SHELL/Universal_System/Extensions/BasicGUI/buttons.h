@@ -34,6 +34,7 @@ namespace gui
 			unsigned int id;
 			rect box;
 			string text = "";
+
 			int state = 0;
 			bool visible = true;
 			bool active = false; //Is button pressed
