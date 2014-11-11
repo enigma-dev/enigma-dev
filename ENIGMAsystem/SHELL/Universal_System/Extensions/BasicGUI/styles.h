@@ -15,40 +15,28 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef BGUI_BUTTONS_H
-#define BGUI_BUTTONS_H
+#ifndef BGUI_STYLES_H
+#define BGUI_STYLES_H
 #include <array>
 using std::array;
 
 #include "common.h"
 
-namespace enigma_user
-{
-	extern double mouse_x, mouse_y;
-}
-
 namespace gui
 {
-	class gui_button{
+	class gui_style{
 		public:
 			unsigned int id;
+
+			array<font_style,6> font_styles; //0 - default, 1 - hover, 2 - active, 3 - on, 4 - on hover, 5 - on active (this is based on enums)
+
+      array<int,6> sprites;
+
 			rect box;
-			string text = "";
-			int state = 0;
-			bool visible = true;
-			bool active = false; //Is button pressed
-			bool togglable = false; //Is button a toggle button
-			int callback = -1; //Script to run when clicked
+			rect_offset border;
+			rect_offset padding;
 
-			int parent_id = -1; //ID of the parent of some kind (probably a window). It won't render with gui_draw_buttons() if it is.
-
-      int style_id = -1; //The style we use
-
-			gui_button();
-			//Update all possible button states (hover, click, toggle etc.)
-			void update(gs_scalar ox = 0, gs_scalar oy = 0, gs_scalar tx = enigma_user::mouse_x, gs_scalar ty = enigma_user::mouse_y);
-			void draw(gs_scalar ox = 0, gs_scalar oy = 0);
-			void update_text_pos(int state = -1);
+			gui_style();
 	};
 }
 

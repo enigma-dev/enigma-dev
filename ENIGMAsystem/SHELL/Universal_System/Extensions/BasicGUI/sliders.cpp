@@ -49,6 +49,8 @@ namespace gui
 	gui_slider::gui_slider(){
 		font_styles[0].halign = font_styles[1].halign = font_styles[2].halign = font_styles[3].halign = font_styles[4].halign = font_styles[5].halign = enigma_user::fa_left;
 		font_styles[0].valign = font_styles[1].valign = font_styles[2].valign = font_styles[3].valign = font_styles[4].valign = font_styles[5].valign = enigma_user::fa_middle;
+		sprites.fill(-1);
+		sprites_indicator.fill(-1);
 	}
 
 	//Update all possible slider states (hover, click etc.)
@@ -58,9 +60,15 @@ namespace gui
 			if (enigma_user::mouse_check_button_pressed(enigma_user::mb_left)){
         state = enigma_user::gui_state_active;
         drag = true;
-        drag_xoffset = tx-ox-box.x;
-        drag_yoffset = ty-oy-box.y;
-			}else{
+        if (indicator_box.point_inside(tx-ox-box.x-slider_offset,ty-oy)){
+          printf("CLicked on indicator!\n");
+          drag_xoffset = tx-ox-indicator_box.x;
+        }else{
+          printf("CLicked on slider!\n");
+          slider_offset = fmin(fmax(0,tx-ox), box.w);
+          drag_xoffset = 0.0;
+        }
+      }else{
 				if (state != enigma_user::gui_state_active){
 					state = enigma_user::gui_state_hover;
 				}else{
@@ -78,9 +86,9 @@ namespace gui
 		}
 		if (drag == true){
       windowStopPropagation = true;
-      value = tx-ox-drag_xoffset;
-      printf("Box.x = %f\n", value);
-      slider_offset = (value-minValue)/(maxValue-minValue) * box.w;
+      slider_offset = fmin(fmax(0,tx-ox-drag_xoffset), box.w);
+      value = minValue + slider_offset/box.w * (maxValue-minValue);
+      //printf("Box.x = %f\n", value);
 			if (enigma_user::mouse_check_button_released(enigma_user::mb_left)){
 				drag = false;
 			}
@@ -88,56 +96,12 @@ namespace gui
 	}
 
 	void gui_slider::draw(gs_scalar ox, gs_scalar oy){
-		//Draw button
-		switch (state){
-			case enigma_user::gui_state_default: //Default off
-				if (sprite!=-1){
-					enigma_user::draw_sprite_padded(sprite,-1,border.left,border.top,border.right,border.bottom,ox + box.x,oy + box.y,ox + box.x+box.w,oy + box.y+box.h);
-        }
-        if (sprite_indicator!=-1){
- 					enigma_user::draw_sprite_padded(sprite_indicator,-1,indicator_border.left,indicator_border.top,indicator_border.right,indicator_border.bottom,ox + box.x + slider_offset,oy + box.y,ox + box.x + indicator_box.w + slider_offset,oy + box.y+indicator_box.h);
-        }
-			break;
-			case enigma_user::gui_state_hover: //Default off hover
-				if (sprite_hover!=-1){
-					enigma_user::draw_sprite_padded(sprite_hover,-1,border.left,border.top,border.right,border.bottom,ox + box.x,oy + box.y,ox + box.x+box.w,oy + box.y+box.h);
-        }
-        if (sprite_indicator_hover!=-1){
-          enigma_user::draw_sprite_padded(sprite_indicator_hover,-1,indicator_border.left,indicator_border.top,indicator_border.right,indicator_border.bottom,ox + box.x + slider_offset,oy + box.y,ox + box.x + indicator_box.w + slider_offset,oy + box.y+indicator_box.h);
-        }
-			break;
-			case enigma_user::gui_state_active: //Default active
-				if (sprite_active!=-1){
-					enigma_user::draw_sprite_padded(sprite_active,-1,border.left,border.top,border.right,border.bottom,ox + box.x,oy + box.y,ox + box.x+box.w,oy + box.y+box.h);
-				}
-        if (sprite_indicator_active!=-1){
-          enigma_user::draw_sprite_padded(sprite_indicator_active,-1,indicator_border.left,indicator_border.top,indicator_border.right,indicator_border.bottom,ox + box.x + slider_offset,oy + box.y,ox + box.x + indicator_box.w + slider_offset,oy + box.y+indicator_box.h);
-        }
-			break;
-			case enigma_user::gui_state_on: //Default on
-				if (sprite_on!=-1){
-					enigma_user::draw_sprite_padded(sprite_on,-1,border.left,border.top,border.right,border.bottom,ox + box.x,oy + box.y,ox + box.x+box.w,oy + box.y+box.h);
-				}
-        if (sprite_indicator_on!=-1){
-          enigma_user::draw_sprite_padded(sprite_indicator_on,-1,indicator_border.left,indicator_border.top,indicator_border.right,indicator_border.bottom,ox + box.x + slider_offset,oy + box.y,ox + box.x + indicator_box.w + slider_offset,oy + box.y+indicator_box.h);
-        }
-			break;
-			case enigma_user::gui_state_on_hover: //Default on hover
-				if (sprite_on_hover!=-1){
-					enigma_user::draw_sprite_padded(sprite_on_hover,-1,border.left,border.top,border.right,border.bottom,ox + box.x,oy + box.y,ox + box.x+box.w,oy + box.y+box.h);
-				}
-        if (sprite_indicator_on_hover!=-1){
-          enigma_user::draw_sprite_padded(sprite_indicator_on_hover,-1,indicator_border.left,indicator_border.top,indicator_border.right,indicator_border.bottom,ox + box.x + slider_offset,oy + box.y,ox + box.x + indicator_box.w + slider_offset,oy + box.y+indicator_box.h);
-        }
-			break;
-      case enigma_user::gui_state_on_active: //Default on active
-				if (sprite_on_active!=-1){
-					enigma_user::draw_sprite_padded(sprite_on_active,-1,border.left,border.top,border.right,border.bottom,ox + box.x,oy + box.y,ox + box.x+box.w,oy + box.y+box.h);
-				}
-        if (sprite_indicator_on_active!=-1){
-          enigma_user::draw_sprite_padded(sprite_indicator_on_active,-1,indicator_border.left,indicator_border.top,indicator_border.right,indicator_border.bottom,ox + box.x + slider_offset,oy + box.y,ox + box.x + indicator_box.w + slider_offset,oy + box.y+indicator_box.h);
-        }
-			break;
+		//Draw slider and indicator
+		if (sprites[state] != -1){
+      enigma_user::draw_sprite_padded(sprites[state],-1,border.left,border.top,border.right,border.bottom,ox + box.x,oy + box.y,ox + box.x+box.w,oy + box.y+box.h);
+		}
+    if (sprites_indicator[state] != -1){
+      enigma_user::draw_sprite_padded(sprites_indicator[state],-1,indicator_border.left,indicator_border.top,indicator_border.right,indicator_border.bottom,ox + box.x + slider_offset,oy + box.y,ox + box.x + indicator_box.w + slider_offset,oy + box.y+indicator_box.h);
 		}
 
 		//Draw text
@@ -206,7 +170,7 @@ namespace enigma_user
     gui::gui_sliders[gui::gui_sliders_maxid].minValue = minVal;
 		gui::gui_sliders[gui::gui_sliders_maxid].maxValue = maxVal;
 		gui::gui_sliders[gui::gui_sliders_maxid].incValue = incrVal;
-    gui::gui_sliders[gui::gui_sliders_maxid].value = value;
+    gui::gui_sliders[gui::gui_sliders_maxid].value = val;
 
 		gui::gui_sliders[gui::gui_sliders_maxid].text = text;
 		gui::gui_sliders[gui::gui_sliders_maxid].update_text_pos();
@@ -296,15 +260,20 @@ namespace enigma_user
 	}
 
 	void gui_slider_set_sprite(int id, int state, int sprid){
-		switch (state){
-			case enigma_user::gui_state_default: gui::gui_sliders[id].sprite = sprid; break;
-			case enigma_user::gui_state_hover: gui::gui_sliders[id].sprite_hover = sprid; break;
-			case enigma_user::gui_state_active: gui::gui_sliders[id].sprite_active = sprid; break;
-			case enigma_user::gui_state_on: gui::gui_sliders[id].sprite_on = sprid; break;
-			case enigma_user::gui_state_on_hover: gui::gui_sliders[id].sprite_on_hover = sprid; break;
-			case enigma_user::gui_state_on_active: gui::gui_sliders[id].sprite_on_active = sprid; break;
-		}
+	  if (state == enigma_user::gui_state_all){
+      gui::gui_sliders[id].sprites.fill(sprid);
+	  }else{
+      gui::gui_sliders[id].sprites[state] = sprid;
+	  }
 	}
+
+  void gui_slider_set_indicator_sprite(int id, int state, int sprid){
+	  if (state == enigma_user::gui_state_all){
+      gui::gui_sliders[id].sprites_indicator.fill(sprid);
+	  }else{
+      gui::gui_sliders[id].sprites_indicator[state] = sprid;
+	  }
+  }
 
 	void gui_slider_set_size(int id, gs_scalar w, gs_scalar h){
 		gui::gui_sliders[id].box.w = w;
@@ -332,7 +301,7 @@ namespace enigma_user
 	bool gui_slider_get_active(int id){
 		return gui::gui_sliders[id].active;
 	}
-  
+
   double gui_slider_get_value(int id){
 		return gui::gui_sliders[id].value;
   }
