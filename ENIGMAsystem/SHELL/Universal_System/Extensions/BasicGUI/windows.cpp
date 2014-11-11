@@ -29,6 +29,7 @@ using std::pair;
 #include "Graphics_Systems/General/GSfont.h"
 #include "Graphics_Systems/General/GScolors.h"
 
+#include "styles.h"
 #include "skins.h"
 #include "windows.h"
 #include "include.h"
@@ -44,6 +45,9 @@ namespace gui
   bool windowStopPropagation = false; //Stop event propagation in windows and between
 	unordered_map<unsigned int, gui_window> gui_windows;
 	unsigned int gui_windows_maxid = 0;
+	extern unsigned int gui_style_window;
+
+  extern unordered_map<unsigned int, gui_style> gui_styles;
 
 	extern int gui_bound_skin;
 	extern unordered_map<unsigned int, gui_skin> gui_skins;
@@ -54,8 +58,9 @@ namespace gui
 
 	//Implements button class
 	gui_window::gui_window(){
-		font_styles[0].halign = font_styles[1].halign = enigma_user::fa_center;
-		font_styles[0].valign = font_styles[1].valign = enigma_user::fa_top;
+    style_id = gui_style_window; //Default style
+    enigma_user::gui_style_set_font_halign(style_id, enigma_user::gui_state_all, enigma_user::fa_center);
+    enigma_user::gui_style_set_font_valign(style_id, enigma_user::gui_state_all, enigma_user::fa_top);
 	}
 
 	//Update all possible button states (hover, click, toggle etc.)
@@ -89,50 +94,31 @@ namespace gui
 	}
 
 	void gui_window::draw(){
-		//Draw button
-		switch (state){
-			case enigma_user::gui_state_default: //Default off
-				if (sprite!=-1){
-					enigma_user::draw_sprite_padded(sprite,-1,border.left,border.top,border.right,border.bottom,box.x,box.y,box.x+box.w,box.y+box.h);
-				}
-			break;
-			case enigma_user::gui_state_on: //Default on
-				if (sprite_on!=-1){
-					enigma_user::draw_sprite_padded(sprite_on,-1,border.left,border.top,border.right,border.bottom,box.x,box.y,box.x+box.w,box.y+box.h);
-				}
-			break;
+	  //Draw window
+    if (gui::gui_styles[style_id].sprites[state] != -1){
+      enigma_user::draw_sprite_padded(gui::gui_styles[style_id].sprites[state],-1,gui::gui_styles[style_id].border.left,gui::gui_styles[style_id].border.top,gui::gui_styles[style_id].border.right,gui::gui_styles[style_id].border.bottom,box.x,box.y,box.x+box.w,box.y+box.h);
 		}
 
 		//Draw text
-		font_styles[state].use();
-		enigma_user::draw_text(font_styles[state].textx,font_styles[state].texty,text);
+		gui::gui_styles[style_id].font_styles[state].use();
+
+		gs_scalar textx = 0.0, texty = 0.0;
+    switch (gui::gui_styles[style_id].font_styles[state].halign){
+      case enigma_user::fa_left: textx = box.x+gui::gui_styles[style_id].padding.left; break;
+      case enigma_user::fa_center: textx = box.x+box.w/2.0; break;
+      case enigma_user::fa_right: textx = box.x+box.w-gui::gui_styles[style_id].padding.right; break;
+    }
+
+    switch (gui::gui_styles[style_id].font_styles[state].valign){
+      case enigma_user::fa_top: texty = box.y+gui::gui_styles[style_id].padding.top; break;
+      case enigma_user::fa_middle: texty = box.y+box.h/2.0; break;
+      case enigma_user::fa_bottom: texty = box.y+box.h-gui::gui_styles[style_id].padding.bottom; break;
+    }
+
+		enigma_user::draw_text(textx,texty,text);
 	}
 
 	void gui_window::update_text_pos(int state){
-		if (state == -1){
-			update_text_pos(enigma_user::gui_state_default);
-			update_text_pos(enigma_user::gui_state_on);
-      return;
-		}
-    if (state != enigma_user::gui_state_default && state != enigma_user::gui_state_on) return;
-
-		font_style* style = &font_styles[state];
-
-		if (style->halign == enigma_user::fa_left){
-			style->textx = box.x+padding.left;
-		}else if (style->halign == enigma_user::fa_center){
-			style->textx = box.x+box.w/2.0;
-		}else if (style->halign == enigma_user::fa_right){
-			style->textx = box.x+box.w-padding.right;
-		}
-
-		if (style->valign == enigma_user::fa_top){
-			style->texty = box.y+padding.top;
-		}else if (style->valign == enigma_user::fa_middle){
-			style->texty = box.y+padding.top+padding.top/2.0;
-		}else if (style->valign == enigma_user::fa_bottom){
-			style->texty = box.y+padding.top*2.0;
-		}
 	}
 }
 
@@ -179,80 +165,19 @@ namespace enigma_user
 		gui::gui_windows[id].box.y = y;
 	}
 
-	void gui_window_set_font(int id, int state, int font){
-		if (state == enigma_user::gui_state_all){
-			gui::gui_windows[id].font_styles[enigma_user::gui_state_default].font = font;
-			gui::gui_windows[id].font_styles[enigma_user::gui_state_on].font = font;
-		}else{
-			gui::gui_windows[id].font_styles[state].font = font;
-		}
-	}
-
-	void gui_window_set_font_halign(int id, int state, unsigned int halign){
-		if (state == enigma_user::gui_state_all){
-			gui::gui_windows[id].font_styles[enigma_user::gui_state_default].halign = halign;
-			gui::gui_windows[id].font_styles[enigma_user::gui_state_on].halign = halign;
-			gui::gui_windows[id].update_text_pos();
-		}else{
-			gui::gui_windows[id].font_styles[state].halign = halign;
-			gui::gui_windows[id].update_text_pos(state);
-		}
-	}
-
-	void gui_window_set_font_valign(int id, int state, unsigned int valign){
-		if (state == enigma_user::gui_state_all){
-			gui::gui_windows[id].font_styles[enigma_user::gui_state_default].valign = valign;
-			gui::gui_windows[id].font_styles[enigma_user::gui_state_on].valign = valign;
-			gui::gui_windows[id].update_text_pos();
-		}else{
-			gui::gui_windows[id].font_styles[state].valign = valign;
-			gui::gui_windows[id].update_text_pos(state);
-		}
-	}
-
-	void gui_window_set_font_color(int id, int state, int color){
-		if (state == enigma_user::gui_state_all){
-			gui::gui_windows[id].font_styles[enigma_user::gui_state_default].color = color;
-			gui::gui_windows[id].font_styles[enigma_user::gui_state_on].color = color;
-		}else{
-			gui::gui_windows[id].font_styles[state].color = color;
-		}
-	}
-
-	void gui_window_set_font_alpha(int id, int state, gs_scalar alpha){
-		if (state == enigma_user::gui_state_all){
-			gui::gui_windows[id].font_styles[enigma_user::gui_state_default].alpha = alpha;
-			gui::gui_windows[id].font_styles[enigma_user::gui_state_on].alpha = alpha;
-		}else{
-			gui::gui_windows[id].font_styles[state].alpha = alpha;
-		}
-	}
-
-	void gui_window_set_sprite(int id, int state, int sprid){
-		switch (state){
-			case enigma_user::gui_state_default: gui::gui_windows[id].sprite = sprid; break;
-			case enigma_user::gui_state_on: gui::gui_windows[id].sprite_on = sprid; break;
-		}
-	}
-
 	void gui_window_set_size(int id, gs_scalar w, gs_scalar h){
 		gui::gui_windows[id].box.w = w;
 		gui::gui_windows[id].box.h = h;
 		gui::gui_windows[id].update_text_pos();
 	}
 
-	void gui_window_set_padding(int id, gs_scalar left, gs_scalar top, gs_scalar right, gs_scalar bottom){
-		gui::gui_windows[id].padding.set(left,top,right,bottom);
-		gui::gui_windows[id].update_text_pos();
-	}
-
-	void gui_window_set_border(int id, gs_scalar left, gs_scalar top, gs_scalar right, gs_scalar bottom){
-		gui::gui_windows[id].border.set(left,top,right,bottom);
-	}
-
 	void gui_window_set_callback(int id, int script_id){
 		gui::gui_windows[id].callback = script_id;
 	}
+
+  void gui_window_set_style(int id, int style_id){
+    gui::gui_windows[id].style_id = (style_id != -1? style_id : gui::gui_style_window);
+  }
 
 	int gui_window_get_state(int id){
 		return gui::gui_windows[id].state;
@@ -261,7 +186,7 @@ namespace enigma_user
 	void gui_window_set_visible(int id, bool visible){
 		gui::gui_windows[id].visible = visible;
 	}
-  
+
   void gui_window_set_draggable(int id, bool draggable){
 		gui::gui_windows[id].draggable = draggable;
 	}

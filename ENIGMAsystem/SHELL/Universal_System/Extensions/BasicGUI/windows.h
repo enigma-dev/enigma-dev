@@ -46,13 +46,7 @@ namespace gui
 			gs_scalar drag_yoffset = 0.0;
 			int callback = -1;
 
-			array<font_style,2> font_styles; //0 - default, 1 - on (this is based based on enums)
-
-			int sprite = -1;
-			int sprite_on = -1;
-
-			rect_offset border;
-			rect_offset padding;
+      int style_id = -1;
 
 			gui_window();
 			//Update all possible window states (focus and unfocused)
