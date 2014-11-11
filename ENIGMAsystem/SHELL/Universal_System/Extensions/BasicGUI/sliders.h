@@ -41,31 +41,36 @@ namespace gui
       bool drag = false;
 			int callback = -1; //Script to run when clicked
 
+			gs_scalar drag_xoffset = 0.0;
+			gs_scalar drag_yoffset = 0.0;
+
       double value = 0.0; //Slider return value
       double minValue = 0.0;
       double maxValue = 1.0;
       double incValue = 0.1;
-      
+
       gs_scalar slider_offset = 0.0;
 
 			int parent_id = -1; //ID of some kind of parent (probably a window). It won't render with gui_draw_sliders() if it is not -1.
 
 			array<font_style,6> font_styles; //0 - default, 1 - hover, 2 - active, 3 - on, 4 - on hover, 5 - on active (this is based on enums)
 
-			int sprite = -1;
+      array<int,6> sprites;
+      array<int,6> sprites_indicator;
+			/*int sprite = -1;
 			int sprite_hover = -1;
 			int sprite_active = -1;
 			int sprite_on = -1;
 			int sprite_on_hover = -1;
-      int sprite_on_active = -1;
+      int sprite_on_active = -1;*/
 
-     	int sprite_indicator = -1;
+     	/*int sprite_indicator = -1;
 			int sprite_indicator_hover = -1;
 			int sprite_indicator_active = -1;
 			int sprite_indicator_on = -1;
 			int sprite_indicator_on_hover = -1;
-      int sprite_indicator_on_active = -1;
-      
+      int sprite_indicator_on_active = -1;*/
+
 			rect_offset border;
       rect_offset indicator_border;
 			rect_offset padding;
