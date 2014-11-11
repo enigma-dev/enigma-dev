@@ -296,6 +296,10 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   for (int i = 0; i < es->roomCount; i++)
     quickmember_variable(&globals_scope,jdi::builtin_type__int,es->rooms[i].name);
 
+  edbg << "Copying constant names [" << es->constantCount << "]" << flushl;
+  for (int i = 0; i < es->constantCount; i++)
+    quickmember_variable(&globals_scope,jdi::builtin_type__int,es->constants[i].name);
+
 
   /// Next we do a simple parse of the code, scouting for some variable names and adding semicolons.
 
