@@ -65,18 +65,8 @@ namespace enigma_user
 	void gui_toggle_set_text(int id, string text);
 	void gui_toggle_set_position(int id, gs_scalar x, gs_scalar y);
 
-	//Font Style changes
-	void gui_toggle_set_font(int id, int state, int font);
-	void gui_toggle_set_font_color(int id, int state, int color);
-	void gui_toggle_set_font_alpha(int id, int state, gs_scalar alpha);
-	void gui_toggle_set_font_halign(int id, int state, unsigned int halign);
-	void gui_toggle_set_font_valign(int id, int state, unsigned int valign);
-
-	void gui_toggle_set_sprite(int id, int state, int sprid);
-
-	void gui_toggle_set_padding(int id, gs_scalar left, gs_scalar top, gs_scalar right, gs_scalar bottom);
-	void gui_toggle_set_border(int id, gs_scalar left, gs_scalar top, gs_scalar right, gs_scalar bottom);
 	void gui_toggle_set_size(int id, gs_scalar w, gs_scalar h);
+  void gui_toggle_set_style(int id, int style_id);
 
 	void gui_toggle_set_callback(int id, int script_id);
 	void gui_toggle_set_visible(int id, bool visible);
