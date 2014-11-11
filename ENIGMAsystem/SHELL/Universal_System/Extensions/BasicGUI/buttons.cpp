@@ -112,7 +112,21 @@ namespace gui
 
 		//Draw text
 		gui::gui_styles[style_id].font_styles[state].use();
-		enigma_user::draw_text(ox + gui::gui_styles[style_id].font_styles[state].textx,oy + gui::gui_styles[style_id].font_styles[state].texty,text);
+
+    gs_scalar textx = 0.0, texty = 0.0;
+    switch (gui::gui_styles[style_id].font_styles[state].halign){
+      case enigma_user::fa_left: textx = box.x+gui::gui_styles[style_id].padding.left; break;
+      case enigma_user::fa_center: textx = box.x+box.w/2.0; break;
+      case enigma_user::fa_right: textx = box.x+box.w-gui::gui_styles[style_id].padding.right; break;
+    }
+
+    switch (gui::gui_styles[style_id].font_styles[state].valign){
+      case enigma_user::fa_top: texty = box.y+gui::gui_styles[style_id].padding.top; break;
+      case enigma_user::fa_middle: texty = box.y+box.h/2.0; break;
+      case enigma_user::fa_bottom: texty = box.y+box.h-gui::gui_styles[style_id].padding.bottom; break;
+    }
+
+		enigma_user::draw_text(ox + textx,oy + texty,text);
 	}
 
 	void gui_button::update_text_pos(int state){
