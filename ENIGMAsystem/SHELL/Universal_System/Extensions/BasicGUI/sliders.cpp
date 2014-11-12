@@ -89,8 +89,8 @@ namespace gui
 		if (drag == true){
       windowStopPropagation = true;
       slider_offset = fmin(fmax(0,tx-ox-drag_xoffset), box.w);
-      value = minValue + slider_offset/box.w * (maxValue-minValue);
-      //printf("Box.x = %f\n", value);
+      value = round((minValue + slider_offset/box.w * (maxValue-minValue)) / incValue) * incValue;
+      slider_offset = box.w*(value/(maxValue-minValue));
 			if (enigma_user::mouse_check_button_released(enigma_user::mb_left)){
 				drag = false;
 			}
@@ -102,13 +102,27 @@ namespace gui
     if (gui::gui_styles[style_id].sprites[state] != -1){
       enigma_user::draw_sprite_padded(gui::gui_styles[style_id].sprites[state],-1,gui::gui_styles[style_id].border.left,gui::gui_styles[style_id].border.top,gui::gui_styles[style_id].border.right,gui::gui_styles[style_id].border.bottom,ox + box.x,oy + box.y,ox + box.x+box.w,oy + box.y+box.h);
 		}
-    if (sprites_indicator[state] != -1){
-      enigma_user::draw_sprite_padded(sprites_indicator[state],-1,indicator_border.left,indicator_border.top,indicator_border.right,indicator_border.bottom,ox + box.x + slider_offset,oy + box.y,ox + box.x + indicator_box.w + slider_offset,oy + box.y+indicator_box.h);
+    if (gui::gui_styles[indicator_style_id].sprites[state] != -1){
+      enigma_user::draw_sprite_padded(gui::gui_styles[indicator_style_id].sprites[state],-1,gui::gui_styles[indicator_style_id].border.left,gui::gui_styles[indicator_style_id].border.top,gui::gui_styles[indicator_style_id].border.right,gui::gui_styles[indicator_style_id].border.bottom,gui::gui_styles[indicator_style_id].image_offset.x + ox + indicator_box.x + slider_offset,gui::gui_styles[indicator_style_id].image_offset.y + oy + indicator_box.y,gui::gui_styles[indicator_style_id].image_offset.x + ox + indicator_box.x + indicator_box.w + slider_offset,gui::gui_styles[indicator_style_id].image_offset.y + oy + indicator_box.y+indicator_box.h);
 		}
 
 		//Draw text
-		font_styles[state].use();
-		enigma_user::draw_text(ox + font_styles[state].textx,oy + font_styles[state].texty,text);
+		gui::gui_styles[style_id].font_styles[state].use();
+
+    gs_scalar textx = 0.0, texty = 0.0;
+    switch (gui::gui_styles[style_id].font_styles[state].halign){
+      case enigma_user::fa_left: textx = box.x+gui::gui_styles[style_id].padding.left; break;
+      case enigma_user::fa_center: textx = box.x+box.w/2.0; break;
+      case enigma_user::fa_right: textx = box.x+box.w-gui::gui_styles[style_id].padding.right; break;
+    }
+
+    switch (gui::gui_styles[style_id].font_styles[state].valign){
+      case enigma_user::fa_top: texty = box.y+gui::gui_styles[style_id].padding.top; break;
+      case enigma_user::fa_middle: texty = box.y+box.h/2.0; break;
+      case enigma_user::fa_bottom: texty = box.y+box.h-gui::gui_styles[style_id].padding.bottom; break;
+    }
+
+		enigma_user::draw_text(ox + textx,oy + texty,text);
 	}
 
 	void gui_slider::update_text_pos(int state){
@@ -146,6 +160,7 @@ namespace enigma_user
 		gui::gui_sliders[gui::gui_sliders_maxid].maxValue = maxVal;
 		gui::gui_sliders[gui::gui_sliders_maxid].incValue = incrVal;
     gui::gui_sliders[gui::gui_sliders_maxid].value = val;
+    gui::gui_sliders[gui::gui_sliders_maxid].segments = (maxVal-minVal)/incrVal;
 
 		gui::gui_sliders[gui::gui_sliders_maxid].text = text;
 		gui::gui_sliders[gui::gui_sliders_maxid].update_text_pos();
@@ -175,12 +190,12 @@ namespace enigma_user
 		gui::gui_sliders[id].callback = script_id;
 	}
 
-  void gui_toggle_set_style(int id, int style_id){
-    gui::gui_toggles[id].style_id = (style_id != -1? style_id : gui::gui_style_slider);
+  void gui_slider_set_style(int id, int style_id){
+    gui::gui_sliders[id].style_id = (style_id != -1? style_id : gui::gui_style_slider);
   }
 
-  void gui_toggle_set_indicator_style(int id, int style_id){
-    gui::gui_toggles[id].indicator_style_id = (style_id != -1? style_id : gui::gui_style_slider);
+  void gui_slider_set_indicator_style(int id, int style_id){
+    gui::gui_sliders[id].indicator_style_id = (style_id != -1? style_id : gui::gui_style_slider);
   }
 
 	int gui_slider_get_state(int id){

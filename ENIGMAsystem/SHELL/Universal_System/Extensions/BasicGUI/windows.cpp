@@ -39,6 +39,7 @@ using std::pair;
 #include "buttons.h"
 #include "toggles.h"
 #include "sliders.h"
+#include "labels.h"
 
 namespace gui
 {
@@ -54,6 +55,7 @@ namespace gui
 	extern unordered_map<unsigned int, gui_button> gui_buttons;
 	extern unordered_map<unsigned int, gui_toggle> gui_toggles;
   extern unordered_map<unsigned int, gui_slider> gui_sliders;
+  extern unordered_map<unsigned int, gui_label> gui_labels;
 	extern unsigned int gui_skins_maxid;
 
 	//Implements button class
@@ -231,6 +233,12 @@ namespace enigma_user
             if (gui::gui_toggles[gui::gui_windows[i].child_toggles[b]].visible == false) continue; //Skip invisible objects
             if (gui::windowStopPropagation == false){ gui::gui_toggles[gui::gui_windows[i].child_toggles[b]].update(gui::gui_windows[i].box.x,gui::gui_windows[i].box.y); } else { break; } //Stop propagation
           }
+          if (gui::gui_windows[i].child_sliders.empty() == false){
+            for (unsigned int b=0; b<gui::gui_windows[i].child_sliders.size(); ++b){
+              if (gui::gui_sliders[gui::gui_windows[i].child_sliders[b]].visible == true) continue;
+              if (gui::windowStopPropagation == false){ gui::gui_sliders[gui::gui_windows[i].child_sliders[b]].update(gui::gui_windows[i].box.x,gui::gui_windows[i].box.y); } else { break; }
+            }
+          }
         }
         if (gui::windowStopPropagation == false){ gui::gui_windows[i].update(); } else { break; } //Stop propagation
 			}
@@ -249,6 +257,16 @@ namespace enigma_user
         if (gui::gui_windows[i].child_toggles.empty() == false){
           for (unsigned int b=0; b<gui::gui_windows[i].child_toggles.size(); ++b){
             if (gui::gui_toggles[gui::gui_windows[i].child_toggles[b]].visible == true) gui::gui_toggles[gui::gui_windows[i].child_toggles[b]].draw(gui::gui_windows[i].box.x,gui::gui_windows[i].box.y);
+          }
+        }
+        if (gui::gui_windows[i].child_sliders.empty() == false){
+          for (unsigned int b=0; b<gui::gui_windows[i].child_sliders.size(); ++b){
+            if (gui::gui_sliders[gui::gui_windows[i].child_sliders[b]].visible == true) gui::gui_sliders[gui::gui_windows[i].child_sliders[b]].draw(gui::gui_windows[i].box.x,gui::gui_windows[i].box.y);
+          }
+        }
+        if (gui::gui_windows[i].child_labels.empty() == false){
+          for (unsigned int b=0; b<gui::gui_windows[i].child_labels.size(); ++b){
+            if (gui::gui_labels[gui::gui_windows[i].child_labels[b]].visible == true) gui::gui_labels[gui::gui_windows[i].child_labels[b]].draw(gui::gui_windows[i].box.x,gui::gui_windows[i].box.y);
           }
         }
 			}
@@ -272,5 +290,10 @@ namespace enigma_user
   void gui_window_add_slider(int id, int sid){
     gui::gui_windows[id].child_sliders.push_back(sid);
     gui::gui_sliders[sid].parent_id = id;
+  }
+
+  void gui_window_add_label(int id, int sid){
+    gui::gui_windows[id].child_labels.push_back(sid);
+    gui::gui_labels[sid].parent_id = id;
   }
 }
