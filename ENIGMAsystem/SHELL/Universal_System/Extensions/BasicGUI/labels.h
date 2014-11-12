@@ -15,49 +15,29 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef BGUI_WINDOWS_H
-#define BGUI_WINDOWS_H
+#ifndef BGUI_LABELS_H
+#define BGUI_LABELS_H
 #include <array>
-#include <vector>
-
 using std::array;
-using std::vector;
 
 #include "common.h"
 
-namespace enigma_user
-{
-	extern double mouse_x, mouse_y;
-}
-
 namespace gui
 {
-	class gui_window{
+	class gui_label{
 		public:
-			int id;
-
+			unsigned int id;
 			rect box;
 			string text = "";
-			int state = 0;
-			bool visible = true;
-			bool drag = false;
-      bool draggable = true; //Specifies if the window can be moved
-			gs_scalar drag_xoffset = 0.0;
-			gs_scalar drag_yoffset = 0.0;
-			int callback = -1;
 
-      int style_id = -1;
+   		bool visible = true;
 
-			gui_window();
-			//Update all possible window states (focus and unfocused)
-			void update(gs_scalar tx = enigma_user::mouse_x, gs_scalar ty = enigma_user::mouse_y);
-			void draw();
-			void update_text_pos(int state = -1);
+			int parent_id = -1; //ID of the parent of some kind (probably a window). It won't render with gui_draw_buttons() if it is.
 
-      vector<unsigned int> child_buttons;
-      vector<unsigned int> child_toggles;
-      vector<unsigned int> child_sliders;
-      vector<unsigned int> child_labels;
+      int style_id = -1; //The style we use
+
+			gui_label();
+			void draw(gs_scalar ox = 0, gs_scalar oy = 0);
 	};
 }
 

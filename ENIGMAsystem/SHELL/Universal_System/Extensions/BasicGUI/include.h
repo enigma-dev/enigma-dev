@@ -84,19 +84,10 @@ namespace enigma_user
 	void gui_slider_set_text(int id, string text);
 	void gui_slider_set_position(int id, gs_scalar x, gs_scalar y);
 
-	//Font Style changes
-	void gui_slider_set_font(int id, int state, int font);
-	void gui_slider_set_font_color(int id, int state, int color);
-	void gui_slider_set_font_alpha(int id, int state, gs_scalar alpha);
-	void gui_slider_set_font_halign(int id, int state, unsigned int halign);
-	void gui_slider_set_font_valign(int id, int state, unsigned int valign);
 
-	void gui_slider_set_sprite(int id, int state, int sprid);
-  void gui_slider_set_indicator_sprite(int id, int state, int sprid);
-
-	void gui_slider_set_padding(int id, gs_scalar left, gs_scalar top, gs_scalar right, gs_scalar bottom);
-	void gui_slider_set_border(int id, gs_scalar left, gs_scalar top, gs_scalar right, gs_scalar bottom);
 	void gui_slider_set_size(int id, gs_scalar w, gs_scalar h);
+  void gui_slider_set_style(int id, int style_id);
+  void gui_slider_set_indicator_style(int id, int indicator_style_id);
 
 	void gui_slider_set_callback(int id, int script_id);
 	void gui_slider_set_visible(int id, bool visible);
@@ -127,10 +118,26 @@ namespace enigma_user
 	void gui_window_draw(int id);
 	void gui_windows_draw();
 
+  ///LABELS
+	int gui_label_create(gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h, string text);
+	int gui_label_create();
+
+	void gui_label_destroy(int id);
+	void gui_label_set_text(int id, string text);
+	void gui_label_set_position(int id, gs_scalar x, gs_scalar y);
+
+  void gui_label_set_size(int id, gs_scalar w, gs_scalar h);
+  void gui_label_set_style(int id, int style_id);
+	void gui_label_set_visible(int id, bool visible);
+
+	void gui_label_draw(int id);
+	void gui_labels_draw();
+
   //Window parenting
   void gui_window_add_button(int id, int bid);
   void gui_window_add_toggle(int id, int tid);
   void gui_window_add_slider(int id, int sid);
+  void gui_window_add_label(int id, int sid);
 
 	//Skins
 	int gui_skin_create();
@@ -138,6 +145,9 @@ namespace enigma_user
 	void gui_skin_set(int id);
 	int gui_skin_get_button(int id);
   int gui_skin_get_window(int id);
+  int gui_skin_get_toggle(int id);
+  int gui_skin_get_slider(int id);
+  int gui_skin_get_label(int id);
 
   //Styles
   int gui_style_create();
@@ -150,6 +160,7 @@ namespace enigma_user
 	void gui_style_set_sprite(int id, int state, int sprid);
 	void gui_style_set_padding(int id, gs_scalar left, gs_scalar top, gs_scalar right, gs_scalar bottom);
 	void gui_style_set_border(int id, gs_scalar left, gs_scalar top, gs_scalar right, gs_scalar bottom);
+  void gui_style_set_image_offset(int id, gs_scalar x, gs_scalar y);
 }
 
 #endif

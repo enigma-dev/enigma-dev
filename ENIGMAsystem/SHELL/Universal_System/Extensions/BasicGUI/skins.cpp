@@ -45,6 +45,9 @@ namespace gui{
 
 		slider_style = (enigma_user::gui_slider_create());
 		enigma_user::gui_slider_set_visible(slider_style,false);
+
+    label_style = (enigma_user::gui_label_create());
+		enigma_user::gui_label_set_visible(label_style,false);
 	}
 
 	int gui_bound_skin = -1;
@@ -82,5 +85,9 @@ namespace enigma_user
 
 	int gui_skin_get_slider(int id){
     return (gui::gui_skins[id].slider_style);
+	}
+
+  int gui_skin_get_label(int id){
+    return (gui::gui_skins[id].label_style);
 	}
 }

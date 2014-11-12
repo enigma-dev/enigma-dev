@@ -36,6 +36,8 @@ namespace gui
 			rect_offset border;
 			rect_offset padding;
 
+			offset image_offset;
+
 			gui_style();
 	};
 }

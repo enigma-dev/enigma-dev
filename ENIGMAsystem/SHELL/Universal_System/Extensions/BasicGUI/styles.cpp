@@ -44,6 +44,7 @@ namespace gui{
 	unsigned int gui_style_toggle = enigma_user::gui_style_create();
 	unsigned int gui_style_window = enigma_user::gui_style_create();
 	unsigned int gui_style_slider = enigma_user::gui_style_create();
+  unsigned int gui_style_label = enigma_user::gui_style_create();
 }
 
 namespace enigma_user
@@ -122,5 +123,9 @@ namespace enigma_user
 
 	void gui_style_set_border(int id, gs_scalar left, gs_scalar top, gs_scalar right, gs_scalar bottom){
 		gui::gui_styles[id].border.set(left,top,right,bottom);
+	}
+
+  void gui_style_set_image_offset(int id, gs_scalar x, gs_scalar y){
+		gui::gui_styles[id].image_offset.set(x,y);
 	}
 }
