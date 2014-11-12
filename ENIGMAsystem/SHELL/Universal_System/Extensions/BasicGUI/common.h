@@ -20,6 +20,10 @@
 
 namespace gui
 {
+  struct offset{
+    gs_scalar x = 0.0, y = 0.0;
+    void set(gs_scalar ox, gs_scalar oy) { x = ox, y = oy; }
+  };
 	struct rect_offset{
 		gs_scalar top = 0.0, left = 0.0, bottom = 0.0, right = 0.0;
 		void set(gs_scalar l, gs_scalar t, gs_scalar r, gs_scalar b) { left = l, top = t, right = r, bottom = b; }

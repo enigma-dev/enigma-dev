@@ -48,6 +48,7 @@ namespace gui
       double minValue = 0.0;
       double maxValue = 1.0;
       double incValue = 0.1;
+      double segments = (maxValue-minValue)/incValue;
 
       gs_scalar slider_offset = 0.0;
 
