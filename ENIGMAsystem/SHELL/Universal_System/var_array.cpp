@@ -1,6 +1,5 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
 **  Copyright (C) 2014 Seth N. Hetu                                             **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
@@ -26,35 +25,27 @@
 **                                                                              **
 \********************************************************************************/
 
-#ifndef _COMPILE_COMMON__H
-#define _COMPILE_COMMON__H
+#include "var_array.h"
+#include "var4.h"
 
-#include <map>
-#include <vector>
-#include "compile_organization.h"
-#include "parser/object_storage.h"
-
-namespace used_funcs
+int enigma_user::array_length_1d(const var& v)
 {
-  extern bool object_set_sprite;
-  void zero();
-}
-extern std::map<string,parsed_script*> scr_lookup;
-extern std::map<string, std::vector<parsed_script*> > tline_lookup;
-
-
-extern const char* license;
-
-
-inline string tdefault(string t) {
-  return (t != "" ? t : "var");
-}
-inline void* javaColor(int c) {
-  return reinterpret_cast<void*>((c & 0xFF)?(((c & 0x00FF0000) >> 8) | ((c & 0x0000FF00) << 8) | ((c & 0xFF000000) >> 24)):0xFFFFFFFF);
+  return v.array_len();
 }
 
-inline string system_get_uppermost_tier() {
-  return "object_collisions";
+int enigma_user::array_length_2d(const var& v, int n)
+{
+  return v.array_len(n);
 }
 
-#endif
+int enigma_user::array_height_2d(const var& v)
+{
+  return v.array_height();
+}
+
+bool enigma_user::is_array(const var& v)
+{
+  //There is no way (currently) to downsize an array from >1 element, so this might not be accurate.
+  return (v.array_height() > 1) || (v.array_len() > 1);
+}
+

@@ -1,6 +1,7 @@
 /********************************************************************************\
 **                                                                              **
 **  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2014 Seth N. Hetu                                             **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -163,7 +164,7 @@ struct variant
 
 struct var
 {
-  void *values;
+  void* values;
   
   private:
     void initialize();
@@ -287,6 +288,11 @@ struct var
   const variant& operator[] (int) const;
   const variant& operator() (int) const;
   const variant& operator() (int,int) const;
+
+  //Calculate array lengths.
+  int array_len() const;
+  int array_height() const;
+  int array_len(int row) const;
   
   ~var();
 };

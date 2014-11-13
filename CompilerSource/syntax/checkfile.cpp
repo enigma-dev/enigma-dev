@@ -81,10 +81,11 @@ int file_check(string filename)
     else if (*in2=='\n') in2++;
     else { puts("An error occurred during syntax check. No newline following list of script names."); return 0; }
 
-    int retval=syncheck::syntacheck(in2);
+    std::string newcode;
+    int retval=syncheck::syntacheck(in2, newcode);
     if (retval==-1)
     {
-      string code=parser_main(in2);
+      string code=parser_main(newcode);
       FILE* o=fopen("C:\\PARSERESULT.TXT","wb");
       if (o)
       {

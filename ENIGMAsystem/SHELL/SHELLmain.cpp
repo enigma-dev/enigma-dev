@@ -1,4 +1,5 @@
 /** Copyright (C) 2008-2013 Josh Ventura
+*** Copyright (C) 2014 Seth N. Hetu
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -26,6 +27,7 @@
 ///////////////////////////////
 
 #include "Universal_System/var4.h"
+#include "Universal_System/var_array.h"
 #include "Universal_System/dynamic_args.h"
 
 #ifdef DEBUG_MODE

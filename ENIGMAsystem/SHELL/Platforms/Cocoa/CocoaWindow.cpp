@@ -2,6 +2,7 @@
  * Copyright (C) 2008 IsmAvatar <ismavatar@gmail.com>
  * Copyright (C) 2010 Alasdair Morrison <ali@alasdairmorrison.com>
  * Copyright (C) 2013 Josh Ventura <JoshV10@gmail.com>
+ * Copyright (C) 2014 Seth N. Hetu
  *
  * This file is part of ENIGMA.
  *
@@ -51,6 +52,7 @@ extern char cocoa_last_keybdstatus[256];
 extern "C" int cocoa_get_screen_size(int getWidth);
 extern "C" void cocoa_window_set_fullscreen(bool full);
 extern "C" int cocoa_window_get_fullscreen();
+extern "C" void cocoa_window_set_color(int bgrColor);
 
 namespace enigma {
     extern char keybdstatus[256];
@@ -59,9 +61,18 @@ namespace enigma {
     extern char last_keybdstatus[256];
     extern char keybdstatus[256];
 
+    void (*WindowResizedCallback)();
+
     //Replacing usermap array with keybdmap map, to align code with Windows implementation.
     std::map<int,int> keybdmap;
     extern int windowColor;
+}
+
+//Callback from ObjC
+extern "C" void enigma_WindowResized() {
+  if (enigma::WindowResizedCallback) {
+    enigma::WindowResizedCallback();
+  }
 }
 
 namespace enigma_user {
@@ -83,6 +94,9 @@ namespace enigma_user {
   void window_set_color(int color)
   {
     enigma::windowColor = color;
+
+    //Inform Cocoa
+    cocoa_window_set_color(color);
   }
 
   int window_get_color()
