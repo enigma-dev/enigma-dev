@@ -146,10 +146,7 @@ namespace enigma_user
 		}
 		gui::gui_toggles[gui::gui_toggles_maxid].visible = true;
 		gui::gui_toggles[gui::gui_toggles_maxid].id = gui::gui_toggles_maxid;
-		gui::gui_toggles[gui::gui_toggles_maxid].box.x = x;
-		gui::gui_toggles[gui::gui_toggles_maxid].box.y = y;
-		gui::gui_toggles[gui::gui_toggles_maxid].box.w = w;
-		gui::gui_toggles[gui::gui_toggles_maxid].box.h = h;
+		gui::gui_toggles[gui::gui_toggles_maxid].box.set(x, y, w, h);
 		gui::gui_toggles[gui::gui_toggles_maxid].text = text;
 		gui::gui_toggles[gui::gui_toggles_maxid].update_text_pos();
 		return (gui::gui_toggles_maxid++);
@@ -181,6 +178,11 @@ namespace enigma_user
   void gui_toggle_set_style(int id, int style_id){
     gui::gui_toggles[id].style_id = (style_id != -1? style_id : gui::gui_style_toggle);
   }
+
+  int gui_toggle_get_style(int id){
+    return gui::gui_toggles[id].style_id;
+  }
+
 
 	int gui_toggle_get_state(int id){
 		return gui::gui_toggles[id].state;

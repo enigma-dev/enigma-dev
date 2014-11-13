@@ -57,17 +57,14 @@ namespace gui
 
 	//Update all possible slider states (hover, click etc.)
 	void gui_slider::update(gs_scalar ox, gs_scalar oy, gs_scalar tx, gs_scalar ty){
-		if (box.point_inside(tx-ox,ty-oy)){
-      gui::windowStopPropagation = true;
+		if (box.point_inside(tx-ox,ty-oy) || indicator_box.point_inside(tx-ox-box.x-slider_offset-indicator_box.x,ty-box.y-oy-indicator_box.y)){
+      windowStopPropagation = true;
 			if (enigma_user::mouse_check_button_pressed(enigma_user::mb_left)){
         state = enigma_user::gui_state_active;
         drag = true;
-        if (indicator_box.point_inside(tx-ox-box.x-slider_offset,ty-oy)){
-          printf("CLicked on indicator!\n");
-          drag_xoffset = tx-ox-indicator_box.x;
+        if (indicator_box.point_inside(tx-ox-box.x-slider_offset-indicator_box.x,ty-box.y-oy-indicator_box.y)){
+          drag_xoffset = tx-ox-indicator_box.x-box.x-slider_offset;
         }else{
-          printf("CLicked on slider!\n");
-          slider_offset = fmin(fmax(0,tx-ox), box.w);
           drag_xoffset = 0.0;
         }
       }else{
@@ -88,7 +85,7 @@ namespace gui
 		}
 		if (drag == true){
       windowStopPropagation = true;
-      slider_offset = fmin(fmax(0,tx-ox-drag_xoffset), box.w);
+      slider_offset = fmin(fmax(0,tx-box.x-ox-drag_xoffset), box.w);
       value = round((minValue + slider_offset/box.w * (maxValue-minValue)) / incValue) * incValue;
       slider_offset = box.w*(value/(maxValue-minValue));
 			if (enigma_user::mouse_check_button_released(enigma_user::mb_left)){
@@ -103,7 +100,8 @@ namespace gui
       enigma_user::draw_sprite_padded(gui::gui_styles[style_id].sprites[state],-1,gui::gui_styles[style_id].border.left,gui::gui_styles[style_id].border.top,gui::gui_styles[style_id].border.right,gui::gui_styles[style_id].border.bottom,ox + box.x,oy + box.y,ox + box.x+box.w,oy + box.y+box.h);
 		}
     if (gui::gui_styles[indicator_style_id].sprites[state] != -1){
-      enigma_user::draw_sprite_padded(gui::gui_styles[indicator_style_id].sprites[state],-1,gui::gui_styles[indicator_style_id].border.left,gui::gui_styles[indicator_style_id].border.top,gui::gui_styles[indicator_style_id].border.right,gui::gui_styles[indicator_style_id].border.bottom,gui::gui_styles[indicator_style_id].image_offset.x + ox + indicator_box.x + slider_offset,gui::gui_styles[indicator_style_id].image_offset.y + oy + indicator_box.y,gui::gui_styles[indicator_style_id].image_offset.x + ox + indicator_box.x + indicator_box.w + slider_offset,gui::gui_styles[indicator_style_id].image_offset.y + oy + indicator_box.y+indicator_box.h);
+      auto &ist = gui::gui_styles[indicator_style_id];
+      enigma_user::draw_sprite_padded(ist.sprites[state],-1,ist.border.left,ist.border.top,ist.border.right,ist.border.bottom,ist.image_offset.x + ox + box.x + slider_offset + indicator_box.x,ist.image_offset.y + oy + box.y + indicator_box.y,ist.image_offset.x + ox + box.x + indicator_box.w + slider_offset + indicator_box.x,ist.image_offset.y + oy + box.y+indicator_box.h + indicator_box.y);
 		}
 
 		//Draw text
@@ -142,7 +140,7 @@ namespace enigma_user
 		return (gui::gui_sliders_maxid++);
 	}
 
-	int gui_slider_create(gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h, gs_scalar ind_w, gs_scalar ind_h, double val, double minVal, double maxVal, double incrVal, string text){
+	int gui_slider_create(gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h, gs_scalar ind_x, gs_scalar ind_y, gs_scalar ind_w, gs_scalar ind_h, double val, double minVal, double maxVal, double incrVal, string text){
 		if (gui::gui_bound_skin == -1){ //Add default one
 			gui::gui_sliders.insert(pair<unsigned int, gui::gui_slider >(gui::gui_sliders_maxid, gui::gui_slider()));
 		}else{
@@ -150,12 +148,8 @@ namespace enigma_user
 		}
 		gui::gui_sliders[gui::gui_sliders_maxid].visible = true;
 		gui::gui_sliders[gui::gui_sliders_maxid].id = gui::gui_sliders_maxid;
-		gui::gui_sliders[gui::gui_sliders_maxid].box.x = x;
-		gui::gui_sliders[gui::gui_sliders_maxid].box.y = y;
-		gui::gui_sliders[gui::gui_sliders_maxid].box.w = w;
-		gui::gui_sliders[gui::gui_sliders_maxid].box.h = h;
-		gui::gui_sliders[gui::gui_sliders_maxid].indicator_box.w = ind_w;
-		gui::gui_sliders[gui::gui_sliders_maxid].indicator_box.h = ind_h;
+		gui::gui_sliders[gui::gui_sliders_maxid].box.set(x, y, w, h);
+		gui::gui_sliders[gui::gui_sliders_maxid].indicator_box.set(ind_x, ind_y, ind_w, ind_h);
     gui::gui_sliders[gui::gui_sliders_maxid].minValue = minVal;
 		gui::gui_sliders[gui::gui_sliders_maxid].maxValue = maxVal;
 		gui::gui_sliders[gui::gui_sliders_maxid].incValue = incrVal;
@@ -196,6 +190,14 @@ namespace enigma_user
 
   void gui_slider_set_indicator_style(int id, int style_id){
     gui::gui_sliders[id].indicator_style_id = (style_id != -1? style_id : gui::gui_style_slider);
+  }
+
+  int gui_slider_get_style(int id){
+    return gui::gui_sliders[id].style_id;
+  }
+
+  int gui_slider_set_indicator_style(int id){
+    return gui::gui_sliders[id].indicator_style_id;
   }
 
 	int gui_slider_get_state(int id){
