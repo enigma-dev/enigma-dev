@@ -30,6 +30,7 @@ namespace gui
 	};
 	struct rect{
 		gs_scalar x = 0.0, y = 0.0, w = 0.0, h = 0.0;
+    void set(gs_scalar rx, gs_scalar ry, gs_scalar rw, gs_scalar rh) { x = rx, y = ry, w = rw, h = rh; }
 		bool point_inside(gs_scalar tx, gs_scalar ty){ return (tx>x && tx<x+w && ty>y && ty<y+h); }
 	};
 	struct font_style{

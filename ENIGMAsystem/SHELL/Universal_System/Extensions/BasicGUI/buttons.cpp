@@ -155,10 +155,7 @@ namespace enigma_user
 		}
 		gui::gui_buttons[gui::gui_buttons_maxid].visible = true;
 		gui::gui_buttons[gui::gui_buttons_maxid].id = gui::gui_buttons_maxid;
-		gui::gui_buttons[gui::gui_buttons_maxid].box.x = x;
-		gui::gui_buttons[gui::gui_buttons_maxid].box.y = y;
-		gui::gui_buttons[gui::gui_buttons_maxid].box.w = w;
-		gui::gui_buttons[gui::gui_buttons_maxid].box.h = h;
+		gui::gui_buttons[gui::gui_buttons_maxid].box.set(x, y, w, h);
 		gui::gui_buttons[gui::gui_buttons_maxid].text = text;
 		gui::gui_buttons[gui::gui_buttons_maxid].update_text_pos();
 		return (gui::gui_buttons_maxid++);
@@ -189,6 +186,10 @@ namespace enigma_user
 
   void gui_button_set_style(int id, int style_id){
     gui::gui_buttons[id].style_id = (style_id != -1? style_id : gui::gui_style_button);
+  }
+
+  int gui_button_get_style(int id){
+    return gui::gui_buttons[id].style_id;
   }
 
 	int gui_button_get_state(int id){

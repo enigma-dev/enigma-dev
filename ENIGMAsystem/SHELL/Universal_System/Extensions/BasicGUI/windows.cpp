@@ -80,7 +80,7 @@ namespace gui
           drag_yoffset = ty-box.y;
         }
       }else{
-      state = enigma_user::gui_state_default;
+        state = enigma_user::gui_state_default;
       }
     }
 
@@ -145,10 +145,7 @@ namespace enigma_user
 		}
 		gui::gui_windows[gui::gui_windows_maxid].visible = true;
 		gui::gui_windows[gui::gui_windows_maxid].id = gui::gui_windows_maxid;
-		gui::gui_windows[gui::gui_windows_maxid].box.x = x;
-		gui::gui_windows[gui::gui_windows_maxid].box.y = y;
-		gui::gui_windows[gui::gui_windows_maxid].box.w = w;
-		gui::gui_windows[gui::gui_windows_maxid].box.h = h;
+		gui::gui_windows[gui::gui_windows_maxid].box.set(x, y, w, h);
 		gui::gui_windows[gui::gui_windows_maxid].text = text;
 		gui::gui_windows[gui::gui_windows_maxid].update_text_pos();
 		return gui::gui_windows_maxid++;
@@ -179,6 +176,10 @@ namespace enigma_user
 
   void gui_window_set_style(int id, int style_id){
     gui::gui_windows[id].style_id = (style_id != -1? style_id : gui::gui_style_window);
+  }
+
+  int gui_window_get_style(int id){
+    return gui::gui_windows[id].style_id;
   }
 
 	int gui_window_get_state(int id){
@@ -229,15 +230,17 @@ namespace enigma_user
             if (gui::gui_buttons[gui::gui_windows[i].child_buttons[b]].visible == false) continue; //Skip invisible objects
             if (gui::windowStopPropagation == false){ gui::gui_buttons[gui::gui_windows[i].child_buttons[b]].update(gui::gui_windows[i].box.x,gui::gui_windows[i].box.y); } else { break; } //Stop propagation
           }
+        }
+        if (gui::gui_windows[i].child_toggles.empty() == false){
           for (int b=gui::gui_windows[i].child_toggles.size()-1; b>=0; --b){
             if (gui::gui_toggles[gui::gui_windows[i].child_toggles[b]].visible == false) continue; //Skip invisible objects
             if (gui::windowStopPropagation == false){ gui::gui_toggles[gui::gui_windows[i].child_toggles[b]].update(gui::gui_windows[i].box.x,gui::gui_windows[i].box.y); } else { break; } //Stop propagation
           }
-          if (gui::gui_windows[i].child_sliders.empty() == false){
-            for (unsigned int b=0; b<gui::gui_windows[i].child_sliders.size(); ++b){
-              if (gui::gui_sliders[gui::gui_windows[i].child_sliders[b]].visible == true) continue;
-              if (gui::windowStopPropagation == false){ gui::gui_sliders[gui::gui_windows[i].child_sliders[b]].update(gui::gui_windows[i].box.x,gui::gui_windows[i].box.y); } else { break; }
-            }
+        }
+        if (gui::gui_windows[i].child_sliders.empty() == false){
+          for (unsigned int b=0; b<gui::gui_windows[i].child_sliders.size(); ++b){
+            if (gui::gui_sliders[gui::gui_windows[i].child_sliders[b]].visible == false) continue;
+            if (gui::windowStopPropagation == false){ gui::gui_sliders[gui::gui_windows[i].child_sliders[b]].update(gui::gui_windows[i].box.x,gui::gui_windows[i].box.y); } else { break; }
           }
         }
         if (gui::windowStopPropagation == false){ gui::gui_windows[i].update(); } else { break; } //Stop propagation
