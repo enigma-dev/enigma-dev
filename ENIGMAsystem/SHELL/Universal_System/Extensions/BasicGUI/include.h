@@ -52,6 +52,7 @@ namespace enigma_user
 	void gui_button_set_togglable(int id, bool togglable);
 	void gui_button_set_visible(int id, bool visible);
 
+  int gui_button_get_style(int id);
 	int gui_button_get_state(int id);
 	bool gui_button_get_active(int id);
 	void gui_button_draw(int id);
@@ -71,13 +72,14 @@ namespace enigma_user
 	void gui_toggle_set_callback(int id, int script_id);
 	void gui_toggle_set_visible(int id, bool visible);
 
+  int gui_toggle_get_style(int id){
 	int gui_toggle_get_state(int id);
 	bool gui_toggle_get_active(int id);
 	void gui_toggle_draw(int id);
 	void gui_toggles_draw();
 
   ///SLIDERS
-	int gui_slider_create(gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h, gs_scalar ind_w, gs_scalar ind_h, double val, double minVal, double maxVal, double incrVal, string text);
+  int gui_slider_create(gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h, gs_scalar ind_x, gs_scalar ind_y, gs_scalar ind_w, gs_scalar ind_h, double val, double minVal, double maxVal, double incrVal, string text);
 	int gui_slider_create();
 
 	void gui_slider_destroy(int id);
@@ -91,6 +93,9 @@ namespace enigma_user
 
 	void gui_slider_set_callback(int id, int script_id);
 	void gui_slider_set_visible(int id, bool visible);
+
+  int gui_slider_get_style(int id);
+  int gui_slider_get_indicator_style(int id);
 
 	int gui_slider_get_state(int id);
 	bool gui_slider_get_active(int id);
@@ -114,6 +119,7 @@ namespace enigma_user
 	void gui_window_set_visible(int id, bool visible);
   void gui_window_set_draggable(int id, bool draggable);
 
+  int gui_window_get_style(int id);
 	int gui_window_get_state(int id);
 	void gui_window_draw(int id);
 	void gui_windows_draw();
@@ -130,6 +136,7 @@ namespace enigma_user
   void gui_label_set_style(int id, int style_id);
 	void gui_label_set_visible(int id, bool visible);
 
+  int gui_label_get_style(int id);
 	void gui_label_draw(int id);
 	void gui_labels_draw();
 

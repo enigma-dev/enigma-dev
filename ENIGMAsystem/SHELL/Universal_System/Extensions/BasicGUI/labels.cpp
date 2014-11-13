@@ -102,10 +102,7 @@ namespace enigma_user
 		}
 		gui::gui_labels[gui::gui_labels_maxid].visible = true;
 		gui::gui_labels[gui::gui_labels_maxid].id = gui::gui_labels_maxid;
-		gui::gui_labels[gui::gui_labels_maxid].box.x = x;
-		gui::gui_labels[gui::gui_labels_maxid].box.y = y;
-		gui::gui_labels[gui::gui_labels_maxid].box.w = w;
-		gui::gui_labels[gui::gui_labels_maxid].box.h = h;
+		gui::gui_labels[gui::gui_labels_maxid].box.set(x, y, w, h);
 		gui::gui_labels[gui::gui_labels_maxid].text = text;
 		return (gui::gui_labels_maxid++);
 	}
@@ -135,6 +132,10 @@ namespace enigma_user
 	void gui_label_set_visible(int id, bool visible){
 		gui::gui_labels[id].visible = visible;
 	}
+
+  int gui_label_get_style(int id){
+    return gui::gui_labels[id].style_id;
+  }
 
 	void gui_label_draw(int id){
 		unsigned int phalign = enigma_user::draw_get_halign();
