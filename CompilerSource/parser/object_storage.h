@@ -1,6 +1,7 @@
 /********************************************************************************\
 **                                                                              **
 **  Copyright (C) 2008-2011 Josh Ventura                                        **
+**  Copyright (C) 2014 Seth N. Hetu                                             **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -90,6 +91,7 @@ struct parsed_object
   double depth;
 
   map<string,dectrip> locals;   // Any variable KEY used but not declared, or declared as local VALUE.
+  map<string,dectrip> ambiguous;// Any variable KEY used in with statement, but not locally declared.
   map<string,dectrip> globals;  // Any variable KEY declared as global VALUE.
   map<string,decquad> consts;   // Any variable KEY declared as constant VALUE.
   map<string,int> globallocals; // Any shared local variable KEY used.
@@ -100,6 +102,7 @@ struct parsed_object
   vector<initpair> initializers; // Variables that need initialized in the constructor for this object
 
   typedef map<string,dectrip>::iterator locit;
+  typedef map<string,dectrip>::iterator ambit;
   typedef map<string,dectrip>::iterator globit;
   typedef map<string,decquad>::iterator constit;
   typedef map<string,int>::iterator funcit;

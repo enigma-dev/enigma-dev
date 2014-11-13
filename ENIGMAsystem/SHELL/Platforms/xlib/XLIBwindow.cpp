@@ -1,4 +1,5 @@
 /** Copyright (C) 2008-2011 IsmAvatar <cmagicj@nni.com>, Josh Ventura
+*** Copyright (C) 2014 Seth N. Hetu
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -90,9 +91,11 @@ namespace enigma {
               if (scaledHeight > windowHeight)
                   windowHeight = scaledHeight;
           }
-           //clampwindow();
+
+          //Now actually set the window's position and size:
+          enigma_user::window_set_rectangle(windowX, windowY, windowWidth, windowHeight);
       } else {
-        //SetWindowPos(hWnd, NULL, 0, 0, parWidth, parHeight, SWP_NOACTIVATE); 
+          enigma_user::window_set_rectangle(0, 0, windowWidth, windowHeight);
       }
   }
 }
@@ -341,8 +344,11 @@ void window_default(bool center_size)
   }
   enigma::windowWidth = enigma::regionWidth = xm;
   enigma::windowHeight = enigma::regionHeight = ym;
+
   if (center) {
-    window_center();
+    enigma::windowX = display_get_width()/2 - enigma::windowWidth/2;
+    enigma::windowY = display_get_height()/2 - enigma::windowHeight/2;
+    //window_center();
   }
   
   enigma::setwindowsize();
@@ -352,7 +358,7 @@ void window_mouse_set(int x,int y) {
 	XWarpPointer(disp,None,win,0,0,0,0,(int)x,(int)y);
 }
 
-void display_mouse_set(double x,double y) {
+void display_mouse_set(int x,int y) {
 	XWarpPointer(disp,None,DefaultRootWindow(disp),0,0,0,0,(int)x,(int)y);
 }
 
@@ -397,7 +403,7 @@ void window_set_size(unsigned int w,unsigned int h) {
 	XResizeWindow(disp,win, w, h);
   enigma::windowWidth = w;
   enigma::windowHeight = h;
-  enigma::setwindowsize();
+  //enigma::setwindowsize(); //NOTE: I think this will also infinitely loop.
 }
 void window_set_rectangle(int x,int y,int w,int h) {
 	XMoveResizeWindow(disp, win, x, y, w, h);
@@ -411,7 +417,9 @@ void window_center()
 	uint w,h,b,d;
 	XGetGeometry(disp,win,&r,&x,&y,&w,&h,&b,&d);
 	Screen *s = DefaultScreenOfDisplay(disp);
-	XMoveWindow(disp,win,s->width/2-w/2,s->height/2-h/2);
+   enigma::windowX = s->width/2-w/2;
+   enigma::windowY = s->height/2-h/2;
+	XMoveWindow(disp,win,enigma::windowX,enigma::windowY);
 }
 
 }
@@ -451,6 +459,8 @@ void window_set_fullscreen(bool full)
 	xev.xclient.data.l[1] = aFullScreen;
 	xev.xclient.data.l[2] = 0;
 	XSendEvent(disp,DefaultRootWindow(disp),False,SubstructureRedirectMask|SubstructureNotifyMask,&xev);
+
+	enigma::setwindowsize();
 }
 
 bool window_get_fullscreen()

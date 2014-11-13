@@ -31,14 +31,20 @@ using std::string;
 #include "var4.h"      // Var stuff
 #include "lua_table.h" // The Lua part
 
-#define as_lua(x) (*(vararray*)(&(x)))
 #define vararray lua_table<lua_table<variant> >
+#define as_lua(x) (*((vararray*)x))
+
+//#define as_lua(x) (*(vararray*)(&(x)))
+//typedef lua_table<lua_table<variant> > vararray;
 
 void var::initialize() {
-  new(&values) vararray;
+  values = new vararray();
 }
 void var::cleanup() {
-  as_lua(values) . ~vararray();
+  if (values) { 
+    delete ((vararray*)values);
+    values = NULL; 
+  }
 }
 
 variant& var::operator*  ()
@@ -59,7 +65,7 @@ variant& var::operator() (int ind)
 }
 variant& var::operator() (int ind1,int ind2)
 {
-  return as_lua(values)[size_t(ind2)][size_t(ind1)];
+  return as_lua(values)[size_t(ind1)][size_t(ind2)];
 }
 
 const variant& var::operator*  () const
@@ -80,13 +86,36 @@ const variant& var::operator() (int ind) const
 }
 const variant& var::operator() (int ind1,int ind2) const
 {
-  return as_lua(values)[size_t(ind2)][size_t(ind1)];
+  return as_lua(values)[size_t(ind1)][size_t(ind2)];
+}
+
+int var::array_len() const
+{
+  return (*as_lua(values)).max_index();
+}
+
+int var::array_height() const
+{
+  return as_lua(values).max_index();
+}
+
+int var::array_len(int row) const
+{
+  return row>=array_height() ? 0 : as_lua(values)[size_t(row)].max_index();
 }
 
 var::var(const var& x) {
-  new(&values) vararray(*(vararray*)&(x.values));
+  values = new vararray();
+  as_lua(values) = as_lua(x.values);
+  //new(&values) vararray(*(vararray*)&(x.values));
 }
 var& var::operator= (const var& x) {
-  *(vararray*)&(values) = *(vararray*)&(x.values);
+  if (values) {
+    delete ((vararray*)values);
+  }
+
+  values = new vararray();
+  as_lua(values) = as_lua(x.values);
+  //*(vararray*)&(values) = *(vararray*)&(x.values);
   return *this;
 }

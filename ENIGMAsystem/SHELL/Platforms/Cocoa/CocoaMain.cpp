@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2008 IsmAvatar <cmagicj@nni.com>
  * Copyright (C) 2010 Alasdair Morrison <tgmg@g-java.com>
+ * Copyright (C) 2014 Seth N. Hetu
  *
  * This file is part of ENIGMA.
  *
@@ -30,6 +31,10 @@
 #include "Universal_System/CallbackArrays.h"
 #include "Universal_System/roomsystem.h"
 
+namespace enigma {
+  void SetResizeFptr();
+}
+
 namespace enigma_user {
   std::string working_directory = "";
 }
@@ -50,6 +55,8 @@ int main(int argc,char** argv)
 	enigma::parameters=new char* [argc];
 	for (int i=0; i<argc; i++)
 		enigma::parameters[i]=argv[i];
+
+   enigma::SetResizeFptr();
 
 	return mainO(argc, argv);
 }

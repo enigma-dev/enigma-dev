@@ -1,6 +1,7 @@
 /********************************************************************************\
 **                                                                              **
 **  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2014 Seth N. Hetu                                             **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -43,8 +44,8 @@ namespace setting
   bool use_incrementals = 0; // Defines how operators ++ and -- are treated.         0 = GML,               1 = C++
   bool literal_autocast = 0; // Determines how literals are treated.                 0 = enigma::variant,   1 = C++ scalars
   bool inherit_objects = 0;  // Determines whether objects should automatically inherit locals and events from their parents
-  string make_directory = "";
   COMPLIANCE_LVL compliance_mode = COMPL_STANDARD;
+  string keyword_blacklist = "";
 };
 
 

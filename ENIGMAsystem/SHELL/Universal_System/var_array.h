@@ -1,6 +1,5 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
 **  Copyright (C) 2014 Seth N. Hetu                                             **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
@@ -26,35 +25,21 @@
 **                                                                              **
 \********************************************************************************/
 
-#ifndef _COMPILE_COMMON__H
-#define _COMPILE_COMMON__H
+#ifndef _H_VAR_ARRAY
+#define _H_VAR_ARRAY
 
-#include <map>
-#include <vector>
-#include "compile_organization.h"
-#include "parser/object_storage.h"
+#include "var4.h"
 
-namespace used_funcs
-{
-  extern bool object_set_sprite;
-  void zero();
-}
-extern std::map<string,parsed_script*> scr_lookup;
-extern std::map<string, std::vector<parsed_script*> > tline_lookup;
+namespace enigma_user {
 
+int array_length_1d(const var& v);
 
-extern const char* license;
+int array_length_2d(const var& v, int n);
 
+int array_height_2d(const var& v);
 
-inline string tdefault(string t) {
-  return (t != "" ? t : "var");
-}
-inline void* javaColor(int c) {
-  return reinterpret_cast<void*>((c & 0xFF)?(((c & 0x00FF0000) >> 8) | ((c & 0x0000FF00) << 8) | ((c & 0xFF000000) >> 24)):0xFFFFFFFF);
+bool is_array(const var& v);
+
 }
 
-inline string system_get_uppermost_tier() {
-  return "object_collisions";
-}
-
-#endif
+#endif //_H_VAR_ARRAY

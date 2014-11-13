@@ -1,6 +1,7 @@
 /********************************************************************************\
  **                                                                              **
  **  Copyright (C) 2010 Alasdair Morrison <tgmg@g-java.com>                      **
+ **  Copyright (C) 2014 Seth N. Hetu                                             **
  **                                                                              **
  **  This file is a part of the ENIGMA Development Environment.                  **
  **                                                                              **
@@ -90,6 +91,11 @@ int getMouse(int i)
 		default: return -1;
 	}
 	
+}
+
+void cocoa_window_set_color(int bgrColor) 
+{
+	[[delegate window] setBackgroundColor: [NSColor colorWithRed:(bgrColor&0xFF)  green:((bgrColor&0xFF00)>>8)  blue:((bgrColor&0xFF0000)>>16)  alpha:1.0]];
 }
 
 void cocoa_window_set_caption(const char* caption)
