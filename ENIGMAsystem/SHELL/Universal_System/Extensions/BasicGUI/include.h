@@ -72,7 +72,7 @@ namespace enigma_user
 	void gui_toggle_set_callback(int id, int script_id);
 	void gui_toggle_set_visible(int id, bool visible);
 
-  int gui_toggle_get_style(int id){
+  int gui_toggle_get_style(int id);
 	int gui_toggle_get_state(int id);
 	bool gui_toggle_get_active(int id);
 	void gui_toggle_draw(int id);
