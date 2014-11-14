@@ -412,3 +412,32 @@ int show_menu_ext_nl(int x, int y, string text)
   return rv;
 }
 */
+namespace enigma_user {
+
+string get_string(string message, string def, string cap)
+{
+	// FIXME: Race condition
+	// TODO: OK on Enter
+	GtkWidget *dialog = gtk_dialog_new();
+	gtk_dialog_add_button(GTK_DIALOG(dialog), "OK", 0);
+	gtk_dialog_add_button(GTK_DIALOG(dialog), "CANCEL", 1);
+	GtkWidget *content_area = gtk_dialog_get_content_area(GTK_DIALOG(dialog));
+	GtkWidget *entry = gtk_entry_new();
+	gtk_entry_set_text(GTK_ENTRY(entry), def.c_str());
+	gtk_container_add(GTK_CONTAINER(content_area), entry);
+	gtk_widget_show_all(dialog);
+	gint result = gtk_dialog_run(GTK_DIALOG(dialog));
+
+	string out = gtk_entry_get_text(GTK_ENTRY(entry));
+	gtk_widget_hide(dialog);
+	gtk_widget_destroy(dialog);
+
+	if (result == 1) return def;
+	return out;
+}
+
+void show_info(string info, int bgcolor, int left, int top, int width, int height, bool embedGameWindow, bool showBorder, bool allowResize, bool stayOnTop, bool pauseGame, string caption) {
+	// STUB
+}
+
+}
