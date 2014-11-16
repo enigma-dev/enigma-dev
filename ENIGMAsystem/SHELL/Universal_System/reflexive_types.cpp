@@ -31,6 +31,10 @@ namespace enigma {
   //Make direction work
   INTERCEPT_DEFAULT_COPY(directionv)
   void directionv::function(variant) {
+    rval.d = fmod(rval.d, 360.0);
+    if(rval.d < 0.0){
+      rval.d += 360.0;
+    }
     *hspd = *spd * cos(rval.d*M_PI/180);
     *vspd = *spd *-sin(rval.d*M_PI/180);
   }

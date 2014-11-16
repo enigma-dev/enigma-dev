@@ -135,12 +135,6 @@ namespace enigma
       }
 
     }
-    //THIS COULD BE DONE BETTER! BUT HOW?
-    if(instance->direction.rval.d < 0){
-      instance->direction.rval.d += 360;
-    }
-    instance->direction.rval.d = fmod(instance->direction.rval.d, 360);
-
     instance->x += instance->hspeed.rval.d;
     instance->y += instance->vspeed.rval.d;
   }
