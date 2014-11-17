@@ -57,8 +57,10 @@ static inline void draw_back()
     for (int back_current=0; back_current<7; back_current++)
     {
         if (background_visible[back_current] == 1) {
-            // if (background_stretched) draw_background_stretched(back, x, y, w, h);
-            draw_background_tiled(background_index[back_current], background_x[back_current], background_y[back_current]);
+          if (int(background_index[back_current]) >= 0) {
+              // if (background_stretched) draw_background_stretched(back, x, y, w, h);
+              draw_background_tiled(background_index[back_current], background_x[back_current], background_y[back_current]);
+          }
         }
         // background_foreground, background_index, background_x, background_y, background_htiled,
         // background_vtiled, background_hspeed, background_vspeed;
