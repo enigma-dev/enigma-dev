@@ -81,7 +81,7 @@ int lang_CPP::compile_writeGlobals(EnigmaStruct* es, parsed_object* global)
     wto << "namespace enigma_user {" << endl;
     for (int i=0; i<es->constantCount; i++) {
       const Constant& con = es->constants[i];
-      wto << "  #define " << con.name << " " << con.value << endl;
+      wto << "  #define " << con.name << " (" << con.value <<")" << endl;
     }
     wto << "}" << endl;
 
