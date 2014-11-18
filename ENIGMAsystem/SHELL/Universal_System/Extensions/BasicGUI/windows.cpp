@@ -67,11 +67,7 @@ namespace gui
 
 	//Update all possible button states (hover, click, toggle etc.)
 	void gui_window::update(gs_scalar tx, gs_scalar ty){
-    if (box.point_inside(tx,ty)){ //Hover
-        windowStopPropagation = true;
-    }
-
-    if (enigma_user::mouse_check_button_pressed(enigma_user::mb_left)){ //Press
+    if (enigma_user::mouse_check_button_pressed(enigma_user::mb_left) && gui::windowStopPropagation == false){ //Press
       if(box.point_inside(tx,ty)){
         state = enigma_user::gui_state_on;
         if (draggable == true){
@@ -82,6 +78,10 @@ namespace gui
       }else{
         state = enigma_user::gui_state_default;
       }
+    }
+
+    if (box.point_inside(tx,ty)){ //Hover
+        windowStopPropagation = true;
     }
 
 		if (drag == true){
@@ -203,9 +203,9 @@ namespace enigma_user
 		gui::gui_windows[id].draw();
 		//Draw children
     if (gui::gui_windows[id].child_buttons.empty() == false){
-      for (unsigned int b=0; b<gui::gui_windows[id].child_buttons.size(); ++b){
-        gui::gui_buttons[gui::gui_windows[id].child_buttons[b]].update();
-        gui::gui_buttons[gui::gui_windows[id].child_buttons[b]].draw();
+      for (const auto &b : gui::gui_windows[id].child_buttons){
+        gui::gui_buttons[b].update();
+        gui::gui_buttons[b].draw();
       }
     }
 		enigma_user::draw_set_halign(phalign);
@@ -228,48 +228,49 @@ namespace enigma_user
         if (gui::gui_windows[i].child_buttons.empty() == false){
           for (int b=gui::gui_windows[i].child_buttons.size()-1; b>=0; --b){
             if (gui::gui_buttons[gui::gui_windows[i].child_buttons[b]].visible == false) continue; //Skip invisible objects
-            if (gui::windowStopPropagation == false){ gui::gui_buttons[gui::gui_windows[i].child_buttons[b]].update(gui::gui_windows[i].box.x,gui::gui_windows[i].box.y); } else { break; } //Stop propagation
+            gui::gui_buttons[gui::gui_windows[i].child_buttons[b]].update(gui::gui_windows[i].box.x,gui::gui_windows[i].box.y);
           }
         }
         if (gui::gui_windows[i].child_toggles.empty() == false){
           for (int b=gui::gui_windows[i].child_toggles.size()-1; b>=0; --b){
             if (gui::gui_toggles[gui::gui_windows[i].child_toggles[b]].visible == false) continue; //Skip invisible objects
-            if (gui::windowStopPropagation == false){ gui::gui_toggles[gui::gui_windows[i].child_toggles[b]].update(gui::gui_windows[i].box.x,gui::gui_windows[i].box.y); } else { break; } //Stop propagation
+            gui::gui_toggles[gui::gui_windows[i].child_toggles[b]].update(gui::gui_windows[i].box.x,gui::gui_windows[i].box.y);
           }
         }
         if (gui::gui_windows[i].child_sliders.empty() == false){
-          for (unsigned int b=0; b<gui::gui_windows[i].child_sliders.size(); ++b){
+          for (int b=gui::gui_windows[i].child_sliders.size()-1; b>=0; --b){
             if (gui::gui_sliders[gui::gui_windows[i].child_sliders[b]].visible == false) continue;
-            if (gui::windowStopPropagation == false){ gui::gui_sliders[gui::gui_windows[i].child_sliders[b]].update(gui::gui_windows[i].box.x,gui::gui_windows[i].box.y); } else { break; }
+            gui::gui_sliders[gui::gui_windows[i].child_sliders[b]].update(gui::gui_windows[i].box.x,gui::gui_windows[i].box.y);
           }
         }
-        if (gui::windowStopPropagation == false){ gui::gui_windows[i].update(); } else { break; } //Stop propagation
+        gui::gui_windows[i].update();
 			}
 		}
 
     //Draw loop
-    for (unsigned int i=0; i<gui::gui_windows_maxid; ++i){
-      if (gui::gui_windows[i].visible == true){
-				gui::gui_windows[i].draw();
+    for (auto &wi : gui::gui_windows){
+      auto &w = wi.second;
+      if (w.visible == true){
+				w.draw();
         //Draw children
-        if (gui::gui_windows[i].child_buttons.empty() == false){
-          for (unsigned int b=0; b<gui::gui_windows[i].child_buttons.size(); ++b){
-            if (gui::gui_buttons[gui::gui_windows[i].child_buttons[b]].visible == true) gui::gui_buttons[gui::gui_windows[i].child_buttons[b]].draw(gui::gui_windows[i].box.x,gui::gui_windows[i].box.y);
+        if (w.child_buttons.empty() == false){
+          for (const auto &b : w.child_buttons){
+            if (gui::gui_buttons[b].visible == true) gui::gui_buttons[b].draw(w.box.x,w.box.y);
           }
         }
-        if (gui::gui_windows[i].child_toggles.empty() == false){
-          for (unsigned int b=0; b<gui::gui_windows[i].child_toggles.size(); ++b){
-            if (gui::gui_toggles[gui::gui_windows[i].child_toggles[b]].visible == true) gui::gui_toggles[gui::gui_windows[i].child_toggles[b]].draw(gui::gui_windows[i].box.x,gui::gui_windows[i].box.y);
+        if (w.child_toggles.empty() == false){
+          for (const auto &t : w.child_toggles){
+            if (gui::gui_toggles[t].visible == true) gui::gui_toggles[t].draw(w.box.x,w.box.y);
           }
         }
-        if (gui::gui_windows[i].child_sliders.empty() == false){
-          for (unsigned int b=0; b<gui::gui_windows[i].child_sliders.size(); ++b){
-            if (gui::gui_sliders[gui::gui_windows[i].child_sliders[b]].visible == true) gui::gui_sliders[gui::gui_windows[i].child_sliders[b]].draw(gui::gui_windows[i].box.x,gui::gui_windows[i].box.y);
+        if (w.child_sliders.empty() == false){
+          for (const auto &s : w.child_sliders){
+            if (gui::gui_sliders[s].visible == true) gui::gui_sliders[s].draw(w.box.x,w.box.y);
           }
         }
-        if (gui::gui_windows[i].child_labels.empty() == false){
-          for (unsigned int b=0; b<gui::gui_windows[i].child_labels.size(); ++b){
-            if (gui::gui_labels[gui::gui_windows[i].child_labels[b]].visible == true) gui::gui_labels[gui::gui_windows[i].child_labels[b]].draw(gui::gui_windows[i].box.x,gui::gui_windows[i].box.y);
+        if (w.child_labels.empty() == false){
+          for (const auto &l : w.child_labels){
+            if (gui::gui_labels[l].visible == true) gui::gui_labels[l].draw(w.box.x,w.box.y);
           }
         }
 			}

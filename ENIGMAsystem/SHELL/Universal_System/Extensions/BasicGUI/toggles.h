@@ -42,6 +42,7 @@ namespace gui
 			int parent_id = -1; //ID of some kind of parent (probably a window). It won't render with gui_draw_toggles() if it is not -1.
 
       int style_id = -1; //The style we use
+      int group_id = -1; //Groups allow making one button disable others
 
 			gui_toggle();
 			//Update all possible button states (hover, click, toggle etc.)

@@ -57,7 +57,7 @@ namespace gui
 
 	//Update all possible slider states (hover, click etc.)
 	void gui_slider::update(gs_scalar ox, gs_scalar oy, gs_scalar tx, gs_scalar ty){
-		if (box.point_inside(tx-ox,ty-oy) || indicator_box.point_inside(tx-ox-box.x-slider_offset-indicator_box.x,ty-box.y-oy-indicator_box.y)){
+		if ((box.point_inside(tx-ox,ty-oy) || indicator_box.point_inside(tx-ox-box.x-slider_offset-indicator_box.x,ty-box.y-oy-indicator_box.y)) && gui::windowStopPropagation == false){
       windowStopPropagation = true;
 			if (enigma_user::mouse_check_button_pressed(enigma_user::mb_left)){
         state = enigma_user::gui_state_active;
@@ -214,6 +214,10 @@ namespace enigma_user
 
 	void gui_slider_set_visible(int id, bool visible){
 		gui::gui_sliders[id].visible = visible;
+	}
+
+  void gui_slider_set_active(int id, bool active){
+		gui::gui_sliders[id].active = active;
 	}
 
 	void gui_slider_draw(int id){

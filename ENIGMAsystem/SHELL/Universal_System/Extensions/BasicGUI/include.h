@@ -51,6 +51,7 @@ namespace enigma_user
 	void gui_button_set_callback(int id, int script_id);
 	void gui_button_set_togglable(int id, bool togglable);
 	void gui_button_set_visible(int id, bool visible);
+  void gui_button_set_active(int id, bool active);
 
   int gui_button_get_style(int id);
 	int gui_button_get_state(int id);
@@ -71,6 +72,7 @@ namespace enigma_user
 
 	void gui_toggle_set_callback(int id, int script_id);
 	void gui_toggle_set_visible(int id, bool visible);
+  void gui_toggle_set_active(int id, bool active);
 
   int gui_toggle_get_style(int id);
 	int gui_toggle_get_state(int id);
@@ -93,6 +95,7 @@ namespace enigma_user
 
 	void gui_slider_set_callback(int id, int script_id);
 	void gui_slider_set_visible(int id, bool visible);
+  void gui_slider_set_active(int id, bool active);
 
   int gui_slider_get_style(int id);
   int gui_slider_get_indicator_style(int id);
@@ -139,6 +142,12 @@ namespace enigma_user
   int gui_label_get_style(int id);
 	void gui_label_draw(int id);
 	void gui_labels_draw();
+
+  ///GROUPS
+	int gui_group_create();
+  void gui_group_destroy(int id);
+  void gui_group_add_button(int id, int bid);
+  void gui_group_add_toggle(int id, int tid);
 
   //Window parenting
   void gui_window_add_button(int id, int bid);
