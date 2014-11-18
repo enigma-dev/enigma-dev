@@ -32,6 +32,8 @@ using std::pair;
 #include "styles.h"
 #include "skins.h"
 #include "toggles.h"
+#include "buttons.h"
+#include "groups.h"
 #include "include.h"
 #include "common.h"
 
@@ -43,6 +45,8 @@ namespace gui
 	extern int gui_bound_skin;
 	extern unordered_map<unsigned int, gui_skin> gui_skins;
   extern unordered_map<unsigned int, gui_style> gui_styles;
+  extern unordered_map<unsigned int, gui_group> gui_groups;
+  extern unordered_map<unsigned int, gui_button> gui_buttons;
 	extern unsigned int gui_skins_maxid;
 	extern unsigned int gui_style_toggle;
 
@@ -57,7 +61,7 @@ namespace gui
 
 	//Update all possible toggle states (hover, click, toggle etc.)
 	void gui_toggle::update(gs_scalar ox, gs_scalar oy, gs_scalar tx, gs_scalar ty){
-		if (box.point_inside(tx-ox,ty-oy)){
+		if (box.point_inside(tx-ox,ty-oy) && gui::windowStopPropagation == false){
       gui::windowStopPropagation = true;
 			if (enigma_user::mouse_check_button_pressed(enigma_user::mb_left)){
         if (active == false){
@@ -83,6 +87,14 @@ namespace gui
 							state = enigma_user::gui_state_hover;
 						}else{
 							state = enigma_user::gui_state_on_hover;
+							if (group_id != -1){ //Groups disable any other active element
+                for (auto &b : gui::gui_groups[group_id].group_buttons){
+                  gui_buttons[b].active = false;
+                }
+                for (auto &t : gui::gui_groups[group_id].group_toggles){
+                  if (t != id) { gui_toggles[t].active = false; }
+                }
+							}
 						}
 					}
 				}
@@ -192,6 +204,10 @@ namespace enigma_user
 		return gui::gui_toggles[id].active;
 	}
 
+  void gui_toggle_set_active(int id, bool active){
+		gui::gui_toggles[id].active = active;
+	}
+
 	void gui_toggle_set_visible(int id, bool visible){
 		gui::gui_toggles[id].visible = visible;
 	}
@@ -214,10 +230,10 @@ namespace enigma_user
 		unsigned int pvalign = enigma_user::draw_get_valign();
 		int pcolor = enigma_user::draw_get_color();
 		gs_scalar palpha = enigma_user::draw_get_alpha();
-		for (unsigned int i=0; i<gui::gui_toggles_maxid; ++i){
-			if (gui::gui_toggles[i].visible == true && gui::gui_toggles[i].parent_id == -1){
-      	gui::gui_toggles[i].update();
-				gui::gui_toggles[i].draw();
+		for (auto &t : gui::gui_toggles){
+			if (t.second.visible == true && t.second.parent_id == -1){
+      	t.second.update();
+				t.second.draw();
 			}
 		}
 		enigma_user::draw_set_halign(phalign);
