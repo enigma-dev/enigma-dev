@@ -218,7 +218,7 @@ void surface_set_target(int id)
   d3d_transform_stack_push();
   glViewport(0, 0, surf->width, surf->height);
   glScissor(0, 0, surf->width, surf->height);
-  d3d_set_projection_ortho(0, 0, surf->width, surf->height, 0);
+  d3d_set_projection_ortho(0, surf->height, surf->width, -surf->height, 0);
 }
 
 void surface_reset_target(void)
