@@ -541,7 +541,9 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
                 std::cout <<"ERROR: function-name match runs to end of code [2].\n";
                 break; 
               }
+
               string innerName;
+              pt savedPos = pos;
               if (!skip_paren(innerName, pos, code, synt, 'n')) {
                 std::cout <<"ERROR: Parentheses don't match on \"" <<ctrlType <<"\" statement.\n";
                 break;
@@ -553,6 +555,33 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
                   std::cout <<"ERROR: with inside with can't be handled yet when self is involved.\n";
                   //break; //Don't break; this will replace object-local with global scripts, but that *should* be harmless (and we might have a nested script).
                }
+              } else if (ctrlType=="if" || ctrlType=="for" || ctrlType=="while") {
+                //If the control type is "if" or "for" (TODO: others?), then we may have parsed over some required scope changes in "inner name".
+                for (pt p=savedPos; p<pos; p++) {
+                  if (synt[p]=='n') {
+                    //Match the name
+                    string funcName;
+                    pt oldPos = p;
+                    if (!scan_token(funcName, p, code, synt, 'n')) {
+                      std::cout <<"ERROR: function-name match runs to end of code [1].\n";
+                      break; 
+                    }
+
+                    //Are we calling a function?
+                    if (synt[p]=='(') {
+                      //Are we calling a valid script?
+                      if (script_names.find(funcName)!=script_names.end()) {
+                        //This needs to be globally scoped, unless we've done this already (with inside with)
+                        if (code[oldPos-1] != ':') { //TODO: We could presumably fix nested "with (x) { with(self) {}}" here, if it occurs often in practice.
+                          code.insert(oldPos, "::");
+                          synt.insert(oldPos, "XX"); //TODO: I have no idea what syntax to use here.
+                          pos += 2;
+                          p += 2;
+                        }
+                      }
+                    }
+                  }
+                }
               }
 
               //The next character determines how much scope we are searching for.
