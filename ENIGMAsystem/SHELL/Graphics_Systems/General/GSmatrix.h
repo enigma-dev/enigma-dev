@@ -69,6 +69,13 @@ bool d3d_transform_stack_empty();
 bool d3d_transform_stack_top();
 bool d3d_transform_stack_disgard();
 
+bool d3d_projection_stack_push();
+bool d3d_projection_stack_pop();
+void d3d_projection_stack_clear();
+bool d3d_projection_stack_empty();
+bool d3d_projection_stack_top();
+bool d3d_projection_stack_disgard();
+
 gs_scalar* d3d_transform_vertex(gs_scalar x, gs_scalar y, gs_scalar z);
 
 gs_scalar* matrix_get(int type);

@@ -238,7 +238,9 @@ void d3d_transform_set_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, gs_s
 
 #include <stack>
 std::stack<enigma::Matrix4> trans_stack;
+std::stack<enigma::Matrix4> proj_stack;
 int trans_stack_size = 0;
+int proj_stack_size = 0;
 
 namespace enigma_user
 {
@@ -264,9 +266,8 @@ bool d3d_transform_stack_pop()
 
 void d3d_transform_stack_clear()
 {
-    do
-      trans_stack.pop();
-    while (trans_stack_size--);
+    trans_stack = std::stack<enigma::Matrix4>();
+    trans_stack_size = 0;
     enigma::model_matrix.InitIdentity();
     enigma::mv_matrix = enigma::view_matrix * enigma::model_matrix;
     glLoadMatrix(enigma::mv_matrix);
@@ -291,6 +292,59 @@ bool d3d_transform_stack_disgard()
     if (trans_stack_size == 0) return false;
     trans_stack.pop();
     trans_stack_size--;
+    return true;
+}
+
+bool d3d_projection_stack_push()
+{
+    //if (proj_stack_size == 31) return false; //This limit no longer applies
+    proj_stack.push(enigma::projection_matrix);
+    proj_stack_size++;
+    return true;
+}
+
+bool d3d_projection_stack_pop()
+{
+    if (proj_stack_size == 0) return false;
+    enigma::projection_matrix = proj_stack.top();
+    proj_stack.pop();
+    if (proj_stack_size > 0) proj_stack_size--;
+    glMatrixMode(GL_PROJECTION);
+    glLoadMatrix(enigma::projection_matrix);
+    glMatrixMode(GL_MODELVIEW);
+    return true;
+}
+
+void d3d_projection_stack_clear()
+{
+    proj_stack = std::stack<enigma::Matrix4>();
+    proj_stack_size = 0;
+    enigma::projection_matrix.InitIdentity();
+    glMatrixMode(GL_PROJECTION);
+    glLoadMatrix(enigma::projection_matrix);
+    glMatrixMode(GL_MODELVIEW);
+}
+
+bool d3d_projection_stack_empty()
+{
+    return (proj_stack_size == 0);
+}
+
+bool d3d_projection_stack_top()
+{
+    if (proj_stack_size == 0) return false;
+    enigma::projection_matrix = proj_stack.top();
+    glMatrixMode(GL_PROJECTION);
+    glLoadMatrix(enigma::projection_matrix);
+    glMatrixMode(GL_MODELVIEW);
+    return true;
+}
+
+bool d3d_projection_stack_disgard()
+{
+    if (proj_stack_size == 0) return false;
+    proj_stack.pop();
+    proj_stack_size--;
     return true;
 }
 

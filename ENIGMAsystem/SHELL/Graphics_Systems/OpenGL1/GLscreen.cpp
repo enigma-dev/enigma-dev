@@ -71,6 +71,7 @@ namespace enigma
 	unsigned gui_width;
 	unsigned gui_height;
 	unsigned int bound_framebuffer = 0; //Shows the bound framebuffer, so glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &fbo); don't need to be called (they are very slow)
+  int viewport_x, viewport_y, viewport_w, viewport_h; //These are used by surfaces, to set back the viewport
 }
 
 static inline void draw_back()
@@ -306,7 +307,7 @@ void screen_redraw()
       screen_set_viewport(1, 1, window_get_region_width(), window_get_region_height());
     else
       screen_set_viewport(0, 0, window_get_region_width(), window_get_region_height());
-    
+
     clear_view(0, 0, window_get_region_width(), window_get_region_height(), 0, background_showcolor);
     draw_back();
     draw_insts();
@@ -323,7 +324,7 @@ void screen_redraw()
       int vc = (int)view_current;
       if (!view_visible[vc])
         continue;
-      
+
       int vob = (int)view_object[vc];
       if (vob != -1)
         follow_object(vob, vc);
@@ -333,14 +334,14 @@ void screen_redraw()
       else
         //printf("%d %d %d %d\n", (int)view_xport[vc], (int)view_yport[vc], (int)view_wport[vc], (int)view_hport[vc]),
         screen_set_viewport(view_xport[vc], view_yport[vc], view_wport[vc], view_hport[vc]);
-	  
+
       clear_view(view_xview[vc], view_yview[vc], view_wview[vc], view_hview[vc], view_angle[vc], background_showcolor && draw_backs);
 
       if (draw_backs)
         draw_back();
-      
+
       draw_insts();
-      
+
       if (draw_tiles())
         break;
       draw_backs = background_allviews;
@@ -355,7 +356,7 @@ void screen_redraw()
   {
     screen_set_viewport(0, 0, window_get_region_width(), window_get_region_height());
     d3d_set_projection_ortho(0, 0, enigma::gui_width, enigma::gui_height, 0);
-	
+
     // Clear the depth buffer if hidden surface removal is on at the beginning of the draw step.
     if (enigma::d3dMode)
       glClear(GL_DEPTH_BUFFER_BIT);
@@ -464,9 +465,13 @@ void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar he
   gs_scalar sx, sy;
   sx = (window_get_width() - window_get_region_width_scaled()) / 2;
   sy = (window_get_height() - window_get_region_height_scaled()) / 2;
+  viewport_x = sx + x;
+  viewport_y = window_get_height() - (sy + y) - height;
+  viewport_w = width;
+  viewport_h = height;
   //NOTE: OpenGL viewports are bottom left unlike Direct3D viewports which are top left
-  glViewport(sx + x, window_get_height() - (sy + y) - height, width, height);
-  glScissor(sx + x, window_get_height() - (sy + y) - height, width, height);
+  glViewport(viewport_x, viewport_y, viewport_w, viewport_h);
+  glScissor(viewport_x, viewport_y, viewport_w, viewport_h);
 }
 
 void display_set_gui_size(unsigned width, unsigned height) {

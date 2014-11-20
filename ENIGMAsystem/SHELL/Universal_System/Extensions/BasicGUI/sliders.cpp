@@ -61,6 +61,7 @@ namespace gui
       windowStopPropagation = true;
 			if (enigma_user::mouse_check_button_pressed(enigma_user::mb_left)){
         state = enigma_user::gui_state_active;
+        active = true;
         drag = true;
         if (indicator_box.point_inside(tx-ox-box.x-slider_offset-indicator_box.x,ty-box.y-oy-indicator_box.y)){
           drag_xoffset = tx-ox-indicator_box.x-box.x-slider_offset;
@@ -73,9 +74,6 @@ namespace gui
 				}else{
 					if (enigma_user::mouse_check_button_released(enigma_user::mb_left)){
 						active = false;
-						if (callback != -1){
-							enigma_user::script_execute(callback, id, active);
-						}
 						state = enigma_user::gui_state_hover;
 					}
 				}
@@ -87,7 +85,10 @@ namespace gui
       windowStopPropagation = true;
       slider_offset = fmin(fmax(0,tx-box.x-ox-drag_xoffset), box.w);
       value = round((minValue + slider_offset/box.w * (maxValue-minValue)) / incValue) * incValue;
-      slider_offset = box.w*(value/(maxValue-minValue));
+      slider_offset = box.w*((value-minValue)/(maxValue-minValue));
+      if (callback != -1){
+        enigma_user::script_execute(callback, id, active);
+      }
 			if (enigma_user::mouse_check_button_released(enigma_user::mb_left)){
 				drag = false;
 			}
