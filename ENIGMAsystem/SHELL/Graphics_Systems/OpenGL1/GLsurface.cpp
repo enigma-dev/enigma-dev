@@ -74,6 +74,7 @@ namespace enigma
 {
   surface **surface_array;
   size_t surface_max=0;
+  extern int viewport_x, viewport_y, viewport_w, viewport_h;
 }
 
 namespace enigma_user
@@ -224,10 +225,11 @@ void surface_set_target(int id)
   //This fixes several consecutive surface_set_target() calls without surface_reset_target.
   int prevFbo;
   glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
-  if (prevFbo != 0) glPopAttrib(); glPopMatrix();
+  if (prevFbo != 0) { glPopAttrib(); glPopMatrix(); d3d_projection_stack_pop(); }
   get_surface(surf,id);
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, surf->fbo); //bind it
   glPushMatrix(); //So you can pop it in the reset
+  d3d_projection_stack_push();
   glPushAttrib(GL_VIEWPORT_BIT); //same
   glViewport(0, 0, surf->width, surf->height);
   glScissor(0, 0, surf->width, surf->height);
@@ -239,6 +241,9 @@ void surface_reset_target(void)
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
   glPopAttrib();
   glPopMatrix();
+  d3d_projection_stack_pop();
+  glViewport(enigma::viewport_x, enigma::viewport_y, enigma::viewport_w, enigma::viewport_h);
+  glScissor(enigma::viewport_x, enigma::viewport_y, enigma::viewport_w, enigma::viewport_h);
 }
 
 int surface_get_target()
