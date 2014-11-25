@@ -25,6 +25,7 @@ int screen_redraw(int dontswap)
 
 using namespace std;
 
+#include "Universal_System/backgroundstruct.h"
 #include "Universal_System/var4.h"
 
 #define __GETR(x) (((unsigned int)x & 0x0000FF))
@@ -57,7 +58,7 @@ static inline void draw_back()
     for (int back_current=0; back_current<7; back_current++)
     {
         if (background_visible[back_current] == 1) {
-          if (int(background_index[back_current]) >= 0) {
+          if (enigma_user::background_exists(background_index[back_current])) {
               // if (background_stretched) draw_background_stretched(back, x, y, w, h);
               draw_background_tiled(background_index[back_current], background_x[back_current], background_y[back_current]);
           }
