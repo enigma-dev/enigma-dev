@@ -29,6 +29,7 @@
 using namespace std;
 
 #include "Universal_System/image_formats.h"
+#include "Universal_System/backgroundstruct.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/estring.h"
 
@@ -96,7 +97,7 @@ static inline void draw_back()
   // Draw the rooms backgrounds
   for (int back_current = 0; back_current < 8; back_current++) {
     if (background_visible[back_current] == 1) {
-      if (int(background_index[back_current]) >= 0) {
+      if (enigma_user::background_exists(background_index[back_current])) {
         //NOTE: This has been double checked with Game Maker 8.1 to work exactly the same, the background_x/y is modified just as object locals are
         //and also just as one would assume the system to work.
         //TODO: This should probably be moved to room system.
