@@ -52,8 +52,7 @@ namespace enigma
   extern char keymap[512];
   void ENIGMA_events(void); //TODO: Synchronize this with Windows by putting these two in a single header.
   bool gameWindowFocused = false;
-  extern int windowX, windowY, windowWidth, windowHeight;
-  extern void setwindowsize();
+  extern int windowWidth, windowHeight;
   extern bool freezeOnLoseFocus;
   unsigned int pausedSteps = 0;
   
@@ -142,8 +141,6 @@ namespace enigma
           return 0;
         }
         case ConfigureNotify: {
-          enigma::windowX = e.xconfigure.x;
-          enigma::windowY = e.xconfigure.y;
           enigma::windowWidth = e.xconfigure.width;
           enigma::windowHeight = e.xconfigure.height;
           enigma::setwindowsize();
