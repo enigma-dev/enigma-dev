@@ -133,14 +133,14 @@ static inline void write_extension_casts(std::ostream &wto) {
 }
 
 // TODO(JoshDreamland): Burn this function into ash and launch the ashes into space
-static inline void compute_locals(lang_CPP *lcpp, po_i &object_iter, const po_i &parent_iter, const string addls) {
+static inline void compute_locals(lang_CPP *lcpp, parsed_object *object, const string addls) {
   pt pos;
   string type, name, pres, sufs;
   for (pos = 0; pos < addls.length(); pos++)
   {
     if (is_useless(addls[pos])) continue;
-    if (addls[pos] == ';') { object_iter->second->locals[name] = dectrip(type, pres, sufs); type = pres = sufs = ""; continue; }
-    if (addls[pos] == ',') { object_iter->second->locals[name] = dectrip(type, pres, sufs); pres = sufs = ""; continue; }
+    if (addls[pos] == ';') { object->locals[name] = dectrip(type, pres, sufs); type = pres = sufs = ""; continue; }
+    if (addls[pos] == ',') { object->locals[name] = dectrip(type, pres, sufs); pres = sufs = ""; continue; }
     if (is_letter(addls[pos]) or addls[pos] == '$') {
       const pt spos = pos;
       while (is_letterdd(addls[++pos]));
@@ -169,10 +169,10 @@ static inline void compute_locals(lang_CPP *lcpp, po_i &object_iter, const po_i 
         if (addls[pos] == '[' or addls[pos] == '(') cnt++;
         else if (addls[pos] == ')' or addls[pos] == ']') cnt--;
       bool redundant = false;
-      if (setting::inherit_objects && parent_iter != parsed_objects.end()) {
-        for (po_i her = object_iter; her != parsed_objects.end(); her = parsed_objects.find(her->second->parent)) {
-          for (size_t j = 0; j < her->second->initializers.size(); j++) {
-            if (her->second->initializers[j].first == name) {
+      if (object->parent_parsedobj) {
+        for (parsed_object *obj = object; obj != NULL; obj = obj->parent_parsedobj) {
+          for (size_t j = 0; j < obj->initializers.size(); j++) {
+            if (obj->initializers[j].first == name) {
               redundant = true;
               break;
             }
@@ -182,24 +182,24 @@ static inline void compute_locals(lang_CPP *lcpp, po_i &object_iter, const po_i 
           }
         }
       } else {
-        for (size_t j = 0; j < object_iter->second->initializers.size(); j++) {
-          if (object_iter->second->initializers[j].first == name) {
+        for (size_t j = 0; j < object->initializers.size(); j++) {
+          if (object->initializers[j].first == name) {
             redundant = true;
             break;
           }
         }
       }
       if (!redundant) {
-        object_iter->second->initializers.push_back(initpair(name,addls.substr(spos,pos-spos)));
+        object->initializers.push_back(initpair(name,addls.substr(spos,pos-spos)));
       }
       pos--; continue;
     }
   }
 }
 
-static inline bool parent_declares(const po_i parent, const deciter decl) {
-  for (po_i her = parent; her != parsed_objects.end(); her = parsed_objects.find(her->second->parent)) {
-    for (deciter it =  her->second->locals.begin(); it != her->second->locals.end(); it++) {
+static inline bool parent_declares(parsed_object *parent, const deciter decl) {
+  for (parsed_object *obj = parent; obj != NULL; obj = obj->parent_parsedobj) {
+    for (deciter it =  obj->locals.begin(); it != obj->locals.end(); it++) {
       if (it->first == decl->first && it->second.prefix == decl->second.prefix && it->second.type == decl->second.type && it->second.suffix == decl->second.suffix) {
         return true;
       }
@@ -208,52 +208,152 @@ static inline bool parent_declares(const po_i parent, const deciter decl) {
   return false;
 }
 
-        // Next, we write the list of all the timelines this object will hoard a copy of for itself.
-        // NOTE: See below; we actually need to assume this object has the potential to call any timeline. 
-        //       BUT we only locally-copy the ones we know about for sure here.
-        bool hasKnownTlines = false;
-        wto << "\n    //Timelines called by this object\n    ";
-        for (parsed_object::tlineit it = t->tlines.begin(); it != t->tlines.end(); it++) //For each timeline potentially set by this object.
-        {
-          map<string, int>::iterator timit = revTlineLookup.find(it->first); //Check if it's a timeline
-          if (timit != revTlineLookup.end()) // If we've got ourselves a script
-          //and subscr->second->pev_global) // And it has distinct code for use at the global scope (meaning it's more efficient locally) //NOTE: It seems all timeline MUST be copied locally.
-          {
-            hasKnownTlines = true;
-            for (int j=0; j<es->timelines[timit->second].momentCount; j++) {
-              wto << "void TLINE_" <<es->timelines[timit->second].name <<"_MOMENT_" <<es->timelines[timit->second].moments[j].stepNo <<"();\n    ";
-            }
-          }
-        } wto << "\n    ";
+static inline bool parent_declares_event(parsed_object *parent, int mid, int sid) {
+  for (parsed_object *obj = parent; obj != NULL; obj = obj->parent_parsedobj) {
+    for (unsigned xx = 0; xx < obj->events.size; xx++) {
+      if (obj->events[xx].mainId == mid && obj->events[xx].id == sid && (obj->events[xx].code.length() > 0
+          || event_has_suffix_code(mid, sid) || event_has_prefix_code(mid, sid) || event_has_const_code(mid, sid) || event_has_default_code(mid,sid)
+          || event_has_iterator_unlink_code(mid,sid) || event_has_iterator_delete_code(mid,sid) || event_has_iterator_declare_code(mid,sid) ||
+      event_has_iterator_initialize_code(mid,sid))) {
+          return true;
+      }
+    }
+  }
+  return false;
+}
 
-        //If at least one timeline is called by this object, override timeline_call_moment_script() to properly dispatch it to the local instance.
-        if (hasKnownTlines) {
-          wto <<"//Dispatch timelines properly for this object..\n    ";
-          wto <<"virtual void timeline_call_moment_script(int timeline_index, int moment_index);\n\n    ";
-        }
+static inline void write_object_locals(lang_CPP *lcpp, std::ostream &wto, parsed_object* global, parsed_object* object) {
+  wto << "    // Local variables\n    ";
+  for (unsigned ii = 0; ii < object->events.size; ii++) {
+    string addls = event_get_locals(object->events[ii].mainId, object->events[ii].id);
+    if (addls.length()) {
+      compute_locals(lcpp, object, addls);
+    }
+  }
+
+  for (deciter ii =  object->locals.begin(); ii != object->locals.end(); ii++) {
+    bool writeit = true; // Whether this "local" should be declared such
+    if (parent_declares(object->parent_parsedobj, ii)) {
+      continue;
+    }
+  
+    // If it's not explicitely defined, we must question whether it should be given a unique presence in this scope
+    if (!ii->second.defined()) {
+      parsed_object::globit ve = global->globals.find(ii->first); // So, we look for a global by this name
+      if (ve != global->globals.end()) {  // If a global by this name is indeed found,
+        if (ve->second.defined()) // And this global is explicitely defined, not just accessed with a dot,
+          writeit = false; // We assume that its definition will cover us, and we do not redeclare it as a local.
+        cout << "enigma: scopedebug: variable `" << ii->first << "' from object `" << object->name
+             << "' will be used from the " << (writeit ? "object" : "global") << " scope." << endl;
+      }
+    }
+    if (writeit) {
+      wto << tdefault(ii->second.type) << " " << ii->second.prefix << ii->first << ii->second.suffix << ";\n    ";
+    }
+  }
+}
+
+static inline void write_object_scripts(std::ostream &wto, parsed_object *object) {
+  // Next, we write the list of all the scripts this object will hoard a copy of for itself.
+  wto << "\n    //Scripts called by this object\n    ";
+  for (parsed_object::funcit it = object->funcs.begin(); it != object->funcs.end(); it++) //For each function called by this object
+  {
+    map<string,parsed_script*>::iterator subscr = scr_lookup.find(it->first); //Check if it's a script
+    if (subscr != scr_lookup.end() // If we've got ourselves a script
+    and subscr->second->pev_global) // And it has distinct code for use at the global scope (meaning it's more efficient locally)
+    {
+      const char* comma = "";
+      wto << "\n    variant _SCR_" << it->first << "(";
+      for (int argn = 0; argn < it->second; argn++) //it->second gives max argument count used
+      {
+        wto << comma << "variant argument" << argn << " = 0";
+        comma = ", ";
+      }
+      wto << ");";
+    }
+  } wto << "\n    ";
+}
+
+static inline void write_object_timelines(std::ostream &wto, EnigmaStruct* es, parsed_object *object, map<string, int> &revTlineLookup) {
+  // Next, we write the list of all the timelines this object will hoard a copy of for itself.
+  // NOTE: See below; we actually need to assume this object has the potential to call any timeline.
+  //       BUT we only locally-copy the ones we know about for sure here.
+  bool hasKnownTlines = false;
+  
+  wto << "\n    //Timelines called by this object\n";
+  for (parsed_object::tlineit it = object->tlines.begin(); it != object->tlines.end(); it++) //For each timeline potentially set by this object.
+  {
+    map<string, int>::iterator timit = revTlineLookup.find(it->first); //Check if it's a timeline
+    if (timit != revTlineLookup.end()) // If we've got ourselves a script
+    //and subscr->second->pev_global) // And it has distinct code for use at the global scope (meaning it's more efficient locally) //NOTE: It seems all timeline MUST be copied locally.
+    {
+      hasKnownTlines = true;
+      for (int j=0; j<es->timelines[timit->second].momentCount; j++) {
+        wto << "    void TLINE_" <<es->timelines[timit->second].name <<"_MOMENT_" <<es->timelines[timit->second].moments[j].stepNo <<"();\n";
+      }
+    }
+  } wto << "\n";
+
+  //If at least one timeline is called by this object, override timeline_call_moment_script() to properly dispatch it to the local instance.
+  if (hasKnownTlines) {
+    wto <<"    // Dispatch timelines properly for this object..\n";
+    wto <<"    virtual void timeline_call_moment_script(int timeline_index, int moment_index);\n\n";
+  }
+}
+
+// TODO(JoshDreamland): What the FUCK are these? Really, burn all five of them.
+typedef vector<unsigned> robertvec;
+typedef map<int, robertvec> robertmap;
+typedef vector<int> event_vec;
+typedef map<int, event_vec> event_map;
+typedef map<int, event_map> evpairmap;
+static inline void write_object_events(std::ostream &wto, parsed_object *object, robertvec &parent_undefined, event_map &evgroup) {
+  // Now we output all the events this object uses
+  // Defaulted events were already added into this array.
+  for (unsigned ii = 0; ii < object->events.size; ii++) {
+    // If the parent also wrote this grouped event for instance some input events in the parent and some in the child, then we need to call the super method
+    if (!parent_declares_event(object->parent_parsedobj, object->events[ii].mainId, object->events[ii].id)) {
+      parent_undefined.push_back(ii);
+    }
+    string evname = event_get_function_name(object->events[ii].mainId, object->events[ii].id);
+    if  (object->events[ii].code != "")
+    {
+      if (event_is_instance(object->events[ii].mainId, object->events[ii].id)) {
+        evgroup[object->events[ii].mainId].push_back(ii);
+      }
+      wto << "    variant myevent_" << evname << "();\n";
+    }
+     
+    if  (object->events[ii].code != "" || event_has_default_code(object->events[ii].mainId, object->events[ii].id)) {
+      if (event_has_sub_check(object->events[ii].mainId, object->events[ii].id)) {
+        wto << "    inline bool myevent_" << evname << "_subcheck();\n";
+      }
+    }
+  }
+}
 
 // TODO(JoshDreamland): ...
 // It seems to do this in a way that makes crying babies weep. It looks as though this used to be a much simpler block, and Robert tried to make it work with inheritance.
 // Did he even succeed? It looks as though parent groups will always be called... or will cause a compile error if overridden.
 /// This function writes event group functions for stacked events, such as keyboard and mouse events, so that only one call is needed to invoke all key kinds.
-static inline void write_stacked_event_groups(std::ostream &wto, po_i &object_iter, const po_i parent, event_map &evgroup, const evpairmap &evmap) {
+static inline void write_stacked_event_groups(std::ostream &wto, parsed_object *object, event_map &evgroup, const evpairmap &evmap) {
   wto << "      \n      // Grouped event bases\n";
   event_vec parentremains;
   for (event_map::const_iterator it = evgroup.begin(); it != evgroup.end(); it++) {
     int mid = it->first;
     wto << "      void myevent_" << event_stacked_get_root_name(mid) << "()\n      {\n";
     for (event_vec::const_iterator vit = it->second.begin(); vit != it->second.end(); vit++) {
-      int id = object_iter->second->events[*vit].id;
+      int id = object->events[*vit].id;
       wto << event_forge_group_code(mid, id);
-      if (setting::inherit_objects && parent != parsed_objects.end()) {
-        for (po_i her = parent; her != parsed_objects.end(); her = parsed_objects.find(her->second->parent)) {
-          evpairmap::const_iterator tt = evmap.find(her->second->id);
+      if (object->parent_parsedobj) {
+        for (parsed_object *obj = object->parent_parsedobj; obj != NULL; obj = obj->parent_parsedobj) {
+          evpairmap::const_iterator tt = evmap.find(obj->id);
           if (tt == evmap.end()) continue;
           for (event_map::const_iterator pit = tt->second.begin(); pit != tt->second.end(); pit++) {
             int pmid = pit->first;
             if (pmid == mid) {
               for (event_vec::const_iterator pvit = pit->second.begin(); pvit != pit->second.end(); pvit++) {
-                int pid = her->second->events[*pvit].id;
+                int pid = obj->events[*pvit].id;
                 wto << event_forge_group_code(pmid, pid) << "\n";
               }
             }
@@ -266,23 +366,23 @@ static inline void write_stacked_event_groups(std::ostream &wto, po_i &object_it
 }
 
 
-static inline void write_event_perform(std::ostream &wto, po_i &object_iter, const po_i parent) {
+static inline void write_event_perform(std::ostream &wto, parsed_object *object) {
   /* Event Perform Code */
   wto << "      // Event Perform Code\n";
   wto << "      variant myevents_perf(int type, int numb)\n      {\n";
 
-  for (unsigned ii = 0; ii < object_iter->second->events.size; ii++) {
-    if  (object_iter->second->events[ii].code != "")
+  for (unsigned ii = 0; ii < object->events.size; ii++) {
+    if  (object->events[ii].code != "")
     {
       //Look up the event name
-      string evname = event_get_function_name(object_iter->second->events[ii].mainId, object_iter->second->events[ii].id);
-      wto << "        if (type == " << object_iter->second->events[ii].mainId << " && numb == " << object_iter->second->events[ii].id << ")\n";
+      string evname = event_get_function_name(object->events[ii].mainId, object->events[ii].id);
+      wto << "        if (type == " << object->events[ii].mainId << " && numb == " << object->events[ii].id << ")\n";
       wto << "          return myevent_" << evname << "();\n";
     }
   }
 
-  if (setting::inherit_objects && parent != parsed_objects.end()) {
-    wto << "          return OBJ_" << parent->second->name << "::myevents_perf(type,numb);\n";
+  if (object->parent_parsedobj) {
+    wto << "          return OBJ_" << object->parent_parsedobj->name << "::myevents_perf(type,numb);\n";
   } else {
     wto << "        return 0;\n";
   }
@@ -292,7 +392,7 @@ static inline void write_event_perform(std::ostream &wto, po_i &object_iter, con
 
 // TODO(JoshDreamland): UGH. This function is doing the same thing the other cyclomatic clusterfunc is doing, only it's just emitting an unlink.
 // Recode both of these things and actually stash the result.
-static inline void write_object_unlink(std::ostream &wto, po_i &object_iter, po_i parent, robertvec &parent_undefined, event_map &evgroup) {
+static inline void write_object_unlink(std::ostream &wto, parsed_object *object, robertvec &parent_undefined, event_map &evgroup) {
   /*
   ** Now we write the callable unlinker. Its job is to disconnect the instance for destroy.
   ** This is an important component that tracks multiple pieces of the instance. These pieces
@@ -303,22 +403,21 @@ static inline void write_object_unlink(std::ostream &wto, po_i &object_iter, po_
   wto << "\n    // Self-tracking\n";
 
   // This tracks components of the instance system.
-  bool has_parent = (parent != parsed_objects.end());
-  if (!setting::inherit_objects || !has_parent) {
+  if (!object->parent_parsedobj) {
     wto << "      enigma::pinstance_list_iterator ENOBJ_ITER_me;\n";
-    for (po_i her = object_iter; her != parsed_objects.end(); her = parsed_objects.find(her->second->parent)) // For this object and each parent thereof
-      wto << "      enigma::inst_iter *ENOBJ_ITER_myobj" << her->second->id << ";\n"; // Keep track of a pointer to `this` inside this list.
+    for (parsed_object *obj = object; obj; obj = obj->parent_parsedobj) // For this object and each parent thereof
+      wto << "      enigma::inst_iter *ENOBJ_ITER_myobj" << obj->id << ";\n"; // Keep track of a pointer to `this` inside this list.
   } else {
-    wto << "      enigma::inst_iter *ENOBJ_ITER_myobj" << object_iter->second->id << ";\n"; // Keep track of a pointer to `this` inside this list.
+    wto << "      enigma::inst_iter *ENOBJ_ITER_myobj" << object->id << ";\n"; // Keep track of a pointer to `this` inside this list.
   }
   // This tracks components of the event system.
   for (vector<unsigned>::iterator it = parent_undefined.begin(); it != parent_undefined.end(); it++) { // Export a tracker for all events
-    if (!event_is_instance(object_iter->second->events[*it].mainId, object_iter->second->events[*it].id)) { //...well, all events which aren't stacked
-      if (event_has_iterator_declare_code(object_iter->second->events[*it].mainId, object_iter->second->events[*it].id)) {
-        if (!iscomment(event_get_iterator_declare_code(object_iter->second->events[*it].mainId, object_iter->second->events[*it].id)))
-          wto << "      " << event_get_iterator_declare_code(object_iter->second->events[*it].mainId, object_iter->second->events[*it].id) << ";\n";
+    if (!event_is_instance(object->events[*it].mainId, object->events[*it].id)) { //...well, all events which aren't stacked
+      if (event_has_iterator_declare_code(object->events[*it].mainId, object->events[*it].id)) {
+        if (!iscomment(event_get_iterator_declare_code(object->events[*it].mainId, object->events[*it].id)))
+          wto << "      " << event_get_iterator_declare_code(object->events[*it].mainId, object->events[*it].id) << ";\n";
       } else
-        wto << "      enigma::inst_iter *ENOBJ_ITER_myevent_" << event_get_function_name(object_iter->second->events[*it].mainId, object_iter->second->events[*it].id) << ";\n";
+        wto << "      enigma::inst_iter *ENOBJ_ITER_myevent_" << event_get_function_name(object->events[*it].mainId, object->events[*it].id) << ";\n";
     }
   }
   for (map<int, vector<int> >::iterator it = evgroup.begin(); it != evgroup.end(); it++) { // The stacked ones should have their root exported
@@ -334,20 +433,20 @@ static inline void write_object_unlink(std::ostream &wto, po_i &object_iter, po_
   wto << "      }\n";
   wto << "    }\n\n";
   wto << "    void deactivate()\n    {\n";
-  if (!setting::inherit_objects || !has_parent) { 
+  if (!object->parent_parsedobj) { 
     wto << "      enigma::unlink_main(ENOBJ_ITER_me); // Remove this instance from the non-redundant, tree-structured list.\n";
-    for (po_i her = object_iter; her != parsed_objects.end(); her = parsed_objects.find(her->second->parent))
-      wto << "      unlink_object_id_iter(ENOBJ_ITER_myobj" << her->second->id << ", " << her->second->id << ");\n";
+    for (parsed_object *obj = object; obj; obj = obj->parent_parsedobj)
+      wto << "      unlink_object_id_iter(ENOBJ_ITER_myobj" << obj->id << ", " << obj->id << ");\n";
   } else {
-      wto << "      OBJ_" << parent->second->name << "::deactivate();\n";
-      wto << "      unlink_object_id_iter(ENOBJ_ITER_myobj" << object_iter->second->id << ", " << object_iter->second->id << ");\n";
+      wto << "      OBJ_" << object->parent_parsedobj->name << "::deactivate();\n";
+      wto << "      unlink_object_id_iter(ENOBJ_ITER_myobj" << object->id << ", " << object->id << ");\n";
   }
   for (vector<unsigned>::iterator it = parent_undefined.begin(); it != parent_undefined.end(); it++) {
-    if (!event_is_instance(object_iter->second->events[*it].mainId, object_iter->second->events[*it].id)) {
-      const string evname = event_get_function_name(object_iter->second->events[*it].mainId, object_iter->second->events[*it].id);
-      if (event_has_iterator_unlink_code(object_iter->second->events[*it].mainId, object_iter->second->events[*it].id)) {
-        if (!iscomment(event_get_iterator_unlink_code(object_iter->second->events[*it].mainId, object_iter->second->events[*it].id)))
-          wto << "      " << event_get_iterator_unlink_code(object_iter->second->events[*it].mainId, object_iter->second->events[*it].id) << ";\n";
+    if (!event_is_instance(object->events[*it].mainId, object->events[*it].id)) {
+      const string evname = event_get_function_name(object->events[*it].mainId, object->events[*it].id);
+      if (event_has_iterator_unlink_code(object->events[*it].mainId, object->events[*it].id)) {
+        if (!iscomment(event_get_iterator_unlink_code(object->events[*it].mainId, object->events[*it].id)))
+          wto << "      " << event_get_iterator_unlink_code(object->events[*it].mainId, object->events[*it].id) << ";\n";
       } else
         wto << "      enigma::event_" << evname << "->unlink(ENOBJ_ITER_myevent_" << evname << ");\n";
     }
@@ -359,34 +458,34 @@ static inline void write_object_unlink(std::ostream &wto, po_i &object_iter, po_
   wto << "    }\n";
 }
 
-static inline void write_object_constructors(std::ostream &wto, po_i &object_iter, po_i parent, robertvec &parent_undefined, event_map &evgroup) {
+static inline void write_object_constructors(std::ostream &wto, parsed_object *object, robertvec &parent_undefined, event_map &evgroup) {
   /*
   ** Next are the constructors. One is automated, the other directed.
   **   Automatic constructor:  The constructor generates the ID from a global maximum and links by that alias.
   **   Directed constructor:   Meant for use by the room system, the constructor uses a specified ID alias assumed to have been checked for conflict.
   */
-  wto <<   "\n    OBJ_" <<  object_iter->second->name << "(int enigma_genericconstructor_newinst_x = 0, int enigma_genericconstructor_newinst_y = 0, const int id = (enigma::maxid++)" 
-  << ", const int enigma_genericobjid = " << object_iter->second->id << ", bool handle = true)";
+  wto <<   "\n    OBJ_" <<  object->name << "(int enigma_genericconstructor_newinst_x = 0, int enigma_genericconstructor_newinst_y = 0, const int id = (enigma::maxid++)"
+      << ", const int enigma_genericobjid = " << object->id << ", bool handle = true)";
       
-  if (setting::inherit_objects && parsed_objects.find(object_iter->second->parent) != parsed_objects.end()) { 
-    wto << ": OBJ_" << parsed_objects.find(object_iter->second->parent)->second->name << "(enigma_genericconstructor_newinst_x,enigma_genericconstructor_newinst_y,id,enigma_genericobjid,false)";
+  if (object->parent_parsedobj) {
+    wto << ": OBJ_" << object->parent_parsedobj->name << "(enigma_genericconstructor_newinst_x,enigma_genericconstructor_newinst_y,id,enigma_genericobjid,false)";
    } else {
     wto << ": object_locals(id,enigma_genericobjid) ";
    }
       
-    for (size_t ii = 0; ii < object_iter->second->initializers.size(); ii++)
-      wto << ", " << object_iter->second->initializers[ii].first << "(" << object_iter->second->initializers[ii].second << ")";
+    for (size_t ii = 0; ii < object->initializers.size(); ii++)
+      wto << ", " << object->initializers[ii].first << "(" << object->initializers[ii].second << ")";
     wto << "\n    {\n";
     wto << "      if (!handle) return;\n";
       // Sprite index
         if (used_funcs::object_set_sprite) //We want to initialize
-          wto << "      sprite_index = enigma::object_table[" << object_iter->second->id << "].->sprite;\n"
-              << "      make_index = enigma::object_table[" << object_iter->second->id << "]->mask;\n";
+          wto << "      sprite_index = enigma::object_table[" << object->id << "].->sprite;\n"
+              << "      make_index = enigma::object_table[" << object->id << "]->mask;\n";
         else
-          wto << "      sprite_index = enigma::objectdata[" << object_iter->second->id << "]->sprite;\n"
-              << "      mask_index = enigma::objectdata[" << object_iter->second->id << "]->mask;\n";
-        wto << "      visible = enigma::objectdata[" << object_iter->second->id << "]->visible;\n      solid = enigma::objectdata[" << object_iter->second->id << "]->solid;\n";
-        wto << "      persistent = enigma::objectdata[" << object_iter->second->id << "]->persistent;\n";
+          wto << "      sprite_index = enigma::objectdata[" << object->id << "]->sprite;\n"
+              << "      mask_index = enigma::objectdata[" << object->id << "]->mask;\n";
+        wto << "      visible = enigma::objectdata[" << object->id << "]->visible;\n      solid = enigma::objectdata[" << object->id << "]->solid;\n";
+        wto << "      persistent = enigma::objectdata[" << object->id << "]->persistent;\n";
         
       wto << "      activate();\n";
         
@@ -397,31 +496,30 @@ static inline void write_object_constructors(std::ostream &wto, po_i &object_ite
     wto << "      enigma::constructor(this);\n";
     wto << "    }\n\n";
 
-  
-    bool has_parent = (parent != parsed_objects.end());
     wto << "    void activate()\n    {\n";
-      if (setting::inherit_objects && has_parent) {
-          wto << "      OBJ_" << parsed_objects.find(object_iter->second->parent)->second->name << "::activate();\n";
+      if (object->parent_parsedobj) {
+          wto << "      OBJ_" << object->parent_parsedobj->name << "::activate();\n";
           // Have to remove the one the parent added so we can add our own
           wto << "      depth.remove();\n";
       }
     // Depth iterator used for draw events in graphics system screen_redraw
-    wto << "      depth.init(enigma::objectdata[" << object_iter->second->id << "]->depth, this);\n";
+    wto << "      depth.init(enigma::objectdata[" << object->id << "]->depth, this);\n";
 // Instance system interface
-      if (!setting::inherit_objects || !has_parent) {
-  wto << "      ENOBJ_ITER_me = enigma::link_instance(this);\n";
-        for (po_i her = object_iter; her != parsed_objects.end(); her = parsed_objects.find(her->second->parent))
-    wto << "      ENOBJ_ITER_myobj" << her->second->id << " = enigma::link_obj_instance(this, " << her->second->id << ");\n";
+      if (!object->parent_parsedobj) {
+        wto << "      ENOBJ_ITER_me = enigma::link_instance(this);\n";
+        for (parsed_object *obj = object; obj; obj = obj->parent_parsedobj) {
+          wto << "      ENOBJ_ITER_myobj" << obj->id << " = enigma::link_obj_instance(this, " << obj->id << ");\n";
+        }
       } else {
-          wto << "      ENOBJ_ITER_myobj" << object_iter->second->id << " = enigma::link_obj_instance(this, " << object_iter->second->id << ");\n";
+        wto << "      ENOBJ_ITER_myobj" << object->id << " = enigma::link_obj_instance(this, " << object->id << ");\n";
       }
       // Event system interface
       for (vector<unsigned>::iterator it = parent_undefined.begin(); it != parent_undefined.end(); it++) {
-        if (!event_is_instance(object_iter->second->events[*it].mainId, object_iter->second->events[*it].id)) {
-          const string evname = event_get_function_name(object_iter->second->events[*it].mainId, object_iter->second->events[*it].id);
-          if (event_has_iterator_initialize_code(object_iter->second->events[*it].mainId, object_iter->second->events[*it].id)) {
-            if (!iscomment(event_get_iterator_initialize_code(object_iter->second->events[*it].mainId, object_iter->second->events[*it].id)))
-              wto << "      " << event_get_iterator_initialize_code(object_iter->second->events[*it].mainId, object_iter->second->events[*it].id) << ";\n";
+        if (!event_is_instance(object->events[*it].mainId, object->events[*it].id)) {
+          const string evname = event_get_function_name(object->events[*it].mainId, object->events[*it].id);
+          if (event_has_iterator_initialize_code(object->events[*it].mainId, object->events[*it].id)) {
+            if (!iscomment(event_get_iterator_initialize_code(object->events[*it].mainId, object->events[*it].id)))
+              wto << "      " << event_get_iterator_initialize_code(object->events[*it].mainId, object->events[*it].id) << ";\n";
           } else {
             wto << "      ENOBJ_ITER_myevent_" << evname << " = enigma::event_" << evname << "->add_inst(this);\n";
           }
@@ -433,25 +531,25 @@ static inline void write_object_constructors(std::ostream &wto, po_i &object_ite
     wto << "    }\n";
 }
 
-static inline void write_object_destructor(std::ostream &wto, po_i &object_iter, po_i parent, robertvec &parent_undefined, event_map &evgroup) {
-    wto <<   "    \n    ~OBJ_" <<  object_iter->second->name << "()\n    {\n";
+static inline void write_object_destructor(std::ostream &wto, parsed_object *object, robertvec &parent_undefined, event_map &evgroup) {
+    wto <<   "    \n    ~OBJ_" <<  object->name << "()\n    {\n";
       
-    bool has_parent = (parent != parsed_objects.end());
-      if (!setting::inherit_objects || !has_parent) {
+      if (!object->parent_parsedobj) {
           wto << "      delete vmap;\n";
           wto << "      enigma::winstance_list_iterator_delete(ENOBJ_ITER_me);\n";
-          for (po_i her = object_iter; her != parsed_objects.end(); her = parsed_objects.find(her->second->parent))
-              wto << "      delete ENOBJ_ITER_myobj" << her->second->id << ";\n";
+          for (parsed_object *obj = object; obj; obj = obj->parent_parsedobj) {
+            wto << "      delete ENOBJ_ITER_myobj" << obj->id << ";\n";
+          }
       } else {
-          wto << "      delete ENOBJ_ITER_myobj" << object_iter->second->id << ";\n";
+          wto << "      delete ENOBJ_ITER_myobj" << object->id << ";\n";
       }
       for (vector<unsigned>::iterator it = parent_undefined.begin(); it != parent_undefined.end(); it++) {
-        if (!event_is_instance(object_iter->second->events[*it].mainId, object_iter->second->events[*it].id)) {
-          if (event_has_iterator_delete_code(object_iter->second->events[*it].mainId, object_iter->second->events[*it].id)) {
-            if (!iscomment(event_get_iterator_delete_code(object_iter->second->events[*it].mainId, object_iter->second->events[*it].id)))
-              wto << "      " << event_get_iterator_delete_code(object_iter->second->events[*it].mainId, object_iter->second->events[*it].id) << ";\n";
+        if (!event_is_instance(object->events[*it].mainId, object->events[*it].id)) {
+          if (event_has_iterator_delete_code(object->events[*it].mainId, object->events[*it].id)) {
+            if (!iscomment(event_get_iterator_delete_code(object->events[*it].mainId, object->events[*it].id)))
+              wto << "      " << event_get_iterator_delete_code(object->events[*it].mainId, object->events[*it].id) << ";\n";
           } else
-            wto << "      delete ENOBJ_ITER_myevent_" << event_get_function_name(object_iter->second->events[*it].mainId, object_iter->second->events[*it].id) << ";\n";
+            wto << "      delete ENOBJ_ITER_myevent_" << event_get_function_name(object->events[*it].mainId, object->events[*it].id) << ";\n";
         }
       }
     for (map<int, vector<int> >::iterator it = evgroup.begin(); it != evgroup.end(); it++) { // The stacked ones should have their root exported
@@ -460,59 +558,52 @@ static inline void write_object_destructor(std::ostream &wto, po_i &object_iter,
     wto << "    }\n";
 }
 
-static inline void write_object_class_bodies(lang_CPP *lcpp, std::ostream &wto, EnigmaStruct *es, parsed_object* global, robertmap &parent_undefinitions, map<string, int> &revTlineLookup) {
-  po_i object_iter = parsed_objects.begin();
-  vector<int> parsed(0);
+static inline void write_object_class_body(parsed_object* object, lang_CPP *lcpp, std::ostream &wto, EnigmaStruct *es, parsed_object* global, robertmap &parent_undefinitions, map<string, int> &revTlineLookup, evpairmap &evmap) {
+  wto << "  \n  struct OBJ_" << object->name;
+  if (object->parent_parsedobj) {
+      wto << ": OBJ_" << object->parent_parsedobj->name;
+  } else {
+      wto << ": object_locals";
+  }
+  wto << "\n  {\n";
 
+  robertvec parent_undefined; // Robert probably knew what this was when he wrote it. Probably.
+  event_map evgroup; // Josh knew what this was when he wrote it.
+
+  write_object_locals(lcpp, wto, global, object);
+  write_object_scripts(wto, object);
+  write_object_timelines(wto, es, object, revTlineLookup);
+  write_object_events(wto, object, parent_undefined, evgroup);
+
+  parent_undefinitions[object->id] = parent_undefined;
+  evmap[object->id] = evgroup;
+
+  write_stacked_event_groups(wto, object, evgroup, evmap);
+  write_event_perform(wto, object);
+  write_object_unlink(wto, object, parent_undefined, evgroup);
+  write_object_constructors(wto, object, parent_undefined, evgroup);
+  write_object_destructor(wto, object, parent_undefined, evgroup);
+
+  wto << "  };\n";
+}
+
+static inline void write_object_family(parsed_object* object, lang_CPP *lcpp, std::ostream &wto, EnigmaStruct *es, parsed_object* global, robertmap &parent_undefinitions, map<string, int> &revTlineLookup, evpairmap &evmap) {
+  write_object_class_body(object, lcpp, wto, es, global, parent_undefinitions, revTlineLookup, evmap);
+  for (vector<parsed_object*>::iterator child_it = object->children.begin(); child_it != object->children.end(); ++child_it) {
+    write_object_family(*child_it, lcpp, wto, es, global, parent_undefinitions, revTlineLookup, evmap);
+  }
+}
+
+static inline void write_object_class_bodies(lang_CPP *lcpp, std::ostream &wto, EnigmaStruct *es, parsed_object* global, robertmap &parent_undefinitions, map<string, int> &revTlineLookup) {
   // Hold an iterator for our parent for later usage
-  po_i parent = parsed_objects.find(object_iter->second->parent);
   evpairmap evmap; // Keep track of events that need added to honor et_stacked
 
-  // TODO(JoshDreamland): This is apparently a Robert-flavored worker queue.
-  // Replace with an actual worker queue, or do the right thing and generate
-  // an inheritance graph to traverse
-  while (parsed.size() < parsed_objects.size()) {
-    if (object_iter == parsed_objects.end()) {
-      object_iter = parsed_objects.begin();
+  for (po_i object_iter = parsed_objects.begin(); object_iter != parsed_objects.end(); ++object_iter) {
+    if (object_iter->second->parent_parsedobj) {
+      continue; // Do not write out objects before we've written their parent
     }
 
-    // if we have already been written or we have a parent that has not been written, continue
-    if (find(parsed.begin(), parsed.end(), object_iter->first) != parsed.end() 
-        || (parent != parsed_objects.end()
-            && find(parsed.begin(), parsed.end(), object_iter->second->parent) == parsed.end())) { 
-      object_iter++;
-      continue; 
-    }
-
-    wto << "  \n  struct OBJ_" << object_iter->second->name;
-    if (setting::inherit_objects && parent != parsed_objects.end()) {
-        wto << ": OBJ_" << parent->second->name;
-    } else {
-        wto << ": object_locals";
-    }
-    wto << "\n  {\n";
-
-    robertvec parent_undefined; // Robert probably knew what this was when he wrote it. Probably.
-    event_map evgroup; // Josh knew what this was when he wrote it.
-
-    write_object_locals(lcpp, wto, global, object_iter, parent);
-    write_object_scripts(wto, object_iter);
-    write_object_timelines(wto, es, object_iter, revTlineLookup);
-    write_object_events(wto, object_iter, parent, parent_undefined, evgroup);
-
-    parent_undefinitions[object_iter->second->id] = parent_undefined;
-    evmap[object_iter->second->id] = evgroup;
-
-    write_stacked_event_groups(wto, object_iter, parent, evgroup, evmap);
-    write_event_perform(wto, object_iter, parent);
-    write_object_unlink(wto, object_iter, parent, parent_undefined, evgroup);
-    write_object_constructors(wto, object_iter, parent, parent_undefined, evgroup);
-    write_object_destructor(wto, object_iter, parent, parent_undefined, evgroup);
-
-    wto << "  };\n";
-
-    parsed.push_back(object_iter->first);
-    object_iter++;
+    write_object_family(object_iter->second, lcpp, wto, es, global, parent_undefinitions, revTlineLookup, evmap);
   }
 }
 
@@ -525,7 +616,7 @@ static inline void write_object_data_structs(std::ostream &wto) {
         << i->second->sprite_index << "," << i->second->solid << "," 
         << i->second->visible << "," << i->second->depth << ","
         << i->second->persistent << "," << i->second->mask_index
-        << "," << i->second->parent << "," << i->second->id
+        << "," << i->second->parent_parsedobj << "," << i->second->id
         << "},\n";
     if (i->second->id >= obmx) obmx = i->second->id;
   }
@@ -557,8 +648,8 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, i
     declare_extension_casts(wto);
     wto << "}\n\n";
     
-    robertmap parent_undefinitions;
-    // TODO(JoshDreamland): Replace with enigma_user
+    robertmap parent_undefinitions; // TODO(JoshDreamland): <-- wtf is this shit? Delete it
+    // TODO(JoshDreamland): Replace with enigma_user:
     wto << "namespace enigma // TODO: Replace with enigma_user\n{\n";
     write_object_class_bodies(this, wto, es, global, parent_undefinitions, revTlineLookup);
     wto << "}\n\n";
@@ -662,12 +753,9 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, i
           cout << "DBGMSG 4-1" << endl;
           
           bool defined_inherited = false;
-          if (setting::inherit_objects) {
-            po_i parent = parsed_objects.find(i->second->parent);
-            if (parent != parsed_objects.end() && std::find(parent_undefined.begin(), parent_undefined.end(), ii) == parent_undefined.end()) {
-              wto << "#define event_inherited OBJ_" + parent->second->name + "::myevent_" + evname + "\n";
-              defined_inherited = true;
-            }
+          if (i->second->parent_parsedobj && std::find(parent_undefined.begin(), parent_undefined.end(), ii) == parent_undefined.end()) {
+            wto << "#define event_inherited OBJ_" + i->second->parent_parsedobj->name + "::myevent_" + evname + "\n";
+            defined_inherited = true;
           }
 
           // Write event code

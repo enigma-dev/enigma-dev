@@ -47,8 +47,8 @@ using namespace std;
     
     HANDLE d=FindFirstFile(name.c_str(),&found);
     if (d==INVALID_HANDLE_VALUE) return "";
-    while (found.dwFileAttributes!=FILE_ATTRIBUTE_NORMAL and !(ff_attribs^found.dwFileAttributes))
-    {
+    while (found.dwFileAttributes!=FILE_ATTRIBUTE_NORMAL
+        && !(ff_attribs^found.dwFileAttributes)) {
       if (FindNextFile(d,&found)==0)
       return "";
     }
@@ -65,8 +65,8 @@ using namespace std;
     if (FindNextFile(current_find,&found)==0)
     return "";
     
-    while (found.dwFileAttributes!=FILE_ATTRIBUTE_NORMAL and !(ff_attribs^found.dwFileAttributes))
-    {
+    while (found.dwFileAttributes!=FILE_ATTRIBUTE_NORMAL
+        && !(ff_attribs^found.dwFileAttributes)) {
       if (FindNextFile(current_find,&found)==0)
       return "";
     }
@@ -74,10 +74,8 @@ using namespace std;
     return found.cFileName;
   }
 
-  int file_find_close()
-  {
+  void file_find_close() {
     FindClose(current_find);
-    return 0;
   }
 #else
   #include <sys/types.h>
@@ -90,6 +88,14 @@ using namespace std;
   static int fff_attrib;
   
   const unsigned u_root = 0;
+  
+  static inline bool file_hidden(const string r) {
+    return (r[0] == '.' or r[r.length()-1] == '~');
+  }
+  
+  static inline bool readable(string fn) {
+    return access(fn.c_str(), W_OK);
+  }
   
   string file_find_next()
   {
@@ -106,23 +112,26 @@ using namespace std;
     const int not_attrib = ~fff_attrib;
     
     if (r == "." or r == ".." // Don't return ./ and 
-    or ((r[0] == '.' or r[r.length()-1] == '~') and not_attrib & fa_hidden) // Filter hidden files
-    ) return file_find_next(); 
+        || (not_attrib & fa_hidden && file_hidden(r))) { // Filter hidden files
+      return file_find_next();
+    }
     
     struct stat sb;
     const string fqfn = fff_path + r;
     stat(fqfn.c_str(), &sb);
     
-    if ((sb.st_mode & S_IFDIR     and not_attrib & fa_directory) // Filter out/for directories
-    or  (sb.st_uid == u_root      and not_attrib & fa_sysfile)    // Filter system files
-    or  (not_attrib & fa_readonly and access(fqfn.c_str(),W_OK)) // Filter read-only files
-    ) return file_find_next();
+    if  (  (not_attrib & fa_directory and sb.st_mode & S_IFDIR)  // Filter out/for directories
+        || (not_attrib & fa_sysfile   and sb.st_uid == u_root)  // Filter system files
+        || (not_attrib & fa_readonly  and readable(fqfn))) {   // Filter read-only files
+      return file_find_next();
+    }
     
     if (~sb.st_mode & S_IFDIR and fff_attrib & fa_nofiles)
       return file_find_next();
     
     return r;
   }
+  
   string file_find_first(string name,int attrib)
   {
     if (fff_dir_open != NULL)
@@ -141,8 +150,8 @@ using namespace std;
     fff_attrib = attrib;
     return file_find_next();
   }
-  void file_find_close()
-  {
+  
+  void file_find_close() {
     if (fff_dir_open != NULL)
       closedir(fff_dir_open);
     fff_dir_open = NULL;

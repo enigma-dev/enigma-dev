@@ -115,11 +115,10 @@ int lang_CPP::compile_writeObjAccess(map<int,parsed_object*> &parsed_objects, pa
 
       for (po_i it = parsed_objects.begin(); it != parsed_objects.end(); it++)
       {
-        po_i parent = it;
-        while(parent != parsed_objects.end())
-        {
-          map<string,dectrip>::iterator x = parent->second->locals.find(pmember);
-          if (x != parent->second->locals.end())
+        parsed_object *parent = it->second;
+        while (parent) {
+          map<string,dectrip>::iterator x = parent->locals.find(pmember);
+          if (x != parent->locals.end())
           {
             string tot = x->second.type != "" ? x->second.type : "var";
             if (tot == dait->second.type and x->second.prefix == dait->second.prefix and x->second.suffix == dait->second.suffix)
@@ -128,7 +127,7 @@ int lang_CPP::compile_writeObjAccess(map<int,parsed_object*> &parsed_objects, pa
               break;
             }
           }
-          parent = parsed_objects.find(parent->second->parent);
+          parent = parent->parent_parsedobj;
         }
       }
 

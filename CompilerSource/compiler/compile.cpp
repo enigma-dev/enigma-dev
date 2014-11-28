@@ -508,11 +508,6 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
 
   idpr("Performing Secondary Parsing and Writing Globals",25);
 
-  // Defragged events must be written before object data, or object data cannot determine which events were used.
-  edbg << "Writing events" << flushl;
-  res = current_language->compile_writeDefraggedEvents(es);
-  irrr();
-
   parsed_object EGMglobal;
 
   edbg << "Linking globals and ambiguous variables" << flushl;
@@ -522,6 +517,10 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
 
   edbg << "Running Secondary Parse Passes" << flushl;
   res = current_language->compile_parseSecondary(parsed_objects,parsed_scripts,es->scriptCount, parsed_tlines, parsed_rooms,&EGMglobal, script_names);
+  
+  edbg << "Writing events" << flushl;
+  res = current_language->compile_writeDefraggedEvents(es);
+  irrr();
 
   edbg << "Writing object data" << flushl;
   res = current_language->compile_writeObjectData(es,&EGMglobal,mode);
