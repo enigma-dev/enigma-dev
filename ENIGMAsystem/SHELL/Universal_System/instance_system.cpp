@@ -277,9 +277,11 @@ namespace enigma
     else ins->prev = NULL; // Found nothing.
 
     iliter in = it.first; in++; // Find next iterator
-    if (in != instance_list.end()) // If it exists
+    if (in != instance_list.end())
+    {
       ins->next = in->second, // Link this to next instance
       in->second->prev = ins; // Link next to this
+    }
     else ins->next = NULL;
     return new winstance_list_iterator(it.first);
   }
