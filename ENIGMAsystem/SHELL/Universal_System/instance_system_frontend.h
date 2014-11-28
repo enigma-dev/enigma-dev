@@ -38,7 +38,7 @@ namespace enigma
   inst_iter *link_obj_instance(object_basic* who, int oid);
 
   // Unlinking/Destroying
-  void instance_iter_queue_for_destroy(pinstance_list_iterator whop);
+  void instance_iter_queue_for_destroy(object_basic*);
   void dispose_destroyed_instances();
   void unlink_main(pinstance_list_iterator);
   void unlink_object_id_iter(inst_iter*,int);

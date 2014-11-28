@@ -743,7 +743,7 @@ bool move_bounce_object(int object, bool adv, bool solid_only)
 
 }
 
-typedef std::pair<int,enigma::inst_iter*> inode_pair;
+typedef std::pair<int,enigma::object_basic*> inode_pair;
 
 namespace enigma_user
 {
@@ -751,7 +751,7 @@ namespace enigma_user
 void instance_deactivate_region(int rleft, int rtop, int rwidth, int rheight, bool inside, bool notme) {
     for (enigma::iterator it = enigma::instance_list_first(); it; ++it) {
         if (notme && (*it)->id == enigma::instance_event_iterator->inst->id) continue;
-        enigma::object_collisions* const inst = ((enigma::object_collisions*)*it);
+        enigma::object_collisions* const inst = (enigma::object_collisions*) *it;
 
         if (inst->sprite_index == -1 && (inst->mask_index == -1)) //no sprite/mask then no collision
             continue;
@@ -767,22 +767,22 @@ void instance_deactivate_region(int rleft, int rtop, int rwidth, int rheight, bo
         if (left <= (rleft+rwidth) && rleft <= right && top <= (rtop+rheight) && rtop <= bottom) {
             if (inside) {
             inst->deactivate();
-            enigma::instance_deactivated_list.insert(inode_pair((*it)->id,it.it));
+            enigma::instance_deactivated_list.insert(inode_pair(inst->id,inst));
             }
         } else {
             if (!inside) {
                 inst->deactivate();
-                enigma::instance_deactivated_list.insert(inode_pair((*it)->id,it.it));
+                enigma::instance_deactivated_list.insert(inode_pair(inst->id,inst));
             }
         }
     }
 }
 
 void instance_activate_region(int rleft, int rtop, int rwidth, int rheight, bool inside) {
-    std::map<int,enigma::inst_iter*>::iterator iter = enigma::instance_deactivated_list.begin();
+    std::map<int,enigma::object_basic*>::iterator iter = enigma::instance_deactivated_list.begin();
     while (iter != enigma::instance_deactivated_list.end()) {
 
-        enigma::object_collisions* const inst = ((enigma::object_collisions*)(iter->second->inst));
+        enigma::object_collisions* const inst = (enigma::object_collisions*) iter->second;
 
         if (inst->sprite_index == -1 && (inst->mask_index == -1)) { //no sprite/mask then no collision
             ++iter;
@@ -842,7 +842,7 @@ void instance_deactivate_circle(int x, int y, int r, bool inside, bool notme)
     {
         if (notme && (*it)->id == enigma::instance_event_iterator->inst->id)
             continue;
-        enigma::object_collisions* const inst = ((enigma::object_collisions*)*it);
+        enigma::object_collisions* const inst = (enigma::object_collisions*) *it;
 
         if (inst->sprite_index == -1 && (inst->mask_index == -1)) //no sprite/mask then no collision
             continue;
@@ -866,7 +866,7 @@ void instance_deactivate_circle(int x, int y, int r, bool inside, bool notme)
             if (inside)
             {
                 inst->deactivate();
-                enigma::instance_deactivated_list.insert(inode_pair((*it)->id,it.it));
+                enigma::instance_deactivated_list.insert(inode_pair(inst->id, inst));
             }
         }
         else
@@ -874,7 +874,7 @@ void instance_deactivate_circle(int x, int y, int r, bool inside, bool notme)
             if (!inside)
             {
                 inst->deactivate();
-                enigma::instance_deactivated_list.insert(inode_pair((*it)->id,it.it));
+                enigma::instance_deactivated_list.insert(inode_pair(inst->id, inst));
             }
         }
     }
@@ -883,9 +883,9 @@ void instance_deactivate_circle(int x, int y, int r, bool inside, bool notme)
 
 void instance_activate_circle(int x, int y, int r, bool inside)
 {
-    std::map<int,enigma::inst_iter*>::iterator iter = enigma::instance_deactivated_list.begin();
+    std::map<int,enigma::object_basic*>::iterator iter = enigma::instance_deactivated_list.begin();
     while (iter != enigma::instance_deactivated_list.end()) {
-        enigma::object_collisions* const inst = ((enigma::object_collisions*)(iter->second->inst));
+        enigma::object_collisions* const inst = (enigma::object_collisions*) iter->second;
 
         if (inst->sprite_index == -1 && (inst->mask_index == -1)) { //no sprite/mask then no collision
             ++iter;

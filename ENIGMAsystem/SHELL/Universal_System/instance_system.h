@@ -36,7 +36,7 @@
 namespace enigma {
   typedef std::map<int,inst_iter*>::iterator instance_list_iterator;
   extern std::map<int,inst_iter*> instance_list;
-  extern std::map<int,inst_iter*> instance_deactivated_list;
+  extern std::map<int,object_basic*> instance_deactivated_list;
   extern std::set<object_basic*> cleanups;
   
   void unlink_main(instance_list_iterator who);

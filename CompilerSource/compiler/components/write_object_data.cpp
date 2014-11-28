@@ -106,7 +106,23 @@ static inline void declare_extension_casts(std::ostream &wto) {
     for (int i=0; i<es->timelineCount; i++) {
       revTlineLookup[es->timelines[i].name] = es->timelines[i].id;
     }
-  wto << "\n";
+
+    wto << "\n";
+    wto << "namespace enigma\n{\n\n";
+    wto << "  extern std::map<int,object_basic*> instance_deactivated_list;\n";
+    wto << "  extern objectstruct** objectdata;\n";
+      wto << "  struct object_locals: event_parent";
+        for (unsigned i = 0; i < parsed_extensions.size(); i++)
+          if (parsed_extensions[i].implements != "")
+            wto << ", virtual " << parsed_extensions[i].implements;
+          else wto << " /*" << parsed_extensions[i].name << "*/";
+        wto << "\n";
+        wto << "  {\n";
+        wto << "    #include \"Preprocessor_Environment_Editable/IDE_EDIT_inherited_locals.h\"\n\n";
+        wto << "    std::map<string, var> *vmap;\n";
+        wto << "    object_locals() {vmap = NULL;}\n";
+        wto << "    object_locals(unsigned _x, int _y): event_parent(_x,_y) {vmap = NULL;}\n";
+        wto << "  };\n";
     
   wto << "  {\n";
   wto << "    #include \"Preprocessor_Environment_Editable/IDE_EDIT_inherited_locals.h\"\n\n";
@@ -510,16 +526,23 @@ static inline void write_object_constructors(std::ostream &wto, parsed_object *o
         for (parsed_object *obj = object; obj; obj = obj->parent_parsedobj) {
           wto << "      ENOBJ_ITER_myobj" << obj->id << " = enigma::link_obj_instance(this, " << obj->id << ");\n";
         }
-      } else {
-        wto << "      ENOBJ_ITER_myobj" << object->id << " = enigma::link_obj_instance(this, " << object->id << ");\n";
-      }
-      // Event system interface
-      for (vector<unsigned>::iterator it = parent_undefined.begin(); it != parent_undefined.end(); it++) {
-        if (!event_is_instance(object->events[*it].mainId, object->events[*it].id)) {
-          const string evname = event_get_function_name(object->events[*it].mainId, object->events[*it].id);
-          if (event_has_iterator_initialize_code(object->events[*it].mainId, object->events[*it].id)) {
-            if (!iscomment(event_get_iterator_initialize_code(object->events[*it].mainId, object->events[*it].id)))
-              wto << "      " << event_get_iterator_initialize_code(object->events[*it].mainId, object->events[*it].id) << ";\n";
+          for (map<int, vector<int> >::iterator it = evgroup.begin(); it != evgroup.end(); it++) { // The stacked ones should have their root exported
+           wto << "      enigma::inst_iter *ENOBJ_ITER_myevent_" << event_stacked_get_root_name(it->first) << ";\n";
+         }
+
+          //This is the actual call to remove the current instance from all linked records before destroying it.
+          wto << "\n    void unlink()\n    {\n";
+          wto << "      instance_iter_queue_for_destroy(this); // Queue for delete while we're still valid\n";
+          wto << "      if (enigma::instance_deactivated_list.erase(id)==0) {\n";
+          wto << "        //If it's not in the deactivated list, then it's active (so deactivate it).\n";
+          wto << "        deactivate();\n";
+          wto << "      }\n";
+          wto << "    }\n\n";
+          wto << "    void deactivate()\n    {\n";
+          if (!setting::inherit_objects || !has_parent) { 
+            wto << "      enigma::unlink_main(ENOBJ_ITER_me); // Remove this instance from the non-redundant, tree-structured list.\n";
+            for (po_i her = i; her != parsed_objects.end(); her = parsed_objects.find(her->second->parent))
+              wto << "      unlink_object_id_iter(ENOBJ_ITER_myobj" << her->second->id << ", " << her->second->id << ");\n";
           } else {
             wto << "      ENOBJ_ITER_myevent_" << evname << " = enigma::event_" << evname << "->add_inst(this);\n";
           }
