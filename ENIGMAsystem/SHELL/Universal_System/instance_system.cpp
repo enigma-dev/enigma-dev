@@ -137,7 +137,7 @@ namespace enigma
 
   // This is the all-inclusive, centralized list of instances.
   map<int,inst_iter*> instance_list;
-  map<int,inst_iter*> instance_deactivated_list;
+  map<int,object_basic*> instance_deactivated_list;
   typedef map<int,inst_iter*>::iterator iliter;
   typedef pair<int,inst_iter*> inode_pair;
     
@@ -239,9 +239,9 @@ namespace enigma
       return iterator();
 
     //Check if it's a deactivated instance first.
-    std::map<int,enigma::inst_iter*>::iterator rIt = enigma::instance_deactivated_list.find(x);
+    std::map<int,enigma::object_basic*>::iterator rIt = enigma::instance_deactivated_list.find(x);
     if (rIt!=enigma::instance_deactivated_list.end()) {
-      return iterator(((enigma::object_basic*)(rIt->second->inst)));
+      return iterator(rIt->second);
     }
 
     //Else, it's still live (or was null). Use normal dispatch.
@@ -289,9 +289,9 @@ namespace enigma
     return objects[oid].add_inst(who);
   }
 
-  void instance_iter_queue_for_destroy(pinstance_list_iterator whop)
+  void instance_iter_queue_for_destroy(object_basic* inst)
   {
-    enigma::cleanups.insert((object_basic*)whop->w->second->inst);
+    enigma::cleanups.insert(inst);
     enigma::instancecount--;
     enigma_user::instance_count--;
   }
