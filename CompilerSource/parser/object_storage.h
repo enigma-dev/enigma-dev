@@ -86,18 +86,21 @@ struct parsed_object
   varray<parsed_event> events;
 
   string name;
-  int id, sprite_index, mask_index, parent;
+  int id, sprite_index, mask_index, parent_index;
   bool visible, solid, persistent;
   double depth;
+  
+  parsed_object* parent_parsedobj; ///< The parent of this object, or NULL if the object has none.
+  vector<parsed_object*> children; ///< A vector of the children of this object; parsed_objects which list this object as a parent.
 
-  map<string,dectrip> locals;   // Any variable KEY used but not declared, or declared as local VALUE.
-  map<string,dectrip> ambiguous;// Any variable KEY used in with statement, but not locally declared.
-  map<string,dectrip> globals;  // Any variable KEY declared as global VALUE.
-  map<string,decquad> consts;   // Any variable KEY declared as constant VALUE.
-  map<string,int> globallocals; // Any shared local variable KEY used.
-  map<string,int> funcs;        // Any function KEY called with at most VALUE parameters.
-  map<string,int> tlines;       // Any timeline KEY set (or possibly set) by this object.
-  map<string,int> dots;         // Any attribute KEY accessed via a dot, as in a.KEY
+  map<string,dectrip> locals;   ///< Any variable KEY used but not declared, or declared as local VALUE.
+  map<string,dectrip> ambiguous;///< Any variable KEY used in with statement, but not locally declared.
+  map<string,dectrip> globals;  ///< Any variable KEY declared as global VALUE.
+  map<string,decquad> consts;   ///< Any variable KEY declared as constant VALUE.
+  map<string,int> globallocals; ///< Any shared local variable KEY used.
+  map<string,int> funcs;        ///< Any function KEY called with at most VALUE parameters.
+  map<string,int> tlines;       ///< Any timeline KEY set (or possibly set) by this object.
+  map<string,int> dots;         ///< Any attribute KEY accessed via a dot, as in a.KEY
 
   vector<initpair> initializers; // Variables that need initialized in the constructor for this object
 
