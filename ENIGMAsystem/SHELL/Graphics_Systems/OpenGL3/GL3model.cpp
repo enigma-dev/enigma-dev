@@ -34,6 +34,8 @@ using namespace std;
 #include "Universal_System/fileio.h"
 #include "Universal_System/estring.h"
 
+#define M_PI		3.14159265358979323846
+
 vector<Mesh*> meshes(0);
 
 namespace enigma {

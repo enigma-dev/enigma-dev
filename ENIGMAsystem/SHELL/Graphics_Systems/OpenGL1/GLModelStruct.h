@@ -156,7 +156,7 @@ class Mesh
   int modeltype; // can be static, dynamic, or stream
   bool modelbuffered; // whether a call list has been generated if the model type is static
   GLuint modellist; // call list for static models
-  
+
   unsigned currentPrimitive; // The type of the current primitive being added to the model
 
   vector<VertexElement> vertices; // Temporary vertices container for the current primitive until they are batched
@@ -214,10 +214,13 @@ class Mesh
     triangleIndices.reserve(64000);
     vertices.reserve(64000);
     indices.reserve(64000);
+
+    //It might not be used if model is not static, but at least we can be consistent
+    modellist = glGenLists(1);
   }
 
   ~Mesh() {
-
+    glDeleteLists(modellist, 1);
   }
 
   void ClearData() {
@@ -248,6 +251,7 @@ class Mesh
     indices.reserve(64000);
 
     vertexStride = 0;
+    modelbuffered = false;
     useColors = false;
     useTextures = false;
     useNormals = false;
@@ -311,113 +315,119 @@ class Mesh
 
   void End()
   {
-    //NOTE: This batching only checks for degenerate primitives on triangle strips and fans since the GPU does not render triangles where the two
-    //vertices are exactly the same, triangle lists could also check for degenerates, it is unknown whether the GPU will render a degenerative
-    //in a line strip primitive.
+	//NOTE: This batching only checks for degenerate primitives on triangle strips and fans since the GPU does not render triangles where the two
+	//vertices are exactly the same, triangle lists could also check for degenerates, it is unknown whether the GPU will render a degenerative
+	//in a line strip primitive.
 
-    unsigned stride = GetStride();
-    if (vertices.size() == 0) return;
+	unsigned stride = GetStride();
+	if (vertices.size() == 0) return;
 
-    // Primitive has ended so now we need to batch the vertices that were given into single lists, eg. line list, triangle list, point list
-    // Indices are optionally supplied, model functions can also be added for the end user to supply the indexing themselves for each primitive
-    // but the batching system does not care either way if they are not supplied it will automatically generate them.
-    switch (currentPrimitive) {
-      case enigma_user::pr_pointlist:
-        if (indices.size() > 0) {
-          pointIndexedVertices.insert(pointIndexedVertices.end(), vertices.begin(), vertices.end());
-          pointIndexedCount += vertices.size() / stride;
-          for (std::vector<GLuint>::iterator it = indices.begin(); it != indices.end(); ++it) { *it += pointCount; }
-          pointIndices.insert(pointIndices.end(), indices.begin(), indices.end());
-        } else {
-          pointVertices.insert(pointVertices.end(), vertices.begin(), vertices.end());
-          pointCount += vertices.size() / stride;
-        }
-        break;
-      case enigma_user::pr_linelist:
-        if (indices.size() > 0) {
-          lineIndexedVertices.insert(lineIndexedVertices.end(), vertices.begin(), vertices.end());
-          lineIndexedCount += vertices.size() / stride;
-          for (std::vector<GLuint>::iterator it = indices.begin(); it != indices.end(); ++it) { *it += lineCount; }
-          lineIndices.insert(lineIndices.end(), indices.begin(), indices.end());
-        } else {
-          lineVertices.insert(lineVertices.end(), vertices.begin(), vertices.end());
-          lineCount += vertices.size() / stride;
-        }
-        break;
-      case enigma_user::pr_linestrip:
-        lineIndexedVertices.insert(lineIndexedVertices.end(), vertices.begin(), vertices.end());
-        if (indices.size() > 0) {
-          for (std::vector<GLuint>::iterator it = indices.begin(); it != indices.end(); ++it) { *it += lineIndexedCount; }
-          for (unsigned i = 0; i < indices.size() - 2; i++) {
-            lineIndices.push_back(indices[i]);
-            lineIndices.push_back(indices[i + 1]);
-          }
-        } else {
-          for (unsigned i = 0; i < vertices.size() / stride - 1; i++) {
-            lineIndices.push_back(lineIndexedCount + i);
-            lineIndices.push_back(lineIndexedCount + i + 1);
-          }
-        }
-        lineIndexedCount += vertices.size() / stride;
-        break;
-      case enigma_user::pr_trianglelist:
-        if (indices.size() > 0) {
-          triangleIndexedVertices.insert(triangleIndexedVertices.end(), vertices.begin(), vertices.end());
-          triangleIndexedCount += vertices.size() / stride;
-          for (std::vector<GLuint>::iterator it = indices.begin(); it != indices.end(); ++it) { *it += triangleCount; }
-          triangleIndices.insert(triangleIndices.end(), indices.begin(), indices.end());
-        } else {
-          triangleVertices.insert(triangleVertices.end(), vertices.begin(), vertices.end());
-          triangleCount += vertices.size() / stride;
-        }
-        break;
-      case enigma_user::pr_trianglestrip:
-        triangleIndexedVertices.insert(triangleIndexedVertices.end(), vertices.begin(), vertices.end());
-        if (indices.size() > 0) {
-          for (std::vector<GLuint>::iterator it = indices.begin(); it != indices.end(); ++it) { *it += triangleIndexedCount; }
-          for (unsigned i = 0; i < indices.size() - 2; i++) {
-            // check for and continue if indexed triangle is degenerate, because the GPU won't render it anyway
-            if (indices[i] == indices[i + 1] || indices[i] == indices[i + 2]  || indices[i + 1] == indices[i + 2] ) { continue; }
-            triangleIndices.push_back(indices[i]);
-            triangleIndices.push_back(indices[i+1]);
-            triangleIndices.push_back(indices[i+2]);
-          }
-        } else {
-          for (unsigned i = 0; i < vertices.size() / stride - 2; i++) {
-            if (i % 2) {
-              triangleIndices.push_back(triangleIndexedCount + i + 2);
-              triangleIndices.push_back(triangleIndexedCount + i + 1);
-              triangleIndices.push_back(triangleIndexedCount + i);
-            } else {
-              triangleIndices.push_back(triangleIndexedCount + i);
-              triangleIndices.push_back(triangleIndexedCount + i + 1);
-              triangleIndices.push_back(triangleIndexedCount + i + 2);
-            }
-          }
-        }
-        triangleIndexedCount += vertices.size() / stride;
-        break;
-      case enigma_user::pr_trianglefan:
-        triangleIndexedVertices.insert(triangleIndexedVertices.end(), vertices.begin(), vertices.end());
-        if (indices.size() > 0) {
-          for (std::vector<GLuint>::iterator it = indices.begin(); it != indices.end(); ++it) { *it += triangleIndexedCount; }
-          for (unsigned i = 1; i < indices.size() - 1; i++) {
-            // check for and continue if indexed triangle is degenerate, because the GPU won't render it anyway
-            if (indices[0] == indices[i] || indices[0] == indices[i + 1]  || indices[i] == indices[i + 1] ) { continue; }
-            triangleIndices.push_back(indices[0]);
-            triangleIndices.push_back(indices[i]);
-            triangleIndices.push_back(indices[i + 1]);
-          }
-        } else {
-          for (unsigned i = 1; i < vertices.size() / stride - 1; i++) {
-            triangleIndices.push_back(triangleIndexedCount);
-            triangleIndices.push_back(triangleIndexedCount + i);
-            triangleIndices.push_back(triangleIndexedCount + i + 1);
-          }
-        }
-        triangleIndexedCount += vertices.size() / stride;
-        break;
-    }
+	// Primitive has ended so now we need to batch the vertices that were given into single lists, eg. line list, triangle list, point list
+	// Indices are optionally supplied, model functions can also be added for the end user to supply the indexing themselves for each primitive
+	// but the batching system does not care either way if they are not supplied it will automatically generate them.
+	switch (currentPrimitive) {
+		case enigma_user::pr_pointlist:
+			if (indices.size() > 0) {
+				pointIndexedVertices.insert(pointIndexedVertices.end(), vertices.begin(), vertices.end());
+				pointIndexedCount += vertices.size() / stride;
+				for (std::vector<GLuint>::iterator it = indices.begin(); it != indices.end(); ++it) { *it += pointCount; }
+				pointIndices.insert(pointIndices.end(), indices.begin(), indices.end());
+			} else {
+				pointVertices.insert(pointVertices.end(), vertices.begin(), vertices.end());
+				pointCount += vertices.size() / stride;
+			}
+			break;
+		case enigma_user::pr_linelist:
+			if (indices.size() > 0) {
+				lineIndexedVertices.insert(lineIndexedVertices.end(), vertices.begin(), vertices.end());
+				lineIndexedCount += vertices.size() / stride;
+				for (std::vector<GLuint>::iterator it = indices.begin(); it != indices.end(); ++it) { *it += lineCount; }
+				lineIndices.insert(lineIndices.end(), indices.begin(), indices.end());
+			} else {
+				lineVertices.insert(lineVertices.end(), vertices.begin(), vertices.end());
+				lineCount += vertices.size() / stride;
+			}
+			break;
+		case enigma_user::pr_linestrip:
+			lineIndexedVertices.insert(lineIndexedVertices.end(), vertices.begin(), vertices.end());
+			if (indices.size() > 0) {
+				for (std::vector<GLuint>::iterator it = indices.begin(); it != indices.end(); ++it) { *it += lineIndexedCount; }
+				for (unsigned i = 0; i < indices.size() - 2; i++) {
+					lineIndices.push_back(indices[i]);
+					lineIndices.push_back(indices[i + 1]);
+				}
+			} else {
+				for (unsigned i = 0; i < vertices.size() / stride - 1; i++) {
+					lineIndices.push_back(lineIndexedCount + i);
+					lineIndices.push_back(lineIndexedCount + i + 1);
+				}
+			}
+			lineIndexedCount += vertices.size() / stride;
+			break;
+		case enigma_user::pr_trianglelist:
+			if (indices.size() > 0) {
+				triangleIndexedVertices.insert(triangleIndexedVertices.end(), vertices.begin(), vertices.end());
+				triangleIndexedCount += vertices.size() / stride;
+				for (std::vector<GLuint>::iterator it = indices.begin(); it != indices.end(); ++it) { *it += triangleCount; }
+				triangleIndices.insert(triangleIndices.end(), indices.begin(), indices.end());
+			} else {
+				triangleVertices.insert(triangleVertices.end(), vertices.begin(), vertices.end());
+				triangleCount += vertices.size() / stride;
+			}
+			break;
+		case enigma_user::pr_trianglestrip:
+			triangleIndexedVertices.insert(triangleIndexedVertices.end(), vertices.begin(), vertices.end());
+			if (indices.size() > 0) {
+				for (std::vector<GLuint>::iterator it = indices.begin(); it != indices.end(); ++it) { *it += triangleIndexedCount; }
+				for (unsigned i = 0; i < indices.size() - 2; i++) {
+					// check for and continue if indexed triangle is degenerate, because the GPU won't render it anyway
+					if (indices[i] == indices[i + 1] || indices[i] == indices[i + 2]  || indices[i + 1] == indices[i + 2] ) { continue; }
+					if (i % 2) {
+                        triangleIndices.push_back(indices[i+1]);
+                        triangleIndices.push_back(indices[i]);
+                        triangleIndices.push_back(indices[i+2]);
+					}else{
+                        triangleIndices.push_back(indices[i]);
+                        triangleIndices.push_back(indices[i+1]);
+                        triangleIndices.push_back(indices[i+2]);
+					}
+				}
+			} else {
+				for (unsigned i = 0; i < vertices.size() / stride - 2; i++) {
+					if (i % 2) {
+						triangleIndices.push_back(triangleIndexedCount + i + 2);
+						triangleIndices.push_back(triangleIndexedCount + i + 1);
+						triangleIndices.push_back(triangleIndexedCount + i);
+					} else {
+						triangleIndices.push_back(triangleIndexedCount + i);
+						triangleIndices.push_back(triangleIndexedCount + i + 1);
+						triangleIndices.push_back(triangleIndexedCount + i + 2);
+					}
+				}
+			}
+			triangleIndexedCount += vertices.size() / stride;
+			break;
+		case enigma_user::pr_trianglefan:
+			triangleIndexedVertices.insert(triangleIndexedVertices.end(), vertices.begin(), vertices.end());
+			if (indices.size() > 0) {
+				for (std::vector<GLuint>::iterator it = indices.begin(); it != indices.end(); ++it) { *it += triangleIndexedCount; }
+				for (unsigned i = 1; i < indices.size() - 1; i++) {
+					// check for and continue if indexed triangle is degenerate, because the GPU won't render it anyway
+					if (indices[0] == indices[i] || indices[0] == indices[i + 1]  || indices[i] == indices[i + 1] ) { continue; }
+					triangleIndices.push_back(indices[0]);
+					triangleIndices.push_back(indices[i]);
+					triangleIndices.push_back(indices[i + 1]);
+				}
+			} else {
+				for (unsigned i = 1; i < vertices.size() / stride - 1; i++) {
+					triangleIndices.push_back(triangleIndexedCount);
+					triangleIndices.push_back(triangleIndexedCount + i);
+					triangleIndices.push_back(triangleIndexedCount + i + 1);
+				}
+			}
+			triangleIndexedCount += vertices.size() / stride;
+			break;
+	}
 
     // Clean up the temporary vertex and index containers now that they have been batched efficiently.
     vertices.clear();
@@ -461,7 +471,7 @@ class Mesh
     if (!count) {
       return;
     }
-    
+
     // Calculate the number of bytes to get to the next vertex
     GLsizei stride = GetStride() * sizeof( gs_scalar );
 
@@ -489,13 +499,13 @@ class Mesh
 
     glDrawArrays(mode, vert_start, count);
   }
-  
+
   void DrawCalls(int vertex_start = 0, int vertex_count = -1) {
     glEnableClientState(GL_VERTEX_ARRAY);
     if (useNormals) glEnableClientState(GL_NORMAL_ARRAY);
     if (useTextures) glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     if (useColors) glEnableClientState(GL_COLOR_ARRAY);
-  
+
     //TODO: Right now vertex count override only works with triangles
     // Draw the batched and indexed primitives
     if (triangleIndexedCount > 0) {
@@ -530,7 +540,6 @@ class Mesh
     if (modeltype == enigma_user::model_static) {
       if (!modelbuffered) {
         modelbuffered = true;
-        modellist = glGenLists(1);
         glNewList(modellist, GL_COMPILE);
           DrawCalls(vertex_start, vertex_count);
         glEndList();

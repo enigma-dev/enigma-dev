@@ -57,17 +57,6 @@ namespace enigma
     }
 }
 
-//NOTE: THIS IS STILL FFP
-#ifdef GS_SCALAR_64
-#define glLoadMatrix(m) glLoadMatrixd((gs_scalar*)m.Transpose());
-#define glGet(m,n)        glGetDoublev(m,(gs_scalar*)n); //For debug
-
-#else
-#define glLoadMatrix(m) glLoadMatrixf((gs_scalar*)m.Transpose());
-#define glGet(m,n)        glGetFloatv(m,(gs_scalar*)n); //For debug
-
-#endif
-
 namespace enigma_user
 {
 
@@ -116,12 +105,18 @@ void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scal
     // and fractional coordinates.
     x = round(x) + 0.01f; y = round(y) + 0.01f;
     oglmgr->Transformation();
-    enigma::projection_matrix.InitRotateZTransform(angle);
+    if (angle!=0){
+      enigma::projection_matrix.InitTranslationTransform(-x-width/2.0, -y-height/2.0, 0);
+      enigma::projection_matrix.rotateZ(-angle);
+      enigma::projection_matrix.translate(x+width/2.0, y+height/2.0, 0);
+    }else{
+      enigma::projection_matrix.InitIdentity();
+    }
 
     enigma::Matrix4 ortho;
     ortho.InitOrthoProjTransform(x,x + width,y + height,y,32000,-32000);
 
-    enigma::projection_matrix = enigma::projection_matrix * ortho;
+    enigma::projection_matrix = ortho * enigma::projection_matrix;
     enigma::view_matrix.InitIdentity();
     enigma::transform_needs_update = true;
     //enigma::d3d_light_update_positions();
@@ -227,7 +222,7 @@ void d3d_transform_set_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, gs_s
 
 #include <stack>
 std::stack<enigma::Matrix4> trans_stack;
-int trans_stack_size = 0;
+std::stack<enigma::Matrix4> proj_stack;
 
 namespace enigma_user
 {
@@ -237,17 +232,15 @@ bool d3d_transform_stack_push()
     //if (trans_stack_size == 31) return false; //This limit no longer applies
     oglmgr->Transformation();
     trans_stack.push(enigma::model_matrix);
-    trans_stack_size++;
     return true;
 }
 
 bool d3d_transform_stack_pop()
 {
-    if (trans_stack_size == 0) return false;
+    if (trans_stack.size() == 0) return false;
     oglmgr->Transformation();
     enigma::model_matrix = trans_stack.top();
     trans_stack.pop();
-    if (trans_stack_size > 0) trans_stack_size--;
     enigma::transform_needs_update = true;
     return true;
 }
@@ -255,21 +248,19 @@ bool d3d_transform_stack_pop()
 void d3d_transform_stack_clear()
 {
     oglmgr->Transformation();
-    do
-      trans_stack.pop();
-    while (trans_stack_size--);
+    trans_stack = std::stack<enigma::Matrix4>(); //Clear the stack
     enigma::model_matrix.InitIdentity();
     enigma::transform_needs_update = true;
 }
 
 bool d3d_transform_stack_empty()
 {
-    return (trans_stack_size == 0);
+    return (trans_stack.size() == 0);
 }
 
 bool d3d_transform_stack_top()
 {
-    if (trans_stack_size == 0) return false;
+    if (trans_stack.size() == 0) return false;
     oglmgr->Transformation();
     enigma::model_matrix = trans_stack.top();
     enigma::transform_needs_update = true;
@@ -278,9 +269,55 @@ bool d3d_transform_stack_top()
 
 bool d3d_transform_stack_disgard()
 {
-    if (trans_stack_size == 0) return false;
-    trans_stack.pop();
-    trans_stack_size--;
+    if (proj_stack.size() == 0) return false;
+    proj_stack.pop();
+    return true;
+}
+
+bool d3d_projection_stack_push()
+{
+    //if (trans_stack_size == 31) return false; //This limit no longer applies
+    oglmgr->Transformation();
+    proj_stack.push(enigma::projection_matrix);
+    return true;
+}
+
+bool d3d_projection_stack_pop()
+{
+    if (proj_stack.size() == 0) return false;
+    oglmgr->Transformation();
+    enigma::projection_matrix = proj_stack.top();
+    proj_stack.pop();
+    enigma::transform_needs_update = true;
+    return true;
+}
+
+void d3d_projection_stack_clear()
+{
+    oglmgr->Transformation();
+    proj_stack = std::stack<enigma::Matrix4>(); //Clear the stack
+    enigma::projection_matrix.InitIdentity();
+    enigma::transform_needs_update = true;
+}
+
+bool d3d_projection_stack_empty()
+{
+    return (proj_stack.size() == 0);
+}
+
+bool d3d_projection_stack_top()
+{
+    if (proj_stack.size() == 0) return false;
+    oglmgr->Transformation();
+    enigma::projection_matrix = proj_stack.top();
+    enigma::transform_needs_update = true;
+    return true;
+}
+
+bool d3d_projection_stack_disgard()
+{
+    if (proj_stack.size() == 0) return false;
+    proj_stack.pop();
     return true;
 }
 
