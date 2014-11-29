@@ -141,6 +141,9 @@ bool path_update()
   inst->y = inst_paths->path_ystart + ay;
 
   if (at_end) {
+    //Give the user some time to intervene
+    inst_paths->myevent_pathend();
+
     switch (inst_paths->path_endaction) {
       case 0: // Stop
           inst_paths->path_index = -1;

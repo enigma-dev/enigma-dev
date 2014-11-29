@@ -17,5 +17,7 @@ namespace enigma {
     cs_scalar path_ystart;
     
     extension_path(): path_index(-1), path_endaction(0), path_orientation(0), path_position(0), path_positionprevious(0), path_scale(1), path_speed(0) {}
+
+    virtual variant myevent_pathend() { return 1; }
   };
 }
