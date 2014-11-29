@@ -58,21 +58,21 @@ CC := gcc
 DEPENDENCIES :=
 
 ifeq ($(GMODE), Debug)
-	CXXFLAGS += -Wall -g -DDEBUG_MODE
-	CFLAGS += -Wall -g -DDEBUG_MODE
+	override CXXFLAGS += -Wall -g -DDEBUG_MODE
+	override CFLAGS += -Wall -g -DDEBUG_MODE
 else ifeq ($(GMODE), Compile)
-	CXXFLAGS += -Wall -s -O3 -fno-rtti -fno-exceptions -flto -fdata-sections -ffunction-sections
-	CFLAGS += -Wall -s -O3 -flto -fno-exceptions -fdata-sections -ffunction-sections
-	LDFLAGS += -flto -s -O3
+	override CXXFLAGS += -Wall -s -O3 -fno-rtti -fno-exceptions -flto -fdata-sections -ffunction-sections
+	override CFLAGS += -Wall -s -O3 -flto -fno-exceptions -fdata-sections -ffunction-sections
+	override LDFLAGS += -flto -s -O3
 else
-	CXXFLAGS += -Wall -s -O3 -fno-rtti -fno-exceptions
-	CFLAGS += -Wall -s -O3 -fno-exceptions
+	override CXXFLAGS += -Wall -s -O3 -fno-rtti -fno-exceptions
+	override CFLAGS += -Wall -s -O3 -fno-exceptions
 endif
 
 ifeq ($(PLATFORM), Win32)
-	LDFLAGS += -L../Additional/i686-w64-mingw32/lib -static-libgcc -static-libstdc++
+	override LDFLAGS += -L../Additional/i686-w64-mingw32/lib -static-libgcc -static-libstdc++
 	ifeq ($(GMODE), Compile)
-		LDFLAGS += -static-libgcc -Wl,-subsystem,windows
+		override LDFLAGS += -static-libgcc -Wl,-subsystem,windows
 	endif
 endif
 
