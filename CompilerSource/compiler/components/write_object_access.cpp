@@ -30,6 +30,8 @@
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
+#include <sstream>
+#include <list>
 
 using namespace std;
 
@@ -88,6 +90,34 @@ int lang_CPP::compile_writeObjAccess(map<int,parsed_object*> &parsed_objects, pa
     "        (*vmap)->insert(std::pair<string, var>(str, 0));" << endl <<
     "      return ((*vmap)->find(str))->second;" << endl <<
     "  }" << endl << endl;
+
+    //We need an array of "children" objects per parsed_object.
+    map< int, vector<int> > direct_children;
+    for (po_i pIt=parsed_objects.begin(); pIt!=parsed_objects.end(); pIt++) {
+      direct_children[pIt->second->parent].push_back(pIt->first);
+    }
+
+    //Test if an object is castable to an object by ID.
+    wto << "bool can_cast(object_basic* inst, int objType) {\n";
+    wto << "  switch(objType) {\n";
+    std::stringstream msg;
+    std::list<int> pending;
+    for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++) {
+      msg <<"(inst->object_index==" <<i->first <<")";
+      pending.insert(pending.end(), direct_children[i->first].begin(), direct_children[i->first].end());
+      while (!pending.empty()) {
+        int pendIt = pending.front();
+        pending.pop_front();
+        msg <<" || " <<"(inst->object_index==" <<pendIt <<")";
+        pending.insert(pending.end(), direct_children[pendIt].begin(), direct_children[pendIt].end());
+      }
+      wto << "    case " <<i->first <<": return " <<msg.str() <<";\n";
+      msg.str("");
+      pending.clear();
+    }
+    wto << "    default: return false;\n";
+    wto << "  }\n";
+    wto << "};\n\n";
 
 
     map<string,usedtype> usedtypes;
