@@ -100,7 +100,7 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, i
 
     wto << "\n";
     wto << "namespace enigma\n{\n\n";
-    wto << "  extern std::map<int,inst_iter*> instance_deactivated_list;\n";
+    wto << "  extern std::map<int,object_basic*> instance_deactivated_list;\n";
     wto << "  extern objectstruct** objectdata;\n";
       wto << "  struct object_locals: event_parent";
         for (unsigned i = 0; i < parsed_extensions.size(); i++)
@@ -420,7 +420,7 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, i
 
           //This is the actual call to remove the current instance from all linked records before destroying it.
           wto << "\n    void unlink()\n    {\n";
-          wto << "      instance_iter_queue_for_destroy(ENOBJ_ITER_me); // Queue for delete while we're still valid\n";
+          wto << "      instance_iter_queue_for_destroy(this); // Queue for delete while we're still valid\n";
           wto << "      if (enigma::instance_deactivated_list.erase(id)==0) {\n";
           wto << "        //If it's not in the deactivated list, then it's active (so deactivate it).\n";
           wto << "        deactivate();\n";
