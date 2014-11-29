@@ -208,7 +208,7 @@ namespace enigma
     if (x < 0) switch (x) // Keyword-based lookup
     {
       case self:
-      case local:  return instance_event_iterator;
+      case local:  return iterator(instance_event_iterator->inst);
       case other:  return instance_other ? iterator(instance_other) : iterator();
       case all:    return instance_list_first();
       case global: return &ENIGMA_global_instance_iterator;
