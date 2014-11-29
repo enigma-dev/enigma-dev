@@ -26,12 +26,14 @@ namespace enigma
       double  xstart=inst->xstart, ystart=inst->ystart;
       double image_index=inst->image_index;
       double image_speed=inst->image_speed;
-      bool visible=inst->visible;
       double image_xscale=inst->image_xscale;
       double image_yscale=inst->image_yscale;
       double image_angle=inst->image_angle;
       vspeedv vspeed=inst->vspeed;
       hspeedv hspeed=inst->hspeed;
+
+      //For reference, these properties should remain as default:
+      //  visible,
 
       //the instance id is the same
       int idn=inst->id;
@@ -55,12 +57,12 @@ namespace enigma
       (void)ob;
       
       object_graphics* newinst = (object_graphics*) (*fetch_inst_iter_by_int(idn));
-      if (perf) newinst->myevent_create();
       newinst->x=x; newinst->y=y; newinst->yprevious=yprevious; newinst->xprevious=xprevious;
       newinst->xstart=xstart; newinst->ystart=ystart;
       newinst->image_index=image_index; newinst->image_speed=image_speed;
-      newinst->visible=visible; newinst->image_xscale=image_xscale; newinst->image_yscale=image_yscale; newinst->image_angle=image_angle;
+      newinst->image_xscale=image_xscale; newinst->image_yscale=image_yscale; newinst->image_angle=image_angle;
       newinst->hspeed=hspeed; newinst->vspeed=vspeed;
+      if (perf) newinst->myevent_create();
   }
   
   object_basic* instance_create_id(int x,int y,int object,int idn)
