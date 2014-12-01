@@ -59,6 +59,7 @@ namespace gui
 
 			gui_slider();
 			//Update all possible slider states (hover, click etc.)
+			void update_spos(); //Updates slider position calculations, needed for things like slider_set_value
 			void update(gs_scalar ox = 0, gs_scalar oy = 0, gs_scalar tx = enigma_user::mouse_x, gs_scalar ty = enigma_user::mouse_y);
 			void draw(gs_scalar ox = 0, gs_scalar oy = 0);
 			void update_text_pos(int state = -1);

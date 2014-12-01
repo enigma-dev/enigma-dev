@@ -96,6 +96,7 @@ namespace enigma_user
 	void gui_slider_set_callback(int id, int script_id);
 	void gui_slider_set_visible(int id, bool visible);
   void gui_slider_set_active(int id, bool active);
+  void gui_slider_set_value(int id, double value);
 
   int gui_slider_get_style(int id);
   int gui_slider_get_indicator_style(int id);
