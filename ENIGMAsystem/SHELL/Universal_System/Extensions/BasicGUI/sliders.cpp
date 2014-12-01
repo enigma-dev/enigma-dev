@@ -163,6 +163,7 @@ namespace enigma_user
 
 		gui::gui_sliders[gui::gui_sliders_maxid].text = text;
 		gui::gui_sliders[gui::gui_sliders_maxid].update_text_pos();
+		gui::gui_sliders[gui::gui_sliders_maxid].update_spos();
 		return (gui::gui_sliders_maxid++);
 	}
 
