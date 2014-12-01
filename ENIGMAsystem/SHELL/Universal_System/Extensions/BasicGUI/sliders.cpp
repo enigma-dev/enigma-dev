@@ -55,6 +55,10 @@ namespace gui
     enigma_user::gui_style_set_font_valign(style_id, enigma_user::gui_state_all, enigma_user::fa_middle);
 	}
 
+	void gui_slider::update_spos(){
+      slider_offset = box.w*((value-minValue)/(maxValue-minValue));
+	}
+
 	//Update all possible slider states (hover, click etc.)
 	void gui_slider::update(gs_scalar ox, gs_scalar oy, gs_scalar tx, gs_scalar ty){
 		if ((box.point_inside(tx-ox,ty-oy) || indicator_box.point_inside(tx-ox-box.x-slider_offset-indicator_box.x,ty-box.y-oy-indicator_box.y)) && gui::windowStopPropagation == false){
@@ -85,7 +89,7 @@ namespace gui
       windowStopPropagation = true;
       slider_offset = fmin(fmax(0,tx-box.x-ox-drag_xoffset), box.w);
       value = round((minValue + slider_offset/box.w * (maxValue-minValue)) / incValue) * incValue;
-      slider_offset = box.w*((value-minValue)/(maxValue-minValue));
+      update_spos();
       if (callback != -1){
         enigma_user::script_execute(callback, id, active);
       }
@@ -191,6 +195,11 @@ namespace enigma_user
 
   void gui_slider_set_indicator_style(int id, int style_id){
     gui::gui_sliders[id].indicator_style_id = (style_id != -1? style_id : gui::gui_style_slider);
+  }
+
+  void gui_slider_set_value(int id, double value){
+		gui::gui_sliders[id].value = value;
+    gui::gui_sliders[id].update_spos();
   }
 
   int gui_slider_get_style(int id){
