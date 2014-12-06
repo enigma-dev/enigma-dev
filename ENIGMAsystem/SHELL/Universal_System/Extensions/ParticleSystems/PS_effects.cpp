@@ -38,6 +38,8 @@
 #include <map>
 #include <cmath>
 
+#define M_PI		3.14159265358979323846
+
 namespace enigma
 {
   // NOTE: The effects are initialized lazily.
@@ -47,7 +49,7 @@ namespace enigma
   const double above_depth = -100000;
   enum ef_pt {
     ef_pt_explosion_s1 = 0, ef_pt_explosion_s2, ef_pt_explosion_s3,
-    ef_pt_ring_s1, ef_pt_ring_s2, ef_pt_ring_s3, 
+    ef_pt_ring_s1, ef_pt_ring_s2, ef_pt_ring_s3,
     ef_pt_ellipse_s1, ef_pt_ellipse_s2, ef_pt_ellipse_s3,
     ef_pt_firework_s1, ef_pt_firework_s2, ef_pt_firework_s3,
     ef_pt_smoke_s1, ef_pt_smoke_s2, ef_pt_smoke_s3,
@@ -100,8 +102,8 @@ namespace enigma
     }
     effectparticletype_to_particletypeid.insert(std::pair<ef_pt,int>(effectparticletype,pt_id));
     switch (effectparticletype) {
-    case ef_pt_explosion_s1: 
-    case ef_pt_explosion_s2: 
+    case ef_pt_explosion_s1:
+    case ef_pt_explosion_s2:
     case ef_pt_explosion_s3: {
       part_type_shape(pt_id, pt_shape_explosion);
       switch (effect_size) {
@@ -130,8 +132,8 @@ namespace enigma
       part_type_orientation(pt_id, 0, 360, 0, 0, 0);
       return p_t;
     }
-    case ef_pt_ring_s1: 
-    case ef_pt_ring_s2: 
+    case ef_pt_ring_s1:
+    case ef_pt_ring_s2:
     case ef_pt_ring_s3: {
       part_type_shape(pt_id, pt_shape_ring);
       switch (effect_size) {
@@ -155,8 +157,8 @@ namespace enigma
       part_type_alpha2(pt_id, 1.0, 0.0);
       return p_t;
     }
-    case ef_pt_ellipse_s1: 
-    case ef_pt_ellipse_s2: 
+    case ef_pt_ellipse_s1:
+    case ef_pt_ellipse_s2:
     case ef_pt_ellipse_s3: {
       part_type_shape(pt_id, pt_shape_ring);
       switch (effect_size) {
@@ -181,8 +183,8 @@ namespace enigma
       part_type_scale(pt_id, 1.2, 0.8);
       return p_t;
     }
-    case ef_pt_firework_s1: 
-    case ef_pt_firework_s2: 
+    case ef_pt_firework_s1:
+    case ef_pt_firework_s2:
     case ef_pt_firework_s3: {
       part_type_shape(pt_id, pt_shape_flare);
       switch (effect_size) {
@@ -209,8 +211,8 @@ namespace enigma
       part_type_alpha1(pt_id, 0.7);
       return p_t;
     }
-    case ef_pt_smoke_s1: 
-    case ef_pt_smoke_s2: 
+    case ef_pt_smoke_s1:
+    case ef_pt_smoke_s2:
     case ef_pt_smoke_s3: {
       part_type_shape(pt_id, pt_shape_explosion);
       switch (effect_size) {
@@ -235,8 +237,8 @@ namespace enigma
       part_type_alpha2(pt_id, 0.3, 0.0);
       return p_t;
     }
-    case ef_pt_smokeup_s1: 
-    case ef_pt_smokeup_s2: 
+    case ef_pt_smokeup_s1:
+    case ef_pt_smokeup_s2:
     case ef_pt_smokeup_s3: {
       part_type_shape(pt_id, pt_shape_explosion);
       switch (effect_size) {
@@ -265,8 +267,8 @@ namespace enigma
       part_type_alpha2(pt_id, 0.3, 0.0);
       return p_t;
     }
-    case ef_pt_star_s1: 
-    case ef_pt_star_s2: 
+    case ef_pt_star_s1:
+    case ef_pt_star_s2:
     case ef_pt_star_s3: {
       part_type_shape(pt_id, pt_shape_star);
       switch (effect_size) {
@@ -290,8 +292,8 @@ namespace enigma
       part_type_orientation(pt_id, 0.0, 360.0, 0, 0, 0);
       return p_t;
     }
-    case ef_pt_spark_s1: 
-    case ef_pt_spark_s2: 
+    case ef_pt_spark_s1:
+    case ef_pt_spark_s2:
     case ef_pt_spark_s3: {
       part_type_shape(pt_id, pt_shape_spark);
       switch (effect_size) {
@@ -315,8 +317,8 @@ namespace enigma
       part_type_orientation(pt_id, 0.0, 360.0, 0, 0, 0);
       return p_t;
     }
-    case ef_pt_flare_s1: 
-    case ef_pt_flare_s2: 
+    case ef_pt_flare_s1:
+    case ef_pt_flare_s2:
     case ef_pt_flare_s3: {
       part_type_shape(pt_id, pt_shape_flare);
       switch (effect_size) {
@@ -340,8 +342,8 @@ namespace enigma
       part_type_orientation(pt_id, 0.0, 360.0, 0, 0, 0);
       return p_t;
     }
-    case ef_pt_cloud_s1: 
-    case ef_pt_cloud_s2: 
+    case ef_pt_cloud_s1:
+    case ef_pt_cloud_s2:
     case ef_pt_cloud_s3: {
       part_type_shape(pt_id, pt_shape_explosion);
       double size = 0.0;

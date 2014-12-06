@@ -38,6 +38,8 @@
 
 #include "floatcomp.h"
 
+#define M_PI		3.14159265358979323846
+
 namespace enigma {
 	extern size_t path_idmax;
 	extern unsigned bound_texture;
@@ -116,7 +118,7 @@ bool path_update()
   enigma::path *path = enigma::pathstructarray[inst_paths->path_index];
   if (!path)
     return false;
-  
+
   bool at_end = false;
   cs_scalar pstep = inst_paths->path_speed / path->total_length;
   if (!inst_paths->path_orientation) {
@@ -132,12 +134,12 @@ bool path_update()
       inst_paths->path_position = 0;
     }
   }
-  
+
   cs_scalar ax, ay;
   path_getXY_scaled(path, ax, ay, inst_paths->path_position, inst_paths->path_scale);
   inst->x = inst_paths->path_xstart + ax;
   inst->y = inst_paths->path_ystart + ay;
-  
+
   if (at_end) {
     switch (inst_paths->path_endaction) {
       case 0: // Stop
@@ -159,7 +161,7 @@ bool path_update()
         break;
     }
   }
-  
+
   return true;
 }
 
@@ -255,7 +257,7 @@ void path_scale(unsigned pathid, cs_scalar xscale, cs_scalar yscale)
 }
 
 void path_rotate(unsigned pathid, double angle)
-{ 
+{
     enigma::path *pa = enigma::pathstructarray[pathid];
     double tmpx, tmpy, a = (M_PI / 180) * -angle;
     for (size_t i=0; i<pa->pointarray.size(); i++){

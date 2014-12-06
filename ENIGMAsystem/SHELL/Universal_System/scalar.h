@@ -15,6 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#define M_PI		3.14159265358979323846
+
 // This header implements scalar data types for double and floating point precision
 // for major systems and coordinate space. Angular unit functions are also implemented
 // to allow you to easily switch major systems between degrees and radians.
@@ -83,7 +85,7 @@ typedef float cs_scalar;
 #else
 #define as_angle_from_radians(radians) ((radians) * 180 / M_PI)
 #define as_angle_to_radians(degrees) ((degrees) / 180 * M_PI)
-#endif 
+#endif
 
 #ifdef CS_ANGULAR_UNIT_RADIANS
 #define cs_angle_from_radians(radians) (radians)

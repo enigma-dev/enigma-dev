@@ -17,7 +17,6 @@
 
 #include <linux/joystick.h>
 #include <math.h>
-#include <stropts.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdio.h>
@@ -143,7 +142,6 @@ namespace enigma_user
       return false;
     
     int ac = 4, bc = 4;
-    ioctl(device, I_SRDOPT, RMSGN);
     if (ioctl(device, JSIOCGAXES, &ac) or ioctl(device, JSIOCGBUTTONS, &bc))
       return (close(device), false);
     
