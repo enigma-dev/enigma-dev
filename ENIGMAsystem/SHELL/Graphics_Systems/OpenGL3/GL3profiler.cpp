@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton
+/** Copyright (C) 2014 Harijs Grinbergs
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,4 +15,11 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "Bridges/General/GL3Context.h"
 #include "GL3profiler.h"
+
+namespace enigma_user{
+	int profiler_get_vertex_count() { return oglmgr->gpuprof.drawn_vertex_number; }
+	int profiler_get_drawcall_count() { return oglmgr->gpuprof.drawn_drawcall_number; }
+	int profiler_get_vbo_count() { return oglmgr->gpuprof.drawn_vbo_number; }
+}
