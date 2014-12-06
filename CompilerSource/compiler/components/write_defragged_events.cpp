@@ -38,11 +38,30 @@ using namespace std;
 #include "languages/lang_CPP.h"
 
 struct foundevent { int mid, id, count; foundevent(): mid(0),id(0),count(0) {} void f2(int m,int i) { id = i, mid = m; } void inc(int m,int i) { mid=m,id=i,count++; } void operator++(int) { count++; } };
-map<string,foundevent> used_events;
 typedef map<string,foundevent>::iterator evfit;
 
 int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
 {
+  /* Generate a new list of events used by the objects in
+  ** this game. Only events on this list will be exported.
+  ***********************************************************/
+  map<string,foundevent> used_events;
+  
+  // Defragged events must be written before object data, or object data cannot determine which events were used.
+  used_events.clear();
+  for (int i = 0; i < es->gmObjectCount; i++) {
+    for (int ii = 0; ii < es->gmObjects[i].mainEventCount; ii++) {
+      for (int iii = 0; iii < es->gmObjects[i].mainEvents[ii].eventCount; iii++) {
+        const int mid = es->gmObjects[i].mainEvents[ii].id, id = es->gmObjects[i].mainEvents[ii].events[iii].id;
+        if (event_is_instance(mid,id)) {
+          used_events[event_stacked_get_root_name(mid)].inc(mid,id);
+        } else {
+          used_events[event_get_function_name(mid,id)].inc(mid,id);
+        }
+      }
+    }
+  }
+
   ofstream wto((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_evparent.h").c_str());
   wto << license;
 
@@ -53,21 +72,6 @@ int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
     }
   }
   wto <<"\n";
-
-  /* Generate a new list of events used by the objects in
-  ** this game. Only events on this list will be exported.
-  ***********************************************************/
-  used_events.clear();
-  for (int i = 0; i < es->gmObjectCount; i++)
-    for (int ii = 0; ii < es->gmObjects[i].mainEventCount; ii++)
-      for (int iii = 0; iii < es->gmObjects[i].mainEvents[ii].eventCount; iii++)
-      {
-        const int mid = es->gmObjects[i].mainEvents[ii].id, id = es->gmObjects[i].mainEvents[ii].events[iii].id;
-        if (event_is_instance(mid,id))
-          used_events[event_stacked_get_root_name(mid)].inc(mid,id);
-        else
-          used_events[event_get_function_name(mid,id)].inc(mid,id);
-      }
 
   /* Some events are included in all objects, even if the user
   ** hasn't specified code for them. Account for those here.
@@ -232,9 +236,4 @@ int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
   wto.close();
 
   return 0;
-}
-
-bool event_used_by_something(string name)
-{
-  return used_events.find(name) != used_events.end();
 }

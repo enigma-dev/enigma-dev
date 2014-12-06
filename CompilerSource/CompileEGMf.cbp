@@ -144,6 +144,7 @@
 		<Unit filename="JDI/src/General/llreader.h" />
 		<Unit filename="JDI/src/General/parse_basics.cpp" />
 		<Unit filename="JDI/src/General/parse_basics.h" />
+		<Unit filename="JDI/src/General/quickreference.h" />
 		<Unit filename="JDI/src/General/quickstack.h" />
 		<Unit filename="JDI/src/General/quickvector.h" />
 		<Unit filename="JDI/src/General/svg_simple.cpp" />
@@ -191,8 +192,10 @@
 		<Unit filename="JDI/src/System/token.cpp" />
 		<Unit filename="JDI/src/System/token.h" />
 		<Unit filename="JDI/src/System/type_usage_flags.h" />
-		<Unit filename="JDI/test/debug_lexer.h" />
+		<Unit filename="JDI/src/User/token_cases.h" />
+		<Unit filename="JDI/src/User/token_types.h" />
 		<Unit filename="OS_Switchboard.h" />
+		<Unit filename="backend/EnigmaCallbacks.h" />
 		<Unit filename="backend/EnigmaStruct.h" />
 		<Unit filename="backend/JavaCallbacks.cpp" />
 		<Unit filename="backend/JavaCallbacks.h" />
@@ -212,6 +215,7 @@
 		<Unit filename="backend/resources/Path.h" />
 		<Unit filename="backend/resources/Room.h" />
 		<Unit filename="backend/resources/Script.h" />
+		<Unit filename="backend/resources/Shader.h" />
 		<Unit filename="backend/resources/Sound.h" />
 		<Unit filename="backend/resources/Sprite.h" />
 		<Unit filename="backend/resources/Timeline.h" />
@@ -219,21 +223,21 @@
 		<Unit filename="backend/sub/Action.h" />
 		<Unit filename="backend/sub/BackgroundDef.h" />
 		<Unit filename="backend/sub/Event.h" />
-		<Unit filename="backend/sub/Image.h" />
+		<Unit filename="backend/sub/Glyph.h" />
+		<Unit filename="backend/sub/GlyphRange.h" />
 		<Unit filename="backend/sub/Instance.h" />
 		<Unit filename="backend/sub/MainEvent.h" />
 		<Unit filename="backend/sub/Moment.h" />
 		<Unit filename="backend/sub/PathPoint.h" />
+		<Unit filename="backend/sub/SubImage.h" />
 		<Unit filename="backend/sub/Tile.h" />
 		<Unit filename="backend/sub/View.h" />
 		<Unit filename="backend/util/Image.h" />
 		<Unit filename="backend/util/Point.h" />
 		<Unit filename="backend/util/Polygon.h" />
 		<Unit filename="compiler/compile.cpp" />
-		<Unit filename="compiler/compile.h" />
 		<Unit filename="compiler/compile_common.cpp" />
 		<Unit filename="compiler/compile_common.h" />
-		<Unit filename="compiler/compile_includes.cpp" />
 		<Unit filename="compiler/compile_includes.h" />
 		<Unit filename="compiler/compile_organization.h" />
 		<Unit filename="compiler/components/components.h" />
@@ -252,6 +256,7 @@
 		<Unit filename="compiler/components/write_object_access.cpp" />
 		<Unit filename="compiler/components/write_object_data.cpp" />
 		<Unit filename="compiler/components/write_room_data.cpp" />
+		<Unit filename="compiler/components/write_shader_data.cpp" />
 		<Unit filename="compiler/event_ids.h" />
 		<Unit filename="compiler/event_reader/event_parser.cpp" />
 		<Unit filename="compiler/event_reader/event_parser.h" />
@@ -264,10 +269,11 @@
 		<Unit filename="compiler/pcs/pcs.h" />
 		<Unit filename="compiler/reshandlers/rectpack.cpp" />
 		<Unit filename="compiler/reshandlers/rectpack.h" />
+		<Unit filename="compiler/reshandlers/refont.cpp" />
+		<Unit filename="compiler/reshandlers/refont.h" />
 		<Unit filename="config.h" />
-		<Unit filename="externs/externs.h" />
-		<Unit filename="externs/references.h" />
 		<Unit filename="filesystem/file_find.cpp" />
+		<Unit filename="filesystem/file_find.h" />
 		<Unit filename="frontend.cpp" />
 		<Unit filename="frontend.h" />
 		<Unit filename="gcc_interface/gcc_backend.cpp" />
@@ -282,7 +288,6 @@
 		<Unit filename="general/macro_integration.h" />
 		<Unit filename="general/parse_basics_old.h" />
 		<Unit filename="general/string.cpp" />
-		<Unit filename="general/textfile.cpp" />
 		<Unit filename="general/textfile.h" />
 		<Unit filename="languages/lang_CPP.cpp" />
 		<Unit filename="languages/lang_CPP.h" />
@@ -290,6 +295,8 @@
 		<Unit filename="languages/language_adapter.h" />
 		<Unit filename="main.cpp" />
 		<Unit filename="main.h" />
+		<Unit filename="makedir.cpp" />
+		<Unit filename="makedir.h" />
 		<Unit filename="parser/collect_variables.cpp" />
 		<Unit filename="parser/collect_variables.h" />
 		<Unit filename="parser/object_storage.cpp" />
@@ -318,11 +325,7 @@
 		<Unit filename="syntax/syntaxtools.h" />
 		<Unit filename="test_gml.h">
 			<Option virtualFolder="Test/" />
-			<Option target="StandAlone" />
-			<Option target="StandAloneND" />
 		</Unit>
-		<Unit filename="varnames/varnames.cpp" />
-		<Unit filename="varnames/varnames.h" />
 		<Extensions>
 			<code_completion />
 			<debugger>
