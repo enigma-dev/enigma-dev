@@ -58,9 +58,9 @@ int lang_CPP::compile_parseSecondary(map<int,parsed_object*> &parsed_objects, pa
   for (po_i it = parsed_objects.begin(); it != parsed_objects.end(); it++) {
     po_i parent_it = parsed_objects.find(it->second->parent_index);
     if (parent_it != parsed_objects.end()) {
-      it->second->parent_parsedobj = parent_it->second;
+      it->second->parent = parent_it->second;
       parent_it->second->children.push_back(it->second);
-      printf("Object %s (%d) is a child of %s (%d)\n", it->second->name.c_str(), it->second->id, it->second->parent_parsedobj->name.c_str(), it->second->parent_parsedobj->id);
+      printf("Object %s (%d) is a child of %s (%d)\n", it->second->name.c_str(), it->second->id, it->second->parent->name.c_str(), it->second->parent->id);
     }
   }
   

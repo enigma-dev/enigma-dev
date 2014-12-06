@@ -117,8 +117,8 @@ bool decquad::operator!= (const decquad& x) {
 parsed_event::parsed_event():                               id(0), mainId(0), code(), synt(), strc(0), otherObjId(-4), myObj(NULL) {}
 parsed_event::parsed_event(parsed_object *po):              id(0), mainId(0), code(), synt(), strc(0), otherObjId(-4), myObj(po) {}
 parsed_event::parsed_event(int m, int s,parsed_object *po): id(s), mainId(m), code(), synt(), strc(0), otherObjId(-4), myObj(po) {}
-parsed_object::parsed_object(): parent_parsedobj(NULL) {}
-parsed_object::parsed_object(string n, int i, int s, int m, int p, bool vis, bool sol, double d,bool pers): name(n), id(i), sprite_index(s), mask_index(m), parent_index(p), visible(vis), solid(sol), persistent(pers), depth(d), parent_parsedobj(NULL) {}
+parsed_object::parsed_object(): parent(NULL) {}
+parsed_object::parsed_object(string n, int i, int s, int m, int p, bool vis, bool sol, double d,bool pers): name(n), id(i), sprite_index(s), mask_index(m), parent_index(p), visible(vis), solid(sol), persistent(pers), depth(d), parent(NULL) {}
 map<int,parsed_object*> parsed_objects;
 map<int,parsed_room*> parsed_rooms;
 vector<parsed_extension> parsed_extensions;

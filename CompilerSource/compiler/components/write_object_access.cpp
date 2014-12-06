@@ -127,7 +127,7 @@ int lang_CPP::compile_writeObjAccess(map<int,parsed_object*> &parsed_objects, pa
               break;
             }
           }
-          parent = parent->parent_parsedobj;
+          parent = parent->parent;
         }
       }
 
