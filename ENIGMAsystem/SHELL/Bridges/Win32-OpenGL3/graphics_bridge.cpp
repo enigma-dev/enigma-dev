@@ -29,14 +29,59 @@ using namespace std;
 
 namespace enigma
 {
-  GLuint msaa_fbo = 0;
-  
+	#ifdef DEBUG_MODE
+	#include "Widget_Systems/widgets_mandatory.h"
+	//Based on code from Cort Stratton (http://www.altdev.co/2011/06/23/improving-opengl-error-messages/)
+	void FormatDebugOutputARB(char outStr[], size_t outStrSize, GLenum source, GLenum type, GLuint id, GLenum severity, const char *msg) {
+		char sourceStr[32]; const char *sourceFmt = "UNDEFINED(0x%04X)";
+		switch(source) {
+			case GL_DEBUG_SOURCE_API_ARB: sourceFmt = "API"; break;
+			case GL_DEBUG_SOURCE_WINDOW_SYSTEM_ARB: sourceFmt = "WINDOW_SYSTEM"; break;
+			case GL_DEBUG_SOURCE_SHADER_COMPILER_ARB: sourceFmt = "SHADER_COMPILER"; break;
+			case GL_DEBUG_SOURCE_THIRD_PARTY_ARB: sourceFmt = "THIRD_PARTY"; break;
+			case GL_DEBUG_SOURCE_APPLICATION_ARB: sourceFmt = "APPLICATION"; break;
+			case GL_DEBUG_SOURCE_OTHER_ARB: sourceFmt = "OTHER"; break;
+		}
+		snprintf(sourceStr, 32, sourceFmt, source);
+		char typeStr[32];
+		const char *typeFmt = "UNDEFINED(0x%04X)";
+		switch(type) {
+			case GL_DEBUG_TYPE_ERROR_ARB: typeFmt = "ERROR"; break;
+			case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR_ARB: typeFmt = "DEPRECATED_BEHAVIOR"; break;
+			case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR_ARB: typeFmt = "UNDEFINED_BEHAVIOR"; break;
+			case GL_DEBUG_TYPE_PORTABILITY_ARB: typeFmt = "PORTABILITY"; break;
+			case GL_DEBUG_TYPE_PERFORMANCE_ARB: typeFmt = "PERFORMANCE"; break;
+			case GL_DEBUG_TYPE_OTHER_ARB: typeFmt = "OTHER"; break;
+		}
+		snprintf(typeStr, 32, typeFmt, type);
+		char severityStr[32];
+		const char *severityFmt = "UNDEFINED(%i)";
+		switch(severity) {
+			case GL_DEBUG_SEVERITY_HIGH_ARB: severityFmt = "HIGH"; break;
+			case GL_DEBUG_SEVERITY_MEDIUM_ARB: severityFmt = "MEDIUM"; break;
+			case GL_DEBUG_SEVERITY_LOW_ARB: severityFmt = "LOW"; break;
+		}
+		snprintf(severityStr, 32, severityFmt, severity);
+		snprintf(outStr, outStrSize, "OpenGL: %s [source=%s type=%s severity=%s id=%d]", msg, sourceStr, typeStr, severityStr, id);
+	}
+
+	void DebugCallbackARB(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, GLvoid* userParam) {
+		(void)length;
+		char finalMessage[256];
+		FormatDebugOutputARB(finalMessage, 256, source, type, id, severity, message);
+		printf("%s\n", finalMessage);
+    show_error(toString(finalMessage), false);
+	}
+	#endif
+
+	GLuint msaa_fbo = 0;
+
   extern void (*WindowResizedCallback)();
   void WindowResized() {
     // clear the window color, viewport does not need set because backbuffer was just recreated
     enigma_user::draw_clear(enigma_user::window_get_color());
   }
-  
+
   void EnableDrawing (HGLRC *hRC)
   {
     WindowResizedCallback = &WindowResized;
@@ -45,7 +90,6 @@ namespace enigma
      * + Updated the Pixel Format to support 24-bitdepth buffers
      * + Correctly create a GL 3.x compliant context
      */
-  
     HGLRC LegacyRC;
     PIXELFORMATDESCRIPTOR pfd;
     int iFormat;
@@ -66,7 +110,7 @@ namespace enigma
     SetPixelFormat ( enigma::window_hDC, iFormat, &pfd );
     LegacyRC = wglCreateContext( enigma::window_hDC );
     wglMakeCurrent( enigma::window_hDC, LegacyRC );
-      
+
     // -- Initialise GLEW
     GLenum err = glewInit();
     if (GLEW_OK != err)
@@ -78,23 +122,38 @@ namespace enigma
     int attribs[] =
     {
       WGL_CONTEXT_MAJOR_VERSION_ARB, 3,
-      WGL_CONTEXT_MINOR_VERSION_ARB, 0,
-      WGL_CONTEXT_FLAGS_ARB, 0,
+      WGL_CONTEXT_MINOR_VERSION_ARB, 3,
+      //WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB,
+      #ifdef DEBUG_MODE
+        WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_DEBUG_BIT_ARB,
+      #else
+        WGL_CONTEXT_FLAGS_ARB, 0,
+      #endif
       0
     };
 
     if ( wglewIsSupported("WGL_ARB_create_context") )
     {
-            *hRC = wglCreateContextAttribsARB( enigma::window_hDC,0, attribs );
-            wglMakeCurrent( NULL,NULL );
-            wglDeleteContext( LegacyRC );
-            wglMakeCurrent(enigma::window_hDC, *hRC );
+      *hRC = wglCreateContextAttribsARB( enigma::window_hDC,0, attribs );
+      wglMakeCurrent( NULL,NULL );
+      wglDeleteContext( LegacyRC );
+      wglMakeCurrent(enigma::window_hDC, *hRC );
     }
-    else // Unable to get a 3.0 Core Context, use the Legacy 1.x context
+    else // Unable to get a 3.3 Core Context, use the Legacy 1.x context
     {
-            *hRC = LegacyRC;
+      *hRC = LegacyRC;
     }
-    
+
+    #ifdef DEBUG_MODE
+    glDebugMessageCallbackARB((GLDEBUGPROCARB)&DebugCallbackARB, 0);
+    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
+    printf("OpenGL version supported by this platform (%s): \n", glGetString(GL_VERSION));
+
+    GLuint ids[] = { 131185 };
+    glDebugMessageControlARB(GL_DEBUG_SOURCE_API_ARB, GL_DEBUG_TYPE_OTHER_ARB, GL_DONT_CARE, 1, ids, GL_FALSE); //Disable notification about rendering HINTS like so:
+    //OpenGL: Buffer detailed info: Buffer object 1 (bound to GL_ELEMENT_ARRAY_BUFFER_ARB, usage hint is GL_STATIC_DRAW) will use VIDEO memory as the source for buffer object operations. [source=API type=OTHER severity=UNDEFINED (33387) id=131185]
+    #endif
+
     //TODO: This never reports higher than 8, but display_aa should be 14 if 2,4,and 8 are supported and 8 only when only 8 is supported
     glGetIntegerv(GL_MAX_SAMPLES_EXT, &enigma_user::display_aa);
   }
@@ -143,10 +202,10 @@ namespace enigma_user {
 		if (enigma::is_ext_swapcontrol_supported()) {
 		  wglSwapIntervalEXT(interval);
 		}
- 
+
 		GLint fbo;
 		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fbo);
- 
+
 		GLuint ColorBufferID, DepthBufferID;
 
 		// Cleanup the multi-sampler fbo if turning off multi-sampling

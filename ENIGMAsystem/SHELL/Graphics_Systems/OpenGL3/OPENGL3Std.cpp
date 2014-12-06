@@ -42,120 +42,97 @@ namespace enigma
   unsigned default_shader;
   unsigned main_shader;
   unsigned bound_shader;
+  unsigned bound_vbo = -1; //This means it's max-1, just so it wouldn't randomly be 0 at first render call.
+  unsigned bound_vboi = -1; //This means it's max-1
+  int bound_texture_stage = -1;
   unsigned char currentcolor[4] = {0,0,0,255};
   int currentblendmode[2] = {0,0};
   int currentblendtype = 0;
   bool glew_isgo;
   bool pbo_isgo;
-  
+
   void graphics_initialize_samplers();
 
-    void graphicssystem_initialize()
-    {
-        oglmgr = new ContextManager();
-        #ifdef DEBUG_MODE
-        GLenum err = glewInit();
-        if (GLEW_OK != err)
-        {
-          std::cout<<"GLEW ERROR!"<<std::endl;
-        }
-        #else
-        glewInit();
-        #endif
-
-        //enigma::pbo_isgo=GL_ARB_pixel_buffer_object;
-        using enigma_user::room_width;
-        using enigma_user::room_height;
-
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        glDisable(GL_DEPTH_TEST);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        glEnable(GL_BLEND);
-        glEnable(GL_ALPHA_TEST);
-        glEnable(GL_TEXTURE_2D);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glAlphaFunc(GL_ALWAYS,0);
-
-        glBindTexture(GL_TEXTURE_2D,0);
-
-        init_shaders();
-        // read shaders into graphics system structure and compile and link them if needed
-        for (size_t i = 0; i < shader_idmax; ++i) {
-            ShaderStruct* shaderstruct = shaderdata[i];
-
-            int vshader_id = glsl_shader_create(enigma_user::sh_vertex);
-            glsl_shader_load_string(vshader_id, shaderstruct->vertex);
-
-            int fshader_id = glsl_shader_create(enigma_user::sh_fragment);
-            glsl_shader_load_string(fshader_id, shaderstruct->fragment);
-
-            int prog_id = glsl_program_create();
-			glsl_program_set_name(prog_id, enigma_user::shader_get_name(i));
-
-            if (shaderstruct->precompile) {
-                glsl_shader_compile(vshader_id);
-                glsl_shader_compile(fshader_id);
-            }
-
-            glsl_program_attach(prog_id, vshader_id);
-            glsl_program_attach(prog_id, fshader_id);
-            glsl_program_link(prog_id);
-            glsl_program_validate(prog_id);
-        }
-
-        //ADD DEFAULT SHADER (emulates FFP)
-        int vshader_id = glsl_shader_create(enigma_user::sh_vertex);
-        glsl_shader_load_string(vshader_id, getDefaultVertexShader());
-
-        int fshader_id = glsl_shader_create(enigma_user::sh_fragment);
-        glsl_shader_load_string(fshader_id, getDefaultFragmentShader());
-
-        int prog_id = glsl_program_create();
-
-        glsl_shader_compile(vshader_id);
-        glsl_shader_compile(fshader_id);
-        glsl_program_attach(prog_id, vshader_id);
-        glsl_program_attach(prog_id, fshader_id);
-        glsl_program_link(prog_id);
-        glsl_program_validate(prog_id);
-
-        getUniforms(prog_id);
-        getAttributes(prog_id);
-        getDefaultUniforms(prog_id);
-        getDefaultAttributes(prog_id);
-
-        default_shader = prog_id; //Default shader for FFP
-        main_shader = default_shader; //Main shader used to override the default one
-
-        glsl_program_reset(); //Set the default program
-        //END DEFAULT SHADER
-        
-        graphics_initialize_samplers();
-        
-        glViewport(0,0,(int)room_width,(int)room_height);
-        d3d_set_projection_ortho(0,(int)room_width,0,(int)room_height, 0);
-    }
-}
-
-namespace enigma_user {
-// Stolen entirely from the documentation and thrown into a switch() structure.
-string draw_get_graphics_error()
-{
-  GLenum err = glGetError();
-  switch (err)
+  void graphicssystem_initialize()
   {
-    case GL_NO_ERROR:         return "";
-    case GL_INVALID_ENUM:     return "An unacceptable value is specified for an enumerated argument. The offending command is ignored and has no other side effect than to set the error flag.";
-    case GL_INVALID_VALUE:    return "A numeric argument is out of range. The offending command is ignored and has no other side effect than to set the error flag.";
-    case GL_INVALID_OPERATION:return "The specified operation is not allowed in the current state. The offending command is ignored and has no other side effect than to set the error flag.";
-    case GL_STACK_OVERFLOW:   return "This command would cause a stack overflow. The offending command is ignored and has no other side effect than to set the error flag.";
-    case GL_STACK_UNDERFLOW:  return "This command would cause a stack underflow. The offending command is ignored and has no other side effect than to set the error flag.";
-    case GL_OUT_OF_MEMORY:    return "There is not enough memory left to execute the command. The state of the GL is undefined, except for the state of the error flags, after this error is recorded.";
-    //case GL_TABLE_TOO_LARGE:  return "The specified table exceeds the implementation's maximum supported table size. The offending command is ignored and has no other side effect than to set the error flag.";
-  }
-  return "Unspecified error.";
-}
-}
+    oglmgr = new ContextManager();
+    #ifdef DEBUG_MODE
+    GLenum err = glewInit();
+    if (GLEW_OK != err)
+    {
+      std::cout<<"GLEW ERROR!"<<std::endl;
+    }
+    #else
+    glewInit();
+    #endif
 
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glDisable(GL_DEPTH_TEST);
+    //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    glBindTexture(GL_TEXTURE_2D,0);
+
+    init_shaders();
+    // read shaders into graphics system structure and compile and link them if needed
+    for (size_t i = 0; i < shader_idmax; ++i) {
+      ShaderStruct* shaderstruct = shaderdata[i];
+      if (shaderstruct->precompile == false) { continue; }
+
+      int vshader_id = enigma_user::glsl_shader_create(enigma_user::sh_vertex);
+      enigma_user::glsl_shader_load_string(vshader_id, shaderstruct->vertex);
+
+      int fshader_id = enigma_user::glsl_shader_create(enigma_user::sh_fragment);
+      enigma_user::glsl_shader_load_string(fshader_id, shaderstruct->fragment);
+
+      int prog_id = enigma_user::glsl_program_create();
+      enigma_user::glsl_program_set_name(prog_id, enigma_user::shader_get_name(i));
+
+      enigma_user::glsl_shader_compile(vshader_id);
+      enigma_user::glsl_shader_compile(fshader_id);
+
+      enigma_user::glsl_program_attach(prog_id, vshader_id);
+      enigma_user::glsl_program_attach(prog_id, fshader_id);
+      enigma_user::glsl_program_link(prog_id);
+      enigma_user::glsl_program_validate(prog_id);
+    }
+
+    //ADD DEFAULT SHADER (emulates FFP)
+    int vshader_id = enigma_user::glsl_shader_create(enigma_user::sh_vertex);
+    enigma_user::glsl_shader_load_string(vshader_id, getDefaultVertexShader());
+
+    int fshader_id = enigma_user::glsl_shader_create(enigma_user::sh_fragment);
+    enigma_user::glsl_shader_load_string(fshader_id, getDefaultFragmentShader());
+
+    int prog_id = enigma_user::glsl_program_create();
+
+    enigma_user::glsl_shader_compile(vshader_id);
+    enigma_user::glsl_shader_compile(fshader_id);
+    enigma_user::glsl_program_attach(prog_id, vshader_id);
+    enigma_user::glsl_program_attach(prog_id, fshader_id);
+    enigma_user::glsl_program_link(prog_id);
+    enigma_user::glsl_program_validate(prog_id);
+    enigma_user::glsl_program_set_name(prog_id, "DEFAULT_SHADER");
+
+    default_shader = prog_id; //Default shader for FFP
+    main_shader = default_shader; //Main shader used to override the default one
+
+    enigma_user::glsl_program_reset(); //Set the default program
+    //END DEFAULT SHADER
+
+    graphics_initialize_samplers();
+
+    using enigma_user::room_width;
+    using enigma_user::room_height;
+    glViewport(0,0,(int)room_width,(int)room_height);
+    enigma_user::d3d_set_projection_ortho(0,(int)room_width,0,(int)room_height, 0);
+
+    //In GL3.3 Core VAO is mandatory. So we create one and never change it
+    GLuint vertexArrayObject;
+    glGenVertexArrays(1, &vertexArrayObject);
+    glBindVertexArray(vertexArrayObject);
+  }
+}
