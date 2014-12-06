@@ -1,4 +1,4 @@
-/** Copyright (C) 2013 Robert B. Colton
+/** Copyright (C) 2013 Robert B. Colton, 2013-2014 Harijs Grinbergs
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -34,6 +34,7 @@ using std::string;
 #define __GETG(x) ((x & 0x00FF00) >> 8)
 #define __GETB(x) ((x & 0xFF0000) >> 16)
 
+#define M_PI		3.14159265358979323846
 
 #ifdef DEBUG_MODE
   #include "libEGMstd.h"
@@ -257,6 +258,114 @@ void d3d_draw_sprite(int spr,int subimg, gs_scalar x, gs_scalar y, gs_scalar z)
 	d3d_vertex_texture(xvert2,yvert1,z,tbx,0);
 	d3d_vertex_texture(xvert1,yvert2,z,0,tby);
 	d3d_vertex_texture(xvert2,yvert2,z,tbx,tby);
+	draw_primitive_end();
+}
+
+//Draw padded
+void draw_sprite_padded(int spr, int subimg, gs_scalar left, gs_scalar top, gs_scalar right, gs_scalar bottom, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, int color, gs_scalar alpha)
+{
+  get_spritev(spr2d,spr);
+  const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
+
+	//Order x1,y1,x2,y2 correctly
+	if (x1>x2) {gs_scalar tx = x2; x2 = x1, x1 = tx;}
+	if (y1>y2) {gs_scalar ty = y2; y2 = y1, y1 = ty;}
+
+	//Minimum w = left+right and minimum h = top+bottom
+	gs_scalar w = x2-x1, h = y2-y1;
+	if (w<left+right) x2 = x1+left+right, w = x2-x1;
+	if (h<top+bottom) y2 = y1+top+bottom, h = y2-y1;
+
+	const gs_scalar midw = w-left-right, midh = h-top-bottom;
+	const gs_scalar midtw = spr2d->width-left-right, midth = spr2d->height-bottom-top;
+	const gs_scalar tbw = spr2d->width/(gs_scalar)spr2d->texbordxarray[usi], tbh = spr2d->height/(gs_scalar)spr2d->texbordyarray[usi];
+	const gs_scalar tbl = left/tbw, tbt = top/tbh, tbr = right/tbw, tbb = bottom/tbh, tbmw = midtw/tbw, tbmh = midth/tbh;
+
+  //Draw top-left corner
+	gs_scalar xvert1 = x1, xvert2 = xvert1 + left,
+	          yvert1 = y1, yvert2 = yvert1 + top;
+
+	draw_primitive_begin_texture(pr_trianglestrip, spr2d->texturearray[usi]);
+	draw_vertex_texture_color(xvert1,yvert1,0.0,0.0,color,alpha);
+	draw_vertex_texture_color(xvert2,yvert1,tbl,0.0,color,alpha);
+	draw_vertex_texture_color(xvert1,yvert2,0.0,tbt,color,alpha);
+	draw_vertex_texture_color(xvert2,yvert2,tbl,tbt,color,alpha);
+
+	//Draw left side
+	xvert1 = x1, xvert2 = xvert1 + left,
+	yvert1 = y1 + top, yvert2 = yvert1 + midh;
+
+	draw_vertex_texture_color(xvert1,yvert1,0.0,tbt,color,alpha);
+	draw_vertex_texture_color(xvert2,yvert1,tbl,tbt,color,alpha);
+	draw_vertex_texture_color(xvert1,yvert2,0.0,tbt+tbmh,color,alpha);
+	draw_vertex_texture_color(xvert2,yvert2,tbl,tbt+tbmh,color,alpha);
+
+	//Draw bottom-left corner
+	xvert1 = x1, xvert2 = xvert1 + left,
+	yvert1 = y1 + top + midh, yvert2 = yvert1 + bottom;
+
+	draw_vertex_texture_color(xvert1,yvert1,0.0,tbt+tbmh,color,alpha);
+	draw_vertex_texture_color(xvert2,yvert1,tbl,tbt+tbmh,color,alpha);
+	draw_vertex_texture_color(xvert1,yvert2,0.0,tbt+tbmh+tbb,color,alpha);
+	draw_vertex_texture_color(xvert2,yvert2,tbl,tbt+tbmh+tbb,color,alpha);
+	draw_primitive_end();
+
+	//Draw top
+  xvert1 = x1 + left, xvert2 = xvert1 + midw,
+  yvert1 = y1, yvert2 = yvert1 + top;
+
+	draw_primitive_begin_texture(pr_trianglestrip, spr2d->texturearray[usi]);
+	draw_vertex_texture_color(xvert1,yvert1,tbl,0.0,color,alpha);
+	draw_vertex_texture_color(xvert2,yvert1,tbl+tbmw,0.0,color,alpha);
+	draw_vertex_texture_color(xvert1,yvert2,tbl,tbt,color,alpha);
+	draw_vertex_texture_color(xvert2,yvert2,tbl+tbmw,tbt,color,alpha);
+
+  //Draw middle
+  xvert1 = x1 + left, xvert2 = xvert1 + midw,
+  yvert1 = y1 + top, yvert2 = yvert1 + midh;
+
+	draw_vertex_texture_color(xvert1,yvert1,tbl,tbt,color,alpha);
+	draw_vertex_texture_color(xvert2,yvert1,tbl+tbmw,tbt,color,alpha);
+	draw_vertex_texture_color(xvert1,yvert2,tbl,tbt+tbmh,color,alpha);
+	draw_vertex_texture_color(xvert2,yvert2,tbl+tbmw,tbt+tbmh,color,alpha);
+
+	//Draw bottom
+  xvert1 = x1 + left, xvert2 = xvert1 + midw,
+  yvert1 = y1 + midh + top, yvert2 = yvert1 + bottom;
+
+	draw_vertex_texture_color(xvert1,yvert1,tbl,tbt+tbmh,color,alpha);
+	draw_vertex_texture_color(xvert2,yvert1,tbl+tbmw,tbt+tbmh,color,alpha);
+	draw_vertex_texture_color(xvert1,yvert2,tbl,tbt+tbmh+tbb,color,alpha);
+	draw_vertex_texture_color(xvert2,yvert2,tbl+tbmw,tbt+tbmh+tbb,color,alpha);
+	draw_primitive_end();
+
+	//Draw top-right corner
+  xvert1 = x1 + midw + left, xvert2 = xvert1 + right,
+  yvert1 = y1, yvert2 = yvert1 + top;
+
+	draw_primitive_begin_texture(pr_trianglestrip, spr2d->texturearray[usi]);
+	draw_vertex_texture_color(xvert1,yvert1,tbl+tbmw,0.0,color,alpha);
+	draw_vertex_texture_color(xvert2,yvert1,tbl+tbmw+tbr,0.0,color,alpha);
+	draw_vertex_texture_color(xvert1,yvert2,tbl+tbmw,tbt,color,alpha);
+	draw_vertex_texture_color(xvert2,yvert2,tbl+tbmw+tbr,tbt,color,alpha);
+
+	//Draw right side
+	xvert1 = x1 + midw + left, xvert2 = xvert1 + right,
+	yvert1 = y1 + top, yvert2 = yvert1 + midh;
+
+	draw_vertex_texture_color(xvert1,yvert1,tbl+tbmw,tbt,color,alpha);
+	draw_vertex_texture_color(xvert2,yvert1,tbl+tbmw+tbr,tbt,color,alpha);
+	draw_vertex_texture_color(xvert1,yvert2,tbl+tbmw,tbt+tbmh,color,alpha);
+	draw_vertex_texture_color(xvert2,yvert2,tbl+tbmw+tbr,tbt+tbmh,color,alpha);
+
+	//Draw bottom-right corner
+    xvert1 = x1 + midw + left, xvert2 = xvert1 + right,
+    yvert1 = y1 + top + midh, yvert2 = yvert1 + bottom;
+
+	draw_vertex_texture_color(xvert1,yvert1,tbl+tbmw,tbt+tbmh,color,alpha);
+	draw_vertex_texture_color(xvert2,yvert1,tbl+tbmw+tbr,tbt+tbmh,color,alpha);
+	draw_vertex_texture_color(xvert1,yvert2,tbl+tbmw,tbt+tbmh+tbb,color,alpha);
+	draw_vertex_texture_color(xvert2,yvert2,tbl+tbmw+tbr,tbt+tbmh+tbb,color,alpha);
 	draw_primitive_end();
 }
 

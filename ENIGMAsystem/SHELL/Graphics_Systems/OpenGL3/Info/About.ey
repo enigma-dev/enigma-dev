@@ -1,10 +1,10 @@
 %e-yaml
 ---
 
-Name: OpenGL 3.0
+Name: OpenGL 3.3
 Identifier: OpenGL3
-Description: High quality optimized rendering using OpenGL V3 making full use of the latest features and the graphics pipeline, but may not be as compatible on older hardware and graphics cards.
-Author: Robert B. Colton
+Description: High quality optimized rendering using OpenGL3.3 making full use of the latest features and the graphics pipeline, but may not be as compatible on older hardware and graphics cards.
+Author: Robert B. Colton, Harijs Grinbergs et al.
 
 Depends:
 	Windowing: xlib, Win32, Cocoa

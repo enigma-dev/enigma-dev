@@ -35,6 +35,7 @@ void draw_sprite_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar xs
 void draw_sprite_stretched_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar wid, gs_scalar hei, int blend = 16777215, gs_scalar alpha = 1);
 void draw_sprite_part_ext(int spr, int subimg, gs_scalar left, gs_scalar top, gs_scalar wid, gs_scalar hei, gs_scalar x, gs_scalar y, gs_scalar xscale = 1, gs_scalar yscale = 1, int color = 16777215, gs_scalar alpha = 1);
 void draw_sprite_tiled_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color = 16777215, gs_scalar alpha = 1);
+void draw_sprite_padded(int spr, int subimg, gs_scalar left, gs_scalar top, gs_scalar right, gs_scalar bottom, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, int color = 16777215, gs_scalar alpha = 1.0);
 
 void d3d_draw_sprite(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar z = 0);
 
