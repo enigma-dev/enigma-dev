@@ -15,10 +15,10 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
+
 #include <stdio.h>
 #include "../General/OpenGLHeaders.h"
 #include <string.h>
-//using std::string;
 #include "../General/GStextures.h"
 #include "GL3TextureStruct.h"
 #include "Universal_System/image_formats.h"
@@ -26,6 +26,7 @@
 #include "Universal_System/spritestruct.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Bridges/General/GL3Context.h"
+#include "GL3aux.h" //glExtension_supported
 
 #define GL_TEXTURE_MAX_ANISOTROPY_EXT 0x84FE
 #define GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT 0x84FF
@@ -55,17 +56,20 @@ TextureStruct::~TextureStruct()
 }
 
 unsigned get_texture(int texid) {
-	return (size_t(texid) >= textureStructs.size())? -1 : textureStructs[texid]->gltex;
+	return (size_t(texid) >= textureStructs.size() || texid < 0)? -1 : textureStructs[texid]->gltex;
 }
 
 namespace enigma
 {
+  extern int bound_texture_stage;
+
   int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool mipmap)
   {
     GLuint texture;
     glGenTextures(1, &texture);
     oglmgr->BindTexture(GL_TEXTURE_2D, texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, 4, fullwidth, fullheight, 0, GL_BGRA, GL_UNSIGNED_BYTE, pxdata);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, fullwidth, fullheight, 0, GL_BGRA, GL_UNSIGNED_BYTE, pxdata);
     if (mipmap) {
       // This allows us to control the number of mipmaps generated, but Direct3D does not have an option for it, so for now we'll just go with the defaults.
       // Honestly not a big deal, Unity3D doesn't allow you to specify either.
@@ -97,7 +101,6 @@ namespace enigma
     glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_BYTE, bitmap);
     unsigned dup_tex = graphics_create_texture(w, h, fw, fh, bitmap, mipmap);
     delete[] bitmap;
-    glPopAttrib();
     return dup_tex;
   }
 
@@ -123,13 +126,12 @@ namespace enigma
         bitmap[i] = (bitmap2[i-3] + bitmap2[i-2] + bitmap2[i-1])/3;
 
     oglmgr->BindTexture(GL_TEXTURE_2D, texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, 4, fw, fh, 0, GL_BGRA, GL_UNSIGNED_BYTE, bitmap);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, fw, fh, 0, GL_BGRA, GL_UNSIGNED_BYTE, bitmap);
 
     oglmgr->BindTexture(GL_TEXTURE_2D, 0);
 
     delete[] bitmap;
     delete[] bitmap2;
-    glPopAttrib();
   }
 
   void graphics_delete_texture(int texid)
@@ -150,22 +152,22 @@ namespace enigma
 
     return ret;
   }
-  
+
   struct SamplerState {
     GLuint sampler_index;
     unsigned bound_texture;
-    
+
     SamplerState(): sampler_index(0) {
     }
-    
+
     ~SamplerState() {
       glDeleteSamplers(1, &sampler_index);
     }
-    
+
   };
-  
+
   SamplerState samplerstates[8];
-  
+
   void graphics_initialize_samplers() {
     GLuint sampler_ids[8];
     glGenSamplers(8, sampler_ids);
@@ -189,7 +191,7 @@ int texture_add(string filename, bool mipmap) {
   if (pxdata == NULL) { printf("ERROR - Failed to append sprite to index!\n"); return -1; }
   unsigned texture = enigma::graphics_create_texture(w, h, fullwidth, fullheight, pxdata, mipmap);
   delete[] pxdata;
-    
+
   return texture;
 }
 
@@ -254,16 +256,16 @@ unsigned texture_get_texel_height(int texid)
 }
 
 void texture_set_stage(int stage, int texid) {
-  if (enigma::samplerstates[stage].bound_texture != get_texture(texid)) {
+  int gt = get_texture(texid);
+  if (enigma::samplerstates[stage].bound_texture != gt) {
     oglmgr->EndShapesBatching();
-    glActiveTexture(GL_TEXTURE0 + stage);
-    glBindTexture(GL_TEXTURE_2D, enigma::samplerstates[stage].bound_texture = get_texture(texid));
-    //oglmgr->ResetTextureStates();
+    if (enigma::bound_texture_stage != GL_TEXTURE0 + stage) { glActiveTexture(enigma::bound_texture_stage = (GL_TEXTURE0 + stage)); }
+    oglmgr->BindTexture(GL_TEXTURE_2D, enigma::samplerstates[stage].bound_texture = (unsigned)(gt >= 0? gt : 0));
   }
 }
 
 void texture_reset() {
-	glActiveTexture(GL_TEXTURE0);
+	if (enigma::bound_texture_stage != GL_TEXTURE0) { glActiveTexture(enigma::bound_texture_stage = GL_TEXTURE0); }
 	oglmgr->BindTexture(GL_TEXTURE_2D, enigma::samplerstates[0].bound_texture = 0);
   oglmgr->EndShapesBatching();
 }
@@ -278,14 +280,14 @@ void texture_set_repeat_ext(int sampler, bool repeat)
 {
   glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_WRAP_R, repeat?GL_REPEAT:GL_CLAMP);
   glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_WRAP_S, repeat?GL_REPEAT:GL_CLAMP);
-  glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_WRAP_T, repeat?GL_REPEAT:GL_CLAMP); 
+  glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_WRAP_T, repeat?GL_REPEAT:GL_CLAMP);
 }
 
 void texture_set_wrap_ext(int sampler, bool wrapu, bool wrapv, bool wrapw)
 {
   glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_WRAP_R, wrapu?GL_REPEAT:GL_CLAMP);
   glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_WRAP_S, wrapv?GL_REPEAT:GL_CLAMP);
-  glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_WRAP_T, wrapw?GL_REPEAT:GL_CLAMP); 
+  glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_WRAP_T, wrapw?GL_REPEAT:GL_CLAMP);
 }
 
 void texture_set_border_ext(int sampler, int r, int g, int b, double a)
@@ -323,14 +325,12 @@ void texture_set_lod_ext(int sampler, double minlod, double maxlod, int maxlevel
 
 bool texture_mipmapping_supported()
 {
-  return strstr((char*)glGetString(GL_EXTENSIONS),
-           "glGenerateMipmap");
+  return enigma::gl_extension_supported("glGenerateMipmap");
 }
 
 bool texture_anisotropy_supported()
 {
-  return strstr((char*)glGetString(GL_EXTENSIONS),
-           "GL_EXT_texture_filter_anisotropic");
+  return enigma::gl_extension_supported("GL_EXT_texture_filter_anisotropic");
 }
 
 float texture_anisotropy_maxlevel()
