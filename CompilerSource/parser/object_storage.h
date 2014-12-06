@@ -90,7 +90,7 @@ struct parsed_object
   bool visible, solid, persistent;
   double depth;
   
-  parsed_object* parent_parsedobj; ///< The parent of this object, or NULL if the object has none.
+  parsed_object* parent; ///< The parent of this object, or NULL if the object has none.
   vector<parsed_object*> children; ///< A vector of the children of this object; parsed_objects which list this object as a parent.
 
   map<string,dectrip> locals;   ///< Any variable KEY used but not declared, or declared as local VALUE.
