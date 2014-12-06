@@ -29,6 +29,8 @@
 #include <cmath>
 #include <utility>
 
+#define M_PI		3.14159265358979323846
+
 static inline void get_border(int *leftv, int *rightv, int *topv, int *bottomv, int left, int top, int right, int bottom, double x, double y, double xscale, double yscale, double angle)
 {
     if (angle == 0)

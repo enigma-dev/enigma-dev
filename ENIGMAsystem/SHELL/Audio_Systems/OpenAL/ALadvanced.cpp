@@ -45,7 +45,7 @@ using std::string;
 using std::vector;
 #include <time.h>
 
-ALenum falloff_models[7] = { 
+ALenum falloff_models[7] = {
   AL_NONE, AL_INVERSE_DISTANCE, AL_INVERSE_DISTANCE_CLAMPED, AL_LINEAR_DISTANCE,
   AL_LINEAR_DISTANCE_CLAMPED, AL_EXPONENT_DISTANCE, AL_EXPONENT_DISTANCE_CLAMPED
 };
@@ -247,7 +247,7 @@ int audio_sound_length(int index)
   if (index >= 200000) {
     alGetSourcei(sound_channels[index - 200000]->source, AL_BUFFER, &buffer);
   } else {
-    get_sound(snd,index,-1);
+    get_sound(snd,index,0);
     buffer = snd->buf[0];
   }
   ALint size, bits, channels, freq;
@@ -346,7 +346,7 @@ int audio_add(string fname)
   int rid = enigma::sound_allocate();
   bool fail = enigma::sound_add_from_buffer(rid,fdata,flen);
   delete [] fdata;
-  
+
   if (fail)
     return -1;
   return rid;

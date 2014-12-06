@@ -46,7 +46,7 @@ TextureStruct::~TextureStruct()
 }
 
 unsigned get_texture(int texid) {
-	return (size_t(texid) >= textureStructs.size())? -1 : textureStructs[texid]->gltex;
+	return (size_t(texid) >= textureStructs.size() || texid < 0)? -1 : textureStructs[texid]->gltex;
 }
 
 inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect powers of two
@@ -79,10 +79,10 @@ namespace enigma
     textureStruct->fullwidth = fullwidth;
     textureStruct->fullheight = fullheight;
     textureStructs.push_back(textureStruct);
-    
+
     //texture must be constructed before unbinding the texture so that it can apply its initial sampler state
     glBindTexture(GL_TEXTURE_2D, 0);
-    
+
     return textureStructs.size()-1;
   }
 
@@ -155,7 +155,7 @@ namespace enigma
 
     return ret;
   }
-  
+
   void graphics_samplers_apply() {
     for (unsigned i = 0; i < 8; i++) {
       if (enigma::samplerstates[i].bound_texture != -1) {
@@ -177,7 +177,7 @@ int texture_add(string filename, bool mipmap) {
   if (pxdata == NULL) { printf("ERROR - Failed to append sprite to index!\n"); return -1; }
   unsigned texture = enigma::graphics_create_texture(w, h, fullwidth, fullheight, pxdata, mipmap);
   delete[] pxdata;
-    
+
   return texture;
 }
 
