@@ -29,15 +29,10 @@
 using namespace std;
 
 #include "OS_Switchboard.h"
+#include "file_find.h"
 
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
   #include <windows.h>
-  const int fa_archive   = FILE_ATTRIBUTE_ARCHIVE;   //0x0020
-  const int fa_directory = FILE_ATTRIBUTE_DIRECTORY; //0x0010
-  const int fa_hidden    = FILE_ATTRIBUTE_HIDDEN;    //0x0002
-  const int fa_readonly  = FILE_ATTRIBUTE_READONLY;  //0x0001
-  const int fa_sysfile   = FILE_ATTRIBUTE_SYSTEM;    //0x0004
-  const int fa_volumeid  = 0x0008;
 
   static int ff_attribs=0;
   static HANDLE current_find = INVALID_HANDLE_VALUE;
@@ -52,8 +47,8 @@ using namespace std;
     
     HANDLE d=FindFirstFile(name.c_str(),&found);
     if (d==INVALID_HANDLE_VALUE) return "";
-    while (found.dwFileAttributes!=FILE_ATTRIBUTE_NORMAL and !(ff_attribs^found.dwFileAttributes))
-    {
+    while (found.dwFileAttributes!=FILE_ATTRIBUTE_NORMAL
+        && !(ff_attribs^found.dwFileAttributes)) {
       if (FindNextFile(d,&found)==0)
       return "";
     }
@@ -70,8 +65,8 @@ using namespace std;
     if (FindNextFile(current_find,&found)==0)
     return "";
     
-    while (found.dwFileAttributes!=FILE_ATTRIBUTE_NORMAL and !(ff_attribs^found.dwFileAttributes))
-    {
+    while (found.dwFileAttributes!=FILE_ATTRIBUTE_NORMAL
+        && !(ff_attribs^found.dwFileAttributes)) {
       if (FindNextFile(current_find,&found)==0)
       return "";
     }
@@ -79,10 +74,8 @@ using namespace std;
     return found.cFileName;
   }
 
-  int file_find_close()
-  {
+  void file_find_close() {
     FindClose(current_find);
-    return 0;
   }
 #else
   #include <sys/types.h>
@@ -90,19 +83,19 @@ using namespace std;
   #include <dirent.h>
   #include <unistd.h>
 
-  const int fa_archive   = 0x000020; // Does nothing
-  const int fa_directory = 0x000010;
-  const int fa_hidden    = 0x000002;
-  const int fa_readonly  = 0x000001;
-  const int fa_sysfile   = 0x000004;
-  const int fa_volumeid  = 0x000008;
-  const int fa_nofiles   = 0x800000;
-
   static DIR* fff_dir_open = NULL;
   static string fff_mask, fff_path;
   static int fff_attrib;
   
   const unsigned u_root = 0;
+  
+  static inline bool file_hidden(const string r) {
+    return (r[0] == '.' or r[r.length()-1] == '~');
+  }
+  
+  static inline bool readable(string fn) {
+    return access(fn.c_str(), W_OK);
+  }
   
   string file_find_next()
   {
@@ -119,23 +112,26 @@ using namespace std;
     const int not_attrib = ~fff_attrib;
     
     if (r == "." or r == ".." // Don't return ./ and 
-    or ((r[0] == '.' or r[r.length()-1] == '~') and not_attrib & fa_hidden) // Filter hidden files
-    ) return file_find_next(); 
+        || (not_attrib & fa_hidden && file_hidden(r))) { // Filter hidden files
+      return file_find_next();
+    }
     
     struct stat sb;
     const string fqfn = fff_path + r;
     stat(fqfn.c_str(), &sb);
     
-    if ((sb.st_mode & S_IFDIR     and not_attrib & fa_directory) // Filter out/for directories
-    or  (sb.st_uid == u_root      and not_attrib & fa_sysfile)    // Filter system files
-    or  (not_attrib & fa_readonly and access(fqfn.c_str(),W_OK)) // Filter read-only files
-    ) return file_find_next();
+    if  (  (not_attrib & fa_directory and sb.st_mode & S_IFDIR)  // Filter out/for directories
+        || (not_attrib & fa_sysfile   and sb.st_uid == u_root)  // Filter system files
+        || (not_attrib & fa_readonly  and readable(fqfn))) {   // Filter read-only files
+      return file_find_next();
+    }
     
     if (~sb.st_mode & S_IFDIR and fff_attrib & fa_nofiles)
       return file_find_next();
     
     return r;
   }
+  
   string file_find_first(string name,int attrib)
   {
     if (fff_dir_open != NULL)
@@ -154,8 +150,8 @@ using namespace std;
     fff_attrib = attrib;
     return file_find_next();
   }
-  void file_find_close()
-  {
+  
+  void file_find_close() {
     if (fff_dir_open != NULL)
       closedir(fff_dir_open);
     fff_dir_open = NULL;
