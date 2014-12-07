@@ -773,12 +773,11 @@ static inline void write_object_functionality(EnigmaStruct *es, int mode, robert
   vector<unsigned> parent_undefined;
   ofstream wto((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_objectfunctionality.h").c_str(),ios_base::out);
     
-    wto << license;
-
-    wto << endl << "#define log_xor || log_xor_helper() ||" << endl;
-    wto << "struct log_xor_helper { bool value; };" << endl;
-    wto << "template<typename LEFT> log_xor_helper operator ||(const LEFT &left, const log_xor_helper &xorh) { log_xor_helper nxor; nxor.value = (bool)left; return nxor; }" << endl;
-    wto << "template<typename RIGHT> bool operator ||(const log_xor_helper &xorh, const RIGHT &right) { return xorh.value ^ (bool)right; }" << endl << endl;
+  wto << license;
+  wto << endl << "#define log_xor || log_xor_helper() ||" << endl;
+  wto << "struct log_xor_helper { bool value; };" << endl;
+  wto << "template<typename LEFT> log_xor_helper operator ||(const LEFT &left, const log_xor_helper &xorh) { log_xor_helper nxor; nxor.value = (bool)left; return nxor; }" << endl;
+  wto << "template<typename RIGHT> bool operator ||(const log_xor_helper &xorh, const RIGHT &right) { return xorh.value ^ (bool)right; }" << endl << endl;
 
   write_script_implementations(wto, es, mode);
   write_timeline_implementations(wto, es);
@@ -790,228 +789,232 @@ static inline void write_object_functionality(EnigmaStruct *es, int mode, robert
 }
 
 static inline void write_script_implementations(ofstream& wto, EnigmaStruct *es, int mode) {
-    cout << "DBGMSG 2" << endl;
-    // Export globalized scripts
-    for (int i = 0; i < es->scriptCount; i++)
-    {
-      parsed_script* scr = scr_lookup[es->scripts[i].name];
-      const char* comma = "";
-      wto << "variant _SCR_" << es->scripts[i].name << "(";
-      for (int argn = 0; argn < scr->globargs; argn++) //it->second gives max argument count used
-      {
-        wto << comma << "variant argument" << argn;
-        comma = ", ";
-      }
-      wto << ")\n{\n  ";
-      if (mode == emode_debug) {
-        wto << "enigma::debug_scope $current_scope(\"script '" << es->scripts[i].name << "'\");\n";
-      }
-      parsed_event& upev = scr->pev_global?*scr->pev_global:scr->pev;
-
-      //Super-hacky
-      std::string override_code = "";
-      std::string override_synt = "";
-      if (upev.code.find("with((self))")==0) {
-        override_code = upev.code.substr(12, std::string::npos);
-        override_synt = upev.synt.substr(12, std::string::npos);
-      }
-      print_to_file(
-        override_code.empty() ? upev.code : override_code,
-        override_synt.empty() ? upev.synt : override_synt,
-        upev.strc,
-        upev.strs,
-        2,wto
-      );
-      wto << "\n  return 0;\n}\n\n";
+  // Export globalized scripts
+  for (int i = 0; i < es->scriptCount; i++) {
+    parsed_script* scr = scr_lookup[es->scripts[i].name];
+    const char* comma = "";
+    wto << "variant _SCR_" << es->scripts[i].name << "(";
+    for (int argn = 0; argn < scr->globargs; argn++) { //it->second gives max argument count used
+      wto << comma << "variant argument" << argn;
+      comma = ", ";
     }
+    wto << ")\n{\n  ";
+    if (mode == emode_debug) {
+      wto << "enigma::debug_scope $current_scope(\"script '" << es->scripts[i].name << "'\");\n";
+    }
+    parsed_event& upev = scr->pev_global?*scr->pev_global:scr->pev;
+
+    // TODO(JoshDreamland): Super-hacky
+    string override_code, override_synt;
+    if (upev.code.compare(0, 12, "with((self))") == 0) {
+      override_code = upev.code.substr(12);
+      override_synt = upev.synt.substr(12);
+    }
+    print_to_file(
+      override_code.empty() ? upev.code : override_code,
+      override_synt.empty() ? upev.synt : override_synt,
+      upev.strc,
+      upev.strs,
+      2,wto
+    );
+    wto << "\n  return 0;\n}\n\n";
+  }
 }
 
 static inline void write_timeline_implementations(ofstream& wto, EnigmaStruct *es) {
-    // Export globalized timelines.
-    // TODO: Is there such a thing as a localized timeline?
-    for (int i=0; i<es->timelineCount; i++)
-    {
-      for (int j=0; j<es->timelines[i].momentCount; j++)
-      {
-        parsed_script* scr = tline_lookup[es->timelines[i].name][j];
-        wto << "void TLINE_" <<es->timelines[i].name <<"_MOMENT_" <<es->timelines[i].moments[j].stepNo <<"()\n{\n";
-        parsed_event& upev = scr->pev_global?*scr->pev_global:scr->pev;
+  // Export globalized timelines.
+  // TODO: Is there such a thing as a localized timeline?
+  for (int i=0; i<es->timelineCount; i++) {
+    for (int j=0; j<es->timelines[i].momentCount; j++) {
+      parsed_script* scr = tline_lookup[es->timelines[i].name][j];
+      wto << "void TLINE_" <<es->timelines[i].name <<"_MOMENT_" <<es->timelines[i].moments[j].stepNo <<"()\n{\n";
+      parsed_event& upev = scr->pev_global?*scr->pev_global:scr->pev;
 
-        std::string override_code = "";
-        std::string override_synt = "";
-        if (upev.code.find("with((self))")==0) {
-          override_code = upev.code.substr(12, std::string::npos);
-          override_synt = upev.synt.substr(12, std::string::npos);
-        }
-        print_to_file(
+      string override_code, override_synt;
+      if (upev.code.compare(0, 12, "with((self))") == 0) {
+        override_code = upev.code.substr(12);
+        override_synt = upev.synt.substr(12);
+      }
+      print_to_file(
           override_code.empty() ? upev.code : override_code,
           override_synt.empty() ? upev.synt : override_synt,
           upev.strc,
           upev.strs,
-          2,wto
-        );
-
-        wto << "\n}\n\n";
-      }
+          2, wto);
+      wto << "\n}\n\n";
     }
+  }
 }
 
 static inline void write_event_bodies(ofstream& wto, EnigmaStruct *es, int mode, robertmap &parent_undefinitions, const map<string, int>& revTlineLookup) {
-    // Export everything else
-    for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
-    {
-      cout << "DBGMSG 4" << endl;
-      vector<unsigned> parent_undefined = parent_undefinitions.find(i->first)->second;
-      for (unsigned ii = 0; ii < i->second->events.size; ii++) {
-        const int mid = i->second->events[ii].mainId, id = i->second->events[ii].id;
-        string evname = event_get_function_name(mid,id);
-        if  (i->second->events[ii].code != "")
-        {
-          cout << "DBGMSG 4-1" << endl;
-          
-          bool defined_inherited = false;
-          if (i->second->parent && std::find(parent_undefined.begin(), parent_undefined.end(), ii) == parent_undefined.end()) {
-            wto << "#define event_inherited OBJ_" + i->second->parent->name + "::myevent_" + evname + "\n";
-            defined_inherited = true;
-          }
-
-          // Write event code
-          cout << "DBGMSG 4-2" << endl;
-          wto << "variant enigma::OBJ_" << i->second->name << "::myevent_" << evname << "()\n{\n  ";
-          if (mode == emode_debug) {
-            wto << "enigma::debug_scope $current_scope(\"event '" << evname << "' for object '" << i->second->name << "'\");\n";
-          }
-          if (!event_execution_uses_default(i->second->events[ii].mainId,i->second->events[ii].id))
-            wto << "enigma::temp_event_scope ENIGMA_PUSH_ITERATOR_AND_VALIDATE(this);\n  ";
-          if (event_has_const_code(mid, id))
-            wto << event_get_const_code(mid, id) << endl;
-          if (event_has_prefix_code(mid, id))
-            wto << event_get_prefix_code(mid, id) << endl;
-          cout << "DBGMSG 4-4" << endl;
-          print_to_file(i->second->events[ii].code,i->second->events[ii].synt,i->second->events[ii].strc,i->second->events[ii].strs,2,wto);
-          if (event_has_suffix_code(mid, id))
-            wto << event_get_suffix_code(mid, id) << endl;
-          cout << "DBGMSG 4-5" << endl;
-          wto << "\n  return 0;\n}\n";
-
-          if (defined_inherited) {
-            wto << "#undef event_inherited\n";
-          }
+  // Export everything else
+  for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++) {
+    cout << "DBGMSG 4" << endl;
+    vector<unsigned> parent_undefined = parent_undefinitions.find(i->first)->second;
+    for (unsigned ii = 0; ii < i->second->events.size; ii++) {
+      const int mid = i->second->events[ii].mainId, id = i->second->events[ii].id;
+      string evname = event_get_function_name(mid,id);
+      if (i->second->events[ii].code.size()) {
+        bool defined_inherited = false;
+        if (i->second->parent && std::find(parent_undefined.begin(), parent_undefined.end(), ii) == parent_undefined.end()) {
+          wto << "#define event_inherited OBJ_" + i->second->parent->name + "::myevent_" + evname + "\n";
+          defined_inherited = true;
         }
-        
-        if  (i->second->events[ii].code != "" || event_has_default_code(mid,id))
-        {
-          // Write event sub check code
-          if (event_has_sub_check(mid, id)) {
-            wto << "inline bool enigma::OBJ_" << i->second->name << "::myevent_" << evname << "_subcheck()\n{\n  ";
-            cout << "DBGMSG 4-3" << endl;
-            wto << event_get_sub_check_condition(mid, id) << endl;
-            wto << "\n}\n";
-          }
+
+        // Write event code
+        cout << "DBGMSG 4-2" << endl;
+        wto << "variant enigma::OBJ_" << i->second->name << "::myevent_" << evname << "()\n{\n  ";
+        if (mode == emode_debug) {
+          wto << "enigma::debug_scope $current_scope(\"event '" << evname << "' for object '" << i->second->name << "'\");\n";
+        }
+        if (!event_execution_uses_default(i->second->events[ii].mainId,i->second->events[ii].id))
+          wto << "enigma::temp_event_scope ENIGMA_PUSH_ITERATOR_AND_VALIDATE(this);\n  ";
+        if (event_has_const_code(mid, id))
+          wto << event_get_const_code(mid, id) << endl;
+        if (event_has_prefix_code(mid, id))
+          wto << event_get_prefix_code(mid, id) << endl;
+        cout << "DBGMSG 4-4" << endl;
+        print_to_file(i->second->events[ii].code,i->second->events[ii].synt,i->second->events[ii].strc,i->second->events[ii].strs,2,wto);
+        if (event_has_suffix_code(mid, id))
+          wto << event_get_suffix_code(mid, id) << endl;
+        cout << "DBGMSG 4-5" << endl;
+        wto << "\n  return 0;\n}\n";
+
+        if (defined_inherited) {
+          wto << "#undef event_inherited\n";
         }
       }
-        
-      cout << "DBGMSG 5" << endl;
-
-    
-      //Write local object copies of scripts
-      parsed_object* t = i->second;
-      for (parsed_object::funcit it = t->funcs.begin(); it != t->funcs.end(); it++) //For each function called by this object
-      {
-        map<string,parsed_script*>::iterator subscr = scr_lookup.find(it->first); //Check if it's a script
-        if (subscr != scr_lookup.end() // If we've got ourselves a script
-        and subscr->second->pev_global) // And it has distinct code for use at the global scope (meaning it's more efficient locally)
-        {
-          const char* comma = "";
-          wto << "variant enigma::OBJ_" << i->second->name << "::_SCR_" << it->first << "(";
-          for (int argn = 0; argn < it->second; argn++) //it->second gives max argument count used
-          {
-            wto << comma << "variant argument" << argn;
-            comma = ", ";
-          }
-          wto << ")\n{\n  ";
-          print_to_file(subscr->second->pev.code,subscr->second->pev.synt,subscr->second->pev.strc,subscr->second->pev.strs,2,wto);
-          wto << "\n  return 0;\n}\n\n";
+      
+      if  (i->second->events[ii].code.size() || event_has_default_code(mid,id)) {
+        // Write event sub check code
+        if (event_has_sub_check(mid, id)) {
+          wto << "inline bool enigma::OBJ_" << i->second->name << "::myevent_" << evname << "_subcheck()\n{\n  ";
+          cout << "DBGMSG 4-3" << endl;
+          wto << event_get_sub_check_condition(mid, id) << endl;
+          wto << "\n}\n";
         }
-      }
-
-
-      //Write local object copies of timelines
-      bool hasKnownTlines = false;
-      for (parsed_object::tlineit it = t->tlines.begin(); it != t->tlines.end(); it++) //For each timeline potentially set by this object
-      {
-        map<string, int>::const_iterator timit = revTlineLookup.find(it->first); //Check if it's a timeline
-        if (timit != revTlineLookup.end()) // If we've got ourselves a script
-        //and subscr->second->pev_global) // And it has distinct code for use at the global scope (meaning it's more efficient locally) //NOTE: It seems all timeline MUST be copied locally.
-        {
-          hasKnownTlines = true;
-          for (int j=0; j<es->timelines[timit->second].momentCount; j++) {
-            parsed_script* scr = tline_lookup[timit->first][j];
-            wto << "void enigma::OBJ_" <<i->second->name <<"::TLINE_" <<es->timelines[timit->second].name <<"_MOMENT_" <<es->timelines[timit->second].moments[j].stepNo <<"() {\n    ";
-            print_to_file(scr->pev.code, scr->pev.synt, scr->pev.strc, scr->pev.strs, 2, wto);
-            wto <<"}\n";
-          }
-        } wto << "\n";
-      }
-
-      //If no timelines are ever used by this script, it can rely on the default lookup table.
-      //NOTE: We have to allow it to fall through to the default in cases where instances (by id) are given a timeline.
-      if (hasKnownTlines) {
-        wto <<"void enigma::OBJ_" <<i->second->name <<"::timeline_call_moment_script(int timeline_index, int moment_index) {\n";
-        wto <<"  switch (timeline_index) {\n";
-        for (parsed_object::tlineit it = t->tlines.begin(); it != t->tlines.end(); it++) {
-          map<string, int>::const_iterator timit = revTlineLookup.find(it->first);
-          if (timit != revTlineLookup.end()) {
-            wto <<"    case " <<es->timelines[timit->second].id <<": {\n";
-            wto <<"      switch (moment_index) {\n";
-            for (int j=0; j<es->timelines[timit->second].momentCount; j++) {
-              wto <<"        case " <<j <<": {\n";
-              wto <<"          TLINE_" <<es->timelines[timit->second].name <<"_MOMENT_" <<es->timelines[timit->second].moments[j].stepNo <<"();\n";
-              wto <<"          break;\n";
-              wto <<"        }\n";
-            }
-            wto <<"      }\n";
-            wto <<"      break;\n";
-           wto <<"    }\n";
-          }
-        }
-        //Fall through to the default case.
-        wto <<"    default: event_parent::timeline_call_moment_script(timeline_index, moment_index);\n";
-        wto <<"  }\n";
-        wto <<"}\n\n";
       }
     }
+      
+    cout << "DBGMSG 5" << endl;
+
+  
+    //Write local object copies of scripts
+    parsed_object* t = i->second;
+    for (parsed_object::funcit it = t->funcs.begin(); it != t->funcs.end(); it++) //For each function called by this object
+    {
+      map<string,parsed_script*>::iterator subscr = scr_lookup.find(it->first); //Check if it's a script
+      if (subscr != scr_lookup.end() // If we've got ourselves a script
+          and subscr->second->pev_global) { // And it has distinct code for use at the global scope (meaning it's more efficient locally)
+        const char* comma = "";
+        wto << "variant enigma::OBJ_" << i->second->name << "::_SCR_" << it->first << "(";
+        for (int argn = 0; argn < it->second; argn++) //it->second gives max argument count used
+        {
+          wto << comma << "variant argument" << argn;
+          comma = ", ";
+        }
+        wto << ")\n{\n  ";
+        print_to_file(subscr->second->pev.code,subscr->second->pev.synt,subscr->second->pev.strc,subscr->second->pev.strs,2,wto);
+        wto << "\n  return 0;\n}\n\n";
+      }
+    }
+
+
+    // Write local object copies of timelines
+    bool hasKnownTlines = false;
+    for (parsed_object::tlineit it = t->tlines.begin(); it != t->tlines.end(); it++) //For each timeline potentially set by this object
+    {
+      map<string, int>::const_iterator timit = revTlineLookup.find(it->first); //Check if it's a timeline
+      if (timit != revTlineLookup.end()) { // If we've got ourselves a script
+        hasKnownTlines = true;
+        for (int j=0; j<es->timelines[timit->second].momentCount; j++) {
+          parsed_script* scr = tline_lookup[timit->first][j];
+          wto << "void enigma::OBJ_" <<i->second->name <<"::TLINE_" <<es->timelines[timit->second].name <<"_MOMENT_" <<es->timelines[timit->second].moments[j].stepNo <<"() {\n    ";
+          print_to_file(scr->pev.code, scr->pev.synt, scr->pev.strc, scr->pev.strs, 2, wto);
+          wto <<"}\n";
+        }
+      } wto << "\n";
+    }
+
+    //If no timelines are ever used by this script, it can rely on the default lookup table.
+    //NOTE: We have to allow it to fall through to the default in cases where instances (by id) are given a timeline.
+    if (hasKnownTlines) {
+      wto <<"void enigma::OBJ_" <<i->second->name <<"::timeline_call_moment_script(int timeline_index, int moment_index) {\n";
+      wto <<"  switch (timeline_index) {\n";
+      for (parsed_object::tlineit it = t->tlines.begin(); it != t->tlines.end(); it++) {
+        map<string, int>::const_iterator timit = revTlineLookup.find(it->first);
+        if (timit != revTlineLookup.end()) {
+          wto <<"    case " <<es->timelines[timit->second].id <<": {\n";
+          wto <<"      switch (moment_index) {\n";
+          for (int j=0; j<es->timelines[timit->second].momentCount; j++) {
+            wto <<"        case " <<j <<": {\n";
+            wto <<"          TLINE_" <<es->timelines[timit->second].name <<"_MOMENT_" <<es->timelines[timit->second].moments[j].stepNo <<"();\n";
+            wto <<"          break;\n";
+            wto <<"        }\n";
+          }
+          wto <<"      }\n";
+          wto <<"      break;\n";
+          wto <<"    }\n";
+        }
+      }
+      // Fall through to the default case.
+      wto <<"    default: event_parent::timeline_call_moment_script(timeline_index, moment_index);\n";
+      wto <<"  }\n";
+      wto <<"}\n\n";
+    }
+  }
 }
 
 static inline void write_global_script_array(ofstream &wto, EnigmaStruct *es) {
-    wto << "namespace enigma\n{\n"
-    "  callable_script callable_scripts[] = {\n";
-    int scr_count = 0;
-    for (int i = 0; i < es->scriptCount; i++)
+  wto << "namespace enigma\n{\n"
+  "  callable_script callable_scripts[] = {\n";
+  int scr_count = 0;
+  for (int i = 0; i < es->scriptCount; i++)
+  {
+    while (es->scripts[i].id > scr_count)
     {
-      while (es->scripts[i].id > scr_count)
-      {
-          wto << "    { NULL, -1 },\n";
-          scr_count++;
-      }
-      scr_count++;
-      wto << "    { (variant(*)())_SCR_" << es->scripts[i].name << ", " << scr_lookup[es->scripts[i].name]->globargs << " },\n";
+        wto << "    { NULL, -1 },\n";
+        scr_count++;
     }
-    wto << "  };\n  \n";
+    scr_count++;
+    wto << "    { (variant(*)())_SCR_" << es->scripts[i].name << ", " << scr_lookup[es->scripts[i].name]->globargs << " },\n";
+  }
+  wto << "  };\n  \n";
 }
 
 static inline void write_basic_constructor(ofstream &wto) {
-    wto << "  void constructor(object_basic* instance_b)\n  {\n"
-    "    //This is the universal create event code\n    object_locals* instance = (object_locals*)instance_b;\n    \n"
-    "    instance->xstart = instance->x;\n    instance->ystart = instance->y;\n    instance->xprevious = instance->x;\n    instance->yprevious = instance->y;\n\n"
-    "    instance->gravity=0;\n    instance->gravity_direction=270;\n    instance->friction=0;\n    \n"
-    "    \n"
-    "    instance->timeline_index = -1;\n    instance->timeline_running = " <<(setting::compliance_mode==setting::COMPL_GM5?"true":"false") <<";\n    instance->timeline_speed = 1;\n    instance->timeline_position = 0;\n"
-    "    instance->timeline_loop = false;\n    \n"
-    "    \n"
-    "    instance->image_alpha = 1.0;\n    instance->image_angle = 0;\n    instance->image_blend = 0xFFFFFF;\n    instance->image_index = 0;\n"
-    "    instance->image_speed  = 1;\n    instance->image_xscale = 1;\n    instance->image_yscale = 1;\n    \n"
-    "instancecount++;\n    instance_count++;\n  }\n}\n";
+  wto <<
+      "  void constructor(object_basic* instance_b) {\n"
+      "    //This is the universal create event code\n"
+      "    object_locals* instance = (object_locals*)instance_b;\n"
+      "    \n"
+      "    instance->xstart = instance->x;\n"
+      "    instance->ystart = instance->y;\n"
+      "    instance->xprevious = instance->x;\n"
+      "    instance->yprevious = instance->y;\n"
+      "    \n"
+      "    instance->gravity=0;\n"
+      "    instance->gravity_direction=270;\n"
+      "    instance->friction=0;\n    \n"
+      "    \n"
+      "    instance->timeline_index = -1;\n"
+      "    instance->timeline_running = " << (setting::compliance_mode == setting::COMPL_GM5? "true" : "false") <<";\n"
+      "    instance->timeline_speed = 1;\n"
+      "    instance->timeline_position = 0;\n"
+      "    instance->timeline_loop = false;\n"
+      "    \n"
+      "    instance->image_alpha = 1.0;\n"
+      "    instance->image_angle = 0;\n"
+      "    instance->image_blend = 0xFFFFFF;\n"
+      "    instance->image_index = 0;\n"
+      "    instance->image_speed  = 1;\n"
+      "    instance->image_xscale = 1;\n"
+      "    instance->image_yscale = 1;\n"
+      "    \n"
+      "    instancecount++;\n"
+      "    instance_count++;\n"
+      "  }\n"
+      "}\n";
 }
 
 int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, int mode) {
