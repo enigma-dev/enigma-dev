@@ -734,8 +734,7 @@ static inline void write_object_data_structs(std::ostream &wto) {
   wto << "  int obj_idmax = " << obmx+1 << ";\n";
 }
 
-int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, int mode)
-{
+static inline void write_object_declarations(lang_CPP* lcpp, EnigmaStruct* es, parsed_object* global, robertmap &parent_undefinitions, map<string, int>& revTlineLookup) {
   //NEXT FILE ----------------------------------------
   //Object declarations: object classes/names and locals.
   ofstream wto;
@@ -752,41 +751,45 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, i
     wto << "\n";
     declare_extension_casts(wto);
     wto << "}\n\n";
-
-    // Build a reverse lookup for timeline names.
-    map<string, int> revTlineLookup;
-    for (int i=0; i<es->timelineCount; i++) {
-      revTlineLookup[es->timelines[i].name] = es->timelines[i].id;
-    }
     
-    robertmap parent_undefinitions; // TODO(JoshDreamland): <-- wtf is this shit? Delete it
     // TODO(JoshDreamland): Replace with enigma_user:
     wto << "namespace enigma // TODO: Replace with enigma_user\n{\n";
-    write_object_class_bodies(this, wto, es, global, parent_undefinitions, revTlineLookup);
+    write_object_class_bodies(lcpp, wto, es, global, parent_undefinitions, revTlineLookup);
     wto << "}\n\n";
 
     wto << "namespace enigma {\n";
     write_object_data_structs(wto);
     wto << "}\n";
   wto.close();
+}
 
+static inline void write_script_implementations(ofstream& wto, EnigmaStruct *es, int mode);
+static inline void write_timeline_implementations(ofstream& wto, EnigmaStruct *es);
+static inline void write_event_bodies(ofstream& wto, EnigmaStruct *es, int mode, robertmap &parent_undefinitions, const map<string, int>& revTlineLookup);
+static inline void write_global_script_array(ofstream &wto, EnigmaStruct *es);
+static inline void write_basic_constructor(ofstream &wto);
 
-
-  /* NEXT FILE `******************************************\
-  ** Object functions: events, constructors, other codes.
-  ********************************************************/
-
+static inline void write_object_functionality(EnigmaStruct *es, int mode, robertmap &parent_undefinitions, const map<string, int>& revTlineLookup) {
   vector<unsigned> parent_undefined;
-
-  cout << "DBGMSG 1" << endl;
-  wto.open((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_objectfunctionality.h").c_str(),ios_base::out);
+  ofstream wto((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_objectfunctionality.h").c_str(),ios_base::out);
+    
     wto << license;
 
     wto << endl << "#define log_xor || log_xor_helper() ||" << endl;
     wto << "struct log_xor_helper { bool value; };" << endl;
     wto << "template<typename LEFT> log_xor_helper operator ||(const LEFT &left, const log_xor_helper &xorh) { log_xor_helper nxor; nxor.value = (bool)left; return nxor; }" << endl;
     wto << "template<typename RIGHT> bool operator ||(const log_xor_helper &xorh, const RIGHT &right) { return xorh.value ^ (bool)right; }" << endl << endl;
-    
+
+  write_script_implementations(wto, es, mode);
+  write_timeline_implementations(wto, es);
+  write_event_bodies(wto, es, mode, parent_undefinitions, revTlineLookup);
+  write_global_script_array(wto, es);
+  write_basic_constructor(wto);
+  
+  wto.close();
+}
+
+static inline void write_script_implementations(ofstream& wto, EnigmaStruct *es, int mode) {
     cout << "DBGMSG 2" << endl;
     // Export globalized scripts
     for (int i = 0; i < es->scriptCount; i++)
@@ -821,7 +824,9 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, i
       );
       wto << "\n  return 0;\n}\n\n";
     }
+}
 
+static inline void write_timeline_implementations(ofstream& wto, EnigmaStruct *es) {
     // Export globalized timelines.
     // TODO: Is there such a thing as a localized timeline?
     for (int i=0; i<es->timelineCount; i++)
@@ -849,13 +854,14 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, i
         wto << "\n}\n\n";
       }
     }
+}
 
-    cout << "DBGMSG 3" << endl;
+static inline void write_event_bodies(ofstream& wto, EnigmaStruct *es, int mode, robertmap &parent_undefinitions, const map<string, int>& revTlineLookup) {
     // Export everything else
     for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
     {
       cout << "DBGMSG 4" << endl;
-      parent_undefined = parent_undefinitions.find(i->first)->second;
+      vector<unsigned> parent_undefined = parent_undefinitions.find(i->first)->second;
       for (unsigned ii = 0; ii < i->second->events.size; ii++) {
         const int mid = i->second->events[ii].mainId, id = i->second->events[ii].id;
         string evname = event_get_function_name(mid,id);
@@ -934,7 +940,7 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, i
       bool hasKnownTlines = false;
       for (parsed_object::tlineit it = t->tlines.begin(); it != t->tlines.end(); it++) //For each timeline potentially set by this object
       {
-        map<string, int>::iterator timit = revTlineLookup.find(it->first); //Check if it's a timeline
+        map<string, int>::const_iterator timit = revTlineLookup.find(it->first); //Check if it's a timeline
         if (timit != revTlineLookup.end()) // If we've got ourselves a script
         //and subscr->second->pev_global) // And it has distinct code for use at the global scope (meaning it's more efficient locally) //NOTE: It seems all timeline MUST be copied locally.
         {
@@ -954,7 +960,7 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, i
         wto <<"void enigma::OBJ_" <<i->second->name <<"::timeline_call_moment_script(int timeline_index, int moment_index) {\n";
         wto <<"  switch (timeline_index) {\n";
         for (parsed_object::tlineit it = t->tlines.begin(); it != t->tlines.end(); it++) {
-          map<string, int>::iterator timit = revTlineLookup.find(it->first);
+          map<string, int>::const_iterator timit = revTlineLookup.find(it->first);
           if (timit != revTlineLookup.end()) {
             wto <<"    case " <<es->timelines[timit->second].id <<": {\n";
             wto <<"      switch (moment_index) {\n";
@@ -974,14 +980,10 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, i
         wto <<"  }\n";
         wto <<"}\n\n";
       }
-
-    cout << "DBGMSG 6" << endl;
     }
-    cout << "DBGMSG 7" << endl;
-    
-    parent_undefined.clear();
-    parent_undefinitions.clear();
+}
 
+static inline void write_global_script_array(ofstream &wto, EnigmaStruct *es) {
     wto << "namespace enigma\n{\n"
     "  callable_script callable_scripts[] = {\n";
     int scr_count = 0;
@@ -996,8 +998,9 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, i
       wto << "    { (variant(*)())_SCR_" << es->scripts[i].name << ", " << scr_lookup[es->scripts[i].name]->globargs << " },\n";
     }
     wto << "  };\n  \n";
+}
 
-    cout << "DBGMSG 8" << endl;
+static inline void write_basic_constructor(ofstream &wto) {
     wto << "  void constructor(object_basic* instance_b)\n  {\n"
     "    //This is the universal create event code\n    object_locals* instance = (object_locals*)instance_b;\n    \n"
     "    instance->xstart = instance->x;\n    instance->ystart = instance->y;\n    instance->xprevious = instance->x;\n    instance->yprevious = instance->y;\n\n"
@@ -1009,7 +1012,18 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, i
     "    instance->image_alpha = 1.0;\n    instance->image_angle = 0;\n    instance->image_blend = 0xFFFFFF;\n    instance->image_index = 0;\n"
     "    instance->image_speed  = 1;\n    instance->image_xscale = 1;\n    instance->image_yscale = 1;\n    \n"
     "instancecount++;\n    instance_count++;\n  }\n}\n";
-  wto.close();
+}
 
+int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, int mode) {
+  // TODO(JoshDreamland): Move the generation of these into the second parse phase.
+  // Build a reverse lookup for timeline names.
+  map<string, int> revTlineLookup;
+  for (int i=0; i<es->timelineCount; i++) {
+    revTlineLookup[es->timelines[i].name] = es->timelines[i].id;
+  }
+  robertmap parent_undefinitions;
+  
+  write_object_declarations(this, es, global, parent_undefinitions, revTlineLookup);
+  write_object_functionality(es, mode, parent_undefinitions, revTlineLookup);
   return 0;
 }
