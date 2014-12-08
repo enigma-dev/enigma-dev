@@ -56,11 +56,11 @@ namespace enigma
               newlong |= WS_SIZEBOX;
         }
         if (showIcons)
-            newlong |= WS_POPUPWINDOW;
+            newlong |= WS_SYSMENU;
         if (isVisible)
             newlong |= WS_VISIBLE;
 
-        return newlong;
+        return newlong | WS_CLIPCHILDREN | WS_CLIPSIBLINGS;
     }
     
     void centerwindow() {
