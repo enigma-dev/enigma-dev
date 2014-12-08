@@ -109,7 +109,9 @@ struct parsed_object
   typedef map<string,dectrip>::iterator globit;
   typedef map<string,decquad>::iterator constit;
   typedef map<string,int>::iterator funcit;
+  typedef map<string,int>::const_iterator const_funcit;
   typedef map<string,int>::iterator tlineit;
+  typedef map<string,int>::const_iterator const_tlineit;
   typedef map<string,int>::iterator dotit;
 
   void copy_from(parsed_object&, string, string);
