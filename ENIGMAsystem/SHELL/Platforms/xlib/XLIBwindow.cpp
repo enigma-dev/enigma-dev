@@ -44,12 +44,12 @@ using namespace enigma::x11;
 
 namespace enigma {
   bool isVisible = true, isMinimized = false, stayOnTop = false, windowAdapt = true;
-  int regionWidth = 0, regionHeight = 0, windowWidth = 0, windowHeight = 0, windowX = 0, windowY = 0;
+  int regionWidth = 0, regionHeight = 0, windowWidth = 0, windowHeight = 0;
   double scaledWidth = 0, scaledHeight = 0;
   extern bool isSizeable, showBorder, showIcons, freezeOnLoseFocus, isFullScreen;
   extern int viewScale, windowColor;
     
-  void setwindowsize()
+  void setwindowsize(int forceX=-1, int forceY=-1)
   {
       if (!regionWidth)
           return;
@@ -91,9 +91,12 @@ namespace enigma {
               if (scaledHeight > windowHeight)
                   windowHeight = scaledHeight;
           }
-
           //Now actually set the window's position and size:
-          enigma_user::window_set_rectangle(windowX, windowY, windowWidth, windowHeight);
+          if (forceX==-1 || forceY==-1) {
+            enigma_user::window_set_size(windowWidth, windowHeight);
+          } else {
+            enigma_user::window_set_rectangle(forceX, forceY, windowWidth, windowHeight);
+          }
       } else {
           enigma_user::window_set_rectangle(0, 0, windowWidth, windowHeight);
       }
@@ -345,13 +348,15 @@ void window_default(bool center_size)
   enigma::windowWidth = enigma::regionWidth = xm;
   enigma::windowHeight = enigma::regionHeight = ym;
 
+  int forceX = -1;
+  int forceY = -1;
   if (center) {
-    enigma::windowX = display_get_width()/2 - enigma::windowWidth/2;
-    enigma::windowY = display_get_height()/2 - enigma::windowHeight/2;
+    forceX = display_get_width()/2 - enigma::windowWidth/2;
+    forceY = display_get_height()/2 - enigma::windowHeight/2;
     //window_center();
   }
   
-  enigma::setwindowsize();
+  enigma::setwindowsize(forceX, forceY);
 }
 
 void window_mouse_set(int x,int y) {
@@ -401,8 +406,8 @@ void window_set_position(int x,int y)
 }
 void window_set_size(unsigned int w,unsigned int h) {
 	XResizeWindow(disp,win, w, h);
-  enigma::windowWidth = w;
-  enigma::windowHeight = h;
+  //enigma::windowWidth = w;
+  //enigma::windowHeight = h;
   //enigma::setwindowsize(); //NOTE: I think this will also infinitely loop.
 }
 void window_set_rectangle(int x,int y,int w,int h) {
@@ -417,9 +422,9 @@ void window_center()
 	uint w,h,b,d;
 	XGetGeometry(disp,win,&r,&x,&y,&w,&h,&b,&d);
 	Screen *s = DefaultScreenOfDisplay(disp);
-   enigma::windowX = s->width/2-w/2;
-   enigma::windowY = s->height/2-h/2;
-	XMoveWindow(disp,win,enigma::windowX,enigma::windowY);
+   int windowX = s->width/2-w/2;
+   int windowY = s->height/2-h/2;
+	XMoveWindow(disp,win,windowX,windowY);
 }
 
 }
