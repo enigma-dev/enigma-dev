@@ -60,6 +60,7 @@ namespace enigma
         if (isVisible)
             newlong |= WS_VISIBLE;
 
+        // these two flags are necessary for extensions like Ultimate3D and GMOgre to render on top of the window
         return newlong | WS_CLIPCHILDREN | WS_CLIPSIBLINGS;
     }
     
