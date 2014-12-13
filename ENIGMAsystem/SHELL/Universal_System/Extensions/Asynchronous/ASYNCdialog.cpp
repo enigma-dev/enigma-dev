@@ -67,7 +67,7 @@ static void fireAsyncDialogEvent() {
 	{
     enigma::object_basic* const inst = ((enigma::object_basic*)*it);
     enigma::extension_async* const inst_async = enigma::extension_cast::as_extension_async(inst);
-	  inst_async->myevent_asyncdialog();
+    inst_async->myevent_asyncdialog();
 	}
 }
 
