@@ -66,23 +66,13 @@ namespace enigma
     variant object_basic::myevent_create()    { return 0; }
     variant object_basic::myevent_gamestart() { return 0; }
     variant object_basic::myevent_gameend() { return 0; }
-	variant object_basic::myevent_closebutton() { return 0; }
-	variant object_basic::myevent_asyncdialog() { return 0; }
-	variant object_basic::myevent_asynchttp() { return 0; }
-	variant object_basic::myevent_asyncimageloaded() { return 0; }
-	variant object_basic::myevent_asyncsoundloaded() { return 0; }
-	variant object_basic::myevent_asyncnetworking() { return 0; }
-	variant object_basic::myevent_asynciap() { return 0; }
-	variant object_basic::myevent_asynccloud() { return 0; }
-	variant object_basic::myevent_asyncsteam() { return 0; }
-	variant object_basic::myevent_asyncsocial() { return 0; }
-	variant object_basic::myevent_asyncpushnotification() { return 0; }
+    variant object_basic::myevent_closebutton() { return 0; }
     variant object_basic::myevent_draw()      { return 0; }
     bool object_basic::myevent_draw_subcheck() { return 0; }
-	variant object_basic::myevent_drawgui()   { return 0; }
-  bool object_basic::myevent_drawgui_subcheck() { return 0; }
-	variant object_basic::myevent_drawresize()   { return 0; }
-	variant object_basic::myevent_roomstart()   { return 0; }
+    variant object_basic::myevent_drawgui()   { return 0; }
+    bool object_basic::myevent_drawgui_subcheck() { return 0; }
+    variant object_basic::myevent_drawresize()   { return 0; }
+    variant object_basic::myevent_roomstart()   { return 0; }
     variant object_basic::myevent_roomend()   { return 0; }
     variant object_basic::myevent_destroy()   { return 0; }
 

@@ -27,6 +27,15 @@
 #include "Universal_System/instance_system.h"
 #include "Universal_System/instance.h"
 
+// include after variant
+#include "implement.h"
+
+namespace enigma {
+  namespace extension_cast {
+    extension_async *as_extension_async(object_basic*);
+  }
+}
+
 struct MessageData {
 	unsigned id;
 	string text1;
@@ -56,7 +65,9 @@ static void fireAsyncDialogEvent() {
 	enigma::instance_event_iterator = new enigma::inst_iter(NULL,NULL,NULL);
 	for (enigma::iterator it = enigma::instance_list_first(); it; ++it)
 	{
-	  it->myevent_asyncdialog();
+    enigma::object_basic* const inst = ((enigma::object_basic*)*it);
+    enigma::extension_async* const inst_async = enigma::extension_cast::as_extension_async(inst);
+	  inst_async->myevent_asyncdialog();
 	}
 }
 
@@ -141,7 +152,7 @@ static int createThread(void (*fnc)(void*), MessageData* md) {
 
 namespace enigma_user {
   //TODO: According to Studio's manual each time these async functions are called
-  //they get their own map and async_load is only set that map when the async dialog
+  //they get their own map and async_load is only set to that map when the async dialog
   //event is fired.
   //This is inferred from the get_login_async documentation.
   unsigned async_load = ds_map_create();
