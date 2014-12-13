@@ -31,6 +31,12 @@ namespace enigma
   object_graphics::object_graphics() {}
   object_graphics::object_graphics(unsigned _x, int _y): object_timelines(_x,_y) {}
   object_graphics::~object_graphics() {}
+  
+  variant object_graphics::myevent_draw()      { return 0; }
+  bool object_graphics::myevent_draw_subcheck() { return 0; }
+  variant object_graphics::myevent_drawgui()   { return 0; }
+  bool object_graphics::myevent_drawgui_subcheck() { return 0; }
+  variant object_graphics::myevent_drawresize()   { return 0; }
 
   INTERCEPT_DEFAULT_COPY(enigma::depthv)
   void depthv::function(variant oldval) {

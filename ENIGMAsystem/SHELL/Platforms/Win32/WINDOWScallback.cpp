@@ -121,7 +121,7 @@ namespace enigma
             instance_event_iterator = new inst_iter(NULL,NULL,NULL);
             for (enigma::iterator it = enigma::instance_list_first(); it; ++it)
             {
-              it->myevent_drawresize();
+              ((object_graphics*)*it)->myevent_drawresize();
             }
           } else {
             DefWindowProc(hWndParameter, message, wParam, lParam);
