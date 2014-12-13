@@ -70,11 +70,6 @@ namespace enigma
       virtual variant myevent_gamestart();
       virtual variant myevent_gameend();
       virtual variant myevent_closebutton();
-      virtual variant myevent_draw();
-      virtual bool myevent_draw_subcheck();
-      virtual variant myevent_drawgui();
-      virtual bool myevent_drawgui_subcheck();
-      virtual variant myevent_drawresize();
       virtual variant myevent_roomstart();
       virtual variant myevent_roomend();
       virtual variant myevent_destroy();

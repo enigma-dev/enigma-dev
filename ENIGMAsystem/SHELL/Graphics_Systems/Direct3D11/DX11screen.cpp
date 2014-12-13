@@ -165,7 +165,8 @@ void screen_redraw()
             enigma::inst_iter* push_it = enigma::instance_event_iterator;
             //loop instances
             for (enigma::instance_event_iterator = dit->second.draw_events->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next) {
-                enigma::instance_event_iterator->inst->myevent_draw();
+                enigma::object_graphics* inst = ((object_graphics*)enigma::instance_event_iterator->inst);
+                inst->myevent_draw();
                 if (enigma::room_switching_id != -1) {
                     stop_loop = true;
                     break;
@@ -316,7 +317,8 @@ void screen_redraw()
 				enigma::inst_iter* push_it = enigma::instance_event_iterator;
 				//loop instances
 				for (enigma::instance_event_iterator = dit->second.draw_events->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next) {
-					enigma::instance_event_iterator->inst->myevent_draw();
+          enigma::object_graphics* inst = ((object_graphics*)enigma::instance_event_iterator->inst);
+					inst->myevent_draw();
 					if (enigma::room_switching_id != -1) {
 						stop_loop = true;
 						break;
@@ -364,7 +366,8 @@ void screen_redraw()
             enigma::inst_iter* push_it = enigma::instance_event_iterator;
             //loop instances
             for (enigma::instance_event_iterator = dit->second.draw_events->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next) {
-				enigma::instance_event_iterator->inst->myevent_drawgui();
+                enigma::object_graphics* inst = ((object_graphics*)enigma::instance_event_iterator->inst);
+                inst->myevent_drawgui();
                 if (enigma::room_switching_id != -1) {
                     stop_loop = true;
                     break;
