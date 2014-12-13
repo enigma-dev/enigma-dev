@@ -40,7 +40,7 @@ RESOURCES += Preprocessor_Environment_Editable/Resources.rc
 endif
 
 # Default windres
-WINDRES = windres.exe
+WINDRES = windres.exe --codepage=65001
 
 # Default find
 FIND = find
