@@ -16,9 +16,9 @@ searchdirs-start: "#include <...> search starts here:"
 searchdirs-end: "End of search list."
 resources: ./MacOS/build/Release/EnigmaXcode.app/Contents/MacOS/EnigmaXcode.res
 cppflags:
-cxxflags: 
+cxxflags: -std=c++11 -stdlib=libc++
 cflags:
-ldflags: 
+ldflags: -stdlib=libc++
 links: -lobjc -lz -framework Cocoa
 
 Build-Extension: .app
