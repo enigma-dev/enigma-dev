@@ -815,7 +815,8 @@ static inline string string_settings_escape(string n)
   }
   return n;
 }
-void print_to_file(string code,string synt,unsigned int &strc, varray<string> &string_in_code,int indentmin_b4,ofstream &of)
+
+void print_to_file(string code,string synt,const unsigned int strc, const varray<string> &string_in_code,int indentmin_b4,ofstream &of)
 {
   //FILE* of = fopen("/media/HP_PAVILION/Documents and Settings/HP_Owner/Desktop/parseout.txt","w+b");
   FILE* of_ = fopen("/home/josh/Desktop/parseout.txt","ab");
