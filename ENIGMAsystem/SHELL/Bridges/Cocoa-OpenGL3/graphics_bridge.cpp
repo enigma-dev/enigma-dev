@@ -26,6 +26,11 @@
 
 // NOTE: Changes/fixes that applies to this likely also applies to the OpenGL3 version.
 
+extern "C" {
+  void cocoa_screen_refresh();
+  void cocoa_flush_opengl();
+}
+
 namespace enigma {
   GLuint msaa_fbo = 0;
   
@@ -51,9 +56,11 @@ namespace enigma_user {
     //TODO: Copy over from the Win32 bridge
   }
     
-  //void screen_refresh() {
-
-  //}
+  void screen_refresh() {
+    cocoa_screen_refresh();
+    enigma::update_mouse_variables();
+    cocoa_flush_opengl();
+  }
 
 }
 

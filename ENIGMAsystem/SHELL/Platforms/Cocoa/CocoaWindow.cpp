@@ -233,10 +233,11 @@ void window_default(bool center_size)
 }
 
 //TODO: Move OpenGL shit to graphics bridges for Cocoa, screen refresh is a platform and graphics system specific function
-void screen_refresh() {
-	cocoa_screen_refresh();
-    cocoa_flush_opengl();
-}
+/*void screen_refresh() {
+  cocoa_screen_refresh();
+  enigma::update_mouse_variables();
+  cocoa_flush_opengl();
+}*/
 
   void io_clear()
   {
