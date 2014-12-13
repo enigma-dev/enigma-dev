@@ -15,5 +15,24 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Universal_System/Extensions/DataStructures/include.h"
-#include "ASYNCdialog.h"
+#ifndef ASYNC_EXT_SET
+#define ASYNC_EXT_SET
+#endif
+
+namespace enigma {
+  struct extension_async
+  {
+    extension_async() {}
+
+    virtual variant myevent_asyncdialog() { return 0; }
+    virtual variant myevent_asynchttp() { return 0; }
+    virtual variant myevent_asyncimageloaded() { return 0; }
+    virtual variant myevent_asyncsoundloaded() { return 0; }
+    virtual variant myevent_asyncnetworking() { return 0; }
+    virtual variant myevent_asynciap() { return 0; }
+    virtual variant myevent_asynccloud() { return 0; }
+    virtual variant myevent_asyncsteam() { return 0; }
+    virtual variant myevent_asyncsocial() { return 0; }
+    virtual variant myevent_asyncpushnotification() { return 0; }
+  };
+}

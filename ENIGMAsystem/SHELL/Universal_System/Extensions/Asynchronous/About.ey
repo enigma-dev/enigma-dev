@@ -10,4 +10,4 @@ Icon: asynclogo.png
 
 Depends: None
 Dependencies: None
-
+Implement: extension_async
