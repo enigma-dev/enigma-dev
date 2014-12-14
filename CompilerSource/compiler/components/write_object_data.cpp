@@ -449,7 +449,7 @@ static inline void write_object_events(std::ostream &wto, parsed_object *object,
 // TODO(JoshDreamland): ...
 // It seems to do this in a way that makes crying babies weep. It looks as though this used to be a much simpler block, and Robert tried to make it work with inheritance.
 // Did he even succeed? It looks as though parent groups will always be called... or will cause a compile error if overridden.
-// Robert: This also needs fixed to sort the alarms so they don't fire out of order, eg. alarm 0, 2 from child and then alarm 1 from the parent
+// Robert: This also needs fixed to sort the events so they don't fire out of order, eg. alarm 0, 2 from child and then alarm 1 from the parent
 /// This function writes event group functions for stacked events, such as keyboard and mouse events, so that only one call is needed to invoke all key kinds.
 static inline void write_stacked_event_groups(std::ostream &wto, parsed_object *object, event_map &evgroup, const evpairmap &evmap) {
   wto << "      \n      // Grouped event bases\n";
