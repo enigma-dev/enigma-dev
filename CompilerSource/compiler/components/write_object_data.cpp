@@ -325,6 +325,17 @@ static inline bool parent_declares_event(parsed_object *parent, int mid, int sid
   return false;
 }
 
+static inline bool parent_declares_groupedevent(parsed_object *parent, int mid) {
+  for (parsed_object *obj = parent; obj != NULL; obj = obj->parent) {
+    for (unsigned xx = 0; xx < obj->events.size; xx++) {
+      if (obj->events[xx].code != "" && event_is_instance(obj->events[xx].mainId, obj->events[xx].id)) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
 static inline void write_object_locals(lang_CPP *lcpp, std::ostream &wto, parsed_object* global, parsed_object* object) {
   wto << "    // Local variables\n    ";
   for (unsigned ii = 0; ii < object->events.size; ii++) {
@@ -413,22 +424,22 @@ typedef map<int, event_map> evpairmap;
 static inline void write_object_events(std::ostream &wto, parsed_object *object, robertvec &parent_undefined, event_map &evgroup) {
   // Now we output all the events this object uses
   // Defaulted events were already added into this array.
-  for (unsigned ii = 0; ii < object->events.size; ii++) {
+  for (unsigned i = 0; i < object->events.size; i++) {
     // If the parent also wrote this grouped event for instance some input events in the parent and some in the child, then we need to call the super method
-    if (!parent_declares_event(object->parent, object->events[ii].mainId, object->events[ii].id)) {
-      parent_undefined.push_back(ii);
+    if (!parent_declares_event(object->parent, object->events[i].mainId, object->events[i].id)) {
+      parent_undefined.push_back(i);
     }
-    string evname = event_get_function_name(object->events[ii].mainId, object->events[ii].id);
-    if  (object->events[ii].code != "")
+    string evname = event_get_function_name(object->events[i].mainId, object->events[i].id);
+    if  (object->events[i].code != "")
     {
-      if (event_is_instance(object->events[ii].mainId, object->events[ii].id)) {
-        evgroup[object->events[ii].mainId].push_back(ii);
+      if (event_is_instance(object->events[i].mainId, object->events[i].id)) {
+        evgroup[object->events[i].mainId].push_back(i);
       }
       wto << "    variant myevent_" << evname << "();\n";
     }
      
-    if  (object->events[ii].code != "" || event_has_default_code(object->events[ii].mainId, object->events[ii].id)) {
-      if (event_has_sub_check(object->events[ii].mainId, object->events[ii].id)) {
+    if  (object->events[i].code != "" || event_has_default_code(object->events[i].mainId, object->events[i].id)) {
+      if (event_has_sub_check(object->events[i].mainId, object->events[i].id)) {
         wto << "    inline bool myevent_" << evname << "_subcheck();\n";
       }
     }
@@ -445,10 +456,13 @@ static inline void write_stacked_event_groups(std::ostream &wto, parsed_object *
   for (event_map::const_iterator it = evgroup.begin(); it != evgroup.end(); it++) {
     int mid = it->first;
     wto << "      void myevent_" << event_stacked_get_root_name(mid) << "()\n      {\n";
+    // we have to write all the events we have even if we override them
     for (event_vec::const_iterator vit = it->second.begin(); vit != it->second.end(); vit++) {
       int id = object->events[*vit].id;
       wto << event_forge_group_code(mid, id);
-      if (object->parent) {
+    }
+    // we also have to write all the parent events for this main id but only if we didn't already write it
+    if (object->parent) {
         for (parsed_object *obj = object->parent; obj != NULL; obj = obj->parent) {
           evpairmap::const_iterator tt = evmap.find(obj->id);
           if (tt == evmap.end()) continue;
@@ -457,12 +471,19 @@ static inline void write_stacked_event_groups(std::ostream &wto, parsed_object *
             if (pmid == mid) {
               for (event_vec::const_iterator pvit = pit->second.begin(); pvit != pit->second.end(); pvit++) {
                 int pid = obj->events[*pvit].id;
-                wto << event_forge_group_code(pmid, pid) << "\n";
+                bool found = false;
+                for (event_vec::const_iterator vit = it->second.begin(); vit != it->second.end(); vit++) {
+                  int id = object->events[*vit].id;
+                  if (id == pid) { found = true; break; }
+                }
+                // if we did not already write it for this object but the parent has it then we can still write it
+                if (!found) {
+                  wto << event_forge_group_code(pmid, pid) << "\n";
+                }
               }
             }
           }
         }
-      }
     }
     wto << "      }\n";
   }
@@ -524,7 +545,9 @@ static inline void write_object_unlink(std::ostream &wto, parsed_object *object,
     }
   }
   for (map<int, vector<int> >::iterator it = evgroup.begin(); it != evgroup.end(); it++) { // The stacked ones should have their root exported
-     wto << "      enigma::inst_iter *ENOBJ_ITER_myevent_" << event_stacked_get_root_name(it->first) << ";\n";
+    if (!object->parent || !parent_declares_groupedevent(object->parent, it->first)) {
+      wto << "      enigma::inst_iter *ENOBJ_ITER_myevent_" << event_stacked_get_root_name(it->first) << ";\n";
+    }
   }
 
   //This is the actual call to remove the current instance from all linked records before destroying it.
@@ -556,7 +579,9 @@ static inline void write_object_unlink(std::ostream &wto, parsed_object *object,
   }
 
   for (map<int, vector<int> >::iterator it = evgroup.begin(); it != evgroup.end(); it++) { // The stacked ones should have their root exported
-    wto << "      enigma::event_" << event_stacked_get_root_name(it->first) << "->unlink(ENOBJ_ITER_myevent_" << event_stacked_get_root_name(it->first) << ");\n";
+    if (!object->parent || !parent_declares_groupedevent(object->parent, it->first)) {
+      wto << "      enigma::event_" << event_stacked_get_root_name(it->first) << "->unlink(ENOBJ_ITER_myevent_" << event_stacked_get_root_name(it->first) << ");\n";
+    }
   }
   wto << "    }\n";
 }
@@ -636,7 +661,9 @@ static inline void write_object_constructors(std::ostream &wto, parsed_object *o
         }
       }
     for (map<int, vector<int> >::iterator it = evgroup.begin(); it != evgroup.end(); it++) { // The stacked ones should have their root exported
-      wto << "      ENOBJ_ITER_myevent_" << event_stacked_get_root_name(it->first) << " = enigma::event_" << event_stacked_get_root_name(it->first) << "->add_inst(this);\n";
+      if (!object->parent || !parent_declares_groupedevent(object->parent, it->first)) {
+        wto << "      ENOBJ_ITER_myevent_" << event_stacked_get_root_name(it->first) << " = enigma::event_" << event_stacked_get_root_name(it->first) << "->add_inst(this);\n";
+      }
     }
     wto << "    }\n";
 }
