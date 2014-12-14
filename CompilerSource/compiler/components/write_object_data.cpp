@@ -313,8 +313,8 @@ static inline bool parent_declares(parsed_object *parent, const deciter decl) {
 
 static inline bool parent_declares_event(parsed_object *parent, int mid, int sid) {
   for (parsed_object *obj = parent; obj != NULL; obj = obj->parent) {
-    for (unsigned xx = 0; xx < obj->events.size; xx++) {
-      if (obj->events[xx].mainId == mid && obj->events[xx].id == sid && (obj->events[xx].code.length() > 0
+    for (unsigned i = 0; i < obj->events.size; i++) {
+      if (obj->events[i].mainId == mid && obj->events[i].id == sid && (obj->events[i].code.length() > 0
           || event_has_suffix_code(mid, sid) || event_has_prefix_code(mid, sid) || event_has_const_code(mid, sid) || event_has_default_code(mid,sid)
           || event_has_iterator_unlink_code(mid,sid) || event_has_iterator_delete_code(mid,sid) || event_has_iterator_declare_code(mid,sid) ||
       event_has_iterator_initialize_code(mid,sid))) {
@@ -327,8 +327,8 @@ static inline bool parent_declares_event(parsed_object *parent, int mid, int sid
 
 static inline bool parent_declares_groupedevent(parsed_object *parent, int mid) {
   for (parsed_object *obj = parent; obj != NULL; obj = obj->parent) {
-    for (unsigned xx = 0; xx < obj->events.size; xx++) {
-      if (obj->events[xx].code != "" && event_is_instance(obj->events[xx].mainId, obj->events[xx].id)) {
+    for (unsigned i = 0; i < obj->events.size; i++) {
+      if (obj->events[i].code != "" && event_is_instance(obj->events[i].mainId, obj->events[i].id)) {
         return true;
       }
     }
