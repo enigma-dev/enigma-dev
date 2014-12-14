@@ -259,11 +259,11 @@ namespace enigma
     {
         unsigned int width, height, fullwidth, fullheight;
 
-        unsigned char *pxdata = image_load(filename, &width, &height, &fullwidth, &fullheight, false);
+        unsigned char *pxdata = image_load(filename, &width, &height, &fullwidth, &fullheight, &imgnumb, false);
         if (pxdata == NULL) { printf("ERROR - Failed to append sprite to index!\n"); return; }
 
         // If sprite transparent, set the alpha to zero for pixels that should be transparent from lower left pixel color
-        if (pxdata && transparent)
+        if (transparent)
         {
           int t_pixel_b = pxdata[(height-1)*fullwidth*4];
           int t_pixel_g = pxdata[(height-1)*fullwidth*4+1];
