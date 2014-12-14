@@ -121,8 +121,9 @@ namespace enigma
   void background_add_to_index(background *bak, string filename, bool transparent, bool smoothEdges, bool preload, bool mipmap)
   {
     unsigned int w, h, fullwidth, fullheight;
+    int img_numb;
 
-    unsigned char *pxdata = image_load(filename,&w,&h,&fullwidth,&fullheight,false);
+    unsigned char *pxdata = image_load(filename,&w,&h,&fullwidth,&fullheight,&img_numb,false);
     if (pxdata == NULL) { printf("ERROR - Failed to append background to index!\n"); return; }
     
     // If background is transparent, set the alpha to zero for pixels that should be transparent from lower left pixel color

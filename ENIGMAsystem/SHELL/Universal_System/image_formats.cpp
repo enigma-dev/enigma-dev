@@ -23,6 +23,7 @@
 #include <string>
 #include <cstring>
 #include "lodepng.h"
+#include "gif_format.h"
 #include <stdlib.h>
 using namespace std;
 #include "image_formats.h"
@@ -64,11 +65,13 @@ string image_get_format(string filename) {
 }
 
 /// Generic all-purpose image loading call.
-unsigned char* image_load(string filename, string format, unsigned int* width, unsigned int* height, unsigned int* fullwidth, unsigned int* fullheight, bool flipped) {
+unsigned char* image_load(string filename, string format, unsigned int* width, unsigned int* height, unsigned int* fullwidth, unsigned int* fullheight, int* imgnumb, bool flipped) {
 	if (format.compare(".png") == 0) {
 		return image_load_png(filename, width, height, fullwidth, fullheight, flipped);
 	} else if (format.compare(".bmp") == 0) {
 		return image_load_bmp(filename, width, height, fullwidth, fullheight, flipped);
+	} else if (format.compare(".gif") == 0) {
+		return image_load_gif(filename, width, height, fullwidth, fullheight, imgnumb, flipped);
 	} else {
 		return image_load_bmp(filename, width, height, fullwidth, fullheight, flipped);
 	}
@@ -76,12 +79,12 @@ unsigned char* image_load(string filename, string format, unsigned int* width, u
 
 
 /// Generic all-purpose image loading call that will regexp the filename for the format and call the appropriate function.
-unsigned char* image_load(string filename, unsigned int* width, unsigned int* height, unsigned int* fullwidth, unsigned int* fullheight, bool flipped) {
+unsigned char* image_load(string filename, unsigned int* width, unsigned int* height, unsigned int* fullwidth, unsigned int* fullheight, int* imgnumb, bool flipped) {
 	string format = image_get_format(filename);
 	if (format.empty()) {
 		format = ".bmp";
 	}
-	return image_load(filename, format, width, height, fullwidth, fullheight, flipped);
+	return image_load(filename, format, width, height, fullwidth, fullheight, imgnumb, flipped);
 }
 
 /// Generic all-purpose image saving call.
@@ -218,7 +221,7 @@ unsigned char* image_load_png(string filename, unsigned int* width, unsigned int
 		bitmap[tmp+0] = image[4*pngwidth*ih+iw*4+2];
 		bitmap[tmp+1] = image[4*pngwidth*ih+iw*4+1];
 		bitmap[tmp+2] = image[4*pngwidth*ih+iw*4+0];
-		bitmap[tmp+3]   = image[4*pngwidth*ih+iw*4+3];
+		bitmap[tmp+3] = image[4*pngwidth*ih+iw*4+3];
 		tmp+=4;
 	  }
 	}
@@ -229,6 +232,19 @@ unsigned char* image_load_png(string filename, unsigned int* width, unsigned int
 	*fullwidth  = widfull;
 	*fullheight = hgtfull;
 	return bitmap;
+}
+
+unsigned char* image_load_gif(string filename, unsigned int* width, unsigned int* height, unsigned int* fullwidth, unsigned int* fullheight, int* imgnumb, bool flipped) {
+	unsigned int error = 0;
+	unsigned char* image = 0;
+
+	error = load_gif_file(filename.c_str(), image, *width, *height, *fullwidth, *fullheight, *imgnumb);
+	if (error) {
+	  printf("error %u: %s\n", error, load_gif_error_text(error));
+	  return NULL;
+	}
+
+	return image;
 }
 
 int image_save_bmp(string filename, const unsigned char* data, unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, bool flipped) {
