@@ -50,10 +50,10 @@ inline bool iscomment(const string &n) {
 
 inline string event_forge_group_code(int mainId, int id) {
   string evname = event_get_function_name(mainId,id);
-  string ret = event_has_sub_check(mainId, id) ? "          if (myevent_" + evname + "_subcheck()) {\n" : "";
+  string ret = event_has_sub_check(mainId, id) ? "        if (myevent_" + evname + "_subcheck()) {\n" : "";
   ret += (event_has_super_check(mainId,id) ?
-    "        if (" + event_get_super_check_condition(mainId,id) + ") myevent_" : "            myevent_") + evname + "();\n",
-  ret += event_has_sub_check(mainId,id) ? "          }\n" : "";
+    "          if (" + event_get_super_check_condition(mainId,id) + ") myevent_" : "          myevent_") + evname + "();\n",
+  ret += event_has_sub_check(mainId,id) ? "        }\n" : "";
   return ret;
 }
 
@@ -506,7 +506,7 @@ static inline void write_event_perform(std::ostream &wto, parsed_object *object)
   }
 
   if (object->parent) {
-    wto << "          return OBJ_" << object->parent->name << "::myevents_perf(type,numb);\n";
+    wto << "        return OBJ_" << object->parent->name << "::myevents_perf(type,numb);\n";
   } else {
     wto << "        return 0;\n";
   }
