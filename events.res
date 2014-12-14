@@ -93,7 +93,7 @@ alarm: 2
 	Group: Alarm
 	Name: Alarm %1
 	Mode: Stacked
-	Sub Check: { alarm[%1] = (int)alarm[%1]; return alarm[%1]<=0 ? false : !(--alarm[%1]); }
+	Sub Check: { alarm[%1] = (int)alarm[%1]; return alarm[%1]<0 ? false : !(--alarm[%1]); }
 
 
 # Keyboard events. These are simple enough.
