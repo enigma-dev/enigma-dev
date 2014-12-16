@@ -26,8 +26,6 @@
 #include <sstream>
 #include <iostream>
 
-#include <cassert> //TEMP
-
 namespace {
 const unsigned int ERR_SUCCESS          = 0; //No error (easy boolean checK)
 const unsigned int ERR_FILE_CANT_OPEN   = 1;
@@ -56,13 +54,8 @@ const char* ERRMSG_OVERSCAN = "Overscan when compiling image data.";
 const char* ERRMSG_INDEX_COUNT_MISMATCH = "Index count mismatch";
 const char* ERRMSG_UNKNOWN = "Unknown error message! What did you do???";
 
+const unsigned int MaxCodeSize = 12;
 
-struct ColorRGB {
-  ColorRGB(unsigned int r, unsigned int g, unsigned int b) : r(r), g(g), b(b) {}
-  unsigned int r;
-  unsigned int g;
-  unsigned int b;
-};
 
 struct LogicalScreen {
   LogicalScreen() : canvasWidth(0), canvasHeight(0), gctFlag(false), clrRes(0), sortFlag(false), gctSize(0), bgColorIndex(0), pixelAspectRatio(0) {}
@@ -76,30 +69,7 @@ struct LogicalScreen {
   unsigned int pixelAspectRatio;
 };
 
-struct ColorTuple {
-  explicit ColorTuple(unsigned int first) { val.push_back(first); }
-  ColorTuple() {}
-  std::vector<unsigned int> val;
-};
-
-struct Image {
-  Image() : left(0), top(0), width(0), height(0), lctFlag(false), interlaceFlag(0), sortFlag(0), reservedBits(0), lctSize(0), lzwMinCodeSize(0) {}
-  unsigned int left;
-  unsigned int top;
-  unsigned int width;
-  unsigned int height;
-  bool lctFlag;
-  bool interlaceFlag;
-  bool sortFlag;
-  unsigned int reservedBits;
-  unsigned int lctSize;
-  std::vector<ColorRGB> localColorTable;
-  unsigned int lzwMinCodeSize;
-  std::vector<unsigned char*> bytes;
-  std::vector<unsigned int> sizes;
-  //std::vector<unsigned int> ctrlCodes;
-  std::vector<ColorTuple> indices;
-};
+typedef std::vector<unsigned int> ColorTuple;
 
 //Can help with debugging.
 std::string to_string(const std::vector<ColorTuple>& src) 
@@ -110,7 +80,7 @@ std::string to_string(const std::vector<ColorTuple>& src)
   for (std::vector<ColorTuple>::const_iterator it=src.begin(); it!=src.end(); it++) {
     res <<comma1 <<"[";
     std::string comma2 = "";
-    for (std::vector<unsigned int>::const_iterator it2=it->val.begin(); it2!=it->val.end(); it2++) {
+    for (std::vector<unsigned int>::const_iterator it2=it->begin(); it2!=it->end(); it2++) {
       res <<comma2 <<(*it2);
       comma2 = ",";
     }
@@ -122,14 +92,35 @@ std::string to_string(const std::vector<ColorTuple>& src)
 }
 
 
+//Return 0b111 for 3, etc.
+unsigned int GetMask(unsigned int size) 
+{
+  switch(size) {
+    case 1: return 0x1;
+    case 2: return 0x3;
+    case 3: return 0x7;
+    case 4: return 0xF;
+    case 5: return 0x1F;
+    case 6: return 0x3F;
+    case 7: return 0x7F;
+    case 8: return 0xFF;
+    case 9: return 0x1FF;   //Shouldn't ever be used.
+    case 10: return 0x3FF;  //Shouldn't ever be used.
+    case 11: return 0x7FF;  //Shouldn't ever be used.
+    case 12: return 0xFFF;  //Shouldn't ever be used.
+    default: return 0;  //No really good way to error check this...
+  }
+}
+
+
 //Turns 1 into [1], etc. Pads up to clearCode
-std::vector<ColorTuple> buildColorTable(const std::vector<ColorRGB>& colorTable, unsigned int clearCode, unsigned int eofCode)
+std::vector<ColorTuple> buildColorTable(size_t colorTableSize, unsigned int clearCode, unsigned int eofCode)
 {
   std::vector<ColorTuple> res;
-  for (std::vector<ColorRGB>::const_iterator it=colorTable.begin(); it!=colorTable.end(); it++) {
-    res.push_back(ColorTuple(res.size()));
+  for (size_t i=0; i<colorTableSize; i++) {
+    res.push_back(ColorTuple(1, res.size()));
   }
-  unsigned int nxtClr = colorTable.size();
+  unsigned int nxtClr = colorTableSize;
   while (nxtClr<=eofCode) {
     res.push_back(ColorTuple());
     nxtClr += 1;
@@ -137,219 +128,125 @@ std::vector<ColorTuple> buildColorTable(const std::vector<ColorRGB>& colorTable,
   return res;
 }
 
-unsigned int readChar(std::ifstream& input, unsigned int& res) 
-{
-  char buff[1] = {0};
-  input.read(buff,1);
-  if (!input) { return ERR_OUT_OF_BYTES; }
-  res = static_cast<unsigned int>(buff[0])&0xFF;
-  return ERR_SUCCESS;
-}
-
-
-unsigned int subByte(unsigned int src, unsigned int orig, unsigned int length, unsigned int& res) 
-{
-  //TODO: Bounds check.
-  res = 0;
-  for (size_t i=0; i<length; i++) {
-    res <<= 1;
-    unsigned int next = (src>>(7 - (orig+i)))&0x1;
-    res |= next;
-  }
-  return ERR_SUCCESS;
-}
-
-
-unsigned int readInt(std::ifstream& input, unsigned int length, unsigned int& res)
-{
-  res = 0;
-  unsigned int count = 0;
-  unsigned int err=ERR_SUCCESS;
-  unsigned int next = 0;
-  for (unsigned int i=0; i<length; i++) {
-    if ((err=readChar(input, next))) { return err; }
-    res = res | (next<<(8*count));
-    count += 1;
-  }
-  return ERR_SUCCESS;
-}
-
-unsigned int readString(std::ifstream& input, unsigned int length, std::string& res)
-{
-  unsigned int next = 0;
-  unsigned int err=ERR_SUCCESS;
-  while (length>0) {
-    length -= 1;
-    if ((err=readChar(input, next))) { return err; }
-    res += std::string(1, static_cast<char>(next));
-  }
-  return ERR_SUCCESS;
-}
-
-unsigned int readSubBlocks(std::ifstream& input, std::vector<unsigned char*>& res, std::vector<unsigned int>& sizes)
+//Does checking; returns false if it can't read all sub-blocks.
+bool skipSubBlocks(const unsigned char* bytes, size_t& pos, size_t length) 
 {
   unsigned int sz = 0;
-  unsigned int err = ERR_SUCCESS;
   for (;;) {
-    if ((err=readInt(input, 1, sz))) { return err; }
+    if (pos+1>length) { return false; }
+    sz = bytes[pos++];
     if (sz==0) { break; }
-    unsigned char* buff = new unsigned char[sz];
-    input.read(reinterpret_cast<char*>(buff),sz);
-    if (!input) { return ERR_OUT_OF_BYTES; }
-    res.push_back(buff);
-    sizes.push_back(sz);
+    if (pos+sz>length) { return false; }
+    pos += sz;
   }
-  return ERR_SUCCESS;
+  return true;
 }
 
-unsigned int readBits(const std::vector<unsigned char*>& bytes, const std::vector<unsigned int>& sizes, unsigned int& currBytestream, unsigned int& currByte, unsigned int& currBit, unsigned int& currCodeSize, unsigned int& res)
+//NOTE: This is still fairly inefficient. We can play around with bits directly later, knowing that the maximum code size is 12.
+bool readBits(unsigned char* bytes, size_t& pos, const size_t size, unsigned int& subBlockEnd, unsigned int& currBit, const unsigned int currCodeSize, unsigned int& res)
 {
   res = 0;
   for (size_t i=0; i<currCodeSize; i++) {
     //Can read?
-    if (currBytestream>=bytes.size()) { return ERR_OUT_OF_BITS_IN_BYTESTREAM; }
+    if (pos>subBlockEnd) { return false; }
+
     //Get the bit, append it
-    unsigned int nextBit = bytes[currBytestream][currByte]&0x1;
-    res |= (nextBit<<i);
+    res |= (((bytes[pos]&0x1)&0xFF)<<i);
+
     //Increment
-    bytes[currBytestream][currByte]>>=1;
+    bytes[pos]>>=1;
     currBit += 1;
     if (currBit==8) {
       currBit = 0;
-      currByte += 1;
-      if (currByte>=sizes[currBytestream]) {
-        currByte = 0;
-        currBytestream += 1;
+      if (pos+1>size) { return false; }
+      pos++;
+      if (pos>subBlockEnd) {
+        if (pos+1>size) { return false; }
+        subBlockEnd = pos + (bytes[pos]&0xFF);
+        pos++;
       }
     }
   }
-  return ERR_SUCCESS;
+  return true;
 }
 
-unsigned int readMagNum(std::ifstream& input) 
+//Should be faster. Do NOT pass currCodeSize by reference!
+bool readBits2(unsigned char* bytes, size_t& pos, const size_t size, unsigned int& subBlockEnd, unsigned int& currBit, unsigned int currCodeSize, unsigned int& res)
 {
-  //Read the magic number.
-  std::string magNum;
-  unsigned int err=ERR_SUCCESS;
-  if ((err=readString(input, 3, magNum))) { return err; }
-  if (magNum != "GIF") { return ERR_BAD_MAG_NUM; }
-  return ERR_SUCCESS;
-}
+  if (currCodeSize>12) { return false; }
+  if (currBit>8) { return false; }
 
-unsigned int readGifVers(std::ifstream& input) 
-{
-  //Read the gif version
-  std::string gifVers;
-  unsigned int err=ERR_SUCCESS;
-  if ((err=readString(input, 3, gifVers))) { return err; }
-  if (gifVers!="87a" && gifVers!="89a") { return ERR_BAD_GIF_VERS; }
-  return ERR_SUCCESS;
-}
-
-unsigned int readLogicalScreenDesc(std::ifstream& input, LogicalScreen& screen)
-{
-  //Read the logical screen descriptor
-  unsigned int err = ERR_SUCCESS;
-  if ((err=readInt(input, 2, screen.canvasWidth))) { return err; }
-  if ((err=readInt(input, 2, screen.canvasHeight))) { return err; }
-
-  unsigned int pb1 = 0;
-  if ((err=readInt(input, 1, pb1))) { return err; }
-
-  unsigned int thing=0;
-  if ((err=subByte(pb1, 0, 1, thing))) { return err; }
-  screen.gctFlag = thing>0;
-
-  if ((err=subByte(pb1, 1, 3, screen.clrRes))) { return err; }
-
-  thing=0;
-  if ((err=subByte(pb1, 4, 1, thing))) { return err; }
-  screen.sortFlag = thing>0;
-
-  if ((err=subByte(pb1, 5, 3, screen.gctSize))) { return err; }
-  screen.gctSize = static_cast<unsigned int>(pow(2, screen.gctSize+1));
-
-  if ((err=readInt(input, 1, screen.bgColorIndex))) { return err; }
-  if ((err=readInt(input, 1, screen.pixelAspectRatio))) { return err; }
-  if (screen.pixelAspectRatio != 0) { return ERR_NONZERO_PIXEL_ASPECT_RATIO; }
-
-  return ERR_SUCCESS;
-}
-
-unsigned int readColorTable(std::ifstream& input, std::vector<ColorRGB>& colors, bool ctExists, unsigned int ctSize)
-{
-  unsigned int r=0;
-  unsigned int g=0;
-  unsigned int b=0;
-  unsigned int err = ERR_SUCCESS;
-  if (ctExists) {
-    for (unsigned int i=0; i<ctSize; i++) {
-      if ((err=readInt(input, 1, r))) { return err; }
-      if ((err=readInt(input, 1, g))) { return err; }
-      if ((err=readInt(input, 1, b))) { return err; }
-      colors.push_back(ColorRGB(r,g,b));
+  //Do we need to advance a byte?
+  if (currBit==8) {
+    currBit = 0;
+    pos++;
+    if (pos>size) { return false; }
+    //Do we need to advance a block?
+    if (pos>subBlockEnd) {
+      subBlockEnd = pos + (bytes[pos]&0xFF);
+      pos++;
+      if (pos>size) { return false; }
     }
   }
-  return ERR_SUCCESS;
-}
 
-unsigned int readExtension(std::ifstream& input) //, Extension& ext)
-{
-  unsigned int ctrl = 0;
-  unsigned int length = 0;
-  unsigned int garbage = 0;
+  //The max code size is 12. So, at most, we read a prefix (from the current byte), a middle (the entire second byte) and a suffix (from the third byte).
+  if (currCodeSize<=(8-currBit)) {
+    //We can read the entire thing from the current byte!
+    res = bytes[pos]&GetMask(currCodeSize);
+    bytes[pos] >>= currCodeSize;
+    currBit += currCodeSize;
+  } else {
+    //We need the current byte, and then some.
+    unsigned int read = 8-currBit;
+    res = bytes[pos]&GetMask(read);
+    currCodeSize -= read;
 
-  unsigned int err = ERR_SUCCESS;
-  if ((err=readInt(input, 1, ctrl))) { return err; }
-  if ((err=readInt(input, 1, length))) { return err; }
-  if ((err=readInt(input, length, garbage))) { return err; }
+    //Advance a byte
+    currBit = 0;
+    pos++;
+    if (pos>size) { return false; }
+    //Do we need to advance a block?
+    if (pos>subBlockEnd) {
+      subBlockEnd = pos + (bytes[pos]&0xFF);
+      pos++;
+      if (pos>size) { return false; }
+    }
 
-  std::vector<unsigned char*> trash;
-  std::vector<unsigned int> trash2;
-  if ((err=readSubBlocks(input, trash, trash2))) { return err; }
-  for (std::vector<unsigned char*>::const_iterator it=trash.begin(); it!=trash.end(); it++) { delete *it; }
-  return ERR_SUCCESS;
-}
+    //We might need all or part of this byte.
+    if (currCodeSize<8) {
+      //We need part of it.
+      res |= ((bytes[pos]&GetMask(currCodeSize))<<read);
+      bytes[pos] >>= currCodeSize;
+      currBit += currCodeSize;
+    } else {
+      //We need all of it.
+      res |= (((bytes[pos])&0xFF)<<read);
+      read += 8;
+      currCodeSize -= 8;
+      currBit = 8;
 
-unsigned int readImage(std::ifstream& input, Image& img)
-{
-  //Read basic image properties.
-  unsigned int err = ERR_SUCCESS;
-  if ((err=readInt(input, 2, img.left))) { return err; }
-  if ((err=readInt(input, 2, img.top))) { return err; }
-  if ((err=readInt(input, 2, img.width))) { return err; }
-  if ((err=readInt(input, 2, img.height))) { return err; }
-  unsigned int pb1 = 0;
-  if ((err=readInt(input, 1, pb1))) { return err; }
+      //There may be a few more bits.
+      if (currCodeSize>0) {
+        //Advance a byte
+        currBit = 0;
+        pos++;
+        if (pos>size) { return false; }
+        //Do we need to advance a block?
+        if (pos>subBlockEnd) {
+          subBlockEnd = pos + (bytes[pos]&0xFF);
+          pos++;
+          if (pos>size) { return false; }
+        }
 
-  unsigned int tmp = 0;
-  if ((err=subByte(pb1, 0, 1, tmp))) { return err; }
-  img.lctFlag = tmp>0;
+        //Read. There will never be a need to advance at this point.
+        res |= ((bytes[pos]&GetMask(currCodeSize))<<read);
+        bytes[pos] >>= currCodeSize;
+        currBit += currCodeSize;
+      }
+    }
+  }
 
-  tmp = 0;
-  if ((err=subByte(pb1, 1, 1, tmp))) { return err; }
-  img.interlaceFlag = tmp>0;
-
-  if (img.interlaceFlag>0) { return ERR_INTERLACED_IMAGE; }
-
-  tmp = 0;
-  if ((err=subByte(pb1, 2, 1, tmp))) { return err; }
-  img.sortFlag = tmp>0;
-
-  if ((err=subByte(pb1, 3, 2, img.reservedBits))) { return err; }
-
-  if ((err=subByte(pb1, 5, 3, img.lctSize))) { return err; }
-  img.lctSize = static_cast<unsigned int>(pow(2, img.lctSize+1));
-
-  //Read Local Color Table, if applicable.
-  if ((err=readColorTable(input, img.localColorTable, img.lctFlag, img.lctSize))) { return err; }
-
-  //One more isolated property.
-  if ((err=readInt(input, 1, img.lzwMinCodeSize))) { return err; }
-
-  //Read the image data, in blocks.
-  if ((err=readSubBlocks(input, img.bytes, img.sizes))) { return err; }
-  return ERR_SUCCESS;
+  return true;
 }
 
 
@@ -358,137 +255,117 @@ unsigned int readImage(std::ifstream& input, Image& img)
 
 unsigned int load_gif_file(const char* filename, unsigned char*& out, unsigned int& gif_width, unsigned int& gif_height, unsigned int& image_width, unsigned int& image_height, int& num_images)
 {
-  //Open it in binary mode.
-  std::ifstream input(filename, std::ios::binary);
+  //Read the entire file into a byte array. This is reasonable because we will output width*height*4 bytes, and the 
+  // GIF file will be noticeably less (it's compressed, indexed color, and no alpha).
+  unsigned char* bytes = 0;
+  size_t pos = 0;
+  size_t size = 0;
+
+  { //File input.
+  std::ifstream input(filename, std::ios::binary|std::ios::ate);
   if (!input.good()) { return ERR_FILE_CANT_OPEN; }
 
-  //Read a few "check only" things.
-  unsigned int err = ERR_SUCCESS;
-  if ((err=readMagNum(input))) { return err; }
-  if ((err=readGifVers(input))) { return err; }
+  size = input.tellg();
+  bytes = new unsigned char[size];
+  input.seekg(0, std::ios::beg);
+  input.read(reinterpret_cast<char*>(bytes), size);
+  if (!input) { return ERR_OUT_OF_BYTES; }
+  input.close();
+  }
+
+  //
+  //Phase 1: A few "check only" things.
+  // TODO: Combine as many of the length checks as possible.
+  //
+
+  //Read the magic number.
+  if (pos+3>size) { return ERR_OUT_OF_BYTES; }
+  std::string magNum = "XXX";
+  magNum[0] = static_cast<char>(bytes[pos++]);
+  magNum[1] = static_cast<char>(bytes[pos++]);
+  magNum[2] = static_cast<char>(bytes[pos++]);
+  if (magNum != "GIF") { return ERR_BAD_MAG_NUM; }
+
+  //Read the gif version
+  if (pos+3>size) { return ERR_OUT_OF_BYTES; }
+  std::string gifVers = "XXX";
+  gifVers[0] = static_cast<char>(bytes[pos++]);
+  gifVers[1] = static_cast<char>(bytes[pos++]);
+  gifVers[2] = static_cast<char>(bytes[pos++]);
+  if (gifVers!="87a" && gifVers!="89a") { return ERR_BAD_GIF_VERS; }
 
   //Read the description of the logical screen.
+  if (pos+7>size) { return ERR_OUT_OF_BYTES; }
   LogicalScreen screen;
-  if ((err=readLogicalScreenDesc(input, screen))) { return err; }
+  screen.canvasWidth = (bytes[pos]&0xFF) | ((bytes[pos+1]&0xFF)<<8);
+  pos += 2;
+  screen.canvasHeight = (bytes[pos]&0xFF) | ((bytes[pos+1]&0xFF)<<8);
+  pos += 2;
+  unsigned int pb1 = (bytes[pos++]&0xFF);
+  screen.gctFlag = pb1&0x80;
+  screen.clrRes = (pb1&0x70)>>4;
+  screen.sortFlag = pb1&0x8;
+  screen.gctSize = static_cast<unsigned int>(pow(2, (pb1&0x7)+1));
+  screen.bgColorIndex = (bytes[pos++]&0xFF);
+  screen.pixelAspectRatio = (bytes[pos++]&0xFF);
+  if (screen.pixelAspectRatio != 0) { return ERR_NONZERO_PIXEL_ASPECT_RATIO; }
 
   //Read the table of global colors (optional).
-  std::vector<ColorRGB> globalColors;
-  if ((err=readColorTable(input, globalColors, screen.gctFlag, screen.gctSize))) { return err; }
+  size_t globalColorStart=0;
+  if (screen.gctFlag) {
+    if (pos+(screen.gctSize*3)>size) { return ERR_OUT_OF_BYTES; }
+    globalColorStart = pos;
+    pos += (screen.gctSize*3);
+  }
 
-  //Now we enter into a processing loop based on control codes.
-  std::vector<Image> images;
+  //
+  //Phase 2: Scan to the end and get the total image count.
+  //
+
+  //Just a count.
+  num_images = 0;
+  {
+  size_t myPos = pos;
   for (;;) {
-    unsigned int ctrlCode = 0;
-    if ((err=readInt(input, 1, ctrlCode))) { return err; }
-    if (ctrlCode==0x21) {
-      //It's an extension.
-      //Extension ext;
-      if ((err=readExtension(input/*, ext*/))) { return err; }
-      std::cerr <<"Skipping extension\n";
-    } else if (ctrlCode==0x3B) {
-      std::cerr <<"EOF found; file structure is valid.\n";
+    if (myPos+1>size) { return ERR_OUT_OF_BYTES; }
+    unsigned int ctrlCode = (bytes[myPos++]&0xFF);
+    if (ctrlCode==0x21) { //It's an extension; skip it.
+      if (myPos+2>size) { return ERR_OUT_OF_BYTES; }
+      ctrlCode = (bytes[myPos++]&0xFF); //Extension control
+      ctrlCode = (bytes[myPos++]&0xFF); //Length
+      if (myPos+ctrlCode>size) { return ERR_OUT_OF_BYTES; }
+      myPos += ctrlCode;
+      if (!skipSubBlocks(bytes, myPos, size)) { return ERR_OUT_OF_BYTES; }
+    } else if (ctrlCode==0x3B) { //EOF; done;
       break;
-    } else if (ctrlCode==0x2C) {
-      //It's an image.
-      images.push_back(Image());
-      if ((err=readImage(input, images.back()))) { return err; }
+    } else if (ctrlCode==0x2C) { //It's an image; skip and add one.
+      num_images++;
+      if (myPos+9>size) { return ERR_OUT_OF_BYTES; }
+      myPos += 9;
+      unsigned int pb1 = (bytes[myPos-1]&0xFF);
+      if (pb1&0x80) { //Skip the local color table.
+        unsigned int lctSize = static_cast<unsigned int>(pow(2, (pb1&0x7)+1));
+        if (myPos+(lctSize*3)>size) { return ERR_OUT_OF_BYTES; }
+        myPos += lctSize*3;
+      }
+      //Skip the LZW min. code size.
+      if (myPos+1>size) { return ERR_OUT_OF_BYTES; }
+      myPos++;
+      if (!skipSubBlocks(bytes, myPos, size)) { return ERR_OUT_OF_BYTES; }
     } else {
       return ERR_UNKNOWN_CONTROL_CODE;
     }
   }
-
-  //Convert the byte stream into control codes, and convert those into index codes (easier to do both at once).
-  //const unsigned int clearCode = static_cast<unsigned int>(pow(2, img.lzwMinCodeSize));
-  //const unsigned int eofCode = clearCode + 1;
-  const unsigned int MaxCodeSize = 12;
-  unsigned int count = 0;
-
-  //We do this per-image; we can tile it later.
-  for (std::vector<Image>::iterator it=images.begin(); it!=images.end(); it++) {
-    Image& img = *it;
-    count += 1;
-    unsigned int currBytestream = 0;
-    unsigned int currByte = 0;
-    unsigned int currBit = 0;
-    const unsigned int clearCode = static_cast<unsigned int>(pow(2, img.lzwMinCodeSize));
-    const unsigned int eofCode = clearCode + 1;
-    const std::vector<ColorRGB>& colorTable = img.lctFlag ? img.localColorTable : globalColors;
-    std::vector<ColorTuple> currColorTable = buildColorTable(colorTable, clearCode, eofCode);
-    const unsigned int startCodeSize = img.lzwMinCodeSize + 1;
-    unsigned int currCodeSize = startCodeSize;
-    std::cerr <<"Reading image: " <<count <<" of " <<images.size() <<"\n";
-    bool first = true; 
-
-    //Decompress as we go.
-    for (;;) {
-      //Read the next control code
-      unsigned int oldCodeSize = currCodeSize;
-      unsigned int currCode = 0;
-      if ((err=readBits(img.bytes, img.sizes, currBytestream, currByte, currBit, currCodeSize, currCode))) { return err; }
-      //std::cerr <<"Read: " <<currCode <<", color table is: " <<to_string(currColorTable) <<"\n";
-
-      if (oldCodeSize==MaxCodeSize && currCode!=clearCode) { return ERR_EXPECTED_CLEAR_CODE; }
-      if (currCode==clearCode) {
-        //print("  Clear code")
-        currColorTable = buildColorTable(colorTable, clearCode, eofCode);
-        //nextCodeSize = startCodeSize;
-      }
-      if (currCode == eofCode) {
-        //print("  EOF code")
-        break;
-      }
-      //img.ctrlCodes.push_back(currCode);
-
-      //Decompress as we go.
-      ColorTuple newCode;
-      if (currCode==clearCode || currCode==eofCode) {
-        continue;
-      }
-      if (first) {
-        first = false;
-        img.indices.push_back(currColorTable[currCode]);
-      } else {
-        //Normal loop
-        if (currCode<currColorTable.size()) {
-          //Add it to the index stream
-          newCode = img.indices[img.indices.size()-1];
-          img.indices.push_back(currColorTable[currCode]);
-          unsigned int tmp = currColorTable[currCode].val[0];
-          newCode.val.push_back(tmp);
-          currColorTable.push_back(newCode);
-        } else {
-          //More complicated
-          unsigned int tmp = img.indices[img.indices.size()-1].val[0];
-          newCode = img.indices[img.indices.size()-1];
-          newCode.val.push_back(tmp);
-          img.indices.push_back(newCode);
-          currColorTable.push_back(newCode);
-        }
-
-        //Increment codeSize?
-        if (currColorTable.size()-1 == static_cast<unsigned int>(pow(2, currCodeSize) -1)) {
-          std::cerr <<"  Increase code size!\n";
-          currCodeSize += 1;
-        }
-      }
-    }
-
-    //Internal check
-    unsigned int nested = 0;
-    for (std::vector<ColorTuple>::const_iterator it2=img.indices.begin(); it2!=img.indices.end(); it2++) {
-      nested += it2->val.size();
-    }
-    std::cerr <<"So far, read: " <<nested <<" of " <<img.width*img.height <<" indices.\n";
-    if (nested != img.width*img.height) { return ERR_INDEX_COUNT_MISMATCH; }
   }
 
-  //For now, just put 5 images per row.
-  const unsigned int imgs_per_row = images.size();
 
-  //Save our output properties.
-  num_images = images.size();
-  gif_width = screen.canvasWidth * imgs_per_row;
-  gif_height = screen.canvasHeight * static_cast<unsigned int>(ceil(num_images/static_cast<double>(imgs_per_row)));
+  //
+  //Phase 3: We now have an image count, so we can create our output buffer (and then write directly into it).
+  //
+
+  //At the same time, save our output properties.
+  gif_width = screen.canvasWidth * num_images;
+  gif_height = screen.canvasHeight;
 
   //Need to scale to factors of 2.
   image_width = nlpo2dc(gif_width) + 1;
@@ -498,40 +375,172 @@ unsigned int load_gif_file(const char* filename, unsigned char*& out, unsigned i
   const unsigned int final_size = image_width*image_height*4;
   out = new unsigned char[final_size](); // Initialize to zero.
 
-  //Save all images.
-  count = 0;
-  for (std::vector<Image>::iterator it=images.begin(); it!=images.end(); it++) {
-    Image& img = *it;
-    unsigned int outY = count / imgs_per_row;
-    unsigned int outX = count % imgs_per_row;
+  //Start output at x=0 (y will always start at 0).
+  unsigned int xOutStart = 0;
 
-    //TODO: (left,top) might not be (0,0)
-    unsigned int y=img.top;
-    unsigned int x=img.left;
-    const std::vector<ColorRGB>& colorTable = img.lctFlag ? img.localColorTable : globalColors;
-    for (std::vector<ColorTuple>::const_iterator it=img.indices.begin(); it!=img.indices.end(); it++) {
-      for (std::vector<unsigned int>::const_iterator it2=it->val.begin(); it2!=it->val.end(); it2++) {
-        //Set1
-        size_t pos = (outY*screen.canvasHeight+y)*image_width*4 + (outX*screen.canvasWidth+x)*4;
-        if (pos+4>final_size) { delete []out; out=0; return ERR_OVERSCAN; }
-        out[pos++] = colorTable[*it2].b;
-        out[pos++] = colorTable[*it2].g;
-        out[pos++] = colorTable[*it2].r;
-        out[pos++] = 0xFF; //alpha
+  //
+  //Phase 4: Now read all image data, and decompress as you go.
+  //
 
-        //Increment
-        x++;
-        if (x>=img.width) {
-          x = img.left;
-          y++;
-        }
+  unsigned int curr_img = 0;
+  for (;;) {
+    if (pos+1>size) { return ERR_OUT_OF_BYTES; }
+    unsigned int ctrlCode = (bytes[pos++]&0xFF);
+    if (ctrlCode==0x21) { //It's an extension; skip it.
+      if (pos+2>size) { return ERR_OUT_OF_BYTES; }
+      ctrlCode = (bytes[pos++]&0xFF); //Extension control
+      ctrlCode = (bytes[pos++]&0xFF); //Length
+      if (pos+ctrlCode>size) { return ERR_OUT_OF_BYTES; }
+      pos += ctrlCode;
+      if (!skipSubBlocks(bytes, pos, size)) { return ERR_OUT_OF_BYTES; }
+    } else if (ctrlCode==0x3B) { //EOF; done;
+      break;
+    } else if (ctrlCode==0x2C) { //It's an image; read and decompress it.
+      std::cerr <<"Reading image: " <<(curr_img+1) <<" of " <<num_images <<"\n";
+      //Read top-level image properties.
+      if (pos+9>size) { return ERR_OUT_OF_BYTES; }
+      unsigned int left = (bytes[pos]&0xFF) | ((bytes[pos+1]&0xFF)<<8);
+      pos += 2;
+      unsigned int top = (bytes[pos]&0xFF) | ((bytes[pos+1]&0xFF)<<8);
+      pos += 2;
+      unsigned int width = (bytes[pos]&0xFF) | ((bytes[pos+1]&0xFF)<<8);
+      pos += 2;
+      unsigned int height = (bytes[pos]&0xFF) | ((bytes[pos+1]&0xFF)<<8);
+      pos += 2;
+      unsigned int pb1 = (bytes[pos++]&0xFF);
+      bool lctFlag = pb1&0x80;
+      bool intFlag = pb1&0x40;
+      //bool sortFlag = pb1&0x20; //Unused.
+      unsigned int lctSize = static_cast<unsigned int>(pow(2, (pb1&0x7)+1));
+      if (intFlag>0) { return ERR_INTERLACED_IMAGE; }
+
+      //Read Local Color Table, if applicable.
+      size_t localColorStart = globalColorStart;
+      size_t colorTableSize = screen.gctSize;
+      if (lctFlag) {
+        if (pos+(lctSize*3)>size) { return ERR_OUT_OF_BYTES; }
+        localColorStart = pos;
+        pos += (lctSize*3);
+        colorTableSize = lctSize;
       }
+
+      //Read the lzw minimum code size.
+      if (pos+1>size) { return ERR_OUT_OF_BYTES; }
+      unsigned int lzwMinCodeSize = (bytes[pos++]&0xFF);
+
+      //Prepare to read the image data. We always need at least one byte (we check at the end of the loop).
+      if (pos+1>size) { return ERR_OUT_OF_BYTES; }
+      unsigned int subBlockEnd = pos + (bytes[pos]&0xFF);
+      pos++;
+      if (pos>subBlockEnd) { return ERR_OUT_OF_BYTES; } //Might be better as "not enough image data"?
+      if (subBlockEnd+1>size) { return ERR_OUT_OF_BYTES; }
+
+      //More stuff.
+      const unsigned int clearCode = static_cast<unsigned int>(pow(2, lzwMinCodeSize));
+      const unsigned int eofCode = clearCode + 1;
+      std::vector<ColorTuple> currColorTable = buildColorTable(colorTableSize, clearCode, eofCode);
+      ColorTuple prevTuple;
+      ColorTuple currTuple;
+
+      //Our image positioning information.
+      unsigned int y=top;
+      unsigned int x=left;
+
+      //Read the image data, in blocks. Translate as we go.
+      unsigned int currBit = 0;
+      unsigned int currCodeSize = lzwMinCodeSize + 1;
+      unsigned int nested = 0; //Sanity check.
+      bool first = true;
+
+      for (;;) {
+        //Read the next control code
+        unsigned int oldCodeSize = currCodeSize;
+        unsigned int currCode = 0;
+        if (!readBits2(bytes, pos, size, subBlockEnd, currBit, currCodeSize, currCode)) { return ERR_OUT_OF_BYTES; }
+        //if (oldCodeSize==MaxCodeSize && currCode!=clearCode) { return ERR_EXPECTED_CLEAR_CODE; } //TODO: This might still be a valid check!
+        if (currCode==clearCode) {
+          currCodeSize = lzwMinCodeSize + 1;
+          currColorTable = buildColorTable(colorTableSize, clearCode, eofCode);
+          continue;
+        }
+        if (currCode == eofCode) {
+std::cerr <<"EOF\n";
+          break;
+        }
+
+        if (first) {
+          first = false;
+          currTuple = currColorTable[currCode];
+        } else {
+          //Normal loop
+          if (currCode<currColorTable.size()) {
+            //Add it to the index stream
+            ColorTuple newCode = prevTuple;
+            currTuple = currColorTable[currCode];
+            unsigned int tmp = currColorTable[currCode][0];
+            newCode.push_back(tmp);
+            currColorTable.push_back(newCode);
+          } else {
+            //More complicated
+            unsigned int tmp = prevTuple[0];
+            ColorTuple newCode = prevTuple;
+            newCode.push_back(tmp);
+            currTuple = newCode;
+            currColorTable.push_back(newCode);
+          }
+
+          //Increment codeSize?
+          if (currColorTable.size()-1 == static_cast<unsigned int>(pow(2, currCodeSize) -1)) {
+            currCodeSize += 1;
+          }
+        }
+
+        //Add the pixels.
+        nested += currTuple.size();
+        for (std::vector<unsigned int>::const_iterator it=currTuple.begin(); it!=currTuple.end(); it++) {
+          //Set1
+          size_t pos = y*image_width*4 + xOutStart*4 + x*4;
+          if (pos+4>final_size) { delete []out; out=0; return ERR_OVERSCAN; }
+          out[pos++] = (bytes[localColorStart + (*it)*3 + 2]&0xFF);
+          out[pos++] = (bytes[localColorStart + (*it)*3 + 1]&0xFF);
+          out[pos++] = (bytes[localColorStart + (*it)*3 + 0]&0xFF);
+          out[pos++] = 0xFF; //alpha
+
+          //Increment
+          x++;
+          if (x>=width) {
+            x = left;
+            y++;
+          }
+        }
+
+        //Finally
+        prevTuple = currTuple;
+      }
+
+      //Skip the remaining null terminator.
+      pos = subBlockEnd+1;
+
+      //NOTE: This is definitely questionable; we should end on a boundary exactly.
+      if ((bytes[pos]&0xFF) == 0) { pos++; }
+
+      //Make sure we read enough colors.
+      if (nested != width*height) { 
+        std::cerr <<"Index mismatch: " <<nested <<" : " <<(width*height) <<"\n";
+        //return ERR_INDEX_COUNT_MISMATCH; 
+      }
+
+      //Finally:
+      xOutStart += screen.canvasWidth;
+      curr_img++;
+    } else {
+      std::cerr <<"Unknown control code: " <<ctrlCode <<"\n";
+      return ERR_UNKNOWN_CONTROL_CODE;
     }
-    count += 1;
   }
 
-  //TODO: We've leaked all the buffered "bytes" arrays. This is easy to clean up, but I'd like to fold it into the "read" step if possible.
   std::cerr <<"All GIF sub-images saved.\n";
+  delete [] bytes; 
   return ERR_SUCCESS;
 }
 
