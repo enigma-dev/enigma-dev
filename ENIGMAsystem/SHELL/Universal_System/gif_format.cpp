@@ -19,6 +19,7 @@
 #include "gif_format.h"
 #include "nlpo2.h"
 
+#include <cstring>
 #include <fstream>
 #include <string>
 #include <vector>
@@ -173,8 +174,8 @@ bool readBits(unsigned char* bytes, size_t& pos, const size_t size, unsigned int
 //Should be faster. Do NOT pass currCodeSize by reference!
 bool readBits2(unsigned char* bytes, size_t& pos, const size_t size, unsigned int& subBlockEnd, unsigned int& currBit, unsigned int currCodeSize, unsigned int& res)
 {
-  if (currCodeSize>12) { return false; }
-  if (currBit>8) { return false; }
+  if (currCodeSize>12) { std::cerr <<"ERR 12\n"; return false; }
+  if (currBit>8) { std::cerr <<"ERR 8\n"; return false; }
 
   //Do we need to advance a byte?
   if (currBit==8) {
@@ -374,9 +375,28 @@ unsigned int load_gif_file(const char* filename, unsigned char*& out, unsigned i
   //Create the output buffer.
   const unsigned int final_size = image_width*image_height*4;
   out = new unsigned char[final_size](); // Initialize to zero.
+  if (screen.gctFlag) {
+    unsigned char r = bytes[globalColorStart + screen.bgColorIndex*3 + 0]&0xFF;
+    unsigned char g = bytes[globalColorStart + screen.bgColorIndex*3 + 1]&0xFF;
+    unsigned char b = bytes[globalColorStart + screen.bgColorIndex*3 + 2]&0xFF;
+    for (size_t y=0; y<gif_height; y++) {
+      for (size_t x=0; x<gif_width; x++) {
+        size_t pos = y*image_width*4 + x*4;
+        if (pos+4>final_size) { delete []out; out=0; return ERR_OVERSCAN; }
+        out[pos] = b;
+        out[pos+1] = g;
+        out[pos+2] = r;
+        out[pos+3] = 0xFF; //alpha
+      }
+    }
+  }
 
   //Start output at x=0 (y will always start at 0).
   unsigned int xOutStart = 0;
+
+  //How to dispose
+  unsigned int disposalMethod = 0;
+  int transpColor = -1;
 
   //
   //Phase 4: Now read all image data, and decompress as you go.
@@ -389,9 +409,13 @@ unsigned int load_gif_file(const char* filename, unsigned char*& out, unsigned i
     if (ctrlCode==0x21) { //It's an extension; skip it.
       if (pos+2>size) { return ERR_OUT_OF_BYTES; }
       ctrlCode = (bytes[pos++]&0xFF); //Extension control
-      ctrlCode = (bytes[pos++]&0xFF); //Length
-      if (pos+ctrlCode>size) { return ERR_OUT_OF_BYTES; }
-      pos += ctrlCode;
+      unsigned int extLen = (bytes[pos++]&0xFF); //Length
+      if (pos+extLen>size) { return ERR_OUT_OF_BYTES; }
+      if (ctrlCode==0xF9) { //Graphics control extension; we need a bit of data.
+        disposalMethod = (bytes[pos]&0x1C)>>2;
+        transpColor = (bytes[pos]&0x1) ? (bytes[pos+3]&0xFF) : -1;
+      }
+      pos += extLen;
       if (!skipSubBlocks(bytes, pos, size)) { return ERR_OUT_OF_BYTES; }
     } else if (ctrlCode==0x3B) { //EOF; done;
       break;
@@ -457,14 +481,13 @@ unsigned int load_gif_file(const char* filename, unsigned char*& out, unsigned i
         unsigned int oldCodeSize = currCodeSize;
         unsigned int currCode = 0;
         if (!readBits2(bytes, pos, size, subBlockEnd, currBit, currCodeSize, currCode)) { return ERR_OUT_OF_BYTES; }
-        //if (oldCodeSize==MaxCodeSize && currCode!=clearCode) { return ERR_EXPECTED_CLEAR_CODE; } //TODO: This might still be a valid check!
         if (currCode==clearCode) {
+          first = true;
           currCodeSize = lzwMinCodeSize + 1;
           currColorTable = buildColorTable(colorTableSize, clearCode, eofCode);
           continue;
         }
         if (currCode == eofCode) {
-std::cerr <<"EOF\n";
           break;
         }
 
@@ -490,7 +513,7 @@ std::cerr <<"EOF\n";
           }
 
           //Increment codeSize?
-          if (currColorTable.size()-1 == static_cast<unsigned int>(pow(2, currCodeSize) -1)) {
+          if (currColorTable.size()-1 == static_cast<unsigned int>(pow(2, currCodeSize) -1) && currCodeSize<12) {
             currCodeSize += 1;
           }
         }
@@ -499,16 +522,18 @@ std::cerr <<"EOF\n";
         nested += currTuple.size();
         for (std::vector<unsigned int>::const_iterator it=currTuple.begin(); it!=currTuple.end(); it++) {
           //Set1
-          size_t pos = y*image_width*4 + xOutStart*4 + x*4;
-          if (pos+4>final_size) { delete []out; out=0; return ERR_OVERSCAN; }
-          out[pos++] = (bytes[localColorStart + (*it)*3 + 2]&0xFF);
-          out[pos++] = (bytes[localColorStart + (*it)*3 + 1]&0xFF);
-          out[pos++] = (bytes[localColorStart + (*it)*3 + 0]&0xFF);
-          out[pos++] = 0xFF; //alpha
+          if (transpColor==-1 || (*it)!=transpColor) {
+            size_t pos = y*image_width*4 + xOutStart*4 + x*4;
+            if (pos+4>final_size) { delete []out; out=0; return ERR_OVERSCAN; }
+            out[pos] = (bytes[localColorStart + (*it)*3 + 2]&0xFF);
+            out[pos+1] = (bytes[localColorStart + (*it)*3 + 1]&0xFF);
+            out[pos+2] = (bytes[localColorStart + (*it)*3 + 0]&0xFF);
+            out[pos+3] = 0xFF; //alpha
+          }
 
           //Increment
           x++;
-          if (x>=width) {
+          if (x-left>=width) {
             x = left;
             y++;
           }
@@ -521,8 +546,8 @@ std::cerr <<"EOF\n";
       //Skip the remaining null terminator.
       pos = subBlockEnd+1;
 
-      //NOTE: This is definitely questionable; we should end on a boundary exactly.
-      if ((bytes[pos]&0xFF) == 0) { pos++; }
+      //Skip any remaining sub-blocks (should effectively skip a single "0").
+      if (!skipSubBlocks(bytes, pos, size)) { return ERR_OUT_OF_BYTES; }
 
       //Make sure we read enough colors.
       if (nested != width*height) { 
@@ -530,7 +555,36 @@ std::cerr <<"EOF\n";
         //return ERR_INDEX_COUNT_MISMATCH; 
       }
 
+      //We're done! React to the disposal method.
+      if (curr_img+1<num_images) {
+        if (disposalMethod==1) {
+          //Leave the background in place (i.e., repaint it).
+          for (size_t y=0; y<screen.canvasHeight; y++) {
+            size_t src = y*image_width*4 + xOutStart*4;
+            size_t dest = y*image_width*4 + (xOutStart+screen.canvasWidth)*4;
+            size_t len = screen.canvasWidth*4;
+            memcpy(&out[dest], &out[src], len);
+          }
+        } else if (disposalMethod==2) {
+          //Restore to background color (NOTE: We initialize to background color, just do nothing.).
+        } else if (disposalMethod==3) {
+          //Restore to the previous state (image, in this case).
+          //NOTE: Mostly untested; few GIFs use this.
+          if (curr_img>0) {
+            for (size_t y=0; y<screen.canvasHeight; y++) {
+              size_t src = y*image_width*4 + (xOutStart-screen.canvasWidth)*4;
+              size_t dest = y*image_width*4 + (xOutStart+screen.canvasWidth)*4;
+              size_t len = screen.canvasWidth*4;
+              memcpy(&out[dest], &out[src], len);
+            }
+          }
+        }
+      }
+
+
       //Finally:
+      disposalMethod = 0;
+      transpColor = -1;
       xOutStart += screen.canvasWidth;
       curr_img++;
     } else {
