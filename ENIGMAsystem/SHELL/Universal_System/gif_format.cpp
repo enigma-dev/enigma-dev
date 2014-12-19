@@ -27,6 +27,10 @@
 #include <sstream>
 #include <iostream>
 
+//Helper macro: Delete the output buffer (if not null) and zero it.
+//This is undef'd at the end of the file.
+#define CLEARMEM if(out) {delete []out; out=0;}
+
 namespace {
 const unsigned int ERR_SUCCESS          = 0; //No error (easy boolean checK)
 const unsigned int ERR_FILE_CANT_OPEN   = 1;
@@ -40,6 +44,8 @@ const unsigned int ERR_EXPECTED_CLEAR_CODE        = 8;
 const unsigned int ERR_OUT_OF_BITS_IN_BYTESTREAM  = 9;
 const unsigned int ERR_OVERSCAN                  = 10;
 const unsigned int ERR_INDEX_COUNT_MISMATCH      = 11;
+const unsigned int ERR_BITS_PAST_8               = 12;
+const unsigned int ERR_CODEBITS_PAST_12          = 13;
 
 const char* ERRMSG_SUCCESS = "Success! Not an error!";
 const char* ERRMSG_FILE_CANT_OPEN = "Couldn't open or read file.";
@@ -54,70 +60,31 @@ const char* ERRMSG_OUT_OF_BITS_IN_BYTESTREAM = "Ran out of bits in the bytestrea
 const char* ERRMSG_OVERSCAN = "Overscan when compiling image data.";
 const char* ERRMSG_INDEX_COUNT_MISMATCH = "Index count mismatch";
 const char* ERRMSG_UNKNOWN = "Unknown error message! What did you do???";
+const char* ERRMSG_BITS_PAST_8 = "Self-reported past 8 bits in a byte.";
+const char* ERRMSG_CODEBITS_PAST_12 = "Self-reported past 12 bits in a control code.";
 
 const unsigned int MaxCodeSize = 12;
 
 
 struct LogicalScreen {
-  LogicalScreen() : canvasWidth(0), canvasHeight(0), gctFlag(false), clrRes(0), sortFlag(false), gctSize(0), bgColorIndex(0), pixelAspectRatio(0) {}
+  LogicalScreen() : canvasWidth(0), canvasHeight(0), gctFlag(false), gctSize(0), bgColorIndex(0) {}
   unsigned int canvasWidth;
   unsigned int canvasHeight;
   bool gctFlag;
-  unsigned int clrRes;
-  bool sortFlag;
   unsigned int gctSize;
   unsigned int bgColorIndex;
-  unsigned int pixelAspectRatio;
 };
 
 typedef std::vector<unsigned int> ColorTuple;
 
-//Can help with debugging.
-std::string to_string(const std::vector<ColorTuple>& src) 
-{
-  std::stringstream res;
-  res <<"[";
-  std::string comma1 = "";
-  for (std::vector<ColorTuple>::const_iterator it=src.begin(); it!=src.end(); it++) {
-    res <<comma1 <<"[";
-    std::string comma2 = "";
-    for (std::vector<unsigned int>::const_iterator it2=it->begin(); it2!=it->end(); it2++) {
-      res <<comma2 <<(*it2);
-      comma2 = ",";
-    }
-    res <<"]";
-    comma1 = " , ";
-  }
-  res <<"]";
-  return res.str();
-}
-
-
 //Return 0b111 for 3, etc.
-unsigned int GetMask(unsigned int size) 
-{
-  switch(size) {
-    case 1: return 0x1;
-    case 2: return 0x3;
-    case 3: return 0x7;
-    case 4: return 0xF;
-    case 5: return 0x1F;
-    case 6: return 0x3F;
-    case 7: return 0x7F;
-    case 8: return 0xFF;
-    case 9: return 0x1FF;   //Shouldn't ever be used.
-    case 10: return 0x3FF;  //Shouldn't ever be used.
-    case 11: return 0x7FF;  //Shouldn't ever be used.
-    case 12: return 0xFFF;  //Shouldn't ever be used.
-    default: return 0;  //No really good way to error check this...
-  }
-}
-
+#define GetMask(size) ((1 << size) - 1)
 
 //Turns 1 into [1], etc. Pads up to clearCode
 std::vector<ColorTuple> buildColorTable(size_t colorTableSize, unsigned int clearCode, unsigned int eofCode)
 {
   std::vector<ColorTuple> res;
+  res.reserve(eofCode+1);
   for (size_t i=0; i<colorTableSize; i++) {
     res.push_back(ColorTuple(1, res.size()));
   }
@@ -143,50 +110,23 @@ bool skipSubBlocks(const unsigned char* bytes, size_t& pos, size_t length)
   return true;
 }
 
-//NOTE: This is still fairly inefficient. We can play around with bits directly later, knowing that the maximum code size is 12.
-bool readBits(unsigned char* bytes, size_t& pos, const size_t size, unsigned int& subBlockEnd, unsigned int& currBit, const unsigned int currCodeSize, unsigned int& res)
-{
-  res = 0;
-  for (size_t i=0; i<currCodeSize; i++) {
-    //Can read?
-    if (pos>subBlockEnd) { return false; }
-
-    //Get the bit, append it
-    res |= (((bytes[pos]&0x1)&0xFF)<<i);
-
-    //Increment
-    bytes[pos]>>=1;
-    currBit += 1;
-    if (currBit==8) {
-      currBit = 0;
-      if (pos+1>size) { return false; }
-      pos++;
-      if (pos>subBlockEnd) {
-        if (pos+1>size) { return false; }
-        subBlockEnd = pos + (bytes[pos]&0xFF);
-        pos++;
-      }
-    }
-  }
-  return true;
-}
-
 //Should be faster. Do NOT pass currCodeSize by reference!
-bool readBits2(unsigned char* bytes, size_t& pos, const size_t size, unsigned int& subBlockEnd, unsigned int& currBit, unsigned int currCodeSize, unsigned int& res)
+//Returns an error code, or ERR_SUCCESS on success.
+unsigned int readBits2(unsigned char* bytes, size_t& pos, const size_t size, unsigned int& subBlockEnd, unsigned int& currBit, unsigned int currCodeSize, unsigned int& res)
 {
-  if (currCodeSize>12) { std::cerr <<"ERR 12\n"; return false; }
-  if (currBit>8) { std::cerr <<"ERR 8\n"; return false; }
+  if (currCodeSize>MaxCodeSize) { return ERR_CODEBITS_PAST_12; }
+  if (currBit>8) { return ERR_BITS_PAST_8; }
 
   //Do we need to advance a byte?
   if (currBit==8) {
     currBit = 0;
     pos++;
-    if (pos>size) { return false; }
+    if (pos>size) { return ERR_OUT_OF_BITS_IN_BYTESTREAM; }
     //Do we need to advance a block?
     if (pos>subBlockEnd) {
-      subBlockEnd = pos + (bytes[pos]&0xFF);
+      subBlockEnd = pos + bytes[pos];
       pos++;
-      if (pos>size) { return false; }
+      if (pos>size) { return ERR_OUT_OF_BITS_IN_BYTESTREAM; }
     }
   }
 
@@ -205,12 +145,12 @@ bool readBits2(unsigned char* bytes, size_t& pos, const size_t size, unsigned in
     //Advance a byte
     currBit = 0;
     pos++;
-    if (pos>size) { return false; }
+    if (pos>size) { return ERR_OUT_OF_BITS_IN_BYTESTREAM; }
     //Do we need to advance a block?
     if (pos>subBlockEnd) {
-      subBlockEnd = pos + (bytes[pos]&0xFF);
+      subBlockEnd = pos + bytes[pos];
       pos++;
-      if (pos>size) { return false; }
+      if (pos>size) { return ERR_OUT_OF_BITS_IN_BYTESTREAM; }
     }
 
     //We might need all or part of this byte.
@@ -221,7 +161,7 @@ bool readBits2(unsigned char* bytes, size_t& pos, const size_t size, unsigned in
       currBit += currCodeSize;
     } else {
       //We need all of it.
-      res |= (((bytes[pos])&0xFF)<<read);
+      res |= bytes[pos]<<read;
       read += 8;
       currCodeSize -= 8;
       currBit = 8;
@@ -231,12 +171,12 @@ bool readBits2(unsigned char* bytes, size_t& pos, const size_t size, unsigned in
         //Advance a byte
         currBit = 0;
         pos++;
-        if (pos>size) { return false; }
+        if (pos>size) { return ERR_OUT_OF_BITS_IN_BYTESTREAM; }
         //Do we need to advance a block?
         if (pos>subBlockEnd) {
-          subBlockEnd = pos + (bytes[pos]&0xFF);
+          subBlockEnd = pos + bytes[pos];
           pos++;
-          if (pos>size) { return false; }
+          if (pos>size) { return ERR_OUT_OF_BITS_IN_BYTESTREAM; }
         }
 
         //Read. There will never be a need to advance at this point.
@@ -247,7 +187,20 @@ bool readBits2(unsigned char* bytes, size_t& pos, const size_t size, unsigned in
     }
   }
 
-  return true;
+  return ERR_SUCCESS;
+}
+
+unsigned char* read_entire_file(const char* filename, size_t& size) 
+{
+  std::ifstream input(filename, std::ios::binary|std::ios::ate);
+  if (input.good()) {
+    size = input.tellg();
+    unsigned char* bytes = new unsigned char[size];
+    input.seekg(0, std::ios::beg);
+    input.read(reinterpret_cast<char*>(bytes), size);
+    if (input) { return bytes; }
+  }
+  return 0;
 }
 
 
@@ -258,21 +211,13 @@ unsigned int load_gif_file(const char* filename, unsigned char*& out, unsigned i
 {
   //Read the entire file into a byte array. This is reasonable because we will output width*height*4 bytes, and the 
   // GIF file will be noticeably less (it's compressed, indexed color, and no alpha).
-  unsigned char* bytes = 0;
   size_t pos = 0;
   size_t size = 0;
+  out = 0; //Make sure this starts null, or our CLEARMEM macro may double-free memory.
 
-  { //File input.
-  std::ifstream input(filename, std::ios::binary|std::ios::ate);
-  if (!input.good()) { return ERR_FILE_CANT_OPEN; }
-
-  size = input.tellg();
-  bytes = new unsigned char[size];
-  input.seekg(0, std::ios::beg);
-  input.read(reinterpret_cast<char*>(bytes), size);
-  if (!input) { return ERR_OUT_OF_BYTES; }
-  input.close();
-  }
+  //File input
+  unsigned char* bytes = read_entire_file(filename, size);
+  if (!bytes) { return ERR_FILE_CANT_OPEN; }
 
   //
   //Phase 1: A few "check only" things.
@@ -298,18 +243,15 @@ unsigned int load_gif_file(const char* filename, unsigned char*& out, unsigned i
   //Read the description of the logical screen.
   if (pos+7>size) { return ERR_OUT_OF_BYTES; }
   LogicalScreen screen;
-  screen.canvasWidth = (bytes[pos]&0xFF) | ((bytes[pos+1]&0xFF)<<8);
+  screen.canvasWidth = bytes[pos] | (bytes[pos+1]<<8);
   pos += 2;
-  screen.canvasHeight = (bytes[pos]&0xFF) | ((bytes[pos+1]&0xFF)<<8);
+  screen.canvasHeight = bytes[pos] | (bytes[pos+1]<<8);
   pos += 2;
-  unsigned int pb1 = (bytes[pos++]&0xFF);
+  unsigned int pb1 = bytes[pos++];
   screen.gctFlag = pb1&0x80;
-  screen.clrRes = (pb1&0x70)>>4;
-  screen.sortFlag = pb1&0x8;
-  screen.gctSize = static_cast<unsigned int>(pow(2, (pb1&0x7)+1));
-  screen.bgColorIndex = (bytes[pos++]&0xFF);
-  screen.pixelAspectRatio = (bytes[pos++]&0xFF);
-  if (screen.pixelAspectRatio != 0) { return ERR_NONZERO_PIXEL_ASPECT_RATIO; }
+  screen.gctSize = 2<<(pb1 & 0x7);
+  screen.bgColorIndex = bytes[pos++];
+  if (bytes[pos++] != 0) { return ERR_NONZERO_PIXEL_ASPECT_RATIO; }
 
   //Read the table of global colors (optional).
   size_t globalColorStart=0;
@@ -323,19 +265,19 @@ unsigned int load_gif_file(const char* filename, unsigned char*& out, unsigned i
   //Phase 2: Scan to the end and get the total image count.
   //
 
-  //Just a count.
+  //Just count.
   num_images = 0;
   {
   size_t myPos = pos;
   for (;;) {
     if (myPos+1>size) { return ERR_OUT_OF_BYTES; }
-    unsigned int ctrlCode = (bytes[myPos++]&0xFF);
+    unsigned int ctrlCode = bytes[myPos++];
     if (ctrlCode==0x21) { //It's an extension; skip it.
       if (myPos+2>size) { return ERR_OUT_OF_BYTES; }
-      ctrlCode = (bytes[myPos++]&0xFF); //Extension control
-      ctrlCode = (bytes[myPos++]&0xFF); //Length
-      if (myPos+ctrlCode>size) { return ERR_OUT_OF_BYTES; }
-      myPos += ctrlCode;
+      unsigned int len = bytes[myPos+1]; //Length
+      myPos += 2;
+      if (myPos+len>size) { return ERR_OUT_OF_BYTES; }
+      myPos += len;
       if (!skipSubBlocks(bytes, myPos, size)) { return ERR_OUT_OF_BYTES; }
     } else if (ctrlCode==0x3B) { //EOF; done;
       break;
@@ -343,9 +285,9 @@ unsigned int load_gif_file(const char* filename, unsigned char*& out, unsigned i
       num_images++;
       if (myPos+9>size) { return ERR_OUT_OF_BYTES; }
       myPos += 9;
-      unsigned int pb1 = (bytes[myPos-1]&0xFF);
+      unsigned int pb1 = bytes[myPos-1];
       if (pb1&0x80) { //Skip the local color table.
-        unsigned int lctSize = static_cast<unsigned int>(pow(2, (pb1&0x7)+1));
+        unsigned int lctSize = 2<<(pb1 & 0x7);
         if (myPos+(lctSize*3)>size) { return ERR_OUT_OF_BYTES; }
         myPos += lctSize*3;
       }
@@ -376,17 +318,17 @@ unsigned int load_gif_file(const char* filename, unsigned char*& out, unsigned i
   const unsigned int final_size = image_width*image_height*4;
   out = new unsigned char[final_size](); // Initialize to zero.
   if (screen.gctFlag) {
-    unsigned char r = bytes[globalColorStart + screen.bgColorIndex*3 + 0]&0xFF;
-    unsigned char g = bytes[globalColorStart + screen.bgColorIndex*3 + 1]&0xFF;
-    unsigned char b = bytes[globalColorStart + screen.bgColorIndex*3 + 2]&0xFF;
+    unsigned char r = bytes[globalColorStart + screen.bgColorIndex*3 + 0];
+    unsigned char g = bytes[globalColorStart + screen.bgColorIndex*3 + 1];
+    unsigned char b = bytes[globalColorStart + screen.bgColorIndex*3 + 2];
     for (size_t y=0; y<gif_height; y++) {
       for (size_t x=0; x<gif_width; x++) {
-        size_t pos = y*image_width*4 + x*4;
-        if (pos+4>final_size) { delete []out; out=0; return ERR_OVERSCAN; }
-        out[pos] = b;
-        out[pos+1] = g;
-        out[pos+2] = r;
-        out[pos+3] = 0xFF; //alpha
+        size_t pos2 = y*image_width*4 + x*4;
+        if (pos2+4>final_size) { CLEARMEM; return ERR_OVERSCAN; }
+        out[pos2] = b;
+        out[pos2+1] = g;
+        out[pos2+2] = r;
+        out[pos2+3] = 0xFF; //alpha
       }
     }
   }
@@ -396,7 +338,7 @@ unsigned int load_gif_file(const char* filename, unsigned char*& out, unsigned i
 
   //How to dispose
   unsigned int disposalMethod = 0;
-  int transpColor = -1;
+  unsigned int transpColor = static_cast<unsigned int>(pow(2,14)); //This will never be a Gif color index.
 
   //
   //Phase 4: Now read all image data, and decompress as you go.
@@ -404,60 +346,58 @@ unsigned int load_gif_file(const char* filename, unsigned char*& out, unsigned i
 
   unsigned int curr_img = 0;
   for (;;) {
-    if (pos+1>size) { return ERR_OUT_OF_BYTES; }
-    unsigned int ctrlCode = (bytes[pos++]&0xFF);
+    if (pos+1>size) { CLEARMEM; return ERR_OUT_OF_BYTES; }
+    unsigned int ctrlCode = bytes[pos++];
     if (ctrlCode==0x21) { //It's an extension; skip it.
-      if (pos+2>size) { return ERR_OUT_OF_BYTES; }
-      ctrlCode = (bytes[pos++]&0xFF); //Extension control
-      unsigned int extLen = (bytes[pos++]&0xFF); //Length
-      if (pos+extLen>size) { return ERR_OUT_OF_BYTES; }
+      if (pos+2>size) { CLEARMEM; return ERR_OUT_OF_BYTES; }
+      ctrlCode = bytes[pos++]; //Extension control
+      unsigned int extLen = bytes[pos++]; //Length
+      if (pos+extLen>size) { CLEARMEM; return ERR_OUT_OF_BYTES; }
       if (ctrlCode==0xF9) { //Graphics control extension; we need a bit of data.
         disposalMethod = (bytes[pos]&0x1C)>>2;
-        transpColor = (bytes[pos]&0x1) ? (bytes[pos+3]&0xFF) : -1;
+        transpColor = (bytes[pos]&0x1) ? bytes[pos+3] : -1;
       }
       pos += extLen;
-      if (!skipSubBlocks(bytes, pos, size)) { return ERR_OUT_OF_BYTES; }
+      if (!skipSubBlocks(bytes, pos, size)) { CLEARMEM; return ERR_OUT_OF_BYTES; }
     } else if (ctrlCode==0x3B) { //EOF; done;
       break;
     } else if (ctrlCode==0x2C) { //It's an image; read and decompress it.
-      std::cerr <<"Reading image: " <<(curr_img+1) <<" of " <<num_images <<"\n";
+      std::cout <<"[GIF] Reading image: " <<(curr_img+1) <<" of " <<num_images <<"\n";
       //Read top-level image properties.
-      if (pos+9>size) { return ERR_OUT_OF_BYTES; }
-      unsigned int left = (bytes[pos]&0xFF) | ((bytes[pos+1]&0xFF)<<8);
+      if (pos+9>size) { CLEARMEM; return ERR_OUT_OF_BYTES; }
+      unsigned int left = bytes[pos] | (bytes[pos+1]<<8);
       pos += 2;
-      unsigned int top = (bytes[pos]&0xFF) | ((bytes[pos+1]&0xFF)<<8);
+      unsigned int top = bytes[pos] | (bytes[pos+1]<<8);
       pos += 2;
-      unsigned int width = (bytes[pos]&0xFF) | ((bytes[pos+1]&0xFF)<<8);
+      unsigned int width = bytes[pos] | (bytes[pos+1]<<8);
       pos += 2;
-      unsigned int height = (bytes[pos]&0xFF) | ((bytes[pos+1]&0xFF)<<8);
+      unsigned int height = bytes[pos] | (bytes[pos+1]<<8);
       pos += 2;
-      unsigned int pb1 = (bytes[pos++]&0xFF);
+      unsigned int pb1 = bytes[pos++];
       bool lctFlag = pb1&0x80;
-      bool intFlag = pb1&0x40;
-      //bool sortFlag = pb1&0x20; //Unused.
-      unsigned int lctSize = static_cast<unsigned int>(pow(2, (pb1&0x7)+1));
-      if (intFlag>0) { return ERR_INTERLACED_IMAGE; }
+      if (pb1&0x40) { CLEARMEM; return ERR_INTERLACED_IMAGE; }
+      unsigned int lctSize = 2<<(pb1 & 0x7);
 
       //Read Local Color Table, if applicable.
       size_t localColorStart = globalColorStart;
       size_t colorTableSize = screen.gctSize;
       if (lctFlag) {
-        if (pos+(lctSize*3)>size) { return ERR_OUT_OF_BYTES; }
+        if (pos+(lctSize*3)>size) { CLEARMEM; return ERR_OUT_OF_BYTES; }
         localColorStart = pos;
         pos += (lctSize*3);
         colorTableSize = lctSize;
       }
 
       //Read the lzw minimum code size.
-      if (pos+1>size) { return ERR_OUT_OF_BYTES; }
-      unsigned int lzwMinCodeSize = (bytes[pos++]&0xFF);
+      if (pos+1>size) { CLEARMEM; return ERR_OUT_OF_BYTES; }
+      unsigned int lzwMinCodeSize = bytes[pos++];
 
       //Prepare to read the image data. We always need at least one byte (we check at the end of the loop).
-      if (pos+1>size) { return ERR_OUT_OF_BYTES; }
-      unsigned int subBlockEnd = pos + (bytes[pos]&0xFF);
+      if (pos+1>size) { CLEARMEM; return ERR_OUT_OF_BYTES; }
+      unsigned int subBlockEnd = pos + bytes[pos];
       pos++;
-      if (pos>subBlockEnd) { return ERR_OUT_OF_BYTES; } //Might be better as "not enough image data"?
-      if (subBlockEnd+1>size) { return ERR_OUT_OF_BYTES; }
+      if (pos>subBlockEnd) { CLEARMEM; return ERR_OUT_OF_BYTES; } //Might be better as "not enough image data"?
+      if (subBlockEnd+1>size) { CLEARMEM; return ERR_OUT_OF_BYTES; }
 
       //More stuff.
       const unsigned int clearCode = static_cast<unsigned int>(pow(2, lzwMinCodeSize));
@@ -476,11 +416,14 @@ unsigned int load_gif_file(const char* filename, unsigned char*& out, unsigned i
       unsigned int nested = 0; //Sanity check.
       bool first = true;
 
+      unsigned int err = 0;
       for (;;) {
         //Read the next control code
-        unsigned int oldCodeSize = currCodeSize;
         unsigned int currCode = 0;
-        if (!readBits2(bytes, pos, size, subBlockEnd, currBit, currCodeSize, currCode)) { return ERR_OUT_OF_BYTES; }
+        err = readBits2(bytes, pos, size, subBlockEnd, currBit, currCodeSize, currCode);
+        if (err!=ERR_SUCCESS) { CLEARMEM; return err; }
+
+        //Clear/EOF are special control codes.
         if (currCode==clearCode) {
           first = true;
           currCodeSize = lzwMinCodeSize + 1;
@@ -522,13 +465,13 @@ unsigned int load_gif_file(const char* filename, unsigned char*& out, unsigned i
         nested += currTuple.size();
         for (std::vector<unsigned int>::const_iterator it=currTuple.begin(); it!=currTuple.end(); it++) {
           //Set1
-          if (transpColor==-1 || (*it)!=transpColor) {
-            size_t pos = y*image_width*4 + xOutStart*4 + x*4;
-            if (pos+4>final_size) { delete []out; out=0; return ERR_OVERSCAN; }
-            out[pos] = (bytes[localColorStart + (*it)*3 + 2]&0xFF);
-            out[pos+1] = (bytes[localColorStart + (*it)*3 + 1]&0xFF);
-            out[pos+2] = (bytes[localColorStart + (*it)*3 + 0]&0xFF);
-            out[pos+3] = 0xFF; //alpha
+          if ((*it)!=transpColor) {
+            size_t pos2 = y*image_width*4 + xOutStart*4 + x*4;
+            if (pos2+4>final_size) { CLEARMEM; return ERR_OVERSCAN; }
+            out[pos2] = bytes[localColorStart + (*it)*3 + 2];
+            out[pos2+1] = bytes[localColorStart + (*it)*3 + 1];
+            out[pos2+2] = bytes[localColorStart + (*it)*3 + 0];
+            out[pos2+3] = 0xFF; //alpha
           }
 
           //Increment
@@ -547,16 +490,17 @@ unsigned int load_gif_file(const char* filename, unsigned char*& out, unsigned i
       pos = subBlockEnd+1;
 
       //Skip any remaining sub-blocks (should effectively skip a single "0").
-      if (!skipSubBlocks(bytes, pos, size)) { return ERR_OUT_OF_BYTES; }
+      if (!skipSubBlocks(bytes, pos, size)) { CLEARMEM; return ERR_OUT_OF_BYTES; }
 
       //Make sure we read enough colors.
       if (nested != width*height) { 
-        std::cerr <<"Index mismatch: " <<nested <<" : " <<(width*height) <<"\n";
-        //return ERR_INDEX_COUNT_MISMATCH; 
+        std::cerr <<"[GIF] Index mismatch: " <<nested <<" : " <<(width*height) <<"\n";
+        CLEARMEM;
+        return ERR_INDEX_COUNT_MISMATCH; 
       }
 
       //We're done! React to the disposal method.
-      if (curr_img+1<num_images) {
+      if (static_cast<int>(curr_img)+1<num_images) {
         if (disposalMethod==1) {
           //Leave the background in place (i.e., repaint it).
           for (size_t y=0; y<screen.canvasHeight; y++) {
@@ -584,16 +528,17 @@ unsigned int load_gif_file(const char* filename, unsigned char*& out, unsigned i
 
       //Finally:
       disposalMethod = 0;
-      transpColor = -1;
+      transpColor = static_cast<unsigned int>(pow(2,14));
       xOutStart += screen.canvasWidth;
       curr_img++;
     } else {
-      std::cerr <<"Unknown control code: " <<ctrlCode <<"\n";
+      std::cerr <<"[GIF] Unknown control code: " <<ctrlCode <<"\n";
+      CLEARMEM;
       return ERR_UNKNOWN_CONTROL_CODE;
     }
   }
 
-  std::cerr <<"All GIF sub-images saved.\n";
+  std::cout <<"[GIF] All GIF sub-images saved.\n";
   delete [] bytes; 
   return ERR_SUCCESS;
 }
@@ -613,7 +558,14 @@ const char* load_gif_error_text(unsigned int err)
     case ERR_OUT_OF_BITS_IN_BYTESTREAM: return ERRMSG_OUT_OF_BITS_IN_BYTESTREAM;
     case ERR_OVERSCAN: return ERRMSG_OVERSCAN;
     case ERR_INDEX_COUNT_MISMATCH: return ERRMSG_INDEX_COUNT_MISMATCH;
+    case ERR_BITS_PAST_8: return ERRMSG_BITS_PAST_8;
+    case ERR_CODEBITS_PAST_12: return ERRMSG_CODEBITS_PAST_12;
     default: return ERRMSG_UNKNOWN;
   }
 }
+
+
+//Remove our macros.
+#undef CLEARMEM
+#undef GetMask
 
