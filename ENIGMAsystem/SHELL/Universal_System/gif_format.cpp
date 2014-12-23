@@ -27,10 +27,6 @@
 #include <sstream>
 #include <iostream>
 
-//Helper macro: Delete the output buffer (if not null) and zero it.
-//This is undef'd at the end of the file.
-#define CLEARMEM if(out) {delete []out; out=0;}
-
 namespace {
 const unsigned int ERR_SUCCESS          = 0; //No error (easy boolean checK)
 const unsigned int ERR_FILE_CANT_OPEN   = 1;
@@ -65,6 +61,10 @@ const char* ERRMSG_CODEBITS_PAST_12 = "Self-reported past 12 bits in a control c
 
 const unsigned int MaxCodeSize = 12;
 
+inline void clearmem(unsigned char* &out) {
+  delete[] out;
+  out = 0;
+}
 
 struct LogicalScreen {
   LogicalScreen() : canvasWidth(0), canvasHeight(0), gctFlag(false), gctSize(0), bgColorIndex(0) {}
@@ -213,7 +213,7 @@ unsigned int load_gif_file(const char* filename, unsigned char*& out, unsigned i
   // GIF file will be noticeably less (it's compressed, indexed color, and no alpha).
   size_t pos = 0;
   size_t size = 0;
-  out = 0; //Make sure this starts null, or our CLEARMEM macro may double-free memory.
+  out = 0; //Make sure this starts null.
 
   //File input
   unsigned char* bytes = read_entire_file(filename, size);
@@ -324,7 +324,7 @@ unsigned int load_gif_file(const char* filename, unsigned char*& out, unsigned i
     for (size_t y=0; y<gif_height; y++) {
       for (size_t x=0; x<gif_width; x++) {
         size_t pos2 = y*image_width*4 + x*4;
-        if (pos2+4>final_size) { CLEARMEM; return ERR_OVERSCAN; }
+        if (pos2+4>final_size) { clearmem(out); return ERR_OVERSCAN; }
         out[pos2] = b;
         out[pos2+1] = g;
         out[pos2+2] = r;
@@ -338,7 +338,7 @@ unsigned int load_gif_file(const char* filename, unsigned char*& out, unsigned i
 
   //How to dispose
   unsigned int disposalMethod = 0;
-  unsigned int transpColor = static_cast<unsigned int>(pow(2,14)); //This will never be a Gif color index.
+  unsigned int transpColor = 1<<14; //This will never be a Gif color index.
 
   //
   //Phase 4: Now read all image data, and decompress as you go.
@@ -346,25 +346,25 @@ unsigned int load_gif_file(const char* filename, unsigned char*& out, unsigned i
 
   unsigned int curr_img = 0;
   for (;;) {
-    if (pos+1>size) { CLEARMEM; return ERR_OUT_OF_BYTES; }
+    if (pos+1>size) { clearmem(out); return ERR_OUT_OF_BYTES; }
     unsigned int ctrlCode = bytes[pos++];
     if (ctrlCode==0x21) { //It's an extension; skip it.
-      if (pos+2>size) { CLEARMEM; return ERR_OUT_OF_BYTES; }
+      if (pos+2>size) { clearmem(out); return ERR_OUT_OF_BYTES; }
       ctrlCode = bytes[pos++]; //Extension control
       unsigned int extLen = bytes[pos++]; //Length
-      if (pos+extLen>size) { CLEARMEM; return ERR_OUT_OF_BYTES; }
+      if (pos+extLen>size) { clearmem(out); return ERR_OUT_OF_BYTES; }
       if (ctrlCode==0xF9) { //Graphics control extension; we need a bit of data.
         disposalMethod = (bytes[pos]&0x1C)>>2;
         transpColor = (bytes[pos]&0x1) ? bytes[pos+3] : -1;
       }
       pos += extLen;
-      if (!skipSubBlocks(bytes, pos, size)) { CLEARMEM; return ERR_OUT_OF_BYTES; }
+      if (!skipSubBlocks(bytes, pos, size)) { clearmem(out); return ERR_OUT_OF_BYTES; }
     } else if (ctrlCode==0x3B) { //EOF; done;
       break;
     } else if (ctrlCode==0x2C) { //It's an image; read and decompress it.
       std::cout <<"[GIF] Reading image: " <<(curr_img+1) <<" of " <<num_images <<"\n";
       //Read top-level image properties.
-      if (pos+9>size) { CLEARMEM; return ERR_OUT_OF_BYTES; }
+      if (pos+9>size) { clearmem(out); return ERR_OUT_OF_BYTES; }
       unsigned int left = bytes[pos] | (bytes[pos+1]<<8);
       pos += 2;
       unsigned int top = bytes[pos] | (bytes[pos+1]<<8);
@@ -375,32 +375,32 @@ unsigned int load_gif_file(const char* filename, unsigned char*& out, unsigned i
       pos += 2;
       unsigned int pb1 = bytes[pos++];
       bool lctFlag = pb1&0x80;
-      if (pb1&0x40) { CLEARMEM; return ERR_INTERLACED_IMAGE; }
+      if (pb1&0x40) { clearmem(out); return ERR_INTERLACED_IMAGE; }
       unsigned int lctSize = 2<<(pb1 & 0x7);
 
       //Read Local Color Table, if applicable.
       size_t localColorStart = globalColorStart;
       size_t colorTableSize = screen.gctSize;
       if (lctFlag) {
-        if (pos+(lctSize*3)>size) { CLEARMEM; return ERR_OUT_OF_BYTES; }
+        if (pos+(lctSize*3)>size) { clearmem(out); return ERR_OUT_OF_BYTES; }
         localColorStart = pos;
         pos += (lctSize*3);
         colorTableSize = lctSize;
       }
 
       //Read the lzw minimum code size.
-      if (pos+1>size) { CLEARMEM; return ERR_OUT_OF_BYTES; }
+      if (pos+1>size) { clearmem(out); return ERR_OUT_OF_BYTES; }
       unsigned int lzwMinCodeSize = bytes[pos++];
 
       //Prepare to read the image data. We always need at least one byte (we check at the end of the loop).
-      if (pos+1>size) { CLEARMEM; return ERR_OUT_OF_BYTES; }
+      if (pos+1>size) { clearmem(out); return ERR_OUT_OF_BYTES; }
       unsigned int subBlockEnd = pos + bytes[pos];
       pos++;
-      if (pos>subBlockEnd) { CLEARMEM; return ERR_OUT_OF_BYTES; } //Might be better as "not enough image data"?
-      if (subBlockEnd+1>size) { CLEARMEM; return ERR_OUT_OF_BYTES; }
+      if (pos>subBlockEnd) { clearmem(out); return ERR_OUT_OF_BYTES; } //Might be better as "not enough image data"?
+      if (subBlockEnd+1>size) { clearmem(out); return ERR_OUT_OF_BYTES; }
 
       //More stuff.
-      const unsigned int clearCode = static_cast<unsigned int>(pow(2, lzwMinCodeSize));
+      const unsigned int clearCode = 1 << lzwMinCodeSize;
       const unsigned int eofCode = clearCode + 1;
       std::vector<ColorTuple> currColorTable = buildColorTable(colorTableSize, clearCode, eofCode);
       ColorTuple prevTuple;
@@ -421,7 +421,7 @@ unsigned int load_gif_file(const char* filename, unsigned char*& out, unsigned i
         //Read the next control code
         unsigned int currCode = 0;
         err = readBits2(bytes, pos, size, subBlockEnd, currBit, currCodeSize, currCode);
-        if (err!=ERR_SUCCESS) { CLEARMEM; return err; }
+        if (err!=ERR_SUCCESS) { clearmem(out); return err; }
 
         //Clear/EOF are special control codes.
         if (currCode==clearCode) {
@@ -456,7 +456,7 @@ unsigned int load_gif_file(const char* filename, unsigned char*& out, unsigned i
           }
 
           //Increment codeSize?
-          if (currColorTable.size()-1 == static_cast<unsigned int>(pow(2, currCodeSize) -1) && currCodeSize<12) {
+          if (currColorTable.size()==static_cast<unsigned int>(1<<currCodeSize) && currCodeSize<12) {
             currCodeSize += 1;
           }
         }
@@ -467,7 +467,7 @@ unsigned int load_gif_file(const char* filename, unsigned char*& out, unsigned i
           //Set1
           if ((*it)!=transpColor) {
             size_t pos2 = y*image_width*4 + xOutStart*4 + x*4;
-            if (pos2+4>final_size) { CLEARMEM; return ERR_OVERSCAN; }
+            if (pos2+4>final_size) { clearmem(out); return ERR_OVERSCAN; }
             out[pos2] = bytes[localColorStart + (*it)*3 + 2];
             out[pos2+1] = bytes[localColorStart + (*it)*3 + 1];
             out[pos2+2] = bytes[localColorStart + (*it)*3 + 0];
@@ -490,12 +490,12 @@ unsigned int load_gif_file(const char* filename, unsigned char*& out, unsigned i
       pos = subBlockEnd+1;
 
       //Skip any remaining sub-blocks (should effectively skip a single "0").
-      if (!skipSubBlocks(bytes, pos, size)) { CLEARMEM; return ERR_OUT_OF_BYTES; }
+      if (!skipSubBlocks(bytes, pos, size)) { clearmem(out); return ERR_OUT_OF_BYTES; }
 
       //Make sure we read enough colors.
       if (nested != width*height) { 
         std::cerr <<"[GIF] Index mismatch: " <<nested <<" : " <<(width*height) <<"\n";
-        CLEARMEM;
+        clearmem(out);
         return ERR_INDEX_COUNT_MISMATCH; 
       }
 
@@ -528,12 +528,12 @@ unsigned int load_gif_file(const char* filename, unsigned char*& out, unsigned i
 
       //Finally:
       disposalMethod = 0;
-      transpColor = static_cast<unsigned int>(pow(2,14));
+      transpColor = 1<<14;
       xOutStart += screen.canvasWidth;
       curr_img++;
     } else {
       std::cerr <<"[GIF] Unknown control code: " <<ctrlCode <<"\n";
-      CLEARMEM;
+      clearmem(out);
       return ERR_UNKNOWN_CONTROL_CODE;
     }
   }
@@ -565,7 +565,6 @@ const char* load_gif_error_text(unsigned int err)
 }
 
 
-//Remove our macros.
-#undef CLEARMEM
+//Remove our macro.
 #undef GetMask
 
