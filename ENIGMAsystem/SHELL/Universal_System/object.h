@@ -77,6 +77,9 @@ namespace enigma
       object_basic();
       object_basic(int uid, int uoid);
       virtual ~object_basic();
+
+      //Can we cast this instance to an object of type "obj". (NOTE: This only checks parents; you can never can_cast(this->id).)
+      virtual bool can_cast(int obj) const;
     };
 
     struct objectstruct
