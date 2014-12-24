@@ -74,6 +74,7 @@ namespace enigma
     object_basic::object_basic(): id(-4), object_index(-4) {}
     object_basic::object_basic(int uid, int uoid): id(DEBUG_ID_CHECK(uid, uoid)), object_index(uoid) {}
     object_basic::~object_basic() {}
+    bool object_basic::can_cast(int obj) const { return false; }
 
     extern objectstruct objs[];
     extern int obj_idmax;
