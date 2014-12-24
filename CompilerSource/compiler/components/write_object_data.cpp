@@ -692,6 +692,9 @@ static inline void write_object_destructor(std::ostream &wto, parsed_object *obj
       wto << "      delete ENOBJ_ITER_myevent_" << event_stacked_get_root_name(it->first) << ";\n";
     }
     wto << "    }\n";
+
+    //We'll sneak this in here.
+    wto << "    virtual bool can_cast(int obj) const;\n";
 }
 
 static inline void write_object_class_body(parsed_object* object, lang_CPP *lcpp, std::ostream &wto, EnigmaStruct *es, parsed_object* global, robertmap &parent_undefinitions, map<string, int> &revTlineLookup, evpairmap &evmap) {
@@ -877,6 +880,7 @@ static inline void write_timeline_implementations(ofstream& wto, EnigmaStruct *e
 static inline void write_object_script_funcs(ofstream& wto, const parsed_object *const t);
 static inline void write_object_timeline_funcs(ofstream& wto, EnigmaStruct *es, const parsed_object *const t, const map<string, int>& revTlineLookup);
 static inline void write_object_event_funcs(ofstream& wto, const parsed_object *const object, int mode, const robertmap &parent_undefinitions);
+static inline void write_can_cast_func(ofstream& wto, const parsed_object *const pobj);
 
 static inline void write_event_bodies(ofstream& wto, EnigmaStruct *es, int mode, robertmap &parent_undefinitions, const map<string, int>& revTlineLookup) {
   // Export everything else
@@ -888,6 +892,9 @@ static inline void write_event_bodies(ofstream& wto, EnigmaStruct *es, int mode,
 
     // Write local object copies of timelines
      write_object_timeline_funcs(wto, es, i->second, revTlineLookup);
+
+    //Write the required "can_cast()" function.
+    write_can_cast_func(wto, i->second);
   }
 }
 
@@ -1017,6 +1024,15 @@ static inline void write_known_timelines(ofstream& wto, EnigmaStruct *es, const 
   wto <<"    default: event_parent::timeline_call_moment_script(timeline_index, moment_index);\n";
   wto <<"  }\n";
   wto <<"}\n\n";
+}
+
+static inline void write_can_cast_func(ofstream& wto, const parsed_object *const pobj) {
+  wto <<"bool enigma::OBJ_" << pobj->name <<"::can_cast(int obj) const {\n";
+  wto <<"  return false";
+  for (parsed_object* curr=pobj->parent; curr; curr=curr->parent) {
+    wto <<" || (obj==" <<curr->id <<")";
+  }
+  wto << ";\n" <<"}\n\n";
 }
 
 static inline void write_global_script_array(ofstream &wto, EnigmaStruct *es) {
