@@ -77,7 +77,7 @@ void instance_activate_object(int obj) {
     std::map<int,enigma::object_basic*>::iterator iter = enigma::instance_deactivated_list.begin();
     while (iter != enigma::instance_deactivated_list.end()) {
         enigma::object_basic* const inst = iter->second;
-        if (obj == all || (obj < 100000? inst->object_index == obj : inst->id == unsigned(obj))) {
+        if (obj == all || (obj < 100000 ? (inst->object_index==obj || inst->can_cast(obj)) : inst->id == unsigned(obj))) {
             inst->activate();
             enigma::instance_deactivated_list.erase(iter++);
         }
