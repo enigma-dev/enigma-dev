@@ -97,7 +97,7 @@ struct variant
   types_extrapolate_alldec(variant& operator-=)
   types_extrapolate_alldec(variant& operator*=)
   types_extrapolate_alldec(variant& operator/=)
-  types_extrapolate_alldec(variant& operator%=) // idk if this line is needed? it works without it
+  types_extrapolate_alldec(variant& operator%=)
   
   types_extrapolate_alldec(variant& operator<<=)
   types_extrapolate_alldec(variant& operator>>=)
