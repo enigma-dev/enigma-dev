@@ -560,7 +560,7 @@ namespace syncheck
             if (code[pos+1] == '=')
               lex.push_back(token(TT_ASSOP, "%=", superPos, 2, false, false, true, mymacroind)), pos += 2; // %= /=
             else
-              lex.push_back(token(TT_OPERATOR, "%=", superPos, 1, false, false, true, mymacroind)), ++pos;
+              lex.push_back(token(TT_OPERATOR, "%=", superPos, 1, false, false, true, mymacroind)), ++pos; // possible typo?, should be just '%' I think - robert
           break;
         
         case '!':
