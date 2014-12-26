@@ -713,7 +713,7 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
           synt.replace(pos,n,"^^^^^^^");
           pos += 6; break;
         }
-      case '&': case '|': case '~': case '/':
+      case '&': case '|': case '~': case '/': case '%':
           Ass: // Assignment operator
           if (synt[pos+1] == '=') {
             deceq |= indecl;
