@@ -463,7 +463,7 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
         if (n.type == enigma_type__var and !n.pad and !n.deref)*/
         dtype = datatypes[exp];
         if (dtype.length() == 0 || dtype == "var") {
-          cout << "is a var" << endl;
+          //cout << "is a var" << endl;
           pt cp = pos;
           code[cp++] = '(';
           for (int cnt = 1; cnt; cp++)
@@ -473,7 +473,7 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
             code[cp] = ')';
         //} else if (n.pad or n.deref) { // Regardless of type, as long as we have some kind of pointer to be dereferenced
         } else {
-          cout << "not a var" << endl;
+          //cout << "not a var" << endl;
           const pt ep = end_of_brackets(synt,pos); // Get position of closing ']'
           code.insert(ep, 1, ')');
           synt.insert(ep, 1, ')');
