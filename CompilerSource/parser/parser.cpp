@@ -366,6 +366,8 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
   //TODO: Fix this dreamland.
   //first string is the name of the local, second is the data type as a string
   map<string,string> datatypes;
+  // hold array identifier for multi-dimensional arrays
+  string arrayIdentifier = "";
 
   for (pt pos = 0; pos < synt.length(); pos++)
   {
@@ -458,10 +460,13 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
       if (!indecl or deceq) {
         const pt sp = move_to_beginning(code,synt,pos-1);
         const string exp = code.substr(sp,pos-sp);
-        cout << "GET TYPE2 OF " << exp << " (" << dtype << ")" << endl;
+        if (!isdigit(exp[0]) && exp.find('[') == string::npos && exp.find(']') == string::npos) {
+          arrayIdentifier = exp;
+        }
+        cout << "GET TYPE2 OF " << exp << " (" << dtype << "," << arrayIdentifier << ")" << endl;
         /*onode n = exp_typeof(exp,sstack.where,slev+1,glob,obj);
         if (n.type == enigma_type__var and !n.pad and !n.deref)*/
-        dtype = datatypes[exp];
+        dtype = datatypes[arrayIdentifier];
         if (dtype.length() == 0 || dtype == "var") {
           //cout << "is a var" << endl;
           pt cp = pos;
@@ -486,7 +491,10 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
       } else {
         const pt sp = move_to_beginning(code,synt,pos-1);
         const string exp = code.substr(sp,pos-sp);
-        datatypes[exp] = dtype;
+        if (!isdigit(exp[0]) && exp.find('[') == string::npos && exp.find(']') == string::npos) {
+          arrayIdentifier = exp;
+        }
+        datatypes[arrayIdentifier] = dtype;
         if (!inbrack and !deceq)
           dpre += "*", inbrack++; // Just increment the ref count; Knowing how many [] there are is unnecessary.
         level++;
