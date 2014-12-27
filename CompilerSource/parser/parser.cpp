@@ -455,7 +455,7 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
     }
     else if (synt[pos] == '[')
     {
-      if ((!indecl or deceq)) {
+      if (!indecl or deceq) {
         const pt sp = move_to_beginning(code,synt,pos-1);
         const string exp = code.substr(sp,pos-sp);
         cout << "GET TYPE2 OF " << exp << " (" << dtype << ")" << endl;
@@ -487,6 +487,9 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
         const pt sp = move_to_beginning(code,synt,pos-1);
         const string exp = code.substr(sp,pos-sp);
         datatypes[exp] = dtype;
+        if (!inbrack and !deceq)
+          dpre += "*", inbrack++; // Just increment the ref count; Knowing how many [] there are is unnecessary.
+        level++;
       }
     }
     else switch (synt[pos])
