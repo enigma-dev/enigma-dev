@@ -48,10 +48,12 @@ namespace enigma
             enigma::mvp_matrix = enigma::projection_matrix * enigma::mv_matrix;
 
             //normal_matrix = invert(transpose(mv_submatrix)), where mv_submatrix is modelview top-left 3x3 matrix
-            enigma::Matrix4 tmpNorm = enigma::mv_matrix.Transpose().Inverse();
-            enigma::normal_matrix = enigma::Matrix3(tmpNorm(0,0),tmpNorm(0,1),tmpNorm(0,2),
-                                                    tmpNorm(1,0),tmpNorm(1,1),tmpNorm(1,2),
-                                                    tmpNorm(2,0),tmpNorm(2,1),tmpNorm(2,2));
+            enigma::Matrix3 tmpNorm(mv_matrix(0,0),mv_matrix(0,1),mv_matrix(0,2),
+                                    mv_matrix(1,0),mv_matrix(1,1),mv_matrix(1,2),
+                                    mv_matrix(2,0),mv_matrix(2,1),mv_matrix(2,2));
+
+            enigma::normal_matrix = tmpNorm.Inverse().Transpose();
+
             enigma::transform_needs_update = false;
         }
     }
