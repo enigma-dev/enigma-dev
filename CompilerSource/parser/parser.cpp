@@ -446,7 +446,7 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
       cout << "New level: " << level << endl << "code from here: " << code.substr(pos) << endl;
       continue;
     }
-    //TODO: See comment in else-switch statement
+    //TODO: See comment in else-switch case '['
     else if (synt[pos] == '[')
     {
       if (!indecl or deceq) {
