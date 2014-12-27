@@ -226,6 +226,7 @@ struct var
   types_extrapolate_alldec(variant& operator-=)
   types_extrapolate_alldec(variant& operator*=)
   types_extrapolate_alldec(variant& operator/=)
+  types_extrapolate_alldec(variant& operator%=)
   
   types_extrapolate_alldec(variant& operator<<=)
   types_extrapolate_alldec(variant& operator>>=)
@@ -305,6 +306,7 @@ types_binary_assign_extrapolate_declare(+, const variant&)
 types_binary_assign_extrapolate_declare(-, const variant&)
 types_binary_assign_extrapolate_declare(*, const variant&)
 types_binary_assign_extrapolate_declare(/, const variant&)
+types_binary_assign_extrapolate_declare(%, const variant&)
 
 types_binary_assign_extrapolate_declare(<<, const variant&) 
 types_binary_assign_extrapolate_declare(>>, const variant&) 
@@ -340,6 +342,7 @@ types_binary_assign_extrapolate_declare(+, const var&)
 types_binary_assign_extrapolate_declare(-, const var&)
 types_binary_assign_extrapolate_declare(*, const var&)
 types_binary_assign_extrapolate_declare(/, const var&)
+types_binary_assign_extrapolate_declare(%, const var&)
 
 types_binary_assign_extrapolate_declare(<<, const var&) 
 types_binary_assign_extrapolate_declare(>>, const var&) 
