@@ -636,6 +636,7 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
           goto Ass;
         dpre += '*';
         break;
+      //TODO: Theoretically unreachable case statement, if-else structure above branches with declaration
       case '[':
         if (!inbrack and !deceq)
           dpre += "*", inbrack++; // Just increment the ref count; Knowing how many [] there are is unnecessary.
