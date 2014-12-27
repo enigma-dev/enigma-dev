@@ -361,6 +361,11 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
   int inbrack = 0, level = 0;
   bool rhs = false;
   int infor = 0;
+  
+  //this is a temporary workaround for coercing array types by me, rubber T
+  //TODO: Fix this dreamland.
+  //first string is the name of the local, second is the data type as a string
+  map<string,string> datatypes;
 
   for (pt pos = 0; pos < synt.length(); pos++)
   {
@@ -448,33 +453,41 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
       cout << "New level: " << level << endl << "code from here: " << code.substr(pos) << endl;
       continue;
     }
-    else if (synt[pos] == '[' and (!indecl or deceq))
+    else if (synt[pos] == '[')
     {
-      const pt sp = move_to_beginning(code,synt,pos-1);
-      const string exp = code.substr(sp,pos-sp);
-      cout << "GET TYPE2 OF " << exp << " (" << dtype << ")" << endl;
-      /*onode n = exp_typeof(exp,sstack.where,slev+1,glob,obj);
-      if (n.type == enigma_type__var and !n.pad and !n.deref)*/
-      if (dtype.length() == 0 || dtype == "var") {
-        cout << "is a var" << endl;
-        pt cp = pos;
-        code[cp++] = '(';
-        for (int cnt = 1; cnt; cp++)
-          if (synt[cp] == '[') cnt++;
-          else if (synt[cp] == ']') cnt--;
-        if (synt[--cp] == ']')
-          code[cp] = ')';
-      //} else if (n.pad or n.deref) { // Regardless of type, as long as we have some kind of pointer to be dereferenced
+      if ((!indecl or deceq)) {
+        const pt sp = move_to_beginning(code,synt,pos-1);
+        const string exp = code.substr(sp,pos-sp);
+        cout << "GET TYPE2 OF " << exp << " (" << dtype << ")" << endl;
+        /*onode n = exp_typeof(exp,sstack.where,slev+1,glob,obj);
+        if (n.type == enigma_type__var and !n.pad and !n.deref)*/
+        dtype = datatypes[exp];
+        if (dtype.length() == 0 || dtype == "var") {
+          cout << "is a var" << endl;
+          pt cp = pos;
+          code[cp++] = '(';
+          for (int cnt = 1; cnt; cp++)
+            if (synt[cp] == '[') cnt++;
+            else if (synt[cp] == ']') cnt--;
+          if (synt[--cp] == ']')
+            code[cp] = ')';
+        //} else if (n.pad or n.deref) { // Regardless of type, as long as we have some kind of pointer to be dereferenced
+        } else {
+          cout << "not a var" << endl;
+          const pt ep = end_of_brackets(synt,pos); // Get position of closing ']'
+          code.insert(ep, 1, ')');
+          synt.insert(ep, 1, ')');
+          pos++; // Move after the '['
+          code.insert(pos, "int(");
+          synt.insert(pos, "ccc(");
+        }
+        level++;
+        dtype = "";
       } else {
-        cout << "not a var" << endl;
-        const pt ep = end_of_brackets(synt,pos); // Get position of closing ']'
-        code.insert(ep, 1, ')');
-        synt.insert(ep, 1, ')');
-        pos++; // Move after the '['
-        code.insert(pos, "int(");
-        synt.insert(pos, "ccc(");
+        const pt sp = move_to_beginning(code,synt,pos-1);
+        const string exp = code.substr(sp,pos-sp);
+        datatypes[exp] = dtype;
       }
-      level++;
     }
     else switch (synt[pos])
     {
