@@ -455,10 +455,10 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
         if (!isdigit(exp[0]) && exp.find('[') == string::npos && exp.find(']') == string::npos) {
           arrayIdentifier = exp;
         }
-        cout << "GET TYPE2 OF " << exp << " (" << dtype << "," << arrayIdentifier << ")" << endl;
+        dtype = datatypes[arrayIdentifier];
+        cout << "GET TYPE2 OF (" << (dtype.length() ? dtype : "implicit var") << "," << arrayIdentifier << ") " << exp << endl;
         /*onode n = exp_typeof(exp,sstack.where,slev+1,glob,obj);
         if (n.type == enigma_type__var and !n.pad and !n.deref)*/
-        dtype = datatypes[arrayIdentifier];
         if (dtype.length() == 0 || dtype == "var") {
           //cout << "is a var" << endl;
           pt cp = pos;
