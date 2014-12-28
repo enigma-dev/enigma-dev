@@ -445,7 +445,7 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
       const string exp = code.substr(sp,pos-sp);
       
       bool replace = false;
-      for (size_t pars = 0, bracks = 1, pot = pos; bracks > 0 and pot < synt.length(); ++pot) {
+      for (size_t pars = 0, bracks = 1, pot = pos + 1; bracks > 0 and pot < synt.length(); ++pot) {
         if (synt[pot] == '(') {
           ++pars;
         } else if (synt[pot] == ')') {
