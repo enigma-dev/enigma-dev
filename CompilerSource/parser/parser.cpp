@@ -439,7 +439,6 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
       cout << "New level: " << level << endl << "code from here: " << code.substr(pos) << endl;
       continue;
     }
-    //TODO: See comment in else-switch case '['
     else if (synt[pos] == '[' and (!indecl or deceq))
     {
         const pt sp = move_to_beginning(code,synt,pos-1);
@@ -451,7 +450,7 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
           if (synt[pot] == ']') break;
           if (synt[pot] == ')') break;
         }
-        //cout << "GET TYPE2 OF (" << (dtype.length() ? dtype : "implicit var") << "," << arrayIdentifier << ") " << exp << endl;
+        cout << "GET TYPE2 OF " << exp << endl;
         /*onode n = exp_typeof(exp,sstack.where,slev+1,glob,obj);
         if (n.type == enigma_type__var and !n.pad and !n.deref)*/
         if (vararr) {
@@ -619,7 +618,6 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
           goto Ass;
         dpre += '*';
         break;
-      //TODO: Theoretically unreachable case expression, if-else structure above branches with declaration
       case '[':
         if (!inbrack and !deceq)
           dpre += "*", inbrack++; // Just increment the ref count; Knowing how many [] there are is unnecessary.
