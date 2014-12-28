@@ -1,0 +1,12 @@
+%e-yaml
+---
+
+Name: RegistrySpoof
+ID: RegistrySpoof
+Author: Seth N. Hetu
+Description: Provides a subset of Windows Registry functionality on other platforms. Requires INI.
+Default: false
+Icon: registryspoof.png
+
+Depends: IniFilesystem
+Dependencies: None
