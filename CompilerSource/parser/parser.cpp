@@ -443,12 +443,14 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
     {
       const pt sp = move_to_beginning(code,synt,pos-1);
       const string exp = code.substr(sp,pos-sp);
-      bool vararr = false;
+      bool vararr = false, inparenthesis = false;
       for (int pot = pos; synt[pot]; pot++) {
-        if (synt[pot] == ',') {vararr = true; break; }
-        if (synt[pot] == '}') break;
-        if (synt[pot] == ']') break;
-        if (synt[pot] == ')') break;
+        if (synt[pot] == ',' && !inparenthesis) {vararr = true; break; }
+        else if (synt[pot] == '(') inparenthesis = true;
+        else if (synt[pot] == ')') inparenthesis = false;
+        else if (synt[pot] == ']') break;
+        else if (synt[pot] == ')') break;
+        else if (synt[pot] == ';') break;
       }
       cout << "GET TYPE2 OF " << exp << endl;
       /*onode n = exp_typeof(exp,sstack.where,slev+1,glob,obj);
