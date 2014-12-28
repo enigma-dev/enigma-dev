@@ -445,16 +445,16 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
       const string exp = code.substr(sp,pos-sp);
       
       bool replace = false;
-      for (int pars = 0, bracks = 1; bracks > 0 and pos < synt.length(); ++pos) {
-        if (synt[pos] == '(') {
+      for (size_t pars = 0, bracks = 1, pot = pos; bracks > 0 and pot < synt.length(); ++pot) {
+        if (synt[pot] == '(') {
           ++pars;
-        } else if (synt[pos] == ')') {
-          --pos;
-        } else if (synt[pos] == '[') {
+        } else if (synt[pot] == ')') {
+          --pot;
+        } else if (synt[pot] == '[') {
           ++bracks;
-        } else if (synt[pos] == ']') {
+        } else if (synt[pot] == ']') {
           --bracks;
-        } else if (synt[pos] == ',' and pars == 0 and bracks == 1) {
+        } else if (synt[pot] == ',' and pars == 0 and bracks == 1) {
           replace = true;
           break;
         }
