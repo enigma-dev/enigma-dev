@@ -1,30 +1,21 @@
-/********************************************************************************\
-**                                                                              **
-**  Copyright (C) 2011 Josh Ventura                                             **
-**  Copyright (C) 2014 Seth N. Hetu                                             **
-**                                                                              **
-**  This file is a part of the ENIGMA Development Environment.                  **
-**                                                                              **
-**                                                                              **
-**  ENIGMA is free software: you can redistribute it and/or modify it under the **
-**  terms of the GNU General Public License as published by the Free Software   **
-**  Foundation, version 3 of the license or any later version.                  **
-**                                                                              **
-**  This application and its source code is distributed AS-IS, WITHOUT ANY      **
-**  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS   **
-**  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more       **
-**  details.                                                                    **
-**                                                                              **
-**  You should have recieved a copy of the GNU General Public License along     **
-**  with this code. If not, see <http://www.gnu.org/licenses/>                  **
-**                                                                              **
-**  ENIGMA is an environment designed to create games and other programs with a **
-**  high-level, fully compilable language. Developers of ENIGMA or anything     **
-**  associated with ENIGMA are in no way responsible for its users or           **
-**  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **
-**                                                                              **
-\********************************************************************************/
+/** Copyright (C) 2008,2014 Josh Ventura
+*** Copyright (C) 2014 Seth N. Hetu
+*** Copyright (C) 2014 Robert B. Colton
+***
+*** This file is a part of the ENIGMA Development Environment.
+***
+*** ENIGMA is free software: you can redistribute it and/or modify it under the
+*** terms of the GNU General Public License as published by the Free Software
+*** Foundation, version 3 of the license or any later version.
+***
+*** This application and its source code is distributed AS-IS, WITHOUT ANY
+*** WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+*** FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+*** details.
+***
+*** You should have received a copy of the GNU General Public License along
+*** with this code. If not, see <http://www.gnu.org/licenses/>
+**/
 
 //Welcome to the ENIGMA EDL-to-C++ parser; just add semicolons.
 //No, it's not really that simple.
@@ -452,10 +443,28 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
     {
       const pt sp = move_to_beginning(code,synt,pos-1);
       const string exp = code.substr(sp,pos-sp);
-      /*cout << "GET TYPE2 OF " << exp << endl;
-      onode n = exp_typeof(exp,sstack.where,slev+1,glob,obj);
-      if (n.type == enigma_type__var and !n.pad and !n.deref)
-      {*/
+      
+      bool replace = false;
+      for (size_t pars = 0, bracks = 1, pot = pos + 1; bracks > 0 and pot < synt.length(); ++pot) {
+        if (synt[pot] == '(') {
+          ++pars;
+        } else if (synt[pot] == ')') {
+          --pars;
+        } else if (synt[pot] == '[') {
+          ++bracks;
+        } else if (synt[pot] == ']') {
+          --bracks;
+        } else if (synt[pot] == ',' and pars == 0 and bracks == 1) {
+          replace = true;
+          break;
+        }
+      }
+
+      cout << "GET TYPE2 OF " << exp << endl;
+      /*onode n = exp_typeof(exp,sstack.where,slev+1,glob,obj);
+      if (n.type == enigma_type__var and !n.pad and !n.deref)*/
+      if (replace) {
+        //cout << "is a var array" << endl;
         pt cp = pos;
         code[cp++] = '(';
         for (int cnt = 1; cnt; cp++)
@@ -463,16 +472,16 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
           else if (synt[cp] == ']') cnt--;
         if (synt[--cp] == ']')
           code[cp] = ')';
-      /*}
-      else if (n.pad or n.deref) // Regardless of type, as long as we have some kind of pointer to be dereferenced
-      {
+      //} else if (n.pad or n.deref) { // Regardless of type, as long as we have some kind of pointer to be dereferenced
+      } else {
+        //cout << "not a var array" << endl;
         const pt ep = end_of_brackets(synt,pos); // Get position of closing ']'
         code.insert(ep, 1, ')');
         synt.insert(ep, 1, ')');
         pos++; // Move after the '['
         code.insert(pos, "int(");
         synt.insert(pos, "ccc(");
-      }*/
+      }
       level++;
     }
     else switch (synt[pos])
