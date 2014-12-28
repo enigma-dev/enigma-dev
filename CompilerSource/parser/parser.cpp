@@ -352,13 +352,6 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
   int inbrack = 0, level = 0;
   bool rhs = false;
   int infor = 0;
-  
-  //this is a temporary workaround for coercing array types by me, rubber T
-  //TODO: Fix this dreamland.
-  //first string is the name of the local, second is the data type as a string
-  map<string,string> datatypes;
-  // hold array identifier for multi-dimensional arrays
-  string arrayIdentifier = "";
 
   for (pt pos = 0; pos < synt.length(); pos++)
   {
@@ -447,20 +440,22 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
       continue;
     }
     //TODO: See comment in else-switch case '['
-    else if (synt[pos] == '[')
+    else if (synt[pos] == '[' and (!indecl or deceq))
     {
-      if (!indecl or deceq) {
         const pt sp = move_to_beginning(code,synt,pos-1);
         const string exp = code.substr(sp,pos-sp);
-        if (!isdigit(exp[0]) && exp.find('[') == string::npos && exp.find(']') == string::npos) {
-          arrayIdentifier = exp;
+        bool vararr = false;
+        for (int pot = pos; synt[pot]; pot++) {
+          if (synt[pot] == ',') {vararr = true; break; }
+          if (synt[pot] == '}') break;
+          if (synt[pot] == ']') break;
+          if (synt[pot] == ')') break;
         }
-        dtype = datatypes[arrayIdentifier];
-        cout << "GET TYPE2 OF (" << (dtype.length() ? dtype : "implicit var") << "," << arrayIdentifier << ") " << exp << endl;
+        //cout << "GET TYPE2 OF (" << (dtype.length() ? dtype : "implicit var") << "," << arrayIdentifier << ") " << exp << endl;
         /*onode n = exp_typeof(exp,sstack.where,slev+1,glob,obj);
         if (n.type == enigma_type__var and !n.pad and !n.deref)*/
-        if (dtype.length() == 0 || dtype == "var") {
-          //cout << "is a var" << endl;
+        if (vararr) {
+          //cout << "is a var array" << endl;
           pt cp = pos;
           code[cp++] = '(';
           for (int cnt = 1; cnt; cp++)
@@ -470,7 +465,7 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
             code[cp] = ')';
         //} else if (n.pad or n.deref) { // Regardless of type, as long as we have some kind of pointer to be dereferenced
         } else {
-          //cout << "not a var" << endl;
+          //cout << "not a var array" << endl;
           const pt ep = end_of_brackets(synt,pos); // Get position of closing ']'
           code.insert(ep, 1, ')');
           synt.insert(ep, 1, ')');
@@ -479,18 +474,6 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
           synt.insert(pos, "ccc(");
         }
         level++;
-        dtype = "";
-      } else {
-        const pt sp = move_to_beginning(code,synt,pos-1);
-        const string exp = code.substr(sp,pos-sp);
-        if (!isdigit(exp[0]) && exp.find('[') == string::npos && exp.find(']') == string::npos) {
-          arrayIdentifier = exp;
-        }
-        datatypes[arrayIdentifier] = dtype;
-        if (!inbrack and !deceq)
-          dpre += "*", inbrack++; // Just increment the ref count; Knowing how many [] there are is unnecessary.
-        level++;
-      }
     }
     else switch (synt[pos])
     {
