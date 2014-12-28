@@ -449,7 +449,7 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
         if (synt[pot] == '(') {
           ++pars;
         } else if (synt[pot] == ')') {
-          --pot;
+          --pars;
         } else if (synt[pot] == '[') {
           ++bracks;
         } else if (synt[pot] == ']') {
