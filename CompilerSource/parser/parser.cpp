@@ -443,19 +443,27 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
     {
       const pt sp = move_to_beginning(code,synt,pos-1);
       const string exp = code.substr(sp,pos-sp);
-      bool vararr = false, inparenthesis = false;
-      for (int pot = pos; synt[pot]; pot++) {
-        if (synt[pot] == ',' && !inparenthesis) {vararr = true; break; }
-        else if (synt[pot] == '(') inparenthesis = true;
-        else if (synt[pot] == ')') inparenthesis = false;
-        else if (synt[pot] == ']') break;
-        else if (synt[pot] == ')') break;
-        else if (synt[pot] == ';') break;
+      
+      bool replace = false;
+      for (int pars = 0, bracks = 1; bracks > 0 and pos < synt.length(); ++pos) {
+        if (synt[pos] == '(') {
+          ++pars;
+        } else if (synt[pos] == ')') {
+          --pos;
+        } else if (synt[pos] == '[') {
+          ++bracks;
+        } else if (synt[pos] == ']') {
+          --bracks;
+        } else if (synt[pos] == ',' and pars == 0 and bracks == 1) {
+          replace = true;
+          break;
+        }
       }
+
       cout << "GET TYPE2 OF " << exp << endl;
       /*onode n = exp_typeof(exp,sstack.where,slev+1,glob,obj);
       if (n.type == enigma_type__var and !n.pad and !n.deref)*/
-      if (vararr) {
+      if (replace) {
         //cout << "is a var array" << endl;
         pt cp = pos;
         code[cp++] = '(';
