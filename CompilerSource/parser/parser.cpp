@@ -441,38 +441,38 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
     }
     else if (synt[pos] == '[' and (!indecl or deceq))
     {
-        const pt sp = move_to_beginning(code,synt,pos-1);
-        const string exp = code.substr(sp,pos-sp);
-        bool vararr = false;
-        for (int pot = pos; synt[pot]; pot++) {
-          if (synt[pot] == ',') {vararr = true; break; }
-          if (synt[pot] == '}') break;
-          if (synt[pot] == ']') break;
-          if (synt[pot] == ')') break;
-        }
-        cout << "GET TYPE2 OF " << exp << endl;
-        /*onode n = exp_typeof(exp,sstack.where,slev+1,glob,obj);
-        if (n.type == enigma_type__var and !n.pad and !n.deref)*/
-        if (vararr) {
-          //cout << "is a var array" << endl;
-          pt cp = pos;
-          code[cp++] = '(';
-          for (int cnt = 1; cnt; cp++)
-            if (synt[cp] == '[') cnt++;
-            else if (synt[cp] == ']') cnt--;
-          if (synt[--cp] == ']')
-            code[cp] = ')';
-        //} else if (n.pad or n.deref) { // Regardless of type, as long as we have some kind of pointer to be dereferenced
-        } else {
-          //cout << "not a var array" << endl;
-          const pt ep = end_of_brackets(synt,pos); // Get position of closing ']'
-          code.insert(ep, 1, ')');
-          synt.insert(ep, 1, ')');
-          pos++; // Move after the '['
-          code.insert(pos, "int(");
-          synt.insert(pos, "ccc(");
-        }
-        level++;
+      const pt sp = move_to_beginning(code,synt,pos-1);
+      const string exp = code.substr(sp,pos-sp);
+      bool vararr = false;
+      for (int pot = pos; synt[pot]; pot++) {
+        if (synt[pot] == ',') {vararr = true; break; }
+        if (synt[pot] == '}') break;
+        if (synt[pot] == ']') break;
+        if (synt[pot] == ')') break;
+      }
+      cout << "GET TYPE2 OF " << exp << endl;
+      /*onode n = exp_typeof(exp,sstack.where,slev+1,glob,obj);
+      if (n.type == enigma_type__var and !n.pad and !n.deref)*/
+      if (vararr) {
+        //cout << "is a var array" << endl;
+        pt cp = pos;
+        code[cp++] = '(';
+        for (int cnt = 1; cnt; cp++)
+          if (synt[cp] == '[') cnt++;
+          else if (synt[cp] == ']') cnt--;
+        if (synt[--cp] == ']')
+          code[cp] = ')';
+      //} else if (n.pad or n.deref) { // Regardless of type, as long as we have some kind of pointer to be dereferenced
+      } else {
+        //cout << "not a var array" << endl;
+        const pt ep = end_of_brackets(synt,pos); // Get position of closing ']'
+        code.insert(ep, 1, ')');
+        synt.insert(ep, 1, ')');
+        pos++; // Move after the '['
+        code.insert(pos, "int(");
+        synt.insert(pos, "ccc(");
+      }
+      level++;
     }
     else switch (synt[pos])
     {
