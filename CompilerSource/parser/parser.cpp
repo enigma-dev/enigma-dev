@@ -1,4 +1,4 @@
-/** Copyright (C) 2008 Josh Ventura
+/** Copyright (C) 2008,2014 Josh Ventura
 *** Copyright (C) 2014 Seth N. Hetu
 *** Copyright (C) 2014 Robert B. Colton
 ***
