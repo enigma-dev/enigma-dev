@@ -288,8 +288,8 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
     parsed_event &pev = pr->events[0]; //Make sure each sub event knows its main event's event ID.
     pev.mainId = 0, pev.id = 0, pev.myObj = pr;
     
-    std::string newcode;
-    int sc = syncheck::syntacheck(es->rooms[i].creationCode, newcode);
+    std::string newcode = es->rooms[i].creationCode;
+    int sc = syncheck::syntacheck(newcode, newcode);
     if (sc != -1) {
       user << "Syntax error in room creation code for room " << es->rooms[i].id << " (`" << es->rooms[i].name << "'):\n" << format_error(newcode,syncheck::syerr,sc) << flushl;
       return E_ERROR_SYNTAX;
@@ -300,7 +300,8 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
     {
       if (es->rooms[i].instances[ii].creationCode and *(es->rooms[i].instances[ii].creationCode))
       {
-        int a = syncheck::syntacheck(es->rooms[i].instances[ii].creationCode, newcode);
+        newcode = es->rooms[i].instances[ii].creationCode;
+        int a = syncheck::syntacheck(newcode, newcode);
         if (a != -1) {
           user << "Syntax error in instance creation code for instance " << es->rooms[i].instances[ii].id <<" in room " << es->rooms[i].id << " (`" << es->rooms[i].name << "'):\n" << format_error(newcode,syncheck::syerr,a) << flushl;
           return E_ERROR_SYNTAX;
