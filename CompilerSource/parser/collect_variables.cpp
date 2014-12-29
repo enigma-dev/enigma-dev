@@ -81,7 +81,6 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
   //Tracking for "exit" commands
   int currGotoBlock = 0;
   bool foundGoto = false;
-  
   for (pt pos = 0; pos < code.length(); pos++)
   {
     //Stop grabbing the timeline index?
@@ -437,7 +436,15 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
       }
     }
   }
-  
+
+  //There's sometimes a trailing block specifier; we do our best to catch these.
+  if (foundGoto) {
+    stringstream newName;
+    newName <<"block_end_" <<currGotoBlock++ <<":;"; //The semicolon is a convention.
+    code.insert(code.size(), newName.str());
+    synt.insert(synt.size(), string(newName.str().size(), 'X'));
+  } 
+ 
   //cout << "**Finished collections in " << (pev==NULL ? "some event for some unspecified object" : pev->myObj->name + ", event " + event_get_human_name(pev->mainId,pev->id))<< "\n";
   
   //Store these for later.
