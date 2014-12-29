@@ -273,7 +273,7 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
         
         //Add this to our objects map
         pev.myObj = pob; //Link to its calling object.
-        parser_main(code,&pev,script_names); //Format it to C++
+        parser_main(code,&pev,script_names, true); //Format it to C++
         
         edbg << " Done." << flushl;
       }
