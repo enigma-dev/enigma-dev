@@ -57,7 +57,7 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
     std::string newcode;
     int a = syncheck::syntacheck(es->scripts[i].code, newcode);
     if (a != -1) {
-      user << "Syntax error in script `" << es->scripts[i].name << "'\n" << syncheck::syerr << flushl;
+      user << "Syntax error in script `" << es->scripts[i].name << "'\n" << format_error(es->scripts[i].code,syncheck::syerr,a) << flushl;
       return E_ERROR_SYNTAX;
     }
     // Keep a parsed record of this script
@@ -84,7 +84,7 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
       std::string newcode;
       int a = syncheck::syntacheck(es->timelines[i].moments[j].code, newcode);
       if (a != -1) {
-        user << "Syntax error in timeline `" << es->timelines[i].name <<", moment: " <<es->timelines[i].moments[j].stepNo << "'\n" << syncheck::syerr << flushl;
+        user << "Syntax error in timeline `" << es->timelines[i].name <<", moment: " <<es->timelines[i].moments[j].stepNo << "'\n" << format_error(es->timelines[i].moments[j].code,syncheck::syerr,a) << flushl;
         return E_ERROR_SYNTAX;
       }
 
@@ -252,7 +252,7 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
         pev.mainId = mev_id, pev.id = sev_id;
         
         //Copy the code into a string, and its attributes elsewhere
-        string code = es->gmObjects[i].mainEvents[ii].events[iii].code;
+        string newcode = es->gmObjects[i].mainEvents[ii].events[iii].code;
         
         //Syntax check the code
         
@@ -260,12 +260,12 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
           edbg << "Check `" << es->gmObjects[i].name << "::" << event_get_function_name(es->gmObjects[i].mainEvents[ii].id,es->gmObjects[i].mainEvents[ii].events[iii].id) << "...";
         
         // Check the code
-        int sc = syncheck::syntacheck(code, code);
+        int sc = syncheck::syntacheck(es->gmObjects[i].mainEvents[ii].events[iii].code, newcode);
         if (sc != -1)
         {
           // Error. Report it.
           user << "Syntax error in object `" << es->gmObjects[i].name << "', " << event_get_human_name(es->gmObjects[i].mainEvents[ii].id,es->gmObjects[i].mainEvents[ii].events[iii].id) << " event:"
-               << es->gmObjects[i].mainEvents[ii].events[iii].id << ":\n" << format_error(code,syncheck::syerr,sc) << flushl;
+               << es->gmObjects[i].mainEvents[ii].events[iii].id << ":\n" << format_error(es->gmObjects[i].mainEvents[ii].events[iii].code,syncheck::syerr,sc) << flushl;
           return E_ERROR_SYNTAX;
         }
         
@@ -273,7 +273,7 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
         
         //Add this to our objects map
         pev.myObj = pob; //Link to its calling object.
-        parser_main(code,&pev,script_names); //Format it to C++
+        parser_main(newcode,&pev,script_names); //Format it to C++
         
         edbg << " Done." << flushl;
       }
@@ -288,10 +288,10 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
     parsed_event &pev = pr->events[0]; //Make sure each sub event knows its main event's event ID.
     pev.mainId = 0, pev.id = 0, pev.myObj = pr;
     
-    std::string newcode = es->rooms[i].creationCode;
-    int sc = syncheck::syntacheck(newcode, newcode);
+    std::string newcode;
+    int sc = syncheck::syntacheck(es->rooms[i].creationCode, newcode);
     if (sc != -1) {
-      user << "Syntax error in room creation code for room " << es->rooms[i].id << " (`" << es->rooms[i].name << "'):\n" << format_error(newcode,syncheck::syerr,sc) << flushl;
+      user << "Syntax error in room creation code for room " << es->rooms[i].id << " (`" << es->rooms[i].name << "'):\n" << format_error(es->rooms[i].creationCode,syncheck::syerr,sc) << flushl;
       return E_ERROR_SYNTAX;
     }
     parser_main(newcode,&pev,script_names);
@@ -300,10 +300,10 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
     {
       if (es->rooms[i].instances[ii].creationCode and *(es->rooms[i].instances[ii].creationCode))
       {
-        newcode = es->rooms[i].instances[ii].creationCode;
-        int a = syncheck::syntacheck(newcode, newcode);
+        newcode = "";
+        int a = syncheck::syntacheck(es->rooms[i].instances[ii].creationCode, newcode);
         if (a != -1) {
-          user << "Syntax error in instance creation code for instance " << es->rooms[i].instances[ii].id <<" in room " << es->rooms[i].id << " (`" << es->rooms[i].name << "'):\n" << format_error(newcode,syncheck::syerr,a) << flushl;
+          user << "Syntax error in instance creation code for instance " << es->rooms[i].instances[ii].id <<" in room " << es->rooms[i].id << " (`" << es->rooms[i].name << "'):\n" << format_error(es->rooms[i].instances[ii].creationCode,syncheck::syerr,a) << flushl;
           return E_ERROR_SYNTAX;
         }
         
