@@ -79,7 +79,7 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
   bool grab_tline_index = false; //Are we currently trying to stockpile a list of known timeline indices?
 
   //Tracking for "exit" commands
-  int currGotoBlock = trackGotos?0:-1;
+  int currGotoBlock = 0;
   bool foundGoto = false;
   
   for (pt pos = 0; pos < code.length(); pos++)
@@ -104,8 +104,8 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
         code.insert(pos+1, newName.str());
         synt.insert(pos+1, string(newName.str().size(), 'X'));
         pos += newName.str().size();
+        foundGoto = false;
       }
-      foundGoto = false;
 
       continue;
     }
@@ -274,7 +274,7 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
       //Special case; "exit"
       if (nname=="exit") {
         stringstream newName;
-        if (currGotoBlock>=0) {
+        if (trackGotos) {
           newName <<"goto block_end_" <<currGotoBlock <<";";
           foundGoto = true;
         } else {
