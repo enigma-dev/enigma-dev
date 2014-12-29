@@ -291,7 +291,7 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
     std::string newcode;
     int sc = syncheck::syntacheck(es->rooms[i].creationCode, newcode);
     if (sc != -1) {
-      cout << "Syntax error in room creation code for room " << es->rooms[i].id << " (`" << es->rooms[i].name << "'):" << endl << syncheck::syerr << flushl;
+      user << "Syntax error in room creation code for room " << es->rooms[i].id << " (`" << es->rooms[i].name << "'):\n" << syncheck::syerr << flushl; //TODO: Possibly call format_error like the other error reporting calls above? - Robert
       return E_ERROR_SYNTAX;
     }
     parser_main(newcode,&pev,script_names);
@@ -302,7 +302,7 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
       {
         int a = syncheck::syntacheck(es->rooms[i].instances[ii].creationCode, newcode);
         if (a != -1) {
-          cout << "Syntax error in instance creation code for instance " << es->rooms[i].instances[ii].id <<" in room " << es->rooms[i].id << " (`" << es->rooms[i].name << "'):" << endl << syncheck::syerr << flushl;
+          user << "Syntax error in instance creation code for instance " << es->rooms[i].instances[ii].id <<" in room " << es->rooms[i].id << " (`" << es->rooms[i].name << "'):\n" << syncheck::syerr << flushl; //TODO: Possibly call format_error like the other error reporting calls above? - Robert
           return E_ERROR_SYNTAX;
         }
         
