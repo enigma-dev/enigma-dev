@@ -151,7 +151,7 @@ void parser_init()
 
 
 
-string parser_main(string code, parsed_event* pev, const std::set<std::string>& script_names)
+string parser_main(string code, parsed_event* pev, const std::set<std::string>& script_names, bool isObject)
 {
   //Converting EDL to C++ is still relatively simple.
   //It can be done, for the most part, using only find and replace.
@@ -166,9 +166,6 @@ string parser_main(string code, parsed_event* pev, const std::set<std::string>& 
   //Initialize us a spot in the global scope
   initscope("script scope");
 
-
-
-
   if (pev) {
     pev->strc = 0; //Number of strings in this code
     parser_ready_input(code,synt,pev->strc,pev->strs);
@@ -179,22 +176,11 @@ string parser_main(string code, parsed_event* pev, const std::set<std::string>& 
     unsigned int strct = 0;
     parser_ready_input(code,synt,strct,strst);
   }
-
-
-
   parser_reinterpret(code,synt);
-
-
-
   parser_add_semicolons(code,synt);
 
-
-  //cout << synt << endl;
-  //cout << code << endl;
-
   if (pev) { cout << "collecting variables..."; fflush(stdout);
-    collect_variables(current_language, code,synt,pev, script_names); cout << " done>"; fflush(stdout);
-
+    collect_variables(current_language, code,synt,pev, script_names, isObject); cout << " done>"; fflush(stdout);
   }
 
   return code;

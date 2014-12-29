@@ -282,7 +282,7 @@ inline void action_set_motion(const double dir, const double nspeed) {
 #define action_message(message) show_message(message)
 #define action_if_sound sound_isplaying
 #define action_end_sound sound_stop
-#define exit return 0;
+//#define exit return 0; //NOTE: This is intentionally disabled; we handle it elsewhere.
 #define globalvar global var
 
 inline void action_create_object(const int object, const double x, const double y)

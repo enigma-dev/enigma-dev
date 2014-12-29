@@ -127,7 +127,7 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
         last_token = '@';
         continue;
       }
-      
+
       jdi::macro_iter_c itm = main_context->get_macros().find(name);
       if (itm != main_context->get_macros().end())
       {
