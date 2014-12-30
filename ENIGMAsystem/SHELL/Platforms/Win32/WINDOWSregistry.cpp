@@ -20,6 +20,8 @@
 #include <sstream>
 using std::string;
 
+#include <windows.h>
+
 #include "WINDOWScallback.h"
 #include "../General/PFregistry.h"
 
