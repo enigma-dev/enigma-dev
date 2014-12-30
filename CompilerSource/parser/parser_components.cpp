@@ -475,10 +475,14 @@ void parser_add_semicolons(string &code,string &synt)
   char *syntbuf = new char[code.length()*2+1];
   int bufpos = 0;
   
+
+  
   //Add the semicolons in obvious places
   stackif *sy_semi = new stackif(';');
   for (pt pos=0; pos<code.length(); pos++)
   {
+    cout << code[pos] << endl;
+    cout << synt[pos] << endl;
     if (synt[pos]==' ') // Automatic semicolon
     {
       codebuf[bufpos] = *sy_semi;
@@ -489,8 +493,9 @@ void parser_add_semicolons(string &code,string &synt)
     {
       codebuf[bufpos]=code[pos];
       syntbuf[bufpos++]=synt[pos];
-      
+      int parentheses = 0, brackets = 0, braces = 0;
       if (synt[pos]=='(') {
+        parentheses++;
         if (pos and (synt[pos-1]=='0' or synt[pos-1] == '\'' or synt[pos-1] == '"')) {
           codebuf[bufpos-1] = *sy_semi;
           syntbuf[bufpos-1] = *sy_semi;
@@ -501,7 +506,11 @@ void parser_add_semicolons(string &code,string &synt)
           sy_semi=sy_semi->push(',','(');
         continue;
       }
-      if (synt[pos]==')') { sy_semi=sy_semi->popif('(');    continue; }
+      if (synt[pos]==')') { parentheses--; sy_semi=sy_semi->popif('(');    continue; }
+      if (synt[pos]=='{') { braces++; }
+      else if (synt[pos]=='}') { braces--; }
+      if (synt[pos]=='[') { brackets++; }
+      else if (synt[pos]==']') { brackets--; }
       if (synt[pos]==';')
       {
         /*if (synt[pos+1] == ')') {
@@ -542,7 +551,7 @@ void parser_add_semicolons(string &code,string &synt)
         continue;
       }
 
-      if (pos and needs_semi(synt[pos-1],synt[pos]))
+      if (pos and needs_semi(synt[pos-1],synt[pos]) and !brackets and !braces and !parentheses)
       {
         codebuf[bufpos-1] = *sy_semi;
         syntbuf[bufpos-1] = *sy_semi;
@@ -600,6 +609,11 @@ void parser_add_semicolons(string &code,string &synt)
     }
   }
 
+    cout << code << "asscock"<< endl;
+  cout << synt << "cockfuck" << endl;
+      cout << codebuf << "asscockbuf"<< endl;
+  cout << syntbuf << "cockfuckbuf" << endl;
+  
   //Dump the semicolon stack at the end.
   do codebuf[bufpos] = syntbuf[bufpos] = *sy_semi, bufpos++;
   while (sy_semi->prev and (sy_semi = sy_semi->prev));
