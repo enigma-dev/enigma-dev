@@ -351,7 +351,7 @@ inline bool needs_semi(char c1,char c2,char c3)
 {
   if (c1 == c2) return 0; //if the two tokens are the same, we assume they are one word; if they are
   return (c1 == 'b' or c1 == 'n' or c1 == '0' or c1 == '"' or c1 == ')' or c1 == ']')
-  and (is_letterd(c2) or c2=='"' or c2=='{' or (c2=='}' and c3 != ';'));
+  and (is_letterd(c2) or c2=='"' or c2=='{' or (c2=='}' and c3 != ';' and c3 != ',' and c3 != '}'));
 }
 inline bool needs_semi_sepd(char c1,char c2)
 {
@@ -480,6 +480,9 @@ void parser_add_semicolons(string &code,string &synt)
   char *codebuf = new char[code.length()*2+1];
   char *syntbuf = new char[code.length()*2+1];
   int bufpos = 0;
+  
+  cout << code << "shitfuck" << endl;
+  cout << synt << "joshfuck" << endl;
   
   //Add the semicolons in obvious places
   stackif *sy_semi = new stackif(';');
@@ -612,6 +615,9 @@ void parser_add_semicolons(string &code,string &synt)
 
   code = string(codebuf,bufpos);
   synt = string(syntbuf,bufpos);
+  
+    cout << code << "shitfuck" << endl;
+  cout << synt << "joshfuck" << endl;
 
   //Free memory here, lest it leak.
   delete codebuf;
