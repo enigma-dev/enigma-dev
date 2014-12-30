@@ -19,8 +19,6 @@
 #ifndef ENIGMA_PLATFORM_REGISTRY
 #define ENIGMA_PLATFORM_REGISTRY
 
-#include <windows.h>
-
 namespace enigma_user
 {
 
