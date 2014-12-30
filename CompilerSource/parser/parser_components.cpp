@@ -347,12 +347,6 @@ inline bool needs_semi(char c1,char c2)
   return (c1 == 'b' or c1 == 'n' or c1 == '0' or c1 == '"' or c1 == ')' or c1 == ']')
   and (is_letterd(c2) or c2=='"' or c2=='{' or c2=='}');
 }
-inline bool needs_semi(char c1,char c2,char c3)
-{
-  if (c1 == c2) return 0; //if the two tokens are the same, we assume they are one word; if they are
-  return (c1 == 'b' or c1 == 'n' or c1 == '0' or c1 == '"' or c1 == ')' or c1 == ']')
-  and (is_letterd(c2) or c2=='"' or c2=='{' or (c2=='}' and c3 != ';' and c3 != ',' and c3 != '}'));
-}
 inline bool needs_semi_sepd(char c1,char c2)
 {
   if (c1 == c2) return 1; //if the two tokens are the same, we assume they are one word; if they are
@@ -481,15 +475,10 @@ void parser_add_semicolons(string &code,string &synt)
   char *syntbuf = new char[code.length()*2+1];
   int bufpos = 0;
   
-  cout << code << "shitfuck" << endl;
-  cout << synt << "joshfuck" << endl;
-  
   //Add the semicolons in obvious places
   stackif *sy_semi = new stackif(';');
-  bool assignment = false;
   for (pt pos=0; pos<code.length(); pos++)
   {
-    
     if (synt[pos]==' ') // Automatic semicolon
     {
       codebuf[bufpos] = *sy_semi;
@@ -500,13 +489,7 @@ void parser_add_semicolons(string &code,string &synt)
     {
       codebuf[bufpos]=code[pos];
       syntbuf[bufpos++]=synt[pos];
-
-      if (synt[pos]=='=') {
-        assignment = true;
-      }
-      if (synt[pos]==';') {
-        assignment = false;
-      }
+      
       if (synt[pos]=='(') {
         if (pos and (synt[pos-1]=='0' or synt[pos-1] == '\'' or synt[pos-1] == '"')) {
           codebuf[bufpos-1] = *sy_semi;
@@ -531,7 +514,6 @@ void parser_add_semicolons(string &code,string &synt)
           syntbuf[bufpos-1] = *sy_semi;
           codebuf[bufpos  ] = ';';
           syntbuf[bufpos++] = ';';
-          assignment = false;
           sy_semi = sy_semi->popif('s');
         }
         sy_semi = sy_semi->popif('s');
@@ -548,7 +530,6 @@ void parser_add_semicolons(string &code,string &synt)
           syntbuf[bufpos-1] = *sy_semi;
           codebuf[bufpos  ] = ';';
           syntbuf[bufpos++] = ';';
-          assignment = false;
           sy_semi = sy_semi->popif('s');
         }
         sy_semi=sy_semi->popif('s');
@@ -561,12 +542,10 @@ void parser_add_semicolons(string &code,string &synt)
         continue;
       }
 
-      bool needssemi = assignment ? needs_semi(synt[pos-1],synt[pos],synt[pos+1]) : needs_semi(synt[pos-1],synt[pos]);
-      if (pos and needssemi)
+      if (pos and needs_semi(synt[pos-1],synt[pos]))
       {
         codebuf[bufpos-1] = *sy_semi;
         syntbuf[bufpos-1] = *sy_semi;
-        assignment = false;
         codebuf[bufpos  ] = code[pos];
         syntbuf[bufpos++] = synt[pos];
         sy_semi=sy_semi->popif('s');
@@ -576,7 +555,6 @@ void parser_add_semicolons(string &code,string &synt)
       {
         codebuf[bufpos  ] = *sy_semi;
         syntbuf[bufpos++] = *sy_semi;
-        assignment = false;
         sy_semi=sy_semi->popif('s');
       }
     }
@@ -619,7 +597,6 @@ void parser_add_semicolons(string &code,string &synt)
       sy_semi=sy_semi->push(')','s');
       sy_semi=sy_semi->push(';','s');
       sy_semi=sy_semi->push(';','s');
-      assignment = false;
     }
   }
 
@@ -629,9 +606,6 @@ void parser_add_semicolons(string &code,string &synt)
 
   code = string(codebuf,bufpos);
   synt = string(syntbuf,bufpos);
-  
-    cout << code << "shitfuck" << endl;
-  cout << synt << "joshfuck" << endl;
 
   //Free memory here, lest it leak.
   delete codebuf;

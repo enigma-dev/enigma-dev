@@ -44,6 +44,7 @@ namespace setting
   bool use_incrementals = 0; // Defines how operators ++ and -- are treated.         0 = GML,               1 = C++
   bool literal_autocast = 0; // Determines how literals are treated.                 0 = enigma::variant,   1 = C++ scalars
   bool inherit_objects = 0;  // Determines whether objects should automatically inherit locals and events from their parents
+  bool automatic_semicolons = 0; // Determines whether semicolons should automatically be added or if the user wants strict syntax
   COMPLIANCE_LVL compliance_mode = COMPL_STANDARD;
   string keyword_blacklist = "";
 };
