@@ -486,8 +486,10 @@ void parser_add_semicolons(string &code,string &synt)
   
   //Add the semicolons in obvious places
   stackif *sy_semi = new stackif(';');
+  bool assignment = false;
   for (pt pos=0; pos<code.length(); pos++)
   {
+    
     if (synt[pos]==' ') // Automatic semicolon
     {
       codebuf[bufpos] = *sy_semi;
@@ -498,7 +500,13 @@ void parser_add_semicolons(string &code,string &synt)
     {
       codebuf[bufpos]=code[pos];
       syntbuf[bufpos++]=synt[pos];
-      
+
+      if (synt[pos]=='=') {
+        assignment = true;
+      }
+      if (synt[pos]==';') {
+        assignment = false;
+      }
       if (synt[pos]=='(') {
         if (pos and (synt[pos-1]=='0' or synt[pos-1] == '\'' or synt[pos-1] == '"')) {
           codebuf[bufpos-1] = *sy_semi;
@@ -523,6 +531,7 @@ void parser_add_semicolons(string &code,string &synt)
           syntbuf[bufpos-1] = *sy_semi;
           codebuf[bufpos  ] = ';';
           syntbuf[bufpos++] = ';';
+          assignment = false;
           sy_semi = sy_semi->popif('s');
         }
         sy_semi = sy_semi->popif('s');
@@ -539,6 +548,7 @@ void parser_add_semicolons(string &code,string &synt)
           syntbuf[bufpos-1] = *sy_semi;
           codebuf[bufpos  ] = ';';
           syntbuf[bufpos++] = ';';
+          assignment = false;
           sy_semi = sy_semi->popif('s');
         }
         sy_semi=sy_semi->popif('s');
@@ -551,10 +561,12 @@ void parser_add_semicolons(string &code,string &synt)
         continue;
       }
 
-      if (pos and needs_semi(synt[pos-1],synt[pos],synt[pos+1]))
+      bool needssemi = assignment ? needs_semi(synt[pos-1],synt[pos],synt[pos+1]) : needs_semi(synt[pos-1],synt[pos]);
+      if (pos and needssemi)
       {
         codebuf[bufpos-1] = *sy_semi;
         syntbuf[bufpos-1] = *sy_semi;
+        assignment = false;
         codebuf[bufpos  ] = code[pos];
         syntbuf[bufpos++] = synt[pos];
         sy_semi=sy_semi->popif('s');
@@ -564,6 +576,7 @@ void parser_add_semicolons(string &code,string &synt)
       {
         codebuf[bufpos  ] = *sy_semi;
         syntbuf[bufpos++] = *sy_semi;
+        assignment = false;
         sy_semi=sy_semi->popif('s');
       }
     }
@@ -606,6 +619,7 @@ void parser_add_semicolons(string &code,string &synt)
       sy_semi=sy_semi->push(')','s');
       sy_semi=sy_semi->push(';','s');
       sy_semi=sy_semi->push(';','s');
+      assignment = false;
     }
   }
 
