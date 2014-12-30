@@ -185,8 +185,9 @@ string parser_main(string code, parsed_event* pev, const std::set<std::string>& 
   parser_reinterpret(code,synt);
 
 
-
-  parser_add_semicolons(code,synt);
+  if (setting::automatic_semicolons) {
+    parser_add_semicolons(code,synt);
+  }
 
 
   //cout << synt << endl;
