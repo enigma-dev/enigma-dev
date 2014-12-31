@@ -466,7 +466,7 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
       } else {
         //cout << "not a var array" << endl;
         const pt ep = end_of_brackets(synt,pos); // Get position of closing ']'
-        // see if there is actually something between the brackets
+        // see if there is actually something between the brackets because ISO C forbids 0 size arrays
         if (ep != pos + 1) {
           code.insert(ep, 1, ')');
           synt.insert(ep, 1, ')');
