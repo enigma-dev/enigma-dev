@@ -249,13 +249,7 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
         str = (code.substr(spos,++pos-spos));
       }
       string_in_code[strc++] = str;
-      if (setting::use_cpp_strings) {
-        codo[bpos] = '\'';
-        synt[bpos] = '\'';
-        last_token = '\'';
-      } else {
-        codo[bpos] = synt[bpos] = last_token = '\"';
-      }
+      codo[bpos] = synt[bpos] = last_token = setting::use_cpp_strings? '\'' : '\"';
       bpos++;
       continue;
     }
