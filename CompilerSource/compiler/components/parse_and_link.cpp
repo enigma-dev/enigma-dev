@@ -380,7 +380,7 @@ int lang_CPP::link_globals(parsed_object *global, EnigmaStruct *es,parsed_script
   for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
     global->copy_from(*i->second,"object `"+i->second->name+"'","the Global Scope");
   for (pr_i i = parsed_rooms.begin(); i != parsed_rooms.end(); i++)
-    global->copy_from(*i->second,"object `"+i->second->name+"'","the Global Scope");
+    global->copy_from(*i->second,"room `"+i->second->name+"'","the Global Scope");
   for (int i = 0; i < es->scriptCount; i++)
     global->copy_from(scripts[i]->obj,"script `"+scripts[i]->obj.name+"'","the Global Scope");
   for (int i = 0; i < int(tlines.size()); i++)
