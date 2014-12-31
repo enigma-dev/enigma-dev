@@ -887,7 +887,7 @@ void print_to_file(string code,string synt,const unsigned int strc, const varray
             if (str_ind >= strc) cout << "What the string literal.\n";
             of << string_settings_escape(string_in_code[str_ind]).c_str();
             str_ind++;
-            if (synt[pos+1] == '+' and (synt[pos+2] == '"' or synt[pos+2] == '\''))
+            if (synt[pos+1] == '+' and synt[pos+2] == '"')
               synt[pos+1] = code[pos+1] = ' ';
         break;
       case 's':
