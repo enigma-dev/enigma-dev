@@ -466,11 +466,20 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
       } else {
         //cout << "not a var array" << endl;
         const pt ep = end_of_brackets(synt,pos); // Get position of closing ']'
-        code.insert(ep, 1, ')');
-        synt.insert(ep, 1, ')');
-        pos++; // Move after the '['
-        code.insert(pos, "int(");
-        synt.insert(pos, "ccc(");
+        // see if there is actually something between the brackets
+        bool anything = false;
+        for (pt pot = pos + 1; pot < ep; pot++) {
+          if (!isspace(code[pot]) || isalnum(code[pot])) {
+            anything = true; break;
+          }
+        }
+        if (anything) {
+          code.insert(ep, 1, ')');
+          synt.insert(ep, 1, ')');
+          pos++; // Move after the '['
+          code.insert(pos, "int(");
+          synt.insert(pos, "ccc(");
+        }
       }
       level++;
     }
