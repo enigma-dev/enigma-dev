@@ -46,6 +46,7 @@ using namespace std;
 #include <languages/lang_CPP.h>
 
 #include "compiler/compile_includes.h"
+#include "settings.h"
 
 extern string tostring(int);
 
@@ -273,7 +274,7 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
         
         //Add this to our objects map
         pev.myObj = pob; //Link to its calling object.
-        parser_main(code,&pev,script_names, true); //Format it to C++
+        parser_main(newcode,&pev,script_names, setting::compliance_mode!=setting::COMPL_STANDARD); //Format it to C++
         
         edbg << " Done." << flushl;
       }

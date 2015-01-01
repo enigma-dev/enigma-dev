@@ -992,7 +992,7 @@ static inline void write_basic_constructor(ofstream &wto) {
       "    instance->friction=0;\n    \n"
       "    \n"
       "    instance->timeline_index = -1;\n"
-      "    instance->timeline_running = " << (setting::compliance_mode == setting::COMPL_GM5? "true" : "false") <<";\n"
+      "    instance->timeline_running = " << (setting::compliance_mode == setting::COMPL_GM567? "true" : "false") <<";\n"
       "    instance->timeline_speed = 1;\n"
       "    instance->timeline_position = 0;\n"
       "    instance->timeline_loop = false;\n"

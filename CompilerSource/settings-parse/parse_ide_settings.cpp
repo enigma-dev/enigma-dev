@@ -137,7 +137,16 @@ void parse_ide_settings(const char* eyaml)
   setting::use_gml_equals    = !settree.get("inherit-equivalence-from").toInt();
   setting::literal_autocast  = settree.get("treat-literals-as").toInt();
   setting::inherit_objects   = settree.get("inherit-objects").toBool();
-  setting::compliance_mode = settree.get("compliance-mode").toInt()==1 ? setting::COMPL_GM5 : setting::COMPL_STANDARD;
+  switch (settree.get("compliance-mode").toInt()) {
+    case 2:
+      setting::compliance_mode = setting::COMPL_GM8;
+      break;
+    case 1:
+      setting::compliance_mode = setting::COMPL_GM567;
+      break;
+    default:
+      setting::compliance_mode = setting::COMPL_STANDARD;
+  }
   setting::keyword_blacklist = settree.get("keyword-blacklist").toString();
 
   // Use a platform-specific make directory.
