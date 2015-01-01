@@ -99,7 +99,7 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
       //Have we completed a new block?
       if (igpos==0 && foundGoto) {
         stringstream newName;
-        newName <<"block_end_" <<currGotoBlock++ <<":";
+        newName <<"enigma_block_end_" <<currGotoBlock++ <<":";
         code.insert(pos+1, newName.str());
         synt.insert(pos+1, string(newName.str().size(), 'X'));
         pos += newName.str().size();
@@ -274,7 +274,7 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
       if (nname=="exit") {
         stringstream newName;
         if (trackGotos) {
-          newName <<"goto block_end_" <<currGotoBlock <<";";
+          newName <<"goto enigma_block_end_" <<currGotoBlock <<";";
           foundGoto = true;
         } else {
           newName <<"return 0;";
@@ -440,7 +440,7 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
   //There's sometimes a trailing block specifier; we do our best to catch these.
   if (foundGoto) {
     stringstream newName;
-    newName <<"block_end_" <<currGotoBlock++ <<":;"; //The semicolon is a convention.
+    newName <<"enigma_block_end_" <<currGotoBlock++ <<":;"; //The semicolon is a convention.
     code.insert(code.size(), newName.str());
     synt.insert(synt.size(), string(newName.str().size(), 'X'));
   } 
