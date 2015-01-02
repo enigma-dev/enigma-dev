@@ -185,8 +185,9 @@ string parser_main(string code, parsed_event* pev, const std::set<std::string>& 
   parser_reinterpret(code,synt);
 
 
-
-  parser_add_semicolons(code,synt);
+  if (setting::automatic_semicolons) {
+    parser_add_semicolons(code,synt);
+  }
 
 
   //cout << synt << endl;
@@ -476,11 +477,14 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
       } else {
         //cout << "not a var array" << endl;
         const pt ep = end_of_brackets(synt,pos); // Get position of closing ']'
-        code.insert(ep, 1, ')');
-        synt.insert(ep, 1, ')');
-        pos++; // Move after the '['
-        code.insert(pos, "int(");
-        synt.insert(pos, "ccc(");
+        // see if there is actually something between the brackets because ISO C forbids 0 size arrays
+        if (ep != pos + 1) {
+          code.insert(ep, 1, ')');
+          synt.insert(ep, 1, ')');
+          pos++; // Move after the '['
+          code.insert(pos, "int(");
+          synt.insert(pos, "ccc(");
+        }
       }
       level++;
     }
