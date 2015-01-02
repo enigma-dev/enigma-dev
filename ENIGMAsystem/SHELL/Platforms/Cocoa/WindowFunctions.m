@@ -32,6 +32,8 @@
 
 EnigmaXcodeAppDelegate* delegate;
 NSPoint mouse; 
+static const unsigned int ClipMaxLen = 1024*1024; //Max clipboard string is arbitrarily 1mb
+static char* ClipBuffer[ClipMaxLen+1];
 
 void cocoa_window_set_fullscreen(bool full) 
 {
@@ -59,6 +61,42 @@ int cocoa_get_screen_size(int getWidth)
 	} else {
 		return [[NSScreen mainScreen] frame].size.height;
 	}
+}
+
+void cocoa_clipboard_set_text(const char* text)
+{
+  //Get the general pasteboard, clear its contents.
+  NSPasteboard* pasteboard = [NSPasteboard generalPasteboard];
+  [pasteboard clearContents];
+
+  //Pass an array of objects to write to the pasteboard.
+  NSString* objToCopy = [NSString stringWithUTF8String:text];
+  NSArray* objectsToCopy = [NSArray arrayWithObject:objToCopy];
+  [pasteboard writeObjects:objectsToCopy];
+}
+
+const char* cocoa_clipboard_get_text()
+{
+  NSPasteboard* pasteboard = [NSPasteboard generalPasteboard];
+  NSArray* classes = [[NSArray alloc] initWithObjects:[NSString class], nil];
+  NSDictionary *options = [NSDictionary dictionary];
+  NSArray *copiedItems = [pasteboard readObjectsForClasses:classes options:options];
+  if (copiedItems!=nil && [copiedItems count]>0) {
+    NSString* res = [copiedItems firstObject];
+    [res getCString:ClipBuffer maxLength:ClipMaxLen encoding:NSUTF8StringEncoding];
+    return &ClipBuffer[0];
+  }
+
+  return 0;
+}
+
+bool cocoa_clipboard_has_text()
+{
+  NSPasteboard* pasteboard = [NSPasteboard generalPasteboard];
+  NSArray* classes = [[NSArray alloc] initWithObjects:[NSString class], nil];
+  NSDictionary *options = [NSDictionary dictionary];
+  NSArray *copiedItems = [pasteboard readObjectsForClasses:classes options:options];
+  return copiedItems!=nil && [copiedItems count]>0;
 }
 
 int getWindowDimension(int i)
