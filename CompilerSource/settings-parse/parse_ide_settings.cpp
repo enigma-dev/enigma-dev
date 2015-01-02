@@ -147,6 +147,7 @@ void parse_ide_settings(const char* eyaml)
     default:
       setting::compliance_mode = setting::COMPL_STANDARD;
   }
+  setting::automatic_semicolons   = settree.get("automatic-semicolons").toBool();
   setting::keyword_blacklist = settree.get("keyword-blacklist").toString();
 
   // Use a platform-specific make directory.

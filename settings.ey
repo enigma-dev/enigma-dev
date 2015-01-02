@@ -54,6 +54,10 @@
         Type: Checkbox
         Label: Object Inheritance
         Default: true
+    -automatic-semicolons:
+        Type: Checkbox
+        Label: Automatic Semicolons
+        Default: true
 		
 -Graphics:
     Layout: Grid
