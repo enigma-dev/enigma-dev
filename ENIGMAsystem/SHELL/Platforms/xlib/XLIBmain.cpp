@@ -41,13 +41,6 @@
 
 #include <time.h>
 
-//TODO: Encoding conversions. 
-namespace {
-char* utf8_to_char(const char* str, unsigned long len) {
-  return (char*)str;
-}
-}
-
 namespace enigma_user {
   const int os_type = os_linux;
   extern int keyboard_key;
@@ -79,7 +72,6 @@ namespace enigma
     Window win;
     Atom wm_delwin;
     Atom XA_CLIPBOARD;
-    Atom UTF8_STRING;
     Atom ENIG_CLIP_STRING;
     Atom XA_TARGETS;
     char* x11_clipboard;
@@ -191,21 +183,13 @@ namespace enigma
           char* data = 0;
           int property_format = 0, data_nitems = 0;
           if ((e.xselectionrequest.selection == XA_CLIPBOARD) || (e.xselectionrequest.selection == XA_PRIMARY)) {
-            if (e.xselectionrequest.target == XA_STRING || e.xselectionrequest.target == UTF8_STRING) {
-              if (e.xselectionrequest.target == XA_STRING) {
-                //Normal string.
-                data = strdup(x11_clipboard);
-              } else if (e.xselectionrequest.target == UTF8_STRING) {
-                //Encode.
-                //TODO: strlen will be wrong for UTF-8, but we don't convert correctly at the moment anyway.
-                data = strdup(utf8_to_char(x11_clipboard, strlen(x11_clipboard)));
-              }
-              data_nitems = strlen(data);
+            if (e.xselectionrequest.target == XA_STRING) {
+              //A string (also works fine for UTF-8).
+              data = strdup(x11_clipboard);              data_nitems = strlen(data);
               property_format = 8; // bits-per-item
             } else if (e.xselectionrequest.target == XA_TARGETS) {
               //List the targets we are able to send.
-              data = (char*)malloc(1 * 4); //2 pointers
-              //((Atom*)data)[0] = UTF8_STRING;
+              data = (char*)malloc(1 * 4); //1 "long" element.
               ((Atom*)data)[0] = XA_STRING;
               data_nitems = 1;
               property_format = 32; //32 bits-per-atom
@@ -337,7 +321,6 @@ int main(int argc,char** argv)
     wm_delwin = XInternAtom(disp,"WM_DELETE_WINDOW",False);
     Window root = DefaultRootWindow(disp);
     XA_CLIPBOARD = XInternAtom(disp, "CLIPBOARD", False);
-    UTF8_STRING = XInternAtom (disp, "UTF8_STRING", False);
     ENIG_CLIP_STRING = XInternAtom (disp, "ENIG_CLIP_STRING", False);
     XA_TARGETS = XInternAtom (disp, "TARGETS", False);
     x11_clipboard = 0;

@@ -45,13 +45,6 @@ using namespace std;
 
 using namespace enigma::x11;
 
-//TODO: Encoding conversions. 
-namespace {
-char* char_to_utf8(const unsigned char* str, unsigned long len) {
-  return (char*)str;
-}
-}
-
 namespace enigma {
   bool isVisible = true, isMinimized = false, stayOnTop = false, windowAdapt = true;
   int regionWidth = 0, regionHeight = 0, windowWidth = 0, windowHeight = 0;
@@ -835,12 +828,12 @@ void clipboard_set_text(string text)
   }
 }
 
-//TODO: "unicode" flag doesn't work.
-bool get_clipboard_from_other(Window clipOwner, string* res, bool unicode)
+//NOTE: This works as-is with Unicode.
+bool get_clipboard_from_other(Window clipOwner, string* res)
 {
   //Ask the other window to convert the selection for you.
   int TimeoutMsLeft = 200;
-  XConvertSelection(disp, XA_CLIPBOARD, (unicode?UTF8_STRING:XA_STRING), ENIG_CLIP_STRING, win, CurrentTime);
+  XConvertSelection(disp, XA_CLIPBOARD, XA_STRING, ENIG_CLIP_STRING, win, CurrentTime);
   
   //Now poll for a response.
   XEvent ev;
@@ -854,9 +847,7 @@ bool get_clipboard_from_other(Window clipOwner, string* res, bool unicode)
           unsigned long nitems, bytesLeft;
           if (XGetWindowProperty (disp, win, ev.xselection.property, 0L, 1000000, False, AnyPropertyType, &actualType, &actualFormat, &nitems, &bytesLeft, &clipData) == Success) {
             if (res) {
-              if (actualType == UTF8_STRING && actualFormat == 8) {
-                *res = char_to_utf8(clipData, nitems);
-              } else if (actualType == XA_STRING && actualFormat == 8) {
+              if (actualType == XA_STRING && actualFormat == 8) {
                 *res = string((const char*)clipData, nitems);
               }
             }
