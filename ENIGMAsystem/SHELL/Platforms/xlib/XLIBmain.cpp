@@ -17,12 +17,15 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include <X11/Xatom.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <unistd.h>
 #include <sys/resource.h>
 #include <stdio.h>
+#include <string.h> //strdup
 #include <string>
+#include <iostream>
 #include <cstdlib>
 
 #include "Platforms/platforms_mandatory.h"
@@ -37,6 +40,13 @@
 #include "Universal_System/loading.h"
 
 #include <time.h>
+
+//TODO: Encoding conversions. 
+namespace {
+char* utf8_to_char(const char* str, unsigned long len) {
+  return (char*)str;
+}
+}
 
 namespace enigma_user {
   const int os_type = os_linux;
@@ -68,6 +78,11 @@ namespace enigma
     Screen *screen;
     Window win;
     Atom wm_delwin;
+    Atom XA_CLIPBOARD;
+    Atom UTF8_STRING;
+    Atom ENIG_CLIP_STRING;
+    Atom XA_TARGETS;
+    char* x11_clipboard;
 
     int handleEvents()
     {
@@ -150,6 +165,65 @@ namespace enigma
           if (WindowResizedCallback != NULL) {
             WindowResizedCallback();
           }
+          return 0;
+        }
+        case SelectionClear: {
+          //We are no longer the owner of the selection.
+          if (e.xselectionclear.selection == XA_CLIPBOARD) {
+            delete [] x11_clipboard;
+            x11_clipboard = 0;
+          }
+          return 0;
+        }
+        case SelectionRequest: {
+          //Respond to another application's request for our clipboard selection.
+          XSelectionEvent selEv;
+          selEv.display   = e.xselectionrequest.display;
+          selEv.property  = None;
+          selEv.selection = e.xselectionrequest.selection;
+          selEv.target    = e.xselectionrequest.target;
+          selEv.type      = SelectionNotify;       
+          selEv.requestor = e.xselectionrequest.requestor;
+          selEv.time      = e.xselectionrequest.time;
+
+          //Only respond to the clipboard.
+          char* data = 0;
+          int property_format = 0, data_nitems = 0;
+          if (e.xselectionrequest.selection == XA_CLIPBOARD) {
+            if (e.xselectionrequest.target == XA_STRING || e.xselectionrequest.target == UTF8_STRING) {
+              if (e.xselectionrequest.target == XA_STRING) {
+                //Normal string.
+                data = strdup(x11_clipboard);
+              } else if (e.xselectionrequest.target == UTF8_STRING) {
+                //Encode.
+                //TODO: strlen will be wrong for UTF-8, but we don't convert correctly at the moment anyway.
+                data = strdup(utf8_to_char(x11_clipboard, strlen(x11_clipboard)));
+              }
+              data_nitems = strlen(data);
+              property_format = 8; // bits-per-item
+            } else if (e.xselectionrequest.target == XA_TARGETS) {
+              //List the targets we are able to send.
+              data = (char*)malloc(1 * 4); //2 pointers
+              //((Atom*)data)[0] = UTF8_STRING;
+              ((Atom*)data)[0] = XA_STRING;
+              data_nitems = 1;
+              property_format = 32; //32 bits-per-atom
+            }
+          }
+
+          //Anything to send?
+          if (data) {
+            const size_t MAX_REASONABLE_SELECTION_SIZE = 1000000;
+            if (e.xselectionrequest.property != None && strlen(data) < MAX_REASONABLE_SELECTION_SIZE) {
+              XChangeProperty(e.xselectionrequest.display, e.xselectionrequest.requestor, e.xselectionrequest.property, e.xselectionrequest.target, property_format, PropModeReplace, (const unsigned char*)data, data_nitems);
+              selEv.property = e.xselectionrequest.property;
+            }
+            free(data);
+          }
+
+          //Send a message either way, so they know if it failed.
+          XSendEvent(e.xselectionrequest.display, e.xselectionrequest.requestor, False, NoEventMask, (XEvent*) &selEv);
+          
           return 0;
         }
         case FocusIn:
@@ -260,6 +334,11 @@ int main(int argc,char** argv)
     // Identify components (close button, root pane)
     wm_delwin = XInternAtom(disp,"WM_DELETE_WINDOW",False);
     Window root = DefaultRootWindow(disp);
+    XA_CLIPBOARD = XInternAtom(disp, "CLIPBOARD", False);
+    UTF8_STRING = XInternAtom (disp, "UTF8_STRING", False);
+    ENIG_CLIP_STRING = XInternAtom (disp, "ENIG_CLIP_STRING", False);
+    XA_TARGETS = XInternAtom (disp, "TARGETS", False);
+    x11_clipboard = 0;
 
     // any normal person would know that this should be deleted but the OpenGL bridge does not want it deleted, please beware
     XVisualInfo* vi = enigma::CreateVisualInfo();

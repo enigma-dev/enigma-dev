@@ -18,11 +18,14 @@
 
 #include <stdio.h> //printf, NULL
 #include <stdlib.h> //malloc
+#include <string.h> //strdup
 #include <unistd.h> //usleep
 #include <time.h> //clock
 #include <string> //Return strings without needing a GC
 #include <map>
 #include <climits>
+#include <iostream>
+#include <X11/Xatom.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
@@ -41,6 +44,13 @@ using namespace std;
 #define uint unsigned int
 
 using namespace enigma::x11;
+
+//TODO: Encoding conversions. 
+namespace {
+char* char_to_utf8(const unsigned char* str, unsigned long len) {
+  return (char*)str;
+}
+}
 
 namespace enigma {
   bool isVisible = true, isMinimized = false, stayOnTop = false, windowAdapt = true;
@@ -218,7 +228,7 @@ void window_set_stayontop(bool stay) {
   Atom wmState = XInternAtom(disp, "_NET_WM_STATE", False);
   Atom aStay = XInternAtom(disp,"_NET_WM_STATE_ABOVE", False);
   XEvent xev;
-  xev.xclient.type=ClientMessage;
+  xev.type=ClientMessage;
   xev.xclient.serial = 0;
   xev.xclient.send_event=True;
   xev.xclient.window=win;
@@ -804,47 +814,93 @@ int window_get_color()
 
 void clipboard_set_text(string text)
 {
-  Atom XA_UTF8 = XInternAtom(disp, "UTF8", 0);
-  Atom XA_CLIPBOARD = XInternAtom(disp, "CLIPBOARD", False);
-  XChangeProperty(disp, RootWindow(disp, 0), XA_CLIPBOARD, XA_UTF8, 8, PropModeReplace, reinterpret_cast<unsigned char*>(const_cast<char*>(text.c_str())), text.length() + 1);
+  x11_clipboard = strndup(text.c_str(), strlen(text.c_str()));
+
+  XSetSelectionOwner(disp, XA_CLIPBOARD, win, CurrentTime);
 }
+
+//TODO: "unicode" flag doesn't work.
+bool get_clipboard_from_other(Window clipOwner, string* res, bool unicode)
+{
+  //Ask the other window to convert the selection for you.
+  int TimeoutMsLeft = 200;
+  XConvertSelection(disp, XA_CLIPBOARD, (unicode?UTF8_STRING:XA_STRING), ENIG_CLIP_STRING, win, CurrentTime);
+  
+  //Now poll for a response.
+  XEvent ev;
+  while (TimeoutMsLeft>0) {
+    if (XCheckTypedWindowEvent(disp, win, SelectionNotify, &ev)) {
+      if (ev.xselection.requestor == win) {
+        if (ev.xselection.property == ENIG_CLIP_STRING) {
+          unsigned char* clipData;
+          Atom actualType;
+          int  actualFormat;
+          unsigned long nitems, bytesLeft;
+          if (XGetWindowProperty (disp, win, ev.xselection.property, 0L, 1000000, False, AnyPropertyType, &actualType, &actualFormat, &nitems, &bytesLeft, &clipData) == Success) {
+            if (res) {
+              if (actualType == UTF8_STRING && actualFormat == 8) {
+                *res = char_to_utf8(clipData, nitems);
+              } else if (actualType == XA_STRING && actualFormat == 8) {
+                *res = string((const char*)clipData, nitems);
+              }
+            }
+      
+            if (clipData) {
+              XFree (clipData);
+            }
+
+            //Don't need this any more.
+            XDeleteProperty (disp, win, ENIG_CLIP_STRING);
+            return true;
+          } else {
+            return false;
+          }
+        }
+      }
+    }
+
+    //Else, sleep-spin
+    usleep(4000); //4ms
+    TimeoutMsLeft -= 4;
+  }
+  return false; //Timeout
+}
+
 
 string clipboard_get_text()
 {
-  Atom XA_UTF8 = XInternAtom(disp, "UTF8", 0);
-  Atom XA_CLIPBOARD = XInternAtom(disp, "CLIPBOARD", False);
-  //Atom XA_UNICODE = XInternAtom(disp, "UNICODE", 0);
-  Atom actual_type;
-  int actual_format;
-  unsigned long nitems, leftover;
-  unsigned char* buf;
-
-  if (XGetWindowProperty(disp, RootWindow(disp,0), XA_CLIPBOARD, 0, 10000000L, False, XA_UTF8, &actual_type, &actual_format, &nitems, &leftover, &buf) == Success) {;
-    if (buf != NULL) {
-      //free(buf);
-      return string(reinterpret_cast<char*>(buf));
-    } else {
-      return "";
+  //Check who owns the current clipboard "selection".
+  Window clipOwner = XGetSelectionOwner(disp, XA_CLIPBOARD);
+  if (clipOwner != None) {
+    //We can serve our own requests.
+    if (clipOwner == win) {
+      return x11_clipboard ? x11_clipboard : "";
     }
-  } else {
-    return "";
+
+    //Otherwise, we need to request the clipboard string from its own. This requires pumping the message queue.
+    string res;
+    get_clipboard_from_other(clipOwner, &res, false)
+    return res;
   }
+
+  return "";
 }
 
-bool clipboard_has_text() {
-  Atom XA_UTF8 = XInternAtom(disp, "UTF8", 0);
-  Atom XA_CLIPBOARD = XInternAtom(disp, "CLIPBOARD", False);
-  //Atom XA_UNICODE = XInternAtom(disp, "UNICODE", 0);
-  Atom actual_type;
-  int actual_format;
-  unsigned long nitems, leftover;
-  unsigned char* buf;
+bool clipboard_has_text() 
+{
+  //Check who owns the current clipboard "selection".
+  Window clipOwner = XGetSelectionOwner(disp, XA_CLIPBOARD);
+  if (clipOwner != None) {
+    //We can serve our own requests.
+    if (clipOwner == win) {
+      return x11_clipboard;
+    }
 
-  if (XGetWindowProperty(disp, RootWindow(disp,0), XA_CLIPBOARD, 0, 10000000L, False, XA_UTF8, &actual_type, &actual_format, &nitems, &leftover, &buf) == Success) {;
-    return buf != NULL;
-  } else {
-    return false;
+    //Otherwise, we need to request the clipboard string from its own. This requires pumping the message queue.
+    return get_clipboard_from_other(clipOwner, 0, false);
   }
+
+  return false;
 }
 
 }
