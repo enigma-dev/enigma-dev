@@ -32,8 +32,6 @@
 
 EnigmaXcodeAppDelegate* delegate;
 NSPoint mouse; 
-static const unsigned int ClipMaxLen = 1024*1024; //Max clipboard string is arbitrarily 1mb
-static char* ClipBuffer[ClipMaxLen+1];
 
 void cocoa_window_set_fullscreen(bool full) 
 {
@@ -75,16 +73,18 @@ void cocoa_clipboard_set_text(const char* text)
   [pasteboard writeObjects:objectsToCopy];
 }
 
-const char* cocoa_clipboard_get_text()
+char* cocoa_clipboard_get_text()
 {
   NSPasteboard* pasteboard = [NSPasteboard generalPasteboard];
   NSArray* classes = [[NSArray alloc] initWithObjects:[NSString class], nil];
   NSDictionary *options = [NSDictionary dictionary];
   NSArray *copiedItems = [pasteboard readObjectsForClasses:classes options:options];
   if (copiedItems!=nil && [copiedItems count]>0) {
-    NSString* res = [copiedItems firstObject];
-    [res getCString:ClipBuffer maxLength:ClipMaxLen encoding:NSUTF8StringEncoding];
-    return &ClipBuffer[0];
+    NSString* res1 = [copiedItems firstObject];
+    const char* res2 = [res1 cStringUsingEncoding:NSUTF8StringEncoding]; //This will be auto-collected.
+    char* res3 = malloc(strlen(res2)+1); //This will be freed by the caller (clipboard_get_text()).
+    strcpy(res3, res2);
+    return res3;
   }
 
   return 0;
