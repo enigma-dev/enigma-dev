@@ -814,9 +814,16 @@ int window_get_color()
 
 void clipboard_set_text(string text)
 {
+  if (x11_clipboard) {
+    free(x11_clipboard);
+  }
   x11_clipboard = strndup(text.c_str(), strlen(text.c_str()));
 
   XSetSelectionOwner(disp, XA_CLIPBOARD, win, CurrentTime);
+  Window clipOwner = XGetSelectionOwner(disp, XA_CLIPBOARD);
+  if (clipOwner != win) {
+    std::cerr <<"Warning: XSetSelectionOwner failed.";
+  }
 }
 
 //TODO: "unicode" flag doesn't work.
@@ -879,7 +886,7 @@ string clipboard_get_text()
 
     //Otherwise, we need to request the clipboard string from its own. This requires pumping the message queue.
     string res;
-    get_clipboard_from_other(clipOwner, &res, false)
+    get_clipboard_from_other(clipOwner, &res, false);
     return res;
   }
 

@@ -40,7 +40,7 @@ namespace enigma {
     extern Atom UTF8_STRING;
     extern Atom ENIG_CLIP_STRING;
     extern Atom XA_TARGETS;
-    extern char* x11_clipboard; //The current clipboard string, if we own the clipboard. Otherwise, the returned clipboard string.
+    extern char* x11_clipboard;   //The current clipboard string, if we own the clipboard. Otherwise, the returned clipboard string.
     
     int handleEvents();
   }

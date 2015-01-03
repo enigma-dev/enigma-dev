@@ -178,12 +178,12 @@ namespace enigma
         case SelectionRequest: {
           //Respond to another application's request for our clipboard selection.
           XSelectionEvent selEv;
+          selEv.type      = SelectionNotify;
           selEv.display   = e.xselectionrequest.display;
-          selEv.property  = None;
+          selEv.requestor = e.xselectionrequest.requestor;
           selEv.selection = e.xselectionrequest.selection;
           selEv.target    = e.xselectionrequest.target;
-          selEv.type      = SelectionNotify;       
-          selEv.requestor = e.xselectionrequest.requestor;
+          selEv.property  = None;
           selEv.time      = e.xselectionrequest.time;
 
           //Only respond to the clipboard.
@@ -208,21 +208,22 @@ namespace enigma
               ((Atom*)data)[0] = XA_STRING;
               data_nitems = 1;
               property_format = 32; //32 bits-per-atom
-            }
-          }
+            } 
 
-          //Anything to send?
-          if (data) {
-            const size_t MAX_REASONABLE_SELECTION_SIZE = 1000000;
-            if (e.xselectionrequest.property != None && strlen(data) < MAX_REASONABLE_SELECTION_SIZE) {
-              XChangeProperty(e.xselectionrequest.display, e.xselectionrequest.requestor, e.xselectionrequest.property, e.xselectionrequest.target, property_format, PropModeReplace, (const unsigned char*)data, data_nitems);
-              selEv.property = e.xselectionrequest.property;
+            //Anything to send?
+            if (data) {
+              const size_t MAX_REASONABLE_SELECTION_SIZE = 1000000;
+              if (e.xselectionrequest.property != None && strlen(data) < MAX_REASONABLE_SELECTION_SIZE) {
+                XChangeProperty(e.xselectionrequest.display, e.xselectionrequest.requestor, e.xselectionrequest.property, e.xselectionrequest.target, property_format, PropModeReplace, (unsigned char*)data, data_nitems);
+                selEv.property = e.xselectionrequest.property;
+              }
+              free(data);
+              data = 0;
             }
-            free(data);
-          }
 
-          //Send a message either way, so they know if it failed.
-          XSendEvent(e.xselectionrequest.display, e.xselectionrequest.requestor, False, NoEventMask, (XEvent*) &selEv);
+            //Send a message either way, so they know if it failed.
+            XSendEvent(e.xselectionrequest.display, e.xselectionrequest.requestor, False, NoEventMask, (XEvent*) &selEv);
+          }
           
           return 0;
         }
