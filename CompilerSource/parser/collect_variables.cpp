@@ -31,6 +31,7 @@
 
 #include <map>
 #include <string>
+#include <sstream>
 #include <iostream>
 #include <stdio.h>
 using namespace std;
@@ -53,7 +54,7 @@ struct scope_ignore {
 #include "collect_variables.h"
 #include "languages/language_adapter.h"
 
-void collect_variables(language_adapter *lang, string &code, string &synt, parsed_event* pev, const std::set<std::string>& script_names)
+void collect_variables(language_adapter *lang, string &code, string &synt, parsed_event* pev, const std::set<std::string>& script_names, bool trackGotos)
 {
   int igpos = 0;
   darray<scope_ignore*> igstack;
@@ -76,7 +77,10 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
   bool with_until_semi = false;
 
   bool grab_tline_index = false; //Are we currently trying to stockpile a list of known timeline indices?
-  
+
+  //Tracking for "exit" commands
+  int currGotoBlock = 0;
+  bool foundGoto = false;
   for (pt pos = 0; pos < code.length(); pos++)
   {
     //Stop grabbing the timeline index?
@@ -91,6 +95,17 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
     }
     if (synt[pos] == '}') {
       delete igstack[igpos--];
+
+      //Have we completed a new block?
+      if (igpos==0 && foundGoto) {
+        stringstream newName;
+        newName <<"enigma_block_end_" <<currGotoBlock++ <<":";
+        code.insert(pos+1, newName.str());
+        synt.insert(pos+1, string(newName.str().size(), 'X'));
+        pos += newName.str().size();
+        foundGoto = false;
+      }
+
       continue;
     }
     
@@ -254,6 +269,21 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
       
       //Looking at a straight identifier. Make sure it actually needs declared.
       string nname = code.substr(spos,pos-spos);
+
+      //Special case; "exit"
+      if (nname=="exit") {
+        stringstream newName;
+        if (trackGotos) {
+          newName <<"goto enigma_block_end_" <<currGotoBlock <<";";
+          foundGoto = true;
+        } else {
+          newName <<"return 0;";
+        }
+        code.replace(spos, 4, newName.str());
+        synt.replace(spos, 4, string(newName.str().size(), 'X'));
+        pos += (newName.str().size()-4 - 1);
+        continue;
+      }
       
       if (!nts)
         { pos--; continue; }
@@ -406,7 +436,15 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
       }
     }
   }
-  
+
+  //There's sometimes a trailing block specifier; we do our best to catch these.
+  if (foundGoto) {
+    stringstream newName;
+    newName <<"enigma_block_end_" <<currGotoBlock++ <<":;"; //The semicolon is a convention.
+    code.insert(code.size(), newName.str());
+    synt.insert(synt.size(), string(newName.str().size(), 'X'));
+  } 
+ 
   //cout << "**Finished collections in " << (pev==NULL ? "some event for some unspecified object" : pev->myObj->name + ", event " + event_get_human_name(pev->mainId,pev->id))<< "\n";
   
   //Store these for later.
