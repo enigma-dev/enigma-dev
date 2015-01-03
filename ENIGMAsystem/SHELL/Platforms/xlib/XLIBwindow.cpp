@@ -24,7 +24,6 @@
 #include <string> //Return strings without needing a GC
 #include <map>
 #include <climits>
-#include <iostream>
 #include <X11/Xatom.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
@@ -221,7 +220,7 @@ void window_set_stayontop(bool stay) {
   Atom wmState = XInternAtom(disp, "_NET_WM_STATE", False);
   Atom aStay = XInternAtom(disp,"_NET_WM_STATE_ABOVE", False);
   XEvent xev;
-  xev.type=ClientMessage;
+  xev.xclient.type=ClientMessage;
   xev.xclient.serial = 0;
   xev.xclient.send_event=True;
   xev.xclient.window=win;
@@ -817,14 +816,14 @@ void clipboard_set_text(string text)
   XSetSelectionOwner(disp, XA_PRIMARY, win, CurrentTime);
   Window primOwner = XGetSelectionOwner(disp, XA_PRIMARY);
   if (primOwner != win) {
-    std::cerr <<"Warning: XSetSelectionOwner(PRIMARY) failed.";
+    printf("Warning: XSetSelectionOwner(PRIMARY) failed.\n");
   }
 
   //Assert clipboard ownership (this must happen even if we already own the clipboard).
   XSetSelectionOwner(disp, XA_CLIPBOARD, win, CurrentTime);
   Window clipOwner = XGetSelectionOwner(disp, XA_CLIPBOARD);
   if (clipOwner != win) {
-    std::cerr <<"Warning: XSetSelectionOwner(CLIPBOARD) failed.";
+    printf("Warning: XSetSelectionOwner(CLIPBOARD) failed.\n");
   }
 }
 
@@ -886,7 +885,7 @@ string clipboard_get_text()
 
     //Otherwise, we need to request the clipboard string from its own. This requires pumping the message queue.
     string res;
-    get_clipboard_from_other(clipOwner, &res, false);
+    get_clipboard_from_other(clipOwner, &res);
     return res;
   }
 
@@ -904,7 +903,7 @@ bool clipboard_has_text()
     }
 
     //Otherwise, we need to request the clipboard string from its own. This requires pumping the message queue.
-    return get_clipboard_from_other(clipOwner, 0, false);
+    return get_clipboard_from_other(clipOwner, 0);
   }
 
   return false;

@@ -25,7 +25,6 @@
 #include <stdio.h>
 #include <string.h> //strdup
 #include <string>
-#include <iostream>
 #include <cstdlib>
 
 #include "Platforms/platforms_mandatory.h"
@@ -181,25 +180,28 @@ namespace enigma
 
           //Only respond to the clipboard.
           char* data = 0;
-          int property_format = 0, data_nitems = 0;
+          int bitsPerItem = 0;
+          int nItems = 0;
           if ((e.xselectionrequest.selection == XA_CLIPBOARD) || (e.xselectionrequest.selection == XA_PRIMARY)) {
             if (e.xselectionrequest.target == XA_STRING) {
               //A string (also works fine for UTF-8).
-              data = strdup(x11_clipboard);              data_nitems = strlen(data);
-              property_format = 8; // bits-per-item
+              data = strdup(x11_clipboard);
+              nItems = strlen(data);
+              bitsPerItem = 8; // bits-per-item
             } else if (e.xselectionrequest.target == XA_TARGETS) {
               //List the targets we are able to send.
               data = (char*)malloc(1 * 4); //1 "long" element.
               ((Atom*)data)[0] = XA_STRING;
-              data_nitems = 1;
-              property_format = 32; //32 bits-per-atom
+              nItems = 1;
+              bitsPerItem = 32; //32 bits-per-atom
             } 
 
             //Anything to send?
             if (data) {
               const size_t MAX_REASONABLE_SELECTION_SIZE = 1000000;
               if (e.xselectionrequest.property != None && strlen(data) < MAX_REASONABLE_SELECTION_SIZE) {
-                XChangeProperty(e.xselectionrequest.display, e.xselectionrequest.requestor, e.xselectionrequest.property, e.xselectionrequest.target, property_format, PropModeReplace, (unsigned char*)data, data_nitems);
+                //Transfer ownership to the requesting window.
+                XChangeProperty(e.xselectionrequest.display, e.xselectionrequest.requestor, e.xselectionrequest.property, e.xselectionrequest.target, bitsPerItem, PropModeReplace, (unsigned char*)data, nItems);
                 selEv.property = e.xselectionrequest.property;
               }
               free(data);
