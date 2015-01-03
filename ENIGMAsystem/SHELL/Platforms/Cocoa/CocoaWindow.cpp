@@ -54,7 +54,7 @@ extern "C" void cocoa_window_set_fullscreen(bool full);
 extern "C" int cocoa_window_get_fullscreen();
 extern "C" void cocoa_window_set_color(int bgrColor);
 extern "C" void cocoa_clipboard_set_text(const char* text);
-extern "C" const char* cocoa_clipboard_get_text();
+extern "C" char* cocoa_clipboard_get_text();
 extern "C" bool cocoa_clipboard_has_text();
 
 namespace enigma {
@@ -469,7 +469,10 @@ namespace enigma_user {
   }
 
   string clipboard_get_text() {
-    return std::string(cocoa_clipboard_get_text());
+    char* res = cocoa_clipboard_get_text();
+    std::string resStr(res);
+    free(res);
+    return resStr;
   }
 
   bool clipboard_has_text() {
