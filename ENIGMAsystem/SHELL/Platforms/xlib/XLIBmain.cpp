@@ -169,6 +169,7 @@ namespace enigma
         }
         case SelectionClear: {
           //We are no longer the owner of the selection.
+          //NOTE: We don't care if we lose PRIMARY selection.
           if (e.xselectionclear.selection == XA_CLIPBOARD) {
             delete [] x11_clipboard;
             x11_clipboard = 0;
@@ -189,7 +190,7 @@ namespace enigma
           //Only respond to the clipboard.
           char* data = 0;
           int property_format = 0, data_nitems = 0;
-          if (e.xselectionrequest.selection == XA_CLIPBOARD) {
+          if ((e.xselectionrequest.selection == XA_CLIPBOARD) || (e.xselectionrequest.selection == XA_PRIMARY)) {
             if (e.xselectionrequest.target == XA_STRING || e.xselectionrequest.target == UTF8_STRING) {
               if (e.xselectionrequest.target == XA_STRING) {
                 //Normal string.

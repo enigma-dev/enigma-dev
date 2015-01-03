@@ -814,15 +814,24 @@ int window_get_color()
 
 void clipboard_set_text(string text)
 {
+  //Copy the string into our buffer.
   if (x11_clipboard) {
     free(x11_clipboard);
   }
   x11_clipboard = strndup(text.c_str(), strlen(text.c_str()));
 
+  //Assert primary ownership
+  XSetSelectionOwner(disp, XA_PRIMARY, win, CurrentTime);
+  Window primOwner = XGetSelectionOwner(disp, XA_PRIMARY);
+  if (primOwner != win) {
+    std::cerr <<"Warning: XSetSelectionOwner(PRIMARY) failed.";
+  }
+
+  //Assert clipboard ownership (this must happen even if we already own the clipboard).
   XSetSelectionOwner(disp, XA_CLIPBOARD, win, CurrentTime);
   Window clipOwner = XGetSelectionOwner(disp, XA_CLIPBOARD);
   if (clipOwner != win) {
-    std::cerr <<"Warning: XSetSelectionOwner failed.";
+    std::cerr <<"Warning: XSetSelectionOwner(CLIPBOARD) failed.";
   }
 }
 
