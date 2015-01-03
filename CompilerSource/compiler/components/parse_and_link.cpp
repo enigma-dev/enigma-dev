@@ -295,7 +295,7 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
       user << "Syntax error in room creation code for room " << es->rooms[i].id << " (`" << es->rooms[i].name << "'):\n" << format_error(es->rooms[i].creationCode,syncheck::syerr,sc) << flushl;
       return E_ERROR_SYNTAX;
     }
-    parser_main(newcode,&pev,script_names);
+    parser_main(newcode,&pev,script_names,false,true);
     
     for (int ii = 0; ii < es->rooms[i].instanceCount; ii++)
     {
@@ -310,7 +310,7 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
         
         pr->instance_create_codes[es->rooms[i].instances[ii].id].object_index = es->rooms[i].instances[ii].objectId;
         parsed_event* icce = pr->instance_create_codes[es->rooms[i].instances[ii].id].pe = new parsed_event(-1,-1,parsed_objects[es->rooms[i].instances[ii].objectId]);
-        parser_main(string("with (") + tostring(es->rooms[i].instances[ii].id) + ") {" + newcode + "\n/* */}", icce, script_names);     
+        parser_main(string("with (") + tostring(es->rooms[i].instances[ii].id) + ") {" + newcode + "\n/* */}", icce, script_names,false,true);
       }
     }
     
@@ -328,7 +328,7 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
         
         pr->instance_precreate_codes[es->rooms[i].instances[ii].id].object_index = es->rooms[i].instances[ii].objectId;
         parsed_event* icce = pr->instance_precreate_codes[es->rooms[i].instances[ii].id].pe = new parsed_event(-1,-1,parsed_objects[es->rooms[i].instances[ii].objectId]);
-        parser_main(string("with (") + tostring(es->rooms[i].instances[ii].id) + ") {" + newcode + "\n/* */}", icce, script_names);     
+        parser_main(string("with (") + tostring(es->rooms[i].instances[ii].id) + ") {" + newcode + "\n/* */}", icce, script_names,false,true);     
       }
     }
   }

@@ -54,7 +54,7 @@ struct scope_ignore {
 #include "collect_variables.h"
 #include "languages/language_adapter.h"
 
-void collect_variables(language_adapter *lang, string &code, string &synt, parsed_event* pev, const std::set<std::string>& script_names, bool trackGotos)
+void collect_variables(language_adapter *lang, string &code, string &synt, parsed_event* pev, const std::set<std::string>& script_names, bool trackGotos, std::string exitReturnVal)
 {
   int igpos = 0;
   darray<scope_ignore*> igstack;
@@ -277,7 +277,7 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
           newName <<"goto enigma_block_end_" <<currGotoBlock <<";";
           foundGoto = true;
         } else {
-          newName <<"return 0;";
+          newName <<"return " <<exitReturnVal <<";";
         }
         code.replace(spos, 4, newName.str());
         synt.replace(spos, 4, string(newName.str().size(), 'X'));
