@@ -139,8 +139,8 @@ namespace enigma
 
     int backcolor;
     bool drawbackcolor;
-    void(*createcode)();
-    void(*precreatecode)();
+    variant(*createcode)();
+    variant(*precreatecode)();
     int width, height, spd, persistent;
     int views_enabled;
     viewstruct views[10];
