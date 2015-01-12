@@ -460,35 +460,52 @@ bool d3d_model_has_normals(int id){
 
 void d3d_model_floor(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, gs_scalar hrep, gs_scalar vrep)
 {
-  gs_scalar nX = (y2-y1)*(z2-z1)*(z2-z1);
-  gs_scalar nY = (z2-z1)*(x2-x1)*(x2-x1);
-  gs_scalar nZ = (x2-x1)*(y2-y1)*(y2-y1);
+  // Setup U and V vectors
+  gs_scalar vX = x2 - x1;
+  gs_scalar vY = y2 - y1;
+  gs_scalar vZ = z2 - z1;
+  gs_scalar wX = x2 - x1;
+  gs_scalar wZ = z2 - z1;
 
-  gs_scalar  m = sqrt(nX*nX + nY*nY + nZ*nZ);
-  nX /= m; nY /= m; nZ /= m;
+  // Cross-Product of vectors to create normal vector
+  gs_scalar nX = (vY * wZ);
+  gs_scalar nY = (vZ * wX) - (vX * wZ);
+  gs_scalar nZ = -(vY * wX);
 
+  // Normalize result
+  gs_scalar mag = sqrt( (nX*nX) + (nY*nY) + (nZ*nZ) );
+  nX /= mag, nY /= mag, nZ /= mag;
+
+  // Create floor
   d3d_model_primitive_begin(id, pr_trianglestrip);
-  d3d_model_vertex_normal_texture(id, x1, y1, z1, -nX, nY, nZ, 0, 0);
-  d3d_model_vertex_normal_texture(id, x1, y2, z1, -nX, nY, nZ, 0, vrep);
-  d3d_model_vertex_normal_texture(id, x2, y1, z2, -nX, nY, nZ, hrep, 0);
-  d3d_model_vertex_normal_texture(id, x2, y2, z2, -nX, nY, nZ, hrep, vrep);
+  d3d_model_vertex_normal_texture(id, x1, y1, z1, nX, nY, nZ, 0, 0);
+  d3d_model_vertex_normal_texture(id, x1, y2, z1, nX, nY, nZ, 0, vrep);
+  d3d_model_vertex_normal_texture(id, x2, y1, z2, nX, nY, nZ, hrep, 0);
+  d3d_model_vertex_normal_texture(id, x2, y2, z2, nX, nY, nZ, hrep, vrep);
   d3d_model_primitive_end(id);
 }
 
 void d3d_model_wall(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, gs_scalar hrep, gs_scalar vrep)
 {
-  gs_scalar nX = (y2-y1)*(z2-z1)*(z2-z1);
-  gs_scalar nY = (z2-z1)*(x2-x1)*(x2-x1);
-  gs_scalar nZ = (x2-x1)*(y2-y1)*(y2-y1);
+ // Setup U and V vectors
+  gs_scalar vX = x2 - x1;
+  gs_scalar vY = y2 - y1;
+  gs_scalar wZ = z2 - z1;
 
-  gs_scalar  m = sqrt(nX*nX + nY*nY + nZ*nZ);
-  nX /= m; nY /= m; nZ /= m;
+  // Cross-Product of vectors to create normal vector
+  gs_scalar nX = (vY * wZ);
+  gs_scalar nY = - (vX * wZ);
 
+  // Normalize result
+  gs_scalar mag = sqrt( (nX*nX) + (nY*nY));
+  nX /= mag, nY /= mag;
+
+  // Create wall
   d3d_model_primitive_begin(id, pr_trianglestrip);
-  d3d_model_vertex_normal_texture(id, x1, y1, z1, nX, nY, nZ, 0, 0);
-  d3d_model_vertex_normal_texture(id, x2, y2, z1, nX, nY, nZ, hrep, 0);
-  d3d_model_vertex_normal_texture(id, x1, y1, z2, nX, nY, nZ, 0, vrep);
-  d3d_model_vertex_normal_texture(id, x2, y2, z2, nX, nY, nZ, hrep, vrep);
+  d3d_model_vertex_normal_texture(id, x1, y1, z1, nX, nY, 0, 0, 0);
+  d3d_model_vertex_normal_texture(id, x2, y2, z1, nX, nY, 0, hrep, 0);
+  d3d_model_vertex_normal_texture(id, x1, y1, z2, nX, nY, 0, 0, vrep);
+  d3d_model_vertex_normal_texture(id, x2, y2, z2, nX, nY, 0, hrep, vrep);
   d3d_model_primitive_end(id);
 }
 
