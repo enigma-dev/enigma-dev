@@ -42,6 +42,8 @@ namespace enigma_user
 	int gui_button_create();
 
 	void gui_button_destroy(int id);
+
+	//Setters
 	void gui_button_set_text(int id, string text);
 	void gui_button_set_position(int id, gs_scalar x, gs_scalar y);
 
@@ -53,17 +55,29 @@ namespace enigma_user
 	void gui_button_set_visible(int id, bool visible);
   void gui_button_set_active(int id, bool active);
 
+  //Getters
   int gui_button_get_style(int id);
 	int gui_button_get_state(int id);
+  int gui_button_get_callback(int id);
 	bool gui_button_get_active(int id);
+  bool gui_button_get_visible(int id);
+	bool gui_button_get_togglable(int id);
+  gs_scalar gui_button_get_width(int id);
+  gs_scalar gui_button_get_height(int id);
+	gs_scalar gui_button_get_x(int id);
+	gs_scalar gui_button_get_y(int id);
+  string gui_button_get_text(int id);
+
+	//Drawers
 	void gui_button_draw(int id);
 	void gui_buttons_draw();
 
   ///TOGGLES
 	int gui_toggle_create(gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h, string text);
 	int gui_toggle_create();
-
 	void gui_toggle_destroy(int id);
+
+	//Setters
 	void gui_toggle_set_text(int id, string text);
 	void gui_toggle_set_position(int id, gs_scalar x, gs_scalar y);
 
@@ -74,20 +88,30 @@ namespace enigma_user
 	void gui_toggle_set_visible(int id, bool visible);
   void gui_toggle_set_active(int id, bool active);
 
+  //Getters
   int gui_toggle_get_style(int id);
 	int gui_toggle_get_state(int id);
+  int gui_toggle_get_callback(int id);
 	bool gui_toggle_get_active(int id);
+	bool gui_toggle_get_visible(int id);
+	gs_scalar gui_toggle_get_width(int id);
+	gs_scalar gui_toggle_get_height(int id);
+	gs_scalar gui_toggle_get_x(int id);
+	gs_scalar gui_toggle_get_y(int id);
+  string gui_toggle_get_text(int id);
+
+	//Drawers
 	void gui_toggle_draw(int id);
 	void gui_toggles_draw();
 
   ///SLIDERS
   int gui_slider_create(gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h, gs_scalar ind_x, gs_scalar ind_y, gs_scalar ind_w, gs_scalar ind_h, double val, double minVal, double maxVal, double incrVal, string text);
 	int gui_slider_create();
-
 	void gui_slider_destroy(int id);
+
+	//Setters
 	void gui_slider_set_text(int id, string text);
 	void gui_slider_set_position(int id, gs_scalar x, gs_scalar y);
-
 
 	void gui_slider_set_size(int id, gs_scalar w, gs_scalar h);
   void gui_slider_set_style(int id, int style_id);
@@ -97,13 +121,34 @@ namespace enigma_user
 	void gui_slider_set_visible(int id, bool visible);
   void gui_slider_set_active(int id, bool active);
   void gui_slider_set_value(int id, double value);
+  void gui_slider_set_minvalue(int id, double minvalue);
+  void gui_slider_set_maxvalue(int id, double maxvalue);
+  void gui_slider_set_incvalue(int id, double incvalue);
 
+  //Getters
   int gui_slider_get_style(int id);
   int gui_slider_get_indicator_style(int id);
 
-	int gui_slider_get_state(int id);
+  int gui_slider_get_state(int id);
+  int gui_slider_get_callback(int id);
 	bool gui_slider_get_active(int id);
+	bool gui_slider_get_visible(int id);
+	gs_scalar gui_slider_get_width(int id);
+	gs_scalar gui_slider_get_height(int id);
+	gs_scalar gui_slider_get_x(int id);
+	gs_scalar gui_slider_get_y(int id);
+  gs_scalar gui_slider_get_indicator_width(int id);
+	gs_scalar gui_slider_get_indicator_height(int id);
+	gs_scalar gui_slider_get_indicator_x(int id);
+	gs_scalar gui_slider_get_indicator_y(int id);
+  string gui_slider_get_text(int id);
+
   double gui_slider_get_value(int id);
+  double gui_slider_get_minvalue(int id);
+  double gui_slider_get_maxvalue(int id);
+  double gui_slider_get_incvalue(int id);
+
+  //Drawers
 	void gui_slider_draw(int id);
 	void gui_sliders_draw();
 
@@ -111,28 +156,41 @@ namespace enigma_user
 	///Windows
 	int gui_window_create(gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h, string text);
 	int gui_window_create();
-
 	void gui_window_destroy(int id);
-	void gui_window_set_text(int id, string text);
-	void gui_window_set_position(int id, gs_scalar x, gs_scalar y);
 
-	void gui_window_set_size(int id, gs_scalar w, gs_scalar h);
+	//Setters
   void gui_window_set_style(int id, int style_id);
-
 	void gui_window_set_callback(int id, int script_id);
-	void gui_window_set_visible(int id, bool visible);
   void gui_window_set_draggable(int id, bool draggable);
+  void gui_window_set_visible(int id, bool visible);
 
+  void gui_window_set_position(int id, gs_scalar x, gs_scalar y);
+	void gui_window_set_size(int id, gs_scalar w, gs_scalar h);
+
+  void gui_window_set_text(int id, string text);
+
+  //Getters
   int gui_window_get_style(int id);
 	int gui_window_get_state(int id);
+  int gui_window_get_callback(int id);
+  bool gui_window_get_draggable(int id);
+	bool gui_window_get_visible(int id);
+  gs_scalar gui_window_get_width(int id);
+	gs_scalar gui_window_get_height(int id);
+	gs_scalar gui_window_get_x(int id);
+	gs_scalar gui_window_get_y(int id);
+	string gui_window_get_text(int id);
+
+	//Drawers
 	void gui_window_draw(int id);
 	void gui_windows_draw();
 
   ///LABELS
 	int gui_label_create(gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h, string text);
 	int gui_label_create();
-
 	void gui_label_destroy(int id);
+
+	//Setters
 	void gui_label_set_text(int id, string text);
 	void gui_label_set_position(int id, gs_scalar x, gs_scalar y);
 
@@ -140,7 +198,16 @@ namespace enigma_user
   void gui_label_set_style(int id, int style_id);
 	void gui_label_set_visible(int id, bool visible);
 
+	//Getters
   int gui_label_get_style(int id);
+  bool gui_label_get_visible(int id);
+  gs_scalar gui_label_get_width(int id);
+  gs_scalar gui_label_get_height(int id);
+  gs_scalar gui_label_get_x(int id);
+  gs_scalar gui_label_get_y(int id);
+	string gui_label_get_text(int id);
+
+  //Drawers
 	void gui_label_draw(int id);
 	void gui_labels_draw();
 
