@@ -177,6 +177,7 @@ namespace enigma_user
 		gui::gui_buttons.erase(gui::gui_buttons.find(id));
 	}
 
+  ///Setters
 	void gui_button_set_text(int id, string text){
 		gui::gui_buttons[id].text = text;
 	}
@@ -200,18 +201,6 @@ namespace enigma_user
     gui::gui_buttons[id].style_id = (style_id != -1? style_id : gui::gui_style_button);
   }
 
-  int gui_button_get_style(int id){
-    return gui::gui_buttons[id].style_id;
-  }
-
-	int gui_button_get_state(int id){
-		return gui::gui_buttons[id].state;
-	}
-
-	bool gui_button_get_active(int id){
-		return gui::gui_buttons[id].active;
-	}
-
   void gui_button_set_active(int id, bool active){
 		gui::gui_buttons[id].active = active;
 	}
@@ -224,6 +213,52 @@ namespace enigma_user
 		gui::gui_buttons[id].visible = visible;
 	}
 
+	///Getters
+  int gui_button_get_style(int id){
+    return gui::gui_buttons[id].style_id;
+  }
+
+	int gui_button_get_state(int id){
+		return gui::gui_buttons[id].state;
+	}
+
+	bool gui_button_get_active(int id){
+		return gui::gui_buttons[id].active;
+	}
+
+  bool gui_button_get_togglable(int id){
+    return gui::gui_buttons[id].togglable;
+  }
+
+	bool gui_button_get_visible(int id){
+    return gui::gui_buttons[id].visible;
+	}
+
+  int gui_button_get_callback(int id){
+    return gui::gui_buttons[id].callback;
+  }
+
+  gs_scalar gui_button_get_width(int id){
+    return gui::gui_buttons[id].box.w;
+  }
+
+  gs_scalar gui_button_get_height(int id){
+    return gui::gui_buttons[id].box.h;
+  }
+
+	gs_scalar gui_button_get_x(int id){
+    return gui::gui_buttons[id].box.x;
+  }
+
+	gs_scalar gui_button_get_y(int id){
+    return gui::gui_buttons[id].box.y;
+  }
+
+  string gui_button_get_text(int id){
+    return gui::gui_buttons[id].text;
+  }
+
+  ///Drawers
 	void gui_button_draw(int id){
 		unsigned int phalign = enigma_user::draw_get_halign();
 		unsigned int pvalign = enigma_user::draw_get_valign();

@@ -111,6 +111,7 @@ namespace enigma_user
 		gui::gui_labels.erase(gui::gui_labels.find(id));
 	}
 
+  ///Setters
 	void gui_label_set_text(int id, string text){
 		gui::gui_labels[id].text = text;
 	}
@@ -133,10 +134,36 @@ namespace enigma_user
 		gui::gui_labels[id].visible = visible;
 	}
 
+  ///Getters
+  gs_scalar gui_label_get_width(int id){
+    return gui::gui_labels[id].box.w;
+  }
+
+  gs_scalar gui_label_get_height(int id){
+    return gui::gui_labels[id].box.h;
+  }
+
+  gs_scalar gui_label_get_x(int id){
+    return gui::gui_labels[id].box.x;
+  }
+
+  gs_scalar gui_label_get_y(int id){
+    return gui::gui_labels[id].box.y;
+  }
+
   int gui_label_get_style(int id){
     return gui::gui_labels[id].style_id;
   }
 
+	bool gui_label_get_visible(int id){
+    return gui::gui_labels[id].visible;
+  }
+
+	string gui_label_get_text(int id){
+    return gui::gui_labels[id].text;
+  }
+
+  ///Drawers
 	void gui_label_draw(int id){
 		unsigned int phalign = enigma_user::draw_get_halign();
 		unsigned int pvalign = enigma_user::draw_get_valign();
