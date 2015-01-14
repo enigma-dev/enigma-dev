@@ -155,6 +155,7 @@ namespace enigma_user
 		gui::gui_windows.erase(gui::gui_windows.find(id));
 	}
 
+  ///Setters
 	void gui_window_set_text(int id, string text){
 		gui::gui_windows[id].text = text;
 	}
@@ -178,14 +179,6 @@ namespace enigma_user
     gui::gui_windows[id].style_id = (style_id != -1? style_id : gui::gui_style_window);
   }
 
-  int gui_window_get_style(int id){
-    return gui::gui_windows[id].style_id;
-  }
-
-	int gui_window_get_state(int id){
-		return gui::gui_windows[id].state;
-	}
-
 	void gui_window_set_visible(int id, bool visible){
 		gui::gui_windows[id].visible = visible;
 	}
@@ -194,6 +187,48 @@ namespace enigma_user
 		gui::gui_windows[id].draggable = draggable;
 	}
 
+	///Getters
+  int gui_window_get_style(int id){
+    return gui::gui_windows[id].style_id;
+  }
+
+	int gui_window_get_state(int id){
+		return gui::gui_windows[id].state;
+	}
+
+	int gui_window_get_callback(int id){
+		return gui::gui_windows[id].callback;
+	}
+
+  bool gui_window_get_draggable(int id){
+    return gui::gui_windows[id].draggable;
+  }
+
+	bool gui_window_get_visible(int id){
+	  return gui::gui_windows[id].visible;
+	}
+
+  gs_scalar gui_window_get_width(int id){
+    return gui::gui_windows[id].box.w;
+  }
+
+	gs_scalar gui_window_get_height(int id){
+    return gui::gui_windows[id].box.h;
+	}
+
+	gs_scalar gui_window_get_x(int id){
+    return gui::gui_windows[id].box.x;
+	}
+
+	gs_scalar gui_window_get_y(int id){
+	  return gui::gui_windows[id].box.y;
+	}
+
+	string gui_window_get_text(int id){
+    return gui::gui_windows[id].text;
+	}
+
+  ///Drawers
 	void gui_window_draw(int id){
 		unsigned int phalign = enigma_user::draw_get_halign();
 		unsigned int pvalign = enigma_user::draw_get_valign();

@@ -168,6 +168,7 @@ namespace enigma_user
 		gui::gui_toggles.erase(gui::gui_toggles.find(id));
 	}
 
+  ///Setters
 	void gui_toggle_set_text(int id, string text){
 		gui::gui_toggles[id].text = text;
 	}
@@ -191,19 +192,6 @@ namespace enigma_user
     gui::gui_toggles[id].style_id = (style_id != -1? style_id : gui::gui_style_toggle);
   }
 
-  int gui_toggle_get_style(int id){
-    return gui::gui_toggles[id].style_id;
-  }
-
-
-	int gui_toggle_get_state(int id){
-		return gui::gui_toggles[id].state;
-	}
-
-	bool gui_toggle_get_active(int id){
-		return gui::gui_toggles[id].active;
-	}
-
   void gui_toggle_set_active(int id, bool active){
 		gui::gui_toggles[id].active = active;
 	}
@@ -212,6 +200,48 @@ namespace enigma_user
 		gui::gui_toggles[id].visible = visible;
 	}
 
+  ///Getters
+  int gui_toggle_get_style(int id){
+    return gui::gui_toggles[id].style_id;
+  }
+
+	int gui_toggle_get_state(int id){
+		return gui::gui_toggles[id].state;
+	}
+
+	int gui_toggle_get_callback(int id){
+    return gui::gui_toggles[id].callback;
+	}
+
+	bool gui_toggle_get_active(int id){
+		return gui::gui_toggles[id].active;
+	}
+
+	bool gui_toggle_get_visible(int id){
+    return gui::gui_toggles[id].visible;
+	}
+
+	gs_scalar gui_toggle_get_width(int id){
+    return gui::gui_toggles[id].box.w;
+	}
+
+	gs_scalar gui_toggle_get_height(int id){
+    return gui::gui_toggles[id].box.h;
+	}
+
+	gs_scalar gui_toggle_get_x(int id){
+    return gui::gui_toggles[id].box.x;
+	}
+
+	gs_scalar gui_toggle_get_y(int id){
+    return gui::gui_toggles[id].box.y;
+	}
+
+  string gui_toggle_get_text(int id){
+    return gui::gui_toggles[id].text;
+	}
+
+  ///Drawers
 	void gui_toggle_draw(int id){
 		unsigned int phalign = enigma_user::draw_get_halign();
 		unsigned int pvalign = enigma_user::draw_get_valign();
