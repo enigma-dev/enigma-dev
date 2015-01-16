@@ -39,7 +39,7 @@ namespace gui
 			bool visible = true;
 			bool active = false; //Is button pressed
 			bool togglable = false; //Is button a toggle button
-			int callback = -1; //Script to run when clicked
+			array<int,4> callback; //Script to run on event
 
 			int parent_id = -1; //ID of the parent of some kind (probably a window). It won't render with gui_draw_buttons() if it is.
 
@@ -51,6 +51,7 @@ namespace gui
 			void update(gs_scalar ox = 0, gs_scalar oy = 0, gs_scalar tx = enigma_user::mouse_x, gs_scalar ty = enigma_user::mouse_y);
 			void draw(gs_scalar ox = 0, gs_scalar oy = 0);
 			void update_text_pos(int state = -1);
+			void callback_execute(int event);
 	};
 }
 

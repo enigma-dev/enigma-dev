@@ -27,6 +27,7 @@ using std::pair;
 
 namespace enigma_user
 {
+  ///NOTE: CALLBACKS AND STYLES CAN BE A SECURITY RISK IF STATE IS NOT THE DEFINED ENUM's. NO CHECKING TAKES PLACE DURING RUNTIME
 	enum {
 	  gui_state_default,
 	  gui_state_on,
@@ -36,6 +37,14 @@ namespace enigma_user
 	  gui_state_on_active,
 	  gui_state_all
 	};
+
+	enum {
+    gui_event_pressed,
+    gui_event_released,
+    gui_event_hover,
+    gui_event_drag,
+    gui_event_all
+  };
 
   ///BUTTONS
 	int gui_button_create(gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h, string text);
@@ -50,7 +59,7 @@ namespace enigma_user
   void gui_button_set_size(int id, gs_scalar w, gs_scalar h);
   void gui_button_set_style(int id, int style_id);
 
-	void gui_button_set_callback(int id, int script_id);
+	void gui_button_set_callback(int id, int event, int script_id);
 	void gui_button_set_togglable(int id, bool togglable);
 	void gui_button_set_visible(int id, bool visible);
   void gui_button_set_active(int id, bool active);
@@ -58,7 +67,8 @@ namespace enigma_user
   //Getters
   int gui_button_get_style(int id);
 	int gui_button_get_state(int id);
-  int gui_button_get_callback(int id);
+  int gui_button_get_callback(int id, int event);
+  int gui_button_get_parent(int id);
 	bool gui_button_get_active(int id);
   bool gui_button_get_visible(int id);
 	bool gui_button_get_togglable(int id);
@@ -84,14 +94,15 @@ namespace enigma_user
 	void gui_toggle_set_size(int id, gs_scalar w, gs_scalar h);
   void gui_toggle_set_style(int id, int style_id);
 
-	void gui_toggle_set_callback(int id, int script_id);
+	void gui_toggle_set_callback(int id, int event, int script_id);
 	void gui_toggle_set_visible(int id, bool visible);
   void gui_toggle_set_active(int id, bool active);
 
   //Getters
   int gui_toggle_get_style(int id);
 	int gui_toggle_get_state(int id);
-  int gui_toggle_get_callback(int id);
+  int gui_toggle_get_callback(int id, int event);
+  int gui_toggle_get_parent(int id);
 	bool gui_toggle_get_active(int id);
 	bool gui_toggle_get_visible(int id);
 	gs_scalar gui_toggle_get_width(int id);
@@ -117,7 +128,7 @@ namespace enigma_user
   void gui_slider_set_style(int id, int style_id);
   void gui_slider_set_indicator_style(int id, int indicator_style_id);
 
-	void gui_slider_set_callback(int id, int script_id);
+	void gui_slider_set_callback(int id, int event, int script_id);
 	void gui_slider_set_visible(int id, bool visible);
   void gui_slider_set_active(int id, bool active);
   void gui_slider_set_value(int id, double value);
@@ -130,7 +141,7 @@ namespace enigma_user
   int gui_slider_get_indicator_style(int id);
 
   int gui_slider_get_state(int id);
-  int gui_slider_get_callback(int id);
+  int gui_slider_get_callback(int id, int event);
 	bool gui_slider_get_active(int id);
 	bool gui_slider_get_visible(int id);
 	gs_scalar gui_slider_get_width(int id);
@@ -160,7 +171,7 @@ namespace enigma_user
 
 	//Setters
   void gui_window_set_style(int id, int style_id);
-	void gui_window_set_callback(int id, int script_id);
+	void gui_window_set_callback(int id, int event, int script_id);
   void gui_window_set_draggable(int id, bool draggable);
   void gui_window_set_visible(int id, bool visible);
 
@@ -172,7 +183,7 @@ namespace enigma_user
   //Getters
   int gui_window_get_style(int id);
 	int gui_window_get_state(int id);
-  int gui_window_get_callback(int id);
+  int gui_window_get_callback(int id, int event);
   bool gui_window_get_draggable(int id);
 	bool gui_window_get_visible(int id);
   gs_scalar gui_window_get_width(int id);
