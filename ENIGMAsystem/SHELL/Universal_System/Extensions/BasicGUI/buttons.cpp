@@ -57,11 +57,19 @@ namespace gui
 	  style_id = gui_style_button; //Default style
 	  enigma_user::gui_style_set_font_halign(style_id, enigma_user::gui_state_all, enigma_user::fa_center);
     enigma_user::gui_style_set_font_valign(style_id, enigma_user::gui_state_all, enigma_user::fa_middle);
+    callback.fill(-1); //Default callbacks don't exist (so it doesn't call any script)
+	}
+
+	void gui_button::callback_execute(int event){
+    if (callback[event] != -1){
+      enigma_user::script_execute(callback[event], id, active, state, event);
+    }
 	}
 
 	//Update all possible button states (hover, click, toggle etc.)
 	void gui_button::update(gs_scalar ox, gs_scalar oy, gs_scalar tx, gs_scalar ty){
 		if (box.point_inside(tx-ox,ty-oy) && gui::windowStopPropagation == false){
+      callback_execute(enigma_user::gui_event_hover);
       gui::windowStopPropagation = true;
 			if (enigma_user::mouse_check_button_pressed(enigma_user::mb_left)){
         if (active == false){
@@ -69,6 +77,7 @@ namespace gui
         }else{
           state = enigma_user::gui_state_on_active;
         }
+        callback_execute(enigma_user::gui_event_pressed);
 			}else{
 				if (state != enigma_user::gui_state_active && state != enigma_user::gui_state_on_active){
 					if (active == false){
@@ -83,9 +92,7 @@ namespace gui
 						}else{
 							active = true;
 						}
-						if (callback != -1){
-							enigma_user::script_execute(callback, id, active);
-						}
+            callback_execute(enigma_user::gui_event_released);
 						if (togglable == false){
 							active = false;
 						}
@@ -193,8 +200,12 @@ namespace enigma_user
 		gui::gui_buttons[id].update_text_pos();
 	}
 
-	void gui_button_set_callback(int id, int script_id){
-		gui::gui_buttons[id].callback = script_id;
+  void gui_button_set_callback(int id, int event, int script_id){
+    if (event == enigma_user::gui_event_all){
+      gui::gui_buttons[id].callback.fill(script_id);
+	  }else{
+      gui::gui_buttons[id].callback[event] = script_id;
+	  }
 	}
 
   void gui_button_set_style(int id, int style_id){
@@ -234,8 +245,12 @@ namespace enigma_user
     return gui::gui_buttons[id].visible;
 	}
 
-  int gui_button_get_callback(int id){
-    return gui::gui_buttons[id].callback;
+  int gui_button_get_callback(int id, int event){
+    return gui::gui_buttons[id].callback[event];
+  }
+
+  int gui_button_get_parent(int id){
+    return gui::gui_buttons[id].parent_id;
   }
 
   gs_scalar gui_button_get_width(int id){

@@ -57,11 +57,19 @@ namespace gui
 	  style_id = gui_style_toggle; //Default style
 	  enigma_user::gui_style_set_font_halign(style_id, enigma_user::gui_state_all, enigma_user::fa_left);
     enigma_user::gui_style_set_font_valign(style_id, enigma_user::gui_state_all, enigma_user::fa_middle);
+    callback.fill(-1); //Default callbacks don't exist (so it doesn't call any script)
+	}
+
+  void gui_toggle::callback_execute(int event){
+    if (callback[event] != -1){
+      enigma_user::script_execute(callback[event], id, active, state, event);
+    }
 	}
 
 	//Update all possible toggle states (hover, click, toggle etc.)
 	void gui_toggle::update(gs_scalar ox, gs_scalar oy, gs_scalar tx, gs_scalar ty){
 		if (box.point_inside(tx-ox,ty-oy) && gui::windowStopPropagation == false){
+      callback_execute(enigma_user::gui_event_hover);
       gui::windowStopPropagation = true;
 			if (enigma_user::mouse_check_button_pressed(enigma_user::mb_left)){
         if (active == false){
@@ -69,6 +77,7 @@ namespace gui
         }else{
           state = enigma_user::gui_state_on_active;
         }
+        callback_execute(enigma_user::gui_event_pressed);
 			}else{
 				if (state != enigma_user::gui_state_active &&  state != enigma_user::gui_state_on_active){
 					if (active == false){
@@ -79,9 +88,7 @@ namespace gui
 				}else{
 					if (enigma_user::mouse_check_button_released(enigma_user::mb_left)){
 						active = !active;
-						if (callback != -1){
-							enigma_user::script_execute(callback, id, active);
-						}
+						callback_execute(enigma_user::gui_event_released);
 
 						if (active == false){
 							state = enigma_user::gui_state_hover;
@@ -184,8 +191,12 @@ namespace enigma_user
 		gui::gui_toggles[id].update_text_pos();
 	}
 
-	void gui_toggle_set_callback(int id, int script_id){
-		gui::gui_toggles[id].callback = script_id;
+	void gui_toggle_set_callback(int id, int event, int script_id){
+    if (event == enigma_user::gui_event_all){
+      gui::gui_toggles[id].callback.fill(script_id);
+	  }else{
+      gui::gui_toggles[id].callback[event] = script_id;
+	  }
 	}
 
   void gui_toggle_set_style(int id, int style_id){
@@ -209,8 +220,12 @@ namespace enigma_user
 		return gui::gui_toggles[id].state;
 	}
 
-	int gui_toggle_get_callback(int id){
-    return gui::gui_toggles[id].callback;
+	int gui_toggle_get_callback(int id, int event){
+    return gui::gui_toggles[id].callback[event];
+	}
+
+	int gui_toggle_get_parent(int id){
+    return gui::gui_toggles[id].parent_id;
 	}
 
 	bool gui_toggle_get_active(int id){

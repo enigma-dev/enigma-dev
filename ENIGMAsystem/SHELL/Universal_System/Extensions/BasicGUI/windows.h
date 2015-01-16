@@ -44,7 +44,7 @@ namespace gui
       bool draggable = true; //Specifies if the window can be moved
 			gs_scalar drag_xoffset = 0.0;
 			gs_scalar drag_yoffset = 0.0;
-			int callback = -1;
+			array<int,4> callback; //Script to run on event
 
       int style_id = -1;
 
@@ -53,6 +53,7 @@ namespace gui
 			void update(gs_scalar tx = enigma_user::mouse_x, gs_scalar ty = enigma_user::mouse_y);
 			void draw();
 			void update_text_pos(int state = -1);
+      void callback_execute(int event);
 
       vector<unsigned int> child_buttons;
       vector<unsigned int> child_toggles;

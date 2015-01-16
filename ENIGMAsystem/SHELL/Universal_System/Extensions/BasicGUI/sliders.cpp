@@ -53,6 +53,13 @@ namespace gui
     style_id = gui_style_slider; //Default style
 	  enigma_user::gui_style_set_font_halign(style_id, enigma_user::gui_state_all, enigma_user::fa_left);
     enigma_user::gui_style_set_font_valign(style_id, enigma_user::gui_state_all, enigma_user::fa_middle);
+    callback.fill(-1); //Default callbacks don't exist (so it doesn't call any script)
+	}
+
+  void gui_slider::callback_execute(int event){
+    if (callback[event] != -1){
+      enigma_user::script_execute(callback[event], id, active, state, event);
+    }
 	}
 
 	void gui_slider::update_spos(){
@@ -63,6 +70,7 @@ namespace gui
 	//Update all possible slider states (hover, click etc.)
 	void gui_slider::update(gs_scalar ox, gs_scalar oy, gs_scalar tx, gs_scalar ty){
 		if ((box.point_inside(tx-ox,ty-oy) || indicator_box.point_inside(tx-ox-box.x-slider_offset-indicator_box.x,ty-box.y-oy-indicator_box.y)) && gui::windowStopPropagation == false){
+      callback_execute(enigma_user::gui_event_hover);
       windowStopPropagation = true;
 			if (enigma_user::mouse_check_button_pressed(enigma_user::mb_left)){
         state = enigma_user::gui_state_active;
@@ -73,6 +81,7 @@ namespace gui
         }else{
           drag_xoffset = 0.0;
         }
+        callback_execute(enigma_user::gui_event_pressed);
       }else{
 				if (state != enigma_user::gui_state_active){
 					state = enigma_user::gui_state_hover;
@@ -91,11 +100,10 @@ namespace gui
       slider_offset = fmin(fmax(0,tx-box.x-ox-drag_xoffset), box.w);
       value = round((minValue + slider_offset/box.w * (maxValue-minValue)) / incValue) * incValue;
       update_spos();
-      if (callback != -1){
-        enigma_user::script_execute(callback, id, active);
-      }
+      callback_execute(enigma_user::gui_event_drag);
 			if (enigma_user::mouse_check_button_released(enigma_user::mb_left)){
 				drag = false;
+				callback_execute(enigma_user::gui_event_released);
 			}
 		}
 	}
@@ -187,9 +195,13 @@ namespace enigma_user
 		gui::gui_sliders[id].update_text_pos();
 	}
 
-	void gui_slider_set_callback(int id, int script_id){
-		gui::gui_sliders[id].callback = script_id;
-	}
+	void gui_slider_set_callback(int id, int event, int script_id){
+    if (event == enigma_user::gui_event_all){
+      gui::gui_sliders[id].callback.fill(script_id);
+	  }else{
+      gui::gui_sliders[id].callback[event] = script_id;
+	  }
+  }
 
   void gui_slider_set_style(int id, int style_id){
     gui::gui_sliders[id].style_id = (style_id != -1? style_id : gui::gui_style_slider);
@@ -244,8 +256,8 @@ namespace enigma_user
 		return gui::gui_sliders[id].state;
 	}
 
-  int gui_slider_get_callback(int id){
-    return gui::gui_sliders[id].callback;
+  int gui_slider_get_callback(int id, int event){
+    return gui::gui_sliders[id].callback[event];
   }
 
 	bool gui_slider_get_active(int id){

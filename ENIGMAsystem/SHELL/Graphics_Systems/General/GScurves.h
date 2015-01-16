@@ -29,7 +29,7 @@ void draw_bezier_cubic(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2,gs_
 void draw_bezier_cubic_color(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2,gs_scalar x3, gs_scalar y3, gs_scalar x4, gs_scalar y4, int c1, int c2, gs_scalar a1, gs_scalar a2);
 void draw_set_curve_mode(int mode);
 void draw_set_curve_detail(int detail);
-void draw_set_curve_width(int width);
+void draw_set_curve_width(gs_scalar width);
 
 gs_scalar draw_bezier_quadratic_x(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2,gs_scalar x3, gs_scalar y3, float t);
 gs_scalar draw_bezier_quadratic_y(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2,gs_scalar x3, gs_scalar y3, float t);

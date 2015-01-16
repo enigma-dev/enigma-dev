@@ -15,6 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include <algorithm> //For std::remove
 #include <unordered_map>
 #include <string>
 using std::string;
@@ -45,6 +46,8 @@ namespace gui
 {
   bool windowStopPropagation = false; //Stop event propagation in windows and between
 	unordered_map<unsigned int, gui_window> gui_windows;
+	vector<unsigned int> gui_window_order; //This allows changing rendering order (like depth)
+
 	unsigned int gui_windows_maxid = 0;
 	extern unsigned int gui_style_window;
 
@@ -63,13 +66,21 @@ namespace gui
     style_id = gui_style_window; //Default style
     enigma_user::gui_style_set_font_halign(style_id, enigma_user::gui_state_all, enigma_user::fa_center);
     enigma_user::gui_style_set_font_valign(style_id, enigma_user::gui_state_all, enigma_user::fa_top);
+    callback.fill(-1); //Default callbacks don't exist (so it doesn't call any script)
+	}
+
+  void gui_window::callback_execute(int event){
+    if (callback[event] != -1){
+      enigma_user::script_execute(callback[event], id, true, state, event);
+    }
 	}
 
 	//Update all possible button states (hover, click, toggle etc.)
 	void gui_window::update(gs_scalar tx, gs_scalar ty){
-    if (enigma_user::mouse_check_button_pressed(enigma_user::mb_left) && gui::windowStopPropagation == false){ //Press
-      if(box.point_inside(tx,ty)){
+    if (enigma_user::mouse_check_button_pressed(enigma_user::mb_left)){ //Press
+      if (windowStopPropagation == false && box.point_inside(tx,ty)){
         state = enigma_user::gui_state_on;
+        callback_execute(enigma_user::gui_event_pressed);
         if (draggable == true){
           drag = true;
           drag_xoffset = tx-box.x;
@@ -80,7 +91,8 @@ namespace gui
       }
     }
 
-    if (box.point_inside(tx,ty)){ //Hover
+    if (windowStopPropagation == false && box.point_inside(tx,ty)){ //Hover
+        callback_execute(enigma_user::gui_event_hover);
         windowStopPropagation = true;
     }
 
@@ -88,8 +100,10 @@ namespace gui
       windowStopPropagation = true;
 			box.x = tx-drag_xoffset;
 			box.y = ty-drag_yoffset;
+			callback_execute(enigma_user::gui_event_drag);
 			if (enigma_user::mouse_check_button_released(enigma_user::mb_left)){
 				drag = false;
+				callback_execute(enigma_user::gui_event_released);
 			}
 			update_text_pos();
 		}
@@ -134,6 +148,7 @@ namespace enigma_user
 		}
 		gui::gui_windows[gui::gui_windows_maxid].visible = true;
 		gui::gui_windows[gui::gui_windows_maxid].id = gui::gui_windows_maxid;
+		gui::gui_window_order.push_back(gui::gui_windows_maxid);
 		return gui::gui_windows_maxid++;
 	}
 
@@ -148,11 +163,14 @@ namespace enigma_user
 		gui::gui_windows[gui::gui_windows_maxid].box.set(x, y, w, h);
 		gui::gui_windows[gui::gui_windows_maxid].text = text;
 		gui::gui_windows[gui::gui_windows_maxid].update_text_pos();
+		gui::gui_window_order.push_back(gui::gui_windows_maxid);
 		return gui::gui_windows_maxid++;
 	}
 
 	void gui_window_destroy(int id){
 		gui::gui_windows.erase(gui::gui_windows.find(id));
+		//This is the fancy remove/erase idiom, which is the fastest way I know how to delete an element by value from vector
+		gui::gui_window_order.erase(std::remove(gui::gui_window_order.begin(), gui::gui_window_order.end(), id), gui::gui_window_order.end());
 	}
 
   ///Setters
@@ -171,9 +189,13 @@ namespace enigma_user
 		gui::gui_windows[id].update_text_pos();
 	}
 
-	void gui_window_set_callback(int id, int script_id){
-		gui::gui_windows[id].callback = script_id;
-	}
+	void gui_window_set_callback(int id, int event, int script_id){
+    if (event == enigma_user::gui_event_all){
+      gui::gui_windows[id].callback.fill(script_id);
+	  }else{
+      gui::gui_windows[id].callback[event] = script_id;
+	  }
+  }
 
   void gui_window_set_style(int id, int style_id){
     gui::gui_windows[id].style_id = (style_id != -1? style_id : gui::gui_style_window);
@@ -196,8 +218,8 @@ namespace enigma_user
 		return gui::gui_windows[id].state;
 	}
 
-	int gui_window_get_callback(int id){
-		return gui::gui_windows[id].callback;
+	int gui_window_get_callback(int id, int event){
+		return gui::gui_windows[id].callback[event];
 	}
 
   bool gui_window_get_draggable(int id){
@@ -250,6 +272,8 @@ namespace enigma_user
 	}
 
 	void gui_windows_draw(){
+	  if (gui::gui_window_order.size() == 0) return;
+
 		unsigned int phalign = enigma_user::draw_get_halign();
 		unsigned int pvalign = enigma_user::draw_get_valign();
 		int pcolor = enigma_user::draw_get_color();
@@ -257,7 +281,10 @@ namespace enigma_user
 		gui::windowStopPropagation = false;
 
     //Update loop in reverse direction
-    for (int i=gui::gui_windows_maxid-1; i>=0; --i){
+    bool window_click = false; //Something clicked in the window (or the window itself)?
+    int window_swap_id = -1;
+    for (int ind = gui::gui_window_order.size()-1; ind >= 0; --ind){
+      int i = gui::gui_window_order[ind];
       if (gui::gui_windows[i].visible == true){
         //Update children
         if (gui::gui_windows[i].child_buttons.empty() == false){
@@ -278,13 +305,24 @@ namespace enigma_user
             gui::gui_sliders[gui::gui_windows[i].child_sliders[b]].update(gui::gui_windows[i].box.x,gui::gui_windows[i].box.y);
           }
         }
+        //This checks if any of the inside elements are pressed
+        if (gui::windowStopPropagation == true && window_click == false) { window_click = true; window_swap_id = ind; }
         gui::gui_windows[i].update();
-			}
+        //This checks for the click on the window itself. I cannot just check window propagation, because hover also stops propagation, but should not change the draw order
+        if (gui::windowStopPropagation == true && window_click == false) { window_click = true; if (gui::gui_windows[i].state == enigma_user::gui_state_on) { window_swap_id = ind; } }
+      }
 		}
+		//printf("Window selected = %i and click = %i and size = %i && mouse_check_button_pressed %i\n", window_swap_id, window_click, gui::gui_window_order.size(), enigma_user::mouse_check_button_pressed(enigma_user::mb_left));
+		//IT REALLY HATE THE MOUSE CHECK HERE :( - Harijs
+		if (window_click == true && enigma_user::mouse_check_button_pressed(enigma_user::mb_left)) { //Push to front
+        int t = gui::gui_window_order[window_swap_id]; //Get the id of the clicked window
+        gui::gui_window_order.erase(gui::gui_window_order.begin()+window_swap_id); //Delete the id from it's current place
+        gui::gui_window_order.push_back(t); //put to top
+    }
 
     //Draw loop
-    for (auto &wi : gui::gui_windows){
-      auto &w = wi.second;
+    for (auto &wi : gui::gui_window_order){
+      auto &w = gui::gui_windows[wi];
       if (w.visible == true){
 				w.draw();
         //Draw children

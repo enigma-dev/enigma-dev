@@ -64,7 +64,7 @@ void draw_line(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2)
 
 void draw_line_color(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, int c1, int c2)
 {
-    gs_scalar alpha = draw_get_alpha();
+  gs_scalar alpha = draw_get_alpha();
 	draw_primitive_begin(pr_linestrip);
 	draw_vertex_color(x1, y1, c1, alpha);
 	draw_vertex_color(x2, y2, c2, alpha);
@@ -73,29 +73,29 @@ void draw_line_color(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, int 
 
 void draw_line_width(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, float width)
 {
-    double dir = fmod(atan2(y1-y2,x2-x1)+2*M_PI,2*M_PI);
-    double cv = cos(dir-M_PI/2.0), sv = -sin(dir-M_PI/2.0);
-    double dw = width/2.0;
-    draw_primitive_begin(pr_trianglestrip);
+  double dir = fmod(atan2(y1-y2,x2-x1)+2*M_PI,2*M_PI);
+  double cv = cos(dir-M_PI/2.0), sv = -sin(dir-M_PI/2.0);
+  double dw = width/2.0;
+  draw_primitive_begin(pr_trianglestrip);
 	draw_vertex(x1+dw*cv, y1+dw*sv);
 	draw_vertex(x1-dw*cv, y1-dw*sv);
-    draw_vertex(x2+dw*cv, y2+dw*sv);
-    draw_vertex(x2-dw*cv, y2-dw*sv);
+  draw_vertex(x2+dw*cv, y2+dw*sv);
+  draw_vertex(x2-dw*cv, y2-dw*sv);
 	draw_primitive_end();
 }
 
 void draw_line_width_color(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, float width, int c1, int c2)
 {
-    gs_scalar alpha = draw_get_alpha();
-    double dir = fmod(atan2(y1-y2,x2-x1)+2*M_PI,2*M_PI);
-    double cv = cos(dir-M_PI/2.0), sv = -sin(dir-M_PI/2.0);
-    double dw = width/2.0;
-    draw_primitive_begin(pr_trianglestrip);
-    draw_vertex_color(x1+dw*cv, y1+dw*sv, c1, alpha);
-    draw_vertex_color(x1-dw*cv, y1-dw*sv, c1, alpha);
-    draw_vertex_color(x2+dw*cv, y2+dw*sv, c2, alpha);
-    draw_vertex_color(x2-dw*cv, y2-dw*sv, c2, alpha);
-    draw_primitive_end();
+  gs_scalar alpha = draw_get_alpha();
+  double dir = fmod(atan2(y1-y2,x2-x1)+2*M_PI,2*M_PI);
+  double cv = cos(dir-M_PI/2.0), sv = -sin(dir-M_PI/2.0);
+  double dw = width/2.0;
+  draw_primitive_begin(pr_trianglestrip);
+  draw_vertex_color(x1+dw*cv, y1+dw*sv, c1, alpha);
+  draw_vertex_color(x1-dw*cv, y1-dw*sv, c1, alpha);
+  draw_vertex_color(x2+dw*cv, y2+dw*sv, c2, alpha);
+  draw_vertex_color(x2-dw*cv, y2-dw*sv, c2, alpha);
+  draw_primitive_end();
 }
 
 void draw_rectangle(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, bool outline)
@@ -353,9 +353,9 @@ void draw_sector(gs_scalar x, gs_scalar y, gs_scalar rx, gs_scalar ry, float a1,
   // TODO(JoshDreamland): Replace with settings macro to get from preferred unit to radians
   a1 *= M_PI/180;
   a2 *= M_PI/180;
-  
+
   gs_scalar pr = 2*M_PI/enigma::circleprecision;
-  
+
   if (outline) {
     draw_primitive_begin(pr_linestrip);
     draw_vertex(x, y);

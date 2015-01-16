@@ -39,7 +39,7 @@ namespace gui
 			bool visible = true;
 			bool active = false; //Is slider pressed
       bool drag = false;
-			int callback = -1; //Script to run when clicked
+			array<int,4> callback; //Script to run on event
 
 			gs_scalar drag_xoffset = 0.0;
 			gs_scalar drag_yoffset = 0.0;
@@ -63,6 +63,7 @@ namespace gui
 			void update(gs_scalar ox = 0, gs_scalar oy = 0, gs_scalar tx = enigma_user::mouse_x, gs_scalar ty = enigma_user::mouse_y);
 			void draw(gs_scalar ox = 0, gs_scalar oy = 0);
 			void update_text_pos(int state = -1);
+			void callback_execute(int event);
 	};
 }
 
