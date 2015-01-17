@@ -56,8 +56,9 @@ namespace setting
   //Compliance levels. These enforce various settings specific to certain versions of GM.
   //Prefer generalized solutions; use these for direct incompatibilities. (Add other GM versions as needed).
   enum COMPLIANCE_LVL {
-    COMPL_STANDARD = 0,  //Standard (enigma) compliance. Default and recommended.
-    COMPL_GM5 = 1        //GM5 compliance. timeline_running will default to "true".
+    COMPL_STANDARD = 0,    //Standard (enigma) compliance. Default and recommended.
+    COMPL_GM567 = 1,       //GM5,6,7 compliance. timeline_running will default to "true". exit will abort single code actions.
+    COMPL_GM8 = 2,         //GM8 compliance. exit will abort single code actions.
   };
 
   //Compatibility / Progess options
@@ -67,6 +68,7 @@ namespace setting
   extern bool use_incrementals; // Defines how operators ++ and -- are treated.         0 = GML,               1 = C++
   extern bool literal_autocast; // Determines how literals are treated.                 0 = enigma::variant,   1 = C++ scalars
   extern bool inherit_objects;  // Determines whether objects should automatically inherit locals and events from their parents
+  extern bool automatic_semicolons; // Determines whether semicolons should automatically be added or if the user wants strict syntax
   extern COMPLIANCE_LVL compliance_mode; // How to resolve differences between GM versions.
   extern string keyword_blacklist; //Words to blacklist from user scripts, separated by commas.
 }
