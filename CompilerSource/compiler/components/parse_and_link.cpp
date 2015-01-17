@@ -46,6 +46,7 @@ using namespace std;
 #include <languages/lang_CPP.h>
 
 #include "compiler/compile_includes.h"
+#include "settings.h"
 
 extern string tostring(int);
 
@@ -273,7 +274,7 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
         
         //Add this to our objects map
         pev.myObj = pob; //Link to its calling object.
-        parser_main(newcode,&pev,script_names); //Format it to C++
+        parser_main(newcode,&pev,script_names, setting::compliance_mode!=setting::COMPL_STANDARD); //Format it to C++
         
         edbg << " Done." << flushl;
       }
@@ -407,8 +408,10 @@ int lang_CPP::link_globals(parsed_object *global, EnigmaStruct *es,parsed_script
 {
   for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
     global->copy_from(*i->second,"object `"+i->second->name+"'","the Global Scope");
+  //TODO: because parsed_room inherits parsed_object it tries to use that as the name but it looks 
+  //like it never gets initialized, this is obviously a bug because this output never tells us the room name always just `'
   for (pr_i i = parsed_rooms.begin(); i != parsed_rooms.end(); i++)
-    global->copy_from(*i->second,"object `"+i->second->name+"'","the Global Scope");
+    global->copy_from(*i->second,"room `"+i->second->name+"'","the Global Scope");
   for (int i = 0; i < es->scriptCount; i++)
     global->copy_from(scripts[i]->obj,"script `"+scripts[i]->obj.name+"'","the Global Scope");
   for (int i = 0; i < int(tlines.size()); i++)
