@@ -692,7 +692,7 @@ namespace jdi {
       else {
         res += d->type->name + d->name;
         if (d->flags & DEF_VALUED)
-          res += " = " + ((definition_valued*)d)->value_of;
+          res += " = " + ((definition_valued*)d)->value_of.toString();
       }
       first = false;
     }
