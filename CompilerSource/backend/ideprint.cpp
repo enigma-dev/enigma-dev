@@ -27,6 +27,9 @@ ideprint &ideprint::operator<< (string x) {
 ideprint &ideprint::operator<< (const char* x) {
   f(x); return *this;
 }
+ideprint &ideprint::operator<< (size_t x) {
+  f(tostring(x).c_str()); return *this;
+}
 ideprint &ideprint::operator<< (int x) {
   f(tostring(x).c_str()); return *this;
 }
