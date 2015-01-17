@@ -54,6 +54,7 @@ namespace parse_bacics {
   is_ is;
   namespace visible {
     string toString(size_t n) { char buf[12]; return string(buf,sprintf(buf,"%d", n)); }
+    string toString(pt n) { char buf[12]; return string(buf,sprintf(buf,"%d", n)); }
     string toString(int n) { char buf[12]; return string(buf,sprintf(buf,"%d", n)); }
     string toString(long n) { char buf[12]; return string(buf,sprintf(buf,"%ld", n)); }
     string toString(short n) { char buf[12]; return string(buf,sprintf(buf,"%d", n)); }
