@@ -90,7 +90,6 @@ namespace parse_bacics {
     using std::string;
     string toString(int);
     string toString(size_t);
-    string toString(pt);
     string toString(long);
     string toString(short);
     string toString(unsigned);
