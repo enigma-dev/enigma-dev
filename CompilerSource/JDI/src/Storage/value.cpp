@@ -75,10 +75,10 @@ namespace jdi {
     switch (type) { case VT_DOUBLE: return val.d <= other.val.d; case VT_INTEGER: return val.i <= other.val.i; case VT_STRING: return strcmp(val.s, other.val.s) <= 0; case VT_NONE: default: return true; }
   }
   
-#if __cplusplus >= 201100
+//#if __cplusplus >= 201100
   value::operator long long unsigned()   const { if (type == VT_INTEGER) return val.i; if (type == VT_DOUBLE) return (long long unsigned)val.d; return 0; }
   value::operator long long int()   const { if (type == VT_INTEGER) return val.i; if (type == VT_DOUBLE) return (long long int)val.d; return 0; }
-#endif
+//#endif
   value::operator long()   const { if (type == VT_INTEGER) return val.i; if (type == VT_DOUBLE) return (long)val.d; return 0; }
   value::operator double() const { if (type == VT_DOUBLE) return val.d; if (type == VT_INTEGER) return val.i; return 0; }
   value::operator bool()   const { if (type == VT_INTEGER) return val.i; if (type == VT_DOUBLE) return fabs(val.d) < DBL_EPSILON; return 0; }
