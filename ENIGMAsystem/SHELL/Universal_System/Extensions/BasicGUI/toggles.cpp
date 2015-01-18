@@ -172,6 +172,9 @@ namespace enigma_user
 	}
 
 	void gui_toggle_destroy(int id){
+	  if (gui::gui_toggles[id].parent_id != -1){
+      gui_window_remove_toggle(gui::gui_toggles[id].parent_id, id);
+	  }
 		gui::gui_toggles.erase(gui::gui_toggles.find(id));
 	}
 

@@ -181,6 +181,9 @@ namespace enigma_user
 	}
 
 	void gui_button_destroy(int id){
+    if (gui::gui_buttons[id].parent_id != -1){
+      gui_window_remove_button(gui::gui_buttons[id].parent_id, id);
+	  }
 		gui::gui_buttons.erase(gui::gui_buttons.find(id));
 	}
 

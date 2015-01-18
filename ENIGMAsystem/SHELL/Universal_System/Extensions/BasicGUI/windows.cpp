@@ -18,9 +18,11 @@
 #include <algorithm> //For std::remove
 #include <unordered_map>
 #include <string>
+#include <deque>
 using std::string;
 using std::unordered_map;
 using std::pair;
+using std::deque;
 
 #include "Universal_System/var4.h"
 #include "Universal_System/CallbackArrays.h" //For mouse_check_button
@@ -46,7 +48,7 @@ namespace gui
 {
   bool windowStopPropagation = false; //Stop event propagation in windows and between
 	unordered_map<unsigned int, gui_window> gui_windows;
-	vector<unsigned int> gui_window_order; //This allows changing rendering order (like depth)
+	deque<unsigned int> gui_window_order; //This allows changing rendering order (like depth)
 
 	unsigned int gui_windows_maxid = 0;
 	extern unsigned int gui_style_window;
@@ -250,6 +252,23 @@ namespace enigma_user
     return gui::gui_windows[id].text;
 	}
 
+	///Depth changers
+	void gui_window_push_to_front(int id){
+    auto it = find(gui::gui_window_order.begin(), gui::gui_window_order.end(), id);
+    if (it != gui::gui_window_order.end()){
+      gui::gui_window_order.erase(it);
+      gui::gui_window_order.push_back(id);
+    }
+	}
+
+  void gui_window_push_to_back(int id){
+    auto it = find(gui::gui_window_order.begin(), gui::gui_window_order.end(), id);
+    if (it != gui::gui_window_order.end()){
+      gui::gui_window_order.erase(it);
+      gui::gui_window_order.push_front(id);
+    }
+	}
+
   ///Drawers
 	void gui_window_draw(int id){
 		unsigned int phalign = enigma_user::draw_get_halign();
@@ -313,7 +332,7 @@ namespace enigma_user
       }
 		}
 		//printf("Window selected = %i and click = %i and size = %i && mouse_check_button_pressed %i\n", window_swap_id, window_click, gui::gui_window_order.size(), enigma_user::mouse_check_button_pressed(enigma_user::mb_left));
-		//IT REALLY HATE THE MOUSE CHECK HERE :( - Harijs
+		//I REALLY HATE THE MOUSE CHECK HERE :( - Harijs
 		if (window_click == true && enigma_user::mouse_check_button_pressed(enigma_user::mb_left)) { //Push to front
         int t = gui::gui_window_order[window_swap_id]; //Get the id of the clicked window
         gui::gui_window_order.erase(gui::gui_window_order.begin()+window_swap_id); //Delete the id from it's current place
@@ -369,8 +388,40 @@ namespace enigma_user
     gui::gui_sliders[sid].parent_id = id;
   }
 
-  void gui_window_add_label(int id, int sid){
-    gui::gui_windows[id].child_labels.push_back(sid);
-    gui::gui_labels[sid].parent_id = id;
+  void gui_window_add_label(int id, int lid){
+    gui::gui_windows[id].child_labels.push_back(lid);
+    gui::gui_labels[lid].parent_id = id;
+  }
+
+  void gui_window_remove_button(int id, int bid){
+    auto it = find(gui::gui_windows[id].child_buttons.begin(), gui::gui_windows[id].child_buttons.end(), bid);
+    if (it != gui::gui_windows[id].child_buttons.end()){
+      gui::gui_windows[id].child_buttons.erase(it);
+      gui::gui_buttons[bid].parent_id = -1;
+    }
+  }
+
+  void gui_window_remove_toggle(int id, int tid){
+    auto it = find(gui::gui_windows[id].child_toggles.begin(), gui::gui_windows[id].child_toggles.end(), tid);
+    if (it != gui::gui_windows[id].child_toggles.end()){
+      gui::gui_windows[id].child_toggles.erase(it);
+      gui::gui_toggles[tid].parent_id = -1;
+    }
+  }
+
+  void gui_window_remove_slider(int id, int sid){
+    auto it = find(gui::gui_windows[id].child_sliders.begin(), gui::gui_windows[id].child_sliders.end(), sid);
+    if (it != gui::gui_windows[id].child_sliders.end()){
+      gui::gui_windows[id].child_sliders.erase(it);
+      gui::gui_sliders[sid].parent_id = -1;
+    }
+  }
+
+  void gui_window_remove_label(int id, int lid){
+    auto it = find(gui::gui_windows[id].child_labels.begin(), gui::gui_windows[id].child_labels.end(), lid);
+    if (it != gui::gui_windows[id].child_labels.end()){
+      gui::gui_windows[id].child_labels.erase(it);
+      gui::gui_labels[lid].parent_id = -1;
+    }
   }
 }

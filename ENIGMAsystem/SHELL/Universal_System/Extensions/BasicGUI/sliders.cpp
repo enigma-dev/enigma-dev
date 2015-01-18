@@ -176,6 +176,9 @@ namespace enigma_user
 	}
 
 	void gui_slider_destroy(int id){
+    if (gui::gui_sliders[id].parent_id != -1){
+      gui_window_remove_slider(gui::gui_sliders[id].parent_id, id);
+	  }
 		gui::gui_sliders.erase(gui::gui_sliders.find(id));
 	}
 

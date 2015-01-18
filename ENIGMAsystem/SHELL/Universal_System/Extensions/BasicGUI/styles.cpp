@@ -117,6 +117,49 @@ namespace enigma_user
 	  }
 	}
 
+	void gui_style_set_sprite_color(int id, int state, int color){
+    if (state == enigma_user::gui_state_all){
+      for ( auto &it : gui::gui_styles[id].sprite_styles ){
+        it.color = color;
+      }
+    }else{
+      gui::gui_styles[id].sprite_styles[state].color = color;
+	  }
+	}
+
+  void gui_style_set_sprite_alpha(int id, int state, gs_scalar alpha){
+    if (state == enigma_user::gui_state_all){
+      for ( auto &it : gui::gui_styles[id].sprite_styles ){
+        it.alpha = alpha;
+      }
+    }else{
+      gui::gui_styles[id].sprite_styles[state].alpha = alpha;
+	  }
+	}
+
+  void gui_style_set_sprite_direction(int id, int state, gs_scalar direction){
+    if (state == enigma_user::gui_state_all){
+      for ( auto &it : gui::gui_styles[id].sprite_styles ){
+        it.rotation = direction;
+      }
+    }else{
+      gui::gui_styles[id].sprite_styles[state].rotation = direction;
+	  }
+	}
+
+  void gui_style_set_sprite_scale(int id, int state, gs_scalar scale_x, gs_scalar scale_y){
+    if (state == enigma_user::gui_state_all){
+      for ( auto &it : gui::gui_styles[id].sprite_styles ){
+        it.scale_x = scale_x;
+        it.scale_y = scale_y;
+      }
+    }else{
+      gui::gui_styles[id].sprite_styles[state].scale_x = scale_x;
+      gui::gui_styles[id].sprite_styles[state].scale_y = scale_y;
+	  }
+	}
+
+
 	void gui_style_set_padding(int id, gs_scalar left, gs_scalar top, gs_scalar right, gs_scalar bottom){
 		gui::gui_styles[id].padding.set(left,top,right,bottom);
 	}
