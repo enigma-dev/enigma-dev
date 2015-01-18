@@ -48,6 +48,12 @@ namespace gui
 			enigma_user::draw_set_alpha(alpha);
 		}
 	};
+  struct render_style{
+		int color = enigma_user::c_white;
+		gs_scalar alpha = 1.0;
+		gs_scalar scale_x = 1.0, scale_y = 1.0;
+		gs_scalar rotation = 1.0;
+	};
 }
 
 #endif

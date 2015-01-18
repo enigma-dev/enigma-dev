@@ -31,6 +31,7 @@ namespace gui
 			array<font_style,6> font_styles; //0 - default, 1 - hover, 2 - active, 3 - on, 4 - on hover, 5 - on active (this is based on enums)
 
       array<int,6> sprites;
+      array<render_style,6> sprite_styles;
 
 			rect box;
 			rect_offset border;
