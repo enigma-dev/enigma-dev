@@ -56,7 +56,7 @@ namespace gui
 	}
 
 	void gui_label::draw(gs_scalar ox, gs_scalar oy){
-		//Draw button
+		//Draw sprite
     if (gui::gui_styles[style_id].sprites[enigma_user::gui_state_default] != -1){
       enigma_user::draw_sprite_padded(gui::gui_styles[style_id].sprites[enigma_user::gui_state_default],-1,gui::gui_styles[style_id].border.left,gui::gui_styles[style_id].border.top,gui::gui_styles[style_id].border.right,gui::gui_styles[style_id].border.bottom,ox + box.x,oy + box.y,ox + box.x+box.w,oy + box.y+box.h);
 		}
@@ -108,6 +108,9 @@ namespace enigma_user
 	}
 
 	void gui_label_destroy(int id){
+    if (gui::gui_labels[id].parent_id != -1){
+      gui_window_remove_label(gui::gui_labels[id].parent_id, id);
+	  }
 		gui::gui_labels.erase(gui::gui_labels.find(id));
 	}
 

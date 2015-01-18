@@ -192,6 +192,10 @@ namespace enigma_user
 	gs_scalar gui_window_get_y(int id);
 	string gui_window_get_text(int id);
 
+	//depth changers
+	void gui_window_push_to_front(int id);
+	void gui_window_push_to_back(int id);
+
 	//Drawers
 	void gui_window_draw(int id);
 	void gui_windows_draw();
@@ -232,7 +236,12 @@ namespace enigma_user
   void gui_window_add_button(int id, int bid);
   void gui_window_add_toggle(int id, int tid);
   void gui_window_add_slider(int id, int sid);
-  void gui_window_add_label(int id, int sid);
+  void gui_window_add_label(int id, int lid);
+
+  void gui_window_remove_button(int id, int bid);
+  void gui_window_remove_toggle(int id, int tid);
+  void gui_window_remove_slider(int id, int aid);
+  void gui_window_remove_label(int id, int lid);
 
 	//Skins
 	int gui_skin_create();
@@ -252,7 +261,13 @@ namespace enigma_user
 	void gui_style_set_font_valign(int id, int state, unsigned int valign);
 	void gui_style_set_font_color(int id, int state, int color);
 	void gui_style_set_font_alpha(int id, int state, gs_scalar alpha);
+
 	void gui_style_set_sprite(int id, int state, int sprid);
+  void gui_style_set_sprite_color(int id, int state, int color);
+  void gui_style_set_sprite_alpha(int id, int state, gs_scalar alpha);
+  void gui_style_set_sprite_direction(int id, int state, gs_scalar direction);
+  void gui_style_set_sprite_scale(int id, int state, gs_scalar scale_x, gs_scalar scale_y);
+
 	void gui_style_set_padding(int id, gs_scalar left, gs_scalar top, gs_scalar right, gs_scalar bottom);
 	void gui_style_set_border(int id, gs_scalar left, gs_scalar top, gs_scalar right, gs_scalar bottom);
   void gui_style_set_image_offset(int id, gs_scalar x, gs_scalar y);
