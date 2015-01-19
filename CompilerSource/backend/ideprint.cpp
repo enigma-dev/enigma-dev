@@ -27,31 +27,24 @@ ideprint &ideprint::operator<< (string x) {
 ideprint &ideprint::operator<< (const char* x) {
   f(x); return *this;
 }
-ideprint &ideprint::operator<< (size_t x) {
+ideprint &ideprint::operator<< (int16_t x) {
   f(tostring(x).c_str()); return *this;
 }
-ideprint &ideprint::operator<< (int x) {
+ideprint &ideprint::operator<< (int32_t x) {
   f(tostring(x).c_str()); return *this;
 }
-ideprint &ideprint::operator<< (long x) {
+ideprint &ideprint::operator<< (int64_t x) {
   f(tostring(x).c_str()); return *this;
 }
-ideprint &ideprint::operator<< (unsigned x) {
+ideprint &ideprint::operator<< (uint16_t x) {
   f(tostring(x).c_str()); return *this;
 }
-ideprint &ideprint::operator<< (unsigned long x) {
+ideprint &ideprint::operator<< (uint32_t x) {
   f(tostring(x).c_str()); return *this;
 }
-
-#if __cplusplus >= 201100
-ideprint &ideprint::operator<< (long long x) {
+ideprint &ideprint::operator<< (uint64_t x) {
   f(tostring(x).c_str()); return *this;
 }
-ideprint &ideprint::operator<< (unsigned long long x) {
-  f(tostring(x).c_str()); return *this;
-}
-#endif
-
 ideprint &ideprint::operator<< (void *x) {
   f(tostringv(x).c_str()); return *this;
 }
