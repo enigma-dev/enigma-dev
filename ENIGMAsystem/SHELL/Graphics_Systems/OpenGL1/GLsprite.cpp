@@ -69,28 +69,32 @@ using std::string;
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
 
+namespace enigma_user {
+  extern int window_get_region_height_scaled();
+}
+
 namespace enigma_user
 {
 
 int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload, int xorig, int yorig) {
-    int full_width=nlpo2dc(w)+1, full_height=nlpo2dc(h)+1;
+  int full_width=nlpo2dc(w)+1, full_height=nlpo2dc(h)+1;
 	int prevFbo;
 	glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
  	glBindFramebuffer(GL_FRAMEBUFFER_EXT, 0);
 	int patchSize = full_width*full_height;
 	std::vector<unsigned char> rgbdata(4*patchSize);
-	glReadPixels(x, h-y,w,h,GL_RGBA, GL_UNSIGNED_BYTE, &rgbdata[0]);
+	glReadPixels(x,enigma_user::window_get_region_height_scaled()-h-y,w,h,GL_RGBA, GL_UNSIGNED_BYTE, &rgbdata[0]);
 	glBindFramebuffer(GL_FRAMEBUFFER_EXT, prevFbo);
 	
 	unsigned char* data = enigma::image_flip(&rgbdata[0], w, h, 4);
 	
 	enigma::spritestructarray_reallocate();
-    int sprid=enigma::sprite_idmax;
-    enigma::sprite_new_empty(sprid, 1, w, h, xorig, yorig, 0, h, 0, w, preload, smooth);
+  int sprid=enigma::sprite_idmax;
+  enigma::sprite_new_empty(sprid, 1, w, h, xorig, yorig, 0, h, 0, w, preload, smooth);
 	enigma::sprite_set_subimage(sprid, 0, w, h, &data[0], &data[0], enigma::ct_precise); //TODO: Support toggling of precise.
-    rgbdata.clear(); // Clear the temporary array
+  rgbdata.clear(); // Clear the temporary array
 	delete[] data;
-    return sprid;
+  return sprid;
 }
 
 int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, int xorig, int yorig) {
@@ -98,13 +102,13 @@ int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool 
 }
 
 void sprite_add_from_screen(int id, int x, int y, int w, int h, bool removeback, bool smooth) {
-    int full_width=nlpo2dc(w)+1, full_height=nlpo2dc(h)+1;
+  int full_width=nlpo2dc(w)+1, full_height=nlpo2dc(h)+1;
 	int prevFbo;
 	glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
  	glBindFramebuffer(GL_FRAMEBUFFER_EXT, 0);
 	int patchSize = full_width*full_height;
 	std::vector<unsigned char> rgbdata(4*patchSize);
-	glReadPixels(x, h-y,w,h,GL_RGBA, GL_UNSIGNED_BYTE, &rgbdata[0]);
+	glReadPixels(x,enigma_user::window_get_region_height_scaled()-h-y,w,h,GL_RGBA, GL_UNSIGNED_BYTE, &rgbdata[0]);
 	glBindFramebuffer(GL_FRAMEBUFFER_EXT, prevFbo);
 	
 	unsigned char* data = enigma::image_flip(&rgbdata[0], w, h, 4);
