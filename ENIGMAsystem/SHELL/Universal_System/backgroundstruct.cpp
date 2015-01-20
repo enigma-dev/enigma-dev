@@ -127,7 +127,7 @@ namespace enigma
     if (pxdata == NULL) { printf("ERROR - Failed to append background to index!\n"); return; }
     
     // If background is transparent, set the alpha to zero for pixels that should be transparent from lower left pixel color
-    if (pxdata && transparent)
+    if (transparent)
     {
       int t_pixel_b = pxdata[(h-1)*fullwidth*4];
       int t_pixel_g = pxdata[(h-1)*fullwidth*4+1];

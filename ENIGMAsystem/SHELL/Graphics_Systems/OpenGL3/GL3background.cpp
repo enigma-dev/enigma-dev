@@ -54,6 +54,9 @@
   #define get_backgroundnv(bck2d,back,r)\
     const enigma::background *const bck2d = enigma::backgroundstructarray[back];
 #endif
+namespace enigma_user {
+  extern int window_get_region_height_scaled();
+}
 
 namespace enigma {
   extern size_t background_idmax;
@@ -65,24 +68,24 @@ namespace enigma_user
 {
 
 int background_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload) {
-    int full_width=nlpo2dc(w)+1, full_height=nlpo2dc(h)+1;
+  int full_width=nlpo2dc(w)+1, full_height=nlpo2dc(h)+1;
 	int prevFbo;
 	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFbo);
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 	int patchSize = full_width*full_height;
 	std::vector<unsigned char> rgbdata(4*patchSize);
-	glReadPixels(x, h-y,w,h,GL_RGBA, GL_UNSIGNED_BYTE, &rgbdata[0]);
+	glReadPixels(x, enigma_user::window_get_region_height_scaled()-h-y,w,h,GL_RGBA, GL_UNSIGNED_BYTE, &rgbdata[0]);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, prevFbo);
 	
 	unsigned char* data = enigma::image_flip(&rgbdata[0], w, h, 4);
 	
 	enigma::backgroundstructarray_reallocate();
-    int bckid=enigma::background_idmax;
+  int bckid=enigma::background_idmax;
 	enigma::background_new(bckid, w, h, &data[0], removeback, smooth, preload, false, 0, 0, 0, 0, 0, 0);
-    delete[] data;
+  delete[] data;
 	rgbdata.clear();
 	enigma::background_idmax++;
-    return bckid;
+  return bckid;
 }
 
 }

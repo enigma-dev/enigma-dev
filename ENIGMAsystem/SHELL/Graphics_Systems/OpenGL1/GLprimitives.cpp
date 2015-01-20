@@ -52,7 +52,7 @@ namespace enigma_user
 void draw_primitive_begin(int kind)
 {
   // This has to be done because these immediate mode vertex functions will
-  // blend with the texture whether or specify texture coordinates or not.
+  // blend with the texture whether you specify texture coordinates or not.
   texture_reset();
   glBegin(ptypes_by_id[ kind & 15 ]);
 }
@@ -74,37 +74,37 @@ void draw_vertex(gs_scalar x, gs_scalar y)
 
 void draw_vertex_color(gs_scalar x, gs_scalar y, int col, float alpha)
 {
-    glColor4ub(
-      (col&0xFF),
-      ((col&0xFF00)>>8),
-      ((col&0xFF0000)>>16),
-      (unsigned char)(alpha*255));
-    glVertex2f(x,y);
-    glColor4ubv(enigma::currentcolor);
+  glColor4ub(
+    (col&0xFF),
+    ((col&0xFF00)>>8),
+    ((col&0xFF0000)>>16),
+    (unsigned char)(alpha*255));
+  glVertex2f(x,y);
+  glColor4ubv(enigma::currentcolor);
 }
 
 void draw_vertex_texture(gs_scalar x, gs_scalar y, gs_scalar tx, gs_scalar ty)
 {
-    glTexCoord2f(tx,ty);
-    glVertex2f(x,y);
+  glTexCoord2f(tx,ty);
+  glVertex2f(x,y);
 }
 
 void draw_vertex_texture_color(gs_scalar x, gs_scalar y, gs_scalar tx, gs_scalar ty, int col, float alpha)
 {
-    glColor4ub(
-      (col&0xFF),
-      ((col&0xFF00)>>8),
-      ((col&0xFF0000)>>16),
-      (unsigned char)(alpha*255));
-    glTexCoord2f(tx,ty);
-    glVertex2f(x,y);
-    glColor4ubv(enigma::currentcolor);
+  glColor4ub(
+    (col&0xFF),
+    ((col&0xFF00)>>8),
+    ((col&0xFF0000)>>16),
+    (unsigned char)(alpha*255));
+  glTexCoord2f(tx,ty);
+  glVertex2f(x,y);
+  glColor4ubv(enigma::currentcolor);
 }
 
 void d3d_primitive_begin(int kind) {
-	// This has to be done because these immediate mode vertex functions will
-	// blend with the texture whether or specify texture coordinates or not.
-	texture_reset();
+  // This has to be done because these immediate mode vertex functions will
+  // blend with the texture whether you specify texture coordinates or not.
+  texture_reset();
   glBegin(ptypes_by_id[kind]);
 }
 
