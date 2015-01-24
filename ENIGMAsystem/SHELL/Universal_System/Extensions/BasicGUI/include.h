@@ -221,6 +221,7 @@ namespace enigma_user
   gs_scalar gui_label_get_x(int id);
   gs_scalar gui_label_get_y(int id);
 	string gui_label_get_text(int id);
+  int gui_label_get_parent(int id);
 
   //Drawers
 	void gui_label_draw(int id);
