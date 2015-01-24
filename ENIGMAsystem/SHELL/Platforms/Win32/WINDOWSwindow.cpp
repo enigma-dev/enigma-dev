@@ -53,7 +53,7 @@ namespace enigma
         if (showBorder) {
             newlong |= WS_CAPTION;
             if (isSizeable)
-              newlong |= WS_SIZEBOX;
+              newlong |= WS_SIZEBOX | WS_MAXIMIZEBOX;
         }
         if (showIcons)
             newlong |= WS_SYSMENU;
@@ -63,7 +63,7 @@ namespace enigma
         // these two flags are necessary for extensions like Ultimate3D and GMOgre to render on top of the window
         return newlong | WS_CLIPCHILDREN | WS_CLIPSIBLINGS;
     }
-    
+
     void centerwindow() {
       int screen_width = GetSystemMetrics(SM_CXSCREEN);
       int screen_height = GetSystemMetrics(SM_CYSCREEN);
@@ -128,9 +128,9 @@ namespace enigma
             }
              clampwindow();
         } else {
-          SetWindowPos(hWnd, NULL, 0, 0, parWidth, parHeight, SWP_NOACTIVATE); 
+          SetWindowPos(hWnd, NULL, 0, 0, parWidth, parHeight, SWP_NOACTIVATE);
         }
-      
+
     }
 }
 
@@ -263,7 +263,7 @@ void window_default(bool center_size)
   if (center_size) {
     center = (xm != enigma::windowWidth || ym != enigma::windowHeight);
   }
-  
+
   enigma::windowWidth = enigma::regionWidth = xm;
   enigma::windowHeight = enigma::regionHeight = ym;
   if (center)
@@ -799,7 +799,7 @@ int window_set_cursor(int c)
           enigma::currentCursor = IDC_SIZEALL;
           break;
   }
-  
+
   return SendMessage(enigma::hWnd, WM_SETCURSOR, (WPARAM)enigma::hWnd, MAKELPARAM(HTCLIENT, WM_MOUSEMOVE));
 }
 
