@@ -162,6 +162,10 @@ namespace enigma_user
     return gui::gui_labels[id].visible;
   }
 
+  int gui_label_get_parent(int id){
+    return gui::gui_labels[id].parent_id;
+  }
+
 	string gui_label_get_text(int id){
     return gui::gui_labels[id].text;
   }

@@ -114,7 +114,17 @@ namespace gui
 	void gui_window::draw(){
 	  //Draw window
     if (gui::gui_styles[style_id].sprites[state] != -1){
-      enigma_user::draw_sprite_padded(gui::gui_styles[style_id].sprites[state],-1,gui::gui_styles[style_id].border.left,gui::gui_styles[style_id].border.top,gui::gui_styles[style_id].border.right,gui::gui_styles[style_id].border.bottom,box.x,box.y,box.x+box.w,box.y+box.h);
+      enigma_user::draw_sprite_padded(gui::gui_styles[style_id].sprites[state],-1,
+                                      gui::gui_styles[style_id].border.left,
+                                      gui::gui_styles[style_id].border.top,
+                                      gui::gui_styles[style_id].border.right,
+                                      gui::gui_styles[style_id].border.bottom,
+                                      box.x,
+                                      box.y,
+                                      box.x+box.w,
+                                      box.y+box.h,
+                                      gui::gui_styles[style_id].sprite_styles[state].color,
+                                      gui::gui_styles[style_id].sprite_styles[state].alpha);
 		}
 
 		//Draw text
