@@ -43,6 +43,7 @@ namespace enigma_user
     gui_event_released,
     gui_event_hover,
     gui_event_drag,
+    gui_event_resize,
     gui_event_all
   };
 
@@ -173,6 +174,7 @@ namespace enigma_user
   void gui_window_set_style(int id, int style_id);
 	void gui_window_set_callback(int id, int event, int script_id);
   void gui_window_set_draggable(int id, bool draggable);
+  void gui_window_set_resizable(int id, bool resizable);
   void gui_window_set_visible(int id, bool visible);
 
   void gui_window_set_position(int id, gs_scalar x, gs_scalar y);
@@ -185,6 +187,7 @@ namespace enigma_user
 	int gui_window_get_state(int id);
   int gui_window_get_callback(int id, int event);
   bool gui_window_get_draggable(int id);
+  bool gui_window_get_resizable(int id);
 	bool gui_window_get_visible(int id);
   gs_scalar gui_window_get_width(int id);
 	gs_scalar gui_window_get_height(int id);
