@@ -22,17 +22,26 @@ namespace gui
 {
   struct offset{
     gs_scalar x = 0.0, y = 0.0;
+    offset(){ }
+    offset(gs_scalar ox, gs_scalar oy) : x(ox), y(oy) { }
     void set(gs_scalar ox, gs_scalar oy) { x = ox, y = oy; }
   };
+
 	struct rect_offset{
 		gs_scalar top = 0.0, left = 0.0, bottom = 0.0, right = 0.0;
+		rect_offset() { }
+		rect_offset(gs_scalar l, gs_scalar t, gs_scalar r, gs_scalar b) : top(t), left(l), bottom(b), right(r) { }
 		void set(gs_scalar l, gs_scalar t, gs_scalar r, gs_scalar b) { left = l, top = t, right = r, bottom = b; }
 	};
+
 	struct rect{
 		gs_scalar x = 0.0, y = 0.0, w = 0.0, h = 0.0;
+		rect() { }
+		rect(gs_scalar rx, gs_scalar ry, gs_scalar rw, gs_scalar rh) : x(rx), y(ry), w(rw), h(rh) { }
     void set(gs_scalar rx, gs_scalar ry, gs_scalar rw, gs_scalar rh) { x = rx, y = ry, w = rw, h = rh; }
 		bool point_inside(gs_scalar tx, gs_scalar ty){ return (tx>x && tx<x+w && ty>y && ty<y+h); }
 	};
+
 	struct font_style{
 		int font = -1;
 		unsigned int halign = enigma_user::fa_left;
@@ -48,6 +57,7 @@ namespace gui
 			enigma_user::draw_set_alpha(alpha);
 		}
 	};
+
   struct render_style{
 		int color = enigma_user::c_white;
 		gs_scalar alpha = 1.0;

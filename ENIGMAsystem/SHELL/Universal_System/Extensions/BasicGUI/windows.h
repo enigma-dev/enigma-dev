@@ -37,14 +37,24 @@ namespace gui
 			int id;
 
 			rect box;
+      rect min_box = rect(0,0,50,50); //If resizable then this is the smallest it can be
 			string text = "";
 			int state = 0;
 			bool visible = true;
 			bool drag = false;
       bool draggable = true; //Specifies if the window can be moved
+      bool resize = false;
+      bool resizable = false; //Specifies if the window can be resized
+      int resize_side = 0; //0 - resize left, 1 - top-left, 2 - top, 3 - top-right, 4 - right, 5 bottom-right, 6 - bottom, 7 - bottom-left
+      gs_scalar resize_width = 0.0;
+      gs_scalar resize_height = 0.0;
+      gs_scalar resize_xoffset = 0.0;
+      gs_scalar resize_yoffset = 0.0;
+
 			gs_scalar drag_xoffset = 0.0;
 			gs_scalar drag_yoffset = 0.0;
-			array<int,4> callback; //Script to run on event
+
+			array<int,5> callback; //Script to run on event
 
       int style_id = -1;
 
