@@ -93,12 +93,78 @@ namespace gui
       }
     }
 
-    if (windowStopPropagation == false && box.point_inside(tx,ty)){ //Hover
+    if (windowStopPropagation == false && box.point_inside(tx,ty)){ //Hover or resize
+      if (resizable == true){
+        rect box_left(box.x,box.y,20,box.h);
+        rect box_top(box.x,box.y,box.w,20);
+        rect box_right(box.w+box.x-20,box.y,20,box.h);
+        rect box_bottom(box.x,box.y+box.h-20,box.w,20);
+
+        //Resize
+        if (enigma_user::mouse_check_button_pressed(enigma_user::mb_left) && (box_left.point_inside(tx,ty) || box_top.point_inside(tx,ty) || box_right.point_inside(tx,ty) || box_bottom.point_inside(tx,ty))){ //Press
+          if (box_left.point_inside(tx,ty)) { if (!box_top.point_inside(tx,ty)) { resize_side = 0; } else { resize_side = 1; } }
+          else if (box_top.point_inside(tx,ty)) { if (!box_right.point_inside(tx,ty)) { resize_side = 2; } else { resize_side = 3; } }
+          else if (box_right.point_inside(tx,ty)) { if (!box_bottom.point_inside(tx,ty)) { resize_side = 4; } else { resize_side = 5; } }
+          else if (box_bottom.point_inside(tx,ty)) { if (!box_left.point_inside(tx,ty)) { resize_side = 6; } else { resize_side = 7; } }
+          drag_xoffset = tx-box.x;
+          drag_yoffset = ty-box.y;
+          resize_xoffset = tx;
+          resize_yoffset = ty;
+          resize_width = box.w;
+          resize_height = box.h;
+          resize = true;
+          drag = false;
+        }
+      }else{
         callback_execute(enigma_user::gui_event_hover);
         windowStopPropagation = true;
+      }
     }
 
-		if (drag == true){
+    if (resize == true){
+      windowStopPropagation = true;
+      switch (resize_side){
+        case 0: { //Resizing left side
+          box.w = fmax(resize_width - (tx - resize_xoffset), min_box.w);
+          box.x = tx-drag_xoffset;
+        } break;
+        case 1: { //Resizing top-left
+          box.w = fmax(resize_width - (tx - resize_xoffset), min_box.w);
+          box.h = fmax(resize_height - (ty - resize_yoffset), min_box.h);
+          box.x = tx-drag_xoffset;
+          box.y = ty-drag_yoffset;
+        } break;
+        case 2: { //Resizing top
+          box.h = fmax(resize_height - (ty - resize_yoffset), min_box.h);
+          box.y = ty-drag_yoffset;
+        } break;
+        case 3: { //Resizing top-right
+          box.w = fmax(resize_width + (tx - resize_xoffset), min_box.w);
+          box.h = fmax(resize_height - (ty - resize_yoffset), min_box.h);
+          box.y = ty-drag_yoffset;
+        } break;
+        case 4: { //Resizing right side
+          box.w = fmax(resize_width + (tx - resize_xoffset), min_box.w);
+        } break;
+        case 5: { //Resizing bottom-right
+          box.w = fmax(resize_width + (tx - resize_xoffset), min_box.w);
+          box.h = fmax(resize_height + (ty - resize_yoffset), min_box.h);
+        } break;
+        case 6: { //Resizing top
+          box.h = fmax(resize_height + (ty - resize_yoffset), min_box.h);
+        } break;
+        case 7: { //Resizing top-left
+          box.w = fmax(resize_width - (tx - resize_xoffset), min_box.w);
+          box.h = fmax(resize_height + (ty - resize_yoffset), min_box.h);
+          box.x = tx-drag_xoffset;
+        } break;
+      }
+      callback_execute(enigma_user::gui_event_resize);
+      if (enigma_user::mouse_check_button_released(enigma_user::mb_left)){
+				resize = false;
+				callback_execute(enigma_user::gui_event_released);
+			}
+    }else if (drag == true){
       windowStopPropagation = true;
 			box.x = tx-drag_xoffset;
 			box.y = ty-drag_yoffset;
@@ -107,7 +173,6 @@ namespace gui
 				drag = false;
 				callback_execute(enigma_user::gui_event_released);
 			}
-			update_text_pos();
 		}
 	}
 
@@ -221,6 +286,10 @@ namespace enigma_user
 		gui::gui_windows[id].draggable = draggable;
 	}
 
+  void gui_window_set_resizable(int id, bool resizable){
+		gui::gui_windows[id].resizable = resizable;
+	}
+
 	///Getters
   int gui_window_get_style(int id){
     return gui::gui_windows[id].style_id;
@@ -236,6 +305,10 @@ namespace enigma_user
 
   bool gui_window_get_draggable(int id){
     return gui::gui_windows[id].draggable;
+  }
+
+  bool gui_window_get_resizable(int id){
+    return gui::gui_windows[id].resizable;
   }
 
 	bool gui_window_get_visible(int id){
