@@ -153,12 +153,12 @@ unsigned int string_width(variant vstr)
       tlen = 0;
     } else {
       fontglyph* g = findGlyph(fnt, character);
-      if (character == ' ' or g == NULL)
+      if (character == ' ' or g == NULL){
         tlen += slen;
-      else {
+      }else {
         tlen += g->xs;
-        if (tlen > mlen) mlen = tlen;
       }
+      if (tlen > mlen) mlen = tlen;
     }
   }
   return ceil(mlen);
