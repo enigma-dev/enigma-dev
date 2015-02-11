@@ -82,13 +82,13 @@ void draw_set_alpha_test_ref_value(unsigned val)
     enigma_user::glsl_uniformf(enigma::shaderprograms[enigma::bound_shader]->uni_alphaTest, (gs_scalar)val/256.0);
 }
 
-void draw_set_line_pattern(unsigned short pattern, int scale)
+void draw_set_line_pattern(int pattern, int scale)
 {
   if (pattern == -1)
       glDisable(GL_LINE_STIPPLE);
   else
     glEnable(GL_LINE_STIPPLE),
-    glLineStipple(scale,pattern);
+    glLineStipple(scale,(short)pattern);
 }
 
 }

@@ -33,7 +33,7 @@ extern unsigned char currentcolor[4];
 
 namespace enigma_user {
 
-void draw_set_line_pattern(unsigned short pattern, int scale)
+void draw_set_line_pattern(int pattern, int scale)
 {
    /* if (pattern == -1){
         glDisable(GL_LINE_STIPPLE);
@@ -48,7 +48,7 @@ int draw_point(gs_scalar x, gs_scalar y)
 	untexture();
 /*	glBegin(GL_POINTS);
     glVertex2f(x,y);
-	glEnd(); OPENGLES */ 
+	glEnd(); OPENGLES */
 	return 0;
 }
 
@@ -135,24 +135,24 @@ int draw_rectangle_angle(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2,
 {
 	untexture();
 	angle *= M_PI/180;
-	
+
 	float
 		xm = (x2+x1)/2,
 		ym = (y2+y1)/2;
-  
+
   float
 		len = hypot(xm-x1,ym-y1),
 		dir = atan2(y1-ym,x1-xm)+angle;
-  
+
   float
 	  ldx1 = len*cos(dir),
 	  ldy1 = len*sin(dir);
-	
+
 	dir = atan2(y2-ym,x1-xm)+angle;
 	float
 	  ldx2 = len*cos(dir),
 	  ldy2 = len*sin(dir);
-	
+
 /*glBegin(outline ? GL_LINE_LOOP : GL_QUADS);
     glVertex2f(xm+ldx1,ym-ldy1);
     glVertex2f(xm+ldx2,ym-ldy2);
@@ -229,7 +229,7 @@ int draw_circle(gs_scalar x, gs_scalar y, float rad, bool outline)
 int draw_circle_color(gs_scalar x, gs_scalar y, float rad, int c1, int c2, bool outline)
 {
   untexture();
-	/*if(outline) 
+	/*if(outline)
 	  glBegin(GL_LINE_STRIP);
 	else
 	{
@@ -354,8 +354,8 @@ int draw_ellipse_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, i
 		x=(x1+x2)/2,y=(y1+y2)/2,
 		hr=fabs(x2-x),vr=fabs(y2-y),
 		pr=2*M_PI/enigma::circleprecision;
-  
-	/*if(outline) 
+
+	/*if(outline)
 	  glBegin(GL_LINE_STRIP);
 	else
 	{
@@ -363,14 +363,14 @@ int draw_ellipse_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, i
 		glColor4ub(__GETR(c1),__GETG(c1),__GETB(c1),enigma::currentcolor[3]);
 		glVertex2f(x,y);
 	}
-	
+
     glColor4ub(__GETR(c2),__GETG(c2),__GETB(c2),enigma::currentcolor[3]);
       glVertex2f(x+hr,0);
     for(float i=pr;i<2*M_PI;i+=pr)
       glVertex2f(x+hr*cos(i),y+vr*sin(i));
     glVertex2f(x+hr,0);
 	glEnd();
-	
+
 	glColor4ubv(enigma::currentcolor); OPENGLES*/
 	return 0;
 }
@@ -610,35 +610,35 @@ void draw_button(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scal
     glVertex2f(x2,y1);
     glVertex2f(x2,y2);
     glVertex2f(x1,y2);
-    
+
     if (up == true){glColor4f(0.5,0.5,0.5,0.5);}else{glColor4f(1,1,1,0.5);}
     glVertex2f(x1+border_width,y2-border_width);
     glVertex2f(x2-border_width,y2-border_width);
     glVertex2f(x2,y2);
     glVertex2f(x1,y2);
-    
+
     glVertex2f(x2-border_width,y1+border_width);
     glVertex2f(x2,y1);
     glVertex2f(x2,y2);
     glVertex2f(x2-border_width,y2-border_width);
-    
+
     if (up == true){glColor4f(1,1,1,0.5);}else{glColor4f(0.5,0.5,0.5,0.5);}
     glVertex2f(x1,y1);
     glVertex2f(x2,y1);
     glVertex2f(x2-border_width,y1+border_width);
     glVertex2f(x1+border_width,y1+border_width);
-    
+
     glVertex2f(x1,y1);
     glVertex2f(x1+border_width,y1+border_width);
     glVertex2f(x1+border_width,y2-border_width);
     glVertex2f(x1,y2);
-    
+
     glEnd();
     glColor4ubv(enigma::currentcolor);*/
 }
 
 //Mind that health is 1-100
-int draw_healthbar(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, float amount, int backcol, int mincol, int maxcol, int dir, bool showback, bool showborder) 
+int draw_healthbar(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, float amount, int backcol, int mincol, int maxcol, int dir, bool showback, bool showborder)
 {
 	if(x1>x2) { // Swap them
 		float t = x2;
@@ -649,9 +649,9 @@ int draw_healthbar(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, float
 		y2 = y1, y1 = t;
 	}
 	amount = amount>=100 ? 1 : (amount<=0 ? 0 : amount/100);
-	
+
 	untexture();
-	/*if(showborder) 
+	/*if(showborder)
 	{
 		glColor4ub(__GETR(backcol),__GETG(backcol),__GETB(backcol),enigma::currentcolor[3]);
 		glBegin(GL_LINE_LOOP);
@@ -668,19 +668,19 @@ int draw_healthbar(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, float
 		glColor4ub(__GETR(backcol),__GETG(backcol),__GETB(backcol),enigma::currentcolor[3]);
 		showback_yes: glRectf(x1,y1,x2,y2);
 	} showback_no:
-	
+
 	switch(dir) {
     case 1:x1=x2-(x2-x1)*amount;
     break;case 2:y2=y1+(y2-y1)*amount;
     break;case 3:y1=y2-(y2-y1)*amount;
     default:x2=x1+(x2-x1)*amount;
 	}
-	
+
 	const int
 		R = __GETR(mincol),
 		G = __GETG(mincol),
 		B = __GETB(mincol);
-  
+
 	glColor4ub(R+(unsigned char)((__GETR(maxcol)-R)*amount),G+(unsigned char)((__GETG(maxcol)-G)*amount),B+(unsigned char)((__GETB(maxcol)-B)*amount),enigma::currentcolor[3]);
 	printf("%d\n",mincol);
 	glRectf(x1,y1,x2,y2);

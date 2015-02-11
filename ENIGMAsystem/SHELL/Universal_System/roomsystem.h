@@ -81,6 +81,8 @@ extern int room_height;
 extern int room_persistent;
 extern int room_speed;
 extern int room_width;
+extern int room_first;
+extern int room_last;
 
 extern var room_caption;
 extern var current_caption;

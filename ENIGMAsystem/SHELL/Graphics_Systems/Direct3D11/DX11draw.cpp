@@ -78,7 +78,7 @@ void draw_set_alpha_test_ref_value(unsigned val)
 
 }
 
-void draw_set_line_pattern(unsigned short pattern, int scale)
+void draw_set_line_pattern(int pattern, int scale)
 {
 
 }
