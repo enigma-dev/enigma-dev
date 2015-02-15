@@ -227,12 +227,14 @@ namespace enigma
   {
     roomdata = new roomstruct*[room_idmax];
     roomorder = new roomstruct*[room_loadtimecount];
-    for (int i = 0; i < room_loadtimecount; i++) {
-      roomdata[grd_rooms[i].id] = &grd_rooms[i];
-      roomorder[i] = &grd_rooms[i];
+    if (room_loadtimecount>0){
+      for (int i = 0; i < room_loadtimecount; i++) {
+        roomdata[grd_rooms[i].id] = &grd_rooms[i];
+        roomorder[i] = &grd_rooms[i];
+      }
+      enigma_user::room_first = roomorder[0]->id;
+      enigma_user::room_last = roomorder[room_loadtimecount-1]->id;
     }
-    enigma_user::room_first = roomorder[0]->id;
-    enigma_user::room_last = roomorder[room_loadtimecount-1]->id;
   }
 }
 
