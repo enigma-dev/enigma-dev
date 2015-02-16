@@ -67,23 +67,27 @@ namespace enigma
 }
 
 namespace enigma_user {
-int font_add(string name, int size, bool bold, bool italic, uint32_t first, uint32_t last);
-bool font_replace(int ind, string name, int size, bool bold, bool italic, uint32_t first, uint32_t last);
-int  font_add_sprite(int spr, uint32_t first, bool prop, int sep);
-bool font_replace_sprite(int ind, int spr, uint32_t first, bool prop, int sep);
-bool font_get_bold(int fnt);
-bool font_get_italic(int fnt);
-int font_get_size(int fnt);
-uint32_t font_get_first(int fnt, int range=0);
-uint32_t font_get_last(int fnt, int range=0);
-int font_get_range_count(int fnt);
-float font_get_glyph_left(int fnt, uint32_t character);
-float font_get_glyph_right(int fnt, uint32_t character);
-float font_get_glyph_top(int fnt, uint32_t character);
-float font_get_glyph_bottom(int fnt, uint32_t character);
-string font_get_fontname(int fnt);
-void font_delete(int fnt);
-bool font_exists(int fnt);
+  int font_add(string name, int size, bool bold, bool italic, uint32_t first, uint32_t last);
+  bool font_replace(int ind, string name, int size, bool bold, bool italic, uint32_t first, uint32_t last);
+  int  font_add_sprite(int spr, uint32_t first, bool prop, int sep);
+  bool font_replace_sprite(int ind, int spr, uint32_t first, bool prop, int sep);
+  string font_get_fontname(int fnt);
+  void font_delete(int fnt);
+  bool font_exists(int fnt);
+  bool font_get_bold(int fnt);
+  bool font_get_italic(int fnt);
+  int font_get_size(int fnt);
+  uint32_t font_get_first(int fnt, int range=0);
+  uint32_t font_get_last(int fnt, int range=0);
+  int font_get_range_count(int fnt);
+  float font_get_glyph_left(int fnt, uint32_t character);
+  float font_get_glyph_right(int fnt, uint32_t character);
+  float font_get_glyph_top(int fnt, uint32_t character);
+  float font_get_glyph_bottom(int fnt, uint32_t character);
+  float font_get_glyph_texture_left(int fnt, uint32_t character);
+  float font_get_glyph_texture_top(int fnt, uint32_t character);
+  float font_get_glyph_texture_right(int fnt, uint32_t character);
+  float font_get_glyph_texture_bottom(int fnt, uint32_t character);
 }
 
 #endif

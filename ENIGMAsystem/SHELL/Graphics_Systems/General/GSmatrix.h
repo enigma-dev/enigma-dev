@@ -76,12 +76,12 @@ bool d3d_projection_stack_empty();
 bool d3d_projection_stack_top();
 bool d3d_projection_stack_disgard();
 
-gs_scalar* d3d_transform_vertex(gs_scalar x, gs_scalar y, gs_scalar z);
+/*gs_scalar* d3d_transform_vertex(gs_scalar x, gs_scalar y, gs_scalar z);
 
 gs_scalar* matrix_get(int type);
 void matrix_set(int type, gs_scalar* matrix);
 gs_scalar* matrix_build(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar xrotation, gs_scalar yrotation, gs_scalar zrotation, gs_scalar xscale, gs_scalar yscale, gs_scalar zscale);
-gs_scalar* matrix_multiply(gs_scalar* matrix1, gs_scalar* matrix2);
+gs_scalar* matrix_multiply(gs_scalar* matrix1, gs_scalar* matrix2);*/
 
 }
 

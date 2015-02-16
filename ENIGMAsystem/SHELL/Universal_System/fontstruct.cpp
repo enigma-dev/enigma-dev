@@ -314,5 +314,25 @@ float font_get_glyph_texture_bottom(int fnt, uint32_t character) {
   return glyph->ty2;
 }
 
+float font_get_glyph_left(int fnt, uint32_t character) {
+  enigma::fontglyph* glyph = findGlyph(enigma::fontstructarray[fnt], character);
+  return glyph->x;
+}
+
+float font_get_glyph_top(int fnt, uint32_t character) {
+  enigma::fontglyph* glyph = findGlyph(enigma::fontstructarray[fnt], character);
+  return glyph->y;
+}
+
+float font_get_glyph_right(int fnt, uint32_t character) {
+  enigma::fontglyph* glyph = findGlyph(enigma::fontstructarray[fnt], character);
+  return glyph->x2;
+}
+
+float font_get_glyph_bottom(int fnt, uint32_t character) {
+  enigma::fontglyph* glyph = findGlyph(enigma::fontstructarray[fnt], character);
+  return glyph->y2;
+}
+
 }
 
