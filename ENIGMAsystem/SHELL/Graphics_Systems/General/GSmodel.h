@@ -40,10 +40,10 @@ namespace enigma_user {
   void d3d_model_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z);
   void d3d_model_draw(int id, int texId);
   void d3d_model_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z, int texId);
-  void d3d_model_part_draw(int id, int vertex_count);
-  void d3d_model_part_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z, int vertex_count);
-  void d3d_model_part_draw(int id, int texId, int vertex_count);
-  void d3d_model_part_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z, int texId, int vertex_count);
+  void d3d_model_part_draw(int id, int vertex_start, int vertex_count);
+  void d3d_model_part_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z, int vertex_start, int vertex_count);
+  void d3d_model_part_draw(int id, int texId, int vertex_start, int vertex_count);
+  void d3d_model_part_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z, int texId, int vertex_start, int vertex_count);
   void d3d_model_primitive_begin(int id, int kind);
   void d3d_model_primitive_end(int id);
   void d3d_model_vertex(int id, gs_scalar x, gs_scalar y);
