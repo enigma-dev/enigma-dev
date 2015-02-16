@@ -261,9 +261,9 @@ bool file_attributes(std::string fname,int attributes)
     return fa & attributes;
 }
 
-void export_include_file(std::string fname);
+/*void export_include_file(std::string fname);
 void export_include_file_location(std::string fname,std::string location);
-void discard_include_file(std::string fname);
+void discard_include_file(std::string fname);*/
 
 extern unsigned game_id;
 extern std::string working_directory;

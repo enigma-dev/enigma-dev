@@ -25,13 +25,13 @@ namespace enigma_user {
   {
       return screen_save(filename);
   }
-  int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h);
+  int screen_save_part(string filename,unsigned int x,unsigned int y,unsigned int w,unsigned int h);
   void screen_redraw();
   void screen_refresh();
   void screen_init();
   void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height);
 
-  unsigned display_get_gui_width();
-  unsigned display_get_gui_height();
-  void display_set_gui_size(unsigned width, unsigned height);
+  unsigned int display_get_gui_width();
+  unsigned int display_get_gui_height();
+  void display_set_gui_size(unsigned int width, unsigned int height);
 }

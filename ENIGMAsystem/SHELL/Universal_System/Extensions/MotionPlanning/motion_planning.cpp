@@ -122,6 +122,12 @@ void mp_grid_clear_all(unsigned id, unsigned cost)
     enigma::gridstructarray[id]->threshold = cost;
 }
 
+void mp_grid_clear_cell(unsigned id,int h,int v, unsigned cost)
+{
+    enigma::gridstructarray[id]->nodearray[h*enigma::gridstructarray[id]->vcells+v].cost = cost;
+    if (enigma::gridstructarray[id]->threshold<cost){enigma::gridstructarray[id]->threshold=cost;}
+}
+
 void mp_grid_add_rectangle(unsigned id,double x1,double y1,double x2,double y2, unsigned cost)
 {
     enigma::grid *grid = enigma::gridstructarray[id];

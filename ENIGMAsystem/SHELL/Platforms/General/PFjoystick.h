@@ -39,8 +39,8 @@ double joystick_pov(int id, int axis1, int axis2);
 double joystick_axis(int id, int axis);
 bool joystick_button(int id, int button);
 
-void joystick_map_button(int id, int butnum, char key);
-void joystick_map_axis(int id, int axisnum, char keyneg, char keypos);
+//void joystick_map_button(int id, int butnum, char key);
+//void joystick_map_axis(int id, int axisnum, char keyneg, char keypos);
 
 extern int joystick_lastbutton;
 

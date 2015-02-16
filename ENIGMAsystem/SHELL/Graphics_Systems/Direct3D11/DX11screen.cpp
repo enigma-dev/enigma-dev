@@ -447,9 +447,18 @@ void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar he
     m_deviceContext->RSSetViewports(1, &viewport);
 }
 
-void display_set_gui_size(unsigned width, unsigned height) {
+//TODO: These need to be in some kind of General
+void display_set_gui_size(unsigned int width, unsigned int height) {
 	enigma::gui_width = width;
 	enigma::gui_height = height;
+}
+
+unsigned int display_get_gui_width(){
+  return enigma::gui_width;
+}
+
+unsigned int display_get_gui_height(){
+  return enigma::gui_height;
 }
 
 }

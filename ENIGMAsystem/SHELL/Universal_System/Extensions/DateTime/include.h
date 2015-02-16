@@ -1,6 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2011 Harijs Grînbergs                                         **
+**  Copyright (C) 2011 Harijs Grinbergs                                         **
 **  Copyright (C) 2012 Alasdair Morrison                                        **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **

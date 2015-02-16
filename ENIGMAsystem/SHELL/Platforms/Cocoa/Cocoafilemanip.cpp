@@ -40,9 +40,9 @@ string file_find_next();
 void file_find_close();
 bool file_attributes(string fname,int attr);
 
-void export_include_file(string fname);
+/*void export_include_file(string fname);
 void export_include_file_location(string fname,string location);
-void discard_include_file(string fname);
+void discard_include_file(string fname);*/
 
 extern unsigned game_id;
 extern string working_directory;

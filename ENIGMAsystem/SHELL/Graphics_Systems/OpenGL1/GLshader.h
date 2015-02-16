@@ -44,7 +44,6 @@ bool glsl_program_link(int id);
 bool glsl_program_validate(int id);
 void glsl_program_attach(int id, int sid);
 void glsl_program_detach(int id, int sid);
-void glsl_program_bind_frag_data(int id, string name);
 
 void glsl_program_set(int id);
 void glsl_program_reset();

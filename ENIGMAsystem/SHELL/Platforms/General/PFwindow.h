@@ -80,7 +80,7 @@ int display_get_width();
 int display_get_height();
 int display_get_colordepth();
 int display_get_frequency();
-int display_get_orientation();
+//int display_get_orientation();
 unsigned display_get_dpi_x();
 unsigned display_get_dpi_y();
 extern int display_aa;

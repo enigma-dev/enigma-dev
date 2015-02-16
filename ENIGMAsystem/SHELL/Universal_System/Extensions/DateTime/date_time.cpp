@@ -1,8 +1,9 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2011 Harijs Grînbergs                                         **
+**  Copyright (C) 2011 Harijs Grinbergs                                         **
+**  Copyright (C) 2015 Harijs Grinbergs                                         **
 **                                                                              **
-**  This file is a part of the ENIGMA Development Environment.                  **
+**  This file is a part odf the ENIGMA Development Environment.                  **
 **                                                                              **
 **                                                                              **
 **  ENIGMA is free software: you can redistribute it and/or modify it under the **
@@ -114,6 +115,14 @@ int date_get_year(time_t date)
 int date_get_month(time_t date)
 {
     return localtime(&date)->tm_mon+1;
+}
+
+int date_get_week(time_t date)
+{
+    //TODO: This is not ISO, but it is from C++'s strftime("%W")
+    struct tm * timeinfo;
+    timeinfo = localtime(&date);
+    return ( timeinfo->tm_yday + 7 - ( ( timeinfo->tm_wday + 1 ) ? (timeinfo->tm_wday - 1) : 6) ) / 7;
 }
 
 int date_get_day(time_t date)
@@ -352,11 +361,19 @@ time_t date_inc_month(time_t date,int amount)
     return mktime(timeinfo);
 }
 
+time_t date_inc_week(time_t date,int amount)
+{
+    struct tm * timeinfo;
+    timeinfo = localtime(&date);
+    timeinfo->tm_yday += amount * 7;
+    return mktime(timeinfo);
+}
+
 time_t date_inc_day(time_t date,int amount)
 {
     struct tm * timeinfo;
     timeinfo = localtime(&date);
-    timeinfo->tm_mday += amount;
+    timeinfo->tm_yday += amount;
     return mktime(timeinfo);
 }
 

@@ -344,6 +344,7 @@ namespace enigma
         ns->bbox_relative.right = bbr - x_offset;
         ns->xoffset   = (int)x_offset;
         ns->yoffset   = (int)y_offset;
+        ns->smooth = smooth;
 
         unsigned char* pixels=new unsigned char[fullcellwidth*fullheight*4]();
         for (int ii = 0; ii < imgnumb; ii++)
@@ -657,8 +658,17 @@ void sprite_set_bbox_mode(int ind, int mode) {
   if (!get_sprite_mtx(spr,ind))
       return;
 
-  // TODO
+  spr->bbox_mode = mode;
 }
+
+int sprite_get_bbox_mode(int ind) {
+  enigma::sprite *spr;
+  if (!get_sprite_mtx(spr,ind))
+      return;
+
+  return spr->bbox_mode;
+}
+
 
 void sprite_set_bbox(int ind, int left, int top, int right, int bottom)
 {

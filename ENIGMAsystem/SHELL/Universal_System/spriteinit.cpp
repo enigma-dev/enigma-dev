@@ -32,7 +32,7 @@ namespace enigma
   void exe_loadsprs(FILE *exe)
   {
     int nullhere;
-    unsigned sprid, width, height, bbt, bbb, bbl, bbr, shape;
+    unsigned sprid, width, height, bbt, bbb, bbl, bbr, bbm, shape;
     int xorig, yorig;
     
     if (!fread(&nullhere,4,1,exe)) return;
@@ -59,6 +59,7 @@ namespace enigma
       if (!fread(&bbb, 4,1,exe)) return;
       if (!fread(&bbl, 4,1,exe)) return;
       if (!fread(&bbr, 4,1,exe)) return;
+      if (!fread(&bbm, 4,1,exe)) return;
       if (!fread(&shape, 4,1,exe)) return;
 
       collision_type coll_type;

@@ -35,14 +35,15 @@ namespace enigma
   {
     int width,height,subcount,xoffset,yoffset,id;
 	
-	vector<int> texturearray; //Each subimage has a texture
-	vector<double> texbordxarray;
-	vector<double> texbordyarray;
-	vector<void*> colldata; // Each subimage has collision data
+    vector<int> texturearray; //Each subimage has a texture
+    vector<double> texbordxarray;
+    vector<double> texbordyarray;
+    vector<void*> colldata; // Each subimage has collision data
 
     //void*  *pixeldata;
     bbox_rect_t bbox, bbox_relative;
-    bool where,smooth;
+    int bbox_mode = 0; //Default is automatic
+    bool where,smooth = false;
 
     sprite();
     sprite(int);
@@ -71,18 +72,16 @@ namespace enigma
 
 namespace enigma_user
 {
+  extern int sprite_get_width  (int sprite);
+  extern int sprite_get_height (int sprite);
+  extern double sprite_get_texture_width_factor(int sprite, int subimg);
+  extern double sprite_get_texture_height_factor(int sprite, int subimg);
 
-extern int sprite_get_width  (int sprite);
-extern int sprite_get_height (int sprite);
-extern double sprite_get_texture_width_factor(int sprite, int subimg);
-extern double sprite_get_texture_height_factor(int sprite, int subimg);
-
-extern int sprite_get_bbox_bottom (int sprite);
-extern int sprite_get_bbox_left   (int sprite);
-extern int sprite_get_bbox_right  (int sprite);
-extern int sprite_get_bbox_top    (int sprite);
-extern int sprite_get_bbox_mode   (int sprite);
-
+  extern int sprite_get_bbox_bottom (int sprite);
+  extern int sprite_get_bbox_left   (int sprite);
+  extern int sprite_get_bbox_right  (int sprite);
+  extern int sprite_get_bbox_top    (int sprite);
+  //extern int sprite_get_bbox_mode   (int sprite); //We don't support this yet
 }
 
 extern int sprite_get_bbox_bottom_relative (int sprite);
@@ -95,30 +94,28 @@ extern const bbox_rect_t &sprite_get_bbox_relative(int sprite);
 
 namespace enigma_user
 {
+  extern int sprite_get_number  (int sprite);
+  extern int sprite_get_texture (int sprite, int subimage);
+  extern int sprite_get_xoffset (int sprite);
+  extern int sprite_get_yoffset (int sprite);
 
-extern int sprite_get_number  (int sprite);
-extern int sprite_get_texture (int sprite, int subimage);
-extern int sprite_get_xoffset (int sprite);
-extern int sprite_get_yoffset (int sprite);
-
-int sprite_add(std::string filename, int imgnumb, bool precise, bool transparent, bool smooth, bool preload, int x_offset, int y_offset, bool mipmap = false); //GM8+ compatible
-int sprite_add(std::string filename, int imgnumb, bool transparent, bool smooth, int x_offset, int y_offset, bool mipmap = false);  //GM7+ compatible
-bool sprite_replace(int ind, std::string fname, int imgnumb, bool precise, bool transparent, bool smooth, bool preload, int x_offset, int y_offset, bool free_texture = true, bool mipmap = false); //GM8+ compatible
-bool sprite_replace(int ind, std::string fname, int imgnumb, bool transparent, bool smooth, int x_offset, int y_offset, bool free_texture = true, bool mipmap = false);   //GM7+ compatible
-bool sprite_exists(int spr);
-void sprite_save(int ind, unsigned subimg, std::string fname);
-void sprite_save_strip(int ind, std::string fname);
-void sprite_delete(int ind, bool free_texture = true);
-int sprite_duplicate(int ind);
-void sprite_assign(int ind, int copy_sprite, bool free_texture = true);
-void sprite_merge(int ind, int copy_sprite);
-void sprite_set_offset(int ind, int xoff, int yoff);
-void sprite_set_alpha_from_sprite(int ind, int copy_sprite, bool free_texture=true);
-void sprite_set_bbox_mode(int ind, int mode);
-void sprite_set_bbox(int ind, int left, int top, int right, int bottom);
-void sprite_set_precise(int ind, bool precise);
-void sprite_collision_mask(int ind, bool sepmasks, int mode, int left, int right, int top, int bottom, int kind, unsigned char tolerance);
-
+  int sprite_add(std::string filename, int imgnumb, bool precise, bool transparent, bool smooth, bool preload, int x_offset, int y_offset, bool mipmap = false); //GM8+ compatible
+  int sprite_add(std::string filename, int imgnumb, bool transparent, bool smooth, int x_offset, int y_offset, bool mipmap = false);  //GM7+ compatible
+  bool sprite_replace(int ind, std::string fname, int imgnumb, bool precise, bool transparent, bool smooth, bool preload, int x_offset, int y_offset, bool free_texture = true, bool mipmap = false); //GM8+ compatible
+  bool sprite_replace(int ind, std::string fname, int imgnumb, bool transparent, bool smooth, int x_offset, int y_offset, bool free_texture = true, bool mipmap = false);   //GM7+ compatible
+  bool sprite_exists(int spr);
+  void sprite_save(int ind, unsigned subimg, std::string fname);
+  void sprite_save_strip(int ind, std::string fname);
+  void sprite_delete(int ind, bool free_texture = true);
+  int sprite_duplicate(int ind);
+  void sprite_assign(int ind, int copy_sprite, bool free_texture = true);
+  void sprite_merge(int ind, int copy_sprite);
+  void sprite_set_offset(int ind, int xoff, int yoff);
+  void sprite_set_alpha_from_sprite(int ind, int copy_sprite, bool free_texture=true);
+  void sprite_set_bbox_mode(int ind, int mode);
+  void sprite_set_bbox(int ind, int left, int top, int right, int bottom);
+  void sprite_set_precise(int ind, bool precise);
+  void sprite_collision_mask(int ind, bool sepmasks, int mode, int left, int right, int top, int bottom, int kind, unsigned char tolerance);
 }
 
 #endif // ENIGMA_SPRITESTRUCT
