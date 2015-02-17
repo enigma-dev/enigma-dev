@@ -664,7 +664,7 @@ void sprite_set_bbox_mode(int ind, int mode) {
 int sprite_get_bbox_mode(int ind) {
   enigma::sprite *spr;
   if (!get_sprite_mtx(spr,ind))
-      return;
+      return 0;
 
   return spr->bbox_mode;
 }

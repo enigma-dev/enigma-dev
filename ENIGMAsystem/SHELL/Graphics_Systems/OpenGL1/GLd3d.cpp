@@ -377,6 +377,46 @@ class d3d_lights
         return true;
     }
 
+    bool light_set_ambient(int id, int r, int g, int b, double a)
+    {
+        int ms;
+        if (light_ind.find(id) != light_ind.end())
+        {
+            ms = (*light_ind.find(id)).second;
+        }
+        else
+        {
+            ms = light_ind.size();
+            int MAX_LIGHTS;
+            glGetIntegerv(GL_MAX_LIGHTS, &MAX_LIGHTS);
+            if (ms >= MAX_LIGHTS)
+                return false;
+        }
+        float specular[4] = {(float)r, (float)g, (float)b, (float)a};
+        glLightfv(GL_LIGHT0+ms, GL_AMBIENT, specular);
+        return true;
+    }
+
+    bool light_set_specular(int id, int r, int g, int b, double a)
+    {
+        int ms;
+        if (light_ind.find(id) != light_ind.end())
+        {
+            ms = (*light_ind.find(id)).second;
+        }
+        else
+        {
+            ms = light_ind.size();
+            int MAX_LIGHTS;
+            glGetIntegerv(GL_MAX_LIGHTS, &MAX_LIGHTS);
+            if (ms >= MAX_LIGHTS)
+                return false;
+        }
+        float specular[4] = {(float)r, (float)g, (float)b, (float)a};
+        glLightfv(GL_LIGHT0+ms, GL_SPECULAR, specular);
+        return true;
+    }
+
     bool light_enable(int id)
     {
         map<int, int>::iterator it = light_ind.find(id);
@@ -434,6 +474,16 @@ void d3d_light_specularity(int facemode, int r, int g, int b, double a)
 {
   double specular[4] = {(double)r, (double)g, (double)b, a};
   glMaterialfv(renderstates[facemode], GL_SPECULAR, (float*)specular);
+}
+
+bool d3d_light_set_ambient(int id, int r, int g, int b, double a)
+{
+  return d3d_lighting.light_set_ambient(id, r, g, b, a);
+}
+
+bool d3d_light_set_specularity(int id, int r, int g, int b, double a)
+{
+  return d3d_lighting.light_set_specular(id, r, g, b, a);
 }
 
 void d3d_light_shininess(int facemode, int shine)
