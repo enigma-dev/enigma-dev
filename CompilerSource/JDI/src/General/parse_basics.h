@@ -102,6 +102,7 @@ namespace parse_bacics {
     string toString(char*);
     string toString(float);
     string toString(double);
+    string toString(size_t);
   }
 }
 using namespace parse_bacics::visible;
