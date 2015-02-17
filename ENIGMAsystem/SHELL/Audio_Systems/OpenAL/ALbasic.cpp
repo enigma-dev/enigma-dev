@@ -223,12 +223,12 @@ float sound_get_length(int sound) { // Not for Streams
 }
 
 float sound_get_pan(int sound){  // Not for Streams
-  get_sound(snd,sound,);
+  get_sound(snd,sound,0.0);
   return snd->pan;
 }
 
 float sound_get_volume(int sound){
-  get_sound(snd,sound,);
+  get_sound(snd,sound,0.0);
   return snd->volume;
 }
 
