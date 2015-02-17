@@ -1,23 +1,23 @@
 /**
  * @file  definition.cpp
  * @brief System source implementing constructor.
- * 
+ *
  * This file is likely used by absolutely everything in the parse system, as
  * it is the medium through which output definitions are created and manipulated.
- * 
+ *
  * @section License
- * 
+ *
  * Copyright (C) 2011-2012 Josh Ventura
  * This file is part of JustDefineIt.
- * 
+ *
  * JustDefineIt is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, version 3 of the License, or (at your option) any later version.
- * 
- * JustDefineIt is distributed in the hope that it will be useful, but WITHOUT ANY 
+ *
+ * JustDefineIt is distributed in the hope that it will be useful, but WITHOUT ANY
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License along with
  * JustDefineIt. If not, see <http://www.gnu.org/licenses/>.
 **/
@@ -33,21 +33,21 @@ namespace jdi {
   definition::definition(string n,definition* p,unsigned int f): flags(f), name(n), parent((definition_scope*)p) {}
   definition::definition(): flags(0), name(), parent(NULL) {}
   definition::~definition() {}
-  
+
   ptrdiff_t definition::defcmp(definition *d1, definition *d2) {
     return d1 - d2;
   }
-  
+
   definition_typed::definition_typed(string n, definition* p, definition* tp, unsigned int typeflags, int flgs): definition(n,p,flgs | DEF_TYPED), type(tp), referencers(), modifiers(typeflags) {}
   definition_typed::definition_typed(string n, definition* p, definition* tp, ref_stack &rf, unsigned int typeflags, int flgs): definition(n,p,flgs), type(tp), referencers(rf), modifiers(typeflags) {}
   definition_typed::~definition_typed() {}
-  
-  definition_function::definition_function(string n, definition* p, definition* tp, ref_stack &rf, unsigned int typeflags, int flgs): 
+
+  definition_function::definition_function(string n, definition* p, definition* tp, ref_stack &rf, unsigned int typeflags, int flgs):
     definition_typed(n, p, tp, rf, typeflags, flgs | DEF_FUNCTION), implementation(NULL) {
     arg_key k(referencers);
     overload(k, this, def_error_handler);
   }
-  
+
   definition *definition_function::overload(arg_key &key, definition_function* ovrl, error_handler *herr) {
     pair<overload_iter, bool> ins = overloads.insert(pair<arg_key,definition_function*>(key, ovrl));
     if (!ins.second) {
@@ -67,14 +67,14 @@ namespace jdi {
   void definition_function::overload(definition_template* ovrl) {
     template_overloads.push_back(ovrl);
   }
-  
+
   definition_function::~definition_function() {
     for (overload_iter it = overloads.begin(); it != overloads.end(); ++it)
       if (it->second != this) delete it->second;
     for (vector<definition_template*>::iterator it = template_overloads.begin(); it != template_overloads.end(); ++it)
       delete *it;
   }
-  
+
   definition *definition_scope::look_up(string sname) {
     defiter it = members.find(sname);
     if (it != members.end())
@@ -118,7 +118,7 @@ namespace jdi {
         return res;
     return parent->look_up(sname);
   }
-  
+
   definition *definition_scope::find_local(string sname) {
     defiter it = members.find(sname);
     if (it != members.end())
@@ -175,18 +175,18 @@ namespace jdi {
   }
   definition_scope::using_node::using_node(definition_scope* scope): use(scope), next(NULL), prev(NULL) { }
   definition_scope::using_node::using_node(definition_scope* scope, using_node* nprev): use(scope), next(nprev->next), prev(nprev) { nprev->next = this; }
-  
+
   definition_class::ancestor::ancestor(unsigned protection_level, definition_class* inherit_from): protection(protection_level), def(inherit_from) {}
   definition_class::ancestor::ancestor() {}
   definition_class::definition_class(string classname, definition_scope* prnt, unsigned flgs): definition_scope(classname, prnt, flgs) {}
-  
+
   definition_union::definition_union(string classname, definition_scope* prnt, unsigned flgs): definition_scope(classname, prnt, flgs) {}
-  
+
   //definition_valued::definition_valued(string vname, definition *parnt, definition* tp, unsigned int flgs, value &val): definition_typed(vname, parnt, tp, 0, flgs | DEF_VALUED), value_of(val) {}
   definition_valued::definition_valued(string vname, definition *parnt, definition* tp, unsigned tflgs, unsigned int flgs, value &val): definition_typed(vname, parnt, tp, tflgs, flgs | DEF_VALUED), value_of(val) {}
-  
+
   definition_enum::definition_enum(string classname, definition_scope* parnt, unsigned flgs): definition_typed(classname, parnt, NULL, 0, flgs) {}
-  
+
   definition_template::definition_template(string n, definition *p, unsigned f): definition(n, p, f | DEF_TEMPLATE), def(NULL)  {}
   definition_template::~definition_template() {
     for (size_t i = 0; i < params.size(); ++i)
@@ -222,7 +222,7 @@ namespace jdi {
         if (j->val() < i->val()) return false;
       }
       else if (i->type == AKT_FULLTYPE) { // I is not a value; ie, it is a full_type
-        if (j->type != AKT_FULLTYPE) return true; 
+        if (j->type != AKT_FULLTYPE) return true;
         if (i->ft() < j->ft()) return true;
         if (j->ft() < i->ft()) return false;
       }
@@ -242,7 +242,7 @@ namespace jdi {
         values[i].type = AKT_VALUE;
       }
   }
-  
+
   void arg_key::put_final_type(size_t argnum, const full_type &type) { new (&values[argnum].data) full_type(); values[argnum].ft().copy(type); values[argnum].type = AKT_FULLTYPE; }
   void arg_key::swap_final_type(size_t argnum, full_type &type)      { new (&values[argnum].data) full_type(); values[argnum].ft().swap(type); values[argnum].type = AKT_FULLTYPE; }
   void arg_key::put_type(size_t argnum, const full_type &type) {
@@ -275,7 +275,7 @@ namespace jdi {
     new(&values[argnum].data) value(val);
     values[argnum].type = AKT_VALUE;
   }
-  
+
   /// Default constructor; mark values NULL.
   arg_key::arg_key(): values(NULL), endv(NULL) {}
   /// Construct with a size, reserving sufficient memory.
@@ -295,7 +295,7 @@ namespace jdi {
         return;
       }
     #endif
-    
+
     const ref_stack::parameter_ct &p = ((ref_stack::node_func*)&n)->params;
     values = new node[p.size()]; endv = values + p.size();
     for (size_t i = 0; i < p.size(); ++i)
@@ -310,7 +310,7 @@ namespace jdi {
   }
   /// Destruct, freeing items.
   arg_key::~arg_key() { delete[] values; }
-  
+
   arg_key::node &arg_key::node::operator=(const node& other) {
     type = other.type;
     if (type == AKT_FULLTYPE)
@@ -320,24 +320,24 @@ namespace jdi {
     return *this;
   }
   arg_key::node::~node() { if (type == AKT_FULLTYPE) ((full_type*)&data)->~full_type(); else if (type == AKT_VALUE) ((value*)&data)->~value(); }
-  
+
   definition_atomic::definition_atomic(string n, definition* p, unsigned int f, size_t size): definition_scope(n,p,f), sz(size) {}
-  
+
   definition_tempscope::definition_tempscope(string n, definition* p, unsigned f, definition* s): definition_scope(n,p,f|DEF_TEMPSCOPE), source(s), referenced(false) {}
-  
+
   definition_hypothetical::definition_hypothetical(string n, definition_scope *p, unsigned f, AST* d): definition_class(n,p,f|DEF_HYPOTHETICAL), def(d) {}
   definition_hypothetical::definition_hypothetical(string n, definition_scope *p, AST* d): definition_class(n,p,DEF_HYPOTHETICAL), def(d) {}
   definition_hypothetical::~definition_hypothetical() { delete def; }
-  
-  
+
+
   using_scope::using_scope(string n, definition_scope* u): definition_scope(n, u, DEF_NAMESPACE), using_me(u->use_namespace(this)) {}
   using_scope::~using_scope() { parent->unuse_namespace(using_me); }
-  
+
   //========================================================================================================
   //======: Declare Functions :=============================================================================
   //========================================================================================================
   decpair::decpair(definition* *d, bool insd): def(d), inserted(insd) {}
-  
+
   decpair definition_scope::declare(string n, definition* def) {
     inspair insp = members.insert(entry(n,def));
     return decpair(&insp.first->second, insp.second);
@@ -366,19 +366,19 @@ namespace jdi {
     inspair insp = members.insert(entry(n,def));
     return decpair(&insp.first->second, insp.second);
   }
-  
+
   //========================================================================================================
   //======: Re-map Functions :==============================================================================
   //========================================================================================================
-  
+
   #ifdef DEBUG_MODE
     #define DEBUG_ONLY(x) x
   #else
     #define DEBUG_ONLY(x)
   #endif
-  
+
   void definition::remap(const remap_set &) {}
-  
+
   void definition_class::remap(const remap_set &n) {
     for (vector<ancestor>::iterator it = ancestors.begin(); it != ancestors.end(); ++it) {
       ancestor& an = *it;
@@ -394,7 +394,7 @@ namespace jdi {
     }
     definition_scope::remap(n);
   }
-  
+
   void definition_enum::remap(const remap_set& DEBUG_ONLY(n)) {
     #ifdef DEBUG_MODE
     if (n.find(type) != n.end()) {
@@ -402,14 +402,14 @@ namespace jdi {
     }
     #endif
   }
-  
+
   void definition_function::remap(const remap_set& n) {
     definition_typed::remap(n);
     for (overload_iter it = overloads.begin(); it != overloads.end(); ++it)
       if (it->second != this)
         it->second->remap(n);
   }
-  
+
   void definition_scope::remap(const remap_set &n) {
     for (defiter it = members.begin(); it != members.end(); ++it) {
       remap_set::const_iterator ex = n.find(it->second);
@@ -429,35 +429,35 @@ namespace jdi {
         it->second = ex->second;
     }
   }
-  
+
   void definition_tempscope::remap(const remap_set &n) {
     definition_scope::remap(n);
     if (source) source->remap(n);
   }
-  
+
   void definition_template::remap(const remap_set &n) {
     if (def)
       def->remap(n);
   }
-  
+
   void definition_typed::remap(const remap_set &n) {
     remap_set::const_iterator ex = n.find(type);
     if (ex != n.end())
       type = ex->second;
   }
-  
+
   void definition_union::remap(const remap_set &) {
-    
+
   }
-  
+
   void definition_atomic::remap(const remap_set &) {}
-  
+
   void definition_hypothetical::remap(const remap_set &) { cerr << "ERROR: Remap called on hypothetical type" << endl; }
-  
+
   //========================================================================================================
   //======: Sizeof functions :==============================================================================
   //========================================================================================================
-  
+
   size_t definition::size_of() { return 0; }
 
   size_t definition_class::size_of() {
@@ -504,26 +504,26 @@ namespace jdi {
         sz = max(sz, it->second->size_of());
     return sz;
   }
-  
+
   size_t definition_atomic::size_of() {
     return sz;
   }
-  
+
   size_t definition_hypothetical::size_of() {
     cerr << "ERROR: sizeof() performed on dependent (hypothetical) type" << endl;
     return 0;
   }
-  
+
   //========================================================================================================
   //======: Duplicators :===================================================================================
   //========================================================================================================
-  
+
   definition *definition::duplicate(remap_set &n) {
     definition* res = new definition(name, parent, flags);
     n[this] = res;
     return res;
   }
-  
+
   definition *definition_class::duplicate(remap_set &n) {
     definition_class* res= new definition_class(name, parent, flags);
     res->definition_scope::copy(this);
@@ -531,7 +531,7 @@ namespace jdi {
     n[this] = res;
     return res;
   }
-  
+
   definition *definition_enum::duplicate(remap_set &n) {
     definition_enum* res = new definition_enum(name, parent, flags);
     res->type = type;
@@ -539,7 +539,7 @@ namespace jdi {
     n[this] = res;
     return res;
   }
-  
+
   function_overload* function_overload::duplicate() {
     function_overload *res = new function_overload();
     res->type.def = type.def;
@@ -548,7 +548,7 @@ namespace jdi {
     res->declaration = declaration;
     return res;
   }
-  
+
   definition *definition_function::duplicate(remap_set &n) {
     ref_stack dup; dup.copy(referencers);
     definition_function* res = new definition_function(name, parent, type, dup, modifiers, flags);
@@ -556,21 +556,21 @@ namespace jdi {
     n[this] = res;
     return res;
   }
-  
+
   definition* definition_scope::duplicate(remap_set &n) {
     definition_scope* res = new definition_scope(name, parent, flags);
     res->copy(this);
     n[this] = res;
     return res;
   }
-  
+
   definition* definition_tempscope::duplicate(remap_set &n) {
     definition_tempscope* res = new definition_tempscope(name, parent, flags, source->duplicate(n));
     res->copy(this);
     n[this] = res;
     return res;
   }
-  
+
   definition* definition_template::duplicate(remap_set &n) {
     definition_template* res = new definition_template(name, parent, flags);
     res->def = def->duplicate(n);
@@ -590,37 +590,37 @@ namespace jdi {
     n[this] = res;
     return res;
   }
-  
+
   definition* definition_typed::duplicate(remap_set &n) {
     definition_typed* res = new definition_typed(name, parent, type, modifiers, flags);
     res->referencers.copy(referencers);
     n[this] = res;
     return res;
   }
-  
+
   definition* definition_union::duplicate(remap_set &n) {
     definition_union* res = new definition_union(name, parent, flags);
     res->definition_scope::copy(this);
     n[this] = res;
     return res;
   }
-  
+
   definition* definition_atomic::duplicate(remap_set &) {
     return this;
   }
-  
+
   definition* definition_hypothetical::duplicate(remap_set &n) {
     definition_hypothetical* res = new definition_hypothetical(name, parent, flags, new AST(*def));
     n[this] = res; return res;
   }
-  
+
   //========================================================================================================
   //======: String printers :===============================================================================
   //========================================================================================================
-  
+
   inline string tostr(int x) { char buf[16]; sprintf(buf, "%d", x); return buf; }
   inline unsigned dl(unsigned l) { return l == unsigned(-1)? l:l-1; }
-  
+
   string definition::toString(unsigned, unsigned indent) {
     return string(indent, ' ') + "void " + name + ";";
   }
@@ -655,7 +655,7 @@ namespace jdi {
       }
       res += "\n" + inds + "}";
     }
-    else res += "{ ... }";  
+    else res += "{ ... }";
     return res;
   }
   string definition_function::toString(unsigned levels, unsigned indent) {
@@ -691,8 +691,9 @@ namespace jdi {
       }
       else {
         res += d->type->name + d->name;
-        if (d->flags & DEF_VALUED)
-          res += " = " + ((definition_valued*)d)->value_of.toString();
+        if (d->flags & DEF_VALUED) {
+          res += " = " + (string)((definition_valued*)d)->value_of;
+        }
       }
       first = false;
     }
