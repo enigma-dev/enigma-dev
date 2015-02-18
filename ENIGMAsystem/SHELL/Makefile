@@ -122,7 +122,7 @@ compile_game: cleandep $(OBJECTS) $(RCFILES) $(RESOURCEBINARY) $(DEPENDENCIES)
 # -MMD outputs dependencies to %.d as a side effect of compilation, ignoring system headers
 # -MP gives phony rules for non-target files, avoiding problems with missing files
 $(OBJDIR)/%.o $(OBJDIR)/%.d: %.cpp | $(OBJDIRS)
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(CFLAGS) $(INCLUDES) -MMD -MP -c -o $(OBJDIR)/$*.o $<
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(INCLUDES) -MMD -MP -c -o $(OBJDIR)/$*.o $<
 
 $(OBJDIR)/%.o $(OBJDIR)/%.d: %.c | $(OBJDIRS)
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(INCLUDES) -MMD -MP -c -o $(OBJDIR)/$*.o $<
