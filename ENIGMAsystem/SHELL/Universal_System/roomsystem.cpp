@@ -283,8 +283,12 @@ int room_restart()
 
 string room_get_name(int indx)
 {
-  errcheck(indx,"Room index out of range", "");
-  return enigma::roomdata[indx]->name;
+  //errcheck(indx,"Room index out of range", "");
+  if (unsigned(indx) >= unsigned(enigma::room_idmax) or !enigma::roomdata[indx]){
+    return "<undefined>";
+  }else{
+    return enigma::roomdata[indx]->name;
+  }
 }
 
 int room_goto_absolute(int indx)
