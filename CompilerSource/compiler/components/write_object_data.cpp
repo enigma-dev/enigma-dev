@@ -613,7 +613,9 @@ static inline void write_object_destructor(std::ostream &wto, parsed_object *obj
         if (i->second->id >= obmx) obmx = i->second->id;
       }
     for (map<int, vector<int> >::iterator it = evgroup.begin(); it != evgroup.end(); it++) { // The stacked ones should have their root exported
-      wto << "      delete ENOBJ_ITER_myevent_" << event_stacked_get_root_name(it->first) << ";\n";
+      if (!object->parent || !parent_declares_groupedevent(object->parent, it->first)) {
+        wto << "      delete ENOBJ_ITER_myevent_" << event_stacked_get_root_name(it->first) << ";\n";
+      }
     }
     wto << "    }\n";
 
