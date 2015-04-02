@@ -247,6 +247,16 @@ namespace enigma_user
   void gui_window_remove_slider(int id, int aid);
   void gui_window_remove_label(int id, int lid);
 
+  int gui_window_get_button_count(int id);
+  int gui_window_get_toggle_count(int id);
+  int gui_window_get_slider_count(int id);
+  int gui_window_get_label_count(int id);
+  
+  int gui_window_get_button(int id, int but);
+  int gui_window_get_toggle(int id, int tog);
+  int gui_window_get_slider(int id, int sli);
+  int gui_window_get_label(int id, int lab);
+  
 	//Skins
 	int gui_skin_create();
 	void gui_skin_destroy(int id);
