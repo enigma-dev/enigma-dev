@@ -507,4 +507,36 @@ namespace enigma_user
       gui::gui_labels[lid].parent_id = -1;
     }
   }
+  
+  int gui_window_get_button_count(int id){
+    return gui::gui_windows[id].child_buttons.size();
+  }
+  
+  int gui_window_get_toggle_count(int id){
+    return gui::gui_windows[id].child_toggles.size();
+  }
+  
+  int gui_window_get_slider_count(int id){
+    return gui::gui_windows[id].child_sliders.size();
+  }
+  
+  int gui_window_get_label_count(int id){
+    return gui::gui_windows[id].child_labels.size();
+  }
+  
+  int gui_window_get_button(int id, int but){
+    return gui::gui_windows[id].child_buttons[but];
+  }
+  
+  int gui_window_get_toggle(int id, int tog){
+    return gui::gui_windows[id].child_toggles[tog];
+  }
+  
+  int gui_window_get_slider(int id, int sli){
+    return gui::gui_windows[id].child_sliders[sli];
+  }
+  
+  int gui_window_get_label(int id, int lab){
+    return gui::gui_windows[id].child_labels[lab];
+  }
 }
