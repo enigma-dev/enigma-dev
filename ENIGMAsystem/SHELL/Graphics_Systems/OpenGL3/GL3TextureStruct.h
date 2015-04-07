@@ -27,6 +27,8 @@ struct TextureStruct {
 	unsigned gltex;
 	unsigned width,height;
 	unsigned fullwidth,fullheight;
+	int internalFormat; //GLint
+	unsigned format, type; //GLenum
 	TextureStruct(unsigned gtex);
 	~TextureStruct();
 };
