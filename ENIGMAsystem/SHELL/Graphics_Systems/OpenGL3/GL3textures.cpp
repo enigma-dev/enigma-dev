@@ -36,6 +36,36 @@ vector<TextureStruct*> textureStructs(0);
 #include <vector>
 using std::vector;
 
+/*enum {
+  //Formats and internal formats
+  tx_rgba = GL_RGBA,
+  tx_rgb = GL_RGB,
+  tx_rg = GL_RG,
+  tx_red = GL_RED,
+  tx_bgra = GL_BGRA,
+  tx_bgr =  GL_BGR,
+  tx_depth_component = GL_DEPTH_COMPONENT
+};
+
+enum {
+  //Internal formats only
+  tx_rgb32f = GL_RGB32F,
+  tx_depth_component32f = GL_DEPTH_COMPONENT32F,
+  tx_depth_component24 = GL_DEPTH_COMPONENT24,
+  tx_depth_component16 = GL_DEPTH_COMPONENT16,
+};
+
+enum {
+  //Types
+  tx_unsigned_byte = GL_UNSIGNED_BYTE,
+  tx_byte = GL_BYTE,
+  tx_unsigned_short = GL_UNSIGNED_SHORT,
+  tx_short = GL_SHORT,
+  tx_unsigned_int = GL_UNSIGNED_INT,
+  tx_int = GL_INT,
+  tx_float = GL_FLOAT;
+};*/
+
 inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect powers of two
 	x =  (x & -x) - 1;
 	x -= ((x >> 1) & 0x55555555);
@@ -63,6 +93,35 @@ namespace enigma
 {
   extern int bound_texture_stage;
 
+  //This allows GL3 surfaces to bind and hold many different types of data
+  int graphics_create_texture_custom(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool mipmap, int internalFormat, unsigned format, unsigned type)
+  {
+    GLuint texture;
+    glGenTextures(1, &texture);
+    oglmgr->BindTexture(GL_TEXTURE_2D, texture);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, fullwidth, fullheight, 0, format, type, pxdata);
+    if (mipmap) {
+      // This allows us to control the number of mipmaps generated, but Direct3D does not have an option for it, so for now we'll just go with the defaults.
+      // Honestly not a big deal, Unity3D doesn't allow you to specify either.
+      //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+      //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 3);
+      glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    oglmgr->BindTexture(GL_TEXTURE_2D, 0);
+
+    TextureStruct* textureStruct = new TextureStruct(texture);
+    textureStruct->width = width;
+    textureStruct->height = height;
+    textureStruct->fullwidth = fullwidth;
+    textureStruct->fullheight = fullheight;
+    textureStruct->internalFormat = internalFormat;
+    textureStruct->format = format;
+    textureStruct->type = type;
+    textureStructs.push_back(textureStruct);
+    return textureStructs.size()-1;
+  }
+
   int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool mipmap)
   {
     GLuint texture;
@@ -84,6 +143,9 @@ namespace enigma
     textureStruct->height = height;
     textureStruct->fullwidth = fullwidth;
     textureStruct->fullheight = fullheight;
+    textureStruct->internalFormat = GL_RGBA;
+    textureStruct->format = GL_BGRA;
+    textureStruct->type = GL_UNSIGNED_BYTE;
     textureStructs.push_back(textureStruct);
     return textureStructs.size()-1;
   }
@@ -266,9 +328,9 @@ void texture_set_stage(int stage, int texid) {
 }
 
 void texture_reset() {
+  oglmgr->EndShapesBatching();
 	if (enigma::bound_texture_stage != GL_TEXTURE0) { glActiveTexture(enigma::bound_texture_stage = GL_TEXTURE0); }
 	oglmgr->BindTexture(GL_TEXTURE_2D, enigma::samplerstates[0].bound_texture = 0);
-  oglmgr->EndShapesBatching();
 }
 
 void texture_set_interpolation_ext(int sampler, bool enable)
