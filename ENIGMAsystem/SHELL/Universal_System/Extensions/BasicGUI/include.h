@@ -117,6 +117,7 @@ namespace enigma_user
 	void gui_toggles_draw();
 
   ///SLIDERS
+  int gui_slider_create(gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h, gs_scalar ind_x, gs_scalar ind_y, gs_scalar ind_w, gs_scalar ind_h, string text);
   int gui_slider_create(gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h, gs_scalar ind_x, gs_scalar ind_y, gs_scalar ind_w, gs_scalar ind_h, double val, double minVal, double maxVal, double incrVal, string text);
 	int gui_slider_create();
 	void gui_slider_destroy(int id);
@@ -164,6 +165,54 @@ namespace enigma_user
 	void gui_slider_draw(int id);
 	void gui_sliders_draw();
 
+  ///SCROLLBARS
+  int gui_scrollbar_create(gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h, gs_scalar ind_x, gs_scalar ind_y, bool direction = false, double val = 0.0, double minVal = 0.0, double maxVal = 1.0, double incrVal = 0.0, gs_scalar size = 0.1);
+	int gui_scrollbar_create();
+	void gui_scrollbar_destroy(int id);
+
+	//Setters
+	void gui_scrollbar_set_position(int id, gs_scalar x, gs_scalar y);
+
+	void gui_scrollbar_set_size(int id, gs_scalar w, gs_scalar h);
+  void gui_scrollbar_set_style(int id, int style_id);
+  void gui_scrollbar_set_indicator_style(int id, int indicator_style_id);
+
+	void gui_scrollbar_set_callback(int id, int event, int script_id);
+	void gui_scrollbar_set_visible(int id, bool visible);
+  void gui_scrollbar_set_active(int id, bool active);
+  void gui_scrollbar_set_value(int id, double value);
+  void gui_scrollbar_set_minvalue(int id, double minvalue);
+  void gui_scrollbar_set_maxvalue(int id, double maxvalue);
+  void gui_scrollbar_set_incvalue(int id, double incvalue);
+  void gui_scrollbar_set_indicator_size(int id, gs_scalar size);
+  void gui_scrollbar_set_direction(int id, bool direction);
+  //Getters
+  int gui_slider_scrollbar_style(int id);
+  int gui_slider_scrollbar_indicator_style(int id);
+
+  int gui_slider_scrollbar_state(int id);
+  int gui_slider_scrollbar_callback(int id, int event);
+	bool gui_slider_scrollbar_active(int id);
+	bool gui_slider_scrollbar_visible(int id);
+	gs_scalar gui_scrollbar_get_width(int id);
+	gs_scalar gui_scrollbar_get_height(int id);
+	gs_scalar gui_scrollbar_get_x(int id);
+	gs_scalar gui_scrollbar_get_y(int id);
+  gs_scalar gui_scrollbar_get_indicator_width(int id);
+	gs_scalar gui_scrollbar_get_indicator_height(int id);
+	gs_scalar gui_scrollbar_get_indicator_x(int id);
+	gs_scalar gui_scrollbar_get_indicator_y(int id);
+  gs_scalar gui_scrollbar_get_indicator_size(int id);
+
+  double gui_scrollbar_get_value(int id);
+  double gui_scrollbar_get_minvalue(int id);
+  double gui_scrollbar_get_maxvalue(int id);
+  double gui_scrollbar_get_incvalue(int id);
+  bool gui_scrollbar_get_direction(int id);
+
+  //Drawers
+	void gui_scrollbar_draw(int id);
+	void gui_scrollbars_draw();
 
 	///Windows
 	int gui_window_create(gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h, string text);
@@ -181,6 +230,7 @@ namespace enigma_user
 	void gui_window_set_size(int id, gs_scalar w, gs_scalar h);
 
   void gui_window_set_text(int id, string text);
+	void gui_window_set_state(int id, int state);
 
   //Getters
   int gui_window_get_style(int id);
@@ -240,23 +290,27 @@ namespace enigma_user
   void gui_window_add_button(int id, int bid);
   void gui_window_add_toggle(int id, int tid);
   void gui_window_add_slider(int id, int sid);
+  void gui_window_add_scrollbar(int id, int scr);
   void gui_window_add_label(int id, int lid);
 
   void gui_window_remove_button(int id, int bid);
   void gui_window_remove_toggle(int id, int tid);
-  void gui_window_remove_slider(int id, int aid);
+  void gui_window_remove_slider(int id, int sid);
+  void gui_window_remove_scrollbar(int id, int scr);
   void gui_window_remove_label(int id, int lid);
 
   int gui_window_get_button_count(int id);
   int gui_window_get_toggle_count(int id);
   int gui_window_get_slider_count(int id);
+  int gui_window_get_scrollbar_count(int id);
   int gui_window_get_label_count(int id);
-  
+
   int gui_window_get_button(int id, int but);
   int gui_window_get_toggle(int id, int tog);
   int gui_window_get_slider(int id, int sli);
+  int gui_window_get_scrollbar(int id, int sli);
   int gui_window_get_label(int id, int lab);
-  
+
 	//Skins
 	int gui_skin_create();
 	void gui_skin_destroy(int id);
@@ -266,9 +320,11 @@ namespace enigma_user
   int gui_skin_get_toggle(int id);
   int gui_skin_get_slider(int id);
   int gui_skin_get_label(int id);
+  int gui_skin_get_scrollbar(int id);
 
   //Styles
   int gui_style_create();
+  int gui_style_duplicate(int style);
   void gui_style_destroy(int id);
   void gui_style_set_font(int id, int state, int font);
 	void gui_style_set_font_halign(int id, int state, unsigned int halign);

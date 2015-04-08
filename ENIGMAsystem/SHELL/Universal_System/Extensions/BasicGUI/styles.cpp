@@ -45,12 +45,19 @@ namespace gui{
 	unsigned int gui_style_window = enigma_user::gui_style_create();
 	unsigned int gui_style_slider = enigma_user::gui_style_create();
   unsigned int gui_style_label = enigma_user::gui_style_create();
+  unsigned int gui_style_scrollbar = enigma_user::gui_style_create();
 }
 
 namespace enigma_user
 {
 	int gui_style_create(){
-		gui::gui_styles.insert(pair<unsigned int, gui::gui_style >(gui::gui_styles_maxid, gui::gui_style()));
+		gui::gui_styles.emplace(gui::gui_styles_maxid, gui::gui_style());
+		gui::gui_styles[gui::gui_styles_maxid].id = gui::gui_styles_maxid;
+		return gui::gui_styles_maxid++;
+	}
+
+	int gui_style_duplicate(int style){
+    gui::gui_styles.emplace(gui::gui_styles_maxid, gui::gui_styles[style]);
 		gui::gui_styles[gui::gui_styles_maxid].id = gui::gui_styles_maxid;
 		return gui::gui_styles_maxid++;
 	}
