@@ -68,6 +68,7 @@ namespace gui
       vector<unsigned int> child_buttons;
       vector<unsigned int> child_toggles;
       vector<unsigned int> child_sliders;
+      vector<unsigned int> child_scrollbars;
       vector<unsigned int> child_labels;
 	};
 }

@@ -27,6 +27,7 @@ namespace gui
 			int window_style;
 			int toggle_style;
 			int slider_style;
+      int scrollbar_style;
 			int label_style;
 
 			gui_skin();

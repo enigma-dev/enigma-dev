@@ -1,4 +1,4 @@
-/** Copyright (C) 2014 Harijs Grinbergs
+/** Copyright (C) 2014-2015 Harijs Grinbergs
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -58,7 +58,17 @@ namespace gui
 	void gui_label::draw(gs_scalar ox, gs_scalar oy){
 		//Draw sprite
     if (gui::gui_styles[style_id].sprites[enigma_user::gui_state_default] != -1){
-      enigma_user::draw_sprite_padded(gui::gui_styles[style_id].sprites[enigma_user::gui_state_default],-1,gui::gui_styles[style_id].border.left,gui::gui_styles[style_id].border.top,gui::gui_styles[style_id].border.right,gui::gui_styles[style_id].border.bottom,ox + box.x,oy + box.y,ox + box.x+box.w,oy + box.y+box.h);
+      enigma_user::draw_sprite_padded(gui::gui_styles[style_id].sprites[enigma_user::gui_state_default],-1,
+                                      gui::gui_styles[style_id].border.left,
+                                      gui::gui_styles[style_id].border.top,
+                                      gui::gui_styles[style_id].border.right,
+                                      gui::gui_styles[style_id].border.bottom,
+                                      ox + box.x,
+                                      oy + box.y,
+                                      ox + box.x+box.w,
+                                      oy + box.y+box.h,
+                                      gui::gui_styles[style_id].sprite_styles[enigma_user::gui_state_default].color,
+                                      gui::gui_styles[style_id].sprite_styles[enigma_user::gui_state_default].alpha);
 		}
 
 		//Draw text
