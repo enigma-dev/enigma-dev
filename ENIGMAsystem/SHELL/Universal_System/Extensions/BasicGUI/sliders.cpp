@@ -1,4 +1,4 @@
-/** Copyright (C) 2014 Harijs Grinbergs
+/** Copyright (C) 2014-2015 Harijs Grinbergs
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -98,8 +98,8 @@ namespace gui
 		if (drag == true){
       windowStopPropagation = true;
       slider_offset = fmin(fmax(0,tx-box.x-ox-drag_xoffset), box.w);
-      value = round((minValue + slider_offset/box.w * (maxValue-minValue)) / incValue) * incValue;
-      update_spos();
+      value = round(minValue + slider_offset/box.w * segments) * incValue;
+      slider_offset = box.w*((value-minValue)/(maxValue-minValue));
       callback_execute(enigma_user::gui_event_drag);
 			if (enigma_user::mouse_check_button_released(enigma_user::mb_left)){
 				drag = false;
@@ -111,11 +111,32 @@ namespace gui
 	void gui_slider::draw(gs_scalar ox, gs_scalar oy){
 		//Draw slider and indicator
     if (gui::gui_styles[style_id].sprites[state] != -1){
-      enigma_user::draw_sprite_padded(gui::gui_styles[style_id].sprites[state],-1,gui::gui_styles[style_id].border.left,gui::gui_styles[style_id].border.top,gui::gui_styles[style_id].border.right,gui::gui_styles[style_id].border.bottom,ox + box.x,oy + box.y,ox + box.x+box.w,oy + box.y+box.h);
+      enigma_user::draw_sprite_padded(gui::gui_styles[style_id].sprites[state],-1,
+                                      gui::gui_styles[style_id].border.left,
+                                      gui::gui_styles[style_id].border.top,
+                                      gui::gui_styles[style_id].border.right,
+                                      gui::gui_styles[style_id].border.bottom,
+                                      ox + box.x,
+                                      oy + box.y,
+                                      ox + box.x+box.w,
+                                      oy + box.y+box.h,
+                                      gui::gui_styles[style_id].sprite_styles[state].color,
+                                      gui::gui_styles[style_id].sprite_styles[state].alpha);
 		}
+
     if (gui::gui_styles[indicator_style_id].sprites[state] != -1){
       auto &ist = gui::gui_styles[indicator_style_id];
-      enigma_user::draw_sprite_padded(ist.sprites[state],-1,ist.border.left,ist.border.top,ist.border.right,ist.border.bottom,ist.image_offset.x + ox + box.x + slider_offset + indicator_box.x,ist.image_offset.y + oy + box.y + indicator_box.y,ist.image_offset.x + ox + box.x + indicator_box.w + slider_offset + indicator_box.x,ist.image_offset.y + oy + box.y+indicator_box.h + indicator_box.y);
+      enigma_user::draw_sprite_padded(ist.sprites[state],-1,
+                                      ist.border.left,
+                                      ist.border.top,
+                                      ist.border.right,
+                                      ist.border.bottom,
+                                      ist.image_offset.x + ox + box.x + slider_offset + indicator_box.x,
+                                      ist.image_offset.y + oy + box.y + indicator_box.y,
+                                      ist.image_offset.x + ox + box.x + indicator_box.w + slider_offset + indicator_box.x,
+                                      ist.image_offset.y + oy + box.y+indicator_box.h + indicator_box.y,
+                                      ist.sprite_styles[state].color,
+                                      ist.sprite_styles[state].alpha);
 		}
 
 		//Draw text
@@ -136,9 +157,6 @@ namespace gui
 
 		enigma_user::draw_text(ox + textx,oy + texty,text);
 	}
-
-	void gui_slider::update_text_pos(int state){
-	}
 }
 
 namespace enigma_user
@@ -154,6 +172,10 @@ namespace enigma_user
 		return (gui::gui_sliders_maxid++);
 	}
 
+	int gui_slider_create(gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h, gs_scalar ind_x, gs_scalar ind_y, gs_scalar ind_w, gs_scalar ind_h, string text){
+    	return gui_slider_create(x, y, w, h, ind_x, ind_y, ind_w, ind_h, 0, 0, 1, 0, text);
+	}
+
 	int gui_slider_create(gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h, gs_scalar ind_x, gs_scalar ind_y, gs_scalar ind_w, gs_scalar ind_h, double val, double minVal, double maxVal, double incrVal, string text){
 		if (gui::gui_bound_skin == -1){ //Add default one
 			gui::gui_sliders.insert(pair<unsigned int, gui::gui_slider >(gui::gui_sliders_maxid, gui::gui_slider()));
@@ -166,11 +188,15 @@ namespace enigma_user
 		gui::gui_sliders[gui::gui_sliders_maxid].indicator_box.set(ind_x, ind_y, ind_w, ind_h);
     gui::gui_sliders[gui::gui_sliders_maxid].minValue = minVal;
 		gui::gui_sliders[gui::gui_sliders_maxid].maxValue = maxVal;
-		gui::gui_sliders[gui::gui_sliders_maxid].incValue = incrVal;
     gui::gui_sliders[gui::gui_sliders_maxid].value = val;
 
+    if (incrVal == 0){
+      gui::gui_sliders[gui::gui_sliders_maxid].incValue = 1.0/w;
+    }else{
+      gui::gui_sliders[gui::gui_sliders_maxid].incValue = incrVal;
+    }
+
 		gui::gui_sliders[gui::gui_sliders_maxid].text = text;
-		gui::gui_sliders[gui::gui_sliders_maxid].update_text_pos();
 		gui::gui_sliders[gui::gui_sliders_maxid].update_spos();
 		return (gui::gui_sliders_maxid++);
 	}
@@ -195,7 +221,7 @@ namespace enigma_user
 	void gui_slider_set_size(int id, gs_scalar w, gs_scalar h){
 		gui::gui_sliders[id].box.w = w;
 		gui::gui_sliders[id].box.h = h;
-		gui::gui_sliders[id].update_text_pos();
+		gui_slider_set_incvalue(id, gui_slider_get_incvalue(id));
 	}
 
 	void gui_slider_set_callback(int id, int event, int script_id){
@@ -212,10 +238,6 @@ namespace enigma_user
 
   void gui_slider_set_indicator_style(int id, int style_id){
     gui::gui_sliders[id].indicator_style_id = (style_id != -1? style_id : gui::gui_style_slider);
-  }
-
-  int gui_slider_set_indicator_style(int id){
-    return gui::gui_sliders[id].indicator_style_id;
   }
 
   void gui_slider_set_visible(int id, bool visible){
@@ -242,7 +264,11 @@ namespace enigma_user
   }
 
   void gui_slider_set_incvalue(int id, double incvalue){
-    gui::gui_sliders[id].incValue = incvalue;
+    if (incvalue == 0){
+      gui::gui_sliders[id].incValue = 1.0/gui::gui_sliders[id].box.w;
+    }else{
+      gui::gui_sliders[id].incValue = incvalue;
+    }
     gui::gui_sliders[id].update_spos();
   }
 

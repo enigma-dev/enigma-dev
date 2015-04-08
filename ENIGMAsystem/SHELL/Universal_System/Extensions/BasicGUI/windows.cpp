@@ -1,4 +1,4 @@
-/** Copyright (C) 2014 Harijs Grinbergs
+/** Copyright (C) 2014-2015 Harijs Grinbergs
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -42,6 +42,7 @@ using std::deque;
 #include "buttons.h"
 #include "toggles.h"
 #include "sliders.h"
+#include "scrollbars.h"
 #include "labels.h"
 
 namespace gui
@@ -60,6 +61,7 @@ namespace gui
 	extern unordered_map<unsigned int, gui_button> gui_buttons;
 	extern unordered_map<unsigned int, gui_toggle> gui_toggles;
   extern unordered_map<unsigned int, gui_slider> gui_sliders;
+  extern unordered_map<unsigned int, gui_scrollbar> gui_scrollbars;
   extern unordered_map<unsigned int, gui_label> gui_labels;
 	extern unsigned int gui_skins_maxid;
 
@@ -250,6 +252,10 @@ namespace enigma_user
 		gui::gui_window_order.erase(std::remove(gui::gui_window_order.begin(), gui::gui_window_order.end(), id), gui::gui_window_order.end());
 	}
 
+	void gui_window_set_state(int id, int state){
+    gui::gui_windows[id].state = state;
+	}
+
   ///Setters
 	void gui_window_set_text(int id, string text){
 		gui::gui_windows[id].text = text;
@@ -407,6 +413,12 @@ namespace enigma_user
             gui::gui_sliders[gui::gui_windows[i].child_sliders[b]].update(gui::gui_windows[i].box.x,gui::gui_windows[i].box.y);
           }
         }
+        if (gui::gui_windows[i].child_scrollbars.empty() == false){
+          for (int b=gui::gui_windows[i].child_scrollbars.size()-1; b>=0; --b){
+            if (gui::gui_scrollbars[gui::gui_windows[i].child_scrollbars[b]].visible == false) continue;
+            gui::gui_scrollbars[gui::gui_windows[i].child_scrollbars[b]].update(gui::gui_windows[i].box.x,gui::gui_windows[i].box.y);
+          }
+        }
         //This checks if any of the inside elements are pressed
         if (gui::windowStopPropagation == true && window_click == false) { window_click = true; window_swap_id = ind; }
         gui::gui_windows[i].update();
@@ -419,7 +431,7 @@ namespace enigma_user
 		if (window_click == true && enigma_user::mouse_check_button_pressed(enigma_user::mb_left)) { //Push to front
         int t = gui::gui_window_order[window_swap_id]; //Get the id of the clicked window
         gui::gui_window_order.erase(gui::gui_window_order.begin()+window_swap_id); //Delete the id from it's current place
-        gui::gui_window_order.push_back(t); //put to top
+        gui::gui_window_order.push_back(t); //put on top
     }
 
     //Draw loop
@@ -441,6 +453,11 @@ namespace enigma_user
         if (w.child_sliders.empty() == false){
           for (const auto &s : w.child_sliders){
             if (gui::gui_sliders[s].visible == true) gui::gui_sliders[s].draw(w.box.x,w.box.y);
+          }
+        }
+        if (w.child_scrollbars.empty() == false){
+          for (const auto &s : w.child_scrollbars){
+            if (gui::gui_scrollbars[s].visible == true) gui::gui_scrollbars[s].draw(w.box.x,w.box.y);
           }
         }
         if (w.child_labels.empty() == false){
@@ -469,6 +486,11 @@ namespace enigma_user
   void gui_window_add_slider(int id, int sid){
     gui::gui_windows[id].child_sliders.push_back(sid);
     gui::gui_sliders[sid].parent_id = id;
+  }
+
+  void gui_window_add_scrollbar(int id, int sid){
+    gui::gui_windows[id].child_scrollbars.push_back(sid);
+    gui::gui_scrollbars[sid].parent_id = id;
   }
 
   void gui_window_add_label(int id, int lid){
@@ -500,6 +522,14 @@ namespace enigma_user
     }
   }
 
+  void gui_window_remove_scrollbar(int id, int sid){
+    auto it = find(gui::gui_windows[id].child_scrollbars.begin(), gui::gui_windows[id].child_scrollbars.end(), sid);
+    if (it != gui::gui_windows[id].child_scrollbars.end()){
+      gui::gui_windows[id].child_scrollbars.erase(it);
+      gui::gui_scrollbars[sid].parent_id = -1;
+    }
+  }
+
   void gui_window_remove_label(int id, int lid){
     auto it = find(gui::gui_windows[id].child_labels.begin(), gui::gui_windows[id].child_labels.end(), lid);
     if (it != gui::gui_windows[id].child_labels.end()){
@@ -507,35 +537,39 @@ namespace enigma_user
       gui::gui_labels[lid].parent_id = -1;
     }
   }
-  
+
   int gui_window_get_button_count(int id){
     return gui::gui_windows[id].child_buttons.size();
   }
-  
+
   int gui_window_get_toggle_count(int id){
     return gui::gui_windows[id].child_toggles.size();
   }
-  
+
   int gui_window_get_slider_count(int id){
     return gui::gui_windows[id].child_sliders.size();
   }
-  
+
   int gui_window_get_label_count(int id){
     return gui::gui_windows[id].child_labels.size();
   }
-  
+
   int gui_window_get_button(int id, int but){
     return gui::gui_windows[id].child_buttons[but];
   }
-  
+
   int gui_window_get_toggle(int id, int tog){
     return gui::gui_windows[id].child_toggles[tog];
   }
-  
+
   int gui_window_get_slider(int id, int sli){
     return gui::gui_windows[id].child_sliders[sli];
   }
-  
+
+  int gui_window_get_scrollbar(int id, int scr){
+    return gui::gui_windows[id].child_scrollbars[scr];
+  }
+
   int gui_window_get_label(int id, int lab){
     return gui::gui_windows[id].child_labels[lab];
   }

@@ -118,7 +118,17 @@ namespace gui
 	void gui_toggle::draw(gs_scalar ox, gs_scalar oy){
 	  //Draw toggle
     if (gui::gui_styles[style_id].sprites[state] != -1){
-      enigma_user::draw_sprite_padded(gui::gui_styles[style_id].sprites[state],-1,gui::gui_styles[style_id].border.left,gui::gui_styles[style_id].border.top,gui::gui_styles[style_id].border.right,gui::gui_styles[style_id].border.bottom,ox + box.x,oy + box.y,ox + box.x+box.w,oy + box.y+box.h);
+      enigma_user::draw_sprite_padded(gui::gui_styles[style_id].sprites[state],-1,
+                                      gui::gui_styles[style_id].border.left,
+                                      gui::gui_styles[style_id].border.top,
+                                      gui::gui_styles[style_id].border.right,
+                                      gui::gui_styles[style_id].border.bottom,
+                                      ox + box.x,
+                                      oy + box.y,
+                                      ox + box.x+box.w,
+                                      oy + box.y+box.h,
+                                      gui::gui_styles[style_id].sprite_styles[state].color,
+                                      gui::gui_styles[style_id].sprite_styles[state].alpha);
 		}
 
 		//Draw text
