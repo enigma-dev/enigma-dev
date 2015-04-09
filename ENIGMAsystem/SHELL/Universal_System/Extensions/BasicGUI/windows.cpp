@@ -550,6 +550,10 @@ namespace enigma_user
     return gui::gui_windows[id].child_sliders.size();
   }
 
+  int gui_window_get_scrollbar_count(int id){
+    return gui::gui_windows[id].child_scrollbars.size();
+  }
+
   int gui_window_get_label_count(int id){
     return gui::gui_windows[id].child_labels.size();
   }
