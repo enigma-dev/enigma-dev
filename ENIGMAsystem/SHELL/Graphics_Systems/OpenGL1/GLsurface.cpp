@@ -88,9 +88,8 @@ bool surface_is_supported()
 
 int surface_create(int width, int height, bool depthbuffer)
 {
-    if (!GLEW_EXT_framebuffer_object)
-    {
-    return -1;
+    if (!GLEW_EXT_framebuffer_object) {
+      return -1;
     }
 
     GLuint fbo;
@@ -100,15 +99,17 @@ int surface_create(int width, int height, bool depthbuffer)
     w = (int)width,
     h = (int)height; //get the integer width and height, and prepare to search for an id
 
+    bool found_empty = false;
     for (unsigned int i=0; i<enigma::surface_max; ++i){ //Find first empty slot
       if (enigma::surface_array.find(i) == enigma::surface_array.end()){
         id = i;
+        found_empty = true;
         break;
       }
     }
 
     enigma::surface_array.emplace(id,enigma::surface());
-    enigma::surface_max++;
+    if (found_empty == false){ enigma::surface_max++; }
 
     enigma::surface_array[id].width = w;
     enigma::surface_array[id].height = h;
