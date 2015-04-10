@@ -179,7 +179,7 @@ namespace enigma {
           double rot;
           double width, height;
           double pi_x_offset, pi_y_offset;
-          double tbx, tby;
+          double tbx, tby, tbw, tbh;
           if (pi.pt->alive) {
             particle_type* pt = pi.pt;
             x = pi.x;
@@ -218,8 +218,10 @@ namespace enigma {
               height = spr2d->height;
               pi_x_offset = spr2d->xoffset;
               pi_y_offset = spr2d->yoffset;
-              tbx = spr2d->texbordxarray[usi];
-              tby = spr2d->texbordyarray[usi];
+              tbx = spr2d->texturexarray[usi];
+              tby = spr2d->textureyarray[usi];
+              tbw = spr2d->texturewarray[usi];
+              tbh = spr2d->textureharray[usi];
               texture_indices.push_back(spr2d->texturearray[usi]);
             }
             else {
@@ -236,6 +238,8 @@ namespace enigma {
               pi_y_offset = ps->height/2.0;
               tbx = 1.0;
               tby = 1.0;
+              tbw = 0.0;
+              tbh = 0.0;
               texture_indices.push_back(ps->texture);
             }
           }
@@ -254,7 +258,7 @@ namespace enigma {
             pi_x_offset = ps->width/2.0;
             pi_y_offset = ps->height/2.0;
             width = ps->width, height = ps->height;
-            tbx = 1, tby = 1;
+            tbx = 1, tby = 1, tbw  = 0, tbh = 0;
           }
 
           const double
@@ -268,18 +272,18 @@ namespace enigma {
           double ulcx = x - xscale * pi_x_offset * cos(rot) + yscale * pi_y_offset * cos(M_PI/2+rot);
           double ulcy = y + xscale * pi_x_offset * sin(rot) - yscale * pi_y_offset * sin(M_PI/2+rot);
 
-          double t1x = 0, t1y = 0;
+          double t1x = tbx, t1y = tby;
           double v1x = ulcx, v1y = ulcy;
-          double t2x = tbx, t2y = 0;
+          double t2x = tbx+tbw, t2y = tby;
           double v2x = ulcx + wcosrot, v2y = ulcy - wsinrot;
 
           const double mpr = 3*M_PI/2 + rot;
           ulcx += h * cos(mpr);
           ulcy -= h * sin(mpr);
 
-          double t3x = 0, t3y = tby;
+          double t3x = tbx, t3y = tby+tbh;
           double v3x = ulcx, v3y = ulcy;
-          double t4x = tbx, t4y = tby;
+          double t4x = tbx+tbw, t4y = tby+tbh;
           double v4x = ulcx + wcosrot, v4y = ulcy - wsinrot;
 
           points.push_back(v1x);

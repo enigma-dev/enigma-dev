@@ -961,8 +961,10 @@ namespace enigma
 
     sprite* sprstr = enigma::spritestructarray[sprid];
     sprstr->texturearray.push_back(ps->texture);
-    sprstr->texbordxarray.push_back(1.0); // Assumes multiple of 2.
-    sprstr->texbordyarray.push_back(1.0); // Assumes multiple of 2.
+    sprstr->texturexarray.push_back(0.0); // Assumes multiple of 2.
+    sprstr->textureyarray.push_back(0.0); // Assumes multiple of 2.
+    sprstr->texturewarray.push_back(1.0); // Assumes multiple of 2.
+    sprstr->textureharray.push_back(1.0); // Assumes multiple of 2.
     sprstr->colldata.push_back(get_collision_mask(sprstr,0,ct_bbox));
 
     shape_to_actual_sprite.insert(std::pair<pt_shape,int>(particle_shape,sprid));
