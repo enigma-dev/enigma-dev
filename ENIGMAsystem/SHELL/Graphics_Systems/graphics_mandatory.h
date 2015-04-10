@@ -33,7 +33,8 @@ namespace enigma
   int graphics_duplicate_texture(int tex, bool mipmap=false);
   void graphics_replace_texture_alpha_from_texture(int tex, int copy_tex);
   void graphics_delete_texture(int tex);
-
+  void graphics_copy_texture(int source, int destination, int x, int y); //Copy one into another with position offset x,y
+  
   /// Retrieve image data from a texture, in unsigned char, BGRA format.
   /// This data will be allocated afresh; the pointer and data are yours to manipulate
   /// and must be freed once you are done.

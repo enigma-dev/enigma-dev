@@ -1,5 +1,6 @@
 /** Copyright (C) 2008 Josh Ventura
 *** Copyright (C) 2013 Robert B. Colton
+*** Copyright (C) 2015 Harijs Grinbergs
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -16,15 +17,15 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#ifndef ENIGMA_SPRITESTRUCT
+#define ENIGMA_SPRITESTRUCT
+
 #include <stdlib.h>
 #include <string>
 #include <vector>
 using std::vector;
 
 #include "Collision_Systems/collision_types.h"
-
-#ifndef ENIGMA_SPRITESTRUCT
-#define ENIGMA_SPRITESTRUCT
 
 struct bbox_rect_t {
   int bottom, left, right, top;
@@ -36,8 +37,10 @@ namespace enigma
     int width,height,subcount,xoffset,yoffset,id;
 	
     vector<int> texturearray; //Each subimage has a texture
-    vector<double> texbordxarray;
-    vector<double> texbordyarray;
+    vector<double> texturexarray; //Offset in texture (used in texture atlas, otherwise 0)
+    vector<double> textureyarray;
+    vector<double> texturewarray; //width of valid texture space
+    vector<double> textureharray; //ditto height 
     vector<void*> colldata; // Each subimage has collision data
 
     //void*  *pixeldata;

@@ -165,6 +165,36 @@ namespace enigma
     delete[] bitmap;
     return dup_tex;
   }
+  
+  void graphics_copy_texture(int source, int destination, int x, int y)
+  {
+    GLuint src = textureStructs[source]->gltex;
+    GLuint dst = textureStructs[destination]->gltex;
+    unsigned sw, sh, sfw, sfh;
+    sw = textureStructs[source]->width;
+    sh = textureStructs[source]->height;
+    sfw = textureStructs[source]->fullwidth;
+    sfh = textureStructs[source]->fullheight;
+    oglmgr->BindTexture(GL_TEXTURE_2D, src);
+    //We could use glCopyImageSubData here, but it's GL4.3
+    char* bitmap = new char[(sfh<<(lgpp2(sfw)+2))|2];
+    glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_BYTE, bitmap);
+    
+    /*char* cropped_bitmap = new char[w*h*4];
+    for (int i=0; i<h; ++i){
+      memcpy(cropped_bitmap+w*i, bitmap+fw*i, w);
+    }*/
+
+    oglmgr->BindTexture(GL_TEXTURE_2D, dst);
+    unsigned dw, dh;
+    dw = textureStructs[destination]->width;
+    dh = textureStructs[destination]->height;
+    glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, (x+sfw<=dw?sfw:dw-x), (y+sfh<=dh?sfh:dh-y), GL_BGRA, GL_UNSIGNED_BYTE, bitmap);
+    
+    oglmgr->BindTexture(GL_TEXTURE_2D, 0);
+    
+    delete[] bitmap;
+  }
 
   void graphics_replace_texture_alpha_from_texture(int tex, int copy_tex)
   {
