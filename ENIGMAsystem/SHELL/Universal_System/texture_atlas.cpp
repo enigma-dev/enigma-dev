@@ -15,10 +15,16 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include <algorithm>    // std::sort
+
 #include "texture_atlas.h"
+
 #include "Universal_System/spritestruct.h"
+#include "Universal_System/fontstruct.h"
+
 #include "Universal_System/nlpo2.h"
 #include "Graphics_Systems/graphics_mandatory.h"
+#include "Universal_System/rectpack.h"
 
 #ifdef DEBUG_MODE
   #include "libEGMstd.h"
@@ -36,6 +42,155 @@
 namespace enigma {
   unordered_map<unsigned int, texture_atlas> texture_atlas_array;
   size_t texture_atlas_idmax = 0;
+
+  bool textures_pack(int ta, bool free_textures){
+    // Implement packing algorithm.
+    vector<texture_element> &textures = texture_atlas_array[ta].textures;
+    vector<enigma::rect_packer::pvrect> metrics(textures.size()); //This means every resource has only one image
+    for (unsigned int i = 0; i < textures.size(); i++){ //This adds the rest of the images
+      switch (textures[i].type){
+        case 0: { //Add all sprite subimages
+          enigma::sprite *sspr = enigma::spritestructarray[textures[i].id];
+          for (int s = 0; s < sspr->subcount; s++){
+            metrics.emplace_back();
+          }
+        } break;
+        case 2: { //Add font glyps
+          //We remove one as it's the font resource itself, but we only need glyps
+          metrics.erase(metrics.begin());
+          enigma::font *fnt = enigma::fontstructarray[textures[i].id];
+          for (size_t g = 0; g < fnt->glyphRangeCount; g++) {
+            enigma::fontglyphrange* fgr = fnt->glyphRanges[g];
+            for (size_t s = 0; s < fgr->glyphcount; s++){
+              metrics.emplace_back();
+            }
+          }
+        } break;
+        default: break; //We do nothing for the rest
+      }
+    }
+
+    unsigned int counter = 0;
+    for (unsigned int i = 0; i < textures.size(); i++){
+      // TODO: This should maybe crop the images so it's totally fit (this can be done on compile time by LGM or compiler even, but it's possible the user has loaded the image at runtime)
+      switch (textures[i].type){
+        case 0: { //Add all sprite subimages
+          enigma::sprite *sspr = enigma::spritestructarray[textures[i].id];
+          for (int s = 0; s < sspr->subcount; s++){
+            metrics[counter].x = 0,   metrics[counter].y = 0,
+            metrics[counter].w = sspr->width, metrics[counter].h = sspr->height;
+            metrics[counter].placed = -1;
+            counter++;
+          }
+        }break;
+        case 2: { //Add font glyps
+          enigma::font *fnt = enigma::fontstructarray[textures[i].id];
+          for (size_t g = 0; g < fnt->glyphRangeCount; g++) {
+            enigma::fontglyphrange* fgr = fnt->glyphRanges[g];
+            for (size_t s = 0; s < fgr->glyphcount; s++){
+              metrics[counter].x = 0,   metrics[counter].y = 0,
+              metrics[counter].w = fgr->glyphs[s]->x2-fgr->glyphs[s]->x, metrics[counter].h = fgr->glyphs[s]->y2-fgr->glyphs[s]->y;
+              metrics[counter].placed = -1;
+              counter++;
+            }
+          }
+        } break;
+        default: break; //We do nothing for the rest
+      }
+    }
+
+    vector<unsigned int> boxes;
+    boxes.reserve(metrics.size());
+    for (unsigned int i = 0; i < metrics.size(); i++){
+      boxes.emplace_back((metrics[i].w * metrics[i].h << 8) + i);
+    }
+    std::sort (boxes.begin(), boxes.end());
+
+    unsigned int w = 64, h = 64; //Minimum atlas size
+    if (texture_atlas_array[ta].width != -1 && texture_atlas_array[ta].height != -1){
+      w = texture_atlas_array[ta].width, h = texture_atlas_array[ta].height;
+    }
+    enigma::rect_packer::rectpnode *rectplane = new enigma::rect_packer::rectpnode(0,0,w,h);
+    unsigned int max_textures = 0;
+    for (vector<unsigned int>::reverse_iterator i = boxes.rbegin(); i != boxes.rend() and w and h; ){
+      enigma::rect_packer::rectpnode *nn = enigma::rect_packer::rninsert(rectplane, *i & 0xFF, &metrics.front());
+      if (nn){
+        enigma::rect_packer::rncopy(nn, &metrics.front(), *i & 0xFF),
+        i++;
+        max_textures++;
+      } else {
+        if (texture_atlas_array[ta].width != -1 && texture_atlas_array[ta].height != -1){
+          break; //We are already at max size
+        }
+        w > h ? h <<= 1 : w <<= 1,
+        rectplane = enigma::rect_packer::expand(rectplane, w, h);
+        //printf("Expanded to %d by %d\n", w, h);
+        if (!w or !h) return false;
+      }
+    }
+
+    if (texture_atlas_array[ta].width == -1 || texture_atlas_array[ta].height == -1){
+        texture_atlas_array[ta].width = w;
+        texture_atlas_array[ta].height = h;
+        if (enigma::texture_atlas_array[ta].texture != -1){
+          graphics_delete_texture(texture_atlas_array[ta].texture);
+        }
+        texture_atlas_array[ta].texture = graphics_create_texture(w, h, w, h, nullptr, false);
+    }
+
+    counter = 0;
+    for (unsigned int i = 0; i < textures.size(); i++){
+      switch (textures[i].type){
+        case 0: { //Add all sprite subimages
+          enigma::sprite *sspr = enigma::spritestructarray[textures[i].id];
+          for (int s = 0; s < sspr->subcount; s++){
+            enigma::graphics_copy_texture(sspr->texturearray[s], enigma::texture_atlas_array[ta].texture, metrics[counter].x, metrics[counter].y);
+            if (free_textures == true){
+              enigma::graphics_delete_texture(sspr->texturearray[s]);
+            }
+            sspr->texturearray[s] = enigma::texture_atlas_array[ta].texture;
+            sspr->texturexarray[s] = (double)metrics[counter].x/(double)(enigma::texture_atlas_array[ta].width);
+            sspr->textureyarray[s] = (double)metrics[counter].y/(double)(enigma::texture_atlas_array[ta].height);
+            sspr->texturewarray[s] = (double)sspr->width/(double)(enigma::texture_atlas_array[ta].width);
+            sspr->textureharray[s] = (double)sspr->height/(double)(enigma::texture_atlas_array[ta].height);
+            //printf("Sprite %i subimage %i placed at x = %f and y = %f, w = %f, h = %f\n", i, s,(double)metrics[counter].x, (double)metrics[counter].y, (double)sspr->width/(double)(enigma::texture_atlas_array[ta].width), (double)sspr->height/(double)(enigma::texture_atlas_array[ta].height));
+
+            counter++;
+            if (counter > max_textures) { return false; }
+          }
+        } break;
+        case 2: { //Add font glyps
+          ///This sometimes draws cut of letters - need to investigate!
+          enigma::font *fnt = enigma::fontstructarray[textures[i].id];
+          for (size_t g = 0; g < fnt->glyphRangeCount; g++) {
+            enigma::fontglyphrange* fgr = fnt->glyphRanges[g];
+            for (size_t s = 0; s < fgr->glyphcount; s++){
+              double tix, tiy; //Calculate texture position in image space (pixels) instead of normalized 0-1. We sadly don't hold this information, but maybe we should
+              tix = (double)fgr->glyphs[s]->tx*(double)fnt->twid;
+              tiy = (double)fgr->glyphs[s]->ty*(double)fnt->thgt;
+
+              //printf("Font %i range %i glyph %i from %f, %f placed at x = %i and y = %i, w = %i, h = %i\n", i, g, s, tix, tiy, metrics[counter].x, metrics[counter].y, metrics[counter].w, metrics[counter].h);
+              enigma::graphics_copy_texture_part(fnt->texture, enigma::texture_atlas_array[ta].texture, tix, tiy, metrics[counter].w, metrics[counter].h, metrics[counter].x, metrics[counter].y);
+
+              fgr->glyphs[s]->tx = (double)metrics[counter].x/(double)(enigma::texture_atlas_array[ta].width);
+              fgr->glyphs[s]->ty = (double)metrics[counter].y/(double)(enigma::texture_atlas_array[ta].height);
+              fgr->glyphs[s]->tx2 = (double)(metrics[counter].x+metrics[counter].w)/(double)(enigma::texture_atlas_array[ta].width);
+              fgr->glyphs[s]->ty2 = (double)(metrics[counter].y+metrics[counter].h)/(double)(enigma::texture_atlas_array[ta].height);
+
+              counter++;
+              if (counter > max_textures) { return false; }
+            }
+          }
+          if (free_textures == true){
+            enigma::graphics_delete_texture(fnt->texture);
+          }
+          fnt->texture = enigma::texture_atlas_array[ta].texture;
+        } break;
+        default: break; //We do nothing for the rest
+      }
+    }
+    return true;
+  }
 }
 
 namespace enigma_user {
@@ -52,22 +207,36 @@ namespace enigma_user {
     }
     if (found_empty == false){ enigma::texture_atlas_idmax++; }
 
-    unsigned int fullwidth = nlpo2dc(w)+1, fullheight = nlpo2dc(h)+1; //We only take power of two
-
     enigma::texture_atlas_array.emplace(id,enigma::texture_atlas());
-    enigma::texture_atlas_array[id].id = id;
-    enigma::texture_atlas_array[id].width = fullwidth;
-    enigma::texture_atlas_array[id].height = fullheight;
-    enigma::texture_atlas_array[id].texture = enigma::graphics_create_texture(fullwidth, fullheight, fullwidth, fullheight, nullptr, false);
-    
+
+    if (w != -1 && h != -1){ //If we set the size manually
+      unsigned int fullwidth = nlpo2dc(w)+1, fullheight = nlpo2dc(h)+1; //We only take power of two
+      enigma::texture_atlas_array[id].width = fullwidth;
+      enigma::texture_atlas_array[id].height = fullheight;
+      enigma::texture_atlas_array[id].texture = enigma::graphics_create_texture(fullwidth, fullheight, fullwidth, fullheight, nullptr, false);
+    }else{
+      enigma::texture_atlas_array[id].width = -1;
+      enigma::texture_atlas_array[id].height = -1;
+      enigma::texture_atlas_array[id].texture = -1;
+    }
+
     return id;
   }
-  
+
+  void texture_atlas_delete(int id){
+    ///TODO: NEEDS ERROR CHECKING
+    enigma::graphics_delete_texture(enigma::texture_atlas_array[id].texture);
+    enigma::texture_atlas_array.erase(id);
+  }
+
   //Manually add sprite at position (NOT RECOMMENDED)
-  void texture_atlas_add_sprite_position(int tp, int sprid, int subimg, int x, int y){
+  void texture_atlas_add_sprite_position(int tp, int sprid, int subimg, int x, int y, bool free_texture){
+    ///TODO: NEEDS ERROR CHECKING
     get_sprite(spr, sprid);
     enigma::graphics_copy_texture(spr->texturearray[subimg], enigma::texture_atlas_array[tp].texture, x, y);
-    enigma::graphics_delete_texture(spr->texturearray[subimg]);
+    if (free_texture == true){
+      enigma::graphics_delete_texture(spr->texturearray[subimg]);
+    }
     spr->texturearray[subimg] = enigma::texture_atlas_array[tp].texture;
     spr->texturexarray[subimg] = (double)x/(double)(enigma::texture_atlas_array[tp].width);
     spr->textureyarray[subimg] = (double)y/(double)(enigma::texture_atlas_array[tp].height);
