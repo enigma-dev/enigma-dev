@@ -30,7 +30,8 @@ namespace enigma
     bool transparent;
     bool smooth;
     bool preload;
-    double texbordx, texbordy;
+    double texturex = 0.0, texturey = 0.0;
+    double texturew, textureh;
 
     bool tileset;
 
@@ -76,6 +77,6 @@ void background_set_alpha_from_background(int back, int copy_background, bool fr
 int background_get_texture(int backId);
 int background_get_width(int backId);
 int background_get_height(int backId);
-  
+
 }
 
