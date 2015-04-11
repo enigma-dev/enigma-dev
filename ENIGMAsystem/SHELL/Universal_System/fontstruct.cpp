@@ -85,9 +85,11 @@ namespace enigma
         fgr->glyphs.push_back(fg);
         unsigned fw, fh;
         unsigned char* data = enigma::graphics_get_texture_pixeldata(sspr->texturearray[i], &fw, &fh);
-        //NOTE: Following line replaced gtw = int((double)sspr->width / sspr->texbordyarray[i]);
+        //NOTE: Following line replaced gtw = int((double)sspr->width / sspr->texturewarray[i]);
         //this was to fix non-power of two subimages
-        gtw = fw;
+        //NTOE2: The commented out code was actually wrong - the width was divided by y instead of x. That is why it only worked with power of two.
+        gtw = int((double)sspr->width / sspr->texturewarray[i]);
+        //gtw = fw;
         glyphdata[i] = data;
 
         // Here we calculate the bbox

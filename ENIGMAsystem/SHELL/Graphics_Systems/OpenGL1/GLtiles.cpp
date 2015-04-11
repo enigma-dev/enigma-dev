@@ -53,11 +53,12 @@ namespace enigma
         if (!enigma_user::background_exists(back)) return;
         get_background(bck2d,back);
 
-        float tbw = bck2d->width/(float)bck2d->texbordx, tbh = bck2d->height/(float)bck2d->texbordy,
-          xvert1 = x, xvert2 = xvert1 + width*xscale,
-          yvert1 = y, yvert2 = yvert1 + height*yscale,
-          tbx1 = left/tbw, tbx2 = tbx1 + width/tbw,
-          tby1 = top/tbh, tby2 = tby1 + height/tbh;
+        const gs_scalar tbx = bck2d->texturex, tby = bck2d->texturey,
+                        tbw = bck2d->width/(gs_scalar)bck2d->texturew, tbh = bck2d->height/(gs_scalar)bck2d->textureh,
+                        xvert1 = x, xvert2 = xvert1 + width*xscale,
+                        yvert1 = y, yvert2 = yvert1 + height*yscale,
+                        tbx1 = tbx+left/tbw, tbx2 = tbx1 + width/tbw,
+                        tby1 = tby+top/tbh, tby2 = tby1 + height/tbh;
 
         enigma_user::draw_primitive_begin_texture(enigma_user::pr_trianglestrip, bck2d->texture);
         enigma_user::draw_vertex_texture_color(xvert1,yvert1,tbx1,tby1,color,alpha);

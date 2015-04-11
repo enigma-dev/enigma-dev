@@ -21,6 +21,7 @@
 
 #include "Universal_System/spritestruct.h"
 #include "Universal_System/fontstruct.h"
+#include "Universal_System/backgroundstruct.h"
 
 #include "Universal_System/nlpo2.h"
 #include "Graphics_Systems/graphics_mandatory.h"
@@ -74,28 +75,35 @@ namespace enigma {
     for (unsigned int i = 0; i < textures.size(); i++){
       // TODO: This should maybe crop the images so it's totally fit (this can be done on compile time by LGM or compiler even, but it's possible the user has loaded the image at runtime)
       switch (textures[i].type){
-        case 0: { //Add all sprite subimages
+        case 0: { //Metrics all sprite subimages
           enigma::sprite *sspr = enigma::spritestructarray[textures[i].id];
           for (int s = 0; s < sspr->subcount; s++){
-            metrics[counter].x = 0,   metrics[counter].y = 0,
+            //metrics[counter].x = 0,   metrics[counter].y = 0,
             metrics[counter].w = sspr->width, metrics[counter].h = sspr->height;
-            metrics[counter].placed = -1;
+            //metrics[counter].placed = -1;
             counter++;
           }
         }break;
-        case 2: { //Add font glyps
+        case 1: { //Metrics for backgrounds
+          enigma::background *bkg = enigma::backgroundstructarray[textures[i].id];
+          //metrics[counter].x = 0,   metrics[counter].y = 0,
+          metrics[counter].w = bkg->width, metrics[counter].h = bkg->height;
+          //metrics[counter].placed = -1;
+          counter++;
+        }break;
+        case 2: { //Metrics for font glyps
           enigma::font *fnt = enigma::fontstructarray[textures[i].id];
           for (size_t g = 0; g < fnt->glyphRangeCount; g++) {
             enigma::fontglyphrange* fgr = fnt->glyphRanges[g];
             for (size_t s = 0; s < fgr->glyphcount; s++){
-              metrics[counter].x = 0,   metrics[counter].y = 0,
+              //metrics[counter].x = 0,   metrics[counter].y = 0,
               metrics[counter].w = fgr->glyphs[s]->x2-fgr->glyphs[s]->x, metrics[counter].h = fgr->glyphs[s]->y2-fgr->glyphs[s]->y;
-              metrics[counter].placed = -1;
+              //metrics[counter].placed = -1;
               counter++;
             }
           }
         } break;
-        default: break; //We do nothing for the rest
+        default: break; //We do nothing for the rest (there shouldn't be any "rest")
       }
     }
 
@@ -141,7 +149,7 @@ namespace enigma {
     counter = 0;
     for (unsigned int i = 0; i < textures.size(); i++){
       switch (textures[i].type){
-        case 0: { //Add all sprite subimages
+        case 0: { //Copy textures for all sprite subimages
           enigma::sprite *sspr = enigma::spritestructarray[textures[i].id];
           for (int s = 0; s < sspr->subcount; s++){
             enigma::graphics_copy_texture(sspr->texturearray[s], enigma::texture_atlas_array[ta].texture, metrics[counter].x, metrics[counter].y);
@@ -159,7 +167,23 @@ namespace enigma {
             if (counter > max_textures) { return false; }
           }
         } break;
-        case 2: { //Add font glyps
+        case 1: { //Copy textures for all the backgrounds
+          enigma::background *bkg = enigma::backgroundstructarray[textures[i].id];
+          enigma::graphics_copy_texture(bkg->texture, enigma::texture_atlas_array[ta].texture, metrics[counter].x, metrics[counter].y);
+          if (free_textures == true){
+            enigma::graphics_delete_texture(bkg->texture);
+          }
+          bkg->texture = enigma::texture_atlas_array[ta].texture;
+          bkg->texturex = (double)metrics[counter].x/(double)(enigma::texture_atlas_array[ta].width);
+          bkg->texturey = (double)metrics[counter].y/(double)(enigma::texture_atlas_array[ta].height);
+          bkg->texturew = (double)bkg->width/(double)(enigma::texture_atlas_array[ta].width);
+          bkg->textureh = (double)bkg->height/(double)(enigma::texture_atlas_array[ta].height);
+          //printf("Sprite %i subimage %i placed at x = %f and y = %f, w = %f, h = %f\n", i, s,(double)metrics[counter].x, (double)metrics[counter].y, (double)sspr->width/(double)(enigma::texture_atlas_array[ta].width), (double)sspr->height/(double)(enigma::texture_atlas_array[ta].height));
+
+          counter++;
+          if (counter > max_textures) { return false; }
+        } break;
+        case 2: { //Copy textures for all font glyps
           ///This sometimes draws cut of letters - need to investigate!
           enigma::font *fnt = enigma::fontstructarray[textures[i].id];
           for (size_t g = 0; g < fnt->glyphRangeCount; g++) {
