@@ -114,8 +114,8 @@ namespace enigma
 
     backgroundstructarray[bkgid] = useAsTileset ? new background(w,h,texture,transparent,smoothEdges,preload) : new background_tileset(w,h,texture,transparent,smoothEdges,preload,tileWidth, tileHeight, hOffset, vOffset, hSep, vSep);
     background *bak = backgroundstructarray[bkgid];
-    bak->texbordx  = (double) w/fullwidth;
-    bak->texbordy  = (double) h/fullheight;
+    bak->texturew  = (double) w/fullwidth;
+    bak->textureh  = (double) h/fullheight;
   }
 
   void background_add_to_index(background *bak, string filename, bool transparent, bool smoothEdges, bool preload, bool mipmap)
@@ -125,7 +125,7 @@ namespace enigma
 
     unsigned char *pxdata = image_load(filename,&w,&h,&fullwidth,&fullheight,&img_numb,false);
     if (pxdata == NULL) { printf("ERROR - Failed to append background to index!\n"); return; }
-    
+
     // If background is transparent, set the alpha to zero for pixels that should be transparent from lower left pixel color
     if (transparent)
     {
@@ -145,7 +145,7 @@ namespace enigma
         }
       }
     }
-    
+
     unsigned texture = graphics_create_texture(w, h, fullwidth, fullheight, pxdata, mipmap);
     delete[] pxdata;
 
@@ -155,8 +155,8 @@ namespace enigma
     bak->smooth = smoothEdges;
     bak->preload = preload;
     bak->tileset = false;
-    bak->texbordx = (double) w/fullwidth;
-    bak->texbordy = (double) h/fullheight;
+    bak->texturew = (double) w/fullwidth;
+    bak->textureh = (double) h/fullheight;
     bak->texture = texture;
   }
 
@@ -168,8 +168,8 @@ namespace enigma
     bak->smooth = bck_copy->smooth;
     bak->preload = bck_copy->preload;
     bak->tileset = bck_copy->tileset;
-    bak->texbordx = bck_copy->texbordx;
-    bak->texbordy = bck_copy->texbordy;
+    bak->texturew = bck_copy->texturew;
+    bak->textureh = bck_copy->textureh;
     bak->texture = graphics_duplicate_texture(bck_copy->texture);
   }
 
