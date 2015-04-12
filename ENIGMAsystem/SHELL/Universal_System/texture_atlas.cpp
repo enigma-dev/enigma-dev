@@ -78,17 +78,13 @@ namespace enigma {
         case 0: { //Metrics all sprite subimages
           enigma::sprite *sspr = enigma::spritestructarray[textures[i].id];
           for (int s = 0; s < sspr->subcount; s++){
-            //metrics[counter].x = 0,   metrics[counter].y = 0,
             metrics[counter].w = sspr->width, metrics[counter].h = sspr->height;
-            //metrics[counter].placed = -1;
             counter++;
           }
         }break;
         case 1: { //Metrics for backgrounds
           enigma::background *bkg = enigma::backgroundstructarray[textures[i].id];
-          //metrics[counter].x = 0,   metrics[counter].y = 0,
           metrics[counter].w = bkg->width, metrics[counter].h = bkg->height;
-          //metrics[counter].placed = -1;
           counter++;
         }break;
         case 2: { //Metrics for font glyps
@@ -96,9 +92,7 @@ namespace enigma {
           for (size_t g = 0; g < fnt->glyphRangeCount; g++) {
             enigma::fontglyphrange* fgr = fnt->glyphRanges[g];
             for (size_t s = 0; s < fgr->glyphcount; s++){
-              //metrics[counter].x = 0,   metrics[counter].y = 0,
               metrics[counter].w = fgr->glyphs[s]->x2-fgr->glyphs[s]->x, metrics[counter].h = fgr->glyphs[s]->y2-fgr->glyphs[s]->y;
-              //metrics[counter].placed = -1;
               counter++;
             }
           }
@@ -132,7 +126,6 @@ namespace enigma {
         }
         w > h ? h <<= 1 : w <<= 1,
         rectplane = enigma::rect_packer::expand(rectplane, w, h);
-        //printf("Expanded to %d by %d\n", w, h);
         if (!w or !h) return false;
       }
     }
@@ -193,13 +186,16 @@ namespace enigma {
               tix = (double)fgr->glyphs[s]->tx*(double)fnt->twid;
               tiy = (double)fgr->glyphs[s]->ty*(double)fnt->thgt;
 
-              //printf("Font %i range %i glyph %i from %f, %f placed at x = %i and y = %i, w = %i, h = %i\n", i, g, s, tix, tiy, metrics[counter].x, metrics[counter].y, metrics[counter].w, metrics[counter].h);
-              enigma::graphics_copy_texture_part(fnt->texture, enigma::texture_atlas_array[ta].texture, tix, tiy, metrics[counter].w, metrics[counter].h, metrics[counter].x, metrics[counter].y);
+              int gw = fgr->glyphs[s]->x2-fgr->glyphs[s]->x;
+              int gh = fgr->glyphs[s]->y2-fgr->glyphs[s]->y;
+
+              //printf("Glyph %i from %f, %f placed at x = %i and y = %i, w = %i, h = %i\n",s, tix, tiy, metrics[counter].x, metrics[counter].y, metrics[counter].w, metrics[counter].h);
+              enigma::graphics_copy_texture_part(fnt->texture, enigma::texture_atlas_array[ta].texture, tix, tiy, gw, gh, metrics[counter].x, metrics[counter].y);
 
               fgr->glyphs[s]->tx = (double)metrics[counter].x/(double)(enigma::texture_atlas_array[ta].width);
               fgr->glyphs[s]->ty = (double)metrics[counter].y/(double)(enigma::texture_atlas_array[ta].height);
-              fgr->glyphs[s]->tx2 = (double)(metrics[counter].x+metrics[counter].w)/(double)(enigma::texture_atlas_array[ta].width);
-              fgr->glyphs[s]->ty2 = (double)(metrics[counter].y+metrics[counter].h)/(double)(enigma::texture_atlas_array[ta].height);
+              fgr->glyphs[s]->tx2 = (double)(metrics[counter].x+gw)/(double)(enigma::texture_atlas_array[ta].width);
+              fgr->glyphs[s]->ty2 = (double)(metrics[counter].y+gh)/(double)(enigma::texture_atlas_array[ta].height);
 
               counter++;
               if (counter > max_textures) { return false; }
