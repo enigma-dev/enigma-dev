@@ -525,6 +525,30 @@ void d3d_set_lighting(bool enable)
     }
 }
 
+void d3d_stencil_start_mask(){
+  oglmgr->BlendFunc();
+  glEnable(GL_STENCIL_TEST);
+  glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+  //glDepthMask(GL_FALSE);
+  glStencilMask(0x1);
+  glStencilFunc(GL_ALWAYS, 0x1, 0x1);
+  glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+  glClear(GL_STENCIL_BUFFER_BIT);
+}
+
+void d3d_stencil_use_mask(){
+  oglmgr->BlendFunc();
+  glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+ // glDepthMask(GL_TRUE);
+  glStencilMask(0x0);
+  glStencilFunc(GL_EQUAL, 1, 0x1);
+}
+
+void d3d_stencil_end_mask(){
+  oglmgr->BlendFunc();
+  glDisable(GL_STENCIL_TEST);
+}
+
 }
 
 namespace enigma {
