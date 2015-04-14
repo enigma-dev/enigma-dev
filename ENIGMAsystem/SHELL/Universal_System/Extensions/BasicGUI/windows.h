@@ -45,6 +45,7 @@ namespace gui
       bool draggable = true; //Specifies if the window can be moved
       bool resize = false;
       bool resizable = false; //Specifies if the window can be resized
+      bool stencil_mask = false; //If true, then anything outside the window will be cut
       int resize_side = 0; //0 - resize left, 1 - top-left, 2 - top, 3 - top-right, 4 - right, 5 bottom-right, 6 - bottom, 7 - bottom-left
       gs_scalar resize_width = 0.0;
       gs_scalar resize_height = 0.0;

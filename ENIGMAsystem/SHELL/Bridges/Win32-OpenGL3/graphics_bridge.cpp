@@ -97,6 +97,7 @@ namespace enigma
     pfd.iPixelType = PFD_TYPE_RGBA;
     pfd.cColorBits = 24;
     pfd.cDepthBits = 24;
+    pfd.cStencilBits = 8;
     pfd.iLayerType = PFD_MAIN_PLANE;
     iFormat = ChoosePixelFormat (enigma::window_hDC, &pfd);
 

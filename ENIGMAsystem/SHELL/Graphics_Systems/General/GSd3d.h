@@ -122,6 +122,11 @@ void d3d_light_define_ambient(int col);
 bool d3d_light_enable(int id, bool enable);
 // ***** LIGHTS END *****
 
+//Stencil stuff
+void d3d_stencil_start_mask();
+void d3d_stencil_use_mask();
+void d3d_stencil_end_mask();
+
 }
 
 #endif // ENIGMA_GL3D3D_H

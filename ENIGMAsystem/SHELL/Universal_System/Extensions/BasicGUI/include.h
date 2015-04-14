@@ -231,6 +231,7 @@ namespace enigma_user
 
   void gui_window_set_text(int id, string text);
 	void gui_window_set_state(int id, int state);
+  void gui_window_set_stencil_mask(int id, bool stencil);
 
   //Getters
   int gui_window_get_style(int id);
@@ -244,6 +245,7 @@ namespace enigma_user
 	gs_scalar gui_window_get_x(int id);
 	gs_scalar gui_window_get_y(int id);
 	string gui_window_get_text(int id);
+  bool gui_window_get_stencil_mask(int id);
 
 	//depth changers
 	void gui_window_push_to_front(int id);
