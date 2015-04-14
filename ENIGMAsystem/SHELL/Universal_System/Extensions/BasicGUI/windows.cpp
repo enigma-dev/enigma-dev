@@ -31,6 +31,7 @@ using std::deque;
 #include "Graphics_Systems/General/GSsprite.h"
 #include "Graphics_Systems/General/GSfont.h"
 #include "Graphics_Systems/General/GScolors.h"
+#include "Graphics_Systems/General/GSd3d.h" //For stencil stuff
 
 #include "styles.h"
 #include "skins.h"
@@ -296,6 +297,10 @@ namespace enigma_user
 		gui::gui_windows[id].resizable = resizable;
 	}
 
+  void gui_window_set_stencil_mask(int id, bool stencil){
+		gui::gui_windows[id].stencil_mask = stencil;
+	}
+
 	///Getters
   int gui_window_get_style(int id){
     return gui::gui_windows[id].style_id;
@@ -339,6 +344,10 @@ namespace enigma_user
 
 	string gui_window_get_text(int id){
     return gui::gui_windows[id].text;
+	}
+
+  bool gui_window_get_stencil_mask(int id){
+		return gui::gui_windows[id].stencil_mask;
 	}
 
 	///Depth changers
@@ -438,7 +447,14 @@ namespace enigma_user
     for (auto &wi : gui::gui_window_order){
       auto &w = gui::gui_windows[wi];
       if (w.visible == true){
-				w.draw();
+        //Stencil test
+        w.draw();
+        if (w.stencil_mask == true){
+          enigma_user::d3d_stencil_start_mask();
+          w.draw();
+          enigma_user::d3d_stencil_use_mask();
+        }
+
         //Draw children
         if (w.child_buttons.empty() == false){
           for (const auto &b : w.child_buttons){
@@ -464,6 +480,10 @@ namespace enigma_user
           for (const auto &l : w.child_labels){
             if (gui::gui_labels[l].visible == true) gui::gui_labels[l].draw(w.box.x,w.box.y);
           }
+        }
+
+        if (w.stencil_mask == true){
+          enigma_user::d3d_stencil_end_mask();
         }
 			}
 		}
