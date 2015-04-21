@@ -102,8 +102,75 @@ namespace enigma
     textureStructs[tex]->sampler->ApplyState();
     unsigned dup_tex = graphics_create_texture(w, h, fw, fh, bitmap, mipmap);
     delete[] bitmap;
-    glPopAttrib();
+
+    //texture must be constructed before unbinding the texture so that it can apply its initial sampler state
+    glBindTexture(GL_TEXTURE_2D, 0);
+
     return dup_tex;
+  }
+
+  void graphics_copy_texture(int source, int destination, int x, int y)
+  {
+    GLuint src = textureStructs[source]->gltex;
+    GLuint dst = textureStructs[destination]->gltex;
+    unsigned int sw, sh, sfw, sfh;
+    sw = textureStructs[source]->width;
+    sh = textureStructs[source]->height;
+    sfw = textureStructs[source]->fullwidth;
+    sfh = textureStructs[source]->fullheight;
+    glBindTexture(GL_TEXTURE_2D, src);
+    //We could use glCopyImageSubData here, but it's GL4.3
+    char* bitmap = new char[(sfh<<(lgpp2(sfw)+2))|2];
+    glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_BYTE, bitmap);
+
+    char* cropped_bitmap = new char[sw*sh*4];
+    for (unsigned int i=0; i<sh; ++i){
+      memcpy(cropped_bitmap+sw*i*4, bitmap+sfw*i*4, sw*4);
+    }
+
+    glBindTexture(GL_TEXTURE_2D, dst);
+    unsigned dw, dh;
+    dw = textureStructs[destination]->width;
+    dh = textureStructs[destination]->height;
+    glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, (x+sw<=dw?sw:dw-x), (y+sh<=dh?sh:dh-y), GL_BGRA, GL_UNSIGNED_BYTE, cropped_bitmap);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    delete[] bitmap;
+    delete[] cropped_bitmap;
+  }
+
+  void graphics_copy_texture_part(int source, int destination, int xoff, int yoff, int w, int h, int x, int y)
+  {
+    GLuint src = textureStructs[source]->gltex;
+    GLuint dst = textureStructs[destination]->gltex;
+    unsigned int sw, sh, sfw, sfh;
+    sw = w;
+    sh = h;
+    sfw = textureStructs[source]->fullwidth;
+    sfh = textureStructs[source]->fullheight;
+    glBindTexture(GL_TEXTURE_2D, src);
+    //We could use glCopyImageSubData here, but it's GL4.3
+    char* bitmap = new char[(sfh<<(lgpp2(sfw)+2))|2];
+    glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_BYTE, bitmap);
+
+    if (xoff+sw>sfw) sw = sfw-xoff;
+    if (yoff+sh>sfh) sh = sfh-yoff;
+    char* cropped_bitmap = new char[sw*sh*4];
+    for (unsigned int i=0; i<sh; ++i){
+      memcpy(cropped_bitmap+sw*i*4, bitmap+xoff*4+sfw*(i+yoff)*4, sw*4);
+    }
+
+    glBindTexture(GL_TEXTURE_2D, dst);
+    unsigned dw, dh;
+    dw = textureStructs[destination]->width;
+    dh = textureStructs[destination]->height;
+    glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, (x+sw<=dw?sw:dw-x), (y+sh<=dh?sh:dh-y), GL_BGRA, GL_UNSIGNED_BYTE, cropped_bitmap);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    delete[] bitmap;
+    delete[] cropped_bitmap;
   }
 
   void graphics_replace_texture_alpha_from_texture(int tex, int copy_tex)
@@ -122,9 +189,8 @@ namespace enigma
     glBindTexture(GL_TEXTURE_2D, copy_texture);
     glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_BYTE, bitmap2);
 
-    for (unsigned i = 3; i < size; i += 4) {
-      bitmap[i] = (bitmap2[i-3] + bitmap2[i-2] + bitmap2[i-1])/3;
-    }
+    for (unsigned int i = 3; i < size; i += 4)
+        bitmap[i] = (bitmap2[i-3] + bitmap2[i-2] + bitmap2[i-1])/3;
 
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexImage2D(GL_TEXTURE_2D, 0, 4, fw, fh, 0, GL_BGRA, GL_UNSIGNED_BYTE, bitmap);

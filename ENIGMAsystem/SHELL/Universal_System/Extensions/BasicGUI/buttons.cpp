@@ -34,6 +34,7 @@ using std::pair;
 #include "groups.h"
 #include "toggles.h"
 #include "buttons.h"
+#include "windows.h"
 #include "include.h"
 #include "common.h"
 
@@ -47,6 +48,7 @@ namespace gui
 	extern unordered_map<unsigned int, gui_style> gui_styles;
   extern unordered_map<unsigned int, gui_group> gui_groups;
   extern unordered_map<unsigned int, gui_toggle> gui_toggles;
+  extern unordered_map<unsigned int, gui_window> gui_windows;
 	extern unsigned int gui_skins_maxid;
 	extern unsigned int gui_style_button;
 
@@ -68,7 +70,8 @@ namespace gui
 
 	//Update all possible button states (hover, click, toggle etc.)
 	void gui_button::update(gs_scalar ox, gs_scalar oy, gs_scalar tx, gs_scalar ty){
-		if (box.point_inside(tx-ox,ty-oy) && gui::windowStopPropagation == false){
+	  bool pacheck = (parent_id == -1 || (parent_id != -1 && (gui_windows[parent_id].stencil_mask == false || gui_windows[parent_id].box.point_inside(tx,ty))));
+		if (box.point_inside(tx-ox,ty-oy) && gui::windowStopPropagation == false && pacheck == true){
       callback_execute(enigma_user::gui_event_hover);
       gui::windowStopPropagation = true;
 			if (enigma_user::mouse_check_button_pressed(enigma_user::mb_left)){
