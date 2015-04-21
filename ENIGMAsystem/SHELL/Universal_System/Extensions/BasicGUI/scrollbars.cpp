@@ -306,7 +306,7 @@ namespace enigma_user
   }
 
   void gui_scrollbar_set_indicator_size(int id, gs_scalar size){
-    if (size<0 || size>1) return;
+    size = (size < 0.0 ? 0.0 : (size > 1.0 ? 1.0 : size));
     gui::gui_scrollbars[id].size = size;
 		if (gui::gui_scrollbars[id].direction == false){
       gui::gui_scrollbars[id].indicator_box.w = gui::gui_scrollbars[id].size*gui::gui_scrollbars[id].box.w;
