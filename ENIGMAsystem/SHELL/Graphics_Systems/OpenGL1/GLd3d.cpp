@@ -506,7 +506,7 @@ bool d3d_light_enable(int id, bool enable)
 void d3d_stencil_start_mask(){
   glEnable(GL_STENCIL_TEST);
   glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-  //glDepthMask(GL_FALSE);
+  glDepthMask(GL_FALSE);
   glStencilMask(0x1);
   glStencilFunc(GL_ALWAYS, 0x1, 0x1);
   glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
@@ -515,9 +515,9 @@ void d3d_stencil_start_mask(){
 
 void d3d_stencil_use_mask(){
   glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
- // glDepthMask(GL_TRUE);
+  glDepthMask(GL_TRUE);
   glStencilMask(0x0);
-  glStencilFunc(GL_EQUAL, 1, 0x1);
+  glStencilFunc(GL_EQUAL, 0x1, 0x1);
 }
 
 void d3d_stencil_end_mask(){

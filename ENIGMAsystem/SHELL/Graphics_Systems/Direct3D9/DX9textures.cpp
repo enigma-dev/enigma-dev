@@ -48,14 +48,16 @@ namespace enigma
   int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool mipmap)
   {
     LPDIRECT3DTEXTURE9 texture = NULL;
-    
+
     d3dmgr->CreateTexture(fullwidth, fullheight, 1, mipmap ? D3DUSAGE_AUTOGENMIPMAP : 0, D3DFMT_A8R8G8B8, D3DPOOL_MANAGED, &texture, 0);
     D3DLOCKED_RECT rect;
 
-    texture->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
-    memcpy(rect.pBits, pxdata, fullwidth * fullheight * 4);
-    texture->UnlockRect(0);
-    
+    if (pxdata != nullptr){
+      texture->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
+      memcpy(rect.pBits, pxdata, fullwidth * fullheight * 4);
+      texture->UnlockRect(0);
+    }
+
     if (mipmap) {
       texture->GenerateMipSubLevels();
     }
@@ -88,11 +90,64 @@ namespace enigma
     return dup_tex;
   }
 
+  void graphics_copy_texture(int source, int destination, int x, int y)
+  {
+    unsigned int sw, sh, sfw;
+    sw = textureStructs[source]->width;
+    sh = textureStructs[source]->height;
+    sfw = textureStructs[source]->fullwidth;
+
+    D3DLOCKED_RECT rect;
+    textureStructs[source]->gTexture->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
+    unsigned char* bitmap = static_cast<unsigned char*>(rect.pBits);
+    textureStructs[source]->gTexture->UnlockRect(0);
+
+    unsigned dw, dh, w, h;
+    dw = textureStructs[destination]->width;
+    dh = textureStructs[destination]->height;
+    w = (x+sw<=dw?sw:dw-x);
+    h = (y+sh<=dh?sh:dh-y);
+    textureStructs[destination]->gTexture->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
+    for (unsigned int i=0; i<h; ++i){
+      memcpy(static_cast<unsigned char*>(rect.pBits)+(dw*(i+y)+x)*4, bitmap+sfw*i*4, w*4);
+    }
+    textureStructs[destination]->gTexture->UnlockRect(0);
+
+    delete[] bitmap;
+  }
+
+  void graphics_copy_texture_part(int source, int destination, int xoff, int yoff, int w, int h, int x, int y)
+  {
+    unsigned int sw, sh, sfw, sfh;
+    sw = w;
+    sh = h;
+    sfw = textureStructs[source]->fullwidth;
+    sfh = textureStructs[source]->fullheight;
+
+    D3DLOCKED_RECT rect;
+    textureStructs[source]->gTexture->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
+    unsigned char* bitmap = static_cast<unsigned char*>(rect.pBits);
+    textureStructs[source]->gTexture->UnlockRect(0);
+
+    if (xoff+sw>sfw) sw = sfw-xoff;
+    if (yoff+sh>sfh) sh = sfh-yoff;
+    unsigned dw, dh, wi, hi;
+    dw = textureStructs[destination]->width;
+    dh = textureStructs[destination]->height;
+    wi = (x+sw<=dw?sw:dw-x);
+    hi = (y+sh<=dh?sh:dh-y);
+    textureStructs[destination]->gTexture->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
+    for (unsigned int i=0; i<hi; ++i){
+      memcpy(static_cast<unsigned char*>(rect.pBits)+(dw*(i+y)+x)*4, bitmap+xoff*4+sfw*(i+yoff)*4, wi*4);
+    }
+    textureStructs[destination]->gTexture->UnlockRect(0);
+
+    delete[] bitmap;
+  }
+
   void graphics_replace_texture_alpha_from_texture(int tex, int copy_tex)
   {
-    unsigned w, h, fw, fh, size;
-    w = textureStructs[tex]->width;
-    h = textureStructs[tex]->height;
+    unsigned fw, fh, size;
     fw = textureStructs[tex]->fullwidth;
     fh = textureStructs[tex]->fullheight;
     size = (fh<<(lgpp2(fw)+2))|2;
@@ -104,7 +159,7 @@ namespace enigma
     textureStructs[copy_tex]->gTexture->UnlockRect(0);
 
     textureStructs[tex]->gTexture->LockRect( 0, &rect, NULL, D3DLOCK_DISCARD);
-    for (int i = 3; i < size; i += 4)
+    for (unsigned int i = 3; i < size; i += 4)
         ((unsigned char*)rect.pBits)[i] = (bitmap_copy[i-3] + bitmap_copy[i-2] + bitmap_copy[i-1])/3;
     textureStructs[tex]->gTexture->UnlockRect(0);
 
@@ -142,7 +197,7 @@ int texture_add(string filename, bool mipmap) {
   if (pxdata == NULL) { printf("ERROR - Failed to append sprite to index!\n"); return -1; }
   unsigned texture = enigma::graphics_create_texture(w, h, fullwidth, fullheight, pxdata, mipmap);
   delete[] pxdata;
-    
+
   return texture;
 }
 
