@@ -85,4 +85,4 @@ gs_scalar* matrix_multiply(gs_scalar* matrix1, gs_scalar* matrix2);*/
 
 }
 
-#endif // ENIGMA_GL3D3D_H
+#endif // ENIGMA_GSMATRIX_H

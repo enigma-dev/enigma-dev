@@ -24,66 +24,65 @@
 
 #include "Universal_System/scalar.h"
 
-#ifndef GSTEXTURES__H
-#define GSTEXTURES__H
+#ifndef ENIGMA_GSTEXTURES_H
+#define ENIGMA_GSTEXTURES_H
 
 #include <string>
 using std::string;
 
 namespace enigma
 {
-    extern bool interpolate_textures;
+  extern bool interpolate_textures;
 }
 
 namespace enigma_user {
-enum {
-  tx_none,
-  tx_nearest,
-  tx_bilinear,
-  tx_trilinear
-};
+  enum {
+    tx_none,
+    tx_nearest,
+    tx_bilinear,
+    tx_trilinear
+  };
 }
 
 namespace enigma_user
 {
-int texture_add(string fname, bool mipmap=false);
-void texture_save(int texid, string fname);
-void texture_delete(int texid);
-bool texture_exists(int texid);
-void texture_preload(int texid);
-void texture_set_enabled(bool enable);
-gs_scalar texture_get_width(int texid);
-gs_scalar texture_get_height(int texid);
-unsigned texture_get_texel_width(int texid);
-unsigned texture_get_texel_height(int texid);
-void texture_set_priority(int texid, double prio);
-void texture_set(int texid);
-void texture_set_stage(int stage, int texid);
-#define texture_set(texid) texture_set_stage(0, texid)
-void texture_reset();
-void texture_set_blending(bool enable);
+  int texture_add(string fname, bool mipmap=false);
+  void texture_save(int texid, string fname);
+  void texture_delete(int texid);
+  bool texture_exists(int texid);
+  void texture_preload(int texid);
+  void texture_set_enabled(bool enable);
+  gs_scalar texture_get_width(int texid);
+  gs_scalar texture_get_height(int texid);
+  unsigned texture_get_texel_width(int texid);
+  unsigned texture_get_texel_height(int texid);
+  void texture_set_priority(int texid, double prio);
+  void texture_set(int texid);
+  void texture_set_stage(int stage, int texid);
+  #define texture_set(texid) texture_set_stage(0, texid)
+  void texture_reset();
+  void texture_set_blending(bool enable);
 
-void texture_set_repeat(bool repeat);
-void texture_set_repeat_ext(int sampler, bool repeat);
-#define texture_set_repeat(repeat) texture_set_repeat_ext(0, repeat)
-void texture_set_wrap(bool wrapu, bool wrapv, bool wrapw);
-void texture_set_wrap_ext(int sampler, bool wrapu, bool wrapv, bool wrapw);
-#define texture_set_wrap(wrapu, wrapv, wrapw) texture_set_wrap_ext(0, wrapu, wrapv, wrapw)
-void texture_set_border(int r, int g, int b, double a);
-void texture_set_border_ext(int sampler, int r, int g, int b, double a);
-#define texture_set_border(r, g, b, a) texture_set_border_ext(0, r, g, b, a)
-void texture_set_filter(int filter);
-void texture_set_filter_ext(int sampler, int filter);
-#define texture_set_filter(filter) texture_set_filter_ext(0, filter)
-void texture_set_lod(gs_scalar minlod, gs_scalar maxlod, int maxlevel);
-void texture_set_lod_ext(int sampler, gs_scalar minlod, gs_scalar maxlod, int maxlevel);
-#define texture_set_lod(minlod, maxlod, maxlevel) texture_set_lod_ext(0, minlod, maxlod, maxlevel)
+  void texture_set_repeat(bool repeat);
+  void texture_set_repeat_ext(int sampler, bool repeat);
+  #define texture_set_repeat(repeat) texture_set_repeat_ext(0, repeat)
+  void texture_set_wrap(bool wrapu, bool wrapv, bool wrapw);
+  void texture_set_wrap_ext(int sampler, bool wrapu, bool wrapv, bool wrapw);
+  #define texture_set_wrap(wrapu, wrapv, wrapw) texture_set_wrap_ext(0, wrapu, wrapv, wrapw)
+  void texture_set_border(int r, int g, int b, double a);
+  void texture_set_border_ext(int sampler, int r, int g, int b, double a);
+  #define texture_set_border(r, g, b, a) texture_set_border_ext(0, r, g, b, a)
+  void texture_set_filter(int filter);
+  void texture_set_filter_ext(int sampler, int filter);
+  #define texture_set_filter(filter) texture_set_filter_ext(0, filter)
+  void texture_set_lod(gs_scalar minlod, gs_scalar maxlod, int maxlevel);
+  void texture_set_lod_ext(int sampler, gs_scalar minlod, gs_scalar maxlod, int maxlevel);
+  #define texture_set_lod(minlod, maxlod, maxlevel) texture_set_lod_ext(0, minlod, maxlod, maxlevel)
 
-bool texture_mipmapping_supported();
-bool  texture_anisotropy_supported();
-float texture_anisotropy_maxlevel();
-void  texture_anisotropy_filter(int samplerid, gs_scalar level);
-
+  bool texture_mipmapping_supported();
+  bool  texture_anisotropy_supported();
+  float texture_anisotropy_maxlevel();
+  void  texture_anisotropy_filter(int samplerid, gs_scalar level);
 }
 
-#endif
+#endif //ENIGMA_GSTEXTURES_H
