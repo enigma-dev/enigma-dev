@@ -15,8 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef _SURFSTRUCT__H
-#define _SURFSTRUCT__H
+#ifndef ENIGMA_GLSURFACESTRUCT_H
+#define ENIGMA_GLSURFACESTRUCT_H
 
 #include <string>
 #include "OpenGLHeaders.h"
@@ -32,4 +32,4 @@ namespace enigma
   };
 }
 
-#endif
+#endif //ENIGMA_GLSURFACESTRUCT_H

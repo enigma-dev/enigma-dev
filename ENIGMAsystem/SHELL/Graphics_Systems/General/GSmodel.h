@@ -15,8 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef ENIGMA_USER_GSMODEL
-#define ENIGMA_USER_GSMODEL
+#ifndef ENIGMA_GSMODEL_H
+#define ENIGMA_GSMODEL_H
 
 #include "Universal_System/scalar.h"
 
