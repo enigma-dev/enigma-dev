@@ -32,6 +32,9 @@ using std::pair;
 #include "skins.h"
 
 namespace gui{
+  extern unsigned int gui_skins_maxid;
+  extern unordered_map<unsigned int, gui_skin> gui_skins;
+
 	gui_skin::gui_skin(){
 		//Create invisible dummy elements to use as styles for them all
 		button_style = (enigma_user::gui_button_create());
@@ -54,8 +57,6 @@ namespace gui{
 	}
 
 	int gui_bound_skin = -1;
-	unordered_map<unsigned int, gui_skin> gui_skins;
-	unsigned int gui_skins_maxid = 0;
 }
 
 namespace enigma_user

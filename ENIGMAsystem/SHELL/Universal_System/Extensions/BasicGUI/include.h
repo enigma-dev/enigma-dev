@@ -21,13 +21,26 @@
 #include "Universal_System/scalar.h"
 #include "Universal_System/var4.h"
 
-#include <unordered_map>
+/*#include <unordered_map>
 using std::unordered_map;
-using std::pair;
+using std::pair;*/
 
 namespace enigma_user
 {
   ///NOTE: CALLBACKS AND STYLES CAN BE A SECURITY RISK IF STATE IS NOT THE DEFINED ENUM's. NO CHECKING TAKES PLACE DURING RUNTIME
+  enum {
+    gui_error = -1,
+	  gui_button,
+	  gui_toggle,
+	  gui_slider,
+	  gui_skin,
+	  gui_window,
+	  gui_label,
+	  gui_group,
+	  gui_scrollbar,
+	  gui_style
+	};
+
 	enum {
 	  gui_state_default,
 	  gui_state_on,

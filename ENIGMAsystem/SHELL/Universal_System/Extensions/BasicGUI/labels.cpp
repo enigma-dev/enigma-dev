@@ -32,19 +32,19 @@ using std::pair;
 #include "styles.h"
 #include "skins.h"
 #include "labels.h"
-#include "include.h"
+//#include "include.h"
 #include "common.h"
 
 namespace gui
 {
-  unordered_map<unsigned int, gui_label> gui_labels;
-	unsigned int gui_labels_maxid = 0;
-
 	extern int gui_bound_skin;
 	extern unordered_map<unsigned int, gui_skin> gui_skins;
 	extern unordered_map<unsigned int, gui_style> gui_styles;
 	extern unsigned int gui_skins_maxid;
 	extern unsigned int gui_style_label;
+
+  extern unsigned int gui_labels_maxid;
+  extern unordered_map<unsigned int, gui_label> gui_labels;
 
 	extern bool windowStopPropagation;
 

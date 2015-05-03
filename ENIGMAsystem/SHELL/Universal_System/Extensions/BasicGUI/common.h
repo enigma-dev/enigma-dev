@@ -1,4 +1,4 @@
-/** Copyright (C) 2014 Harijs Grinbergs
+/** Copyright (C) 2014-2015 Harijs Grinbergs
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -17,6 +17,11 @@
 
 #ifndef BGUI_COMMON_H
 #define BGUI_COMMON_H
+
+#include "include.h"
+#include "Graphics_Systems/General/GSsprite.h"
+#include "Graphics_Systems/General/GSfont.h"
+#include "Graphics_Systems/General/GScolors.h"
 
 namespace gui
 {
