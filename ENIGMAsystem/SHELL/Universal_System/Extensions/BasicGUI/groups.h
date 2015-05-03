@@ -20,7 +20,7 @@
 
 namespace gui
 {
-	class gui_group{
+	class Group{
 		public:
 			unsigned int id;
 
