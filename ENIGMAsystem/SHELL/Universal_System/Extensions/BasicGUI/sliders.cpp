@@ -29,6 +29,7 @@ using std::pair;
 #include "Graphics_Systems/General/GSfont.h"
 #include "Graphics_Systems/General/GScolors.h"
 
+#include "elements.h"
 #include "styles.h"
 #include "skins.h"
 #include "sliders.h"
@@ -37,38 +38,38 @@ using std::pair;
 
 namespace gui
 {
-  unordered_map<unsigned int, gui_slider> gui_sliders;
-	unsigned int gui_sliders_maxid = 0;
-
 	extern int gui_bound_skin;
 	extern unordered_map<unsigned int, gui_skin> gui_skins;
   extern unordered_map<unsigned int, gui_style> gui_styles;
 	extern unsigned int gui_skins_maxid;
   extern unsigned int gui_style_slider;
 
+  extern unsigned int gui_elements_maxid;
+  extern unordered_map<unsigned int, Element> gui_elements;
+
 	extern bool windowStopPropagation; //This stops event propagation between window elements
 
 	//Implements slider class
-	gui_slider::gui_slider(){
+	Slider::Slider(){
     style_id = gui_style_slider; //Default style
 	  enigma_user::gui_style_set_font_halign(style_id, enigma_user::gui_state_all, enigma_user::fa_left);
     enigma_user::gui_style_set_font_valign(style_id, enigma_user::gui_state_all, enigma_user::fa_middle);
     callback.fill(-1); //Default callbacks don't exist (so it doesn't call any script)
 	}
 
-  void gui_slider::callback_execute(int event){
+  void Slider::callback_execute(int event){
     if (callback[event] != -1){
       enigma_user::script_execute(callback[event], id, active, state, event);
     }
 	}
 
-	void gui_slider::update_spos(){
+	void Slider::update_spos(){
       slider_offset = box.w*((value-minValue)/(maxValue-minValue));
       segments = (maxValue-minValue)/incValue;
 	}
 
 	//Update all possible slider states (hover, click etc.)
-	void gui_slider::update(gs_scalar ox, gs_scalar oy, gs_scalar tx, gs_scalar ty){
+	void Slider::update(gs_scalar ox, gs_scalar oy, gs_scalar tx, gs_scalar ty){
 		if ((box.point_inside(tx-ox,ty-oy) || indicator_box.point_inside(tx-ox-box.x-slider_offset-indicator_box.x,ty-box.y-oy-indicator_box.y)) && gui::windowStopPropagation == false){
       callback_execute(enigma_user::gui_event_hover);
       windowStopPropagation = true;
@@ -108,7 +109,7 @@ namespace gui
 		}
 	}
 
-	void gui_slider::draw(gs_scalar ox, gs_scalar oy){
+	void Slider::draw(gs_scalar ox, gs_scalar oy){
 		//Draw slider and indicator
     if (gui::gui_styles[style_id].sprites[state] != -1){
       enigma_user::draw_sprite_padded(gui::gui_styles[style_id].sprites[state],-1,
@@ -163,13 +164,14 @@ namespace enigma_user
 {
 	int gui_slider_create(){
 		if (gui::gui_bound_skin == -1){ //Add default one
-			gui::gui_sliders.insert(pair<unsigned int, gui::gui_slider >(gui::gui_sliders_maxid, gui::gui_slider()));
+			gui::gui_elements.insert(pair<unsigned int, gui::Slider >(gui::gui_elements_maxid, gui::Slider()));
 		}else{
-			gui::gui_sliders.insert(pair<unsigned int, gui::gui_slider >(gui::gui_sliders_maxid, gui::gui_sliders[gui::gui_skins[gui::gui_bound_skin].slider_style]));
+			gui::gui_elements.insert(pair<unsigned int, gui::Slider >(gui::gui_elements_maxid, gui::gui_elements[gui::gui_skins[gui::gui_bound_skin].slider_style]));
 		}
-		gui::gui_sliders[gui::gui_sliders_maxid].visible = true;
-		gui::gui_sliders[gui::gui_sliders_maxid].id = gui::gui_sliders_maxid;
-		return (gui::gui_sliders_maxid++);
+    gui::Slider &s = gui::gui_elements[gui::gui_elements_maxid];
+		s.visible = true;
+		s.id = gui::gui_elements_maxid;
+		return (gui::gui_elements_maxid++);
 	}
 
 	int gui_slider_create(gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h, gs_scalar ind_x, gs_scalar ind_y, gs_scalar ind_w, gs_scalar ind_h, string text){
@@ -178,185 +180,219 @@ namespace enigma_user
 
 	int gui_slider_create(gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h, gs_scalar ind_x, gs_scalar ind_y, gs_scalar ind_w, gs_scalar ind_h, double val, double minVal, double maxVal, double incrVal, string text){
 		if (gui::gui_bound_skin == -1){ //Add default one
-			gui::gui_sliders.insert(pair<unsigned int, gui::gui_slider >(gui::gui_sliders_maxid, gui::gui_slider()));
+			gui::gui_elements.insert(pair<unsigned int, gui::Slider >(gui::gui_elements_maxid, gui::Slider()));
 		}else{
-			gui::gui_sliders.insert(pair<unsigned int, gui::gui_slider >(gui::gui_sliders_maxid, gui::gui_sliders[gui::gui_skins[gui::gui_bound_skin].slider_style]));
+			gui::gui_elements.insert(pair<unsigned int, gui::Slider >(gui::gui_elements_maxid, gui::gui_elements[gui::gui_skins[gui::gui_bound_skin].slider_style]));
 		}
-		gui::gui_sliders[gui::gui_sliders_maxid].visible = true;
-		gui::gui_sliders[gui::gui_sliders_maxid].id = gui::gui_sliders_maxid;
-		gui::gui_sliders[gui::gui_sliders_maxid].box.set(x, y, w, h);
-		gui::gui_sliders[gui::gui_sliders_maxid].indicator_box.set(ind_x, ind_y, ind_w, ind_h);
-    gui::gui_sliders[gui::gui_sliders_maxid].minValue = minVal;
-		gui::gui_sliders[gui::gui_sliders_maxid].maxValue = maxVal;
-    gui::gui_sliders[gui::gui_sliders_maxid].value = val;
+    gui::Slider &s = gui::gui_elements[gui::gui_elements_maxid];
+		s.visible = true;
+		s.id = gui::gui_elements_maxid;
+		s.box.set(x, y, w, h);
+		s.indicator_box.set(ind_x, ind_y, ind_w, ind_h);
+    s.minValue = minVal;
+		s.maxValue = maxVal;
+    s.value = val;
 
     if (incrVal == 0){
-      gui::gui_sliders[gui::gui_sliders_maxid].incValue = 1.0/w;
+      s.incValue = 1.0/w;
     }else{
-      gui::gui_sliders[gui::gui_sliders_maxid].incValue = incrVal;
+      s.incValue = incrVal;
     }
 
-		gui::gui_sliders[gui::gui_sliders_maxid].text = text;
-		gui::gui_sliders[gui::gui_sliders_maxid].update_spos();
-		return (gui::gui_sliders_maxid++);
+		s.text = text;
+		s.update_spos();
+		return (gui::gui_elements_maxid++);
 	}
 
 	void gui_slider_destroy(int id){
-    if (gui::gui_sliders[id].parent_id != -1){
-      gui_window_remove_slider(gui::gui_sliders[id].parent_id, id);
+    get_element(sli,gui::Slider,gui::GUI_TYPE::SLIDER,id);
+    if (sli.parent_id != -1){
+      gui_window_remove_slider(sli.parent_id, id);
 	  }
-		gui::gui_sliders.erase(gui::gui_sliders.find(id));
+		gui::gui_elements.erase(gui::gui_elements.find(id));
 	}
 
   ///Setters
 	void gui_slider_set_text(int id, string text){
-		gui::gui_sliders[id].text = text;
+    get_element(sli,gui::Slider,gui::GUI_TYPE::SLIDER,id);
+		sli.text = text;
 	}
 
 	void gui_slider_set_position(int id, gs_scalar x, gs_scalar y){
-		gui::gui_sliders[id].box.x = x;
-		gui::gui_sliders[id].box.y = y;
+    get_element(sli,gui::Slider,gui::GUI_TYPE::SLIDER,id);
+		sli.box.x = x;
+		sli.box.y = y;
 	}
 
 	void gui_slider_set_size(int id, gs_scalar w, gs_scalar h){
-		gui::gui_sliders[id].box.w = w;
-		gui::gui_sliders[id].box.h = h;
+    get_element(sli,gui::Slider,gui::GUI_TYPE::SLIDER,id);
+		sli.box.w = w;
+		sli.box.h = h;
 		gui_slider_set_incvalue(id, gui_slider_get_incvalue(id));
 	}
 
 	void gui_slider_set_callback(int id, int event, int script_id){
+    get_element(sli,gui::Slider,gui::GUI_TYPE::SLIDER,id);
     if (event == enigma_user::gui_event_all){
-      gui::gui_sliders[id].callback.fill(script_id);
+      sli.callback.fill(script_id);
 	  }else{
-      gui::gui_sliders[id].callback[event] = script_id;
+      sli.callback[event] = script_id;
 	  }
   }
 
   void gui_slider_set_style(int id, int style_id){
-    gui::gui_sliders[id].style_id = (style_id != -1? style_id : gui::gui_style_slider);
+    get_element(sli,gui::Slider,gui::GUI_TYPE::SLIDER,id);
+    sli.style_id = (style_id != -1? style_id : gui::gui_style_slider);
   }
 
   void gui_slider_set_indicator_style(int id, int style_id){
-    gui::gui_sliders[id].indicator_style_id = (style_id != -1? style_id : gui::gui_style_slider);
+    get_element(sli,gui::Slider,gui::GUI_TYPE::SLIDER,id);
+    sli.indicator_style_id = (style_id != -1? style_id : gui::gui_style_slider);
   }
 
   void gui_slider_set_visible(int id, bool visible){
-		gui::gui_sliders[id].visible = visible;
+    get_element(sli,gui::Slider,gui::GUI_TYPE::SLIDER,id);
+		sli.visible = visible;
 	}
 
   void gui_slider_set_active(int id, bool active){
-		gui::gui_sliders[id].active = active;
+    get_element(sli,gui::Slider,gui::GUI_TYPE::SLIDER,id);
+		sli.active = active;
 	}
 
   void gui_slider_set_value(int id, double value){
-		gui::gui_sliders[id].value = value;
-    gui::gui_sliders[id].update_spos();
+    get_element(sli,gui::Slider,gui::GUI_TYPE::SLIDER,id);
+		sli.value = value;
+    sli.update_spos();
   }
 
   void gui_slider_set_minvalue(int id, double minvalue){
-    gui::gui_sliders[id].minValue = minvalue;
-    gui::gui_sliders[id].update_spos();
+    get_element(sli,gui::Slider,gui::GUI_TYPE::SLIDER,id);
+    sli.minValue = minvalue;
+    sli.update_spos();
   }
 
   void gui_slider_set_maxvalue(int id, double maxvalue){
-    gui::gui_sliders[id].maxValue = maxvalue;
-    gui::gui_sliders[id].update_spos();
+    get_element(sli,gui::Slider,gui::GUI_TYPE::SLIDER,id);
+    sli.maxValue = maxvalue;
+    sli.update_spos();
   }
 
   void gui_slider_set_incvalue(int id, double incvalue){
+    get_element(sli,gui::Slider,gui::GUI_TYPE::SLIDER,id);
     if (incvalue == 0){
-      gui::gui_sliders[id].incValue = 1.0/gui::gui_sliders[id].box.w;
+      sli.incValue = 1.0/sli.box.w;
     }else{
-      gui::gui_sliders[id].incValue = incvalue;
+      sli.incValue = incvalue;
     }
-    gui::gui_sliders[id].update_spos();
+    sli.update_spos();
   }
 
   ///Getters
   int gui_slider_get_style(int id){
-    return gui::gui_sliders[id].style_id;
+    get_elementv(sli,gui::Slider,gui::GUI_TYPE::SLIDER,id,-1);
+    return sli.style_id;
   }
 
   int gui_slider_get_indicator_style(int id){
-    return gui::gui_sliders[id].indicator_style_id;
+    get_elementv(sli,gui::Slider,gui::GUI_TYPE::SLIDER,id,-1);
+    return sli.indicator_style_id;
   }
 
 	int gui_slider_get_state(int id){
-		return gui::gui_sliders[id].state;
+    get_elementv(sli,gui::Slider,gui::GUI_TYPE::SLIDER,id,-1);
+		return sli.state;
 	}
 
   int gui_slider_get_callback(int id, int event){
-    return gui::gui_sliders[id].callback[event];
+    get_elementv(sli,gui::Slider,gui::GUI_TYPE::SLIDER,id,-1);
+    return sli.callback[event];
   }
 
 	bool gui_slider_get_active(int id){
-		return gui::gui_sliders[id].active;
+    get_elementv(sli,gui::Slider,gui::GUI_TYPE::SLIDER,id,false);
+		return sli.active;
 	}
 
 	bool gui_slider_get_visible(int id){
-		return gui::gui_sliders[id].visible;
+    get_elementv(sli,gui::Slider,gui::GUI_TYPE::SLIDER,id,false);
+		return sli.visible;
 	}
 
 	gs_scalar gui_slider_get_width(int id){
-    return gui::gui_sliders[id].box.w;
+    get_elementv(sli,gui::Slider,gui::GUI_TYPE::SLIDER,id,-1);
+    return sli.box.w;
 	}
 
 	gs_scalar gui_slider_get_height(int id){
-    return gui::gui_sliders[id].box.h;
+    get_elementv(sli,gui::Slider,gui::GUI_TYPE::SLIDER,id,-1);
+    return sli.box.h;
 	}
 
 	gs_scalar gui_slider_get_x(int id){
-    return gui::gui_sliders[id].box.x;
+    get_elementv(sli,gui::Slider,gui::GUI_TYPE::SLIDER,id,-1);
+    return sli.box.x;
 	}
 
 	gs_scalar gui_slider_get_y(int id){
-    return gui::gui_sliders[id].box.y;
+    get_elementv(sli,gui::Slider,gui::GUI_TYPE::SLIDER,id,-1);
+    return sli.box.y;
 	}
 
   gs_scalar gui_slider_get_indicator_width(int id){
-    return gui::gui_sliders[id].indicator_box.w;
+    get_elementv(sli,gui::Slider,gui::GUI_TYPE::SLIDER,id,-1);
+    return sli.indicator_box.w;
 	}
 
 	gs_scalar gui_slider_get_indicator_height(int id){
-    return gui::gui_sliders[id].indicator_box.h;
+    get_elementv(sli,gui::Slider,gui::GUI_TYPE::SLIDER,id,-1);
+    return sli.indicator_box.h;
 	}
 
 	gs_scalar gui_slider_get_indicator_x(int id){
-    return gui::gui_sliders[id].indicator_box.x;
+    get_elementv(sli,gui::Slider,gui::GUI_TYPE::SLIDER,id,-1);
+    return sli.indicator_box.x;
 	}
 
 	gs_scalar gui_slider_get_indicator_y(int id){
-    return gui::gui_sliders[id].indicator_box.y;
+    get_elementv(sli,gui::Slider,gui::GUI_TYPE::SLIDER,id,-1);
+    return sli.indicator_box.y;
 	}
 
   string gui_slider_get_text(int id){
-    return gui::gui_sliders[id].text;
+    get_elementv(sli,gui::Slider,gui::GUI_TYPE::SLIDER,id,"");
+    return sli.text;
 	}
 
   double gui_slider_get_value(int id){
-		return gui::gui_sliders[id].value;
+    get_elementv(sli,gui::Slider,gui::GUI_TYPE::SLIDER,id,-1);
+		return sli.value;
   }
 
   double gui_slider_get_minvalue(int id){
-    return gui::gui_sliders[id].minValue;
+    get_elementv(sli,gui::Slider,gui::GUI_TYPE::SLIDER,id,-1);
+    return sli.minValue;
   }
 
   double gui_slider_get_maxvalue(int id){
-    return gui::gui_sliders[id].maxValue;
+    get_elementv(sli,gui::Slider,gui::GUI_TYPE::SLIDER,id,-1);
+    return sli.maxValue;
   }
 
   double gui_slider_get_incvalue(int id){
-    return gui::gui_sliders[id].incValue;
+    get_elementv(sli,gui::Slider,gui::GUI_TYPE::SLIDER,id,-1);
+    return sli.incValue;
   }
 
   ///Drawers
 	void gui_slider_draw(int id){
+    get_element(sli,gui::Slider,gui::GUI_TYPE::SLIDER,id);
 		unsigned int phalign = enigma_user::draw_get_halign();
 		unsigned int pvalign = enigma_user::draw_get_valign();
 		int pcolor = enigma_user::draw_get_color();
 		gs_scalar palpha = enigma_user::draw_get_alpha();
-    gui::gui_sliders[id].update();
-		gui::gui_sliders[id].draw();
+    sli.update();
+		sli.draw();
 		enigma_user::draw_set_halign(phalign);
 		enigma_user::draw_set_valign(pvalign);
 		enigma_user::draw_set_color(pcolor);
@@ -368,11 +404,15 @@ namespace enigma_user
 		unsigned int pvalign = enigma_user::draw_get_valign();
 		int pcolor = enigma_user::draw_get_color();
 		gs_scalar palpha = enigma_user::draw_get_alpha();
-		for (unsigned int i=0; i<gui::gui_sliders_maxid; ++i){
-			if (gui::gui_sliders[i].visible == true && gui::gui_sliders[i].parent_id == -1){
-      	gui::gui_sliders[i].update();
-				gui::gui_sliders[i].draw();
-			}
+		for (auto &b : gui::gui_elements){
+		  ///TODO(harijs) - THIS NEEDS TO BE A LOT PRETTIER (now it does lookup twice)
+      if (b.second.type == gui::GUI_TYPE::SLIDER){
+        get_element(but,gui::Slider,gui::GUI_TYPE::SLIDER,b.first);
+        if (but.visible == true && but.parent_id == -1){
+          but.update();
+          but.draw();
+        }
+      }
 		}
 		enigma_user::draw_set_halign(phalign);
 		enigma_user::draw_set_valign(pvalign);

@@ -37,14 +37,14 @@ using std::pair;
 
 namespace gui
 {
-  unordered_map<unsigned int, gui_scrollbar> gui_scrollbars;
-	unsigned int gui_scrollbars_maxid = 0;
-
 	extern int gui_bound_skin;
 	extern unordered_map<unsigned int, gui_skin> gui_skins;
   extern unordered_map<unsigned int, gui_style> gui_styles;
 	extern unsigned int gui_skins_maxid;
   extern unsigned int gui_style_scrollbar;
+
+	extern unsigned int gui_scrollbars_maxid;
+  extern unordered_map<unsigned int, gui_scrollbar> gui_scrollbars;
 
 	extern bool windowStopPropagation; //This stops event propagation between window elements
 

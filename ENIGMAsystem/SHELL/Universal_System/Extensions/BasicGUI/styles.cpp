@@ -30,14 +30,14 @@ using std::pair;
 #include "styles.h"
 
 namespace gui{
+  extern unsigned int gui_styles_maxid;
+  extern unordered_map<unsigned int, gui_style> gui_styles;
+
 	gui_style::gui_style(){
 		font_styles[0].halign = font_styles[1].halign = font_styles[2].halign = font_styles[3].halign = font_styles[4].halign = font_styles[5].halign = enigma_user::fa_left;
 		font_styles[0].valign = font_styles[1].valign = font_styles[2].valign = font_styles[3].valign = font_styles[4].valign = font_styles[5].valign = enigma_user::fa_middle;
     sprites.fill(-1);
 	}
-
-	unordered_map<unsigned int, gui_style> gui_styles;
-	unsigned int gui_styles_maxid = 0;
 
 	//Default styles
 	unsigned int gui_style_button = enigma_user::gui_style_create();

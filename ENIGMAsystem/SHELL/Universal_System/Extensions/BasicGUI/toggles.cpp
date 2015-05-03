@@ -29,45 +29,44 @@ using std::pair;
 #include "Graphics_Systems/General/GSfont.h"
 #include "Graphics_Systems/General/GScolors.h"
 
+#include "elements.h"
 #include "styles.h"
 #include "skins.h"
 #include "toggles.h"
 #include "buttons.h"
 #include "groups.h"
-#include "include.h"
+//#include "include.h"
 #include "common.h"
 
 namespace gui
 {
-  unordered_map<unsigned int, gui_toggle> gui_toggles;
-	unsigned int gui_toggles_maxid = 0;
-
 	extern int gui_bound_skin;
 	extern unordered_map<unsigned int, gui_skin> gui_skins;
   extern unordered_map<unsigned int, gui_style> gui_styles;
-  extern unordered_map<unsigned int, gui_group> gui_groups;
-  extern unordered_map<unsigned int, gui_button> gui_buttons;
+  extern unordered_map<unsigned int, Element> gui_elements;
 	extern unsigned int gui_skins_maxid;
 	extern unsigned int gui_style_toggle;
+
+	extern unsigned int gui_elements_maxid;
 
 	extern bool windowStopPropagation;
 
 	//Implements toggle class
-	gui_toggle::gui_toggle(){
+	Toggle::Toggle(){
 	  style_id = gui_style_toggle; //Default style
 	  enigma_user::gui_style_set_font_halign(style_id, enigma_user::gui_state_all, enigma_user::fa_left);
     enigma_user::gui_style_set_font_valign(style_id, enigma_user::gui_state_all, enigma_user::fa_middle);
     callback.fill(-1); //Default callbacks don't exist (so it doesn't call any script)
 	}
 
-  void gui_toggle::callback_execute(int event){
+  void Toggle::callback_execute(int event){
     if (callback[event] != -1){
       enigma_user::script_execute(callback[event], id, active, state, event);
     }
 	}
 
 	//Update all possible toggle states (hover, click, toggle etc.)
-	void gui_toggle::update(gs_scalar ox, gs_scalar oy, gs_scalar tx, gs_scalar ty){
+	void Toggle::update(gs_scalar ox, gs_scalar oy, gs_scalar tx, gs_scalar ty){
 		if (box.point_inside(tx-ox,ty-oy) && gui::windowStopPropagation == false){
       callback_execute(enigma_user::gui_event_hover);
       gui::windowStopPropagation = true;
@@ -87,7 +86,12 @@ namespace gui
 					}
 				}else{
 					if (enigma_user::mouse_check_button_released(enigma_user::mb_left)){
-						active = !active;
+            if (group_id != -1){ //Toggles in groups cannot be disabled by user clicking again. At least one toggle must be active
+              active = true;
+            }else{
+              active = !active;
+            }
+
 						callback_execute(enigma_user::gui_event_released);
 
 						if (active == false){
@@ -95,11 +99,16 @@ namespace gui
 						}else{
 							state = enigma_user::gui_state_on_hover;
 							if (group_id != -1){ //Groups disable any other active element
-                for (auto &b : gui::gui_groups[group_id].group_buttons){
-                  gui_buttons[b].active = false;
+                get_element(gro,gui::Group,gui::GUI_TYPE::GROUP,group_id);
+                for (const auto &b : gro.group_buttons){
+                  get_element(but,gui::Button,gui::GUI_TYPE::BUTTON,b);
+                  but.active = false;
                 }
-                for (auto &t : gui::gui_groups[group_id].group_toggles){
-                  if (t != id) { gui_toggles[t].active = false; }
+                for (const auto &t : gro.group_toggles){
+                  if (t != id) {
+                    get_element(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,t);
+                    tog.active = false;
+                  }
                 }
 							}
 						}
@@ -115,7 +124,7 @@ namespace gui
 		}
 	}
 
-	void gui_toggle::draw(gs_scalar ox, gs_scalar oy){
+	void Toggle::draw(gs_scalar ox, gs_scalar oy){
 	  //Draw toggle
     if (gui::gui_styles[style_id].sprites[state] != -1){
       enigma_user::draw_sprite_padded(gui::gui_styles[style_id].sprites[state],-1,
@@ -150,7 +159,7 @@ namespace gui
 		enigma_user::draw_text(ox + textx,oy + texty,text);
 	}
 
-	void gui_toggle::update_text_pos(int state){
+	void Toggle::update_text_pos(int state){
 	}
 }
 
@@ -158,125 +167,147 @@ namespace enigma_user
 {
 	int gui_toggle_create(){
 		if (gui::gui_bound_skin == -1){ //Add default one
-			gui::gui_toggles.insert(pair<unsigned int, gui::gui_toggle >(gui::gui_toggles_maxid, gui::gui_toggle()));
+			gui::gui_elements.insert(pair<unsigned int, gui::Toggle >(gui::gui_elements_maxid, gui::Toggle()));
 		}else{
-			gui::gui_toggles.insert(pair<unsigned int, gui::gui_toggle >(gui::gui_toggles_maxid, gui::gui_toggles[gui::gui_skins[gui::gui_bound_skin].toggle_style]));
+			gui::gui_elements.insert(pair<unsigned int, gui::Toggle >(gui::gui_elements_maxid, gui::gui_elements[gui::gui_skins[gui::gui_bound_skin].toggle_style]));
 		}
-		gui::gui_toggles[gui::gui_toggles_maxid].visible = true;
-		gui::gui_toggles[gui::gui_toggles_maxid].id = gui::gui_toggles_maxid;
-		return (gui::gui_toggles_maxid++);
+    gui::Toggle &t = gui::gui_elements[gui::gui_elements_maxid];
+		t.visible = true;
+		t.id = gui::gui_elements_maxid;
+		return (gui::gui_elements_maxid++);
 	}
 
 	int gui_toggle_create(gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h, string text){
 		if (gui::gui_bound_skin == -1){ //Add default one
-			gui::gui_toggles.insert(pair<unsigned int, gui::gui_toggle >(gui::gui_toggles_maxid, gui::gui_toggle()));
+			gui::gui_elements.insert(pair<unsigned int, gui::Toggle >(gui::gui_elements_maxid, gui::Toggle()));
 		}else{
-			gui::gui_toggles.insert(pair<unsigned int, gui::gui_toggle >(gui::gui_toggles_maxid, gui::gui_toggles[gui::gui_skins[gui::gui_bound_skin].toggle_style]));
+			gui::gui_elements.insert(pair<unsigned int, gui::Toggle >(gui::gui_elements_maxid, gui::gui_elements[gui::gui_skins[gui::gui_bound_skin].toggle_style]));
 		}
-		gui::gui_toggles[gui::gui_toggles_maxid].visible = true;
-		gui::gui_toggles[gui::gui_toggles_maxid].id = gui::gui_toggles_maxid;
-		gui::gui_toggles[gui::gui_toggles_maxid].box.set(x, y, w, h);
-		gui::gui_toggles[gui::gui_toggles_maxid].text = text;
-		gui::gui_toggles[gui::gui_toggles_maxid].update_text_pos();
-		return (gui::gui_toggles_maxid++);
+    gui::Toggle &t = gui::gui_elements[gui::gui_elements_maxid];
+		t.visible = true;
+		t.id = gui::gui_elements_maxid;
+		t.box.set(x, y, w, h);
+		t.text = text;
+		t.update_text_pos();
+		return (gui::gui_elements_maxid++);
 	}
 
 	void gui_toggle_destroy(int id){
-	  if (gui::gui_toggles[id].parent_id != -1){
-      gui_window_remove_toggle(gui::gui_toggles[id].parent_id, id);
+    get_element(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,id);
+	  if (tog.parent_id != -1){
+      gui_window_remove_toggle(tog.parent_id, id);
 	  }
-		gui::gui_toggles.erase(gui::gui_toggles.find(id));
+		gui::gui_elements.erase(gui::gui_elements.find(id));
 	}
 
   ///Setters
 	void gui_toggle_set_text(int id, string text){
-		gui::gui_toggles[id].text = text;
+    get_element(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,id);
+		tog.text = text;
 	}
 
 	void gui_toggle_set_position(int id, gs_scalar x, gs_scalar y){
-		gui::gui_toggles[id].box.x = x;
-		gui::gui_toggles[id].box.y = y;
+    get_element(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,id);
+		tog.box.x = x;
+		tog.box.y = y;
 	}
 
 	void gui_toggle_set_size(int id, gs_scalar w, gs_scalar h){
-		gui::gui_toggles[id].box.w = w;
-		gui::gui_toggles[id].box.h = h;
-		gui::gui_toggles[id].update_text_pos();
+    get_element(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,id);
+		tog.box.w = w;
+		tog.box.h = h;
+		tog.update_text_pos();
 	}
 
 	void gui_toggle_set_callback(int id, int event, int script_id){
+    get_element(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,id);
     if (event == enigma_user::gui_event_all){
-      gui::gui_toggles[id].callback.fill(script_id);
+      tog.callback.fill(script_id);
 	  }else{
-      gui::gui_toggles[id].callback[event] = script_id;
+      tog.callback[event] = script_id;
 	  }
 	}
 
   void gui_toggle_set_style(int id, int style_id){
-    gui::gui_toggles[id].style_id = (style_id != -1? style_id : gui::gui_style_toggle);
+    get_element(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,id);
+    tog.style_id = (style_id != -1? style_id : gui::gui_style_toggle);
   }
 
   void gui_toggle_set_active(int id, bool active){
-		gui::gui_toggles[id].active = active;
+    get_element(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,id);
+		tog.active = active;
 	}
 
 	void gui_toggle_set_visible(int id, bool visible){
-		gui::gui_toggles[id].visible = visible;
+    get_element(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,id);
+		tog.visible = visible;
 	}
 
   ///Getters
   int gui_toggle_get_style(int id){
-    return gui::gui_toggles[id].style_id;
+    get_elementv(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,id,-1);
+    return tog.style_id;
   }
 
 	int gui_toggle_get_state(int id){
-		return gui::gui_toggles[id].state;
+    get_elementv(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,id,-1);
+		return tog.state;
 	}
 
 	int gui_toggle_get_callback(int id, int event){
-    return gui::gui_toggles[id].callback[event];
+    get_elementv(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,id,-1);
+    return tog.callback[event];
 	}
 
 	int gui_toggle_get_parent(int id){
-    return gui::gui_toggles[id].parent_id;
+    get_elementv(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,id,-1);
+    return tog.parent_id;
 	}
 
 	bool gui_toggle_get_active(int id){
-		return gui::gui_toggles[id].active;
+    get_elementv(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,id,false);
+		return tog.active;
 	}
 
 	bool gui_toggle_get_visible(int id){
-    return gui::gui_toggles[id].visible;
+    get_elementv(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,id,false);
+    return tog.visible;
 	}
 
 	gs_scalar gui_toggle_get_width(int id){
-    return gui::gui_toggles[id].box.w;
+    get_elementv(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,id,-1);
+    return tog.box.w;
 	}
 
 	gs_scalar gui_toggle_get_height(int id){
-    return gui::gui_toggles[id].box.h;
+    get_elementv(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,id,-1);
+    return tog.box.h;
 	}
 
 	gs_scalar gui_toggle_get_x(int id){
-    return gui::gui_toggles[id].box.x;
+    get_elementv(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,id,-1);
+    return tog.box.x;
 	}
 
 	gs_scalar gui_toggle_get_y(int id){
-    return gui::gui_toggles[id].box.y;
+    get_elementv(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,id,-1);
+    return tog.box.y;
 	}
 
   string gui_toggle_get_text(int id){
-    return gui::gui_toggles[id].text;
+    get_elementv(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,id,"");
+    return tog.text;
 	}
 
   ///Drawers
 	void gui_toggle_draw(int id){
+    get_element(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,id);
 		unsigned int phalign = enigma_user::draw_get_halign();
 		unsigned int pvalign = enigma_user::draw_get_valign();
 		int pcolor = enigma_user::draw_get_color();
 		gs_scalar palpha = enigma_user::draw_get_alpha();
-    gui::gui_toggles[id].update();
-		gui::gui_toggles[id].draw();
+    tog.update();
+		tog.draw();
 		enigma_user::draw_set_halign(phalign);
 		enigma_user::draw_set_valign(pvalign);
 		enigma_user::draw_set_color(pcolor);
@@ -288,11 +319,15 @@ namespace enigma_user
 		unsigned int pvalign = enigma_user::draw_get_valign();
 		int pcolor = enigma_user::draw_get_color();
 		gs_scalar palpha = enigma_user::draw_get_alpha();
-		for (auto &t : gui::gui_toggles){
-			if (t.second.visible == true && t.second.parent_id == -1){
-      	t.second.update();
-				t.second.draw();
-			}
+		for (auto &b : gui::gui_elements){
+		  ///TODO(harijs) - THIS NEEDS TO BE A LOT PRETTIER (now it does lookup twice)
+      if (b.second.type == gui::GUI_TYPE::TOGGLE){
+        get_element(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,b.first);
+        if (tog.visible == true && tog.parent_id == -1){
+          tog.update();
+          tog.draw();
+        }
+      }
 		}
 		enigma_user::draw_set_halign(phalign);
 		enigma_user::draw_set_valign(pvalign);
