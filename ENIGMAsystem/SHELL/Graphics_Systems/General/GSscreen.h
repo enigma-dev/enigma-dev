@@ -15,6 +15,9 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#ifndef ENIGMA_GSSCREEN_H
+#define ENIGMA_GSSCREEN_H
+
 #include <string>
 using std::string;
 #include "Universal_System/scalar.h"
@@ -35,3 +38,5 @@ namespace enigma_user {
   unsigned int display_get_gui_height();
   void display_set_gui_size(unsigned int width, unsigned int height);
 }
+
+#endif //ENIGMA_GSSCREEN_H
