@@ -19,7 +19,6 @@
 #include <string>
 using std::string;
 using std::unordered_map;
-using std::pair;
 
 #include "Universal_System/var4.h"
 #include "Universal_System/CallbackArrays.h" //For mouse_check_button
@@ -44,13 +43,14 @@ namespace gui{
 namespace enigma_user
 {
 	int gui_group_create(){
-		gui::gui_elements.insert(pair<unsigned int, gui::Group >(gui::gui_elements_maxid, gui::Group()));
+		gui::gui_elements.emplace(gui::gui_elements_maxid, gui::Group());
 		gui::Group &g = gui::gui_elements[gui::gui_elements_maxid];
 		g.id = gui::gui_elements_maxid;
 		return gui::gui_elements_maxid++;
 	}
 
 	void gui_group_destroy(int id){
+    check_element(gui::GUI_TYPE::GROUP,bid);
 		gui::gui_elements.erase(gui::gui_elements.find(id));
 	}
 

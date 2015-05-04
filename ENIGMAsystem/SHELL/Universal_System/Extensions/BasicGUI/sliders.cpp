@@ -19,7 +19,6 @@
 #include <string>
 using std::string;
 using std::unordered_map;
-using std::pair;
 
 #include "Universal_System/var4.h"
 #include "Universal_System/CallbackArrays.h" //For mouse_check_button
@@ -39,9 +38,6 @@ using std::pair;
 namespace gui
 {
 	extern int gui_bound_skin;
-	extern unordered_map<unsigned int, gui_skin> gui_skins;
-  extern unordered_map<unsigned int, gui_style> gui_styles;
-	extern unsigned int gui_skins_maxid;
   extern unsigned int gui_style_slider;
 
   extern unsigned int gui_elements_maxid;
@@ -111,49 +107,50 @@ namespace gui
 
 	void Slider::draw(gs_scalar ox, gs_scalar oy){
 		//Draw slider and indicator
-    if (gui::gui_styles[style_id].sprites[state] != -1){
-      enigma_user::draw_sprite_padded(gui::gui_styles[style_id].sprites[state],-1,
-                                      gui::gui_styles[style_id].border.left,
-                                      gui::gui_styles[style_id].border.top,
-                                      gui::gui_styles[style_id].border.right,
-                                      gui::gui_styles[style_id].border.bottom,
+    get_element(sty,gui::Style,gui::GUI_TYPE::STYLE,style_id);
+    if (sty.sprites[state] != -1){
+      enigma_user::draw_sprite_padded(sty.sprites[state],-1,
+                                      sty.border.left,
+                                      sty.border.top,
+                                      sty.border.right,
+                                      sty.border.bottom,
                                       ox + box.x,
                                       oy + box.y,
                                       ox + box.x+box.w,
                                       oy + box.y+box.h,
-                                      gui::gui_styles[style_id].sprite_styles[state].color,
-                                      gui::gui_styles[style_id].sprite_styles[state].alpha);
+                                      sty.sprite_styles[state].color,
+                                      sty.sprite_styles[state].alpha);
 		}
-
-    if (gui::gui_styles[indicator_style_id].sprites[state] != -1){
-      auto &ist = gui::gui_styles[indicator_style_id];
-      enigma_user::draw_sprite_padded(ist.sprites[state],-1,
-                                      ist.border.left,
-                                      ist.border.top,
-                                      ist.border.right,
-                                      ist.border.bottom,
-                                      ist.image_offset.x + ox + box.x + slider_offset + indicator_box.x,
-                                      ist.image_offset.y + oy + box.y + indicator_box.y,
-                                      ist.image_offset.x + ox + box.x + indicator_box.w + slider_offset + indicator_box.x,
-                                      ist.image_offset.y + oy + box.y+indicator_box.h + indicator_box.y,
-                                      ist.sprite_styles[state].color,
-                                      ist.sprite_styles[state].alpha);
+    
+    get_element(sty_ind,gui::Style,gui::GUI_TYPE::STYLE,indicator_style_id);
+    if (sty_ind.sprites[state] != -1){
+      enigma_user::draw_sprite_padded(sty_ind.sprites[state],-1,
+                                      sty_ind.border.left,
+                                      sty_ind.border.top,
+                                      sty_ind.border.right,
+                                      sty_ind.border.bottom,
+                                      sty_ind.image_offset.x + ox + box.x + slider_offset + indicator_box.x,
+                                      sty_ind.image_offset.y + oy + box.y + indicator_box.y,
+                                      sty_ind.image_offset.x + ox + box.x + indicator_box.w + slider_offset + indicator_box.x,
+                                      sty_ind.image_offset.y + oy + box.y+indicator_box.h + indicator_box.y,
+                                      sty_ind.sprite_styles[state].color,
+                                      sty_ind.sprite_styles[state].alpha);
 		}
 
 		//Draw text
-		gui::gui_styles[style_id].font_styles[state].use();
+		sty.font_styles[state].use();
 
     gs_scalar textx = 0.0, texty = 0.0;
-    switch (gui::gui_styles[style_id].font_styles[state].halign){
-      case enigma_user::fa_left: textx = box.x+gui::gui_styles[style_id].padding.left; break;
+    switch (sty.font_styles[state].halign){
+      case enigma_user::fa_left: textx = box.x+sty.padding.left; break;
       case enigma_user::fa_center: textx = box.x+box.w/2.0; break;
-      case enigma_user::fa_right: textx = box.x+box.w-gui::gui_styles[style_id].padding.right; break;
+      case enigma_user::fa_right: textx = box.x+box.w-sty.padding.right; break;
     }
 
-    switch (gui::gui_styles[style_id].font_styles[state].valign){
-      case enigma_user::fa_top: texty = box.y+gui::gui_styles[style_id].padding.top; break;
+    switch (sty.font_styles[state].valign){
+      case enigma_user::fa_top: texty = box.y+sty.padding.top; break;
       case enigma_user::fa_middle: texty = box.y+box.h/2.0; break;
-      case enigma_user::fa_bottom: texty = box.y+box.h-gui::gui_styles[style_id].padding.bottom; break;
+      case enigma_user::fa_bottom: texty = box.y+box.h-sty.padding.bottom; break;
     }
 
 		enigma_user::draw_text(ox + textx,oy + texty,text);
@@ -164,9 +161,10 @@ namespace enigma_user
 {
 	int gui_slider_create(){
 		if (gui::gui_bound_skin == -1){ //Add default one
-			gui::gui_elements.insert(pair<unsigned int, gui::Slider >(gui::gui_elements_maxid, gui::Slider()));
+			gui::gui_elements.emplace(gui::gui_elements_maxid, gui::Slider());
 		}else{
-			gui::gui_elements.insert(pair<unsigned int, gui::Slider >(gui::gui_elements_maxid, gui::gui_elements[gui::gui_skins[gui::gui_bound_skin].slider_style]));
+      get_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,gui::gui_bound_skin,-1);
+			gui::gui_elements.emplace(gui::gui_elements_maxid, gui::gui_elements[ski.slider_style]);
 		}
     gui::Slider &s = gui::gui_elements[gui::gui_elements_maxid];
 		s.visible = true;
@@ -180,9 +178,10 @@ namespace enigma_user
 
 	int gui_slider_create(gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h, gs_scalar ind_x, gs_scalar ind_y, gs_scalar ind_w, gs_scalar ind_h, double val, double minVal, double maxVal, double incrVal, string text){
 		if (gui::gui_bound_skin == -1){ //Add default one
-			gui::gui_elements.insert(pair<unsigned int, gui::Slider >(gui::gui_elements_maxid, gui::Slider()));
+			gui::gui_elements.emplace(gui::gui_elements_maxid, gui::Slider());
 		}else{
-			gui::gui_elements.insert(pair<unsigned int, gui::Slider >(gui::gui_elements_maxid, gui::gui_elements[gui::gui_skins[gui::gui_bound_skin].slider_style]));
+      get_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,gui::gui_bound_skin,-1);
+			gui::gui_elements.emplace(gui::gui_elements_maxid, gui::gui_elements[ski.slider_style]);
 		}
     gui::Slider &s = gui::gui_elements[gui::gui_elements_maxid];
 		s.visible = true;

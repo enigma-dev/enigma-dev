@@ -29,7 +29,7 @@ namespace enigma_user
 
 namespace gui
 {
-	class gui_scrollbar{
+	class Scrollbar{
 		public:
 			unsigned int id;
 			rect box;
@@ -56,7 +56,7 @@ namespace gui
       int style_id = -1;
       int indicator_style_id = -1;
 
-			gui_scrollbar();
+			Scrollbar();
 			//Update all possible scroll states (hover, click etc.)
 			void update_spos(); //Updates scroll position calculations, needed for things like scrollbar_set_value
 			void update(gs_scalar ox = 0, gs_scalar oy = 0, gs_scalar tx = enigma_user::mouse_x, gs_scalar ty = enigma_user::mouse_y);
