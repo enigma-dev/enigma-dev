@@ -24,7 +24,7 @@ using std::array;
 
 namespace gui
 {
-	class gui_label{
+	class Label{
 		public:
 			unsigned int id;
 			rect box;
@@ -36,7 +36,7 @@ namespace gui
 
       int style_id = -1; //The style we use
 
-			gui_label();
+			Label();
 			void draw(gs_scalar ox = 0, gs_scalar oy = 0);
 	};
 }

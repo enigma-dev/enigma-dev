@@ -21,7 +21,6 @@
 #include <deque>
 using std::string;
 using std::unordered_map;
-using std::pair;
 using std::deque;
 
 #include "Universal_System/var4.h"
@@ -49,39 +48,32 @@ using std::deque;
 
 namespace gui
 {
-  extern unsigned int gui_windows_maxid;
-  extern unordered_map<unsigned int, gui_window> gui_windows;
+  extern unsigned int gui_elements_maxid;
+  extern unordered_map<unsigned int, Element> gui_elements;
 
   bool windowStopPropagation = false; //Stop event propagation in windows and between
 	deque<unsigned int> gui_window_order; //This allows changing rendering order (like depth)
-
+  
 	extern unsigned int gui_style_window;
 
-  extern unordered_map<unsigned int, gui_style> gui_styles;
-
 	extern int gui_bound_skin;
-	extern unordered_map<unsigned int, gui_skin> gui_skins;
-	extern unordered_map<unsigned int, Element> gui_elements;
-  extern unordered_map<unsigned int, gui_scrollbar> gui_scrollbars;
-  extern unordered_map<unsigned int, gui_label> gui_labels;
-	extern unsigned int gui_skins_maxid;
 
 	//Implements button class
-	gui_window::gui_window(){
+	Window::Window(){
     style_id = gui_style_window; //Default style
     enigma_user::gui_style_set_font_halign(style_id, enigma_user::gui_state_all, enigma_user::fa_center);
     enigma_user::gui_style_set_font_valign(style_id, enigma_user::gui_state_all, enigma_user::fa_top);
     callback.fill(-1); //Default callbacks don't exist (so it doesn't call any script)
 	}
 
-  void gui_window::callback_execute(int event){
+  void Window::callback_execute(int event){
     if (callback[event] != -1){
       enigma_user::script_execute(callback[event], id, true, state, event);
     }
 	}
 
 	//Update all possible button states (hover, click, toggle etc.)
-	void gui_window::update(gs_scalar tx, gs_scalar ty){
+	void Window::update(gs_scalar tx, gs_scalar ty){
     if (enigma_user::mouse_check_button_pressed(enigma_user::mb_left)){ //Press
       if (windowStopPropagation == false && box.point_inside(tx,ty)){
         state = enigma_user::gui_state_on;
@@ -179,42 +171,43 @@ namespace gui
 		}
 	}
 
-	void gui_window::draw(){
+	void Window::draw(){
 	  //Draw window
-    if (gui::gui_styles[style_id].sprites[state] != -1){
-      enigma_user::draw_sprite_padded(gui::gui_styles[style_id].sprites[state],-1,
-                                      gui::gui_styles[style_id].border.left,
-                                      gui::gui_styles[style_id].border.top,
-                                      gui::gui_styles[style_id].border.right,
-                                      gui::gui_styles[style_id].border.bottom,
+    get_element(sty,gui::Style,gui::GUI_TYPE::STYLE,style_id);
+    if (sty.sprites[state] != -1){
+      enigma_user::draw_sprite_padded(sty.sprites[state],-1,
+                                      sty.border.left,
+                                      sty.border.top,
+                                      sty.border.right,
+                                      sty.border.bottom,
                                       box.x,
                                       box.y,
                                       box.x+box.w,
                                       box.y+box.h,
-                                      gui::gui_styles[style_id].sprite_styles[state].color,
-                                      gui::gui_styles[style_id].sprite_styles[state].alpha);
+                                      sty.sprite_styles[state].color,
+                                      sty.sprite_styles[state].alpha);
 		}
 
 		//Draw text
-		gui::gui_styles[style_id].font_styles[state].use();
+		sty.font_styles[state].use();
 
 		gs_scalar textx = 0.0, texty = 0.0;
-    switch (gui::gui_styles[style_id].font_styles[state].halign){
-      case enigma_user::fa_left: textx = box.x+gui::gui_styles[style_id].padding.left; break;
+    switch (sty.font_styles[state].halign){
+      case enigma_user::fa_left: textx = box.x+sty.padding.left; break;
       case enigma_user::fa_center: textx = box.x+box.w/2.0; break;
-      case enigma_user::fa_right: textx = box.x+box.w-gui::gui_styles[style_id].padding.right; break;
+      case enigma_user::fa_right: textx = box.x+box.w-sty.padding.right; break;
     }
 
-    switch (gui::gui_styles[style_id].font_styles[state].valign){
-      case enigma_user::fa_top: texty = box.y+gui::gui_styles[style_id].padding.top; break;
+    switch (sty.font_styles[state].valign){
+      case enigma_user::fa_top: texty = box.y+sty.padding.top; break;
       case enigma_user::fa_middle: texty = box.y+box.h/2.0; break;
-      case enigma_user::fa_bottom: texty = box.y+box.h-gui::gui_styles[style_id].padding.bottom; break;
+      case enigma_user::fa_bottom: texty = box.y+box.h-sty.padding.bottom; break;
     }
 
 		enigma_user::draw_text(textx,texty,text);
 	}
 
-	void gui_window::update_text_pos(int state){
+	void Window::update_text_pos(int state){
 	}
 }
 
@@ -222,136 +215,165 @@ namespace enigma_user
 {
 	int gui_window_create(){
 		if (gui::gui_bound_skin == -1){ //Add default one
-			gui::gui_windows.insert(pair<unsigned int, gui::gui_window >(gui::gui_windows_maxid, gui::gui_window()));
+			gui::gui_elements.emplace(gui::gui_elements_maxid, gui::Window());
 		}else{
-			gui::gui_windows.insert(pair<unsigned int, gui::gui_window >(gui::gui_windows_maxid, gui::gui_windows[gui::gui_skins[gui::gui_bound_skin].window_style]));
+      get_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,gui::gui_bound_skin,-1);
+			gui::gui_elements.emplace(gui::gui_elements_maxid, gui::gui_elements[ski.window_style]);
 		}
-		gui::gui_windows[gui::gui_windows_maxid].visible = true;
-		gui::gui_windows[gui::gui_windows_maxid].id = gui::gui_windows_maxid;
-		gui::gui_window_order.push_back(gui::gui_windows_maxid);
-		return gui::gui_windows_maxid++;
+    gui::Window &win = gui::gui_elements[gui::gui_elements_maxid];
+		win.visible = true;
+		win.id = gui::gui_elements_maxid;
+		gui::gui_window_order.push_back(gui::gui_elements_maxid);
+		return gui::gui_elements_maxid++;
 	}
 
 	int gui_window_create(gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h, string text){
 		if (gui::gui_bound_skin == -1){ //Add default one
-			gui::gui_windows.insert(pair<unsigned int, gui::gui_window >(gui::gui_windows_maxid, gui::gui_window()));
+			gui::gui_elements.emplace(gui::gui_elements_maxid, gui::Window());
 		}else{
-			gui::gui_windows.insert(pair<unsigned int, gui::gui_window >(gui::gui_windows_maxid, gui::gui_windows[gui::gui_skins[gui::gui_bound_skin].window_style]));
+      get_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,gui::gui_bound_skin,-1);
+			gui::gui_elements.emplace(gui::gui_elements_maxid, gui::gui_elements[ski.window_style]);
+      printf("Creating window with size %i\n", sizeof(gui::gui_elements[gui::gui_elements_maxid]));
 		}
-		gui::gui_windows[gui::gui_windows_maxid].visible = true;
-		gui::gui_windows[gui::gui_windows_maxid].id = gui::gui_windows_maxid;
-		gui::gui_windows[gui::gui_windows_maxid].box.set(x, y, w, h);
-		gui::gui_windows[gui::gui_windows_maxid].text = text;
-		gui::gui_windows[gui::gui_windows_maxid].update_text_pos();
-		gui::gui_window_order.push_back(gui::gui_windows_maxid);
-		return gui::gui_windows_maxid++;
+    gui::Window &win = gui::gui_elements[gui::gui_elements_maxid];
+		win.visible = true;
+		win.id = gui::gui_elements_maxid;
+		win.box.set(x, y, w, h);
+		win.text = text;
+		win.update_text_pos();
+		gui::gui_window_order.push_back(gui::gui_elements_maxid);
+		return gui::gui_elements_maxid++;
 	}
 
 	void gui_window_destroy(int id){
-		gui::gui_windows.erase(gui::gui_windows.find(id));
+    check_element(gui::GUI_TYPE::WINDOW,id);
+		gui::gui_elements.erase(gui::gui_elements.find(id));
 		//This is the fancy remove/erase idiom, which is the fastest way I know how to delete an element by value from vector
 		gui::gui_window_order.erase(std::remove(gui::gui_window_order.begin(), gui::gui_window_order.end(), id), gui::gui_window_order.end());
 	}
 
 	void gui_window_set_state(int id, int state){
-    gui::gui_windows[id].state = state;
+    get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
+    win.state = state;
 	}
 
   ///Setters
 	void gui_window_set_text(int id, string text){
-		gui::gui_windows[id].text = text;
+    get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
+		win.text = text;
 	}
 
 	void gui_window_set_position(int id, gs_scalar x, gs_scalar y){
-		gui::gui_windows[id].box.x = x;
-		gui::gui_windows[id].box.y = y;
+    get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
+		win.box.x = x;
+		win.box.y = y;
 	}
 
 	void gui_window_set_size(int id, gs_scalar w, gs_scalar h){
-		gui::gui_windows[id].box.w = w;
-		gui::gui_windows[id].box.h = h;
-		gui::gui_windows[id].update_text_pos();
+    get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
+		win.box.w = w;
+		win.box.h = h;
+		win.update_text_pos();
 	}
 
 	void gui_window_set_callback(int id, int event, int script_id){
+    get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
     if (event == enigma_user::gui_event_all){
-      gui::gui_windows[id].callback.fill(script_id);
+      win.callback.fill(script_id);
 	  }else{
-      gui::gui_windows[id].callback[event] = script_id;
+      win.callback[event] = script_id;
 	  }
   }
 
   void gui_window_set_style(int id, int style_id){
-    gui::gui_windows[id].style_id = (style_id != -1? style_id : gui::gui_style_window);
+    get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
+    win.style_id = (style_id != -1? style_id : gui::gui_style_window);
   }
 
 	void gui_window_set_visible(int id, bool visible){
-		gui::gui_windows[id].visible = visible;
+    get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
+		win.visible = visible;
 	}
 
   void gui_window_set_draggable(int id, bool draggable){
-		gui::gui_windows[id].draggable = draggable;
+    get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
+		win.draggable = draggable;
 	}
 
   void gui_window_set_resizable(int id, bool resizable){
-		gui::gui_windows[id].resizable = resizable;
+    get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
+		win.resizable = resizable;
 	}
 
   void gui_window_set_stencil_mask(int id, bool stencil){
-		gui::gui_windows[id].stencil_mask = stencil;
+    get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
+		win.stencil_mask = stencil;
 	}
 
 	///Getters
   int gui_window_get_style(int id){
-    return gui::gui_windows[id].style_id;
+    get_elementv(win,gui::Window,gui::GUI_TYPE::WINDOW,id,-1);
+    return win.style_id;
   }
 
 	int gui_window_get_state(int id){
-		return gui::gui_windows[id].state;
+    get_elementv(win,gui::Window,gui::GUI_TYPE::WINDOW,id,-1);
+		return win.state;
 	}
 
 	int gui_window_get_callback(int id, int event){
-		return gui::gui_windows[id].callback[event];
+    get_elementv(win,gui::Window,gui::GUI_TYPE::WINDOW,id,-1);
+		return win.callback[event];
 	}
 
   bool gui_window_get_draggable(int id){
-    return gui::gui_windows[id].draggable;
+    get_elementv(win,gui::Window,gui::GUI_TYPE::WINDOW,id,false);
+    return win.draggable;
   }
 
   bool gui_window_get_resizable(int id){
-    return gui::gui_windows[id].resizable;
+    get_elementv(win,gui::Window,gui::GUI_TYPE::WINDOW,id,false);
+    return win.resizable;
   }
 
 	bool gui_window_get_visible(int id){
-	  return gui::gui_windows[id].visible;
+    get_elementv(win,gui::Window,gui::GUI_TYPE::WINDOW,id,false);
+	  return win.visible;
 	}
 
   gs_scalar gui_window_get_width(int id){
-    return gui::gui_windows[id].box.w;
+    get_elementv(win,gui::Window,gui::GUI_TYPE::WINDOW,id,-1);
+    return win.box.w;
   }
 
 	gs_scalar gui_window_get_height(int id){
-    return gui::gui_windows[id].box.h;
+    get_elementv(win,gui::Window,gui::GUI_TYPE::WINDOW,id,-1);
+    return win.box.h;
 	}
 
 	gs_scalar gui_window_get_x(int id){
-    return gui::gui_windows[id].box.x;
+    get_elementv(win,gui::Window,gui::GUI_TYPE::WINDOW,id,-1);
+    return win.box.x;
 	}
 
 	gs_scalar gui_window_get_y(int id){
-	  return gui::gui_windows[id].box.y;
+    get_elementv(win,gui::Window,gui::GUI_TYPE::WINDOW,id,-1);
+	  return win.box.y;
 	}
 
 	string gui_window_get_text(int id){
-    return gui::gui_windows[id].text;
+    get_elementv(win,gui::Window,gui::GUI_TYPE::WINDOW,id,"");
+    return win.text;
 	}
 
   bool gui_window_get_stencil_mask(int id){
-		return gui::gui_windows[id].stencil_mask;
+    get_elementv(win,gui::Window,gui::GUI_TYPE::WINDOW,id,false);
+		return win.stencil_mask;
 	}
 
 	///Depth changers
 	void gui_window_push_to_front(int id){
+    check_element(gui::GUI_TYPE::WINDOW,id);
     auto it = find(gui::gui_window_order.begin(), gui::gui_window_order.end(), id);
     if (it != gui::gui_window_order.end()){
       gui::gui_window_order.erase(it);
@@ -360,6 +382,7 @@ namespace enigma_user
 	}
 
   void gui_window_push_to_back(int id){
+    check_element(gui::GUI_TYPE::WINDOW,id);
     auto it = find(gui::gui_window_order.begin(), gui::gui_window_order.end(), id);
     if (it != gui::gui_window_order.end()){
       gui::gui_window_order.erase(it);
@@ -369,12 +392,13 @@ namespace enigma_user
 
   ///Drawers
 	void gui_window_draw(int id){
+    get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
 		unsigned int phalign = enigma_user::draw_get_halign();
 		unsigned int pvalign = enigma_user::draw_get_valign();
 		int pcolor = enigma_user::draw_get_color();
 		gs_scalar palpha = enigma_user::draw_get_alpha();
-    gui::gui_windows[id].update();
-		gui::gui_windows[id].draw();
+    win.update();
+		win.draw();
 		//Draw children
 		///TODO(harijs) - This needs to implemented!
     /*if (gui::gui_windows[id].child_buttons.empty() == false){
@@ -403,53 +427,57 @@ namespace enigma_user
     int window_swap_id = -1;
     for (int ind = gui::gui_window_order.size()-1; ind >= 0; --ind){
       int i = gui::gui_window_order[ind];
-      if (gui::gui_windows[i].visible == true){
+      get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,i);
+      if (win.visible == true){
         //Update children
-        if (gui::gui_windows[i].child_buttons.empty() == false){
-          for (int b=gui::gui_windows[i].child_buttons.size()-1; b>=0; --b){
-            get_element(but,gui::Button,gui::GUI_TYPE::BUTTON,gui::gui_windows[i].child_buttons[b]);
+        if (win.child_buttons.empty() == false){
+          for (int b=win.child_buttons.size()-1; b>=0; --b){
+            get_element(but,gui::Button,gui::GUI_TYPE::BUTTON,win.child_buttons[b]);
             if (but.visible == false) continue; //Skip invisible objects
-            but.update(gui::gui_windows[i].box.x,gui::gui_windows[i].box.y);
+            but.update(win.box.x,win.box.y);
           }
         }
-        if (gui::gui_windows[i].child_toggles.empty() == false){
-          for (int b=gui::gui_windows[i].child_toggles.size()-1; b>=0; --b){
-            get_element(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,gui::gui_windows[i].child_toggles[b]);
+        if (win.child_toggles.empty() == false){
+          for (int b=win.child_toggles.size()-1; b>=0; --b){
+            get_element(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,win.child_toggles[b]);
             if (tog.visible == false) continue; //Skip invisible objects
-            tog.update(gui::gui_windows[i].box.x,gui::gui_windows[i].box.y);
+            tog.update(win.box.x,win.box.y);
           }
         }
-        if (gui::gui_windows[i].child_sliders.empty() == false){
-          for (int b=gui::gui_windows[i].child_sliders.size()-1; b>=0; --b){
-            get_element(sli,gui::Slider,gui::GUI_TYPE::SLIDER,gui::gui_windows[i].child_sliders[b]);
+        if (win.child_sliders.empty() == false){
+          for (int b=win.child_sliders.size()-1; b>=0; --b){
+            get_element(sli,gui::Slider,gui::GUI_TYPE::SLIDER,win.child_sliders[b]);
             if (sli.visible == false) continue;
-            sli.update(gui::gui_windows[i].box.x,gui::gui_windows[i].box.y);
+            sli.update(win.box.x,win.box.y);
           }
         }
-        if (gui::gui_windows[i].child_scrollbars.empty() == false){
-          for (int b=gui::gui_windows[i].child_scrollbars.size()-1; b>=0; --b){
-            if (gui::gui_scrollbars[gui::gui_windows[i].child_scrollbars[b]].visible == false) continue;
-            gui::gui_scrollbars[gui::gui_windows[i].child_scrollbars[b]].update(gui::gui_windows[i].box.x,gui::gui_windows[i].box.y);
+        if (win.child_scrollbars.empty() == false){
+          for (int b=win.child_scrollbars.size()-1; b>=0; --b){
+            get_element(scr,gui::Scrollbar,gui::GUI_TYPE::SCROLLBAR,win.child_scrollbars[b]);
+            if (scr.visible == false) continue;
+            scr.update(win.box.x,win.box.y);
           }
         }
         //This checks if any of the inside elements are pressed
         if (gui::windowStopPropagation == true && window_click == false) { window_click = true; window_swap_id = ind; }
-        gui::gui_windows[i].update();
+        win.update();
         //This checks for the click on the window itself. I cannot just check window propagation, because hover also stops propagation, but should not change the draw order
-        if (gui::windowStopPropagation == true && window_click == false) { window_click = true; if (gui::gui_windows[i].state == enigma_user::gui_state_on) { window_swap_id = ind; } }
+        if (gui::windowStopPropagation == true && window_click == false) { 
+          window_click = true; if (win.state == enigma_user::gui_state_on) { window_swap_id = ind; }
+        }
       }
 		}
 		//printf("Window selected = %i and click = %i and size = %i && mouse_check_button_pressed %i\n", window_swap_id, window_click, gui::gui_window_order.size(), enigma_user::mouse_check_button_pressed(enigma_user::mb_left));
 		//I REALLY HATE THE MOUSE CHECK HERE :( - Harijs
 		if (window_click == true && enigma_user::mouse_check_button_pressed(enigma_user::mb_left)) { //Push to front
         int t = gui::gui_window_order[window_swap_id]; //Get the id of the clicked window
-        gui::gui_window_order.erase(gui::gui_window_order.begin()+window_swap_id); //Delete the id from it's current place
+        gui::gui_window_order.erase(gui::gui_window_order.begin()+window_swap_id); //Delete the id from its current place
         gui::gui_window_order.push_back(t); //put on top
     }
 
     //Draw loop
     for (auto &wi : gui::gui_window_order){
-      auto &w = gui::gui_windows[wi];
+      get_element(w,gui::Window,gui::GUI_TYPE::WINDOW,wi);
       if (w.visible == true){
         //Stencil test
         w.draw();
@@ -480,12 +508,14 @@ namespace enigma_user
         }
         if (w.child_scrollbars.empty() == false){
           for (const auto &s : w.child_scrollbars){
-            if (gui::gui_scrollbars[s].visible == true) gui::gui_scrollbars[s].draw(w.box.x,w.box.y);
+            get_element(scr,gui::Scrollbar,gui::GUI_TYPE::SCROLLBAR,s);
+            if (scr.visible == true) scr.draw(w.box.x,w.box.y);
           }
         }
         if (w.child_labels.empty() == false){
           for (const auto &l : w.child_labels){
-            if (gui::gui_labels[l].visible == true) gui::gui_labels[l].draw(w.box.x,w.box.y);
+            get_element(lab,gui::Label,gui::GUI_TYPE::LABEL,l);
+            if (lab.visible == true) lab.draw(w.box.x,w.box.y);          
           }
         }
 
@@ -501,113 +531,137 @@ namespace enigma_user
 	}
 
   void gui_window_add_button(int id, int bid){
+    get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
     get_element(but,gui::Button,gui::GUI_TYPE::BUTTON,bid);
-    gui::gui_windows[id].child_buttons.push_back(bid);
+    win.child_buttons.push_back(bid);
     but.parent_id = id;
   }
 
   void gui_window_add_toggle(int id, int tid){
+    get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
     get_element(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,tid);
-    gui::gui_windows[id].child_toggles.push_back(tid);
+    win.child_toggles.push_back(tid);
     tog.parent_id = id;
   }
 
   void gui_window_add_slider(int id, int sid){
+    get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
     get_element(sli,gui::Slider,gui::GUI_TYPE::SLIDER,sid);
-    gui::gui_windows[id].child_sliders.push_back(sid);
+    win.child_sliders.push_back(sid);
     sli.parent_id = id;
   }
 
   void gui_window_add_scrollbar(int id, int sid){
-    gui::gui_windows[id].child_scrollbars.push_back(sid);
-    gui::gui_scrollbars[sid].parent_id = id;
+    get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
+    get_element(scr,gui::Scrollbar,gui::GUI_TYPE::SCROLLBAR,sid);
+    win.child_scrollbars.push_back(sid);
+    scr.parent_id = id;
   }
 
   void gui_window_add_label(int id, int lid){
-    gui::gui_windows[id].child_labels.push_back(lid);
-    gui::gui_labels[lid].parent_id = id;
+    get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
+    get_element(lab,gui::Label,gui::GUI_TYPE::LABEL,lid);
+    win.child_labels.push_back(lid);
+    lab.parent_id = id;
   }
 
   void gui_window_remove_button(int id, int bid){
-    auto it = find(gui::gui_windows[id].child_buttons.begin(), gui::gui_windows[id].child_buttons.end(), bid);
-    if (it != gui::gui_windows[id].child_buttons.end()){
+    get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
+    auto it = find(win.child_buttons.begin(), win.child_buttons.end(), bid);
+    if (it != win.child_buttons.end()){
       get_element(but,gui::Button,gui::GUI_TYPE::BUTTON,bid);
-      gui::gui_windows[id].child_buttons.erase(it);
+      win.child_buttons.erase(it);
       but.parent_id = -1;
     }
   }
 
   void gui_window_remove_toggle(int id, int tid){
-    auto it = find(gui::gui_windows[id].child_toggles.begin(), gui::gui_windows[id].child_toggles.end(), tid);
-    if (it != gui::gui_windows[id].child_toggles.end()){
+    get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
+    auto it = find(win.child_toggles.begin(), win.child_toggles.end(), tid);
+    if (it != win.child_toggles.end()){
       get_element(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,tid);
-      gui::gui_windows[id].child_toggles.erase(it);
+      win.child_toggles.erase(it);
       tog.parent_id = -1;
     }
   }
 
   void gui_window_remove_slider(int id, int sid){
-    auto it = find(gui::gui_windows[id].child_sliders.begin(), gui::gui_windows[id].child_sliders.end(), sid);
-    if (it != gui::gui_windows[id].child_sliders.end()){
+    get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
+    auto it = find(win.child_sliders.begin(), win.child_sliders.end(), sid);
+    if (it != win.child_sliders.end()){
       get_element(sli,gui::Slider,gui::GUI_TYPE::SLIDER,sid);
-      gui::gui_windows[id].child_sliders.erase(it);
+      win.child_sliders.erase(it);
       sli.parent_id = -1;
     }
   }
 
   void gui_window_remove_scrollbar(int id, int sid){
-    auto it = find(gui::gui_windows[id].child_scrollbars.begin(), gui::gui_windows[id].child_scrollbars.end(), sid);
-    if (it != gui::gui_windows[id].child_scrollbars.end()){
-      gui::gui_windows[id].child_scrollbars.erase(it);
-      gui::gui_scrollbars[sid].parent_id = -1;
+    get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
+    auto it = find(win.child_scrollbars.begin(), win.child_scrollbars.end(), sid);
+    if (it != win.child_scrollbars.end()){
+      get_element(scr,gui::Scrollbar,gui::GUI_TYPE::SCROLLBAR,sid);
+      win.child_scrollbars.erase(it);
+      scr.parent_id = -1;
     }
   }
 
   void gui_window_remove_label(int id, int lid){
-    auto it = find(gui::gui_windows[id].child_labels.begin(), gui::gui_windows[id].child_labels.end(), lid);
-    if (it != gui::gui_windows[id].child_labels.end()){
-      gui::gui_windows[id].child_labels.erase(it);
-      gui::gui_labels[lid].parent_id = -1;
+    get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
+    auto it = find(win.child_labels.begin(), win.child_labels.end(), lid);
+    if (it != win.child_labels.end()){
+      get_element(lab,gui::Label,gui::GUI_TYPE::LABEL,lid);
+      win.child_labels.erase(it);
+      lab.parent_id = -1;
     }
   }
 
   int gui_window_get_button_count(int id){
-    return gui::gui_windows[id].child_buttons.size();
+    get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
+    return win.child_buttons.size();
   }
 
   int gui_window_get_toggle_count(int id){
-    return gui::gui_windows[id].child_toggles.size();
+    get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
+    return win.child_toggles.size();
   }
 
   int gui_window_get_slider_count(int id){
-    return gui::gui_windows[id].child_sliders.size();
+    get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
+    return win.child_sliders.size();
   }
 
   int gui_window_get_scrollbar_count(int id){
-    return gui::gui_windows[id].child_scrollbars.size();
+    get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
+    return win.child_scrollbars.size();
   }
 
   int gui_window_get_label_count(int id){
-    return gui::gui_windows[id].child_labels.size();
+    get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
+    return win.child_labels.size();
   }
 
   int gui_window_get_button(int id, int but){
-    return gui::gui_windows[id].child_buttons[but];
+    get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
+    return win.child_buttons[but];
   }
 
   int gui_window_get_toggle(int id, int tog){
-    return gui::gui_windows[id].child_toggles[tog];
+    get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
+    return win.child_toggles[tog];
   }
 
   int gui_window_get_slider(int id, int sli){
-    return gui::gui_windows[id].child_sliders[sli];
+    get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
+    return win.child_sliders[sli];
   }
 
   int gui_window_get_scrollbar(int id, int scr){
-    return gui::gui_windows[id].child_scrollbars[scr];
+    get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
+    return win.child_scrollbars[scr];
   }
 
   int gui_window_get_label(int id, int lab){
-    return gui::gui_windows[id].child_labels[lab];
+    get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
+    return win.child_labels[lab];
   }
 }

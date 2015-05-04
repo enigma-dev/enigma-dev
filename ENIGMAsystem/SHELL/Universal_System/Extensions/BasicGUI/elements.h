@@ -19,19 +19,22 @@
 #define BGUI_ELEMENTS_H
 
 #include <new> //Placement new
-#include <unordered_map>
-using std::unordered_map;
-using std::pair;
 
 #include "sliders.h"
 #include "buttons.h"
 #include "toggles.h"
 #include "groups.h"
+#include "labels.h"
+#include "windows.h"
+#include "scrollbars.h"
+#include "styles.h"
+#include "skins.h"
 
 #ifdef DEBUG_MODE
   #include <string>
   #include "libEGMstd.h"
   #include "Widget_Systems/widgets_mandatory.h"
+  //This checks and returns an element
   #define get_elementv(element,clastype,entype,id,ret)\
     if (gui::gui_elements.find(id) == gui::gui_elements.end() || gui::gui_elements[id].type != entype) {\
       show_error("Attempting to use non-existing element " + std::to_string(id), false);\
@@ -39,10 +42,20 @@ using std::pair;
     }\
     clastype &element = gui::gui_elements[id];
   #define get_element(element,type,entype,id) get_elementv(element,type,entype,id,)
+  
+  //This only checks an element if it exists
+  #define check_elementv(entype,id,ret) \
+    if (gui::gui_elements.find(id) == gui::gui_elements.end() || gui::gui_elements[id].type != entype) {\
+      show_error("Attempting to use non-existing element " + std::to_string(id), false);\
+      return ret;\
+    }\
+   #define check_element(entype,id) check_elementv(entype,id,)
 #else
   #define get_elementv(element,clastype,entype,id,ret)\
     clastype &element = gui::gui_elements[id];
   #define get_element(element,type,entype,id) get_elementv(element,type,entype,id,)
+  #define check_elementv(entype,id,ret)
+  #define check_element(entype,id) check_elementv(entype,id,)
 #endif
 
 namespace gui
@@ -71,6 +84,11 @@ namespace gui
         Slider slider;
         Toggle toggle;
         Group group;
+        Label label;
+        Style style;
+        Scrollbar scrollbar;
+        Window window;
+        Skin skin;
 
         Data() {}
         ~Data() {}
@@ -99,7 +117,32 @@ namespace gui
         type = GUI_TYPE::GROUP;
         new (&(data.group)) Group(gro);
       }
+      
+      inline Element(const Label &lab){
+        type = GUI_TYPE::LABEL;
+        new (&(data.label)) Label(lab);
+      }
+      
+      inline Element(const Style &sty){
+        type = GUI_TYPE::STYLE;
+        new (&(data.style)) Style(sty);
+      }
 
+      inline Element(const Scrollbar &scr){
+        type = GUI_TYPE::SCROLLBAR;
+        new (&(data.scrollbar)) Scrollbar(scr);
+      }
+      
+      inline Element(const Window &win){
+        type = GUI_TYPE::WINDOW;
+        new (&(data.window)) Window(win);
+      }
+      
+      inline Element(const Skin &ski){
+        type = GUI_TYPE::SKIN;
+        new (&(data.skin)) Skin(ski);
+      }     
+      
       //Destructor
       inline ~Element(){
         switch (type){
@@ -114,6 +157,24 @@ namespace gui
             break;
           case GUI_TYPE::GROUP:
             data.group.~Group();
+            break;
+          case GUI_TYPE::LABEL:
+            data.label.~Label();
+            break;
+          case GUI_TYPE::STYLE:
+            data.style.~Style();
+            break;
+          case GUI_TYPE::SCROLLBAR:
+            data.scrollbar.~Scrollbar();
+            break;
+          case GUI_TYPE::WINDOW:
+            data.window.~Window();
+            break;
+          case GUI_TYPE::SKIN:
+            data.skin.~Skin();
+            break;
+          default:
+            printf("Unknown element type or element type == ERROR!\n");
             break;
         }
       }
@@ -150,6 +211,46 @@ namespace gui
         printf("Type is not a group! This is going to crash now!\n");
         return data.group;
       }
+      
+      inline operator Label&(){
+        if (type == GUI_TYPE::LABEL){
+          return data.label;
+        }
+        printf("Type is not a label! This is going to crash now!\n");
+        return data.label;
+      }
+      
+      inline operator Style&(){
+        if (type == GUI_TYPE::STYLE){
+          return data.style;
+        }
+        printf("Type is not a style! This is going to crash now!\n");
+        return data.style;
+      }
+      
+      inline operator Scrollbar&(){
+        if (type == GUI_TYPE::SCROLLBAR){
+          return data.scrollbar;
+        }
+        printf("Type is not a scrollbar! This is going to crash now!\n");
+        return data.scrollbar;
+      }
+      
+      inline operator Window&(){
+        if (type == GUI_TYPE::WINDOW){
+          return data.window;
+        }
+        printf("Type is not a window! This is going to crash now!\n");
+        return data.window;
+      }
+      
+      inline operator Skin&(){
+        if (type == GUI_TYPE::SKIN){
+          return data.skin;
+        }
+        printf("Type is not a skin! This is going to crash now!\n");
+        return data.skin;
+      }
 
       //This is only needed if we have non-trivial copy constructors, but I leave it here for now
       inline Element(const Element & rhs){
@@ -167,6 +268,24 @@ namespace gui
           case GUI_TYPE::GROUP:
               new (&(data.group)) Group(rhs.data.group);
               break;
+          case GUI_TYPE::LABEL:
+              new (&(data.label)) Label(rhs.data.label);
+              break;
+          case GUI_TYPE::STYLE:
+              new (&(data.style)) Style(rhs.data.style);
+              break;
+          case GUI_TYPE::SCROLLBAR:
+              new (&(data.scrollbar)) Scrollbar(rhs.data.scrollbar);
+              break;
+          case GUI_TYPE::WINDOW:
+              new (&(data.window)) Window(rhs.data.window);
+              break;
+          case GUI_TYPE::SKIN:
+              new (&(data.skin)) Skin(rhs.data.skin);
+              break;
+          default:
+            printf("Unknown element type or element type == ERROR!\n");
+            break;
         }
       }
 	};

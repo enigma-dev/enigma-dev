@@ -19,7 +19,6 @@
 #include <string>
 using std::string;
 using std::unordered_map;
-using std::pair;
 
 #include "Universal_System/var4.h"
 #include "Universal_System/CallbackArrays.h" //For mouse_check_button
@@ -45,11 +44,6 @@ namespace gui
   extern unordered_map<unsigned int, Element> gui_elements;
 
 	extern int gui_bound_skin;
-	extern unordered_map<unsigned int, gui_skin> gui_skins;
-	extern unordered_map<unsigned int, gui_style> gui_styles;
-  extern unordered_map<unsigned int, gui_window> gui_windows;
-  extern unordered_map<unsigned int, Element> gui_elements;
-	extern unsigned int gui_skins_maxid;
 	extern unsigned int gui_style_button;
 
 	extern bool windowStopPropagation;
@@ -70,7 +64,8 @@ namespace gui
 
 	//Update all possible button states (hover, click, toggle etc.)
 	void Button::update(gs_scalar ox, gs_scalar oy, gs_scalar tx, gs_scalar ty){
-	  bool pacheck = (parent_id == -1 || (parent_id != -1 && (gui_windows[parent_id].stencil_mask == false || gui_windows[parent_id].box.point_inside(tx,ty))));
+    get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,parent_id);
+	  bool pacheck = (parent_id == -1 || (parent_id != -1 && (win.stencil_mask == false || win.box.point_inside(tx,ty))));
 		if (box.point_inside(tx-ox,ty-oy) && gui::windowStopPropagation == false && pacheck == true){
       callback_execute(enigma_user::gui_event_hover);
       gui::windowStopPropagation = true;
@@ -133,34 +128,35 @@ namespace gui
 
 	void Button::draw(gs_scalar ox, gs_scalar oy){
 		//Draw button
-    if (gui::gui_styles[style_id].sprites[state] != -1){
-      enigma_user::draw_sprite_padded(gui::gui_styles[style_id].sprites[state],-1,
-                                      gui::gui_styles[style_id].border.left,
-                                      gui::gui_styles[style_id].border.top,
-                                      gui::gui_styles[style_id].border.right,
-                                      gui::gui_styles[style_id].border.bottom,
+    get_element(sty,gui::Style,gui::GUI_TYPE::STYLE,style_id);
+    if (sty.sprites[state] != -1){
+      enigma_user::draw_sprite_padded(sty.sprites[state],-1,
+                                      sty.border.left,
+                                      sty.border.top,
+                                      sty.border.right,
+                                      sty.border.bottom,
                                       ox + box.x,
                                       oy + box.y,
                                       ox + box.x+box.w,
                                       oy + box.y+box.h,
-                                      gui::gui_styles[style_id].sprite_styles[state].color,
-                                      gui::gui_styles[style_id].sprite_styles[state].alpha);
+                                      sty.sprite_styles[state].color,
+                                      sty.sprite_styles[state].alpha);
 		}
 
 		//Draw text
-		gui::gui_styles[style_id].font_styles[state].use();
+		sty.font_styles[state].use();
 
     gs_scalar textx = 0.0, texty = 0.0;
-    switch (gui::gui_styles[style_id].font_styles[state].halign){
-      case enigma_user::fa_left: textx = box.x+gui::gui_styles[style_id].padding.left; break;
+    switch (sty.font_styles[state].halign){
+      case enigma_user::fa_left: textx = box.x+sty.padding.left; break;
       case enigma_user::fa_center: textx = box.x+box.w/2.0; break;
-      case enigma_user::fa_right: textx = box.x+box.w-gui::gui_styles[style_id].padding.right; break;
+      case enigma_user::fa_right: textx = box.x+box.w-sty.padding.right; break;
     }
 
-    switch (gui::gui_styles[style_id].font_styles[state].valign){
-      case enigma_user::fa_top: texty = box.y+gui::gui_styles[style_id].padding.top; break;
+    switch (sty.font_styles[state].valign){
+      case enigma_user::fa_top: texty = box.y+sty.padding.top; break;
       case enigma_user::fa_middle: texty = box.y+box.h/2.0; break;
-      case enigma_user::fa_bottom: texty = box.y+box.h-gui::gui_styles[style_id].padding.bottom; break;
+      case enigma_user::fa_bottom: texty = box.y+box.h-sty.padding.bottom; break;
     }
 
 		enigma_user::draw_text(ox + textx,oy + texty,text);
@@ -175,9 +171,12 @@ namespace enigma_user
 {
 	int gui_button_create(){
 		if (gui::gui_bound_skin == -1){ //Add default one
-			gui::gui_elements.insert(pair<unsigned int, gui::Element >(gui::gui_elements_maxid, gui::Button()));
+			gui::gui_elements.emplace(gui::gui_elements_maxid, gui::Button());
+      printf("Creating default button with size %i\n", sizeof(gui::gui_elements[gui::gui_elements_maxid]));
 		}else{
-			gui::gui_elements.insert(pair<unsigned int, gui::Element >(gui::gui_elements_maxid, gui::gui_elements[gui::gui_skins[gui::gui_bound_skin].button_style]));
+      get_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,gui::gui_bound_skin,-1);
+			gui::gui_elements.emplace(gui::gui_elements_maxid, gui::gui_elements[ski.button_style]);
+      printf("Creating button with size %i\n", sizeof(gui::gui_elements[gui::gui_elements_maxid]));
 		}
 		gui::Button &b = gui::gui_elements[gui::gui_elements_maxid];
 		b.visible = true;
@@ -187,9 +186,10 @@ namespace enigma_user
 
 	int gui_button_create(gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h, string text){
 		if (gui::gui_bound_skin == -1){ //Add default one
-			gui::gui_elements.insert(pair<unsigned int, gui::Element >(gui::gui_elements_maxid, gui::Button()));
+			gui::gui_elements.emplace(gui::gui_elements_maxid, gui::Button());
 		}else{
-			gui::gui_elements.insert(pair<unsigned int, gui::Element >(gui::gui_elements_maxid, gui::gui_elements[gui::gui_skins[gui::gui_bound_skin].button_style]));
+      get_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,gui::gui_bound_skin,-1);
+			gui::gui_elements.emplace(gui::gui_elements_maxid, gui::gui_elements[ski.button_style]);
 		}
     gui::Button &b = gui::gui_elements[gui::gui_elements_maxid];
 		b.visible = true;

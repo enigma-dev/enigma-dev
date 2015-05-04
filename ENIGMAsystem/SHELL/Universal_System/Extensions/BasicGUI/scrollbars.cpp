@@ -19,7 +19,6 @@
 #include <string>
 using std::string;
 using std::unordered_map;
-using std::pair;
 
 #include "Universal_System/var4.h"
 #include "Universal_System/CallbackArrays.h" //For mouse_check_button
@@ -29,6 +28,7 @@ using std::pair;
 #include "Graphics_Systems/General/GSfont.h"
 #include "Graphics_Systems/General/GScolors.h"
 
+#include "elements.h"
 #include "styles.h"
 #include "skins.h"
 #include "scrollbars.h"
@@ -38,29 +38,26 @@ using std::pair;
 namespace gui
 {
 	extern int gui_bound_skin;
-	extern unordered_map<unsigned int, gui_skin> gui_skins;
-  extern unordered_map<unsigned int, gui_style> gui_styles;
-	extern unsigned int gui_skins_maxid;
   extern unsigned int gui_style_scrollbar;
 
-	extern unsigned int gui_scrollbars_maxid;
-  extern unordered_map<unsigned int, gui_scrollbar> gui_scrollbars;
+	extern unsigned int gui_elements_maxid;
+  extern unordered_map<unsigned int, Element> gui_elements;
 
 	extern bool windowStopPropagation; //This stops event propagation between window elements
 
 	//Implements scrollbar class
-	gui_scrollbar::gui_scrollbar(){
+	Scrollbar::Scrollbar(){
     style_id = gui_style_scrollbar; //Default style
     callback.fill(-1); //Default callbacks don't exist (so it doesn't call any script)
 	}
 
-  void gui_scrollbar::callback_execute(int event){
+  void Scrollbar::callback_execute(int event){
     if (callback[event] != -1){
       enigma_user::script_execute(callback[event], id, active, state, event);
     }
 	}
 
-	void gui_scrollbar::update_spos(){
+	void Scrollbar::update_spos(){
       if (direction == false){
         if (indicator_box.w != box.w){
           scroll_offset = fmin(scroll_offset, box.w-indicator_box.w);
@@ -77,7 +74,7 @@ namespace gui
 	}
 
 	//Update all possible scrollbar states (hover, click etc.)
-	void gui_scrollbar::update(gs_scalar ox, gs_scalar oy, gs_scalar tx, gs_scalar ty){
+	void Scrollbar::update(gs_scalar ox, gs_scalar oy, gs_scalar tx, gs_scalar ty){
 		if ((box.point_inside(tx-ox,ty-oy) || indicator_box.point_inside(tx-ox-box.x-scroll_offset-indicator_box.x,ty-box.y-oy-indicator_box.y)) && gui::windowStopPropagation == false){
       callback_execute(enigma_user::gui_event_hover);
       windowStopPropagation = true;
@@ -142,48 +139,49 @@ namespace gui
 		}
 	}
 
-	void gui_scrollbar::draw(gs_scalar ox, gs_scalar oy){
+	void Scrollbar::draw(gs_scalar ox, gs_scalar oy){
 		//Draw scrollbar and indicator
-    if (gui::gui_styles[style_id].sprites[state] != -1){
-      enigma_user::draw_sprite_padded(gui::gui_styles[style_id].sprites[state],-1,
-                                      gui::gui_styles[style_id].border.left,
-                                      gui::gui_styles[style_id].border.top,
-                                      gui::gui_styles[style_id].border.right,
-                                      gui::gui_styles[style_id].border.bottom,
+    get_element(sty,gui::Style,gui::GUI_TYPE::STYLE,style_id);
+    if (sty.sprites[state] != -1){
+      enigma_user::draw_sprite_padded(sty.sprites[state],-1,
+                                      sty.border.left,
+                                      sty.border.top,
+                                      sty.border.right,
+                                      sty.border.bottom,
                                       ox + box.x,
                                       oy + box.y,
                                       ox + box.x+box.w,
                                       oy + box.y+box.h,
-                                      gui::gui_styles[style_id].sprite_styles[state].color,
-                                      gui::gui_styles[style_id].sprite_styles[state].alpha);
+                                      sty.sprite_styles[state].color,
+                                      sty.sprite_styles[state].alpha);
 		}
-
-    if (gui::gui_styles[indicator_style_id].sprites[state] != -1){
-      auto &ist = gui::gui_styles[indicator_style_id];
+    
+    get_element(sty_ind,gui::Style,gui::GUI_TYPE::STYLE,style_id);
+    if (sty_ind.sprites[state] != -1){
       if (direction == false){
-        enigma_user::draw_sprite_padded(ist.sprites[state],-1,
-                                        ist.border.left,
-                                        ist.border.top,
-                                        ist.border.right,
-                                        ist.border.bottom,
-                                        ist.image_offset.x + ox + box.x + scroll_offset + indicator_box.x,
-                                        ist.image_offset.y + oy + box.y + indicator_box.y,
-                                        ist.image_offset.x + ox + box.x + indicator_box.w + scroll_offset + indicator_box.x,
-                                        ist.image_offset.y + oy + box.y+indicator_box.h + indicator_box.y,
-                                        ist.sprite_styles[state].color,
-                                        ist.sprite_styles[state].alpha);
+        enigma_user::draw_sprite_padded(sty_ind.sprites[state],-1,
+                                        sty_ind.border.left,
+                                        sty_ind.border.top,
+                                        sty_ind.border.right,
+                                        sty_ind.border.bottom,
+                                        sty_ind.image_offset.x + ox + box.x + scroll_offset + indicator_box.x,
+                                        sty_ind.image_offset.y + oy + box.y + indicator_box.y,
+                                        sty_ind.image_offset.x + ox + box.x + indicator_box.w + scroll_offset + indicator_box.x,
+                                        sty_ind.image_offset.y + oy + box.y+indicator_box.h + indicator_box.y,
+                                        sty_ind.sprite_styles[state].color,
+                                        sty_ind.sprite_styles[state].alpha);
       }else{
-        enigma_user::draw_sprite_padded(ist.sprites[state],-1,
-                                        ist.border.left,
-                                        ist.border.top,
-                                        ist.border.right,
-                                        ist.border.bottom,
-                                        ist.image_offset.x + ox + box.x + indicator_box.x,
-                                        ist.image_offset.y + oy + box.y + scroll_offset + indicator_box.y,
-                                        ist.image_offset.x + ox + box.x + indicator_box.w + indicator_box.x,
-                                        ist.image_offset.y + oy + box.y+indicator_box.h + scroll_offset + indicator_box.y,
-                                        ist.sprite_styles[state].color,
-                                        ist.sprite_styles[state].alpha);
+        enigma_user::draw_sprite_padded(sty_ind.sprites[state],-1,
+                                        sty_ind.border.left,
+                                        sty_ind.border.top,
+                                        sty_ind.border.right,
+                                        sty_ind.border.bottom,
+                                        sty_ind.image_offset.x + ox + box.x + indicator_box.x,
+                                        sty_ind.image_offset.y + oy + box.y + scroll_offset + indicator_box.y,
+                                        sty_ind.image_offset.x + ox + box.x + indicator_box.w + indicator_box.x,
+                                        sty_ind.image_offset.y + oy + box.y+indicator_box.h + scroll_offset + indicator_box.y,
+                                        sty_ind.sprite_styles[state].color,
+                                        sty_ind.sprite_styles[state].alpha);
       }
     }
 	}
@@ -193,226 +191,269 @@ namespace enigma_user
 {
 	int gui_scrollbar_create(){
 		if (gui::gui_bound_skin == -1){ //Add default one
-			gui::gui_scrollbars.insert(pair<unsigned int, gui::gui_scrollbar >(gui::gui_scrollbars_maxid, gui::gui_scrollbar()));
+			gui::gui_elements.emplace(gui::gui_elements_maxid, gui::Scrollbar());
 		}else{
-			gui::gui_scrollbars.insert(pair<unsigned int, gui::gui_scrollbar >(gui::gui_scrollbars_maxid, gui::gui_scrollbars[gui::gui_skins[gui::gui_bound_skin].scrollbar_style]));
+      get_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,gui::gui_bound_skin,-1);
+			gui::gui_elements.emplace(gui::gui_elements_maxid, gui::gui_elements[ski.scrollbar_style]);
 		}
-		gui::gui_scrollbars[gui::gui_scrollbars_maxid].visible = true;
-		gui::gui_scrollbars[gui::gui_scrollbars_maxid].id = gui::gui_scrollbars_maxid;
-		return (gui::gui_scrollbars_maxid++);
+    gui::Scrollbar &scr = gui::gui_elements[gui::gui_elements_maxid];
+		scr.visible = true;
+		scr.id = gui::gui_elements_maxid;
+		return (gui::gui_elements_maxid++);
 	}
 
 	int gui_scrollbar_create(gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h, gs_scalar ind_x, gs_scalar ind_y, bool direction, double val, double minVal, double maxVal, double incrVal, gs_scalar size){
 		if (gui::gui_bound_skin == -1){ //Add default one
-			gui::gui_scrollbars.insert(pair<unsigned int, gui::gui_scrollbar >(gui::gui_scrollbars_maxid, gui::gui_scrollbar()));
+			gui::gui_elements.emplace(gui::gui_elements_maxid, gui::Scrollbar());
 		}else{
-			gui::gui_scrollbars.insert(pair<unsigned int, gui::gui_scrollbar >(gui::gui_scrollbars_maxid, gui::gui_scrollbars[gui::gui_skins[gui::gui_bound_skin].scrollbar_style]));
+      get_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,gui::gui_bound_skin,-1);
+			gui::gui_elements.emplace(gui::gui_elements_maxid, gui::gui_elements[ski.scrollbar_style]);
 		}
-		gui::gui_scrollbars[gui::gui_scrollbars_maxid].visible = true;
-		gui::gui_scrollbars[gui::gui_scrollbars_maxid].id = gui::gui_scrollbars_maxid;
-		gui::gui_scrollbars[gui::gui_scrollbars_maxid].box.set(x, y, w, h);
-    gui::gui_scrollbars[gui::gui_scrollbars_maxid].minValue = minVal;
-		gui::gui_scrollbars[gui::gui_scrollbars_maxid].maxValue = maxVal;
-    gui::gui_scrollbars[gui::gui_scrollbars_maxid].size = size;
-    gui::gui_scrollbars[gui::gui_scrollbars_maxid].value = val;
-    gui::gui_scrollbars[gui::gui_scrollbars_maxid].direction = direction;
+    gui::Scrollbar &scr = gui::gui_elements[gui::gui_elements_maxid];
+		scr.visible = true;
+		scr.id = gui::gui_elements_maxid;
+		scr.box.set(x, y, w, h);
+    scr.minValue = minVal;
+		scr.maxValue = maxVal;
+    scr.size = size;
+    scr.value = val;
+    scr.direction = direction;
 
     if (direction == false){
-      gui::gui_scrollbars[gui::gui_scrollbars_maxid].indicator_box.set(ind_x, ind_y, size*w, h);
+      scr.indicator_box.set(ind_x, ind_y, size*w, h);
     }else{
-      gui::gui_scrollbars[gui::gui_scrollbars_maxid].indicator_box.set(ind_x, ind_y, w, size*h);
+      scr.indicator_box.set(ind_x, ind_y, w, size*h);
     }
 
     if (incrVal == 0){
-      gui::gui_scrollbars[gui::gui_scrollbars_maxid].incValue = 1.0/(direction == false?w:h);
+      scr.incValue = 1.0/(direction == false?w:h);
     }else{
-      gui::gui_scrollbars[gui::gui_scrollbars_maxid].incValue = incrVal;
+      scr.incValue = incrVal;
     }
 
-		gui::gui_scrollbars[gui::gui_scrollbars_maxid].update_spos();
-		return (gui::gui_scrollbars_maxid++);
+		scr.update_spos();
+		return (gui::gui_elements_maxid++);
 	}
 
 	void gui_scrollbar_destroy(int id){
-    if (gui::gui_scrollbars[id].parent_id != -1){
-      gui_window_remove_scrollbar(gui::gui_scrollbars[id].parent_id, id);
+    get_element(scr,gui::Scrollbar,gui::GUI_TYPE::SCROLLBAR,id);
+    if (scr.parent_id != -1){
+      gui_window_remove_scrollbar(scr.parent_id, id);
 	  }
-		gui::gui_scrollbars.erase(gui::gui_scrollbars.find(id));
+		gui::gui_elements.erase(gui::gui_elements.find(id));
 	}
 
   ///Setters
 	void gui_scrollbar_set_position(int id, gs_scalar x, gs_scalar y){
-		gui::gui_scrollbars[id].box.x = x;
-		gui::gui_scrollbars[id].box.y = y;
+    get_element(scr,gui::Scrollbar,gui::GUI_TYPE::SCROLLBAR,id);
+    scr.box.x = x;
+		scr.box.y = y;
 	}
 
 	void gui_scrollbar_set_size(int id, gs_scalar w, gs_scalar h){
-		gui::gui_scrollbars[id].box.w = w;
-		gui::gui_scrollbars[id].box.h = h;
-		if (gui::gui_scrollbars[id].direction == false){
-      gui::gui_scrollbars[id].indicator_box.w = gui::gui_scrollbars[id].size*w;
+    get_element(scr,gui::Scrollbar,gui::GUI_TYPE::SCROLLBAR,id);
+		scr.box.w = w;
+		scr.box.h = h;
+		if (scr.direction == false){
+      scr.indicator_box.w = scr.size*w;
 		}else{
-      gui::gui_scrollbars[id].indicator_box.h = gui::gui_scrollbars[id].size*h;
+      scr.indicator_box.h = scr.size*h;
 		}
     gui_scrollbar_set_incvalue(id, gui_scrollbar_get_incvalue(id));
 	}
 
 	void gui_scrollbar_set_callback(int id, int event, int script_id){
+    get_element(scr,gui::Scrollbar,gui::GUI_TYPE::SCROLLBAR,id);
     if (event == enigma_user::gui_event_all){
-      gui::gui_scrollbars[id].callback.fill(script_id);
+      scr.callback.fill(script_id);
 	  }else{
-      gui::gui_scrollbars[id].callback[event] = script_id;
+      scr.callback[event] = script_id;
 	  }
   }
 
   void gui_scrollbar_set_style(int id, int style_id){
-    gui::gui_scrollbars[id].style_id = (style_id != -1? style_id : gui::gui_style_scrollbar);
+    get_element(scr,gui::Scrollbar,gui::GUI_TYPE::SCROLLBAR,id);
+    scr.style_id = (style_id != -1? style_id : gui::gui_style_scrollbar);
   }
 
   void gui_scrollbar_set_indicator_style(int id, int style_id){
-    gui::gui_scrollbars[id].indicator_style_id = (style_id != -1? style_id : gui::gui_style_scrollbar);
+    get_element(scr,gui::Scrollbar,gui::GUI_TYPE::SCROLLBAR,id);
+    scr.indicator_style_id = (style_id != -1? style_id : gui::gui_style_scrollbar);
   }
 
   void gui_scrollbar_set_visible(int id, bool visible){
-		gui::gui_scrollbars[id].visible = visible;
+    get_element(scr,gui::Scrollbar,gui::GUI_TYPE::SCROLLBAR,id);
+		scr.visible = visible;
 	}
 
   void gui_scrollbar_set_active(int id, bool active){
-		gui::gui_scrollbars[id].active = active;
+    get_element(scr,gui::Scrollbar,gui::GUI_TYPE::SCROLLBAR,id);
+		scr.active = active;
 	}
 
   void gui_scrollbar_set_value(int id, double value){
-		gui::gui_scrollbars[id].value = value;
-    gui::gui_scrollbars[id].update_spos();
+    get_element(scr,gui::Scrollbar,gui::GUI_TYPE::SCROLLBAR,id);
+		scr.value = value;
+    scr.update_spos();
   }
 
   void gui_scrollbar_set_minvalue(int id, double minvalue){
-    gui::gui_scrollbars[id].minValue = minvalue;
-    gui::gui_scrollbars[id].update_spos();
+    get_element(scr,gui::Scrollbar,gui::GUI_TYPE::SCROLLBAR,id);
+    scr.minValue = minvalue;
+    scr.update_spos();
   }
 
   void gui_scrollbar_set_maxvalue(int id, double maxvalue){
-    gui::gui_scrollbars[id].maxValue = maxvalue;
-    gui::gui_scrollbars[id].update_spos();
+    get_element(scr,gui::Scrollbar,gui::GUI_TYPE::SCROLLBAR,id);
+    scr.maxValue = maxvalue;
+    scr.update_spos();
   }
 
   void gui_scrollbar_set_incvalue(int id, double incvalue){
+    get_element(scr,gui::Scrollbar,gui::GUI_TYPE::SCROLLBAR,id);
     if (incvalue == 0){
-      gui::gui_scrollbars[id].incValue = 1.0/(gui::gui_scrollbars[id].direction == false?gui::gui_scrollbars[id].box.w:gui::gui_scrollbars[id].box.h);
+      scr.incValue = 1.0/(scr.direction == false?scr.box.w:scr.box.h);
     }else{
-      gui::gui_scrollbars[id].incValue = incvalue;
+      scr.incValue = incvalue;
     }
-    gui::gui_scrollbars[id].update_spos();
+    scr.update_spos();
   }
 
   void gui_scrollbar_set_indicator_size(int id, gs_scalar size){
+    get_element(scr,gui::Scrollbar,gui::GUI_TYPE::SCROLLBAR,id);
     size = (size < 0.0 ? 0.0 : (size > 1.0 ? 1.0 : size));
-    gui::gui_scrollbars[id].size = size;
-		if (gui::gui_scrollbars[id].direction == false){
-      gui::gui_scrollbars[id].indicator_box.w = gui::gui_scrollbars[id].size*gui::gui_scrollbars[id].box.w;
+    scr.size = size;
+		if (scr.direction == false){
+      scr.indicator_box.w = scr.size*scr.box.w;
 		}else{
-      gui::gui_scrollbars[id].indicator_box.h = gui::gui_scrollbars[id].size*gui::gui_scrollbars[id].box.h;
+      scr.indicator_box.h = scr.size*scr.box.h;
 		}
-		gui::gui_scrollbars[id].update_spos();
+		scr.update_spos();
   }
 
   void gui_scrollbar_set_direction(int id, bool direction){
-		gui::gui_scrollbars[id].direction = direction;
+    get_element(scr,gui::Scrollbar,gui::GUI_TYPE::SCROLLBAR,id);
+		scr.direction = direction;
 	}
 
   ///Getters
   int gui_scrollbar_get_style(int id){
-    return gui::gui_scrollbars[id].style_id;
+    get_elementv(scr,gui::Scrollbar,gui::GUI_TYPE::SCROLLBAR,id,-1);
+    return scr.style_id;
   }
 
   int gui_scrollbar_get_indicator_style(int id){
-    return gui::gui_scrollbars[id].indicator_style_id;
+    get_elementv(scr,gui::Scrollbar,gui::GUI_TYPE::SCROLLBAR,id,-1);
+    return scr.indicator_style_id;
   }
 
 	int gui_scrollbar_get_state(int id){
-		return gui::gui_scrollbars[id].state;
+    get_elementv(scr,gui::Scrollbar,gui::GUI_TYPE::SCROLLBAR,id,-1);
+		return scr.state;
 	}
 
   int gui_scrollbar_get_callback(int id, int event){
-    return gui::gui_scrollbars[id].callback[event];
+    get_elementv(scr,gui::Scrollbar,gui::GUI_TYPE::SCROLLBAR,id,-1);
+    return scr.callback[event];
   }
 
 	bool gui_scrollbar_get_active(int id){
-		return gui::gui_scrollbars[id].active;
+    get_elementv(scr,gui::Scrollbar,gui::GUI_TYPE::SCROLLBAR,id,false);
+		return scr.active;
 	}
 
 	bool gui_scrollbar_get_visible(int id){
-		return gui::gui_scrollbars[id].visible;
+    get_elementv(scr,gui::Scrollbar,gui::GUI_TYPE::SCROLLBAR,id,false);
+		return scr.visible;
 	}
 
 	gs_scalar gui_scrollbar_get_width(int id){
-    return gui::gui_scrollbars[id].box.w;
+    get_elementv(scr,gui::Scrollbar,gui::GUI_TYPE::SCROLLBAR,id,-1);
+    return scr.box.w;
 	}
 
 	gs_scalar gui_scrollbar_get_height(int id){
-    return gui::gui_scrollbars[id].box.h;
+    get_elementv(scr,gui::Scrollbar,gui::GUI_TYPE::SCROLLBAR,id,-1);
+    return scr.box.h;
 	}
 
 	gs_scalar gui_scrollbar_get_x(int id){
-    return gui::gui_scrollbars[id].box.x;
+    get_elementv(scr,gui::Scrollbar,gui::GUI_TYPE::SCROLLBAR,id,-1);
+    return scr.box.x;
 	}
 
 	gs_scalar gui_scrollbar_get_y(int id){
-    return gui::gui_scrollbars[id].box.y;
+    get_elementv(scr,gui::Scrollbar,gui::GUI_TYPE::SCROLLBAR,id,-1);
+    return scr.box.y;
 	}
 
   gs_scalar gui_scrollbar_get_indicator_width(int id){
-    return gui::gui_scrollbars[id].indicator_box.w;
+    get_elementv(scr,gui::Scrollbar,gui::GUI_TYPE::SCROLLBAR,id,-1);
+    return scr.indicator_box.w;
 	}
 
 	gs_scalar gui_scrollbar_get_indicator_height(int id){
-    return gui::gui_scrollbars[id].indicator_box.h;
+    get_elementv(scr,gui::Scrollbar,gui::GUI_TYPE::SCROLLBAR,id,-1);
+    return scr.indicator_box.h;
 	}
 
 	gs_scalar gui_scrollbar_get_indicator_x(int id){
-    return gui::gui_scrollbars[id].indicator_box.x;
+    get_elementv(scr,gui::Scrollbar,gui::GUI_TYPE::SCROLLBAR,id,-1);
+    return scr.indicator_box.x;
 	}
 
 	gs_scalar gui_scrollbar_get_indicator_y(int id){
-    return gui::gui_scrollbars[id].indicator_box.y;
+    get_elementv(scr,gui::Scrollbar,gui::GUI_TYPE::SCROLLBAR,id,-1);
+    return scr.indicator_box.y;
 	}
 
   double gui_scrollbar_get_value(int id){
-		return gui::gui_scrollbars[id].value;
+    get_elementv(scr,gui::Scrollbar,gui::GUI_TYPE::SCROLLBAR,id,-1);
+		return scr.value;
   }
 
   double gui_scrollbar_get_minvalue(int id){
-    return gui::gui_scrollbars[id].minValue;
+    get_elementv(scr,gui::Scrollbar,gui::GUI_TYPE::SCROLLBAR,id,-1);
+    return scr.minValue;
   }
 
   double gui_scrollbar_get_maxvalue(int id){
-    return gui::gui_scrollbars[id].maxValue;
+    get_elementv(scr,gui::Scrollbar,gui::GUI_TYPE::SCROLLBAR,id,-1);
+    return scr.maxValue;
   }
 
   double gui_scrollbar_get_incvalue(int id){
-    return gui::gui_scrollbars[id].incValue;
+    get_elementv(scr,gui::Scrollbar,gui::GUI_TYPE::SCROLLBAR,id,-1);
+    return scr.incValue;
   }
 
   gs_scalar gui_scrollbar_get_indicator_size(int id){
-    return gui::gui_scrollbars[id].size;
+    get_elementv(scr,gui::Scrollbar,gui::GUI_TYPE::SCROLLBAR,id,-1);
+    return scr.size;
   }
 
   bool gui_scrollbar_get_direction(int id){
-    return gui::gui_scrollbars[id].direction;
+    get_elementv(scr,gui::Scrollbar,gui::GUI_TYPE::SCROLLBAR,id,false);
+    return scr.direction;
   }
 
   ///Drawers
 	void gui_scrollbar_draw(int id){
-    gui::gui_scrollbars[id].update();
-		gui::gui_scrollbars[id].draw();
+    get_element(scr,gui::Scrollbar,gui::GUI_TYPE::SCROLLBAR,id);
+    scr.update();
+		scr.draw();
 	}
 
 	void gui_scrollbars_draw(){
-		for (unsigned int i=0; i<gui::gui_scrollbars_maxid; ++i){
-			if (gui::gui_scrollbars[i].visible == true && gui::gui_scrollbars[i].parent_id == -1){
-      	gui::gui_scrollbars[i].update();
-				gui::gui_scrollbars[i].draw();
-			}
+		for (auto &s : gui::gui_elements){
+		  ///TODO(harijs) - THIS NEEDS TO BE A LOT PRETTIER (now it does lookup twice)
+      if (s.second.type == gui::GUI_TYPE::SCROLLBAR){
+        get_element(scr,gui::Scrollbar,gui::GUI_TYPE::SCROLLBAR,s.first);
+        if (scr.visible == true && scr.parent_id == -1){
+          scr.update();
+          scr.draw();
+        }
+      }
 		}
 	}
 }

@@ -32,7 +32,7 @@ namespace enigma_user
 
 namespace gui
 {
-	class gui_window{
+	class Window{
 		public:
 			int id;
 
@@ -59,7 +59,7 @@ namespace gui
 
       int style_id = -1;
 
-			gui_window();
+			Window();
 			//Update all possible window states (focus and unfocused)
 			void update(gs_scalar tx = enigma_user::mouse_x, gs_scalar ty = enigma_user::mouse_y);
 			void draw();

@@ -1,4 +1,4 @@
-/** Copyright (C) 2014 Harijs Grinbergs
+/** Copyright (C) 2014-2015 Harijs Grinbergs
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -24,7 +24,7 @@ using std::array;
 
 namespace gui
 {
-	class gui_style{
+	class Style{
 		public:
 			unsigned int id;
 
@@ -39,7 +39,7 @@ namespace gui
 
 			offset image_offset;
 
-			gui_style();
+			Style();
 	};
 }
 
