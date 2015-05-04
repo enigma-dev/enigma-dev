@@ -17,32 +17,12 @@
 
 #include <unordered_map>
 using std::unordered_map;
-using std::pair;
 
 #include "elements.h"
-#include "windows.h"
-#include "toggles.h"
-#include "buttons.h"
-#include "groups.h"
-#include "labels.h"
-#include "scrollbars.h"
-#include "styles.h"
-#include "skins.h"
-#include "sliders.h"
 
 namespace gui
 {
-  unsigned int gui_styles_maxid = 0;
-	unsigned int gui_labels_maxid = 0;
-  unsigned int gui_scrollbars_maxid = 0;
-  unsigned int gui_skins_maxid = 0;
-	unsigned int gui_windows_maxid = 0;
   unsigned int gui_elements_maxid = 0;
 
-	unordered_map<unsigned int, gui_style> gui_styles;
-  unordered_map<unsigned int, gui_label> gui_labels;
-  unordered_map<unsigned int, gui_scrollbar> gui_scrollbars;
-  unordered_map<unsigned int, gui_skin> gui_skins;
-  unordered_map<unsigned int, gui_window> gui_windows;
   unordered_map<unsigned int, Element> gui_elements;
 }

@@ -20,7 +20,7 @@
 
 namespace gui
 {
-	class gui_skin{
+	class Skin{
 		public:
 			unsigned int id;
 			int button_style;
@@ -30,7 +30,7 @@ namespace gui
       int scrollbar_style;
 			int label_style;
 
-			gui_skin();
+			Skin();
 	};
 }
 
