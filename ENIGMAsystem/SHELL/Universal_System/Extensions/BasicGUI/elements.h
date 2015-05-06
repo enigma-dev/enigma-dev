@@ -42,6 +42,26 @@
     }\
     clastype &element = gui::gui_elements[id];
   #define get_element(element,type,entype,id) get_elementv(element,type,entype,id,)
+ 
+  //This checks and returns an element but uses the type already assigned
+  #define get_element_smartv(element,id,ret)\
+    if (gui::gui_elements.find(id) == gui::gui_elements.end()) {\
+      show_error("Attempting to use non-existing element " + std::to_string(id), false);\
+      return ret;\
+    }\
+    switch (gui::gui_elements[id].type){ \
+      case gui::GUI_TYPE::BUTTON: gui::Button &element = gui::gui_elements[id]; break; \
+      case gui::GUI_TYPE::TOGGLE: gui::Toggle &element = gui::gui_elements[id]; break; \
+      case gui::GUI_TYPE::LABEL:  gui::Label &element = gui::gui_elements[id]; break; \
+      case gui::GUI_TYPE::SCROLLBAR: gui::Scrollbar &element = gui::gui_elements[id]; break; \
+      case gui::GUI_TYPE::SLIDER: gui::Slider &element = gui::gui_elements[id]; break; \
+      case gui::GUI_TYPE::WINDOW: gui::Window &element = gui::gui_elements[id]; break; \
+      case gui::GUI_TYPE::SKIN: gui::Skin &element = gui::gui_elements[id]; break; \
+      case gui::GUI_TYPE::STYLE: gui::Style &element = gui::gui_elements[id]; break; \
+      case gui::GUI_TYPE::GROUP: gui::Group &element = gui::gui_elements[id]; break; \
+      default: show_error("Cannot determine type of element " + std::to_string(id), false); return ret; \
+    }
+  #define get_element_smart(element,id,)\
   
   //This only checks an element if it exists
   #define check_elementv(entype,id,ret) \
@@ -50,12 +70,24 @@
       return ret;\
     }\
    #define check_element(entype,id) check_elementv(entype,id,)
+   
+  //This only checks if an element id exists (so it doesn't care about type)
+  #define check_element_existsv(id,ret) \
+    if (gui::gui_elements.find(id) == gui::gui_elements.end()) {\
+      show_error("Attempting to use non-existing element " + std::to_string(id), false);\
+      return ret;\
+    }\
+   #define check_element_exists(entype,id) check_element_existsv(id,)
 #else
   #define get_elementv(element,clastype,entype,id,ret)\
     clastype &element = gui::gui_elements[id];
   #define get_element(element,type,entype,id) get_elementv(element,type,entype,id,)
   #define check_elementv(entype,id,ret)
   #define check_element(entype,id) check_elementv(entype,id,)
+  #define check_element_existsv(id,ret)
+  #define check_element_exists(id) check_element_existsv(id,)
+  #define get_element_smartv(element,id,ret)
+  #define get_element_smart(element,id)
 #endif
 
 namespace gui

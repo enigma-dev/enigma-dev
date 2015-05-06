@@ -18,10 +18,10 @@
 #include <algorithm> //For std::remove
 #include <unordered_map>
 #include <string>
-#include <deque>
+#include <map>
 using std::string;
 using std::unordered_map;
-using std::deque;
+using std::map;
 
 #include "Universal_System/var4.h"
 #include "Universal_System/CallbackArrays.h" //For mouse_check_button
@@ -50,6 +50,7 @@ namespace gui
 {
   extern unsigned int gui_elements_maxid;
   extern unordered_map<unsigned int, Element> gui_elements;
+  extern map<unsigned int, unsigned int> gui_element_order;
 
   bool windowStopPropagation = false; //Stop event propagation in windows and between
 	deque<unsigned int> gui_window_order; //This allows changing rendering order (like depth)
@@ -223,7 +224,8 @@ namespace enigma_user
     gui::Window &win = gui::gui_elements[gui::gui_elements_maxid];
 		win.visible = true;
 		win.id = gui::gui_elements_maxid;
-		gui::gui_window_order.push_back(gui::gui_elements_maxid);
+    gui::gui_window_order.emplace_back(gui::gui_elements_maxid);
+		gui::gui_element_order.emplace_hint(gui::gui_elements_maxid,gui::gui_elements_maxid);
 		return gui::gui_elements_maxid++;
 	}
 
@@ -241,7 +243,8 @@ namespace enigma_user
 		win.box.set(x, y, w, h);
 		win.text = text;
 		win.update_text_pos();
-		gui::gui_window_order.push_back(gui::gui_elements_maxid);
+    gui::gui_window_order.emplace_back(gui::gui_elements_maxid);
+		gui::gui_element_order.emplace_hint(gui::gui_elements_maxid,gui::gui_elements_maxid);
 		return gui::gui_elements_maxid++;
 	}
 
@@ -249,6 +252,7 @@ namespace enigma_user
     check_element(gui::GUI_TYPE::WINDOW,id);
 		gui::gui_elements.erase(gui::gui_elements.find(id));
 		//This is the fancy remove/erase idiom, which is the fastest way I know how to delete an element by value from vector
+		gui::gui_element_order.erase(std::remove(gui::gui_element_order.begin(), gui::gui_element_order.end(), id), gui::gui_element_order.end());
 		gui::gui_window_order.erase(std::remove(gui::gui_window_order.begin(), gui::gui_window_order.end(), id), gui::gui_window_order.end());
 	}
 
@@ -533,135 +537,123 @@ namespace enigma_user
   void gui_window_add_button(int id, int bid){
     get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
     get_element(but,gui::Button,gui::GUI_TYPE::BUTTON,bid);
-    win.child_buttons.push_back(bid);
+    win.child_elements.push_back(bid);
     but.parent_id = id;
   }
 
   void gui_window_add_toggle(int id, int tid){
     get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
     get_element(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,tid);
-    win.child_toggles.push_back(tid);
+    win.child_elements.push_back(tid);
     tog.parent_id = id;
   }
 
   void gui_window_add_slider(int id, int sid){
     get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
     get_element(sli,gui::Slider,gui::GUI_TYPE::SLIDER,sid);
-    win.child_sliders.push_back(sid);
+    win.child_elements.push_back(sid);
     sli.parent_id = id;
   }
 
   void gui_window_add_scrollbar(int id, int sid){
     get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
     get_element(scr,gui::Scrollbar,gui::GUI_TYPE::SCROLLBAR,sid);
-    win.child_scrollbars.push_back(sid);
+    win.child_elements.push_back(sid);
     scr.parent_id = id;
   }
 
   void gui_window_add_label(int id, int lid){
     get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
     get_element(lab,gui::Label,gui::GUI_TYPE::LABEL,lid);
-    win.child_labels.push_back(lid);
+    win.child_elements.push_back(lid);
     lab.parent_id = id;
   }
 
   void gui_window_remove_button(int id, int bid){
     get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
-    auto it = find(win.child_buttons.begin(), win.child_buttons.end(), bid);
-    if (it != win.child_buttons.end()){
+    check_element(gui::GUI_TYPE::BUTTON,bid);
+    auto it = find(win.child_elements.begin(), win.child_elements.end(), bid);
+    if (it != win.child_elements.end()){
       get_element(but,gui::Button,gui::GUI_TYPE::BUTTON,bid);
-      win.child_buttons.erase(it);
+      win.child_elements.erase(it);
       but.parent_id = -1;
     }
   }
 
   void gui_window_remove_toggle(int id, int tid){
     get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
-    auto it = find(win.child_toggles.begin(), win.child_toggles.end(), tid);
-    if (it != win.child_toggles.end()){
+    check_element(gui::GUI_TYPE::TOGGLE,tid);
+    auto it = find(win.child_elements.begin(), win.child_elements.end(), tid);
+    if (it != win.child_elements.end()){
       get_element(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,tid);
-      win.child_toggles.erase(it);
+      win.child_elements.erase(it);
       tog.parent_id = -1;
     }
   }
 
   void gui_window_remove_slider(int id, int sid){
     get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
-    auto it = find(win.child_sliders.begin(), win.child_sliders.end(), sid);
-    if (it != win.child_sliders.end()){
+    check_element(gui::GUI_TYPE::SLIDER,sid);
+    auto it = find(win.child_elements.begin(), win.child_elements.end(), sid);
+    if (it != win.child_elements.end()){
       get_element(sli,gui::Slider,gui::GUI_TYPE::SLIDER,sid);
-      win.child_sliders.erase(it);
+      win.child_elements.erase(it);
       sli.parent_id = -1;
     }
   }
 
   void gui_window_remove_scrollbar(int id, int sid){
     get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
-    auto it = find(win.child_scrollbars.begin(), win.child_scrollbars.end(), sid);
-    if (it != win.child_scrollbars.end()){
+    check_element(gui::GUI_TYPE::SCROLLBAR,sid);
+    auto it = find(win.child_elements.begin(), win.child_elements.end(), sid);
+    if (it != win.child_elements.end()){
       get_element(scr,gui::Scrollbar,gui::GUI_TYPE::SCROLLBAR,sid);
-      win.child_scrollbars.erase(it);
+      win.child_elements.erase(it);
       scr.parent_id = -1;
     }
   }
 
   void gui_window_remove_label(int id, int lid){
     get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
-    auto it = find(win.child_labels.begin(), win.child_labels.end(), lid);
-    if (it != win.child_labels.end()){
+    check_element(gui::GUI_TYPE::LABEL,lid);
+    auto it = find(win.child_elements.begin(), win.child_elements.end(), lid);
+    if (it != win.child_elements.end()){
       get_element(lab,gui::Label,gui::GUI_TYPE::LABEL,lid);
-      win.child_labels.erase(it);
+      win.child_elements.erase(it);
       lab.parent_id = -1;
     }
   }
-
-  int gui_window_get_button_count(int id){
+  
+  void gui_window_add_element(int id, int ele){ //This adds a generic element. No type checking is done, so be careful using this!
     get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
-    return win.child_buttons.size();
+    get_element_smart(el,ele);
+    if (gui_elements[ele].type == gui::GUI_TYPE::WINDOW || gui_elements[ele].type == gui::GUI_TYPE::GROUP ||
+        gui_elements[ele].type == gui::GUI_TYPE::SKIN   || gui_elements[ele].type == gui::GUI_TYPE::STYLE){
+      return; //We cannot add these kinds of elements
+    }
+    win.child_elements.push_back(ele);
+    el.parent_id = id;
   }
 
-  int gui_window_get_toggle_count(int id){
+  void gui_window_remove_element(int id, int ele){
     get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
-    return win.child_toggles.size();
+    auto it = find(win.child_elements.begin(), win.child_elements.end(), ele);
+    if (it != win.child_elements.end()){
+      win.child_elements.erase(it);
+      get_element_smart(el,ele);
+      el.parent_id = -1;
+    }
+  }
+  
+  int gui_window_get_element_count(int id){
+    get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
+    return win.child_elements.size();
   }
 
-  int gui_window_get_slider_count(int id){
+  int gui_window_get_element(int id, int ele){
     get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
-    return win.child_sliders.size();
-  }
-
-  int gui_window_get_scrollbar_count(int id){
-    get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
-    return win.child_scrollbars.size();
-  }
-
-  int gui_window_get_label_count(int id){
-    get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
-    return win.child_labels.size();
-  }
-
-  int gui_window_get_button(int id, int but){
-    get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
-    return win.child_buttons[but];
-  }
-
-  int gui_window_get_toggle(int id, int tog){
-    get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
-    return win.child_toggles[tog];
-  }
-
-  int gui_window_get_slider(int id, int sli){
-    get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
-    return win.child_sliders[sli];
-  }
-
-  int gui_window_get_scrollbar(int id, int scr){
-    get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
-    return win.child_scrollbars[scr];
-  }
-
-  int gui_window_get_label(int id, int lab){
-    get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
-    return win.child_labels[lab];
+    if (ele<0 || ele >= child_elements.size()) return -1;
+    check_element_exists(ele);    
+    return win.child_elements[ele];
   }
 }

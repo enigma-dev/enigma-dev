@@ -16,9 +16,11 @@
 **/
 
 #include <unordered_map>
+#include <deque>
 #include <string>
 using std::string;
 using std::unordered_map;
+using std::deque;
 
 #include "Universal_System/var4.h"
 #include "Universal_System/CallbackArrays.h" //For mouse_check_button
@@ -41,6 +43,8 @@ namespace gui
 
   extern unsigned int gui_elements_maxid;
   extern unordered_map<unsigned int, Element> gui_elements;
+  
+  extern deque<unsigned int> gui_element_order;
 
 	extern bool windowStopPropagation;
 
