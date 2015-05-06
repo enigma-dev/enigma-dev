@@ -66,11 +66,7 @@ namespace gui
 			void update_text_pos(int state = -1);
       void callback_execute(int event);
 
-      vector<unsigned int> child_buttons;
-      vector<unsigned int> child_toggles;
-      vector<unsigned int> child_sliders;
-      vector<unsigned int> child_scrollbars;
-      vector<unsigned int> child_labels;
+      vector<unsigned int> child_elements;
 	};
 }
 

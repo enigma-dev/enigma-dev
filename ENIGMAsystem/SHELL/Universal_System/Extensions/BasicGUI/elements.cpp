@@ -16,7 +16,9 @@
 **/
 
 #include <unordered_map>
+#include <map>
 using std::unordered_map;
+using std::map;
 
 #include "elements.h"
 
@@ -25,4 +27,33 @@ namespace gui
   unsigned int gui_elements_maxid = 0;
 
   unordered_map<unsigned int, Element> gui_elements;
+  map<unsigned int, unsigned int> gui_element_order; //This allows changing rendering order (like depth)
+}
+
+namespace enigma_user
+{
+  int gui_element_get_type(int ele){
+    check_element_existsv(ele,-1);
+    return static_cast<int>(gui::gui_elements[ele].type);
+  }
+  
+ ///Depth changers
+  //TODO(harijs) - Got here!
+	/*void gui_element_push_to_front(int id){
+    check_element(gui::GUI_TYPE::WINDOW,id);
+    auto it = find(gui::gui_window_order.begin(), gui::gui_window_order.end(), id);
+    if (it != gui::gui_window_order.end()){
+      gui::gui_window_order.erase(it);
+      gui::gui_window_order.push_back(id);
+    }
+	}
+
+  void gui_window_push_to_back(int id){
+    check_element(gui::GUI_TYPE::WINDOW,id);
+    auto it = find(gui::gui_window_order.begin(), gui::gui_window_order.end(), id);
+    if (it != gui::gui_window_order.end()){
+      gui::gui_window_order.erase(it);
+      gui::gui_window_order.push_front(id);
+    }
+	}*/
 }
