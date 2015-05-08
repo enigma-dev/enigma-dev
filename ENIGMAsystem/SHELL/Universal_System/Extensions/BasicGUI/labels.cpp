@@ -35,6 +35,7 @@ using std::deque;
 #include "skins.h"
 #include "labels.h"
 #include "common.h"
+#include "include.h"
 
 namespace gui
 {

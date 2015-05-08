@@ -34,7 +34,7 @@ using std::unordered_map;
 #include "toggles.h"
 #include "buttons.h"
 #include "groups.h"
-//#include "include.h"
+#include "include.h"
 #include "common.h"
 
 namespace gui
