@@ -19,9 +19,11 @@
 #include <unordered_map>
 #include <string>
 #include <map>
+#include <deque>
 using std::string;
 using std::unordered_map;
 using std::map;
+using std::deque;
 
 #include "Universal_System/var4.h"
 #include "Universal_System/CallbackArrays.h" //For mouse_check_button
@@ -36,15 +38,16 @@ using std::map;
 #include "styles.h"
 #include "skins.h"
 #include "windows.h"
-//#include "include.h"
+#include "include.h"
 #include "common.h"
 
 //Children
+/*
 #include "buttons.h"
 #include "toggles.h"
 #include "sliders.h"
 #include "scrollbars.h"
-#include "labels.h"
+#include "labels.h"*/
 
 namespace gui
 {
@@ -172,7 +175,7 @@ namespace gui
 		}
 	}
 
-	void Window::draw(){
+	void Window::draw(gs_scalar ox, gs_scalar oy){
 	  //Draw window
     get_element(sty,gui::Style,gui::GUI_TYPE::STYLE,style_id);
     if (sty.sprites[state] != -1){
@@ -225,7 +228,7 @@ namespace enigma_user
 		win.visible = true;
 		win.id = gui::gui_elements_maxid;
     gui::gui_window_order.emplace_back(gui::gui_elements_maxid);
-		gui::gui_element_order.emplace_hint(gui::gui_elements_maxid,gui::gui_elements_maxid);
+		gui::gui_element_order.emplace(gui::gui_elements_maxid, gui::gui_elements_maxid);
 		return gui::gui_elements_maxid++;
 	}
 
@@ -244,7 +247,7 @@ namespace enigma_user
 		win.text = text;
 		win.update_text_pos();
     gui::gui_window_order.emplace_back(gui::gui_elements_maxid);
-		gui::gui_element_order.emplace_hint(gui::gui_elements_maxid,gui::gui_elements_maxid);
+		gui::gui_element_order.emplace(gui::gui_elements_maxid, gui::gui_elements_maxid);
 		return gui::gui_elements_maxid++;
 	}
 
@@ -252,7 +255,7 @@ namespace enigma_user
     check_element(gui::GUI_TYPE::WINDOW,id);
 		gui::gui_elements.erase(gui::gui_elements.find(id));
 		//This is the fancy remove/erase idiom, which is the fastest way I know how to delete an element by value from vector
-		gui::gui_element_order.erase(std::remove(gui::gui_element_order.begin(), gui::gui_element_order.end(), id), gui::gui_element_order.end());
+		gui::gui_element_order.erase(id);
 		gui::gui_window_order.erase(std::remove(gui::gui_window_order.begin(), gui::gui_window_order.end(), id), gui::gui_window_order.end());
 	}
 
@@ -402,7 +405,7 @@ namespace enigma_user
 		int pcolor = enigma_user::draw_get_color();
 		gs_scalar palpha = enigma_user::draw_get_alpha();
     win.update();
-		win.draw();
+		win.draw(0,0);
 		//Draw children
 		///TODO(harijs) - This needs to implemented!
     /*if (gui::gui_windows[id].child_buttons.empty() == false){
@@ -434,34 +437,22 @@ namespace enigma_user
       get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,i);
       if (win.visible == true){
         //Update children
-        if (win.child_buttons.empty() == false){
-          for (int b=win.child_buttons.size()-1; b>=0; --b){
-            get_element(but,gui::Button,gui::GUI_TYPE::BUTTON,win.child_buttons[b]);
-            if (but.visible == false) continue; //Skip invisible objects
-            but.update(win.box.x,win.box.y);
+        for (const auto& x: win.child_elements){
+          //get_element_smart(ele, x);
+          switch (gui::gui_elements[x].type){
+            case gui::GUI_TYPE::BUTTON: { gui::Button &element = gui::gui_elements[x]; if (element.visible == true) element.update(win.box.x,win.box.y); break; }
+            case gui::GUI_TYPE::TOGGLE: { gui::Toggle &element = gui::gui_elements[x]; if (element.visible == true) element.update(win.box.x,win.box.y); break; }
+            case gui::GUI_TYPE::SCROLLBAR: { gui::Scrollbar &element = gui::gui_elements[x]; if (element.visible == true) element.update(win.box.x,win.box.y); break; }
+            case gui::GUI_TYPE::SLIDER: { gui::Slider &element = gui::gui_elements[x]; if (element.visible == true) element.update(win.box.x,win.box.y); break; }
+            case gui::GUI_TYPE::WINDOW: { gui::Window &element = gui::gui_elements[x]; if (element.visible == true) element.update(win.box.x,win.box.y); break; }
+            case gui::GUI_TYPE::LABEL:
+            case gui::GUI_TYPE::SKIN:
+            case gui::GUI_TYPE::STYLE:
+            case gui::GUI_TYPE::GROUP:
+            case gui::GUI_TYPE::ERROR: { break; }
           }
         }
-        if (win.child_toggles.empty() == false){
-          for (int b=win.child_toggles.size()-1; b>=0; --b){
-            get_element(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,win.child_toggles[b]);
-            if (tog.visible == false) continue; //Skip invisible objects
-            tog.update(win.box.x,win.box.y);
-          }
-        }
-        if (win.child_sliders.empty() == false){
-          for (int b=win.child_sliders.size()-1; b>=0; --b){
-            get_element(sli,gui::Slider,gui::GUI_TYPE::SLIDER,win.child_sliders[b]);
-            if (sli.visible == false) continue;
-            sli.update(win.box.x,win.box.y);
-          }
-        }
-        if (win.child_scrollbars.empty() == false){
-          for (int b=win.child_scrollbars.size()-1; b>=0; --b){
-            get_element(scr,gui::Scrollbar,gui::GUI_TYPE::SCROLLBAR,win.child_scrollbars[b]);
-            if (scr.visible == false) continue;
-            scr.update(win.box.x,win.box.y);
-          }
-        }
+        
         //This checks if any of the inside elements are pressed
         if (gui::windowStopPropagation == true && window_click == false) { window_click = true; window_swap_id = ind; }
         win.update();
@@ -480,50 +471,37 @@ namespace enigma_user
     }
 
     //Draw loop
-    for (auto &wi : gui::gui_window_order){
-      get_element(w,gui::Window,gui::GUI_TYPE::WINDOW,wi);
-      if (w.visible == true){
+    for (const auto &wi : gui::gui_window_order){
+      get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,wi);
+      if (win.visible == true){
         //Stencil test
-        w.draw();
-        if (w.stencil_mask == true){
+        win.draw(0,0);
+        if (win.stencil_mask == true){
           enigma_user::d3d_stencil_start_mask();
-          w.draw();
+          win.draw(0,0);
           enigma_user::d3d_stencil_use_mask();
         }
 
         //Draw children
-        if (w.child_buttons.empty() == false){
-          for (const auto &b : w.child_buttons){
-            get_element(but,gui::Button,gui::GUI_TYPE::BUTTON,b);
-            if (but.visible == true) but.draw(w.box.x,w.box.y);
-          }
-        }
-        if (w.child_toggles.empty() == false){
-          for (const auto &t : w.child_toggles){
-            get_element(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,t);
-            if (tog.visible == true) tog.draw(w.box.x,w.box.y);
-          }
-        }
-        if (w.child_sliders.empty() == false){
-          for (const auto &s : w.child_sliders){
-            get_element(sli,gui::Slider,gui::GUI_TYPE::SLIDER,s);
-            if (sli.visible == true) sli.draw(w.box.x,w.box.y);
-          }
-        }
-        if (w.child_scrollbars.empty() == false){
-          for (const auto &s : w.child_scrollbars){
-            get_element(scr,gui::Scrollbar,gui::GUI_TYPE::SCROLLBAR,s);
-            if (scr.visible == true) scr.draw(w.box.x,w.box.y);
-          }
-        }
-        if (w.child_labels.empty() == false){
-          for (const auto &l : w.child_labels){
-            get_element(lab,gui::Label,gui::GUI_TYPE::LABEL,l);
-            if (lab.visible == true) lab.draw(w.box.x,w.box.y);          
-          }
+        for (const auto& x: win.child_elements){
+            switch (gui::gui_elements[x].type){
+              case gui::GUI_TYPE::BUTTON: { gui::Button &element = gui::gui_elements[x]; if (element.visible == true) element.draw(win.box.x,win.box.y); break; }
+              case gui::GUI_TYPE::TOGGLE: { gui::Toggle &element = gui::gui_elements[x]; if (element.visible == true) element.draw(win.box.x,win.box.y); break; }
+              case gui::GUI_TYPE::LABEL:  { gui::Label &element = gui::gui_elements[x]; if (element.visible == true) element.draw(win.box.x,win.box.y); break; }
+              case gui::GUI_TYPE::SCROLLBAR: { gui::Scrollbar &element = gui::gui_elements[x]; if (element.visible == true) element.draw(win.box.x,win.box.y); break; }
+              case gui::GUI_TYPE::SLIDER: { gui::Slider &element = gui::gui_elements[x]; if (element.visible == true) element.draw(win.box.x,win.box.y); break; }
+              case gui::GUI_TYPE::WINDOW: { gui::Window &element = gui::gui_elements[x]; if (element.visible == true) element.draw(win.box.x,win.box.y); break; }
+              case gui::GUI_TYPE::SKIN:
+              case gui::GUI_TYPE::STYLE:
+              case gui::GUI_TYPE::GROUP:
+              case gui::GUI_TYPE::ERROR: { break; }
+            }
+        
+          //get_element_smart(ele, x);
+          //if (ele.visible == true) ele.draw(w.box.x,w.box.y);
         }
 
-        if (w.stencil_mask == true){
+        if (win.stencil_mask == true){
           enigma_user::d3d_stencil_end_mask();
         }
 			}
@@ -624,7 +602,139 @@ namespace enigma_user
     }
   }
   
-  void gui_window_add_element(int id, int ele){ //This adds a generic element. No type checking is done, so be careful using this!
+  int gui_window_get_button_count(int id){
+    get_elementv(win,gui::Window,gui::GUI_TYPE::WINDOW,id, -1);
+    int c = 0;
+    for (unsigned int &e: win.child_elements){
+      check_element_existsv(e, -1);
+      if (gui::gui_elements[e].type == gui::GUI_TYPE::BUTTON) c++;
+    }
+    return c;
+  }
+  
+  int gui_window_get_toggle_count(int id){
+    get_elementv(win,gui::Window,gui::GUI_TYPE::WINDOW,id, -1);
+    int c = 0;
+    for (unsigned int &e: win.child_elements){
+      check_element_existsv(e, -1);
+      if (gui::gui_elements[e].type == gui::GUI_TYPE::TOGGLE) c++;
+    }
+    return c;
+  }
+  
+  int gui_window_get_slider_count(int id){
+    get_elementv(win,gui::Window,gui::GUI_TYPE::WINDOW,id, -1);
+    int c = 0;
+    for (unsigned int &e: win.child_elements){
+      check_element_existsv(e, -1);
+      if (gui::gui_elements[e].type == gui::GUI_TYPE::SLIDER) c++;
+    }
+    return c;
+  }
+  
+  int gui_window_get_scrollbar_count(int id){
+    get_elementv(win,gui::Window,gui::GUI_TYPE::WINDOW,id, -1);
+    int c = 0;
+    for (unsigned int &e: win.child_elements){
+      check_element_existsv(e, -1);
+      if (gui::gui_elements[e].type == gui::GUI_TYPE::SCROLLBAR) c++;
+    }
+    return c;
+  }
+  
+  int gui_window_get_label_count(int id){
+    get_elementv(win,gui::Window,gui::GUI_TYPE::WINDOW,id, -1);
+    int c = 0;
+    for (unsigned int &e: win.child_elements){
+      check_element_existsv(e, -1);
+      if (gui::gui_elements[e].type == gui::GUI_TYPE::LABEL) c++;
+    }
+    return c;
+  }
+
+  ///GETTERS FOR ELEMENTS
+  int gui_window_get_button(int id, int but){
+    get_elementv(win,gui::Window,gui::GUI_TYPE::WINDOW,id, -1);
+    if (but<0 || unsigned(but) >= win.child_elements.size()) return -1;
+    int c = 0;
+    for (const unsigned int &e : win.child_elements){
+      check_element_existsv(e, -1);
+      if (gui::gui_elements[e].type == gui::GUI_TYPE::BUTTON){
+        if (c == but){
+          return e;
+        }
+        c++; 
+      }
+    }
+    return -1;
+  }
+  
+  int gui_window_get_toggle(int id, int tog){
+    get_elementv(win,gui::Window,gui::GUI_TYPE::WINDOW,id, -1);
+    if (tog<0 || unsigned(tog) >= win.child_elements.size()) return -1;
+    int c = 0;
+    for (const unsigned int &e: win.child_elements){
+      check_element_existsv(e, -1);
+      if (gui::gui_elements[e].type == gui::GUI_TYPE::TOGGLE){
+        if (c == tog){
+          return e;
+        }
+        c++; 
+      }
+    }
+    return -1;
+  }
+  
+  int gui_window_get_slider(int id, int sli){
+    get_elementv(win,gui::Window,gui::GUI_TYPE::WINDOW,id, -1);
+    if (sli<0 || unsigned(sli) >= win.child_elements.size()) return -1;
+    int c = 0;
+    for (const unsigned int &e: win.child_elements){
+      check_element_existsv(e, -1);
+      if (gui::gui_elements[e].type == gui::GUI_TYPE::SLIDER){
+        if (c == sli){
+          return e;
+        }
+        c++; 
+      }
+    }
+    return -1;
+  }
+  
+  int gui_window_get_scrollbar(int id, int scr){
+    get_elementv(win,gui::Window,gui::GUI_TYPE::WINDOW,id, -1);
+    if (scr<0 || unsigned(scr) >= win.child_elements.size()) return -1;
+    int c = 0;
+    for (const unsigned int &e: win.child_elements){
+      check_element_existsv(e, -1);
+      if (gui::gui_elements[e].type == gui::GUI_TYPE::SCROLLBAR){
+        if (c == scr){
+          return e;
+        }
+        c++; 
+      }
+    }
+    return -1;
+  }
+  
+  int gui_window_get_label(int id, int lab){
+    get_elementv(win,gui::Window,gui::GUI_TYPE::WINDOW,id, -1);
+    if (lab<0 || unsigned(lab) >= win.child_elements.size()) return -1;
+    int c = 0;
+    for (const unsigned int &e: win.child_elements){
+      check_element_existsv(e, -1);
+      if (gui::gui_elements[e].type == gui::GUI_TYPE::LABEL){
+        if (c == lab){
+          return e;
+        }
+        c++; 
+      }
+    }
+    return -1;
+  }
+
+  
+  /*void gui_window_add_element(int id, int ele){ //This adds a generic element. No type checking is done, so be careful using this!
     get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
     get_element_smart(el,ele);
     if (gui_elements[ele].type == gui::GUI_TYPE::WINDOW || gui_elements[ele].type == gui::GUI_TYPE::GROUP ||
@@ -643,7 +753,7 @@ namespace enigma_user
       get_element_smart(el,ele);
       el.parent_id = -1;
     }
-  }
+  }*/
   
   int gui_window_get_element_count(int id){
     get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
@@ -652,8 +762,8 @@ namespace enigma_user
 
   int gui_window_get_element(int id, int ele){
     get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
-    if (ele<0 || ele >= child_elements.size()) return -1;
-    check_element_exists(ele);    
+    if (ele<0 || unsigned(ele) >= win.child_elements.size()) return -1;
+    check_element_exists(win.child_elements[ele]);    
     return win.child_elements[ele];
   }
 }

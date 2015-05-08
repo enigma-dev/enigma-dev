@@ -18,7 +18,6 @@
 #ifndef BGUI_COMMON_H
 #define BGUI_COMMON_H
 
-#include "include.h"
 #include "Graphics_Systems/General/GSsprite.h"
 #include "Graphics_Systems/General/GSfont.h"
 #include "Graphics_Systems/General/GScolors.h"

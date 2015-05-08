@@ -326,7 +326,7 @@ namespace enigma_user
   int gui_window_get_button(int id, int but);
   int gui_window_get_toggle(int id, int tog);
   int gui_window_get_slider(int id, int sli);
-  int gui_window_get_scrollbar(int id, int sli);
+  int gui_window_get_scrollbar(int id, int scr);
   int gui_window_get_label(int id, int lab);
 
 	//Skins
