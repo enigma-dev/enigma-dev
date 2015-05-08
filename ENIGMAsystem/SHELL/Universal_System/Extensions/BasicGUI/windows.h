@@ -62,11 +62,18 @@ namespace gui
 			Window();
 			//Update all possible window states (focus and unfocused)
 			void update(gs_scalar tx = enigma_user::mouse_x, gs_scalar ty = enigma_user::mouse_y);
-			void draw();
+			void draw(gs_scalar ox, gs_scalar oy);
 			void update_text_pos(int state = -1);
       void callback_execute(int event);
 
+      //Element vectors for faster iteration
       vector<unsigned int> child_elements;
+       
+      /*vector<unsigned int> child_buttons;
+      vector<unsigned int> child_labels;
+      vector<unsigned int> child_sliders;
+      vector<unsigned int> child_scrollbars;
+      vector<unsigned int> child_buttons;*/
 	};
 }
 

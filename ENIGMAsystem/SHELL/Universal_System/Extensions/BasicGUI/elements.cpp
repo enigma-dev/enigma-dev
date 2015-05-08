@@ -38,22 +38,22 @@ namespace enigma_user
   }
   
  ///Depth changers
-  //TODO(harijs) - Got here!
+ ///TODO(harijs) - this still needs to be worked on
 	/*void gui_element_push_to_front(int id){
-    check_element(gui::GUI_TYPE::WINDOW,id);
-    auto it = find(gui::gui_window_order.begin(), gui::gui_window_order.end(), id);
-    if (it != gui::gui_window_order.end()){
-      gui::gui_window_order.erase(it);
-      gui::gui_window_order.push_back(id);
+    check_element_exists(id);
+    auto it = gui::gui_element_order.find(id);
+    if (it != gui::gui_element_order.end()){
+      gui::gui_element_order.erase(it);
+      gui::gui_element_order.emplace(gui::gui_element_order.size(),id);
     }
 	}
 
-  void gui_window_push_to_back(int id){
-    check_element(gui::GUI_TYPE::WINDOW,id);
-    auto it = find(gui::gui_window_order.begin(), gui::gui_window_order.end(), id);
-    if (it != gui::gui_window_order.end()){
-      gui::gui_window_order.erase(it);
-      gui::gui_window_order.push_front(id);
+  void gui_element_push_to_back(int id){
+    check_element_exists(id);
+    auto it = gui::gui_element_order.find(id);
+    if (it != gui::gui_element_order.end()){
+      gui::gui_element_order.erase(it);
+      gui::gui_element_order.emplace(0,id);
     }
 	}*/
 }
