@@ -32,8 +32,8 @@ using std::unordered_map;
 #include "skins.h"
 
 namespace gui{
-  extern unsigned int gui_elements_maxid;
-  extern unordered_map<unsigned int, Element> gui_elements;
+  extern unsigned int gui_data_elements_maxid;
+  extern unordered_map<unsigned int, DataElement> gui_data_elements;
 
 	Skin::Skin(){
 		//Create invisible dummy elements to use as styles for them all
@@ -62,15 +62,16 @@ namespace gui{
 namespace enigma_user
 {
 	int gui_skin_create(){
-		gui::gui_elements.emplace(gui::gui_elements_maxid, gui::Skin());
-    gui::Skin &ski = gui::gui_elements[gui::gui_elements_maxid];
-		ski.id = gui::gui_elements_maxid;
-		return gui::gui_elements_maxid++;
+		gui::gui_data_elements.emplace(gui::gui_data_elements_maxid, gui::Skin());
+    gui::Skin &ski = gui::gui_data_elements[gui::gui_data_elements_maxid];
+		ski.id = gui::gui_data_elements_maxid;
+    printf("Creating skin with size %i\n", sizeof(gui::gui_data_elements[gui::gui_data_elements_maxid]));
+		return gui::gui_data_elements_maxid++;
 	}
 
 	void gui_skin_destroy(int id){
-    check_element(gui::GUI_TYPE::SKIN,id);
-		gui::gui_elements.erase(gui::gui_elements.find(id));
+    check_data_element(gui::GUI_TYPE::SKIN,id);
+		gui::gui_data_elements.erase(gui::gui_data_elements.find(id));
 	}
 
 	void gui_skin_set(int id){
@@ -78,32 +79,32 @@ namespace enigma_user
 	}
 
 	int gui_skin_get_button(int id){
-    get_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,id,-1);
+    get_data_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,id,-1);
 		return (ski.button_style);
 	}
 
   int gui_skin_get_window(int id){
-    get_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,id,-1);
+    get_data_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,id,-1);
 		return (ski.window_style);
 	}
 
   int gui_skin_get_toggle(int id){
-    get_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,id,-1);
+    get_data_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,id,-1);
 		return (ski.toggle_style);
 	}
 
 	int gui_skin_get_slider(int id){
-    get_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,id,-1);
+    get_data_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,id,-1);
     return (ski.slider_style);
 	}
 
   int gui_skin_get_scrollbar(int id){
-    get_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,id,-1);
+    get_data_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,id,-1);
     return (ski.scrollbar_style);
 	}
 
   int gui_skin_get_label(int id){
-    get_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,id,-1);
+    get_data_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,id,-1);
     return (ski.label_style);
 	}
 }

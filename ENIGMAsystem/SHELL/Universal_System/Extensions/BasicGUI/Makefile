@@ -8,3 +8,4 @@ SOURCES += Universal_System/Extensions/BasicGUI/labels.cpp
 SOURCES += Universal_System/Extensions/BasicGUI/groups.cpp
 SOURCES += Universal_System/Extensions/BasicGUI/scrollbars.cpp
 SOURCES += Universal_System/Extensions/BasicGUI/elements.cpp
+SOURCES += Universal_System/Extensions/BasicGUI/parents.cpp

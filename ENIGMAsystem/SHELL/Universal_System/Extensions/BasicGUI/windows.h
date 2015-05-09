@@ -24,6 +24,7 @@ using std::array;
 using std::vector;
 
 #include "common.h"
+#include "parents.h"
 
 namespace enigma_user
 {
@@ -57,18 +58,23 @@ namespace gui
 
 			array<int,5> callback; //Script to run on event
 
+			int parent_id = -1; //ID of some kind of parent (probably a window). It won't render with gui_draw_windows() if it is not -1.
+
       int style_id = -1;
+
+      int stencil_style_id = -1; //This is for rendering the stencil. If it is -1, then the style_id is used
 
 			Window();
 			//Update all possible window states (focus and unfocused)
-			void update(gs_scalar tx = enigma_user::mouse_x, gs_scalar ty = enigma_user::mouse_y);
-			void draw(gs_scalar ox, gs_scalar oy);
+			void update(gs_scalar ox = 0, gs_scalar oy = 0, gs_scalar tx = enigma_user::mouse_x, gs_scalar ty = enigma_user::mouse_y);
+			void draw(gs_scalar ox = 0, gs_scalar oy = 0);
+
 			void update_text_pos(int state = -1);
       void callback_execute(int event);
 
       //Element vectors for faster iteration
-      vector<unsigned int> child_elements;
-       
+      Parent parenter;
+
       /*vector<unsigned int> child_buttons;
       vector<unsigned int> child_labels;
       vector<unsigned int> child_sliders;

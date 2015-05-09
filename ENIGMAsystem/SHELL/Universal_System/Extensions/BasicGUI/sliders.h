@@ -1,4 +1,4 @@
-/** Copyright (C) 2014 Harijs Grinbergs
+/** Copyright (C) 2014-2015 Harijs Grinbergs
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***

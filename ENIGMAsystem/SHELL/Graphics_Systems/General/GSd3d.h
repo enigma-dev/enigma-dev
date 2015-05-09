@@ -124,6 +124,7 @@ namespace enigma_user {
 
   //Stencil stuff
   void d3d_stencil_start_mask();
+  void d3d_stencil_continue_mask();
   void d3d_stencil_use_mask();
   void d3d_stencil_end_mask();
 }
