@@ -40,10 +40,12 @@ using std::unordered_map;
 namespace gui
 {
 	extern int gui_bound_skin;
-  extern unordered_map<unsigned int, Element> gui_elements;
 	extern unsigned int gui_style_toggle;
 
 	extern unsigned int gui_elements_maxid;
+  extern unsigned int gui_data_elements_maxid;
+  extern unordered_map<unsigned int, Element> gui_elements;
+  extern unordered_map<unsigned int, DataElement> gui_data_elements;
 
 	extern bool windowStopPropagation;
 
@@ -95,7 +97,7 @@ namespace gui
 						}else{
 							state = enigma_user::gui_state_on_hover;
 							if (group_id != -1){ //Groups disable any other active element
-                get_element(gro,gui::Group,gui::GUI_TYPE::GROUP,group_id);
+                get_data_element(gro,gui::Group,gui::GUI_TYPE::GROUP,group_id);
                 for (const auto &b : gro.group_buttons){
                   get_element(but,gui::Button,gui::GUI_TYPE::BUTTON,b);
                   but.active = false;
@@ -122,9 +124,18 @@ namespace gui
 
 	void Toggle::draw(gs_scalar ox, gs_scalar oy){
 	  //Draw toggle
-    get_element(sty,gui::Style,gui::GUI_TYPE::STYLE,style_id);
+    get_data_element(sty,gui::Style,gui::GUI_TYPE::STYLE,style_id);
     if (sty.sprites[state] != -1){
-      enigma_user::draw_sprite_padded(sty.sprites[state],-1,
+      if (sty.border.zero == true){
+        enigma_user::draw_sprite_stretched(sty.sprites[state],-1,
+                                           ox + box.x,
+                                           oy + box.y,
+                                           box.w,
+                                           box.h,
+                                           sty.sprite_styles[state].color,
+                                           sty.sprite_styles[state].alpha);
+      }else{
+        enigma_user::draw_sprite_padded(sty.sprites[state],-1,
                                       sty.border.left,
                                       sty.border.top,
                                       sty.border.right,
@@ -135,6 +146,7 @@ namespace gui
                                       oy + box.y+box.h,
                                       sty.sprite_styles[state].color,
                                       sty.sprite_styles[state].alpha);
+      }
 		}
 
 		//Draw text
@@ -166,7 +178,7 @@ namespace enigma_user
 		if (gui::gui_bound_skin == -1){ //Add default one
 			gui::gui_elements.emplace(gui::gui_elements_maxid, gui::Toggle());
 		}else{
-      get_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,gui::gui_bound_skin,-1);
+      get_data_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,gui::gui_bound_skin,-1);
 			gui::gui_elements.emplace(gui::gui_elements_maxid, gui::gui_elements[ski.toggle_style]);
 		}
     gui::Toggle &t = gui::gui_elements[gui::gui_elements_maxid];
@@ -179,7 +191,7 @@ namespace enigma_user
 		if (gui::gui_bound_skin == -1){ //Add default one
 			gui::gui_elements.emplace(gui::gui_elements_maxid, gui::Toggle());
 		}else{
-      get_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,gui::gui_bound_skin,-1);
+      get_data_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,gui::gui_bound_skin,-1);
 			gui::gui_elements.emplace(gui::gui_elements_maxid, gui::gui_elements[ski.toggle_style]);
 		}
     gui::Toggle &t = gui::gui_elements[gui::gui_elements_maxid];
@@ -229,6 +241,7 @@ namespace enigma_user
 
   void gui_toggle_set_style(int id, int style_id){
     get_element(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,id);
+    check_data_element(gui::GUI_TYPE::STYLE, style_id);
     tog.style_id = (style_id != -1? style_id : gui::gui_style_toggle);
   }
 
@@ -301,6 +314,7 @@ namespace enigma_user
   ///Drawers
 	void gui_toggle_draw(int id){
     get_element(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,id);
+    int pfont = enigma_user::draw_get_font();
 		unsigned int phalign = enigma_user::draw_get_halign();
 		unsigned int pvalign = enigma_user::draw_get_valign();
 		int pcolor = enigma_user::draw_get_color();
@@ -311,9 +325,11 @@ namespace enigma_user
 		enigma_user::draw_set_valign(pvalign);
 		enigma_user::draw_set_color(pcolor);
 		enigma_user::draw_set_alpha(palpha);
+    enigma_user::draw_set_font(pfont);
 	}
 
 	void gui_toggles_draw(){
+    int pfont = enigma_user::draw_get_font();
 		unsigned int phalign = enigma_user::draw_get_halign();
 		unsigned int pvalign = enigma_user::draw_get_valign();
 		int pcolor = enigma_user::draw_get_color();
@@ -332,6 +348,7 @@ namespace enigma_user
 		enigma_user::draw_set_valign(pvalign);
 		enigma_user::draw_set_color(pcolor);
 		enigma_user::draw_set_alpha(palpha);
+    enigma_user::draw_set_font(pfont);
 	}
 }
 

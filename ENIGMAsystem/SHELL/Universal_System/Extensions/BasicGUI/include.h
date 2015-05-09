@@ -99,6 +99,35 @@ namespace enigma_user
 	void gui_button_draw(int id);
 	void gui_buttons_draw();
 
+  //Button parenting
+  void gui_button_add_button(int id, int bid);
+  void gui_button_add_toggle(int id, int tid);
+  void gui_button_add_slider(int id, int sid);
+  void gui_button_add_scrollbar(int id, int scr);
+  void gui_button_add_label(int id, int lid);
+  void gui_button_add_window(int id, int wid);
+
+  void gui_button_remove_button(int id, int bid);
+  void gui_button_remove_toggle(int id, int tid);
+  void gui_button_remove_slider(int id, int sid);
+  void gui_button_remove_scrollbar(int id, int scr);
+  void gui_button_remove_label(int id, int lid);
+  void gui_button_remove_window(int id, int wid);
+
+  int gui_button_get_button_count(int id);
+  int gui_button_get_toggle_count(int id);
+  int gui_button_get_slider_count(int id);
+  int gui_button_get_scrollbar_count(int id);
+  int gui_button_get_label_count(int id);
+  int gui_button_get_window_count(int id);
+
+  int gui_button_get_button(int id, int but);
+  int gui_button_get_toggle(int id, int tog);
+  int gui_button_get_slider(int id, int sli);
+  int gui_button_get_scrollbar(int id, int scr);
+  int gui_button_get_label(int id, int lab);
+  int gui_button_get_window(int id, int wid);
+
   ///TOGGLES
 	int gui_toggle_create(gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h, string text);
 	int gui_toggle_create();
@@ -237,6 +266,7 @@ namespace enigma_user
 
 	//Setters
   void gui_window_set_style(int id, int style_id);
+  void gui_window_set_stencil_style(int id, int style_id);
 	void gui_window_set_callback(int id, int event, int script_id);
   void gui_window_set_draggable(int id, bool draggable);
   void gui_window_set_resizable(int id, bool resizable);
@@ -251,6 +281,7 @@ namespace enigma_user
 
   //Getters
   int gui_window_get_style(int id);
+  int gui_window_get_stencil_style(int id);
 	int gui_window_get_state(int id);
   int gui_window_get_callback(int id, int event);
   bool gui_window_get_draggable(int id);
@@ -270,6 +301,35 @@ namespace enigma_user
 	//Drawers
 	void gui_window_draw(int id);
 	void gui_windows_draw();
+
+  //Window parenting
+  void gui_window_add_button(int id, int bid);
+  void gui_window_add_toggle(int id, int tid);
+  void gui_window_add_slider(int id, int sid);
+  void gui_window_add_scrollbar(int id, int scr);
+  void gui_window_add_label(int id, int lid);
+  void gui_window_add_window(int id, int wid);
+
+  void gui_window_remove_button(int id, int bid);
+  void gui_window_remove_toggle(int id, int tid);
+  void gui_window_remove_slider(int id, int sid);
+  void gui_window_remove_scrollbar(int id, int scr);
+  void gui_window_remove_label(int id, int lid);
+  void gui_window_remove_window(int id, int wid);
+
+  int gui_window_get_button_count(int id);
+  int gui_window_get_toggle_count(int id);
+  int gui_window_get_slider_count(int id);
+  int gui_window_get_scrollbar_count(int id);
+  int gui_window_get_label_count(int id);
+  int gui_window_get_window_count(int id);
+
+  int gui_window_get_button(int id, int but);
+  int gui_window_get_toggle(int id, int tog);
+  int gui_window_get_slider(int id, int sli);
+  int gui_window_get_scrollbar(int id, int scr);
+  int gui_window_get_label(int id, int lab);
+  int gui_window_get_window(int id, int wid);
 
   ///LABELS
 	int gui_label_create(gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h, string text);
@@ -304,31 +364,6 @@ namespace enigma_user
   void gui_group_add_button(int id, int bid);
   void gui_group_add_toggle(int id, int tid);
 
-  //Window parenting
-  void gui_window_add_button(int id, int bid);
-  void gui_window_add_toggle(int id, int tid);
-  void gui_window_add_slider(int id, int sid);
-  void gui_window_add_scrollbar(int id, int scr);
-  void gui_window_add_label(int id, int lid);
-
-  void gui_window_remove_button(int id, int bid);
-  void gui_window_remove_toggle(int id, int tid);
-  void gui_window_remove_slider(int id, int sid);
-  void gui_window_remove_scrollbar(int id, int scr);
-  void gui_window_remove_label(int id, int lid);
-
-  int gui_window_get_button_count(int id);
-  int gui_window_get_toggle_count(int id);
-  int gui_window_get_slider_count(int id);
-  int gui_window_get_scrollbar_count(int id);
-  int gui_window_get_label_count(int id);
-
-  int gui_window_get_button(int id, int but);
-  int gui_window_get_toggle(int id, int tog);
-  int gui_window_get_slider(int id, int sli);
-  int gui_window_get_scrollbar(int id, int scr);
-  int gui_window_get_label(int id, int lab);
-
 	//Skins
 	int gui_skin_create();
 	void gui_skin_destroy(int id);
@@ -359,6 +394,9 @@ namespace enigma_user
 	void gui_style_set_padding(int id, gs_scalar left, gs_scalar top, gs_scalar right, gs_scalar bottom);
 	void gui_style_set_border(int id, gs_scalar left, gs_scalar top, gs_scalar right, gs_scalar bottom);
   void gui_style_set_image_offset(int id, gs_scalar x, gs_scalar y);
+  void gui_style_set_box(int id, gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h);
+
+  int gui_element_get_type(int ele);
 }
 
 #endif

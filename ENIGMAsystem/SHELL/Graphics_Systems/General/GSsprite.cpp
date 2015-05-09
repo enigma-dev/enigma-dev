@@ -113,6 +113,8 @@ void draw_sprite_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar xs
 	draw_primitive_end();
 }
 
+///NOTE(harijs) - This function fits in as a priest in candy shop. It's the only sprite drawing function that uses bound draw color and we cannot add a color argument before the alpha, because YYG had it this way
+///Maybe we should forget about GM compatibility once again and just modify this so it fits the others
 void draw_sprite_pos(int spr, int subimg, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, gs_scalar x4, gs_scalar y4, gs_scalar alpha)
 {
   get_spritev(spr2d,spr);
@@ -235,20 +237,7 @@ void draw_sprite_stretched(int spr, int subimg, gs_scalar x, gs_scalar y, gs_sca
 
 void draw_sprite_stretched_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, int color, gs_scalar alpha)
 {
-  get_spritev(spr2d,spr);
-  const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
-
-  const gs_scalar tbx = spr2d->texturexarray[usi], tby = spr2d->textureyarray[usi],
-              tbw = spr2d->texturewarray[usi], tbh = spr2d->textureharray[usi],
-              xvert1 = x-spr2d->xoffset, xvert2 = xvert1 + width,
-              yvert1 = y-spr2d->yoffset, yvert2 = yvert1 + height;
-
-	draw_primitive_begin_texture(pr_trianglestrip, spr2d->texturearray[usi]);
-	draw_vertex_texture_color(xvert1,yvert1,tbx,tby,color,alpha);
-	draw_vertex_texture_color(xvert2,yvert1,tbx+tbw,tby,color,alpha);
-	draw_vertex_texture_color(xvert1,yvert2,tbx,tby+tbh,color,alpha);
-	draw_vertex_texture_color(xvert2,yvert2,tbx+tbw,tby+tbh,color,alpha);
-	draw_primitive_end();
+  draw_sprite_stretched(spr, subimg, x, y, width, height, color, alpha);
 }
 
 void d3d_draw_sprite(int spr,int subimg, gs_scalar x, gs_scalar y, gs_scalar z)

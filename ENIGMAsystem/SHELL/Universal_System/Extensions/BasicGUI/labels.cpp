@@ -42,9 +42,11 @@ namespace gui
 	extern int gui_bound_skin;
 	extern unsigned int gui_style_label;
 
-  extern unsigned int gui_elements_maxid;
+	extern unsigned int gui_elements_maxid;
+  extern unsigned int gui_data_elements_maxid;
   extern unordered_map<unsigned int, Element> gui_elements;
-  
+  extern unordered_map<unsigned int, DataElement> gui_data_elements;
+
   extern deque<unsigned int> gui_element_order;
 
 	extern bool windowStopPropagation;
@@ -58,9 +60,18 @@ namespace gui
 
 	void Label::draw(gs_scalar ox, gs_scalar oy){
 		//Draw sprite
-    get_element(sty,gui::Style,gui::GUI_TYPE::STYLE,style_id);
+    get_data_element(sty,gui::Style,gui::GUI_TYPE::STYLE,style_id);
     if (sty.sprites[enigma_user::gui_state_default] != -1){
-      enigma_user::draw_sprite_padded(sty.sprites[enigma_user::gui_state_default],-1,
+      if (sty.border.zero == true){
+        enigma_user::draw_sprite_stretched(sty.sprites[enigma_user::gui_state_default],-1,
+                                           ox + box.x,
+                                           oy + box.y,
+                                           box.w,
+                                           box.h,
+                                           sty.sprite_styles[enigma_user::gui_state_default].color,
+                                           sty.sprite_styles[enigma_user::gui_state_default].alpha);
+      }else{
+        enigma_user::draw_sprite_padded(sty.sprites[enigma_user::gui_state_default],-1,
                                       sty.border.left,
                                       sty.border.top,
                                       sty.border.right,
@@ -71,6 +82,7 @@ namespace gui
                                       oy + box.y+box.h,
                                       sty.sprite_styles[enigma_user::gui_state_default].color,
                                       sty.sprite_styles[enigma_user::gui_state_default].alpha);
+      }
 		}
 
 		//Draw text
@@ -99,7 +111,7 @@ namespace enigma_user
 		if (gui::gui_bound_skin == -1){ //Add default one
 			gui::gui_elements.emplace(gui::gui_elements_maxid, gui::Label());
 		}else{
-      get_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,gui::gui_bound_skin,-1);
+      get_data_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,gui::gui_bound_skin,-1);
 			gui::gui_elements.emplace(gui::gui_elements_maxid, gui::gui_elements[ski.label_style]);
 		}
     gui::Label &lab = gui::gui_elements[gui::gui_elements_maxid];
@@ -112,7 +124,7 @@ namespace enigma_user
 		if (gui::gui_bound_skin == -1){ //Add default one
 			gui::gui_elements.emplace(gui::gui_elements_maxid, gui::Label());
 		}else{
-      get_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,gui::gui_bound_skin,-1);
+      get_data_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,gui::gui_bound_skin,-1);
 			gui::gui_elements.emplace(gui::gui_elements_maxid, gui::gui_elements[ski.label_style]);
 		}
     gui::Label &lab = gui::gui_elements[gui::gui_elements_maxid];
@@ -151,6 +163,7 @@ namespace enigma_user
 
 	void gui_label_set_style(int id, int style_id){
     get_element(lab,gui::Label,gui::GUI_TYPE::LABEL,id);
+    check_data_element(gui::GUI_TYPE::STYLE, style_id);
     lab.style_id = (style_id != -1? style_id : gui::gui_style_label);
   }
 
@@ -202,7 +215,8 @@ namespace enigma_user
 
   ///Drawers
 	void gui_label_draw(int id){
-     get_element(lab,gui::Label,gui::GUI_TYPE::LABEL,id);
+    get_element(lab,gui::Label,gui::GUI_TYPE::LABEL,id);
+    int pfont = enigma_user::draw_get_font();
 		unsigned int phalign = enigma_user::draw_get_halign();
 		unsigned int pvalign = enigma_user::draw_get_valign();
 		int pcolor = enigma_user::draw_get_color();
@@ -212,9 +226,11 @@ namespace enigma_user
 		enigma_user::draw_set_valign(pvalign);
 		enigma_user::draw_set_color(pcolor);
 		enigma_user::draw_set_alpha(palpha);
+    enigma_user::draw_set_font(pfont);
 	}
 
 	void gui_labels_draw(){
+    int pfont = enigma_user::draw_get_font();
 		unsigned int phalign = enigma_user::draw_get_halign();
 		unsigned int pvalign = enigma_user::draw_get_valign();
 		int pcolor = enigma_user::draw_get_color();
@@ -232,6 +248,7 @@ namespace enigma_user
 		enigma_user::draw_set_valign(pvalign);
 		enigma_user::draw_set_color(pcolor);
 		enigma_user::draw_set_alpha(palpha);
+    enigma_user::draw_set_font(pfont);
 	}
 }
 

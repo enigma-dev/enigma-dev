@@ -1,4 +1,4 @@
-/** Copyright (C) 2014 Harijs Grinbergs
+/** Copyright (C) 2014-2015 Harijs Grinbergs
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -21,6 +21,7 @@
 using std::array;
 
 #include "common.h"
+#include "parents.h"
 
 namespace enigma_user
 {
@@ -52,6 +53,8 @@ namespace gui
 			void draw(gs_scalar ox = 0, gs_scalar oy = 0);
 			void update_text_pos(int state = -1);
 			void callback_execute(int event);
+
+      Parent parenter;
 	};
 }
 

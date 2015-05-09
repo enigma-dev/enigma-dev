@@ -40,8 +40,10 @@ namespace gui
 	extern int gui_bound_skin;
   extern unsigned int gui_style_slider;
 
-  extern unsigned int gui_elements_maxid;
+	extern unsigned int gui_elements_maxid;
+  extern unsigned int gui_data_elements_maxid;
   extern unordered_map<unsigned int, Element> gui_elements;
+  extern unordered_map<unsigned int, DataElement> gui_data_elements;
 
 	extern bool windowStopPropagation; //This stops event propagation between window elements
 
@@ -107,9 +109,18 @@ namespace gui
 
 	void Slider::draw(gs_scalar ox, gs_scalar oy){
 		//Draw slider and indicator
-    get_element(sty,gui::Style,gui::GUI_TYPE::STYLE,style_id);
+    get_data_element(sty,gui::Style,gui::GUI_TYPE::STYLE,style_id);
     if (sty.sprites[state] != -1){
-      enigma_user::draw_sprite_padded(sty.sprites[state],-1,
+      if (sty.border.zero == true){
+        enigma_user::draw_sprite_stretched(sty.sprites[state],-1,
+                                           ox + box.x,
+                                           oy + box.y,
+                                           box.w,
+                                           box.h,
+                                           sty.sprite_styles[state].color,
+                                           sty.sprite_styles[state].alpha);
+      }else{
+        enigma_user::draw_sprite_padded(sty.sprites[state],-1,
                                       sty.border.left,
                                       sty.border.top,
                                       sty.border.right,
@@ -120,11 +131,25 @@ namespace gui
                                       oy + box.y+box.h,
                                       sty.sprite_styles[state].color,
                                       sty.sprite_styles[state].alpha);
+      }
 		}
-    
-    get_element(sty_ind,gui::Style,gui::GUI_TYPE::STYLE,indicator_style_id);
+
+    get_data_element(sty_ind,gui::Style,gui::GUI_TYPE::STYLE,indicator_style_id);
     if (sty_ind.sprites[state] != -1){
-      enigma_user::draw_sprite_padded(sty_ind.sprites[state],-1,
+      /*printf("Ind spr size = %f x %f and %f x %f\n", sty_ind.image_offset.x + ox + box.x + slider_offset + indicator_box.x,
+                                           sty_ind.image_offset.y + oy + box.y + indicator_box.y,
+                                           sty_ind.image_offset.x + ox + box.x + indicator_box.w + slider_offset + indicator_box.x,
+                                           sty_ind.image_offset.y + oy + box.y+indicator_box.h + indicator_box.y);*/
+      if (sty_ind.border.zero == true){
+        enigma_user::draw_sprite_stretched(sty_ind.sprites[state],-1,
+                                           sty_ind.image_offset.x + ox + box.x + slider_offset + indicator_box.x,
+                                           sty_ind.image_offset.y + oy + box.y + indicator_box.y,
+                                           indicator_box.w,
+                                           indicator_box.h,
+                                           sty_ind.sprite_styles[state].color,
+                                           sty_ind.sprite_styles[state].alpha);
+      }else{
+        enigma_user::draw_sprite_padded(sty_ind.sprites[state],-1,
                                       sty_ind.border.left,
                                       sty_ind.border.top,
                                       sty_ind.border.right,
@@ -135,6 +160,7 @@ namespace gui
                                       sty_ind.image_offset.y + oy + box.y+indicator_box.h + indicator_box.y,
                                       sty_ind.sprite_styles[state].color,
                                       sty_ind.sprite_styles[state].alpha);
+      }
 		}
 
 		//Draw text
@@ -163,7 +189,7 @@ namespace enigma_user
 		if (gui::gui_bound_skin == -1){ //Add default one
 			gui::gui_elements.emplace(gui::gui_elements_maxid, gui::Slider());
 		}else{
-      get_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,gui::gui_bound_skin,-1);
+      get_data_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,gui::gui_bound_skin,-1);
 			gui::gui_elements.emplace(gui::gui_elements_maxid, gui::gui_elements[ski.slider_style]);
 		}
     gui::Slider &s = gui::gui_elements[gui::gui_elements_maxid];
@@ -180,7 +206,7 @@ namespace enigma_user
 		if (gui::gui_bound_skin == -1){ //Add default one
 			gui::gui_elements.emplace(gui::gui_elements_maxid, gui::Slider());
 		}else{
-      get_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,gui::gui_bound_skin,-1);
+      get_data_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,gui::gui_bound_skin,-1);
 			gui::gui_elements.emplace(gui::gui_elements_maxid, gui::gui_elements[ski.slider_style]);
 		}
     gui::Slider &s = gui::gui_elements[gui::gui_elements_maxid];
@@ -241,11 +267,13 @@ namespace enigma_user
 
   void gui_slider_set_style(int id, int style_id){
     get_element(sli,gui::Slider,gui::GUI_TYPE::SLIDER,id);
+    check_data_element(gui::GUI_TYPE::STYLE, style_id);
     sli.style_id = (style_id != -1? style_id : gui::gui_style_slider);
   }
 
   void gui_slider_set_indicator_style(int id, int style_id){
     get_element(sli,gui::Slider,gui::GUI_TYPE::SLIDER,id);
+    check_data_element(gui::GUI_TYPE::STYLE, style_id);
     sli.indicator_style_id = (style_id != -1? style_id : gui::gui_style_slider);
   }
 
@@ -386,6 +414,7 @@ namespace enigma_user
   ///Drawers
 	void gui_slider_draw(int id){
     get_element(sli,gui::Slider,gui::GUI_TYPE::SLIDER,id);
+    int pfont = enigma_user::draw_get_font();
 		unsigned int phalign = enigma_user::draw_get_halign();
 		unsigned int pvalign = enigma_user::draw_get_valign();
 		int pcolor = enigma_user::draw_get_color();
@@ -396,9 +425,11 @@ namespace enigma_user
 		enigma_user::draw_set_valign(pvalign);
 		enigma_user::draw_set_color(pcolor);
 		enigma_user::draw_set_alpha(palpha);
+    enigma_user::draw_set_font(pfont);
 	}
 
 	void gui_sliders_draw(){
+    int pfont = enigma_user::draw_get_font();
 		unsigned int phalign = enigma_user::draw_get_halign();
 		unsigned int pvalign = enigma_user::draw_get_valign();
 		int pcolor = enigma_user::draw_get_color();
@@ -417,6 +448,7 @@ namespace enigma_user
 		enigma_user::draw_set_valign(pvalign);
 		enigma_user::draw_set_color(pcolor);
 		enigma_user::draw_set_alpha(palpha);
+    enigma_user::draw_set_font(pfont);
 	}
 }
 
