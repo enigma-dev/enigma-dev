@@ -36,34 +36,37 @@ using std::unordered_map;
 #include "toggles.h"
 
 namespace gui{
-  extern unsigned int gui_elements_maxid;
+	extern unsigned int gui_elements_maxid;
+  extern unsigned int gui_data_elements_maxid;
   extern unordered_map<unsigned int, Element> gui_elements;
+  extern unordered_map<unsigned int, DataElement> gui_data_elements;
 }
 
 namespace enigma_user
 {
 	int gui_group_create(){
-		gui::gui_elements.emplace(gui::gui_elements_maxid, gui::Group());
-		gui::Group &g = gui::gui_elements[gui::gui_elements_maxid];
-		g.id = gui::gui_elements_maxid;
-		return gui::gui_elements_maxid++;
+		gui::gui_data_elements.emplace(gui::gui_data_elements_maxid, gui::Group());
+		gui::Group &g = gui::gui_data_elements[gui::gui_data_elements_maxid];
+    printf("Creating group with size %i\n", sizeof(gui::gui_data_elements[gui::gui_data_elements_maxid]));
+		g.id = gui::gui_data_elements_maxid;
+		return gui::gui_data_elements_maxid++;
 	}
 
 	void gui_group_destroy(int id){
-    check_element(gui::GUI_TYPE::GROUP,bid);
-		gui::gui_elements.erase(gui::gui_elements.find(id));
+    check_data_element(gui::GUI_TYPE::GROUP,id);
+		gui::gui_data_elements.erase(gui::gui_data_elements.find(id));
 	}
 
   void gui_group_add_button(int id, int bid){
     get_element(but,gui::Button,gui::GUI_TYPE::BUTTON,bid);
-    get_element(gro,gui::Group,gui::GUI_TYPE::GROUP,id);
+    get_data_element(gro,gui::Group,gui::GUI_TYPE::GROUP,id);
     gro.group_buttons.push_back(bid);
     but.group_id = id;
   }
 
   void gui_group_add_toggle(int id, int tid){
     get_element(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,tid);
-    get_element(gro,gui::Group,gui::GUI_TYPE::GROUP,id);
+    get_data_element(gro,gui::Group,gui::GUI_TYPE::GROUP,id);
     gro.group_toggles.push_back(tid);
     tog.group_id = id;
   }

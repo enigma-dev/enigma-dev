@@ -32,17 +32,19 @@ namespace gui
   };
 
 	struct rect_offset{
+	  bool zero = true;
 		gs_scalar top = 0.0, left = 0.0, bottom = 0.0, right = 0.0;
 		rect_offset() { }
 		rect_offset(gs_scalar l, gs_scalar t, gs_scalar r, gs_scalar b) : top(t), left(l), bottom(b), right(r) { }
-		void set(gs_scalar l, gs_scalar t, gs_scalar r, gs_scalar b) { left = l, top = t, right = r, bottom = b; }
+		void set(gs_scalar l, gs_scalar t, gs_scalar r, gs_scalar b) { left = l, top = t, right = r, bottom = b; zero = ((((0==l)==t)==r)==b); }
 	};
 
 	struct rect{
+	  bool zero = true;
 		gs_scalar x = 0.0, y = 0.0, w = 0.0, h = 0.0;
 		rect() { }
 		rect(gs_scalar rx, gs_scalar ry, gs_scalar rw, gs_scalar rh) : x(rx), y(ry), w(rw), h(rh) { }
-    void set(gs_scalar rx, gs_scalar ry, gs_scalar rw, gs_scalar rh) { x = rx, y = ry, w = rw, h = rh; }
+    void set(gs_scalar rx, gs_scalar ry, gs_scalar rw, gs_scalar rh) { x = rx, y = ry, w = rw, h = rh; zero = ((0==w)==h); }
 		bool point_inside(gs_scalar tx, gs_scalar ty){ return (tx>x && tx<x+w && ty>y && ty<y+h); }
 	};
 
