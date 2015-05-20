@@ -110,14 +110,23 @@ namespace gui
 
         //Resize
         if (enigma_user::mouse_check_button_pressed(enigma_user::mb_left) && (box_left.point_inside(txox,tyoy) || box_top.point_inside(txox,tyoy) || box_right.point_inside(txox,tyoy) || box_bottom.point_inside(txox,tyoy))){ //Press
-          if (box_left.point_inside(txox,tyoy)) { if (!box_top.point_inside(txox,tyoy)) { resize_side = 0; } else { resize_side = 1; } }
-          else if (box_top.point_inside(txox,tyoy)) { if (!box_right.point_inside(txox,tyoy)) { resize_side = 2; } else { resize_side = 3; } }
-          else if (box_right.point_inside(txox,tyoy)) { if (!box_bottom.point_inside(txox,tyoy)) { resize_side = 4; } else { resize_side = 5; } }
-          else if (box_bottom.point_inside(txox,tyoy)) { if (!box_left.point_inside(txox,tyoy)) { resize_side = 6; } else { resize_side = 7; } }
+          if (box_bottom.point_inside(txox,tyoy)){ //Check bottom and corners
+            if (box_left.point_inside(txox,tyoy)){ resize_side = 7; } 
+            else if (box_right.point_inside(txox,tyoy)){ resize_side = 5; } 
+            else { resize_side = 6; } 
+          } else if (box_top.point_inside(txox, tyoy)){ //Check top and corners
+            if (box_left.point_inside(txox,tyoy)){ resize_side = 1; } 
+            else if (box_right.point_inside(txox,tyoy)){ resize_side = 3; } 
+            else { resize_side = 2; } 
+          } else if (box_left.point_inside(txox,tyoy)){ //Check left
+            resize_side = 0; 
+          } else if (box_right.point_inside(txox,tyoy)){ //Check right
+            resize_side = 4;
+          }
           drag_xoffset = txox-box.x;
-          drag_yoffset = txox-box.y;
+          drag_yoffset = tyoy-box.y;
           resize_xoffset = txox;
-          resize_yoffset = txox;
+          resize_yoffset = tyoy;
           resize_width = box.w;
           resize_height = box.h;
           resize = true;
@@ -134,22 +143,22 @@ namespace gui
       switch (resize_side){
         case 0: { //Resizing left side
           box.w = fmax(resize_width - (txox - resize_xoffset), min_box.w);
-          box.x = txox-drag_xoffset;
+          box.x = fmin(txox-drag_xoffset, resize_xoffset+resize_width-min_box.w-drag_xoffset);
         } break;
         case 1: { //Resizing top-left
           box.w = fmax(resize_width - (txox - resize_xoffset), min_box.w);
           box.h = fmax(resize_height - (tyoy - resize_yoffset), min_box.h);
-          box.x = txox-drag_xoffset;
-          box.y = tyoy-drag_yoffset;
+          box.x = fmin(txox-drag_xoffset, resize_xoffset+resize_width-min_box.w-drag_xoffset);
+          box.y = fmin(tyoy-drag_yoffset, resize_yoffset+resize_height-min_box.h-drag_yoffset);
         } break;
         case 2: { //Resizing top
           box.h = fmax(resize_height - (tyoy - resize_yoffset), min_box.h);
-          box.y = tyoy-drag_yoffset;
+          box.y = fmin(tyoy-drag_yoffset, resize_yoffset+resize_height-min_box.h-drag_yoffset);
         } break;
         case 3: { //Resizing top-right
           box.w = fmax(resize_width + (txox - resize_xoffset), min_box.w);
           box.h = fmax(resize_height - (tyoy - resize_yoffset), min_box.h);
-          box.y = tyoy-drag_yoffset;
+          box.y = fmin(tyoy-drag_yoffset, resize_yoffset+resize_height-min_box.h-drag_yoffset);
         } break;
         case 4: { //Resizing right side
           box.w = fmax(resize_width + (txox - resize_xoffset), min_box.w);
@@ -158,13 +167,13 @@ namespace gui
           box.w = fmax(resize_width + (txox - resize_xoffset), min_box.w);
           box.h = fmax(resize_height + (tyoy - resize_yoffset), min_box.h);
         } break;
-        case 6: { //Resizing top
+        case 6: { //Resizing bottom
           box.h = fmax(resize_height + (tyoy - resize_yoffset), min_box.h);
         } break;
-        case 7: { //Resizing top-left
+        case 7: { //Resizing bottom-left
           box.w = fmax(resize_width - (txox - resize_xoffset), min_box.w);
           box.h = fmax(resize_height + (tyoy - resize_yoffset), min_box.h);
-          box.x = txox-drag_xoffset;
+          box.x = fmin(txox-drag_xoffset, resize_xoffset+resize_width-min_box.w-drag_xoffset);
         } break;
       }
       callback_execute(enigma_user::gui_event_resize);
