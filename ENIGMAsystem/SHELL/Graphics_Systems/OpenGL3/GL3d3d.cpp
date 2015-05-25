@@ -198,6 +198,7 @@ int d3d_get_culling() {
 
 void d3d_set_fill_mode(int fill)
 {
+  oglmgr->BlendFunc();
   glPolygonMode(GL_FRONT_AND_BACK, fillmodes[fill]);
 }
 
