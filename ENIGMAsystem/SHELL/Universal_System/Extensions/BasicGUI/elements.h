@@ -19,6 +19,8 @@
 #define BGUI_ELEMENTS_H
 
 #include <new> //Placement new
+#include <utility>      // std::pair, std::piecewise_construct
+#include <tuple>        // std::forward_as_tuple
 
 #include "sliders.h"
 #include "buttons.h"
@@ -175,32 +177,32 @@ namespace gui
       //Constructors
       inline Element(){ }
 
-      inline Element(const Button &but){
+      inline Element(const Button &but, int id) : id(id){
         type = GUI_TYPE::BUTTON;
         new (&(data.button)) Button(but);
       }
 
-      inline Element(const Slider &sli){
+      inline Element(const Slider &sli, int id) : id(id){
         type = GUI_TYPE::SLIDER;
         new (&(data.button)) Slider(sli);
       }
 
-      inline Element(const Toggle &tog){
+      inline Element(const Toggle &tog, int id) : id(id){
         type = GUI_TYPE::TOGGLE;
         new (&(data.toggle)) Toggle(tog);
       }
 
-      inline Element(const Label &lab){
+      inline Element(const Label &lab, int id) : id(id){
         type = GUI_TYPE::LABEL;
         new (&(data.label)) Label(lab);
       }
 
-      inline Element(const Scrollbar &scr){
+      inline Element(const Scrollbar &scr, int id) : id(id){
         type = GUI_TYPE::SCROLLBAR;
         new (&(data.scrollbar)) Scrollbar(scr);
       }
 
-      inline Element(const Window &win){
+      inline Element(const Window &win, int id) : id(id){
         type = GUI_TYPE::WINDOW;
         new (&(data.window)) Window(win);
       }
@@ -227,7 +229,7 @@ namespace gui
             data.window.~Window();
             break;
           default:
-            printf("Unknown element type or element type == ERROR!\n");
+            printf("Unknown element type or element type == ERROR and id = %i!\n", id);
             break;
         }
       }

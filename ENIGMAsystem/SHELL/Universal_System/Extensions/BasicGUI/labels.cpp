@@ -109,10 +109,11 @@ namespace enigma_user
 {
 	int gui_label_create(){
 		if (gui::gui_bound_skin == -1){ //Add default one
-			gui::gui_elements.emplace(gui::gui_elements_maxid, gui::Label());
+    	gui::gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(gui::gui_elements_maxid), std::forward_as_tuple(gui::Label(), gui::gui_elements_maxid));
 		}else{
       get_data_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,gui::gui_bound_skin,-1);
-			gui::gui_elements.emplace(gui::gui_elements_maxid, gui::gui_elements[ski.label_style]);
+      get_elementv(lab,gui::Label,gui::GUI_TYPE::LABEL,ski.label_style,-1);
+      gui::gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(gui::gui_elements_maxid), std::forward_as_tuple(lab, gui::gui_elements_maxid));
 		}
     gui::Label &lab = gui::gui_elements[gui::gui_elements_maxid];
 		lab.visible = true;
@@ -122,10 +123,11 @@ namespace enigma_user
 
 	int gui_label_create(gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h, string text){
 		if (gui::gui_bound_skin == -1){ //Add default one
-			gui::gui_elements.emplace(gui::gui_elements_maxid, gui::Label());
+    	gui::gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(gui::gui_elements_maxid), std::forward_as_tuple(gui::Label(), gui::gui_elements_maxid));
 		}else{
       get_data_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,gui::gui_bound_skin,-1);
-			gui::gui_elements.emplace(gui::gui_elements_maxid, gui::gui_elements[ski.label_style]);
+      get_elementv(lab,gui::Label,gui::GUI_TYPE::LABEL,ski.label_style,-1);
+      gui::gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(gui::gui_elements_maxid), std::forward_as_tuple(lab, gui::gui_elements_maxid));
 		}
     gui::Label &lab = gui::gui_elements[gui::gui_elements_maxid];
 		lab.visible = true;

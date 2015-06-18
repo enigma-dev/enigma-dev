@@ -63,6 +63,7 @@ namespace gui
 
 	void Slider::update_spos(){
       slider_offset = box.w*((value-minValue)/(maxValue-minValue));
+      rangeValue = fabs(minValue)+fabs(maxValue);
       segments = (maxValue-minValue)/incValue;
 	}
 
@@ -97,7 +98,7 @@ namespace gui
 		if (drag == true){
       windowStopPropagation = true;
       slider_offset = fmin(fmax(0,tx-box.x-ox-drag_xoffset), box.w);
-      value = round(minValue + slider_offset/box.w * segments) * incValue;
+      value = round((minValue + slider_offset/box.w * rangeValue) / incValue) * incValue;
       slider_offset = box.w*((value-minValue)/(maxValue-minValue));
       callback_execute(enigma_user::gui_event_drag);
 			if (enigma_user::mouse_check_button_released(enigma_user::mb_left)){
@@ -187,10 +188,11 @@ namespace enigma_user
 {
 	int gui_slider_create(){
 		if (gui::gui_bound_skin == -1){ //Add default one
-			gui::gui_elements.emplace(gui::gui_elements_maxid, gui::Slider());
-		}else{
+			gui::gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(gui::gui_elements_maxid), std::forward_as_tuple(gui::Slider(), gui::gui_elements_maxid));
+		}else{  
       get_data_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,gui::gui_bound_skin,-1);
-			gui::gui_elements.emplace(gui::gui_elements_maxid, gui::gui_elements[ski.slider_style]);
+      get_elementv(sli,gui::Slider,gui::GUI_TYPE::SLIDER,ski.slider_style,-1);
+      gui::gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(gui::gui_elements_maxid), std::forward_as_tuple(sli, gui::gui_elements_maxid));
 		}
     gui::Slider &s = gui::gui_elements[gui::gui_elements_maxid];
 		s.visible = true;
@@ -204,10 +206,11 @@ namespace enigma_user
 
 	int gui_slider_create(gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h, gs_scalar ind_x, gs_scalar ind_y, gs_scalar ind_w, gs_scalar ind_h, double val, double minVal, double maxVal, double incrVal, string text){
 		if (gui::gui_bound_skin == -1){ //Add default one
-			gui::gui_elements.emplace(gui::gui_elements_maxid, gui::Slider());
+			gui::gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(gui::gui_elements_maxid), std::forward_as_tuple(gui::Slider(), gui::gui_elements_maxid));
 		}else{
       get_data_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,gui::gui_bound_skin,-1);
-			gui::gui_elements.emplace(gui::gui_elements_maxid, gui::gui_elements[ski.slider_style]);
+      get_elementv(sli,gui::Slider,gui::GUI_TYPE::SLIDER,ski.slider_style,-1);
+      gui::gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(gui::gui_elements_maxid), std::forward_as_tuple(sli, gui::gui_elements_maxid));
 		}
     gui::Slider &s = gui::gui_elements[gui::gui_elements_maxid];
 		s.visible = true;
@@ -217,6 +220,7 @@ namespace enigma_user
     s.minValue = minVal;
 		s.maxValue = maxVal;
     s.value = val;
+    s.rangeValue = fabs(minVal)+fabs(maxVal);
 
     if (incrVal == 0){
       s.incValue = 1.0/w;
