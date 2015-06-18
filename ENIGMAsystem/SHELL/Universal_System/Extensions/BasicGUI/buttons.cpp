@@ -190,12 +190,13 @@ namespace enigma_user
 {
 	int gui_button_create(){
 		if (gui::gui_bound_skin == -1){ //Add default one
-			gui::gui_elements.emplace(gui::gui_elements_maxid, gui::Button());
-      printf("Creating default button with size %i\n", sizeof(gui::gui_elements[gui::gui_elements_maxid]));
+			gui::gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(gui::gui_elements_maxid), std::forward_as_tuple(gui::Button(), gui::gui_elements_maxid));
+      //printf("Creating default button with size %i\n", sizeof(gui::gui_elements[gui::gui_elements_maxid]));
 		}else{
       get_data_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,gui::gui_bound_skin,-1);
-			gui::gui_elements.emplace(gui::gui_elements_maxid, gui::gui_elements[ski.button_style]);
-      printf("Creating button with size %i\n", sizeof(gui::gui_elements[gui::gui_elements_maxid]));
+      get_elementv(but,gui::Button,gui::GUI_TYPE::BUTTON,ski.button_style,-1);
+      gui::gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(gui::gui_elements_maxid), std::forward_as_tuple(but, gui::gui_elements_maxid));
+      //printf("Creating button with size %i\n", sizeof(gui::gui_elements[gui::gui_elements_maxid]));
 		}
 		gui::Button &b = gui::gui_elements[gui::gui_elements_maxid];
 		b.visible = true;
@@ -205,10 +206,11 @@ namespace enigma_user
 
 	int gui_button_create(gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h, string text){
 		if (gui::gui_bound_skin == -1){ //Add default one
-			gui::gui_elements.emplace(gui::gui_elements_maxid, gui::Button());
+			gui::gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(gui::gui_elements_maxid), std::forward_as_tuple(gui::Button(), gui::gui_elements_maxid));
 		}else{
       get_data_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,gui::gui_bound_skin,-1);
-			gui::gui_elements.emplace(gui::gui_elements_maxid, gui::gui_elements[ski.button_style]);
+      get_elementv(but,gui::Button,gui::GUI_TYPE::BUTTON,ski.button_style,-1);
+      gui::gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(gui::gui_elements_maxid), std::forward_as_tuple(but, gui::gui_elements_maxid));
 		}
     gui::Button &b = gui::gui_elements[gui::gui_elements_maxid];
 		b.visible = true;
