@@ -493,7 +493,7 @@ string get_open_filename(string filter,string filename,string caption)
   ofn.lpstrFile=fn; ofn.nMaxFile=MAX_PATH;
   ofn.lpstrFileTitle=NULL; ofn.nMaxFileTitle=0;
   ofn.lpstrInitialDir=NULL; ofn.lpstrTitle=caption.length()?caption.c_str():NULL;
-  ofn.Flags=OFN_FILEMUSTEXIST|OFN_HIDEREADONLY;
+  ofn.Flags=OFN_FILEMUSTEXIST|OFN_HIDEREADONLY|OFN_NOCHANGEDIR;
   ofn.nFileOffset=0; ofn.nFileExtension=0;
   ofn.lpstrDefExt=NULL; ofn.lCustData=0;
   ofn.lpfnHook=NULL; ofn.lpTemplateName=0;
@@ -519,7 +519,7 @@ string get_save_filename(string filter, string filename, string caption)
   ofn.lpstrFile=fn; ofn.nMaxFile=MAX_PATH;
   ofn.lpstrFileTitle=NULL; ofn.nMaxFileTitle=0;
   ofn.lpstrInitialDir=NULL; ofn.lpstrTitle=caption.length()?caption.c_str():NULL;
-  ofn.Flags=OFN_PATHMUSTEXIST;
+  ofn.Flags=OFN_PATHMUSTEXIST|OFN_NOCHANGEDIR;
   ofn.nFileOffset=0; ofn.nFileExtension=0;
   ofn.lpstrDefExt=NULL; ofn.lCustData=0;
   ofn.lpfnHook=NULL; ofn.lpTemplateName=0;
