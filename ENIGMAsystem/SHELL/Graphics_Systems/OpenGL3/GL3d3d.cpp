@@ -117,8 +117,8 @@ void d3d_end()
 // disabling hidden surface removal in means there is no depth buffer
 void d3d_set_hidden(bool enable)
 {
-    (enable?glEnable:glDisable)(GL_DEPTH_TEST);
-    enigma::d3dHidden = enable;
+  oglmgr->SetEnabled(GL_DEPTH_TEST, enable);
+  enigma::d3dHidden = enable;
 	d3d_set_zwriteenable(enable);
 }
 
@@ -127,6 +127,7 @@ void d3d_set_hidden(bool enable)
 // properly particle effects are usually drawn with zwriting disabled because of this as well
 void d3d_set_zwriteenable(bool enable)
 {
+  oglmgr->BlendFunc();
 	glDepthMask(enable);
 	enigma::d3dZWriteEnable = enable;
 }
@@ -518,12 +519,12 @@ bool d3d_light_enable(int id, bool enable)
 
 void d3d_set_lighting(bool enable)
 {
-    enigma::d3d_lighting.lights_enable(enable);
+  enigma::d3d_lighting.lights_enable(enable);
 	oglmgr->Lighting();
-    enigma::d3d_lighting.light_update();
-    if (enable == true){
-        enigma::d3d_lighting.lightsource_update();
-    }
+  enigma::d3d_lighting.light_update();
+  if (enable == true){
+    enigma::d3d_lighting.lightsource_update();
+  }
 }
 
 void d3d_stencil_start_mask(){
@@ -562,8 +563,8 @@ void d3d_stencil_end_mask(){
 }
 
 namespace enigma {
-    void d3d_light_update_positions()
-    {
-        enigma::d3d_lighting.light_update_positions();
-    }
+  void d3d_light_update_positions()
+  {
+      enigma::d3d_lighting.light_update_positions();
+  }
 }
