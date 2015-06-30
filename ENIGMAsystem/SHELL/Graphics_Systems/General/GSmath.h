@@ -226,6 +226,14 @@ namespace enigma
           m[3][0] = a30; m[3][1] = a31; m[3][2] = a32; m[3][3] = a33;
       }
 
+      Matrix4(const gs_scalar *array)
+      {
+        gs_scalar *i = (gs_scalar*)m;
+        const float *j =  array;
+        for (int k=0; k<16; i++,j++,k++)
+          *i = *j;
+      }
+
       void SetZero()
       {
           for (unsigned int i = 0 ; i < 4 ; ++i) {
@@ -297,7 +305,7 @@ namespace enigma
           return &(m[0][0]);
       }
 
-      void Print() const
+      void print() const
       {
           for (int i = 0 ; i < 4 ; ++i) {
               printf("%f %f %f %f\n", m[i][0], m[i][1], m[i][2], m[i][3]);
