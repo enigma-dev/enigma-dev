@@ -195,7 +195,7 @@ static INT_PTR CALLBACK ShowMessageExtProc(HWND hwndDlg, UINT uMsg, WPARAM wPara
   return 0;
 }
 
-static INT CALLBACK GetDirectoryAltProc(HWND hwnd, UINT uMsg, LPARAM lp, LPARAM pData)
+static int CALLBACK GetDirectoryAltProc(HWND hwnd, UINT uMsg, LPARAM lp, LPARAM pData)
 {
   if (uMsg == BFFM_INITIALIZED)
     SetWindowText(hwnd, gs_cap.c_str());
@@ -575,46 +575,48 @@ string get_directory(string dname, string caption)
 }
 
 string get_directory_alt(string message, string root, bool modern, string caption) {
-  // standard use of the Shell API to browse for folders
-  bool f_selected = false;
+	//standard use of the Shell API to browse for folders
+	bool f_selected = false;
 
-  char szDir [MAX_PATH];
-  BROWSEINFO bi;
-  LPITEMIDLIST pidl;
-  LPMALLOC pMalloc;
+	char szDir [MAX_PATH];
+	BROWSEINFO bi;        
+	LPITEMIDLIST pidl;        
+	LPMALLOC pMalloc;
 
-  if (SUCCEEDED (::SHGetMalloc (&pMalloc)))
-  {
-    ::ZeroMemory (&bi, sizeof(bi));
+	if (SUCCEEDED (::SHGetMalloc (&pMalloc)))
+	{
+	  ::ZeroMemory (&bi,sizeof(bi)); 
 
-    bi.lpszTitle = message.c_str();
-    bi.hwndOwner = enigma::hWnd;
-    bi.pszDisplayName = 0;
-    bi.pidlRoot = 0;
-    bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_STATUSTEXT;
-    if (modern) {
-      bi.ulFlags |= BIF_EDITBOX | BIF_NEWDIALOGSTYLE;
-    }
-    gs_cap = caption;
-    bi.lpfn =  GetDirectoryAltProc;      //callback to set window caption
-    bi.lParam = (LPARAM)root.c_str();    //start in root directory
+	  bi.lpszTitle = message.c_str();
+	  bi.hwndOwner = enigma::hWnd;
+	  bi.pszDisplayName = 0;           
+	  bi.pidlRoot = 0;
+	  bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_STATUSTEXT;
+	  if (modern) {
+		bi.ulFlags |= BIF_EDITBOX | BIF_NEWDIALOGSTYLE;
+	  }
+	  gs_cap = caption;
+	  bi.lpfn =  GetDirectoryAltProc;      //callback to set window caption
+	  //bi.lParam = (LPARAM)root.c_str();    //start in root directory
 
-    pidl = ::SHBrowseForFolder(&bi);
-    if (pidl) {
-      if (::SHGetPathFromIDList(pidl, szDir)) {
-        f_selected = true;
-      }
+	  pidl = ::SHBrowseForFolder(&bi);           
+	  if (pidl)
+	  {
+		 if (::SHGetPathFromIDList(pidl, szDir))
+		 {
+			f_selected = true;
+		 }
 
-      pMalloc->Free(pidl);
-      pMalloc->Release();
-    }
-  }
+		 pMalloc->Free(pidl);
+		 pMalloc->Release();
+	  }     
+	}
 
-  if (f_selected) {
-    return szDir;
-  } else {
-    return "";
-  }
+	if (f_selected) {
+		return szDir;
+	} else {
+		return "";
+	}
 }
 
 }

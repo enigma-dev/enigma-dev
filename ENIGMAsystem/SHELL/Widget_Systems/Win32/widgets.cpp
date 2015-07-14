@@ -47,7 +47,7 @@ typedef gtkl_widget enigma_widget;
 using namespace std;
 
 vector<gtkl_object*> widgets;
-static unsigned widget_idmax = 0;
+static INT_PTR widget_idmax = 0;
 
 namespace enigma {
   extern HWND hWnd;
@@ -83,9 +83,8 @@ bool wgt_exists(int id) {
 
 #define enigma_window_generic_class "enigma_window_generic_class"
 
-#define getID(hwnd) GetWindowLongPtr((HWND)(hwnd), GWLP_USERDATA)
-#define setID(hwnd,id) SetWindowLongPtr((HWND)(hwnd), GWLP_USERDATA,(id))
-
+#define getID(hwnd) GetWindowLongPtr((HWND)(hwnd),GWLP_USERDATA)
+#define setID(hwnd,id) SetWindowLongPtr((HWND)(hwnd),GWLP_USERDATA,(id))
 #define fixFont(hwnd) SendMessage(hwnd,WM_SETFONT,(WPARAM)GetStockObject(DEFAULT_GUI_FONT),0);
 
 struct enigma_window: enigma_widget {
