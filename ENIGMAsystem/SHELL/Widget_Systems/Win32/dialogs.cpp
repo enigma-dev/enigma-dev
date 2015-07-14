@@ -202,7 +202,7 @@ static INT_PTR CALLBACK ShowMessageExtProc(HWND hwndDlg,UINT uMsg,WPARAM wParam,
   return 0;
 }
 
-static INT_PTR CALLBACK GetDirectoryAltProc(HWND hwnd, UINT uMsg, LPARAM lp, LPARAM pData)
+static int CALLBACK GetDirectoryAltProc(HWND hwnd, UINT uMsg, LPARAM lp, LPARAM pData)
 {
 	if (uMsg == BFFM_INITIALIZED) 
 		SetWindowText(hwnd, gs_cap.c_str());
@@ -610,7 +610,7 @@ string get_directory_alt(string message, string root, bool modern, string captio
 	  }
 	  gs_cap = caption;
 	  bi.lpfn =  GetDirectoryAltProc;      //callback to set window caption
-	  bi.lParam = (LPARAM)root.c_str();    //start in root directory
+	  //bi.lParam = (LPARAM)root.c_str();    //start in root directory
 
 	  pidl = ::SHBrowseForFolder(&bi);           
 	  if (pidl)
