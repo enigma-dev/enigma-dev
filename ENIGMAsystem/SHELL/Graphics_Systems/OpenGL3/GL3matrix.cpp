@@ -222,14 +222,16 @@ void d3d_transform_set_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, gs_s
 void d3d_transform_set_array(const gs_scalar *matrix)
 {
     oglmgr->Transformation();
-    printf("TRANSFORM Before:\n");
-    enigma::model_matrix.print();
     enigma::model_matrix = enigma::Matrix4(matrix);
-    printf("TRANSFORM After:\n");
-    enigma::model_matrix.print();
     enigma::transform_needs_update = true;
 }
-
+void d3d_transform_add_array(const gs_scalar *matrix)
+{
+    oglmgr->Transformation();
+    enigma::Matrix4 m(matrix);
+    enigma::model_matrix = m*enigma::model_matrix;
+    enigma::transform_needs_update = true;
+}
 }
 
 #include <stack>
@@ -335,11 +337,14 @@ bool d3d_projection_stack_disgard()
 void d3d_projection_set_array(const gs_scalar *matrix)
 {
     oglmgr->Transformation();
-    printf("PROJECTION Before:\n");
-    enigma::projection_matrix.print();
     enigma::projection_matrix = enigma::Matrix4(matrix);
-    printf("PROJECTION After:\n");
-    enigma::projection_matrix.print();
+    enigma::transform_needs_update = true;
+}
+void d3d_projection_add_array(const gs_scalar *matrix)
+{
+    oglmgr->Transformation();
+    enigma::Matrix4 m(matrix);
+    enigma::projection_matrix = m*enigma::projection_matrix;
     enigma::transform_needs_update = true;
 }
 

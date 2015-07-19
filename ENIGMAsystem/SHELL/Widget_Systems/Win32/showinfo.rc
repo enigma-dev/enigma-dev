@@ -1,3 +1,5 @@
+#ifndef SHOWINFO_RC
+#define SHOWINFO_RC 
 #include <windows.h>
 3 ICON "Widget_Systems/Win32/info.ico"
 1 24 "Widget_Systems/Win32/manifest.xml"
@@ -10,3 +12,4 @@ FONT 8, "Ms Shell Dlg 2"
 {
 
 }
+#endif

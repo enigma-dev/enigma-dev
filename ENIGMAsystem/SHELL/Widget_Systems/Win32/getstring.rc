@@ -1,5 +1,5 @@
-1 24 "Widget_Systems/Win32/manifest.xml"
-
+#ifndef GETSTRING_RC
+#define GETSTRING_RC 
 getstringdialog DIALOG 0, 0, 185, 63
 
 #include <windows.h>
@@ -13,3 +13,4 @@ FONT 8, "Ms Shell Dlg 2"
   EDITTEXT        12, 5, 43, 174, 15, ES_AUTOHSCROLL | ES_LEFT | WS_BORDER | WS_TABSTOP
   LTEXT           "Uninitialized message",13, 5, 5, 119, 33, SS_LEFT
 }
+#endif

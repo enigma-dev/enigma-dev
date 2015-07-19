@@ -1,5 +1,5 @@
-1 24 "Widget_Systems/Win32/manifest.xml"
-
+#ifndef SHOWMESSAGEEXT_RC
+#define SHOWMESSAGEEXT_RC 
 showmessageext DIALOG 0, 0, 185, 64
 
 #include <windows.h>
@@ -13,3 +13,4 @@ FONT 8, "Ms Shell Dlg 2"
   PUSHBUTTON      "but2", 12, 60, 44, 50, 14, BS_PUSHBUTTON
   PUSHBUTTON      "but3", 13, 115, 44, 50, 14, BS_PUSHBUTTON
 }
+#endif

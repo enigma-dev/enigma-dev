@@ -1,5 +1,5 @@
-1 24 "Widget_Systems/Win32/manifest.xml"
-
+#ifndef GETLOGIN_RC
+#define GETLOGIN_RC 
 getlogindialog DIALOG 0, 0, 185, 64
 
 #include <windows.h>
@@ -15,3 +15,4 @@ FONT 8, "Ms Shell Dlg 2"
   EDITTEXT        14, 45, 5, 135, 14, ES_AUTOHSCROLL | ES_LEFT | WS_BORDER | WS_TABSTOP
   EDITTEXT        15, 45, 21, 135, 14, ES_AUTOHSCROLL | ES_LEFT | ES_PASSWORD | WS_BORDER | WS_TABSTOP
 }
+#endif
