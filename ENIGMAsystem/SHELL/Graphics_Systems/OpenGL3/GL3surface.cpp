@@ -121,12 +121,12 @@ int surface_create(int width, int height, bool depthbuffer)
     glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureStructs[texture]->gltex, 0);
 
     if (depthbuffer == 1){
-      GLuint depthBuffer;
-      glGenRenderbuffers(1, &depthBuffer);
-      glBindRenderbuffer(GL_RENDERBUFFER, depthBuffer);
+      glGenRenderbuffers(1, &enigma::surface_array[id].render_buffer);
+      glBindRenderbuffer(GL_RENDERBUFFER, enigma::surface_array[id].render_buffer);
       glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, w, h);
-      glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthBuffer);
+      glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, enigma::surface_array[id].render_buffer);
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+      enigma::surface_array[id].has_render_buffer = true;
     }else{
       glClear(GL_COLOR_BUFFER_BIT);
     }
@@ -244,6 +244,7 @@ void surface_free(int id)
   get_surface(surf,id);
   if (enigma::bound_framebuffer == surf.fbo) glBindFramebuffer(GL_DRAW_FRAMEBUFFER, enigma::bound_framebuffer=0);
   enigma::graphics_delete_texture(surf.tex);
+  if (surf.has_render_buffer == true) { glDeleteRenderbuffers(1, &surf.render_buffer); }
   glDeleteFramebuffers(1, &surf.fbo);
   enigma::surface_array.erase(id);
 }
