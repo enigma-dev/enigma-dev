@@ -63,6 +63,7 @@ void d3d_transform_set_rotation_y(gs_scalar angle);
 void d3d_transform_set_rotation_z(gs_scalar angle);
 void d3d_transform_set_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar angle);
 void d3d_transform_set_array(const gs_scalar *matrix);
+void d3d_transform_add_array(const gs_scalar *matrix);
 
 bool d3d_transform_stack_push();
 bool d3d_transform_stack_pop();
@@ -78,6 +79,7 @@ bool d3d_projection_stack_empty();
 bool d3d_projection_stack_top();
 bool d3d_projection_stack_disgard();
 void d3d_projection_set_array(const gs_scalar *matrix);
+void d3d_projection_add_array(const gs_scalar *matrix);
 
 /*gs_scalar* d3d_transform_vertex(gs_scalar x, gs_scalar y, gs_scalar z);
 

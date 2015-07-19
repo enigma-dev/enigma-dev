@@ -28,7 +28,9 @@ namespace enigma
   {
     GLuint fbo;
     int tex;
+    GLuint render_buffer;
     int width, height;
+    bool has_render_buffer = false;
   };
 }
 
