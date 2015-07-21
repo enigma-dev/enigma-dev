@@ -8,6 +8,7 @@ Target-platform: MacOSX
 # Some info about it
 path:
 make: make
+makeflags:
 cc: x86_64-apple-darwin13-clang
 cxx: x86_64-apple-darwin13-clang++
 defines: x86_64-apple-darwin13-cpp -dM -x c++ -E $blank
