@@ -8,6 +8,7 @@ Target-platform: Windows
 # Some info about it
 path:
 make: make
+makeflags:
 gcc: /usr/local/i386-mingw32-4.3.0/bin/i386-mingw32-gcc
 g++: /usr/local/i386-mingw32-4.3.0/bin/i386-mingw32-g++
 defines: /usr/local/i386-mingw32-4.3.0/bin/i386-mingw32-cpp -dM -x c++ -E $blank

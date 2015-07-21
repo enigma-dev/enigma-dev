@@ -8,6 +8,7 @@ Target-platform: MacOSX
 # Some info about it
 path:
 make: make
+makeflags:
 gcc: gcc
 g++: g++
 cxx: g++

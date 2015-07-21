@@ -8,6 +8,7 @@ Target-platform: iPhone
 # Some info about it
 path:
 make: make
+makeflags:
 gcc: /Applications/Xcode5-DP3.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++
 g++: /Applications/Xcode5-DP3.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++
 cxx: /Applications/Xcode5-DP3.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang++

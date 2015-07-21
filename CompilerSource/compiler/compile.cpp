@@ -128,8 +128,9 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   {
     edbg << "Cleaning..." << flushl;
 
-	string make = "clean-game ";
-	string compilepath = CURRENT_PLATFORM_NAME "/" + extensions::targetOS.identifier;
+  string compilepath = CURRENT_PLATFORM_NAME "/" + extensions::targetOS.identifier;
+	string make = MAKE_flags;
+  make += " clean-game ";
 	make += "COMPILEPATH=\"" + compilepath + "\" ";
 	make += "WORKDIR=\"" + makedir + "\" ";
 	make += "eTCpath=\"" + MAKE_tcpaths + "\"";
@@ -580,8 +581,9 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
 
   idpr("Starting compile (This may take a while...)", 30);
 
-  string make = "Game ";
+  string make = MAKE_flags;
 
+  make += " Game ";
   make += "WORKDIR=\"" + makedir + "\" ";
   make += mode == emode_debug? "GMODE=Debug ": mode == emode_design? "GMODE=Design ": mode == emode_compile?"GMODE=Compile ": "GMODE=Run ";
   make += "GRAPHICS=" + extensions::targetAPI.graphicsSys + " ";

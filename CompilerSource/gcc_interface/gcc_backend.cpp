@@ -65,7 +65,7 @@ inline string fc(const char* fn)
 bool init_found_gcc = false;
 bool init_load_successful = false;
 
-string MAKE_paths, MAKE_tcpaths, MAKE_location, TOPLEVEL_cflags, TOPLEVEL_cppflags, TOPLEVEL_cxxflags, TOPLEVEL_links, CXX_override, CC_override, WINDRES_location, TOPLEVEL_ldflags;
+string MAKE_flags, MAKE_paths, MAKE_tcpaths, MAKE_location, TOPLEVEL_cflags, TOPLEVEL_cppflags, TOPLEVEL_cxxflags, TOPLEVEL_links, CXX_override, CC_override, WINDRES_location, TOPLEVEL_ldflags;
 
 inline int rdir_system(string x, string y)
 {
@@ -164,6 +164,7 @@ const char* establish_bearings(const char *compiler)
   ****************************/
   MAKE_paths = compey.get("path");
   MAKE_tcpaths = compey.get("tcpath");
+  MAKE_flags =  compey.get("makeflags");
   TOPLEVEL_cflags = compey.get("cflags");
   TOPLEVEL_cppflags = compey.get("cppflags");
   TOPLEVEL_cxxflags = compey.get("cxxflags");

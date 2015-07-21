@@ -1,3 +1,4 @@
+
 #################
 # configuration #
 #################
@@ -131,9 +132,8 @@ $(OBJDIR)/%.o $(OBJDIR)/%.d: %.m | $(OBJDIRS)
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(INCLUDES) -MMD -MP -c -o $(OBJDIR)/$*.o $<
 
 $(OBJDIR)/resources.res: $(RCFILES) GENERATED_FILE
-	echo "// GENERATED RESOURCE FILE FRONTEND" > $(OBJDIR)/resources.rc
-	
-	for res in $(RESOURCES); do echo "#include \"$$res\"" >> $(OBJDIR)/resources.rc; done
+	echo // GENERATED RESOURCE FILE FRONTEND > $(OBJDIR)/resources.rc
+	for %%r in ($(RESOURCES)) do echo #include "%%r" >> $(OBJDIR)/resources.rc
 	$(WINDRES) -o $@ -I. -I$(WORKDIR) $(OBJDIR)/resources.rc -O coff
 GENERATED_FILE:
 
