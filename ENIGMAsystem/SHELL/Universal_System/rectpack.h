@@ -34,8 +34,8 @@ namespace enigma
       void rect(int xx, int yy, int w, int h);
     };
     
-    void rncopy(rectpnode *h, pvrect *boxes, unsigned char c);
-    rectpnode *rninsert(rectpnode* who, unsigned char c, pvrect* boxes);
+    void rncopy(rectpnode *h, pvrect *boxes, unsigned int c);
+    rectpnode *rninsert(rectpnode* who, unsigned int c, pvrect* boxes);
     rectpnode *expand(rectpnode* who, int w, int h);
   }
 }
