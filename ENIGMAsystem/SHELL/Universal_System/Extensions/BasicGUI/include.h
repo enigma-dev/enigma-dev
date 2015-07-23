@@ -298,10 +298,16 @@ namespace enigma_user
 	//depth changers
 	void gui_window_push_to_front(int id);
 	void gui_window_push_to_back(int id);
+  void gui_window_group_push_to_front(int gid);
+  void gui_window_group_push_to_back(int gid);
+
+  //Updaters
+  void gui_windows_update();
 
 	//Drawers
 	void gui_window_draw(int id);
 	void gui_windows_draw();
+  void gui_windows_group_draw(int gid);
 
   //Window parenting
   void gui_window_add_button(int id, int bid);
@@ -364,7 +370,11 @@ namespace enigma_user
   void gui_group_destroy(int id);
   void gui_group_add_button(int id, int bid);
   void gui_group_add_toggle(int id, int tid);
-
+  void gui_group_add_window(int id, int wid);
+  void gui_group_remove_button(int id, int bid);
+  void gui_group_remove_toggle(int id, int tid);
+  void gui_group_remove_window(int id, int wid);
+  
 	//Skins
 	int gui_skin_create();
 	void gui_skin_destroy(int id);

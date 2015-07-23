@@ -26,6 +26,7 @@ namespace gui
 
       vector<unsigned int> group_buttons;
       vector<unsigned int> group_toggles;
+      vector<unsigned int> group_windows;
 	};
 }
 

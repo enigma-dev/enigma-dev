@@ -35,9 +35,9 @@ namespace gui
 {
 	class Window{
 		public:
-			int id;
+			int id = -1;
 
-			rect box;
+			rect box = rect(0,0,50,50);
       rect min_box = rect(0,0,50,50); //If resizable then this is the smallest it can be
 			string text = "";
 			int state = 0;
