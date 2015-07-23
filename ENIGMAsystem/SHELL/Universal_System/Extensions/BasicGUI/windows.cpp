@@ -374,6 +374,13 @@ namespace enigma_user
 		win.update_text_pos();
 	}
 
+  void gui_window_set_minsize(int id, gs_scalar w, gs_scalar h){
+    get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
+    win.min_box.w = w;
+    win.min_box.h = h;
+    win.update_text_pos();
+  }
+
 	void gui_window_set_callback(int id, int event, int script_id){
     get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
     if (event == enigma_user::gui_event_all){

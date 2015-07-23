@@ -274,6 +274,7 @@ namespace enigma_user
 
   void gui_window_set_position(int id, gs_scalar x, gs_scalar y);
 	void gui_window_set_size(int id, gs_scalar w, gs_scalar h);
+  void gui_window_set_minsize(int id, gs_scalar w, gs_scalar h);
 
   void gui_window_set_text(int id, string text);
 	void gui_window_set_state(int id, int state);
