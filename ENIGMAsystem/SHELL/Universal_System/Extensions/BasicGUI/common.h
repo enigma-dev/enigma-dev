@@ -45,7 +45,7 @@ namespace gui
 		rect() { }
 		rect(gs_scalar rx, gs_scalar ry, gs_scalar rw, gs_scalar rh) : x(rx), y(ry), w(rw), h(rh) { }
     void set(gs_scalar rx, gs_scalar ry, gs_scalar rw, gs_scalar rh) { x = rx, y = ry, w = rw, h = rh; zero = ((0==w)==h); }
-		bool point_inside(gs_scalar tx, gs_scalar ty){ return (tx>x && tx<x+w && ty>y && ty<y+h); }
+		bool point_inside(gs_scalar tx, gs_scalar ty) { return (tx>x && tx<x+w && ty>y && ty<y+h); }
 	};
 
 	struct font_style{
@@ -70,6 +70,24 @@ namespace gui
 		gs_scalar scale_x = 1.0, scale_y = 1.0;
 		gs_scalar rotation = 1.0;
 	};
+
+	inline font_style get_current_draw_state(){
+		font_style st;
+		st.halign = enigma_user::draw_get_halign();
+		st.valign = enigma_user::draw_get_valign();
+		st.font = enigma_user::draw_get_font();
+		st.color = enigma_user::draw_get_color();
+		st.alpha = enigma_user::draw_get_alpha();
+		return st;
+	}
+
+	inline void set_current_draw_state(const font_style &st){
+    enigma_user::draw_set_halign(st.halign);
+    enigma_user::draw_set_valign(st.valign);
+    enigma_user::draw_set_color(st.color);
+    enigma_user::draw_set_alpha(st.alpha);
+    enigma_user::draw_set_font(st.font);
+	}
 }
 
 #endif
