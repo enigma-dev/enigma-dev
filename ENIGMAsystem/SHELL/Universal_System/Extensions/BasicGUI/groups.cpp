@@ -15,6 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include <algorithm>
 #include <unordered_map>
 #include <string>
 using std::string;
@@ -47,7 +48,6 @@ namespace enigma_user
 	int gui_group_create(){
 		gui::gui_data_elements.emplace(gui::gui_data_elements_maxid, gui::Group());
 		gui::Group &g = gui::gui_data_elements[gui::gui_data_elements_maxid];
-    printf("Creating group with size %i\n", sizeof(gui::gui_data_elements[gui::gui_data_elements_maxid]));
 		g.id = gui::gui_data_elements_maxid;
 		return gui::gui_data_elements_maxid++;
 	}
@@ -69,5 +69,40 @@ namespace enigma_user
     get_data_element(gro,gui::Group,gui::GUI_TYPE::GROUP,id);
     gro.group_toggles.push_back(tid);
     tog.group_id = id;
+  }
+
+  void gui_group_add_window(int id, int wid){
+    get_data_element(gro,gui::Group,gui::GUI_TYPE::GROUP,id);
+    gro.group_windows.push_back(wid);
+  }
+
+  void gui_group_remove_button(int id, int bid){
+    get_data_element(gro,gui::Group,gui::GUI_TYPE::GROUP,id);
+    auto it = find(gro.group_buttons.begin(), gro.group_buttons.end(), bid);
+    if (it != gro.group_buttons.end()){
+      get_element(but,gui::Button,gui::GUI_TYPE::BUTTON,bid);
+      gro.group_buttons.erase(it);
+      but.parent_id = -1;
+    }
+  }
+
+  void gui_group_remove_toggle(int id, int tid){
+    get_data_element(gro,gui::Group,gui::GUI_TYPE::GROUP,id);
+    auto it = find(gro.group_toggles.begin(), gro.group_toggles.end(), tid);
+    if (it != gro.group_toggles.end()){
+      get_element(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,tid);
+      gro.group_toggles.erase(it);
+      tog.parent_id = -1;
+    }
+  }
+
+  void gui_group_remove_window(int id, int wid){
+    get_data_element(gro,gui::Group,gui::GUI_TYPE::GROUP,id);
+    auto it = find(gro.group_windows.begin(), gro.group_windows.end(), wid);
+    if (it != gro.group_windows.end()){
+      get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,wid);
+      gro.group_windows.erase(it);
+      win.parent_id = -1;
+    }
   }
 }

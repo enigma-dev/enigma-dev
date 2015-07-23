@@ -513,39 +513,52 @@ namespace enigma_user
     }
 	}
 
-  ///Drawers
-	void gui_window_draw(int id){
-    get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
-    int pfont = enigma_user::draw_get_font();
-		unsigned int phalign = enigma_user::draw_get_halign();
-		unsigned int pvalign = enigma_user::draw_get_valign();
-		int pcolor = enigma_user::draw_get_color();
-		gs_scalar palpha = enigma_user::draw_get_alpha();
-    win.update();
-		win.draw(0,0);
-		//Draw children
-		///TODO(harijs) - This needs to implemented!
-    /*if (gui::gui_windows[id].child_buttons.empty() == false){
-      for (const auto &b : gui::gui_windows[id].child_buttons){
-        gui::gui_buttons[b].update();
-        gui::gui_buttons[b].draw();
-      }
-    }*/
-		enigma_user::draw_set_halign(phalign);
-		enigma_user::draw_set_valign(pvalign);
-		enigma_user::draw_set_color(pcolor);
-		enigma_user::draw_set_alpha(palpha);
-    enigma_user::draw_set_font(pfont);
-	}
+  ///TODO(harijs) - The next two functions are awful. They are N^2 or worse, so optimizations are welcome
+  void gui_window_group_push_to_front(int gid){
+    get_data_element(gro,gui::Group,gui::GUI_TYPE::GROUP,gid);
+    if (gro.group_windows.size() == 0) return;
 
-	void gui_windows_draw(){
-	  if (gui::gui_window_order.size() == 0) return;
-    int pfont = enigma_user::draw_get_font();
-		unsigned int phalign = enigma_user::draw_get_halign();
-		unsigned int pvalign = enigma_user::draw_get_valign();
-		int pcolor = enigma_user::draw_get_color();
-		gs_scalar palpha = enigma_user::draw_get_alpha();
-		gui::windowStopPropagation = false;
+    std::vector<unsigned int> tmp_group;
+    tmp_group.reserve(gro.group_windows.size());
+    for (auto it=gui::gui_window_order.begin(); it!=gui::gui_window_order.end(); ){
+      bool found = false;
+      for (const auto &gw : gro.group_windows){
+        if (*it == gw){
+          it = gui::gui_window_order.erase(it);
+          tmp_group.push_back(gw);
+          found = true;
+          break;
+        }
+      }
+      if (found == false) ++it;
+    }
+    gui::gui_window_order.insert(gui::gui_window_order.end(), tmp_group.begin(), tmp_group.end());
+  }
+
+  void gui_window_group_push_to_back(int gid){
+    get_data_element(gro,gui::Group,gui::GUI_TYPE::GROUP,gid);
+    if (gro.group_windows.size() == 0) return;
+    std::vector<unsigned int> tmp_group;
+    tmp_group.reserve(gro.group_windows.size());
+    for (auto it=gui::gui_window_order.begin(); it!=gui::gui_window_order.end(); ){
+      bool found = false;
+      for (const auto &gw : gro.group_windows){
+        if (*it == gw){
+          it = gui::gui_window_order.erase(it);
+          tmp_group.push_back(gw);
+          found = true;
+          break;
+        }
+      }
+      if (found == false) ++it;
+    }
+    gui::gui_window_order.insert(gui::gui_window_order.begin(), tmp_group.begin(), tmp_group.end());
+  }
+
+  ///Updaters
+  void gui_windows_update(){
+    if (gui::gui_window_order.size() == 0) return;
+    gui::windowStopPropagation = false;
     //Update loop in reverse direction
     bool window_click = false; //Something clicked in the window (or the window itself)?
     int window_swap_id = -1;
@@ -565,28 +578,56 @@ namespace enigma_user
           if (win.state == enigma_user::gui_state_on) { window_swap_id = ind; }
         }
       }
-		}
-		//printf("Window selected = %i and click = %i and size = %i && mouse_check_button_pressed %i\n", window_swap_id, window_click, gui::gui_window_order.size(), enigma_user::mouse_check_button_pressed(enigma_user::mb_left));
-		//I REALLY HATE THE MOUSE CHECK HERE :( - Harijs
-		if (window_click == true && enigma_user::mouse_check_button_pressed(enigma_user::mb_left)) { //Push to front
-        int t = gui::gui_window_order[window_swap_id]; //Get the id of the clicked window
-        gui::gui_window_order.erase(gui::gui_window_order.begin()+window_swap_id); //Delete the id from its current place
-        gui::gui_window_order.push_back(t); //put on top
     }
+    //printf("Window selected = %i and click = %i and size = %i && mouse_check_button_pressed %i\n", window_swap_id, window_click, gui::gui_window_order.size(), enigma_user::mouse_check_button_pressed(enigma_user::mb_left));
+    //I REALLY HATE THE MOUSE CHECK HERE :( - Harijs
+    if (window_click == true && enigma_user::mouse_check_button_pressed(enigma_user::mb_left)) { //Push to front
+      int t = gui::gui_window_order[window_swap_id]; //Get the id of the clicked window
+      gui::gui_window_order.erase(gui::gui_window_order.begin()+window_swap_id); //Delete the id from its current place
+      gui::gui_window_order.push_back(t); //put on top
+    }
+  }
 
-    //Draw loop
+  ///Drawers
+	void gui_window_draw(int id){
+    get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
+    if (win.visible == true){
+      gui::font_style psty = gui::get_current_draw_state();
+  		win.draw();
+  		gui::set_current_draw_state(psty);
+    }
+	}
+
+	void gui_windows_draw(){
+	  if (gui::gui_window_order.size() == 0) return;
+    gui::font_style psty = gui::get_current_draw_state();
     for (const auto &wi : gui::gui_window_order){
       get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,wi);
       if (win.parent_id == -1){
         win.draw();
       }
 		}
-		enigma_user::draw_set_halign(phalign);
-		enigma_user::draw_set_valign(pvalign);
-		enigma_user::draw_set_color(pcolor);
-		enigma_user::draw_set_alpha(palpha);
-    enigma_user::draw_set_font(pfont);
+		gui::set_current_draw_state(psty);
 	}
+
+  void gui_windows_group_draw(int gid){
+    get_data_element(gro,gui::Group,gui::GUI_TYPE::GROUP,gid);
+    if (gro.group_windows.size() == 0) return;
+    gui::font_style psty = gui::get_current_draw_state();
+    ///TODO(harijs): This needs to be made more efficient.
+    for (const auto &wi : gui::gui_window_order){
+      for (const auto &gw : gro.group_windows){
+        if (wi == gw){
+          get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,wi);
+          if (win.parent_id == -1){
+            win.draw();
+          }
+          break;
+        }
+      }
+    }
+    gui::set_current_draw_state(psty);
+  }
 
   void gui_window_add_button(int id, int bid){
     get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
