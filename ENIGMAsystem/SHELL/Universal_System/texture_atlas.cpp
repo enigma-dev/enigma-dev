@@ -81,12 +81,12 @@ namespace enigma {
             metrics[counter].w = sspr->width, metrics[counter].h = sspr->height;
             counter++;
           }
-        }break;
+        } break;
         case 1: { //Metrics for backgrounds
           enigma::background *bkg = enigma::backgroundstructarray[textures[i].id];
           metrics[counter].w = bkg->width, metrics[counter].h = bkg->height;
           counter++;
-        }break;
+        } break;
         case 2: { //Metrics for font glyps
           enigma::font *fnt = enigma::fontstructarray[textures[i].id];
           for (size_t g = 0; g < fnt->glyphRangeCount; g++) {
@@ -115,9 +115,10 @@ namespace enigma {
     enigma::rect_packer::rectpnode *rectplane = new enigma::rect_packer::rectpnode(0,0,w,h);
     unsigned int max_textures = 0;
     for (vector<unsigned int>::reverse_iterator i = boxes.rbegin(); i != boxes.rend() and w and h; ){
-      enigma::rect_packer::rectpnode *nn = enigma::rect_packer::rninsert(rectplane, *i & 0xFF, &metrics.front());
+      unsigned int indx = std::distance(begin(boxes), i.base()) - 1;
+      enigma::rect_packer::rectpnode *nn = enigma::rect_packer::rninsert(rectplane, indx, &metrics.front());
       if (nn){
-        enigma::rect_packer::rncopy(nn, &metrics.front(), *i & 0xFF),
+        enigma::rect_packer::rncopy(nn, &metrics.front(), indx),
         i++;
         max_textures++;
       } else {
