@@ -92,24 +92,6 @@ inline string string_replace_all(string str,string substr,string nstr)
   return str;
 }
 
-inline string fc(const char* fn)
-{
-  FILE *file = fopen(fn,"rb");
-  if (!file) return "";
-
-  fseek(file, 0, SEEK_END);
-  size_t sz = ftell(file);
-  fseek(file, 0, SEEK_SET);
-
-  char *a = new char[sz];
-  sz = fread(a, 1, sz, file);
-  fclose(file);
-
-  string res(a, sz);
-  delete[] a;
-  return res;
-}
-
 #include "System/builtins.h"
 
 dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode) {
@@ -120,56 +102,56 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
 {
 
   cout << "Initializing dialog boxes" << endl;
-    ide_dia_clear();
-    ide_dia_open();
+  ide_dia_clear();
+  ide_dia_open();
   cout << "Initialized." << endl;
 
   if (mode == emode_rebuild)
   {
     edbg << "Cleaning..." << flushl;
 
-  string compilepath = CURRENT_PLATFORM_NAME "/" + extensions::targetOS.identifier;
-	string make = MAKE_flags;
-  make += " clean-game ";
-	make += "COMPILEPATH=\"" + compilepath + "\" ";
-	make += "WORKDIR=\"" + makedir + "\" ";
-	make += "eTCpath=\"" + MAKE_tcpaths + "\"";
+    string compilepath = CURRENT_PLATFORM_NAME "/" + extensions::targetOS.identifier;
+  	string make = MAKE_flags;
+    make += " clean-game ";
+  	make += "COMPILEPATH=\"" + compilepath + "\" ";
+  	make += "WORKDIR=\"" + makedir + "\" ";
+  	make += "eTCpath=\"" + MAKE_tcpaths + "\"";
 
-	edbg << "Full command line: " << MAKE_location << " " << make << flushl;
-    e_execs(MAKE_location,make);
+  	edbg << "Full command line: " << MAKE_location << " " << make << flushl;
+      e_execs(MAKE_location,make);
 
-    edbg << "Done.\n" << flushl;
-	idpr("Done.", 100);
-	return 0;
+      edbg << "Done.\n" << flushl;
+  	idpr("Done.", 100);
+  	return 0;
   }
   edbg << "Building for mode (" << mode << ")" << flushl;
 
   // CLean up from any previous executions.
 
   edbg << "Cleaning up from previous executions" << flushl;
-    parsed_objects.clear(); //Make sure we don't dump in any old object code...
-    edbg << " - Cleared parsed objects" << flushl;
-    parsed_rooms.clear();   //Or that we dump any room code, for that matter...
-    edbg << " - Cleared room entries" << flushl;
-    shared_locals_clear();  //Forget inherited locals, we'll reparse them
-    edbg << " - Cleared shared locals list" << flushl;
-    event_info_clear();     //Forget event definitions, we'll re-get them
-    edbg << " - Cleared event info" << flushl;
+  parsed_objects.clear(); //Make sure we don't dump in any old object code...
+  edbg << " - Cleared parsed objects" << flushl;
+  parsed_rooms.clear();   //Or that we dump any room code, for that matter...
+  edbg << " - Cleared room entries" << flushl;
+  shared_locals_clear();  //Forget inherited locals, we'll reparse them
+  edbg << " - Cleared shared locals list" << flushl;
+  event_info_clear();     //Forget event definitions, we'll re-get them
+  edbg << " - Cleared event info" << flushl;
 
   // Re-establish ourself
-    // Read the global locals: locals that will be included with each instance
-    {
-      vector<string> extnp;
-      for (int i = 0; i < es->extensionCount; i++) {
-        cout << "Adding extension " << flushl << "extension " << flushl << es->extensions[i].path << flushl << ":" << endl << es->extensions[i].name << flushl;
-        extnp.push_back(string(es->extensions[i].path) + es->extensions[i].name);
-      }
-      edbg << "Loading shared locals from extensions list" << flushl;
-      if (shared_locals_load(extnp) != 0) {
-        user << "Failed to determine locals; couldn't determine bottom tier: is ENIGMA configured correctly?";
-        idpr("ENIGMA Misconfiguration",-1); return E_ERROR_LOAD_LOCALS;
-      }
+  // Read the global locals: locals that will be included with each instance
+  {
+    vector<string> extnp;
+    for (int i = 0; i < es->extensionCount; i++) {
+      cout << "Adding extension " << flushl << "extension " << flushl << es->extensions[i].path << flushl << ":" << endl << es->extensions[i].name << flushl;
+      extnp.push_back(string(es->extensions[i].path) + es->extensions[i].name);
     }
+    edbg << "Loading shared locals from extensions list" << flushl;
+    if (shared_locals_load(extnp) != 0) {
+      user << "Failed to determine locals; couldn't determine bottom tier: is ENIGMA configured correctly?";
+      idpr("ENIGMA Misconfiguration",-1); return E_ERROR_LOAD_LOCALS;
+    }
+  }
 
   //Read the types of events
   event_parse_resourcefile();
@@ -609,6 +591,8 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
     if (TOPLEVEL_cxxflags.length()) make += "CXXFLAGS=\"" + TOPLEVEL_cxxflags + " -g -DDEBUG_MODE\" ";
     if (TOPLEVEL_ldflags.length()) make += "LDFLAGS=\"" + TOPLEVEL_ldflags + "\" ";
   }
+
+  if (TOPLEVEL_rcflags.length()) make += "RCFLAGS=\"" + TOPLEVEL_rcflags + "\" ";
 
   string compilepath = CURRENT_PLATFORM_NAME "/" + extensions::targetOS.identifier;
   make += "COMPILEPATH=\"" + compilepath + "\" ";

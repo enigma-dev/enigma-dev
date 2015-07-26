@@ -40,6 +40,7 @@ using namespace std;
 #include "crawler.h"
 #include "eyaml.h"
 
+#include "gcc_interface/gcc_backend.h"
 #include "parse_ide_settings.h"
 #include "compiler/compile_common.h"
 #include "makedir.h"
@@ -96,25 +97,6 @@ static void clear_ide_editables()
     wto << "void ABORT_ON_ALL_ERRORS() { }\n";
     wto << '\n';
   wto.close();
-}
-
-static inline vector<string> explode(string n) {
-  vector<string> ret;
-  size_t pos = 0, epos;
-  while (is_useless(n[pos])) pos++;
-  for (epos = n.find(','); epos != string::npos; epos = n.find(',',pos)) {
-    ret.push_back(n.substr(pos,epos-pos));
-    pos = epos; while (is_useless(n[++pos]));
-  }
-  if (n.length() > pos)
-    ret.push_back(n.substr(pos));
-  return ret;
-}
-
-inline string tolower(string x) {
-  for (size_t i = 0; i < x.length(); i++)
-    if (x[i] >= 'A' and x[i] <= 'Z') x[i] -= 'A' - 'a';
-  return x;
 }
 
 //#include "backend/ideprint.h"

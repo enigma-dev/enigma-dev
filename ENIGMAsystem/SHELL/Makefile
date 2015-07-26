@@ -73,7 +73,6 @@ else
 endif
 
 ifeq ($(PLATFORM), Win32)
-	override LDFLAGS += -L../Additional/i686-w64-mingw32/lib -static-libgcc -static-libstdc++
 	ifeq ($(GMODE), Compile)
 		override LDFLAGS += -static-libgcc -Wl,-subsystem,windows
 	endif
@@ -134,11 +133,11 @@ $(OBJDIR)/%.o $(OBJDIR)/%.d: %.m | $(OBJDIRS)
 $(OBJDIR)/resources.res: $(RCFILES) GENERATED_FILE
 	echo // GENERATED RESOURCE FILE FRONTEND > $(OBJDIR)/resources.rc
 	for %%r in ($(RESOURCES)) do echo #include "%%r" >> $(OBJDIR)/resources.rc
-	$(WINDRES) -o $@ -I. -I$(WORKDIR) $(OBJDIR)/resources.rc -O coff
+	$(WINDRES) -o $@ -I. -I$(WORKDIR) $(OBJDIR)/resources.rc -O coff $(RCFLAGS) 
 GENERATED_FILE:
 
 $(OBJDIR)/%.rc: %.rc
-	$(WINDRES) -o $@ -I. -I$(WORKDIR) $^ -O rc
+	$(WINDRES) -o $@ -I. -I$(WORKDIR) $^ -O rc $(RCFLAGS)
 
 $(OBJDIRS):
 	$(MKDIR) -p $@
