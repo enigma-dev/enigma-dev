@@ -18,6 +18,8 @@
  * You should have received a copy of the GNU General Public License along with
  * JustDefineIt. If not, see <http://www.gnu.org/licenses/>.
 **/
+#ifndef PARSE_BASICS_H
+#define PARSE_BASICS_H
 
 #include <string>
 #include <cstdlib>
@@ -106,3 +108,5 @@ namespace parse_bacics {
   }
 }
 using namespace parse_bacics::visible;
+
+#endif

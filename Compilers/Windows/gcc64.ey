@@ -1,8 +1,8 @@
 %e-yaml
 ---
-Name: Mingw GCC G++
+Name: Mingw GCC G++ 64bit
 Native: Yes
-Maintainer: cheeseboy
+Maintainer: Harijs Grinbergs
 Target-platform: Windows
 
 # Some info about it
@@ -17,10 +17,10 @@ searchdirs-start: "#include <...> search starts here:"
 searchdirs-end: "End of search list."
 resources: $exe
 cppflags:
-cxxflags: -std=c++11 -I../Additional/i686-w64-mingw32/include
-cflags:
-ldflags: -L../Additional/i686-w64-mingw32/lib -static-libgcc -static-libstdc++
-rcflags: 
+cxxflags: -m64 -std=c++11 -I../Additional/x86_64-w64-mingw32/include
+cflags: -m64
+ldflags: -m64 -L../Additional/x86_64-w64-mingw32/lib -static-libgcc -static-libstdc++
+rcflags: --target=pe-x86-64 
 links:
 
 Build-Extension: .exe
