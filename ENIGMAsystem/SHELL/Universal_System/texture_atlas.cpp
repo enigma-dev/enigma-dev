@@ -41,6 +41,15 @@
 #endif
 
 namespace enigma {
+  struct TextureAtlasRect{
+    unsigned int metric = 0;
+    unsigned int size = 0;
+    TextureAtlasRect(unsigned int m, unsigned int s) : metric(m), size(s) {}
+    bool operator<(TextureAtlasRect const &rhs){   
+      return size < rhs.size;
+    }
+  };
+
   unordered_map<unsigned int, texture_atlas> texture_atlas_array;
   size_t texture_atlas_idmax = 0;
 
@@ -101,21 +110,21 @@ namespace enigma {
       }
     }
 
-    vector<unsigned int> boxes;
+    vector<TextureAtlasRect> boxes;
     boxes.reserve(metrics.size());
     for (unsigned int i = 0; i < metrics.size(); i++){
-      boxes.emplace_back((metrics[i].w * metrics[i].h << 8) + i);
+      boxes.emplace_back(i,metrics[i].w * metrics[i].h);
     }
-    std::sort (boxes.begin(), boxes.end());
+    std::sort(boxes.begin(), boxes.end());
 
     unsigned int w = 64, h = 64; //Minimum atlas size
-    if (texture_atlas_array[ta].width != -1 && texture_atlas_array[ta].height != -1){
+    if (texture_atlas_array[ta].width > 0 && texture_atlas_array[ta].height > 0){
       w = texture_atlas_array[ta].width, h = texture_atlas_array[ta].height;
     }
     enigma::rect_packer::rectpnode *rectplane = new enigma::rect_packer::rectpnode(0,0,w,h);
     unsigned int max_textures = 0;
-    for (vector<unsigned int>::reverse_iterator i = boxes.rbegin(); i != boxes.rend() and w and h; ){
-      unsigned int indx = std::distance(begin(boxes), i.base()) - 1;
+    for (auto i = boxes.rbegin(); i != boxes.rend();){
+      unsigned int indx = (*i).metric;
       enigma::rect_packer::rectpnode *nn = enigma::rect_packer::rninsert(rectplane, indx, &metrics.front());
       if (nn){
         enigma::rect_packer::rncopy(nn, &metrics.front(), indx),
@@ -132,12 +141,12 @@ namespace enigma {
     }
 
     if (texture_atlas_array[ta].width == -1 || texture_atlas_array[ta].height == -1){
-        texture_atlas_array[ta].width = w;
-        texture_atlas_array[ta].height = h;
-        if (enigma::texture_atlas_array[ta].texture != -1){
-          graphics_delete_texture(texture_atlas_array[ta].texture);
-        }
-        texture_atlas_array[ta].texture = graphics_create_texture(w, h, w, h, nullptr, false);
+      texture_atlas_array[ta].width = w;
+      texture_atlas_array[ta].height = h;
+      if (enigma::texture_atlas_array[ta].texture != -1){
+        graphics_delete_texture(texture_atlas_array[ta].texture);
+      }
+      texture_atlas_array[ta].texture = graphics_create_texture(w, h, w, h, nullptr, false);
     }
 
     counter = 0;
