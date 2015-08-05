@@ -72,6 +72,8 @@ rvt view_hborder, view_hport, view_hspeed, view_hview, view_object, view_vborder
 
 namespace enigma
 {
+  int ENIGMA_events();
+
   roomstruct** roomdata;
   roomstruct** roomorder;
 
@@ -800,6 +802,14 @@ void window_views_mouse_set(int x, int y) {
   }
   window_mouse_set(x, y);
   return;
+}
+
+void window_update_mouse() {
+  enigma::update_mouse_variables();
+}
+
+void window_update() {
+  enigma::ENIGMA_events();
 }
 
 }

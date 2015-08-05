@@ -372,9 +372,19 @@ void window_set_minimized(bool minimized)
     ShowWindow(enigma::hWnd,(minimized?SW_MINIMIZE:SW_RESTORE));
 }
 
+void window_set_maximized(bool maximized)
+{
+    ShowWindow(enigma::hWnd,(maximized?SW_MAXIMIZE:SW_RESTORE));
+}
+
 bool window_get_minimized()
 {
     return IsIconic(enigma::hWnd);
+}
+
+bool window_get_maximized()
+{
+    return IsZoomed (enigma::hWnd);
 }
 
 void window_set_stayontop(bool stay)
@@ -428,7 +438,7 @@ void window_set_region_size(int w, int h, bool adaptwindow)
     enigma::regionHeight = h;
     enigma::windowAdapt = adaptwindow;
     enigma::setwindowsize();
-    window_center();
+    //window_center();
 }
 
 int window_get_region_width()
