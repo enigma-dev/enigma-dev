@@ -223,23 +223,25 @@ namespace gui
       }
 		}
 
-		//Draw text
-		sty.font_styles[state].use();
+  	//Draw text
+    if (text.empty() == false){
+  		sty.font_styles[state].use();
 
-		gs_scalar textx = 0.0, texty = 0.0;
-    switch (sty.font_styles[state].halign){
-      case enigma_user::fa_left: textx = ox+box.x+sty.padding.left; break;
-      case enigma_user::fa_center: textx = ox+box.x+box.w/2.0; break;
-      case enigma_user::fa_right: textx = ox+box.x+box.w-sty.padding.right; break;
+  		gs_scalar textx = 0.0, texty = 0.0;
+      switch (sty.font_styles[state].halign){
+        case enigma_user::fa_left: textx = ox+box.x+sty.padding.left; break;
+        case enigma_user::fa_center: textx = ox+box.x+box.w/2.0; break;
+        case enigma_user::fa_right: textx = ox+box.x+box.w-sty.padding.right; break;
+      }
+
+      switch (sty.font_styles[state].valign){
+        case enigma_user::fa_top: texty = oy+box.y+sty.padding.top; break;
+        case enigma_user::fa_middle: texty = oy+box.y+box.h/2.0; break;
+        case enigma_user::fa_bottom: texty = oy+box.y+box.h-sty.padding.bottom; break;
+      }
+
+  		enigma_user::draw_text(textx,texty,text);
     }
-
-    switch (sty.font_styles[state].valign){
-      case enigma_user::fa_top: texty = oy+box.y+sty.padding.top; break;
-      case enigma_user::fa_middle: texty = oy+box.y+box.h/2.0; break;
-      case enigma_user::fa_bottom: texty = oy+box.y+box.h-sty.padding.bottom; break;
-    }
-
-		enigma_user::draw_text(textx,texty,text);
 
     get_data_element(ssty,gui::Style,gui::GUI_TYPE::STYLE,(stencil_style_id==-1?style_id:stencil_style_id));
     if (stencil_mask == true && ssty.sprites[state] != -1){
@@ -588,6 +590,45 @@ namespace enigma_user
     }
   }
 
+  void gui_windows_group_update(int gid, bool continueProp){
+    if (continueProp == false){ gui::windowStopPropagation = false; }
+    if (gui::gui_window_order.size() == 0) return;
+    get_data_element(gro,gui::Group,gui::GUI_TYPE::GROUP,gid);
+    if (gro.group_windows.size() == 0) return;
+    //Update loop in reverse direction
+    bool window_click = false; //Something clicked in the window (or the window itself)?
+    int window_swap_id = -1;
+    ///TODO(harijs): This needs to be made more efficient.
+    for (int ind = gui::gui_window_order.size()-1; ind >= 0; --ind){
+      int i = gui::gui_window_order[ind];
+      for (const auto &gw : gro.group_windows){
+        if (i == gw){
+          get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,i);
+          if (win.visible == true && win.parent_id == -1){
+            //Update children
+            win.parenter.update_children(win.box.x, win.box.y);
+
+            //This checks if any of the inside elements are pressed
+            if (gui::windowStopPropagation == true && window_click == false) { window_click = true; window_swap_id = ind; }
+            win.update();
+            //This checks for the click on the window itself. I cannot just check window propagation, because hover also stops propagation, but should not change the draw order
+            if (gui::windowStopPropagation == true && window_click == false) {
+              window_click = true;
+              if (win.state == enigma_user::gui_state_on) { window_swap_id = ind; }
+            }
+          }
+        }
+      }
+    }
+    //printf("Window selected = %i and click = %i and size = %i && mouse_check_button_pressed %i\n", window_swap_id, window_click, gui::gui_window_order.size(), enigma_user::mouse_check_button_pressed(enigma_user::mb_left));
+    //I REALLY HATE THE MOUSE CHECK HERE :( - Harijs
+    if (window_click == true && enigma_user::mouse_check_button_pressed(enigma_user::mb_left)) { //Push to front
+      int t = gui::gui_window_order[window_swap_id]; //Get the id of the clicked window
+      gui::gui_window_order.erase(gui::gui_window_order.begin()+window_swap_id); //Delete the id from its current place
+      gui::gui_window_order.push_back(t); //put on top
+    }
+  }
+
   ///Drawers
 	void gui_window_draw(int id){
     get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
@@ -780,5 +821,9 @@ namespace enigma_user
   int gui_window_get_element(int id, int ele){
     get_elementv(win,gui::Window,gui::GUI_TYPE::WINDOW,id,-1);
     return win.parenter.element(ele);
+  }
+
+  void gui_continue_propagation(){
+    gui::windowStopPropagation = false;
   }
 }

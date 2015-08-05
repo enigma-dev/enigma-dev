@@ -160,23 +160,24 @@ namespace gui
 		}
 
 		//Draw text
-		sty.font_styles[state].use();
+    if (text.empty() == false){
+  		sty.font_styles[state].use();
 
-    gs_scalar textx = 0.0, texty = 0.0;
-    switch (sty.font_styles[state].halign){
-      case enigma_user::fa_left: textx = box.x+sty.padding.left; break;
-      case enigma_user::fa_center: textx = box.x+box.w/2.0; break;
-      case enigma_user::fa_right: textx = box.x+box.w-sty.padding.right; break;
+      gs_scalar textx = 0.0, texty = 0.0;
+      switch (sty.font_styles[state].halign){
+        case enigma_user::fa_left: textx = box.x+sty.padding.left; break;
+        case enigma_user::fa_center: textx = box.x+box.w/2.0; break;
+        case enigma_user::fa_right: textx = box.x+box.w-sty.padding.right; break;
+      }
+
+      switch (sty.font_styles[state].valign){
+        case enigma_user::fa_top: texty = box.y+sty.padding.top; break;
+        case enigma_user::fa_middle: texty = box.y+box.h/2.0; break;
+        case enigma_user::fa_bottom: texty = box.y+box.h-sty.padding.bottom; break;
+      }
+
+  		enigma_user::draw_text(ox + textx,oy + texty,text);
     }
-
-    switch (sty.font_styles[state].valign){
-      case enigma_user::fa_top: texty = box.y+sty.padding.top; break;
-      case enigma_user::fa_middle: texty = box.y+box.h/2.0; break;
-      case enigma_user::fa_bottom: texty = box.y+box.h-sty.padding.bottom; break;
-    }
-
-		enigma_user::draw_text(ox + textx,oy + texty,text);
-
 		//Draw children
 		parenter.draw_children(ox+box.x,oy+box.y);
 	}

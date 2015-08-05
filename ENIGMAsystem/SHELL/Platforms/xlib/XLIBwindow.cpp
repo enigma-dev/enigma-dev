@@ -43,7 +43,7 @@ using namespace std;
 using namespace enigma::x11;
 
 namespace enigma {
-  bool isVisible = true, isMinimized = false, stayOnTop = false, windowAdapt = true;
+  bool isVisible = true, isMinimized = false, isMaximized = false, stayOnTop = false, windowAdapt = true;
   int regionWidth = 0, regionHeight = 0, windowWidth = 0, windowHeight = 0;
   double scaledWidth = 0, scaledHeight = 0;
   extern bool isSizeable, showBorder, showIcons, freezeOnLoseFocus, isFullScreen;
@@ -294,7 +294,6 @@ bool window_get_showicons() {
 
 void window_set_minimized(bool minimized) {
   if (enigma::isMinimized == minimized) return;
-  enigma::isMinimized = minimized;
 
   XClientMessageEvent ev;
   Atom prop;
@@ -309,10 +308,52 @@ void window_set_minimized(bool minimized) {
   ev.format = 32;
   ev.data.l[0] = minimized ? IconicState : NormalState;
   XSendEvent(disp, RootWindow(disp, 0), False, SubstructureRedirectMask|SubstructureNotifyMask,(XEvent *)&ev);
+  enigma::isMinimized = minimized;
+}
+
+void window_set_maximized(bool maximized) {
+  if (enigma::isMaximized == maximized) return;
+  XClientMessageEvent ev;
+
+  if (maximized == true){
+    Atom wm_state, max_horz, max_vert;
+    wm_state = XInternAtom(disp, "_NET_WM_STATE", False);
+    if (wm_state == None) return;
+
+    max_horz = XInternAtom(disp, "_NET_WM_STATE_MAXIMIZED_HORZ", False);
+    max_vert = XInternAtom(disp, "_NET_WM_STATE_MAXIMIZED_VERT", False);
+
+    // TODO: When restored after a minimize the window may not have focus.
+    ev.type = ClientMessage;
+    ev.window = win;
+    ev.message_type = wm_state;
+    ev.format = 32;
+    ev.data.l[0] = _NET_WM_STATE_ADD;
+    ev.data.l[1] = max_horz;
+    ev.data.l[2] = max_vert;
+    XSendEvent(disp, RootWindow(disp, 0), False, SubstructureRedirectMask|SubstructureNotifyMask,(XEvent *)&ev);
+  }else{
+    Atom prop;
+    prop = XInternAtom(disp, "WM_CHANGE_STATE", False);
+    if (prop == None) return;
+
+    // TODO: When restored after a minimize the window may not have focus.
+    ev.type = ClientMessage;
+    ev.window = win;
+    ev.message_type = prop;
+    ev.format = 32;
+    ev.data.l[0] = NormalState;
+    XSendEvent(disp, RootWindow(disp, 0), False, SubstructureRedirectMask|SubstructureNotifyMask,(XEvent *)&ev);
+  }
+  enigma::isMaximized = maximized;
 }
 
 bool window_get_minimized() { 
 	return enigma::isMinimized;
+}
+
+bool window_get_maximized() { 
+  return enigma::isMaximized;
 }
 
 void window_default(bool center_size)
