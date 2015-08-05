@@ -3,7 +3,7 @@
 Name: Mingw GCC G++ 64bit
 Native: Yes
 Maintainer: Harijs Grinbergs
-Target-platform: Windows
+Target-platform: Windows64
 
 # Some info about it
 path:

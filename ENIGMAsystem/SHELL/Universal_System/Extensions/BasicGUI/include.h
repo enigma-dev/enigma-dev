@@ -303,6 +303,7 @@ namespace enigma_user
 
   //Updaters
   void gui_windows_update();
+  void gui_windows_group_update(int gid, bool continueProp = false);
 
 	//Drawers
 	void gui_window_draw(int id);
@@ -408,6 +409,8 @@ namespace enigma_user
   void gui_style_set_box(int id, gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h);
 
   int gui_element_get_type(int ele);
+
+  void gui_continue_propagation();
 }
 
 #endif
