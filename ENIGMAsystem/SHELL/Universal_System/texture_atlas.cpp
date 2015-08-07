@@ -45,8 +45,8 @@ namespace enigma {
     unsigned int metric = 0;
     unsigned int size = 0;
     TextureAtlasRect(unsigned int m, unsigned int s) : metric(m), size(s) {}
-    bool operator<(TextureAtlasRect const &rhs){   
-      return size < rhs.size;
+    const bool operator<(TextureAtlasRect const &rhs) const{   
+      return this->size < rhs.size;
     }
   };
 
