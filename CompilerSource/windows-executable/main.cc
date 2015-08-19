@@ -110,7 +110,7 @@ void output_warning(const char* msg) {
     wOldColorAttrs = csbiInfo.wAttributes;
 
     // Set the new color information
-    SetConsoleTextAttribute ( h, FOREGROUND_RED+FOREGROUND_GREEN | BACKGROUND_BLUE | FOREGROUND_INTENSITY );
+    SetConsoleTextAttribute ( h, FOREGROUND_RED | BACKGROUND_BLUE | FOREGROUND_INTENSITY );
 
     cout << "WARNING! ";
 	// Restore the original colors
@@ -176,7 +176,7 @@ void check_for_updates() {
     wOldColorAttrs = csbiInfo.wAttributes;
 
     // Set the new color information
-    SetConsoleTextAttribute ( h, FOREGROUND_BLUE+FOREGROUND_GREEN | BACKGROUND_BLUE | FOREGROUND_INTENSITY );
+    SetConsoleTextAttribute ( h, FOREGROUND_BLUE | BACKGROUND_BLUE | FOREGROUND_INTENSITY );
 
 	char currentversion[256], lastupdated[256];
 	GetPrivateProfileString("MAIN", "lastupdated", "Never", lastupdated, 256, settingspath.c_str());
@@ -416,10 +416,10 @@ int main(int argc, char *argv[])
     StartupInfo.hStdOutput = h;
   }
 
-  DWORD flags = NULL;
+  DWORD flags = 0;
 
   if (redirectoutput) {
-	flags += CREATE_NO_WINDOW;
+    flags += CREATE_NO_WINDOW;
   }
 
   CreateProcess(NULL,(char *)cmdline.c_str(),NULL,NULL,
