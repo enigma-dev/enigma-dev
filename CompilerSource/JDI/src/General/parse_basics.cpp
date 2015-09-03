@@ -60,7 +60,7 @@ namespace parse_bacics {
     string toString(uint32_t n) { char buf[11]; return string(buf, snprintf(buf, sizeof(buf), "%" PRIu32, n)); }
     string toString(uint64_t n) { char buf[21]; return string(buf, snprintf(buf, sizeof(buf), "%" PRIu64, n)); }
     string toString(char n) { char buf[8]; return string(buf,sprintf(buf,"%d", n)); }
-    string toString(char* n) { return string(n); }
+    string toString(char* n) { if (n == nullptr) return ""; else return string(n); }
     string toString(float n) { char buf[32]; return string(buf,sprintf(buf,"%g", n)); }
     string toString(double n) { char buf[32]; return string(buf,sprintf(buf,"%g", n)); }
 #if __GNUC__ //64bit compilers define size_t as something more than unsigned
