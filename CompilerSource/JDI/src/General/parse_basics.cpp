@@ -64,7 +64,7 @@ namespace parse_bacics {
 #endif
     string toString(unsigned short n) { char buf[12]; return string(buf,sprintf(buf,"%u", n)); }
     string toString(char n) { char buf[8]; return string(buf,sprintf(buf,"%d", n)); }
-    string toString(char* n) { return string(n); }
+    string toString(char* n) { if (n == nullptr) return ""; else return string(n); }
     string toString(float n) { char buf[32]; return string(buf,sprintf(buf,"%g", n)); }
     string toString(double n) { char buf[32]; return string(buf,sprintf(buf,"%g", n)); }
 #if __GNUC__ //64bit compilers define size_t as something more than unsigned
