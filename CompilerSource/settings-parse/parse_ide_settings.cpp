@@ -211,6 +211,12 @@ void parse_ide_settings(const char* eyaml)
   extensions::targetOS.runparam  = cinfo.get("run-params");
   extensions::targetOS.identifier = cinfo.get("target-platform");
 
+  if (cinfo.exists("build-dir") == true){
+    extensions::targetOS.builddir = cinfo.get("build-dir");
+  }else{
+    extensions::targetOS.builddir = cinfo.get("target-platform");
+  }
+
   cout << "Setting up IDE editables... " << endl;
   requested_extensions.clear();
   requested_extensions = explode((string)settree.get("extensions"));

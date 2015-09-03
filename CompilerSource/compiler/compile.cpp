@@ -110,7 +110,7 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   {
     edbg << "Cleaning..." << flushl;
 
-    string compilepath = CURRENT_PLATFORM_NAME "/" + extensions::targetOS.identifier;
+    string compilepath = CURRENT_PLATFORM_NAME "/" + extensions::targetOS.builddir;
   	string make = MAKE_flags;
     make += " clean-game ";
   	make += "COMPILEPATH=\"" + compilepath + "\" ";
@@ -594,7 +594,7 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
 
   if (TOPLEVEL_rcflags.length()) make += "RCFLAGS=\"" + TOPLEVEL_rcflags + "\" ";
 
-  string compilepath = CURRENT_PLATFORM_NAME "/" + extensions::targetOS.identifier;
+  string compilepath = CURRENT_PLATFORM_NAME "/" + extensions::targetOS.builddir;
   make += "COMPILEPATH=\"" + compilepath + "\" ";
 
   string extstr = "EXTENSIONS=\"";

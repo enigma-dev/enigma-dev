@@ -43,7 +43,7 @@ namespace extensions
       windowLinks, graphicsLinks, audioLinks, collisionLinks, widgetLinks, networkLinks;
   };
   struct compiler_descriptor {
-    string identifier, resfile, buildext, buildname, runprog, runparam;
+    string identifier, resfile, buildext, buildname, runprog, runparam, builddir;
   };
 
   extern sdk_descriptor targetSDK;

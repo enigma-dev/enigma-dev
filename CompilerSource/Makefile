@@ -29,8 +29,8 @@ endif
 ###########
 
 CXX := g++
-CXXFLAGS += -std=c++11 -Wall -O3 -g -I./JDI/src
-LDFLAGS += -shared
+CXXFLAGS += -std=c++11 -m32 -Wall -O3 -g -I./JDI/src
+LDFLAGS += -shared -m32 -O3 -g
 
 SOURCES := $(shell find . -name "*.cpp" -and ! -name "standalone_*")
 OBJECTS := $(addprefix .eobjs/,$(SOURCES:.cpp=.o))

@@ -3,13 +3,14 @@
 Name: Mingw GCC G++ 64bit
 Native: Yes
 Maintainer: Harijs Grinbergs
-Target-platform: Windows64
+Target-platform: Windows
+Build-dir: Windows64
 
 # Some info about it
 path:
 tcpath:
 make: mingw32-make.exe
-makeflags: SHELL=cmd
+makeflags: SHELL=cmd.exe
 binpath:
 defines: cpp -dM -x c++ -E $blank
 searchdirs: gcc -E -x c++ -v $blank
