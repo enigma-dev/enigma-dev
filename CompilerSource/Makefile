@@ -32,7 +32,10 @@ CXX := g++
 CXXFLAGS += -std=c++11 -m32 -Wall -O3 -g -I./JDI/src
 LDFLAGS += -shared -m32 -O3 -g
 
-SOURCES := $(shell find . -name "*.cpp" -and ! -name "standalone_*")
+# This implements a recursive wildcard allowing us to iterate in subdirs
+rwildcard=$(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2))
+
+SOURCES := $(filter-out ./standalone_main.cpp, $(call rwildcard,./,*.cpp))
 OBJECTS := $(addprefix .eobjs/,$(SOURCES:.cpp=.o))
 DEPENDS := $(OBJECTS:.o=.d)
 
