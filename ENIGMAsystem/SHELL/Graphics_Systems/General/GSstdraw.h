@@ -66,19 +66,19 @@ namespace enigma_user
   void draw_roundrect_precise_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, float rad, int col1, int col2, bool outline);
 
   inline void draw_roundrect(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, bool outline) {
-    draw_roundrect(x1, y1, x2, y2, 10, false);
+    draw_roundrect(x1, y1, x2, y2, 10, outline);
   }
 
   inline void draw_roundrect_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, int col1, int col2, bool outline) {
-    draw_roundrect_color(x1, y1, x2, y2, 10, col1, col2, false);
+    draw_roundrect_color(x1, y1, x2, y2, 10, col1, col2, outline);
   }
 
   inline void draw_roundrect_precise(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, bool outline) {
-    draw_roundrect_precise(x1, y1, x2, y2, 10, false);
+    draw_roundrect_precise(x1, y1, x2, y2, 10, outline);
   }
 
   inline void draw_roundrect_precise_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, int col1, int col2, bool outline) {
-    draw_roundrect_precise_color(x1, y1, x2, y2, 10, col1, col2, false);
+    draw_roundrect_precise_color(x1, y1, x2, y2, 10, col1, col2, outline);
   }
 
   void draw_healthbar(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, float amount, int backcol, int mincol, int maxcol, int direction, bool showback, bool showborder);
