@@ -46,6 +46,7 @@ namespace gui{
 	unsigned int gui_style_slider = enigma_user::gui_style_create();
   unsigned int gui_style_label = enigma_user::gui_style_create();
   unsigned int gui_style_scrollbar = enigma_user::gui_style_create();
+  unsigned int gui_style_textbox = enigma_user::gui_style_create();
 }
 
 namespace enigma_user

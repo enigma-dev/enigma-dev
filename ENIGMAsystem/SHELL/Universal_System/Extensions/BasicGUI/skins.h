@@ -29,6 +29,7 @@ namespace gui
 			int slider_style;
       int scrollbar_style;
 			int label_style;
+			int textbox_style;
 
 			Skin();
 	};

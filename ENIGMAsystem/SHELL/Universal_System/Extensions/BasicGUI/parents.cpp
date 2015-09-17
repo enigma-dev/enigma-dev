@@ -35,6 +35,7 @@ namespace gui
       //get_element_smart(ele, x);
       switch (gui::gui_elements[x].type){
         case gui::GUI_TYPE::BUTTON: { gui::Button &element = gui::gui_elements[x]; if (element.visible == true) element.update(ox,oy); break; }
+        case gui::GUI_TYPE::TEXTBOX: { gui::Textbox &element = gui::gui_elements[x]; if (element.visible == true) element.update(ox,oy); break; }
         case gui::GUI_TYPE::TOGGLE: { gui::Toggle &element = gui::gui_elements[x]; if (element.visible == true) element.update(ox,oy); break; }
         case gui::GUI_TYPE::SCROLLBAR: { gui::Scrollbar &element = gui::gui_elements[x]; if (element.visible == true) element.update(ox,oy); break; }
         case gui::GUI_TYPE::SLIDER: { gui::Slider &element = gui::gui_elements[x]; if (element.visible == true) element.update(ox,oy); break; }
@@ -53,6 +54,7 @@ namespace gui
     for (const auto& x: child_elements){
       switch (gui::gui_elements[x].type){
         case gui::GUI_TYPE::BUTTON: { gui::Button &element = gui::gui_elements[x]; if (element.visible == true) element.draw(ox,oy); break; }
+        case gui::GUI_TYPE::TEXTBOX: { gui::Textbox &element = gui::gui_elements[x]; if (element.visible == true) element.draw(ox,oy); break; }
         case gui::GUI_TYPE::TOGGLE: { gui::Toggle &element = gui::gui_elements[x]; if (element.visible == true) element.draw(ox,oy); break; }
         case gui::GUI_TYPE::LABEL:  { gui::Label &element = gui::gui_elements[x]; if (element.visible == true) element.draw(ox,oy); break; }
         case gui::GUI_TYPE::SCROLLBAR: { gui::Scrollbar &element = gui::gui_elements[x]; if (element.visible == true) element.draw(ox,oy); break; }
@@ -100,6 +102,12 @@ namespace gui
     get_element(lab,gui::Label,gui::GUI_TYPE::LABEL,id);
     child_elements.push_back(id);
     lab.parent_id = element_id;
+  }
+
+  void Parent::textbox_add(int id){
+    get_element(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
+    child_elements.push_back(id);
+    tex.parent_id = element_id;
   }
 
   void Parent::button_remove(int id){
@@ -162,6 +170,16 @@ namespace gui
     }
   }
 
+  void Parent::textbox_remove(int id){
+    check_element(gui::GUI_TYPE::TEXTBOX,id);
+    auto it = find(child_elements.begin(), child_elements.end(), id);
+    if (it != child_elements.end()){
+      get_element(tex,gui::Label,gui::GUI_TYPE::TEXTBOX,id);
+      child_elements.erase(it);
+      tex.parent_id = -1;
+    }
+  }
+
   int Parent::button_count(){
     int c = 0;
     for (const unsigned int &e: child_elements){
@@ -212,6 +230,15 @@ namespace gui
     for (const unsigned int &e: child_elements){
       check_element_existsv(e, -1);
       if (gui::gui_elements[e].type == gui::GUI_TYPE::LABEL) c++;
+    }
+    return c;
+  }
+
+  int Parent::textbox_count(){
+    int c = 0;
+    for (const unsigned int &e: child_elements){
+      check_element_existsv(e, -1);
+      if (gui::gui_elements[e].type == gui::GUI_TYPE::TEXTBOX) c++;
     }
     return c;
   }
@@ -297,6 +324,21 @@ namespace gui
     for (const unsigned int &e : child_elements){
       check_element_existsv(e, -1);
       if (gui::gui_elements[e].type == gui::GUI_TYPE::LABEL){
+        if (c == id){
+          return e;
+        }
+        c++;
+      }
+    }
+    return -1;
+  }
+
+  int Parent::textbox(int id){
+    if (id<0 || unsigned(id) >= child_elements.size()) return -1;
+    int c = 0;
+    for (const unsigned int &e : child_elements){
+      check_element_existsv(e, -1);
+      if (gui::gui_elements[e].type == gui::GUI_TYPE::TEXTBOX){
         if (c == id){
           return e;
         }

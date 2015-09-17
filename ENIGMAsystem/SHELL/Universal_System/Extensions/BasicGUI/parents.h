@@ -40,6 +40,7 @@ namespace gui
       void slider_add(int id);
       void window_add(int id);
       void label_add(int id);
+      void textbox_add(int id);
 
       void button_remove(int id);
       void toggle_remove(int id);
@@ -47,6 +48,7 @@ namespace gui
       void slider_remove(int id);
       void window_remove(int id);
       void label_remove(int id);
+      void textbox_remove(int id);
 
 			int button_count();
 			int toggle_count();
@@ -54,6 +56,7 @@ namespace gui
 			int slider_count();
 			int window_count();
 			int label_count();
+      int textbox_count();
 
 			int button(int id);
 			int toggle(int id);
@@ -61,6 +64,7 @@ namespace gui
 			int slider(int id);
 			int window(int id);
 			int label(int id);
+      int textbox(int id);
 
 			int element_count();
 			int element(int id);
