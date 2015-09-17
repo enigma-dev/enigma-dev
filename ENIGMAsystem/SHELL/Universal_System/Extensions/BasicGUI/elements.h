@@ -28,6 +28,7 @@
 #include "groups.h"
 #include "labels.h"
 #include "windows.h"
+#include "textboxes.h"
 #include "scrollbars.h"
 #include "styles.h"
 #include "skins.h"
@@ -106,6 +107,7 @@
       return ret;\
     }
    #define check_data_element_exists(id) check_data_element_existsv(id,)
+   #define SHOW_ERROR(error) show_error(error, false);
 #else
   #define get_elementv(element,clastype,entype,id,ret)\
     clastype &element = gui::gui_elements[id];
@@ -137,6 +139,7 @@
   #define check_data_element(entype,id) check_data_elementv(entype,id,)
   #define check_data_element_existsv(id,ret)
   #define check_data_element_exists(id) check_data_element_existsv(id,)
+  #define SHOW_ERROR(error)
 #endif
 
 namespace gui
@@ -152,7 +155,8 @@ namespace gui
     WINDOW,
     SKIN,
     STYLE,
-    GROUP
+    GROUP,
+    TEXTBOX
   };
 
   class Element{
@@ -168,6 +172,7 @@ namespace gui
         Label label;
         Scrollbar scrollbar;
         Window window;
+        Textbox textbox;
 
         Data() {}
         ~Data() {}
@@ -207,6 +212,11 @@ namespace gui
         new (&(data.window)) Window(win);
       }
 
+      inline Element(const Textbox &tex, int id) : id(id){
+        type = GUI_TYPE::TEXTBOX;
+        new (&(data.textbox)) Textbox(tex);
+      }
+
       //Destructor
       inline ~Element(){
         switch (type){
@@ -228,8 +238,11 @@ namespace gui
           case GUI_TYPE::WINDOW:
             data.window.~Window();
             break;
+          case GUI_TYPE::TEXTBOX:
+            data.textbox.~Textbox();
+            break;
           default:
-            printf("Unknown element type or element type == ERROR and id = %i!\n", id);
+            SHOW_ERROR("BasicGUI: Unknown element type or element type == ERROR and id = "+std::to_string(id)+"!\n");
             break;
         }
       }
@@ -239,7 +252,7 @@ namespace gui
         if (type == GUI_TYPE::BUTTON){
           return data.button;
         }
-        printf("Type is not a button! This is going to crash now!\n");
+        SHOW_ERROR("BasicGUI: Type is not a button! This is going to crash now!\n");
         return data.button;
       }
 
@@ -247,7 +260,7 @@ namespace gui
         if (type == GUI_TYPE::SLIDER){
           return data.slider;
         }
-        printf("Type is not a slider! This is going to crash now!\n");
+        SHOW_ERROR("BasicGUI: Type is not a slider! This is going to crash now!\n");
         return data.slider;
       }
 
@@ -255,7 +268,7 @@ namespace gui
         if (type == GUI_TYPE::TOGGLE){
           return data.toggle;
         }
-        printf("Type is not a toggle! This is going to crash now!\n");
+        SHOW_ERROR("BasicGUI: Type is not a toggle! This is going to crash now!\n");
         return data.toggle;
       }
 
@@ -263,7 +276,7 @@ namespace gui
         if (type == GUI_TYPE::LABEL){
           return data.label;
         }
-        printf("Type is not a label! This is going to crash now!\n");
+        SHOW_ERROR("BasicGUI: Type is not a label! This is going to crash now!\n");
         return data.label;
       }
 
@@ -271,7 +284,7 @@ namespace gui
         if (type == GUI_TYPE::SCROLLBAR){
           return data.scrollbar;
         }
-        printf("Type is not a scrollbar! This is going to crash now!\n");
+        SHOW_ERROR("BasicGUI: Type is not a scrollbar! This is going to crash now!\n");
         return data.scrollbar;
       }
 
@@ -279,8 +292,16 @@ namespace gui
         if (type == GUI_TYPE::WINDOW){
           return data.window;
         }
-        printf("Type is not a window! This is going to crash now!\n");
+        SHOW_ERROR("BasicGUI: Type is not a window! This is going to crash now!\n");
         return data.window;
+      }
+
+      inline operator Textbox&(){
+        if (type == GUI_TYPE::TEXTBOX){
+          return data.textbox;
+        }
+        SHOW_ERROR("BasicGUI: Type is not a textbox! This is going to crash now!\n");
+        return data.textbox;
       }
 
       //This is only needed if we have non-trivial copy constructors, but I leave it here for now
@@ -305,8 +326,11 @@ namespace gui
           case GUI_TYPE::WINDOW:
               new (&(data.window)) Window(rhs.data.window);
               break;
+          case GUI_TYPE::TEXTBOX:
+              new (&(data.textbox)) Textbox(rhs.data.textbox);
+              break;
           default:
-            printf("Unknown element type or element type == ERROR!\n");
+            SHOW_ERROR("BasicGUI: Unknown element type or element type == ERROR!\n");
             break;
         }
       }
@@ -360,7 +384,7 @@ namespace gui
             data.skin.~Skin();
             break;
           default:
-            printf("Unknown element type or element type == ERROR!\n");
+            SHOW_ERROR("BasicGUI: Unknown element type or element type == ERROR!\n");
             break;
         }
       }
@@ -370,7 +394,7 @@ namespace gui
         if (type == GUI_TYPE::GROUP){
           return data.group;
         }
-        printf("Type is not a group! This is going to crash now!\n");
+        SHOW_ERROR("BasicGUI: Type is not a group! This is going to crash now!\n");
         return data.group;
       }
 
@@ -378,7 +402,7 @@ namespace gui
         if (type == GUI_TYPE::STYLE){
           return data.style;
         }
-        printf("Type is not a style! This is going to crash now!\n");
+        SHOW_ERROR("BasicGUI: Type is not a style! This is going to crash now!\n");
         return data.style;
       }
 
@@ -386,7 +410,7 @@ namespace gui
         if (type == GUI_TYPE::SKIN){
           return data.skin;
         }
-        printf("Type is not a skin! This is going to crash now!\n");
+        SHOW_ERROR("BasicGUI: Type is not a skin! This is going to crash now!\n");
         return data.skin;
       }
 
@@ -404,7 +428,7 @@ namespace gui
               new (&(data.skin)) Skin(rhs.data.skin);
               break;
           default:
-            printf("Unknown element type or element type == ERROR!\n");
+            SHOW_ERROR("BasicGUI: Unknown element type or element type == ERROR!\n");
             break;
         }
       }

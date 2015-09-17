@@ -54,6 +54,9 @@ namespace gui{
 
     label_style = (enigma_user::gui_label_create());
 		enigma_user::gui_label_set_visible(label_style,false);
+
+    textbox_style = (enigma_user::gui_textbox_create());
+    enigma_user::gui_textbox_set_visible(textbox_style,false);
 	}
 
 	int gui_bound_skin = -1;
@@ -107,4 +110,9 @@ namespace enigma_user
     get_data_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,id,-1);
     return (ski.label_style);
 	}
+
+  int gui_skin_get_textbox(int id){
+    get_data_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,id,-1);
+    return (ski.textbox_style);
+  }
 }

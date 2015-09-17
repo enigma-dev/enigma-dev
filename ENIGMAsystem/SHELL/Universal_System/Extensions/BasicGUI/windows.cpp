@@ -331,7 +331,7 @@ namespace enigma_user
       get_data_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,gui::gui_bound_skin,-1);
       get_elementv(win,gui::Window,gui::GUI_TYPE::WINDOW,ski.window_style,-1);
       gui::gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(gui::gui_elements_maxid), std::forward_as_tuple(win, gui::gui_elements_maxid));
-      //printf("Creating window with size %i\n", sizeof(gui::gui_elements[gui::gui_elements_maxid]));
+      printf("Creating window with size %i\n", sizeof(gui::gui_elements[gui::gui_elements_maxid]));
 		}
     gui::Window &win = gui::gui_elements[gui::gui_elements_maxid];
 		win.visible = true;
@@ -600,7 +600,7 @@ namespace enigma_user
     int window_swap_id = -1;
     ///TODO(harijs): This needs to be made more efficient.
     for (int ind = gui::gui_window_order.size()-1; ind >= 0; --ind){
-      int i = gui::gui_window_order[ind];
+      unsigned int i = gui::gui_window_order[ind];
       for (const auto &gw : gro.group_windows){
         if (i == gw){
           get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,i);
