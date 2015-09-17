@@ -41,7 +41,8 @@ namespace enigma_user
 	  gui_label = static_cast<int>(gui::GUI_TYPE::LABEL),
 	  gui_group = static_cast<int>(gui::GUI_TYPE::GROUP),
 	  gui_scrollbar = static_cast<int>(gui::GUI_TYPE::SCROLLBAR),
-	  gui_style = static_cast<int>(gui::GUI_TYPE::STYLE)
+	  gui_style = static_cast<int>(gui::GUI_TYPE::STYLE),
+    gui_textbox = static_cast<int>(gui::GUI_TYPE::TEXTBOX)
 	};
 
 	enum {
@@ -258,6 +259,71 @@ namespace enigma_user
   //Drawers
 	void gui_scrollbar_draw(int id);
 	void gui_scrollbars_draw();
+
+  ///TEXTBOXES
+  int gui_textbox_create(gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h, string text);
+  int gui_textbox_create();
+
+  void gui_textbox_destroy(int id);
+/*
+  //Setters
+  void gui_button_set_text(int id, string text);
+  void gui_button_set_position(int id, gs_scalar x, gs_scalar y);
+
+  void gui_button_set_size(int id, gs_scalar w, gs_scalar h);
+  void gui_button_set_style(int id, int style_id);
+
+  void gui_button_set_callback(int id, int event, int script_id);
+  void gui_button_set_togglable(int id, bool togglable);*/
+  void gui_textbox_set_visible(int id, bool visible);
+  /*void gui_button_set_active(int id, bool active);
+
+  //Getters
+  int gui_button_get_style(int id);
+  int gui_button_get_state(int id);
+  int gui_button_get_callback(int id, int event);
+  int gui_button_get_parent(int id);
+  bool gui_button_get_active(int id);
+  bool gui_button_get_visible(int id);
+  bool gui_button_get_togglable(int id);
+  gs_scalar gui_button_get_width(int id);
+  gs_scalar gui_button_get_height(int id);
+  gs_scalar gui_button_get_x(int id);
+  gs_scalar gui_button_get_y(int id);
+  string gui_button_get_text(int id);
+
+  //Drawers
+  void gui_button_draw(int id);
+  void gui_buttons_draw();
+
+  //Button parenting
+  void gui_button_add_button(int id, int bid);
+  void gui_button_add_toggle(int id, int tid);
+  void gui_button_add_slider(int id, int sid);
+  void gui_button_add_scrollbar(int id, int scr);
+  void gui_button_add_label(int id, int lid);
+  void gui_button_add_window(int id, int wid);
+
+  void gui_button_remove_button(int id, int bid);
+  void gui_button_remove_toggle(int id, int tid);
+  void gui_button_remove_slider(int id, int sid);
+  void gui_button_remove_scrollbar(int id, int scr);
+  void gui_button_remove_label(int id, int lid);
+  void gui_button_remove_window(int id, int wid);
+
+  int gui_button_get_button_count(int id);
+  int gui_button_get_toggle_count(int id);
+  int gui_button_get_slider_count(int id);
+  int gui_button_get_scrollbar_count(int id);
+  int gui_button_get_label_count(int id);
+  int gui_button_get_window_count(int id);
+
+  int gui_button_get_button(int id, int but);
+  int gui_button_get_toggle(int id, int tog);
+  int gui_button_get_slider(int id, int sli);
+  int gui_button_get_scrollbar(int id, int scr);
+  int gui_button_get_label(int id, int lab);
+  int gui_button_get_window(int id, int wid);*/
 
 	///Windows
 	int gui_window_create(gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h, string text);
