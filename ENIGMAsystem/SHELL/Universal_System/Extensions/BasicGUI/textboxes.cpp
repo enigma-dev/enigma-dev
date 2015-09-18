@@ -18,11 +18,14 @@
 #include <unordered_map>
 #include <string>
 using std::string;
+using std::to_string;
 using std::unordered_map;
 
 #include "Universal_System/var4.h"
-#include "Universal_System/CallbackArrays.h" //For mouse_check_button
+#include "Universal_System/CallbackArrays.h" //For mouse_check_button and keyboard_check_button
 #include "Universal_System/resource_data.h" //For script_execute
+#include "Universal_System/estring.h" //For string manipulation
+
 //#include "Universal_System/spritestruct.h"
 #include "Graphics_Systems/General/GSsprite.h"
 #include "Graphics_Systems/General/GSfont.h"
@@ -66,21 +69,36 @@ namespace gui
   //Update all possible textbox states (hover, click, toggle etc.)
   void Textbox::update(gs_scalar ox, gs_scalar oy, gs_scalar tx, gs_scalar ty){
     //Update children
-    /*parenter.update_children(ox+box.x, oy+box.y);
+    parenter.update_children(ox+box.x, oy+box.y);
 
     get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,parent_id);
+
+    get_data_element(sty,gui::Style,gui::GUI_TYPE::STYLE,style_id);
+    sty.font_styles[state].use();
     ///TODO(harijs) - This box check needs to take into account multi-level parenting
     bool pacheck = (parent_id == -1 || (parent_id != -1 && (win.stencil_mask == false || win.box.point_inside(tx,ty))));
     if (gui::windowStopPropagation == false && pacheck == true && box.point_inside(tx-ox,ty-oy)){
       callback_execute(enigma_user::gui_event_hover);
       gui::windowStopPropagation = true;
       if (enigma_user::mouse_check_button_pressed(enigma_user::mb_left)){
-        if (active == false){
-          state = enigma_user::gui_state_active;
-        }else{
-          state = enigma_user::gui_state_on_active;
-        }
+        active = true;
+        state = enigma_user::gui_state_on_active;
         callback_execute(enigma_user::gui_event_pressed);
+        //Update cursor position
+        int h = floor(enigma_user::mouse_y / (double)enigma_user::font_height(enigma_user::draw_get_font()));
+        if (h >= lines){
+          cursor_position = text[lines-1].length()-1;
+          cursor_x = enigma_user::string_width(text[lines-1]);
+          cursor_y = (lines-1) * (double)enigma_user::font_height(enigma_user::draw_get_font());
+          cursor_line = (lines-1);
+          printf("h>=Line [%i] = [%s] and cursor [%i] with x [%f] y [%f]\n", cursor_line, text[cursor_line].c_str(), cursor_position, cursor_x, cursor_y);
+        }else{
+          cursor_position = text[h].length()-1;
+          cursor_x = enigma_user::string_width(text[h]);
+          cursor_y = h * (double)enigma_user::font_height(enigma_user::draw_get_font());
+          cursor_line = h;
+          printf("h<Line [%i] = [%s] and cursor [%i] with x [%f] y [%f]\n", cursor_line, text[cursor_line].c_str(), cursor_position, cursor_x, cursor_y);
+        }
       }else{
         if (state != enigma_user::gui_state_active && state != enigma_user::gui_state_on_active){
           if (active == false){
@@ -90,50 +108,52 @@ namespace gui
           }
         }else{
           if (enigma_user::mouse_check_button_released(enigma_user::mb_left)){
-            if (togglable == true){
-              active = !active;
-            }else{
-              active = true;
-            }
             callback_execute(enigma_user::gui_event_released);
-            if (togglable == false){
-              active = false;
-            }
-
-            if (active == false){
-              state = enigma_user::gui_state_hover;
-            }else{
-              state = enigma_user::gui_state_on_hover;
-              if (group_id != -1){ //Groups disable any other active element
-                get_data_element(gro,gui::Group,gui::GUI_TYPE::GROUP,group_id);
-                for (const auto &b : gro.group_buttons){
-                  if (b != id) {
-                    get_element(but,gui::Button,gui::GUI_TYPE::BUTTON,b);
-                    but.active = false;
-                  }
-                }
-                for (const auto &t : gro.group_toggles){
-                  get_element(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,t);
-                  tog.active = false;
-                }
-              }
-            }
           }
         }
       }
     }else{
-      if (togglable == false) active = false;
-      if (active == false){
-        state = enigma_user::gui_state_default;
-      }else{
-        state = enigma_user::gui_state_on;
+      if (enigma_user::mouse_check_button_pressed(enigma_user::mb_left)){
+        active = false;
       }
-    }*/
+      state = enigma_user::gui_state_on;
+    }
+
+    if (active == true){
+      if (enigma_user::keyboard_check_pressed(enigma_user::vk_anykey)){
+        if (enigma_user::keyboard_lastkey == enigma_user::vk_backspace){
+          printf("Line [%i] = [%s] and cursor [%i] with x [%f] y [%f]\n", cursor_line, text[cursor_line].c_str(), cursor_position, cursor_x, cursor_y);
+          if (cursor_position > 0) {
+            cursor_x -= enigma_user::string_width(text[cursor_line][cursor_position]);
+            printf("Line [%i] = [%s] and cursor [%i] with x [%f] y [%f]\n", cursor_line, text[cursor_line].c_str(), cursor_position, cursor_x, cursor_y);
+            text[cursor_line].erase(cursor_position,1);
+            cursor_position--;
+          }
+        }else if (enigma_user::keyboard_lastkey == enigma_user::vk_delete){
+          if (cursor_position < text[cursor_line].length() - 1){
+            text[cursor_line].erase(cursor_position,1);
+          }
+        }else if (enigma_user::keyboard_lastkey == enigma_user::vk_left){
+          if (cursor_position > 0){
+            printf("Line [%i] = [%c] and delta x = %u\n", cursor_line, text[cursor_line][cursor_position], enigma_user::string_width(text[cursor_line][cursor_position]));
+            cursor_x -= enigma_user::string_width(text[cursor_line][cursor_position]);
+            cursor_position--;
+          }
+        }else if (enigma_user::keyboard_lastkey == enigma_user::vk_right){
+          if (cursor_position < text[cursor_line].length() - 1){
+            cursor_x += enigma_user::string_width(text[cursor_line][cursor_position]);
+            cursor_position++;
+          }
+        }else{
+          text[cursor_line] += enigma_user::keyboard_lastchar;
+        }
+      }
+    }
   }
 
   void Textbox::draw(gs_scalar ox, gs_scalar oy){
     //Draw textbox
-    /*get_data_element(sty,gui::Style,gui::GUI_TYPE::STYLE,style_id);
+    get_data_element(sty,gui::Style,gui::GUI_TYPE::STYLE,style_id);
     if (sty.sprites[state] != -1){
       if (sty.border.zero == true){
         enigma_user::draw_sprite_stretched(sty.sprites[state],-1,
@@ -159,13 +179,31 @@ namespace gui
     }
 
     //Draw text
-    if (text.empty() == false){
-      sty.font_styles[state].use();
+    sty.font_styles[state].use();
 
-      gs_scalar textx = 0.0, texty = 0.0;
+    gs_scalar textx = 0.0, texty = 0.0;
+    switch (sty.font_styles[state].halign){
+      case enigma_user::fa_left: textx = box.x+sty.padding.left; break;
+      case enigma_user::fa_center: textx = box.x+box.w/2.0; break;
+      case enigma_user::fa_right: textx = box.x+box.w-sty.padding.right; break;
+    }
+
+    switch (sty.font_styles[state].valign){
+      case enigma_user::fa_top: texty = box.y+sty.padding.top; break;
+      case enigma_user::fa_middle: texty = box.y+box.h/2.0; break;
+      case enigma_user::fa_bottom: texty = box.y+box.h-sty.padding.bottom; break;
+    }
+
+    for (auto &str : text){
+      if (str.empty() == false){
+        printf("Drawing text at %f and %f\n", textx, texty);
+        enigma_user::draw_text(ox + textx,oy + texty,str);
+      }
+    }
+    if (active == true){
       switch (sty.font_styles[state].halign){
         case enigma_user::fa_left: textx = box.x+sty.padding.left; break;
-        case enigma_user::fa_center: textx = box.x+box.w/2.0; break;
+        case enigma_user::fa_center: textx = box.x+box.w/2.0+cursor_x/2.0; break;
         case enigma_user::fa_right: textx = box.x+box.w-sty.padding.right; break;
       }
 
@@ -174,11 +212,11 @@ namespace gui
         case enigma_user::fa_middle: texty = box.y+box.h/2.0; break;
         case enigma_user::fa_bottom: texty = box.y+box.h-sty.padding.bottom; break;
       }
-
-      enigma_user::draw_text(ox + textx,oy + texty,text);
+      printf("Drawing cursor at %f and %f\n", textx + cursor_x, texty + cursor_y);
+      enigma_user::draw_text(ox + textx + cursor_x, oy + texty + cursor_y, "|");
     }
     //Draw children
-    parenter.draw_children(ox+box.x,oy+box.y);*/
+    parenter.draw_children(ox+box.x,oy+box.y);
   }
 
   void Textbox::update_text_pos(int state){
@@ -216,7 +254,7 @@ namespace enigma_user
     b.visible = true;
     b.id = gui::gui_elements_maxid;
     b.box.set(x, y, w, h);
-    b.text = text;
+    b.text[0] = text;
     b.update_text_pos();
     return (gui::gui_elements_maxid++);
   }
@@ -256,12 +294,12 @@ namespace enigma_user
       but.callback[event] = script_id;
     }
   }
-
-  void gui_button_set_style(int id, int style_id){
-    get_element(but,gui::Button,gui::GUI_TYPE::BUTTON,id);
+*/
+  void gui_textbox_set_style(int id, int style_id){
+    get_element(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
     check_data_element(gui::GUI_TYPE::STYLE, style_id);
-    but.style_id = (style_id != -1? style_id : gui::gui_style_button);
-  }
+    tex.style_id = (style_id != -1? style_id : gui::gui_style_textbox);
+  }/*
 
   void gui_button_set_active(int id, bool active){
     get_element(but,gui::Button,gui::GUI_TYPE::BUTTON,id);
