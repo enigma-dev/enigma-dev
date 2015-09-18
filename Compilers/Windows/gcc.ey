@@ -19,7 +19,7 @@ resources: $exe
 cppflags:
 cxxflags: -std=c++11 -m32 -I../Additional/i686-w64-mingw32/include
 cflags:
-ldflags: -m32 -L../Additional/i686-w64-mingw32/lib -static-libgcc -static-libstdc++
+ldflags: -m32 -L../Additional/i686-w64-mingw32/lib -static-libgcc -static-libstdc++ -static
 rcflags: 
 links:
 

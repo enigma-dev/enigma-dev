@@ -52,9 +52,10 @@ namespace enigma_user
   void draw_text_ext_transformed(gs_scalar x, gs_scalar y, variant str, gs_scalar sep, gs_scalar wid, gs_scalar xscale, gs_scalar yscale, double rot);
   void draw_text_ext_transformed_color(gs_scalar x, gs_scalar y, variant str, gs_scalar sep, gs_scalar wid, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, gs_scalar a);
 
-  unsigned int font_get_texture(int fnt);
-  unsigned int font_get_texture_width(int fnt);
-  unsigned int font_get_texture_height(int fnt);
+  int font_get_texture(int fnt);
+  int font_get_texture_width(int fnt);
+  int font_get_texture_height(int fnt);
+  int font_height(int fnt);
 
   unsigned int string_width(variant str);
   unsigned int string_height(variant str);

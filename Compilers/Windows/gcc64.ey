@@ -20,7 +20,7 @@ resources: $exe
 cppflags:
 cxxflags: -m64 -std=c++11 -I../Additional/x86_64-w64-mingw32/include
 cflags: -m64
-ldflags: -m64 -L../Additional/x86_64-w64-mingw32/lib -static-libgcc -static-libstdc++
+ldflags: -m64 -L../Additional/x86_64-w64-mingw32/lib -static-libgcc -static-libstdc++ -static
 rcflags: --target=pe-x86-64 
 links:
 

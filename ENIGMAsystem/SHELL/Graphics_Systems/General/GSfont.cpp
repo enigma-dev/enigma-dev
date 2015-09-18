@@ -244,13 +244,13 @@ unsigned int string_width_line(variant vstr, int line)
     uint32_t character = getUnicodeCharacter(str, i);
     if (character == '\r') {
       if (cl == line)
-        return len;
+        return ceil(len);
       cl += 1;
       len = 0;
       i += (str[i+1] == '\n');
     } else if (character == '\n') {
       if (cl == line)
-        return len;
+        return ceil(len);
       cl += 1;
       len = 0;
     } else {
@@ -262,7 +262,7 @@ unsigned int string_width_line(variant vstr, int line)
       }
     }
   }
-  return ceil(len);
+  return (cl != line ? 0 : ceil(len));
 }
 
 //TODO: These next functions can be rewritten to get rid of Schlemiel the Painter's algorithm happening in the second for loop
@@ -276,9 +276,9 @@ unsigned int string_width_ext_line(variant vstr, gs_scalar w, int line)
   {
     uint32_t character = getUnicodeCharacter(str, i);
     if (character == '\r') {
-      if (cl == line) return width; else {width = 0; cl +=1; i += str[i+1] == '\n';}
+      if (cl == line) return ceil(width); else {width = 0; cl +=1; i += str[i+1] == '\n';}
     } else if (character == '\n') {
-      if (cl == line) return width; else width = 0, cl +=1;
+      if (cl == line) return ceil(width); else width = 0, cl +=1;
     } else {
       fontglyph* g = findGlyph(fnt, character);
       if ((character == ' ' or g == NULL) && w != -1) {
@@ -292,14 +292,14 @@ unsigned int string_width_ext_line(variant vstr, gs_scalar w, int line)
           tw += (gt!=NULL?g->xs:slen);
         }
         if (width+tw >= w){
-        if (cl == line) { return width; } else {width = 0; cl +=1;}
+        if (cl == line) { return ceil(width); } else {width = 0; cl +=1;}
         }
       } else {
         width += (g!=NULL?g->xs:slen);
       }
     }
   }
-  return ceil(width);
+  return  (cl != line ? 0 : ceil(width));
 }
 
 unsigned int string_width_ext_line_count(variant vstr, gs_scalar w)
@@ -307,7 +307,8 @@ unsigned int string_width_ext_line_count(variant vstr, gs_scalar w)
   string str = toString(vstr);
   get_font(fnt,currentfont,0);
 
-  float width = 0, tw = 0, cl = 1, slen = get_space_width(fnt);
+  float width = 0, tw = 0, slen = get_space_width(fnt);
+  unsigned int cl = 1;
   for (size_t i = 0; i < str.length(); i++)
   {
     uint32_t character = getUnicodeCharacter(str, i);
@@ -334,7 +335,7 @@ unsigned int string_width_ext_line_count(variant vstr, gs_scalar w)
       }
     }
   }
-  return ceil(cl);
+  return cl;
 }
 
 }
@@ -1275,20 +1276,26 @@ void draw_text_ext_color(gs_scalar x, gs_scalar y,variant vstr,gs_scalar sep, gs
   }
 }
 
-unsigned int font_get_texture(int fnt)
+int font_get_texture(int fnt)
 {
   get_font_null(f,fnt,-1);
-  return f ? f->texture : unsigned(-1);
+  return f ? f->texture : (-1);
 }
-unsigned int font_get_texture_width(int fnt)
+int font_get_texture_width(int fnt)
 {
   get_font_null(f,fnt,-1);
-  return f ? f->twid: unsigned(-1);
+  return f ? f->twid: (-1);
 }
-unsigned int font_get_texture_height(int fnt)
+int font_get_texture_height(int fnt)
 {
   get_font_null(f,fnt,-1);
-  return f ? f->thgt: unsigned(-1);
+  return f ? f->thgt: (-1);
+}
+
+int font_height(int fnt)
+{
+  get_font_null(f,fnt,-1);
+  return f ? f->height: (-1);
 }
 
 void draw_set_font(int fnt) {
