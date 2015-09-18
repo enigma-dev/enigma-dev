@@ -18,7 +18,11 @@
 #ifndef BGUI_TEXTBOXES_H
 #define BGUI_TEXTBOXES_H
 #include <array>
+#include <string>
+#include <vector>
 using std::array;
+using std::string;
+using std::vector;
 
 #include "common.h"
 #include "parents.h"
@@ -34,12 +38,21 @@ namespace gui
     public:
       unsigned int id;
       rect box;
-      string text = "";
+      vector<string> text{""};
 
       int state = 0;
       bool visible = true;
       bool active = false; //Is textbox is used
       array<int,4> callback; //Script to run on event
+
+      //Cursor position in chars and line
+      int cursor_position = 0;
+      int cursor_line = 0; 
+      int lines = 1;
+
+      //Cursor Position in pixels relative to the widget
+      double cursor_x = 0;
+      double cursor_y = 0;
 
       int parent_id = -1; //ID of the parent of some kind (probably a window). It won't render with gui_draw_textboxes() if it is.
 

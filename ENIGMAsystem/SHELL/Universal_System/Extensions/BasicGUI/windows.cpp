@@ -51,7 +51,7 @@ using std::deque;
 
 namespace gui
 {
-	extern unsigned int gui_elements_maxid;
+  extern unsigned int gui_elements_maxid;
   extern unsigned int gui_data_elements_maxid;
   extern unordered_map<unsigned int, Element> gui_elements;
   extern unordered_map<unsigned int, DataElement> gui_data_elements;
@@ -59,34 +59,34 @@ namespace gui
   extern map<unsigned int, unsigned int> gui_element_order;
 
   bool windowStopPropagation = false; //Stop event propagation in windows and between
-	deque<unsigned int> gui_window_order; //This allows changing rendering order (like depth)
+  deque<unsigned int> gui_window_order; //This allows changing rendering order (like depth)
 
-	extern unsigned int gui_style_window;
+  extern unsigned int gui_style_window;
 
-	extern int gui_bound_skin;
+  extern int gui_bound_skin;
 
-	//Implements button class
-	Window::Window(){
+  //Implements button class
+  Window::Window(){
     style_id = gui_style_window; //Default style
     enigma_user::gui_style_set_font_halign(style_id, enigma_user::gui_state_all, enigma_user::fa_center);
     enigma_user::gui_style_set_font_valign(style_id, enigma_user::gui_state_all, enigma_user::fa_top);
     callback.fill(-1); //Default callbacks don't exist (so it doesn't call any script)
-	}
+  }
 
   void Window::callback_execute(int event){
     if (callback[event] != -1){
       enigma_user::script_execute(callback[event], id, true, state, event);
     }
-	}
+  }
 
-	//Update all possible button states (hover, click, toggle etc.)
-	void Window::update(gs_scalar ox, gs_scalar oy, gs_scalar tx, gs_scalar ty){
-	  if (visible == false) return;
-	  if (parent_id != -1){ //This stops update_children() from being called twice (once in gui_window/s_draw() and once here)
+  //Update all possible button states (hover, click, toggle etc.)
+  void Window::update(gs_scalar ox, gs_scalar oy, gs_scalar tx, gs_scalar ty){
+    if (visible == false) return;
+    if (parent_id != -1){ //This stops update_children() from being called twice (once in gui_window/s_draw() and once here)
       parenter.update_children(ox+box.x, oy+box.y);
-	  }
-	  gs_scalar txox = tx-ox;
-	  gs_scalar tyoy = ty-oy;
+    }
+    gs_scalar txox = tx-ox;
+    gs_scalar tyoy = ty-oy;
     if (enigma_user::mouse_check_button_pressed(enigma_user::mb_left)){ //Press
       if (windowStopPropagation == false && box.point_inside(txox,tyoy)){
         state = enigma_user::gui_state_on;
@@ -178,24 +178,24 @@ namespace gui
       }
       callback_execute(enigma_user::gui_event_resize);
       if (enigma_user::mouse_check_button_released(enigma_user::mb_left)){
-				resize = false;
-				callback_execute(enigma_user::gui_event_released);
-			}
+        resize = false;
+        callback_execute(enigma_user::gui_event_released);
+      }
     }else if (drag == true){
       windowStopPropagation = true;
-			box.x = txox-drag_xoffset;
-			box.y = tyoy-drag_yoffset;
-			callback_execute(enigma_user::gui_event_drag);
-			if (enigma_user::mouse_check_button_released(enigma_user::mb_left)){
-				drag = false;
-				callback_execute(enigma_user::gui_event_released);
-			}
-		}
-	}
+      box.x = txox-drag_xoffset;
+      box.y = tyoy-drag_yoffset;
+      callback_execute(enigma_user::gui_event_drag);
+      if (enigma_user::mouse_check_button_released(enigma_user::mb_left)){
+        drag = false;
+        callback_execute(enigma_user::gui_event_released);
+      }
+    }
+  }
 
-	void Window::draw(gs_scalar ox, gs_scalar oy){
-	  if (visible == false) return;
-	  //Draw window
+  void Window::draw(gs_scalar ox, gs_scalar oy){
+    if (visible == false) return;
+    //Draw window
     get_data_element(sty,gui::Style,gui::GUI_TYPE::STYLE,style_id);
     if (sty.sprites[state] != -1){
       rect &b = (sty.box.zero == true ? box : sty.box);
@@ -221,13 +221,13 @@ namespace gui
                                       sty.sprite_styles[state].color,
                                       sty.sprite_styles[state].alpha);
       }
-		}
+    }
 
-  	//Draw text
+    //Draw text
     if (text.empty() == false){
-  		sty.font_styles[state].use();
+      sty.font_styles[state].use();
 
-  		gs_scalar textx = 0.0, texty = 0.0;
+      gs_scalar textx = 0.0, texty = 0.0;
       switch (sty.font_styles[state].halign){
         case enigma_user::fa_left: textx = ox+box.x+sty.padding.left; break;
         case enigma_user::fa_center: textx = ox+box.x+box.w/2.0; break;
@@ -240,7 +240,7 @@ namespace gui
         case enigma_user::fa_bottom: texty = oy+box.y+box.h-sty.padding.bottom; break;
       }
 
-  		enigma_user::draw_text(textx,texty,text);
+      enigma_user::draw_text(textx,texty,text);
     }
 
     get_data_element(ssty,gui::Style,gui::GUI_TYPE::STYLE,(stencil_style_id==-1?style_id:stencil_style_id));
@@ -299,82 +299,82 @@ namespace gui
     }else{
       parenter.draw_children(ox+box.x,oy+box.y);
     }
-	}
+  }
 
-	void Window::update_text_pos(int state){
-	}
+  void Window::update_text_pos(int state){
+  }
 }
 
 namespace enigma_user
 {
-	int gui_window_create(){
-		if (gui::gui_bound_skin == -1){ //Add default one
+  int gui_window_create(){
+    if (gui::gui_bound_skin == -1){ //Add default one
       gui::gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(gui::gui_elements_maxid), std::forward_as_tuple(gui::Window(), gui::gui_elements_maxid));
-		}else{
+    }else{
       get_data_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,gui::gui_bound_skin,-1);
       get_elementv(win,gui::Window,gui::GUI_TYPE::WINDOW,ski.window_style,-1);
       gui::gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(gui::gui_elements_maxid), std::forward_as_tuple(win, gui::gui_elements_maxid));
-		}
+    }
     gui::Window &win = gui::gui_elements[gui::gui_elements_maxid];
-		win.visible = true;
-		win.id = gui::gui_elements_maxid;
-		win.parenter.element_id = win.id;
+    win.visible = true;
+    win.id = gui::gui_elements_maxid;
+    win.parenter.element_id = win.id;
     gui::gui_window_order.emplace_back(gui::gui_elements_maxid);
-		gui::gui_element_order.emplace(gui::gui_elements_maxid, gui::gui_elements_maxid);
-		return gui::gui_elements_maxid++;
-	}
+    gui::gui_element_order.emplace(gui::gui_elements_maxid, gui::gui_elements_maxid);
+    return gui::gui_elements_maxid++;
+  }
 
-	int gui_window_create(gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h, string text){
-		if (gui::gui_bound_skin == -1){ //Add default one
+  int gui_window_create(gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h, string text){
+    if (gui::gui_bound_skin == -1){ //Add default one
       gui::gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(gui::gui_elements_maxid), std::forward_as_tuple(gui::Window(), gui::gui_elements_maxid));
-		}else{
+    }else{
       get_data_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,gui::gui_bound_skin,-1);
       get_elementv(win,gui::Window,gui::GUI_TYPE::WINDOW,ski.window_style,-1);
       gui::gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(gui::gui_elements_maxid), std::forward_as_tuple(win, gui::gui_elements_maxid));
       printf("Creating window with size %i\n", sizeof(gui::gui_elements[gui::gui_elements_maxid]));
-		}
+    }
     gui::Window &win = gui::gui_elements[gui::gui_elements_maxid];
-		win.visible = true;
-		win.id = gui::gui_elements_maxid;
-		win.box.set(x, y, w, h);
-		win.text = text;
-		win.parenter.element_id = win.id;
+    win.visible = true;
+    win.id = gui::gui_elements_maxid;
+    win.box.set(x, y, w, h);
+    win.text = text;
+    win.parenter.element_id = win.id;
     gui::gui_window_order.emplace_back(gui::gui_elements_maxid);
-		gui::gui_element_order.emplace(gui::gui_elements_maxid, gui::gui_elements_maxid);
-		return gui::gui_elements_maxid++;
-	}
+    gui::gui_element_order.emplace(gui::gui_elements_maxid, gui::gui_elements_maxid);
+    return gui::gui_elements_maxid++;
+  }
 
-	void gui_window_destroy(int id){
+  void gui_window_destroy(int id){
     check_element(gui::GUI_TYPE::WINDOW,id);
-		gui::gui_elements.erase(gui::gui_elements.find(id));
-		//This is the fancy remove/erase idiom, which is the fastest way I know how to delete an element by value from vector
-		gui::gui_element_order.erase(id);
-		gui::gui_window_order.erase(std::remove(gui::gui_window_order.begin(), gui::gui_window_order.end(), id), gui::gui_window_order.end());
-	}
+    gui::gui_elements.erase(gui::gui_elements.find(id));
+    //This is the fancy remove/erase idiom, which is the fastest way I know how to delete an element by value from vector
+    gui::gui_element_order.erase(id);
+    gui::gui_window_order.erase(std::remove(gui::gui_window_order.begin(), gui::gui_window_order.end(), id), gui::gui_window_order.end());
+  }
 
-	void gui_window_set_state(int id, int state){
+  void gui_window_set_state(int id, int state){
     get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
     win.state = state;
-	}
+  }
 
   ///Setters
-	void gui_window_set_text(int id, string text){
+  void gui_window_set_text(int id, string text){
     get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
-		win.text = text;
-	}
+    win.text = text;
+  }
 
-	void gui_window_set_position(int id, gs_scalar x, gs_scalar y){
+  void gui_window_set_position(int id, gs_scalar x, gs_scalar y){
     get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
-		win.box.x = x;
-		win.box.y = y;
-	}
+    win.box.x = x;
+    win.box.y = y;
+  }
 
-	void gui_window_set_size(int id, gs_scalar w, gs_scalar h){
+  void gui_window_set_size(int id, gs_scalar w, gs_scalar h){
     get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
-		win.box.w = w;
-		win.box.h = h;
-		win.update_text_pos();
-	}
+    win.box.w = w;
+    win.box.h = h;
+    win.update_text_pos();
+  }
 
   void gui_window_set_minsize(int id, gs_scalar w, gs_scalar h){
     get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
@@ -383,13 +383,13 @@ namespace enigma_user
     win.update_text_pos();
   }
 
-	void gui_window_set_callback(int id, int event, int script_id){
+  void gui_window_set_callback(int id, int event, int script_id){
     get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
     if (event == enigma_user::gui_event_all){
       win.callback.fill(script_id);
-	  }else{
+    }else{
       win.callback[event] = script_id;
-	  }
+    }
   }
 
   void gui_window_set_style(int id, int style_id){
@@ -410,27 +410,27 @@ namespace enigma_user
     win.stencil_style_id = style_id;
   }
 
-	void gui_window_set_visible(int id, bool visible){
+  void gui_window_set_visible(int id, bool visible){
     get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
-		win.visible = visible;
-	}
+    win.visible = visible;
+  }
 
   void gui_window_set_draggable(int id, bool draggable){
     get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
-		win.draggable = draggable;
-	}
+    win.draggable = draggable;
+  }
 
   void gui_window_set_resizable(int id, bool resizable){
     get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
-		win.resizable = resizable;
-	}
+    win.resizable = resizable;
+  }
 
   void gui_window_set_stencil_mask(int id, bool stencil){
     get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
-		win.stencil_mask = stencil;
-	}
+    win.stencil_mask = stencil;
+  }
 
-	///Getters
+  ///Getters
   int gui_window_get_style(int id){
     get_elementv(win,gui::Window,gui::GUI_TYPE::WINDOW,id,-1);
     return win.style_id;
@@ -441,15 +441,15 @@ namespace enigma_user
     return win.stencil_style_id;
   }
 
-	int gui_window_get_state(int id){
+  int gui_window_get_state(int id){
     get_elementv(win,gui::Window,gui::GUI_TYPE::WINDOW,id,-1);
-		return win.state;
-	}
+    return win.state;
+  }
 
-	int gui_window_get_callback(int id, int event){
+  int gui_window_get_callback(int id, int event){
     get_elementv(win,gui::Window,gui::GUI_TYPE::WINDOW,id,-1);
-		return win.callback[event];
-	}
+    return win.callback[event];
+  }
 
   bool gui_window_get_draggable(int id){
     get_elementv(win,gui::Window,gui::GUI_TYPE::WINDOW,id,false);
@@ -461,50 +461,50 @@ namespace enigma_user
     return win.resizable;
   }
 
-	bool gui_window_get_visible(int id){
+  bool gui_window_get_visible(int id){
     get_elementv(win,gui::Window,gui::GUI_TYPE::WINDOW,id,false);
-	  return win.visible;
-	}
+    return win.visible;
+  }
 
   gs_scalar gui_window_get_width(int id){
     get_elementv(win,gui::Window,gui::GUI_TYPE::WINDOW,id,-1);
     return win.box.w;
   }
 
-	gs_scalar gui_window_get_height(int id){
+  gs_scalar gui_window_get_height(int id){
     get_elementv(win,gui::Window,gui::GUI_TYPE::WINDOW,id,-1);
     return win.box.h;
-	}
+  }
 
-	gs_scalar gui_window_get_x(int id){
+  gs_scalar gui_window_get_x(int id){
     get_elementv(win,gui::Window,gui::GUI_TYPE::WINDOW,id,-1);
     return win.box.x;
-	}
+  }
 
-	gs_scalar gui_window_get_y(int id){
+  gs_scalar gui_window_get_y(int id){
     get_elementv(win,gui::Window,gui::GUI_TYPE::WINDOW,id,-1);
-	  return win.box.y;
-	}
+    return win.box.y;
+  }
 
-	string gui_window_get_text(int id){
+  string gui_window_get_text(int id){
     get_elementv(win,gui::Window,gui::GUI_TYPE::WINDOW,id,"");
     return win.text;
-	}
+  }
 
   bool gui_window_get_stencil_mask(int id){
     get_elementv(win,gui::Window,gui::GUI_TYPE::WINDOW,id,false);
-		return win.stencil_mask;
-	}
+    return win.stencil_mask;
+  }
 
-	///Depth changers
-	void gui_window_push_to_front(int id){
+  ///Depth changers
+  void gui_window_push_to_front(int id){
     check_element(gui::GUI_TYPE::WINDOW,id);
     auto it = find(gui::gui_window_order.begin(), gui::gui_window_order.end(), id);
     if (it != gui::gui_window_order.end()){
       gui::gui_window_order.erase(it);
       gui::gui_window_order.push_back(id);
     }
-	}
+  }
 
   void gui_window_push_to_back(int id){
     check_element(gui::GUI_TYPE::WINDOW,id);
@@ -513,7 +513,7 @@ namespace enigma_user
       gui::gui_window_order.erase(it);
       gui::gui_window_order.push_front(id);
     }
-	}
+  }
 
   ///TODO(harijs) - The next two functions are awful. They are N^2 or worse, so optimizations are welcome
   void gui_window_group_push_to_front(int gid){
@@ -630,26 +630,26 @@ namespace enigma_user
   }
 
   ///Drawers
-	void gui_window_draw(int id){
+  void gui_window_draw(int id){
     get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
     if (win.visible == true){
       gui::font_style psty = gui::get_current_draw_state();
-  		win.draw();
-  		gui::set_current_draw_state(psty);
+      win.draw();
+      gui::set_current_draw_state(psty);
     }
-	}
+  }
 
-	void gui_windows_draw(){
-	  if (gui::gui_window_order.size() == 0) return;
+  void gui_windows_draw(){
+    if (gui::gui_window_order.size() == 0) return;
     gui::font_style psty = gui::get_current_draw_state();
     for (const auto &wi : gui::gui_window_order){
       get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,wi);
       if (win.parent_id == -1){
         win.draw();
       }
-		}
-		gui::set_current_draw_state(psty);
-	}
+    }
+    gui::set_current_draw_state(psty);
+  }
 
   void gui_windows_group_draw(int gid){
     get_data_element(gro,gui::Group,gui::GUI_TYPE::GROUP,gid);
@@ -700,6 +700,11 @@ namespace enigma_user
     win.parenter.window_add(wid);
   }
 
+  void gui_window_add_textbox(int id, int tex){
+    get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
+    win.parenter.textbox_add(tex);
+  }
+
   void gui_window_remove_button(int id, int bid){
     get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
     win.parenter.button_remove(bid);
@@ -729,6 +734,11 @@ namespace enigma_user
   void gui_window_remove_window(int id, int wid){
     get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
     win.parenter.window_remove(wid);
+  }
+
+  void gui_window_remove_textbox(int id, int tex){
+    get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,id);
+    win.parenter.textbox_remove(tex);
   }
 
   int gui_window_get_button_count(int id){
@@ -761,6 +771,11 @@ namespace enigma_user
     return win.parenter.window_count();
   }
 
+  int gui_window_get_textbox_count(int id){
+    get_elementv(win,gui::Window,gui::GUI_TYPE::WINDOW,id, -1);
+    return win.parenter.textbox_count();
+  }
+
   ///GETTERS FOR ELEMENTS
   int gui_window_get_button(int id, int but){
     get_elementv(win,gui::Window,gui::GUI_TYPE::WINDOW,id, -1);
@@ -790,6 +805,11 @@ namespace enigma_user
   int gui_window_get_window(int id, int wid){
     get_elementv(win,gui::Window,gui::GUI_TYPE::WINDOW,id, -1);
     return win.parenter.window(wid);
+  }
+
+  int gui_window_get_textbox(int id, int tex){
+    get_elementv(win,gui::Window,gui::GUI_TYPE::WINDOW,id, -1);
+    return win.parenter.textbox(tex);
   }
 
   /*void gui_window_add_element(int id, int ele){ //This adds a generic element. No type checking is done, so be careful using this!

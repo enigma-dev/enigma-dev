@@ -270,9 +270,9 @@ namespace enigma_user
   void gui_button_set_text(int id, string text);
   void gui_button_set_position(int id, gs_scalar x, gs_scalar y);
 
-  void gui_button_set_size(int id, gs_scalar w, gs_scalar h);
-  void gui_button_set_style(int id, int style_id);
-
+  void gui_button_set_size(int id, gs_scalar w, gs_scalar h);*/
+  void gui_textbox_set_style(int id, int style_id);
+/*
   void gui_button_set_callback(int id, int event, int script_id);
   void gui_button_set_togglable(int id, bool togglable);*/
   void gui_textbox_set_visible(int id, bool visible);
@@ -383,6 +383,7 @@ namespace enigma_user
   void gui_window_add_scrollbar(int id, int scr);
   void gui_window_add_label(int id, int lid);
   void gui_window_add_window(int id, int wid);
+  void gui_window_add_textbox(int id, int tex);
 
   void gui_window_remove_button(int id, int bid);
   void gui_window_remove_toggle(int id, int tid);
@@ -390,6 +391,7 @@ namespace enigma_user
   void gui_window_remove_scrollbar(int id, int scr);
   void gui_window_remove_label(int id, int lid);
   void gui_window_remove_window(int id, int wid);
+  void gui_window_remove_textbox(int id, int tex);
 
   int gui_window_get_button_count(int id);
   int gui_window_get_toggle_count(int id);
@@ -397,6 +399,7 @@ namespace enigma_user
   int gui_window_get_scrollbar_count(int id);
   int gui_window_get_label_count(int id);
   int gui_window_get_window_count(int id);
+  int gui_window_get_textbox_count(int id);
 
   int gui_window_get_button(int id, int but);
   int gui_window_get_toggle(int id, int tog);
@@ -404,6 +407,7 @@ namespace enigma_user
   int gui_window_get_scrollbar(int id, int scr);
   int gui_window_get_label(int id, int lab);
   int gui_window_get_window(int id, int wid);
+  int gui_window_get_textbox(int id, int tex);
 
   ///LABELS
 	int gui_label_create(gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h, string text);
@@ -452,7 +456,8 @@ namespace enigma_user
   int gui_skin_get_slider(int id);
   int gui_skin_get_label(int id);
   int gui_skin_get_scrollbar(int id);
-
+  int gui_skin_get_textbox(int id);
+  
   //Styles
   int gui_style_create();
   int gui_style_duplicate(int style);
