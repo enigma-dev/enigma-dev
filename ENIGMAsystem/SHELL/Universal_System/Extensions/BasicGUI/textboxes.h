@@ -49,6 +49,9 @@ namespace gui
       int cursor_position = 0;
       int cursor_line = 0; 
       int lines = 1;
+      int blink_timer = 0;
+
+      int repeat_timer = 0;
 
       //Cursor Position in pixels relative to the widget
       double cursor_x = 0;

@@ -17,6 +17,7 @@
 
 #include <unordered_map>
 #include <string>
+#include <ctype.h> //isalnum
 using std::string;
 using std::to_string;
 using std::unordered_map;
@@ -85,20 +86,31 @@ namespace gui
         state = enigma_user::gui_state_on_active;
         callback_execute(enigma_user::gui_event_pressed);
         //Update cursor position
-        int h = floor(enigma_user::mouse_y / (double)enigma_user::font_height(enigma_user::draw_get_font()));
+        int h = floor((ty-oy-box.y) / (double)enigma_user::font_height(enigma_user::draw_get_font()));
+        //printf("Line check [%i] with mouse_y = %f and oy = %f and boxy = %f and font_height = %i\n", h, ty, oy, box.y, enigma_user::font_height(enigma_user::draw_get_font()));
+        lines = text.size();
         if (h >= lines){
-          cursor_position = text[lines-1].length()-1;
+          cursor_position = text[lines-1].length();
           cursor_x = enigma_user::string_width(text[lines-1]);
           cursor_y = (lines-1) * (double)enigma_user::font_height(enigma_user::draw_get_font());
           cursor_line = (lines-1);
-          printf("h>=Line [%i] = [%s] and cursor [%i] with x [%f] y [%f]\n", cursor_line, text[cursor_line].c_str(), cursor_position, cursor_x, cursor_y);
+          //printf("h>=Line [%i] = [%s] and cursor [%i] with x [%f] y [%f]\n", cursor_line, text[cursor_line].c_str(), cursor_position, cursor_x, cursor_y);
         }else{
-          cursor_position = text[h].length()-1;
-          cursor_x = enigma_user::string_width(text[h]);
+          double wi = 0.0;
+          for (int c=0; c<text[h].length(); ++c){
+            //printf("char [%i] and xcheck %f < wi %f\n", c, tx-ox-box.x, wi);
+            if (tx-ox-box.x < wi){
+              break;
+            }
+            cursor_position = c;
+            wi += enigma_user::string_width(text[h].substr(c,1));
+          }
+          cursor_x = enigma_user::string_width(text[h].substr(0,cursor_position));
           cursor_y = h * (double)enigma_user::font_height(enigma_user::draw_get_font());
           cursor_line = h;
-          printf("h<Line [%i] = [%s] and cursor [%i] with x [%f] y [%f]\n", cursor_line, text[cursor_line].c_str(), cursor_position, cursor_x, cursor_y);
+          //printf("h<Line [%i] = [%s] and cursor [%i] with x [%f] y [%f]\n", cursor_line, text[cursor_line].c_str(), cursor_position, cursor_x, cursor_y);
         }
+        blink_timer = 0;
       }else{
         if (state != enigma_user::gui_state_active && state != enigma_user::gui_state_on_active){
           if (active == false){
@@ -121,32 +133,118 @@ namespace gui
 
     if (active == true){
       if (enigma_user::keyboard_check_pressed(enigma_user::vk_anykey)){
-        if (enigma_user::keyboard_lastkey == enigma_user::vk_backspace){
-          printf("Line [%i] = [%s] and cursor [%i] with x [%f] y [%f]\n", cursor_line, text[cursor_line].c_str(), cursor_position, cursor_x, cursor_y);
-          if (cursor_position > 0) {
-            cursor_x -= enigma_user::string_width(text[cursor_line][cursor_position]);
-            printf("Line [%i] = [%s] and cursor [%i] with x [%f] y [%f]\n", cursor_line, text[cursor_line].c_str(), cursor_position, cursor_x, cursor_y);
-            text[cursor_line].erase(cursor_position,1);
-            cursor_position--;
+        repeat_timer = 0;
+      }
+
+      if (enigma_user::keyboard_check(enigma_user::vk_anykey)){
+        if (repeat_timer == 0 || repeat_timer > 15){
+          switch (enigma_user::keyboard_lastkey){
+            case enigma_user::vk_backspace:{
+              //printf("Line [%i] = [%s] and cursor [%i] with x [%f] y [%f]\n", cursor_line, text[cursor_line].c_str(), cursor_position, cursor_x, cursor_y);
+              if (cursor_position > 0) {
+                cursor_position--;
+                //This would be more efficient, but string_width() returns rounded values
+                //cursor_x -= enigma_user::string_width(text[cursor_line][cursor_position]);
+                //printf("Line [%i] = [%s] and cursor [%i] with x [%f] y [%f]\n", cursor_line, text[cursor_line].c_str(), cursor_position, cursor_x, cursor_y);
+                text[cursor_line].erase(cursor_position,1);
+              }else{
+                if (cursor_line > 0){
+                  cursor_line--;
+                  cursor_position = text[cursor_line].length();
+                  cursor_y = cursor_line * (double)enigma_user::font_height(enigma_user::draw_get_font());
+
+                  text[cursor_line] += text[cursor_line+1];
+                  text.erase(text.begin()+cursor_line+1);
+                }
+              }
+              break;
+            }
+            case enigma_user::vk_delete:{
+              if (cursor_position < text[cursor_line].length()){
+                text[cursor_line].erase(cursor_position,1);
+              }else{
+                if (cursor_line < text.size()-1){
+                  text[cursor_line] += text[cursor_line+1];
+                  text.erase(text.begin()+cursor_line+1);
+                }
+              }
+              break;
+            }
+            case enigma_user::vk_left:{
+              if (cursor_position > 0){
+                cursor_position--;
+                //printf("Line [%i] = [%c] and delta x = %u\n", cursor_line, text[cursor_line][cursor_position], enigma_user::string_width(string(1,text[cursor_line][cursor_position]))/*enigma_user::string_width(to_string(text[cursor_line][cursor_position]))*/);
+                //This would be more efficient, but string_width() returns rounded values
+                //cursor_x -= enigma_user::string_width(string(1,text[cursor_line][cursor_position]));
+                //printf("String [%s]\n", text[cursor_line].substr(0,cursor_position).c_str());
+              }else{
+                if (cursor_line > 0){
+                  cursor_line--;
+                  cursor_position = text[cursor_line].length();
+                  cursor_y = cursor_line * (double)enigma_user::font_height(enigma_user::draw_get_font());
+                }
+              }
+              break;
+            }
+            case enigma_user::vk_right:{
+              if (cursor_position < text[cursor_line].length()){
+                cursor_position++;
+                //This would be more efficient, but string_width() returns rounded values
+                //cursor_x += enigma_user::string_width(string(1,text[cursor_line][cursor_position]));
+                //printf("String [%s]\n", text[cursor_line].substr(0,cursor_position).c_str());
+              }else{
+                if (cursor_line < text.size()-1){
+                  cursor_line++;
+                  cursor_position = 0;
+                  cursor_y = cursor_line * (double)enigma_user::font_height(enigma_user::draw_get_font());
+                }
+              }
+              break;
+            }
+            case enigma_user::vk_enter:{
+              //printf("Line [%i] = [%s] and cursor [%i] with x [%f] y [%f]\n", cursor_line, text[cursor_line].c_str(), cursor_position, cursor_x, cursor_y);
+              text.insert(text.begin()+cursor_line+1,text[cursor_line].substr(cursor_position, string::npos));
+              /*int in=0;
+              for (auto &str : text){
+                printf("String[%i] - %s\n",in,str.c_str());
+                in++;
+              }*/
+              text[cursor_line].erase(cursor_position, string::npos);
+              cursor_line++;
+              cursor_position = 0;
+              cursor_y = cursor_line * (double)enigma_user::font_height(enigma_user::draw_get_font());
+              break;
+            }
+            case enigma_user::vk_up:{
+              if (cursor_line > 0){
+                cursor_line--;
+                if (cursor_position > text[cursor_line].length()){
+                  cursor_position = text[cursor_line].length();
+                }
+                cursor_y = cursor_line * (double)enigma_user::font_height(enigma_user::draw_get_font());
+              }
+              break;
+            }
+            case enigma_user::vk_down:{
+              if (cursor_line < text.size()-1){
+                cursor_line++;
+                if (cursor_position > text[cursor_line].length()){
+                  cursor_position = text[cursor_line].length();
+                }
+                cursor_y = cursor_line * (double)enigma_user::font_height(enigma_user::draw_get_font());
+              }
+              break;
+            }
+            default:{
+              text[cursor_line].insert(cursor_position,enigma_user::keyboard_lastchar);
+              cursor_position++;
+              break;
+            }
           }
-        }else if (enigma_user::keyboard_lastkey == enigma_user::vk_delete){
-          if (cursor_position < text[cursor_line].length() - 1){
-            text[cursor_line].erase(cursor_position,1);
-          }
-        }else if (enigma_user::keyboard_lastkey == enigma_user::vk_left){
-          if (cursor_position > 0){
-            printf("Line [%i] = [%c] and delta x = %u\n", cursor_line, text[cursor_line][cursor_position], enigma_user::string_width(text[cursor_line][cursor_position]));
-            cursor_x -= enigma_user::string_width(text[cursor_line][cursor_position]);
-            cursor_position--;
-          }
-        }else if (enigma_user::keyboard_lastkey == enigma_user::vk_right){
-          if (cursor_position < text[cursor_line].length() - 1){
-            cursor_x += enigma_user::string_width(text[cursor_line][cursor_position]);
-            cursor_position++;
-          }
-        }else{
-          text[cursor_line] += enigma_user::keyboard_lastchar;
+          cursor_x = enigma_user::string_width(text[cursor_line].substr(0,cursor_position));
+          blink_timer = 0;
         }
+        repeat_timer++;
       }
     }
   }
@@ -194,26 +292,37 @@ namespace gui
       case enigma_user::fa_bottom: texty = box.y+box.h-sty.padding.bottom; break;
     }
 
+    int l = 0;
+    double h = (double)enigma_user::font_height(enigma_user::draw_get_font());
     for (auto &str : text){
       if (str.empty() == false){
         printf("Drawing text at %f and %f\n", textx, texty);
-        enigma_user::draw_text(ox + textx,oy + texty,str);
+        enigma_user::draw_text(ox + textx,oy + texty + l * h,str);
       }
+      l++;
     }
+    
     if (active == true){
-      switch (sty.font_styles[state].halign){
-        case enigma_user::fa_left: textx = box.x+sty.padding.left; break;
-        case enigma_user::fa_center: textx = box.x+box.w/2.0+cursor_x/2.0; break;
-        case enigma_user::fa_right: textx = box.x+box.w-sty.padding.right; break;
-      }
+      if (blink_timer < 15){
+        switch (sty.font_styles[state].halign){
+          case enigma_user::fa_left: textx = box.x+sty.padding.left; break;
+          case enigma_user::fa_center: textx = box.x+box.w/2.0+cursor_x/2.0; break;
+          case enigma_user::fa_right: textx = box.x+box.w-sty.padding.right; break;
+        }
 
-      switch (sty.font_styles[state].valign){
-        case enigma_user::fa_top: texty = box.y+sty.padding.top; break;
-        case enigma_user::fa_middle: texty = box.y+box.h/2.0; break;
-        case enigma_user::fa_bottom: texty = box.y+box.h-sty.padding.bottom; break;
+        switch (sty.font_styles[state].valign){
+          case enigma_user::fa_top: texty = box.y+sty.padding.top; break;
+          case enigma_user::fa_middle: texty = box.y+box.h/2.0; break;
+          case enigma_user::fa_bottom: texty = box.y+box.h-sty.padding.bottom; break;
+        }
+        printf("Drawing cursor at %f and %f\n", textx + cursor_x, texty + cursor_y);
+        double cw = enigma_user::string_width("|")/2.0;
+        enigma_user::draw_text(ox + textx + cursor_x - cw, oy + texty + cursor_y, "|");
       }
-      printf("Drawing cursor at %f and %f\n", textx + cursor_x, texty + cursor_y);
-      enigma_user::draw_text(ox + textx + cursor_x, oy + texty + cursor_y, "|");
+      blink_timer++;
+      if (blink_timer > 30){
+        blink_timer = 0;
+      }
     }
     //Draw children
     parenter.draw_children(ox+box.x,oy+box.y);
