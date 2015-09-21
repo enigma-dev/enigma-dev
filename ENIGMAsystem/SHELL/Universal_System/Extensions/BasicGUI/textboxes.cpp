@@ -86,30 +86,33 @@ namespace gui
         state = enigma_user::gui_state_on_active;
         callback_execute(enigma_user::gui_event_pressed);
         //Update cursor position
-        int h = floor((ty-oy-box.y) / (double)enigma_user::font_height(enigma_user::draw_get_font()));
+        int h = floor((ty-oy-texty) / (double)enigma_user::font_height(enigma_user::draw_get_font()));
         //printf("Line check [%i] with mouse_y = %f and oy = %f and boxy = %f and font_height = %i\n", h, ty, oy, box.y, enigma_user::font_height(enigma_user::draw_get_font()));
         lines = text.size();
-        if (h >= lines){
+        if (h < 0){
+          cursor_position = 0;
+          cursor_line = 0;
+        }else if (h >= lines){
           cursor_position = text[lines-1].length();
-          cursor_x = enigma_user::string_width(text[lines-1]);
-          cursor_y = (lines-1) * (double)enigma_user::font_height(enigma_user::draw_get_font());
           cursor_line = (lines-1);
           //printf("h>=Line [%i] = [%s] and cursor [%i] with x [%f] y [%f]\n", cursor_line, text[cursor_line].c_str(), cursor_position, cursor_x, cursor_y);
         }else{
           double wi = 0.0;
+          bool fit = false;
           for (int c=0; c<text[h].length(); ++c){
             //printf("char [%i] and xcheck %f < wi %f\n", c, tx-ox-box.x, wi);
-            if (tx-ox-box.x < wi){
+            if (tx-ox-textx < wi){
+              fit = true;
               break;
             }
             cursor_position = c;
             wi += enigma_user::string_width(text[h].substr(c,1));
           }
-          cursor_x = enigma_user::string_width(text[h].substr(0,cursor_position));
-          cursor_y = h * (double)enigma_user::font_height(enigma_user::draw_get_font());
+          if (fit == false) cursor_position++; //Cursor at end is AFTER the last char
           cursor_line = h;
           //printf("h<Line [%i] = [%s] and cursor [%i] with x [%f] y [%f]\n", cursor_line, text[cursor_line].c_str(), cursor_position, cursor_x, cursor_y);
         }
+        update_cursor();
         blink_timer = 0;
       }else{
         if (state != enigma_user::gui_state_active && state != enigma_user::gui_state_on_active){
@@ -151,12 +154,14 @@ namespace gui
                 if (cursor_line > 0){
                   cursor_line--;
                   cursor_position = text[cursor_line].length();
-                  cursor_y = cursor_line * (double)enigma_user::font_height(enigma_user::draw_get_font());
+                  update_cursory();
 
                   text[cursor_line] += text[cursor_line+1];
                   text.erase(text.begin()+cursor_line+1);
+                  update_cursory();
                 }
               }
+              update_cursorx();
               break;
             }
             case enigma_user::vk_delete:{
@@ -181,9 +186,10 @@ namespace gui
                 if (cursor_line > 0){
                   cursor_line--;
                   cursor_position = text[cursor_line].length();
-                  cursor_y = cursor_line * (double)enigma_user::font_height(enigma_user::draw_get_font());
+                  update_cursory();
                 }
               }
+              update_cursorx();
               break;
             }
             case enigma_user::vk_right:{
@@ -196,9 +202,10 @@ namespace gui
                 if (cursor_line < text.size()-1){
                   cursor_line++;
                   cursor_position = 0;
-                  cursor_y = cursor_line * (double)enigma_user::font_height(enigma_user::draw_get_font());
+                  update_cursory();
                 }
               }
+              update_cursorx();
               break;
             }
             case enigma_user::vk_enter:{
@@ -212,7 +219,7 @@ namespace gui
               text[cursor_line].erase(cursor_position, string::npos);
               cursor_line++;
               cursor_position = 0;
-              cursor_y = cursor_line * (double)enigma_user::font_height(enigma_user::draw_get_font());
+              update_cursor();
               break;
             }
             case enigma_user::vk_up:{
@@ -220,8 +227,9 @@ namespace gui
                 cursor_line--;
                 if (cursor_position > text[cursor_line].length()){
                   cursor_position = text[cursor_line].length();
+                  update_cursorx();
                 }
-                cursor_y = cursor_line * (double)enigma_user::font_height(enigma_user::draw_get_font());
+                update_cursory();
               }
               break;
             }
@@ -230,19 +238,39 @@ namespace gui
                 cursor_line++;
                 if (cursor_position > text[cursor_line].length()){
                   cursor_position = text[cursor_line].length();
+                  update_cursorx();
                 }
-                cursor_y = cursor_line * (double)enigma_user::font_height(enigma_user::draw_get_font());
+                update_cursory();
               }
               break;
             }
+            break;
             default:{
+              if (numbers_only == true){
+                if (!(enigma_user::keyboard_lastchar.find_first_not_of("0123456789."))){ //We could do >'0' && <'9' || '.', but this wouldn't work in unicode
+                  break;
+                }
+              }
               text[cursor_line].insert(cursor_position,enigma_user::keyboard_lastchar);
               cursor_position++;
+              update_cursorx();
               break;
             }
           }
-          cursor_x = enigma_user::string_width(text[cursor_line].substr(0,cursor_position));
           blink_timer = 0;
+          ///Todo(harijs) : This might go in the top switch for each time c,C,v,V is pressed
+          if (enigma_user::keyboard_check(vk_control)){
+            switch (enigma_user::keyboard_lastkey){
+              case 'v':
+              case 'V':
+                text[cursor_line] += "Paste!";
+              break;
+              case 'c':
+              case 'C':
+                text[cursor_line] += "Copy!";
+              break;
+            }
+          }
         }
         repeat_timer++;
       }
@@ -252,6 +280,10 @@ namespace gui
   void Textbox::draw(gs_scalar ox, gs_scalar oy){
     //Draw textbox
     get_data_element(sty,gui::Style,gui::GUI_TYPE::STYLE,style_id);
+
+    sty.font_styles[state].use();
+    double h = (double)enigma_user::font_height(enigma_user::draw_get_font());
+
     if (sty.sprites[state] != -1){
       if (sty.border.zero == true){
         enigma_user::draw_sprite_stretched(sty.sprites[state],-1,
@@ -261,6 +293,13 @@ namespace gui
                                            box.h,
                                            sty.sprite_styles[state].color,
                                            sty.sprite_styles[state].alpha);
+        /*enigma_user::draw_sprite_stretched(sty.sprites[state],-1,
+                                           ox + box.x + mark_start_line /,
+                                           oy + box.y,
+                                           box.w,
+                                           box.h,
+                                           sty.sprite_styles[state].color,
+                                           sty.sprite_styles[state].alpha);*/
       }else{
         enigma_user::draw_sprite_padded(sty.sprites[state],-1,
                                       sty.border.left,
@@ -277,9 +316,7 @@ namespace gui
     }
 
     //Draw text
-    sty.font_styles[state].use();
 
-    gs_scalar textx = 0.0, texty = 0.0;
     switch (sty.font_styles[state].halign){
       case enigma_user::fa_left: textx = box.x+sty.padding.left; break;
       case enigma_user::fa_center: textx = box.x+box.w/2.0; break;
@@ -293,10 +330,9 @@ namespace gui
     }
 
     int l = 0;
-    double h = (double)enigma_user::font_height(enigma_user::draw_get_font());
     for (auto &str : text){
       if (str.empty() == false){
-        printf("Drawing text at %f and %f\n", textx, texty);
+        //printf("Drawing text at %f and %f\n", textx, texty);
         enigma_user::draw_text(ox + textx,oy + texty + l * h,str);
       }
       l++;
@@ -304,18 +340,7 @@ namespace gui
     
     if (active == true){
       if (blink_timer < 15){
-        switch (sty.font_styles[state].halign){
-          case enigma_user::fa_left: textx = box.x+sty.padding.left; break;
-          case enigma_user::fa_center: textx = box.x+box.w/2.0+cursor_x/2.0; break;
-          case enigma_user::fa_right: textx = box.x+box.w-sty.padding.right; break;
-        }
-
-        switch (sty.font_styles[state].valign){
-          case enigma_user::fa_top: texty = box.y+sty.padding.top; break;
-          case enigma_user::fa_middle: texty = box.y+box.h/2.0; break;
-          case enigma_user::fa_bottom: texty = box.y+box.h-sty.padding.bottom; break;
-        }
-        printf("Drawing cursor at %f and %f\n", textx + cursor_x, texty + cursor_y);
+        //printf("Drawing cursor at %f and %f\n", textx + cursor_x, texty + cursor_y);
         double cw = enigma_user::string_width("|")/2.0;
         enigma_user::draw_text(ox + textx + cursor_x - cw, oy + texty + cursor_y, "|");
       }
@@ -328,8 +353,7 @@ namespace gui
     parenter.draw_children(ox+box.x,oy+box.y);
   }
 
-  void Textbox::update_text_pos(int state){
-    //gui::gui_styles[style_id].update_text_pos(box, state);
+  void Textbox::update_text_pos(){
   }
 }
 
