@@ -21,6 +21,7 @@
 #include <windows.h>
 using namespace std;
 
+#include "Universal_System/estring.h" // For string_replace_all
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
 #include <unistd.h> //usleep
@@ -1028,6 +1029,7 @@ string clipboard_get_text()
 
 void clipboard_set_text(string text)
 {
+  text = string_replace_all(text, "\n", "\r\n"); //Otherwise newlines don't work
 	HGLOBAL hGlobal, hgBuffer;
 	if (!OpenClipboard(enigma::hWnd)) return;
 	EmptyClipboard();
