@@ -60,6 +60,8 @@ namespace gui
       int mark_start_line = 0;
       int mark_end_pos = 0;
       int mark_end_line = 0;
+      int mark_pos = 0;
+      int mark_line = 0;
 
       //This is text offset for alignmets
       double textx = 0.0;
@@ -72,6 +74,7 @@ namespace gui
       int parent_id = -1; //ID of the parent of some kind (probably a window). It won't render with gui_draw_textboxes() if it is.
 
       int style_id = -1; //The style we use
+      int marker_style_id = -1;
 
       bool numbers_only = false; //Meaning 0-9 and .
 
@@ -82,9 +85,22 @@ namespace gui
       void update_text_pos();
       void callback_execute(int event);
 
+      void set_cursor(double x, double y); //x/y in global pixels
+
       inline void update_cursorx() { cursor_x = enigma_user::string_width(text[cursor_line].substr(0,cursor_position)); }
       inline void update_cursory() { cursor_y = cursor_line * (double)enigma_user::font_height(enigma_user::draw_get_font()); }
       inline void update_cursor() { update_cursorx(); update_cursory(); }
+
+      void set_marker(int line, int pos);
+
+      inline void set_marker_start(int line, int pos){
+        mark_line = line;
+        mark_pos = pos;
+      }
+
+      void marker_delete();
+      string marker_string();
+      void marker_insert();
 
       Parent parenter;
   };

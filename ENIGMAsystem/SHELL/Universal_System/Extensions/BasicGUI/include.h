@@ -272,6 +272,7 @@ namespace enigma_user
 
   void gui_button_set_size(int id, gs_scalar w, gs_scalar h);*/
   void gui_textbox_set_style(int id, int style_id);
+  void gui_textbox_set_marker_style(int id, int style_id);
 /*
   void gui_button_set_callback(int id, int event, int script_id);
   void gui_button_set_togglable(int id, bool togglable);*/

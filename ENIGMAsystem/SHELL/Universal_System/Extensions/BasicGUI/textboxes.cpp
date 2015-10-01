@@ -26,6 +26,7 @@ using std::unordered_map;
 #include "Universal_System/CallbackArrays.h" //For mouse_check_button and keyboard_check_button
 #include "Universal_System/resource_data.h" //For script_execute
 #include "Universal_System/estring.h" //For string manipulation
+#include "Platforms/General/PFwindow.h" //For clipboard
 
 //#include "Universal_System/spritestruct.h"
 #include "Graphics_Systems/General/GSsprite.h"
@@ -85,35 +86,9 @@ namespace gui
         active = true;
         state = enigma_user::gui_state_on_active;
         callback_execute(enigma_user::gui_event_pressed);
-        //Update cursor position
-        int h = floor((ty-oy-texty) / (double)enigma_user::font_height(enigma_user::draw_get_font()));
-        //printf("Line check [%i] with mouse_y = %f and oy = %f and boxy = %f and font_height = %i\n", h, ty, oy, box.y, enigma_user::font_height(enigma_user::draw_get_font()));
-        lines = text.size();
-        if (h < 0){
-          cursor_position = 0;
-          cursor_line = 0;
-        }else if (h >= lines){
-          cursor_position = text[lines-1].length();
-          cursor_line = (lines-1);
-          //printf("h>=Line [%i] = [%s] and cursor [%i] with x [%f] y [%f]\n", cursor_line, text[cursor_line].c_str(), cursor_position, cursor_x, cursor_y);
-        }else{
-          double wi = 0.0;
-          bool fit = false;
-          for (int c=0; c<text[h].length(); ++c){
-            //printf("char [%i] and xcheck %f < wi %f\n", c, tx-ox-box.x, wi);
-            if (tx-ox-textx < wi){
-              fit = true;
-              break;
-            }
-            cursor_position = c;
-            wi += enigma_user::string_width(text[h].substr(c,1));
-          }
-          if (fit == false) cursor_position++; //Cursor at end is AFTER the last char
-          cursor_line = h;
-          //printf("h<Line [%i] = [%s] and cursor [%i] with x [%f] y [%f]\n", cursor_line, text[cursor_line].c_str(), cursor_position, cursor_x, cursor_y);
-        }
-        update_cursor();
-        blink_timer = 0;
+        
+        set_cursor(tx-ox, ty-oy);
+        set_marker_start(cursor_line, cursor_position);
       }else{
         if (state != enigma_user::gui_state_active && state != enigma_user::gui_state_on_active){
           if (active == false){
@@ -130,146 +105,222 @@ namespace gui
     }else{
       if (enigma_user::mouse_check_button_pressed(enigma_user::mb_left)){
         active = false;
+        mark = false;
       }
       state = enigma_user::gui_state_on;
     }
 
     if (active == true){
+      if (enigma_user::mouse_check_button(enigma_user::mb_left)){ //Drag select
+        mark = true;
+        set_cursor(tx-ox, ty-oy);
+        set_marker(cursor_line, cursor_position);
+      }
+
       if (enigma_user::keyboard_check_pressed(enigma_user::vk_anykey)){
         repeat_timer = 0;
       }
 
       if (enigma_user::keyboard_check(enigma_user::vk_anykey)){
         if (repeat_timer == 0 || repeat_timer > 15){
-          switch (enigma_user::keyboard_lastkey){
-            case enigma_user::vk_backspace:{
-              //printf("Line [%i] = [%s] and cursor [%i] with x [%f] y [%f]\n", cursor_line, text[cursor_line].c_str(), cursor_position, cursor_x, cursor_y);
-              if (cursor_position > 0) {
-                cursor_position--;
-                //This would be more efficient, but string_width() returns rounded values
-                //cursor_x -= enigma_user::string_width(text[cursor_line][cursor_position]);
-                //printf("Line [%i] = [%s] and cursor [%i] with x [%f] y [%f]\n", cursor_line, text[cursor_line].c_str(), cursor_position, cursor_x, cursor_y);
-                text[cursor_line].erase(cursor_position,1);
-              }else{
-                if (cursor_line > 0){
-                  cursor_line--;
-                  cursor_position = text[cursor_line].length();
-                  update_cursory();
-
-                  text[cursor_line] += text[cursor_line+1];
-                  text.erase(text.begin()+cursor_line+1);
-                  update_cursory();
-                }
-              }
-              update_cursorx();
-              break;
-            }
-            case enigma_user::vk_delete:{
-              if (cursor_position < text[cursor_line].length()){
-                text[cursor_line].erase(cursor_position,1);
-              }else{
-                if (cursor_line < text.size()-1){
-                  text[cursor_line] += text[cursor_line+1];
-                  text.erase(text.begin()+cursor_line+1);
-                }
-              }
-              break;
-            }
-            case enigma_user::vk_left:{
-              if (cursor_position > 0){
-                cursor_position--;
-                //printf("Line [%i] = [%c] and delta x = %u\n", cursor_line, text[cursor_line][cursor_position], enigma_user::string_width(string(1,text[cursor_line][cursor_position]))/*enigma_user::string_width(to_string(text[cursor_line][cursor_position]))*/);
-                //This would be more efficient, but string_width() returns rounded values
-                //cursor_x -= enigma_user::string_width(string(1,text[cursor_line][cursor_position]));
-                //printf("String [%s]\n", text[cursor_line].substr(0,cursor_position).c_str());
-              }else{
-                if (cursor_line > 0){
-                  cursor_line--;
-                  cursor_position = text[cursor_line].length();
-                  update_cursory();
-                }
-              }
-              update_cursorx();
-              break;
-            }
-            case enigma_user::vk_right:{
-              if (cursor_position < text[cursor_line].length()){
-                cursor_position++;
-                //This would be more efficient, but string_width() returns rounded values
-                //cursor_x += enigma_user::string_width(string(1,text[cursor_line][cursor_position]));
-                //printf("String [%s]\n", text[cursor_line].substr(0,cursor_position).c_str());
-              }else{
-                if (cursor_line < text.size()-1){
-                  cursor_line++;
-                  cursor_position = 0;
-                  update_cursory();
-                }
-              }
-              update_cursorx();
-              break;
-            }
-            case enigma_user::vk_enter:{
-              //printf("Line [%i] = [%s] and cursor [%i] with x [%f] y [%f]\n", cursor_line, text[cursor_line].c_str(), cursor_position, cursor_x, cursor_y);
-              text.insert(text.begin()+cursor_line+1,text[cursor_line].substr(cursor_position, string::npos));
-              /*int in=0;
-              for (auto &str : text){
-                printf("String[%i] - %s\n",in,str.c_str());
-                in++;
-              }*/
-              text[cursor_line].erase(cursor_position, string::npos);
-              cursor_line++;
-              cursor_position = 0;
-              update_cursor();
-              break;
-            }
-            case enigma_user::vk_up:{
-              if (cursor_line > 0){
-                cursor_line--;
-                if (cursor_position > text[cursor_line].length()){
-                  cursor_position = text[cursor_line].length();
-                  update_cursorx();
-                }
-                update_cursory();
-              }
-              break;
-            }
-            case enigma_user::vk_down:{
-              if (cursor_line < text.size()-1){
-                cursor_line++;
-                if (cursor_position > text[cursor_line].length()){
-                  cursor_position = text[cursor_line].length();
-                  update_cursorx();
-                }
-                update_cursory();
-              }
-              break;
-            }
-            break;
-            default:{
-              if (numbers_only == true){
-                if (!(enigma_user::keyboard_lastchar.find_first_not_of("0123456789."))){ //We could do >'0' && <'9' || '.', but this wouldn't work in unicode
-                  break;
-                }
-              }
-              text[cursor_line].insert(cursor_position,enigma_user::keyboard_lastchar);
-              cursor_position++;
-              update_cursorx();
-              break;
-            }
-          }
-          blink_timer = 0;
-          ///Todo(harijs) : This might go in the top switch for each time c,C,v,V is pressed
-          if (enigma_user::keyboard_check(vk_control)){
+          ///Todo(harijs) : This might go in the bottom switch for each time c,C,v,V is pressed
+          if (enigma_user::keyboard_check(enigma_user::vk_control)){
             switch (enigma_user::keyboard_lastkey){
               case 'v':
               case 'V':
+                marker_delete();
                 text[cursor_line] += "Paste!";
               break;
               case 'c':
               case 'C':
-                text[cursor_line] += "Copy!";
+                if (mark == true) {
+                  enigma_user::clipboard_set_text(marker_string());
+                }
               break;
             }
+          }else{
+            switch (enigma_user::keyboard_lastkey){
+              case enigma_user::vk_backspace:{
+                if (mark == true){
+                  marker_delete();
+                  update_cursor();
+                  break;
+                }
+                //printf("Line [%i] = [%s] and cursor [%i] with x [%f] y [%f]\n", cursor_line, text[cursor_line].c_str(), cursor_position, cursor_x, cursor_y);
+                if (cursor_position > 0) {
+                  cursor_position--;
+                  //This would be more efficient, but string_width() returns rounded values
+                  //cursor_x -= enigma_user::string_width(text[cursor_line][cursor_position]);
+                  //printf("Line [%i] = [%s] and cursor [%i] with x [%f] y [%f]\n", cursor_line, text[cursor_line].c_str(), cursor_position, cursor_x, cursor_y);
+                  text[cursor_line].erase(cursor_position,1);
+                }else{
+                  if (cursor_line > 0){
+                    cursor_line--;
+                    cursor_position = text[cursor_line].length();
+                    update_cursory();
+
+                    text[cursor_line] += text[cursor_line+1];
+                    text.erase(text.begin()+cursor_line+1);
+                    update_cursory();
+                  }
+                }
+                update_cursorx();
+                break;
+              }
+              case enigma_user::vk_delete:{
+                if (mark == true){
+                  marker_delete();
+                  update_cursor();
+                  break;
+                }
+                if (cursor_position < text[cursor_line].length()){
+                  text[cursor_line].erase(cursor_position,1);
+                }else{
+                  if (cursor_line < text.size()-1){
+                    text[cursor_line] += text[cursor_line+1];
+                    text.erase(text.begin()+cursor_line+1);
+                  }
+                }
+                break;
+              }
+              case enigma_user::vk_left:{
+                int pcp = cursor_position;
+                if (cursor_position > 0){
+                  cursor_position--;
+                  //printf("Line [%i] = [%c] and delta x = %u\n", cursor_line, text[cursor_line][cursor_position], enigma_user::string_width(string(1,text[cursor_line][cursor_position]))/*enigma_user::string_width(to_string(text[cursor_line][cursor_position]))*/);
+                  //This would be more efficient, but string_width() returns rounded values
+                  //cursor_x -= enigma_user::string_width(string(1,text[cursor_line][cursor_position]));
+                  //printf("String [%s]\n", text[cursor_line].substr(0,cursor_position).c_str());
+                }else{
+                  if (cursor_line > 0){
+                    cursor_line--;
+                    cursor_position = text[cursor_line].length();
+                    update_cursory();
+                  }
+                }
+                update_cursorx();
+                if (enigma_user::keyboard_check(enigma_user::vk_shift)){
+                  if (mark == false){
+                    set_marker_start(cursor_line, pcp);
+                    set_marker(cursor_line, cursor_position);
+                    mark = true;
+                  }else{ //Update marker
+                    set_marker(cursor_line, cursor_position);
+                  }
+                }else{
+                  mark = false;
+                }
+                break;
+              }
+              case enigma_user::vk_right:{
+                int pcp = cursor_position;
+                if (cursor_position < text[cursor_line].length()){
+                  cursor_position++;
+                  //This would be more efficient, but string_width() returns rounded values
+                  //cursor_x += enigma_user::string_width(string(1,text[cursor_line][cursor_position]));
+                  //printf("String [%s]\n", text[cursor_line].substr(0,cursor_position).c_str());
+                }else{
+                  if (cursor_line < text.size()-1){
+                    cursor_line++;
+                    cursor_position = 0;
+                    update_cursory();
+                  }
+                }
+                update_cursorx();
+                if (enigma_user::keyboard_check(enigma_user::vk_shift)){
+                  if (mark == false){
+                    set_marker_start(cursor_line, pcp);
+                    set_marker(cursor_line, cursor_position);
+                    mark = true;
+                  }else{ //Update marker
+                    set_marker(cursor_line, cursor_position);
+                  }
+                }else{
+                  mark = false;
+                }
+                break;
+              }
+              case enigma_user::vk_enter:{
+                //printf("Line [%i] = [%s] and cursor [%i] with x [%f] y [%f]\n", cursor_line, text[cursor_line].c_str(), cursor_position, cursor_x, cursor_y);
+                marker_delete();
+                text.insert(text.begin()+cursor_line+1,text[cursor_line].substr(cursor_position, string::npos));
+                /*int in=0;
+                for (auto &str : text){
+                  printf("String[%i] - %s\n",in,str.c_str());
+                  in++;
+                }*/
+                text[cursor_line].erase(cursor_position, string::npos);
+                cursor_line++;
+                cursor_position = 0;
+                update_cursor();
+                mark = false;
+                break;
+              }
+              case enigma_user::vk_up:{
+                int pcp = cursor_position;
+                int pcl = cursor_line;
+                if (cursor_line > 0){
+                  cursor_line--;
+                  if (cursor_position > text[cursor_line].length()){
+                    cursor_position = text[cursor_line].length();
+                  }
+                  update_cursor();
+                }
+                if (enigma_user::keyboard_check(enigma_user::vk_shift)){
+                  if (mark == false){
+                    set_marker_start(pcl, pcp);
+                    set_marker(cursor_line, cursor_position);
+                    mark = true;
+                  }else{ //Update marker
+                    set_marker(cursor_line, cursor_position);
+                  }
+                }else{
+                  mark = false;
+                }
+                break;
+              }
+              case enigma_user::vk_down:{
+                int pcp = cursor_position;
+                int pcl = cursor_line;
+                if (cursor_line < text.size()-1){
+                  cursor_line++;
+                  if (cursor_position > text[cursor_line].length()){
+                    cursor_position = text[cursor_line].length();
+                  }
+                  update_cursor();
+                }
+                if (enigma_user::keyboard_check(enigma_user::vk_shift)){
+                  if (mark == false){
+                    set_marker_start(pcl, pcp);
+                    set_marker(cursor_line, cursor_position);
+                    mark = true;
+                  }else{ //Update marker
+                    set_marker(cursor_line, cursor_position);
+                  }
+                }else{
+                  mark = false;
+                }
+                break;
+              }
+              break;
+              case enigma_user::vk_control:
+              case enigma_user::vk_shift:
+              case enigma_user::vk_escape:
+              break;
+              default:{
+                if (numbers_only == true){
+                  if (!(enigma_user::keyboard_lastchar.find_first_not_of("0123456789."))){ //We could do >'0' && <'9' || '.', but this wouldn't work in unicode
+                    break;
+                  }
+                }
+                marker_delete(); //If something is selected then this deletes it and resets mark
+                text[cursor_line].insert(cursor_position,enigma_user::keyboard_lastchar);
+                cursor_position++;
+                update_cursorx();
+                break;
+              }
+            }
+            blink_timer = 0;
           }
         }
         repeat_timer++;
@@ -293,13 +344,6 @@ namespace gui
                                            box.h,
                                            sty.sprite_styles[state].color,
                                            sty.sprite_styles[state].alpha);
-        /*enigma_user::draw_sprite_stretched(sty.sprites[state],-1,
-                                           ox + box.x + mark_start_line /,
-                                           oy + box.y,
-                                           box.w,
-                                           box.h,
-                                           sty.sprite_styles[state].color,
-                                           sty.sprite_styles[state].alpha);*/
       }else{
         enigma_user::draw_sprite_padded(sty.sprites[state],-1,
                                       sty.border.left,
@@ -315,8 +359,78 @@ namespace gui
       }
     }
 
-    //Draw text
+    //Draw marker
+    get_data_element(msty,gui::Style,gui::GUI_TYPE::STYLE,marker_style_id);
 
+    if (mark == true){
+      if (msty.sprites[state] != -1){
+        if (msty.border.zero == true){
+          printf("Start line = %i and end line = %i\n", mark_start_line, mark_end_line);
+          for (int l=mark_start_line; l<mark_end_line+1; ++l ){
+            double msx, msy, mex, mey;
+            if (mark_start_line == l && mark_end_line == l){
+              printf("1 Line = %i and start pos = %i and end pos = %i\n", l, mark_start_pos, mark_end_pos);
+              msx = ox + textx + enigma_user::string_width(text[mark_start_line].substr(0, mark_start_pos));
+              mex = enigma_user::string_width(text[mark_end_line].substr(mark_start_pos, mark_end_pos-mark_start_pos));
+            }else if (l == mark_start_line){
+              printf("2 Line = %i and start pos = %i\n", l, mark_start_pos);
+              msx = ox + textx + enigma_user::string_width(text[mark_start_line].substr(0, mark_start_pos));
+              mex = enigma_user::string_width(text[mark_start_line].substr(mark_start_pos, string::npos));
+            }else if (l == mark_end_line){
+              printf("3 Line = %i and end pos = %i\n", l, mark_end_pos);
+              msx = ox + textx;
+              mex = enigma_user::string_width(text[mark_end_line].substr(0, mark_end_pos));
+            }else{
+              printf("4 Normal line = %i\n", l);
+              msx = ox + textx;
+              mex = enigma_user::string_width(text[l]);
+            }
+            enigma_user::draw_sprite_stretched(msty.sprites[state],-1,
+                                               msx,
+                                               oy + texty + l * h,
+                                               mex,
+                                               h,
+                                               msty.sprite_styles[state].color,
+                                               msty.sprite_styles[state].alpha);
+          }
+        }else{
+          printf("Start line = %i and end line = %i\n", mark_start_line, mark_end_line);
+          for (int l=mark_start_line; l<mark_end_line+1; ++l ){
+            double msx, msy, mex, mey;
+            if (mark_start_line == l && mark_end_line == l){
+              printf("Start line = %i and end line = %i and line = %i\n", mark_start_line, mark_end_line, l);
+              msx = ox + textx + enigma_user::string_width(text[mark_start_line].substr(0, mark_start_pos));
+              mex = ox + textx + enigma_user::string_width(text[mark_end_line].substr(0, mark_end_pos));
+            }else if (l == mark_start_line){
+              printf("Start line = %i and line = %i\n", mark_start_line, l);
+              msx = ox + textx + enigma_user::string_width(text[mark_start_line].substr(0, mark_start_pos));
+              mex = ox + textx + enigma_user::string_width(text[mark_start_line].substr(mark_start_pos, string::npos));
+            }else if (l == mark_end_line){
+              printf("End line = %i and line = %i\n", mark_end_line, l);
+              msx = ox + textx;
+              mex = ox + textx + enigma_user::string_width(text[mark_end_line].substr(0, mark_end_pos));
+            }else{
+              printf("Normal line = %i\n", l);
+              msx = ox + textx;
+              mex = ox + textx + enigma_user::string_width(text[l]);
+            }
+            enigma_user::draw_sprite_padded(msty.sprites[state],-1,
+                                            msty.border.left,
+                                            msty.border.top,
+                                            msty.border.right,
+                                            msty.border.bottom,
+                                            msx,
+                                            oy + box.y + l * h,
+                                            mex,
+                                            oy + box.y+box.h + l * h,
+                                            msty.sprite_styles[state].color,
+                                            msty.sprite_styles[state].alpha);
+          }
+        }
+      }
+    }
+
+    //Draw text
     switch (sty.font_styles[state].halign){
       case enigma_user::fa_left: textx = box.x+sty.padding.left; break;
       case enigma_user::fa_center: textx = box.x+box.w/2.0; break;
@@ -354,6 +468,120 @@ namespace gui
   }
 
   void Textbox::update_text_pos(){
+  }
+
+  void Textbox::set_marker(int line, int pos){
+    if (line == mark_line){
+      if (pos == mark_pos) { mark = false; return; }
+      mark_start_line = line;
+      mark_end_line = line;
+      if (pos < mark_pos){
+        mark_start_pos = pos;
+        mark_end_pos = mark_pos;
+      }else{
+        mark_start_pos = mark_pos;
+        mark_end_pos = pos;
+      }
+    }else{
+      if (line < mark_line){
+        mark_start_line = line;
+        mark_start_pos = pos;
+        mark_end_line = mark_line;
+        mark_end_pos = mark_pos;
+      }else{
+        mark_start_line = mark_line;
+        mark_start_pos = mark_pos;
+        mark_end_line = line;
+        mark_end_pos = pos;
+      }
+    }
+    printf("Set line = %i and pos %i\n", line, pos);
+  }
+
+
+  void Textbox::marker_delete(){
+    if (mark == true){
+      if ( mark_start_line == mark_end_line ){
+        text[mark_start_line].erase(mark_start_pos, mark_end_pos-mark_start_pos);
+      }else{
+        //Remove at start line
+        text[mark_start_line].erase(mark_start_pos, string::npos);
+        
+        //Add to start
+        text[mark_start_line] += text[mark_end_line].substr(mark_end_pos, string::npos);
+
+        //Remove the rest
+        int l = mark_start_line+1;
+        for (auto it = text.begin()+l; it != text.end();){
+          it = text.erase(it);
+          if (++l >mark_end_line){ break; }
+        }
+      }
+      cursor_position = mark_start_pos;
+      cursor_line = mark_start_line; 
+      mark = false;
+    }
+  }
+
+  string Textbox::marker_string(){
+    string str = "";
+    if (mark == true){
+      if ( mark_start_line == mark_end_line ){
+        str = text[mark_start_line].substr(mark_start_pos, mark_end_pos-mark_start_pos);
+      }else{
+        //Get at start line
+        str += text[mark_start_line].substr(mark_start_pos, string::npos);
+        str += "\n";
+
+        //Add the middle
+        int l = mark_start_line+1;
+        for (int l = mark_start_line+1; l < mark_end_line; ++l){
+          str += text[l];
+          str += "\n";
+          if (++l >mark_end_line){ break; }
+        }
+
+        //Add the end
+        str += text[mark_end_line].substr(0, mark_end_pos);
+        printf("We got string %s\n", str.c_str());
+      }
+    }
+    return str;
+  }
+
+  void Textbox::marker_insert(){
+
+  }
+
+  void Textbox::set_cursor(double x, double y){
+    int h = floor((y-texty) / (double)enigma_user::font_height(enigma_user::draw_get_font()));
+    //printf("Line check [%i] with mouse_y = %f and oy = %f and boxy = %f and font_height = %i\n", h, ty, oy, box.y, enigma_user::font_height(enigma_user::draw_get_font()));
+    lines = text.size();
+    if (h < 0){
+      cursor_position = 0;
+      cursor_line = 0;
+    }else if (h >= lines){
+      cursor_position = text[lines-1].length();
+      cursor_line = (lines-1);
+      //printf("h>=Line [%i] = [%s] and cursor [%i] with x [%f] y [%f]\n", cursor_line, text[cursor_line].c_str(), cursor_position, cursor_x, cursor_y);
+    }else{
+      double wi = 0.0;
+      bool fit = false;
+      for (int c=0; c<text[h].length(); ++c){
+        //printf("char [%i] and xcheck %f < wi %f\n", c, tx-ox-box.x, wi);
+        if (x-textx < wi){
+          fit = true;
+          break;
+        }
+        cursor_position = c;
+        wi += enigma_user::string_width(text[h].substr(c,1));
+      }
+      if (fit == false) cursor_position++; //Cursor at end is AFTER the last char
+      cursor_line = h;
+      //printf("h<Line [%i] = [%s] and cursor [%i] with x [%f] y [%f]\n", cursor_line, text[cursor_line].c_str(), cursor_position, cursor_x, cursor_y);
+    }
+    update_cursor();
+    blink_timer = 0;
   }
 }
 
@@ -432,7 +660,14 @@ namespace enigma_user
     get_element(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
     check_data_element(gui::GUI_TYPE::STYLE, style_id);
     tex.style_id = (style_id != -1? style_id : gui::gui_style_textbox);
-  }/*
+  }
+
+  void gui_textbox_set_marker_style(int id, int style_id){
+    get_element(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
+    check_data_element(gui::GUI_TYPE::STYLE, style_id);
+    tex.marker_style_id = (style_id != -1? style_id : gui::gui_style_textbox);
+  }
+  /*
 
   void gui_button_set_active(int id, bool active){
     get_element(but,gui::Button,gui::GUI_TYPE::BUTTON,id);
