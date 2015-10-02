@@ -71,6 +71,7 @@ void glsl_program_free(int id);
 void glsl_program_default_set(int id); //Override default shader
 void glsl_program_default_reset(); //Reset back the default shader
 void glsl_program_set_name(int id, string name); //Useful for debug
+int glsl_program_get();
 
 int glsl_get_uniform_location(int program, string name);
 int glsl_get_attribute_location(int program, string name);
@@ -107,6 +108,7 @@ void glsl_uniform_matrix2fv(int location, int size, const float *matrix);
 void glsl_uniform_matrix3fv(int location, int size, const float *matrix);
 void glsl_uniform_matrix4fv(int location, int size, const float *matrix);
 
+void glsl_attribute_enable_all(bool enable);
 void glsl_attribute_enable(int location, bool enable);
 void glsl_attribute_set(int location, int size, int type, bool normalize, int stride, int offset);
 
