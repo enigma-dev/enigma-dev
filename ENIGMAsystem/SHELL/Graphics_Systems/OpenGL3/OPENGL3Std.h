@@ -40,3 +40,4 @@ namespace enigma
 #include "../General/GSblend.h"
 #include "../General/GSsurface.h"
 #include "../General/GSscreen.h"
+#include "../General/GSvertex.h"

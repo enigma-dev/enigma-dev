@@ -633,6 +633,11 @@ void glsl_program_set(int id)
   }
 }
 
+int glsl_program_get()
+{
+  return enigma::bound_shader;
+}
+
 void glsl_program_reset()
 {
     //if (enigma::bound_shader != enigma::main_shader){ //This doesn't work because enigma::bound_shader is the same as enigma::main_shader at start
@@ -931,6 +936,19 @@ int glsl_get_attribute_location(int program, string name) {
     return -1;
   }else{
     return it->second;
+  }
+}
+
+void glsl_attribute_enable_all(bool enable){
+  for ( auto &it : enigma::shaderprograms[enigma::bound_shader]->attributes ){
+    if (enable != it.second.enabled){
+      if (enable == true){
+        glEnableVertexAttribArray( it.second.location );
+      }else{
+        glDisableVertexAttribArray( it.second.location );
+      }
+      it.second.enabled = enable;
+    }
   }
 }
 
