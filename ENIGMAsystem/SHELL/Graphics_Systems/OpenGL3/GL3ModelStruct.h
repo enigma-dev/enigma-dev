@@ -367,7 +367,9 @@ namespace enigma {
     {
       vbobuffered = false;
       currentPrimitive = pt;
-      format = fmt;
+      if (fmt != -2){
+        format = fmt;
+      }
     }
 
     void AddVertex(gs_scalar x, gs_scalar y)

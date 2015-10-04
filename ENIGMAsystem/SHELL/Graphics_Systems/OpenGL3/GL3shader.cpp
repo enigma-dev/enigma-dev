@@ -67,6 +67,12 @@
         printf("%s - Attribute at location %i not found!\n", str, location);\
         return;\
     }
+
+    #define get_program(ptiter,program,err)\
+    if (program < 0) { printf("Program id [%i] < 0 given!\n", program); return err; }\
+    if (program >= enigma::shaderprograms.size()) { printf("Program id [%i] > size() [%i] given!\n", program, enigma::shaderprograms.size()); return err; }\
+    if (enigma::shaderprograms[program] == nullptr) { printf("Program with id [%i] is deleted!\n", program); return err; }\
+    enigma::ShaderProgram* ptiter = enigma::shaderprograms[program];
 #else
     #define get_uniform(uniter,location,usize)\
     if (location < 0) return; \
@@ -81,6 +87,12 @@
     if (atiter == enigma::shaderprograms[enigma::bound_shader]->attributes.end()){\
         return;\
     }
+
+    #define get_program(ptiter,program,err)\
+    if (program < 0) { return err; }\
+    if (program >= enigma::shaderprograms.size()) { return err; }\
+    if (enigma::shaderprograms[program] == nullptr) { return err; }\
+    enigma::ShaderProgram* ptiter = enigma::shaderprograms[program];
 #endif
 
 extern GLenum shadertypes[5] = {
@@ -659,6 +671,7 @@ void glsl_program_default_reset(){
 void glsl_program_free(int id)
 {
   delete enigma::shaderprograms[id];
+  enigma::shaderprograms[id] = nullptr;
 }
 
 void glsl_program_set_name(int id, string name){
@@ -926,12 +939,13 @@ void glsl_uniform_matrix4fv(int location, int size, const float *matrix){
 
 //Attributes
 int glsl_get_attribute_location(int program, string name) {
-  std::unordered_map<string,GLint>::iterator it = enigma::shaderprograms[program]->attribute_names.find(name);
-  if (it == enigma::shaderprograms[program]->attribute_names.end()){
-    if (enigma::shaderprograms[program]->name == ""){
+  get_program(prog, program, -1);
+  std::unordered_map<string,GLint>::iterator it = prog->attribute_names.find(name);
+  if (it == prog->attribute_names.end()){
+    if (prog->name == ""){
       printf("Program[%i] - Attribute %s not found!\n", program, name.c_str());
     }else{
-      printf("Program[%s = %i] - Attribute %s not found!\n", enigma::shaderprograms[program]->name.c_str(), program, name.c_str());
+      printf("Program[%s = %i] - Attribute %s not found!\n", prog->name.c_str(), program, name.c_str());
     }
     return -1;
   }else{
