@@ -44,7 +44,7 @@ namespace enigma_user {
   void d3d_model_part_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z, int vertex_start, int vertex_count);
   void d3d_model_part_draw(int id, int texId, int vertex_start, int vertex_count);
   void d3d_model_part_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z, int texId, int vertex_start, int vertex_count);
-  void d3d_model_primitive_begin(int id, int kind, int format = -1);
+  void d3d_model_primitive_begin(int id, int kind, int format = -2);
   void d3d_model_primitive_end(int id);
   void d3d_model_vertex(int id, gs_scalar x, gs_scalar y);
   void d3d_model_vertex(int id, gs_scalar x, gs_scalar y, gs_scalar z);
@@ -59,11 +59,15 @@ namespace enigma_user {
   void d3d_model_vertex_normal_color(int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, int col, double alpha);
   void d3d_model_vertex_normal_texture(int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, gs_scalar tx, gs_scalar ty);
   void d3d_model_vertex_normal_texture_color(int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, gs_scalar tx, gs_scalar ty, int col, double alpha);
-  void d3d_model_vertex_float(int id, float f1);
-  void d3d_model_vertex_float2(int id, float f1, float f2);
-  void d3d_model_vertex_float3(int id, float f1, float f2, float f3);
-  void d3d_model_vertex_float4(int id, float f1, float f2, float f3, float f4);
-  void d3d_model_vertex_ubyte4(int id, unsigned char u1, unsigned char u2, unsigned char u3, unsigned char u4);
+  
+  void d3d_model_add_color(int id, int col, double alpha);
+  void d3d_model_add_texcoord(int id, gs_scalar tx, gs_scalar ty);
+  void d3d_model_add_normal(int id, gs_scalar nx, gs_scalar ny, gs_scalar nz);
+  void d3d_model_add_float(int id, float f1);
+  void d3d_model_add_float2(int id, float f1, float f2);
+  void d3d_model_add_float3(int id, float f1, float f2, float f3);
+  void d3d_model_add_float4(int id, float f1, float f2, float f3, float f4);
+  void d3d_model_add_ubyte4(int id, unsigned char u1, unsigned char u2, unsigned char u3, unsigned char u4);
 
   void d3d_model_wall(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, gs_scalar hrep, gs_scalar vrep);
   void d3d_model_floor(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, gs_scalar hrep, gs_scalar vrep);

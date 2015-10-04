@@ -418,23 +418,35 @@ namespace enigma_user
     enigma::meshes[id]->AddColor(col, alpha);
   }
 
-  void d3d_model_vertex_float(int id, float f1) {
+  void d3d_model_add_color(int id, int col, double alpha) {
+    enigma::meshes[id]->AddColor(col, alpha);
+  }
+
+  void d3d_model_add_texcoord(int id, gs_scalar tx, gs_scalar ty) {
+    enigma::meshes[id]->AddTexture(tx, ty);
+  }
+
+  void d3d_model_add_normal(int id, gs_scalar nx, gs_scalar ny, gs_scalar nz) {
+    enigma::meshes[id]->AddNormal(nx, ny, nz);
+  }
+
+  void d3d_model_add_float(int id, float f1) {
     enigma::meshes[id]->AddFloat(f1);
   }
 
-  void d3d_model_vertex_float2(int id, float f1, float f2) {
+  void d3d_model_add_float2(int id, float f1, float f2) {
     enigma::meshes[id]->AddFloat2(f1, f2);
   }
 
-  void d3d_model_vertex_float3(int id, float f1, float f2, float f3) {
+  void d3d_model_add_float3(int id, float f1, float f2, float f3) {
     enigma::meshes[id]->AddFloat3(f1, f2, f3);
   }
 
-  void d3d_model_vertex_float4(int id, float f1, float f2, float f3, float f4) {
+  void d3d_model_add_float4(int id, float f1, float f2, float f3, float f4) {
     enigma::meshes[id]->AddFloat4(f1, f2, f3, f4);
   }
 
-  void d3d_model_vertex_ubyte4(int id, unsigned char u1, unsigned char u2, unsigned char u3, unsigned char u4) {
+  void d3d_model_add_ubyte4(int id, unsigned char u1, unsigned char u2, unsigned char u3, unsigned char u4) {
     enigma::meshes[id]->AddUbyte4(u1, u2, u3, u4);
   }
 

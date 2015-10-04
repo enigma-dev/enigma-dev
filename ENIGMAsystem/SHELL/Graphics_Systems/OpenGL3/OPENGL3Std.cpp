@@ -80,6 +80,7 @@ namespace enigma
     // read shaders into graphics system structure and compile and link them if needed
     for (size_t i = 0; i < shader_idmax; ++i) {
       ShaderStruct* shaderstruct = shaderdata[i];
+      //TODO(harijs): If precompile == false or ID's are not defragged, there is a segfault because we try to access invalid position in shader vector
       if (shaderstruct->precompile == false) { continue; }
 
       int vshader_id = enigma_user::glsl_shader_create(enigma_user::sh_vertex);
