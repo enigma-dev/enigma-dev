@@ -53,19 +53,23 @@ namespace parse_bacics {
 
   is_ is;
   namespace visible {
-    string toString(int16_t n) { char buf[7]; return string(buf, snprintf(buf, sizeof(buf), "%" PRIi16, n)); }
-    string toString(int32_t n) { char buf[12]; return string(buf, snprintf(buf, sizeof(buf), "%" PRIi32, n)); }
-    string toString(int64_t n) { char buf[32]; return string(buf, snprintf(buf, sizeof(buf), "%" PRIi64, n)); }
-    string toString(uint16_t n) { char buf[6]; return string(buf, snprintf(buf, sizeof(buf), "%" PRIu16, n)); }
-    string toString(uint32_t n) { char buf[11]; return string(buf, snprintf(buf, sizeof(buf), "%" PRIu32, n)); }
-    string toString(uint64_t n) { char buf[21]; return string(buf, snprintf(buf, sizeof(buf), "%" PRIu64, n)); }
-    string toString(char n) { char buf[8]; return string(buf,sprintf(buf,"%d", n)); }
+    string toString(int n) { return std::to_string(n); }
+    string toString(long n) { return std::to_string(n); }
+    string toString(short n) { return std::to_string(n); }
+    string toString(unsigned n) { return std::to_string(n); }
+    string toString(unsigned long n) { return std::to_string(n); }
+#if __cplusplus >= 201100
+    string toString(long long n) { return std::to_string(n); }
+    string toString(unsigned long long n) { return std::to_string(n); }
+#endif
+    string toString(unsigned short n) { return std::to_string(n); }
+    string toString(char n) { return std::to_string(n); }
     string toString(char* n) { if (n == nullptr) return ""; else return string(n); }
-    string toString(float n) { char buf[32]; return string(buf,sprintf(buf,"%g", n)); }
-    string toString(double n) { char buf[32]; return string(buf,sprintf(buf,"%g", n)); }
+    string toString(float n) { return std::to_string(n); }
+    string toString(double n) { return std::to_string(n); }
 #if __GNUC__ //64bit compilers define size_t as something more than unsigned
 #if __x86_64__ || __ppc64__
-    string toString(size_t n) { char buf[12]; return string(buf,sprintf(buf,"%lu", (unsigned long)n)); }
+    string toString(size_t n) { return std::to_string(n); }
 #endif
 #endif
   }

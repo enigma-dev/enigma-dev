@@ -89,6 +89,29 @@ namespace gui
         
         set_cursor(tx-ox, ty-oy);
         set_marker_start(cursor_line, cursor_position);
+
+        //Check double click
+        if (mouse_timer>0){
+          int c = cursor_position;
+          for (c=cursor_position; c>0; --c){
+            if (text[cursor_line][c] == ' '){
+              ++c;
+              break;
+            }
+          }
+          set_marker_start(cursor_line, c);
+          for (c=cursor_position; c<text[cursor_line].length(); ++c){
+            if (text[cursor_line][c] == ' '){
+              break;
+            }
+          }
+          set_marker(cursor_line, c);
+          cursor_position = c;
+          update_cursor();
+          mark = true;
+          double_click = true;
+        }
+        mouse_timer = 10;
       }else{
         if (state != enigma_user::gui_state_active && state != enigma_user::gui_state_on_active){
           if (active == false){
@@ -105,13 +128,16 @@ namespace gui
     }else{
       if (enigma_user::mouse_check_button_pressed(enigma_user::mb_left)){
         active = false;
-        mark = false;
+        mark = false;        
       }
       state = enigma_user::gui_state_on;
     }
 
     if (active == true){
-      if (enigma_user::mouse_check_button(enigma_user::mb_left)){ //Drag select
+      if (mouse_timer>0) mouse_timer--;
+      if (mouse_timer == 0) { double_click = false; }
+
+      if (enigma_user::mouse_check_button(enigma_user::mb_left) && double_click == false){ //Drag select
         mark = true;
         set_cursor(tx-ox, ty-oy);
         set_marker(cursor_line, cursor_position);
@@ -122,14 +148,14 @@ namespace gui
       }
 
       if (enigma_user::keyboard_check(enigma_user::vk_anykey)){
+        bool change = false;
         if (repeat_timer == 0 || repeat_timer > 15){
           ///Todo(harijs) : This might go in the bottom switch for each time c,C,v,V is pressed
           if (enigma_user::keyboard_check(enigma_user::vk_control)){
             switch (enigma_user::keyboard_lastkey){
               case 'v':
               case 'V':
-                marker_delete();
-                text[cursor_line] += "Paste!";
+                marker_insert(enigma_user::clipboard_get_text()); change = true;
               break;
               case 'c':
               case 'C':
@@ -141,6 +167,7 @@ namespace gui
           }else{
             switch (enigma_user::keyboard_lastkey){
               case enigma_user::vk_backspace:{
+                change = true;
                 if (mark == true){
                   marker_delete();
                   update_cursor();
@@ -168,6 +195,7 @@ namespace gui
                 break;
               }
               case enigma_user::vk_delete:{
+                change = true;
                 if (mark == true){
                   marker_delete();
                   update_cursor();
@@ -241,6 +269,7 @@ namespace gui
                 break;
               }
               case enigma_user::vk_enter:{
+                change = true;
                 //printf("Line [%i] = [%s] and cursor [%i] with x [%f] y [%f]\n", cursor_line, text[cursor_line].c_str(), cursor_position, cursor_x, cursor_y);
                 marker_delete();
                 text.insert(text.begin()+cursor_line+1,text[cursor_line].substr(cursor_position, string::npos));
@@ -313,6 +342,7 @@ namespace gui
                     break;
                   }
                 }
+                change = true;
                 marker_delete(); //If something is selected then this deletes it and resets mark
                 text[cursor_line].insert(cursor_position,enigma_user::keyboard_lastchar);
                 cursor_position++;
@@ -324,6 +354,9 @@ namespace gui
           }
         }
         repeat_timer++;
+        if (change == true){
+          callback_execute(enigma_user::gui_event_change);
+        }
       }
     }
   }
@@ -334,6 +367,17 @@ namespace gui
 
     sty.font_styles[state].use();
     double h = (double)enigma_user::font_height(enigma_user::draw_get_font());
+    switch (sty.font_styles[state].halign){
+      case enigma_user::fa_left: textx = box.x+sty.padding.left; break;
+      case enigma_user::fa_center: textx = box.x+box.w/2.0; break;
+      case enigma_user::fa_right: textx = box.x+box.w-sty.padding.right; break;
+    }
+
+    switch (sty.font_styles[state].valign){
+      case enigma_user::fa_top: texty = box.y+sty.padding.top; break;
+      case enigma_user::fa_middle: texty = box.y+box.h/2.0; break;
+      case enigma_user::fa_bottom: texty = box.y+box.h-sty.padding.bottom; break;
+    }
 
     if (sty.sprites[state] != -1){
       if (sty.border.zero == true){
@@ -361,27 +405,26 @@ namespace gui
 
     //Draw marker
     get_data_element(msty,gui::Style,gui::GUI_TYPE::STYLE,marker_style_id);
-
     if (mark == true){
       if (msty.sprites[state] != -1){
         if (msty.border.zero == true){
-          printf("Start line = %i and end line = %i\n", mark_start_line, mark_end_line);
+          //printf("Start line = %i and end line = %i\n", mark_start_line, mark_end_line);
           for (int l=mark_start_line; l<mark_end_line+1; ++l ){
             double msx, msy, mex, mey;
             if (mark_start_line == l && mark_end_line == l){
-              printf("1 Line = %i and start pos = %i and end pos = %i\n", l, mark_start_pos, mark_end_pos);
+              //printf("1 Line = %i and start pos = %i and end pos = %i\n", l, mark_start_pos, mark_end_pos);
               msx = ox + textx + enigma_user::string_width(text[mark_start_line].substr(0, mark_start_pos));
               mex = enigma_user::string_width(text[mark_end_line].substr(mark_start_pos, mark_end_pos-mark_start_pos));
             }else if (l == mark_start_line){
-              printf("2 Line = %i and start pos = %i\n", l, mark_start_pos);
+              //printf("2 Line = %i and start pos = %i\n", l, mark_start_pos);
               msx = ox + textx + enigma_user::string_width(text[mark_start_line].substr(0, mark_start_pos));
               mex = enigma_user::string_width(text[mark_start_line].substr(mark_start_pos, string::npos));
             }else if (l == mark_end_line){
-              printf("3 Line = %i and end pos = %i\n", l, mark_end_pos);
+              //printf("3 Line = %i and end pos = %i\n", l, mark_end_pos);
               msx = ox + textx;
               mex = enigma_user::string_width(text[mark_end_line].substr(0, mark_end_pos));
             }else{
-              printf("4 Normal line = %i\n", l);
+              //printf("4 Normal line = %i\n", l);
               msx = ox + textx;
               mex = enigma_user::string_width(text[l]);
             }
@@ -394,23 +437,23 @@ namespace gui
                                                msty.sprite_styles[state].alpha);
           }
         }else{
-          printf("Start line = %i and end line = %i\n", mark_start_line, mark_end_line);
+          //printf("Start line = %i and end line = %i\n", mark_start_line, mark_end_line);
           for (int l=mark_start_line; l<mark_end_line+1; ++l ){
             double msx, msy, mex, mey;
             if (mark_start_line == l && mark_end_line == l){
-              printf("Start line = %i and end line = %i and line = %i\n", mark_start_line, mark_end_line, l);
+              //printf("Start line = %i and end line = %i and line = %i\n", mark_start_line, mark_end_line, l);
               msx = ox + textx + enigma_user::string_width(text[mark_start_line].substr(0, mark_start_pos));
               mex = ox + textx + enigma_user::string_width(text[mark_end_line].substr(0, mark_end_pos));
             }else if (l == mark_start_line){
-              printf("Start line = %i and line = %i\n", mark_start_line, l);
+              //printf("Start line = %i and line = %i\n", mark_start_line, l);
               msx = ox + textx + enigma_user::string_width(text[mark_start_line].substr(0, mark_start_pos));
               mex = ox + textx + enigma_user::string_width(text[mark_start_line].substr(mark_start_pos, string::npos));
             }else if (l == mark_end_line){
-              printf("End line = %i and line = %i\n", mark_end_line, l);
+              //printf("End line = %i and line = %i\n", mark_end_line, l);
               msx = ox + textx;
               mex = ox + textx + enigma_user::string_width(text[mark_end_line].substr(0, mark_end_pos));
             }else{
-              printf("Normal line = %i\n", l);
+              //printf("Normal line = %i\n", l);
               msx = ox + textx;
               mex = ox + textx + enigma_user::string_width(text[l]);
             }
@@ -431,18 +474,6 @@ namespace gui
     }
 
     //Draw text
-    switch (sty.font_styles[state].halign){
-      case enigma_user::fa_left: textx = box.x+sty.padding.left; break;
-      case enigma_user::fa_center: textx = box.x+box.w/2.0; break;
-      case enigma_user::fa_right: textx = box.x+box.w-sty.padding.right; break;
-    }
-
-    switch (sty.font_styles[state].valign){
-      case enigma_user::fa_top: texty = box.y+sty.padding.top; break;
-      case enigma_user::fa_middle: texty = box.y+box.h/2.0; break;
-      case enigma_user::fa_bottom: texty = box.y+box.h-sty.padding.bottom; break;
-    }
-
     int l = 0;
     for (auto &str : text){
       if (str.empty() == false){
@@ -543,14 +574,41 @@ namespace gui
 
         //Add the end
         str += text[mark_end_line].substr(0, mark_end_pos);
-        printf("We got string %s\n", str.c_str());
       }
     }
     return str;
   }
 
-  void Textbox::marker_insert(){
-
+  void Textbox::marker_insert(string str){
+    if (mark == true){
+      marker_delete();
+    }
+    size_t ni = 0;
+    size_t line = cursor_line;
+    size_t i;
+    string endOfFirst = text[cursor_line].substr(cursor_position, string::npos);
+    text[cursor_line].erase(cursor_position, string::npos);
+    for (i = 0; i < str.length(); ++i){
+      if (str[i] == '\r' or str[i] == '\n'){
+        if (line == cursor_line) { text[line].insert(cursor_position,str.substr(ni, i-ni)); }
+        else { text.insert(text.begin()+line,str.substr(ni, i-ni)); }
+        ++i; //Skip /r or /n
+        i += (str[i] == '\n'); //If we have /r/n then then skip to next one
+        ni = i;
+        line++;
+      }
+    }
+    if (ni != i){
+      if (line != cursor_line){ //End of multiline
+        text.insert(text.begin()+line, str.substr(ni, string::npos));
+      }else{ //We only had one line without line endings
+        text[line].insert(cursor_position,str);
+      }
+      text[line].append(endOfFirst);
+    }
+    cursor_line = line;
+    cursor_position = text[line].length() - endOfFirst.length();
+    update_cursor();
   }
 
   void Textbox::set_cursor(double x, double y){
@@ -569,7 +627,7 @@ namespace gui
       bool fit = false;
       for (int c=0; c<text[h].length(); ++c){
         //printf("char [%i] and xcheck %f < wi %f\n", c, tx-ox-box.x, wi);
-        if (x-textx < wi){
+        if (x-textx < (wi + enigma_user::string_width(text[h].substr(c,1))/2.0)){
           fit = true;
           break;
         }
@@ -582,6 +640,15 @@ namespace gui
     }
     update_cursor();
     blink_timer = 0;
+  }
+
+  string Textbox::get_text(){
+    string str = "";
+    for (int l = 0; l < text.size(); ++l){
+      str += text[l];
+      str += "\n";
+    }
+    return str;
   }
 }
 
@@ -597,9 +664,9 @@ namespace enigma_user
       gui::gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(gui::gui_elements_maxid), std::forward_as_tuple(tex, gui::gui_elements_maxid));
       //printf("Creating button with size %i\n", sizeof(gui::gui_elements[gui::gui_elements_maxid]));
     }
-    gui::Textbox &b = gui::gui_elements[gui::gui_elements_maxid];
-    b.visible = true;
-    b.id = gui::gui_elements_maxid;
+    gui::Textbox &t = gui::gui_elements[gui::gui_elements_maxid];
+    t.visible = true;
+    t.id = gui::gui_elements_maxid;
     return (gui::gui_elements_maxid++);
   }
 
@@ -611,12 +678,12 @@ namespace enigma_user
       get_elementv(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,ski.textbox_style,-1);
       gui::gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(gui::gui_elements_maxid), std::forward_as_tuple(tex, gui::gui_elements_maxid));
     }
-    gui::Textbox &b = gui::gui_elements[gui::gui_elements_maxid];
-    b.visible = true;
-    b.id = gui::gui_elements_maxid;
-    b.box.set(x, y, w, h);
-    b.text[0] = text;
-    b.update_text_pos();
+    gui::Textbox &t = gui::gui_elements[gui::gui_elements_maxid];
+    t.visible = true;
+    t.id = gui::gui_elements_maxid;
+    t.box.set(x, y, w, h);
+    t.marker_insert(text);
+    t.update_text_pos();
     return (gui::gui_elements_maxid++);
   }
 
@@ -628,34 +695,40 @@ namespace enigma_user
     gui::gui_elements.erase(gui::gui_elements.find(id));
   }
 
-/*  ///Setters
-  void gui_button_set_text(int id, string text){
-    get_element(but,gui::Button,gui::GUI_TYPE::BUTTON,id);
-    but.text = text;
+  ///Setters
+  void gui_textbox_set_text(int id, string text){
+    get_element(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
+    tex.clear();
+    tex.marker_insert(text);
   }
 
-  void gui_button_set_position(int id, gs_scalar x, gs_scalar y){
-    get_element(but,gui::Button,gui::GUI_TYPE::BUTTON,id);
-    but.box.x = x;
-    but.box.y = y;
+  void gui_textbox_set_numeric(int id, bool numeric){
+    get_element(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
+    tex.numbers_only = numeric;
   }
 
-  void gui_button_set_size(int id, gs_scalar w, gs_scalar h){
-    get_element(but,gui::Button,gui::GUI_TYPE::BUTTON,id);
-    but.box.w = w;
-    but.box.h = h;
-    but.update_text_pos();
+  void gui_textbox_set_position(int id, gs_scalar x, gs_scalar y){
+    get_element(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
+    tex.box.x = x;
+    tex.box.y = y;
   }
 
-  void gui_button_set_callback(int id, int event, int script_id){
-    get_element(but,gui::Button,gui::GUI_TYPE::BUTTON,id);
+  void gui_textbox_set_size(int id, gs_scalar w, gs_scalar h){
+    get_element(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
+    tex.box.w = w;
+    tex.box.h = h;
+    tex.update_text_pos();
+  }
+
+  void gui_textbox_set_callback(int id, int event, int script_id){
+    get_element(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
     if (event == enigma_user::gui_event_all){
-      but.callback.fill(script_id);
+      tex.callback.fill(script_id);
     }else{
-      but.callback[event] = script_id;
+      tex.callback[event] = script_id;
     }
   }
-*/
+
   void gui_textbox_set_style(int id, int style_id){
     get_element(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
     check_data_element(gui::GUI_TYPE::STYLE, style_id);
@@ -667,245 +740,244 @@ namespace enigma_user
     check_data_element(gui::GUI_TYPE::STYLE, style_id);
     tex.marker_style_id = (style_id != -1? style_id : gui::gui_style_textbox);
   }
-  /*
+  
 
-  void gui_button_set_active(int id, bool active){
-    get_element(but,gui::Button,gui::GUI_TYPE::BUTTON,id);
-    but.active = active;
+  void gui_textbox_set_active(int id, bool active){
+    get_element(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
+    tex.active = active;
   }
 
-  void gui_button_set_togglable(int id, bool togglable){
-    get_element(but,gui::Button,gui::GUI_TYPE::BUTTON,id);
-    but.togglable = togglable;
-  }
-*/
   void gui_textbox_set_visible(int id, bool visible){
     get_element(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
     tex.visible = visible;
   }
-/*
+
   ///Getters
-  int gui_button_get_style(int id){
-    get_elementv(but,gui::Button,gui::GUI_TYPE::BUTTON,id,-1);
-    return but.style_id;
+  int gui_textbox_get_style(int id){
+    get_elementv(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id,-1);
+    return tex.style_id;
   }
 
-  int gui_button_get_state(int id){
-    get_elementv(but,gui::Button,gui::GUI_TYPE::BUTTON,id,-1);
-    return but.state;
+  int gui_textbox_get_state(int id){
+    get_elementv(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id,-1);
+    return tex.state;
   }
 
-  bool gui_button_get_active(int id){
-    get_elementv(but,gui::Button,gui::GUI_TYPE::BUTTON,id,false);
-    return but.active;
+  bool gui_textbox_get_active(int id){
+    get_elementv(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id,false);
+    return tex.active;
   }
 
-  bool gui_button_get_togglable(int id){
-    get_elementv(but,gui::Button,gui::GUI_TYPE::BUTTON,id,false);
-    return but.togglable;
+  bool gui_textbox_get_visible(int id){
+    get_elementv(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id,false);
+    return tex.visible;
   }
 
-  bool gui_button_get_visible(int id){
-    get_elementv(but,gui::Button,gui::GUI_TYPE::BUTTON,id,false);
-    return but.visible;
+  int gui_textbox_get_callback(int id, int event){
+    get_elementv(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id,-1);
+    return tex.callback[event];
   }
 
-  int gui_button_get_callback(int id, int event){
-    get_elementv(but,gui::Button,gui::GUI_TYPE::BUTTON,id,-1);
-    return but.callback[event];
+  int gui_textbox_get_parent(int id){
+    get_elementv(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id,-1);
+    return tex.parent_id;
   }
 
-  int gui_button_get_parent(int id){
-    get_elementv(but,gui::Button,gui::GUI_TYPE::BUTTON,id,-1);
-    return but.parent_id;
+  bool gui_textbox_get_numeric(int id){
+    get_elementv(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id,-1);
+    return tex.numbers_only;
   }
 
-  gs_scalar gui_button_get_width(int id){
-    get_elementv(but,gui::Button,gui::GUI_TYPE::BUTTON,id,-1);
-    return but.box.w;
+  gs_scalar gui_textbox_get_width(int id){
+    get_elementv(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id,-1);
+    return tex.box.w;
   }
 
-  gs_scalar gui_button_get_height(int id){
-    get_elementv(but,gui::Button,gui::GUI_TYPE::BUTTON,id,-1);
-    return but.box.h;
+  gs_scalar gui_textbox_get_height(int id){
+    get_elementv(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id,-1);
+    return tex.box.h;
   }
 
-  gs_scalar gui_button_get_x(int id){
-    get_elementv(but,gui::Button,gui::GUI_TYPE::BUTTON,id,-1);
-    return but.box.x;
+  gs_scalar gui_textbox_get_x(int id){
+    get_elementv(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id,-1);
+    return tex.box.x;
   }
 
-  gs_scalar gui_button_get_y(int id){
-    get_elementv(but,gui::Button,gui::GUI_TYPE::BUTTON,id,-1);
-    return but.box.y;
+  gs_scalar gui_textbox_get_y(int id){
+    get_elementv(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id,-1);
+    return tex.box.y;
   }
 
-  string gui_button_get_text(int id){
-    get_elementv(but,gui::Button,gui::GUI_TYPE::BUTTON,id,"");
-    return but.text;
+  string gui_textbox_get_text(int id){
+    get_elementv(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id,"");
+    return tex.get_text();
   }
 
   ///Drawers
-  void gui_button_draw(int id){
-    get_element(but,gui::Button,gui::GUI_TYPE::BUTTON,id);
-    int pfont = enigma_user::draw_get_font();
-    unsigned int phalign = enigma_user::draw_get_halign();
-    unsigned int pvalign = enigma_user::draw_get_valign();
-    int pcolor = enigma_user::draw_get_color();
-    gs_scalar palpha = enigma_user::draw_get_alpha();
-    but.update();
-    but.draw();
-    enigma_user::draw_set_halign(phalign);
-    enigma_user::draw_set_valign(pvalign);
-    enigma_user::draw_set_color(pcolor);
-    enigma_user::draw_set_alpha(palpha);
-    enigma_user::draw_set_font(pfont);
+  void gui_textbox_draw(int id){
+    get_element(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
+    gui::font_style psty = gui::get_current_draw_state();
+    tex.update();
+    tex.draw();
+    gui::set_current_draw_state(psty);
   }
 
-  void gui_buttons_draw(){
-    int pfont = enigma_user::draw_get_font();
-    unsigned int phalign = enigma_user::draw_get_halign();
-    unsigned int pvalign = enigma_user::draw_get_valign();
-    int pcolor = enigma_user::draw_get_color();
-    gs_scalar palpha = enigma_user::draw_get_alpha();
+  void gui_textbox_draw(){
+    gui::font_style psty = gui::get_current_draw_state();
     for (auto &b : gui::gui_elements){
       ///TODO(harijs) - THIS NEEDS TO BE A LOT PRETTIER (now it does lookup twice)
-      if (b.second.type == gui::GUI_TYPE::BUTTON){
-        get_element(but,gui::Button,gui::GUI_TYPE::BUTTON,b.first);
-        if (but.visible == true && but.parent_id == -1){
-          but.update();
-          but.draw();
+      if (b.second.type == gui::GUI_TYPE::TEXTBOX){
+        get_element(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,b.first);
+        if (tex.visible == true && tex.parent_id == -1){
+          tex.update();
+          tex.draw();
         }
       }
     }
-    enigma_user::draw_set_halign(phalign);
-    enigma_user::draw_set_valign(pvalign);
-    enigma_user::draw_set_color(pcolor);
-    enigma_user::draw_set_alpha(palpha);
-    enigma_user::draw_set_font(pfont);
+    gui::set_current_draw_state(psty);
   }
 
   ///Parenting
-  void gui_button_add_button(int id, int bid){
-    get_element(ele,gui::Button,gui::GUI_TYPE::BUTTON,id);
+  void gui_textbox_add_textbox(int id, int tid){
+    get_element(ele,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
+    ele.parenter.textbox_add(tid);
+  }
+
+  void gui_textbox_add_button(int id, int bid){
+    get_element(ele,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
     ele.parenter.button_add(bid);
   }
 
-  void gui_button_add_toggle(int id, int tid){
-    get_element(ele,gui::Button,gui::GUI_TYPE::BUTTON,id);
+  void gui_textbox_add_toggle(int id, int tid){
+    get_element(ele,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
     ele.parenter.toggle_add(tid);
   }
 
-  void gui_button_add_slider(int id, int sid){
-    get_element(ele,gui::Button,gui::GUI_TYPE::BUTTON,id);
+  void gui_textbox_add_slider(int id, int sid){
+    get_element(ele,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
     ele.parenter.slider_add(sid);
   }
 
-  void gui_button_add_scrollbar(int id, int sid){
-    get_element(ele,gui::Button,gui::GUI_TYPE::BUTTON,id);
+  void gui_textbox_add_scrollbar(int id, int sid){
+    get_element(ele,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
     ele.parenter.scrollbar_add(sid);
   }
 
-  void gui_button_add_label(int id, int lid){
-    get_element(ele,gui::Button,gui::GUI_TYPE::BUTTON,id);
+  void gui_textbox_add_label(int id, int lid){
+    get_element(ele,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
     ele.parenter.label_add(lid);
   }
 
-  void gui_button_add_window(int id, int wid){
-    get_element(ele,gui::Button,gui::GUI_TYPE::BUTTON,id);
+  void gui_textbox_add_window(int id, int wid){
+    get_element(ele,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
     ele.parenter.window_add(wid);
   }
 
-  void gui_button_remove_button(int id, int bid){
-    get_element(ele,gui::Button,gui::GUI_TYPE::BUTTON,id);
+  void gui_textbox_remove_textbox(int id, int tid){
+    get_element(ele,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
+    ele.parenter.textbox_remove(tid);
+  }
+
+  void gui_textbox_remove_button(int id, int bid){
+    get_element(ele,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
     ele.parenter.button_remove(bid);
   }
 
-  void gui_button_remove_toggle(int id, int tid){
-    get_element(ele,gui::Button,gui::GUI_TYPE::BUTTON,id);
+  void gui_textbox_remove_toggle(int id, int tid){
+    get_element(ele,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
     ele.parenter.toggle_remove(tid);
   }
 
-  void gui_button_remove_slider(int id, int sid){
-    get_element(ele,gui::Button,gui::GUI_TYPE::BUTTON,id);
+  void gui_textbox_remove_slider(int id, int sid){
+    get_element(ele,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
     ele.parenter.slider_remove(sid);
 
   }
 
-  void gui_button_remove_scrollbar(int id, int sid){
-    get_element(ele,gui::Button,gui::GUI_TYPE::BUTTON,id);
+  void gui_textbox_remove_scrollbar(int id, int sid){
+    get_element(ele,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
     ele.parenter.scrollbar_remove(sid);
   }
 
-  void gui_button_remove_label(int id, int lid){
-    get_element(ele,gui::Button,gui::GUI_TYPE::BUTTON,id);
+  void gui_textbox_remove_label(int id, int lid){
+    get_element(ele,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
     ele.parenter.label_remove(lid);
   }
 
-  void gui_button_remove_window(int id, int wid){
-    get_element(ele,gui::Button,gui::GUI_TYPE::BUTTON,id);
+  void gui_textbox_remove_window(int id, int wid){
+    get_element(ele,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
     ele.parenter.window_remove(wid);
   }
 
-  int gui_button_get_button_count(int id){
-    get_elementv(ele,gui::Button,gui::GUI_TYPE::BUTTON,id,-1);
+  int gui_textbox_get_textbox_count(int id){
+    get_elementv(ele,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id,-1);
+    return ele.parenter.textbox_count();
+  }
+
+  int gui_textbox_get_button_count(int id){
+    get_elementv(ele,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id,-1);
     return ele.parenter.button_count();
   }
 
-  int gui_button_get_toggle_count(int id){
-    get_elementv(ele,gui::Button,gui::GUI_TYPE::BUTTON,id,-1);
+  int gui_textbox_get_toggle_count(int id){
+    get_elementv(ele,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id,-1);
     return ele.parenter.toggle_count();
   }
 
-  int gui_button_get_slider_count(int id){
-    get_elementv(ele,gui::Button,gui::GUI_TYPE::BUTTON,id,-1);
+  int gui_textbox_get_slider_count(int id){
+    get_elementv(ele,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id,-1);
     return ele.parenter.slider_count();
   }
 
-  int gui_button_get_scrollbar_count(int id){
-    get_elementv(ele,gui::Button,gui::GUI_TYPE::BUTTON,id,-1);
+  int gui_textbox_get_scrollbar_count(int id){
+    get_elementv(ele,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id,-1);
     return ele.parenter.scrollbar_count();
   }
 
-  int gui_button_get_label_count(int id){
-    get_elementv(ele,gui::Button,gui::GUI_TYPE::BUTTON,id,-1);
+  int gui_textbox_get_label_count(int id){
+    get_elementv(ele,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id,-1);
     return ele.parenter.label_count();
   }
 
-  int gui_button_get_window_count(int id){
-    get_elementv(ele,gui::Button,gui::GUI_TYPE::BUTTON,id,-1);
+  int gui_textbox_get_window_count(int id){
+    get_elementv(ele,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id,-1);
     return ele.parenter.window_count();
   }
 
   ///GETTERS FOR ELEMENTS
-  int gui_button_get_button(int id, int but){
-    get_elementv(ele,gui::Button,gui::GUI_TYPE::BUTTON,id,-1);
+  int gui_textbox_get_textbox(int id, int tex){
+    get_elementv(ele,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id,-1);
+    return ele.parenter.textbox(tex);
+  }
+
+  int gui_textbox_get_button(int id, int but){
+    get_elementv(ele,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id,-1);
     return ele.parenter.button(but);
   }
 
-  int gui_button_get_toggle(int id, int tog){
-    get_elementv(ele,gui::Button,gui::GUI_TYPE::BUTTON,id,-1);
+  int gui_textbox_get_toggle(int id, int tog){
+    get_elementv(ele,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id,-1);
     return ele.parenter.toggle(tog);
   }
 
-  int gui_button_get_slider(int id, int sli){
-    get_elementv(ele,gui::Button,gui::GUI_TYPE::BUTTON,id,-1);
+  int gui_textbox_get_slider(int id, int sli){
+    get_elementv(ele,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id,-1);
     return ele.parenter.slider(sli);
   }
 
-  int gui_button_get_scrollbar(int id, int scr){
-    get_elementv(ele,gui::Button,gui::GUI_TYPE::BUTTON,id,-1);
+  int gui_textbox_get_scrollbar(int id, int scr){
+    get_elementv(ele,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id,-1);
     return ele.parenter.scrollbar(scr);
   }
 
-  int gui_button_get_label(int id, int lab){
-    get_elementv(ele,gui::Button,gui::GUI_TYPE::BUTTON,id,-1);
+  int gui_textbox_get_label(int id, int lab){
+    get_elementv(ele,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id,-1);
     return ele.parenter.label(lab);
   }
 
-  int gui_button_get_window(int id, int wid){
-    get_elementv(ele,gui::Button,gui::GUI_TYPE::BUTTON,id,-1);
+  int gui_textbox_get_window(int id, int wid){
+    get_elementv(ele,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id,-1);
     return ele.parenter.window(wid);
-  }*/
+  }
 }
 

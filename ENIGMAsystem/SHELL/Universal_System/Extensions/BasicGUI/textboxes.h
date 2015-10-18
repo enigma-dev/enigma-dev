@@ -45,7 +45,7 @@ namespace gui
       int state = 0;
       bool visible = true;
       bool active = false; //Is textbox is used
-      array<int,4> callback; //Script to run on event
+      array<int,6> callback; //Script to run on event
 
       //Cursor position in chars and line
       int cursor_position = 0;
@@ -54,6 +54,8 @@ namespace gui
 
       int blink_timer = 0;
       int repeat_timer = 0;
+      int mouse_timer = 0; //Double/triple clicks
+      bool double_click = false;
 
       bool mark = false;
       int mark_start_pos = 0;
@@ -85,11 +87,15 @@ namespace gui
       void update_text_pos();
       void callback_execute(int event);
 
+      string get_text();
+
       void set_cursor(double x, double y); //x/y in global pixels
 
       inline void update_cursorx() { cursor_x = enigma_user::string_width(text[cursor_line].substr(0,cursor_position)); }
       inline void update_cursory() { cursor_y = cursor_line * (double)enigma_user::font_height(enigma_user::draw_get_font()); }
       inline void update_cursor() { update_cursorx(); update_cursory(); }
+
+      inline void clear() { mark = false; text.clear(); text.push_back(""); cursor_line = 0; cursor_position = 0; update_cursor(); }
 
       void set_marker(int line, int pos);
 
@@ -100,7 +106,7 @@ namespace gui
 
       void marker_delete();
       string marker_string();
-      void marker_insert();
+      void marker_insert(string str);
 
       Parent parenter;
   };
