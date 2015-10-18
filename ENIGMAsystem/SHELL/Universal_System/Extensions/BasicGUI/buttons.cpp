@@ -343,26 +343,14 @@ namespace enigma_user
   ///Drawers
 	void gui_button_draw(int id){
     get_element(but,gui::Button,gui::GUI_TYPE::BUTTON,id);
-    int pfont = enigma_user::draw_get_font();
-		unsigned int phalign = enigma_user::draw_get_halign();
-		unsigned int pvalign = enigma_user::draw_get_valign();
-		int pcolor = enigma_user::draw_get_color();
-		gs_scalar palpha = enigma_user::draw_get_alpha();
+    gui::font_style psty = gui::get_current_draw_state();
     but.update();
 		but.draw();
-		enigma_user::draw_set_halign(phalign);
-		enigma_user::draw_set_valign(pvalign);
-		enigma_user::draw_set_color(pcolor);
-		enigma_user::draw_set_alpha(palpha);
-    enigma_user::draw_set_font(pfont);
+		gui::set_current_draw_state(psty);
 	}
 
 	void gui_buttons_draw(){
-	  int pfont = enigma_user::draw_get_font();
-		unsigned int phalign = enigma_user::draw_get_halign();
-		unsigned int pvalign = enigma_user::draw_get_valign();
-		int pcolor = enigma_user::draw_get_color();
-		gs_scalar palpha = enigma_user::draw_get_alpha();
+    gui::font_style psty = gui::get_current_draw_state();
 		for (auto &b : gui::gui_elements){
 		  ///TODO(harijs) - THIS NEEDS TO BE A LOT PRETTIER (now it does lookup twice)
       if (b.second.type == gui::GUI_TYPE::BUTTON){
@@ -373,11 +361,7 @@ namespace enigma_user
         }
       }
 		}
-		enigma_user::draw_set_halign(phalign);
-		enigma_user::draw_set_valign(pvalign);
-		enigma_user::draw_set_color(pcolor);
-		enigma_user::draw_set_alpha(palpha);
-		enigma_user::draw_set_font(pfont);
+		gui::set_current_draw_state(psty);
 	}
 
 	///Parenting
