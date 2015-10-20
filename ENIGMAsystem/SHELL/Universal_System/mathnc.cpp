@@ -16,6 +16,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include <limits>
 #include <stdlib.h>
 #include <cmath>
 #include "var4.h"
@@ -55,6 +56,7 @@ namespace enigma_user
 
   int sign(ma_scalar x)                { return (x>0)-(x<0); }
   int cmp(ma_scalar x,ma_scalar y)        { return (x>y)-(x<y); }
+  bool equal(ma_scalar x, ma_scalar y)    { return (::fabs(x-y) <= std::numeric_limits<ma_scalar>::epsilon() * ::fmax(ma_scalar(1.0), ::fmax(::fabs(x), ::fabs(y)))); }
   ma_scalar frac(ma_scalar x)             { return x-(int)x;    }
 
   ma_scalar degtorad(ma_scalar x)         { return x*(M_PI/180.0);}
@@ -203,6 +205,16 @@ namespace enigma_user
  
     return 0;
   }
+
+  int ray_sphere_intersect(ma_scalar xc, ma_scalar yc, ma_scalar zc, ma_scalar xs, ma_scalar ys, ma_scalar zs, ma_scalar xd, ma_scalar yd, ma_scalar zd, ma_scalar r){
+    ma_scalar b = 2*(xd*(xs-xc)+yd*(ys-yc)+zd*(zs-zc));
+    ma_scalar c = xs*xs - 2*xs*xc+xc*xc+ys*ys - 2*ys*yc+yc*yc+zs*zs - 2*zs*zc+zc*zc-r*r;
+    ma_scalar det = (b*b-4*c);
+    if (det < 0.0) return 0;
+    else if (equal(det, 0.0) == 1) return 1;
+    else return 2; 
+  }
+
   
   ma_scalar dot_product(ma_scalar x1,ma_scalar y1,ma_scalar x2,ma_scalar y2) { return (x1 * x2 + y1 * y2); }
   ma_scalar dot_product_3d(ma_scalar x1,ma_scalar y1,ma_scalar z1,ma_scalar x2,ma_scalar y2, ma_scalar z2) { return (x1 * x2 + y1 * y2 + z1 * z2); }
