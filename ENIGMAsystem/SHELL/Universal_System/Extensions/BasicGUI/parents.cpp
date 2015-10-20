@@ -174,7 +174,7 @@ namespace gui
     check_element(gui::GUI_TYPE::TEXTBOX,id);
     auto it = find(child_elements.begin(), child_elements.end(), id);
     if (it != child_elements.end()){
-      get_element(tex,gui::Label,gui::GUI_TYPE::TEXTBOX,id);
+      get_element(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
       child_elements.erase(it);
       tex.parent_id = -1;
     }

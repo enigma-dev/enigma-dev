@@ -64,6 +64,7 @@ void d3d_transform_set_rotation_z(gs_scalar angle);
 void d3d_transform_set_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar angle);
 void d3d_transform_set_array(const gs_scalar *matrix);
 void d3d_transform_add_array(const gs_scalar *matrix);
+gs_scalar * d3d_transform_get_array();
 
 bool d3d_transform_stack_push();
 bool d3d_transform_stack_pop();
