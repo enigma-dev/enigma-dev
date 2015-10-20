@@ -232,6 +232,10 @@ void d3d_transform_add_array(const gs_scalar *matrix)
     enigma::model_matrix = m*enigma::model_matrix;
     enigma::transform_needs_update = true;
 }
+
+gs_scalar * d3d_transform_get_array(){
+    return enigma::model_matrix;
+}
 }
 
 #include <stack>

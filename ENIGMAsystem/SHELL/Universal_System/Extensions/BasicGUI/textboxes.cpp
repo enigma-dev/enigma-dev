@@ -690,7 +690,7 @@ namespace enigma_user
   void gui_textbox_destroy(int id){
     get_element(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
     if (tex.parent_id != -1){
-      gui_window_remove_button(tex.parent_id, id);
+      gui_window_remove_textbox(tex.parent_id, id);
     }
     gui::gui_elements.erase(gui::gui_elements.find(id));
   }
