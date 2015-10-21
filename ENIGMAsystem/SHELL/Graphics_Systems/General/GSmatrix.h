@@ -1,5 +1,6 @@
 /** Copyright (C) 2008-2012 Josh Ventura
 *** Copyright (C) 2013-2014 Robert B. Colton, Harijs Grinbergs
+*** Copyright (C) 2015 Harijs Grinbergs
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -65,20 +66,21 @@ void d3d_transform_set_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, gs_s
 void d3d_transform_set_array(const gs_scalar *matrix);
 void d3d_transform_add_array(const gs_scalar *matrix);
 gs_scalar * d3d_transform_get_array();
+void d3d_transform_force_update();
 
 bool d3d_transform_stack_push();
 bool d3d_transform_stack_pop();
 void d3d_transform_stack_clear();
 bool d3d_transform_stack_empty();
 bool d3d_transform_stack_top();
-bool d3d_transform_stack_disgard();
+bool d3d_transform_stack_discard();
 
 bool d3d_projection_stack_push();
 bool d3d_projection_stack_pop();
 void d3d_projection_stack_clear();
 bool d3d_projection_stack_empty();
 bool d3d_projection_stack_top();
-bool d3d_projection_stack_disgard();
+bool d3d_projection_stack_discard();
 void d3d_projection_set_array(const gs_scalar *matrix);
 void d3d_projection_add_array(const gs_scalar *matrix);
 

@@ -81,19 +81,6 @@ namespace enigma
       void Rotate(gs_scalar Angle, const Vector3& Axis);
   };
 
-
-  struct Vector4
-  {
-      gs_scalar x;
-      gs_scalar y;
-      gs_scalar z;
-      gs_scalar w;
-
-      Vector4() {};
-
-      Vector4(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar w) : x(x), y(y), z(z), w(w) {};
-  };
-
   inline Vector3 operator+(const Vector3& l, const Vector3& r)
   {
       Vector3 Ret(l.x + r.x,
@@ -120,6 +107,20 @@ namespace enigma
 
       return Ret;
   }
+
+  struct Vector4
+  {
+      gs_scalar x;
+      gs_scalar y;
+      gs_scalar z;
+      gs_scalar w;
+
+      Vector4() {};
+
+      Vector4(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar w) : x(x), y(y), z(z), w(w) {};
+
+      Vector4& Normalize();
+  };
 
   class Matrix3
   {
@@ -191,7 +192,6 @@ namespace enigma
                   Ret.m[i][j] = m[i][0] * Right.m[0][j] +
                                 m[i][1] * Right.m[1][j] +
                                 m[i][2] * Right.m[2][j];
-                                //m[i][3] * Right.m[3][j]; //CHECK THIS
               }
           }
           return Ret;
