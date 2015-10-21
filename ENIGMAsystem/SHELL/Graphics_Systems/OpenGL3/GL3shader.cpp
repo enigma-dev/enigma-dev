@@ -50,7 +50,7 @@
         printf("%s - Uniform at location %i not found!\n", str, location);\
         return;\
     }else if ( uniter->second.size != usize ){\
-        printf("%s - Uniform at location %i with %i arguments is accesed by a function with %i arguments!\n", str, location, uniter->second.size, usize);\
+        printf("%s - Uniform [%s] at location %i with %i arguments is accesed by a function with %i arguments!\n", str, uniter->second.name.c_str(), location, uniter->second.size, usize);\
     }
 
   #define get_attribute(atiter,location)\
