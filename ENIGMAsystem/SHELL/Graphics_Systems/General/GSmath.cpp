@@ -74,6 +74,22 @@ void Vector3::Rotate(gs_scalar Angle, const Vector3& Axe)
 }
 
 ///////////
+//Vector4//
+///////////
+Vector4& Vector4::Normalize()
+{
+    const gs_scalar Length = sqrt(x * x + y * y + z * z + w * w);
+
+    x /= Length;
+    y /= Length;
+    z /= Length;
+    w /= Length;
+
+    return *this;
+}
+
+
+///////////
 //MATRIX3//
 ///////////
 gs_scalar Matrix3::Determinant() const
