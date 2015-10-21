@@ -236,6 +236,11 @@ void d3d_transform_add_array(const gs_scalar *matrix)
 gs_scalar * d3d_transform_get_array(){
     return enigma::model_matrix;
 }
+
+void d3d_transform_force_update(){
+    oglmgr->Transformation();
+    enigma::transformation_update();
+}
 }
 
 #include <stack>
@@ -285,7 +290,7 @@ bool d3d_transform_stack_top()
     return true;
 }
 
-bool d3d_transform_stack_disgard()
+bool d3d_transform_stack_discard()
 {
     if (proj_stack.size() == 0) return false;
     proj_stack.pop();
@@ -332,7 +337,7 @@ bool d3d_projection_stack_top()
     return true;
 }
 
-bool d3d_projection_stack_disgard()
+bool d3d_projection_stack_discard()
 {
     if (proj_stack.size() == 0) return false;
     proj_stack.pop();
@@ -351,5 +356,7 @@ void d3d_projection_add_array(const gs_scalar *matrix)
     enigma::projection_matrix = m*enigma::projection_matrix;
     enigma::transform_needs_update = true;
 }
-
+gs_scalar * d3d_projection_get_array(){
+    return enigma::projection_matrix;
+}
 }

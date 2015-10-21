@@ -233,6 +233,20 @@ void d3d_transform_set_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, gs_s
     enigma::mv_matrix = enigma::view_matrix * enigma::model_matrix;
     glLoadMatrix(enigma::mv_matrix);
 }
+void d3d_transform_set_array(const gs_scalar *matrix)
+{
+    enigma::model_matrix = enigma::Matrix4(matrix);
+    glLoadMatrix(enigma::mv_matrix);
+}
+void d3d_transform_add_array(const gs_scalar *matrix)
+{
+    enigma::Matrix4 m(matrix);
+    enigma::model_matrix = m*enigma::model_matrix;
+    glLoadMatrix(enigma::mv_matrix);
+}
+gs_scalar * d3d_transform_get_array(){
+    return enigma::model_matrix;
+}
 
 }
 
@@ -287,7 +301,7 @@ bool d3d_transform_stack_top()
     return true;
 }
 
-bool d3d_transform_stack_disgard()
+bool d3d_transform_stack_discard()
 {
     if (trans_stack_size == 0) return false;
     trans_stack.pop();
@@ -340,12 +354,29 @@ bool d3d_projection_stack_top()
     return true;
 }
 
-bool d3d_projection_stack_disgard()
+bool d3d_projection_stack_discard()
 {
     if (proj_stack_size == 0) return false;
     proj_stack.pop();
     proj_stack_size--;
     return true;
 }
-
+void d3d_projection_set_array(const gs_scalar *matrix)
+{
+    enigma::projection_matrix = enigma::Matrix4(matrix);
+    glMatrixMode(GL_PROJECTION);
+    glLoadMatrix(enigma::projection_matrix);
+    glMatrixMode(GL_MODELVIEW);
+}
+void d3d_projection_add_array(const gs_scalar *matrix)
+{
+    enigma::Matrix4 m(matrix);
+    enigma::projection_matrix = m*enigma::projection_matrix;
+    glMatrixMode(GL_PROJECTION);
+    glLoadMatrix(enigma::projection_matrix);
+    glMatrixMode(GL_MODELVIEW);
+}
+gs_scalar * d3d_projection_get_array(){
+    return enigma::projection_matrix;
+}
 }
