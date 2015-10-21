@@ -42,6 +42,11 @@ Vector3 Vector3::Cross(const Vector3& v) const
     return Vector3(_x, _y, _z);
 }
 
+gs_scalar Vector3::Dot(const Vector3& v) const
+{
+    return x * v.x + y * v.y + z * v.z;
+}
+
 Vector3& Vector3::Normalize()
 {
     const gs_scalar Length = sqrt(x * x + y * y + z * z);

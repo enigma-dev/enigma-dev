@@ -77,6 +77,7 @@ namespace enigma
       }
 
       Vector3 Cross(const Vector3& v) const;
+      gs_scalar Dot(const Vector3& v) const;
       Vector3& Normalize();
       void Rotate(gs_scalar Angle, const Vector3& Axis);
   };
