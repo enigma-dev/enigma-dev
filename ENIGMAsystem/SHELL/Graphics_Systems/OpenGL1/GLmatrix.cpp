@@ -196,6 +196,13 @@ void d3d_transform_add_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, gs_s
     enigma::mv_matrix = enigma::view_matrix * enigma::model_matrix;
     glLoadMatrix(enigma::mv_matrix);
 }
+void d3d_transform_add_rotation(gs_scalar x, gs_scalar y, gs_scalar z)
+{
+    enigma::model_matrix.rotate(x,y,z);
+    enigma::mv_matrix = enigma::view_matrix * enigma::model_matrix;
+    enigma::transform_needs_update = true;
+    glLoadMatrix(enigma::mv_matrix);
+}
 void d3d_transform_set_translation(gs_scalar xt, gs_scalar yt, gs_scalar zt)
 {
     enigma::model_matrix.InitTranslationTransform(xt, yt, zt);
@@ -230,6 +237,13 @@ void d3d_transform_set_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, gs_s
 {
     enigma::model_matrix.InitIdentity();
     enigma::model_matrix.rotate(-angle, x, y, z);
+    enigma::mv_matrix = enigma::view_matrix * enigma::model_matrix;
+    glLoadMatrix(enigma::mv_matrix);
+}
+void d3d_transform_set_rotation(gs_scalar x, gs_scalar y, gs_scalar z)
+{
+    enigma::model_matrix.InitIdentity();
+    enigma::model_matrix.rotate(x,y,z);
     enigma::mv_matrix = enigma::view_matrix * enigma::model_matrix;
     glLoadMatrix(enigma::mv_matrix);
 }
