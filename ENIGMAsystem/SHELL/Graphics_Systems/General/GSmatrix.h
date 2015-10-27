@@ -57,12 +57,16 @@ void d3d_transform_add_rotation_x(gs_scalar angle);
 void d3d_transform_add_rotation_y(gs_scalar angle);
 void d3d_transform_add_rotation_z(gs_scalar angle);
 void d3d_transform_add_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar angle);
+void d3d_transform_add_rotation(gs_scalar x, gs_scalar y, gs_scalar z);
+
 void d3d_transform_set_translation(gs_scalar xt, gs_scalar yt, gs_scalar zt);
 void d3d_transform_set_scaling(gs_scalar xs, gs_scalar ys, gs_scalar zs);
 void d3d_transform_set_rotation_x(gs_scalar angle);
 void d3d_transform_set_rotation_y(gs_scalar angle);
 void d3d_transform_set_rotation_z(gs_scalar angle);
 void d3d_transform_set_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar angle);
+void d3d_transform_set_rotation(gs_scalar x, gs_scalar y, gs_scalar z);
+
 void d3d_transform_set_array(const gs_scalar *matrix);
 void d3d_transform_add_array(const gs_scalar *matrix);
 gs_scalar * d3d_transform_get_array();
