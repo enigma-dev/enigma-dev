@@ -453,17 +453,6 @@ void execute_program(string fname, string args, bool wait)
   }
 }
 
-string environment_get_variable(string name)
-{
-  char* env;
-  env = getenv(name.c_str());
-  if (env!=NULL){
-    return string(env);
-  } else {
-    return "";
-  }
-}
-
 void game_end(int ret) {
   game_isending = true;
   enigma::game_return = ret;
