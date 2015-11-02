@@ -68,6 +68,10 @@ GLenum cullingstates[3] = {
   GL_BACK, GL_FRONT, GL_FRONT_AND_BACK
 };
 
+GLenum stenciloperators[8] = {
+  GL_KEEP, GL_ZERO, GL_REPLACE, GL_INCR, GL_INCR_WRAP, GL_DECR, GL_DECR_WRAP, GL_INVERT
+};
+
 namespace enigma_user
 {
 
@@ -183,6 +187,11 @@ void d3d_set_culling(int mode)
 	if (mode > 0){
 		glFrontFace(windingstates[mode-1]);
 	}
+}
+
+void d3d_set_color_mask(bool r, bool g, bool b, bool a){
+  oglmgr->BlendFunc();
+  glColorMask(r,g,b,a);
 }
 
 bool d3d_get_mode()
@@ -559,6 +568,37 @@ void d3d_stencil_use_mask(){
 void d3d_stencil_end_mask(){
   oglmgr->BlendFunc();
   glDisable(GL_STENCIL_TEST);
+}
+
+void d3d_stencil_enable(bool enable){
+  oglmgr->BlendFunc();
+  oglmgr->SetEnabled(GL_STENCIL_TEST, enable);
+}
+
+void d3d_stencil_clear_value(int value){
+  oglmgr->BlendFunc();
+  glClearStencil(value);
+  glClear(GL_STENCIL_BUFFER_BIT);
+}
+
+void d3d_stencil_mask(unsigned int mask){
+  oglmgr->BlendFunc();
+  glStencilMask(mask);
+}
+
+void d3d_stencil_clear(){
+  oglmgr->BlendFunc();
+  glClear(GL_STENCIL_BUFFER_BIT);
+}
+
+void d3d_stencil_function(int func, int ref, unsigned int mask){
+  oglmgr->BlendFunc();
+  glStencilFunc(depthoperators[func], ref, mask);
+}
+
+void d3d_stencil_operator(int sfail, int dpfail, int dppass){
+  oglmgr->BlendFunc();
+  glStencilOp(stenciloperators[sfail], stenciloperators[dpfail], stenciloperators[dppass]);
 }
 
 }

@@ -46,6 +46,7 @@ namespace enigma_user {
   void d3d_model_part_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z, int texId, int vertex_start, int vertex_count);
   void d3d_model_primitive_begin(int id, int kind, int format = -2);
   void d3d_model_primitive_end(int id);
+  void d3d_model_format(int id, int fmt);
   void d3d_model_vertex(int id, gs_scalar x, gs_scalar y);
   void d3d_model_vertex(int id, gs_scalar x, gs_scalar y, gs_scalar z);
   void d3d_model_index(int id, unsigned ind);

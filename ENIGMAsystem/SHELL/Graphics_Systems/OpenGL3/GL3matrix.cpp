@@ -82,7 +82,7 @@ namespace enigma_user
   void d3d_set_projection(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom, gs_scalar xto, gs_scalar yto, gs_scalar zto, gs_scalar xup, gs_scalar yup, gs_scalar zup)
   {
       oglmgr->Transformation();
-      (enigma::d3dHidden?glEnable:glDisable)(GL_DEPTH_TEST);
+     // (enigma::d3dHidden?glEnable:glDisable)(GL_DEPTH_TEST);
       enigma::projection_matrix.init_perspective_proj_transform(45, -view_wview[view_current] / (gs_scalar)view_hview[view_current], 1, 32000);
       enigma::view_matrix.init_camera_transform(enigma::Vector3(xfrom,yfrom,zfrom),enigma::Vector3(xto,yto,zto),enigma::Vector3(xup,yup,zup));
       enigma::transform_needs_update = true;
@@ -93,7 +93,7 @@ namespace enigma_user
   {
       if (angle == 0 || znear == 0) return; //THEY CANNOT BE 0!!!
       oglmgr->Transformation();
-      (enigma::d3dHidden?glEnable:glDisable)(GL_DEPTH_TEST);
+      //(enigma::d3dHidden?glEnable:glDisable)(GL_DEPTH_TEST);
 
       enigma::projection_matrix.init_perspective_proj_transform(angle, -aspect, znear, zfar);
 
@@ -263,6 +263,7 @@ namespace enigma_user
   #include <stack>
   std::stack<enigma::Matrix4> trans_stack;
   std::stack<enigma::Matrix4> proj_stack;
+  std::stack<enigma::Matrix4> view_stack;
 
   namespace enigma_user
   {
@@ -319,6 +320,7 @@ namespace enigma_user
       //if (trans_stack_size == 31) return false; //This limit no longer applies
       oglmgr->Transformation();
       proj_stack.push(enigma::projection_matrix);
+      view_stack.push(enigma::view_matrix);
       return true;
   }
 
@@ -327,7 +329,9 @@ namespace enigma_user
       if (proj_stack.size() == 0) return false;
       oglmgr->Transformation();
       enigma::projection_matrix = proj_stack.top();
+      enigma::view_matrix = view_stack.top();
       proj_stack.pop();
+      view_stack.pop();
       enigma::transform_needs_update = true;
       return true;
   }
@@ -337,6 +341,7 @@ namespace enigma_user
       oglmgr->Transformation();
       proj_stack = std::stack<enigma::Matrix4>(); //Clear the stack
       enigma::projection_matrix.init_identity();
+      enigma::view_matrix.init_identity();
       enigma::transform_needs_update = true;
   }
 
@@ -350,6 +355,7 @@ namespace enigma_user
       if (proj_stack.size() == 0) return false;
       oglmgr->Transformation();
       enigma::projection_matrix = proj_stack.top();
+      enigma::view_matrix = view_stack.top();
       enigma::transform_needs_update = true;
       return true;
   }
@@ -358,6 +364,7 @@ namespace enigma_user
   {
       if (proj_stack.size() == 0) return false;
       proj_stack.pop();
+      view_stack.pop();
       return true;
   }
   void d3d_projection_set_array(const gs_scalar *matrix)

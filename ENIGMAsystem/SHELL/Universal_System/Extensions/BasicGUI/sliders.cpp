@@ -295,7 +295,7 @@ namespace enigma_user
 
   void gui_slider_set_value(int id, double value){
     get_element(sli,gui::Slider,gui::GUI_TYPE::SLIDER,id);
-		sli.value = value;
+		sli.value = fmin(fmax(value,sli.minValue),sli.maxValue);
     sli.update_spos();
   }
 
