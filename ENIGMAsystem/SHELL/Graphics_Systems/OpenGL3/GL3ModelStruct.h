@@ -20,6 +20,7 @@
 #include "../General/GSd3d.h"
 #include "../General/GSprimitives.h"
 #include "../General/GSmatrix.h"
+#include "../General/GSmath.h"
 #include "../General/GSvertex.h"
 #include "Bridges/General/GL3Context.h" //Needed to get if bound texture == -1
 #include "GLSLshader.h"

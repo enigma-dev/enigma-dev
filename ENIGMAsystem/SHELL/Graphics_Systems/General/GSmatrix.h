@@ -21,16 +21,19 @@
 #define ENIGMA_GSMATRIX_H
 
 #include "Universal_System/scalar.h"
-#include "../General/GSmath.h"
 #include <string>
 
 namespace enigma
 {
-    extern Matrix4 projection_matrix, view_matrix, model_matrix;
-    extern Matrix4 mv_matrix, mvp_matrix;
-    extern Matrix3 normal_matrix;
-    extern bool transform_needs_update;
-    extern void transformation_update();
+  //Forward declare
+  struct Matrix3;
+  struct Matrix4;
+
+  extern Matrix4 projection_matrix, view_matrix, model_matrix;
+  extern Matrix4 mv_matrix, mvp_matrix;
+  extern Matrix3 normal_matrix;
+  extern bool transform_needs_update;
+  extern void transformation_update();
 }
 
 namespace enigma_user
