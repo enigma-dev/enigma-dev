@@ -1,4 +1,5 @@
 /** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton
+*** Copyright (C) 2015 Harijs Grinbergs
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -54,6 +55,17 @@ namespace enigma_user {
     rs_always     // Always True             D3DCMP_ALWAYS           GL_ALWAYS
   };
 
+  enum {
+    rs_keep,   // GL_KEEP
+    rs_zero,      //  GL_ZERO
+    rs_replace,     //  GL_REPLACE
+    rs_incr,  // GL_INCR
+    rs_incr_wrap, // GL_INCR_WRAP
+    rs_decr,  // GL_DECR
+    rs_decr_wrap,  // GL_DECR_WRAP
+    rs_invert     // GL_INVERT
+  };
+
   // NOTE: Game Maker uses clockwise culling to define the front face,
   // OpenGL's mode sets what defines the front face, Direct3D's mode sets what defines the back face
   enum {
@@ -106,6 +118,7 @@ namespace enigma_user {
   void d3d_set_depth(double dep);
   void d3d_clear_depth();
   void d3d_set_shading(bool smooth);
+  void d3d_set_color_mask(bool r, bool g, bool b, bool a);
 
   bool d3d_get_mode();
   int d3d_get_culling();
@@ -127,6 +140,13 @@ namespace enigma_user {
   void d3d_stencil_continue_mask();
   void d3d_stencil_use_mask();
   void d3d_stencil_end_mask();
+
+  void d3d_stencil_enable(bool enable);
+  void d3d_stencil_clear_value(int value);
+  void d3d_stencil_mask(unsigned int mask);
+  void d3d_stencil_clear();
+  void d3d_stencil_function(int func, int ref, unsigned int mask);
+  void d3d_stencil_operator(int sfail, int dpfail, int dppass);
 }
 
 #endif // ENIGMA_GL3D3D_H

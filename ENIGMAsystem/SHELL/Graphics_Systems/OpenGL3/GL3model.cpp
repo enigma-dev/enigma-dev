@@ -348,6 +348,10 @@ namespace enigma_user
     enigma::meshes[id]->End();
   }
 
+  void d3d_model_format(int id, int fmt){
+    enigma::meshes[id]->SetFormat(fmt);
+  }
+  
   void d3d_model_index(int id, unsigned ind) {
     enigma::meshes[id]->AddIndex(ind);
   }
