@@ -18,6 +18,7 @@
 #include "../General/OpenGLHeaders.h"
 #include "../General/GSd3d.h"
 #include "../General/GSmatrix.h"
+#include "../General/GSmath.h"
 #include "GLSLshader.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
@@ -231,7 +232,7 @@ void d3d_set_shading(bool smooth)
 
 void d3d_set_clip_plane(bool enable)
 {
-    (enable?glEnable:glDisable)(GL_CLIP_DISTANCE0);
+  (enable?glEnable:glDisable)(GL_CLIP_DISTANCE0);
 }
 
 }
@@ -244,239 +245,239 @@ namespace enigma
 {
 
 struct light3D {
-    int type; //0 - directional, 1 - positional
-    bool enabled;
-    bool update;
-    gs_scalar position[4];
-    gs_scalar transformed_position[4];
-    float diffuse[4];
-    float specular[4];
-    float ambient[4];
-    float constant_attenuation;
-    float linear_attenuation;
-    float quadratic_attenuation;
+  int type; //0 - directional, 1 - positional
+  bool enabled;
+  bool update;
+  gs_scalar position[4];
+  gs_scalar transformed_position[4];
+  float diffuse[4];
+  float specular[4];
+  float ambient[4];
+  float constant_attenuation;
+  float linear_attenuation;
+  float quadratic_attenuation;
 
-    light3D(bool first = false)
-    {
-        type = 0;
-        enabled = false;
-        update = false;
-        position[0]=0, position[1]=0, position[2]=1, position[3]=0;
-        transformed_position[0]=0, transformed_position[1]=0, transformed_position[2]=0, transformed_position[3]=0;
-        if (first == true){ //By GL1 spec, the first light is different
-            diffuse[0]=1, diffuse[1]=1, diffuse[2]=1, diffuse[3]=1;
-            specular[0]=1, specular[1]=1, specular[2]=1, specular[3]=1;
-        }else{
-            diffuse[0]=0, diffuse[1]=0, diffuse[2]=0, diffuse[3]=0;
-            specular[0]=0, specular[1]=0, specular[2]=0, specular[3]=0;
-        }
-        ambient[0]=0, ambient[1]=0, ambient[2]=0, ambient[3]=1.0;
-        constant_attenuation = 1.0;
-        linear_attenuation = 0;
-        quadratic_attenuation = 0;
-    };
+  light3D(bool first = false)
+  {
+    type = 0;
+    enabled = false;
+    update = false;
+    position[0]=0, position[1]=0, position[2]=1, position[3]=0;
+    transformed_position[0]=0, transformed_position[1]=0, transformed_position[2]=0, transformed_position[3]=0;
+    if (first == true){ //By GL1 spec, the first light is different
+      diffuse[0]=1, diffuse[1]=1, diffuse[2]=1, diffuse[3]=1;
+      specular[0]=1, specular[1]=1, specular[2]=1, specular[3]=1;
+    }else{
+      diffuse[0]=0, diffuse[1]=0, diffuse[2]=0, diffuse[3]=0;
+      specular[0]=0, specular[1]=0, specular[2]=0, specular[3]=0;
+    }
+    ambient[0]=0, ambient[1]=0, ambient[2]=0, ambient[3]=1.0;
+    constant_attenuation = 1.0;
+    linear_attenuation = 0;
+    quadratic_attenuation = 0;
+  };
 };
 
 struct material3D {
-    float ambient[4];
-    float diffuse[4];
-    float specular[4];
-    float shininess;
+  float ambient[4];
+  float diffuse[4];
+  float specular[4];
+  float shininess;
 
-    material3D()
-    {
-        //ambient[0] = 0.2, ambient[1] = 0.2, ambient[2] = 0.2, ambient[3] = 1.0; //This is default in GL1.1
-	    ambient[0] = 0.0, ambient[1] = 0.0, ambient[2] = 0.0, ambient[3] = 1.0; //This is default in GM
-        diffuse[0] = 0.8, diffuse[1] = 0.8, diffuse[2] = 0.8, diffuse[3] = 1.0;
-        specular[0] = 0.0, specular[1] = 0.0, specular[2] = 0.0, specular[3] = 0.0;
-        shininess = 0.0;
-    }
+  material3D()
+  {
+    //ambient[0] = 0.2, ambient[1] = 0.2, ambient[2] = 0.2, ambient[3] = 1.0; //This is default in GL1.1
+    ambient[0] = 0.0, ambient[1] = 0.0, ambient[2] = 0.0, ambient[3] = 1.0; //This is default in GM
+    diffuse[0] = 0.8, diffuse[1] = 0.8, diffuse[2] = 0.8, diffuse[3] = 1.0;
+    specular[0] = 0.0, specular[1] = 0.0, specular[2] = 0.0, specular[3] = 0.0;
+    shininess = 0.0;
+  }
 };
 
 class d3d_lights
 {
-    vector<light3D> lights;
-    material3D material;
-    bool lights_enabled;
+  vector<light3D> lights;
+  material3D material;
+  bool lights_enabled;
 
-    public:
-    float global_ambient_color[4];
-    d3d_lights() {
-        lights_enabled = false;
-        global_ambient_color[0] = global_ambient_color[1] = global_ambient_color[2] = 0.2f;
-        global_ambient_color[3] = 1.0f;
-        lights.push_back(light3D(true));
-        for (unsigned int i=0; i<7; ++i){
-            lights.push_back(light3D());
-        }
+  public:
+  float global_ambient_color[4];
+  d3d_lights() {
+    lights_enabled = false;
+    global_ambient_color[0] = global_ambient_color[1] = global_ambient_color[2] = 0.2f;
+    global_ambient_color[3] = 1.0f;
+    lights.push_back(light3D(true));
+    for (unsigned int i=0; i<7; ++i){
+      lights.push_back(light3D());
     }
-    //~d3d_lights() {}
+  }
+  //~d3d_lights() {}
 
-    void lights_enable(bool enable){
-        lights_enabled = enable;
+  void lights_enable(bool enable){
+    lights_enabled = enable;
+  }
+
+  void light_update()
+  {
+    enigma_user::glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_lightEnable, lights_enabled);
+    if (lights_enabled == true){
+      enigma_user::glsl_uniform4fv(enigma::shaderprograms[enigma::bound_shader]->uni_ambient_color, 1, global_ambient_color);
+      enigma_user::glsl_uniform4fv(enigma::shaderprograms[enigma::bound_shader]->uni_material_ambient, 1, material.ambient);
+      enigma_user::glsl_uniform4fv(enigma::shaderprograms[enigma::bound_shader]->uni_material_diffuse, 1, material.diffuse);
+      enigma_user::glsl_uniform4fv(enigma::shaderprograms[enigma::bound_shader]->uni_material_specular, 1, material.specular);
+      enigma_user::glsl_uniformf(enigma::shaderprograms[enigma::bound_shader]->uni_material_shininess, material.shininess);
     }
+  }
 
-    void light_update()
-    {
-        enigma_user::glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_lightEnable, lights_enabled);
-        if (lights_enabled == true){
-            enigma_user::glsl_uniform4fv(enigma::shaderprograms[enigma::bound_shader]->uni_ambient_color, 1, global_ambient_color);
-            enigma_user::glsl_uniform4fv(enigma::shaderprograms[enigma::bound_shader]->uni_material_ambient, 1, material.ambient);
-            enigma_user::glsl_uniform4fv(enigma::shaderprograms[enigma::bound_shader]->uni_material_diffuse, 1, material.diffuse);
-            enigma_user::glsl_uniform4fv(enigma::shaderprograms[enigma::bound_shader]->uni_material_specular, 1, material.specular);
-            enigma_user::glsl_uniformf(enigma::shaderprograms[enigma::bound_shader]->uni_material_shininess, material.shininess);
-        }
-    }
-
-    void lightsource_update()
-    {
-        if (lights_enabled == true){
-            unsigned int al = 0; //Active lights
-            for (unsigned int i=0; i<lights.size(); ++i){
-                if (lights[i].enabled == true){
-                    if (lights[i].update == true){
-                        enigma_user::glsl_uniform4fv(enigma::shaderprograms[enigma::bound_shader]->uni_light_ambient[al], 1, lights[i].ambient);
-                        enigma_user::glsl_uniform4fv(enigma::shaderprograms[enigma::bound_shader]->uni_light_diffuse[al], 1, lights[i].diffuse);
-                        enigma_user::glsl_uniform4fv(enigma::shaderprograms[enigma::bound_shader]->uni_light_specular[al], 1, lights[i].specular);
-                        if (lights[i].position[3] != 0.0){ //Light is a point light
-                            enigma_user::glsl_uniformf(enigma::shaderprograms[enigma::bound_shader]->uni_light_cAttenuation[al], lights[i].constant_attenuation);
-                            enigma_user::glsl_uniformf(enigma::shaderprograms[enigma::bound_shader]->uni_light_lAttenuation[al], lights[i].linear_attenuation);
-                            enigma_user::glsl_uniformf(enigma::shaderprograms[enigma::bound_shader]->uni_light_qAttenuation[al], lights[i].quadratic_attenuation);
-                        }
-                        enigma_user::glsl_uniform4fv(enigma::shaderprograms[enigma::bound_shader]->uni_light_position[al], 1, lights[i].transformed_position);
-                        lights[i].update = false;
-                    }
-                    ++al;
-                }
+  void lightsource_update()
+  {
+    if (lights_enabled == true){
+      unsigned int al = 0; //Active lights
+      for (unsigned int i=0; i<lights.size(); ++i){
+        if (lights[i].enabled == true){
+          if (lights[i].update == true){
+            enigma_user::glsl_uniform4fv(enigma::shaderprograms[enigma::bound_shader]->uni_light_ambient[al], 1, lights[i].ambient);
+            enigma_user::glsl_uniform4fv(enigma::shaderprograms[enigma::bound_shader]->uni_light_diffuse[al], 1, lights[i].diffuse);
+            enigma_user::glsl_uniform4fv(enigma::shaderprograms[enigma::bound_shader]->uni_light_specular[al], 1, lights[i].specular);
+            if (lights[i].position[3] != 0.0){ //Light is a point light
+              enigma_user::glsl_uniformf(enigma::shaderprograms[enigma::bound_shader]->uni_light_cAttenuation[al], lights[i].constant_attenuation);
+              enigma_user::glsl_uniformf(enigma::shaderprograms[enigma::bound_shader]->uni_light_lAttenuation[al], lights[i].linear_attenuation);
+              enigma_user::glsl_uniformf(enigma::shaderprograms[enigma::bound_shader]->uni_light_qAttenuation[al], lights[i].quadratic_attenuation);
             }
-            enigma_user::glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_lights_active, al);
+            enigma_user::glsl_uniform4fv(enigma::shaderprograms[enigma::bound_shader]->uni_light_position[al], 1, lights[i].transformed_position);
+            lights[i].update = false;
+          }
+          ++al;
         }
+      }
+      enigma_user::glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_lights_active, al);
     }
+  }
 
-    void light_update_positions()
-    {
-        enigma::transformation_update();
-        unsigned int al = 0; //Active lights
-        for (unsigned int i=0; i<lights.size(); ++i){
-            if (lights[i].type == 0){ //Directional light
-                enigma::Vector3 lpos_eyespace;
-                lpos_eyespace = enigma::normal_matrix * enigma::Vector3(lights[i].position[0],lights[i].position[1],lights[i].position[2]);
-                lights[i].transformed_position[0] = lpos_eyespace.x, lights[i].transformed_position[1] = lpos_eyespace.y, lights[i].transformed_position[2] = lpos_eyespace.z, lights[i].transformed_position[3] = lights[i].position[3];
-            }else{ //Point lights
-                enigma::Vector4 lpos_eyespace;
-                lpos_eyespace = enigma::mv_matrix  * enigma::Vector4(lights[i].position[0],lights[i].position[1],lights[i].position[2],1.0);
-                lights[i].transformed_position[0] = lpos_eyespace.x, lights[i].transformed_position[1] = lpos_eyespace.y, lights[i].transformed_position[2] = lpos_eyespace.z, lights[i].transformed_position[3] = lights[i].position[3];
-            }
-            if (lights[i].enabled == true){
-                enigma_user::glsl_uniform4fv(enigma::shaderprograms[enigma::bound_shader]->uni_light_position[al], 1, lights[i].transformed_position);
-                ++al;
-            }
-        }
+  void light_update_positions()
+  {
+    enigma::transformation_update();
+    unsigned int al = 0; //Active lights
+    for (unsigned int i=0; i<lights.size(); ++i){
+      if (lights[i].type == 0){ //Directional light
+        enigma::Vector3 lpos_eyespace;
+        lpos_eyespace = enigma::normal_matrix * enigma::Vector3(lights[i].position[0],lights[i].position[1],lights[i].position[2]);
+        lights[i].transformed_position[0] = lpos_eyespace.x, lights[i].transformed_position[1] = lpos_eyespace.y, lights[i].transformed_position[2] = lpos_eyespace.z, lights[i].transformed_position[3] = lights[i].position[3];
+      }else{ //Point lights
+        enigma::Vector4 lpos_eyespace;
+        lpos_eyespace = enigma::mv_matrix  * enigma::Vector4(lights[i].position[0],lights[i].position[1],lights[i].position[2],1.0);
+        lights[i].transformed_position[0] = lpos_eyespace.x, lights[i].transformed_position[1] = lpos_eyespace.y, lights[i].transformed_position[2] = lpos_eyespace.z, lights[i].transformed_position[3] = lights[i].position[3];
+      }
+      if (lights[i].enabled == true){
+        enigma_user::glsl_uniform4fv(enigma::shaderprograms[enigma::bound_shader]->uni_light_position[al], 1, lights[i].transformed_position);
+        ++al;
+      }
     }
+  }
 
-    bool light_define_direction(unsigned int id, gs_scalar dx, gs_scalar dy, gs_scalar dz, int col)
-    {
-        if (id<lights.size()){
-            lights[id].type = 0;
-            lights[id].position[0] = -dx;
-            lights[id].position[1] = -dy;
-            lights[id].position[2] = -dz;
-            lights[id].position[3] = 0.0;
-            lights[id].diffuse[0] = __GETR(col);
-            lights[id].diffuse[1] = __GETG(col);
-            lights[id].diffuse[2] = __GETB(col);
-            lights[id].diffuse[3] = 1.0f;
-            lights[id].update = true;
-            lightsource_update();
-            light_update_positions();
-            return true;
-        }
-        return false;
+  bool light_define_direction(unsigned int id, gs_scalar dx, gs_scalar dy, gs_scalar dz, int col)
+  {
+    if (id<lights.size()){
+      lights[id].type = 0;
+      lights[id].position[0] = -dx;
+      lights[id].position[1] = -dy;
+      lights[id].position[2] = -dz;
+      lights[id].position[3] = 0.0;
+      lights[id].diffuse[0] = __GETR(col);
+      lights[id].diffuse[1] = __GETG(col);
+      lights[id].diffuse[2] = __GETB(col);
+      lights[id].diffuse[3] = 1.0f;
+      lights[id].update = true;
+      lightsource_update();
+      light_update_positions();
+      return true;
     }
+    return false;
+  }
 
-    bool light_define_point(unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar range, int col)
-    {
-        if (range <= 0.0) {
-            return false;
-        }
-        if (id<lights.size()){
-            lights[id].type = 1;
-            lights[id].position[0] = x;
-            lights[id].position[1] = y;
-            lights[id].position[2] = z;
-            lights[id].position[3] = range;
-            lights[id].diffuse[0] = __GETR(col);
-            lights[id].diffuse[1] = __GETG(col);
-            lights[id].diffuse[2] = __GETB(col);
-            lights[id].diffuse[3] = 1.0f;
-            lights[id].specular[0] = 0.0f;
-            lights[id].specular[1] = 0.0f;
-            lights[id].specular[2] = 0.0f;
-            lights[id].specular[3] = 0.0f;
-            lights[id].ambient[0] = 0.0f;
-            lights[id].ambient[1] = 0.0f;
-            lights[id].ambient[2] = 0.0f;
-            lights[id].ambient[3] = 0.0f;
-            lights[id].constant_attenuation = 1.0f;
-            lights[id].linear_attenuation = 0.0f;
-            lights[id].quadratic_attenuation = 8.0f/(range*range);
-            lights[id].update = true;
-            lightsource_update();
-            light_update_positions();
-            return true;
-        }
-        return false;
+  bool light_define_point(unsigned int id, gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar range, int col)
+  {
+    if (range <= 0.0) {
+      return false;
     }
-
-    bool light_set_specularity(unsigned int id, gs_scalar r, gs_scalar g, gs_scalar b, gs_scalar a)
-    {
-        if (id<lights.size()){
-            lights[id].specular[0] = r;
-            lights[id].specular[1] = g;
-            lights[id].specular[2] = b;
-            lights[id].specular[3] = a;
-            lights[id].update = true;
-            lightsource_update();
-            return true;
-        }
-        return false;
+    if (id<lights.size()){
+      lights[id].type = 1;
+      lights[id].position[0] = x;
+      lights[id].position[1] = y;
+      lights[id].position[2] = z;
+      lights[id].position[3] = range;
+      lights[id].diffuse[0] = __GETR(col);
+      lights[id].diffuse[1] = __GETG(col);
+      lights[id].diffuse[2] = __GETB(col);
+      lights[id].diffuse[3] = 1.0f;
+      lights[id].specular[0] = 0.0f;
+      lights[id].specular[1] = 0.0f;
+      lights[id].specular[2] = 0.0f;
+      lights[id].specular[3] = 0.0f;
+      lights[id].ambient[0] = 0.0f;
+      lights[id].ambient[1] = 0.0f;
+      lights[id].ambient[2] = 0.0f;
+      lights[id].ambient[3] = 0.0f;
+      lights[id].constant_attenuation = 1.0f;
+      lights[id].linear_attenuation = 0.0f;
+      lights[id].quadratic_attenuation = 8.0f/(range*range);
+      lights[id].update = true;
+      lightsource_update();
+      light_update_positions();
+      return true;
     }
+    return false;
+  }
 
-    bool light_set_ambient(unsigned int id, gs_scalar r, gs_scalar g, gs_scalar b, gs_scalar a)
-    {
-        if (id<lights.size()){
-            lights[id].ambient[0] = r;
-            lights[id].ambient[1] = g;
-            lights[id].ambient[2] = b;
-            lights[id].ambient[3] = a;
-            lights[id].update = true;
-            lightsource_update();
-            return true;
-        }
-        return false;
+  bool light_set_specularity(unsigned int id, gs_scalar r, gs_scalar g, gs_scalar b, gs_scalar a)
+  {
+    if (id<lights.size()){
+      lights[id].specular[0] = r;
+      lights[id].specular[1] = g;
+      lights[id].specular[2] = b;
+      lights[id].specular[3] = a;
+      lights[id].update = true;
+      lightsource_update();
+      return true;
     }
+    return false;
+  }
 
-
-    bool light_enable(unsigned int id)
-    {
-        if (id<lights.size()){
-            lights[id].enabled = true;
-            lights[id].update = true;
-            lightsource_update();
-            return true;
-        }
-        return false;
+  bool light_set_ambient(unsigned int id, gs_scalar r, gs_scalar g, gs_scalar b, gs_scalar a)
+  {
+    if (id<lights.size()){
+      lights[id].ambient[0] = r;
+      lights[id].ambient[1] = g;
+      lights[id].ambient[2] = b;
+      lights[id].ambient[3] = a;
+      lights[id].update = true;
+      lightsource_update();
+      return true;
     }
+    return false;
+  }
 
-    bool light_disable(unsigned int id)
-    {
-        if (id<lights.size()){
-            lights[id].enabled = false;
-            lightsource_update();
-            return true;
-        }
-        return false;
+
+  bool light_enable(unsigned int id)
+  {
+    if (id<lights.size()){
+      lights[id].enabled = true;
+      lights[id].update = true;
+      lightsource_update();
+      return true;
     }
+    return false;
+  }
+
+  bool light_disable(unsigned int id)
+  {
+    if (id<lights.size()){
+      lights[id].enabled = false;
+      lightsource_update();
+      return true;
+    }
+    return false;
+  }
 } d3d_lighting;
 
 }
@@ -486,35 +487,35 @@ namespace enigma_user
 
 bool d3d_light_define_direction(int id, gs_scalar dx, gs_scalar dy, gs_scalar dz, int col)
 {
-    return enigma::d3d_lighting.light_define_direction(id, dx, dy, dz, col);
+  return enigma::d3d_lighting.light_define_direction(id, dx, dy, dz, col);
 }
 
 bool d3d_light_define_point(int id, gs_scalar x, gs_scalar y, gs_scalar z, double range, int col)
 {
-    return enigma::d3d_lighting.light_define_point(id, x, y, z, range, col);
+  return enigma::d3d_lighting.light_define_point(id, x, y, z, range, col);
 }
 
 bool d3d_light_set_specularity(int id, int r, int g, int b, double a)
 {
-    return enigma::d3d_lighting.light_set_specularity(id, (gs_scalar)r/255.0, (gs_scalar)g/255.0, (gs_scalar)b/255.0, a);
+  return enigma::d3d_lighting.light_set_specularity(id, (gs_scalar)r/255.0, (gs_scalar)g/255.0, (gs_scalar)b/255.0, a);
 }
 
 bool d3d_light_set_ambient(int id, int r, int g, int b, double a)
 {
-    return enigma::d3d_lighting.light_set_ambient(id, (gs_scalar)r/255.0, (gs_scalar)g/255.0, (gs_scalar)b/255.0, a);
+  return enigma::d3d_lighting.light_set_ambient(id, (gs_scalar)r/255.0, (gs_scalar)g/255.0, (gs_scalar)b/255.0, a);
 }
 
 void d3d_light_define_ambient(int col)
 {
-    enigma::d3d_lighting.global_ambient_color[0] = __GETR(col);
-    enigma::d3d_lighting.global_ambient_color[1] = __GETG(col);
-    enigma::d3d_lighting.global_ambient_color[2] = __GETB(col);
-    enigma::d3d_lighting.light_update();
+  enigma::d3d_lighting.global_ambient_color[0] = __GETR(col);
+  enigma::d3d_lighting.global_ambient_color[1] = __GETG(col);
+  enigma::d3d_lighting.global_ambient_color[2] = __GETB(col);
+  enigma::d3d_lighting.light_update();
 }
 
 bool d3d_light_enable(int id, bool enable)
 {
-    return enable?enigma::d3d_lighting.light_enable(id):enigma::d3d_lighting.light_disable(id);
+  return enable?enigma::d3d_lighting.light_enable(id):enigma::d3d_lighting.light_disable(id);
 }
 
 void d3d_set_lighting(bool enable)
@@ -565,6 +566,6 @@ void d3d_stencil_end_mask(){
 namespace enigma {
   void d3d_light_update_positions()
   {
-      enigma::d3d_lighting.light_update_positions();
+    enigma::d3d_lighting.light_update_positions();
   }
 }
