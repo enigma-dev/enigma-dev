@@ -84,7 +84,7 @@ namespace enigma_user
   }
 
   unsigned d3d_model_get_stride(int id){
-    return enigma::meshes[id]->GetStride();
+    return enigma::meshes[id]->stride;
   }
 
   void d3d_model_save(int id, string fname){

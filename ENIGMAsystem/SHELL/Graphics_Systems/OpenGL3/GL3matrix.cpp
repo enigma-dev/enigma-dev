@@ -270,7 +270,7 @@ namespace enigma_user
 
   bool d3d_transform_stack_push()
   {
-      //if (trans_stack_size == 31) return false; //This limit no longer applies
+      //if (trans_stack.size() == 31) return false; //This is a GM limitation that ENIGMA doesn't have
       oglmgr->Transformation();
       trans_stack.push(enigma::model_matrix);
       return true;
@@ -317,7 +317,7 @@ namespace enigma_user
 
   bool d3d_projection_stack_push()
   {
-      //if (trans_stack_size == 31) return false; //This limit no longer applies
+      //if (proj_stack.size() == 31) return false; //This is a GM limitation that ENIGMA doesn't have
       oglmgr->Transformation();
       proj_stack.push(enigma::projection_matrix);
       view_stack.push(enigma::view_matrix);
@@ -340,6 +340,7 @@ namespace enigma_user
   {
       oglmgr->Transformation();
       proj_stack = std::stack<enigma::Matrix4>(); //Clear the stack
+      view_stack = std::stack<enigma::Matrix4>();
       enigma::projection_matrix.init_identity();
       enigma::view_matrix.init_identity();
       enigma::transform_needs_update = true;
@@ -367,12 +368,14 @@ namespace enigma_user
       view_stack.pop();
       return true;
   }
+
   void d3d_projection_set_array(const gs_scalar *matrix)
   {
       oglmgr->Transformation();
       enigma::projection_matrix = enigma::Matrix4(matrix);
       enigma::transform_needs_update = true;
   }
+
   void d3d_projection_add_array(const gs_scalar *matrix)
   {
       oglmgr->Transformation();
@@ -380,6 +383,7 @@ namespace enigma_user
       enigma::projection_matrix = m*enigma::projection_matrix;
       enigma::transform_needs_update = true;
   }
+  
   gs_scalar * d3d_projection_get_array(){
       return enigma::projection_matrix;
   }
