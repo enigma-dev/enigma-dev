@@ -17,7 +17,7 @@ searchdirs-start: "#include <...> search starts here:"
 searchdirs-end: "End of search list."
 resources: $exe
 cppflags:
-cxxflags: -m32
+cxxflags: -std=c++11 -m32
 cflags: -m32
 ldflags: -m32
 links:
