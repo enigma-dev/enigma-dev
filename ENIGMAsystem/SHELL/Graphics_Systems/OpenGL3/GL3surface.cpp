@@ -62,7 +62,7 @@ namespace enigma_user {
       return r;\
     }\
     enigma::surface &surf = enigma::surface_array[id];
-  #define showerror(error) show_error(error, false);
+  #define showerror(error, ...) show_error(error, false);
 #else
   #define get_surface(surf,id)\
     enigma::surface &surf = enigma::surface_array[id];
