@@ -92,7 +92,7 @@ namespace enigma
                     if (prev_bkid != t.bckid || i == dit->second.tiles.size()-1){ //Texture switch has happened. Create new batch
                         get_background(bck2d,prev_bkid);
                         drawing_depths[dit->second.tiles[0].depth].tilevector.push_back( vector< int >(3) );
-                        drawing_depths[dit->second.tiles[0].depth].tilevector.back()[0] = textureStructs[bck2d->texture]->gltex;
+                        drawing_depths[dit->second.tiles[0].depth].tilevector.back()[0] = bck2d->texture;
                         drawing_depths[dit->second.tiles[0].depth].tilevector.back()[1] = vert_start;
                         drawing_depths[dit->second.tiles[0].depth].tilevector.back()[2] = vert_size;
                         //printf("Texture id = %i and vertices to render = %i and start = %i\n", prev_bkid, vert_size, vert_start );

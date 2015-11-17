@@ -36,6 +36,21 @@ vector<TextureStruct*> textureStructs(0);
 #include <vector>
 using std::vector;
 
+#ifdef DEBUG_MODE
+  #include <string>
+  #include "libEGMstd.h"
+  #include "Widget_Systems/widgets_mandatory.h"
+  #define get_texture(tex,texid,v)\
+    if (size_t(texid) >= textureStructs.size() || texid < 0) {\
+      show_error("Attempting to access non-existing texture " + toString(texid), false);\
+      return v;\
+    }\
+    const unsigned tex = textureStructs[texid]->gltex;
+#else
+  #define get_texture(tex,texid,v)\
+    const unsigned tex = textureStructs[texid]->gltex;
+#endif
+
 /*enum {
   //Formats and internal formats
   tx_rgba = GL_RGBA,
@@ -83,10 +98,6 @@ TextureStruct::TextureStruct(unsigned gtex)
 TextureStruct::~TextureStruct()
 {
 	glDeleteTextures(1, &gltex);
-}
-
-unsigned get_texture(int texid) {
-	return (size_t(texid) >= textureStructs.size() || texid < 0)? -1 : textureStructs[texid]->gltex;
 }
 
 namespace enigma
@@ -381,7 +392,7 @@ unsigned texture_get_texel_height(int texid)
 }
 
 void texture_set_stage(int stage, int texid) {
-  int gt = get_texture(texid);
+  get_texture(gt,texid,);
   if (enigma::samplerstates[stage].bound_texture != gt) {
     oglmgr->EndShapesBatching();
     if ((unsigned int)enigma::bound_texture_stage != GL_TEXTURE0 + stage) { glActiveTexture(enigma::bound_texture_stage = (GL_TEXTURE0 + stage)); }
