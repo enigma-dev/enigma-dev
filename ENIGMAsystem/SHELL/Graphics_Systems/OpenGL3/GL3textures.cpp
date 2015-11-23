@@ -41,14 +41,14 @@ using std::vector;
   #include "libEGMstd.h"
   #include "Widget_Systems/widgets_mandatory.h"
   #define get_texture(tex,texid,v)\
-    if (size_t(texid) >= textureStructs.size() || texid < 0) {\
+    if (size_t(texid) >= textureStructs.size() || texid < -1) {\
       show_error("Attempting to access non-existing texture " + toString(texid), false);\
       return v;\
     }\
-    const unsigned tex = textureStructs[texid]->gltex;
+    const int tex = (texid==-1?-1:textureStructs[texid]->gltex);
 #else
   #define get_texture(tex,texid,v)\
-    const unsigned tex = textureStructs[texid]->gltex;
+    const int tex = (texid==-1?-1:textureStructs[texid]->gltex);
 #endif
 
 /*enum {
