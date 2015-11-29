@@ -578,7 +578,9 @@ static inline void write_object_destructor(std::ostream &wto, parsed_object *obj
         }
       }
     for (map<int, vector<int> >::iterator it = evgroup.begin(); it != evgroup.end(); it++) { // The stacked ones should have their root exported
-      wto << "      delete ENOBJ_ITER_myevent_" << event_stacked_get_root_name(it->first) << ";\n";
+      if (!object->parent || !parent_declares_groupedevent(object->parent, it->first)) {
+        wto << "      delete ENOBJ_ITER_myevent_" << event_stacked_get_root_name(it->first) << ";\n";
+      }
     }
     wto << "    }\n";
 
@@ -957,7 +959,7 @@ static inline void write_basic_constructor(ofstream &wto) {
       "    instance->friction=0;\n    \n"
       "    \n"
       "    instance->timeline_index = -1;\n"
-      "    instance->timeline_running = " << (setting::compliance_mode == setting::COMPL_GM5? "true" : "false") <<";\n"
+      "    instance->timeline_running = " << (setting::compliance_mode == setting::COMPL_GM567? "true" : "false") <<";\n"
       "    instance->timeline_speed = 1;\n"
       "    instance->timeline_position = 0;\n"
       "    instance->timeline_loop = false;\n"
