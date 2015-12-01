@@ -517,8 +517,7 @@ namespace enigma_user
   }
 
   void d3d_model_block(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, gs_scalar hrep, gs_scalar vrep, bool closed){
-    //NOTE: This is the fastest way to batch cubes with uninterpolated normals thanks to my model batching, still slower than a triangle strip with interpolated normals
-    //however.
+    //NOTE: This is the fastest way to batch cubes with uninterpolated normals, but still slower than a triangle strip with interpolated normals however.
     // Negative X
     d3d_model_primitive_begin( id, pr_trianglefan );
     d3d_model_vertex_normal_texture( id, x1,y1,z1, -1,0,0, 0,1 );

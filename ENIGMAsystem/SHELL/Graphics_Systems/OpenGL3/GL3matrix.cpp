@@ -190,6 +190,14 @@ namespace enigma_user
       enigma::model_matrix.rotate(x,y,z);
       enigma::transform_needs_update = true;
   }
+  void d3d_transform_add_look_at(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs_scalar xto, gs_scalar yto, gs_scalar zto, gs_scalar xup, gs_scalar yup, gs_scalar zup)
+  {
+      oglmgr->Transformation();
+      enigma::Matrix4 m;
+      m.init_look_at_transform(enigma::Vector3(xfrom,yfrom,zfrom),enigma::Vector3(xto,yto,zto),enigma::Vector3(xup,yup,zup));
+      enigma::model_matrix = m*enigma::model_matrix;
+      enigma::transform_needs_update = true;
+  }
 
   void d3d_transform_set_translation(gs_scalar xt, gs_scalar yt, gs_scalar zt)
   {
@@ -233,6 +241,12 @@ namespace enigma_user
       oglmgr->Transformation();
       enigma::model_matrix.init_identity();
       enigma::model_matrix.rotate(x,y,z);
+      enigma::transform_needs_update = true;
+  }
+  void d3d_transform_set_look_at(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs_scalar xto, gs_scalar yto, gs_scalar zto, gs_scalar xup, gs_scalar yup, gs_scalar zup)
+  {
+      oglmgr->Transformation();
+      enigma::model_matrix.init_look_at_transform(enigma::Vector3(xfrom,yfrom,zfrom),enigma::Vector3(xto,yto,zto),enigma::Vector3(xup,yup,zup));
       enigma::transform_needs_update = true;
   }
 
@@ -386,5 +400,13 @@ namespace enigma_user
   
   gs_scalar * d3d_projection_get_array(){
       return enigma::projection_matrix;
+  }
+
+  gs_scalar * d3d_transformation_get_mv(){
+      return enigma::mv_matrix;
+  }
+
+  gs_scalar * d3d_transformation_get_mvp(){
+      return enigma::mvp_matrix;
   }
 }
