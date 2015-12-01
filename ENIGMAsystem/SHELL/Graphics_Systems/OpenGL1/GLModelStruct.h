@@ -439,7 +439,7 @@ class Mesh
       return;
     }
 
-      // Calculate the number of bytes to get to the next vertex
+    // Calculate the number of bytes to get to the next vertex
     GLsizei stride = GetStride() * sizeof( gs_scalar );
 
     #define OFFSET( P )  ( char* ) ( &verts[0] ) + ( ( sizeof( gs_scalar ) * ( P         ) ) )

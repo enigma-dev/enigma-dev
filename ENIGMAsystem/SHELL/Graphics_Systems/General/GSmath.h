@@ -201,6 +201,7 @@ namespace enigma
     void init_rotate_y_transform(gs_scalar angle);
     void init_rotate_z_transform(gs_scalar angle);
     void init_translation_transform(gs_scalar x, gs_scalar y, gs_scalar z);
+    void init_look_at_transform(const Vector3& from, const Vector3& to, const Vector3& up);
 
     void init_camera_transform(const Vector3& from, const Vector3& to, const Vector3& up);
     void init_perspective_proj_transform(gs_scalar fovy, gs_scalar aspect_ratio, gs_scalar znear, gs_scalar zfar);
@@ -724,25 +725,14 @@ namespace enigma
   }
 
   inline void Matrix4::init_camera_transform(const Vector3& from, const Vector3& to, const Vector3& up){
-    Vector3 f(to.x - from.x,to.y - from.y,to.z - from.z);
-    f.normalize();
-
-    Vector3 U = up;
-    U.normalize();
-
-    Vector3 s = f.cross(U);
-    s.normalize();
-
-    U = s.cross(f);
-
-    m[0][0] = s.x;    m[0][1] = s.y;   m[0][2] = s.z;   m[0][3] = 0.0f;
-    m[1][0] = U.x;    m[1][1] = U.y;   m[1][2] = U.z;   m[1][3] = 0.0f;
-    m[2][0] = -f.x;   m[2][1] = -f.y;  m[2][2] = -f.z;  m[2][3] = 0.0f;
-    m[3][0] = 0.0f;   m[3][1] = 0.0f;  m[3][2] = 0.0f;  m[3][3] = 1.0f;
-
-    Matrix4 trans;
-    trans.init_translation_transform(-from.x,-from.y,-from.z);
-    *this = (*this) * trans;
+    Vector3 zaxis = (to-from).normalize();
+    Vector3 xaxis = zaxis.cross(up).normalize();
+    Vector3 yaxis = xaxis.cross(zaxis);
+            
+    m[0][0] = xaxis.x;    m[0][1] = xaxis.y;   m[0][2] = xaxis.z;   m[0][3] = -xaxis.dot(from);
+    m[1][0] = yaxis.x;    m[1][1] = yaxis.y;   m[1][2] = yaxis.z;   m[1][3] = -yaxis.dot(from);
+    m[2][0] =-zaxis.x;    m[2][1] =-zaxis.y;   m[2][2] =-zaxis.z;   m[2][3] = zaxis.dot(from);
+    m[3][0] = 0.0f;       m[3][1] = 0.0f;      m[3][2] = 0.0f;      m[3][3] = 1.0f;
   }
 
   inline void Matrix4::init_perspective_proj_transform(gs_scalar fovy, gs_scalar aspect_ratio, gs_scalar znear, gs_scalar zfar){
@@ -761,6 +751,22 @@ namespace enigma
     m[2][0] = 0.0f;                   m[2][1] = 0.0f;                m[2][2] = -2.0f/(zfar-znear);  m[2][3] = -(zfar+znear)/(zfar-znear);
     m[3][0] = 0.0f;                   m[3][1] = 0.0f;                m[3][2] = 0.0f;                m[3][3] = 1.0f;
   }
+
+  inline void Matrix4::init_look_at_transform(const Vector3& from, const Vector3& to, const Vector3& wup){
+
+    Vector3 up = wup;
+    Vector3 direction = (to-from).normalize();
+
+    up.normalize();
+    Vector3 right = up.cross(direction).normalize();
+    up = direction.cross(right).normalize();
+
+    m[0][0] = right.x;    m[0][1] = up.x;   m[0][2] = direction.x;   m[0][3] = from.x;
+    m[1][0] = right.y;    m[1][1] = up.y;   m[1][2] = direction.y;   m[1][3] = from.y;
+    m[2][0] = right.z;    m[2][1] = up.z;   m[2][2] = direction.z;   m[2][3] = from.z;
+    m[3][0] = 0.0f;       m[3][1] = 0.0f;   m[3][2] = 0.0f;          m[3][3] = 1.0f;
+  }
+
 }
 #endif
 

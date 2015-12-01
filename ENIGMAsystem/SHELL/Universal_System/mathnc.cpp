@@ -244,7 +244,7 @@ namespace enigma_user
     z2 = z2/length;
     return (x1 * x2 + y1 * y2 + z1 * z2); 
   }
-  ma_scalar lerp(ma_scalar x, ma_scalar y, ma_scalar a) { return x + ((y-x)*a); }
+  ma_scalar lerp(ma_scalar x, ma_scalar y, ma_scalar a) { return std::fma(a, y-x, x); }
   ma_scalar clamp(ma_scalar val, ma_scalar min, ma_scalar max) {
       if (val < min) { return min; }
       if (val > max) { return max; }

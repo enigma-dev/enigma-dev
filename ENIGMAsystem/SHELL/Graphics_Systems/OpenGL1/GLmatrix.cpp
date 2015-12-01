@@ -37,6 +37,9 @@ namespace enigma
 
     //This is for GL1
     enigma::Matrix4 mv_matrix(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1);
+
+    //This is the user can access it
+    enigma::Matrix4 mvp_matrix(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1);
 }
 
 //NOTE: THIS IS STILL FFP
@@ -204,6 +207,15 @@ void d3d_transform_add_rotation(gs_scalar x, gs_scalar y, gs_scalar z)
     enigma::mv_matrix = enigma::view_matrix * enigma::model_matrix;
     glLoadMatrix(enigma::mv_matrix);
 }
+void d3d_transform_add_look_at(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs_scalar xto, gs_scalar yto, gs_scalar zto, gs_scalar xup, gs_scalar yup, gs_scalar zup)
+{
+    enigma::Matrix4 m;
+    m.init_look_at_transform(enigma::Vector3(xfrom,yfrom,zfrom),enigma::Vector3(xto,yto,zto),enigma::Vector3(xup,yup,zup));
+    enigma::model_matrix = m*enigma::model_matrix;
+    enigma::mv_matrix = enigma::view_matrix * enigma::model_matrix;
+    glLoadMatrix(enigma::mv_matrix);
+}
+
 void d3d_transform_set_translation(gs_scalar xt, gs_scalar yt, gs_scalar zt)
 {
     enigma::model_matrix.init_translation_transform(xt, yt, zt);
@@ -248,6 +260,13 @@ void d3d_transform_set_rotation(gs_scalar x, gs_scalar y, gs_scalar z)
     enigma::mv_matrix = enigma::view_matrix * enigma::model_matrix;
     glLoadMatrix(enigma::mv_matrix);
 }
+void d3d_transform_set_look_at(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs_scalar xto, gs_scalar yto, gs_scalar zto, gs_scalar xup, gs_scalar yup, gs_scalar zup)
+{
+    enigma::model_matrix.init_look_at_transform(enigma::Vector3(xfrom,yfrom,zfrom),enigma::Vector3(xto,yto,zto),enigma::Vector3(xup,yup,zup));
+    enigma::mv_matrix = enigma::view_matrix * enigma::model_matrix;
+    glLoadMatrix(enigma::mv_matrix);
+}
+
 void d3d_transform_set_array(const gs_scalar *matrix)
 {
     enigma::model_matrix = enigma::Matrix4(matrix);
@@ -400,5 +419,14 @@ void d3d_projection_add_array(const gs_scalar *matrix)
 
 gs_scalar * d3d_projection_get_array(){
     return enigma::projection_matrix;
+}
+
+gs_scalar * d3d_transformation_get_mv(){
+    return enigma::mv_matrix;
+}
+
+gs_scalar * d3d_transformation_get_mvp(){
+    enigma::mvp_matrix = enigma::projection_matrix * enigma::mv_matrix;
+    return enigma::mvp_matrix;
 }
 }
