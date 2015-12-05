@@ -76,7 +76,73 @@ int color_get_saturation(int color);
 
 int make_color_hsv(int hue,int saturation,int value);
 
+//UK localisation
+//This has been done because GameMaker:Studio allows for both spellings of 'color'
+inline int merge_colour(int col1, int col2, double amount)
+{
+  return merge_color(col1, col2, amount);
+}
+inline void draw_set_colour(int col)
+{
+  draw_set_color(col);
+}
+inline void draw_set_colour_rgb(unsigned char red, unsigned char green, unsigned char blue)
+{
+  draw_set_color_rgb(red, green, blue);
+}
+inline void draw_set_colour_rgba(unsigned char red, unsigned char green, unsigned char blue, float alpha)
+{
+  draw_set_color_rgba(red, green, blue, alpha);
+}
+inline void draw_set_colour_write_enable(bool red, bool green, bool blue, bool alpha)
+{
+  draw_set_color_write_enable(red, green, blue, alpha);
+}
+inline int draw_get_colour()
+{
+  return draw_get_color();
+}
+inline int make_colour_rgb(unsigned char red, unsigned char green, unsigned char blue)
+{
+  return make_color_rgb(red, green, blue);
+}
+inline int make_colour_rgba(unsigned char red, unsigned char green, unsigned char blue, unsigned char alpha)
+{
+  return make_color_rgba(red, green, blue, alpha);
+}
+inline int make_colour(unsigned char r, unsigned char g, unsigned char b)
+{
+    return make_color_rgb(r,g,b);
+}
+inline int colour_get_red(int color)
+{
+  return color_get_red(color);
+}
+inline int colour_get_green(int color)
+{
+  return color_get_green(color);
+}
+inline int colour_get_blue(int color)
+{
+  return color_get_blue(color);
+}
+inline int colour_get_hue(int color)
+{
+  return color_get_hue(color);
+}
+inline int colour_get_value(int color)
+{
+  return color_get_value(color);
+}
+inline int colour_get_saturation(int color)
+{
+  return color_get_saturation(color);
+}
+inline int make_colour_hsv(int hue,int saturation,int value)
+{
+  return make_color_hsv(hue,saturation,value);
+}
+
 }
 
 #endif // ENIGMA_GLCOLORS_H
-

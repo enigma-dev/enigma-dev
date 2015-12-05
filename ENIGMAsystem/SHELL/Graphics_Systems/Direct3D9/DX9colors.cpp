@@ -81,7 +81,7 @@ void draw_set_color_rgba(unsigned char red,unsigned char green,unsigned char blu
 	enigma::currentcolor[0] = red;
 	enigma::currentcolor[1] = green;
 	enigma::currentcolor[2] = blue;
-	enigma::currentcolor[3] = bind_alpha(alpha);	
+	enigma::currentcolor[3] = bind_alpha(alpha);
 	D3DCOLOR D3DColor = D3DCOLOR_RGBA(enigma::currentcolor[0],enigma::currentcolor[1],enigma::currentcolor[2], enigma::currentcolor[3]);
 }
 
@@ -170,4 +170,3 @@ int make_color_hsv(int hue,int saturation,int value)
 }
 
 }
-
