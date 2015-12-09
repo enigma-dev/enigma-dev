@@ -1,4 +1,4 @@
-/** Copyright (C) 2014-2015 Harijs Grinbergs
+/** Copyright (C) 2015 Harijs Grinbergs
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -92,7 +92,7 @@ namespace gui
 
         //Check double click
         if (mouse_timer>0){
-          int c = cursor_position;
+          size_t c = cursor_position;
           for (c=cursor_position; c>0; --c){
             if (text[cursor_line][c] == ' '){
               ++c;
@@ -162,6 +162,15 @@ namespace gui
                 if (mark == true) {
                   enigma_user::clipboard_set_text(marker_string());
                 }
+              break;
+              case 'a':
+              case 'A':
+                mark = true;
+                set_marker_start(0, 0);
+                set_marker(text.size()-1, text.back().length());
+                cursor_position = text.back().length();
+                cursor_line = text.size()-1;
+                update_cursor();
               break;
             }
           }else{
@@ -269,6 +278,7 @@ namespace gui
                 break;
               }
               case enigma_user::vk_enter:{
+                if (line_limit>0 && text.size()>=line_limit) break;
                 change = true;
                 //printf("Line [%i] = [%s] and cursor [%i] with x [%f] y [%f]\n", cursor_line, text[cursor_line].c_str(), cursor_position, cursor_x, cursor_y);
                 marker_delete();
@@ -338,15 +348,31 @@ namespace gui
               break;
               default:{
                 if (numbers_only == true){
-                  if (!(enigma_user::keyboard_lastchar.find_first_not_of("0123456789."))){ //We could do >'0' && <'9' || '.', but this wouldn't work in unicode
+                  char* p;
+                  string str = text[cursor_line];
+                  str.insert(cursor_position,enigma_user::keyboard_lastchar);
+                  double val = strtod(str.c_str(), &p);
+                  if (*p != 0){
                     break;
                   }
+                  /*if (cursor_position == 0){
+                    if (text[cursor_line].find_first_not_of("-+") && !enigma_user::keyboard_lastchar.find_first_not_of("0123456789.-+")){ //+ and - can only be the first chars
+                      break;
+                    }
+                  }else if (!(enigma_user::keyboard_lastchar.find_first_not_of("0123456789."))){ //We could do >'0' && <'9' || '.' || '-' || '+', but this wouldn't work in unicode
+                    break;
+                  }*/
                 }
-                change = true;
-                marker_delete(); //If something is selected then this deletes it and resets mark
-                text[cursor_line].insert(cursor_position,enigma_user::keyboard_lastchar);
-                cursor_position++;
-                update_cursorx();
+                if (mark == true){
+                  change = true;
+                  marker_delete(); //If something is selected then this deletes it and resets mark
+                }
+                if (char_limit==0 || text[cursor_line].length()+1<=char_limit){
+                  change = true;
+                  text[cursor_line].insert(cursor_position,enigma_user::keyboard_lastchar);
+                  cursor_position++;
+                  update_cursorx();
+                }
                 break;
               }
             }
@@ -355,6 +381,18 @@ namespace gui
         }
         repeat_timer++;
         if (change == true){
+          //Resize if needed
+          /*double h = (double)enigma_user::font_height(enigma_user::draw_get_font());
+          double maxw = 0.0;
+          //TODO(harijs): Cache this so we don't have to recalculate every time
+          for (auto &t : text){
+            double w = enigma_user::string_width(t);
+            if (w>maxw) maxw = w;
+          }
+          printf("Cw = %f, ch = %f, nw = %f, nh = %f\n", box.w, box.h, maxw, h * text.size());
+          box.w = maxw + sty.padding.left + sty.padding.right;
+          box.h = h * text.size() + sty.padding.top + sty.padding.bottom;*/
+
           callback_execute(enigma_user::gui_event_change);
         }
       }
@@ -526,9 +564,7 @@ namespace gui
         mark_end_pos = pos;
       }
     }
-    printf("Set line = %i and pos %i\n", line, pos);
   }
-
 
   void Textbox::marker_delete(){
     if (mark == true){
@@ -545,7 +581,7 @@ namespace gui
         int l = mark_start_line+1;
         for (auto it = text.begin()+l; it != text.end();){
           it = text.erase(it);
-          if (++l >mark_end_line){ break; }
+          if (++l > mark_end_line){ break; }
         }
       }
       cursor_position = mark_start_pos;
@@ -588,55 +624,131 @@ namespace gui
     size_t i;
     string endOfFirst = text[cursor_line].substr(cursor_position, string::npos);
     text[cursor_line].erase(cursor_position, string::npos);
-    for (i = 0; i < str.length(); ++i){
-      if (str[i] == '\r' or str[i] == '\n'){
-        if (line == cursor_line) { text[line].insert(cursor_position,str.substr(ni, i-ni)); }
-        else { text.insert(text.begin()+line,str.substr(ni, i-ni)); }
-        ++i; //Skip /r or /n
-        i += (str[i] == '\n'); //If we have /r/n then then skip to next one
-        ni = i;
-        line++;
+    
+    bool limit = false;
+    if (char_limit==0){ //UNLIMITED POWE... chars
+      for (i = 0; i < str.length(); ++i){
+        if (str[i] == '\r' or str[i] == '\n'){
+          if (line_limit>0 && (text.size()+1)>line_limit){ limit = true; break; }
+          if (line == cursor_line) { //This is still the first line, so we append
+            text[line].insert(cursor_position,str.substr(0, i));
+          } else { text.insert(text.begin()+line,str.substr(ni, i-ni)); }
+          ++i; //Skip /r or /n
+          i += (str[i] == '\n'); //If we have /r/n then then skip to next one
+          ni = i;
+          line++;
+        }
+      }
+      if (ni != i){
+        if (line != cursor_line){ //End of multiline
+          if (line_limit==0 || (line_limit>0 && text.size()+1<=line_limit)){
+            text.insert(text.begin()+line, str.substr(ni, string::npos));
+          }
+        }else{ //We only had one line without line endings OR the line limit was reached on the first line of multiline string
+          if (limit == false){
+            text[line].insert(cursor_position,str);
+          }else{ //Line limit was reached, so we append only to the first eol
+            text[line].insert(cursor_position,str.substr(ni, i-ni));
+          }
+        }
+        text[line].append(endOfFirst);
+      }
+    }else{ //Limited chars
+      for (i = 0; i < str.length(); ++i){
+        if (str[i] == '\r' or str[i] == '\n'){
+          if (line_limit>0 && (text.size()+1)>line_limit){ limit = true; break; }
+          if (line == cursor_line) { //This is still the first line, so we append
+            if (text[line].length()+i>=char_limit){ //Char limit reached in the line
+              text[line].insert(cursor_position,str.substr(0, char_limit-text[line].length()));
+            }else{ //We can fit the whole thing
+              text[line].insert(cursor_position,str.substr(0, i));
+            }
+          } else { text.insert(text.begin()+line,str.substr(ni, i-ni)); }
+          ++i; //Skip /r or /n
+          i += (str[i] == '\n'); //If we have /r/n then then skip to next one
+          ni = i;
+          line++;
+        }
+      }
+      if (ni != i){
+        if (line != cursor_line){ //End of multiline
+          if (line_limit==0 || (line_limit>0 && text.size()+1<=line_limit)){
+            printf("Line = %lu and text size =%lu\n", line, text.size());
+            printf("Line  = %lu, ni = %lu, text len = %i\n", line, ni, text[line].length());
+            printf("Str len = %i\n",str.length());
+            printf("Eoff = %i\n", endOfFirst.length());
+            if (text[line].length()+str.length()-ni+endOfFirst.length()>=char_limit){
+              text.insert(text.begin()+line, str.substr(ni, char_limit-text[line].length()-endOfFirst.length()));
+              printf("This called!\n");
+            }else{
+              printf("This called2!\n");
+              text.insert(text.begin()+line, str.substr(ni, string::npos));
+            }
+          }
+        }else{ //We only had one line without line endings OR the line limit was reached on the first line of multiline string
+          if (limit == false){
+            if (text[line].length()+str.length()+endOfFirst.length()>=char_limit){
+              printf("This called3!\n");
+
+              text[line].insert(cursor_position,str.substr(0, char_limit-text[line].length()-endOfFirst.length()));
+            }else{
+              printf("This called4!\n");
+
+              text[line].insert(cursor_position,str);
+            }
+          }else{ //Line limit was reached, so we append only to the first eol
+            if (text[line].length()+i-ni+endOfFirst.length()>=char_limit){
+              text[line].insert(cursor_position,str.substr(ni, char_limit-text[line].length()-endOfFirst.length()));
+              printf("This called5!\n");
+
+            }else{
+              printf("This called6!\n");
+
+              text[line].insert(cursor_position,str.substr(ni, i-ni));
+            }
+          }
+        }
+        text[line].append(endOfFirst);
       }
     }
-    if (ni != i){
-      if (line != cursor_line){ //End of multiline
-        text.insert(text.begin()+line, str.substr(ni, string::npos));
-      }else{ //We only had one line without line endings
-        text[line].insert(cursor_position,str);
-      }
-      text[line].append(endOfFirst);
-    }
+    printf("Line count = %i, line = %i, and line 0 = %s\n", text.size(), line, text[0].c_str());
+
     cursor_line = line;
     cursor_position = text[line].length() - endOfFirst.length();
     update_cursor();
   }
 
   void Textbox::set_cursor(double x, double y){
-    int h = floor((y-texty) / (double)enigma_user::font_height(enigma_user::draw_get_font()));
     //printf("Line check [%i] with mouse_y = %f and oy = %f and boxy = %f and font_height = %i\n", h, ty, oy, box.y, enigma_user::font_height(enigma_user::draw_get_font()));
     lines = text.size();
-    if (h < 0){
+    if (y-texty < 0){ //Mouse x less than textbox y, so cursor at beginning
       cursor_position = 0;
       cursor_line = 0;
-    }else if (h >= lines){
+    }else if (y-texty >= (double)enigma_user::font_height(enigma_user::draw_get_font())*lines){ //Mouse y more than textbox height, so cursot at end
       cursor_position = text[lines-1].length();
       cursor_line = (lines-1);
       //printf("h>=Line [%i] = [%s] and cursor [%i] with x [%f] y [%f]\n", cursor_line, text[cursor_line].c_str(), cursor_position, cursor_x, cursor_y);
     }else{
-      double wi = 0.0;
-      bool fit = false;
-      for (int c=0; c<text[h].length(); ++c){
-        //printf("char [%i] and xcheck %f < wi %f\n", c, tx-ox-box.x, wi);
-        if (x-textx < (wi + enigma_user::string_width(text[h].substr(c,1))/2.0)){
-          fit = true;
-          break;
+      size_t h = floor((y-texty) / (double)enigma_user::font_height(enigma_user::draw_get_font()));
+      if (text[h].length() == 0 || x-textx < enigma_user::string_char_width(text[h][0])/2.0){
+        cursor_position = 0;
+        cursor_line = h;
+      }else{
+        cursor_position = 0;
+        double wi = 0.0;
+        for (size_t c=0; c<text[h].length(); ++c){
+          double cw = enigma_user::string_char_width(text[h].substr(c,1));
+          printf("char [%u] %c, and xcheck %f < wi %f\n", c, text[h][c], x-textx, (wi + cw/2.0));
+          if (x-textx < (wi + cw/2.0)){
+            break;
+          }
+          cursor_position = c;
+          wi += cw;
         }
-        cursor_position = c;
-        wi += enigma_user::string_width(text[h].substr(c,1));
+        cursor_position++; //Cursor at end is AFTER the last char
+        cursor_line = h;
+        //printf("h<Line [%i] = [%s] and cursor [%i] with x [%f] y [%f]\n", cursor_line, text[cursor_line].c_str(), cursor_position, cursor_x, cursor_y);
       }
-      if (fit == false) cursor_position++; //Cursor at end is AFTER the last char
-      cursor_line = h;
-      //printf("h<Line [%i] = [%s] and cursor [%i] with x [%f] y [%f]\n", cursor_line, text[cursor_line].c_str(), cursor_position, cursor_x, cursor_y);
     }
     update_cursor();
     blink_timer = 0;
@@ -644,7 +756,7 @@ namespace gui
 
   string Textbox::get_text(){
     string str = "";
-    for (int l = 0; l < text.size(); ++l){
+    for (size_t l = 0; l < text.size(); ++l){
       str += text[l];
       str += "\n";
     }
@@ -705,6 +817,16 @@ namespace enigma_user
   void gui_textbox_set_numeric(int id, bool numeric){
     get_element(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
     tex.numbers_only = numeric;
+  }
+
+  void gui_textbox_set_max_length(int id, int length){
+    get_element(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
+    tex.char_limit = length;
+  }
+
+  void gui_textbox_set_max_lines(int id, int lines){
+    get_element(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
+    tex.line_limit = lines;
   }
 
   void gui_textbox_set_position(int id, gs_scalar x, gs_scalar y){

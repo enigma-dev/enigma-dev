@@ -558,8 +558,8 @@ namespace enigma_user
   }
 
   ///Updaters
-  void gui_windows_update(){
-    if (gui::gui_window_order.size() == 0) return;
+  bool gui_windows_update(){
+    if (gui::gui_window_order.size() == 0) return false;
     gui::windowStopPropagation = false;
     //Update loop in reverse direction
     bool window_click = false; //Something clicked in the window (or the window itself)?
@@ -588,13 +588,15 @@ namespace enigma_user
       gui::gui_window_order.erase(gui::gui_window_order.begin()+window_swap_id); //Delete the id from its current place
       gui::gui_window_order.push_back(t); //put on top
     }
+
+    return gui::windowStopPropagation;
   }
 
-  void gui_windows_group_update(int gid, bool continueProp){
+  bool gui_windows_group_update(int gid, bool continueProp){
     if (continueProp == false){ gui::windowStopPropagation = false; }
-    if (gui::gui_window_order.size() == 0) return;
+    if (gui::gui_window_order.size() == 0) return false;
     get_data_element(gro,gui::Group,gui::GUI_TYPE::GROUP,gid);
-    if (gro.group_windows.size() == 0) return;
+    if (gro.group_windows.size() == 0) return false;
     //Update loop in reverse direction
     bool window_click = false; //Something clicked in the window (or the window itself)?
     int window_swap_id = -1;
@@ -627,6 +629,8 @@ namespace enigma_user
       gui::gui_window_order.erase(gui::gui_window_order.begin()+window_swap_id); //Delete the id from its current place
       gui::gui_window_order.push_back(t); //put on top
     }
+
+    return gui::windowStopPropagation;
   }
 
   ///Drawers
