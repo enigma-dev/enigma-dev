@@ -57,6 +57,8 @@ namespace enigma_user
   int font_get_texture_height(int fnt);
   int font_height(int fnt);
 
+  double string_char_width(variant vstr);
+
   unsigned int string_width(variant str);
   unsigned int string_height(variant str);
 
