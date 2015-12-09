@@ -141,6 +141,23 @@ namespace enigma {
 
 namespace enigma_user {
 
+double string_char_width(variant vstr)
+{
+  string str = toString(vstr);
+  get_font(fnt,currentfont,0);
+  size_t i = 0;
+  uint32_t character = getUnicodeCharacter(str, i);
+  if (character == ' '){
+    return get_space_width(fnt);
+  }
+  fontglyph* g = findGlyph(fnt, character);
+  if (g == NULL){
+    return get_space_width(fnt);
+  }else{
+    return g->xs;
+  }
+}
+
 unsigned int string_width(variant vstr)
 {
   string str = toString(vstr);

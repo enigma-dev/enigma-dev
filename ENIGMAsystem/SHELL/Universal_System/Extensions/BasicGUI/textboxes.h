@@ -38,32 +38,43 @@ namespace gui
 {
   class Textbox{
     public:
-      unsigned int id;
       rect box;
       vector<string> text{""};
+      vector<double> text_width{0.0};
 
-      int state = 0;
-      bool visible = true;
-      bool active = false; //Is textbox is used
       array<int,6> callback; //Script to run on event
 
+      unsigned int id;
+      int state = 0;
+      int parent_id = -1; //ID of the parent of some kind (probably a window). It won't render with gui_draw_textboxes() if it is.
+
+      int style_id = -1; //The style we use
+      int marker_style_id = -1;
+
       //Cursor position in chars and line
-      int cursor_position = 0;
-      int cursor_line = 0; 
-      int lines = 1;
+      size_t cursor_position = 0;
+      size_t cursor_line = 0; 
+      size_t lines = 1;
+
+      size_t line_limit = 2; //How many lines
+      size_t char_limit = 100; //How many chars per line
 
       int blink_timer = 0;
       int repeat_timer = 0;
       int mouse_timer = 0; //Double/triple clicks
-      bool double_click = false;
-
-      bool mark = false;
+      
       int mark_start_pos = 0;
       int mark_start_line = 0;
       int mark_end_pos = 0;
       int mark_end_line = 0;
       int mark_pos = 0;
       int mark_line = 0;
+
+      bool double_click = false;
+      bool mark = false;
+      bool numbers_only = false; //Meaning 0-9 and .
+      bool visible = true;
+      bool active = false; //Is textbox is used
 
       //This is text offset for alignmets
       double textx = 0.0;
@@ -73,12 +84,7 @@ namespace gui
       double cursor_x = 0;
       double cursor_y = 0;
 
-      int parent_id = -1; //ID of the parent of some kind (probably a window). It won't render with gui_draw_textboxes() if it is.
-
-      int style_id = -1; //The style we use
-      int marker_style_id = -1;
-
-      bool numbers_only = false; //Meaning 0-9 and .
+      Parent parenter;
 
       Textbox();
       //Update all possible textbox states (hover, click, type, etc.)
@@ -107,8 +113,6 @@ namespace gui
       void marker_delete();
       string marker_string();
       void marker_insert(string str);
-
-      Parent parenter;
   };
 }
 

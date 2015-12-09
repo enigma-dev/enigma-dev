@@ -279,6 +279,8 @@ namespace enigma_user
   void gui_textbox_set_togglable(int id, bool togglable);
   void gui_textbox_set_visible(int id, bool visible);
   void gui_textbox_set_active(int id, bool active);
+  void gui_textbox_set_max_length(int id, int length);
+  void gui_textbox_set_max_lines(int id, int lines);
 
   //Getters
   int gui_textbox_get_style(int id);
@@ -376,8 +378,8 @@ namespace enigma_user
   void gui_window_group_push_to_back(int gid);
 
   //Updaters
-  void gui_windows_update();
-  void gui_windows_group_update(int gid, bool continueProp = false);
+  bool gui_windows_update();
+  bool gui_windows_group_update(int gid, bool continueProp = false);
 
 	//Drawers
 	void gui_window_draw(int id);
