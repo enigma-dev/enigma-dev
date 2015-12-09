@@ -84,6 +84,7 @@ namespace enigma_user
   void draw_healthbar(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, float amount, int backcol, int mincol, int maxcol, int direction, bool showback, bool showborder);
   void draw_arrow(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, float arrow_size, float line_size = 1, bool outline = false);
   void draw_button(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, float border_width, bool up);
+  void draw_button(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, bool up);
   int draw_mandelbrot(int x, int y, float w, double Zx, double Zy, double Zw, unsigned iter);
   int draw_getpixel(int,int);
   int draw_getpixel_ext(int, int);

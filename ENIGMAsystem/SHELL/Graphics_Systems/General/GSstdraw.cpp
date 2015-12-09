@@ -819,6 +819,10 @@ void draw_button(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, gs_scala
 	draw_primitive_end();
 }
 
+void draw_button(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, bool up){
+  draw_button(x1,y1,x2,y2,2,up);
+}
+
 //Mind that health is 1-100
 void draw_healthbar(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, float amount, int backcol, int mincol, int maxcol, int dir, bool showback, bool showborder)
 {
