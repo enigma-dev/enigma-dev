@@ -403,10 +403,12 @@ namespace enigma_user
   }
 
   gs_scalar * d3d_transformation_get_mv(){
+      enigma::transformation_update();
       return enigma::mv_matrix;
   }
 
   gs_scalar * d3d_transformation_get_mvp(){
+      enigma::transformation_update();
       return enigma::mvp_matrix;
   }
 }
