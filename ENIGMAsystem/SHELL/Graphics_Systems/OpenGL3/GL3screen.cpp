@@ -396,6 +396,7 @@ void screen_redraw()
 
 void screen_init()
 {
+  oglmgr->EndShapesBatching();
   enigma::gui_width = window_get_region_width();
   enigma::gui_height = window_get_region_height();
 
@@ -434,6 +435,7 @@ void screen_init()
 
 int screen_save(string filename) //Assumes native integers are little endian
 {
+  oglmgr->EndShapesBatching();
   unsigned int w=window_get_width(),h=window_get_height(),sz=w*h;
 
   string ext = enigma::image_get_format(filename);
@@ -454,6 +456,7 @@ int screen_save(string filename) //Assumes native integers are little endian
 
 int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h) //Assumes native integers are little endian
 {
+  oglmgr->EndShapesBatching();
   unsigned sz = w*h;
 
   string ext = enigma::image_get_format(filename);
