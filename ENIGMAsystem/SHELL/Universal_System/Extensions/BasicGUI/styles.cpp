@@ -60,9 +60,9 @@ namespace enigma_user
 	}
 
 	int gui_style_duplicate(int style){
-    gui::gui_data_elements.emplace(gui::gui_data_elements_maxid, gui::gui_data_elements[style]);
-    gui::Style &sty = gui::gui_data_elements[gui::gui_data_elements_maxid];
-		sty.id = gui::gui_data_elements_maxid;
+    get_data_elementv(sty,gui::Style,gui::GUI_TYPE::STYLE,style,-1);
+    gui::gui_data_elements.emplace(gui::gui_data_elements_maxid, sty);
+    gui::gui_data_elements[gui::gui_data_elements_maxid].id = gui::gui_data_elements_maxid;
 		return gui::gui_data_elements_maxid++;
 	}
 

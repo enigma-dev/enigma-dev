@@ -72,6 +72,13 @@ namespace enigma_user
 		return gui::gui_data_elements_maxid++;
 	}
 
+  int gui_skin_duplicate(int skin){
+    get_data_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,skin,-1);
+    gui::gui_data_elements.emplace(gui::gui_data_elements_maxid, ski);
+    gui::gui_data_elements[gui::gui_data_elements_maxid].id = gui::gui_data_elements_maxid;
+    return gui::gui_data_elements_maxid++;
+  }
+
 	void gui_skin_destroy(int id){
     check_data_element(gui::GUI_TYPE::SKIN,id);
 		gui::gui_data_elements.erase(gui::gui_data_elements.find(id));

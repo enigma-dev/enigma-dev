@@ -269,6 +269,16 @@ namespace enigma_user
 		return (gui::gui_elements_maxid++);
 	}
 
+  int gui_scrollbar_duplicate(int id){
+    get_elementv(scr,gui::Scrollbar,gui::GUI_TYPE::SCROLLBAR,id,-1);
+    gui::gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(gui::gui_elements_maxid), std::forward_as_tuple(scr, gui::gui_elements_maxid));
+    gui::gui_elements[gui::gui_elements_maxid].id = gui::gui_elements_maxid;
+    gui::Scrollbar &sc = gui::gui_elements[gui::gui_elements_maxid];
+    sc.id = gui::gui_elements_maxid;
+    sc.parent_id = -1; //We cannot duplicate parenting for now
+    return gui::gui_elements_maxid++;
+  }
+
 	void gui_scrollbar_destroy(int id){
     get_element(scr,gui::Scrollbar,gui::GUI_TYPE::SCROLLBAR,id);
     if (scr.parent_id != -1){

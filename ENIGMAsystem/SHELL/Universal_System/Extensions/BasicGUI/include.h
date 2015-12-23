@@ -69,6 +69,7 @@ namespace enigma_user
 	int gui_button_create(gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h, string text);
 	int gui_button_create();
 
+  int gui_button_duplicate(int id);
 	void gui_button_destroy(int id);
 
 	//Setters
@@ -133,6 +134,7 @@ namespace enigma_user
   ///TOGGLES
 	int gui_toggle_create(gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h, string text);
 	int gui_toggle_create();
+  int gui_toggle_duplicate(int id);
 	void gui_toggle_destroy(int id);
 
 	//Setters
@@ -167,6 +169,7 @@ namespace enigma_user
   int gui_slider_create(gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h, gs_scalar ind_x, gs_scalar ind_y, gs_scalar ind_w, gs_scalar ind_h, string text);
   int gui_slider_create(gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h, gs_scalar ind_x, gs_scalar ind_y, gs_scalar ind_w, gs_scalar ind_h, double val, double minVal, double maxVal, double incrVal, string text);
 	int gui_slider_create();
+  int gui_slider_duplicate(int id);
 	void gui_slider_destroy(int id);
 
 	//Setters
@@ -215,7 +218,8 @@ namespace enigma_user
   ///SCROLLBARS
   int gui_scrollbar_create(gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h, gs_scalar ind_x, gs_scalar ind_y, bool direction = false, double val = 0.0, double minVal = 0.0, double maxVal = 1.0, double incrVal = 0.0, gs_scalar size = 0.1);
 	int gui_scrollbar_create();
-	void gui_scrollbar_destroy(int id);
+	int gui_scrollbar_duplicate(int id);
+  void gui_scrollbar_destroy(int id);
 
 	//Setters
 	void gui_scrollbar_set_position(int id, gs_scalar x, gs_scalar y);
@@ -233,6 +237,7 @@ namespace enigma_user
   void gui_scrollbar_set_incvalue(int id, double incvalue);
   void gui_scrollbar_set_indicator_size(int id, gs_scalar size);
   void gui_scrollbar_set_direction(int id, bool direction);
+  
   //Getters
   int gui_slider_scrollbar_style(int id);
   int gui_slider_scrollbar_indicator_style(int id);
@@ -265,6 +270,7 @@ namespace enigma_user
   int gui_textbox_create(gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h, string text);
   int gui_textbox_create();
 
+  int gui_textbox_duplicate(int id);
   void gui_textbox_destroy(int id);
 
   //Setters
@@ -338,6 +344,7 @@ namespace enigma_user
 	///Windows
 	int gui_window_create(gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h, string text);
 	int gui_window_create();
+  int gui_window_duplicate(int id);
 	void gui_window_destroy(int id);
 
 	//Setters
@@ -422,6 +429,7 @@ namespace enigma_user
   ///LABELS
 	int gui_label_create(gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h, string text);
 	int gui_label_create();
+  int gui_label_duplicate(int id);
 	void gui_label_destroy(int id);
 
 	//Setters
@@ -448,6 +456,7 @@ namespace enigma_user
 
   ///GROUPS
 	int gui_group_create();
+  int gui_group_duplicate(int group);
   void gui_group_destroy(int id);
   void gui_group_add_button(int id, int bid);
   void gui_group_add_toggle(int id, int tid);
@@ -458,6 +467,7 @@ namespace enigma_user
   
 	//Skins
 	int gui_skin_create();
+  int gui_skin_duplicate(int skin);
 	void gui_skin_destroy(int id);
 	void gui_skin_set(int id);
 	int gui_skin_get_button(int id);

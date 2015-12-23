@@ -235,6 +235,16 @@ namespace enigma_user
 		return (gui::gui_elements_maxid++);
 	}
 
+  int gui_slider_duplicate(int id){
+    get_elementv(sli,gui::Slider,gui::GUI_TYPE::SLIDER,id,-1);
+    gui::gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(gui::gui_elements_maxid), std::forward_as_tuple(sli, gui::gui_elements_maxid));
+    gui::gui_elements[gui::gui_elements_maxid].id = gui::gui_elements_maxid;
+    gui::Slider &s = gui::gui_elements[gui::gui_elements_maxid];
+    s.id = gui::gui_elements_maxid;
+    s.parent_id = -1; //We cannot duplicate parenting for now
+    return gui::gui_elements_maxid++;
+  }
+
 	void gui_slider_destroy(int id){
     get_element(sli,gui::Slider,gui::GUI_TYPE::SLIDER,id);
     if (sli.parent_id != -1){

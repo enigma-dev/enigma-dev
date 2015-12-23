@@ -139,6 +139,16 @@ namespace enigma_user
 		return (gui::gui_elements_maxid++);
 	}
 
+  int gui_label_duplicate(int id){
+    get_elementv(lab,gui::Label,gui::GUI_TYPE::LABEL,id,-1);
+    gui::gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(gui::gui_elements_maxid), std::forward_as_tuple(lab, gui::gui_elements_maxid));
+    gui::gui_elements[gui::gui_elements_maxid].id = gui::gui_elements_maxid;
+    gui::Label &l = gui::gui_elements[gui::gui_elements_maxid];
+    l.id = gui::gui_elements_maxid;
+    l.parent_id = -1; //We cannot duplicate parenting for now
+    return gui::gui_elements_maxid++;
+  }
+
 	void gui_label_destroy(int id){
     get_element(lab,gui::Label,gui::GUI_TYPE::LABEL,id);
     if (lab.parent_id != -1){
