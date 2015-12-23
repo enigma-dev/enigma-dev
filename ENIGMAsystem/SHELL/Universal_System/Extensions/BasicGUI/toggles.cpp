@@ -207,6 +207,16 @@ namespace enigma_user
 		return (gui::gui_elements_maxid++);
 	}
 
+  int gui_toggle_duplicate(int id){
+    get_elementv(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,id,-1);
+    gui::gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(gui::gui_elements_maxid), std::forward_as_tuple(tog, gui::gui_elements_maxid));
+    gui::gui_elements[gui::gui_elements_maxid].id = gui::gui_elements_maxid;
+    gui::Toggle &t = gui::gui_elements[gui::gui_elements_maxid];
+    t.id = gui::gui_elements_maxid;
+    t.parent_id = -1; //We cannot duplicate parenting for now
+    return gui::gui_elements_maxid++;
+  }
+
 	void gui_toggle_destroy(int id){
     get_element(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,id);
 	  if (tog.parent_id != -1){
