@@ -799,6 +799,17 @@ namespace enigma_user
     return (gui::gui_elements_maxid++);
   }
 
+  int gui_textbox_duplicate(int id){
+    get_elementv(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id,-1);
+    gui::gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(gui::gui_elements_maxid), std::forward_as_tuple(tex, gui::gui_elements_maxid));
+    auto &e = gui::gui_elements[gui::gui_elements_maxid];
+    e.id = gui::gui_elements_maxid;
+    gui::Textbox &t = gui::gui_elements[gui::gui_elements_maxid];
+    t.id = gui::gui_elements_maxid;
+    t.parent_id = -1; //We cannot duplicate parenting for now
+    return gui::gui_elements_maxid++;
+  }
+
   void gui_textbox_destroy(int id){
     get_element(tex,gui::Textbox,gui::GUI_TYPE::TEXTBOX,id);
     if (tex.parent_id != -1){

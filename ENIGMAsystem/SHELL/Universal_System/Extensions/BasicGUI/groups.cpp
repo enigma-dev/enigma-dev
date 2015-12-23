@@ -52,6 +52,13 @@ namespace enigma_user
 		return gui::gui_data_elements_maxid++;
 	}
 
+  int gui_group_duplicate(int group){
+    get_data_elementv(gro,gui::Group,gui::GUI_TYPE::GROUP,group,-1);
+    gui::gui_data_elements.emplace(gui::gui_data_elements_maxid, gro);
+    gui::gui_data_elements[gui::gui_data_elements_maxid].id = gui::gui_data_elements_maxid;
+    return gui::gui_data_elements_maxid++;
+  }
+
 	void gui_group_destroy(int id){
     check_data_element(gui::GUI_TYPE::GROUP,id);
 		gui::gui_data_elements.erase(gui::gui_data_elements.find(id));

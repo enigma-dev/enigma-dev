@@ -192,12 +192,10 @@ namespace enigma_user
 	int gui_button_create(){
 		if (gui::gui_bound_skin == -1){ //Add default one
 			gui::gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(gui::gui_elements_maxid), std::forward_as_tuple(gui::Button(), gui::gui_elements_maxid));
-      printf("Creating default button with size %i\n", sizeof(gui::gui_elements[gui::gui_elements_maxid]));
 		}else{
       get_data_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,gui::gui_bound_skin,-1);
       get_elementv(but,gui::Button,gui::GUI_TYPE::BUTTON,ski.button_style,-1);
       gui::gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(gui::gui_elements_maxid), std::forward_as_tuple(but, gui::gui_elements_maxid));
-      printf("Creating button with size %i\n", sizeof(gui::gui_elements[gui::gui_elements_maxid]));
 		}
 		gui::Button &b = gui::gui_elements[gui::gui_elements_maxid];
 		b.visible = true;
@@ -221,6 +219,16 @@ namespace enigma_user
 		b.update_text_pos();
 		return (gui::gui_elements_maxid++);
 	}
+
+  int gui_button_duplicate(int id){
+    get_elementv(but,gui::Button,gui::GUI_TYPE::BUTTON,id,-1);
+    gui::gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(gui::gui_elements_maxid), std::forward_as_tuple(but, gui::gui_elements_maxid));
+    gui::gui_elements[gui::gui_elements_maxid].id = gui::gui_elements_maxid;
+    gui::Button &b = gui::gui_elements[gui::gui_elements_maxid];
+    b.id = gui::gui_elements_maxid;
+    b.parent_id = -1; //We cannot duplicate parenting for now
+    return gui::gui_elements_maxid++;
+  }
 
 	void gui_button_destroy(int id){
 	  get_element(but,gui::Button,gui::GUI_TYPE::BUTTON,id);
