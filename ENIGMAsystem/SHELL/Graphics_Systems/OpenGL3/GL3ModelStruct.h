@@ -313,6 +313,8 @@ namespace enigma {
 
     void Clear()
     {
+      if (stride == 0) return; //We have no data!
+
       ClearData();
 
       triangleIndexedVertices.reserve(64000);
@@ -435,14 +437,11 @@ namespace enigma {
       vertices.push_back(val); vertices.push_back(val2); vertices.push_back(val3); vertices.push_back(val4);
     }
 
-    void AddUbyte4(unsigned char val, unsigned char val2, unsigned char val3, unsigned char val4)
+    void AddUbyte4(uint8_t val, uint8_t val2, uint8_t val3, uint8_t val4)
     {
-      union { float f; unsigned char rgba[4]; } u;
-      u.rgba[0] = val;
-      u.rgba[1] = val2;
-      u.rgba[2] = val3;
-      u.rgba[3] = val4;
-      vertices.push_back(u.f);
+      uint32_t c = (val << 24) | (val2 << 16) | (val3 << 8) | val4;
+      color_t s = color_t(c);
+      vertices.push_back(s);
     }
 
     void SetFormat(int fmt){
@@ -765,7 +764,6 @@ namespace enigma {
       unsigned offset = 0;
       if (format != -1){
         enigma_user::glsl_attribute_enable_all(false); //Disable all attributes
-        unsigned offset = 0;
         for (auto &att : vertexFormats[format]->flags){
           enigma_user::glsl_attribute_enable(att.second,true);
           int type = GL_FLOAT, num = 1, off = 1; //Off is offset in bytes
@@ -775,7 +773,7 @@ namespace enigma {
             case enigma_user::vertex_type_float2: { type = GL_FLOAT, num = 2, off = 2; break; }
             case enigma_user::vertex_type_float3: { type = GL_FLOAT, num = 3, off = 3; break; }
             case enigma_user::vertex_type_float4: { type = GL_FLOAT, num = 4, off = 4; break; }
-            case enigma_user::vertex_type_ubyte4: { type = GL_UNSIGNED_BYTE, num = 4, norm = true, off = 1; break; }
+            case enigma_user::vertex_type_ubyte4: { type = GL_UNSIGNED_BYTE, num = 4, norm = false, off = 1; break; }
           }
           enigma_user::glsl_attribute_set(att.second, num, type, norm, STRIDE, offset);
           offset += off;

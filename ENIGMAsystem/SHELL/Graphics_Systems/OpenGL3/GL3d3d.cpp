@@ -75,11 +75,8 @@ GLenum stenciloperators[8] = {
 namespace enigma_user
 {
 
-void d3d_depth_clear() {
-  d3d_depth_clear_value(1.0f);
-}
-
 void d3d_depth_clear_value(float value) {
+  oglmgr->BlendFunc();
   glClearDepthf(value);
 }
 
@@ -214,18 +211,22 @@ void d3d_set_fill_mode(int fill)
 }
 
 void d3d_set_line_width(float value) {
+  oglmgr->BlendFunc();
   glLineWidth(value);
 }
 
 void d3d_set_point_size(float value) {
+  oglmgr->BlendFunc();
   glPointSize(value);
 }
 
 void d3d_set_depth_operator(int mode) {
+  oglmgr->BlendFunc();
   glDepthFunc(depthoperators[mode]);
 }
 
 void d3d_clear_depth(){
+  oglmgr->BlendFunc();
   glClear(GL_DEPTH_BUFFER_BIT);
 }
 

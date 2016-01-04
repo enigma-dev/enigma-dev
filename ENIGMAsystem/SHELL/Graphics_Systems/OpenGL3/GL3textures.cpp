@@ -401,9 +401,11 @@ void texture_set_stage(int stage, int texid) {
 }
 
 void texture_reset() {
-  oglmgr->EndShapesBatching();
-	if (enigma::bound_texture_stage != GL_TEXTURE0) { glActiveTexture(enigma::bound_texture_stage = GL_TEXTURE0); }
-	oglmgr->BindTexture(GL_TEXTURE_2D, enigma::samplerstates[0].bound_texture = 0);
+  if (enigma::samplerstates[0].bound_texture != 0){
+    oglmgr->EndShapesBatching();
+  	if (enigma::bound_texture_stage != GL_TEXTURE0) { glActiveTexture(enigma::bound_texture_stage = GL_TEXTURE0); }
+  	oglmgr->BindTexture(GL_TEXTURE_2D, enigma::samplerstates[0].bound_texture = 0);
+  }
 }
 
 void texture_set_interpolation_ext(int sampler, bool enable)
