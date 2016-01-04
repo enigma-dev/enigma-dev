@@ -91,7 +91,7 @@ namespace enigma_user {
   namespace enigma_user
   {
 
-  void d3d_depth_clear();
+  void d3d_clear_depth();
   void d3d_depth_clear_value(float value);
   void d3d_start();
   void d3d_end();
@@ -116,7 +116,6 @@ namespace enigma_user {
   void d3d_set_fog_end(double end);
   void d3d_set_fog_density(double density);
   void d3d_set_depth(double dep);
-  void d3d_clear_depth();
   void d3d_set_shading(bool smooth);
   void d3d_set_color_mask(bool r, bool g, bool b, bool a);
 

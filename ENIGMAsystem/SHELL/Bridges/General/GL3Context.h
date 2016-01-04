@@ -190,6 +190,10 @@ void Lighting() { //Used when lighting is enabled/disabled
 	EndShapesBatching();
 }
 
+void ShaderFunc() { //Used when calling shader functions, like uniform changes
+  EndShapesBatching();
+}
+
 GLuint GetBoundTexture() { //This is used for cases when there are texture coordinates provided, but texture is 0 (like d3d_model_block)
 	return bound_tex;
 }

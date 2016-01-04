@@ -673,37 +673,23 @@ namespace gui
       if (ni != i){
         if (line != cursor_line){ //End of multiline
           if (line_limit==0 || (line_limit>0 && text.size()+1<=line_limit)){
-            printf("Line = %lu and text size =%lu\n", line, text.size());
-            printf("Line  = %lu, ni = %lu, text len = %i\n", line, ni, text[line].length());
-            printf("Str len = %i\n",str.length());
-            printf("Eoff = %i\n", endOfFirst.length());
             if (text[line].length()+str.length()-ni+endOfFirst.length()>=char_limit){
               text.insert(text.begin()+line, str.substr(ni, char_limit-text[line].length()-endOfFirst.length()));
-              printf("This called!\n");
             }else{
-              printf("This called2!\n");
               text.insert(text.begin()+line, str.substr(ni, string::npos));
             }
           }
         }else{ //We only had one line without line endings OR the line limit was reached on the first line of multiline string
           if (limit == false){
             if (text[line].length()+str.length()+endOfFirst.length()>=char_limit){
-              printf("This called3!\n");
-
               text[line].insert(cursor_position,str.substr(0, char_limit-text[line].length()-endOfFirst.length()));
             }else{
-              printf("This called4!\n");
-
               text[line].insert(cursor_position,str);
             }
           }else{ //Line limit was reached, so we append only to the first eol
             if (text[line].length()+i-ni+endOfFirst.length()>=char_limit){
               text[line].insert(cursor_position,str.substr(ni, char_limit-text[line].length()-endOfFirst.length()));
-              printf("This called5!\n");
-
             }else{
-              printf("This called6!\n");
-
               text[line].insert(cursor_position,str.substr(ni, i-ni));
             }
           }
@@ -711,7 +697,6 @@ namespace gui
         text[line].append(endOfFirst);
       }
     }
-    printf("Line count = %i, line = %i, and line 0 = %s\n", text.size(), line, text[0].c_str());
 
     cursor_line = line;
     cursor_position = text[line].length() - endOfFirst.length();
@@ -738,7 +723,6 @@ namespace gui
         double wi = 0.0;
         for (size_t c=0; c<text[h].length(); ++c){
           double cw = enigma_user::string_char_width(text[h].substr(c,1));
-          printf("char [%u] %c, and xcheck %f < wi %f\n", c, text[h][c], x-textx, (wi + cw/2.0));
           if (x-textx < (wi + cw/2.0)){
             break;
           }

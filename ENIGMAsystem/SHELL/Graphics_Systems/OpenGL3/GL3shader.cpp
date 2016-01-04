@@ -15,10 +15,6 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "../General/OpenGLHeaders.h"
-#include "../General/GStextures.h"
-#include "GL3shader.h"
-#include "GLSLshader.h"
 #include <math.h>
 
 #include <stdio.h>      /* printf, scanf, NULL */
@@ -28,9 +24,14 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-//using namespace std;
 
 #include <vector>
+
+#include "Bridges/General/GL3Context.h"
+#include "../General/OpenGLHeaders.h"
+#include "../General/GStextures.h"
+#include "GL3shader.h"
+#include "GLSLshader.h"
 
 #ifdef DEBUG_MODE
   #include <string>
@@ -639,7 +640,7 @@ void glsl_program_detach(int id, int sid)
 void glsl_program_set(int id)
 {
   if (enigma::bound_shader != id){
-    texture_reset();
+    oglmgr->ShaderFunc();
     enigma::bound_shader = id;
     glUseProgram(enigma::shaderprograms[id]->shaderprogram);
   }
@@ -653,8 +654,7 @@ int glsl_program_get()
 void glsl_program_reset()
 {
     //if (enigma::bound_shader != enigma::main_shader){ //This doesn't work because enigma::bound_shader is the same as enigma::main_shader at start
-        //NOTE: Texture must be reset first so the Global VBO can draw and let people use shaders on text.
-        texture_reset();
+        oglmgr->ShaderFunc();
         enigma::bound_shader = enigma::main_shader;
         glUseProgram(enigma::shaderprograms[enigma::main_shader]->shaderprogram);
     //}
@@ -696,6 +696,7 @@ int glsl_get_uniform_location(int program, string name) {
 void glsl_uniformf(int location, float v0) {
   get_uniform(it,location,1);
   if (it->second.data[0].f != v0){
+    oglmgr->ShaderFunc();
     glUniform1f(location, v0);
     it->second.data[0].f = v0;
   }
@@ -704,6 +705,7 @@ void glsl_uniformf(int location, float v0) {
 void glsl_uniformf(int location, float v0, float v1) {
   get_uniform(it,location,2);
   if (it->second.data[0].f != v0 || it->second.data[1].f != v1){
+    oglmgr->ShaderFunc();
     glUniform2f(location, v0, v1);
     it->second.data[0].f = v0, it->second.data[1].f = v1;
   }
@@ -712,6 +714,7 @@ void glsl_uniformf(int location, float v0, float v1) {
 void glsl_uniformf(int location, float v0, float v1, float v2) {
   get_uniform(it,location,3);
   if (it->second.data[0].f != v0 || it->second.data[1].f != v1 || it->second.data[2].f != v2){
+    oglmgr->ShaderFunc();
     glUniform3f(location, v0, v1, v2);
     it->second.data[0].f = v0, it->second.data[1].f = v1, it->second.data[2].f = v2;
 	}
@@ -720,6 +723,7 @@ void glsl_uniformf(int location, float v0, float v1, float v2) {
 void glsl_uniformf(int location, float v0, float v1, float v2, float v3) {
   get_uniform(it,location,4);
   if (it->second.data[0].f != v0 || it->second.data[1].f != v1 || it->second.data[2].f != v2 || it->second.data[3].f != v3){
+    oglmgr->ShaderFunc();
     glUniform4f(location, v0, v1, v2, v3);
     it->second.data[0].f = v0, it->second.data[1].f = v1, it->second.data[2].f = v2, it->second.data[3].f = v3;
 	}
@@ -728,6 +732,7 @@ void glsl_uniformf(int location, float v0, float v1, float v2, float v3) {
 void glsl_uniformi(int location, int v0) {
   get_uniform(it,location,1);
   if (it->second.data[0].i != v0){
+    oglmgr->ShaderFunc();
     glUniform1i(location, v0);
     it->second.data[0].i = v0;
   }
@@ -736,6 +741,7 @@ void glsl_uniformi(int location, int v0) {
 void glsl_uniformi(int location, int v0, int v1) {
   get_uniform(it,location,2);
   if (it->second.data[0].i != v0 || it->second.data[1].i != v1){
+    oglmgr->ShaderFunc();
     glUniform2i(location, v0, v1);
     it->second.data[0].i = v0, it->second.data[1].i = v1;
   }
@@ -744,6 +750,7 @@ void glsl_uniformi(int location, int v0, int v1) {
 void glsl_uniformi(int location, int v0, int v1, int v2) {
   get_uniform(it,location,3);
   if (it->second.data[0].i != v0 || it->second.data[1].i != v1 || it->second.data[2].i != v2){
+    oglmgr->ShaderFunc();
     glUniform3i(location, v0, v1, v2);
     it->second.data[0].i = v0, it->second.data[1].i = v1, it->second.data[2].i = v2;
   }
@@ -752,6 +759,7 @@ void glsl_uniformi(int location, int v0, int v1, int v2) {
 void glsl_uniformi(int location, int v0, int v1, int v2, int v3) {
   get_uniform(it,location,4);
   if (it->second.data[0].i != v0 || it->second.data[1].i != v1 || it->second.data[2].i != v2 || it->second.data[3].i != v3){
+    oglmgr->ShaderFunc();
     glUniform4i(location, v0, v1, v2, v3);
     it->second.data[0].i = v0, it->second.data[1].i = v1, it->second.data[2].i = v2, it->second.data[3].i = v3;
   }
@@ -760,6 +768,7 @@ void glsl_uniformi(int location, int v0, int v1, int v2, int v3) {
 void glsl_uniformui(int location, unsigned v0) {
   get_uniform(it,location,1);
   if (it->second.data[0].ui != v0){
+    oglmgr->ShaderFunc();
     glUniform1ui(location, v0);
     it->second.data[0].ui = v0;
   }
@@ -768,6 +777,7 @@ void glsl_uniformui(int location, unsigned v0) {
 void glsl_uniformui(int location, unsigned v0, unsigned v1) {
   get_uniform(it,location,2);
   if (it->second.data[0].ui != v0 || it->second.data[1].ui != v1){
+    oglmgr->ShaderFunc();
     glUniform2ui(location, v0, v1);
     it->second.data[0].ui = v0, it->second.data[1].ui = v1;
   }
@@ -776,6 +786,7 @@ void glsl_uniformui(int location, unsigned v0, unsigned v1) {
 void glsl_uniformui(int location, unsigned v0, unsigned v1, unsigned v2) {
   get_uniform(it,location,3);
   if (it->second.data[0].ui != v0 || it->second.data[1].ui != v1 || it->second.data[2].ui != v2){
+    oglmgr->ShaderFunc();
     glUniform3ui(location, v0, v1, v2);
     it->second.data[0].ui = v0, it->second.data[1].ui = v1, it->second.data[2].ui = v2;
   }
@@ -784,6 +795,7 @@ void glsl_uniformui(int location, unsigned v0, unsigned v1, unsigned v2) {
 void glsl_uniformui(int location, unsigned v0, unsigned v1, unsigned v2, unsigned v3) {
   get_uniform(it,location,4);
   if (it->second.data[0].ui != v0 || it->second.data[1].ui != v1 || it->second.data[2].ui != v2 || it->second.data[3].ui != v3){
+    oglmgr->ShaderFunc();
     glUniform4ui(location, v0, v1, v2, v3);
     it->second.data[0].ui = v0, it->second.data[1].ui = v1, it->second.data[2].ui = v2, it->second.data[3].ui = v3;
   }
@@ -793,6 +805,7 @@ void glsl_uniformui(int location, unsigned v0, unsigned v1, unsigned v2, unsigne
 void glsl_uniform1fv(int location, int size, const float *value){
   get_uniform(it,location,1);
   if (std::equal(it->second.data.begin(), it->second.data.end(), value, enigma::UATypeFComp) == false){
+    oglmgr->ShaderFunc();
     glUniform1fv(location, size, value);
     for (size_t i=0; i<it->second.data.size(); ++i){
       it->second.data[i].f = value[i];
@@ -803,6 +816,7 @@ void glsl_uniform1fv(int location, int size, const float *value){
 void glsl_uniform2fv(int location, int size, const float *value){
   get_uniform(it,location,2);
   if (std::equal(it->second.data.begin(), it->second.data.end(), value, enigma::UATypeFComp) == false){
+    oglmgr->ShaderFunc();
     glUniform2fv(location, size, value);
     for (size_t i=0; i<it->second.data.size(); ++i){
       it->second.data[i].f = value[i];
@@ -813,6 +827,7 @@ void glsl_uniform2fv(int location, int size, const float *value){
 void glsl_uniform3fv(int location, int size, const float *value){
   get_uniform(it,location,3);
   if (std::equal(it->second.data.begin(), it->second.data.end(), value, enigma::UATypeFComp) == false){
+    oglmgr->ShaderFunc();
     glUniform3fv(location, size, value);
     for (size_t i=0; i<it->second.data.size(); ++i){
       it->second.data[i].f = value[i];
@@ -823,6 +838,7 @@ void glsl_uniform3fv(int location, int size, const float *value){
 void glsl_uniform4fv(int location, int size, const float *value){
   get_uniform(it,location,4);
   if (std::equal(it->second.data.begin(), it->second.data.end(), value, enigma::UATypeFComp) == false){
+    oglmgr->ShaderFunc();
     glUniform4fv(location, size, value);
     for (size_t i=0; i<it->second.data.size(); ++i){
       it->second.data[i].f = value[i];
@@ -834,6 +850,7 @@ void glsl_uniform4fv(int location, int size, const float *value){
 void glsl_uniform1iv(int location, int size, const int *value){
   get_uniform(it,location,1);
   if (std::equal(it->second.data.begin(), it->second.data.end(), value, enigma::UATypeIComp) == false){
+    oglmgr->ShaderFunc();
     glUniform1iv(location, size, value);
     for (size_t i=0; i<it->second.data.size(); ++i){
       it->second.data[i].i = value[i];
@@ -844,6 +861,7 @@ void glsl_uniform1iv(int location, int size, const int *value){
 void glsl_uniform2iv(int location, int size, const int *value){
   get_uniform(it,location,2);
   if (std::equal(it->second.data.begin(), it->second.data.end(), value, enigma::UATypeIComp) == false){
+    oglmgr->ShaderFunc();
     glUniform2iv(location, size, value);
     for (size_t i=0; i<it->second.data.size(); ++i){
       it->second.data[i].i = value[i];
@@ -854,6 +872,7 @@ void glsl_uniform2iv(int location, int size, const int *value){
 void glsl_uniform3iv(int location, int size, const int *value){
   get_uniform(it,location,3);
   if (std::equal(it->second.data.begin(), it->second.data.end(), value, enigma::UATypeIComp) == false){
+    oglmgr->ShaderFunc();
     glUniform3iv(location, size, value);
     for (size_t i=0; i<it->second.data.size(); ++i){
       it->second.data[i].i = value[i];
@@ -864,6 +883,7 @@ void glsl_uniform3iv(int location, int size, const int *value){
 void glsl_uniform4iv(int location, int size, const int *value){
   get_uniform(it,location,4);
   if (std::equal(it->second.data.begin(), it->second.data.end(), value, enigma::UATypeIComp) == false){
+    oglmgr->ShaderFunc();
     glUniform4iv(location, size, value);
     for (size_t i=0; i<it->second.data.size(); ++i){
       it->second.data[i].i = value[i];
@@ -875,6 +895,7 @@ void glsl_uniform4iv(int location, int size, const int *value){
 void glsl_uniform1uiv(int location, int size, const unsigned int *value){
   get_uniform(it,location,1);
   if (std::equal(it->second.data.begin(), it->second.data.end(), value, enigma::UATypeUIComp) == false){
+    oglmgr->ShaderFunc();
     glUniform1uiv(location, size, value);
     for (size_t i=0; i<it->second.data.size(); ++i){
       it->second.data[i].ui = value[i];
@@ -885,6 +906,7 @@ void glsl_uniform1uiv(int location, int size, const unsigned int *value){
 void glsl_uniform2uiv(int location, int size, const unsigned int *value){
   get_uniform(it,location,2);
   if (std::equal(it->second.data.begin(), it->second.data.end(), value, enigma::UATypeUIComp) == false){
+    oglmgr->ShaderFunc();
     glUniform2uiv(location, size, value);
     for (size_t i=0; i<it->second.data.size(); ++i){
       it->second.data[i].ui = value[i];
@@ -895,6 +917,7 @@ void glsl_uniform2uiv(int location, int size, const unsigned int *value){
 void glsl_uniform3uiv(int location, int size, const unsigned int *value){
   get_uniform(it,location,3);
   if (std::equal(it->second.data.begin(), it->second.data.end(), value, enigma::UATypeUIComp) == false){
+    oglmgr->ShaderFunc();
     glUniform3uiv(location, size, value);
     for (size_t i=0; i<it->second.data.size(); ++i){
       it->second.data[i].ui = value[i];
@@ -905,6 +928,7 @@ void glsl_uniform3uiv(int location, int size, const unsigned int *value){
 void glsl_uniform4uiv(int location, int size, const unsigned int *value){
   get_uniform(it,location,4);
   if (std::equal(it->second.data.begin(), it->second.data.end(), value, enigma::UATypeUIComp) == false){
+    oglmgr->ShaderFunc();
     glUniform4uiv(location, size, value);
     for (size_t i=0; i<it->second.data.size(); ++i){
       it->second.data[i].ui = value[i];
@@ -916,6 +940,7 @@ void glsl_uniform4uiv(int location, int size, const unsigned int *value){
 void glsl_uniform_matrix2fv(int location, int size, const float *matrix){
   get_uniform(it,location,4);
   if (std::equal(it->second.data.begin(), it->second.data.end(), matrix, enigma::UATypeFComp) == false){
+    oglmgr->ShaderFunc();
     glUniformMatrix2fv(location, size, true, matrix);
     memcpy(&it->second.data[0], &matrix[0], it->second.data.size() * sizeof(enigma::UAType));
   }
@@ -924,6 +949,7 @@ void glsl_uniform_matrix2fv(int location, int size, const float *matrix){
 void glsl_uniform_matrix3fv(int location, int size, const float *matrix){
   get_uniform(it,location,9);
   if (std::equal(it->second.data.begin(), it->second.data.end(), matrix, enigma::UATypeFComp) == false){
+    oglmgr->ShaderFunc();
     glUniformMatrix3fv(location, size, true, matrix);
     memcpy(&it->second.data[0], &matrix[0], it->second.data.size() * sizeof(enigma::UAType));
   }
@@ -932,6 +958,7 @@ void glsl_uniform_matrix3fv(int location, int size, const float *matrix){
 void glsl_uniform_matrix4fv(int location, int size, const float *matrix){
   get_uniform(it,location,16);
   if (std::equal(it->second.data.begin(), it->second.data.end(), matrix, enigma::UATypeFComp) == false){
+    oglmgr->ShaderFunc();
     glUniformMatrix4fv(location, size, true, matrix);
     memcpy(&it->second.data[0], &matrix[0], it->second.data.size() * sizeof(enigma::UAType));
   }
@@ -956,6 +983,7 @@ int glsl_get_attribute_location(int program, string name) {
 void glsl_attribute_enable_all(bool enable){
   for ( auto &it : enigma::shaderprograms[enigma::bound_shader]->attributes ){
     if (enable != it.second.enabled){
+      oglmgr->ShaderFunc();
       if (enable == true){
         glEnableVertexAttribArray( it.second.location );
       }else{
@@ -969,6 +997,7 @@ void glsl_attribute_enable_all(bool enable){
 void glsl_attribute_enable(int location, bool enable){
   get_attribute(it,location);
   if (enable != it->second.enabled){
+    oglmgr->ShaderFunc();
     if (enable == true){
       glEnableVertexAttribArray(location);
     }else{
@@ -981,6 +1010,7 @@ void glsl_attribute_enable(int location, bool enable){
 void glsl_attribute_set(int location, int size, int type, bool normalize, int stride, int offset){
   get_attribute(it,location);
   //if (/*it->second.enabled == true*/ (it->second.vao != enigma::bound_vbo || it->second.datatype != type || it->second.datasize != size || it->second.normalize != normalize || it->second.stride != stride || it->second.offset != offset)){
+    oglmgr->ShaderFunc();
     glVertexAttribPointer(location, size, type, normalize, stride, ( ( const GLvoid * ) ( sizeof( gs_scalar ) * ( offset ) ) ));
     it->second.datatype = type;
     it->second.datasize = size;
