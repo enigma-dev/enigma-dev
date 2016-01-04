@@ -68,7 +68,7 @@ namespace enigma_user {
   void d3d_model_add_float2(int id, float f1, float f2);
   void d3d_model_add_float3(int id, float f1, float f2, float f3);
   void d3d_model_add_float4(int id, float f1, float f2, float f3, float f4);
-  void d3d_model_add_ubyte4(int id, unsigned char u1, unsigned char u2, unsigned char u3, unsigned char u4);
+  void d3d_model_add_ubyte4(int id, uint8_t u1, uint8_t u2, uint8_t u3, uint8_t u4);
 
   void d3d_model_wall(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, gs_scalar hrep, gs_scalar vrep);
   void d3d_model_floor(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, gs_scalar hrep, gs_scalar vrep);

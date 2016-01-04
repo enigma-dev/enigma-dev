@@ -450,7 +450,7 @@ namespace enigma_user
     enigma::meshes[id]->AddFloat4(f1, f2, f3, f4);
   }
 
-  void d3d_model_add_ubyte4(int id, unsigned char u1, unsigned char u2, unsigned char u3, unsigned char u4) {
+  void d3d_model_add_ubyte4(int id, uint8_t u1, uint8_t u2, uint8_t u3, uint8_t u4) {
     enigma::meshes[id]->AddUbyte4(u1, u2, u3, u4);
   }
 
