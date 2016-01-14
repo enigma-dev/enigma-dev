@@ -297,7 +297,8 @@ namespace enigma_user
   }
 
   void d3d_model_part_draw(int id, int vertex_start, int vertex_count){ // overload for no additional texture or transformation call's
-      enigma::meshes[id]->Draw(vertex_start, vertex_count);
+    texture_reset();
+    enigma::meshes[id]->Draw(vertex_start, vertex_count);
   }
 
   void d3d_model_part_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z, int vertex_start, int vertex_count){ // overload for no additional texture call's
@@ -319,6 +320,7 @@ namespace enigma_user
   }
 
   void d3d_model_draw(int id){ // overload for no additional texture or transformation call's
+    texture_reset();
     enigma::meshes[id]->Draw();
   }
 
