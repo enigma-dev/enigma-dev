@@ -303,14 +303,14 @@ gs_scalar texture_get_height(int texid)
   return textureStructs[texid]->height / textureStructs[texid]->fullheight;
 }
 
-unsigned texture_get_texel_width(int texid)
+gs_scalar texture_get_texel_width(int texid)
 {
-  return textureStructs[texid]->width;
+	return 1.0/textureStructs[texid]->width;
 }
 
-unsigned texture_get_texel_height(int texid)
+gs_scalar texture_get_texel_height(int texid)
 {
-  return textureStructs[texid]->height;
+	return 1.0/textureStructs[texid]->height;
 }
 
 void texture_set_stage(int stage, int texid) {
