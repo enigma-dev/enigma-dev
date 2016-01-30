@@ -381,17 +381,18 @@ gs_scalar texture_get_height(int texid)
 	return textureStructs[texid]->height / textureStructs[texid]->fullheight;
 }
 
-unsigned texture_get_texel_width(int texid)
+gs_scalar texture_get_texel_width(int texid)
 {
-	return textureStructs[texid]->width;
+	return 1.0/textureStructs[texid]->fullwidth;
 }
 
-unsigned texture_get_texel_height(int texid)
+gs_scalar texture_get_texel_height(int texid)
 {
-	return textureStructs[texid]->height;
+	return 1.0/textureStructs[texid]->fullheight;
 }
 
 void texture_set_stage(int stage, int texid) {
+  //TODO(harijs): Check if stage <0
   get_texture(gt,texid,);
   if (enigma::samplerstates[stage].bound_texture != gt) {
     oglmgr->EndShapesBatching();
@@ -410,12 +411,14 @@ void texture_reset() {
 
 void texture_set_interpolation_ext(int sampler, bool enable)
 {
+  //TODO(harijs): Check if sampler <0
   glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_MIN_FILTER, enable?GL_LINEAR:GL_NEAREST);
   glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_MAG_FILTER, enable?GL_LINEAR:GL_NEAREST);
 }
 
 void texture_set_repeat_ext(int sampler, bool repeat)
 {
+  //TODO(harijs): Check if sampler <0
   glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_WRAP_R, repeat?GL_REPEAT:GL_CLAMP_TO_EDGE);
   glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_WRAP_S, repeat?GL_REPEAT:GL_CLAMP_TO_EDGE);
   glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_WRAP_T, repeat?GL_REPEAT:GL_CLAMP_TO_EDGE);
@@ -423,6 +426,7 @@ void texture_set_repeat_ext(int sampler, bool repeat)
 
 void texture_set_wrap_ext(int sampler, bool wrapu, bool wrapv, bool wrapw)
 {
+  //TODO(harijs): Check if sampler <0
   glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_WRAP_R, wrapu?GL_REPEAT:GL_CLAMP_TO_EDGE);
   glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_WRAP_S, wrapv?GL_REPEAT:GL_CLAMP_TO_EDGE);
   glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_WRAP_T, wrapw?GL_REPEAT:GL_CLAMP_TO_EDGE);
@@ -430,6 +434,7 @@ void texture_set_wrap_ext(int sampler, bool wrapu, bool wrapv, bool wrapw)
 
 void texture_set_border_ext(int sampler, int r, int g, int b, double a)
 {
+  //TODO(harijs): Check if sampler <0
   GLint bordercolor[4] = { r, g, b, int(a * 255) };
   glSamplerParameteriv(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_BORDER_COLOR, bordercolor);
 }
