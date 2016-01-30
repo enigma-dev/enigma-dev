@@ -713,5 +713,20 @@ void sprite_set_precise(int ind, bool precise) {
   // TODO
 }
 
+var sprite_get_uvs(int ind, int subimg){
+  var uvs;
+  uvs[4] = 0; 
+
+  enigma::sprite *spr;
+  if (!get_sprite(spr,ind))
+    return uvs;
+
+  uvs[0] = spr->texturexarray[subimg];
+  uvs[1] = spr->textureyarray[subimg];
+  uvs[2] = spr->texturexarray[subimg] + spr->texturewarray[subimg];
+  uvs[3] = spr->textureyarray[subimg] + spr->textureharray[subimg];
+  return uvs;
+}
+
 }
 

@@ -25,6 +25,7 @@
 #include <vector>
 using std::vector;
 
+#include "var4.h"
 #include "Collision_Systems/collision_types.h"
 
 struct bbox_rect_t {
@@ -119,6 +120,7 @@ namespace enigma_user
   void sprite_set_bbox(int ind, int left, int top, int right, int bottom);
   void sprite_set_precise(int ind, bool precise);
   void sprite_collision_mask(int ind, bool sepmasks, int mode, int left, int right, int top, int bottom, int kind, unsigned char tolerance);
+  var sprite_get_uvs(int ind, int subimg);
 }
 
 #endif // ENIGMA_SPRITESTRUCT
