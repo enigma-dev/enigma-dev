@@ -620,7 +620,7 @@ namespace enigma {
       if (triangleIndexedCount > 0) {
         vdata.insert(vdata.end(), triangleIndexedVertices.begin(), triangleIndexedVertices.end());
         idata.insert(idata.end(), triangleIndices.begin(), triangleIndices.end());
-        interleave += triangleIndexedVertices.size()/GetStride();
+        interleave += triangleIndexedVertices.size()/stride;
       }
 
       lineIndexedCount = lineIndices.size();
@@ -628,7 +628,7 @@ namespace enigma {
         vdata.insert(vdata.end(), lineIndexedVertices.begin(), lineIndexedVertices.end());
         for (std::vector<GLuint>::iterator it = lineIndices.begin(); it != lineIndices.end(); ++it) { *it += interleave; }
         idata.insert(idata.end(), lineIndices.begin(), lineIndices.end());
-        interleave += lineIndexedVertices.size()/GetStride();
+        interleave += lineIndexedVertices.size()/stride;
       }
 
       pointIndexedCount = pointIndices.size();
@@ -740,15 +740,15 @@ namespace enigma {
       }
 
       //Send transposed (done by GL because of "true" in the function below) matrices to shader
-      enigma_user::glsl_uniform_matrix4fv(enigma::shaderprograms[enigma::bound_shader]->uni_viewMatrix,  1, enigma::view_matrix);
-      enigma_user::glsl_uniform_matrix4fv(enigma::shaderprograms[enigma::bound_shader]->uni_projectionMatrix,  1, enigma::projection_matrix);
-      enigma_user::glsl_uniform_matrix4fv(enigma::shaderprograms[enigma::bound_shader]->uni_modelMatrix,  1, enigma::model_matrix);
-      enigma_user::glsl_uniform_matrix4fv(enigma::shaderprograms[enigma::bound_shader]->uni_mvMatrix,  1, enigma::mv_matrix);
-      enigma_user::glsl_uniform_matrix4fv(enigma::shaderprograms[enigma::bound_shader]->uni_mvpMatrix,  1, enigma::mvp_matrix);
-      enigma_user::glsl_uniform_matrix3fv(enigma::shaderprograms[enigma::bound_shader]->uni_normalMatrix,  1, enigma::normal_matrix);
+      enigma::glsl_uniform_matrix4fv_internal(enigma::shaderprograms[enigma::bound_shader]->uni_viewMatrix,  1, enigma::view_matrix);
+      enigma::glsl_uniform_matrix4fv_internal(enigma::shaderprograms[enigma::bound_shader]->uni_projectionMatrix,  1, enigma::projection_matrix);
+      enigma::glsl_uniform_matrix4fv_internal(enigma::shaderprograms[enigma::bound_shader]->uni_modelMatrix,  1, enigma::model_matrix);
+      enigma::glsl_uniform_matrix4fv_internal(enigma::shaderprograms[enigma::bound_shader]->uni_mvMatrix,  1, enigma::mv_matrix);
+      enigma::glsl_uniform_matrix4fv_internal(enigma::shaderprograms[enigma::bound_shader]->uni_mvpMatrix,  1, enigma::mvp_matrix);
+      enigma::glsl_uniform_matrix3fv_internal(enigma::shaderprograms[enigma::bound_shader]->uni_normalMatrix,  1, enigma::normal_matrix);
 
       //Bind texture
-      enigma_user::glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_texSampler, 0);
+      enigma::glsl_uniformi_internal(enigma::shaderprograms[enigma::bound_shader]->uni_texSampler, 0);
 
       // Enable vertex array's for fast vertex processing
       bind_array_buffer( vertexBuffer );
@@ -763,9 +763,9 @@ namespace enigma {
 
       unsigned offset = 0;
       if (format != -1){
-        enigma_user::glsl_attribute_enable_all(false); //Disable all attributes
+        enigma::glsl_attribute_enable_all_internal(false); //Disable all attributes
         for (auto &att : vertexFormats[format]->flags){
-          enigma_user::glsl_attribute_enable(att.second,true);
+          enigma::glsl_attribute_enable_internal(att.second,true);
           int type = GL_FLOAT, num = 1, off = 1; //Off is offset in bytes
           bool norm = false;
           switch (att.first){
@@ -775,39 +775,39 @@ namespace enigma {
             case enigma_user::vertex_type_float4: { type = GL_FLOAT, num = 4, off = 4; break; }
             case enigma_user::vertex_type_ubyte4: { type = GL_UNSIGNED_BYTE, num = 4, norm = false, off = 1; break; }
           }
-          enigma_user::glsl_attribute_set(att.second, num, type, norm, STRIDE, offset);
+          enigma::glsl_attribute_set_internal(att.second, num, type, norm, STRIDE, offset);
           offset += off;
         }
       }else{
-        enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_vertex,true);
-        enigma_user::glsl_attribute_set(enigma::shaderprograms[enigma::bound_shader]->att_vertex, vertexStride, GL_FLOAT, false, STRIDE, offset);
+        enigma::glsl_attribute_enable_internal(enigma::shaderprograms[enigma::bound_shader]->att_vertex,true);
+        enigma::glsl_attribute_set_internal(enigma::shaderprograms[enigma::bound_shader]->att_vertex, vertexStride, GL_FLOAT, false, STRIDE, offset);
         offset += vertexStride;
 
         if (useNormals){
-          enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_normal, true);
-          enigma_user::glsl_attribute_set(enigma::shaderprograms[enigma::bound_shader]->att_normal, 3, GL_FLOAT, false, STRIDE, offset);
+          enigma::glsl_attribute_enable_internal(enigma::shaderprograms[enigma::bound_shader]->att_normal, true);
+          enigma::glsl_attribute_set_internal(enigma::shaderprograms[enigma::bound_shader]->att_normal, 3, GL_FLOAT, false, STRIDE, offset);
           offset += 3;
         }else{
-          enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_normal, false);
+          enigma::glsl_attribute_enable_internal(enigma::shaderprograms[enigma::bound_shader]->att_normal, false);
         }
 
         if (useTextures){
-          enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_texture, true);
-          enigma_user::glsl_attribute_set(enigma::shaderprograms[enigma::bound_shader]->att_texture, 2, GL_FLOAT, false, STRIDE, offset);
+          enigma::glsl_attribute_enable_internal(enigma::shaderprograms[enigma::bound_shader]->att_texture, true);
+          enigma::glsl_attribute_set_internal(enigma::shaderprograms[enigma::bound_shader]->att_texture, 2, GL_FLOAT, false, STRIDE, offset);
           offset += 2;
         }else{
-          enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_texture, false);
+          enigma::glsl_attribute_enable_internal(enigma::shaderprograms[enigma::bound_shader]->att_texture, false);
         }
 
         if (useColors){
-          enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_color, true);
-          enigma_user::glsl_attribute_set(enigma::shaderprograms[enigma::bound_shader]->att_color, 4, GL_UNSIGNED_BYTE, true, STRIDE, offset);
+          enigma::glsl_attribute_enable_internal(enigma::shaderprograms[enigma::bound_shader]->att_color, true);
+          enigma::glsl_attribute_set_internal(enigma::shaderprograms[enigma::bound_shader]->att_color, 4, GL_UNSIGNED_BYTE, true, STRIDE, offset);
         }else{
-          enigma_user::glsl_attribute_enable(enigma::shaderprograms[enigma::bound_shader]->att_color, false);
+          enigma::glsl_attribute_enable_internal(enigma::shaderprograms[enigma::bound_shader]->att_color, false);
         }
       }
 
-      enigma_user::glsl_uniformf( enigma::shaderprograms[enigma::bound_shader]->uni_color, (float)enigma::currentcolor[0]/255.0f, (float)enigma::currentcolor[1]/255.0f, (float)enigma::currentcolor[2]/255.0f, (float)enigma::currentcolor[3]/255.0f );
+      enigma::glsl_uniformf_internal( enigma::shaderprograms[enigma::bound_shader]->uni_color, (float)enigma::currentcolor[0]/255.0f, (float)enigma::currentcolor[1]/255.0f, (float)enigma::currentcolor[2]/255.0f, (float)enigma::currentcolor[3]/255.0f );
 
       if (useTextures){
         //This part sucks, but is required because models can be drawn without textures even if coordinates are provided
@@ -817,14 +817,14 @@ namespace enigma {
         // Harijs: No, it doesn't support "multi-texturing" in the regular sense, because we only bind one texture when drawing by default. This check is to see if this texture is used.
         // The best of both worlds fix is to send the texture coordinates, but disable the use of them in the default shader like so:
         if (oglmgr->GetBoundTexture() != 0){
-          enigma_user::glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_textureEnable, 1);
+          enigma::glsl_uniformi_internal(enigma::shaderprograms[enigma::bound_shader]->uni_textureEnable, 1);
         }else{
-          enigma_user::glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_textureEnable, 0);
+          enigma::glsl_uniformi_internal(enigma::shaderprograms[enigma::bound_shader]->uni_textureEnable, 0);
         }
       }else{
-        enigma_user::glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_textureEnable, 0);
+        enigma::glsl_uniformi_internal(enigma::shaderprograms[enigma::bound_shader]->uni_textureEnable, 0);
       }
-      enigma_user::glsl_uniformi(enigma::shaderprograms[enigma::bound_shader]->uni_colorEnable,useColors);
+      enigma::glsl_uniformi_internal(enigma::shaderprograms[enigma::bound_shader]->uni_colorEnable,useColors);
 
       #define OFFSETE( P )  ( ( const GLvoid * ) ( sizeof( GLuint ) * ( P         ) ) )
       offset = ringBufferIDrawOffset+vertex_start;
