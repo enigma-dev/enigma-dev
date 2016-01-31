@@ -296,5 +296,17 @@ namespace enigma_user
     get_backgroundnv(bck2d,backId,-1);
     return bck2d->height;
   }
+
+  var background_get_uvs(int backId){
+    var uvs;
+    uvs[4] = 0; 
+    get_backgroundnv(bck2d,backId,uvs);
+
+    uvs[0] = bck2d->texturex;
+    uvs[1] = bck2d->texturey;
+    uvs[2] = bck2d->texturex + bck2d->texturew;
+    uvs[3] = bck2d->texturey + bck2d->textureh;
+    return uvs;
+  }
 }
 
