@@ -34,6 +34,15 @@ namespace enigma
   void getUniforms(int prog_id);
   void getAttributes(int prog_id);
   int getGLTypeSize(GLuint type);
+
+  void glsl_uniform_matrix3fv_internal(int location, int size, const float *matrix);
+  void glsl_uniform_matrix4fv_internal(int location, int size, const float *matrix);
+  void glsl_uniformi_internal(int location, int v0);
+  void glsl_uniformf_internal(int location, float v0, float v1, float v2, float v3);
+
+  void glsl_attribute_enable_all_internal(bool enable);
+  void glsl_attribute_enable_internal(int location, bool enable);
+  void glsl_attribute_set_internal(int location, int size, int type, bool normalize, int stride, int offset);
 }
 
 namespace enigma_user

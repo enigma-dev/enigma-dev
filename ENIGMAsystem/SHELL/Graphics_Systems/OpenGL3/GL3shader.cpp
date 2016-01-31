@@ -682,11 +682,13 @@ int glsl_get_uniform_location(int program, string name) {
 	//int uni = glGetUniformLocation(enigma::shaderprograms[program]->shaderprogram, name.c_str());
 	std::unordered_map<string,GLint>::iterator it = enigma::shaderprograms[program]->uniform_names.find(name);
   if (it == enigma::shaderprograms[program]->uniform_names.end()){
-    if (enigma::shaderprograms[program]->name == ""){
-      printf("Program[%i] - Uniform %s not found!\n", program, name.c_str());
-    }else{
-      printf("Program[%s = %i] - Uniform %s not found!\n", enigma::shaderprograms[program]->name.c_str(), program, name.c_str());
-    }
+    #ifdef DEBUG_MODE
+      if (enigma::shaderprograms[program]->name == ""){
+        printf("Program[%i] - Uniform %s not found!\n", program, name.c_str());
+      }else{
+        printf("Program[%s = %i] - Uniform %s not found!\n", enigma::shaderprograms[program]->name.c_str(), program, name.c_str());
+      }
+    #endif
     return -1;
   }else{
     return it->second;
@@ -969,11 +971,13 @@ int glsl_get_attribute_location(int program, string name) {
   get_program(prog, program, -1);
   std::unordered_map<string,GLint>::iterator it = prog->attribute_names.find(name);
   if (it == prog->attribute_names.end()){
-    if (prog->name == ""){
-      printf("Program[%i] - Attribute %s not found!\n", program, name.c_str());
-    }else{
-      printf("Program[%s = %i] - Attribute %s not found!\n", prog->name.c_str(), program, name.c_str());
-    }
+    #ifdef DEBUG_MODE
+      if (prog->name == ""){
+        printf("Program[%i] - Attribute %s not found!\n", program, name.c_str());
+      }else{
+        printf("Program[%s = %i] - Attribute %s not found!\n", prog->name.c_str(), program, name.c_str());
+      }
+    #endif
     return -1;
   }else{
     return it->second;
@@ -1023,3 +1027,76 @@ void glsl_attribute_set(int location, int size, int type, bool normalize, int st
 
 }
 
+//Internal functions - they do less error checking and don't call batch flush to stop recursion in GL3ModelStruct::Draw
+namespace enigma
+{
+  void glsl_uniform_matrix3fv_internal(int location, int size, const float *matrix){
+    get_uniform(it,location,9);
+    if (std::equal(it->second.data.begin(), it->second.data.end(), matrix, enigma::UATypeFComp) == false){
+      glUniformMatrix3fv(location, size, true, matrix);
+      memcpy(&it->second.data[0], &matrix[0], it->second.data.size() * sizeof(enigma::UAType));
+    }
+  }
+
+  void glsl_uniform_matrix4fv_internal(int location, int size, const float *matrix){
+    get_uniform(it,location,16);
+    if (std::equal(it->second.data.begin(), it->second.data.end(), matrix, enigma::UATypeFComp) == false){
+      glUniformMatrix4fv(location, size, true, matrix);
+      memcpy(&it->second.data[0], &matrix[0], it->second.data.size() * sizeof(enigma::UAType));
+    }
+  }
+
+  void glsl_uniformi_internal(int location, int v0) {
+    get_uniform(it,location,1);
+    if (it->second.data[0].i != v0){
+      glUniform1i(location, v0);
+      it->second.data[0].i = v0;
+    }
+  }
+
+  void glsl_uniformf_internal(int location, float v0, float v1, float v2, float v3) {
+    get_uniform(it,location,4);
+    if (it->second.data[0].f != v0 || it->second.data[1].f != v1 || it->second.data[2].f != v2 || it->second.data[3].f != v3){
+      glUniform4f(location, v0, v1, v2, v3);
+      it->second.data[0].f = v0, it->second.data[1].f = v1, it->second.data[2].f = v2, it->second.data[3].f = v3;
+    }
+  }
+
+  void glsl_attribute_enable_all_internal(bool enable){
+    for ( auto &it : enigma::shaderprograms[enigma::bound_shader]->attributes ){
+      if (enable != it.second.enabled){
+        if (enable == true){
+          glEnableVertexAttribArray( it.second.location );
+        }else{
+          glDisableVertexAttribArray( it.second.location );
+        }
+        it.second.enabled = enable;
+      }
+    }
+  }
+
+  void glsl_attribute_enable_internal(int location, bool enable){
+    get_attribute(it,location);
+    if (enable != it->second.enabled){
+      if (enable == true){
+        glEnableVertexAttribArray(location);
+      }else{
+        glDisableVertexAttribArray(location);
+      }
+      it->second.enabled = enable;
+    }
+  }
+
+  void glsl_attribute_set_internal(int location, int size, int type, bool normalize, int stride, int offset){
+    get_attribute(it,location);
+    //if (/*it->second.enabled == true*/ (it->second.vao != enigma::bound_vbo || it->second.datatype != type || it->second.datasize != size || it->second.normalize != normalize || it->second.stride != stride || it->second.offset != offset)){
+      glVertexAttribPointer(location, size, type, normalize, stride, ( ( const GLvoid * ) ( sizeof( gs_scalar ) * ( offset ) ) ));
+      it->second.datatype = type;
+      it->second.datasize = size;
+      it->second.normalize = normalize;
+      it->second.stride = stride;
+      it->second.offset = offset;
+      it->second.vao = enigma::bound_vbo;
+    //}
+  }
+}
