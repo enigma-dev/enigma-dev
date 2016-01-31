@@ -18,6 +18,7 @@
 **/
 
 #include <string>
+#include "var4.h"
 
 namespace enigma
 {
@@ -77,6 +78,6 @@ void background_set_alpha_from_background(int back, int copy_background, bool fr
 int background_get_texture(int backId);
 int background_get_width(int backId);
 int background_get_height(int backId);
-
+var sprite_get_uvs(int backId);
 }
 
