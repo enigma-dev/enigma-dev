@@ -226,8 +226,7 @@ static inline int draw_tiles()
     if (dit->second.tiles.size())
     {
       for (unsigned int t = 0; t<drawing_depths[dit->second.tiles[0].depth].tilevector.size(); ++t){
-        enigma_user::texture_set(drawing_depths[dit->second.tiles[0].depth].tilevector[t][0]);
-        d3d_model_part_draw(drawing_depths[dit->second.tiles[0].depth].tilelist, drawing_depths[dit->second.tiles[0].depth].tilevector[t][1], drawing_depths[dit->second.tiles[0].depth].tilevector[t][2]);
+        d3d_model_part_draw(drawing_depths[dit->second.tiles[0].depth].tilelist, drawing_depths[dit->second.tiles[0].depth].tilevector[t][0], drawing_depths[dit->second.tiles[0].depth].tilevector[t][1], drawing_depths[dit->second.tiles[0].depth].tilevector[t][2]);
       }
     }
     enigma::inst_iter* push_it = enigma::instance_event_iterator;
