@@ -12,6 +12,7 @@ blank.txt
 *.db
 *.depend
 *.so
+start.sh
 *.dll
 *.dylib
 *.exe

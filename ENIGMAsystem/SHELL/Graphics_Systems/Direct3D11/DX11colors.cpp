@@ -39,7 +39,7 @@ namespace enigma_user
 void draw_clear_alpha(int col, float alpha)
 {
 	float color[4];
-	
+
 	// Setup the color to clear the buffer to.
 	color[0] = __GETR(col)/255.0;
 	color[1] = __GETG(col)/255.0;
@@ -53,7 +53,7 @@ void draw_clear_alpha(int col, float alpha)
 void draw_clear(int col)
 {
 	float color[4];
-	
+
 	// Setup the color to clear the buffer to.
 	color[0] = __GETR(col)/255.0;
 	color[1] = __GETG(col)/255.0;
@@ -96,7 +96,7 @@ void draw_set_color_rgba(unsigned char red,unsigned char green,unsigned char blu
 	enigma::currentcolor[0] = red;
 	enigma::currentcolor[1] = green;
 	enigma::currentcolor[2] = blue;
-	enigma::currentcolor[3] = bind_alpha(alpha);	
+	enigma::currentcolor[3] = bind_alpha(alpha);
 }
 
 void draw_set_color_write_enable(bool red, bool green, bool blue, bool alpha)
@@ -182,4 +182,3 @@ int make_color_hsv(int hue,int saturation,int value)
 }
 
 }
-
