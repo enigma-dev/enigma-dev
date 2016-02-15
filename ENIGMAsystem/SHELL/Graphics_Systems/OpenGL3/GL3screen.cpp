@@ -95,7 +95,7 @@ static inline void draw_back()
   using enigma_user::draw_background_tiled_ext;
   using enigma_user::draw_background_ext;
   // Draw the rooms backgrounds
-  for (int back_current = 0; back_current < 8; back_current++) {
+  for (size_t back_current = 0; back_current < 8; back_current++) {
     if (background_visible[back_current] == 1) {
       if (enigma_user::background_exists(background_index[back_current])) {
         //NOTE: This has been double checked with Game Maker 8.1 to work exactly the same, the background_x/y is modified just as object locals are
@@ -225,8 +225,8 @@ static inline int draw_tiles()
   {
     if (dit->second.tiles.size())
     {
-      for (unsigned int t = 0; t<drawing_depths[dit->second.tiles[0].depth].tilevector.size(); ++t){
-        d3d_model_part_draw(drawing_depths[dit->second.tiles[0].depth].tilelist, drawing_depths[dit->second.tiles[0].depth].tilevector[t][0], drawing_depths[dit->second.tiles[0].depth].tilevector[t][1], drawing_depths[dit->second.tiles[0].depth].tilevector[t][2]);
+      for (auto &t : drawing_depths[dit->second.tiles[0].depth].tilevector){
+        d3d_model_part_draw(drawing_depths[dit->second.tiles[0].depth].tilelist, t[0], t[1], t[2]);
       }
     }
     enigma::inst_iter* push_it = enigma::instance_event_iterator;

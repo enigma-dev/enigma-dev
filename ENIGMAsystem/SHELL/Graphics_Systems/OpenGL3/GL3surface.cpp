@@ -19,6 +19,7 @@
 #include "../General/OpenGLHeaders.h"
 #include "../General/GSscreen.h"
 #include "../General/GSmatrix.h"
+#include "Bridges/General/GL3Context.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 
 using namespace std;
@@ -246,7 +247,7 @@ void surface_add_depthbuffer(int id, int internalFormat, unsigned format, unsign
 void surface_set_target(int id)
 {
   get_surface(surf,id);
-  texture_reset();
+  oglmgr->Bind();
   //This fixes several consecutive surface_set_target() calls without surface_reset_target.
   if (enigma::bound_framebuffer != 0) { d3d_transform_stack_pop(); d3d_projection_stack_pop();}
   enigma::bound_framebuffer = surf.fbo;
@@ -260,7 +261,7 @@ void surface_set_target(int id)
 
 void surface_reset_target(void)
 {
-  texture_reset();
+  oglmgr->Bind();
   enigma::bound_framebuffer = 0;
   glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
   d3d_transform_stack_pop();

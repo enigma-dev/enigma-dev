@@ -49,7 +49,7 @@ string string_delete(string str,int index,int count);
 string string_insert(string substr,string str,int index);
 string string_replace(string str,string substr,string newstr);
 string string_replace_all(string str,string substr,string newstr);
-int string_count(string substr, string str);
+size_t string_count(string substr, string str);
 
 string string_lower(string str);
 string string_upper(string str);

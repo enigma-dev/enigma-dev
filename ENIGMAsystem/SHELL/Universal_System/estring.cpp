@@ -232,7 +232,7 @@ string string_replace_all(string str,string substr,string newstr) {
 	return str;
 }
 
-int string_count(string substr,string str) {
+size_t string_count(string substr,string str) {
 	size_t pos = 0, occ = 0;
 	const size_t sublen = substr.length();
   while((pos=str.find(substr,pos)) != string::npos)
@@ -241,7 +241,7 @@ int string_count(string substr,string str) {
 }
 
 string string_lower(string str) {
-	const size_t len = str.length()-1;
+	const size_t len = str.length();
 	for(size_t i = 0; i < len; i++)
 		if(ldgrs[(int)(unsigned char)str[i]] & 2)
 		  str[i] += 32;
@@ -249,8 +249,8 @@ string string_lower(string str) {
 }
 
 string string_upper(string str) {
-	int len=str.length()-1;
-	for(int i = 0; i < len; i++)
+	const size_t len=str.length();
+	for(size_t i = 0; i < len; i++)
 		if(ldgrs[(unsigned char)str[i]]&1) str[i]-=32;
 	return str;
 }

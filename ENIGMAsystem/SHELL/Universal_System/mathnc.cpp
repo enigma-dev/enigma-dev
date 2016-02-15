@@ -27,6 +27,8 @@
 #define INCLUDED_FROM_SHELLMAIN Not really.
 #include "mathnc.h"
 
+#define M_PI    3.14159265358979323846
+
 //overloading
 
 namespace enigma_user
