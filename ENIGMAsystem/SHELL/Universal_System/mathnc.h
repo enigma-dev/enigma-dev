@@ -76,14 +76,8 @@ namespace enigma_user
   inline ma_scalar arctan(ma_scalar x)           { return ::atan(x); }
   inline ma_scalar arctan2(ma_scalar y,ma_scalar x) { return ::atan2(y,x); }
 
-  //MSVC++ uses __int64 instead of int64_t for some reason
-  #ifdef WINDOWS
-    inline __int64 int64(ma_scalar x) { return (__int64) x; }
-    inline __int64 int64(string x) { return (__int64) atol(x.c_str()); }
-  #else
-    inline int64_t int64(ma_scalar x) { return (int64_t)x; }
-    inline int64_t int64(string x) { return (int64_t) atol(x.c_str()); }
-  #endif
+  inline int64_t int64(ma_scalar x) { return (int64_t)x; }
+  inline int64_t int64(string x) { return (int64_t) atol(x.c_str()); }
 
   // TODO: Once the user space switch to namespace enigma_user has been made,
   // comment in these functions.
