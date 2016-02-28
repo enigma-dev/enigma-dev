@@ -78,9 +78,9 @@ namespace enigma_user
 
   //MSVC++ uses __int64 instead of int64_t for some reason
   #ifdef WINDOWS
-    inline ma_scalar int64(ma_scalar x) { return (__int64) x; }
+    inline __int64 int64(ma_scalar x) { return (__int64) x; }
   #else
-    inline ma_scalar int64(ma_scalar x) { return (int64_t)x; }
+    inline int64_t int64(ma_scalar x) { return (int64_t)x; }
   #endif
 
   // TODO: Once the user space switch to namespace enigma_user has been made,
