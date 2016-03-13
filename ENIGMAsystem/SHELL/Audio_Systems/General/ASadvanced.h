@@ -27,7 +27,7 @@ using std::string;
 namespace enigma_user
 {
 
-enum { 
+enum {
   audio_falloff_none,                         // AL_NONE
   audio_falloff_inverse_distance,             // AL_INVERSE_DISTANCE
   audio_falloff_inverse_distance_clamped,     // AL_INVERSE_DISTANCE_CLAMPED
@@ -67,7 +67,7 @@ void audio_listener_velocity(as_scalar vx, as_scalar vy, as_scalar vz);
 int audio_sound_length(int index);
 void audio_sound_pitch(int index, float pitch);
 void audio_sound_gain(int index, float volume, double time);
-void audio_master_gain(float volume, double time);
+void audio_master_gain(float volume);
 
 void audio_channel_num(int num);
 
