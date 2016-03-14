@@ -40,6 +40,7 @@
 
 #include <cstdlib> // random()
 #include "scalar.h"
+#include "libEGMstd.h"
 
 #define M_PI		3.14159265358979323846
 
@@ -78,7 +79,7 @@ namespace enigma_user
 
   inline int64_t int64(ma_scalar x) { return (int64_t)x; }
   inline int64_t int64(string x) { return (int64_t) atol(x.c_str()); }
-  inline int64_t int64(const var& x) { return (int64_t) atol(to_string(x).c_str()); }
+  inline int64_t int64(const var& x) { return (int64_t) atol(toString(x).c_str()); }
 
   // TODO: Once the user space switch to namespace enigma_user has been made,
   // comment in these functions.
