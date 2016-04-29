@@ -30,22 +30,22 @@ namespace enigma_user {
     gp_shoulderrb = 7,
     gp_select = 8,
     gp_start = 9,
-    gp_stickl = 10, 
+    gp_stickl = 10,
     gp_stickr = 11,
     gp_padu = 12,
     gp_padd = 13,
     gp_padl = 14,
     gp_padr = 15,
-    gp_axislh = 16, 
+    gp_axislh = 16,
     gp_axislv = 17,
     gp_axisrh = 18,
     gp_axisrv = 19,
-    
+
     gp_empty = 20,
-    gp_low = 21, 
+    gp_low = 21,
     gp_medium = 22,
     gp_full = 23,
-    
+
     gp_disconnected = 24,
     gp_wired = 25,
     gp_alkaline = 26,

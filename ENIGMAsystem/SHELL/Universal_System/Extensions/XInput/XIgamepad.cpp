@@ -122,7 +122,7 @@ void gamepad_set_vibration(int device, float left, float right) {
 int gamepad_axis_count(int device) {
   return 4;
 }
-  
+
 float gamepad_axis_value(int device, int axis) {
   XINPUT_STATE controllerState = {};
 
