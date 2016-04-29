@@ -26,8 +26,7 @@
 using namespace std;
 
 int better_system(
-    const char* jname, const char* param, const char *direc = NULL)
-{
+    const char* jname, const char* param, const char *direc = NULL) {
   DWORD exit_status;
 
   if (direc)
@@ -74,8 +73,7 @@ HWND dlb = NULL, cbb = NULL;
 typedef vector<string> CommandLineStringArgs;
 
 void myReplace(
-    std::string& str, const std::string& oldStr, const std::string& newStr)
-{
+    std::string& str, const std::string& oldStr, const std::string& newStr) {
   size_t pos = 0;
   while ((pos = str.find(oldStr, pos)) != std::string::npos)
   {
@@ -177,7 +175,7 @@ void ask_for_updates() {
 void check_for_updates() {
   bool updatesavailable = false;
   if (updatesavailable) {
-    HANDLE h = GetStdHandle ( STD_OUTPUT_HANDLE );
+    HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
     WORD wOldColorAttrs;
     CONSOLE_SCREEN_BUFFER_INFO csbiInfo;
 
@@ -201,7 +199,7 @@ void check_for_updates() {
     puts("*** Updates Available ***");
 
     // Restore the original colors
-    SetConsoleTextAttribute ( h, wOldColorAttrs);
+    SetConsoleTextAttribute(h, wOldColorAttrs);
 
     string lvtxt = "Latest Version: ";
     puts(lvtxt.c_str());
@@ -223,15 +221,7 @@ void check_for_updates() {
 
 #include <unistd.h>
 
-/*
-JoshDreamland> 
-<JoshDreamland> put newlines after the commas
-<JoshDreamland> and go ahead and include permutations for C:
-<JoshDreamland> then just iterate that and do the check
-*/
-
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
   //if setup script exists; run it then create flag file called "compiled"
   CommandLineStringArgs cmdlineStringArgs(&argv[0], &argv[0 + argc]);
 
@@ -269,32 +259,36 @@ int main(int argc, char *argv[])
       GetEnvironmentVariable("programfiles(x86)", buf, MAX_PATH);
       string pfx86p = buf;
 
-      string java_paths[] = {
-          pfx86p + "\\Java\\jre8\\bin\\java.exe",
-          pfx86p + "\\Java\\jre7\\bin\\java.exe",
-          pfx86p + "\\Java\\jre6\\bin\\java.exe",
-          "\\Program Files (x86)\\Java\\jre8\\bin\\",
-          "\\Program Files (x86)\\Java\\jre7\\bin\\",
-          "\\Program Files (x86)\\Java\\jre6\\bin\\",
-          "C:\\Program Files (x86)\\Java\\jre8\\bin\\",
-          "C:\\Program Files (x86)\\Java\\jre7\\bin\\",
-          "C:\\Program Files (x86)\\Java\\jre6\\bin\\",
-          pfp + "\\Java\\jre8\\bin\\java.exe",
-          pfp + "\\Java\\jre7\\bin\\java.exe",
-          pfp + "\\Java\\jre6\\bin\\java.exe",
-          "\\Program Files\\Java\\jre8\\bin\\",
-          "\\Program Files\\Java\\jre7\\bin\\",
-          "\\Program Files\\Java\\jre6\\bin\\",
-          "C:\\Program Files\\Java\\jre8\\bin\\",
-          "C:\\Program Files\\Java\\jre7\\bin\\",
-          "C:\\Program Files\\Java\\jre6\\bin\\"
-      };
-      
       int result = better_system(jpath, "-version");
-      for (size_t i = 0; i < 18; i++) {
-        int result = better_system(jpath = java_paths[i].c_str(), "-version");
-        if (!result) break;
+      if (result) {
+        string pfx86paths[] = {
+            pfx86p,
+            "\\Program Files (x86)\\",
+            "C:\\Program Files (x86)\\"
+        };
+
+        for (size_t i = 0; i < 3; i++) {
+          string path = pfx86paths[i];
+          HANDLE hFind;
+          WIN32_FIND_DATA data;
+          hFind = FindFirstFile(std::string(path + "\\Java\\*").c_str(), &data);
+          if (hFind == INVALID_HANDLE_VALUE) continue;
+          do {
+            if (data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY
+                && (strncmp(data.cFileName, "jre", 3) == 0
+                || strncmp(data.cFileName, "jdk", 3) == 0)) {
+              result = better_system(
+                  jpath = string(path + "\\Java\\" + data.cFileName
+                  + "\\bin\\java").c_str(),
+                  "-version");
+              if (!result) break;
+            }
+          } while (FindNextFile(hFind, &data));
+          FindClose(hFind);
+          break;
+        }
       }
+      puts(jpath);
       if (result)
       {
         output_error(java_not_found);
@@ -316,10 +310,10 @@ int main(int argc, char *argv[])
   bool skippedsetup = GetPrivateProfileInt(
       "MAIN", "skippedsetup", 0, settingspath.c_str());
 
+  //If setup script not found
   if (!skippedsetup && !setupcompleted
       && INVALID_FILE_ATTRIBUTES == GetFileAttributes(setuppath.c_str())
-      && GetLastError()== ERROR_FILE_NOT_FOUND)  //If setup script not found
-  {
+      && GetLastError()== ERROR_FILE_NOT_FOUND) {
     output_error("Setup script not found.");
     bool launchanyway = false;
     if (redirectoutput) {
@@ -345,9 +339,8 @@ int main(int argc, char *argv[])
       }
       return -1;
     }
-  }
-  else if (!setupcompleted && !skippedsetup)  // make sure not already compiled
-  {
+  } else if (!setupcompleted && !skippedsetup) {
+    // make sure not already compiled
     puts("Downloading and Compiling Binaries, please wait...");
 
     DWORD exit_status;
@@ -361,8 +354,8 @@ int main(int argc, char *argv[])
     string cmdline = "\"" + bashpath + "\" \"" + setuppath + "\"";
 
     if (CreateProcess(NULL,(char *)cmdline.c_str(),NULL,NULL,
-      FALSE,0,NULL,NULL,&StartupInfo,&ProcessInfo)) {
-        WaitForSingleObject(ProcessInfo.hProcess, INFINITE);
+        FALSE,0,NULL,NULL,&StartupInfo,&ProcessInfo)) {
+      WaitForSingleObject(ProcessInfo.hProcess, INFINITE);
       GetExitCodeProcess(ProcessInfo.hProcess, &exit_status);
       CloseHandle(ProcessInfo.hProcess);
       CloseHandle(ProcessInfo.hThread);
@@ -405,8 +398,7 @@ int main(int argc, char *argv[])
   string workpath = exepath + "enigma-dev/";
   //Test if subdirectory exists, if it doesn't, then assume exe is in it
   DWORD ftyp = GetFileAttributesA(workpath.c_str());
-  if (ftyp == INVALID_FILE_ATTRIBUTES || !(ftyp & FILE_ATTRIBUTE_DIRECTORY))
-  {
+  if (ftyp == INVALID_FILE_ATTRIBUTES || !(ftyp & FILE_ATTRIBUTE_DIRECTORY)) {
     workpath = exepath;
   }
 
