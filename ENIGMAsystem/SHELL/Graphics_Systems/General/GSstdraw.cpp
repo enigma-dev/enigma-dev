@@ -195,6 +195,7 @@ void draw_circle(gs_scalar x, gs_scalar y, float rad, bool outline)
 		draw_primitive_begin(pr_linestrip);
 	} else {
 		draw_primitive_begin(pr_trianglefan);
+		draw_vertex(x,y);
 	}
 
 	for (double i = 0; i <= 2*M_PI; i += pr)
