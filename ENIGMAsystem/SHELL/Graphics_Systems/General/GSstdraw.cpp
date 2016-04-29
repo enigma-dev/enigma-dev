@@ -190,22 +190,16 @@ float draw_get_circle_precision() {
 
 void draw_circle(gs_scalar x, gs_scalar y, float rad, bool outline)
 {
-    double pr = 2 * M_PI / enigma::circleprecision;
-    if (outline) {
+	double pr = 2 * M_PI / enigma::circleprecision;
+	if (outline) {
 		draw_primitive_begin(pr_linestrip);
-        for (double i = 0; i <= 2*M_PI; i += pr) {
-            double xc1=cos(i)*rad,yc1=sin(i)*rad;
-			draw_vertex(x+xc1, y+yc1);
-        }
-		draw_primitive_end();
-    } else {
+	} else {
 		draw_primitive_begin(pr_trianglefan);
-        for (double i = 0; i <= 2*M_PI; i += pr) {
-            double xc1=cos(i)*rad,yc1=sin(i)*rad;
-			draw_vertex(x+xc1, y+yc1);
-        }
-		draw_primitive_end();
-    }
+	}
+
+	for (double i = 0; i <= 2*M_PI; i += pr)
+		draw_vertex(x+rad*cos(i),y+rad*sin(i));
+	draw_primitive_end();
 }
 
 void draw_circle_color(gs_scalar x, gs_scalar y, float rad,int c1, int c2,bool outline)
