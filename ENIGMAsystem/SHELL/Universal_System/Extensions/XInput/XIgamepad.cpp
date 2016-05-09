@@ -28,13 +28,7 @@ bool gamepad_is_supported() {
 
 bool gamepad_is_connected(int num) {
   XINPUT_STATE controllerState = {};
-  // Get the state
-  DWORD dwResult = XInputGetState(num, &controllerState);
-  if (dwResult == ERROR_SUCCESS) {
-    return true;
-  } else {
-    return false;
-  }
+  return XInputGetState(num, &controllerState) == ERROR_SUCCESS;
 }
 
 int gamepad_get_device_count() {
@@ -42,18 +36,60 @@ int gamepad_get_device_count() {
 }
 
 string gamepad_get_description(int device) {
-  if (gamepad_is_connected(device)) {
-    return "Xbox 360 Controller (XInput STANDARD GAMEPAD)";
-  } else {
-    return "No device connected";
+  XINPUT_CAPABILITIES capabilities = {};
+
+  DWORD dwResult = XInputGetCapabilities(device, 0, &capabilities);
+
+  if (dwResult == ERROR_SUCCESS) {
+    //if (capabilities.Type == XINPUT_DEVTYPE_GAMEPAD) {
+      switch (capabilities.SubType) {
+        default:
+#ifdef XINPUT_DEVSUBTYPE_UNKNOWN
+        case XINPUT_DEVSUBTYPE_UNKNOWN:
+          return "Xbox 360 Controller (XInput UNKNOWN)";
+#endif
+        case XINPUT_DEVSUBTYPE_GAMEPAD:
+          return "Xbox 360 Controller (XInput STANDARD GAMEPAD)";
+        case XINPUT_DEVSUBTYPE_WHEEL:
+          return "Xbox 360 Controller (XInput WHEEL)";
+        case XINPUT_DEVSUBTYPE_ARCADE_STICK:
+          return "Xbox 360 Controller (XInput ARCADE STICK)";
+#ifdef XINPUT_DEVSUBTYPE_FLIGHT_STICK
+        case XINPUT_DEVSUBTYPE_FLIGHT_STICK:
+          return "Xbox 360 Controller (XInput FLIGHT STICK)";
+#endif
+        case XINPUT_DEVSUBTYPE_DANCE_PAD:
+          return "Xbox 360 Controller (XInput DANCE PAD)";
+        case XINPUT_DEVSUBTYPE_GUITAR:
+          return "Xbox 360 Controller (XInput GUITAR)";
+#ifdef XINPUT_DEVSUBTYPE_GUITAR_ALTERNATE
+        case XINPUT_DEVSUBTYPE_GUITAR_ALTERNATE:
+          return "Xbox 360 Controller (XInput GUITAR ALTERNATE)";
+#endif
+#ifdef XINPUT_DEVSUBTYPE_GUITAR_BASS
+        case XINPUT_DEVSUBTYPE_GUITAR_BASS:
+          return "Xbox 360 Controller (XInput GUITAR BASS)";
+#endif
+        case XINPUT_DEVSUBTYPE_DRUM_KIT:
+          return "Xbox 360 Controller (XInput DRUM KIT)";
+#ifdef XINPUT_DEVSUBTYPE_ARCADE_PAD
+        case XINPUT_DEVSUBTYPE_ARCADE_PAD:
+          return "Xbox 360 Controller (XInput ARCADE PAD)";
+#endif
+      }
+    //}
+    //return "Unknown Controller";
   }
+
+  return "";
 }
 
 int gamepad_get_battery_type(int device) {
   XINPUT_BATTERY_INFORMATION batteryInformation = {};
-  // Get the state
+
   DWORD dwResult = XInputGetBatteryInformation(
-      device, XINPUT_DEVTYPE_GAMEPAD, &batteryInformation);
+      device, BATTERY_DEVTYPE_GAMEPAD, &batteryInformation);
+
   if (dwResult == ERROR_SUCCESS) {
     switch (batteryInformation.BatteryType) {
       case BATTERY_TYPE_DISCONNECTED:
@@ -65,19 +101,20 @@ int gamepad_get_battery_type(int device) {
       case BATTERY_TYPE_NIMH:
         return gp_nimh;
       case BATTERY_TYPE_UNKNOWN:
-        return gp_unknown;
       default:
-        break;
+        return gp_unknown;
     }
   }
+
   return 0;
 }
 
 int gamepad_get_battery_charge(int device) {
   XINPUT_BATTERY_INFORMATION batteryInformation = {};
-  // Get the state
+
   DWORD dwResult = XInputGetBatteryInformation(
       device, XINPUT_DEVTYPE_GAMEPAD, &batteryInformation);
+
   if (dwResult == ERROR_SUCCESS) {
     switch (batteryInformation.BatteryLevel) {
       case BATTERY_LEVEL_EMPTY:
@@ -92,6 +129,7 @@ int gamepad_get_battery_charge(int device) {
         break;
     }
   }
+
   return 0;
 }
 
@@ -108,14 +146,11 @@ void gamepad_set_axis_deadzone(int device, float deadzone) {
 }
 
 void gamepad_set_vibration(int device, float left, float right) {
-  // Create a Vibraton State
   XINPUT_VIBRATION vibration = {};
 
-  // Set the Vibration Values
   vibration.wLeftMotorSpeed = left * 65535;
   vibration.wRightMotorSpeed = right * 65535;
 
-  // Vibrate the controller
   XInputSetState(device, &vibration);
 }
 
@@ -126,22 +161,22 @@ int gamepad_axis_count(int device) {
 float gamepad_axis_value(int device, int axis) {
   XINPUT_STATE controllerState = {};
 
-  // Get the state
   DWORD dwResult = XInputGetState(device, &controllerState);
+
   if (dwResult == ERROR_SUCCESS) {
     float ret = 0;
     switch (axis) {
       case gp_axislh:
-        ret = controllerState.Gamepad.sThumbLX;
+          ret = controllerState.Gamepad.sThumbLX;
         break;
       case gp_axislv:
-        ret = -controllerState.Gamepad.sThumbLY - 1;
+          ret = -controllerState.Gamepad.sThumbLY - 1;
         break;
       case gp_axisrh:
-        ret = controllerState.Gamepad.sThumbRX;
+          ret = controllerState.Gamepad.sThumbRX;
         break;
       case gp_axisrv:
-        ret = -controllerState.Gamepad.sThumbRY - 1;
+          ret = -controllerState.Gamepad.sThumbRY - 1;
         break;
       default:
         return 0;
@@ -168,44 +203,29 @@ WORD digitalButtons[20] = {
 bool gamepad_button_check(int device, int button) {
   XINPUT_STATE controllerState = {};
 
-  // Get the state
   XInputGetState(device, &controllerState);
 
-  if (controllerState.Gamepad.wButtons & digitalButtons[button]) {
-    return true;
-  } else {
-    return false;
-  }
+  return controllerState.Gamepad.wButtons & digitalButtons[button];
 }
 
 bool gamepad_button_check_pressed(int device, int button) {
   XINPUT_STATE controllerState = {};
 
-  // Get the state
   XInputGetState(device, &controllerState);
 
-  if (controllerState.Gamepad.wButtons & digitalButtons[button]) {
-    return true;
-  } else {
-    return false;
-  }
+  return controllerState.Gamepad.wButtons & digitalButtons[button];
 }
 
 bool gamepad_button_check_released(int device, int button) {
   XINPUT_STATE controllerState = {};
 
-  // Get the state
   XInputGetState(device, &controllerState);
 
-  if (controllerState.Gamepad.wButtons & digitalButtons[button]) {
-    return false;
-  } else {
-    return true;
-  }
+  return !(controllerState.Gamepad.wButtons & digitalButtons[button]);
 }
 
 int gamepad_button_count(int device) {
-  // GMS gives 16 for my wired 360 controller, i assume every button except
+  // GMS gives 16 for my wired 360 controller, I assume every button except
   // the guide button is counted
   return gamepad_is_connected(device) ? 16 : 0;
 }
@@ -213,7 +233,6 @@ int gamepad_button_count(int device) {
 float gamepad_button_value(int device, int button) {
   XINPUT_STATE controllerState = {};
 
-  // Get the state
   DWORD dwResult = XInputGetState(device, &controllerState);
 
   if (dwResult == ERROR_SUCCESS) {
@@ -226,6 +245,7 @@ float gamepad_button_value(int device, int button) {
         break;
     }
   }
+
   return 0;
 }
 
