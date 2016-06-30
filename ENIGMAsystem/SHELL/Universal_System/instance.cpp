@@ -140,8 +140,8 @@ int instance_number(int obj)
       return (bool) enigma::fetch_inst_iter_by_int(obj);
     case all:
       return enigma::instance_list.size();
-    case noone: case global: case local:
-      return 0;
+    default:
+      if (obj < 0) return 0;
   }
   return enigma::objects[obj].count;
 }
