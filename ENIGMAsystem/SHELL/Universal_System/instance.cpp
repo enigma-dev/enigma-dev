@@ -134,6 +134,15 @@ enigma::instance_t instance_last(int obj) {
 
 int instance_number(int obj)
 {
+  switch (obj) {
+    case self:
+    case other:
+      return (bool) enigma::fetch_inst_iter_by_int(obj);
+    case all:
+      return enigma::instance_list.size();
+    case noone: case global: case local:
+      return 0;
+  }
   return enigma::objects[obj].count;
 }
 
