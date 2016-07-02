@@ -64,4 +64,3 @@ unsigned int string_width_ext_line(variant str, gs_scalar wid, int line);
 unsigned int string_width_ext_line_count(variant str, gs_scalar wid);
 
 }
-
