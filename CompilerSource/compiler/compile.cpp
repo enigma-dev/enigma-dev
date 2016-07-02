@@ -118,7 +118,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode) 
 
 int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
 {
-  
+
   cout << "Initializing dialog boxes" << endl;
     ide_dia_clear();
     ide_dia_open();
@@ -142,7 +142,7 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
 	return 0;
   }
   edbg << "Building for mode (" << mode << ")" << flushl;
- 
+
   // CLean up from any previous executions.
 
   edbg << "Cleaning up from previous executions" << flushl;
@@ -202,7 +202,7 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
     cout << "Name on this side2: " << ((jdi::definition_scope*)&globals_scope)->name << endl;
     cout << "Pointer on this side: " << (&globals_scope) << endl;
     cout << "Address on this side: " << ((jdi::definition_scope*)&globals_scope) << endl;
-    
+
     quickmember_variable(&globals_scope,jdi::builtin_type__int,es->sprites[i].name);
   }
 
@@ -281,7 +281,7 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
 
   // FIRST FILE
   // Modes, settings and executable information.
-  
+
   GameSettings gameSet = es->gameSettings;
   edbg << "Writing executable information and resources." << flushl;
   wto.open((makedir +"Preprocessor_Environment_Editable/Resources.rc").c_str(),ios_base::out);
@@ -309,7 +309,7 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
 	wto << "VALUE \"Translation\", 0x409, 1252\n";
 	wto << "END\nEND";
   wto.close();
-  
+
   edbg << "Writing modes and settings" << flushl;
   wto.open((makedir +"Preprocessor_Environment_Editable/GAME_SETTINGS.h").c_str(),ios_base::out);
     wto << license;
@@ -318,6 +318,7 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
     wto << "#define PRIMDEPTH2 6\n";
     wto << "#define AUTOLOCALS 0\n";
     wto << "#define MODE3DVARS 0\n";
+    wto << "#define GM_COMPATIBILITY_VERSION " << setting::compliance_mode << "\n";
     wto << "void ABORT_ON_ALL_ERRORS() { " << (false?"game_end();":"") << " }\n";
     wto << '\n';
   wto.close();
@@ -466,7 +467,7 @@ wto << "namespace enigma_user {\nstring script_get_name(int i) {\n switch (i) {\
 wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\n";
      wto << ss.str() << " default: return \"<undefined>\";}};}\n\n";
      ss.str( "" );
-	 
+
     max = 0;
     wto << "namespace enigma_user {\nenum //room names\n{\n";
     for (int i = 0; i < es->roomCount; i++) {
@@ -486,7 +487,7 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
     wto <<"namespace enigma {\n\n";
 
     //Each timeline has a lookup structure (in this case, a map) which allows easy forward/backward lookup.
-    //This is currently constructed rather manually; there are probably more efficient 
+    //This is currently constructed rather manually; there are probably more efficient
     // construction techniques, but none come to mind.
     wto <<"void timeline_system_initialize() {\n";
     wto <<"  std::vector< std::map<int, int> >& res = object_timelines::timeline_moments_maps;\n";
@@ -501,7 +502,7 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
     }
     wto <<"}\n\n";
 
-    wto <<"}\n"; //namespace 
+    wto <<"}\n"; //namespace
   }
   wto.close();
 
@@ -517,7 +518,7 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
 
   edbg << "Running Secondary Parse Passes" << flushl;
   res = current_language->compile_parseSecondary(parsed_objects,parsed_scripts,es->scriptCount, parsed_tlines, parsed_rooms,&EGMglobal, script_names);
-  
+
   edbg << "Writing events" << flushl;
   res = current_language->compile_writeDefraggedEvents(es);
   irrr();
@@ -738,14 +739,14 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
     getcwd (prevdir, 4096);
     chdir(newdir.c_str());
     #endif
-    
+
     string rprog = extensions::targetOS.runprog, rparam = extensions::targetOS.runparam;
     rprog = string_replace_all(rprog,"$game",gameFname);
     rparam = string_replace_all(rparam,"$game",gameFname);
     user << "Running \"" << rprog << "\" " << rparam << flushl;
     int gameres = e_execs(rprog, rparam);
     user << "\n\nGame returned " << gameres << "\n";
-    
+
     // Restore the compilers original working directory.
     #if CURRENT_PLATFORM_ID == OS_WINDOWS
     SetCurrentDirectory(prevdir);
@@ -757,4 +758,3 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
   idpr("Done.", 100);
   return 0;
 }
-
