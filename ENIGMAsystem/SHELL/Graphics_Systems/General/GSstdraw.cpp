@@ -1,5 +1,6 @@
 /** Copyright (C) 2013 Robert B. Colton
 *** Copyright (C) 2014 Seth N. Hetu
+*** Copyright (C) 2016 Faissal I. Bensefia
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -355,9 +356,9 @@ void draw_sector(gs_scalar x, gs_scalar y, gs_scalar rx, gs_scalar ry, float a1,
   // TODO(JoshDreamland): Replace with settings macro to get from preferred unit to radians
   a1 *= M_PI/180;
   a2 *= M_PI/180;
-  
+
   gs_scalar pr = 2*M_PI/enigma::circleprecision;
-  
+
   if (outline) {
     draw_primitive_begin(pr_linestrip);
     draw_vertex(x, y);
@@ -415,11 +416,77 @@ void draw_triangle_color(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, 
 }
 
 void draw_roundrect(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, float rad, bool outline) {
-	//TODO: Needs written to use circle precision for the corners
+	if (x1>x2) {
+		float t=x2;
+		x2=x1;
+		x1=t;
+    }
+  if (y1>y2) {
+    float t=y2;
+		y2=y1;
+		y1=t;
+	}
+
+	double pr = 2 * M_PI / enigma::circleprecision;
+	if (outline) {
+		draw_primitive_begin(pr_linestrip);
+	} else {
+		draw_primitive_begin(pr_trianglefan);
+	}
+
+	for (double i = 0; i <= 2*M_PI*0.25; i += pr)
+		draw_vertex((x2+rad*cos(i))-rad,(y2+rad*sin(i))-rad);
+
+	for (double i = 2*M_PI*0.24; i <= 2*M_PI*0.50; i+= pr)
+		draw_vertex((x1+rad*cos(i))+rad,(y2+rad*sin(i))-rad);
+
+	for (double i = 2*M_PI*0.49;i <=2*M_PI*0.75;i += pr)
+		draw_vertex((x1+rad*cos(i))+rad,(y1+rad*sin(i))+rad);
+
+	for (double i = 2*M_PI*0.74;i <=(2*M_PI);i += pr)
+		draw_vertex((x2+rad*cos(i))-rad,(y1+rad*sin(i))+rad);
+
+	if (outline) {
+  		draw_vertex(x2,y2-rad);
+	}
+	draw_primitive_end();
 }
 
 void draw_roundrect_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, float rad, int col1, int col2, bool outline) {
-	//TODO: Needs written to use circle precision for the corners
+  gs_scalar alpha = draw_get_alpha();
+  if (x1>x2) {
+		float t=x2;
+		x2=x1;
+		x1=t;
+    }
+  if (y1>y2) {
+    float t=y2;
+		y2=y1;
+		y1=t;
+	}
+
+	double pr = 2 * M_PI / enigma::circleprecision;
+	if (outline) {
+		draw_primitive_begin(pr_linestrip);
+	} else {
+		draw_primitive_begin(pr_trianglefan);
+    draw_vertex_color((x2+x1)/2,(y2+y1)/2, col1, alpha);
+	}
+
+	for (double i = 0; i <= 2*M_PI*0.25; i += pr)
+		draw_vertex_color((x2+rad*cos(i))-rad,(y2+rad*sin(i))-rad, col2, alpha);
+
+	for (double i = 2*M_PI*0.24; i <= 2*M_PI*0.50; i+= pr)
+		draw_vertex_color((x1+rad*cos(i))+rad,(y2+rad*sin(i))-rad, col2, alpha);
+
+	for (double i = 2*M_PI*0.49;i <=2*M_PI*0.75;i += pr)
+		draw_vertex_color((x1+rad*cos(i))+rad,(y1+rad*sin(i))+rad, col2, alpha);
+
+	for (double i = 2*M_PI*0.74;i <=(2*M_PI);i += pr)
+		draw_vertex_color((x2+rad*cos(i))-rad,(y1+rad*sin(i))+rad, col2, alpha);
+
+	draw_vertex_color(x2,y2-rad, col2, alpha);
+	draw_primitive_end();
 }
 
 void draw_roundrect_ext(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, float xrad, float yrad, bool outline) {
@@ -770,4 +837,3 @@ void draw_polygon_end(bool outline, bool allowHoles)
 
 
 }
-
