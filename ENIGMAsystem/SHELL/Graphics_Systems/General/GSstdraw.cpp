@@ -428,11 +428,7 @@ void draw_roundrect(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, float
 	}
 
 	double pr = 2 * M_PI / enigma::circleprecision;
-	if (outline) {
-		draw_primitive_begin(pr_linestrip);
-	} else {
-		draw_primitive_begin(pr_trianglefan);
-	}
+	draw_primitive_begin(outline ? pr_linestrip : pr_trianglefan);
 
 	for (double i = 0; i <= 2*M_PI*0.25; i += pr)
 		draw_vertex((x2+rad*cos(i))-rad,(y2+rad*sin(i))-rad);
