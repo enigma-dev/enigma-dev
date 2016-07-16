@@ -102,6 +102,26 @@ namespace enigma_user
       //enigma::d3d_light_update_positions();
   }
 
+  void d3d_set_projection_ortho_lookat(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom, gs_scalar xto, gs_scalar yto, gs_scalar zto, gs_scalar xup, gs_scalar yup, gs_scalar zup)
+  {
+      // This fixes font glyph edge artifacting and vertical scroll gaps
+      // seen by mostly NVIDIA GPU users.  Rounds x and y and adds +0.01 offset.
+      // This will prevent the fix from being negated through moving projections
+      // and fractional coordinates.
+      x = round(x) + 0.01f; y = round(y) + 0.01f;
+
+      oglmgr->Transformation();
+      enigma::projection_matrix.init_identity();
+
+      enigma::Matrix4 ortho;
+      ortho.init_ortho_proj_transform(x,x + width,y,y + height,32000,-32000);
+
+      enigma::projection_matrix = ortho * enigma::projection_matrix;
+      enigma::view_matrix.init_camera_transform(enigma::Vector3(xfrom,yfrom,zfrom),enigma::Vector3(xto,yto,zto),enigma::Vector3(xup,yup,zup));
+      enigma::transform_needs_update = true;
+      //enigma::d3d_light_update_positions();
+  }
+
   void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, gs_scalar angle)
   {
       // This fixes font glyph edge artifacting and vertical scroll gaps
@@ -261,27 +281,93 @@ namespace enigma_user
       oglmgr->Transformation();
       enigma::Matrix4 m(matrix);
       enigma::model_matrix = m*enigma::model_matrix;
-      enigma::transform_needs_update = true;
+     enigma::transform_needs_update = true;
   }
 
-  gs_scalar * d3d_transform_get_array(){
+  gs_scalar * d3d_transform_get_array_pointer(){
       return enigma::model_matrix;
+  }
+
+  var d3d_transform_get_array(){
+      enigma::transformation_update();
+      var mm;
+      mm(4,4) = 0;
+      mm(0,0) = enigma::model_matrix(0,0), mm(0,1) = enigma::model_matrix(0,1), mm(0,2) = enigma::model_matrix(0,2), mm(0,3) = enigma::model_matrix(0,3),
+      mm(1,0) = enigma::model_matrix(1,0), mm(1,1) = enigma::model_matrix(1,1), mm(1,2) = enigma::model_matrix(1,2), mm(1,3) = enigma::model_matrix(1,3),
+      mm(2,0) = enigma::model_matrix(2,0), mm(2,1) = enigma::model_matrix(2,1), mm(2,2) = enigma::model_matrix(2,2), mm(2,3) = enigma::model_matrix(2,3),
+      mm(3,0) = enigma::model_matrix(3,0), mm(3,1) = enigma::model_matrix(3,1), mm(3,2) = enigma::model_matrix(3,2), mm(3,3) = enigma::model_matrix(3,3);
+      return mm;
   }
 
   void d3d_transform_force_update(){
       oglmgr->Transformation();
       enigma::transformation_update();
   }
+  
+  void d3d_projection_set_array(const gs_scalar *matrix)
+  {
+      oglmgr->Transformation();
+      enigma::projection_matrix = enigma::Matrix4(matrix);
+      enigma::view_matrix.init_identity();
+      enigma::transform_needs_update = true;
   }
 
+  void d3d_projection_add_array(const gs_scalar *matrix)
+  {
+      oglmgr->Transformation();
+      enigma::Matrix4 m(matrix);
+      enigma::projection_matrix = m*enigma::projection_matrix;
+      enigma::view_matrix.init_identity();
+      enigma::transform_needs_update = true;
+  }
+  
+  gs_scalar * d3d_projection_get_array_pointer(){
+      return enigma::projection_matrix;
+  }
+
+  var d3d_projection_get_array(){
+      enigma::transformation_update();
+      var pm;
+      pm(4,4) = 0;
+      pm(0,0) = enigma::projection_matrix(0,0), pm(0,1) = enigma::projection_matrix(0,1), pm(0,2) = enigma::projection_matrix(0,2), pm(0,3) = enigma::projection_matrix(0,3),
+      pm(1,0) = enigma::projection_matrix(1,0), pm(1,1) = enigma::projection_matrix(1,1), pm(1,2) = enigma::projection_matrix(1,2), pm(1,3) = enigma::projection_matrix(1,3),
+      pm(2,0) = enigma::projection_matrix(2,0), pm(2,1) = enigma::projection_matrix(2,1), pm(2,2) = enigma::projection_matrix(2,2), pm(2,3) = enigma::projection_matrix(2,3),
+      pm(3,0) = enigma::projection_matrix(3,0), pm(3,1) = enigma::projection_matrix(3,1), pm(3,2) = enigma::projection_matrix(3,2), pm(3,3) = enigma::projection_matrix(3,3);
+      return pm;
+  }
+
+  gs_scalar * d3d_view_get_array_pointer(){
+      return enigma::view_matrix;
+  }
+
+  var d3d_view_get_array(){
+      enigma::transformation_update();
+      var pm;
+      pm(4,4) = 0;
+      pm(0,0) = enigma::view_matrix(0,0), pm(0,1) = enigma::view_matrix(0,1), pm(0,2) = enigma::view_matrix(0,2), pm(0,3) = enigma::view_matrix(0,3),
+      pm(1,0) = enigma::view_matrix(1,0), pm(1,1) = enigma::view_matrix(1,1), pm(1,2) = enigma::view_matrix(1,2), pm(1,3) = enigma::view_matrix(1,3),
+      pm(2,0) = enigma::view_matrix(2,0), pm(2,1) = enigma::view_matrix(2,1), pm(2,2) = enigma::view_matrix(2,2), pm(2,3) = enigma::view_matrix(2,3),
+      pm(3,0) = enigma::view_matrix(3,0), pm(3,1) = enigma::view_matrix(3,1), pm(3,2) = enigma::view_matrix(3,2), pm(3,3) = enigma::view_matrix(3,3);
+      return pm;
+  }
+
+  gs_scalar * d3d_transformation_get_mv(){
+      enigma::transformation_update();
+      return enigma::mv_matrix;
+  }
+
+  gs_scalar * d3d_transformation_get_mvp(){
+      enigma::transformation_update();
+      return enigma::mvp_matrix;
+  }
+}
   #include <stack>
   std::stack<enigma::Matrix4> trans_stack;
   std::stack<enigma::Matrix4> proj_stack;
   std::stack<enigma::Matrix4> view_stack;
 
-  namespace enigma_user
-  {
-
+namespace enigma_user
+{
   bool d3d_transform_stack_push()
   {
       //if (trans_stack.size() == 31) return false; //This is a GM limitation that ENIGMA doesn't have
@@ -381,34 +467,5 @@ namespace enigma_user
       proj_stack.pop();
       view_stack.pop();
       return true;
-  }
-
-  void d3d_projection_set_array(const gs_scalar *matrix)
-  {
-      oglmgr->Transformation();
-      enigma::projection_matrix = enigma::Matrix4(matrix);
-      enigma::transform_needs_update = true;
-  }
-
-  void d3d_projection_add_array(const gs_scalar *matrix)
-  {
-      oglmgr->Transformation();
-      enigma::Matrix4 m(matrix);
-      enigma::projection_matrix = m*enigma::projection_matrix;
-      enigma::transform_needs_update = true;
-  }
-  
-  gs_scalar * d3d_projection_get_array(){
-      return enigma::projection_matrix;
-  }
-
-  gs_scalar * d3d_transformation_get_mv(){
-      enigma::transformation_update();
-      return enigma::mv_matrix;
-  }
-
-  gs_scalar * d3d_transformation_get_mvp(){
-      enigma::transformation_update();
-      return enigma::mvp_matrix;
   }
 }
