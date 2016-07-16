@@ -41,7 +41,7 @@ using std::vector;
   #include "libEGMstd.h"
   #include "Widget_Systems/widgets_mandatory.h"
   #define get_texture(tex,texid,v)\
-    if (texid < -1 || (texid!=-1 && size_t(texid) >= textureStructs.size())) {\
+    if ((texid < -1 || size_t(texid) >= textureStructs.size()) && texid!=-1) {\
       show_error("Attempting to access non-existing texture " + toString(texid), false);\
       return v;\
     }\

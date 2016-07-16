@@ -147,8 +147,8 @@ namespace enigma
     GLuint other_ids[] = { 131185 };
     glDebugMessageControlARB(GL_DEBUG_SOURCE_API_ARB, GL_DEBUG_TYPE_OTHER_ARB, GL_DONT_CARE, 1, other_ids, GL_FALSE); //Disable some notifications shown below:
     //OpenGL: Buffer detailed info: Buffer object 1 (bound to GL_ELEMENT_ARRAY_BUFFER_ARB, usage hint is GL_STATIC_DRAW) will use VIDEO memory as the source for buffer object operations. [source=API type=OTHER severity=UNDEFINED (33387) id=131185]
-    GLuint performance_ids[] = { 131218 };
-    glDebugMessageControlARB(GL_DEBUG_SOURCE_API_ARB, GL_DEBUG_TYPE_PERFORMANCE_ARB, GL_DONT_CARE, 1, performance_ids, GL_FALSE); //Disable some notifications shown below:
+    GLuint performance_ids[] = { 131218, 2 };
+    glDebugMessageControlARB(GL_DEBUG_SOURCE_API_ARB, GL_DEBUG_TYPE_PERFORMANCE_ARB, GL_DONT_CARE, 2, performance_ids, GL_FALSE); //Disable some notifications shown below:
     //OpenGL: Program/shader state performance warning: Vertex shader in program 9 is being recompiled based on GL state. [source=API type=PERFORMANCE severity=MEDIUM id=131218] - This is NVidia only and doesn't tell much
     #endif
 

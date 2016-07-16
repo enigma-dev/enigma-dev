@@ -90,7 +90,7 @@ namespace enigma {
   	size_t spaces = 0;
   	bool trimmed = false;
   	bool checknormal = false;
-  	for (unsigned int i = 0; i < s->size() ; i++)
+  	for (size_t i = 0; i < s->size() ; i++)
   	{
   		//comment
   		if ((*s)[i] == '#')
@@ -485,13 +485,13 @@ namespace enigma {
     			lineIndexedVertices.insert(lineIndexedVertices.end(), vertices.begin(), vertices.end());
     			if (indices.size() > 0) {
     				for (std::vector<GLuint>::iterator it = indices.begin(); it != indices.end(); ++it) { *it += lineIndexedCount; }
-    				for (unsigned i = 0; i < indices.size() - 2; i++) {
+    				for (size_t i = 0; i < indices.size() - 2; i++) {
     					lineIndices.push_back(indices[i]);
     					lineIndices.push_back(indices[i + 1]);
     				}
     			} else {
-    				unsigned offset = (lineIndexedVertices.size() - vertices.size()) / stride;
-    				for (unsigned i = 0; i < vertices.size() / stride - 1; i++) {
+    				size_t offset = (lineIndexedVertices.size() - vertices.size()) / stride;
+    				for (size_t i = 0; i < vertices.size() / stride - 1; i++) {
     					lineIndices.push_back(offset + i);
     					lineIndices.push_back(offset + i + 1);
     				}
@@ -511,7 +511,7 @@ namespace enigma {
     			triangleIndexedVertices.insert(triangleIndexedVertices.end(), vertices.begin(), vertices.end());
     			if (indices.size() > 0) {
     				for (std::vector<GLuint>::iterator it = indices.begin(); it != indices.end(); ++it) { *it += triangleIndexedCount; }
-    				for (unsigned i = 0; i < indices.size() - 2; i++) {
+    				for (size_t i = 0; i < indices.size() - 2; i++) {
     					// check for and continue if indexed triangle is degenerate, because the GPU won't render it anyway
     					if (indices[i] == indices[i + 1] || indices[i] == indices[i + 2]  || indices[i + 1] == indices[i + 2] ) { continue; }
     					if (i % 2) {
@@ -525,8 +525,8 @@ namespace enigma {
     					}
     				}
     			} else {
-    				unsigned offset = (triangleIndexedVertices.size() - vertices.size()) / stride;
-    				for (unsigned i = 0; i < vertices.size() / stride - 2; i++) {
+    				size_t offset = (triangleIndexedVertices.size() - vertices.size()) / stride;
+    				for (size_t i = 0; i < vertices.size() / stride - 2; i++) {
     					if (i % 2) {
     						triangleIndices.push_back(offset + i + 2);
     						triangleIndices.push_back(offset + i + 1);
@@ -543,7 +543,7 @@ namespace enigma {
     			triangleIndexedVertices.insert(triangleIndexedVertices.end(), vertices.begin(), vertices.end());
     			if (indices.size() > 0) {
     				for (std::vector<GLuint>::iterator it = indices.begin(); it != indices.end(); ++it) { *it += triangleIndexedCount; }
-    				for (unsigned i = 1; i < indices.size() - 1; i++) {
+    				for (size_t i = 1; i < indices.size() - 1; i++) {
     					// check for and continue if indexed triangle is degenerate, because the GPU won't render it anyway
     					if (indices[0] == indices[i] || indices[0] == indices[i + 1]  || indices[i] == indices[i + 1] ) { continue; }
     					triangleIndices.push_back(indices[0]);
@@ -551,8 +551,8 @@ namespace enigma {
     					triangleIndices.push_back(indices[i + 1]);
     				}
     			} else {
-    				unsigned offset = (triangleIndexedVertices.size() - vertices.size()) / stride;
-    				for (unsigned i = 1; i < vertices.size() / stride - 1; i++) {
+    				size_t offset = (triangleIndexedVertices.size() - vertices.size()) / stride;
+    				for (size_t i = 1; i < vertices.size() / stride - 1; i++) {
     					triangleIndices.push_back(offset);
     					triangleIndices.push_back(offset + i);
     					triangleIndices.push_back(offset + i + 1);

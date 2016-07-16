@@ -21,6 +21,7 @@
 #define ENIGMA_GSMATRIX_H
 
 #include "Universal_System/scalar.h"
+#include "Universal_System/var4.h"
 #include <string>
 
 namespace enigma
@@ -52,6 +53,7 @@ void d3d_set_projection(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs_sca
 void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs_scalar xto, gs_scalar yto, gs_scalar zto, gs_scalar xup, gs_scalar yup, gs_scalar zup, gs_scalar angle, gs_scalar aspect, gs_scalar znear, gs_scalar zfar);
 void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, gs_scalar angle);
 void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, gs_scalar angle);
+void d3d_set_projection_ortho_lookat(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom, gs_scalar xto, gs_scalar yto, gs_scalar zto, gs_scalar xup, gs_scalar yup, gs_scalar zup);
 
 void d3d_transform_set_identity();
 void d3d_transform_add_translation(gs_scalar xt, gs_scalar yt, gs_scalar zt);
@@ -74,7 +76,8 @@ void d3d_transform_set_look_at(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom
 
 void d3d_transform_set_array(const gs_scalar *matrix);
 void d3d_transform_add_array(const gs_scalar *matrix);
-gs_scalar * d3d_transform_get_array();
+gs_scalar * d3d_transform_get_array_pointer();
+var d3d_transform_get_array();
 void d3d_transform_force_update();
 
 bool d3d_transform_stack_push();
@@ -92,6 +95,11 @@ bool d3d_projection_stack_top();
 bool d3d_projection_stack_discard();
 void d3d_projection_set_array(const gs_scalar *matrix);
 void d3d_projection_add_array(const gs_scalar *matrix);
+gs_scalar * d3d_projection_get_array_pointer();
+var d3d_projection_get_array();
+
+gs_scalar * d3d_view_get_array_pointer();
+var d3d_view_get_array();
 
 gs_scalar * d3d_transformation_get_mv();
 gs_scalar * d3d_transformation_get_mvp();
