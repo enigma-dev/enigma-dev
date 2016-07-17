@@ -107,21 +107,23 @@ void output_error(const char* msg) {
 }
 
 void output_warning(const char* msg) {
-    HANDLE h = GetStdHandle ( STD_OUTPUT_HANDLE );
-    WORD wOldColorAttrs;
-    CONSOLE_SCREEN_BUFFER_INFO csbiInfo;
+  HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
+  WORD wOldColorAttrs;
+  CONSOLE_SCREEN_BUFFER_INFO csbiInfo;
 
-    //First save the current color information
-    GetConsoleScreenBufferInfo(h, &csbiInfo);
-    wOldColorAttrs = csbiInfo.wAttributes;
+  //First save the current color information
+  GetConsoleScreenBufferInfo(h, &csbiInfo);
+  wOldColorAttrs = csbiInfo.wAttributes;
 
-    // Set the new color information
-    SetConsoleTextAttribute ( h, FOREGROUND_RED | BACKGROUND_BLUE | FOREGROUND_INTENSITY );
+  // Set the new color information
+  SetConsoleTextAttribute(h,
+      FOREGROUND_RED | FOREGROUND_GREEN | BACKGROUND_BLUE
+      | FOREGROUND_INTENSITY);
 
-    cout << "WARNING! ";
-	// Restore the original colors
-    SetConsoleTextAttribute ( h, wOldColorAttrs);
-	cout << msg << "\n";
+  cout << "WARNING! ";
+  // Restore the original colors
+  SetConsoleTextAttribute(h, wOldColorAttrs);
+  cout << msg << "\n";
 }
 
 #include <ctime>
@@ -184,11 +186,17 @@ void check_for_updates() {
     wOldColorAttrs = csbiInfo.wAttributes;
 
     // Set the new color information
-    SetConsoleTextAttribute ( h, FOREGROUND_BLUE | BACKGROUND_BLUE | FOREGROUND_INTENSITY );
+    SetConsoleTextAttribute(h,
+        FOREGROUND_BLUE | FOREGROUND_GREEN | BACKGROUND_BLUE
+        | FOREGROUND_INTENSITY);
 
-	char currentversion[256], lastupdated[256];
-	GetPrivateProfileString("MAIN", "lastupdated", "Never", lastupdated, 256, settingspath.c_str());
-	GetPrivateProfileString("MAIN", "currentversion", "0.0.0.0", currentversion, 256, settingspath.c_str());
+    char currentversion[256], lastupdated[256];
+    GetPrivateProfileString(
+        "MAIN", "lastupdated", "Never", lastupdated, 256,
+        settingspath.c_str());
+    GetPrivateProfileString(
+        "MAIN", "currentversion", "0.0.0.0", currentversion, 256, 
+        settingspath.c_str());
 
     puts("*** Updates Available ***");
 
@@ -237,7 +245,7 @@ int main(int argc, char *argv[])
   // set the console window title
   system("title ENIGMA Development Environment");
   system("Color 1F");
-  puts("Copyright (C) 2013-2015 The ENIGMA Team\n");
+  puts("Copyright (C) 2013 The ENIGMA Team\n");
 
   
   bool checkforupdates = GetPrivateProfileInt(
