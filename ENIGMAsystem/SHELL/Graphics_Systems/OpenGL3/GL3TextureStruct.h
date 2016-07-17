@@ -27,11 +27,11 @@ struct TextureStruct {
 	unsigned gltex;
 	unsigned width,height;
 	unsigned fullwidth,fullheight;
+	int internalFormat; //GLint
+	unsigned format, type; //GLenum
 	TextureStruct(unsigned gtex);
 	~TextureStruct();
 };
 extern vector<TextureStruct*> textureStructs;
-
-unsigned get_texture(int texid);
 
 #endif // ENIGMA_GL3_TEXTURESTRUCT__H

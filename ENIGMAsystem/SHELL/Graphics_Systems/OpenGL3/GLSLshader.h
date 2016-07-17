@@ -54,27 +54,27 @@ namespace enigma
     };
 
     struct Uniform{
-        string name;
-        GLint location;
-        GLenum type;
-        GLint arraySize;
-        int size;
+        string name = "";
+        GLint location = -1;
+        GLenum type = GL_INVALID_VALUE;
+        GLint arraySize = -1;
+        int size = -1;
         vector<UAType> data;
     };
 
     struct Attribute{
-        string name;
-        GLint location;
-        GLenum type;
-        GLint arraySize;
-        int size;
-        bool enabled;
-        bool normalize;
-        int stride;
-        int offset;
-        int datatype; //Difference is that "type" is the type inside the shader (like float for color), but "datatype" is the type for data (unsigned int for color)
-        int datasize;
-        int vao;
+        string name = "";
+        GLint location = -1;
+        GLenum type = GL_INVALID_VALUE;
+        GLint arraySize = -1;
+        int size = -1;
+        bool enabled = false;
+        bool normalize = false;
+        int stride = -1;
+        int offset = -1;
+        int datatype = 0; //Difference is that "type" is the type inside the shader (like float for color), but "datatype" is the type for data (unsigned int for color)
+        int datasize = -1;
+        int vao = -1;
     };
 
     //This holds attribute parameters and works as a OpenGL VAO

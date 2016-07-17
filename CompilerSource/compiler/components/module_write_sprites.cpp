@@ -96,6 +96,7 @@ int lang_CPP::module_write_sprites(EnigmaStruct *es, FILE *gameModule)
     writei(es->sprites[i].bbBottom,gameModule); //BBox Bottom
     writei(es->sprites[i].bbLeft,gameModule);   //BBox Left
     writei(es->sprites[i].bbRight,gameModule);  //BBox Right
+    writei(es->sprites[i].bbMode,gameModule);  //BBox Mode
     writei(es->sprites[i].shape,gameModule);  //Mask shape
     
     writei(subCount,gameModule); //subimages

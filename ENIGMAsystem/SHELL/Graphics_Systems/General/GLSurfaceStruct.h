@@ -15,8 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef _SURFSTRUCT__H
-#define _SURFSTRUCT__H
+#ifndef ENIGMA_GLSURFACESTRUCT_H
+#define ENIGMA_GLSURFACESTRUCT_H
 
 #include <string>
 #include "OpenGLHeaders.h"
@@ -29,7 +29,12 @@ namespace enigma
     GLuint fbo;
     int tex;
     int width, height;
+    GLuint depth_buffer;
+    GLuint stencil_buffer;
+    bool has_depth_buffer = false;
+    bool has_stencil_buffer = false;
+    bool write_only = true;
   };
 }
 
-#endif
+#endif //ENIGMA_GLSURFACESTRUCT_H

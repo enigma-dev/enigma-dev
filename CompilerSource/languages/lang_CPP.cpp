@@ -50,7 +50,7 @@ void lang_CPP::load_extension_locals()
     
     jdi::definition_class *cadd = (jdi::definition_class*)found;
     for (jdi::definition_scope::defiter it = cadd->members.begin(); it != cadd->members.end(); it++) {
-      if (!it->second->flags & jdi::DEF_TYPED) { cout << "WARNING: Non-scalar `" << it->first << "' ignored." << endl; continue; }
+      if ((!it->second->flags) & jdi::DEF_TYPED) { cout << "WARNING: Non-scalar `" << it->first << "' ignored." << endl; continue; }
       jdi::definition_typed *t = (jdi::definition_typed*)it->second;
       locals[t->name] = t->type ? t->type->name : "var";
     }
@@ -63,18 +63,16 @@ const char* heaping_pile_of_dog_shit = "ERROR: Unknown";
 #ifdef _WIN32
  #include <windows.h>
  #define dllexport extern "C" __declspec(dllexport)
-   #define DECLARE_TIME() clock_t cs, ce
-   #define START_TIME() cs = clock()
-   #define STOP_TIME() ce = clock()
-   #define PRINT_TIME() (((ce - cs) * 1000)/CLOCKS_PER_SEC)
+   #define DECLARE_TIME_TYPE clock_t
+   #define CURRENT_TIME(t) t = clock()
+   #define PRINT_TIME(ts, te) (((te - ts) * 1000)/CLOCKS_PER_SEC)
 #else
  #define dllexport extern "C"
  #include <cstdio>
  #include <sys/time.h>
-   #define DECLARE_TIME()  timeval ts, tn
-   #define START_TIME() gettimeofday(&ts,NULL);
-   #define STOP_TIME() gettimeofday(&tn,NULL);
-   #define PRINT_TIME() ((double(tn.tv_sec - ts.tv_sec) + double(tn.tv_usec - ts.tv_usec)/1000000.0)*1000)
+   #define DECLARE_TIME_TYPE timeval
+   #define CURRENT_TIME(t) gettimeofday(&t,NULL)
+   #define PRINT_TIME(ts,te) ((double(te.tv_sec - ts.tv_sec) + double(te.tv_usec - ts.tv_usec)/1000000.0)*1000)
 #endif
 
 
@@ -105,11 +103,11 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode, const char* targ
   
   llreader f("ENIGMAsystem/SHELL/SHELLmain.cpp");
   int res = 1;
-  DECLARE_TIME();
+  DECLARE_TIME_TYPE ts, te;
   if (f.is_open()) {
-    START_TIME();
+    CURRENT_TIME(ts);
     res = main_context->parse_C_stream(f, "SHELLmain.cpp");
-    STOP_TIME();
+    CURRENT_TIME(te);
   }
   
   jdi::definition *d;
@@ -147,7 +145,7 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode, const char* targ
     cout << "Continuing anyway." << endl;
     // return &ide_passback_error;
   } else {    
-    cout << "Successfully parsed ENIGMA's engine (" << PRINT_TIME() << "ms)\n"
+    cout << "Successfully parsed ENIGMA's engine (" << PRINT_TIME(ts,te) << "ms)\n"
     << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
     //cout << "Namespace std contains " << global_scope.members["std"]->members.size() << " items.\n";
   }
