@@ -36,6 +36,51 @@ vector<TextureStruct*> textureStructs(0);
 #include <vector>
 using std::vector;
 
+#ifdef DEBUG_MODE
+  #include <string>
+  #include "libEGMstd.h"
+  #include "Widget_Systems/widgets_mandatory.h"
+  #define get_texture(tex,texid,v)\
+    if ((texid < -1 || size_t(texid) >= textureStructs.size()) && texid!=-1) {\
+      show_error("Attempting to access non-existing texture " + toString(texid), false);\
+      return v;\
+    }\
+    const int tex = (texid==-1?-1:textureStructs[texid]->gltex);
+#else
+  #define get_texture(tex,texid,v)\
+    const int tex = (texid==-1?-1:textureStructs[texid]->gltex);
+#endif
+
+/*enum {
+  //Formats and internal formats
+  tx_rgba = GL_RGBA,
+  tx_rgb = GL_RGB,
+  tx_rg = GL_RG,
+  tx_red = GL_RED,
+  tx_bgra = GL_BGRA,
+  tx_bgr =  GL_BGR,
+  tx_depth_component = GL_DEPTH_COMPONENT
+};
+
+enum {
+  //Internal formats only
+  tx_rgb32f = GL_RGB32F,
+  tx_depth_component32f = GL_DEPTH_COMPONENT32F,
+  tx_depth_component24 = GL_DEPTH_COMPONENT24,
+  tx_depth_component16 = GL_DEPTH_COMPONENT16,
+};
+
+enum {
+  //Types
+  tx_unsigned_byte = GL_UNSIGNED_BYTE,
+  tx_byte = GL_BYTE,
+  tx_unsigned_short = GL_UNSIGNED_SHORT,
+  tx_short = GL_SHORT,
+  tx_unsigned_int = GL_UNSIGNED_INT,
+  tx_int = GL_INT,
+  tx_float = GL_FLOAT;
+};*/
+
 inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect powers of two
 	x =  (x & -x) - 1;
 	x -= ((x >> 1) & 0x55555555);
@@ -55,13 +100,38 @@ TextureStruct::~TextureStruct()
 	glDeleteTextures(1, &gltex);
 }
 
-unsigned get_texture(int texid) {
-	return (size_t(texid) >= textureStructs.size() || texid < 0)? -1 : textureStructs[texid]->gltex;
-}
-
 namespace enigma
 {
   extern int bound_texture_stage;
+
+  //This allows GL3 surfaces to bind and hold many different types of data
+  int graphics_create_texture_custom(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool mipmap, int internalFormat, unsigned format, unsigned type)
+  {
+    GLuint texture;
+    glGenTextures(1, &texture);
+    oglmgr->BindTexture(GL_TEXTURE_2D, texture);
+
+    glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, fullwidth, fullheight, 0, format, type, pxdata);
+    if (mipmap) {
+      // This allows us to control the number of mipmaps generated, but Direct3D does not have an option for it, so for now we'll just go with the defaults.
+      // Honestly not a big deal, Unity3D doesn't allow you to specify either.
+      //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+      //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 3);
+      glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    oglmgr->BindTexture(GL_TEXTURE_2D, 0);
+
+    TextureStruct* textureStruct = new TextureStruct(texture);
+    textureStruct->width = width;
+    textureStruct->height = height;
+    textureStruct->fullwidth = fullwidth;
+    textureStruct->fullheight = fullheight;
+    textureStruct->internalFormat = internalFormat;
+    textureStruct->format = format;
+    textureStruct->type = type;
+    textureStructs.push_back(textureStruct);
+    return textureStructs.size()-1;
+  }
 
   int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool mipmap)
   {
@@ -84,6 +154,9 @@ namespace enigma
     textureStruct->height = height;
     textureStruct->fullwidth = fullwidth;
     textureStruct->fullheight = fullheight;
+    textureStruct->internalFormat = GL_RGBA;
+    textureStruct->format = GL_BGRA;
+    textureStruct->type = GL_UNSIGNED_BYTE;
     textureStructs.push_back(textureStruct);
     return textureStructs.size()-1;
   }
@@ -104,15 +177,77 @@ namespace enigma
     return dup_tex;
   }
 
+  void graphics_copy_texture(int source, int destination, int x, int y)
+  {
+    GLuint src = textureStructs[source]->gltex;
+    GLuint dst = textureStructs[destination]->gltex;
+    unsigned int sw, sh, sfw, sfh;
+    sw = textureStructs[source]->width;
+    sh = textureStructs[source]->height;
+    sfw = textureStructs[source]->fullwidth;
+    sfh = textureStructs[source]->fullheight;
+    oglmgr->BindTexture(GL_TEXTURE_2D, src);
+    //We could use glCopyImageSubData here, but it's GL4.3
+    char* bitmap = new char[(sfh<<(lgpp2(sfw)+2))|2];
+    glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_BYTE, bitmap);
+
+    char* cropped_bitmap = new char[sw*sh*4];
+    for (unsigned int i=0; i<sh; ++i){
+      memcpy(cropped_bitmap+sw*i*4, bitmap+sfw*i*4, sw*4);
+    }
+
+    oglmgr->BindTexture(GL_TEXTURE_2D, dst);
+    unsigned dw, dh;
+    dw = textureStructs[destination]->width;
+    dh = textureStructs[destination]->height;
+    glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, (x+sw<=dw?sw:dw-x), (y+sh<=dh?sh:dh-y), GL_BGRA, GL_UNSIGNED_BYTE, cropped_bitmap);
+
+    oglmgr->BindTexture(GL_TEXTURE_2D, 0);
+
+    delete[] bitmap;
+    delete[] cropped_bitmap;
+  }
+
+  void graphics_copy_texture_part(int source, int destination, int xoff, int yoff, int w, int h, int x, int y)
+  {
+    GLuint src = textureStructs[source]->gltex;
+    GLuint dst = textureStructs[destination]->gltex;
+    unsigned int sw, sh, sfw, sfh;
+    sw = w;
+    sh = h;
+    sfw = textureStructs[source]->fullwidth;
+    sfh = textureStructs[source]->fullheight;
+    oglmgr->BindTexture(GL_TEXTURE_2D, src);
+    //We could use glCopyImageSubData here, but it's GL4.3
+    char* bitmap = new char[(sfh<<(lgpp2(sfw)+2))|2];
+    glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_BYTE, bitmap);
+
+    if (xoff+sw>sfw) sw = sfw-xoff;
+    if (yoff+sh>sfh) sh = sfh-yoff;
+    char* cropped_bitmap = new char[sw*sh*4];
+    for (unsigned int i=0; i<sh; ++i){
+      memcpy(cropped_bitmap+sw*i*4, bitmap+xoff*4+sfw*(i+yoff)*4, sw*4);
+    }
+
+    oglmgr->BindTexture(GL_TEXTURE_2D, dst);
+    unsigned dw, dh;
+    dw = textureStructs[destination]->width;
+    dh = textureStructs[destination]->height;
+    glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, (x+sw<=dw?sw:dw-x), (y+sh<=dh?sh:dh-y), GL_BGRA, GL_UNSIGNED_BYTE, cropped_bitmap);
+
+    oglmgr->BindTexture(GL_TEXTURE_2D, 0);
+
+    delete[] bitmap;
+    delete[] cropped_bitmap;
+  }
+
   void graphics_replace_texture_alpha_from_texture(int tex, int copy_tex)
   {
     GLuint texture = textureStructs[tex]->gltex;
     GLuint copy_texture = textureStructs[copy_tex]->gltex;
 
-    unsigned w, h, fw, fh, size;
+    unsigned int fw, fh, size;
     oglmgr->BindTexture(GL_TEXTURE_2D, texture);
-    w = textureStructs[tex]->width;
-    h = textureStructs[tex]->height;
     fw = textureStructs[tex]->fullwidth;
     fh = textureStructs[tex]->fullheight;
     size = (fh<<(lgpp2(fw)+2))|2;
@@ -122,7 +257,7 @@ namespace enigma
     oglmgr->BindTexture(GL_TEXTURE_2D, copy_texture);
     glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_BYTE, bitmap2);
 
-    for (int i = 3; i < size; i += 4)
+    for (unsigned  int i = 3; i < size; i += 4)
         bitmap[i] = (bitmap2[i-3] + bitmap2[i-2] + bitmap2[i-1])/3;
 
     oglmgr->BindTexture(GL_TEXTURE_2D, texture);
@@ -246,53 +381,60 @@ gs_scalar texture_get_height(int texid)
 	return textureStructs[texid]->height / textureStructs[texid]->fullheight;
 }
 
-unsigned texture_get_texel_width(int texid)
+gs_scalar texture_get_texel_width(int texid)
 {
-	return textureStructs[texid]->width;
+	return 1.0/textureStructs[texid]->fullwidth;
 }
 
-unsigned texture_get_texel_height(int texid)
+gs_scalar texture_get_texel_height(int texid)
 {
-	return textureStructs[texid]->height;
+	return 1.0/textureStructs[texid]->fullheight;
 }
 
 void texture_set_stage(int stage, int texid) {
-  int gt = get_texture(texid);
+  //TODO(harijs): Check if stage <0
+  get_texture(gt,texid,);
   if (enigma::samplerstates[stage].bound_texture != gt) {
     oglmgr->EndShapesBatching();
-    if (enigma::bound_texture_stage != GL_TEXTURE0 + stage) { glActiveTexture(enigma::bound_texture_stage = (GL_TEXTURE0 + stage)); }
+    if ((unsigned int)enigma::bound_texture_stage != GL_TEXTURE0 + stage) { glActiveTexture(enigma::bound_texture_stage = (GL_TEXTURE0 + stage)); }
     oglmgr->BindTexture(GL_TEXTURE_2D, enigma::samplerstates[stage].bound_texture = (unsigned)(gt >= 0? gt : 0));
   }
 }
 
 void texture_reset() {
-	if (enigma::bound_texture_stage != GL_TEXTURE0) { glActiveTexture(enigma::bound_texture_stage = GL_TEXTURE0); }
-	oglmgr->BindTexture(GL_TEXTURE_2D, enigma::samplerstates[0].bound_texture = 0);
-  oglmgr->EndShapesBatching();
+  if (enigma::samplerstates[0].bound_texture != 0){
+    oglmgr->EndShapesBatching();
+  	if (enigma::bound_texture_stage != GL_TEXTURE0) { glActiveTexture(enigma::bound_texture_stage = GL_TEXTURE0); }
+  	oglmgr->BindTexture(GL_TEXTURE_2D, enigma::samplerstates[0].bound_texture = 0);
+  }
 }
 
 void texture_set_interpolation_ext(int sampler, bool enable)
 {
+  //TODO(harijs): Check if sampler <0
   glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_MIN_FILTER, enable?GL_LINEAR:GL_NEAREST);
   glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_MAG_FILTER, enable?GL_LINEAR:GL_NEAREST);
 }
 
 void texture_set_repeat_ext(int sampler, bool repeat)
 {
-  glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_WRAP_R, repeat?GL_REPEAT:GL_CLAMP);
-  glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_WRAP_S, repeat?GL_REPEAT:GL_CLAMP);
-  glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_WRAP_T, repeat?GL_REPEAT:GL_CLAMP);
+  //TODO(harijs): Check if sampler <0
+  glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_WRAP_R, repeat?GL_REPEAT:GL_CLAMP_TO_EDGE);
+  glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_WRAP_S, repeat?GL_REPEAT:GL_CLAMP_TO_EDGE);
+  glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_WRAP_T, repeat?GL_REPEAT:GL_CLAMP_TO_EDGE);
 }
 
 void texture_set_wrap_ext(int sampler, bool wrapu, bool wrapv, bool wrapw)
 {
-  glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_WRAP_R, wrapu?GL_REPEAT:GL_CLAMP);
-  glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_WRAP_S, wrapv?GL_REPEAT:GL_CLAMP);
-  glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_WRAP_T, wrapw?GL_REPEAT:GL_CLAMP);
+  //TODO(harijs): Check if sampler <0
+  glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_WRAP_R, wrapu?GL_REPEAT:GL_CLAMP_TO_EDGE);
+  glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_WRAP_S, wrapv?GL_REPEAT:GL_CLAMP_TO_EDGE);
+  glSamplerParameteri(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_WRAP_T, wrapw?GL_REPEAT:GL_CLAMP_TO_EDGE);
 }
 
 void texture_set_border_ext(int sampler, int r, int g, int b, double a)
 {
+  //TODO(harijs): Check if sampler <0
   GLint bordercolor[4] = { r, g, b, int(a * 255) };
   glSamplerParameteriv(enigma::samplerstates[sampler].sampler_index, GL_TEXTURE_BORDER_COLOR, bordercolor);
 }

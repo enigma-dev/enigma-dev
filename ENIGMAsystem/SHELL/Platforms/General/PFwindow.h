@@ -80,7 +80,7 @@ int display_get_width();
 int display_get_height();
 int display_get_colordepth();
 int display_get_frequency();
-int display_get_orientation();
+//int display_get_orientation();
 unsigned display_get_dpi_x();
 unsigned display_get_dpi_y();
 extern int display_aa;
@@ -119,6 +119,7 @@ int window_get_region_width_scaled();
 int window_get_region_height_scaled();
 
 void window_set_minimized(bool minimized);
+void window_set_maximized(bool maximized);
 void window_set_visible(bool visible);
 int window_get_visible();
 bool window_get_stayontop();
@@ -127,6 +128,7 @@ bool window_get_showborder();
 bool window_get_showicons();
 bool window_get_freezeonlosefocus();
 bool window_get_minimized();
+bool window_get_maximized();
 
 int window_mouse_get_x();
 int window_mouse_get_y();

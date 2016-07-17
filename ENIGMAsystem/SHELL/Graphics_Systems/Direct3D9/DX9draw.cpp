@@ -74,7 +74,7 @@ unsigned draw_get_alpha_test_ref_value()
 
 void draw_set_alpha_test(bool enable)
 {
-	d3dmgr->SetRenderState(D3DRS_ALPHATESTENABLE, enable); 
+	d3dmgr->SetRenderState(D3DRS_ALPHATESTENABLE, enable);
 }
 
 void draw_set_alpha_test_ref_value(unsigned val)
@@ -82,7 +82,7 @@ void draw_set_alpha_test_ref_value(unsigned val)
 	d3dmgr->SetRenderState(D3DRS_ALPHAREF, val);
 }
 
-void draw_set_line_pattern(unsigned short pattern, int scale)
+void draw_set_line_pattern(int pattern, int scale)
 {
 
 }
@@ -117,10 +117,10 @@ int draw_getpixel(int x, int y)
 	d3dmgr->GetBackBuffer(0, 0, D3DBACKBUFFER_TYPE_MONO, &pBackBuffer);
 	D3DSURFACE_DESC desc;
 	pBackBuffer->GetDesc(&desc);
-	
+
 	d3dmgr->device->CreateOffscreenPlainSurface( desc.Width, desc.Height, desc.Format, D3DPOOL_SYSTEMMEM, &pDestBuffer, NULL );
 	d3dmgr->device->GetRenderTargetData(pBackBuffer, pDestBuffer);
-	
+
 	D3DLOCKED_RECT rect;
 
 	pDestBuffer->LockRect(&rect, NULL, D3DLOCK_READONLY);
@@ -131,7 +131,7 @@ int draw_getpixel(int x, int y)
 	delete[] bitmap;
 	pBackBuffer->Release();
 	pDestBuffer->Release();
-	
+
 	return ret;
 }
 
@@ -157,7 +157,7 @@ int draw_getpixel_ext(int x, int y)
 	pBackBuffer->GetDesc(&desc);
 	d3dmgr->device->CreateOffscreenPlainSurface( desc.Width, desc.Height, desc.Format, D3DPOOL_SYSTEMMEM, &pDestBuffer, NULL );
 	d3dmgr->device->GetRenderTargetData(pBackBuffer, pDestBuffer);
-	
+
 	D3DLOCKED_RECT rect;
 
 	pDestBuffer->LockRect(&rect, NULL, D3DLOCK_READONLY);

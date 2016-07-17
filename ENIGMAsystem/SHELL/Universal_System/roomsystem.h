@@ -70,6 +70,9 @@ int view_set(int vind, int vis, int xview, int yview, int wview, int hview, int 
 int window_views_mouse_get_x(); // same as mouse_x variable, with respect to the view the mouse intersects
 int window_views_mouse_get_y(); // same as mouse_y variable, with respect to the view the mouse intersects
 void window_views_mouse_set(int x, int y); // with respect to first visible view
+void window_update_mouse();
+
+void window_update();
 
 extern int background_color;
 extern int background_showcolor;
@@ -81,6 +84,8 @@ extern int room_height;
 extern int room_persistent;
 extern int room_speed;
 extern int room_width;
+extern int room_first;
+extern int room_last;
 
 extern var room_caption;
 extern var current_caption;
