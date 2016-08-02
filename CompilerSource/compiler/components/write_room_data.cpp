@@ -48,6 +48,15 @@ using namespace std;
 
 #include "languages/lang_CPP.h"
 
+// TODO: this is an awful hack; we're doing a linear pass over rooms in es
+// because no one's passing the metadata we would need to check quickly...
+static inline bool background_exists(EnigmaStruct* es, int background) {
+  for (int i = 0; i < es->backgroundCount; ++i)
+    if (es->backgrounds[i].id == background)
+      return true;
+  return false;
+}
+
 int lang_CPP::compile_writeRoomData(EnigmaStruct* es, parsed_object *EGMglobal, int mode)
 {
   ofstream wto((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_roomarrays.h").c_str(),ios_base::out);
@@ -56,28 +65,39 @@ int lang_CPP::compile_writeRoomData(EnigmaStruct* es, parsed_object *EGMglobal, 
   << "  int room_loadtimecount = " << es->roomCount << ";\n";
   int room_highid = 0, room_highinstid = 100000,room_hightileid=10000000;
 
+  int computedTileCounts[es->roomCount] = {};
   for (int i = 0; i < es->roomCount; i++)
   {
     wto << "  tile tiles_" << es->rooms[i].id << "[] = {\n";
+    map<int, int> missingBackgrounds;
     for (int ii = 0, modme = 0; ii < es->rooms[i].tileCount; ii++)
     {
-      wto << "{" <<
-        es->rooms[i].tiles[ii].id << "," <<
-        es->rooms[i].tiles[ii].backgroundId << "," <<
-        es->rooms[i].tiles[ii].bgX << "," <<
-        es->rooms[i].tiles[ii].bgY << "," <<
-        es->rooms[i].tiles[ii].depth << "," <<
-        es->rooms[i].tiles[ii].height << "," <<
-        es->rooms[i].tiles[ii].width << "," <<
-        es->rooms[i].tiles[ii].roomX << "," <<
-        es->rooms[i].tiles[ii].roomY << "," <<
-        /*es->rooms[i].tiles[ii].xscale*/1 << "," <<
-        /*es->rooms[i].tiles[ii].yscale*/1 << "," <<
-        /*es->rooms[i].tiles[ii].alpha*/"1.0" << "," <<
-        /*es->rooms[i].tiles[ii].color*/0xFFFFFF << "},";
+      if (background_exists(es, es->rooms[i].tiles[ii].backgroundId)) {
+        wto << "{" <<
+          es->rooms[i].tiles[ii].id << "," <<
+          es->rooms[i].tiles[ii].backgroundId << "," <<
+          es->rooms[i].tiles[ii].bgX << "," <<
+          es->rooms[i].tiles[ii].bgY << "," <<
+          es->rooms[i].tiles[ii].depth << "," <<
+          es->rooms[i].tiles[ii].height << "," <<
+          es->rooms[i].tiles[ii].width << "," <<
+          es->rooms[i].tiles[ii].roomX << "," <<
+          es->rooms[i].tiles[ii].roomY << "," <<
+          /*es->rooms[i].tiles[ii].xscale*/1 << "," <<
+          /*es->rooms[i].tiles[ii].yscale*/1 << "," <<
+          /*es->rooms[i].tiles[ii].alpha*/"1.0" << "," <<
+          /*es->rooms[i].tiles[ii].color*/0xFFFFFF <<
+          "},";
+        ++computedTileCounts[i];
         if (++modme % 16 == 0) wto << "\n        ";
-      if (es->rooms[i].tiles[ii].id > room_hightileid)
-        room_hightileid = es->rooms[i].tiles[ii].id;
+        if (es->rooms[i].tiles[ii].id > room_hightileid)
+          room_hightileid = es->rooms[i].tiles[ii].id;
+      } else {
+        missingBackgrounds[es->rooms[i].tiles[ii].backgroundId]++;
+      }
+    }
+    if (missingBackgrounds.size()) {
+      // TODO: Report error!
     }
     wto << "  };\n";
   }
@@ -160,7 +180,7 @@ int lang_CPP::compile_writeRoomData(EnigmaStruct* es, parsed_object *EGMglobal, 
     "      }," //End of Backgrounds
 
     << "      " << es->rooms[i].instanceCount << ", insts_" << es->rooms[i].id
-    << "      ," << es->rooms[i].tileCount << ", tiles_" << es->rooms[i].id;
+    << "      ," << computedTileCounts[i] << ", tiles_" << es->rooms[i].id;
 
     // End of this room
     wto << "    },\n";
