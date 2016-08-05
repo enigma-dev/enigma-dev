@@ -92,7 +92,7 @@ static inline void declare_extension_casts(std::ostream &wto) {
   // Write extension cast methods; these are a temporary fix until the new instance system is in place.
   wto << "  namespace extension_cast {\n";
   for (unsigned i = 0; i < parsed_extensions.size(); i++) {
-    if (parsed_extensions[i].implements != "") {
+    if (!parsed_extensions[i].implements.empty()) {
       wto << "    " << parsed_extensions[i].implements << " *as_" << parsed_extensions[i].implements << "(object_basic* x) {\n";
       wto << "      return (" << parsed_extensions[i].implements << "*)(object_locals*)x;\n";
       wto << "    }\n";
@@ -127,97 +127,21 @@ static inline void declare_extension_casts(std::ostream &wto) {
     // Write extension cast methods; these are a temporary fix until the new instance system is in place.
     wto << "  namespace extension_cast {\n";
     for (unsigned i = 0; i < parsed_extensions.size(); i++) {
-      if (parsed_extensions[i].implements != "") {
-        wto << "    " << parsed_extensions[i].implements << " *as_" << parsed_extensions[i].implements << "(object_basic* x) {\n";
-        wto << "      return (" << parsed_extensions[i].implements << "*)(object_locals*)x;\n";
-        wto << "    }\n";
+      if (!parsed_extensions[i].implements.empty()) {
+        wto << ",\n      virtual " << parsed_extensions[i].implements;
+      } else {
+        wto << " /* " << parsed_extensions[i].name << " */";
       }
     }
-    wto << "  }";
-    
-    po_i i = parsed_objects.begin();
-	  vector<int> parsed(0);
-	  // Hold an iterator for our parent for later usage
-	  po_i parent = parsed_objects.find(i->second->parent);
-    evpairmap evmap; // Keep track of events that need added to honor et_stacked
-	  // Hold a map of all the
-	  map<int, vector<unsigned> > parent_undefinitions;
-	  vector<unsigned> parent_undefined;
-	  while (parsed.size() < parsed_objects.size())
-      {
-		if (i == parsed_objects.end()) { i = parsed_objects.begin(); }
-		// if we have already been written or we have a parent that has not been written, continue
-		if (find(parsed.begin(), parsed.end(), i->first) != parsed.end() || 
-		(parsed_objects.find(i->second->parent)->second && find(parsed.begin(), parsed.end(), i->second->parent) == parsed.end())) { 
-			i++; continue; 
-		}
-		parent = parsed_objects.find(i->second->parent);
-		
-		wto << "  \n  struct OBJ_" << i->second->name;
-		if (setting::inherit_objects && parsed_objects.find(i->second->parent) != parsed_objects.end()) {
-			wto << ": OBJ_" << parsed_objects.find(i->second->parent)->second->name;
-		} else {
-			wto << ": object_locals";
-		}
-		wto << "\n  {\n	// Local variables\n	";
+  wto << "\n";
 
-        for (unsigned ii = 0; ii < i->second->events.size; ii++)
-        {
-          string addls = event_get_locals(i->second->events[ii].mainId,i->second->events[ii].id);
-          if (addls != "")
-          {
-            pt pos;
-            string type, name, pres, sufs;
-            for (pos = 0; pos < addls.length(); pos++)
-            {
-              if (is_useless(addls[pos])) continue;
-              if (addls[pos] == ';') { i->second->locals[name] = dectrip(type, pres, sufs); type = pres = sufs = ""; continue; }
-              if (addls[pos] == ',') { i->second->locals[name] = dectrip(type, pres, sufs); pres = sufs = ""; continue; }
-              if (is_letter(addls[pos]) or addls[pos] == '$') {
-                const pt spos = pos;
-                while (is_letterdd(addls[++pos]));
-                string tn = addls.substr(spos,pos-spos);
-                (find_typename(tn) ? type : name) = tn;
-                pos--; continue;
-              }
-              if (addls[pos] == '*') { pres += '*'; continue; }
-              if (addls[pos] == '[') {
-                int cnt = 1;
-                const pt spos = pos;
-                while (cnt and ++pos < addls.length())
-                  if (addls[pos] == '[' or addls[pos] == '(') cnt++;
-                  else if (addls[pos] == ')' or addls[pos] == ']') cnt--;
-                sufs += addls.substr(spos,pos-spos+1);
-                continue;
-              }
-              if (addls[pos] == '=') {
-                int cnt = 0;
-
-                pt spos = ++pos;
-                while (is_useless(addls[spos])) spos++;
-                pos = spos - 1;
-
-                while (++pos < addls.length() and (cnt or (addls[pos] != ',' and addls[pos] != ';')))
-                  if (addls[pos] == '[' or addls[pos] == '(') cnt++;
-                  else if (addls[pos] == ')' or addls[pos] == ']') cnt--;
-                bool redundant = false;
-                if (setting::inherit_objects && parent != parsed_objects.end()) {
-                  for (po_i her = i; her != parsed_objects.end(); her = parsed_objects.find(her->second->parent)) {
-                    for (size_t j = 0; j < her->second->initializers.size(); j++)
-                      if (her->second->initializers[j].first == name) { redundant = true; break; }
-                    if (redundant) { break; }
-                  }
-                } else {
-                    for (size_t j = 0; j < i->second->initializers.size(); j++)
-                      if (i->second->initializers[j].first == name) { redundant = true; break; }
-                }
-                if (!redundant)
-                  i->second->initializers.push_back(initpair(name,addls.substr(spos,pos-spos)));
-                pos--; continue;
-              }
-            }
-          }
-        }
+  wto << "  {\n";
+  wto << "    #include \"Preprocessor_Environment_Editable/IDE_EDIT_inherited_locals.h\"\n\n";
+  wto << "    std::map<string, var> *vmap;\n";
+  wto << "    object_locals() {vmap = NULL;}\n";
+  wto << "    object_locals(unsigned _x, int _y): event_parent(_x,_y) {vmap = NULL;}\n";
+  wto << "  };\n";
+}
 
 // TODO(JoshDreamland): MOVEME: group with extension code; call remains in this file
 static inline void write_extension_casts(std::ostream &wto) {
@@ -225,7 +149,7 @@ static inline void write_extension_casts(std::ostream &wto) {
   wto << "namespace enigma {\n";
   wto << "  namespace extension_cast {\n";
   for (unsigned i = 0; i < parsed_extensions.size(); i++) {
-    if (parsed_extensions[i].implements != "") {
+    if (!parsed_extensions[i].implements.empty()) {
       wto << "    " << parsed_extensions[i].implements << " *as_" << parsed_extensions[i].implements << "(object_basic* x) {\n";
       wto << "      return (" << parsed_extensions[i].implements << "*)(object_locals*)x;\n";
       wto << "    }\n";
@@ -328,7 +252,7 @@ static inline bool parent_declares_event(parsed_object *parent, int mid, int sid
 static inline bool parent_declares_groupedevent(parsed_object *parent, int mid) {
   for (parsed_object *obj = parent; obj != NULL; obj = obj->parent) {
     for (unsigned i = 0; i < obj->events.size; i++) {
-      if (obj->events[i].code != "" && event_is_instance(obj->events[i].mainId, obj->events[i].id)) {
+      if (obj->events[i].mainId == mid && !obj->events[i].code.empty() && event_is_instance(obj->events[i].mainId, obj->events[i].id)) {
         return true;
       }
     }
@@ -350,7 +274,7 @@ static inline void write_object_locals(lang_CPP *lcpp, std::ostream &wto, parsed
     if (parent_declares(object->parent, ii)) {
       continue;
     }
-  
+
     // If it's not explicitely defined, we must question whether it should be given a unique presence in this scope
     if (!ii->second.defined()) {
       parsed_object::globit ve = global->globals.find(ii->first); // So, we look for a global by this name
@@ -393,7 +317,7 @@ static inline void write_object_timelines(std::ostream &wto, EnigmaStruct* es, p
   // NOTE: See below; we actually need to assume this object has the potential to call any timeline.
   //       BUT we only locally-copy the ones we know about for sure here.
   bool hasKnownTlines = false;
-  
+
   wto << "\n    //Timelines called by this object\n";
   for (parsed_object::tlineit it = object->tlines.begin(); it != object->tlines.end(); it++) //For each timeline potentially set by this object.
   {
@@ -430,15 +354,15 @@ static inline void write_object_events(std::ostream &wto, parsed_object *object,
       parent_undefined.push_back(i);
     }
     string evname = event_get_function_name(object->events[i].mainId, object->events[i].id);
-    if  (object->events[i].code != "")
+    if  (!object->events[i].code.empty())
     {
       if (event_is_instance(object->events[i].mainId, object->events[i].id)) {
         evgroup[object->events[i].mainId].push_back(i);
       }
       wto << "    variant myevent_" << evname << "();\n";
     }
-     
-    if  (object->events[i].code != "" || event_has_default_code(object->events[i].mainId, object->events[i].id)) {
+
+    if  (!object->events[i].code.empty() || event_has_default_code(object->events[i].mainId, object->events[i].id)) {
       if (event_has_sub_check(object->events[i].mainId, object->events[i].id)) {
         wto << "    inline bool myevent_" << evname << "_subcheck();\n";
       }
@@ -497,7 +421,7 @@ static inline void write_event_perform(std::ostream &wto, parsed_object *object)
   wto << "      variant myevents_perf(int type, int numb)\n      {\n";
 
   for (unsigned ii = 0; ii < object->events.size; ii++) {
-    if  (object->events[ii].code != "")
+    if  (!object->events[ii].code.empty())
     {
       //Look up the event name
       string evname = event_get_function_name(object->events[ii].mainId, object->events[ii].id);
@@ -511,7 +435,7 @@ static inline void write_event_perform(std::ostream &wto, parsed_object *object)
   } else {
     wto << "        return 0;\n";
   }
-  
+
   wto << "      }\n";
 }
 
@@ -595,13 +519,13 @@ static inline void write_object_constructors(std::ostream &wto, parsed_object *o
   */
   wto <<   "\n    OBJ_" <<  object->name << "(int enigma_genericconstructor_newinst_x = 0, int enigma_genericconstructor_newinst_y = 0, const int id = (enigma::maxid++)"
       << ", const int enigma_genericobjid = " << object->id << ", bool handle = true)";
-      
+
   if (object->parent) {
     wto << ": OBJ_" << object->parent->name << "(enigma_genericconstructor_newinst_x,enigma_genericconstructor_newinst_y,id,enigma_genericobjid,false)";
    } else {
     wto << ": object_locals(id,enigma_genericobjid) ";
    }
-      
+
     for (size_t ii = 0; ii < object->initializers.size(); ii++)
       wto << ", " << object->initializers[ii].first << "(" << object->initializers[ii].second << ")";
     wto << "\n    {\n";
@@ -615,10 +539,10 @@ static inline void write_object_constructors(std::ostream &wto, parsed_object *o
               << "      mask_index = enigma::objectdata[" << object->id << "]->mask;\n";
         wto << "      visible = enigma::objectdata[" << object->id << "]->visible;\n      solid = enigma::objectdata[" << object->id << "]->solid;\n";
         wto << "      persistent = enigma::objectdata[" << object->id << "]->persistent;\n";
-        
+
       wto << "      activate();\n";
-        
-        
+
+
       // Coordinates
         wto << "      x = enigma_genericconstructor_newinst_x, y = enigma_genericconstructor_newinst_y;\n";
 
@@ -671,7 +595,7 @@ static inline void write_object_constructors(std::ostream &wto, parsed_object *o
 
 static inline void write_object_destructor(std::ostream &wto, parsed_object *object, robertvec &parent_undefined, event_map &evgroup) {
     wto <<   "    \n    ~OBJ_" <<  object->name << "()\n    {\n";
-      
+
       if (!object->parent) {
           wto << "      delete vmap;\n";
           wto << "      enigma::winstance_list_iterator_delete(ENOBJ_ITER_me);\n";
@@ -752,7 +676,7 @@ static inline void write_object_data_structs(std::ostream &wto) {
   for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++, objcount++)
   {
     wto << "    {"
-        << i->second->sprite_index << "," << i->second->solid << "," 
+        << i->second->sprite_index << "," << i->second->solid << ","
         << i->second->visible << "," << i->second->depth << ","
         << i->second->persistent << "," << i->second->mask_index
         << "," << i->second->parent_index << "," << i->second->id
@@ -782,7 +706,7 @@ static inline void write_object_declarations(lang_CPP* lcpp, EnigmaStruct* es, p
     wto << "\n";
     declare_extension_casts(wto);
     wto << "}\n\n";
-    
+
     // TODO(JoshDreamland): Replace with enigma_user:
     wto << "namespace enigma // TODO: Replace with enigma_user\n{\n";
     write_object_class_bodies(lcpp, wto, es, global, parent_undefinitions, revTlineLookup);
@@ -803,7 +727,7 @@ static inline void write_basic_constructor(ofstream &wto);
 static inline void write_object_functionality(EnigmaStruct *es, int mode, robertmap &parent_undefinitions, const map<string, int>& revTlineLookup) {
   vector<unsigned> parent_undefined;
   ofstream wto((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_objectfunctionality.h").c_str(),ios_base::out);
-    
+
   wto << license;
   wto << endl << "#define log_xor || log_xor_helper() ||" << endl;
   wto << "struct log_xor_helper { bool value; };" << endl;
@@ -815,7 +739,7 @@ static inline void write_object_functionality(EnigmaStruct *es, int mode, robert
   write_event_bodies(wto, es, mode, parent_undefinitions, revTlineLookup);
   write_global_script_array(wto, es);
   write_basic_constructor(wto);
-  
+
   wto.close();
 }
 
@@ -907,7 +831,7 @@ static inline void write_object_event_funcs(ofstream& wto, const parsed_object *
     string evname = event_get_function_name(mid, id);
     if (event.code.size()) {
       bool defined_inherited = false;
-      
+
       // TODO(JoshDreamland): This is a pretty major hack; it's an extra line for no reason nine times in ten,
       // and it doesn't allow us to give feedback as to why a call to event_inherited() may not be valid.
       if (object->parent && std::find(parent_undefined.begin(), parent_undefined.end(), ii) == parent_undefined.end()) {
@@ -993,7 +917,7 @@ static inline void write_object_timeline_funcs(ofstream& wto, EnigmaStruct *es, 
       wto << "\n";
     }
   }
-  
+
   // If no timelines are ever used by this script, it can rely on the default lookup table.
   // NOTE: We have to allow it to fall through to the default in cases where instances (by id) are given a timeline.
   if (hasKnownTlines) {
@@ -1095,7 +1019,7 @@ int lang_CPP::compile_writeObjectData(EnigmaStruct* es, parsed_object* global, i
     revTlineLookup[es->timelines[i].name] = es->timelines[i].id;
   }
   robertmap parent_undefinitions;
-  
+
   write_object_declarations(this, es, global, parent_undefinitions, revTlineLookup);
   write_object_functionality(es, mode, parent_undefinitions, revTlineLookup);
   return 0;
