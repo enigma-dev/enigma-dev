@@ -9,7 +9,7 @@ Description: Create Widgets using Win32 API on Windows.
 Author: Josh Ventura
 
 Depends:
-	Build-Platforms: Windows
+  Build-Platforms: Windows
 
 Represents:
-	Build-Platforms: Windows
+  Build-Platforms: Windows
