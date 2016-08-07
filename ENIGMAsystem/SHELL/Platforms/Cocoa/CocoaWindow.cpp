@@ -53,6 +53,9 @@ extern "C" int cocoa_get_screen_size(int getWidth);
 extern "C" void cocoa_window_set_fullscreen(bool full);
 extern "C" int cocoa_window_get_fullscreen();
 extern "C" void cocoa_window_set_color(int bgrColor);
+extern "C" void cocoa_clipboard_set_text(const char* text);
+extern "C" char* cocoa_clipboard_get_text();
+extern "C" bool cocoa_clipboard_has_text();
 
 namespace enigma {
     extern char keybdstatus[256];
@@ -471,6 +474,21 @@ namespace enigma_user {
 
   void keyboard_unset_map() {
     enigma::keybdmap.clear();
+  }
+
+  void clipboard_set_text(string text) {
+    cocoa_clipboard_set_text(text.c_str());
+  }
+
+  string clipboard_get_text() {
+    char* res = cocoa_clipboard_get_text();
+    std::string resStr(res);
+    free(res);
+    return resStr;
+  }
+
+  bool clipboard_has_text() {
+    return cocoa_clipboard_has_text();
   }
 
   void window_set_region_scale(double scale, bool adaptwindow) {}
