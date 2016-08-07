@@ -61,6 +61,44 @@ int cocoa_get_screen_size(int getWidth)
 	}
 }
 
+void cocoa_clipboard_set_text(const char* text)
+{
+  //Get the general pasteboard, clear its contents.
+  NSPasteboard* pasteboard = [NSPasteboard generalPasteboard];
+  [pasteboard clearContents];
+
+  //Pass an array of objects to write to the pasteboard.
+  NSString* objToCopy = [NSString stringWithUTF8String:text];
+  NSArray* objectsToCopy = [NSArray arrayWithObject:objToCopy];
+  [pasteboard writeObjects:objectsToCopy];
+}
+
+char* cocoa_clipboard_get_text()
+{
+  NSPasteboard* pasteboard = [NSPasteboard generalPasteboard];
+  NSArray* classes = [[NSArray alloc] initWithObjects:[NSString class], nil];
+  NSDictionary *options = [NSDictionary dictionary];
+  NSArray *copiedItems = [pasteboard readObjectsForClasses:classes options:options];
+  if (copiedItems!=nil && [copiedItems count]>0) {
+    NSString* res1 = [copiedItems firstObject];
+    const char* res2 = [res1 cStringUsingEncoding:NSUTF8StringEncoding]; //This will be auto-collected.
+    char* res3 = malloc(strlen(res2)+1); //This will be freed by the caller (clipboard_get_text()).
+    strcpy(res3, res2);
+    return res3;
+  }
+
+  return 0;
+}
+
+bool cocoa_clipboard_has_text()
+{
+  NSPasteboard* pasteboard = [NSPasteboard generalPasteboard];
+  NSArray* classes = [[NSArray alloc] initWithObjects:[NSString class], nil];
+  NSDictionary *options = [NSDictionary dictionary];
+  NSArray *copiedItems = [pasteboard readObjectsForClasses:classes options:options];
+  return copiedItems!=nil && [copiedItems count]>0;
+}
+
 int getWindowDimension(int i)
 {
 	if(i == 0) return [[delegate window] frame].origin.x;
