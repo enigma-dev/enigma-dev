@@ -32,7 +32,7 @@
     -compliance-mode:
         Type: Combobox
         Label: Compliance Mode: 
-        Options: "Standard, GM5"
+        Options: "Standard, GM567, GM8"
     -keyword-blacklist:
         Type: Textfield
         Label: Keyword Blacklist: 
@@ -53,6 +53,10 @@
     -inherit-objects:
         Type: Checkbox
         Label: Object Inheritance
+        Default: true
+    -automatic-semicolons:
+        Type: Checkbox
+        Label: Automatic Semicolons
         Default: true
 		
 -Graphics:

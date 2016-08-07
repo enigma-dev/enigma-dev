@@ -76,6 +76,13 @@ namespace enigma_user
   inline ma_scalar arctan(ma_scalar x)           { return ::atan(x); }
   inline ma_scalar arctan2(ma_scalar y,ma_scalar x) { return ::atan2(y,x); }
 
+  inline int64_t int64(ma_scalar x) { return (int64_t)x; }
+  inline int64_t int64(string x) { return (int64_t) atol(x.c_str()); }
+  inline int64_t int64(const variant& x) {
+    return x.type == enigma::vt_tstr ? int64((string) x) : int64((double) x);
+  }
+  inline int64_t int64(const var& x) { return int64(*x); }
+
   // TODO: Once the user space switch to namespace enigma_user has been made,
   // comment in these functions.
   /*
