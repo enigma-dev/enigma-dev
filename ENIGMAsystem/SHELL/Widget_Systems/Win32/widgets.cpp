@@ -83,8 +83,9 @@ bool wgt_exists(int id) {
 
 #define enigma_window_generic_class "enigma_window_generic_class"
 
-#define getID(hwnd) GetWindowLong((HWND)(hwnd),GWL_USERDATA)
-#define setID(hwnd,id) SetWindowLong((HWND)(hwnd),GWL_USERDATA,(id))
+#define getID(hwnd) GetWindowLongPtr((HWND)(hwnd), GWLP_USERDATA)
+#define setID(hwnd,id) SetWindowLongPtr((HWND)(hwnd), GWLP_USERDATA,(id))
+
 #define fixFont(hwnd) SendMessage(hwnd,WM_SETFONT,(WPARAM)GetStockObject(DEFAULT_GUI_FONT),0);
 
 struct enigma_window: enigma_widget {
@@ -168,7 +169,7 @@ struct Sgeneric_window
 
 int wgt_window_create(int w, int h)
 {
-  HWND win = CreateWindowEx(0, enigma_window_generic_class, "caption", WS_POPUP | WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, w, h, enigma::hWnd, (HMENU)widget_idmax, enigma::hInstance, (LPVOID)widget_idmax);
+  HWND win = CreateWindowEx(0, enigma_window_generic_class, "caption", WS_POPUP | WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, w, h, enigma::hWnd, (HMENU)(ptrdiff_t)widget_idmax, enigma::hInstance, (LPVOID)(ptrdiff_t)widget_idmax);
   if (!win)
     return -1;
   setID(win,widget_idmax); fixFont(win);
@@ -257,7 +258,7 @@ void enigma_button::resolve()
 
 int wgt_button_create(string text)
 {
-  HWND butn = CreateWindow("button", text.c_str(), BS_PUSHBUTTON, 0, 0, 24, 24, NULL, (HMENU)NULL, NULL, (LPVOID*)widget_idmax);
+  HWND butn = CreateWindow("button", text.c_str(), BS_PUSHBUTTON, 0, 0, 24, 24, NULL, (HMENU)NULL, NULL, (LPVOID*)(ptrdiff_t)widget_idmax);
   if (!butn) return -1;
   setID(butn,widget_idmax); fixFont(butn);
   log_enigma_widget(new enigma_button(widget_idmax,butn,BS_PUSHBUTTON,24,24));

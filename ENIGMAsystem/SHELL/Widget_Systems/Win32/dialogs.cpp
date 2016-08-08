@@ -195,7 +195,7 @@ static INT_PTR CALLBACK ShowMessageExtProc(HWND hwndDlg, UINT uMsg, WPARAM wPara
   return 0;
 }
 
-static INT_PTR CALLBACK GetDirectoryAltProc(HWND hwnd, UINT uMsg, LPARAM lp, LPARAM pData)
+static INT CALLBACK GetDirectoryAltProc(HWND hwnd, UINT uMsg, LPARAM lp, LPARAM pData)
 {
   if (uMsg == BFFM_INITIALIZED)
     SetWindowText(hwnd, gs_cap.c_str());

@@ -313,7 +313,7 @@ void audio_listener_velocity(as_scalar vx, as_scalar vy, as_scalar vz)
   alListenerfv(AL_VELOCITY, listenerVel);
 }
 
-void audio_master_gain(float volume, double time)
+void audio_master_gain(float volume)
 {
   alListenerf(AL_GAIN, volume);
 }
@@ -431,4 +431,3 @@ void audio_emitter_velocity(int emitter, as_scalar vx, as_scalar vy, as_scalar v
 }
 
 }
-
