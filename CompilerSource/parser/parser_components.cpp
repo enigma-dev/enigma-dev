@@ -127,7 +127,7 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
         last_token = '@';
         continue;
       }
-      
+
       jdi::macro_iter_c itm = main_context->get_macros().find(name);
       if (itm != main_context->get_macros().end())
       {
@@ -249,7 +249,8 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
         str = (code.substr(spos,++pos-spos));
       }
       string_in_code[strc++] = str;
-      codo[bpos] = synt[bpos] = last_token = '"', bpos++;
+      codo[bpos] = synt[bpos] = last_token = setting::use_cpp_strings? '\'' : '\"';
+      bpos++;
       continue;
     }
     if (code[pos] == '/')
@@ -781,9 +782,15 @@ const char * indent_chars   =  "\n                                \
                                                                   ";
 static inline string string_settings_escape(string n)
 {
-  if (!n.length()) return "\"\"";
-  if (n[0] == '\'' and n[n.length()-1] == '\'')
-    n[0] = n[n.length() - 1] = '"';
+  if (!setting::use_cpp_strings) {
+    if (!n.length()) return "\"\"";
+    if (n[0] == '\'' and n[n.length()-1] == '\'')
+      n[0] = n[n.length() - 1] = '"';
+  } else {
+    if (!n.length()) {
+      return "\'\'";
+    }
+  }
   for (size_t pos = 1; pos < n.length()-1; pos++)
   {
     switch (n[pos])
@@ -875,9 +882,9 @@ void print_to_file(string code,string synt,const unsigned int strc, const varray
             }
           }
         break;
-      case '"':
+      case '"': case '\'':
           if (pars) pars--;
-            if (str_ind >= strc) cout << "What the crap.\n";
+            if (str_ind >= strc) cout << "What the string literal.\n";
             of << string_settings_escape(string_in_code[str_ind]).c_str();
             str_ind++;
             if (synt[pos+1] == '+' and synt[pos+2] == '"')
