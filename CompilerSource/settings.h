@@ -56,9 +56,9 @@ namespace setting
   //Compliance levels. These enforce various settings specific to certain versions of GM.
   //Prefer generalized solutions; use these for direct incompatibilities. (Add other GM versions as needed).
   enum COMPLIANCE_LVL {
-    COMPL_STANDARD = 0,    //Standard (enigma) compliance. Default and recommended.
-    COMPL_GM567 = 1,       //GM5,6,7 compliance. timeline_running will default to "true". exit will abort single code actions.
-    COMPL_GM8 = 2,         //GM8 compliance. exit will abort single code actions.
+    COMPL_GM567 = 5,       //GM5,6,7 compliance. timeline_running will default to "true". exit will abort single code actions. Sprite and background alphas default to 1
+    COMPL_GM8 = 8,         //GM8 compliance. exit will abort single code actions. Sprite and background alphas default to 1.
+    COMPL_STANDARD = 255,    //Standard (enigma) compliance. Default and recommended.
   };
 
   //Compatibility / Progess options
