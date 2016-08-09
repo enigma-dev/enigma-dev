@@ -12,17 +12,17 @@ gcc: gcc
 g++: g++
 cxx: g++
 defines: gcc -dM -x c++ -E $blank
-searchdirs: gcc -E -x c++ -v $blank -I./ENIGMAsystem/SHELL/
+searchdirs: gcc -E -x c++ -v $blank
 searchdirs-start: "#include <...> search starts here:"
 searchdirs-end: "End of search list."
 resources: ./MacOS/build/Release/EnigmaXcode.app/Contents/MacOS/EnigmaXcode.res
-cxxflags: -I/opt/X11/include/
+cxxflags: -I/opt/X11/include/ -I../../ENIGMA/
 cppflags:
 cflags:
 links: -lz -framework Cocoa
 
 Build-Extension: .app
 Run-output: ./MacOS/build/Release/EnigmaXcode.app/Contents/MacOS/EnigmaXcode
-Run-Program: open ./MacOS/build/Release/EnigmaXcode.app/Contents/MacOS/EnigmaXcode
+Run-Program: open $game
 Run-Params:
 
