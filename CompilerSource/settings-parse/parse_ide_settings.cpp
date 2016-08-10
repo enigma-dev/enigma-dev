@@ -138,11 +138,17 @@ void parse_ide_settings(const char* eyaml)
   setting::literal_autocast  = settree.get("treat-literals-as").toInt();
   setting::inherit_objects   = settree.get("inherit-objects").toBool();
   switch (settree.get("compliance-mode").toInt()) {
-    case 2:
+    case 4:
       setting::compliance_mode = setting::COMPL_GM8;
       break;
+    case 3:
+      setting::compliance_mode = setting::COMPL_GM7;
+      break;
+    case 2:
+      setting::compliance_mode = setting::COMPL_GM6;
+      break;
     case 1:
-      setting::compliance_mode = setting::COMPL_GM567;
+      setting::compliance_mode = setting::COMPL_GM5;
       break;
     default:
       setting::compliance_mode = setting::COMPL_STANDARD;
