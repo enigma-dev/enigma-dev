@@ -29,52 +29,52 @@ using namespace std;
 
 namespace enigma
 {
-	#ifdef DEBUG_MODE
-	#include "Widget_Systems/widgets_mandatory.h"
-	//Based on code from Cort Stratton (http://www.altdev.co/2011/06/23/improving-opengl-error-messages/)
-	void FormatDebugOutputARB(char outStr[], size_t outStrSize, GLenum source, GLenum type, GLuint id, GLenum severity, const char *msg) {
-		char sourceStr[32]; const char *sourceFmt = "UNDEFINED(0x%04X)";
-		switch(source) {
-			case GL_DEBUG_SOURCE_API_ARB: sourceFmt = "API"; break;
-			case GL_DEBUG_SOURCE_WINDOW_SYSTEM_ARB: sourceFmt = "WINDOW_SYSTEM"; break;
-			case GL_DEBUG_SOURCE_SHADER_COMPILER_ARB: sourceFmt = "SHADER_COMPILER"; break;
-			case GL_DEBUG_SOURCE_THIRD_PARTY_ARB: sourceFmt = "THIRD_PARTY"; break;
-			case GL_DEBUG_SOURCE_APPLICATION_ARB: sourceFmt = "APPLICATION"; break;
-			case GL_DEBUG_SOURCE_OTHER_ARB: sourceFmt = "OTHER"; break;
-		}
-		snprintf(sourceStr, 32, sourceFmt, source);
-		char typeStr[32];
-		const char *typeFmt = "UNDEFINED(0x%04X)";
-		switch(type) {
-			case GL_DEBUG_TYPE_ERROR_ARB: typeFmt = "ERROR"; break;
-			case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR_ARB: typeFmt = "DEPRECATED_BEHAVIOR"; break;
-			case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR_ARB: typeFmt = "UNDEFINED_BEHAVIOR"; break;
-			case GL_DEBUG_TYPE_PORTABILITY_ARB: typeFmt = "PORTABILITY"; break;
-			case GL_DEBUG_TYPE_PERFORMANCE_ARB: typeFmt = "PERFORMANCE"; break;
-			case GL_DEBUG_TYPE_OTHER_ARB: typeFmt = "OTHER"; break;
-		}
-		snprintf(typeStr, 32, typeFmt, type);
-		char severityStr[32];
-		const char *severityFmt = "UNDEFINED(%i)";
-		switch(severity) {
-			case GL_DEBUG_SEVERITY_HIGH_ARB: severityFmt = "HIGH"; break;
-			case GL_DEBUG_SEVERITY_MEDIUM_ARB: severityFmt = "MEDIUM"; break;
-			case GL_DEBUG_SEVERITY_LOW_ARB: severityFmt = "LOW"; break;
-		}
-		snprintf(severityStr, 32, severityFmt, severity);
-		snprintf(outStr, outStrSize, "OpenGL: %s [source=%s type=%s severity=%s id=%d]", msg, sourceStr, typeStr, severityStr, id);
-	}
+  #ifdef DEBUG_MODE
+  #include "Widget_Systems/widgets_mandatory.h"
+  //Based on code from Cort Stratton (http://www.altdev.co/2011/06/23/improving-opengl-error-messages/)
+  void FormatDebugOutputARB(char outStr[], size_t outStrSize, GLenum source, GLenum type, GLuint id, GLenum severity, const char *msg) {
+    char sourceStr[32]; const char *sourceFmt = "UNDEFINED(0x%04X)";
+    switch(source) {
+      case GL_DEBUG_SOURCE_API_ARB: sourceFmt = "API"; break;
+      case GL_DEBUG_SOURCE_WINDOW_SYSTEM_ARB: sourceFmt = "WINDOW_SYSTEM"; break;
+      case GL_DEBUG_SOURCE_SHADER_COMPILER_ARB: sourceFmt = "SHADER_COMPILER"; break;
+      case GL_DEBUG_SOURCE_THIRD_PARTY_ARB: sourceFmt = "THIRD_PARTY"; break;
+      case GL_DEBUG_SOURCE_APPLICATION_ARB: sourceFmt = "APPLICATION"; break;
+      case GL_DEBUG_SOURCE_OTHER_ARB: sourceFmt = "OTHER"; break;
+    }
+    snprintf(sourceStr, 32, sourceFmt, source);
+    char typeStr[32];
+    const char *typeFmt = "UNDEFINED(0x%04X)";
+    switch(type) {
+      case GL_DEBUG_TYPE_ERROR_ARB: typeFmt = "ERROR"; break;
+      case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR_ARB: typeFmt = "DEPRECATED_BEHAVIOR"; break;
+      case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR_ARB: typeFmt = "UNDEFINED_BEHAVIOR"; break;
+      case GL_DEBUG_TYPE_PORTABILITY_ARB: typeFmt = "PORTABILITY"; break;
+      case GL_DEBUG_TYPE_PERFORMANCE_ARB: typeFmt = "PERFORMANCE"; break;
+      case GL_DEBUG_TYPE_OTHER_ARB: typeFmt = "OTHER"; break;
+    }
+    snprintf(typeStr, 32, typeFmt, type);
+    char severityStr[32];
+    const char *severityFmt = "UNDEFINED(%i)";
+    switch(severity) {
+      case GL_DEBUG_SEVERITY_HIGH_ARB: severityFmt = "HIGH"; break;
+      case GL_DEBUG_SEVERITY_MEDIUM_ARB: severityFmt = "MEDIUM"; break;
+      case GL_DEBUG_SEVERITY_LOW_ARB: severityFmt = "LOW"; break;
+    }
+    snprintf(severityStr, 32, severityFmt, severity);
+    snprintf(outStr, outStrSize, "OpenGL: %s [source=%s type=%s severity=%s id=%d]", msg, sourceStr, typeStr, severityStr, id);
+  }
 
-	void DebugCallbackARB(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, GLvoid* userParam) {
-		(void)length;
-		char finalMessage[256];
-		FormatDebugOutputARB(finalMessage, 256, source, type, id, severity, message);
-		printf("%s\n", finalMessage);
+  void DebugCallbackARB(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar *message, GLvoid* userParam) {
+    (void)length;
+    char finalMessage[256];
+    FormatDebugOutputARB(finalMessage, 256, source, type, id, severity, message);
+    printf("%s\n", finalMessage);
     show_error(toString(finalMessage), false);
-	}
-	#endif
+  }
+  #endif
 
-	GLuint msaa_fbo = 0;
+  GLuint msaa_fbo = 0;
 
   extern void (*WindowResizedCallback)();
   void WindowResized() {
@@ -151,10 +151,13 @@ namespace enigma
 
     GLuint ids[] = { 131185 };
     glDebugMessageControlARB(GL_DEBUG_SOURCE_API_ARB, GL_DEBUG_TYPE_OTHER_ARB, GL_DONT_CARE, 1, ids, GL_FALSE); //Disable notification about rendering HINTS like so:
-    //OpenGL: Buffer detailed info: Buffer object 1 (bound to GL_ELEMENT_ARRAY_BUFFER_ARB, usage hint is GL_STATIC_DRAW) will use VIDEO memory as the source for buffer object operations. [source=API type=OTHER severity=UNDEFINED (33387) id=131185]
+    //OpenGL: Buffer detailed info: Buffer object 1 (bound to GL_ELEMENT_ARRAY_BUFFER_ARB, usage hint is GL_STATIC_DRAW)
+    //will use VIDEO memory as the source for buffer object operations.
+    //[source=API type=OTHER severity=UNDEFINED (33387) id=131185]
     #endif
 
-    //TODO: This never reports higher than 8, but display_aa should be 14 if 2,4,and 8 are supported and 8 only when only 8 is supported
+    //TODO: This never reports higher than 8, but display_aa should be 14 if 2, 4,and 8 are
+    //supported and 8 only when only 8 is supported.
     glGetIntegerv(GL_MAX_SAMPLES_EXT, &enigma_user::display_aa);
   }
 
@@ -174,7 +177,6 @@ namespace enigma {
     bool ext_swapcontrol_supported;
 
     void investigate_swapcontrol_support() {
-
       if (has_checked_extensions) return; // Already calculated, no need to calculate it more.
 
       const char *wgl_extensions = wglGetExtensionsStringARB(window_hDC);
@@ -194,47 +196,47 @@ namespace enigma {
 #include "Universal_System/roomsystem.h"
 
 namespace enigma_user {
-	int display_aa = 0;
+  int display_aa = 0;
 
-	void display_reset(int samples, bool vsync) {
-		int interval = vsync ? 1 : 0;
+  void display_reset(int samples, bool vsync) {
+    int interval = vsync ? 1 : 0;
 
-		if (enigma::is_ext_swapcontrol_supported()) {
-		  wglSwapIntervalEXT(interval);
-		}
+    if (enigma::is_ext_swapcontrol_supported()) {
+      wglSwapIntervalEXT(interval);
+    }
 
-		GLint fbo;
-		glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fbo);
+    GLint fbo;
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &fbo);
 
-		GLuint ColorBufferID, DepthBufferID;
+    GLuint ColorBufferID, DepthBufferID;
 
-		// Cleanup the multi-sampler fbo if turning off multi-sampling
-		if (samples == 0) {
-			if (enigma::msaa_fbo != 0) {
-				glDeleteFramebuffers(1, &enigma::msaa_fbo);
-				enigma::msaa_fbo = 0;
-			}
-			return;
-		}
+    // Cleanup the multi-sampler fbo if turning off multi-sampling
+    if (samples == 0) {
+      if (enigma::msaa_fbo != 0) {
+        glDeleteFramebuffers(1, &enigma::msaa_fbo);
+        enigma::msaa_fbo = 0;
+      }
+      return;
+    }
 
-		//TODO: Change the code below to fix this to size properly to views
-		// If we don't already have a multi-sample fbo then create one
-		if (enigma::msaa_fbo == 0) {
-			glGenFramebuffers(1, &enigma::msaa_fbo);
-		}
-		glBindFramebuffer(GL_FRAMEBUFFER, enigma::msaa_fbo);
-		// Now make a multi-sample color buffer
-		glGenRenderbuffers(1, &ColorBufferID);
-		glBindRenderbuffer(GL_RENDERBUFFER, ColorBufferID);
-		glRenderbufferStorageMultisampleEXT(GL_RENDERBUFFER, samples, GL_RGBA8, window_get_region_width(), window_get_region_height());
-		// We also need a depth buffer
-		glGenRenderbuffersEXT(1, &DepthBufferID);
-		glBindRenderbufferEXT(GL_RENDERBUFFER, DepthBufferID);
-		glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples, GL_DEPTH_COMPONENT24, window_get_region_width(), window_get_region_height());
-		// Attach the render buffers to the multi-sampler fbo
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, ColorBufferID);
-		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, DepthBufferID);
-	}
+    //TODO: Change the code below to fix this to size properly to views
+    // If we don't already have a multi-sample fbo then create one
+    if (enigma::msaa_fbo == 0) {
+      glGenFramebuffers(1, &enigma::msaa_fbo);
+    }
+    glBindFramebuffer(GL_FRAMEBUFFER, enigma::msaa_fbo);
+    // Now make a multi-sample color buffer
+    glGenRenderbuffers(1, &ColorBufferID);
+    glBindRenderbuffer(GL_RENDERBUFFER, ColorBufferID);
+    glRenderbufferStorageMultisampleEXT(GL_RENDERBUFFER, samples, GL_RGBA8, window_get_region_width(), window_get_region_height());
+    // We also need a depth buffer
+    glGenRenderbuffersEXT(1, &DepthBufferID);
+    glBindRenderbufferEXT(GL_RENDERBUFFER, DepthBufferID);
+    glRenderbufferStorageMultisample(GL_RENDERBUFFER, samples, GL_DEPTH_COMPONENT24, window_get_region_width(), window_get_region_height());
+    // Attach the render buffers to the multi-sampler fbo
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, ColorBufferID);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, DepthBufferID);
+  }
 
 
   void screen_refresh() {
@@ -244,7 +246,6 @@ namespace enigma_user {
   }
 
   void set_synchronization(bool enable) {
-
     // General notes:
     // Setting swapping on and off is platform-dependent and requires platform-specific extensions.
     // Platform-specific extensions are even more bothersome than regular extensions.
