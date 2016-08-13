@@ -20,17 +20,18 @@
 // GM front-end functions - Implementations of standard GM collision functions.
 ////////////////////////////////////
 
+#include <cmath>
+#include <limits>
+
 #include "Universal_System/collisions_object.h"
 #include "Universal_System/instance_system.h" //iter
 #include "Universal_System/roomsystem.h"
 #include "Collision_Systems/collision_mandatory.h" //iter
-#include "PRECimpl.h"
-#include "../General/CSfuncs.h"
-#include <limits>
-#include <cmath>
 #include "Universal_System/instance.h"
+#include "Universal_System/math_consts.h"
 
-#define M_PI		3.14159265358979323846
+#include "../General/CSfuncs.h"
+#include "PRECimpl.h"
 
 static inline void get_border(int *leftv, int *rightv, int *topv, int *bottomv, int left, int top, int right, int bottom, cs_scalar x, cs_scalar y, double xscale, double yscale, double angle)
 {

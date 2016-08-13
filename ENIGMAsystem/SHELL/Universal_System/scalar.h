@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#define M_PI		3.14159265358979323846
+#include "math_consts.h"
 
 // This header implements scalar data types for double and floating point precision
 // for major systems and coordinate space. Angular unit functions are also implemented

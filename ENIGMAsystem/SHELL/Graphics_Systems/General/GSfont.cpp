@@ -19,20 +19,18 @@
 #include <cmath>
 #include <string>
 #include <cstdint>
-#include "Universal_System/var4.h"
 #include "libEGMstd.h"
+#include "Universal_System/var4.h"
 #include "../General/GScolors.h"
 #include "../General/GSfont.h"
 #include "../General/GStextures.h"
 #include "../General/GSprimitives.h"
 #include "../General/GSsprite.h"
 
-#ifndef M_PI // M_PI is non-standard
-#  define M_PI 3.14159265358979323846
-#endif
+#include "Universal_System/math_consts.h"
+#include "Universal_System/fontstruct.h"
 
 using namespace std;
-#include "Universal_System/fontstruct.h"
 
 #define __GETR(x) ((x & 0x0000FF))
 #define __GETG(x) ((x & 0x00FF00) >> 8)
