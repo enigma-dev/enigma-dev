@@ -25,11 +25,10 @@
 #include "Universal_System/nlpo2.h"
 #include "Universal_System/backgroundstruct.h"
 #include "Universal_System/spritestruct.h"
+#include "Universal_System/math_consts.h"
 
 //Note that this clamps between 0 and 1, not 0 and 255
 #define clamp_alpha(alpha) (alpha <= 0 ? 0: alpha >= 1? 1: alpha)
-
-#define M_PI		3.14159265358979323846
 
 #ifdef DEBUG_MODE
   #include <string>

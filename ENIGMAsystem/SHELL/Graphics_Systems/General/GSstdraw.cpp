@@ -23,13 +23,11 @@
 
 #include <stdio.h>
 #include "Universal_System/roomsystem.h"
+#include "Universal_System/math_consts.h"
 
 #include <list>
 #include <vector>
 using std::vector;
-
-#define M_PI		3.14159265358979323846
-#define M_SQRT1_2	0.70710678118654752440
 
 namespace enigma {
   float circleprecision=24;

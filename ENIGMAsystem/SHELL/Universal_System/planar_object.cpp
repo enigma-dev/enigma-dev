@@ -24,18 +24,17 @@
 
 #include <math.h>
 
-#include "object.h"
+#include <floatcomp.h>
+
 #include "var4.h"
+#include "object.h"
+#include "math_consts.h"
 #include "reflexive_types.h"
 
 #include "planar_object.h"
 
-#include <floatcomp.h>
-
-#define M_PI		3.14159265358979323846
-
 #ifdef PATH_EXT_SET
-    #include "Universal_System/Extensions/Paths/path_functions.h"
+#  include "Universal_System/Extensions/Paths/path_functions.h"
 #endif
 
 namespace enigma

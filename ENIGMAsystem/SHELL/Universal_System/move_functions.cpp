@@ -17,14 +17,13 @@
 **/
 
 #include <cmath>
+#include <floatcomp.h>
+
 #include "collisions_object.h"
 #include "instance_system.h"
 #include "roomsystem.h"
 #include "move_functions.h"
-
-#include <floatcomp.h>
-
-#define M_PI		3.14159265358979323846
+#include "math_consts.h"
 
 namespace enigma_user
 {

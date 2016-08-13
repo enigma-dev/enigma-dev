@@ -27,6 +27,7 @@ using namespace std;
 #include "Universal_System/spritestruct.h"
 #include "Universal_System/backgroundstruct.h"
 #include "Collision_Systems/collision_types.h"
+#include "Universal_System/math_consts.h"
 
 #define __GETR(x) ((x & 0x0000FF))
 #define __GETG(x) ((x & 0x00FF00) >> 8)
@@ -34,8 +35,6 @@ using namespace std;
 
 //Note that this clamps between 0 and 1, not 0 and 255
 #define clamp_alpha(alpha) (alpha <= 0 ? 0: alpha >= 1? 1: alpha)
-
-#define M_PI		3.14159265358979323846
 
 namespace enigma_user {
 extern int room_width, room_height/*, sprite_idmax*/;

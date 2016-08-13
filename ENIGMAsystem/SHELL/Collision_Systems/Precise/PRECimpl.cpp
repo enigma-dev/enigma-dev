@@ -24,12 +24,11 @@
 #include "Universal_System/collisions_object.h"
 #include "Universal_System/instance_system.h" //iter
 #include "Universal_System/instance.h"
+#include "Universal_System/math_consts.h"
 
 #include "PRECimpl.h"
 #include <cmath>
 #include <utility>
-
-#define M_PI		3.14159265358979323846
 
 static inline void get_border(int *leftv, int *rightv, int *topv, int *bottomv, int left, int top, int right, int bottom, double x, double y, double xscale, double yscale, double angle)
 {

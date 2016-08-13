@@ -29,6 +29,7 @@ using std::string;
 #include "Universal_System/spritestruct.h"
 #include "Universal_System/instance_system.h"
 #include "Universal_System/graphics_object.h"
+#include "Universal_System/math_consts.h"
 
 #define __GETR(x) ((x & 0x0000FF))
 #define __GETG(x) ((x & 0x00FF00) >> 8)
@@ -36,8 +37,6 @@ using std::string;
 
 //Note that this clamps between 0 and 1, not 0 and 255
 #define clamp_alpha(alpha) (alpha <= 0 ? 0: alpha >= 1? 1: alpha)
-
-#define M_PI		3.14159265358979323846
 
 #ifdef DEBUG_MODE
   #include "libEGMstd.h"

@@ -26,32 +26,32 @@ using std::map;
 namespace enigma {
 
 struct VertexFormat {
-	map<int,int> flags;
-	
-	VertexFormat() {
-	
-	}
-	
-	~VertexFormat() {
-	
-	}
-	
-	void AddAttribute(int type, int usage) {
-		flags.insert(map<int,int>::value_type(type, usage));
-	}
+  map<int,int> flags;
+  
+  VertexFormat() {
+  
+  }
+  
+  ~VertexFormat() {
+  
+  }
+  
+  void AddAttribute(int type, int usage) {
+    flags.insert(map<int,int>::value_type(type, usage));
+  }
 };
 
 struct VertexBuffer {
-	vector<gs_scalar> vertices;
-	vector<gs_scalar> indices;
-	
-	GLuint vertexBuffer;
-	GLuint indexBuffer;
+  vector<gs_scalar> vertices;
+  vector<gs_scalar> indices;
+  
+  GLuint vertexBuffer;
+  GLuint indexBuffer;
 };
 
 vector<VertexFormat*> vertexFormats;
 vector<VertexBuffer*> vertexBuffers;
-	
+
 VertexFormat* vertexFormat = 0;
 
 }
@@ -59,12 +59,12 @@ VertexFormat* vertexFormat = 0;
 namespace enigma_user {
 
 int vertex_create_buffer() {
-	return -1;
+  return -1;
 }
 
 int vertex_create_buffer_ext(unsigned size) {
-	(void) size;
-	return -1;
+  (void) size;
+  return -1;
 }
 
 void vertex_delete_buffer(int buffer) {
@@ -144,36 +144,36 @@ void vertex_ubyte4(int buffer, unsigned char u1, unsigned char u2, unsigned char
 }
 
 void vertex_format_begin() {
-	enigma::vertexFormat = new enigma::VertexFormat();
+  enigma::vertexFormat = new enigma::VertexFormat();
 }
 
 void vertex_format_add_colour() {
-	enigma::vertexFormat->AddAttribute(vertex_type_colour, vertex_usage_colour);
+  enigma::vertexFormat->AddAttribute(vertex_type_colour, vertex_usage_colour);
 }
 
 void vertex_format_add_position() {
-	enigma::vertexFormat->AddAttribute(vertex_type_float2, vertex_usage_position);
+  enigma::vertexFormat->AddAttribute(vertex_type_float2, vertex_usage_position);
 }
 
 void vertex_format_add_position_3d() {
-	enigma::vertexFormat->AddAttribute(vertex_type_float3, vertex_usage_position);
+  enigma::vertexFormat->AddAttribute(vertex_type_float3, vertex_usage_position);
 } 
 
 void vertex_format_add_textcoord() {
-	enigma::vertexFormat->AddAttribute(vertex_type_float2, vertex_usage_textcoord);
+  enigma::vertexFormat->AddAttribute(vertex_type_float2, vertex_usage_textcoord);
 }
 
 void vertex_format_add_normal() {
-	enigma::vertexFormat->AddAttribute(vertex_type_float3, vertex_usage_normal);
+  enigma::vertexFormat->AddAttribute(vertex_type_float3, vertex_usage_normal);
 }
 
 void vertex_format_add_custom(int type, int usage) {
-	enigma::vertexFormat->AddAttribute(type, usage);
+  enigma::vertexFormat->AddAttribute(type, usage);
 }
 
 int vertex_format_end() {
-	enigma::vertexFormats.push_back(enigma::vertexFormat);
-	return enigma::vertexFormats.size() - 1;
+  enigma::vertexFormats.push_back(enigma::vertexFormat);
+  return enigma::vertexFormats.size() - 1;
 }
 
 }

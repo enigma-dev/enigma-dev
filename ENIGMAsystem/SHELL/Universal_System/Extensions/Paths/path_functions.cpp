@@ -28,7 +28,10 @@
 #include "pathstruct.h"
 #include "path_functions.h"
 #include <algorithm>
+#include <floatcomp.h>
 #include <cmath>
+
+#include "Universal_System/math_consts.h"
 
 #ifdef DEBUG_MODE
   #include <string>
@@ -36,9 +39,6 @@
   #include "Widget_Systems/widgets_mandatory.h"
 #endif
 
-#include "floatcomp.h"
-
-#define M_PI		3.14159265358979323846
 
 namespace enigma {
 	extern size_t path_idmax;

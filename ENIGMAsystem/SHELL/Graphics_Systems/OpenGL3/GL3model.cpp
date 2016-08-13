@@ -33,8 +33,7 @@ using namespace std;
 #include <list>
 #include "Universal_System/fileio.h"
 #include "Universal_System/estring.h"
-
-#define M_PI		3.14159265358979323846
+#include "Universal_System/math_consts.h"
 
 vector<Mesh*> meshes(0);
 

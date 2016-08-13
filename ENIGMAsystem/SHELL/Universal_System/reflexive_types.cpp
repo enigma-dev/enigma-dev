@@ -20,9 +20,7 @@
 #include <string>
 #include "var4.h"
 #include "reflexive_types.h"
-//#include <floatcomp.h>
-
-#define M_PI		3.14159265358979323846
+#include "math_consts.h"
 
 // Variable not zero.
 inline bool varnz(double x) { return fabs(x) > var_e; }
