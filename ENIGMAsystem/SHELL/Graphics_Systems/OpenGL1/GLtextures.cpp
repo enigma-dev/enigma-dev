@@ -46,7 +46,8 @@ TextureStruct::~TextureStruct()
 }
 
 unsigned get_texture(int texid) {
-	return (size_t(texid) >= textureStructs.size() || texid < 0)? -1 : textureStructs[texid]->gltex;
+	return (size_t(texid) >= textureStructs.size() || texid < 0)
+      ? -1 : textureStructs[texid]->gltex;
 }
 
 inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect powers of two
@@ -60,8 +61,8 @@ inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect 
 
 namespace enigma
 {
-  int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool mipmap)
-  {
+  int graphics_create_texture(unsigned width, unsigned height,
+      unsigned fullwidth, unsigned fullheight, void* pxdata, bool mipmap) {
     GLuint texture;
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
@@ -110,10 +111,8 @@ namespace enigma
     GLuint texture = textureStructs[tex]->gltex;
     GLuint copy_texture = textureStructs[copy_tex]->gltex;
 
-    unsigned w, h, fw, fh, size;
+    unsigned fw, fh, size;
     glBindTexture(GL_TEXTURE_2D, texture);
-    w = textureStructs[tex]->width;
-    h = textureStructs[tex]->height;
     fw = textureStructs[tex]->fullwidth;
     fh = textureStructs[tex]->fullheight;
     size = (fh<<(lgpp2(fw)+2))|2;
@@ -123,8 +122,9 @@ namespace enigma
     glBindTexture(GL_TEXTURE_2D, copy_texture);
     glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_BYTE, bitmap2);
 
-    for (int i = 3; i < size; i += 4)
-        bitmap[i] = (bitmap2[i-3] + bitmap2[i-2] + bitmap2[i-1])/3;
+    for (unsigned i = 3; i < size; i += 4) {
+      bitmap[i] = (bitmap2[i-3] + bitmap2[i-2] + bitmap2[i-1])/3;
+    }
 
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexImage2D(GL_TEXTURE_2D, 0, 4, fw, fh, 0, GL_BGRA, GL_UNSIGNED_BYTE, bitmap);
@@ -174,8 +174,13 @@ int texture_add(string filename, bool mipmap) {
   unsigned int w, h, fullwidth, fullheight;
   int img_num;
 
-  unsigned char *pxdata = enigma::image_load(filename,&w,&h,&fullwidth,&fullheight,&img_num,false);
-  if (pxdata == NULL) { printf("ERROR - Failed to append sprite to index!\n"); return -1; }
+  unsigned char *pxdata = enigma::image_load(
+      filename, &w, &h, &fullwidth, &fullheight, &img_num, false);
+  if (pxdata == NULL) {
+    printf("ERROR - Failed to append sprite to index!\n");
+    return -1;
+  }
+
   unsigned texture = enigma::graphics_create_texture(w, h, fullwidth, fullheight, pxdata, mipmap);
   delete[] pxdata;
 

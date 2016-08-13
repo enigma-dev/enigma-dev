@@ -76,8 +76,11 @@ namespace enigma
 
   void propagate_locals(object_planar* instance)
   {
-    #ifdef PATH_EXT_SET
-        if (enigma_user::path_update()) {instance->speed = 0; return;}
+    #ifdef PATH_EXT_SET // TODO(#997): this does not belong here...
+      if (enigma_user::path_update()) {
+        instance->speed = 0;
+        return;
+      }
     #endif
 
     if (fnzero(instance->gravity) || fnzero(instance->friction))
@@ -86,35 +89,39 @@ namespace enigma
         hb4 = instance->hspeed.rval.d,
         vb4 = instance->vspeed.rval.d;
       int sign = (instance->speed > 0) - (instance->speed < 0);
-      if (instance->hspeed!=0)
-        instance->hspeed.rval.d -= (sign * instance->friction) * cos(instance->direction.rval.d * M_PI/180);
-      if ((hb4>0 && instance->hspeed.rval.d<0) || (hb4<0 && instance->hspeed.rval.d>0))
-        instance->hspeed.rval.d=0;
-        if (instance->vspeed!=0)
-        instance->vspeed.rval.d -= (sign * instance->friction) * -sin(instance->direction.rval.d * M_PI/180);
-      if ((vb4>0 && instance->vspeed.rval.d<0) || (vb4<0 && instance->vspeed.rval.d>0))
+      
+      if (instance->hspeed != 0) {
+        instance->hspeed.rval.d -= (sign * instance->friction)
+            * cos(instance->direction.rval.d * M_PI/180);
+      }
+      if ((hb4 > 0 && instance->hspeed.rval.d < 0)
+      ||  (hb4 < 0 && instance->hspeed.rval.d > 0)) {
+        instance->hspeed.rval.d = 0;
+      }
+      if (instance->vspeed != 0) {
+        instance->vspeed.rval.d -= (sign * instance->friction)
+            * -sin(instance->direction.rval.d * M_PI/180);
+      }
+      if ((vb4 > 0 && instance->vspeed.rval.d < 0)
+      ||  (vb4 < 0 && instance->vspeed.rval.d > 0)) {
         instance->vspeed.rval.d=0;
+      }
 
-      if (fequal(instance->gravity_direction, 270))
-      {
+      // XXX: The likely_if here is the == 270 case; the rest might not be worth
+      // checking, as they're mostly just prolonging the inevitable
+      if (fequal(instance->gravity_direction, 270)) {
         instance->vspeed.rval.d += (instance->gravity);
-      }
-      else if (fequal(instance->gravity_direction, 180))
-      {
+      } else if (fequal(instance->gravity_direction, 180)) {
         instance->hspeed.rval.d -= (instance->gravity);
-      }
-      else if (fequal(instance->gravity_direction, 90))
-      {
+      } else if (fequal(instance->gravity_direction, 90)) {
         instance->vspeed.rval.d -= (instance->gravity);
-      }
-      else if (fequal(instance->gravity_direction, 0))
-      {
+      } else if (fequal(instance->gravity_direction, 0)) {
         instance->hspeed.rval.d += (instance->gravity);
-      }
-      else
-      {
-        instance->hspeed.rval.d += (instance->gravity) * cos(instance->gravity_direction * M_PI/180);
-        instance->vspeed.rval.d += (instance->gravity) *-sin(instance->gravity_direction * M_PI/180);
+      } else {
+        instance->hspeed.rval.d +=
+            (instance->gravity) * cos(instance->gravity_direction * M_PI/180);
+        instance->vspeed.rval.d +=
+            (instance->gravity) *-sin(instance->gravity_direction * M_PI/180);
       }
 
       /*
@@ -129,11 +136,10 @@ namespace enigma
 
       instance->speed.rval.d = instance->speed.rval.d < 0? -hypot(instance->hspeed.rval.d, instance->vspeed.rval.d) :
       hypot(instance->hspeed.rval.d, instance->vspeed.rval.d);
-      if (fabs(instance->speed.rval.d) > 1e-12){
+      if (fabs(instance->speed.rval.d) > 1e-12) {
         instance->direction.rval.d = fmod((atan2(-instance->vspeed.rval.d, instance->hspeed.rval.d) * (180/M_PI))
         + (instance->speed.rval.d < 0?  180 : 360), 360);
       }
-
     }
     instance->x += instance->hspeed.rval.d;
     instance->y += instance->vspeed.rval.d;

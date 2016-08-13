@@ -16,9 +16,9 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <math.h>
+#include <cmath>
 #include <string>
-#include <stdint.h>
+#include <cstdint>
 #include "Universal_System/var4.h"
 #include "libEGMstd.h"
 #include "../General/GScolors.h"
@@ -27,7 +27,9 @@
 #include "../General/GSprimitives.h"
 #include "../General/GSsprite.h"
 
-#define M_PI		3.14159265358979323846
+#ifndef M_PI // M_PI is non-standard
+#  define M_PI 3.14159265358979323846
+#endif
 
 using namespace std;
 #include "Universal_System/fontstruct.h"
@@ -70,30 +72,29 @@ static uint32_t getUnicodeCharacter(const string str, size_t& pos) {
 }
 
 static fontglyph* findGlyph(const font *const fnt, uint32_t character) {
-	for (size_t i = 0; i < fnt->glyphRangeCount; i++) {
-		fontglyphrange* fgr = fnt->glyphRanges[i];
-		if (character >= fgr->glyphstart && character < fgr->glyphstart + fgr->glyphcount) {
-			return fgr->glyphs[character - fgr->glyphstart];
-		}
-	}
-	return NULL;
+  for (size_t i = 0; i < fnt->glyphRangeCount; i++) {
+    fontglyphrange* fgr = fnt->glyphRanges[i];
+    if (character >= fgr->glyphstart && character < fgr->glyphstart + fgr->glyphcount) {
+      return fgr->glyphs[character - fgr->glyphstart];
+    }
+  }
+  return NULL;
 }
 
-namespace enigma_user
-{
+namespace enigma_user {
 
 void draw_set_halign(unsigned align){
-    halign = align;
+  align = align;
 }
 void draw_set_valign(unsigned align){
-    valign = align;
+  align = align;
 }
 
 unsigned draw_get_halign(){
-    return halign;
+  return halign;
 }
 unsigned draw_get_valign(){
-    return valign;
+  return valign;
 }
 
 }
@@ -124,10 +125,8 @@ unsigned draw_get_valign(){
     const font *const fnt = fontstructarray[id];
 #endif
 
-namespace enigma
-{
-  inline float get_space_width(const font *const fnt)
-  {
+namespace enigma {
+  inline float get_space_width(const font *const fnt) {
     fontglyph* g = findGlyph(fnt, ' ');
     // Use the width of the space glyph when available,
     // else use the backup.
@@ -142,8 +141,7 @@ namespace enigma
 
 ///////////////////////////////////////////////////
 
-namespace enigma_user
-{
+namespace enigma_user {
 
 unsigned int string_width(variant vstr)
 {
@@ -216,20 +214,21 @@ unsigned int string_height_ext(variant vstr, gs_scalar sep, gs_scalar w)
 
     } else {
       fontglyph* g = findGlyph(fnt, character);
-      if (character == ' ' or g == NULL)
+      if (character == ' ' or g == NULL) {
         width += fnt->height/3;
-        tw = 0;
-        for (size_t c = i+1; c < str.length(); c++)
-        {
+      }
+      
+      tw = 0;
+      for (size_t c = i+1; c < str.length(); c++) {
         character = getUnicodeCharacter(str, c);
         if (character == ' ' or character == '\r' or character == '\n')
           break;
         tw += g->xs;
-        }
+      }
 
-        if (width+tw >= w && w != -1)
+      if (width+tw >= w && w != -1) {
         height += (sep==-1 ? fnt->height : sep), width = 0, tw = 0;
-      else {
+      } else {
         width += g->xs;
       }
     }
@@ -445,13 +444,13 @@ void draw_text_sprite(gs_scalar x, gs_scalar y, variant vstr, int sep, int lineW
     //A line break can occur here if we are starting a new word that won't fit.
     if (lineWidth!=-1 && prev_c==' ' && c!= ' ') {
       //Assume a space at str[str.length()]
-      size_t word_len = str.find(' ',i+1);
+      size_t word_len = str.find(' ', i+1);
       if (word_len == string::npos) {
         word_len = str.length();
       }
 
       //Break if the next word is too long.
-      if (offX + w * (word_len-i) > lineWidth) {
+      if (offX + w * int(word_len - i) > lineWidth) {
         offX = 0;
         offY += sep;
       }
