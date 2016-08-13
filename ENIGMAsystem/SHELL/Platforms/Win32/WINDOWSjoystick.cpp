@@ -24,8 +24,7 @@ using std::string;
 #include "Platforms/Win32/WINDOWSmain.h"
 
 #include "Universal_System/scalar.h"
-
-#define M_PI		3.14159265358979323846
+#include "Universal_System/math_consts.h"
 
 namespace enigma_user
 {

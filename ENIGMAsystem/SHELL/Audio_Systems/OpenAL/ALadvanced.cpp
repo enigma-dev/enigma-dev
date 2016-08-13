@@ -160,13 +160,13 @@ int audio_play_sound_at(int sound, as_scalar x, as_scalar y, as_scalar z, as_sca
 
 int audio_play_sound_on(int emitter, int sound, bool loop, double priority)
 {
-	get_sound(snd,sound,0);
-	SoundEmitter *emit = sound_emitters[emitter];
-	int src = audio_play_sound_at(sound, emit->emitPos[0], emit->emitPos[1], emit->emitPos[2],
-	emit->falloff[0], emit->falloff[1], emit->falloff[2], loop, priority) - 200000;
-	alSourcefv(sound_channels[src]->source, AL_VELOCITY, emit->emitVel);
-	alSourcei(sound_channels[src]->source, AL_PITCH, emit->pitch);
-	return src + 200000;
+  get_sound(snd,sound,0);
+  SoundEmitter *emit = sound_emitters[emitter];
+  int src = audio_play_sound_at(sound, emit->emitPos[0], emit->emitPos[1], emit->emitPos[2],
+  emit->falloff[0], emit->falloff[1], emit->falloff[2], loop, priority) - 200000;
+  alSourcefv(sound_channels[src]->source, AL_VELOCITY, emit->emitVel);
+  alSourcei(sound_channels[src]->source, AL_PITCH, emit->pitch);
+  return src + 200000;
 }
 
 void audio_stop_sound(int index)
@@ -174,11 +174,11 @@ void audio_stop_sound(int index)
   if (index >= 200000) {
     alureStopSource(sound_channels[index - 200000]->source, AL_TRUE);
   } else {
-	  for (size_t i = 0; i < sound_channels.size(); i++) {
+    for (size_t i = 0; i < sound_channels.size(); i++) {
       if (sound_channels[i]->soundIndex == index) {
         alureStopSource(sound_channels[i]->source, AL_TRUE);
       }
-	  }
+    }
   }
 }
 
@@ -187,11 +187,11 @@ void audio_pause_sound(int index)
   if (index >= 200000) {
     alurePauseSource(sound_channels[index - 200000]->source);
   } else {
-	  for (size_t i = 0; i < sound_channels.size(); i++) {
+    for (size_t i = 0; i < sound_channels.size(); i++) {
       if (sound_channels[i]->soundIndex == index) {
         alurePauseSource(sound_channels[i]->source);
       }
-	  }
+    }
   }
 }
 
@@ -200,11 +200,11 @@ void audio_resume_sound(int index)
   if (index >= 200000) {
     alureResumeSource(sound_channels[index - 200000]->source);
   } else {
-	  for (size_t i = 0; i < sound_channels.size(); i++) {
+    for (size_t i = 0; i < sound_channels.size(); i++) {
       if (sound_channels[i]->soundIndex == index) {
         alureResumeSource(sound_channels[i]->source);
       }
-	  }
+    }
   }
 }
 

@@ -25,25 +25,25 @@
 **                                                                              **
 \********************************************************************************/
 
-#include "PS_particle_sprites.h"
-#include "PS_particle_enums.h"
-#include "Graphics_Systems/graphics_mandatory.h"
-#include "Universal_System/spritestruct.h"
-#include "Collision_Systems/collision_mandatory.h"
-#include "Widget_Systems/widgets_mandatory.h" // show_error
 #include <map>
 #include <cmath>
 #include <cstdlib>
 
 #include <floatcomp.h>
 
+#include "PS_particle_sprites.h"
+#include "PS_particle_enums.h"
+#include "Graphics_Systems/graphics_mandatory.h"
+#include "Universal_System/spritestruct.h"
+#include "Collision_Systems/collision_mandatory.h"
+#include "Widget_Systems/widgets_mandatory.h" // show_error
+#include "Universal_System/math_consts.h"
+
 #ifdef CODEBLOX
 #  define codebloxt(x, y) (x)
 #else
 #  define codebloxt(x, y) (y)
 #endif
-
-#define M_PI		3.14159265358979323846
 
 namespace enigma
 {
