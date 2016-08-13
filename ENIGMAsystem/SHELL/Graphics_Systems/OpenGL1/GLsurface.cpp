@@ -248,7 +248,7 @@ void surface_reset_target(void)
 
 int surface_get_target()
 {
-  int prevFbo;
+  GLint prevFbo;
   glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
   return prevFbo;
 }
@@ -256,8 +256,11 @@ int surface_get_target()
 void surface_free(int id)
 {
   get_surface(surf,id);
-  GLint prevFbo; glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
-  if (prevFbo == surf->fbo) { glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0); }
+  GLint prevFbo;
+  glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
+  if ((GLuint) prevFbo == surf->fbo) {
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
+  }
   enigma::graphics_delete_texture(surf->tex);
   glDeleteFramebuffers(1, &surf->fbo);
   surf->width = surf->height = surf->tex = surf->fbo = 0;
