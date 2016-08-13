@@ -39,39 +39,104 @@ extern  deque<int> instance_id; // TODO: Implement and move to enigma_user.
 
 namespace enigma
 {
-  inst_iter::inst_iter(object_basic* i,inst_iter *n = NULL,inst_iter *p = NULL): inst(i), next(n), prev(p) {}
+  inst_iter::inst_iter(object_basic* i,inst_iter *n = NULL,inst_iter *p = NULL):
+      inst(i), next(n), prev(p) {}
   inst_iter::inst_iter() {}
+  
   objectid_base::objectid_base(): inst_iter(NULL,NULL,this), count(0) {}
   event_iter::event_iter(string n): inst_iter(NULL,NULL,this), name(n) {}
   event_iter::event_iter(): inst_iter(NULL,NULL,this) {}
 
 
-  /*------ New iterator system --------------------------------*\
-  \*-----------------------------------------------------------*/
+  /*------ New iterator system -----------------------------------------------*\
+  \*--------------------------------------------------------------------------*/
 
     set<iterator*> central_iterator_cache;
     typedef set<iterator*>::iterator central_iterator_cache_iterator;
 
-    object_basic* iterator::operator*() { return it->inst; }
-    object_basic* iterator::operator->() { return it->inst; }
+    object_basic* iterator::operator*()  const { return it->inst; }
+    object_basic* iterator::operator->() const { return it->inst; }
 
-    void iterator::addme() { central_iterator_cache.insert(this); }
-    inst_iter* iterator::copy(const iterator& other, inst_iter& temp_iter) { if (other.it == &other.temp_iter) { return &temp_iter; temp_iter = other.temp_iter; } else { return other.it; } };
+    void iterator::addme() {
+      central_iterator_cache.insert(this);
+    }
+    
+    void iterator::copy(const iterator& other) {
+      // If the other pointer indicates its own temporary object, copy
+      // it into our temporary object and point to ours, instead.
+      if (other.it == &other.temp_iter) {
+        temp_iter = other.temp_iter;
+        it = &temp_iter;
+      } else {
+        // Otherwise, assume the pointer is from one of the global lists.
+        // Registering ourself with the central iterator list will handle
+        // memory management caveats, for us.
+        it = other.it;
+      }
+    }
+    
+    void iterator::handle_unlink(const inst_iter *dead) {
+      if (it) {
+        if (it->next == dead) {
+          it->next = dead->next;
+        } else if (it->prev == dead) {
+          it->prev = dead->prev;
+        }
+      }
+    }
 
     iterator::operator bool() { return it; }
-    iterator &iterator::operator++()    { it = it->next; return *this; }
-    iterator  iterator::operator++(int) { iterator ret(*this); it = it->next; return ret; }
-    iterator &iterator::operator--()    { it = it->prev; return *this; }
-    iterator  iterator::operator--(int) { iterator ret(*this); it = it->prev; return ret; }
+    iterator &iterator::operator++() {
+      it = it->next;
+      return *this;
+    }
+    iterator  iterator::operator++(int) {
+      iterator ret(*this);
+      it = it->next;
+      return ret;
+    }
+    iterator &iterator::operator--() {
+      it = it->prev;
+      return *this;
+    }
+    iterator  iterator::operator--(int) {
+      iterator ret(*this);
+      it = it->prev;
+      return ret;
+    }
 
-    iterator &iterator::operator=(const iterator& other) { it = copy(other, temp_iter); return *this; }
-    iterator &iterator::operator=(inst_iter* niter)      { it = niter; return *this; }
-    iterator &iterator::operator=(object_basic* object)  { temp_iter.next = temp_iter.prev = NULL; temp_iter.inst = object; it = &temp_iter; return *this; }
+    iterator &iterator::operator=(const iterator& other) {
+      copy(other);
+      return *this;
+    }
+    iterator &iterator::operator=(inst_iter* niter) {
+      it = niter;
+      return *this;
+    }
+    iterator &iterator::operator=(object_basic* object) {
+      temp_iter.next = temp_iter.prev = NULL;
+      temp_iter.inst = object;
+      it = &temp_iter;
+      return *this;
+    }
     
-    iterator::iterator(const iterator& other): it(copy(other, temp_iter)) { addme(); }
-    iterator::iterator(inst_iter* iter): it(iter) { addme(); }
-    iterator::iterator(object_basic* ob): temp_iter(ob, NULL, NULL), it(&temp_iter)  { }
-    iterator::iterator(): it(NULL)  { }
+    // Always add ourself to the central iterator cache, because future
+    // assignment could cause us to point to something deleteable
+    iterator::iterator(): it(NULL) {
+      addme();
+    }
+    iterator::iterator(const iterator& other) {
+      copy(other);
+      addme();
+    }
+    iterator::iterator(inst_iter* iter): it(iter) {
+      addme();
+    }
+    iterator::iterator(object_basic* ob):
+        temp_iter(ob, NULL, NULL), it(&temp_iter) {
+      addme();
+    }
+
     iterator:: ~iterator() {
       central_iterator_cache.erase(this);
     }
@@ -79,18 +144,14 @@ namespace enigma
     void update_iterators_for_destroy(const inst_iter* dd)
     {
       for (central_iterator_cache_iterator it = central_iterator_cache.begin();
-           it != central_iterator_cache.end(); ++it)
-      {
-        if ((*it)->it->next == dd)
-          (*it)->it->next = dd->next;
-        else if ((*it)->it->prev == dd)
-          (*it)->it->prev = dd->prev;
+           it != central_iterator_cache.end(); ++it) {
+        (*it)->handle_unlink(dd);
       }
     }
 
 
-  /*------Iterator methods ------------------------------------*\
-  \*-----------------------------------------------------------*/
+  /*------Iterator methods ---------------------------------------------------*\
+  \*--------------------------------------------------------------------------*/
 
   inst_iter *event_iter::add_inst(object_basic* ninst)
   {
@@ -139,11 +200,12 @@ namespace enigma
   map<int,object_basic*> instance_deactivated_list;
   typedef map<int,inst_iter*>::iterator iliter;
   typedef pair<int,inst_iter*> inode_pair;
-    
-   
+
+
 
   // When you say "global.vname", this is the structure that answers
-  extern object_basic *ENIGMA_global_instance; // We also need an iterator for only global.
+  extern object_basic *ENIGMA_global_instance;
+  // We also need an iterator for only global.
   inst_iter ENIGMA_global_instance_iterator(ENIGMA_global_instance,0,0);
 
   // With() will operate on this
