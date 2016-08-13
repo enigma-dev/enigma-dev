@@ -26,33 +26,14 @@
 **                                                                              **
 \********************************************************************************/
 
-#define with(x) for (enigma::with_iter ENIGMA_WITHITER(enigma::fetch_inst_iter_by_int(x),enigma::instance_event_iterator->inst); \
-enigma::instance_event_iterator; enigma::instance_event_iterator = enigma::instance_event_iterator->next)
+#define with(x) \
+  for (enigma::iterator::with with(enigma::fetch_inst_iter_by_int(x)); \
+      enigma::instance_event_iterator; \
+      enigma::instance_event_iterator = enigma::instance_event_iterator->next)
 
 //NOTE: This macro is ONLY to be used (in place of "with") for "room instance creation" code; that is, code which initializes a single instance
 //      and is defined in the room editor. It does the same thing as "with", but checks instance_deactivated_list first.
-#define with_room_inst(x) for (enigma::with_iter ENIGMA_WITHITER(enigma::fetch_roominst_iter_by_id(x),enigma::instance_event_iterator->inst); \
-enigma::instance_event_iterator; enigma::instance_event_iterator = enigma::instance_event_iterator->next)
-
-
-namespace enigma
-{
-  struct with_iter
-  {
-    iterator_level *my_il;
-    iterator my_iterator;
-    with_iter(enigma::iterator nt, object_basic* other): my_iterator(nt)
-    {
-      il_top = my_il = new iterator_level(instance_event_iterator,instance_other,il_top);
-      instance_event_iterator = nt.it;
-      instance_other = other;
-    }
-    ~with_iter()
-    {
-      il_top = my_il->last;
-      instance_event_iterator = my_il->it;
-      instance_other = my_il->other;
-      delete my_il;
-    }
-  };
-}
+#define with_room_inst(x) \
+  for (enigma::iterator::with with(enigma::fetch_roominst_iter_by_id(x)); \
+      enigma::instance_event_iterator; \
+      enigma::instance_event_iterator = enigma::instance_event_iterator->next)
