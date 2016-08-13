@@ -15,8 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef _INSTANCE_SYSTEM_BASE__H
-#define _INSTANCE_SYSTEM_BASE__H
+#ifndef INSTANCE_SYSTEM_BASE_h
+#define INSTANCE_SYSTEM_BASE_h
 
 namespace enigma
 {
@@ -67,29 +67,30 @@ namespace enigma
     objectid_base();
   };
 
-  // Centralized stack of iterators in use by with() statements and the like.
-  // Never empty; always contains a pointer to the instance_event_iterator.
-  struct iterator_level {
-    inst_iter* it;
-    object_basic* other;
-    iterator_level *last;
-    iterator_level(inst_iter*,object_basic* oth,iterator_level*);
-    void push(inst_iter*,object_basic* oth);
-    void pop();
-  };
-  extern iterator_level *il_base, *il_top;
-
   // The rest is decently commented on in the corresponding source file.
   extern event_iter *events;
   extern objectid_base *objects;
   extern object_basic *ENIGMA_global_instance;
   extern inst_iter *instance_event_iterator;
   extern object_basic *instance_other;
-/* INSTANTLY ANTIQUATED
-  inst_iter*    instance_list_first();
-  inst_iter*    fetch_inst_iter_by_id(int id);
-  inst_iter*    fetch_inst_iter_by_int(int x);
-*/
+
+  // Stack pusher for iterators in use by with() statements and the like.
+  struct iterator_level {
+    inst_iter* stored_it;
+    object_basic* stored_other;
+    iterator_level(inst_iter* push_to, object_basic* push_other):
+        stored_it(instance_event_iterator), stored_other(instance_other) {
+      instance_event_iterator = push_to;
+      instance_other = push_other;
+    }
+    iterator_level(inst_iter* push_to):
+        iterator_level(push_to, instance_event_iterator->inst) {}
+    ~iterator_level() {
+      instance_event_iterator = stored_it;
+      instance_other = stored_other;
+    }
+  };
+
   object_basic* fetch_instance_by_int(int x);
   object_basic* fetch_instance_by_id(int x);
 }

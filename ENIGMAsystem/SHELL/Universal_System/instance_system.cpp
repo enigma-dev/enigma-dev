@@ -208,12 +208,6 @@ namespace enigma
   // We also need an iterator for only global.
   inst_iter ENIGMA_global_instance_iterator(ENIGMA_global_instance,0,0);
 
-  // With() will operate on this
-  iterator_level::iterator_level(inst_iter* i,object_basic* o, iterator_level* l): it(i), other(o), last(l) {}
-  void iterator_level::push(inst_iter* i,object_basic* o) { il_top = new iterator_level(i,o,il_top); }
-  void iterator_level::pop() { il_top = il_top->last; }
-  iterator_level *il_top = NULL;
-
   // This is basically a garbage collection list for when instances are destroyed
   set<object_basic*> cleanups; // We'll use set, to prevent stupidity
 

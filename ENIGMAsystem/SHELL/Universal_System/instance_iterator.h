@@ -23,8 +23,8 @@
 
 namespace enigma {
   class iterator {
-    inst_iter temp_iter;
-    struct inst_iter* it;
+    enigma::inst_iter temp_iter;
+    enigma::inst_iter* it;
 
     void addme();
     void copy(const iterator& other);
@@ -51,6 +51,13 @@ namespace enigma {
     iterator();
     
     ~iterator();
+
+    class with;
+  };
+
+  class iterator::with: iterator, iterator_level {
+   public:
+    with(const iterator& push): iterator(push), iterator_level(push.it) {}
   };
   
   void update_iterators_for_destroy(const inst_iter*);
