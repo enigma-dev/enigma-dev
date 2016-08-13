@@ -19,6 +19,7 @@
 
 namespace enigma {
   extern bool gameWindowFocused;
+  extern bool freezeOnLoseFocus;
 }
 
 namespace enigma_user {
