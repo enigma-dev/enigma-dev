@@ -57,7 +57,7 @@ namespace enigma {
 
   class iterator::with: iterator, iterator_level {
    public:
-    with(const iterator& push): iterator(push), iterator_level(push.it) {}
+    with(const iterator& push): iterator(push), iterator_level(it) {}
   };
   
   void update_iterators_for_destroy(const inst_iter*);
