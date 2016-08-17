@@ -82,10 +82,10 @@ static fontglyph* findGlyph(const font *const fnt, uint32_t character) {
 namespace enigma_user {
 
 void draw_set_halign(unsigned align){
-  align = align;
+  halign = align;
 }
 void draw_set_valign(unsigned align){
-  align = align;
+  valign = align;
 }
 
 unsigned draw_get_halign(){
