@@ -25,6 +25,11 @@
 **                                                                              **
 \********************************************************************************/
 
+#include <map>
+#include <cmath>
+#include <cstddef>
+#include <cstdlib>
+
 #include "PS_effects_enums.h"
 #include "PS_particle.h"
 #include "PS_particle_system.h"
@@ -33,12 +38,7 @@
 #include "PS_particle_updatedraw.h"
 #include "Universal_System/roomsystem.h"
 #include "Widget_Systems/widgets_mandatory.h" // show_error
-#include <cstddef>
-#include <cstdlib>
-#include <map>
-#include <cmath>
-
-#define M_PI		3.14159265358979323846
+#include "Universal_System/math_consts.h"
 
 namespace enigma
 {

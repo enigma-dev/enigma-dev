@@ -25,17 +25,17 @@
 **                                                                              **
 \********************************************************************************/
 
-#include "Universal_System/scalar.h"
-#include "Universal_System/collisions_object.h"
 #include <cmath>
-#include "Universal_System/instance_system.h"
-#include "mp_movement.h"
-#include "../Paths/pathstruct.h"
-#include "../Paths/path_functions.h"
 #include <floatcomp.h>
 
-#define M_PI		3.14159265358979323846
-// FIXME: NONSTANDARD
+#include "Universal_System/scalar.h"
+#include "Universal_System/collisions_object.h"
+#include "Universal_System/instance_system.h"
+#include "Universal_System/math_consts.h"
+
+#include "../Paths/pathstruct.h"
+#include "../Paths/path_functions.h"
+#include "mp_movement.h"
 
 namespace enigma_user {
 extern bool place_meeting(cs_scalar x, cs_scalar y, int object);

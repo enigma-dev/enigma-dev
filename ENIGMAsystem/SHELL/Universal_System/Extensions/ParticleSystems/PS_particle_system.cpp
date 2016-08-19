@@ -25,19 +25,19 @@
 **                                                                              **
 \********************************************************************************/
 
-#include "PS_particle.h"
-#include "PS_particle_system.h"
-#include "Graphics_Systems/graphics_mandatory.h"
-#include "PS_particle_type.h"
-#include "Universal_System/spritestruct.h"
-#include "Widget_Systems/widgets_mandatory.h" // show_error
 #include <cmath>
 #include <cstdlib>
 #include <vector>
 #include <algorithm>
 #include <floatcomp.h>
 
-#define M_PI		3.14159265358979323846
+#include "PS_particle.h"
+#include "PS_particle_system.h"
+#include "Graphics_Systems/graphics_mandatory.h"
+#include "PS_particle_type.h"
+#include "Universal_System/spritestruct.h"
+#include "Widget_Systems/widgets_mandatory.h" // show_error
+#include "Universal_System/math_consts.h"
 
 inline int bounds(int value, int low, int high)
 {
