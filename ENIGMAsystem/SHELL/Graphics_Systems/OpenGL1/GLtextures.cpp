@@ -42,26 +42,27 @@ TextureStruct::TextureStruct(unsigned gtex)
 
 TextureStruct::~TextureStruct()
 {
-	glDeleteTextures(1, &gltex);
+  glDeleteTextures(1, &gltex);
 }
 
 unsigned get_texture(int texid) {
-	return (size_t(texid) >= textureStructs.size() || texid < 0)? -1 : textureStructs[texid]->gltex;
+  return (size_t(texid) >= textureStructs.size() || texid < 0)
+      ? -1 : textureStructs[texid]->gltex;
 }
 
 inline unsigned int lgpp2(unsigned int x){//Trailing zero count. lg for perfect powers of two
-	x =  (x & -x) - 1;
-	x -= ((x >> 1) & 0x55555555);
-	x =  ((x >> 2) & 0x33333333) + (x & 0x33333333);
-	x =  ((x >> 4) + x) & 0x0f0f0f0f;
-	x += x >> 8;
-	return (x + (x >> 16)) & 63;
+  x =  (x & -x) - 1;
+  x -= ((x >> 1) & 0x55555555);
+  x =  ((x >> 2) & 0x33333333) + (x & 0x33333333);
+  x =  ((x >> 4) + x) & 0x0f0f0f0f;
+  x += x >> 8;
+  return (x + (x >> 16)) & 63;
 }
 
 namespace enigma
 {
-  int graphics_create_texture(unsigned width, unsigned height, unsigned fullwidth, unsigned fullheight, void* pxdata, bool mipmap)
-  {
+  int graphics_create_texture(unsigned width, unsigned height,
+      unsigned fullwidth, unsigned fullheight, void* pxdata, bool mipmap) {
     GLuint texture;
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
@@ -110,10 +111,8 @@ namespace enigma
     GLuint texture = textureStructs[tex]->gltex;
     GLuint copy_texture = textureStructs[copy_tex]->gltex;
 
-    unsigned w, h, fw, fh, size;
+    unsigned fw, fh, size;
     glBindTexture(GL_TEXTURE_2D, texture);
-    w = textureStructs[tex]->width;
-    h = textureStructs[tex]->height;
     fw = textureStructs[tex]->fullwidth;
     fh = textureStructs[tex]->fullheight;
     size = (fh<<(lgpp2(fw)+2))|2;
@@ -123,8 +122,9 @@ namespace enigma
     glBindTexture(GL_TEXTURE_2D, copy_texture);
     glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_BYTE, bitmap2);
 
-    for (int i = 3; i < size; i += 4)
-        bitmap[i] = (bitmap2[i-3] + bitmap2[i-2] + bitmap2[i-1])/3;
+    for (unsigned i = 3; i < size; i += 4) {
+      bitmap[i] = (bitmap2[i-3] + bitmap2[i-2] + bitmap2[i-1])/3;
+    }
 
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexImage2D(GL_TEXTURE_2D, 0, 4, fw, fh, 0, GL_BGRA, GL_UNSIGNED_BYTE, bitmap);
@@ -174,8 +174,13 @@ int texture_add(string filename, bool mipmap) {
   unsigned int w, h, fullwidth, fullheight;
   int img_num;
 
-  unsigned char *pxdata = enigma::image_load(filename,&w,&h,&fullwidth,&fullheight,&img_num,false);
-  if (pxdata == NULL) { printf("ERROR - Failed to append sprite to index!\n"); return -1; }
+  unsigned char *pxdata = enigma::image_load(
+      filename, &w, &h, &fullwidth, &fullheight, &img_num, false);
+  if (pxdata == NULL) {
+    printf("ERROR - Failed to append sprite to index!\n");
+    return -1;
+  }
+
   unsigned texture = enigma::graphics_create_texture(w, h, fullwidth, fullheight, pxdata, mipmap);
   delete[] pxdata;
 
@@ -183,14 +188,14 @@ int texture_add(string filename, bool mipmap) {
 }
 
 void texture_save(int texid, string fname) {
-	unsigned w, h;
-	unsigned char* rgbdata = enigma::graphics_get_texture_pixeldata(texid, &w, &h);
+  unsigned w, h;
+  unsigned char* rgbdata = enigma::graphics_get_texture_pixeldata(texid, &w, &h);
 
   string ext = enigma::image_get_format(fname);
 
-	enigma::image_save(fname, rgbdata, w, h, w, h, false);
+  enigma::image_save(fname, rgbdata, w, h, w, h, false);
 
-	delete[] rgbdata;
+  delete[] rgbdata;
 }
 
 void texture_delete(int texid) {
@@ -224,22 +229,22 @@ void texture_set_blending(bool enable)
 }
 
 gs_scalar texture_get_width(int texid) {
-	return textureStructs[texid]->width / textureStructs[texid]->fullwidth;
+  return textureStructs[texid]->width / textureStructs[texid]->fullwidth;
 }
 
 gs_scalar texture_get_height(int texid)
 {
-	return textureStructs[texid]->height / textureStructs[texid]->fullheight;
+  return textureStructs[texid]->height / textureStructs[texid]->fullheight;
 }
 
 unsigned texture_get_texel_width(int texid)
 {
-	return textureStructs[texid]->width;
+  return textureStructs[texid]->width;
 }
 
 unsigned texture_get_texel_height(int texid)
 {
-	return textureStructs[texid]->height;
+  return textureStructs[texid]->height;
 }
 
 void texture_set_stage(int stage, int texid) {
@@ -254,9 +259,9 @@ void texture_set_stage(int stage, int texid) {
 }
 
 void texture_reset() {
-	glActiveTexture(GL_TEXTURE0);
+  glActiveTexture(GL_TEXTURE0);
   enigma::samplerstates[0].bound_texture = -1;
-	glBindTexture(GL_TEXTURE_2D, 0);
+  glBindTexture(GL_TEXTURE_2D, 0);
   //Should only rarely apply the full state, I believe it is unnecessary to do it when we set no texture and it does not appear
   //to cause any issues so leave it commented.
   //enigma::samplerstates[0].ApplyState();
