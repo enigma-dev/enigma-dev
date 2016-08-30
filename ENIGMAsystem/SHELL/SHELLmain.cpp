@@ -19,7 +19,13 @@
 
 #include <cstdlib>
 #include <cstddef>
-#include <string>
+#ifndef JUST_DEFINE_IT_RUN
+  #include <string>
+#else
+  #define _GLIBCXX_STRING 1
+  template<typename T, typename traits = int> class basic_string {};
+  typedef basic_string<char> string;
+#endif
 
 #define INCLUDED_FROM_SHELLMAIN 1
 

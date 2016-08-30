@@ -64,7 +64,7 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
     // Keep a parsed record of this script
     scr_lookup[es->scripts[i].name] = scripts[i] = new parsed_script;
     parser_main(newcode,&scripts[i]->pev, script_names);
-    edbg << "Parsed `" << es->scripts[i].name << "': " << scripts[i]->obj.locals.size() << " locals, " << scripts[i]->obj.globals.size() << " globals" << flushl;
+    edbg << "Parsed `" << es->scripts[i].name << "': " << (int)(scripts[i]->obj.locals.size()) << " locals, " << scripts[i]->obj.globals.size() << " globals" << flushl;
     
     // If the script accesses variables from outside its scope implicitly
     if (scripts[i]->obj.locals.size() or scripts[i]->obj.globallocals.size() or scripts[i]->obj.ambiguous.size()) {
@@ -95,7 +95,7 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
       // Keep a parsed record of this timeline
       tline_lookup[es->timelines[i].name].push_back(tlines.back());
       parser_main(newcode, &tlines.back()->pev, script_names);
-      edbg << "Parsed `" << es->timelines[i].name <<", moment: " <<es->timelines[i].moments[j].stepNo << "': " << tlines.back()->obj.locals.size() << " locals, " << tlines.back()->obj.globals.size() << " globals" << flushl;
+      edbg << "Parsed `" << es->timelines[i].name <<", moment: " <<es->timelines[i].moments[j].stepNo << "': " << (int)(tlines.back()->obj.locals.size()) << " locals, " << tlines.back()->obj.globals.size() << " globals" << flushl;
 
       // If the timeline accesses variables from outside its scope implicitly
       if (tlines.back()->obj.locals.size() or tlines.back()->obj.globallocals.size() or tlines.back()->obj.ambiguous.size()) {
