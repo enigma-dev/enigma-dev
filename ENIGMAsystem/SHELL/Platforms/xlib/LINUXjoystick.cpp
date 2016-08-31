@@ -229,15 +229,15 @@ namespace enigma_user
   }
   
   double joystick_pov(int id, int axis1, int axis2) {
-	checkId(0);
-	double a1, a2;
-	a1 = joystick_axis(id, axis1);
-	a2 = joystick_axis(id, axis2);
-	if (a1 == 0 && a2 == 0) {
-		return -1.f;
-	}
-	// in C, atan2 is y,x not x,y
-	return ma_angle_from_radians((atan2(-a1, a2) + M_PI));
+    checkId(0);
+    double a1, a2;
+    a1 = joystick_axis(id, axis1);
+    a2 = joystick_axis(id, axis2);
+    if (a1 == 0 && a2 == 0) {
+      return -1.f;
+    }
+    // in C, atan2 is y,x not x,y
+    return ma_angle_from_radians((atan2(-a1, a2) + M_PI));
   }
   
   double joystick_pov(int id) {
@@ -247,4 +247,3 @@ namespace enigma_user
   
   int joystick_lastbutton = -1;
 }
-

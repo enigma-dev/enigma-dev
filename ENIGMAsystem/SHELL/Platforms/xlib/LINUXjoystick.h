@@ -41,4 +41,3 @@ void joystick_map_axis(int id, int axisnum, char keyneg, char keypos);
 extern int joystick_lastbutton;
 
 }
-
