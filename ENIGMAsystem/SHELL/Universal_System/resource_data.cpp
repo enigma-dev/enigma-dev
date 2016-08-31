@@ -33,7 +33,7 @@ using namespace std;
 static map<string,int> resources;
 namespace enigma
 {
-  extern int script_idmax;
+  extern size_t script_idmax;
   void map_resource_ids(nameid_pair* n)
   {
     for (nameid_pair* i = n; i->id != -1; i++)
