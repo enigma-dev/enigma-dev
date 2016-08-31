@@ -35,7 +35,7 @@ namespace enigma_user {
   int instance_count = 0;
 }
 
-extern  deque<int> instance_id; // TODO: Implement and move to enigma_user.
+extern deque<int> instance_id; // TODO: Implement and move to enigma_user.
 
 namespace enigma
 {
@@ -51,103 +51,103 @@ namespace enigma
   /*------ New iterator system -----------------------------------------------*\
   \*--------------------------------------------------------------------------*/
 
-    set<iterator*> central_iterator_cache;
-    typedef set<iterator*>::iterator central_iterator_cache_iterator;
+  set<iterator*> central_iterator_cache;
+  typedef set<iterator*>::iterator central_iterator_cache_iterator;
 
-    object_basic* iterator::operator*()  const { return it->inst; }
-    object_basic* iterator::operator->() const { return it->inst; }
+  object_basic* iterator::operator*()  const { return it->inst; }
+  object_basic* iterator::operator->() const { return it->inst; }
 
-    void iterator::addme() {
-      central_iterator_cache.insert(this);
-    }
-    
-    void iterator::copy(const iterator& other) {
-      // If the other pointer indicates its own temporary object, copy
-      // it into our temporary object and point to ours, instead.
-      if (other.it == &other.temp_iter) {
-        temp_iter = other.temp_iter;
-        it = &temp_iter;
-      } else {
-        // Otherwise, assume the pointer is from one of the global lists.
-        // Registering ourself with the central iterator list will handle
-        // memory management caveats, for us.
-        it = other.it;
-      }
-    }
-    
-    void iterator::handle_unlink(const inst_iter *dead) {
-      if (it) {
-        if (it->next == dead) {
-          it->next = dead->next;
-        } else if (it->prev == dead) {
-          it->prev = dead->prev;
-        }
-      }
-    }
-
-    iterator::operator bool() { return it; }
-    iterator &iterator::operator++() {
-      it = it->next;
-      return *this;
-    }
-    iterator  iterator::operator++(int) {
-      iterator ret(*this);
-      it = it->next;
-      return ret;
-    }
-    iterator &iterator::operator--() {
-      it = it->prev;
-      return *this;
-    }
-    iterator  iterator::operator--(int) {
-      iterator ret(*this);
-      it = it->prev;
-      return ret;
-    }
-
-    iterator &iterator::operator=(const iterator& other) {
-      copy(other);
-      return *this;
-    }
-    iterator &iterator::operator=(inst_iter* niter) {
-      it = niter;
-      return *this;
-    }
-    iterator &iterator::operator=(object_basic* object) {
-      temp_iter.next = temp_iter.prev = NULL;
-      temp_iter.inst = object;
+  void iterator::addme() {
+    central_iterator_cache.insert(this);
+  }
+  
+  void iterator::copy(const iterator& other) {
+    // If the other pointer indicates its own temporary object, copy
+    // it into our temporary object and point to ours, instead.
+    if (other.it == &other.temp_iter) {
+      temp_iter = other.temp_iter;
       it = &temp_iter;
-      return *this;
+    } else {
+      // Otherwise, assume the pointer is from one of the global lists.
+      // Registering ourself with the central iterator list will handle
+      // memory management caveats, for us.
+      it = other.it;
     }
-    
-    // Always add ourself to the central iterator cache, because future
-    // assignment could cause us to point to something deleteable
-    iterator::iterator(): it(NULL) {
-      addme();
-    }
-    iterator::iterator(const iterator& other) {
-      copy(other);
-      addme();
-    }
-    iterator::iterator(inst_iter* iter): it(iter) {
-      addme();
-    }
-    iterator::iterator(object_basic* ob):
-        temp_iter(ob, NULL, NULL), it(&temp_iter) {
-      addme();
-    }
-
-    iterator:: ~iterator() {
-      central_iterator_cache.erase(this);
-    }
-
-    void update_iterators_for_destroy(const inst_iter* dd)
-    {
-      for (central_iterator_cache_iterator it = central_iterator_cache.begin();
-           it != central_iterator_cache.end(); ++it) {
-        (*it)->handle_unlink(dd);
+  }
+  
+  void iterator::handle_unlink(const inst_iter *dead) {
+    if (it) {
+      if (it->next == dead) {
+        it->next = dead->next;
+      } else if (it->prev == dead) {
+        it->prev = dead->prev;
       }
     }
+  }
+
+  iterator::operator bool() { return it; }
+  iterator &iterator::operator++() {
+    it = it->next;
+    return *this;
+  }
+  iterator  iterator::operator++(int) {
+    iterator ret(*this);
+    it = it->next;
+    return ret;
+  }
+  iterator &iterator::operator--() {
+    it = it->prev;
+    return *this;
+  }
+  iterator  iterator::operator--(int) {
+    iterator ret(*this);
+    it = it->prev;
+    return ret;
+  }
+
+  iterator &iterator::operator=(const iterator& other) {
+    copy(other);
+    return *this;
+  }
+  iterator &iterator::operator=(inst_iter* niter) {
+    it = niter;
+    return *this;
+  }
+  iterator &iterator::operator=(object_basic* object) {
+    temp_iter.next = temp_iter.prev = NULL;
+    temp_iter.inst = object;
+    it = &temp_iter;
+    return *this;
+  }
+  
+  // Always add ourself to the central iterator cache, because future
+  // assignment could cause us to point to something deleteable
+  iterator::iterator(): it(NULL) {
+    addme();
+  }
+  iterator::iterator(const iterator& other) {
+    copy(other);
+    addme();
+  }
+  iterator::iterator(inst_iter* iter): it(iter) {
+    addme();
+  }
+  iterator::iterator(object_basic* ob):
+      temp_iter(ob, NULL, NULL), it(&temp_iter) {
+    addme();
+  }
+
+  iterator:: ~iterator() {
+    central_iterator_cache.erase(this);
+  }
+
+  void update_iterators_for_destroy(const inst_iter* dd)
+  {
+    for (central_iterator_cache_iterator it = central_iterator_cache.begin();
+         it != central_iterator_cache.end(); ++it) {
+      (*it)->handle_unlink(dd);
+    }
+  }
 
 
   /*------Iterator methods ---------------------------------------------------*\
@@ -228,7 +228,7 @@ namespace enigma
     return a != instance_list.end() ? a->second : NULL;
   }
 
-  extern int object_idmax;
+  extern size_t object_idmax;
   object_basic* fetch_instance_by_int(int x)
   {
     using namespace enigma_user;

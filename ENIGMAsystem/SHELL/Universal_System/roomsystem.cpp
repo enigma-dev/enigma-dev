@@ -215,7 +215,7 @@ namespace enigma
 
   extern int room_loadtimecount;
   extern roomstruct grd_rooms[];
-  extern int room_idmax;
+  extern size_t room_idmax;
   int room_switching_id = -1;
   int room_switching_restartgame = false;
   void rooms_load()
