@@ -35,6 +35,10 @@ using std::multimap;
 #  error This file includes non-ENIGMA STL headers and should not be included from SHELLmain.
 #endif
 
+#ifdef COLLISION_NONE
+	#error Error, The motion planning extension requires a collision system.
+#endif
+
 namespace enigma
 {
   struct node
