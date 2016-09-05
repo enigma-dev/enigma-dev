@@ -23,6 +23,6 @@ links: -lz -framework Cocoa
 
 Build-Extension: .app
 Run-output: ./MacOS/build/Release/EnigmaXcode.app/Contents/MacOS/EnigmaXcode
-Run-Program: open $game
+Run-Program: open "$game"
 Run-Params:
 
