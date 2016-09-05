@@ -11,6 +11,8 @@ ifeq ($(OS), Linux)
 else ifeq ($(OS), Darwin)
 	PLATFORM := Cocoa
 	MKDIR := mkdir
+	APPBUNDLEDIR := $(shell pwd)/../../MacOS/build/Release/EnigmaXcode.app
+	APPBUNDLEEXE := $(APPBUNDLEDIR)/Contents/MacOS/EnigmaXcode
 else
 	PLATFORM := Win32
 	MKDIR := mkdir.exe
@@ -111,6 +113,15 @@ endif
 
 compile_game: $(OBJECTS) $(RCFILES) $(RESOURCEBINARY) $(DEPENDENCIES)
 	$(CXX) $(LDFLAGS) -o "$(OUTPUTNAME)" $(OBJECTS) $(RESOURCEBINARY) $(LDLIBS)
+
+ifeq ($(GMODE), Compile)
+ifeq ($(OS), Darwin)
+	@echo copying app bundle directory "$(APPBUNDLEDIR)"
+	mv "$(OUTPUTNAME)" "$(APPBUNDLEEXE)"
+	cp -r "$(APPBUNDLEDIR)" "$(OUTPUTNAME)"
+endif
+endif
+
 	@echo Built to "$(OUTPUTNAME)"
 
 # GCC will figure out dependencies and write out makefile rules in %.d when they change
