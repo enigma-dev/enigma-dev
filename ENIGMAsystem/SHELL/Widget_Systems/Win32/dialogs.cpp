@@ -290,7 +290,7 @@ void show_info(string info, int bgcolor, int left, int top, int width, int heigh
 
     if (showBorder) {
       // Set Window Information Icon
-      HICON hIcon = LoadIcon(enigma::hInstance, MAKEINTRESOURCE(3));
+      HICON hIcon = LoadIcon(enigma::hInstance, "infoicon");
       if (hIcon) {
         SendMessage(parent, WM_SETICON, ICON_SMALL,(LPARAM)hIcon);
         SendMessage(parent, WM_SETICON, ICON_BIG, (LPARAM)hIcon);
