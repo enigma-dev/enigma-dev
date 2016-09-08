@@ -65,7 +65,7 @@ string base64_encode(string const& str) {
       char_array_4[2] = ((char_array_3[1] & 0x0f) << 2) + ((char_array_3[2] & 0xc0) >> 6);
       char_array_4[3] = char_array_3[2] & 0x3f;
 
-      for (i = 0; (i <4); i++)
+      for (i = 0; (i < 4); i++)
         ret += base64_chars[char_array_4[i]];
 
       i = 0;
@@ -134,20 +134,16 @@ string base64_decode(string const& str) {
   return ret;
 }
 
+double real(variant str) { return str.type ? atof(((string)str).c_str()) : (double) str; }
+
 bool is_string(variant val) { return val.type;  }
 bool is_real(variant val)   { return !val.type; }
 string ansi_char(char byte) { return string(1,byte); }
 string chr(char val) { return string(1,val); }
 int ord(string str)  { return str[0]; }
 
-double real(variant str) { return str.type ? atof(((string)str).c_str()) : (double) str; }
-
 size_t string_length(string str) { return str.length(); }
-
-size_t string_length(const char* str)
-{
-  return strlen(str);
-}
+size_t string_length(const char* str) { return strlen(str); }
 
 size_t string_length_utf8(string str) {
   size_t res = 0;
