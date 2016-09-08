@@ -165,9 +165,9 @@ size_t string_length_utf8(const char* str) {
   return res;
 }
 
-int string_pos(string substr,string str) {
-  const size_t res = str.find(substr,0)+1;
-  return res == string::npos ? -1 : (int)res;
+size_t string_pos(string substr,string str) {
+  const size_t res = str.find(substr,0) + 1;
+  return res == string::npos ? 0 : (int)res;
 }
 
 string string_format(double val, unsigned tot, unsigned dec)
