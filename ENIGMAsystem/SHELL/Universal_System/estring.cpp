@@ -103,7 +103,7 @@ string base64_decode(string const& str) {
 
   while (in_len-- && ( str[in_] != '=') && is_base64(str[in_])) {
     char_array_4[i++] = str[in_]; in_++;
-    if (i ==4) {
+    if (i == 4) {
       for (i = 0; i <4; i++)
         char_array_4[i] = base64_chars.find(char_array_4[i]);
 
@@ -235,7 +235,7 @@ string string_replace_all(string str,string substr,string newstr) {
 size_t string_count(string substr,string str) {
   size_t pos = 0, occ = 0;
   const size_t sublen = substr.length();
-  while ((pos=str.find(substr,pos)) != string::npos)
+  while ((pos = str.find(substr,pos)) != string::npos)
     occ++, pos += sublen;
   return occ;
 }
@@ -265,7 +265,7 @@ string string_repeat(string str,int count) {
 string string_letters(string str) {
   string ret;
   for (const char *c = str.c_str(); *c; c++)
-    if (ldgrs[(unsigned char)*c] & 3) ret+=*c;
+    if (ldgrs[(unsigned char)*c] & 3) ret += *c;
   return ret;
 }
 
