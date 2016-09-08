@@ -190,7 +190,7 @@ string string_set_byte_at(string str, int index, char byte) {
 }
 
 char string_byte_at(string str, int index) {
-  unsigned int n = index <= 1? 0 : (unsigned int)(index - 1);
+  unsigned int n = index <= 1 ? 0 : (unsigned int)(index - 1);
   #ifdef DEBUG_MODE
     if (n > str.length())
       show_error("Index " + toString(index) + " is outside range " + toString(str.length()) + " in the following string:\n\"" + str + "\".", false);
@@ -199,7 +199,7 @@ char string_byte_at(string str, int index) {
 }
 
 string string_char_at(string str,int index) {
-  unsigned int n = index <= 1? 0: (unsigned int)(index - 1);
+  unsigned int n = index <= 1 ? 0 : (unsigned int)(index - 1);
   #ifdef DEBUG_MODE
     if (n > str.length())
       show_error("Index " + toString(index) + " is outside range " + toString(str.length()) + " in the following string:\n\"" + str + "\".", false);
