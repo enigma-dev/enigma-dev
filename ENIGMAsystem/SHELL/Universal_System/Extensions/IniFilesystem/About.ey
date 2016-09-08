@@ -1,8 +1,8 @@
 %e-yaml
 ---
 
-Name: IniFilesystem
-ID: IniFilesystem
+Name: Ini Filesystem
+Identifier: IniFilesystem
 Author: Seth N. Hetu
 Description: Provides a consistent, performant, cross-platform, GM-compliant API for manipulating INI files.
 Default: false

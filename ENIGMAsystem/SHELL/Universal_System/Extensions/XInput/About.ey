@@ -2,7 +2,7 @@
 ---
 
 Name: XInput
-ID: XInput
+Identifier: XInput
 Description: Input support including gamepads on Windows and Xbox 360.
 Default: false
 Build-date: 8/8/2013
