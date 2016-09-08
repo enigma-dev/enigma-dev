@@ -322,7 +322,7 @@ string filename_dir(string fname)
 {
   size_t fp = fname.find_last_of("/\\");
   if (fp == string::npos)
-      return "";
+    return "";
   return fname.substr(0, fp);
 }
 
@@ -336,7 +336,7 @@ string filename_ext(string fname)
 {
   size_t fp = fname.find_last_of(".");
   if (fp == string::npos)
-      return "";
+    return "";
   return fname.substr(fp);
 }
 
@@ -344,7 +344,7 @@ string filename_change_ext(string fname, string newext)
 {
   size_t fp = fname.find_last_of(".");
   if (fp == string::npos)
-      return fname + newext;
+    return fname + newext;
   return fname.replace(fp,fname.length(),newext);
 }
 
