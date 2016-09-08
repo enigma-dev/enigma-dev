@@ -232,7 +232,7 @@ string string_replace_all(string str,string substr,string newstr) {
   return str;
 }
 
-int string_count(string substr,string str) {
+size_t string_count(string substr,string str) {
   size_t pos = 0, occ = 0;
   const size_t sublen = substr.length();
   while ((pos=str.find(substr,pos)) != string::npos)
