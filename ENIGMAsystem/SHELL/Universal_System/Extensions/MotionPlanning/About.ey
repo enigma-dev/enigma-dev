@@ -1,8 +1,8 @@
 %E-YAML
 ---
 
-Name: MotionPlanning
-ID: Motion Planning
+Name: Motion Planning
+Identifier: MotionPlanning
 Description: Adds motion planning functions.
 Icon: mp.png
 

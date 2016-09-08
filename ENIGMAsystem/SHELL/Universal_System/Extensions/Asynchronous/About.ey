@@ -2,7 +2,7 @@
 ---
 
 Name: Asynchronous
-ID: Asynchronous
+Identifier: Asynchronous
 Description: Asynchronous dialog support for GameMaker: Studio. Requires a set Widget System and the Data Structure extension enabled.
 Default: false
 Build-date: 1/30/2014

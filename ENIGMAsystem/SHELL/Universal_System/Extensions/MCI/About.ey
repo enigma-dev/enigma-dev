@@ -2,7 +2,7 @@
 ---
 
 Name: Media Control Interface
-ID: Media Control Interface
+Identifier: MediaControlInterface
 Description: CD playback on Windows using the MCI.
 Default: false
 Build-date: 11/2/2013

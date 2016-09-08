@@ -2,7 +2,7 @@
 ---
 
 Name: Data Structures
-ID: Data Structures
+Identifier: DataStructures
 Description: Adds data structures using generic collections.
 Build-date: 09/03/2011
 Icon: datastructures.png

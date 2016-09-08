@@ -2,7 +2,7 @@
 ---
 
 Name: Paths
-ID: Paths
+Identifier: Paths
 Description: Adds path functions and local variables.
 Icon: path.png
 

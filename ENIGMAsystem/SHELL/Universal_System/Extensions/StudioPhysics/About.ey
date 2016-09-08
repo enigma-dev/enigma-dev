@@ -1,8 +1,8 @@
 %E-YAML
 ---
 
-Name: StudioPhysics
-ID: Studio Physics
+Name: Studio Physics
+Identifier: StudioPhysics
 Description: Physics compatibility with GameMaker: Studio
 Default: false
 Build-date: 5/05/2013
@@ -10,4 +10,3 @@ Icon: spicon.png
 
 Depends: None
 Dependencies: None
-

@@ -1,8 +1,8 @@
 %E-YAML
 ---
 
-Name: GM5Compat
-ID: GameMaker 5 Compatibility
+Name: GameMaker 5 Compatibility
+Identifier: GM5Compat
 Description: Compatibility function calls for Game Maker 5.
 Default: false
 Build-date: 01/18/2014

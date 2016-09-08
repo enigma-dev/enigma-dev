@@ -1,8 +1,8 @@
 %E-YAML
 ---
 
-Name: Box2DPhysics
-ID: Box2D Physics
+Name: Box2D Physics
+Identifier: Box2DPhysics
 Description: Physics simulation of 2D rigid bodies, joints, and forces.
 Default: false
 Build-date: 5/05/2013
