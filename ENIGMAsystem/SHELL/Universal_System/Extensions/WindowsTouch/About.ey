@@ -1,8 +1,8 @@
 %E-YAML
 ---
 
-Name: WindowsTouch
-ID: Windows Touch
+Name: Windows Touch
+Identifier: WindowsTouch
 Description: Touch support for Windows based environments.
 Default: false
 Build-date: 10/04/2014
