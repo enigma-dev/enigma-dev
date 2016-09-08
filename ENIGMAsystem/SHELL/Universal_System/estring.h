@@ -72,4 +72,3 @@ string filename_ext(string fname);
 string filename_change_ext(string fname, string newext);
 
 }
-

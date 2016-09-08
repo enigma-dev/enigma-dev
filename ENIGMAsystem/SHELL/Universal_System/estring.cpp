@@ -37,7 +37,7 @@ static const char ldgrs[256] = {
   1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0
 };
 
-static const std::string base64_chars = 
+static const std::string base64_chars =
              "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
              "abcdefghijklmnopqrstuvwxyz"
              "0123456789+/";
@@ -56,7 +56,7 @@ string base64_encode(string const& str) {
   int in_ = 0;
   unsigned char char_array_3[3];
   unsigned char char_array_4[4];
-  
+
   while (in_len--) {
     char_array_3[i++] = str[in_]; in_++;
     if (i == 3) {
@@ -146,206 +146,206 @@ size_t string_length(string str) { return str.length(); }
 
 size_t string_length(const char* str)
 {
-	return strlen(str);
+  return strlen(str);
 }
 
-size_t string_length_utf8(string str) { 
-	size_t res = 0; 
-	for (size_t i = 0; i < str.length(); ++i) 
-		if ((str[i] & 0xC0) != 0x80) 
-			++res; 
-	return res; 
+size_t string_length_utf8(string str) {
+  size_t res = 0;
+  for (size_t i = 0; i < str.length(); ++i)
+    if ((str[i] & 0xC0) != 0x80)
+      ++res;
+  return res;
 }
 
-size_t string_length_utf8(const char* str) { 
-	size_t res = 0; 
-	for (size_t i = 0; str[i]; ++i) 
-		if ((str[i] & 0xC0) != 0x80) 
-			++res; 
-	return res; 
+size_t string_length_utf8(const char* str) {
+  size_t res = 0;
+  for (size_t i = 0; str[i]; ++i)
+    if ((str[i] & 0xC0) != 0x80)
+      ++res;
+  return res;
 }
 
 int string_pos(string substr,string str) {
-	const size_t res = str.find(substr,0)+1;
-	return res == string::npos ? -1 : (int)res;
+  const size_t res = str.find(substr,0)+1;
+  return res == string::npos ? -1 : (int)res;
 }
 
 string string_format(double val, unsigned tot, unsigned dec)
 {
-    char sbuf[19]; sbuf[0] = 0;
-    sprintf(sbuf,"%0*.*f",tot,dec,val);
-    const string fstr = sbuf;
-    return fstr.c_str();
+  char sbuf[19]; sbuf[0] = 0;
+  sprintf(sbuf,"%0*.*f",tot,dec,val);
+  const string fstr = sbuf;
+  return fstr.c_str();
 }
 
 string string_copy(string str, int index, int count) {
-	index = index < 0 ? 0 : index;
-	return (size_t)index > str.length()? "": str.substr(index < 2? 0: index-1, count < 1? 0: count);
+  index = index < 0 ? 0 : index;
+  return (size_t)index > str.length() ? "" : str.substr(index < 2 ? 0 : index - 1, count < 1 ? 0 : count);
 }
 
 string string_set_byte_at(string str, int index, char byte) {
-	if (index<=1) return str + byte;
-	const size_t x = index-1;
-	return x>str.length()? str + byte: str.replace(x, 1, 1, byte);
+  if (index <= 1) return str + byte;
+  const size_t x = index - 1;
+  return x > str.length()? str + byte: str.replace(x, 1, 1, byte);
 }
 
 char string_byte_at(string str, int index) {
-	unsigned int n = index <= 1? 0: (unsigned int)index-1;
-	#ifdef DEBUG_MODE
-	  if (n > str.length())
-	    show_error("Index " + toString(index) + " is outside range " + toString(str.length()) + " in the following string:\n\"" + str + "\".", false);
+  unsigned int n = index <= 1? 0 : (unsigned int)(index - 1);
+  #ifdef DEBUG_MODE
+    if (n > str.length())
+      show_error("Index " + toString(index) + " is outside range " + toString(str.length()) + " in the following string:\n\"" + str + "\".", false);
   #endif
-	return str[n];
+  return str[n];
 }
 
 string string_char_at(string str,int index) {
-	unsigned int n = index <= 1? 0: (unsigned int)index-1;
-	#ifdef DEBUG_MODE
-	  if (n > str.length())
-	    show_error("Index " + toString(index) + " is outside range " + toString(str.length()) + " in the following string:\n\"" + str + "\".", false);
+  unsigned int n = index <= 1? 0: (unsigned int)(index - 1);
+  #ifdef DEBUG_MODE
+    if (n > str.length())
+      show_error("Index " + toString(index) + " is outside range " + toString(str.length()) + " in the following string:\n\"" + str + "\".", false);
   #endif
-	return string(1, str[n]);
+  return string(1, str[n]);
 }
 
 string string_delete(string str,int index,int count) {
-	return str.erase(index < 2? 0: index-1, count < 1? 0: count);
+  return str.erase(index < 2 ? 0 : index - 1, count < 1 ? 0 : count);
 }
 
 string string_insert(string substr,string str,int index) {
-	if (index<=1) return substr + str;
-	const size_t x = index-1;
-	return x>str.length()? str + substr: str.insert(x, substr);
+  if (index <= 1) return substr + str;
+  const size_t x = index - 1;
+  return x > str.length() ? str + substr : str.insert(x, substr);
 }
 
 string string_replace(string str,string substr,string newstr) {
-	size_t pos=str.find(substr,0);
-	return pos==(size_t)-1?str:str.replace(pos,substr.length(),newstr);
+  size_t pos = str.find(substr,0);
+  return pos == (size_t)-1 ? str : str.replace(pos,substr.length(),newstr);
 }
 
 string string_replace_all(string str,string substr,string newstr) {
-	size_t pos = 0;
-	const size_t sublen = substr.length(), newlen = newstr.length();
-    while((pos=str.find(substr,pos)) != string::npos) {
-		str.replace(pos,sublen,newstr);
-		pos += newlen;
-	}
-	return str;
+  size_t pos = 0;
+  const size_t sublen = substr.length(), newlen = newstr.length();
+  while ((pos = str.find(substr,pos)) != string::npos) {
+    str.replace(pos,sublen,newstr);
+    pos += newlen;
+  }
+  return str;
 }
 
-size_t string_count(string substr,string str) {
-	size_t pos = 0, occ = 0;
-	const size_t sublen = substr.length();
-  while((pos=str.find(substr,pos)) != string::npos)
+int string_count(string substr,string str) {
+  size_t pos = 0, occ = 0;
+  const size_t sublen = substr.length();
+  while ((pos=str.find(substr,pos)) != string::npos)
     occ++, pos += sublen;
   return occ;
 }
 
 string string_lower(string str) {
-	const size_t len = str.length();
-	for(size_t i = 0; i < len; i++)
-		if(ldgrs[(int)(unsigned char)str[i]] & 2)
-		  str[i] += 32;
-	return str;
+  const size_t len = str.length();
+  for (size_t i = 0; i < len; ++i)
+    if (ldgrs[(int)(unsigned char)str[i]] & 2)
+      str[i] += 32;
+  return str;
 }
 
 string string_upper(string str) {
-	const size_t len=str.length();
-	for(size_t i = 0; i < len; i++)
-		if(ldgrs[(unsigned char)str[i]]&1) str[i]-=32;
-	return str;
+  const size_t len = str.length();
+  for (size_t i = 0; i < len; ++i)
+    if (ldgrs[(unsigned char)str[i]] & 1)
+      str[i] -= 32;
+  return str;
 }
 
 string string_repeat(string str,int count) {
-	string ret; ret.reserve(str.length() * count);
-	for(int i = count; i; i--) ret.append(str);
-	return ret;
+  string ret; ret.reserve(str.length() * count);
+  for (int i = count; i; i--) ret.append(str);
+  return ret;
 }
 
 string string_letters(string str) {
-	string ret;
-	for(const char*c=str.c_str();*c;c++)
-		if(ldgrs[(unsigned char)*c]&3) ret+=*c;
-	return ret;
+  string ret;
+  for (const char *c = str.c_str(); *c; c++)
+    if (ldgrs[(unsigned char)*c] & 3) ret+=*c;
+  return ret;
 }
 
 string string_digits(string str) {
-	string ret;
-	for(const char*c=str.c_str();*c;c++)
-		if(ldgrs[(unsigned char)*c]&4) ret += *c;
-	return ret;
+  string ret;
+  for (const char *c = str.c_str(); *c; c++)
+    if (ldgrs[(unsigned char)*c] & 4) ret += *c;
+  return ret;
 }
 
 string string_lettersdigits(string str) {
-	string ret;
-	for(const char*c=str.c_str();*c;c++)
-		if(ldgrs[(unsigned char)*c]) ret += *c;
-	return ret;
+  string ret;
+  for (const char *c = str.c_str(); *c; c++)
+    if (ldgrs[(unsigned char)*c]) ret += *c;
+  return ret;
 }
 
 bool string_isletters(string str) {
-	for(const char*c = str.c_str(); *c; c++)
-		if(!(ldgrs[(unsigned char)*c] & 3))
+  for (const char *c = str.c_str(); *c; c++)
+    if (!(ldgrs[(unsigned char)*c] & 3))
       return false;
-	return true;
+  return true;
 }
 
 bool string_isdigits(string str) {
-	for(const char*c = str.c_str(); *c; c++)
-		if(!(ldgrs[(unsigned char)*c] & 4))
-		  return false;
-	return true;
+  for (const char *c = str.c_str(); *c; c++)
+    if (!(ldgrs[(unsigned char)*c] & 4))
+      return false;
+  return true;
 }
 
 bool string_islettersdigits(string str) {
-	for(const char*c=str.c_str(); *c; c++)
-		if(!ldgrs[(unsigned char)*c])
-		  return false;
-	return true;
+  for (const char *c = str.c_str(); *c; c++)
+    if (!ldgrs[(unsigned char)*c])
+      return false;
+  return true;
 }
 
 //filename fucntions place here as they are just string based
 
 string filename_name(string fname)
 {
-    size_t fp = fname.find_last_of("/\\");
-    return fname.substr(fp+1);
+  size_t fp = fname.find_last_of("/\\");
+  return fname.substr(fp+1);
 }
 
 string filename_path(string fname)
 {
-    size_t fp = fname.find_last_of("/\\");
-    return fname.substr(0,fp+1);
+  size_t fp = fname.find_last_of("/\\");
+  return fname.substr(0,fp+1);
 }
 
 string filename_dir(string fname)
 {
-    size_t fp = fname.find_last_of("/\\");
-    if (fp == string::npos)
-        return "";
-    return fname.substr(0, fp);
+  size_t fp = fname.find_last_of("/\\");
+  if (fp == string::npos)
+      return "";
+  return fname.substr(0, fp);
 }
 
 string filename_drive(string fname)
 {
-    size_t fp = fname.find("/\\");
-    return fname.substr(0, fp);
+  size_t fp = fname.find("/\\");
+  return fname.substr(0, fp);
 }
 
 string filename_ext(string fname)
 {
-    size_t fp = fname.find_last_of(".");
-    if (fp == string::npos)
-        return "";
-    return fname.substr(fp);
+  size_t fp = fname.find_last_of(".");
+  if (fp == string::npos)
+      return "";
+  return fname.substr(fp);
 }
 
 string filename_change_ext(string fname, string newext)
 {
-    size_t fp = fname.find_last_of(".");
-    if (fp == string::npos)
-        return fname + newext;
-    return fname.replace(fp,fname.length(),newext);
+  size_t fp = fname.find_last_of(".");
+  if (fp == string::npos)
+      return fname + newext;
+  return fname.replace(fp,fname.length(),newext);
 }
 
 }
-
