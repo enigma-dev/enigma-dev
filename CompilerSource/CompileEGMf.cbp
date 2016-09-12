@@ -317,9 +317,6 @@
 			<Option target="StandAlone" />
 			<Option target="StandAloneND" />
 		</Unit>
-		<Unit filename="syntax/checkfile.cpp" />
-		<Unit filename="syntax/checkfile.h" />
-		<Unit filename="syntax/chkfunction.h" />
 		<Unit filename="syntax/syncheck.h" />
 		<Unit filename="syntax/syntax.cpp" />
 		<Unit filename="syntax/syntaxtools.h" />

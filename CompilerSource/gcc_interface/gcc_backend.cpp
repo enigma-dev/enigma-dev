@@ -28,7 +28,6 @@ using namespace std;
 #define flushl '\n' << flush
 #define flushs flush
 
-#include "syntax/checkfile.h"
 #include "general/parse_basics_old.h"
 #include "general/bettersystem.h"
 
@@ -82,7 +81,7 @@ inline int rdir_system(string x, string y)
 // This function parses one command line specified to the eYAML into a filename string and a parameter string,
 // then returns whether or not the output from this call must be manually redirected to the output file ofile.
 static inline bool toolchain_parseout(string line, string &exename, string &command, string ofile = "")
-{ 
+{
   pt pos = 0, spos;
 
   /* Isolate the executable path and filename
@@ -142,7 +141,7 @@ const char* establish_bearings(const char *compiler)
   if (compiler == lastbearings)
     return 0;
   lastbearings = compiler;
-  
+
   string GCC_location;
   string compfq = compiler; //Filename of compiler.ey
   ifstream compis(compfq.c_str());
