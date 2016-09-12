@@ -64,7 +64,7 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
     // Keep a parsed record of this script
     scr_lookup[es->scripts[i].name] = scripts[i] = new parsed_script;
     parser_main(newcode,&scripts[i]->pev, script_names);
-    edbg << "Parsed `" << es->scripts[i].name << "': " << to_string(scripts[i]->obj.locals.size()) << " locals, " << to_string(scripts[i]->obj.globals.size()) << " globals" << flushl;
+    edbg << "Parsed `" << es->scripts[i].name << "': " << scripts[i]->obj.locals.size() << " locals, " << scripts[i]->obj.globals.size() << " globals" << flushl;
 
     // If the script accesses variables from outside its scope implicitly
     if (scripts[i]->obj.locals.size() or scripts[i]->obj.globallocals.size() or scripts[i]->obj.ambiguous.size()) {
@@ -274,7 +274,7 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
 
         //Add this to our objects map
         pev.myObj = pob; //Link to its calling object.
-        parser_main(newcode,&pev,script_names); //Format it to C++
+        parser_main(newcode,&pev,script_names, setting::compliance_mode!=setting::COMPL_STANDARD); //Format it to C++
 
         edbg << " Done." << flushl;
       }
@@ -310,7 +310,7 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
 
         pr->instance_create_codes[es->rooms[i].instances[ii].id].object_index = es->rooms[i].instances[ii].objectId;
         parsed_event* icce = pr->instance_create_codes[es->rooms[i].instances[ii].id].pe = new parsed_event(-1,-1,parsed_objects[es->rooms[i].instances[ii].objectId]);
-        parser_main(string("with (") + to_string(es->rooms[i].instances[ii].id) + ") {" + newcode + "\n/* */}", icce, script_names);
+        parser_main(string("with (") + tostring(es->rooms[i].instances[ii].id) + ") {" + newcode + "\n/* */}", icce, script_names);
       }
     }
 
@@ -328,7 +328,7 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
 
         pr->instance_precreate_codes[es->rooms[i].instances[ii].id].object_index = es->rooms[i].instances[ii].objectId;
         parsed_event* icce = pr->instance_precreate_codes[es->rooms[i].instances[ii].id].pe = new parsed_event(-1,-1,parsed_objects[es->rooms[i].instances[ii].objectId]);
-        parser_main(string("with (") + to_string(es->rooms[i].instances[ii].id) + ") {" + newcode + "\n/* */}", icce, script_names);
+        parser_main(string("with (") + tostring(es->rooms[i].instances[ii].id) + ") {" + newcode + "\n/* */}", icce, script_names);
       }
     }
   }
@@ -380,7 +380,7 @@ int lang_CPP::link_globals(parsed_object *global, EnigmaStruct *es,parsed_script
 {
   for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
     global->copy_from(*i->second,"object `"+i->second->name+"'","the Global Scope");
-  //TODO: because parsed_room inherits parsed_object it tries to use that as the name but it looks 
+  //TODO: because parsed_room inherits parsed_object it tries to use that as the name but it looks
   //like it never gets initialized, this is obviously a bug because this output never tells us the room name always just `'
   for (pr_i i = parsed_rooms.begin(); i != parsed_rooms.end(); i++)
     global->copy_from(*i->second,"room `"+i->second->name+"'","the Global Scope");

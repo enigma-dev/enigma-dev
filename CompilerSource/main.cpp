@@ -61,7 +61,7 @@ extern const char* establish_bearings(const char *compiler);
 
 #ifdef NOT_A_DLL
 #  undef dllexport
-#  define dllexport 
+#  define dllexport
 #endif
 
 #include "languages/lang_CPP.h"
@@ -88,31 +88,31 @@ dllexport const char* libInit(EnigmaCallbacks* ecs)
     ide_dia_clear    = ecs->dia_clear;
     ide_dia_progress = ecs->dia_progress;
     ide_dia_progress_text = ecs->dia_progress_text;
-    
+
     ide_output_redirect_file = ecs->output_redirect_file;
     ide_output_redirect_reset = ecs->output_redirect_reset;
   }
   else cout << "IDE Not Found. Continuing without graphical output." << endl;
-  
+
   cout << "Implementing JDI basics" << endl;
   jdi::initialize();
   jdi::builtin->output_types();
   jdi::builtin->add_macro("true","1"); // Temporary, or permanent, fix for true/false in ENIGMA
   jdi::builtin->add_macro("false","0"); // Added because polygone is a bitch
   cout << endl << endl;
-  
+
   cout << "Choosing language: C++" << endl;
   current_language_name = "CPP";
   current_language = languages[current_language_name] = new lang_CPP();
-  
+
   cout << "Reading GCC builtins" << endl;
   const char* a = establish_bearings("Compilers/" CURRENT_PLATFORM_NAME "/gcc.ey");
   if (a)
     cout << "ERROR: " << a << endl << "See scrollback for more information.\n";
-  
+
   cout << "Creating parse context" << endl;
   main_context = new jdi::context;
-  
+
   return a;
 }
 
@@ -142,25 +142,25 @@ void quickmember_script(jdi::definition_scope* scope, string name);
 dllexport syntax_error *syntaxCheck(int script_count, const char* *script_names, const char* code)
 {
   cout << "******** Compiling Initialized ********" << endl;
-  
+
   //First, we make a space to put our scripts.
   jdi::using_scope globals_scope("<ENIGMA Resources>", main_context->get_global());
-  
+
   cout << "Checkpoint." << endl;
   for (int i = 0; i < script_count; i++)
     quickmember_script(&globals_scope,script_names[i]);
-  
+
   cout << "Starting syntax check." << endl;
   std::string newcode;
   ide_passback_error.absolute_index = syncheck::syntaxcheck(code, newcode);
   cout << "Syntax checking complete." << endl;
   error_sstring = syncheck::syerr;
-  
-  
-  
+
+
+
   cout << "Copying error pointer." << endl;
   ide_passback_error.err_str = error_sstring.c_str();
-  
+
   cout << "Computing position." << endl;
   if (ide_passback_error.absolute_index != -1)
   {
@@ -170,7 +170,7 @@ dllexport syntax_error *syntaxCheck(int script_count, const char* *script_names,
         line++, lp = 0, i += code[i+1] == '\n';
       else if (code[i] == '\n') line++, lp = 0;
     }
-    
+
     ide_passback_error.line = line;
     ide_passback_error.position = lp;
   }

@@ -60,8 +60,8 @@ static string lastbearings;
 
 // This function parses one command line specified to the eYAML into a filename string and a parameter string,
 // then returns whether or not the output from this call must be manually redirected to the output file ofile.
-static bool toolchain_parseout(string line, string &exename, string &command, string ofile = "")
-{ 
+static inline bool toolchain_parseout(string line, string &exename, string &command, string ofile = "")
+{
   pt pos = 0, spos;
 
   /* Isolate the executable path and filename
@@ -118,7 +118,7 @@ const char* establish_bearings(const char *compiler)
   if (compiler == lastbearings)
     return 0;
   lastbearings = compiler;
-  
+
   string GCC_location;
   string compfq = compiler; //Filename of compiler.ey
   ifstream compis(compfq.c_str());
