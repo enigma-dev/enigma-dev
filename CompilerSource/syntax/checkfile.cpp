@@ -82,7 +82,7 @@ int file_check(string filename)
     else { puts("An error occurred during syntax check. No newline following list of script names."); return 0; }
 
     std::string newcode;
-    int retval=syncheck::syntacheck(in2, newcode);
+    int retval=syncheck::syntaxcheck(in2, newcode);
     if (retval==-1)
     {
       string code=parser_main(newcode);

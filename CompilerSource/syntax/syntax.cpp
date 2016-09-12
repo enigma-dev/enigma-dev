@@ -207,7 +207,7 @@ namespace syncheck
   #define superPos (mymacroind ? mymacrostack[0].pos : pos)
   #define ptrace() for (unsigned i = 0; i < lex.size(); i++) cout << (string)lex[i] << "\t\t" << endl
   #define lexlast (lex.size()-1)
-  int syntacheck(string code, string& newcode)
+  int syntaxcheck(string code, string& newcode)
   {
     syerr = "No error";
     if (code.empty()) {
