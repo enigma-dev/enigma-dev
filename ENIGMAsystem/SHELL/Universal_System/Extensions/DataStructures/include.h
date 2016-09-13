@@ -160,4 +160,3 @@ std::string ds_stack_write(const unsigned int id);
 void ds_stack_read(const unsigned int id, std::string value);
 
 }
-
