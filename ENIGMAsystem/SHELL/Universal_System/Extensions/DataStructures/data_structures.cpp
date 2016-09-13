@@ -27,6 +27,7 @@
  \********************************************************************************/
 
 #include "Universal_System/var4.h"
+#include "Universal_System/dynamic_args.h"
 #include <float.h>
 #include <algorithm>
 #include <map>
@@ -1201,10 +1202,11 @@ bool ds_list_empty(const unsigned int id)
     return ds_lists[id].empty();
 }
 
-void ds_list_add(const unsigned int id, const variant val)
+void ds_list_add(const unsigned int id, const enigma::varargs &values)
 {
-   //Adds the value at the end of the list.
-    ds_lists[id].push_back(val);
+  //Adds the values at the end of the list.
+  for (int i = 0; i < values.argc; ++i)
+    ds_lists[id].push_back(values.get(i));
 }
 
 void ds_list_insert(const unsigned int id, const unsigned int pos, const variant val)
@@ -1711,10 +1713,11 @@ bool ds_queue_empty(const unsigned int id)
     return ds_queues[id].empty();
 }
 
-void ds_queue_enqueue(const unsigned int id, const variant val)
+void ds_queue_enqueue(const unsigned int id, const enigma::varargs &values)
 {
-   //Adds the value to the back of the queue
-    ds_queues[id].push_back(val);
+  //Adds the values to the back of the queue
+  for (int i = 0; i < values.argc; ++i)
+    ds_queues[id].push_back(values.get(i));
 }
 
 variant ds_queue_dequeue(const unsigned int id)
@@ -1895,10 +1898,11 @@ bool ds_stack_empty(const unsigned int id)
     return ds_stacks[id].empty();
 }
 
-void ds_stack_push(const unsigned int id, const variant val)
+void ds_stack_push(const unsigned int id, const enigma::varargs &values)
 {
-   //Pushes the value on the stack
-    ds_stacks[id].push_front(val);
+  //Pushes the values onto the stack
+  for (int i = 0; i < values.argc; ++i)
+    ds_stacks[id].push_front(values.get(i));
 }
 
 variant ds_stack_pop(const unsigned int id)
