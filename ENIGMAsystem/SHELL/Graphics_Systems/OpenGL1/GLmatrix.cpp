@@ -270,16 +270,86 @@ void d3d_transform_set_look_at(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom
 void d3d_transform_set_array(const gs_scalar *matrix)
 {
     enigma::model_matrix = enigma::Matrix4(matrix);
+    enigma::mv_matrix = enigma::view_matrix * enigma::model_matrix;
     glLoadMatrix(enigma::mv_matrix);
 }
+
 void d3d_transform_add_array(const gs_scalar *matrix)
 {
     enigma::Matrix4 m(matrix);
     enigma::model_matrix = m*enigma::model_matrix;
+    enigma::mv_matrix = enigma::view_matrix * enigma::model_matrix;
     glLoadMatrix(enigma::mv_matrix);
 }
-gs_scalar * d3d_transform_get_array(){
+
+gs_scalar * d3d_transform_get_array_pointer(){
     return enigma::model_matrix;
+}
+
+var d3d_transform_get_array(){
+    var mm;
+    mm(3,3) = 0;
+    mm(0,0) = enigma::model_matrix(0,0), mm(0,1) = enigma::model_matrix(0,1), mm(0,2) = enigma::model_matrix(0,2), mm(0,3) = enigma::model_matrix(0,3),
+    mm(1,0) = enigma::model_matrix(1,0), mm(1,1) = enigma::model_matrix(1,1), mm(1,2) = enigma::model_matrix(1,2), mm(1,3) = enigma::model_matrix(1,3),
+    mm(2,0) = enigma::model_matrix(2,0), mm(2,1) = enigma::model_matrix(2,1), mm(2,2) = enigma::model_matrix(2,2), mm(2,3) = enigma::model_matrix(2,3),
+    mm(3,0) = enigma::model_matrix(3,0), mm(3,1) = enigma::model_matrix(3,1), mm(3,2) = enigma::model_matrix(3,2), mm(3,3) = enigma::model_matrix(3,3);
+    return mm;
+}
+
+void d3d_transform_force_update(){}
+
+void d3d_projection_set_array(const gs_scalar *matrix)
+{
+    enigma::projection_matrix = enigma::Matrix4(matrix);
+    glMatrixMode(GL_PROJECTION);
+    glLoadMatrix(enigma::projection_matrix);
+    glMatrixMode(GL_MODELVIEW);
+}
+
+void d3d_projection_add_array(const gs_scalar *matrix)
+{
+    enigma::Matrix4 m(matrix);
+    enigma::projection_matrix = m*enigma::projection_matrix;
+    glMatrixMode(GL_PROJECTION);
+    glLoadMatrix(enigma::projection_matrix);
+    glMatrixMode(GL_MODELVIEW);
+}
+
+gs_scalar * d3d_projection_get_array_pointer(){
+    return enigma::projection_matrix;
+}
+
+var d3d_projection_get_array(){
+    var pm;
+    pm(3,3) = 0;
+    pm(0,0) = enigma::projection_matrix(0,0), pm(0,1) = enigma::projection_matrix(0,1), pm(0,2) = enigma::projection_matrix(0,2), pm(0,3) = enigma::projection_matrix(0,3),
+    pm(1,0) = enigma::projection_matrix(1,0), pm(1,1) = enigma::projection_matrix(1,1), pm(1,2) = enigma::projection_matrix(1,2), pm(1,3) = enigma::projection_matrix(1,3),
+    pm(2,0) = enigma::projection_matrix(2,0), pm(2,1) = enigma::projection_matrix(2,1), pm(2,2) = enigma::projection_matrix(2,2), pm(2,3) = enigma::projection_matrix(2,3),
+    pm(3,0) = enigma::projection_matrix(3,0), pm(3,1) = enigma::projection_matrix(3,1), pm(3,2) = enigma::projection_matrix(3,2), pm(3,3) = enigma::projection_matrix(3,3);
+    return pm;
+}
+
+gs_scalar * d3d_view_get_array_pointer(){
+    return enigma::view_matrix;
+}
+
+var d3d_view_get_array(){
+    var pm;
+    pm(3,3) = 0;
+    pm(0,0) = enigma::view_matrix(0,0), pm(0,1) = enigma::view_matrix(0,1), pm(0,2) = enigma::view_matrix(0,2), pm(0,3) = enigma::view_matrix(0,3),
+    pm(1,0) = enigma::view_matrix(1,0), pm(1,1) = enigma::view_matrix(1,1), pm(1,2) = enigma::view_matrix(1,2), pm(1,3) = enigma::view_matrix(1,3),
+    pm(2,0) = enigma::view_matrix(2,0), pm(2,1) = enigma::view_matrix(2,1), pm(2,2) = enigma::view_matrix(2,2), pm(2,3) = enigma::view_matrix(2,3),
+    pm(3,0) = enigma::view_matrix(3,0), pm(3,1) = enigma::view_matrix(3,1), pm(3,2) = enigma::view_matrix(3,2), pm(3,3) = enigma::view_matrix(3,3);
+    return pm;
+}
+
+gs_scalar * d3d_transformation_get_mv(){
+    return enigma::mv_matrix;
+}
+
+gs_scalar * d3d_transformation_get_mvp(){
+    enigma::mvp_matrix = enigma::projection_matrix * enigma::mv_matrix;
+    return enigma::mvp_matrix;
 }
 
 }
@@ -398,35 +468,5 @@ bool d3d_projection_stack_discard()
     proj_stack.pop();
     view_stack.pop();
     return true;
-}
-
-void d3d_projection_set_array(const gs_scalar *matrix)
-{
-    enigma::projection_matrix = enigma::Matrix4(matrix);
-    glMatrixMode(GL_PROJECTION);
-    glLoadMatrix(enigma::projection_matrix);
-    glMatrixMode(GL_MODELVIEW);
-}
-
-void d3d_projection_add_array(const gs_scalar *matrix)
-{
-    enigma::Matrix4 m(matrix);
-    enigma::projection_matrix = m*enigma::projection_matrix;
-    glMatrixMode(GL_PROJECTION);
-    glLoadMatrix(enigma::projection_matrix);
-    glMatrixMode(GL_MODELVIEW);
-}
-
-gs_scalar * d3d_projection_get_array(){
-    return enigma::projection_matrix;
-}
-
-gs_scalar * d3d_transformation_get_mv(){
-    return enigma::mv_matrix;
-}
-
-gs_scalar * d3d_transformation_get_mvp(){
-    enigma::mvp_matrix = enigma::projection_matrix * enigma::mv_matrix;
-    return enigma::mvp_matrix;
 }
 }
