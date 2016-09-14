@@ -39,17 +39,17 @@ using namespace std;
 namespace enigma
 {
     GLuint msaa_fbo = 0;
-		
+
     extern void (*WindowResizedCallback)();
     void WindowResized() {
       // clear the window color, viewport does not need set because backbuffer was just recreated
       enigma_user::draw_clear(enigma_user::window_get_color());
     }
-    
+
     void EnableDrawing (HGLRC *hRC)
     {
       WindowResizedCallback = &WindowResized;
-      
+
       PIXELFORMATDESCRIPTOR pfd;
       int iFormat;
 
@@ -69,11 +69,11 @@ namespace enigma
       SetPixelFormat (enigma::window_hDC, iFormat, &pfd);
       *hRC = wglCreateContext( enigma::window_hDC );
       wglMakeCurrent( enigma::window_hDC, *hRC );
-		
+
       //TODO: This never reports higher than 8, but display_aa should be 14 if 2,4,and 8 are supported and 8 only when only 8 is supported
       glGetIntegerv(GL_MAX_SAMPLES_EXT, &enigma_user::display_aa);
     }
-	
+
     void DisableDrawing (HWND hWnd, HDC hDC, HGLRC hRC)
     {
       wglMakeCurrent (NULL, NULL);
@@ -90,7 +90,6 @@ namespace enigma {
     bool ext_swapcontrol_supported;
 
     void investigate_swapcontrol_support() {
-
       if (has_checked_extensions) return; // Already calculated, no need to calculate it more.
 
       const char *wgl_extensions = wglGetExtensionsStringARB(window_hDC);
@@ -111,48 +110,48 @@ namespace enigma {
 
 namespace enigma_user {
 
-	int display_aa = 0;
+  int display_aa = 0;
 
-	void display_reset(int samples, bool vsync) {
-		int interval = vsync ? 1 : 0;
+  void display_reset(int samples, bool vsync) {
+    int interval = vsync ? 1 : 0;
 
-		if (enigma::is_ext_swapcontrol_supported()) {
-		  wglSwapIntervalEXT(interval);
-		}
- 
-		GLint fbo;
-		glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &fbo);
- 
-		GLuint ColorBufferID, DepthBufferID;
+    if (enigma::is_ext_swapcontrol_supported()) {
+      wglSwapIntervalEXT(interval);
+    }
 
-		// Cleanup the multi-sampler fbo if turning off multi-sampling
-		if (samples == 0) {
-			if (enigma::msaa_fbo != 0) {
-				glDeleteFramebuffers(1, &enigma::msaa_fbo);
-				enigma::msaa_fbo = 0;
-			}
-			return;
-		}
+    GLint fbo;
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &fbo);
 
-		//TODO: Change the code below to fix this to size properly to views
-		// If we don't already have a multi-sample fbo then create one
-		if (enigma::msaa_fbo == 0) {
-			glGenFramebuffersEXT(1, &enigma::msaa_fbo);
-		}
-		glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, enigma::msaa_fbo);
-		// Now make a multi-sample color buffer
-		glGenRenderbuffersEXT(1, &ColorBufferID);
-		glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, ColorBufferID);
-		glRenderbufferStorageMultisampleEXT(GL_RENDERBUFFER_EXT, samples, GL_RGBA8, window_get_region_width(), window_get_region_height());
-		// We also need a depth buffer
-		glGenRenderbuffersEXT(1, &DepthBufferID);
-		glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, DepthBufferID);
-		glRenderbufferStorageMultisampleEXT(GL_RENDERBUFFER_EXT, samples, GL_DEPTH_COMPONENT24, window_get_region_width(), window_get_region_height());
-		// Attach the render buffers to the multi-sampler fbo
-		glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_RENDERBUFFER_EXT, ColorBufferID);
-		glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, DepthBufferID);
-		
-	}
+    GLuint ColorBufferID, DepthBufferID;
+
+    // Cleanup the multi-sampler fbo if turning off multi-sampling
+    if (samples == 0) {
+      if (enigma::msaa_fbo != 0) {
+        glDeleteFramebuffers(1, &enigma::msaa_fbo);
+        enigma::msaa_fbo = 0;
+      }
+      return;
+    }
+
+    //TODO: Change the code below to fix this to size properly to views
+    // If we don't already have a multi-sample fbo then create one
+    if (enigma::msaa_fbo == 0) {
+      glGenFramebuffersEXT(1, &enigma::msaa_fbo);
+    }
+    glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, enigma::msaa_fbo);
+    // Now make a multi-sample color buffer
+    glGenRenderbuffersEXT(1, &ColorBufferID);
+    glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, ColorBufferID);
+    glRenderbufferStorageMultisampleEXT(GL_RENDERBUFFER_EXT, samples, GL_RGBA8, window_get_region_width(), window_get_region_height());
+    // We also need a depth buffer
+    glGenRenderbuffersEXT(1, &DepthBufferID);
+    glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, DepthBufferID);
+    glRenderbufferStorageMultisampleEXT(GL_RENDERBUFFER_EXT, samples, GL_DEPTH_COMPONENT24, window_get_region_width(), window_get_region_height());
+    // Attach the render buffers to the multi-sampler fbo
+    glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_RENDERBUFFER_EXT, ColorBufferID);
+    glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, DepthBufferID);
+
+  }
 
   void screen_refresh() {
     window_set_caption(room_caption);
@@ -161,7 +160,6 @@ namespace enigma_user {
   }
 
   void set_synchronization(bool enable) {
-
     // General notes:
     // Setting swapping on and off is platform-dependent and requires platform-specific extensions.
     // Platform-specific extensions are even more bothersome than regular extensions.

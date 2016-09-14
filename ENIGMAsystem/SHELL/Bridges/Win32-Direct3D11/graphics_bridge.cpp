@@ -31,45 +31,45 @@ using namespace std;
 #include "Bridges/General/DX11Context.h"
 #include "Graphics_Systems/General/GScolors.h"
 
-	bool m_vsync_enabled;
-	int m_videoCardMemory;
-	char m_videoCardDescription[128];
-	IDXGISwapChain* m_swapChain;
-	ID3D11Device* m_device;
-	ID3D11DeviceContext* m_deviceContext;
-	ID3D11RenderTargetView* m_renderTargetView;
-	ID3D11Texture2D* m_depthStencilBuffer;
-	ID3D11DepthStencilState* m_depthStencilState;
-	ID3D11DepthStencilView* m_depthStencilView;
-	ID3D11RasterizerState* m_rasterState;
+bool m_vsync_enabled;
+int m_videoCardMemory;
+char m_videoCardDescription[128];
+IDXGISwapChain* m_swapChain;
+ID3D11Device* m_device;
+ID3D11DeviceContext* m_deviceContext;
+ID3D11RenderTargetView* m_renderTargetView;
+ID3D11Texture2D* m_depthStencilBuffer;
+ID3D11DepthStencilState* m_depthStencilState;
+ID3D11DepthStencilView* m_depthStencilView;
+ID3D11RasterizerState* m_rasterState;
 
 // global declarations
 ContextManager* d3dmgr;    // the pointer to the device class
 
 // the WindowProc function prototype
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
-	
+
 namespace enigma
 {
-	
+
   extern void (*WindowResizedCallback)();
   void WindowResized() {
     // clear the window color, viewport does not need set because backbuffer was just recreated
     enigma_user::draw_clear(enigma_user::window_get_color());
   }
-  
+
   void EnableDrawing (HGLRC *hRC) {
     WindowResizedCallback = &WindowResized;
-  
+
     d3dmgr = new ContextManager();
-      int screenWidth = window_get_width(),
-          screenHeight = window_get_height();
-      screenWidth = screenWidth <= 0 ? 1 : screenWidth;
-      screenHeight = screenHeight <= 0 ? 1 : screenHeight;
+    int screenWidth = window_get_width(),
+        screenHeight = window_get_height();
+    screenWidth = screenWidth <= 0 ? 1 : screenWidth;
+    screenHeight = screenHeight <= 0 ? 1 : screenHeight;
     bool vsync = false;
     HWND hwnd = enigma::hWnd;
     bool fullscreen = false;
-    
+
     HRESULT result;
     IDXGIFactory* factory;
     IDXGIAdapter* adapter;
@@ -88,60 +88,45 @@ namespace enigma
     D3D11_VIEWPORT viewport;
     float fieldOfView, screenAspect;
 
-
     // Store the vsync setting.
     m_vsync_enabled = vsync;
 
     // Create a DirectX graphics interface factory.
     result = CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)&factory);
-    if(FAILED(result))
-    {
+    if (FAILED(result))
       //return false;
-    }
 
     // Use the factory to create an adapter for the primary graphics interface (video card).
     result = factory->EnumAdapters(0, &adapter);
-    if(FAILED(result))
-    {
+    if (FAILED(result))
       //return false;
-    }
 
     // Enumerate the primary adapter output (monitor).
     result = adapter->EnumOutputs(0, &adapterOutput);
-    if(FAILED(result))
-    {
+    if (FAILED(result))
       //return false;
-    }
 
     // Get the number of modes that fit the DXGI_FORMAT_R8G8B8A8_UNORM display format for the adapter output (monitor).
     result = adapterOutput->GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_ENUM_MODES_INTERLACED, &numModes, NULL);
-    if(FAILED(result))
-    {
+    if (FAILED(result))
       //return false;
-    }
 
     // Create a list to hold all the possible display modes for this monitor/video card combination.
     displayModeList = new DXGI_MODE_DESC[numModes];
-    if(!displayModeList)
-    {
+    if (FAILED(result))
       //return false;
-    }
 
     // Now fill the display mode list structures.
     result = adapterOutput->GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_ENUM_MODES_INTERLACED, &numModes, displayModeList);
-    if(FAILED(result))
-    {
+    if (FAILED(result))
       //return false;
-    }
 
     // Now go through all the display modes and find the one that matches the screen width and height.
     // When a match is found store the numerator and denominator of the refresh rate for that monitor.
-    for(i=0; i<numModes; i++)
+    for (i = 0; i < numModes; i++)
     {
-      if(displayModeList[i].Width == (unsigned int)screenWidth)
-      {
-        if(displayModeList[i].Height == (unsigned int)screenHeight)
-        {
+      if (displayModeList[i].Width == (unsigned int)screenWidth) {
+        if (displayModeList[i].Height == (unsigned int)screenHeight) {
           numerator = displayModeList[i].RefreshRate.Numerator;
           denominator = displayModeList[i].RefreshRate.Denominator;
         }
@@ -150,20 +135,16 @@ namespace enigma
 
     // Get the adapter (video card) description.
     result = adapter->GetDesc(&adapterDesc);
-    if(FAILED(result))
-    {
+    if (FAILED(result))
       //return false;
-    }
 
     // Store the dedicated video card memory in megabytes.
     m_videoCardMemory = (int)(adapterDesc.DedicatedVideoMemory / 1024 / 1024);
 
     // Convert the name of the video card to a character array and store it.
     //error = wcstombs_s(&stringLength, m_videoCardDescription, 128, adapterDesc.Description, 128);
-    if(error != 0)
-    {
+    if (error != 0)
       //return false;
-    }
 
     // Release the display mode list.
     delete [] displayModeList;
@@ -195,13 +176,10 @@ namespace enigma
     swapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 
     // Set the refresh rate of the back buffer.
-    if(m_vsync_enabled)
-    {
+    if (m_vsync_enabled) {
       swapChainDesc.BufferDesc.RefreshRate.Numerator = numerator;
       swapChainDesc.BufferDesc.RefreshRate.Denominator = denominator;
-    }
-    else
-    {
+    } else {
       swapChainDesc.BufferDesc.RefreshRate.Numerator = 0;
       swapChainDesc.BufferDesc.RefreshRate.Denominator = 1;
     }
@@ -217,14 +195,7 @@ namespace enigma
     swapChainDesc.SampleDesc.Quality = 0;
 
     // Set to full screen or windowed mode.
-    if(fullscreen)
-    {
-      swapChainDesc.Windowed = false;
-    }
-    else
-    {
-      swapChainDesc.Windowed = true;
-    }
+    swapChainDesc.Windowed = fullscreen;
 
     // Set the scan line ordering and scaling to unspecified.
     swapChainDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
@@ -240,27 +211,20 @@ namespace enigma
     featureLevel = D3D_FEATURE_LEVEL_11_0;
 
     // Create the swap chain, Direct3D device, and Direct3D device context.
-    result = D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, 0, &featureLevel, 1, 
+    result = D3D11CreateDeviceAndSwapChain(NULL, D3D_DRIVER_TYPE_HARDWARE, NULL, 0, &featureLevel, 1,
                    D3D11_SDK_VERSION, &swapChainDesc, &m_swapChain, &m_device, NULL, &m_deviceContext);
-
-    if(FAILED(result))
-    {
+    if (FAILED(result))
       //return false;
-    }
 
     // Get the pointer to the back buffer.
     result = m_swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&backBufferPtr);
-    if(FAILED(result))
-    {
+    if (FAILED(result))
       //return false;
-    }
 
     // Create the render target view with the back buffer pointer.
     result = m_device->CreateRenderTargetView(backBufferPtr, NULL, &m_renderTargetView);
-    if(FAILED(result))
-    {
+    if (FAILED(result))
       //return false;
-    }
 
     // Release pointer to the back buffer as we no longer need it.
     backBufferPtr->Release();
@@ -284,10 +248,8 @@ namespace enigma
 
     // Create the texture for the depth buffer using the filled out description.
     result = m_device->CreateTexture2D(&depthBufferDesc, NULL, &m_depthStencilBuffer);
-    if(FAILED(result))
-    {
+    if (FAILED(result))
       //return false;
-    }
 
     // Initialize the description of the stencil state.
     ZeroMemory(&depthStencilDesc, sizeof(depthStencilDesc));
@@ -315,10 +277,8 @@ namespace enigma
 
     // Create the depth stencil state.
     result = m_device->CreateDepthStencilState(&depthStencilDesc, &m_depthStencilState);
-    if(FAILED(result))
-    {
+    if (FAILED(result))
       //return false;
-    }
 
     // Set the depth stencil state.
     m_deviceContext->OMSetDepthStencilState(m_depthStencilState, 1);
@@ -333,10 +293,8 @@ namespace enigma
 
     // Create the depth stencil view.
     result = m_device->CreateDepthStencilView(m_depthStencilBuffer, &depthStencilViewDesc, &m_depthStencilView);
-    if(FAILED(result))
-    {
+    if (FAILED(result))
       //return false;
-    }
 
     // Bind the render target view and depth stencil buffer to the output render pipeline.
     m_deviceContext->OMSetRenderTargets(1, &m_renderTargetView, m_depthStencilView);
@@ -355,14 +313,12 @@ namespace enigma
 
     // Create the rasterizer state from the description we just filled out.
     result = m_device->CreateRasterizerState(&rasterDesc, &m_rasterState);
-    if(FAILED(result))
-    {
+    if (FAILED(result))
       //return false;
-    }
 
     // Now set the rasterizer state.
     m_deviceContext->RSSetState(m_rasterState);
-      
+
     // Setup the viewport for rendering.
     viewport.Width = (float)screenWidth;
     viewport.Height = (float)screenHeight;
@@ -384,7 +340,7 @@ namespace enigma
 
 #include "Universal_System/roomsystem.h"
 
-namespace enigma_user 
+namespace enigma_user
 {
   int display_aa = 0;
 
@@ -393,14 +349,14 @@ namespace enigma_user
   }
 
   void screen_refresh() {
-      window_set_caption(room_caption);
-      enigma::update_mouse_variables();
+    window_set_caption(room_caption);
+    enigma::update_mouse_variables();
     m_swapChain->Present(0, 0);
   }
 
   void set_synchronization(bool enable) //TODO: Needs to be rewritten
   {
 
-  }  
+  }
 
 }

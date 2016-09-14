@@ -33,7 +33,7 @@ extern "C" {
 
 namespace enigma {
   GLuint msaa_fbo = 0;
-  
+
   extern void (*WindowResizedCallback)();
   void WindowResized() {
     // clear the window color, viewport does not need set because backbuffer was just recreated
@@ -57,12 +57,12 @@ namespace enigma_user {
   void set_synchronization(bool enable) {
 
   }
-    
+
   void display_reset(int samples, bool vsync) {
     set_synchronization(vsync);
     //TODO: Copy over from the Win32 bridge
   }
-    
+
   void screen_refresh() {
     cocoa_screen_refresh();
     enigma::update_mouse_variables();
@@ -70,4 +70,3 @@ namespace enigma_user {
   }
 
 }
-
