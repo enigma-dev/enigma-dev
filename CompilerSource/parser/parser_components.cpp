@@ -413,7 +413,7 @@ int parser_reinterpret(string &code,string &synt)
       cout << "CHECK POINT" << endl;
       if (!en) {
         code.insert(pos,"(enigma::varargs(),");
-        synt.insert(pos,"(ttttttttttttttt(),");
+        synt.insert(pos,"(nnnnnnnnnnnnnnn(),");
         pos += 19;
         for (unsigned lvl = 1; lvl; pos++)
         {
