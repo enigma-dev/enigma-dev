@@ -151,7 +151,7 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
         }
       }
       
-      char c = 'n';
+      char c = 'n', cprime = 0;
       
       jdi::definition* d;
       tokiter itt = edl_tokens.find(name);
@@ -163,12 +163,12 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
         if (d->flags & jdi::DEF_TYPENAME)
           c = 't';
         else if (d->flags & jdi::DEF_FUNCTION and referencers_varargs(((jdi::definition_function*)d)->referencers))
-          c = 'V';
+          c = 'V', cprime = 'n';
       }
       else if (name == "then")
         continue; //"Then" is a truly useless keyword. I see no need to preserve it.
       
-      if (last_token == c)
+      if (last_token == c || last_token == cprime)
       {
         if (c == '&' or c == '^' or c == '|') {} //Ignore these tokens
         else if (c != 'r' and c != 't' and c != '!')
