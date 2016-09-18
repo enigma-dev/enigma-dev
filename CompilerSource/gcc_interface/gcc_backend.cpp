@@ -28,7 +28,6 @@ using namespace std;
 #define flushl '\n' << flush
 #define flushs flush
 
-#include "syntax/checkfile.h"
 #include "general/parse_basics_old.h"
 #include "general/bettersystem.h"
 
