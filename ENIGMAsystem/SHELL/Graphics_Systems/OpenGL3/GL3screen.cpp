@@ -95,7 +95,7 @@ static inline void draw_back()
   using enigma_user::draw_background_tiled_ext;
   using enigma_user::draw_background_ext;
   // Draw the rooms backgrounds
-  for (int back_current = 0; back_current < 8; back_current++) {
+  for (size_t back_current = 0; back_current < 8; back_current++) {
     if (background_visible[back_current] == 1) {
       if (enigma_user::background_exists(background_index[back_current])) {
         //NOTE: This has been double checked with Game Maker 8.1 to work exactly the same, the background_x/y is modified just as object locals are
@@ -225,9 +225,8 @@ static inline int draw_tiles()
   {
     if (dit->second.tiles.size())
     {
-      for (unsigned int t = 0; t<drawing_depths[dit->second.tiles[0].depth].tilevector.size(); ++t){
-        enigma_user::texture_set(drawing_depths[dit->second.tiles[0].depth].tilevector[t][0]);
-        d3d_model_part_draw(drawing_depths[dit->second.tiles[0].depth].tilelist, drawing_depths[dit->second.tiles[0].depth].tilevector[t][1], drawing_depths[dit->second.tiles[0].depth].tilevector[t][2]);
+      for (auto &t : drawing_depths[dit->second.tiles[0].depth].tilevector){
+        d3d_model_part_draw(drawing_depths[dit->second.tiles[0].depth].tilelist, t[0], t[1], t[2]);
       }
     }
     enigma::inst_iter* push_it = enigma::instance_event_iterator;
@@ -396,6 +395,7 @@ void screen_redraw()
 
 void screen_init()
 {
+  oglmgr->EndShapesBatching();
   enigma::gui_width = window_get_region_width();
   enigma::gui_height = window_get_region_height();
 
@@ -434,6 +434,7 @@ void screen_init()
 
 int screen_save(string filename) //Assumes native integers are little endian
 {
+  oglmgr->EndShapesBatching();
   unsigned int w=window_get_width(),h=window_get_height(),sz=w*h;
 
   string ext = enigma::image_get_format(filename);
@@ -454,6 +455,7 @@ int screen_save(string filename) //Assumes native integers are little endian
 
 int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h) //Assumes native integers are little endian
 {
+  oglmgr->EndShapesBatching();
   unsigned sz = w*h;
 
   string ext = enigma::image_get_format(filename);
@@ -489,9 +491,18 @@ void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar he
   glScissor(viewport_x, viewport_y, viewport_w, viewport_h);
 }
 
-void display_set_gui_size(unsigned width, unsigned height) {
+//TODO: These need to be in some kind of General
+void display_set_gui_size(unsigned int width, unsigned int height) {
   enigma::gui_width = width;
   enigma::gui_height = height;
+}
+
+unsigned int display_get_gui_width(){
+  return enigma::gui_width;
+}
+
+unsigned int display_get_gui_height(){
+  return enigma::gui_height;
 }
 
 }

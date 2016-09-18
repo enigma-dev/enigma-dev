@@ -80,6 +80,13 @@ ey_string &ey_data::get(string n) { //Fetch a key's value as a scalar
   return eys_empty; // Otherwise, return empty
 }
 
+bool ey_data::exists(string n) {
+  eyit it = values.find(n); // Find it
+  if (it != values.end() and it->second->is_scalar) // Make sure it's alive and scalar
+    return true;
+  return false;
+}
+
 // Tree iteration
 eyit ey_data::find(string n)  { return values.find(n); }
 eyit ey_data::begin()         { return values.begin(); }

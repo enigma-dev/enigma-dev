@@ -37,7 +37,7 @@ static const char ldgrs[256] = {
   1,1,1,1,1,1,1,1,1,1,1,0,0,0,0,0
 };
 
-static const std::string base64_chars =
+static const std::string base64_chars = 
              "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
              "abcdefghijklmnopqrstuvwxyz"
              "0123456789+/";
@@ -56,7 +56,7 @@ string base64_encode(string const& str) {
   int in_ = 0;
   unsigned char char_array_3[3];
   unsigned char char_array_4[4];
-
+  
   while (in_len--) {
     char_array_3[i++] = str[in_]; in_++;
     if (i == 3) {
@@ -65,7 +65,7 @@ string base64_encode(string const& str) {
       char_array_4[2] = ((char_array_3[1] & 0x0f) << 2) + ((char_array_3[2] & 0xc0) >> 6);
       char_array_4[3] = char_array_3[2] & 0x3f;
 
-      for (i = 0; (i < 4); i++)
+      for(i = 0; (i <4) ; i++)
         ret += base64_chars[char_array_4[i]];
 
       i = 0;
@@ -73,7 +73,7 @@ string base64_encode(string const& str) {
   }
 
   if (i) {
-    for (j = i; j < 3; j++)
+    for(j = i; j < 3; j++)
       char_array_3[j] = '\0';
 
     char_array_4[0] = (char_array_3[0] & 0xfc) >> 2;
@@ -100,10 +100,10 @@ string base64_decode(string const& str) {
   unsigned char char_array_4[4], char_array_3[3];
   string ret;
 
-  while (in_len-- && (str[in_] != '=') && is_base64(str[in_])) {
+  while (in_len-- && ( str[in_] != '=') && is_base64(str[in_])) {
     char_array_4[i++] = str[in_]; in_++;
-    if (i == 4) {
-      for (i = 0; i < 4; i++)
+    if (i ==4) {
+      for (i = 0; i <4; i++)
         char_array_4[i] = base64_chars.find(char_array_4[i]);
 
       char_array_3[0] = (char_array_4[0] << 2) + ((char_array_4[1] & 0x30) >> 4);
@@ -118,10 +118,10 @@ string base64_decode(string const& str) {
   }
 
   if (i) {
-    for (j = i; j < 4; j++)
+    for (j = i; j <4; j++)
       char_array_4[j] = 0;
 
-    for (j = 0; j < 4; j++)
+    for (j = 0; j <4; j++)
       char_array_4[j] = base64_chars.find(char_array_4[j]);
 
     char_array_3[0] = (char_array_4[0] << 2) + ((char_array_4[1] & 0x30) >> 4);
@@ -145,24 +145,24 @@ int ord(string str)  { return str[0]; }
 size_t string_length(string str) { return str.length(); }
 size_t string_length(const char* str) { return strlen(str); }
 
-size_t string_length_utf8(string str) {
-  size_t res = 0;
-  for (size_t i = 0; i < str.length(); ++i)
-    if ((str[i] & 0xC0) != 0x80)
-      ++res;
-  return res;
+size_t string_length_utf8(string str) { 
+  size_t res = 0; 
+  for (size_t i = 0; i < str.length(); ++i) 
+    if ((str[i] & 0xC0) != 0x80) 
+      ++res; 
+  return res; 
 }
 
-size_t string_length_utf8(const char* str) {
-  size_t res = 0;
-  for (size_t i = 0; str[i]; ++i)
-    if ((str[i] & 0xC0) != 0x80)
-      ++res;
-  return res;
+size_t string_length_utf8(const char* str) { 
+  size_t res = 0; 
+  for (size_t i = 0; str[i]; ++i) 
+    if ((str[i] & 0xC0) != 0x80) 
+      ++res; 
+  return res; 
 }
 
 size_t string_pos(string substr,string str) {
-  const size_t res = str.find(substr,0) + 1;
+  const size_t res = str.find(substr,0)+1;
   return res == string::npos ? 0 : (int)res;
 }
 
@@ -176,13 +176,13 @@ string string_format(double val, unsigned tot, unsigned dec)
 
 string string_copy(string str, int index, int count) {
   index = index < 0 ? 0 : index;
-  return (size_t)index > str.length() ? "" : str.substr(index < 2 ? 0 : index - 1, count < 1 ? 0 : count);
+  return (size_t)index > str.length()? "": str.substr(index < 2? 0: index-1, count < 1? 0: count);
 }
 
 string string_set_byte_at(string str, int index, char byte) {
-  if (index <= 1) return str + byte;
-  const size_t x = index - 1;
-  return x > str.length()? str + byte: str.replace(x, 1, 1, byte);
+  if (index<=1) return str + byte;
+  const size_t x = index-1;
+  return x>str.length()? str + byte: str.replace(x, 1, 1, byte);
 }
 
 char string_byte_at(string str, int index) {
@@ -204,24 +204,24 @@ string string_char_at(string str,int index) {
 }
 
 string string_delete(string str,int index,int count) {
-  return str.erase(index < 2 ? 0 : index - 1, count < 1 ? 0 : count);
+  return str.erase(index < 2? 0: index-1, count < 1? 0: count);
 }
 
 string string_insert(string substr,string str,int index) {
-  if (index <= 1) return substr + str;
-  const size_t x = index - 1;
-  return x > str.length() ? str + substr : str.insert(x, substr);
+  if (index<=1) return substr + str;
+  const size_t x = index-1;
+  return x>str.length()? str + substr: str.insert(x, substr);
 }
 
 string string_replace(string str,string substr,string newstr) {
-  size_t pos = str.find(substr,0);
-  return pos == (size_t)-1 ? str : str.replace(pos,substr.length(),newstr);
+  size_t pos=str.find(substr,0);
+  return pos==(size_t)-1?str:str.replace(pos,substr.length(),newstr);
 }
 
 string string_replace_all(string str,string substr,string newstr) {
   size_t pos = 0;
   const size_t sublen = substr.length(), newlen = newstr.length();
-  while ((pos = str.find(substr,pos)) != string::npos) {
+    while((pos=str.find(substr,pos)) != string::npos) {
     str.replace(pos,sublen,newstr);
     pos += newlen;
   }
@@ -231,7 +231,7 @@ string string_replace_all(string str,string substr,string newstr) {
 size_t string_count(string substr,string str) {
   size_t pos = 0, occ = 0;
   const size_t sublen = substr.length();
-  while ((pos = str.find(substr,pos)) != string::npos)
+  while((pos=str.find(substr,pos)) != string::npos)
     occ++, pos += sublen;
   return occ;
 }
@@ -254,48 +254,48 @@ string string_upper(string str) {
 
 string string_repeat(string str,int count) {
   string ret; ret.reserve(str.length() * count);
-  for (int i = count; i; i--) ret.append(str);
+  for(int i = count; i; i--) ret.append(str);
   return ret;
 }
 
 string string_letters(string str) {
   string ret;
-  for (const char *c = str.c_str(); *c; c++)
-    if (ldgrs[(unsigned char)*c] & 3) ret += *c;
+  for(const char*c=str.c_str();*c;c++)
+    if(ldgrs[(unsigned char)*c]&3) ret+=*c;
   return ret;
 }
 
 string string_digits(string str) {
   string ret;
-  for (const char *c = str.c_str(); *c; c++)
-    if (ldgrs[(unsigned char)*c] & 4) ret += *c;
+  for(const char*c=str.c_str();*c;c++)
+    if(ldgrs[(unsigned char)*c]&4) ret += *c;
   return ret;
 }
 
 string string_lettersdigits(string str) {
   string ret;
-  for (const char *c = str.c_str(); *c; c++)
-    if (ldgrs[(unsigned char)*c]) ret += *c;
+  for(const char*c=str.c_str();*c;c++)
+    if(ldgrs[(unsigned char)*c]) ret += *c;
   return ret;
 }
 
 bool string_isletters(string str) {
-  for (const char *c = str.c_str(); *c; c++)
-    if (!(ldgrs[(unsigned char)*c] & 3))
+  for(const char*c = str.c_str(); *c; c++)
+    if(!(ldgrs[(unsigned char)*c] & 3))
       return false;
   return true;
 }
 
 bool string_isdigits(string str) {
-  for (const char *c = str.c_str(); *c; c++)
-    if (!(ldgrs[(unsigned char)*c] & 4))
+  for(const char*c = str.c_str(); *c; c++)
+    if(!(ldgrs[(unsigned char)*c] & 4))
       return false;
   return true;
 }
 
 bool string_islettersdigits(string str) {
-  for (const char *c = str.c_str(); *c; c++)
-    if (!ldgrs[(unsigned char)*c])
+  for(const char*c=str.c_str(); *c; c++)
+    if(!ldgrs[(unsigned char)*c])
       return false;
   return true;
 }
