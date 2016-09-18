@@ -23,13 +23,19 @@
 #include "instance_system_base.h"
 
 namespace enigma {
-  struct iterator {
-    inst_iter temp_iter;
-    struct inst_iter* it;
-    
+  class iterator {
+    enigma::inst_iter temp_iter;
+    enigma::inst_iter* it;
+
+    void addme();
+    void copy(const iterator& other);
+
+   public:
     operator bool();
-    object_basic* operator*();
-    object_basic* operator->();
+    object_basic* operator*() const;
+    object_basic* operator->() const;
+    
+    void handle_unlink(const inst_iter* dead);
     
     iterator &operator++();
     iterator operator++(int);
@@ -46,10 +52,13 @@ namespace enigma {
     iterator();
     
     ~iterator();
-    
-    private: 
-      void addme();
-      static inst_iter* copy(const iterator& other, inst_iter& temp_iter);
+
+    class with;
+  };
+
+  class iterator::with: iterator, iterator_level {
+   public:
+    with(const iterator& push): iterator(push), iterator_level(it) {}
   };
   
   void update_iterators_for_destroy(const inst_iter*);

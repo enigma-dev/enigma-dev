@@ -48,7 +48,7 @@ using namespace std;
 #include "compiler/compile_includes.h"
 #include "settings.h"
 
-//extern string tostring(int);
+extern string tostring(int);
 
 int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], vector<parsed_script*>& tlines, const std::set<std::string>& script_names)
 {
@@ -56,7 +56,7 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
   for (int i = 0; i < es->scriptCount; i++)
   {
     std::string newcode;
-    int a = syncheck::syntacheck(es->scripts[i].code, newcode);
+    int a = syncheck::syntaxcheck(es->scripts[i].code, newcode);
     if (a != -1) {
       user << "Syntax error in script `" << es->scripts[i].name << "'\n" << format_error(es->scripts[i].code,syncheck::syerr,a) << flushl;
       return E_ERROR_SYNTAX;
@@ -64,7 +64,7 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
     // Keep a parsed record of this script
     scr_lookup[es->scripts[i].name] = scripts[i] = new parsed_script;
     parser_main(newcode,&scripts[i]->pev, script_names);
-    edbg << "Parsed `" << es->scripts[i].name << "': " << to_string(scripts[i]->obj.locals.size()) << " locals, " << to_string(scripts[i]->obj.globals.size()) << " globals" << flushl;
+    edbg << "Parsed `" << es->scripts[i].name << "': " << scripts[i]->obj.locals.size() << " locals, " << scripts[i]->obj.globals.size() << " globals" << flushl;
 
     // If the script accesses variables from outside its scope implicitly
     if (scripts[i]->obj.locals.size() or scripts[i]->obj.globallocals.size() or scripts[i]->obj.ambiguous.size()) {
@@ -78,12 +78,12 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
 
   //Next we just parse the timeline scripts to add semicolons and collect variable names
   tline_lookup.clear();
-  for (int i=0; i<es->timelineCount; i++)
+  for (int i=0; i<es->timelineCount; i++) 
   {
-    for (int j=0; j<es->timelines[i].momentCount; j++)
+    for (int j=0; j<es->timelines[i].momentCount; j++) 
     {
       std::string newcode;
-      int a = syncheck::syntacheck(es->timelines[i].moments[j].code, newcode);
+      int a = syncheck::syntaxcheck(es->timelines[i].moments[j].code, newcode);
       if (a != -1) {
         user << "Syntax error in timeline `" << es->timelines[i].name <<", moment: " <<es->timelines[i].moments[j].stepNo << "'\n" << format_error(es->timelines[i].moments[j].code,syncheck::syerr,a) << flushl;
         return E_ERROR_SYNTAX;
@@ -95,7 +95,7 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
       // Keep a parsed record of this timeline
       tline_lookup[es->timelines[i].name].push_back(tlines.back());
       parser_main(newcode, &tlines.back()->pev, script_names);
-      edbg << "Parsed `" << es->timelines[i].name <<", moment: " <<es->timelines[i].moments[j].stepNo << "': " << to_string(tlines.back()->obj.locals.size()) << " locals, " << to_string(tlines.back()->obj.globals.size()) << " globals" << flushl;
+      edbg << "Parsed `" << es->timelines[i].name <<", moment: " <<es->timelines[i].moments[j].stepNo << "': " << tlines.back()->obj.locals.size() << " locals, " << tlines.back()->obj.globals.size() << " globals" << flushl;
 
       // If the timeline accesses variables from outside its scope implicitly
       if (tlines.back()->obj.locals.size() or tlines.back()->obj.globallocals.size() or tlines.back()->obj.ambiguous.size()) {
@@ -261,7 +261,7 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
           edbg << "Check `" << es->gmObjects[i].name << "::" << event_get_function_name(es->gmObjects[i].mainEvents[ii].id,es->gmObjects[i].mainEvents[ii].events[iii].id) << "...";
 
         // Check the code
-        int sc = syncheck::syntacheck(es->gmObjects[i].mainEvents[ii].events[iii].code, newcode);
+        int sc = syncheck::syntaxcheck(es->gmObjects[i].mainEvents[ii].events[iii].code, newcode);
         if (sc != -1)
         {
           // Error. Report it.
@@ -275,6 +275,7 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
         //Add this to our objects map
         pev.myObj = pob; //Link to its calling object.
         parser_main(newcode,&pev,script_names, setting::compliance_mode!=setting::COMPL_STANDARD); //Format it to C++
+
         edbg << " Done." << flushl;
       }
     }
@@ -289,7 +290,7 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
     pev.mainId = 0, pev.id = 0, pev.myObj = pr;
 
     std::string newcode;
-    int sc = syncheck::syntacheck(es->rooms[i].creationCode, newcode);
+    int sc = syncheck::syntaxcheck(es->rooms[i].creationCode, newcode);
     if (sc != -1) {
       user << "Syntax error in room creation code for room " << es->rooms[i].id << " (`" << es->rooms[i].name << "'):\n" << format_error(es->rooms[i].creationCode,syncheck::syerr,sc) << flushl;
       return E_ERROR_SYNTAX;
@@ -301,7 +302,7 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
       if (es->rooms[i].instances[ii].creationCode and *(es->rooms[i].instances[ii].creationCode))
       {
         newcode = "";
-        int a = syncheck::syntacheck(es->rooms[i].instances[ii].creationCode, newcode);
+        int a = syncheck::syntaxcheck(es->rooms[i].instances[ii].creationCode, newcode);
         if (a != -1) {
           user << "Syntax error in instance creation code for instance " << es->rooms[i].instances[ii].id <<" in room " << es->rooms[i].id << " (`" << es->rooms[i].name << "'):\n" << format_error(es->rooms[i].instances[ii].creationCode,syncheck::syerr,a) << flushl;
           return E_ERROR_SYNTAX;
@@ -319,7 +320,7 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
       if (es->rooms[i].instances[ii].preCreationCode and *(es->rooms[i].instances[ii].preCreationCode))
       {
         std::string newcode;
-        int a = syncheck::syntacheck(es->rooms[i].instances[ii].preCreationCode, newcode);
+        int a = syncheck::syntaxcheck(es->rooms[i].instances[ii].preCreationCode, newcode);
         if (a != -1) {
           cout << "Syntax error in instance preCreation code for instance " << es->rooms[i].instances[ii].id <<" in room " << es->rooms[i].id << " (`" << es->rooms[i].name << "'):" << endl << syncheck::syerr << flushl;
           return E_ERROR_SYNTAX;
@@ -327,7 +328,7 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
 
         pr->instance_precreate_codes[es->rooms[i].instances[ii].id].object_index = es->rooms[i].instances[ii].objectId;
         parsed_event* icce = pr->instance_precreate_codes[es->rooms[i].instances[ii].id].pe = new parsed_event(-1,-1,parsed_objects[es->rooms[i].instances[ii].objectId]);
-        parser_main(string("with (") + to_string(es->rooms[i].instances[ii].id) + ") {" + newcode + "\n/* */}", icce, script_names);
+        parser_main(string("with (") + tostring(es->rooms[i].instances[ii].id) + ") {" + newcode + "\n/* */}", icce, script_names);
       }
     }
   }
@@ -407,7 +408,7 @@ int lang_CPP::link_globals(parsed_object *global, EnigmaStruct *es,parsed_script
 {
   for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
     global->copy_from(*i->second,"object `"+i->second->name+"'","the Global Scope");
-  //TODO: because parsed_room inherits parsed_object it tries to use that as the name but it looks 
+  //TODO: because parsed_room inherits parsed_object it tries to use that as the name but it looks
   //like it never gets initialized, this is obviously a bug because this output never tells us the room name always just `'
   for (pr_i i = parsed_rooms.begin(); i != parsed_rooms.end(); i++)
     global->copy_from(*i->second,"room `"+i->second->name+"'","the Global Scope");

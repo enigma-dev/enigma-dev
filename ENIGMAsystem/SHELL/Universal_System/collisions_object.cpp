@@ -16,16 +16,14 @@
 **/
 
 /**
-  @file  graphics_object.h
-  @brief Adds a collisions-related tier following the transform tier.
-*/
+ * @file  graphics_object.h
+ * @brief Adds a collisions-related tier following the transform tier.
+ */
 
-#include "collisions_object.h"
 #include <cmath>
-
 #include <floatcomp.h>
-
-#define M_PI		3.14159265358979323846
+#include "collisions_object.h"
+#include "math_consts.h"
 
 namespace enigma
 {
