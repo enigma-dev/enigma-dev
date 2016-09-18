@@ -40,12 +40,12 @@ namespace enigma
   int font_new(uint32_t gs, uint32_t gc) // Creates a new font, allocating 'gc' glyphs
   {
     font *ret = new font;
-	
-	ret->glyphRangeCount = 1;
-	fontglyphrange* fgr = new fontglyphrange();
-	ret->glyphRanges.push_back(fgr);
-	fgr->glyphstart = gs;
-	fgr->glyphcount = gc;
+
+    ret->glyphRangeCount = 1;
+    fontglyphrange* fgr = new fontglyphrange();
+    ret->glyphRanges.push_back(fgr);
+    fgr->glyphstart = gs;
+    fgr->glyphcount = gc;
     ret->height = 0;
 
     font **fsan = new font*[font_idmax+2];
@@ -76,18 +76,20 @@ namespace enigma
           gtw = 0;
 
       font->height = ghm;
-      
+
       enigma::fontglyphrange* fgr = font->glyphRanges[0];
-      
+
       for (unsigned i = 0; i < gcount; i++)
       {
         enigma::fontglyph* fg = new enigma::fontglyph();
         fgr->glyphs.push_back(fg);
         unsigned fw, fh;
         unsigned char* data = enigma::graphics_get_texture_pixeldata(sspr->texturearray[i], &fw, &fh);
-        //NOTE: Following line replaced gtw = int((double)sspr->width / sspr->texbordyarray[i]);
+        //NOTE: Following line replaced gtw = int((double)sspr->width / sspr->texturewarray[i]);
         //this was to fix non-power of two subimages
-        gtw = fw;
+        //NTOE2: The commented out code was actually wrong - the width was divided by y instead of x. That is why it only worked with power of two.
+        gtw = int((double)sspr->width / sspr->texturewarray[i]);
+        //gtw = fw;
         glyphdata[i] = data;
 
         // Here we calculate the bbox
@@ -131,8 +133,7 @@ namespace enigma
         boxes.push_back((glyphmetrics[i].w * glyphmetrics[i].h << 8) + i);
       boxes.sort();
 
-      //NOTE: This was hardcoded with 64x64 now it starts with the size of the first glyph, maybe should be fixed properly?
-      unsigned w = glyphmetrics[0].w, h = glyphmetrics[0].h;
+      unsigned w = 64, h = 64;
       enigma::rect_packer::rectpnode *rectplane = new enigma::rect_packer::rectpnode(0,0,w,h);
       for (list<unsigned int>::reverse_iterator i = boxes.rbegin(); i != boxes.rend() and w and h; )
       {
@@ -166,7 +167,7 @@ namespace enigma
         fg->tx2 = (glyphmetrics[i].x + glyphmetrics[i].w) / double(w);
         fg->ty2 = (glyphmetrics[i].y + glyphmetrics[i].h) / double(h);
       }
-	  
+
       font->texture = enigma::graphics_create_texture(w,h,w,h,bigtex,false);
       font->twid = w;
       font->thgt = h;
@@ -247,7 +248,7 @@ int font_add(string name, int size, bool bold, bool italic, uint32_t first, uint
   fnt->glyphRanges.push_back(fgr);
   fgr->glyphstart = first;
   fgr->glyphcount = last-first;
-  
+
   return res;
 }
 
@@ -312,6 +313,26 @@ float font_get_glyph_texture_right(int fnt, uint32_t character) {
 float font_get_glyph_texture_bottom(int fnt, uint32_t character) {
   enigma::fontglyph* glyph = findGlyph(enigma::fontstructarray[fnt], character);
   return glyph->ty2;
+}
+
+float font_get_glyph_left(int fnt, uint32_t character) {
+  enigma::fontglyph* glyph = findGlyph(enigma::fontstructarray[fnt], character);
+  return glyph->x;
+}
+
+float font_get_glyph_top(int fnt, uint32_t character) {
+  enigma::fontglyph* glyph = findGlyph(enigma::fontstructarray[fnt], character);
+  return glyph->y;
+}
+
+float font_get_glyph_right(int fnt, uint32_t character) {
+  enigma::fontglyph* glyph = findGlyph(enigma::fontstructarray[fnt], character);
+  return glyph->x2;
+}
+
+float font_get_glyph_bottom(int fnt, uint32_t character) {
+  enigma::fontglyph* glyph = findGlyph(enigma::fontstructarray[fnt], character);
+  return glyph->y2;
 }
 
 }

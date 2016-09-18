@@ -43,6 +43,7 @@
 #include "Universal_System/backgroundstruct.h"
 #include "Universal_System/spritestruct.h"
 #include "Universal_System/fontstruct.h"
+#include "Universal_System/texture_atlas.h"
 
 #include "Universal_System/callbacks_events.h"
 
