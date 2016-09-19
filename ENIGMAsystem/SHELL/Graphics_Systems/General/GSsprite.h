@@ -22,7 +22,7 @@
 #include "Universal_System/spritestruct.h"
 #include "GScolors.h"
 
-#if GM_COMPATIBILITY_VERSION <= 8
+#if GM_COMPATIBILITY_VERSION <= 81
 #  define DEFAULT_ALPHA 1
 #else
 #  define DEFAULT_ALPHA draw_get_alpha()
