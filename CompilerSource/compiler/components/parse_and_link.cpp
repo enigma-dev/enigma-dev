@@ -28,10 +28,10 @@
 
 #include <stdio.h>
 #include <iostream>
+#include <string>     // std::string, std::to_string (C++11)
 #include "backend/ideprint.h"
 
 using namespace std;
-
 
 #include "syntax/syncheck.h"
 #include "parser/parser.h"
@@ -78,9 +78,9 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
 
   //Next we just parse the timeline scripts to add semicolons and collect variable names
   tline_lookup.clear();
-  for (int i=0; i<es->timelineCount; i++)
+  for (int i=0; i<es->timelineCount; i++) 
   {
-    for (int j=0; j<es->timelines[i].momentCount; j++)
+    for (int j=0; j<es->timelines[i].momentCount; j++) 
     {
       std::string newcode;
       int a = syncheck::syntaxcheck(es->timelines[i].moments[j].code, newcode);
@@ -310,7 +310,7 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
 
         pr->instance_create_codes[es->rooms[i].instances[ii].id].object_index = es->rooms[i].instances[ii].objectId;
         parsed_event* icce = pr->instance_create_codes[es->rooms[i].instances[ii].id].pe = new parsed_event(-1,-1,parsed_objects[es->rooms[i].instances[ii].objectId]);
-        parser_main(string("with (") + tostring(es->rooms[i].instances[ii].id) + ") {" + newcode + "\n/* */}", icce, script_names);
+        parser_main(string("with (") + to_string(es->rooms[i].instances[ii].id) + ") {" + newcode + "\n/* */}", icce, script_names);
       }
     }
 
