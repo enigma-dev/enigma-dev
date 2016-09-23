@@ -33,5 +33,5 @@ int main(int argc, char* argv[])
         return plugin.BuildGame(game.ConstructGame(), mode, options.GetOption("output").c_str());
     }
 
-    return 0;
+    return result;
 }
