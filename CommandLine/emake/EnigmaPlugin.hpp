@@ -28,7 +28,6 @@ class EnigmaPlugin
 public:
     EnigmaPlugin();
     int Init();
-    void SetCompiler(const char* def);
     void SetDefinitions(const char* def);
     int BuildGame(EnigmaStruct* data, GameMode mode, const char* fpath);
 
@@ -49,7 +48,6 @@ private:
     std::function<void()> plugin_Free = nullptr;
     std::function<syntax_error*(const char*, const char*)> plugin_DefinitionsModified = nullptr;
     std::function<syntax_error*(int, const char**, const char*)> plugin_SyntaxCheck = nullptr;
-    std::function<const char*(const char*)> plugin_CompilerModified = nullptr;
 
     void* _handle;
 };
