@@ -1,4 +1,3 @@
-
 #################
 # configuration #
 #################
@@ -73,6 +72,7 @@ else
 endif
 
 ifeq ($(PLATFORM), Win32)
+	override LDFLAGS += -L../Additional/i686-w64-mingw32/lib -static-libgcc -static-libstdc++
 	ifeq ($(GMODE), Compile)
 		override LDFLAGS += -static-libgcc -Wl,-subsystem,windows
 	endif
@@ -88,8 +88,8 @@ all: compile_game
 
 clean:
 	$(RM) $(OUTPUTNAME) $(RESOURCEBINARY)
-	$(FIND) $(OBJDIR) -name "*.o" -exec $(RM) -rf {} \;
-	$(FIND) $(OBJDIR) -name "*.d" -exec $(RM) -rf {} \;
+	$(FIND) $(WORKDIR).eobjs/$(COMPILEPATH) -name "*.o" -exec $(RM) -rf {} \;
+	$(FIND) $(WORKDIR).eobjs/$(COMPILEPATH) -name "*.d" -exec $(RM) -rf {} \;
 	
 cleandep:
 	$(RM) $(CLEANDEPS)
@@ -122,7 +122,7 @@ compile_game: cleandep $(OBJECTS) $(RCFILES) $(RESOURCEBINARY) $(DEPENDENCIES)
 # -MMD outputs dependencies to %.d as a side effect of compilation, ignoring system headers
 # -MP gives phony rules for non-target files, avoiding problems with missing files
 $(OBJDIR)/%.o $(OBJDIR)/%.d: %.cpp | $(OBJDIRS)
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(INCLUDES) -MMD -MP -c -o $(OBJDIR)/$*.o $<
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(CFLAGS) $(INCLUDES) -MMD -MP -c -o $(OBJDIR)/$*.o $<
 
 $(OBJDIR)/%.o $(OBJDIR)/%.d: %.c | $(OBJDIRS)
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(INCLUDES) -MMD -MP -c -o $(OBJDIR)/$*.o $<
@@ -131,13 +131,14 @@ $(OBJDIR)/%.o $(OBJDIR)/%.d: %.m | $(OBJDIRS)
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(INCLUDES) -MMD -MP -c -o $(OBJDIR)/$*.o $<
 
 $(OBJDIR)/resources.res: $(RCFILES) GENERATED_FILE
-	echo // GENERATED RESOURCE FILE FRONTEND > $(OBJDIR)/resources.rc
-	for %%r in ($(RESOURCES)) do echo #include "%%r" >> $(OBJDIR)/resources.rc
-	$(WINDRES) -o $@ -I. -I$(WORKDIR) $(OBJDIR)/resources.rc -O coff $(RCFLAGS) 
+	echo "// GENERATED RESOURCE FILE FRONTEND" > $(OBJDIR)/resources.rc
+	
+	for res in $(RESOURCES); do echo "#include \"$$res\"" >> $(OBJDIR)/resources.rc; done
+	$(WINDRES) -o $@ -I. -I$(WORKDIR) $(OBJDIR)/resources.rc -O coff
 GENERATED_FILE:
 
 $(OBJDIR)/%.rc: %.rc
-	$(WINDRES) -o $@ -I. -I$(WORKDIR) $^ -O rc $(RCFLAGS)
+	$(WINDRES) -o $@ -I. -I$(WORKDIR) $^ -O rc
 
 $(OBJDIRS):
 	$(MKDIR) -p $@
