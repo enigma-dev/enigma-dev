@@ -1,4 +1,4 @@
-/** Copyright (C) 2014 Harijs Grinbergs
+/** Copyright (C) 2014-2015 Harijs Grinbergs
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -29,7 +29,7 @@ namespace enigma_user
 
 namespace gui
 {
-	class gui_slider{
+	class Slider{
 		public:
 			unsigned int id;
 			rect box;
@@ -39,7 +39,7 @@ namespace gui
 			bool visible = true;
 			bool active = false; //Is slider pressed
       bool drag = false;
-			int callback = -1; //Script to run when clicked
+			array<int,4> callback; //Script to run on event
 
 			gs_scalar drag_xoffset = 0.0;
 			gs_scalar drag_yoffset = 0.0;
@@ -49,6 +49,7 @@ namespace gui
       double maxValue = 1.0;
       double incValue = 0.1;
       double segments = (maxValue-minValue)/incValue;
+      double rangeValue = 1.0; //abs(min)+abs(max)
 
       gs_scalar slider_offset = 0.0;
 
@@ -57,12 +58,13 @@ namespace gui
       int style_id = -1;
       int indicator_style_id = -1;
 
-			gui_slider();
+			Slider();
 			//Update all possible slider states (hover, click etc.)
 			void update_spos(); //Updates slider position calculations, needed for things like slider_set_value
 			void update(gs_scalar ox = 0, gs_scalar oy = 0, gs_scalar tx = enigma_user::mouse_x, gs_scalar ty = enigma_user::mouse_y);
 			void draw(gs_scalar ox = 0, gs_scalar oy = 0);
 			void update_text_pos(int state = -1);
+			void callback_execute(int event);
 	};
 }
 

@@ -20,16 +20,18 @@
 
 namespace gui
 {
-	class gui_skin{
+	class Skin{
 		public:
 			unsigned int id;
 			int button_style;
 			int window_style;
 			int toggle_style;
 			int slider_style;
+      int scrollbar_style;
 			int label_style;
+			int textbox_style;
 
-			gui_skin();
+			Skin();
 	};
 }
 

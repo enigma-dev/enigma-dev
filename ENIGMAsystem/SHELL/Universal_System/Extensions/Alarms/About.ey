@@ -2,7 +2,7 @@
 ---
 
 Name: Alarms
-ID: Alarms
+Identifier: Alarms
 Description: Adds the local alarm variable and alarm-related DND tiles.
 Build-date: 6/17/2011
 Icon: alarm.png

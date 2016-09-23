@@ -8,6 +8,7 @@ Target-platform: Windows
 # Some info about it
 path:
 make: make
+makeflags:
 cc: x86_64-w64-mingw32-gcc
 cxx: x86_64-w64-mingw32-g++
 defines: x86_64-w64-mingw32-cpp -dM -x c++ -E $blank
@@ -16,7 +17,7 @@ searchdirs-start: "#include <...> search starts here:"
 searchdirs-end: "End of search list."
 resources: $exe
 cppflags:
-cxxflags: -I../Additional/x86_64-w64-mingw32/include
+cxxflags: -std=c++11 -I../Additional/x86_64-w64-mingw32/include
 cflags:
 ldflags:
 links:

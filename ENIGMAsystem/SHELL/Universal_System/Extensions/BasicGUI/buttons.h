@@ -1,4 +1,4 @@
-/** Copyright (C) 2014 Harijs Grinbergs
+/** Copyright (C) 2014-2015 Harijs Grinbergs
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -21,6 +21,7 @@
 using std::array;
 
 #include "common.h"
+#include "parents.h"
 
 namespace enigma_user
 {
@@ -29,7 +30,7 @@ namespace enigma_user
 
 namespace gui
 {
-	class gui_button{
+	class Button{
 		public:
 			unsigned int id;
 			rect box;
@@ -39,18 +40,21 @@ namespace gui
 			bool visible = true;
 			bool active = false; //Is button pressed
 			bool togglable = false; //Is button a toggle button
-			int callback = -1; //Script to run when clicked
+			array<int,4> callback; //Script to run on event
 
 			int parent_id = -1; //ID of the parent of some kind (probably a window). It won't render with gui_draw_buttons() if it is.
 
       int style_id = -1; //The style we use
       int group_id = -1; //Groups allow making one button disable others
 
-			gui_button();
+			Button();
 			//Update all possible button states (hover, click, toggle etc.)
 			void update(gs_scalar ox = 0, gs_scalar oy = 0, gs_scalar tx = enigma_user::mouse_x, gs_scalar ty = enigma_user::mouse_y);
 			void draw(gs_scalar ox = 0, gs_scalar oy = 0);
 			void update_text_pos(int state = -1);
+			void callback_execute(int event);
+
+      Parent parenter;
 	};
 }
 

@@ -37,7 +37,7 @@ namespace enigma{
 int pr_curve_detail = 20;
 int pr_curve_mode = GL_LINE_STRIP;
 int pr_spline_points = 0;
-int pr_curve_width = 1;
+gs_scalar pr_curve_width = 1;
 
 struct splinePoint {
     gs_scalar x,y,al;
@@ -50,9 +50,9 @@ static std::stack< int > startedSplinesMode;
 namespace enigma_user
 {
 
-void draw_set_curve_width(int width)
+void draw_set_curve_width(gs_scalar width)
 {
-    pr_curve_width=width;
+    pr_curve_width = (width<1.0?1.0:width);
 }
 
 void draw_set_curve_mode(int mode)
@@ -62,7 +62,7 @@ void draw_set_curve_mode(int mode)
 
 void draw_set_curve_detail(int detail)
 {
-    pr_curve_detail = detail;
+    pr_curve_detail = (detail<1?1:detail);
 }
 
 void draw_bezier_quadratic(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3)
@@ -127,20 +127,53 @@ void draw_bezier_cubic_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar
     int col;
     gs_scalar x, y, al;
     float a2, b2, a = 1.0, b = 0.0, det = 1.0/(gs_scalar)pr_curve_detail;
-    draw_primitive_begin(pr_curve_mode);
-    for(int i = 0; i <= pr_curve_detail; ++i)
-    {
-        a2 = a*a; b2 = b*b;
-        x = x1*a2*a + x2*3*a2*b + x3*3*a*b2 + x4*b2*b;
-        y = y1*a2*a + y2*3*a2*b + y3*3*a*b2 + y4*b2*b;
-        al = al1 + (al2-al1)*b;
-        col = merge_color(c1, c2, b);
-        draw_vertex_color(x, y,col,al);
 
-        a -= det;
-        b = 1.0 - a;
+    if (pr_curve_width == 1){
+      draw_primitive_begin(pr_curve_mode);
+      for(int i = 0; i <= pr_curve_detail; ++i)
+      {
+          a2 = a*a; b2 = b*b;
+          x = x1*a2*a + x2*3*a2*b + x3*3*a*b2 + x4*b2*b;
+          y = y1*a2*a + y2*3*a2*b + y3*3*a*b2 + y4*b2*b;
+          al = al1 + (al2-al1)*b;
+          col = merge_color(c1, c2, b);
+          draw_vertex_color(x, y,col,al);
+
+          a -= det;
+          b = 1.0 - a;
+      }
+      draw_primitive_end();
+    }else{ //Thick line
+      gs_scalar dw = pr_curve_width/2.0;
+      gs_scalar px, py;
+      x = x1, y = y1;
+      a -= det;
+      b = 1.0 - a;
+      al = al1, col = c1;
+
+      draw_primitive_begin(pr_trianglestrip);
+      for(int i = 1; i <= pr_curve_detail; ++i)
+      {
+          a2 = a*a; b2 = b*b;
+          px = x, py = y;
+          x = x1*a2*a + x2*3*a2*b + x3*3*a*b2 + x4*b2*b;
+          y = y1*a2*a + y2*3*a2*b + y3*3*a*b2 + y4*b2*b;
+          double dir = fmod(atan2(py-y,x-px)+2*M_PI,2*M_PI);
+          double cv = cos(dir-M_PI/2.0), sv = -sin(dir-M_PI/2.0);
+          draw_vertex_color(px+dw*cv, py+dw*sv, col, al);
+          draw_vertex_color(px-dw*cv, py-dw*sv, col, al);
+
+          al = al1 + (al2-al1)*b;
+          col = merge_color(c1, c2, b);
+
+          draw_vertex_color(x+dw*cv, y+dw*sv, col, al);
+          draw_vertex_color(x-dw*cv, y-dw*sv, col, al);
+
+          a -= det;
+          b = 1.0 - a;
+      }
+      draw_primitive_end();
     }
-    draw_primitive_end();
 }
 
 //NOTICE:
@@ -172,7 +205,7 @@ gs_scalar draw_bezier_cubic_y(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scala
 }
 
 //The following function is used in other drawing functions for all splines
-//it takes 4 points. Two control points which are at the beggining and the end, and the two points which it actually draws through
+//it takes 4 points. Two control points which are at the beginning and the end, and the two points which it actually draws through
 //in the middle
 void draw_spline_part(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, gs_scalar x4, gs_scalar y4)
 {
@@ -239,7 +272,7 @@ void draw_spline3_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, 
     al1 = a1 + (a2-a1)*0.5;
     draw_primitive_begin(pr_curve_mode);
     //As I need 4 points to draw 1 line, then I will just take 2 control points from the existing ones
-    //Color and alpha is interpolated in the middle for now (so it doesn't take into account length of each seperate segment)
+    //Color and alpha is interpolated in the middle for now (so it doesn't take into account length of each separate segment)
     draw_spline_part_color(x1, y1, x1, y1, x2, y2, x3, y3, c1, col1, a1, al1);
     draw_spline_part_color(x1, y1, x2, y2, x3, y3, x3, y3, col1, c2, al1, a2);
     draw_primitive_end();
@@ -263,7 +296,7 @@ void draw_spline3c_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2,
     al1 = a1 + (a2-a1)*0.5;
     draw_primitive_begin(pr_curve_mode);
     //As I need 4 points to draw 1 line, then I will just take 2 control points from the existing ones
-    //Color and alpha is interpolated in the middle for now (so it doesn't take into account length of each seperate segment)
+    //Color and alpha is interpolated in the middle for now (so it doesn't take into account length of each separate segment)
     draw_spline_part_color(x1, y1, x2, y2, x3, y3, x4, y4, c1, col1, a1, al1);
     draw_spline_part_color(x2, y2, x3, y3, x4, y4, x5, y5, col1, c2, al1, a2);
     draw_primitive_end();
