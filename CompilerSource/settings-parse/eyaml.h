@@ -29,9 +29,8 @@
 #include <fstream>
 using std::string;
 
-
-typedef map<string, struct ey_base*>::iterator eyit;
-typedef pair<string, struct ey_base*> eypair;
+typedef std::map<string, struct ey_base*>::iterator eyit;
+typedef std::pair<string, struct ey_base*> eypair;
 
 struct ey_base { // A very vague container, representing something
   string name;  // Each one has a name, mostly to preserve case
@@ -58,7 +57,7 @@ struct ey_string: ey_base { // If it doesn't contain more named members, it's a 
 
 struct ey_data: ey_base // Contains multiple members
 {
-  map<string, ey_base*> values; // Members stored here
+  std::map<string, ey_base*> values; // Members stored here
   struct eylist { // Chronological storage and iteration
     ey_base *value; eylist *next; // Store a value and forward-pointer
     eylist(); eylist(eylist*);
@@ -66,8 +65,6 @@ struct ey_data: ey_base // Contains multiple members
   
   operator const char*(); // Implicitly return name when char* casted, i.e. for print
   struct ey_string &get(string); // Get the value of a scalar
-  bool exists(string); // Check if exists
-
   eyit find(string), // Get an iterator to an element by that name
        begin(), end(); // Iterator to first element and to end of data map (an invalid iterator)
   eylist* first(); // Get the first element defined chronologically
@@ -78,7 +75,7 @@ struct ey_data: ey_base // Contains multiple members
 
 typedef ey_data::eylist *eycit; // Quick access of chronological iterators
 
-ey_data parse_eyaml(istream &file, string fname = "");
+ey_data parse_eyaml(std::istream &file, string fname = "");
 ey_data parse_eyaml_str(string, string = "LGM Settings");
 
 ey_string &eyscalar(ey_base* x);

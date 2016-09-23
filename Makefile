@@ -13,5 +13,8 @@ Game:
 
 clean-game:
 	$(MAKE) -C ENIGMAsystem/SHELL clean
+	
+emake:
+	$(MAKE) -j 3 -C CommandLine/emake/
 
 
