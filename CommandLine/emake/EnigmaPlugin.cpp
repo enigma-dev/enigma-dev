@@ -66,7 +66,6 @@ int EnigmaPlugin::Init()
     plugin_Free = reinterpret_cast<void (*)()>(BindFunc(_handle, "libFree"));
     plugin_DefinitionsModified = reinterpret_cast<syntax_error* (*)(const char*, const char*)>(BindFunc(_handle, "definitionsModified"));
     plugin_SyntaxCheck = reinterpret_cast<syntax_error* (*)(int, const char**, const char*)>(BindFunc(_handle, "syntaxCheck"));
-    plugin_CompilerModified = reinterpret_cast<const char* (*)(const char*)>(BindFunc(_handle, "gccDefinePath"));
 
 
     CallBack ecb;
@@ -77,11 +76,6 @@ int EnigmaPlugin::Init()
     //plugin_SetMakeDirectory("");
 
     return PLUGIN_SUCCESS;
-}
-
-void EnigmaPlugin::SetCompiler(const char* def)
-{
-    plugin_CompilerModified(def);
 }
 
 void EnigmaPlugin::SetDefinitions(const char* def)
