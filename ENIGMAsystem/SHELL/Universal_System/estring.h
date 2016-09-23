@@ -38,7 +38,7 @@ size_t string_length(const char* str);
 #define string_byte_length(x) string_length(x)
 size_t string_length_utf8(string str);
 size_t string_length_utf8(const char* str);
-int string_pos(string substr,string str);
+size_t string_pos(string substr, string str);
 
 string string_format(double val, unsigned tot, unsigned dec);
 string string_copy(string str, int index,int count);
@@ -49,7 +49,7 @@ string string_delete(string str,int index,int count);
 string string_insert(string substr,string str,int index);
 string string_replace(string str,string substr,string newstr);
 string string_replace_all(string str,string substr,string newstr);
-int string_count(string substr, string str);
+size_t string_count(string substr, string str);
 
 string string_lower(string str);
 string string_upper(string str);
@@ -72,4 +72,3 @@ string filename_ext(string fname);
 string filename_change_ext(string fname, string newext);
 
 }
-

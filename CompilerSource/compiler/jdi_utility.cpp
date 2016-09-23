@@ -44,21 +44,22 @@ int referencers_varargs_at(ref_stack &refs) {
  of arguments in the overload.
  */
 void iterate_overloads(definition_function* d, unsigned &min, unsigned &max) {
-    bool variadic = false;
-    unsigned int local_min=0,local_max=0;
-    
-    const ref_stack &refs = ((definition_function*)d)->referencers;
-    const ref_stack::parameter_ct& params = ((ref_stack::node_func*)&refs.top())->params;
-    for (size_t i = 0; i < params.size(); ++i)
-        if (params[i].variadic or params[i].def == enigma_type__varargs) variadic = true;
-        else if (params[i].default_value) ++local_max; else ++local_min, ++local_max;
-    if (variadic) max = -1;
-    if (min > local_min) min = local_min;
-    if (max < local_max) max = local_max;
+  bool variadic = false;
+  unsigned int local_min=0,local_max=0;
+  
+  const ref_stack &refs = ((definition_function*)d)->referencers;
+  const ref_stack::parameter_ct& params = ((ref_stack::node_func*)&refs.top())->params;
+  for (size_t i = 0; i < params.size(); ++i)
+      if (params[i].variadic or params[i].def == enigma_type__varargs) variadic = true;
+      else if (params[i].default_value) ++local_max; else ++local_min, ++local_max;
+  if (variadic) max = -1;
+  if (min > local_min) min = local_min;
+  if (max < local_max) max = local_max;
 }
 
 void definition_parameter_bounds(definition *d, unsigned &min, unsigned &max) {
-  min = max = 0;
+  min = SIZE_MAX;
+  max = 0;
   
   if (!(d->flags & DEF_FUNCTION)) { cout << "Attempt to use " << d->toString() << " as function" << endl; return; }
     

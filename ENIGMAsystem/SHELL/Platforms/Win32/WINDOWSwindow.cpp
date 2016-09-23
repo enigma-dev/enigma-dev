@@ -21,6 +21,7 @@
 #include <windows.h>
 using namespace std;
 
+#include "Universal_System/estring.h" // For string_replace_all
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
 #include <unistd.h> //usleep
@@ -53,7 +54,7 @@ namespace enigma
         if (showBorder) {
             newlong |= WS_CAPTION;
             if (isSizeable)
-              newlong |= WS_SIZEBOX;
+              newlong |= WS_SIZEBOX | WS_MAXIMIZEBOX;
         }
         if (showIcons)
             newlong |= WS_SYSMENU;
@@ -63,7 +64,7 @@ namespace enigma
         // these two flags are necessary for extensions like Ultimate3D and GMOgre to render on top of the window
         return newlong | WS_CLIPCHILDREN | WS_CLIPSIBLINGS;
     }
-    
+
     void centerwindow() {
       int screen_width = GetSystemMetrics(SM_CXSCREEN);
       int screen_height = GetSystemMetrics(SM_CYSCREEN);
@@ -128,9 +129,9 @@ namespace enigma
             }
              clampwindow();
         } else {
-          SetWindowPos(hWnd, NULL, 0, 0, parWidth, parHeight, SWP_NOACTIVATE); 
+          SetWindowPos(hWnd, NULL, 0, 0, parWidth, parHeight, SWP_NOACTIVATE);
         }
-      
+
     }
 }
 
@@ -263,7 +264,7 @@ void window_default(bool center_size)
   if (center_size) {
     center = (xm != enigma::windowWidth || ym != enigma::windowHeight);
   }
-  
+
   enigma::windowWidth = enigma::regionWidth = xm;
   enigma::windowHeight = enigma::regionHeight = ym;
   if (center)
@@ -372,9 +373,19 @@ void window_set_minimized(bool minimized)
     ShowWindow(enigma::hWnd,(minimized?SW_MINIMIZE:SW_RESTORE));
 }
 
+void window_set_maximized(bool maximized)
+{
+    ShowWindow(enigma::hWnd,(maximized?SW_MAXIMIZE:SW_RESTORE));
+}
+
 bool window_get_minimized()
 {
     return IsIconic(enigma::hWnd);
+}
+
+bool window_get_maximized()
+{
+    return IsZoomed (enigma::hWnd);
 }
 
 void window_set_stayontop(bool stay)
@@ -428,7 +439,7 @@ void window_set_region_size(int w, int h, bool adaptwindow)
     enigma::regionHeight = h;
     enigma::windowAdapt = adaptwindow;
     enigma::setwindowsize();
-    window_center();
+    //window_center();
 }
 
 int window_get_region_width()
@@ -799,7 +810,7 @@ int window_set_cursor(int c)
           enigma::currentCursor = IDC_SIZEALL;
           break;
   }
-  
+
   return SendMessage(enigma::hWnd, WM_SETCURSOR, (WPARAM)enigma::hWnd, MAKELPARAM(HTCLIENT, WM_MOUSEMOVE));
 }
 
@@ -1018,6 +1029,7 @@ string clipboard_get_text()
 
 void clipboard_set_text(string text)
 {
+  text = string_replace_all(text, "\n", "\r\n"); //Otherwise newlines don't work
 	HGLOBAL hGlobal, hgBuffer;
 	if (!OpenClipboard(enigma::hWnd)) return;
 	EmptyClipboard();
