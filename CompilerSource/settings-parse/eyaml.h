@@ -65,6 +65,7 @@ struct ey_data: ey_base // Contains multiple members
   
   operator const char*(); // Implicitly return name when char* casted, i.e. for print
   struct ey_string &get(string); // Get the value of a scalar
+  bool exists(string); // Check if exists
   eyit find(string), // Get an iterator to an element by that name
        begin(), end(); // Iterator to first element and to end of data map (an invalid iterator)
   eylist* first(); // Get the first element defined chronologically
