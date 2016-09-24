@@ -1,4 +1,4 @@
-/** Copyright (C) 2014 Harijs Grinbergs
+/** Copyright (C) 2014-2015 Harijs Grinbergs
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,11 +15,11 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include <algorithm>
 #include <unordered_map>
 #include <string>
 using std::string;
 using std::unordered_map;
-using std::pair;
 
 #include "Universal_System/var4.h"
 #include "Universal_System/CallbackArrays.h" //For mouse_check_button
@@ -28,7 +28,8 @@ using std::pair;
 #include "Graphics_Systems/General/GSfont.h"
 #include "Graphics_Systems/General/GScolors.h"
 
-#include "include.h"
+#include "elements.h"
+//#include "include.h"
 #include "groups.h"
 
 //Groups
@@ -36,33 +37,79 @@ using std::pair;
 #include "toggles.h"
 
 namespace gui{
-
-	unordered_map<unsigned int, gui_group> gui_groups;
-	unsigned int gui_groups_maxid = 0;
-
-  extern unordered_map<unsigned int, gui_button> gui_buttons;
-	extern unordered_map<unsigned int, gui_toggle> gui_toggles;
+	extern unsigned int gui_elements_maxid;
+  extern unsigned int gui_data_elements_maxid;
+  extern unordered_map<unsigned int, Element> gui_elements;
+  extern unordered_map<unsigned int, DataElement> gui_data_elements;
 }
 
 namespace enigma_user
 {
 	int gui_group_create(){
-		gui::gui_groups.insert(pair<unsigned int, gui::gui_group >(gui::gui_groups_maxid, gui::gui_group()));
-		gui::gui_groups[gui::gui_groups_maxid].id = gui::gui_groups_maxid;
-		return gui::gui_groups_maxid++;
+		gui::gui_data_elements.emplace(gui::gui_data_elements_maxid, gui::Group());
+		gui::Group &g = gui::gui_data_elements[gui::gui_data_elements_maxid];
+		g.id = gui::gui_data_elements_maxid;
+		return gui::gui_data_elements_maxid++;
 	}
 
+  int gui_group_duplicate(int group){
+    get_data_elementv(gro,gui::Group,gui::GUI_TYPE::GROUP,group,-1);
+    gui::gui_data_elements.emplace(gui::gui_data_elements_maxid, gro);
+    gui::gui_data_elements[gui::gui_data_elements_maxid].id = gui::gui_data_elements_maxid;
+    return gui::gui_data_elements_maxid++;
+  }
+
 	void gui_group_destroy(int id){
-		gui::gui_groups.erase(gui::gui_groups.find(id));
+    check_data_element(gui::GUI_TYPE::GROUP,id);
+		gui::gui_data_elements.erase(gui::gui_data_elements.find(id));
 	}
 
   void gui_group_add_button(int id, int bid){
-    gui::gui_groups[id].group_buttons.push_back(bid);
-    gui::gui_buttons[bid].group_id = id;
+    get_element(but,gui::Button,gui::GUI_TYPE::BUTTON,bid);
+    get_data_element(gro,gui::Group,gui::GUI_TYPE::GROUP,id);
+    gro.group_buttons.push_back(bid);
+    but.group_id = id;
   }
 
   void gui_group_add_toggle(int id, int tid){
-    gui::gui_groups[id].group_toggles.push_back(tid);
-    gui::gui_toggles[tid].group_id = id;
+    get_element(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,tid);
+    get_data_element(gro,gui::Group,gui::GUI_TYPE::GROUP,id);
+    gro.group_toggles.push_back(tid);
+    tog.group_id = id;
+  }
+
+  void gui_group_add_window(int id, int wid){
+    get_data_element(gro,gui::Group,gui::GUI_TYPE::GROUP,id);
+    gro.group_windows.push_back(wid);
+  }
+
+  void gui_group_remove_button(int id, int bid){
+    get_data_element(gro,gui::Group,gui::GUI_TYPE::GROUP,id);
+    auto it = find(gro.group_buttons.begin(), gro.group_buttons.end(), bid);
+    if (it != gro.group_buttons.end()){
+      get_element(but,gui::Button,gui::GUI_TYPE::BUTTON,bid);
+      gro.group_buttons.erase(it);
+      but.parent_id = -1;
+    }
+  }
+
+  void gui_group_remove_toggle(int id, int tid){
+    get_data_element(gro,gui::Group,gui::GUI_TYPE::GROUP,id);
+    auto it = find(gro.group_toggles.begin(), gro.group_toggles.end(), tid);
+    if (it != gro.group_toggles.end()){
+      get_element(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,tid);
+      gro.group_toggles.erase(it);
+      tog.parent_id = -1;
+    }
+  }
+
+  void gui_group_remove_window(int id, int wid){
+    get_data_element(gro,gui::Group,gui::GUI_TYPE::GROUP,id);
+    auto it = find(gro.group_windows.begin(), gro.group_windows.end(), wid);
+    if (it != gro.group_windows.end()){
+      get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,wid);
+      gro.group_windows.erase(it);
+      win.parent_id = -1;
+    }
   }
 }

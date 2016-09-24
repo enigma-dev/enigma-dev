@@ -16,6 +16,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include <limits>
 #include <stdlib.h>
 #include <cmath>
 #include "var4.h"
@@ -25,6 +26,8 @@
 // around contributors' bad habits, not because of developers' bad habits.
 #define INCLUDED_FROM_SHELLMAIN Not really.
 #include "mathnc.h"
+
+#define M_PI    3.14159265358979323846
 
 //overloading
 
@@ -55,6 +58,7 @@ namespace enigma_user
 
   int sign(ma_scalar x)                { return (x>0)-(x<0); }
   int cmp(ma_scalar x,ma_scalar y)        { return (x>y)-(x<y); }
+  bool equal(ma_scalar x, ma_scalar y)    { return (::fabs(x-y) <= std::numeric_limits<ma_scalar>::epsilon() * ::fmax(ma_scalar(1.0), ::fmax(::fabs(x), ::fabs(y)))); }
   ma_scalar frac(ma_scalar x)             { return x-(int)x;    }
 
   ma_scalar degtorad(ma_scalar x)         { return x*(M_PI/180.0);}
@@ -71,12 +75,17 @@ namespace enigma_user
   ma_scalar point_distance_3d(ma_scalar x1,ma_scalar y1,ma_scalar z1,ma_scalar x2,
   ma_scalar y2,ma_scalar z2)  { return ::sqrt(sqr(x1-x2) + sqr(y1-y2) + sqr(z1-z2)); }
   
+  ma_scalar triangle_area(ma_scalar x1, ma_scalar y1, ma_scalar x2, ma_scalar y2, ma_scalar x3, ma_scalar y3){
+    return fabs(((x2 - x1)*(y3 - y1) - (x3 - x1)*(y2 - y1))/2.0);
+  }
+
+  
   bool point_in_circle(ma_scalar px, ma_scalar py, ma_scalar x1, ma_scalar y1, ma_scalar rad) {
-	return (((px-x1)*(px-x1)+(py-y1)*(py-y1))<rad*rad);
+    return (((px-x1)*(px-x1)+(py-y1)*(py-y1))<rad*rad);
   }
   
   bool point_in_rectangle(ma_scalar px, ma_scalar py, ma_scalar x1, ma_scalar y1, ma_scalar x2, ma_scalar y2) {
-	return px > x1 && px < x2 && py > y1 && py < y2; 
+    return px > x1 && px < x2 && py > y1 && py < y2; 
   }
   
   bool point_in_triangle(ma_scalar px, ma_scalar py, ma_scalar x1, ma_scalar y1, ma_scalar x2, ma_scalar y2, ma_scalar x3, ma_scalar y3) {
@@ -198,6 +207,16 @@ namespace enigma_user
  
     return 0;
   }
+
+  int ray_sphere_intersect(ma_scalar xc, ma_scalar yc, ma_scalar zc, ma_scalar xs, ma_scalar ys, ma_scalar zs, ma_scalar xd, ma_scalar yd, ma_scalar zd, ma_scalar r){
+    ma_scalar b = 2*(xd*(xs-xc)+yd*(ys-yc)+zd*(zs-zc));
+    ma_scalar c = xs*xs - 2*xs*xc+xc*xc+ys*ys - 2*ys*yc+yc*yc+zs*zs - 2*zs*zc+zc*zc-r*r;
+    ma_scalar det = (b*b-4*c);
+    if (det < 0.0) return 0;
+    else if (equal(det, 0.0) == 1) return 1;
+    else return 2; 
+  }
+
   
   ma_scalar dot_product(ma_scalar x1,ma_scalar y1,ma_scalar x2,ma_scalar y2) { return (x1 * x2 + y1 * y2); }
   ma_scalar dot_product_3d(ma_scalar x1,ma_scalar y1,ma_scalar z1,ma_scalar x2,ma_scalar y2, ma_scalar z2) { return (x1 * x2 + y1 * y2 + z1 * z2); }
@@ -227,7 +246,7 @@ namespace enigma_user
     z2 = z2/length;
     return (x1 * x2 + y1 * y2 + z1 * z2); 
   }
-  ma_scalar lerp(ma_scalar x, ma_scalar y, ma_scalar a) { return x + ((y-x)*a); }
+  ma_scalar lerp(ma_scalar x, ma_scalar y, ma_scalar a) { return std::fma(a, y-x, x); }
   ma_scalar clamp(ma_scalar val, ma_scalar min, ma_scalar max) {
       if (val < min) { return min; }
       if (val > max) { return max; }

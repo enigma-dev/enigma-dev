@@ -1,6 +1,7 @@
 /** Copyright (C) 2008-2011 IsmAvatar <cmagicj@nni.com>, Josh Ventura
 *** Copyright (C) 2013 Robert B. Colton
 *** Copyright (C) 2014 Seth N. Hetu
+*** Copyright (C) 2015 Harijs Grinbergs
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -24,6 +25,7 @@
 #include <stdio.h>
 #include <string>
 #include <cstdlib>
+#include <stdlib.h> //getenv and system
 
 #include "Platforms/platforms_mandatory.h"
 
@@ -49,7 +51,7 @@ namespace enigma_user {
 namespace enigma
 {
   int game_return = 0;
-  extern char keymap[512];
+  extern unsigned char keymap[512];
   void ENIGMA_events(void); //TODO: Synchronize this with Windows by putting these two in a single header.
   bool gameWindowFocused = false;
   extern int windowWidth, windowHeight;
@@ -411,6 +413,46 @@ string parameter_string(int num) {
 
 int parameter_count() {
   return enigma::parameterc;
+}
+
+void execute_shell(string fname, string args)
+{
+  if (system(NULL)) {
+    system((fname + args + " &").c_str());
+  } else {
+    printf("execute_shell cannot be used as there is no command processor!"); 
+    return; 
+  }
+}
+
+void execute_shell(string operation, string fname, string args)
+{
+  if (system(NULL)) {
+    system((fname + args + " &").c_str());
+  } else {
+    printf("execute_shell cannot be used as there is no command processor!"); 
+    return; 
+  }
+}
+
+void execute_program(string operation, string fname, string args, bool wait)
+{
+  if (system(NULL)) {
+    system((fname + args + (wait?" &":"")).c_str());
+  } else {
+    printf("execute_program cannot be used as there is no command processor!"); 
+    return; 
+  }
+}
+
+void execute_program(string fname, string args, bool wait)
+{
+  if (system(NULL)) {
+    system((fname + args + (wait?" &":"")).c_str());
+  } else {
+    printf("execute_program cannot be used as there is no command processor!"); 
+    return; 
+  }
 }
 
 void game_end(int ret) {

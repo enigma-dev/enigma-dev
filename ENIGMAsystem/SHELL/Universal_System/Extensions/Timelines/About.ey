@@ -2,7 +2,7 @@
 ---
 
 Name: Timelines
-ID: Timelines
+Identifier: Timelines
 Description: Adds timeline local variables and functions.
 Icon: timeline.png
 

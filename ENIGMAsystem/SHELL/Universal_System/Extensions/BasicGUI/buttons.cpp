@@ -1,4 +1,4 @@
-/** Copyright (C) 2014 Harijs Grinbergs
+/** Copyright (C) 2014-2015 Harijs Grinbergs
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -19,7 +19,6 @@
 #include <string>
 using std::string;
 using std::unordered_map;
-using std::pair;
 
 #include "Universal_System/var4.h"
 #include "Universal_System/CallbackArrays.h" //For mouse_check_button
@@ -29,39 +28,52 @@ using std::pair;
 #include "Graphics_Systems/General/GSfont.h"
 #include "Graphics_Systems/General/GScolors.h"
 
+#include "elements.h"
 #include "styles.h"
 #include "skins.h"
 #include "groups.h"
 #include "toggles.h"
 #include "buttons.h"
+#include "windows.h"
 #include "include.h"
 #include "common.h"
 
 namespace gui
 {
-  unordered_map<unsigned int, gui_button> gui_buttons;
-	unsigned int gui_buttons_maxid = 0;
+	extern unsigned int gui_elements_maxid;
+  extern unsigned int gui_data_elements_maxid;
+  extern unordered_map<unsigned int, Element> gui_elements;
+  extern unordered_map<unsigned int, DataElement> gui_data_elements;
 
 	extern int gui_bound_skin;
-	extern unordered_map<unsigned int, gui_skin> gui_skins;
-	extern unordered_map<unsigned int, gui_style> gui_styles;
-  extern unordered_map<unsigned int, gui_group> gui_groups;
-  extern unordered_map<unsigned int, gui_toggle> gui_toggles;
-	extern unsigned int gui_skins_maxid;
 	extern unsigned int gui_style_button;
 
 	extern bool windowStopPropagation;
 
 	//Implements button class
-	gui_button::gui_button(){
+	Button::Button(){
 	  style_id = gui_style_button; //Default style
 	  enigma_user::gui_style_set_font_halign(style_id, enigma_user::gui_state_all, enigma_user::fa_center);
     enigma_user::gui_style_set_font_valign(style_id, enigma_user::gui_state_all, enigma_user::fa_middle);
+    callback.fill(-1); //Default callbacks don't exist (so it doesn't call any script)
+	}
+
+	void Button::callback_execute(int event){
+    if (callback[event] != -1){
+      enigma_user::script_execute(callback[event], id, active, state, event);
+    }
 	}
 
 	//Update all possible button states (hover, click, toggle etc.)
-	void gui_button::update(gs_scalar ox, gs_scalar oy, gs_scalar tx, gs_scalar ty){
-		if (box.point_inside(tx-ox,ty-oy) && gui::windowStopPropagation == false){
+	void Button::update(gs_scalar ox, gs_scalar oy, gs_scalar tx, gs_scalar ty){
+	  //Update children
+	  parenter.update_children(ox+box.x, oy+box.y);
+
+    get_element(win,gui::Window,gui::GUI_TYPE::WINDOW,parent_id);
+    ///TODO(harijs) - This box check needs to take into account multi-level parenting
+	  bool pacheck = (parent_id == -1 || (parent_id != -1 && (win.stencil_mask == false || win.box.point_inside(tx,ty))));
+		if (gui::windowStopPropagation == false && pacheck == true && box.point_inside(tx-ox,ty-oy)){
+      callback_execute(enigma_user::gui_event_hover);
       gui::windowStopPropagation = true;
 			if (enigma_user::mouse_check_button_pressed(enigma_user::mb_left)){
         if (active == false){
@@ -69,6 +81,7 @@ namespace gui
         }else{
           state = enigma_user::gui_state_on_active;
         }
+        callback_execute(enigma_user::gui_event_pressed);
 			}else{
 				if (state != enigma_user::gui_state_active && state != enigma_user::gui_state_on_active){
 					if (active == false){
@@ -83,9 +96,7 @@ namespace gui
 						}else{
 							active = true;
 						}
-						if (callback != -1){
-							enigma_user::script_execute(callback, id, active);
-						}
+            callback_execute(enigma_user::gui_event_released);
 						if (togglable == false){
 							active = false;
 						}
@@ -95,11 +106,16 @@ namespace gui
 						}else{
 							state = enigma_user::gui_state_on_hover;
 							if (group_id != -1){ //Groups disable any other active element
-                for (const auto &b : gui::gui_groups[group_id].group_buttons){
-                  if (b != id) { gui_buttons[b].active = false; }
+                get_data_element(gro,gui::Group,gui::GUI_TYPE::GROUP,group_id);
+                for (const auto &b : gro.group_buttons){
+                  if (b != id) {
+                    get_element(but,gui::Button,gui::GUI_TYPE::BUTTON,b);
+                    but.active = false;
+                  }
                 }
-                for (const auto &t : gui::gui_groups[group_id].group_toggles){
-                  gui_toggles[t].active = false;
+                for (const auto &t : gro.group_toggles){
+                  get_element(tog,gui::Toggle,gui::GUI_TYPE::TOGGLE,t);
+                  tog.active = false;
                 }
 							}
 						}
@@ -116,32 +132,57 @@ namespace gui
 		}
 	}
 
-	void gui_button::draw(gs_scalar ox, gs_scalar oy){
+	void Button::draw(gs_scalar ox, gs_scalar oy){
 		//Draw button
-    if (gui::gui_styles[style_id].sprites[state] != -1){
-      enigma_user::draw_sprite_padded(gui::gui_styles[style_id].sprites[state],-1,gui::gui_styles[style_id].border.left,gui::gui_styles[style_id].border.top,gui::gui_styles[style_id].border.right,gui::gui_styles[style_id].border.bottom,ox + box.x,oy + box.y,ox + box.x+box.w,oy + box.y+box.h);
+    get_data_element(sty,gui::Style,gui::GUI_TYPE::STYLE,style_id);
+    if (sty.sprites[state] != -1){
+      if (sty.border.zero == true){
+        enigma_user::draw_sprite_stretched(sty.sprites[state],-1,
+                                           ox + box.x,
+                                           oy + box.y,
+                                           box.w,
+                                           box.h,
+                                           sty.sprite_styles[state].color,
+                                           sty.sprite_styles[state].alpha);
+      }else{
+        enigma_user::draw_sprite_padded(sty.sprites[state],-1,
+                                      sty.border.left,
+                                      sty.border.top,
+                                      sty.border.right,
+                                      sty.border.bottom,
+                                      ox + box.x,
+                                      oy + box.y,
+                                      ox + box.x+box.w,
+                                      oy + box.y+box.h,
+                                      sty.sprite_styles[state].color,
+                                      sty.sprite_styles[state].alpha);
+      }
 		}
 
 		//Draw text
-		gui::gui_styles[style_id].font_styles[state].use();
+    if (text.empty() == false){
+  		sty.font_styles[state].use();
 
-    gs_scalar textx = 0.0, texty = 0.0;
-    switch (gui::gui_styles[style_id].font_styles[state].halign){
-      case enigma_user::fa_left: textx = box.x+gui::gui_styles[style_id].padding.left; break;
-      case enigma_user::fa_center: textx = box.x+box.w/2.0; break;
-      case enigma_user::fa_right: textx = box.x+box.w-gui::gui_styles[style_id].padding.right; break;
+      gs_scalar textx = 0.0, texty = 0.0;
+      switch (sty.font_styles[state].halign){
+        case enigma_user::fa_left: textx = box.x+sty.padding.left; break;
+        case enigma_user::fa_center: textx = box.x+box.w/2.0; break;
+        case enigma_user::fa_right: textx = box.x+box.w-sty.padding.right; break;
+      }
+
+      switch (sty.font_styles[state].valign){
+        case enigma_user::fa_top: texty = box.y+sty.padding.top; break;
+        case enigma_user::fa_middle: texty = box.y+box.h/2.0; break;
+        case enigma_user::fa_bottom: texty = box.y+box.h-sty.padding.bottom; break;
+      }
+
+  		enigma_user::draw_text(ox + textx,oy + texty,text);
     }
-
-    switch (gui::gui_styles[style_id].font_styles[state].valign){
-      case enigma_user::fa_top: texty = box.y+gui::gui_styles[style_id].padding.top; break;
-      case enigma_user::fa_middle: texty = box.y+box.h/2.0; break;
-      case enigma_user::fa_bottom: texty = box.y+box.h-gui::gui_styles[style_id].padding.bottom; break;
-    }
-
-		enigma_user::draw_text(ox + textx,oy + texty,text);
+		//Draw children
+		parenter.draw_children(ox+box.x,oy+box.y);
 	}
 
-	void gui_button::update_text_pos(int state){
+	void Button::update_text_pos(int state){
 	  //gui::gui_styles[style_id].update_text_pos(box, state);
 	}
 }
@@ -150,108 +191,308 @@ namespace enigma_user
 {
 	int gui_button_create(){
 		if (gui::gui_bound_skin == -1){ //Add default one
-			gui::gui_buttons.insert(pair<unsigned int, gui::gui_button >(gui::gui_buttons_maxid, gui::gui_button()));
+			gui::gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(gui::gui_elements_maxid), std::forward_as_tuple(gui::Button(), gui::gui_elements_maxid));
 		}else{
-			gui::gui_buttons.insert(pair<unsigned int, gui::gui_button >(gui::gui_buttons_maxid, gui::gui_buttons[gui::gui_skins[gui::gui_bound_skin].button_style]));
+      get_data_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,gui::gui_bound_skin,-1);
+      get_elementv(but,gui::Button,gui::GUI_TYPE::BUTTON,ski.button_style,-1);
+      gui::gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(gui::gui_elements_maxid), std::forward_as_tuple(but, gui::gui_elements_maxid));
 		}
-		gui::gui_buttons[gui::gui_buttons_maxid].visible = true;
-		gui::gui_buttons[gui::gui_buttons_maxid].id = gui::gui_buttons_maxid;
-		return (gui::gui_buttons_maxid++);
+		gui::Button &b = gui::gui_elements[gui::gui_elements_maxid];
+		b.visible = true;
+		b.id = gui::gui_elements_maxid;
+		return (gui::gui_elements_maxid++);
 	}
 
 	int gui_button_create(gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h, string text){
 		if (gui::gui_bound_skin == -1){ //Add default one
-			gui::gui_buttons.insert(pair<unsigned int, gui::gui_button >(gui::gui_buttons_maxid, gui::gui_button()));
+			gui::gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(gui::gui_elements_maxid), std::forward_as_tuple(gui::Button(), gui::gui_elements_maxid));
 		}else{
-			gui::gui_buttons.insert(pair<unsigned int, gui::gui_button >(gui::gui_buttons_maxid, gui::gui_buttons[gui::gui_skins[gui::gui_bound_skin].button_style]));
+      get_data_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,gui::gui_bound_skin,-1);
+      get_elementv(but,gui::Button,gui::GUI_TYPE::BUTTON,ski.button_style,-1);
+      gui::gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(gui::gui_elements_maxid), std::forward_as_tuple(but, gui::gui_elements_maxid));
 		}
-		gui::gui_buttons[gui::gui_buttons_maxid].visible = true;
-		gui::gui_buttons[gui::gui_buttons_maxid].id = gui::gui_buttons_maxid;
-		gui::gui_buttons[gui::gui_buttons_maxid].box.set(x, y, w, h);
-		gui::gui_buttons[gui::gui_buttons_maxid].text = text;
-		gui::gui_buttons[gui::gui_buttons_maxid].update_text_pos();
-		return (gui::gui_buttons_maxid++);
+    gui::Button &b = gui::gui_elements[gui::gui_elements_maxid];
+		b.visible = true;
+		b.id = gui::gui_elements_maxid;
+		b.box.set(x, y, w, h);
+		b.text = text;
+		b.update_text_pos();
+		return (gui::gui_elements_maxid++);
 	}
+
+  int gui_button_duplicate(int id){
+    get_elementv(but,gui::Button,gui::GUI_TYPE::BUTTON,id,-1);
+    gui::gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(gui::gui_elements_maxid), std::forward_as_tuple(but, gui::gui_elements_maxid));
+    gui::gui_elements[gui::gui_elements_maxid].id = gui::gui_elements_maxid;
+    gui::Button &b = gui::gui_elements[gui::gui_elements_maxid];
+    b.id = gui::gui_elements_maxid;
+    b.parent_id = -1; //We cannot duplicate parenting for now
+    return gui::gui_elements_maxid++;
+  }
 
 	void gui_button_destroy(int id){
-		gui::gui_buttons.erase(gui::gui_buttons.find(id));
+	  get_element(but,gui::Button,gui::GUI_TYPE::BUTTON,id);
+    if (but.parent_id != -1){
+      gui_window_remove_button(but.parent_id, id);
+	  }
+		gui::gui_elements.erase(gui::gui_elements.find(id));
 	}
 
+  ///Setters
 	void gui_button_set_text(int id, string text){
-		gui::gui_buttons[id].text = text;
+	  get_element(but,gui::Button,gui::GUI_TYPE::BUTTON,id);
+		but.text = text;
 	}
 
 	void gui_button_set_position(int id, gs_scalar x, gs_scalar y){
-		gui::gui_buttons[id].box.x = x;
-		gui::gui_buttons[id].box.y = y;
+    get_element(but,gui::Button,gui::GUI_TYPE::BUTTON,id);
+		but.box.x = x;
+		but.box.y = y;
 	}
 
   void gui_button_set_size(int id, gs_scalar w, gs_scalar h){
-		gui::gui_buttons[id].box.w = w;
-		gui::gui_buttons[id].box.h = h;
-		gui::gui_buttons[id].update_text_pos();
+    get_element(but,gui::Button,gui::GUI_TYPE::BUTTON,id);
+		but.box.w = w;
+		but.box.h = h;
+		but.update_text_pos();
 	}
 
-	void gui_button_set_callback(int id, int script_id){
-		gui::gui_buttons[id].callback = script_id;
+  void gui_button_set_callback(int id, int event, int script_id){
+    get_element(but,gui::Button,gui::GUI_TYPE::BUTTON,id);
+    if (event == enigma_user::gui_event_all){
+      but.callback.fill(script_id);
+	  }else{
+      but.callback[event] = script_id;
+	  }
 	}
 
   void gui_button_set_style(int id, int style_id){
-    gui::gui_buttons[id].style_id = (style_id != -1? style_id : gui::gui_style_button);
+    get_element(but,gui::Button,gui::GUI_TYPE::BUTTON,id);
+    check_data_element(gui::GUI_TYPE::STYLE, style_id);
+    but.style_id = (style_id != -1? style_id : gui::gui_style_button);
   }
-
-  int gui_button_get_style(int id){
-    return gui::gui_buttons[id].style_id;
-  }
-
-	int gui_button_get_state(int id){
-		return gui::gui_buttons[id].state;
-	}
-
-	bool gui_button_get_active(int id){
-		return gui::gui_buttons[id].active;
-	}
 
   void gui_button_set_active(int id, bool active){
-		gui::gui_buttons[id].active = active;
+    get_element(but,gui::Button,gui::GUI_TYPE::BUTTON,id);
+		but.active = active;
 	}
 
 	void gui_button_set_togglable(int id, bool togglable){
-		gui::gui_buttons[id].togglable = togglable;
+    get_element(but,gui::Button,gui::GUI_TYPE::BUTTON,id);
+		but.togglable = togglable;
 	}
 
 	void gui_button_set_visible(int id, bool visible){
-		gui::gui_buttons[id].visible = visible;
+    get_element(but,gui::Button,gui::GUI_TYPE::BUTTON,id);
+		but.visible = visible;
 	}
 
+	///Getters
+  int gui_button_get_style(int id){
+    get_elementv(but,gui::Button,gui::GUI_TYPE::BUTTON,id,-1);
+    return but.style_id;
+  }
+
+	int gui_button_get_state(int id){
+    get_elementv(but,gui::Button,gui::GUI_TYPE::BUTTON,id,-1);
+		return but.state;
+	}
+
+	bool gui_button_get_active(int id){
+    get_elementv(but,gui::Button,gui::GUI_TYPE::BUTTON,id,false);
+		return but.active;
+	}
+
+  bool gui_button_get_togglable(int id){
+    get_elementv(but,gui::Button,gui::GUI_TYPE::BUTTON,id,false);
+    return but.togglable;
+  }
+
+	bool gui_button_get_visible(int id){
+    get_elementv(but,gui::Button,gui::GUI_TYPE::BUTTON,id,false);
+    return but.visible;
+	}
+
+  int gui_button_get_callback(int id, int event){
+    get_elementv(but,gui::Button,gui::GUI_TYPE::BUTTON,id,-1);
+    return but.callback[event];
+  }
+
+  int gui_button_get_parent(int id){
+    get_elementv(but,gui::Button,gui::GUI_TYPE::BUTTON,id,-1);
+    return but.parent_id;
+  }
+
+  gs_scalar gui_button_get_width(int id){
+    get_elementv(but,gui::Button,gui::GUI_TYPE::BUTTON,id,-1);
+    return but.box.w;
+  }
+
+  gs_scalar gui_button_get_height(int id){
+    get_elementv(but,gui::Button,gui::GUI_TYPE::BUTTON,id,-1);
+    return but.box.h;
+  }
+
+	gs_scalar gui_button_get_x(int id){
+    get_elementv(but,gui::Button,gui::GUI_TYPE::BUTTON,id,-1);
+    return but.box.x;
+  }
+
+	gs_scalar gui_button_get_y(int id){
+    get_elementv(but,gui::Button,gui::GUI_TYPE::BUTTON,id,-1);
+    return but.box.y;
+  }
+
+  string gui_button_get_text(int id){
+    get_elementv(but,gui::Button,gui::GUI_TYPE::BUTTON,id,"");
+    return but.text;
+  }
+
+  ///Drawers
 	void gui_button_draw(int id){
-		unsigned int phalign = enigma_user::draw_get_halign();
-		unsigned int pvalign = enigma_user::draw_get_valign();
-		int pcolor = enigma_user::draw_get_color();
-		gs_scalar palpha = enigma_user::draw_get_alpha();
-    gui::gui_buttons[id].update();
-		gui::gui_buttons[id].draw();
-		enigma_user::draw_set_halign(phalign);
-		enigma_user::draw_set_valign(pvalign);
-		enigma_user::draw_set_color(pcolor);
-		enigma_user::draw_set_alpha(palpha);
+    get_element(but,gui::Button,gui::GUI_TYPE::BUTTON,id);
+    gui::font_style psty = gui::get_current_draw_state();
+    but.update();
+		but.draw();
+		gui::set_current_draw_state(psty);
 	}
 
 	void gui_buttons_draw(){
-		unsigned int phalign = enigma_user::draw_get_halign();
-		unsigned int pvalign = enigma_user::draw_get_valign();
-		int pcolor = enigma_user::draw_get_color();
-		gs_scalar palpha = enigma_user::draw_get_alpha();
-		for (auto &b : gui::gui_buttons){
-			if (b.second.visible == true && b.second.parent_id == -1){
-      	b.second.update();
-				b.second.draw();
-			}
+    gui::font_style psty = gui::get_current_draw_state();
+		for (auto &b : gui::gui_elements){
+		  ///TODO(harijs) - THIS NEEDS TO BE A LOT PRETTIER (now it does lookup twice)
+      if (b.second.type == gui::GUI_TYPE::BUTTON){
+        get_element(but,gui::Button,gui::GUI_TYPE::BUTTON,b.first);
+        if (but.visible == true && but.parent_id == -1){
+          but.update();
+          but.draw();
+        }
+      }
 		}
-		enigma_user::draw_set_halign(phalign);
-		enigma_user::draw_set_valign(pvalign);
-		enigma_user::draw_set_color(pcolor);
-		enigma_user::draw_set_alpha(palpha);
+		gui::set_current_draw_state(psty);
 	}
+
+	///Parenting
+  void gui_button_add_button(int id, int bid){
+    get_element(ele,gui::Button,gui::GUI_TYPE::BUTTON,id);
+    ele.parenter.button_add(bid);
+  }
+
+  void gui_button_add_toggle(int id, int tid){
+    get_element(ele,gui::Button,gui::GUI_TYPE::BUTTON,id);
+    ele.parenter.toggle_add(tid);
+  }
+
+  void gui_button_add_slider(int id, int sid){
+    get_element(ele,gui::Button,gui::GUI_TYPE::BUTTON,id);
+    ele.parenter.slider_add(sid);
+  }
+
+  void gui_button_add_scrollbar(int id, int sid){
+    get_element(ele,gui::Button,gui::GUI_TYPE::BUTTON,id);
+    ele.parenter.scrollbar_add(sid);
+  }
+
+  void gui_button_add_label(int id, int lid){
+    get_element(ele,gui::Button,gui::GUI_TYPE::BUTTON,id);
+    ele.parenter.label_add(lid);
+  }
+
+  void gui_button_add_window(int id, int wid){
+    get_element(ele,gui::Button,gui::GUI_TYPE::BUTTON,id);
+    ele.parenter.window_add(wid);
+  }
+
+  void gui_button_remove_button(int id, int bid){
+    get_element(ele,gui::Button,gui::GUI_TYPE::BUTTON,id);
+    ele.parenter.button_remove(bid);
+  }
+
+  void gui_button_remove_toggle(int id, int tid){
+    get_element(ele,gui::Button,gui::GUI_TYPE::BUTTON,id);
+    ele.parenter.toggle_remove(tid);
+  }
+
+  void gui_button_remove_slider(int id, int sid){
+    get_element(ele,gui::Button,gui::GUI_TYPE::BUTTON,id);
+    ele.parenter.slider_remove(sid);
+
+  }
+
+  void gui_button_remove_scrollbar(int id, int sid){
+    get_element(ele,gui::Button,gui::GUI_TYPE::BUTTON,id);
+    ele.parenter.scrollbar_remove(sid);
+  }
+
+  void gui_button_remove_label(int id, int lid){
+    get_element(ele,gui::Button,gui::GUI_TYPE::BUTTON,id);
+    ele.parenter.label_remove(lid);
+  }
+
+  void gui_button_remove_window(int id, int wid){
+    get_element(ele,gui::Button,gui::GUI_TYPE::BUTTON,id);
+    ele.parenter.window_remove(wid);
+  }
+
+  int gui_button_get_button_count(int id){
+    get_elementv(ele,gui::Button,gui::GUI_TYPE::BUTTON,id,-1);
+    return ele.parenter.button_count();
+  }
+
+  int gui_button_get_toggle_count(int id){
+    get_elementv(ele,gui::Button,gui::GUI_TYPE::BUTTON,id,-1);
+    return ele.parenter.toggle_count();
+  }
+
+  int gui_button_get_slider_count(int id){
+    get_elementv(ele,gui::Button,gui::GUI_TYPE::BUTTON,id,-1);
+    return ele.parenter.slider_count();
+  }
+
+  int gui_button_get_scrollbar_count(int id){
+    get_elementv(ele,gui::Button,gui::GUI_TYPE::BUTTON,id,-1);
+    return ele.parenter.scrollbar_count();
+  }
+
+  int gui_button_get_label_count(int id){
+    get_elementv(ele,gui::Button,gui::GUI_TYPE::BUTTON,id,-1);
+    return ele.parenter.label_count();
+  }
+
+  int gui_button_get_window_count(int id){
+    get_elementv(ele,gui::Button,gui::GUI_TYPE::BUTTON,id,-1);
+    return ele.parenter.window_count();
+  }
+
+  ///GETTERS FOR ELEMENTS
+  int gui_button_get_button(int id, int but){
+    get_elementv(ele,gui::Button,gui::GUI_TYPE::BUTTON,id,-1);
+    return ele.parenter.button(but);
+  }
+
+  int gui_button_get_toggle(int id, int tog){
+    get_elementv(ele,gui::Button,gui::GUI_TYPE::BUTTON,id,-1);
+    return ele.parenter.toggle(tog);
+  }
+
+  int gui_button_get_slider(int id, int sli){
+    get_elementv(ele,gui::Button,gui::GUI_TYPE::BUTTON,id,-1);
+    return ele.parenter.slider(sli);
+  }
+
+  int gui_button_get_scrollbar(int id, int scr){
+    get_elementv(ele,gui::Button,gui::GUI_TYPE::BUTTON,id,-1);
+    return ele.parenter.scrollbar(scr);
+  }
+
+  int gui_button_get_label(int id, int lab){
+    get_elementv(ele,gui::Button,gui::GUI_TYPE::BUTTON,id,-1);
+    return ele.parenter.label(lab);
+  }
+
+  int gui_button_get_window(int id, int wid){
+    get_elementv(ele,gui::Button,gui::GUI_TYPE::BUTTON,id,-1);
+    return ele.parenter.window(wid);
+  }
 }
 

@@ -19,7 +19,6 @@
 #include <string>
 using std::string;
 using std::unordered_map;
-using std::pair;
 
 #include "Universal_System/var4.h"
 #include "Universal_System/CallbackArrays.h" //For mouse_check_button
@@ -28,11 +27,15 @@ using std::pair;
 #include "Graphics_Systems/General/GSfont.h"
 #include "Graphics_Systems/General/GScolors.h"
 
+#include "elements.h"
 #include "include.h"
 #include "skins.h"
 
 namespace gui{
-	gui_skin::gui_skin(){
+  extern unsigned int gui_data_elements_maxid;
+  extern unordered_map<unsigned int, DataElement> gui_data_elements;
+
+	Skin::Skin(){
 		//Create invisible dummy elements to use as styles for them all
 		button_style = (enigma_user::gui_button_create());
 		enigma_user::gui_button_set_visible(button_style,false);
@@ -46,25 +49,39 @@ namespace gui{
 		slider_style = (enigma_user::gui_slider_create());
 		enigma_user::gui_slider_set_visible(slider_style,false);
 
+		scrollbar_style = (enigma_user::gui_scrollbar_create());
+		enigma_user::gui_scrollbar_set_visible(scrollbar_style,false);
+
     label_style = (enigma_user::gui_label_create());
 		enigma_user::gui_label_set_visible(label_style,false);
+
+    textbox_style = (enigma_user::gui_textbox_create());
+    enigma_user::gui_textbox_set_visible(textbox_style,false);
 	}
 
 	int gui_bound_skin = -1;
-	unordered_map<unsigned int, gui_skin> gui_skins;
-	unsigned int gui_skins_maxid = 0;
 }
 
 namespace enigma_user
 {
 	int gui_skin_create(){
-		gui::gui_skins.insert(pair<unsigned int, gui::gui_skin >(gui::gui_skins_maxid, gui::gui_skin()));
-		gui::gui_skins[gui::gui_skins_maxid].id = gui::gui_skins_maxid;
-		return gui::gui_skins_maxid++;
+		gui::gui_data_elements.emplace(gui::gui_data_elements_maxid, gui::Skin());
+    gui::Skin &ski = gui::gui_data_elements[gui::gui_data_elements_maxid];
+		ski.id = gui::gui_data_elements_maxid;
+    //printf("Creating skin with size %i\n", sizeof(gui::gui_data_elements[gui::gui_data_elements_maxid]));
+		return gui::gui_data_elements_maxid++;
 	}
 
+  int gui_skin_duplicate(int skin){
+    get_data_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,skin,-1);
+    gui::gui_data_elements.emplace(gui::gui_data_elements_maxid, ski);
+    gui::gui_data_elements[gui::gui_data_elements_maxid].id = gui::gui_data_elements_maxid;
+    return gui::gui_data_elements_maxid++;
+  }
+
 	void gui_skin_destroy(int id){
-		gui::gui_skins.erase(gui::gui_skins.find(id));
+    check_data_element(gui::GUI_TYPE::SKIN,id);
+		gui::gui_data_elements.erase(gui::gui_data_elements.find(id));
 	}
 
 	void gui_skin_set(int id){
@@ -72,22 +89,37 @@ namespace enigma_user
 	}
 
 	int gui_skin_get_button(int id){
-		return (gui::gui_skins[id].button_style);
+    get_data_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,id,-1);
+		return (ski.button_style);
 	}
 
   int gui_skin_get_window(int id){
-		return (gui::gui_skins[id].window_style);
+    get_data_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,id,-1);
+		return (ski.window_style);
 	}
 
   int gui_skin_get_toggle(int id){
-		return (gui::gui_skins[id].toggle_style);
+    get_data_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,id,-1);
+		return (ski.toggle_style);
 	}
 
 	int gui_skin_get_slider(int id){
-    return (gui::gui_skins[id].slider_style);
+    get_data_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,id,-1);
+    return (ski.slider_style);
+	}
+
+  int gui_skin_get_scrollbar(int id){
+    get_data_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,id,-1);
+    return (ski.scrollbar_style);
 	}
 
   int gui_skin_get_label(int id){
-    return (gui::gui_skins[id].label_style);
+    get_data_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,id,-1);
+    return (ski.label_style);
 	}
+
+  int gui_skin_get_textbox(int id){
+    get_data_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,id,-1);
+    return (ski.textbox_style);
+  }
 }

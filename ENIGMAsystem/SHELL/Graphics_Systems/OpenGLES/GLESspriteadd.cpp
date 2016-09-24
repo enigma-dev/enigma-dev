@@ -40,17 +40,17 @@ int sprite_add(string filename,double imgnumb,double precise,double transparent,
 	glTexImage2D(
 		GL_TEXTURE_2D,
 		(int)smooth,
-		GL_RGBA,//4, OPENGLES 
+		GL_RGBA,//4, OPENGLES
 		fullwidth,
 		fullheight,
 		0,
 		GL_RGBA,
 		GL_UNSIGNED_BYTE,
 		pxdata);
-	
+
 	//test code
 	//end test code
-	
+
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
 	//glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE); //OPENGLES
@@ -67,8 +67,8 @@ int sprite_add(string filename,double imgnumb,double precise,double transparent,
 	ns->height    = height;
 	ns->xoffset   = (int)x_offset;
 	ns->yoffset   = (int)y_offset;
-	ns->texbordx  = (double) width/fullwidth;
-	ns->texbordy  = (double) height/fullheight;
+	ns->texturew  = (double) width/fullwidth;
+	ns->textureh  = (double) height/fullheight;
 	ns->texturearray[0] = texture;
 	return enigma::sprite_idmax++;
 }
@@ -90,26 +90,26 @@ namespace enigma
     for (int i = 0; i < spr_highid; i++)
       spritestructarray[i] = NULL;
   }
-  
+
   //Adds an empty sprite to the list
  /* int sprite_new_empty(unsigned sprid, unsigned subc, int w, int h, int x, int y, int pl, int sm)
   {
     int fullwidth=nlpo2dc(w)+1,fullheight=nlpo2dc(h)+1;
     sprite *as = new sprite(subc);
     spritestructarray[sprid] = as;
-    
+
     as->id=sprid;
     as->subcount=0;
     as->width=w;
     as->height=h;
     as->xoffset=x;
     as->yoffset=y;
-    as->texbordx=(double)w/fullwidth;
-    as->texbordy=(double)h/fullheight;
-    
+    as->texturew=(double)w/fullwidth;
+    as->textureh=(double)h/fullheight;
+
     if (enigma::sprite_idmax < sprid+1)
       enigma::sprite_idmax = sprid+1;
-    
+
     return sprid;
   }*/
 
@@ -133,25 +133,25 @@ namespace enigma
       imgpxptr += (fullwidth-colindex) << 2;
     }
     memset(imgpxptr,0,(fullheight-h) * fullwidth);
-    
+
     glGenTextures(1,&texture);
     glBindTexture(GL_TEXTURE_2D,texture);
 	  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR); // OPENGLES added
 	  glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR); // OPENGLES added
-	  
+
 	  glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,fullwidth,fullheight,0,GL_RGBA,GL_UNSIGNED_BYTE,imgpxdata); //OPENGLES changed 4 to GL_RGBA
     //removed fullwidth, fullheight
 	  //glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST); //OPENGLES
     //glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST); //OPENGLES
     //glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE); //OPENGLES
     //glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE); //OPENGLES
-	  
+
     //gluBuild2DMipmaps( GL_TEXTURE_2D, 3, bmpwidth, bmpheight, GL_RGB, GL_UNSIGNED_BYTE, readbuffer);
     glBindTexture(GL_TEXTURE_2D,0);
     delete[] imgpxdata;
-    
+
     enigma::sprite* sprstr = enigma::spritestructarray[sprid];
-    
+
     sprstr->texturearray[sprstr->subcount] = texture;
     sprstr->subcount++;
     //std::c out << "Added subimage " << sprstr->subcount << " to sprite " << sprid << std::endl;

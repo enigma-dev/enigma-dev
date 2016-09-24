@@ -32,7 +32,7 @@
     -compliance-mode:
         Type: Combobox
         Label: Compliance Mode: 
-        Options: "Standard, GM567, GM8"
+        Options: "Standard, GM5, GM6, GM7, GM8"
     -keyword-blacklist:
         Type: Textfield
         Label: Keyword Blacklist: 

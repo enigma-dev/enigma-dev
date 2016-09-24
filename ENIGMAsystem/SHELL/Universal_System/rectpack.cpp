@@ -36,14 +36,14 @@ namespace enigma
     void rectpnode::rect(int xx, int yy, int w, int h) { x=xx, y=yy, wid=w, hgt=h; }
     
     // Copies the content of a element `c` of pvrect array `boxes` into container `h`
-    void rncopy(rectpnode *h, pvrect *boxes, unsigned char c)
+    void rncopy(rectpnode *h, pvrect *boxes, unsigned int c)
     {
       boxes[c].x = h->x,   boxes[c].y = h->y;
       boxes[c].w = h->wid, boxes[c].h = h->hgt;
     }
     
     // Inserts a new node into container `who` using metrics obtained from `boxes`[`c`]
-    rectpnode *rninsert(rectpnode* who, unsigned char c, pvrect* boxes)
+    rectpnode *rninsert(rectpnode* who, unsigned int c, pvrect* boxes)
     {
       rectpnode *newNode;
       if (who->child[0]) // Already split

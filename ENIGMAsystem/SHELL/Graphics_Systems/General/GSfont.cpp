@@ -16,21 +16,21 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <math.h>
+#include <cmath>
 #include <string>
-#include <stdint.h>
-#include "Universal_System/var4.h"
+#include <cstdint>
 #include "libEGMstd.h"
+#include "Universal_System/var4.h"
 #include "../General/GScolors.h"
 #include "../General/GSfont.h"
 #include "../General/GStextures.h"
 #include "../General/GSprimitives.h"
 #include "../General/GSsprite.h"
 
-#define M_PI		3.14159265358979323846
+#include "Universal_System/math_consts.h"
+#include "Universal_System/fontstruct.h"
 
 using namespace std;
-#include "Universal_System/fontstruct.h"
 
 #define __GETR(x) ((x & 0x0000FF))
 #define __GETG(x) ((x & 0x00FF00) >> 8)
@@ -70,30 +70,29 @@ static uint32_t getUnicodeCharacter(const string str, size_t& pos) {
 }
 
 static fontglyph* findGlyph(const font *const fnt, uint32_t character) {
-	for (size_t i = 0; i < fnt->glyphRangeCount; i++) {
-		fontglyphrange* fgr = fnt->glyphRanges[i];
-		if (character >= fgr->glyphstart && character < fgr->glyphstart + fgr->glyphcount) {
-			return fgr->glyphs[character - fgr->glyphstart];
-		}
-	}
-	return NULL;
+  for (size_t i = 0; i < fnt->glyphRangeCount; i++) {
+    fontglyphrange* fgr = fnt->glyphRanges[i];
+    if (character >= fgr->glyphstart && character < fgr->glyphstart + fgr->glyphcount) {
+      return fgr->glyphs[character - fgr->glyphstart];
+    }
+  }
+  return NULL;
 }
 
-namespace enigma_user
-{
+namespace enigma_user {
 
 void draw_set_halign(unsigned align){
-    halign = align;
+  halign = align;
 }
 void draw_set_valign(unsigned align){
-    valign = align;
+  valign = align;
 }
 
 unsigned draw_get_halign(){
-    return halign;
+  return halign;
 }
 unsigned draw_get_valign(){
-    return valign;
+  return valign;
 }
 
 }
@@ -124,10 +123,8 @@ unsigned draw_get_valign(){
     const font *const fnt = fontstructarray[id];
 #endif
 
-namespace enigma
-{
-  inline float get_space_width(const font *const fnt)
-  {
+namespace enigma {
+  inline float get_space_width(const font *const fnt) {
     fontglyph* g = findGlyph(fnt, ' ');
     // Use the width of the space glyph when available,
     // else use the backup.
@@ -142,8 +139,24 @@ namespace enigma
 
 ///////////////////////////////////////////////////
 
-namespace enigma_user
+namespace enigma_user {
+
+double string_char_width(variant vstr)
 {
+  string str = toString(vstr);
+  get_font(fnt,currentfont,0);
+  size_t i = 0;
+  uint32_t character = getUnicodeCharacter(str, i);
+  if (character == ' ') {
+    return get_space_width(fnt);
+  }
+  fontglyph* g = findGlyph(fnt, character);
+  if (g == NULL) {
+    return get_space_width(fnt);
+  } else {
+    return g->xs;
+  }
+}
 
 unsigned int string_width(variant vstr)
 {
@@ -157,12 +170,12 @@ unsigned int string_width(variant vstr)
       tlen = 0;
     } else {
       fontglyph* g = findGlyph(fnt, character);
-      if (character == ' ' or g == NULL)
+      if (character == ' ' or g == NULL) {
         tlen += slen;
-      else {
+      } else {
         tlen += g->xs;
-        if (tlen > mlen) mlen = tlen;
       }
+      if (tlen > mlen) mlen = tlen;
     }
   }
   return ceil(mlen);
@@ -190,14 +203,16 @@ unsigned int string_width_ext(variant vstr, gs_scalar sep, gs_scalar w) //here s
     uint32_t character = getUnicodeCharacter(str, i);
 
     fontglyph* g = findGlyph(fnt, character);
-    if (character == ' ' or g == NULL)
-          if (width >= w && w!=-1)
-              (width>maxwidth ? maxwidth=width, width = 0 : width = 0);
-          else
-              width += slen;
-    else {
-          width += g->xs;
+    if (character == ' ' or g == NULL) {
+        if (width >= w && w!=-1) {
+          (width>maxwidth ? maxwidth=width, width = 0 : width = 0);
+        } else {
+          width += slen;
+        }
+    } else {
+      width += g->xs;
     }
+    if (width > maxwidth) maxwidth = width;
   }
   return ceil(maxwidth);
 }
@@ -207,29 +222,29 @@ unsigned int string_height_ext(variant vstr, gs_scalar sep, gs_scalar w)
   string str = toString(vstr);
   get_font(fnt,currentfont,0);
 
-  float width = 0, tw = 0, height = fnt->height;
+  float width = 0, tw = 0, height = fnt->height, slen = get_space_width(fnt);
   for (size_t i = 0; i < str.length(); i++)
   {
     uint32_t character = getUnicodeCharacter(str, i);
     if (character == '\r' or character == '\n') {
       width = 0, height +=  (sep+2 ? fnt->height : sep);
-
     } else {
       fontglyph* g = findGlyph(fnt, character);
-      if (character == ' ' or g == NULL)
-        width += fnt->height/3;
-        tw = 0;
-        for (size_t c = i+1; c < str.length(); c++)
-        {
+      if (character == ' ' or g == NULL) {
+        width += slen;
+      }
+      
+      tw = 0;
+      for (size_t c = i+1; c < str.length(); c++) {
         character = getUnicodeCharacter(str, c);
         if (character == ' ' or character == '\r' or character == '\n')
           break;
         tw += g->xs;
-        }
+      }
 
-        if (width+tw >= w && w != -1)
+      if (width+tw >= w && w != -1) {
         height += (sep==-1 ? fnt->height : sep), width = 0, tw = 0;
-      else {
+      } else {
         width += g->xs;
       }
     }
@@ -247,13 +262,13 @@ unsigned int string_width_line(variant vstr, int line)
     uint32_t character = getUnicodeCharacter(str, i);
     if (character == '\r') {
       if (cl == line)
-        return len;
+        return ceil(len);
       cl += 1;
       len = 0;
       i += (str[i+1] == '\n');
     } else if (character == '\n') {
       if (cl == line)
-        return len;
+        return ceil(len);
       cl += 1;
       len = 0;
     } else {
@@ -265,44 +280,48 @@ unsigned int string_width_line(variant vstr, int line)
       }
     }
   }
-  return ceil(len);
+  return (cl != line ? 0 : ceil(len));
 }
 
 //TODO: These next functions can be rewritten to get rid of Schlemiel the Painter's algorithm happening in the second for loop
 unsigned int string_width_ext_line(variant vstr, gs_scalar w, int line)
 {
   string str = toString(vstr);
-  get_font(fnt,currentfont,0);
+  get_font(fnt, currentfont,0);
 
-  float width = 0, tw = 0; int cl = 0;
+  float width = 0, tw = 0; int cl = 0, slen = get_space_width(fnt);
   for (size_t i = 0; i < str.length(); i++)
   {
     uint32_t character = getUnicodeCharacter(str, i);
     if (character == '\r') {
-      if (cl == line) return width; else {width = 0; cl +=1; i += str[i+1] == '\n';}
+      if (cl == line) return ceil(width); else {width = 0; cl +=1; i += str[i+1] == '\n';}
     } else if (character == '\n') {
-      if (cl == line) return width; else width = 0, cl +=1;
+      if (cl == line) return ceil(width); else width = 0, cl +=1;
     } else {
       fontglyph* g = findGlyph(fnt, character);
       if ((character == ' ' or g == NULL) && w != -1) {
-        width += fnt->height/3, tw = 0;
+        width += slen, tw = 0;
         for (size_t c = i+1; c < str.length(); c++)
         {
-        uint32_t ct = getUnicodeCharacter(str, c);
-        if (ct == ' ' or ct == '\r' or ct == '\n')
-          break;
-              fontglyph* gt = findGlyph(fnt, ct);
-        tw += gt->xs;
+          uint32_t ct = getUnicodeCharacter(str, c);
+          if (ct == ' ' or ct == '\r' or ct == '\n')
+            break;
+          fontglyph* gt = findGlyph(fnt, ct);
+          tw += (gt != NULL ? g->xs : slen);
         }
         if (width+tw >= w){
-        if (cl == line) { return width; } else {width = 0; cl +=1;}
+          if (cl == line) {
+            return ceil(width);
+          }
+          width = 0;
+          cl += 1;
         }
       } else {
-        width += g->xs;
+        width += (g!=NULL?g->xs:slen);
       }
     }
   }
-  return ceil(width);
+  return  (cl != line ? 0 : ceil(width));
 }
 
 unsigned int string_width_ext_line_count(variant vstr, gs_scalar w)
@@ -310,7 +329,8 @@ unsigned int string_width_ext_line_count(variant vstr, gs_scalar w)
   string str = toString(vstr);
   get_font(fnt,currentfont,0);
 
-  float width = 0, tw = 0, cl = 1;
+  float width = 0, tw = 0, slen = get_space_width(fnt);
+  unsigned int cl = 1;
   for (size_t i = 0; i < str.length(); i++)
   {
     uint32_t character = getUnicodeCharacter(str, i);
@@ -321,23 +341,23 @@ unsigned int string_width_ext_line_count(variant vstr, gs_scalar w)
     } else {
       fontglyph* g = findGlyph(fnt, character);
       if ((character == ' ' or g == NULL) && w != -1){
-        width += fnt->height/3, tw = 0;
+        width += slen, tw = 0;
         for (size_t c = i+1; c < str.length(); c++)
         {
-        uint32_t ct = getUnicodeCharacter(str, c);
-        if (ct == ' ' or ct == '\r' or ct == '\n')
-          break;
-              fontglyph* gt = findGlyph(fnt, ct);
-        tw += gt->xs;
+          uint32_t ct = getUnicodeCharacter(str, c);
+          if (ct == ' ' or ct == '\r' or ct == '\n')
+            break;
+          fontglyph* gt = findGlyph(fnt, ct);
+          tw += (gt != NULL ? g->xs : slen);
         }
         if (width+tw >= w)
         width = 0, cl +=1;
       } else {
-        width += g->xs;
+        width += (g != NULL ? g->xs : slen);
       }
     }
   }
-  return ceil(cl);
+  return cl;
 }
 
 }
@@ -445,13 +465,13 @@ void draw_text_sprite(gs_scalar x, gs_scalar y, variant vstr, int sep, int lineW
     //A line break can occur here if we are starting a new word that won't fit.
     if (lineWidth!=-1 && prev_c==' ' && c!= ' ') {
       //Assume a space at str[str.length()]
-      size_t word_len = str.find(' ',i+1);
+      size_t word_len = str.find(' ', i+1);
       if (word_len == string::npos) {
         word_len = str.length();
       }
 
       //Break if the next word is too long.
-      if (offX + w * (word_len-i) > lineWidth) {
+      if (offX + w * int(word_len - i) > lineWidth) {
         offX = 0;
         offY += sep;
       }
@@ -559,11 +579,11 @@ void draw_text_ext(gs_scalar x, gs_scalar y, variant vstr, gs_scalar sep, gs_sca
           tw = 0;
           for (size_t c = i+1; c < str.length(); c++)
           {
-          character = getUnicodeCharacter(str, c);
-          if (character == ' ' or character == '\r' or character == '\n')
-            break;
-          g = findGlyph(fnt, character);
-          tw += g->xs;
+            character = getUnicodeCharacter(str, c);
+            if (character == ' ' or character == '\r' or character == '\n')
+              break;
+            g = findGlyph(fnt, character);
+            tw += (g!=NULL?g->xs:slen);
           }
           if (width+tw >= w && w != -1)
           xx = x, yy += (sep==-1 ? fnt->height : sep), width = 0, tw = 0;
@@ -593,15 +613,15 @@ void draw_text_ext(gs_scalar x, gs_scalar y, variant vstr, gs_scalar sep, gs_sca
           xx += slen, width += slen, tw = 0;
           for (size_t c = i+1; c < str.length(); c++)
           {
-          character = getUnicodeCharacter(str, c);
-          if (character == ' ' or character == '\r' or character == '\n')
-            break;
-          g = findGlyph(fnt, character);
-          tw += g->xs;
+            character = getUnicodeCharacter(str, c);
+            if (character == ' ' or character == '\r' or character == '\n')
+              break;
+            g = findGlyph(fnt, character);
+            tw += (g != NULL ? g->xs : slen);
           }
 
           if (width+tw >= w && w != -1)
-          line += 1, xx = halign == fa_center ? x-gs_scalar(string_width_ext_line(str,w,line)/2) : x-gs_scalar(string_width_ext_line(str,w,line)), yy += (sep==-1 ? fnt->height : sep), width = 0, tw = 0;
+            line += 1, xx = halign == fa_center ? x-gs_scalar(string_width_ext_line(str,w,line)/2) : x-gs_scalar(string_width_ext_line(str,w,line)), yy += (sep==-1 ? fnt->height : sep), width = 0, tw = 0;
         } else {
           draw_primitive_begin_texture(pr_trianglestrip, fnt->texture);
           draw_vertex_texture(xx + g->x,  yy + g->y, g->tx, g->ty);
@@ -755,11 +775,11 @@ void draw_text_ext_transformed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar
             tw = 0;
             for (size_t c = i+1; c < str.length(); c++)
             {
-            character = getUnicodeCharacter(str, c);
-            if (character == ' ' or character == '\r' or character == '\n')
-              break;
-            g = findGlyph(fnt, character);
-            tw += g->xs;
+              character = getUnicodeCharacter(str, c);
+              if (character == ' ' or character == '\r' or character == '\n')
+                break;
+              g = findGlyph(fnt, character);
+              tw += (g != NULL ? g->xs : sw);
             }
 
             if (width+tw >= w && w != -1)
@@ -814,11 +834,11 @@ void draw_text_ext_transformed(gs_scalar x, gs_scalar y, variant vstr, gs_scalar
             tw = 0;
             for (size_t c = i+1; c < str.length(); c++)
             {
-            character = getUnicodeCharacter(str, c);
-            if (character == ' ' or character == '\r' or character == '\n')
-              break;
-            g = findGlyph(fnt, character);
-            tw += g->xs;
+              character = getUnicodeCharacter(str, c);
+              if (character == ' ' or character == '\r' or character == '\n')
+                break;
+              g = findGlyph(fnt, character);
+              tw += (g != NULL ? g->xs : sw);
             }
 
             if (width+tw >= w && w != -1){
@@ -999,11 +1019,11 @@ void draw_text_ext_transformed_color(gs_scalar x, gs_scalar y, variant vstr, gs_
             tw = 0;
             for (size_t c = i+1; c < str.length(); c++)
             {
-            character = getUnicodeCharacter(str, c);
-            if (character == ' ' or character == '\r' or character == '\n')
-              break;
-            g = findGlyph(fnt, character);
-            tw += g->xs;
+              character = getUnicodeCharacter(str, c);
+              if (character == ' ' or character == '\r' or character == '\n')
+                break;
+              g = findGlyph(fnt, character);
+              tw += (g != NULL ? g->xs : sw);
             }
 
             if (width+tw >= w && w != -1)
@@ -1061,11 +1081,11 @@ void draw_text_ext_transformed_color(gs_scalar x, gs_scalar y, variant vstr, gs_
             tw = 0;
             for (size_t c = i+1; c < str.length(); c++)
             {
-            character = getUnicodeCharacter(str, c);
-            if (character == ' ' or character == '\r' or character == '\n')
-              break;
-            g = findGlyph(fnt, character);
-            tw += g->xs;
+              character = getUnicodeCharacter(str, c);
+              if (character == ' ' or character == '\r' or character == '\n')
+                break;
+              g = findGlyph(fnt, character);
+              tw += (g != NULL ? g->xs : sw);
             }
 
             if (width+tw >= w && w != -1){
@@ -1207,11 +1227,11 @@ void draw_text_ext_color(gs_scalar x, gs_scalar y,variant vstr,gs_scalar sep, gs
             tw = 0;
             for (size_t c = i+1; c < str.length(); c++)
             {
-            character = getUnicodeCharacter(str, c);
-            if (character == ' ' or character == '\r' or character == '\n')
-              break;
-            g = findGlyph(fnt, character);
-            tw += g->xs;
+              character = getUnicodeCharacter(str, c);
+              if (character == ' ' or character == '\r' or character == '\n')
+                break;
+              g = findGlyph(fnt, character);
+              tw += (g != NULL ? g->xs : slen);
             }
 
             if (width+tw >= w && w != -1)
@@ -1249,11 +1269,11 @@ void draw_text_ext_color(gs_scalar x, gs_scalar y,variant vstr,gs_scalar sep, gs
             xx += slen, width = xx-tmpx, tw = 0;
             for (size_t c = i+1; c < str.length(); c++)
             {
-            character = getUnicodeCharacter(str, c);
-            if (character == ' ' or character == '\r' or character == '\n')
-              break;
-            g = findGlyph(fnt, character);
-            tw += g->xs;
+              character = getUnicodeCharacter(str, c);
+              if (character == ' ' or character == '\r' or character == '\n')
+                break;
+              g = findGlyph(fnt, character);
+              tw += (g != NULL ? g->xs : slen);
             }
             if (width+tw >= w && w != -1)
             yy += (sep==-1 ? fnt->height : sep), width = 0, line += 1, sw = string_width_ext_line(str, w, line), xx = halign == fa_center ? x-sw/2 : x-sw, tmpx = xx;
@@ -1278,20 +1298,24 @@ void draw_text_ext_color(gs_scalar x, gs_scalar y,variant vstr,gs_scalar sep, gs
   }
 }
 
-unsigned int font_get_texture(int fnt)
-{
+unsigned font_get_texture(int fnt) {
   get_font_null(f,fnt,-1);
   return f ? f->texture : unsigned(-1);
 }
-unsigned int font_get_texture_width(int fnt)
-{
+
+unsigned font_get_texture_width(int fnt) {
   get_font_null(f,fnt,-1);
   return f ? f->twid: unsigned(-1);
 }
-unsigned int font_get_texture_height(int fnt)
-{
+
+unsigned font_get_texture_height(int fnt) {
   get_font_null(f,fnt,-1);
-  return f ? f->thgt: unsigned(-1);
+  return f ? f->thgt : unsigned(-1);
+}
+
+unsigned font_height(int fnt) {
+  get_font_null(f,fnt,-1);
+  return f ? f->height : unsigned(-1);
 }
 
 void draw_set_font(int fnt) {

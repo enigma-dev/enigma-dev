@@ -72,6 +72,11 @@ void d3d_depth_clear_value(float value) {
   glClearDepthf(value);
 }
 
+void d3d_set_software_vertex_processing(bool software) {
+	//Does nothing as GL doesn't have such an awful thing
+  //TODO: When we seperate platform specific things, then this shouldn't even exist
+}
+
 void d3d_start()
 {
   // Set global ambient lighting to nothing.
@@ -372,6 +377,46 @@ class d3d_lights
         return true;
     }
 
+    bool light_set_ambient(int id, int r, int g, int b, double a)
+    {
+        int ms;
+        if (light_ind.find(id) != light_ind.end())
+        {
+            ms = (*light_ind.find(id)).second;
+        }
+        else
+        {
+            ms = light_ind.size();
+            int MAX_LIGHTS;
+            glGetIntegerv(GL_MAX_LIGHTS, &MAX_LIGHTS);
+            if (ms >= MAX_LIGHTS)
+                return false;
+        }
+        float specular[4] = {(float)r, (float)g, (float)b, (float)a};
+        glLightfv(GL_LIGHT0+ms, GL_AMBIENT, specular);
+        return true;
+    }
+
+    bool light_set_specular(int id, int r, int g, int b, double a)
+    {
+        int ms;
+        if (light_ind.find(id) != light_ind.end())
+        {
+            ms = (*light_ind.find(id)).second;
+        }
+        else
+        {
+            ms = light_ind.size();
+            int MAX_LIGHTS;
+            glGetIntegerv(GL_MAX_LIGHTS, &MAX_LIGHTS);
+            if (ms >= MAX_LIGHTS)
+                return false;
+        }
+        float specular[4] = {(float)r, (float)g, (float)b, (float)a};
+        glLightfv(GL_LIGHT0+ms, GL_SPECULAR, specular);
+        return true;
+    }
+
     bool light_enable(int id)
     {
         map<int, int>::iterator it = light_ind.find(id);
@@ -431,6 +476,16 @@ void d3d_light_specularity(int facemode, int r, int g, int b, double a)
   glMaterialfv(renderstates[facemode], GL_SPECULAR, (float*)specular);
 }
 
+bool d3d_light_set_ambient(int id, int r, int g, int b, double a)
+{
+  return d3d_lighting.light_set_ambient(id, r, g, b, a);
+}
+
+bool d3d_light_set_specularity(int id, int r, int g, int b, double a)
+{
+  return d3d_lighting.light_set_specular(id, r, g, b, a);
+}
+
 void d3d_light_shininess(int facemode, int shine)
 {
   glMateriali(renderstates[facemode], GL_SHININESS, shine);
@@ -445,6 +500,36 @@ void d3d_light_define_ambient(int col)
 bool d3d_light_enable(int id, bool enable)
 {
     return enable?d3d_lighting.light_enable(id):d3d_lighting.light_disable(id);
+}
+
+
+void d3d_stencil_start_mask(){
+  glEnable(GL_STENCIL_TEST);
+  glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+  glDepthMask(GL_FALSE);
+  glStencilMask(0x1);
+  glStencilFunc(GL_ALWAYS, 0x1, 0x1);
+  glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+  glClear(GL_STENCIL_BUFFER_BIT);
+}
+
+void d3d_stencil_continue_mask(){
+  glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+  glDepthMask(GL_FALSE);
+  glStencilMask(0x1);
+  glStencilFunc(GL_ALWAYS, 0x1, 0x1);
+  glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+}
+
+void d3d_stencil_use_mask(){
+  glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+  glDepthMask(GL_TRUE);
+  glStencilMask(0x0);
+  glStencilFunc(GL_EQUAL, 0x1, 0x1);
+}
+
+void d3d_stencil_end_mask(){
+  glDisable(GL_STENCIL_TEST);
 }
 
 }
