@@ -488,6 +488,7 @@ void glsl_shader_print_infolog(int id)
     glGetShaderInfoLog(enigma::shaders[id]->shader, blen, &slen, compiler_log);
     enigma::shaders[id]->log = (string)compiler_log;
     std::cout << compiler_log << std::endl;
+    free(compiler_log);
   } else {
     enigma::shaders[id]->log = "Shader log empty";
     std::cout << enigma::shaders[id]->log << std::endl;
@@ -506,6 +507,7 @@ void glsl_program_print_infolog(int id)
     glGetProgramInfoLog(enigma::shaderprograms[id]->shaderprogram, blen, &slen, compiler_log);
     enigma::shaderprograms[id]->log = (string)compiler_log;
     std::cout << compiler_log << std::endl;
+    free(compiler_log);
   } else {
     enigma::shaderprograms[id]->log = "Shader program log empty";
     std::cout << enigma::shaderprograms[id]->log << std::endl;
