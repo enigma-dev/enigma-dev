@@ -3,7 +3,7 @@ PATH := $(eTCpath)$(PATH)
 .PHONY: ENIGMA
 
 ENIGMA:
-	$(MAKE) -j 3 -C CompilerSource 
+	$(MAKE) -C CompilerSource 
 
 clean:
 	$(MAKE) -C CompilerSource clean
@@ -15,6 +15,6 @@ clean-game:
 	$(MAKE) -C ENIGMAsystem/SHELL clean
 	
 emake:
-	$(MAKE) -j 3 -C CommandLine/emake/
+	$(MAKE) -C CommandLine/emake/
 
 
