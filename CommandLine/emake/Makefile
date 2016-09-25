@@ -13,7 +13,7 @@ $(EXECUTABLE): $(OBJECTS) eyaml
 .eobjs/%.o : %.cpp dir
 	$(CXX) $(CXXFLAGS) $< -o $@
 
-#I'm To lazy to write my own yaml parser of fix plugin to do shit I need
+#I'm To lazy to write my own yaml parser or fix plugin to do shit I need
 eyaml:
 	$(CXX) $(CXXFLAGS) ../../CompilerSource/settings-parse/eyaml.cpp -o .eobjs/eyaml.o
 	

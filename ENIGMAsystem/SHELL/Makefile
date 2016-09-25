@@ -1,3 +1,5 @@
+
+
 #################
 # configuration #
 #################
@@ -56,8 +58,6 @@ OBJDIR := $(WORKDIR).eobjs/$(COMPILEPATH)/$(GMODE)
 CXX := g++
 CC := gcc
 DEPENDENCIES :=
-CLEANDEPS :=
-
 
 ifeq ($(GMODE), Debug)
 	override CXXFLAGS += -Wall -g -DDEBUG_MODE
@@ -72,7 +72,6 @@ else
 endif
 
 ifeq ($(PLATFORM), Win32)
-	override LDFLAGS += -L../Additional/i686-w64-mingw32/lib -static-libgcc -static-libstdc++
 	ifeq ($(GMODE), Compile)
 		override LDFLAGS += -static-libgcc -Wl,-subsystem,windows
 	endif
@@ -82,14 +81,14 @@ endif
 override CPPFLAGS += $(SYSTEMS:%=-I%/Info)
 override CPPFLAGS += -I. -I${WORKDIR}
 
-.PHONY: all clean cleandep
+.PHONY: all clean
 
 all: compile_game
 
 clean:
 	$(RM) $(OUTPUTNAME) $(RESOURCEBINARY)
-	$(FIND) $(WORKDIR).eobjs/$(COMPILEPATH) -name "*.o" -exec $(RM) -rf {} \;
-	$(FIND) $(WORKDIR).eobjs/$(COMPILEPATH) -name "*.d" -exec $(RM) -rf {} \;
+	$(FIND) "$(WORKDIR).eobjs/$(COMPILEPATH)" -name "*.o" -exec $(RM) -rf {} \;
+	$(FIND) "$(WORKDIR).eobjs/$(COMPILEPATH)" -name "*.d" -exec $(RM) -rf {} \;
 	
 cleandep:
 	$(RM) $(CLEANDEPS)
@@ -122,7 +121,7 @@ compile_game: cleandep $(OBJECTS) $(RCFILES) $(RESOURCEBINARY) $(DEPENDENCIES)
 # -MMD outputs dependencies to %.d as a side effect of compilation, ignoring system headers
 # -MP gives phony rules for non-target files, avoiding problems with missing files
 $(OBJDIR)/%.o $(OBJDIR)/%.d: %.cpp | $(OBJDIRS)
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(CFLAGS) $(INCLUDES) -MMD -MP -c -o $(OBJDIR)/$*.o $<
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(INCLUDES) -MMD -MP -c -o $(OBJDIR)/$*.o $<
 
 $(OBJDIR)/%.o $(OBJDIR)/%.d: %.c | $(OBJDIRS)
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(INCLUDES) -MMD -MP -c -o $(OBJDIR)/$*.o $<
@@ -131,14 +130,13 @@ $(OBJDIR)/%.o $(OBJDIR)/%.d: %.m | $(OBJDIRS)
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(INCLUDES) -MMD -MP -c -o $(OBJDIR)/$*.o $<
 
 $(OBJDIR)/resources.res: $(RCFILES) GENERATED_FILE
-	echo "// GENERATED RESOURCE FILE FRONTEND" > $(OBJDIR)/resources.rc
-	
-	for res in $(RESOURCES); do echo "#include \"$$res\"" >> $(OBJDIR)/resources.rc; done
-	$(WINDRES) -o $@ -I. -I$(WORKDIR) $(OBJDIR)/resources.rc -O coff
+	echo // GENERATED RESOURCE FILE FRONTEND > $(OBJDIR)/resources.rc
+	for %%r in ($(RESOURCES)) do echo #include "%%r" >> $(OBJDIR)/resources.rc
+	$(WINDRES) -o $@ -I. -I$(WORKDIR) $(OBJDIR)/resources.rc -O coff $(RCFLAGS) 
 GENERATED_FILE:
 
 $(OBJDIR)/%.rc: %.rc
-	$(WINDRES) -o $@ -I. -I$(WORKDIR) $^ -O rc
+	$(WINDRES) -o $@ -I. -I$(WORKDIR) $^ -O rc $(RCFLAGS)
 
 $(OBJDIRS):
 	$(MKDIR) -p $@

@@ -11,20 +11,20 @@
 class CallBack : public EnigmaCallbacks
 {
 public:
-    CallBack();
+  CallBack();
 
-    static void FrameOpen();
-    static void AppendFrame(const char*);
-    static void ClearFrame();
-    static void SetProgress(int);
-    static void SetProgressText(const char*);
-    static void SetOutFile(const char*);
-    static void ResetRedirect();
-    static int Execute(const char*, const char**, bool);
-    static Image* CompressImage(char *, int);
-    static void* OutputThread(void*);
-    static std::ifstream _outFile;
-    static bool _isOutputting;
+  static void FrameOpen();
+  static void AppendFrame(const char*);
+  static void ClearFrame();
+  static void SetProgress(int);
+  static void SetProgressText(const char*);
+  static void SetOutFile(const char*);
+  static void ResetRedirect();
+  static int Execute(const char*, const char**, bool);
+  static Image* CompressImage(char *, int);
+  static void* OutputThread(void*);
+  static std::ifstream _outFile;
+  static bool _isOutputting;
 };
 
 #endif

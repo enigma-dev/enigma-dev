@@ -36,11 +36,11 @@ using std::multimap;
 #endif
 
 #ifdef COLLISION_NONE
-	#error Error, The motion planning extension requires a collision system.
+	#error The motion planning extension requires a collision system.
 #endif
 
 #ifndef PATH_EXT_SET
-	#error Error, The motion planning extension requires the paths extension.
+	#error The motion planning extension requires the paths extension.
 #endif
 
 namespace enigma
