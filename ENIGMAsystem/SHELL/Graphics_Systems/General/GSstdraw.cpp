@@ -419,33 +419,33 @@ void draw_triangle_color(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, 
 
 void draw_roundrect(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, float rad, bool outline) {
   if (x1>x2) {
-  	float t=x2;
-  	x2=x1;
-  	x1=t;
+    float t=x2;
+    x2=x1;
+    x1=t;
     }
   if (y1>y2) {
     float t=y2;
-  	y2=y1;
-  	y1=t;
+    y2=y1;
+    y1=t;
   }
 
   double pr = 2 * M_PI / enigma::circleprecision;
   draw_primitive_begin(outline ? pr_linestrip : pr_trianglefan);
 
   for (double i = 0; i <= 2*M_PI*0.25; i += pr)
-  	draw_vertex((x2+rad*cos(i))-rad,(y2+rad*sin(i))-rad);
+    draw_vertex((x2+rad*cos(i))-rad,(y2+rad*sin(i))-rad);
 
   for (double i = 2*M_PI*0.24; i <= 2*M_PI*0.50; i+= pr)
-  	draw_vertex((x1+rad*cos(i))+rad,(y2+rad*sin(i))-rad);
+    draw_vertex((x1+rad*cos(i))+rad,(y2+rad*sin(i))-rad);
 
   for (double i = 2*M_PI*0.49;i <=2*M_PI*0.75;i += pr)
-  	draw_vertex((x1+rad*cos(i))+rad,(y1+rad*sin(i))+rad);
+    draw_vertex((x1+rad*cos(i))+rad,(y1+rad*sin(i))+rad);
 
   for (double i = 2*M_PI*0.74;i <=(2*M_PI);i += pr)
-  	draw_vertex((x2+rad*cos(i))-rad,(y1+rad*sin(i))+rad);
+    draw_vertex((x2+rad*cos(i))-rad,(y1+rad*sin(i))+rad);
 
   if (outline) {
-    	draw_vertex(x2,y2-rad);
+      draw_vertex(x2,y2-rad);
   }
   draw_primitive_end();
 }
@@ -453,35 +453,35 @@ void draw_roundrect(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, float
 void draw_roundrect_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, float rad, int col1, int col2, bool outline) {
   gs_scalar alpha = draw_get_alpha();
   if (x1>x2) {
-  	float t=x2;
-  	x2=x1;
-  	x1=t;
+    float t=x2;
+    x2=x1;
+    x1=t;
     }
   if (y1>y2) {
     float t=y2;
-  	y2=y1;
-  	y1=t;
+    y2=y1;
+    y1=t;
   }
 
   double pr = 2 * M_PI / enigma::circleprecision;
   if (outline) {
-  	draw_primitive_begin(pr_linestrip);
+    draw_primitive_begin(pr_linestrip);
   } else {
-  	draw_primitive_begin(pr_trianglefan);
+    draw_primitive_begin(pr_trianglefan);
     draw_vertex_color((x2+x1)/2,(y2+y1)/2, col1, alpha);
   }
 
   for (double i = 0; i <= 2*M_PI*0.25; i += pr)
-  	draw_vertex_color((x2+rad*cos(i))-rad,(y2+rad*sin(i))-rad, col2, alpha);
+    draw_vertex_color((x2+rad*cos(i))-rad,(y2+rad*sin(i))-rad, col2, alpha);
 
   for (double i = 2*M_PI*0.24; i <= 2*M_PI*0.50; i+= pr)
-  	draw_vertex_color((x1+rad*cos(i))+rad,(y2+rad*sin(i))-rad, col2, alpha);
+    draw_vertex_color((x1+rad*cos(i))+rad,(y2+rad*sin(i))-rad, col2, alpha);
 
   for (double i = 2*M_PI*0.49;i <=2*M_PI*0.75;i += pr)
-  	draw_vertex_color((x1+rad*cos(i))+rad,(y1+rad*sin(i))+rad, col2, alpha);
+    draw_vertex_color((x1+rad*cos(i))+rad,(y1+rad*sin(i))+rad, col2, alpha);
 
   for (double i = 2*M_PI*0.74;i <=(2*M_PI);i += pr)
-  	draw_vertex_color((x2+rad*cos(i))-rad,(y1+rad*sin(i))+rad, col2, alpha);
+    draw_vertex_color((x2+rad*cos(i))-rad,(y1+rad*sin(i))+rad, col2, alpha);
 
   draw_vertex_color(x2,y2-rad, col2, alpha);
   draw_primitive_end();
@@ -489,33 +489,33 @@ void draw_roundrect_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2
 
 void draw_roundrect_ext(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, float xrad, float yrad, bool outline) {
   if (x1>x2) {
-  	float t=x2;
-  	x2=x1;
-  	x1=t;
+    float t=x2;
+    x2=x1;
+    x1=t;
     }
   if (y1>y2) {
     float t=y2;
-  	y2=y1;
-  	y1=t;
+    y2=y1;
+    y1=t;
   }
 
   double pr = 2 * M_PI / enigma::circleprecision;
   draw_primitive_begin(outline ? pr_linestrip : pr_trianglefan);
 
   for (double i = 0; i <= 2*M_PI*0.25; i += pr)
-  	draw_vertex((x2+xrad*cos(i))-xrad,(y2+yrad*sin(i))-yrad);
+    draw_vertex((x2+xrad*cos(i))-xrad,(y2+yrad*sin(i))-yrad);
 
   for (double i = 2*M_PI*0.24; i <= 2*M_PI*0.50; i+= pr)
-  	draw_vertex((x1+xrad*cos(i))+xrad,(y2+yrad*sin(i))-yrad);
+    draw_vertex((x1+xrad*cos(i))+xrad,(y2+yrad*sin(i))-yrad);
 
   for (double i = 2*M_PI*0.49;i <=2*M_PI*0.75;i += pr)
-  	draw_vertex((x1+xrad*cos(i))+xrad,(y1+yrad*sin(i))+yrad);
+    draw_vertex((x1+xrad*cos(i))+xrad,(y1+yrad*sin(i))+yrad);
 
   for (double i = 2*M_PI*0.74;i <=(2*M_PI);i += pr)
-  	draw_vertex((x2+xrad*cos(i))-xrad,(y1+yrad*sin(i))+yrad);
+    draw_vertex((x2+xrad*cos(i))-xrad,(y1+yrad*sin(i))+yrad);
 
   if (outline) {
-    	draw_vertex(x2,y2-yrad);
+      draw_vertex(x2,y2-yrad);
   }
   draw_primitive_end();
 }
@@ -523,35 +523,35 @@ void draw_roundrect_ext(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, 
 void draw_roundrect_color_ext(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, float xrad, float yrad, int col1, int col2, bool outline) {
   gs_scalar alpha = draw_get_alpha();
   if (x1>x2) {
-  	float t=x2;
-  	x2=x1;
-  	x1=t;
+    float t=x2;
+    x2=x1;
+    x1=t;
     }
   if (y1>y2) {
     float t=y2;
-  	y2=y1;
-  	y1=t;
+    y2=y1;
+    y1=t;
   }
 
   double pr = 2 * M_PI / enigma::circleprecision;
   if (outline) {
-  	draw_primitive_begin(pr_linestrip);
+    draw_primitive_begin(pr_linestrip);
   } else {
-  	draw_primitive_begin(pr_trianglefan);
+    draw_primitive_begin(pr_trianglefan);
     draw_vertex_color((x2+x1)/2,(y2+y1)/2, col1, alpha);
   }
 
   for (double i = 0; i <= 2*M_PI*0.25; i += pr)
-  	draw_vertex_color((x2+xrad*cos(i))-xrad,(y2+yrad*sin(i))-yrad, col2, alpha);
+    draw_vertex_color((x2+xrad*cos(i))-xrad,(y2+yrad*sin(i))-yrad, col2, alpha);
 
   for (double i = 2*M_PI*0.24; i <= 2*M_PI*0.50; i+= pr)
-  	draw_vertex_color((x1+xrad*cos(i))+xrad,(y2+yrad*sin(i))-yrad, col2, alpha);
+    draw_vertex_color((x1+xrad*cos(i))+xrad,(y2+yrad*sin(i))-yrad, col2, alpha);
 
   for (double i = 2*M_PI*0.49;i <=2*M_PI*0.75;i += pr)
-  	draw_vertex_color((x1+xrad*cos(i))+xrad,(y1+yrad*sin(i))+yrad, col2, alpha);
+    draw_vertex_color((x1+xrad*cos(i))+xrad,(y1+yrad*sin(i))+yrad, col2, alpha);
 
   for (double i = 2*M_PI*0.74;i <=(2*M_PI);i += pr)
-  	draw_vertex_color((x2+xrad*cos(i))-xrad,(y1+yrad*sin(i))+yrad, col2, alpha);
+    draw_vertex_color((x2+xrad*cos(i))-xrad,(y1+yrad*sin(i))+yrad, col2, alpha);
 
   draw_vertex_color(x2,y2-yrad, col2, alpha);
   draw_primitive_end();
