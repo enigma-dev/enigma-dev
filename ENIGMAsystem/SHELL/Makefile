@@ -1,4 +1,5 @@
 
+
 #################
 # configuration #
 #################
@@ -88,8 +89,11 @@ all: compile_game
 
 clean:
 	$(RM) $(OUTPUTNAME) $(RESOURCEBINARY)
-	$(FIND) $(OBJDIR) -name "*.o" -exec $(RM) -rf {} \;
-	$(FIND) $(OBJDIR) -name "*.d" -exec $(RM) -rf {} \;
+	$(FIND) "$(WORKDIR).eobjs/$(COMPILEPATH)" -name "*.o" -exec $(RM) -rf {} \;
+	$(FIND) "$(WORKDIR).eobjs/$(COMPILEPATH)" -name "*.d" -exec $(RM) -rf {} \;
+	
+cleandep:
+	$(RM) $(CLEANDEPS)
 
 SOURCES := $(wildcard *.cpp)
 include $(addsuffix /Makefile,$(SYSTEMS) $(EXTENSIONS))
@@ -111,7 +115,7 @@ endif
 # building #
 ############
 
-compile_game: $(OBJECTS) $(RCFILES) $(RESOURCEBINARY) $(DEPENDENCIES)
+compile_game: cleandep $(OBJECTS) $(RCFILES) $(RESOURCEBINARY) $(DEPENDENCIES)
 	$(CXX) $(LDFLAGS) -o "$(OUTPUTNAME)" $(OBJECTS) $(RESOURCEBINARY) $(LDLIBS)
 
 ifeq ($(GMODE), Compile)

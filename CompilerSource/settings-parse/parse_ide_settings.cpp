@@ -47,7 +47,7 @@ using namespace std;
 
 string makedir = "";
 
-string fc(const char* fn);
+inline string fc(const char* fn);
 static void clear_ide_editables()
 {
   ofstream wto;
