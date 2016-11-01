@@ -5,6 +5,7 @@ Name: Basic GUI
 Identifier: BasicGUI
 Description: Adds basic GUI functions: buttons, labels, scrollbars etc.
 Build-date: 08/04/2015
+Default: false
 Icon: BasicGUI.png
 
 Depends: None
