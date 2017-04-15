@@ -36,13 +36,12 @@ namespace enigma
       //  visible,
 
       //the instance id is the same
-      int idn=inst->id;
+      int idn = inst->id;
 
-      //Destory the instance
-      if (perf) inst->myevent_destroy();
-      inst->unlink();
+      // Destroy the instance
+      instance_destroy(idn, perf);
 
-      //Create the instance
+      // Re-create the instance
       object_basic* ob = NULL;
       switch((int)obj)
       {
