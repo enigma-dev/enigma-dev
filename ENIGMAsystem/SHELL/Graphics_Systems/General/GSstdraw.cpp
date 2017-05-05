@@ -1,5 +1,6 @@
 /** Copyright (C) 2013 Robert B. Colton
 *** Copyright (C) 2014 Seth N. Hetu
+*** Copyright (C) 2016 Faissal I. Bensefia
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -357,9 +358,9 @@ void draw_sector(gs_scalar x, gs_scalar y, gs_scalar rx, gs_scalar ry, float a1,
   // TODO(JoshDreamland): Replace with settings macro to get from preferred unit to radians
   a1 *= M_PI/180;
   a2 *= M_PI/180;
-  
+
   gs_scalar pr = 2*M_PI/enigma::circleprecision;
-  
+
   if (outline) {
     draw_primitive_begin(pr_linestrip);
     draw_vertex(x, y);
@@ -421,94 +422,68 @@ void draw_roundrect(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, float
     gs_scalar t=x2;
     x2=x1;
     x1=t;
-  }
+    }
   if (y1>y2) {
     gs_scalar t=y2;
     y2=y1;
     y1=t;
   }
-  x1++, y1++; //This fixes an off-by-one error when drawing over a regular draw_rectangle
+
   gs_scalar pr = 2 * M_PI / enigma::circleprecision;
+  draw_primitive_begin(outline ? pr_linestrip : pr_trianglefan);
+
+  for (gs_scalar i = 0; i <= 2*M_PI*0.25; i += pr)
+    draw_vertex((x2+rad*cos(i))-rad,(y2+rad*sin(i))-rad);
+
+  for (gs_scalar i = 2*M_PI*0.24; i <= 2*M_PI*0.50; i+= pr)
+    draw_vertex((x1+rad*cos(i))+rad,(y2+rad*sin(i))-rad);
+
+  for (gs_scalar i = 2*M_PI*0.49;i <=2*M_PI*0.75;i += pr)
+    draw_vertex((x1+rad*cos(i))+rad,(y1+rad*sin(i))+rad);
+
+  for (gs_scalar i = 2*M_PI*0.74;i <=(2*M_PI);i += pr)
+    draw_vertex((x2+rad*cos(i))-rad,(y1+rad*sin(i))+rad);
+
   if (outline) {
-    draw_primitive_begin(pr_linestrip);
-  }else{
-    draw_primitive_begin(pr_trianglefan);
-  }
-  //Draw left 1/4 circle
-  for (gs_scalar i = M_PI; i > M_PI_2; i -= pr) {
-    gs_scalar xc1=cos(i)*rad,yc1=-sin(i)*rad;
-    draw_vertex(x1+rad+xc1, y1+rad+yc1);
-  }
-  draw_vertex(x1+rad, y1);
-  //Draw right 1/4 circle
-  for (gs_scalar i = M_PI_2; i > 0; i -= pr) {
-    gs_scalar xc1=cos(i)*rad,yc1=-sin(i)*rad;
-    draw_vertex(x2-rad+xc1, y1+rad+yc1);
-  }
-  draw_vertex(x2, y1+rad);
-  //Bottom right 1/4 circle
-  for (gs_scalar i = 2 * M_PI; i > M_PI+M_PI_2; i -= pr) {
-    gs_scalar xc1=cos(i)*rad,yc1=-sin(i)*rad;
-    draw_vertex(x2-rad+xc1, y2-rad+yc1);
-  }
-  draw_vertex(x2-rad, y2);
-  //Bottom left 1/4 circle
-  for (gs_scalar i = M_PI+M_PI_2; i > M_PI; i -= pr) {
-    gs_scalar xc1=cos(i)*rad,yc1=-sin(i)*rad;
-    draw_vertex(x1+rad+xc1, y2-rad+yc1);
-  }
-  draw_vertex(x1, y2-rad);
-  if (outline) {
-    draw_vertex(x1, y1+rad);
+      draw_vertex(x2,y2-rad);
   }
   draw_primitive_end();
 }
 
 void draw_roundrect_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, float rad, int col1, int col2, bool outline) {
+  gs_scalar alpha = draw_get_alpha();
   if (x1>x2) {
     gs_scalar t=x2;
     x2=x1;
     x1=t;
-  }
+    }
   if (y1>y2) {
     gs_scalar t=y2;
     y2=y1;
     y1=t;
   }
-  x1++, y1++; //This fixes an off-by-one error when drawing over a regular draw_rectangle
-  gs_scalar alpha = draw_get_alpha();
+
   gs_scalar pr = 2 * M_PI / enigma::circleprecision;
   if (outline) {
     draw_primitive_begin(pr_linestrip);
-  }else{
+  } else {
     draw_primitive_begin(pr_trianglefan);
-    draw_vertex_color(x1+(x2-x1)/2.0, y1+(y2-y1)/2.0, col1, alpha);
+    draw_vertex_color((x2+x1)/2,(y2+y1)/2, col1, alpha);
   }
-  //Draw left 1/4 circle
-  for (gs_scalar i = M_PI; i > M_PI_2; i -= pr) {
-    gs_scalar xc1=cos(i)*rad,yc1=-sin(i)*rad;
-    draw_vertex_color(x1+rad+xc1, y1+rad+yc1, col2, alpha);
-  }
-  draw_vertex_color(x1+rad, y1, col2, alpha);
-  //Draw right 1/4 circle
-  for (gs_scalar i = M_PI_2; i > 0; i -= pr) {
-    gs_scalar xc1=cos(i)*rad,yc1=-sin(i)*rad;
-    draw_vertex_color(x2-rad+xc1, y1+rad+yc1, col2, alpha);
-  }
-  draw_vertex_color(x2, y1+rad, col2, alpha);
-  //Bottom right 1/4 circle
-  for (gs_scalar i = 2 * M_PI; i > M_PI+M_PI_2; i -= pr) {
-    gs_scalar xc1=cos(i)*rad,yc1=-sin(i)*rad;
-    draw_vertex_color(x2-rad+xc1, y2-rad+yc1, col2, alpha);
-  }
-  draw_vertex_color(x2-rad, y2, col2, alpha);
-  //Bottom left 1/4 circle
-  for (gs_scalar i = M_PI+M_PI_2; i > M_PI; i -= pr) {
-    gs_scalar xc1=cos(i)*rad,yc1=-sin(i)*rad;
-    draw_vertex_color(x1+rad+xc1, y2-rad+yc1, col2, alpha);
-  }
-  draw_vertex_color(x1, y2-rad, col2, alpha);
-  draw_vertex_color(x1, y1+rad, col2, alpha);
+
+  for (gs_scalar i = 0; i <= 2*M_PI*0.25; i += pr)
+    draw_vertex_color((x2+rad*cos(i))-rad,(y2+rad*sin(i))-rad, col2, alpha);
+
+  for (gs_scalar i = 2*M_PI*0.24; i <= 2*M_PI*0.50; i+= pr)
+    draw_vertex_color((x1+rad*cos(i))+rad,(y2+rad*sin(i))-rad, col2, alpha);
+
+  for (gs_scalar i = 2*M_PI*0.49;i <=2*M_PI*0.75;i += pr)
+    draw_vertex_color((x1+rad*cos(i))+rad,(y1+rad*sin(i))+rad, col2, alpha);
+
+  for (gs_scalar i = 2*M_PI*0.74;i <=(2*M_PI);i += pr)
+    draw_vertex_color((x2+rad*cos(i))-rad,(y1+rad*sin(i))+rad, col2, alpha);
+
+  draw_vertex_color(x2,y2-rad, col2, alpha);
   draw_primitive_end();
 }
 
@@ -517,94 +492,68 @@ void draw_roundrect_ext(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, 
     gs_scalar t=x2;
     x2=x1;
     x1=t;
-  }
+    }
   if (y1>y2) {
     gs_scalar t=y2;
     y2=y1;
     y1=t;
   }
-  x1++, y1++; //This fixes an off-by-one error when drawing over a regular draw_rectangle
+
   gs_scalar pr = 2 * M_PI / enigma::circleprecision;
+  draw_primitive_begin(outline ? pr_linestrip : pr_trianglefan);
+
+  for (gs_scalar i = 0; i <= 2*M_PI*0.25; i += pr)
+    draw_vertex((x2+xrad*cos(i))-xrad,(y2+yrad*sin(i))-yrad);
+
+  for (gs_scalar i = 2*M_PI*0.24; i <= 2*M_PI*0.50; i+= pr)
+    draw_vertex((x1+xrad*cos(i))+xrad,(y2+yrad*sin(i))-yrad);
+
+  for (gs_scalar i = 2*M_PI*0.49;i <=2*M_PI*0.75;i += pr)
+    draw_vertex((x1+xrad*cos(i))+xrad,(y1+yrad*sin(i))+yrad);
+
+  for (gs_scalar i = 2*M_PI*0.74;i <=(2*M_PI);i += pr)
+    draw_vertex((x2+xrad*cos(i))-xrad,(y1+yrad*sin(i))+yrad);
+
   if (outline) {
-    draw_primitive_begin(pr_linestrip);
-  }else{
-    draw_primitive_begin(pr_trianglefan);
-  }
-  //Draw left 1/4 circle
-  for (gs_scalar i = M_PI; i > M_PI_2; i -= pr) {
-    gs_scalar xc1=cos(i)*xrad,yc1=-sin(i)*yrad;
-    draw_vertex(x1+xrad+xc1, y1+yrad+yc1);
-  }
-  draw_vertex(x1+xrad, y1);
-  //Draw right 1/4 circle
-  for (gs_scalar i = M_PI_2; i > 0; i -= pr) {
-    gs_scalar xc1=cos(i)*xrad,yc1=-sin(i)*yrad;
-    draw_vertex(x2-xrad+xc1, y1+yrad+yc1);
-  }
-  draw_vertex(x2, y1+yrad);
-  //Bottom right 1/4 circle
-  for (gs_scalar i = 2 * M_PI; i > M_PI+M_PI_2; i -= pr) {
-    gs_scalar xc1=cos(i)*xrad,yc1=-sin(i)*yrad;
-    draw_vertex(x2-xrad+xc1, y2-yrad+yc1);
-  }
-  draw_vertex(x2-xrad, y2);
-  //Bottom left 1/4 circle
-  for (gs_scalar i = M_PI+M_PI_2; i > M_PI; i -= pr) {
-    gs_scalar xc1=cos(i)*xrad,yc1=-sin(i)*yrad;
-    draw_vertex(x1+xrad+xc1, y2-yrad+yc1);
-  }
-  draw_vertex(x1, y2-yrad);
-  if (outline) {
-    draw_vertex(x1, y1+yrad);
+      draw_vertex(x2,y2-yrad);
   }
   draw_primitive_end();
 }
 
 void draw_roundrect_color_ext(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, float xrad, float yrad, int col1, int col2, bool outline) {
+  gs_scalar alpha = draw_get_alpha();
   if (x1>x2) {
     gs_scalar t=x2;
     x2=x1;
     x1=t;
-  }
+    }
   if (y1>y2) {
     gs_scalar t=y2;
     y2=y1;
     y1=t;
   }
-  x1++, y1++; //This fixes an off-by-one error when drawing over a regular draw_rectangle
-  gs_scalar alpha = draw_get_alpha();
+
   gs_scalar pr = 2 * M_PI / enigma::circleprecision;
   if (outline) {
     draw_primitive_begin(pr_linestrip);
-  }else{
+  } else {
     draw_primitive_begin(pr_trianglefan);
-    draw_vertex_color(x1+(x2-x1)/2.0, y1+(y2-y1)/2.0, col1, alpha);
+    draw_vertex_color((x2+x1)/2,(y2+y1)/2, col1, alpha);
   }
-  //Draw left 1/4 circle
-  for (gs_scalar i = M_PI; i > M_PI_2; i -= pr) {
-    gs_scalar xc1=cos(i)*xrad,yc1=-sin(i)*yrad;
-    draw_vertex_color(x1+xrad+xc1, y1+yrad+yc1, col2, alpha);
-  }
-  draw_vertex_color(x1+xrad, y1, col2, alpha);
-  //Draw right 1/4 circle
-  for (gs_scalar i = M_PI_2; i > 0; i -= pr) {
-    gs_scalar xc1=cos(i)*xrad,yc1=-sin(i)*yrad;
-    draw_vertex_color(x2-xrad+xc1, y1+yrad+yc1, col2, alpha);
-  }
-  draw_vertex_color(x2, y1+yrad, col2, alpha);
-  //Bottom right 1/4 circle
-  for (gs_scalar i = 2 * M_PI; i > M_PI+M_PI_2; i -= pr) {
-    gs_scalar xc1=cos(i)*xrad,yc1=-sin(i)*yrad;
-    draw_vertex_color(x2-xrad+xc1, y2-yrad+yc1, col2, alpha);
-  }
-  draw_vertex_color(x2-xrad, y2, col2, alpha);
-  //Bottom left 1/4 circle
-  for (gs_scalar i = M_PI+M_PI_2; i > M_PI; i -= pr) {
-    gs_scalar xc1=cos(i)*xrad,yc1=-sin(i)*yrad;
-    draw_vertex_color(x1+xrad+xc1, y2-yrad+yc1, col2, alpha);
-  }
-  draw_vertex_color(x1, y2-yrad, col2, alpha);
-  draw_vertex_color(x1, y1+yrad, col2, alpha);
+
+  for (gs_scalar i = 0; i <= 2*M_PI*0.25; i += pr)
+    draw_vertex_color((x2+xrad*cos(i))-xrad,(y2+yrad*sin(i))-yrad, col2, alpha);
+
+  for (gs_scalar i = 2*M_PI*0.24; i <= 2*M_PI*0.50; i+= pr)
+    draw_vertex_color((x1+xrad*cos(i))+xrad,(y2+yrad*sin(i))-yrad, col2, alpha);
+
+  for (gs_scalar i = 2*M_PI*0.49;i <=2*M_PI*0.75;i += pr)
+    draw_vertex_color((x1+xrad*cos(i))+xrad,(y1+yrad*sin(i))+yrad, col2, alpha);
+
+  for (gs_scalar i = 2*M_PI*0.74;i <=(2*M_PI);i += pr)
+    draw_vertex_color((x2+xrad*cos(i))-xrad,(y1+yrad*sin(i))+yrad, col2, alpha);
+
+  draw_vertex_color(x2,y2-yrad, col2, alpha);
   draw_primitive_end();
 }
 
@@ -951,4 +900,3 @@ void draw_polygon_end(bool outline, bool allowHoles)
 }
 
 }
-
