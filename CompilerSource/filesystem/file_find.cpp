@@ -46,23 +46,25 @@ using namespace std;
   string file_find_first(string name,int attributes) 
   {
     if (current_find != INVALID_HANDLE_VALUE) file_find_close();
-    
+
     ff_attribs = attributes;
     current_find = FindFirstFile(name.c_str(), &found);
+    if (current_find == INVALID_HANDLE_VALUE) return "";
+
     return ff_matches() ? found.cFileName : file_find_next();
   }
 
   string file_find_next()
   {
     if (current_find == INVALID_HANDLE_VALUE) return "";
-    
+
     do {
       if (!FindNextFile(current_find, &found)) {
         file_find_close();
         return "";
       }
     } while (!ff_matches());
-    
+
     return found.cFileName;
   }
 
