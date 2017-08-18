@@ -45,7 +45,7 @@ using namespace std;
 
   string file_find_first(string name,int attributes) 
   {
-    if (current_find!=INVALID_HANDLE_VALUE) file_find_close();
+    if (current_find != INVALID_HANDLE_VALUE) file_find_close();
     
     ff_attribs = attributes;
     current_find = FindFirstFile(name.c_str(), &found);
@@ -58,7 +58,7 @@ using namespace std;
     
     do {
       if (!FindNextFile(current_find, &found)) {
-        current_find = INVALID_HANDLE_VALUE;
+        file_find_close();
         return "";
       }
     } while (!ff_matches());
