@@ -64,7 +64,7 @@ struct B2DBody {
 
   ~B2DBody()
   {
-
+    this->body->GetWorld()->DestroyBody(this->body);
   }
 
 }; 
