@@ -38,44 +38,39 @@ using namespace std;
   static HANDLE current_find = INVALID_HANDLE_VALUE;
   static WIN32_FIND_DATA found;
 
+  static bool ff_matches() {
+    return found.dwFileAttributes == FILE_ATTRIBUTE_NORMAL
+        || (ff_attribs ^ found.dwFileAttributes);
+  }
+
   string file_find_first(string name,int attributes) 
   {
-    if (current_find!=INVALID_HANDLE_VALUE)
-    { FindClose(current_find); current_find=INVALID_HANDLE_VALUE; }
+    if (current_find!=INVALID_HANDLE_VALUE) file_find_close();
     
-    ff_attribs=attributes;
-    
-    HANDLE d=FindFirstFile(name.c_str(),&found);
-    if (d==INVALID_HANDLE_VALUE) return "";
-    while (found.dwFileAttributes!=FILE_ATTRIBUTE_NORMAL
-        && !(ff_attribs^found.dwFileAttributes)) {
-      if (FindNextFile(d,&found)==0)
-      return "";
-    }
-    
-    current_find=d;
-    return found.cFileName;
+    ff_attribs = attributes;
+    current_find = FindFirstFile(name.c_str(), &found);
+    return ff_matches() ? found.cFileName : file_find_next();
   }
 
   string file_find_next()
   {
-    if (current_find==INVALID_HANDLE_VALUE)
-    return "";
+    if (current_find == INVALID_HANDLE_VALUE) return "";
     
-    if (FindNextFile(current_find,&found)==0)
-    return "";
-    
-    while (found.dwFileAttributes!=FILE_ATTRIBUTE_NORMAL
-        && !(ff_attribs^found.dwFileAttributes)) {
-      if (FindNextFile(current_find,&found)==0)
-      return "";
-    }
+    do {
+      if (!FindNextFile(current_find, &found)) {
+        current_find = INVALID_HANDLE_VALUE;
+        return "";
+      }
+    } while (!ff_matches());
     
     return found.cFileName;
   }
 
   void file_find_close() {
+    if (current_find == INVALID_HANDLE_VALUE) return;
+
     FindClose(current_find);
+    current_find = INVALID_HANDLE_VALUE;
   }
 #else
   #include <sys/types.h>
