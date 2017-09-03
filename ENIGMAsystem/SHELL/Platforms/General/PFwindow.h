@@ -15,6 +15,7 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
+#include <string>
 
 #ifndef ENIGMA_PLATFORM_WINDOW_H
 #define ENIGMA_PLATFORM_WINDOW_H
@@ -99,8 +100,8 @@ int window_get_y();
 int window_get_width();
 int window_get_height();
 
-void window_set_caption(string caption);
-string window_get_caption();
+void window_set_caption(std::string caption);
+std::string window_get_caption();
 void window_set_color(int color);
 int window_get_color();
 void window_set_alpha(double alpha);
@@ -135,8 +136,8 @@ int window_mouse_get_y();
 int window_view_mouse_get_x(int id);
 int window_view_mouse_get_y(int id);
 
-string clipboard_get_text();
-void clipboard_set_text(string text);
+std::string clipboard_get_text();
+void clipboard_set_text(std::string text);
 bool clipboard_has_text();
 
 }
