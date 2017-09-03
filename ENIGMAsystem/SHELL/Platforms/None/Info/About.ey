@@ -1,0 +1,11 @@
+%e-yaml
+---
+
+Name: None
+Identifier: None
+Represents: None
+Description: Run without using a windowing system (headless), intended primarily for servers.
+Author: Faissaloo
+
+Depends:
+	Build-Platforms: Windows, Linux, MacOSX

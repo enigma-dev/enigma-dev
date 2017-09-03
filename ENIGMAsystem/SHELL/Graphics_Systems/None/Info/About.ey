@@ -1,0 +1,12 @@
+%e-yaml
+---
+
+Name: None
+Identifier: None
+Description: Run without displaying graphics
+Author: Faissaloo
+
+Depends:
+
+Represents:
+	Build-platforms: Windows, Linux, MacOSX
