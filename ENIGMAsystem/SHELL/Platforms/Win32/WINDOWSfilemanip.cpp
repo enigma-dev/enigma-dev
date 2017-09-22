@@ -144,6 +144,13 @@ int file_rename(std::string oldname,std::string newname)
     std::replace(str1.begin(),str1.end(),'/','\\');
     std::replace(str2.begin(),str2.end(),'/','\\');
 
+    char rpath1[MAX_PATH];
+    char rpath2[MAX_PATH];
+    GetFullPathName((char *)str1.c_str(),MAX_PATH,rpath1,NULL);
+    GetFullPathName((char *)str2.c_str(),MAX_PATH,rpath2,NULL);
+    str1 = string(rpath1);
+    str2 = string(rpath2);
+
     if (str1 != str2)
     {
         struct stat sb1;
@@ -165,6 +172,13 @@ int file_copy(std::string fname,std::string newname)
     std::string str2(newname);
     std::replace(str1.begin(),str1.end(),'/','\\');
     std::replace(str2.begin(),str2.end(),'/','\\');
+
+    char rpath1[MAX_PATH];
+    char rpath2[MAX_PATH];
+    GetFullPathName((char *)str1.c_str(),MAX_PATH,rpath1,NULL);
+    GetFullPathName((char *)str2.c_str(),MAX_PATH,rpath2,NULL);
+    str1 = string(rpath1);
+    str2 = string(rpath2);
 
     if (str1 != str2)
     {
@@ -336,6 +350,13 @@ int directory_rename(std::string oldname,std::string newname)
         }
     }
 
+    char rpath1[MAX_PATH];
+    char rpath2[MAX_PATH];
+    GetFullPathName((char *)str1.c_str(),MAX_PATH,rpath1,NULL);
+    GetFullPathName((char *)str2.c_str(),MAX_PATH,rpath2,NULL);
+    str1 = string(rpath1);
+    str2 = string(rpath2);
+
     if (str1 != str2)
     {
         struct stat sb1;
@@ -344,7 +365,10 @@ int directory_rename(std::string oldname,std::string newname)
             S_ISDIR(sb1.st_mode) &&
             stat((char *)str2.c_str(),&sb2) != 0)
         {
-            return (rename((char *)str1.c_str(),(char *)str2.c_str()) == 0);
+            if (str1 != str2.substr(0,str1.length()))
+            {
+                return (rename((char *)str1.c_str(),(char *)str2.c_str()) == 0);
+            }
         }
     }
 
@@ -373,6 +397,13 @@ int directory_copy(std::string dname,std::string newname)
         }
     }
 
+    char rpath1[MAX_PATH];
+    char rpath2[MAX_PATH];
+    GetFullPathName((char *)str1.c_str(),MAX_PATH,rpath1,NULL);
+    GetFullPathName((char *)str2.c_str(),MAX_PATH,rpath2,NULL);
+    str1 = string(rpath1);
+    str2 = string(rpath2);
+
     if (str1 != str2)
     {
         struct stat sb1;
@@ -381,7 +412,7 @@ int directory_copy(std::string dname,std::string newname)
             S_ISDIR(sb1.st_mode) &&
             stat((char *)str2.c_str(),&sb2) != 0)
         {
-            if (str1 != str2.substr(0,str1.length()) && str2 != str1.substr(0,str2.length()))
+            if (str1 != str2.substr(0,str1.length()))
             {
                 std::string strSource;
                 std::string strDestination;
