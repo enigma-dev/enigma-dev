@@ -335,6 +335,13 @@ int directory_rename(std::string oldname,std::string newname)
     std::replace(str1.begin(),str1.end(),'/','\\');
     std::replace(str2.begin(),str2.end(),'/','\\');
 
+    char rpath1[MAX_PATH];
+    char rpath2[MAX_PATH];
+    GetFullPathName((char *)str1.c_str(),MAX_PATH,rpath1,NULL);
+    GetFullPathName((char *)str2.c_str(),MAX_PATH,rpath2,NULL);
+    str1 = std::string(rpath1);
+    str2 = std::string(rpath2);
+
     if (!str1.empty())
     {
         while (*str1.rbegin() == '\\')
@@ -350,12 +357,12 @@ int directory_rename(std::string oldname,std::string newname)
         }
     }
 
-    char rpath1[MAX_PATH];
-    char rpath2[MAX_PATH];
-    GetFullPathName((char *)str1.c_str(),MAX_PATH,rpath1,NULL);
-    GetFullPathName((char *)str2.c_str(),MAX_PATH,rpath2,NULL);
-    str1 = std::string(rpath1);
-    str2 = std::string(rpath2);
+    size_t slash1;
+    size_t slash2;
+    string dir1(str1);
+    string dir2(str2);
+    slash1 = dir1.find_last_of("\\");
+    slash2 = dir2.find_last_of("\\");
 
     if (str1 != str2)
     {
@@ -365,7 +372,8 @@ int directory_rename(std::string oldname,std::string newname)
             S_ISDIR(sb1.st_mode) &&
             stat((char *)str2.c_str(),&sb2) != 0)
         {
-            if (str1 != str2.substr(0,str1.length()))
+            if (str1 != str2.substr(0,str1.length()) ||
+                dir1.substr(0,slash1) == dir2.substr(0,slash2))
             {
                 return (rename((char *)str1.c_str(),(char *)str2.c_str()) == 0);
             }
@@ -382,6 +390,13 @@ int directory_copy(std::string dname,std::string newname)
     std::replace(str1.begin(),str1.end(),'/','\\');
     std::replace(str2.begin(),str2.end(),'/','\\');
 
+    char rpath1[MAX_PATH];
+    char rpath2[MAX_PATH];
+    GetFullPathName((char *)str1.c_str(),MAX_PATH,rpath1,NULL);
+    GetFullPathName((char *)str2.c_str(),MAX_PATH,rpath2,NULL);
+    str1 = std::string(rpath1);
+    str2 = std::string(rpath2);
+
     if (!str1.empty())
     {
         while (*str1.rbegin() == '\\')
@@ -397,12 +412,12 @@ int directory_copy(std::string dname,std::string newname)
         }
     }
 
-    char rpath1[MAX_PATH];
-    char rpath2[MAX_PATH];
-    GetFullPathName((char *)str1.c_str(),MAX_PATH,rpath1,NULL);
-    GetFullPathName((char *)str2.c_str(),MAX_PATH,rpath2,NULL);
-    str1 = std::string(rpath1);
-    str2 = std::string(rpath2);
+    size_t slash1;
+    size_t slash2;
+    string dir1(str1);
+    string dir2(str2);
+    slash1 = dir1.find_last_of("\\");
+    slash2 = dir2.find_last_of("\\");
 
     if (str1 != str2)
     {
@@ -412,7 +427,8 @@ int directory_copy(std::string dname,std::string newname)
             S_ISDIR(sb1.st_mode) &&
             stat((char *)str2.c_str(),&sb2) != 0)
         {
-            if (str1 != str2.substr(0,str1.length()))
+            if (str1 != str2.substr(0,str1.length()) ||
+                dir1.substr(0,slash1) == dir2.substr(0,slash2))
             {
                 std::string strSource;
                 std::string strDestination;
