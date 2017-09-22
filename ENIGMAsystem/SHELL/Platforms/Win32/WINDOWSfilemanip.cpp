@@ -148,8 +148,8 @@ int file_rename(std::string oldname,std::string newname)
     char rpath2[MAX_PATH];
     GetFullPathName((char *)str1.c_str(),MAX_PATH,rpath1,NULL);
     GetFullPathName((char *)str2.c_str(),MAX_PATH,rpath2,NULL);
-    str1 = string(rpath1);
-    str2 = string(rpath2);
+    str1 = std::string(rpath1);
+    str2 = std::string(rpath2);
 
     if (str1 != str2)
     {
@@ -177,8 +177,8 @@ int file_copy(std::string fname,std::string newname)
     char rpath2[MAX_PATH];
     GetFullPathName((char *)str1.c_str(),MAX_PATH,rpath1,NULL);
     GetFullPathName((char *)str2.c_str(),MAX_PATH,rpath2,NULL);
-    str1 = string(rpath1);
-    str2 = string(rpath2);
+    str1 = std::string(rpath1);
+    str2 = std::string(rpath2);
 
     if (str1 != str2)
     {
@@ -354,8 +354,8 @@ int directory_rename(std::string oldname,std::string newname)
     char rpath2[MAX_PATH];
     GetFullPathName((char *)str1.c_str(),MAX_PATH,rpath1,NULL);
     GetFullPathName((char *)str2.c_str(),MAX_PATH,rpath2,NULL);
-    str1 = string(rpath1);
-    str2 = string(rpath2);
+    str1 = std::string(rpath1);
+    str2 = std::string(rpath2);
 
     if (str1 != str2)
     {
@@ -401,8 +401,8 @@ int directory_copy(std::string dname,std::string newname)
     char rpath2[MAX_PATH];
     GetFullPathName((char *)str1.c_str(),MAX_PATH,rpath1,NULL);
     GetFullPathName((char *)str2.c_str(),MAX_PATH,rpath2,NULL);
-    str1 = string(rpath1);
-    str2 = string(rpath2);
+    str1 = std::string(rpath1);
+    str2 = std::string(rpath2);
 
     if (str1 != str2)
     {
