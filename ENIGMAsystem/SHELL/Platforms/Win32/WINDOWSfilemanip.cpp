@@ -36,6 +36,7 @@
 #include <fstream>
 #include <algorithm>
 #include <direct.h>
+#include <dirent.h>
 #include <tchar.h>
 
 #include "../General/PFini.h"
@@ -182,20 +183,30 @@ int file_copy(std::string fname,std::string newname)
 
     if (str1 != str2)
     {
-        struct stat sb;
-        if (stat((char *)str1.c_str(),&sb) == 0 &&
-            S_ISREG(sb.st_mode))
+        struct stat sb1;
+        if (stat((char *)str1.c_str(),&sb1) == 0 &&
+            S_ISREG(sb1.st_mode))
         {
-            std::ifstream srce((char *)str1.c_str(),std::ios::binary);
-            if (srce.tellg() < 0) return 0;
+            double ret = 0;
+            size_t sz1 = sb1.st_size;
 
-            std::ofstream dest((char *)str2.c_str(),std::ios::binary);
-            if (dest.tellp() < 0) return 0;
+            ifstream srce((char *)str1.c_str(),ios::binary);
+            ret = (srce.tellg() >= 0);
+
+            ofstream dest((char *)str2.c_str(),ios::binary);
+            ret = (dest.tellp() >= 0);
 
             dest << srce.rdbuf();
-            if (srce.tellg()-dest.tellp() != 0) return 0;
+            ret = (srce.tellg()-dest.tellp() == 0);
 
-            return 1;
+            struct stat sb2;
+            if (stat((char *)str2.c_str(),&sb2) == 0 &&
+                S_ISREG(sb2.st_mode))
+            {
+                size_t sz2 = sb2.st_size;
+                return ((ret == 1) ||
+                    (sz1 == 0 && sz2 == 0));
+            }
         }
     }
 
@@ -430,50 +441,46 @@ int directory_copy(std::string dname,std::string newname)
             if (str1 != str2.substr(0,str1.length()) ||
                 dir1.substr(0,slash1) == dir2.substr(0,slash2))
             {
-                std::string strSource;
-                std::string strDestination;
-                std::string strPattern;
-
-                HANDLE hFile;
-                WIN32_FIND_DATA FileInformation;
-
-                strPattern = str1+"\\*.*";
-
-                if (!CreateDirectory(str2.c_str(),0))
+                if (!directory_create((char *)str2.c_str()))
                     return 0;
 
-                hFile = FindFirstFile(strPattern.c_str(),&FileInformation);
-                if (hFile != INVALID_HANDLE_VALUE)
+                DIR *dir;
+                struct dirent *ent;
+                if ((dir = opendir((char *)str1.c_str())) != NULL)
                 {
-                    do
+                    while ((ent = readdir(dir)) != NULL)
                     {
-                        if (FileInformation.cFileName[0] != '.')
+                        if (ent->d_name != string("."))
                         {
-                            strSource.erase();
-                            strDestination.erase();
-
-                            strSource = str1+"\\"+FileInformation.cFileName;
-                            strDestination = str2+"\\"+FileInformation.cFileName;
-
-                            if (FileInformation.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+                            if (ent->d_name != string(".."))
                             {
-                                if (!directory_copy((char *)strSource.c_str(),(char *)strDestination.c_str()))
-                                    return 0;
-                            }
-                            else
-                            {
-                                if (!CopyFile(strSource.c_str(),strDestination.c_str(),true))
-                                    return 0;
+                                string copy_sorc = str1+"\\"+ent->d_name;
+                                string copy_dest = str2+"\\"+ent->d_name;
+
+                                struct stat sb3;
+                                if (stat((char *)copy_sorc.c_str(),&sb3) == 0 &&
+                                    S_ISDIR(sb3.st_mode))
+                                {
+                                    if (!directory_copy((char *)copy_sorc.c_str(),(char *)copy_dest.c_str()))
+                                        return 0;
+                                }
+
+                                struct stat sb4;
+                                if (stat((char *)copy_sorc.c_str(),&sb4) == 0 &&
+                                    S_ISREG(sb4.st_mode))
+                                {
+                                    if (!file_copy((char *)copy_sorc.c_str(),(char *)copy_dest.c_str()))
+                                        return 0;
+                                }
                             }
                         }
                     }
-                    while (FindNextFile(hFile,&FileInformation) == true);
 
-                    FindClose(hFile);
-
-                    DWORD dwError = GetLastError();
-                    if (dwError != ERROR_NO_MORE_FILES)
-                        return 0;
+                    closedir(dir);
+                }
+                else
+                {
+                    return 0;
                 }
 
                 return 1;
