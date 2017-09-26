@@ -37,6 +37,7 @@
 #include <algorithm>
 #include <direct.h>
 #include <dirent.h>
+#include <libgen.h>
 #include <tchar.h>
 
 #include "../General/PFini.h"
@@ -152,7 +153,30 @@ int file_rename(std::string oldname,std::string newname)
     str1 = std::string(rpath1);
     str2 = std::string(rpath2);
 
-    if (str1 != str2)
+    size_t slash1;
+    size_t slash2;
+    std::string dir1(str1);
+    std::string dir2(str2);
+
+    if (dir1.find('\\') != std::string::npos)
+        slash1 = dir1.find_last_of("\\");
+    else
+    {
+        dir1 = std::string("");
+        slash1 = 0;
+    }
+
+    if (dir2.find('\\') != std::string::npos)
+        slash2 = dir2.find_last_of("\\");
+    else
+    {
+        dir2 = std::string("");
+        slash2 = 0;
+    }
+
+    int proceed = (dir1.substr(0,slash1) != dir2.substr(0,slash2));
+
+    if (proceed || basename((char *)str1.c_str()) != basename((char *)str2.c_str()))
     {
         struct stat sb1;
         struct stat sb2;
@@ -181,7 +205,30 @@ int file_copy(std::string fname,std::string newname)
     str1 = std::string(rpath1);
     str2 = std::string(rpath2);
 
-    if (str1 != str2)
+    size_t slash1;
+    size_t slash2;
+    std::string dir1(str1);
+    std::string dir2(str2);
+
+    if (dir1.find('\\') != std::string::npos)
+        slash1 = dir1.find_last_of("\\");
+    else
+    {
+        dir1 = std::string("");
+        slash1 = 0;
+    }
+
+    if (dir2.find('\\') != std::string::npos)
+        slash2 = dir2.find_last_of("\\");
+    else
+    {
+        dir2 = std::string("");
+        slash2 = 0;
+    }
+
+    int proceed = (dir1.substr(0,slash1) != dir2.substr(0,slash2));
+
+    if (proceed || basename((char *)str1.c_str()) != basename((char *)str2.c_str()))
     {
         struct stat sb1;
         if (stat((char *)str1.c_str(),&sb1) == 0 &&
@@ -190,10 +237,10 @@ int file_copy(std::string fname,std::string newname)
             double ret = 0;
             size_t sz1 = sb1.st_size;
 
-            ifstream srce((char *)str1.c_str(),ios::binary);
+            std::ifstream srce((char *)str1.c_str(),std::ios::binary);
             ret = (srce.tellg() >= 0);
 
-            ofstream dest((char *)str2.c_str(),ios::binary);
+            std::ofstream dest((char *)str2.c_str(),std::ios::binary);
             ret = (dest.tellp() >= 0);
 
             dest << srce.rdbuf();
@@ -222,7 +269,7 @@ int directory_exists(std::string dname)
     {
         while (*str.rbegin() == '\\')
         {
-                str.erase(str.size()-1);
+            str.erase(str.size()-1);
         }
     }
 
@@ -370,12 +417,29 @@ int directory_rename(std::string oldname,std::string newname)
 
     size_t slash1;
     size_t slash2;
-    string dir1(str1);
-    string dir2(str2);
-    slash1 = dir1.find_last_of("\\");
-    slash2 = dir2.find_last_of("\\");
+    std::string dir1(str1);
+    std::string dir2(str2);
 
-    if (str1 != str2)
+    if (dir1.find('\\') != std::string::npos)
+        slash1 = dir1.find_last_of("\\");
+    else
+    {
+        dir1 = std::string("");
+        slash1 = 0;
+    }
+
+    if (dir2.find('\\') != std::string::npos)
+        slash2 = dir2.find_last_of("\\");
+    else
+    {
+        dir2 = std::string("");
+        slash2 = 0;
+    }
+
+    int proceed1 = (str1 != str2.substr(0,str1.length()));
+    int proceed2 = (dir1.substr(0,slash1) == dir2.substr(0,slash2));
+
+    if (proceed1 || (proceed2 && basename((char *)str1.c_str()) != basename((char *)str2.c_str())))
     {
         struct stat sb1;
         struct stat sb2;
@@ -383,11 +447,7 @@ int directory_rename(std::string oldname,std::string newname)
             S_ISDIR(sb1.st_mode) &&
             stat((char *)str2.c_str(),&sb2) != 0)
         {
-            if (str1 != str2.substr(0,str1.length()) ||
-                dir1.substr(0,slash1) == dir2.substr(0,slash2))
-            {
-                return (rename((char *)str1.c_str(),(char *)str2.c_str()) == 0);
-            }
+            return (rename((char *)str1.c_str(),(char *)str2.c_str()) == 0);
         }
     }
 
@@ -425,12 +485,29 @@ int directory_copy(std::string dname,std::string newname)
 
     size_t slash1;
     size_t slash2;
-    string dir1(str1);
-    string dir2(str2);
-    slash1 = dir1.find_last_of("\\");
-    slash2 = dir2.find_last_of("\\");
+    std::string dir1(str1);
+    std::string dir2(str2);
 
-    if (str1 != str2)
+    if (dir1.find('\\') != std::string::npos)
+        slash1 = dir1.find_last_of("\\");
+    else
+    {
+        dir1 = std::string("");
+        slash1 = 0;
+    }
+
+    if (dir2.find('\\') != std::string::npos)
+        slash2 = dir2.find_last_of("\\");
+    else
+    {
+        dir2 = std::string("");
+        slash2 = 0;
+    }
+
+    int proceed1 = (str1 != str2.substr(0,str1.length()));
+    int proceed2 = (dir1.substr(0,slash1) == dir2.substr(0,slash2));
+
+    if (proceed1 || (proceed2 && basename((char *)str1.c_str()) != basename((char *)str2.c_str())))
     {
         struct stat sb1;
         struct stat sb2;
@@ -438,53 +515,49 @@ int directory_copy(std::string dname,std::string newname)
             S_ISDIR(sb1.st_mode) &&
             stat((char *)str2.c_str(),&sb2) != 0)
         {
-            if (str1 != str2.substr(0,str1.length()) ||
-                dir1.substr(0,slash1) == dir2.substr(0,slash2))
+            if (!directory_create((char *)str2.c_str()))
+                return 0;
+
+            DIR *dir;
+            struct dirent *ent;
+            if ((dir = opendir((char *)str1.c_str())) != NULL)
             {
-                if (!directory_create((char *)str2.c_str()))
-                    return 0;
-
-                DIR *dir;
-                struct dirent *ent;
-                if ((dir = opendir((char *)str1.c_str())) != NULL)
+                while ((ent = readdir(dir)) != NULL)
                 {
-                    while ((ent = readdir(dir)) != NULL)
+                    if (ent->d_name != std::string("."))
                     {
-                        if (ent->d_name != string("."))
+                        if (ent->d_name != std::string(".."))
                         {
-                            if (ent->d_name != string(".."))
+                            std::string copy_sorc = str1+"\\"+ent->d_name;
+                            std::string copy_dest = str2+"\\"+ent->d_name;
+
+                            struct stat sb3;
+                            if (stat((char *)copy_sorc.c_str(),&sb3) == 0 &&
+                                S_ISDIR(sb3.st_mode))
                             {
-                                string copy_sorc = str1+"\\"+ent->d_name;
-                                string copy_dest = str2+"\\"+ent->d_name;
+                                if (!directory_copy((char *)copy_sorc.c_str(),(char *)copy_dest.c_str()))
+                                    return 0;
+                            }
 
-                                struct stat sb3;
-                                if (stat((char *)copy_sorc.c_str(),&sb3) == 0 &&
-                                    S_ISDIR(sb3.st_mode))
-                                {
-                                    if (!directory_copy((char *)copy_sorc.c_str(),(char *)copy_dest.c_str()))
-                                        return 0;
-                                }
-
-                                struct stat sb4;
-                                if (stat((char *)copy_sorc.c_str(),&sb4) == 0 &&
-                                    S_ISREG(sb4.st_mode))
-                                {
-                                    if (!file_copy((char *)copy_sorc.c_str(),(char *)copy_dest.c_str()))
-                                        return 0;
-                                }
+                            struct stat sb4;
+                            if (stat((char *)copy_sorc.c_str(),&sb4) == 0 &&
+                                S_ISREG(sb4.st_mode))
+                            {
+                                if (!file_copy((char *)copy_sorc.c_str(),(char *)copy_dest.c_str()))
+                                    return 0;
                             }
                         }
                     }
-
-                    closedir(dir);
-                }
-                else
-                {
-                    return 0;
                 }
 
-                return 1;
+                closedir(dir);
             }
+            else
+            {
+                return 0;
+            }
+
+            return 1;
         }
     }
 
