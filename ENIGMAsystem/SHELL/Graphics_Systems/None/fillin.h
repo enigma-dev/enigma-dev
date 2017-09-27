@@ -49,7 +49,6 @@ namespace enigma
 	void graphics_replace_texture_alpha_from_texture(int tex, int copy_tex);
 	void graphics_delete_texture(int texid);
 	unsigned char* graphics_get_texture_pixeldata(unsigned texture, unsigned* fullwidth, unsigned* fullheight);
-	void graphics_samplers_apply();
 
 	bool fill_complex_polygon(const std::list<PolyVertex>& vertices, int defaultColor, bool allowHoles);
 }
@@ -57,10 +56,7 @@ namespace enigma
 namespace enigma_user
 {
 	string draw_get_graphics_error();
-	unsigned vertex_format_create();
 
-	void vertex_format_destroy(int id);
-	bool vertex_format_exists(int id);
 	unsigned vertex_create_buffer();
 	unsigned vertex_create_buffer_ext(unsigned size);
 	void vertex_delete_buffer(int buffer);
@@ -161,33 +157,18 @@ namespace enigma_user
 	int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, int xorig, int yorig);
 	void sprite_add_from_screen(int id, int x, int y, int w, int h, bool removeback, bool smooth);
 
-	int glsl_shader_create(int type);
-	int glsl_shader_load(int id, string fname);
-	bool glsl_shader_compile(int id);
-	bool glsl_shader_get_compiled(int id);
-	string glsl_shader_get_infolog(int id);
-	void glsl_shader_free(int id);
-	int glsl_program_create();
-	bool glsl_program_link(int id);
-	bool glsl_program_validate(int id);
-	void glsl_program_attach(int id, int sid);
-	void glsl_program_detach(int id, int sid);
-	void glsl_program_set(int id);
-	void glsl_program_reset();
-	void glsl_program_free(int id);
-	int glsl_get_uniform_location(int program, string name);
-	void glsl_uniformf(int location, float v0);
-	void glsl_uniformf(int location, float v0, float v1);
-	void glsl_uniformf(int location, float v0, float v1, float v2);
-	void glsl_uniformf(int location, float v0, float v1, float v2, float v3);
-	void glsl_uniformi(int location, int v0);
-	void glsl_uniformi(int location, int v0, int v1);
-	void glsl_uniformi(int location, int v0, int v1, int v2);
-	void glsl_uniformi(int location, int v0, int v1, int v2, int v3);
-	void glsl_uniformui(int location, unsigned v0);
-	void glsl_uniformui(int location, unsigned v0, unsigned v1);
-	void glsl_uniformui(int location, unsigned v0, unsigned v1, unsigned v2);
-	void glsl_uniformui(int location, unsigned v0, unsigned v1, unsigned v2, unsigned v3);
+	void shader_set(int id);
+	void shader_reset();
+	int shader_get_uniform(int program, string name);
+	int shader_get_sampler_index(int program, string name);
+	void shader_set_uniform_f(int location, float v0);
+	void shader_set_uniform_f(int location, float v0, float v1);
+	void shader_set_uniform_f(int location, float v0, float v1, float v2);
+	void shader_set_uniform_f(int location, float v0, float v1, float v2, float v3);
+	void shader_set_uniform_i(int location, int v0);
+	void shader_set_uniform_i(int location, int v0, int v1);
+	void shader_set_uniform_i(int location, int v0, int v1, int v2);
+	void shader_set_uniform_i(int location, int v0, int v1, int v2, int v3);
 
 	extern int window_get_width();
 	extern int window_get_height();
