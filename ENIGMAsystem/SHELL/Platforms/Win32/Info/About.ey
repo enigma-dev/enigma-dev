@@ -3,7 +3,8 @@
 
 Name: Windows
 Identifier: Win32
-Represents: Windows
+Represents:
+	Build-Platforms: Windows
 Description: Run on Microsoft Windows.
 Author: Josh Ventura
 
