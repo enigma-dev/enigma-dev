@@ -3,7 +3,8 @@
 
 Name: Linux X11
 Identifier: xlib
-Represents: Linux
+Represents:
+	Build-Platforms: Linux
 Description: Run on any Linux distribution powered by the X Window Server.
 Author: IsmAvatar, Josh Ventura
 

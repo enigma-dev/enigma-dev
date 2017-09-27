@@ -3,7 +3,8 @@
 
 Name: Android
 Identifier: Android
-Represents: Android
+Represents:
+	Build-Platforms: Android
 Description: Build for Android.
 Author: TGMG
 
