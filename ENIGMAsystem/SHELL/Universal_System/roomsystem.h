@@ -30,6 +30,13 @@
 
 #include "var4.h"
 
+namespace enigma
+{
+
+void follow_object(int vob, size_t vc);
+
+}
+
 namespace enigma_user
 {
 
