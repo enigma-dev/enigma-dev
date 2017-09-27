@@ -25,7 +25,6 @@
 #include <math.h>
 
 using namespace std;
-#include "OPENGLStd.h"
 #include "Universal_System/shaderstruct.h"
 #include "Universal_System/scalar.h"
 #include "Universal_System/var4.h"
@@ -81,15 +80,9 @@ namespace enigma {
 	unsigned char currentcolor[4] = {0,0,0,255};
 	int currentblendmode[2] = {0,0};
 	int currentblendtype = 0;
-	bool glew_isgo;
-	bool pbo_isgo;
 
 	unordered_map<unsigned int, surface> surface_array;
 	size_t surface_max=0;
 
 	extern unsigned char currentcolor[4];
-}
-
-namespace enigma_user {
-	extern int room_width, room_height/*, sprite_idmax*/;
 }
