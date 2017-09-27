@@ -1,4 +1,8 @@
-/** Copyright (C) 2013 Robert B. Colton
+/** Copyright (C) 2017 Faissal I. Bensefia
+*** Copyright (C) 2008-2011 IsmAvatar <cmagicj@nni.com>, Josh Ventura
+*** Copyright (C) 2013 Robert B. Colton
+*** Copyright (C) 2014 Seth N. Hetu
+*** Copyright (C) 2015 Harijs Grinbergs
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,30 +19,28 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <iostream>
 #include <string>
+using std::string;
 
-#include "Direct3D11Headers.h"
-using namespace std;
-#include "DIRECTX11Std.h"
-#include "Universal_System/var4.h"
-#include "Universal_System/roomsystem.h" // Room dimensions.
-#include "Graphics_Systems/graphics_mandatory.h" // Room dimensions.
-namespace enigma
-{
-  unsigned bound_texture=0;
-  bool pbo_isgo;
-
-  void graphicssystem_initialize()
-  {
-
-  }
+namespace enigma {
+  void input_push();
 }
+
+#include "../General/PFwindow.h"
+#include "../General/PFmain.h"
+
+#include <string>
+using std::string;
+
+void Sleep(int ms);
 
 namespace enigma_user {
-// Stolen entirely from the documentation and thrown into a switch() structure.
-string draw_get_graphics_error()
-{
-
+  static inline void sleep(int ms) { Sleep(ms); }
 }
+
+namespace enigma {
+  extern string* parameters;
+  extern int parameterc;
+  extern int current_room_speed;
+  //void writename(char* x);
 }

@@ -1,4 +1,6 @@
-/** Copyright (C) 2013 Robert B. Colton
+/** Copyright (C) 2017 Faissal I. Bensefia
+*** Copyright (C) 2008-2013 Robert B. Colton, Adriano Tumminelli
+*** Copyright (C) 2014 Seth N. Hetu
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,30 +17,33 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <iostream>
 #include <string>
+#include <vector>
+#include "../General/GScolors.h"
+#include "../General/GSprimitives.h"
+#include "../General/GSd3d.h"
+#include "../General/GSstdraw.h"
+#include "../General/GSblend.h"
+#include "../General/GSsurface.h"
+#include "../General/GSscreen.h"
+#include "Universal_System/scalar.h"
 
-#include "Direct3D11Headers.h"
-using namespace std;
-#include "DIRECTX11Std.h"
-#include "Universal_System/var4.h"
-#include "Universal_System/roomsystem.h" // Room dimensions.
-#include "Graphics_Systems/graphics_mandatory.h" // Room dimensions.
 namespace enigma
 {
-  unsigned bound_texture=0;
-  bool pbo_isgo;
+  extern unsigned char currentcolor[4];
 
-  void graphicssystem_initialize()
-  {
-
-  }
+  extern int currentblendmode[2];
+  extern int currentblendtype;
+	unsigned get_texture(int texid);
 }
 
-namespace enigma_user {
-// Stolen entirely from the documentation and thrown into a switch() structure.
-string draw_get_graphics_error()
+namespace enigma_user
 {
-
-}
+enum {
+  sh_vertex = 0,
+  sh_fragment = 1,
+  sh_tesscontrol = 2,
+  sh_tessevaluation = 3,
+  sh_geometry = 4
+};
 }
