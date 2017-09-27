@@ -1,4 +1,4 @@
-/** Copyright (C) 2013 Robert B. Colton
+/** Copyright (C) 2017 Faissal I. Bensefia
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -14,31 +14,22 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
+#include "Graphics_Systems/graphics_mandatory.h"
+#include "Platforms/General/PFwindow.h"
+#include "Graphics_Systems/General/GScolors.h"
 
 #include <iostream>
-#include <string>
-
-#include "Direct3D11Headers.h"
-using namespace std;
-#include "DIRECTX11Std.h"
-#include "Universal_System/var4.h"
-#include "Universal_System/roomsystem.h" // Room dimensions.
-#include "Graphics_Systems/graphics_mandatory.h" // Room dimensions.
-namespace enigma
-{
-  unsigned bound_texture=0;
-  bool pbo_isgo;
-
-  void graphicssystem_initialize()
-  {
-
-  }
-}
+#include <cstring>
+#include <stdio.h>
+#include <Universal_System/roomsystem.h> // room_caption, update_mouse_variables
 
 namespace enigma_user {
-// Stolen entirely from the documentation and thrown into a switch() structure.
-string draw_get_graphics_error()
-{
+  int display_aa = 14;
 
+  void set_synchronization(bool enable){}
+    
+  void display_reset(int samples, bool vsync){}
+    
+  void screen_refresh(){}
 }
-}
+
