@@ -3,10 +3,10 @@
 
 Name: iPhone
 Identifier: iPhone
-Represents: iPhone
+Represents:
+	Build-Platforms: iPhone
 Description: Build for Apple iPhone.
 Author: TGMG
 
 Depends:
 	Build-Platforms: iPhone
-
