@@ -31,7 +31,9 @@ static inline int bclamp(int x){return x > 255 ? 255 : x < 0 ? 0 : x;}
 
 namespace enigma
 {
-	extern unsigned char currentcolor[4];
+	unsigned char currentcolor[4] = {0,0,0,255};
+	int currentblendmode[2] = {0,0};
+	int currentblendtype = 0;
 }
 
 namespace enigma_user
