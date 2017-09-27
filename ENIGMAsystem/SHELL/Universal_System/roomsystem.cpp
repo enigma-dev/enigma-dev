@@ -78,7 +78,7 @@ namespace enigma
 
   roomstruct** roomdata;
   roomstruct** roomorder;
-  
+
   void roomstruct::end() {
     // Fire the Room End event.
     instance_event_iterator = new inst_iter(NULL,NULL,NULL);
@@ -99,7 +99,7 @@ namespace enigma
     using namespace enigma_user;
 
     this->end();
-    
+
     perform_callbacks_clean_up_roomend();
 
     // Set the index to self
@@ -193,7 +193,7 @@ namespace enigma
     if (precreatecode) {
       precreatecode();
     }
-    
+
     // Fire the create event of all the new instances.
     for (int i = 0; i < instancecount; i++) {
       if (is[i]) {
@@ -760,7 +760,7 @@ int window_views_mouse_get_x() {
           return view_xview[i]+((x-view_xport[i])/(double)view_wport[i])*view_wview[i];
         }
       }
-    } 
+    }
   }
   return x;
 */
@@ -831,7 +831,7 @@ namespace enigma
     mouse_y = (window_mouse_get_y() - sy) * ((gs_scalar)window_get_region_height() / (gs_scalar)window_get_region_height_scaled());
 
     if (view_enabled) {
-      for (int i = 0; i < 8; i++) { 
+      for (int i = 0; i < 8; i++) {
         if (view_visible[i]) {
           if (mouse_x >= view_xport[i] && mouse_x < view_xport[i]+view_wport[i] &&  mouse_y >= view_yport[i] && mouse_y < view_yport[i]+view_hport[i]) {
             mouse_x = view_xview[view_current]+((mouse_x-view_xport[view_current])/(double)view_wport[view_current])*view_wview[i];
@@ -839,12 +839,12 @@ namespace enigma
             return;
           }
         }
-      } 
+      }
       mouse_x = view_xview[view_current]+((mouse_x-view_xport[view_current])/(double)view_wport[view_current])*view_wview[view_current];
       mouse_y = view_yview[view_current]+((mouse_y-view_yport[view_current])/(double)view_hport[view_current])*view_hview[view_current];
     }
   }
-  
+
   void rooms_switch()
   {
     if (enigma_user::room_exists(room_switching_id)) {
@@ -855,9 +855,85 @@ namespace enigma
       enigma::roomdata[local_room_switching_id]->gotome(local_room_switching_restartgame);
     }
   }
-  
+
   void game_start() {
     enigma::roomstruct *rit = *enigma::roomorder;
     enigma::roomdata[rit->id]->gotome(true);
   }
+
+	static inline void follow_object(int vob, size_t vc)
+	{
+		using namespace enigma_user;
+	  object_basic *instanceexists = fetch_instance_by_int(vob);
+
+	  if (instanceexists)
+	  {
+	    object_planar* vobr = (object_planar*)instanceexists;
+
+	    double vobx = vobr->x, voby = vobr->y;
+
+	    //int bbl=*vobr.x+*vobr.bbox_left,bbr=*vobr.x+*vobr.bbox_right,bbt=*vobr.y+*vobr.bbox_top,bbb=*vobr.y+*vobr.bbox_bottom;
+	    //if (bbl<view_xview[vc]+view_hbor[vc]) view_xview[vc]=bbl-view_hbor[vc];
+
+	    double vbc_h, vbc_v;
+	    (view_hborder[vc] > view_wview[vc]/2) ? vbc_h = view_wview[vc]/2 : vbc_h = view_hborder[vc];
+	    (view_vborder[vc] > view_hview[vc]/2) ? vbc_v = view_hview[vc]/2 : vbc_v = view_vborder[vc];
+
+	    if (view_hspeed[vc] == -1)
+	    {
+	      if (vobx < view_xview[vc] + vbc_h)
+	        view_xview[vc] = vobx - vbc_h;
+	      else if (vobx > view_xview[vc] + view_wview[vc] - vbc_h)
+	        view_xview[vc] = vobx + vbc_h - view_wview[vc];
+	    }
+	    else
+	    {
+	      if (vobx < view_xview[vc] + vbc_h)
+	      {
+	        view_xview[vc] -= view_hspeed[vc];
+	        if (view_xview[vc] < vobx - vbc_h)
+	          view_xview[vc] = vobx - vbc_h;
+	      }
+	      else if (vobx > view_xview[vc] + view_wview[vc] - vbc_h)
+	      {
+	        view_xview[vc] += view_hspeed[vc];
+	        if (view_xview[vc] > vobx + vbc_h - view_wview[vc])
+	          view_xview[vc] = vobx + vbc_h - view_wview[vc];
+	      }
+	    }
+
+	    if (view_vspeed[vc] == -1)
+	    {
+	      if (voby < view_yview[vc] + vbc_v)
+	        view_yview[vc] = voby - vbc_v;
+	      else if (voby > view_yview[vc] + view_hview[vc] - vbc_v)
+	        view_yview[vc] = voby + vbc_v - view_hview[vc];
+	    }
+	    else
+	    {
+	      if (voby < view_yview[vc] + vbc_v)
+	      {
+	        view_yview[vc] -= view_vspeed[vc];
+	        if (view_yview[vc] < voby - vbc_v)
+	          view_yview[vc] = voby - vbc_v;
+	      }
+	      if (voby > view_yview[vc] + view_hview[vc] - vbc_v)
+	      {
+	        view_yview[vc] += view_vspeed[vc];
+	        if (view_yview[vc] > voby + vbc_v - view_hview[vc])
+	          view_yview[vc] = voby + vbc_v - view_hview[vc];
+	      }
+	    }
+
+	    if (view_xview[vc] < 0)
+	      view_xview[vc] = 0;
+	    else if (view_xview[vc] > room_width - view_wview[vc])
+	      view_xview[vc] = room_width - view_wview[vc];
+
+	    if (view_yview[vc] < 0)
+	      view_yview[vc] = 0;
+	    else if (view_yview[vc] > room_height - view_hview[vc])
+	      view_yview[vc] = room_height - view_hview[vc];
+	  }
+	}
 }
