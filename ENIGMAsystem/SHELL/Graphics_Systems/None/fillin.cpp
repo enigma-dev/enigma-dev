@@ -23,7 +23,6 @@
 #include <math.h>
 
 using namespace std;
-#include "OPENGLStd.h"
 #include "Universal_System/shaderstruct.h"
 #include "Universal_System/scalar.h"
 #include "Universal_System/var4.h"
@@ -86,7 +85,6 @@ namespace enigma
 	void graphics_replace_texture_alpha_from_texture(int tex, int copy_tex){}
 	void graphics_delete_texture(int texid){}
 	unsigned char* graphics_get_texture_pixeldata(unsigned texture, unsigned* fullwidth, unsigned* fullheight){return NULL;}
-	void graphics_samplers_apply(){}
 
 	bool fill_complex_polygon(const std::list<PolyVertex>& vertices, int defaultColor, bool allowHoles){return false;}
 }
@@ -209,22 +207,18 @@ namespace enigma_user
 	bool glsl_program_validate(int id){return false;}
 	void glsl_program_attach(int id, int sid){}
 	void glsl_program_detach(int id, int sid){}
-	void glsl_program_set(int id){}
-	void glsl_program_reset(){}
-	void glsl_program_free(int id){}
-	int glsl_get_uniform_location(int program, string name){return -1;}
-	void glsl_uniformf(int location, float v0){}
-	void glsl_uniformf(int location, float v0, float v1){}
-	void glsl_uniformf(int location, float v0, float v1, float v2){}
-	void glsl_uniformf(int location, float v0, float v1, float v2, float v3){}
-	void glsl_uniformi(int location, int v0){}
-	void glsl_uniformi(int location, int v0, int v1){}
-	void glsl_uniformi(int location, int v0, int v1, int v2){}
-	void glsl_uniformi(int location, int v0, int v1, int v2, int v3){}
-	void glsl_uniformui(int location, unsigned v0){}
-	void glsl_uniformui(int location, unsigned v0, unsigned v1){}
-	void glsl_uniformui(int location, unsigned v0, unsigned v1, unsigned v2){}
-	void glsl_uniformui(int location, unsigned v0, unsigned v1, unsigned v2, unsigned v3){}
+	void shader_set(int id){}
+	void shader_reset(){}
+	int shader_get_uniform(int program, string name){return -1;}
+	int shader_get_sampler_index(int program, string name){return -1;}
+	void shader_set_uniform_f(int location, float v0){}
+	void shader_set_uniform_f(int location, float v0, float v1){}
+	void shader_set_uniform_f(int location, float v0, float v1, float v2){}
+	void shader_set_uniform_f(int location, float v0, float v1, float v2, float v3){}
+	void shader_set_uniform_i(int location, int v0){}
+	void shader_set_uniform_i(int location, int v0, int v1){}
+	void shader_set_uniform_i(int location, int v0, int v1, int v2){}
+	void shader_set_uniform_i(int location, int v0, int v1, int v2, int v3){}
 
 	extern int window_get_width();
 	extern int window_get_height();
