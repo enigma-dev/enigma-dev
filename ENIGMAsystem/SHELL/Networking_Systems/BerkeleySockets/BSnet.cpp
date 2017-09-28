@@ -119,7 +119,7 @@ string net_receive(int sock) {
 
 int net_bounce(int sock) {
  struct sockaddr_storage whom;
- socketlen_t len = sizeof(whom);
+ socklen_t len = sizeof(whom);
  int n = recvfrom(sock,buf,BUFSIZE,0,(struct sockaddr *)&whom,&len);
  if (n == 0) return 1;
  if (n == SOCKET_ERROR) return -1;
