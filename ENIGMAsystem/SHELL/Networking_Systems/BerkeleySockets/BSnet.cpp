@@ -19,10 +19,6 @@
 #include "BSnet.h"
 #include "libEGMstd.h"
 
-#ifndef _WIN32
- #include <netdb.h>
-#endif
-
 bool winsock_started = 0;
 
 namespace enigma_user {
@@ -123,8 +119,8 @@ string net_receive(int sock) {
 
 int net_bounce(int sock) {
  struct sockaddr_storage whom;
- u_int len = sizeof(whom);
- int n = recvfrom(sock,buf,BUFSIZE,0,(struct sockaddr *)&whom,(int*)&len);
+ socketlen_t len = sizeof(whom);
+ int n = recvfrom(sock,buf,BUFSIZE,0,(struct sockaddr *)&whom,&len);
  if (n == 0) return 1;
  if (n == SOCKET_ERROR) return -1;
  printf("Bouncing: %s\n",buf);
