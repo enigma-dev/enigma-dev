@@ -17,9 +17,9 @@
 
 #include <cstdio>
 #include <cstdlib>
-#include <fstream>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
 
 #include <string>
 #include "PFfilemanip.h"
@@ -48,16 +48,16 @@ int file_rename(string oldname,string newname)
 
 int file_copy(string fname,string newname)
 {
-    ifstream srce(fname.c_str(),ios::binary);
-    if (srce.tellg() < 0) return 0;
-
-    ofstream dest(newname.c_str(),ios::binary);
-    if (dest.tellp() < 0) return 0;
-
-    dest << srce.rdbuf();
-    if (srce.tellg()-dest.tellp() != 0) return 0;
-
-    return 1;
+  pid_t c = fork();
+  if (c == -1) return false;
+  if (c) {
+    int status;
+    waitpid(c,&status,0);
+    return !status;
+  } else {
+    execlp("cp","cp",fname.c_str(),newname.c_str(),(char *)0);
+    exit(1);
+  }
 }
 
 int directory_exists(string dname)
