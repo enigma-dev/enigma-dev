@@ -150,7 +150,6 @@ const char* establish_bearings(const char *compiler)
   WINDRES_location = compey.get("windres");
   TOPLEVEL_ldflags = compey.get("ldflags");
   TOPLEVEL_rcflags = compey.get("rcflags");
-  cout << "Hello, Josh " << TOPLEVEL_ldflags << endl;
 
   /* Get a list of all macros defined by our compiler.
   ** These will help us through parsing available libraries.

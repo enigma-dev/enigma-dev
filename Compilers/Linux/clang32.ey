@@ -19,7 +19,7 @@ resources: $exe
 cppflags:
 cxxflags: -std=c++11 -m32 -Wno-missing-declarations -Wno-parentheses-equality
 cflags: -m32 -Wall -O3
-ldlags: -m32 -Wall -O3
+ldflags: -m32 -Wall -O3 -stdlib=libc++
 links:
 
 Build-Extension:
