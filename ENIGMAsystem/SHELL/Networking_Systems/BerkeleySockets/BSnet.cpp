@@ -137,8 +137,8 @@ int net_send_raw(int sock, string msg, int len) {
 
 int net_get_port(int sock) {
  struct sockaddr_in sa;
- u_int sas = sizeof(sa);
- if (getsockname(sock, (struct sockaddr*) &sa, (int*)&sas) == SOCKET_ERROR) {
+ socklen_t sas = sizeof(sa);
+ if (getsockname(sock, (struct sockaddr*) &sa, &sas) == SOCKET_ERROR) {
   closesocket(sock);
   return -1;
  }
