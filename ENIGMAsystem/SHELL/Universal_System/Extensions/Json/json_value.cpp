@@ -24,7 +24,7 @@
 
 #if DEBUG_MODE || (defined(SHOW_ERRORS) && SHOW_ERRORS)
   #define JSON_ASSERT_UNREACHABLE assert( false )
-  #define JSON_ASSERT( condition ) (condition ? 0 : show_error("Assertion failed: " #condition, true))
+  #define JSON_ASSERT( condition ) (condition ? void() : show_error("Assertion failed: " #condition, true))
   #define JSON_FAIL_MESSAGE( message ) show_error(message, true)
   #define JSON_ASSERT_MESSAGE( condition, message ) if (!( condition )) JSON_FAIL_MESSAGE( message )
 #else
