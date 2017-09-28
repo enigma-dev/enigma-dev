@@ -203,6 +203,14 @@ static int CALLBACK GetDirectoryAltProc(HWND hwnd, UINT uMsg, LPARAM lp, LPARAM 
   return 0;
 }
 
+static wchar_t* string_to_widechar(string str) {
+  // Number of shorts will be <= number of bytes; add one for null terminator
+  const size_t wchars_num = str.size() + 1;
+  wchar_t* wstr = new wchar_t[wchars_num];
+  MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, wstr, wchars_num);
+  return wstr;
+}
+
 namespace enigma_user {
 
 extern string window_get_caption();
@@ -407,7 +415,14 @@ int show_message(string str)
   //rendered its own message boxes like most game engines.
   //In Studio this function will cause the window to be minimized and the message shown, fullscreen will not be restored.
   //A possible alternative is fake fullscreen for Win32, but who knows if we have to do that on XLIB or anywhere else.
-  MessageBox(enigma::hWnd, str.c_str(), window_get_caption().c_str(), MB_OK);
+
+  wchar_t* message = string_to_widechar(str);
+  wchar_t* caption = string_to_widechar(window_get_caption());
+
+  MessageBoxW(enigma::hWnd, message, caption, MB_OK);
+
+  delete[] message;
+  delete[] caption;
 
   return 0;
 }
