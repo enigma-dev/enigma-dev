@@ -17,12 +17,11 @@
 
 #ifndef ASYNC_EXT_SET
 #define ASYNC_EXT_SET
-#endif
 
 namespace enigma {
   struct extension_async
   {
-    extension_async() {}
+    extension_async() { }
 
     virtual variant myevent_asyncdialog() { return 0; }
     virtual variant myevent_asynchttp() { return 0; }
@@ -36,3 +35,5 @@ namespace enigma {
     virtual variant myevent_asyncpushnotification() { return 0; }
   };
 }
+
+#endif // ASYNC_EXT_SET
