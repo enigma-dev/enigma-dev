@@ -40,8 +40,6 @@ int directory_exists(std::string dname);
 int directory_create(std::string dname);
 int directory_destroy(std::string dname);
 #define directory_delete directory_destroy
-int directory_rename(std::string oldname,std::string newname);
-int directory_copy(std::string dname,std::string newname);
 
 std::string file_find_next();
 void file_find_close();
