@@ -28,7 +28,9 @@
  #define _WIN32_WINNT 0x0501
  #include <winsock2.h>
  #include <ws2tcpip.h>
+ typedef int socketlen_t;
 #else
+ #include <netdb.h>
  #include <sys/types.h>
  #include <sys/socket.h>
  #include <fcntl.h>
