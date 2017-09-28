@@ -211,8 +211,8 @@ void parse_ide_settings(const char* eyaml)
   eygl(Audio_Systems, audio);
   eygl(Networking_Systems, network);
 
-  string cinffile = settree.get("target-compiler");
-  cinffile = "Compilers/" CURRENT_PLATFORM_NAME "/" + cinffile + ".ey";
+  string target = settree.get("target-compiler");
+  string cinffile = "Compilers/" CURRENT_PLATFORM_NAME "/" + target + ".ey";
 
   const char *a = establish_bearings(cinffile.c_str());
   if (a) cout << "Parse fail: " << a << endl;
@@ -220,6 +220,7 @@ void parse_ide_settings(const char* eyaml)
   // Read info about the compiler
   ifstream cinfstream(cinffile.c_str());
   ey_data cinfo = parse_eyaml(cinfstream,cinffile);
+  extensions::targetOS.target    = target;
   extensions::targetOS.resfile   = cinfo.get("resources");
   extensions::targetOS.buildext  = cinfo.get("build-extension");
   extensions::targetOS.buildname = cinfo.get("run-output");
