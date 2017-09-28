@@ -124,50 +124,50 @@ namespace enigma_user
 			{
 				int dsmap=ds_map_create();
 				ds_map_add(dsmap,"default",0);
-				ds_list_add(jsonArray,dsmap);
+				ds_list_add(jsonArray,(enigma::varargs(), dsmap));
 			}
 			else if (root[i].isBool())
 			{
 				int dsmap=ds_map_create();
 				ds_map_add(dsmap,"default",root[i].asInt());
-				ds_list_add(jsonArray,dsmap);
+				ds_list_add(jsonArray,(enigma::varargs(), dsmap));
 			}
 			else if (root[i].isInt())
 			{
 				int dsmap=ds_map_create();
 				ds_map_add(dsmap,"default",root[i].asInt());
-				ds_list_add(jsonArray,dsmap);
+				ds_list_add(jsonArray,(enigma::varargs(), dsmap));
 			}
 			else if (root[i].isUInt())
 			{
 				int dsmap=ds_map_create();
 				ds_map_add(dsmap,"default",root[i].asUInt());
-				ds_list_add(jsonArray,dsmap);
+				ds_list_add(jsonArray,(enigma::varargs(), dsmap));
 			}
 			else if (root[i].isIntegral())
 			{
 				int dsmap=ds_map_create();
 				ds_map_add(dsmap,"default",root[i].asInt());
-				ds_list_add(jsonArray,dsmap);
+				ds_list_add(jsonArray,(enigma::varargs(), dsmap));
 			}
 			else if (root[i].isDouble())
 			{
 				int dsmap=ds_map_create();
 				ds_map_add(dsmap,"default",root[i].asDouble());
-				ds_list_add(jsonArray,dsmap);
+				ds_list_add(jsonArray,(enigma::varargs(), dsmap));
 			}
 			else if (root[i].isNumeric())
 			{
 				int dsmap=ds_map_create();
 				ds_map_add(dsmap,"default",root[i].asDouble());
-				ds_list_add(jsonArray,dsmap);
+				ds_list_add(jsonArray,(enigma::varargs(), dsmap));
 			}
 			else if (root[i].isString())
 			{
 				//ds_map with key "default" and value
 				int dsmap=ds_map_create();
 				ds_map_add(dsmap,"default",root[i].asString());
-				ds_list_add(jsonArray,dsmap);
+				ds_list_add(jsonArray,(enigma::varargs(), dsmap));
 			}
 			else if (root[i].isArray())
 			{
@@ -177,7 +177,7 @@ namespace enigma_user
 				{
 					return -1;
 				}
-				ds_list_add(jsonArray,dsmap);
+				ds_list_add(jsonArray,(enigma::varargs(), dsmap));
 			}
 			else if (root[i].isObject())
 			{
@@ -186,7 +186,7 @@ namespace enigma_user
 				{
 					return -1;
 				}
-				ds_list_add(jsonArray,dsmap);
+				ds_list_add(jsonArray,(enigma::varargs(), dsmap));
 			}
 			else
 			{
