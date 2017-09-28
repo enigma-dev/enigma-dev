@@ -26,8 +26,6 @@
  **                                                                              **
  \********************************************************************************/
 
-#include "Universal_System/var4.h"
-#include "Universal_System/dynamic_args.h"
 #include <float.h>
 #include <algorithm>
 #include <map>

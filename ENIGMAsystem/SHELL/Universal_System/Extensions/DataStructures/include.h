@@ -25,6 +25,12 @@
 **                                                                              **
 \********************************************************************************/
 
+#ifndef ENIGMA_DATASTRUCTURES_H
+#define ENIGMA_DATASTRUCTURES_H
+
+#include "Universal_System/var4.h"
+#include "Universal_System/dynamic_args.h"
+
 namespace enigma_user
 {
 
@@ -160,3 +166,5 @@ std::string ds_stack_write(const unsigned int id);
 void ds_stack_read(const unsigned int id, std::string value);
 
 }
+
+#endif // ENIGMA_DATASTRUCTURES_H

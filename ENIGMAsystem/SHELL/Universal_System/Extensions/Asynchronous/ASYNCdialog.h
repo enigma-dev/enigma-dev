@@ -15,15 +15,20 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#ifndef ENIGMA_ASYNCDIALOG_H
+#define ENIGMA_ASYNCDIALOG_H
+
 #include <string>
 using std::string;
 
 namespace enigma_user {
-	extern unsigned async_load;
-	
-	int show_message_async(string str);
-	int show_question_async(string str);
-	int get_string_async(string message, string def, string cap="");
-	int get_integer_async(string message, string def, string cap="");
-	int get_login_async(string username, string password, string cap="");
+  extern unsigned async_load;
+
+  int show_message_async(string str);
+  int show_question_async(string str);
+  int get_string_async(string message, string def, string cap="");
+  int get_integer_async(string message, string def, string cap="");
+  int get_login_async(string username, string password, string cap="");
 }
+
+#endif // ENIGMA_ASYNCDIALOG_H
