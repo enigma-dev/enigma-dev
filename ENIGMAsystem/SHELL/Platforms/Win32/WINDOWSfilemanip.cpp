@@ -33,13 +33,6 @@
 #include <time.h>
 #include <sys/stat.h>
 
-#include <fstream>
-#include <algorithm>
-#include <direct.h>
-#include <dirent.h>
-#include <libgen.h>
-#include <tchar.h>
-
 #include "../General/PFini.h"
 
 using namespace std;
@@ -114,454 +107,92 @@ void ini_section_delete(std::string section)
 
 /* OS Specific; should be moved */
 
-int file_exists(std::string fname)
-{
-    std::string str(fname);
-    std::replace(str.begin(),str.end(),'/','\\');
-
-    struct stat sb;
-    return (stat((char *)str.c_str(),&sb) == 0 &&
-        S_ISREG(sb.st_mode));
+int file_exists(std::string fname) {
+    DWORD attributes = GetFileAttributes(fname.c_str());
+    if(attributes == 0xFFFFFFFF) {
+        return 0;
+    } else {
+        return 1;
+    }
 }
 
-int file_delete(std::string fname)
-{
-    std::string str(fname);
-    std::replace(str.begin(),str.end(),'/','\\');
+int file_delete(std::string fname) {
+    DWORD result = DeleteFileA(fname.c_str());
 
-    struct stat sb;
-    if (stat((char *)str.c_str(),&sb) == 0 &&
-        S_ISREG(sb.st_mode))
-    {
-        return (remove((char *)str.c_str()) == 0);
+    switch(result) {
+        case 0:
+            return 0;
+            break;
+        case ERROR_FILE_NOT_FOUND:
+            return 0;
+            break;
+        case ERROR_ACCESS_DENIED:
+            return 0;
+            break;
+        default:
+            return 1;
+            break;
     }
-
-    return 0;
 }
 
-int file_rename(std::string oldname,std::string newname)
-{
-    std::string str1(oldname);
-    std::string str2(newname);
-    std::replace(str1.begin(),str1.end(),'/','\\');
-    std::replace(str2.begin(),str2.end(),'/','\\');
+int file_rename(std::string oldname, std::string newname) {
+    DWORD result = MoveFileA(oldname.c_str(), newname.c_str());
 
-    char rpath1[MAX_PATH];
-    char rpath2[MAX_PATH];
-    GetFullPathName((char *)str1.c_str(),MAX_PATH,rpath1,NULL);
-    GetFullPathName((char *)str2.c_str(),MAX_PATH,rpath2,NULL);
-    str1 = std::string(rpath1);
-    str2 = std::string(rpath2);
-
-    size_t slash1;
-    size_t slash2;
-    std::string dir1(str1);
-    std::string dir2(str2);
-
-    if (dir1.find('\\') != std::string::npos)
-        slash1 = dir1.find_last_of("\\");
-    else
-    {
-        dir1 = std::string("");
-        slash1 = 0;
+    switch(result) {
+        case 0:
+            return 0;
+            break;
+        default:
+            return 1;
+            break;
     }
-
-    if (dir2.find('\\') != std::string::npos)
-        slash2 = dir2.find_last_of("\\");
-    else
-    {
-        dir2 = std::string("");
-        slash2 = 0;
-    }
-
-    int proceed = (dir1.substr(0,slash1) != dir2.substr(0,slash2));
-
-    if (proceed || basename((char *)str1.c_str()) != basename((char *)str2.c_str()))
-    {
-        struct stat sb1;
-        struct stat sb2;
-        if (stat((char *)str1.c_str(),&sb1) == 0 &&
-            S_ISREG(sb1.st_mode) &&
-            stat((char *)str2.c_str(),&sb2) != 0)
-        {
-            return (rename((char *)str1.c_str(),(char *)str2.c_str()) == 0);
-        }
-    }
-
-    return 0;
 }
 
-int file_copy(std::string fname,std::string newname)
-{
-    std::string str1(fname);
-    std::string str2(newname);
-    std::replace(str1.begin(),str1.end(),'/','\\');
-    std::replace(str2.begin(),str2.end(),'/','\\');
+int file_copy(std::string fname, std::string newname) {
+    DWORD result = CopyFileA(fname.c_str(), newname.c_str(), false);
 
-    char rpath1[MAX_PATH];
-    char rpath2[MAX_PATH];
-    GetFullPathName((char *)str1.c_str(),MAX_PATH,rpath1,NULL);
-    GetFullPathName((char *)str2.c_str(),MAX_PATH,rpath2,NULL);
-    str1 = std::string(rpath1);
-    str2 = std::string(rpath2);
-
-    size_t slash1;
-    size_t slash2;
-    std::string dir1(str1);
-    std::string dir2(str2);
-
-    if (dir1.find('\\') != std::string::npos)
-        slash1 = dir1.find_last_of("\\");
-    else
-    {
-        dir1 = std::string("");
-        slash1 = 0;
+    switch(result) {
+        case 0:
+            return 0;
+            break;
+        default:
+            return 1;
+            break;
     }
-
-    if (dir2.find('\\') != std::string::npos)
-        slash2 = dir2.find_last_of("\\");
-    else
-    {
-        dir2 = std::string("");
-        slash2 = 0;
-    }
-
-    int proceed = (dir1.substr(0,slash1) != dir2.substr(0,slash2));
-
-    if (proceed || basename((char *)str1.c_str()) != basename((char *)str2.c_str()))
-    {
-        struct stat sb1;
-        if (stat((char *)str1.c_str(),&sb1) == 0 &&
-            S_ISREG(sb1.st_mode))
-        {
-            double ret = 0;
-            size_t sz1 = sb1.st_size;
-
-            std::ifstream srce((char *)str1.c_str(),std::ios::binary);
-            ret = (srce.tellg() >= 0);
-
-            std::ofstream dest((char *)str2.c_str(),std::ios::binary);
-            ret = (dest.tellp() >= 0);
-
-            dest << srce.rdbuf();
-            ret = (srce.tellg()-dest.tellp() == 0);
-
-            struct stat sb2;
-            if (stat((char *)str2.c_str(),&sb2) == 0 &&
-                S_ISREG(sb2.st_mode))
-            {
-                size_t sz2 = sb2.st_size;
-                return ((ret == 1) ||
-                    (sz1 == 0 && sz2 == 0));
-            }
-        }
-    }
-
-    return 0;
 }
 
-int directory_exists(std::string dname)
-{
-    std::string str(dname);
-    std::replace(str.begin(),str.end(),'/','\\');
+int directory_exists(std::string dname) {
+  DWORD dwAttrib = GetFileAttributes(dname.c_str());
 
-    if (!str.empty())
-    {
-        while (*str.rbegin() == '\\')
-        {
-            str.erase(str.size()-1);
-        }
-    }
-
-    struct stat sb;
-    return (stat((char *)str.c_str(),&sb) == 0 &&
-        S_ISDIR(sb.st_mode));
+  return (dwAttrib != INVALID_FILE_ATTRIBUTES &&
+         (dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
 }
 
 // NOTICE: May behave differently than GM. May fail if there are
 // directories in the path missing, whereas GM would create them all
-int directory_create(std::string dname)
-{
-    std::string str(dname);
-    std::replace(str.begin(),str.end(),'/','\\');
+int directory_create(std::string dname) {
+    DWORD result = CreateDirectoryA(dname.c_str(), NULL);
 
-    if (!str.empty())
-    {
-        while (*str.rbegin() == '\\')
-        {
-            str.erase(str.size()-1);
-        }
-    }
-
-    struct stat sb;
-    if (stat((char *)str.c_str(),&sb) != 0)
-    {
-        return (_mkdir((char *)str.c_str()) == 0);
-    }
-
-    return 0;
-}
-
-int directory_destroy(std::string dname)
-{
-    std::string str(dname);
-    std::replace(str.begin(),str.end(),'/','\\');
-
-    if (!str.empty())
-    {
-        while (*str.rbegin() == '\\')
-        {
-            str.erase(str.size()-1);
-        }
-    }
-
-    struct stat sb;
-    if (stat((char *)str.c_str(),&sb) == 0 &&
-        S_ISDIR(sb.st_mode))
-    {
-        HANDLE hFind;
-        WIN32_FIND_DATA FindFileData;
-
-        TCHAR DirPath[MAX_PATH];
-        TCHAR FileName[MAX_PATH];
-
-        _tcscpy(DirPath,(char *)str.c_str());
-        _tcscat(DirPath,"\\*");
-        _tcscpy(FileName,(char *)str.c_str());
-        _tcscat(FileName,"\\");
-
-        hFind = FindFirstFile(DirPath,&FindFileData);
-        if (hFind == INVALID_HANDLE_VALUE) return 0;
-        _tcscpy(DirPath,FileName);
-
-        bool bSearch = true;
-        while (bSearch)
-        {
-            if (FindNextFile(hFind,&FindFileData))
-            {
-                if (!(_tcscmp(FindFileData.cFileName,".") &&
-                    _tcscmp(FindFileData.cFileName,".."))) continue;
-                _tcscat(FileName,FindFileData.cFileName);
-                if ((FindFileData.dwFileAttributes &
-                    FILE_ATTRIBUTE_DIRECTORY))
-                {
-                    if (!directory_destroy(FileName))
-                    {
-                        FindClose(hFind);
-                        return 0;
-                    }
-                    RemoveDirectory(FileName);
-                    _tcscpy(FileName,DirPath);
-                }
-                else
-                {
-                    if (FindFileData.dwFileAttributes &
-                        FILE_ATTRIBUTE_READONLY)
-                        _chmod(FileName, _S_IWRITE);
-
-                    if (!DeleteFile(FileName))
-                    {
-                        FindClose(hFind);
-                        return 0;
-                    }
-                    _tcscpy(FileName,DirPath);
-                }
-            }
-            else
-            {
-                if (GetLastError() == ERROR_NO_MORE_FILES)
-                    bSearch = false;
-                else
-                {
-                    FindClose(hFind);
-                    return 0;
-                }
-            }
-        }
-        FindClose(hFind);
-
-        return (RemoveDirectory((char *)str.c_str()) == true);
-    }
-
-    return 0;
-}
-
-int directory_rename(std::string oldname,std::string newname)
-{
-    std::string str1(oldname);
-    std::string str2(newname);
-    std::replace(str1.begin(),str1.end(),'/','\\');
-    std::replace(str2.begin(),str2.end(),'/','\\');
-
-    char rpath1[MAX_PATH];
-    char rpath2[MAX_PATH];
-    GetFullPathName((char *)str1.c_str(),MAX_PATH,rpath1,NULL);
-    GetFullPathName((char *)str2.c_str(),MAX_PATH,rpath2,NULL);
-    str1 = std::string(rpath1);
-    str2 = std::string(rpath2);
-
-    if (!str1.empty())
-    {
-        while (*str1.rbegin() == '\\')
-        {
-            str1.erase(str1.size()-1);
-        }
-    }
-    if (!str2.empty())
-    {
-        while (*str2.rbegin() == '\\')
-        {
-            str2.erase(str2.size()-1);
-        }
-    }
-
-    size_t slash1;
-    size_t slash2;
-    std::string dir1(str1);
-    std::string dir2(str2);
-
-    if (dir1.find('\\') != std::string::npos)
-        slash1 = dir1.find_last_of("\\");
-    else
-    {
-        dir1 = std::string("");
-        slash1 = 0;
-    }
-
-    if (dir2.find('\\') != std::string::npos)
-        slash2 = dir2.find_last_of("\\");
-    else
-    {
-        dir2 = std::string("");
-        slash2 = 0;
-    }
-
-    int proceed1 = (str1 != str2.substr(0,str1.length()));
-    int proceed2 = (dir1.substr(0,slash1) == dir2.substr(0,slash2));
-
-    if (proceed1 || (proceed2 && basename((char *)str1.c_str()) != basename((char *)str2.c_str())))
-    {
-        struct stat sb1;
-        struct stat sb2;
-        if (stat((char *)str1.c_str(),&sb1) == 0 &&
-            S_ISDIR(sb1.st_mode) &&
-            stat((char *)str2.c_str(),&sb2) != 0)
-        {
-            return (rename((char *)str1.c_str(),(char *)str2.c_str()) == 0);
-        }
-    }
-
-    return 0;
-}
-
-int directory_copy(std::string dname,std::string newname)
-{
-    std::string str1(dname);
-    std::string str2(newname);
-    std::replace(str1.begin(),str1.end(),'/','\\');
-    std::replace(str2.begin(),str2.end(),'/','\\');
-
-    char rpath1[MAX_PATH];
-    char rpath2[MAX_PATH];
-    GetFullPathName((char *)str1.c_str(),MAX_PATH,rpath1,NULL);
-    GetFullPathName((char *)str2.c_str(),MAX_PATH,rpath2,NULL);
-    str1 = std::string(rpath1);
-    str2 = std::string(rpath2);
-
-    if (!str1.empty())
-    {
-        while (*str1.rbegin() == '\\')
-        {
-            str1.erase(str1.size()-1);
-        }
-    }
-    if (!str2.empty())
-    {
-        while (*str2.rbegin() == '\\')
-        {
-            str2.erase(str2.size()-1);
-        }
-    }
-
-    size_t slash1;
-    size_t slash2;
-    std::string dir1(str1);
-    std::string dir2(str2);
-
-    if (dir1.find('\\') != std::string::npos)
-        slash1 = dir1.find_last_of("\\");
-    else
-    {
-        dir1 = std::string("");
-        slash1 = 0;
-    }
-
-    if (dir2.find('\\') != std::string::npos)
-        slash2 = dir2.find_last_of("\\");
-    else
-    {
-        dir2 = std::string("");
-        slash2 = 0;
-    }
-
-    int proceed1 = (str1 != str2.substr(0,str1.length()));
-    int proceed2 = (dir1.substr(0,slash1) == dir2.substr(0,slash2));
-
-    if (proceed1 || (proceed2 && basename((char *)str1.c_str()) != basename((char *)str2.c_str())))
-    {
-        struct stat sb1;
-        struct stat sb2;
-        if (stat((char *)str1.c_str(),&sb1) == 0 &&
-            S_ISDIR(sb1.st_mode) &&
-            stat((char *)str2.c_str(),&sb2) != 0)
-        {
-            if (!directory_create((char *)str2.c_str()))
-                return 0;
-
-            DIR *dir;
-            struct dirent *ent;
-            if ((dir = opendir((char *)str1.c_str())) != NULL)
-            {
-                while ((ent = readdir(dir)) != NULL)
-                {
-                    if (ent->d_name != std::string("."))
-                    {
-                        if (ent->d_name != std::string(".."))
-                        {
-                            std::string copy_sorc = str1+"\\"+ent->d_name;
-                            std::string copy_dest = str2+"\\"+ent->d_name;
-
-                            struct stat sb3;
-                            if (stat((char *)copy_sorc.c_str(),&sb3) == 0 &&
-                                S_ISDIR(sb3.st_mode))
-                            {
-                                if (!directory_copy((char *)copy_sorc.c_str(),(char *)copy_dest.c_str()))
-                                    return 0;
-                            }
-
-                            struct stat sb4;
-                            if (stat((char *)copy_sorc.c_str(),&sb4) == 0 &&
-                                S_ISREG(sb4.st_mode))
-                            {
-                                if (!file_copy((char *)copy_sorc.c_str(),(char *)copy_dest.c_str()))
-                                    return 0;
-                            }
-                        }
-                    }
-                }
-
-                closedir(dir);
-            }
-            else
-            {
-                return 0;
-            }
-
+    switch(result) {
+        case 0:
+            return 0;
+            break;
+        case ERROR_ALREADY_EXISTS:
+            return 0;
+            break;
+        case ERROR_PATH_NOT_FOUND:
+            return 0;
+            break;
+        default:
             return 1;
-        }
+            break;
     }
+}
 
-    return 0;
+int directory_destroy(std::string dname) {
+  BOOL result = RemoveDirectory(dname.c_str());
+  if (result) return 1;
+  else return 0;
 }
 
 
@@ -667,3 +298,4 @@ time_t file_modified_time(std::string fname)
 }
 
 }
+
