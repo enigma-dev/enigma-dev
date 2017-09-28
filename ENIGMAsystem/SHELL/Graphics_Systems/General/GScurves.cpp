@@ -44,7 +44,7 @@ struct splinePoint {
     int col;
 };
 typedef std::vector< splinePoint > spline;
-static std::stack< spline, std::vector<spline*> > startedSplines;
+static std::stack< spline*, std::vector<spline*> > startedSplines;
 static std::stack< int > startedSplinesMode;
 
 namespace enigma_user
