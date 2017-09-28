@@ -186,7 +186,7 @@ namespace enigma {
 
 #include <cstdio>
 #include <mmsystem.h>
-int WINAPI wWinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,PWSTR lpCmdLine,int iCmdShow)
+int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,int iCmdShow)
 {
     int wid = (int)enigma_user::room_width, hgt = (int)enigma_user::room_height;
     if (!wid || !hgt) wid = 640, hgt = 480;
