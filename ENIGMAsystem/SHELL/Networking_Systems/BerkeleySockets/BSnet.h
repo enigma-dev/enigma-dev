@@ -20,6 +20,7 @@
 #define ENIGMA_BSNET_H
 
 #include <string>
+#include <string.h>
 using std::string;
 
 namespace enigma_user {
