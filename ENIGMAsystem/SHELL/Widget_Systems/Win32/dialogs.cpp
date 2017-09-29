@@ -204,16 +204,9 @@ static int CALLBACK GetDirectoryAltProc(HWND hwnd, UINT uMsg, LPARAM lp, LPARAM 
   return 0;
 }
 
-static wchar_t* string_to_widechar(string str) {
-  // Number of shorts will be <= number of bytes; add one for null terminator
-  const size_t wchars_num = str.size() + 1;
-  wchar_t* wstr = new wchar_t[wchars_num];
-  MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, wstr, wchars_num);
-  return wstr;
-}
-
 typedef basic_string<WCHAR> tstring;
 tstring widen(const string &str) {
+  // Number of shorts will be <= number of bytes; add one for null terminator
   const size_t wchar_count = str.size() + 1;
   vector<WCHAR> buf(wchar_count);
   return tstring{buf.data(), MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, buf.data(), wchar_count)};
