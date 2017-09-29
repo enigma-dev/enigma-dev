@@ -34,6 +34,7 @@ http://www.ietf.org/rfc/rfc2616.txt
 #define ENIGMA_BSBROWSER_H
 
 #include <string>
+#include <string.h>
 using std::string;
 
 void die(const char *e, int n, ...);
