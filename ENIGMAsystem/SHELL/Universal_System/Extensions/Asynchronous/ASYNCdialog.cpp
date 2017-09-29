@@ -104,9 +104,14 @@ static void* getLoginAsync(void* data) {
   ds_map_replaceanyway(async_load, "id", md->id);
   string ret = threads[md->id]->ret;
   size_t end = ret.find('\0', 0);
+  string username, password;
   // must still check if the string is empty which is the case when the user cancels the dialog
-  ds_map_replaceanyway(async_load, "username", (end == string::npos) ? "" : ret.substr(0, end));
-  ds_map_replaceanyway(async_load, "password", (end == string::npos) ? "" : ret.substr(end + 1, ret.size() - end));
+  if (end != string::npos) {
+    username = ret.substr(0, end);
+    password = ret.substr(end + 1, ret.size() - end);
+  }
+  ds_map_replaceanyway(async_load, "username", username);
+  ds_map_replaceanyway(async_load, "password", password);
   fireAsyncDialogEvent();
   return NULL;
 }
