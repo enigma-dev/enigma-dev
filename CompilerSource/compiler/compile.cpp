@@ -105,7 +105,7 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   ide_dia_clear();
   ide_dia_open();
   cout << "Initialized." << endl;
-  string compilepath = CURRENT_PLATFORM_NAME "/" + extensions::targetOS.builddir + "/" + extensions::targetOS.target;
+  string compilepath = CURRENT_PLATFORM_NAME "/" + extensions::targetOS.builddir + "/" + extensions::targetOS.compiler;
 
   if (mode == emode_rebuild)
   {
