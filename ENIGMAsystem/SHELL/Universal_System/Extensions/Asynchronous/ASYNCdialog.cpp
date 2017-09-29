@@ -118,9 +118,10 @@ static void* getLoginAsync(void* data) {
   threads[md->id]->active = false;
   ds_map_replaceanyway(async_load, "id", md->id);
   string ret = threads[md->id]->ret;
-  size_t end = ret.find('\0', 0);
-  ds_map_replaceanyway(async_load, "username", ret.substr(0, end));
-  ds_map_replaceanyway(async_load, "password", ret.substr(end + 1, ret.size() - end));
+  vector<string> split = string_split(ret, '\0');
+  // must still check if the size is larger than 0 for when user cancels the dialog
+  ds_map_replaceanyway(async_load, "username", (split.size() > 0) ? split[0] : "");
+  ds_map_replaceanyway(async_load, "password", (split.size() > 1) ? split[1] : "");
   fireAsyncDialogEvent();
   return NULL;
 }
