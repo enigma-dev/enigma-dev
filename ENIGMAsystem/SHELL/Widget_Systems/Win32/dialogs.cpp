@@ -26,6 +26,7 @@
 #include <richedit.h>
 #include <stdio.h>
 #include <string>
+#include <vector>
 
 using namespace std;
 #include "Widget_Systems/widgets_mandatory.h"
@@ -209,6 +210,13 @@ static wchar_t* string_to_widechar(string str) {
   wchar_t* wstr = new wchar_t[wchars_num];
   MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, wstr, wchars_num);
   return wstr;
+}
+
+typedef basic_string<WCHAR> tstring;
+tstring widen(const string &str) {
+  const size_t wchar_count = str.size() + 1;
+  vector<WCHAR> buf(wchar_count);
+  return tstring{buf.data(), MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, buf.data(), wchar_count)};
 }
 
 namespace enigma_user {
@@ -416,13 +424,10 @@ int show_message(string str)
   //In Studio this function will cause the window to be minimized and the message shown, fullscreen will not be restored.
   //A possible alternative is fake fullscreen for Win32, but who knows if we have to do that on XLIB or anywhere else.
 
-  wchar_t* message = string_to_widechar(str);
-  wchar_t* caption = string_to_widechar(window_get_caption());
+  tstring message = widen(str);
+  tstring caption = widen(window_get_caption());
 
-  MessageBoxW(enigma::hWnd, message, caption, MB_OK);
-
-  delete[] message;
-  delete[] caption;
+  MessageBoxW(enigma::hWnd, message.c_str(), caption.c_str(), MB_OK);
 
   return 0;
 }
