@@ -25,6 +25,49 @@ using std::string;
 
 #include "GameSettings.h"
 
+#include <iostream>
+#include <iomanip>
+using namespace std;
+
+#ifdef _WIN32
+#  include <windows.h>
+#  define TC_WINDOWS 1
+#else
+#  include <termios.h>
+#  include <unistd.h>
+#endif
+ 
+class PasswordContext {
+# ifdef TC_WINDOWS
+  DWORD old_attrs = 0;
+  HANDLE hStdin = 0;
+# else
+  termios old_attrs;
+# endif
+ 
+ public:
+  PasswordContext() {
+#   ifdef TC_WINDOWS
+      hStdin = GetStdHandle(STD_INPUT_HANDLE);
+      GetConsoleMode(hStdin, &old_attrs);
+      SetConsoleMode(hStdin, old_attrs & (~ENABLE_ECHO_INPUT));
+#   else
+      tcgetattr(STDIN_FILENO, &old_attrs);
+      termios new_attrs = old_attrs;
+      new_attrs.c_lflag &= ~ECHO;
+      tcsetattr(STDIN_FILENO, TCSANOW, &new_attrs);
+#   endif
+  }
+ 
+  ~PasswordContext() {
+#   ifdef TC_WINDOWS
+      SetConsoleMode(hStdin, old_attrs);
+#   else
+      tcsetattr(STDIN_FILENO, TCSANOW, &old_attrs);
+#   endif
+  }
+};
+
 namespace enigma
 {
   bool widget_system_initialize()
@@ -56,17 +99,58 @@ namespace enigma_user {
 
 int show_message(string message)
 {
-  printf("show_message: %s\n",message.c_str());
+  printf("show_message: %s\n", message.c_str());
   return 0;
 }
 
 void show_info(string info, int bgcolor, int left, int top, int width, int height, bool embedGameWindow, bool showBorder, bool allowResize, bool stayOnTop, bool pauseGame, string caption) {
-
+  printf("%s\n%s\n", caption.c_str(), info.c_str());
 }
 
 void show_info() {
   show_info(enigma::gameInfoText, enigma::gameInfoBackgroundColor, enigma::gameInfoLeft, enigma::gameInfoTop, enigma::gameInfoWidth, enigma::gameInfoHeight, enigma::gameInfoEmbedGameWindow, enigma::gameInfoShowBorder,
 	enigma::gameInfoAllowResize, enigma::gameInfoStayOnTop, enigma::gameInfoPauseGame, enigma::gameInfoCaption);
+}
+
+bool show_question(string str) {
+  cout << str;
+  char answer;
+  while (answer != 'N' && answer != 'Y') {
+    cout << endl << "[Y/N]:";
+    cin >> answer;
+    answer = toupper(answer);
+  }
+  return (answer == 'Y');
+}
+
+string get_login(string username, string password, string cap="") {
+  cout << cap << endl;
+  string input;
+  cout << "Username: " << flush;
+  cin >> input;
+  {
+    PasswordContext pw;
+    input += '\0';
+    cout << "Password: " << flush;
+    cin >> input;
+    cout << endl;
+  }
+  return input;
+}
+
+string get_string(string message, string def, string cap="") {
+  printf("%s\n%s\n", cap.c_str(), message.c_str());
+  string input;
+  cin >> input;
+  return (input.empty()) ? def : input;
+}
+
+int get_integer(string message, string def, string cap="") {
+  printf("%s\n%s\n", cap.c_str(), message.c_str());
+  string input;
+  cin >> input;
+  if (input.empty()) input = def;
+  return stoi(input);
 }
 
 }

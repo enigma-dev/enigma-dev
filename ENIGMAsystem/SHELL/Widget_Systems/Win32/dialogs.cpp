@@ -143,7 +143,7 @@ static INT_PTR CALLBACK GetLoginProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPA
       GetDlgItemText(hwndDlg, 14, strget, 1024);
       gs_str_submitted = strget;
       GetDlgItemText(hwndDlg, 15, strget, 1024);
-      gs_str_submitted += string("|") + string(strget);
+      gs_str_submitted += string(1, 0) + string(strget);
       gs_form_canceled = 0;
       EndDialog(hwndDlg, 2);
     }
