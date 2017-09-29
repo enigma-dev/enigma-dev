@@ -17,6 +17,7 @@
 **/
 
 #include "BSnet.h"
+#include "common.h"
 #include "libEGMstd.h"
 
 bool winsock_started = 0;

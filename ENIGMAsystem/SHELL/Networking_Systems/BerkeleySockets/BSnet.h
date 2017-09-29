@@ -16,30 +16,11 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef ___BSNET_H_
-#define ___BSNET_H_
+#ifndef ENIGMA_BSNET_H
+#define ENIGMA_BSNET_H
 
-#include <errno.h>
-#include <stdio.h>
-#include <string.h>
-#include <unistd.h>
-
-#ifdef _WIN32
- #define _WIN32_WINNT 0x0501
- #include <winsock2.h>
- #include <ws2tcpip.h>
- typedef int socklen_t;
-#else
- #include <netdb.h>
- #include <sys/types.h>
- #include <sys/socket.h>
- #include <fcntl.h>
-
- #define SOCKET_ERROR -1
- #define closesocket(s) close(s)
-#endif
-
-#include "Universal_System/var4.h"
+#include <string>
+using std::string;
 
 namespace enigma_user {
 
@@ -97,4 +78,4 @@ int net_blocking(int sock, bool block);
 
 }
 
-#endif
+#endif // ENIGMA_BSNET_H
