@@ -18,6 +18,7 @@
 
 #include "BSbrowser.h"
 #include "BSnet.h"
+#include "common.h"
 #include <stdarg.h>
 #include <stdlib.h>
 using namespace enigma_user;
@@ -107,7 +108,7 @@ void net_ftp_send(int in, string file, string msg, int msglen) {
   r2 = strchr(r2,',');
  }
  *(r2++) = '\0';
- sprintf(port,"%d\0",atoi(r2) * 256 + atoi(strchr(r2,',') + 1));
+ sprintf(port,"%d",atoi(r2) * 256 + atoi(strchr(r2,',') + 1));
  int out = net_connect_tcp(ip,port,0);
 
  ftpparse(in,"STOR %s\r\n",file.c_str(),file.c_str()); //ip overwritten
@@ -129,7 +130,7 @@ string net_http(string host, string loc) {
  int s = net_connect_tcp(host,"http",0);
  if (s < 0) die("Connect",0);
 
- char *cmd = "\
+ const char *cmd = "\
 GET %s HTTP/1.1\r\n\
 Host: %s\r\n\
 User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; rv:12.0) Gecko/20100101 Firefox/12.0\r\n\
