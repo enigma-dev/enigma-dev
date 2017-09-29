@@ -118,11 +118,9 @@ static void* getLoginAsync(void* data) {
   threads[md->id]->active = false;
   ds_map_replaceanyway(async_load, "id", md->id);
   string ret = threads[md->id]->ret;
-  if (ret.find('|', 0) != std::string::npos) {
-    vector<string> split = string_split(ret,'|');
-    ds_map_replaceanyway(async_load, "username", split[0]);
-    ds_map_replaceanyway(async_load, "password", split[1]);
-  }
+  size_t end = ret.find('\0', 0);
+  ds_map_replaceanyway(async_load, "username", ret.substr(0, end));
+  ds_map_replaceanyway(async_load, "password", ret.substr(end + 1, ret.size() - end));
   fireAsyncDialogEvent();
   return NULL;
 }
