@@ -1,6 +1,7 @@
 #include <errno.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <cstring>
 
 #ifdef _WIN32
  #ifndef _WIN32_WINNT
