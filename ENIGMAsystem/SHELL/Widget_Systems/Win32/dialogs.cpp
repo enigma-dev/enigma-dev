@@ -209,7 +209,7 @@ tstring widen(const string &str) {
   // Number of shorts will be <= number of bytes; add one for null terminator
   const size_t wchar_count = str.size() + 1;
   vector<WCHAR> buf(wchar_count);
-  return tstring{buf.data(), MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, buf.data(), wchar_count)};
+  return tstring{buf.data(), (size_t)MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, buf.data(), wchar_count)};
 }
 
 namespace enigma_user {
