@@ -22,7 +22,7 @@ public:
   OptionsParser();
   int ReadArgs(int argc, char* argv[]);
   int HandleArgs();
-  const char* APIyaml();
+  const std::string APIyaml();
   std::string GetOption(std::string option);
 
 private:

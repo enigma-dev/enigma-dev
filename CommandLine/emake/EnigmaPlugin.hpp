@@ -28,7 +28,7 @@ class EnigmaPlugin
 public:
   EnigmaPlugin();
   int Init();
-  void SetDefinitions(const char* def);
+  void SetDefinitions(const std::string def);
   int BuildGame(EnigmaStruct* data, GameMode mode, const char* fpath);
 
 private:
