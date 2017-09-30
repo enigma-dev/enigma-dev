@@ -189,7 +189,7 @@ int OptionsParser::HandleArgs()
   return OPTIONS_SUCCESS;
 }
 
-const char* OptionsParser::APIyaml()
+std::string OptionsParser::APIyaml()
 {
   std::string yaml;
   yaml += "%e-yaml\n";
@@ -216,7 +216,7 @@ const char* OptionsParser::APIyaml()
   yaml += "target-networking: " + _finalArgs["network"] + "\n";
   yaml += "extensions: " + _finalArgs["extensions"] + "\n";
 
-  return yaml.c_str();
+  return yaml;
 }
 
 int OptionsParser::find_ey(const char* dir)
