@@ -15,10 +15,6 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "../General/OpenGLHeaders.h"
-#include "../General/GStextures.h"
-#include "GL3shader.h"
-#include "GLSLshader.h"
 #include <math.h>
 
 #include <stdio.h>      /* printf, scanf, NULL */
@@ -28,9 +24,14 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
-//using namespace std;
 
 #include <vector>
+
+#include "Bridges/General/GL3Context.h"
+#include "../General/OpenGLHeaders.h"
+#include "../General/GStextures.h"
+#include "GL3shader.h"
+#include "GLSLshader.h"
 
 #ifdef DEBUG_MODE
   #include <string>
@@ -50,7 +51,7 @@
         printf("%s - Uniform at location %i not found!\n", str, location);\
         return;\
     }else if ( uniter->second.size != usize ){\
-        printf("%s - Uniform at location %i with %i arguments is accesed by a function with %i arguments!\n", str, location, uniter->second.size, usize);\
+        printf("%s - Uniform [%s] at location %i with %i arguments is accesed by a function with %i arguments!\n", str, uniter->second.name.c_str(), location, uniter->second.size, usize);\
     }
 
   #define get_attribute(atiter,location)\
@@ -67,6 +68,12 @@
         printf("%s - Attribute at location %i not found!\n", str, location);\
         return;\
     }
+
+    #define get_program(ptiter,program,err)\
+    if (program < 0) { printf("Program id [%i] < 0 given!\n", program); return err; }\
+    if (program >= enigma::shaderprograms.size()) { printf("Program id [%i] > size() [%i] given!\n", program, enigma::shaderprograms.size()); return err; }\
+    if (enigma::shaderprograms[program] == nullptr) { printf("Program with id [%i] is deleted!\n", program); return err; }\
+    enigma::ShaderProgram* ptiter = enigma::shaderprograms[program];
 #else
     #define get_uniform(uniter,location,usize)\
     if (location < 0) return; \
@@ -81,6 +88,12 @@
     if (atiter == enigma::shaderprograms[enigma::bound_shader]->attributes.end()){\
         return;\
     }
+
+    #define get_program(ptiter,program,err)\
+    if (program < 0) { return err; }\
+    if (program >= enigma::shaderprograms.size()) { return err; }\
+    if (enigma::shaderprograms[program] == nullptr) { return err; }\
+    enigma::ShaderProgram* ptiter = enigma::shaderprograms[program];
 #endif
 
 extern GLenum shadertypes[5] = {
@@ -98,165 +111,177 @@ namespace enigma
   extern unsigned bound_shader;
   extern unsigned bound_vbo;
   string getVertexShaderPrefix(){
-    return "#version 330\n"
-            "#define MATRIX_VIEW                                    0\n"
-            "#define MATRIX_PROJECTION                              1\n"
-            "#define MATRIX_WORLD                                   2\n"
-            "#define MATRIX_WORLD_VIEW                              3\n"
-            "#define MATRIX_WORLD_VIEW_PROJECTION                   4\n"
-            "#define MATRICES_MAX                                   5\n"
+    return R"CODE(
 
-            "uniform mat4 transform_matrix[MATRICES_MAX];           \n"
-            "#define gm_Matrices transform_matrix \n"
-            "#define modelMatrix transform_matrix[MATRIX_WORLD] \n"
-            "#define modelViewMatrix transform_matrix[MATRIX_WORLD_VIEW] \n"
-            "#define projectionMatrix transform_matrix[MATRIX_PROJECTION] \n"
-            "#define viewMatrix transform_matrix[MATRIX_VIEW] \n"
-            "#define modelViewProjectionMatrix transform_matrix[MATRIX_WORLD_VIEW_PROJECTION] \n"
-            "#define in_Colour in_Color \n"
+#version 330
+#define MATRIX_VIEW                                    0
+#define MATRIX_PROJECTION                              1
+#define MATRIX_WORLD                                   2
+#define MATRIX_WORLD_VIEW                              3
+#define MATRIX_WORLD_VIEW_PROJECTION                   4
+#define MATRICES_MAX                                   5
 
-            "uniform mat3 normalMatrix;     \n"
-    "#line 0 \n";
+uniform mat4 transform_matrix[MATRICES_MAX];
+#define gm_Matrices transform_matrix
+#define modelMatrix transform_matrix[MATRIX_WORLD]
+#define modelViewMatrix transform_matrix[MATRIX_WORLD_VIEW]
+#define projectionMatrix transform_matrix[MATRIX_PROJECTION]
+#define viewMatrix transform_matrix[MATRIX_VIEW]
+#define modelViewProjectionMatrix transform_matrix[MATRIX_WORLD_VIEW_PROJECTION]
+#define in_Colour in_Color
+
+uniform mat3 normalMatrix;
+#line 0
+            )CODE";
   }
   string getFragmentShaderPrefix(){
-    return "#version 330\n"
-            "#define MATRIX_VIEW                                    0\n"
-            "#define MATRIX_PROJECTION                              1\n"
-            "#define MATRIX_WORLD                                   2\n"
-            "#define MATRIX_WORLD_VIEW                              3\n"
-            "#define MATRIX_WORLD_VIEW_PROJECTION                   4\n"
-            "#define MATRICES_MAX                                   5\n"
+    return R"CODE(
 
-            "uniform mat4 transform_matrix[MATRICES_MAX];           \n"
-            "#define gm_Matrices transform_matrix \n"
-            "#define modelMatrix transform_matrix[MATRIX_WORLD] \n"
-            "#define modelViewMatrix transform_matrix[MATRIX_WORLD_VIEW] \n"
-            "#define projectionMatrix transform_matrix[MATRIX_PROJECTION] \n"
-            "#define viewMatrix transform_matrix[MATRIX_VIEW] \n"
-            "#define modelViewProjectionMatrix transform_matrix[MATRIX_WORLD_VIEW_PROJECTION] \n"
+#version 330
+#define MATRIX_VIEW                                    0
+#define MATRIX_PROJECTION                              1
+#define MATRIX_WORLD                                   2
+#define MATRIX_WORLD_VIEW                              3
+#define MATRIX_WORLD_VIEW_PROJECTION                   4
+#define MATRICES_MAX                                   5
 
-            "uniform mat3 normalMatrix;     \n"
+uniform mat4 transform_matrix[MATRICES_MAX];
+#define gm_Matrices transform_matrix
+#define modelMatrix transform_matrix[MATRIX_WORLD]
+#define modelViewMatrix transform_matrix[MATRIX_WORLD_VIEW]
+#define projectionMatrix transform_matrix[MATRIX_PROJECTION]
+#define viewMatrix transform_matrix[MATRIX_VIEW]
+#define modelViewProjectionMatrix transform_matrix[MATRIX_WORLD_VIEW_PROJECTION]
 
-            "uniform sampler2D en_TexSampler;\n"
-            "#define gm_BaseTexture en_TexSampler\n"
-            "uniform bool en_TexturingEnabled;\n"
-            "uniform bool en_ColorEnabled;\n"
-            "uniform bool en_AlphaTestEnabled;\n"
+uniform mat3 normalMatrix;
 
-            "uniform float en_AlphaTestValue;\n"
-            "uniform vec4 en_BoundColor;\n"
-            "#line 0 \n";
+uniform sampler2D en_TexSampler;
+#define gm_BaseTexture en_TexSampler
+uniform bool en_TexturingEnabled;
+uniform bool en_ColorEnabled;
+uniform bool en_AlphaTestEnabled;
+
+uniform float en_AlphaTestValue;
+uniform vec4 en_BoundColor;
+#line 0
+            )CODE";
   }
   string getDefaultVertexShader(){
-    return  "in vec3 in_Position;                 // (x,y,z)\n"
-            "in vec3 in_Normal;                  // (x,y,z)\n"
-            "in vec4 in_Color;                    // (r,g,b,a)\n"
-            "in vec2 in_TextureCoord;             // (u,v)\n"
+    return  R"CODE(
 
-            "out vec2 v_TextureCoord;\n"
-            "out vec4 v_Color;\n"
-            "uniform int en_ActiveLights;\n"
-            "uniform bool en_ColorEnabled;\n"
+in vec3 in_Position;   // (x,y,z)
+in vec3 in_Normal;           // (x,y,z)
+in vec4 in_Color;            // (r,g,b,a)
+in vec2 in_TextureCoord;     // (u,v)
 
-            "uniform bool en_LightingEnabled;\n"
-            "uniform bool en_VS_FogEnabled;\n"
-            "uniform float en_FogStart;\n"
-            "uniform float en_RcpFogRange;\n"
+out vec2 v_TextureCoord;
+out vec4 v_Color;
+uniform int en_ActiveLights;
+uniform bool en_ColorEnabled;
 
-            "uniform vec4 en_BoundColor;\n"
+uniform bool en_LightingEnabled;
+uniform bool en_VS_FogEnabled;
+uniform float en_FogStart;
+uniform float en_RcpFogRange;
 
-            "#define MAX_LIGHTS   8\n"
+uniform vec4 en_BoundColor;
 
-            "uniform vec4   en_AmbientColor;                              // rgba=color\n"
+#define MAX_LIGHTS   8
 
-            "struct LightInfo {\n"
-              "vec4 Position; // Light position in eye coords\n"
-              "vec4 La; // Ambient light intensity\n"
-              "vec4 Ld; // Diffuse light intensity\n"
-              "vec4 Ls; // Specular light intensity\n"
-              "float cA, lA, qA; // Attenuation for point lights\n"
-            "};\n"
-            "uniform LightInfo Light[MAX_LIGHTS];\n"
+uniform vec4   en_AmbientColor;                              // rgba=color
 
-            "struct MaterialInfo {\n"
-                "vec4 Ka; // Ambient reflectivity\n"
-                "vec4 Kd; // Diffuse reflectivity\n"
-                "vec4 Ks; // Specular reflectivity\n"
-                "float Shininess; // Specular shininess factor\n"
-            "};\n"
-            "uniform MaterialInfo Material;\n"
+struct LightInfo {
+  vec4 Position; // Light position in eye coords
+  vec4 La; // Ambient light intensity
+  vec4 Ld; // Diffuse light intensity
+  vec4 Ls; // Specular light intensity
+  float cA, lA, qA; // Attenuation for point lights
+};
+uniform LightInfo Light[MAX_LIGHTS];
 
-            "void getEyeSpace( inout vec3 norm, inout vec4 position )\n"
-            "{\n"
-                "norm = normalize( normalMatrix * in_Normal );\n"
-                "position = modelViewMatrix * vec4(in_Position, 1.0);\n"
-            "}\n"
+struct MaterialInfo {
+  vec4 Ka; // Ambient reflectivity
+  vec4 Kd; // Diffuse reflectivity
+  vec4 Ks; // Specular reflectivity
+  float Shininess; // Specular shininess factor
+};
+uniform MaterialInfo Material;
 
-            "vec4 phongModel( in vec3 norm, in vec4 position )\n"
-            "{\n"
-              "vec4 total_light = vec4(0.0);\n"
-              "vec3 v = normalize(-position.xyz);\n"
-              "float attenuation;\n"
-              "for (int index = 0; index < en_ActiveLights; ++index){\n"
-                  "vec3 L;\n"
-                  "if (Light[index].Position.w == 0.0){ //Directional light\n"
-                    "L = normalize(Light[index].Position.xyz);\n"
-                    "attenuation = 1.0;\n"
-                  "}else{ //Point light\n"
-                    "vec3 positionToLightSource = vec3(Light[index].Position.xyz - position.xyz);\n"
-                    "float distance = length(positionToLightSource);\n"
-                    "L = normalize(positionToLightSource);\n"
-                    "attenuation = 1.0 / (Light[index].cA + Light[index].lA * distance + Light[index].qA * distance * distance);\n"
-                  "}\n"
-                  "vec3 r = reflect( -L, norm );\n"
-                  "total_light += Light[index].La * Material.Ka;\n"
-                  "float LdotN = max( dot(norm, L), 0.0 );\n"
-                  "vec4 diffuse = vec4(attenuation * vec3(Light[index].Ld) * vec3(Material.Kd) * LdotN,1.0);\n"
-                  "vec4 spec = vec4(0.0);\n"
-                  "if( LdotN > 0.0 )\n"
-                      "spec = clamp(vec4(attenuation * vec3(Light[index].Ls) * vec3(Material.Ks) * pow( max( dot(r,v), 0.0 ), Material.Shininess ),1.0),0.0,1.0);\n"
-                  "total_light += diffuse + spec;\n"
-              "}\n"
-              "return total_light;\n"
-            "}\n"
+void getEyeSpace( inout vec3 norm, inout vec4 position )
+{
+  norm = normalize( normalMatrix * in_Normal );
+  position = modelViewMatrix * vec4(in_Position, 1.0);
+}
 
-            "void main()\n"
-            "{\n"
-                "vec4 iColor = en_BoundColor;\n"
-                "if (en_ColorEnabled == true){\n"
-                    "iColor = in_Color;\n"
-                "}\n"
-                "if (en_LightingEnabled == true){\n"
-                    "vec3 eyeNorm;\n"
-                    "vec4 eyePosition;\n"
-                    "getEyeSpace(eyeNorm, eyePosition);\n"
-                    "v_Color = (en_AmbientColor + phongModel( eyeNorm, eyePosition )) * iColor;\n"
-                "}else{\n"
-                  "v_Color = iColor;\n"
-                "}\n"
-                "gl_Position = modelViewProjectionMatrix * vec4( in_Position.xyz, 1.0);\n"
+vec4 phongModel( in vec3 norm, in vec4 position )
+{
+  vec4 total_light = vec4(0.0);
+  vec3 v = normalize(-position.xyz);
+  float attenuation;
+  for (int index = 0; index < en_ActiveLights; ++index){
+    vec3 L;
+    if (Light[index].Position.w == 0.0){ //Directional light
+      L = normalize(Light[index].Position.xyz);
+      attenuation = 1.0;
+    }else{ //Point light
+      vec3 positionToLightSource = vec3(Light[index].Position.xyz - position.xyz);
+      float distance = length(positionToLightSource);
+      L = normalize(positionToLightSource);
+      attenuation = 1.0 / (Light[index].cA + Light[index].lA * distance + Light[index].qA * distance * distance);
+    }
+    vec3 r = reflect( -L, norm );
+    total_light += Light[index].La * Material.Ka;
+    float LdotN = max( dot(norm, L), 0.0 );
+    vec4 diffuse = vec4(attenuation * vec3(Light[index].Ld) * vec3(Material.Kd) * LdotN,1.0);
+    vec4 spec = vec4(0.0);
+    if( LdotN > 0.0 )
+        spec = clamp(vec4(attenuation * vec3(Light[index].Ls) * vec3(Material.Ks) * pow( max( dot(r,v), 0.0 ), Material.Shininess ),1.0),0.0,1.0);
+    total_light += diffuse + spec;
+  }
+  return total_light;
+}
 
-                "v_TextureCoord = in_TextureCoord;\n"
-            "}\n";
+void main()
+{
+  vec4 iColor = en_BoundColor;
+  if (en_ColorEnabled == true){
+    iColor = in_Color;
+  }
+  if (en_LightingEnabled == true){
+    vec3 eyeNorm;
+    vec4 eyePosition;
+    getEyeSpace(eyeNorm, eyePosition);
+    v_Color = (en_AmbientColor + phongModel( eyeNorm, eyePosition )) * iColor;
+  }else{
+    v_Color = iColor;
+  }
+  gl_Position = modelViewProjectionMatrix * vec4( in_Position.xyz, 1.0);
+
+  v_TextureCoord = in_TextureCoord;
+}
+            )CODE";
   }
   string getDefaultFragmentShader(){
-    return  "in vec2 v_TextureCoord;\n"
-            "in vec4 v_Color;\n"
-            "out vec4 out_FragColor;\n"
+    return  R"CODE(
+    
+in vec2 v_TextureCoord;
+in vec4 v_Color;
+out vec4 out_FragColor;
 
-            "void main()\n"
-            "{\n"
-                "vec4 TexColor;\n"
-                "if (en_TexturingEnabled == true){\n"
-                    "TexColor = texture2D( en_TexSampler, v_TextureCoord.st ) * v_Color;\n"
-                "}else{\n"
-                    "TexColor = v_Color;\n"
-                "}\n"
-                "if (en_AlphaTestEnabled == true){\n"
-                    "if (TexColor.a<=en_AlphaTestValue) discard;\n"
-                "}\n"
-                "out_FragColor = TexColor;\n"
-            "}\n";
+void main()
+{
+  vec4 TexColor;
+  if (en_TexturingEnabled == true){
+    TexColor = texture2D( en_TexSampler, v_TextureCoord.st ) * v_Color;
+  }else{
+    TexColor = v_Color;
+  }
+  if (en_AlphaTestEnabled == true){
+    if (TexColor.a<=en_AlphaTestValue) discard;
+  }
+  out_FragColor = TexColor;
+}
+            )CODE";
   }
   void getUniforms(int prog_id){
     int uniform_count, max_length, uniform_count_arr = 0;
@@ -463,6 +488,7 @@ void glsl_shader_print_infolog(int id)
     glGetShaderInfoLog(enigma::shaders[id]->shader, blen, &slen, compiler_log);
     enigma::shaders[id]->log = (string)compiler_log;
     std::cout << compiler_log << std::endl;
+    free(compiler_log);
   } else {
     enigma::shaders[id]->log = "Shader log empty";
     std::cout << enigma::shaders[id]->log << std::endl;
@@ -481,6 +507,7 @@ void glsl_program_print_infolog(int id)
     glGetProgramInfoLog(enigma::shaderprograms[id]->shaderprogram, blen, &slen, compiler_log);
     enigma::shaderprograms[id]->log = (string)compiler_log;
     std::cout << compiler_log << std::endl;
+    free(compiler_log);
   } else {
     enigma::shaderprograms[id]->log = "Shader program log empty";
     std::cout << enigma::shaderprograms[id]->log << std::endl;
@@ -502,7 +529,7 @@ bool glsl_shader_load(int id, string fname)
   string source;
   if (enigma::shaders[id]->type == sh_vertex) source = enigma::getVertexShaderPrefix() + shaderSource;
   if (enigma::shaders[id]->type == sh_fragment) source = enigma::getFragmentShaderPrefix() + shaderSource;
-
+  
   const char *ShaderSource = source.c_str();
   //std::cout << ShaderSource << std::endl;
   glShaderSource(enigma::shaders[id]->shader, 1, &ShaderSource, NULL);
@@ -514,6 +541,7 @@ bool glsl_shader_load_string(int id, string shaderSource)
   string source;
   if (enigma::shaders[id]->type == sh_vertex) source = enigma::getVertexShaderPrefix() + shaderSource;
   if (enigma::shaders[id]->type == sh_fragment) source = enigma::getFragmentShaderPrefix() + shaderSource;
+
   const char *ShaderSource = source.c_str();
   //std::cout << ShaderSource << std::endl;
   glShaderSource(enigma::shaders[id]->shader, 1, &ShaderSource, NULL);
@@ -614,17 +642,21 @@ void glsl_program_detach(int id, int sid)
 void glsl_program_set(int id)
 {
   if (enigma::bound_shader != id){
-    texture_reset();
+    oglmgr->ShaderFunc();
     enigma::bound_shader = id;
     glUseProgram(enigma::shaderprograms[id]->shaderprogram);
   }
 }
 
+int glsl_program_get()
+{
+  return enigma::bound_shader;
+}
+
 void glsl_program_reset()
 {
     //if (enigma::bound_shader != enigma::main_shader){ //This doesn't work because enigma::bound_shader is the same as enigma::main_shader at start
-        //NOTE: Texture must be reset first so the Global VBO can draw and let people use shaders on text.
-        texture_reset();
+        oglmgr->ShaderFunc();
         enigma::bound_shader = enigma::main_shader;
         glUseProgram(enigma::shaderprograms[enigma::main_shader]->shaderprogram);
     //}
@@ -641,6 +673,7 @@ void glsl_program_default_reset(){
 void glsl_program_free(int id)
 {
   delete enigma::shaderprograms[id];
+  enigma::shaderprograms[id] = nullptr;
 }
 
 void glsl_program_set_name(int id, string name){
@@ -651,11 +684,13 @@ int glsl_get_uniform_location(int program, string name) {
 	//int uni = glGetUniformLocation(enigma::shaderprograms[program]->shaderprogram, name.c_str());
 	std::unordered_map<string,GLint>::iterator it = enigma::shaderprograms[program]->uniform_names.find(name);
   if (it == enigma::shaderprograms[program]->uniform_names.end()){
-    if (enigma::shaderprograms[program]->name == ""){
-      printf("Program[%i] - Uniform %s not found!\n", program, name.c_str());
-    }else{
-      printf("Program[%s = %i] - Uniform %s not found!\n", enigma::shaderprograms[program]->name.c_str(), program, name.c_str());
-    }
+    #ifdef DEBUG_MODE
+      if (enigma::shaderprograms[program]->name == ""){
+        printf("Program[%i] - Uniform %s not found!\n", program, name.c_str());
+      }else{
+        printf("Program[%s = %i] - Uniform %s not found!\n", enigma::shaderprograms[program]->name.c_str(), program, name.c_str());
+      }
+    #endif
     return -1;
   }else{
     return it->second;
@@ -665,6 +700,7 @@ int glsl_get_uniform_location(int program, string name) {
 void glsl_uniformf(int location, float v0) {
   get_uniform(it,location,1);
   if (it->second.data[0].f != v0){
+    oglmgr->ShaderFunc();
     glUniform1f(location, v0);
     it->second.data[0].f = v0;
   }
@@ -673,6 +709,7 @@ void glsl_uniformf(int location, float v0) {
 void glsl_uniformf(int location, float v0, float v1) {
   get_uniform(it,location,2);
   if (it->second.data[0].f != v0 || it->second.data[1].f != v1){
+    oglmgr->ShaderFunc();
     glUniform2f(location, v0, v1);
     it->second.data[0].f = v0, it->second.data[1].f = v1;
   }
@@ -681,6 +718,7 @@ void glsl_uniformf(int location, float v0, float v1) {
 void glsl_uniformf(int location, float v0, float v1, float v2) {
   get_uniform(it,location,3);
   if (it->second.data[0].f != v0 || it->second.data[1].f != v1 || it->second.data[2].f != v2){
+    oglmgr->ShaderFunc();
     glUniform3f(location, v0, v1, v2);
     it->second.data[0].f = v0, it->second.data[1].f = v1, it->second.data[2].f = v2;
 	}
@@ -689,6 +727,7 @@ void glsl_uniformf(int location, float v0, float v1, float v2) {
 void glsl_uniformf(int location, float v0, float v1, float v2, float v3) {
   get_uniform(it,location,4);
   if (it->second.data[0].f != v0 || it->second.data[1].f != v1 || it->second.data[2].f != v2 || it->second.data[3].f != v3){
+    oglmgr->ShaderFunc();
     glUniform4f(location, v0, v1, v2, v3);
     it->second.data[0].f = v0, it->second.data[1].f = v1, it->second.data[2].f = v2, it->second.data[3].f = v3;
 	}
@@ -697,6 +736,7 @@ void glsl_uniformf(int location, float v0, float v1, float v2, float v3) {
 void glsl_uniformi(int location, int v0) {
   get_uniform(it,location,1);
   if (it->second.data[0].i != v0){
+    oglmgr->ShaderFunc();
     glUniform1i(location, v0);
     it->second.data[0].i = v0;
   }
@@ -705,6 +745,7 @@ void glsl_uniformi(int location, int v0) {
 void glsl_uniformi(int location, int v0, int v1) {
   get_uniform(it,location,2);
   if (it->second.data[0].i != v0 || it->second.data[1].i != v1){
+    oglmgr->ShaderFunc();
     glUniform2i(location, v0, v1);
     it->second.data[0].i = v0, it->second.data[1].i = v1;
   }
@@ -713,6 +754,7 @@ void glsl_uniformi(int location, int v0, int v1) {
 void glsl_uniformi(int location, int v0, int v1, int v2) {
   get_uniform(it,location,3);
   if (it->second.data[0].i != v0 || it->second.data[1].i != v1 || it->second.data[2].i != v2){
+    oglmgr->ShaderFunc();
     glUniform3i(location, v0, v1, v2);
     it->second.data[0].i = v0, it->second.data[1].i = v1, it->second.data[2].i = v2;
   }
@@ -721,6 +763,7 @@ void glsl_uniformi(int location, int v0, int v1, int v2) {
 void glsl_uniformi(int location, int v0, int v1, int v2, int v3) {
   get_uniform(it,location,4);
   if (it->second.data[0].i != v0 || it->second.data[1].i != v1 || it->second.data[2].i != v2 || it->second.data[3].i != v3){
+    oglmgr->ShaderFunc();
     glUniform4i(location, v0, v1, v2, v3);
     it->second.data[0].i = v0, it->second.data[1].i = v1, it->second.data[2].i = v2, it->second.data[3].i = v3;
   }
@@ -729,6 +772,7 @@ void glsl_uniformi(int location, int v0, int v1, int v2, int v3) {
 void glsl_uniformui(int location, unsigned v0) {
   get_uniform(it,location,1);
   if (it->second.data[0].ui != v0){
+    oglmgr->ShaderFunc();
     glUniform1ui(location, v0);
     it->second.data[0].ui = v0;
   }
@@ -737,6 +781,7 @@ void glsl_uniformui(int location, unsigned v0) {
 void glsl_uniformui(int location, unsigned v0, unsigned v1) {
   get_uniform(it,location,2);
   if (it->second.data[0].ui != v0 || it->second.data[1].ui != v1){
+    oglmgr->ShaderFunc();
     glUniform2ui(location, v0, v1);
     it->second.data[0].ui = v0, it->second.data[1].ui = v1;
   }
@@ -745,6 +790,7 @@ void glsl_uniformui(int location, unsigned v0, unsigned v1) {
 void glsl_uniformui(int location, unsigned v0, unsigned v1, unsigned v2) {
   get_uniform(it,location,3);
   if (it->second.data[0].ui != v0 || it->second.data[1].ui != v1 || it->second.data[2].ui != v2){
+    oglmgr->ShaderFunc();
     glUniform3ui(location, v0, v1, v2);
     it->second.data[0].ui = v0, it->second.data[1].ui = v1, it->second.data[2].ui = v2;
   }
@@ -753,6 +799,7 @@ void glsl_uniformui(int location, unsigned v0, unsigned v1, unsigned v2) {
 void glsl_uniformui(int location, unsigned v0, unsigned v1, unsigned v2, unsigned v3) {
   get_uniform(it,location,4);
   if (it->second.data[0].ui != v0 || it->second.data[1].ui != v1 || it->second.data[2].ui != v2 || it->second.data[3].ui != v3){
+    oglmgr->ShaderFunc();
     glUniform4ui(location, v0, v1, v2, v3);
     it->second.data[0].ui = v0, it->second.data[1].ui = v1, it->second.data[2].ui = v2, it->second.data[3].ui = v3;
   }
@@ -762,6 +809,7 @@ void glsl_uniformui(int location, unsigned v0, unsigned v1, unsigned v2, unsigne
 void glsl_uniform1fv(int location, int size, const float *value){
   get_uniform(it,location,1);
   if (std::equal(it->second.data.begin(), it->second.data.end(), value, enigma::UATypeFComp) == false){
+    oglmgr->ShaderFunc();
     glUniform1fv(location, size, value);
     for (size_t i=0; i<it->second.data.size(); ++i){
       it->second.data[i].f = value[i];
@@ -772,6 +820,7 @@ void glsl_uniform1fv(int location, int size, const float *value){
 void glsl_uniform2fv(int location, int size, const float *value){
   get_uniform(it,location,2);
   if (std::equal(it->second.data.begin(), it->second.data.end(), value, enigma::UATypeFComp) == false){
+    oglmgr->ShaderFunc();
     glUniform2fv(location, size, value);
     for (size_t i=0; i<it->second.data.size(); ++i){
       it->second.data[i].f = value[i];
@@ -782,6 +831,7 @@ void glsl_uniform2fv(int location, int size, const float *value){
 void glsl_uniform3fv(int location, int size, const float *value){
   get_uniform(it,location,3);
   if (std::equal(it->second.data.begin(), it->second.data.end(), value, enigma::UATypeFComp) == false){
+    oglmgr->ShaderFunc();
     glUniform3fv(location, size, value);
     for (size_t i=0; i<it->second.data.size(); ++i){
       it->second.data[i].f = value[i];
@@ -792,6 +842,7 @@ void glsl_uniform3fv(int location, int size, const float *value){
 void glsl_uniform4fv(int location, int size, const float *value){
   get_uniform(it,location,4);
   if (std::equal(it->second.data.begin(), it->second.data.end(), value, enigma::UATypeFComp) == false){
+    oglmgr->ShaderFunc();
     glUniform4fv(location, size, value);
     for (size_t i=0; i<it->second.data.size(); ++i){
       it->second.data[i].f = value[i];
@@ -803,6 +854,7 @@ void glsl_uniform4fv(int location, int size, const float *value){
 void glsl_uniform1iv(int location, int size, const int *value){
   get_uniform(it,location,1);
   if (std::equal(it->second.data.begin(), it->second.data.end(), value, enigma::UATypeIComp) == false){
+    oglmgr->ShaderFunc();
     glUniform1iv(location, size, value);
     for (size_t i=0; i<it->second.data.size(); ++i){
       it->second.data[i].i = value[i];
@@ -813,6 +865,7 @@ void glsl_uniform1iv(int location, int size, const int *value){
 void glsl_uniform2iv(int location, int size, const int *value){
   get_uniform(it,location,2);
   if (std::equal(it->second.data.begin(), it->second.data.end(), value, enigma::UATypeIComp) == false){
+    oglmgr->ShaderFunc();
     glUniform2iv(location, size, value);
     for (size_t i=0; i<it->second.data.size(); ++i){
       it->second.data[i].i = value[i];
@@ -823,6 +876,7 @@ void glsl_uniform2iv(int location, int size, const int *value){
 void glsl_uniform3iv(int location, int size, const int *value){
   get_uniform(it,location,3);
   if (std::equal(it->second.data.begin(), it->second.data.end(), value, enigma::UATypeIComp) == false){
+    oglmgr->ShaderFunc();
     glUniform3iv(location, size, value);
     for (size_t i=0; i<it->second.data.size(); ++i){
       it->second.data[i].i = value[i];
@@ -833,6 +887,7 @@ void glsl_uniform3iv(int location, int size, const int *value){
 void glsl_uniform4iv(int location, int size, const int *value){
   get_uniform(it,location,4);
   if (std::equal(it->second.data.begin(), it->second.data.end(), value, enigma::UATypeIComp) == false){
+    oglmgr->ShaderFunc();
     glUniform4iv(location, size, value);
     for (size_t i=0; i<it->second.data.size(); ++i){
       it->second.data[i].i = value[i];
@@ -844,6 +899,7 @@ void glsl_uniform4iv(int location, int size, const int *value){
 void glsl_uniform1uiv(int location, int size, const unsigned int *value){
   get_uniform(it,location,1);
   if (std::equal(it->second.data.begin(), it->second.data.end(), value, enigma::UATypeUIComp) == false){
+    oglmgr->ShaderFunc();
     glUniform1uiv(location, size, value);
     for (size_t i=0; i<it->second.data.size(); ++i){
       it->second.data[i].ui = value[i];
@@ -854,6 +910,7 @@ void glsl_uniform1uiv(int location, int size, const unsigned int *value){
 void glsl_uniform2uiv(int location, int size, const unsigned int *value){
   get_uniform(it,location,2);
   if (std::equal(it->second.data.begin(), it->second.data.end(), value, enigma::UATypeUIComp) == false){
+    oglmgr->ShaderFunc();
     glUniform2uiv(location, size, value);
     for (size_t i=0; i<it->second.data.size(); ++i){
       it->second.data[i].ui = value[i];
@@ -864,6 +921,7 @@ void glsl_uniform2uiv(int location, int size, const unsigned int *value){
 void glsl_uniform3uiv(int location, int size, const unsigned int *value){
   get_uniform(it,location,3);
   if (std::equal(it->second.data.begin(), it->second.data.end(), value, enigma::UATypeUIComp) == false){
+    oglmgr->ShaderFunc();
     glUniform3uiv(location, size, value);
     for (size_t i=0; i<it->second.data.size(); ++i){
       it->second.data[i].ui = value[i];
@@ -874,6 +932,7 @@ void glsl_uniform3uiv(int location, int size, const unsigned int *value){
 void glsl_uniform4uiv(int location, int size, const unsigned int *value){
   get_uniform(it,location,4);
   if (std::equal(it->second.data.begin(), it->second.data.end(), value, enigma::UATypeUIComp) == false){
+    oglmgr->ShaderFunc();
     glUniform4uiv(location, size, value);
     for (size_t i=0; i<it->second.data.size(); ++i){
       it->second.data[i].ui = value[i];
@@ -885,6 +944,7 @@ void glsl_uniform4uiv(int location, int size, const unsigned int *value){
 void glsl_uniform_matrix2fv(int location, int size, const float *matrix){
   get_uniform(it,location,4);
   if (std::equal(it->second.data.begin(), it->second.data.end(), matrix, enigma::UATypeFComp) == false){
+    oglmgr->ShaderFunc();
     glUniformMatrix2fv(location, size, true, matrix);
     memcpy(&it->second.data[0], &matrix[0], it->second.data.size() * sizeof(enigma::UAType));
   }
@@ -893,6 +953,7 @@ void glsl_uniform_matrix2fv(int location, int size, const float *matrix){
 void glsl_uniform_matrix3fv(int location, int size, const float *matrix){
   get_uniform(it,location,9);
   if (std::equal(it->second.data.begin(), it->second.data.end(), matrix, enigma::UATypeFComp) == false){
+    oglmgr->ShaderFunc();
     glUniformMatrix3fv(location, size, true, matrix);
     memcpy(&it->second.data[0], &matrix[0], it->second.data.size() * sizeof(enigma::UAType));
   }
@@ -901,6 +962,7 @@ void glsl_uniform_matrix3fv(int location, int size, const float *matrix){
 void glsl_uniform_matrix4fv(int location, int size, const float *matrix){
   get_uniform(it,location,16);
   if (std::equal(it->second.data.begin(), it->second.data.end(), matrix, enigma::UATypeFComp) == false){
+    oglmgr->ShaderFunc();
     glUniformMatrix4fv(location, size, true, matrix);
     memcpy(&it->second.data[0], &matrix[0], it->second.data.size() * sizeof(enigma::UAType));
   }
@@ -908,22 +970,40 @@ void glsl_uniform_matrix4fv(int location, int size, const float *matrix){
 
 //Attributes
 int glsl_get_attribute_location(int program, string name) {
-  std::unordered_map<string,GLint>::iterator it = enigma::shaderprograms[program]->attribute_names.find(name);
-  if (it == enigma::shaderprograms[program]->attribute_names.end()){
-    if (enigma::shaderprograms[program]->name == ""){
-      printf("Program[%i] - Attribute %s not found!\n", program, name.c_str());
-    }else{
-      printf("Program[%s = %i] - Attribute %s not found!\n", enigma::shaderprograms[program]->name.c_str(), program, name.c_str());
-    }
+  get_program(prog, program, -1);
+  std::unordered_map<string,GLint>::iterator it = prog->attribute_names.find(name);
+  if (it == prog->attribute_names.end()){
+    #ifdef DEBUG_MODE
+      if (prog->name == ""){
+        printf("Program[%i] - Attribute %s not found!\n", program, name.c_str());
+      }else{
+        printf("Program[%s = %i] - Attribute %s not found!\n", prog->name.c_str(), program, name.c_str());
+      }
+    #endif
     return -1;
   }else{
     return it->second;
   }
 }
 
+void glsl_attribute_enable_all(bool enable){
+  for ( auto &it : enigma::shaderprograms[enigma::bound_shader]->attributes ){
+    if (enable != it.second.enabled){
+      oglmgr->ShaderFunc();
+      if (enable == true){
+        glEnableVertexAttribArray( it.second.location );
+      }else{
+        glDisableVertexAttribArray( it.second.location );
+      }
+      it.second.enabled = enable;
+    }
+  }
+}
+
 void glsl_attribute_enable(int location, bool enable){
   get_attribute(it,location);
   if (enable != it->second.enabled){
+    oglmgr->ShaderFunc();
     if (enable == true){
       glEnableVertexAttribArray(location);
     }else{
@@ -936,6 +1016,7 @@ void glsl_attribute_enable(int location, bool enable){
 void glsl_attribute_set(int location, int size, int type, bool normalize, int stride, int offset){
   get_attribute(it,location);
   //if (/*it->second.enabled == true*/ (it->second.vao != enigma::bound_vbo || it->second.datatype != type || it->second.datasize != size || it->second.normalize != normalize || it->second.stride != stride || it->second.offset != offset)){
+    oglmgr->ShaderFunc();
     glVertexAttribPointer(location, size, type, normalize, stride, ( ( const GLvoid * ) ( sizeof( gs_scalar ) * ( offset ) ) ));
     it->second.datatype = type;
     it->second.datasize = size;
@@ -948,3 +1029,76 @@ void glsl_attribute_set(int location, int size, int type, bool normalize, int st
 
 }
 
+//Internal functions - they do less error checking and don't call batch flush to stop recursion in GL3ModelStruct::Draw
+namespace enigma
+{
+  void glsl_uniform_matrix3fv_internal(int location, int size, const float *matrix){
+    get_uniform(it,location,9);
+    if (std::equal(it->second.data.begin(), it->second.data.end(), matrix, enigma::UATypeFComp) == false){
+      glUniformMatrix3fv(location, size, true, matrix);
+      memcpy(&it->second.data[0], &matrix[0], it->second.data.size() * sizeof(enigma::UAType));
+    }
+  }
+
+  void glsl_uniform_matrix4fv_internal(int location, int size, const float *matrix){
+    get_uniform(it,location,16);
+    if (std::equal(it->second.data.begin(), it->second.data.end(), matrix, enigma::UATypeFComp) == false){
+      glUniformMatrix4fv(location, size, true, matrix);
+      memcpy(&it->second.data[0], &matrix[0], it->second.data.size() * sizeof(enigma::UAType));
+    }
+  }
+
+  void glsl_uniformi_internal(int location, int v0) {
+    get_uniform(it,location,1);
+    if (it->second.data[0].i != v0){
+      glUniform1i(location, v0);
+      it->second.data[0].i = v0;
+    }
+  }
+
+  void glsl_uniformf_internal(int location, float v0, float v1, float v2, float v3) {
+    get_uniform(it,location,4);
+    if (it->second.data[0].f != v0 || it->second.data[1].f != v1 || it->second.data[2].f != v2 || it->second.data[3].f != v3){
+      glUniform4f(location, v0, v1, v2, v3);
+      it->second.data[0].f = v0, it->second.data[1].f = v1, it->second.data[2].f = v2, it->second.data[3].f = v3;
+    }
+  }
+
+  void glsl_attribute_enable_all_internal(bool enable){
+    for ( auto &it : enigma::shaderprograms[enigma::bound_shader]->attributes ){
+      if (enable != it.second.enabled){
+        if (enable == true){
+          glEnableVertexAttribArray( it.second.location );
+        }else{
+          glDisableVertexAttribArray( it.second.location );
+        }
+        it.second.enabled = enable;
+      }
+    }
+  }
+
+  void glsl_attribute_enable_internal(int location, bool enable){
+    get_attribute(it,location);
+    if (enable != it->second.enabled){
+      if (enable == true){
+        glEnableVertexAttribArray(location);
+      }else{
+        glDisableVertexAttribArray(location);
+      }
+      it->second.enabled = enable;
+    }
+  }
+
+  void glsl_attribute_set_internal(int location, int size, int type, bool normalize, int stride, int offset){
+    get_attribute(it,location);
+    //if (/*it->second.enabled == true*/ (it->second.vao != enigma::bound_vbo || it->second.datatype != type || it->second.datasize != size || it->second.normalize != normalize || it->second.stride != stride || it->second.offset != offset)){
+      glVertexAttribPointer(location, size, type, normalize, stride, ( ( const GLvoid * ) ( sizeof( gs_scalar ) * ( offset ) ) ));
+      it->second.datatype = type;
+      it->second.datasize = size;
+      it->second.normalize = normalize;
+      it->second.stride = stride;
+      it->second.offset = offset;
+      it->second.vao = enigma::bound_vbo;
+    //}
+  }
+}

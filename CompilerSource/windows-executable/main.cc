@@ -464,7 +464,7 @@ int main(int argc, char *argv[])
     StartupInfo.hStdOutput = h;
   }
 
-  DWORD flags = NULL;
+  DWORD flags = 0;
 
   if (redirectoutput) {
     flags += CREATE_NO_WINDOW;

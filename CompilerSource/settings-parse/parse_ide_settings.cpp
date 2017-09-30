@@ -40,13 +40,14 @@ using namespace std;
 #include "crawler.h"
 #include "eyaml.h"
 
+#include "gcc_interface/gcc_backend.h"
 #include "parse_ide_settings.h"
 #include "compiler/compile_common.h"
 #include "makedir.h"
 
 string makedir = "";
 
-string fc(const char* fn);
+inline string fc(const char* fn);
 static void clear_ide_editables()
 {
   ofstream wto;
@@ -98,25 +99,6 @@ static void clear_ide_editables()
   wto.close();
 }
 
-static inline vector<string> explode(string n) {
-  vector<string> ret;
-  size_t pos = 0, epos;
-  while (is_useless(n[pos])) pos++;
-  for (epos = n.find(','); epos != string::npos; epos = n.find(',',pos)) {
-    ret.push_back(n.substr(pos,epos-pos));
-    pos = epos; while (is_useless(n[++pos]));
-  }
-  if (n.length() > pos)
-    ret.push_back(n.substr(pos));
-  return ret;
-}
-
-inline string tolower(string x) {
-  for (size_t i = 0; i < x.length(); i++)
-    if (x[i] >= 'A' and x[i] <= 'Z') x[i] -= 'A' - 'a';
-  return x;
-}
-
 //#include "backend/ideprint.h"
 //#include "backend/JavaCallbacks.h"
 
@@ -138,11 +120,17 @@ void parse_ide_settings(const char* eyaml)
   setting::literal_autocast  = settree.get("treat-literals-as").toInt();
   setting::inherit_objects   = settree.get("inherit-objects").toBool();
   switch (settree.get("compliance-mode").toInt()) {
-    case 2:
+    case 4:
       setting::compliance_mode = setting::COMPL_GM8;
       break;
+    case 3:
+      setting::compliance_mode = setting::COMPL_GM7;
+      break;
+    case 2:
+      setting::compliance_mode = setting::COMPL_GM6;
+      break;
     case 1:
-      setting::compliance_mode = setting::COMPL_GM567;
+      setting::compliance_mode = setting::COMPL_GM5;
       break;
     default:
       setting::compliance_mode = setting::COMPL_STANDARD;
@@ -222,8 +210,8 @@ void parse_ide_settings(const char* eyaml)
   eygl(Audio_Systems, audio);
   eygl(Networking_Systems, network);
 
-  string cinffile = settree.get("target-compiler");
-  cinffile = "Compilers/" CURRENT_PLATFORM_NAME "/" + cinffile + ".ey";
+  string target_compiler = settree.get("target-compiler");
+  string cinffile = "Compilers/" CURRENT_PLATFORM_NAME "/" + target_compiler + ".ey";
 
   const char *a = establish_bearings(cinffile.c_str());
   if (a) cout << "Parse fail: " << a << endl;
@@ -231,12 +219,19 @@ void parse_ide_settings(const char* eyaml)
   // Read info about the compiler
   ifstream cinfstream(cinffile.c_str());
   ey_data cinfo = parse_eyaml(cinfstream,cinffile);
-  extensions::targetOS.resfile   = cinfo.get("resources");
-  extensions::targetOS.buildext  = cinfo.get("build-extension");
-  extensions::targetOS.buildname = cinfo.get("run-output");
-  extensions::targetOS.runprog   = cinfo.get("run-program");
-  extensions::targetOS.runparam  = cinfo.get("run-params");
+  extensions::targetOS.compiler   = target_compiler;
+  extensions::targetOS.resfile    = cinfo.get("resources");
+  extensions::targetOS.buildext   = cinfo.get("build-extension");
+  extensions::targetOS.buildname  = cinfo.get("run-output");
+  extensions::targetOS.runprog    = cinfo.get("run-program");
+  extensions::targetOS.runparam   = cinfo.get("run-params");
   extensions::targetOS.identifier = cinfo.get("target-platform");
+
+  if (cinfo.exists("build-dir") == true){
+    extensions::targetOS.builddir = cinfo.get("build-dir");
+  }else{
+    extensions::targetOS.builddir = cinfo.get("target-platform");
+  }
 
   cout << "Setting up IDE editables... " << endl;
   requested_extensions.clear();
@@ -244,4 +239,3 @@ void parse_ide_settings(const char* eyaml)
   extensions::parse_extensions(requested_extensions);
   clear_ide_editables();
 }
-

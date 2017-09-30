@@ -8,6 +8,7 @@ Default: false
 Build-date: 1/30/2014
 Icon: asynclogo.png
 
-Depends: None
+Depends:
+	Extensions: DataStructures
 Dependencies: None
 Implement: extension_async

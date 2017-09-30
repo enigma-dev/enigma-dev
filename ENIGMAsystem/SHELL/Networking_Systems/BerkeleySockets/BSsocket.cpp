@@ -17,6 +17,7 @@
 **/
 
 #include "BSnet.h"
+#include "common.h"
 using namespace enigma_user;
 
 #ifdef _WIN32

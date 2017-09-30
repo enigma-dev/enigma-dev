@@ -15,6 +15,7 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
+#include <string>
 
 #ifndef ENIGMA_PLATFORM_WINDOW_H
 #define ENIGMA_PLATFORM_WINDOW_H
@@ -80,7 +81,7 @@ int display_get_width();
 int display_get_height();
 int display_get_colordepth();
 int display_get_frequency();
-int display_get_orientation();
+//int display_get_orientation();
 unsigned display_get_dpi_x();
 unsigned display_get_dpi_y();
 extern int display_aa;
@@ -99,8 +100,8 @@ int window_get_y();
 int window_get_width();
 int window_get_height();
 
-void window_set_caption(string caption);
-string window_get_caption();
+void window_set_caption(std::string caption);
+std::string window_get_caption();
 void window_set_color(int color);
 int window_get_color();
 void window_set_alpha(double alpha);
@@ -119,6 +120,7 @@ int window_get_region_width_scaled();
 int window_get_region_height_scaled();
 
 void window_set_minimized(bool minimized);
+void window_set_maximized(bool maximized);
 void window_set_visible(bool visible);
 int window_get_visible();
 bool window_get_stayontop();
@@ -127,14 +129,15 @@ bool window_get_showborder();
 bool window_get_showicons();
 bool window_get_freezeonlosefocus();
 bool window_get_minimized();
+bool window_get_maximized();
 
 int window_mouse_get_x();
 int window_mouse_get_y();
 int window_view_mouse_get_x(int id);
 int window_view_mouse_get_y(int id);
 
-string clipboard_get_text();
-void clipboard_set_text(string text);
+std::string clipboard_get_text();
+void clipboard_set_text(std::string text);
 bool clipboard_has_text();
 
 }

@@ -92,24 +92,6 @@ inline string string_replace_all(string str,string substr,string nstr)
   return str;
 }
 
-inline string fc(const char* fn)
-{
-  FILE *file = fopen(fn,"rb");
-  if (!file) return "";
-
-  fseek(file, 0, SEEK_END);
-  size_t sz = ftell(file);
-  fseek(file, 0, SEEK_SET);
-
-  char *a = new char[sz];
-  sz = fread(a, 1, sz, file);
-  fclose(file);
-
-  string res(a, sz);
-  delete[] a;
-  return res;
-}
-
 #include "System/builtins.h"
 
 dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode) {
@@ -120,55 +102,55 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
 {
 
   cout << "Initializing dialog boxes" << endl;
-    ide_dia_clear();
-    ide_dia_open();
+  ide_dia_clear();
+  ide_dia_open();
   cout << "Initialized." << endl;
+  string compilepath = CURRENT_PLATFORM_NAME "/" + extensions::targetOS.builddir + "/" + extensions::targetOS.compiler;
 
   if (mode == emode_rebuild)
   {
     edbg << "Cleaning..." << flushl;
 
-	string make = "clean-game ";
-	string compilepath = CURRENT_PLATFORM_NAME "/" + extensions::targetOS.identifier;
-	make += "COMPILEPATH=\"" + compilepath + "\" ";
-	make += "WORKDIR=\"" + makedir + "\" ";
-	make += "eTCpath=\"" + MAKE_tcpaths + "\"";
+  	string make = MAKE_flags;
+    make += " clean-game ";
+  	make += "COMPILEPATH=\"" + compilepath + "\" ";
+  	make += "WORKDIR=\"" + makedir + "\" ";
+  	make += "eTCpath=\"" + MAKE_tcpaths + "\"";
 
-	edbg << "Full command line: " << MAKE_location << " " << make << flushl;
+  	edbg << "Full command line: " << MAKE_location << " " << make << flushl;
     e_execs(MAKE_location,make);
 
     edbg << "Done.\n" << flushl;
-	idpr("Done.", 100);
-	return 0;
+  	idpr("Done.", 100);
+  	return 0;
   }
   edbg << "Building for mode (" << mode << ")" << flushl;
 
-  // CLean up from any previous executions.
-
+  // Clean up from any previous executions.
   edbg << "Cleaning up from previous executions" << flushl;
-    parsed_objects.clear(); //Make sure we don't dump in any old object code...
-    edbg << " - Cleared parsed objects" << flushl;
-    parsed_rooms.clear();   //Or that we dump any room code, for that matter...
-    edbg << " - Cleared room entries" << flushl;
-    shared_locals_clear();  //Forget inherited locals, we'll reparse them
-    edbg << " - Cleared shared locals list" << flushl;
-    event_info_clear();     //Forget event definitions, we'll re-get them
-    edbg << " - Cleared event info" << flushl;
+  parsed_objects.clear(); //Make sure we don't dump in any old object code...
+  edbg << " - Cleared parsed objects" << flushl;
+  parsed_rooms.clear();   //Or that we dump any room code, for that matter...
+  edbg << " - Cleared room entries" << flushl;
+  shared_locals_clear();  //Forget inherited locals, we'll reparse them
+  edbg << " - Cleared shared locals list" << flushl;
+  event_info_clear();     //Forget event definitions, we'll re-get them
+  edbg << " - Cleared event info" << flushl;
 
   // Re-establish ourself
-    // Read the global locals: locals that will be included with each instance
-    {
-      vector<string> extnp;
-      for (int i = 0; i < es->extensionCount; i++) {
-        cout << "Adding extension " << flushl << "extension " << flushl << es->extensions[i].path << flushl << ":" << endl << es->extensions[i].name << flushl;
-        extnp.push_back(string(es->extensions[i].path) + es->extensions[i].name);
-      }
-      edbg << "Loading shared locals from extensions list" << flushl;
-      if (shared_locals_load(extnp) != 0) {
-        user << "Failed to determine locals; couldn't determine bottom tier: is ENIGMA configured correctly?";
-        idpr("ENIGMA Misconfiguration",-1); return E_ERROR_LOAD_LOCALS;
-      }
+  // Read the global locals: locals that will be included with each instance
+  {
+    vector<string> extnp;
+    for (int i = 0; i < es->extensionCount; i++) {
+      cout << "Adding extension " << flushl << "extension " << flushl << es->extensions[i].path << flushl << ":" << endl << es->extensions[i].name << flushl;
+      extnp.push_back(string(es->extensions[i].path) + es->extensions[i].name);
     }
+    edbg << "Loading shared locals from extensions list" << flushl;
+    if (shared_locals_load(extnp) != 0) {
+      user << "Failed to determine locals; couldn't determine bottom tier: is ENIGMA configured correctly?";
+      idpr("ENIGMA Misconfiguration",-1); return E_ERROR_LOAD_LOCALS;
+    }
+  }
 
   //Read the types of events
   event_parse_resourcefile();
@@ -284,9 +266,9 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
 
   GameSettings gameSet = es->gameSettings;
   edbg << "Writing executable information and resources." << flushl;
-  wto.open((makedir +"Preprocessor_Environment_Editable/Resources.rc").c_str(),ios_base::out);
-    wto << license;
-    wto << "#include <windows.h>\n";
+  wto.open((makedir + "Preprocessor_Environment_Editable/Resources.rc").c_str(),ios_base::out);
+  wto << license;
+  wto << "#include <windows.h>\n";
 	if (gameSet.gameIcon != NULL && strlen(gameSet.gameIcon) > 0) {
 		wto << "IDI_MAIN_ICON ICON          \"" << string_replace_all(gameSet.gameIcon,"\\","/")  << "\"\n";
 	}
@@ -311,33 +293,32 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   wto.close();
 
   edbg << "Writing modes and settings" << flushl;
-  wto.open((makedir +"Preprocessor_Environment_Editable/GAME_SETTINGS.h").c_str(),ios_base::out);
-    wto << license;
-    wto << "#define ASSUMEZERO 0\n";
-    wto << "#define PRIMBUFFER 0\n";
-    wto << "#define PRIMDEPTH2 6\n";
-    wto << "#define AUTOLOCALS 0\n";
-    wto << "#define MODE3DVARS 0\n";
-    wto << "#define GM_COMPATIBILITY_VERSION " << setting::compliance_mode << "\n";
-    wto << "void ABORT_ON_ALL_ERRORS() { " << (false?"game_end();":"") << " }\n";
-    wto << '\n';
+  wto.open((makedir + "Preprocessor_Environment_Editable/GAME_SETTINGS.h").c_str(),ios_base::out);
+  wto << license;
+  wto << "#define ASSUMEZERO 0\n";
+  wto << "#define PRIMBUFFER 0\n";
+  wto << "#define PRIMDEPTH2 6\n";
+  wto << "#define AUTOLOCALS 0\n";
+  wto << "#define MODE3DVARS 0\n";
+  wto << "#define GM_COMPATIBILITY_VERSION " << setting::compliance_mode << "\n";
+  wto << "void ABORT_ON_ALL_ERRORS() { " << (false?"game_end();":"") << " }\n";
+  wto << '\n';
   wto.close();
 
-  wto.open((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_modesenabled.h").c_str(),ios_base::out);
-    wto << license;
-    wto << "#define BUILDMODE " << 0 << "\n";
-    wto << "#define DEBUGMODE " << 0 << "\n";
-    wto << '\n';
+  wto.open((makedir + "Preprocessor_Environment_Editable/IDE_EDIT_modesenabled.h").c_str(),ios_base::out);
+  wto << license;
+  wto << "#define BUILDMODE " << 0 << "\n";
+  wto << "#define DEBUGMODE " << 0 << "\n";
+  wto << '\n';
   wto.close();
 
-  wto.open((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_inherited_locals.h").c_str(),ios_base::out);
+  wto.open((makedir + "Preprocessor_Environment_Editable/IDE_EDIT_inherited_locals.h").c_str(),ios_base::out);
   wto.close();
-
 
   //NEXT FILE ----------------------------------------
   //Object switch: A listing of all object IDs and the code to allocate them.
   edbg << "Writing object switch" << flushl;
-  wto.open((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h").c_str(),ios_base::out);
+  wto.open((makedir + "Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h").c_str(),ios_base::out);
     wto << license;
     wto << "#ifndef NEW_OBJ_PREFIX\n#  define NEW_OBJ_PREFIX\n#endif\n\n";
     for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
@@ -354,11 +335,11 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   //Resource names: Defines integer constants for all resources.
   int max;
   edbg << "Writing resource names and maxima" << flushl;
-  wto.open((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_resourcenames.h").c_str(),ios_base::out);
-    wto << license;
+  wto.open((makedir + "Preprocessor_Environment_Editable/IDE_EDIT_resourcenames.h").c_str(),ios_base::out);
+  wto << license;
 
 
-stringstream ss;
+  stringstream ss;
 
     max = 0;
     wto << "namespace enigma_user {\nenum //object names\n{\n";
@@ -580,8 +561,9 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
 
   idpr("Starting compile (This may take a while...)", 30);
 
-  string make = "Game ";
+  string make = MAKE_flags;
 
+  make += " Game ";
   make += "WORKDIR=\"" + makedir + "\" ";
   make += mode == emode_debug? "GMODE=Debug ": mode == emode_design? "GMODE=Design ": mode == emode_compile?"GMODE=Compile ": "GMODE=Run ";
   make += "GRAPHICS=" + extensions::targetAPI.graphicsSys + " ";
@@ -608,7 +590,8 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
     if (TOPLEVEL_ldflags.length()) make += "LDFLAGS=\"" + TOPLEVEL_ldflags + "\" ";
   }
 
-  string compilepath = CURRENT_PLATFORM_NAME "/" + extensions::targetOS.identifier;
+  if (TOPLEVEL_rcflags.length()) make += "RCFLAGS=\"" + TOPLEVEL_rcflags + "\" ";
+
   make += "COMPILEPATH=\"" + compilepath + "\" ";
 
   string extstr = "EXTENSIONS=\"";
@@ -626,7 +609,7 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
   edbg << "Full command line: " << MAKE_location << " " << make << flushl;
 
 //  #if CURRENT_PLATFORM_ID == OS_MACOSX
-  //int makeres = better_system("cd ","/MacOS/");
+//  int makeres = better_system("cd ","/MacOS/");
 //  int makeres = better_system(MAKE_location,"MacOS");
 
   // Pick a file and flush it

@@ -222,6 +222,16 @@ float sound_get_length(int sound) { // Not for Streams
   return size / channels / (bits/8) / (float)freq;
 }
 
+float sound_get_pan(int sound){  // Not for Streams
+  get_sound(snd,sound,0.0);
+  return snd->pan;
+}
+
+float sound_get_volume(int sound){
+  get_sound(snd,sound,0.0);
+  return snd->volume;
+}
+
 float sound_get_position(int sound) { // Not for Streams
   float offset = -1;
   for (size_t i = 0; i < sound_channels.size(); i++) {

@@ -15,6 +15,11 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#ifndef ENIGMA_DXTILESTRUCT_H
+#define ENIGMA_DXTILESTRUCT_H
+
+///TODO(harijs) - This is the same as GLtileStruct.h. Do we need this?
+
 #include "Universal_System/roomsystem.h"
 namespace enigma
 {
@@ -27,3 +32,5 @@ namespace enigma
     void load_tiles();
     void rebuild_tile_layer(int layer_depth);
 }
+
+#endif
