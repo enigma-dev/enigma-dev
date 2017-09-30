@@ -39,7 +39,7 @@ namespace gui
   class Textbox{
     public:
       rect box;
-      vector"MockSTL/string" text{""};
+      vector<string> text{""};
       vector<double> text_width{0.0};
 
       array<int,6> callback; //Script to run on event
