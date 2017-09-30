@@ -25,9 +25,9 @@
 **  or programs made in the environment.                                        **
 **                                                                              **
 \********************************************************************************/
-#include <vector>
-#include <cstdlib>
-#include <map>
+#include "MockSTL/vector"
+#include "MockSTL/cstdlib"
+#include "MockSTL/map"
 using std::vector;
 using std::multimap;
 

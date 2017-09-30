@@ -20,7 +20,7 @@
 
 #include "Universal_System/scalar.h"
 
-#include <string>
+#include "MockSTL/string"
 
 namespace enigma_user {
   enum {

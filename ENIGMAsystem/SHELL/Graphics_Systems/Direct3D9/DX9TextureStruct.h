@@ -21,7 +21,7 @@
 #include "Bridges/General/DX9Context.h"
 #include "Direct3D9Headers.h"
 
-#include <vector>
+#include "MockSTL/vector"
 using std::vector;
 
 struct TextureStruct {

@@ -21,8 +21,8 @@
 #define ENIGMA_SPRITESTRUCT
 
 #include <stdlib.h>
-#include <string>
-#include <vector>
+#include "MockSTL/string"
+#include "MockSTL/vector"
 using std::vector;
 
 #include "var4.h"

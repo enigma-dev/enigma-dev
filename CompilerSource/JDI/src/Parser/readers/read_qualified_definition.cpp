@@ -1,9 +1,12 @@
 #include <Parser/bodies.h>
 #include <API/compile_settings.h>
 
+#include <iostream>
+
 using namespace jdip;
 definition* jdip::read_qualified_definition(lexer *lex, definition_scope* scope, token_t &token, context_parser *cp, error_handler *herr)
 {
+  std::cout << (const char*)token.file << ' ' << token.linenum << '\n';
   definition *res = NULL;
   if (token.type == TT_SCOPE) {
     token = lex->get_token_in_scope(scope);

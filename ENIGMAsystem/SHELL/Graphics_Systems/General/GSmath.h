@@ -20,7 +20,7 @@
 
 #include "Universal_System/scalar.h"
 #include <stdio.h> //For printf
-#include <limits> //For numerical limits
+#include "MockSTL/limits" //For numerical limits
 //#include "util.h"
 
 namespace enigma

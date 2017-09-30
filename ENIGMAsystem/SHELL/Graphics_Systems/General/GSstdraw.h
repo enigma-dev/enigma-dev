@@ -19,7 +19,7 @@
 #ifndef ENIGMA_GSSTDRAW_H
 #define ENIGMA_GSSTDRAW_H
 
-#include <list>
+#include "MockSTL/list"
 
 #include "Universal_System/scalar.h"
 

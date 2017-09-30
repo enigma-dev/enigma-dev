@@ -29,7 +29,7 @@
 #define ENIGMA_PS_PARTICLEDEPTH
 
 #include <set>
-#include <map>
+#include "MockSTL/map"
 
 namespace enigma
 {

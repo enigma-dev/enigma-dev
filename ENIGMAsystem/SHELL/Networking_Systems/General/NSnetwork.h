@@ -18,7 +18,7 @@
 #ifndef ENIGMA_NSNETWORK_H
 #define ENIGMA_NSNETWORK_H
 
-#include <string>
+#include "MockSTL/string"
 using std::string;
 
 namespace enigma_user {

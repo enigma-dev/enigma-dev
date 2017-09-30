@@ -20,8 +20,8 @@
 \*/// Accidental failure to implement them could cause error.
 
 #include "Universal_System/Extensions/ParticleSystems/PS_particle_instance.h"
-#include <string>
-#include <vector>
+#include "MockSTL/string"
+#include "MockSTL/vector"
 
 namespace enigma
 {

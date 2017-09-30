@@ -26,7 +26,7 @@
   #define y0 bessel_y0
   #define y1 bessel_y1
   #define yn bessel_yn
-    #include <cmath> // Basic math functions
+    #include "MockSTL/cmath" // Basic math functions
   #undef j1
   #undef j0
   #undef jn
@@ -38,7 +38,7 @@
 #error ln2math and stop including this damn header.
 #endif
 
-#include <cstdlib> // random()
+#include "MockSTL/cstdlib" // random()
 #include "math_consts.h"
 #include "scalar.h"
 

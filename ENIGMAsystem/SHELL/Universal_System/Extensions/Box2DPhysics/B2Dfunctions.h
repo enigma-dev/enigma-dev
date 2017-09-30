@@ -18,7 +18,7 @@
 #ifndef ENIGMA_B2D_FUNCTIONS__H
 #define ENIGMA_B2D_FUNCTIONS__H
 
-#include <vector>
+#include "MockSTL/vector"
 using std::vector;
 
 #include <Box2D/Box2D.h>

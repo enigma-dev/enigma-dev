@@ -18,8 +18,8 @@
 #ifndef ENIGMA_TEXTUREATLAS
 #define ENIGMA_TEXTUREATLAS
 
-#include <vector>
-#include <unordered_map>
+#include "MockSTL/vector"
+#include "MockSTL/unordered_map"
 using std::unordered_map;
 using std::vector;
 

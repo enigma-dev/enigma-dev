@@ -20,7 +20,7 @@
 #define ENIGMA_GSD3D_H
 
 #include "Universal_System/scalar.h"
-#include <string>
+#include "MockSTL/string"
 
 namespace enigma {
   extern bool d3dMode;

@@ -20,9 +20,9 @@
 
 #include "PS_particle_instance.h"
 #include "PS_particle_sprites.h"
-#include <vector>
-#include <cmath>
-#include <algorithm>
+#include "MockSTL/vector"
+#include "MockSTL/cmath"
+#include "MockSTL/algorithm"
 //#include <GL/gl.h>
 
 #include "PS_particle_system.h"

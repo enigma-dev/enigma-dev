@@ -31,7 +31,7 @@
 #include "Widget_Systems/widgets_mandatory.h" // show_error
 #endif
 
-#include <map>
+#include "MockSTL/map"
 
 enum load_state {
     LOADSTATE_NONE,

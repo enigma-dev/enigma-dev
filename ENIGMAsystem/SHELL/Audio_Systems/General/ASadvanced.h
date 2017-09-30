@@ -21,7 +21,7 @@
 #ifndef _AS_ADVANCED__H
 #define _AS_ADVANCED__H
 
-#include <string>
+#include "MockSTL/string"
 using std::string;
 
 namespace enigma_user

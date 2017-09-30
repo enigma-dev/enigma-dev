@@ -15,8 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <string>
-#include <vector>
+#include "MockSTL/string"
+#include "MockSTL/vector"
 using std::vector;
 
 #include "var4.h"

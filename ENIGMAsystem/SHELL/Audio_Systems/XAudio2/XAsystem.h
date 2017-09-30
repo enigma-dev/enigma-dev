@@ -17,7 +17,7 @@
 
 #ifndef _XA_SYSTEM__H
 #define _XA_SYSTEM__H
-#include <stddef.h>
+#include "MockSTL/cstddef"
 
 extern int falloff_model;
 extern size_t channel_num;

@@ -27,7 +27,7 @@
 
 #include "../General/PFwindow.h"
  
-#include <string>
+#include "MockSTL/string"
 using std::string;
 
 void gmw_init();

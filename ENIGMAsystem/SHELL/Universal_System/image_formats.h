@@ -19,7 +19,7 @@
 #ifndef ENIGMA_IMAGEFORMATS_H
 #define ENIGMA_IMAGEFORMATS_H
 
-#include <string>
+#include "MockSTL/string"
 using std::string;
 
 /// NOTE: These image formats expect the data to be un-aligned and always reads and writes with BGRA full color

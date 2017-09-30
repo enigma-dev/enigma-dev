@@ -1,0 +1,7 @@
+#ifndef JUST_DEFINE_IT_RUN
+	#include <tupple>
+#else
+
+class std::tupple;
+
+#endif
