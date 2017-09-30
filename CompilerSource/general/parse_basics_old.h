@@ -24,6 +24,8 @@
 **  or programs made in the environment.                                        **
 **                                                                              **
 \*********************************************************************************/
+#ifndef PARSE_BASICS_OLD_H
+#define PARSE_BASICS_OLD_H
 
 typedef size_t pt;
 
@@ -69,3 +71,5 @@ inline bool is_linker(char x)
 {
   return x=='+' || x=='-' || x=='*' || x=='/' || x=='=' || x=='!' || x=='~' || x=='&' || x=='|' || x=='^' || x=='.';
 }
+
+#endif

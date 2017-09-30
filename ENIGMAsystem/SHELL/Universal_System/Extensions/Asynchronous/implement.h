@@ -17,7 +17,6 @@
 
 #ifndef ASYNC_EXT_SET
 #define ASYNC_EXT_SET
-#endif
 
 namespace enigma {
   struct extension_async
@@ -36,3 +35,5 @@ namespace enigma {
     virtual variant myevent_asyncpushnotification() { return 0; }
   };
 }
+
+#endif // ASYNC_EXT_SET

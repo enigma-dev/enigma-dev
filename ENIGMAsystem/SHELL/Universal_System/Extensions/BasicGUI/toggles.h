@@ -29,7 +29,7 @@ namespace enigma_user
 
 namespace gui
 {
-	class gui_toggle{
+	class Toggle{
 		public:
 			unsigned int id;
 			rect box;
@@ -37,18 +37,19 @@ namespace gui
 			int state = 0;
 			bool visible = true;
 			bool active = false; //Is button pressed
-			int callback = -1; //Script to run when clicked
+			array<int,4> callback; //Script to run on event
 
 			int parent_id = -1; //ID of some kind of parent (probably a window). It won't render with gui_draw_toggles() if it is not -1.
 
       int style_id = -1; //The style we use
       int group_id = -1; //Groups allow making one button disable others
 
-			gui_toggle();
+			Toggle();
 			//Update all possible button states (hover, click, toggle etc.)
 			void update(gs_scalar ox = 0, gs_scalar oy = 0, gs_scalar tx = enigma_user::mouse_x, gs_scalar ty = enigma_user::mouse_y);
 			void draw(gs_scalar ox = 0, gs_scalar oy = 0);
 			void update_text_pos(int state = -1);
+			void callback_execute(int event);
 	};
 }
 

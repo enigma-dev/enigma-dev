@@ -30,12 +30,9 @@ using namespace std;
 #include "Graphics_Systems/graphics_mandatory.h" // Room dimensions.
 namespace enigma
 {
-  unsigned char currentcolor[4] = {0,0,0,255};
-  int currentblendmode[2] = {0,0};
-  int currentblendtype = 0;
   bool glew_isgo;
   bool pbo_isgo;
-  
+
   void graphicssystem_initialize()
   {
     #ifdef DEBUG_MODE
@@ -154,4 +151,3 @@ string draw_get_graphics_error()
 }
 
 }
-

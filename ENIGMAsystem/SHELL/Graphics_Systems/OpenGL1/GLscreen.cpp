@@ -111,81 +111,6 @@ static inline void draw_back()
   }
 }
 
-static inline void follow_object(int vob, size_t vc)
-{
-  object_basic *instanceexists = fetch_instance_by_int(vob);
-
-  if (instanceexists)
-  {
-    object_planar* vobr = (object_planar*)instanceexists;
-
-    double vobx = vobr->x, voby = vobr->y;
-
-    //int bbl=*vobr.x+*vobr.bbox_left,bbr=*vobr.x+*vobr.bbox_right,bbt=*vobr.y+*vobr.bbox_top,bbb=*vobr.y+*vobr.bbox_bottom;
-    //if (bbl<view_xview[vc]+view_hbor[vc]) view_xview[vc]=bbl-view_hbor[vc];
-
-    double vbc_h, vbc_v;
-    (view_hborder[vc] > view_wview[vc]/2) ? vbc_h = view_wview[vc]/2 : vbc_h = view_hborder[vc];
-    (view_vborder[vc] > view_hview[vc]/2) ? vbc_v = view_hview[vc]/2 : vbc_v = view_vborder[vc];
-
-    if (view_hspeed[vc] == -1)
-    {
-      if (vobx < view_xview[vc] + vbc_h)
-        view_xview[vc] = vobx - vbc_h;
-      else if (vobx > view_xview[vc] + view_wview[vc] - vbc_h)
-        view_xview[vc] = vobx + vbc_h - view_wview[vc];
-    }
-    else
-    {
-      if (vobx < view_xview[vc] + vbc_h)
-      {
-        view_xview[vc] -= view_hspeed[vc];
-        if (view_xview[vc] < vobx - vbc_h)
-          view_xview[vc] = vobx - vbc_h;
-      }
-      else if (vobx > view_xview[vc] + view_wview[vc] - vbc_h)
-      {
-        view_xview[vc] += view_hspeed[vc];
-        if (view_xview[vc] > vobx + vbc_h - view_wview[vc])
-          view_xview[vc] = vobx + vbc_h - view_wview[vc];
-      }
-    }
-
-    if (view_vspeed[vc] == -1)
-    {
-      if (voby < view_yview[vc] + vbc_v)
-        view_yview[vc] = voby - vbc_v;
-      else if (voby > view_yview[vc] + view_hview[vc] - vbc_v)
-        view_yview[vc] = voby + vbc_v - view_hview[vc];
-    }
-    else
-    {
-      if (voby < view_yview[vc] + vbc_v)
-      {
-        view_yview[vc] -= view_vspeed[vc];
-        if (view_yview[vc] < voby - vbc_v)
-          view_yview[vc] = voby - vbc_v;
-      }
-      if (voby > view_yview[vc] + view_hview[vc] - vbc_v)
-      {
-        view_yview[vc] += view_vspeed[vc];
-        if (view_yview[vc] > voby + vbc_v - view_hview[vc])
-          view_yview[vc] = voby + vbc_v - view_hview[vc];
-      }
-    }
-
-    if (view_xview[vc] < 0)
-      view_xview[vc] = 0;
-    else if (view_xview[vc] > room_width - view_wview[vc])
-      view_xview[vc] = room_width - view_wview[vc];
-
-    if (view_yview[vc] < 0)
-      view_yview[vc] = 0;
-    else if (view_yview[vc] > room_height - view_hview[vc])
-      view_yview[vc] = room_height - view_hview[vc];
-  }
-}
-
 static inline void draw_insts()
 {
   // Apply and clear stored depth changes.
@@ -479,9 +404,18 @@ void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar he
   glScissor(viewport_x, viewport_y, viewport_w, viewport_h);
 }
 
-void display_set_gui_size(unsigned width, unsigned height) {
+//TODO: These need to be in some kind of General
+void display_set_gui_size(unsigned int width, unsigned int height) {
 	enigma::gui_width = width;
 	enigma::gui_height = height;
+}
+
+unsigned int display_get_gui_width(){
+  return enigma::gui_width;
+}
+
+unsigned int display_get_gui_height(){
+  return enigma::gui_height;
 }
 
 }

@@ -450,7 +450,7 @@ bool move_bounce_object(int object, bool adv, bool solid_only)
 
         const double effective_direction = inst1->speed >= 0 ? inst1->direction : fmod(inst1->direction+180.0, 360.0);
         const double flipped_direction = fmod(effective_direction + 180.0, 360.0);
-        const double speed = abs(inst1->speed + 1);//max(1, abs(inst1->speed));
+        const double speed = abs((double) inst1->speed + 1); //max(1, abs(inst1->speed));
 
         // Find the normal direction of the collision by doing radial collisions based on the speed and flipped direction.
 

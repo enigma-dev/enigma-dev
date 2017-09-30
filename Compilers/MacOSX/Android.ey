@@ -8,6 +8,7 @@ Target-platform: Android
 # Some info about it
 Path:
 make: "cd ./ENIGMAsystem/SHELL/Platforms/Android/EnigmaAndroidGame/jni && ~/.ENIGMA/SDKs/android-ndk-r7b/ndk-build #"
+makeflags:
 gcc: gcc
 g++: g++
 defines: gcc -dM -x c++ -E $blank

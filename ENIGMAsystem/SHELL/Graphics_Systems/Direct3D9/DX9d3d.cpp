@@ -427,6 +427,35 @@ bool d3d_light_enable(int id, bool enable)
     return enable?d3d_lighting.light_enable(id):d3d_lighting.light_disable(id);
 }
 
+
+//TODO(harijs) - This seems to be broken like this. Almost works, but stencilmask needs some different value
+void d3d_stencil_start_mask(){
+  d3dmgr->SetRenderState(D3DRS_STENCILENABLE, true);
+  d3dmgr->SetRenderState(D3DRS_ZWRITEENABLE, false);
+  d3dmgr->SetRenderState(D3DRS_COLORWRITEENABLE, false);
+
+  d3dmgr->SetRenderState(D3DRS_STENCILREF, 0x1);
+  d3dmgr->SetRenderState(D3DRS_STENCILMASK, 0x1);
+
+  d3dmgr->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_ALWAYS);
+
+  d3dmgr->SetRenderState(D3DRS_STENCILZFAIL, D3DSTENCILOP_KEEP);
+  d3dmgr->SetRenderState(D3DRS_STENCILFAIL, D3DSTENCILOP_KEEP);
+  d3dmgr->SetRenderState(D3DRS_STENCILPASS, D3DSTENCILOP_REPLACE);
+}
+
+void d3d_stencil_use_mask(){
+  d3dmgr->SetRenderState(D3DRS_ZWRITEENABLE, true);
+  d3dmgr->SetRenderState(D3DRS_COLORWRITEENABLE, true);
+
+  d3dmgr->SetRenderState(D3DRS_STENCILMASK, 0x0);
+  d3dmgr->SetRenderState(D3DRS_STENCILFUNC, D3DCMP_EQUAL);
+}
+
+void d3d_stencil_end_mask(){
+  d3dmgr->SetRenderState(D3DRS_STENCILENABLE, false);
+}
+
 }
 
 namespace enigma {

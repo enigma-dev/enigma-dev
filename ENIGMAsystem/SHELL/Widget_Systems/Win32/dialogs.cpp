@@ -1,5 +1,5 @@
-/** Copyright (C) 2011 Josh Ventura
-*** Copyright (C) 2014 Robert B. Colton
+/** Copyright (C) 2011, 2017 Josh Ventura
+*** Copyright (C) 2014, 2017 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -26,6 +26,7 @@
 #include <richedit.h>
 #include <stdio.h>
 #include <string>
+#include <vector>
 
 using namespace std;
 #include "Widget_Systems/widgets_mandatory.h"
@@ -143,7 +144,7 @@ static INT_PTR CALLBACK GetLoginProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPA
       GetDlgItemText(hwndDlg, 14, strget, 1024);
       gs_str_submitted = strget;
       GetDlgItemText(hwndDlg, 15, strget, 1024);
-      gs_str_submitted += string("|") + string(strget);
+      gs_str_submitted += string(1, 0) + string(strget);
       gs_form_canceled = 0;
       EndDialog(hwndDlg, 2);
     }
@@ -203,6 +204,14 @@ static INT CALLBACK GetDirectoryAltProc(HWND hwnd, UINT uMsg, LPARAM lp, LPARAM 
   return 0;
 }
 
+typedef basic_string<WCHAR> tstring;
+tstring widen(const string &str) {
+  // Number of shorts will be <= number of bytes; add one for null terminator
+  const size_t wchar_count = str.size() + 1;
+  vector<WCHAR> buf(wchar_count);
+  return tstring{buf.data(), (size_t)MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, buf.data(), (int)wchar_count)};
+}
+
 namespace enigma_user {
 
 extern string window_get_caption();
@@ -257,24 +266,24 @@ void message_text_charset(int type, int charset) {
 
 void show_info(string info, int bgcolor, int left, int top, int width, int height, bool embedGameWindow, bool showBorder, bool allowResize, bool stayOnTop, bool pauseGame, string caption) {
   LoadLibrary(TEXT("Riched32.dll"));
-
+  
   // Center Information Window to the Middle of the Screen
   if (left < 0) {
-    left = (GetSystemMetrics(SM_CXSCREEN) - width) / 2;
+    left = (GetSystemMetrics(SM_CXSCREEN) - width)/2;
   }
   if (top < 0) {
-    top = (GetSystemMetrics(SM_CYSCREEN) - height) / 2;
+    top = (GetSystemMetrics(SM_CYSCREEN) - height)/2;
   }
-
+  
   HWND parent;
   if (embedGameWindow) {
     parent = enigma::hWnd;
   } else {
-    WNDCLASS wc = { CS_VREDRAW | CS_HREDRAW, (WNDPROC)ShowInfoProc, 0, 0, enigma::hInstance, 0,
-      0, GetSysColorBrush(COLOR_WINDOW), 0, "infodialog" };
+    WNDCLASS wc = {CS_VREDRAW|CS_HREDRAW,(WNDPROC)ShowInfoProc,0,0,enigma::hInstance,0,
+      0,GetSysColorBrush(COLOR_WINDOW),0,"infodialog"};
     RegisterClass(&wc);
-
-    DWORD flags = WS_VISIBLE | WS_POPUP | WS_SYSMENU | WS_TABSTOP | WS_CLIPCHILDREN; // DS_3DLOOK|DS_CENTER|DS_FIXEDSYS
+    
+    DWORD flags = WS_VISIBLE|WS_POPUP|WS_SYSMENU|WS_TABSTOP|WS_CLIPCHILDREN; // DS_3DLOOK|DS_CENTER|DS_FIXEDSYS
     if (showBorder) {
       flags |= WS_BORDER | WS_DLGFRAME | WS_CAPTION;
     }
@@ -284,10 +293,10 @@ void show_info(string info, int bgcolor, int left, int top, int width, int heigh
     if (allowResize) {
       flags |= WS_SIZEBOX;
     }
-
+  
     parent = CreateWindow("infodialog", TEXT(caption.c_str()),
       flags, left, top, width, height, enigma::hWnd, 0, enigma::hInstance, 0);
-
+      
     if (showBorder) {
       // Set Window Information Icon
       HICON hIcon = LoadIcon(enigma::hInstance, "infoicon");
@@ -297,51 +306,51 @@ void show_info(string info, int bgcolor, int left, int top, int width, int heigh
       }
     }
   }
-
-  enigma::infore = CreateWindowEx(WS_EX_TOPMOST, "RICHEDIT", TEXT("information text"),
+    
+  enigma::infore=CreateWindowEx(WS_EX_TOPMOST,"RICHEDIT",TEXT("information text"),
     ES_LEFT | ES_MULTILINE | ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_WANTRETURN | ES_READONLY | WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP,
     0, 0, width, height, parent, 0, enigma::hInstance, 0);
-
+    
   // Size the RTF Component to the Window
   RECT rectParent;
   GetClientRect(parent, &rectParent);
-  MoveWindow(enigma::infore, rectParent.top, rectParent.left, rectParent.right, rectParent.bottom, TRUE);
-
+  MoveWindow(enigma::infore, rectParent.top, rectParent.left, rectParent.right, rectParent.bottom, TRUE); 
+  
   // Set RTF Editor Background Color
   SendMessage(enigma::infore, EM_SETBKGNDCOLOR, (WPARAM)0, (LPARAM)RGB(__GETR(bgcolor), __GETG(bgcolor), __GETB(bgcolor)));
-
+  
   // Set RTF Information Text
   SETTEXTEX se;
   se.codepage = CP_ACP;
   se.flags = ST_DEFAULT;
   SendMessage(enigma::infore, EM_SETTEXTEX, (WPARAM)&se, (LPARAM)info.c_str());
-
+    
   //TODO: Figure out how to block if we need to pause the game, otherwise ShowWindowAsync
   ShowWindow(parent, SW_SHOWDEFAULT);
   if (!embedGameWindow) {
     SetFocus(enigma::infore);
   }
-
+  
   /*
   MSG msg;
   BOOL bRet;
 
   bool bQuit = false;
   while (!bQuit)
-  {
+  { 
     bRet = PeekMessage(&msg, main, 0, 0, PM_REMOVE);
     if (bRet == -1) {
       // handle the error and possibly exit
     } else if (msg.message == WM_CLOSE) {
       bQuit = true;
     } else {
-      TranslateMessage(&msg);
-      DispatchMessage(&msg);
+      TranslateMessage(&msg); 
+      DispatchMessage(&msg); 
     }
   }*/
-
+  
   /* Round two...
-    MSG msg;
+  MSG msg;
   BOOL bRet;
 
   bool bQuit = false;
@@ -353,21 +362,21 @@ void show_info(string info, int bgcolor, int left, int top, int width, int heigh
       // handle the error and possibly exit
       PostMessage(embedGameWindow ? infore : main, WM_CLOSE, 0, 0);
       bQuit = true;
-    } else {
+    } else { 
       if (msg.message == WM_KEYUP) {
         switch(msg.wParam)
-          {
+        {
           case VK_ESCAPE:
           PostMessage(embedGameWindow ? infore : main, WM_CLOSE, 0, 0);
           bQuit = true;
           break;
-          }
+        }
       } else {
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
+        TranslateMessage(&msg); 
+        DispatchMessage(&msg); 
       }
     }
-
+    
     // If game information was showed in a separate window, then handle the messages for sizing and stuff
     if (!embedGameWindow) {
       bRet = PeekMessage(&msg, main, 0, 0, PM_REMOVE);
@@ -375,7 +384,7 @@ void show_info(string info, int bgcolor, int left, int top, int width, int heigh
         // handle the error and possibly exit
         PostMessage(main, WM_CLOSE, 0, 0);
         bQuit = true;
-      } else {
+      } else { 
         if (msg.message == WM_KEYUP) {
           switch(msg.wParam)
             {
@@ -387,14 +396,14 @@ void show_info(string info, int bgcolor, int left, int top, int width, int heigh
         } else if (msg.message == WM_SIZE) {
           RECT rectParent;
           GetClientRect(main, &rectParent);
-          MoveWindow(infore, rectParent.top, rectParent.left, rectParent.right, rectParent.bottom, TRUE);
+          MoveWindow(infore, rectParent.top, rectParent.left, rectParent.right, rectParent.bottom, TRUE); 
         } else {
-          TranslateMessage(&msg);
-          DispatchMessage(&msg);
+          TranslateMessage(&msg); 
+          DispatchMessage(&msg); 
         }
       }
     }
-
+    
 
   }
   */
@@ -403,21 +412,26 @@ void show_info(string info, int bgcolor, int left, int top, int width, int heigh
 int show_message(string str)
 {
   //NOTE: This will not work with a fullscreen application, it is an issue with Windows
-  //this could be why GM8.1, unlike Studio, did not use native dialogs and custom
+  //this could be why GM8.1, unlike Studio, did not use native dialogs and custom 
   //rendered its own message boxes like most game engines.
   //In Studio this function will cause the window to be minimized and the message shown, fullscreen will not be restored.
   //A possible alternative is fake fullscreen for Win32, but who knows if we have to do that on XLIB or anywhere else.
-  MessageBox(enigma::hWnd, str.c_str(), window_get_caption().c_str(), MB_OK);
+
+  tstring message = widen(str);
+  tstring caption = widen(window_get_caption());
+
+  MessageBoxW(enigma::hWnd, message.c_str(), caption.c_str(), MB_OK);
 
   return 0;
 }
 
 int show_message_ext(string msg, string but1, string but2, string but3)
 {
-  gs_cap = window_get_caption(); gs_message = msg;
+  gs_cap = window_get_caption();
+  gs_message = msg;
   gs_but1 = but1; gs_but2 = but2; gs_but3 = but3;
 
-  return DialogBox(enigma::hInstance, "showmessageext", enigma::hWnd, ShowMessageExtProc);
+  return DialogBox(enigma::hInstance,"showmessageext",enigma::hWnd,ShowMessageExtProc);
 }
 
 bool show_question(string str)
@@ -428,7 +442,7 @@ bool show_question(string str)
 string get_login(string username, string password, string cap)
 {
   gs_cap = cap; gs_username = username; gs_password = password;
-  DialogBox(enigma::hInstance, "getlogindialog", enigma::hWnd, GetLoginProc);
+  DialogBox(enigma::hInstance,"getlogindialog",enigma::hWnd,GetLoginProc);
 
   return gs_str_submitted;
 }
@@ -436,15 +450,15 @@ string get_login(string username, string password, string cap)
 string get_string(string message,string def,string cap)
 {
   gs_cap = cap; gs_message = message; gs_def = def;
-  DialogBox(enigma::hInstance, "getstringdialog", enigma::hWnd, GetStrProc);
+  DialogBox(enigma::hInstance,"getstringdialog",enigma::hWnd,GetStrProc);
 
   return gs_str_submitted;
 }
 
-int get_integer(string message, string def, string cap)
+int get_integer(string message,string def,string cap)
 {
   gs_cap = cap; gs_message = message; gs_def = def;
-  DialogBox(enigma::hInstance, "getstringdialog", enigma::hWnd, GetStrProc);
+  DialogBox(enigma::hInstance,"getstringdialog",enigma::hWnd,GetStrProc);
   if (gs_str_submitted == "") return 0;
   puts(gs_str_submitted.c_str());
 
@@ -454,7 +468,7 @@ int get_integer(string message, string def, string cap)
 double get_number(string message,string def,string cap)
 {
   gs_cap = cap; gs_message = message; gs_def = def;
-  DialogBox(enigma::hInstance, "getstringdialog", enigma::hWnd, GetStrProc);
+  DialogBox(enigma::hInstance,"getstringdialog",enigma::hWnd,GetStrProc);
   if (gs_str_submitted == "") return 0;
   puts(gs_str_submitted.c_str());
 
@@ -482,7 +496,7 @@ string get_open_filename(string filter,string filename,string caption)
   ofn.lpstrFile = fn; ofn.nMaxFile = MAX_PATH;
   ofn.lpstrFileTitle = NULL; ofn.nMaxFileTitle = 0;
   ofn.lpstrInitialDir = NULL; ofn.lpstrTitle = caption.length() ? caption.c_str() : NULL;
-  ofn.Flags = OFN_FILEMUSTEXIST | OFN_HIDEREADONLY;
+  ofn.Flags=OFN_FILEMUSTEXIST | OFN_HIDEREADONLY | OFN_NOCHANGEDIR;
   ofn.nFileOffset = 0; ofn.nFileExtension = 0;
   ofn.lpstrDefExt = NULL; ofn.lCustData = 0;
   ofn.lpfnHook = NULL; ofn.lpTemplateName = 0;
@@ -496,7 +510,8 @@ string get_save_filename(string filter, string filename, string caption)
   filter.append("||");
   const unsigned int l = filter.length();
   for (unsigned int i = 0;i < l; i++)
-    if (filter[i] == '|') filter[i] = 0;
+    if (filter[i] == '|')
+      filter[i] = 0;
 
   char fn[MAX_PATH];
   strcpy(fn, filename.c_str());
@@ -508,7 +523,7 @@ string get_save_filename(string filter, string filename, string caption)
   ofn.lpstrFile = fn; ofn.nMaxFile = MAX_PATH;
   ofn.lpstrFileTitle = NULL; ofn.nMaxFileTitle = 0;
   ofn.lpstrInitialDir = NULL; ofn.lpstrTitle = caption.length() ? caption.c_str() : NULL;
-  ofn.Flags = OFN_PATHMUSTEXIST;
+  ofn.Flags = OFN_PATHMUSTEXIST | OFN_NOCHANGEDIR;
   ofn.nFileOffset = 0; ofn.nFileExtension = 0;
   ofn.lpstrDefExt = NULL; ofn.lCustData = 0;
   ofn.lpfnHook = NULL; ofn.lpTemplateName = 0;
@@ -519,87 +534,86 @@ string get_save_filename(string filter, string filename, string caption)
 
 int get_color(int defcolor, bool advanced)
 {
-  COLORREF defc = (int)defcolor;
-  static COLORREF custcs[16];
+    COLORREF defc=(int)defcolor;
+    static COLORREF custcs[16];
 
-  CHOOSECOLOR gcol;
-  gcol.lStructSize = sizeof(CHOOSECOLOR);
-  gcol.hwndOwner = enigma::hWnd;
-  gcol.rgbResult = defc;
-  gcol.lpCustColors = custcs;
+    CHOOSECOLOR gcol;
+    gcol.lStructSize=sizeof(CHOOSECOLOR);
+    gcol.hwndOwner=enigma::hWnd;
+    gcol.rgbResult=defc;
+    gcol.lpCustColors=custcs;
   if (advanced) {
-    gcol.Flags = CC_FULLOPEN | CC_RGBINIT;
+    gcol.Flags= CC_FULLOPEN | CC_RGBINIT;
   } else {
-    gcol.Flags = CC_RGBINIT;
+    gcol.Flags= CC_RGBINIT;
   }
-  gcol.lpTemplateName = "";
+    gcol.lpTemplateName="";
 
-  if (ChooseColor(&gcol))
-    return (int)gcol.rgbResult;
-  else return defc;
+    if (ChooseColor(&gcol))
+      return (int)gcol.rgbResult;
+    else return defc;
 }
 
 string get_directory(string dname, string caption)
 {
-  //NOTE: This uses the Windows Vista or later file chooser, which is different than the one used by GM8 and lower
-  //because I could not find out which one it uses, since IFileDialog is used by both wxWidgets and QtFramework
-  //and there doesn't appear to be a standard file picker for XP or lower in the Windows API except SHBrowseForFolder that is
-  //used by Game Maker for get_directory_alt
+//NOTE: This uses the Windows Vista or later file chooser, which is different than the one used by GM8 and lower
+//because I could not find out which one it uses, since IFileDialog is used by both wxWidgets and QtFramework
+//and there doesn't appear to be a standard file picker for XP or lower in the Windows API except SHBrowseForFolder that is
+//used by Game Maker for get_directory_alt
   IFileDialog* fileDialog;
   CoCreateInstance(CLSID_FileOpenDialog, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&fileDialog));
 
   DWORD options;
   fileDialog->GetOptions(&options);
-  options &= ~FOS_FILEMUSTEXIST;
+  options &= ~FOS_FILEMUSTEXIST;  
   options &= ~FOS_PATHMUSTEXIST;
   fileDialog->SetOptions(options | FOS_PICKFOLDERS);
   //TODO: Set default directory to dname
   //fileDialog->SetDefaultFolder(std::wstring(dname.begin(), dname.end()).c_str());
   fileDialog->SetTitle(std::wstring(caption.begin(), caption.end()).c_str());
-
+  
   fileDialog->Show(enigma::hWnd);
-
+  
   string res = "";
   IShellItem *psi;
-
+  
   if (SUCCEEDED(fileDialog->GetResult(&psi))) {
     LPWSTR wideres;
     psi->GetDisplayName(SIGDN_DESKTOPABSOLUTEPARSING, &wideres);
     psi->Release();
-
+    
     std::wstring wstr = wideres;
     res = string(wstr.begin(), wstr.end());
   }
-
+  
   return res;
 }
 
 string get_directory_alt(string message, string root, bool modern, string caption) {
-  // standard use of the Shell API to browse for folders
+  //standard use of the Shell API to browse for folders
   bool f_selected = false;
 
   char szDir [MAX_PATH];
-  BROWSEINFO bi;
-  LPITEMIDLIST pidl;
+  BROWSEINFO bi;        
+  LPITEMIDLIST pidl;        
   LPMALLOC pMalloc;
 
   if (SUCCEEDED (::SHGetMalloc (&pMalloc)))
   {
-    ::ZeroMemory (&bi, sizeof(bi));
+    ::ZeroMemory (&bi,sizeof(bi)); 
 
     bi.lpszTitle = message.c_str();
     bi.hwndOwner = enigma::hWnd;
-    bi.pszDisplayName = 0;
+    bi.pszDisplayName = 0;           
     bi.pidlRoot = 0;
     bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_STATUSTEXT;
     if (modern) {
-      bi.ulFlags |= BIF_EDITBOX | BIF_NEWDIALOGSTYLE;
+    bi.ulFlags |= BIF_EDITBOX | BIF_NEWDIALOGSTYLE;
     }
     gs_cap = caption;
     bi.lpfn =  GetDirectoryAltProc;      //callback to set window caption
-    bi.lParam = (LPARAM)root.c_str();    //start in root directory
 
-    pidl = ::SHBrowseForFolder(&bi);
+    pidl = ::SHBrowseForFolder(&bi);           
     if (pidl) {
       if (::SHGetPathFromIDList(pidl, szDir)) {
         f_selected = true;
@@ -607,7 +621,7 @@ string get_directory_alt(string message, string root, bool modern, string captio
 
       pMalloc->Free(pidl);
       pMalloc->Release();
-    }
+    }     
   }
 
   if (f_selected) {

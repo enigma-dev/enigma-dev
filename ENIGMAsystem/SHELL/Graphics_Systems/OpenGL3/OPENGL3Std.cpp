@@ -45,9 +45,6 @@ namespace enigma
   unsigned bound_vbo = -1; //This means it's max-1, just so it wouldn't randomly be 0 at first render call.
   unsigned bound_vboi = -1; //This means it's max-1
   int bound_texture_stage = -1;
-  unsigned char currentcolor[4] = {0,0,0,255};
-  int currentblendmode[2] = {0,0};
-  int currentblendtype = 0;
   bool glew_isgo;
   bool pbo_isgo;
 
@@ -80,6 +77,7 @@ namespace enigma
     // read shaders into graphics system structure and compile and link them if needed
     for (size_t i = 0; i < shader_idmax; ++i) {
       ShaderStruct* shaderstruct = shaderdata[i];
+      //TODO(harijs): If precompile == false or ID's are not defragged, there is a segfault because we try to access invalid position in shader vector
       if (shaderstruct->precompile == false) { continue; }
 
       int vshader_id = enigma_user::glsl_shader_create(enigma_user::sh_vertex);
