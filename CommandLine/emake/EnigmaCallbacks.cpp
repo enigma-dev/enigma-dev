@@ -71,14 +71,6 @@ void CallBack::SetOutFile(const char* file)
 
 void CallBack::ResetRedirect()
 {
-  //FIXME: only outputs when done...
-
-  //_isOutputting = true;
-
-  pthread_t me;
-  pthread_create(&me, NULL, &OutputThread, NULL);
-
-  //_isOutputting = false;
 }
 
 int CallBack::Execute(const char*, const char**, bool)

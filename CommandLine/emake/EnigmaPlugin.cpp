@@ -78,9 +78,10 @@ int EnigmaPlugin::Init()
   return PLUGIN_SUCCESS;
 }
 
-void EnigmaPlugin::SetDefinitions(const char* def)
+void EnigmaPlugin::SetDefinitions(const std::string def)
 {
-  plugin_DefinitionsModified("", def);
+  const char* d_cstr = def.c_str();
+  plugin_DefinitionsModified("", d_cstr);
 }
 
 int EnigmaPlugin::BuildGame(EnigmaStruct* data, GameMode mode, const char* fpath)
