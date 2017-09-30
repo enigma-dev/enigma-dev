@@ -1,4 +1,4 @@
-# ENIGMA
+# ENIGMA ![build status](https://travis-ci.org/enigma-dev/enigma-dev.svg?branch=master)
 
 Official Website: http://enigma-dev.org
 
