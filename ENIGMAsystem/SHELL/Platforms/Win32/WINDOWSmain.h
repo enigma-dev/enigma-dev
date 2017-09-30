@@ -35,12 +35,13 @@ void windowsystem_write_exename(char* exenamehere);
 namespace enigma_user
 {
 
+//NOTE: window_handle() should never be used by the engine, other systems, such as bridges, can make direct use of the HWND
 #if GM_COMPATIBILITY_VERSION <= 81
-static unsigned long long window_handle() {
+static inline unsigned long long window_handle() {
   return (unsigned long long)enigma::hWnd;
 }
 #else
-static HWND window_handle() {
+static inline HWND window_handle() {
   return enigma::hWnd;
 }
 #endif
