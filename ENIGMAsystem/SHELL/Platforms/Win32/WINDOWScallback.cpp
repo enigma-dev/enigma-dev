@@ -57,7 +57,7 @@ namespace enigma
   extern int viewScale;
   extern double scaledWidth, scaledHeight;
   extern char* currentCursor;
-  extern HWND hWnd,hWndParent;
+  extern HWND hWnd;
   extern HDC window_hDC;
   extern LONG_PTR getwindowstyle();
   extern void setwindowsize();
