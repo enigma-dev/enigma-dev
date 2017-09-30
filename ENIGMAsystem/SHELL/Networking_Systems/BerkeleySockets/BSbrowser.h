@@ -30,6 +30,9 @@ RFC 2616 (very difficult to read)
 http://www.ietf.org/rfc/rfc2616.txt
 */
 
+#ifndef ENIGMA_BSBROWSER_H
+#define ENIGMA_BSBROWSER_H
+
 #include <string>
 using std::string;
 
@@ -54,3 +57,5 @@ void net_ftp_close(int in);
 string net_http(string host, string loc);
 
 }
+
+#endif // ENIGMA_BSBROWSER_H
