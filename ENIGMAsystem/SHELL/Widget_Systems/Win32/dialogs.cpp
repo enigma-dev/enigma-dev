@@ -1,5 +1,5 @@
-/** Copyright (C) 2011 Josh Ventura
-*** Copyright (C) 2014 Robert B. Colton
+/** Copyright (C) 2011, 2017 Josh Ventura
+*** Copyright (C) 2014, 2017 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -26,6 +26,7 @@
 #include <richedit.h>
 #include <stdio.h>
 #include <string>
+#include <vector>
 
 using namespace std;
 #include "Widget_Systems/widgets_mandatory.h"
@@ -143,7 +144,7 @@ static INT_PTR CALLBACK GetLoginProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPA
       GetDlgItemText(hwndDlg, 14, strget, 1024);
       gs_str_submitted = strget;
       GetDlgItemText(hwndDlg, 15, strget, 1024);
-      gs_str_submitted += string("|") + string(strget);
+      gs_str_submitted += string(1, 0) + string(strget);
       gs_form_canceled = 0;
       EndDialog(hwndDlg, 2);
     }
@@ -201,6 +202,14 @@ static INT CALLBACK GetDirectoryAltProc(HWND hwnd, UINT uMsg, LPARAM lp, LPARAM 
     SetWindowText(hwnd, gs_cap.c_str());
 
   return 0;
+}
+
+typedef basic_string<WCHAR> tstring;
+tstring widen(const string &str) {
+  // Number of shorts will be <= number of bytes; add one for null terminator
+  const size_t wchar_count = str.size() + 1;
+  vector<WCHAR> buf(wchar_count);
+  return tstring{buf.data(), (size_t)MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, buf.data(), (int)wchar_count)};
 }
 
 namespace enigma_user {
@@ -407,7 +416,11 @@ int show_message(string str)
   //rendered its own message boxes like most game engines.
   //In Studio this function will cause the window to be minimized and the message shown, fullscreen will not be restored.
   //A possible alternative is fake fullscreen for Win32, but who knows if we have to do that on XLIB or anywhere else.
-  MessageBox(enigma::hWnd, str.c_str(), window_get_caption().c_str(), MB_OK);
+
+  tstring message = widen(str);
+  tstring caption = widen(window_get_caption());
+
+  MessageBoxW(enigma::hWnd, message.c_str(), caption.c_str(), MB_OK);
 
   return 0;
 }

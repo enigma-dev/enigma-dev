@@ -1,12 +1,13 @@
 %e-yaml
 ---
 
-Name: Json
+Name: JSON
 Identifier: Json
 Author: Ssss
 Description: Adds support for json_decode and json_encode.
 Default: false
 Icon: json.png
 
-Depends: DataStructures
+Depends:
+	Extensions: DataStructures
 Dependencies: None
