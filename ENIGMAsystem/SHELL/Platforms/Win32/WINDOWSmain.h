@@ -35,7 +35,16 @@ void windowsystem_write_exename(char* exenamehere);
 namespace enigma_user
 {
 
-unsigned long long window_handle();
+#if GM_COMPATIBILITY_VERSION <= 81
+static unsigned long long window_handle() {
+  return (unsigned long long)enigma::hWnd;
+}
+#else
+static HWND window_handle() {
+  return enigma::hWnd;
+}
+#endif
+
 int sleep(int millis);
 
 }
