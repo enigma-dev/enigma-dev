@@ -91,7 +91,7 @@ struct variant
   operator string() const;
   
   variant();
-  variant(void *p);
+  variant(const void *p);
   types_extrapolate_alldecc(variant)
   
   types_extrapolate_alldec(variant& operator=)
