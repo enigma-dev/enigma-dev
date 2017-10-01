@@ -21,10 +21,6 @@ namespace enigma_user
 {
 
 enum {
-  ty_real = 0,
-  ty_string = 1
-};
-enum {
   dll_cdecl = 0,
   dll_stdcall = 1
 };
