@@ -27,6 +27,9 @@ install:
   - chmod +x ./travis.sh
   - make
   - make emake
+  - curl -L https://github.com/fundies/enigma-libs/files/1345933/enigma-libs.zip > enigma-libs.zip
+  - unzip enigma-libs.zip -d ENIGMAsystem/
+  - mv ENIGMAsystem/Install ENIGMAsystem/Additional
 
 env:
   matrix:
@@ -78,8 +81,5 @@ env:
     - COMPILER=MinGW64 PLATFORM=Win32 MODE=Run GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
   #END LINUX
 script:
-  - curl -L https://github.com/fundies/enigma-libs/files/1345933/enigma-libs.zip > enigma-libs.zip
-  - unzip enigma-libs.zip -d enigma-dev/ENIGMAsystem/
-  - mv enigma-dev/ENIGMAsystem/Install enigma-dev/ENIGMAsystem/Additional
   - ./travis.sh
 
