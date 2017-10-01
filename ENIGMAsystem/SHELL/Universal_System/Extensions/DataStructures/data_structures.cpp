@@ -731,10 +731,10 @@ std::string ds_grid_write(const unsigned int id)
 
       // Write type
       ss.width(2);
-      ss << (unsigned int)((vari.type == enigma::vt_real) ? 0x00 : 0x01);
+      ss << (unsigned int)((vari.type == enigma_user::ty_real) ? 0x00 : 0x01);
 
       // Write data
-      if (vari.type == enigma::vt_real)
+      if (vari.type == enigma_user::ty_real)
       {
         ss.width(16);
         char* b = (char*)&vari.rval.d;
@@ -793,7 +793,7 @@ void ds_grid_read(const unsigned int id, std::string value)
       if (type == 0)
       {
         variant vari;
-        vari.type = enigma::vt_real;
+        vari.type = enigma_user::ty_real;
 
         string b;
         ss << std::hex << value.substr(i, 16);
@@ -809,7 +809,7 @@ void ds_grid_read(const unsigned int id, std::string value)
       else
       {
         variant vari;
-        vari.type = enigma::vt_tstr;
+        vari.type = enigma_user::ty_string;
         int len;
 
         // Read length
@@ -1019,10 +1019,10 @@ std::string ds_map_write(const unsigned int id)
   {
     // Write type
     ss.width(2);
-    ss << (unsigned int)(((*it).first.type == enigma::vt_real) ? 0x00 : 0x01);
+    ss << (unsigned int)(((*it).first.type == enigma_user::ty_real) ? 0x00 : 0x01);
 
     // Write data
-    if ((*it).first.type == enigma::vt_real)
+    if ((*it).first.type == enigma_user::ty_real)
     {
       ss.width(16);
             char* b = (char*)&(*it).first.rval.d;
@@ -1039,10 +1039,10 @@ std::string ds_map_write(const unsigned int id)
 
     // Write type
     ss.width(2);
-    ss << (unsigned int)(((*it).second.type == enigma::vt_real) ? 0x00 : 0x01);
+    ss << (unsigned int)(((*it).second.type == enigma_user::ty_real) ? 0x00 : 0x01);
 
     // Write data
-    if ((*it).second.type == enigma::vt_real)
+    if ((*it).second.type == enigma_user::ty_real)
     {
       ss.width(16);
       char* b = (char*)&(*it).second.rval.d;
@@ -1095,7 +1095,7 @@ void ds_map_read(const unsigned int id, std::string value)
       i += 16;
 
       variKey.rval.d = d;
-      variKey.type = enigma::vt_real;
+      variKey.type = enigma_user::ty_real;
     }
     else
     {
@@ -1107,7 +1107,7 @@ void ds_map_read(const unsigned int id, std::string value)
       ss.clear();
       i += 4;
 
-      variKey.type = enigma::vt_tstr;
+      variKey.type = enigma_user::ty_string;
       variKey.sval = value.substr(i, len);
       i += len;
     }
@@ -1129,7 +1129,7 @@ void ds_map_read(const unsigned int id, std::string value)
       i += 16;
 
       variValue.rval.d = d;
-      variValue.type = enigma::vt_real;
+      variValue.type = enigma_user::ty_real;
     }
     else
     {
@@ -1141,7 +1141,7 @@ void ds_map_read(const unsigned int id, std::string value)
       ss.clear();
       i += 4;
 
-      variValue.type = enigma::vt_tstr;
+      variValue.type = enigma_user::ty_string;
       variValue.sval = value.substr(i, len);
       i += len;
     }
@@ -1310,10 +1310,10 @@ std::string ds_list_write(const unsigned int id)
   {
     // Write type
     ss.width(2);
-    ss << (unsigned int)((dsList[i].type == enigma::vt_real) ? 0x00 : 0x01);
+    ss << (unsigned int)((dsList[i].type == enigma_user::ty_real) ? 0x00 : 0x01);
 
     // Write data
-    if (dsList[i].type == enigma::vt_real)
+    if (dsList[i].type == enigma_user::ty_real)
     {
       ss.width(16);
       char* b = (char*)&dsList[i].rval.d;
@@ -1356,7 +1356,7 @@ void ds_list_read(const unsigned int id, std::string value)
     if (type == 0)
     {
       variant vari;
-      vari.type = enigma::vt_real;
+      vari.type = enigma_user::ty_real;
 
       string b;
       ss << std::hex << value.substr(i, 16);
@@ -1372,7 +1372,7 @@ void ds_list_read(const unsigned int id, std::string value)
     else
     {
       variant vari;
-      vari.type = enigma::vt_tstr;
+      vari.type = enigma_user::ty_string;
       int len;
 
       // Read length
@@ -1567,14 +1567,14 @@ std::string ds_priority_write(const unsigned int id)
   {
     // Write type
     ss.width(2);
-    ss << (unsigned int)(((*it).first.type == enigma::vt_real) ? 0x00 : 0x01);
+    ss << (unsigned int)(((*it).first.type == enigma_user::ty_real) ? 0x00 : 0x01);
     ss.width(16);
     char* b = (char*)&(*it).second.rval.d;
     for (unsigned i = 0; i < sizeof(double); ++i)
         ss << b[i];
 
     // Write data
-    if ((*it).first.type == enigma::vt_real)
+    if ((*it).first.type == enigma_user::ty_real)
     {
       ss.width(16);
       char* b = (char*)&(*it).first.rval.d;
@@ -1611,7 +1611,7 @@ void ds_priority_read(const unsigned int id, std::string value)
     variant vari, prio;
     int type;
 
-    prio.type = enigma::vt_real;
+    prio.type = enigma_user::ty_real;
 
     // Read type
     ss << std::hex << value.substr(i, 2);
@@ -1640,7 +1640,7 @@ void ds_priority_read(const unsigned int id, std::string value)
       i += 16;
 
       vari.rval.d = d;
-      vari.type = enigma::vt_real;
+      vari.type = enigma_user::ty_real;
     }
     else
     {
@@ -1652,7 +1652,7 @@ void ds_priority_read(const unsigned int id, std::string value)
       ss.clear();
       i += 4;
 
-      vari.type = enigma::vt_tstr;
+      vari.type = enigma_user::ty_string;
       vari.sval = value.substr(i, len);
       i += len;
     }
@@ -1770,10 +1770,10 @@ std::string ds_queue_write(const unsigned int id)
   {
     // Write type
     ss.width(2);
-    ss << (unsigned int)((dsQueue[i].type == enigma::vt_real) ? 0x00 : 0x01);
+    ss << (unsigned int)((dsQueue[i].type == enigma_user::ty_real) ? 0x00 : 0x01);
 
     // Write data
-    if (dsQueue[i].type == enigma::vt_real)
+    if (dsQueue[i].type == enigma_user::ty_real)
     {
       ss.width(16);
       char* b = (char*)&dsQueue[i].rval.d;
@@ -1825,7 +1825,7 @@ void ds_queue_read(const unsigned int id, std::string value)
       i += 16;
 
       vari.rval.d = d;
-      vari.type = enigma::vt_real;
+      vari.type = enigma_user::ty_real;
     }
     else
     {
@@ -1837,7 +1837,7 @@ void ds_queue_read(const unsigned int id, std::string value)
       ss.clear();
       i += 4;
 
-      vari.type = enigma::vt_tstr;
+      vari.type = enigma_user::ty_string;
       vari.sval = value.substr(i, len);
       i += len;
     }
@@ -1948,10 +1948,10 @@ std::string ds_stack_write(const unsigned int id)
   {
     // Write type
     ss.width(2);
-    ss << (unsigned int)((dsStack[i].type == enigma::vt_real) ? 0x00 : 0x01);
+    ss << (unsigned int)((dsStack[i].type == enigma_user::ty_real) ? 0x00 : 0x01);
 
     // Write data
-    if (dsStack[i].type == enigma::vt_real)
+    if (dsStack[i].type == enigma_user::ty_real)
     {
       ss.width(16);
       char* b = (char*)&dsStack[i].rval.d;
@@ -2003,7 +2003,7 @@ void ds_stack_read(const unsigned int id, std::string value)
       i += 16;
 
       vari.rval.d = d;
-      vari.type = enigma::vt_real;
+      vari.type = enigma_user::ty_real;
     }
     else
     {
@@ -2015,7 +2015,7 @@ void ds_stack_read(const unsigned int id, std::string value)
       ss.clear();
       i += 4;
 
-      vari.type = enigma::vt_tstr;
+      vari.type = enigma_user::ty_string;
       vari.sval = value.substr(i, len);
       i += len;
     }
