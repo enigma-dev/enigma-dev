@@ -25,9 +25,6 @@
     #define terror2(x)
     #define terrortrue()
   #endif
-
-  // Types
-  namespace enigma { enum var_types { vt_real, vt_tstr }; }
 #endif
 
 #undef EVCONST

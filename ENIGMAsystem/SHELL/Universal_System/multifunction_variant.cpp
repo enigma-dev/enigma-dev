@@ -54,8 +54,8 @@
 
 #include <cmath> // fn
 
-#define real enigma::vt_real
-#define tstr enigma::vt_tstr
+#define real enigma_user::ty_real
+#define tstr enigma_user::ty_string
 
 #include <cmath>
 

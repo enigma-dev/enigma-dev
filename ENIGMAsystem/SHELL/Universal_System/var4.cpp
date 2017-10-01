@@ -90,10 +90,8 @@ variant::operator float()     const { ccast(0); return float      (rval.d); }
 
 variant::operator string() const { ccast(1); return sval; }
 
-//TODO: vt_real and vt_tstr should probably just be
-//replaced with ty_real, ty_string, ty_* user constants for consistency - Robert
-#define real enigma::vt_real
-#define tstr enigma::vt_tstr
+#define real enigma_user::ty_real
+#define tstr enigma_user::ty_string
 
 types_extrapolate_real_p  (variant::variant,: rval(x), sval( ), type(real) {})
 types_extrapolate_string_p(variant::variant,: rval(0.0), sval(x), type(tstr) {})
