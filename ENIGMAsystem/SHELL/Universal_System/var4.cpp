@@ -569,5 +569,5 @@ namespace enigma_user {
   bool is_undefined(variant val)   { return val.type == ty_undefined; }
   bool is_real(variant val)   { return val.type == real; }
   bool is_string(variant val) { return val.type == tstr;  }
-  bool is_pointer(variant val)   { return val.type == ty_pointer; }
+  bool is_ptr(variant val)   { return val.type == ty_pointer; }
 }
