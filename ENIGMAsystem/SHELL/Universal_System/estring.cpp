@@ -136,8 +136,6 @@ string base64_decode(string const& str) {
 
 double real(variant str) { return str.type ? atof(((string)str).c_str()) : (double) str; }
 
-bool is_string(variant val) { return val.type;  }
-bool is_real(variant val)   { return !val.type; }
 string ansi_char(char byte) { return string(1,byte); }
 string chr(char val) { return string(1,val); }
 int ord(string str)  { return str[0]; }

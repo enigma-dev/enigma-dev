@@ -39,8 +39,9 @@ using std::string;
 namespace enigma {
   union rvt {
     double d;
-    void * p;
+    const void * p;
     rvt(double x): d(x) {}
+    rvt(const void * x): p(x) {}
     #define var_e 1e-12
   };
 }
@@ -90,9 +91,11 @@ struct variant
   operator string() const;
   
   variant();
+  variant(void *p);
   types_extrapolate_alldecc(variant)
   
   types_extrapolate_alldec(variant& operator=)
+  variant& operator=(const void* p);
   types_extrapolate_alldec(variant& operator+=)
   types_extrapolate_alldec(variant& operator-=)
   types_extrapolate_alldec(variant& operator*=)
@@ -385,4 +388,18 @@ types_binary_extrapolate_alldecce(bool, operator<,  const var&)
 
 #undef unsigll
 
-#endif
+namespace enigma_user {
+  enum {
+    ty_undefined = -1,
+    ty_real = 0,
+    ty_string = 1,
+    ty_pointer = 2
+  };
+
+  bool is_undefined(variant var);
+  bool is_real(variant val);
+  bool is_string(variant val);
+  bool is_pointer(variant var);
+}
+
+#endif // _var4_h

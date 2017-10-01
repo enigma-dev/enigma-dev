@@ -24,8 +24,6 @@ string base64_encode(string const& str);
 string base64_decode(string const& str);
 
 bool is_base64(unsigned char byte);
-bool is_string(variant val);
-bool is_real(variant val);
 
 string ansi_char(char byte);
 string chr(char val);
