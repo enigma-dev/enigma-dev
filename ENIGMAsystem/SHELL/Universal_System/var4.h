@@ -399,7 +399,7 @@ namespace enigma_user {
   bool is_undefined(variant var);
   bool is_real(variant val);
   bool is_string(variant val);
-  bool is_pointer(variant var);
+  bool is_ptr(variant var);
 }
 
 #endif // _var4_h
