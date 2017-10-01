@@ -27,8 +27,8 @@
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
 #include "GL3shader.h"
-#include "MockSTL/cmath"
-#include "MockSTL/cstdint"
+#include <math.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -38,16 +38,16 @@ using namespace std;
 #define __GETG(x) ((x & 0x00FF00)>>8)
 #define __GETB(x) ((x & 0xFF0000)>>16)
 
-#include "MockSTL/iostream"
-#include "MockSTL/map"
-#include "MockSTL/list"
+#include <iostream>
+#include <map>
+#include <list>
 #include "Universal_System/fileio.h"
 #include "Universal_System/estring.h"
 
 #define bind_array_buffer(vbo) if (enigma::bound_vbo != vbo) glBindBuffer( GL_ARRAY_BUFFER, enigma::bound_vbo = vbo );
 #define bind_element_buffer(vboi) if (enigma::bound_vboi != vboi) glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, enigma::bound_vboi = vboi );
 
-#include "MockSTL/vector"
+#include <vector>
 using std::vector;
 
 namespace enigma {

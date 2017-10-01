@@ -25,7 +25,7 @@
 #include "Widget_Systems/widgets_mandatory.h" // show_error
 #endif
 
-#include "MockSTL/vector"
+#include <vector>
 using std::vector;
 
 struct SoundChannel {

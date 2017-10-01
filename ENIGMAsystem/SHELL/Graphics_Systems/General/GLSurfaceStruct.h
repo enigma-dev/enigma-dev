@@ -18,7 +18,7 @@
 #ifndef ENIGMA_GLSURFACESTRUCT_H
 #define ENIGMA_GLSURFACESTRUCT_H
 
-#include "MockSTL/string"
+#include <string>
 #include "OpenGLHeaders.h"
 using std::string;
 

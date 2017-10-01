@@ -29,7 +29,7 @@
 #define ENIGMA_PS_PARTICLESYSTEMMANAGER
 
 #include "PS_particle_system.h"
-#include "MockSTL/map"
+#include <map>
 
 namespace enigma
 {

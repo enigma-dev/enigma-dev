@@ -19,8 +19,8 @@
 #define ENIGMA_GSVERTEX_H
 
 #include "../General/OpenGLHeaders.h"
-#include "MockSTL/vector"
-#include "MockSTL/utility"
+#include <vector>
+#include <utility>
 using std::vector;
 using std::pair;
 

@@ -18,12 +18,12 @@
 #ifndef DX9_SURFSTRUCT__H
 #define DX9_SURFSTRUCT__H
 #include <windows.h>
-#include "MockSTL/string"
+#include <string>
 #include "Direct3D9Headers.h"
 #include "DX9TextureStruct.h"
 using std::string;
 
-#include "MockSTL/vector"
+#include <vector>
 using std::vector;
 
 namespace enigma
@@ -62,7 +62,7 @@ namespace enigma
 }
 
 #ifdef DEBUG_MODE
-  #include "MockSTL/string"
+  #include <string>
   #include "libEGMstd.h"
   #include "Widget_Systems/widgets_mandatory.h"
   #define get_surface(surf,id)\

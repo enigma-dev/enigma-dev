@@ -1,7 +1,0 @@
-#ifndef JUST_DEFINE_IT_RUN
-	#include <map>
-#else
-
-class std::map;
-
-#endif

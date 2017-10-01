@@ -19,7 +19,7 @@
 #ifndef ENIGMA_BSNET_H
 #define ENIGMA_BSNET_H
 
-#include "MockSTL/string"
+#include <string>
 using std::string;
 
 namespace enigma_user {

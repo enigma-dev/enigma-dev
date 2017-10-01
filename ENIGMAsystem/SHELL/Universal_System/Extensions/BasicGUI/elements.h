@@ -19,7 +19,7 @@
 #define BGUI_ELEMENTS_H
 
 #include <new> //Placement new
-#include "MockSTL/utility"      // std::pair, std::piecewise_construct
+#include <utility>      // std::pair, std::piecewise_construct
 #include <tuple>        // std::forward_as_tuple
 
 #include "sliders.h"
@@ -34,7 +34,7 @@
 #include "skins.h"
 
 #ifdef DEBUG_MODE
-  #include "MockSTL/string"
+  #include <string>
   #include "libEGMstd.h"
   #include "Widget_Systems/widgets_mandatory.h"
   //This checks and returns an element

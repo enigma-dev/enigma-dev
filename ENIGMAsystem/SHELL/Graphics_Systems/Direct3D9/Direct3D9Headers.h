@@ -18,8 +18,8 @@
 #ifndef __DIRECT3D9_HEADERS_H
 #define __DIRECT3D9_HEADERS_H
 #include <d3d9.h>
-#include "MockSTL/cmath"
-#include "MockSTL/string"
+#include <cmath>
+#include <string>
 using namespace std;
 
 #include <d3dx9.h>

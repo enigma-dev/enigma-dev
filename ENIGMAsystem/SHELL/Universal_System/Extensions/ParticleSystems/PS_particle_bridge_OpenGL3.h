@@ -26,16 +26,16 @@
 #include "Graphics_Systems/General/GSd3d.h"
 #include "PS_particle_instance.h"
 #include "PS_particle_sprites.h"
-#include "MockSTL/vector"
-#include "MockSTL/deque"
-#include "MockSTL/cmath"
-#include "MockSTL/algorithm"
+#include <vector>
+#include <deque>
+#include <cmath>
+#include <algorithm>
 #ifndef __APPLE__
 #include <GL/gl.h>
 #else
 #include <OpenGL/gl.h>
 #endif
-#include "MockSTL/iostream"
+#include <iostream>
 
 #include "PS_particle_system.h"
 #include "PS_particle.h"

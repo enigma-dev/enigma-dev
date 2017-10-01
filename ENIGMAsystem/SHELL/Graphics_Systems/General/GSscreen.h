@@ -18,7 +18,7 @@
 #ifndef ENIGMA_GSSCREEN_H
 #define ENIGMA_GSSCREEN_H
 
-#include "MockSTL/string"
+#include <string>
 using std::string;
 #include "Universal_System/scalar.h"
 

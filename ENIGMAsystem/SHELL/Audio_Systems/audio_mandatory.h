@@ -18,7 +18,7 @@
 /*\\\ This file contains prototypes for functions that must be defined by the audio
 |*||| library wrapper modules. Each of these is used by other systems throughout the engine.
 \*/// Accidental failure to implement them could cause error.
-#include "MockSTL/cstdlib"
+#include <cstdlib>
 
 namespace enigma
 {

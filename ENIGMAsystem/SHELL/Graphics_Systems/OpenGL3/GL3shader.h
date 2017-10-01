@@ -20,7 +20,7 @@
 #define GL_SHADER_H
 
 #include "../General/OpenGLHeaders.h"
-#include "MockSTL/string"
+#include <string>
 using std::string;
 
 namespace enigma

@@ -1,7 +1,7 @@
 #ifndef MATH_CONSTS_h
 #define MATH_CONSTS_h
 
-#include "MockSTL/cmath"
+#include <cmath>
 #ifndef M_PI // M_PI is non-standard
 #  define M_PI   3.14159265358979323846
 #  define M_PI_2 1.57079632679489661923

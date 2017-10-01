@@ -19,7 +19,7 @@
 #ifndef _AS_BASIC__H
 #define _AS_BASIC__H
 
-#include "MockSTL/string"
+#include <string>
 using std::string;
 
 namespace enigma_user

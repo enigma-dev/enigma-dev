@@ -29,9 +29,9 @@
 #define MATHEM_FUNC_H
 
 //#include <math.h>
-#include "MockSTL/cmath"
-#include "MockSTL/vector"
-#include "MockSTL/algorithm"    // std::fill
+#include <cmath>
+#include <vector>
+#include <algorithm>    // std::fill
 
 using std::vector;
 //using std::abs;

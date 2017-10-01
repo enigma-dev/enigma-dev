@@ -61,7 +61,7 @@ typedef float cs_scalar;
 //#define AS_ANGULAR_UNIT_RADIANS
 //#define CS_ANGULAR_UNIT_RADIANS
 
-#include "MockSTL/cmath"
+#include <math.h>
 
 #ifdef MA_ANGULAR_UNIT_RADIANS
 #define ma_angle_from_radians(radians) (radians)

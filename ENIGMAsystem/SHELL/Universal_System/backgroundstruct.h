@@ -17,7 +17,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "MockSTL/string"
+#include <string>
 #include "var4.h"
 
 namespace enigma

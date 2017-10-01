@@ -28,7 +28,7 @@
 #ifndef ENIGMA_PS_PARTICLETYPE
 #define ENIGMA_PS_PARTICLETYPE
 
-#include "MockSTL/map"
+#include <map>
 #include "PS_particle_enums.h"
 #include "PS_particle_sprites.h"
 

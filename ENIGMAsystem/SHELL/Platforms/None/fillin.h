@@ -19,7 +19,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "MockSTL/string"
+#include <string>
 using std::string;
 
 namespace enigma {
@@ -29,7 +29,7 @@ namespace enigma {
 #include "../General/PFwindow.h"
 #include "../General/PFmain.h"
 
-#include "MockSTL/string"
+#include <string>
 using std::string;
 
 void Sleep(int ms);

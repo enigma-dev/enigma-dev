@@ -18,21 +18,21 @@
 **/
 #ifndef GS_NONE_FILLIN
 #define GS_NONE_FILLIN
-#include "MockSTL/iostream"
-#include "MockSTL/fstream"
-#include "MockSTL/string"
+#include <iostream>
+#include <fstream>
+#include <string>
 #include <stdlib.h>     /* malloc, free, rand */
-#include "MockSTL/unordered_map"
-#include "MockSTL/cmath"
+#include <unordered_map>
+#include <math.h>
 
 using namespace std;
-#include "MockSTL/algorithm"
+#include <algorithm>
 #include <floatcomp.h>
-#include "MockSTL/vector"
-#include "MockSTL/limits"
-#include "MockSTL/map"
-#include "MockSTL/list"
-#include "MockSTL/stack"
+#include <vector>
+#include <limits>
+#include <map>
+#include <list>
+#include <stack>
 #include "Universal_System/estring.h"
 
 namespace enigma

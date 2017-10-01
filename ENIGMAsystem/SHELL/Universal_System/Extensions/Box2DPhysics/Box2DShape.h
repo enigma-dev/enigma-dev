@@ -18,7 +18,7 @@
 #ifndef ENIGMA_BOX2D_SHAPE__H
 #define ENIGMA_BOX2D_SHAPE__H
 
-#include "MockSTL/vector"
+#include <vector>
 using std::vector;
 
 #include <Box2D/Box2D.h>
@@ -62,7 +62,7 @@ struct B2DFixture {
 extern vector<B2DFixture*> b2dfixtures;
 
 #ifdef DEBUG_MODE
-  #include "MockSTL/string"
+  #include <string>
   #include "libEGMstd.h"
   #include "Widget_Systems/widgets_mandatory.h"
   #define get_shaper(s,id,r) \

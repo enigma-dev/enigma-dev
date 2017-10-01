@@ -24,7 +24,7 @@
 #include <pthread.h> // use POSIX threads
 #endif
 
-#include "MockSTL/deque"
+#include <deque>
 #include <stdio.h>
 
 #include "Universal_System/var4.h"

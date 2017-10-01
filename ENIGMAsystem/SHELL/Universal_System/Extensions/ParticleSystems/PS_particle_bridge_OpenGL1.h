@@ -24,9 +24,9 @@
 #include "Graphics_Systems/General/GScolors.h"
 #include "PS_particle_instance.h"
 #include "PS_particle_sprites.h"
-#include "MockSTL/vector"
-#include "MockSTL/cmath"
-#include "MockSTL/algorithm"
+#include <vector>
+#include <cmath>
+#include <algorithm>
 #ifndef __APPLE__
 #include <GL/gl.h>
 #else

@@ -21,7 +21,7 @@
 
 #ifndef _AL_SYSTEM__H
 #define _AL_SYSTEM__H
-#include "MockSTL/cstddef"
+#include <stddef.h>
 
 #ifdef __APPLE__
 #include "../../../additional/alure/include/AL/alure.h"

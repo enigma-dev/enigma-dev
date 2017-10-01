@@ -20,7 +20,7 @@
 #ifndef ENIGMA_GL3_TEXTURESTRUCT__H
 #define ENIGMA_GL3_TEXTURESTRUCT__H
 
-#include "MockSTL/vector"
+#include <vector>
 using std::vector;
 
 struct TextureStruct {

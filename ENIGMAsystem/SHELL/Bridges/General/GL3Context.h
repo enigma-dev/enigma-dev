@@ -22,8 +22,8 @@
 #include "Graphics_Systems/General/GSmodel.h"
 #include "Graphics_Systems/OpenGL3/GL3profiler.h"
 
-#include "MockSTL/vector"
-#include "MockSTL/map"
+#include <vector>
+#include <map>
 using std::vector;
 using std::map;
 

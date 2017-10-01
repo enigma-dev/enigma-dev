@@ -18,7 +18,7 @@
 #ifndef ENIGMA_SHADERSTRUCT
 #define ENIGMA_SHADERSTRUCT
 
-#include "MockSTL/string"
+#include <string>
 
 namespace enigma
 {

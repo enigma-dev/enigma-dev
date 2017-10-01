@@ -18,7 +18,7 @@
 #ifndef _GLSHADER__H
 #define _GLSHADER__H
 
-#include "MockSTL/string"
+#include <string>
 using std::string;
 
 namespace enigma_user

@@ -18,7 +18,7 @@
 #ifndef ENIGMA_BOX2D_WORLD__H
 #define ENIGMA_BOX2D_WORLD__H
 
-#include "MockSTL/vector"
+#include <vector>
 using std::vector;
 
 #include <Box2D/Box2D.h>

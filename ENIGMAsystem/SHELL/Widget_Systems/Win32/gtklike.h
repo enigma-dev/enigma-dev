@@ -74,7 +74,7 @@ struct gtkl_container: gtkl_placer
 };
 
 
-#include "MockSTL/map"
+#include <map>
 inline int min(int x, int y) { return x<y?x:y; }
 // Above we have the basic class layout;
 // Now we provide some useful algorithms

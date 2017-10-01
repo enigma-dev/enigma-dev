@@ -20,7 +20,7 @@
 /*
 #ifndef stringinclude
 #define stringinclude
-#include "MockSTL/string"
+#include <string>
 using std::string;
 #endif
 
@@ -50,7 +50,7 @@ using std::string;
 #ifndef _BULLETSOFTBODY__H
 #define _BULLETSOFTBODY__H
 
-#include "MockSTL/vector"
+#include <vector>
 using std::vector;
 
 #include <BulletSoftBody/btSoftBody.h>

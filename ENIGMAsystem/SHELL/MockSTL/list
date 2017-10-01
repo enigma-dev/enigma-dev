@@ -1,7 +1,0 @@
-#ifndef JUST_DEFINE_IT_RUN
-	#include <list>
-#else
-
-class std::list;
-
-#endif

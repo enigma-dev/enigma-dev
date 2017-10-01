@@ -18,11 +18,11 @@
 #ifndef _SURFSTRUCT__H
 #define _SURFSTRUCT__H
 
-#include "MockSTL/string"
+#include <string>
 #include "Direct3D11Headers.h"
 using std::string;
 
-#include "MockSTL/vector"
+#include <vector>
 using std::vector;
 
 namespace enigma
@@ -48,7 +48,7 @@ namespace enigma
 }
 
 #ifdef DEBUG_MODE
-  #include "MockSTL/string"
+  #include <string>
   #include "libEGMstd.h"
   #include "Widget_Systems/widgets_mandatory.h"
   #define get_surface(surf,id)\

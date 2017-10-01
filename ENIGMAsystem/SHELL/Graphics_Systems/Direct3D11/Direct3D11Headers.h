@@ -18,7 +18,7 @@
 #ifndef __DIRECT3D11_HEADERS_H
 #define __DIRECT3D11_HEADERS_H
 #include <d3d11.h>
-#include "MockSTL/cmath"
-#include "MockSTL/string"
+#include <cmath>
+#include <string>
 using namespace std;
 #endif

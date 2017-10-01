@@ -18,7 +18,7 @@
 #ifndef _DS_SYSTEM__H
 #define _DS_SYSTEM__H
 
-#include "MockSTL/cstddef"
+#include <stddef.h>
 #include <windows.h>
 #include <mmsystem.h>
 #include <dsound.h>

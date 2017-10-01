@@ -29,7 +29,7 @@
 #define ENIGMA_PS_PARTICLESPRITES
 
 #include "PS_particle_enums.h"
-#include "MockSTL/map"
+#include <map>
 
 namespace enigma
 {

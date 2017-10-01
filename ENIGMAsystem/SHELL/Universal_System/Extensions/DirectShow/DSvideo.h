@@ -16,7 +16,7 @@
 **/
 
 
-#include "MockSTL/string"
+#include <string>
 using std::string;
 
 namespace enigma_user {

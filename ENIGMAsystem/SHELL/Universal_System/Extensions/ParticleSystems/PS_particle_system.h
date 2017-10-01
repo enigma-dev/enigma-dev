@@ -36,9 +36,9 @@
 #include "PS_particle_instance.h"
 #include "PS_particle_enums.h"
 #include "Graphics_Systems/General/GScolors.h"
-#include "MockSTL/list"
-#include "MockSTL/vector"
-#include "MockSTL/map"
+#include <list>
+#include <vector>
+#include <map>
 
 using namespace enigma_user;
 

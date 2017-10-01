@@ -153,7 +153,7 @@
 typedef unsigned short wchar_t;
 #  define _WCHAR_T_DEFINED
 #endif
-/* "MockSTL/cstddef" */
+/* <stddef.h> */
 #if !defined(_W64)
 #  if !defined(__midl) && (defined(_X86_) || defined(_M_IX86)) && defined(_MSC_VER) && _MSC_VER >= 1300
 #    define _W64 __w64
@@ -213,15 +213,15 @@ typedef _W64 int ptrdiff_t;
  * (mem, 2004-01-04)
  */
 
-#include "MockSTL/cstddef"
+#include <stddef.h>
 
 /* SGI MIPSPro doesn't like stdint.h in C++ mode          */
 /* ID: 3376260 Solaris 9 has inttypes.h, but not stdint.h */
 
 #if (defined(__sgi) || defined(__sun)) && !defined(__GNUC__)
-#include "MockSTL/cinttypes"
+#include <inttypes.h>
 #else
-#include "MockSTL/cstdint"
+#include <stdint.h>
 #endif
 
 #define GLEW_APIENTRY_DEFINED
@@ -291,7 +291,7 @@ typedef signed long long GLint64EXT;
 typedef unsigned long long GLuint64EXT;
 #else
 #  if defined(__MINGW32__) || defined(__CYGWIN__)
-#include "MockSTL/cinttypes"
+#include <inttypes.h>
 #  endif
 typedef int64_t GLint64EXT;
 typedef uint64_t GLuint64EXT;

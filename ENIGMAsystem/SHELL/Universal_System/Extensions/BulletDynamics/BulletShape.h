@@ -20,7 +20,7 @@
 /*
 #ifndef stringinclude
 #define stringinclude
-#include "MockSTL/string"
+#include <string>
 using std::string;
 #endif
 
@@ -50,7 +50,7 @@ using std::string;
 #ifndef _BULLETSHAPE__H
 #define _BULLETSHAPE__H
 
-#include "MockSTL/vector"
+#include <vector>
 using std::vector;
 
 #include <btBulletDynamicsCommon.h>

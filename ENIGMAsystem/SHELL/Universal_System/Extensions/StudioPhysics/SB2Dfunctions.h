@@ -18,7 +18,7 @@
 #ifndef _ENIGMA_STUDIO_PHYSICS_FUNCTIONS__H
 #define _ENIGMA_STUDIO_PHYSICS_FUNCTIONS__H
 
-#include "MockSTL/vector"
+#include <vector>
 using std::vector;
 
 #include <Box2D/Box2D.h>

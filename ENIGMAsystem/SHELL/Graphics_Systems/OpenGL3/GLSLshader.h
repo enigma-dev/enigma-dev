@@ -19,9 +19,9 @@
 #define _GLSLSHADER__H
 
 //#include <functional> //For std::hash
-#include "MockSTL/vector"
-#include "MockSTL/string"
-#include "MockSTL/unordered_map"
+#include <vector>
+#include <string>
+#include <unordered_map>
 using std::string;
 using std::vector;
 using std::unordered_map;

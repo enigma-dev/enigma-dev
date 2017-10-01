@@ -18,8 +18,8 @@
 #ifndef BGUI_TEXTBOXES_H
 #define BGUI_TEXTBOXES_H
 #include <array>
-#include "MockSTL/string"
-#include "MockSTL/vector"
+#include <string>
+#include <vector>
 using std::array;
 using std::string;
 using std::vector;

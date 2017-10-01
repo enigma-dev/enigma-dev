@@ -20,7 +20,7 @@
 #include "../General/GSprimitives.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
-#include "MockSTL/cmath"
+#include <math.h>
 #include <stdlib.h>
 
 
@@ -33,13 +33,13 @@ using namespace std;
 #define __GETGf(x) fmod(x/256,256)
 #define __GETBf(x) fmod(x/65536,256)*
 
-#include "MockSTL/iostream"
-#include "MockSTL/map"
-#include "MockSTL/list"
+#include <iostream>
+#include <map>
+#include <list>
 #include "Universal_System/fileio.h"
 #include "Universal_System/estring.h"
 
-#include "MockSTL/vector"
+#include <vector>
 using std::vector;
 
 extern int ptypes_by_id[16];

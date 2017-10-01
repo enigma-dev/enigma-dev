@@ -19,8 +19,8 @@
 #define ENIGMA_VIDEO_STRUCT
 
 #include <dshow.h>
-#include "MockSTL/vector"
-#include "MockSTL/string"
+#include <vector>
+#include <string>
 using std::vector;
 using std::string;
 

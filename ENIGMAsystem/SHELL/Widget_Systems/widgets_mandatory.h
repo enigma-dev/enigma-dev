@@ -19,7 +19,7 @@
 #ifndef _WIDGETS_MANDATORY__H
 #define _WIDGETS_MANDATORY__H
 
-#include "MockSTL/string"
+#include <string>
 using std::string;
 
 namespace enigma

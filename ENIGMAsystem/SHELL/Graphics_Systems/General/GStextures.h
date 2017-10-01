@@ -27,7 +27,7 @@
 #ifndef ENIGMA_GSTEXTURES_H
 #define ENIGMA_GSTEXTURES_H
 
-#include "MockSTL/string"
+#include <string>
 using std::string;
 
 namespace enigma

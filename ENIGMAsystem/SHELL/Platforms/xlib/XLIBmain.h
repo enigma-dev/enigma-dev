@@ -26,7 +26,7 @@
 \********************************************************************************/
 
 #include <X11/Xlib.h>
-#include "MockSTL/string"
+#include <string>
 using std::string;
 
 namespace enigma {

@@ -18,7 +18,7 @@
 #ifndef ENIGMA_PLATFORM_SYSTEM_H
 #define ENIGMA_PLATFORM_SYSTEM_H
 
-#include "MockSTL/string"
+#include <string>
 using std::string;
 
 namespace enigma_user {

@@ -18,7 +18,7 @@
 #ifndef ENIGMA_BOX2D_WORLD__H
 #define ENIGMA_BOX2D_WORLD__H
 
-#include "MockSTL/vector"
+#include <vector>
 using std::vector;
 
 #include <Box2D/Box2D.h>
@@ -71,7 +71,7 @@ struct B2DBody {
 extern vector<B2DBody*> b2dbodies;
 
 #ifdef DEBUG_MODE
-  #include "MockSTL/string"
+  #include <string>
   #include "libEGMstd.h"
   #include "Widget_Systems/widgets_mandatory.h"
   #define get_worldr(w,id,r) \

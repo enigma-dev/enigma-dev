@@ -19,8 +19,8 @@
 #ifndef DEBUG_SCOPE_H
 #define DEBUG_SCOPE_H
 
-#include "MockSTL/string"
-#include "MockSTL/vector"
+#include <string>
+#include <vector>
 using std::string;
 using std::vector;
 

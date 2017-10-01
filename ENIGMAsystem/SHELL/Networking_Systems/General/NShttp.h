@@ -18,7 +18,7 @@
 #ifndef ENIGMA_NSHTTP_H
 #define ENIGMA_NSHTTP_H
 
-#include "MockSTL/string"
+#include <string>
 using std::string;
 
 namespace enigma_user {

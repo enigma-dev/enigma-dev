@@ -24,8 +24,8 @@
 #ifndef _timelines_object_h
 #define _timelines_object_h
 
-#include "MockSTL/vector"
-#include "MockSTL/map"
+#include <vector>
+#include <map>
 
 #include "planar_object.h"
 #include "var4.h"

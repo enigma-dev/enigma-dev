@@ -16,7 +16,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "MockSTL/string"
+#include <string>
 
 namespace enigma_user
 {

@@ -17,9 +17,9 @@
 **/
 
 
-#include "MockSTL/cstdlib"
-#include "MockSTL/cstddef"
-#include "MockSTL/string"
+#include <cstdlib>
+#include <cstddef>
+#include <string>
 
 #define INCLUDED_FROM_SHELLMAIN 1
 

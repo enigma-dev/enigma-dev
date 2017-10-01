@@ -29,8 +29,8 @@ freely, subject to the following restrictions:
 #include <string.h> /*for size_t*/
 
 #ifdef __cplusplus
-#include "MockSTL/vector"
-#include "MockSTL/string"
+#include <vector>
+#include <string>
 #endif /*__cplusplus*/
 
 /*
@@ -1506,7 +1506,7 @@ examples can be found on the LodePNG website.
 -------------------------
 
 #include "lodepng.h"
-#include "MockSTL/iostream"
+#include <iostream>
 
 int main(int argc, char *argv[])
 {

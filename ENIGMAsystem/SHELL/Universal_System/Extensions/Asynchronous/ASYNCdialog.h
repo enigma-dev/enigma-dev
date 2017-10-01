@@ -18,7 +18,7 @@
 #ifndef ENIGMA_ASYNCDIALOG_H
 #define ENIGMA_ASYNCDIALOG_H
 
-#include "MockSTL/string"
+#include <string>
 using std::string;
 
 namespace enigma_user {

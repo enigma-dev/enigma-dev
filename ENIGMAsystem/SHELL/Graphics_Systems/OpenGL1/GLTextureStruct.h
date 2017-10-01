@@ -21,7 +21,7 @@
 #include "Universal_System/scalar.h"
 #include "GLSamplerState.h"
 
-#include "MockSTL/vector"
+#include <vector>
 using std::vector;
 
 struct TextureStruct {

@@ -16,9 +16,9 @@
 // with this code. If not, see <http://www.gnu.org/licenses/>
 //
 
-#include "MockSTL/map"
-#include "MockSTL/string"
-#include "MockSTL/vector"
+#include <map>
+#include <string>
+#include <vector>
 #include <istream>
 
 namespace enigma {

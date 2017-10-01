@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "MockSTL/string"
+#include <string>
 using std::string;
 
 double show_menu(string str, double def);

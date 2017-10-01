@@ -18,7 +18,7 @@
 #ifndef INSTANCE_SYSTEM__H
 #define INSTANCE_SYSTEM__H
 
-#include "MockSTL/string"
+#include <string>
 #include "var4.h"
 #include "reflexive_types.h"
 
@@ -30,7 +30,7 @@
 #error This file is high-impact and should not be included from SHELLmain.cpp.
 #endif
 
-#include "MockSTL/map"
+#include <map>
 #include <set>
 
 namespace enigma {
