@@ -96,7 +96,7 @@ variant::operator string() const { ccast(1); return sval; }
 types_extrapolate_real_p  (variant::variant,: rval(x), sval( ), type(real) {})
 types_extrapolate_string_p(variant::variant,: rval(0.0), sval(x), type(tstr) {})
 //variant::variant(var x): rval(x[0].rval), sval(x[0].sval) { }
-variant::variant(void *p): rval(p), type(enigma_user::ty_pointer) {}
+variant::variant(const void *p): rval(p), type(enigma_user::ty_pointer) {}
 variant::variant(const variant& x): rval(x.rval.d), sval(x.sval), type(x.type) { }
 variant::variant(const var& x): rval((*x).rval.d), sval((*x).sval), type((*x).type) { }
 variant::variant(): rval(0.0), sval( ), type(default_type) { }
