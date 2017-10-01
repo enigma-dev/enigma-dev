@@ -90,20 +90,23 @@ variant::operator float()     const { ccast(0); return float      (rval.d); }
 
 variant::operator string() const { ccast(1); return sval; }
 
-#define real enigma::vt_real
-#define tstr enigma::vt_tstr
+#define real enigma_user::ty_real
+#define tstr enigma_user::ty_string
 
 types_extrapolate_real_p  (variant::variant,: rval(x), sval( ), type(real) {})
-types_extrapolate_string_p(variant::variant,: rval(0), sval(x), type(tstr) {})
+types_extrapolate_string_p(variant::variant,: rval(0.0), sval(x), type(tstr) {})
 //variant::variant(var x): rval(x[0].rval), sval(x[0].sval) { }
+variant::variant(const void *p): rval(p), type(enigma_user::ty_pointer) {}
 variant::variant(const variant& x): rval(x.rval.d), sval(x.sval), type(x.type) { }
 variant::variant(const var& x): rval((*x).rval.d), sval((*x).sval), type((*x).type) { }
-variant::variant(): rval(0), sval( ), type(default_type) { }
+variant::variant(): rval(0.0), sval( ), type(default_type) { }
 
 types_extrapolate_real_p  (variant& variant::operator=, { rval.d = x; type = real; return *this; })
 types_extrapolate_string_p(variant& variant::operator=, { sval   = x; type = tstr; return *this; })
 variant& variant::operator=(const variant x)            { rval.d = x.rval.d; if ((type = x.type) == tstr) sval = x.sval; return *this; }
 variant& variant::operator=(const var &x)               { return *this = *x; }
+variant& variant::operator=(const void* p)              { type = enigma_user::ty_pointer; rval.p = p; return *this; }
+
 types_extrapolate_real_p  (variant& variant::operator+=, { terror(real); rval.d += x; return *this; })
 types_extrapolate_string_p(variant& variant::operator+=, { terror(tstr); sval   += x; return *this; })
 variant& variant::operator+=(const variant x)            { terror(x.type); if (x.type == real) rval.d += x.rval.d; else sval += x.sval; return *this; }
@@ -562,4 +565,9 @@ string toString(const var &a) {
   }
 }
 
-
+namespace enigma_user {
+  bool is_undefined(variant val)   { return val.type == ty_undefined; }
+  bool is_real(variant val)   { return val.type == real; }
+  bool is_string(variant val) { return val.type == tstr;  }
+  bool is_ptr(variant val)   { return val.type == ty_pointer; }
+}
