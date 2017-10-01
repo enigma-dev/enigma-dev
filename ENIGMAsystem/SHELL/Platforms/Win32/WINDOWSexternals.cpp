@@ -163,12 +163,12 @@ variant external_call(int id,variant a1,variant a2, variant a3, variant a4, vari
   void *arg_values[a->argc];
 
   variant args[] = { a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16 };
-  for (size_t i = 0; i < a->argc; ++i)
+  for (int i = 0; i < a->argc; ++i)
   {
     if (a->arg_type[i] == &ffi_type_double)
       array[i].d = (double)args[i];
     else if (args[i].type == ty_pointer)
-      array[i].p = args[i].rval.p;
+      array[i].p = (const void*)args[i].rval.p;
     else
       array[i].s = ((string)args[i]).c_str();
     arg_values[i]=&array[i];
