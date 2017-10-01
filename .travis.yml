@@ -27,7 +27,7 @@ install:
   - chmod +x ./travis.sh
   - make
   - make emake
-  - curl -L https://github.com/fundies/enigma-libs/files/1345933/enigma-libs.zip > enigma-libs.zip
+  - curl -L https://github.com/fundies/enigma-libs/files/1347135/enigma-libs.zip > enigma-libs.zip
   - unzip enigma-libs.zip -d ENIGMAsystem/
   - mv ENIGMAsystem/Install ENIGMAsystem/Additional
 
