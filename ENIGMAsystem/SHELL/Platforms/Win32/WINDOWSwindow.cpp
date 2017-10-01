@@ -814,15 +814,9 @@ int window_set_cursor(int c)
   return SendMessage(enigma::hWnd, WM_SETCURSOR, (WPARAM)enigma::hWnd, MAKELPARAM(HTCLIENT, WM_MOUSEMOVE));
 }
 
-
 int window_get_cursor()
 {
   return enigma::cursorInt;
-}
-
-unsigned long long window_handle()
-{
-  return (unsigned long long)enigma::hWnd;
 }
 
 void io_handle()
