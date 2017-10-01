@@ -26,8 +26,8 @@
 **                                                                              **
 \********************************************************************************/
 
-#include <map>
-#include <vector>
+#include "MockSTL/map"
+#include "MockSTL/vector"
 using std::vector;
 using std::map;
 

@@ -17,7 +17,7 @@
 
 #ifndef _FLOATCMP__H
 #define _FLOATCMP__H
-#include <cmath>
+#include "MockSTL/cmath"
 static inline bool fzero(double x)   { return fabs(x) < 1e-8; }
 static inline bool fnzero(double x)  { return fabs(x) >= 1e-8; }
 static inline bool ftrueGM(double x) { return x >= .5; }

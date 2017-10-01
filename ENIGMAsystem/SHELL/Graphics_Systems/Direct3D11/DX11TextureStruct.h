@@ -20,7 +20,7 @@
 
 #include "Direct3D11Headers.h"
 
-#include <vector>
+#include "MockSTL/vector"
 using std::vector;
 
 struct TextureStruct {

@@ -26,7 +26,7 @@
 \********************************************************************************/
 #include "Universal_System/collisions_object.h"
 //#include "Universal_System/instance_system.h"
-#include <cmath>
+#include "MockSTL/cmath"
 
 namespace enigma_user
 {

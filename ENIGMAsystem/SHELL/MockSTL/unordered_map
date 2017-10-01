@@ -1,0 +1,7 @@
+#ifndef JUST_DEFINE_IT_RUN
+	#include <unordered_map>
+#else
+
+class std::unordered_map;
+
+#endif

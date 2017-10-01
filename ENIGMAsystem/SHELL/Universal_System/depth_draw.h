@@ -31,10 +31,10 @@
 #ifndef ENIGMA_DEPTH_DRAW_H
 #define ENIGMA_DEPTH_DRAW_H
 
-#include <map>
+#include "MockSTL/map"
 #include <set>
 #include "instance_system.h"
-#include <vector>
+#include "MockSTL/vector"
 #include "roomsystem.h"
 using namespace std;
 

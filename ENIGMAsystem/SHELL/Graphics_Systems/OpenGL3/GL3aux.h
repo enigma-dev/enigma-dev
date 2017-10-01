@@ -17,7 +17,7 @@
 #ifndef GL3_AUX_H
 #define GL3_AUX_H
 
-#include <string>
+#include "MockSTL/string"
 
 namespace enigma {
 	bool gl_extension_supported(std::string extension);

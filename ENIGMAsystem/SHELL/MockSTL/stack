@@ -1,0 +1,7 @@
+#ifndef JUST_DEFINE_IT_RUN
+	#include <stack>
+#else
+
+class std::stack;
+
+#endif

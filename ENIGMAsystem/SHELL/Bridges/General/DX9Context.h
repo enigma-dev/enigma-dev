@@ -27,13 +27,13 @@
 #include "Platforms/Win32/WINDOWSmain.h"
 using namespace enigma_user;
 
-#include <vector>
-#include <map>
+#include "MockSTL/vector"
+#include "MockSTL/map"
 using std::vector;
 using std::map;
 
 #include "Widget_Systems/widgets_mandatory.h"
-#include <sstream>
+#include "MockSTL/sstream"
 #include <string.h>
 using std::string;
 using std::stringstream;

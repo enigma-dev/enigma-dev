@@ -17,8 +17,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <string>
-#include <vector>
+#include "MockSTL/string"
+#include "MockSTL/vector"
 #include "../General/GScolors.h"
 #include "../General/GSprimitives.h"
 #include "../General/GSd3d.h"

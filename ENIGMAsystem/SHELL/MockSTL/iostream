@@ -1,0 +1,10 @@
+#ifndef JUST_DEFINE_IT_RUN
+	#include <iostream>
+#else
+
+class std::cout;
+class std::cerr;
+class std::endl;
+
+
+#endif

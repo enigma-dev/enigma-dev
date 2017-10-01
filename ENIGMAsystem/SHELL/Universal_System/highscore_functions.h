@@ -29,7 +29,7 @@
 #ifndef HIGHSCORE_FUNCTIONS_H
 #define HIGHSCORE_FUNCTIONS_H 1
 
-#include <string>
+#include "MockSTL/string"
 
 
 namespace enigma {

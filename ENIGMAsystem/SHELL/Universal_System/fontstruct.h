@@ -20,9 +20,9 @@
 #ifndef _FONTSTRUCT__H
 #define _FONTSTRUCT__H
 
-#include <string>
-#include <vector>
-#include <stdint.h>
+#include "MockSTL/string"
+#include "MockSTL/vector"
+#include "MockSTL/cstdint"
 
 namespace enigma
 {

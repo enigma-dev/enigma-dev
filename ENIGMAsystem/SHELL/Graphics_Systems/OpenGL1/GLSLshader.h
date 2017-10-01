@@ -18,8 +18,8 @@
 #ifndef _GLSLSHADER__H
 #define _GLSLSHADER__H
 
-#include <vector>
-#include <string>
+#include "MockSTL/vector"
+#include "MockSTL/string"
 using std::string;
 using std::vector;
 

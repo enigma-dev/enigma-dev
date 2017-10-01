@@ -27,8 +27,8 @@
 #ifndef INCLUDED_FROM_SHELLMAIN
   #include "var4.h"
   #include "spritestruct.h"
-  #include <cstdlib>
-  #include <cmath>
+  #include "MockSTL/cstdlib"
+  #include "MockSTL/cmath"
 #endif
 
 #include "scalar.h"

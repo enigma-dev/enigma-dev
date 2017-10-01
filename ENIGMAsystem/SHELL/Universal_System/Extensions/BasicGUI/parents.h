@@ -20,7 +20,7 @@
 
 #include "common.h" //For gs_scalar
 
-#include <vector>
+#include "MockSTL/vector"
 using std::vector;
 
 namespace gui

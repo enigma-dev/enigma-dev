@@ -20,7 +20,7 @@
 /*
 #ifndef stringinclude
 #define stringinclude
-#include <string>
+#include "MockSTL/string"
 using std::string;
 #endif
 
@@ -57,7 +57,7 @@ using std::string;
 #ifndef _BULLETWORLD__H
 #define _BULLETWORLD__H
 
-#include <vector>
+#include "MockSTL/vector"
 using std::vector;
 
 #undef None

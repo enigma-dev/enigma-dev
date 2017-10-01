@@ -24,7 +24,7 @@
  **  or programs made in the environment.                                        **
  **                                                                              **
  \********************************************************************************/
-#include <string>
+#include "MockSTL/string"
 using std::string;
 
 #include "../General/PFwindow.h"

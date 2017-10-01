@@ -33,7 +33,7 @@ http://www.ietf.org/rfc/rfc2616.txt
 #ifndef ENIGMA_BSBROWSER_H
 #define ENIGMA_BSBROWSER_H
 
-#include <string>
+#include "MockSTL/string"
 using std::string;
 
 void die(const char *e, int n, ...);

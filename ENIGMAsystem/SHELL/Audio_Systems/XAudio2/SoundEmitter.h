@@ -23,7 +23,7 @@
 #include "Widget_Systems/widgets_mandatory.h" // show_error
 #endif
 
-#include <vector>
+#include "MockSTL/vector"
 using std::vector;
 
 struct SoundEmitter

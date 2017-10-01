@@ -18,7 +18,7 @@
 #ifndef BGUI_WINDOWS_H
 #define BGUI_WINDOWS_H
 #include <array>
-#include <vector>
+#include "MockSTL/vector"
 
 using std::array;
 using std::vector;

@@ -25,7 +25,7 @@
 **                                                                              **
 \********************************************************************************/
 
-#include <map>
+#include "MockSTL/map"
 using std::map;
 
 namespace enigma

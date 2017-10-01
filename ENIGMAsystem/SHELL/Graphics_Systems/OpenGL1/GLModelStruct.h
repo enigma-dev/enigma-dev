@@ -24,7 +24,7 @@
 #include "../General/GSprimitives.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
-#include <math.h>
+#include "MockSTL/cmath"
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -35,13 +35,13 @@ using namespace std;
 #define __GETG(x) ((x & 0x00FF00)>>8)/255.0
 #define __GETB(x) ((x & 0xFF0000)>>16)/255.0
 
-#include <iostream>
-#include <map>
-#include <list>
+#include "MockSTL/iostream"
+#include "MockSTL/map"
+#include "MockSTL/list"
 #include "Universal_System/fileio.h"
 #include "Universal_System/estring.h"
 
-#include <vector>
+#include "MockSTL/vector"
 using std::vector;
 
 extern GLenum ptypes_by_id[16];

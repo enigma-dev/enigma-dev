@@ -22,7 +22,7 @@
 
 #include "Universal_System/scalar.h"
 #include "Universal_System/var4.h"
-#include <string>
+#include "MockSTL/string"
 
 namespace enigma
 {

@@ -29,7 +29,7 @@
 #ifndef _var4_h
 #define _var4_h
 
-#include <string>
+#include "MockSTL/string"
 using std::string;
 
 // We want var and variant to support a lot of assignment types.

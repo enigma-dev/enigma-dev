@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <string>
+#include "MockSTL/string"
 using std::string;
 
 int wgt_window_create(int w, int h);
