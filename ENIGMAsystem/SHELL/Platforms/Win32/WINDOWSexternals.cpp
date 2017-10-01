@@ -82,22 +82,22 @@ int external_define(string dll,string func,int calltype,bool returntype,int argc
 
   switch (ac)
   {
-    case 16: a->arg_type[15] = (t16==ty_string?(&ffi_type_pointer):(&ffi_type_double));
-    case 15: a->arg_type[14] = (t15==ty_string?(&ffi_type_pointer):(&ffi_type_double));
-    case 14: a->arg_type[13] = (t14==ty_string?(&ffi_type_pointer):(&ffi_type_double));
-    case 13: a->arg_type[12] = (t13==ty_string?(&ffi_type_pointer):(&ffi_type_double));
-    case 12: a->arg_type[11] = (t12==ty_string?(&ffi_type_pointer):(&ffi_type_double));
-    case 11: a->arg_type[10] = (t11==ty_string?(&ffi_type_pointer):(&ffi_type_double));
-    case 10: a->arg_type[ 9] = (t10==ty_string?(&ffi_type_pointer):(&ffi_type_double));
-    case 9:  a->arg_type[ 8] = (t09==ty_string?(&ffi_type_pointer):(&ffi_type_double));
-    case 8:  a->arg_type[ 7] = (t08==ty_string?(&ffi_type_pointer):(&ffi_type_double));
-    case 7:  a->arg_type[ 6] = (t07==ty_string?(&ffi_type_pointer):(&ffi_type_double));
-    case 6:  a->arg_type[ 5] = (t06==ty_string?(&ffi_type_pointer):(&ffi_type_double));
-    case 5:  a->arg_type[ 4] = (t05==ty_string?(&ffi_type_pointer):(&ffi_type_double));
-    case 4:  a->arg_type[ 3] = (t04==ty_string?(&ffi_type_pointer):(&ffi_type_double));
-    case 3:  a->arg_type[ 2] = (t03==ty_string?(&ffi_type_pointer):(&ffi_type_double));
-    case 2:  a->arg_type[ 1] = (t02==ty_string?(&ffi_type_pointer):(&ffi_type_double));
-    case 1:  a->arg_type[ 0] = (t01==ty_string?(&ffi_type_pointer):(&ffi_type_double));
+    case 16: a->arg_type[15] = (t16 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
+    case 15: a->arg_type[14] = (t15 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
+    case 14: a->arg_type[13] = (t14 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
+    case 13: a->arg_type[12] = (t13 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
+    case 12: a->arg_type[11] = (t12 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
+    case 11: a->arg_type[10] = (t11 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
+    case 10: a->arg_type[ 9] = (t10 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
+    case 9:  a->arg_type[ 8] = (t09 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
+    case 8:  a->arg_type[ 7] = (t08 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
+    case 7:  a->arg_type[ 6] = (t07 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
+    case 6:  a->arg_type[ 5] = (t06 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
+    case 5:  a->arg_type[ 4] = (t05 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
+    case 4:  a->arg_type[ 3] = (t04 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
+    case 3:  a->arg_type[ 2] = (t03 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
+    case 2:  a->arg_type[ 1] = (t02 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
+    case 1:  a->arg_type[ 0] = (t01 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
   }
   
   ffi_type *restype = ((returntype==ty_string)?(&ffi_type_pointer):(&ffi_type_double));
