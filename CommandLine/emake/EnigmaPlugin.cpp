@@ -29,23 +29,28 @@ int EnigmaPlugin::Init()
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
 #	define dlopen(x, y) LoadLibrary(x)
   std::string extension = ".dll";
-#elseif CURRENT_PLATFORM_ID ==  OS_MACOSX
+  std::string prefix = "";
+#elif CURRENT_PLATFORM_ID ==  OS_MACOSX
   std::string extension = ".dylib";
+  std::string prefix = "lib";
 #else
   std::string extension = ".so";
+  std::string prefix = "lib";
 #endif
 
-  _handle = dlopen(("./libcompileEGMf" + extension).c_str(), RTLD_LAZY);
+  std::string pluginName = "./" + prefix + "compileEGMf" + extension;
+  
+  _handle = dlopen(pluginName.c_str(), RTLD_LAZY);
 
   if (!_handle)
   {
-    std::cerr << "Error Loading Plugin" << std::endl;
+    std::cerr << "Error Loading Plugin " << pluginName << std::endl;
     return PLUGIN_ERROR;
   }
 
   // Bind Functions
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
-#	define BindFunc(x, y) GetProcAddress(x, y)
+#	define BindFunc(x, y) GetProcAddress(static_cast<HMODULE>(x), y)
 #else
 #	define BindFunc(x, y) dlsym(x, y)
 #endif
