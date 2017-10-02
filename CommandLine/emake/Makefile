@@ -7,7 +7,6 @@ else
 	LDFLAGS=-lboost_system -Wl,--no-as-needed -Wl,-rpath=./ -lboost_program_options -lboost_iostreams -lboost_filesystem -lboost_system -lpthread -ldl
 endif
 	
-
 SOURCES=$(shell find . -name "*.cpp")
 OBJECTS=$(addprefix .eobjs/,$(SOURCES:.cpp=.o))
 EXECUTABLE=../../emake
