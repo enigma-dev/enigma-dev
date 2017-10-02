@@ -4,7 +4,6 @@
 #include <pthread.h>
 #include <unistd.h>
 
-bool CallBack::_isOutputting = false;
 std::ifstream CallBack::_outFile;
 
 void* CallBack::OutputThread(void*)
@@ -12,23 +11,25 @@ void* CallBack::OutputThread(void*)
   if (_outFile)
   {
     int pos = 0;
-    while (!_outFile.eof()) {
+    while (!_outFile.eof()) 
+    {
       _outFile.seekg(0, _outFile.end);
-      int length = (int)_outFile.tellg() - pos;
+      int length = static_cast<int>(_outFile.tellg()) - pos;
       _outFile.seekg(pos, _outFile.beg);
  
-      if (length > 0) {
-		char* buffer = new char[length + 1];
-		_outFile.read(buffer, length);
-		buffer[length] = '\0';
-		pos += length;
-		std::cout << buffer;
-		delete[] buffer;
+      if (length > 0) 
+      {
+        char* buffer = new char[length + 1];
+        _outFile.read(buffer, length);
+        buffer[length] = '\0';
+        pos += length;
+        std::cout << buffer;
+        delete[] buffer;
       }
     }
   }
   
-  pthread_exit(NULL);
+  pthread_exit(nullptr);
 }
 
 CallBack::CallBack()
@@ -68,7 +69,7 @@ void CallBack::SetOutFile(const char* file)
 {
   _outFile.open(file);
   pthread_t me;
-  pthread_create(&me, NULL, &OutputThread, NULL);
+  pthread_create(&me, nullptr, &OutputThread, nullptr);
 }
 
 void CallBack::ResetRedirect()
