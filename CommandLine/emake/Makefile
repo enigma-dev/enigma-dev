@@ -1,5 +1,5 @@
 CXX=g++
-CXXFLAGS=-std=c++11 -c -Wall -I. -I../../CompilerSource
+CXXFLAGS=-g -std=c++11 -c -Wall -I. -I../../CompilerSource
 LDFLAGS=-lboost_system -Wl,--no-as-needed -Wl,-rpath=./ -lboost_program_options -lboost_iostreams -lboost_filesystem -lboost_system -lpthread -ldl
 SOURCES=$(shell find . -name "*.cpp")
 OBJECTS=$(addprefix .eobjs/,$(SOURCES:.cpp=.o))

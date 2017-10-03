@@ -24,7 +24,6 @@ public:
   static Image* CompressImage(char *, int);
   static void* OutputThread(void*);
   static std::ifstream _outFile;
-  static bool _isOutputting;
 };
 
 #endif
