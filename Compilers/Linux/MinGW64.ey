@@ -19,12 +19,12 @@ resources: $exe
 cppflags:
 cxxflags: -std=c++11 -I../Additional/x86_64-w64-mingw32/include
 cflags:
-ldflags:
+ldflags: -L../Additional/x86_64-w64-mingw32/lib -static-libgcc -static-libstdc++ -static
 links:
 windres: x86_64-w64-mingw32-windres
 
 Build-Extension:
 Run-output: $tempfile
-Run-Program: wine64 $game
+Run-Program: wine $game
 Run-Params:
 

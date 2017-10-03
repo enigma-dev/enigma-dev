@@ -231,7 +231,7 @@ int OptionsParser::find_ey(const char* dir)
       auto ey = i.string().find(".ey");
 
       list_t apiType(8);
-      apiType[0] = "Platforms";
+      apiType[0] = "Platform";
       apiType[1] = "Graphics";
       apiType[2] = "Audio";
       apiType[3] = "Collision";
@@ -474,7 +474,7 @@ int OptionsParser::network(const std::string &str)
 
 int OptionsParser::platform(const std::string &str)
 {
-  return searchAPI("Platforms", str);
+  return searchAPI("Platform", str);
 }
 
 int OptionsParser::extensions(const std::string &str)
