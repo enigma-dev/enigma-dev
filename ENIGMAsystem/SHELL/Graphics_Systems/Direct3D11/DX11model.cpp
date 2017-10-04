@@ -326,7 +326,7 @@ void d3d_model_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z, int texId)
     d3d_model_draw(id, x, y, z);
 }
 
-void d3d_model_primitive_begin(int id, int kind)
+void d3d_model_primitive_begin(int id, int kind, int format)
 {
   meshes[id]->Begin(kind);
 }
