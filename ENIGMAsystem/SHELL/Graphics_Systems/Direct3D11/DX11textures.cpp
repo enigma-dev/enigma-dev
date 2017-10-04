@@ -96,6 +96,16 @@ namespace enigma
 
   }
 
+  void graphics_copy_texture(int source, int destination, int x, int y)
+  {
+
+  }
+
+  void graphics_copy_texture_part(int source, int destination, int xoff, int yoff, int w, int h, int x, int y)
+  {
+
+  }
+
   void graphics_replace_texture_alpha_from_texture(int tex, int copy_tex)
   {
 
