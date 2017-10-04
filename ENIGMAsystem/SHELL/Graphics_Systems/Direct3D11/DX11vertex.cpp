@@ -24,22 +24,6 @@ using std::map;
 
 namespace enigma {
 
-struct VertexFormat {
-	map<int,int> flags;
-	
-	VertexFormat() {
-	
-	}
-	
-	~VertexFormat() {
-	
-	}
-	
-	void AddAttribute(int type, int usage) {
-		flags.insert(map<int,int>::value_type(type, usage));
-	}
-};
-
 struct VertexBuffer {
 	vector<gs_scalar> vertices;
 	vector<gs_scalar> indices;
