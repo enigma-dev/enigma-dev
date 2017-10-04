@@ -51,21 +51,18 @@ namespace enigma {
     string next;
     vector<float> result;
 
-    for (string::const_iterator it = str.begin(); it != str.end(); it++)
-	{
-		if (*it == ch)
-		{
-			if (!next.empty())
-			{
-				result.push_back(atof(next.c_str()));
-				next.clear();
-			}
-        } else {
-            next += *it;
+    for (string::const_iterator it = str.begin(); it != str.end(); it++) {
+      if (*it == ch) {
+        if (!next.empty()) {
+          result.push_back(atof(next.c_str()));
+          next.clear();
         }
+      } else {
+        next += *it;
+      }
     }
     if (!next.empty())
-         result.push_back(atof(next.c_str()));
+      result.push_back(atof(next.c_str()));
     return result;
   }
 
@@ -542,9 +539,6 @@ class Mesh
     if (pointCount > 0) {
       vdata.insert(vdata.end(), pointVertices.begin(), pointVertices.end());
     }
-
-
-    unsigned stride = vertexStride;
 
     if (vertexbuffer != NULL) {
       D3DVERTEXBUFFER_DESC pDesc;
