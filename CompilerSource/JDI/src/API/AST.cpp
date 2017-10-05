@@ -31,11 +31,6 @@
 
 #ifndef __APPLE__
 #include <malloc.h>
-# ifdef HAVE_ALLOCA_H
-#  include <alloca.h>
-# else
-#  include <stdlib.h>
-# endif
 #endif
 
 #include <cstring>
