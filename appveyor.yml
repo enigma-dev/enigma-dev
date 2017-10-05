@@ -4,7 +4,7 @@ environment:
   matrix:
     - MSYS2_ARCH: x86_64
 install:
-  - del /F c:\msys64
+  - del /Q c:\msys64
   - appveyor DownloadFile "https://sourceforge.net/projects/msys2/files/latest/download?source=files" -FileName "msys2.exe"
   - appveyor DownloadFile "https://raw.githubusercontent.com/msys2/msys2-installer/master/auto-install.js" -FileName "auto-install.js"
   - msys2 --platform minimal --script auto-install.js -v
