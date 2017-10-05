@@ -706,7 +706,7 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
     // in compile mode it is the same as program_directory, or where the (*.exe executable) is located.
     // The working_directory global is set in the main() of each platform using the platform specific function.
     // This the exact behaviour of GM8.1
-    char prevdir[4096];
+    std::vector<char> prevdir(size_t(4096));
     string newdir = (es->filename != NULL && strlen(es->filename) > 0) ? string(es->filename) : string( exe_filename );
     #if CURRENT_PLATFORM_ID == OS_WINDOWS
       if (newdir[0] == '/' || newdir[0] == '\\') {
@@ -716,10 +716,10 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
     newdir = newdir.substr( 0, newdir.find_last_of( "\\/" ));
 
     #if CURRENT_PLATFORM_ID == OS_WINDOWS
-    GetCurrentDirectory( 4096, prevdir );
+    GetCurrentDirectory( 4096, prevdir.data() );
     SetCurrentDirectory(newdir.c_str());
     #else
-    getcwd (prevdir, 4096);
+    getcwd (prevdir.data(), 4096);
     chdir(newdir.c_str());
     #endif
 
@@ -732,9 +732,9 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
 
     // Restore the compilers original working directory.
     #if CURRENT_PLATFORM_ID == OS_WINDOWS
-    SetCurrentDirectory(prevdir);
+    SetCurrentDirectory(prevdir.data());
     #else
-    chdir(prevdir);
+    chdir(prevdir.data());
     #endif
   }
 
