@@ -1,3 +1,8 @@
+# fetch repository as zip archive
+shallow_clone: true
+# disable automatic tests 
+test: off
+
 platform:
   - x64
 environment:
@@ -13,5 +18,3 @@ install:
 build_script:
   - bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -j 4"
   - bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -j 4 emake"
-# disable automatic tests 
-test: off
