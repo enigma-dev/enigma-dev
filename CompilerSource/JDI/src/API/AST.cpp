@@ -571,7 +571,7 @@ namespace jdi
         size_t num_len = content.length();
         const char* number = content.c_str();
         // This block will fail if the number is all letters--but we know it isn't.
-        for (char *i = number + content.length() - 1; is_letter(*i); --i) {
+        for (const char *i = number + content.length() - 1; is_letter(*i); --i) {
           if (*i == 'f' or *i == 'd' or  *i == 'F' or *i == 'D')
             is_float = true;
           num_len = i - number;
