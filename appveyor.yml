@@ -1,5 +1,7 @@
 platform:
   - x64
+cache:
+  - C:\msys64
 environment:
   matrix:
     - MSYS2_ARCH: x86_64
