@@ -29,9 +29,12 @@
 #include <Parser/bodies.h>
 #include <API/compile_settings.h>
 
-//#ifndef __APPLE__
+#ifndef __APPLE__
 #include <malloc.h>
-//#endif
+# ifndef alloca
+#   define alloca(_x) _alloca(_x);
+# endif
+#endif
 
 #include <cstring>
 #include <cstdio>
