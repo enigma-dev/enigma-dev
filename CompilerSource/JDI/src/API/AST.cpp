@@ -29,9 +29,9 @@
 #include <Parser/bodies.h>
 #include <API/compile_settings.h>
 
-#ifndef __APPLE__
+//#ifndef __APPLE__
 #include <malloc.h>
-#endif
+//#endif
 
 #include <cstring>
 #include <cstdio>
