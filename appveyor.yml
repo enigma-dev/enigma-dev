@@ -5,7 +5,7 @@ environment:
     - MSYS2_ARCH: x86_64
 install:
   - appveyor DownloadFile "https://sourceforge.net/projects/msys2/files/latest/download?source=files" -FileName "msys2.exe"
-  - msys2
+  - msys2 --platform minimal --script auto-install.js -v
   - 7z x msys2.tar > NUL
   - msys64\usr\bin\bash -lc ""
   - msys64\usr\bin\bash -lc "for i in {1..3}; do pacman --noconfirm -Suy autoconf automake pkg-config gcc make zlib-devel && break || sleep 15; done"
