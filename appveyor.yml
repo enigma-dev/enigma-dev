@@ -11,5 +11,6 @@ install:
   - gcc -v
 build_script:
   - bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -j 4"
+  - bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -j 4 emake"
 # disable automatic tests 
 test: off
