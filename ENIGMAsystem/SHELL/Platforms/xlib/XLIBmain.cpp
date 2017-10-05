@@ -468,10 +468,7 @@ void url_open(std::string url,std::string target,std::string options)
 {
 	if (system(NULL))
 	{
-		if (system(("xdg-open \""+url+"\"").c_str())==-1)
-		{
-
-		}
+		system(("xdg-open \""+url+"\"").c_str());
 	}
 	else
 	{
