@@ -108,7 +108,7 @@ OptionsParser::OptionsParser() : _desc("Options")
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
   _finalArgs["platform"] = "Win32";
   _finalArgs["workdir"] = "%PROGRAMDATA%/ENIGMA/";
-#elseif CURRENT_PLATFORM_ID ==  OS_MACOSX
+#elif CURRENT_PLATFORM_ID ==  OS_MACOSX
   _finalArgs["platform"] = "Cocoa";
   _finalArgs["workdir"] = "/tmp/ENIGMA/";
 #else
@@ -159,7 +159,7 @@ int OptionsParser::ReadArgs(int argc, char* argv[])
   // Platform Compilers
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
   find_ey("Compilers/Windows");
-#elseif CURRENT_PLATFORM_ID ==  OS_MACOSX
+#elif CURRENT_PLATFORM_ID ==  OS_MACOSX
   find_ey("Compilers/MacOSX");
 #else
   find_ey("Compilers/Linux");
