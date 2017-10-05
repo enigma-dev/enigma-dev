@@ -31,8 +31,8 @@
 
 #ifndef __APPLE__
 #include <malloc.h>
-# ifndef alloca
-#   define alloca(_x) _alloca(_x);
+# ifdef HAVE_ALLOCA_H
+#  include <alloca.h>
 # endif
 #endif
 
