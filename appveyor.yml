@@ -4,9 +4,9 @@ environment:
   matrix:
     - MSYS2_ARCH: x86_64
 install:
-  - C:\msys64\usr\bin\bash.exe -lc "pacman --noconfirm --sync --refresh --refresh pacman"
+  - C:\msys64\usr\bin\bash.exe -lc "pacman -Sy"
   - C:\msys64\usr\bin\bash.exe -lc "gcc -v"
-  - C:\msys64\usr\bin\bash.exe -lc "pacman --noconfirm --sync --refresh --refresh --sysupgrade --sysupgrade"
+  - C:\msys64\usr\bin\bash.exe -lc "update-core"
   - C:\msys64\usr\bin\bash.exe -lc "gcc -v"
   - C:\msys64\usr\bin\bash.exe -lc "pacman --noconfirm -Syu"
   - C:\msys64\usr\bin\bash.exe -lc "gcc -v"
