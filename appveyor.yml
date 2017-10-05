@@ -6,7 +6,7 @@ environment:
 install:
   - C:\msys64\usr\bin\bash.exe -lc "pacman -Sy"
   - C:\msys64\usr\bin\bash.exe -lc "gcc -v"
-  - C:\msys64\usr\bin\bash.exe -lc "update-core"
+  - C:\msys64\usr\bin\bash.exe -lc "pacman update-core"
   - C:\msys64\usr\bin\bash.exe -lc "gcc -v"
   - C:\msys64\usr\bin\bash.exe -lc "pacman --noconfirm -Syu"
   - C:\msys64\usr\bin\bash.exe -lc "gcc -v"
