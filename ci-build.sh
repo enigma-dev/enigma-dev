@@ -9,4 +9,4 @@
         --network ${NETWORK} \
         --widgets ${WIDGETS} \
         --extensions ${EXTENSIONS} \
-        -o ${OUTPUT}
+        -o ${OUTPUT} && exit
