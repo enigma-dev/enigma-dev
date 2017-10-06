@@ -4,7 +4,7 @@ shallow_clone: true
 test: off
 
 environment:
-  - OUTPUT: /tmp/test.exe
+  OUTPUT: /tmp/test.exe
   matrix:
   #BEGIN WINDOWS
     # Game Modes
