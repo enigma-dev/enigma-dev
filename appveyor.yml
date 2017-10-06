@@ -26,4 +26,4 @@ install:
   - gcc -v
 build_script:
   - bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -j 4"
-  - C:\msys64\msys2.exe -lc "cd $APPVEYOR_BUILD_FOLDER; make -j 4 emake"
+  - bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -j 4 emake"
