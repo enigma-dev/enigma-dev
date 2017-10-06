@@ -9,24 +9,27 @@ std::ifstream CallBack::_outFile;
 
 void* CallBack::OutputThread(void*)
 {
-  int pos = 0;
-  std::vector<char> buffer(size_t(4096));
-  while (!_outFile.eof()) 
-  {
-    _outFile.seekg(0, _outFile.end);
-    int length = static_cast<int>(_outFile.tellg()) - pos;
-    _outFile.seekg(pos, _outFile.beg);
-    if (length > 4095) length = 4095;
-
-    if (length > 0) 
+  if (_outFile.is_open())
+    int pos = 0;
+    std::vector<char> buffer(size_t(4096));
+    while (_outFile.good() && !_outFile.eof()) 
     {
-      _outFile.read(buffer.data(), length);
-      buffer[length] = '\0';
-      pos += length;
-      std::cout << buffer.data();
+      _outFile.seekg(0, _outFile.end);
+      int length = static_cast<int>(_outFile.tellg()) - pos;
+      _outFile.seekg(pos, _outFile.beg);
+      if (length > 4095) length = 4095;
+ 
+      if (length > 0) 
+      {
+        _outFile.read(buffer.data(), length);
+        buffer[length] = '\0';
+        pos += length;
+        std::cout << buffer.data();
+      }
     }
   }
-  _outFile.close();
+  }
+  
   pthread_exit(nullptr);
 }
 
@@ -72,7 +75,7 @@ void CallBack::SetOutFile(const char* file)
 
 void CallBack::ResetRedirect()
 {
-
+  _outFile.close();
 }
 
 int CallBack::Execute(const char*, const char**, bool)
