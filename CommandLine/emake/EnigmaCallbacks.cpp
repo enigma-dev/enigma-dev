@@ -21,8 +21,9 @@ void* CallBack::OutputThread(void*)
       if (length > 0) 
       {
         _outFile.read(buffer.data(), length);
+        buffer[length] = '\0';
         pos += length;
-        std::cout.write(buffer.data(), length);
+        std::cout << buffer.data();
       }
       _outFile.clear();
     }
