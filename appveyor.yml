@@ -33,5 +33,6 @@ build_script:
   - bash -lc "echo $AUDIO"
   - bash -lc "echo \"$audio\""
   - bash -lc "echo \"$AUDIO\""
-  - echo "$(AUDIO)"
-  - emake --compiler "$(COMPILER)" --mode "$(MODE)" --platform "$(PLATFORM)" --graphics "$(GRAPHICS)" --audio "$(AUDIO)" --collision "$(COLLISION)" --network "$(NETWORK)" --widgets "$(WIDGETS)" --extensions "$(EXTENSIONS)" -o /tmp/test
+  - echo ${AUDIO}
+  - echo "${AUDIO}"
+  - bash -lc "cd $APPVEYOR_BUILD_FOLDER; ./ci-build.sh"
