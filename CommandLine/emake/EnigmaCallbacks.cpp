@@ -9,7 +9,7 @@ std::ifstream CallBack::_outFile;
 
 void* CallBack::OutputThread(void*)
 {
-  if (_outFile.is_open())
+  if (_outFile.is_open()) {
     int pos = 0;
     std::vector<char> buffer(size_t(4096));
     while (_outFile.good() && !_outFile.eof()) 
@@ -28,8 +28,7 @@ void* CallBack::OutputThread(void*)
       }
     }
   }
-  }
-  
+
   pthread_exit(nullptr);
 }
 
