@@ -44,7 +44,7 @@ int EnigmaPlugin::Init()
 
   if (!_handle)
   {
-    std::cerr << "Error Loading Plugin " << pluginName << std::endl;
+    std::cerr << "Error Loading Plugin '" << pluginName << "'" << std::endl;
     return PLUGIN_ERROR;
   }
 
