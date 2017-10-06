@@ -25,15 +25,15 @@ cache:
   - CompilerSource\.eobjs -> CompilerSource
   - CommandLine\emake\.eobjs -> CommandLine\emake
 install:
-  - set PATH=c:\msys64;C:\msys64\mingw64\bin;c:\msys64\usr\bin;%PATH%
-  - set MSYSTEM=MINGW64
-  - set MSYSTEM_PREFIX=/mingw64
-  - set MSYSTEM_CHOST=x86_64-w64-mingw32
-  - set CONFIG_SITE=/mingw64/etc/config.site
-  - set MINGW_PACKAGE_PREFIX=mingw-w64-x86_64
-  - set MINGW_PREFIX=/mingw64
-  - set MINGW_CHOST=x86_64-w64-mingw32
-  - set PKG_CONFIG_PATH=/mingw64/lib/pkgconfig:/mingw64/share/pkgconfig
+  - env PATH=c:\msys64;C:\msys64\mingw64\bin;c:\msys64\usr\bin;%PATH%
+  - env MSYSTEM=MINGW64
+  - env MSYSTEM_PREFIX=/mingw64
+  - env MSYSTEM_CHOST=x86_64-w64-mingw32
+  - env CONFIG_SITE=/mingw64/etc/config.site
+  - env MINGW_PACKAGE_PREFIX=mingw-w64-x86_64
+  - env MINGW_PREFIX=/mingw64
+  - env MINGW_CHOST=x86_64-w64-mingw32
+  - env PKG_CONFIG_PATH=/mingw64/lib/pkgconfig:/mingw64/share/pkgconfig
   - >
     pacman --noconfirm -S base-devel git mingw-w64-x86_64-toolchain mingw-w64-x86_64-boost mingw-w64-x86_64-openal
     mingw-w64-x86_64-dumb mingw-w64-x86_64-libvorbis mingw-w64-x86_64-libogg mingw-w64-x86_64-flac mingw-w64-x86_64-mpg123
