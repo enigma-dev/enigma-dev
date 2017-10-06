@@ -30,4 +30,4 @@ install:
   - bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -j 4"
   - bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -j 4 emake"
 build_script:
-  - ./emake --compiler $(COMPILER) --mode $(MODE) --platform $(PLATFORM) --graphics $(GRAPHICS) --audio $(AUDIO) --collision $(COLLISION) --network $(NETWORK) --widgets $(WIDGETS) --extensions $(EXTENSIONS) -o /tmp/test
+  - emake --compiler $(COMPILER) --mode $(MODE) --platform $(PLATFORM) --graphics $(GRAPHICS) --audio $(AUDIO) --collision $(COLLISION) --network $(NETWORK) --widgets $(WIDGETS) --extensions $(EXTENSIONS) -o /tmp/test
