@@ -24,6 +24,11 @@
  **  or programs made in the environment.                                        **
  **                                                                              **
  \********************************************************************************/
+
+#ifdef INCLUDED_FROM_SHELLMAIN
+  #error This file includes non-ENIGMA STL headers and should not be included from SHELLmain.
+#endif
+
 #include <string>
 using std::string;
 

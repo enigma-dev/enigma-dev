@@ -30,6 +30,10 @@ RFC 2616 (very difficult to read)
 http://www.ietf.org/rfc/rfc2616.txt
 */
 
+#ifdef INCLUDED_FROM_SHELLMAIN
+  #error This file includes non-ENIGMA STL headers and should not be included from SHELLmain.
+#endif
+
 #ifndef ENIGMA_BSBROWSER_H
 #define ENIGMA_BSBROWSER_H
 

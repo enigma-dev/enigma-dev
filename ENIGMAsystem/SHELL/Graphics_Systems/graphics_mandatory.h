@@ -19,6 +19,10 @@
 |*||| library wrapper modules. Each of these is used by other systems throughout the engine.
 \*/// Accidental failure to implement them could cause error.
 
+#ifdef INCLUDED_FROM_SHELLMAIN
+  #error This file includes non-ENIGMA STL headers and should not be included from SHELLmain.
+#endif
+
 #include "Universal_System/Extensions/ParticleSystems/PS_particle_instance.h"
 #include <string>
 #include <vector>

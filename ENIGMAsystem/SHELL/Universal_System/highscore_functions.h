@@ -25,6 +25,9 @@
  **                                                                              **
  \********************************************************************************/
 
+#ifdef INCLUDED_FROM_SHELLMAIN
+  #error This file includes non-ENIGMA STL headers and should not be included from SHELLmain.
+#endif
 
 #ifndef HIGHSCORE_FUNCTIONS_H
 #define HIGHSCORE_FUNCTIONS_H 1

@@ -25,15 +25,16 @@
 **  or programs made in the environment.                                        **
 **                                                                              **
 \********************************************************************************/
+
+#ifdef INCLUDED_FROM_SHELLMAIN
+  #error This file includes non-ENIGMA STL headers and should not be included from SHELLmain.
+#endif
+
 #include <vector>
 #include <cstdlib>
 #include <map>
 using std::vector;
 using std::multimap;
-
-#ifdef INCLUDED_FROM_SHELLMAIN
-#  error This file includes non-ENIGMA STL headers and should not be included from SHELLmain.
-#endif
 
 #ifdef COLLISION_NONE
 	#error The motion planning extension requires a collision system.

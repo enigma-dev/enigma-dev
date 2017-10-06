@@ -21,6 +21,10 @@
   @brief Adds a timelines tier following the main tier.
 */
 
+#ifdef INCLUDED_FROM_SHELLMAIN
+  #error This file includes non-ENIGMA STL headers and should not be included from SHELLmain.
+#endif
+
 #ifndef _timelines_object_h
 #define _timelines_object_h
 

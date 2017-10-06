@@ -25,6 +25,10 @@
 **                                                                              **
 \********************************************************************************/
 
+#ifdef INCLUDED_FROM_SHELLMAIN
+  #error This file includes non-ENIGMA STL headers and should not be included from SHELLmain.
+#endif
+
 #include <X11/Xlib.h>
 #include <string>
 using std::string;
