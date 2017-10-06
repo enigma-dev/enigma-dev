@@ -14,7 +14,7 @@ cache:
   - CommandLine\emake\.eobjs -> CommandLine\emake
 build_script:
   - bash -lc "echo $COMPILER"
-  - set PLATFORM=$E_PLATFORM
+  - set PLATFORM=%E_PLATFORM%
   - bash -lc "echo $PLATFORM"
   - bash -lc "echo $MODE"
   - bash -lc "echo $GRAPHICS"
