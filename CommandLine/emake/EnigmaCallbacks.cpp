@@ -3,6 +3,7 @@
 #include <iostream>
 #include <pthread.h>
 #include <unistd.h>
+#include <vector>
 
 std::ifstream CallBack::_outFile;
 
