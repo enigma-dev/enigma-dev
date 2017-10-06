@@ -17,14 +17,12 @@ void* CallBack::OutputThread(void*)
       _outFile.seekg(0, _outFile.end);
       int length = static_cast<int>(_outFile.tellg()) - pos;
       _outFile.seekg(pos, _outFile.beg);
-      if (length > 4095) length = 4095;
  
       if (length > 0) 
       {
         _outFile.read(buffer.data(), length);
-        buffer[length] = '\0';
         pos += length;
-        std::cout << buffer.data();
+        std::cout.write(buffer.data(), length);
       }
     }
   }
