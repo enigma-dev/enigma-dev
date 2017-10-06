@@ -466,13 +466,9 @@ void action_end_game() {
 
 void url_open(std::string url,std::string target,std::string options)
 {
-	if (system(NULL))
-	{
-		system(("xdg-open \""+url+"\"").c_str());
-	}
-	else
-	{
-		printf("url_open cannot be used as there is no command processor!");
+	if (!fork()) {
+		execlp("xdg-open","xdg-open",url.c_str(),NULL);
+		exit(0);
 	}
 }
 
