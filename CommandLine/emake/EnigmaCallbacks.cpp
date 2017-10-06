@@ -24,6 +24,7 @@ void* CallBack::OutputThread(void*)
         pos += length;
         std::cout.write(buffer.data(), length);
       }
+      _outFile.clear();
     }
   }
 
