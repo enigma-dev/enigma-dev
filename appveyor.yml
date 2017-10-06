@@ -43,5 +43,4 @@ install:
   - bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -j 4"
   - bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -j 4 emake"
 build_script:
-  - export PLATFORM=%PLATFORM%
-  - bash -lc "cd $APPVEYOR_BUILD_FOLDER; ./ci-build.sh"
+  - bash -lc "cd $APPVEYOR_BUILD_FOLDER; export PLATFORM=%PLATFORM%; ./ci-build.sh"
