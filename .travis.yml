@@ -24,7 +24,7 @@ before_install:
   - sudo ln -s /usr/include/x86_64-linux-gnu/zconf.h /usr/include
   
 install:
-  - chmod +x ./travis.sh
+  - chmod +x ./ci-build.sh
   - make
   - make emake
   - curl -L https://github.com/fundies/enigma-libs/files/1347135/enigma-libs.zip > enigma-libs.zip
