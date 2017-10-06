@@ -15,6 +15,7 @@ cache:
   - CompilerSource\.eobjs -> CompilerSource
   - CommandLine\emake\.eobjs -> CommandLine\emake
 build_script:
+  - bash -lc "echo $COMPILER"
   - bash -lc "echo $PLATFORM"
   - bash -lc "echo \"$PLATFORM\""
   - bash -lc "echo ${PLATFORM}"
