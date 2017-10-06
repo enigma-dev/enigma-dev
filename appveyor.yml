@@ -7,14 +7,13 @@ environment:
   matrix:
   #BEGIN WINDOWS
     # Game Modes
-    - {COMPILER: gcc, E_PLATFORM: Win32, MODE: Run, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "None"}
+    - "{COMPILER: gcc, PLATFORM: Win32, MODE: Run, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "None"}"
   #END WINDOWS
 cache:
   - CompilerSource\.eobjs -> CompilerSource
   - CommandLine\emake\.eobjs -> CommandLine\emake
 build_script:
   - bash -lc "echo $COMPILER"
-  - set PLATFORM=%E_PLATFORM%
   - bash -lc "echo $PLATFORM"
   - bash -lc "echo $MODE"
   - bash -lc "echo $GRAPHICS"
