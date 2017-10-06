@@ -3,13 +3,11 @@ shallow_clone: true
 # disable automatic tests 
 test: off
 
-platform:
-  - x64
 environment:
   matrix:
   #BEGIN WINDOWS
     # Game Modes
-    - {COMPILER: gcc, "HEYHEYHEY": "Windowzer32", MODE: Run, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "None"}
+    - {COMPILER: gcc, Platform: Win32, MODE: Run, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "None"}
   #END WINDOWS
 cache:
   - CompilerSource\.eobjs -> CompilerSource
