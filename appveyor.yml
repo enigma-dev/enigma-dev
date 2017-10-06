@@ -30,4 +30,4 @@ install:
   - bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -j 4"
   - bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -j 4 emake"
 build_script:
-  - bash -lc "./ci-build.sh"
+  - bash ci-build.sh
