@@ -28,6 +28,11 @@
 /// While the code that manages tiles and drawing is to be declared and managed
 /// by the files under Graphics_Systems, this file exists to provide a way to
 /// structure layers of depth, for both tiles and instances.
+
+#ifdef INCLUDED_FROM_SHELLMAIN
+  #error This file includes non-ENIGMA STL headers and should not be included from SHELLmain.
+#endif
+
 #ifndef ENIGMA_DEPTH_DRAW_H
 #define ENIGMA_DEPTH_DRAW_H
 

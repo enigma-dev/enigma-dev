@@ -22,6 +22,10 @@
  * RAW format, RGB only.
  */
 
+#ifdef INCLUDED_FROM_SHELLMAIN
+  #error This file includes non-ENIGMA STL headers and should not be included from SHELLmain.
+#endif
+
 #include "Universal_System/scalar.h"
 
 #ifndef ENIGMA_GSTEXTURES_H

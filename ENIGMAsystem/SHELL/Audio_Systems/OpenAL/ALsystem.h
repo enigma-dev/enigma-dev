@@ -16,6 +16,10 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#ifdef INCLUDED_FROM_SHELLMAIN
+  #error This file includes non-ENIGMA STL headers and should not be included from SHELLmain.
+#endif
+
 // We don't want to load ALURE from a DLL. Would be kind of a waste.
 #define ALURE_STATIC_LIBRARY 1
 

@@ -15,6 +15,10 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#ifdef INCLUDED_FROM_SHELLMAIN
+  #error This file includes non-ENIGMA STL headers and should not be included from SHELLmain.
+#endif
+
 #ifndef __DIRECT3D9_HEADERS_H
 #define __DIRECT3D9_HEADERS_H
 #include <d3d9.h>

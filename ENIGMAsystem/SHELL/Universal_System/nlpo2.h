@@ -27,7 +27,6 @@
 
 // This was forged in hell.
 
-#include <stdio.h>
 inline unsigned int nlpo2dc(unsigned int x) // Taking x, returns n such that n = 2**k where k is an integer and n >= x.
 {
   --x;

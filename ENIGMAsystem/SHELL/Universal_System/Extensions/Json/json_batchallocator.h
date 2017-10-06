@@ -3,6 +3,10 @@
 // recognized in your jurisdiction.
 // See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
 
+#ifdef INCLUDED_FROM_SHELLMAIN
+  #error This file includes non-ENIGMA STL headers and should not be included from SHELLmain.
+#endif
+
 #ifndef JSONCPP_BATCHALLOCATOR_H_INCLUDED
 # define JSONCPP_BATCHALLOCATOR_H_INCLUDED
 
