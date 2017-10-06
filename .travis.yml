@@ -32,6 +32,7 @@ install:
   - mv ENIGMAsystem/Install ENIGMAsystem/Additional
 
 env:
+  - OUTPUT=/tmp/test
   matrix:
   #BEGIN LINUX
     # Game Modes
