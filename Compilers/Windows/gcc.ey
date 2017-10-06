@@ -17,7 +17,7 @@ searchdirs-start: "#include <...> search starts here:"
 searchdirs-end: "End of search list."
 resources: $exe
 cppflags:
-cxxflags: -std=c++11
+cxxflags: -std=c++11 -I/mingw64/lib/libffi-3.2.1/include
 cflags:
 ldflags: -static-libgcc -static-libstdc++ -static
 rcflags: 
