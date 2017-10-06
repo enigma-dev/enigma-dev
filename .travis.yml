@@ -81,5 +81,5 @@ env:
     - COMPILER=MinGW64 PLATFORM=Win32 MODE=Run GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
   #END LINUX
 script:
-  - ./travis.sh
+  - ./ci-build.sh
 
