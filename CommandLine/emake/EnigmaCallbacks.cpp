@@ -11,20 +11,20 @@ void* CallBack::OutputThread(void*)
   if (_outFile)
   {
     int pos = 0;
+    std::vector<char> buffer(size_t(4096));
     while (!_outFile.eof()) 
     {
       _outFile.seekg(0, _outFile.end);
       int length = static_cast<int>(_outFile.tellg()) - pos;
       _outFile.seekg(pos, _outFile.beg);
+      if (length > 4095) length = 4095;
  
       if (length > 0) 
       {
-        char* buffer = new char[length + 1];
-        _outFile.read(buffer, length);
+        _outFile.read(buffer.data(), length);
         buffer[length] = '\0';
         pos += length;
-        std::cout << buffer;
-        delete[] buffer;
+        std::cout << buffer.data();
       }
     }
   }
