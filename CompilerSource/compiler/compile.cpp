@@ -703,7 +703,7 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
   fclose(gameModule);
 
   // Run the game if requested
-  if (run_game)
+  if (run_game && (mode == emode_run or mode == emode_debug or mode == emode_design))
   {
     // The games working directory, in run/debug it is the GMK/GMX location where the IDE is working with the project,
     // in compile mode it is the same as program_directory, or where the (*.exe executable) is located.
