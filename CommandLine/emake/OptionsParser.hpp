@@ -49,6 +49,7 @@ private:
   int compiler(const std::string &str);
 
   bool _readArgsFail;
+  std::string _extensions;
 
   opt::variables_map _rawArgs;
   opt::options_description _desc;

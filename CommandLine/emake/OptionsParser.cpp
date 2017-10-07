@@ -12,6 +12,7 @@
 #include <iostream>
 
 namespace fs = boost::filesystem;
+namespace po = boost::program_options;
 
 inline std::string word_wrap(std::string text, unsigned per_line)
 {
@@ -116,7 +117,6 @@ OptionsParser::OptionsParser() : _desc("Options")
   _handler["platform"] = std::bind(&OptionsParser::platform, this, std::placeholders::_1);
   _handler["extensions"] = std::bind(&OptionsParser::extensions, this, std::placeholders::_1);
   _handler["compiler"] = std::bind(&OptionsParser::compiler, this, std::placeholders::_1);
-  //_handler["run"] = std::bind(&OptionsParser::run, this, std::placeholders::_1);
 }
 
 std::string OptionsParser::GetOption(std::string option)
@@ -203,7 +203,7 @@ std::string OptionsParser::APIyaml()
   yaml += "target-widget: " + _rawArgs["widgets"].as<std::string>() + "\n";
   yaml += "target-collision: " + _rawArgs["collision"].as<std::string>() + "\n";
   yaml += "target-networking: " + _rawArgs["network"].as<std::string>() + "\n";
-  yaml += "extensions: " + _rawArgs["extensions"].as<std::string>() + "\n";
+  yaml += "extensions: " + _extensions + "\n";
 
   return yaml;
 }
@@ -418,10 +418,8 @@ int OptionsParser::searchAPI(const std::string &api, const std::string &target)
 
     if (lower == "extensions")
     {
-      //_finalArgs["extensions"] += "Universal_System/Extensions/" + target + ",";
+      _extensions += "Universal_System/Extensions/" + target + ",";
     }
-    else
-      //_finalArgs[lower] = target;
 
     return OPTIONS_SUCCESS;
   }
@@ -466,13 +464,13 @@ int OptionsParser::extensions(const std::string &str)
 {
   if (str == "None")
   {
-    //_finalArgs["extensions"] = "";
+    _extensions = "";
   }
   else
   {
     list_t ext = splitString(str);
 
-    //_finalArgs["extensions"] = "";
+    _extensions = "";
     for (auto &&e : ext)
     {
       int valid = searchAPI("Extensions", e);
