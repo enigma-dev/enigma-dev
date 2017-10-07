@@ -101,7 +101,7 @@ OptionsParser::OptionsParser() : _desc("Options")
     ("collision,c", opt::value<std::string>()->default_value("None"), "Collision System")
     ("extensions,e", opt::value<std::string>()->default_value("None"), "Extensions (Paths, Timelines, Particles)")
     ("compiler,x", opt::value<std::string>()->default_value("gcc"), "Compiler.ey Descriptor")
-    ("run,r", opt::value<bool>()->default_value(false), "Automatically run the game after it is built")
+    ("run,r", opt::bool_switch()->default_value(false), "Automatically run the game after it is built")
   ;
 
   _handler["info"] = std::bind(&OptionsParser::printInfo, this, std::placeholders::_1);
