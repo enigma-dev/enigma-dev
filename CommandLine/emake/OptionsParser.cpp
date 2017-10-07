@@ -12,7 +12,6 @@
 #include <iostream>
 
 namespace fs = boost::filesystem;
-namespace po = boost::program_options;
 
 inline std::string word_wrap(std::string text, unsigned per_line)
 {
@@ -119,9 +118,9 @@ OptionsParser::OptionsParser() : _desc("Options")
   _handler["compiler"] = std::bind(&OptionsParser::compiler, this, std::placeholders::_1);
 }
 
-std::string OptionsParser::GetOption(std::string option)
+opt::variable_value OptionsParser::GetOption(std::string option)
 {
-  return _rawArgs[option].as<std::string>();
+  return _rawArgs[option];
 }
 
 int OptionsParser::ReadArgs(int argc, char* argv[])

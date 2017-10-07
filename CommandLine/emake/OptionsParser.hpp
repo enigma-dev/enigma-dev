@@ -23,7 +23,7 @@ public:
   int ReadArgs(int argc, char* argv[]);
   int HandleArgs();
   std::string APIyaml();
-  std::string GetOption(std::string option);
+  opt::variable_value GetOption(std::string option);
 
 private:
   int find_ey(const char* dir);

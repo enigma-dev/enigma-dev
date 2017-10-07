@@ -99,7 +99,7 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode) 
 }
 
 static bool run_game = true;
-extern "C" { void ide_handles_game_launch() { run_game = false; } }
+dllexport void ide_handles_game_launch() { run_game = false; }
 
 int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
 {
