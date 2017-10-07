@@ -10,22 +10,11 @@ std::ifstream CallBack::_outFile;
 void* CallBack::OutputThread(void*)
 {
   if (_outFile.is_open()) {
-    int pos = 0;
-    std::vector<char> buffer(size_t(4096));
-    while (_outFile.good() && !_outFile.eof()) 
-    {
-      _outFile.seekg(0, _outFile.end);
-      int length = static_cast<int>(_outFile.tellg()) - pos;
-      _outFile.seekg(pos, _outFile.beg);
- 
-      if (length > 0) 
-      {
-        _outFile.read(buffer.data(), length);
-        buffer[length] = '\0';
-        pos += length;
-        std::cout << buffer.data();
-      }
-      _outFile.clear();
+    std::string line;
+    while (true) {
+        while (std::getline(_outFile, line)) std::cout << line << "\n";
+        if (!_outFile.eof()) break; // Ensure end of read was EOF.
+        _outFile.clear();
     }
   }
 
