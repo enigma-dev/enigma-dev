@@ -12,7 +12,7 @@ void* CallBack::OutputThread(void*)
   if (_outFile.is_open()) {
     std::string line;
     while (true) {
-        while (std::getline(_outFile, line)) std::cout << line << "\n";
+        while (std::getline(_outFile, line)) std::cout << line << std::endl;
         if (!_outFile.eof()) break; // Ensure end of read was EOF.
         _outFile.clear();
     }
