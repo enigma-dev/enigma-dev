@@ -90,11 +90,12 @@ void EnigmaPlugin::SetDefinitions(const char* def)
 
 int EnigmaPlugin::BuildGame(EnigmaStruct* data, GameMode mode, const char* fpath)
 {
+  /* TODO: Use to print keywords list...
   const char* currentResource = plugin_FirstResource();
   while (!plugin_ResourcesAtEnd())
   {
     currentResource = plugin_NextResource();
-  }
+  }*/
 
   return plugin_CompileEGM(data, fpath, mode);
 }

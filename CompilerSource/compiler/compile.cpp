@@ -98,6 +98,9 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode) 
   return current_language->compile(es, exe_filename, mode);
 }
 
+static bool run_game = true;
+extern "C" { void ide_handles_game_launch() { run_game = false; } }
+
 int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
 {
 
@@ -697,7 +700,7 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
   // Close the game module; we're done adding resources
   idpr("Closing game module and running if requested.",99);
   edbg << "Closing game module and running if requested." << flushl;
-  fclose(gameModule);
+  if (run_game) fclose(gameModule);
 
   // Run the game if requested
   if (mode == emode_run or mode == emode_debug or mode == emode_design)

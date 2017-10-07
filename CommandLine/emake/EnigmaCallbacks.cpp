@@ -29,7 +29,7 @@ void* CallBack::OutputThread(void*)
     }
   }
 
-  pthread_exit(nullptr);
+  return nullptr;
 }
 
 CallBack::CallBack()

@@ -51,7 +51,6 @@ private:
   bool _readArgsFail;
 
   opt::variables_map _rawArgs;
-  std::map<std::string, std::string> _finalArgs;
   opt::options_description _desc;
   std::map<std::string, func_t> _handler;
   std::map<std::string, list_t> _api;
