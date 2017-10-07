@@ -700,10 +700,10 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
   // Close the game module; we're done adding resources
   idpr("Closing game module and running if requested.",99);
   edbg << "Closing game module and running if requested." << flushl;
-  if (run_game) fclose(gameModule);
+  fclose(gameModule);
 
   // Run the game if requested
-  if (mode == emode_run or mode == emode_debug or mode == emode_design)
+  if (run_game)
   {
     // The games working directory, in run/debug it is the GMK/GMX location where the IDE is working with the project,
     // in compile mode it is the same as program_directory, or where the (*.exe executable) is located.
