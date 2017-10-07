@@ -7,6 +7,7 @@
 #include <boost/foreach.hpp>
 #include <boost/iostreams/device/mapped_file.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/exception/diagnostic_information.hpp> 
 
 #include <iostream>
 
@@ -136,13 +137,12 @@ int OptionsParser::ReadArgs(int argc, char* argv[])
   }
   catch(opt::error& e)
   {
-    std::cerr << "OPTIONS_ERROR: " << e.what() << std::endl << std::endl;
+    std::cerr << "OPTIONS_ERROR: " << boost::diagnostic_information(e) << std::endl << std::endl;
 
     _readArgsFail = true;
 
     return OPTIONS_ERROR;
   }
-
   find_ey("ENIGMAsystem/SHELL/");
 
   // Platform Compilers
@@ -166,13 +166,13 @@ int OptionsParser::HandleArgs()
     return OPTIONS_HELP;
   }
 
-
-  for (auto &&arg : _rawArgs)
+  for (auto &&handle : _handler)
   {
-    std::string str = boost::any_cast<std::string>(arg.second.value());
-    int result = _handler[arg.first](str);
-    if (result == OPTIONS_ERROR || result == OPTIONS_HELP)
-      return result;
+    if (_rawArgs.count(handle.first)) {
+      int result = handle.second(_rawArgs[handle.first].as<std::string>());
+      if (result == OPTIONS_ERROR || result == OPTIONS_HELP)
+        return result;
+    }
   }
 
   return OPTIONS_SUCCESS;
