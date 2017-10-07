@@ -200,7 +200,7 @@ std::string OptionsParser::APIyaml()
   yaml += "target-windowing: " + _rawArgs["platform"].as<std::string>() + "\n";
   yaml += "target-compiler: " + _rawArgs["compiler"].as<std::string>() + "\n";
   yaml += "target-graphics: " + _rawArgs["graphics"].as<std::string>() + "\n";
-  yaml += "target-widget: " + _rawArgs["widget"].as<std::string>() + "\n";
+  yaml += "target-widget: " + _rawArgs["widgets"].as<std::string>() + "\n";
   yaml += "target-collision: " + _rawArgs["collision"].as<std::string>() + "\n";
   yaml += "target-networking: " + _rawArgs["network"].as<std::string>() + "\n";
   yaml += "extensions: " + _rawArgs["extensions"].as<std::string>() + "\n";
