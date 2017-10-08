@@ -568,13 +568,11 @@ namespace jdi
       dec_literal:
       if (is_letter(content[content.length() - 1])) {
         bool is_float = false;
-        size_t num_len = content.length();
         const char* number = content.c_str();
         // This block will fail if the number is all letters--but we know it isn't.
-        for (const char *i = number + content.length() - 1; is_letter(*i); --i) {
-          if (*i == 'f' or *i == 'd' or  *i == 'F' or *i == 'D')
+        for (size_t i = content.length() - 1; is_letter(content[i]); --i) {
+          if (content[i] == 'f' or content[i] == 'd' or  content[i] == 'F' or content[i] == 'D')
             is_float = true;
-          num_len = i - number;
         }
         if (!is_float)
           for (size_t i = 0; i < content.length(); i++)
