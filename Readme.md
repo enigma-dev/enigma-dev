@@ -1,4 +1,4 @@
-# ENIGMA ![build status](https://travis-ci.org/enigma-dev/enigma-dev.svg?branch=master)
+# ENIGMA [![Travis CI Build Status](https://travis-ci.org/enigma-dev/enigma-dev.svg?branch=master)](https://travis-ci.org/enigma-dev/enigma-dev/) [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/4j4hklw0ned5wbys?svg=true)](https://ci.appveyor.com/project/enigma-dev/enigma-dev)
 
 Official Website: http://enigma-dev.org
 
@@ -9,9 +9,12 @@ Like Game Maker, ENIGMA comprises both an easy to use Drag & Drop system as well
 Although EDL adopts GML's very lax syntax in its scripting, the inputted code is actually parsed and translated into valid C++. This compilation improves size and performance of the language by incredible amounts, while almost magically maintaining its simplicity of use.
 
 ## Install
-In order to keep the ENIGMA repository small and fast binary files are excluded. To install you will need to obtain the binary files for your chosen platform. Please read the `building.md` file for more information.
+Please see http://enigma-dev.org/download.htm for installation instructions.
 
-### MACOSX
-After cloning the repository run the following command in terminal to install the main binary files
+## Documentation
+We have a community-led Wiki project hosted on our site where users contribute function and other API documentation. All you need to do is register for an account on our forums and you will be able to edit and make changes to the documentation pages.
+* http://enigma-dev.org/forums/
+* http://enigma-dev.org/docs/Wiki/Main_Page
 
-python install.py mac
+If you are having trouble registering for an account or looking for an answer to more specific technical questions about ENIGMA, you can visit us on the ``#enigma-dev`` channel on freenode IRC as well:
+http://webchat.freenode.net/?channels=enigma&uio=d4

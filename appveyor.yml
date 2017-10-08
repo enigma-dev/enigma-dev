@@ -1,0 +1,48 @@
+# fetch repository as zip archive
+shallow_clone: true
+# disable automatic tests 
+test: off
+
+environment:
+  OUTPUT: /tmp/test.exe
+  matrix:
+  #BEGIN WINDOWS
+    # Game Modes
+    - {COMPILER: gcc, PLATFORM: Win32, MODE: Run, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "None"}
+    - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "None"}
+    - {COMPILER: gcc, PLATFORM: Win32, MODE: Compile, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "None"}
+    # Graphics
+    - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D11, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "None"}
+    # Audio
+    - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: DirectSound, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "None"}
+    # Widgets
+    - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: Win32, EXTENSIONS: "None"}
+    # Extensions
+    - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "DirectShow"}
+    - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "WindowsTouch"}
+    - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "XInput"}
+    - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "MediaControlInterface"}
+  #END WINDOWS
+cache:
+  - CompilerSource\.eobjs -> CompilerSource
+  - CommandLine\emake\.eobjs -> CommandLine\emake
+install:
+  - set PATH=c:\msys64;C:\msys64\mingw64\bin;c:\msys64\usr\bin;%PATH%
+  - set MSYSTEM=MINGW64
+  - set MSYSTEM_PREFIX=/mingw64
+  - set MSYSTEM_CHOST=x86_64-w64-mingw32
+  - set CONFIG_SITE=/mingw64/etc/config.site
+  - set MINGW_PACKAGE_PREFIX=mingw-w64-x86_64
+  - set MINGW_PREFIX=/mingw64
+  - set MINGW_CHOST=x86_64-w64-mingw32
+  - set setPKG_CONFIG_PATH=/mingw64/lib/pkgconfig:/mingw64/share/pkgconfig
+  - >
+    pacman --noconfirm -S base-devel git mingw-w64-x86_64-toolchain mingw-w64-x86_64-boost mingw-w64-x86_64-openal
+    mingw-w64-x86_64-dumb mingw-w64-x86_64-libvorbis mingw-w64-x86_64-libogg mingw-w64-x86_64-flac mingw-w64-x86_64-mpg123
+    mingw-w64-x86_64-libsndfile mingw-w64-x86_64-libgme mingw-w64-x86_64-sfml mingw-w64-x86_64-gtk2 mingw-w64-x86_64-zlib
+    mingw-w64-x86_64-libffi mingw-w64-x86_64-box2d mingw-w64-x86_64-bullet
+  - gcc -v
+  - bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -j 4"
+  - bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -j 4 emake"
+build_script:
+  - bash -lc "cd $APPVEYOR_BUILD_FOLDER; export PLATFORM=%PLATFORM%; ./ci-build.sh"

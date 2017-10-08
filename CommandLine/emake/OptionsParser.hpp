@@ -23,7 +23,7 @@ public:
   int ReadArgs(int argc, char* argv[]);
   int HandleArgs();
   std::string APIyaml();
-  std::string GetOption(std::string option);
+  opt::variable_value GetOption(std::string option);
 
 private:
   int find_ey(const char* dir);
@@ -49,9 +49,9 @@ private:
   int compiler(const std::string &str);
 
   bool _readArgsFail;
+  std::string _extensions;
 
   opt::variables_map _rawArgs;
-  std::map<std::string, std::string> _finalArgs;
   opt::options_description _desc;
   std::map<std::string, func_t> _handler;
   std::map<std::string, list_t> _api;

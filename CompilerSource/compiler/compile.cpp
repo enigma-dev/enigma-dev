@@ -98,6 +98,9 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode) 
   return current_language->compile(es, exe_filename, mode);
 }
 
+static bool run_game = true;
+dllexport void ide_handles_game_launch() { run_game = false; }
+
 int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
 {
 
@@ -700,7 +703,7 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
   fclose(gameModule);
 
   // Run the game if requested
-  if (mode == emode_run or mode == emode_debug or mode == emode_design)
+  if (run_game && (mode == emode_run or mode == emode_debug or mode == emode_design))
   {
     // The games working directory, in run/debug it is the GMK/GMX location where the IDE is working with the project,
     // in compile mode it is the same as program_directory, or where the (*.exe executable) is located.
