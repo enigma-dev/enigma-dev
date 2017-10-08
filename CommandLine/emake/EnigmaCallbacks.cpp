@@ -3,33 +3,22 @@
 #include <iostream>
 #include <pthread.h>
 #include <unistd.h>
+#include <vector>
 
 std::ifstream CallBack::_outFile;
 
 void* CallBack::OutputThread(void*)
 {
-  if (_outFile)
-  {
-    int pos = 0;
-    while (!_outFile.eof()) 
-    {
-      _outFile.seekg(0, _outFile.end);
-      int length = static_cast<int>(_outFile.tellg()) - pos;
-      _outFile.seekg(pos, _outFile.beg);
- 
-      if (length > 0) 
-      {
-        char* buffer = new char[length + 1];
-        _outFile.read(buffer, length);
-        buffer[length] = '\0';
-        pos += length;
-        std::cout << buffer;
-        delete[] buffer;
-      }
+  if (_outFile.is_open()) {
+    std::string line;
+    while (true) {
+        while (std::getline(_outFile, line)) std::cout << line << std::endl;
+        if (!_outFile.eof()) break; // Ensure end of read was EOF.
+        _outFile.clear();
     }
   }
-  
-  pthread_exit(nullptr);
+
+  return nullptr;
 }
 
 CallBack::CallBack()
@@ -74,7 +63,7 @@ void CallBack::SetOutFile(const char* file)
 
 void CallBack::ResetRedirect()
 {
-    _outFile.close();
+  _outFile.close();
 }
 
 int CallBack::Execute(const char*, const char**, bool)
