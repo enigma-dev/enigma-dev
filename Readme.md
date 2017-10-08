@@ -1,4 +1,6 @@
-# ENIGMA ![build status](https://travis-ci.org/enigma-dev/enigma-dev.svg?branch=master)
+# ENIGMA
+[![Travis CI Build Status](https://travis-ci.org/enigma-dev/enigma-dev.svg?branch=master)](https://travis-ci.org/enigma-dev/enigma-dev/) *Travis CI (Linux and cross-compile)*
+[![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/4j4hklw0ned5wbys?svg=true)](https://ci.appveyor.com/project/enigma-dev/enigma-dev) *AppVeyor (Windows)*
 
 Official Website: http://enigma-dev.org
 
@@ -12,7 +14,7 @@ Although EDL adopts GML's very lax syntax in its scripting, the inputted code is
 Please see http://enigma-dev.org/download.htm for installation instructions.
 
 ## Documentation
-We have a community led Wiki project hosted on our site where users contribute function and other API documentation. All you will need to do is register for an account on our forums and you will be able to edit and make changes to the documentation pages.
+We have a community-led Wiki project hosted on our site where users contribute function and other API documentation. All you need to do is register for an account on our forums and you will be able to edit and make changes to the documentation pages.
 * http://enigma-dev.org/forums/
 * http://enigma-dev.org/docs/Wiki/Main_Page
 
