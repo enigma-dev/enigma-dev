@@ -25,13 +25,15 @@ before_install:
   
 install:
   - chmod +x ./ci-build.sh
-  - make
-  - make emake
+  - make -j4
+  - make -j4 emake
   - curl -L https://github.com/fundies/enigma-libs/files/1347135/enigma-libs.zip > enigma-libs.zip
   - unzip enigma-libs.zip -d ENIGMAsystem/
   - mv ENIGMAsystem/Install ENIGMAsystem/Additional
 
 env:
+  global:
+    - OUTPUT=/tmp/test
   matrix:
   #BEGIN LINUX
     # Game Modes

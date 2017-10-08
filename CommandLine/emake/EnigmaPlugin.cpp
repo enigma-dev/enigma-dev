@@ -44,7 +44,7 @@ int EnigmaPlugin::Init()
 
   if (!_handle)
   {
-    std::cerr << "Error Loading Plugin " << pluginName << std::endl;
+    std::cerr << "Error Loading Plugin '" << pluginName << "'" << std::endl;
     return PLUGIN_ERROR;
   }
 
@@ -71,7 +71,7 @@ int EnigmaPlugin::Init()
   plugin_Free = reinterpret_cast<void (*)()>(BindFunc(_handle, "libFree"));
   plugin_DefinitionsModified = reinterpret_cast<syntax_error* (*)(const char*, const char*)>(BindFunc(_handle, "definitionsModified"));
   plugin_SyntaxCheck = reinterpret_cast<syntax_error* (*)(int, const char**, const char*)>(BindFunc(_handle, "syntaxCheck"));
-
+  plugin_HandleGameLaunch = reinterpret_cast<void (*)()>(BindFunc(_handle, "ide_handles_game_launch"));
 
   CallBack ecb;
   CallBack::SetOutFile("emake_out.log");
@@ -88,13 +88,19 @@ void EnigmaPlugin::SetDefinitions(const char* def)
   plugin_DefinitionsModified("", def);
 }
 
+void EnigmaPlugin::HandleGameLaunch()
+{
+  plugin_HandleGameLaunch();
+}
+
 int EnigmaPlugin::BuildGame(EnigmaStruct* data, GameMode mode, const char* fpath)
 {
+  /* TODO: Use to print keywords list...
   const char* currentResource = plugin_FirstResource();
   while (!plugin_ResourcesAtEnd())
   {
     currentResource = plugin_NextResource();
-  }
+  }*/
 
   return plugin_CompileEGM(data, fpath, mode);
 }

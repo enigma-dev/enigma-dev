@@ -17,20 +17,23 @@ int main(int argc, char* argv[])
     Game game;
 
     GameMode mode;
+    std::string _mode = options.GetOption("mode").as<std::string>();
 
-    if (options.GetOption("mode") == "Compile")
+    if (_mode == "Compile")
       mode = emode_compile;
-    else if (options.GetOption("mode") == "Run")
+    else if (_mode == "Run")
       mode = emode_run;
-    else if (options.GetOption("mode") == "Debug")
+    else if (_mode == "Debug")
       mode = emode_debug;
-    else if (options.GetOption("mode") == "Design")
+    else if (_mode == "Design")
       mode = emode_design;
-    else if (options.GetOption("mode") == "Rebuild")
+    else if (_mode == "Rebuild")
       mode = emode_rebuild;
 
+    bool _run = options.GetOption("run").as<bool>();
+    if (!_run) plugin.HandleGameLaunch();
 
-    return plugin.BuildGame(game.ConstructGame(), mode, options.GetOption("output").c_str());
+    return plugin.BuildGame(game.ConstructGame(), mode, options.GetOption("output").as<std::string>().c_str());
   }
 
   return result;

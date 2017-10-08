@@ -568,21 +568,20 @@ namespace jdi
       dec_literal:
       if (is_letter(content[content.length() - 1])) {
         bool is_float = false;
-        char *number = (char*)alloca(content.length());
-        memcpy(number, content.c_str(), content.length() * sizeof(char));
+        size_t i = content.length() - 1;
         // This block will fail if the number is all letters--but we know it isn't.
-        for (char *i = number + content.length() - 1; is_letter(*i); --i) {
-          if (*i == 'f' or *i == 'd' or  *i == 'F' or *i == 'D')
+        for (; is_letter(content[i]); --i) {
+          if (content[i] == 'f' or content[i] == 'd' or  content[i] == 'F' or content[i] == 'D')
             is_float = true;
-          *i = 0;
         }
+        std::string number = content.substr(0, i + 1);
         if (!is_float)
           for (size_t i = 0; i < content.length(); i++)
             if (content[i] == '.' or  content[i] == 'E' or content[i] == 'e')
               is_float = true;
         if (is_float)
-          return value(atof(number));
-        return value(atol(number));
+          return value(atof(number.c_str()));
+        return value(atol(number.c_str()));
       }
       return value(atol(content.c_str()));
     }

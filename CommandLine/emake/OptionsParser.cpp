@@ -7,6 +7,7 @@
 #include <boost/foreach.hpp>
 #include <boost/iostreams/device/mapped_file.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/exception/diagnostic_information.hpp> 
 
 #include <iostream>
 
@@ -73,22 +74,35 @@ inline list_t splitString(const std::string &str)
 
 OptionsParser::OptionsParser() : _desc("Options")
 {
+  // Platform Defaults
+  std::string def_platform, def_workdir;
+  #if CURRENT_PLATFORM_ID == OS_WINDOWS
+    def_platform = "Win32";
+    def_workdir = "%PROGRAMDATA%/ENIGMA/";
+  #elif CURRENT_PLATFORM_ID ==  OS_MACOSX
+    def_platform = "Cocoa";
+    def_workdir = "/tmp/ENIGMA/";
+  #else
+    def_platform = "xlib";
+    def_workdir = "/tmp/ENIGMA/";
+  #endif
+
   _desc.add_options()
-
-  ("help,h", "Print help messages")
-  ("info,i", opt::value<std::string>(), "Provides a listing of Platforms, APIs and Extensions")
-  ("output,o", opt::value<std::string>()->required(), "Output file")
-  ("workdir,w", opt::value<std::string>(), "Working Directory")
-  ("mode,m", opt::value<std::string>(), "Game Mode (Run, Release, Debug, Design)")
-  ("graphics,g", opt::value<std::string>(), "Graphics System (OpenGL1, OpenGL3, DirectX)")
-  ("audio,a", opt::value<std::string>(), "Audio System (OpenAL, DirectSound, SFML, None)")
-  ("widgets,W", opt::value<std::string>(), "Widget System (GTK, None)")
-  ("network,n", opt::value<std::string>(), "Networking System (Async, Berkeley, DirectPlay)")
-  ("collision,c", opt::value<std::string>(), "Collision System")
-  ("platform,p", opt::value<std::string>(), "Target Platform (XLib, Win32, Cocoa)")
-  ("extensions,e", opt::value<std::string>(), "Extensions (Paths, Timelines, Particles)")
-  ("compiler,x", opt::value<std::string>(), "Compiler.ey Descriptor");
-
+    ("help,h", "Print help messages")
+    ("info,i", opt::value<std::string>(), "Provides a listing of Platforms, APIs and Extensions")
+    ("output,o", opt::value<std::string>()->required(), "Output file")
+    ("platform,p", opt::value<std::string>()->default_value(def_platform), "Target Platform (XLib, Win32, Cocoa)")
+    ("workdir,w", opt::value<std::string>()->default_value(def_workdir), "Working Directory")
+    ("mode,m", opt::value<std::string>()->default_value("Debug"), "Game Mode (Run, Release, Debug, Design)")
+    ("graphics,g", opt::value<std::string>()->default_value("OpenGL1"), "Graphics System (OpenGL1, OpenGL3, DirectX)")
+    ("audio,a", opt::value<std::string>()->default_value("None"), "Audio System (OpenAL, DirectSound, SFML, None)")
+    ("widgets,W", opt::value<std::string>()->default_value("None"), "Widget System (GTK, None)")
+    ("network,n", opt::value<std::string>()->default_value("None"), "Networking System (Async, Berkeley, DirectPlay)")
+    ("collision,c", opt::value<std::string>()->default_value("None"), "Collision System")
+    ("extensions,e", opt::value<std::string>()->default_value("None"), "Extensions (Paths, Timelines, Particles)")
+    ("compiler,x", opt::value<std::string>()->default_value("gcc"), "Compiler.ey Descriptor")
+    ("run,r", opt::bool_switch()->default_value(false), "Automatically run the game after it is built")
+  ;
 
   _handler["info"] = std::bind(&OptionsParser::printInfo, this, std::placeholders::_1);
   _handler["output"] = std::bind(&OptionsParser::output, this, std::placeholders::_1);
@@ -102,36 +116,11 @@ OptionsParser::OptionsParser() : _desc("Options")
   _handler["platform"] = std::bind(&OptionsParser::platform, this, std::placeholders::_1);
   _handler["extensions"] = std::bind(&OptionsParser::extensions, this, std::placeholders::_1);
   _handler["compiler"] = std::bind(&OptionsParser::compiler, this, std::placeholders::_1);
-
-
-  // Platform Defaults
-#if CURRENT_PLATFORM_ID == OS_WINDOWS
-  _finalArgs["platform"] = "Win32";
-  _finalArgs["workdir"] = "%PROGRAMDATA%/ENIGMA/";
-#elif CURRENT_PLATFORM_ID ==  OS_MACOSX
-  _finalArgs["platform"] = "Cocoa";
-  _finalArgs["workdir"] = "/tmp/ENIGMA/";
-#else
-  _finalArgs["platform"] = "xlib";
-  _finalArgs["workdir"] = "/tmp/ENIGMA/";
-#endif
-
-  // Universal Defaults
-  _finalArgs["graphics"] = "OpenGL1";
-  _finalArgs["audio"] = "None";
-  _finalArgs["widget"] = "None";
-  _finalArgs["network"] = "None";
-  _finalArgs["collision"] = "None";
-  _finalArgs["mode"] = "Debug";
-
-  // Compiler Defaults
-  _finalArgs["compiler"] = "gcc";
-
 }
 
-std::string OptionsParser::GetOption(std::string option)
+opt::variable_value OptionsParser::GetOption(std::string option)
 {
-  return _finalArgs[option];
+  return _rawArgs[option];
 }
 
 int OptionsParser::ReadArgs(int argc, char* argv[])
@@ -147,13 +136,12 @@ int OptionsParser::ReadArgs(int argc, char* argv[])
   }
   catch(opt::error& e)
   {
-    std::cerr << "OPTIONS_ERROR: " << e.what() << std::endl << std::endl;
+    std::cerr << "OPTIONS_ERROR: " << boost::diagnostic_information(e) << std::endl << std::endl;
 
     _readArgsFail = true;
 
     return OPTIONS_ERROR;
   }
-
   find_ey("ENIGMAsystem/SHELL/");
 
   // Platform Compilers
@@ -177,13 +165,13 @@ int OptionsParser::HandleArgs()
     return OPTIONS_HELP;
   }
 
-
-  for (auto &&arg : _rawArgs)
+  for (auto &&handle : _handler)
   {
-    std::string str = boost::any_cast<std::string>(arg.second.value());
-    int result = _handler[arg.first](str);
-    if (result == OPTIONS_ERROR || result == OPTIONS_HELP)
-      return result;
+    if (_rawArgs.count(handle.first)) {
+      int result = handle.second(_rawArgs[handle.first].as<std::string>());
+      if (result == OPTIONS_ERROR || result == OPTIONS_HELP)
+        return result;
+    }
   }
 
   return OPTIONS_SUCCESS;
@@ -197,7 +185,7 @@ std::string OptionsParser::APIyaml()
   yaml += "treat-literals-as: 0\n";
   yaml += "sample-lots-of-radios: 0\n";
   yaml += "inherit-equivalence-from: 0\n";
-  yaml += "make-directory: " + _finalArgs["workdir"] + "\n";
+  yaml += "make-directory: " + _rawArgs["workdir"].as<std::string>() + "\n";
   yaml += "sample-checkbox: on\n";
   yaml += "sample-edit: DEADBEEF\n";
   yaml += "sample-combobox: 0\n";
@@ -207,14 +195,14 @@ std::string OptionsParser::APIyaml()
   yaml += "inherit-objects: true \n";
   yaml += "inherit-increment-from: 0\n";
   yaml += " \n";
-  yaml += "target-audio: " + _finalArgs["audio"] + "\n";
-  yaml += "target-windowing: " + _finalArgs["platform"] + "\n";
-  yaml += "target-compiler: " + _finalArgs["compiler"] + "\n";
-  yaml += "target-graphics: " + _finalArgs["graphics"] + "\n";
-  yaml += "target-widget: " + _finalArgs["widget"] + "\n";
-  yaml += "target-collision: " + _finalArgs["collision"] + "\n";
-  yaml += "target-networking: " + _finalArgs["network"] + "\n";
-  yaml += "extensions: " + _finalArgs["extensions"] + "\n";
+  yaml += "target-audio: " + _rawArgs["audio"].as<std::string>() + "\n";
+  yaml += "target-windowing: " + _rawArgs["platform"].as<std::string>() + "\n";
+  yaml += "target-compiler: " + _rawArgs["compiler"].as<std::string>() + "\n";
+  yaml += "target-graphics: " + _rawArgs["graphics"].as<std::string>() + "\n";
+  yaml += "target-widget: " + _rawArgs["widgets"].as<std::string>() + "\n";
+  yaml += "target-collision: " + _rawArgs["collision"].as<std::string>() + "\n";
+  yaml += "target-networking: " + _rawArgs["network"].as<std::string>() + "\n";
+  yaml += "extensions: " + _extensions + "\n";
 
   return yaml;
 }
@@ -330,7 +318,6 @@ int OptionsParser::help(const std::string &str)
 int OptionsParser::output(const std::string &str)
 {
   //set outfile
-  _finalArgs["output"] = str;
   return OPTIONS_SUCCESS;
 }
 
@@ -369,7 +356,6 @@ int OptionsParser::parse(const std::string &str)
 int OptionsParser::workdir(const std::string &str)
 {
   //set workdir
-  _finalArgs["workdir"] = str;
   return OPTIONS_SUCCESS;
 }
 
@@ -377,7 +363,6 @@ int OptionsParser::mode(const std::string &str)
 {
   if (str == "Run" || str == "Debug" || str == "Compile" || str == "Design" || str == "Rebuild")
   {
-    _finalArgs["mode"] = str;
     return OPTIONS_SUCCESS;
   }
   else
@@ -401,7 +386,6 @@ int OptionsParser::searchCompilers(const std::string &target)
 
   if (it != std::end(_api["Compilers"]))
   {
-    _finalArgs["compiler"] = target;
     return OPTIONS_SUCCESS;
   }
   else
@@ -433,10 +417,8 @@ int OptionsParser::searchAPI(const std::string &api, const std::string &target)
 
     if (lower == "extensions")
     {
-      _finalArgs["extensions"] += "Universal_System/Extensions/" + target + ",";
+      _extensions += "Universal_System/Extensions/" + target + ",";
     }
-    else
-      _finalArgs[lower] = target;
 
     return OPTIONS_SUCCESS;
   }
@@ -481,13 +463,13 @@ int OptionsParser::extensions(const std::string &str)
 {
   if (str == "None")
   {
-    _finalArgs["extensions"] = "";
+    _extensions = "";
   }
   else
   {
     list_t ext = splitString(str);
 
-    _finalArgs["extensions"] = "";
+    _extensions = "";
     for (auto &&e : ext)
     {
       int valid = searchAPI("Extensions", e);
