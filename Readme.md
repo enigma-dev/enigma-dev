@@ -1,5 +1,4 @@
 # ENIGMA [![Travis CI Build Status](https://travis-ci.org/enigma-dev/enigma-dev.svg?branch=master)](https://travis-ci.org/enigma-dev/enigma-dev/) [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/4j4hklw0ned5wbys?svg=true)](https://ci.appveyor.com/project/enigma-dev/enigma-dev)
----
 
 Official Website: http://enigma-dev.org
 
