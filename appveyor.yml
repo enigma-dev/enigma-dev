@@ -43,8 +43,8 @@ install:
     mingw-w64-x86_64-libffi mingw-w64-x86_64-box2d mingw-w64-x86_64-bullet
   - gcc -v
   - cd %APPVEYOR_BUILD_FOLDER%
-  - bash -lc "make -j 4"
-  - bash -lc "make -j 4 emake"
+  - make -j 4
+  - make -j 4 emake
 build_script:
   # AppVeyor overrides PLATFORM because it's part of its API
   - export PLATFORM=%PLATFORM%
