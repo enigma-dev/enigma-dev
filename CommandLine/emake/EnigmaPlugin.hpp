@@ -30,10 +30,7 @@ public:
   int Init();
   void SetDefinitions(const char* def);
   void HandleGameLaunch();
-<<<<<<< HEAD
   void LogMakeToConsole();
-=======
->>>>>>> e7024026fe80daee69ff26497e047e95291007dd
   int BuildGame(EnigmaStruct* data, GameMode mode, const char* fpath);
 
 private:
@@ -54,10 +51,7 @@ private:
   std::function<syntax_error*(const char*, const char*)> plugin_DefinitionsModified = nullptr;
   std::function<syntax_error*(int, const char**, const char*)> plugin_SyntaxCheck = nullptr;
   std::function<void()> plugin_HandleGameLaunch = nullptr;
-<<<<<<< HEAD
   std::function<void()> plugin_LogMakeToConsole = nullptr;
-=======
->>>>>>> e7024026fe80daee69ff26497e047e95291007dd
 
   void* _handle;
 };

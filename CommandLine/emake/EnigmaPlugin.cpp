@@ -72,10 +72,7 @@ int EnigmaPlugin::Init()
   plugin_DefinitionsModified = reinterpret_cast<syntax_error* (*)(const char*, const char*)>(BindFunc(_handle, "definitionsModified"));
   plugin_SyntaxCheck = reinterpret_cast<syntax_error* (*)(int, const char**, const char*)>(BindFunc(_handle, "syntaxCheck"));
   plugin_HandleGameLaunch = reinterpret_cast<void (*)()>(BindFunc(_handle, "ide_handles_game_launch"));
-<<<<<<< HEAD
   plugin_LogMakeToConsole = reinterpret_cast<void (*)()>(BindFunc(_handle, "log_make_to_console"));
-=======
->>>>>>> e7024026fe80daee69ff26497e047e95291007dd
 
   CallBack ecb;
   plugin_Init(&ecb);
@@ -96,14 +93,11 @@ void EnigmaPlugin::HandleGameLaunch()
   plugin_HandleGameLaunch();
 }
 
-<<<<<<< HEAD
 void EnigmaPlugin::LogMakeToConsole()
 {
   plugin_LogMakeToConsole();
 }
 
-=======
->>>>>>> e7024026fe80daee69ff26497e047e95291007dd
 int EnigmaPlugin::BuildGame(EnigmaStruct* data, GameMode mode, const char* fpath)
 {
   /* TODO: Use to print keywords list...
