@@ -18,8 +18,8 @@ init:
   # job numbers are 1-n (i.e. not zero-based)
   # don't use the cache on the first job so we can build a fresh compileEGMf.dll and emake.exe
   # then restore it on the subsequent jobs
-  - IF %APPVEYOR_JOB_NUMBER% == 1 set APPVEYOR_CACHE_SKIP_RESTORE=true
-    ELSE set APPVEYOR_CACHE_SKIP_SAVE=true
+  - IF %APPVEYOR_JOB_NUMBER% == 1 (set APPVEYOR_CACHE_SKIP_RESTORE=true)
+    ELSE (set APPVEYOR_CACHE_SKIP_SAVE=true)
 install:
   - set PATH=c:\msys64;C:\msys64\mingw64\bin;c:\msys64\usr\bin;%PATH%
   - set MSYSTEM=MINGW64
