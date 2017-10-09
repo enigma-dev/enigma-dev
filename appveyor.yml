@@ -24,8 +24,8 @@ environment:
     - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "MediaControlInterface"}
   #END WINDOWS
 cache:
-  - CompilerSource\.eobjs -> CompilerSource
-  - CommandLine\emake\.eobjs -> CommandLine\emake
+  - %APPVEYOR_BUILD_FOLDER%\CompilerSource\.eobjs -> CompilerSource
+  - %APPVEYOR_BUILD_FOLDER%\CommandLine\emake\.eobjs -> CommandLine\emake
 install:
   - set PATH=c:\msys64;C:\msys64\mingw64\bin;c:\msys64\usr\bin;%PATH%
   - set MSYSTEM=MINGW64
@@ -44,7 +44,7 @@ install:
   - gcc -v
   - cd %APPVEYOR_BUILD_FOLDER%
   - make -j 4
-  - bash -lc "make -j 4 emake"
+  - bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -j 4 emake"
 build_script:
   # AppVeyor overrides PLATFORM because it's part of its API
   - export PLATFORM=%PLATFORM%
