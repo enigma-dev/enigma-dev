@@ -1,12 +1,5 @@
 #include "EnigmaCallbacks.hpp"
 
-#include <iostream>
-#include <pthread.h>
-#include <unistd.h>
-#include <vector>
-
-std::ifstream CallBack::_outFile;
-
 CallBack::CallBack()
 {
   dia_open = &CallBack::FrameOpen;
