@@ -14,7 +14,6 @@ environment:
 cache:
   - compileEGMf.dll
   - emake.exe
-  - '%PROGRAMDATA%\ENIGMA -> **\compileEGMf.dll'
 init:
   # job numbers are 1-n (i.e. not zero-based)
   # don't use the cache on the first job so we can build a fresh compileEGMf.dll and emake.exe
