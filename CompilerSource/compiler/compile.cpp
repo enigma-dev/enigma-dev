@@ -101,9 +101,12 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode) 
 static bool run_game = true;
 dllexport void ide_handles_game_launch() { run_game = false; }
 
+<<<<<<< HEAD
 static bool redirect_make = true;
 dllexport void log_make_to_console() { redirect_make = false; }
 
+=======
+>>>>>>> e7024026fe80daee69ff26497e047e95291007dd
 int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
 {
 
