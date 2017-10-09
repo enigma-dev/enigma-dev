@@ -47,6 +47,5 @@ install:
   - bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -j 4 emake"
 build_script:
   # AppVeyor overrides PLATFORM because it's part of its API
-  - set PLATFORM=%PLATFORM%
-  - bash -lc "./ci-build.sh"
+  - bash -lc "cd $APPVEYOR_BUILD_FOLDER; export PLATFORM=$PLATFORM; ./ci-build.sh"
   
