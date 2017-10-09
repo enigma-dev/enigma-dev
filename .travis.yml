@@ -6,22 +6,14 @@ notifications:
   irc: "chat.freenode.net#enigma"
 compiler:
   - gcc
-addons:
-  apt:
-    sources:
-      - ubuntu-toolchain-r-test
-    packages:
-      - gcc-7
-      - g++-7
-      - clang-3.5
 before_install:
-  - sudo ln -s /usr/bin/gcc-7 /usr/local/bin/gcc
-  - sudo ln -s /usr/bin/g++-7 /usr/local/bin/g++
   - sudo dpkg --add-architecture i386
-  - sudo apt-get install build-essential libglu1-mesa-dev zlib1g-dev libalure-dev libvorbisfile3 libvorbis-dev 
+  - sudo apt-get install gcc-7 gcc-7-multilib g++-7 clang-3.5 build-essential libglu1-mesa-dev zlib1g-dev libalure-dev libvorbisfile3 libvorbis-dev 
       libdumb1-dev libboost-all-dev libc++-dev libsfml-dev libgtk2.0-dev libbullet-dev libbox2d-dev libgme-dev gcc-multilib 
       g++-multilib libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1-dev libglu1-mesa:i386 libx11-6:i386  libc++-dev:i386
       mingw-w64 wine
+  - sudo ln -s /usr/bin/gcc-7 /usr/local/bin/gcc
+  - sudo ln -s /usr/bin/g++-7 /usr/local/bin/g++
   # Ubuntu is a turd
   - sudo ln -s /usr/lib/i386-linux-gnu/mesa/libGL.so.1 /usr/lib/i386-linux-gnu/libGL.so
   - sudo ln -s /usr/lib/i386-linux-gnu/libX11.so.6 /usr/lib/i386-linux-gnu/libX11.so
