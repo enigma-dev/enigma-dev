@@ -14,6 +14,9 @@ environment:
 cache:
   - compileEGMf.dll
   - emake.exe
+init:
+  - IF %APPVEYOR_JOB_NUMBER% == 0 set APPVEYOR_CACHE_SKIP_RESTORE=true
+    ELSE set APPVEYOR_CACHE_SKIP_SAVE=true
 install:
   - set PATH=c:\msys64;C:\msys64\mingw64\bin;c:\msys64\usr\bin;%PATH%
   - set MSYSTEM=MINGW64
@@ -31,7 +34,7 @@ install:
   - gcc -v
   - cd %APPVEYOR_BUILD_FOLDER%
   - IF NOT EXIST %APPVEYOR_BUILD_FOLDER%\compileEGMf.dll make -j 4
-  - bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -j 4 emake"
+  - IF NOT EXIST %APPVEYOR_BUILD_FOLDER%\emake.exe bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -j 4 emake"
 build_script:
   # AppVeyor overrides PLATFORM because it's part of its API
   - bash -lc "cd $APPVEYOR_BUILD_FOLDER; export PLATFORM=%PLATFORM%; ./ci-build.sh"
