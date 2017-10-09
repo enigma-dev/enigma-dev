@@ -7,20 +7,6 @@
 
 std::ifstream CallBack::_outFile;
 
-void* CallBack::OutputThread(void*)
-{
-  if (_outFile.is_open()) {
-    std::string line;
-    while (true) {
-        while (std::getline(_outFile, line)) std::cout << line << std::endl;
-        if (!_outFile.eof()) break; // Ensure end of read was EOF.
-        _outFile.clear();
-    }
-  }
-
-  return nullptr;
-}
-
 CallBack::CallBack()
 {
   dia_open = &CallBack::FrameOpen;
@@ -56,14 +42,10 @@ void CallBack::SetProgressText(const char*)
 
 void CallBack::SetOutFile(const char* file)
 {
-  _outFile.open(file);
-  pthread_t me;
-  pthread_create(&me, nullptr, &OutputThread, nullptr);
 }
 
 void CallBack::ResetRedirect()
 {
-  _outFile.close();
 }
 
 int CallBack::Execute(const char*, const char**, bool)
