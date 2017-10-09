@@ -8,6 +8,7 @@ compiler:
   - gcc
 before_install:
   - sudo dpkg --add-architecture i386
+  - sudo add-apt-repository ppa:ubuntu-toolchain-r/test
   - sudo apt-get update
   - sudo apt-get install -y gcc-7 gcc-7-multilib g++-7 clang-3.5 build-essential libglu1-mesa-dev zlib1g-dev libalure-dev libvorbisfile3 libvorbis-dev 
       libdumb1-dev libboost-all-dev libc++-dev libsfml-dev libgtk2.0-dev libbullet-dev libbox2d-dev libgme-dev gcc-multilib 
