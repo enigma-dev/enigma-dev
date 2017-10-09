@@ -24,7 +24,8 @@ environment:
     - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "MediaControlInterface"}
   #END WINDOWS
 cache:
-  - CompilerSource\.eobjs
+  - compileEGMf.dll
+  - emake.exe
   - CommandLine\emake\.eobjs\ -> **\CommandLine\emake\
 install:
   - set PATH=c:\msys64;C:\msys64\mingw64\bin;c:\msys64\usr\bin;%PATH%
