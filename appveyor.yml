@@ -42,11 +42,11 @@ install:
     mingw-w64-x86_64-libsndfile mingw-w64-x86_64-libgme mingw-w64-x86_64-sfml mingw-w64-x86_64-gtk2 mingw-w64-x86_64-zlib
     mingw-w64-x86_64-libffi mingw-w64-x86_64-box2d mingw-w64-x86_64-bullet
   - gcc -v
-  - bash -lc "export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'"
-  - set GCC_COLORS="error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01"
-  - setx GCC_COLORS "error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01"
   - cd %APPVEYOR_BUILD_FOLDER%
-  - make -j 4
-  - make -j 4 emake
+  - bash -lc "make -j 4"
+  - bash -lc "make -j 4 emake"
 build_script:
-  - bash -lc "set GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'; cd $APPVEYOR_BUILD_FOLDER; export PLATFORM=%PLATFORM%; ./ci-build.sh"
+  # AppVeyor overrides PLATFORM because it's part of its API
+  - export PLATFORM=%PLATFORM%
+  - bash -lc "./ci-build.sh"
+  
