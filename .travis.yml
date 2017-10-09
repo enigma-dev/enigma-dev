@@ -14,6 +14,7 @@ addons:
       - gcc-6
       - g++-6
 before_install:
+  - sudo apt-get remove mongodb
   - sudo dpkg --add-architecture i386
   - sudo apt-get --allow-unauthenticated update
   - sudo apt-get install build-essential g++ clang-3.5 libglu1-mesa-dev zlib1g-dev libalure-dev libvorbisfile3 libvorbis-dev 
