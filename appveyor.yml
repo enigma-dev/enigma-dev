@@ -15,8 +15,7 @@ cache:
   - compileEGMf.dll
   - emake.exe
 init:
-  - IF %APPVEYOR_JOB_NUMBER% == 0 set APPVEYOR_CACHE_SKIP_RESTORE=true
-    ELSE set APPVEYOR_CACHE_SKIP_SAVE=true
+  - set APPVEYOR_CACHE_SKIP_RESTORE=true
 install:
   - set PATH=c:\msys64;C:\msys64\mingw64\bin;c:\msys64\usr\bin;%PATH%
   - set MSYSTEM=MINGW64
