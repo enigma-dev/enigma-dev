@@ -11,7 +11,7 @@ environment:
     - {COMPILER: gcc, PLATFORM: Win32, MODE: Run, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "None"}
     - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "None"}
   #END WINDOWS
-cache: '%PROGRAMDATA%\ENIGMA'
+cache:
   - compileEGMf.dll
   - emake.exe
 init:
