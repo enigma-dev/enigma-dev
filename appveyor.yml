@@ -43,7 +43,7 @@ install:
     mingw-w64-x86_64-libsndfile mingw-w64-x86_64-libgme mingw-w64-x86_64-sfml mingw-w64-x86_64-gtk2 mingw-w64-x86_64-zlib
     mingw-w64-x86_64-libffi mingw-w64-x86_64-box2d mingw-w64-x86_64-bullet
   - gcc -v
-  - bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -j 4"
+  - bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -fdiagnostics-color=always -j 4"
   - bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -j 4 emake"
 build_script:
   - bash -lc "cd $APPVEYOR_BUILD_FOLDER; export PLATFORM=%PLATFORM%; ./ci-build.sh"
