@@ -21,7 +21,7 @@ cache:
 before_install:
   - sudo dpkg --add-architecture i386
   #- sudo apt-get -qq update
-  - sudo apt-get -qq -y install libglu1-mesa-dev
+  #- sudo apt-get -qq -y install libglu1-mesa-dev
   - sudo apt-get -qq -y install zlib1g-dev
   - sudo apt-get -qq -y install libalure-dev
   - sudo apt-get -qq -y install libvorbisfile3
@@ -36,11 +36,11 @@ before_install:
   - sudo apt-get -qq -y install libgme-dev
   #- sudo apt-get -qq -y install gcc-multilib
   #- sudo apt-get -qq -y install g++-multilib
-  - sudo apt-get -qq -y install libc6:i386
-  - sudo apt-get -qq -y install libncurses5:i386
+  #- sudo apt-get -qq -y install libc6:i386
+  #- sudo apt-get -qq -y install libncurses5:i386
   #- sudo apt-get -qq -y install libstdc++6:i386
-  - sudo apt-get -qq -y install lib32z1-dev
-  - sudo apt-get -qq -y install libglu1-mesa:i386
+  #- sudo apt-get -qq -y install lib32z1-dev
+  #- sudo apt-get -qq -y install libglu1-mesa:i386
   #- sudo apt-get -qq -y install libx11-6:i386
   #- sudo apt-get -qq -y install libc++-dev:i386
   #- sudo apt-get -qq -y install mingw-w64
