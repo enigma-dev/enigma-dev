@@ -369,6 +369,7 @@ int OptionsParser::mode(const std::string &str)
     std::cerr << "OPTIONS_ERROR: invalid mode: " << str << std::endl
               << "Available Modes: " << std::endl
               << "Run" << std::endl
+              << "Debug" << std::endl
               << "Compile" << std::endl
               << "Design" << std::endl
               << "Rebuild" << std::endl;

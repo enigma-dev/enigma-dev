@@ -72,9 +72,9 @@ int EnigmaPlugin::Init()
   plugin_DefinitionsModified = reinterpret_cast<syntax_error* (*)(const char*, const char*)>(BindFunc(_handle, "definitionsModified"));
   plugin_SyntaxCheck = reinterpret_cast<syntax_error* (*)(int, const char**, const char*)>(BindFunc(_handle, "syntaxCheck"));
   plugin_HandleGameLaunch = reinterpret_cast<void (*)()>(BindFunc(_handle, "ide_handles_game_launch"));
+  plugin_LogMakeToConsole = reinterpret_cast<void (*)()>(BindFunc(_handle, "log_make_to_console"));
 
   CallBack ecb;
-  CallBack::SetOutFile("emake_out.log");
   plugin_Init(&ecb);
 
   // Who Added this garbage and why?
@@ -91,6 +91,11 @@ void EnigmaPlugin::SetDefinitions(const char* def)
 void EnigmaPlugin::HandleGameLaunch()
 {
   plugin_HandleGameLaunch();
+}
+
+void EnigmaPlugin::LogMakeToConsole()
+{
+  plugin_LogMakeToConsole();
 }
 
 int EnigmaPlugin::BuildGame(EnigmaStruct* data, GameMode mode, const char* fpath)
