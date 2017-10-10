@@ -34,8 +34,8 @@ stages:
 
 before_install:
   # move our cached files back onto the relative path if they exist in the restored cache
-  - if [[ -f "cache/libcompileEGMf.so" ]]; then mv cache/libcompileEGMf.so libcompileEGMf.so; fi
-  - if [[ -f "cache/emake" ]]; then mv cache/emake emake; fi
+  - mv cache/libcompileEGMf.so libcompileEGMf.so
+  - mv cache/emake emake
   - sudo dpkg --add-architecture i386
   #- sudo apt-get -qq update
   #- sudo apt-get -qq -y install libglu1-mesa-dev
