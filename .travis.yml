@@ -21,13 +21,13 @@ jobs:
     - stage: prepare cache
       before_install: skip
       install: skip
-      script: sudo apt-get -qq -y install libboost-dev libboost-iostreams-dev libboost-filesystem-dev
+    - script: sudo apt-get -qq -y install libboost-dev libboost-iostreams-dev libboost-filesystem-dev
                    libboost-program-options-dev libboost-system-dev;
               make -j4;
               make -j4 emake;
               mv libcompileEGMf.so cache/libcompileEGMf.so;
               mv emake cache/emake;
-              echo "hello";
+              echo "Moving blobs into the cache";
 stages:
   - prepare cache
   - test
@@ -39,6 +39,8 @@ before_install:
   - sudo dpkg --add-architecture i386
   #- sudo apt-get -qq update
   #- sudo apt-get -qq -y install libglu1-mesa-dev
+  - sudo apt-get -qq -y install libboost-dev libboost-iostreams-dev libboost-filesystem-dev
+    libboost-program-options-dev libboost-system-dev;
   - sudo apt-get -qq -y install zlib1g-dev
   - sudo apt-get -qq -y install libalure-dev
   - sudo apt-get -qq -y install libvorbisfile3
