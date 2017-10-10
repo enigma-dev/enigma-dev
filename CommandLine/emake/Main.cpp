@@ -12,6 +12,7 @@ int main(int argc, char* argv[])
   {
     EnigmaPlugin plugin;
     plugin.Init();
+    plugin.LogMakeToConsole();
     plugin.SetDefinitions(options.APIyaml().c_str());
 
     Game game;

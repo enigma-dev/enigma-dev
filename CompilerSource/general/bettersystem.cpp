@@ -141,8 +141,8 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
           parameters += " " + pcur;
         }
       }
-	  myReplace(redirout, "\"", "");
-	  myReplace(redirerr, "\"", "");
+    myReplace(redirout, "\"", "");
+    myReplace(redirerr, "\"", "");
 
 
       STARTUPINFO StartupInfo;
@@ -210,6 +210,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
       }
 
       printf("\n\n********* EXECUTE:\n%s\n\n",parameters.c_str());
+      fflush(stdout);
 
       if (CreateProcess(NULL,(CHAR*)parameters.c_str(),NULL,&inheritibility,TRUE,CREATE_DEFAULT_ERROR_MODE,Cenviron_use,NULL,&StartupInfo,&ProcessInformation ))
       {
@@ -334,13 +335,14 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
       for (char **i = argv; *i; i++)
         printf("  `%s`\n",*i);
       puts("\n\n");
+      fflush(stdout);
 
       int result = -1;
       pid_t fk = fork();
 
       if (!fk)
       {
-		// Redirect STDOUT
+        // Redirect STDOUT
         if (redirout == "") {
             int flags = fcntl(STDOUT_FILENO, F_GETFD);
             if (flags != -1)
@@ -354,7 +356,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
           if (redirerr == redirout)
             dup2(1,2);
         }
-		
+
         // Redirect STDERR
         if (redirerr == "") {
             int flags = fcntl(STDERR_FILENO, F_GETFD);
@@ -366,7 +368,7 @@ void myReplace(std::string& str, const std::string& oldStr, const std::string& n
           close(STDERR_FILENO);
           if (dup(creat(redirerr.c_str(),laxpermissions)) == -1) {}
         }
-        
+
         char** usenviron;
         if (Cenviron)
         {
