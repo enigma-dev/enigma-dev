@@ -25,9 +25,9 @@ environment:
     - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "MediaControlInterface"}
   #END WINDOWS
 cache:
-  - compileEGMf.dll
-  - emake.exe
-  - '%PROGRAMDATA%\ENIGMA'
+  - %APPVEYOR_CACHE_NAME%\compileEGMf.dll
+  - %APPVEYOR_CACHE_NAME%\emake.exe
+  - %APPVEYOR_CACHE_NAME%\'%PROGRAMDATA%\ENIGMA'
 init:
   # job numbers are 1-n (i.e. not zero-based)
   # don't use the cache on the first job so we can build a fresh compileEGMf.dll and emake.exe
