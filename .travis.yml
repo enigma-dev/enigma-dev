@@ -26,8 +26,8 @@ jobs:
                    libboost-program-options-dev libboost-system-dev;
               make -j4;
               make -j4 emake;
-              sudo mv -f libcompileEGMf.so blobs/;
-              sudo mv -f emake blobs/;
+              mv -f libcompileEGMf.so blobs;
+              mv -f emake blobs;
               echo "Moved blobs into the cache";
 stages:
   - prepare cache
