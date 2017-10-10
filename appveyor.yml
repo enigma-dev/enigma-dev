@@ -24,6 +24,11 @@ environment:
     - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "MediaControlInterface"}
   #END WINDOWS
 install:
+  - echo %APPVEYOR_JOB_ID%
+  - echo %APPVEYOR_BUILD_ID%
+  - echo %APPVEYOR_BUILD_NUMBER%
+  - echo %APPVEYOR_PULL_REQUEST_HEAD_COMMIT%
+  - echo %APPVEYOR_API_URL%
   - set PATH=c:\msys64;C:\msys64\mingw64\bin;c:\msys64\usr\bin;%PATH%
   - set MSYSTEM=MINGW64
   - set MSYSTEM_PREFIX=/mingw64
@@ -45,11 +50,6 @@ install:
       7z a blobs.zip compileEGMf.dll emake.exe &&
       appveyor PushArtifact blobs.zip
     ) ELSE (
-      echo %APPVEYOR_JOB_ID% &&
-      echo %APPVEYOR_BUILD_ID% &&
-      echo %APPVEYOR_BUILD_NUMBER% &&
-      echo %APPVEYOR_PULL_REQUEST_HEAD_COMMIT% &&
-      echo %APPVEYOR_API_URL% &&
       curl -O -J https://ci.appveyor.com/api/buildjobs/%APPVEYOR_BUILD_ID%/artifacts/blobs.zip &&
       7z x blobs.zip
     )
