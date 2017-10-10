@@ -21,6 +21,7 @@ jobs:
     - stage: prepare cache
       script: make -j4
               mv libcompileEGMf.so cache/libcompileEGMf.so
+    - stage: test
     - script: ./ci-build.sh
 
 before_install:
