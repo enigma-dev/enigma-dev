@@ -76,3 +76,6 @@ script:
 before_cache:
   - mv libcompileEGMf.so cache/libcompileEGMf.so
   - mv emake cache/emake
+
+after_success:
+  - echo "Hello"
