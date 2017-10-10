@@ -26,7 +26,7 @@ jobs:
                    libboost-program-options-dev libboost-system-dev;
               make -j4;
               make -j4 emake;
-              rm -f cache;
+              rm -rf cache;
               mkdir cache;
               mv libcompileEGMf.so cache/;
               mv emake cache/;
