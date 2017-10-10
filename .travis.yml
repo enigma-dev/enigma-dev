@@ -28,8 +28,12 @@ jobs:
         - make -j4 emake
       script: skip
       before_cache:
+        - stat libcompileEGMf.so
+        - stat emake
         - mv libcompileEGMf.so cache/libcompileEGMf.so
         - mv emake cache/emake
+        - stat cache/libcompileEGMf.so
+        - stat cache/emake
 stages:
   - prepare cache
   - test
