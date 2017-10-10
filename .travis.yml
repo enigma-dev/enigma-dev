@@ -22,7 +22,7 @@ jobs:
       script: make -j4
               mv libcompileEGMf.so cache/libcompileEGMf.so
     - stage: test
-    - script: ./ci-build.sh
+      script: ./ci-build.sh
 
 before_install:
   # move our cached files back onto the relative path if they exist in the restored cache
