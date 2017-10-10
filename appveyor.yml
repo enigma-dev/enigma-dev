@@ -3,9 +3,9 @@ shallow_clone: true
 # disable automatic tests 
 test: off
 artifacts:
-  - path: %APPVEYOR_BUILD_FOLDER%\compileEGMf.dll
+  - path: compileEGMf.dll
     type: zip
-  - path: %APPVEYOR_BUILD_FOLDER%\emake.exe
+  - path: emake.exe
     type: zip
 
 environment:
