@@ -52,8 +52,8 @@ before_install:
 
 install:
   - chmod +x ./ci-build.sh
-  - IF NOT EXIST libcompileEGMf.so make -j4
-  - IF NOT EXIST emake make -j4 emake
+  - [[ -f "libcompileEGMf.so" ]] || make -j4
+  - [[ -f "emake" ]] || make -j4 emake
   - curl -L https://github.com/fundies/enigma-libs/files/1347135/enigma-libs.zip > enigma-libs.zip
   - unzip enigma-libs.zip -d ENIGMAsystem/
   - mv ENIGMAsystem/Install ENIGMAsystem/Additional
