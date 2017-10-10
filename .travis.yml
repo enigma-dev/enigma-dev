@@ -21,7 +21,9 @@ jobs:
     - stage: prepare cache
       script: make -j4
               mv libcompileEGMf.so cache/libcompileEGMf.so
-    - script: ./ci-build.sh
+stages:
+  - prepare cache
+  - test
 
 before_install:
   # move our cached files back onto the relative path if they exist in the restored cache
@@ -76,3 +78,5 @@ env:
     - COMPILER=gcc PLATFORM=xlib MODE=Compile GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
     - COMPILER=gcc PLATFORM=xlib MODE=Run GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
   #END LINUX
+script:
+  - ./ci-build.sh
