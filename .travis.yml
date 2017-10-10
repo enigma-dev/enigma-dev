@@ -21,7 +21,7 @@ jobs:
     - stage: prepare cache
       before_install: skip
       install: skip
-      env: FOO=FOO
+      env: UPDATING_CACHE
       script: sudo apt-get -qq -y install libboost-dev libboost-iostreams-dev libboost-filesystem-dev
                    libboost-program-options-dev libboost-system-dev;
               make -j4;
