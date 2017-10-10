@@ -19,7 +19,7 @@ cache:
 jobs:
   include:
     - stage: prepare cache
-    - script: make -j4
+      script: make -j4
               mv libcompileEGMf.so cache/libcompileEGMf.so
 
 before_install:
