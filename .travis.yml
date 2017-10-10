@@ -50,6 +50,10 @@ before_install:
   #- sudo ln -s /usr/lib/i386-linux-gnu/libGLU.so.1 /usr/lib/i386-linux-gnu/libGLU.so
   - sudo ln -s /usr/include/x86_64-linux-gnu/zconf.h /usr/include
 
+before_install:
+  - if [[ -f "cache/libcompileEGMf.so" ]]; then mv cache/libcompileEGMf.so libcompileEGMf.so; fi
+  - if [[ -f "cache/emake" ]]; then mv cache/emake emake; fi
+
 install:
   - chmod +x ./ci-build.sh
   - if [[ ! -f "libcompileEGMf.so" ]]; then make -j4; fi
