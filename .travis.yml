@@ -1,8 +1,8 @@
 sudo: required
 dist: trusty
 
-notifications:
-  irc: "chat.freenode.net#enigma"
+#notifications:
+  #irc: "chat.freenode.net#enigma"
 
 language: cpp
 
@@ -13,8 +13,8 @@ git:
   depth: 1
 
 cache:
-  directories:
-    - $TRAVIS_BUILD_DIR/compileEGMf.dll
+  #directories:
+    #- $TRAVIS_BUILD_DIR/compileEGMf.dll
   files:
     - $TRAVIS_BUILD_DIR/compileEGMf.dll
 
