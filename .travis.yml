@@ -13,7 +13,7 @@ git:
   depth: 1
 
 cache:
-  directories:
+  files:
     - $TRAVIS_BUILD_DIR/libcompileEGMf.so
 
 before_install:
