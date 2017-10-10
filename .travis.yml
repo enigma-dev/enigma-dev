@@ -26,10 +26,15 @@ jobs:
                    libboost-program-options-dev libboost-system-dev;
               make -j4;
               make -j4 emake;
+              rm -rf blobs;
+              dir;
+              mkdir blobs;
+              dir;
               cd blobs;
               dir;
               cd ..;
-              mv libcompileEGMf.so libcompileEGMf.so;
+              dir;
+              mv libcompileEGMf.so blobs/libcompileEGMf.so;
               mv emake blobs/emake;
               dir;
               cd blobs;
