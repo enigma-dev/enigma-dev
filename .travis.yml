@@ -26,8 +26,14 @@ jobs:
                    libboost-program-options-dev libboost-system-dev;
               make -j4;
               make -j4 emake;
-              mv $TRAVIS_BUILD_DIR/libcompileEGMf.so $TRAVIS_BUILD_DIR/blobs/libcompileEGMf.so;
-              mv $TRAVIS_BUILD_DIR/emake $TRAVIS_BUILD_DIR/blobs/emake;
+              cd blobs;
+              dir;
+              cd ..;
+              mv libcompileEGMf.so libcompileEGMf.so;
+              mv emake blobs/emake;
+              dir;
+              cd blobs;
+              dir;
               echo "Moved blobs into the cache";
 stages:
   - prepare cache
