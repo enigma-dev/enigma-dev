@@ -18,6 +18,7 @@ cache:
 
 jobs:
   include:
+    - script: ./ci-build.sh
     - stage: prepare cache
       script: make -j4
               mv libcompileEGMf.so cache/libcompileEGMf.so
@@ -75,5 +76,3 @@ env:
     - COMPILER=gcc PLATFORM=xlib MODE=Compile GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
     - COMPILER=gcc PLATFORM=xlib MODE=Run GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
   #END LINUX
-script:
-  - ./ci-build.sh
