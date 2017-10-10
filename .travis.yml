@@ -9,11 +9,11 @@ git:
   depth: 1
 cache:
   directories:
-    - $HOME/cache
+    - $CACHE
 before_install:
   # move our cached files back onto the relative path if they exist in the restored cache
-  - mv $HOME/cache/libcompileEGMf.so ./
-  - mv $HOME/cache/emake ./
+  - mv $CACHE/libcompileEGMf.so ./
+  - mv $CACHE/emake ./
   - sudo dpkg --add-architecture i386
   #- sudo apt-get -qq update
   #- sudo apt-get -qq -y install libglu1-mesa-dev
@@ -55,6 +55,7 @@ install:
 env:
   global:
     - OUTPUT=/tmp/test
+    - CACHE=$HOME/blobs
   matrix:
   #BEGIN LINUX
     # Game Modes
@@ -76,8 +77,8 @@ jobs:
         - make -j4 emake
       script: skip
       before_cache:
-        - mv libcompileEGMf.so $HOME/cache
-        - mv emake $HOME/cache
+        - mv libcompileEGMf.so $CACHE
+        - mv emake $CACHE
 stages:
   - prepare cache
   - test
