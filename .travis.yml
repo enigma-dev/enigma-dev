@@ -7,9 +7,6 @@ compiler:
   - gcc
 git:
   depth: 1
-cache:
-  directories:
-    - $CACHE
 before_install:
   # move our cached files back onto the relative path if they exist in the restored cache
   - mv $CACHE/libcompileEGMf.so ./
@@ -70,13 +67,12 @@ jobs:
     - stage: prepare cache
       env: UPDATING_CACHE
       before_install: skip
-      install:
+      install: skip
+      script:
         - sudo apt-get -qq -y install libboost-dev libboost-iostreams-dev libboost-filesystem-dev
             libboost-program-options-dev libboost-system-dev
         - make -j4
         - make -j4 emake
-      script: skip
-      before_cache:
         - mv libcompileEGMf.so $CACHE
         - mv emake $CACHE
 stages:
