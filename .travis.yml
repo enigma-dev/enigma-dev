@@ -14,7 +14,7 @@ git:
 
 cache:
   directories:
-    - $TRAVIS_BUILD_DIR/blobs
+    - $TRAVIS_BUILD_DIR/cache
 
 jobs:
   include:
@@ -36,8 +36,8 @@ stages:
 
 before_install:
   # move our cached files back onto the relative path if they exist in the restored cache
-  - mv blobs/libcompileEGMf.so ./
-  - mv blobs/emake ./
+  - mv cache/libcompileEGMf.so ./
+  - mv cache/emake ./
   - sudo dpkg --add-architecture i386
   #- sudo apt-get -qq update
   #- sudo apt-get -qq -y install libglu1-mesa-dev
