@@ -14,7 +14,7 @@ git:
 
 cache:
   directories:
-    - $TRAVIS_BUILD_DIR/compileEGMf.dll
+    - $TRAVIS_BUILD_DIR/libcompileEGMf.so
 
 before_install:
   - sudo dpkg --add-architecture i386
@@ -52,8 +52,8 @@ before_install:
 
 install:
   - chmod +x ./ci-build.sh
-  - [ -f "libcompileEGMf.so" ] || make -j4
-  - [ -f "emake" ] || make -j4 emake
+  - if [[ -f "libcompileEGMf.so" ]]; then make -j4; fi
+  - if [[ -f "emake" ]]; then make -j4 emake; fi
   - curl -L https://github.com/fundies/enigma-libs/files/1347135/enigma-libs.zip > enigma-libs.zip
   - unzip enigma-libs.zip -d ENIGMAsystem/
   - mv ENIGMAsystem/Install ENIGMAsystem/Additional
