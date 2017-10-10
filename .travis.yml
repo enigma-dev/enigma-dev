@@ -11,8 +11,8 @@ compiler:
   
 before_install:
   - sudo dpkg --add-architecture i386
-  - sudo apt-get update
-  - sudo apt-get install build-essential g++ clang-3.5 libglu1-mesa-dev zlib1g-dev libalure-dev libvorbisfile3 libvorbis-dev 
+  - sudo apt-get -qq update
+  - sudo apt-get -qq -y install build-essential libglu1-mesa-dev zlib1g-dev libalure-dev libvorbisfile3 libvorbis-dev 
       libdumb1-dev libboost-all-dev libc++-dev libsfml-dev libgtk2.0-dev libbullet-dev libbox2d-dev libgme-dev gcc-multilib 
       g++-multilib libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1-dev libglu1-mesa:i386 libx11-6:i386  libc++-dev:i386
       mingw-w64 wine
@@ -84,4 +84,3 @@ env:
   #END LINUX
 script:
   - ./ci-build.sh
-

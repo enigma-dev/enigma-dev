@@ -101,6 +101,9 @@ dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode) 
 static bool run_game = true;
 dllexport void ide_handles_game_launch() { run_game = false; }
 
+static bool redirect_make = true;
+dllexport void log_make_to_console() { redirect_make = false; }
+
 int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
 {
 
@@ -615,16 +618,24 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
 //  int makeres = better_system("cd ","/MacOS/");
 //  int makeres = better_system(MAKE_location,"MacOS");
 
-  // Pick a file and flush it
-  const string redirfile = (makedir + "enigma_compile.log");
-  fclose(fopen(redirfile.c_str(),"wb"));
+  string flags = "";
 
-  // Redirect it
-  ide_output_redirect_file(redirfile.c_str()); //TODO: If you pass this function the address it will screw up the value; most likely a JNA/Plugin bug.
-  int makeres = e_execs(MAKE_location,make,"&> \"" + redirfile + "\"");
+  if (redirect_make) {
+    // Pick a file and flush it
+    const string redirfile = (makedir + "enigma_compile.log");
+    fclose(fopen(redirfile.c_str(),"wb"));
+
+    // Redirect it
+    ide_output_redirect_file(redirfile.c_str()); //TODO: If you pass this function the address it will screw up the value; most likely a JNA/Plugin bug.
+
+    flags += "&> \"" + redirfile + "\"";
+  }
+
+  int makeres = e_execs(MAKE_location, make, flags);
 
   // Stop redirecting GCC output
-  ide_output_redirect_reset();
+  if (redirect_make)
+    ide_output_redirect_reset();
 
   if (makeres) {
     idpr("Compile failed at C++ level.",-1);
