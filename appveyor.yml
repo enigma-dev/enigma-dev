@@ -50,7 +50,7 @@ install:
       7z a blobs.zip compileEGMf.dll emake.exe &&
       appveyor PushArtifact blobs.zip
     ) ELSE (
-      curl -O -J https://ci.appveyor.com/api/buildjobs/%APPVEYOR_JOB_ID%/artifacts/blobs.zip &&
+      curl -O -J https://ci.appveyor.com/api/buildjobs/%APPVEYOR_BUILD_ID%/artifacts/blobs.zip &&
       7z x blobs.zip
     )
 build_script:
