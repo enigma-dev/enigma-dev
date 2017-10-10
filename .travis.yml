@@ -21,7 +21,7 @@ jobs:
     - stage: prepare cache
       before_install: skip
       install: skip
-    - script: sudo apt-get -qq -y install libboost-dev libboost-iostreams-dev libboost-filesystem-dev
+      script: sudo apt-get -qq -y install libboost-dev libboost-iostreams-dev libboost-filesystem-dev
                    libboost-program-options-dev libboost-system-dev;
               make -j4;
               make -j4 emake;
@@ -84,7 +84,6 @@ env:
     - COMPILER=gcc PLATFORM=xlib MODE=Run GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
     - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
     - COMPILER=gcc PLATFORM=xlib MODE=Compile GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
-    - COMPILER=gcc PLATFORM=xlib MODE=Run GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
   #END LINUX
 script:
   - ./ci-build.sh
