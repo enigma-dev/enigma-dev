@@ -2,6 +2,11 @@
 shallow_clone: true
 # disable automatic tests 
 test: off
+artifacts:
+  - path: %APPVEYOR_BUILD_FOLDER%\compileEGMf.dll
+    type: zip
+  - path: %APPVEYOR_BUILD_FOLDER%\emake.exe
+    type: zip
 
 environment:
   OUTPUT: /tmp/test.exe
@@ -47,11 +52,11 @@ install:
   - IF %APPVEYOR_JOB_NUMBER% == 1 (
       make -j 4 &&
       bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -j 4 emake" &&
-      7z a blobs.zip compileEGMf.dll emake.exe &&
-      appveyor PushArtifact blobs.zip
+      #7z a blobs.zip compileEGMf.dll emake.exe &&
+      #appveyor PushArtifact blobs.zip
     ) ELSE (
-      curl -O -J https://ci.appveyor.com/api/buildjobs/%APPVEYOR_BUILD_ID%/artifacts/blobs.zip &&
-      7z x blobs.zip
+      #curl -O -J https://ci.appveyor.com/api/buildjobs/%APPVEYOR_BUILD_ID%/artifacts/blobs.zip &&
+      #7z x blobs.zip
     )
 build_script:
   # AppVeyor overrides PLATFORM because it's part of its API
