@@ -19,6 +19,7 @@ cache:
 jobs:
   include:
     - stage: prepare cache
+      before_install: skip
       install: skip
       script: sudo apt-get -qq -y install libboost-dev libboost-iostreams-dev libboost-filesystem-dev
                    libboost-program-options-dev libboost-system-dev;
