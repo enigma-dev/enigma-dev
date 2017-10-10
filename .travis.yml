@@ -27,7 +27,7 @@ before_install:
   - sudo apt-get -qq -y install libvorbisfile3
   - sudo apt-get -qq -y install libvorbis-dev 
   - sudo apt-get -qq -y install libdumb1-dev
-  - sudo apt-get -qq -y install libboost-all-dev
+  #- sudo apt-get -qq -y install libboost-all-dev
   - sudo apt-get -qq -y install libc++-dev
   - sudo apt-get -qq -y install libsfml-dev
   - sudo apt-get -qq -y install libgtk2.0-dev
