@@ -45,12 +45,12 @@ install:
       7z a blobs.zip compileEGMf.dll emake.exe &&
       appveyor PushArtifact blobs.zip
     ) ELSE (
-      echo %APPVEYOR_PROJECT_SLUG% &&
-      echo %APPVEYOR_PROJECT_ID% &&
-      echo %APPVEYOR_PROJECT_NAME% &&
-      echo %APPVEYOR_ACCOUNT_NAME% &&
+      echo %APPVEYOR_JOB_ID% &&
+      echo %APPVEYOR_BUILD_ID% &&
+      echo %APPVEYOR_BUILD_NUMBER% &&
+      echo %APPVEYOR_PULL_REQUEST_HEAD_COMMIT% &&
       echo %APPVEYOR_API_URL% &&
-      curl -O -J https://ci.appveyor.com/api/projects/%APPVEYOR_ACCOUNT_NAME%/%APPVEYOR_PROJECT_SLUG%/artifacts/blobs.zip &&
+      curl -O -J https://ci.appveyor.com/api/buildjobs/%APPVEYOR_BUILD_ID%/artifacts/blobs.zip &&
       7z x blobs.zip
     )
 build_script:
