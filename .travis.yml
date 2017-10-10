@@ -28,9 +28,9 @@ before_install:
   - sudo apt-get -qq -y install libvorbis-dev 
   - sudo apt-get -qq -y install libdumb1-dev
   - sudo apt-get -qq -y install libboost-dev libboost-iostreams-dev libboost-filesystem-dev libboost-program-options-dev libboost-system-dev
-  - sudo apt-get -qq -y install libc++-dev
+  #- sudo apt-get -qq -y install libc++-dev
   - sudo apt-get -qq -y install libsfml-dev
-  - sudo apt-get -qq -y install libgtk2.0-dev
+  #- sudo apt-get -qq -y install libgtk2.0-dev
   - sudo apt-get -qq -y install libbullet-dev
   - sudo apt-get -qq -y install libbox2d-dev
   - sudo apt-get -qq -y install libgme-dev
