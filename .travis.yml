@@ -22,24 +22,14 @@ jobs:
       before_install: skip
       install: skip
       env: UPDATING_CACHE
-      script: sudo apt-get -qq -y install libboost-dev libboost-iostreams-dev libboost-filesystem-dev
-                   libboost-program-options-dev libboost-system-dev;
-              make -j4;
-              make -j4 emake;
-              rm -rf blobs;
-              dir;
-              mkdir blobs;
-              dir;
-              cd blobs;
-              dir;
-              cd ..;
-              dir;
-              mv libcompileEGMf.so blobs/libcompileEGMf.so;
-              mv emake blobs/emake;
-              dir;
-              cd blobs;
-              dir;
-              echo "Moved blobs into the cache";
+      script:
+        - sudo apt-get -qq -y install libboost-dev libboost-iostreams-dev libboost-filesystem-dev
+            libboost-program-options-dev libboost-system-dev
+        - make -j4
+        - make -j4 emake
+      before_cache:
+        - mv libcompileEGMf.so cache/libcompileEGMf.so
+        - mv emake cache/emake
 stages:
   - prepare cache
   - test
@@ -52,7 +42,7 @@ before_install:
   #- sudo apt-get -qq update
   #- sudo apt-get -qq -y install libglu1-mesa-dev
   - sudo apt-get -qq -y install libboost-dev libboost-iostreams-dev libboost-filesystem-dev
-    libboost-program-options-dev libboost-system-dev;
+    libboost-program-options-dev libboost-system-dev
   - sudo apt-get -qq -y install zlib1g-dev
   - sudo apt-get -qq -y install libalure-dev
   - sudo apt-get -qq -y install libvorbisfile3
