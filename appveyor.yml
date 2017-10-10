@@ -33,6 +33,8 @@ init:
   # don't use the cache on the first job so we can build a fresh compileEGMf.dll and emake.exe
   # then restore it on the subsequent jobs
   - echo %APPVEYOR_CACHE_NAME%
+  - cd %APPVEYOR_CACHE_NAME%
+  - dir
   - IF %APPVEYOR_JOB_NUMBER% == 1 (set APPVEYOR_CACHE_SKIP_RESTORE=true)
 install:
   - set PATH=c:\msys64;C:\msys64\mingw64\bin;c:\msys64\usr\bin;%PATH%
