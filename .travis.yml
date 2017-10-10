@@ -20,14 +20,14 @@ cache:
 
 before_install:
   - sudo dpkg --add-architecture i386
-  - sudo apt-get -qq update
+  #- sudo apt-get -qq update
   - sudo apt-get -qq -y install libglu1-mesa-dev
   - sudo apt-get -qq -y install zlib1g-dev
   - sudo apt-get -qq -y install libalure-dev
   - sudo apt-get -qq -y install libvorbisfile3
   - sudo apt-get -qq -y install libvorbis-dev 
   - sudo apt-get -qq -y install libdumb1-dev
-  - sudo apt-get -qq -y install libboost-dev
+  - sudo apt-get -qq -y install libboost-dev libboost-iostreams-dev libboost-filesystem-dev libboost-program-options-dev libboost-system-dev
   - sudo apt-get -qq -y install libc++-dev
   - sudo apt-get -qq -y install libsfml-dev
   - sudo apt-get -qq -y install libgtk2.0-dev
@@ -54,7 +54,7 @@ before_install:
 
 install:
   - chmod +x ./ci-build.sh
-  - make -j4
+  #- make -j4
   - make -j4 emake
   - curl -L https://github.com/fundies/enigma-libs/files/1347135/enigma-libs.zip > enigma-libs.zip
   - unzip enigma-libs.zip -d ENIGMAsystem/
