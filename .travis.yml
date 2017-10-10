@@ -19,8 +19,8 @@ cache:
 jobs:
   include:
     - stage: prepare cache
-      script: make -j4
-              mv libcompileEGMf.so cache/libcompileEGMf.so
+      script: make -j4;
+              mv libcompileEGMf.so cache/libcompileEGMf.so;
 stages:
   - prepare cache
   - test
