@@ -25,7 +25,7 @@ environment:
   #END WINDOWS
 install:
   - echo %APPVEYOR_JOB_ID%
-  - echo %APPVEYOR_BUILD_ID%
+  - echo %APPVEYOR_JOB_NAME%
   - echo %APPVEYOR_BUILD_NUMBER%
   - echo %APPVEYOR_PULL_REQUEST_HEAD_COMMIT%
   - echo %APPVEYOR_API_URL%
