@@ -45,7 +45,8 @@ install:
       7z a blobs.zip compileEGMf.dll emake.exe &&
       appveyor PushArtifact blobs.zip
     ) ELSE (
-      curl https://ci.appveyor.com/api/projects/RobertBColton/enigma-dev/artifacts/blobs.zip &&
+      echo %APPVEYOR_PROJECT_SLUG% &&
+      curl -O -J https://ci.appveyor.com/api/projects/%APPVEYOR_PROJECT_SLUG%/artifacts/blobs.zip &&
       7z x blobs.zip
     )
 build_script:
