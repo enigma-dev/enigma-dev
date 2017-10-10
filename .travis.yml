@@ -9,6 +9,9 @@ language: cpp
 compiler:
   - gcc
 
+git:
+  depth: 0
+
 cache:
   directories:
     - $TRAVIS_BUILD_DIR/compileEGMf.dll
