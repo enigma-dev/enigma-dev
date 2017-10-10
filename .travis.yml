@@ -12,9 +12,7 @@ compiler:
 git:
   depth: 1
 
-cache:
-  files:
-    - $TRAVIS_BUILD_DIR/libcompileEGMf.so
+cache: $TRAVIS_BUILD_DIR/libcompileEGMf.so
 
 before_install:
   - sudo dpkg --add-architecture i386
