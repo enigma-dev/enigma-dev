@@ -10,7 +10,7 @@ compiler:
   - gcc
 
 git:
-  depth: 0
+  depth: 1
 
 cache:
   directories:
