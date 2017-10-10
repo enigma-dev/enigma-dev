@@ -27,6 +27,7 @@ jobs:
               make -j4 emake;
               mv libcompileEGMf.so cache/libcompileEGMf.so;
               mv emake cache/emake;
+              echo "hello";
 stages:
   - prepare cache
   - test
