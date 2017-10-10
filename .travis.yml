@@ -68,7 +68,7 @@ script:
 jobs:
   include:
     - stage: prepare cache
-      env: UPDATING_CACHE
+      env: CACHE_NAME=JOB1
       before_install: skip
       install:
         - sudo apt-get -qq -y install libboost-dev libboost-iostreams-dev libboost-filesystem-dev
