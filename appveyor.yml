@@ -45,8 +45,8 @@ install:
       7z a blobs.zip compileEGMf.dll emake.exe &&
       appveyor PushArtifact blobs.zip
     ) ELSE (
-      echo %BLOBS_URL% &&
-      curl %BLOBS_URL% -o blobs.zip &&
+      echo "%BLOBS_URL%" &&
+      curl "%BLOBS_URL%" -o blobs.zip &&
       dir &&
       7z x blobs.zip
     )
