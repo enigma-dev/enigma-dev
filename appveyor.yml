@@ -2,12 +2,6 @@
 shallow_clone: true
 # disable automatic tests 
 test: off
-artifacts:
-  - path: compileEGMf.dll
-    type: zip
-  - path: emake.exe
-    type: zip
-
 environment:
   OUTPUT: /tmp/test.exe
   matrix:
@@ -29,20 +23,6 @@ environment:
     - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "MediaControlInterface"}
   #END WINDOWS
 install:
-  - echo %APPVEYOR_JOB_ID%
-  - echo %APPVEYOR_JOB_NAME%
-  - echo %APPVEYOR_JOB_NUMBER%
-  - echo %APPVEYOR_BUILD_ID%
-  - echo %APPVEYOR_BUILD_NAME%
-  - echo %APPVEYOR_BUILD_NUMBER%
-  - echo %APPVEYOR_BUILD_FOLDER%
-  - echo %APPVEYOR_BUILD_VERSION%
-  - echo %APPVEYOR_PROJECT_ID%
-  - echo %APPVEYOR_PROJECT_NAME%
-  - echo %APPVEYOR_PROJECT_SLUG%
-  - echo %APPVEYOR_ACCOUNT_NAME%
-  - echo %APPVEYOR_PULL_REQUEST_HEAD_COMMIT%
-  - echo %APPVEYOR_API_URL%
   - set PATH=c:\msys64;C:\msys64\mingw64\bin;c:\msys64\usr\bin;%PATH%
   - set MSYSTEM=MINGW64
   - set MSYSTEM_PREFIX=/mingw64
@@ -64,7 +44,7 @@ install:
       7z a blobs.zip compileEGMf.dll emake.exe &&
       appveyor PushArtifact blobs.zip
     ) ELSE (
-      curl -O -J https://ci.appveyor.com/api/projects/%APPVEYOR_ACCOUNT_NAME%/%APPVEYOR_PROJECT_SLUG%/artifacts/blobs.zip?all=true%26job=Environment%3A%20COMPILER%3Dgcc%2C%20PLATFORM%3DWin32%2C%20MODE%3DRun%2C%20GRAPHICS%3DDirect3D9%2C%20AUDIO%3DNone%2C%20COLLISION%3DNone%2C%20NETWORK%3DNone%2C%20WIDGETS%3DNone%2C%20EXTENSIONS%3DNone &&
+      curl -O -J https://ci.appveyor.com/api/projects/%APPVEYOR_ACCOUNT_NAME%/%APPVEYOR_PROJECT_SLUG%/artifacts/blobs.zip?all=true^&job=Environment%3A%20COMPILER%3Dgcc%2C%20PLATFORM%3DWin32%2C%20MODE%3DRun%2C%20GRAPHICS%3DDirect3D9%2C%20AUDIO%3DNone%2C%20COLLISION%3DNone%2C%20NETWORK%3DNone%2C%20WIDGETS%3DNone%2C%20EXTENSIONS%3DNone &&
       7z x blobs.zip
     )
 build_script:
