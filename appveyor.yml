@@ -43,7 +43,7 @@ install:
       make -j 4 &&
       bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -j 4 emake" &&
       7z a blobs.zip compileEGMf.dll emake.exe &&
-      appveyor PushArtifact blobs.zip
+      appveyor PushArtifact blobs.zip -Type Zip
     ) ELSE (
       echo curl -L %BLOBS_URL% > blobs.zip &&
       curl -L %BLOBS_URL% > blobs.zip &&
