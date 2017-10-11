@@ -44,7 +44,9 @@ install:
       7z a blobs.zip compileEGMf.dll emake.exe &&
       appveyor PushArtifact blobs.zip
     ) ELSE (
-      curl -O -J https://ci.appveyor.com/api/projects/%APPVEYOR_ACCOUNT_NAME%/%APPVEYOR_PROJECT_SLUG%/artifacts/blobs.zip?all=true^&job=Environment%3A%20COMPILER%3Dgcc%2C%20PLATFORM%3DWin32%2C%20MODE%3DRun%2C%20GRAPHICS%3DDirect3D9%2C%20AUDIO%3DNone%2C%20COLLISION%3DNone%2C%20NETWORK%3DNone%2C%20WIDGETS%3DNone%2C%20EXTENSIONS%3DNone &&
+      set blobURL=https://ci.appveyor.com/api/projects/%APPVEYOR_ACCOUNT_NAME%/%APPVEYOR_PROJECT_SLUG%/artifacts/blobs.zip?all=true^&job=Environment%3A%20COMPILER%3Dgcc%2C%20PLATFORM%3DWin32%2C%20MODE%3DRun%2C%20GRAPHICS%3DDirect3D9%2C%20AUDIO%3DNone%2C%20COLLISION%3DNone%2C%20NETWORK%3DNone%2C%20WIDGETS%3DNone%2C%20EXTENSIONS%3DNone &&
+      curl -O -J bloburl &&
+      dir &&
       7z x blobs.zip
     )
 build_script:
