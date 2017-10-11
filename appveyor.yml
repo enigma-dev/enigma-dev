@@ -2,9 +2,10 @@
 shallow_clone: true
 # disable automatic tests 
 test: off
-
 environment:
   OUTPUT: /tmp/test.exe
+  BLOBS_URL: "https://ci.appveyor.com/api/projects/%APPVEYOR_ACCOUNT_NAME%/%APPVEYOR_PROJECT_SLUG%/artifacts/blobs.zip?all=true^&\
+             job=Environment%3A%20COMPILER%3Dgcc%2C%20PLATFORM%3DWin32%2C%20MODE%3DRun%2C%20GRAPHICS%3DDirect3D9%2C%20AUDIO%3DNone%2C%20COLLISION%3DNone%2C%20NETWORK%3DNone%2C%20WIDGETS%3DNone%2C%20EXTENSIONS%3DNone"
   matrix:
   #BEGIN WINDOWS
     # Game Modes
@@ -23,15 +24,6 @@ environment:
     - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "XInput"}
     - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "MediaControlInterface"}
   #END WINDOWS
-cache:
-  - compileEGMf.dll
-  - emake.exe
-  - '%PROGRAMDATA%\ENIGMA'
-init:
-  # job numbers are 1-n (i.e. not zero-based)
-  # don't use the cache on the first job so we can build a fresh compileEGMf.dll and emake.exe
-  # then restore it on the subsequent jobs
-  - IF %APPVEYOR_JOB_NUMBER% == 1 (set APPVEYOR_CACHE_SKIP_RESTORE=true)
 install:
   - set PATH=c:\msys64;C:\msys64\mingw64\bin;c:\msys64\usr\bin;%PATH%
   - set MSYSTEM=MINGW64
@@ -48,8 +40,17 @@ install:
     mingw-w64-x86_64-sfml mingw-w64-x86_64-gtk2 mingw-w64-x86_64-box2d mingw-w64-x86_64-bullet
   - gcc -v
   - cd %APPVEYOR_BUILD_FOLDER%
-  - IF NOT EXIST compileEGMf.dll make -j 4
-  - IF NOT EXIST emake.exe bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -j 4 emake"
+  - IF %APPVEYOR_JOB_NUMBER% == 1 (
+      make -j 4 &&
+      bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -j 4 emake" &&
+      7z a blobs.zip compileEGMf.dll emake.exe &&
+      appveyor PushArtifact blobs.zip -Type Zip
+    ) ELSE (
+      echo curl -L %BLOBS_URL% > blobs.zip &&
+      curl -L %BLOBS_URL% > blobs.zip &&
+      dir &&
+      7z x blobs.zip
+    )
 build_script:
   # AppVeyor overrides PLATFORM because it's part of its API
   - bash -lc "cd $APPVEYOR_BUILD_FOLDER; export PLATFORM=%PLATFORM%; ./ci-build.sh"
