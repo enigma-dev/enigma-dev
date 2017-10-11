@@ -196,13 +196,13 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
     // Set the working_directory
     char buffer[MAX_PATH];
     GetCurrentDirectory( MAX_PATH, buffer );
-    enigma_user::working_directory = string( buffer );
+    enigma_user::working_directory = string( buffer ) + string( "\\" );
 
     // Set the program_directory
     memset(&buffer[0], 0, MAX_PATH);
     GetModuleFileName( NULL, buffer, MAX_PATH );
     enigma_user::program_directory = string( buffer );
-    enigma_user::program_directory = enigma_user::program_directory.substr( 0, enigma_user::program_directory.find_last_of( "\\/" ));
+    enigma_user::program_directory = enigma_user::program_directory.substr( 0, enigma_user::program_directory.find_last_of( "\\/" )) + string( "\\" );
 
     LPWSTR *argv;
     if ((argv = CommandLineToArgvW(GetCommandLineW(), &enigma::main_argc)))
@@ -251,8 +251,8 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
     }
     enigma::EnableDrawing (&hRC);
     //Do not set the parent window visible until we have initialized the graphics context.
-    ShowWindow(enigma::hWnd, iCmdShow);
     enigma::initialize_everything();
+    ShowWindow(enigma::hWnd, SW_SHOW);
 
     //Main loop
 
