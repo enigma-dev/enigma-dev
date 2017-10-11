@@ -196,13 +196,13 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
     // Set the working_directory
     char buffer[MAX_PATH];
     GetCurrentDirectory( MAX_PATH, buffer );
-    enigma_user::working_directory = string( buffer ) + string( "\\" );
+    enigma_user::working_directory = string( buffer ) + "\\";
 
     // Set the program_directory
     memset(&buffer[0], 0, MAX_PATH);
     GetModuleFileName( NULL, buffer, MAX_PATH );
     enigma_user::program_directory = string( buffer );
-    enigma_user::program_directory = enigma_user::program_directory.substr( 0, enigma_user::program_directory.find_last_of( "\\/" )) + string( "\\" );
+    enigma_user::program_directory = enigma_user::program_directory.substr( 0, enigma_user::program_directory.find_last_of( "\\/" )) + "\\";
 
     LPWSTR *argv;
     if ((argv = CommandLineToArgvW(GetCommandLineW(), &enigma::main_argc)))
