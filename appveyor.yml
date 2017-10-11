@@ -46,7 +46,7 @@ install:
       appveyor PushArtifact blobs.zip
     ) ELSE (
       echo %BLOBS_URL% &&
-      curl "%BLOBS_URL%" -fsS -o blobs.zip &&
+      curl -fsS -o blobs.zip %BLOBS_URL% &&
       dir &&
       7z x blobs.zip
     )
