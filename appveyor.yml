@@ -46,7 +46,7 @@ install:
   - cd %APPVEYOR_BUILD_FOLDER%
   - ps: |
       If ($env:APPVEYOR_JOB_NUMBER -eq 1) {
-        bash -ilc "cd $env:APPVEYOR_BUILD_FOLDER; make -j 4"
+        bash -ilc "cd $"$env:APPVEYOR_BUILD_FOLDER"; make -j 4"
         dir
         bash -ilc "cd $env:APPVEYOR_BUILD_FOLDER; make -j 4 emake"
         7z a blobs.zip compileEGMf.dll emake.exe
