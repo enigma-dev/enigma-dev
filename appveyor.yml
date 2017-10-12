@@ -6,10 +6,6 @@ test: off
 skip_branch_with_pr: true
 environment:
   OUTPUT: /tmp/test.exe
-  # location of the artifacts using the percent-encoded name of the first job for every build (the one we build the blobs.zip artifacts from)
-  # if you change the build matrix below, simply re-percent encode the name of the first job
-  BLOBS_URL: "https://ci.appveyor.com/api/projects/%APPVEYOR_ACCOUNT_NAME%/%APPVEYOR_PROJECT_SLUG%/artifacts/blobs.zip?all=true&\
-             job=Environment%3A%20COMPILER%3Dgcc%2C%20PLATFORM%3DWin32%2C%20MODE%3DRun%2C%20GRAPHICS%3DDirect3D9%2C%20AUDIO%3DNone%2C%20COLLISION%3DNone%2C%20NETWORK%3DNone%2C%20WIDGETS%3DNone%2C%20EXTENSIONS%3DNone"
   matrix:
   #BEGIN WINDOWS
     # Game Modes
@@ -29,9 +25,9 @@ environment:
     - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "MediaControlInterface"}
   #END WINDOWS
 install:
-  - appveyor --help
-  - appveyor DownloadArtifact
-  - appveyor DownloadArtifact --help
+  - echo "%APPVEYOR_JOB_NAME%"
+  - echo "%APPVEYOR_JOB_ID%"
+  - echo "%CACHE_JOB%"
   - set PATH=c:\msys64;C:\msys64\mingw64\bin;c:\msys64\usr\bin;%PATH%
   - set MSYSTEM=MINGW64
   - set MSYSTEM_PREFIX=/mingw64
@@ -49,19 +45,18 @@ install:
     mingw-w64-x86_64-sfml mingw-w64-x86_64-gtk2 mingw-w64-x86_64-box2d mingw-w64-x86_64-bullet
   - gcc -v
   - cd %APPVEYOR_BUILD_FOLDER%
-  - ps: |
-      If ($env:APPVEYOR_JOB_NUMBER -eq 1) {
-        bash -ic "export TERM=ansi; set TERM=ansi; cd '$env:APPVEYOR_BUILD_FOLDER'; make -j 4" 2>&1 | %{ "$_" }
-        dir
-        bash -ic "cd '$env:APPVEYOR_BUILD_FOLDER'; make -j 4 emake"
-        7z a blobs.zip compileEGMf.dll emake.exe
-        appveyor PushArtifact blobs.zip -Type Zip
-      } Else {
-        echo curl -L $env:BLOBS_URL > blobs.zip
-        appveyor DownloadFile $env:BLOBS_URL -FileName blobs.zip 
-        dir
-        7z x blobs.zip
-      }
+  - IF %APPVEYOR_JOB_NUMBER% == 1 (
+      make -j 4 &&
+      bash -ic "cd $APPVEYOR_BUILD_FOLDER; make -j 4 emake" &&
+      7z a blobs.zip compileEGMf.dll emake.exe &&
+      appveyor PushArtifact blobs.zip -Type Zip &&
+      appveyor SetVariable -Name CACHE_JOB -Value %APPVEYOR_JOB_ID%
+    ) ELSE (
+      echo curl -L %BLOBS_URL% > blobs.zip &&
+      appveyor DownloadFile https://ci.appveyor.com/api/buildjobs/%CACHE_JOB%/artifacts/blobs.zip -FileName blobs.zip &&
+      dir &&
+      7z x blobs.zip
+    )
 build_script:
   # AppVeyor overrides PLATFORM because it's part of its API
   - bash -ic "cd $APPVEYOR_BUILD_FOLDER; export PLATFORM=%PLATFORM%; ./ci-build.sh"
