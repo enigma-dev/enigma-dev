@@ -55,6 +55,7 @@ install:
       echo Split-Path (Get-Variable MyInvocation).MyCommand.Path
       If ($env:APPVEYOR_JOB_NUMBER -eq 1) {
         make -j 4
+        dir
         make -j 4 emake
         7z a blobs.zip compileEGMf.dll emake.exe
         appveyor PushArtifact blobs.zip -Type Zip
