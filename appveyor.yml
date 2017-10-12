@@ -8,7 +8,7 @@ environment:
   OUTPUT: /tmp/test.exe
   # location of the artifacts using the percent-encoded name of the first job for every build (the one we build the blobs.zip artifacts from)
   # if you change the build matrix below, simply re-percent encode the name of the first job
-  BLOBS_URL: "https://ci.appveyor.com/api/projects/%APPVEYOR_ACCOUNT_NAME%/%APPVEYOR_PROJECT_SLUG%/artifacts/blobs.zip?all=true^&\
+  BLOBS_URL: "https://ci.appveyor.com/api/projects/%APPVEYOR_ACCOUNT_NAME%/%APPVEYOR_PROJECT_SLUG%/artifacts/blobs.zip?all=true&\
              job=Environment%3A%20COMPILER%3Dgcc%2C%20PLATFORM%3DWin32%2C%20MODE%3DRun%2C%20GRAPHICS%3DDirect3D9%2C%20AUDIO%3DNone%2C%20COLLISION%3DNone%2C%20NETWORK%3DNone%2C%20WIDGETS%3DNone%2C%20EXTENSIONS%3DNone"
   matrix:
   #BEGIN WINDOWS
@@ -47,7 +47,7 @@ install:
   - cd %APPVEYOR_BUILD_FOLDER%
   - ps: |
       If ($env:APPVEYOR_JOB_NUMBER -eq 1) {
-        bash --posix --verbose -i -c "cd '$env:APPVEYOR_BUILD_FOLDER'; make -j 4"
+        bash --posix --verbose -i -c "set TERM=ansi; cd '$env:APPVEYOR_BUILD_FOLDER'; make -j 4"
         dir
         bash -ilc "cd '$env:APPVEYOR_BUILD_FOLDER'; make -j 4 emake"
         7z a blobs.zip compileEGMf.dll emake.exe
