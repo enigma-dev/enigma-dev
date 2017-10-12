@@ -45,17 +45,17 @@ install:
   - gcc -v
   - cd %APPVEYOR_BUILD_FOLDER%
   - ps: >-
-    IF %APPVEYOR_JOB_NUMBER% == 1 (
+      IF %APPVEYOR_JOB_NUMBER% == 1 (
       bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -j 4" &&
       bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -j 4 emake" &&
       7z a blobs.zip compileEGMf.dll emake.exe &&
       appveyor PushArtifact blobs.zip -Type Zip
-    ) ELSE (
+      ) ELSE (
       echo curl -L %BLOBS_URL% > blobs.zip &&
       appveyor DownloadFile %BLOBS_URL% -FileName blobs.zip &&
       dir &&
       7z x blobs.zip
-    )
+      )
 build_script:
   # AppVeyor overrides PLATFORM because it's part of its API
   - bash -lc "cd $APPVEYOR_BUILD_FOLDER; export PLATFORM=%PLATFORM%; ./ci-build.sh"
