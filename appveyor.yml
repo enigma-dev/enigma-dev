@@ -2,6 +2,8 @@
 shallow_clone: true
 # disable automatic tests 
 test: off
+# don't build feature branches
+skip_branch_with_pr: true
 environment:
   OUTPUT: /tmp/test.exe
   BLOBS_URL: "https://ci.appveyor.com/api/projects/%APPVEYOR_ACCOUNT_NAME%/%APPVEYOR_PROJECT_SLUG%/artifacts/blobs.zip?all=true^&\
@@ -47,7 +49,7 @@ install:
       appveyor PushArtifact blobs.zip -Type Zip
     ) ELSE (
       echo curl -L %BLOBS_URL% > blobs.zip &&
-      curl -L %BLOBS_URL% -o blobs.zip &&
+      curl %BLOBS_URL% -o blobs.zip &&
       dir &&
       7z x blobs.zip
     )
