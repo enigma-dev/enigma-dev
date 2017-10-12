@@ -60,4 +60,4 @@ install:
       }
 build_script:
   # AppVeyor overrides PLATFORM because it's part of its API
-  - bash -ilc "cd $APPVEYOR_BUILD_FOLDER; export PLATFORM=%PLATFORM%; ./ci-build.sh"
+  - bash -ilc "cd $APPVEYOR_BUILD_FOLDER; set PLATFORM=%PLATFORM%; ./ci-build.sh"
