@@ -191,6 +191,7 @@ const char* establish_bearings(const char *compiler)
       pos += idirstart.length();
     }
     jdi::builtin->add_search_directory("ENIGMAsystem/SHELL/");
+    jdi::builtin->add_search_directory("ENIGMAsystem/SHELL/Mock_JDI_Headers/");
     jdi::builtin->add_search_directory(makedir.c_str());
 
     while (is_useless(idirs[++pos]));
