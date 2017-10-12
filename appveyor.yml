@@ -51,7 +51,7 @@ install:
       appveyor PushArtifact blobs.zip -Type Zip
     ) ELSE (
       echo curl -L %BLOBS_URL% > blobs.zip &&
-      appveyor DownloadFile %BLOBS_URL% &&
+      appveyor DownloadFile %BLOBS_URL% -FileName blobs.zip &&
       dir &&
       7z x blobs.zip
     )
