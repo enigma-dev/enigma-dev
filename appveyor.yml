@@ -46,8 +46,8 @@ install:
   - cd %APPVEYOR_BUILD_FOLDER%
   - ps: |
       If ($env:APPVEYOR_JOB_NUMBER -eq 1) {
-        bash -lc "cd %APPVEYOR_BUILD_FOLDER%; make -j 4"
-        bash -lc "cd %APPVEYOR_BUILD_FOLDER%; make -j 4 emake"
+        make -j 4
+        make -j 4 emake
         7z a blobs.zip compileEGMf.dll emake.exe
         appveyor PushArtifact blobs.zip -Type Zip
       } Else {
