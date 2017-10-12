@@ -38,7 +38,7 @@ install:
   - ps: echo ${env:CACHE_JOB}
   - ps: echo $env:CACHE_JOB
   - echo "%CACHE_JOB%"
-  - appveyor SetVariable -Name "CACHE_JOB" -Value "HELLER"
+  - set "CACHE_JOB=HELLER"
   - ps: echo ${env:CACHE_JOB}
   - ps: echo $env:CACHE_JOB
   - echo "%CACHE_JOB%"
