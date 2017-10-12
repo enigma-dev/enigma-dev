@@ -6,6 +6,8 @@ test: off
 skip_branch_with_pr: true
 environment:
   OUTPUT: /tmp/test.exe
+  # location of the artifacts using the percent-encoded name of the first job for every build (the one we build the blobs.zip artifacts from)
+  # if you change the build matrix below, simply re-percent encode the name of the first job
   BLOBS_URL: "https://ci.appveyor.com/api/projects/%APPVEYOR_ACCOUNT_NAME%/%APPVEYOR_PROJECT_SLUG%/artifacts/blobs.zip?all=true^&\
              job=Environment%3A%20COMPILER%3Dgcc%2C%20PLATFORM%3DWin32%2C%20MODE%3DRun%2C%20GRAPHICS%3DDirect3D9%2C%20AUDIO%3DNone%2C%20COLLISION%3DNone%2C%20NETWORK%3DNone%2C%20WIDGETS%3DNone%2C%20EXTENSIONS%3DNone"
   matrix:
@@ -49,7 +51,7 @@ install:
       appveyor PushArtifact blobs.zip -Type Zip
     ) ELSE (
       echo curl -L %BLOBS_URL% > blobs.zip &&
-      curl --include -v --post301 --post302 --post303 -L %BLOBS_URL% -o blobs.zip &&
+      appveyor DownloadFile %BLOBS_URL% &&
       dir &&
       7z x blobs.zip
     )
