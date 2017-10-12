@@ -29,6 +29,10 @@ environment:
     - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "MediaControlInterface"}
   #END WINDOWS
 install:
+  - bash -ilc "cd "%APPVEYOR_BUILD_FOLDER%""
+  - cmd: bash -ilc "cd "%APPVEYOR_BUILD_FOLDER%""
+  - ps: bash -ilc "cd "%APPVEYOR_BUILD_FOLDER%""
+  - bash -ilc "cd ^"%APPVEYOR_BUILD_FOLDER%^""
   - set PATH=%APPVEYOR_BUILD_FOLDER%;c:\msys64;C:\msys64\mingw64\bin;c:\msys64\usr\bin;%PATH%
   - set MSYSTEM=MINGW64
   - set MSYSTEM_PREFIX=/mingw64
@@ -45,7 +49,6 @@ install:
     mingw-w64-x86_64-sfml mingw-w64-x86_64-gtk2 mingw-w64-x86_64-box2d mingw-w64-x86_64-bullet
   - gcc -v
   - cd %APPVEYOR_BUILD_FOLDER%
-  - bash -ilc "cd %APPVEYOR_BUILD_FOLDER%"
   - ps: |
       echo (Get-Variable MyInvocation).Value
       echo Split-Path (Get-Variable MyInvocation).MyCommand.Path
