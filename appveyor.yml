@@ -27,6 +27,7 @@ environment:
 install:
   - echo "%APPVEYOR_API_URL%"
   - echo "%APPVEYOR_JOB_ID%"
+  - echo %APPVEYOR_JOB_ID%
   - echo "%CACHE_JOB%"
   - echo %CACHE_JOB%
   - echo "$(CACHE_JOB)"
@@ -57,11 +58,11 @@ install:
       bash -ilc "export TERM=ansi; set TERM=ansi; cd $APPVEYOR_BUILD_FOLDER; make -j 4 emake" &&
       7z a blobs.zip compileEGMf.dll emake.exe &&
       appveyor PushArtifact blobs.zip -Type Zip &&
-      appveyor SetVariable -Name CACHE_JOB -Value %APPVEYOR_JOB_ID% &&
+      appveyor SetVariable -Name CACHE_JOB -Value "%APPVEYOR_JOB_ID%" &&
       echo "%CACHE_JOB%" &&
       echo ${CACHE_JOB} &&
       echo $CACHE_JOB &&
-      set CACHE_JOB=%APPVEYOR_JOB_ID% &&
+      set CACHE_JOB="%APPVEYOR_JOB_ID%" &&
       echo "%CACHE_JOB%" &&
       echo ${CACHE_JOB} &&
       echo $CACHE_JOB
