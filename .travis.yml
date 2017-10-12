@@ -1,4 +1,4 @@
-sudo: required
+sudo: false
 dist: trusty
 notifications:
   irc: "chat.freenode.net#enigma"
@@ -13,7 +13,7 @@ branches:
     - "master"
 
 before_install:
-  - apt-get -qq -y install build-essential libglu1-mesa-dev zlib1g-dev libalure-dev libvorbisfile3 libvorbis-dev 
+  - sudo apt-get -qq -y install build-essential libglu1-mesa-dev zlib1g-dev libalure-dev libvorbisfile3 libvorbis-dev 
       libdumb1-dev libc++-dev libsfml-dev libgtk2.0-dev libbullet-dev libbox2d-dev libgme-dev gcc-multilib 
       g++-multilib libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1-dev libglu1-mesa:i386 libx11-6:i386  libc++-dev:i386
       mingw-w64 wine libboost-dev libboost-iostreams-dev libboost-filesystem-dev libboost-program-options-dev libboost-system-dev
