@@ -7,7 +7,11 @@ git:
   depth: 1
 compiler:
   - gcc
-  
+# don't build "feature" branches
+branches:
+  only:
+    - "master"
+
 before_install:
   - sudo dpkg --add-architecture i386
   - sudo apt-get -qq -y install build-essential libglu1-mesa-dev zlib1g-dev libalure-dev libvorbisfile3 libvorbis-dev 
