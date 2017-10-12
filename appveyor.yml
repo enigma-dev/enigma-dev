@@ -46,10 +46,10 @@ install:
   - cd %APPVEYOR_BUILD_FOLDER%
   - ps: |
       echo (Get-Variable MyInvocation).Value
-      echo Split-Path $invocation.MyCommand.Path
+      echo Split-Path (Get-Variable MyInvocation).MyCommand.Path
       cd -Path $env:APPVEYOR_BUILD_FOLDER
       echo (Get-Variable MyInvocation).Value
-      echo Split-Path $invocation.MyCommand.Path
+      echo Split-Path (Get-Variable MyInvocation).MyCommand.Path
       If ($env:APPVEYOR_JOB_NUMBER -eq 1) {
         make -j 4
         make -j 4 emake
