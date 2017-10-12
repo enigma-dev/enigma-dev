@@ -26,6 +26,7 @@ environment:
   #END WINDOWS
 install:
   - echo "%APPVEYOR_JOB_ID%"
+  - echo "%CACHE_JOB%"
   - echo %CACHE_JOB%
   - set PATH=c:\msys64;C:\msys64\mingw64\bin;c:\msys64\usr\bin;%PATH%
   - set MSYSTEM=MINGW64
@@ -49,7 +50,7 @@ install:
       bash -ilc "export TERM=ansi; set TERM=ansi; cd $APPVEYOR_BUILD_FOLDER; make -j 4 emake" &&
       7z a blobs.zip compileEGMf.dll emake.exe &&
       appveyor PushArtifact blobs.zip -Type Zip &&
-      appveyor SetVariable -Name "CACHE_JOB" -Value "%APPVEYOR_JOB_ID%" &&
+      appveyor SetVariable -Name CACHE_JOB -Value %APPVEYOR_JOB_ID% &&
       echo "%CACHE_JOB%" &&
       echo %CACHE_JOB%
     ) ELSE (
