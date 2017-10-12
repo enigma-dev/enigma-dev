@@ -47,6 +47,7 @@ install:
   - ps: |
       echo (Get-Variable MyInvocation).Value
       echo Split-Path (Get-Variable MyInvocation).MyCommand.Path
+      echo $PWD
       cd -Path $env:APPVEYOR_BUILD_FOLDER
       echo (Get-Variable MyInvocation).Value
       echo Split-Path (Get-Variable MyInvocation).MyCommand.Path
