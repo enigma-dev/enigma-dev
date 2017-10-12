@@ -44,7 +44,7 @@ install:
     mingw-w64-x86_64-sfml mingw-w64-x86_64-gtk2 mingw-w64-x86_64-box2d mingw-w64-x86_64-bullet
   - gcc -v
   - cd %APPVEYOR_BUILD_FOLDER%
-  - cmd: >-
+  - |-
       IF %APPVEYOR_JOB_NUMBER% == 1 (
       bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -j 4" &&
       bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -j 4 emake" &&
