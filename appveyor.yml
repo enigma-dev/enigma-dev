@@ -33,6 +33,8 @@ install:
   - echo $(CACHE_JOB)
   - echo "${CACHE_JOB}"
   - echo ${CACHE_JOB}
+  - echo "$CACHE_JOB"
+  - echo $CACHE_JOB
   - set PATH=c:\msys64;C:\msys64\mingw64\bin;c:\msys64\usr\bin;%PATH%
   - set MSYSTEM=MINGW64
   - set MSYSTEM_PREFIX=/mingw64
@@ -57,9 +59,14 @@ install:
       appveyor PushArtifact blobs.zip -Type Zip &&
       appveyor SetVariable -Name CACHE_JOB -Value %APPVEYOR_JOB_ID% &&
       echo "%CACHE_JOB%" &&
-      echo ${CACHE_JOB}
+      echo ${CACHE_JOB} &&
+      echo $CACHE_JOB &&
+      set CACHE_JOB=%APPVEYOR_JOB_ID% &&
+      echo "%CACHE_JOB%" &&
+      echo ${CACHE_JOB} &&
+      echo $CACHE_JOB
     ) ELSE (
-      appveyor DownloadFile %APPVEYOR_API_URL%/buildjobs/${CACHE_JOB}/artifacts/blobs.zip -FileName blobs.zip &&
+      appveyor DownloadFile %APPVEYOR_API_URL%/buildjobs/%CACHE_JOB%/artifacts/blobs.zip -FileName blobs.zip &&
       dir &&
       7z x blobs.zip
     )
