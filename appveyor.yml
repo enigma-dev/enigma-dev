@@ -40,14 +40,17 @@ install:
   - echo "%APPVEYOR_API_URL%"
   - echo "%APPVEYOR_JOB_ID%"
   - echo %APPVEYOR_JOB_ID%
-  - set HEYHEYHEY=%APPVEYOR_JOB_ID%
-  - echo "%HEYHEYHEY%"
-  - echo ${HEYHEYHEY}
-  - echo $HEYHEYHEY
-  - appveyor SetVariable -Name "HEYHEYHEY" -Value %APPVEYOR_JOB_ID%
-  - echo "%HEYHEYHEY%"
-  - echo ${HEYHEYHEY}
-  - echo $HEYHEYHEY
+  - echo "%APPVEYOR_API_URL%" &&
+    echo "%APPVEYOR_JOB_ID%" &&
+    echo %APPVEYOR_JOB_ID% &&
+    set HEYHEYHEY=!APPVEYOR_JOB_ID! &&
+    echo "%HEYHEYHEY%" &&
+    echo ${HEYHEYHEY} &&
+    echo $HEYHEYHEY &&
+    appveyor SetVariable -Name "HEYHEYHEY" -Value !APPVEYOR_JOB_ID! &&
+    echo "%HEYHEYHEY%" &&
+    echo ${HEYHEYHEY} &&
+    echo $HEYHEYHEY
   - set PATH=c:\msys64;C:\msys64\mingw64\bin;c:\msys64\usr\bin;%PATH%
   - set MSYSTEM=MINGW64
   - set MSYSTEM_PREFIX=/mingw64
