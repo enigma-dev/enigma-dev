@@ -48,9 +48,9 @@ install:
   - cd %APPVEYOR_BUILD_FOLDER%
   - ps: |
       If ($env:APPVEYOR_JOB_NUMBER -eq 1) {
-        bash -i -c "export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'; set TERM=ansi; cd '$env:APPVEYOR_BUILD_FOLDER'; make -j 4"
+        start bash -ilc "export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'; set TERM=ansi; cd '$env:APPVEYOR_BUILD_FOLDER'; make -j 4"
         dir
-        bash -ilc "cd '$env:APPVEYOR_BUILD_FOLDER'; make -j 4 emake"
+        bash -ic "cd '$env:APPVEYOR_BUILD_FOLDER'; make -j 4 emake"
         7z a blobs.zip compileEGMf.dll emake.exe
         appveyor PushArtifact blobs.zip -Type Zip
       } Else {
@@ -61,4 +61,4 @@ install:
       }
 build_script:
   # AppVeyor overrides PLATFORM because it's part of its API
-  - bash -ilc "cd $APPVEYOR_BUILD_FOLDER; export PLATFORM=%PLATFORM%; ./ci-build.sh"
+  - bash -ic "cd $APPVEYOR_BUILD_FOLDER; export PLATFORM=%PLATFORM%; ./ci-build.sh"
