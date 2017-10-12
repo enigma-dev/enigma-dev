@@ -46,7 +46,6 @@ install:
   - gcc -v
   - cd %APPVEYOR_BUILD_FOLDER%
   - ps: |
-      bash
       echo (Get-Variable MyInvocation).Value
       echo Split-Path (Get-Variable MyInvocation).MyCommand.Path
       cd -Path $env:APPVEYOR_BUILD_FOLDER
