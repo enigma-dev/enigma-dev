@@ -29,7 +29,7 @@ environment:
     - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "MediaControlInterface"}
   #END WINDOWS
 install:
-  - set PATH=c:\msys64;C:\msys64\mingw64\bin;c:\msys64\usr\bin;%PATH%
+  - set PATH=cd %APPVEYOR_BUILD_FOLDER%;c:\msys64;C:\msys64\mingw64\bin;c:\msys64\usr\bin;%PATH%
   - set MSYSTEM=MINGW64
   - set MSYSTEM_PREFIX=/mingw64
   - set MSYSTEM_CHOST=x86_64-w64-mingw32
@@ -44,11 +44,9 @@ install:
     mingw-w64-x86_64-libogg mingw-w64-x86_64-flac mingw-w64-x86_64-mpg123 mingw-w64-x86_64-libsndfile mingw-w64-x86_64-libgme
     mingw-w64-x86_64-sfml mingw-w64-x86_64-gtk2 mingw-w64-x86_64-box2d mingw-w64-x86_64-bullet
   - gcc -v
-  - cd %APPVEYOR_BUILD_FOLDER%
   - ps: |
       echo (Get-Variable MyInvocation).Value
       echo Split-Path (Get-Variable MyInvocation).MyCommand.Path
-      cd -Path $env:APPVEYOR_BUILD_FOLDER
       echo (Get-Variable MyInvocation).Value
       echo Split-Path (Get-Variable MyInvocation).MyCommand.Path
       If ($env:APPVEYOR_JOB_NUMBER -eq 1) {
