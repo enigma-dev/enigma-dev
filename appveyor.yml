@@ -29,13 +29,13 @@ install:
   - echo "%APPVEYOR_API_URL%"
   - echo "%APPVEYOR_JOB_ID%"
   - echo "%CACHE_JOB%"
-  - set "HEYHEYHEY=%APPVEYOR_JOB_ID%" &&
-    echo "%HEYHEYHEY%" &&
-    setx HEYHEYHEY %APPVEYOR_JOB_ID% &&
-    echo "%HEYHEYHEY%" &&
-    appveyor SetVariable -Name "HEYHEYHEY" -Value "%APPVEYOR_JOB_ID%" &&
-    echo "%HEYHEYHEY%"
-  - echo "%HEYHEYHEY%"
+  - set "CACHE_JOB=%APPVEYOR_JOB_ID%" &&
+    echo "%CACHE_JOB%" &&
+    setx CACHE_JOB %APPVEYOR_JOB_ID% &&
+    echo "%CACHE_JOB%" &&
+    appveyor SetVariable -Name "CACHE_JOB" -Value "%APPVEYOR_JOB_ID%" &&
+    echo "%CACHE_JOB%"
+  - echo "%CACHE_JOB%"
   - set PATH=c:\msys64;C:\msys64\mingw64\bin;c:\msys64\usr\bin;%PATH%
   - set MSYSTEM=MINGW64
   - set MSYSTEM_PREFIX=/mingw64
