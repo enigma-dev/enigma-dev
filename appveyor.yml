@@ -45,14 +45,14 @@ install:
   - gcc -v
   - cd %APPVEYOR_BUILD_FOLDER%
   - ps: >-
-      If (%APPVEYOR_JOB_NUMBER% -eq 1) {
-        bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -j 4"
-        bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -j 4 emake"
+      If ($env:APPVEYOR_JOB_NUMBER -eq 1) {
+        bash -lc "cd %APPVEYOR_BUILD_FOLDER%; make -j 4"
+        bash -lc "cd %APPVEYOR_BUILD_FOLDER%; make -j 4 emake"
         7z a blobs.zip compileEGMf.dll emake.exe
         appveyor PushArtifact blobs.zip -Type Zip
       } Else {
-        echo curl -L %BLOBS_URL% > blobs.zip
-        appveyor DownloadFile %BLOBS_URL% -FileName blobs.zip 
+        echo curl -L $env:BLOBS_URL > blobs.zip
+        appveyor DownloadFile $env:BLOBS_URL -FileName blobs.zip 
         dir
         7z x blobs.zip
       }
