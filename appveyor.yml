@@ -38,6 +38,7 @@ install:
   - set MINGW_PREFIX=/mingw64
   - set MINGW_CHOST=x86_64-w64-mingw32
   - set PKG_CONFIG_PATH=/mingw64/lib/pkgconfig:/mingw64/share/pkgconfig
+  - bash
   - ps: |
       echo $pwd
   - dir
