@@ -29,6 +29,9 @@ environment:
     - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "MediaControlInterface"}
   #END WINDOWS
 install:
+  - appveyor --help
+  - appveyor DownloadArtifact
+  - appveyor DownloadArtifact --help
   - set PATH=c:\msys64;C:\msys64\mingw64\bin;c:\msys64\usr\bin;%PATH%
   - set MSYSTEM=MINGW64
   - set MSYSTEM_PREFIX=/mingw64
@@ -50,7 +53,7 @@ install:
       If ($env:APPVEYOR_JOB_NUMBER -eq 1) {
         bash -ic "export TERM=ansi; set TERM=ansi; cd '$env:APPVEYOR_BUILD_FOLDER'; make -j 4" 2>&1 | %{ "$_" }
         dir
-        bash -ic "cd $env:APPVEYOR_BUILD_FOLDER; make -j 4 emake"
+        bash -ic "cd '$env:APPVEYOR_BUILD_FOLDER'; make -j 4 emake"
         7z a blobs.zip compileEGMf.dll emake.exe
         appveyor PushArtifact blobs.zip -Type Zip
       } Else {
