@@ -47,7 +47,7 @@ install:
   - cd %APPVEYOR_BUILD_FOLDER%
   - IF %APPVEYOR_JOB_NUMBER% == 1 (
       make -j 4 &&
-      bash -ic "cd $APPVEYOR_BUILD_FOLDER; make -j 4 emake" &&
+      bash -ilc "export TERM=ansi; set TERM=ansi; cd $APPVEYOR_BUILD_FOLDER; make -j 4 emake" &&
       7z a blobs.zip compileEGMf.dll emake.exe &&
       appveyor PushArtifact blobs.zip -Type Zip &&
       appveyor SetVariable -Name CACHE_JOB -Value %APPVEYOR_JOB_ID%
@@ -59,4 +59,4 @@ install:
     )
 build_script:
   # AppVeyor overrides PLATFORM because it's part of its API
-  - bash -ic "cd $APPVEYOR_BUILD_FOLDER; export PLATFORM=%PLATFORM%; ./ci-build.sh"
+  - bash -ilc "cd $APPVEYOR_BUILD_FOLDER; export PLATFORM=%PLATFORM%; ./ci-build.sh"
