@@ -49,8 +49,8 @@ install:
       bash -ilc "export TERM=ansi; set TERM=ansi; cd $APPVEYOR_BUILD_FOLDER; make -j 4 emake" &&
       7z a blobs.zip compileEGMf.dll emake.exe &&
       appveyor PushArtifact blobs.zip -Type Zip &&
-      appveyor SetVariable -Name CACHE_JOB -Value "%APPVEYOR_JOB_ID%" &&
-      echo "%CACHE_JOB%"
+      appveyor SetVariable -Name "CACHE_JOB" -Value "%APPVEYOR_JOB_ID%" &&
+      echo "%CACHE_JOB%" &&
       echo %CACHE_JOB%
     ) ELSE (
       appveyor DownloadFile %APPVEYOR_API_URL%/buildjobs/%CACHE_JOB%/artifacts/blobs.zip -FileName blobs.zip &&
