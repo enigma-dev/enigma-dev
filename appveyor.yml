@@ -29,6 +29,8 @@ install:
   - echo "%APPVEYOR_API_URL%"
   - echo "%APPVEYOR_JOB_ID%"
   - echo "%CACHE_JOB%"
+  - ps: echo $(CACHE_JOB)
+  - ps: echo ${CACHE_JOB}
   - set "CACHE_JOB=%APPVEYOR_JOB_ID%" &&
     echo "%CACHE_JOB%" &&
     setx CACHE_JOB %APPVEYOR_JOB_ID% &&
