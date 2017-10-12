@@ -6,7 +6,7 @@ test: off
 skip_branch_with_pr: true
 environment:
   OUTPUT: /tmp/test.exe
-  CACHE_JOB:
+  CACHE_JOB: "YOUVE GOT A HUGE PROBLEM IF THIS IS THE VALUE BUT APPVEYOR WANTS A DEFAULT TO SHARE GLOBAL VARIABLES"
   matrix:
   #BEGIN WINDOWS
     # Game Modes
@@ -28,7 +28,10 @@ environment:
 install:
   - echo "%APPVEYOR_API_URL%"
   - echo "%APPVEYOR_JOB_ID%"
+  - ps: echo ${env:CACHE_JOB}
+  - ps: echo $env:CACHE_JOB
   - echo "%CACHE_JOB%"
+  - appveyor GetVariable -Name CACHE_JOB
   - appveyor SetVariable -Name CACHE_JOB -Value %APPVEYOR_JOB_ID%
   - appveyor SetVariable -Name CACHE_JOB -Value "%APPVEYOR_JOB_ID%"
   - appveyor SetVariable -Name "CACHE_JOB" -Value %APPVEYOR_JOB_ID%
