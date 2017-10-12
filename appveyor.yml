@@ -34,7 +34,7 @@ install:
   - appveyor SetVariable -Name CACHE_JOB -Value %APPVEYOR_JOB_ID%
   - appveyor SetVariable -Name CACHE_JOB -Value "%APPVEYOR_JOB_ID%"
   - appveyor SetVariable -Name "CACHE_JOB" -Value %APPVEYOR_JOB_ID%
-  - appveyor SetVariable -Name "CACHE_JOB" -Value "%APPVEYOR_JOB_ID%"
+  #- appveyor SetVariable -Name "CACHE_JOB" -Value "%APPVEYOR_JOB_ID%"
   - ps: echo ${env:CACHE_JOB}
   - ps: echo $env:CACHE_JOB
   - echo "%CACHE_JOB%"
