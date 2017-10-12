@@ -48,7 +48,7 @@ install:
   - cd %APPVEYOR_BUILD_FOLDER%
   - ps: |
       If ($env:APPVEYOR_JOB_NUMBER -eq 1) {
-        bash -ic "export TERM=ansi; set TERM=ansi; cd $env:APPVEYOR_BUILD_FOLDER; make -j 4" 2> $null
+        bash -ic "export TERM=ansi; set TERM=ansi; cd $env:APPVEYOR_BUILD_FOLDER; make -j 4" 2>&1 | out-null
         dir
         bash -ic "cd $env:APPVEYOR_BUILD_FOLDER; make -j 4 emake"
         7z a blobs.zip compileEGMf.dll emake.exe
