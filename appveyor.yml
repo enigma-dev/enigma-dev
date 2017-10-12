@@ -29,11 +29,6 @@ install:
   - echo "%APPVEYOR_API_URL%"
   - echo "%APPVEYOR_JOB_ID%"
   - echo "%CACHE_JOB%"
-  - ps: echo $(CACHE_JOB)
-  - ps: echo $(env:CACHE_JOB)
-  - ps: echo ${CACHE_JOB}
-  - ps: echo ${env:CACHE_JOB}
-  - ps: echo $env:CACHE_JOB
   - set "CACHE_JOB=%APPVEYOR_JOB_ID%" &&
     echo "%CACHE_JOB%" &&
     setx CACHE_JOB %APPVEYOR_JOB_ID% &&
@@ -44,6 +39,11 @@ install:
   - appveyor SetVariable -Name CACHE_JOB -Value "%APPVEYOR_JOB_ID%"
   - appveyor SetVariable -Name "CACHE_JOB" -Value %APPVEYOR_JOB_ID%
   - appveyor SetVariable -Name "CACHE_JOB" -Value "%APPVEYOR_JOB_ID%"
+  - ps: echo $(CACHE_JOB)
+  - ps: echo $(env:CACHE_JOB)
+  - ps: echo ${CACHE_JOB}
+  - ps: echo ${env:CACHE_JOB}
+  - ps: echo $env:CACHE_JOB
   - echo "%CACHE_JOB%"
   - set PATH=c:\msys64;C:\msys64\mingw64\bin;c:\msys64\usr\bin;%PATH%
   - set MSYSTEM=MINGW64
