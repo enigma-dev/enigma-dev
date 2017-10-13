@@ -1,11 +1,21 @@
 # fetch repository as zip archive
 shallow_clone: true
-# disable automatic tests 
+# disable automatic tests
 test: off
+# don't build "feature" branches
+skip_branch_with_pr: true
+
+init:
+  - echo "%APPVEYOR_JOB_ID%"
+  # store the name of the archive job in an environment variable
+  # this designates the first job of every build as the archive job
+  - ps: |
+      $apiURL = "https://ci.appveyor.com/api/projects/$env:APPVEYOR_ACCOUNT_NAME/$env:APPVEYOR_PROJECT_SLUG"
+      $env:ARCHIVE_JOB = (Invoke-RestMethod -Method Get -Uri $apiURL).build.jobs[0].jobId
+  - echo "%ARCHIVE_JOB%"
+  - cd %APPVEYOR_BUILD_FOLDER%
 environment:
   OUTPUT: /tmp/test.exe
-  BLOBS_URL: "https://ci.appveyor.com/api/projects/%APPVEYOR_ACCOUNT_NAME%/%APPVEYOR_PROJECT_SLUG%/artifacts/blobs.zip?all=true^&\
-             job=Environment%3A%20COMPILER%3Dgcc%2C%20PLATFORM%3DWin32%2C%20MODE%3DRun%2C%20GRAPHICS%3DDirect3D9%2C%20AUDIO%3DNone%2C%20COLLISION%3DNone%2C%20NETWORK%3DNone%2C%20WIDGETS%3DNone%2C%20EXTENSIONS%3DNone"
   matrix:
   #BEGIN WINDOWS
     # Game Modes
@@ -25,7 +35,7 @@ environment:
     - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "MediaControlInterface"}
   #END WINDOWS
 install:
-  - set PATH=c:\msys64;C:\msys64\mingw64\bin;c:\msys64\usr\bin;%PATH%
+  - set PATH=c:\msys64;C:\msys64\mingw64\bin;c:\msys64\usr\local\bin;c:\msys64\usr\bin;%PATH%
   - set MSYSTEM=MINGW64
   - set MSYSTEM_PREFIX=/mingw64
   - set MSYSTEM_CHOST=x86_64-w64-mingw32
@@ -39,18 +49,32 @@ install:
     mingw-w64-x86_64-libogg mingw-w64-x86_64-flac mingw-w64-x86_64-mpg123 mingw-w64-x86_64-libsndfile mingw-w64-x86_64-libgme
     mingw-w64-x86_64-sfml mingw-w64-x86_64-gtk2 mingw-w64-x86_64-box2d mingw-w64-x86_64-bullet
   - gcc -v
-  - cd %APPVEYOR_BUILD_FOLDER%
-  - IF %APPVEYOR_JOB_NUMBER% == 1 (
-      make -j 4 &&
-      bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -j 4 emake" &&
-      7z a blobs.zip compileEGMf.dll emake.exe &&
-      appveyor PushArtifact blobs.zip -Type Zip
-    ) ELSE (
-      echo curl -L %BLOBS_URL% > blobs.zip &&
-      curl -L %BLOBS_URL% > blobs.zip &&
-      dir &&
-      7z x blobs.zip
-    )
+  - ps: |
+      If ($env:APPVEYOR_JOB_NUMBER -eq 1) {
+        # use our first job to build JDI and the CLI
+        bash -lc "cd '$env:APPVEYOR_BUILD_FOLDER'; make -j 4; make -j 4 emake"
+
+        # create a daemon PowerShell "job" (not the same as an AppVeyor build job) to zip and upload
+        # the blobs artifact while we start building the engine
+        $archive = {
+          Set-Location $using:PWD
+          7z a -t7z -mm=lzma2 -mx=4 -mmt blobs.zip compileEGMf.dll emake.exe
+          appveyor PushArtifact blobs.zip -Type Zip
+        }
+        $daemon = Start-Job -ScriptBlock $archive
+
+        # register a callback so we can show the zip and upload output when it completes
+        $jobEvent = Register-ObjectEvent $daemon StateChanged -Action {
+          $result = Receive-Job -Job $daemon
+          Write-Host ('Artifact daemon has completed.') -foregroundcolor "Magenta"
+          Write-Host ($result | Out-String) -foregroundcolor "Gray"
+        }
+      } Else {
+        # simply restore JDI and the CLI from the archive artifact of this same build using REST API
+        $artifactsURL = "https://ci.appveyor.com/api/buildjobs/$env:ARCHIVE_JOB/artifacts/"
+        appveyor DownloadFile ($artifactsURL + "blobs.zip") -FileName blobs.zip
+        7z e -mmt blobs.zip
+      }
 build_script:
-  # AppVeyor overrides PLATFORM because it's part of its API
+  # AppVeyor overrides %PLATFORM% because it's part of its API, so export it
   - bash -lc "cd $APPVEYOR_BUILD_FOLDER; export PLATFORM=%PLATFORM%; ./ci-build.sh"
