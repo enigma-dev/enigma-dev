@@ -1,6 +1,6 @@
 # fetch repository as zip archive
 shallow_clone: true
-# disable automatic tests 
+# disable automatic tests
 test: off
 # don't build "feature" branches
 skip_branch_with_pr: true
@@ -52,9 +52,7 @@ install:
   - ps: |
       If ($env:APPVEYOR_JOB_NUMBER -eq 1) {
         # use our first job to build JDI and the CLI
-        bash -lc "cd $APPVEYOR_BUILD_FOLDER;" +
-                 "make -j 4 2>&1;" +
-                 "make -j 4 emake 2>&1"
+        bash -lc "cd $APPVEYOR_BUILD_FOLDER;make -j 4 2>&1;make -j 4 emake 2>&1"
 
         # create a daemon job to zip and upload the blobs artifact while we start building the engine
         $archive = {
