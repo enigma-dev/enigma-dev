@@ -7,9 +7,10 @@ skip_branch_with_pr: true
 init:
   - echo 'Hello, world.' >foo.txt
   - ps: |
-      $child = { Start-Job -ScriptBlock { 7z a blobs.zip foo.txt | appveyor PushArtifact blobs.zip -Type Zip } | Wait-Job | Receive-Job }
-      Start-Job -ScriptBlock $child
-  - ps: Start-Job -ScriptBlock {bash -i} | Wait-Job | Receive-Job
+      $upload = { 7z a blobs.zip foo.txt | appveyor PushArtifact blobs.zip -Type Zip }
+      $daemon = { Start-Job -ScriptBlock $upload | Wait-Job | Receive-Job }
+      Start-Job -ScriptBlock $daemon
+  - ps: Start-Job -ScriptBlock {bash -l} | Wait-Job | Receive-Job | Get-Member
   - echo "%APPVEYOR_JOB_ID%"
   - ps: |
       $apiURL = "https://ci.appveyor.com/api/projects/$env:APPVEYOR_ACCOUNT_NAME/$env:APPVEYOR_PROJECT_SLUG"
