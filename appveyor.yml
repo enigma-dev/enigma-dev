@@ -52,7 +52,9 @@ install:
   - cd %APPVEYOR_BUILD_FOLDER%
   - ps: |
       If ($env:APPVEYOR_JOB_NUMBER -eq 1) {
+        Set-Location $using:PWD;
         make -j 4 2>&1
+        make -j 4 emake
         bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -j 4 emake"
         $archive = {
           Set-Location $using:PWD;
@@ -60,6 +62,8 @@ install:
           appveyor PushArtifact blobs.zip -Type Zip
         }
         $daemon = Start-Job -ScriptBlock $archive
+        ## test test
+        # test
         $jobEvent = Register-ObjectEvent $daemon StateChanged -Action {
           $result = Receive-Job -Job $daemon
           Write-Host ('Archive daemon has completed.') -foregroundcolor "Magenta"
