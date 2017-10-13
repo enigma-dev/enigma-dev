@@ -5,25 +5,11 @@ test: off
 # don't build feature branches
 skip_branch_with_pr: true
 init:
-  - echo "%APPVEYOR_API_URL%"
   - echo "%APPVEYOR_JOB_ID%"
   - ps: |
       $apiURL = "https://ci.appveyor.com/api/projects/$env:APPVEYOR_ACCOUNT_NAME/$env:APPVEYOR_PROJECT_SLUG"
       $env:CACHE_JOB = (Invoke-RestMethod -Method Get -Uri $apiURL).build.jobs[0].jobId
-  - curl -v %APPVEYOR_API_URL%api/build/variables
-  - ps: echo $(CACHE_JOB)
-  - ps: echo ${env:CACHE_JOB}
-  - ps: echo $env:CACHE_JOB
-  - ps: echo $CACHE_JOB
-  - curl -v https://ci.appveyor.com/api/build/variables
-  - echo curl -v %APPVEYOR_API_URL%api/build/variables
-  - ps: appveyor SetVariable -Name CACHE_JOB -Value $env:APPVEYOR_JOB_ID
-  - curl -v %APPVEYOR_API_URL%api/build/variables
-  - curl -v https://ci.appveyor.com/api/build/variables
-  - echo curl -v %APPVEYOR_API_URL%api/build/variables
   - echo "%CACHE_JOB%"
-  - echo $(CACHE_JOB)
-  - echo $CACHE_JOB
 environment:
   OUTPUT: /tmp/test.exe
   matrix:
@@ -68,7 +54,7 @@ install:
       7z a blobs.zip compileEGMf.dll emake.exe &&
       appveyor PushArtifact blobs.zip -Type Zip
     ) ELSE (
-      appveyor DownloadFile %APPVEYOR_API_URL%/buildjobs/%CACHE_JOB%/artifacts/blobs.zip -FileName blobs.zip &&
+      appveyor DownloadFile https://ci.appveyor.com/api/buildjobs/%CACHE_JOB%/artifacts/blobs.zip -FileName blobs.zip &&
       dir &&
       7z x blobs.zip
     )
