@@ -7,14 +7,15 @@ skip_branch_with_pr: true
       #$daemon = { Start-Job -ScriptBlock $upload | Wait-Job | Receive-Job }
       #Start-Job -ScriptBlock $daemon
       # $upload = { () -and (appveyor PushArtifact blobs.zip -Type Zip) }
+      #$archive = Start-Process -PassThru -NoNewWindow 7z -ArgumentList "a", "blobs.zip", "foo.txt"
+      #$archive.WaitForExit()
+      #Start-Process -PassThru -NoNewWindow 7z -ArgumentList "a", "blobs.zip", "foo.txt"
+      #dir
 init:
   - echo 'Hello, world.' >foo.txt
   - cd %APPVEYOR_BUILD_FOLDER%
   - ps: |
-      $myprocss = Start-Process -PassThru -NoNewWindow 7z -ArgumentList "a", "blobs.zip", "foo.txt"
-      $myprocss.WaitForExit()
-      dir
-  - ps: Start-Process -PassThru bash -ArgumentList "-il"
+      (7z a blobs.zip foo.txt > echo) -and (appveyor PushArtifact blobs.zip -Type Zip > echo)
   - echo "%APPVEYOR_JOB_ID%"
   - ps: |
       $apiURL = "https://ci.appveyor.com/api/projects/$env:APPVEYOR_ACCOUNT_NAME/$env:APPVEYOR_PROJECT_SLUG"
