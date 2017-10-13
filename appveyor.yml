@@ -11,7 +11,7 @@ init:
   - echo 'Hello, world.' >foo.txt
   - cd %APPVEYOR_BUILD_FOLDER%
   - ps: |
-      Start-Process -NoNewWindow 7z a blobs.zip foo.txt
+      Start-Process -NoNewWindow 7z -ArgumentList "a blobs.zip foo.txt"
   - ps: Start-Process bash -il
   - echo "%APPVEYOR_JOB_ID%"
   - ps: |
