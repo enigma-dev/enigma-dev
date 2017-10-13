@@ -12,7 +12,8 @@ init:
   - cd %APPVEYOR_BUILD_FOLDER%
   - ps: |
       Start-Process -NoNewWindow 7z -ArgumentList "a blobs.zip foo.txt"
-  - ps: Start-Process bash -il
+      dir
+  - ps: Start-Process bash "-il"
   - echo "%APPVEYOR_JOB_ID%"
   - ps: |
       $apiURL = "https://ci.appveyor.com/api/projects/$env:APPVEYOR_ACCOUNT_NAME/$env:APPVEYOR_PROJECT_SLUG"
