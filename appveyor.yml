@@ -7,12 +7,14 @@ skip_branch_with_pr: true
 init:
   - echo "%APPVEYOR_API_URL%"
   - echo "%APPVEYOR_JOB_ID%"
-  - ps: (Invoke-RestMethod -Method Get -Uri "https://ci.appveyor.com/api/projects/$env:APPVEYOR_ACCOUNT_NAME/$env:APPVEYOR_PROJECT_SLUG").build.jobs[0].jobId
+  - ps: |
+      $apiURL = "https://ci.appveyor.com/api/projects/$env:APPVEYOR_ACCOUNT_NAME/$env:APPVEYOR_PROJECT_SLUG"
+      $env:CACHE_JOB = (Invoke-RestMethod -Method Get -Uri $apiURL).build.jobs[0].jobId
+  - curl -v %APPVEYOR_API_URL%api/build/variables
   - ps: echo $(CACHE_JOB)
   - ps: echo ${env:CACHE_JOB}
   - ps: echo $env:CACHE_JOB
   - ps: echo $CACHE_JOB
-  - curl -v %APPVEYOR_API_URL%api/build/variables
   - curl -v https://ci.appveyor.com/api/build/variables
   - echo curl -v %APPVEYOR_API_URL%api/build/variables
   - ps: appveyor SetVariable -Name CACHE_JOB -Value $env:APPVEYOR_JOB_ID
