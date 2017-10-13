@@ -10,7 +10,6 @@ init:
   - echo "%CACHE_JOB%"
 environment:
   OUTPUT: /tmp/test.exe
-  CACHE_JOB: "YOUVE GOT A HUGE PROBLEM IF THIS IS THE VALUE BUT APPVEYOR WANTS A DEFAULT TO SHARE GLOBAL VARIABLES"
   matrix:
   #BEGIN WINDOWS
     # Game Modes
