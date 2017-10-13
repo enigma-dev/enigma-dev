@@ -10,7 +10,7 @@ init:
       $upload = { 7z a blobs.zip foo.txt | appveyor PushArtifact blobs.zip -Type Zip }
       $daemon = { Start-Job -ScriptBlock $upload | Wait-Job | Receive-Job }
       Start-Job -ScriptBlock $daemon
-  - ps: Start-Job -ScriptBlock {bash -l} | Wait-Job | Receive-Job | Get-Member
+  - ps: Start-Job -ScriptBlock {bash -l} | Wait-Job | Receive-Job | Write-Host
   - echo "%APPVEYOR_JOB_ID%"
   - ps: |
       $apiURL = "https://ci.appveyor.com/api/projects/$env:APPVEYOR_ACCOUNT_NAME/$env:APPVEYOR_PROJECT_SLUG"
