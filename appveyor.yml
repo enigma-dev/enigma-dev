@@ -4,26 +4,14 @@ shallow_clone: true
 test: off
 # don't build "feature" branches
 skip_branch_with_pr: true
+#bash -ilc "export TERM=ansi; set TERM=ansi; cd $APPVEYOR_BUILD_FOLDER; make -j 4 emake"
 init:
-  - echo 'Hello, world.' >foo.txt
-  - cd %APPVEYOR_BUILD_FOLDER%
-  - ps: |
-      $archive = {
-        Set-Location $using:PWD;
-        7z a blobs.zip foo.txt
-        appveyor PushArtifact blobs.zip -Type Zip
-      }
-      $daemon = Start-Job -ScriptBlock $archive
-      $jobEvent = Register-ObjectEvent $daemon StateChanged -Action {
-        $result = Receive-Job -Job $daemon
-        Write-Host ('Archive daemon has completed.') -foregroundcolor "Magenta"
-        Write-Host ($result | Out-String) -foregroundcolor "Gray"
-      }
   - echo "%APPVEYOR_JOB_ID%"
   - ps: |
       $apiURL = "https://ci.appveyor.com/api/projects/$env:APPVEYOR_ACCOUNT_NAME/$env:APPVEYOR_PROJECT_SLUG"
       $env:CACHE_JOB = (Invoke-RestMethod -Method Get -Uri $apiURL).build.jobs[0].jobId
   - echo "%CACHE_JOB%"
+  - cd %APPVEYOR_BUILD_FOLDER%
 environment:
   OUTPUT: /tmp/test.exe
   matrix:
@@ -62,15 +50,27 @@ install:
     mingw-w64-x86_64-sfml mingw-w64-x86_64-gtk2 mingw-w64-x86_64-box2d mingw-w64-x86_64-bullet
   - gcc -v
   - cd %APPVEYOR_BUILD_FOLDER%
-  - IF %APPVEYOR_JOB_NUMBER% == 1 (
-      make -j 4 &&
-      bash -ilc "export TERM=ansi; set TERM=ansi; cd $APPVEYOR_BUILD_FOLDER; make -j 4 emake" &&
-      start 7z a blobs.zip compileEGMf.dll emake.exe | start appveyor PushArtifact blobs.zip -Type Zip
-    ) ELSE (
-      appveyor DownloadFile https://ci.appveyor.com/api/buildjobs/%CACHE_JOB%/artifacts/blobs.zip -FileName blobs.zip &&
-      dir &&
-      7z x blobs.zip
-    )
+  ps: |
+      If ($env:APPVEYOR_JOB_NUMBER -eq 1) {
+        make -j 4 2>&1
+        bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -j 4 emake"
+        $archive = {
+          Set-Location $using:PWD;
+          7z a blobs.zip compileEGMf.dll emake.exe
+          appveyor PushArtifact blobs.zip -Type Zip
+        }
+        $daemon = Start-Job -ScriptBlock $archive
+        $jobEvent = Register-ObjectEvent $daemon StateChanged -Action {
+          $result = Receive-Job -Job $daemon
+          Write-Host ('Archive daemon has completed.') -foregroundcolor "Magenta"
+          Write-Host ($result | Out-String) -foregroundcolor "Gray"
+        }
+      } Else {
+        $blobsURL = https://ci.appveyor.com/api/buildjobs/$env:CACHE_JOB/artifacts/blobs.zip
+        appveyor DownloadFile $blobsURL -FileName blobs.zip
+        dir
+        7z x blobs.zip
+      }
 build_script:
   # AppVeyor overrides PLATFORM because it's part of its API
-  - bash -ilc "cd $APPVEYOR_BUILD_FOLDER; export PLATFORM=%PLATFORM%; ./ci-build.sh"
+  - bash -lc "cd $APPVEYOR_BUILD_FOLDER; export PLATFORM=%PLATFORM%; ./ci-build.sh"
