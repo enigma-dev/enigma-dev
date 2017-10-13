@@ -22,7 +22,7 @@ init:
       }
       $daemon = Start-Job -ScriptBlock $archive
       $jobEvent = Register-ObjectEvent $daemon StateChanged -Action {
-          Write-Host ('Job #{0} ({1}) complete.' -f $sender.Id, $sender.Name)
+          Write-Host ('Archive daemon has completed.') -foregroundcolor "magenta"
           $jobEvent | Unregister-Event
       }
   - echo "%APPVEYOR_JOB_ID%"
