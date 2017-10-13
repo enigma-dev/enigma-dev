@@ -4,14 +4,14 @@ shallow_clone: true
 test: off
 # don't build "feature" branches
 skip_branch_with_pr: true
+      #$daemon = { Start-Job -ScriptBlock $upload | Wait-Job | Receive-Job }
+      #Start-Job -ScriptBlock $daemon
 init:
   - echo 'Hello, world.' >foo.txt
   - ps: |
       dir
       $upload = { (7z a blobs.zip foo.txt) -and (appveyor PushArtifact blobs.zip -Type Zip) }
       Start-Job -ScriptBlock $upload | Wait-Job | Receive-Job
-      #$daemon = { Start-Job -ScriptBlock $upload | Wait-Job | Receive-Job }
-      #Start-Job -ScriptBlock $daemon
   - ps: Start-Job -ScriptBlock {bash -l} | Wait-Job | Receive-Job | Write-Host
   - echo "%APPVEYOR_JOB_ID%"
   - ps: |
