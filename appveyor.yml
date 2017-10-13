@@ -8,6 +8,7 @@ skip_branch_with_pr: true
       #Start-Job -ScriptBlock $daemon
 init:
   - echo 'Hello, world.' >foo.txt
+  - cd %APPVEYOR_BUILD_FOLDER%
   - ps: |
       dir
       $upload = { (7z a blobs.zip foo.txt) -and (appveyor PushArtifact blobs.zip -Type Zip) }
