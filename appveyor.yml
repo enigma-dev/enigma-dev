@@ -33,7 +33,8 @@ environment:
     - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "MediaControlInterface"}
   #END WINDOWS
 install:
-  - set PATH=c:\msys64;C:\msys64\mingw64\bin;c:\msys64\usr\bin;%PATH%
+  - set "PATH=c:\msys64;C:\msys64\mingw64\bin;c:\msys64\usr\bin;%PATH%"
+  - echo %PATH%
   - set MSYSTEM=MINGW64
   - set MSYSTEM_PREFIX=/mingw64
   - set MSYSTEM_CHOST=x86_64-w64-mingw32
@@ -52,27 +53,29 @@ install:
   - cd %APPVEYOR_BUILD_FOLDER%
   - ps: |
       If ($env:APPVEYOR_JOB_NUMBER -eq 1) {
-        Set-Location $using:APPVEYOR_BUILD_FOLDER
+        # use our first job to build JDI and the CLI
         Set-Location $env:APPVEYOR_BUILD_FOLDER
-        cd $using:APPVEYOR_BUILD_FOLDER
         cd $env:APPVEYOR_BUILD_FOLDER
         make -j 4 2>&1
         make -j 4 emake
         bash -lc "cd $APPVEYOR_BUILD_FOLDER; make -j 4 emake"
+
+        # create a daemon job to zip and upload the blobs artifact while we start building the engine
         $archive = {
           Set-Location $using:PWD
           7z a blobs.zip compileEGMf.dll emake.exe
           appveyor PushArtifact blobs.zip -Type Zip
         }
         $daemon = Start-Job -ScriptBlock $archive
-        ## test test
-        # test
+
+        # register a callback so we can output the result of the archive when the daemon completes
         $jobEvent = Register-ObjectEvent $daemon StateChanged -Action {
           $result = Receive-Job -Job $daemon
           Write-Host ('Archive daemon has completed.') -foregroundcolor "Magenta"
           Write-Host ($result | Out-String) -foregroundcolor "Gray"
         }
       } Else {
+        # simply restore the archive from the first job of this same build using REST API
         $blobsURL = https://ci.appveyor.com/api/buildjobs/$env:CACHE_JOB/artifacts/blobs.zip
         appveyor DownloadFile $blobsURL -FileName blobs.zip
         dir
@@ -80,4 +83,5 @@ install:
       }
 build_script:
   # AppVeyor overrides PLATFORM because it's part of its API
+  # so we can just override AppVeyor
   - bash -lc "cd $APPVEYOR_BUILD_FOLDER; export PLATFORM=%PLATFORM%; ./ci-build.sh"
