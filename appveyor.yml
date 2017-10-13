@@ -4,13 +4,6 @@ shallow_clone: true
 test: off
 # don't build "feature" branches
 skip_branch_with_pr: true
-      #$daemon = { Start-Job -ScriptBlock $upload | Wait-Job | Receive-Job }
-      #Start-Job -ScriptBlock $daemon
-      # $upload = { () -and (appveyor PushArtifact blobs.zip -Type Zip) }
-      #$archive = Start-Process -PassThru -NoNewWindow 7z -ArgumentList "a", "blobs.zip", "foo.txt"
-      #$archive.WaitForExit()
-      #Start-Process -PassThru -NoNewWindow 7z -ArgumentList "a", "blobs.zip", "foo.txt"
-      #dir
 init:
   - echo 'Hello, world.' >foo.txt
   - cd %APPVEYOR_BUILD_FOLDER%
@@ -23,7 +16,7 @@ init:
       $daemon = Start-Job -ScriptBlock $archive
       $jobEvent = Register-ObjectEvent $daemon StateChanged -Action {
         $result = Receive-Job -Job $daemon
-        Write-Host ('Archive daemon has completed.') -foregroundcolor "DarkGreen"
+        Write-Host ('Archive daemon has completed.') -foregroundcolor "Magenta"
         Write-Host ($result | Out-String) -foregroundcolor "Gray"
       }
   - echo "%APPVEYOR_JOB_ID%"
