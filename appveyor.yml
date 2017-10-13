@@ -18,9 +18,9 @@ init:
       $archive = {
         Set-Location $using:PWD;
         7z a blobs.zip foo.txt
-        appveyor PushArtifact blobs.zip -Type Zip > echo
+        appveyor PushArtifact blobs.zip -Type Zip
       }
-      Start-Job -ScriptBlock $archive | Wait-Job | Receive-Job
+      Start-Job -ScriptBlock $archive
   - echo "%APPVEYOR_JOB_ID%"
   - ps: |
       $apiURL = "https://ci.appveyor.com/api/projects/$env:APPVEYOR_ACCOUNT_NAME/$env:APPVEYOR_PROJECT_SLUG"
