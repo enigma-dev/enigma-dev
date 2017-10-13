@@ -58,22 +58,26 @@ install:
         # the blobs artifact while we start building the engine
         $archive = {
           Set-Location $using:PWD
-          7z a -t7z -m0=lzma2:d1024m -mx=9 -aoa -mfb=64 -md=32m -ms=on blobs.zip compileEGMf.dll emake.exe
-          appveyor PushArtifact blobs.zip -Type Zip
+          #7z a -t7z -m0=lzma2:d1024m -mx=9 -aoa -mfb=64 -md=32m -ms=on blobs.zip compileEGMf.dll emake.exe
+          #appveyor PushArtifact blobs.zip -Type Zip
+          appveyor PushArtifact compileEGMf.dll -Type File
+          appveyor PushArtifact emake.exe -Type File
         }
         $daemon = Start-Job -ScriptBlock $archive
 
         # register a callback so we can show the zip and upload output when it completes
         $jobEvent = Register-ObjectEvent $daemon StateChanged -Action {
           $result = Receive-Job -Job $daemon
-          Write-Host ('Archive daemon has completed.') -foregroundcolor "Magenta"
+          Write-Host ('Artifact daemon has completed.') -foregroundcolor "Magenta"
           Write-Host ($result | Out-String) -foregroundcolor "Gray"
         }
       } Else {
         # simply restore JDI and the CLI from the archive artifact of this same build using REST API
-        $blobsURL = "https://ci.appveyor.com/api/buildjobs/$env:ARCHIVE_JOB/artifacts/blobs.zip"
-        appveyor DownloadFile $blobsURL -FileName blobs.zip
-        7z x blobs.zip
+        $artifactsURL = "https://ci.appveyor.com/api/buildjobs/$env:ARCHIVE_JOB/artifacts/"
+        appveyor DownloadFile ($artifactsURL + "compileEGMf.dll") -FileName compileEGMf.dll
+        appveyor DownloadFile ($artifactsURL + "emake.exe") -FileName emake.exe
+        #appveyor DownloadFile ($artifactsURL + "blobs.zip") -FileName blobs.zip
+        #7z x blobs.zip
       }
 build_script:
   # AppVeyor overrides %PLATFORM% because it's part of its API, so export it
