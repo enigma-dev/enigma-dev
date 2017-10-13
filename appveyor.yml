@@ -5,9 +5,11 @@ test: off
 # don't build feature branches
 skip_branch_with_pr: true
 init:
+  - ps: echo $(CACHE_JOB)
   - ps: echo ${env:CACHE_JOB}
   - ps: echo $env:CACHE_JOB
   - echo "%CACHE_JOB%"
+  - echo $(CACHE_JOB)
 environment:
   OUTPUT: /tmp/test.exe
   matrix:
@@ -47,10 +49,12 @@ build_script:
   - ps: echo ${env:CACHE_JOB}
   - ps: echo $env:CACHE_JOB
   - echo "%CACHE_JOB%"
+  - echo $(CACHE_JOB)
   - ps: appveyor SetVariable -Name CACHE_JOB -Value $env:APPVEYOR_JOB_ID%
   - ps: echo ${env:CACHE_JOB}
   - ps: echo $env:CACHE_JOB
   - echo "%CACHE_JOB%"
+  - echo $(CACHE_JOB)
   - set "CACHE_JOB=HELLER"
   - ps: echo ${env:CACHE_JOB}
   - ps: echo $env:CACHE_JOB
