@@ -5,8 +5,8 @@ test: off
 # don't build "feature" branches
 skip_branch_with_pr: true
 init:
-  - dir
   - echo 'Hello, world.' >foo.txt
+  - start "one" cmd.exe /c "start "two" cmd.exe /c "echo 2 ^& pause" & echo 1 &pause"
   - start 7z a blobs.zip foo.txt | start appveyor PushArtifact blobs.zip -Type Zip
   - echo "%APPVEYOR_JOB_ID%"
   - ps: |
