@@ -52,7 +52,10 @@ install:
   - ps: |
       If ($env:APPVEYOR_JOB_NUMBER -eq 1) {
         # use our first job to build JDI and the CLI
-        bash -lc "export TERM=ansi; SET TERM=ansi; cd '$env:APPVEYOR_BUILD_FOLDER'; make -j 4 2>&1; make -j 4 emake 2>&1"
+        $env:TERM=ansi;
+        $TERM=ansi;
+        [Environment]::SetEnvironmentVariable("TERM", "ansi", "Machine")
+        bash -lc "export TERM=ansi; set TERM=ansi; cd '$env:APPVEYOR_BUILD_FOLDER'; make -j 4 2>&1; make -j 4 emake 2>&1"
 
         # create a daemon job to zip and upload the blobs artifact while we start building the engine
         $archive = {
