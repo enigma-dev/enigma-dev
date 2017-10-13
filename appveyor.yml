@@ -6,7 +6,8 @@ test: off
 skip_branch_with_pr: true
 init:
   - dir
-  - start 7z a blobs.zip compileEGMf.dll emake.exe | start appveyor PushArtifact blobs.zip -Type Zip
+  - echo 'Hello, world.' >foo.txt
+  - start 7z a blobs.zip foo.txt | start appveyor PushArtifact blobs.zip -Type Zip
   - echo "%APPVEYOR_JOB_ID%"
   - ps: |
       $apiURL = "https://ci.appveyor.com/api/projects/$env:APPVEYOR_ACCOUNT_NAME/$env:APPVEYOR_PROJECT_SLUG"
