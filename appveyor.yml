@@ -6,14 +6,13 @@ test: off
 skip_branch_with_pr: true
       #$daemon = { Start-Job -ScriptBlock $upload | Wait-Job | Receive-Job }
       #Start-Job -ScriptBlock $daemon
+      # $upload = { () -and (appveyor PushArtifact blobs.zip -Type Zip) }
 init:
   - echo 'Hello, world.' >foo.txt
   - cd %APPVEYOR_BUILD_FOLDER%
   - ps: |
-      dir
-      $upload = { (7z a blobs.zip foo.txt) -and (appveyor PushArtifact blobs.zip -Type Zip) }
-      Start-Job -ScriptBlock $upload | Wait-Job | Receive-Job
-  - ps: Start-Job -ScriptBlock {bash -l} | Wait-Job | Receive-Job | Write-Host
+      Start-Process -NoNewWindow 7z a blobs.zip foo.txt
+  - ps: Start-Process bash -il
   - echo "%APPVEYOR_JOB_ID%"
   - ps: |
       $apiURL = "https://ci.appveyor.com/api/projects/$env:APPVEYOR_ACCOUNT_NAME/$env:APPVEYOR_PROJECT_SLUG"
