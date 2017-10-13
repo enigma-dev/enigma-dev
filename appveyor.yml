@@ -28,23 +28,6 @@ environment:
 install:
   - echo "%APPVEYOR_API_URL%"
   - echo "%APPVEYOR_JOB_ID%"
-  - ps: echo ${env:CACHE_JOB}
-  - ps: echo $env:CACHE_JOB
-  - echo "%CACHE_JOB%"
-  - ps: appveyor SetVariable -Name CACHE_JOB -Value $env:APPVEYOR_JOB_ID%
-  - ps: echo ${env:CACHE_JOB}
-  - ps: echo $env:CACHE_JOB
-  - echo "%CACHE_JOB%"
-  - set "CACHE_JOB=HELLER"
-  - ps: echo ${env:CACHE_JOB}
-  - ps: echo $env:CACHE_JOB
-  - echo "%CACHE_JOB%"
-  - ps: appveyor GetVariable -Name CACHE_JOB
-  - ps: echo ${env:CACHE_JOB}
-  - ps: echo $env:CACHE_JOB
-  - echo "%CACHE_JOB%"
-  - ps: appveyor GetVariablesForMe -Name CACHE_JOB
-  - cmd: appveyor Help
   - set PATH=c:\msys64;C:\msys64\mingw64\bin;c:\msys64\usr\bin;%PATH%
   - set MSYSTEM=MINGW64
   - set MSYSTEM_PREFIX=/mingw64
@@ -73,6 +56,22 @@ install:
       dir &&
       7z x blobs.zip
     )
+before_build:
+  - ps: echo ${env:CACHE_JOB}
+  - ps: echo $env:CACHE_JOB
+  - echo "%CACHE_JOB%"
+  - ps: appveyor SetVariable -Name CACHE_JOB -Value $env:APPVEYOR_JOB_ID%
+  - ps: echo ${env:CACHE_JOB}
+  - ps: echo $env:CACHE_JOB
+  - echo "%CACHE_JOB%"
+  - set "CACHE_JOB=HELLER"
+  - ps: echo ${env:CACHE_JOB}
+  - ps: echo $env:CACHE_JOB
+  - echo "%CACHE_JOB%"
+  - ps: appveyor GetVariable -Name CACHE_JOB
+  - ps: echo ${env:CACHE_JOB}
+  - ps: echo $env:CACHE_JOB
+  - echo "%CACHE_JOB%"
 build_script:
   # AppVeyor overrides PLATFORM because it's part of its API
   - bash -ilc "cd $APPVEYOR_BUILD_FOLDER; export PLATFORM=%PLATFORM%; ./ci-build.sh"
