@@ -20,7 +20,8 @@ init:
         7z a blobs.zip foo.txt
         appveyor PushArtifact blobs.zip -Type Zip
       }
-      Start-Job -ScriptBlock $archive
+      $daemon = { Start-Job -ScriptBlock $archive | Wait-Job | Receive-Job }
+      Start-Job -ScriptBlock $daemon
   - echo "%APPVEYOR_JOB_ID%"
   - ps: |
       $apiURL = "https://ci.appveyor.com/api/projects/$env:APPVEYOR_ACCOUNT_NAME/$env:APPVEYOR_PROJECT_SLUG"
