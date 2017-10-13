@@ -50,6 +50,8 @@ install:
     mingw-w64-x86_64-sfml mingw-w64-x86_64-gtk2 mingw-w64-x86_64-box2d mingw-w64-x86_64-bullet
   - gcc -v
   - ps: |
+      # enable HTTP proxy
+      iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-http-proxy.ps1'))
       If ($env:APPVEYOR_JOB_NUMBER -eq 1) {
         # use our first job to build JDI and the CLI
         bash -lc "cd '$env:APPVEYOR_BUILD_FOLDER'; make -j 4; make -j 4 emake"
@@ -58,10 +60,8 @@ install:
         # the blobs artifact while we start building the engine
         $archive = {
           Set-Location $using:PWD
-          #7z a -t7z -m0=lzma2:d1024m -mx=9 -aoa -mfb=64 -md=32m -ms=on blobs.zip compileEGMf.dll emake.exe
-          #appveyor PushArtifact blobs.zip -Type Zip
-          appveyor PushArtifact compileEGMf.dll -Type File
-          appveyor PushArtifact emake.exe -Type File
+          7z a -t7z -m0=BCJ -m1=LZMA:d=21 -mx=9 -mmt blobs.zip compileEGMf.dll emake.exe
+          appveyor PushArtifact blobs.zip -Type Zip
         }
         $daemon = Start-Job -ScriptBlock $archive
 
@@ -74,10 +74,8 @@ install:
       } Else {
         # simply restore JDI and the CLI from the archive artifact of this same build using REST API
         $artifactsURL = "https://ci.appveyor.com/api/buildjobs/$env:ARCHIVE_JOB/artifacts/"
-        appveyor DownloadFile ($artifactsURL + "compileEGMf.dll") -FileName compileEGMf.dll
-        appveyor DownloadFile ($artifactsURL + "emake.exe") -FileName emake.exe
-        #appveyor DownloadFile ($artifactsURL + "blobs.zip") -FileName blobs.zip
-        #7z x blobs.zip
+        appveyor DownloadFile ($artifactsURL + "blobs.zip") -FileName blobs.zip
+        7z e -mmt=on blobs.zip
       }
 build_script:
   # AppVeyor overrides %PLATFORM% because it's part of its API, so export it
