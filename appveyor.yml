@@ -33,7 +33,7 @@ environment:
     - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "MediaControlInterface"}
   #END WINDOWS
 install:
-  - set "PATH=c:\msys64;C:\msys64\mingw64\bin;c:\msys64\usr\bin;%PATH%"
+  - setx "PATH=c:\msys64;C:\msys64\mingw64\bin;c:\msys64\usr\bin;%PATH%"
   - echo %PATH%
   - set MSYSTEM=MINGW64
   - set MSYSTEM_PREFIX=/mingw64
@@ -82,6 +82,5 @@ install:
         7z x blobs.zip
       }
 build_script:
-  # AppVeyor overrides PLATFORM because it's part of its API
-  # so we can just override AppVeyor
+  # AppVeyor overrides %PLATFORM% because it's part of its API, so export it
   - bash -lc "cd $APPVEYOR_BUILD_FOLDER; export PLATFORM=%PLATFORM%; ./ci-build.sh"
