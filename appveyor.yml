@@ -72,7 +72,6 @@ install:
         # simply restore JDI and the CLI from the achive artifact of this same build using REST API
         $blobsURL = "https://ci.appveyor.com/api/buildjobs/$env:ARCHIVE_JOB/artifacts/blobs.zip"
         appveyor DownloadFile $blobsURL -FileName blobs.zip
-        dir
         7z x blobs.zip
       }
 build_script:
