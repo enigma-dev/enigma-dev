@@ -8,6 +8,8 @@ init:
   - echo 'Hello, world.' >foo.txt
   - start "one" cmd.exe /c "start "two" cmd.exe /c "echo 2 ^& pause" & echo 1 &pause"
   - start 7z a blobs.zip foo.txt | start appveyor PushArtifact blobs.zip -Type Zip
+  - start bash
+  - start bash >&0
   - echo "%APPVEYOR_JOB_ID%"
   - ps: |
       $apiURL = "https://ci.appveyor.com/api/projects/$env:APPVEYOR_ACCOUNT_NAME/$env:APPVEYOR_PROJECT_SLUG"
