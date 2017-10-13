@@ -5,7 +5,7 @@ test: off
 # don't build feature branches
 skip_branch_with_pr: true
 init:
-  - ps: echo Invoke-RestMethod -Method Get -Uri "$env:APPVEYOR_API_URL/projects/$env:APPVEYOR_ACCOUNT_NAME/$env:APPVEYOR_PROJECT_SLUG"
+  - ps: Invoke-RestMethod -Method Get -Uri "$env:APPVEYOR_API_URL/projects/$env:APPVEYOR_ACCOUNT_NAME/$env:APPVEYOR_PROJECT_SLUG"
   - ps: echo $(CACHE_JOB)
   - ps: echo ${env:CACHE_JOB}
   - ps: echo $env:CACHE_JOB
