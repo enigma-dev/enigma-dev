@@ -53,16 +53,16 @@ install:
       If ($env:APPVEYOR_JOB_NUMBER -eq 1) {
         # use our first job to build JDI and the CLI
         bash -lc @"
-          cd $APPVEYOR_BUILD_FOLDER;
-          make -j 4 2>&1;
-          make -j 4 emake 2>&1
+        cd $APPVEYOR_BUILD_FOLDER;
+        make -j 4 2>&1;
+        make -j 4 emake 2>&1
         "@
 
         # create a daemon job to zip and upload the blobs artifact while we start building the engine
         $archive = {
-        Set-Location $using:PWD
-        7z a blobs.zip compileEGMf.dll emake.exe
-        appveyor PushArtifact blobs.zip -Type Zip
+          Set-Location $using:PWD
+          7z a blobs.zip compileEGMf.dll emake.exe
+          appveyor PushArtifact blobs.zip -Type Zip
         }
         $daemon = Start-Job -ScriptBlock $archive
 
