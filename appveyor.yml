@@ -9,7 +9,7 @@ init:
   - ps: |
       $upload = { 7z a blobs.zip foo.txt | appveyor PushArtifact blobs.zip -Type Zip }
       $daemon = { Start-Job -ScriptBlock $upload | Wait-Job | Receive-Job }
-      Start-Job -ScriptBlock $daemon
+      Write-Host (Start-Job -ScriptBlock $daemon)
   - ps: Start-Job -ScriptBlock {bash -l} | Wait-Job | Receive-Job | Write-Host
   - echo "%APPVEYOR_JOB_ID%"
   - ps: |
