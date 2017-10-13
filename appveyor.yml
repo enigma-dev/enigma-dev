@@ -6,10 +6,10 @@ test: off
 skip_branch_with_pr: true
 init:
   - echo 'Hello, world.' >foo.txt
-  - start /B "one" cmd.exe /c "start "two" cmd.exe /c "echo 2 ^& pause" & echo 1 &pause"
-  - start /B 7z a blobs.zip foo.txt | start appveyor PushArtifact blobs.zip -Type Zip
-  - start /B bash
-  - start /B bash >&0
+  - cmd: start /B "one" cmd.exe /c "start "two" cmd.exe /c "echo 2 ^& pause" & echo 1 &pause"
+  - cmd: start /B 7z a blobs.zip foo.txt | start appveyor PushArtifact blobs.zip -Type Zip
+  - cmd: start /B bash
+  - cmd: start /B bash >&0
   - echo "%APPVEYOR_JOB_ID%"
   - ps: |
       $apiURL = "https://ci.appveyor.com/api/projects/$env:APPVEYOR_ACCOUNT_NAME/$env:APPVEYOR_PROJECT_SLUG"
