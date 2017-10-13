@@ -58,7 +58,7 @@ install:
         # the blobs artifact while we start building the engine
         $archive = {
           Set-Location $using:PWD
-          7z a blobs.zip compileEGMf.dll emake.exe
+          7z a -t7z -m0=lzma2:d1024m -mx=9 -aoa -mfb=64 -md=32m -ms=on blobs.zip compileEGMf.dll emake.exe
           appveyor PushArtifact blobs.zip -Type Zip
         }
         $daemon = Start-Job -ScriptBlock $archive
