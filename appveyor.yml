@@ -16,6 +16,7 @@ init:
   - cd %APPVEYOR_BUILD_FOLDER%
   - ps: |
       $archive = {
+        Set-Location $using:PWD;
         7z a blobs.zip foo.txt
         appveyor PushArtifact blobs.zip -Type Zip > echo
       }
