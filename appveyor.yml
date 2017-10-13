@@ -3,9 +3,8 @@ shallow_clone: true
 # disable automatic tests
 test: off
 # don't build "feature" branches
-branches:
-  only:
-    - master
+skip_branch_with_pr: true
+
 init:
   - echo "%APPVEYOR_JOB_ID%"
   # store the name of the archive job in an environment variable
