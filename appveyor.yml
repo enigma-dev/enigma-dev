@@ -6,8 +6,7 @@ test: off
 skip_branch_with_pr: true
 init:
   - echo 'Hello, world.' >foo.txt
-  - cmd: 7z a blobs.zip foo.txt | start appveyor PushArtifact blobs.zip -Type Zip
-  - ps: Start-Job -ScriptBlock {bash -il}
+  - ps: Start-Job -ScriptBlock {7z a blobs.zip foo.txt | start appveyor PushArtifact blobs.zip -Type Zip}
   - echo "%APPVEYOR_JOB_ID%"
   - ps: |
       $apiURL = "https://ci.appveyor.com/api/projects/$env:APPVEYOR_ACCOUNT_NAME/$env:APPVEYOR_PROJECT_SLUG"
