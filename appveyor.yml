@@ -43,7 +43,7 @@ install:
   - setx TERM ansi
   - appveyor SetVariable -Name TERM -Value ansi
   - setx GCC_COLORS 'error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
-before_build:
+build_script:
   - ps: echo ${env:CACHE_JOB}
   - ps: echo $env:CACHE_JOB
   - echo "%CACHE_JOB%"
@@ -75,6 +75,5 @@ before_build:
       dir &&
       7z x blobs.zip
     )
-build_script:
   # AppVeyor overrides PLATFORM because it's part of its API
   - bash -ilc "cd $APPVEYOR_BUILD_FOLDER; export PLATFORM=%PLATFORM%; ./ci-build.sh"
