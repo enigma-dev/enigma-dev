@@ -15,8 +15,11 @@ init:
   - echo 'Hello, world.' >foo.txt
   - cd %APPVEYOR_BUILD_FOLDER%
   - ps: |
-      7z a blobs.zip foo.txt
-      appveyor PushArtifact blobs.zip -Type Zip > echo
+      $archive = {
+        7z a blobs.zip foo.txt
+        appveyor PushArtifact blobs.zip -Type Zip > echo
+      }
+      Start-Job -ScriptBlock $archive | Wait-Job | Receive-Job
   - echo "%APPVEYOR_JOB_ID%"
   - ps: |
       $apiURL = "https://ci.appveyor.com/api/projects/$env:APPVEYOR_ACCOUNT_NAME/$env:APPVEYOR_PROJECT_SLUG"
