@@ -11,8 +11,10 @@ init:
   - echo 'Hello, world.' >foo.txt
   - cd %APPVEYOR_BUILD_FOLDER%
   - ps: |
-      Start-Process -PassThru -NoNewWindow 7z -ArgumentList "a", "blobs.zip", "foo.txt"
-  - ps: Start-Process bash -ArgumentList "-il"
+      $myprocss = Start-Process -PassThru -NoNewWindow 7z -ArgumentList "a", "blobs.zip", "foo.txt"
+      $myprocss.WaitForExit()
+      dir
+  - ps: Start-Process -PassThru bash -ArgumentList "-il"
   - echo "%APPVEYOR_JOB_ID%"
   - ps: |
       $apiURL = "https://ci.appveyor.com/api/projects/$env:APPVEYOR_ACCOUNT_NAME/$env:APPVEYOR_PROJECT_SLUG"
