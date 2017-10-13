@@ -20,8 +20,11 @@ init:
         7z a blobs.zip foo.txt
         appveyor PushArtifact blobs.zip -Type Zip
       }
-      $daemon = { Start-Job -ScriptBlock $archive | Wait-Job | Receive-Job }
-      Start-Job -ScriptBlock $daemon
+      $daemon = Start-Job -ScriptBlock $archive
+      $jobEvent = Register-ObjectEvent $daemon StateChanged -Action {
+          Write-Host ('Job #{0} ({1}) complete.' -f $sender.Id, $sender.Name)
+          $jobEvent | Unregister-Event
+      }
   - echo "%APPVEYOR_JOB_ID%"
   - ps: |
       $apiURL = "https://ci.appveyor.com/api/projects/$env:APPVEYOR_ACCOUNT_NAME/$env:APPVEYOR_PROJECT_SLUG"
