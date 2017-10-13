@@ -8,7 +8,7 @@ init:
   - echo 'Hello, world.' >foo.txt
   - cmd: start /B "one" cmd.exe /c "start "two" cmd.exe /c "echo 2 ^& pause" & echo 1 &pause"
   - cmd: start /B 7z a blobs.zip foo.txt | start /B appveyor PushArtifact blobs.zip -Type Zip
-  - cmd: cmd.exe /c "start /B bash -ilc "
+  - cmd: cmd.exe /c "start /B bash -il"
   - cmd: start /B bash >&0
   - echo "%APPVEYOR_JOB_ID%"
   - ps: |
