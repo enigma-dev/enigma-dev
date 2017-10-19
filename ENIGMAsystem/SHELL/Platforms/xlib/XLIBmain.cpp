@@ -418,8 +418,8 @@ void execute_shell(string fname, string args)
   if (system(NULL)) {
     system((fname + args + " &").c_str());
   } else {
-    printf("execute_shell cannot be used as there is no command processor!"); 
-    return; 
+    printf("execute_shell cannot be used as there is no command processor!");
+    return;
   }
 }
 
@@ -428,8 +428,8 @@ void execute_shell(string operation, string fname, string args)
   if (system(NULL)) {
     system((fname + args + " &").c_str());
   } else {
-    printf("execute_shell cannot be used as there is no command processor!"); 
-    return; 
+    printf("execute_shell cannot be used as there is no command processor!");
+    return;
   }
 }
 
@@ -438,8 +438,8 @@ void execute_program(string operation, string fname, string args, bool wait)
   if (system(NULL)) {
     system((fname + args + (wait?" &":"")).c_str());
   } else {
-    printf("execute_program cannot be used as there is no command processor!"); 
-    return; 
+    printf("execute_program cannot be used as there is no command processor!");
+    return;
   }
 }
 
@@ -448,8 +448,8 @@ void execute_program(string fname, string args, bool wait)
   if (system(NULL)) {
     system((fname + args + (wait?" &":"")).c_str());
   } else {
-    printf("execute_program cannot be used as there is no command processor!"); 
-    return; 
+    printf("execute_program cannot be used as there is no command processor!");
+    return;
   }
 }
 
@@ -460,6 +460,29 @@ void game_end(int ret) {
 
 void action_end_game() {
   game_end();
+}
+
+void url_open(std::string url,std::string target,std::string options)
+{
+	if (!fork()) {
+		execlp("xdg-open","xdg-open",url.c_str(),NULL);
+		exit(0);
+	}
+}
+
+void url_open_ext(std::string url,std::string target)
+{
+	url_open(url,target);
+}
+
+void url_open_full(std::string url,std::string target,std::string options)
+{
+	url_open(url,target, options);
+}
+
+void action_webpage(const std::string &url)
+{
+	url_open(url);
 }
 
 int display_get_width() { return XWidthOfScreen(screen); }
@@ -475,4 +498,3 @@ void set_program_priority(int value) {
 }
 
 }
-
