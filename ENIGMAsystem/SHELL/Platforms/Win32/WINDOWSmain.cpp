@@ -245,8 +245,12 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
     if (wid > screen_width) wid = screen_width;
     if (hgt > screen_height) hgt = screen_height;
     // Create the window initially without the WS_VISIBLE flag until we've loaded all of the resources.
-    // This will be handled by game_start in roomsystem.cpp where window_default(true) sets the initial fullscreen state of the window before showing it.
-    enigma::hWnd = CreateWindow ("EnigmaDevGameMainWindow", "", (enigma::getwindowstyle() & ~(WS_VISIBLE)), (screen_width-wid)/2, (screen_height-hgt)/2, wid, hgt, NULL, NULL, hInstance, NULL);
+    // This will be handled by game_start in roomsystem.cpp where window_default(true) sets the initial
+    // fullscreen state of the window before showing it.
+    enigma::hWnd = CreateWindow("EnigmaDevGameMainWindow", "",
+                                (enigma::getwindowstyle() & ~(WS_VISIBLE)),
+                                (screen_width-wid)/2, (screen_height-hgt)/2, wid, hgt,
+                                NULL, NULL, hInstance, NULL);
 
     if (enigma::touch_extension_register != NULL) {
       enigma::touch_extension_register(enigma::hWnd);
