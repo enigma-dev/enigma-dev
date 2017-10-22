@@ -244,11 +244,15 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
     // We won't limit those functions like GM, just the default.
     if (wid > screen_width) wid = screen_width;
     if (hgt > screen_height) hgt = screen_height;
-     enigma::hWnd = CreateWindow ("TMain", "", (enigma::getwindowstyle() & ~(WS_VISIBLE)), (screen_width-wid)/2, (screen_height-hgt)/2, wid, hgt, NULL, NULL, hInstance, NULL);
+    // Create the window initially without the WS_VISIBLE flag until we've loaded all of the resources.
+    // This will be handled by game_start in roomsystem.cpp where window_default(true) sets the initial
+    // fullscreen state of the window before showing it.
+    enigma::hWnd = CreateWindow("EnigmaDevGameMainWindow", "",
+                                (enigma::getwindowstyle() & ~(WS_VISIBLE)),
+                                (screen_width-wid)/2, (screen_height-hgt)/2, wid, hgt,
+                                NULL, NULL, hInstance, NULL);
 
     enigma::EnableDrawing (&hRC);
-    //Do not set the parent window visible until we have initialized the graphics context.
-    ShowWindow(enigma::hWnd, iCmdShow);
     enigma::initialize_everything();
 
     //Main loop
