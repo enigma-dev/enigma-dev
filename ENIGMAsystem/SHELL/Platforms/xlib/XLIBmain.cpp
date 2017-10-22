@@ -289,7 +289,6 @@ int main(int argc,char** argv)
 
     //Make the window
     win = XCreateWindow(disp,root,0,0,winw,winh,0,vi->depth,InputOutput,vi->visual,valmask,&swa);
-    XMapRaised(disp,win); //request visible
 
     //printf("Screen: %d %d %d %d\n",s->width/2,s->height/2,winw,winh);
     XMoveWindow(disp,win,(screen->width-winw)/2,(screen->height-winh)/2);
@@ -312,6 +311,7 @@ int main(int argc,char** argv)
 
     //Call ENIGMA system initializers; sprites, audio, and what have you
     enigma::initialize_everything();
+    XMapRaised(disp,win); //request visible
 
     struct timespec time_offset;
     struct timespec time_offset_slowing;
