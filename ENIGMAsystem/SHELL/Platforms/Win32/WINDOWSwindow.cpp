@@ -51,15 +51,19 @@ namespace enigma
     LONG_PTR getwindowstyle()
     {
         LONG_PTR newlong = WS_MINIMIZEBOX;
-        if (showBorder) {
-            newlong |= WS_CAPTION;
-            if (isSizeable)
-              newlong |= WS_SIZEBOX | WS_MAXIMIZEBOX;
-        }
+
         if (showIcons)
             newlong |= WS_SYSMENU;
         if (isVisible)
             newlong |= WS_VISIBLE;
+
+        if (isFullScreen) {
+            newlong |= WS_POPUP | WS_MAXIMIZE;
+        } else if (showBorder) {
+            newlong |= WS_CAPTION;
+            if (isSizeable)
+                newlong |= WS_SIZEBOX | WS_MAXIMIZEBOX;
+        }
 
         // these two flags are necessary for extensions like Ultimate3D and GMOgre to render on top of the window
         return newlong | WS_CLIPCHILDREN | WS_CLIPSIBLINGS;
@@ -270,35 +274,17 @@ void window_default(bool center_size)
   if (center)
     enigma::centerwindow();
 
-  if (enigma::isFullScreen)
-  {
-      SetWindowLongPtr(enigma::hWnd,GWL_STYLE,WS_POPUP);
-      ShowWindow(enigma::hWnd,SW_MAXIMIZE);
-  }
-  else
-  {
-      enigma::setwindowstyle();
-      ShowWindow(enigma::hWnd,SW_RESTORE);
-  }
-
+  enigma::setwindowstyle();
   enigma::setwindowsize();
 }
 
 void window_set_fullscreen(bool full)
 {
     if (enigma::isFullScreen == full)
-      return;
+        return;
 
-    if ((enigma::isFullScreen = full))
-    {
-      SetWindowLongPtr(enigma::hWnd,GWL_STYLE,WS_POPUP);
-      ShowWindow(enigma::hWnd,SW_MAXIMIZE);
-    }
-    else
-    {
-      enigma::setwindowstyle();
-      ShowWindow(enigma::hWnd,SW_RESTORE);
-    }
+    enigma::isFullScreen = full;
+    enigma::setwindowstyle();
     enigma::setwindowsize();
 }
 
@@ -1046,4 +1032,3 @@ bool clipboard_has_text()
 }
 
 }
-
