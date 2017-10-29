@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+import "Image.proto";
+
+message Background {
+  string name = 1;
+  int32 id = 2;
+
+  bool transparent = 3;
+  bool smoothEdges = 4;
+  bool preload = 5;
+  bool useAsTileset = 6;
+  int32 tileWidth = 7;
+  int32 tileHeight = 8;
+  int32 hOffset = 9;
+  int32 vOffset = 10;
+  int32 hSep = 11;
+  int32 vSep = 12;
+
+  Image image = 13;
+}
