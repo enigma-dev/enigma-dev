@@ -1,0 +1,8 @@
+syntax = "proto3";
+
+message Image {
+  int32 width = 1;
+  int32 height = 2;
+
+  bytes data = 3;
+}
