@@ -1,0 +1,8 @@
+
+table Image {
+  width:int;
+  height:int;
+  data:[byte];
+}
+
+root_type Image;
