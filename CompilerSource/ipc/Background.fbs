@@ -13,8 +13,8 @@ table Background {
   tile_height:int;
   horizontal_offset:int;
   vertical_offset:int;
-  horizontal_separation:int;
-  vertical_separation:int;
+  horizontal_spacing:int;
+  vertical_spacing:int;
 
   image:Image;
 }
