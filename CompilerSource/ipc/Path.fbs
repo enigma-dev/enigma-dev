@@ -13,9 +13,9 @@ table Path {
   closed:bool;
   precision:int;
 
-  //backgroundRoomId:int; //This was used by LGM rather than ENIGMA; it doesn't need to be here.
-  snapX:int; //TODO: Find out if these are needed and decide on keeping them
-  snapY:int;
+  //background_room_id:int; //This was used by LGM rather than ENIGMA; it doesn't need to be here.
+  snap_x:int; //TODO: Find out if these are needed and decide on keeping them
+  snap_y:int;
 
   points:[PathPoint];
 }

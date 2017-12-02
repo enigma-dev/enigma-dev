@@ -44,8 +44,8 @@ struct Path FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     VT_SMOOTH = 8,
     VT_CLOSED = 10,
     VT_PRECISION = 12,
-    VT_SNAPX = 14,
-    VT_SNAPY = 16,
+    VT_SNAP_X = 14,
+    VT_SNAP_Y = 16,
     VT_POINTS = 18
   };
   const flatbuffers::String *name() const {
@@ -63,11 +63,11 @@ struct Path FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   int32_t precision() const {
     return GetField<int32_t>(VT_PRECISION, 0);
   }
-  int32_t snapX() const {
-    return GetField<int32_t>(VT_SNAPX, 0);
+  int32_t snap_x() const {
+    return GetField<int32_t>(VT_SNAP_X, 0);
   }
-  int32_t snapY() const {
-    return GetField<int32_t>(VT_SNAPY, 0);
+  int32_t snap_y() const {
+    return GetField<int32_t>(VT_SNAP_Y, 0);
   }
   const flatbuffers::Vector<const PathPoint *> *points() const {
     return GetPointer<const flatbuffers::Vector<const PathPoint *> *>(VT_POINTS);
@@ -80,8 +80,8 @@ struct Path FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            VerifyField<uint8_t>(verifier, VT_SMOOTH) &&
            VerifyField<uint8_t>(verifier, VT_CLOSED) &&
            VerifyField<int32_t>(verifier, VT_PRECISION) &&
-           VerifyField<int32_t>(verifier, VT_SNAPX) &&
-           VerifyField<int32_t>(verifier, VT_SNAPY) &&
+           VerifyField<int32_t>(verifier, VT_SNAP_X) &&
+           VerifyField<int32_t>(verifier, VT_SNAP_Y) &&
            VerifyOffset(verifier, VT_POINTS) &&
            verifier.Verify(points()) &&
            verifier.EndTable();
@@ -106,11 +106,11 @@ struct PathBuilder {
   void add_precision(int32_t precision) {
     fbb_.AddElement<int32_t>(Path::VT_PRECISION, precision, 0);
   }
-  void add_snapX(int32_t snapX) {
-    fbb_.AddElement<int32_t>(Path::VT_SNAPX, snapX, 0);
+  void add_snap_x(int32_t snap_x) {
+    fbb_.AddElement<int32_t>(Path::VT_SNAP_X, snap_x, 0);
   }
-  void add_snapY(int32_t snapY) {
-    fbb_.AddElement<int32_t>(Path::VT_SNAPY, snapY, 0);
+  void add_snap_y(int32_t snap_y) {
+    fbb_.AddElement<int32_t>(Path::VT_SNAP_Y, snap_y, 0);
   }
   void add_points(flatbuffers::Offset<flatbuffers::Vector<const PathPoint *>> points) {
     fbb_.AddOffset(Path::VT_POINTS, points);
@@ -134,13 +134,13 @@ inline flatbuffers::Offset<Path> CreatePath(
     bool smooth = false,
     bool closed = false,
     int32_t precision = 0,
-    int32_t snapX = 0,
-    int32_t snapY = 0,
+    int32_t snap_x = 0,
+    int32_t snap_y = 0,
     flatbuffers::Offset<flatbuffers::Vector<const PathPoint *>> points = 0) {
   PathBuilder builder_(_fbb);
   builder_.add_points(points);
-  builder_.add_snapY(snapY);
-  builder_.add_snapX(snapX);
+  builder_.add_snap_y(snap_y);
+  builder_.add_snap_x(snap_x);
   builder_.add_precision(precision);
   builder_.add_id(id);
   builder_.add_name(name);
@@ -156,8 +156,8 @@ inline flatbuffers::Offset<Path> CreatePathDirect(
     bool smooth = false,
     bool closed = false,
     int32_t precision = 0,
-    int32_t snapX = 0,
-    int32_t snapY = 0,
+    int32_t snap_x = 0,
+    int32_t snap_y = 0,
     const std::vector<const PathPoint *> *points = nullptr) {
   return CreatePath(
       _fbb,
@@ -166,8 +166,8 @@ inline flatbuffers::Offset<Path> CreatePathDirect(
       smooth,
       closed,
       precision,
-      snapX,
-      snapY,
+      snap_x,
+      snap_y,
       points ? _fbb.CreateVector<const PathPoint *>(*points) : 0);
 }
 
