@@ -9,13 +9,13 @@ table Path {
   name:string;
   id:int;
 
-	smooth:bool;
-	closed:bool;
-	precision:int;
-	
-	//backgroundRoomId:int; //This was used by LGM rather than ENIGMA; it doesn't need to be here.
-	snapX:int; //TODO: Find out if these are needed and decide on keeping them
-	snapY:int;
+  smooth:bool;
+  closed:bool;
+  precision:int;
+
+  //backgroundRoomId:int; //This was used by LGM rather than ENIGMA; it doesn't need to be here.
+  snapX:int; //TODO: Find out if these are needed and decide on keeping them
+  snapY:int;
 
   points:[PathPoint];
 }

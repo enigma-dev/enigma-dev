@@ -46,8 +46,7 @@ struct Path FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     VT_PRECISION = 12,
     VT_SNAPX = 14,
     VT_SNAPY = 16,
-    VT_POINTS = 18,
-    VT_POINTCOUNT = 20
+    VT_POINTS = 18
   };
   const flatbuffers::String *name() const {
     return GetPointer<const flatbuffers::String *>(VT_NAME);
@@ -73,9 +72,6 @@ struct Path FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const flatbuffers::Vector<const PathPoint *> *points() const {
     return GetPointer<const flatbuffers::Vector<const PathPoint *> *>(VT_POINTS);
   }
-  int32_t pointCount() const {
-    return GetField<int32_t>(VT_POINTCOUNT, 0);
-  }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
            VerifyOffset(verifier, VT_NAME) &&
@@ -88,7 +84,6 @@ struct Path FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            VerifyField<int32_t>(verifier, VT_SNAPY) &&
            VerifyOffset(verifier, VT_POINTS) &&
            verifier.Verify(points()) &&
-           VerifyField<int32_t>(verifier, VT_POINTCOUNT) &&
            verifier.EndTable();
   }
 };
@@ -120,9 +115,6 @@ struct PathBuilder {
   void add_points(flatbuffers::Offset<flatbuffers::Vector<const PathPoint *>> points) {
     fbb_.AddOffset(Path::VT_POINTS, points);
   }
-  void add_pointCount(int32_t pointCount) {
-    fbb_.AddElement<int32_t>(Path::VT_POINTCOUNT, pointCount, 0);
-  }
   explicit PathBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
@@ -144,10 +136,8 @@ inline flatbuffers::Offset<Path> CreatePath(
     int32_t precision = 0,
     int32_t snapX = 0,
     int32_t snapY = 0,
-    flatbuffers::Offset<flatbuffers::Vector<const PathPoint *>> points = 0,
-    int32_t pointCount = 0) {
+    flatbuffers::Offset<flatbuffers::Vector<const PathPoint *>> points = 0) {
   PathBuilder builder_(_fbb);
-  builder_.add_pointCount(pointCount);
   builder_.add_points(points);
   builder_.add_snapY(snapY);
   builder_.add_snapX(snapX);
@@ -168,8 +158,7 @@ inline flatbuffers::Offset<Path> CreatePathDirect(
     int32_t precision = 0,
     int32_t snapX = 0,
     int32_t snapY = 0,
-    const std::vector<const PathPoint *> *points = nullptr,
-    int32_t pointCount = 0) {
+    const std::vector<const PathPoint *> *points = nullptr) {
   return CreatePath(
       _fbb,
       name ? _fbb.CreateString(name) : 0,
@@ -179,8 +168,7 @@ inline flatbuffers::Offset<Path> CreatePathDirect(
       precision,
       snapX,
       snapY,
-      points ? _fbb.CreateVector<const PathPoint *>(*points) : 0,
-      pointCount);
+      points ? _fbb.CreateVector<const PathPoint *>(*points) : 0);
 }
 
 inline const Path *GetPath(const void *buf) {
