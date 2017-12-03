@@ -5,17 +5,21 @@ struct PathPoint {
   speed:int;
 }
 
+table PathEditorMetadata {
+  background_room_id:int;
+  snap_x:int;
+  snap_y:int;
+}
+
 table Path {
   name:string;
   id:int;
 
+  editor_metadata:PathEditorMetadata;
+
   smooth:bool;
   closed:bool;
   precision:int;
-
-  //background_room_id:int; //This was used by LGM rather than ENIGMA; it doesn't need to be here.
-  snap_x:int; //TODO: Find out if these are needed and decide on keeping them
-  snap_y:int;
 
   points:[PathPoint];
 }
