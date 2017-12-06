@@ -1,0 +1,31 @@
+
+table Glyph
+{
+	origin:double; //to convert to int, these should be rounded on .5
+	baseline:double;
+	advance:double;
+	width:int;
+	height:int;
+	data:[byte]; //size = width * height
+}
+
+table GlyphRange
+{
+	min:int;
+  max:int;
+  glyphs:[Glyph];
+}
+
+table Font {
+  name:string;
+  id:int;
+
+  font_name:string;
+  size:int;
+  bold:bool;
+  italic:bool;
+
+  glyph_ranges:[GlyphRange];
+}
+
+root_type Font;
