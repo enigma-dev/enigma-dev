@@ -1,0 +1,27 @@
+
+enum SoundKind : byte { NORMAL, BACKGROUND_MUSIC, THREE_DIMENSIONAL, MULTIMEDIA_PLAYER }
+
+struct SoundEffects {
+  chorus:bool;
+  echo:bool;
+  flanger:bool;
+  gargle:bool;
+  reverb:bool;
+}
+
+table Sound {
+  name:string;
+  id:int;
+
+  kind:SoundKind;
+  file_type:string;
+  file_name:string;
+  effects:SoundEffects;
+  volume:double;
+  pan:double;
+  preload:bool;
+
+  data:[byte];
+}
+
+root_type Sound;
