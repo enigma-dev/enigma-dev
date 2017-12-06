@@ -22,8 +22,8 @@ struct Background FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     VT_TILE_HEIGHT = 18,
     VT_HORIZONTAL_OFFSET = 20,
     VT_VERTICAL_OFFSET = 22,
-    VT_HORIZONTAL_SEPARATION = 24,
-    VT_VERTICAL_SEPARATION = 26,
+    VT_HORIZONTAL_SPACING = 24,
+    VT_VERTICAL_SPACING = 26,
     VT_IMAGE = 28
   };
   const flatbuffers::String *name() const {
@@ -56,11 +56,11 @@ struct Background FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   int32_t vertical_offset() const {
     return GetField<int32_t>(VT_VERTICAL_OFFSET, 0);
   }
-  int32_t horizontal_separation() const {
-    return GetField<int32_t>(VT_HORIZONTAL_SEPARATION, 0);
+  int32_t horizontal_spacing() const {
+    return GetField<int32_t>(VT_HORIZONTAL_SPACING, 0);
   }
-  int32_t vertical_separation() const {
-    return GetField<int32_t>(VT_VERTICAL_SEPARATION, 0);
+  int32_t vertical_spacing() const {
+    return GetField<int32_t>(VT_VERTICAL_SPACING, 0);
   }
   const Image *image() const {
     return GetPointer<const Image *>(VT_IMAGE);
@@ -78,8 +78,8 @@ struct Background FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            VerifyField<int32_t>(verifier, VT_TILE_HEIGHT) &&
            VerifyField<int32_t>(verifier, VT_HORIZONTAL_OFFSET) &&
            VerifyField<int32_t>(verifier, VT_VERTICAL_OFFSET) &&
-           VerifyField<int32_t>(verifier, VT_HORIZONTAL_SEPARATION) &&
-           VerifyField<int32_t>(verifier, VT_VERTICAL_SEPARATION) &&
+           VerifyField<int32_t>(verifier, VT_HORIZONTAL_SPACING) &&
+           VerifyField<int32_t>(verifier, VT_VERTICAL_SPACING) &&
            VerifyOffset(verifier, VT_IMAGE) &&
            verifier.VerifyTable(image()) &&
            verifier.EndTable();
@@ -119,11 +119,11 @@ struct BackgroundBuilder {
   void add_vertical_offset(int32_t vertical_offset) {
     fbb_.AddElement<int32_t>(Background::VT_VERTICAL_OFFSET, vertical_offset, 0);
   }
-  void add_horizontal_separation(int32_t horizontal_separation) {
-    fbb_.AddElement<int32_t>(Background::VT_HORIZONTAL_SEPARATION, horizontal_separation, 0);
+  void add_horizontal_spacing(int32_t horizontal_spacing) {
+    fbb_.AddElement<int32_t>(Background::VT_HORIZONTAL_SPACING, horizontal_spacing, 0);
   }
-  void add_vertical_separation(int32_t vertical_separation) {
-    fbb_.AddElement<int32_t>(Background::VT_VERTICAL_SEPARATION, vertical_separation, 0);
+  void add_vertical_spacing(int32_t vertical_spacing) {
+    fbb_.AddElement<int32_t>(Background::VT_VERTICAL_SPACING, vertical_spacing, 0);
   }
   void add_image(flatbuffers::Offset<Image> image) {
     fbb_.AddOffset(Background::VT_IMAGE, image);
@@ -152,13 +152,13 @@ inline flatbuffers::Offset<Background> CreateBackground(
     int32_t tile_height = 0,
     int32_t horizontal_offset = 0,
     int32_t vertical_offset = 0,
-    int32_t horizontal_separation = 0,
-    int32_t vertical_separation = 0,
+    int32_t horizontal_spacing = 0,
+    int32_t vertical_spacing = 0,
     flatbuffers::Offset<Image> image = 0) {
   BackgroundBuilder builder_(_fbb);
   builder_.add_image(image);
-  builder_.add_vertical_separation(vertical_separation);
-  builder_.add_horizontal_separation(horizontal_separation);
+  builder_.add_vertical_spacing(vertical_spacing);
+  builder_.add_horizontal_spacing(horizontal_spacing);
   builder_.add_vertical_offset(vertical_offset);
   builder_.add_horizontal_offset(horizontal_offset);
   builder_.add_tile_height(tile_height);
@@ -184,8 +184,8 @@ inline flatbuffers::Offset<Background> CreateBackgroundDirect(
     int32_t tile_height = 0,
     int32_t horizontal_offset = 0,
     int32_t vertical_offset = 0,
-    int32_t horizontal_separation = 0,
-    int32_t vertical_separation = 0,
+    int32_t horizontal_spacing = 0,
+    int32_t vertical_spacing = 0,
     flatbuffers::Offset<Image> image = 0) {
   return CreateBackground(
       _fbb,
@@ -199,8 +199,8 @@ inline flatbuffers::Offset<Background> CreateBackgroundDirect(
       tile_height,
       horizontal_offset,
       vertical_offset,
-      horizontal_separation,
-      vertical_separation,
+      horizontal_spacing,
+      vertical_spacing,
       image);
 }
 
