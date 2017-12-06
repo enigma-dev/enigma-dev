@@ -1,0 +1,9 @@
+
+table Script {
+  name:string;
+  id:int;
+
+  code:string;
+}
+
+root_type Script;
