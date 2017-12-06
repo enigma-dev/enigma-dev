@@ -1,17 +1,17 @@
 
 table Glyph
 {
-	origin:double; //to convert to int, these should be rounded on .5
-	baseline:double;
-	advance:double;
-	width:int;
-	height:int;
-	data:[byte]; //size = width * height
+  origin:double; //to convert to int, these should be rounded on .5
+  baseline:double;
+  advance:double;
+  width:int;
+  height:int;
+  data:[byte]; //size = width * height
 }
 
 table GlyphRange
 {
-	min:int;
+  min:int;
   max:int;
   glyphs:[Glyph];
 }
