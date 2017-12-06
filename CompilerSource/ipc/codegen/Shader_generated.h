@@ -9,10 +9,10 @@
 struct Shader;
 
 enum ShaderType {
-  ShaderType_GLSL = 1,
-  ShaderType_GLSLES = 2,
-  ShaderType_HLSL9 = 3,
-  ShaderType_HLSL11 = 4,
+  ShaderType_GLSL = 0,
+  ShaderType_GLSLES = 1,
+  ShaderType_HLSL9 = 2,
+  ShaderType_HLSL11 = 3,
   ShaderType_MIN = ShaderType_GLSL,
   ShaderType_MAX = ShaderType_HLSL11
 };
@@ -39,7 +39,7 @@ inline const char **EnumNamesShaderType() {
 }
 
 inline const char *EnumNameShaderType(ShaderType e) {
-  const size_t index = static_cast<int>(e) - static_cast<int>(ShaderType_GLSL);
+  const size_t index = static_cast<int>(e);
   return EnumNamesShaderType()[index];
 }
 
@@ -122,7 +122,7 @@ inline flatbuffers::Offset<Shader> CreateShader(
     flatbuffers::FlatBufferBuilder &_fbb,
     flatbuffers::Offset<flatbuffers::String> name = 0,
     int32_t id = 0,
-    ShaderType type = static_cast<ShaderType>(0),
+    ShaderType type = ShaderType_GLSL,
     bool precompile = false,
     flatbuffers::Offset<flatbuffers::String> vertex_code = 0,
     flatbuffers::Offset<flatbuffers::String> fragment_code = 0) {
@@ -140,7 +140,7 @@ inline flatbuffers::Offset<Shader> CreateShaderDirect(
     flatbuffers::FlatBufferBuilder &_fbb,
     const char *name = nullptr,
     int32_t id = 0,
-    ShaderType type = static_cast<ShaderType>(0),
+    ShaderType type = ShaderType_GLSL,
     bool precompile = false,
     const char *vertex_code = nullptr,
     const char *fragment_code = nullptr) {

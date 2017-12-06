@@ -1,5 +1,5 @@
 
-enum ShaderType : byte { GLSL = 1, GLSLES, HLSL9, HLSL11 }
+enum ShaderType : byte { GLSL, GLSLES, HLSL9, HLSL11 }
 
 table Shader {
   name:string;
