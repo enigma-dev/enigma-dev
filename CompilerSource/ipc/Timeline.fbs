@@ -1,6 +1,5 @@
 
-table Moment
-{
+table Moment {
   step:int;
   code:string;
 }

@@ -1,0 +1,27 @@
+
+table Event {
+  id:int;
+  code:string;
+}
+
+table MainEvent {
+  id:int;
+  events:[Event];
+}
+
+table Object {
+  name:string;
+  id:int;
+
+  parent_id:int;
+  sprite_id:int;
+  mask_id:int;
+  depth:int;
+  solid:bool;
+  visible:bool;
+  persisent:bool;
+  
+  main_events:[MainEvent];
+}
+
+root_type Object;
