@@ -1,0 +1,113 @@
+
+table RoomInstance {
+  id:int;
+
+  x:int;
+  y:int;
+  object_id:int;
+
+  flip_x:bool;
+  flip_y:bool;
+  scale_x:double;
+  scale_y:double;
+  rotation:double;
+  color:int;
+
+  creation_code:string;
+  locked:bool;
+}
+
+struct RoomTile {
+  id:int;
+
+  background_id:int;
+  bg_x:int;
+  bg_y:int;
+  room_x:int;
+  room_y:int;
+  width:int;
+  height:int;
+  depth:int;
+
+  scale_x:double;
+  scale_y:double;
+  color:int;
+
+  locked:bool;
+}
+
+struct RoomBackground {
+  visible:bool;
+  foreground:bool;
+  background_id:int;
+  x:int;
+  y:int;
+  tile_horizontal:bool;
+  tile_vertical:bool;
+  speed_h:int;
+  speed_v:int;
+  stretch:bool;
+}
+
+struct RoomView {
+  visible:bool;
+  x:int;
+  y:int;
+  width:int;
+  height:int;
+  port_x:int;
+  port_y:int;
+  port_w:int;
+  port_h:int;
+  border_h:int;
+  border_v:int;
+  speed_h:int;
+  speed_v:int;
+  object_id:int;
+}
+
+struct RoomEditorMetadata {
+  remember_window_size:bool;
+  editor_width:int;
+  editor_height:int;
+  current_tab:int;
+  scroll_x:int;
+  scroll_y:int;
+
+  show_grid:bool;
+  show_objects:bool;
+  show_tiles:bool;
+  show_backgrounds:bool;
+  show_views:bool;
+  delete_underlying_objects:bool;
+  delete_underlying_tiles:bool;
+
+  snap_x:int;
+  snap_y:int;
+  isometric:bool;
+}
+
+table Room {
+  name:string;
+  id:int;
+
+  editor_metadata:RoomEditorMetadata;
+
+  caption:string;
+  width:int;
+  height:int;
+
+  speed:int;
+  persistent:bool;
+  background_color:int;
+  draw_background_color:bool;
+  creation_code:string;
+
+  views_enabled:bool;
+  views:[RoomView];
+  backgrounds:[RoomBackground];
+  instances:[RoomInstance];
+  tiles:[RoomTile];
+}
+
+root_type Room;
