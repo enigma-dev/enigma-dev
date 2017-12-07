@@ -1,0 +1,15 @@
+
+table Moment
+{
+  step:int;
+  code:string;
+}
+
+table Timeline {
+  name:string;
+  id:int;
+
+  moments:[Moment];
+}
+
+root_type Timeline;
