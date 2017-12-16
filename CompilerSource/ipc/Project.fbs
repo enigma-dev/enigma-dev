@@ -1,0 +1,31 @@
+include "Sprite.fbs";
+include "Sound.fbs";
+include "Background.fbs";
+include "Path.fbs";
+include "Script.fbs";
+include "Shader.fbs";
+include "Font.fbs";
+include "Timeline.fbs";
+include "Object.fbs";
+include "Room.fbs";
+
+include "GameInformation.fbs";
+//include "GameSettings.fbs";
+
+table Project {
+  file_name:string;
+  file_version:int;
+
+  sprites:[Sprite];
+  sounds:[Sound];
+  backgrounds:[Background];
+  paths:[Path];
+  scripts:[Script];
+  shaders:[Shader];
+  fonts:[Font];
+  timelines:[Timeline];
+  objects:[Object];
+  rooms:[Room];
+}
+
+root_type Project;

@@ -1,8 +1,8 @@
 
 codegen/%_generated.h: %.fbs
-	flatc -o codegen --cpp $<
+	flatc -I util -I resources -o codegen --cpp $<
 
-SOURCES := $(wildcard *.fbs)
+SOURCES := $(shell find -name '*.fbs')
 GENERATED := $(addprefix codegen/,$(SOURCES:.fbs=_generated.h))
 
 .PHONY: regenerate-flatbuffers
