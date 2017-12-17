@@ -13,7 +13,6 @@ codegen/%_generated.h: %.fbs | $(OBJDIRS)
 	flatc -I util -I resources -o codegen/$(dir $*.d) --cpp $<
 
 $(OBJDIRS):
-	echo $(OBJDIRS)
 	mkdir -p $@
 
 -include $(addprefix codegen/,$(SOURCES:.fbs=.d))
