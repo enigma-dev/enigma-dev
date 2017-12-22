@@ -217,7 +217,7 @@ namespace enigma_user
 	}
 
 
-	void d3d_model_floor(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, gs_scalar hrep, gs_scalar vrep) {
+	/*void d3d_model_floor(int id, gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2, gs_scalar hrep, gs_scalar vrep) {
 		// Setup U and V vectors
 		gs_scalar vX = x2 - x1;
 		gs_scalar vY = y2 - y1;
@@ -512,7 +512,7 @@ namespace enigma_user
 			}
 			d3d_model_primitive_end(id);
 		}
-	}
+	}*/
 	//
 
 	void d3d_model_save(int id, string fname) {

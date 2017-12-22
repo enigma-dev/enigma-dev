@@ -28,12 +28,16 @@
 #ifndef _CALLBACK_ARRAYS__H
 #define _CALLBACK_ARRAYS__H
 
+#include <string>
+
 namespace enigma
 {
   extern char mousestatus[3];
   extern char last_mousestatus[3];
   extern char last_keybdstatus[256];
   extern char keybdstatus[256];
+
+  void input_push();
 }
 
 namespace enigma_user
@@ -121,23 +125,17 @@ enum {
   vk_rsuper = 92,
 };
 
-
 extern double mouse_x, mouse_y;
 extern int mouse_button, mouse_lastbutton;
-extern string keyboard_lastchar;
+extern std::string keyboard_lastchar;
 extern int keyboard_lastkey;
 
 bool mouse_check_button(int button);
 bool mouse_check_button_pressed(int button);
 bool mouse_check_button_released(int button);
 
-}
-
 extern short mouse_hscrolls;
 extern short mouse_vscrolls;
-
-namespace enigma_user
-{
 
 bool keyboard_check(int key);
 bool keyboard_check_pressed(int key);

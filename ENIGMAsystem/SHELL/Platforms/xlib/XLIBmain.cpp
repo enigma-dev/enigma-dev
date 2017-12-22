@@ -18,51 +18,24 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
-#include <unistd.h>
-#include <sys/resource.h>
-#include <stdio.h>
-#include <string>
-#include <cstdlib>
-#include <stdlib.h> //getenv and system
-
-#include "Platforms/platforms_mandatory.h"
-
 #include "XLIBmain.h"
 #include "XLIBwindow.h"
 #include "LINUXjoystick.h"
+
+#include "Platforms/platforms_mandatory.h"
+#include "Platforms/POSIX/GameLoop.h"
 
 #include "Universal_System/var4.h"
 #include "Universal_System/CallbackArrays.h"
 #include "Universal_System/roomsystem.h"
 #include "Universal_System/loading.h"
 
-#include <time.h>
-
-namespace enigma_user {
-  const int os_type = os_linux;
-  extern int keyboard_key;
-  extern int keyboard_lastkey;
-  extern string keyboard_lastchar;
-  extern string keyboard_string;
-}
+#include <unistd.h> //getcwd
 
 namespace enigma
 {
-  int game_return = 0;
-  extern unsigned char keymap[512];
-  void ENIGMA_events(void); //TODO: Synchronize this with Windows by putting these two in a single header.
-  bool gameWindowFocused = false;
-  extern int windowWidth, windowHeight;
-  extern bool freezeOnLoseFocus;
-  unsigned int pausedSteps = 0;
-
   void (*WindowResizedCallback)();
   XVisualInfo* CreateVisualInfo();
-  void EnableDrawing();
-  void DisableDrawing();
-  void WindowResized();
 
   namespace x11
   {
@@ -71,7 +44,7 @@ namespace enigma
     Window win;
     Atom wm_delwin;
 
-    int handleEvents()
+    void handleEvents()
     {
       XEvent e;
       XNextEvent(disp, &e);
@@ -81,7 +54,7 @@ namespace enigma
         case KeyPress: {
               gk=XLookupKeysym(&e.xkey,0);
               if (gk==NoSymbol)
-                return 0;
+                return;
 
               if (!(gk & 0xFF00)) actualKey = enigma_user::keyboard_get_map((int)enigma::keymap[gk & 0xFF]);
               else actualKey = enigma_user::keyboard_get_map((int)enigma::keymap[gk & 0x1FF]);
@@ -101,46 +74,46 @@ namespace enigma
               enigma_user::keyboard_key = actualKey;
               if (enigma::last_keybdstatus[actualKey]==1 && enigma::keybdstatus[actualKey]==0) {
                 enigma::keybdstatus[actualKey]=1;
-                return 0;
+                return;
               }
               enigma::last_keybdstatus[actualKey]=enigma::keybdstatus[actualKey];
               enigma::keybdstatus[actualKey]=1;
-              return 0;
+              return;
         }
         case KeyRelease: {
             enigma_user::keyboard_key = 0;
             gk=XLookupKeysym(&e.xkey,0);
             if (gk == NoSymbol)
-              return 0;
+              return;
 
             if (!(gk & 0xFF00)) actualKey = enigma_user::keyboard_get_map((int)enigma::keymap[gk & 0xFF]);
             else actualKey = enigma_user::keyboard_get_map((int)enigma::keymap[gk & 0x1FF]);
 
             enigma::last_keybdstatus[actualKey]=enigma::keybdstatus[actualKey];
             enigma::keybdstatus[actualKey]=0;
-          return 0;
+          return;
         }
         case ButtonPress: {
             if (e.xbutton.button < 4) enigma::mousestatus[e.xbutton.button == 1 ? 0 : 4-e.xbutton.button] = 1;
             else switch (e.xbutton.button) {
-              case 4: mouse_vscrolls++; break;
-              case 5: mouse_vscrolls--; break;
-              case 6: mouse_hscrolls++; break;
-              case 7: mouse_hscrolls--; break;
+              case 4: enigma_user::mouse_vscrolls++; break;
+              case 5: enigma_user::mouse_vscrolls--; break;
+              case 6: enigma_user::mouse_hscrolls++; break;
+              case 7: enigma_user::mouse_hscrolls--; break;
               default: ;
             }
-          return 0;
+          return;
         }
         case ButtonRelease: {
             if (e.xbutton.button < 4) enigma::mousestatus[e.xbutton.button == 1 ? 0 : 4-e.xbutton.button] = 0;
             else switch (e.xbutton.button) {
-              case 4: mouse_vscrolls++; break;
-              case 5: mouse_vscrolls--; break;
-              case 6: mouse_hscrolls++; break;
-              case 7: mouse_hscrolls--; break;
+              case 4: enigma_user::mouse_vscrolls++; break;
+              case 5: enigma_user::mouse_vscrolls--; break;
+              case 6: enigma_user::mouse_hscrolls++; break;
+              case 7: enigma_user::mouse_hscrolls--; break;
               default: ;
             }
-          return 0;
+          return;
         }
         case ConfigureNotify: {
           enigma::windowWidth = e.xconfigure.width;
@@ -152,88 +125,43 @@ namespace enigma
           if (WindowResizedCallback != NULL) {
             WindowResizedCallback();
           }
-          return 0;
+          return;
         }
         case FocusIn:
           gameWindowFocused = true;
           pausedSteps = 0;
-          return 0;
+          return;
         case FocusOut:
           gameWindowFocused = false;
-          return 0;
+          return;
         case ClientMessage:
           if ((Atom)e.xclient.data.l[0] == wm_delwin) //For some reason, this line warns whether we cast to unsigned or not.
-            return 1;
+          {
+            enigma_user::game_end(0);
+            return;
+          }
           //else fall through
         default:
-            printf("%d\n",e.type);
-          return 0;
+            //printf("%d\n",e.type);
+          return;
       }
       //Move/Resize = ConfigureNotify
       //Min = UnmapNotify
       //Restore = MapNotify
     }
   }
+
+void platformEvents()
+{
+  while (XQLength(enigma::x11::disp) || XPending(enigma::x11::disp))
+    enigma::x11::handleEvents();
+
+  enigma::handle_joysticks();
 }
 
+}
 using namespace enigma::x11;
 
-namespace enigma
-{
-  extern int windowColor;
-
-  void input_initialize()
-  {
-    //Clear the input arrays
-    for(int i=0;i<3;i++){
-      last_mousestatus[i]=0;
-      mousestatus[i]=0;
-    }
-    for(int i=0;i<256;i++){
-      last_keybdstatus[i]=0;
-      keybdstatus[i]=0;
-    }
-
-    init_joysticks();
-  }
-
-  void input_push()
-  {
-    for(int i=0;i<3;i++){
-      last_mousestatus[i] = mousestatus[i];
-    }
-    for(int i=0;i<256;i++){
-      last_keybdstatus[i] = keybdstatus[i];
-    }
-    mouse_hscrolls = mouse_vscrolls = 0;
-  }
-
-  int game_ending();
-}
-
-//TODO: Implement pause events
-unsigned long current_time_mcs = 0; // microseconds since the start of the game
-
-namespace enigma_user {
-  std::string working_directory = "";
-  extern double fps;
-  unsigned long current_time = 0; // milliseconds since the start of the game
-  unsigned long delta_time = 0; // microseconds since the last step event
-
-  unsigned long get_timer() {  // microseconds since the start of the game
-    return current_time_mcs;
-  }
-}
-
-static inline long clamp(long value, long min, long max)
-{
-  if (value < min) return min;
-  if (value > max) return max;
-  return value;
-}
-
-#include <unistd.h>
-static bool game_isending = false;
 int main(int argc,char** argv)
 {
     // Set the working_directory
@@ -244,13 +172,7 @@ int main(int argc,char** argv)
        perror("getcwd() error");
     enigma_user::working_directory = string( buffer );
 
-    // Copy our parameters
-    enigma::parameters = new string[argc];
-    enigma::parameterc = argc;
-    for (int i=0; i<argc; i++)
-        enigma::parameters[i]=argv[i];
     enigma::initkeymap();
-
 
     // Initiate display
     disp = XOpenDisplay(NULL);
@@ -307,196 +229,14 @@ int main(int argc,char** argv)
         printf("NoClose\n");
         return -4;
     }
-    gmw_init(); //init gm window functions, flushes
-    //#include "initialize.h"
+    
+   enigma::gmw_init(); //init gm window functions, flushes
+  //#include "initialize.h"
 
-    //Call ENIGMA system initializers; sprites, audio, and what have you
-    enigma::initialize_everything();
+  int ret = enigma::gameLoop(argc, argv);
 
-    struct timespec time_offset;
-    struct timespec time_offset_slowing;
-    struct timespec time_current;
-    clock_gettime(CLOCK_MONOTONIC, &time_offset);
-    time_offset_slowing.tv_sec = time_offset.tv_sec;
-    time_offset_slowing.tv_nsec = time_offset.tv_nsec;
-    int frames_count = 0;
+  XCloseDisplay(disp);
 
-    while (!game_isending)
-    {
-        using enigma::current_room_speed;
-        clock_gettime(CLOCK_MONOTONIC, &time_current);
-        {
-            long passed_mcs = (time_current.tv_sec - time_offset.tv_sec)*1000000 + (time_current.tv_nsec/1000 - + time_offset.tv_nsec/1000);
-            passed_mcs = clamp(passed_mcs, 0, 1000000);
-            if (passed_mcs >= 1000000) { // Handle resetting.
-
-                enigma_user::fps = frames_count;
-                frames_count = 0;
-                time_offset.tv_sec += passed_mcs/1000000;
-                time_offset_slowing.tv_sec = time_offset.tv_sec;
-                time_offset_slowing.tv_nsec = time_offset.tv_nsec;
-            }
-        }
-        long spent_mcs = 0;
-        long last_mcs = 0;
-        if (current_room_speed > 0) {
-            spent_mcs = (time_current.tv_sec - time_offset_slowing.tv_sec)*1000000 + (time_current.tv_nsec/1000 - time_offset_slowing.tv_nsec/1000);
-            spent_mcs = clamp(spent_mcs, 0, 1000000);
-            long remaining_mcs = 1000000 - spent_mcs;
-            long needed_mcs = long((1.0 - 1.0*frames_count/current_room_speed)*1e6);
-            const int catchup_limit_ms = 50;
-            if (needed_mcs > remaining_mcs + catchup_limit_ms*1000) {
-                // If more than catchup_limit ms is needed than is remaining, we risk running too fast to catch up.
-                // In order to avoid running too fast, we advance the offset, such that we are only at most catchup_limit ms behind.
-                // Thus, if the load is consistently making the game slow, the game is still allowed to run as fast as possible
-                // without any sleep.
-                // And if there is very heavy load once in a while, the game will only run too fast for catchup_limit ms.
-                time_offset_slowing.tv_nsec += 1000*(needed_mcs - (remaining_mcs + catchup_limit_ms*1000));
-                spent_mcs = (time_current.tv_sec - time_offset_slowing.tv_sec)*1000000 + (time_current.tv_nsec/1000 - time_offset_slowing.tv_nsec/1000);
-                spent_mcs = clamp(spent_mcs, 0, 1000000);
-                remaining_mcs = 1000000 - spent_mcs;
-                needed_mcs = long((1.0 - 1.0*frames_count/current_room_speed)*1e6);
-            }
-            if (remaining_mcs > needed_mcs) {
-                const long sleeping_time = std::min((remaining_mcs - needed_mcs)/5, long(999999));
-                usleep(std::max(long(1), sleeping_time));
-                continue;
-            }
-        }
-
-        //TODO: The placement of this code is inconsistent with Win32 because events are handled after, ask Josh.
-        unsigned long dt = 0;
-        if (spent_mcs > last_mcs) {
-            dt = (spent_mcs - last_mcs);
-        } else {
-            //TODO: figure out what to do here this happens when the fps is reached and the timers start over
-            dt = enigma_user::delta_time;
-        }
-        last_mcs = spent_mcs;
-        enigma_user::delta_time = dt;
-        current_time_mcs += enigma_user::delta_time;
-        enigma_user::current_time += enigma_user::delta_time / 1000;
-
-        while (XQLength(disp) || XPending(disp))
-            if(handleEvents() > 0)
-                goto end;
-
-        if (!enigma::gameWindowFocused && enigma::freezeOnLoseFocus) {
-          if (enigma::pausedSteps < 1) {
-            enigma::pausedSteps += 1;
-          } else {
-            usleep(100000);
-            continue;
-          }
-        }
-
-        enigma::handle_joysticks();
-        enigma::ENIGMA_events();
-        enigma::input_push();
-
-        frames_count++;
-    }
-
-    end:
-    enigma::game_ending();
-    enigma::DisableDrawing();
-    XCloseDisplay(disp);
-    return enigma::game_return;
-}
-
-namespace enigma_user
-{
-
-string parameter_string(int num) {
-  return num < enigma::parameterc ? enigma::parameters[num] : "";
-}
-
-int parameter_count() {
-  return enigma::parameterc;
-}
-
-void execute_shell(string fname, string args)
-{
-  if (system(NULL)) {
-    system((fname + args + " &").c_str());
-  } else {
-    printf("execute_shell cannot be used as there is no command processor!");
-    return;
-  }
-}
-
-void execute_shell(string operation, string fname, string args)
-{
-  if (system(NULL)) {
-    system((fname + args + " &").c_str());
-  } else {
-    printf("execute_shell cannot be used as there is no command processor!");
-    return;
-  }
-}
-
-void execute_program(string operation, string fname, string args, bool wait)
-{
-  if (system(NULL)) {
-    system((fname + args + (wait?" &":"")).c_str());
-  } else {
-    printf("execute_program cannot be used as there is no command processor!");
-    return;
-  }
-}
-
-void execute_program(string fname, string args, bool wait)
-{
-  if (system(NULL)) {
-    system((fname + args + (wait?" &":"")).c_str());
-  } else {
-    printf("execute_program cannot be used as there is no command processor!");
-    return;
-  }
-}
-
-void game_end(int ret) {
-  game_isending = true;
-  enigma::game_return = ret;
-}
-
-void action_end_game() {
-  game_end();
-}
-
-void url_open(std::string url,std::string target,std::string options)
-{
-	if (!fork()) {
-		execlp("xdg-open","xdg-open",url.c_str(),NULL);
-		exit(0);
-	}
-}
-
-void url_open_ext(std::string url,std::string target)
-{
-	url_open(url,target);
-}
-
-void url_open_full(std::string url,std::string target,std::string options)
-{
-	url_open(url,target, options);
-}
-
-void action_webpage(const std::string &url)
-{
-	url_open(url);
-}
-
-int display_get_width() { return XWidthOfScreen(screen); }
-int display_get_height() { return XHeightOfScreen(screen); }
-
-string environment_get_variable(string name) {
-  char *ev = getenv(name.c_str());
-  return ev? ev : "";
-}
-
-void set_program_priority(int value) {
-  setpriority(PRIO_PROCESS, getpid(), value);
-}
-
+  return ret;
+  
 }
