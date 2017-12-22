@@ -54,7 +54,7 @@ namespace enigma
         case KeyPress: {
               gk=XLookupKeysym(&e.xkey,0);
               if (gk==NoSymbol)
-                return;
+                break;
 
               if (!(gk & 0xFF00)) actualKey = enigma_user::keyboard_get_map((int)enigma::keymap[gk & 0xFF]);
               else actualKey = enigma_user::keyboard_get_map((int)enigma::keymap[gk & 0x1FF]);
@@ -74,24 +74,24 @@ namespace enigma
               enigma_user::keyboard_key = actualKey;
               if (enigma::last_keybdstatus[actualKey]==1 && enigma::keybdstatus[actualKey]==0) {
                 enigma::keybdstatus[actualKey]=1;
-                return;
+                break;
               }
               enigma::last_keybdstatus[actualKey]=enigma::keybdstatus[actualKey];
               enigma::keybdstatus[actualKey]=1;
-              return;
+              break;
         }
         case KeyRelease: {
             enigma_user::keyboard_key = 0;
             gk=XLookupKeysym(&e.xkey,0);
             if (gk == NoSymbol)
-              return;
+              break;
 
             if (!(gk & 0xFF00)) actualKey = enigma_user::keyboard_get_map((int)enigma::keymap[gk & 0xFF]);
             else actualKey = enigma_user::keyboard_get_map((int)enigma::keymap[gk & 0x1FF]);
 
             enigma::last_keybdstatus[actualKey]=enigma::keybdstatus[actualKey];
             enigma::keybdstatus[actualKey]=0;
-          return;
+          break;
         }
         case ButtonPress: {
             if (e.xbutton.button < 4) enigma::mousestatus[e.xbutton.button == 1 ? 0 : 4-e.xbutton.button] = 1;
@@ -102,7 +102,7 @@ namespace enigma
               case 7: enigma_user::mouse_hscrolls--; break;
               default: ;
             }
-          return;
+          break;
         }
         case ButtonRelease: {
             if (e.xbutton.button < 4) enigma::mousestatus[e.xbutton.button == 1 ? 0 : 4-e.xbutton.button] = 0;
@@ -113,7 +113,7 @@ namespace enigma
               case 7: enigma_user::mouse_hscrolls--; break;
               default: ;
             }
-          return;
+          break;
         }
         case ConfigureNotify: {
           enigma::windowWidth = e.xconfigure.width;
@@ -125,25 +125,25 @@ namespace enigma
           if (WindowResizedCallback != NULL) {
             WindowResizedCallback();
           }
-          return;
+          break;
         }
         case FocusIn:
           gameWindowFocused = true;
           pausedSteps = 0;
-          return;
+          break;
         case FocusOut:
           gameWindowFocused = false;
-          return;
+          break;
         case ClientMessage:
           if ((Atom)e.xclient.data.l[0] == wm_delwin) //For some reason, this line warns whether we cast to unsigned or not.
           {
             enigma_user::game_end(0);
-            return;
+            break;
           }
           //else fall through
         default:
             //printf("%d\n",e.type);
-          return;
+          break;
       }
       //Move/Resize = ConfigureNotify
       //Min = UnmapNotify
