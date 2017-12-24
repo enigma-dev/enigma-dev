@@ -1,20 +1,23 @@
 include "Image.fbs";
 
+attribute "gmx";
+
 table Background {
   name:string;
   id:int;
 
+  preload:bool;
   transparent:bool;
   smooth_edges:bool;
-  preload:bool;
-  use_as_tileset:bool;
 
-  tile_width:int;
-  tile_height:int;
-  horizontal_offset:int;
-  vertical_offset:int;
-  horizontal_spacing:int;
-  vertical_spacing:int;
+  use_as_tileset:bool (gmx: "istileset");
+
+  tile_width:int (gmx: "tilewidth");
+  tile_height:int (gmx: "tileheight");
+  horizontal_offset:int (gmx: "tilexoff");
+  vertical_offset:int (gmx: "tileyoff");
+  horizontal_spacing:int (gmx: "tilehsep");
+  vertical_spacing:int (gmx: "tilevsep");
 
   image:Image;
 }

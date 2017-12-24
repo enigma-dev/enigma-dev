@@ -41,12 +41,12 @@ STRUCT_END(PathPoint, 12);
 
 struct PathEditorMetadata FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   enum {
-    VT_BACKGROUND_ROOM_ID = 4,
+    VT_BACKGROUND_ROOM_NAME = 4,
     VT_SNAP_X = 6,
     VT_SNAP_Y = 8
   };
-  int32_t background_room_id() const {
-    return GetField<int32_t>(VT_BACKGROUND_ROOM_ID, 0);
+  const flatbuffers::String *background_room_name() const {
+    return GetPointer<const flatbuffers::String *>(VT_BACKGROUND_ROOM_NAME);
   }
   int32_t snap_x() const {
     return GetField<int32_t>(VT_SNAP_X, 0);
@@ -56,7 +56,8 @@ struct PathEditorMetadata FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
-           VerifyField<int32_t>(verifier, VT_BACKGROUND_ROOM_ID) &&
+           VerifyOffset(verifier, VT_BACKGROUND_ROOM_NAME) &&
+           verifier.Verify(background_room_name()) &&
            VerifyField<int32_t>(verifier, VT_SNAP_X) &&
            VerifyField<int32_t>(verifier, VT_SNAP_Y) &&
            verifier.EndTable();
@@ -66,8 +67,8 @@ struct PathEditorMetadata FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
 struct PathEditorMetadataBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
-  void add_background_room_id(int32_t background_room_id) {
-    fbb_.AddElement<int32_t>(PathEditorMetadata::VT_BACKGROUND_ROOM_ID, background_room_id, 0);
+  void add_background_room_name(flatbuffers::Offset<flatbuffers::String> background_room_name) {
+    fbb_.AddOffset(PathEditorMetadata::VT_BACKGROUND_ROOM_NAME, background_room_name);
   }
   void add_snap_x(int32_t snap_x) {
     fbb_.AddElement<int32_t>(PathEditorMetadata::VT_SNAP_X, snap_x, 0);
@@ -89,14 +90,26 @@ struct PathEditorMetadataBuilder {
 
 inline flatbuffers::Offset<PathEditorMetadata> CreatePathEditorMetadata(
     flatbuffers::FlatBufferBuilder &_fbb,
-    int32_t background_room_id = 0,
+    flatbuffers::Offset<flatbuffers::String> background_room_name = 0,
     int32_t snap_x = 0,
     int32_t snap_y = 0) {
   PathEditorMetadataBuilder builder_(_fbb);
   builder_.add_snap_y(snap_y);
   builder_.add_snap_x(snap_x);
-  builder_.add_background_room_id(background_room_id);
+  builder_.add_background_room_name(background_room_name);
   return builder_.Finish();
+}
+
+inline flatbuffers::Offset<PathEditorMetadata> CreatePathEditorMetadataDirect(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    const char *background_room_name = nullptr,
+    int32_t snap_x = 0,
+    int32_t snap_y = 0) {
+  return CreatePathEditorMetadata(
+      _fbb,
+      background_room_name ? _fbb.CreateString(background_room_name) : 0,
+      snap_x,
+      snap_y);
 }
 
 struct Path FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {

@@ -1,3 +1,5 @@
+attribute "gmx";
+attribute "split";
 
 struct PathPoint {
   x:int;
@@ -6,9 +8,9 @@ struct PathPoint {
 }
 
 table PathEditorMetadata {
-  background_room_id:int;
-  snap_x:int;
-  snap_y:int;
+  background_room_name:string (gmx: "backroom");
+  snap_x:int (gmx: "hsnap");
+  snap_y:int (gmx: "vsnap");
 }
 
 table Path {
@@ -17,11 +19,11 @@ table Path {
 
   editor_metadata:PathEditorMetadata;
 
-  smooth:bool;
+  smooth:bool (gmx: "kind");
   closed:bool;
   precision:int;
 
-  points:[PathPoint];
+  points:[PathPoint] (split: ",");
 }
 
 root_type Path;

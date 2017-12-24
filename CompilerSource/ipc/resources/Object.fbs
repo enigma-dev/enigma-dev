@@ -1,3 +1,4 @@
+attribute "gmx";
 
 table Event {
   id:int;
@@ -13,9 +14,9 @@ table Object {
   name:string;
   id:int;
 
-  parent_id:int;
-  sprite_id:int;
-  mask_id:int;
+  parent_name:string (gmx: "parentName");
+  sprite_name:string (gmx: "spriteName");
+  mask_name:string (gmx: "maskName");
   depth:int;
   solid:bool;
   visible:bool;

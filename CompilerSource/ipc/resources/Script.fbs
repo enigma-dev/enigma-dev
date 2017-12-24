@@ -1,4 +1,3 @@
-
 table Script {
   name:string;
   id:int;

@@ -1,4 +1,3 @@
-
 table Image {
   width:int;
   height:int;

@@ -14,9 +14,9 @@ struct Background FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   enum {
     VT_NAME = 4,
     VT_ID = 6,
-    VT_TRANSPARENT = 8,
-    VT_SMOOTH_EDGES = 10,
-    VT_PRELOAD = 12,
+    VT_PRELOAD = 8,
+    VT_TRANSPARENT = 10,
+    VT_SMOOTH_EDGES = 12,
     VT_USE_AS_TILESET = 14,
     VT_TILE_WIDTH = 16,
     VT_TILE_HEIGHT = 18,
@@ -32,14 +32,14 @@ struct Background FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   int32_t id() const {
     return GetField<int32_t>(VT_ID, 0);
   }
+  bool preload() const {
+    return GetField<uint8_t>(VT_PRELOAD, 0) != 0;
+  }
   bool transparent() const {
     return GetField<uint8_t>(VT_TRANSPARENT, 0) != 0;
   }
   bool smooth_edges() const {
     return GetField<uint8_t>(VT_SMOOTH_EDGES, 0) != 0;
-  }
-  bool preload() const {
-    return GetField<uint8_t>(VT_PRELOAD, 0) != 0;
   }
   bool use_as_tileset() const {
     return GetField<uint8_t>(VT_USE_AS_TILESET, 0) != 0;
@@ -70,9 +70,9 @@ struct Background FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            VerifyOffset(verifier, VT_NAME) &&
            verifier.Verify(name()) &&
            VerifyField<int32_t>(verifier, VT_ID) &&
+           VerifyField<uint8_t>(verifier, VT_PRELOAD) &&
            VerifyField<uint8_t>(verifier, VT_TRANSPARENT) &&
            VerifyField<uint8_t>(verifier, VT_SMOOTH_EDGES) &&
-           VerifyField<uint8_t>(verifier, VT_PRELOAD) &&
            VerifyField<uint8_t>(verifier, VT_USE_AS_TILESET) &&
            VerifyField<int32_t>(verifier, VT_TILE_WIDTH) &&
            VerifyField<int32_t>(verifier, VT_TILE_HEIGHT) &&
@@ -95,14 +95,14 @@ struct BackgroundBuilder {
   void add_id(int32_t id) {
     fbb_.AddElement<int32_t>(Background::VT_ID, id, 0);
   }
+  void add_preload(bool preload) {
+    fbb_.AddElement<uint8_t>(Background::VT_PRELOAD, static_cast<uint8_t>(preload), 0);
+  }
   void add_transparent(bool transparent) {
     fbb_.AddElement<uint8_t>(Background::VT_TRANSPARENT, static_cast<uint8_t>(transparent), 0);
   }
   void add_smooth_edges(bool smooth_edges) {
     fbb_.AddElement<uint8_t>(Background::VT_SMOOTH_EDGES, static_cast<uint8_t>(smooth_edges), 0);
-  }
-  void add_preload(bool preload) {
-    fbb_.AddElement<uint8_t>(Background::VT_PRELOAD, static_cast<uint8_t>(preload), 0);
   }
   void add_use_as_tileset(bool use_as_tileset) {
     fbb_.AddElement<uint8_t>(Background::VT_USE_AS_TILESET, static_cast<uint8_t>(use_as_tileset), 0);
@@ -144,9 +144,9 @@ inline flatbuffers::Offset<Background> CreateBackground(
     flatbuffers::FlatBufferBuilder &_fbb,
     flatbuffers::Offset<flatbuffers::String> name = 0,
     int32_t id = 0,
+    bool preload = false,
     bool transparent = false,
     bool smooth_edges = false,
-    bool preload = false,
     bool use_as_tileset = false,
     int32_t tile_width = 0,
     int32_t tile_height = 0,
@@ -166,9 +166,9 @@ inline flatbuffers::Offset<Background> CreateBackground(
   builder_.add_id(id);
   builder_.add_name(name);
   builder_.add_use_as_tileset(use_as_tileset);
-  builder_.add_preload(preload);
   builder_.add_smooth_edges(smooth_edges);
   builder_.add_transparent(transparent);
+  builder_.add_preload(preload);
   return builder_.Finish();
 }
 
@@ -176,9 +176,9 @@ inline flatbuffers::Offset<Background> CreateBackgroundDirect(
     flatbuffers::FlatBufferBuilder &_fbb,
     const char *name = nullptr,
     int32_t id = 0,
+    bool preload = false,
     bool transparent = false,
     bool smooth_edges = false,
-    bool preload = false,
     bool use_as_tileset = false,
     int32_t tile_width = 0,
     int32_t tile_height = 0,
@@ -191,9 +191,9 @@ inline flatbuffers::Offset<Background> CreateBackgroundDirect(
       _fbb,
       name ? _fbb.CreateString(name) : 0,
       id,
+      preload,
       transparent,
       smooth_edges,
-      preload,
       use_as_tileset,
       tile_width,
       tile_height,

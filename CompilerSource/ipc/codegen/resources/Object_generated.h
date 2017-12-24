@@ -139,9 +139,9 @@ struct Object FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   enum {
     VT_NAME = 4,
     VT_ID = 6,
-    VT_PARENT_ID = 8,
-    VT_SPRITE_ID = 10,
-    VT_MASK_ID = 12,
+    VT_PARENT_NAME = 8,
+    VT_SPRITE_NAME = 10,
+    VT_MASK_NAME = 12,
     VT_DEPTH = 14,
     VT_SOLID = 16,
     VT_VISIBLE = 18,
@@ -154,14 +154,14 @@ struct Object FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   int32_t id() const {
     return GetField<int32_t>(VT_ID, 0);
   }
-  int32_t parent_id() const {
-    return GetField<int32_t>(VT_PARENT_ID, 0);
+  const flatbuffers::String *parent_name() const {
+    return GetPointer<const flatbuffers::String *>(VT_PARENT_NAME);
   }
-  int32_t sprite_id() const {
-    return GetField<int32_t>(VT_SPRITE_ID, 0);
+  const flatbuffers::String *sprite_name() const {
+    return GetPointer<const flatbuffers::String *>(VT_SPRITE_NAME);
   }
-  int32_t mask_id() const {
-    return GetField<int32_t>(VT_MASK_ID, 0);
+  const flatbuffers::String *mask_name() const {
+    return GetPointer<const flatbuffers::String *>(VT_MASK_NAME);
   }
   int32_t depth() const {
     return GetField<int32_t>(VT_DEPTH, 0);
@@ -183,9 +183,12 @@ struct Object FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            VerifyOffset(verifier, VT_NAME) &&
            verifier.Verify(name()) &&
            VerifyField<int32_t>(verifier, VT_ID) &&
-           VerifyField<int32_t>(verifier, VT_PARENT_ID) &&
-           VerifyField<int32_t>(verifier, VT_SPRITE_ID) &&
-           VerifyField<int32_t>(verifier, VT_MASK_ID) &&
+           VerifyOffset(verifier, VT_PARENT_NAME) &&
+           verifier.Verify(parent_name()) &&
+           VerifyOffset(verifier, VT_SPRITE_NAME) &&
+           verifier.Verify(sprite_name()) &&
+           VerifyOffset(verifier, VT_MASK_NAME) &&
+           verifier.Verify(mask_name()) &&
            VerifyField<int32_t>(verifier, VT_DEPTH) &&
            VerifyField<uint8_t>(verifier, VT_SOLID) &&
            VerifyField<uint8_t>(verifier, VT_VISIBLE) &&
@@ -206,14 +209,14 @@ struct ObjectBuilder {
   void add_id(int32_t id) {
     fbb_.AddElement<int32_t>(Object::VT_ID, id, 0);
   }
-  void add_parent_id(int32_t parent_id) {
-    fbb_.AddElement<int32_t>(Object::VT_PARENT_ID, parent_id, 0);
+  void add_parent_name(flatbuffers::Offset<flatbuffers::String> parent_name) {
+    fbb_.AddOffset(Object::VT_PARENT_NAME, parent_name);
   }
-  void add_sprite_id(int32_t sprite_id) {
-    fbb_.AddElement<int32_t>(Object::VT_SPRITE_ID, sprite_id, 0);
+  void add_sprite_name(flatbuffers::Offset<flatbuffers::String> sprite_name) {
+    fbb_.AddOffset(Object::VT_SPRITE_NAME, sprite_name);
   }
-  void add_mask_id(int32_t mask_id) {
-    fbb_.AddElement<int32_t>(Object::VT_MASK_ID, mask_id, 0);
+  void add_mask_name(flatbuffers::Offset<flatbuffers::String> mask_name) {
+    fbb_.AddOffset(Object::VT_MASK_NAME, mask_name);
   }
   void add_depth(int32_t depth) {
     fbb_.AddElement<int32_t>(Object::VT_DEPTH, depth, 0);
@@ -246,9 +249,9 @@ inline flatbuffers::Offset<Object> CreateObject(
     flatbuffers::FlatBufferBuilder &_fbb,
     flatbuffers::Offset<flatbuffers::String> name = 0,
     int32_t id = 0,
-    int32_t parent_id = 0,
-    int32_t sprite_id = 0,
-    int32_t mask_id = 0,
+    flatbuffers::Offset<flatbuffers::String> parent_name = 0,
+    flatbuffers::Offset<flatbuffers::String> sprite_name = 0,
+    flatbuffers::Offset<flatbuffers::String> mask_name = 0,
     int32_t depth = 0,
     bool solid = false,
     bool visible = false,
@@ -257,9 +260,9 @@ inline flatbuffers::Offset<Object> CreateObject(
   ObjectBuilder builder_(_fbb);
   builder_.add_main_events(main_events);
   builder_.add_depth(depth);
-  builder_.add_mask_id(mask_id);
-  builder_.add_sprite_id(sprite_id);
-  builder_.add_parent_id(parent_id);
+  builder_.add_mask_name(mask_name);
+  builder_.add_sprite_name(sprite_name);
+  builder_.add_parent_name(parent_name);
   builder_.add_id(id);
   builder_.add_name(name);
   builder_.add_persisent(persisent);
@@ -272,9 +275,9 @@ inline flatbuffers::Offset<Object> CreateObjectDirect(
     flatbuffers::FlatBufferBuilder &_fbb,
     const char *name = nullptr,
     int32_t id = 0,
-    int32_t parent_id = 0,
-    int32_t sprite_id = 0,
-    int32_t mask_id = 0,
+    const char *parent_name = nullptr,
+    const char *sprite_name = nullptr,
+    const char *mask_name = nullptr,
     int32_t depth = 0,
     bool solid = false,
     bool visible = false,
@@ -284,9 +287,9 @@ inline flatbuffers::Offset<Object> CreateObjectDirect(
       _fbb,
       name ? _fbb.CreateString(name) : 0,
       id,
-      parent_id,
-      sprite_id,
-      mask_id,
+      parent_name ? _fbb.CreateString(parent_name) : 0,
+      sprite_name ? _fbb.CreateString(sprite_name) : 0,
+      mask_name ? _fbb.CreateString(mask_name) : 0,
       depth,
       solid,
       visible,

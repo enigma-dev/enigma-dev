@@ -18,103 +18,19 @@ struct RoomEditorMetadata;
 
 struct Room;
 
-MANUALLY_ALIGNED_STRUCT(8) RoomTile FLATBUFFERS_FINAL_CLASS {
- private:
-  int32_t id_;
-  int32_t background_id_;
-  int32_t bg_x_;
-  int32_t bg_y_;
-  int32_t room_x_;
-  int32_t room_y_;
-  int32_t width_;
-  int32_t height_;
-  int32_t depth_;
-  int32_t padding0__;
-  double scale_x_;
-  double scale_y_;
-  int32_t color_;
-  uint8_t locked_;
-  int8_t padding1__;  int16_t padding2__;
-
- public:
-  RoomTile() {
-    memset(this, 0, sizeof(RoomTile));
-  }
-  RoomTile(int32_t _id, int32_t _background_id, int32_t _bg_x, int32_t _bg_y, int32_t _room_x, int32_t _room_y, int32_t _width, int32_t _height, int32_t _depth, double _scale_x, double _scale_y, int32_t _color, bool _locked)
-      : id_(flatbuffers::EndianScalar(_id)),
-        background_id_(flatbuffers::EndianScalar(_background_id)),
-        bg_x_(flatbuffers::EndianScalar(_bg_x)),
-        bg_y_(flatbuffers::EndianScalar(_bg_y)),
-        room_x_(flatbuffers::EndianScalar(_room_x)),
-        room_y_(flatbuffers::EndianScalar(_room_y)),
-        width_(flatbuffers::EndianScalar(_width)),
-        height_(flatbuffers::EndianScalar(_height)),
-        depth_(flatbuffers::EndianScalar(_depth)),
-        padding0__(0),
-        scale_x_(flatbuffers::EndianScalar(_scale_x)),
-        scale_y_(flatbuffers::EndianScalar(_scale_y)),
-        color_(flatbuffers::EndianScalar(_color)),
-        locked_(flatbuffers::EndianScalar(static_cast<uint8_t>(_locked))),
-        padding1__(0),
-        padding2__(0) {
-    (void)padding0__;
-    (void)padding1__;    (void)padding2__;
-  }
-  int32_t id() const {
-    return flatbuffers::EndianScalar(id_);
-  }
-  int32_t background_id() const {
-    return flatbuffers::EndianScalar(background_id_);
-  }
-  int32_t bg_x() const {
-    return flatbuffers::EndianScalar(bg_x_);
-  }
-  int32_t bg_y() const {
-    return flatbuffers::EndianScalar(bg_y_);
-  }
-  int32_t room_x() const {
-    return flatbuffers::EndianScalar(room_x_);
-  }
-  int32_t room_y() const {
-    return flatbuffers::EndianScalar(room_y_);
-  }
-  int32_t width() const {
-    return flatbuffers::EndianScalar(width_);
-  }
-  int32_t height() const {
-    return flatbuffers::EndianScalar(height_);
-  }
-  int32_t depth() const {
-    return flatbuffers::EndianScalar(depth_);
-  }
-  double scale_x() const {
-    return flatbuffers::EndianScalar(scale_x_);
-  }
-  double scale_y() const {
-    return flatbuffers::EndianScalar(scale_y_);
-  }
-  int32_t color() const {
-    return flatbuffers::EndianScalar(color_);
-  }
-  bool locked() const {
-    return flatbuffers::EndianScalar(locked_) != 0;
-  }
-};
-STRUCT_END(RoomTile, 64);
-
 MANUALLY_ALIGNED_STRUCT(4) RoomBackground FLATBUFFERS_FINAL_CLASS {
  private:
-  uint8_t visible_;
-  uint8_t foreground_;
+  uint8_t background_visible_;
+  uint8_t background_foreground_;
   int16_t padding0__;
-  int32_t background_id_;
-  int32_t x_;
-  int32_t y_;
-  uint8_t tile_horizontal_;
-  uint8_t tile_vertical_;
+  int32_t background_index_;
+  int32_t background_x_;
+  int32_t background_y_;
+  uint8_t background_htiled_;
+  uint8_t background_vtiled_;
   int16_t padding1__;
-  int32_t speed_h_;
-  int32_t speed_v_;
+  int32_t background_hspeed_;
+  int32_t background_vspeed_;
   uint8_t stretch_;
   int8_t padding2__;  int16_t padding3__;
 
@@ -122,18 +38,18 @@ MANUALLY_ALIGNED_STRUCT(4) RoomBackground FLATBUFFERS_FINAL_CLASS {
   RoomBackground() {
     memset(this, 0, sizeof(RoomBackground));
   }
-  RoomBackground(bool _visible, bool _foreground, int32_t _background_id, int32_t _x, int32_t _y, bool _tile_horizontal, bool _tile_vertical, int32_t _speed_h, int32_t _speed_v, bool _stretch)
-      : visible_(flatbuffers::EndianScalar(static_cast<uint8_t>(_visible))),
-        foreground_(flatbuffers::EndianScalar(static_cast<uint8_t>(_foreground))),
+  RoomBackground(bool _background_visible, bool _background_foreground, int32_t _background_index, int32_t _background_x, int32_t _background_y, bool _background_htiled, bool _background_vtiled, int32_t _background_hspeed, int32_t _background_vspeed, bool _stretch)
+      : background_visible_(flatbuffers::EndianScalar(static_cast<uint8_t>(_background_visible))),
+        background_foreground_(flatbuffers::EndianScalar(static_cast<uint8_t>(_background_foreground))),
         padding0__(0),
-        background_id_(flatbuffers::EndianScalar(_background_id)),
-        x_(flatbuffers::EndianScalar(_x)),
-        y_(flatbuffers::EndianScalar(_y)),
-        tile_horizontal_(flatbuffers::EndianScalar(static_cast<uint8_t>(_tile_horizontal))),
-        tile_vertical_(flatbuffers::EndianScalar(static_cast<uint8_t>(_tile_vertical))),
+        background_index_(flatbuffers::EndianScalar(_background_index)),
+        background_x_(flatbuffers::EndianScalar(_background_x)),
+        background_y_(flatbuffers::EndianScalar(_background_y)),
+        background_htiled_(flatbuffers::EndianScalar(static_cast<uint8_t>(_background_htiled))),
+        background_vtiled_(flatbuffers::EndianScalar(static_cast<uint8_t>(_background_vtiled))),
         padding1__(0),
-        speed_h_(flatbuffers::EndianScalar(_speed_h)),
-        speed_v_(flatbuffers::EndianScalar(_speed_v)),
+        background_hspeed_(flatbuffers::EndianScalar(_background_hspeed)),
+        background_vspeed_(flatbuffers::EndianScalar(_background_vspeed)),
         stretch_(flatbuffers::EndianScalar(static_cast<uint8_t>(_stretch))),
         padding2__(0),
         padding3__(0) {
@@ -141,32 +57,32 @@ MANUALLY_ALIGNED_STRUCT(4) RoomBackground FLATBUFFERS_FINAL_CLASS {
     (void)padding1__;
     (void)padding2__;    (void)padding3__;
   }
-  bool visible() const {
-    return flatbuffers::EndianScalar(visible_) != 0;
+  bool background_visible() const {
+    return flatbuffers::EndianScalar(background_visible_) != 0;
   }
-  bool foreground() const {
-    return flatbuffers::EndianScalar(foreground_) != 0;
+  bool background_foreground() const {
+    return flatbuffers::EndianScalar(background_foreground_) != 0;
   }
-  int32_t background_id() const {
-    return flatbuffers::EndianScalar(background_id_);
+  int32_t background_index() const {
+    return flatbuffers::EndianScalar(background_index_);
   }
-  int32_t x() const {
-    return flatbuffers::EndianScalar(x_);
+  int32_t background_x() const {
+    return flatbuffers::EndianScalar(background_x_);
   }
-  int32_t y() const {
-    return flatbuffers::EndianScalar(y_);
+  int32_t background_y() const {
+    return flatbuffers::EndianScalar(background_y_);
   }
-  bool tile_horizontal() const {
-    return flatbuffers::EndianScalar(tile_horizontal_) != 0;
+  bool background_htiled() const {
+    return flatbuffers::EndianScalar(background_htiled_) != 0;
   }
-  bool tile_vertical() const {
-    return flatbuffers::EndianScalar(tile_vertical_) != 0;
+  bool background_vtiled() const {
+    return flatbuffers::EndianScalar(background_vtiled_) != 0;
   }
-  int32_t speed_h() const {
-    return flatbuffers::EndianScalar(speed_h_);
+  int32_t background_hspeed() const {
+    return flatbuffers::EndianScalar(background_hspeed_);
   }
-  int32_t speed_v() const {
-    return flatbuffers::EndianScalar(speed_v_);
+  int32_t background_vspeed() const {
+    return flatbuffers::EndianScalar(background_vspeed_);
   }
   bool stretch() const {
     return flatbuffers::EndianScalar(stretch_) != 0;
@@ -176,93 +92,93 @@ STRUCT_END(RoomBackground, 32);
 
 MANUALLY_ALIGNED_STRUCT(4) RoomView FLATBUFFERS_FINAL_CLASS {
  private:
-  uint8_t visible_;
+  uint8_t view_visible_;
   int8_t padding0__;  int16_t padding1__;
-  int32_t x_;
-  int32_t y_;
-  int32_t width_;
-  int32_t height_;
-  int32_t port_x_;
-  int32_t port_y_;
-  int32_t port_w_;
-  int32_t port_h_;
-  int32_t border_h_;
-  int32_t border_v_;
-  int32_t speed_h_;
-  int32_t speed_v_;
-  int32_t object_id_;
+  int32_t view_xview_;
+  int32_t view_yview_;
+  int32_t view_wview_;
+  int32_t view_hview_;
+  int32_t view_xport_;
+  int32_t view_yport_;
+  int32_t view_wport_;
+  int32_t view_hport_;
+  int32_t view_hborder_;
+  int32_t view_vborder_;
+  int32_t view_hspeed_;
+  int32_t view_vspeed_;
+  int32_t view_object_;
 
  public:
   RoomView() {
     memset(this, 0, sizeof(RoomView));
   }
-  RoomView(bool _visible, int32_t _x, int32_t _y, int32_t _width, int32_t _height, int32_t _port_x, int32_t _port_y, int32_t _port_w, int32_t _port_h, int32_t _border_h, int32_t _border_v, int32_t _speed_h, int32_t _speed_v, int32_t _object_id)
-      : visible_(flatbuffers::EndianScalar(static_cast<uint8_t>(_visible))),
+  RoomView(bool _view_visible, int32_t _view_xview, int32_t _view_yview, int32_t _view_wview, int32_t _view_hview, int32_t _view_xport, int32_t _view_yport, int32_t _view_wport, int32_t _view_hport, int32_t _view_hborder, int32_t _view_vborder, int32_t _view_hspeed, int32_t _view_vspeed, int32_t _view_object)
+      : view_visible_(flatbuffers::EndianScalar(static_cast<uint8_t>(_view_visible))),
         padding0__(0),
         padding1__(0),
-        x_(flatbuffers::EndianScalar(_x)),
-        y_(flatbuffers::EndianScalar(_y)),
-        width_(flatbuffers::EndianScalar(_width)),
-        height_(flatbuffers::EndianScalar(_height)),
-        port_x_(flatbuffers::EndianScalar(_port_x)),
-        port_y_(flatbuffers::EndianScalar(_port_y)),
-        port_w_(flatbuffers::EndianScalar(_port_w)),
-        port_h_(flatbuffers::EndianScalar(_port_h)),
-        border_h_(flatbuffers::EndianScalar(_border_h)),
-        border_v_(flatbuffers::EndianScalar(_border_v)),
-        speed_h_(flatbuffers::EndianScalar(_speed_h)),
-        speed_v_(flatbuffers::EndianScalar(_speed_v)),
-        object_id_(flatbuffers::EndianScalar(_object_id)) {
+        view_xview_(flatbuffers::EndianScalar(_view_xview)),
+        view_yview_(flatbuffers::EndianScalar(_view_yview)),
+        view_wview_(flatbuffers::EndianScalar(_view_wview)),
+        view_hview_(flatbuffers::EndianScalar(_view_hview)),
+        view_xport_(flatbuffers::EndianScalar(_view_xport)),
+        view_yport_(flatbuffers::EndianScalar(_view_yport)),
+        view_wport_(flatbuffers::EndianScalar(_view_wport)),
+        view_hport_(flatbuffers::EndianScalar(_view_hport)),
+        view_hborder_(flatbuffers::EndianScalar(_view_hborder)),
+        view_vborder_(flatbuffers::EndianScalar(_view_vborder)),
+        view_hspeed_(flatbuffers::EndianScalar(_view_hspeed)),
+        view_vspeed_(flatbuffers::EndianScalar(_view_vspeed)),
+        view_object_(flatbuffers::EndianScalar(_view_object)) {
     (void)padding0__;    (void)padding1__;
   }
-  bool visible() const {
-    return flatbuffers::EndianScalar(visible_) != 0;
+  bool view_visible() const {
+    return flatbuffers::EndianScalar(view_visible_) != 0;
   }
-  int32_t x() const {
-    return flatbuffers::EndianScalar(x_);
+  int32_t view_xview() const {
+    return flatbuffers::EndianScalar(view_xview_);
   }
-  int32_t y() const {
-    return flatbuffers::EndianScalar(y_);
+  int32_t view_yview() const {
+    return flatbuffers::EndianScalar(view_yview_);
   }
-  int32_t width() const {
-    return flatbuffers::EndianScalar(width_);
+  int32_t view_wview() const {
+    return flatbuffers::EndianScalar(view_wview_);
   }
-  int32_t height() const {
-    return flatbuffers::EndianScalar(height_);
+  int32_t view_hview() const {
+    return flatbuffers::EndianScalar(view_hview_);
   }
-  int32_t port_x() const {
-    return flatbuffers::EndianScalar(port_x_);
+  int32_t view_xport() const {
+    return flatbuffers::EndianScalar(view_xport_);
   }
-  int32_t port_y() const {
-    return flatbuffers::EndianScalar(port_y_);
+  int32_t view_yport() const {
+    return flatbuffers::EndianScalar(view_yport_);
   }
-  int32_t port_w() const {
-    return flatbuffers::EndianScalar(port_w_);
+  int32_t view_wport() const {
+    return flatbuffers::EndianScalar(view_wport_);
   }
-  int32_t port_h() const {
-    return flatbuffers::EndianScalar(port_h_);
+  int32_t view_hport() const {
+    return flatbuffers::EndianScalar(view_hport_);
   }
-  int32_t border_h() const {
-    return flatbuffers::EndianScalar(border_h_);
+  int32_t view_hborder() const {
+    return flatbuffers::EndianScalar(view_hborder_);
   }
-  int32_t border_v() const {
-    return flatbuffers::EndianScalar(border_v_);
+  int32_t view_vborder() const {
+    return flatbuffers::EndianScalar(view_vborder_);
   }
-  int32_t speed_h() const {
-    return flatbuffers::EndianScalar(speed_h_);
+  int32_t view_hspeed() const {
+    return flatbuffers::EndianScalar(view_hspeed_);
   }
-  int32_t speed_v() const {
-    return flatbuffers::EndianScalar(speed_v_);
+  int32_t view_vspeed() const {
+    return flatbuffers::EndianScalar(view_vspeed_);
   }
-  int32_t object_id() const {
-    return flatbuffers::EndianScalar(object_id_);
+  int32_t view_object() const {
+    return flatbuffers::EndianScalar(view_object_);
   }
 };
 STRUCT_END(RoomView, 56);
 
 MANUALLY_ALIGNED_STRUCT(4) RoomEditorMetadata FLATBUFFERS_FINAL_CLASS {
  private:
-  uint8_t remember_window_size_;
+  uint8_t remember_state_;
   int8_t padding0__;  int16_t padding1__;
   int32_t editor_width_;
   int32_t editor_height_;
@@ -273,21 +189,21 @@ MANUALLY_ALIGNED_STRUCT(4) RoomEditorMetadata FLATBUFFERS_FINAL_CLASS {
   uint8_t show_objects_;
   uint8_t show_tiles_;
   uint8_t show_backgrounds_;
+  uint8_t show_foregrounds_;
   uint8_t show_views_;
   uint8_t delete_underlying_objects_;
   uint8_t delete_underlying_tiles_;
-  int8_t padding2__;
   int32_t snap_x_;
   int32_t snap_y_;
   uint8_t isometric_;
-  int8_t padding3__;  int16_t padding4__;
+  int8_t padding2__;  int16_t padding3__;
 
  public:
   RoomEditorMetadata() {
     memset(this, 0, sizeof(RoomEditorMetadata));
   }
-  RoomEditorMetadata(bool _remember_window_size, int32_t _editor_width, int32_t _editor_height, int32_t _current_tab, int32_t _scroll_x, int32_t _scroll_y, bool _show_grid, bool _show_objects, bool _show_tiles, bool _show_backgrounds, bool _show_views, bool _delete_underlying_objects, bool _delete_underlying_tiles, int32_t _snap_x, int32_t _snap_y, bool _isometric)
-      : remember_window_size_(flatbuffers::EndianScalar(static_cast<uint8_t>(_remember_window_size))),
+  RoomEditorMetadata(bool _remember_state, int32_t _editor_width, int32_t _editor_height, int32_t _current_tab, int32_t _scroll_x, int32_t _scroll_y, bool _show_grid, bool _show_objects, bool _show_tiles, bool _show_backgrounds, bool _show_foregrounds, bool _show_views, bool _delete_underlying_objects, bool _delete_underlying_tiles, int32_t _snap_x, int32_t _snap_y, bool _isometric)
+      : remember_state_(flatbuffers::EndianScalar(static_cast<uint8_t>(_remember_state))),
         padding0__(0),
         padding1__(0),
         editor_width_(flatbuffers::EndianScalar(_editor_width)),
@@ -299,21 +215,20 @@ MANUALLY_ALIGNED_STRUCT(4) RoomEditorMetadata FLATBUFFERS_FINAL_CLASS {
         show_objects_(flatbuffers::EndianScalar(static_cast<uint8_t>(_show_objects))),
         show_tiles_(flatbuffers::EndianScalar(static_cast<uint8_t>(_show_tiles))),
         show_backgrounds_(flatbuffers::EndianScalar(static_cast<uint8_t>(_show_backgrounds))),
+        show_foregrounds_(flatbuffers::EndianScalar(static_cast<uint8_t>(_show_foregrounds))),
         show_views_(flatbuffers::EndianScalar(static_cast<uint8_t>(_show_views))),
         delete_underlying_objects_(flatbuffers::EndianScalar(static_cast<uint8_t>(_delete_underlying_objects))),
         delete_underlying_tiles_(flatbuffers::EndianScalar(static_cast<uint8_t>(_delete_underlying_tiles))),
-        padding2__(0),
         snap_x_(flatbuffers::EndianScalar(_snap_x)),
         snap_y_(flatbuffers::EndianScalar(_snap_y)),
         isometric_(flatbuffers::EndianScalar(static_cast<uint8_t>(_isometric))),
-        padding3__(0),
-        padding4__(0) {
+        padding2__(0),
+        padding3__(0) {
     (void)padding0__;    (void)padding1__;
-    (void)padding2__;
-    (void)padding3__;    (void)padding4__;
+    (void)padding2__;    (void)padding3__;
   }
-  bool remember_window_size() const {
-    return flatbuffers::EndianScalar(remember_window_size_) != 0;
+  bool remember_state() const {
+    return flatbuffers::EndianScalar(remember_state_) != 0;
   }
   int32_t editor_width() const {
     return flatbuffers::EndianScalar(editor_width_);
@@ -342,6 +257,9 @@ MANUALLY_ALIGNED_STRUCT(4) RoomEditorMetadata FLATBUFFERS_FINAL_CLASS {
   bool show_backgrounds() const {
     return flatbuffers::EndianScalar(show_backgrounds_) != 0;
   }
+  bool show_foregrounds() const {
+    return flatbuffers::EndianScalar(show_foregrounds_) != 0;
+  }
   bool show_views() const {
     return flatbuffers::EndianScalar(show_views_) != 0;
   }
@@ -365,21 +283,19 @@ STRUCT_END(RoomEditorMetadata, 44);
 
 struct RoomInstance FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   enum {
-    VT_ID = 4,
+    VT_NAME = 4,
     VT_X = 6,
     VT_Y = 8,
-    VT_OBJECT_ID = 10,
-    VT_FLIP_X = 12,
-    VT_FLIP_Y = 14,
-    VT_SCALE_X = 16,
-    VT_SCALE_Y = 18,
-    VT_ROTATION = 20,
-    VT_COLOR = 22,
-    VT_CREATION_CODE = 24,
-    VT_LOCKED = 26
+    VT_LOCKED = 10,
+    VT_OBJECT_NAME = 12,
+    VT_SCALE_X = 14,
+    VT_SCALE_Y = 16,
+    VT_ROTATION = 18,
+    VT_COLOR = 20,
+    VT_CREATION_CODE = 22
   };
-  int32_t id() const {
-    return GetField<int32_t>(VT_ID, 0);
+  const flatbuffers::String *name() const {
+    return GetPointer<const flatbuffers::String *>(VT_NAME);
   }
   int32_t x() const {
     return GetField<int32_t>(VT_X, 0);
@@ -387,14 +303,11 @@ struct RoomInstance FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   int32_t y() const {
     return GetField<int32_t>(VT_Y, 0);
   }
-  int32_t object_id() const {
-    return GetField<int32_t>(VT_OBJECT_ID, 0);
+  bool locked() const {
+    return GetField<uint8_t>(VT_LOCKED, 0) != 0;
   }
-  bool flip_x() const {
-    return GetField<uint8_t>(VT_FLIP_X, 0) != 0;
-  }
-  bool flip_y() const {
-    return GetField<uint8_t>(VT_FLIP_Y, 0) != 0;
+  const flatbuffers::String *object_name() const {
+    return GetPointer<const flatbuffers::String *>(VT_OBJECT_NAME);
   }
   double scale_x() const {
     return GetField<double>(VT_SCALE_X, 0.0);
@@ -411,24 +324,21 @@ struct RoomInstance FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const flatbuffers::String *creation_code() const {
     return GetPointer<const flatbuffers::String *>(VT_CREATION_CODE);
   }
-  bool locked() const {
-    return GetField<uint8_t>(VT_LOCKED, 0) != 0;
-  }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
-           VerifyField<int32_t>(verifier, VT_ID) &&
+           VerifyOffset(verifier, VT_NAME) &&
+           verifier.Verify(name()) &&
            VerifyField<int32_t>(verifier, VT_X) &&
            VerifyField<int32_t>(verifier, VT_Y) &&
-           VerifyField<int32_t>(verifier, VT_OBJECT_ID) &&
-           VerifyField<uint8_t>(verifier, VT_FLIP_X) &&
-           VerifyField<uint8_t>(verifier, VT_FLIP_Y) &&
+           VerifyField<uint8_t>(verifier, VT_LOCKED) &&
+           VerifyOffset(verifier, VT_OBJECT_NAME) &&
+           verifier.Verify(object_name()) &&
            VerifyField<double>(verifier, VT_SCALE_X) &&
            VerifyField<double>(verifier, VT_SCALE_Y) &&
            VerifyField<double>(verifier, VT_ROTATION) &&
            VerifyField<int32_t>(verifier, VT_COLOR) &&
            VerifyOffset(verifier, VT_CREATION_CODE) &&
            verifier.Verify(creation_code()) &&
-           VerifyField<uint8_t>(verifier, VT_LOCKED) &&
            verifier.EndTable();
   }
 };
@@ -436,8 +346,8 @@ struct RoomInstance FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
 struct RoomInstanceBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
-  void add_id(int32_t id) {
-    fbb_.AddElement<int32_t>(RoomInstance::VT_ID, id, 0);
+  void add_name(flatbuffers::Offset<flatbuffers::String> name) {
+    fbb_.AddOffset(RoomInstance::VT_NAME, name);
   }
   void add_x(int32_t x) {
     fbb_.AddElement<int32_t>(RoomInstance::VT_X, x, 0);
@@ -445,14 +355,11 @@ struct RoomInstanceBuilder {
   void add_y(int32_t y) {
     fbb_.AddElement<int32_t>(RoomInstance::VT_Y, y, 0);
   }
-  void add_object_id(int32_t object_id) {
-    fbb_.AddElement<int32_t>(RoomInstance::VT_OBJECT_ID, object_id, 0);
+  void add_locked(bool locked) {
+    fbb_.AddElement<uint8_t>(RoomInstance::VT_LOCKED, static_cast<uint8_t>(locked), 0);
   }
-  void add_flip_x(bool flip_x) {
-    fbb_.AddElement<uint8_t>(RoomInstance::VT_FLIP_X, static_cast<uint8_t>(flip_x), 0);
-  }
-  void add_flip_y(bool flip_y) {
-    fbb_.AddElement<uint8_t>(RoomInstance::VT_FLIP_Y, static_cast<uint8_t>(flip_y), 0);
+  void add_object_name(flatbuffers::Offset<flatbuffers::String> object_name) {
+    fbb_.AddOffset(RoomInstance::VT_OBJECT_NAME, object_name);
   }
   void add_scale_x(double scale_x) {
     fbb_.AddElement<double>(RoomInstance::VT_SCALE_X, scale_x, 0.0);
@@ -469,9 +376,6 @@ struct RoomInstanceBuilder {
   void add_creation_code(flatbuffers::Offset<flatbuffers::String> creation_code) {
     fbb_.AddOffset(RoomInstance::VT_CREATION_CODE, creation_code);
   }
-  void add_locked(bool locked) {
-    fbb_.AddElement<uint8_t>(RoomInstance::VT_LOCKED, static_cast<uint8_t>(locked), 0);
-  }
   explicit RoomInstanceBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
     start_ = fbb_.StartTable();
@@ -486,62 +390,248 @@ struct RoomInstanceBuilder {
 
 inline flatbuffers::Offset<RoomInstance> CreateRoomInstance(
     flatbuffers::FlatBufferBuilder &_fbb,
-    int32_t id = 0,
+    flatbuffers::Offset<flatbuffers::String> name = 0,
     int32_t x = 0,
     int32_t y = 0,
-    int32_t object_id = 0,
-    bool flip_x = false,
-    bool flip_y = false,
+    bool locked = false,
+    flatbuffers::Offset<flatbuffers::String> object_name = 0,
     double scale_x = 0.0,
     double scale_y = 0.0,
     double rotation = 0.0,
     int32_t color = 0,
-    flatbuffers::Offset<flatbuffers::String> creation_code = 0,
-    bool locked = false) {
+    flatbuffers::Offset<flatbuffers::String> creation_code = 0) {
   RoomInstanceBuilder builder_(_fbb);
   builder_.add_rotation(rotation);
   builder_.add_scale_y(scale_y);
   builder_.add_scale_x(scale_x);
   builder_.add_creation_code(creation_code);
   builder_.add_color(color);
-  builder_.add_object_id(object_id);
+  builder_.add_object_name(object_name);
   builder_.add_y(y);
   builder_.add_x(x);
-  builder_.add_id(id);
+  builder_.add_name(name);
   builder_.add_locked(locked);
-  builder_.add_flip_y(flip_y);
-  builder_.add_flip_x(flip_x);
   return builder_.Finish();
 }
 
 inline flatbuffers::Offset<RoomInstance> CreateRoomInstanceDirect(
     flatbuffers::FlatBufferBuilder &_fbb,
-    int32_t id = 0,
+    const char *name = nullptr,
     int32_t x = 0,
     int32_t y = 0,
-    int32_t object_id = 0,
-    bool flip_x = false,
-    bool flip_y = false,
+    bool locked = false,
+    const char *object_name = nullptr,
     double scale_x = 0.0,
     double scale_y = 0.0,
     double rotation = 0.0,
     int32_t color = 0,
-    const char *creation_code = nullptr,
-    bool locked = false) {
+    const char *creation_code = nullptr) {
   return CreateRoomInstance(
       _fbb,
-      id,
+      name ? _fbb.CreateString(name) : 0,
       x,
       y,
-      object_id,
-      flip_x,
-      flip_y,
+      locked,
+      object_name ? _fbb.CreateString(object_name) : 0,
       scale_x,
       scale_y,
       rotation,
       color,
-      creation_code ? _fbb.CreateString(creation_code) : 0,
-      locked);
+      creation_code ? _fbb.CreateString(creation_code) : 0);
+}
+
+struct RoomTile FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  enum {
+    VT_NAME = 4,
+    VT_X = 6,
+    VT_Y = 8,
+    VT_LOCKED = 10,
+    VT_BACKGROUND_NAME = 12,
+    VT_WIDTH = 14,
+    VT_HEIGHT = 16,
+    VT_BG_X = 18,
+    VT_BG_Y = 20,
+    VT_DEPTH = 22,
+    VT_SCALE_X = 24,
+    VT_SCALE_Y = 26,
+    VT_COLOR = 28
+  };
+  const flatbuffers::String *name() const {
+    return GetPointer<const flatbuffers::String *>(VT_NAME);
+  }
+  int32_t x() const {
+    return GetField<int32_t>(VT_X, 0);
+  }
+  int32_t y() const {
+    return GetField<int32_t>(VT_Y, 0);
+  }
+  bool locked() const {
+    return GetField<uint8_t>(VT_LOCKED, 0) != 0;
+  }
+  const flatbuffers::String *background_name() const {
+    return GetPointer<const flatbuffers::String *>(VT_BACKGROUND_NAME);
+  }
+  int32_t width() const {
+    return GetField<int32_t>(VT_WIDTH, 0);
+  }
+  int32_t height() const {
+    return GetField<int32_t>(VT_HEIGHT, 0);
+  }
+  int32_t bg_x() const {
+    return GetField<int32_t>(VT_BG_X, 0);
+  }
+  int32_t bg_y() const {
+    return GetField<int32_t>(VT_BG_Y, 0);
+  }
+  int32_t depth() const {
+    return GetField<int32_t>(VT_DEPTH, 0);
+  }
+  double scale_x() const {
+    return GetField<double>(VT_SCALE_X, 0.0);
+  }
+  double scale_y() const {
+    return GetField<double>(VT_SCALE_Y, 0.0);
+  }
+  int32_t color() const {
+    return GetField<int32_t>(VT_COLOR, 0);
+  }
+  bool Verify(flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyOffset(verifier, VT_NAME) &&
+           verifier.Verify(name()) &&
+           VerifyField<int32_t>(verifier, VT_X) &&
+           VerifyField<int32_t>(verifier, VT_Y) &&
+           VerifyField<uint8_t>(verifier, VT_LOCKED) &&
+           VerifyOffset(verifier, VT_BACKGROUND_NAME) &&
+           verifier.Verify(background_name()) &&
+           VerifyField<int32_t>(verifier, VT_WIDTH) &&
+           VerifyField<int32_t>(verifier, VT_HEIGHT) &&
+           VerifyField<int32_t>(verifier, VT_BG_X) &&
+           VerifyField<int32_t>(verifier, VT_BG_Y) &&
+           VerifyField<int32_t>(verifier, VT_DEPTH) &&
+           VerifyField<double>(verifier, VT_SCALE_X) &&
+           VerifyField<double>(verifier, VT_SCALE_Y) &&
+           VerifyField<int32_t>(verifier, VT_COLOR) &&
+           verifier.EndTable();
+  }
+};
+
+struct RoomTileBuilder {
+  flatbuffers::FlatBufferBuilder &fbb_;
+  flatbuffers::uoffset_t start_;
+  void add_name(flatbuffers::Offset<flatbuffers::String> name) {
+    fbb_.AddOffset(RoomTile::VT_NAME, name);
+  }
+  void add_x(int32_t x) {
+    fbb_.AddElement<int32_t>(RoomTile::VT_X, x, 0);
+  }
+  void add_y(int32_t y) {
+    fbb_.AddElement<int32_t>(RoomTile::VT_Y, y, 0);
+  }
+  void add_locked(bool locked) {
+    fbb_.AddElement<uint8_t>(RoomTile::VT_LOCKED, static_cast<uint8_t>(locked), 0);
+  }
+  void add_background_name(flatbuffers::Offset<flatbuffers::String> background_name) {
+    fbb_.AddOffset(RoomTile::VT_BACKGROUND_NAME, background_name);
+  }
+  void add_width(int32_t width) {
+    fbb_.AddElement<int32_t>(RoomTile::VT_WIDTH, width, 0);
+  }
+  void add_height(int32_t height) {
+    fbb_.AddElement<int32_t>(RoomTile::VT_HEIGHT, height, 0);
+  }
+  void add_bg_x(int32_t bg_x) {
+    fbb_.AddElement<int32_t>(RoomTile::VT_BG_X, bg_x, 0);
+  }
+  void add_bg_y(int32_t bg_y) {
+    fbb_.AddElement<int32_t>(RoomTile::VT_BG_Y, bg_y, 0);
+  }
+  void add_depth(int32_t depth) {
+    fbb_.AddElement<int32_t>(RoomTile::VT_DEPTH, depth, 0);
+  }
+  void add_scale_x(double scale_x) {
+    fbb_.AddElement<double>(RoomTile::VT_SCALE_X, scale_x, 0.0);
+  }
+  void add_scale_y(double scale_y) {
+    fbb_.AddElement<double>(RoomTile::VT_SCALE_Y, scale_y, 0.0);
+  }
+  void add_color(int32_t color) {
+    fbb_.AddElement<int32_t>(RoomTile::VT_COLOR, color, 0);
+  }
+  explicit RoomTileBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  RoomTileBuilder &operator=(const RoomTileBuilder &);
+  flatbuffers::Offset<RoomTile> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = flatbuffers::Offset<RoomTile>(end);
+    return o;
+  }
+};
+
+inline flatbuffers::Offset<RoomTile> CreateRoomTile(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    flatbuffers::Offset<flatbuffers::String> name = 0,
+    int32_t x = 0,
+    int32_t y = 0,
+    bool locked = false,
+    flatbuffers::Offset<flatbuffers::String> background_name = 0,
+    int32_t width = 0,
+    int32_t height = 0,
+    int32_t bg_x = 0,
+    int32_t bg_y = 0,
+    int32_t depth = 0,
+    double scale_x = 0.0,
+    double scale_y = 0.0,
+    int32_t color = 0) {
+  RoomTileBuilder builder_(_fbb);
+  builder_.add_scale_y(scale_y);
+  builder_.add_scale_x(scale_x);
+  builder_.add_color(color);
+  builder_.add_depth(depth);
+  builder_.add_bg_y(bg_y);
+  builder_.add_bg_x(bg_x);
+  builder_.add_height(height);
+  builder_.add_width(width);
+  builder_.add_background_name(background_name);
+  builder_.add_y(y);
+  builder_.add_x(x);
+  builder_.add_name(name);
+  builder_.add_locked(locked);
+  return builder_.Finish();
+}
+
+inline flatbuffers::Offset<RoomTile> CreateRoomTileDirect(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    const char *name = nullptr,
+    int32_t x = 0,
+    int32_t y = 0,
+    bool locked = false,
+    const char *background_name = nullptr,
+    int32_t width = 0,
+    int32_t height = 0,
+    int32_t bg_x = 0,
+    int32_t bg_y = 0,
+    int32_t depth = 0,
+    double scale_x = 0.0,
+    double scale_y = 0.0,
+    int32_t color = 0) {
+  return CreateRoomTile(
+      _fbb,
+      name ? _fbb.CreateString(name) : 0,
+      x,
+      y,
+      locked,
+      background_name ? _fbb.CreateString(background_name) : 0,
+      width,
+      height,
+      bg_x,
+      bg_y,
+      depth,
+      scale_x,
+      scale_y,
+      color);
 }
 
 struct Room FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
@@ -549,15 +639,15 @@ struct Room FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     VT_NAME = 4,
     VT_ID = 6,
     VT_EDITOR_METADATA = 8,
-    VT_CAPTION = 10,
+    VT_ROOM_CAPTION = 10,
     VT_WIDTH = 12,
     VT_HEIGHT = 14,
     VT_SPEED = 16,
     VT_PERSISTENT = 18,
     VT_BACKGROUND_COLOR = 20,
-    VT_DRAW_BACKGROUND_COLOR = 22,
+    VT_BACKGROUND_SHOWCOLOR = 22,
     VT_CREATION_CODE = 24,
-    VT_VIEWS_ENABLED = 26,
+    VT_VIEW_ENABLED = 26,
     VT_VIEWS = 28,
     VT_BACKGROUNDS = 30,
     VT_INSTANCES = 32,
@@ -572,8 +662,8 @@ struct Room FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const RoomEditorMetadata *editor_metadata() const {
     return GetStruct<const RoomEditorMetadata *>(VT_EDITOR_METADATA);
   }
-  const flatbuffers::String *caption() const {
-    return GetPointer<const flatbuffers::String *>(VT_CAPTION);
+  const flatbuffers::String *room_caption() const {
+    return GetPointer<const flatbuffers::String *>(VT_ROOM_CAPTION);
   }
   int32_t width() const {
     return GetField<int32_t>(VT_WIDTH, 0);
@@ -590,14 +680,14 @@ struct Room FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   int32_t background_color() const {
     return GetField<int32_t>(VT_BACKGROUND_COLOR, 0);
   }
-  bool draw_background_color() const {
-    return GetField<uint8_t>(VT_DRAW_BACKGROUND_COLOR, 0) != 0;
+  bool background_showcolor() const {
+    return GetField<uint8_t>(VT_BACKGROUND_SHOWCOLOR, 0) != 0;
   }
   const flatbuffers::String *creation_code() const {
     return GetPointer<const flatbuffers::String *>(VT_CREATION_CODE);
   }
-  bool views_enabled() const {
-    return GetField<uint8_t>(VT_VIEWS_ENABLED, 0) != 0;
+  bool view_enabled() const {
+    return GetField<uint8_t>(VT_VIEW_ENABLED, 0) != 0;
   }
   const flatbuffers::Vector<const RoomView *> *views() const {
     return GetPointer<const flatbuffers::Vector<const RoomView *> *>(VT_VIEWS);
@@ -608,8 +698,8 @@ struct Room FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const flatbuffers::Vector<flatbuffers::Offset<RoomInstance>> *instances() const {
     return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<RoomInstance>> *>(VT_INSTANCES);
   }
-  const flatbuffers::Vector<const RoomTile *> *tiles() const {
-    return GetPointer<const flatbuffers::Vector<const RoomTile *> *>(VT_TILES);
+  const flatbuffers::Vector<flatbuffers::Offset<RoomTile>> *tiles() const {
+    return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<RoomTile>> *>(VT_TILES);
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
@@ -617,17 +707,17 @@ struct Room FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            verifier.Verify(name()) &&
            VerifyField<int32_t>(verifier, VT_ID) &&
            VerifyField<RoomEditorMetadata>(verifier, VT_EDITOR_METADATA) &&
-           VerifyOffset(verifier, VT_CAPTION) &&
-           verifier.Verify(caption()) &&
+           VerifyOffset(verifier, VT_ROOM_CAPTION) &&
+           verifier.Verify(room_caption()) &&
            VerifyField<int32_t>(verifier, VT_WIDTH) &&
            VerifyField<int32_t>(verifier, VT_HEIGHT) &&
            VerifyField<int32_t>(verifier, VT_SPEED) &&
            VerifyField<uint8_t>(verifier, VT_PERSISTENT) &&
            VerifyField<int32_t>(verifier, VT_BACKGROUND_COLOR) &&
-           VerifyField<uint8_t>(verifier, VT_DRAW_BACKGROUND_COLOR) &&
+           VerifyField<uint8_t>(verifier, VT_BACKGROUND_SHOWCOLOR) &&
            VerifyOffset(verifier, VT_CREATION_CODE) &&
            verifier.Verify(creation_code()) &&
-           VerifyField<uint8_t>(verifier, VT_VIEWS_ENABLED) &&
+           VerifyField<uint8_t>(verifier, VT_VIEW_ENABLED) &&
            VerifyOffset(verifier, VT_VIEWS) &&
            verifier.Verify(views()) &&
            VerifyOffset(verifier, VT_BACKGROUNDS) &&
@@ -637,6 +727,7 @@ struct Room FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            verifier.VerifyVectorOfTables(instances()) &&
            VerifyOffset(verifier, VT_TILES) &&
            verifier.Verify(tiles()) &&
+           verifier.VerifyVectorOfTables(tiles()) &&
            verifier.EndTable();
   }
 };
@@ -653,8 +744,8 @@ struct RoomBuilder {
   void add_editor_metadata(const RoomEditorMetadata *editor_metadata) {
     fbb_.AddStruct(Room::VT_EDITOR_METADATA, editor_metadata);
   }
-  void add_caption(flatbuffers::Offset<flatbuffers::String> caption) {
-    fbb_.AddOffset(Room::VT_CAPTION, caption);
+  void add_room_caption(flatbuffers::Offset<flatbuffers::String> room_caption) {
+    fbb_.AddOffset(Room::VT_ROOM_CAPTION, room_caption);
   }
   void add_width(int32_t width) {
     fbb_.AddElement<int32_t>(Room::VT_WIDTH, width, 0);
@@ -671,14 +762,14 @@ struct RoomBuilder {
   void add_background_color(int32_t background_color) {
     fbb_.AddElement<int32_t>(Room::VT_BACKGROUND_COLOR, background_color, 0);
   }
-  void add_draw_background_color(bool draw_background_color) {
-    fbb_.AddElement<uint8_t>(Room::VT_DRAW_BACKGROUND_COLOR, static_cast<uint8_t>(draw_background_color), 0);
+  void add_background_showcolor(bool background_showcolor) {
+    fbb_.AddElement<uint8_t>(Room::VT_BACKGROUND_SHOWCOLOR, static_cast<uint8_t>(background_showcolor), 0);
   }
   void add_creation_code(flatbuffers::Offset<flatbuffers::String> creation_code) {
     fbb_.AddOffset(Room::VT_CREATION_CODE, creation_code);
   }
-  void add_views_enabled(bool views_enabled) {
-    fbb_.AddElement<uint8_t>(Room::VT_VIEWS_ENABLED, static_cast<uint8_t>(views_enabled), 0);
+  void add_view_enabled(bool view_enabled) {
+    fbb_.AddElement<uint8_t>(Room::VT_VIEW_ENABLED, static_cast<uint8_t>(view_enabled), 0);
   }
   void add_views(flatbuffers::Offset<flatbuffers::Vector<const RoomView *>> views) {
     fbb_.AddOffset(Room::VT_VIEWS, views);
@@ -689,7 +780,7 @@ struct RoomBuilder {
   void add_instances(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<RoomInstance>>> instances) {
     fbb_.AddOffset(Room::VT_INSTANCES, instances);
   }
-  void add_tiles(flatbuffers::Offset<flatbuffers::Vector<const RoomTile *>> tiles) {
+  void add_tiles(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<RoomTile>>> tiles) {
     fbb_.AddOffset(Room::VT_TILES, tiles);
   }
   explicit RoomBuilder(flatbuffers::FlatBufferBuilder &_fbb)
@@ -709,19 +800,19 @@ inline flatbuffers::Offset<Room> CreateRoom(
     flatbuffers::Offset<flatbuffers::String> name = 0,
     int32_t id = 0,
     const RoomEditorMetadata *editor_metadata = 0,
-    flatbuffers::Offset<flatbuffers::String> caption = 0,
+    flatbuffers::Offset<flatbuffers::String> room_caption = 0,
     int32_t width = 0,
     int32_t height = 0,
     int32_t speed = 0,
     bool persistent = false,
     int32_t background_color = 0,
-    bool draw_background_color = false,
+    bool background_showcolor = false,
     flatbuffers::Offset<flatbuffers::String> creation_code = 0,
-    bool views_enabled = false,
+    bool view_enabled = false,
     flatbuffers::Offset<flatbuffers::Vector<const RoomView *>> views = 0,
     flatbuffers::Offset<flatbuffers::Vector<const RoomBackground *>> backgrounds = 0,
     flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<RoomInstance>>> instances = 0,
-    flatbuffers::Offset<flatbuffers::Vector<const RoomTile *>> tiles = 0) {
+    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<RoomTile>>> tiles = 0) {
   RoomBuilder builder_(_fbb);
   builder_.add_tiles(tiles);
   builder_.add_instances(instances);
@@ -732,12 +823,12 @@ inline flatbuffers::Offset<Room> CreateRoom(
   builder_.add_speed(speed);
   builder_.add_height(height);
   builder_.add_width(width);
-  builder_.add_caption(caption);
+  builder_.add_room_caption(room_caption);
   builder_.add_editor_metadata(editor_metadata);
   builder_.add_id(id);
   builder_.add_name(name);
-  builder_.add_views_enabled(views_enabled);
-  builder_.add_draw_background_color(draw_background_color);
+  builder_.add_view_enabled(view_enabled);
+  builder_.add_background_showcolor(background_showcolor);
   builder_.add_persistent(persistent);
   return builder_.Finish();
 }
@@ -747,37 +838,37 @@ inline flatbuffers::Offset<Room> CreateRoomDirect(
     const char *name = nullptr,
     int32_t id = 0,
     const RoomEditorMetadata *editor_metadata = 0,
-    const char *caption = nullptr,
+    const char *room_caption = nullptr,
     int32_t width = 0,
     int32_t height = 0,
     int32_t speed = 0,
     bool persistent = false,
     int32_t background_color = 0,
-    bool draw_background_color = false,
+    bool background_showcolor = false,
     const char *creation_code = nullptr,
-    bool views_enabled = false,
+    bool view_enabled = false,
     const std::vector<const RoomView *> *views = nullptr,
     const std::vector<const RoomBackground *> *backgrounds = nullptr,
     const std::vector<flatbuffers::Offset<RoomInstance>> *instances = nullptr,
-    const std::vector<const RoomTile *> *tiles = nullptr) {
+    const std::vector<flatbuffers::Offset<RoomTile>> *tiles = nullptr) {
   return CreateRoom(
       _fbb,
       name ? _fbb.CreateString(name) : 0,
       id,
       editor_metadata,
-      caption ? _fbb.CreateString(caption) : 0,
+      room_caption ? _fbb.CreateString(room_caption) : 0,
       width,
       height,
       speed,
       persistent,
       background_color,
-      draw_background_color,
+      background_showcolor,
       creation_code ? _fbb.CreateString(creation_code) : 0,
-      views_enabled,
+      view_enabled,
       views ? _fbb.CreateVector<const RoomView *>(*views) : 0,
       backgrounds ? _fbb.CreateVector<const RoomBackground *>(*backgrounds) : 0,
       instances ? _fbb.CreateVector<flatbuffers::Offset<RoomInstance>>(*instances) : 0,
-      tiles ? _fbb.CreateVector<const RoomTile *>(*tiles) : 0);
+      tiles ? _fbb.CreateVector<flatbuffers::Offset<RoomTile>>(*tiles) : 0);
 }
 
 inline const Room *GetRoom(const void *buf) {

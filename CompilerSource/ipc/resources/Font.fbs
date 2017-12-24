@@ -1,3 +1,5 @@
+attribute "gmx";
+attribute "split";
 
 table Glyph
 {
@@ -20,12 +22,12 @@ table Font {
   name:string;
   id:int;
 
-  font_name:string;
+  font_name:string (gmx: "name");
   size:int;
   bold:bool;
   italic:bool;
 
-  glyph_ranges:[GlyphRange];
+  glyph_ranges:[GlyphRange] (gmx: "ranges", split: ",");
 }
 
 root_type Font;

@@ -1,4 +1,3 @@
-
 enum ShaderType : byte { GLSL, GLSLES, HLSL9, HLSL11 }
 
 table Shader {

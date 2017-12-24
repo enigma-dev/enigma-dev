@@ -86,13 +86,13 @@ struct Sound FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   enum {
     VT_NAME = 4,
     VT_ID = 6,
-    VT_KIND = 8,
-    VT_FILE_TYPE = 10,
-    VT_FILE_NAME = 12,
-    VT_EFFECTS = 14,
-    VT_VOLUME = 16,
-    VT_PAN = 18,
-    VT_PRELOAD = 20,
+    VT_PRELOAD = 8,
+    VT_KIND = 10,
+    VT_FILE_TYPE = 12,
+    VT_FILE_NAME = 14,
+    VT_EFFECTS = 16,
+    VT_VOLUME = 18,
+    VT_PAN = 20,
     VT_DATA = 22
   };
   const flatbuffers::String *name() const {
@@ -100,6 +100,9 @@ struct Sound FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   }
   int32_t id() const {
     return GetField<int32_t>(VT_ID, 0);
+  }
+  bool preload() const {
+    return GetField<uint8_t>(VT_PRELOAD, 0) != 0;
   }
   SoundKind kind() const {
     return static_cast<SoundKind>(GetField<int8_t>(VT_KIND, 0));
@@ -119,9 +122,6 @@ struct Sound FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   double pan() const {
     return GetField<double>(VT_PAN, 0.0);
   }
-  bool preload() const {
-    return GetField<uint8_t>(VT_PRELOAD, 0) != 0;
-  }
   const flatbuffers::Vector<int8_t> *data() const {
     return GetPointer<const flatbuffers::Vector<int8_t> *>(VT_DATA);
   }
@@ -130,6 +130,7 @@ struct Sound FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            VerifyOffset(verifier, VT_NAME) &&
            verifier.Verify(name()) &&
            VerifyField<int32_t>(verifier, VT_ID) &&
+           VerifyField<uint8_t>(verifier, VT_PRELOAD) &&
            VerifyField<int8_t>(verifier, VT_KIND) &&
            VerifyOffset(verifier, VT_FILE_TYPE) &&
            verifier.Verify(file_type()) &&
@@ -138,7 +139,6 @@ struct Sound FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            VerifyField<SoundEffects>(verifier, VT_EFFECTS) &&
            VerifyField<double>(verifier, VT_VOLUME) &&
            VerifyField<double>(verifier, VT_PAN) &&
-           VerifyField<uint8_t>(verifier, VT_PRELOAD) &&
            VerifyOffset(verifier, VT_DATA) &&
            verifier.Verify(data()) &&
            verifier.EndTable();
@@ -153,6 +153,9 @@ struct SoundBuilder {
   }
   void add_id(int32_t id) {
     fbb_.AddElement<int32_t>(Sound::VT_ID, id, 0);
+  }
+  void add_preload(bool preload) {
+    fbb_.AddElement<uint8_t>(Sound::VT_PRELOAD, static_cast<uint8_t>(preload), 0);
   }
   void add_kind(SoundKind kind) {
     fbb_.AddElement<int8_t>(Sound::VT_KIND, static_cast<int8_t>(kind), 0);
@@ -171,9 +174,6 @@ struct SoundBuilder {
   }
   void add_pan(double pan) {
     fbb_.AddElement<double>(Sound::VT_PAN, pan, 0.0);
-  }
-  void add_preload(bool preload) {
-    fbb_.AddElement<uint8_t>(Sound::VT_PRELOAD, static_cast<uint8_t>(preload), 0);
   }
   void add_data(flatbuffers::Offset<flatbuffers::Vector<int8_t>> data) {
     fbb_.AddOffset(Sound::VT_DATA, data);
@@ -194,13 +194,13 @@ inline flatbuffers::Offset<Sound> CreateSound(
     flatbuffers::FlatBufferBuilder &_fbb,
     flatbuffers::Offset<flatbuffers::String> name = 0,
     int32_t id = 0,
+    bool preload = false,
     SoundKind kind = SoundKind_NORMAL,
     flatbuffers::Offset<flatbuffers::String> file_type = 0,
     flatbuffers::Offset<flatbuffers::String> file_name = 0,
     const SoundEffects *effects = 0,
     double volume = 0.0,
     double pan = 0.0,
-    bool preload = false,
     flatbuffers::Offset<flatbuffers::Vector<int8_t>> data = 0) {
   SoundBuilder builder_(_fbb);
   builder_.add_pan(pan);
@@ -211,8 +211,8 @@ inline flatbuffers::Offset<Sound> CreateSound(
   builder_.add_file_type(file_type);
   builder_.add_id(id);
   builder_.add_name(name);
-  builder_.add_preload(preload);
   builder_.add_kind(kind);
+  builder_.add_preload(preload);
   return builder_.Finish();
 }
 
@@ -220,25 +220,25 @@ inline flatbuffers::Offset<Sound> CreateSoundDirect(
     flatbuffers::FlatBufferBuilder &_fbb,
     const char *name = nullptr,
     int32_t id = 0,
+    bool preload = false,
     SoundKind kind = SoundKind_NORMAL,
     const char *file_type = nullptr,
     const char *file_name = nullptr,
     const SoundEffects *effects = 0,
     double volume = 0.0,
     double pan = 0.0,
-    bool preload = false,
     const std::vector<int8_t> *data = nullptr) {
   return CreateSound(
       _fbb,
       name ? _fbb.CreateString(name) : 0,
       id,
+      preload,
       kind,
       file_type ? _fbb.CreateString(file_type) : 0,
       file_name ? _fbb.CreateString(file_name) : 0,
       effects,
       volume,
       pan,
-      preload,
       data ? _fbb.CreateVector<int8_t>(*data) : 0);
 }
 

@@ -1,4 +1,3 @@
-
 table GameInformation {
   background_color:int;
   embed_game_window:bool;

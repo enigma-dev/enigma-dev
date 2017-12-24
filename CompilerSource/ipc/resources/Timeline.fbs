@@ -1,6 +1,7 @@
+attribute "gmx";
 
 table Moment {
-  step:int;
+  step:int (gmx: "step");
   code:string;
 }
 
@@ -8,7 +9,7 @@ table Timeline {
   name:string;
   id:int;
 
-  moments:[Moment];
+  moments:[Moment] (gmx: "entry");
 }
 
 root_type Timeline;

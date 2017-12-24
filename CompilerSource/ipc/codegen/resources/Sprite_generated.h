@@ -176,12 +176,12 @@ struct Sprite FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   enum {
     VT_NAME = 4,
     VT_ID = 6,
-    VT_TRANSPARENT = 8,
-    VT_SHAPE = 10,
-    VT_ALPHA_TOLERANCE = 12,
-    VT_SEPARATE_MASK = 14,
-    VT_SMOOTH_EDGES = 16,
-    VT_PRELOAD = 18,
+    VT_PRELOAD = 8,
+    VT_TRANSPARENT = 10,
+    VT_SMOOTH_EDGES = 12,
+    VT_SHAPE = 14,
+    VT_ALPHA_TOLERANCE = 16,
+    VT_SEPARATE_MASK = 18,
     VT_ORIGIN_X = 20,
     VT_ORIGIN_Y = 22,
     VT_BOUNDING_BOX = 24,
@@ -194,8 +194,14 @@ struct Sprite FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   int32_t id() const {
     return GetField<int32_t>(VT_ID, 0);
   }
+  bool preload() const {
+    return GetField<uint8_t>(VT_PRELOAD, 0) != 0;
+  }
   bool transparent() const {
     return GetField<uint8_t>(VT_TRANSPARENT, 0) != 0;
+  }
+  bool smooth_edges() const {
+    return GetField<uint8_t>(VT_SMOOTH_EDGES, 0) != 0;
   }
   SpriteShape shape() const {
     return static_cast<SpriteShape>(GetField<int8_t>(VT_SHAPE, 0));
@@ -205,12 +211,6 @@ struct Sprite FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   }
   bool separate_mask() const {
     return GetField<uint8_t>(VT_SEPARATE_MASK, 0) != 0;
-  }
-  bool smooth_edges() const {
-    return GetField<uint8_t>(VT_SMOOTH_EDGES, 0) != 0;
-  }
-  bool preload() const {
-    return GetField<uint8_t>(VT_PRELOAD, 0) != 0;
   }
   int32_t origin_x() const {
     return GetField<int32_t>(VT_ORIGIN_X, 0);
@@ -232,12 +232,12 @@ struct Sprite FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            VerifyOffset(verifier, VT_NAME) &&
            verifier.Verify(name()) &&
            VerifyField<int32_t>(verifier, VT_ID) &&
+           VerifyField<uint8_t>(verifier, VT_PRELOAD) &&
            VerifyField<uint8_t>(verifier, VT_TRANSPARENT) &&
+           VerifyField<uint8_t>(verifier, VT_SMOOTH_EDGES) &&
            VerifyField<int8_t>(verifier, VT_SHAPE) &&
            VerifyField<int32_t>(verifier, VT_ALPHA_TOLERANCE) &&
            VerifyField<uint8_t>(verifier, VT_SEPARATE_MASK) &&
-           VerifyField<uint8_t>(verifier, VT_SMOOTH_EDGES) &&
-           VerifyField<uint8_t>(verifier, VT_PRELOAD) &&
            VerifyField<int32_t>(verifier, VT_ORIGIN_X) &&
            VerifyField<int32_t>(verifier, VT_ORIGIN_Y) &&
            VerifyField<SpriteBoundingBox>(verifier, VT_BOUNDING_BOX) &&
@@ -260,8 +260,14 @@ struct SpriteBuilder {
   void add_id(int32_t id) {
     fbb_.AddElement<int32_t>(Sprite::VT_ID, id, 0);
   }
+  void add_preload(bool preload) {
+    fbb_.AddElement<uint8_t>(Sprite::VT_PRELOAD, static_cast<uint8_t>(preload), 0);
+  }
   void add_transparent(bool transparent) {
     fbb_.AddElement<uint8_t>(Sprite::VT_TRANSPARENT, static_cast<uint8_t>(transparent), 0);
+  }
+  void add_smooth_edges(bool smooth_edges) {
+    fbb_.AddElement<uint8_t>(Sprite::VT_SMOOTH_EDGES, static_cast<uint8_t>(smooth_edges), 0);
   }
   void add_shape(SpriteShape shape) {
     fbb_.AddElement<int8_t>(Sprite::VT_SHAPE, static_cast<int8_t>(shape), 0);
@@ -271,12 +277,6 @@ struct SpriteBuilder {
   }
   void add_separate_mask(bool separate_mask) {
     fbb_.AddElement<uint8_t>(Sprite::VT_SEPARATE_MASK, static_cast<uint8_t>(separate_mask), 0);
-  }
-  void add_smooth_edges(bool smooth_edges) {
-    fbb_.AddElement<uint8_t>(Sprite::VT_SMOOTH_EDGES, static_cast<uint8_t>(smooth_edges), 0);
-  }
-  void add_preload(bool preload) {
-    fbb_.AddElement<uint8_t>(Sprite::VT_PRELOAD, static_cast<uint8_t>(preload), 0);
   }
   void add_origin_x(int32_t origin_x) {
     fbb_.AddElement<int32_t>(Sprite::VT_ORIGIN_X, origin_x, 0);
@@ -309,12 +309,12 @@ inline flatbuffers::Offset<Sprite> CreateSprite(
     flatbuffers::FlatBufferBuilder &_fbb,
     flatbuffers::Offset<flatbuffers::String> name = 0,
     int32_t id = 0,
+    bool preload = false,
     bool transparent = false,
+    bool smooth_edges = false,
     SpriteShape shape = SpriteShape_PRECISE,
     int32_t alpha_tolerance = 0,
     bool separate_mask = false,
-    bool smooth_edges = false,
-    bool preload = false,
     int32_t origin_x = 0,
     int32_t origin_y = 0,
     const SpriteBoundingBox *bounding_box = 0,
@@ -329,11 +329,11 @@ inline flatbuffers::Offset<Sprite> CreateSprite(
   builder_.add_alpha_tolerance(alpha_tolerance);
   builder_.add_id(id);
   builder_.add_name(name);
-  builder_.add_preload(preload);
-  builder_.add_smooth_edges(smooth_edges);
   builder_.add_separate_mask(separate_mask);
   builder_.add_shape(shape);
+  builder_.add_smooth_edges(smooth_edges);
   builder_.add_transparent(transparent);
+  builder_.add_preload(preload);
   return builder_.Finish();
 }
 
@@ -341,12 +341,12 @@ inline flatbuffers::Offset<Sprite> CreateSpriteDirect(
     flatbuffers::FlatBufferBuilder &_fbb,
     const char *name = nullptr,
     int32_t id = 0,
+    bool preload = false,
     bool transparent = false,
+    bool smooth_edges = false,
     SpriteShape shape = SpriteShape_PRECISE,
     int32_t alpha_tolerance = 0,
     bool separate_mask = false,
-    bool smooth_edges = false,
-    bool preload = false,
     int32_t origin_x = 0,
     int32_t origin_y = 0,
     const SpriteBoundingBox *bounding_box = 0,
@@ -356,12 +356,12 @@ inline flatbuffers::Offset<Sprite> CreateSpriteDirect(
       _fbb,
       name ? _fbb.CreateString(name) : 0,
       id,
+      preload,
       transparent,
+      smooth_edges,
       shape,
       alpha_tolerance,
       separate_mask,
-      smooth_edges,
-      preload,
       origin_x,
       origin_y,
       bounding_box,
