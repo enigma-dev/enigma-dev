@@ -1,0 +1,15 @@
+attribute "gmx";
+
+table Moment {
+  step:int (gmx: "step");
+  code:string;
+}
+
+table Timeline {
+  name:string;
+  id:int;
+
+  moments:[Moment] (gmx: "entry");
+}
+
+root_type Timeline;
