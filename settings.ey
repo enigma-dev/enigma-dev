@@ -46,7 +46,7 @@
     -make-directory:
         Type: Textfield
         Label: Make Directory
-        Default-Windows: "%PROGRAMDATA%/ENIGMA/"
+        Default-Windows: "%LOCALAPPDATA%/ENIGMA/"
         Default-Linux: "%HOME%/.enigma/"
         Default-MacOSX: "./ENIGMA/"
         Default: "./ENIGMA/"

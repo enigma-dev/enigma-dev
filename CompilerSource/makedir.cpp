@@ -48,7 +48,9 @@ string escapeEnv(string str, string env) {
 }
 
 string escapeEnv(string str) {
-	string escaped = escapeEnv(str, "PROGRAMDATA");
+	string escaped = escapeEnv(str, "LOCALAPPDATA");
+	escaped = escapeEnv(escaped, "APPDATA");
+	escaped = escapeEnv(escaped, "PROGRAMDATA");
 	escaped = escapeEnv(escaped, "ALLUSERSPROFILE");
 	escaped = escapeEnv(escaped, "HOME");
 	return escaped;

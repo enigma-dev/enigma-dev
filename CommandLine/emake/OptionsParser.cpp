@@ -78,7 +78,7 @@ OptionsParser::OptionsParser() : _desc("Options")
   std::string def_platform, def_workdir;
   #if CURRENT_PLATFORM_ID == OS_WINDOWS
     def_platform = "Win32";
-    def_workdir = "%PROGRAMDATA%/ENIGMA/";
+    def_workdir = "%LOCALAPPDATA%/ENIGMA/";
   #elif CURRENT_PLATFORM_ID ==  OS_MACOSX
     def_platform = "Cocoa";
     def_workdir = "/tmp/ENIGMA/";
