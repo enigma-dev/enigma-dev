@@ -142,7 +142,7 @@ void parse_ide_settings(const char* eyaml)
   // Use a platform-specific make directory.
   std::string make_directory = "./ENIGMA/";
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
-  make_directory = "%PROGRAMDATA%/ENIGMA/";
+  make_directory = "%LOCALAPPDATA%/ENIGMA/";
 #elif CURRENT_PLATFORM_ID == OS_LINUX
   make_directory = "%HOME%/.enigma/";
 #elif CURRENT_PLATFORM_ID == OS_MACOSX
