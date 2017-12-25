@@ -1,4 +1,5 @@
-/** Copyright (C) 2008-2011 IsmAvatar <cmagicj@nni.com>, Josh Ventura
+/** Copyright (C) 2008-2017 Josh Ventura
+*** Copyright (C) 2008-2011 IsmAvatar <cmagicj@nni.com>
 *** Copyright (C) 2013 Robert B. Colton
 *** Copyright (C) 2014 Seth N. Hetu
 *** Copyright (C) 2015 Harijs Grinbergs
@@ -27,6 +28,7 @@
 #include <cstdlib>
 #include <stdlib.h> //getenv and system
 
+#include "Platforms/General/PFsystem.h"
 #include "Platforms/platforms_mandatory.h"
 
 #include "XLIBmain.h"
@@ -53,9 +55,6 @@ namespace enigma
   int game_return = 0;
   extern unsigned char keymap[512];
   void ENIGMA_events(void); //TODO: Synchronize this with Windows by putting these two in a single header.
-  bool gameWindowFocused = false;
-  extern int windowWidth, windowHeight;
-  extern bool freezeOnLoseFocus;
   unsigned int pausedSteps = 0;
 
   void (*WindowResizedCallback)();
@@ -70,6 +69,7 @@ namespace enigma
     Screen *screen;
     Window win;
     Atom wm_delwin;
+    bool game_window_focused = true;
 
     int handleEvents()
     {
@@ -146,20 +146,17 @@ namespace enigma
           enigma::windowWidth = e.xconfigure.width;
           enigma::windowHeight = e.xconfigure.height;
 
-          //NOTE: This will lead to a loop, and it seems superfluous.
-          //enigma::setwindowsize();
-
           if (WindowResizedCallback != NULL) {
             WindowResizedCallback();
           }
           return 0;
         }
         case FocusIn:
-          gameWindowFocused = true;
+          game_window_focused = true;
           pausedSteps = 0;
           return 0;
         case FocusOut:
-          gameWindowFocused = false;
+          game_window_focused = false;
           return 0;
         case ClientMessage:
           if ((Atom)e.xclient.data.l[0] == wm_delwin) //For some reason, this line warns whether we cast to unsigned or not.
@@ -381,7 +378,7 @@ int main(int argc,char** argv)
             if(handleEvents() > 0)
                 goto end;
 
-        if (!enigma::gameWindowFocused && enigma::freezeOnLoseFocus) {
+        if (enigma_user::os_is_paused()) {
           if (enigma::pausedSteps < 1) {
             enigma::pausedSteps += 1;
           } else {

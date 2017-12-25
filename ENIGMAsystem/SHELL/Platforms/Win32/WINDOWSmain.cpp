@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2011 Josh Ventura
+/** Copyright (C) 2008-2017 Josh Ventura
 *** Copyright (C) 2013-2014 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
@@ -37,6 +37,7 @@ using std::vector;
 namespace enigma_user {
 
 const int os_type = os_windows;
+extern double fps; // TODO: Move.
 
 }
 
@@ -47,7 +48,6 @@ namespace enigma //TODO: Find where this belongs
   LRESULT CALLBACK WndProc (HWND hWnd, UINT message,WPARAM wParam, LPARAM lParam);
   HDC window_hDC;
   HANDLE mainthread;
-  extern bool gameWindowFocused, freezeOnLoseFocus;
   unsigned int pausedSteps = 0;
 
   vector<string> main_argv;
@@ -64,27 +64,11 @@ namespace enigma //TODO: Find where this belongs
   }
 }
 
-void enigma_catchmouse_backend(bool x) {
-  if (x) SetCapture(enigma::hWnd); else ReleaseCapture();
-}
-
 namespace enigma {
   int initialize_everything();
   int ENIGMA_events();
   int game_ending();
-  LONG_PTR getwindowstyle();
 } // TODO: synchronize with XLib by moving these declarations to a platform_includes header in the root.
-
-//TODO: Implement pause events
-unsigned long current_time_mcs = 0; // microseconds since the start of the game
-
-namespace enigma_user {
-  std::string working_directory = "";
-  std::string program_directory = "";
-  extern double fps;
-  unsigned long current_time = 0; // milliseconds since the start of the game
-  unsigned long delta_time = 0; // microseconds since the last step event
-}
 
 namespace enigma {
   int current_room_speed;
@@ -184,6 +168,27 @@ namespace enigma {
   }
 }
 
+//TODO: Implement pause events
+unsigned long current_time_mcs = 0; // microseconds since the start of the game
+
+static LONG_PTR ComputeInitialWindowStyle() {
+  LONG_PTR newlong = WS_VISIBLE;
+
+  if (enigma::showIcons)
+    newlong |= WS_SYSMENU;
+
+  if (enigma::isFullScreen) {
+    newlong |= WS_POPUP | WS_MAXIMIZE;
+  } else if (enigma::showBorder) {
+    newlong |= WS_CAPTION | WS_MINIMIZEBOX;
+    if (enigma::isSizeable)
+      newlong |= WS_SIZEBOX | WS_MAXIMIZEBOX;
+  }
+
+  // these two flags are necessary for extensions like Ultimate3D and GMOgre to render on top of the window
+  return newlong | WS_CLIPCHILDREN | WS_CLIPSIBLINGS;
+}
+
 #include <cstdio>
 #include <mmsystem.h>
 int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,int iCmdShow)
@@ -229,7 +234,7 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
     wcontainer.hInstance = hInstance;
     wcontainer.hIcon = LoadIcon (hInstance, "IDI_MAIN_ICON");
     wcontainer.hCursor = LoadCursor (NULL, IDC_ARROW);
-    wcontainer.hbrBackground = (HBRUSH) GetStockObject (BLACK_BRUSH);
+    wcontainer.hbrBackground = (HBRUSH) CreateSolidBrush(enigma::windowColor);
     wcontainer.lpszMenuName = NULL;
     wcontainer.lpszClassName = "EnigmaDevGameMainWindow";
     RegisterClass (&wcontainer);
@@ -248,7 +253,7 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
     // This will be handled by game_start in roomsystem.cpp where window_default(true) sets the initial
     // fullscreen state of the window before showing it.
     enigma::hWnd = CreateWindow("EnigmaDevGameMainWindow", "",
-                                (enigma::getwindowstyle() & ~(WS_VISIBLE)),
+                                ComputeInitialWindowStyle(),
                                 (screen_width-wid)/2, (screen_height-hgt)/2, wid, hgt,
                                 NULL, NULL, hInstance, NULL);
 
@@ -336,7 +341,7 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
         }
         else
         {
-          if (!enigma::gameWindowFocused && enigma::freezeOnLoseFocus) {
+          if (enigma_user::os_is_paused()) {
             if (enigma::pausedSteps < 1) {
               enigma::pausedSteps += 1;
             } else {
@@ -376,8 +381,13 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
     return enigma::game_return;
 }
 
-namespace enigma_user
-{
+namespace enigma_user {
+
+std::string working_directory = "";
+std::string program_directory = "";
+unsigned long current_time = 0; // milliseconds since the start of the game
+unsigned long delta_time = 0; // microseconds since the last step event
+
 unsigned long get_timer() {  // microseconds since the start of the game
     enigma::update_current_time();
 
@@ -511,11 +521,9 @@ void game_end(int ret) { PostQuitMessage(ret); }
 
 void action_end_game() { game_end(); }
 
-void action_webpage(const std::string &url)
-{
-	ShellExecute (NULL, "open", url.c_str(), NULL, NULL, SW_SHOWNORMAL);
+void action_webpage(const std::string &url) {
+	ShellExecute(NULL, "open", url.c_str(), NULL, NULL, SW_SHOWNORMAL);
 }
 
-
-}
+}  // namespace enigma_user
 
