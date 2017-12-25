@@ -887,17 +887,17 @@ void keyboard_set_scroll(bool on) {
 
 static map<int, int> keybdmap;
 void keyboard_set_map(int key1, int key2) {
-  map<int, int>::iterator it = enigma::keybdmap.find(key1);
-  if (enigma::keybdmap.end() != it) {
+  map<int, int>::iterator it = keybdmap.find(key1);
+  if (keybdmap.end() != it) {
     it->second = key2;
   } else {
-    enigma::keybdmap.insert(map<int, int>::value_type(key1, key2));
+    keybdmap.insert(map<int, int>::value_type(key1, key2));
   }
 }
 
 int keyboard_get_map(int key) {
-  map<int, int>::iterator it = enigma::keybdmap.find(key);
-  if (enigma::keybdmap.end() != it) {
+  map<int, int>::iterator it = keybdmap.find(key);
+  if (keybdmap.end() != it) {
     return it->second;
   } else {
     return key;
@@ -905,7 +905,7 @@ int keyboard_get_map(int key) {
 }
 
 void keyboard_unset_map() {
-  enigma::keybdmap.clear();
+  keybdmap.clear();
 }
 
 void mouse_clear(const int button)
