@@ -41,6 +41,7 @@ namespace enigma
 {
   extern HWND hWnd;
   bool windowAdapt = true;
+  int windowWidth = 0, windowHeight = 0;
   int cursorInt = 0, regionWidth = 0, regionHeight = 0, windowX = 0, windowY = 0;
   double scaledWidth = 0, scaledHeight = 0;
   char* currentCursor = IDC_ARROW;
@@ -884,26 +885,27 @@ void keyboard_set_scroll(bool on) {
   }
 }
 
+static map<int, int> keybdmap;
 void keyboard_set_map(int key1, int key2) {
-	map< int, int >::iterator it = enigma::keybdmap.find( key1 );
-    if ( enigma::keybdmap.end() != it ) {
-		it->second = key2;
-    } else {
-		enigma::keybdmap.insert( map< int, int >::value_type(key1, key2) );
-	}
+  map<int, int>::iterator it = enigma::keybdmap.find(key1);
+  if (enigma::keybdmap.end() != it) {
+    it->second = key2;
+  } else {
+    enigma::keybdmap.insert(map<int, int>::value_type(key1, key2));
+  }
 }
 
 int keyboard_get_map(int key) {
-	map< int, int >::iterator it = enigma::keybdmap.find( key );
-    if ( enigma::keybdmap.end() != it ) {
-		return it->second;
-    } else {
-		return key;
-	}
+  map<int, int>::iterator it = enigma::keybdmap.find(key);
+  if (enigma::keybdmap.end() != it) {
+    return it->second;
+  } else {
+    return key;
+  }
 }
 
 void keyboard_unset_map() {
-	enigma::keybdmap.clear();
+  enigma::keybdmap.clear();
 }
 
 void mouse_clear(const int button)
