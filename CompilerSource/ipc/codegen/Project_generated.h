@@ -20,28 +20,109 @@
 #include "Image_generated.h"
 #include "Point_generated.h"
 
+struct TreeNode;
+
 struct Project;
+
+struct TreeNode FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  enum {
+    VT_FILE_NAME = 4,
+    VT_IS_DIRECTORY = 6,
+    VT_CHILDREN = 8
+  };
+  const flatbuffers::String *file_name() const {
+    return GetPointer<const flatbuffers::String *>(VT_FILE_NAME);
+  }
+  bool is_directory() const {
+    return GetField<uint8_t>(VT_IS_DIRECTORY, 0) != 0;
+  }
+  const flatbuffers::Vector<flatbuffers::Offset<TreeNode>> *children() const {
+    return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<TreeNode>> *>(VT_CHILDREN);
+  }
+  bool Verify(flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyOffset(verifier, VT_FILE_NAME) &&
+           verifier.Verify(file_name()) &&
+           VerifyField<uint8_t>(verifier, VT_IS_DIRECTORY) &&
+           VerifyOffset(verifier, VT_CHILDREN) &&
+           verifier.Verify(children()) &&
+           verifier.VerifyVectorOfTables(children()) &&
+           verifier.EndTable();
+  }
+};
+
+struct TreeNodeBuilder {
+  flatbuffers::FlatBufferBuilder &fbb_;
+  flatbuffers::uoffset_t start_;
+  void add_file_name(flatbuffers::Offset<flatbuffers::String> file_name) {
+    fbb_.AddOffset(TreeNode::VT_FILE_NAME, file_name);
+  }
+  void add_is_directory(bool is_directory) {
+    fbb_.AddElement<uint8_t>(TreeNode::VT_IS_DIRECTORY, static_cast<uint8_t>(is_directory), 0);
+  }
+  void add_children(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<TreeNode>>> children) {
+    fbb_.AddOffset(TreeNode::VT_CHILDREN, children);
+  }
+  explicit TreeNodeBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  TreeNodeBuilder &operator=(const TreeNodeBuilder &);
+  flatbuffers::Offset<TreeNode> Finish() {
+    const auto end = fbb_.EndTable(start_);
+    auto o = flatbuffers::Offset<TreeNode>(end);
+    return o;
+  }
+};
+
+inline flatbuffers::Offset<TreeNode> CreateTreeNode(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    flatbuffers::Offset<flatbuffers::String> file_name = 0,
+    bool is_directory = false,
+    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<TreeNode>>> children = 0) {
+  TreeNodeBuilder builder_(_fbb);
+  builder_.add_children(children);
+  builder_.add_file_name(file_name);
+  builder_.add_is_directory(is_directory);
+  return builder_.Finish();
+}
+
+inline flatbuffers::Offset<TreeNode> CreateTreeNodeDirect(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    const char *file_name = nullptr,
+    bool is_directory = false,
+    const std::vector<flatbuffers::Offset<TreeNode>> *children = nullptr) {
+  return CreateTreeNode(
+      _fbb,
+      file_name ? _fbb.CreateString(file_name) : 0,
+      is_directory,
+      children ? _fbb.CreateVector<flatbuffers::Offset<TreeNode>>(*children) : 0);
+}
 
 struct Project FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   enum {
     VT_FILE_NAME = 4,
     VT_FILE_VERSION = 6,
-    VT_SPRITES = 8,
-    VT_SOUNDS = 10,
-    VT_BACKGROUNDS = 12,
-    VT_PATHS = 14,
-    VT_SCRIPTS = 16,
-    VT_SHADERS = 18,
-    VT_FONTS = 20,
-    VT_TIMELINES = 22,
-    VT_OBJECTS = 24,
-    VT_ROOMS = 26
+    VT_TREE_ROOT = 8,
+    VT_SPRITES = 10,
+    VT_SOUNDS = 12,
+    VT_BACKGROUNDS = 14,
+    VT_PATHS = 16,
+    VT_SCRIPTS = 18,
+    VT_SHADERS = 20,
+    VT_FONTS = 22,
+    VT_TIMELINES = 24,
+    VT_OBJECTS = 26,
+    VT_ROOMS = 28
   };
   const flatbuffers::String *file_name() const {
     return GetPointer<const flatbuffers::String *>(VT_FILE_NAME);
   }
   int32_t file_version() const {
     return GetField<int32_t>(VT_FILE_VERSION, 0);
+  }
+  const TreeNode *tree_root() const {
+    return GetPointer<const TreeNode *>(VT_TREE_ROOT);
   }
   const flatbuffers::Vector<flatbuffers::Offset<Sprite>> *sprites() const {
     return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<Sprite>> *>(VT_SPRITES);
@@ -78,6 +159,8 @@ struct Project FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            VerifyOffset(verifier, VT_FILE_NAME) &&
            verifier.Verify(file_name()) &&
            VerifyField<int32_t>(verifier, VT_FILE_VERSION) &&
+           VerifyOffset(verifier, VT_TREE_ROOT) &&
+           verifier.VerifyTable(tree_root()) &&
            VerifyOffset(verifier, VT_SPRITES) &&
            verifier.Verify(sprites()) &&
            verifier.VerifyVectorOfTables(sprites()) &&
@@ -120,6 +203,9 @@ struct ProjectBuilder {
   }
   void add_file_version(int32_t file_version) {
     fbb_.AddElement<int32_t>(Project::VT_FILE_VERSION, file_version, 0);
+  }
+  void add_tree_root(flatbuffers::Offset<TreeNode> tree_root) {
+    fbb_.AddOffset(Project::VT_TREE_ROOT, tree_root);
   }
   void add_sprites(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Sprite>>> sprites) {
     fbb_.AddOffset(Project::VT_SPRITES, sprites);
@@ -167,6 +253,7 @@ inline flatbuffers::Offset<Project> CreateProject(
     flatbuffers::FlatBufferBuilder &_fbb,
     flatbuffers::Offset<flatbuffers::String> file_name = 0,
     int32_t file_version = 0,
+    flatbuffers::Offset<TreeNode> tree_root = 0,
     flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Sprite>>> sprites = 0,
     flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Sound>>> sounds = 0,
     flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Background>>> backgrounds = 0,
@@ -188,6 +275,7 @@ inline flatbuffers::Offset<Project> CreateProject(
   builder_.add_backgrounds(backgrounds);
   builder_.add_sounds(sounds);
   builder_.add_sprites(sprites);
+  builder_.add_tree_root(tree_root);
   builder_.add_file_version(file_version);
   builder_.add_file_name(file_name);
   return builder_.Finish();
@@ -197,6 +285,7 @@ inline flatbuffers::Offset<Project> CreateProjectDirect(
     flatbuffers::FlatBufferBuilder &_fbb,
     const char *file_name = nullptr,
     int32_t file_version = 0,
+    flatbuffers::Offset<TreeNode> tree_root = 0,
     const std::vector<flatbuffers::Offset<Sprite>> *sprites = nullptr,
     const std::vector<flatbuffers::Offset<Sound>> *sounds = nullptr,
     const std::vector<flatbuffers::Offset<Background>> *backgrounds = nullptr,
@@ -211,6 +300,7 @@ inline flatbuffers::Offset<Project> CreateProjectDirect(
       _fbb,
       file_name ? _fbb.CreateString(file_name) : 0,
       file_version,
+      tree_root,
       sprites ? _fbb.CreateVector<flatbuffers::Offset<Sprite>>(*sprites) : 0,
       sounds ? _fbb.CreateVector<flatbuffers::Offset<Sound>>(*sounds) : 0,
       backgrounds ? _fbb.CreateVector<flatbuffers::Offset<Background>>(*backgrounds) : 0,

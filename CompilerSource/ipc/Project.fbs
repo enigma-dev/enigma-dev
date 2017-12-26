@@ -12,9 +12,16 @@ include "Room.fbs";
 include "GameInformation.fbs";
 //include "GameSettings.fbs";
 
+table TreeNode {
+  file_name:string;
+  is_directory:bool;
+  children:[TreeNode];
+}
+
 table Project {
   file_name:string;
   file_version:int;
+  tree_root:TreeNode;
 
   sprites:[Sprite];
   sounds:[Sound];

@@ -9,8 +9,8 @@ OBJDIRS := $(sort $(dir $(GENERATED)))
 regenerate-flatbuffers: $(GENERATED)
 
 codegen/%_generated.h: %.fbs | $(OBJDIRS)
-	flatc -I util -I resources -M --cpp $< &> codegen/$*.d
 	flatc -I util -I resources -o codegen/$(dir $*.d) --cpp $<
+	flatc -I util -I resources -M --cpp $< &> codegen/$*.d
 
 $(OBJDIRS):
 	mkdir -p $@
