@@ -7,8 +7,7 @@ OBJDIRS := $(sort $(dir $(GENERATED)))
 
 .PHONY: regenerate-flatbuffers
 
-regenerate-flatbuffers: $(GENERATED)
-regenerate-flatbuffers: $(OBJS)
+regenerate-flatbuffers: $(GENERATED) | $(OBJS)
 
 codegen/%_generated.h: %.fbs | $(OBJDIRS)
 	flatc -I util -I resources -o codegen/$(dir $*) --cpp $<
