@@ -297,6 +297,97 @@ inline flatbuffers::Offset<Object> CreateObjectDirect(
       main_events ? _fbb.CreateVector<flatbuffers::Offset<MainEvent>>(*main_events) : 0);
 }
 
+inline flatbuffers::TypeTable *EventTypeTable();
+
+inline flatbuffers::TypeTable *MainEventTypeTable();
+
+inline flatbuffers::TypeTable *ObjectTypeTable();
+
+inline flatbuffers::TypeTable *EventTypeTable() {
+  static flatbuffers::TypeCode type_codes[] = {
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_STRING, 0, -1 }
+  };
+  static const char *names[] = {
+    "id",
+    "code"
+  };
+  static flatbuffers::TypeTable tt = {
+    flatbuffers::ST_TABLE, 2, type_codes, nullptr, nullptr, names, nullptr
+  };
+  return &tt;
+}
+
+inline flatbuffers::TypeTable *MainEventTypeTable() {
+  static flatbuffers::TypeCode type_codes[] = {
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_SEQUENCE, 1, 0 }
+  };
+  static flatbuffers::TypeFunction type_refs[] = {
+    EventTypeTable
+  };
+  static const char *names[] = {
+    "id",
+    "events"
+  };
+  static flatbuffers::TypeTable tt = {
+    flatbuffers::ST_TABLE, 2, type_codes, type_refs, nullptr, names, nullptr
+  };
+  return &tt;
+}
+
+inline flatbuffers::TypeTable *ObjectTypeTable() {
+  static flatbuffers::TypeCode type_codes[] = {
+    { flatbuffers::ET_STRING, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_STRING, 0, -1 },
+    { flatbuffers::ET_STRING, 0, -1 },
+    { flatbuffers::ET_STRING, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_BOOL, 0, -1 },
+    { flatbuffers::ET_BOOL, 0, -1 },
+    { flatbuffers::ET_BOOL, 0, -1 },
+    { flatbuffers::ET_SEQUENCE, 1, 0 }
+  };
+  static flatbuffers::TypeFunction type_refs[] = {
+    MainEventTypeTable
+  };
+  static const char* attr_keys_2[] = { "gmx" };
+  static const char* attr_vals_2[] = { "parentName" };
+  static const char* attr_keys_3[] = { "gmx" };
+  static const char* attr_vals_3[] = { "spriteName" };
+  static const char* attr_keys_4[] = { "gmx" };
+  static const char* attr_vals_4[] = { "maskName" };
+  static const flatbuffers::AttributeList attrs[] = {
+    {},
+    {},
+    { 1, attr_keys_2, attr_vals_2 },
+    { 1, attr_keys_3, attr_vals_3 },
+    { 1, attr_keys_4, attr_vals_4 },
+    {},
+    {},
+    {},
+    {},
+    {}
+  };
+  static const char *names[] = {
+    "name",
+    "id",
+    "parent_name",
+    "sprite_name",
+    "mask_name",
+    "depth",
+    "solid",
+    "visible",
+    "persisent",
+    "main_events"
+  };
+  static flatbuffers::TypeTable tt = {
+    flatbuffers::ST_TABLE, 10, type_codes, type_refs, nullptr, names, field_attrs
+  };
+  return &tt;
+}
+
 inline const Object *GetObject(const void *buf) {
   return flatbuffers::GetRoot<Object>(buf);
 }

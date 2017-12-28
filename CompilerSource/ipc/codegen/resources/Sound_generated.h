@@ -122,8 +122,8 @@ struct Sound FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   double pan() const {
     return GetField<double>(VT_PAN, 0.0);
   }
-  const flatbuffers::Vector<int8_t> *data() const {
-    return GetPointer<const flatbuffers::Vector<int8_t> *>(VT_DATA);
+  const flatbuffers::String *data() const {
+    return GetPointer<const flatbuffers::String *>(VT_DATA);
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
@@ -175,7 +175,7 @@ struct SoundBuilder {
   void add_pan(double pan) {
     fbb_.AddElement<double>(Sound::VT_PAN, pan, 0.0);
   }
-  void add_data(flatbuffers::Offset<flatbuffers::Vector<int8_t>> data) {
+  void add_data(flatbuffers::Offset<flatbuffers::String> data) {
     fbb_.AddOffset(Sound::VT_DATA, data);
   }
   explicit SoundBuilder(flatbuffers::FlatBufferBuilder &_fbb)
@@ -201,7 +201,7 @@ inline flatbuffers::Offset<Sound> CreateSound(
     const SoundEffects *effects = 0,
     double volume = 0.0,
     double pan = 0.0,
-    flatbuffers::Offset<flatbuffers::Vector<int8_t>> data = 0) {
+    flatbuffers::Offset<flatbuffers::String> data = 0) {
   SoundBuilder builder_(_fbb);
   builder_.add_pan(pan);
   builder_.add_volume(volume);
@@ -227,7 +227,7 @@ inline flatbuffers::Offset<Sound> CreateSoundDirect(
     const SoundEffects *effects = 0,
     double volume = 0.0,
     double pan = 0.0,
-    const std::vector<int8_t> *data = nullptr) {
+    const char *data = nullptr) {
   return CreateSound(
       _fbb,
       name ? _fbb.CreateString(name) : 0,
@@ -239,7 +239,105 @@ inline flatbuffers::Offset<Sound> CreateSoundDirect(
       effects,
       volume,
       pan,
-      data ? _fbb.CreateVector<int8_t>(*data) : 0);
+      data ? _fbb.CreateString(data) : 0);
+}
+
+inline flatbuffers::TypeTable *SoundEffectsTypeTable();
+
+inline flatbuffers::TypeTable *SoundTypeTable();
+
+inline flatbuffers::TypeTable *SoundKindTypeTable() {
+  static flatbuffers::TypeCode type_codes[] = {
+    { flatbuffers::ET_CHAR, 0, 0 },
+    { flatbuffers::ET_CHAR, 0, 0 },
+    { flatbuffers::ET_CHAR, 0, 0 },
+    { flatbuffers::ET_CHAR, 0, 0 }
+  };
+  static flatbuffers::TypeFunction type_refs[] = {
+    SoundKindTypeTable
+  };
+  static const int32_t values[] = { 0, 1, 2, 3 };
+  static const char *names[] = {
+    "NORMAL",
+    "BACKGROUND_MUSIC",
+    "THREE_DIMENSIONAL",
+    "MULTIMEDIA_PLAYER"
+  };
+  static flatbuffers::TypeTable tt = {
+    flatbuffers::ST_ENUM, 4, type_codes, type_refs, values, names, nullptr
+  };
+  return &tt;
+}
+
+inline flatbuffers::TypeTable *SoundEffectsTypeTable() {
+  static flatbuffers::TypeCode type_codes[] = {
+    { flatbuffers::ET_BOOL, 0, -1 },
+    { flatbuffers::ET_BOOL, 0, -1 },
+    { flatbuffers::ET_BOOL, 0, -1 },
+    { flatbuffers::ET_BOOL, 0, -1 },
+    { flatbuffers::ET_BOOL, 0, -1 }
+  };
+  static const int32_t values[] = { 0, 1, 2, 3, 4, 5 };
+  static const char *names[] = {
+    "chorus",
+    "echo",
+    "flanger",
+    "gargle",
+    "reverb"
+  };
+  static flatbuffers::TypeTable tt = {
+    flatbuffers::ST_STRUCT, 5, type_codes, nullptr, values, names, nullptr
+  };
+  return &tt;
+}
+
+inline flatbuffers::TypeTable *SoundTypeTable() {
+  static flatbuffers::TypeCode type_codes[] = {
+    { flatbuffers::ET_STRING, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_BOOL, 0, -1 },
+    { flatbuffers::ET_CHAR, 0, 0 },
+    { flatbuffers::ET_STRING, 0, -1 },
+    { flatbuffers::ET_STRING, 0, -1 },
+    { flatbuffers::ET_SEQUENCE, 0, 1 },
+    { flatbuffers::ET_DOUBLE, 0, -1 },
+    { flatbuffers::ET_DOUBLE, 0, -1 },
+    { flatbuffers::ET_STRING, 0, -1 }
+  };
+  static flatbuffers::TypeFunction type_refs[] = {
+    SoundKindTypeTable,
+    SoundEffectsTypeTable
+  };
+  static const char* attr_keys_7[] = { "gmx" };
+  static const char* attr_vals_7[] = { "volume/volume" };
+  static const flatbuffers::AttributeList attrs[] = {
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    {},
+    { 1, attr_keys_7, attr_vals_7 },
+    {},
+    {}
+  };
+  static const char *names[] = {
+    "name",
+    "id",
+    "preload",
+    "kind",
+    "file_type",
+    "file_name",
+    "effects",
+    "volume",
+    "pan",
+    "data"
+  };
+  static flatbuffers::TypeTable tt = {
+    flatbuffers::ST_TABLE, 10, type_codes, type_refs, nullptr, names, field_attrs
+  };
+  return &tt;
 }
 
 inline const Sound *GetSound(const void *buf) {

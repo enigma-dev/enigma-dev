@@ -146,6 +146,58 @@ inline flatbuffers::Offset<Timeline> CreateTimelineDirect(
       moments ? _fbb.CreateVector<flatbuffers::Offset<Moment>>(*moments) : 0);
 }
 
+inline flatbuffers::TypeTable *MomentTypeTable();
+
+inline flatbuffers::TypeTable *TimelineTypeTable();
+
+inline flatbuffers::TypeTable *MomentTypeTable() {
+  static flatbuffers::TypeCode type_codes[] = {
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_STRING, 0, -1 }
+  };
+  static const char* attr_keys_0[] = { "gmx" };
+  static const char* attr_vals_0[] = { "step" };
+  static const flatbuffers::AttributeList attrs[] = {
+    { 1, attr_keys_0, attr_vals_0 },
+    {}
+  };
+  static const char *names[] = {
+    "step",
+    "code"
+  };
+  static flatbuffers::TypeTable tt = {
+    flatbuffers::ST_TABLE, 2, type_codes, nullptr, nullptr, names, field_attrs
+  };
+  return &tt;
+}
+
+inline flatbuffers::TypeTable *TimelineTypeTable() {
+  static flatbuffers::TypeCode type_codes[] = {
+    { flatbuffers::ET_STRING, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_SEQUENCE, 1, 0 }
+  };
+  static flatbuffers::TypeFunction type_refs[] = {
+    MomentTypeTable
+  };
+  static const char* attr_keys_2[] = { "gmx" };
+  static const char* attr_vals_2[] = { "entry" };
+  static const flatbuffers::AttributeList attrs[] = {
+    {},
+    {},
+    { 1, attr_keys_2, attr_vals_2 }
+  };
+  static const char *names[] = {
+    "name",
+    "id",
+    "moments"
+  };
+  static flatbuffers::TypeTable tt = {
+    flatbuffers::ST_TABLE, 3, type_codes, type_refs, nullptr, names, field_attrs
+  };
+  return &tt;
+}
+
 inline const Timeline *GetTimeline(const void *buf) {
   return flatbuffers::GetRoot<Timeline>(buf);
 }

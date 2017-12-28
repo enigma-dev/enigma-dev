@@ -154,6 +154,57 @@ inline flatbuffers::Offset<Shader> CreateShaderDirect(
       fragment_code ? _fbb.CreateString(fragment_code) : 0);
 }
 
+inline flatbuffers::TypeTable *ShaderTypeTable();
+
+inline flatbuffers::TypeTable *ShaderTypeTypeTable() {
+  static flatbuffers::TypeCode type_codes[] = {
+    { flatbuffers::ET_CHAR, 0, 0 },
+    { flatbuffers::ET_CHAR, 0, 0 },
+    { flatbuffers::ET_CHAR, 0, 0 },
+    { flatbuffers::ET_CHAR, 0, 0 }
+  };
+  static flatbuffers::TypeFunction type_refs[] = {
+    ShaderTypeTypeTable
+  };
+  static const int32_t values[] = { 0, 1, 2, 3 };
+  static const char *names[] = {
+    "GLSL",
+    "GLSLES",
+    "HLSL9",
+    "HLSL11"
+  };
+  static flatbuffers::TypeTable tt = {
+    flatbuffers::ST_ENUM, 4, type_codes, type_refs, values, names, nullptr
+  };
+  return &tt;
+}
+
+inline flatbuffers::TypeTable *ShaderTypeTable() {
+  static flatbuffers::TypeCode type_codes[] = {
+    { flatbuffers::ET_STRING, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_CHAR, 0, 0 },
+    { flatbuffers::ET_BOOL, 0, -1 },
+    { flatbuffers::ET_STRING, 0, -1 },
+    { flatbuffers::ET_STRING, 0, -1 }
+  };
+  static flatbuffers::TypeFunction type_refs[] = {
+    ShaderTypeTypeTable
+  };
+  static const char *names[] = {
+    "name",
+    "id",
+    "type",
+    "precompile",
+    "vertex_code",
+    "fragment_code"
+  };
+  static flatbuffers::TypeTable tt = {
+    flatbuffers::ST_TABLE, 6, type_codes, type_refs, nullptr, names, nullptr
+  };
+  return &tt;
+}
+
 inline const Shader *GetShader(const void *buf) {
   return flatbuffers::GetRoot<Shader>(buf);
 }

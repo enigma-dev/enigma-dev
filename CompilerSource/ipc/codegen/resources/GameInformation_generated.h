@@ -190,6 +190,43 @@ inline flatbuffers::Offset<GameInformation> CreateGameInformationDirect(
       text ? _fbb.CreateString(text) : 0);
 }
 
+inline flatbuffers::TypeTable *GameInformationTypeTable();
+
+inline flatbuffers::TypeTable *GameInformationTypeTable() {
+  static flatbuffers::TypeCode type_codes[] = {
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_BOOL, 0, -1 },
+    { flatbuffers::ET_STRING, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_BOOL, 0, -1 },
+    { flatbuffers::ET_BOOL, 0, -1 },
+    { flatbuffers::ET_BOOL, 0, -1 },
+    { flatbuffers::ET_BOOL, 0, -1 },
+    { flatbuffers::ET_STRING, 0, -1 }
+  };
+  static const char *names[] = {
+    "background_color",
+    "embed_game_window",
+    "form_caption",
+    "left",
+    "top",
+    "width",
+    "height",
+    "show_border",
+    "allow_resize",
+    "stay_on_top",
+    "pause_game",
+    "text"
+  };
+  static flatbuffers::TypeTable tt = {
+    flatbuffers::ST_TABLE, 12, type_codes, nullptr, nullptr, names, nullptr
+  };
+  return &tt;
+}
+
 inline const GameInformation *GetGameInformation(const void *buf) {
   return flatbuffers::GetRoot<GameInformation>(buf);
 }

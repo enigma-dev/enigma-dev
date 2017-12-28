@@ -30,4 +30,22 @@ MANUALLY_ALIGNED_STRUCT(4) Point FLATBUFFERS_FINAL_CLASS {
 };
 STRUCT_END(Point, 8);
 
+inline flatbuffers::TypeTable *PointTypeTable();
+
+inline flatbuffers::TypeTable *PointTypeTable() {
+  static flatbuffers::TypeCode type_codes[] = {
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 }
+  };
+  static const int32_t values[] = { 0, 4, 8 };
+  static const char *names[] = {
+    "x",
+    "y"
+  };
+  static flatbuffers::TypeTable tt = {
+    flatbuffers::ST_STRUCT, 2, type_codes, nullptr, values, names, nullptr
+  };
+  return &tt;
+}
+
 #endif  // FLATBUFFERS_GENERATED_POINT_H_

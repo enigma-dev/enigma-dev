@@ -313,6 +313,80 @@ inline flatbuffers::Offset<Project> CreateProjectDirect(
       rooms ? _fbb.CreateVector<flatbuffers::Offset<Room>>(*rooms) : 0);
 }
 
+inline flatbuffers::TypeTable *TreeNodeTypeTable();
+
+inline flatbuffers::TypeTable *ProjectTypeTable();
+
+inline flatbuffers::TypeTable *TreeNodeTypeTable() {
+  static flatbuffers::TypeCode type_codes[] = {
+    { flatbuffers::ET_STRING, 0, -1 },
+    { flatbuffers::ET_BOOL, 0, -1 },
+    { flatbuffers::ET_SEQUENCE, 1, 0 }
+  };
+  static flatbuffers::TypeFunction type_refs[] = {
+    TreeNodeTypeTable
+  };
+  static const char *names[] = {
+    "file_name",
+    "is_directory",
+    "children"
+  };
+  static flatbuffers::TypeTable tt = {
+    flatbuffers::ST_TABLE, 3, type_codes, type_refs, nullptr, names, nullptr
+  };
+  return &tt;
+}
+
+inline flatbuffers::TypeTable *ProjectTypeTable() {
+  static flatbuffers::TypeCode type_codes[] = {
+    { flatbuffers::ET_STRING, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_SEQUENCE, 0, 0 },
+    { flatbuffers::ET_SEQUENCE, 1, 1 },
+    { flatbuffers::ET_SEQUENCE, 1, 2 },
+    { flatbuffers::ET_SEQUENCE, 1, 3 },
+    { flatbuffers::ET_SEQUENCE, 1, 4 },
+    { flatbuffers::ET_SEQUENCE, 1, 5 },
+    { flatbuffers::ET_SEQUENCE, 1, 6 },
+    { flatbuffers::ET_SEQUENCE, 1, 7 },
+    { flatbuffers::ET_SEQUENCE, 1, 8 },
+    { flatbuffers::ET_SEQUENCE, 1, 9 },
+    { flatbuffers::ET_SEQUENCE, 1, 10 }
+  };
+  static flatbuffers::TypeFunction type_refs[] = {
+    TreeNodeTypeTable,
+    SpriteTypeTable,
+    SoundTypeTable,
+    BackgroundTypeTable,
+    PathTypeTable,
+    ScriptTypeTable,
+    ShaderTypeTable,
+    FontTypeTable,
+    TimelineTypeTable,
+    ObjectTypeTable,
+    RoomTypeTable
+  };
+  static const char *names[] = {
+    "file_name",
+    "file_version",
+    "tree_root",
+    "sprites",
+    "sounds",
+    "backgrounds",
+    "paths",
+    "scripts",
+    "shaders",
+    "fonts",
+    "timelines",
+    "objects",
+    "rooms"
+  };
+  static flatbuffers::TypeTable tt = {
+    flatbuffers::ST_TABLE, 13, type_codes, type_refs, nullptr, names, nullptr
+  };
+  return &tt;
+}
+
 inline const Project *GetProject(const void *buf) {
   return flatbuffers::GetRoot<Project>(buf);
 }

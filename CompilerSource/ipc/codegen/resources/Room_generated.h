@@ -871,6 +871,464 @@ inline flatbuffers::Offset<Room> CreateRoomDirect(
       tiles ? _fbb.CreateVector<flatbuffers::Offset<RoomTile>>(*tiles) : 0);
 }
 
+inline flatbuffers::TypeTable *RoomInstanceTypeTable();
+
+inline flatbuffers::TypeTable *RoomTileTypeTable();
+
+inline flatbuffers::TypeTable *RoomBackgroundTypeTable();
+
+inline flatbuffers::TypeTable *RoomViewTypeTable();
+
+inline flatbuffers::TypeTable *RoomEditorMetadataTypeTable();
+
+inline flatbuffers::TypeTable *RoomTypeTable();
+
+inline flatbuffers::TypeTable *RoomInstanceTypeTable() {
+  static flatbuffers::TypeCode type_codes[] = {
+    { flatbuffers::ET_STRING, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_BOOL, 0, -1 },
+    { flatbuffers::ET_STRING, 0, -1 },
+    { flatbuffers::ET_DOUBLE, 0, -1 },
+    { flatbuffers::ET_DOUBLE, 0, -1 },
+    { flatbuffers::ET_DOUBLE, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_STRING, 0, -1 }
+  };
+  static const char* attr_keys_4[] = { "gmx" };
+  static const char* attr_vals_4[] = { "objName" };
+  static const char* attr_keys_5[] = { "gmx" };
+  static const char* attr_vals_5[] = { "scaleX" };
+  static const char* attr_keys_6[] = { "gmx" };
+  static const char* attr_vals_6[] = { "scaleY" };
+  static const char* attr_keys_7[] = { "gmx" };
+  static const char* attr_vals_7[] = { "rotation" };
+  static const char* attr_keys_8[] = { "gmx" };
+  static const char* attr_vals_8[] = { "colour" };
+  static const char* attr_keys_9[] = { "gmx" };
+  static const char* attr_vals_9[] = { "code" };
+  static const flatbuffers::AttributeList attrs[] = {
+    {},
+    {},
+    {},
+    {},
+    { 1, attr_keys_4, attr_vals_4 },
+    { 1, attr_keys_5, attr_vals_5 },
+    { 1, attr_keys_6, attr_vals_6 },
+    { 1, attr_keys_7, attr_vals_7 },
+    { 1, attr_keys_8, attr_vals_8 },
+    { 1, attr_keys_9, attr_vals_9 }
+  };
+  static const char *names[] = {
+    "name",
+    "x",
+    "y",
+    "locked",
+    "object_name",
+    "scale_x",
+    "scale_y",
+    "rotation",
+    "color",
+    "creation_code"
+  };
+  static flatbuffers::TypeTable tt = {
+    flatbuffers::ST_TABLE, 10, type_codes, nullptr, nullptr, names, field_attrs
+  };
+  return &tt;
+}
+
+inline flatbuffers::TypeTable *RoomTileTypeTable() {
+  static flatbuffers::TypeCode type_codes[] = {
+    { flatbuffers::ET_STRING, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_BOOL, 0, -1 },
+    { flatbuffers::ET_STRING, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_DOUBLE, 0, -1 },
+    { flatbuffers::ET_DOUBLE, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 }
+  };
+  static const char* attr_keys_4[] = { "gmx" };
+  static const char* attr_vals_4[] = { "bgName" };
+  static const char* attr_keys_5[] = { "gmx" };
+  static const char* attr_vals_5[] = { "w" };
+  static const char* attr_keys_6[] = { "gmx" };
+  static const char* attr_vals_6[] = { "h" };
+  static const char* attr_keys_7[] = { "gmx" };
+  static const char* attr_vals_7[] = { "xo" };
+  static const char* attr_keys_8[] = { "gmx" };
+  static const char* attr_vals_8[] = { "yo" };
+  static const char* attr_keys_10[] = { "gmx" };
+  static const char* attr_vals_10[] = { "scaleX" };
+  static const char* attr_keys_11[] = { "gmx" };
+  static const char* attr_vals_11[] = { "scaleY" };
+  static const char* attr_keys_12[] = { "gmx" };
+  static const char* attr_vals_12[] = { "colour" };
+  static const flatbuffers::AttributeList attrs[] = {
+    {},
+    {},
+    {},
+    {},
+    { 1, attr_keys_4, attr_vals_4 },
+    { 1, attr_keys_5, attr_vals_5 },
+    { 1, attr_keys_6, attr_vals_6 },
+    { 1, attr_keys_7, attr_vals_7 },
+    { 1, attr_keys_8, attr_vals_8 },
+    {},
+    { 1, attr_keys_10, attr_vals_10 },
+    { 1, attr_keys_11, attr_vals_11 },
+    { 1, attr_keys_12, attr_vals_12 }
+  };
+  static const char *names[] = {
+    "name",
+    "x",
+    "y",
+    "locked",
+    "background_name",
+    "width",
+    "height",
+    "bg_x",
+    "bg_y",
+    "depth",
+    "scale_x",
+    "scale_y",
+    "color"
+  };
+  static flatbuffers::TypeTable tt = {
+    flatbuffers::ST_TABLE, 13, type_codes, nullptr, nullptr, names, field_attrs
+  };
+  return &tt;
+}
+
+inline flatbuffers::TypeTable *RoomBackgroundTypeTable() {
+  static flatbuffers::TypeCode type_codes[] = {
+    { flatbuffers::ET_BOOL, 0, -1 },
+    { flatbuffers::ET_BOOL, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_BOOL, 0, -1 },
+    { flatbuffers::ET_BOOL, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_BOOL, 0, -1 }
+  };
+  static const int32_t values[] = { 0, 1, 4, 8, 12, 16, 17, 20, 24, 28, 32 };
+  static const char* attr_keys_0[] = { "gmx" };
+  static const char* attr_vals_0[] = { "visible" };
+  static const char* attr_keys_1[] = { "gmx" };
+  static const char* attr_vals_1[] = { "foreground" };
+  static const char* attr_keys_2[] = { "gmx" };
+  static const char* attr_vals_2[] = { "name" };
+  static const char* attr_keys_3[] = { "gmx" };
+  static const char* attr_vals_3[] = { "x" };
+  static const char* attr_keys_4[] = { "gmx" };
+  static const char* attr_vals_4[] = { "y" };
+  static const char* attr_keys_5[] = { "gmx" };
+  static const char* attr_vals_5[] = { "htiled" };
+  static const char* attr_keys_6[] = { "gmx" };
+  static const char* attr_vals_6[] = { "vtiled" };
+  static const char* attr_keys_7[] = { "gmx" };
+  static const char* attr_vals_7[] = { "hspeed" };
+  static const char* attr_keys_8[] = { "gmx" };
+  static const char* attr_vals_8[] = { "vspeed" };
+  static const char* attr_keys_9[] = { "gmx" };
+  static const char* attr_vals_9[] = { "stretch" };
+  static const flatbuffers::AttributeList attrs[] = {
+    { 1, attr_keys_0, attr_vals_0 },
+    { 1, attr_keys_1, attr_vals_1 },
+    { 1, attr_keys_2, attr_vals_2 },
+    { 1, attr_keys_3, attr_vals_3 },
+    { 1, attr_keys_4, attr_vals_4 },
+    { 1, attr_keys_5, attr_vals_5 },
+    { 1, attr_keys_6, attr_vals_6 },
+    { 1, attr_keys_7, attr_vals_7 },
+    { 1, attr_keys_8, attr_vals_8 },
+    { 1, attr_keys_9, attr_vals_9 }
+  };
+  static const char *names[] = {
+    "background_visible",
+    "background_foreground",
+    "background_index",
+    "background_x",
+    "background_y",
+    "background_htiled",
+    "background_vtiled",
+    "background_hspeed",
+    "background_vspeed",
+    "stretch"
+  };
+  static flatbuffers::TypeTable tt = {
+    flatbuffers::ST_STRUCT, 10, type_codes, nullptr, values, names, field_attrs
+  };
+  return &tt;
+}
+
+inline flatbuffers::TypeTable *RoomViewTypeTable() {
+  static flatbuffers::TypeCode type_codes[] = {
+    { flatbuffers::ET_BOOL, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 }
+  };
+  static const int32_t values[] = { 0, 4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48, 52, 56 };
+  static const char* attr_keys_0[] = { "gmx" };
+  static const char* attr_vals_0[] = { "visible" };
+  static const char* attr_keys_1[] = { "gmx" };
+  static const char* attr_vals_1[] = { "xview" };
+  static const char* attr_keys_2[] = { "gmx" };
+  static const char* attr_vals_2[] = { "yview" };
+  static const char* attr_keys_3[] = { "gmx" };
+  static const char* attr_vals_3[] = { "wview" };
+  static const char* attr_keys_4[] = { "gmx" };
+  static const char* attr_vals_4[] = { "hview" };
+  static const char* attr_keys_5[] = { "gmx" };
+  static const char* attr_vals_5[] = { "xport" };
+  static const char* attr_keys_6[] = { "gmx" };
+  static const char* attr_vals_6[] = { "yport" };
+  static const char* attr_keys_7[] = { "gmx" };
+  static const char* attr_vals_7[] = { "wport" };
+  static const char* attr_keys_8[] = { "gmx" };
+  static const char* attr_vals_8[] = { "hport" };
+  static const char* attr_keys_9[] = { "gmx" };
+  static const char* attr_vals_9[] = { "hborder" };
+  static const char* attr_keys_10[] = { "gmx" };
+  static const char* attr_vals_10[] = { "vborder" };
+  static const char* attr_keys_11[] = { "gmx" };
+  static const char* attr_vals_11[] = { "hspeed" };
+  static const char* attr_keys_12[] = { "gmx" };
+  static const char* attr_vals_12[] = { "vspeed" };
+  static const char* attr_keys_13[] = { "gmx" };
+  static const char* attr_vals_13[] = { "objName" };
+  static const flatbuffers::AttributeList attrs[] = {
+    { 1, attr_keys_0, attr_vals_0 },
+    { 1, attr_keys_1, attr_vals_1 },
+    { 1, attr_keys_2, attr_vals_2 },
+    { 1, attr_keys_3, attr_vals_3 },
+    { 1, attr_keys_4, attr_vals_4 },
+    { 1, attr_keys_5, attr_vals_5 },
+    { 1, attr_keys_6, attr_vals_6 },
+    { 1, attr_keys_7, attr_vals_7 },
+    { 1, attr_keys_8, attr_vals_8 },
+    { 1, attr_keys_9, attr_vals_9 },
+    { 1, attr_keys_10, attr_vals_10 },
+    { 1, attr_keys_11, attr_vals_11 },
+    { 1, attr_keys_12, attr_vals_12 },
+    { 1, attr_keys_13, attr_vals_13 }
+  };
+  static const char *names[] = {
+    "view_visible",
+    "view_xview",
+    "view_yview",
+    "view_wview",
+    "view_hview",
+    "view_xport",
+    "view_yport",
+    "view_wport",
+    "view_hport",
+    "view_hborder",
+    "view_vborder",
+    "view_hspeed",
+    "view_vspeed",
+    "view_object"
+  };
+  static flatbuffers::TypeTable tt = {
+    flatbuffers::ST_STRUCT, 14, type_codes, nullptr, values, names, field_attrs
+  };
+  return &tt;
+}
+
+inline flatbuffers::TypeTable *RoomEditorMetadataTypeTable() {
+  static flatbuffers::TypeCode type_codes[] = {
+    { flatbuffers::ET_BOOL, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_BOOL, 0, -1 },
+    { flatbuffers::ET_BOOL, 0, -1 },
+    { flatbuffers::ET_BOOL, 0, -1 },
+    { flatbuffers::ET_BOOL, 0, -1 },
+    { flatbuffers::ET_BOOL, 0, -1 },
+    { flatbuffers::ET_BOOL, 0, -1 },
+    { flatbuffers::ET_BOOL, 0, -1 },
+    { flatbuffers::ET_BOOL, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_BOOL, 0, -1 }
+  };
+  static const int32_t values[] = { 0, 4, 8, 12, 16, 20, 24, 25, 26, 27, 28, 29, 30, 31, 32, 36, 40, 44 };
+  static const char* attr_keys_0[] = { "gmx" };
+  static const char* attr_vals_0[] = { "isSet" };
+  static const char* attr_keys_1[] = { "gmx" };
+  static const char* attr_vals_1[] = { "w" };
+  static const char* attr_keys_2[] = { "gmx" };
+  static const char* attr_vals_2[] = { "h" };
+  static const char* attr_keys_3[] = { "gmx" };
+  static const char* attr_vals_3[] = { "page" };
+  static const char* attr_keys_4[] = { "gmx" };
+  static const char* attr_vals_4[] = { "xoffset" };
+  static const char* attr_keys_5[] = { "gmx" };
+  static const char* attr_vals_5[] = { "yoffset" };
+  static const char* attr_keys_6[] = { "gmx" };
+  static const char* attr_vals_6[] = { "showGrid" };
+  static const char* attr_keys_7[] = { "gmx" };
+  static const char* attr_vals_7[] = { "showObjects" };
+  static const char* attr_keys_8[] = { "gmx" };
+  static const char* attr_vals_8[] = { "showTiles" };
+  static const char* attr_keys_9[] = { "gmx" };
+  static const char* attr_vals_9[] = { "showBackgrounds" };
+  static const char* attr_keys_10[] = { "gmx" };
+  static const char* attr_vals_10[] = { "showForegrounds" };
+  static const char* attr_keys_11[] = { "gmx" };
+  static const char* attr_vals_11[] = { "showViews" };
+  static const char* attr_keys_12[] = { "gmx" };
+  static const char* attr_vals_12[] = { "deleteUnderlyingObj" };
+  static const char* attr_keys_13[] = { "gmx" };
+  static const char* attr_vals_13[] = { "deleteUnderlyingTiles" };
+  static const char* attr_keys_14[] = { "gmx" };
+  static const char* attr_vals_14[] = { "hsnap" };
+  static const char* attr_keys_15[] = { "gmx" };
+  static const char* attr_vals_15[] = { "vsnap" };
+  static const flatbuffers::AttributeList attrs[] = {
+    { 1, attr_keys_0, attr_vals_0 },
+    { 1, attr_keys_1, attr_vals_1 },
+    { 1, attr_keys_2, attr_vals_2 },
+    { 1, attr_keys_3, attr_vals_3 },
+    { 1, attr_keys_4, attr_vals_4 },
+    { 1, attr_keys_5, attr_vals_5 },
+    { 1, attr_keys_6, attr_vals_6 },
+    { 1, attr_keys_7, attr_vals_7 },
+    { 1, attr_keys_8, attr_vals_8 },
+    { 1, attr_keys_9, attr_vals_9 },
+    { 1, attr_keys_10, attr_vals_10 },
+    { 1, attr_keys_11, attr_vals_11 },
+    { 1, attr_keys_12, attr_vals_12 },
+    { 1, attr_keys_13, attr_vals_13 },
+    { 1, attr_keys_14, attr_vals_14 },
+    { 1, attr_keys_15, attr_vals_15 },
+    {}
+  };
+  static const char *names[] = {
+    "remember_state",
+    "editor_width",
+    "editor_height",
+    "current_tab",
+    "scroll_x",
+    "scroll_y",
+    "show_grid",
+    "show_objects",
+    "show_tiles",
+    "show_backgrounds",
+    "show_foregrounds",
+    "show_views",
+    "delete_underlying_objects",
+    "delete_underlying_tiles",
+    "snap_x",
+    "snap_y",
+    "isometric"
+  };
+  static flatbuffers::TypeTable tt = {
+    flatbuffers::ST_STRUCT, 17, type_codes, nullptr, values, names, field_attrs
+  };
+  return &tt;
+}
+
+inline flatbuffers::TypeTable *RoomTypeTable() {
+  static flatbuffers::TypeCode type_codes[] = {
+    { flatbuffers::ET_STRING, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_SEQUENCE, 0, 0 },
+    { flatbuffers::ET_STRING, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_BOOL, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_BOOL, 0, -1 },
+    { flatbuffers::ET_STRING, 0, -1 },
+    { flatbuffers::ET_BOOL, 0, -1 },
+    { flatbuffers::ET_SEQUENCE, 1, 1 },
+    { flatbuffers::ET_SEQUENCE, 1, 2 },
+    { flatbuffers::ET_SEQUENCE, 1, 3 },
+    { flatbuffers::ET_SEQUENCE, 1, 4 }
+  };
+  static flatbuffers::TypeFunction type_refs[] = {
+    RoomEditorMetadataTypeTable,
+    RoomViewTypeTable,
+    RoomBackgroundTypeTable,
+    RoomInstanceTypeTable,
+    RoomTileTypeTable
+  };
+  static const char* attr_keys_2[] = { "gmx" };
+  static const char* attr_vals_2[] = { "makerSettings" };
+  static const char* attr_keys_8[] = { "gmx" };
+  static const char* attr_vals_8[] = { "colour" };
+  static const char* attr_keys_9[] = { "gmx" };
+  static const char* attr_vals_9[] = { "showcolour" };
+  static const char* attr_keys_10[] = { "gmx" };
+  static const char* attr_vals_10[] = { "code" };
+  static const char* attr_keys_11[] = { "gmx" };
+  static const char* attr_vals_11[] = { "enableViews" };
+  static const flatbuffers::AttributeList attrs[] = {
+    {},
+    {},
+    { 1, attr_keys_2, attr_vals_2 },
+    {},
+    {},
+    {},
+    {},
+    {},
+    { 1, attr_keys_8, attr_vals_8 },
+    { 1, attr_keys_9, attr_vals_9 },
+    { 1, attr_keys_10, attr_vals_10 },
+    { 1, attr_keys_11, attr_vals_11 },
+    {},
+    {},
+    {},
+    {}
+  };
+  static const char *names[] = {
+    "name",
+    "id",
+    "editor_metadata",
+    "room_caption",
+    "width",
+    "height",
+    "speed",
+    "persistent",
+    "background_color",
+    "background_showcolor",
+    "creation_code",
+    "view_enabled",
+    "views",
+    "backgrounds",
+    "instances",
+    "tiles"
+  };
+  static flatbuffers::TypeTable tt = {
+    flatbuffers::ST_TABLE, 16, type_codes, type_refs, nullptr, names, field_attrs
+  };
+  return &tt;
+}
+
 inline const Room *GetRoom(const void *buf) {
   return flatbuffers::GetRoot<Room>(buf);
 }

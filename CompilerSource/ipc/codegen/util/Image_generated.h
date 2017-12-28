@@ -81,6 +81,25 @@ inline flatbuffers::Offset<Image> CreateImageDirect(
       data ? _fbb.CreateVector<int8_t>(*data) : 0);
 }
 
+inline flatbuffers::TypeTable *ImageTypeTable();
+
+inline flatbuffers::TypeTable *ImageTypeTable() {
+  static flatbuffers::TypeCode type_codes[] = {
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_CHAR, 1, -1 }
+  };
+  static const char *names[] = {
+    "width",
+    "height",
+    "data"
+  };
+  static flatbuffers::TypeTable tt = {
+    flatbuffers::ST_TABLE, 3, type_codes, nullptr, nullptr, names, nullptr
+  };
+  return &tt;
+}
+
 inline const Image *GetImage(const void *buf) {
   return flatbuffers::GetRoot<Image>(buf);
 }

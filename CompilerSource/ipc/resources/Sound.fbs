@@ -1,5 +1,4 @@
 attribute "gmx";
-attribute "gmx_blob";
 
 enum SoundKind : byte { NORMAL, BACKGROUND_MUSIC, THREE_DIMENSIONAL, MULTIMEDIA_PLAYER }
 
@@ -23,7 +22,7 @@ table Sound {
   volume:double (gmx: "volume/volume");
   pan:double;
 
-  data:[byte] (gmx_blob: "data");
+  data:string;
 }
 
 root_type Sound;

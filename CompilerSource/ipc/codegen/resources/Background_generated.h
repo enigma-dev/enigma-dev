@@ -204,6 +204,77 @@ inline flatbuffers::Offset<Background> CreateBackgroundDirect(
       image);
 }
 
+inline flatbuffers::TypeTable *BackgroundTypeTable();
+
+inline flatbuffers::TypeTable *BackgroundTypeTable() {
+  static flatbuffers::TypeCode type_codes[] = {
+    { flatbuffers::ET_STRING, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_BOOL, 0, -1 },
+    { flatbuffers::ET_BOOL, 0, -1 },
+    { flatbuffers::ET_BOOL, 0, -1 },
+    { flatbuffers::ET_BOOL, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_SEQUENCE, 0, 0 }
+  };
+  static flatbuffers::TypeFunction type_refs[] = {
+    ImageTypeTable
+  };
+  static const char* attr_keys_5[] = { "gmx" };
+  static const char* attr_vals_5[] = { "istileset" };
+  static const char* attr_keys_6[] = { "gmx" };
+  static const char* attr_vals_6[] = { "tilewidth" };
+  static const char* attr_keys_7[] = { "gmx" };
+  static const char* attr_vals_7[] = { "tileheight" };
+  static const char* attr_keys_8[] = { "gmx" };
+  static const char* attr_vals_8[] = { "tilexoff" };
+  static const char* attr_keys_9[] = { "gmx" };
+  static const char* attr_vals_9[] = { "tileyoff" };
+  static const char* attr_keys_10[] = { "gmx" };
+  static const char* attr_vals_10[] = { "tilehsep" };
+  static const char* attr_keys_11[] = { "gmx" };
+  static const char* attr_vals_11[] = { "tilevsep" };
+  static const flatbuffers::AttributeList attrs[] = {
+    {},
+    {},
+    {},
+    {},
+    {},
+    { 1, attr_keys_5, attr_vals_5 },
+    { 1, attr_keys_6, attr_vals_6 },
+    { 1, attr_keys_7, attr_vals_7 },
+    { 1, attr_keys_8, attr_vals_8 },
+    { 1, attr_keys_9, attr_vals_9 },
+    { 1, attr_keys_10, attr_vals_10 },
+    { 1, attr_keys_11, attr_vals_11 },
+    {}
+  };
+  static const char *names[] = {
+    "name",
+    "id",
+    "preload",
+    "transparent",
+    "smooth_edges",
+    "use_as_tileset",
+    "tile_width",
+    "tile_height",
+    "horizontal_offset",
+    "vertical_offset",
+    "horizontal_spacing",
+    "vertical_spacing",
+    "image"
+  };
+  static flatbuffers::TypeTable tt = {
+    flatbuffers::ST_TABLE, 13, type_codes, type_refs, nullptr, names, field_attrs
+  };
+  return &tt;
+}
+
 inline const Background *GetBackground(const void *buf) {
   return flatbuffers::GetRoot<Background>(buf);
 }

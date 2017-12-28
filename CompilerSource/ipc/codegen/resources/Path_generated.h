@@ -235,6 +235,100 @@ inline flatbuffers::Offset<Path> CreatePathDirect(
       points ? _fbb.CreateVector<const PathPoint *>(*points) : 0);
 }
 
+inline flatbuffers::TypeTable *PathPointTypeTable();
+
+inline flatbuffers::TypeTable *PathEditorMetadataTypeTable();
+
+inline flatbuffers::TypeTable *PathTypeTable();
+
+inline flatbuffers::TypeTable *PathPointTypeTable() {
+  static flatbuffers::TypeCode type_codes[] = {
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 }
+  };
+  static const int32_t values[] = { 0, 4, 8, 12 };
+  static const char *names[] = {
+    "x",
+    "y",
+    "speed"
+  };
+  static flatbuffers::TypeTable tt = {
+    flatbuffers::ST_STRUCT, 3, type_codes, nullptr, values, names, nullptr
+  };
+  return &tt;
+}
+
+inline flatbuffers::TypeTable *PathEditorMetadataTypeTable() {
+  static flatbuffers::TypeCode type_codes[] = {
+    { flatbuffers::ET_STRING, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 }
+  };
+  static const char* attr_keys_0[] = { "gmx" };
+  static const char* attr_vals_0[] = { "backroom" };
+  static const char* attr_keys_1[] = { "gmx" };
+  static const char* attr_vals_1[] = { "hsnap" };
+  static const char* attr_keys_2[] = { "gmx" };
+  static const char* attr_vals_2[] = { "vsnap" };
+  static const flatbuffers::AttributeList attrs[] = {
+    { 1, attr_keys_0, attr_vals_0 },
+    { 1, attr_keys_1, attr_vals_1 },
+    { 1, attr_keys_2, attr_vals_2 }
+  };
+  static const char *names[] = {
+    "background_room_name",
+    "snap_x",
+    "snap_y"
+  };
+  static flatbuffers::TypeTable tt = {
+    flatbuffers::ST_TABLE, 3, type_codes, nullptr, nullptr, names, field_attrs
+  };
+  return &tt;
+}
+
+inline flatbuffers::TypeTable *PathTypeTable() {
+  static flatbuffers::TypeCode type_codes[] = {
+    { flatbuffers::ET_STRING, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_SEQUENCE, 0, 0 },
+    { flatbuffers::ET_BOOL, 0, -1 },
+    { flatbuffers::ET_BOOL, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_SEQUENCE, 1, 1 }
+  };
+  static flatbuffers::TypeFunction type_refs[] = {
+    PathEditorMetadataTypeTable,
+    PathPointTypeTable
+  };
+  static const char* attr_keys_3[] = { "gmx" };
+  static const char* attr_vals_3[] = { "kind" };
+  static const char* attr_keys_6[] = { "split" };
+  static const char* attr_vals_6[] = { "," };
+  static const flatbuffers::AttributeList attrs[] = {
+    {},
+    {},
+    {},
+    { 1, attr_keys_3, attr_vals_3 },
+    {},
+    {},
+    { 1, attr_keys_6, attr_vals_6 }
+  };
+  static const char *names[] = {
+    "name",
+    "id",
+    "editor_metadata",
+    "smooth",
+    "closed",
+    "precision",
+    "points"
+  };
+  static flatbuffers::TypeTable tt = {
+    flatbuffers::ST_TABLE, 7, type_codes, type_refs, nullptr, names, field_attrs
+  };
+  return &tt;
+}
+
 inline const Path *GetPath(const void *buf) {
   return flatbuffers::GetRoot<Path>(buf);
 }

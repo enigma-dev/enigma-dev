@@ -319,6 +319,96 @@ inline flatbuffers::Offset<Font> CreateFontDirect(
       glyph_ranges ? _fbb.CreateVector<flatbuffers::Offset<GlyphRange>>(*glyph_ranges) : 0);
 }
 
+inline flatbuffers::TypeTable *GlyphTypeTable();
+
+inline flatbuffers::TypeTable *GlyphRangeTypeTable();
+
+inline flatbuffers::TypeTable *FontTypeTable();
+
+inline flatbuffers::TypeTable *GlyphTypeTable() {
+  static flatbuffers::TypeCode type_codes[] = {
+    { flatbuffers::ET_DOUBLE, 0, -1 },
+    { flatbuffers::ET_DOUBLE, 0, -1 },
+    { flatbuffers::ET_DOUBLE, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_CHAR, 1, -1 }
+  };
+  static const char *names[] = {
+    "origin",
+    "baseline",
+    "advance",
+    "width",
+    "height",
+    "data"
+  };
+  static flatbuffers::TypeTable tt = {
+    flatbuffers::ST_TABLE, 6, type_codes, nullptr, nullptr, names, nullptr
+  };
+  return &tt;
+}
+
+inline flatbuffers::TypeTable *GlyphRangeTypeTable() {
+  static flatbuffers::TypeCode type_codes[] = {
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_SEQUENCE, 1, 0 }
+  };
+  static flatbuffers::TypeFunction type_refs[] = {
+    GlyphTypeTable
+  };
+  static const char *names[] = {
+    "min",
+    "max",
+    "glyphs"
+  };
+  static flatbuffers::TypeTable tt = {
+    flatbuffers::ST_TABLE, 3, type_codes, type_refs, nullptr, names, nullptr
+  };
+  return &tt;
+}
+
+inline flatbuffers::TypeTable *FontTypeTable() {
+  static flatbuffers::TypeCode type_codes[] = {
+    { flatbuffers::ET_STRING, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_STRING, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_BOOL, 0, -1 },
+    { flatbuffers::ET_BOOL, 0, -1 },
+    { flatbuffers::ET_SEQUENCE, 1, 0 }
+  };
+  static flatbuffers::TypeFunction type_refs[] = {
+    GlyphRangeTypeTable
+  };
+  static const char* attr_keys_2[] = { "gmx" };
+  static const char* attr_vals_2[] = { "name" };
+  static const char* attr_keys_6[] = { "gmx", "split" };
+  static const char* attr_vals_6[] = { "ranges", "," };
+  static const flatbuffers::AttributeList attrs[] = {
+    {},
+    {},
+    { 1, attr_keys_2, attr_vals_2 },
+    {},
+    {},
+    {},
+    { 2, attr_keys_6, attr_vals_6 }
+  };
+  static const char *names[] = {
+    "name",
+    "id",
+    "font_name",
+    "size",
+    "bold",
+    "italic",
+    "glyph_ranges"
+  };
+  static flatbuffers::TypeTable tt = {
+    flatbuffers::ST_TABLE, 7, type_codes, type_refs, nullptr, names, field_attrs
+  };
+  return &tt;
+}
+
 inline const Font *GetFont(const void *buf) {
   return flatbuffers::GetRoot<Font>(buf);
 }

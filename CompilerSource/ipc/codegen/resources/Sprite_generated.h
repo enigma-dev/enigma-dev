@@ -369,6 +369,184 @@ inline flatbuffers::Offset<Sprite> CreateSpriteDirect(
       mask_shapes ? _fbb.CreateVector<flatbuffers::Offset<Polygon>>(*mask_shapes) : 0);
 }
 
+inline flatbuffers::TypeTable *SpriteBoundingBoxTypeTable();
+
+inline flatbuffers::TypeTable *PolygonTypeTable();
+
+inline flatbuffers::TypeTable *SpriteTypeTable();
+
+inline flatbuffers::TypeTable *SpriteShapeTypeTable() {
+  static flatbuffers::TypeCode type_codes[] = {
+    { flatbuffers::ET_CHAR, 0, 0 },
+    { flatbuffers::ET_CHAR, 0, 0 },
+    { flatbuffers::ET_CHAR, 0, 0 },
+    { flatbuffers::ET_CHAR, 0, 0 }
+  };
+  static flatbuffers::TypeFunction type_refs[] = {
+    SpriteShapeTypeTable
+  };
+  static const int32_t values[] = { 0, 1, 2, 3 };
+  static const char *names[] = {
+    "PRECISE",
+    "RECTANGLE",
+    "DISK",
+    "DIAMOND"
+  };
+  static flatbuffers::TypeTable tt = {
+    flatbuffers::ST_ENUM, 4, type_codes, type_refs, values, names, nullptr
+  };
+  return &tt;
+}
+
+inline flatbuffers::TypeTable *SpriteBoundingBoxTypeTypeTable() {
+  static flatbuffers::TypeCode type_codes[] = {
+    { flatbuffers::ET_CHAR, 0, 0 },
+    { flatbuffers::ET_CHAR, 0, 0 },
+    { flatbuffers::ET_CHAR, 0, 0 }
+  };
+  static flatbuffers::TypeFunction type_refs[] = {
+    SpriteBoundingBoxTypeTypeTable
+  };
+  static const int32_t values[] = { 0, 1, 2 };
+  static const char *names[] = {
+    "AUTOMATIC",
+    "FULL_IMAGE",
+    "MANUAL"
+  };
+  static flatbuffers::TypeTable tt = {
+    flatbuffers::ST_ENUM, 3, type_codes, type_refs, values, names, nullptr
+  };
+  return &tt;
+}
+
+inline flatbuffers::TypeTable *SpriteBoundingBoxTypeTable() {
+  static flatbuffers::TypeCode type_codes[] = {
+    { flatbuffers::ET_CHAR, 0, 0 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 }
+  };
+  static flatbuffers::TypeFunction type_refs[] = {
+    SpriteBoundingBoxTypeTypeTable
+  };
+  static const int32_t values[] = { 0, 4, 8, 12, 16, 20 };
+  static const char* attr_keys_0[] = { "gmx" };
+  static const char* attr_vals_0[] = { "bboxmode" };
+  static const char* attr_keys_1[] = { "gmx" };
+  static const char* attr_vals_1[] = { "bbox_left" };
+  static const char* attr_keys_2[] = { "gmx" };
+  static const char* attr_vals_2[] = { "bbox_right" };
+  static const char* attr_keys_3[] = { "gmx" };
+  static const char* attr_vals_3[] = { "bbox_top" };
+  static const char* attr_keys_4[] = { "gmx" };
+  static const char* attr_vals_4[] = { "bbox_bottom" };
+  static const flatbuffers::AttributeList attrs[] = {
+    { 1, attr_keys_0, attr_vals_0 },
+    { 1, attr_keys_1, attr_vals_1 },
+    { 1, attr_keys_2, attr_vals_2 },
+    { 1, attr_keys_3, attr_vals_3 },
+    { 1, attr_keys_4, attr_vals_4 }
+  };
+  static const char *names[] = {
+    "type",
+    "left",
+    "right",
+    "top",
+    "bottom"
+  };
+  static flatbuffers::TypeTable tt = {
+    flatbuffers::ST_STRUCT, 5, type_codes, type_refs, values, names, field_attrs
+  };
+  return &tt;
+}
+
+inline flatbuffers::TypeTable *PolygonTypeTable() {
+  static flatbuffers::TypeCode type_codes[] = {
+    { flatbuffers::ET_SEQUENCE, 1, 0 }
+  };
+  static flatbuffers::TypeFunction type_refs[] = {
+    PointTypeTable
+  };
+  static const char *names[] = {
+    "points"
+  };
+  static flatbuffers::TypeTable tt = {
+    flatbuffers::ST_TABLE, 1, type_codes, type_refs, nullptr, names, nullptr
+  };
+  return &tt;
+}
+
+inline flatbuffers::TypeTable *SpriteTypeTable() {
+  static flatbuffers::TypeCode type_codes[] = {
+    { flatbuffers::ET_STRING, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_BOOL, 0, -1 },
+    { flatbuffers::ET_BOOL, 0, -1 },
+    { flatbuffers::ET_BOOL, 0, -1 },
+    { flatbuffers::ET_CHAR, 0, 0 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_BOOL, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_SEQUENCE, 0, 1 },
+    { flatbuffers::ET_SEQUENCE, 1, 2 },
+    { flatbuffers::ET_SEQUENCE, 1, 3 }
+  };
+  static flatbuffers::TypeFunction type_refs[] = {
+    SpriteShapeTypeTable,
+    SpriteBoundingBoxTypeTable,
+    ImageTypeTable,
+    PolygonTypeTable
+  };
+  static const char* attr_keys_5[] = { "gmx" };
+  static const char* attr_vals_5[] = { "type" };
+  static const char* attr_keys_6[] = { "gmx" };
+  static const char* attr_vals_6[] = { "coltolerance" };
+  static const char* attr_keys_7[] = { "gmx" };
+  static const char* attr_vals_7[] = { "sepmasks" };
+  static const char* attr_keys_8[] = { "gmx" };
+  static const char* attr_vals_8[] = { "xorig" };
+  static const char* attr_keys_9[] = { "gmx" };
+  static const char* attr_vals_9[] = { "yorigin" };
+  static const char* attr_keys_11[] = { "gmx" };
+  static const char* attr_vals_11[] = { "frames" };
+  static const flatbuffers::AttributeList attrs[] = {
+    {},
+    {},
+    {},
+    {},
+    {},
+    { 1, attr_keys_5, attr_vals_5 },
+    { 1, attr_keys_6, attr_vals_6 },
+    { 1, attr_keys_7, attr_vals_7 },
+    { 1, attr_keys_8, attr_vals_8 },
+    { 1, attr_keys_9, attr_vals_9 },
+    {},
+    { 1, attr_keys_11, attr_vals_11 },
+    {}
+  };
+  static const char *names[] = {
+    "name",
+    "id",
+    "preload",
+    "transparent",
+    "smooth_edges",
+    "shape",
+    "alpha_tolerance",
+    "separate_mask",
+    "origin_x",
+    "origin_y",
+    "bounding_box",
+    "subimages",
+    "mask_shapes"
+  };
+  static flatbuffers::TypeTable tt = {
+    flatbuffers::ST_TABLE, 13, type_codes, type_refs, nullptr, names, field_attrs
+  };
+  return &tt;
+}
+
 inline const Sprite *GetSprite(const void *buf) {
   return flatbuffers::GetRoot<Sprite>(buf);
 }

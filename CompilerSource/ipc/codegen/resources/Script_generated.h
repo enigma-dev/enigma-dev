@@ -82,6 +82,25 @@ inline flatbuffers::Offset<Script> CreateScriptDirect(
       code ? _fbb.CreateString(code) : 0);
 }
 
+inline flatbuffers::TypeTable *ScriptTypeTable();
+
+inline flatbuffers::TypeTable *ScriptTypeTable() {
+  static flatbuffers::TypeCode type_codes[] = {
+    { flatbuffers::ET_STRING, 0, -1 },
+    { flatbuffers::ET_INT, 0, -1 },
+    { flatbuffers::ET_STRING, 0, -1 }
+  };
+  static const char *names[] = {
+    "name",
+    "id",
+    "code"
+  };
+  static flatbuffers::TypeTable tt = {
+    flatbuffers::ST_TABLE, 3, type_codes, nullptr, nullptr, names, nullptr
+  };
+  return &tt;
+}
+
 inline const Script *GetScript(const void *buf) {
   return flatbuffers::GetRoot<Script>(buf);
 }
