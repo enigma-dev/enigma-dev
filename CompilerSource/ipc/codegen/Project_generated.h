@@ -102,24 +102,20 @@ inline flatbuffers::Offset<TreeNode> CreateTreeNodeDirect(
 struct Project FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   enum {
     VT_FILE_NAME = 4,
-    VT_FILE_VERSION = 6,
-    VT_TREE_ROOT = 8,
-    VT_SPRITES = 10,
-    VT_SOUNDS = 12,
-    VT_BACKGROUNDS = 14,
-    VT_PATHS = 16,
-    VT_SCRIPTS = 18,
-    VT_SHADERS = 20,
-    VT_FONTS = 22,
-    VT_TIMELINES = 24,
-    VT_OBJECTS = 26,
-    VT_ROOMS = 28
+    VT_TREE_ROOT = 6,
+    VT_SPRITES = 8,
+    VT_SOUNDS = 10,
+    VT_BACKGROUNDS = 12,
+    VT_PATHS = 14,
+    VT_SCRIPTS = 16,
+    VT_SHADERS = 18,
+    VT_FONTS = 20,
+    VT_TIMELINES = 22,
+    VT_OBJECTS = 24,
+    VT_ROOMS = 26
   };
   const flatbuffers::String *file_name() const {
     return GetPointer<const flatbuffers::String *>(VT_FILE_NAME);
-  }
-  int32_t file_version() const {
-    return GetField<int32_t>(VT_FILE_VERSION, 0);
   }
   const TreeNode *tree_root() const {
     return GetPointer<const TreeNode *>(VT_TREE_ROOT);
@@ -158,7 +154,6 @@ struct Project FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     return VerifyTableStart(verifier) &&
            VerifyOffset(verifier, VT_FILE_NAME) &&
            verifier.Verify(file_name()) &&
-           VerifyField<int32_t>(verifier, VT_FILE_VERSION) &&
            VerifyOffset(verifier, VT_TREE_ROOT) &&
            verifier.VerifyTable(tree_root()) &&
            VerifyOffset(verifier, VT_SPRITES) &&
@@ -200,9 +195,6 @@ struct ProjectBuilder {
   flatbuffers::uoffset_t start_;
   void add_file_name(flatbuffers::Offset<flatbuffers::String> file_name) {
     fbb_.AddOffset(Project::VT_FILE_NAME, file_name);
-  }
-  void add_file_version(int32_t file_version) {
-    fbb_.AddElement<int32_t>(Project::VT_FILE_VERSION, file_version, 0);
   }
   void add_tree_root(flatbuffers::Offset<TreeNode> tree_root) {
     fbb_.AddOffset(Project::VT_TREE_ROOT, tree_root);
@@ -252,7 +244,6 @@ struct ProjectBuilder {
 inline flatbuffers::Offset<Project> CreateProject(
     flatbuffers::FlatBufferBuilder &_fbb,
     flatbuffers::Offset<flatbuffers::String> file_name = 0,
-    int32_t file_version = 0,
     flatbuffers::Offset<TreeNode> tree_root = 0,
     flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Sprite>>> sprites = 0,
     flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<Sound>>> sounds = 0,
@@ -276,7 +267,6 @@ inline flatbuffers::Offset<Project> CreateProject(
   builder_.add_sounds(sounds);
   builder_.add_sprites(sprites);
   builder_.add_tree_root(tree_root);
-  builder_.add_file_version(file_version);
   builder_.add_file_name(file_name);
   return builder_.Finish();
 }
@@ -284,7 +274,6 @@ inline flatbuffers::Offset<Project> CreateProject(
 inline flatbuffers::Offset<Project> CreateProjectDirect(
     flatbuffers::FlatBufferBuilder &_fbb,
     const char *file_name = nullptr,
-    int32_t file_version = 0,
     flatbuffers::Offset<TreeNode> tree_root = 0,
     const std::vector<flatbuffers::Offset<Sprite>> *sprites = nullptr,
     const std::vector<flatbuffers::Offset<Sound>> *sounds = nullptr,
@@ -299,7 +288,6 @@ inline flatbuffers::Offset<Project> CreateProjectDirect(
   return CreateProject(
       _fbb,
       file_name ? _fbb.CreateString(file_name) : 0,
-      file_version,
       tree_root,
       sprites ? _fbb.CreateVector<flatbuffers::Offset<Sprite>>(*sprites) : 0,
       sounds ? _fbb.CreateVector<flatbuffers::Offset<Sound>>(*sounds) : 0,
@@ -340,7 +328,6 @@ inline flatbuffers::TypeTable *TreeNodeTypeTable() {
 inline flatbuffers::TypeTable *ProjectTypeTable() {
   static flatbuffers::TypeCode type_codes[] = {
     { flatbuffers::ET_STRING, 0, -1 },
-    { flatbuffers::ET_INT, 0, -1 },
     { flatbuffers::ET_SEQUENCE, 0, 0 },
     { flatbuffers::ET_SEQUENCE, 1, 1 },
     { flatbuffers::ET_SEQUENCE, 1, 2 },
@@ -368,7 +355,6 @@ inline flatbuffers::TypeTable *ProjectTypeTable() {
   };
   static const char *names[] = {
     "file_name",
-    "file_version",
     "tree_root",
     "sprites",
     "sounds",
@@ -382,7 +368,7 @@ inline flatbuffers::TypeTable *ProjectTypeTable() {
     "rooms"
   };
   static flatbuffers::TypeTable tt = {
-    flatbuffers::ST_TABLE, 13, type_codes, type_refs, nullptr, names, nullptr
+    flatbuffers::ST_TABLE, 12, type_codes, type_refs, nullptr, names, nullptr
   };
   return &tt;
 }

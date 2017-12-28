@@ -20,7 +20,6 @@ table TreeNode {
 
 table Project {
   file_name:string;
-  file_version:int;
   tree_root:TreeNode;
 
   sprites:[Sprite];

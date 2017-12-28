@@ -15,61 +15,71 @@ namespace gmx {
 using namespace tinyxml2;
 
 void load_tree(XMLNode* root, TreeNodeBuilder *rootBuilder) {
-	std::vector<flatbuffers::Offset<TreeNode>> children;
+  std::vector<flatbuffers::Offset<TreeNode>> children;
 
-	for (const XMLElement* child = root.FirstChildElement();
-		 child != NULL;
-		 child = child.NextSiblingElement()) {
-		const char* nameAttribute = child->Attribute("name");
+  for (const XMLElement* child = root.FirstChildElement();
+       child != NULL;
+       child = child.NextSiblingElement()) {
+    const char* nameAttribute = child->Attribute("name");
 
-		flatbuffers::FlatBufferBuilder childFBB;
-		TreeNodeBuilder childBuilder(childFBB);
+    flatbuffers::FlatBufferBuilder childFBB;
+    TreeNodeBuilder childBuilder(childFBB);
 
-		if (nameAttribute) {
-			childuilder.add_file_name(childFBB.CreateString(nameAttribute));
-			childuilder.add_is_directory(true);
-			load_tree(child, childBuilder);
-		} else {
-			childBuilder.add_file_name(childFBB.CreateString(nameAttribute));
-			childuilder.add_is_directory(false);
-		}
+    if (nameAttribute) {
+      childuilder.add_file_name(childFBB.CreateString(nameAttribute));
+      childuilder.add_is_directory(true);
+      load_tree(child, childBuilder);
+    } else {
+      childBuilder.add_file_name(childFBB.CreateString(nameAttribute));
+      childuilder.add_is_directory(false);
+    }
 
-		auto childBuffer = childBuilder.Finish();
-		FinishTreeNodeBuffer(childFBB, childBuffer);
-		children.push_back(childBuffer);
-	}
+    auto childBuffer = childBuilder.Finish();
+    FinishTreeNodeBuffer(childFBB, childBuffer);
+    children.push_back(childBuffer);
+  }
 
-	rootBuilder->add_children(rootBuilder->CreateVector(children));
+  rootBuilder->add_children(rootBuilder->CreateVector(children));
 }
 
 Project *load_project(const char *fileName) {
-	XMLDocument doc;
-	doc.LoadFile(fileName);
+  // load the gmx manifest
+  XMLDocument doc;
+  doc.LoadFile(fileName);
 
-	flatbuffers::FlatBufferBuilder projectFBB;
-	ProjectBuilder projectBuilder(projectFBB);
+  // create project builder
+  flatbuffers::FlatBufferBuilder projectFBB;
+  ProjectBuilder projectBuilder(projectFBB);
 
-	flatbuffers::FlatBufferBuilder rootFBB;
-	TreeNodeBuilder rootBuilder(rootFBB);
-	rootBuilder.add_file_name(rootFBB.CreateString(fileName));
-	rootBuilder.add_is_directory(false);
+  projectBuilder.add_file_name(fileName);
 
-	load_tree(&doc);
+  // create builder for the project tree's root node
+  flatbuffers::FlatBufferBuilder rootFBB;
+  TreeNodeBuilder rootBuilder(rootFBB);
 
-	auto rootBuffer = rootBuilder.Finish();
-	FinishTreeNodeBuffer(rootFBB, rootBuffer);
+  rootBuilder.add_file_name(rootFBB.CreateString(fileName));
+  rootBuilder.add_is_directory(false);
 
-	projectBuilder.add_tree_root(rootBuffer);
+  // recursively build the project tree using DFS
+  load_tree(&doc);
 
-	auto projectBuffer = projectBuilder.Finish();
-	FinishProjectBuffer(projectFBB, projectBuffer);
+  // finish the root tree node buffer
+  auto rootBuffer = rootBuilder.Finish();
+  FinishTreeNodeBuffer(rootFBB, rootBuffer);
 
-	return GetProject(projectBuffer);
+  // add the finished tree root to the project
+  projectBuilder.add_tree_root(rootBuffer);
+
+  // finish the project buffer
+  auto projectBuffer = projectBuilder.Finish();
+  FinishProjectBuffer(projectFBB, projectBuffer);
+
+  return GetProject(projectBuffer);
 }
 
 int main() {
 
-	return 0;
+  return 0;
 }
 
 } // end namespace gmx
