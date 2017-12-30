@@ -16,32 +16,24 @@
 **/
 
 #ifdef DEBUG_MODE
+
 #ifndef DEBUG_SCOPE_H
 #define DEBUG_SCOPE_H
 
 #include <string>
-#include <vector>
-using std::string;
-using std::vector;
 
-namespace enigma {
-
-extern vector<string> scope_stack;
-
+namespace enigma 
+{
+  
 struct debug_scope { 
 
-  debug_scope(string x) 
-  { 
-    scope_stack.push_back(x);
-  } 
-  
-  ~debug_scope() { 
-    scope_stack.pop_back();
-  } 
-   
+  debug_scope(std::string x);
+  ~debug_scope();
+  static std::string GetErrors();
 };
 
-}
+} //namespace enigma
 
-#endif
-#endif
+#endif //DEBUG_MODE
+
+#endif //DEBUG_SCOPE_H
