@@ -25,12 +25,19 @@
 **                                                                              **
 \********************************************************************************/
 
-namespace enigma_user {
-void cons_show_message(string message);
-void cons_print_overwritable(string message);
-void show_debug_message(string message);
-char cons_get_byte();
-string cons_get_char();
-string cons_get_string();
-}
+#ifndef TERMINAL_IO_H
+#define TERMINAL_IO_H
 
+#include <string>
+
+namespace enigma_user 
+{
+void cons_show_message(std::string message);
+void cons_print_overwritable(std::string message);
+void show_debug_message(std::string message);
+char cons_get_byte();
+std::string cons_get_char();
+std::string cons_get_string();
+} //namespace enigma_user
+
+#endif //TERMINAL_IO_H

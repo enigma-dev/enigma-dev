@@ -29,12 +29,10 @@
 #ifndef _var4_h
 #define _var4_h
 
-#include <string>
-using std::string;
-
 // We want var and variant to support a lot of assignment types.
-
 #include "var_te.h"
+
+#include <string>
 
 namespace enigma {
   union rvt {
@@ -55,7 +53,7 @@ struct variant
   static const int default_type;
 
   enigma::rvt rval;
-  string sval;
+  std::string sval;
   int type;
   
   operator int();
@@ -72,7 +70,7 @@ struct variant
   operator double();
   operator float();
   
-  operator string();
+  operator std::string();
   
   operator int() const;
   operator bool() const;
@@ -88,7 +86,7 @@ struct variant
   operator double() const;
   operator float() const;
   
-  operator string() const;
+  operator std::string() const;
   
   variant();
   variant(const void *p);
@@ -191,7 +189,7 @@ struct var
   operator double();
   operator float();
   
-  operator string();
+  operator std::string();
   
   operator int() const;
   operator bool() const;
@@ -207,7 +205,7 @@ struct var
   operator double() const;
   operator float() const;
   
-  operator string() const;
+  operator std::string() const;
   
   var();
   var(const var&);

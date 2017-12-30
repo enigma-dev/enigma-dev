@@ -38,10 +38,12 @@
 #error ln2math and stop including this damn header.
 #endif
 
-#include <cstdlib> // random()
 #include "math_consts.h"
 #include "scalar.h"
 #include "var4.h"
+
+#include <cstdlib> // random()
+#include <string>
 
 namespace enigma_user
 {
@@ -77,9 +79,9 @@ namespace enigma_user
   inline ma_scalar arctan2(ma_scalar y,ma_scalar x) { return ::atan2(y,x); }
 
   inline int64_t int64(ma_scalar x) { return (int64_t)x; }
-  inline int64_t int64(string x) { return (int64_t) atol(x.c_str()); }
+  inline int64_t int64(std::string x) { return (int64_t) atol(x.c_str()); }
   inline int64_t int64(const variant& x) {
-    return x.type == ty_string ? int64((string) x) : int64((double) x);
+    return x.type == ty_string ? int64((std::string) x) : int64((double) x);
   }
   inline int64_t int64(const var& x) { return int64(*x); }
 
