@@ -28,35 +28,40 @@
 /// While the code that manages tiles and drawing is to be declared and managed
 /// by the files under Graphics_Systems, this file exists to provide a way to
 /// structure layers of depth, for both tiles and instances.
+#ifdef INCLUDED_FROM_SHELLMAIN
+  #error This file is high-impact and should not be included from SHELLmain.cpp.
+#endif
+
 #ifndef ENIGMA_DEPTH_DRAW_H
 #define ENIGMA_DEPTH_DRAW_H
 
+#include "instance_system.h"
+#include "roomsystem.h"
+
 #include <map>
 #include <set>
-#include "instance_system.h"
 #include <vector>
-#include "roomsystem.h"
-using namespace std;
 
-#ifdef INCLUDED_FROM_SHELLMAIN
-#error This file is high-impact and should not be included from SHELLmain.cpp.
-#endif
+namespace enigma 
+{
+struct depth_layer 
+{
+  std::vector<tile> tiles;
+  event_iter* draw_events;
+  int tilelist;
 
-namespace enigma {
-  struct depth_layer {
-    vector<tile> tiles;
-    event_iter* draw_events;
-    int tilelist;
+  //TODO: This should probably be moved into graphics_systems/GENERAL?
+  std::vector<std::vector<int> > tilevector; //Tile vector holds several values, like number of vertices to render, texture to use and so on
+  //The structure is like this [render batch][batch info]
+  //batch info - 0 = texture to use, 1 = vertices to render,
 
-    //TODO: This should probably be moved into graphics_systems/GENERAL?
-    vector<vector<int> > tilevector; //Tile vector holds several values, like number of vertices to render, texture to use and so on
-    //The structure is like this [render batch][batch info]
-    //batch info - 0 = texture to use, 1 = vertices to render,
+  depth_layer();
+};
 
-    depth_layer();
-  };
-  extern map<double,depth_layer> drawing_depths;
-  extern map<int,pair<double,double> > id_to_currentnextdepth;
-  typedef map<double,depth_layer>::reverse_iterator diter;
-}
+extern std::map<double,depth_layer> drawing_depths;
+extern std::map<int,std::pair<double,double> > id_to_currentnextdepth;
+typedef std::map<double,depth_layer>::reverse_iterator diter;
+
+} //namespace enigma
+
 #endif
