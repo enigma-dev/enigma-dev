@@ -4,6 +4,8 @@
 **  See the license of local files for more details.
 **/
 
+#include <string>
+
 #define unsigl  unsigned long
 #define unsigll unsigned long long
 #define llong   long long
@@ -106,11 +108,11 @@
 
 #define types_extrapolate_string_p(prefix,suffix...)\
  prefix (const char *x) EVCONST suffix\
- prefix (string x)      EVCONST suffix
+ prefix (std::string x)      EVCONST suffix
 
 #define types_binary_extrapolate_string_p(prefix,type2,suffix...)\
  prefix (const char *x,type2 y) EVCONST suffix\
- prefix (string x,type2 y)      EVCONST suffix
+ prefix (std::string x,type2 y)      EVCONST suffix
 
 #define types_extrapolate_mix_p(prefix,suffix...)\
  prefix (variant x) EVCONST suffix\
@@ -128,7 +130,7 @@
  prefix (const var &x) EVCONST;
 #define types_binary_extrapolate_alldecc(type,fname,type2)\
  types_binary_extrapolate_real_p  (type   fname, type2,;)\
- types_binary_extrapolate_string_p(string fname, type2,;)
+ types_binary_extrapolate_string_p(std::string fname, type2,;)
 #define types_binary_extrapolate_alldecce(type,fname,type2)\
  types_binary_extrapolate_real_p  (type fname, type2,;)\
  types_binary_extrapolate_string_p(type fname, type2,;)

@@ -30,6 +30,8 @@
 
 #include "var4.h"
 
+#include <string>
+
 namespace enigma
 {
 
@@ -42,7 +44,7 @@ namespace enigma_user
 
 int room_goto(int roomind);
 int room_restart();
-string room_get_name(int index);
+std::string room_get_name(int index);
 int room_goto_absolute(int index);
 int room_goto_first(bool restart_game=false);
 int room_goto_previous();
@@ -55,7 +57,7 @@ int room_set_height(int indx, int hei);
 int room_set_background(int indx, int bind, bool vis, bool fore, bool back, double x, double y, bool htiled, bool vtiled, double hspeed, double vspeed, double alpha = 1, int color = 0xFFFFFF);
 int room_set_view(int indx, int vind, int vis, int xview, int yview, int wview, int hview, int xport, int yport, int wport, int hport, int hborder, int vborder, int hspeed, int vspeed, int obj);
 int room_set_background_color(int indx, int col, bool show);
-int room_set_caption(int indx, string str);
+int room_set_caption(int indx, std::string str);
 int room_set_persistent(int indx, bool pers);
 int room_set_view_enabled(int indx, int val);
 int room_tile_add_ext(int indx, int bck, int left, int top, int width, int height, int x, int y, int depth, int xscale, int yscale, double alpha, int color = 0xFFFFFF);
@@ -146,8 +148,8 @@ namespace enigma
   {
     int id;
     int order;
-    string name;
-    string cap;
+    std::string name;
+    std::string cap;
 
     int backcolor;
     bool drawbackcolor;
