@@ -17,12 +17,14 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef _INSTANCE_ITERATOR_H
-#define _INSTANCE_ITERATOR_H
+#ifndef ENIGMA_INSTANCE_ITERATOR_H
+#define ENIGMA_INSTANCE_ITERATOR_H
 
 #include "instance_system_base.h"
 
-namespace enigma {
+namespace enigma 
+{
+  
   class iterator {
     enigma::inst_iter temp_iter;
     enigma::inst_iter* it;
@@ -66,6 +68,7 @@ namespace enigma {
   iterator fetch_inst_iter_by_id(int id);
   iterator fetch_inst_iter_by_int(int x);
   iterator fetch_roominst_iter_by_id(int x);
-}
 
-#endif
+} //namespace enigma
+
+#endif //ENIGMA_INSTANCE_ITERATOR_H
