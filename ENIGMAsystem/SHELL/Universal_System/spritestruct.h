@@ -28,11 +28,12 @@ using std::vector;
 #include "var4.h"
 #include "Collision_Systems/collision_types.h"
 
-struct bbox_rect_t {
-  int bottom, left, right, top;
-};
 namespace enigma
 {
+  struct bbox_rect_t {
+    int bottom, left, right, top;
+  };
+
   struct sprite
   {
     int width,height,subcount,xoffset,yoffset,id;
@@ -54,12 +55,7 @@ namespace enigma
   };
   extern sprite** spritestructarray; // INVARIANT: Should only be modified inside spritestruct.cpp.
   extern size_t sprite_idmax;
-}
 
-//int sprite_add(string filename,double imgnumb,double precise,double transparent,double smooth,double preload,double x_offset,double y_offset);
-
-namespace enigma
-{
   /// Called at game start.
   void sprites_init(); /// This should allocate room for sprites and perform any other necessary actions.
 
@@ -72,36 +68,32 @@ namespace enigma
   //Appends a subimage
   void sprite_add_subimage(int sprid, unsigned int w, unsigned int h, unsigned char*chunk, unsigned char*collision_data, collision_type ct);
   void spritestructarray_reallocate();
-}
+  
+  extern const bbox_rect_t &sprite_get_bbox(int sprid);
+  extern const bbox_rect_t &sprite_get_bbox_relative(int sprid);
+} //namespace enigma
 
 namespace enigma_user
 {
-  extern int sprite_get_width  (int sprite);
-  extern int sprite_get_height (int sprite);
-  extern double sprite_get_texture_width_factor(int sprite, int subimg);
-  extern double sprite_get_texture_height_factor(int sprite, int subimg);
+  extern int sprite_get_width  (int sprid);
+  extern int sprite_get_height (int sprid);
+  extern double sprite_get_texture_width_factor(int sprid, int subimg);
+  extern double sprite_get_texture_height_factor(int sprid, int subimg);
 
-  extern int sprite_get_bbox_bottom (int sprite);
-  extern int sprite_get_bbox_left   (int sprite);
-  extern int sprite_get_bbox_right  (int sprite);
-  extern int sprite_get_bbox_top    (int sprite);
-  //extern int sprite_get_bbox_mode   (int sprite); //We don't support this yet
-}
+  extern int sprite_get_bbox_bottom (int sprid);
+  extern int sprite_get_bbox_left   (int sprid);
+  extern int sprite_get_bbox_right  (int sprid);
+  extern int sprite_get_bbox_top    (int sprid);
+  //extern int sprite_get_bbox_mode   (int sprid); //We don't support this yet
+  extern int sprite_get_bbox_bottom_relative (int sprid);
+  extern int sprite_get_bbox_left_relative   (int sprid);
+  extern int sprite_get_bbox_right_relative  (int sprid);
+  extern int sprite_get_bbox_top_relative    (int sprid);
 
-extern int sprite_get_bbox_bottom_relative (int sprite);
-extern int sprite_get_bbox_left_relative   (int sprite);
-extern int sprite_get_bbox_right_relative  (int sprite);
-extern int sprite_get_bbox_top_relative    (int sprite);
-
-extern const bbox_rect_t &sprite_get_bbox(int sprite);
-extern const bbox_rect_t &sprite_get_bbox_relative(int sprite);
-
-namespace enigma_user
-{
-  extern int sprite_get_number  (int sprite);
-  extern int sprite_get_texture (int sprite, int subimage);
-  extern int sprite_get_xoffset (int sprite);
-  extern int sprite_get_yoffset (int sprite);
+  extern int sprite_get_number  (int sprid);
+  extern int sprite_get_texture (int sprid, int subimage);
+  extern int sprite_get_xoffset (int sprid);
+  extern int sprite_get_yoffset (int sprid);
 
   int sprite_add(std::string filename, int imgnumb, bool precise, bool transparent, bool smooth, bool preload, int x_offset, int y_offset, bool mipmap = false); //GM8+ compatible
   int sprite_add(std::string filename, int imgnumb, bool transparent, bool smooth, int x_offset, int y_offset, bool mipmap = false);  //GM7+ compatible
@@ -121,7 +113,7 @@ namespace enigma_user
   void sprite_set_precise(int ind, bool precise);
   void sprite_collision_mask(int ind, bool sepmasks, int mode, int left, int right, int top, int bottom, int kind, unsigned char tolerance);
   var sprite_get_uvs(int ind, int subimg);
-}
+} //namespace enigma_user
 
 #endif // ENIGMA_SPRITESTRUCT
 
