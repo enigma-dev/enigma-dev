@@ -20,7 +20,7 @@
 #include "texture_atlas.h"
 
 #include "Universal_System/spritestruct.h"
-#include "Universal_System/fontstruct.h"
+#include "Universal_System/fonts_internal.h"
 #include "Universal_System/background_internal.h"
 
 #include "Universal_System/nlpo2.h"

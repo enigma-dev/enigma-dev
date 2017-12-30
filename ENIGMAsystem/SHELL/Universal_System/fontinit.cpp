@@ -17,7 +17,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "fontstruct.h"
+#include "fonts_internal.h"
 #include "libEGMstd.h"
 #include "zlib.h"
 #include "resinit.h"

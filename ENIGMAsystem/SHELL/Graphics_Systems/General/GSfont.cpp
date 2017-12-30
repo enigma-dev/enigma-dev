@@ -28,7 +28,7 @@
 #include "../General/GSsprite.h"
 
 #include "Universal_System/math_consts.h"
-#include "Universal_System/fontstruct.h"
+#include "Universal_System/fonts_internal.h"
 
 using namespace std;
 
