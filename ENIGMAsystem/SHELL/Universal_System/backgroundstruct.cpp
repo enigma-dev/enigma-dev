@@ -17,35 +17,14 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <string>
-#include <cstring>
-using namespace std;
-
-#include "Graphics_Systems/graphics_mandatory.h"
+#include "background_internal.h"
 #include "libEGMstd.h"
-#include "backgroundstruct.h"
 #include "image_formats.h"
 
-#ifdef DEBUG_MODE
-  #include "Widget_Systems/widgets_mandatory.h"
-  #define get_background(bck2d,back)\
-    if (back < 0 or size_t(back) >= enigma::background_idmax or !enigma::backgroundstructarray[back]) {\
-      show_error("Attempting to draw non-existing background " + toString(back), false);\
-      return;\
-    }\
-    enigma::background *bck2d = enigma::backgroundstructarray[back];
-  #define get_backgroundnv(bck2d,back,r)\
-    if (back < 0 or size_t(back) >= enigma::background_idmax or !enigma::backgroundstructarray[back]) {\
-      show_error("Attempting to draw non-existing background " + toString(back), false);\
-      return r;\
-    }\
-    enigma::background *bck2d = enigma::backgroundstructarray[back];
-#else
-  #define get_background(bck2d,back)\
-    enigma::background *bck2d = enigma::backgroundstructarray[back];
-  #define get_backgroundnv(bck2d,back,r)\
-    enigma::background *bck2d = enigma::backgroundstructarray[back];
-#endif
+#include "Graphics_Systems/graphics_mandatory.h"
+
+#include <string>
+#include <cstring>
 
 namespace enigma {
   background** backgroundstructarray;
@@ -185,11 +164,6 @@ namespace enigma
 	delete[] backgroundold;
   }
 }
-
-#include "estring.h"
-#define __GETR(x) ((x & 0x0000FF))
-#define __GETG(x) ((x & 0x00FF00)>>8)
-#define __GETB(x) ((x & 0xFF0000)>>16)
 
 namespace enigma_user
 {

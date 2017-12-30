@@ -19,7 +19,7 @@
 #include "Universal_System/depth_draw.h"
 #include <algorithm>
 #include "../General/GSbackground.h"
-#include "Universal_System/backgroundstruct.h"
+#include "Universal_System/background_internal.h"
 #include "../General/GStextures.h"
 #include "GL3TextureStruct.h"
 #include "../General/GStiles.h"
