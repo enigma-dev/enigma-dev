@@ -16,11 +16,6 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-
-#include <cstdlib>
-#include <cstddef>
-#include <string>
-
 #define INCLUDED_FROM_SHELLMAIN 1
 
 // Simple Universal libraries
@@ -36,11 +31,11 @@
 
 #include "Universal_System/mathnc.h"
 #include "Universal_System/estring.h"
-#include "Universal_System/bufferstruct.h"
+#include "Universal_System/buffers.h"
 #include "Universal_System/fileio.h"
 #include "Universal_System/terminal_io.h"
 
-#include "Universal_System/backgroundstruct.h"
+#include "Universal_System/background.h"
 #include "Universal_System/spritestruct.h"
 #include "Universal_System/fontstruct.h"
 #include "Universal_System/texture_atlas.h"

@@ -33,7 +33,7 @@ using namespace std;
 #include "Universal_System/image_formats.h"
 #include "Universal_System/nlpo2.h"
 #include "Universal_System/spritestruct.h"
-#include "Universal_System/backgroundstruct.h"
+#include "Universal_System/background_internal.h"
 #include "Collision_Systems/collision_types.h"
 
 #define __GETR(x) ((x & 0x0000FF))

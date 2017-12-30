@@ -25,7 +25,7 @@ using namespace std;
 #include <stdio.h> //for file writing (surface_save)
 #include "Universal_System/nlpo2.h"
 #include "Universal_System/spritestruct.h"
-#include "Universal_System/backgroundstruct.h"
+#include "Universal_System/background_internal.h"
 #include "Collision_Systems/collision_types.h"
 #include "Universal_System/math_consts.h"
 
