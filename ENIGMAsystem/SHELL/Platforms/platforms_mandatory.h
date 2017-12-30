@@ -41,6 +41,8 @@ namespace enigma
 
   // This method is called at load time. It allows for initializing arrays for input.
   void input_initialize();
+  
+  int initialize_everything();
 }
 
 namespace enigma_user

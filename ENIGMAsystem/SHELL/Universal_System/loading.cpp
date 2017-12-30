@@ -22,7 +22,6 @@
 #include "roomsystem.h"
 #include "object.h"
 #include "libEGMstd.h"
-#include "loading.h"
 //#include "mathnc.h"
 
 #include "Platforms/platforms_mandatory.h"
