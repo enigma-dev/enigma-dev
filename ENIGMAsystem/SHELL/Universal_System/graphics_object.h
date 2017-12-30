@@ -90,6 +90,6 @@ namespace enigma
       object_graphics(unsigned x, int y);
       virtual ~object_graphics();
   };
-}
+} //namespace enigma
 
 #endif
