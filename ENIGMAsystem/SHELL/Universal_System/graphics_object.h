@@ -27,8 +27,6 @@
 #ifndef INCLUDED_FROM_SHELLMAIN
   #include "var4.h"
   #include "spritestruct.h"
-  #include <cstdlib>
-  #include <cmath>
 #endif
 
 #include "scalar.h"
