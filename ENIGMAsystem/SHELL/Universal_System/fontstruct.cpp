@@ -28,7 +28,7 @@ using namespace std;
 #include "libEGMstd.h"
 
 #include "spritestruct.h"
-#include "fontstruct.h"
+#include "fonts_internal.h"
 #include "rectpack.h"
 #include "image_formats.h"
 
