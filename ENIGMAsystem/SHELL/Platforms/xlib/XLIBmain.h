@@ -37,7 +37,7 @@ namespace enigma {
     extern GC gc;
     extern Atom wm_delwin;
     
-    int handleEvents();
+    void handleEvents();
   }
 }
 

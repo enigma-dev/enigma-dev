@@ -1,2 +1,2 @@
-SOURCES += $(wildcard Platforms/None/*.cpp) Platforms/General/POSIXthreads.cpp Platforms/General/UNIXfilemanip.cpp
+SOURCES += $(wildcard Platforms/None/*.cpp) $(wildcard Platforms/POSIX/*.cpp)
 LDLIBS += -lz -lpthread

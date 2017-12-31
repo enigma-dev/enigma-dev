@@ -30,7 +30,7 @@ using namespace std;
 
 #include "Universal_System/CallbackArrays.h" // For those damn vk_ constants, and io_clear().
 #include "Universal_System/roomsystem.h"
-#include "Platforms/platforms_mandatory.h" // For type insurance
+#include "Platforms/POSIX/GameLoop.h"
 #include "XLIBwindow.h" // Type insurance for non-mandatory functions
 #include "GameSettings.h" // ABORT_ON_ALL_ERRORS (MOVEME: this shouldn't be needed here)
 #include "XLIBwindow.h"
@@ -38,14 +38,14 @@ using namespace std;
 #undef sleep
 
 #include <X11/Xlib.h>
-#define uint unsigned int
+//#define uint unsigned int
 
 using namespace enigma::x11;
 
 namespace enigma {
-  bool isVisible = true, isMinimized = false, isMaximized = false, stayOnTop = false, windowAdapt = true;
-  int regionWidth = 0, regionHeight = 0, windowWidth = 0, windowHeight = 0;
-  double scaledWidth = 0, scaledHeight = 0;
+  extern bool isVisible, isMinimized, isMaximized, stayOnTop, windowAdapt;
+  extern int regionWidth, regionHeight;
+  extern double scaledWidth, scaledHeight;
   extern bool isSizeable, showBorder, showIcons, freezeOnLoseFocus, isFullScreen;
   extern int viewScale, windowColor;
     
@@ -101,8 +101,6 @@ namespace enigma {
           enigma_user::window_set_rectangle(0, 0, windowWidth, windowHeight);
       }
   }
-}
-
 //////////
 // INIT //
 //////////
@@ -124,10 +122,6 @@ void gmw_init()
 	}
 }
 
-void Sleep(int ms)
-{
-	if(ms>=1000) sleep(ms/1000);
-	if(ms>0)	usleep(ms%1000*1000);
 }
 
 int visx = -1, visy = -1;
@@ -633,30 +627,6 @@ namespace enigma
 
 #include <sys/time.h>
 
-namespace enigma_user {
-  extern double fps;
-}
-
-namespace enigma {
-  string* parameters;
-  int parameterc;
-  int current_room_speed;
-  int cursorInt;
-  void windowsystem_write_exename(char* x)
-  {
-    unsigned irx = 0;
-    if (enigma::parameterc)
-      for (irx = 0; enigma::parameters[0][irx] != 0; irx++)
-        x[irx] = enigma::parameters[0][irx];
-    x[irx] = 0;
-  }
-  #define hielem 9
-  void set_room_speed(int rs)
-  {
-    current_room_speed = rs;
-  }
-}
-
 #include "Universal_System/globalupdate.h"
 
 namespace enigma_user
@@ -667,8 +637,7 @@ void io_handle()
   enigma::input_push();
   while(XQLength(disp)) {
     printf("processing an event...\n");
-    if(handleEvents() > 0)
-      exit(0);
+    handleEvents();
   }
   enigma::update_mouse_variables();
 }
@@ -677,7 +646,7 @@ int window_set_cursor(int c)
 {
   enigma::cursorInt = c;
 	XUndefineCursor(disp,win);
-	XDefineCursor(disp, win, (c == -1) ? NoCursor : XCreateFontCursor(disp,curs[-c]));
+	XDefineCursor(disp, win, (c == -1) ? enigma::NoCursor : XCreateFontCursor(disp,curs[-c]));
 	return 0;
 }
 
@@ -841,6 +810,16 @@ void window_set_color(int color)
 int window_get_color()
 {
     return enigma::windowColor;
+}
+
+int display_get_width() 
+{ 
+  return XWidthOfScreen(screen);
+}
+
+int display_get_height() 
+{ 
+  return XHeightOfScreen(screen);
 }
 
 void clipboard_set_text(string text)

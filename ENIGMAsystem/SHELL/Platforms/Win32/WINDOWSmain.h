@@ -46,8 +46,6 @@ static inline HWND window_handle() {
 }
 #endif
 
-int sleep(int millis);
-
 }
 
 void enigma_catchmouse_backend(bool x);

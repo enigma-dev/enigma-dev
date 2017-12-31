@@ -18,25 +18,22 @@
 #ifndef _XLIB_WINDOW__H
 #define _XLIB_WINDOW__H
 
-#include "../General/PFwindow.h"
-#include "../General/PFmain.h"
+#include "Platforms/General/PFwindow.h"
+#include "Platforms/General/PFmain.h"
 
 #include <string>
-using std::string;
 
-void gmw_init();
-
-void Sleep(int ms);
-
-namespace enigma_user {
-  static inline void sleep(int ms) { Sleep(ms); }
-}
+#include <X11/Xlib.h>
+#include <X11/Xutil.h>
 
 namespace enigma {
-  extern string*  parameters;
-  extern int parameterc;
-  extern int current_room_speed;
-  //void writename(char* x);
+  namespace x11
+  {
+    extern Display *disp;
+    extern Screen *screen;
+  }
+  
+  void gmw_init();
   void initkeymap();
 }
 

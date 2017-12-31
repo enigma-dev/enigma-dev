@@ -267,28 +267,4 @@ namespace enigma
     }
     return DefWindowProc (hWndParameter, message, wParam, lParam);
   }
-
-  void input_initialize()
-  {
-    //Clear the input arrays
-    for(int i=0;i<3;i++){
-      last_mousestatus[i]=0;
-      mousestatus[i]=0;
-    }
-    for(int i=0;i<256;i++){
-      last_keybdstatus[i]=0;
-      keybdstatus[i]=0;
-    }
-  }
-
-  void input_push()
-  {
-    for(int i=0;i<3;i++){
-      last_mousestatus[i] = mousestatus[i];
-    }
-    for(int i=0;i<256;i++){
-      last_keybdstatus[i] = keybdstatus[i];
-    }
-    mouse_hscrolls = mouse_vscrolls = 0;
-  }
 }

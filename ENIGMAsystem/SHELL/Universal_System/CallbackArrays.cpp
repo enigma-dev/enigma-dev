@@ -1,4 +1,5 @@
 /** Copyright (C) 2008-2011 Josh Ventura
+ * 
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,6 +16,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "CallbackArrays.h"
+
 #include <string>
 using std::string;
 
@@ -24,15 +27,40 @@ namespace enigma
 	char last_mousestatus[3];
 	char last_keybdstatus[256];
 	char keybdstatus[256];
-}
 
-#include "CallbackArrays.h"
+  void input_initialize()
+  {
+    //Clear the input arrays
+    for(int i=0;i<3;i++){
+      last_mousestatus[i]=0;
+      mousestatus[i]=0;
+    }
+    for(int i=0;i<256;i++){
+      last_keybdstatus[i]=0;
+      keybdstatus[i]=0;
+    }
+  }
+
+  void input_push()
+  {
+    for(int i=0;i<3;i++){
+      last_mousestatus[i] = mousestatus[i];
+    }
+    for(int i=0;i<256;i++){
+      last_keybdstatus[i] = keybdstatus[i];
+    }
+    enigma_user::mouse_hscrolls = enigma_user::mouse_vscrolls = 0;
+  }
+}
 
 namespace enigma_user
 {
 
 double mouse_x, mouse_y;
 int mouse_button, mouse_lastbutton;
+
+short mouse_hscrolls;
+short mouse_vscrolls;
 
 bool mouse_check_button(int button)
 {
@@ -85,9 +113,6 @@ bool mouse_check_button_released(int button)
 }
 
 }
-
-short mouse_hscrolls = 0;
-short mouse_vscrolls = 0;
 
 namespace enigma_user
 {
