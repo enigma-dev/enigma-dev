@@ -29,7 +29,7 @@
 /// by the files under Graphics_Systems, this file exists to provide a way to
 /// structure layers of depth, for both tiles and instances.
 #ifdef INCLUDED_FROM_SHELLMAIN
-  #error This file is high-impact and should not be included from SHELLmain.cpp.
+#error This file is high-impact and should not be included from SHELLmain.cpp.
 #endif
 
 #ifndef ENIGMA_DEPTH_DRAW_H
@@ -42,26 +42,25 @@
 #include <set>
 #include <vector>
 
-namespace enigma 
-{
-struct depth_layer 
-{
+namespace enigma {
+struct depth_layer {
   std::vector<tile> tiles;
   event_iter* draw_events;
   int tilelist;
 
   //TODO: This should probably be moved into graphics_systems/GENERAL?
-  std::vector<std::vector<int> > tilevector; //Tile vector holds several values, like number of vertices to render, texture to use and so on
+  std::vector<std::vector<int> >
+      tilevector;  //Tile vector holds several values, like number of vertices to render, texture to use and so on
   //The structure is like this [render batch][batch info]
   //batch info - 0 = texture to use, 1 = vertices to render,
 
   depth_layer();
 };
 
-extern std::map<double,depth_layer> drawing_depths;
-extern std::map<int,std::pair<double,double> > id_to_currentnextdepth;
-typedef std::map<double,depth_layer>::reverse_iterator diter;
+extern std::map<double, depth_layer> drawing_depths;
+extern std::map<int, std::pair<double, double> > id_to_currentnextdepth;
+typedef std::map<double, depth_layer>::reverse_iterator diter;
 
-} //namespace enigma
+}  //namespace enigma
 
-#endif
+#endif //ENIGMA_DEPTH_DRAW_H

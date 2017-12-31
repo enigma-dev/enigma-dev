@@ -19,57 +19,56 @@
 
 //FIXME: this should be ifdef shellmain but enigmas in a sorry state
 #ifdef JUST_DEFINE_IT_RUN
-#  error This file includes non-ENIGMA STL headers and should not be included from SHELLmain.
+#error This file includes non-ENIGMA STL headers and should not be included from SHELLmain.
 #endif
 
 #ifndef ENIGMA_FONTS_INTERNAL_H
 #define ENIGMA_FONTS_INTERNAL_H
 
+#include <stdint.h>
 #include <string>
 #include <vector>
-#include <stdint.h>
 
-namespace enigma
-{
-  struct fontglyph
-  {
-    int   x,  y,  x2,  y2; // Draw coordinates, relative to the top-left corner of a full glyph. Added to xx and yy for draw.
-    float tx, ty, tx2, ty2; // Texture coords: used to locate glyph on bound font texture
-    float xs; // Spacing: used to increment xx
-  };
-  struct fontglyphrange {
-    unsigned int glyphstart, glyphcount;
-    std::vector<fontglyph*> glyphs;
-  };
-  struct font
-  {
-    // Trivia
-    std::string name, fontname;
-    int fontsize; bool bold, italic;
+namespace enigma {
+struct fontglyph {
+  int x, y, x2, y2;  // Draw coordinates, relative to the top-left corner of a full glyph. Added to xx and yy for draw.
+  float tx, ty, tx2, ty2;  // Texture coords: used to locate glyph on bound font texture
+  float xs;                // Spacing: used to increment xx
+};
+struct fontglyphrange {
+  unsigned int glyphstart, glyphcount;
+  std::vector<fontglyph *> glyphs;
+};
+struct font {
+  // Trivia
+  std::string name, fontname;
+  int fontsize;
+  bool bold, italic;
 
-    // Metrics and such
-    unsigned glyphRangeCount;
-    std::vector<fontglyphrange*> glyphRanges;
-    unsigned int height, yoffset;
+  // Metrics and such
+  unsigned glyphRangeCount;
+  std::vector<fontglyphrange *> glyphRanges;
+  unsigned int height, yoffset;
 
-    // Texture layer
-    int texture;
-    int twid, thgt;
-  };
-  struct rawfont {
-    std::string name;
-    int id;
+  // Texture layer
+  int texture;
+  int twid, thgt;
+};
+struct rawfont {
+  std::string name;
+  int id;
 
-    std::string fontname;
-    int fontsize; bool bold, italic;
-    unsigned int glyphRangeCount;
-  };
-  extern rawfont rawfontdata[];
-  extern font **fontstructarray;
+  std::string fontname;
+  int fontsize;
+  bool bold, italic;
+  unsigned int glyphRangeCount;
+};
+extern rawfont rawfontdata[];
+extern font **fontstructarray;
 
-  extern int rawfontcount, rawfontmaxid;
-  int font_new(uint32_t gs, uint32_t gc); // Creates a new font, allocating 'gc' glyphs
-  int font_pack(enigma::font *font, int spr, uint32_t gcount, bool prop, int sep);
-} //namespace enigma
+extern int rawfontcount, rawfontmaxid;
+int font_new(uint32_t gs, uint32_t gc);  // Creates a new font, allocating 'gc' glyphs
+int font_pack(enigma::font *font, int spr, uint32_t gcount, bool prop, int sep);
+}  //namespace enigma
 
-#endif //ENIGMA_FONTS_INTERNAL_H
+#endif  //ENIGMA_FONTS_INTERNAL_H

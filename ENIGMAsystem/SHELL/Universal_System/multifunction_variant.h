@@ -28,6 +28,7 @@
 #ifndef ENIGMA_MULTIFUNCTION_VARIANT_H
 #define ENIGMA_MULTIFUNCTION_VARIANT_H
 
+#include "var4.h"
 #include "var_te.h"
 
 namespace enigma

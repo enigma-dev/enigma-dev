@@ -28,10 +28,9 @@
 #ifndef ENIGMA_GLOBAL_UPDATE_H
 #define ENIGMA_GLOBAL_UPDATE_H
 
-namespace enigma
-{
-  extern double mouse_xprevious, mouse_yprevious;
-  void update_globals();
-} //namespace enigma
+namespace enigma {
+extern double mouse_xprevious, mouse_yprevious;
+void update_globals();
+}  //namespace enigma
 
-#endif //ENIGMA_GLOBAL_UPDATE_H
+#endif  //ENIGMA_GLOBAL_UPDATE_H

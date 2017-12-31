@@ -16,27 +16,25 @@
 **/
 
 #include "lives.h"
+
 #include <cmath>
 
 INTERCEPT_DEFAULT_COPY(enigma::livesv)
-namespace enigma
-{
-  using enigma_user::lives;
-  bool has_been_zeroless = false;
+namespace enigma {
+using enigma_user::lives;
+bool has_been_zeroless = false;
 
-  void reset_lives()
-  {
-    lives.rval.d = -1;
-    has_been_zeroless = false;
-  }
-
-  bool update_lives_status_and_return_zeroless()
-  {
-    bool was_zeroless = has_been_zeroless;
-    has_been_zeroless = false;
-    return was_zeroless;
-  }
+void reset_lives() {
+  lives.rval.d = -1;
+  has_been_zeroless = false;
 }
+
+bool update_lives_status_and_return_zeroless() {
+  bool was_zeroless = has_been_zeroless;
+  has_been_zeroless = false;
+  return was_zeroless;
+}
+}  // namespace enigma
 
 void enigma::livesv::function(variant oldval) {
   rval.d = round(rval.d);
@@ -45,8 +43,6 @@ void enigma::livesv::function(variant oldval) {
   }
 }
 
-namespace enigma_user
-{
-  enigma::livesv lives;
+namespace enigma_user {
+enigma::livesv lives;
 }
-

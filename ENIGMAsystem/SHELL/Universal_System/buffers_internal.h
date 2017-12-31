@@ -16,7 +16,7 @@
 **/
 
 #ifdef INCLUDED_FROM_SHELLMAIN
-#  error This file includes non-ENIGMA STL headers and should not be included from SHELLmain.
+#error This file includes non-ENIGMA STL headers and should not be included from SHELLmain.
 #endif
 
 #ifndef ENIGMA_BUFFERS_INTERNAL_H
@@ -24,46 +24,42 @@
 
 #include <vector>
 
-namespace enigma
-{
-  struct BinaryBuffer
-  {
-    std::vector<unsigned char> data;
-    unsigned position;
-    unsigned alignment;
-    int type;
-    
-    BinaryBuffer(unsigned size);
-    ~BinaryBuffer() = default;
-    unsigned GetSize();
-    void Resize(unsigned size);
-    void Seek(unsigned offset);  
-    unsigned char ReadByte();
-    void WriteByte(unsigned char byte);
-  };
-  
-  extern std::vector<BinaryBuffer*> buffers;
-}
+namespace enigma {
+struct BinaryBuffer {
+  std::vector<unsigned char> data;
+  unsigned position;
+  unsigned alignment;
+  int type;
+
+  BinaryBuffer(unsigned size);
+  ~BinaryBuffer() = default;
+  unsigned GetSize();
+  void Resize(unsigned size);
+  void Seek(unsigned offset);
+  unsigned char ReadByte();
+  void WriteByte(unsigned char byte);
+};
+
+extern std::vector<BinaryBuffer *> buffers;
+}  // namespace enigma
 
 #ifdef DEBUG_MODE
 #include "Widget_Systems/widgets_mandatory.h"
-#define get_buffer(binbuff,buff)\
-  if (buff < 0 or size_t(buff) >= enigma::buffers.size() or !enigma::buffers[buff]) {\
-    show_error("Attempting to access non-existing buffer " + toString(buff), false);\
-    return;\
-  }\
+#define get_buffer(binbuff, buff)                                                     \
+  if (buff < 0 or size_t(buff) >= enigma::buffers.size() or !enigma::buffers[buff]) { \
+    show_error("Attempting to access non-existing buffer " + toString(buff), false);  \
+    return;                                                                           \
+  }                                                                                   \
   enigma::BinaryBuffer *binbuff = enigma::buffers[buff];
-#define get_bufferr(binbuff,buff,r)\
-  if (buff < 0 or size_t(buff) >= enigma::buffers.size() or !enigma::buffers[buff]) {\
-    show_error("Attempting to access non-existing buffer " + toString(buff), false);\
-    return r;\
-  }\
+#define get_bufferr(binbuff, buff, r)                                                 \
+  if (buff < 0 or size_t(buff) >= enigma::buffers.size() or !enigma::buffers[buff]) { \
+    show_error("Attempting to access non-existing buffer " + toString(buff), false);  \
+    return r;                                                                         \
+  }                                                                                   \
   enigma::BinaryBuffer *binbuff = enigma::buffers[buff];
 #else
-  #define get_buffer(binbuff,buff)\
-  enigma::BinaryBuffer *binbuff = enigma::buffers[buff];
-  #define get_bufferr(binbuff,buff,r)\
-  enigma::BinaryBuffer *binbuff = enigma::buffers[buff];
+#define get_buffer(binbuff, buff) enigma::BinaryBuffer *binbuff = enigma::buffers[buff];
+#define get_bufferr(binbuff, buff, r) enigma::BinaryBuffer *binbuff = enigma::buffers[buff];
 #endif
 
-#endif // ENIGMA_BUFFERS_INTERNAL_H
+#endif  // ENIGMA_BUFFERS_INTERNAL_H

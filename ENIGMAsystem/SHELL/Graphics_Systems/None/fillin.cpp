@@ -30,7 +30,7 @@ using namespace std;
 #include "Universal_System/depth_draw.h"
 #include "Universal_System/background_internal.h"
 #include "Universal_System/image_formats.h"
-#include "Universal_System/spritestruct.h"
+#include "Universal_System/sprites_internal.h"
 #include "Universal_System/image_formats.h"
 #include "Universal_System/nlpo2.h"
 #include "Universal_System/fileio.h"

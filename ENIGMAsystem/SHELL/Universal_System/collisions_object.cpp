@@ -22,6 +22,8 @@
 
 #include "collisions_object.h"
 #include "math_consts.h"
+#include "sprites.h"
+#include "sprites_internal.h"
 
 #include <cmath>
 #include <floatcomp.h>

@@ -25,19 +25,18 @@
 **                                                                              **
 \********************************************************************************/
 
-#ifndef TERMINAL_IO_H
-#define TERMINAL_IO_H
+#ifndef ENIGMA_TERMINAL_IO_H
+#define ENIGMA_TERMINAL_IO_H
 
 #include <string>
 
-namespace enigma_user 
-{
+namespace enigma_user {
 void cons_show_message(std::string message);
 void cons_print_overwritable(std::string message);
 void show_debug_message(std::string message);
 char cons_get_byte();
 std::string cons_get_char();
 std::string cons_get_string();
-} //namespace enigma_user
+}  //namespace enigma_user
 
-#endif //TERMINAL_IO_H
+#endif  //ENIGMA_TERMINAL_IO_H

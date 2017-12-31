@@ -30,14 +30,14 @@
   @summary Adds a collisions-related tier following the transform tier.
 */
 
-#ifndef _COLLISIONS_OBJECT_H
-#define _COLLISIONS_OBJECT_H
+#ifndef ENIGMA_COLLISIONS_OBJECT_H
+#define ENIGMA_COLLISIONS_OBJECT_H
 
 #include "transform_object.h"
 
-struct bbox_rect_t;
 namespace enigma
 {
+  struct bbox_rect_t;
   struct object_collisions: object_transform
   {
     //Bit Mask
@@ -65,6 +65,6 @@ namespace enigma
       object_collisions(unsigned, int);
       virtual ~object_collisions();
   };
-}
+} //namespace enigma
 
-#endif
+#endif //ENIGMA_COLLISIONS_OBJECT_H

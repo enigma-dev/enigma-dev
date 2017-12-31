@@ -25,23 +25,28 @@
 **                                                                              **
 \********************************************************************************/
 
-#ifndef RESOURCE_DATA_H
-#define RESOURCE_DATA_H
+#ifndef ENIGMA_RESOURCE_DATA_H
+#define ENIGMA_RESOURCE_DATA_H
+
+#include "var4.h"
 
 #include <string>
 
-namespace enigma {
-  struct callable_script {
-    variant (*base)();
-    int argnum;
-  };
-  struct nameid_pair {
-    std::string name; int id;
-  };
-  void map_resource_ids(nameid_pair* n);
-  extern callable_script callable_scripts[];
-  extern nameid_pair resource_nameids[];
-}
+namespace enigma 
+{
+
+struct callable_script {
+  variant (*base)();
+  int argnum;
+};
+struct nameid_pair {
+  std::string name; int id;
+};
+void map_resource_ids(nameid_pair* n);
+extern callable_script callable_scripts[];
+extern nameid_pair resource_nameids[];
+
+} //namespace enigma
 
 namespace enigma_user
 {
@@ -60,6 +65,6 @@ std::string sound_get_name(int i);
 std::string script_get_name(int i);
 std::string shader_get_name(int i);
 
-}
+} //namespace enigma_user
 
-#endif //RESOURCE_DATA_H
+#endif //ENIGMA_RESOURCE_DATA_H

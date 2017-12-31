@@ -18,13 +18,12 @@
 #ifndef ENIGMA_LIVES_H
 #define ENIGMA_LIVES_H
 
-#include "var4.h"
 #include "multifunction_variant.h"
+#include "var4.h"
 
-namespace enigma
-{
-  
-struct livesv: multifunction_variant {
+namespace enigma {
+
+struct livesv : multifunction_variant {
   INHERIT_OPERATORS(livesv)
   void function(variant oldval);
 };
@@ -37,12 +36,10 @@ void reset_lives();
 // previously been set to zero or less and it was positive before that.
 bool update_lives_status_and_return_zeroless();
 
-} //namespace enigma
+}  //namespace enigma
 
-namespace enigma_user
-{
-  extern enigma::livesv lives;
-} //namespace enigma_user
+namespace enigma_user {
+extern enigma::livesv lives;
+}  //namespace enigma_user
 
-#endif //ENIGMA_LIVES_H
-
+#endif  //ENIGMA_LIVES_H

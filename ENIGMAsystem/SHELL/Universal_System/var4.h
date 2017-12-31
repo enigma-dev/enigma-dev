@@ -26,8 +26,8 @@
 **                                                                              **
 \********************************************************************************/
 
-#ifndef _var4_h
-#define _var4_h
+#ifndef ENIGMA_VAR4_H
+#define ENIGMA_VAR4_H
 
 // We want var and variant to support a lot of assignment types.
 #include "var_te.h"
@@ -400,4 +400,4 @@ namespace enigma_user {
   bool is_ptr(variant var);
 }
 
-#endif // _var4_h
+#endif //ENIGMA_VAR4_H

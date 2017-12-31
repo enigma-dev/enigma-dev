@@ -15,24 +15,25 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef ENIGMA_SHADERSTRUCT
-#define ENIGMA_SHADERSTRUCT
+#ifndef ENIGMA_SHADERSTRUCT_H
+#define ENIGMA_SHADERSTRUCT_H
 
 #include <string>
 
-namespace enigma
-{
-	struct ShaderStruct {
-		const char* vertex; // the shaders vertex code
-		const char* fragment; // the shaders fragment code
-		const char* type; // the language of the shader
-		bool precompile; // whether or not to compile and link the shader after loading it
-	};
-	
-	extern size_t shader_idmax;
-	extern ShaderStruct** shaderdata;
-	
-	void init_shaders();
-}
+namespace enigma {
 
-#endif
+struct ShaderStruct {
+  const char* vertex;    // the shaders vertex code
+  const char* fragment;  // the shaders fragment code
+  const char* type;      // the language of the shader
+  bool precompile;       // whether or not to compile and link the shader after loading it
+};
+
+extern size_t shader_idmax;
+extern ShaderStruct** shaderdata;
+
+void init_shaders();
+
+}  //namespace enigma
+
+#endif  //ENIGMA_SHADERSTRUCT_H

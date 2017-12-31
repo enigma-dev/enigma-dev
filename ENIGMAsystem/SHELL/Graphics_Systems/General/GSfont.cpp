@@ -29,6 +29,7 @@
 
 #include "Universal_System/math_consts.h"
 #include "Universal_System/fonts_internal.h"
+#include "Universal_System/sprites.h"
 
 using namespace std;
 

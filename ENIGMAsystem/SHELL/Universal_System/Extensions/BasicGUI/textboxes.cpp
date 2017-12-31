@@ -28,7 +28,7 @@ using std::unordered_map;
 #include "Universal_System/estring.h" //For string manipulation
 #include "Platforms/General/PFwindow.h" //For clipboard
 
-//#include "Universal_System/spritestruct.h"
+//#include "Universal_System/sprites_internal.h"
 #include "Graphics_Systems/General/GSsprite.h"
 #include "Graphics_Systems/General/GSfont.h"
 #include "Graphics_Systems/General/GScolors.h"
