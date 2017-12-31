@@ -99,7 +99,7 @@ void background_new(int bkgid, unsigned w, unsigned h, unsigned char *chunk, boo
   bak->textureh = (double)h / fullheight;
 }
 
-void background_add_to_index(background *bak, string filename, bool transparent, bool smoothEdges, bool preload,
+void background_add_to_index(background *bak, std::string filename, bool transparent, bool smoothEdges, bool preload,
                              bool mipmap) {
   unsigned int w, h, fullwidth, fullheight;
   int img_numb;
@@ -167,7 +167,7 @@ void backgroundstructarray_reallocate() {
 }  // namespace enigma
 
 namespace enigma_user {
-int background_add(string filename, bool transparent, bool smooth, bool preload, bool mipmap) {
+int background_add(std::string filename, bool transparent, bool smooth, bool preload, bool mipmap) {
   enigma::backgroundstructarray_reallocate();
   enigma::background *bck = enigma::backgroundstructarray[enigma::background_idmax] = new enigma::background;
   enigma::background_add_to_index(bck, filename, transparent, smooth, preload, mipmap);
@@ -195,7 +195,7 @@ int background_create_color(unsigned w, unsigned h, int col, bool preload) {
   return bckid;
 }
 
-bool background_replace(int back, string filename, bool transparent, bool smooth, bool preload, bool free_texture,
+bool background_replace(int back, std::string filename, bool transparent, bool smooth, bool preload, bool free_texture,
                         bool mipmap) {
   get_backgroundnv(bck, back, false);
   if (free_texture) enigma::graphics_delete_texture(bck->texture);
@@ -204,12 +204,12 @@ bool background_replace(int back, string filename, bool transparent, bool smooth
   return true;
 }
 
-void background_save(int back, string fname) {
+void background_save(int back, std::string fname) {
   get_background(bck, back);
   unsigned w, h;
   unsigned char *rgbdata = enigma::graphics_get_texture_pixeldata(bck->texture, &w, &h);
 
-  string ext = enigma::image_get_format(fname);
+  std::string ext = enigma::image_get_format(fname);
 
   enigma::image_save(fname, rgbdata, bck->width, bck->height, w, h, false);
 

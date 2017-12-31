@@ -25,6 +25,8 @@
 #include <fstream>
 #include <iostream>
 
+using std::string;
+
 namespace enigma {
 std::vector<BinaryBuffer*> buffers(0);
 
