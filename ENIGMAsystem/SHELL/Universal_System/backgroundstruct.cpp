@@ -71,7 +71,7 @@ namespace enigma
   //Adds a subimage to an existing sprite from the exe
   void background_new(int bkgid, unsigned w, unsigned h, unsigned char* chunk, bool transparent, bool smoothEdges, bool preload, bool useAsTileset, int tileWidth, int tileHeight, int hOffset, int vOffset, int hSep, int vSep)
   {
-    unsigned int fullwidth = nlpo2dc(w)+1, fullheight = nlpo2dc(h)+1;
+    unsigned int fullwidth = enigma::nlpo2dc(w)+1, fullheight = enigma::nlpo2dc(h)+1;
     char *imgpxdata = new char[4*fullwidth*fullheight+1], *imgpxptr = imgpxdata;
     unsigned int rowindex,colindex;
     for (rowindex = 0; rowindex < h; rowindex++)
@@ -177,7 +177,7 @@ namespace enigma_user
 
   int background_create_color(unsigned w, unsigned h, int col, bool preload)
   {
-    int full_width=nlpo2dc(w)+1, full_height=nlpo2dc(h)+1;
+    int full_width=enigma::nlpo2dc(w)+1, full_height=enigma::nlpo2dc(h)+1;
 
     unsigned sz=full_width*full_height;
     unsigned char *surfbuf=new unsigned char[sz*4];
