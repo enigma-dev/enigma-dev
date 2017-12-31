@@ -26,6 +26,8 @@ using namespace std;
 
 #include "var_te.h"
 
+using std::string;
+
 #ifdef DEBUG_MODE
 #include "Widget_Systems/widgets_mandatory.h"
   #define ccast(tpc) { if (type != tpc) \
