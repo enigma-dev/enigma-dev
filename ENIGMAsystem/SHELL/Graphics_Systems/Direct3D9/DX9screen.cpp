@@ -30,6 +30,7 @@ using namespace std;
 
 #include "Universal_System/image_formats.h"
 #include "Universal_System/background_internal.h"
+#include "Universal_System/background.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/estring.h"
 
