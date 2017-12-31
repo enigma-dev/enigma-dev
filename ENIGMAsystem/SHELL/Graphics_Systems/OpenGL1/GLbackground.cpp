@@ -41,7 +41,7 @@ namespace enigma_user
 
 int background_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload)
 {
-  int full_width=nlpo2dc(w)+1, full_height=nlpo2dc(h)+1;
+  int full_width=enigma::nlpo2dc(w)+1, full_height=enigma::nlpo2dc(h)+1;
 	int prevFbo;
 	glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &prevFbo);
  	glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, 0);
