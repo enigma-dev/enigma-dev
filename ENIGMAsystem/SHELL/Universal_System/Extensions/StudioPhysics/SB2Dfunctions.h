@@ -23,8 +23,7 @@ using std::vector;
 
 #include <Box2D/Box2D.h>
 
-namespace enigma_user
-{
+namespace enigma_user {
 
 /************** Worlds **************/
 
@@ -34,7 +33,7 @@ void physics_world_delete(int index);
 void physics_world_pause_enable(int index, bool paused);
 void physics_world_scale(int index, int pixelstometers);
 void physics_world_gravity(int index, double gx, double gy);
-void physics_world_update(int index); 
+void physics_world_update(int index);
 void physics_world_update_settings(int index, double timeStep, int velocityIterations, int positionIterations);
 void physics_world_update_iterations(int index, int iterationsperstep);
 void physics_world_update_speed(int index, int updatesperstep);
@@ -42,17 +41,17 @@ void physics_world_draw_debug();
 
 /************** Fixtures **************/
 
-int  physics_fixture_create(int world);
-int  physics_fixture_create(); 
-void physics_fixture_bind(int id); 
-void physics_fixture_bind(); 
+int physics_fixture_create(int world);
+int physics_fixture_create();
+void physics_fixture_bind(int id);
+void physics_fixture_bind();
 void physics_fixture_set_collision_group(int id, int group);
 void physics_fixture_delete(int id);
 
 void physics_fixture_set_box_shape(int id, double halfwidth, double halfheight);
 void physics_fixture_set_circle_shape(int id, double radius);
 void physics_fixture_set_polygon_shape(int id);
-void physics_fixture_set_edge_shape(int id, bool adjstart = true, bool adjend = true); 
+void physics_fixture_set_edge_shape(int id, bool adjstart = true, bool adjend = true);
 void physics_fixture_add_point(int id, double x, double y);
 
 void physics_fixture_set_transform(int id, double x, double y, double angle);
@@ -81,23 +80,23 @@ double physics_fixture_get_inertia(int id);
 
 /************** Forces **************/
 
-void physics_apply_force(int world, double xpos, double ypos, double xforce, double yforce, bool wake=true);
-void physics_apply_force_radial(int world, double xpos, double ypos, bool wake=true);
-void physics_apply_impulse(int world, double xpos, double ypos, double ximpulse, double yimpulse, bool wake=true);
-void physics_apply_impulse_radial(int world, double xpos, double ypos, bool wake=true);
-void physics_apply_local_force(int id, double xlocal, double ylocal, double xforce, double yforce, bool wake=true);
-void physics_apply_local_force_radial(int world, double xpos, double ypos, bool wake=true);
-void physics_apply_local_impulse(int id, double xlocal, double ylocal, double ximpulse, double yimpulse, bool wake=true);
-void physics_apply_local_impulse_radial(int world, double xpos, double ypos, bool wake=true);
-void physics_apply_local_torque(int id, double torque, bool wake=true);
+void physics_apply_force(int world, double xpos, double ypos, double xforce, double yforce, bool wake = true);
+void physics_apply_force_radial(int world, double xpos, double ypos, bool wake = true);
+void physics_apply_impulse(int world, double xpos, double ypos, double ximpulse, double yimpulse, bool wake = true);
+void physics_apply_impulse_radial(int world, double xpos, double ypos, bool wake = true);
+void physics_apply_local_force(int id, double xlocal, double ylocal, double xforce, double yforce, bool wake = true);
+void physics_apply_local_force_radial(int world, double xpos, double ypos, bool wake = true);
+void physics_apply_local_impulse(int id, double xlocal, double ylocal, double ximpulse, double yimpulse,
+                                 bool wake = true);
+void physics_apply_local_impulse_radial(int world, double xpos, double ypos, bool wake = true);
+void physics_apply_local_torque(int id, double torque, bool wake = true);
 
 /************** Miscellaneous **************/
 void physics_test_overlap();
 void physics_mass_properties(double mass, double local_center_x, double local_center_y, double inertia);
-void physics_draw_debug(); 
+void physics_draw_debug();
 void physics_pause_enable(bool pause);
 
-}
+}  // namespace enigma_user
 
-#endif // _ENIGMA_STUDIO_PHYSICS_FUNCTIONS__H
-
+#endif  // _ENIGMA_STUDIO_PHYSICS_FUNCTIONS__H

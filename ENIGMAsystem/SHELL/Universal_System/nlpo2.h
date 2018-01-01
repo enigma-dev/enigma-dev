@@ -28,12 +28,12 @@
 // This was forged in hell.
 
 #include <stdio.h>
-inline unsigned int nlpo2dc(unsigned int x) // Taking x, returns n such that n = 2**k where k is an integer and n >= x.
+inline unsigned int nlpo2dc(unsigned int x)  // Taking x, returns n such that n = 2**k where k is an integer and n >= x.
 {
   --x;
-	x |= x>>1;
-	x |= x>>2;
-	x |= x>>4;
-	x |= x>>8;
-	return x | (x>>16);
+  x |= x >> 1;
+  x |= x >> 2;
+  x |= x >> 4;
+  x |= x >> 8;
+  return x | (x >> 16);
 }

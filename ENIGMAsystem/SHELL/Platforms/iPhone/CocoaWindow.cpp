@@ -18,11 +18,11 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stdio.h> //printf, NULL
-#include <stdlib.h> //malloc
-#include <unistd.h> //usleep
-#include <time.h> //clock
-#include <string> //Return strings without needing a GC
+#include <stdio.h>   //printf, NULL
+#include <stdlib.h>  //malloc
+#include <time.h>    //clock
+#include <unistd.h>  //usleep
+#include <string>    //Return strings without needing a GC
 //#include <X11/Xlib.h>
 //#include <X11/Xutil.h>
 //#include <X11/Xos.h>
@@ -36,43 +36,39 @@
 
 using namespace std;
 
-
 void io_handle() {
-    //cocoa_io_handle();
+  //cocoa_io_handle();
 }
 
 //////////
 // INIT //
 //////////
 
-void gmw_init()
-{
-	//Default cursor
-	//DefCursor = XCreateFontCursor(disp,68);
-	//Blank cursor
-	//XColor dummy;
-	//Pixmap blank = XCreateBitmapFromData(disp,win,"",1,1);
-	//if(blank == None) { //out of memory
-	//	printf("Failed to create no cursor. lulz\n");
-	//	NoCursor = DefCursor;
-	//}
-	//else {
-		//NoCursor = XCreatePixmapCursor(disp,blank,blank,&dummy,&dummy,0,0);
-		//XFreePixmap(disp,blank);
-	//}
+void gmw_init() {
+  //Default cursor
+  //DefCursor = XCreateFontCursor(disp,68);
+  //Blank cursor
+  //XColor dummy;
+  //Pixmap blank = XCreateBitmapFromData(disp,win,"",1,1);
+  //if(blank == None) { //out of memory
+  //	printf("Failed to create no cursor. lulz\n");
+  //	NoCursor = DefCursor;
+  //}
+  //else {
+  //NoCursor = XCreatePixmapCursor(disp,blank,blank,&dummy,&dummy,0,0);
+  //XFreePixmap(disp,blank);
+  //}
 }
 
-
-void sleep(int ms){
-    if (ms > 1000) sleep(ms/1000);
-    usleep((ms % 1000) *1000);
-    };
-void window_set_position(int x,int y);
+void sleep(int ms) {
+  if (ms > 1000) sleep(ms / 1000);
+  usleep((ms % 1000) * 1000);
+};
+void window_set_position(int x, int y);
 int visx = -1, visy = -1;
 
-int window_set_visible(const bool visible)
-{
-	/*if(visible)
+int window_set_visible(const bool visible) {
+  /*if(visible)
 	{
 		XMapRaised(disp,win);
 		GLXContext glxc = glXGetCurrentContext();
@@ -84,58 +80,56 @@ int window_set_visible(const bool visible)
 		XUnmapWindow(disp, win);
 	return 0;*/
 }
-int window_get_visible()
-{
-	/*XWindowAttributes wa;
+int window_get_visible() {
+  /*XWindowAttributes wa;
 	XGetWindowAttributes(disp,win,&wa);
 	return wa.map_state != IsUnmapped;*/
 }
 
-int window_set_caption(string caption)
-{
-	/*XStoreName(disp,win,caption.c_str());
+int window_set_caption(string caption) {
+  /*XStoreName(disp,win,caption.c_str());
 	return 0;*/
 }
-string window_get_caption()
-{
-	/*char *caption;
+string window_get_caption() {
+  /*char *caption;
 	XFetchName(disp,win,&caption);
 	string r=caption;
 	return r;*/
 }
 
-int imousex,imousey;
-inline int getMouse(int i)
-{
-	
-	switch(i)
-	{
-		case 0:  return imousex;
-		case 1:  return imousey;
-		case 2:  return imousex;
-		case 3:  return imousey;
-		default: return -1;
-	}
+int imousex, imousey;
+inline int getMouse(int i) {
+  switch (i) {
+    case 0:
+      return imousex;
+    case 1:
+      return imousey;
+    case 2:
+      return imousex;
+    case 3:
+      return imousey;
+    default:
+      return -1;
+  }
 }
 
 int display_mouse_get_x() { return getMouse(0); }
 int display_mouse_get_y() { return getMouse(1); }
-int window_mouse_get_x()  { return getMouse(2); }
-int window_mouse_get_y()  { return getMouse(3); }
+int window_mouse_get_x() { return getMouse(2); }
+int window_mouse_get_y() { return getMouse(3); }
 
-void window_mouse_set(double x,double y) {
-	//XWarpPointer(disp,None,win,0,0,0,0,(int)x,(int)y);
+void window_mouse_set(double x, double y) {
+  //XWarpPointer(disp,None,win,0,0,0,0,(int)x,(int)y);
 }
-void display_mouse_set(double x,double y) {
-	//XWarpPointer(disp,None,DefaultRootWindow(disp),0,0,0,0,(int)x,(int)y);
+void display_mouse_set(double x, double y) {
+  //XWarpPointer(disp,None,DefaultRootWindow(disp),0,0,0,0,(int)x,(int)y);
 }
 
 ////////////
 // WINDOW //
 ////////////
-int getWindowDimension(int i)
-{
-	/*XFlush(disp);
+int getWindowDimension(int i) {
+  /*XFlush(disp);
 	XWindowAttributes wa;
 	XGetWindowAttributes(disp,win,&wa);
 	if(i == 2) return wa.width;
@@ -149,29 +143,27 @@ int getWindowDimension(int i)
 }
 
 //Getters
-int window_get_x()      { return 0;}//return getWindowDimension(0); }
-int window_get_y()      { return 0;}//return getWindowDimension(1); }
-int window_get_width()  { return 320;}//getWindowDimension(2); }
-int window_get_height() { return 480;}//getWindowDimension(3); }
+int window_get_x() { return 0; }         //return getWindowDimension(0); }
+int window_get_y() { return 0; }         //return getWindowDimension(1); }
+int window_get_width() { return 320; }   //getWindowDimension(2); }
+int window_get_height() { return 480; }  //getWindowDimension(3); }
 
 //Setters
-void window_set_position(int x,int y)
-{
-	/*XWindowAttributes wa;
+void window_set_position(int x, int y) {
+  /*XWindowAttributes wa;
 	XGetWindowAttributes(disp,win,&wa);
 	XMoveWindow(disp,win,(int) x  - wa.x,(int) y - wa.y);*/
 }
-void window_set_size(unsigned int w,unsigned int h) {
-	//XResizeWindow(disp,win, w, h);
+void window_set_size(unsigned int w, unsigned int h) {
+  //XResizeWindow(disp,win, w, h);
 }
-void window_set_rectangle(int x,int y,int w,int h) {
-	//XMoveResizeWindow(disp, win, x, y, w, h);
+void window_set_rectangle(int x, int y, int w, int h) {
+  //XMoveResizeWindow(disp, win, x, y, w, h);
 }
 
 //Center
-void window_center()
-{
-	/*Window r;
+void window_center() {
+  /*Window r;
 	int x,y;
 	uint w,h,b,d;
 	XGetGeometry(disp,win,&r,&x,&y,&w,&h,&b,&d);
@@ -182,15 +174,10 @@ void window_center()
 ////////////////
 // FULLSCREEN //
 ////////////////
-enum {
-	_NET_WM_STATE_REMOVE,
-	_NET_WM_STATE_ADD,
-	_NET_WM_STATE_TOGGLE
-};
+enum { _NET_WM_STATE_REMOVE, _NET_WM_STATE_ADD, _NET_WM_STATE_TOGGLE };
 
-void window_set_fullscreen(const bool full)
-{
-	/*Atom wmState = XInternAtom(disp, "_NET_WM_STATE", False);
+void window_set_fullscreen(const bool full) {
+  /*Atom wmState = XInternAtom(disp, "_NET_WM_STATE", False);
 	Atom aFullScreen = XInternAtom(disp,"_NET_WM_STATE_FULLSCREEN", False);
 	XEvent xev;
 	xev.xclient.type=ClientMessage;
@@ -204,9 +191,8 @@ void window_set_fullscreen(const bool full)
 	xev.xclient.data.l[2] = 0;
 	XSendEvent(disp,DefaultRootWindow(disp),False,SubstructureRedirectMask|SubstructureNotifyMask,&xev);*/
 }
-int window_get_fullscreen()
-{
-	/*Atom aFullScreen = XInternAtom(disp,"_NET_WM_STATE_FULLSCREEN",False);
+int window_get_fullscreen() {
+  /*Atom aFullScreen = XInternAtom(disp,"_NET_WM_STATE_FULLSCREEN",False);
 	Atom ra;
 	int ri;
 	unsigned long nr, bar;
@@ -216,75 +202,72 @@ int window_get_fullscreen()
 		printf("Status: %d\n",stat);
 		//return 0;
 	}*/
-	/*printf("%d %d %d %d\n",ra,ri,nr,bar);
+  /*printf("%d %d %d %d\n",ra,ri,nr,bar);
 	 for (int i = 0; i < nr; i++) printf("%02X ",data[i]);
 	 printf("\n");*/
-	return 0;
+  return 0;
 }
 
 //default    +   -5   I    \    |    /    -    ^   ...  drg  no  -    |  drg3 ...  X  ...  ?   url  +
-short curs[] = { 68, 68, 68, 130, 52, 152, 135, 116, 136, 108, 114, 150, 90, 68, 108, 116, 90, 150, 0, 150, 92, 60, 52};
-int window_set_cursor(double c)
-{
-	/*XUndefineCursor(disp,win);
+short curs[] = {68, 68, 68, 130, 52, 152, 135, 116, 136, 108, 114, 150, 90, 68, 108, 116, 90, 150, 0, 150, 92, 60, 52};
+int window_set_cursor(double c) {
+  /*XUndefineCursor(disp,win);
 	XDefineCursor(disp, win, (c == -1) ? NoCursor : XCreateFontCursor(disp,curs[-c]));
 	return 0;*/
 }
 
 void screen_refresh() {
-	//glXSwapBuffers(disp,win);
+  //glXSwapBuffers(disp,win);
 }
 
-namespace enigma
-{
-	char keymap[256]; /* WARNING: This is iphone version, will be used for onscreen mapping of buttons to keys */
-	void initkeymap()
-	{
-		keymap[0x51] = 37;  //vk_left;
-		keymap[0x53] = 39;  //vk_right;
-		keymap[0x52] = 38;  //vk_up;
-		keymap[0x54] = 40;  //vk_down;
-		keymap[0xE4] = 17;  //vk_control;
-		keymap[0xEA] = 18;  //vk_alt;
-		keymap[0xE2] = 16;  //vk_shift;
-		keymap[0x0D] = 13;  //vk_enter;
-		keymap[0x9E] = 96;  //vk_numpad0;
-		keymap[0x9C] = 97;  //vk_numpad1;
-		keymap[0x99] = 98;  //vk_numpad2;
-		keymap[0x9B] = 99;  //vk_numpad3;
-		keymap[0x96] = 100; //vk_numpad4;
-		keymap[0x9D] = 101; //vk_numpad5;
-		keymap[0x98] = 102; //vk_numpad6;
-		keymap[0x95] = 103; //vk_numpad7;
-		keymap[0x97] = 104; //vk_numpad8;
-		keymap[0x9A] = 105; //vk_numpad9;
-		keymap[0xAF] = 111; //vk_divide;
-		keymap[0xAA] = 106; //vk_multiply;
-		keymap[0xAD] = 109; //vk_subtract;
-		keymap[0xAB] = 107; //vk_add;
-		keymap[0x9F] = 110; //vk_decimal;
-		keymap[0xBE] = 112; //vk_f1;
-		keymap[0xBF] = 113; //vk_f2;
-		keymap[0xC0] = 114; //vk_f3;
-		keymap[0xC1] = 115; //vk_f4;
-		keymap[0xC2] = 116; //vk_f5;
-		keymap[0xC3] = 117; //vk_f6;
-		keymap[0xC4] = 118; //vk_f7;
-		keymap[0xC5] = 119; //vk_f8;
-		keymap[0xC6] = 120; //vk_f9;
-		keymap[0xC7] = 121; //vk_f10;
-		keymap[0xC8] = 122; //vk_f11;
-		keymap[0xC9] = 123; //vk_f12;
-		keymap[0x08] = 8;   //vk_backspace;
-		keymap[0x1B] = 27;  //vk_escape;
-		keymap[0x50] = 36;  //vk_home;
-		keymap[0x57] = 35;  //vk_end;
-		keymap[0x55] = 33;  //vk_pageup;
-		keymap[0x56] = 34;  //vk_pagedown;
-		keymap[0xFF] = 46;  //vk_delete;
-		keymap[0x63] = 45;  //vk_insert;
-	}
+namespace enigma {
+char keymap[256]; /* WARNING: This is iphone version, will be used for onscreen mapping of buttons to keys */
+void initkeymap() {
+  keymap[0x51] = 37;   //vk_left;
+  keymap[0x53] = 39;   //vk_right;
+  keymap[0x52] = 38;   //vk_up;
+  keymap[0x54] = 40;   //vk_down;
+  keymap[0xE4] = 17;   //vk_control;
+  keymap[0xEA] = 18;   //vk_alt;
+  keymap[0xE2] = 16;   //vk_shift;
+  keymap[0x0D] = 13;   //vk_enter;
+  keymap[0x9E] = 96;   //vk_numpad0;
+  keymap[0x9C] = 97;   //vk_numpad1;
+  keymap[0x99] = 98;   //vk_numpad2;
+  keymap[0x9B] = 99;   //vk_numpad3;
+  keymap[0x96] = 100;  //vk_numpad4;
+  keymap[0x9D] = 101;  //vk_numpad5;
+  keymap[0x98] = 102;  //vk_numpad6;
+  keymap[0x95] = 103;  //vk_numpad7;
+  keymap[0x97] = 104;  //vk_numpad8;
+  keymap[0x9A] = 105;  //vk_numpad9;
+  keymap[0xAF] = 111;  //vk_divide;
+  keymap[0xAA] = 106;  //vk_multiply;
+  keymap[0xAD] = 109;  //vk_subtract;
+  keymap[0xAB] = 107;  //vk_add;
+  keymap[0x9F] = 110;  //vk_decimal;
+  keymap[0xBE] = 112;  //vk_f1;
+  keymap[0xBF] = 113;  //vk_f2;
+  keymap[0xC0] = 114;  //vk_f3;
+  keymap[0xC1] = 115;  //vk_f4;
+  keymap[0xC2] = 116;  //vk_f5;
+  keymap[0xC3] = 117;  //vk_f6;
+  keymap[0xC4] = 118;  //vk_f7;
+  keymap[0xC5] = 119;  //vk_f8;
+  keymap[0xC6] = 120;  //vk_f9;
+  keymap[0xC7] = 121;  //vk_f10;
+  keymap[0xC8] = 122;  //vk_f11;
+  keymap[0xC9] = 123;  //vk_f12;
+  keymap[0x08] = 8;    //vk_backspace;
+  keymap[0x1B] = 27;   //vk_escape;
+  keymap[0x50] = 36;   //vk_home;
+  keymap[0x57] = 35;   //vk_end;
+  keymap[0x55] = 33;   //vk_pageup;
+  keymap[0x56] = 34;   //vk_pagedown;
+  keymap[0xFF] = 46;   //vk_delete;
+  keymap[0x63] = 45;   //vk_insert;
 }
+}  // namespace enigma
 
 extern void ABORT_ON_ALL_ERRORS();
 /*void show_error(string err, const bool fatal)
@@ -299,39 +282,38 @@ extern void ABORT_ON_ALL_ERRORS();
 
 extern double fps;
 namespace enigma {
-	char** parameters;
-	void windowsystem_write_exename(char* x)
-	{
-		unsigned irx;
-		for (irx = 0; enigma::parameters[0][irx] != 0; irx++)
-			x[irx] = enigma::parameters[0][irx];
-		x[irx] = 0;
-	}
-#define hielem 9
-	static int last_second[hielem+1] = {0},last_microsecond[hielem+1] = {0};
-	void set_room_speed(int rs)
-	{
-		timeval tv;
-		
-		for (int i=1; i<hielem+1; i++) {
-			last_microsecond[i-1] = last_microsecond[i];
-			last_second[i-1] = last_second[i];
-		}
-		
-		//How many microseconds since 1970? herp
-		gettimeofday(&tv, NULL);
-		
-		// I'm feeling hacky, so we'll give the processor a millisecond to take care
-		// of these calculations and hop threads. I'd rather be fast than slow.
-		int sdur = 1000000/rs - 1000 - (tv.tv_sec - last_second[hielem]) * 1000000 - (tv.tv_usec - last_microsecond[hielem]);
-		if (sdur > 0 and sdur < 1000000) usleep(sdur);
-		
-		// Store this time for diff next time
-		gettimeofday(&tv, NULL);
-		last_second[hielem] = tv.tv_sec, last_microsecond[hielem] = tv.tv_usec;
-		fps = (hielem+1)*1000000 / ((last_second[hielem] - last_second[0]) * 1000000 + (last_microsecond[hielem] - last_microsecond[0]));
-	}
+char** parameters;
+void windowsystem_write_exename(char* x) {
+  unsigned irx;
+  for (irx = 0; enigma::parameters[0][irx] != 0; irx++) x[irx] = enigma::parameters[0][irx];
+  x[irx] = 0;
 }
+#define hielem 9
+static int last_second[hielem + 1] = {0}, last_microsecond[hielem + 1] = {0};
+void set_room_speed(int rs) {
+  timeval tv;
+
+  for (int i = 1; i < hielem + 1; i++) {
+    last_microsecond[i - 1] = last_microsecond[i];
+    last_second[i - 1] = last_second[i];
+  }
+
+  //How many microseconds since 1970? herp
+  gettimeofday(&tv, NULL);
+
+  // I'm feeling hacky, so we'll give the processor a millisecond to take care
+  // of these calculations and hop threads. I'd rather be fast than slow.
+  int sdur =
+      1000000 / rs - 1000 - (tv.tv_sec - last_second[hielem]) * 1000000 - (tv.tv_usec - last_microsecond[hielem]);
+  if (sdur > 0 and sdur < 1000000) usleep(sdur);
+
+  // Store this time for diff next time
+  gettimeofday(&tv, NULL);
+  last_second[hielem] = tv.tv_sec, last_microsecond[hielem] = tv.tv_usec;
+  fps = (hielem + 1) * 1000000 /
+        ((last_second[hielem] - last_second[0]) * 1000000 + (last_microsecond[hielem] - last_microsecond[0]));
+}
+}  // namespace enigma
 
 /*
  display_get_width() // Returns the width of the display in pixels.
@@ -365,17 +347,15 @@ namespace enigma {
  */
 
 namespace enigma {
-    extern char keybdstatus[256];
-    extern char mousestatus[3];
-    extern char last_mousestatus[3];
-    extern char last_keybdstatus[256];
-    extern char keybdstatus[256];
-}
+extern char keybdstatus[256];
+extern char mousestatus[3];
+extern char last_mousestatus[3];
+extern char last_keybdstatus[256];
+extern char keybdstatus[256];
+}  // namespace enigma
 
-void io_clear()
-{
-   /* for (int i = 0; i < 255; i++)
+void io_clear() {
+  /* for (int i = 0; i < 255; i++)
         enigma::keybdstatus[i] = enigma::last_keybdstatus[i] = cocoa_keybdstatus[i] = cocoa_last_keybdstatus[i] = 0;*/
-    for (int i = 0; i < 3; i++)
-        enigma::mousestatus[i] = enigma::last_mousestatus[i] = 0;
+  for (int i = 0; i < 3; i++) enigma::mousestatus[i] = enigma::last_mousestatus[i] = 0;
 }

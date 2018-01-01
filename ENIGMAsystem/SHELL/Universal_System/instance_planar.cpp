@@ -25,22 +25,19 @@
 **                                                                              **
 \********************************************************************************/
 
-#include "planar_object.h"
-#include "instance_system.h"
-#include "instance.h"
 #include <cfloat>
+#include "instance.h"
+#include "instance_system.h"
+#include "planar_object.h"
 
-namespace enigma_user
-{
+namespace enigma_user {
 
-int instance_nearest(int x,int y,int obj,bool notme)
-{
+int instance_nearest(int x, int y, int obj, bool notme) {
   double dist_lowest = DBL_MAX;
   int retid = -4;
   double xl, yl;
 
-  for (enigma::iterator it = enigma::fetch_inst_iter_by_int(obj); it; ++it)
-  {
+  for (enigma::iterator it = enigma::fetch_inst_iter_by_int(obj); it; ++it) {
     if (notme && (*it)->id == enigma::instance_event_iterator->inst->id) continue;
     xl = ((enigma::object_planar*)*it)->x - x;
     yl = ((enigma::object_planar*)*it)->y - y;
@@ -54,21 +51,18 @@ int instance_nearest(int x,int y,int obj,bool notme)
   return retid;
 }
 
-int instance_furthest(int x,int y,int obj,bool notme)
-{
+int instance_furthest(int x, int y, int obj, bool notme) {
   double dist_highest = -1;
   int retid = noone;
-  double xl,yl;
+  double xl, yl;
   double dstclc;
 
-  for (enigma::iterator it = enigma::fetch_inst_iter_by_int(obj); it; ++it)
-  {
+  for (enigma::iterator it = enigma::fetch_inst_iter_by_int(obj); it; ++it) {
     if (notme && (*it)->id == enigma::instance_event_iterator->inst->id) continue;
-    xl=((enigma::object_planar*)*it)->x - x;
-    yl=((enigma::object_planar*)*it)->y - y;
+    xl = ((enigma::object_planar*)*it)->x - x;
+    yl = ((enigma::object_planar*)*it)->y - y;
     dstclc = xl * xl + yl * yl;
-    if (dstclc > dist_highest)
-    {
+    if (dstclc > dist_highest) {
       dist_highest = dstclc;
       retid = it->id;
     }
@@ -77,5 +71,4 @@ int instance_furthest(int x,int y,int obj,bool notme)
   return retid;
 }
 
-}
-
+}  // namespace enigma_user

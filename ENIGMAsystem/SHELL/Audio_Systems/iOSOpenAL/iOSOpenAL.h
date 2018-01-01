@@ -28,7 +28,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-	void loadstaticSound(const char* filename);
+void loadstaticSound(const char* filename);
 #ifdef __cplusplus
 }
 #endif

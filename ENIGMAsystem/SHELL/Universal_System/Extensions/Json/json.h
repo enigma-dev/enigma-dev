@@ -28,12 +28,10 @@
 #define ENIGMA_INI_BUFFER_SIZE 512
 #endif
 
-namespace enigma_user
-{
-	variant json_decode(string data);
+namespace enigma_user {
+variant json_decode(string data);
 
-	string json_encode(variant ds_map);
-}
+string json_encode(variant ds_map);
+}  // namespace enigma_user
 
-
-#endif // _ENIGMA_INIFILESYSTEM__HPP
+#endif  // _ENIGMA_INIFILESYSTEM__HPP

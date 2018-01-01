@@ -26,25 +26,24 @@ using std::string;
 
   #include "libEGMstd.h"
 */
-#define toString(s) \
-  s
+#define toString(s) s
 
-  #include "Widget_Systems/widgets_mandatory.h"
-  #define get_softbodyr(w,id,r) \
-    if (unsigned(id) >= bulletSoftBodies.size() || id < 0) { \
-      show_error("Cannot access Bullet Dynamics physics body with id " + toString(id), false); \
-      return r; \
-    } BulletSoftBody* w = bulletSoftBodies[id];
-  #define get_softbody(w,id) \
-    if (unsigned(id) >= bulletSoftBodies.size() || id < 0) { \
-      show_error("Cannot access Bullet Dynamics physics body with id " + toString(id), false); \
-      return; \
-    } BulletSoftBody* w = bulletSoftBodies[id];
+#include "Widget_Systems/widgets_mandatory.h"
+#define get_softbodyr(w, id, r)                                                              \
+  if (unsigned(id) >= bulletSoftBodies.size() || id < 0) {                                   \
+    show_error("Cannot access Bullet Dynamics physics body with id " + toString(id), false); \
+    return r;                                                                                \
+  }                                                                                          \
+  BulletSoftBody* w = bulletSoftBodies[id];
+#define get_softbody(w, id)                                                                  \
+  if (unsigned(id) >= bulletSoftBodies.size() || id < 0) {                                   \
+    show_error("Cannot access Bullet Dynamics physics body with id " + toString(id), false); \
+    return;                                                                                  \
+  }                                                                                          \
+  BulletSoftBody* w = bulletSoftBodies[id];
 #else
-  #define get_softbodyr(w,id,r) \
-    BulletSoftBody* w = bulletSoftBodies[id];
-  #define get_softbody(w,id) \
-    BulletSoftBody* w = bulletSoftBodies[id];
+#define get_softbodyr(w, id, r) BulletSoftBody* w = bulletSoftBodies[id];
+#define get_softbody(w, id) BulletSoftBody* w = bulletSoftBodies[id];
 #endif
 
 #ifndef _BULLETSOFTBODY__H
@@ -54,8 +53,8 @@ using std::string;
 using std::vector;
 
 #include <BulletSoftBody/btSoftBody.h>
-#include <btBulletDynamicsCommon.h>
 #include <BulletSoftBody/btSoftRigidDynamicsWorld.h>
+#include <btBulletDynamicsCommon.h>
 
 #include "BulletWorld.h"
 //#include "BulletShape.h"
@@ -65,8 +64,7 @@ struct BulletSoftBody {
   int shapeid;
   btSoftBody* softBody;
 
-  BulletSoftBody(int sid, double airdensity, double waterdensity, double wateroffset, int nodecount, int m)
-  {
+  BulletSoftBody(int sid, double airdensity, double waterdensity, double wateroffset, int nodecount, int m) {
     shapeid = sid;
     btSoftBodyWorldInfo* softBodyWI = new btSoftBodyWorldInfo();
     softBodyWI->air_density = airdensity;
@@ -76,50 +74,43 @@ struct BulletSoftBody {
     softBody = new btSoftBody(softBodyWI, nodecount, test, new btScalar(5));
   }
 
-  ~BulletSoftBody() 
-  {
-    btSoftRigidDynamicsWorld* dynamicsWorld = (btSoftRigidDynamicsWorld*) bulletWorlds[worldid]->dynamicsWorld;
+  ~BulletSoftBody() {
+    btSoftRigidDynamicsWorld* dynamicsWorld = (btSoftRigidDynamicsWorld*)bulletWorlds[worldid]->dynamicsWorld;
     dynamicsWorld->removeSoftBody(softBody);
     delete softBody;
   }
 
-  double getX() 
-  {
+  double getX() {
     btTransform trans = softBody->getWorldTransform();
     return trans.getOrigin().getX();
   }
 
-  double getY() 
-  {
+  double getY() {
     btTransform trans = softBody->getWorldTransform();
     return trans.getOrigin().getY();
   }
-  
-  double getZ()
-  {
+
+  double getZ() {
     btTransform trans = softBody->getWorldTransform();
     return trans.getOrigin().getZ();
   }
 
-  void setPosition(double x, double y, double z)
-  {
+  void setPosition(double x, double y, double z) {
     btTransform trans = softBody->getWorldTransform();
     trans.setOrigin(btVector3(x, y, z));
     softBody->setWorldTransform(trans);
   }
 
-  void setQuaternion(double qx, double qy, double qz, double qw)
-  {
+  void setQuaternion(double qx, double qy, double qz, double qw) {
     btTransform trans = softBody->getWorldTransform();
     //trans.setIdentity();
     trans.setRotation(btQuaternion(qx, qy, qz, qw));
     softBody->setWorldTransform(trans);
 
-//softBody->setCenterOfMassTransform(trans);
+    //softBody->setCenterOfMassTransform(trans);
   }
 
-  void setRotation(double yaw, double pitch, double roll)
-  {
+  void setRotation(double yaw, double pitch, double roll) {
     btTransform trans = softBody->getWorldTransform();
     //trans.setIdentity();
     btQuaternion quat;
@@ -127,45 +118,23 @@ struct BulletSoftBody {
     trans.setRotation(quat);
     softBody->setWorldTransform(trans);
 
-//softBody->setCenterOfMassTransform(trans);
+    //softBody->setCenterOfMassTransform(trans);
   }
 
-  double getYaw()
-  {
-    return softBody->getWorldTransform().getRotation().getAxis().getX();
-  }
+  double getYaw() { return softBody->getWorldTransform().getRotation().getAxis().getX(); }
 
-  double getPitch()
-  {
-    return softBody->getWorldTransform().getRotation().getAxis().getY();
-  }
+  double getPitch() { return softBody->getWorldTransform().getRotation().getAxis().getY(); }
 
-  double getRoll()
-  {
-    return softBody->getWorldTransform().getRotation().getAxis().getZ();
-  }
+  double getRoll() { return softBody->getWorldTransform().getRotation().getAxis().getZ(); }
 
-  double getQuatX()
-  {
-    return softBody->getWorldTransform().getRotation().getX();
-  }
+  double getQuatX() { return softBody->getWorldTransform().getRotation().getX(); }
 
-  double getQuatY()
-  {
-    return softBody->getWorldTransform().getRotation().getY();
-  }
+  double getQuatY() { return softBody->getWorldTransform().getRotation().getY(); }
 
-  double getQuatZ()
-  {
-    return softBody->getWorldTransform().getRotation().getZ();
-  }
+  double getQuatZ() { return softBody->getWorldTransform().getRotation().getZ(); }
 
-  double getQuatW()
-  {
-    return softBody->getWorldTransform().getRotation().getW();
-  }
-
-}; 
+  double getQuatW() { return softBody->getWorldTransform().getRotation().getW(); }
+};
 extern vector<BulletSoftBody*> bulletSoftBodies;
 
 #endif

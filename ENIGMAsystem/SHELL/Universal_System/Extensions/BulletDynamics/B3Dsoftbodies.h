@@ -37,5 +37,5 @@ void b3d_bodys_set_rotation(int id, double yaw, double pitch, double roll);
 void b3d_bodys_set_quaternion(int id, double qx, double qy, double qz, double qw);
 void b3d_bodys_set_massdata(int id, double mass, double ix, double iy, double iz);
 
-}
+}  // namespace enigma_user
 #endif

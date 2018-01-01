@@ -29,61 +29,38 @@
 #define ENIGMA_PS_PARTICLECONSTANTS
 
 namespace enigma_user {
-  enum
-  {
-    pt_shape_pixel = 0,
-    pt_shape_disk,
-    pt_shape_square,
-    pt_shape_line,
-    pt_shape_star,
-    pt_shape_circle,
-    pt_shape_ring,
-    pt_shape_sphere,
-    pt_shape_flare,
-    pt_shape_spark,
-    pt_shape_explosion,
-    pt_shape_cloud,
-    pt_shape_smoke,
-    pt_shape_snow
-  };
+enum {
+  pt_shape_pixel = 0,
+  pt_shape_disk,
+  pt_shape_square,
+  pt_shape_line,
+  pt_shape_star,
+  pt_shape_circle,
+  pt_shape_ring,
+  pt_shape_sphere,
+  pt_shape_flare,
+  pt_shape_spark,
+  pt_shape_explosion,
+  pt_shape_cloud,
+  pt_shape_smoke,
+  pt_shape_snow
+};
 
-  enum
-  {
-    ps_shape_rectangle = 0,
-    ps_shape_ellipse,
-    ps_shape_diamond,
-    ps_shape_line
-  };
+enum { ps_shape_rectangle = 0, ps_shape_ellipse, ps_shape_diamond, ps_shape_line };
 
-  enum
-  {
-    ps_distr_linear = 0,
-    ps_distr_gaussian,
-    ps_distr_invgaussian
-  };
+enum { ps_distr_linear = 0, ps_distr_gaussian, ps_distr_invgaussian };
 
-  enum
-  {
-    ps_force_constant = 0,
-    ps_force_linear,
-    ps_force_quadratic
-  };
+enum { ps_force_constant = 0, ps_force_linear, ps_force_quadratic };
 
-  enum
-  {
-    ps_deflect_horizontal = 0,
-    ps_deflect_vertical
-  };
+enum { ps_deflect_horizontal = 0, ps_deflect_vertical };
 
-  enum
-  {
-    ps_change_all = 0
-    // NOTE: ps_change_motion and ps_change_shape are intentionally not
-    // implemented. The reasoning for this decision is that their
-    // interface is loosely defined, and an existing implementation
-    // seems contrary to the loosely defined interface.
-  };
-}
+enum {
+  ps_change_all = 0
+  // NOTE: ps_change_motion and ps_change_shape are intentionally not
+  // implemented. The reasoning for this decision is that their
+  // interface is loosely defined, and an existing implementation
+  // seems contrary to the loosely defined interface.
+};
+}  // namespace enigma_user
 
-#endif // ENIGMA_PS_PARTICLECONSTANTS
-
+#endif  // ENIGMA_PS_PARTICLECONSTANTS

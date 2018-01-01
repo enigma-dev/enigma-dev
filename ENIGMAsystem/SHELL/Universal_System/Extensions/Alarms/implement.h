@@ -5,10 +5,8 @@
 #include <Universal_System/var4.h>
 
 namespace enigma {
-  struct extension_alarm
-  {
-    var alarm;
-    extension_alarm();
-  };
-}
-
+struct extension_alarm {
+  var alarm;
+  extension_alarm();
+};
+}  // namespace enigma

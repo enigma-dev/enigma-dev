@@ -25,73 +25,71 @@
 #define _GRAPHICS_OBJECT_H
 
 #ifndef INCLUDED_FROM_SHELLMAIN
-  #include "var4.h"
-  #include "spritestruct.h"
-  #include <cstdlib>
-  #include <cmath>
+#include <cmath>
+#include <cstdlib>
+#include "spritestruct.h"
+#include "var4.h"
 #endif
 
+#include "multifunction_variant.h"
 #include "scalar.h"
 #include "timelines_object.h"
-#include "multifunction_variant.h"
 
-namespace enigma
-{
-  extern bool gui_used;
-  struct depthv: multifunction_variant {
-    INHERIT_OPERATORS(depthv)
-    struct inst_iter *myiter;
-    void function(variant oldval);
-    void init(gs_scalar depth, object_basic* who);
-    void remove();
-    depthv();
-    ~depthv();
-  };
-  struct object_graphics: object_timelines
-  {
-    //Sprites: these are mostly for higher tiers...
-      int sprite_index;
-      gs_scalar image_index;
-      gs_scalar image_speed;
+namespace enigma {
+extern bool gui_used;
+struct depthv : multifunction_variant {
+  INHERIT_OPERATORS(depthv)
+  struct inst_iter* myiter;
+  void function(variant oldval);
+  void init(gs_scalar depth, object_basic* who);
+  void remove();
+  depthv();
+  ~depthv();
+};
+struct object_graphics : object_timelines {
+  //Sprites: these are mostly for higher tiers...
+  int sprite_index;
+  gs_scalar image_index;
+  gs_scalar image_speed;
 
-      //Depth
-      enigma::depthv  depth;
-      bool visible;
+  //Depth
+  enigma::depthv depth;
+  bool visible;
 
-    //Transformations: these are mostly for higher tiers...
-      gs_scalar image_xscale;
-      gs_scalar image_yscale;
-      gs_scalar image_angle;
+  //Transformations: these are mostly for higher tiers...
+  gs_scalar image_xscale;
+  gs_scalar image_yscale;
+  gs_scalar image_angle;
 
-      virtual variant myevent_draw();
-      virtual bool myevent_draw_subcheck();
-      virtual variant myevent_drawgui();
-      virtual bool myevent_drawgui_subcheck();
-      virtual variant myevent_drawresize();
-      
-    //Accessors
-      #ifdef JUST_DEFINE_IT_RUN
-        int sprite_width, sprite_height;
-        int sprite_xoffset, sprite_yoffset;
-        int image_number;
-      #else
-        int $sprite_width() const;
-        int $sprite_height() const;
-        int $sprite_xoffset() const;
-        int $sprite_yoffset() const;
-        int $image_number() const;
-        #define sprite_width $sprite_width()
-        #define sprite_height $sprite_height()
-        #define sprite_xoffset $sprite_xoffset()
-        #define sprite_yoffset $sprite_yoffset()
-        #define image_number $image_number()
-      #endif
+  virtual variant myevent_draw();
+  virtual bool myevent_draw_subcheck();
+  virtual variant myevent_drawgui();
+  virtual bool myevent_drawgui_subcheck();
+  virtual variant myevent_drawresize();
 
-    //Constructors
-      object_graphics();
-      object_graphics(unsigned x, int y);
-      virtual ~object_graphics();
-  };
-}
+  //Accessors
+#ifdef JUST_DEFINE_IT_RUN
+  int sprite_width, sprite_height;
+  int sprite_xoffset, sprite_yoffset;
+  int image_number;
+#else
+  int $sprite_width() const;
+  int $sprite_height() const;
+  int $sprite_xoffset() const;
+  int $sprite_yoffset() const;
+  int $image_number() const;
+#define sprite_width $sprite_width()
+#define sprite_height $sprite_height()
+#define sprite_xoffset $sprite_xoffset()
+#define sprite_yoffset $sprite_yoffset()
+#define image_number $image_number()
+#endif
+
+  //Constructors
+  object_graphics();
+  object_graphics(unsigned x, int y);
+  virtual ~object_graphics();
+};
+}  // namespace enigma
 
 #endif

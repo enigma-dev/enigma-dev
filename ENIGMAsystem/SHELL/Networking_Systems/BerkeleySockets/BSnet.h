@@ -44,7 +44,7 @@ int net_connect_udp(string localport, bool server);
 //A server must accept or reject (ignore) incoming socket connections.
 //The argument is this server socket's ID.
 //Returns the incoming socket's ID, or -1 if an error occurred.
-int net_accept(int sock); 
+int net_accept(int sock);
 
 //Receives data on a socket's stream.
 //The argument is the socket to receive data from.
@@ -76,6 +76,6 @@ int net_get_port(int sock);
 //Windows users, see the return value of ioctlsocket.
 int net_blocking(int sock, bool block);
 
-}
+}  // namespace enigma_user
 
-#endif // ENIGMA_BSNET_H
+#endif  // ENIGMA_BSNET_H

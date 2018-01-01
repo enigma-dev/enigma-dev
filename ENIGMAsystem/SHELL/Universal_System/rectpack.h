@@ -15,27 +15,25 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-namespace enigma
-{
-  namespace rect_packer
-  {
-    struct pvrect {
-      int x,y,w,h, placed;
-      pvrect(); pvrect(int a,int b,int c,int d,int e);
-    };
-    
-    struct rectpnode
-    {
-      rectpnode* child[2];
-      int x,y,wid,hgt;
-      int c;
-      rectpnode();
-      rectpnode(int xx,int yy,int w,int h,rectpnode* c1=NULL,rectpnode* c2=NULL);
-      void rect(int xx, int yy, int w, int h);
-    };
-    
-    void rncopy(rectpnode *h, pvrect *boxes, unsigned int c);
-    rectpnode *rninsert(rectpnode* who, unsigned int c, pvrect* boxes);
-    rectpnode *expand(rectpnode* who, int w, int h);
-  }
-}
+namespace enigma {
+namespace rect_packer {
+struct pvrect {
+  int x, y, w, h, placed;
+  pvrect();
+  pvrect(int a, int b, int c, int d, int e);
+};
+
+struct rectpnode {
+  rectpnode* child[2];
+  int x, y, wid, hgt;
+  int c;
+  rectpnode();
+  rectpnode(int xx, int yy, int w, int h, rectpnode* c1 = NULL, rectpnode* c2 = NULL);
+  void rect(int xx, int yy, int w, int h);
+};
+
+void rncopy(rectpnode* h, pvrect* boxes, unsigned int c);
+rectpnode* rninsert(rectpnode* who, unsigned int c, pvrect* boxes);
+rectpnode* expand(rectpnode* who, int w, int h);
+}  // namespace rect_packer
+}  // namespace enigma

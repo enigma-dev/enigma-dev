@@ -22,19 +22,17 @@
 #include "OpenGLHeaders.h"
 using std::string;
 
-namespace enigma
-{
-  struct surface
-  {
-    GLuint fbo;
-    int tex;
-    int width, height;
-    GLuint depth_buffer;
-    GLuint stencil_buffer;
-    bool has_depth_buffer = false;
-    bool has_stencil_buffer = false;
-    bool write_only = true;
-  };
-}
+namespace enigma {
+struct surface {
+  GLuint fbo;
+  int tex;
+  int width, height;
+  GLuint depth_buffer;
+  GLuint stencil_buffer;
+  bool has_depth_buffer = false;
+  bool has_stencil_buffer = false;
+  bool write_only = true;
+};
+}  // namespace enigma
 
-#endif //ENIGMA_GLSURFACESTRUCT_H
+#endif  //ENIGMA_GLSURFACESTRUCT_H

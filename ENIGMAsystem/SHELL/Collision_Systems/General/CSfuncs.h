@@ -15,11 +15,10 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Universal_System/scalar.h"
 #include "Universal_System/instance_system_base.h"
+#include "Universal_System/scalar.h"
 
-namespace enigma_user
-{
+namespace enigma_user {
 
 bool place_free(cs_scalar x, cs_scalar y);
 bool place_empty(cs_scalar x, cs_scalar y);
@@ -33,11 +32,15 @@ void position_destroy_solid(cs_scalar x, cs_scalar y);
 void position_destroy(cs_scalar x, cs_scalar y);
 enigma::instance_t instance_place(cs_scalar x, cs_scalar y, int object);
 enigma::instance_t instance_position(cs_scalar x, cs_scalar y, int object);
-enigma::instance_t collision_rectangle(cs_scalar x1, cs_scalar y1, cs_scalar x2, cs_scalar y2, int obj, bool prec = true, bool notme = true);
-enigma::instance_t collision_line(cs_scalar x1, cs_scalar y1, cs_scalar x2, cs_scalar y2, int obj, bool prec = true, bool notme = true);
+enigma::instance_t collision_rectangle(cs_scalar x1, cs_scalar y1, cs_scalar x2, cs_scalar y2, int obj,
+                                       bool prec = true, bool notme = true);
+enigma::instance_t collision_line(cs_scalar x1, cs_scalar y1, cs_scalar x2, cs_scalar y2, int obj, bool prec = true,
+                                  bool notme = true);
 enigma::instance_t collision_point(cs_scalar x, cs_scalar y, int obj, bool prec = true, bool notme = true);
-enigma::instance_t collision_circle(cs_scalar x, cs_scalar y, double radius, int obj, bool prec = true, bool notme = true);
-enigma::instance_t collision_ellipse(cs_scalar x1, cs_scalar y1, cs_scalar x2, cs_scalar y2, int obj, bool prec = true, bool notme = true);
+enigma::instance_t collision_circle(cs_scalar x, cs_scalar y, double radius, int obj, bool prec = true,
+                                    bool notme = true);
+enigma::instance_t collision_ellipse(cs_scalar x1, cs_scalar y1, cs_scalar x2, cs_scalar y2, int obj, bool prec = true,
+                                     bool notme = true);
 
 double distance_to_object(int object);
 double distance_to_point(cs_scalar x, cs_scalar y);
@@ -45,41 +48,34 @@ double distance_to_point(cs_scalar x, cs_scalar y);
 double move_contact_object(int object, double angle, double max_dist = 1000000, bool solid_only = false);
 
 inline double move_contact_all(const double direction, const double max_dist = 1000000) {
-    return move_contact_object(all, direction, max_dist);
+  return move_contact_object(all, direction, max_dist);
 }
 
-inline double move_contact(const double direction) {
-    return move_contact_object(all, direction, -1);
-}
+inline double move_contact(const double direction) { return move_contact_object(all, direction, -1); }
 
 inline double move_contact_solid(const double direction, const double max_dist = 1000000) {
-    return move_contact_object(all, direction, max_dist, true);
+  return move_contact_object(all, direction, max_dist, true);
 }
 
 double move_outside_object(int object, double angle, double max_dist = 1000000, bool solid_only = false);
 
 inline double move_outside_all(const double direction, const double speed = 1000000) {
-    return move_outside_object(all, direction, speed);
+  return move_outside_object(all, direction, speed);
 }
 
 inline double move_outside_solid(const double direction, const double speed = 1000000) {
-    return move_outside_object(all, direction, speed, true);
+  return move_outside_object(all, direction, speed, true);
 }
 
 bool move_bounce_object(int object, bool adv = true, bool solid_only = false);
 
-inline bool move_bounce_all(bool adv = true) {
-    return move_bounce_object(all, adv);
-}
+inline bool move_bounce_all(bool adv = true) { return move_bounce_object(all, adv); }
 
-inline bool move_bounce_solid(bool adv = true) {
-    return move_bounce_object(all, adv, true);
-}
+inline bool move_bounce_solid(bool adv = true) { return move_bounce_object(all, adv, true); }
 
 void instance_deactivate_region(int rleft, int rtop, int rwidth, int rheight, bool inside = true, bool notme = true);
 void instance_activate_region(int left, int top, int width, int height, bool inside = true);
 void instance_deactivate_circle(int x, int y, int r, bool inside = true, bool notme = true);
 void instance_activate_circle(int x, int y, int r, bool inside = true);
 
-}
-
+}  // namespace enigma_user

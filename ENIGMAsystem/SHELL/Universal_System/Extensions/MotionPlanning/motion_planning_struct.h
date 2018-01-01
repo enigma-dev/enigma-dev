@@ -25,46 +25,45 @@
 **  or programs made in the environment.                                        **
 **                                                                              **
 \********************************************************************************/
-#include <vector>
 #include <cstdlib>
 #include <map>
-using std::vector;
+#include <vector>
 using std::multimap;
+using std::vector;
 
 #ifdef INCLUDED_FROM_SHELLMAIN
-#  error This file includes non-ENIGMA STL headers and should not be included from SHELLmain.
+#error This file includes non-ENIGMA STL headers and should not be included from SHELLmain.
 #endif
 
 #ifdef COLLISION_NONE
-	#error The motion planning extension requires a collision system.
+#error The motion planning extension requires a collision system.
 #endif
 
 #ifndef PATH_EXT_SET
-	#error The motion planning extension requires the paths extension.
+#error The motion planning extension requires the paths extension.
 #endif
 
-namespace enigma
-{
-  struct node
-  {
-    unsigned x, y, F, H, G, cost;
-    node* came_from;
-    vector<node*> neighbor_nodes;
-    node(unsigned X = 0, unsigned Y = 0, unsigned f = 0, unsigned h = 0, unsigned g = 0, unsigned Cost = 0, node* CameFrom = NULL):
-      x(X), y(Y), F(f), H(h), G(g), cost(Cost), came_from(CameFrom) {}
-  };
-  struct grid
-  {
-    unsigned int id;
-    int left, top;
-    unsigned int hcells, vcells, cellwidth, cellheight;
-    unsigned threshold;
-    double speed_modifier;
-    vector<node> nodearray;
-    grid(unsigned int id,int left,int top,unsigned int hcells,unsigned int vcells,unsigned int cellwidth,unsigned int cellheight, unsigned int threshold, double speed_modifier);
-    ~grid();
-  };
-  extern grid** gridstructarray;
-  void gridstructarray_reallocate();
-  multimap<unsigned,node*> find_path(unsigned id, node* n0, node* n1, bool allow_diag, bool &status);
-}
+namespace enigma {
+struct node {
+  unsigned x, y, F, H, G, cost;
+  node* came_from;
+  vector<node*> neighbor_nodes;
+  node(unsigned X = 0, unsigned Y = 0, unsigned f = 0, unsigned h = 0, unsigned g = 0, unsigned Cost = 0,
+       node* CameFrom = NULL)
+      : x(X), y(Y), F(f), H(h), G(g), cost(Cost), came_from(CameFrom) {}
+};
+struct grid {
+  unsigned int id;
+  int left, top;
+  unsigned int hcells, vcells, cellwidth, cellheight;
+  unsigned threshold;
+  double speed_modifier;
+  vector<node> nodearray;
+  grid(unsigned int id, int left, int top, unsigned int hcells, unsigned int vcells, unsigned int cellwidth,
+       unsigned int cellheight, unsigned int threshold, double speed_modifier);
+  ~grid();
+};
+extern grid** gridstructarray;
+void gridstructarray_reallocate();
+multimap<unsigned, node*> find_path(unsigned id, node* n0, node* n1, bool allow_diag, bool& status);
+}  // namespace enigma

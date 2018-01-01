@@ -25,53 +25,51 @@
 using std::vector;
 
 struct TextureStruct {
-	LPDIRECT3DTEXTURE9 gTexture;
-	unsigned width,height;
-	unsigned fullwidth,fullheight;
-  
+  LPDIRECT3DTEXTURE9 gTexture;
+  unsigned width, height;
+  unsigned fullwidth, fullheight;
+
   // for the purpose of restoring the texture
   D3DSURFACE_DESC backupdesc;
   LPDIRECT3DSURFACE9 pCopy;
-  
-	TextureStruct(LPDIRECT3DTEXTURE9 gTex) {
-		gTexture = gTex;
-	}
-  
+
+  TextureStruct(LPDIRECT3DTEXTURE9 gTex) { gTexture = gTex; }
+
   void Release() {
     if (gTexture != NULL) {
       gTexture->Release();
       gTexture = NULL;
     }
   }
-	
-	~TextureStruct() {
-		Release();
-	}
-  
+
+  ~TextureStruct() { Release(); }
+
   void OnDeviceLost() {
     // backup texture data
     gTexture->GetLevelDesc(0, &backupdesc);
 
     LPDIRECT3DSURFACE9 pBackBuffer;
-    gTexture->GetSurfaceLevel(0,&pBackBuffer);
-    d3dmgr->device->CreateOffscreenPlainSurface( backupdesc.Width, backupdesc.Height, backupdesc.Format, D3DPOOL_SYSTEMMEM, &pCopy, NULL );
+    gTexture->GetSurfaceLevel(0, &pBackBuffer);
+    d3dmgr->device->CreateOffscreenPlainSurface(backupdesc.Width, backupdesc.Height, backupdesc.Format,
+                                                D3DPOOL_SYSTEMMEM, &pCopy, NULL);
     d3dmgr->device->GetRenderTargetData(pBackBuffer, pCopy);
-    
+
     pBackBuffer->Release();
-  
+
     Release();
   }
-  
+
   void OnDeviceReset() {
     // restore texture data
-    d3dmgr->CreateTexture(backupdesc.Width, backupdesc.Height, 1, D3DUSAGE_RENDERTARGET, backupdesc.Format, D3DPOOL_DEFAULT, &gTexture, NULL);
-   
+    d3dmgr->CreateTexture(backupdesc.Width, backupdesc.Height, 1, D3DUSAGE_RENDERTARGET, backupdesc.Format,
+                          D3DPOOL_DEFAULT, &gTexture, NULL);
+
     LPDIRECT3DSURFACE9 pBackBuffer;
-    gTexture->GetSurfaceLevel(0,&pBackBuffer);
+    gTexture->GetSurfaceLevel(0, &pBackBuffer);
     d3dmgr->device->UpdateSurface(pCopy, NULL, pBackBuffer, NULL);
     pCopy->Release();
     pBackBuffer->Release();
-    
+
     // delete &backupdesc;
   }
 };
@@ -79,4 +77,4 @@ extern vector<TextureStruct*> textureStructs;
 
 LPDIRECT3DTEXTURE9 get_texture(int texid);
 
-#endif // DX9_TEXTURESTRUCT__H
+#endif  // DX9_TEXTURESTRUCT__H

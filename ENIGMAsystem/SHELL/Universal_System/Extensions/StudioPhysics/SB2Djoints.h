@@ -18,9 +18,9 @@
 #ifndef ENIGMA_STUDIO_PHYSICS_JOINTS__H
 #define ENIGMA_STUDIO_PHYSICS_JOINTS__H
 
-#include "Universal_System/var4.h"
 #include <Box2D/Box2D.h>
 #include "SB2Dfunctions.h"
+#include "Universal_System/var4.h"
 
 // constants for getting and setting joint data using physics_joint_get_value and physics_joint_set_value, use switch case
 // see http://enigma-dev.org/docs/Wiki/, for information on what they are
@@ -28,8 +28,8 @@ namespace enigma_user {
 enum {
   phy_joint_anchor_1_x,
   phy_joint_anchor_1_y,
-  phy_joint_anchor_2_x,	
-  phy_joint_anchor_2_y,	
+  phy_joint_anchor_2_x,
+  phy_joint_anchor_2_y,
   phy_joint_reaction_force_x,
   phy_joint_reaction_force_y,
   phy_joint_reaction_torque,
@@ -48,13 +48,19 @@ enum {
 };
 }
 
-namespace enigma_user
-{
+namespace enigma_user {
 
-void physics_joint_distance_create(int inst1, int inst2, double w_anchor1_x, double w_anchor1_y, double w_anchor2_x, double w_anchor2_y, bool col);
-void physics_joint_revolute_create(int inst1, int inst2, double w_anchor_x, double w_anchor_y, double ang_min_limt, double ang_max_limit, double ang_limit, double max_motor_torque, double motor_speed, bool motor, bool col);
-void physics_joint_prismatic_create(int inst1, int inst2, double w_anchor_x, double w_anchor_y, double w_axis_x, double w_axis_y, double lower_trans_limit, double upper_trans_limit, double limit, double max_motor_force, double motor_speed, bool motor, bool col);
-void physics_joint_pulley_create(int inst1, int inst2, double w_anchor1_x, double w_anchor1_y, double w_anchor2_x, double w_anchor2_y, double l_anchor1_x, double l_anchor1_y, double l_anchor2_x, double l_anchor2_y, double ratio, double max_len1, double max_len2, bool col);
+void physics_joint_distance_create(int inst1, int inst2, double w_anchor1_x, double w_anchor1_y, double w_anchor2_x,
+                                   double w_anchor2_y, bool col);
+void physics_joint_revolute_create(int inst1, int inst2, double w_anchor_x, double w_anchor_y, double ang_min_limt,
+                                   double ang_max_limit, double ang_limit, double max_motor_torque, double motor_speed,
+                                   bool motor, bool col);
+void physics_joint_prismatic_create(int inst1, int inst2, double w_anchor_x, double w_anchor_y, double w_axis_x,
+                                    double w_axis_y, double lower_trans_limit, double upper_trans_limit, double limit,
+                                    double max_motor_force, double motor_speed, bool motor, bool col);
+void physics_joint_pulley_create(int inst1, int inst2, double w_anchor1_x, double w_anchor1_y, double w_anchor2_x,
+                                 double w_anchor2_y, double l_anchor1_x, double l_anchor1_y, double l_anchor2_x,
+                                 double l_anchor2_y, double ratio, double max_len1, double max_len2, bool col);
 void physics_joint_gear_create(int inst1, int inst2, int joint_1, int joint_2, double ratio);
 void physics_joint_delete(int id);
 
@@ -62,7 +68,6 @@ void physics_joint_enable_motor(int id);
 variant physics_joint_get_value(int id, int field);
 void physics_joint_set_value(int id, int field, variant value);
 
-}
+}  // namespace enigma_user
 
-#endif // _ENIGMA_STUDIO_PHYSICS_JOINTS__H
-
+#endif  // _ENIGMA_STUDIO_PHYSICS_JOINTS__H

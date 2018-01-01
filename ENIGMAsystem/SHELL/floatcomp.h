@@ -18,8 +18,8 @@
 #ifndef _FLOATCMP__H
 #define _FLOATCMP__H
 #include <cmath>
-static inline bool fzero(double x)   { return fabs(x) < 1e-8; }
-static inline bool fnzero(double x)  { return fabs(x) >= 1e-8; }
+static inline bool fzero(double x) { return fabs(x) < 1e-8; }
+static inline bool fnzero(double x) { return fabs(x) >= 1e-8; }
 static inline bool ftrueGM(double x) { return x >= .5; }
 static inline bool fequal(double x, double y) { return fabs(x - y) < 1e-8; }
 #endif

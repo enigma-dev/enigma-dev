@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "B3Dworlds.h"
 #include "B3Dbodies.h"
 #include "B3Dshapes.h"
 #include "B3Dsoftbodies.h"
+#include "B3Dworlds.h"

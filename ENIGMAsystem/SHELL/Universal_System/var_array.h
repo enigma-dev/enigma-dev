@@ -40,6 +40,6 @@ int array_height_2d(const var& v);
 
 bool is_array(const var& v);
 
-}
+}  // namespace enigma_user
 
-#endif //_H_VAR_ARRAY
+#endif  //_H_VAR_ARRAY

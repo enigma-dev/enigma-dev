@@ -15,33 +15,31 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <unordered_map>
 #include <map>
-using std::unordered_map;
+#include <unordered_map>
 using std::map;
+using std::unordered_map;
 
 #include "elements.h"
 
-namespace gui
-{
-  unsigned int gui_elements_maxid = 0;
-  unsigned int gui_data_elements_maxid = 0;
+namespace gui {
+unsigned int gui_elements_maxid = 0;
+unsigned int gui_data_elements_maxid = 0;
 
-  unordered_map<unsigned int, Element> gui_elements;
-  unordered_map<unsigned int, DataElement> gui_data_elements;
-  map<unsigned int, unsigned int> gui_element_order; //This allows changing rendering order (like depth)
+unordered_map<unsigned int, Element> gui_elements;
+unordered_map<unsigned int, DataElement> gui_data_elements;
+map<unsigned int, unsigned int> gui_element_order;  //This allows changing rendering order (like depth)
+}  // namespace gui
+
+namespace enigma_user {
+int gui_element_get_type(int ele) {
+  check_element_existsv(ele, -1);
+  return static_cast<int>(gui::gui_elements[ele].type);
 }
 
-namespace enigma_user
-{
-  int gui_element_get_type(int ele){
-    check_element_existsv(ele,-1);
-    return static_cast<int>(gui::gui_elements[ele].type);
-  }
-
- ///Depth changers
- ///TODO(harijs) - this still needs to be worked on
-	/*void gui_element_push_to_front(int id){
+///Depth changers
+///TODO(harijs) - this still needs to be worked on
+/*void gui_element_push_to_front(int id){
     check_element_exists(id);
     auto it = gui::gui_element_order.find(id);
     if (it != gui::gui_element_order.end()){
@@ -58,4 +56,4 @@ namespace enigma_user
       gui::gui_element_order.emplace(0,id);
     }
 	}*/
-}
+}  // namespace enigma_user

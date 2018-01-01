@@ -26,25 +26,23 @@
 #include "Platforms/General/PFsystem.h"
 
 namespace enigma_user {
-  extern const int os_type;
-  extern unsigned long current_time; // milliseconds since the start of the game
-  extern unsigned long delta_time; // microseconds since the last step event
-}
+extern const int os_type;
+extern unsigned long current_time;  // milliseconds since the start of the game
+extern unsigned long delta_time;    // microseconds since the last step event
+}  // namespace enigma_user
 
-namespace enigma
-{
-  // This method should write the name of the running module to exenamehere.
-  void windowsystem_write_exename(char* exenamehere);
+namespace enigma {
+// This method should write the name of the running module to exenamehere.
+void windowsystem_write_exename(char* exenamehere);
 
-  // This method should take an integer framerate and perform the necessary operations to limit fps to that rate.
-  void set_room_speed(int framerate);
+// This method should take an integer framerate and perform the necessary operations to limit fps to that rate.
+void set_room_speed(int framerate);
 
-  // This method is called at load time. It allows for initializing arrays for input.
-  void input_initialize();
-}
+// This method is called at load time. It allows for initializing arrays for input.
+void input_initialize();
+}  // namespace enigma
 
-namespace enigma_user
-{
+namespace enigma_user {
 
 // These functions are standard GML that are an integral part of the system.
 // Each instance must implement these, even if they are unable to do anything on the target platform.
@@ -56,7 +54,7 @@ void window_default(bool center_size = false);
 int window_mouse_get_x();
 int window_mouse_get_y();
 void window_view_mouse_set(int id, int x, int y);
-void window_mouse_set(int x,int y);
+void window_mouse_set(int x, int y);
 
 // These two are used by screen_redraw for view calculations and such.
 int window_get_region_width_scaled();
@@ -68,13 +66,13 @@ bool window_get_fullscreen();
 
 int window_set_cursor(int c);
 inline void action_set_cursor(int spr, bool c) {
-	// TODO: if spr exists should create a sprite cursor, game maker allows
-	// both the sprite cursor and system cursor to be visible at the same time
-	if (c) {
-		window_set_cursor(0); // no system cursor
-	} else {
-		window_set_cursor(-1); // default system cursor
-	}
+  // TODO: if spr exists should create a sprite cursor, game maker allows
+  // both the sprite cursor and system cursor to be visible at the same time
+  if (c) {
+    window_set_cursor(0);  // no system cursor
+  } else {
+    window_set_cursor(-1);  // default system cursor
+  }
 }
 int window_get_cursor();
 void window_set_region_scale(double scale, bool adaptwindow);
@@ -83,7 +81,7 @@ void window_set_sizeable(bool sizeable);
 void window_set_showborder(bool show);
 void window_set_showicons(bool show);
 void window_set_freezeonlosefocus(bool freeze);
-unsigned long get_timer(); // number of microseconds since the game started
-}
+unsigned long get_timer();  // number of microseconds since the game started
+}  // namespace enigma_user
 
 #endif

@@ -19,47 +19,43 @@
 #define ENIGMA_VIDEO_STRUCT
 
 #include <dshow.h>
-#include <vector>
 #include <string>
-using std::vector;
+#include <vector>
 using std::string;
+using std::vector;
 
 namespace enigma {
 
 struct VideoStruct {
-    IGraphBuilder *pGraph = NULL;
-	
-	VideoStruct() {
-	
-	}
-	
-	~VideoStruct() {
-		pGraph->Release();
-	}
+  IGraphBuilder* pGraph = NULL;
+
+  VideoStruct() {}
+
+  ~VideoStruct() { pGraph->Release(); }
 };
 
 extern vector<VideoStruct*> videoStructs;
 
-}
+}  // namespace enigma
 
 #ifdef DEBUG_MODE
-  #include "libEGMstd.h"
-  #include "Widget_Systems/widgets_mandatory.h"
-  #define get_videor(s,id,r) \
-    if (unsigned(id) >= enigma::videoStructs.size() || id < 0) { \
-      show_error("Cannot access video with id " + toString(id), false); \
-      return r; \
-    } enigma::VideoStruct* s = enigma::videoStructs[id];
-  #define get_video(s,id) \
-    if (unsigned(id) >= enigma::videoStructs.size() || id < 0) { \
-      show_error("Cannot access video with id " + toString(id), false); \
-      return; \
-    } enigma::VideoStruct* s = enigma::videoStructs[id];
+#include "Widget_Systems/widgets_mandatory.h"
+#include "libEGMstd.h"
+#define get_videor(s, id, r)                                          \
+  if (unsigned(id) >= enigma::videoStructs.size() || id < 0) {        \
+    show_error("Cannot access video with id " + toString(id), false); \
+    return r;                                                         \
+  }                                                                   \
+  enigma::VideoStruct* s = enigma::videoStructs[id];
+#define get_video(s, id)                                              \
+  if (unsigned(id) >= enigma::videoStructs.size() || id < 0) {        \
+    show_error("Cannot access video with id " + toString(id), false); \
+    return;                                                           \
+  }                                                                   \
+  enigma::VideoStruct* s = enigma::videoStructs[id];
 #else
-  #define get_videor(s,id,r) \
-    enigma::VideoStruct* s = enigma::videoStructs[id];
-  #define get_video(s,id) \
-    enigma::VideoStruct* s = enigma::videoStructs[id];
+#define get_videor(s, id, r) enigma::VideoStruct* s = enigma::videoStructs[id];
+#define get_video(s, id) enigma::VideoStruct* s = enigma::videoStructs[id];
 #endif
 
 #endif

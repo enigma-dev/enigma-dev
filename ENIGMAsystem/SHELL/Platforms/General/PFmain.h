@@ -19,17 +19,16 @@
 #ifndef ENIGMA_PLATFORM_MAIN
 #define ENIGMA_PLATFORM_MAIN
 
-namespace enigma_user
-{
+namespace enigma_user {
 
 extern std::string working_directory;
 extern std::string program_directory;
 
-void game_end(int ret=0);
+void game_end(int ret = 0);
 void action_end_game();
-void url_open(std::string url,std::string target="_self",std::string options="");
+void url_open(std::string url, std::string target = "_self", std::string options = "");
 void url_open_ext(std::string url, std::string target);
-void url_open_full(std::string url, std::string target,std::string options);
+void url_open_full(std::string url, std::string target, std::string options);
 void action_webpage(const std::string &url);
 
 // Data type could be unsigned for the paramter since the collection is size_t, however this would make the function not behave as GM.
@@ -49,6 +48,6 @@ void execute_program(std::string fname, std::string args, bool wait);
 void execute_program(std::string operation, std::string fname, std::string args, bool wait);
 
 std::string environment_get_variable(std::string name);
-}
+}  // namespace enigma_user
 
-#endif //ENIGMA_PLATFORM_MAIN
+#endif  //ENIGMA_PLATFORM_MAIN

@@ -32,10 +32,10 @@ GM Global variables
 #ifndef __GAME_GLOBALS_H
 #define __GAME_GLOBALS_H
 
-bool argument_relative=false;
+bool argument_relative = false;
 
 namespace enigma_user {
-string caption_score="Score:", caption_lives="Lives:", caption_health="Health:";
+string caption_score = "Score:", caption_lives = "Lives:", caption_health = "Health:";
 }
 
 /*
@@ -47,9 +47,9 @@ global:     event_number
 global:     event_object
 global:     event_type*/
 namespace enigma_user {
-  double fps;
-  double health=100;
-}
+double fps;
+double health = 100;
+}  // namespace enigma_user
 
 // TODO: MOVEME: Who put this here?
 #ifndef JUST_DEFINE_IT_RUN
@@ -60,35 +60,35 @@ int *instance_id;
 #endif
 
 namespace enigma_user {
-int keyboard_key=0;
+int keyboard_key = 0;
 }
 /*global:     keyboard_lastchar
 global:     keyboard_lastkey */
 namespace enigma_user {
-  string keyboard_string="";
+string keyboard_string = "";
 
-  double score=0;
+double score = 0;
 
-  bool secure_mode=false;
-  bool show_score=0, show_lives=0, show_health=0;
-}
+bool secure_mode = false;
+bool show_score = 0, show_lives = 0, show_health = 0;
+}  // namespace enigma_user
 
 //string temp_directory="";
 namespace enigma_user {
-int transition_kind=0;
-int transition_steps=80;
-}
+int transition_kind = 0;
+int transition_steps = 80;
+}  // namespace enigma_user
 /*global:     transition_time
 global:  working_directory*/
 namespace enigma_user {
 bool automatic_redraw = true;
-int gamemaker_version=0;
-}
+int gamemaker_version = 0;
+}  // namespace enigma_user
 //int transition_steps;
 namespace enigma_user {
 int cursor_sprite;
 extern int room_first, room_last;
-}
+}  // namespace enigma_user
 
 /*********************
 End GM global variables

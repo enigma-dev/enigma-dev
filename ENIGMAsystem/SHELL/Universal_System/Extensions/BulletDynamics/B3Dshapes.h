@@ -56,11 +56,12 @@ void b3d_shape_compound(int id, bool aabbtree = true);
 void b3d_shape_empty(int id);
 
 // These functions are special for compound shapes which contain multiple child shapes
-// It is important to note, if you intend to keep the shape but not access its children later, you should clear them after 
+// It is important to note, if you intend to keep the shape but not access its children later, you should clear them after
 // calling the shape build function
 // If you modify any of the shapes children after it has already been built, you need to call its build function again
 void b3d_shape_add_child(int id, int child, double lx, double ly, double lz, double rx, double ry, double rz);
-void b3d_shape_add_child(int id, int child, double lx, double ly, double lz, double qx, double qy, double qz, double qw);
+void b3d_shape_add_child(int id, int child, double lx, double ly, double lz, double qx, double qy, double qz,
+                         double qw);
 int b3d_shape_get_child(int id, int child);
 int b3d_shape_get_child_count(int id);
 double b3d_shape_get_child_lx(int id, int child);
@@ -102,5 +103,5 @@ double b3d_shape_get_margin(int id);
 void b3d_shape_set_margin(int id, double margin);
 void b3d_shape_set_scale(int id, double sx, double sy, double sz);
 
-}
+}  // namespace enigma_user
 #endif

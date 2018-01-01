@@ -28,76 +28,75 @@
 #ifndef ENIGMA_PS_PARTICLESYSTEM
 #define ENIGMA_PS_PARTICLESYSTEM
 
-#include "PS_particle_emitter.h"
-#include "PS_particle_attractor.h"
-#include "PS_particle_destroyer.h"
-#include "PS_particle_deflector.h"
-#include "PS_particle_changer.h"
-#include "PS_particle_instance.h"
-#include "PS_particle_enums.h"
-#include "Graphics_Systems/General/GScolors.h"
 #include <list>
-#include <vector>
 #include <map>
+#include <vector>
+#include "Graphics_Systems/General/GScolors.h"
+#include "PS_particle_attractor.h"
+#include "PS_particle_changer.h"
+#include "PS_particle_deflector.h"
+#include "PS_particle_destroyer.h"
+#include "PS_particle_emitter.h"
+#include "PS_particle_enums.h"
+#include "PS_particle_instance.h"
 
 using namespace enigma_user;
 
-namespace enigma
-{
-  namespace particle_bridge {
-    // Initialization
-    void initialize_particle_bridge();
-    // Drawing
-    void draw_particles(std::vector<particle_instance>& pi_list, bool oldtonew, double wiggle, int subimage_index,
-        double x_offset, double y_offset);
-  }
-  
-  struct particle_system
-  {
-    // Wiggling.
-    double wiggle;
-    int wiggle_frequency; // Number of steps for a full cycle. Domain: [1;[.
-    double get_wiggle_result(double wiggle_offset);
-    static double get_wiggle_result(double wiggle_offset, double wiggle_amount);
-    // Subimage index.
-    int subimage_index;
-    // Particles.
-    int id;
-    bool oldtonew;
-    double x_offset, y_offset;
-    double depth; // Integer stored as double.
-    std::vector<particle_instance> pi_list;
-    bool auto_update, auto_draw;
-    void initialize();
-    void update_particlesystem();
-    void draw_particlesystem();
-    void create_particles(double x, double y, particle_type* pt, int number, bool use_color=false, int given_color=c_white);
-    // Emitters.
-    std::map<int,particle_emitter*> id_to_emitter;
-    int emitter_max_id;
-    int create_emitter();
-    void set_emitter_region(int em_id, double xmin, double xmax, double ymin, double ymax, ps_shape shape, ps_distr distribution);
-    void set_emitter_stream(int em_id, int particle_type_id, int number);
-    // Attractors.
-    std::map<int,particle_attractor*> id_to_attractor;
-    int attractor_max_id;
-    int create_attractor();
-    // Destroyers.
-    std::map<int,particle_destroyer*> id_to_destroyer;
-    int destroyer_max_id;
-    int create_destroyer();
-    // Deflectors.
-    std::map<int,particle_deflector*> id_to_deflector;
-    int deflector_max_id;
-    int create_deflector();
-    // Changers.
-    std::map<int,particle_changer*> id_to_changer;
-    int changer_max_id;
-    int create_changer();
-    // Protection.
-    bool hidden;
-  };
-}
+namespace enigma {
+namespace particle_bridge {
+// Initialization
+void initialize_particle_bridge();
+// Drawing
+void draw_particles(std::vector<particle_instance>& pi_list, bool oldtonew, double wiggle, int subimage_index,
+                    double x_offset, double y_offset);
+}  // namespace particle_bridge
 
-#endif // ENIGMA_PS_PARTICLESYSTEM
+struct particle_system {
+  // Wiggling.
+  double wiggle;
+  int wiggle_frequency;  // Number of steps for a full cycle. Domain: [1;[.
+  double get_wiggle_result(double wiggle_offset);
+  static double get_wiggle_result(double wiggle_offset, double wiggle_amount);
+  // Subimage index.
+  int subimage_index;
+  // Particles.
+  int id;
+  bool oldtonew;
+  double x_offset, y_offset;
+  double depth;  // Integer stored as double.
+  std::vector<particle_instance> pi_list;
+  bool auto_update, auto_draw;
+  void initialize();
+  void update_particlesystem();
+  void draw_particlesystem();
+  void create_particles(double x, double y, particle_type* pt, int number, bool use_color = false,
+                        int given_color = c_white);
+  // Emitters.
+  std::map<int, particle_emitter*> id_to_emitter;
+  int emitter_max_id;
+  int create_emitter();
+  void set_emitter_region(int em_id, double xmin, double xmax, double ymin, double ymax, ps_shape shape,
+                          ps_distr distribution);
+  void set_emitter_stream(int em_id, int particle_type_id, int number);
+  // Attractors.
+  std::map<int, particle_attractor*> id_to_attractor;
+  int attractor_max_id;
+  int create_attractor();
+  // Destroyers.
+  std::map<int, particle_destroyer*> id_to_destroyer;
+  int destroyer_max_id;
+  int create_destroyer();
+  // Deflectors.
+  std::map<int, particle_deflector*> id_to_deflector;
+  int deflector_max_id;
+  int create_deflector();
+  // Changers.
+  std::map<int, particle_changer*> id_to_changer;
+  int changer_max_id;
+  int create_changer();
+  // Protection.
+  bool hidden;
+};
+}  // namespace enigma
 
+#endif  // ENIGMA_PS_PARTICLESYSTEM

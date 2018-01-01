@@ -28,20 +28,13 @@ namespace enigma {
 
 extern vector<string> scope_stack;
 
-struct debug_scope { 
+struct debug_scope {
+  debug_scope(string x) { scope_stack.push_back(x); }
 
-  debug_scope(string x) 
-  { 
-    scope_stack.push_back(x);
-  } 
-  
-  ~debug_scope() { 
-    scope_stack.pop_back();
-  } 
-   
+  ~debug_scope() { scope_stack.pop_back(); }
 };
 
-}
+}  // namespace enigma
 
 #endif
 #endif

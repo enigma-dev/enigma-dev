@@ -18,13 +18,13 @@
 #ifndef ENIGMA_PLATFORM_DEVICE_H
 #define ENIGMA_PLATFORM_DEVICE_H
 
-namespace enigma_user
-{
+namespace enigma_user {
 
 bool device_mouse_check_button(int device, int button);
 bool device_mouse_check_button_pressed(int device, int button);
 bool device_mouse_check_button_released(int device, int button);
-void device_mouse_dbclick_enable(bool enable); // Studio's manual says this function returns a boolean but I believe it is a typo.
+void device_mouse_dbclick_enable(
+    bool enable);  // Studio's manual says this function returns a boolean but I believe it is a typo.
 int device_mouse_x(int device);
 int device_mouse_y(int device);
 int device_mouse_raw_x(int device);
@@ -38,6 +38,6 @@ float device_get_tilt_x();
 float device_get_tilt_y();
 float device_get_tilt_z();
 
-}
+}  // namespace enigma_user
 
 #endif

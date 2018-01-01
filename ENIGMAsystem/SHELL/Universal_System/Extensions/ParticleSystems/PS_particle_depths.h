@@ -28,16 +28,14 @@
 #ifndef ENIGMA_PS_PARTICLEDEPTH
 #define ENIGMA_PS_PARTICLEDEPTH
 
-#include <set>
 #include <map>
+#include <set>
 
-namespace enigma
-{
-  struct particle_depth_layer {
-    std::set<int> particlesystem_ids;
-  };
-  extern std::map<double,particle_depth_layer> negated_particle_depths; // NOTE: Depths are negated.
-}
+namespace enigma {
+struct particle_depth_layer {
+  std::set<int> particlesystem_ids;
+};
+extern std::map<double, particle_depth_layer> negated_particle_depths;  // NOTE: Depths are negated.
+}  // namespace enigma
 
-#endif // ENIGMA_PS_PARTICLEDEPTH
-
+#endif  // ENIGMA_PS_PARTICLEDEPTH

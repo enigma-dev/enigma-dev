@@ -18,98 +18,94 @@
 
 #include <string>
 using std::string;
-#include "Widget_Systems/widgets_mandatory.h"
-#include "Universal_System/instance_system.h"
-#include <cstdlib>
 #include <cstdio>
+#include <cstdlib>
+#include "Universal_System/instance_system.h"
+#include "Widget_Systems/widgets_mandatory.h"
 
 #include "GameSettings.h"
 
-#include <iostream>
 #include <iomanip>
+#include <iostream>
 using namespace std;
 
 #ifdef _WIN32
-#  include <windows.h>
-#  define TC_WINDOWS 1
+#include <windows.h>
+#define TC_WINDOWS 1
 #else
-#  include <termios.h>
-#  include <unistd.h>
+#include <termios.h>
+#include <unistd.h>
 #endif
- 
+
 class PasswordContext {
-# ifdef TC_WINDOWS
+#ifdef TC_WINDOWS
   DWORD old_attrs = 0;
   HANDLE hStdin = 0;
-# else
+#else
   termios old_attrs;
-# endif
- 
+#endif
+
  public:
   PasswordContext() {
-#   ifdef TC_WINDOWS
-      hStdin = GetStdHandle(STD_INPUT_HANDLE);
-      GetConsoleMode(hStdin, &old_attrs);
-      SetConsoleMode(hStdin, old_attrs & (~ENABLE_ECHO_INPUT));
-#   else
-      tcgetattr(STDIN_FILENO, &old_attrs);
-      termios new_attrs = old_attrs;
-      new_attrs.c_lflag &= ~ECHO;
-      tcsetattr(STDIN_FILENO, TCSANOW, &new_attrs);
-#   endif
+#ifdef TC_WINDOWS
+    hStdin = GetStdHandle(STD_INPUT_HANDLE);
+    GetConsoleMode(hStdin, &old_attrs);
+    SetConsoleMode(hStdin, old_attrs & (~ENABLE_ECHO_INPUT));
+#else
+    tcgetattr(STDIN_FILENO, &old_attrs);
+    termios new_attrs = old_attrs;
+    new_attrs.c_lflag &= ~ECHO;
+    tcsetattr(STDIN_FILENO, TCSANOW, &new_attrs);
+#endif
   }
- 
+
   ~PasswordContext() {
-#   ifdef TC_WINDOWS
-      SetConsoleMode(hStdin, old_attrs);
-#   else
-      tcsetattr(STDIN_FILENO, TCSANOW, &old_attrs);
-#   endif
+#ifdef TC_WINDOWS
+    SetConsoleMode(hStdin, old_attrs);
+#else
+    tcsetattr(STDIN_FILENO, TCSANOW, &old_attrs);
+#endif
   }
 };
 
-namespace enigma
-{
-  bool widget_system_initialize()
-  {
-    return 0;
-  }
-  extern string gameInfoText, gameInfoCaption;
-  extern int gameInfoBackgroundColor, gameInfoLeft, gameInfoTop, gameInfoWidth, gameInfoHeight;
-  extern bool gameInfoEmbedGameWindow, gameInfoShowBorder, gameInfoAllowResize, gameInfoStayOnTop, gameInfoPauseGame;
-}
+namespace enigma {
+bool widget_system_initialize() { return 0; }
+extern string gameInfoText, gameInfoCaption;
+extern int gameInfoBackgroundColor, gameInfoLeft, gameInfoTop, gameInfoWidth, gameInfoHeight;
+extern bool gameInfoEmbedGameWindow, gameInfoShowBorder, gameInfoAllowResize, gameInfoStayOnTop, gameInfoPauseGame;
+}  // namespace enigma
 
-void show_error(string err, const bool fatal)
-{
+void show_error(string err, const bool fatal) {
   printf("ERROR in some action of some event for object %d, instance id %d: %s\n",
-         (enigma::instance_event_iterator == NULL? enigma_user::global :
-            enigma::instance_event_iterator->inst == NULL? enigma_user::noone :
-              enigma::instance_event_iterator->inst->object_index),
-         (enigma::instance_event_iterator == NULL? enigma_user::global :
-            enigma::instance_event_iterator->inst == NULL? enigma_user::noone :
-              enigma::instance_event_iterator->inst->id),
-         err.c_str()
-    );
+         (enigma::instance_event_iterator == NULL
+              ? enigma_user::global
+              : enigma::instance_event_iterator->inst == NULL ? enigma_user::noone
+                                                              : enigma::instance_event_iterator->inst->object_index),
+         (enigma::instance_event_iterator == NULL
+              ? enigma_user::global
+              : enigma::instance_event_iterator->inst == NULL ? enigma_user::noone
+                                                              : enigma::instance_event_iterator->inst->id),
+         err.c_str());
   if (fatal) exit(0);
   ABORT_ON_ALL_ERRORS();
 }
 
-
 namespace enigma_user {
 
-int show_message(string message)
-{
+int show_message(string message) {
   printf("show_message: %s\n", message.c_str());
   return 0;
 }
 
-void show_info(string info, int bgcolor, int left, int top, int width, int height, bool embedGameWindow, bool showBorder, bool allowResize, bool stayOnTop, bool pauseGame, string caption) {
+void show_info(string info, int bgcolor, int left, int top, int width, int height, bool embedGameWindow,
+               bool showBorder, bool allowResize, bool stayOnTop, bool pauseGame, string caption) {
   printf("%s\n%s\n", caption.c_str(), info.c_str());
 }
 
 void show_info() {
-  show_info(enigma::gameInfoText, enigma::gameInfoBackgroundColor, enigma::gameInfoLeft, enigma::gameInfoTop, enigma::gameInfoWidth, enigma::gameInfoHeight, enigma::gameInfoEmbedGameWindow, enigma::gameInfoShowBorder,
-	enigma::gameInfoAllowResize, enigma::gameInfoStayOnTop, enigma::gameInfoPauseGame, enigma::gameInfoCaption);
+  show_info(enigma::gameInfoText, enigma::gameInfoBackgroundColor, enigma::gameInfoLeft, enigma::gameInfoTop,
+            enigma::gameInfoWidth, enigma::gameInfoHeight, enigma::gameInfoEmbedGameWindow, enigma::gameInfoShowBorder,
+            enigma::gameInfoAllowResize, enigma::gameInfoStayOnTop, enigma::gameInfoPauseGame, enigma::gameInfoCaption);
 }
 
 bool show_question(string str) {
@@ -123,7 +119,7 @@ bool show_question(string str) {
   return (answer == 'Y');
 }
 
-string get_login(string username, string password, string cap="") {
+string get_login(string username, string password, string cap = "") {
   cout << cap << endl;
   string input;
   cout << "Username: " << flush;
@@ -138,14 +134,14 @@ string get_login(string username, string password, string cap="") {
   return input;
 }
 
-string get_string(string message, string def, string cap="") {
+string get_string(string message, string def, string cap = "") {
   printf("%s\n%s\n", cap.c_str(), message.c_str());
   string input;
   cin >> input;
   return (input.empty()) ? def : input;
 }
 
-int get_integer(string message, string def, string cap="") {
+int get_integer(string message, string def, string cap = "") {
   printf("%s\n%s\n", cap.c_str(), message.c_str());
   string input;
   cin >> input;
@@ -153,4 +149,4 @@ int get_integer(string message, string def, string cap="") {
   return stoi(input);
 }
 
-}
+}  // namespace enigma_user

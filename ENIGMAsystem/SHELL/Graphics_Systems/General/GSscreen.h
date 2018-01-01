@@ -23,20 +23,17 @@ using std::string;
 #include "Universal_System/scalar.h"
 
 namespace enigma_user {
-  int screen_save(string filename);
-  inline int action_snapshot(string filename)
-  {
-      return screen_save(filename);
-  }
-  int screen_save_part(string filename,unsigned int x,unsigned int y,unsigned int w,unsigned int h);
-  void screen_redraw();
-  void screen_refresh();
-  void screen_init();
-  void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height);
+int screen_save(string filename);
+inline int action_snapshot(string filename) { return screen_save(filename); }
+int screen_save_part(string filename, unsigned int x, unsigned int y, unsigned int w, unsigned int h);
+void screen_redraw();
+void screen_refresh();
+void screen_init();
+void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height);
 
-  unsigned int display_get_gui_width();
-  unsigned int display_get_gui_height();
-  void display_set_gui_size(unsigned int width, unsigned int height);
-}
+unsigned int display_get_gui_width();
+unsigned int display_get_gui_height();
+void display_set_gui_size(unsigned int width, unsigned int height);
+}  // namespace enigma_user
 
-#endif //ENIGMA_GSSCREEN_H
+#endif  //ENIGMA_GSSCREEN_H

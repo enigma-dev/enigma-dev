@@ -20,7 +20,8 @@
 
 namespace enigma_user {
 
-int b3d_bodyr_create(int sid, double mass = 0, double ix = 0, double iy = 0, double iz = 0, double friction = 0, double restitution = 0);
+int b3d_bodyr_create(int sid, double mass = 0, double ix = 0, double iy = 0, double iz = 0, double friction = 0,
+                     double restitution = 0);
 void b3d_bodyr_delete(int id);
 double b3d_bodyr_get_x(int id);
 double b3d_bodyr_get_y(int id);
@@ -45,5 +46,5 @@ void b3d_bodyr_apply_impulse(int id, double ix, double iy, double iz, double lx,
 void b3d_bodyr_apply_impulse_central(int id, double ix, double iy, double iz);
 void b3d_bodyr_apply_impulse_torque(int id, double tx, double ty, double tz);
 
-}
+}  // namespace enigma_user
 #endif

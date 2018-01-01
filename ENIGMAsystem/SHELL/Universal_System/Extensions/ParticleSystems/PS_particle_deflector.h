@@ -30,24 +30,21 @@
 
 #include "PS_particle_enums.h"
 
-namespace enigma
-{
-  struct particle_deflector
-  {
-    double xmin, xmax, ymin, ymax;
-    ps_deflect deflection_kind;
-    double friction; // NOTE: Can be negative.
+namespace enigma {
+struct particle_deflector {
+  double xmin, xmax, ymin, ymax;
+  ps_deflect deflection_kind;
+  double friction;  // NOTE: Can be negative.
 
-    void initialize();
-    void clear_particle_deflector();
-    bool is_inside(double x, double y);
-    void set_region(double xmin, double xmax, double ymin, double ymax);
-    void set_kind(ps_deflect deflection_kind);
-    void set_friction(double friction);
-  };
+  void initialize();
+  void clear_particle_deflector();
+  bool is_inside(double x, double y);
+  void set_region(double xmin, double xmax, double ymin, double ymax);
+  void set_kind(ps_deflect deflection_kind);
+  void set_friction(double friction);
+};
 
-  particle_deflector* create_particle_deflector();
-}
+particle_deflector* create_particle_deflector();
+}  // namespace enigma
 
-#endif // ENIGMA_PS_PARTICLEDEFLECTOR
-
+#endif  // ENIGMA_PS_PARTICLEDEFLECTOR

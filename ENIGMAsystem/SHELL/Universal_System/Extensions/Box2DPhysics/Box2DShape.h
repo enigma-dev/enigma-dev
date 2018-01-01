@@ -30,17 +30,10 @@ struct B2DShape {
   bool shapeBuilt;
   vector<b2Vec2> vertices;
 
-  B2DShape()
-  {
-    shapeBuilt = false;
-  }
+  B2DShape() { shapeBuilt = false; }
 
-  ~B2DShape()
-  {
-
-  }
-
-}; 
+  ~B2DShape() {}
+};
 extern vector<B2DShape*> b2dshapes;
 
 struct B2DFixture {
@@ -49,57 +42,53 @@ struct B2DFixture {
   int shapeid;
   b2Fixture* fixture;
 
-  B2DFixture()
-  {
-  }
+  B2DFixture() {}
 
-  ~B2DFixture()
-  {
-
-  }
-
-}; 
+  ~B2DFixture() {}
+};
 extern vector<B2DFixture*> b2dfixtures;
 
 #ifdef DEBUG_MODE
-  #include <string>
-  #include "libEGMstd.h"
-  #include "Widget_Systems/widgets_mandatory.h"
-  #define get_shaper(s,id,r) \
-    if (unsigned(id) >= b2dshapes.size() || id < 0) { \
-      show_error("Cannot access Box2D physics shape with id " + toString(id), false); \
-      return r; \
-    } B2DShape* s = b2dshapes[id];
-  #define get_shape(s,id) \
-    if (unsigned(id) >= b2dshapes.size() || id < 0) { \
-      show_error("Cannot access Box2D physics shape with id " + toString(id), false); \
-      return; \
-    } B2DShape* s = b2dshapes[id];
-  #define get_fixturer(f,id,r) \
-    if (unsigned(id) >= b2dfixtures.size() || id < 0) { \
-      show_error("Cannot access Box2D physics fixture with id " + toString(id), false); \
-      return r; \
-    } B2DFixture* f = b2dfixtures[id];
-  #define get_fixture(f,id) \
-    if (unsigned(id) >= b2dfixtures.size() || id < 0) { \
-      show_error("Cannot access Box2D physics fixture with id " + toString(id), false); \
-      return; \
-    } B2DFixture* f = b2dfixtures[id];
-  #define check_cast(obj, shapeid, failv) { \
-    if ((obj)->shape != shapeid) { \
-      show_error("Invalid cast of Box2D shape.", false); return failv; \
-    } }
+#include <string>
+#include "Widget_Systems/widgets_mandatory.h"
+#include "libEGMstd.h"
+#define get_shaper(s, id, r)                                                        \
+  if (unsigned(id) >= b2dshapes.size() || id < 0) {                                 \
+    show_error("Cannot access Box2D physics shape with id " + toString(id), false); \
+    return r;                                                                       \
+  }                                                                                 \
+  B2DShape* s = b2dshapes[id];
+#define get_shape(s, id)                                                            \
+  if (unsigned(id) >= b2dshapes.size() || id < 0) {                                 \
+    show_error("Cannot access Box2D physics shape with id " + toString(id), false); \
+    return;                                                                         \
+  }                                                                                 \
+  B2DShape* s = b2dshapes[id];
+#define get_fixturer(f, id, r)                                                        \
+  if (unsigned(id) >= b2dfixtures.size() || id < 0) {                                 \
+    show_error("Cannot access Box2D physics fixture with id " + toString(id), false); \
+    return r;                                                                         \
+  }                                                                                   \
+  B2DFixture* f = b2dfixtures[id];
+#define get_fixture(f, id)                                                            \
+  if (unsigned(id) >= b2dfixtures.size() || id < 0) {                                 \
+    show_error("Cannot access Box2D physics fixture with id " + toString(id), false); \
+    return;                                                                           \
+  }                                                                                   \
+  B2DFixture* f = b2dfixtures[id];
+#define check_cast(obj, shapeid, failv)                  \
+  {                                                      \
+    if ((obj)->shape != shapeid) {                       \
+      show_error("Invalid cast of Box2D shape.", false); \
+      return failv;                                      \
+    }                                                    \
+  }
 #else
-  #define get_shaper(s,id,r) \
-    B2DShape* s = b2dshapes[id];
-  #define get_shape(s,id) \
-    B2DShape* s = b2dshapes[id];
-  #define get_fixturer(f,id,r) \
-    B2DFixture* f = b2dfixtures[id];
-  #define get_fixture(f,id) \
-    B2DFixture* f = b2dfixtures[id];
-  #define check_cast(obj, shapeid, failv)
+#define get_shaper(s, id, r) B2DShape* s = b2dshapes[id];
+#define get_shape(s, id) B2DShape* s = b2dshapes[id];
+#define get_fixturer(f, id, r) B2DFixture* f = b2dfixtures[id];
+#define get_fixture(f, id) B2DFixture* f = b2dfixtures[id];
+#define check_cast(obj, shapeid, failv)
 #endif
 
-#endif // ENIGMA_BOX2D_SHAPE__H
-
+#endif  // ENIGMA_BOX2D_SHAPE__H

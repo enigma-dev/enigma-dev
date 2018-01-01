@@ -25,28 +25,25 @@
 **                                                                              **
 \********************************************************************************/
 
-#include <string>
 #include <gtk/gtk.h>
+#include <string>
 #include "Widget_Systems/widgets_mandatory.h"
 
-static void *gtk_thread(gpointer)
-{
-  gtk_main ();
+static void *gtk_thread(gpointer) {
+  gtk_main();
   return NULL;
 }
 
-namespace enigma
-{
-  bool widget_system_initialize()
-  {
-    g_thread_init(NULL);
-    gdk_threads_init();
-    char a[] = "Fix me";
-    char *b = a;
-    char **c = &b;
-    int one = 1;
-    gtk_init (&one, &c);
-    g_thread_create(gtk_thread,NULL,0,0);
-    return 0;
-  }
+namespace enigma {
+bool widget_system_initialize() {
+  g_thread_init(NULL);
+  gdk_threads_init();
+  char a[] = "Fix me";
+  char *b = a;
+  char **c = &b;
+  int one = 1;
+  gtk_init(&one, &c);
+  g_thread_create(gtk_thread, NULL, 0, 0);
+  return 0;
 }
+}  // namespace enigma

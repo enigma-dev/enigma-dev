@@ -25,44 +25,42 @@
 #define _planar_object_h
 
 #include "object.h"
-#include "var4.h"
-#include "scalar.h"
 #include "reflexive_types.h"
+#include "scalar.h"
+#include "var4.h"
 
 #define ISLOCAL_persistent true
 
-namespace enigma
-{
-  struct object_planar: object_basic
-  {
-    //Position
-      cs_scalar x, y;
-      cs_scalar  xprevious, yprevious;
-      cs_scalar  xstart, ystart;
+namespace enigma {
+struct object_planar : object_basic {
+  //Position
+  cs_scalar x, y;
+  cs_scalar xprevious, yprevious;
+  cs_scalar xstart, ystart;
 
-    //Persistence
-    #ifdef ISLOCAL_persistent
-      bool  persistent;
-    #endif
+//Persistence
+#ifdef ISLOCAL_persistent
+  bool persistent;
+#endif
 
-    //Motion
-      directionv direction;
-      speedv     speed;
-      hspeedv    hspeed;
-      vspeedv    vspeed;
+  //Motion
+  directionv direction;
+  speedv speed;
+  hspeedv hspeed;
+  vspeedv vspeed;
 
-    //Accelerators
-      cs_scalar  gravity;
-      cs_scalar  gravity_direction;
-      cs_scalar  friction;
+  //Accelerators
+  cs_scalar gravity;
+  cs_scalar gravity_direction;
+  cs_scalar friction;
 
-    //Constructors
-      object_planar();
-      object_planar(unsigned, int);
-      virtual ~object_planar();
-  };
+  //Constructors
+  object_planar();
+  object_planar(unsigned, int);
+  virtual ~object_planar();
+};
 
-  void propagate_locals(object_planar*);
-}
+void propagate_locals(object_planar*);
+}  // namespace enigma
 
-#endif //_planar_object_h
+#endif  //_planar_object_h

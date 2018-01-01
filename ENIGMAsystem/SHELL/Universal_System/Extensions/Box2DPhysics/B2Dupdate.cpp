@@ -21,10 +21,9 @@
 using std::vector;
 
 namespace enigma {
-  void box2dphysics_update() {
-    for (std::vector<B2DWorld*>::iterator it = b2dworlds.begin(); it != b2dworlds.end(); it++) {
-      (*it)->world_update();
-    }
+void box2dphysics_update() {
+  for (std::vector<B2DWorld*>::iterator it = b2dworlds.begin(); it != b2dworlds.end(); it++) {
+    (*it)->world_update();
   }
 }
-
+}  // namespace enigma

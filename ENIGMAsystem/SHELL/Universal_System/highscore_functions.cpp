@@ -25,15 +25,14 @@
  **                                                                              **
  \********************************************************************************/
 
-
 #include "highscore_functions.h"
-#include "libEGMstd.h"
 #include <algorithm>
-#include <vector>
 #include <string>
+#include <vector>
 #include "CallbackArrays.h"
+#include "libEGMstd.h"
 
-#include "Widget_Systems/widgets_mandatory.h" // show_error
+#include "Widget_Systems/widgets_mandatory.h"  // show_error
 
 namespace enigma_user {
 extern double score;
@@ -41,147 +40,137 @@ extern double score;
 
 namespace enigma {
 
-    int highscore_background;
-    bool highscore_border;
-    int highscore_back_color;
-    int highscore_new_entry_color;
-    int highscore_other_entries_color;
-    std::string highscore_caption;
-    std::string highscore_nobody;
-    std::string highscore_escape;
-    std::vector< playerScore > highscore_list;
+int highscore_background;
+bool highscore_border;
+int highscore_back_color;
+int highscore_new_entry_color;
+int highscore_other_entries_color;
+std::string highscore_caption;
+std::string highscore_nobody;
+std::string highscore_escape;
+std::vector<playerScore> highscore_list;
 
-static bool cmp_highscore( const playerScore& a, const playerScore& b ) {
-    return a > b;
+static bool cmp_highscore(const playerScore& a, const playerScore& b) { return a > b; }
+
+playerScore::playerScore(std::string name, int score) {
+  player_name = name;
+  player_score = score;
 }
 
-    playerScore::playerScore(std::string name, int score) {
-        player_name=name;
-        player_score = score;
+playerScore::playerScore() {}
 
-    }
-
-    playerScore::playerScore() {
-
-    }
-
-    void highscore_init() {
-        highscore_background=-1;
-        highscore_border=true;
-        /*highscore_back_color=c_black;
+void highscore_init() {
+  highscore_background = -1;
+  highscore_border = true;
+  /*highscore_back_color=c_black;
         highscore_new_entry_color=c_red;
         highscore_other_entries_color-c_yellow;*/
-        highscore_caption="Top Ten Players";
-        highscore_nobody="<nobody>";
-        highscore_escape="press <Escape> to close";
-        enigma_user::highscore_clear();
-
-    }
-
+  highscore_caption = "Top Ten Players";
+  highscore_nobody = "<nobody>";
+  highscore_escape = "press <Escape> to close";
+  enigma_user::highscore_clear();
 }
 
-#include <Universal_System/roomsystem.h>
-#include <Universal_System/CallbackArrays.h>
-#include <Graphics_Systems/graphics_mandatory.h>
+}  // namespace enigma
 
-namespace enigma_user
-{
+#include <Graphics_Systems/graphics_mandatory.h>
+#include <Universal_System/CallbackArrays.h>
+#include <Universal_System/roomsystem.h>
+
+namespace enigma_user {
 
 extern int room_width;
 extern int room_height;
-extern void io_handle(); // FIXME: This might not exist! It should be determined whether this function belongs in widgets_mandatory or if it shouldn't be used on a whim.
+extern void
+io_handle();  // FIXME: This might not exist! It should be determined whether this function belongs in widgets_mandatory or if it shouldn't be used on a whim.
 
 void highscore_show(int numb) {
-    highscore_add("player name",numb);
-     while(!keyboard_check(27 /*vk_escape*/)) {
-    draw_highscore(20, 0, room_width-20, room_height);
+  highscore_add("player name", numb);
+  while (!keyboard_check(27 /*vk_escape*/)) {
+    draw_highscore(20, 0, room_width - 20, room_height);
 
-         screen_refresh();
-         io_handle();
-     }
-     io_clear();
+    screen_refresh();
+    io_handle();
+  }
+  io_clear();
 }
 
-void action_highscore_show(int background,int border,double newColor,double otherColor,std::string font,int a,int b,int c,int d,int e,int f) {
-    highscore_show(score);
+void action_highscore_show(int background, int border, double newColor, double otherColor, std::string font, int a,
+                           int b, int c, int d, int e, int f) {
+  highscore_show(score);
 }
 
-void highscore_set_background(int back) {enigma::highscore_background=back;}
+void highscore_set_background(int back) { enigma::highscore_background = back; }
 
-void highscore_set_border(bool show) {enigma::highscore_border=show;}
+void highscore_set_border(bool show) { enigma::highscore_border = show; }
 
 void highscore_set_font(std::string name, int size, int style) {
-    //not cross platform compatible?
-    show_error("Warning function: highscore_set_font doesn't work, please use draw_set_font", false);
+  //not cross platform compatible?
+  show_error("Warning function: highscore_set_font doesn't work, please use draw_set_font", false);
 }
 
 void highscore_set_colors(int back, int newcol, int othercol) {
-    enigma::highscore_back_color=back;
-    enigma::highscore_new_entry_color=newcol;
-    enigma::highscore_other_entries_color=othercol;
+  enigma::highscore_back_color = back;
+  enigma::highscore_new_entry_color = newcol;
+  enigma::highscore_other_entries_color = othercol;
 }
 
 void highscore_set_strings(std::string caption, std::string nobody, std::string escape) {
-    enigma::highscore_caption=caption;
-    enigma::highscore_nobody=nobody;
-    enigma::highscore_escape=escape;
+  enigma::highscore_caption = caption;
+  enigma::highscore_nobody = nobody;
+  enigma::highscore_escape = escape;
 }
 
 void highscore_show_ext(int numb, int back, int show, int newcol, int othercol, std::string name, int size) {
-    enigma::highscore_background=back;
-    enigma::highscore_border=show;
-    enigma::highscore_new_entry_color=newcol;
-    enigma::highscore_other_entries_color=othercol;
+  enigma::highscore_background = back;
+  enigma::highscore_border = show;
+  enigma::highscore_new_entry_color = newcol;
+  enigma::highscore_other_entries_color = othercol;
 
-    highscore_show(numb);
+  highscore_show(numb);
 }
 
 void highscore_clear() {
-    enigma::highscore_list.clear();
-    for (int i=0; i < 10; i++) {
-        enigma::highscore_list.push_back(enigma::playerScore(enigma::highscore_nobody,0));
-    }
+  enigma::highscore_list.clear();
+  for (int i = 0; i < 10; i++) {
+    enigma::highscore_list.push_back(enigma::playerScore(enigma::highscore_nobody, 0));
+  }
 }
 
 void highscore_add(std::string str, int numb) {
-    enigma::highscore_list.push_back(enigma::playerScore(str,numb));
-    std::sort( enigma::highscore_list.begin(), enigma::highscore_list.end(), enigma::cmp_highscore );
-    if (enigma::highscore_list.size()>10)
-    enigma::highscore_list.resize(10);
+  enigma::highscore_list.push_back(enigma::playerScore(str, numb));
+  std::sort(enigma::highscore_list.begin(), enigma::highscore_list.end(), enigma::cmp_highscore);
+  if (enigma::highscore_list.size() > 10) enigma::highscore_list.resize(10);
 }
 
-void highscore_add_current() {
-    highscore_add("Ask for Name!", score);
-}
+void highscore_add_current() { highscore_add("Ask for Name!", score); }
 
 int highscore_value(int place) {
-    size_t act = static_cast<size_t>(place) - 1;
-    return act<enigma::highscore_list.size() ? enigma::highscore_list[act].player_score : 0;
+  size_t act = static_cast<size_t>(place) - 1;
+  return act < enigma::highscore_list.size() ? enigma::highscore_list[act].player_score : 0;
 }
 
 std::string highscore_name(int place) {
-    size_t act = static_cast<size_t>(place) - 1;
-    return act<enigma::highscore_list.size() ? enigma::highscore_list[act].player_name : "";
+  size_t act = static_cast<size_t>(place) - 1;
+  return act < enigma::highscore_list.size() ? enigma::highscore_list[act].player_name : "";
 }
 
-}
+}  // namespace enigma_user
 
-#include "var4.h"
 #include "Universal_System/scalar.h"
+#include "var4.h"
 
-namespace enigma_user
-{
+namespace enigma_user {
 
-void draw_text(gs_scalar x, gs_scalar y,variant str); // TODO: Holy shit.
+void draw_text(gs_scalar x, gs_scalar y, variant str);  // TODO: Holy shit.
 int string_width(variant str);
 
 void draw_highscore(int x1, int y1, int x2, int y2) {
-
-    for (size_t i=0; i<enigma::highscore_list.size(); i++) {
-        draw_text(x1, (i*((y2-y1)/10))+y1+10, enigma::highscore_list[i].player_name.c_str());
-        draw_text(x2-string_width(toString((var)enigma::highscore_list[i].player_score)), (i*((y2-y1)/10))+y1+10 , toString((var)enigma::highscore_list[i].player_score));
-    }
+  for (size_t i = 0; i < enigma::highscore_list.size(); i++) {
+    draw_text(x1, (i * ((y2 - y1) / 10)) + y1 + 10, enigma::highscore_list[i].player_name.c_str());
+    draw_text(x2 - string_width(toString((var)enigma::highscore_list[i].player_score)),
+              (i * ((y2 - y1) / 10)) + y1 + 10, toString((var)enigma::highscore_list[i].player_score));
+  }
 }
 
-}
-
+}  // namespace enigma_user

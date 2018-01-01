@@ -23,11 +23,11 @@
 using std::string;
 
 namespace enigma {
-  void input_push();
+void input_push();
 }
 
-#include "../General/PFwindow.h"
 #include "../General/PFmain.h"
+#include "../General/PFwindow.h"
 
 #include <string>
 using std::string;
@@ -35,12 +35,12 @@ using std::string;
 void Sleep(int ms);
 
 namespace enigma_user {
-  static inline void sleep(int ms) { Sleep(ms); }
-}
+static inline void sleep(int ms) { Sleep(ms); }
+}  // namespace enigma_user
 
 namespace enigma {
-  extern string* parameters;
-  extern int parameterc;
-  extern int current_room_speed;
-  //void writename(char* x);
-}
+extern string* parameters;
+extern int parameterc;
+extern int current_room_speed;
+//void writename(char* x);
+}  // namespace enigma

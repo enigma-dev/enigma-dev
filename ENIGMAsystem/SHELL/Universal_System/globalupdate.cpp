@@ -29,15 +29,11 @@
 using namespace std;
 #include "globalupdate.h"
 
-#include "roomsystem.h"
+#include "Audio_Systems/audio_mandatory.h"
 #include "CallbackArrays.h"
 #include "Platforms/platforms_mandatory.h"
-#include "Audio_Systems/audio_mandatory.h"
+#include "roomsystem.h"
 
-namespace enigma
-{
-  void update_globals()
-  {
-    audiosystem_update();
-  }
-}
+namespace enigma {
+void update_globals() { audiosystem_update(); }
+}  // namespace enigma

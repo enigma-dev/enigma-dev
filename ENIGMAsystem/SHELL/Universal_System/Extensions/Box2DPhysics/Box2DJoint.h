@@ -25,38 +25,34 @@ struct B2DJoint {
   int worldid;
   b2Joint* joint;
 
-  B2DJoint()
-  {
-  }
+  B2DJoint() {}
 
-  ~B2DJoint()
-  {
+  ~B2DJoint() {
     b2dworlds[worldid]->world->DestroyJoint(joint);
-	joint = NULL;
+    joint = NULL;
   }
-}; 
+};
 extern vector<B2DJoint*> b2djoints;
 
 #ifdef DEBUG_MODE
-  #include <string>
-  #include "libEGMstd.h"
-  #include "Widget_Systems/widgets_mandatory.h"
-  #define get_jointr(j,id,r) \
-    if (unsigned(id) >= b2djoints.size() || id < 0) { \
-      show_error("Cannot access Box2D physics joint with id " + toString(id), false); \
-      return r; \
-    } B2DJoint* j = b2djoints[id];
-  #define get_joint(j,id) \
-    if (unsigned(id) >= b2djoints.size() || id < 0) { \
-      show_error("Cannot access Box2D physics joint with id " + toString(id), false); \
-      return; \
-    } B2DJoint* j = b2djoints[id];
+#include <string>
+#include "Widget_Systems/widgets_mandatory.h"
+#include "libEGMstd.h"
+#define get_jointr(j, id, r)                                                        \
+  if (unsigned(id) >= b2djoints.size() || id < 0) {                                 \
+    show_error("Cannot access Box2D physics joint with id " + toString(id), false); \
+    return r;                                                                       \
+  }                                                                                 \
+  B2DJoint* j = b2djoints[id];
+#define get_joint(j, id)                                                            \
+  if (unsigned(id) >= b2djoints.size() || id < 0) {                                 \
+    show_error("Cannot access Box2D physics joint with id " + toString(id), false); \
+    return;                                                                         \
+  }                                                                                 \
+  B2DJoint* j = b2djoints[id];
 #else
-  #define get_jointr(j,id,r) \
-    B2DJoint* j = b2djoints[id];
-  #define get_joint(j,id) \
-    B2DJoint* j = b2djoints[id];
+#define get_jointr(j, id, r) B2DJoint* j = b2djoints[id];
+#define get_joint(j, id) B2DJoint* j = b2djoints[id];
 #endif
 
-#endif // ENIGMA_BOX2D_JOINT__H
-
+#endif  // ENIGMA_BOX2D_JOINT__H

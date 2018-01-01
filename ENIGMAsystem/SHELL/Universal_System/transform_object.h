@@ -25,18 +25,16 @@
 
 #include "graphics_object.h"
 
-namespace enigma
-{
-  struct object_transform: object_graphics
-  {
-    //Other attributes that logically don't belong here
-        double image_alpha;
-        int    image_blend;
-    //Constructors
-      object_transform();
-      object_transform(unsigned x, int y);
-      virtual ~object_transform();
-  };
-}
+namespace enigma {
+struct object_transform : object_graphics {
+  //Other attributes that logically don't belong here
+  double image_alpha;
+  int image_blend;
+  //Constructors
+  object_transform();
+  object_transform(unsigned x, int y);
+  virtual ~object_transform();
+};
+}  // namespace enigma
 
 #endif

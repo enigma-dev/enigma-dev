@@ -24,8 +24,7 @@ using std::vector;
 #include <Box2D/Box2D.h>
 #include "B2Dshapes.h"
 
-namespace enigma_user
-{
+namespace enigma_user {
 
 /************** Worlds **************/
 
@@ -33,7 +32,7 @@ void b2d_world_create(int pixeltometerscale);
 int b2d_world_create();
 void b2d_world_delete(int index);
 void b2d_world_pause_enable(int index, bool paused);
-void b2d_world_update(int index); 
+void b2d_world_update(int index);
 void b2d_world_dump(int index);
 void b2d_world_update_settings(int index, double timeStep, int velocityIterations, int positionIterations);
 void b2d_world_update_iterations(int index, int iterationsperstep);
@@ -60,11 +59,11 @@ bool b2d_world_get_clearforces(int index);
 
 /************** Bodies **************/
 
-int  b2d_body_create(int world = 0);
-int  b2d_body_create_shape(int world, int shape);
-int  b2d_body_create_box(int world, double halfwidth, double halfheight);
-int  b2d_body_create_circle(int world, double radius);
-void b2d_body_bind(int id, int obj); 
+int b2d_body_create(int world = 0);
+int b2d_body_create_shape(int world, int shape);
+int b2d_body_create_box(int world, double halfwidth, double halfheight);
+int b2d_body_create_circle(int world, double radius);
+void b2d_body_bind(int id, int obj);
 void b2d_body_delete(int id);
 void b2d_body_dump(int id);
 
@@ -116,10 +115,9 @@ void b2d_world_apply_impulse(int world, double xpos, double ypos, double ximpuls
 void b2d_world_apply_impulse_radial(int world, double xpos, double ypos, bool wake);
 
 /************** Miscellaneous **************/
-void b2d_draw_debug(); 
+void b2d_draw_debug();
 void b2d_pause_system(bool pause);
 
-}
+}  // namespace enigma_user
 
-#endif // ENIGMA_B2D_FUNCTIONS__H
-
+#endif  // ENIGMA_B2D_FUNCTIONS__H

@@ -16,31 +16,22 @@
 **/
 
 #include <stdio.h>
-#include <unistd.h>
 #include <stdlib.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 #include <string>
 using namespace std;
 
 /* UNIX-ready port of file manipulation */
 
-string file_find_first(string mask,int attr) {
+string file_find_first(string mask, int attr) {}
 
-}
-
-enum {
-  fa_readonly  = 1,
-  fa_hidden    = 2,
-  fa_sysfile   = 4,
-  fa_volumeid  = 8,
-  fa_directory = 16,
-  fa_archive   = 32
-};
+enum { fa_readonly = 1, fa_hidden = 2, fa_sysfile = 4, fa_volumeid = 8, fa_directory = 16, fa_archive = 32 };
 
 string file_find_next();
 void file_find_close();
-bool file_attributes(string fname,int attr);
+bool file_attributes(string fname, int attr);
 
 /*void export_include_file(string fname);
 void export_include_file_location(string fname,string location);

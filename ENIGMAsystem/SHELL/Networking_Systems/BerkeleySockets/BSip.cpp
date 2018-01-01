@@ -24,10 +24,8 @@ char ip[IPLEN];
 int p = 0;
 
 int handle_data(void *ptr, int size, int nmemb, void *stream) {
- int i, numbytes = size * nmemb;
- char *str = (char *)ptr;
- for (i = 0; i < numbytes && p < IPLEN - 1; i++)
-  ip[p++] = str[i];
- ip[p] = '\0';
+  int i, numbytes = size * nmemb;
+  char *str = (char *)ptr;
+  for (i = 0; i < numbytes && p < IPLEN - 1; i++) ip[p++] = str[i];
+  ip[p] = '\0';
 }
-

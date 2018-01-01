@@ -22,16 +22,7 @@
 
 namespace enigma_user {
 
-enum {
-  b2d_none,
-  b2d_unknown,
-  b2d_box,
-  b2d_circle,
-  b2d_edge,
-  b2d_chain,
-  b2d_loop,
-  b2d_polygon
-};
+enum { b2d_none, b2d_unknown, b2d_box, b2d_circle, b2d_edge, b2d_chain, b2d_loop, b2d_polygon };
 
 int b2d_shape_create();
 void b2d_shape_delete(int id);
@@ -65,7 +56,6 @@ void b2d_fixture_set_sensor(int id, bool state);
 int b2d_fixture_get_shape(int id);
 int b2d_fixture_get_body(int id);
 
-}
+}  // namespace enigma_user
 
-#endif // _ENIGMA_B2D_SHAPES__H
-
+#endif  // _ENIGMA_B2D_SHAPES__H

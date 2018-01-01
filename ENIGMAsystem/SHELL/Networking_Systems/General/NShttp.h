@@ -28,6 +28,6 @@ void http_get_file(string url, string directory);
 void http_post_string(string url, string str);
 void http_request(string url, string method, unsigned header, unsigned body);
 
-}
+}  // namespace enigma_user
 
 #endif

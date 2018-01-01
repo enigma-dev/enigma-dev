@@ -25,24 +25,23 @@
  **                                                                              **
  \********************************************************************************/
 
-#import <Foundation/Foundation.h>
-#import "OpenAl/alc.h"
-#import "OpenAl/al.h"
 #import <AudioToolbox/AudioToolbox.h>
+#import <Foundation/Foundation.h>
+#import "OpenAl/al.h"
+#import "OpenAl/alc.h"
 #include "iOSOpenAL.h"
 
 @interface OpenALManager : NSObject {
-	// OpenAl variables
-	ALCcontext* mContext;
-	ALCdevice* mDevice;
-	NSMutableDictionary* soundDictionary; //Dictionary of sound name to id
-	NSMutableArray* bufferStorageArray; //used for sotring sound data when sounds are being loaded
+  // OpenAl variables
+  ALCcontext* mContext;
+  ALCdevice* mDevice;
+  NSMutableDictionary* soundDictionary;  //Dictionary of sound name to id
+  NSMutableArray* bufferStorageArray;    //used for sotring sound data when sounds are being loaded
 }
-+(AudioFileID)openAudioFile:(NSString*)filePath;
--(void)initOpenAL;
--(void)loadASoundOpenAL:(NSString*)soundname;
--(void)stopSound:(NSString*)soundKey;
--(void)playSound:(NSString*)soundKey;
--(void)cleanUpOpenAL;
++ (AudioFileID)openAudioFile:(NSString*)filePath;
+- (void)initOpenAL;
+- (void)loadASoundOpenAL:(NSString*)soundname;
+- (void)stopSound:(NSString*)soundKey;
+- (void)playSound:(NSString*)soundKey;
+- (void)cleanUpOpenAL;
 @end
-

@@ -25,12 +25,11 @@
  **                                                                              **
  \********************************************************************************/
 
-#include <string>
 #include <stdio.h>
+#include <string>
 using namespace std;
 
-int show_message(string message)
-{
-	printf("show_message: %s\n",message.c_str());
-	return 0;
+int show_message(string message) {
+  printf("show_message: %s\n", message.c_str());
+  return 0;
 }

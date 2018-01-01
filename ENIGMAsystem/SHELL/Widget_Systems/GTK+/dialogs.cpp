@@ -28,167 +28,155 @@
 #include "../General/WSdialogs.h"
 #include "../General/WSmenus.h"
 
-#include <string>
 #include <gtk/gtk.h>
+#include <string>
 
 using namespace std;
 
 void show_error(string errortext, const bool fatal) {
-//TODO: Implement
+  //TODO: Implement
 }
 
-int get_color(int defcol)
-{
+int get_color(int defcol) {
   gdk_threads_enter();
 
-    GtkWidget* colsel = gtk_color_selection_dialog_new("Pick a color");
+  GtkWidget *colsel = gtk_color_selection_dialog_new("Pick a color");
 
-    GdkColor col;
-      col.red   = ((defcol & 0xFF) | ((defcol & 0xFF) << 8));
-      col.green = ((defcol & 0xFF00) >> 8) | (defcol & 0xFF00);
-      col.blue  = ((defcol & 0xFF0000) >> 16) | ((defcol & 0xFF0000) >> 8);
-    col.pixel = ((defcol & 0xFF) << 16) | (defcol & 0xFF00) | ((defcol & 0xFF0000) >> 16);
+  GdkColor col;
+  col.red = ((defcol & 0xFF) | ((defcol & 0xFF) << 8));
+  col.green = ((defcol & 0xFF00) >> 8) | (defcol & 0xFF00);
+  col.blue = ((defcol & 0xFF0000) >> 16) | ((defcol & 0xFF0000) >> 8);
+  col.pixel = ((defcol & 0xFF) << 16) | (defcol & 0xFF00) | ((defcol & 0xFF0000) >> 16);
 
-    gtk_color_selection_set_previous_color (GTK_COLOR_SELECTION(gtk_color_selection_dialog_get_color_selection(GTK_COLOR_SELECTION_DIALOG(colsel))), &col);
-    gtk_color_selection_set_current_color(GTK_COLOR_SELECTION(gtk_color_selection_dialog_get_color_selection(GTK_COLOR_SELECTION_DIALOG(colsel))), &col);
-    int resp = gtk_dialog_run(GTK_DIALOG(colsel));
-    gtk_color_selection_get_current_color(GTK_COLOR_SELECTION(gtk_color_selection_dialog_get_color_selection(GTK_COLOR_SELECTION_DIALOG(colsel))), &col);
-    gtk_widget_destroy(colsel);
+  gtk_color_selection_set_previous_color(
+      GTK_COLOR_SELECTION(gtk_color_selection_dialog_get_color_selection(GTK_COLOR_SELECTION_DIALOG(colsel))), &col);
+  gtk_color_selection_set_current_color(
+      GTK_COLOR_SELECTION(gtk_color_selection_dialog_get_color_selection(GTK_COLOR_SELECTION_DIALOG(colsel))), &col);
+  int resp = gtk_dialog_run(GTK_DIALOG(colsel));
+  gtk_color_selection_get_current_color(
+      GTK_COLOR_SELECTION(gtk_color_selection_dialog_get_color_selection(GTK_COLOR_SELECTION_DIALOG(colsel))), &col);
+  gtk_widget_destroy(colsel);
 
   gdk_threads_leave();
 
-  if (resp == GTK_RESPONSE_DELETE_EVENT or resp == GTK_RESPONSE_NONE or resp == GTK_RESPONSE_CANCEL)
-    return defcol;
+  if (resp == GTK_RESPONSE_DELETE_EVENT or resp == GTK_RESPONSE_NONE or resp == GTK_RESPONSE_CANCEL) return defcol;
   return ((col.red & 0xFF00) >> 8) | (col.green & 0xFF00) | ((col.blue & 0xFF00) << 8);
 }
 
-inline void parse_filter_string(GtkFileChooser *dialog, const string &filter)
-{
-  unsigned ts = 0; bool itn = 0; string filtname;
+inline void parse_filter_string(GtkFileChooser *dialog, const string &filter) {
+  unsigned ts = 0;
+  bool itn = 0;
+  string filtname;
   for (unsigned i = 0; i <= filter.length(); i++)
-  if (i == filter.length() or filter[i] == '|')
-  {
-    string fs = filter.substr(ts,i-ts);
-    if (!itn)
-      itn = 1,
-      filtname = fs;
-    else
-    {
-      itn = 0;
-      GtkFileFilter *FF = gtk_file_filter_new();
-      gtk_file_filter_set_name(FF,filtname.c_str());
-      unsigned fb = 0; while (fs[fb] == ' ' or fs[fb] == '\t' or fs[fb] == '\r' or fs[fb] == '\n') fb++;
-      for (unsigned ii = fb; ii < fs.length(); ii++)
-        if (fs[ii] == ';') {
-          gtk_file_filter_add_pattern(FF,fs.substr(fb,ii-fb).c_str());
-          fb = ii + 1; while (fs[fb] == ' ' or fs[fb] == '\t' or fs[fb] == '\r' or fs[fb] == '\n') fb++;
-          ii = fb - 1;
-        }
-      if (fb < fs.length())
-        gtk_file_filter_add_pattern(FF,fs.substr(fb).c_str());
-      gtk_file_chooser_add_filter(dialog, FF);
+    if (i == filter.length() or filter[i] == '|') {
+      string fs = filter.substr(ts, i - ts);
+      if (!itn)
+        itn = 1, filtname = fs;
+      else {
+        itn = 0;
+        GtkFileFilter *FF = gtk_file_filter_new();
+        gtk_file_filter_set_name(FF, filtname.c_str());
+        unsigned fb = 0;
+        while (fs[fb] == ' ' or fs[fb] == '\t' or fs[fb] == '\r' or fs[fb] == '\n') fb++;
+        for (unsigned ii = fb; ii < fs.length(); ii++)
+          if (fs[ii] == ';') {
+            gtk_file_filter_add_pattern(FF, fs.substr(fb, ii - fb).c_str());
+            fb = ii + 1;
+            while (fs[fb] == ' ' or fs[fb] == '\t' or fs[fb] == '\r' or fs[fb] == '\n') fb++;
+            ii = fb - 1;
+          }
+        if (fb < fs.length()) gtk_file_filter_add_pattern(FF, fs.substr(fb).c_str());
+        gtk_file_chooser_add_filter(dialog, FF);
+      }
+      ts = i + 1;
     }
-    ts = i+1;
-  }
 }
 
 ///TODO: Empty caption should probably not be default "Open File" or similar. It should just be empty, as now it is impossible to set empty caption because of this behavior
-string get_open_filename(string filter, string fname, string caption)
-{
+string get_open_filename(string filter, string fname, string caption) {
   string ret;
   gdk_threads_enter();
 
-    GtkWidget *dialog;
-    dialog = gtk_file_chooser_dialog_new (caption.empty()? "Open File" : caption.c_str(), NULL, GTK_FILE_CHOOSER_ACTION_OPEN,
-             GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
+  GtkWidget *dialog;
+  dialog =
+      gtk_file_chooser_dialog_new(caption.empty() ? "Open File" : caption.c_str(), NULL, GTK_FILE_CHOOSER_ACTION_OPEN,
+                                  GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
 
-    parse_filter_string(GTK_FILE_CHOOSER(dialog), filter);
-    if (!gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dialog), fname.c_str()))
-      gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(dialog), fname.substr(fname.find_last_of("\\/") + 1).c_str());
+  parse_filter_string(GTK_FILE_CHOOSER(dialog), filter);
+  if (!gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dialog), fname.c_str()))
+    gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(dialog), fname.substr(fname.find_last_of("\\/") + 1).c_str());
 
-    if (gtk_dialog_run (GTK_DIALOG (dialog)) == GTK_RESPONSE_ACCEPT)
-    {
-      char* rcs = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
-      if (rcs)
-        ret = rcs,
-        g_free(rcs);
-    }
-    gtk_widget_destroy (dialog);
+  if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT) {
+    char *rcs = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+    if (rcs) ret = rcs, g_free(rcs);
+  }
+  gtk_widget_destroy(dialog);
   gdk_threads_leave();
 
   return ret;
 }
 
-string get_save_filename(string filter, string fname, string caption)
-{
-
+string get_save_filename(string filter, string fname, string caption) {
   string ret;
   gdk_threads_enter();
 
-    GtkWidget *dialog;
-    dialog = gtk_file_chooser_dialog_new (caption.empty()? "Save File" : caption.c_str(), NULL, GTK_FILE_CHOOSER_ACTION_SAVE,
-             GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
+  GtkWidget *dialog;
+  dialog =
+      gtk_file_chooser_dialog_new(caption.empty() ? "Save File" : caption.c_str(), NULL, GTK_FILE_CHOOSER_ACTION_SAVE,
+                                  GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL, GTK_STOCK_OPEN, GTK_RESPONSE_ACCEPT, NULL);
 
-    parse_filter_string(GTK_FILE_CHOOSER(dialog), filter);
-    if (!gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dialog), fname.c_str())) {
-      size_t a = fname.find_last_of("\\/");
-      gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(dialog), fname.substr(a != string::npos ? a+1 : 0).c_str());
-    }
+  parse_filter_string(GTK_FILE_CHOOSER(dialog), filter);
+  if (!gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(dialog), fname.c_str())) {
+    size_t a = fname.find_last_of("\\/");
+    gtk_file_chooser_set_current_name(GTK_FILE_CHOOSER(dialog), fname.substr(a != string::npos ? a + 1 : 0).c_str());
+  }
 
-    if (gtk_dialog_run (GTK_DIALOG (dialog)) == GTK_RESPONSE_ACCEPT)
-    {
-      char* rcs = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
-      if (rcs)
-        ret = rcs,
-        g_free(rcs);
-    }
-    gtk_widget_destroy (dialog);
+  if (gtk_dialog_run(GTK_DIALOG(dialog)) == GTK_RESPONSE_ACCEPT) {
+    char *rcs = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
+    if (rcs) ret = rcs, g_free(rcs);
+  }
+  gtk_widget_destroy(dialog);
   gdk_threads_leave();
 
   return ret;
 }
 
-
-
-
-static int* cmret;
-static void menu_item_clicked(gpointer user_data) {
-  *cmret = (int)long(user_data);
-}
+static int *cmret;
+static void menu_item_clicked(gpointer user_data) { *cmret = (int)long(user_data); }
 
 enum { MFT_STRING, MFT_SEPARATOR, MFT_RADIOCHECK };
-enum { MFS_UNCHECKED, MFS_DISABLED, MFS_CHECKED, };
+enum {
+  MFS_UNCHECKED,
+  MFS_DISABLED,
+  MFS_CHECKED,
+};
 
-static void menu_add_item(GtkMenu *menu,int iid,int id,string str,unsigned int type)
-{
+static void menu_add_item(GtkMenu *menu, int iid, int id, string str, unsigned int type) {
   GtkWidget *nitem;
   if (type != MFT_SEPARATOR)
-      nitem = gtk_menu_item_new_with_label(str.c_str()),
-      g_signal_connect_swapped (G_OBJECT(nitem), "activate", G_CALLBACK(menu_item_clicked), (gpointer)id);
+    nitem = gtk_menu_item_new_with_label(str.c_str()),
+    g_signal_connect_swapped(G_OBJECT(nitem), "activate", G_CALLBACK(menu_item_clicked), (gpointer)id);
   else
     nitem = gtk_separator_menu_item_new();
   gtk_widget_show(nitem), gtk_menu_append(menu, nitem);
 }
-static void menu_add_submenu(GtkMenu* menu, GtkWidget* smenu,int iid,int id,string str)
-{
+static void menu_add_submenu(GtkMenu *menu, GtkWidget *smenu, int iid, int id, string str) {
   GtkWidget *nitem = gtk_menu_item_new_with_label(str.c_str());
   gtk_menu_item_set_submenu(GTK_MENU_ITEM(nitem), smenu);
   gtk_widget_show(nitem), gtk_menu_append(menu, nitem);
 }
-static void menu_add_item_ext(GtkMenu* menu,int iid,int id,string str,unsigned int type,unsigned int state,const bool checkmark=0)
-{
+static void menu_add_item_ext(GtkMenu *menu, int iid, int id, string str, unsigned int type, unsigned int state,
+                              const bool checkmark = 0) {
   GtkWidget *nitem;
-  if (type != MFT_SEPARATOR)
-  {
+  if (type != MFT_SEPARATOR) {
     if (checkmark)
       nitem = gtk_check_menu_item_new_with_label(str.c_str()),
       gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(nitem), bool(state & MFS_CHECKED)),
       gtk_check_menu_item_set_draw_as_radio(GTK_CHECK_MENU_ITEM(nitem), bool(type & MFT_RADIOCHECK));
     else
       nitem = gtk_menu_item_new_with_label(str.c_str());
-    g_signal_connect_swapped (G_OBJECT(nitem), "activate", G_CALLBACK(menu_item_clicked), (gpointer)id);
-  }
-  else
+    g_signal_connect_swapped(G_OBJECT(nitem), "activate", G_CALLBACK(menu_item_clicked), (gpointer)id);
+  } else
     nitem = gtk_separator_menu_item_new();
 
   if (state & MFS_CHECKED) gtk_check_menu_item_set_active(GTK_CHECK_MENU_ITEM(nitem), true);
@@ -203,138 +191,136 @@ struct menu_descriptor {
 
 static void menu_destroy(GtkObject *menu, gpointer mdv) {
   if (*cmret == -2) *cmret = -1;
-  int *i = ((menu_descriptor*)mdv)->result;
+  int *i = ((menu_descriptor *)mdv)->result;
   if (*i == -2) *i = -1;
 }
 
 void strict_positioner(GtkMenu *menu, gint *x, gint *y, gboolean *push_in, gpointer user_data) {
-  menu_descriptor *md = (menu_descriptor*)user_data;
+  menu_descriptor *md = (menu_descriptor *)user_data;
   *x = md->x, *y = md->y;
 }
 
-int show_menu(int x, int y, string text)
-{
+int show_menu(int x, int y, string text) {
   gdk_threads_enter();
 
-    int i=0, is=0, id=1, iid=1;
-    const int len=text.length();
-    GtkWidget *menu = gtk_menu_new();
+  int i = 0, is = 0, id = 1, iid = 1;
+  const int len = text.length();
+  GtkWidget *menu = gtk_menu_new();
 
-    while (i<=len)
-    {
-      if (i>=len or text[i]=='|')
-      {
-        string itxt=text.substr(is,i-is);
-        if (itxt=="-")
-          menu_add_item(GTK_MENU(menu),iid,id,itxt,MFT_SEPARATOR);
-        else
-        {
-          menu_add_item(GTK_MENU(menu),iid,id,itxt,MFT_STRING);
-          id++;
-        }
-        is = i+1; iid++;
+  while (i <= len) {
+    if (i >= len or text[i] == '|') {
+      string itxt = text.substr(is, i - is);
+      if (itxt == "-")
+        menu_add_item(GTK_MENU(menu), iid, id, itxt, MFT_SEPARATOR);
+      else {
+        menu_add_item(GTK_MENU(menu), iid, id, itxt, MFT_STRING);
+        id++;
       }
-      i++;
+      is = i + 1;
+      iid++;
     }
+    i++;
+  }
 
-    int rv = -2; cmret = &rv;
-    menu_descriptor md = { &rv, x, y };
-    g_signal_connect(G_OBJECT(menu), "destroy", G_CALLBACK(menu_destroy), (gpointer)&md);
-    g_signal_connect(G_OBJECT(menu), "hide", G_CALLBACK(menu_destroy), (gpointer)&md);
-    gtk_menu_popup(GTK_MENU(menu),NULL,NULL,strict_positioner,&md,0,0);
+  int rv = -2;
+  cmret = &rv;
+  menu_descriptor md = {&rv, x, y};
+  g_signal_connect(G_OBJECT(menu), "destroy", G_CALLBACK(menu_destroy), (gpointer)&md);
+  g_signal_connect(G_OBJECT(menu), "hide", G_CALLBACK(menu_destroy), (gpointer)&md);
+  gtk_menu_popup(GTK_MENU(menu), NULL, NULL, strict_positioner, &md, 0, 0);
 
   gdk_threads_leave();
 
-  while (rv == -2)
-    g_usleep(25000);
+  while (rv == -2) g_usleep(25000);
 
   gdk_threads_enter();
-    gtk_widget_destroy(menu);
+  gtk_widget_destroy(menu);
   gdk_threads_leave();
 
   return rv;
 }
 
-struct hmenustack
-{
+struct hmenustack {
   hmenustack *prev;
   GtkWidget *menu;
-  hmenustack():prev(NULL) {}
+  hmenustack() : prev(NULL) {}
 
-  hmenustack* push(GtkWidget *n) { hmenustack* next=new hmenustack; next->prev=this; next->menu=n; return next; }
-  hmenustack* pop() { if (prev==NULL) return this; hmenustack* r=prev; delete this; return r; }
+  hmenustack *push(GtkWidget *n) {
+    hmenustack *next = new hmenustack;
+    next->prev = this;
+    next->menu = n;
+    return next;
+  }
+  hmenustack *pop() {
+    if (prev == NULL) return this;
+    hmenustack *r = prev;
+    delete this;
+    return r;
+  }
 };
 #include <iostream>
-int show_menu_ext(int x, int y, string text)
-{
+int show_menu_ext(int x, int y, string text) {
   gdk_threads_enter();
 
-  int i=0, is=0, id=1, iid=1;
-  const int len=text.length();
-  hmenustack* ms=new hmenustack;
-  ms->menu=gtk_menu_new();
-  if (ms->menu==NULL) return -1;
+  int i = 0, is = 0, id = 1, iid = 1;
+  const int len = text.length();
+  hmenustack *ms = new hmenustack;
+  ms->menu = gtk_menu_new();
+  if (ms->menu == NULL) return -1;
 
-  while (i<=len)
-  {
-    if (i>=len or text[i]=='|')
-    {
-      string itxt=text.substr(is,i-is);
-      if (itxt=="-")
-        menu_add_item(GTK_MENU(ms->menu),iid,id,itxt,MFT_SEPARATOR);
-      else
-      {
-        if (i-is>1 and itxt[0]=='/')
-          menu_add_item_ext(GTK_MENU(ms->menu),iid,id,itxt.substr(1),MFT_STRING,MFS_DISABLED);
-        else if (i-is>1 and itxt[0]=='[' and itxt[1]==']')
-          menu_add_item_ext(GTK_MENU(ms->menu),iid,id,itxt.substr(2),MFT_STRING,MFS_UNCHECKED,1);
-        else if (i-is>2 and itxt[0]=='[' and itxt[1]=='*' and itxt[2]==']')
-          menu_add_item_ext(GTK_MENU(ms->menu),iid,id,itxt.substr(3),MFT_STRING,MFS_CHECKED,1);
-        else if (i-is>1 and itxt[0]=='(' and itxt[1]==')')
-          menu_add_item_ext(GTK_MENU(ms->menu),iid,id,itxt.substr(2),MFT_STRING|MFT_RADIOCHECK,MFS_UNCHECKED,1);
-        else if (i-is>1 and itxt[0]=='(' and itxt[1]=='*' and itxt[2]==')')
-          menu_add_item_ext(GTK_MENU(ms->menu),iid,id,itxt.substr(3),MFT_STRING|MFT_RADIOCHECK,MFS_CHECKED,1);
-        else if (i-is>0 and itxt[0]=='>')
-        {
+  while (i <= len) {
+    if (i >= len or text[i] == '|') {
+      string itxt = text.substr(is, i - is);
+      if (itxt == "-")
+        menu_add_item(GTK_MENU(ms->menu), iid, id, itxt, MFT_SEPARATOR);
+      else {
+        if (i - is > 1 and itxt[0] == '/')
+          menu_add_item_ext(GTK_MENU(ms->menu), iid, id, itxt.substr(1), MFT_STRING, MFS_DISABLED);
+        else if (i - is > 1 and itxt[0] == '[' and itxt[1] == ']')
+          menu_add_item_ext(GTK_MENU(ms->menu), iid, id, itxt.substr(2), MFT_STRING, MFS_UNCHECKED, 1);
+        else if (i - is > 2 and itxt[0] == '[' and itxt[1] == '*' and itxt[2] == ']')
+          menu_add_item_ext(GTK_MENU(ms->menu), iid, id, itxt.substr(3), MFT_STRING, MFS_CHECKED, 1);
+        else if (i - is > 1 and itxt[0] == '(' and itxt[1] == ')')
+          menu_add_item_ext(GTK_MENU(ms->menu), iid, id, itxt.substr(2), MFT_STRING | MFT_RADIOCHECK, MFS_UNCHECKED, 1);
+        else if (i - is > 1 and itxt[0] == '(' and itxt[1] == '*' and itxt[2] == ')')
+          menu_add_item_ext(GTK_MENU(ms->menu), iid, id, itxt.substr(3), MFT_STRING | MFT_RADIOCHECK, MFS_CHECKED, 1);
+        else if (i - is > 0 and itxt[0] == '>') {
           id--;
-          ms=ms->push(gtk_menu_new());
-          menu_add_submenu(GTK_MENU(ms->prev->menu),ms->menu,iid,0,itxt.substr(1));
-        }
-        else if (itxt=="<")
-        {
-          ms=ms->pop();
-          id--; iid--; //This counts as nothing
-        }
-        else if (i-is>1 and itxt[0]=='<')
-        {
-          ms=ms->pop();
+          ms = ms->push(gtk_menu_new());
+          menu_add_submenu(GTK_MENU(ms->prev->menu), ms->menu, iid, 0, itxt.substr(1));
+        } else if (itxt == "<") {
+          ms = ms->pop();
+          id--;
+          iid--;  //This counts as nothing
+        } else if (i - is > 1 and itxt[0] == '<') {
+          ms = ms->pop();
           cout << "\"" << itxt.substr(1) << "\"" << endl;
-          menu_add_item(GTK_MENU(ms->menu),iid,id,itxt.substr(1),MFT_STRING);
-        }
-        else
-          menu_add_item(GTK_MENU(ms->menu),iid,id,itxt,MFT_STRING);
+          menu_add_item(GTK_MENU(ms->menu), iid, id, itxt.substr(1), MFT_STRING);
+        } else
+          menu_add_item(GTK_MENU(ms->menu), iid, id, itxt, MFT_STRING);
         id++;
       }
-      is=i+1; iid++;
+      is = i + 1;
+      iid++;
     }
     i++;
   }
 
-  while (ms->prev) ms=ms->pop();
+  while (ms->prev) ms = ms->pop();
 
-    int rv = -2; cmret = &rv;
-    menu_descriptor md = { &rv, x, y };
-    g_signal_connect(G_OBJECT(ms->menu), "destroy", G_CALLBACK(menu_destroy), (gpointer)&md);
-    g_signal_connect(G_OBJECT(ms->menu), "hide", G_CALLBACK(menu_destroy), (gpointer)&md);
-    gtk_menu_popup(GTK_MENU(ms->menu),NULL,NULL,strict_positioner,&md,0,0);
+  int rv = -2;
+  cmret = &rv;
+  menu_descriptor md = {&rv, x, y};
+  g_signal_connect(G_OBJECT(ms->menu), "destroy", G_CALLBACK(menu_destroy), (gpointer)&md);
+  g_signal_connect(G_OBJECT(ms->menu), "hide", G_CALLBACK(menu_destroy), (gpointer)&md);
+  gtk_menu_popup(GTK_MENU(ms->menu), NULL, NULL, strict_positioner, &md, 0, 0);
 
   gdk_threads_leave();
 
-  while (rv == -2)
-    g_usleep(25000);
+  while (rv == -2) g_usleep(25000);
 
   gdk_threads_enter();
-    gtk_widget_destroy(ms->menu);
+  gtk_widget_destroy(ms->menu);
   gdk_threads_leave();
 
   delete ms;

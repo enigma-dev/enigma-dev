@@ -30,24 +30,21 @@
 
 #include "PS_particle_enums.h"
 
-namespace enigma
-{
-  struct particle_attractor
-  {
-    double x, y;
-    double force_strength; // Negative values indicates pushing.
-    double dist_effect; // Effect radius, always non-negative.
-    ps_force force_kind;
-    bool additive;
+namespace enigma {
+struct particle_attractor {
+  double x, y;
+  double force_strength;  // Negative values indicates pushing.
+  double dist_effect;     // Effect radius, always non-negative.
+  ps_force force_kind;
+  bool additive;
 
-    void initialize();
-    void clear_particle_attractor();
-    void set_position(double x, double y);
-    void set_force(double force_strength, double dist_effect, ps_force force_kind, bool additive);
-  };
+  void initialize();
+  void clear_particle_attractor();
+  void set_position(double x, double y);
+  void set_force(double force_strength, double dist_effect, ps_force force_kind, bool additive);
+};
 
-  particle_attractor* create_particle_attractor();
-}
+particle_attractor* create_particle_attractor();
+}  // namespace enigma
 
-#endif // ENIGMA_PS_PARTICLEATTRACTOR
-
+#endif  // ENIGMA_PS_PARTICLEATTRACTOR

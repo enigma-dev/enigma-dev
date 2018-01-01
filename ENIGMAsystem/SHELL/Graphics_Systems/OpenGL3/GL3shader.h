@@ -19,42 +19,34 @@
 #ifndef GL_SHADER_H
 #define GL_SHADER_H
 
-#include "../General/OpenGLHeaders.h"
 #include <string>
+#include "../General/OpenGLHeaders.h"
 using std::string;
 
-namespace enigma
-{
-  string getVertexShaderPrefix();
-  string getFragmentShaderPrefix();
-  string getDefaultFragmentShader();
-  string getDefaultVertexShader();
-  void getDefaultUniforms(int prog_id);
-  void getDefaultAttributes(int prog_id);
-  void getUniforms(int prog_id);
-  void getAttributes(int prog_id);
-  int getGLTypeSize(GLuint type);
+namespace enigma {
+string getVertexShaderPrefix();
+string getFragmentShaderPrefix();
+string getDefaultFragmentShader();
+string getDefaultVertexShader();
+void getDefaultUniforms(int prog_id);
+void getDefaultAttributes(int prog_id);
+void getUniforms(int prog_id);
+void getAttributes(int prog_id);
+int getGLTypeSize(GLuint type);
 
-  void glsl_uniform_matrix3fv_internal(int location, int size, const float *matrix);
-  void glsl_uniform_matrix4fv_internal(int location, int size, const float *matrix);
-  void glsl_uniformi_internal(int location, int v0);
-  void glsl_uniformf_internal(int location, float v0, float v1, float v2, float v3);
+void glsl_uniform_matrix3fv_internal(int location, int size, const float *matrix);
+void glsl_uniform_matrix4fv_internal(int location, int size, const float *matrix);
+void glsl_uniformi_internal(int location, int v0);
+void glsl_uniformf_internal(int location, float v0, float v1, float v2, float v3);
 
-  void glsl_attribute_enable_all_internal(bool enable);
-  void glsl_attribute_enable_internal(int location, bool enable);
-  void glsl_attribute_set_internal(int location, int size, int type, bool normalize, int stride, int offset);
-}
+void glsl_attribute_enable_all_internal(bool enable);
+void glsl_attribute_enable_internal(int location, bool enable);
+void glsl_attribute_set_internal(int location, int size, int type, bool normalize, int stride, int offset);
+}  // namespace enigma
 
-namespace enigma_user
-{
+namespace enigma_user {
 
-enum {
-  sh_vertex = 0,
-  sh_fragment = 1,
-  sh_tesscontrol = 2,
-  sh_tessevaluation = 3,
-  sh_geometry = 4
-};
+enum { sh_vertex = 0, sh_fragment = 1, sh_tesscontrol = 2, sh_tessevaluation = 3, sh_geometry = 4 };
 
 int glsl_shader_create(int type);
 bool glsl_shader_load(int id, string fname);
@@ -77,9 +69,9 @@ string glsl_program_get_infolog(int id);
 void glsl_program_set(int id);
 void glsl_program_reset();
 void glsl_program_free(int id);
-void glsl_program_default_set(int id); //Override default shader
-void glsl_program_default_reset(); //Reset back the default shader
-void glsl_program_set_name(int id, string name); //Useful for debug
+void glsl_program_default_set(int id);            //Override default shader
+void glsl_program_default_reset();                //Reset back the default shader
+void glsl_program_set_name(int id, string name);  //Useful for debug
 int glsl_program_get();
 
 int glsl_get_uniform_location(int program, string name);
@@ -122,14 +114,14 @@ void glsl_attribute_enable(int location, bool enable);
 void glsl_attribute_set(int location, int size, int type, bool normalize, int stride, int offset);
 
 // Wrap our abstracted version to the GameMaker version
-#define shader_set            glsl_program_set
-#define shader_reset          glsl_program_reset
-#define shader_get_uniform    glsl_get_uniform_location
+#define shader_set glsl_program_set
+#define shader_reset glsl_program_reset
+#define shader_get_uniform glsl_get_uniform_location
 #define shader_get_sampler_index glsl_get_uniform_location
-#define shader_set_uniform_f  glsl_uniformf
-#define shader_set_uniform_i  glsl_uniformi
-#define shader_is_compiled    glsl_shader_get_compiled
+#define shader_set_uniform_f glsl_uniformf
+#define shader_set_uniform_i glsl_uniformi
+#define shader_is_compiled glsl_shader_get_compiled
 
-}
+}  // namespace enigma_user
 
 #endif

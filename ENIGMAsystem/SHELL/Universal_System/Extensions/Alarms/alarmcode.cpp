@@ -10,24 +10,24 @@
 extern bool argument_relative;
 
 namespace enigma {
-  namespace extension_cast {
-    extension_alarm *as_extension_alarm(object_basic*);
-  }
+namespace extension_cast {
+extension_alarm *as_extension_alarm(object_basic *);
 }
+}  // namespace enigma
 
-namespace enigma_user
-{
- 
-void action_set_alarm(int steps, int alarmno)
-{
+namespace enigma_user {
+
+void action_set_alarm(int steps, int alarmno) {
   if (argument_relative)
     enigma::extension_cast::as_extension_alarm(enigma::instance_event_iterator->inst)->alarm[alarmno] += (steps);
   else
     enigma::extension_cast::as_extension_alarm(enigma::instance_event_iterator->inst)->alarm[alarmno] = (steps);
 }
 
-}
+}  // namespace enigma_user
 
 namespace enigma {
-extension_alarm::extension_alarm() { for (int i = 0; i < 12; i++) alarm[i] = -1; }
+extension_alarm::extension_alarm() {
+  for (int i = 0; i < 12; i++) alarm[i] = -1;
 }
+}  // namespace enigma

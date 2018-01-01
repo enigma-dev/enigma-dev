@@ -29,29 +29,26 @@
 #define ENIGMA_PS_EFFECTSCONSTANTS
 
 namespace enigma_user {
-  enum
-  {
-    ef_explosion = 0,
-    ef_ring,
-    ef_ellipse,
-    ef_firework,
-    ef_smoke,
-    ef_smokeup,
-    ef_star,
-    ef_spark,
-    ef_flare,
-    ef_cloud,
-    ef_rain,
-    ef_snow
-  };
+enum {
+  ef_explosion = 0,
+  ef_ring,
+  ef_ellipse,
+  ef_firework,
+  ef_smoke,
+  ef_smokeup,
+  ef_star,
+  ef_spark,
+  ef_flare,
+  ef_cloud,
+  ef_rain,
+  ef_snow
+};
 
-  enum
-  {
-    ef_size_small = 0,
-    ef_size_medium,
-    ef_size_large,
-  };
-}
+enum {
+  ef_size_small = 0,
+  ef_size_medium,
+  ef_size_large,
+};
+}  // namespace enigma_user
 
-#endif // ENIGMA_PS_EFFECTSCONSTANTS
-
+#endif  // ENIGMA_PS_EFFECTSCONSTANTS

@@ -26,16 +26,15 @@
  **                                                                              **
  \********************************************************************************/
 
-#include <string>
 #include <stdio.h>
+#include <string>
 using namespace std;
 #include <android/log.h>
-#define  LOG_TAG    "libenigma"
-#define  LOGI(...)  __android_log_print(ANDROID_LOG_INFO,LOG_TAG,__VA_ARGS__)
-#define  LOGE(...)  __android_log_print(ANDROID_LOG_ERROR,LOG_TAG,__VA_ARGS__)
+#define LOG_TAG "libenigma"
+#define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
+#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 
-int show_message(string message)
-{
-	LOGI("show_message: %s\n",message.c_str());
-	return 0;
+int show_message(string message) {
+  LOGI("show_message: %s\n", message.c_str());
+  return 0;
 }

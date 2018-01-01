@@ -29,12 +29,12 @@
 
 @class iPhoneEnigmaView;
 
-@interface EnigmaXcodeAppDelegate : NSObject <UIApplicationDelegate> {
-    UIWindow *window;
-    iPhoneEnigmaView *glView;
+@interface EnigmaXcodeAppDelegate : NSObject<UIApplicationDelegate> {
+  UIWindow *window;
+  iPhoneEnigmaView *glView;
 }
 
-@property (nonatomic, retain) IBOutlet UIWindow *window;
-@property (nonatomic, retain) IBOutlet iPhoneEnigmaView *glView;
+@property(nonatomic, retain) IBOutlet UIWindow *window;
+@property(nonatomic, retain) IBOutlet iPhoneEnigmaView *glView;
 
 @end

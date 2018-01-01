@@ -26,224 +26,221 @@
 **                                                                              **
 \********************************************************************************/
 
-#include <vector>
-#include <map>
-#include <list>
 #include "motion_planning_struct.h"
-#include <cmath>
 #include <algorithm>
+#include <cmath>
 #include <cstdlib>
+#include <list>
+#include <map>
+#include <vector>
 //#include <iostream>
+using std::list;
 using std::multimap;
 using std::pair;
-using std::list;
 
-namespace enigma
-{
-	grid** gridstructarray;
-	size_t grid_idmax=0;
+namespace enigma {
+grid** gridstructarray;
+size_t grid_idmax = 0;
+}  // namespace enigma
+
+namespace enigma {
+grid::grid(unsigned int idp, int leftp, int topp, unsigned int hcellsp, unsigned int vcellsp, unsigned int cellwidthp,
+           unsigned int cellheightp, unsigned thresholdp, double speed_modifierp)
+    : id(idp),
+      left(leftp),
+      top(topp),
+      hcells(hcellsp),
+      vcells(vcellsp),
+      cellwidth(cellwidthp),
+      cellheight(cellheightp),
+      threshold(thresholdp),
+      speed_modifier(speed_modifierp),
+      nodearray() {
+  gridstructarray[id] = this;
+  gridstructarray[id]->nodearray.reserve(hcells * vcells);
+  for (unsigned int i = 0; i < hcells * vcells; i++) {
+    node nnode(floor(i / vcells), i % vcells, 0, 0, 0, 1);
+    gridstructarray[id]->nodearray.push_back(nnode);
+  }
+
+  grid* gr = gridstructarray[id];
+
+  for (unsigned int i = 0; i < hcells; i++) {
+    for (unsigned int c = 0; c < vcells; c++) {
+      if (i > 0) {
+        gr->nodearray[i * vcells + c].neighbor_nodes.push_back(&gr->nodearray[(i - 1) * vcells + c]);  //left
+        if (c > 0)
+          gr->nodearray[i * vcells + c].neighbor_nodes.push_back(&gr->nodearray[(i - 1) * vcells + c - 1]);  //top-left
+        if (c < vcells - 1)
+          gr->nodearray[i * vcells + c].neighbor_nodes.push_back(
+              &gr->nodearray[(i - 1) * vcells + c + 1]);  //bottom-left
+      }
+      if (c > 0) gr->nodearray[i * vcells + c].neighbor_nodes.push_back(&gr->nodearray[i * vcells + c - 1]);  //top
+      if (i < hcells - 1) {
+        gr->nodearray[i * vcells + c].neighbor_nodes.push_back(&gr->nodearray[(i + 1) * vcells + c]);  //right
+        if (c > 0)
+          gr->nodearray[i * vcells + c].neighbor_nodes.push_back(&gr->nodearray[(i + 1) * vcells + c - 1]);  //top-right
+        if (c < vcells - 1)
+          gr->nodearray[i * vcells + c].neighbor_nodes.push_back(
+              &gr->nodearray[(i + 1) * vcells + c + 1]);  //bottom-bottom
+      }
+      if (c < vcells - 1)
+        gr->nodearray[i * vcells + c].neighbor_nodes.push_back(&gr->nodearray[i * vcells + c + 1]);  //bottom
+    }
+  }
+
+  if (enigma::grid_idmax < id + 1) enigma::grid_idmax = id + 1;
+}
+grid::~grid() { gridstructarray[id] = NULL; }
+
+void gridstructarray_reallocate() {
+  enigma::grid** gridold = gridstructarray;
+  gridstructarray = new grid*[enigma::grid_idmax + 2];
+  for (size_t i = 0; i < enigma::grid_idmax; i++) gridstructarray[i] = gridold[i];
+  delete[] gridold;
 }
 
-namespace enigma
+//Helper functions
+static inline unsigned find_heuristic(const node* n0, const node* n1, bool allow_diag)  //Distance from n0 to n1
 {
-    grid::grid(unsigned int idp,int leftp,int topp,unsigned int hcellsp,unsigned int vcellsp,unsigned int cellwidthp,unsigned int cellheightp,unsigned thresholdp,double speed_modifierp):
-        id(idp), left(leftp), top(topp), hcells(hcellsp), vcells(vcellsp), cellwidth(cellwidthp), cellheight(cellheightp), threshold(thresholdp), speed_modifier(speed_modifierp), nodearray()
-    {
-        gridstructarray[id] = this;
-        gridstructarray[id]->nodearray.reserve(hcells*vcells);
-        for (unsigned int i = 0; i < hcells*vcells; i++)
-        {
-            node nnode(floor(i / vcells),i % vcells,0,0,0,1);
-            gridstructarray[id]->nodearray.push_back(nnode);
-        }
+  if (!allow_diag) {
+    //std::cout << "Straight " << " H = " << fabs((int)n0->x-(int)n1->x) + fabs((int)n0->y-(int)n1->y) << std::endl;
+    return fabs((int)n0->x - (int)n1->x) + fabs((int)n0->y - (int)n1->y);
+  } else {
+    //std::cout << "Diagn " << " H = " << fmax(fabs((int)n0->x-(int)n1->x) , fabs((int)n0->y-(int)n1->y)) << std::endl;
+    return fmax(fabs((int)n0->x - (int)n1->x), fabs((int)n0->y - (int)n1->y));
+  }
+}
 
-        grid *gr = gridstructarray[id];
+static inline int find_priority(multimap<unsigned, node*>& m, node* value) {
+  multimap<unsigned, node*>::iterator it;
+  for (it = m.begin(); it != m.end(); it++)
+    if (it->second == value) return (int)it->first;
+  return -1;
+}
 
-        for (unsigned int i = 0; i < hcells; i++){
-            for (unsigned int c = 0; c < vcells; c++){
-            if (i>0){
-                gr->nodearray[i*vcells+c].neighbor_nodes.push_back(&gr->nodearray[(i-1)*vcells+c]); //left
-                if (c>0)
-                    gr->nodearray[i*vcells+c].neighbor_nodes.push_back(&gr->nodearray[(i-1)*vcells+c-1]); //top-left
-                if (c<vcells-1)
-                    gr->nodearray[i*vcells+c].neighbor_nodes.push_back(&gr->nodearray[(i-1)*vcells+c+1]); //bottom-left
-            }
-            if (c>0)
-                gr->nodearray[i*vcells+c].neighbor_nodes.push_back(&gr->nodearray[i*vcells+c-1]); //top
-            if (i<hcells-1){
-                gr->nodearray[i*vcells+c].neighbor_nodes.push_back(&gr->nodearray[(i+1)*vcells+c]); //right
-                if (c>0)
-                    gr->nodearray[i*vcells+c].neighbor_nodes.push_back(&gr->nodearray[(i+1)*vcells+c-1]); //top-right
-                if (c<vcells-1)
-                    gr->nodearray[i*vcells+c].neighbor_nodes.push_back(&gr->nodearray[(i+1)*vcells+c+1]); //bottom-bottom
-            }
-            if (c<vcells-1)
-                gr->nodearray[i*vcells+c].neighbor_nodes.push_back(&gr->nodearray[i*vcells+c+1]); //bottom
-
-            }
-        }
-
-        if (enigma::grid_idmax < id+1)
-          enigma::grid_idmax = id+1;
+static inline bool check_corners(unsigned id, node* n0, node* n1)  //There must be a better way to do this
+{
+  //std::cout << "Searching..." << std::endl;
+  for (vector<enigma::node*>::iterator it0 = n0->neighbor_nodes.begin(); it0 != n0->neighbor_nodes.end(); ++it0) {
+    for (vector<enigma::node*>::iterator it1 = n1->neighbor_nodes.begin(); it1 != n1->neighbor_nodes.end(); ++it1) {
+      // std::cout << (*it0) << " == " << (*it1) << " && it0.cost=" << (*it0)->cost << std::endl;
+      if ((*it0) == (*it1) && (*it0)->cost >= gridstructarray[id]->threshold) return true;
     }
-    grid::~grid() { gridstructarray[id] = NULL; }
+  }
+  return false;
+}
 
-    void gridstructarray_reallocate()
-    {
-        enigma::grid** gridold = gridstructarray;
-        gridstructarray = new grid*[enigma::grid_idmax+2];
-        for (size_t i = 0; i < enigma::grid_idmax; i++) gridstructarray[i] = gridold[i]; delete[] gridold;
-    }
+multimap<unsigned, node*> find_path(unsigned id, node* n0, node* n1, bool allow_diag, bool& status) {
+  node* current;
+  for (unsigned int i = 0; i < gridstructarray[id]->hcells * gridstructarray[id]->vcells; i++) {
+    gridstructarray[id]->nodearray[i].F = 0;
+    gridstructarray[id]->nodearray[i].G = 0;
+    gridstructarray[id]->nodearray[i].H = 0;
+    gridstructarray[id]->nodearray[i].came_from = NULL;
+  }
 
-    //Helper functions
-    static inline unsigned find_heuristic(const node* n0, const node* n1, bool allow_diag) //Distance from n0 to n1
-    {
-        if (!allow_diag){
-            //std::cout << "Straight " << " H = " << fabs((int)n0->x-(int)n1->x) + fabs((int)n0->y-(int)n1->y) << std::endl;
-            return fabs((int)n0->x-(int)n1->x) + fabs((int)n0->y-(int)n1->y);
-        } else {
-            //std::cout << "Diagn " << " H = " << fmax(fabs((int)n0->x-(int)n1->x) , fabs((int)n0->y-(int)n1->y)) << std::endl;
-            return fmax(fabs((int)n0->x-(int)n1->x) , fabs((int)n0->y-(int)n1->y));
-        }
-    }
+  node* start = n0;
+  node* destination = n1;
+  multimap<unsigned, node*> OPEN;
+  list<node*> CLOSED;
+  multimap<unsigned, node*> mm_ret;
 
-    static inline int find_priority(multimap<unsigned,node*> &m, node* value){
-        multimap<unsigned,node*>::iterator it;
-        for (it = m.begin(); it != m.end(); it++)
-            if (it->second == value) return (int)it->first;
-        return -1;
-    }
+  if (start == destination) return mm_ret;
+  start->H = find_heuristic(start, destination, allow_diag);
+  start->F = start->H;
+  OPEN.insert(pair<unsigned, node*>(start->F, start));
 
-    static inline bool check_corners(unsigned id, node* n0, node* n1) //There must be a better way to do this
-    {
-        //std::cout << "Searching..." << std::endl;
-        for (vector<enigma::node*>::iterator it0 = n0->neighbor_nodes.begin(); it0!=n0->neighbor_nodes.end(); ++it0)
-        {
-            for (vector<enigma::node*>::iterator it1 = n1->neighbor_nodes.begin(); it1!=n1->neighbor_nodes.end(); ++it1)
-            {
-               // std::cout << (*it0) << " == " << (*it1) << " && it0.cost=" << (*it0)->cost << std::endl;
-                if ((*it0)==(*it1) && (*it0)->cost >= gridstructarray[id]->threshold)
-                return true;
-            }
-        }
-        return false;
-    }
-
-    multimap<unsigned,node*> find_path(unsigned id, node* n0, node* n1, bool allow_diag, bool &status)
-    {
-        node* current;
-        for (unsigned int i = 0; i < gridstructarray[id]->hcells*gridstructarray[id]->vcells; i++)
-        {
-            gridstructarray[id]->nodearray[i].F=0;
-            gridstructarray[id]->nodearray[i].G=0;
-            gridstructarray[id]->nodearray[i].H=0;
-            gridstructarray[id]->nodearray[i].came_from=NULL;
-        }
-
-        node* start = n0;
-        node* destination = n1;
-        multimap<unsigned,node*> OPEN;
-        list<node*> CLOSED;
-        multimap<unsigned,node*> mm_ret;
-
-        if (start == destination)
-            return mm_ret;
-        start->H = find_heuristic(start,destination,allow_diag);
-        start->F = start->H;
-        OPEN.insert(pair<unsigned,node*>(start->F,start));
-
-        while (find(CLOSED.begin(), CLOSED.end(), destination) == CLOSED.end() && !OPEN.empty())
-        //loop until destination is in the closed list or the open multimap is empty
-        {
-            //if (OPEN.empty()){break;}
-            //multimap<unsigned,node*>::iterator tit;
-            /*std::cout << "Begin" << std::endl;
+  while (find(CLOSED.begin(), CLOSED.end(), destination) == CLOSED.end() && !OPEN.empty())
+  //loop until destination is in the closed list or the open multimap is empty
+  {
+    //if (OPEN.empty()){break;}
+    //multimap<unsigned,node*>::iterator tit;
+    /*std::cout << "Begin" << std::endl;
             for ( tit=OPEN.begin() ; tit != OPEN.end(); tit++ )
                 std::cout << (*tit).first << " => " << (*tit).second << std::endl;*/
 
-            //this is basically ds_priority_delete_min
-            {
-              multimap<unsigned,node*>::iterator it = OPEN.begin(), it_check;
-              it_check = it++;
-              while (it != OPEN.end())
-              {
-                  if ((*it).first < (*it_check).first) {it_check = it;}
-                  it++;
-              }
-              current = (*it_check).second;
-              OPEN.erase(it_check);
-            }
-            //std::cout << OPEN.size() << std::endl;
-            //std::cout << "End" << std::endl;
-            //multimap<unsigned,node*>::iterator tit;
-            /*for ( tit=OPEN.begin() ; tit != OPEN.end(); tit++ )
-                std::cout << (*tit).first << " => " << (*tit).second << std::endl;*/
-            //std::cout << "Ended" << std::endl;
-
-            CLOSED.push_front(current);
-            for (vector<enigma::node*>::iterator it = current->neighbor_nodes.begin(); it!=current->neighbor_nodes.end(); ++it)
-            { //go trough all the neighbors (should be faster then 8 if cycles like in the init)
-                if (!allow_diag && (*it)->x != current->x && (*it)->y != current->y)
-                    continue;
-
-                bool cutting = false;
-                if (allow_diag == true  && (*it)->x != current->x && (*it)->y != current->y)
-                        cutting = check_corners(id, current, (*it));
-
-                if (find(CLOSED.begin(), CLOSED.end(), (*it)) == CLOSED.end() && (*it)->cost<gridstructarray[id]->threshold && cutting == false){
-                    if (find_priority(OPEN,(*it)) == -1){ //if the node isn't on the open list
-                        (*it)->came_from = current;
-                        (*it)->G = current->G + (*it)->cost;
-                        if ((*it)->x != current->x && (*it)->y != current->y)
-                            (*it)->G += ceil((*it)->cost/2.5); //if it is diagonal increase the move cost
-                        (*it)->H = find_heuristic(*it,destination,allow_diag);
-                        (*it)->F = (*it)->G + (*it)->H;
-                        //std::cout << "Node: " << (*it)->x*gridstructarray[id]->vcells+(*it)->y << " F = " << (*it)->F << " H = " << (*it)->H << " G = " << (*it)->G << std::endl;
-                        OPEN.insert(pair<unsigned,node*>((*it)->F,(*it)));
-
-                    }else{ //if the node is already on the open list we just have to see if it is a better path
-                        unsigned temp_G = current->G + (*it)->cost;
-                        if (temp_G < (*it)->G) {
-                            (*it)->came_from = current;
-                            (*it)->G = current->G + (*it)->cost;
-                            if ((*it)->x != current->x && (*it)->y != current->y)
-                                (*it)->G += ceil((*it)->cost/2.5);
-                            (*it)->H = find_heuristic(*it,destination,allow_diag);
-                            (*it)->F = (*it)->G + (*it)->H;
-                        }
-                    }
-                }
-            }
+    //this is basically ds_priority_delete_min
+    {
+      multimap<unsigned, node*>::iterator it = OPEN.begin(), it_check;
+      it_check = it++;
+      while (it != OPEN.end()) {
+        if ((*it).first < (*it_check).first) {
+          it_check = it;
         }
-        node *last, *nearest;
-        unsigned i = 0;
-        status = true;
-        if (find(CLOSED.begin(), CLOSED.end(), destination) == CLOSED.end())
-        {   //this is for if the destionation can't be found if
-            status = false;
-            nearest = start;
-
-            list<node*>::iterator it;
-            for (it=CLOSED.begin(); it != CLOSED.end(); it++){
-                (*it)->H = find_heuristic(*it,destination,allow_diag);
-                if ((*it)->H < nearest->H)
-                    nearest = *it;
-            }
-            destination = nearest;
-            if (start == destination)
-                return mm_ret;
-        }
-
-        //mm_ret.insert(pair<unsigned,node*>(i,destination));
-        last = destination;
-        while (last->came_from != start){
-            i += 1;
-            mm_ret.insert(pair<unsigned,node*>(i,last->came_from));
-            last = last->came_from;
-        }
-
-        //delete CLOSED;
-        //delete OPEN;
-        return mm_ret; //return the multimap containing a list of all the nodes that are in the path.
+        it++;
+      }
+      current = (*it_check).second;
+      OPEN.erase(it_check);
     }
+    //std::cout << OPEN.size() << std::endl;
+    //std::cout << "End" << std::endl;
+    //multimap<unsigned,node*>::iterator tit;
+    /*for ( tit=OPEN.begin() ; tit != OPEN.end(); tit++ )
+                std::cout << (*tit).first << " => " << (*tit).second << std::endl;*/
+    //std::cout << "Ended" << std::endl;
+
+    CLOSED.push_front(current);
+    for (vector<enigma::node*>::iterator it = current->neighbor_nodes.begin(); it != current->neighbor_nodes.end();
+         ++it) {  //go trough all the neighbors (should be faster then 8 if cycles like in the init)
+      if (!allow_diag && (*it)->x != current->x && (*it)->y != current->y) continue;
+
+      bool cutting = false;
+      if (allow_diag == true && (*it)->x != current->x && (*it)->y != current->y)
+        cutting = check_corners(id, current, (*it));
+
+      if (find(CLOSED.begin(), CLOSED.end(), (*it)) == CLOSED.end() && (*it)->cost < gridstructarray[id]->threshold &&
+          cutting == false) {
+        if (find_priority(OPEN, (*it)) == -1) {  //if the node isn't on the open list
+          (*it)->came_from = current;
+          (*it)->G = current->G + (*it)->cost;
+          if ((*it)->x != current->x && (*it)->y != current->y)
+            (*it)->G += ceil((*it)->cost / 2.5);  //if it is diagonal increase the move cost
+          (*it)->H = find_heuristic(*it, destination, allow_diag);
+          (*it)->F = (*it)->G + (*it)->H;
+          //std::cout << "Node: " << (*it)->x*gridstructarray[id]->vcells+(*it)->y << " F = " << (*it)->F << " H = " << (*it)->H << " G = " << (*it)->G << std::endl;
+          OPEN.insert(pair<unsigned, node*>((*it)->F, (*it)));
+
+        } else {  //if the node is already on the open list we just have to see if it is a better path
+          unsigned temp_G = current->G + (*it)->cost;
+          if (temp_G < (*it)->G) {
+            (*it)->came_from = current;
+            (*it)->G = current->G + (*it)->cost;
+            if ((*it)->x != current->x && (*it)->y != current->y) (*it)->G += ceil((*it)->cost / 2.5);
+            (*it)->H = find_heuristic(*it, destination, allow_diag);
+            (*it)->F = (*it)->G + (*it)->H;
+          }
+        }
+      }
+    }
+  }
+  node *last, *nearest;
+  unsigned i = 0;
+  status = true;
+  if (find(CLOSED.begin(), CLOSED.end(), destination) ==
+      CLOSED.end()) {  //this is for if the destionation can't be found if
+    status = false;
+    nearest = start;
+
+    list<node*>::iterator it;
+    for (it = CLOSED.begin(); it != CLOSED.end(); it++) {
+      (*it)->H = find_heuristic(*it, destination, allow_diag);
+      if ((*it)->H < nearest->H) nearest = *it;
+    }
+    destination = nearest;
+    if (start == destination) return mm_ret;
+  }
+
+  //mm_ret.insert(pair<unsigned,node*>(i,destination));
+  last = destination;
+  while (last->came_from != start) {
+    i += 1;
+    mm_ret.insert(pair<unsigned, node*>(i, last->came_from));
+    last = last->came_from;
+  }
+
+  //delete CLOSED;
+  //delete OPEN;
+  return mm_ret;  //return the multimap containing a list of all the nodes that are in the path.
 }
+}  // namespace enigma

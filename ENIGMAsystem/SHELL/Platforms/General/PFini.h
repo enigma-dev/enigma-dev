@@ -18,8 +18,7 @@
 
 #include <string>
 
-namespace enigma_user
-{
+namespace enigma_user {
 
 void ini_open(std::string fname);
 void ini_close();
@@ -32,5 +31,4 @@ bool ini_section_exists(std::string section);
 void ini_key_delete(std::string section, std::string key);
 void ini_section_delete(std::string section);
 
-}
-
+}  // namespace enigma_user

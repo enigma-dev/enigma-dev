@@ -34,8 +34,8 @@ void gmw_init();
 void Sleep(int ms);
 
 namespace enigma {
-	extern char** parameters;
-	//void writename(char* x);
-}
+extern char** parameters;
+//void writename(char* x);
+}  // namespace enigma
 
-#define enigmacatchmouse() //Linux should hopefully do that automatically.
+#define enigmacatchmouse()  //Linux should hopefully do that automatically.

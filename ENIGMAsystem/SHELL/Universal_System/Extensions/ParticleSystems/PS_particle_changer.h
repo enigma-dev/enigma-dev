@@ -30,26 +30,23 @@
 
 #include "PS_particle_enums.h"
 
-namespace enigma
-{
-  struct particle_changer
-  {
-    double xmin, xmax, ymin, ymax;
-    ps_shape shape;
-    int parttypeid1;
-    int parttypeid2;
-    ps_change change_kind;
+namespace enigma {
+struct particle_changer {
+  double xmin, xmax, ymin, ymax;
+  ps_shape shape;
+  int parttypeid1;
+  int parttypeid2;
+  ps_change change_kind;
 
-    void initialize();
-    void clear_particle_changer();
-    void set_region(double xmin, double xmax, double ymin, double ymax, ps_shape shape);
-    void set_types(int parttypeid1, int parttypeid2);
-    void set_change_kind(ps_change change_kind);
-    bool is_inside(double x, double y);
-  };
+  void initialize();
+  void clear_particle_changer();
+  void set_region(double xmin, double xmax, double ymin, double ymax, ps_shape shape);
+  void set_types(int parttypeid1, int parttypeid2);
+  void set_change_kind(ps_change change_kind);
+  bool is_inside(double x, double y);
+};
 
-  particle_changer* create_particle_changer();
-}
+particle_changer* create_particle_changer();
+}  // namespace enigma
 
-#endif // ENIGMA_PS_PARTICLECHANGER
-
+#endif  // ENIGMA_PS_PARTICLECHANGER

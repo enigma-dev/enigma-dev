@@ -30,26 +30,23 @@
 
 #include "PS_particle_type.h"
 
-namespace enigma
-{
-  struct particle_instance
-  {
-    particle_type* pt;
+namespace enigma {
+struct particle_instance {
+  particle_type* pt;
 
-    int sprite_subimageindex_initial;
-    double size;
-    double size_wiggle_offset; // [-1;1].
-    double angle;
-    double ang_wiggle_offset; // [-1;1].
-    int color;
-    int alpha;
-    int life_current, life_start;
-    double x, y;
-    double speed, direction;
-    double speed_wiggle_offset; // [-1;1].
-    double dir_wiggle_offset; // [-1;1].
-  };
-}
+  int sprite_subimageindex_initial;
+  double size;
+  double size_wiggle_offset;  // [-1;1].
+  double angle;
+  double ang_wiggle_offset;  // [-1;1].
+  int color;
+  int alpha;
+  int life_current, life_start;
+  double x, y;
+  double speed, direction;
+  double speed_wiggle_offset;  // [-1;1].
+  double dir_wiggle_offset;    // [-1;1].
+};
+}  // namespace enigma
 
-#endif // ENIGMA_PS_PARTICLEINSTANCE
-
+#endif  // ENIGMA_PS_PARTICLEINSTANCE

@@ -28,33 +28,36 @@
 //#include "Universal_System/instance_system.h"
 #include <cmath>
 
-namespace enigma_user
-{
+namespace enigma_user {
 
 void mp_potential_settings(double maxrot, double rotstep, double ahead, bool onspot);
-bool mp_potential_step_object(const double x, const double y, const double stepsize, const int object, const bool solid_only = false);
+bool mp_potential_step_object(const double x, const double y, const double stepsize, const int object,
+                              const bool solid_only = false);
 
 inline bool mp_potential_step(const double x, const double y, const double stepsize, const bool checkall) {
-    return mp_potential_step_object(x, y, stepsize, all, !checkall);
+  return mp_potential_step_object(x, y, stepsize, all, !checkall);
 }
 
-bool mp_potential_path_object(int path, const double x, const double y, const double stepsize, double factor, const int object, const bool solid_only = false);
+bool mp_potential_path_object(int path, const double x, const double y, const double stepsize, double factor,
+                              const int object, const bool solid_only = false);
 
-inline bool mp_potential_path(int path, const double x, const double y, const double stepsize, double factor, const bool checkall) {
-    return mp_potential_path_object(path, x, y, stepsize, factor, all, !checkall);
+inline bool mp_potential_path(int path, const double x, const double y, const double stepsize, double factor,
+                              const bool checkall) {
+  return mp_potential_path_object(path, x, y, stepsize, factor, all, !checkall);
 }
 
-bool mp_linear_step_object(const double x, const double y, const double stepsize, const int object, const bool solid_only = false);
+bool mp_linear_step_object(const double x, const double y, const double stepsize, const int object,
+                           const bool solid_only = false);
 
 inline bool mp_linear_step(const double x, const double y, const double stepsize, const bool checkall) {
-    return mp_linear_step_object(x, y, stepsize, all, !checkall);
+  return mp_linear_step_object(x, y, stepsize, all, !checkall);
 }
 
-bool mp_linear_path_object(int path, const double x, const double y, const double stepsize, const int object, const bool solid_only = false);
+bool mp_linear_path_object(int path, const double x, const double y, const double stepsize, const int object,
+                           const bool solid_only = false);
 
 inline bool mp_linear_path(int path, const double x, const double y, const double stepsize, const bool checkall) {
-    return mp_linear_path_object(path, x, y, stepsize, all, !checkall);
+  return mp_linear_path_object(path, x, y, stepsize, all, !checkall);
 }
 
-}
-
+}  // namespace enigma_user

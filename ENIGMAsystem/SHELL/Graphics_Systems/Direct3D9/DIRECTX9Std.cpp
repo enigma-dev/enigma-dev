@@ -22,22 +22,16 @@
 #include "Direct3D9Headers.h"
 using namespace std;
 #include "DIRECTX9Std.h"
+#include "Graphics_Systems/graphics_mandatory.h"  // Room dimensions.
+#include "Universal_System/roomsystem.h"          // Room dimensions.
 #include "Universal_System/var4.h"
-#include "Universal_System/roomsystem.h" // Room dimensions.
-#include "Graphics_Systems/graphics_mandatory.h" // Room dimensions.
-namespace enigma
-{
-  bool pbo_isgo;
+namespace enigma {
+bool pbo_isgo;
 
-  void graphicssystem_initialize()
-  {
-  }
-}
+void graphicssystem_initialize() {}
+}  // namespace enigma
 
 namespace enigma_user {
 // Stolen entirely from the documentation and thrown into a switch() structure.
-string draw_get_graphics_error()
-{
-
-}
-}
+string draw_get_graphics_error() {}
+}  // namespace enigma_user

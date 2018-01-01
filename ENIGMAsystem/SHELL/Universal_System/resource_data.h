@@ -29,23 +29,26 @@
 #define RESOURCE_DATA_H
 
 namespace enigma {
-  struct callable_script {
-    variant (*base)();
-    int argnum;
-  };
-  struct nameid_pair {
-    string name; int id;
-  };
-  void map_resource_ids(nameid_pair* n);
-  extern callable_script callable_scripts[];
-  extern nameid_pair resource_nameids[];
-}
+struct callable_script {
+  variant (*base)();
+  int argnum;
+};
+struct nameid_pair {
+  string name;
+  int id;
+};
+void map_resource_ids(nameid_pair* n);
+extern callable_script callable_scripts[];
+extern nameid_pair resource_nameids[];
+}  // namespace enigma
 
-namespace enigma_user
-{
+namespace enigma_user {
 
 int resource_get_id(string name);
-variant script_execute(int scr, variant arg0 = 0, variant arg1 = 0, variant arg2 = 0, variant arg3 = 0, variant arg4 = 0, variant arg5 = 0, variant arg6 = 0, variant arg7 = 0, variant arg8 = 0, variant arg9 = 0, variant arg10 = 0, variant arg11 = 0, variant arg12 = 0, variant arg13 = 0, variant arg14 = 14, variant arg15 = 0);
+variant script_execute(int scr, variant arg0 = 0, variant arg1 = 0, variant arg2 = 0, variant arg3 = 0,
+                       variant arg4 = 0, variant arg5 = 0, variant arg6 = 0, variant arg7 = 0, variant arg8 = 0,
+                       variant arg9 = 0, variant arg10 = 0, variant arg11 = 0, variant arg12 = 0, variant arg13 = 0,
+                       variant arg14 = 14, variant arg15 = 0);
 bool script_exists(int script);
 
 string object_get_name(int i);
@@ -58,6 +61,6 @@ string sound_get_name(int i);
 string script_get_name(int i);
 string shader_get_name(int i);
 
-}
+}  // namespace enigma_user
 
 #endif

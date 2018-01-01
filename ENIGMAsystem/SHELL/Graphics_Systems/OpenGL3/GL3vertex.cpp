@@ -15,39 +15,37 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "../General/OpenGLHeaders.h"
-#include <vector>
 #include <map>
 #include <utility>
-using std::vector;
+#include <vector>
+#include "../General/OpenGLHeaders.h"
 using std::pair;
+using std::vector;
 
-#include "../General/GSvertex.h"
 #include "../General/GStextures.h"
+#include "../General/GSvertex.h"
 
 namespace enigma {
-  vector<VertexFormat*> vertexFormats(0);    
+vector<VertexFormat*> vertexFormats(0);
 }
 
 namespace enigma_user {
 
-  unsigned vertex_format_create(){
-    unsigned id = enigma::vertexFormats.size();
-    enigma::vertexFormats.push_back(new enigma::VertexFormat());
-    return id;
-  }
-
-  void vertex_format_destroy(int id){
-    delete enigma::vertexFormats[id];
-    enigma::vertexFormats[id] = nullptr;
-  }
-
-  bool vertex_format_exists(int id){
-    return (id >= 0 && (unsigned)id < enigma::vertexFormats.size() &&  enigma::vertexFormats[id] != nullptr);
-  }
-
-  void vertex_format_add(int id, int type, int attribute) {
-    enigma::vertexFormats[id]->AddAttribute(type, attribute);
-  }
-
+unsigned vertex_format_create() {
+  unsigned id = enigma::vertexFormats.size();
+  enigma::vertexFormats.push_back(new enigma::VertexFormat());
+  return id;
 }
+
+void vertex_format_destroy(int id) {
+  delete enigma::vertexFormats[id];
+  enigma::vertexFormats[id] = nullptr;
+}
+
+bool vertex_format_exists(int id) {
+  return (id >= 0 && (unsigned)id < enigma::vertexFormats.size() && enigma::vertexFormats[id] != nullptr);
+}
+
+void vertex_format_add(int id, int type, int attribute) { enigma::vertexFormats[id]->AddAttribute(type, attribute); }
+
+}  // namespace enigma_user

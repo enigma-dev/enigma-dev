@@ -16,8 +16,8 @@
 **/
 
 /*
-#include "../General/OpenGLHeaders.h"
 #include "GLTextureStruct.h"
+#include "../General/OpenGLHeaders.h"
 
 TextureStruct::TextureStruct(unsigned gtex): gltex(gtex) {
   sampler = new enigma::SamplerState();

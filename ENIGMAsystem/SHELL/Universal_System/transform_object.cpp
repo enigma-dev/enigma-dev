@@ -22,9 +22,8 @@
 
 #include "transform_object.h"
 
-namespace enigma
-{
-  object_transform::object_transform(): object_graphics() {}
-  object_transform::object_transform(unsigned _x, int _y): object_graphics(_x,_y) {}
-  object_transform::~object_transform() {}
-}
+namespace enigma {
+object_transform::object_transform() : object_graphics() {}
+object_transform::object_transform(unsigned _x, int _y) : object_graphics(_x, _y) {}
+object_transform::~object_transform() {}
+}  // namespace enigma

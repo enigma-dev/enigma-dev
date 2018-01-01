@@ -19,8 +19,7 @@
 #ifndef ENIGMA_PLATFORM_REGISTRY
 #define ENIGMA_PLATFORM_REGISTRY
 
-namespace enigma_user
-{
+namespace enigma_user {
 
 void registry_write_string(std::string name, std::string str);
 void registry_write_real(std::string name, int x);
@@ -34,6 +33,6 @@ int registry_read_real_ext(std::string key, std::string name);
 bool registry_exists_ext(std::string key, std::string name);
 void registry_set_root(int root);
 
-}
+}  // namespace enigma_user
 
-#endif //ENIGMA_PLATFORM_REGISTRY
+#endif  //ENIGMA_PLATFORM_REGISTRY

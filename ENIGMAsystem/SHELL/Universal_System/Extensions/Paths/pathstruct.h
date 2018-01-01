@@ -28,46 +28,42 @@
 
 #include <map>
 #include <vector>
-using std::vector;
 using std::map;
+using std::vector;
 
 #include "Universal_System/scalar.h"
 
 #ifdef INCLUDED_FROM_SHELLMAIN
-#  error This file includes non-ENIGMA STL headers and should not be included from SHELLmain.
+#error This file includes non-ENIGMA STL headers and should not be included from SHELLmain.
 #endif
 
-namespace enigma
-{
-  struct path_point
-  {
-    cs_scalar x, y, speed, length;
-    path_point(cs_scalar X = 0, cs_scalar Y = 0, cs_scalar Speed = 0, cs_scalar Length = 0):
-      x(X), y(Y), speed(Speed), length(Length) {}
-  };
-  struct path
-  {
-    int id, precision;
-    bool smooth, closed;
-    vector<path_point> pointarray;
-    map<cs_scalar,int> pointoffset;
-    cs_scalar total_length, centerx, centery;
-    path(unsigned pathid, bool smooth, bool closed, int precision, unsigned pointcount);
-    ~path();
-  };
+namespace enigma {
+struct path_point {
+  cs_scalar x, y, speed, length;
+  path_point(cs_scalar X = 0, cs_scalar Y = 0, cs_scalar Speed = 0, cs_scalar Length = 0)
+      : x(X), y(Y), speed(Speed), length(Length) {}
+};
+struct path {
+  int id, precision;
+  bool smooth, closed;
+  vector<path_point> pointarray;
+  map<cs_scalar, int> pointoffset;
+  cs_scalar total_length, centerx, centery;
+  path(unsigned pathid, bool smooth, bool closed, int precision, unsigned pointcount);
+  ~path();
+};
 
-  extern path** pathstructarray;
-  void path_add_point(unsigned pathid, cs_scalar x, cs_scalar y, cs_scalar speed);
-  void path_recalculate(unsigned pathid);
-  void path_getXY(path *pth, cs_scalar &x, cs_scalar &y, cs_scalar position);
-  void path_getXY_scaled(path *pth, cs_scalar &x, cs_scalar &y, cs_scalar position, cs_scalar scale);
-  void path_getspeed(path *pth, cs_scalar &speed, cs_scalar position);
-  void pathstructarray_reallocate();
-  typedef map<cs_scalar,int>::iterator ppi_t;
-}
+extern path **pathstructarray;
+void path_add_point(unsigned pathid, cs_scalar x, cs_scalar y, cs_scalar speed);
+void path_recalculate(unsigned pathid);
+void path_getXY(path *pth, cs_scalar &x, cs_scalar &y, cs_scalar position);
+void path_getXY_scaled(path *pth, cs_scalar &x, cs_scalar &y, cs_scalar position, cs_scalar scale);
+void path_getspeed(path *pth, cs_scalar &speed, cs_scalar position);
+void pathstructarray_reallocate();
+typedef map<cs_scalar, int>::iterator ppi_t;
+}  // namespace enigma
 
-namespace enigma
-{
-	//Allocates and zero-fills the array at game start
-	void paths_init();
-}
+namespace enigma {
+//Allocates and zero-fills the array at game start
+void paths_init();
+}  // namespace enigma

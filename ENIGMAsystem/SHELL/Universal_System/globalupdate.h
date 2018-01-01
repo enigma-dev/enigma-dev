@@ -25,9 +25,7 @@
 **                                                                              **
 \********************************************************************************/
 
-namespace enigma
-{
-  extern double mouse_xprevious, mouse_yprevious;
-  void update_globals();
-}
-
+namespace enigma {
+extern double mouse_xprevious, mouse_yprevious;
+void update_globals();
+}  // namespace enigma

@@ -26,12 +26,12 @@
 **                                                                              **
 \********************************************************************************/
 
-#include <string>
-#include <sstream>
-#include <windows.h>
-#include "Universal_System/estring.h"
-#include <time.h>
 #include <sys/stat.h>
+#include <time.h>
+#include <windows.h>
+#include <sstream>
+#include <string>
+#include "Universal_System/estring.h"
 
 #include "../General/PFini.h"
 
@@ -39,211 +39,192 @@ using namespace std;
 
 static std::string iniFilename = "";
 
-namespace enigma_user
-{
+namespace enigma_user {
 
-void ini_open(std::string fname)
-{
-	iniFilename = fname;
+void ini_open(std::string fname) { iniFilename = fname; }
+
+void ini_close() { iniFilename = ""; }
+
+std::string ini_read_string(std::string section, std::string key, std::string defaultValue) {
+  char buffer[1024];
+  GetPrivateProfileString(section.c_str(), key.c_str(), defaultValue.c_str(), buffer, 1024, iniFilename.c_str());
+
+  return buffer;
 }
 
-void ini_close()
-{
-	iniFilename = "";
+float ini_read_real(std::string section, std::string key, float defaultValue) {
+  char res[255];
+  char def[255];
+  sprintf(def, "%f", defaultValue);
+  GetPrivateProfileString(section.c_str(), key.c_str(), def, res, 255, iniFilename.c_str());
+  return atof(res);
+  //return GetPrivateProfileInt(section.c_str(), key.c_str(), defaultValue, iniFilename.c_str());
 }
 
-std::string ini_read_string(std::string section, std::string key, std::string defaultValue)
-{
-	char buffer[1024];
-	GetPrivateProfileString(section.c_str(), key.c_str(), defaultValue.c_str(), buffer, 1024, iniFilename.c_str());
-
-	return buffer;
+void ini_write_string(std::string section, std::string key, std::string value) {
+  WritePrivateProfileString(section.c_str(), key.c_str(), value.c_str(), iniFilename.c_str());
 }
 
-float ini_read_real(std::string section, std::string key, float defaultValue)
-{
-	char res[255];
-	char def[255];
-	sprintf(def, "%f", defaultValue);
-	GetPrivateProfileString(section.c_str(), key.c_str(), def, res, 255, iniFilename.c_str()); 
-	return atof(res);
-	//return GetPrivateProfileInt(section.c_str(), key.c_str(), defaultValue, iniFilename.c_str());
+void ini_write_real(std::string section, std::string key, float value) {
+  std::stringstream ss;
+  ss << value;
+
+  WritePrivateProfileString(section.c_str(), key.c_str(), ss.str().c_str(), iniFilename.c_str());
 }
 
-void ini_write_string(std::string section, std::string key, std::string value)
-{
-	WritePrivateProfileString(section.c_str(), key.c_str(), value.c_str(), iniFilename.c_str());
+bool ini_key_exists(std::string section, std::string key) {
+  char buffer[1024];
+  return GetPrivateProfileString(section.c_str(), key.c_str(), "", buffer, 1024, iniFilename.c_str()) != 0;
 }
 
-void ini_write_real(std::string section, std::string key, float value)
-{
-	std::stringstream ss;
-	ss << value;
-
-	WritePrivateProfileString(section.c_str(), key.c_str(), ss.str().c_str(), iniFilename.c_str());
+bool ini_section_exists(std::string section) {
+  char buffer[1024];
+  return GetPrivateProfileSection(section.c_str(), buffer, 1024, iniFilename.c_str()) != 0;
 }
 
-bool ini_key_exists(std::string section, std::string key)
-{
-	char buffer[1024];
-	return GetPrivateProfileString(section.c_str(), key.c_str(), "", buffer, 1024, iniFilename.c_str()) != 0;
+void ini_key_delete(std::string section, std::string key) {
+  WritePrivateProfileString(section.c_str(), key.c_str(), NULL, iniFilename.c_str());
 }
 
-bool ini_section_exists(std::string section)
-{
-	char buffer[1024];
-	return GetPrivateProfileSection(section.c_str(), buffer, 1024, iniFilename.c_str()) != 0;
-}
-
-void ini_key_delete(std::string section, std::string key)
-{
-	WritePrivateProfileString(section.c_str(), key.c_str(), NULL, iniFilename.c_str());
-}
-
-void ini_section_delete(std::string section)
-{
+void ini_section_delete(std::string section) {
   WritePrivateProfileString(section.c_str(), NULL, NULL, iniFilename.c_str());
 }
 
 /* OS Specific; should be moved */
 
 int file_exists(std::string fname) {
-    DWORD attributes = GetFileAttributes(fname.c_str());
-    if(attributes == 0xFFFFFFFF) {
-        return 0;
-    } else {
-        return 1;
-    }
+  DWORD attributes = GetFileAttributes(fname.c_str());
+  if (attributes == 0xFFFFFFFF) {
+    return 0;
+  } else {
+    return 1;
+  }
 }
 
 int file_delete(std::string fname) {
-    DWORD result = DeleteFileA(fname.c_str());
+  DWORD result = DeleteFileA(fname.c_str());
 
-    switch(result) {
-        case 0:
-            return 0;
-            break;
-        case ERROR_FILE_NOT_FOUND:
-            return 0;
-            break;
-        case ERROR_ACCESS_DENIED:
-            return 0;
-            break;
-        default:
-            return 1;
-            break;
-    }
+  switch (result) {
+    case 0:
+      return 0;
+      break;
+    case ERROR_FILE_NOT_FOUND:
+      return 0;
+      break;
+    case ERROR_ACCESS_DENIED:
+      return 0;
+      break;
+    default:
+      return 1;
+      break;
+  }
 }
 
 int file_rename(std::string oldname, std::string newname) {
-    DWORD result = MoveFileA(oldname.c_str(), newname.c_str());
+  DWORD result = MoveFileA(oldname.c_str(), newname.c_str());
 
-    switch(result) {
-        case 0:
-            return 0;
-            break;
-        default:
-            return 1;
-            break;
-    }
+  switch (result) {
+    case 0:
+      return 0;
+      break;
+    default:
+      return 1;
+      break;
+  }
 }
 
 int file_copy(std::string fname, std::string newname) {
-    DWORD result = CopyFileA(fname.c_str(), newname.c_str(), false);
+  DWORD result = CopyFileA(fname.c_str(), newname.c_str(), false);
 
-    switch(result) {
-        case 0:
-            return 0;
-            break;
-        default:
-            return 1;
-            break;
-    }
+  switch (result) {
+    case 0:
+      return 0;
+      break;
+    default:
+      return 1;
+      break;
+  }
 }
 
 int directory_exists(std::string dname) {
   DWORD dwAttrib = GetFileAttributes(dname.c_str());
 
-  return (dwAttrib != INVALID_FILE_ATTRIBUTES && 
-         (dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
+  return (dwAttrib != INVALID_FILE_ATTRIBUTES && (dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
 }
 
 // NOTICE: May behave differently than GM. May fail if there are
 // directories in the path missing, whereas GM would create them all
 int directory_create(std::string dname) {
-    DWORD result = CreateDirectoryA(dname.c_str(), NULL);
+  DWORD result = CreateDirectoryA(dname.c_str(), NULL);
 
-    switch(result) {
-        case 0:
-            return 0;
-            break;
-        case ERROR_ALREADY_EXISTS:
-            return 0;
-            break;
-        case ERROR_PATH_NOT_FOUND:
-            return 0;
-            break;
-        default:
-            return 1;
-            break;
-    }
+  switch (result) {
+    case 0:
+      return 0;
+      break;
+    case ERROR_ALREADY_EXISTS:
+      return 0;
+      break;
+    case ERROR_PATH_NOT_FOUND:
+      return 0;
+      break;
+    default:
+      return 1;
+      break;
+  }
 }
 
 int directory_delete(std::string dname) {
   BOOL result = RemoveDirectory(dname.c_str());
-  if (result) return 1;
-  else return 0;
+  if (result)
+    return 1;
+  else
+    return 0;
 }
-
 
 // Maintainer: If this segment errors, it is an error of philosophy.
 // The Game Maker constants do not have a standard, but line up with
 // their Windows equivalents. Should either change, we have an issue.
 enum {
-  fa_readonly  = FILE_ATTRIBUTE_READONLY,
-  fa_hidden    = FILE_ATTRIBUTE_HIDDEN,
-  fa_sysfile   = FILE_ATTRIBUTE_SYSTEM,
-  fa_volumeid  = 0x00000008,
+  fa_readonly = FILE_ATTRIBUTE_READONLY,
+  fa_hidden = FILE_ATTRIBUTE_HIDDEN,
+  fa_sysfile = FILE_ATTRIBUTE_SYSTEM,
+  fa_volumeid = 0x00000008,
   fa_directory = FILE_ATTRIBUTE_DIRECTORY,
-  fa_archive   = FILE_ATTRIBUTE_ARCHIVE
+  fa_archive = FILE_ATTRIBUTE_ARCHIVE
 };
 
-}
+}  // namespace enigma_user
 
 static int ff_attribs = 0;
 static HANDLE current_find = INVALID_HANDLE_VALUE;
 static WIN32_FIND_DATA found;
 
-namespace enigma_user
-{
+namespace enigma_user {
 
-string file_find_first(string name,int attributes)
-{
-  if (current_find != INVALID_HANDLE_VALUE)
-  { FindClose(current_find); current_find=INVALID_HANDLE_VALUE; }
-
-  ff_attribs=attributes;
-
-  HANDLE d=FindFirstFile(name.c_str(),&found);
-  if (d==INVALID_HANDLE_VALUE) return "";
-  while (found.dwFileAttributes!=FILE_ATTRIBUTE_NORMAL and !(ff_attribs^found.dwFileAttributes))
-  {
-    if (FindNextFile(d,&found)==0)
-    return "";
+string file_find_first(string name, int attributes) {
+  if (current_find != INVALID_HANDLE_VALUE) {
+    FindClose(current_find);
+    current_find = INVALID_HANDLE_VALUE;
   }
 
-  current_find=d;
+  ff_attribs = attributes;
+
+  HANDLE d = FindFirstFile(name.c_str(), &found);
+  if (d == INVALID_HANDLE_VALUE) return "";
+  while (found.dwFileAttributes != FILE_ATTRIBUTE_NORMAL and !(ff_attribs ^ found.dwFileAttributes)) {
+    if (FindNextFile(d, &found) == 0) return "";
+  }
+
+  current_find = d;
   return found.cFileName;
 }
 
-string file_find_next()
-{
-  if (current_find==INVALID_HANDLE_VALUE) return "";
-  if (FindNextFile(current_find,&found)==0) return "";
+string file_find_next() {
+  if (current_find == INVALID_HANDLE_VALUE) return "";
+  if (FindNextFile(current_find, &found) == 0) return "";
 
-  while (found.dwFileAttributes!=FILE_ATTRIBUTE_NORMAL and !(ff_attribs^found.dwFileAttributes)) {
-    if (FindNextFile(current_find,&found)==0)
-    return "";
+  while (found.dwFileAttributes != FILE_ATTRIBUTE_NORMAL and !(ff_attribs ^ found.dwFileAttributes)) {
+    if (FindNextFile(current_find, &found) == 0) return "";
   }
   return found.cFileName;
 }
@@ -253,12 +234,10 @@ int file_find_close() {
   return 0;
 }
 
-bool file_attributes(std::string fname,int attributes)
-{
-    DWORD fa = GetFileAttributes(fname.c_str());
-    if (fa == 0xFFFFFFFF)
-        return false;
-    return fa & attributes;
+bool file_attributes(std::string fname, int attributes) {
+  DWORD fa = GetFileAttributes(fname.c_str());
+  if (fa == 0xFFFFFFFF) return false;
+  return fa & attributes;
 }
 
 /*void export_include_file(std::string fname);
@@ -270,32 +249,28 @@ extern std::string working_directory;
 extern std::string program_directory;
 extern std::string temp_directory;
 
-long long file_size(std::string fname)
-{
-    struct stat sb;
-    if (stat(fname.c_str(), &sb) == -1) {
-        return -1;
-    }
-    return (long long) sb.st_size;
+long long file_size(std::string fname) {
+  struct stat sb;
+  if (stat(fname.c_str(), &sb) == -1) {
+    return -1;
+  }
+  return (long long)sb.st_size;
 }
 
-time_t file_access_time(std::string fname)
-{
-    struct stat sb;
-    if (stat(fname.c_str(), &sb) == -1) {
-        return -1;
-    }
-    return sb.st_atime;
+time_t file_access_time(std::string fname) {
+  struct stat sb;
+  if (stat(fname.c_str(), &sb) == -1) {
+    return -1;
+  }
+  return sb.st_atime;
 }
 
-time_t file_modified_time(std::string fname)
-{
-    struct stat sb;
-    if (stat(fname.c_str(), &sb) == -1) {
-        return -1;
-    }
-    return sb.st_mtime;
+time_t file_modified_time(std::string fname) {
+  struct stat sb;
+  if (stat(fname.c_str(), &sb) == -1) {
+    return -1;
+  }
+  return sb.st_mtime;
 }
 
-}
-
+}  // namespace enigma_user
