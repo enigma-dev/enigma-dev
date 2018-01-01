@@ -25,6 +25,8 @@
 #include "../DataStructures/include.h"
 #include "libjson.h"
 
+using std::string;
+
 namespace enigma_user
 {
 	int RecursiveDSList(Json::Value value);
