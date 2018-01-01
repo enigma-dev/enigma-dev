@@ -17,8 +17,9 @@
 
 #ifndef BGUI_TOGGLE_H
 #define BGUI_TOGGLE_H
+
 #include <array>
-using std::array;
+#include <string>
 
 #include "common.h"
 
@@ -33,11 +34,11 @@ namespace gui
 		public:
 			unsigned int id;
 			rect box;
-			string text = "";
+			std::string text = "";
 			int state = 0;
 			bool visible = true;
 			bool active = false; //Is button pressed
-			array<int,4> callback; //Script to run on event
+			std::array<int,4> callback; //Script to run on event
 
 			int parent_id = -1; //ID of some kind of parent (probably a window). It won't render with gui_draw_toggles() if it is not -1.
 
