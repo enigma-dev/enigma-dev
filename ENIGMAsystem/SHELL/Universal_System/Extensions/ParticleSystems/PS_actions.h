@@ -28,9 +28,8 @@
 #ifndef ENIGMA_PS_ACTIONS
 #define ENIGMA_PS_ACTIONS
 
-extern bool argument_relative;
-
 namespace enigma_user {
+  extern bool argument_relative;
   void action_effect(int effect_type, double x, double y, int size, int color, int where);
 
   void action_partsyst_create(double depth);
