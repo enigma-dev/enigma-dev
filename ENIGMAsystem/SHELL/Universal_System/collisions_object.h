@@ -34,10 +34,10 @@
 #define ENIGMA_COLLISIONS_OBJECT_H
 
 #include "transform_object.h"
+#include "sprites_internal.h" //bbox_rect
 
 namespace enigma
 {
-  struct bbox_rect_t;
   struct object_collisions: object_transform
   {
     //Bit Mask
