@@ -30,32 +30,26 @@
 
 extern bool argument_relative;
 
-namespace enigma_user
-{
+namespace enigma_user {
 
-inline void action_linear_step(double x, double y, double stepsize, bool solid_only)
-{
-    if (argument_relative)
-    {
-        mp_linear_step_object(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->x+x, ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->y+y, stepsize,all, solid_only);
-    }
-    else
-    {
-        mp_linear_step_object(x, y, stepsize,all, solid_only);
-	}
+inline void action_linear_step(double x, double y, double stepsize, bool solid_only) {
+  if (argument_relative) {
+    mp_linear_step_object(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->x + x,
+                          ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->y + y, stepsize, all,
+                          solid_only);
+  } else {
+    mp_linear_step_object(x, y, stepsize, all, solid_only);
+  }
 }
 
-inline void action_potential_step(double x, double y, double stepsize, bool solid_only)
-{
-    if (argument_relative)
-    {
-        mp_potential_step_object(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->x+x, ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->y+y, stepsize,all, solid_only);
-    }
-    else
-    {
-        mp_potential_step_object(x, y, stepsize,all, solid_only);
-	}
+inline void action_potential_step(double x, double y, double stepsize, bool solid_only) {
+  if (argument_relative) {
+    mp_potential_step_object(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->x + x,
+                             ((enigma::object_graphics*)enigma::instance_event_iterator->inst)->y + y, stepsize, all,
+                             solid_only);
+  } else {
+    mp_potential_step_object(x, y, stepsize, all, solid_only);
+  }
 }
 
-}
-
+}  // namespace enigma_user

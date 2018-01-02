@@ -26,25 +26,24 @@ using std::string;
 
   #include "libEGMstd.h"
 */
-#define toString(s) \
-  s
+#define toString(s) s
 
-  #include "Widget_Systems/widgets_mandatory.h"
-  #define get_shaper(s,id,r) \
-    if (unsigned(id) >= bulletShapes.size() || id < 0) { \
-      show_error("Cannot access Bullet Dynamics physics shape with id " + toString(id), false); \
-      return r; \
-    } BulletShape* s = bulletShapes[id];
-  #define get_shape(s,id) \
-    if (unsigned(id) >= bulletShapes.size() || id < 0) { \
-      show_error("Cannot access Bullet Dynamics physics shape with id " + toString(id), false); \
-      return; \
-    } BulletShape* s = bulletShapes[id];
+#include "Widget_Systems/widgets_mandatory.h"
+#define get_shaper(s, id, r)                                                                  \
+  if (unsigned(id) >= bulletShapes.size() || id < 0) {                                        \
+    show_error("Cannot access Bullet Dynamics physics shape with id " + toString(id), false); \
+    return r;                                                                                 \
+  }                                                                                           \
+  BulletShape* s = bulletShapes[id];
+#define get_shape(s, id)                                                                      \
+  if (unsigned(id) >= bulletShapes.size() || id < 0) {                                        \
+    show_error("Cannot access Bullet Dynamics physics shape with id " + toString(id), false); \
+    return;                                                                                   \
+  }                                                                                           \
+  BulletShape* s = bulletShapes[id];
 #else
-  #define get_shaper(s,id,r) \
-    BulletShape* s = bulletShapes[id];
-  #define get_shape(s,id) \
-    BulletShape* s = bulletShapes[id];
+#define get_shaper(s, id, r) BulletShape* s = bulletShapes[id];
+#define get_shape(s, id) BulletShape* s = bulletShapes[id];
 #endif
 
 #ifndef _BULLETSHAPE__H
@@ -62,26 +61,18 @@ struct BulletShape {
   btCollisionShape* colShape;
   vector<btVector3> vertices;
 
-  BulletShape()
-  {
-    shapebuilt = false;
-  }
+  BulletShape() { shapebuilt = false; }
 
-  ~BulletShape() 
-  {
-    delete colShape;
-  }
+  ~BulletShape() { delete colShape; }
 
-  void beginShape() 
-  {
+  void beginShape() {
     if (shapebuilt) {
       delete colShape;
-    } else {  
+    } else {
       shapebuilt = true;
     }
   }
-
-}; 
+};
 extern vector<BulletShape*> bulletShapes;
 
 #endif

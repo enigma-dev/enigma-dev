@@ -1,5 +1,5 @@
-#include "PS_particle.h"
 #include "PS_actions.h"
+#include "PS_particle.h"
 
 //#if defined(ENIGMA_GS_OPENGL1) && ENIGMA_GS_OPENGL1
 //#include "PS_particle_bridge_OpenGL1.h"
@@ -12,4 +12,3 @@
 //#else
 #include "PS_particle_bridge_fallback.h"
 //#endif
-

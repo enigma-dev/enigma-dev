@@ -15,20 +15,20 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <string>
-#include <stdio.h>
-#include <stddef.h>
 #include <math.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <string>
 using std::string;
 #include "../General/ASadvanced.h"
 #include "Audio_Systems/audio_mandatory.h"
-#include "SoundResource.h"
 #include "SoundEmitter.h"
+#include "SoundResource.h"
 #include "XAsystem.h"
 
 #ifdef DEBUG_MODE
+#include "Widget_Systems/widgets_mandatory.h"  // show_error
 #include "libEGMstd.h"
-#include "Widget_Systems/widgets_mandatory.h" // show_error
 #endif
 
 #include "Universal_System/estring.h"
@@ -37,222 +37,94 @@ using std::string;
 using std::vector;
 #include <time.h>
 
-namespace enigma_user
-{
+namespace enigma_user {
 
-bool audio_exists(int sound)
-{
+bool audio_exists(int sound) {}
 
-}
+bool audio_is_playing(int sound) {}
 
-bool audio_is_playing(int sound) {
+void audio_play_music(int sound, bool loop) {}
 
-}
+int audio_play_sound(int sound, double priority, bool loop) {}
 
-void audio_play_music(int sound, bool loop)
-{
+int audio_play_sound_at(int sound, as_scalar x, as_scalar y, as_scalar z, int falloff_ref, as_scalar falloff_max,
+                        as_scalar falloff_factor, bool loop, double priority) {}
 
-}
+void audio_pause_sound(int index) {}
 
-int audio_play_sound(int sound, double priority, bool loop)
-{
+void audio_resume_sound(int index) {}
 
-}
+void audio_stop_sound(int index) {}
 
-int audio_play_sound_at(int sound, as_scalar x, as_scalar y, as_scalar z, int falloff_ref, as_scalar falloff_max, as_scalar falloff_factor, bool loop, double priority)
-{
+void audio_pause_channel(int index) {}
 
-}
+void audio_resume_channel(int index) {}
 
-void audio_pause_sound(int index)
-{
+void audio_stop_channel(int index) {}
 
-}
+void audio_stop_all() {}
 
-void audio_resume_sound(int index)
-{
+void audio_stop_music() {}
 
-}
+void audio_pause_all() {}
 
-void audio_stop_sound(int index)
-{
+void audio_pause_music() {}
 
-}
+void audio_resume_all() {}
 
-void audio_pause_channel(int index)
-{
+void audio_resume_music() {}
 
-}
+void audio_music_seek(double offset) {}
 
-void audio_resume_channel(int index)
-{
+void audio_sound_seek(int index, double offset) {}
 
-}
+double audio_music_offset() {}
 
-void audio_stop_channel(int index)
-{
+double audio_sound_offset(int index) {}
 
-}
+int audio_get_type(int index) {}
 
+void audio_listener_orientation(as_scalar lookat_x, as_scalar lookat_y, as_scalar lookat_z, as_scalar up_x,
+                                as_scalar up_y, as_scalar up_z) {}
 
-void audio_stop_all()
-{
+void audio_listener_position(as_scalar x, as_scalar y, as_scalar z) {}
 
-}
+void audio_listener_velocity(as_scalar vx, as_scalar vy, as_scalar vz) {}
 
-void audio_stop_music()
-{
+double audio_sound_length(int index) {}
 
-}
+void audio_master_gain(float volume, double time) {}
 
-void audio_pause_all()
-{
+void audio_music_gain(float volume, double time) {}
 
-}
+void audio_sound_gain(int index, float volume, double time) {}
 
-void audio_pause_music()
-{
+void audio_channel_num(int num) {}
 
-}
+int audio_system() {}
 
-void audio_resume_all()
-{
+int audio_add(string fname, int type) {}
 
-}
+void audio_delete(int sound) {}
 
-void audio_resume_music()
-{
+void audio_falloff_set_model(int model) {}
 
-}
+int audio_emitter_create() {}
 
-void audio_music_seek(double offset)
-{
+bool audio_emitter_exists(int index) {}
 
-}
+void audio_emitter_falloff(int emitter, as_scalar falloff_ref, as_scalar falloff_max, as_scalar falloff_factor) {}
 
-void audio_sound_seek(int index, double offset)
-{
+void audio_emitter_free(int emitter) {}
 
-}
+void audio_emitter_gain(int emitter, double volume) {}
 
-double audio_music_offset()
-{
+void audio_emitter_pitch(int emitter, double pitch) {}
 
-}
+void audio_emitter_position(int emitter, as_scalar x, as_scalar y, as_scalar z) {}
 
-double audio_sound_offset(int index)
-{
+void audio_emitter_velocity(int emitter, as_scalar vx, as_scalar vy, as_scalar vz) {}
 
-}
+void audio_play_sound_on(int emitter, int sound, bool loop, double priority) {}
 
-int audio_get_type(int index)
-{
-
-}
-
-void audio_listener_orientation(as_scalar lookat_x, as_scalar lookat_y, as_scalar lookat_z, as_scalar up_x, as_scalar up_y, as_scalar up_z)
-{
-
-}
-
-void audio_listener_position(as_scalar x, as_scalar y, as_scalar z)
-{
-
-}
-
-void audio_listener_velocity(as_scalar vx, as_scalar vy, as_scalar vz)
-{
-
-}
-
-double audio_sound_length(int index)
-{
-
-}
-
-void audio_master_gain(float volume, double time)
-{
-
-}
-
-void audio_music_gain(float volume, double time)
-{
-
-}
-
-void audio_sound_gain(int index, float volume, double time)
-{
-
-}
-
-void audio_channel_num(int num) {
-
-}
-
-int audio_system()
-{
-
-}
-
-int audio_add(string fname, int type)
-{
-
-}
-
-void audio_delete(int sound)
-{
-
-}
-
-void audio_falloff_set_model(int model)
-{
-
-}
-
-int audio_emitter_create()
-{
-
-}
-
-bool audio_emitter_exists(int index)
-{
-
-}
-
-void audio_emitter_falloff(int emitter, as_scalar falloff_ref, as_scalar falloff_max, as_scalar falloff_factor)
-{
-
-}
-
-void audio_emitter_free(int emitter)
-{
-
-}
-
-void audio_emitter_gain(int emitter, double volume)
-{
-
-}
-
-void audio_emitter_pitch(int emitter, double pitch)
-{
-
-}
-
-void audio_emitter_position(int emitter, as_scalar x, as_scalar y, as_scalar z)
-{
-
-}
-
-void audio_emitter_velocity(int emitter, as_scalar vx, as_scalar vy, as_scalar vz)
-{
-
-}
-
-void audio_play_sound_on(int emitter, int sound, bool loop, double priority)
-{
-
-}
-
-}
-
+}  // namespace enigma_user

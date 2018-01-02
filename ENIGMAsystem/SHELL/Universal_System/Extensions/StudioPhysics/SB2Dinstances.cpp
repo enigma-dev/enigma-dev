@@ -15,15 +15,14 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-
 #include "Universal_System/collisions_object.h"
-#include "Universal_System/instance_system.h" //iter
+#include "Universal_System/instance_system.h"  //iter
 //#include "Universal_System/roomsystem.h"
-#include "Collision_Systems/collision_mandatory.h" //iter
+#include "Collision_Systems/collision_mandatory.h"  //iter
 #include "Universal_System/instance.h"
 
-#include "SB2Dinstances.h"
 #include "SB2Dfunctions.h"
+#include "SB2Dinstances.h"
 
 #include <vector>
 using std::vector;

@@ -14,22 +14,21 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
+#include "Graphics_Systems/General/GScolors.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Platforms/General/PFwindow.h"
-#include "Graphics_Systems/General/GScolors.h"
 
-#include <iostream>
-#include <cstring>
+#include <Universal_System/roomsystem.h>  // room_caption, update_mouse_variables
 #include <stdio.h>
-#include <Universal_System/roomsystem.h> // room_caption, update_mouse_variables
+#include <cstring>
+#include <iostream>
 
 namespace enigma_user {
-  int display_aa = 14;
+int display_aa = 14;
 
-  void set_synchronization(bool enable){}
-    
-  void display_reset(int samples, bool vsync){}
-    
-  void screen_refresh(){}
-}
+void set_synchronization(bool enable) {}
 
+void display_reset(int samples, bool vsync) {}
+
+void screen_refresh() {}
+}  // namespace enigma_user

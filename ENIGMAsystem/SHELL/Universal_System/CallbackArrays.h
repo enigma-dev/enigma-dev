@@ -28,40 +28,38 @@
 #ifndef _CALLBACK_ARRAYS__H
 #define _CALLBACK_ARRAYS__H
 
-namespace enigma
-{
-  extern char mousestatus[3];
-  extern char last_mousestatus[3];
-  extern char last_keybdstatus[256];
-  extern char keybdstatus[256];
-}
+namespace enigma {
+extern char mousestatus[3];
+extern char last_mousestatus[3];
+extern char last_keybdstatus[256];
+extern char keybdstatus[256];
+}  // namespace enigma
 
-namespace enigma_user
-{
+namespace enigma_user {
 
 enum {
-  mb_any    = -1,
-  mb_none   =  0,
-  mb_left   =  1,
-  mb_right  =  2,
-  mb_middle =  3,
+  mb_any = -1,
+  mb_none = 0,
+  mb_left = 1,
+  mb_right = 2,
+  mb_middle = 3,
 };
 
 enum {
   vk_anykey = 1,
-  vk_nokey  = 0,
+  vk_nokey = 0,
 
-  vk_left  = 37,
+  vk_left = 37,
   vk_right = 39,
-  vk_up    = 38,
-  vk_down  = 40,
+  vk_up = 38,
+  vk_down = 40,
 
-  vk_tab    = 9,
-  vk_enter  = 13,
-  vk_shift  = 16,
-  vk_control= 17,
-  vk_alt    = 18,
-  vk_space  = 32,
+  vk_tab = 9,
+  vk_enter = 13,
+  vk_shift = 16,
+  vk_control = 17,
+  vk_alt = 18,
+  vk_space = 32,
 
   vk_numpad0 = 96,
   vk_numpad1 = 97,
@@ -75,52 +73,51 @@ enum {
   vk_numpad9 = 105,
 
   vk_multiply = 106,
-  vk_add      = 107,
+  vk_add = 107,
   vk_subtract = 109,
-  vk_decimal  = 110,
-  vk_divide   = 111,
+  vk_decimal = 110,
+  vk_divide = 111,
 
-  vk_f1  = 112,
-  vk_f2  = 113,
-  vk_f3  = 114,
-  vk_f4  = 115,
-  vk_f5  = 116,
-  vk_f6  = 117,
-  vk_f7  = 118,
-  vk_f8  = 119,
-  vk_f9  = 120,
+  vk_f1 = 112,
+  vk_f2 = 113,
+  vk_f3 = 114,
+  vk_f4 = 115,
+  vk_f5 = 116,
+  vk_f6 = 117,
+  vk_f7 = 118,
+  vk_f8 = 119,
+  vk_f9 = 120,
   vk_f10 = 121,
   vk_f11 = 122,
   vk_f12 = 123,
 
   vk_backspace = 8,
-  vk_escape    = 27,
-  vk_pageup    = 33,
-  vk_pagedown  = 34,
-  vk_end       = 35,
-  vk_home      = 36,
-  vk_insert    = 45,
-  vk_delete    = 46,
+  vk_escape = 27,
+  vk_pageup = 33,
+  vk_pagedown = 34,
+  vk_end = 35,
+  vk_home = 36,
+  vk_insert = 45,
+  vk_delete = 46,
 
   // These are for check_direct only
-  vk_lshift   = 160,
-  vk_rshift   = 161,
+  vk_lshift = 160,
+  vk_rshift = 161,
   vk_lcontrol = 162,
   vk_rcontrol = 163,
-  vk_lalt     = 164,
-  vk_ralt     = 165,
+  vk_lalt = 164,
+  vk_ralt = 165,
 
   // This one's Windows only
   vk_printscreen = 42,
 
   //These are ENIGMA-only
-  vk_caps   = 20,
+  vk_caps = 20,
   vk_scroll = 145,
-  vk_pause  = 19,
+  vk_pause = 19,
   vk_lsuper = 91,
   vk_rsuper = 92,
 };
-
 
 extern double mouse_x, mouse_y;
 extern int mouse_button, mouse_lastbutton;
@@ -131,13 +128,12 @@ bool mouse_check_button(int button);
 bool mouse_check_button_pressed(int button);
 bool mouse_check_button_released(int button);
 
-}
+}  // namespace enigma_user
 
 extern short mouse_hscrolls;
 extern short mouse_vscrolls;
 
-namespace enigma_user
-{
+namespace enigma_user {
 
 bool keyboard_check(int key);
 bool keyboard_check_pressed(int key);
@@ -146,6 +142,6 @@ bool mouse_wheel_up();
 bool mouse_wheel_down();
 
 void io_clear();
-}
+}  // namespace enigma_user
 
 #endif

@@ -33,8 +33,7 @@ struct worldInstance {
   int32 pixelstometers;
   bool paused;
 
-  worldInstance()
-  {
+  worldInstance() {
     // Define the gravity vector.
     b2Vec2 gravity(0.0f, 10.0f);
 
@@ -47,7 +46,7 @@ struct worldInstance {
   }
 
   void world_update();
-}; 
+};
 extern vector<worldInstance*> worlds;
 
 struct fixtureInstance {
@@ -58,59 +57,50 @@ struct fixtureInstance {
   b2PolygonShape* polygonshape;
   vector<b2Vec2> vertices;
 
-  fixtureInstance() 
-  {
+  fixtureInstance() {}
 
-  }
+  ~fixtureInstance() {}
 
-  ~fixtureInstance()
-  {
-
-  }
-
-  void FinishShape()
-  {
+  void FinishShape() {
     b2FixtureDef fixtureDef;
     fixtureDef.shape = shape;
     fixture = body->CreateFixture(&fixtureDef);
   }
-
-}; 
+};
 extern vector<fixtureInstance*> fixtures;
 
 #ifdef DEBUG_MODE
-  #include "libEGMstd.h"
-  #include "Widget_Systems/widgets_mandatory.h"
-  #define get_worldr(w,id,r) \
-    if (unsigned(id) >= worlds.size() || id < 0) { \
-      show_error("Cannot access GayMaker: Stupido physics world with id " + toString(id), false); \
-      return r; \
-    } worldInstance* w = worlds[id];
-  #define get_world(w,id) \
-    if (unsigned(id) >= worlds.size() || id < 0) { \
-      show_error("Cannot access GayMaker: Stupido physics world with id " + toString(id), false); \
-      return; \
-    } worldInstance* w = worlds[id];
-  #define get_fixturer(f,id,r) \
-    if (unsigned(id) >= fixtures.size() || id < 0) { \
-      show_error("Cannot access GayMaker: Stupido physics fixture with id " + toString(id), false); \
-      return r; \
-    } fixtureInstance* f = fixtures[id];
-  #define get_fixture(f,id) \
-    if (unsigned(id) >= fixtures.size() || id < 0) { \
-      show_error("Cannot access GayMaker: Stupido physics fixture with id " + toString(id), false); \
-      return; \
-    } fixtureInstance* f = fixtures[id];
+#include "Widget_Systems/widgets_mandatory.h"
+#include "libEGMstd.h"
+#define get_worldr(w, id, r)                                                                    \
+  if (unsigned(id) >= worlds.size() || id < 0) {                                                \
+    show_error("Cannot access GayMaker: Stupido physics world with id " + toString(id), false); \
+    return r;                                                                                   \
+  }                                                                                             \
+  worldInstance* w = worlds[id];
+#define get_world(w, id)                                                                        \
+  if (unsigned(id) >= worlds.size() || id < 0) {                                                \
+    show_error("Cannot access GayMaker: Stupido physics world with id " + toString(id), false); \
+    return;                                                                                     \
+  }                                                                                             \
+  worldInstance* w = worlds[id];
+#define get_fixturer(f, id, r)                                                                    \
+  if (unsigned(id) >= fixtures.size() || id < 0) {                                                \
+    show_error("Cannot access GayMaker: Stupido physics fixture with id " + toString(id), false); \
+    return r;                                                                                     \
+  }                                                                                               \
+  fixtureInstance* f = fixtures[id];
+#define get_fixture(f, id)                                                                        \
+  if (unsigned(id) >= fixtures.size() || id < 0) {                                                \
+    show_error("Cannot access GayMaker: Stupido physics fixture with id " + toString(id), false); \
+    return;                                                                                       \
+  }                                                                                               \
+  fixtureInstance* f = fixtures[id];
 #else
-  #define get_worldr(w,id,r) \
-    worldInstance* w = worlds[id];
-  #define get_world(w,id) \
-    worldInstance* w = worlds[id];
-  #define get_fixturer(f,id,r) \
-    fixtureInstance* f = fixtures[id];
-  #define get_fixture(f,id) \
-    fixtureInstance* f = fixtures[id];
+#define get_worldr(w, id, r) worldInstance* w = worlds[id];
+#define get_world(w, id) worldInstance* w = worlds[id];
+#define get_fixturer(f, id, r) fixtureInstance* f = fixtures[id];
+#define get_fixture(f, id) fixtureInstance* f = fixtures[id];
 #endif
 
-#endif // ENIGMA_BOX2D_WORLD__H
-
+#endif  // ENIGMA_BOX2D_WORLD__H

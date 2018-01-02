@@ -28,11 +28,10 @@
 #ifndef ENIGMA_DATASTRUCTURES_H
 #define ENIGMA_DATASTRUCTURES_H
 
-#include "Universal_System/var4.h"
 #include "Universal_System/dynamic_args.h"
+#include "Universal_System/var4.h"
 
-namespace enigma_user
-{
+namespace enigma_user {
 
 unsigned int ds_grid_create(const unsigned int w, const unsigned int h);
 void ds_grid_destroy(const unsigned int id);
@@ -44,28 +43,45 @@ unsigned int ds_grid_height(const unsigned int id);
 void ds_grid_set(const unsigned int id, const unsigned int x, const unsigned int y, const variant val);
 void ds_grid_add(const unsigned int id, const unsigned int x, const unsigned int y, const variant val);
 void ds_grid_multiply(const unsigned int id, const unsigned int x, const unsigned int y, const double val);
-void ds_grid_set_region(const unsigned int id, const unsigned int x1, const unsigned int y1, const unsigned int x2, const unsigned int y2, const variant val);
-void ds_grid_add_region(const unsigned int id, const unsigned int x1, const unsigned int y1, const unsigned int x2, const unsigned int y2, const variant val);
-void ds_grid_multiply_region(const unsigned int id, const unsigned int x1, const unsigned int y1, const unsigned int x2, const unsigned int y2, const double val);
+void ds_grid_set_region(const unsigned int id, const unsigned int x1, const unsigned int y1, const unsigned int x2,
+                        const unsigned int y2, const variant val);
+void ds_grid_add_region(const unsigned int id, const unsigned int x1, const unsigned int y1, const unsigned int x2,
+                        const unsigned int y2, const variant val);
+void ds_grid_multiply_region(const unsigned int id, const unsigned int x1, const unsigned int y1, const unsigned int x2,
+                             const unsigned int y2, const double val);
 void ds_grid_set_disk(const unsigned int id, const double x, const double y, const double r, const variant val);
 void ds_grid_add_disk(const unsigned int id, const double x, const double y, const double r, const variant val);
 void ds_grid_multiply_disk(const unsigned int id, const double x, const double y, const double r, const double val);
-void ds_grid_set_grid_region(const unsigned int id, const unsigned int source, const unsigned int x1, const unsigned int y1, const unsigned int x2, const unsigned int y2, const unsigned int xpos, const unsigned int ypos);
-void ds_grid_add_grid_region(const unsigned int id, const unsigned int source, const unsigned int x1, const unsigned int y1, const unsigned int x2, const unsigned int y2, const unsigned int xpos, const unsigned int ypos);
-void ds_grid_multiply_grid_region(const unsigned int id, const unsigned int source, const unsigned int x1, const unsigned int y1, const unsigned int x2, const unsigned int y2, const unsigned int xpos, const unsigned int ypos);
+void ds_grid_set_grid_region(const unsigned int id, const unsigned int source, const unsigned int x1,
+                             const unsigned int y1, const unsigned int x2, const unsigned int y2,
+                             const unsigned int xpos, const unsigned int ypos);
+void ds_grid_add_grid_region(const unsigned int id, const unsigned int source, const unsigned int x1,
+                             const unsigned int y1, const unsigned int x2, const unsigned int y2,
+                             const unsigned int xpos, const unsigned int ypos);
+void ds_grid_multiply_grid_region(const unsigned int id, const unsigned int source, const unsigned int x1,
+                                  const unsigned int y1, const unsigned int x2, const unsigned int y2,
+                                  const unsigned int xpos, const unsigned int ypos);
 variant ds_grid_get(const unsigned int id, const unsigned int x, const unsigned int y);
-variant ds_grid_get_sum(const unsigned int id, const unsigned int x1, const unsigned int y1, const unsigned int x2, const unsigned int y2);
-variant ds_grid_get_max(const unsigned int id, const unsigned int x1, const unsigned int y1, const unsigned int x2, const unsigned int y2);
-variant ds_grid_get_min(const unsigned int id, const unsigned int x1, const unsigned int y1, const unsigned int x2, const unsigned int y2);
-variant ds_grid_get_mean(const unsigned int id, const unsigned int x1, const unsigned int y1, const unsigned int x2, const unsigned int y2);
+variant ds_grid_get_sum(const unsigned int id, const unsigned int x1, const unsigned int y1, const unsigned int x2,
+                        const unsigned int y2);
+variant ds_grid_get_max(const unsigned int id, const unsigned int x1, const unsigned int y1, const unsigned int x2,
+                        const unsigned int y2);
+variant ds_grid_get_min(const unsigned int id, const unsigned int x1, const unsigned int y1, const unsigned int x2,
+                        const unsigned int y2);
+variant ds_grid_get_mean(const unsigned int id, const unsigned int x1, const unsigned int y1, const unsigned int x2,
+                         const unsigned int y2);
 variant ds_grid_get_disk_sum(const unsigned int id, const double x, const double y, const double r);
 variant ds_grid_get_disk_max(const unsigned int id, const double x, const double y, const double r);
 variant ds_grid_get_disk_min(const unsigned int id, const double x, const double y, const double r);
 variant ds_grid_get_disk_mean(const unsigned int id, const double x, const double y, const double r);
-bool ds_grid_value_exists(const unsigned int id, const unsigned int x1, const unsigned int y1, const unsigned int x2, const unsigned int y2, const variant val);
-int ds_grid_value_x(const unsigned int id, const unsigned int x1, const unsigned int y1, const unsigned int x2, const unsigned int y2, const variant val);
-int ds_grid_value_y(const unsigned int id, const unsigned int x1, const unsigned int y1, const unsigned int x2, const unsigned int y2, const variant val);
-bool ds_grid_value_disk_exists(const unsigned int id, const double x, const double y, const double r, const variant val);
+bool ds_grid_value_exists(const unsigned int id, const unsigned int x1, const unsigned int y1, const unsigned int x2,
+                          const unsigned int y2, const variant val);
+int ds_grid_value_x(const unsigned int id, const unsigned int x1, const unsigned int y1, const unsigned int x2,
+                    const unsigned int y2, const variant val);
+int ds_grid_value_y(const unsigned int id, const unsigned int x1, const unsigned int y1, const unsigned int x2,
+                    const unsigned int y2, const variant val);
+bool ds_grid_value_disk_exists(const unsigned int id, const double x, const double y, const double r,
+                               const variant val);
 bool ds_grid_value_disk_x(const unsigned int id, const double x, const double y, const double r, const variant val);
 bool ds_grid_value_disk_y(const unsigned int id, const double x, const double y, const double r, const variant val);
 void ds_grid_shuffle(const unsigned int id);
@@ -165,6 +181,6 @@ unsigned int ds_stack_duplicate(const unsigned int source);
 std::string ds_stack_write(const unsigned int id);
 void ds_stack_read(const unsigned int id, std::string value);
 
-}
+}  // namespace enigma_user
 
-#endif // ENIGMA_DATASTRUCTURES_H
+#endif  // ENIGMA_DATASTRUCTURES_H

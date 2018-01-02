@@ -20,13 +20,13 @@
 
 #define ENIGMA_WS_IPHONE 1
 
-#if ENIGMA_WS_COCOA !=0
-  #include <OpenGL/gl.h>	
+#if ENIGMA_WS_COCOA != 0
+#include <OpenGL/gl.h>
 
-#elif ENIGMA_WS_IPHONE != 0 //|| TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
-  #include <OpenGLES/ES1/gl.h>
+#elif ENIGMA_WS_IPHONE != 0  //|| TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR
+#include <OpenGLES/ES1/gl.h>
 #elif ENIGMA_WS_ANDROID
 #include <GLES/gl.h>
 #else
-  #include <GL/gl.h>
+#include <GL/gl.h>
 #endif

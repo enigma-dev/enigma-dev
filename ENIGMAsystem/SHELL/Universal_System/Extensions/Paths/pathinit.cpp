@@ -29,52 +29,47 @@
 #include <stdio.h>
 //using namespace std;
 
-#include "pathstruct.h"
 #include "Universal_System/resinit.h"
+#include "pathstruct.h"
 //#include "Platforms/platforms_mandatory.h"
 //#include "libEGMstd.h"
 
-namespace enigma
-{
-  void exe_loadpaths(FILE *exe)
-  {
-    unsigned pathid, pointcount;
-    bool smooth, closed;
-    int x, y, speed, nullhere, precision;
+namespace enigma {
+void exe_loadpaths(FILE *exe) {
+  unsigned pathid, pointcount;
+  bool smooth, closed;
+  int x, y, speed, nullhere, precision;
 
-    if (!fread(&nullhere,4,1,exe)) return;
-    if (nullhere != *(int*)"PTH ")
-      return;
+  if (!fread(&nullhere, 4, 1, exe)) return;
+  if (nullhere != *(int *)"PTH ") return;
 
-    // Determine how many paths we have
-    int pathcount;
-    if (!fread(&pathcount,4,1,exe)) return;
+  // Determine how many paths we have
+  int pathcount;
+  if (!fread(&pathcount, 4, 1, exe)) return;
 
-    // Fetch the highest ID we will be using
-    int path_highid, buf;
-    if (!fread(&path_highid,4,1,exe)) return;
-    paths_init();
+  // Fetch the highest ID we will be using
+  int path_highid, buf;
+  if (!fread(&path_highid, 4, 1, exe)) return;
+  paths_init();
 
-    for (int i = 0; i < pathcount; i++)
-    {
-      if (!fread(&pathid, 4,1,exe)) return;
-      if (!fread(&buf, 4,1,exe)) return;
-      smooth = buf; //to fix int to bool issues
-      if (!fread(&buf, 4,1,exe)) return;
-      closed = buf;
-      if (!fread(&precision, 4,1,exe)) return;
+  for (int i = 0; i < pathcount; i++) {
+    if (!fread(&pathid, 4, 1, exe)) return;
+    if (!fread(&buf, 4, 1, exe)) return;
+    smooth = buf;  //to fix int to bool issues
+    if (!fread(&buf, 4, 1, exe)) return;
+    closed = buf;
+    if (!fread(&precision, 4, 1, exe)) return;
 
-      if (!fread(&pointcount,4,1,exe)) return;
+    if (!fread(&pointcount, 4, 1, exe)) return;
 
-      new path(pathid, smooth, closed, precision, pointcount);
-      for (unsigned ii=0;ii<pointcount;ii++)
-      {
-        if (!fread(&x, 4,1,exe)) return;
-        if (!fread(&y, 4,1,exe)) return;
-        if (!fread(&speed, 4,1,exe)) return;
-        path_add_point(pathid, x, y, speed/100);
-      }
-      path_recalculate(pathid);
+    new path(pathid, smooth, closed, precision, pointcount);
+    for (unsigned ii = 0; ii < pointcount; ii++) {
+      if (!fread(&x, 4, 1, exe)) return;
+      if (!fread(&y, 4, 1, exe)) return;
+      if (!fread(&speed, 4, 1, exe)) return;
+      path_add_point(pathid, x, y, speed / 100);
     }
+    path_recalculate(pathid);
   }
 }
+}  // namespace enigma

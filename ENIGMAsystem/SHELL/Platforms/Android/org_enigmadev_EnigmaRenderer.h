@@ -12,35 +12,29 @@ extern "C" {
  * Method:    nativeInit
  * Signature: ()V
  */
-JNIEXPORT void JNICALL Java_org_enigmadev_EnigmaRenderer_nativeInit
-  (JNIEnv *, jclass);
+JNIEXPORT void JNICALL Java_org_enigmadev_EnigmaRenderer_nativeInit(JNIEnv *, jclass);
 
 /*
  * Class:     org_enigmadev_EnigmaRenderer
  * Method:    nativeResize
  * Signature: (II)V
  */
-JNIEXPORT void JNICALL Java_org_enigmadev_EnigmaRenderer_nativeResize
-  (JNIEnv *, jclass, jint, jint);
+JNIEXPORT void JNICALL Java_org_enigmadev_EnigmaRenderer_nativeResize(JNIEnv *, jclass, jint, jint);
 
 /*
  * Class:     org_enigmadev_EnigmaRenderer
  * Method:    nativeRender
  * Signature: ()V
  */
-JNIEXPORT void JNICALL Java_org_enigmadev_EnigmaRenderer_nativeRender
-  (JNIEnv *, jclass);
+JNIEXPORT void JNICALL Java_org_enigmadev_EnigmaRenderer_nativeRender(JNIEnv *, jclass);
 
 /*
  * Class:     org_enigmadev_EnigmaRenderer
  * Method:    nativeDone
  * Signature: ()V
  */
-JNIEXPORT void JNICALL Java_org_enigmadev_EnigmaRenderer_nativeDone
-  (JNIEnv *, jclass);
+JNIEXPORT void JNICALL Java_org_enigmadev_EnigmaRenderer_nativeDone(JNIEnv *, jclass);
 
-
-	
 #ifdef __cplusplus
 }
 #endif

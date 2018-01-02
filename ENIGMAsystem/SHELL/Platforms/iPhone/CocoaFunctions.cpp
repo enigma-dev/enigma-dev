@@ -26,60 +26,52 @@
  \********************************************************************************/
 
 #include "CocoaFunctions.h"
-#include "CocoaWindow.h"
 #include <stdio.h>
+#include "CocoaWindow.h"
 #include "Universal_System/CallbackArrays.h"
 #include "Universal_System/roomsystem.h"
 
+namespace enigma {
+extern char keymap[256];
+void ENIGMA_events(void);
+extern int initialize_everything();
+}  // namespace enigma
 
-namespace enigma
-{
-	extern char keymap[256];
-	void ENIGMA_events(void);
-	extern int initialize_everything();
-}
+int handleEvents() {}
 
-int handleEvents()
-{
+namespace enigma {
+void initkeymap();
+void input_initialize() {
+  //Clear the input arrays
+  for (int i = 0; i < 3; i++) {
+    enigma::last_mousestatus[i] = 0;
+    enigma::mousestatus[i] = 0;
+  }
+  for (int i = 0; i < 256; i++) {
+    enigma::last_keybdstatus[i] = 0;
+    enigma::keybdstatus[i] = 0;
+  }
 }
-
-namespace enigma
-{
-	void initkeymap();
-	void input_initialize()
-	{
-		//Clear the input arrays
-		for(int i=0;i<3;i++){
-			enigma::last_mousestatus[i]=0;
-			enigma::mousestatus[i]=0;
-		}
-		for(int i=0;i<256;i++){
-			enigma::last_keybdstatus[i]=0;
-			enigma::keybdstatus[i]=0;
-		}
-	}
-}
+}  // namespace enigma
 
 int loopy() {
-	enigma::initkeymap();
-	enigma::ENIGMA_events();
-	return 0;
+  enigma::initkeymap();
+  enigma::ENIGMA_events();
+  return 0;
 }
 
-extern int imousex,imousey;
+extern int imousex, imousey;
 
-int init() {
-enigma::initialize_everything();
-}
+int init() { enigma::initialize_everything(); }
 
 int mouse_press(int x, int y) {
-	enigma::mousestatus[mb_left-1]=1;
-	imousex=x;
-	imousey=y;
+  enigma::mousestatus[mb_left - 1] = 1;
+  imousex = x;
+  imousey = y;
 }
 
 int mouse_release(int x, int y) {
-enigma::mousestatus[mb_left-1]=0;
-	imousex=x;
-	imousey=y;
+  enigma::mousestatus[mb_left - 1] = 0;
+  imousex = x;
+  imousey = y;
 }

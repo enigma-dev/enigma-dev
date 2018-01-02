@@ -15,26 +15,20 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
-#include <windows.h>
 #include "WINDOWStouch.h"
+#include <windows.h>
 
 namespace enigma {
 
-  LRESULT CALLBACK windows_touch_extension_callback(HWND hWndParameter, UINT message,WPARAM wParam, LPARAM lParam) {
-    switch (message) {
-    
-    }
-    return DefWindowProc(hWndParameter, message, wParam, lParam);
-  }
-  
-  void windows_touch_extension_register(HWND hWnd) {
-    MessageBox(hWnd, "Just a test", "Hello, world!", MB_OK);
-  }
-
-  //extern LRESULT CALLBACK (*touch_extension_callback)(HWND hWndParameter, UINT message,WPARAM wParam, LPARAM lParam) = &windows_touch_extension_callback;
-  //extern void (*touch_extension_register)(HWND hWnd) = &windows_touch_extension_register;
+LRESULT CALLBACK windows_touch_extension_callback(HWND hWndParameter, UINT message, WPARAM wParam, LPARAM lParam) {
+  switch (message) {}
+  return DefWindowProc(hWndParameter, message, wParam, lParam);
 }
 
-namespace enigma_user {
+void windows_touch_extension_register(HWND hWnd) { MessageBox(hWnd, "Just a test", "Hello, world!", MB_OK); }
 
-}
+//extern LRESULT CALLBACK (*touch_extension_callback)(HWND hWndParameter, UINT message,WPARAM wParam, LPARAM lParam) = &windows_touch_extension_callback;
+//extern void (*touch_extension_register)(HWND hWnd) = &windows_touch_extension_register;
+}  // namespace enigma
+
+namespace enigma_user {}

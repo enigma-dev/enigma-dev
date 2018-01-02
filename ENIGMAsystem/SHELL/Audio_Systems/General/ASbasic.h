@@ -22,8 +22,7 @@
 #include <string>
 using std::string;
 
-namespace enigma_user
-{
+namespace enigma_user {
 
 bool sound_exists(int sound);
 bool sound_play(int sound);
@@ -50,10 +49,7 @@ void action_sound(int snd, bool loop);
 
 int sound_add(string fname, int kind, bool preload);
 bool sound_replace(int sound, string fname, int kind, bool preload);
-inline bool action_replace_sound(int sound, string fname)
-{
-    return sound_replace(sound, fname, 0, true);
-}
+inline bool action_replace_sound(int sound, string fname) { return sound_replace(sound, fname, 0, true); }
 
 const char* sound_get_audio_error();
 
@@ -66,27 +62,30 @@ void sound_global_volume(float mastervolume);
 // and redistribute it, wait until someone requests them before adding them if they are not requested
 // we will eventually deprecate them
 enum {
-	se_none = 0,
-	se_chorus = 1,
-	se_echo = 2,
-	se_flanger = 3,
-	se_gargle = 4,
-	se_reverb = 5,
-	se_compressor = 6,
-	se_equalizer = 7
+  se_none = 0,
+  se_chorus = 1,
+  se_echo = 2,
+  se_flanger = 3,
+  se_gargle = 4,
+  se_reverb = 5,
+  se_compressor = 6,
+  se_equalizer = 7
 };
 void sound_3d_set_sound_cone(int snd, float x, float y, float z, double anglein, double angleout, long voloutside);
 void sound_3d_set_sound_distance(int snd, float mindist, float maxdist);
 void sound_3d_set_sound_position(int snd, float x, float y, float z);
 void sound_3d_set_sound_velocity(int snd, float x, float y, float z);
-void sound_effect_chorus(int snd, float wetdry, float depth, float feedback, float frequency, long wave, float delay, long phase);
-void sound_effect_compressor(int snd, float gain, float attack, float release, float threshold, float ratio, float delay);
+void sound_effect_chorus(int snd, float wetdry, float depth, float feedback, float frequency, long wave, float delay,
+                         long phase);
+void sound_effect_compressor(int snd, float gain, float attack, float release, float threshold, float ratio,
+                             float delay);
 void sound_effect_echo(int snd, float wetdry, float feedback, float leftdelay, float rightdelay, long pandelay);
 void sound_effect_equalizer(int snd, float center, float bandwidth, float gain);
-void sound_effect_flanger(int snd, float wetdry, float depth, float feedback, float frequency, long wave, float delay, long phase);
+void sound_effect_flanger(int snd, float wetdry, float depth, float feedback, float frequency, long wave, float delay,
+                          long phase);
 void sound_effect_gargle(int snd, unsigned rate, unsigned wave);
 void sound_effect_reverb(int snd, float gain, float mix, float time, float ratio);
 void sound_effect_set(int snd, int effect);
-}
+}  // namespace enigma_user
 
 #endif

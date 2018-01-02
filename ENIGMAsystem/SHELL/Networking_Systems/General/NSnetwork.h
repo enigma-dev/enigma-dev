@@ -35,6 +35,6 @@ unsigned network_send_raw(int socket, int buffer, unsigned size);
 unsigned network_send_udp(int socket, string url, int port, int buffer, unsigned size);
 void network_set_timeout(int socket, long read, long write);
 
-}
+}  // namespace enigma_user
 
 #endif

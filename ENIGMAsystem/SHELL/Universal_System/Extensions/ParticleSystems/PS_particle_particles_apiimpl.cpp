@@ -25,67 +25,61 @@
 **                                                                              **
 \********************************************************************************/
 
+#include <cstddef>
 #include "PS_particle.h"
 #include "PS_particle_system.h"
-#include "PS_particle_type.h"
 #include "PS_particle_system_manager.h"
-#include <cstddef>
+#include "PS_particle_type.h"
 
 using enigma::particle_system;
 using enigma::particle_type;
-using enigma::pt_manager;
 using enigma::particle_type_manager;
+using enigma::pt_manager;
 
 namespace enigma_user {
-  // Particles.
+// Particles.
 
-  void part_particles_create(int id, double x, double y, int particle_type_id, int number)
-  {
-    particle_system* p_s = enigma::get_particlesystem(id);
-    if (p_s != NULL) {
-      particle_type* p_t = enigma::get_particletype(particle_type_id);
-      if (p_t != NULL) {
-        p_s->create_particles(x, y, p_t, number);
-      }
+void part_particles_create(int id, double x, double y, int particle_type_id, int number) {
+  particle_system* p_s = enigma::get_particlesystem(id);
+  if (p_s != NULL) {
+    particle_type* p_t = enigma::get_particletype(particle_type_id);
+    if (p_t != NULL) {
+      p_s->create_particles(x, y, p_t, number);
     }
-  }
-  void part_particles_create_color(int id, double x, double y, int particle_type_id, int color, int number)
-  {
-    particle_system* p_s = enigma::get_particlesystem(id);
-    if (p_s != NULL) {
-      particle_type* p_t = enigma::get_particletype(particle_type_id);
-      if (p_t != NULL) {
-        p_s->create_particles(x, y, p_t, number, true, color);
-      }
-    }
-  }
-  void part_particles_clear(int id)
-  {
-    particle_system* p_s = enigma::get_particlesystem(id);
-    if (p_s != NULL) {
-      for (std::vector<enigma::particle_instance>::iterator it = p_s->pi_list.begin(); it != p_s->pi_list.end(); it++)
-      {
-        particle_type* pt = it->pt;
-
-        // Death handling.
-        pt->particle_count--;
-        if (pt->particle_count <= 0 && !pt->alive) {
-          // Particle type is no longer used, delete it.
-          int pid = pt->id;
-          delete pt;
-          enigma::pt_manager.id_to_particletype.erase(pid);
-        }
-      }
-      p_s->pi_list.clear();
-    }
-  }
-  int part_particles_count(int id)
-  {
-    particle_system* p_s = enigma::get_particlesystem(id);
-    if (p_s != NULL) {
-      return p_s->pi_list.size();
-    }
-    return 0;
   }
 }
+void part_particles_create_color(int id, double x, double y, int particle_type_id, int color, int number) {
+  particle_system* p_s = enigma::get_particlesystem(id);
+  if (p_s != NULL) {
+    particle_type* p_t = enigma::get_particletype(particle_type_id);
+    if (p_t != NULL) {
+      p_s->create_particles(x, y, p_t, number, true, color);
+    }
+  }
+}
+void part_particles_clear(int id) {
+  particle_system* p_s = enigma::get_particlesystem(id);
+  if (p_s != NULL) {
+    for (std::vector<enigma::particle_instance>::iterator it = p_s->pi_list.begin(); it != p_s->pi_list.end(); it++) {
+      particle_type* pt = it->pt;
 
+      // Death handling.
+      pt->particle_count--;
+      if (pt->particle_count <= 0 && !pt->alive) {
+        // Particle type is no longer used, delete it.
+        int pid = pt->id;
+        delete pt;
+        enigma::pt_manager.id_to_particletype.erase(pid);
+      }
+    }
+    p_s->pi_list.clear();
+  }
+}
+int part_particles_count(int id) {
+  particle_system* p_s = enigma::get_particlesystem(id);
+  if (p_s != NULL) {
+    return p_s->pi_list.size();
+  }
+  return 0;
+}
+}  // namespace enigma_user

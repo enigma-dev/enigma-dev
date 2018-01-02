@@ -39,8 +39,8 @@ string toString(double);
 string toString();
 string toString(const string& str);
 string toString(const string& str, size_t pos, size_t n = string::npos);
-string toString(const char *s, size_t n);
-string toString(const char *s);
+string toString(const char* s, size_t n);
+string toString(const char* s);
 string toString(size_t n, char c);
 
 string toString(const struct var&);

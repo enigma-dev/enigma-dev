@@ -27,19 +27,16 @@
 
 #include "PS_particle_system_manager.h"
 
-namespace enigma
-{
-  particle_system_manager ps_manager;
-  particle_system* get_particlesystem(int id)
-  {
-    std::map<int,particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(id);
-    if (ps_it != ps_manager.id_to_particlesystem.end()) {
-      particle_system* p_s = (*ps_it).second;
-      if (!p_s->hidden) { // Do not allow users access to internal particle systems.
-        return p_s;
-      }
+namespace enigma {
+particle_system_manager ps_manager;
+particle_system* get_particlesystem(int id) {
+  std::map<int, particle_system*>::iterator ps_it = ps_manager.id_to_particlesystem.find(id);
+  if (ps_it != ps_manager.id_to_particlesystem.end()) {
+    particle_system* p_s = (*ps_it).second;
+    if (!p_s->hidden) {  // Do not allow users access to internal particle systems.
+      return p_s;
     }
-    return 0;
   }
+  return 0;
 }
-
+}  // namespace enigma

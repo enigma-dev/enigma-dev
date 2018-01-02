@@ -24,28 +24,26 @@
 
 //#include "OpenGLHeaders.h"
 
-namespace enigma
-{
-  extern unsigned bound_texture;
-  extern unsigned char currentcolor[4];
-  extern bool glew_isgo;
-  extern bool pbo_isgo;
-}
+namespace enigma {
+extern unsigned bound_texture;
+extern unsigned char currentcolor[4];
+extern bool glew_isgo;
+extern bool pbo_isgo;
+}  // namespace enigma
 
 #if COLORSLIB
-    #include "../General/GScolors.h"
+#include "../General/GScolors.h"
 #endif
 #if PRIMTVLIB
-    #include "GLESprmtvs.h"
+#include "GLESprmtvs.h"
 #endif
 #if STDRAWLIB
-    #include "../General/GSstdraw.h"
+#include "../General/GSstdraw.h"
 #endif
 #if BLENDMODE
-    #include "../General/GSblend.h"
+#include "../General/GSblend.h"
 #endif
 #if GMSURFACE
-    #include "../General/GSsurface.h"
+#include "../General/GSsurface.h"
 #endif
 #include "../General/GSscreen.h"
-

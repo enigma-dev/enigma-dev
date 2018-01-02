@@ -24,16 +24,12 @@
 struct jointInstance {
   int worldid;
   b2Joint* joint;
-  jointInstance()
-  {
-  }
+  jointInstance() {}
 
-  ~jointInstance()
-  {
+  ~jointInstance() {
     //worlds[worldid].world->DestroyJoint(joint);
   }
 };
 extern vector<jointInstance> joints;
 
-#endif // ENIGMA_BOX2D_JOINT__H
-
+#endif  // ENIGMA_BOX2D_JOINT__H

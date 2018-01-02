@@ -28,18 +28,20 @@ extern float listenerOri[];
 
 #include "SoundResource.h"
 
-namespace enigma { 
+namespace enigma {
 
-  int get_free_channel(double priority);
+int get_free_channel(double priority);
 
-  void eos_callback(void *soundID, unsigned src);
-  int audiosystem_initialize();
-  SoundResource* sound_new_with_source();
-  int sound_add_from_buffer(int id, void* buffer, size_t bufsize);
-  int sound_add_from_stream(int id, size_t (*callback)(void *userdata, void *buffer, size_t size), void (*seek)(void *userdata, float position), void (*cleanup)(void *userdata), void *userdata);
-  int sound_allocate();
-  void audiosystem_update(void);
-  void audiosystem_cleanup();
-}
+void eos_callback(void *soundID, unsigned src);
+int audiosystem_initialize();
+SoundResource *sound_new_with_source();
+int sound_add_from_buffer(int id, void *buffer, size_t bufsize);
+int sound_add_from_stream(int id, size_t (*callback)(void *userdata, void *buffer, size_t size),
+                          void (*seek)(void *userdata, float position), void (*cleanup)(void *userdata),
+                          void *userdata);
+int sound_allocate();
+void audiosystem_update(void);
+void audiosystem_cleanup();
+}  // namespace enigma
 
 #endif

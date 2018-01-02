@@ -22,25 +22,25 @@ using std::array;
 
 #include "common.h"
 
-namespace gui
-{
-	class Style{
-		public:
-			unsigned int id;
+namespace gui {
+class Style {
+ public:
+  unsigned int id;
 
-			array<font_style,6> font_styles; //0 - default, 1 - hover, 2 - active, 3 - on, 4 - on hover, 5 - on active (this is based on enums)
+  array<font_style, 6>
+      font_styles;  //0 - default, 1 - hover, 2 - active, 3 - on, 4 - on hover, 5 - on active (this is based on enums)
 
-      array<int,6> sprites;
-      array<render_style,6> sprite_styles;
+  array<int, 6> sprites;
+  array<render_style, 6> sprite_styles;
 
-			rect box;
-			rect_offset border;
-			rect_offset padding;
+  rect box;
+  rect_offset border;
+  rect_offset padding;
 
-			offset image_offset;
+  offset image_offset;
 
-			Style();
-	};
-}
+  Style();
+};
+}  // namespace gui
 
 #endif

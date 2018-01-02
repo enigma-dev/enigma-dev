@@ -17,7 +17,7 @@
 
 #include <string>
 using std::string;
- 
+
 #include "../General/PFmain.h"
 
 //TODO: Move all this shit to a general header, along with the sleep shit in Win32 and XLIB as well so platforms are consistent.
@@ -27,12 +27,12 @@ void gmw_init();
 namespace enigma_user {
 void sleep(int ms);
 
-#define enigmacatchmouse() //Linux should hopefully do that automatically.
+#define enigmacatchmouse()  //Linux should hopefully do that automatically.
 
-}
+}  // namespace enigma_user
 
 namespace enigma {
-	extern char** parameters;
-	//void writename(char* x);
-    long int current_time();
-}
+extern char** parameters;
+//void writename(char* x);
+long int current_time();
+}  // namespace enigma

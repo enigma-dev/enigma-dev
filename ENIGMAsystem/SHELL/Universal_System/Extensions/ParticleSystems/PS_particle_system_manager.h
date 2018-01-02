@@ -28,20 +28,17 @@
 #ifndef ENIGMA_PS_PARTICLESYSTEMMANAGER
 #define ENIGMA_PS_PARTICLESYSTEMMANAGER
 
-#include "PS_particle_system.h"
 #include <map>
+#include "PS_particle_system.h"
 
-namespace enigma
-{
-  struct particle_system_manager
-  {
-    int max_id;
-    std::map<int,particle_system*> id_to_particlesystem;
-  };
+namespace enigma {
+struct particle_system_manager {
+  int max_id;
+  std::map<int, particle_system*> id_to_particlesystem;
+};
 
-  extern particle_system_manager ps_manager;
-  particle_system* get_particlesystem(int id); // Null if not found.
-}
+extern particle_system_manager ps_manager;
+particle_system* get_particlesystem(int id);  // Null if not found.
+}  // namespace enigma
 
-#endif // ENIGMA_PS_PARTICLESYSTEMMANAGER
-
+#endif  // ENIGMA_PS_PARTICLESYSTEMMANAGER

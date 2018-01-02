@@ -18,36 +18,36 @@
 #ifndef BGUI_ELEMENTS_H
 #define BGUI_ELEMENTS_H
 
-#include <new> //Placement new
-#include <utility>      // std::pair, std::piecewise_construct
-#include <tuple>        // std::forward_as_tuple
+#include <new>      //Placement new
+#include <tuple>    // std::forward_as_tuple
+#include <utility>  // std::pair, std::piecewise_construct
 
-#include "sliders.h"
 #include "buttons.h"
-#include "toggles.h"
 #include "groups.h"
 #include "labels.h"
-#include "windows.h"
-#include "textboxes.h"
 #include "scrollbars.h"
-#include "styles.h"
 #include "skins.h"
+#include "sliders.h"
+#include "styles.h"
+#include "textboxes.h"
+#include "toggles.h"
+#include "windows.h"
 
 #ifdef DEBUG_MODE
-  #include <string>
-  #include "libEGMstd.h"
-  #include "Widget_Systems/widgets_mandatory.h"
-  //This checks and returns an element
-  #define get_elementv(element,clastype,entype,id,ret)\
-    if (gui::gui_elements.find(id) == gui::gui_elements.end() || gui::gui_elements[id].type != entype) {\
-      show_error("Attempting to use non-existing element " + std::to_string(id), false);\
-      return ret;\
-    }\
-    clastype &element = gui::gui_elements[id];
-  #define get_element(element,type,entype,id) get_elementv(element,type,entype,id,)
+#include <string>
+#include "Widget_Systems/widgets_mandatory.h"
+#include "libEGMstd.h"
+//This checks and returns an element
+#define get_elementv(element, clastype, entype, id, ret)                                               \
+  if (gui::gui_elements.find(id) == gui::gui_elements.end() || gui::gui_elements[id].type != entype) { \
+    show_error("Attempting to use non-existing element " + std::to_string(id), false);                 \
+    return ret;                                                                                        \
+  }                                                                                                    \
+  clastype &element = gui::gui_elements[id];
+#define get_element(element, type, entype, id) get_elementv(element, type, entype, id, )
 
-  //This checks and returns an element but uses the type already assigned
-  /*#define get_element_smartv(element,id,ret)\
+//This checks and returns an element but uses the type already assigned
+/*#define get_element_smartv(element,id,ret)\
     if (gui::gui_elements.find(id) == gui::gui_elements.end()) {\
       show_error("Attempting to use non-existing element " + std::to_string(id), false);\
       return ret;\
@@ -66,57 +66,56 @@
     }
   #define get_element_smart(element,id) get_element_smartv(element,id,)*/
 
-  //This only checks an element if it exists
-  #define check_elementv(entype,id,ret)\
-    if (gui::gui_elements.find(id) == gui::gui_elements.end() || gui::gui_elements[id].type != entype) {\
-      show_error("Attempting to use non-existing element " + std::to_string(id), false);\
-      return ret;\
-    }
-  #define check_element(entype,id) check_elementv(entype,id,)
+//This only checks an element if it exists
+#define check_elementv(entype, id, ret)                                                                \
+  if (gui::gui_elements.find(id) == gui::gui_elements.end() || gui::gui_elements[id].type != entype) { \
+    show_error("Attempting to use non-existing element " + std::to_string(id), false);                 \
+    return ret;                                                                                        \
+  }
+#define check_element(entype, id) check_elementv(entype, id, )
 
-  //This only checks if an element id exists (so it doesn't care about type)
-  #define check_element_existsv(id,ret)\
-    if (gui::gui_elements.find(id) == gui::gui_elements.end()) {\
-      show_error("Attempting to use non-existing element " + std::to_string(id), false);\
-      return ret;\
-    }
-   #define check_element_exists(id) check_element_existsv(id,)
+//This only checks if an element id exists (so it doesn't care about type)
+#define check_element_existsv(id, ret)                                                 \
+  if (gui::gui_elements.find(id) == gui::gui_elements.end()) {                         \
+    show_error("Attempting to use non-existing element " + std::to_string(id), false); \
+    return ret;                                                                        \
+  }
+#define check_element_exists(id) check_element_existsv(id, )
 
-  ///THIS IS FOR DATA ELEMENTS
-  //This checks and returns an element
-  #define get_data_elementv(element,clastype,entype,id,ret)\
-    if (gui::gui_data_elements.find(id) == gui::gui_data_elements.end() || gui::gui_data_elements[id].type != entype) {\
-      show_error("Attempting to use non-existing element " + std::to_string(id), false);\
-      return ret;\
-    }\
-    clastype &element = gui::gui_data_elements[id];
-  #define get_data_element(element,type,entype,id) get_data_elementv(element,type,entype,id,)
+///THIS IS FOR DATA ELEMENTS
+//This checks and returns an element
+#define get_data_elementv(element, clastype, entype, id, ret)                                                         \
+  if (gui::gui_data_elements.find(id) == gui::gui_data_elements.end() || gui::gui_data_elements[id].type != entype) { \
+    show_error("Attempting to use non-existing element " + std::to_string(id), false);                                \
+    return ret;                                                                                                       \
+  }                                                                                                                   \
+  clastype &element = gui::gui_data_elements[id];
+#define get_data_element(element, type, entype, id) get_data_elementv(element, type, entype, id, )
 
-  //This only checks an element if it exists
-  #define check_data_elementv(entype,id,ret)\
-    if (gui::gui_data_elements.find(id) == gui::gui_data_elements.end() || gui::gui_data_elements[id].type != entype) {\
-      show_error("Attempting to use non-existing element " + std::to_string(id), false);\
-      return ret;\
-    }
-  #define check_data_element(entype,id) check_data_elementv(entype,id,)
+//This only checks an element if it exists
+#define check_data_elementv(entype, id, ret)                                                                          \
+  if (gui::gui_data_elements.find(id) == gui::gui_data_elements.end() || gui::gui_data_elements[id].type != entype) { \
+    show_error("Attempting to use non-existing element " + std::to_string(id), false);                                \
+    return ret;                                                                                                       \
+  }
+#define check_data_element(entype, id) check_data_elementv(entype, id, )
 
-  //This only checks if an element id exists (so it doesn't care about type)
-  #define check_data_element_existsv(id,ret)\
-    if (gui::gui_data_elements.find(id) == gui::gui_data_elements.end()) {\
-      show_error("Attempting to use non-existing element " + std::to_string(id), false);\
-      return ret;\
-    }
-   #define check_data_element_exists(id) check_data_element_existsv(id,)
-   #define SHOW_ERROR(error) show_error(error, false);
+//This only checks if an element id exists (so it doesn't care about type)
+#define check_data_element_existsv(id, ret)                                            \
+  if (gui::gui_data_elements.find(id) == gui::gui_data_elements.end()) {               \
+    show_error("Attempting to use non-existing element " + std::to_string(id), false); \
+    return ret;                                                                        \
+  }
+#define check_data_element_exists(id) check_data_element_existsv(id, )
+#define SHOW_ERROR(error) show_error(error, false);
 #else
-  #define get_elementv(element,clastype,entype,id,ret)\
-    clastype &element = gui::gui_elements[id];
-  #define get_element(element,type,entype,id) get_elementv(element,type,entype,id,)
-  #define check_elementv(entype,id,ret)
-  #define check_element(entype,id) check_elementv(entype,id,)
-  #define check_element_existsv(id,ret)
-  #define check_element_exists(id) check_element_existsv(id,)
-  /*#define get_element_smartv(element,id,ret) \
+#define get_elementv(element, clastype, entype, id, ret) clastype &element = gui::gui_elements[id];
+#define get_element(element, type, entype, id) get_elementv(element, type, entype, id, )
+#define check_elementv(entype, id, ret)
+#define check_element(entype, id) check_elementv(entype, id, )
+#define check_element_existsv(id, ret)
+#define check_element_exists(id) check_element_existsv(id, )
+/*#define get_element_smartv(element,id,ret) \
     gui::Button *b, gui::Toggle *t, gui::Label *l, gui::Scrollbar *s, gui::Slider *sl, gui::Window *w, gui::Skin *sk, gui::Style *st, gui::Group *g; \
     switch (gui::gui_elements[id].type){ \
       case gui::GUI_TYPE::BUTTON:    element = gui::Button element; break; \
@@ -132,306 +131,292 @@
     } \
     auto element = &b;
   #define get_element_smart(element,id) get_element_smartv(element,id,)*/
-  #define get_data_elementv(element,clastype,entype,id,ret)\
-    clastype &element = gui::gui_data_elements[id];
-  #define get_data_element(element,type,entype,id) get_data_elementv(element,type,entype,id,)
-  #define check_data_elementv(entype,id,ret)
-  #define check_data_element(entype,id) check_data_elementv(entype,id,)
-  #define check_data_element_existsv(id,ret)
-  #define check_data_element_exists(id) check_data_element_existsv(id,)
-  #define SHOW_ERROR(error)
+#define get_data_elementv(element, clastype, entype, id, ret) clastype &element = gui::gui_data_elements[id];
+#define get_data_element(element, type, entype, id) get_data_elementv(element, type, entype, id, )
+#define check_data_elementv(entype, id, ret)
+#define check_data_element(entype, id) check_data_elementv(entype, id, )
+#define check_data_element_existsv(id, ret)
+#define check_data_element_exists(id) check_data_element_existsv(id, )
+#define SHOW_ERROR(error)
 #endif
 
-namespace gui
-{
-  #undef ERROR //Windows has ERROR of its own
-  enum GUI_TYPE{
-    ERROR = -1,
-    BUTTON,
-    TOGGLE,
-    LABEL,
-    SCROLLBAR,
-    SLIDER,
-    WINDOW,
-    SKIN,
-    STYLE,
-    GROUP,
-    TEXTBOX
+namespace gui {
+#undef ERROR  //Windows has ERROR of its own
+enum GUI_TYPE { ERROR = -1, BUTTON, TOGGLE, LABEL, SCROLLBAR, SLIDER, WINDOW, SKIN, STYLE, GROUP, TEXTBOX };
+
+class Element {
+ public:
+  GUI_TYPE type = GUI_TYPE::ERROR;
+  unsigned int id = 0;
+
+  //Unrestricted union is C++14
+  union Data {
+    Button button;
+    Slider slider;
+    Toggle toggle;
+    Label label;
+    Scrollbar scrollbar;
+    Window window;
+    Textbox textbox;
+
+    Data() {}
+    ~Data() {}
   };
+  Data data;
 
-  class Element{
-    public:
-      GUI_TYPE type = GUI_TYPE::ERROR;
-      unsigned int id = 0;
+  //Constructors
+  inline Element() {}
 
-      //Unrestricted union is C++14
-      union Data{
-        Button button;
-        Slider slider;
-        Toggle toggle;
-        Label label;
-        Scrollbar scrollbar;
-        Window window;
-        Textbox textbox;
+  inline Element(const Button &but, int id) : id(id) {
+    type = GUI_TYPE::BUTTON;
+    new (&(data.button)) Button(but);
+  }
 
-        Data() {}
-        ~Data() {}
-      };
-      Data data;
+  inline Element(const Slider &sli, int id) : id(id) {
+    type = GUI_TYPE::SLIDER;
+    new (&(data.button)) Slider(sli);
+  }
 
-      //Constructors
-      inline Element(){ }
+  inline Element(const Toggle &tog, int id) : id(id) {
+    type = GUI_TYPE::TOGGLE;
+    new (&(data.toggle)) Toggle(tog);
+  }
 
-      inline Element(const Button &but, int id) : id(id){
-        type = GUI_TYPE::BUTTON;
-        new (&(data.button)) Button(but);
-      }
+  inline Element(const Label &lab, int id) : id(id) {
+    type = GUI_TYPE::LABEL;
+    new (&(data.label)) Label(lab);
+  }
 
-      inline Element(const Slider &sli, int id) : id(id){
-        type = GUI_TYPE::SLIDER;
-        new (&(data.button)) Slider(sli);
-      }
+  inline Element(const Scrollbar &scr, int id) : id(id) {
+    type = GUI_TYPE::SCROLLBAR;
+    new (&(data.scrollbar)) Scrollbar(scr);
+  }
 
-      inline Element(const Toggle &tog, int id) : id(id){
-        type = GUI_TYPE::TOGGLE;
-        new (&(data.toggle)) Toggle(tog);
-      }
+  inline Element(const Window &win, int id) : id(id) {
+    type = GUI_TYPE::WINDOW;
+    new (&(data.window)) Window(win);
+  }
 
-      inline Element(const Label &lab, int id) : id(id){
-        type = GUI_TYPE::LABEL;
-        new (&(data.label)) Label(lab);
-      }
+  inline Element(const Textbox &tex, int id) : id(id) {
+    type = GUI_TYPE::TEXTBOX;
+    new (&(data.textbox)) Textbox(tex);
+  }
 
-      inline Element(const Scrollbar &scr, int id) : id(id){
-        type = GUI_TYPE::SCROLLBAR;
-        new (&(data.scrollbar)) Scrollbar(scr);
-      }
+  //Destructor
+  inline ~Element() {
+    switch (type) {
+      case GUI_TYPE::BUTTON:
+        data.button.~Button();
+        break;
+      case GUI_TYPE::SLIDER:
+        data.slider.~Slider();
+        break;
+      case GUI_TYPE::TOGGLE:
+        data.toggle.~Toggle();
+        break;
+      case GUI_TYPE::LABEL:
+        data.label.~Label();
+        break;
+      case GUI_TYPE::SCROLLBAR:
+        data.scrollbar.~Scrollbar();
+        break;
+      case GUI_TYPE::WINDOW:
+        data.window.~Window();
+        break;
+      case GUI_TYPE::TEXTBOX:
+        data.textbox.~Textbox();
+        break;
+      default:
+        SHOW_ERROR("BasicGUI: Unknown element type or element type == ERROR and id = " + std::to_string(id) + "!\n");
+        break;
+    }
+  }
 
-      inline Element(const Window &win, int id) : id(id){
-        type = GUI_TYPE::WINDOW;
-        new (&(data.window)) Window(win);
-      }
+  //Accessor
+  inline operator Button &() {
+    if (type == GUI_TYPE::BUTTON) {
+      return data.button;
+    }
+    SHOW_ERROR("BasicGUI: Type is not a button! This is going to crash now!\n");
+    return data.button;
+  }
 
-      inline Element(const Textbox &tex, int id) : id(id){
-        type = GUI_TYPE::TEXTBOX;
-        new (&(data.textbox)) Textbox(tex);
-      }
+  inline operator Slider &() {
+    if (type == GUI_TYPE::SLIDER) {
+      return data.slider;
+    }
+    SHOW_ERROR("BasicGUI: Type is not a slider! This is going to crash now!\n");
+    return data.slider;
+  }
 
-      //Destructor
-      inline ~Element(){
-        switch (type){
-          case GUI_TYPE::BUTTON:
-            data.button.~Button();
-            break;
-          case GUI_TYPE::SLIDER:
-            data.slider.~Slider();
-            break;
-          case GUI_TYPE::TOGGLE:
-            data.toggle.~Toggle();
-            break;
-          case GUI_TYPE::LABEL:
-            data.label.~Label();
-            break;
-          case GUI_TYPE::SCROLLBAR:
-            data.scrollbar.~Scrollbar();
-            break;
-          case GUI_TYPE::WINDOW:
-            data.window.~Window();
-            break;
-          case GUI_TYPE::TEXTBOX:
-            data.textbox.~Textbox();
-            break;
-          default:
-            SHOW_ERROR("BasicGUI: Unknown element type or element type == ERROR and id = "+std::to_string(id)+"!\n");
-            break;
-        }
-      }
+  inline operator Toggle &() {
+    if (type == GUI_TYPE::TOGGLE) {
+      return data.toggle;
+    }
+    SHOW_ERROR("BasicGUI: Type is not a toggle! This is going to crash now!\n");
+    return data.toggle;
+  }
 
-      //Accessor
-      inline operator Button&(){
-        if (type == GUI_TYPE::BUTTON){
-          return data.button;
-        }
-        SHOW_ERROR("BasicGUI: Type is not a button! This is going to crash now!\n");
-        return data.button;
-      }
+  inline operator Label &() {
+    if (type == GUI_TYPE::LABEL) {
+      return data.label;
+    }
+    SHOW_ERROR("BasicGUI: Type is not a label! This is going to crash now!\n");
+    return data.label;
+  }
 
-      inline operator Slider&(){
-        if (type == GUI_TYPE::SLIDER){
-          return data.slider;
-        }
-        SHOW_ERROR("BasicGUI: Type is not a slider! This is going to crash now!\n");
-        return data.slider;
-      }
+  inline operator Scrollbar &() {
+    if (type == GUI_TYPE::SCROLLBAR) {
+      return data.scrollbar;
+    }
+    SHOW_ERROR("BasicGUI: Type is not a scrollbar! This is going to crash now!\n");
+    return data.scrollbar;
+  }
 
-      inline operator Toggle&(){
-        if (type == GUI_TYPE::TOGGLE){
-          return data.toggle;
-        }
-        SHOW_ERROR("BasicGUI: Type is not a toggle! This is going to crash now!\n");
-        return data.toggle;
-      }
+  inline operator Window &() {
+    if (type == GUI_TYPE::WINDOW) {
+      return data.window;
+    }
+    SHOW_ERROR("BasicGUI: Type is not a window! This is going to crash now!\n");
+    return data.window;
+  }
 
-      inline operator Label&(){
-        if (type == GUI_TYPE::LABEL){
-          return data.label;
-        }
-        SHOW_ERROR("BasicGUI: Type is not a label! This is going to crash now!\n");
-        return data.label;
-      }
+  inline operator Textbox &() {
+    if (type == GUI_TYPE::TEXTBOX) {
+      return data.textbox;
+    }
+    SHOW_ERROR("BasicGUI: Type is not a textbox! This is going to crash now!\n");
+    return data.textbox;
+  }
 
-      inline operator Scrollbar&(){
-        if (type == GUI_TYPE::SCROLLBAR){
-          return data.scrollbar;
-        }
-        SHOW_ERROR("BasicGUI: Type is not a scrollbar! This is going to crash now!\n");
-        return data.scrollbar;
-      }
+  //This is only needed if we have non-trivial copy constructors, but I leave it here for now
+  inline Element(const Element &rhs) {
+    type = rhs.type;
+    switch (type) {
+      case GUI_TYPE::BUTTON:
+        new (&(data.button)) Button(rhs.data.button);
+        break;
+      case GUI_TYPE::SLIDER:
+        new (&(data.slider)) Slider(rhs.data.slider);
+        break;
+      case GUI_TYPE::TOGGLE:
+        new (&(data.toggle)) Toggle(rhs.data.toggle);
+        break;
+      case GUI_TYPE::LABEL:
+        new (&(data.label)) Label(rhs.data.label);
+        break;
+      case GUI_TYPE::SCROLLBAR:
+        new (&(data.scrollbar)) Scrollbar(rhs.data.scrollbar);
+        break;
+      case GUI_TYPE::WINDOW:
+        new (&(data.window)) Window(rhs.data.window);
+        break;
+      case GUI_TYPE::TEXTBOX:
+        new (&(data.textbox)) Textbox(rhs.data.textbox);
+        break;
+      default:
+        SHOW_ERROR("BasicGUI: Unknown element type or element type == ERROR!\n");
+        break;
+    }
+  }
+};
 
-      inline operator Window&(){
-        if (type == GUI_TYPE::WINDOW){
-          return data.window;
-        }
-        SHOW_ERROR("BasicGUI: Type is not a window! This is going to crash now!\n");
-        return data.window;
-      }
+///These are data elements, like skins, styles and groups. They are separate from widgets, so we can iterate faster. This should also bring down memory consumption
+class DataElement {
+ public:
+  GUI_TYPE type = GUI_TYPE::ERROR;
+  unsigned int id = 0;
 
-      inline operator Textbox&(){
-        if (type == GUI_TYPE::TEXTBOX){
-          return data.textbox;
-        }
-        SHOW_ERROR("BasicGUI: Type is not a textbox! This is going to crash now!\n");
-        return data.textbox;
-      }
+  //Unrestricted union is C++14
+  union Data {
+    Group group;
+    Style style;
+    Skin skin;
 
-      //This is only needed if we have non-trivial copy constructors, but I leave it here for now
-      inline Element(const Element & rhs){
-        type = rhs.type;
-        switch(type){
-          case GUI_TYPE::BUTTON:
-              new (&(data.button)) Button(rhs.data.button);
-              break;
-          case GUI_TYPE::SLIDER:
-              new (&(data.slider)) Slider(rhs.data.slider);
-              break;
-          case GUI_TYPE::TOGGLE:
-              new (&(data.toggle)) Toggle(rhs.data.toggle);
-              break;
-          case GUI_TYPE::LABEL:
-              new (&(data.label)) Label(rhs.data.label);
-              break;
-          case GUI_TYPE::SCROLLBAR:
-              new (&(data.scrollbar)) Scrollbar(rhs.data.scrollbar);
-              break;
-          case GUI_TYPE::WINDOW:
-              new (&(data.window)) Window(rhs.data.window);
-              break;
-          case GUI_TYPE::TEXTBOX:
-              new (&(data.textbox)) Textbox(rhs.data.textbox);
-              break;
-          default:
-            SHOW_ERROR("BasicGUI: Unknown element type or element type == ERROR!\n");
-            break;
-        }
-      }
-	};
+    Data() {}
+    ~Data() {}
+  };
+  Data data;
 
-	///These are data elements, like skins, styles and groups. They are separate from widgets, so we can iterate faster. This should also bring down memory consumption
-	class DataElement{
-    public:
-      GUI_TYPE type = GUI_TYPE::ERROR;
-      unsigned int id = 0;
+  //Constructors
+  inline DataElement() {}
 
-      //Unrestricted union is C++14
-      union Data{
-        Group group;
-        Style style;
-        Skin skin;
+  inline DataElement(const Group &gro) {
+    type = GUI_TYPE::GROUP;
+    new (&(data.group)) Group(gro);
+  }
 
-        Data() {}
-        ~Data() {}
-      };
-      Data data;
+  inline DataElement(const Style &sty) {
+    type = GUI_TYPE::STYLE;
+    new (&(data.style)) Style(sty);
+  }
 
-      //Constructors
-      inline DataElement(){ }
+  inline DataElement(const Skin &ski) {
+    type = GUI_TYPE::SKIN;
+    new (&(data.skin)) Skin(ski);
+  }
 
-      inline DataElement(const Group &gro){
-        type = GUI_TYPE::GROUP;
-        new (&(data.group)) Group(gro);
-      }
+  //Destructor
+  inline ~DataElement() {
+    switch (type) {
+      case GUI_TYPE::GROUP:
+        data.group.~Group();
+        break;
+      case GUI_TYPE::STYLE:
+        data.style.~Style();
+        break;
+      case GUI_TYPE::SKIN:
+        data.skin.~Skin();
+        break;
+      default:
+        SHOW_ERROR("BasicGUI: Unknown element type or element type == ERROR!\n");
+        break;
+    }
+  }
 
-      inline DataElement(const Style &sty){
-        type = GUI_TYPE::STYLE;
-        new (&(data.style)) Style(sty);
-      }
+  //Accessor
+  inline operator Group &() {
+    if (type == GUI_TYPE::GROUP) {
+      return data.group;
+    }
+    SHOW_ERROR("BasicGUI: Type is not a group! This is going to crash now!\n");
+    return data.group;
+  }
 
-      inline DataElement(const Skin &ski){
-        type = GUI_TYPE::SKIN;
-        new (&(data.skin)) Skin(ski);
-      }
+  inline operator Style &() {
+    if (type == GUI_TYPE::STYLE) {
+      return data.style;
+    }
+    SHOW_ERROR("BasicGUI: Type is not a style! This is going to crash now!\n");
+    return data.style;
+  }
 
-      //Destructor
-      inline ~DataElement(){
-        switch (type){
-          case GUI_TYPE::GROUP:
-            data.group.~Group();
-            break;
-          case GUI_TYPE::STYLE:
-            data.style.~Style();
-            break;
-          case GUI_TYPE::SKIN:
-            data.skin.~Skin();
-            break;
-          default:
-            SHOW_ERROR("BasicGUI: Unknown element type or element type == ERROR!\n");
-            break;
-        }
-      }
+  inline operator Skin &() {
+    if (type == GUI_TYPE::SKIN) {
+      return data.skin;
+    }
+    SHOW_ERROR("BasicGUI: Type is not a skin! This is going to crash now!\n");
+    return data.skin;
+  }
 
-      //Accessor
-      inline operator Group&(){
-        if (type == GUI_TYPE::GROUP){
-          return data.group;
-        }
-        SHOW_ERROR("BasicGUI: Type is not a group! This is going to crash now!\n");
-        return data.group;
-      }
-
-      inline operator Style&(){
-        if (type == GUI_TYPE::STYLE){
-          return data.style;
-        }
-        SHOW_ERROR("BasicGUI: Type is not a style! This is going to crash now!\n");
-        return data.style;
-      }
-
-      inline operator Skin&(){
-        if (type == GUI_TYPE::SKIN){
-          return data.skin;
-        }
-        SHOW_ERROR("BasicGUI: Type is not a skin! This is going to crash now!\n");
-        return data.skin;
-      }
-
-      //This is only needed if we have non-trivial copy constructors, but I leave it here for now
-      inline DataElement(const DataElement & rhs){
-        type = rhs.type;
-        switch(type){
-          case GUI_TYPE::GROUP:
-              new (&(data.group)) Group(rhs.data.group);
-              break;
-          case GUI_TYPE::STYLE:
-              new (&(data.style)) Style(rhs.data.style);
-              break;
-          case GUI_TYPE::SKIN:
-              new (&(data.skin)) Skin(rhs.data.skin);
-              break;
-          default:
-            SHOW_ERROR("BasicGUI: Unknown element type or element type == ERROR!\n");
-            break;
-        }
-      }
-	};
+  //This is only needed if we have non-trivial copy constructors, but I leave it here for now
+  inline DataElement(const DataElement &rhs) {
+    type = rhs.type;
+    switch (type) {
+      case GUI_TYPE::GROUP:
+        new (&(data.group)) Group(rhs.data.group);
+        break;
+      case GUI_TYPE::STYLE:
+        new (&(data.style)) Style(rhs.data.style);
+        break;
+      case GUI_TYPE::SKIN:
+        new (&(data.skin)) Skin(rhs.data.skin);
+        break;
+      default:
+        SHOW_ERROR("BasicGUI: Unknown element type or element type == ERROR!\n");
+        break;
+    }
+  }
+};
 }
 #endif

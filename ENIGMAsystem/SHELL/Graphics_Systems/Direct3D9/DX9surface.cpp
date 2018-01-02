@@ -18,23 +18,22 @@
 #include "Bridges/General/DX9Context.h"
 #include "Direct3D9Headers.h"
 using namespace std;
+#include <math.h>
 #include <cstddef>
 #include <iostream>
-#include <math.h>
 
-
-#include <stdio.h> //for file writing (surface_save)
+#include <stdio.h>  //for file writing (surface_save)
+#include "Collision_Systems/collision_types.h"
+#include "Universal_System/backgroundstruct.h"
 #include "Universal_System/nlpo2.h"
 #include "Universal_System/spritestruct.h"
-#include "Universal_System/backgroundstruct.h"
-#include "Collision_Systems/collision_types.h"
 
 #define __GETR(x) ((x & 0x0000FF))
 #define __GETG(x) ((x & 0x00FF00) >> 8)
 #define __GETB(x) ((x & 0xFF0000) >> 16)
 
 namespace enigma_user {
-extern int room_width, room_height/*, sprite_idmax*/;
+extern int room_width, room_height /*, sprite_idmax*/;
 }
 
 #include "../General/GSprimitives.h"
@@ -42,40 +41,35 @@ extern int room_width, room_height/*, sprite_idmax*/;
 #include "DX9SurfaceStruct.h"
 #include "DX9TextureStruct.h"
 
-namespace enigma
-{
-  vector<Surface*> Surfaces(0);
+namespace enigma {
+vector<Surface*> Surfaces(0);
 
-  D3DCOLOR get_currentcolor();
-}
+D3DCOLOR get_currentcolor();
+}  // namespace enigma
 
+namespace enigma_user {
 
-namespace enigma_user
-{
-
-bool surface_is_supported()
-{
+bool surface_is_supported() {
   //TODO: Implement with IDirect3D9::CheckDeviceFormat
   return true;
 }
 
-int surface_create(int width, int height, bool depthbuffer)
-{
+int surface_create(int width, int height, bool depthbuffer) {
   LPDIRECT3DTEXTURE9 texture = NULL;
   d3dmgr->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &texture, NULL);
   enigma::Surface* surface = new enigma::Surface();
   TextureStruct* gmTexture = new TextureStruct(texture);
   textureStructs.push_back(gmTexture);
   //d3dmgr->CreateRenderTarget(width, height, D3DFMT_A8R8G8B8, D3DMULTISAMPLE_2_SAMPLES, 2, false, &surface->surf, NULL);
-  texture->GetSurfaceLevel(0,&surface->surf);
+  texture->GetSurfaceLevel(0, &surface->surf);
   surface->tex = textureStructs.size() - 1;
-  surface->width = width; surface->height = height;
+  surface->width = width;
+  surface->height = height;
   enigma::Surfaces.push_back(surface);
   return enigma::Surfaces.size() - 1;
 }
 
-int surface_create_msaa(int width, int height, int levels)
-{
+int surface_create_msaa(int width, int height, int levels) {
   LPDIRECT3DTEXTURE9 texture = NULL;
   d3dmgr->CreateTexture(width, height, 1, D3DUSAGE_RENDERTARGET, D3DFMT_A8R8G8B8, D3DPOOL_DEFAULT, &texture, NULL);
   enigma::Surface* surface = new enigma::Surface();
@@ -83,27 +77,26 @@ int surface_create_msaa(int width, int height, int levels)
   textureStructs.push_back(gmTexture);
   d3dmgr->CreateRenderTarget(width, height, D3DFMT_A8R8G8B8, D3DMULTISAMPLE_2_SAMPLES, 2, false, &surface->surf, NULL);
   surface->tex = textureStructs.size() - 1;
-  surface->width = width; surface->height = height;
+  surface->width = width;
+  surface->height = height;
   enigma::Surfaces.push_back(surface);
   return enigma::Surfaces.size() - 1;
 }
 
 LPDIRECT3DSURFACE9 pBackBuffer;
 
-void surface_set_target(int id)
-{
-  get_surface(surface,id);
+void surface_set_target(int id) {
+  get_surface(surface, id);
   d3dmgr->device->GetRenderTarget(0, &pBackBuffer);
   d3dmgr->device->SetRenderTarget(0, surface->surf);
 
   D3DXMATRIX matProjection;
-  D3DXMatrixPerspectiveFovLH(&matProjection,D3DX_PI / 4.0f,1,1,100);
+  D3DXMatrixPerspectiveFovLH(&matProjection, D3DX_PI / 4.0f, 1, 1, 100);
   //set projection matrix
-  d3dmgr->SetTransform(D3DTS_PROJECTION,&matProjection);
+  d3dmgr->SetTransform(D3DTS_PROJECTION, &matProjection);
 }
 
-void surface_reset_target()
-{
+void surface_reset_target() {
   //d3dmgr->ResetRenderTarget();
   d3dmgr->EndShapesBatching();
   d3dmgr->device->SetRenderTarget(0, pBackBuffer);
@@ -111,43 +104,32 @@ void surface_reset_target()
   pBackBuffer = NULL;
 }
 
-int surface_get_target()
-{
+int surface_get_target() {}
 
-}
-
-void surface_free(int id)
-{
+void surface_free(int id) {
   get_surface(surf, id);
   delete surf;
 }
 
-bool surface_exists(int id)
-{
-  return !((id < 0) or (id > enigma::Surfaces.size()) or (enigma::Surfaces[id] == NULL));
-}
+bool surface_exists(int id) { return !((id < 0) or (id > enigma::Surfaces.size()) or (enigma::Surfaces[id] == NULL)); }
 
-int surface_get_texture(int id)
-{
-  get_surfacev(surf,id,-1);
+int surface_get_texture(int id) {
+  get_surfacev(surf, id, -1);
   return (surf->tex);
 }
 
-int surface_get_width(int id)
-{
-  get_surfacev(surf,id,-1);
+int surface_get_width(int id) {
+  get_surfacev(surf, id, -1);
   return (surf->width);
 }
 
-int surface_get_height(int id)
-{
-  get_surfacev(surf,id,-1);
+int surface_get_height(int id) {
+  get_surfacev(surf, id, -1);
   return (surf->height);
 }
 
-int surface_getpixel(int id, int x, int y)
-{
-  get_surfacev(surface,id,-1);
+int surface_getpixel(int id, int x, int y) {
+  get_surfacev(surface, id, -1);
   if (x < 0) x = 0;
   if (y < 0) y = 0;
   if (x > surface->width || y > surface->height) return 0;
@@ -170,9 +152,8 @@ int surface_getpixel(int id, int x, int y)
   return ret;
 }
 
-int surface_getpixel_ext(int id, int x, int y)
-{
-  get_surfacev(surface,id,-1);
+int surface_getpixel_ext(int id, int x, int y) {
+  get_surfacev(surface, id, -1);
   if (x < 0) x = 0;
   if (y < 0) y = 0;
   if (x > surface->width || y > surface->height) return 0;
@@ -195,9 +176,8 @@ int surface_getpixel_ext(int id, int x, int y)
   return ret;
 }
 
-int surface_getpixel_alpha(int id, int x, int y)
-{
-  get_surfacev(surface,id,-1);
+int surface_getpixel_alpha(int id, int x, int y) {
+  get_surfacev(surface, id, -1);
   if (x < 0) x = 0;
   if (y < 0) y = 0;
   if (x > surface->width || y > surface->height) return 0;
@@ -220,23 +200,21 @@ int surface_getpixel_alpha(int id, int x, int y)
   return ret;
 }
 
-}
+}  // namespace enigma_user
 
 //////////////////////////////////////SAVE TO FILE AND CTEATE SPRITE FUNCTIONS/////////
 //Fuck whoever did this to the spec
 #ifndef DX_BGR
-  #define DX_BGR 0x80E0
+#define DX_BGR 0x80E0
 #endif
 
 #include "Universal_System/estring.h"
 #include "Universal_System/image_formats.h"
 
-namespace enigma_user
-{
+namespace enigma_user {
 
-int surface_save(int id, string filename)
-{
-  get_surfacev(surface,id,-1);
+int surface_save(int id, string filename) {
+  get_surfacev(surface, id, -1);
   string ext = enigma::image_get_format(filename);
 
   d3dmgr->EndShapesBatching();
@@ -244,7 +222,8 @@ int surface_save(int id, string filename)
   D3DSURFACE_DESC desc;
   surface->surf->GetDesc(&desc);
 
-  d3dmgr->device->CreateOffscreenPlainSurface( desc.Width, desc.Height, desc.Format, D3DPOOL_SYSTEMMEM, &pDestBuffer, NULL );
+  d3dmgr->device->CreateOffscreenPlainSurface(desc.Width, desc.Height, desc.Format, D3DPOOL_SYSTEMMEM, &pDestBuffer,
+                                              NULL);
   d3dmgr->device->GetRenderTargetData(surface->surf, pDestBuffer);
 
   D3DLOCKED_RECT rect;
@@ -260,39 +239,21 @@ int surface_save(int id, string filename)
   return ret;
 }
 
-int surface_save_part(int id, string filename, unsigned x, unsigned y, unsigned w, unsigned h)
-{
+int surface_save_part(int id, string filename, unsigned x, unsigned y, unsigned w, unsigned h) {}
 
-}
+int background_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, bool preload) {}
 
-int background_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, bool preload)
-{
+int sprite_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, bool preload,
+                               int xorig, int yorig) {}
 
-}
-
-int sprite_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, bool preload, int xorig, int yorig)
-{
-
-}
-
-int sprite_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, int xorig, int yorig)
-{
+int sprite_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, int xorig, int yorig) {
   return sprite_create_from_surface(id, x, y, w, h, removeback, smooth, true, xorig, yorig);
 }
 
-void sprite_add_from_surface(int ind, int id, int x, int y, int w, int h, bool removeback, bool smooth)
-{
+void sprite_add_from_surface(int ind, int id, int x, int y, int w, int h, bool removeback, bool smooth) {}
 
-}
+void surface_copy_part(int destination, gs_scalar x, gs_scalar y, int source, int xs, int ys, int ws, int hs) {}
 
-void surface_copy_part(int destination, gs_scalar x, gs_scalar y, int source, int xs, int ys, int ws, int hs)
-{
+void surface_copy(int destination, gs_scalar x, gs_scalar y, int source) {}
 
-}
-
-void surface_copy(int destination, gs_scalar x, gs_scalar y, int source)
-{
-
-}
-
-}
+}  // namespace enigma_user

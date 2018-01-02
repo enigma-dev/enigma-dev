@@ -18,10 +18,10 @@
 
 #include <math.h>
 #include "../General/GSprimitives.h"
-#include "Direct3D11Headers.h"
 #include "Bridges/General/DX11Context.h"
-#include "Graphics_Systems/General/GSstdraw.h"
+#include "Direct3D11Headers.h"
 #include "Graphics_Systems/General/GScolors.h"
+#include "Graphics_Systems/General/GSstdraw.h"
 
 #include <stdio.h>
 #include "Universal_System/roomsystem.h"
@@ -34,84 +34,49 @@
 using std::vector;
 
 namespace enigma {
-  extern unsigned char currentcolor[4];
+extern unsigned char currentcolor[4];
 }
 
-namespace enigma_user
-{
+namespace enigma_user {
 
-int draw_get_msaa_maxlevel()
-{
+int draw_get_msaa_maxlevel() {}
 
-}
+bool draw_get_msaa_supported() {}
 
-bool draw_get_msaa_supported()
-{
+void draw_set_msaa_enabled(bool enable) {}
 
-}
+void draw_enable_alphablend(bool enable) {}
 
-void draw_set_msaa_enabled(bool enable)
-{
+bool draw_get_alpha_test() {}
 
-}
+unsigned draw_get_alpha_test_ref_value() {}
 
-void draw_enable_alphablend(bool enable) {
+void draw_set_alpha_test(bool enable) {}
 
-}
+void draw_set_alpha_test_ref_value(unsigned val) {}
 
-bool draw_get_alpha_test() {
+void draw_set_line_pattern(int pattern, int scale) {}
 
-}
-
-unsigned draw_get_alpha_test_ref_value()
-{
-
-}
-
-void draw_set_alpha_test(bool enable)
-{
-
-}
-
-void draw_set_alpha_test_ref_value(unsigned val)
-{
-
-}
-
-void draw_set_line_pattern(int pattern, int scale)
-{
-
-}
-
-}
+}  // namespace enigma_user
 
 //#include <endian.h>
 //TODO: Though serprex, the author of the function below, never included endian.h,
 //   // Doing so is necessary for the function to work at its peak.
 //   // When ENIGMA generates configuration files, one should be included here.
 
-namespace enigma_user
-{
+namespace enigma_user {
 
-int draw_getpixel(int x, int y)
-{
+int draw_getpixel(int x, int y) {}
 
-}
+int draw_getpixel_ext(int x, int y) {}
+}  // namespace enigma_user
 
-int draw_getpixel_ext(int x, int y)
-{
+namespace enigma {
 
-}
-}
-
-namespace enigma{
-
-bool fill_complex_polygon(const std::list<PolyVertex>& vertices, int defaultColor, bool allowHoles)
-{
+bool fill_complex_polygon(const std::list<PolyVertex>& vertices, int defaultColor, bool allowHoles) {
   //TODO: Complex polygon supported only in OpenGL1 at the moment. By returning false here, we fall back
   //      on a convex-only polygon drawing routine that works on any platform.
   return false;
 }
 
-}
-
+}  // namespace enigma

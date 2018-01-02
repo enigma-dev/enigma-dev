@@ -18,25 +18,25 @@
 #ifndef ENIGMA_GL_TEXTURESTRUCT__H
 #define ENIGMA_GL_TEXTURESTRUCT__H
 
-#include "Universal_System/scalar.h"
 #include "GLSamplerState.h"
+#include "Universal_System/scalar.h"
 
 #include <vector>
 using std::vector;
 
 struct TextureStruct {
   enigma::SamplerState* sampler;
-	unsigned gltex;
-	unsigned width,height;
-	unsigned fullwidth,fullheight;
-	TextureStruct(unsigned gtex);
-	~TextureStruct();
+  unsigned gltex;
+  unsigned width, height;
+  unsigned fullwidth, fullheight;
+  TextureStruct(unsigned gtex);
+  ~TextureStruct();
 };
 extern vector<TextureStruct*> textureStructs;
 
 namespace enigma {
 unsigned get_texture(int texid);
 void graphics_samplers_apply();
-}
+}  // namespace enigma
 
-#endif // ENIGMA_GL_TEXTURESTRUCT__H
+#endif  // ENIGMA_GL_TEXTURESTRUCT__H

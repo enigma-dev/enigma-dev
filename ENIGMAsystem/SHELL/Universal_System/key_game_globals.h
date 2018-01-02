@@ -66,7 +66,7 @@ extern global:     event_object
 extern global:     event_type*/
 
 namespace enigma_user {
-  extern double      fps;
+extern double fps;
 }
 
 /*

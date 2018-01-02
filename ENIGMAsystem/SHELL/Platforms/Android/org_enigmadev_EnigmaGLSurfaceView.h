@@ -12,16 +12,14 @@ extern "C" {
  * Method:    nativeMouse_Press
  * Signature: (II)V
  */
-JNIEXPORT void JNICALL Java_org_enigmadev_EnigmaGLSurfaceView_nativeMouse_1Press
-  (JNIEnv *, jclass, jint, jint);
+JNIEXPORT void JNICALL Java_org_enigmadev_EnigmaGLSurfaceView_nativeMouse_1Press(JNIEnv *, jclass, jint, jint);
 
 /*
  * Class:     org_enigmadev_EnigmaGLSurfaceView
  * Method:    nativeMouse_Release
  * Signature: (II)V
  */
-JNIEXPORT void JNICALL Java_org_enigmadev_EnigmaGLSurfaceView_nativeMouse_1Release
-  (JNIEnv *, jclass, jint, jint);
+JNIEXPORT void JNICALL Java_org_enigmadev_EnigmaGLSurfaceView_nativeMouse_1Release(JNIEnv *, jclass, jint, jint);
 
 #ifdef __cplusplus
 }

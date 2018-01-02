@@ -18,16 +18,15 @@
 #ifndef BGUI_GROUPS_H
 #define BGUI_GROUPS_H
 
-namespace gui
-{
-	class Group{
-		public:
-			unsigned int id;
+namespace gui {
+class Group {
+ public:
+  unsigned int id;
 
-      vector<unsigned int> group_buttons;
-      vector<unsigned int> group_toggles;
-      vector<unsigned int> group_windows;
-	};
-}
+  vector<unsigned int> group_buttons;
+  vector<unsigned int> group_toggles;
+  vector<unsigned int> group_windows;
+};
+}  // namespace gui
 
 #endif

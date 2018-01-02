@@ -30,15 +30,16 @@
 #include "Universal_System/instance_iterator.h"
 
 namespace enigma {
-  extern int destroycalls, createcalls;
+extern int destroycalls, createcalls;
 }
 
 namespace enigma_user {
-enigma::instance_t instance_create(int x,int y,int object);
+enigma::instance_t instance_create(int x, int y, int object);
 }
 
 namespace enigma {
-  object_basic *instance_create_id(int x,int y,int object,int idg); //This is for use by the system only. Please leave be.
+object_basic* instance_create_id(int x, int y, int object,
+                                 int idg);  //This is for use by the system only. Please leave be.
 }
 
 namespace enigma_user {
@@ -48,24 +49,22 @@ void instance_activate_object(int obj);
 void instance_deactivate_object(int obj);
 void instance_destroy(int id, bool dest_ev = true);
 void instance_destroy();
-bool instance_exists (int obj);
-enigma::instance_t instance_find   (int obj,int n);
-int instance_number (int obj);
+bool instance_exists(int obj);
+enigma::instance_t instance_find(int obj, int n);
+int instance_number(int obj);
 enigma::instance_t instance_last(int obj);
-enigma::instance_t instance_nearest (int x,int y,int obj,bool notme = false);
-enigma::instance_t instance_furthest(int x,int y,int obj,bool notme = false);
-}
-
+enigma::instance_t instance_nearest(int x, int y, int obj, bool notme = false);
+enigma::instance_t instance_furthest(int x, int y, int obj, bool notme = false);
+}  // namespace enigma_user
 
 //int instance_place(x,y,obj)
 //int instance_copy(performevent)
 namespace enigma {
-  void instance_change_inst(int obj, bool perf, enigma::object_graphics* inst);
+void instance_change_inst(int obj, bool perf, enigma::object_graphics* inst);
 }
 
 namespace enigma_user {
 void instance_change(int obj, bool perf = false);
-void instance_copy(bool perf = true); // this is supposed to return an iterator
+void instance_copy(bool perf = true);  // this is supposed to return an iterator
 inline void action_change_object(int obj, bool perf);
-}
-
+}  // namespace enigma_user

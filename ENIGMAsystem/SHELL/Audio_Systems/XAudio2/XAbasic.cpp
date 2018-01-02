@@ -15,20 +15,20 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <string>
-#include <stdio.h>
-#include <stddef.h>
 #include <math.h>
+#include <stddef.h>
+#include <stdio.h>
+#include <string>
 using std::string;
 #include "../General/ASbasic.h"
 #include "Audio_Systems/audio_mandatory.h"
-#include "SoundResource.h"
 #include "SoundEmitter.h"
+#include "SoundResource.h"
 #include "XAsystem.h"
 
 #ifdef DEBUG_MODE
+#include "Widget_Systems/widgets_mandatory.h"  // show_error
 #include "libEGMstd.h"
-#include "Widget_Systems/widgets_mandatory.h" // show_error
 #endif
 
 #include "Universal_System/estring.h"
@@ -36,118 +36,65 @@ using std::string;
 #include <vector>
 using std::vector;
 
-namespace enigma_user
-{
+namespace enigma_user {
 
-bool sound_exists(int sound)
-{
+bool sound_exists(int sound) {}
 
+bool sound_play(int sound)  // Returns whether sound is playing
+{}
+bool sound_loop(int sound)  // Returns whether sound is playing
+{}
+
+bool sound_pause(int sound)  // Returns whether the sound was successfully paused
+{}
+
+void sound_pause_all() {}
+
+void sound_stop(int sound) {}
+
+void sound_stop_all() {}
+
+void sound_delete(int sound) {}
+
+void sound_volume(int sound, float volume) {}
+
+void sound_global_volume(float mastervolume) {}
+
+bool sound_resume(int sound)  // Returns whether the sound is playing
+{}
+void sound_resume_all() {}
+
+bool sound_isplaying(int sound) {}
+
+bool sound_ispaused(int sound) {}
+
+void sound_pan(int sound, float value) {}
+
+float sound_get_length(int sound) {  // Not for Streams
 }
 
-bool sound_play(int sound) // Returns whether sound is playing
-{
-
-}
-bool sound_loop(int sound) // Returns whether sound is playing
-{
-
+float sound_get_position(int sound) {  // Not for Streams
 }
 
-bool sound_pause(int sound) // Returns whether the sound was successfully paused
-{
+void sound_seek(int sound, float position) {}
 
-}
+void sound_seek_all(float position) {}
 
-void sound_pause_all()
-{
+void action_sound(int snd, bool loop) {}
 
-}
+const char* sound_get_audio_error() {}
 
-void sound_stop(int sound) {
-
-}
-
-void sound_stop_all()
-{
-
-}
-
-void sound_delete(int sound) {
-
-}
-
-void sound_volume(int sound, float volume) {
-
-}
-
-void sound_global_volume(float mastervolume) {
-
-}
-
-bool sound_resume(int sound) // Returns whether the sound is playing
-{
-
-}
-void sound_resume_all()
-{
-
-}
-
-bool sound_isplaying(int sound) {
-
-}
-
-bool sound_ispaused(int sound) {
-
-}
-
-void sound_pan(int sound, float value)
-{
-
-}
-
-float sound_get_length(int sound) { // Not for Streams
-
-}
-
-float sound_get_position(int sound) { // Not for Streams
-
-}
-
-void sound_seek(int sound, float position) {
-
-}
-
-void sound_seek_all(float position) {
-
-}
-
-void action_sound(int snd, bool loop)
-{
-
-}
-
-const char* sound_get_audio_error() {
-
-}
-
-}
+}  // namespace enigma_user
 
 #include <string>
 using namespace std;
 extern void show_message(string);
 
-namespace enigma_user
-{
+namespace enigma_user {
 
-int sound_add(string fname, int kind, bool preload) //At the moment, the latter two arguments do nothing! =D
-{
+int sound_add(string fname, int kind, bool preload)  //At the moment, the latter two arguments do nothing! =D
+{}
 
-}
+bool sound_replace(int sound, string fname, int kind, bool preload) {}
 
-bool sound_replace(int sound, string fname, int kind, bool preload)
-{
-
-}
-
-}
+}  // namespace enigma_user

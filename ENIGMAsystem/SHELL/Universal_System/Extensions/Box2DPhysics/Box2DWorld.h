@@ -35,8 +35,7 @@ struct B2DWorld {
   int32 pixelstometers;
   bool paused;
 
-  B2DWorld()
-  {
+  B2DWorld() {
     // Define the gravity vector.
     b2Vec2 gravity(0.0f, 10.0f);
 
@@ -49,7 +48,7 @@ struct B2DWorld {
   }
 
   void world_update();
-}; 
+};
 extern vector<B2DWorld*> b2dworlds;
 
 struct B2DBody {
@@ -57,53 +56,45 @@ struct B2DBody {
   vector<int> fixtures;
   b2Body* body;
 
-  B2DBody() 
-  {
+  B2DBody() {}
 
-  }
-
-  ~B2DBody()
-  {
-    this->body->GetWorld()->DestroyBody(this->body);
-  }
-
-}; 
+  ~B2DBody() { this->body->GetWorld()->DestroyBody(this->body); }
+};
 extern vector<B2DBody*> b2dbodies;
 
 #ifdef DEBUG_MODE
-  #include <string>
-  #include "libEGMstd.h"
-  #include "Widget_Systems/widgets_mandatory.h"
-  #define get_worldr(w,id,r) \
-    if (unsigned(id) >= b2dworlds.size() || id < 0) { \
-      show_error("Cannot access Box2D physics world with id " + toString(id), false); \
-      return r; \
-    } B2DWorld* w = b2dworlds[id];
-  #define get_world(w,id) \
-    if (unsigned(id) >= b2dworlds.size() || id < 0) { \
-      show_error("Cannot access Box2D physics world with id " + toString(id), false); \
-      return; \
-    } B2DWorld* w = b2dworlds[id];
-  #define get_bodyr(b,id,r) \
-    if (unsigned(id) >= b2dbodies.size() || id < 0) { \
-      show_error("Cannot access Box2D physics body with id " + toString(id), false); \
-      return r; \
-    } B2DBody* b = b2dbodies[id];
-  #define get_body(b,id) \
-    if (unsigned(id) >= b2dbodies.size() || id < 0) { \
-      show_error("Cannot access Box2D physics body with id " + toString(id), false); \
-      return; \
-    } B2DBody* b = b2dbodies[id];
+#include <string>
+#include "Widget_Systems/widgets_mandatory.h"
+#include "libEGMstd.h"
+#define get_worldr(w, id, r)                                                        \
+  if (unsigned(id) >= b2dworlds.size() || id < 0) {                                 \
+    show_error("Cannot access Box2D physics world with id " + toString(id), false); \
+    return r;                                                                       \
+  }                                                                                 \
+  B2DWorld* w = b2dworlds[id];
+#define get_world(w, id)                                                            \
+  if (unsigned(id) >= b2dworlds.size() || id < 0) {                                 \
+    show_error("Cannot access Box2D physics world with id " + toString(id), false); \
+    return;                                                                         \
+  }                                                                                 \
+  B2DWorld* w = b2dworlds[id];
+#define get_bodyr(b, id, r)                                                        \
+  if (unsigned(id) >= b2dbodies.size() || id < 0) {                                \
+    show_error("Cannot access Box2D physics body with id " + toString(id), false); \
+    return r;                                                                      \
+  }                                                                                \
+  B2DBody* b = b2dbodies[id];
+#define get_body(b, id)                                                            \
+  if (unsigned(id) >= b2dbodies.size() || id < 0) {                                \
+    show_error("Cannot access Box2D physics body with id " + toString(id), false); \
+    return;                                                                        \
+  }                                                                                \
+  B2DBody* b = b2dbodies[id];
 #else
-  #define get_worldr(w,id,r) \
-    B2DWorld* w = b2dworlds[id];
-  #define get_world(w,id) \
-    B2DWorld* w = b2dworlds[id];
-  #define get_bodyr(b,id,r) \
-    B2DBody* b = b2dbodies[id];
-  #define get_body(b,id) \
-    B2DBody* b = b2dbodies[id];
+#define get_worldr(w, id, r) B2DWorld* w = b2dworlds[id];
+#define get_world(w, id) B2DWorld* w = b2dworlds[id];
+#define get_bodyr(b, id, r) B2DBody* b = b2dbodies[id];
+#define get_body(b, id) B2DBody* b = b2dbodies[id];
 #endif
 
-#endif // ENIGMA_BOX2D_WORLD__H
-
+#endif  // ENIGMA_BOX2D_WORLD__H

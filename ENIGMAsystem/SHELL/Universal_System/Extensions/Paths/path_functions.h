@@ -70,5 +70,4 @@ cs_scalar path_get_y(unsigned pathid, double t);
 cs_scalar path_get_speed(unsigned pathid, double t);
 double path_get_direction(unsigned pathid, double t);
 void draw_path(unsigned path, gs_scalar x, gs_scalar y, bool absolute);
-}
-
+}  // namespace enigma_user

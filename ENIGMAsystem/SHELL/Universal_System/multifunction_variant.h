@@ -30,43 +30,41 @@
 
 #include "var_te.h"
 
-namespace enigma
-{
-  struct multifunction_variant: variant
-  {
-    #undef  types_extrapolate_alldec
-    #define types_extrapolate_alldec(prefix)\
-     types_extrapolate_real_p  (prefix,;)\
-     types_extrapolate_string_p(prefix,;)\
-     prefix (const variant &x);\
-     prefix (const var &x);
-    
-    virtual void function(variant oldvalue);
-    
-    //These are assignment operators and require a reference to be passed
-    multifunction_variant& operator=(multifunction_variant&); // Stop shit from happening
-    types_extrapolate_alldec(multifunction_variant& operator=)
-    types_extrapolate_alldec(multifunction_variant& operator+=)
-    types_extrapolate_alldec(multifunction_variant& operator-=)
-    types_extrapolate_alldec(multifunction_variant& operator*=)
-    types_extrapolate_alldec(multifunction_variant& operator/=)
-    types_extrapolate_alldec(multifunction_variant& operator%=)
-    types_extrapolate_alldec(multifunction_variant& operator<<=)
-    types_extrapolate_alldec(multifunction_variant& operator>>=)
-    types_extrapolate_alldec(multifunction_variant& operator&=)
-    types_extrapolate_alldec(multifunction_variant& operator|=)
-    types_extrapolate_alldec(multifunction_variant& operator^=)
-    
-    multifunction_variant(); // Assigns default type to real
-    types_extrapolate_alldecc(multifunction_variant) // Other constructors outsource to variant's
-    virtual ~multifunction_variant();
-    #undef  types_extrapolate_alldec
-  };
-}
+namespace enigma {
+struct multifunction_variant : variant {
+#undef types_extrapolate_alldec
+#define types_extrapolate_alldec(prefix)                                                              \
+  types_extrapolate_real_p(prefix, ;) types_extrapolate_string_p(prefix, ;) prefix(const variant& x); \
+  prefix(const var& x);
 
-#define INHERIT_OPERATORS(t)\
-  using multifunction_variant::operator=;\
-  t &operator=(t&);
-#define INTERCEPT_DEFAULT_COPY(t)\
-  t &t::operator=(t& x) { *this = (variant&)x; return *this; }
+  virtual void function(variant oldvalue);
+
+  //These are assignment operators and require a reference to be passed
+  multifunction_variant& operator=(multifunction_variant&);  // Stop shit from happening
+  types_extrapolate_alldec(multifunction_variant& operator=) types_extrapolate_alldec(multifunction_variant& operator+=)
+      types_extrapolate_alldec(multifunction_variant& operator-=)
+          types_extrapolate_alldec(multifunction_variant& operator*=)
+              types_extrapolate_alldec(multifunction_variant& operator/=)
+                  types_extrapolate_alldec(multifunction_variant& operator%=)
+                      types_extrapolate_alldec(multifunction_variant& operator<<=)
+                          types_extrapolate_alldec(multifunction_variant& operator>>=)
+                              types_extrapolate_alldec(multifunction_variant& operator&=)
+                                  types_extrapolate_alldec(multifunction_variant& operator|=)
+                                      types_extrapolate_alldec(multifunction_variant& operator^=)
+
+                                          multifunction_variant();  // Assigns default type to real
+  types_extrapolate_alldecc(multifunction_variant)                  // Other constructors outsource to variant's
+      virtual ~multifunction_variant();
+#undef types_extrapolate_alldec
+};
+}  // namespace enigma
+
+#define INHERIT_OPERATORS(t)              \
+  using multifunction_variant::operator=; \
+  t& operator=(t&);
+#define INTERCEPT_DEFAULT_COPY(t) \
+  t& t::operator=(t& x) {         \
+    *this = (variant&)x;          \
+    return *this;                 \
+  }
 #endif

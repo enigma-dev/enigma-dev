@@ -28,20 +28,17 @@
 #ifndef ENIGMA_PS_PARTICLESPRITES
 #define ENIGMA_PS_PARTICLESPRITES
 
-#include "PS_particle_enums.h"
 #include <map>
+#include "PS_particle_enums.h"
 
-namespace enigma
-{
-  struct particle_sprite
-  {
-    int texture;
-    int width, height; // Assumes multiple of 2.
-    pt_shape shape;
-  };
-  particle_sprite* get_particle_sprite(pt_shape particle_shape);
-  int get_particle_actual_sprite(pt_shape particle_shape);
-}
+namespace enigma {
+struct particle_sprite {
+  int texture;
+  int width, height;  // Assumes multiple of 2.
+  pt_shape shape;
+};
+particle_sprite* get_particle_sprite(pt_shape particle_shape);
+int get_particle_actual_sprite(pt_shape particle_shape);
+}  // namespace enigma
 
-#endif // ENIGMA_PS_PARTICLESPRITES
-
+#endif  // ENIGMA_PS_PARTICLESPRITES

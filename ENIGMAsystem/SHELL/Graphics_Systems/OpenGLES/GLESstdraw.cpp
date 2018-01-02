@@ -17,25 +17,25 @@
 **/
 
 #include <math.h>
-#include "OpenGLHeaders.h"
 #include <stdio.h>
+#include "OpenGLHeaders.h"
 
 #define __GETR(x) ((x & 0x0000FF))
 #define __GETG(x) ((x & 0x00FF00) >> 8)
 #define __GETB(x) ((x & 0xFF0000) >> 16)
 
-namespace enigma{
-float circleprecision=24;
+namespace enigma {
+float circleprecision = 24;
 extern unsigned bound_texture;
 extern unsigned char currentcolor[4];
-}
-#define untexture() if(enigma::bound_texture) glBindTexture(GL_TEXTURE_2D,enigma::bound_texture=0);
+}  // namespace enigma
+#define untexture() \
+  if (enigma::bound_texture) glBindTexture(GL_TEXTURE_2D, enigma::bound_texture = 0);
 
 namespace enigma_user {
 
-void draw_set_line_pattern(int pattern, int scale)
-{
-   /* if (pattern == -1){
+void draw_set_line_pattern(int pattern, int scale) {
+  /* if (pattern == -1){
         glDisable(GL_LINE_STIPPLE);
     }else{
         glEnable(GL_LINE_STIPPLE);
@@ -43,66 +43,61 @@ void draw_set_line_pattern(int pattern, int scale)
     }*/
 }
 
-int draw_point(gs_scalar x, gs_scalar y)
-{
-	untexture();
-/*	glBegin(GL_POINTS);
+int draw_point(gs_scalar x, gs_scalar y) {
+  untexture();
+  /*	glBegin(GL_POINTS);
     glVertex2f(x,y);
 	glEnd(); OPENGLES */
-	return 0;
+  return 0;
 }
 
-int draw_point_color(gs_scalar x, gs_scalar y, int col)
-{
-	untexture();
-	/*glPushAttrib(GL_CURRENT_BIT);
+int draw_point_color(gs_scalar x, gs_scalar y, int col) {
+  untexture();
+  /*glPushAttrib(GL_CURRENT_BIT);
 	glColor4ub(__GETR(col),__GETG(col),__GETB(col),enigma::currentcolor[3]);
 	glBegin(GL_POINTS);
 	glVertex2f(x,y);
 	glEnd();
 	glPopAttrib(); OPENGLES */
-	return 0;
+  return 0;
 }
 
-int draw_line(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2)
-{
-	untexture();
-	/*glBegin(GL_LINES);
+int draw_line(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2) {
+  untexture();
+  /*glBegin(GL_LINES);
 	glVertex2f(x1,y1);
 	glVertex2f(x2,y2);
 	glEnd(); OPENGLES */
-	return 0;
+  return 0;
 }
 
-int draw_line_width(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar width)
-{
-	untexture();
-	/*glPushAttrib(GL_LINE_BIT);
+int draw_line_width(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar width) {
+  untexture();
+  /*glPushAttrib(GL_LINE_BIT);
 	glLineWidth(width);
 	glBegin(GL_LINES);
 	glVertex2f(x1,y1);
 	glVertex2f(x2,y2);
 	glEnd();
 	glPopAttrib(); OPENGLES */
-	return 0;
+  return 0;
 }
 
-int draw_line_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, int c1, int c2)
-{
-	untexture();
-	/*glBegin(GL_LINES);
+int draw_line_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, int c1, int c2) {
+  untexture();
+  /*glBegin(GL_LINES);
     glColor4ub(__GETR(c1),__GETG(c1),__GETB(c1),enigma::currentcolor[3]);
       glVertex2f(x1,y1);
     glColor4ub(__GETR(c2),__GETG(c2),__GETB(c2),enigma::currentcolor[3]);
       glVertex2f(x2,y2);
 	glEnd();
 	glColor4ubv(enigma::currentcolor); OPENGLES */
-	return 0;
+  return 0;
 }
 
-int draw_line_width_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar width, int c1, int c2){
-	untexture();
-	/*glPushAttrib(GL_LINE_BIT);
+int draw_line_width_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar width, int c1, int c2) {
+  untexture();
+  /*glPushAttrib(GL_LINE_BIT);
     glLineWidth(width);
     glBegin(GL_LINES);
       glColor4ub(__GETR(c1),__GETG(c1),__GETB(c1),enigma::currentcolor[3]);
@@ -112,13 +107,12 @@ int draw_line_width_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2
     glEnd();
 	glPopAttrib();
 	glColor4ubv(enigma::currentcolor); OPENGLES */
-	return 0;
+  return 0;
 }
 
-int draw_rectangle(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, bool outline)
-{
-	untexture();
-	/*if(outline)
+int draw_rectangle(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, bool outline) {
+  untexture();
+  /*if(outline)
 	{
 		glBegin(GL_LINE_LOOP);
       glVertex2f(x1,y1);
@@ -128,44 +122,35 @@ int draw_rectangle(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, bool 
 		glEnd();
 	}
 	else glRectf(x1,y1,x2,y2); OPENGLES */
-	return 0;
+  return 0;
 }
 
-int draw_rectangle_angle(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, float angle, bool outline)
-{
-	untexture();
-	angle *= M_PI/180;
+int draw_rectangle_angle(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, float angle, bool outline) {
+  untexture();
+  angle *= M_PI / 180;
 
-	float
-		xm = (x2+x1)/2,
-		ym = (y2+y1)/2;
+  float xm = (x2 + x1) / 2, ym = (y2 + y1) / 2;
 
-  float
-		len = hypot(xm-x1,ym-y1),
-		dir = atan2(y1-ym,x1-xm)+angle;
+  float len = hypot(xm - x1, ym - y1), dir = atan2(y1 - ym, x1 - xm) + angle;
 
-  float
-	  ldx1 = len*cos(dir),
-	  ldy1 = len*sin(dir);
+  float ldx1 = len * cos(dir), ldy1 = len * sin(dir);
 
-	dir = atan2(y2-ym,x1-xm)+angle;
-	float
-	  ldx2 = len*cos(dir),
-	  ldy2 = len*sin(dir);
+  dir = atan2(y2 - ym, x1 - xm) + angle;
+  float ldx2 = len * cos(dir), ldy2 = len * sin(dir);
 
-/*glBegin(outline ? GL_LINE_LOOP : GL_QUADS);
+  /*glBegin(outline ? GL_LINE_LOOP : GL_QUADS);
     glVertex2f(xm+ldx1,ym-ldy1);
     glVertex2f(xm+ldx2,ym-ldy2);
     glVertex2f(xm-ldx1,ym+ldy1);
     glVertex2f(xm-ldx2,ym+ldy2);
 	glEnd(); OPENGLES*/
-	return 0;
+  return 0;
 }
 
-int draw_rectangle_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, int c1, int c2, int c3, int c4, bool outline)
-{
-	untexture();
-	/*glBegin(outline?GL_LINE_LOOP:GL_QUADS);
+int draw_rectangle_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, int c1, int c2, int c3, int c4,
+                         bool outline) {
+  untexture();
+  /*glBegin(outline?GL_LINE_LOOP:GL_QUADS);
     glColor4ub(__GETR(c1),__GETG(c1),__GETB(c1),enigma::currentcolor[3]);
       glVertex2f(x1,y1);
     glColor4ub(__GETR(c2),__GETG(c2),__GETB(c2),enigma::currentcolor[3]);
@@ -176,22 +161,19 @@ int draw_rectangle_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2,
       glVertex2f(x1,y2);
 	glEnd();
 	glColor4ubv(enigma::currentcolor); OPENGLES*/
-	return 0;
+  return 0;
 }
 
 int draw_set_circle_precision(float pr) {
-	enigma::circleprecision = pr<3 ? 3 : pr;
-	return 0;
+  enigma::circleprecision = pr < 3 ? 3 : pr;
+  return 0;
 }
-float draw_get_circle_precision() {
-	return enigma::circleprecision;
-}
+float draw_get_circle_precision() { return enigma::circleprecision; }
 
-int draw_circle(gs_scalar x, gs_scalar y, float rad, bool outline)
-{
-	untexture();
-	gs_scalar pr=2*M_PI/enigma::circleprecision;
-	/*if(outline)
+int draw_circle(gs_scalar x, gs_scalar y, float rad, bool outline) {
+  untexture();
+  gs_scalar pr = 2 * M_PI / enigma::circleprecision;
+  /*if(outline)
 	{
 		glBegin(GL_LINES);
 		for(gs_scalar i=pr;i<M_PI/2;i+=pr)
@@ -223,13 +205,12 @@ int draw_circle(gs_scalar x, gs_scalar y, float rad, bool outline)
 		}
 	}
 	glEnd(); OPENGLES*/
-	return 0;
+  return 0;
 }
 
-int draw_circle_color(gs_scalar x, gs_scalar y, float rad, int c1, int c2, bool outline)
-{
+int draw_circle_color(gs_scalar x, gs_scalar y, float rad, int c1, int c2, bool outline) {
   untexture();
-	/*if(outline)
+  /*if(outline)
 	  glBegin(GL_LINE_STRIP);
 	else
 	{
@@ -246,14 +227,13 @@ int draw_circle_color(gs_scalar x, gs_scalar y, float rad, int c1, int c2, bool 
       glVertex2f(x+rad,y);
 	glEnd();
 	glColor4ubv(enigma::currentcolor); OPENGLES*/
-	return 0;
+  return 0;
 }
 
-int draw_circle_perfect(gs_scalar x, gs_scalar y, float rad, bool outline)
-{
-	untexture();
-	gs_scalar r2=rad*rad,r12=rad*M_SQRT1_2;
-	/*glBegin(outline?GL_POINTS:GL_LINES);
+int draw_circle_perfect(gs_scalar x, gs_scalar y, float rad, bool outline) {
+  untexture();
+  gs_scalar r2 = rad * rad, r12 = rad * M_SQRT1_2;
+  /*glBegin(outline?GL_POINTS:GL_LINES);
     for(float xc=0,yc=r;xc<=r12;xc++)
     {
       if(xc*xc+yc*yc>r2) yc--;
@@ -267,14 +247,13 @@ int draw_circle_perfect(gs_scalar x, gs_scalar y, float rad, bool outline)
       glVertex2f(x-yc,y-xc);
     }
 	glEnd(); */
-    return 0;
+  return 0;
 }
 
-int draw_circle_color_perfect(gs_scalar x, gs_scalar y, float rad, int c1, int c2, bool outline)
-{
-	untexture();
-	gs_scalar r2=rad*rad;
-	/*if(outline)
+int draw_circle_color_perfect(gs_scalar x, gs_scalar y, float rad, int c1, int c2, bool outline) {
+  untexture();
+  gs_scalar r2 = rad * rad;
+  /*if(outline)
 	{
 		glBegin(GL_POINTS);
       glColor4ub(__GETR(c2),__GETG(c2),__GETB(c2),enigma::currentcolor[3]);
@@ -307,17 +286,14 @@ int draw_circle_color_perfect(gs_scalar x, gs_scalar y, float rad, int c1, int c
 	}
 	glEnd();
 	glColor4ubv(enigma::currentcolor); OPENGLES */
-	return 0;
+  return 0;
 }
 
-int draw_ellipse(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, bool outline)
-{
-	untexture();
-	gs_scalar
-		x=(x1+x2)/2,y=(y1+y2)/2,
-		hr=fabs(x2-x),vr=fabs(y2-y),
-		pr=2*M_PI/enigma::circleprecision;
-	/*if(outline)
+int draw_ellipse(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, bool outline) {
+  untexture();
+  gs_scalar x = (x1 + x2) / 2, y = (y1 + y2) / 2, hr = fabs(x2 - x), vr = fabs(y2 - y),
+            pr = 2 * M_PI / enigma::circleprecision;
+  /*if(outline)
 	{
 		glBegin(GL_LINES);
 		for(float i=pr;i<M_PI;i+=pr)
@@ -344,18 +320,15 @@ int draw_ellipse(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, bool ou
 		}
 	}
 	glEnd(); OPENGLES*/
-	return 0;
+  return 0;
 }
 
-int draw_ellipse_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, int c1, int c2, bool outline)
-{
+int draw_ellipse_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, int c1, int c2, bool outline) {
   untexture();
-	float
-		x=(x1+x2)/2,y=(y1+y2)/2,
-		hr=fabs(x2-x),vr=fabs(y2-y),
-		pr=2*M_PI/enigma::circleprecision;
+  float x = (x1 + x2) / 2, y = (y1 + y2) / 2, hr = fabs(x2 - x), vr = fabs(y2 - y),
+        pr = 2 * M_PI / enigma::circleprecision;
 
-	/*if(outline)
+  /*if(outline)
 	  glBegin(GL_LINE_STRIP);
 	else
 	{
@@ -372,16 +345,13 @@ int draw_ellipse_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, i
 	glEnd();
 
 	glColor4ubv(enigma::currentcolor); OPENGLES*/
-	return 0;
+  return 0;
 }
 
-int draw_ellipse_perfect(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, bool outline)
-{
-	untexture();
-	float
-		x=(x1+x2)/2,y=(y1+y2)/2,
-		hr=fabs(x2-x),vr=fabs(y2-y);
-	/*glBegin(outline?GL_POINTS:GL_LINES);
+int draw_ellipse_perfect(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, bool outline) {
+  untexture();
+  float x = (x1 + x2) / 2, y = (y1 + y2) / 2, hr = fabs(x2 - x), vr = fabs(y2 - y);
+  /*glBegin(outline?GL_POINTS:GL_LINES);
 	for(float xc=0;xc<hr;xc++)
 	{
 		float yc=vr*cos((M_PI/2)/hr*xc);
@@ -391,24 +361,23 @@ int draw_ellipse_perfect(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2,
 		glVertex2f(x-xc,y-yc);
 	}
 	glEnd(); OPENGLES*/
-	return 0;
+  return 0;
 }
 
-int draw_triangle(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, bool outline)
-{
-	untexture();
-	/*glBegin(outline?GL_LINE_LOOP:GL_TRIANGLES);
+int draw_triangle(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, bool outline) {
+  untexture();
+  /*glBegin(outline?GL_LINE_LOOP:GL_TRIANGLES);
 	glVertex2f(x1,y1);
 	glVertex2f(x2,y2);
 	glVertex2f(x3,y3);
 	glEnd(); OPENGLES*/
-	return 0;
+  return 0;
 }
 
-int draw_triangle_color(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, int col1, int col2, int col3, bool outline)
-{
-	untexture();
-	/*glBegin(outline?GL_LINE_LOOP:GL_TRIANGLES);
+int draw_triangle_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, int col1,
+                        int col2, int col3, bool outline) {
+  untexture();
+  /*glBegin(outline?GL_LINE_LOOP:GL_TRIANGLES);
 	glColor4ub(__GETR(col1),__GETG(col1),__GETB(col1),enigma::currentcolor[3]);
 	glVertex2f(x1,y1);
 	glColor4ub(__GETR(col2),__GETG(col2),__GETB(col2),enigma::currentcolor[3]);
@@ -417,31 +386,32 @@ int draw_triangle_color(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, g
 	glVertex2f(x3,y3);
 	glEnd();
 	glColor4ubv(enigma::currentcolor); OPENGLES*/
-	return 0;
+  return 0;
 }
 
-int draw_roundrect(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, float rad, bool outline)
-{
-    untexture();
-    if(x1>x2)
-    {
-        float t=x2;
-        x2=x1;
-        x1=t;
-    }
-    if(y1>y2)
-    {
-        float t=y2;
-        y2=y1;
-        y1=t;
-    }
-    if (x2-x1<r*2){r=(x2-x1)/2;}
-    if (y2-y1<r*2){r=(y2-y1)/2;}
-    if (r<0){r=0;}
-    gs_scalar r2=rad*rad,r12=r*M_SQRT1_2,
-    bx1=x1+rad,by1=y1+rad,
-    bx2=x2-rad,by2=y2-rad;
-   /* glBegin(GL_LINES);
+int draw_roundrect(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, float rad, bool outline) {
+  untexture();
+  if (x1 > x2) {
+    float t = x2;
+    x2 = x1;
+    x1 = t;
+  }
+  if (y1 > y2) {
+    float t = y2;
+    y2 = y1;
+    y1 = t;
+  }
+  if (x2 - x1 < r * 2) {
+    r = (x2 - x1) / 2;
+  }
+  if (y2 - y1 < r * 2) {
+    r = (y2 - y1) / 2;
+  }
+  if (r < 0) {
+    r = 0;
+  }
+  gs_scalar r2 = rad * rad, r12 = r * M_SQRT1_2, bx1 = x1 + rad, by1 = y1 + rad, bx2 = x2 - rad, by2 = y2 - rad;
+  /* glBegin(GL_LINES);
     if(outline)
     {
         glVertex2f(x1,by1);glVertex2f(x1,by2);
@@ -481,31 +451,33 @@ int draw_roundrect(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, float
         glEnd();
         glRectf(bx1,y1,bx2,y2);
     }*/
-    return 0;
+  return 0;
 }
 
-int draw_roundrect_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, float rad, int col1, int col2, bool outline)
-{
-    untexture();
-    if(x1>x2)
-    {
-        float t=x2;
-        x2=x1;
-        x1=t;
-    }
-    if(y1>y2)
-    {
-        float t=y2;
-        y2=y1;
-        y1=t;
-    }
-    if (x2-x1<r*2){r=(x2-x1)/2;}
-    if (y2-y1<r*2){r=(y2-y1)/2;}
-    if (r<0){r=0;}
-    gs_scalar r2=rad*rad,r12=r*M_SQRT1_2,
-    bx1=x1+rad,by1=y1+rad,
-    bx2=x2-rad,by2=y2-rad;
-   /* glBegin(GL_LINES);
+int draw_roundrect_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, float rad, int col1, int col2,
+                         bool outline) {
+  untexture();
+  if (x1 > x2) {
+    float t = x2;
+    x2 = x1;
+    x1 = t;
+  }
+  if (y1 > y2) {
+    float t = y2;
+    y2 = y1;
+    y1 = t;
+  }
+  if (x2 - x1 < r * 2) {
+    r = (x2 - x1) / 2;
+  }
+  if (y2 - y1 < r * 2) {
+    r = (y2 - y1) / 2;
+  }
+  if (r < 0) {
+    r = 0;
+  }
+  gs_scalar r2 = rad * rad, r12 = r * M_SQRT1_2, bx1 = x1 + rad, by1 = y1 + rad, bx2 = x2 - rad, by2 = y2 - rad;
+  /* glBegin(GL_LINES);
     if(outline)
     {
         glColor4ub(__GETR(col2),__GETG(col2),__GETB(col2),enigma::currentcolor[3]);
@@ -564,14 +536,13 @@ int draw_roundrect_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2,
     */ return 0;
 }
 
-int draw_arrow(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, gs_scalar arrow_size, gs_scalar line_size, bool outline)
-{
-    untexture();
-    double dir = atan2(y2-y1,x2-x1);
-    float tc = cos(dir), ts = sin(dir),
-    xs = x2-tc*arrow_size, ys = y2-ts*arrow_size,
-    lw = ts*(line_size/2), lh = tc*(line_size/2);
-    double at = atan2(ys-y1,xs-x1);
+int draw_arrow(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar arrow_size, gs_scalar line_size,
+               bool outline) {
+  untexture();
+  double dir = atan2(y2 - y1, x2 - x1);
+  float tc = cos(dir), ts = sin(dir), xs = x2 - tc * arrow_size, ys = y2 - ts * arrow_size, lw = ts * (line_size / 2),
+        lh = tc * (line_size / 2);
+  double at = atan2(ys - y1, xs - x1);
   /*  if (fabs((dir<0?dir+2*M_PI:dir)-(at<0?at+2*M_PI:at)) < 0.01){
         glBegin(outline?GL_LINE_LOOP:GL_QUADS);
         glVertex2f(x1+lw,y1-lh);
@@ -588,24 +559,25 @@ int draw_arrow(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, gs_scalar 
     */ return 0;
 }
 
-void draw_button(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar border_width, bool up)
-{
-    untexture();
-    if(x1>x2)
-    {
-        float t=x2;
-        x2=x1;
-        x1=t;
-    }
-    if(y1>y2)
-    {
-        float t=y2;
-        y2=y1;
-        y1=t;
-    }
-    if (x2-x1<border_width*2){border_width=(x2-x1)/2;}
-    if (y2-y1<border_width*2){border_width=(y2-y1)/2;}
-   /* glBegin(GL_QUADS);
+void draw_button(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar border_width, bool up) {
+  untexture();
+  if (x1 > x2) {
+    float t = x2;
+    x2 = x1;
+    x1 = t;
+  }
+  if (y1 > y2) {
+    float t = y2;
+    y2 = y1;
+    y1 = t;
+  }
+  if (x2 - x1 < border_width * 2) {
+    border_width = (x2 - x1) / 2;
+  }
+  if (y2 - y1 < border_width * 2) {
+    border_width = (y2 - y1) / 2;
+  }
+  /* glBegin(GL_QUADS);
     glVertex2f(x1,y1);
     glVertex2f(x2,y1);
     glVertex2f(x2,y2);
@@ -638,20 +610,20 @@ void draw_button(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scal
 }
 
 //Mind that health is 1-100
-int draw_healthbar(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, float amount, int backcol, int mincol, int maxcol, int dir, bool showback, bool showborder)
-{
-	if(x1>x2) { // Swap them
-		float t = x2;
-		x2 = x1, x1 = t;
-	}
-	if(y1>y2) { // Swap them
-		float t = y2;
-		y2 = y1, y1 = t;
-	}
-	amount = amount>=100 ? 1 : (amount<=0 ? 0 : amount/100);
+int draw_healthbar(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, float amount, int backcol, int mincol,
+                   int maxcol, int dir, bool showback, bool showborder) {
+  if (x1 > x2) {  // Swap them
+    float t = x2;
+    x2 = x1, x1 = t;
+  }
+  if (y1 > y2) {  // Swap them
+    float t = y2;
+    y2 = y1, y1 = t;
+  }
+  amount = amount >= 100 ? 1 : (amount <= 0 ? 0 : amount / 100);
 
-	untexture();
-	/*if(showborder)
+  untexture();
+  /*if(showborder)
 	{
 		glColor4ub(__GETR(backcol),__GETG(backcol),__GETB(backcol),enigma::currentcolor[3]);
 		glBegin(GL_LINE_LOOP);
@@ -685,30 +657,28 @@ int draw_healthbar(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, float
 	printf("%d\n",mincol);
 	glRectf(x1,y1,x2,y2);
 	glColor4ubv(enigma::currentcolor);OPENGLES */
-	return 0;
+  return 0;
 }
 
-int draw_getpixel(int x, int y)
-{
-  #ifdef __BIG_ENDIAN__
-    glReadPixels(x,y,1,1,GL_RGB,GL_UNSIGNED_BYTE,&x);
-    return x;
-  #elif defined __LITTLE_ENDIAN__
-   // glReadPixels(x,y,1,1,GL_BGR,GL_UNSIGNED_BYTE,&x); //OPENGLES
-    return x>>8;
-  #else
-    char r,g,b;
-    //glReadPixels(x,y,1,1,GL_RED,GL_UNSIGNED_BYTE,&r);
-    //glReadPixels(x,y,1,1,GL_GREEN,GL_UNSIGNED_BYTE,&g);
-    //glReadPixels(x,y,1,1,GL_BLUE,GL_UNSIGNED_BYTE,&b);
-    return r|(g<<8)|(b<<16);
-  #endif
+int draw_getpixel(int x, int y) {
+#ifdef __BIG_ENDIAN__
+  glReadPixels(x, y, 1, 1, GL_RGB, GL_UNSIGNED_BYTE, &x);
+  return x;
+#elif defined __LITTLE_ENDIAN__
+  // glReadPixels(x,y,1,1,GL_BGR,GL_UNSIGNED_BYTE,&x); //OPENGLES
+  return x >> 8;
+#else
+  char r, g, b;
+  //glReadPixels(x,y,1,1,GL_RED,GL_UNSIGNED_BYTE,&r);
+  //glReadPixels(x,y,1,1,GL_GREEN,GL_UNSIGNED_BYTE,&g);
+  //glReadPixels(x,y,1,1,GL_BLUE,GL_UNSIGNED_BYTE,&b);
+  return r | (g << 8) | (b << 16);
+#endif
 }
 
-int draw_mandelbrot(int x, int y, float w, double Zx, double Zy, double Zw, unsigned iter)
-{
-	int c=0;
-	/*glBegin(GL_POINTS);
+int draw_mandelbrot(int x, int y, float w, double Zx, double Zy, double Zw, unsigned iter) {
+  int c = 0;
+  /*glBegin(GL_POINTS);
 	for(int i=y; i<y+w; i++)
 		for(int j=x;j<x+w;j++){
 			double zx=Zx+(j-x)*(Zw/w),zy=Zy+(i-y)*(Zw/w),cx=zx,cy=zy;
@@ -723,17 +693,16 @@ int draw_mandelbrot(int x, int y, float w, double Zx, double Zy, double Zw, unsi
 			UNMANLY:;
 		}
 	glEnd(); OPENGLES*/
-	return c;
+  return c;
 }
-}
+}  // namespace enigma_user
 
-namespace enigma{
+namespace enigma {
 
-bool fill_complex_polygon(const std::list<PolyVertex>& vertices, int defaultColor, bool allowHoles)
-{
+bool fill_complex_polygon(const std::list<PolyVertex>& vertices, int defaultColor, bool allowHoles) {
   //TODO: Complex polygon supported only in OpenGL1 at the moment. By returning false here, we fall back
   //      on a convex-only polygon drawing routine that works on any platform.
   return false;
 }
 
-}
+}  // namespace enigma

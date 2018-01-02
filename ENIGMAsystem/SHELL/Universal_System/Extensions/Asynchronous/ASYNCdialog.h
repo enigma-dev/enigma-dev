@@ -22,13 +22,13 @@
 using std::string;
 
 namespace enigma_user {
-  extern unsigned async_load;
+extern unsigned async_load;
 
-  int show_message_async(string str);
-  int show_question_async(string str);
-  int get_string_async(string message, string def, string cap="");
-  int get_integer_async(string message, string def, string cap="");
-  int get_login_async(string username, string password, string cap="");
-}
+int show_message_async(string str);
+int show_question_async(string str);
+int get_string_async(string message, string def, string cap = "");
+int get_integer_async(string message, string def, string cap = "");
+int get_login_async(string username, string password, string cap = "");
+}  // namespace enigma_user
 
-#endif // ENIGMA_ASYNCDIALOG_H
+#endif  // ENIGMA_ASYNCDIALOG_H

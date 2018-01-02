@@ -1,5 +1,4 @@
 
-namespace enigma
-{
-  int initialize_everything();
+namespace enigma {
+int initialize_everything();
 }

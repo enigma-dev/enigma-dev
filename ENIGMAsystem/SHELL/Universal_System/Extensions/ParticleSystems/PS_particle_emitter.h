@@ -30,27 +30,24 @@
 
 #include "PS_particle_enums.h"
 
-namespace enigma
-{
-  struct particle_emitter
-  {
-    double xmin, ymin, xmax, ymax;
-    ps_shape shape;
-    ps_distr distribution;
-    int particle_type_id; // -1 for no id.
-    int number;
+namespace enigma {
+struct particle_emitter {
+  double xmin, ymin, xmax, ymax;
+  ps_shape shape;
+  ps_distr distribution;
+  int particle_type_id;  // -1 for no id.
+  int number;
 
-    void initialize();
-    void clear_particle_emitter();
-    void set_region(double xmin, double ymin, double xmax, double ymax, ps_shape shape, ps_distr distribution);
-    void set_burst(int particle_type_id, int number);
-    void set_stream(int particle_type_id, int number);
-    void get_point(int& x, int& y);
-    int get_step_number();
-  };
+  void initialize();
+  void clear_particle_emitter();
+  void set_region(double xmin, double ymin, double xmax, double ymax, ps_shape shape, ps_distr distribution);
+  void set_burst(int particle_type_id, int number);
+  void set_stream(int particle_type_id, int number);
+  void get_point(int& x, int& y);
+  int get_step_number();
+};
 
-  particle_emitter* create_particle_emitter();
-}
+particle_emitter* create_particle_emitter();
+}  // namespace enigma
 
-#endif // ENIGMA_PS_PARTICLEEMITTER
-
+#endif  // ENIGMA_PS_PARTICLEEMITTER

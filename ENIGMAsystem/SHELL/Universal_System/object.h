@@ -35,66 +35,56 @@
 #define _object_h
 
 namespace enigma_user {
-  enum {
-    self =   -1,
-    other =  -2,
-    all =    -3,
-    noone =  -4,
-    global = -5,
-    local =  -7
-  };
+enum { self = -1, other = -2, all = -3, noone = -4, global = -5, local = -7 };
 }
 
-#include "var4.h"
 #include "scalar.h"
+#include "var4.h"
 
-namespace enigma
-{
-    extern int maxid;
-    extern int instancecount;
-    extern int id_current;
-    extern int objectcount;
+namespace enigma {
+extern int maxid;
+extern int instancecount;
+extern int id_current;
+extern int objectcount;
 
-    extern double newinst_x, newinst_y;
-    extern int newinst_obj, newinst_id;
+extern double newinst_x, newinst_y;
+extern int newinst_obj, newinst_id;
 
-    struct object_basic
-    {
-      const unsigned id;
-      const int object_index;
+struct object_basic {
+  const unsigned id;
+  const int object_index;
 
-      virtual void unlink();
-      virtual void deactivate();
-      virtual void activate();
-      virtual variant myevent_create();
-      virtual variant myevent_gamestart();
-      virtual variant myevent_gameend();
-      virtual variant myevent_closebutton();
-      virtual variant myevent_roomstart();
-      virtual variant myevent_roomend();
-      virtual variant myevent_destroy();
+  virtual void unlink();
+  virtual void deactivate();
+  virtual void activate();
+  virtual variant myevent_create();
+  virtual variant myevent_gamestart();
+  virtual variant myevent_gameend();
+  virtual variant myevent_closebutton();
+  virtual variant myevent_roomstart();
+  virtual variant myevent_roomend();
+  virtual variant myevent_destroy();
 
-      object_basic();
-      object_basic(int uid, int uoid);
-      virtual ~object_basic();
+  object_basic();
+  object_basic(int uid, int uoid);
+  virtual ~object_basic();
 
-      //Can we cast this instance to an object of type "obj". (NOTE: This only checks parents; you can never can_cast(this->id).)
-      virtual bool can_cast(int obj) const;
-    };
+  //Can we cast this instance to an object of type "obj". (NOTE: This only checks parents; you can never can_cast(this->id).)
+  virtual bool can_cast(int obj) const;
+};
 
-    struct objectstruct
-    {
-        int sprite;
-        bool solid, visible;
-        double depth;
-        bool persistent;
-        double mask;
-        double parent;
-        int id;
-    };
-    void objectdata_load();
-    void constructor(object_basic* instance);
-}
+struct objectstruct {
+  int sprite;
+  bool solid, visible;
+  double depth;
+  bool persistent;
+  double mask;
+  double parent;
+  int id;
+};
+void objectdata_load();
+void constructor(object_basic* instance);
+}  // namespace enigma
 
 namespace enigma_user {
 bool object_exists(int objid);
@@ -112,6 +102,6 @@ bool object_get_solid(int objid);
 int object_get_sprite(int objid);
 bool object_get_visible(int objid);
 bool object_is_ancestor(int objid, int acid);
-}
+}  // namespace enigma_user
 
-#endif //_object_h
+#endif  //_object_h

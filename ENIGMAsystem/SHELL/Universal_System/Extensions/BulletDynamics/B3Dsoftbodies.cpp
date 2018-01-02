@@ -16,105 +16,89 @@
 **/
 
 #include "B3Dsoftbodies.h"
-#include "BulletSoftBody.h"
-#include "BulletShape.h"
 #include <iostream>
+#include "BulletShape.h"
+#include "BulletSoftBody.h"
 
 vector<BulletSoftBody*> bulletSoftBodies;
 
 namespace enigma_user {
 
-int b3d_bodys_create(int sid, double mass, double ix, double iy, double iz)
-{
+int b3d_bodys_create(int sid, double mass, double ix, double iy, double iz) {
   int i = bulletSoftBodies.size();
   get_shaper(bulletshape, sid, -1);
-  bulletSoftBodies.push_back(new BulletSoftBody(sid, 5, 5, 5, 5, 5 ));
+  bulletSoftBodies.push_back(new BulletSoftBody(sid, 5, 5, 5, 5, 5));
   return i;
 }
 
-void b3d_bodys_delete(int id)
-{
+void b3d_bodys_delete(int id) {
   get_softbody(bulletsoftbody, id);
   bulletSoftBodies.erase(bulletSoftBodies.begin() + id);
 }
 
-double b3d_bodys_get_x(int id)
-{
+double b3d_bodys_get_x(int id) {
   get_softbodyr(bulletsoftbody, id, -1);
   return bulletsoftbody->getX();
 }
 
-double b3d_bodys_get_y(int id)
-{
+double b3d_bodys_get_y(int id) {
   get_softbodyr(bulletsoftbody, id, -1);
   return bulletsoftbody->getY();
 }
 
-double b3d_bodys_get_z(int id)
-{
+double b3d_bodys_get_z(int id) {
   get_softbodyr(bulletsoftbody, id, -1);
   return bulletsoftbody->getZ();
 }
 
-double b3d_bodys_get_rot_x(int id)
-{
+double b3d_bodys_get_rot_x(int id) {
   get_softbodyr(bulletsoftbody, id, -1);
   return bulletsoftbody->getYaw();
 }
 
-double b3d_bodys_get_rot_y(int id)
-{
+double b3d_bodys_get_rot_y(int id) {
   get_softbodyr(bulletsoftbody, id, -1);
   return bulletsoftbody->getPitch();
 }
 
-double b3d_bodys_get_rot_z(int id)
-{
+double b3d_bodys_get_rot_z(int id) {
   get_softbodyr(bulletsoftbody, id, -1);
   return bulletsoftbody->getRoll();
 }
 
-double b3d_bodys_get_quat_x(int id)
-{
+double b3d_bodys_get_quat_x(int id) {
   get_softbodyr(bulletsoftbody, id, -1);
   return bulletsoftbody->getQuatX();
 }
 
-double b3d_bodys_get_quat_y(int id)
-{
+double b3d_bodys_get_quat_y(int id) {
   get_softbodyr(bulletsoftbody, id, -1);
   return bulletsoftbody->getQuatY();
 }
 
-double b3d_bodys_get_quat_z(int id)
-{
+double b3d_bodys_get_quat_z(int id) {
   get_softbodyr(bulletsoftbody, id, -1);
   return bulletsoftbody->getQuatZ();
 }
 
-double b3d_bodys_get_quat_w(int id)
-{
+double b3d_bodys_get_quat_w(int id) {
   get_softbodyr(bulletsoftbody, id, -1);
   return bulletsoftbody->getQuatW();
 }
 
-void b3d_bodys_set_position(int id, double x, double y, double z)
-{
+void b3d_bodys_set_position(int id, double x, double y, double z) {
   get_softbody(bulletsoftbody, id);
   bulletsoftbody->setPosition(x, y, z);
 }
 
-void b3d_bodys_set_rotation(int id, double yaw, double pitch, double roll)
-{
+void b3d_bodys_set_rotation(int id, double yaw, double pitch, double roll) {
   get_softbody(bulletsoftbody, id);
   bulletsoftbody->setRotation(yaw, pitch, roll);
 }
 
-void b3d_bodys_set_quaternion(int id, double qx, double qy, double qz, double qw)
-{
+void b3d_bodys_set_quaternion(int id, double qx, double qy, double qz, double qw) {
   get_softbody(bulletsoftbody, id);
   bulletsoftbody->setQuaternion(qx, qy, qz, qw);
 }
 
-}
-
+}  // namespace enigma_user

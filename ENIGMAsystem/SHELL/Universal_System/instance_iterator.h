@@ -23,49 +23,49 @@
 #include "instance_system_base.h"
 
 namespace enigma {
-  class iterator {
-    enigma::inst_iter temp_iter;
-    enigma::inst_iter* it;
+class iterator {
+  enigma::inst_iter temp_iter;
+  enigma::inst_iter* it;
 
-    void addme();
-    void copy(const iterator& other);
+  void addme();
+  void copy(const iterator& other);
 
-   public:
-    operator bool();
-    object_basic* operator*() const;
-    object_basic* operator->() const;
-    
-    void handle_unlink(const inst_iter* dead);
-    
-    iterator &operator++();
-    iterator operator++(int);
-    iterator &operator--();
-    iterator operator--(int);
-    
-    iterator &operator=(const iterator&);
-    iterator &operator=(inst_iter*);
-    iterator &operator=(object_basic*);
-    
-    iterator(const iterator&);
-    iterator(inst_iter*);
-    iterator(object_basic*);
-    iterator();
-    
-    ~iterator();
+ public:
+  operator bool();
+  object_basic* operator*() const;
+  object_basic* operator->() const;
 
-    class with;
-  };
+  void handle_unlink(const inst_iter* dead);
 
-  class iterator::with: iterator, iterator_level {
-   public:
-    with(const iterator& push): iterator(push), iterator_level(it) {}
-  };
-  
-  void update_iterators_for_destroy(const inst_iter*);
-  iterator instance_list_first();
-  iterator fetch_inst_iter_by_id(int id);
-  iterator fetch_inst_iter_by_int(int x);
-  iterator fetch_roominst_iter_by_id(int x);
-}
+  iterator& operator++();
+  iterator operator++(int);
+  iterator& operator--();
+  iterator operator--(int);
+
+  iterator& operator=(const iterator&);
+  iterator& operator=(inst_iter*);
+  iterator& operator=(object_basic*);
+
+  iterator(const iterator&);
+  iterator(inst_iter*);
+  iterator(object_basic*);
+  iterator();
+
+  ~iterator();
+
+  class with;
+};
+
+class iterator::with : iterator, iterator_level {
+ public:
+  with(const iterator& push) : iterator(push), iterator_level(it) {}
+};
+
+void update_iterators_for_destroy(const inst_iter*);
+iterator instance_list_first();
+iterator fetch_inst_iter_by_id(int id);
+iterator fetch_inst_iter_by_int(int x);
+iterator fetch_roominst_iter_by_id(int x);
+}  // namespace enigma
 
 #endif

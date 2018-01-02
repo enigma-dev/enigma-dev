@@ -16,16 +16,15 @@
 **/
 
 #include "B3Dworlds.h"
+#include <iostream>
 #include "BulletRigidBody.h"
 #include "BulletSoftBody.h"
-#include <iostream>
 
 vector<BulletWorld*> bulletWorlds;
 
 namespace enigma_user {
 
-int b3d_world_create_softrigid()
-{
+int b3d_world_create_softrigid() {
   int i = bulletWorlds.size();
   BulletWorld* bulletworld = new BulletWorld();
   bulletworld->createSoftRigid();
@@ -33,8 +32,7 @@ int b3d_world_create_softrigid()
   return i;
 }
 
-int b3d_world_create_discrete()
-{
+int b3d_world_create_discrete() {
   int i = bulletWorlds.size();
   BulletWorld* bulletworld = new BulletWorld();
   bulletworld->createDiscrete();
@@ -42,8 +40,7 @@ int b3d_world_create_discrete()
   return i;
 }
 
-int b3d_world_create_simple()
-{
+int b3d_world_create_simple() {
   int i = bulletWorlds.size();
   BulletWorld* bulletworld = new BulletWorld();
   bulletworld->createSimple();
@@ -51,57 +48,48 @@ int b3d_world_create_simple()
   return i;
 }
 
-void b3d_world_delete(int id)
-{
+void b3d_world_delete(int id) {
   get_world(bulletworld, id);
   bulletWorlds.erase(bulletWorlds.begin() + id);
 }
 
-int b3d_world_get_type(int id) 
-{
+int b3d_world_get_type(int id) {
   get_worldr(bulletworld, id, -1);
   return bulletworld->type;
 }
 
-void b3d_world_set_gravity(int id, double gx, double gy, double gz)
-{
+void b3d_world_set_gravity(int id, double gx, double gy, double gz) {
   get_world(bulletworld, id);
-  bulletworld->dynamicsWorld->setGravity(btVector3(gx,gy,gz));
+  bulletworld->dynamicsWorld->setGravity(btVector3(gx, gy, gz));
 }
 
-void b3d_world_add_bodyr(int id, int rigidbody)
-{
+void b3d_world_add_bodyr(int id, int rigidbody) {
   get_world(bulletworld, id);
   get_body(bulletbodyr, rigidbody);
   bulletworld->dynamicsWorld->addRigidBody(bulletbodyr->rigidBody);
 }
 
-void b3d_world_add_bodys(int id, int softbody)
-{
+void b3d_world_add_bodys(int id, int softbody) {
   get_worldc(bulletworld, id, btSoftRigidDynamicsWorld*);
   get_softbody(bulletbodys, softbody);
   bulletworld->addSoftBody(bulletbodys->softBody);
 }
 
-void b3d_world_remove_bodyr(int id, int rigidbody)
-{
+void b3d_world_remove_bodyr(int id, int rigidbody) {
   get_world(bulletworld, id);
   get_body(bulletbodyr, rigidbody);
   bulletworld->dynamicsWorld->removeRigidBody(bulletbodyr->rigidBody);
 }
 
-void b3d_world_remove_bodys(int id, int softbody)
-{
+void b3d_world_remove_bodys(int id, int softbody) {
   get_worldc(bulletworld, id, btSoftRigidDynamicsWorld*);
   get_softbody(bulletbodys, softbody);
   bulletworld->removeSoftBody(bulletbodys->softBody);
 }
 
-void b3d_world_update(int id, double timestep, double iterations) 
-{
+void b3d_world_update(int id, double timestep, double iterations) {
   get_world(bulletworld, id);
   bulletworld->update(timestep, iterations);
 }
 
-}
-
+}  // namespace enigma_user

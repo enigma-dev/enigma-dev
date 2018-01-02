@@ -25,135 +25,119 @@
 **                                                                              **
 \********************************************************************************/
 
-#include "PS_particle.h"
-#include "PS_particle_system.h"
-#include "PS_particle_type.h"
-#include "PS_particle_system_manager.h"
-#include "PS_particle_depths.h"
-#include "PS_particle_updatedraw.h"
 #include <cmath>
 #include <cstddef>
+#include "PS_particle.h"
+#include "PS_particle_depths.h"
+#include "PS_particle_system.h"
+#include "PS_particle_system_manager.h"
+#include "PS_particle_type.h"
+#include "PS_particle_updatedraw.h"
 
 using enigma::particle_system;
 using enigma::particle_type;
-using enigma::pt_manager;
 using enigma::particle_type_manager;
+using enigma::pt_manager;
 
 namespace enigma_user {
-  // General functions.
+// General functions.
 
-  int part_system_create()
-  {
-    enigma::initialize_particle_systems_drawing();
+int part_system_create() {
+  enigma::initialize_particle_systems_drawing();
 
-    using enigma::ps_manager;
-    particle_system* p_s = new particle_system();
-    p_s->initialize();
+  using enigma::ps_manager;
+  particle_system* p_s = new particle_system();
+  p_s->initialize();
 
-    ps_manager.max_id++;
-    ps_manager.id_to_particlesystem.insert(std::pair<int,particle_system*>(ps_manager.max_id, p_s));
-    p_s->id = ps_manager.max_id;
+  ps_manager.max_id++;
+  ps_manager.id_to_particlesystem.insert(std::pair<int, particle_system*>(ps_manager.max_id, p_s));
+  p_s->id = ps_manager.max_id;
 
-    // Drawing is automatic, so register in depth.
-    enigma::negated_particle_depths[-p_s->depth].particlesystem_ids.insert(ps_manager.max_id);
+  // Drawing is automatic, so register in depth.
+  enigma::negated_particle_depths[-p_s->depth].particlesystem_ids.insert(ps_manager.max_id);
 
-    return ps_manager.max_id;
+  return ps_manager.max_id;
+}
+void part_system_destroy(int id) {
+  part_system_clear(id);
+  // Remember to destroy the system.
+  particle_system* p_s = enigma::get_particlesystem(id);
+  if (p_s != NULL) {
+    delete p_s;
+    enigma::ps_manager.id_to_particlesystem.erase(id);
   }
-  void part_system_destroy(int id)
-  {
-    part_system_clear(id);
-    // Remember to destroy the system.
-    particle_system* p_s = enigma::get_particlesystem(id);
-    if (p_s != NULL) {
-      delete p_s;
-      enigma::ps_manager.id_to_particlesystem.erase(id);
-    }
+}
+bool part_system_exists(int id) { return enigma::get_particlesystem(id) != NULL; }
+void part_system_clear(int id) {
+  if (enigma::get_particlesystem(id) == NULL) return;
+  part_emitter_destroy_all(id);
+  part_attractor_destroy_all(id);
+  part_destroyer_destroy_all(id);
+  part_deflector_destroy_all(id);
+  part_changer_destroy_all(id);
+  part_particles_clear(id);
+}
+void part_system_draw_order(int id, bool oldtonew) {
+  particle_system* p_s = enigma::get_particlesystem(id);
+  if (p_s != NULL) {
+    p_s->oldtonew = oldtonew;
   }
-  bool part_system_exists(int id)
-  {
-    return enigma::get_particlesystem(id) != NULL;
-  }
-  void part_system_clear(int id)
-  {
-    if (enigma::get_particlesystem(id) == NULL) return;
-    part_emitter_destroy_all(id);
-    part_attractor_destroy_all(id);
-    part_destroyer_destroy_all(id);
-    part_deflector_destroy_all(id);
-    part_changer_destroy_all(id);
-    part_particles_clear(id);
-  }
-  void part_system_draw_order(int id, bool oldtonew)
-  {
-    particle_system* p_s = enigma::get_particlesystem(id);
-    if (p_s != NULL) {
-      p_s->oldtonew = oldtonew;
-    }
-  }
-  void part_system_depth(int id, double depth)
-  {
-    particle_system* p_s = enigma::get_particlesystem(id);
-    if (p_s != NULL) {
-      const double new_depth = round(depth);
-      if (p_s->auto_draw) {
-        // If the particle system has automatic drawing enabled, it is in the depth system,
-        // and it should be moved.
-        const double current_depth = p_s->depth;
-        enigma::negated_particle_depths[-current_depth].particlesystem_ids.erase(p_s->id);
-        enigma::negated_particle_depths[-new_depth].particlesystem_ids.insert(p_s->id);
-      }
-      else {
-        // If the particle system does not have automatic drawing enabled, it is not in the depth system,
-        // and the value should just be updated.
-        p_s->depth = new_depth;
-      }
-    }
-  }
-  void part_system_position(int id, double x, double y)
-  {
-    particle_system* p_s = enigma::get_particlesystem(id);
-    if (p_s != NULL) {
-      p_s->x_offset = x;
-      p_s->y_offset = y;
-    }
-  }
-
-  // Update and draw.
-
-  void part_system_automatic_update(int id, bool automatic)
-  {
-    particle_system* p_s = enigma::get_particlesystem(id);
-    if (p_s != NULL) {
-      p_s->auto_update = automatic;
-    }
-  }
-  void part_system_automatic_draw(int id, bool automatic)
-  {
-    particle_system* p_s = enigma::get_particlesystem(id);
-    if (p_s != NULL) {
-      bool auto_draw_before = p_s->auto_draw;
-      p_s->auto_draw = automatic;
-      if (automatic && !auto_draw_before) { // Add to drawing depths.
-        enigma::negated_particle_depths[-p_s->depth].particlesystem_ids.insert(p_s->id);
-      }
-      else if (!automatic && auto_draw_before) { // Remove from drawing depths.
-        enigma::negated_particle_depths[-p_s->depth].particlesystem_ids.erase(p_s->id);
-      }
-    }
-  }
-  void part_system_update(int id)
-  {
-    particle_system* p_s = enigma::get_particlesystem(id);
-    if (p_s != NULL) {
-      p_s->update_particlesystem();
-    }
-  }
-  void part_system_drawit(int id)
-  {
-    particle_system* p_s = enigma::get_particlesystem(id);
-    if (p_s != NULL) {
-      p_s->draw_particlesystem();
+}
+void part_system_depth(int id, double depth) {
+  particle_system* p_s = enigma::get_particlesystem(id);
+  if (p_s != NULL) {
+    const double new_depth = round(depth);
+    if (p_s->auto_draw) {
+      // If the particle system has automatic drawing enabled, it is in the depth system,
+      // and it should be moved.
+      const double current_depth = p_s->depth;
+      enigma::negated_particle_depths[-current_depth].particlesystem_ids.erase(p_s->id);
+      enigma::negated_particle_depths[-new_depth].particlesystem_ids.insert(p_s->id);
+    } else {
+      // If the particle system does not have automatic drawing enabled, it is not in the depth system,
+      // and the value should just be updated.
+      p_s->depth = new_depth;
     }
   }
 }
+void part_system_position(int id, double x, double y) {
+  particle_system* p_s = enigma::get_particlesystem(id);
+  if (p_s != NULL) {
+    p_s->x_offset = x;
+    p_s->y_offset = y;
+  }
+}
 
+// Update and draw.
+
+void part_system_automatic_update(int id, bool automatic) {
+  particle_system* p_s = enigma::get_particlesystem(id);
+  if (p_s != NULL) {
+    p_s->auto_update = automatic;
+  }
+}
+void part_system_automatic_draw(int id, bool automatic) {
+  particle_system* p_s = enigma::get_particlesystem(id);
+  if (p_s != NULL) {
+    bool auto_draw_before = p_s->auto_draw;
+    p_s->auto_draw = automatic;
+    if (automatic && !auto_draw_before) {  // Add to drawing depths.
+      enigma::negated_particle_depths[-p_s->depth].particlesystem_ids.insert(p_s->id);
+    } else if (!automatic && auto_draw_before) {  // Remove from drawing depths.
+      enigma::negated_particle_depths[-p_s->depth].particlesystem_ids.erase(p_s->id);
+    }
+  }
+}
+void part_system_update(int id) {
+  particle_system* p_s = enigma::get_particlesystem(id);
+  if (p_s != NULL) {
+    p_s->update_particlesystem();
+  }
+}
+void part_system_drawit(int id) {
+  particle_system* p_s = enigma::get_particlesystem(id);
+  if (p_s != NULL) {
+    p_s->draw_particlesystem();
+  }
+}
+}  // namespace enigma_user

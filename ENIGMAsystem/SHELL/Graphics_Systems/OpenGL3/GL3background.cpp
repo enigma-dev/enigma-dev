@@ -15,78 +15,74 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <cstddef>
 #include <math.h>
-#include "../General/OpenGLHeaders.h"
+#include <cstddef>
 #include "../General/GSbackground.h"
+#include "../General/OpenGLHeaders.h"
 
+#include "Graphics_Systems/graphics_mandatory.h"
+#include "Universal_System/backgroundstruct.h"
 #include "Universal_System/image_formats.h"
 #include "Universal_System/nlpo2.h"
-#include "Universal_System/backgroundstruct.h"
-#include "Graphics_Systems/graphics_mandatory.h"
 #include "Universal_System/spritestruct.h"
 
 #include "Universal_System/roomsystem.h"
 
-#define __GETR(x) (gs_scalar)(((x & 0x0000FF))/255.0)
-#define __GETG(x) (gs_scalar)(((x & 0x00FF00) >> 8)/255.0)
-#define __GETB(x) (gs_scalar)(((x & 0xFF0000) >> 16)/255.0)
+#define __GETR(x) (gs_scalar)(((x & 0x0000FF)) / 255.0)
+#define __GETG(x) (gs_scalar)(((x & 0x00FF00) >> 8) / 255.0)
+#define __GETB(x) (gs_scalar)(((x & 0xFF0000) >> 16) / 255.0)
 
 #ifdef DEBUG_MODE
-  #include <string>
-  #include "libEGMstd.h"
-  #include "Widget_Systems/widgets_mandatory.h"
-  #define get_background(bck2d,back)\
-    if (back < 0 or size_t(back) >= enigma::background_idmax or !enigma::backgroundstructarray[back]) {\
-      show_error("Attempting to draw non-existing background " + toString(back), false);\
-      return;\
-    }\
-    const enigma::background *const bck2d = enigma::backgroundstructarray[back];
-  #define get_backgroundnv(bck2d,back,r)\
-    if (back < 0 or size_t(back) >= enigma::background_idmax or !enigma::backgroundstructarray[back]) {\
-      show_error("Attempting to draw non-existing background " + toString(back), false);\
-      return r;\
-    }\
-    const enigma::background *const bck2d = enigma::backgroundstructarray[back];
+#include <string>
+#include "Widget_Systems/widgets_mandatory.h"
+#include "libEGMstd.h"
+#define get_background(bck2d, back)                                                                   \
+  if (back < 0 or size_t(back) >= enigma::background_idmax or !enigma::backgroundstructarray[back]) { \
+    show_error("Attempting to draw non-existing background " + toString(back), false);                \
+    return;                                                                                           \
+  }                                                                                                   \
+  const enigma::background *const bck2d = enigma::backgroundstructarray[back];
+#define get_backgroundnv(bck2d, back, r)                                                              \
+  if (back < 0 or size_t(back) >= enigma::background_idmax or !enigma::backgroundstructarray[back]) { \
+    show_error("Attempting to draw non-existing background " + toString(back), false);                \
+    return r;                                                                                         \
+  }                                                                                                   \
+  const enigma::background *const bck2d = enigma::backgroundstructarray[back];
 #else
-  #define get_background(bck2d,back)\
-    const enigma::background *const bck2d = enigma::backgroundstructarray[back];
-  #define get_backgroundnv(bck2d,back,r)\
-    const enigma::background *const bck2d = enigma::backgroundstructarray[back];
+#define get_background(bck2d, back) const enigma::background *const bck2d = enigma::backgroundstructarray[back];
+#define get_backgroundnv(bck2d, back, r) const enigma::background *const bck2d = enigma::backgroundstructarray[back];
 #endif
 namespace enigma_user {
-  extern int window_get_region_height_scaled();
+extern int window_get_region_height_scaled();
 }
 
 namespace enigma {
-  extern size_t background_idmax;
+extern size_t background_idmax;
 }
 
 //#include <string.h> // needed for querying ARB extensions
 
-namespace enigma_user
-{
+namespace enigma_user {
 
 int background_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload) {
-  int full_width=nlpo2dc(w)+1, full_height=nlpo2dc(h)+1;
-	int prevFbo;
-	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFbo);
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-	int patchSize = full_width*full_height;
-	std::vector<unsigned char> rgbdata(4*patchSize);
-	glReadPixels(x, enigma_user::window_get_region_height_scaled()-h-y,w,h,GL_RGBA, GL_UNSIGNED_BYTE, &rgbdata[0]);
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, prevFbo);
-	
-	unsigned char* data = enigma::image_flip(&rgbdata[0], w, h, 4);
-	
-	enigma::backgroundstructarray_reallocate();
-  int bckid=enigma::background_idmax;
-	enigma::background_new(bckid, w, h, &data[0], removeback, smooth, preload, false, 0, 0, 0, 0, 0, 0);
+  int full_width = nlpo2dc(w) + 1, full_height = nlpo2dc(h) + 1;
+  int prevFbo;
+  glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFbo);
+  glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+  int patchSize = full_width * full_height;
+  std::vector<unsigned char> rgbdata(4 * patchSize);
+  glReadPixels(x, enigma_user::window_get_region_height_scaled() - h - y, w, h, GL_RGBA, GL_UNSIGNED_BYTE, &rgbdata[0]);
+  glBindFramebuffer(GL_DRAW_FRAMEBUFFER, prevFbo);
+
+  unsigned char *data = enigma::image_flip(&rgbdata[0], w, h, 4);
+
+  enigma::backgroundstructarray_reallocate();
+  int bckid = enigma::background_idmax;
+  enigma::background_new(bckid, w, h, &data[0], removeback, smooth, preload, false, 0, 0, 0, 0, 0, 0);
   delete[] data;
-	rgbdata.clear();
-	enigma::background_idmax++;
+  rgbdata.clear();
+  enigma::background_idmax++;
   return bckid;
 }
 
-}
-
+}  // namespace enigma_user

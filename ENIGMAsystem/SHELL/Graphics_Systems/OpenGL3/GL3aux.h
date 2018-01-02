@@ -20,7 +20,7 @@
 #include <string>
 
 namespace enigma {
-	bool gl_extension_supported(std::string extension);
+bool gl_extension_supported(std::string extension);
 }
 
 #endif

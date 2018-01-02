@@ -16,39 +16,38 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <sstream> // std::stringstream, std::stringbuf
+#include <sstream>  // std::stringstream, std::stringbuf
 
 #include "ASYNCdialog.h"
 #include "Platforms/General/PFthreads.h"
+#include "Universal_System/Extensions/DataStructures/include.h"
+#include "Universal_System/instance.h"
+#include "Universal_System/instance_system.h"
 #include "Widget_Systems/General/WSdialogs.h"
 #include "Widget_Systems/widgets_mandatory.h"
-#include "Universal_System/Extensions/DataStructures/include.h"
-#include "Universal_System/instance_system.h"
-#include "Universal_System/instance.h"
 
 // include after variant
 #include "implement.h"
 
 namespace enigma {
-  namespace extension_cast {
-    extension_async *as_extension_async(object_basic*);
-  }
+namespace extension_cast {
+extension_async* as_extension_async(object_basic*);
 }
+}  // namespace enigma
 
 struct MessageData {
   unsigned id;
   string text1;
   string text2;
   string text3;
-  MessageData(string t1, string t2, string t3): id(-1), text1(t1), text2(t2), text3(t3) { }
+  MessageData(string t1, string t2, string t3) : id(-1), text1(t1), text2(t2), text3(t3) {}
 };
 
 using namespace enigma_user;
 
 static void fireAsyncDialogEvent() {
-  enigma::instance_event_iterator = new enigma::inst_iter(NULL,NULL,NULL);
-  for (enigma::iterator it = enigma::instance_list_first(); it; ++it)
-  {
+  enigma::instance_event_iterator = new enigma::inst_iter(NULL, NULL, NULL);
+  for (enigma::iterator it = enigma::instance_list_first(); it; ++it) {
     enigma::object_basic* const inst = ((enigma::object_basic*)*it);
     enigma::extension_async* const inst_async = enigma::extension_cast::as_extension_async(inst);
     inst_async->myevent_asyncdialog();
@@ -60,7 +59,9 @@ static void* showMessageAsync(void* data) {
   threads[md->id]->ret = show_message(md->text1);
   threads[md->id]->active = false;
   ds_map_replaceanyway(async_load, "id", md->id);
-  ds_map_replaceanyway(async_load, "status", true); //TODO: Stupido is so god damn retarded, it gives a cancel operation for a rhetorical message according to the manual
+  ds_map_replaceanyway(
+      async_load, "status",
+      true);  //TODO: Stupido is so god damn retarded, it gives a cancel operation for a rhetorical message according to the manual
   fireAsyncDialogEvent();
   return NULL;
 }
@@ -137,7 +138,8 @@ static int createThread(void* (*fnc)(void*), MessageData* md) {
 #else
   if (pthread_create(&newthread->handle, NULL, fnc, md)) {
 #endif
-    delete md; delete newthread;
+    delete md;
+    delete newthread;
     return -1;
   }
   threads.push_back(newthread);
@@ -145,30 +147,30 @@ static int createThread(void* (*fnc)(void*), MessageData* md) {
 }
 
 namespace enigma_user {
-  unsigned async_load = 0;
+unsigned async_load = 0;
 
-  int show_message_async(string str) {
-    MessageData* md = new MessageData(str, "", "");
-    return createThread(showMessageAsync, md);
-  }
-
-  int show_question_async(string str) {
-    MessageData* md = new MessageData(str, "", "");
-    return createThread(showQuestionAsync, md);
-  }
-
-  int get_string_async(string message, string def, string cap) {
-    MessageData* md = new MessageData(message, def, cap);
-    return createThread(getStringAsync, md);
-  }
-
-  int get_integer_async(string message, string def, string cap) {
-    MessageData* md = new MessageData(message, def, cap);
-    return createThread(getIntegerAsync, md);
-  }
-
-  int get_login_async(string username, string password, string cap) {
-    MessageData* md = new MessageData(username, password, cap);
-    return createThread(getLoginAsync, md);
-  }
+int show_message_async(string str) {
+  MessageData* md = new MessageData(str, "", "");
+  return createThread(showMessageAsync, md);
 }
+
+int show_question_async(string str) {
+  MessageData* md = new MessageData(str, "", "");
+  return createThread(showQuestionAsync, md);
+}
+
+int get_string_async(string message, string def, string cap) {
+  MessageData* md = new MessageData(message, def, cap);
+  return createThread(getStringAsync, md);
+}
+
+int get_integer_async(string message, string def, string cap) {
+  MessageData* md = new MessageData(message, def, cap);
+  return createThread(getIntegerAsync, md);
+}
+
+int get_login_async(string username, string password, string cap) {
+  MessageData* md = new MessageData(username, password, cap);
+  return createThread(getLoginAsync, md);
+}
+}  // namespace enigma_user

@@ -19,22 +19,21 @@
 #define _SOUND_EMITTER__H
 
 #ifdef DEBUG_MODE
+#include "Widget_Systems/widgets_mandatory.h"  // show_error
 #include "libEGMstd.h"
-#include "Widget_Systems/widgets_mandatory.h" // show_error
 #endif
 
 #include <vector>
 using std::vector;
 
-struct SoundEmitter
-{
+struct SoundEmitter {
   float emitPos[3];
   float emitVel[3];
   float falloff[3];
   float pitch;
   float volume;
   vector<int> sound_tracks;
-  SoundEmitter(): emitPos {0.0f,0.0f,0.0f}, emitVel {0.0f,0.0f,0.0f}, falloff{0.0f,0.0f,1.0f}, volume(1.0f) {}
+  SoundEmitter() : emitPos{0.0f, 0.0f, 0.0f}, emitVel{0.0f, 0.0f, 0.0f}, falloff{0.0f, 0.0f, 1.0f}, volume(1.0f) {}
 };
 
 extern vector<SoundEmitter*> sound_emitters;

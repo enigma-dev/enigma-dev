@@ -18,38 +18,31 @@
 **/
 #include "../General/GSblend.h"
 
-namespace enigma
-{
-	extern int currentblendmode[2];
-	extern int currentblendtype;
+namespace enigma {
+extern int currentblendmode[2];
+extern int currentblendtype;
+}  // namespace enigma
+
+namespace enigma_user {
+int draw_set_blend_mode(int mode) {
+  if (enigma::currentblendmode[0] == mode && enigma::currentblendtype == 0) return 0;
+  enigma::currentblendmode[0] = mode;
+  enigma::currentblendtype = 0;
+  return 0;
 }
 
-namespace enigma_user
-{
-	int draw_set_blend_mode(int mode){
-			if (enigma::currentblendmode[0] == mode && enigma::currentblendtype == 0) return 0;
-			enigma::currentblendmode[0] = mode;
-			enigma::currentblendtype = 0;
-			return 0;
-	}
-
-	int draw_set_blend_mode_ext(int src,int dest){
-			if (enigma::currentblendmode[0] == src && enigma::currentblendmode[1] == dest && enigma::currentblendtype == 1) return 0;
-			enigma::currentblendtype = 1;
-			enigma::currentblendmode[0] = src;
-			enigma::currentblendmode[1] = dest;
-			return 0;
-	}
-
-	int draw_get_blend_mode(){
-			return enigma::currentblendmode[0];
-	}
-
-	int draw_get_blend_mode_ext(bool src){
-			return enigma::currentblendmode[(src==true?0:1)];
-	}
-
-	int draw_get_blend_mode_type(){
-			return enigma::currentblendtype;
-	}
+int draw_set_blend_mode_ext(int src, int dest) {
+  if (enigma::currentblendmode[0] == src && enigma::currentblendmode[1] == dest && enigma::currentblendtype == 1)
+    return 0;
+  enigma::currentblendtype = 1;
+  enigma::currentblendmode[0] = src;
+  enigma::currentblendmode[1] = dest;
+  return 0;
 }
+
+int draw_get_blend_mode() { return enigma::currentblendmode[0]; }
+
+int draw_get_blend_mode_ext(bool src) { return enigma::currentblendmode[(src == true ? 0 : 1)]; }
+
+int draw_get_blend_mode_type() { return enigma::currentblendtype; }
+}  // namespace enigma_user

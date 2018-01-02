@@ -15,7 +15,6 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-
 #include <string>
 using std::string;
 
@@ -42,4 +41,4 @@ void splash_set_stop_key(bool stop);
 void splash_set_stop_mouse(bool stop);
 void splash_set_close_button(bool show);
 
-}
+}  // namespace enigma_user

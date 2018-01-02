@@ -31,18 +31,18 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-	int mainO(int argc, char *argv[]);
-	int getWindowDimension(int i);
-	void cocoa_window_set_size(unsigned int w,unsigned int h);
-	int getMouse(int i);
-	void cocoa_window_set_caption(const char* caption);
-	const char* cocoa_window_get_caption();
-	void cocoa_screen_refresh();
-	int cocoa_window_set_visible(int visible);
-    void cocoa_flush_opengl();
-    int cocoa_window_get_region_width();
-    int cocoa_window_get_region_height();
-    
+int mainO(int argc, char* argv[]);
+int getWindowDimension(int i);
+void cocoa_window_set_size(unsigned int w, unsigned int h);
+int getMouse(int i);
+void cocoa_window_set_caption(const char* caption);
+const char* cocoa_window_get_caption();
+void cocoa_screen_refresh();
+int cocoa_window_set_visible(int visible);
+void cocoa_flush_opengl();
+int cocoa_window_get_region_width();
+int cocoa_window_get_region_height();
+
 #ifdef __cplusplus
 }
 #endif

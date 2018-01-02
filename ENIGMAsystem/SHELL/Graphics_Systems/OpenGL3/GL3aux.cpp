@@ -14,18 +14,18 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
+#include "GL3aux.h"
 #include <cstring>
 #include "../General/OpenGLHeaders.h"
-#include "GL3aux.h"
 
 namespace enigma {
 
-	bool gl_extension_supported(std::string extension){
-		GLint n, i;
-		glGetIntegerv(GL_NUM_EXTENSIONS, &n);
-		for (i = 0; i < n; ++i) {
-			if (std::strstr((char*)glGetStringi(GL_EXTENSIONS, i),extension.c_str())!=NULL) return true;
-		}
-		return false;
-	}
+bool gl_extension_supported(std::string extension) {
+  GLint n, i;
+  glGetIntegerv(GL_NUM_EXTENSIONS, &n);
+  for (i = 0; i < n; ++i) {
+    if (std::strstr((char*)glGetStringi(GL_EXTENSIONS, i), extension.c_str()) != NULL) return true;
+  }
+  return false;
 }
+}  // namespace enigma

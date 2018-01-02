@@ -26,67 +26,61 @@
  \********************************************************************************/
 
 #include "AndroidFunctions.h"
-#include "AndroidWindow.h"
+#include <android/log.h>
 #include <stdio.h>
+#include "AndroidWindow.h"
 #include "Universal_System/CallbackArrays.h"
 #include "Universal_System/roomsystem.h"
-#include <android/log.h>
-#define  LOG_TAG    "libenigma"
-#define  LOGI(...)  __android_log_print(ANDROID_LOG_INFO,LOG_TAG,__VA_ARGS__)
-#define  LOGE(...)  __android_log_print(ANDROID_LOG_ERROR,LOG_TAG,__VA_ARGS__)
+#define LOG_TAG "libenigma"
+#define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
+#define LOGE(...) __android_log_print(ANDROID_LOG_ERROR, LOG_TAG, __VA_ARGS__)
 
-namespace enigma
-{
-	extern char keymap[256];
-	void ENIGMA_events(void);
-	extern int initialize_everything();
-}
+namespace enigma {
+extern char keymap[256];
+void ENIGMA_events(void);
+extern int initialize_everything();
+}  // namespace enigma
 
-int handleEvents()
-{
-}
+int handleEvents() {}
 
-namespace enigma
-{
-	void initkeymap();
-	void input_initialize()
-	{
-		//Clear the input arrays
-		for(int i=0;i<3;i++){
-			enigma::last_mousestatus[i]=0;
-			enigma::mousestatus[i]=0;
-		}
-		for(int i=0;i<256;i++){
-			enigma::last_keybdstatus[i]=0;
-			enigma::keybdstatus[i]=0;
-		}
-	}
+namespace enigma {
+void initkeymap();
+void input_initialize() {
+  //Clear the input arrays
+  for (int i = 0; i < 3; i++) {
+    enigma::last_mousestatus[i] = 0;
+    enigma::mousestatus[i] = 0;
+  }
+  for (int i = 0; i < 256; i++) {
+    enigma::last_keybdstatus[i] = 0;
+    enigma::keybdstatus[i] = 0;
+  }
 }
+}  // namespace enigma
 
 int loopy() {
-	enigma::initkeymap();
-	enigma::ENIGMA_events();
-	return 0;
+  enigma::initkeymap();
+  enigma::ENIGMA_events();
+  return 0;
 }
-
 
 int init() {
-	LOGE("Before initilise everything!",1,1);
-	enigma::parameters=new char* [0]; 
-	enigma::parameters[0]="/data/data/org.enigmadev/lib/libndkEnigmaGame.so";
-enigma::initialize_everything();
+  LOGE("Before initilise everything!", 1, 1);
+  enigma::parameters = new char*[0];
+  enigma::parameters[0] = "/data/data/org.enigmadev/lib/libndkEnigmaGame.so";
+  enigma::initialize_everything();
 }
 
-extern int imousex,imousey;
+extern int imousex, imousey;
 
 int mouse_press(int x, int y) {
-	enigma::mousestatus[mb_left-1]=1;
-	imousex=x;
-	imousey=y;
+  enigma::mousestatus[mb_left - 1] = 1;
+  imousex = x;
+  imousey = y;
 }
 
 int mouse_release(int x, int y) {
-	enigma::mousestatus[mb_left-1]=0;
-	imousex=x;
-	imousey=y;
+  enigma::mousestatus[mb_left - 1] = 0;
+  imousex = x;
+  imousey = y;
 }

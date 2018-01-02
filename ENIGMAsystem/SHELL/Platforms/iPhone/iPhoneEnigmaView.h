@@ -25,23 +25,22 @@
  **                                                                              **
  \********************************************************************************/
 
-#import <UIKit/UIKit.h>
-#import <QuartzCore/QuartzCore.h>
 #import <OpenGLES/EAGL.h>
 #import <OpenGLES/EAGLDrawable.h>
 #import <OpenGLES/ES1/gl.h>
 #import <OpenGLES/ES1/glext.h>
-
+#import <QuartzCore/QuartzCore.h>
+#import <UIKit/UIKit.h>
 
 @interface iPhoneEnigmaView : UIView {
-	NSTimer *animationTimer;
-	EAGLContext *context;
-	GLuint defaultFramebuffer, colorRenderbuffer;
-	CGPoint lastTouchPoint; 
-	CGPoint currentTouchPoint;
-	float rotation,rotationChange;
+  NSTimer *animationTimer;
+  EAGLContext *context;
+  GLuint defaultFramebuffer, colorRenderbuffer;
+  CGPoint lastTouchPoint;
+  CGPoint currentTouchPoint;
+  float rotation, rotationChange;
 }
 
--(BOOL) initOpenGL;
--(void) render;
+- (BOOL)initOpenGL;
+- (void)render;
 @end

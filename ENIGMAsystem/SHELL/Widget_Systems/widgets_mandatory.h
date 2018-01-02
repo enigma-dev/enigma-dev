@@ -22,14 +22,13 @@
 #include <string>
 using std::string;
 
-namespace enigma
-{
-  // This function is called at the beginning of the game to allow the widget system to load.
-  bool widget_system_initialize();
-  extern string gameInfoText, gameInfoCaption;
-  extern int gameInfoBackgroundColor, gameInfoLeft, gameInfoTop, gameInfoWidth, gameInfoHeight;
-  extern bool gameInfoEmbedGameWindow, gameInfoShowBorder, gameInfoAllowResize, gameInfoStayOnTop, gameInfoPauseGame;
-}
+namespace enigma {
+// This function is called at the beginning of the game to allow the widget system to load.
+bool widget_system_initialize();
+extern string gameInfoText, gameInfoCaption;
+extern int gameInfoBackgroundColor, gameInfoLeft, gameInfoTop, gameInfoWidth, gameInfoHeight;
+extern bool gameInfoEmbedGameWindow, gameInfoShowBorder, gameInfoAllowResize, gameInfoStayOnTop, gameInfoPauseGame;
+}  // namespace enigma
 
 // This obviously displays an error message.
 // It should offer a button to end the game, and if not fatal, a button to ignore the error.
@@ -38,15 +37,15 @@ void show_error(std::string msg, const bool fatal);
 namespace enigma_user {
 
 int show_message(string str);
-inline int action_show_message(string str)
-{
-  return show_message(str);
-}
-void show_info(string text=enigma::gameInfoText, int bgcolor=enigma::gameInfoBackgroundColor, int left=enigma::gameInfoLeft, int top=enigma::gameInfoTop, int width=enigma::gameInfoWidth, int height=enigma::gameInfoHeight, 
-	bool embedGameWindow=enigma::gameInfoEmbedGameWindow, bool showBorder=enigma::gameInfoShowBorder, bool allowResize=enigma::gameInfoAllowResize, bool stayOnTop=enigma::gameInfoStayOnTop, 
-	bool pauseGame=enigma::gameInfoPauseGame, string caption=enigma::gameInfoCaption);
+inline int action_show_message(string str) { return show_message(str); }
+void show_info(string text = enigma::gameInfoText, int bgcolor = enigma::gameInfoBackgroundColor,
+               int left = enigma::gameInfoLeft, int top = enigma::gameInfoTop, int width = enigma::gameInfoWidth,
+               int height = enigma::gameInfoHeight, bool embedGameWindow = enigma::gameInfoEmbedGameWindow,
+               bool showBorder = enigma::gameInfoShowBorder, bool allowResize = enigma::gameInfoAllowResize,
+               bool stayOnTop = enigma::gameInfoStayOnTop, bool pauseGame = enigma::gameInfoPauseGame,
+               string caption = enigma::gameInfoCaption);
 static inline void action_show_info() { show_info(); }
 
-}
+}  // namespace enigma_user
 
 #endif

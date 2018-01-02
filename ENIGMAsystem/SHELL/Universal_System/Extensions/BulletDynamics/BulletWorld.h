@@ -26,32 +26,31 @@ using std::string;
 
   #include "libEGMstd.h"
 */
-#define toString(s) \
-  s
+#define toString(s) s
 
-  #include "Widget_Systems/widgets_mandatory.h"
-  #define get_worldr(w,id,r) \
-    if (unsigned(id) >= bulletWorlds.size() || id < 0) { \
-      show_error("Cannot access Bullet Dynamics physics world with id " + toString(id), false); \
-      return r; \
-    } BulletWorld* w = bulletWorlds[id];
-  #define get_world(w,id) \
-    if (unsigned(id) >= bulletWorlds.size() || id < 0) { \
-      show_error("Cannot access Bullet Dynamics physics world with id " + toString(id), false); \
-      return; \
-    } BulletWorld* w = bulletWorlds[id];
-  #define get_worldc(w,id, c) \
-    if (unsigned(id) >= bulletWorlds.size() || id < 0) { \
-      show_error("Cannot cast Bullet Dynamics physics world with id " + toString(id), false); \
-      return; \
-    } c w = (c) bulletWorlds[id]->dynamicsWorld;
+#include "Widget_Systems/widgets_mandatory.h"
+#define get_worldr(w, id, r)                                                                  \
+  if (unsigned(id) >= bulletWorlds.size() || id < 0) {                                        \
+    show_error("Cannot access Bullet Dynamics physics world with id " + toString(id), false); \
+    return r;                                                                                 \
+  }                                                                                           \
+  BulletWorld* w = bulletWorlds[id];
+#define get_world(w, id)                                                                      \
+  if (unsigned(id) >= bulletWorlds.size() || id < 0) {                                        \
+    show_error("Cannot access Bullet Dynamics physics world with id " + toString(id), false); \
+    return;                                                                                   \
+  }                                                                                           \
+  BulletWorld* w = bulletWorlds[id];
+#define get_worldc(w, id, c)                                                                \
+  if (unsigned(id) >= bulletWorlds.size() || id < 0) {                                      \
+    show_error("Cannot cast Bullet Dynamics physics world with id " + toString(id), false); \
+    return;                                                                                 \
+  }                                                                                         \
+  c w = (c)bulletWorlds[id]->dynamicsWorld;
 #else
-  #define get_worldr(w,id,r) \
-    BulletWorld* w = bulletWorlds[id];
-  #define get_world(w,id) \
-    BulletWorld* w = bulletWorlds[id];
-  #define get_worldc(w,id,c) \
-    c w = (c) bulletWorlds[id]->dynamicsWorld;
+#define get_worldr(w, id, r) BulletWorld* w = bulletWorlds[id];
+#define get_world(w, id) BulletWorld* w = bulletWorlds[id];
+#define get_worldc(w, id, c) c w = (c)bulletWorlds[id]->dynamicsWorld;
 #endif
 
 #ifndef _BULLETWORLD__H
@@ -62,18 +61,12 @@ using std::vector;
 
 #undef None
 #include <BulletSoftBody/btSoftBody.h>
-#include <btBulletDynamicsCommon.h>
 #include <BulletSoftBody/btSoftRigidDynamicsWorld.h>
+#include <btBulletDynamicsCommon.h>
 
 namespace enigma_user {
 
-enum {
-  b3d_world_unknown,
-  b3d_world_softrigid,
-  b3d_world_discrete,
-  b3d_world_simple
-};
-
+enum { b3d_world_unknown, b3d_world_softrigid, b3d_world_discrete, b3d_world_simple };
 }
 
 struct BulletWorld {
@@ -86,8 +79,7 @@ struct BulletWorld {
 
   bool paused;
 
-  BulletWorld()
-  {
+  BulletWorld() {
     // Construct a world object, which will hold and simulate the physics bodies.
     broadphase = new btDbvtBroadphase();
     collisionConfiguration = new btDefaultCollisionConfiguration();
@@ -97,26 +89,22 @@ struct BulletWorld {
     paused = false;
   }
 
-  void createDiscrete()
-  {
-    dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher,broadphase,solver,collisionConfiguration);
+  void createDiscrete() {
+    dynamicsWorld = new btDiscreteDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration);
     type = enigma_user::b3d_world_discrete;
   }
 
-  void createSoftRigid()
-  {
-    dynamicsWorld = new btSoftRigidDynamicsWorld(dispatcher,broadphase,solver,collisionConfiguration);
+  void createSoftRigid() {
+    dynamicsWorld = new btSoftRigidDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration);
     type = enigma_user::b3d_world_softrigid;
   }
 
-  void createSimple()
-  {
-    dynamicsWorld = new btSimpleDynamicsWorld(dispatcher,broadphase,solver,collisionConfiguration);
+  void createSimple() {
+    dynamicsWorld = new btSimpleDynamicsWorld(dispatcher, broadphase, solver, collisionConfiguration);
     type = enigma_user::b3d_world_simple;
   }
 
-  ~BulletWorld() 
-  {
+  ~BulletWorld() {
     delete dynamicsWorld;
     delete solver;
     delete collisionConfiguration;
@@ -124,11 +112,8 @@ struct BulletWorld {
     delete broadphase;
   }
 
-  void update(double timestep, double iterations) 
-  {
-    dynamicsWorld->stepSimulation(timestep, iterations);
-  }
-}; 
+  void update(double timestep, double iterations) { dynamicsWorld->stepSimulation(timestep, iterations); }
+};
 extern vector<BulletWorld*> bulletWorlds;
 
 #endif

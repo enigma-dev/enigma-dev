@@ -16,38 +16,37 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <map>
 #include <math.h>
+#include <map>
 #include <string>
 
-#include "var4.h"
 #include "reflexive_types.h"
+#include "var4.h"
 
-#include "Platforms/platforms_mandatory.h"
-#include "Platforms/General/PFwindow.h"
-#include "Widget_Systems/widgets_mandatory.h"
 #include "Graphics_Systems/graphics_mandatory.h"
+#include "Platforms/General/PFwindow.h"
+#include "Platforms/platforms_mandatory.h"
 #include "Universal_System/callbacks_events.h"
-#include "libEGMstd.h"
-#include "instance_system.h"
-#include "instance.h"
-#include "planar_object.h"
+#include "Widget_Systems/widgets_mandatory.h"
 #include "backgroundstruct.h"
+#include "instance.h"
+#include "instance_system.h"
+#include "libEGMstd.h"
+#include "planar_object.h"
 
-#include "roomsystem.h"
 #include "depth_draw.h"
+#include "roomsystem.h"
 
 #include "CallbackArrays.h"
 
-#include "lives.h"
 #include <string.h>
+#include "lives.h"
 
-namespace enigma_user
-{
+namespace enigma_user {
 
-int room_speed  = 60;
+int room_speed = 60;
 
-int room_width  = 640;
+int room_width = 640;
 int room_height = 480;
 
 int room_first = 0;
@@ -58,7 +57,7 @@ var room_caption = "";
 var current_caption = "";
 
 int background_color = 0xFFFFFF;
-int background_showcolor=1;
+int background_showcolor = 1;
 
 var background_visible, background_foreground, background_index, background_x, background_y, background_htiled,
     background_vtiled, background_hspeed, background_vspeed, background_alpha, background_coloring, background_width,
@@ -66,260 +65,249 @@ var background_visible, background_foreground, background_index, background_x, b
 
 int view_current = 0;
 int view_enabled = 0;
-rvt view_hborder, view_hport, view_hspeed, view_hview, view_object, view_vborder,
-    view_visible, view_vspeed, view_wport, view_wview, view_xport, view_xview,
-    view_yport, view_yview, view_angle;
+rvt view_hborder, view_hport, view_hspeed, view_hview, view_object, view_vborder, view_visible, view_vspeed, view_wport,
+    view_wview, view_xport, view_xview, view_yport, view_yview, view_angle;
 
+}  // namespace enigma_user
+
+namespace enigma {
+int ENIGMA_events();
+
+roomstruct **roomdata;
+roomstruct **roomorder;
+
+void follow_object(int vob, size_t vc) {
+  using namespace enigma_user;
+  object_basic *instanceexists = fetch_instance_by_int(vob);
+
+  if (instanceexists) {
+    object_planar *vobr = (object_planar *)instanceexists;
+
+    double vobx = vobr->x, voby = vobr->y;
+
+    //int bbl=*vobr.x+*vobr.bbox_left,bbr=*vobr.x+*vobr.bbox_right,bbt=*vobr.y+*vobr.bbox_top,bbb=*vobr.y+*vobr.bbox_bottom;
+    //if (bbl<view_xview[vc]+view_hbor[vc]) view_xview[vc]=bbl-view_hbor[vc];
+
+    double vbc_h, vbc_v;
+    (view_hborder[vc] > view_wview[vc] / 2) ? vbc_h = view_wview[vc] / 2 : vbc_h = view_hborder[vc];
+    (view_vborder[vc] > view_hview[vc] / 2) ? vbc_v = view_hview[vc] / 2 : vbc_v = view_vborder[vc];
+
+    if (view_hspeed[vc] == -1) {
+      if (vobx < view_xview[vc] + vbc_h)
+        view_xview[vc] = vobx - vbc_h;
+      else if (vobx > view_xview[vc] + view_wview[vc] - vbc_h)
+        view_xview[vc] = vobx + vbc_h - view_wview[vc];
+    } else {
+      if (vobx < view_xview[vc] + vbc_h) {
+        view_xview[vc] -= view_hspeed[vc];
+        if (view_xview[vc] < vobx - vbc_h) view_xview[vc] = vobx - vbc_h;
+      } else if (vobx > view_xview[vc] + view_wview[vc] - vbc_h) {
+        view_xview[vc] += view_hspeed[vc];
+        if (view_xview[vc] > vobx + vbc_h - view_wview[vc]) view_xview[vc] = vobx + vbc_h - view_wview[vc];
+      }
+    }
+
+    if (view_vspeed[vc] == -1) {
+      if (voby < view_yview[vc] + vbc_v)
+        view_yview[vc] = voby - vbc_v;
+      else if (voby > view_yview[vc] + view_hview[vc] - vbc_v)
+        view_yview[vc] = voby + vbc_v - view_hview[vc];
+    } else {
+      if (voby < view_yview[vc] + vbc_v) {
+        view_yview[vc] -= view_vspeed[vc];
+        if (view_yview[vc] < voby - vbc_v) view_yview[vc] = voby - vbc_v;
+      }
+      if (voby > view_yview[vc] + view_hview[vc] - vbc_v) {
+        view_yview[vc] += view_vspeed[vc];
+        if (view_yview[vc] > voby + vbc_v - view_hview[vc]) view_yview[vc] = voby + vbc_v - view_hview[vc];
+      }
+    }
+
+    if (view_xview[vc] < 0)
+      view_xview[vc] = 0;
+    else if (view_xview[vc] > room_width - view_wview[vc])
+      view_xview[vc] = room_width - view_wview[vc];
+
+    if (view_yview[vc] < 0)
+      view_yview[vc] = 0;
+    else if (view_yview[vc] > room_height - view_hview[vc])
+      view_yview[vc] = room_height - view_hview[vc];
+  }
 }
 
-namespace enigma
-{
-  int ENIGMA_events();
-
-  roomstruct** roomdata;
-  roomstruct** roomorder;
-
-  void follow_object(int vob, size_t vc)
-  {
-    using namespace enigma_user;
-    object_basic *instanceexists = fetch_instance_by_int(vob);
-  
-    if (instanceexists)
-    {
-      object_planar* vobr = (object_planar*)instanceexists;
-  
-      double vobx = vobr->x, voby = vobr->y;
-  
-      //int bbl=*vobr.x+*vobr.bbox_left,bbr=*vobr.x+*vobr.bbox_right,bbt=*vobr.y+*vobr.bbox_top,bbb=*vobr.y+*vobr.bbox_bottom;
-      //if (bbl<view_xview[vc]+view_hbor[vc]) view_xview[vc]=bbl-view_hbor[vc];
-  
-      double vbc_h, vbc_v;
-      (view_hborder[vc] > view_wview[vc]/2) ? vbc_h = view_wview[vc]/2 : vbc_h = view_hborder[vc];
-      (view_vborder[vc] > view_hview[vc]/2) ? vbc_v = view_hview[vc]/2 : vbc_v = view_vborder[vc];
-  
-      if (view_hspeed[vc] == -1)
-      {
-        if (vobx < view_xview[vc] + vbc_h)
-          view_xview[vc] = vobx - vbc_h;
-        else if (vobx > view_xview[vc] + view_wview[vc] - vbc_h)
-          view_xview[vc] = vobx + vbc_h - view_wview[vc];
-      }
-      else
-      {
-        if (vobx < view_xview[vc] + vbc_h)
-        {
-          view_xview[vc] -= view_hspeed[vc];
-          if (view_xview[vc] < vobx - vbc_h)
-            view_xview[vc] = vobx - vbc_h;
-        }
-        else if (vobx > view_xview[vc] + view_wview[vc] - vbc_h)
-        {
-          view_xview[vc] += view_hspeed[vc];
-          if (view_xview[vc] > vobx + vbc_h - view_wview[vc])
-            view_xview[vc] = vobx + vbc_h - view_wview[vc];
-        }
-      }
-  
-      if (view_vspeed[vc] == -1)
-      {
-        if (voby < view_yview[vc] + vbc_v)
-          view_yview[vc] = voby - vbc_v;
-        else if (voby > view_yview[vc] + view_hview[vc] - vbc_v)
-          view_yview[vc] = voby + vbc_v - view_hview[vc];
-      }
-      else
-      {
-        if (voby < view_yview[vc] + vbc_v)
-        {
-          view_yview[vc] -= view_vspeed[vc];
-          if (view_yview[vc] < voby - vbc_v)
-            view_yview[vc] = voby - vbc_v;
-        }
-        if (voby > view_yview[vc] + view_hview[vc] - vbc_v)
-        {
-          view_yview[vc] += view_vspeed[vc];
-          if (view_yview[vc] > voby + vbc_v - view_hview[vc])
-            view_yview[vc] = voby + vbc_v - view_hview[vc];
-        }
-      }
-  
-      if (view_xview[vc] < 0)
-        view_xview[vc] = 0;
-      else if (view_xview[vc] > room_width - view_wview[vc])
-        view_xview[vc] = room_width - view_wview[vc];
-  
-      if (view_yview[vc] < 0)
-        view_yview[vc] = 0;
-      else if (view_yview[vc] > room_height - view_hview[vc])
-        view_yview[vc] = room_height - view_hview[vc];
-    }
+void roomstruct::end() {
+  // Fire the Room End event.
+  instance_event_iterator = new inst_iter(NULL, NULL, NULL);
+  for (enigma::iterator it = enigma::instance_list_first(); it; ++it) {
+    it->myevent_roomend();
   }
-  
+  // This needs to be a separate loop because the room end event for some object may
+  // access another instance.
+  for (enigma::iterator it = enigma::instance_list_first(); it; ++it) {
+    // Destroy the object if it is not persistent
+    if (!((object_planar *)*it)->persistent) enigma_user::instance_destroy(it->id, false);
+  }
+}
 
-  void roomstruct::end() {
-    // Fire the Room End event.
-    instance_event_iterator = new inst_iter(NULL,NULL,NULL);
-    for (enigma::iterator it = enigma::instance_list_first(); it; ++it) {
-      it->myevent_roomend();
-    }
-    // This needs to be a separate loop because the room end event for some object may
-    // access another instance.
-    for (enigma::iterator it = enigma::instance_list_first(); it; ++it) {
-      // Destroy the object if it is not persistent
-      if (!((object_planar*)*it)->persistent)
-        enigma_user::instance_destroy(it->id, false);
-    }
+void roomstruct::gotome(bool gamestart) {
+  using namespace enigma_user;
+
+  this->end();
+
+  perform_callbacks_clean_up_roomend();
+
+  // Set the index to self
+  room.rval.d = id;
+  room_caption = cap;
+  room_width = width;
+  room_height = height;
+  room_speed = spd;
+  room_persistent = persistent;
+  background_color = backcolor;
+  background_showcolor = drawbackcolor;
+
+  if (gamestart) {
+    reset_lives();
   }
 
-  void roomstruct::gotome(bool gamestart)
-  {
-    using namespace enigma_user;
+  //We may still be holding on to deactivated instances; they can interact badly with existing instances in certain cases.
+  instance_deactivated_list.clear();
 
-    this->end();
-
-    perform_callbacks_clean_up_roomend();
-
-    // Set the index to self
-    room.rval.d = id;
-    room_caption = cap;
-    room_width   = width;
-    room_height  = height;
-    room_speed   = spd;
-    room_persistent = persistent;
-    background_color = backcolor;
-    background_showcolor = drawbackcolor;
-
-    if (gamestart) {
-      reset_lives();
+  // Initialize background variants so they do not throw uninitialized variable access errors.
+  for (unsigned i = 0; i < 8; i++) {
+    background_visible[i] = backs[i].visible;
+    background_foreground[i] = backs[i].foreground;
+    background_index[i] = backs[i].background;
+    background_x[i] = backs[i].area_x;
+    background_y[i] = backs[i].area_y;
+    background_hspeed[i] = backs[i].horSpeed;
+    background_vspeed[i] = backs[i].verSpeed;
+    background_htiled[i] = backs[i].tileHor;
+    background_vtiled[i] = backs[i].tileVert;
+    background_alpha[i] = backs[i].alpha;
+    background_coloring[i] = backs[i].color;
+    if (enigma_user::background_exists(background_index[i])) {
+      background_width[i] = background_get_width(background_index[i]);
+      background_height[i] = background_get_height(background_index[i]);
+      background_xscale[i] = (backs[i].stretch) ? room_width / background_width[i] : 1;
+      background_yscale[i] = (backs[i].stretch) ? room_height / background_height[i] : 1;
+    } else {
+      background_width[i] = 0;
+      background_height[i] = 0;
+      background_xscale[i] = 1;
+      background_yscale[i] = 1;
     }
+  }
+  //Backgrounds end
 
-    //We may still be holding on to deactivated instances; they can interact badly with existing instances in certain cases.
-    instance_deactivated_list.clear();
+  view_enabled = views_enabled;
 
-    // Initialize background variants so they do not throw uninitialized variable access errors.
-    for (unsigned i=0;i<8;i++) {
-      background_visible[i] = backs[i].visible;
-      background_foreground[i] = backs[i].foreground;
-      background_index[i] = backs[i].background;
-      background_x[i] = backs[i].area_x; background_y[i] = backs[i].area_y;
-      background_hspeed[i] = backs[i].horSpeed; background_vspeed[i] = backs[i].verSpeed;
-      background_htiled[i] = backs[i].tileHor; background_vtiled[i] = backs[i].tileVert;
-      background_alpha[i] = backs[i].alpha;
-      background_coloring[i] = backs[i].color;
-      if (enigma_user::background_exists(background_index[i])) {
-        background_width[i] = background_get_width(background_index[i]); background_height[i] = background_get_height(background_index[i]);
-        background_xscale[i] = (backs[i].stretch) ? room_width/background_width[i] : 1;
-        background_yscale[i] = (backs[i].stretch) ? room_height/background_height[i] : 1;
-      }
-      else {
-        background_width[i] = 0; background_height[i] = 0;
-        background_xscale[i] = 1;
-        background_yscale[i] = 1;
-      }
+  // Initialize view variants so they do not throw uninitialized variable access errors.
+  for (unsigned i = 0; i < 8; i++) {
+    view_xview[i] = views[i].area_x;
+    view_yview[i] = views[i].area_y;
+    view_wview[i] = views[i].area_w;
+    view_hview[i] = views[i].area_h;
+    view_xport[i] = views[i].port_x;
+    view_yport[i] = views[i].port_y;
+    view_wport[i] = views[i].port_w;
+    view_hport[i] = views[i].port_h;
+    view_object[i] = views[i].object2follow;
+    view_hborder[i] = views[i].hborder;
+    view_vborder[i] = views[i].vborder;
+    view_hspeed[i] = views[i].hspd;
+    view_vspeed[i] = views[i].vspd;
+    view_visible[i] = (bool)views[i].start_vis;
+    view_angle[i] = 0;
+  }
+
+  //NOTE: window_default() always centers the Window, GM8 only recenters the window when switching rooms
+  //if the window size changes.
+  enigma_user::window_default(true);
+  enigma_user::io_clear();
+  screen_init();
+  screen_refresh();
+
+  //Load tiles
+  delete_tiles();
+  for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++) {
+    if (dit->second.tiles.size()) {
+      dit->second.tiles.clear();
     }
-    //Backgrounds end
+  }
+  for (int i = 0; i < tilecount; i++) {
+    tile t = tiles[i];
+    drawing_depths[t.depth].tiles.push_back(t);
+  }
+  load_tiles();
+  //Tiles end
 
-    view_enabled = views_enabled;
-
-    // Initialize view variants so they do not throw uninitialized variable access errors.
-    for (unsigned i=0;i<8;i++) {
-      view_xview[i] = views[i].area_x; view_yview[i] = views[i].area_y; view_wview[i] = views[i].area_w; view_hview[i] = views[i].area_h;
-      view_xport[i] = views[i].port_x; view_yport[i] = views[i].port_y; view_wport[i] = views[i].port_w; view_hport[i] = views[i].port_h;
-      view_object[i] = views[i].object2follow;
-      view_hborder[i] = views[i].hborder; view_vborder[i] = views[i].vborder; view_hspeed[i] = views[i].hspd; view_vspeed[i] = views[i].vspd;
-      view_visible[i] = (bool)views[i].start_vis;
-      view_angle[i] = 0;
+  object_basic *is[instancecount];
+  for (int i = 0; i < instancecount; i++) {
+    inst *obj = &instances[i];
+    object_basic *existing;
+    if ((existing = enigma::fetch_instance_by_id(obj->id))) {
+      is[i] = NULL;
+    } else {
+      is[i] = instance_create_id(obj->x, obj->y, obj->obj, obj->id);
     }
+  }
 
-    //NOTE: window_default() always centers the Window, GM8 only recenters the window when switching rooms
-    //if the window size changes.
-    enigma_user::window_default(true);
-    enigma_user::io_clear();
-    screen_init();
-    screen_refresh();
+  instance_event_iterator = new inst_iter(NULL, NULL, NULL);
 
-    //Load tiles
-    delete_tiles();
-    for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++){
-      if (dit->second.tiles.size()){
-        dit->second.tiles.clear();
-      }
+  // Fire the rooms preCreation code. This code includes instance sprite transformations added in the room editor.
+  // (NOTE: This code uses instance_deactivated_list to look up instances by ID, in addition to the normal lookup approach).
+  if (precreatecode) {
+    precreatecode();
+  }
+
+  // Fire the create event of all the new instances.
+  for (int i = 0; i < instancecount; i++) {
+    if (is[i]) {
+      is[i]->myevent_create();
     }
-    for (int i = 0; i < tilecount; i++) {
-      tile t = tiles[i];
-      drawing_depths[t.depth].tiles.push_back(t);
-    }
-    load_tiles();
-    //Tiles end
+  }
 
-    object_basic* is[instancecount];
-    for (int i = 0; i < instancecount; i++) {
-      inst *obj = &instances[i];
-      object_basic *existing;
-      if ((existing = enigma::fetch_instance_by_id(obj->id))) {
-        is[i] = NULL;
-      } else {
-        is[i] = instance_create_id(obj->x,obj->y,obj->obj,obj->id);
-      }
-    }
-
-    instance_event_iterator = new inst_iter(NULL,NULL,NULL);
-
-    // Fire the rooms preCreation code. This code includes instance sprite transformations added in the room editor.
-    // (NOTE: This code uses instance_deactivated_list to look up instances by ID, in addition to the normal lookup approach).
-    if (precreatecode) {
-      precreatecode();
-    }
-
-    // Fire the create event of all the new instances.
+  // Fire the game start event for all the new instances, persistent objects don't matter since this is the first time
+  // the game ran they won't even exist yet
+  if (gamestart) {
     for (int i = 0; i < instancecount; i++) {
       if (is[i]) {
-        is[i]->myevent_create();
+        is[i]->myevent_gamestart();
       }
-    }
-
-    // Fire the game start event for all the new instances, persistent objects don't matter since this is the first time
-    // the game ran they won't even exist yet
-    if (gamestart) {
-      for (int i = 0; i < instancecount; i++) {
-        if (is[i]) {
-          is[i]->myevent_gamestart();
-        }
-      }
-    }
-
-    // Fire the rooms creation code. This includes instance creation code.
-    // (NOTE: This code uses instance_deactivated_list to look up instances by ID, in addition to the normal lookup approach).
-    if (createcode) {
-      createcode();
-    }
-
-    // Fire the room start event for all persistent objects still kept alive and all the new instances
-    for (enigma::iterator it = enigma::instance_list_first(); it; ++it) {
-      it->myevent_roomstart();
     }
   }
 
-  extern int room_loadtimecount;
-  extern roomstruct grd_rooms[];
-  extern size_t room_idmax;
-  int room_switching_id = -1;
-  int room_switching_restartgame = false;
-  void rooms_load()
-  {
-    roomdata = new roomstruct*[room_idmax];
-    roomorder = new roomstruct*[room_loadtimecount];
-    if (room_loadtimecount > 0) {
-      for (int i = 0; i < room_loadtimecount; i++) {
-        roomdata[grd_rooms[i].id] = &grd_rooms[i];
-        roomorder[i] = &grd_rooms[i];
-      }
-      enigma_user::room_first = roomorder[0]->id;
-      enigma_user::room_last = roomorder[room_loadtimecount-1]->id;
-    }
+  // Fire the rooms creation code. This includes instance creation code.
+  // (NOTE: This code uses instance_deactivated_list to look up instances by ID, in addition to the normal lookup approach).
+  if (createcode) {
+    createcode();
+  }
+
+  // Fire the room start event for all persistent objects still kept alive and all the new instances
+  for (enigma::iterator it = enigma::instance_list_first(); it; ++it) {
+    it->myevent_roomstart();
   }
 }
 
+extern int room_loadtimecount;
+extern roomstruct grd_rooms[];
+extern size_t room_idmax;
+int room_switching_id = -1;
+int room_switching_restartgame = false;
+void rooms_load() {
+  roomdata = new roomstruct *[room_idmax];
+  roomorder = new roomstruct *[room_loadtimecount];
+  if (room_loadtimecount > 0) {
+    for (int i = 0; i < room_loadtimecount; i++) {
+      roomdata[grd_rooms[i].id] = &grd_rooms[i];
+      roomorder[i] = &grd_rooms[i];
+    }
+    enigma_user::room_first = roomorder[0]->id;
+    enigma_user::room_last = roomorder[room_loadtimecount - 1]->id;
+  }
+}
+}  // namespace enigma
 
 //Implement the "room" global before we continue
 INTERCEPT_DEFAULT_COPY(enigma::roomv)
@@ -328,53 +316,46 @@ void enigma::roomv::function(variant oldval) {
   rval.d = oldval.rval.d;
 }
 namespace enigma_user {
-  enigma::roomv room;
+enigma::roomv room;
 }
 
 #if DEBUG_MODE || (defined(SHOW_ERRORS) && SHOW_ERRORS)
-  #define errcheck(indx,err,v) \
-  if (unsigned(indx) >= unsigned(enigma::room_idmax) or !enigma::roomdata[indx]) \
-    return (show_error(err,0), (v))
-  #define errcheck_o(indx,err) \
-  if (unsigned(indx) >= unsigned(enigma::room_loadtimecount)) \
-    return (show_error(err,0), 0)
+#define errcheck(indx, err, v) \
+  if (unsigned(indx) >= unsigned(enigma::room_idmax) or !enigma::roomdata[indx]) return (show_error(err, 0), (v))
+#define errcheck_o(indx, err) \
+  if (unsigned(indx) >= unsigned(enigma::room_loadtimecount)) return (show_error(err, 0), 0)
 #else
-  #define errcheck(indx,err,v)
-  #define errcheck_o(indx,err)
+#define errcheck(indx, err, v)
+#define errcheck_o(indx, err)
 #endif
 
-namespace enigma_user
-{
+namespace enigma_user {
 
-int room_goto(int indx)
-{
-  errcheck(indx,"Attempting to go to nonexisting room", 0);
+int room_goto(int indx) {
+  errcheck(indx, "Attempting to go to nonexisting room", 0);
   enigma::room_switching_id = indx;
   enigma::room_switching_restartgame = false;
   return 1;
 }
 
-int room_restart()
-{
-  int indx=(int)room.rval.d;
+int room_restart() {
+  int indx = (int)room.rval.d;
   errcheck(indx, "Is this some kind of joke?", 0);
   enigma::room_switching_id = indx;
   enigma::room_switching_restartgame = false;
   return 1;
 }
 
-string room_get_name(int indx)
-{
-  if (unsigned(indx) >= unsigned(enigma::room_idmax) or !enigma::roomdata[indx]){
+string room_get_name(int indx) {
+  if (unsigned(indx) >= unsigned(enigma::room_idmax) or !enigma::roomdata[indx]) {
     return "<undefined>";
   } else {
     return enigma::roomdata[indx]->name;
   }
 }
 
-int room_goto_absolute(int indx)
-{
-  errcheck_o(indx,"Room index out of range");
+int room_goto_absolute(int indx) {
+  errcheck_o(indx, "Room index out of range");
   enigma::roomstruct *rit = enigma::roomorder[indx];
   int index = rit->id;
 
@@ -384,87 +365,70 @@ int room_goto_absolute(int indx)
 }
 
 #undef room_count
-int room_count() {
-  return enigma::room_loadtimecount;
-}
+int room_count() { return enigma::room_loadtimecount; }
 
-int room_goto_first(bool restart_game)
-{
-  errcheck_o(0,"Game must have at least one room to do anything");
+int room_goto_first(bool restart_game) {
+  errcheck_o(0, "Game must have at least one room to do anything");
   enigma::roomstruct *rit = enigma::roomorder[0];
   enigma::room_switching_id = rit->id;
   enigma::room_switching_restartgame = restart_game;
   return 1;
 }
 
-int room_goto_next()
-{
+int room_goto_next() {
   enigma::roomstruct *rit = enigma::roomdata[(int)room.rval.d];
-  errcheck((int)room.rval.d,"Going to next room from invalid room. wat", 0);
+  errcheck((int)room.rval.d, "Going to next room from invalid room. wat", 0);
 
   rit = enigma::roomorder[rit->order + 1];
-  errcheck(rit->order+1,"Going to next room after last", 0);
+  errcheck(rit->order + 1, "Going to next room after last", 0);
 
   enigma::room_switching_id = rit->id;
   enigma::room_switching_restartgame = false;
   return 1;
 }
 
-int room_goto_previous()
-{
+int room_goto_previous() {
   enigma::roomstruct *rit = enigma::roomdata[(int)room.rval.d];
-  errcheck((int)room.rval.d,"Going to next room from invalid room. wat", 0);
+  errcheck((int)room.rval.d, "Going to next room from invalid room. wat", 0);
 
   rit = enigma::roomorder[rit->order - 1];
-  errcheck(rit->order-1,"Going to next room before first", 0);
+  errcheck(rit->order - 1, "Going to next room before first", 0);
 
   enigma::room_switching_id = rit->id;
   enigma::room_switching_restartgame = false;
   return 1;
 }
 
-
-int room_next(int num)
-{
-  if (num < 0 or num >= enigma::room_idmax)
-    return -1;
+int room_next(int num) {
+  if (num < 0 or num >= enigma::room_idmax) return -1;
   enigma::roomstruct *rit = enigma::roomdata[num];
-  if (!rit or rit->order+1 >= enigma::room_loadtimecount)
-    return -1;
+  if (!rit or rit->order + 1 >= enigma::room_loadtimecount) return -1;
   return enigma::roomorder[rit->order + 1]->id;
 }
-int room_previous(int num)
-{
-  if (num < 0 or num >= enigma::room_idmax)
-    return -1;
+int room_previous(int num) {
+  if (num < 0 or num >= enigma::room_idmax) return -1;
   enigma::roomstruct *rit = enigma::roomdata[num];
-  if (!rit or rit->order-1 < 0)
-    return -1;
+  if (!rit or rit->order - 1 < 0) return -1;
   return enigma::roomorder[rit->order - 1]->id;
 }
 
-bool room_exists(int roomid)
-{
-  return roomid >= 0 and roomid < enigma::room_idmax and enigma::roomdata[roomid];
-}
+bool room_exists(int roomid) { return roomid >= 0 and roomid < enigma::room_idmax and enigma::roomdata[roomid]; }
 
-int room_set_width(int indx, int wid)
-{
-  errcheck(indx,"Nonexistent room", 0);
+int room_set_width(int indx, int wid) {
+  errcheck(indx, "Nonexistent room", 0);
   enigma::roomdata[indx]->width = wid;
   return 1;
 }
 
-int room_set_height(int indx, int hei)
-{
-  errcheck(indx,"Nonexistent room", 0);
+int room_set_height(int indx, int hei) {
+  errcheck(indx, "Nonexistent room", 0);
   enigma::roomdata[indx]->height = hei;
   return 1;
 }
 
-int room_set_background(int indx, int bind, bool vis, bool fore, bool back, double x, double y, bool htiled, bool vtiled, double hspeed, double vspeed, double alpha, int color)
-{
-  errcheck(indx,"Nonexistent room", 0);
+int room_set_background(int indx, int bind, bool vis, bool fore, bool back, double x, double y, bool htiled,
+                        bool vtiled, double hspeed, double vspeed, double alpha, int color) {
+  errcheck(indx, "Nonexistent room", 0);
   enigma::backstruct &bk = enigma::roomdata[indx]->backs[bind];
   bk.visible = vis;
   bk.foreground = fore;
@@ -480,9 +444,9 @@ int room_set_background(int indx, int bind, bool vis, bool fore, bool back, doub
   return 1;
 }
 
-int room_set_view(int indx, int vind, int vis, int xview, int yview, int wview, int hview, int xport, int yport, int wport, int hport, int hborder, int vborder, int hspeed, int vspeed, int obj)
-{
-  errcheck(indx,"Nonexistent room", 0);
+int room_set_view(int indx, int vind, int vis, int xview, int yview, int wview, int hview, int xport, int yport,
+                  int wport, int hport, int hborder, int vborder, int hspeed, int vspeed, int obj) {
+  errcheck(indx, "Nonexistent room", 0);
   enigma::viewstruct &vw = enigma::roomdata[indx]->views[vind];
   vw.start_vis = vis;
   vw.area_x = xview;
@@ -501,55 +465,48 @@ int room_set_view(int indx, int vind, int vis, int xview, int yview, int wview, 
   return 1;
 }
 
-int room_set_background_color(int indx, int col, bool show)
-{
-  errcheck(indx,"Nonexistent room", 0);
+int room_set_background_color(int indx, int col, bool show) {
+  errcheck(indx, "Nonexistent room", 0);
   enigma::roomdata[indx]->backcolor = col;
   enigma::roomdata[indx]->drawbackcolor = show;
   return 1;
 }
 
-int room_set_caption(int indx, string str)
-{
-  errcheck(indx,"Nonexistent room", 0);
+int room_set_caption(int indx, string str) {
+  errcheck(indx, "Nonexistent room", 0);
   enigma::roomdata[indx]->cap = str;
   return 1;
 }
 
-int room_set_persistent(int indx, bool pers)
-{
-  errcheck(indx,"Nonexistent room", 0);
+int room_set_persistent(int indx, bool pers) {
+  errcheck(indx, "Nonexistent room", 0);
   enigma::roomdata[indx]->persistent = pers;
   return 1;
 }
 
-int room_set_view_enabled(int indx, int val)
-{
-  errcheck(indx,"Nonexistent room", 0);
+int room_set_view_enabled(int indx, int val) {
+  errcheck(indx, "Nonexistent room", 0);
   enigma::roomdata[indx]->views_enabled = val;
   return 1;
 }
 
-}
+}  // namespace enigma_user
 
-namespace enigma
-{
-  bool tile_alter = false;
-  bool instance_alter = false;
-}
+namespace enigma {
+bool tile_alter = false;
+bool instance_alter = false;
+}  // namespace enigma
 
-namespace enigma_user
-{
+namespace enigma_user {
 
-int room_tile_add_ext(int indx, int bck, int left, int top, int width, int height, int x, int y, int depth, int xscale, int yscale, double alpha, int color)
-{
-  errcheck(indx,"Nonexistent room", 0);
+int room_tile_add_ext(int indx, int bck, int left, int top, int width, int height, int x, int y, int depth, int xscale,
+                      int yscale, double alpha, int color) {
+  errcheck(indx, "Nonexistent room", 0);
   enigma::roomstruct *rm = enigma::roomdata[indx];
   const int tcount = rm->tilecount++;
   enigma::tile *ti = rm->tiles;
   enigma::tile *newtiles = new enigma::tile[tcount + 1];
-  for (int tilei = 0; tilei < tcount; tilei++)
-    newtiles[tilei] = ti[tilei];
+  for (int tilei = 0; tilei < tcount; tilei++) newtiles[tilei] = ti[tilei];
 
   newtiles[tcount].id = enigma::maxtileid++;
   newtiles[tcount].bckid = bck;
@@ -571,9 +528,8 @@ int room_tile_add_ext(int indx, int bck, int left, int top, int width, int heigh
   return 1;
 }
 
-int room_tile_clear(int indx)
-{
-  errcheck(indx,"Nonexistent room", 0);
+int room_tile_clear(int indx) {
+  errcheck(indx, "Nonexistent room", 0);
   enigma::roomstruct *rm = enigma::roomdata[indx];
   enigma::tile *newtiles = new enigma::tile[1];
   rm->tilecount = 0;
@@ -584,15 +540,13 @@ int room_tile_clear(int indx)
   return 1;
 }
 
-int room_instance_add(int indx, int x, int y, int obj)
-  {
-  errcheck(indx,"Nonexistent room", 0);
+int room_instance_add(int indx, int x, int y, int obj) {
+  errcheck(indx, "Nonexistent room", 0);
   enigma::roomstruct *rm = enigma::roomdata[indx];
   const int icount = rm->instancecount++;
   enigma::inst *in = rm->instances;
   enigma::inst *newinst = new enigma::inst[icount + 1];
-  for (int insti = 0; insti < icount; insti++)
-    newinst[insti] = in[insti];
+  for (int insti = 0; insti < icount; insti++) newinst[insti] = in[insti];
 
   newinst[icount].id = enigma::maxid++;
   newinst[icount].x = x;
@@ -600,14 +554,13 @@ int room_instance_add(int indx, int x, int y, int obj)
   newinst[icount].obj = obj;
 
   if (enigma::instance_alter) delete[] rm->instances;
-    rm->instances = newinst;
-    enigma::instance_alter = true;
-    return 1;
-  }
+  rm->instances = newinst;
+  enigma::instance_alter = true;
+  return 1;
+}
 
-int room_instance_clear(int indx)
-{
-  errcheck(indx,"Nonexistent room", 0);
+int room_instance_clear(int indx) {
+  errcheck(indx, "Nonexistent room", 0);
   enigma::roomstruct *rm = enigma::roomdata[indx];
   enigma::inst *newinst = new enigma::inst[1];
   rm->instancecount = 0;
@@ -618,14 +571,12 @@ int room_instance_clear(int indx)
   return 1;
 }
 
-int room_add()
-{
+int room_add() {
   int newrm = enigma::room_idmax++;
-  enigma::roomstruct** newroomdata;
+  enigma::roomstruct **newroomdata;
 
-  newroomdata = new enigma::roomstruct*[newrm + 1];
-  for (int i = 0; i < newrm; i++)
-    newroomdata[i] = enigma::roomdata[i];
+  newroomdata = new enigma::roomstruct *[newrm + 1];
+  for (int i = 0; i < newrm; i++) newroomdata[i] = enigma::roomdata[i];
 
   enigma::roomstruct *rm = newroomdata[newrm] = new enigma::roomstruct;
 
@@ -652,8 +603,7 @@ int room_add()
   rm->tilecount = 0;
 
   enigma::viewstruct vw;
-  for (int i = 0; i < 8; i++)
-  {
+  for (int i = 0; i < 8; i++) {
     vw = rm->views[i];
     vw.start_vis = false;
     vw.area_x = 0;
@@ -672,8 +622,7 @@ int room_add()
   }
 
   enigma::backstruct bk;
-  for (int i = 0; i < 8; i++)
-  {
+  for (int i = 0; i < 8; i++) {
     bk = rm->backs[i];
     bk.visible = 0;
     bk.foreground = 0;
@@ -693,24 +642,22 @@ int room_add()
   return newrm;
 }
 
-int room_duplicate(int indx, bool ass, int assroom)
-{
-  errcheck(indx,"Nonexistent room", 0);
+int room_duplicate(int indx, bool ass, int assroom) {
+  errcheck(indx, "Nonexistent room", 0);
   if (ass) {
-    errcheck(assroom,"Nonexistent room", 0);
+    errcheck(assroom, "Nonexistent room", 0);
   }
-  int newrm = (ass)?enigma::room_idmax++ : enigma::room_idmax - 1;
+  int newrm = (ass) ? enigma::room_idmax++ : enigma::room_idmax - 1;
 
-  enigma::roomstruct** newroomdata;
-  newroomdata = new enigma::roomstruct*[newrm + 1];
-  for (int i = 0; i < newrm; i++)
-    newroomdata[i] = enigma::roomdata[i];
+  enigma::roomstruct **newroomdata;
+  newroomdata = new enigma::roomstruct *[newrm + 1];
+  for (int i = 0; i < newrm; i++) newroomdata[i] = enigma::roomdata[i];
 
-  enigma::roomstruct *rm = (ass)?newroomdata[indx] : newroomdata[newrm] = new enigma::roomstruct;
-  enigma::roomstruct *copyrm = (ass)?enigma::roomdata[assroom]:enigma::roomdata[indx];
+  enigma::roomstruct *rm = (ass) ? newroomdata[indx] : newroomdata[newrm] = new enigma::roomstruct;
+  enigma::roomstruct *copyrm = (ass) ? enigma::roomdata[assroom] : enigma::roomdata[indx];
 
   rm->id = copyrm->id;
-  rm->order = (ass)?copyrm->order:-1;
+  rm->order = (ass) ? copyrm->order : -1;
   rm->name = "New Room";
   rm->cap = copyrm->cap;
   rm->backcolor = copyrm->backcolor;
@@ -726,18 +673,15 @@ int room_duplicate(int indx, bool ass, int assroom)
   enigma::inst *newinst = new enigma::inst[copyrm->instancecount];
   rm->instances = newinst;
   rm->instancecount = copyrm->instancecount;
-  for (int i = 0; i < rm->instancecount; i++)
-    rm->instances[i] = copyrm->instances[i];
+  for (int i = 0; i < rm->instancecount; i++) rm->instances[i] = copyrm->instances[i];
 
   enigma::tile *newtiles = new enigma::tile[copyrm->tilecount];
   rm->tiles = newtiles;
   rm->tilecount = copyrm->tilecount;
-  for (int i = 0; i < rm->tilecount; i++)
-    rm->tiles[i] = copyrm->tiles[i];
+  for (int i = 0; i < rm->tilecount; i++) rm->tiles[i] = copyrm->tiles[i];
 
   enigma::viewstruct vw, vc;
-  for (int i = 0; i < 8; i++)
-  {
+  for (int i = 0; i < 8; i++) {
     vw = rm->views[i];
     vc = copyrm->views[i];
     vw.start_vis = vc.start_vis;
@@ -757,8 +701,7 @@ int room_duplicate(int indx, bool ass, int assroom)
   }
 
   enigma::backstruct bk, bc;
-  for (int i = 0; i < 8; i++)
-  {
+  for (int i = 0; i < 8; i++) {
     bk = rm->backs[i];
     bc = copyrm->backs[i];
     bk.visible = bc.visible;
@@ -776,11 +719,11 @@ int room_duplicate(int indx, bool ass, int assroom)
 
   delete[] enigma::roomdata;
   enigma::roomdata = newroomdata;
-  return ((ass)?indx:newrm);
+  return ((ass) ? indx : newrm);
 }
 
-int view_set(int vind, int vis, int xview, int yview, int wview, int hview, int xport, int yport, int wport, int hport, int hborder, int vborder, int hspeed, int vspeed, int obj)
-{
+int view_set(int vind, int vis, int xview, int yview, int wview, int hview, int xport, int yport, int wport, int hport,
+             int hborder, int vborder, int hspeed, int vspeed, int obj) {
   view_visible[vind] = vis;
   view_xview[vind] = xview;
   view_yport[vind] = yview;
@@ -798,19 +741,12 @@ int view_set(int vind, int vis, int xview, int yview, int wview, int hview, int 
   return 1;
 }
 
-int window_view_mouse_get_x(int id)
-{
-  return window_mouse_get_x()+view_xview[id];
-}
+int window_view_mouse_get_x(int id) { return window_mouse_get_x() + view_xview[id]; }
 
-int window_view_mouse_get_y(int id)
-{
-  return window_mouse_get_y()+view_yview[id];
-}
+int window_view_mouse_get_y(int id) { return window_mouse_get_y() + view_yview[id]; }
 
-void window_view_mouse_set(int id, int x, int y)
-{
-  window_mouse_set(window_get_x() + x + view_xview[id],window_get_y() + y + view_yview[id]);
+void window_view_mouse_set(int id, int x, int y) {
+  window_mouse_set(window_get_x() + x + view_xview[id], window_get_y() + y + view_yview[id]);
 }
 
 //NOTE: GM8.1 allowed the mouse to go outside the window, for basically all mouse functions and constants, Studio however
@@ -822,12 +758,14 @@ void window_view_mouse_set(int id, int x, int y)
 int window_views_mouse_get_x() {
   gs_scalar sx;
   sx = (window_get_width() - window_get_region_width_scaled()) / 2;
-  int x = (window_mouse_get_x() - sx) * ((gs_scalar)window_get_region_width() / (gs_scalar)window_get_region_width_scaled());
+  int x = (window_mouse_get_x() - sx) *
+          ((gs_scalar)window_get_region_width() / (gs_scalar)window_get_region_width_scaled());
   if (view_enabled) {
-    x = view_xview[view_current]+((x-view_xport[view_current])/(double)view_wport[view_current])*view_wview[view_current];
+    x = view_xview[view_current] +
+        ((x - view_xport[view_current]) / (double)view_wport[view_current]) * view_wview[view_current];
   }
   return x;
-/* This code replicates GM8.1's broken mouse_x/y
+  /* This code replicates GM8.1's broken mouse_x/y
   int x = window_mouse_get_x();
   int y = window_mouse_get_y();
   if (view_enabled) {
@@ -846,12 +784,14 @@ int window_views_mouse_get_x() {
 int window_views_mouse_get_y() {
   gs_scalar sy;
   sy = (window_get_height() - window_get_region_height_scaled()) / 2;
-  int y = (window_mouse_get_y() - sy) * ((gs_scalar)window_get_region_height() / (gs_scalar)window_get_region_height_scaled());
+  int y = (window_mouse_get_y() - sy) *
+          ((gs_scalar)window_get_region_height() / (gs_scalar)window_get_region_height_scaled());
   if (view_enabled) {
-    y = view_yview[view_current]+((y-view_yport[view_current])/(double)view_hport[view_current])*view_hview[view_current];
+    y = view_yview[view_current] +
+        ((y - view_yport[view_current]) / (double)view_hport[view_current]) * view_hview[view_current];
   }
   return y;
-/*
+  /*
   int x = window_mouse_get_x();
   int y = window_mouse_get_y();
   if (view_enabled) {
@@ -880,61 +820,61 @@ void window_views_mouse_set(int x, int y) {
   return;
 }
 
-void window_update_mouse() {
-  enigma::update_mouse_variables();
-}
+void window_update_mouse() { enigma::update_mouse_variables(); }
 
-void window_update() {
-  enigma::ENIGMA_events();
-}
+void window_update() { enigma::ENIGMA_events(); }
 
-}
+}  // namespace enigma_user
 
-namespace enigma
-{
-  double mouse_xprevious, mouse_yprevious;
-  void update_mouse_variables()
-  {
-    using namespace enigma_user;
-    mouse_xprevious = mouse_x;
-    mouse_yprevious = mouse_y;
+namespace enigma {
+double mouse_xprevious, mouse_yprevious;
+void update_mouse_variables() {
+  using namespace enigma_user;
+  mouse_xprevious = mouse_x;
+  mouse_yprevious = mouse_y;
 
-    gs_scalar sx, sy;
-    sx = (window_get_width() - window_get_region_width_scaled()) / 2;
-    sy = (window_get_height() - window_get_region_height_scaled()) / 2;
+  gs_scalar sx, sy;
+  sx = (window_get_width() - window_get_region_width_scaled()) / 2;
+  sy = (window_get_height() - window_get_region_height_scaled()) / 2;
 
-    // scale the mouse positions to the area on screen where we put the scaled viewports for the scaling options
-    mouse_x = (window_mouse_get_x() - sx) * ((gs_scalar)window_get_region_width() / (gs_scalar)window_get_region_width_scaled());
-    mouse_y = (window_mouse_get_y() - sy) * ((gs_scalar)window_get_region_height() / (gs_scalar)window_get_region_height_scaled());
+  // scale the mouse positions to the area on screen where we put the scaled viewports for the scaling options
+  mouse_x = (window_mouse_get_x() - sx) *
+            ((gs_scalar)window_get_region_width() / (gs_scalar)window_get_region_width_scaled());
+  mouse_y = (window_mouse_get_y() - sy) *
+            ((gs_scalar)window_get_region_height() / (gs_scalar)window_get_region_height_scaled());
 
-    if (view_enabled) {
-      for (int i = 0; i < 8; i++) {
-        if (view_visible[i]) {
-          if (mouse_x >= view_xport[i] && mouse_x < view_xport[i]+view_wport[i] &&  mouse_y >= view_yport[i] && mouse_y < view_yport[i]+view_hport[i]) {
-            mouse_x = view_xview[view_current]+((mouse_x-view_xport[view_current])/(double)view_wport[view_current])*view_wview[i];
-            mouse_y = view_yview[view_current]+((mouse_y-view_yport[view_current])/(double)view_hport[view_current])*view_hview[i];
-            return;
-          }
+  if (view_enabled) {
+    for (int i = 0; i < 8; i++) {
+      if (view_visible[i]) {
+        if (mouse_x >= view_xport[i] && mouse_x < view_xport[i] + view_wport[i] && mouse_y >= view_yport[i] &&
+            mouse_y < view_yport[i] + view_hport[i]) {
+          mouse_x = view_xview[view_current] +
+                    ((mouse_x - view_xport[view_current]) / (double)view_wport[view_current]) * view_wview[i];
+          mouse_y = view_yview[view_current] +
+                    ((mouse_y - view_yport[view_current]) / (double)view_hport[view_current]) * view_hview[i];
+          return;
         }
       }
-      mouse_x = view_xview[view_current]+((mouse_x-view_xport[view_current])/(double)view_wport[view_current])*view_wview[view_current];
-      mouse_y = view_yview[view_current]+((mouse_y-view_yport[view_current])/(double)view_hport[view_current])*view_hview[view_current];
     }
-  }
-
-  void rooms_switch()
-  {
-    if (enigma_user::room_exists(room_switching_id)) {
-      int local_room_switching_id = room_switching_id;
-      bool local_room_switching_restartgame = room_switching_restartgame;
-      room_switching_id = -1;
-      room_switching_restartgame = false;
-      enigma::roomdata[local_room_switching_id]->gotome(local_room_switching_restartgame);
-    }
-  }
-
-  void game_start() {
-    enigma::roomstruct *rit = *enigma::roomorder;
-    enigma::roomdata[rit->id]->gotome(true);
+    mouse_x = view_xview[view_current] +
+              ((mouse_x - view_xport[view_current]) / (double)view_wport[view_current]) * view_wview[view_current];
+    mouse_y = view_yview[view_current] +
+              ((mouse_y - view_yport[view_current]) / (double)view_hport[view_current]) * view_hview[view_current];
   }
 }
+
+void rooms_switch() {
+  if (enigma_user::room_exists(room_switching_id)) {
+    int local_room_switching_id = room_switching_id;
+    bool local_room_switching_restartgame = room_switching_restartgame;
+    room_switching_id = -1;
+    room_switching_restartgame = false;
+    enigma::roomdata[local_room_switching_id]->gotome(local_room_switching_restartgame);
+  }
+}
+
+void game_start() {
+  enigma::roomstruct *rit = *enigma::roomorder;
+  enigma::roomdata[rit->id]->gotome(true);
+}
+}  // namespace enigma

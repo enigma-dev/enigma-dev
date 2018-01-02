@@ -19,34 +19,32 @@
 
 #include <math.h>
 #include "Direct3D11Headers.h"
-#include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GSbackground.h"
+#include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GStextures.h"
-#include "Universal_System/nlpo2.h"
 #include "Universal_System/backgroundstruct.h"
+#include "Universal_System/nlpo2.h"
 #include "Universal_System/spritestruct.h"
 
 #ifdef DEBUG_MODE
-  #include <string>
-  #include "libEGMstd.h"
-  #include "Widget_Systems/widgets_mandatory.h"
-  #define get_background(bck2d,back)\
-    if (back < 0 or size_t(back) >= enigma::background_idmax or !enigma::backgroundstructarray[back]) {\
-      show_error("Attempting to draw non-existing background " + toString(back), false);\
-      return;\
-    }\
-    const enigma::background *const bck2d = enigma::backgroundstructarray[back];
-  #define get_backgroundnv(bck2d,back,r)\
-    if (back < 0 or size_t(back) >= enigma::background_idmax or !enigma::backgroundstructarray[back]) {\
-      show_error("Attempting to draw non-existing background " + toString(back), false);\
-      return r;\
-    }\
-    const enigma::background *const bck2d = enigma::backgroundstructarray[back];
+#include <string>
+#include "Widget_Systems/widgets_mandatory.h"
+#include "libEGMstd.h"
+#define get_background(bck2d, back)                                                                   \
+  if (back < 0 or size_t(back) >= enigma::background_idmax or !enigma::backgroundstructarray[back]) { \
+    show_error("Attempting to draw non-existing background " + toString(back), false);                \
+    return;                                                                                           \
+  }                                                                                                   \
+  const enigma::background *const bck2d = enigma::backgroundstructarray[back];
+#define get_backgroundnv(bck2d, back, r)                                                              \
+  if (back < 0 or size_t(back) >= enigma::background_idmax or !enigma::backgroundstructarray[back]) { \
+    show_error("Attempting to draw non-existing background " + toString(back), false);                \
+    return r;                                                                                         \
+  }                                                                                                   \
+  const enigma::background *const bck2d = enigma::backgroundstructarray[back];
 #else
-  #define get_background(bck2d,back)\
-    const enigma::background *const bck2d = enigma::backgroundstructarray[back];
-  #define get_backgroundnv(bck2d,back,r)\
-    const enigma::background *const bck2d = enigma::backgroundstructarray[back];
+#define get_background(bck2d, back) const enigma::background *const bck2d = enigma::backgroundstructarray[back];
+#define get_backgroundnv(bck2d, back, r) const enigma::background *const bck2d = enigma::backgroundstructarray[back];
 #endif
 
 #define __GETR(x) ((x & 0x0000FF))
@@ -54,25 +52,19 @@
 #define __GETB(x) ((x & 0xFF0000) >> 16)
 
 namespace enigma_user {
-  extern int room_width, room_height;
+extern int room_width, room_height;
 }
 namespace enigma {
-  extern size_t background_idmax;
+extern size_t background_idmax;
 }
 
-
-#include <string.h> // needed for querying ARB extensions
+#include <string.h>  // needed for querying ARB extensions
 
 #include "Bridges/General/DX11Context.h"
 #include "DX11TextureStruct.h"
 
-namespace enigma_user
-{
+namespace enigma_user {
 
-int background_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload)
-{
+int background_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload) {}
 
-}
-
-}
-
+}  // namespace enigma_user

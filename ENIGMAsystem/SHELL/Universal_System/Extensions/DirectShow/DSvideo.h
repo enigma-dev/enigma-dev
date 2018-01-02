@@ -15,30 +15,29 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-
 #include <string>
 using std::string;
 
 namespace enigma_user {
-	void action_show_video(string fname, bool windowed, bool loop);
-	int video_add(string fname);
-	void video_delete(int id);
-	bool video_exists(int id);
-	void video_start(int id, bool loop);
-	void video_pause(int id);
-	void video_stop(int id);
-	void video_set_seek(int id, long position);
-	void video_set_rate(int id, double rate);
-	void video_set_fullscreen(int id, bool fullscreen);
-	void video_set_window_region(int id, long x, long y, long w, long h);
-	void video_set_destination_region(int id, long x, long y, long w, long h);
-	void video_set_source_region(int id, long x, long y, long w, long h);
-	void video_set_scale(int id, bool scale);
-	long video_get_seek(int id);
-	double video_get_rate(int id);
-	long video_get_duration(int id);
-	long video_get_width(int id);
-	long video_get_height(int id);
-	double video_get_frame_time(int id);
-	int video_get_frame_rate(int id);
-}
+void action_show_video(string fname, bool windowed, bool loop);
+int video_add(string fname);
+void video_delete(int id);
+bool video_exists(int id);
+void video_start(int id, bool loop);
+void video_pause(int id);
+void video_stop(int id);
+void video_set_seek(int id, long position);
+void video_set_rate(int id, double rate);
+void video_set_fullscreen(int id, bool fullscreen);
+void video_set_window_region(int id, long x, long y, long w, long h);
+void video_set_destination_region(int id, long x, long y, long w, long h);
+void video_set_source_region(int id, long x, long y, long w, long h);
+void video_set_scale(int id, bool scale);
+long video_get_seek(int id);
+double video_get_rate(int id);
+long video_get_duration(int id);
+long video_get_width(int id);
+long video_get_height(int id);
+double video_get_frame_time(int id);
+int video_get_frame_rate(int id);
+}  // namespace enigma_user

@@ -18,24 +18,24 @@
 #ifndef DIRECTX11CONTEXTMANAGER
 #define DIRECTX11CONTEXTMANAGER
 
+#include <d3d11.h>
+#include <d3dcommon.h>
+#include <dxgi.h>
 #include <windows.h>
 #include <windowsx.h>
-#include <dxgi.h>
-#include <d3dcommon.h>
-#include <d3d11.h>
 #include "Graphics_Systems/Direct3D11/Direct3D11Headers.h"
 #include "Graphics_Systems/General/GSmodel.h"
 #include "Platforms/Win32/WINDOWSmain.h"
 using namespace enigma_user;
 
-#include <vector>
 #include <map>
-using std::vector;
+#include <vector>
 using std::map;
+using std::vector;
 
-#include "Widget_Systems/widgets_mandatory.h"
-#include <sstream>
 #include <string.h>
+#include <sstream>
+#include "Widget_Systems/widgets_mandatory.h"
 using std::string;
 using std::stringstream;
 
@@ -54,86 +54,72 @@ extern ID3D11RasterizerState* m_rasterState;
 //TODO: Replace the fixed function pipeline with shaders
 
 class ContextManager {
+  float last_depth;
+  int last_stride;
+  bool hasdrawn;
+  int shapes_d3d_model;
+  int shapes_d3d_texture;
 
-float last_depth;
-int last_stride;
-bool hasdrawn;
-int shapes_d3d_model;
-int shapes_d3d_texture;
+  bool renderingScene;
 
-bool renderingScene;
+ public:
+  ContextManager() {
+    hasdrawn = false;
+    shapes_d3d_model = -1;
+    shapes_d3d_texture = -1;
+    last_stride = -1;
+    last_depth = 0.0f;
+  }
 
-public :
+  ~ContextManager() {}
 
-ContextManager() {
-	hasdrawn = false;
-	shapes_d3d_model = -1;
-	shapes_d3d_texture = -1;
-	last_stride = -1;
-	last_depth = 0.0f;
-}
+  float GetDepth() { return last_depth; }
 
-~ContextManager() {
+  //TODO: Write this method so that for debugging purposes we can dump the entire render state to a text file.
+  void DumpState() {}
 
-}
+  //TODO: Write this method so that we can serialize and save the entire render state to be reloaded
+  void SaveState() {}
 
-float GetDepth() {
-	return last_depth;
-}
+  //TODO: Write this method so that we can read and restore a previously saved render state
+  void LoadState() {}
 
-//TODO: Write this method so that for debugging purposes we can dump the entire render state to a text file.
-void DumpState() {
+  // Reapply the render states and other stuff to the device.
+  void RestoreState() {}
 
-}
+  int GetShapesModel() { return shapes_d3d_model; }
 
-//TODO: Write this method so that we can serialize and save the entire render state to be reloaded
-void SaveState() {
+  void BeginShapesBatching(int texId) {
+    if (shapes_d3d_model == -1) {
+      shapes_d3d_model = d3d_model_create(true);
+      last_stride = -1;
+    } else if (texId != shapes_d3d_texture ||
+               (d3d_model_get_stride(shapes_d3d_model) != last_stride && last_stride != -1)) {
+      last_stride = -1;
+      if (!hasdrawn) {
+        d3d_model_draw(shapes_d3d_model, shapes_d3d_texture);
+        d3d_model_clear(shapes_d3d_model);
+      }
+    } else {
+      last_stride = d3d_model_get_stride(shapes_d3d_model);
+    }
+    hasdrawn = false;
+    shapes_d3d_texture = texId;
+  }
 
-}
-
-//TODO: Write this method so that we can read and restore a previously saved render state
-void LoadState() {
-
-}
-
-// Reapply the render states and other stuff to the device.
-void RestoreState() {
-
-}
-
-int GetShapesModel() {
-	return shapes_d3d_model;
-}
-
-void BeginShapesBatching(int texId) {
-	if (shapes_d3d_model == -1) {
-		shapes_d3d_model = d3d_model_create(true);
-		last_stride = -1;
-	} else if (texId != shapes_d3d_texture || (d3d_model_get_stride(shapes_d3d_model) != last_stride && last_stride != -1)) {
-		last_stride = -1;
-		if (!hasdrawn) {
-			d3d_model_draw(shapes_d3d_model, shapes_d3d_texture);
-			d3d_model_clear(shapes_d3d_model);
-		}
-	} else {
-		last_stride = d3d_model_get_stride(shapes_d3d_model);
-	}
-	hasdrawn = false;
-	shapes_d3d_texture = texId;
-}
-
-void EndShapesBatching() {
-	last_depth -= 1;
-	if (hasdrawn || shapes_d3d_model == -1) { return; }
-	hasdrawn = true;
-	d3d_model_draw(shapes_d3d_model, shapes_d3d_texture);
-	d3d_model_clear(shapes_d3d_model);
-	shapes_d3d_texture = -1;
-	last_stride = -1;
-}
-
+  void EndShapesBatching() {
+    last_depth -= 1;
+    if (hasdrawn || shapes_d3d_model == -1) {
+      return;
+    }
+    hasdrawn = true;
+    d3d_model_draw(shapes_d3d_model, shapes_d3d_texture);
+    d3d_model_clear(shapes_d3d_model);
+    shapes_d3d_texture = -1;
+    last_stride = -1;
+  }
 };
 
-extern ContextManager* d3dmgr; // point to our device manager
+extern ContextManager* d3dmgr;  // point to our device manager
 
 #endif

@@ -20,7 +20,6 @@
 
 namespace enigma {
 
-  vector<string> scope_stack;
-
+vector<string> scope_stack;
 }
 #endif

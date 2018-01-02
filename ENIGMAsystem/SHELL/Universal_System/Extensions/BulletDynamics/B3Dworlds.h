@@ -30,7 +30,7 @@ void b3d_world_add_bodyr(int id, int rigidbody);
 void b3d_world_add_bodys(int id, int softbody);
 void b3d_world_remove_bodyr(int id, int rigidbody);
 void b3d_world_remove_bodys(int id, int softbody);
-void b3d_world_update(int id, double timestep, double iterations); 
+void b3d_world_update(int id, double timestep, double iterations);
 
-}
+}  // namespace enigma_user
 #endif

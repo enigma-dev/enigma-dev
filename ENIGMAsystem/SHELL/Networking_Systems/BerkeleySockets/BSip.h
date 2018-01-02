@@ -17,4 +17,3 @@
 **/
 
 int handle_data(void *ptr, int size, int nmemb, void *stream);
-

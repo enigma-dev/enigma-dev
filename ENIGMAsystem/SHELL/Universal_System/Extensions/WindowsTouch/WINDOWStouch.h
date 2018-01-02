@@ -15,6 +15,4 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-namespace enigma_user {
-
-}
+namespace enigma_user {}

@@ -20,10 +20,9 @@
 
 #include <Box2D/Box2D.h>
 
-namespace enigma_user
-{
+namespace enigma_user {
 
-int b2d_joint_create_distance(int world, int bodya, int bodyb,  bool collide_connected = true);
+int b2d_joint_create_distance(int world, int bodya, int bodyb, bool collide_connected = true);
 int b2d_joint_create_revolute(int world, int bodya, int bodyb, bool limit, double lower, double upper);
 int b2d_joint_create_prismatic(int world);
 int b2d_joint_create_pulley(int world);
@@ -34,7 +33,6 @@ void b2d_joint_delete(int id);
 void b2d_joint_set_target(int id, double x, double y);
 void b2d_joint_enable_motor(int id);
 
-}
+}  // namespace enigma_user
 
-#endif // ENIGMA_B2D_JOINTS__H
-
+#endif  // ENIGMA_B2D_JOINTS__H

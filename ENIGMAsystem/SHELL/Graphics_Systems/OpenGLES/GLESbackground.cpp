@@ -16,17 +16,17 @@
 **/
 
 #include <math.h>
+#include "../General/GSbackground.h"
 #include "OpenGLHeaders.h"
 #include "Universal_System/backgroundstruct.h"
-#include "../General/GSbackground.h"
 
 #define __GETR(x) ((x & 0x0000FF))
 #define __GETG(x) ((x & 0x00FF00) >> 8)
 #define __GETB(x) ((x & 0xFF0000) >> 16)
 
 extern int room_width, room_height;
-namespace enigma{extern unsigned bound_texture;}
-
-namespace enigma_user {
-
+namespace enigma {
+extern unsigned bound_texture;
 }
+
+namespace enigma_user {}

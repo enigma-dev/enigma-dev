@@ -19,48 +19,38 @@
 using std::string;
 
 namespace enigma_user {
-    string MCI_command(string str);
-	void cd_open_door();
-    void cd_close_door();
-    void cd_init();
-    unsigned long cd_length();
-    unsigned cd_number();
-    void cd_play(unsigned first, unsigned last);
-    void cd_pause();
-	void cd_resume();
-	void cd_stop();
-    bool cd_paused();
-    bool cd_playing();
-    bool cd_present();
-	unsigned long cd_position();
-    void cd_set_position(unsigned long pos);
-    void cd_set_track_position(unsigned long pos);
-    unsigned cd_track();
-    unsigned long cd_track_length(unsigned n);
-    unsigned long cd_track_position();
-	
-	inline void action_cd_play(unsigned first, unsigned last) {
-		cd_init(); // needs to be called once in a while and at least once otherwise pause and stop and seeking and tracks are all wrong
-		cd_play(first, last);
-	}
-	
-	inline void action_cd_stop() {
-		cd_stop();
-	}
-	
-	inline void action_cd_pause() {
-		cd_pause();
-	}
-	
-	inline void action_cd_resume() {
-		cd_resume();
-	}
-	
-	inline bool action_cd_present() {
-		return cd_present();
-	}
-	
-	inline bool action_cd_playing() {
-		return cd_playing();
-	}
+string MCI_command(string str);
+void cd_open_door();
+void cd_close_door();
+void cd_init();
+unsigned long cd_length();
+unsigned cd_number();
+void cd_play(unsigned first, unsigned last);
+void cd_pause();
+void cd_resume();
+void cd_stop();
+bool cd_paused();
+bool cd_playing();
+bool cd_present();
+unsigned long cd_position();
+void cd_set_position(unsigned long pos);
+void cd_set_track_position(unsigned long pos);
+unsigned cd_track();
+unsigned long cd_track_length(unsigned n);
+unsigned long cd_track_position();
+
+inline void action_cd_play(unsigned first, unsigned last) {
+  cd_init();  // needs to be called once in a while and at least once otherwise pause and stop and seeking and tracks are all wrong
+  cd_play(first, last);
 }
+
+inline void action_cd_stop() { cd_stop(); }
+
+inline void action_cd_pause() { cd_pause(); }
+
+inline void action_cd_resume() { cd_resume(); }
+
+inline bool action_cd_present() { return cd_present(); }
+
+inline bool action_cd_playing() { return cd_playing(); }
+}  // namespace enigma_user

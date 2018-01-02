@@ -24,38 +24,38 @@
 #ifndef _timelines_object_h
 #define _timelines_object_h
 
-#include <vector>
 #include <map>
+#include <vector>
 
 #include "planar_object.h"
-#include "var4.h"
 #include "scalar.h"
+#include "var4.h"
 
-namespace enigma
-{
-  struct object_timelines : object_planar
-  {
-    //Used as a global lookup for timeline moments. Filled at runtime.
-    //vector is indexed by timeline_id. map::key is moment_time; map::value is moment_id
-    static std::vector< std::map<int, int> > timeline_moments_maps;
+namespace enigma {
+struct object_timelines : object_planar {
+  //Used as a global lookup for timeline moments. Filled at runtime.
+  //vector is indexed by timeline_id. map::key is moment_time; map::value is moment_id
+  static std::vector<std::map<int, int> > timeline_moments_maps;
 
-    //Timeline properties.
-    int timeline_index;    //-1 means "no timeline running"
-    bool timeline_running; //True if running, False if not. Setting to True again will continue execution; it's more like a "pause" button.
-    gs_scalar timeline_speed; //Can be set to fractions, negative, zero, etc. Defaults to 1.
-    gs_scalar timeline_position; //How far along "time" is in this timeline. Bounded by [0,lastMoment)
-    bool timeline_loop; //Allows looping from lastMoment->0 and vice versa. 
+  //Timeline properties.
+  int timeline_index;  //-1 means "no timeline running"
+  bool
+      timeline_running;  //True if running, False if not. Setting to True again will continue execution; it's more like a "pause" button.
+  gs_scalar timeline_speed;     //Can be set to fractions, negative, zero, etc. Defaults to 1.
+  gs_scalar timeline_position;  //How far along "time" is in this timeline. Bounded by [0,lastMoment)
+  bool timeline_loop;           //Allows looping from lastMoment->0 and vice versa.
 
-    //Constructors
-    object_timelines();
-    object_timelines(unsigned x, int y);
-    virtual ~object_timelines();
+  //Constructors
+  object_timelines();
+  object_timelines(unsigned x, int y);
+  virtual ~object_timelines();
 
-    //Object-local timelines functionality.
-    void advance_curr_timeline();
-    void loop_curr_timeline();
-    virtual void timeline_call_moment_script(int timeline_index, int moment_index) {} //This will be provided by the object_locals subclass in compiled code.
-  };
-}
+  //Object-local timelines functionality.
+  void advance_curr_timeline();
+  void loop_curr_timeline();
+  virtual void timeline_call_moment_script(int timeline_index, int moment_index) {
+  }  //This will be provided by the object_locals subclass in compiled code.
+};
+}  // namespace enigma
 
-#endif //_timelines_object_h
+#endif  //_timelines_object_h

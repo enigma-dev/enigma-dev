@@ -30,21 +30,18 @@
 
 #include "PS_particle_enums.h"
 
-namespace enigma
-{
-  struct particle_destroyer
-  {
-    double xmin, xmax, ymin, ymax;
-    ps_shape shape;
+namespace enigma {
+struct particle_destroyer {
+  double xmin, xmax, ymin, ymax;
+  ps_shape shape;
 
-    void initialize();
-    void clear_particle_destroyer();
-    void set_region(double xmin, double xmax, double ymin, double ymax, ps_shape shape);
-    bool is_inside(double x, double y);
-  };
+  void initialize();
+  void clear_particle_destroyer();
+  void set_region(double xmin, double xmax, double ymin, double ymax, ps_shape shape);
+  bool is_inside(double x, double y);
+};
 
-  particle_destroyer* create_particle_destroyer();
-}
+particle_destroyer* create_particle_destroyer();
+}  // namespace enigma
 
-#endif // ENIGMA_PS_PARTICLEDESTROYER
-
+#endif  // ENIGMA_PS_PARTICLEDESTROYER

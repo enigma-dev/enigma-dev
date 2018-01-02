@@ -38,7 +38,7 @@ double FMODSoundGetLength(double sound);
 double FMODMasterSetVolume(double volume);
 double FMODGroupSetVolume(double group, double volume);
 double FMODSoundSetGroup(double sound, double group);
-double FMODGroupSetPitch(double group,double vol);
+double FMODGroupSetPitch(double group, double vol);
 
 double FMODInstanceSetPitch(double instance, double pitch);
 double FMODInstanceStop(double instance);
@@ -49,25 +49,10 @@ double FMODInstanceGetPosition(double instance);
 double FMODInstanceSetPosition(double instance, double p);
 double FMODInstanceSetPan(double instance, double p);
 double FMODInstanceGetPan(double instance);
-double FMODInstanceSetSpeakerMix(double instance,
-  double  frontleft,
-  double  frontright,
-  double  center,
-  double  lfe,
-  double  backleft,
-  double  backright,
-  double  sideleft,
-  double  sideright);
-double FMODInstanceGetSpeakerMix(double instance,
-  float *  frontleft,
-  float *  frontright,
-  float *  center,
-  float *  lfe,
-  float *  backleft,
-  float *  backright,
-  float *  sideleft,
-  float *  sideright);
-
+double FMODInstanceSetSpeakerMix(double instance, double frontleft, double frontright, double center, double lfe,
+                                 double backleft, double backright, double sideleft, double sideright);
+double FMODInstanceGetSpeakerMix(double instance, float* frontleft, float* frontright, float* center, float* lfe,
+                                 float* backleft, float* backright, float* sideleft, float* sideright);
 
 double FMODInstanceSetVolume(double instance, double volume);
 double FMODInstanceAddEffect(double instance, double effect);

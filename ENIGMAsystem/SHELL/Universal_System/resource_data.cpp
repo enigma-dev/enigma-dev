@@ -25,62 +25,87 @@
 **                                                                              **
 \********************************************************************************/
 
+#include "resource_data.h"
 #include <map>
 #include "var4.h"
-#include "resource_data.h"
 using namespace std;
 
-static map<string,int> resources;
-namespace enigma
-{
-  extern size_t script_idmax;
-  void map_resource_ids(nameid_pair* n)
-  {
-    for (nameid_pair* i = n; i->id != -1; i++)
-    {
-      //TODO: IMPLEMENT
-    }
+static map<string, int> resources;
+namespace enigma {
+extern size_t script_idmax;
+void map_resource_ids(nameid_pair* n) {
+  for (nameid_pair* i = n; i->id != -1; i++) {
+    //TODO: IMPLEMENT
+  }
+}
+}  // namespace enigma
+
+namespace enigma_user {
+
+int resource_get_id(string name) { return -1; }
+
+variant script_execute(int scr, variant arg0, variant arg1, variant arg2, variant arg3, variant arg4, variant arg5,
+                       variant arg6, variant arg7, variant arg8, variant arg9, variant arg10, variant arg11,
+                       variant arg12, variant arg13, variant arg14, variant arg15) {
+  enigma::callable_script& i = enigma::callable_scripts[scr];
+  switch (i.argnum) {
+    case 0:
+      return ((variant(*)())i.base)();
+    case 1:
+      return ((variant(*)(variant))i.base)(arg0);
+    case 2:
+      return ((variant(*)(variant, variant))i.base)(arg0, arg1);
+    case 3:
+      return ((variant(*)(variant, variant, variant))i.base)(arg0, arg1, arg2);
+    case 4:
+      return ((variant(*)(variant, variant, variant, variant))i.base)(arg0, arg1, arg2, arg3);
+    case 5:
+      return ((variant(*)(variant, variant, variant, variant, variant))i.base)(arg0, arg1, arg2, arg3, arg4);
+    case 6:
+      return ((variant(*)(variant, variant, variant, variant, variant, variant))i.base)(arg0, arg1, arg2, arg3, arg4,
+                                                                                        arg5);
+    case 7:
+      return ((variant(*)(variant, variant, variant, variant, variant, variant, variant))i.base)(arg0, arg1, arg2, arg3,
+                                                                                                 arg4, arg5, arg6);
+    case 8:
+      return ((variant(*)(variant, variant, variant, variant, variant, variant, variant, variant))i.base)(
+          arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+    case 9:
+      return ((variant(*)(variant, variant, variant, variant, variant, variant, variant, variant, variant))i.base)(
+          arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
+    case 10:
+      return ((variant(*)(variant, variant, variant, variant, variant, variant, variant, variant, variant,
+                          variant))i.base)(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
+    case 11:
+      return ((variant(*)(variant, variant, variant, variant, variant, variant, variant, variant, variant, variant,
+                          variant))i.base)(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10);
+    case 12:
+      return ((variant(*)(variant, variant, variant, variant, variant, variant, variant, variant, variant, variant,
+                          variant, variant))i.base)(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10,
+                                                    arg11);
+    case 13:
+      return ((variant(*)(variant, variant, variant, variant, variant, variant, variant, variant, variant, variant,
+                          variant, variant, variant))i.base)(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9,
+                                                             arg10, arg11, arg12);
+    case 14:
+      return ((variant(*)(variant, variant, variant, variant, variant, variant, variant, variant, variant, variant,
+                          variant, variant, variant, variant))i.base)(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7,
+                                                                      arg8, arg9, arg10, arg11, arg12, arg13);
+    case 15:
+      return ((variant(*)(variant, variant, variant, variant, variant, variant, variant, variant, variant, variant,
+                          variant, variant, variant, variant, variant))i.base)(
+          arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14);
+    case 16:
+      return ((variant(*)(variant, variant, variant, variant, variant, variant, variant, variant, variant, variant,
+                          variant, variant, variant, variant, variant, variant))i.base)(
+          arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14, arg15);
+    default:
+      return 0;
   }
 }
 
-namespace enigma_user
-{
-
-int resource_get_id(string name)
-{
-  return -1;
+bool script_exists(int script) {
+  return (script >= 0 && script < enigma::script_idmax && bool(enigma::callable_scripts[script].base));
 }
 
-variant script_execute(int scr, variant arg0, variant arg1, variant arg2, variant arg3, variant arg4, variant arg5, variant arg6, variant arg7, variant arg8, variant arg9, variant arg10, variant arg11, variant arg12, variant arg13, variant arg14, variant arg15)
-{
-  enigma::callable_script &i = enigma::callable_scripts[scr];
-  switch (i.argnum)
-  {
-    case 0:  return ((variant(*)())i.base)                                                                                                                                  ();
-    case 1:  return ((variant(*)(variant))i.base)                                                                                                                           (arg0);
-    case 2:  return ((variant(*)(variant,variant))i.base)                                                                                                                   (arg0,arg1);
-    case 3:  return ((variant(*)(variant,variant,variant))i.base)                                                                                                           (arg0,arg1,arg2);
-    case 4:  return ((variant(*)(variant,variant,variant,variant))i.base)                                                                                                   (arg0,arg1,arg2,arg3);
-    case 5:  return ((variant(*)(variant,variant,variant,variant,variant))i.base)                                                                                           (arg0,arg1,arg2,arg3,arg4);
-    case 6:  return ((variant(*)(variant,variant,variant,variant,variant,variant))i.base)                                                                                   (arg0,arg1,arg2,arg3,arg4,arg5);
-    case 7:  return ((variant(*)(variant,variant,variant,variant,variant,variant,variant))i.base)                                                                           (arg0,arg1,arg2,arg3,arg4,arg5,arg6);
-    case 8:  return ((variant(*)(variant,variant,variant,variant,variant,variant,variant,variant))i.base)                                                                   (arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7);
-    case 9:  return ((variant(*)(variant,variant,variant,variant,variant,variant,variant,variant,variant))i.base)                                                           (arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8);
-    case 10: return ((variant(*)(variant,variant,variant,variant,variant,variant,variant,variant,variant,variant))i.base)                                                   (arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9);
-    case 11: return ((variant(*)(variant,variant,variant,variant,variant,variant,variant,variant,variant,variant,variant))i.base)                                           (arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10);
-    case 12: return ((variant(*)(variant,variant,variant,variant,variant,variant,variant,variant,variant,variant,variant,variant))i.base)                                   (arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10,arg11);
-    case 13: return ((variant(*)(variant,variant,variant,variant,variant,variant,variant,variant,variant,variant,variant,variant,variant))i.base)                           (arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10,arg11,arg12);
-    case 14: return ((variant(*)(variant,variant,variant,variant,variant,variant,variant,variant,variant,variant,variant,variant,variant,variant))i.base)                   (arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10,arg11,arg12,arg13);
-    case 15: return ((variant(*)(variant,variant,variant,variant,variant,variant,variant,variant,variant,variant,variant,variant,variant,variant,variant))i.base)           (arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10,arg11,arg12,arg13,arg14);
-    case 16: return ((variant(*)(variant,variant,variant,variant,variant,variant,variant,variant,variant,variant,variant,variant,variant,variant,variant,variant))i.base)   (arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,arg10,arg11,arg12,arg13,arg14,arg15);
-    default: return 0;
-  }
-}
-
-bool script_exists(int script)
-{
-    return (script >= 0 && script < enigma::script_idmax && bool(enigma::callable_scripts[script].base));
-}
-
-}
-
+}  // namespace enigma_user

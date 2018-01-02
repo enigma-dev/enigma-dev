@@ -28,8 +28,6 @@
 #import <Cocoa/Cocoa.h>
 #import "EnigmaXcodeAppDelegate.h"
 
-
-
 extern EnigmaXcodeAppDelegate* delegate;
-extern NSPoint mouse; 
-extern int cocoa_mouse_x,cocoa_mouse_y;
+extern NSPoint mouse;
+extern int cocoa_mouse_x, cocoa_mouse_y;

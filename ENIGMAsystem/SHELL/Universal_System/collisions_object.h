@@ -36,35 +36,33 @@
 #include "transform_object.h"
 
 struct bbox_rect_t;
-namespace enigma
-{
-  struct object_collisions: object_transform
-  {
-    //Bit Mask
-      int  mask_index;
-      bool solid;
-    
-    //Bounding box
-      #ifdef JUST_DEFINE_IT_RUN
-        int bbox_left, bbox_right, bbox_top, bbox_bottom;
-      #else
-        int $bbox_left()   const;
-        int $bbox_right()  const;
-        int $bbox_top()    const;
-        int $bbox_bottom() const;
-        const bbox_rect_t& $bbox_relative() const;
-        const bbox_rect_t& $bbox() const;
-        #define bbox_left   $bbox_left()
-        #define bbox_right  $bbox_right()
-        #define bbox_top    $bbox_top()
-        #define bbox_bottom $bbox_bottom()
-      #endif
-    
-    //Constructors
-      object_collisions();
-      object_collisions(unsigned, int);
-      virtual ~object_collisions();
-  };
-}
+namespace enigma {
+struct object_collisions : object_transform {
+  //Bit Mask
+  int mask_index;
+  bool solid;
+
+  //Bounding box
+#ifdef JUST_DEFINE_IT_RUN
+  int bbox_left, bbox_right, bbox_top, bbox_bottom;
+#else
+  int $bbox_left() const;
+  int $bbox_right() const;
+  int $bbox_top() const;
+  int $bbox_bottom() const;
+  const bbox_rect_t& $bbox_relative() const;
+  const bbox_rect_t& $bbox() const;
+#define bbox_left $bbox_left()
+#define bbox_right $bbox_right()
+#define bbox_top $bbox_top()
+#define bbox_bottom $bbox_bottom()
+#endif
+
+  //Constructors
+  object_collisions();
+  object_collisions(unsigned, int);
+  virtual ~object_collisions();
+};
+}  // namespace enigma
 
 #endif

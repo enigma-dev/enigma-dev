@@ -16,57 +16,52 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
-#include <string>
 #include <cstdio>
-#include "../General/GStextures.h"
+#include <string>
 #include "../General/GSbackground.h"
-#include "../General/GSscreen.h"
+#include "../General/GScolors.h"
 #include "../General/GSd3d.h"
 #include "../General/GSmatrix.h"
-#include "../General/GScolors.h"
+#include "../General/GSscreen.h"
+#include "../General/GStextures.h"
 
 using namespace std;
 
-#include "Universal_System/image_formats.h"
 #include "Universal_System/backgroundstruct.h"
-#include "Universal_System/var4.h"
 #include "Universal_System/estring.h"
+#include "Universal_System/image_formats.h"
+#include "Universal_System/var4.h"
 
 #define __GETR(x) (((unsigned int)x & 0x0000FF))
 #define __GETG(x) (((unsigned int)x & 0x00FF00) >> 8)
 #define __GETB(x) (((unsigned int)x & 0xFF0000) >> 16)
 
-#include "Universal_System/roomsystem.h"
-#include "Universal_System/instance_system.h"
-#include "Universal_System/graphics_object.h"
-#include "Universal_System/depth_draw.h"
-#include "Platforms/platforms_mandatory.h"
-#include "Graphics_Systems/graphics_mandatory.h"
 #include <limits>
+#include "Graphics_Systems/graphics_mandatory.h"
+#include "Platforms/platforms_mandatory.h"
+#include "Universal_System/depth_draw.h"
+#include "Universal_System/graphics_object.h"
+#include "Universal_System/instance_system.h"
+#include "Universal_System/roomsystem.h"
 
 using namespace enigma;
 using namespace enigma_user;
 namespace enigma_user {
-  extern int window_get_width();
-  extern int window_get_height();
-  extern int window_get_region_width();
-  extern int window_get_region_height();
-}
+extern int window_get_width();
+extern int window_get_height();
+extern int window_get_region_width();
+extern int window_get_region_height();
+}  // namespace enigma_user
 
-namespace enigma
-{
-	extern bool d3dMode;
-	extern int d3dCulling;
-	particles_implementation* particles_impl;
-	void set_particles_implementation(particles_implementation* part_impl)
-	{
-			particles_impl = part_impl;
-	}
-}
+namespace enigma {
+extern bool d3dMode;
+extern int d3dCulling;
+particles_implementation* particles_impl;
+void set_particles_implementation(particles_implementation* part_impl) { particles_impl = part_impl; }
+}  // namespace enigma
 
-
-static inline void draw_back(){}
-static inline void draw_insts(){}
-static inline int draw_tiles(){return 0;}
-void clear_view(float x, float y, float w, float h, float angle, bool showcolor){}
-static inline void draw_gui(){}
+static inline void draw_back() {}
+static inline void draw_insts() {}
+static inline int draw_tiles() { return 0; }
+void clear_view(float x, float y, float w, float h, float angle, bool showcolor) {}
+static inline void draw_gui() {}

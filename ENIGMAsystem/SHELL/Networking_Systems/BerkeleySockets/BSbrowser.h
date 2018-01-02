@@ -56,6 +56,6 @@ void net_ftp_close(int in);
 //This method handles the packets and headers for you
 string net_http(string host, string loc);
 
-}
+}  // namespace enigma_user
 
-#endif // ENIGMA_BSBROWSER_H
+#endif  // ENIGMA_BSBROWSER_H

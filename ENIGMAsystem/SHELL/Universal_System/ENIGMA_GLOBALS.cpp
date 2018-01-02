@@ -28,9 +28,8 @@
 /*************************************************************
 ENIGMA Global Variables
 **********************/
-namespace enigma
-{
-  int nodestroy = 0; //Signals not to perform the destroy event in a destructor
+namespace enigma {
+int nodestroy = 0;  //Signals not to perform the destroy event in a destructor
 }
 /*************************
 End ENIGMA Global Variables

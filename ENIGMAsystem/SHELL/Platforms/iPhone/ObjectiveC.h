@@ -28,7 +28,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-	int mainO(int argc, char *argv[]);
+int mainO(int argc, char *argv[]);
 #ifdef __cplusplus
 }
 #endif

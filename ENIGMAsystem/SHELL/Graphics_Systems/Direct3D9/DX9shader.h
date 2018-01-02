@@ -18,14 +18,9 @@
 #ifndef _DX9SHADER__H
 #define _DX9SHADER__H
 
-namespace enigma_user
-{
+namespace enigma_user {
 
-enum {
-  sh_unknown = 0,
-  sh_vertex = 1,
-  sh_pixel = 2
-};
+enum { sh_unknown = 0, sh_vertex = 1, sh_pixel = 2 };
 
 int hlsl_shader_create(int type);
 int hlsl_shader_load(int id, string fname);
@@ -35,6 +30,6 @@ void hlsl_shader_use(int id);
 void hlsl_shader_reset();
 void hlsl_shader_free(int id);
 
-}
+}  // namespace enigma_user
 
 #endif

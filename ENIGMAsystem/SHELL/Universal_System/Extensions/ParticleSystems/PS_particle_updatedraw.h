@@ -30,11 +30,9 @@
 
 #include <set>
 
-namespace enigma
-{
-  // Should be called whenever effects or particle systems are created.
-  void initialize_particle_systems_drawing();
-}
+namespace enigma {
+// Should be called whenever effects or particle systems are created.
+void initialize_particle_systems_drawing();
+}  // namespace enigma
 
-#endif // ENIGMA_PS_PARTICLEUPDATEDRAW
-
+#endif  // ENIGMA_PS_PARTICLEUPDATEDRAW

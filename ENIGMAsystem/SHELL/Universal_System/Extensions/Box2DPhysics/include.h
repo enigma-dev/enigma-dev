@@ -31,6 +31,5 @@
 #include "B2Dshapes.h"
 
 namespace enigma {
-  void box2dphysics_update();
+void box2dphysics_update();
 }
-

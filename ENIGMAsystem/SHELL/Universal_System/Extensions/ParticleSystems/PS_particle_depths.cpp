@@ -27,8 +27,6 @@
 
 #include "PS_particle_depths.h"
 
-namespace enigma
-{
-  std::map<double,particle_depth_layer> negated_particle_depths;
+namespace enigma {
+std::map<double, particle_depth_layer> negated_particle_depths;
 }
-

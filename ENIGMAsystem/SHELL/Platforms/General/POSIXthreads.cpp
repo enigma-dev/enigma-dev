@@ -16,24 +16,25 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Universal_System/var4.h"
-#include "Universal_System/resource_data.h"
 #include "PFthreads.h"
+#include "Universal_System/resource_data.h"
+#include "Universal_System/var4.h"
 
 std::deque<ethread*> threads;
 
 static void* thread_script_func(void* data) {
   const scrtdata* const md = (scrtdata*)data;
-  md->mt->ret = enigma_user::script_execute(md->scr,md->args[0],md->args[1],md->args[2],md->args[3],md->args[4],md->args[5],md->args[6],md->args[7]);
+  md->mt->ret = enigma_user::script_execute(md->scr, md->args[0], md->args[1], md->args[2], md->args[3], md->args[4],
+                                            md->args[5], md->args[6], md->args[7]);
   md->mt->active = false;
   return NULL;
 }
 
-namespace enigma_user
-{
+namespace enigma_user {
 
-int script_thread(int scr,variant arg0, variant arg1, variant arg2, variant arg3, variant arg4, variant arg5, variant arg6, variant arg7) {
-  int thread = thread_create_script(scr,arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7);
+int script_thread(int scr, variant arg0, variant arg1, variant arg2, variant arg3, variant arg4, variant arg5,
+                  variant arg6, variant arg7) {
+  int thread = thread_create_script(scr, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
   int res = thread_start(thread);
   if (res != 0) {
     thread_delete(thread);
@@ -42,17 +43,19 @@ int script_thread(int scr,variant arg0, variant arg1, variant arg2, variant arg3
   return thread;
 }
 
-int thread_create_script(int scr,variant arg0, variant arg1, variant arg2, variant arg3, variant arg4, variant arg5, variant arg6, variant arg7)
-{
+int thread_create_script(int scr, variant arg0, variant arg1, variant arg2, variant arg3, variant arg4, variant arg5,
+                         variant arg6, variant arg7) {
   ethread* newthread = new ethread();
-  variant args[] = {arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7};
+  variant args[] = {arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7};
   newthread->sd = new scrtdata(scr, args, newthread);
   threads.push_back(newthread);
   return threads.size() - 1;
 }
 
 int thread_start(int thread) {
-  if (threads[thread]->active) { return -1; }
+  if (threads[thread]->active) {
+    return -1;
+  }
   if (pthread_create(&threads[thread]->handle, NULL, thread_script_func, threads[thread]->sd)) {
     return -2;
   }
@@ -60,25 +63,19 @@ int thread_start(int thread) {
   return 0;
 }
 
-void thread_join(int thread) {
-  pthread_join(threads[thread]->handle, NULL);
-}
+void thread_join(int thread) { pthread_join(threads[thread]->handle, NULL); }
 
 void thread_delete(int thread) {
-  if (threads[thread]->active) { return; }
+  if (threads[thread]->active) {
+    return;
+  }
   delete threads[thread];
 }
 
-bool thread_exists(int thread) {
-  return threads[thread] != NULL;
-}
+bool thread_exists(int thread) { return threads[thread] != NULL; }
 
-bool thread_get_finished(int thread) {
-  return !threads[thread]->active;
-}
+bool thread_get_finished(int thread) { return !threads[thread]->active; }
 
-variant thread_get_return(int thread) {
-  return threads[thread]->ret;
-}
+variant thread_get_return(int thread) { return threads[thread]->ret; }
 
-}
+}  // namespace enigma_user

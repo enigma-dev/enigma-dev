@@ -29,25 +29,15 @@
 #include <iostream>
 using namespace std;
 
+int main(int argc, char** argv) {
+  enigma::parameters = new char*[argc];
+  for (int i = 0; i < argc; i++) enigma::parameters[i] = argv[i];
 
-int main(int argc,char** argv)
-{
-	enigma::parameters=new char* [argc];
-	for (int i=0; i<argc; i++)
-		enigma::parameters[i]=argv[i];
-	
-	
-	return mainO(argc, argv);
+  return mainO(argc, argv);
 }
 
-int parameter_count(){
+int parameter_count() {}
 
-}
+string parameter_string(int n) {}
 
-string parameter_string(int n) {
-
-}
-
-string environment_get_variable(string name) {
-
-}
+string environment_get_variable(string name) {}
