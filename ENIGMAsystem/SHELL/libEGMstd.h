@@ -52,4 +52,6 @@ std::string toString(const struct variant&);
 
 }  // namespace enigma_user
 
+using enigma_user::toString; // TODO: Factor out
+
 #endif  //ENIGMA_LIBEGMSTD_H
