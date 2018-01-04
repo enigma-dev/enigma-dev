@@ -17,11 +17,11 @@ searchdirs-start: "#include <...> search starts here:"
 searchdirs-end: "End of search list."
 resources: ./MacOS/build/Release/EnigmaXcode.app/Contents/MacOS/EnigmaXcode.rescppflags: -Wall -O3
 cxxflags: -Wno-missing-declarations -Wno-parentheses-equality
-cxxflags: -I/opt/X11/include/
+cxxflags: -I/opt/X11/include/ -std=c++11
 cflags: -Wall -O3
 links: -lz -framework Cocoa
 
 Build-Extension: .app
 Run-output: ./MacOS/build/Release/EnigmaXcode.app/Contents/MacOS/EnigmaXcode
-Run-Program: open ./MacOS/build/Release/EnigmaXcode.app/Contents/MacOS/EnigmaXcode
+Run-Program: open "$game"
 Run-Params:

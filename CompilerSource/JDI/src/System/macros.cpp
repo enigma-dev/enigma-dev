@@ -153,7 +153,7 @@ inline void jdip::macro_function::preparse(string val, error_handler *herr)
         value.push_back(mv_chunk(val.c_str(), push_from, i-push_from)); // Push it onto our value
       while (is_useless_macros(val[++i]));
       push_from = i; // Store current position just in case something stupid happens
-      if (!is_letter(val[i])) { herr->error("Expected parameter name following '#' token; `" + val + "'[" + ::toString(i) + "] is not a valid identifier character"); continue; }
+      if (!is_letter(val[i])) { herr->error("Expected parameter name following '#' token; `" + val + "'[" + ::toString((int)i) + "] is not a valid identifier character"); continue; }
       const size_t asi = i;
       while (is_letterd(val[++i]));
       map<string,int>::iterator pi = parameters.find(val.substr(asi,i-asi));
@@ -195,7 +195,7 @@ bool macro_function::parse(vector<string> &arg_list, char* &dest, char* &destend
 {
   if (arg_list.size() < args.size()) {
     if (arg_list.size() + 1 < args.size())
-      return errtok.report_error(herr, "Too few arguments to macro function `" + name + "': provided " + ::toString(arg_list.size()) + ", requested " + ::toString(args.size())), false;
+      return errtok.report_error(herr, "Too few arguments to macro function `" + name + "': provided " + ::toString((int)arg_list.size()) + ", requested " + ::toString((int)args.size())), false;
     arg_list.push_back("");
   }
   else if ((arg_list.size() > args.size() and args.size() == (unsigned)argc))
