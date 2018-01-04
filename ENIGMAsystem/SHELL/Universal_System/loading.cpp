@@ -17,7 +17,7 @@
 **/
 
 #include "resinit.h"
-#include "spritestruct.h"
+#include "sprites_internal.h"
 #include "background_internal.h"
 #include "roomsystem.h"
 #include "object.h"

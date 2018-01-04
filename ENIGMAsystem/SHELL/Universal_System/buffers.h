@@ -22,8 +22,7 @@
 
 #include <string>
 
-namespace enigma_user
-{
+namespace enigma_user {
 // Other buffer constants
 enum {
   buffer_generalerror,
@@ -34,26 +33,13 @@ enum {
 };
 
 // Buffer surface constants
-enum {
-  buffer_surface_copy,
-  buffer_surface_grayscale,
-  buffer_surface_mask
-};
+enum { buffer_surface_copy, buffer_surface_grayscale, buffer_surface_mask };
 
 // Buffer seek base
-enum {
-  buffer_seek_start = 0,
-  buffer_seek_relative = 1,
-  buffer_seek_end = 2
-};
+enum { buffer_seek_start = 0, buffer_seek_relative = 1, buffer_seek_end = 2 };
 
 // Buffer types
-enum {
-  buffer_fixed = 0,
-  buffer_grow = 1,
-  buffer_wrap = 2,
-  buffer_fast = 3
-};
+enum { buffer_fixed = 0, buffer_grow = 1, buffer_wrap = 2, buffer_fast = 3 };
 
 // Buffer data types
 enum {
@@ -102,6 +88,6 @@ void buffer_write(int buffer, int type, variant value);
 void game_save_buffer(int buffer);
 void game_load_buffer(int buffer);
 
-} //namespace enigma_user
+}  //namespace enigma_user
 
-#endif //ENIGMA_BUFFERS_H
+#endif  //ENIGMA_BUFFERS_H

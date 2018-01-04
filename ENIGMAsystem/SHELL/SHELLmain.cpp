@@ -36,7 +36,7 @@
 #include "Universal_System/terminal_io.h"
 
 #include "Universal_System/background.h"
-#include "Universal_System/spritestruct.h"
+#include "Universal_System/sprites.h"
 #include "Universal_System/fonts.h"
 #include "Universal_System/texture_atlas.h"
 

@@ -1,4 +1,4 @@
-/** Copyright (C) 2008 Josh Ventura
+/** Copyright (C) 2015 Harijs Grinbergs
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -16,28 +16,28 @@
 **/
 
 #ifdef INCLUDED_FROM_SHELLMAIN
-#error This file is high-impact and should not be included from SHELLmain.cpp.
+#error This file includes non-ENIGMA STL headers and should not be included from SHELLmain.
 #endif
 
-#ifndef ENIGMA_INSTANCE_SYSTEM_H
-#define ENIGMA_INSTANCE_SYSTEM_H
+#ifndef ENIGMA_TEXTUREATLAS_INTERNAL_H
+#define ENIGMA_TEXTUREATLAS_INTERNAL_H
 
-#include "instance_iterator.h"
-#include "object.h"
-#include "reflexive_types.h"
-#include "var4.h"
-
-#include <map>
-#include <set>
+#include <unordered_map>
+#include <vector>
 
 namespace enigma {
+struct texture_element {
+  int id, type;  //type 0 - sprite, 1 - background, 2 - font
+  texture_element(int id, int type) : id(id), type(type){};
+};
 
-typedef std::map<int, inst_iter*>::iterator instance_list_iterator;
-extern std::map<int, inst_iter*> instance_list;
-extern std::map<int, object_basic*> instance_deactivated_list;
-extern std::set<object_basic*> cleanups;
-void unlink_main(instance_list_iterator who);
+struct texture_atlas {
+  int width, height, texture;
+  std::vector<texture_element> textures;
+};
 
+extern std::unordered_map<unsigned int, texture_atlas> texture_atlas_array;
+bool textures_pack(int ta, bool free_textures = true);
 }  //namespace enigma
 
-#endif  //ENIGMA_INSTANCE_SYSTEM_H
+#endif  //ENIGMA_TEXTUREATLAS_INTERNAL_H

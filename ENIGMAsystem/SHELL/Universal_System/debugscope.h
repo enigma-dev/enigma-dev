@@ -22,18 +22,16 @@
 
 #include <string>
 
-namespace enigma 
-{
-  
-struct debug_scope { 
+namespace enigma {
 
+struct debug_scope {
   debug_scope(std::string x);
   ~debug_scope();
   static std::string GetErrors();
 };
 
-} //namespace enigma
+}  //namespace enigma
 
-#endif //DEBUG_MODE
+#endif  //DEBUG_MODE
 
-#endif //DEBUG_SCOPE_H
+#endif  //DEBUG_SCOPE_H

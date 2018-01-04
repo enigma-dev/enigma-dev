@@ -22,8 +22,7 @@
 
 #include <string>
 
-namespace enigma_user
-{
+namespace enigma_user {
 
 std::string base64_encode(std::string const& str);
 std::string base64_decode(std::string const& str);
@@ -44,20 +43,20 @@ size_t string_length_utf8(const char* str);
 size_t string_pos(std::string substr, std::string str);
 
 std::string string_format(double val, unsigned tot, unsigned dec);
-std::string string_copy(std::string str, int index,int count);
+std::string string_copy(std::string str, int index, int count);
 std::string string_set_byte_at(std::string str, int pos, char byte);
 char string_byte_at(std::string str, int index);
-std::string string_char_at(std::string str,int index);
-std::string string_delete(std::string str,int index,int count);
-std::string string_insert(std::string substr,std::string str,int index);
-std::string string_replace(std::string str,std::string substr,std::string newstr);
-std::string string_replace_all(std::string str,std::string substr,std::string newstr);
+std::string string_char_at(std::string str, int index);
+std::string string_delete(std::string str, int index, int count);
+std::string string_insert(std::string substr, std::string str, int index);
+std::string string_replace(std::string str, std::string substr, std::string newstr);
+std::string string_replace_all(std::string str, std::string substr, std::string newstr);
 size_t string_count(std::string substr, std::string str);
 
 std::string string_lower(std::string str);
 std::string string_upper(std::string str);
 
-std::string string_repeat(std::string str,int count);
+std::string string_repeat(std::string str, int count);
 
 std::string string_letters(std::string str);
 std::string string_digits(std::string str);
@@ -74,6 +73,6 @@ std::string filename_drive(std::string fname);
 std::string filename_ext(std::string fname);
 std::string filename_change_ext(std::string fname, std::string newext);
 
-} //namespace enigma_user
+}  //namespace enigma_user
 
-#endif //ENIGMA_ESTRING_H
+#endif  //ENIGMA_ESTRING_H

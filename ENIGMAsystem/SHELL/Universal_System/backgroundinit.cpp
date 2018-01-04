@@ -90,12 +90,12 @@ namespace enigma
       unsigned char* cpixels=new unsigned char[size+1];
       if (!cpixels)
       {
-        show_error("Failed to load background: Cannot allocate enough memory "+toString(unpacked),0);
+        show_error("Failed to load background: Cannot allocate enough memory "+enigma_user::toString(unpacked),0);
         break;
       }
       unsigned int sz2=fread(cpixels,1,size,exe);
       if (size!=sz2) {
-        show_error("Failed to load background: Data is truncated before exe end. Read "+toString(sz2)+" out of expected "+toString(size),0);
+        show_error("Failed to load background: Data is truncated before exe end. Read "+enigma_user::toString(sz2)+" out of expected "+enigma_user::toString(size),0);
         return;
       }
       unsigned char* pixels=new unsigned char[unpacked+1];
