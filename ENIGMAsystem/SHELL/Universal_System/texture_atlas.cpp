@@ -18,10 +18,11 @@
 #include <algorithm>    // std::sort
 
 #include "texture_atlas.h"
+#include "texture_atlas_internal.h"
 
-#include "Universal_System/spritestruct.h"
-#include "Universal_System/fonts_internal.h"
 #include "Universal_System/background_internal.h"
+#include "Universal_System/fonts_internal.h"
+#include "Universal_System/sprites_internal.h"
 
 #include "Universal_System/nlpo2.h"
 #include "Graphics_Systems/graphics_mandatory.h"
@@ -39,6 +40,9 @@
   #define get_sprite(spr,id) \
     enigma::sprite *const spr = enigma::spritestructarray[id];
 #endif
+
+using std::unordered_map;
+using std::vector;
 
 namespace enigma {
   struct TextureAtlasRect{

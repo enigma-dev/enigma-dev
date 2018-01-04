@@ -17,19 +17,19 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "spritestruct.h"
-#include "graphics_object.h"
-#include "libEGMstd.h"
-#include "image_formats.h"
 #include "estring.h"
+#include "graphics_object.h"
+#include "image_formats.h"
+#include "libEGMstd.h"
+#include "sprites_internal.h"
 
-#include "Graphics_Systems/graphics_mandatory.h"
 #include "Collision_Systems/collision_mandatory.h"
-#include "Widget_Systems/widgets_mandatory.h"
+#include "Graphics_Systems/graphics_mandatory.h"
 #include "Universal_System/instance_system.h"
+#include "Widget_Systems/widgets_mandatory.h"
 
-#include <string>
 #include <cstring>
+#include <string>
 
 #define get_current_instance() \
     ((enigma::object_graphics*) enigma::instance_event_iterator->inst)

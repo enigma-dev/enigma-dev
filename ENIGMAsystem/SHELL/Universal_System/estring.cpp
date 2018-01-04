@@ -26,6 +26,8 @@
 #include "Widget_Systems/widgets_mandatory.h"
 #endif
 
+using std::string;
+
 static const char ldgrs[256] = {
   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
