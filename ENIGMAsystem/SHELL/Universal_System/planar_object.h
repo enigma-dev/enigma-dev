@@ -21,8 +21,8 @@
   @brief Adds a planar tier following the main tier.
 */
 
-#ifndef _planar_object_h
-#define _planar_object_h
+#ifndef ENIGMA_PLANAR_OBJECT_H
+#define ENIGMA_PLANAR_OBJECT_H
 
 #include "object.h"
 #include "var4.h"
@@ -63,6 +63,7 @@ namespace enigma
   };
 
   void propagate_locals(object_planar*);
-}
 
-#endif //_planar_object_h
+} //namespace enigma
+
+#endif //ENIGMA_PLANAR_OBJECT_H

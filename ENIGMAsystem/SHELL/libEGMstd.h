@@ -18,32 +18,40 @@
 // This file contains functions that are used by virtually all components of ENIGMA.
 // They are also, directly or otherwise, available to the user.
 
-#ifndef __libegmstd_h
-#define __libegmstd_h
+#ifndef ENIGMA_LIBEGMSTD_H
+#define ENIGMA_LIBEGMSTD_H
 
-using std::string;
+#include "Universal_System/var4.h"
 
-string toString(int);
-string toString(long);
-string toString(short);
-string toString(unsigned);
-string toString(unsigned long);
-string toString(unsigned short);
-string toString(long long n);
-string toString(unsigned long long n);
-string toString(char);
-string toString(char*);
-string toString(float);
-string toString(double);
+#include <string>
 
-string toString();
-string toString(const string& str);
-string toString(const string& str, size_t pos, size_t n = string::npos);
-string toString(const char *s, size_t n);
-string toString(const char *s);
-string toString(size_t n, char c);
+namespace enigma_user {
 
-string toString(const struct var&);
-string toString(const struct variant&);
+std::string toString(int);
+std::string toString(long);
+std::string toString(short);
+std::string toString(unsigned);
+std::string toString(unsigned long);
+std::string toString(unsigned short);
+std::string toString(long long n);
+std::string toString(unsigned long long n);
+std::string toString(char);
+std::string toString(char*);
+std::string toString(float);
+std::string toString(double);
 
-#endif
+std::string toString();
+std::string toString(const std::string& str);
+std::string toString(const std::string& str, size_t pos, size_t n = std::string::npos);
+std::string toString(const char* s, size_t n);
+std::string toString(const char* s);
+std::string toString(size_t n, char c);
+
+std::string toString(const struct var&);
+std::string toString(const struct variant&);
+
+}  // namespace enigma_user
+
+using enigma_user::toString; // TODO: Factor out
+
+#endif  //ENIGMA_LIBEGMSTD_H

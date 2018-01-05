@@ -27,8 +27,8 @@ using namespace std;
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "libEGMstd.h"
 
-#include "spritestruct.h"
-#include "fontstruct.h"
+#include "sprites_internal.h"
+#include "fonts_internal.h"
 #include "rectpack.h"
 #include "image_formats.h"
 

@@ -948,7 +948,7 @@
 		<Unit filename="Universal_System/actions.h" />
 		<Unit filename="Universal_System/backgroundinit.cpp" />
 		<Unit filename="Universal_System/backgroundstruct.cpp" />
-		<Unit filename="Universal_System/backgroundstruct.h" />
+		<Unit filename="Universal_System/background_internal.h" />
 		<Unit filename="Universal_System/bufferstruct.cpp" />
 		<Unit filename="Universal_System/bufferstruct.h" />
 		<Unit filename="Universal_System/callbacks_events.cpp" />

@@ -17,9 +17,8 @@
 
 #ifndef BGUI_LABELS_H
 #define BGUI_LABELS_H
-#include <array>
-using std::array;
 
+#include <string>
 #include "common.h"
 
 namespace gui
@@ -28,7 +27,7 @@ namespace gui
 		public:
 			unsigned int id;
 			rect box;
-			string text = "";
+			std::string text = "";
 
    		bool visible = true;
 

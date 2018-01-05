@@ -46,7 +46,7 @@ namespace enigma {
   #ifdef DEBUG_MODE
     #define get_sound(snd,id,failure)\
       if (id < 0 or sound_resources.find(id)==sound_resources.end() or !sound_resources[id]) {\
-        show_error("Sound " + toString(id) + " does not exist", false);\
+        show_error("Sound " + enigma_user::toString(id) + " does not exist", false);\
         return failure;\
       } SoundResource *const snd = sound_resources[id];
   #else

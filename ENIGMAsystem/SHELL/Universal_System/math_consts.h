@@ -1,7 +1,6 @@
-#ifndef MATH_CONSTS_h
-#define MATH_CONSTS_h
+#ifndef ENIGMA_MATH_CONSTS_H
+#define ENIGMA_MATH_CONSTS_H
 
-#include <cmath>
 #ifndef M_PI // M_PI is non-standard
 #  define M_PI 3.14159265358979323846
 #endif
@@ -10,4 +9,4 @@
 #  define M_SQRT1_2 0.70710678118654752440
 #endif
 
-#endif
+#endif //ENIGMA_MATH_CONSTS_H

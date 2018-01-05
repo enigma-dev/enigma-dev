@@ -206,7 +206,8 @@ unsigned char* read_entire_file(const char* filename, size_t& size)
 
 } //End un-named namespace
 
-
+namespace enigma
+{
 unsigned int load_gif_file(const char* filename, unsigned char*& out, unsigned int& gif_width, unsigned int& gif_height, unsigned int& image_width, unsigned int& image_height, int& num_images)
 {
   //Read the entire file into a byte array. This is reasonable because we will output width*height*4 bytes, and the 
@@ -563,6 +564,8 @@ const char* load_gif_error_text(unsigned int err)
     default: return ERRMSG_UNKNOWN;
   }
 }
+
+} //namespace enigma
 
 
 //Remove our macro.

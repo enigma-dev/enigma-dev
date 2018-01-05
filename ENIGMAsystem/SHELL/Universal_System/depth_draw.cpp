@@ -19,11 +19,12 @@
 /// by the files under Graphics_Systems, this file exists to provide a way to
 /// structure layers of depth, for both tiles and instances.
 
-#include <math.h>
 #include "depth_draw.h"
 
+#include <math.h>
+
 namespace enigma {
-  depth_layer::depth_layer(): draw_events(new event_iter("Draw")), tilelist(-1) {}
-  map<double,depth_layer> drawing_depths;
-  map<int,pair<double,double> > id_to_currentnextdepth;
-}
+depth_layer::depth_layer() : draw_events(new event_iter("Draw")), tilelist(-1) {}
+std::map<double, depth_layer> drawing_depths;
+std::map<int, std::pair<double, double> > id_to_currentnextdepth;
+}  // namespace enigma

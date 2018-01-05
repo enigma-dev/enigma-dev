@@ -25,16 +25,16 @@
 **                                                                              **
 \********************************************************************************/
 
+#ifdef INCLUDED_FROM_SHELLMAIN
+#error This file is high-impact and should not be included from SHELLmain.cpp.
+#endif
+
 #ifndef _H_LUA_TABLE
 #define _H_LUA_TABLE
 
 #include <map>      // Sparse part
 #include <string.h> // Memcpy
 #include <stdlib.h> // Malloc, Realloc, Free
-
-#ifdef INCLUDED_FROM_SHELLMAIN
-#error This file is high-impact and should not be included from SHELLmain.cpp.
-#endif
 
 /**
   This file implements a Lua-table-like structure. It borrows ideas not only from 

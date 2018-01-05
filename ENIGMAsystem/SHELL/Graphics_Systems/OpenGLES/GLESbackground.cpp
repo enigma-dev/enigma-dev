@@ -17,7 +17,7 @@
 
 #include <math.h>
 #include "OpenGLHeaders.h"
-#include "Universal_System/backgroundstruct.h"
+#include "Universal_System/background_internal.h"
 #include "../General/GSbackground.h"
 
 #define __GETR(x) ((x & 0x0000FF))

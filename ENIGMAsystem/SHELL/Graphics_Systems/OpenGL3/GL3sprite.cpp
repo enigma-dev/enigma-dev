@@ -25,7 +25,7 @@ using std::string;
 
 #include "Universal_System/image_formats.h"
 #include "Universal_System/nlpo2.h"
-#include "Universal_System/spritestruct.h"
+#include "Universal_System/sprites_internal.h"
 #include "Universal_System/instance_system.h"
 #include "Universal_System/graphics_object.h"
 
@@ -77,7 +77,7 @@ namespace enigma_user
 {
 
 int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload, int xorig, int yorig) {
-  int full_width=nlpo2dc(w)+1, full_height=nlpo2dc(h)+1;
+  int full_width=enigma::nlpo2dc(w)+1, full_height=enigma::nlpo2dc(h)+1;
 	int prevFbo;
 	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFbo);
  	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
@@ -102,7 +102,7 @@ int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool 
 }
 
 void sprite_add_from_screen(int id, int x, int y, int w, int h, bool removeback, bool smooth) {
-  int full_width=nlpo2dc(w)+1, full_height=nlpo2dc(h)+1;
+  int full_width=enigma::nlpo2dc(w)+1, full_height=enigma::nlpo2dc(h)+1;
 	int prevFbo;
 	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFbo);
  	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);

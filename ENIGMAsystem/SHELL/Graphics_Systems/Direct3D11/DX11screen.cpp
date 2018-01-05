@@ -30,7 +30,8 @@ using namespace std;
 
 #include "Universal_System/var4.h"
 #include "Universal_System/estring.h"
-#include "Universal_System/backgroundstruct.h"
+#include "Universal_System/background.h"
+#include "Universal_System/background_internal.h"
 
 #define __GETR(x) (((unsigned int)x & 0x0000FF))/255.0
 #define __GETG(x) (((unsigned int)x & 0x00FF00) >> 8)/255.0

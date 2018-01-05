@@ -17,19 +17,19 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <string>
-#include <cstring>
-using namespace std;
-
-#include "Graphics_Systems/graphics_mandatory.h"
-#include "Collision_Systems/collision_mandatory.h"
-#include "Widget_Systems/widgets_mandatory.h"
-#include "spritestruct.h"
-#include "graphics_object.h"
-#include "Universal_System/instance_system.h"
-#include "libEGMstd.h"
-#include "image_formats.h"
 #include "estring.h"
+#include "graphics_object.h"
+#include "image_formats.h"
+#include "libEGMstd.h"
+#include "sprites_internal.h"
+
+#include "Collision_Systems/collision_mandatory.h"
+#include "Graphics_Systems/graphics_mandatory.h"
+#include "Universal_System/instance_system.h"
+#include "Widget_Systems/widgets_mandatory.h"
+
+#include <cstring>
+#include <string>
 
 #define get_current_instance() \
     ((enigma::object_graphics*) enigma::instance_event_iterator->inst)
@@ -486,172 +486,169 @@ namespace enigma
 
   delete[] imgpxdata;
   }
+  
+  bbox_rect_t dummy_bbox = {32,0,32,0};
+
+  const bbox_rect_t &sprite_get_bbox(int sprid)
+  {
+    sprite *spr;
+    if (!get_sprite(spr,sprid))
+      return dummy_bbox;
+
+    return spr->bbox;
+  }
+  
+  const bbox_rect_t &sprite_get_bbox_relative(int sprid)
+  {
+    sprite *spr;
+    if (!get_sprite(spr,sprid))
+      return dummy_bbox;
+
+    return spr->bbox_relative;
+  }
 }
 
 namespace enigma_user
 {
 
-int sprite_get_width(int sprite)
+int sprite_get_width(int sprid)
 {
   enigma::sprite *spr;
-  if (!get_sprite(spr,sprite))
+  if (!get_sprite(spr,sprid))
     return 32;
 
   return spr->width;
 }
 
-int sprite_get_height(int sprite)
+int sprite_get_height(int sprid)
 {
   enigma::sprite *spr;
-  if (!get_sprite(spr,sprite))
+  if (!get_sprite(spr,sprid))
     return 32;
 
   return spr->height;
 }
 
-double sprite_get_texture_width_factor(int sprite, int subimg)
+double sprite_get_texture_width_factor(int sprid, int subimg)
 {
   enigma::sprite *spr;
-  if (!get_sprite(spr,sprite))
+  if (!get_sprite(spr,sprid))
     return 32;
 
   return spr->texturewarray[subimg];
 }
 
-double sprite_get_texture_height_factor(int sprite, int subimg)
+double sprite_get_texture_height_factor(int sprid, int subimg)
 {
   enigma::sprite *spr;
-  if (!get_sprite(spr,sprite))
+  if (!get_sprite(spr,sprid))
     return 32;
 
   return spr->textureharray[subimg];
 }
 
-int sprite_get_bbox_bottom(int sprite)
+int sprite_get_bbox_bottom(int sprid)
 {
   enigma::sprite *spr;
-  if (!get_sprite(spr,sprite))
+  if (!get_sprite(spr,sprid))
     return 32;
 
   return spr->bbox.bottom;
 }
-int sprite_get_bbox_left(int sprite)
+int sprite_get_bbox_left(int sprid)
 {
   enigma::sprite *spr;
-  if (!get_sprite(spr,sprite))
+  if (!get_sprite(spr,sprid))
     return 0;
 
   return spr->bbox.left;
 }
-int sprite_get_bbox_right(int sprite)
+int sprite_get_bbox_right(int sprid)
 {
   enigma::sprite *spr;
-  if (!get_sprite(spr,sprite))
-      return 32;
+  if (!get_sprite(spr,sprid))
+    return 32;
 
   return spr->bbox.right;
 }
-int sprite_get_bbox_top(int sprite)
+int sprite_get_bbox_top(int sprid)
 {
   enigma::sprite *spr;
-  if (!get_sprite(spr,sprite))
-      return 0;
+  if (!get_sprite(spr,sprid))
+    return 0;
 
   return spr->bbox.top;
 }
 
-}
-
-int sprite_get_bbox_bottom_relative(int sprite)
+int sprite_get_bbox_bottom_relative(int sprid)
 {
   enigma::sprite *spr;
-  if (!get_sprite(spr,sprite))
-      return 32;
+  if (!get_sprite(spr,sprid))
+    return 32;
 
   return spr->bbox_relative.bottom;
 }
-int sprite_get_bbox_left_relative(int sprite)
+int sprite_get_bbox_left_relative(int sprid)
 {
   enigma::sprite *spr;
-  if (!get_sprite(spr,sprite))
-      return 0;
+  if (!get_sprite(spr,sprid))
+    return 0;
 
   return spr->bbox_relative.left;
 }
-int sprite_get_bbox_right_relative(int sprite)
+
+int sprite_get_bbox_right_relative(int sprid)
 {
   enigma::sprite *spr;
-  if (!get_sprite(spr,sprite))
-      return 32;
+  if (!get_sprite(spr,sprid))
+    return 32;
 
   return spr->bbox_relative.right;
 }
-int sprite_get_bbox_top_relative(int sprite)
+int sprite_get_bbox_top_relative(int sprid)
 {
   enigma::sprite *spr;
-  if (!get_sprite(spr,sprite))
-      return 0;
+  if (!get_sprite(spr,sprid))
+    return 0;
 
   return spr->bbox_relative.top;
 }
 
-bbox_rect_t dummy_bbox = {32,0,32,0};
-
-const bbox_rect_t &sprite_get_bbox(int sprite)
+int sprite_get_number(int sprid)
 {
-  enigma::sprite *spr;
-  if (!get_sprite(spr,sprite))
-      return dummy_bbox;
-
-  return spr->bbox;
-}
-const bbox_rect_t &sprite_get_bbox_relative(int sprite)
-{
-  enigma::sprite *spr;
-  if (!get_sprite(spr,sprite))
-      return dummy_bbox;
-
-  return spr->bbox_relative;
-}
-
-namespace enigma_user
-{
-
-int sprite_get_number(int sprite)
-{
-  if (sprite == -1) return 0;
+  if (sprid == -1) return 0;
 
   enigma::sprite *spr;
-  if (!get_sprite(spr,sprite))
-      return 0;
+  if (!get_sprite(spr,sprid))
+    return 0;
 
   return spr->subcount;
 }
 
-int sprite_get_texture(int sprite,int subimage)
+int sprite_get_texture(int sprid,int subimage)
 {
   enigma::sprite *spr;
-  if (!get_sprite(spr,sprite))
-      return 0;
+  if (!get_sprite(spr,sprid))
+    return 0;
 
   const int usi = subimage >= 0 ? (subimage % spr->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr->subcount;
   return spr->texturearray[usi];
 }
 
-int sprite_get_xoffset(int sprite)
+int sprite_get_xoffset(int sprid)
 {
   enigma::sprite *spr;
-  if (!get_sprite(spr,sprite))
-      return 0;
+  if (!get_sprite(spr,sprid))
+    return 0;
 
   return spr->xoffset;
 }
 
-int sprite_get_yoffset(int sprite)
+int sprite_get_yoffset(int sprid)
 {
   enigma::sprite *spr;
-  if (!get_sprite(spr,sprite))
-      return 0;
+  if (!get_sprite(spr,sprid))
+    return 0;
 
   return spr->yoffset;
 }

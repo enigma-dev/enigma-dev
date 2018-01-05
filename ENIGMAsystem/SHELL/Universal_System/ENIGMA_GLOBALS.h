@@ -28,9 +28,8 @@
 /*************************************************************
 ENIGMA Global Variables
 **********************/
-namespace enigma
-{
-  extern int nodestroy;
+namespace enigma {
+extern int nodestroy;
 }
 /*************************
 End ENIGMA Global Variables

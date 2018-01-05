@@ -18,10 +18,11 @@
 #include <algorithm>    // std::sort
 
 #include "texture_atlas.h"
+#include "texture_atlas_internal.h"
 
-#include "Universal_System/spritestruct.h"
-#include "Universal_System/fontstruct.h"
-#include "Universal_System/backgroundstruct.h"
+#include "Universal_System/background_internal.h"
+#include "Universal_System/fonts_internal.h"
+#include "Universal_System/sprites_internal.h"
 
 #include "Universal_System/nlpo2.h"
 #include "Graphics_Systems/graphics_mandatory.h"
@@ -39,6 +40,9 @@
   #define get_sprite(spr,id) \
     enigma::sprite *const spr = enigma::spritestructarray[id];
 #endif
+
+using std::unordered_map;
+using std::vector;
 
 namespace enigma {
   struct TextureAtlasRect{
@@ -240,7 +244,7 @@ namespace enigma_user {
     enigma::texture_atlas_array.emplace(id,enigma::texture_atlas());
 
     if (w != -1 && h != -1){ //If we set the size manually
-      unsigned int fullwidth = nlpo2dc(w)+1, fullheight = nlpo2dc(h)+1; //We only take power of two
+      unsigned int fullwidth = enigma::nlpo2dc(w)+1, fullheight = enigma::nlpo2dc(h)+1; //We only take power of two
       enigma::texture_atlas_array[id].width = fullwidth;
       enigma::texture_atlas_array[id].height = fullheight;
       enigma::texture_atlas_array[id].texture = enigma::graphics_create_texture(fullwidth, fullheight, fullwidth, fullheight, nullptr, false);

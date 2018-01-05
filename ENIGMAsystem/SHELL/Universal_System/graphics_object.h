@@ -26,9 +26,7 @@
 
 #ifndef INCLUDED_FROM_SHELLMAIN
   #include "var4.h"
-  #include "spritestruct.h"
-  #include <cstdlib>
-  #include <cmath>
+  #include "sprites.h"
 #endif
 
 #include "scalar.h"
@@ -92,6 +90,6 @@ namespace enigma
       object_graphics(unsigned x, int y);
       virtual ~object_graphics();
   };
-}
+} //namespace enigma
 
 #endif

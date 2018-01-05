@@ -27,7 +27,7 @@ int sprite_add(string filename,double imgnumb,double precise,double transparent,
 using namespace std;
 
 #include "Universal_System/IMGloading.h"
-#include "Universal_System/spritestruct.h"
+#include "Universal_System/sprites_internal.h"
 #include "libEGMstd.h"
 
 int sprite_add(string filename,double imgnumb,double precise,double transparent,double smooth,double preload,double x_offset,double y_offset)

@@ -15,17 +15,19 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <string>
-#include <stdio.h>
-using namespace std;
-
-#include "spritestruct.h"
-#include "Platforms/platforms_mandatory.h"
-#include "Graphics_Systems/graphics_mandatory.h"
-#include "Widget_Systems/widgets_mandatory.h"
 #include "libEGMstd.h"
-#include "zlib.h"
 #include "resinit.h"
+#include "sprites_internal.h"
+#include "zlib.h"
+
+#include "Graphics_Systems/graphics_mandatory.h"
+#include "Platforms/platforms_mandatory.h"
+#include "Widget_Systems/widgets_mandatory.h"
+
+#include <stdio.h>
+#include <string>
+
+using enigma_user::toString;
 
 namespace enigma
 {

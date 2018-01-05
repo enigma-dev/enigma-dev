@@ -23,39 +23,12 @@
 #include "Graphics_Systems/General/GSbackground.h"
 #include "Graphics_Systems/General/GStextures.h"
 #include "Universal_System/nlpo2.h"
-#include "Universal_System/backgroundstruct.h"
-#include "Universal_System/spritestruct.h"
+#include "Universal_System/background_internal.h"
+#include "Universal_System/sprites_internal.h"
 #include "Universal_System/math_consts.h"
 
 //Note that this clamps between 0 and 1, not 0 and 255
 #define clamp_alpha(alpha) (alpha <= 0 ? 0: alpha >= 1? 1: alpha)
-
-#ifdef DEBUG_MODE
-  #include <string>
-  #include "libEGMstd.h"
-  #include "Widget_Systems/widgets_mandatory.h"
-  #define get_background(bck2d,back)\
-    if (back < 0 or size_t(back) >= enigma::background_idmax or !enigma::backgroundstructarray[back]) {\
-      show_error("Attempting to draw non-existing background " + toString(back), false);\
-      return;\
-    }\
-    const enigma::background *const bck2d = enigma::backgroundstructarray[back];
-  #define get_backgroundnv(bck2d,back,r)\
-    if (back < 0 or size_t(back) >= enigma::background_idmax or !enigma::backgroundstructarray[back]) {\
-      show_error("Attempting to draw non-existing background " + toString(back), false);\
-      return r;\
-    }\
-    const enigma::background *const bck2d = enigma::backgroundstructarray[back];
-#else
-  #define get_background(bck2d,back)\
-    const enigma::background *const bck2d = enigma::backgroundstructarray[back];
-  #define get_backgroundnv(bck2d,back,r)\
-    const enigma::background *const bck2d = enigma::backgroundstructarray[back];
-#endif
-
-#define __GETR(x) ((x & 0x0000FF))
-#define __GETG(x) ((x & 0x00FF00) >> 8)
-#define __GETB(x) ((x & 0xFF0000) >> 16)
 
 namespace enigma_user {
   extern int room_width, room_height;

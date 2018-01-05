@@ -27,12 +27,13 @@
 #include "Universal_System/var4.h"
 #include "Universal_System/scalar.h"
 
+#include <string>
 
 namespace enigma_user
 {
 
 //Add a sound (the other parameters are ignored).
-int sound_add(string fName, int buffers, bool useEffects, bool loadOnUse);
+int sound_add(std::string fName, int buffers, bool useEffects, bool loadOnUse);
 
 //Modify the sound's frequency (approximated with pitch).
 void sound_frequency(int sound, float value);

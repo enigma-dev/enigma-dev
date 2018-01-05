@@ -16,55 +16,57 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef _INSTANCE_ITERATOR_H
-#define _INSTANCE_ITERATOR_H
+#ifndef ENIGMA_INSTANCE_ITERATOR_H
+#define ENIGMA_INSTANCE_ITERATOR_H
 
 #include "instance_system_base.h"
 
 namespace enigma {
-  class iterator {
-    enigma::inst_iter temp_iter;
-    enigma::inst_iter* it;
 
-    void addme();
-    void copy(const iterator& other);
+class iterator {
+  enigma::inst_iter temp_iter;
+  enigma::inst_iter* it;
 
-   public:
-    operator bool();
-    object_basic* operator*() const;
-    object_basic* operator->() const;
-    
-    void handle_unlink(const inst_iter* dead);
-    
-    iterator &operator++();
-    iterator operator++(int);
-    iterator &operator--();
-    iterator operator--(int);
-    
-    iterator &operator=(const iterator&);
-    iterator &operator=(inst_iter*);
-    iterator &operator=(object_basic*);
-    
-    iterator(const iterator&);
-    iterator(inst_iter*);
-    iterator(object_basic*);
-    iterator();
-    
-    ~iterator();
+  void addme();
+  void copy(const iterator& other);
 
-    class with;
-  };
+ public:
+  operator bool();
+  object_basic* operator*() const;
+  object_basic* operator->() const;
 
-  class iterator::with: iterator, iterator_level {
-   public:
-    with(const iterator& push): iterator(push), iterator_level(it) {}
-  };
-  
-  void update_iterators_for_destroy(const inst_iter*);
-  iterator instance_list_first();
-  iterator fetch_inst_iter_by_id(int id);
-  iterator fetch_inst_iter_by_int(int x);
-  iterator fetch_roominst_iter_by_id(int x);
-}
+  void handle_unlink(const inst_iter* dead);
 
-#endif
+  iterator& operator++();
+  iterator operator++(int);
+  iterator& operator--();
+  iterator operator--(int);
+
+  iterator& operator=(const iterator&);
+  iterator& operator=(inst_iter*);
+  iterator& operator=(object_basic*);
+
+  iterator(const iterator&);
+  iterator(inst_iter*);
+  iterator(object_basic*);
+  iterator();
+
+  ~iterator();
+
+  class with;
+};
+
+class iterator::with : iterator, iterator_level {
+ public:
+  with(const iterator& push) : iterator(push), iterator_level(it) {}
+};
+
+void update_iterators_for_destroy(const inst_iter*);
+iterator instance_list_first();
+iterator fetch_inst_iter_by_id(int id);
+iterator fetch_inst_iter_by_int(int x);
+iterator fetch_roominst_iter_by_id(int x);
+
+}  //namespace enigma
+
+#endif  //ENIGMA_INSTANCE_ITERATOR_H

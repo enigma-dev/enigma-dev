@@ -39,7 +39,7 @@ using namespace std;
 int lang_CPP::compile_writeFontInfo(EnigmaStruct* es)
 {
   ofstream wto((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_fontinfo.h").c_str(),ios_base::out);
-  wto << license << "#include \"Universal_System/fontstruct.h\"" << endl
+  wto << license << "#include \"Universal_System/fonts_internal.h\"" << endl
       << endl;
 
   int maxid = -1, rawfontcount = 0;

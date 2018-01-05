@@ -30,8 +30,8 @@ using namespace std;
 
 #include <stdio.h> //for file writing (surface_save)
 #include "Universal_System/nlpo2.h"
-#include "Universal_System/spritestruct.h"
-#include "Universal_System/backgroundstruct.h"
+#include "Universal_System/sprites_internal.h"
+#include "Universal_System/background_internal.h"
 #include "Collision_Systems/collision_types.h"
 
 #define __GETR(x) (gs_scalar)(((x & 0x0000FF))/255.0)
@@ -414,7 +414,7 @@ int surface_save_part(int id, string filename, unsigned x, unsigned y, unsigned 
 int background_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, bool preload)
 {
   get_surfacev(surf,id,-1);
-  int full_width=nlpo2dc(w)+1, full_height=nlpo2dc(h)+1;
+  int full_width=enigma::nlpo2dc(w)+1, full_height=enigma::nlpo2dc(h)+1;
 
   unsigned sz=full_width*full_height;
   unsigned char *surfbuf=new unsigned char[sz*4];
@@ -432,7 +432,7 @@ int background_create_from_surface(int id, int x, int y, int w, int h, bool remo
 int sprite_create_from_surface(int id, int x, int y, int w, int h, bool removeback, bool smooth, bool preload, int xorig, int yorig)
 {
   get_surfacev(surf,id,-1);
-  int full_width=nlpo2dc(w)+1, full_height=nlpo2dc(h)+1;
+  int full_width=enigma::nlpo2dc(w)+1, full_height=enigma::nlpo2dc(h)+1;
   enigma::spritestructarray_reallocate();
   int sprid=enigma::sprite_idmax;
   enigma::sprite_new_empty(sprid, 1, w, h, xorig, yorig, 0, h, 0, w, preload, smooth);
@@ -455,7 +455,7 @@ int sprite_create_from_surface(int id, int x, int y, int w, int h, bool removeba
 void sprite_add_from_surface(int ind, int id, int x, int y, int w, int h, bool removeback, bool smooth)
 {
   get_surface(surf,id);
-  int full_width=nlpo2dc(w)+1, full_height=nlpo2dc(h)+1;
+  int full_width=enigma::nlpo2dc(w)+1, full_height=enigma::nlpo2dc(h)+1;
 
   unsigned sz=full_width*full_height;
   unsigned char *surfbuf=new unsigned char[sz*4];

@@ -18,7 +18,7 @@
 #ifndef BGUI_SLIDER_H
 #define BGUI_SLIDER_H
 #include <array>
-using std::array;
+#include <string>
 
 #include "common.h"
 
@@ -34,12 +34,12 @@ namespace gui
 			unsigned int id;
 			rect box;
       rect indicator_box;
-			string text = "";
+			std::string text = "";
 			int state = 0;
 			bool visible = true;
 			bool active = false; //Is slider pressed
       bool drag = false;
-			array<int,4> callback; //Script to run on event
+			std::array<int,4> callback; //Script to run on event
 
 			gs_scalar drag_xoffset = 0.0;
 			gs_scalar drag_yoffset = 0.0;

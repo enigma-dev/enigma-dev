@@ -24,15 +24,17 @@
 #define _ENIGMA_INIFILESYSTEM__HPP
 #include "Universal_System/estring.h"
 
+#include <string>
+
 #ifndef ENIGMA_INI_BUFFER_SIZE
 #define ENIGMA_INI_BUFFER_SIZE 512
 #endif
 
 namespace enigma_user
 {
-	variant json_decode(string data);
+	variant json_decode(std::string data);
 
-	string json_encode(variant ds_map);
+	std::string json_encode(variant ds_map);
 }
 
 

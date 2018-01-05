@@ -17,8 +17,9 @@
 
 #ifndef BGUI_BUTTONS_H
 #define BGUI_BUTTONS_H
+
 #include <array>
-using std::array;
+#include <string>
 
 #include "common.h"
 #include "parents.h"
@@ -34,13 +35,13 @@ namespace gui
 		public:
 			unsigned int id;
 			rect box;
-			string text = "";
+			std::string text = "";
 
 			int state = 0;
 			bool visible = true;
 			bool active = false; //Is button pressed
 			bool togglable = false; //Is button a toggle button
-			array<int,4> callback; //Script to run on event
+			std::array<int,4> callback; //Script to run on event
 
 			int parent_id = -1; //ID of the parent of some kind (probably a window). It won't render with gui_draw_buttons() if it is.
 

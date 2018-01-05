@@ -28,16 +28,10 @@
 #ifndef ENIGMA_GIFFORMAT_H
 #define ENIGMA_GIFFORMAT_H
 
+namespace enigma
+{
 unsigned int load_gif_file(const char* filename, unsigned char*& out, unsigned int& gif_width, unsigned int& gif_height, unsigned int& image_width, unsigned int& image_height, int& num_images);
-
 const char* load_gif_error_text(unsigned int err);
-
-
-
-
-
-
-
-
+} //namespace enigma
 
 #endif //ENIGMA_GIFFORMAT_H

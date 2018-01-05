@@ -16,15 +16,14 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <map>
-#include <string>
-#include <math.h>
-using namespace std;
 
 #include "var4.h"
 #undef   string
-
 #include "var_te.h"
+
+#include <math.h>
+
+using std::string;
 
 #ifdef DEBUG_MODE
 #include "Widget_Systems/widgets_mandatory.h"
@@ -517,53 +516,6 @@ long      var::operator~ () const { return ~long(**this); }
 double    var::operator- () const { return -(double)(**this); }
 double    var::operator+ () const { return +(double)(**this); }
 
-
-
-
-#include <stdio.h>
-#include <sstream>
-#include "libEGMstd.h"
-string toString(const variant &a)
-{
-  if (a.type == real) {
-    //Ensure that integral types don't pick up any baggage from being stored 
-    //  as a double in a var-type.
-    double dVal = a.rval.d;
-    long lVal = (long)dVal;
-    if (dVal == lVal) {
-      return toString(lVal);
-    }
-    return toString(dVal);
-  }
-  return a.sval;
-}
-string toString(const var &a) {
-  //Arrays (2D and linear) are printed differently.
-  if (a.array_height() > 1) {
-    std::stringstream res;
-    res <<"<";
-    for (int i=0; i<a.array_height(); i++) {
-      for (int j=0; j<a.array_len(i); j++) {
-        res <<toString(const_cast<var&>(a)(i,j));
-        if (j+1<a.array_len(i)) { res <<" , "; }
-      }
-      if (i+1<a.array_height()) { res <<" ; "; }
-    }
-    res <<">";
-    return res.str();
-  } else if (a.array_len() > 1) {
-    std::stringstream res;
-    res <<"[";
-    for (int i=0; i<a.array_len(); i++) {
-      res <<toString(const_cast<var&>(a)[i]);
-      if (i+1<a.array_len()) { res <<" , "; }
-    }
-    res <<"]";
-    return res.str();
-  } else {
-    return toString(*a);
-  }
-}
 
 namespace enigma_user {
   bool is_undefined(variant val)   { return val.type == ty_undefined; }

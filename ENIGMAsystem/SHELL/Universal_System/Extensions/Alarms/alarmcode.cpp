@@ -7,8 +7,6 @@
 #include "implement.h"
 #include "include.h"
 
-extern bool argument_relative;
-
 namespace enigma {
   namespace extension_cast {
     extension_alarm *as_extension_alarm(object_basic*);
@@ -20,6 +18,7 @@ namespace enigma_user
  
 void action_set_alarm(int steps, int alarmno)
 {
+  extern bool argument_relative;
   if (argument_relative)
     enigma::extension_cast::as_extension_alarm(enigma::instance_event_iterator->inst)->alarm[alarmno] += (steps);
   else

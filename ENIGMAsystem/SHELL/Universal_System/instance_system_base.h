@@ -18,6 +18,9 @@
 #ifndef INSTANCE_SYSTEM_BASE_h
 #define INSTANCE_SYSTEM_BASE_h
 
+#include "object.h"
+#include <string>
+
 namespace enigma
 {
   typedef int instance_t;
@@ -49,10 +52,10 @@ namespace enigma
     // Inherits object_basic *inst: should be NULL
     // Inherits inst_iter *next:    First of instances for which to perform this event (Can be NULL)
     // Inherits inst_iter *prev:    The last instance for which to perform it. (Can be NULL)
-    string name; // Event name
+    std::string name; // Event name
     inst_iter *add_inst(object_basic* inst);  // Append an instance to the list
     void unlink(inst_iter*);
-    event_iter(string name);
+    event_iter(std::string name);
     event_iter();
   };
 

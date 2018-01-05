@@ -21,9 +21,10 @@
   @brief Adds a graphics-related tier following the planar tier.
 */
 
-#include <math.h>
 #include "depth_draw.h"
 #include "graphics_object.h"
+
+#include <math.h>
 #include <floatcomp.h>
 
 namespace enigma
@@ -45,9 +46,9 @@ namespace enigma
     rval.d = floor(rval.d);
     if (fequal(oldval.rval.d, rval.d)) return;
 
-    map<int,pair<double,double> >::iterator it = id_to_currentnextdepth.find(myiter->inst->id);
+    std::map<int,std::pair<double,double> >::iterator it = id_to_currentnextdepth.find(myiter->inst->id);
     if (it == id_to_currentnextdepth.end()) { // Insert a request to change in depth.
-      id_to_currentnextdepth.insert(pair<int,pair<double,double> >(myiter->inst->id, pair<double,double>(oldval.rval.d,rval.d)));
+      id_to_currentnextdepth.insert(std::pair<int,std::pair<double,double> >(myiter->inst->id, std::pair<double,double>(oldval.rval.d,rval.d)));
     }
     else { // Update the request to change in depth.
       (*it).second.second = rval.d;
@@ -57,7 +58,7 @@ namespace enigma
     myiter = drawing_depths[rval.d = floor(d)].draw_events->add_inst(who);
   }
   void depthv::remove() {
-    map<int,pair<double,double> >::iterator it = id_to_currentnextdepth.find(myiter->inst->id);
+    std::map<int,std::pair<double,double> >::iterator it = id_to_currentnextdepth.find(myiter->inst->id);
     if (it == id_to_currentnextdepth.end()) { // Local value is valid, use it.
       drawing_depths[rval.d].draw_events->unlink(myiter);
     }

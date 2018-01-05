@@ -16,7 +16,7 @@
 **/
 
 #include "Universal_System/scalar.h"
-#include "Universal_System/spritestruct.h"
+#include "Universal_System/sprites_internal.h"
 #include "Collision_Systems/collision_types.h"
 
 namespace enigma

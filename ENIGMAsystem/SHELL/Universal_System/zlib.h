@@ -15,5 +15,12 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#ifndef ENIGMA_ZLIB_H
+#define ENIGMA_ZLIB_H
+
+namespace enigma {
 unsigned char* zlib_compress(unsigned char* inbuffer, int actualsize);
 int zlib_decompress(unsigned char* inbuffer, int insize, int uncompresssize, unsigned char* outbytef);
+}  //namespace enigma
+
+#endif  //ENIGMA_ZLIB_H

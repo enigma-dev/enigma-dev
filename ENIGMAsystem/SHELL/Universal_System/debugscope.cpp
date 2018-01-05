@@ -16,11 +16,32 @@
 **/
 
 #ifdef DEBUG_MODE
+
 #include "debugscope.h"
+
+#include <vector>
 
 namespace enigma {
 
-  vector<string> scope_stack;
+  static std::vector<std::string> scope_stack;
+  
+  debug_scope::debug_scope(std::string x) 
+  { 
+    scope_stack.push_back(x);
+  }
+  
+  debug_scope::~debug_scope() { 
+    scope_stack.pop_back();
+  }  
+  
+  std::string debug_scope::GetErrors()
+  {
+    std::string str;
+    for (std::vector<std::string>::reverse_iterator it = scope_stack.rbegin(); it != scope_stack.rend(); it++)
+      str += "\n" + *it;
+      
+    return str;
+  }
 
 }
-#endif
+#endif //DEBUG_MODE

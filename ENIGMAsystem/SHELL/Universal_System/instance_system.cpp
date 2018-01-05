@@ -33,9 +33,8 @@ using namespace std;
 
 namespace enigma_user {
   int instance_count = 0;
+  extern deque<int> instance_id;  // TODO: Implement and move to enigma_user.
 }
-
-extern deque<int> instance_id; // TODO: Implement and move to enigma_user.
 
 namespace enigma
 {
@@ -317,7 +316,7 @@ namespace enigma
   pinstance_list_iterator link_instance(object_basic* who)
   {
     inst_iter *ins = new inst_iter(who);
-    instance_id.push_back(who->id);
+    enigma_user::instance_id.push_back(who->id);
     pair<iliter,bool> it = instance_list.insert(inode_pair(who->id,ins));
     if (!it.second) {
       delete ins;

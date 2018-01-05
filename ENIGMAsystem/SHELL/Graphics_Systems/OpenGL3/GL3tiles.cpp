@@ -19,7 +19,8 @@
 #include "Universal_System/depth_draw.h"
 #include <algorithm>
 #include "../General/GSbackground.h"
-#include "Universal_System/backgroundstruct.h"
+#include "Universal_System/background.h"
+#include "Universal_System/background_internal.h"
 #include "../General/GStextures.h"
 #include "GL3TextureStruct.h"
 #include "../General/GStiles.h"
@@ -27,25 +28,6 @@
 #include "../General/OpenGLHeaders.h"
 #include "../General/GSprimitives.h" //pr_trianglestrip
 #include "../General/GSmodel.h" //For batcher
-
-#ifdef DEBUG_MODE
-  #include <string>
-  #include "libEGMstd.h"
-  #include "Widget_Systems/widgets_mandatory.h"
-  #define get_background(bck2d,back)\
-    if (back < 0 or size_t(back) >= enigma::background_idmax or !enigma::backgroundstructarray[back]) {\
-      show_error("Attempting to draw non-existing background " + toString(back), false);\
-      return;\
-    }\
-    const enigma::background *const bck2d = enigma::backgroundstructarray[back];
-#else
-  #define get_background(bck2d,back)\
-    const enigma::background *const bck2d = enigma::backgroundstructarray[back];
-#endif
-
-#define __GETR(x) ((x & 0x0000FF))
-#define __GETG(x) ((x & 0x00FF00) >> 8)
-#define __GETB(x) ((x & 0xFF0000) >> 16)
 
 namespace enigma
 {
