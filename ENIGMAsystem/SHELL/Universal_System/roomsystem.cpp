@@ -32,7 +32,7 @@
 #include "instance_system.h"
 #include "instance.h"
 #include "planar_object.h"
-#include "backgroundstruct.h"
+#include "background.h"
 
 #include "roomsystem.h"
 #include "depth_draw.h"

@@ -15,6 +15,9 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#ifndef ENIGMA_INSTANCE_CREATE_H
+#define ENIGMA_INSTANCE_CREATE_H
+
 namespace enigma
 {
   void instance_change_inst(int obj, bool perf, object_graphics* inst)
@@ -81,7 +84,7 @@ namespace enigma
     }
     return ob;
   }
-}
+} //namespace enigma
 
 namespace enigma_user
 {
@@ -139,5 +142,7 @@ namespace enigma_user
     newinst->visible=inst->visible; newinst->image_xscale=inst->image_xscale; newinst->image_yscale=inst->image_yscale; newinst->image_angle=inst->image_angle;
     newinst->hspeed=inst->hspeed; newinst->vspeed=inst->vspeed;
   }
-}
+} //namespace enigma_user
+
+#endif //ENIGMA_INSTANCE_CREATE_H
 

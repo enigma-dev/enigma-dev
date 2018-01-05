@@ -23,6 +23,10 @@ freely, subject to the following restrictions:
     distribution.
 */
 
+#ifdef INCLUDED_FROM_SHELLMAIN
+#  error This file includes non-ENIGMA STL headers and should not be included from SHELLmain.
+#endif
+
 #ifndef LODEPNG_H
 #define LODEPNG_H
 

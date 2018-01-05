@@ -21,7 +21,7 @@
 #include "OpenGLHeaders.h"
 
 #include "../General/GSsprite.h"
-#include "Universal_System/spritestruct.h"
+#include "Universal_System/sprites_internal.h"
 #include "Universal_System/instance_system.h"
 #include "Universal_System/graphics_object.h"
 

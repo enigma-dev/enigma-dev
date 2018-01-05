@@ -25,21 +25,28 @@
 **                                                                              **
 \********************************************************************************/
 
+#ifndef ENIGMA_INSTANCE_SYSTEM_FRONTEND_H
+#define ENIGMA_INSTANCE_SYSTEM_FRONTEND_H
+
 #include "instance_system_base.h"
 
 namespace enigma
 {
-  // This is an iterator typedef for use with the red-black backbone of the instance list.
-  typedef struct winstance_list_iterator *pinstance_list_iterator;
-  void winstance_list_iterator_delete(pinstance_list_iterator);
+  
+// This is an iterator typedef for use with the red-black backbone of the instance list.
+typedef struct winstance_list_iterator *pinstance_list_iterator;
+void winstance_list_iterator_delete(pinstance_list_iterator);
 
-  // Linking
-  pinstance_list_iterator link_instance(object_basic* who);
-  inst_iter *link_obj_instance(object_basic* who, int oid);
+// Linking
+pinstance_list_iterator link_instance(object_basic* who);
+inst_iter *link_obj_instance(object_basic* who, int oid);
 
-  // Unlinking/Destroying
-  void instance_iter_queue_for_destroy(object_basic*);
-  void dispose_destroyed_instances();
-  void unlink_main(pinstance_list_iterator);
-  void unlink_object_id_iter(inst_iter*,int);
-}
+// Unlinking/Destroying
+void instance_iter_queue_for_destroy(object_basic*);
+void dispose_destroyed_instances();
+void unlink_main(pinstance_list_iterator);
+void unlink_object_id_iter(inst_iter*,int);
+
+} //namespace enigma
+
+#endif //ENIGMA_INSTANCE_SYSTEM_FRONTEND_H

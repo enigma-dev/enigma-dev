@@ -25,9 +25,10 @@
 **                                                                              **
 \********************************************************************************/
 
-#ifndef _MULTIFUNCTION_VARIANT__H
-#define _MULTIFUNCTION_VARIANT__H
+#ifndef ENIGMA_MULTIFUNCTION_VARIANT_H
+#define ENIGMA_MULTIFUNCTION_VARIANT_H
 
+#include "var4.h"
 #include "var_te.h"
 
 namespace enigma
@@ -62,11 +63,12 @@ namespace enigma
     virtual ~multifunction_variant();
     #undef  types_extrapolate_alldec
   };
-}
+} //namespace enigma
 
 #define INHERIT_OPERATORS(t)\
   using multifunction_variant::operator=;\
   t &operator=(t&);
 #define INTERCEPT_DEFAULT_COPY(t)\
   t &t::operator=(t& x) { *this = (variant&)x; return *this; }
-#endif
+
+#endif //ENIGMA_MULTIFUNCTION_VARIANT_H

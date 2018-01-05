@@ -27,12 +27,14 @@
  **                                                                              **
  \********************************************************************************/
 
-#include <stdio.h>
+
 
 extern bool argument_relative;
 
 #include "instance_system_base.h"
 #include "lives.h"
+
+#include <stdio.h>
 
 namespace enigma_user
 {
