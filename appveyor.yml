@@ -4,6 +4,9 @@ shallow_clone: true
 test: off
 # don't build "feature" branches
 skip_branch_with_pr: true
+branches:
+  only:
+    - master
 
 init:
   - echo "%APPVEYOR_JOB_ID%"
