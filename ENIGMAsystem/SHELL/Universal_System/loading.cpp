@@ -16,46 +16,44 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <time.h>
-#include <stdio.h>
-
-#include <string>
-
 #include "resinit.h"
-#include "spritestruct.h"
-#include "backgroundstruct.h"
+#include "sprites_internal.h"
+#include "background_internal.h"
+#include "roomsystem.h"
+#include "object.h"
+#include "libEGMstd.h"
+//#include "mathnc.h"
+
 #include "Platforms/platforms_mandatory.h"
 #include "Audio_Systems/audio_mandatory.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Graphics_Systems/graphics_mandatory.h"
-#include "roomsystem.h"
-#include "object.h"
 
+#include <time.h>
+#include <stdio.h>
 
-#include "libEGMstd.h"
-#include "loading.h"
+namespace enigma_user
+{
+  //FIXME: These two functions are declared in mathnc.h but we arent allowed to include that here
+  extern int random_set_seed(int seed);
+  extern int mtrandom_seed(int x);
+} //namespace enigma_user
 
-namespace enigma {
+namespace enigma 
+{
   extern int event_system_initialize(); //Leave this here until you can find a more brilliant way to include it; it's pretty much not-optional.
   extern void timeline_system_initialize();
   extern int game_settings_initialize();
-}
-namespace enigma_user {
-  extern int random_set_seed(int ss);
-  extern int mtrandom_seed(int ss);
-}
 
-//This is like main(), only cross-api
-namespace enigma
-{
+  //This is like main(), only cross-api
   int initialize_everything()
   {
     time_t ss = time(0);
     enigma_user::random_set_seed(ss);
     enigma_user::mtrandom_seed(ss);
 
-	// must occur before the create/room start/game start events so that it does not override the user setting them in code
-	enigma::game_settings_initialize();
+    // must occur before the create/room start/game start events so that it does not override the user setting them in code
+    enigma::game_settings_initialize();
 
     graphicssystem_initialize();
     audiosystem_initialize();
@@ -101,9 +99,9 @@ namespace enigma
       enigma::exe_loadsounds(exe);
       enigma::exe_loadbackgrounds(exe);
       enigma::exe_loadfonts(exe);
-	  #ifdef PATH_EXT_SET
-		enigma::exe_loadpaths(exe);
-	  #endif
+    #ifdef PATH_EXT_SET
+    enigma::exe_loadpaths(exe);
+    #endif
 
       fclose(exe);
     }
@@ -123,4 +121,4 @@ namespace enigma
 
     return 0;
   }
-}
+} //namespace enigma

@@ -17,6 +17,13 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#ifdef INCLUDED_FROM_SHELLMAIN
+#  error This file includes non-ENIGMA STL headers and should not be included from SHELLmain.
+#endif
+
+#ifndef ENIGMA_BACKGROUND_INTERNAL_H
+#define ENIGMA_BACKGROUND_INTERNAL_H
+
 #include <string>
 #include "var4.h"
 
@@ -61,23 +68,32 @@ namespace enigma
   void background_add_copy(background *bak, background *bck_copy);
   void backgrounds_init();
   void backgroundstructarray_reallocate();
-}
+} //namespace enigma
 
-namespace enigma_user
-{
+#ifdef DEBUG_MODE
+  #include "libEGMstd.h"
+  #include "Widget_Systems/widgets_mandatory.h"
+  #define get_background(bck2d,back)\
+    if (back < 0 or size_t(back) >= enigma::background_idmax or !enigma::backgroundstructarray[back]) {\
+      show_error("Attempting to draw non-existing background " + toString(back), false);\
+      return;\
+    }\
+    enigma::background *bck2d = enigma::backgroundstructarray[back];
+  #define get_backgroundnv(bck2d,back,r)\
+    if (back < 0 or size_t(back) >= enigma::background_idmax or !enigma::backgroundstructarray[back]) {\
+      show_error("Attempting to draw non-existing background " + toString(back), false);\
+      return r;\
+    }\
+    enigma::background *bck2d = enigma::backgroundstructarray[back];
+#else
+  #define get_background(bck2d,back)\
+    enigma::background *bck2d = enigma::backgroundstructarray[back];
+  #define get_backgroundnv(bck2d,back,r)\
+    enigma::background *bck2d = enigma::backgroundstructarray[back];
+#endif
 
-int background_add(std::string filename, bool transparent = false, bool smooth = false, bool preload = true, bool mipmap = false);
-int background_create_color(unsigned w, unsigned h, int col, bool preload = true);
-bool background_replace(int back, std::string filename, bool transparent = false, bool smooth = false, bool preload = true, bool free_texture = true, bool mipmap = false);
-void background_save(int back, std::string fname);
-void background_delete(int back, bool free_texture = true);
-int background_duplicate(int back);
-void background_assign(int back, int copy_background, bool free_texture = true);
-bool background_exists(int back);
-void background_set_alpha_from_background(int back, int copy_background, bool free_texture = true);
-int background_get_texture(int backId);
-int background_get_width(int backId);
-int background_get_height(int backId);
-var sprite_get_uvs(int backId);
-}
+#define __GETR(x) ((x & 0x0000FF))
+#define __GETG(x) ((x & 0x00FF00) >> 8)
+#define __GETB(x) ((x & 0xFF0000) >> 16)
 
+#endif //ENIGMA_BACKGROUND_INTERNAL_H

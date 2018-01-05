@@ -17,11 +17,10 @@
 
 #ifndef BGUI_WINDOWS_H
 #define BGUI_WINDOWS_H
+
 #include <array>
 #include <vector>
-
-using std::array;
-using std::vector;
+#include <string>
 
 #include "common.h"
 #include "parents.h"
@@ -39,7 +38,7 @@ namespace gui
 
       rect box = rect(0,0,50,50);
       rect min_box = rect(0,0,50,50); //If resizable then this is the smallest it can be
-      string text = "";
+      std::string text = "";
       int state = 0;
       bool visible = true;
       bool drag = false;
@@ -56,7 +55,7 @@ namespace gui
       gs_scalar drag_xoffset = 0.0;
       gs_scalar drag_yoffset = 0.0;
 
-      array<int,5> callback; //Script to run on event
+      std::array<int,5> callback; //Script to run on event
 
       int parent_id = -1; //ID of some kind of parent (probably a window). It won't render with gui_draw_windows() if it is not -1.
 

@@ -23,8 +23,8 @@
 #include "Graphics_Systems/General/GSbackground.h"
 #include "Graphics_Systems/General/GStextures.h"
 #include "Universal_System/nlpo2.h"
-#include "Universal_System/backgroundstruct.h"
-#include "Universal_System/spritestruct.h"
+#include "Universal_System/background_internal.h"
+#include "Universal_System/sprites_internal.h"
 
 #ifdef DEBUG_MODE
   #include <string>

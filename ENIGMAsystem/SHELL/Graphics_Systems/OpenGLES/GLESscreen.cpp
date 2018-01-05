@@ -25,7 +25,7 @@ int screen_redraw(int dontswap)
 
 using namespace std;
 
-#include "Universal_System/backgroundstruct.h"
+#include "Universal_System/background_internal.h"
 #include "Universal_System/var4.h"
 
 #define __GETR(x) (((unsigned int)x & 0x0000FF))
