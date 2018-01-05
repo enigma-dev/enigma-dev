@@ -25,23 +25,26 @@
 **                                                                              **
 \********************************************************************************/
 
-#ifndef _VARARGS_H
-#define _VARARGS_H
+#ifndef ENIGMA_VARARGS_H
+#define ENIGMA_VARARGS_H
+
+#include "var4.h"
+
 namespace enigma {
-  struct varargs
-  {
-    int argc;
-    void *argv;
-    #ifndef JUST_DEFINE_IT_RUN
-    void sort();
-    void reverse();
-    variant get(int) const;
-    varargs& operator,(variant);
-    varargs();
-    varargs(variant);
-    varargs(varargs&);
-    ~varargs();
-    #endif
-  };
-}
+struct varargs {
+  int argc;
+  void* argv;
+#ifndef JUST_DEFINE_IT_RUN
+  void sort();
+  void reverse();
+  variant get(int) const;
+  varargs& operator,(variant);
+  varargs();
+  varargs(variant);
+  varargs(varargs&);
+  ~varargs();
 #endif
+};
+}  // namespace enigma
+
+#endif //ENIGMA_VARARGS_H

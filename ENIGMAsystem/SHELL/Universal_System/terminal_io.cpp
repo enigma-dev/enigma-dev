@@ -15,58 +15,44 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <stdio.h>
-#include <string>
-using namespace std;
 #include "terminal_io.h"
 
+#include <stdio.h>
+#include <string>
+
+using std::string;
+
 #ifdef DEBUG_MODE
-  #define debug_message(message)\
-    puts(message.c_str());
+#define debug_message(message) puts(message.c_str());
 #else
-  #define debug_message(message)\
-    (void)0;
+#define debug_message(message) (void)0;
 #endif
 
-namespace enigma_user
-{
+namespace enigma_user {
 
-void cons_show_message(string message) {
-  puts(message.c_str());
-}
-void cons_print_overwritable(string message) {
-  printf("%s\r",message.c_str());
-}
-void show_debug_message(string message) {
-  debug_message(message);
-}
-char cons_get_byte()
-{
+void cons_show_message(string message) { puts(message.c_str()); }
+void cons_print_overwritable(string message) { printf("%s\r", message.c_str()); }
+void show_debug_message(string message) { debug_message(message); }
+char cons_get_byte() {
   int c, first;
   first = c = getchar();
-  while (c != '\n' && c != EOF)
-  c = getchar();
+  while (c != '\n' && c != EOF) c = getchar();
   return first;
 }
-string cons_get_char()
-{
+string cons_get_char() {
   int c, first;
   first = c = getchar();
-  while (c != '\n' && c != EOF)
-  c = getchar();
-  return string(first,1);
+  while (c != '\n' && c != EOF) c = getchar();
+  return string(first, 1);
 }
-string cons_get_string()
-{
+string cons_get_string() {
   string res;
   int c = getchar();
-  while (c != '\n' && c != EOF)
-  {
+  while (c != '\n' && c != EOF) {
     res += char(c);
     c = getchar();
   }
   return res;
 }
 
-}
-
+}  // namespace enigma_user

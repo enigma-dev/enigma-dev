@@ -25,39 +25,46 @@
 **                                                                              **
 \********************************************************************************/
 
-#ifndef RESOURCE_DATA_H
-#define RESOURCE_DATA_H
+#ifndef ENIGMA_RESOURCE_DATA_H
+#define ENIGMA_RESOURCE_DATA_H
 
-namespace enigma {
-  struct callable_script {
-    variant (*base)();
-    int argnum;
-  };
-  struct nameid_pair {
-    string name; int id;
-  };
-  void map_resource_ids(nameid_pair* n);
-  extern callable_script callable_scripts[];
-  extern nameid_pair resource_nameids[];
-}
+#include "var4.h"
+
+#include <string>
+
+namespace enigma 
+{
+
+struct callable_script {
+  variant (*base)();
+  int argnum;
+};
+struct nameid_pair {
+  std::string name; int id;
+};
+void map_resource_ids(nameid_pair* n);
+extern callable_script callable_scripts[];
+extern nameid_pair resource_nameids[];
+
+} //namespace enigma
 
 namespace enigma_user
 {
 
-int resource_get_id(string name);
+int resource_get_id(std::string name);
 variant script_execute(int scr, variant arg0 = 0, variant arg1 = 0, variant arg2 = 0, variant arg3 = 0, variant arg4 = 0, variant arg5 = 0, variant arg6 = 0, variant arg7 = 0, variant arg8 = 0, variant arg9 = 0, variant arg10 = 0, variant arg11 = 0, variant arg12 = 0, variant arg13 = 0, variant arg14 = 14, variant arg15 = 0);
 bool script_exists(int script);
 
-string object_get_name(int i);
-string sprite_get_name(int i);
-string background_get_name(int i);
-string font_get_name(int i);
-string timeline_get_name(int i);
-string path_get_name(int i);
-string sound_get_name(int i);
-string script_get_name(int i);
-string shader_get_name(int i);
+std::string object_get_name(int i);
+std::string sprite_get_name(int i);
+std::string background_get_name(int i);
+std::string font_get_name(int i);
+std::string timeline_get_name(int i);
+std::string path_get_name(int i);
+std::string sound_get_name(int i);
+std::string script_get_name(int i);
+std::string shader_get_name(int i);
 
-}
+} //namespace enigma_user
 
-#endif
+#endif //ENIGMA_RESOURCE_DATA_H

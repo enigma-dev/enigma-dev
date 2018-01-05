@@ -9,14 +9,16 @@
 **/
 
 #define repeat(x) for (int ENIGMA_REPEAT_VAR = (x); ENIGMA_REPEAT_VAR > 0; ENIGMA_REPEAT_VAR--)
-#define mod %(variant)
+#define mod % (variant)
 
-struct INTEGER_DIVISION
-{
-    int v;
-    explicit INTEGER_DIVISION(int a): v(a) {}
+struct INTEGER_DIVISION {
+  int v;
+  explicit INTEGER_DIVISION(int a) : v(a) {}
 };
-template<typename real>  int operator/ (real x, INTEGER_DIVISION y) { return int(x)/y.v; }
-#define div /(INTEGER_DIVISION)(int)
+template <typename real>
+int operator/(real x, INTEGER_DIVISION y) {
+  return int(x) / y.v;
+}
+#define div / (INTEGER_DIVISION)(int)
 
-#define until(x) while(!(x))
+#define until(x) while (!(x))

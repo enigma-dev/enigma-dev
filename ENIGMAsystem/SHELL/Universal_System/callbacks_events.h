@@ -15,22 +15,21 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef _ENIGMA_CALLBACKS_EVENTS__H
-#define _ENIGMA_CALLBACKS_EVENTS__H
+#ifndef ENIGMA_CALLBACKS_EVENTS_H
+#define ENIGMA_CALLBACKS_EVENTS_H
 
 namespace enigma {
-  // Before collision event.
-  void perform_callbacks_before_collision_event();
-  void register_callback_before_collision_event(void (*callback)());
+// Before collision event.
+void perform_callbacks_before_collision_event();
+void register_callback_before_collision_event(void (*callback)());
 
-  // Particle updating.
-  void perform_callbacks_particle_updating();
-  void register_callback_particle_updating(void (*callback)());
+// Particle updating.
+void perform_callbacks_particle_updating();
+void register_callback_particle_updating(void (*callback)());
 
-  // Clean up room-end.
-  void perform_callbacks_clean_up_roomend();
-  void register_callback_clean_up_roomend(void (*callback)());
-}
+// Clean up room-end.
+void perform_callbacks_clean_up_roomend();
+void register_callback_clean_up_roomend(void (*callback)());
+}  // namespace enigma
 
-#endif // _ENIGMA_CALLBACKS_EVENTS__H
-
+#endif  //ENIGMA_CALLBACKS_EVENTS_H

@@ -17,16 +17,14 @@
 
 #include "shaderstruct.h"
 
-namespace enigma
-{
-	extern ShaderStruct shaderstructarray[];
-	ShaderStruct** shaderdata;
-	
-	void init_shaders() {
-		    shaderdata = new ShaderStruct*[shader_idmax];
-    for (unsigned i = 0; i < shader_idmax; i++) {
-      shaderdata[i] = &shaderstructarray[i];
-    }
+namespace enigma {
+extern ShaderStruct shaderstructarray[];
+ShaderStruct** shaderdata;
 
-	}
+void init_shaders() {
+  shaderdata = new ShaderStruct*[shader_idmax];
+  for (unsigned i = 0; i < shader_idmax; i++) {
+    shaderdata[i] = &shaderstructarray[i];
+  }
 }
+}  // namespace enigma

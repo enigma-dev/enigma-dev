@@ -15,33 +15,31 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef lives_h
-#define lives_h
+#ifndef ENIGMA_LIVES_H
+#define ENIGMA_LIVES_H
 
-#include "var4.h"
 #include "multifunction_variant.h"
-namespace enigma
-{
-  struct livesv: multifunction_variant {
-    INHERIT_OPERATORS(livesv)
-    void function(variant oldval);
-  };
-}
-namespace enigma_user
-{
-  extern enigma::livesv lives;
-}
-namespace enigma
-{
-  void reset_lives();
-  // Updates the status of whether the "lives" variable
-  // has been set to zero. Set the "lives" variable status
-  // to "false". Only call this once per step.
-  // Even if the value of "lives" is greater than zero
-  // now, the function may still return true if it has
-  // previously been set to zero or less and it was positive before that.
-  bool update_lives_status_and_return_zeroless();
-}
+#include "var4.h"
 
-#endif // lives_h
+namespace enigma {
 
+struct livesv : multifunction_variant {
+  INHERIT_OPERATORS(livesv)
+  void function(variant oldval);
+};
+void reset_lives();
+// Updates the status of whether the "lives" variable
+// has been set to zero. Set the "lives" variable status
+// to "false". Only call this once per step.
+// Even if the value of "lives" is greater than zero
+// now, the function may still return true if it has
+// previously been set to zero or less and it was positive before that.
+bool update_lives_status_and_return_zeroless();
+
+}  //namespace enigma
+
+namespace enigma_user {
+extern enigma::livesv lives;
+}  //namespace enigma_user
+
+#endif  //ENIGMA_LIVES_H

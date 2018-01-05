@@ -19,7 +19,7 @@
 #define ENIGMA_GSSPRITE_H
 
 #include "Universal_System/scalar.h"
-#include "Universal_System/spritestruct.h"
+#include "Universal_System/sprites_internal.h"
 #include "GScolors.h"
 
 #if GM_COMPATIBILITY_VERSION <= 81

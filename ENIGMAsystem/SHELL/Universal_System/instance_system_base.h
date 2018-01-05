@@ -16,88 +16,87 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef INSTANCE_SYSTEM_BASE_h
-#define INSTANCE_SYSTEM_BASE_h
+#ifndef ENIGMA_INSTANCE_SYSTEM_BASE_H
+#define ENIGMA_INSTANCE_SYSTEM_BASE_H
 
-namespace enigma
+#include "object.h"
+
+namespace enigma {
+
+typedef int instance_t;
+
+struct inst_iter {
+  object_basic* inst;      // Inst is first member for non-arithmetic dereference
+  inst_iter *next, *prev;  // Double linked for active removal
+  bool dead;               // Whether or not this instance has been destroyed. Should be accessed rarely.
+  //std::deque<inst_iter*>::iterator instance_id_index;
+  inst_iter(object_basic* i, inst_iter* n, inst_iter* p);
+  inst_iter();
+};
+
+class temp_event_scope {
+  object_basic* oinst;
+  inst_iter* oiter;
+  object_basic* prev_other;  //Should always be NULL, but just in case...
+
+ public:
+  temp_event_scope(object_basic*);
+  ~temp_event_scope();
+};
+
+// This structure is for composing lists of events to execute.
+struct event_iter : inst_iter  // It is a special instance iterator with an add_inst member and a name.
 {
-  typedef int instance_t;
+  // Inherits object_basic *inst: should be NULL
+  // Inherits inst_iter *next:    First of instances for which to perform this event (Can be NULL)
+  // Inherits inst_iter *prev:    The last instance for which to perform it. (Can be NULL)
+  std::string name;                         // Event name
+  inst_iter* add_inst(object_basic* inst);  // Append an instance to the list
+  void unlink(inst_iter*);
+  event_iter(std::string name);
+  event_iter();
+};
 
-  struct inst_iter
-  {
-    object_basic* inst;     // Inst is first member for non-arithmetic dereference
-    inst_iter *next, *prev; // Double linked for active removal
-    bool dead;              // Whether or not this instance has been destroyed. Should be accessed rarely.
-    //std::deque<inst_iter*>::iterator instance_id_index;
-    inst_iter(object_basic* i,inst_iter *n,inst_iter *p);
-    inst_iter();
-  };
+// This structure will store info about and lists of each object by index.
+struct objectid_base : inst_iter {
+  // Inherits object_basic *inst: should be NULL
+  // Inherits inst_iter *next:    First of instances for which to perform this event (Can be NULL)
+  // Inherits inst_iter *prev:    The last instance for which to perform it. (Can be NULL)
+  size_t count;                             // Number of instances on this list
+  inst_iter* add_inst(object_basic* inst);  // Append an instance to the list
+  objectid_base();
+};
 
-  class temp_event_scope
-  {
-    object_basic *oinst;
-    inst_iter *oiter;
-    object_basic* prev_other; //Should always be NULL, but just in case...
-    
-    public:
-    temp_event_scope(object_basic*);
-    ~temp_event_scope();
-  };
+// The rest is decently commented on in the corresponding source file.
+extern event_iter* events;
+extern objectid_base* objects;
+extern object_basic* ENIGMA_global_instance;
+extern inst_iter* instance_event_iterator;
+extern object_basic* instance_other;
 
-  // This structure is for composing lists of events to execute.
-  struct event_iter: inst_iter // It is a special instance iterator with an add_inst member and a name.
-  {
-    // Inherits object_basic *inst: should be NULL
-    // Inherits inst_iter *next:    First of instances for which to perform this event (Can be NULL)
-    // Inherits inst_iter *prev:    The last instance for which to perform it. (Can be NULL)
-    string name; // Event name
-    inst_iter *add_inst(object_basic* inst);  // Append an instance to the list
-    void unlink(inst_iter*);
-    event_iter(string name);
-    event_iter();
-  };
+// Stack pusher for iterators in use by with() statements and the like.
+struct iterator_level {
+  inst_iter* stored_it;
+  object_basic* stored_other;
+  iterator_level(inst_iter* push_to, object_basic* push_other)
+      : stored_it(instance_event_iterator), stored_other(instance_other) {
+    instance_event_iterator = push_to;
+    instance_other = push_other;
+  }
+  iterator_level(inst_iter* push_to) : iterator_level(push_to, instance_event_iterator->inst) {}
+  ~iterator_level() {
+    instance_event_iterator = stored_it;
+    instance_other = stored_other;
+  }
+};
 
-  // This structure will store info about and lists of each object by index.
-  struct objectid_base: inst_iter
-  {
-    // Inherits object_basic *inst: should be NULL
-    // Inherits inst_iter *next:    First of instances for which to perform this event (Can be NULL)
-    // Inherits inst_iter *prev:    The last instance for which to perform it. (Can be NULL)
-    size_t count;     // Number of instances on this list
-    inst_iter *add_inst(object_basic* inst);  // Append an instance to the list
-    objectid_base();
-  };
+object_basic* fetch_instance_by_int(int x);
+object_basic* fetch_instance_by_id(int x);
 
-  // The rest is decently commented on in the corresponding source file.
-  extern event_iter *events;
-  extern objectid_base *objects;
-  extern object_basic *ENIGMA_global_instance;
-  extern inst_iter *instance_event_iterator;
-  extern object_basic *instance_other;
+}  //namespace enigma
 
-  // Stack pusher for iterators in use by with() statements and the like.
-  struct iterator_level {
-    inst_iter* stored_it;
-    object_basic* stored_other;
-    iterator_level(inst_iter* push_to, object_basic* push_other):
-        stored_it(instance_event_iterator), stored_other(instance_other) {
-      instance_event_iterator = push_to;
-      instance_other = push_other;
-    }
-    iterator_level(inst_iter* push_to):
-        iterator_level(push_to, instance_event_iterator->inst) {}
-    ~iterator_level() {
-      instance_event_iterator = stored_it;
-      instance_other = stored_other;
-    }
-  };
-
-  object_basic* fetch_instance_by_int(int x);
-  object_basic* fetch_instance_by_id(int x);
-}
-
-// Other
 namespace enigma_user {
-  extern int instance_count;
-}
-#endif
+extern int instance_count;
+}  //namespace enigma_user
+
+#endif  //ENIGMA_INSTANCE_SYSTEM_BASE_H

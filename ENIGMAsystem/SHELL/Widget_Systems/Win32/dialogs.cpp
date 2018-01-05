@@ -57,9 +57,7 @@ static string gs_but1, gs_but2, gs_but3;
 void show_error(string errortext, const bool fatal)
 {
   #ifdef DEBUG_MODE
-  for (vector<string>::reverse_iterator it = enigma::scope_stack.rbegin(); it != enigma::scope_stack.rend(); it++) {
-    errortext += "\n" + *it;
-  }
+    errortext += enigma::debug_scope::GetErrors();
   #else
   errortext = "Error in some event or another for some object: \r\n" + errortext;
   #endif

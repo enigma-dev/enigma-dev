@@ -25,80 +25,45 @@
  **                                                                              **
  \********************************************************************************/
 
-
-#ifndef HIGHSCORE_FUNCTIONS_H
-#define HIGHSCORE_FUNCTIONS_H 1
+#ifndef ENIGMA_HIGHSCORE_FUNCTIONS_H
+#define ENIGMA_HIGHSCORE_FUNCTIONS_H
 
 #include <string>
 
-
 namespace enigma {
 
-class playerScore
-{
-public:
-    std::string player_name;
-    int player_score;
+void highscore_init();
+class playerScore {
+ public:
+  std::string player_name;
+  int player_score;
 
-    playerScore();
-    playerScore(std::string name, int score);
-
-
-    bool operator<(const playerScore& other) const
-    {
-        return player_score < other.player_score;
-    }
-    bool operator>(const playerScore& other) const
-    {
-        return player_score > other.player_score;
-    }
+  playerScore();
+  playerScore(std::string name, int score);
+  bool operator<(const playerScore& other) const { return player_score < other.player_score; }
+  bool operator>(const playerScore& other) const { return player_score > other.player_score; }
 };
 
-}
+}  //namespace enigma
 
-
-/*
- HighScore functions
- */
-
-
-//#ifdef __APPLE__
-
-namespace enigma_user
-{
+namespace enigma_user {
 
 void highscore_show(int numb);
-
-void action_highscore_show(int background,int border,double newColor,double otherColor,std::string font,int a,int b,int c,int d,int e,int f);
-
-}
-
-//#endif
-
-namespace enigma_user
-{
-
-void highscore_set_background(int back) ;
-
-void highscore_set_border(bool show) ;
-
-void highscore_set_font(std::string name, int size, int style) ;
-
-void highscore_set_colors(int back, int newcol, int othercol) ;
-
-void highscore_set_strings(std::string caption, std::string nobody, std::string escape) ;
-void highscore_show_ext(int numb, int back, int show, int newcol, int othercol, std::string name, int size) ;
-void highscore_clear() ;
-void highscore_add(std::string str, int numb) ;
-void highscore_add_current() ;
+void action_highscore_show(int background, int border, double newColor, double otherColor, std::string font, int a,
+                           int b, int c, int d, int e, int f);
+void highscore_set_background(int back);
+void highscore_set_border(bool show);
+void highscore_set_font(std::string name, int size, int style);
+void highscore_set_colors(int back, int newcol, int othercol);
+void highscore_set_strings(std::string caption, std::string nobody, std::string escape);
+void highscore_show_ext(int numb, int back, int show, int newcol, int othercol, std::string name, int size);
+void highscore_clear();
+void highscore_add(std::string str, int numb);
+void highscore_add_current();
 int highscore_value(int place);
-std::string highscore_name(int place) ;
-void draw_highscore(int x1, int y1, int x2, int y2) ;
+std::string highscore_name(int place);
+void draw_highscore(int x1, int y1, int x2, int y2);
 
-}
+}  // namespace enigma_user
 
-namespace enigma {
-    void highscore_init();
-}
-
-#endif
+#endif  //ENIGMA_HIGHSCORE_FUNCTIONS_H
