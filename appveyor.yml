@@ -19,6 +19,7 @@ init:
   - cd %APPVEYOR_BUILD_FOLDER%
 environment:
   OUTPUT: /tmp/test.exe
+  MSYS2_FC_CACHE_SKIP: yes
   matrix:
   #BEGIN WINDOWS
     # Game Modes
