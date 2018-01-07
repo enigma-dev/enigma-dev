@@ -229,6 +229,14 @@ static inline long clamp(long value, long min, long max)
   return value;
 }
 
+static void set_net_wm_pid(Window window) {
+  pid_t pid = getpid();
+  Atom cardinal = XInternAtom(disp, "CARDINAL", False);
+  Atom net_wm_pid = XInternAtom(disp, "_NET_WM_PID", False);
+  XChangeProperty(disp, window, net_wm_pid, cardinal, 32, PropModeReplace,
+                  (unsigned char*) &pid, sizeof(pid) / 4);
+}
+
 #include <unistd.h>
 static bool game_isending = false;
 int main(int argc,char** argv)
@@ -260,43 +268,41 @@ int main(int argc,char** argv)
     wm_delwin = XInternAtom(disp,"WM_DELETE_WINDOW",False);
     Window root = DefaultRootWindow(disp);
 
-    // any normal person would know that this should be deleted but the OpenGL bridge does not want it deleted, please beware
+    // Defined in the appropriate graphics bridge.
+    // Populates GLX attributes (or other graphics-system-specific properties).
     XVisualInfo* vi = enigma::CreateVisualInfo();
     
     // Window event listening and coloring
     XSetWindowAttributes swa;
     swa.border_pixel = 0;
-    swa.background_pixel = (enigma::windowColor & 0xFF000000) | ((enigma::windowColor & 0xFF0000) >> 16) | (enigma::windowColor & 0xFF00) | ((enigma::windowColor & 0xFF) << 16);
+    swa.background_pixel =  (enigma::windowColor & 0xFF000000)
+                         | ((enigma::windowColor & 0xFF0000) >> 16)
+                         |  (enigma::windowColor & 0xFF00)
+                         | ((enigma::windowColor & 0xFF) << 16);
     swa.colormap = XCreateColormap(disp,root,vi->visual,AllocNone);
-    swa.event_mask = ExposureMask | KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask | FocusChangeMask | StructureNotifyMask;
-    unsigned long valmask = CWColormap | CWEventMask; //  | CWBackPixel | CWBorderPixel;
+    swa.event_mask = ExposureMask | KeyPressMask | KeyReleaseMask | ButtonPressMask
+                   | ButtonReleaseMask | FocusChangeMask | StructureNotifyMask;
+    unsigned long valmask = CWColormap | CWEventMask | CWBackPixel; // | CWBorderPixel;
 
-    //prepare window for display (center, caption, etc)
+    // Prepare window for display (center, caption, etc)
     screen = DefaultScreenOfDisplay(disp);
-    //default window size
     int winw = enigma_user::room_width;
     int winh = enigma_user::room_height;
-    // By default if the room is too big instead of creating a gigantic ass window
-    // make it not bigger than the screen to full screen it, this is what 8.1 and Studio
-    // do, if the user wants to manually override this they can using
-    // views/screen_set_viewport or window_set_size/window_set_region_size
-    // We won't limit those functions like GM, just the default.
+    // By default, if the room is too big, limit the size of the window to the
+    // size of the screen. This is what 8.1 and Studio do; if the user wants to
+    // manually override this they can do so using views/screen_set_viewport or
+    // window_set_size/window_set_region_size.
     if (winw > screen->width) winw = screen->width;
     if (winh > screen->height) winh = screen->height;
 
-    //Make the window
-    win = XCreateWindow(disp,root,0,0,winw,winh,0,vi->depth,InputOutput,vi->visual,valmask,&swa);
-    XMapRaised(disp,win); //request visible
-
-    //printf("Screen: %d %d %d %d\n",s->width/2,s->height/2,winw,winh);
-    XMoveWindow(disp,win,(screen->width-winw)/2,(screen->height-winh)/2);
+    // Make the window
+    win = XCreateWindow(disp, root, 0, 0, winw, winh,
+                        0, vi->depth, InputOutput, vi->visual, valmask, &swa);
+    set_net_wm_pid(win);
+    XMapRaised(disp, win);
+    XMoveWindow(disp, win, (screen->width-winw) / 2, (screen->height-winh) / 2);
 
     enigma::EnableDrawing();
-
-    /* XEvent e;//wait for server to report our display request
-    do {
-    XNextEvent(disp, &e); //auto-flush
-    } while (e.type != MapNotify);*/
 
     //register CloseButton listener
     Atom prots[] = {wm_delwin};
@@ -304,10 +310,9 @@ int main(int argc,char** argv)
         printf("NoClose\n");
         return -4;
     }
-    gmw_init(); //init gm window functions, flushes
-    //#include "initialize.h"
+    gmw_init();  // Initialize resources for use in window API
 
-    //Call ENIGMA system initializers; sprites, audio, and what have you
+    // Call ENIGMA system initializers; sprites, audio, and what have you
     enigma::initialize_everything();
 
     struct timespec time_offset;
