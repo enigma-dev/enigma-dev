@@ -16,7 +16,7 @@ grab_latest() {
   curl -L -o "$3" "https://github.com/$1/releases/download/$2/$fileName"
 }
 
-mkdir -p plugins/shared
+mkdir -p "plugins/shared"
 
 #This is some ancient jna version we depend on 
 if [ -f "plugins/shared/jna.jar" ]; then
@@ -26,17 +26,17 @@ else
   curl -L -o "plugins/shared/jna.jar" "https://dl.dropboxusercontent.com/s/8n2pgy9qhsnc972/jna.jar"
 fi
 
+if [ ! -f ".deps" ]; then
+  touch ".deps"
+fi
+  
+lineCount=$(wc -l < ".deps")
 lineNum=1;
+
 for key in ${!deps[@]}; 
 do
   
   latest=$(get_latest ${deps[$key]})
-  
-  if [ ! -f ".deps" ]; then
-    touch ".deps"
-  fi
-  
-  lineCount=$(wc -l < ".deps")
 
   if [ "$lineCount" -lt "$lineNum" ]; then
     echo "$key $latest" >> ".deps"
