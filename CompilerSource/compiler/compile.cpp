@@ -712,6 +712,28 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
   idpr("Closing game module and running if requested.",99);
   edbg << "Closing game module and running if requested." << flushl;
   fclose(gameModule);
+  
+  if (extensions::targetOS.identifier == "Linux" && mode == emode_compile)
+  {
+    std::string fName = gameFname.substr(gameFname.find_last_of("/\\") + 1);
+    wto.open(gameFname + ".desktop");
+    wto << "[Desktop Entry]\n";
+    wto << "Type=Application\n";
+    wto << "Version=" << gameSet.versionMajor << "." << gameSet.versionMinor << "." << gameSet.versionRelease << "." << gameSet.versionBuild << "\n";
+    wto << "Name=" << fName << "\n";
+    wto << "Comment=" << gameSet.description << "\n";
+    wto << "Path=.\n";
+    wto << "Exec=./" << fName << "\n";
+    //NOTE: Due to security concerns linux doesn't allow releative paths for icons
+    // hardcoding icon because relative paths search /usr/share/icons and full paths aren't portable
+    wto << "Icon=applications-games-symbolic.svg\n";
+    wto << "Terminal=false\n"; //TODO: Add setting for this in ide
+    wto << "Categories=Game;\n";
+    wto << "MimeType=application/octet-stream;\n";
+    wto.close();
+    
+    chmod((gameFname + ".desktop").c_str(), S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH);
+  }
 
   // Run the game if requested
   if (run_game && (mode == emode_run or mode == emode_debug or mode == emode_design))
