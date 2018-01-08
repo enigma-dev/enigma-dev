@@ -161,12 +161,13 @@ void window_set_caption(string caption) {
 	XStoreName(disp,win,caption.c_str());
 }
 
-string window_get_caption()
-{
-	char *caption;
-	XFetchName(disp,win,&caption);
-	string r=caption;
-	return r;
+string window_get_caption() {
+  char *caption;
+  XFetchName(disp, win, &caption);
+  if (!caption) return string();
+  string res = caption;
+  XFree(caption);
+  return res;
 }
 
 }
