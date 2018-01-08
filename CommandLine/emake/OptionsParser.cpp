@@ -90,7 +90,8 @@ OptionsParser::OptionsParser() : _desc("Options")
   _desc.add_options()
     ("help,h", "Print help messages")
     ("info,i", opt::value<std::string>(), "Provides a listing of Platforms, APIs and Extensions")
-    ("output,o", opt::value<std::string>()->required(), "Output file")
+    ("input",   opt::value<std::string>(), "Input game file")
+    ("output,o", opt::value<std::string>()->required(), "Output executable file")
     ("platform,p", opt::value<std::string>()->default_value(def_platform), "Target Platform (XLib, Win32, Cocoa)")
     ("workdir,w", opt::value<std::string>()->default_value(def_workdir), "Working Directory")
     ("mode,m", opt::value<std::string>()->default_value("Debug"), "Game Mode (Run, Release, Debug, Design)")
@@ -103,6 +104,8 @@ OptionsParser::OptionsParser() : _desc("Options")
     ("compiler,x", opt::value<std::string>()->default_value("gcc"), "Compiler.ey Descriptor")
     ("run,r", opt::bool_switch()->default_value(false), "Automatically run the game after it is built")
   ;
+
+  _positional.add("input", 1);
 
   _handler["info"] = std::bind(&OptionsParser::printInfo, this, std::placeholders::_1);
   _handler["output"] = std::bind(&OptionsParser::output, this, std::placeholders::_1);
@@ -129,7 +132,9 @@ int OptionsParser::ReadArgs(int argc, char* argv[])
 
   try
   {
-    opt::store(opt::parse_command_line(argc, argv, _desc), _rawArgs);
+    opt::store(opt::command_line_parser(argc, argv)
+                   .options(_desc).positional(_positional).run(),
+               _rawArgs);
 
     if (!_rawArgs.count("info"))
       opt::notify(_rawArgs);
