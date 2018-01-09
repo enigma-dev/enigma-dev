@@ -12,7 +12,6 @@ public:
   void AddSimpleObject(std::string create, std::string step, std::string draw);
   void AddDefaultRoom();
   EnigmaStruct* ConstructGame();
-  ~Game();
 
 protected:
   EnigmaStruct _game;
