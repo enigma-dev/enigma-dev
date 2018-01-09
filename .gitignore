@@ -46,5 +46,5 @@ ENIGMAsystem/SHELL/.objs
 MacOS/build/Release/EnigmaXcode.app/Contents/Info.plist
 MacOS/build/Release/EnigmaXcode.app/Contents/Resources/*
 *.stackdump
-emake
+/emake
 .deps
