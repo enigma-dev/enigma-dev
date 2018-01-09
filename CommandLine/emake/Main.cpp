@@ -1,6 +1,7 @@
 #include "OptionsParser.hpp"
 #include "EnigmaPlugin.hpp"
 #include "Game.hpp"
+#include "3FG.hpp"
 
 #include <fstream>
 #include <iostream>
@@ -12,33 +13,6 @@ static std::string tolower(const std::string &str) {
     if (res[i] >= 'A' && res[i] <= 'Z') res[i] += 'a' - 'A';
   }
   return res;
-}
-
-bool read_3fg(const std::string &input_file, Game *game) {
-  std::string create, step, draw;
-  if (std::ifstream f{input_file + "/create.edl"}) {
-    create = {
-      std::istreambuf_iterator<char>(f), std::istreambuf_iterator<char>()
-    };
-  }
-  if (std::ifstream f{input_file + "/step.edl"}) {
-    step = {
-      std::istreambuf_iterator<char>(f), std::istreambuf_iterator<char>()
-    };
-  }
-  if (std::ifstream f{input_file + "/draw.edl"}) {
-    draw = {
-      std::istreambuf_iterator<char>(f), std::istreambuf_iterator<char>()
-    };
-  }
-  if (create.empty() && step.empty() && draw.empty()) {
-    std::cerr << "Error: Failed to read input \"" << input_file << "\". "
-                 "Is the game empty?" << std::endl;
-    return false;
-  }
-  game->AddSimpleObject(create, step, draw);
-  game->AddDefaultRoom();
-  return true;
 }
 
 int main(int argc, char* argv[])
@@ -74,12 +48,9 @@ int main(int argc, char* argv[])
     Game game;
     std::string input_file = options.GetOption("input").as<std::string>();
     if (input_file.size()) {
-      if (input_file.size() < 4 || input_file[input_file.length() - 4] != '.') {
-        std::cerr << "Error: Unknown filetype: can't read input file \""
-                  << input_file << "\"." << std::endl;
-        return 1;
-      }
-      std::string ext = tolower(input_file.substr(input_file.length() - 3, 3));
+      std::string ext;
+      size_t dot = input_file.find_last_of('.');
+      if (dot != std::string::npos) ext = tolower(input_file.substr(dot + 1));
       if (ext != "3fg") {
         if (ext == "egm") {
           std::cerr << "EGM format not yet supported. "
@@ -88,9 +59,13 @@ int main(int argc, char* argv[])
           std::cerr << "GMX format not supported. "
                        "Please use LateralGM or find a converter." << std::endl;
           return 1;
+        } else if (ext.empty()) {
+          std::cerr << "Error: Unknown filetype: cannot determine type of file "
+                    << '"' << input_file << "\"." << std::endl;
         } else {
-          std::cerr << "Error: Unknown filetype: can't read input file \""
-                    << input_file << "\"." << std::endl;
+          std::cerr << "Error: Unknown filetype \"" << ext
+                    << "\": cannot read input file \"" << input_file
+                    << "\"." << std::endl;
         }
         return 1;
       }

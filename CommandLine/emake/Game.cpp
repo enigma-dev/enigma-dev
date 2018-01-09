@@ -1,6 +1,14 @@
 #include "Game.hpp"
 using std::string;
 
+namespace {
+
+constexpr int NO_SPRITE = -1;
+constexpr int NO_OBJECT = -1;
+constexpr int INSTANCE_ID_MIN = 100001;
+
+}
+
 const char *Game::SS(string str) {
   _strings.emplace_back(std::move(str));
   return _strings.back().c_str();
@@ -35,13 +43,13 @@ void Game::AddSimpleObject(string create, string step, string draw) {
   GmObject &object = _objects.back();
   object.name = SS("object" + std::to_string(object_index));
   object.id = object_index;
-  object.spriteId = -1;
+  object.spriteId = NO_SPRITE;
   object.solid = false;
   object.visible = true;
   object.depth = 0;
   object.persistent = false;
-  object.parentId = -1;
-  object.maskId = -1;
+  object.parentId = NO_OBJECT;
+  object.maskId = NO_SPRITE;
 
   object.mainEvents = main_events.data();
   object.mainEventCount = main_events.size();
@@ -56,10 +64,10 @@ void Game::AddDefaultRoom() {
   _instances.push_back({});
   auto &instances = _instances.back();
 
-  int instance_id = 100001;
+  int instance_id = INSTANCE_ID_MIN;
   for (size_t i = 0; i < _objects.size(); ++i) {
     instances.push_back({
-      /* x: */ 32, /* y: */ 32,
+      /* x: */ 0, /* y: */ 0,
       /* objectId: */ _objects[i].id,
       /* id: */ instance_id++,
       /* creationCode: */ "",
@@ -133,5 +141,3 @@ EnigmaStruct* Game::ConstructGame()
 
   return &_game;
 }
-
-Game::~Game() {}
