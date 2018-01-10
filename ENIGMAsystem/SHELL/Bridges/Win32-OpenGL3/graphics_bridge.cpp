@@ -18,6 +18,7 @@
 
 #include <string>
 #include <windows.h>
+#include <GL/glew.h>
 #include <GL/wglew.h>
 
 using namespace std;
