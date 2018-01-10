@@ -1,11 +1,9 @@
 SOURCES += $(wildcard Graphics_Systems/OpenGLES/*.cpp) $(wildcard Graphics_Systems/General/*.cpp)
 
-LDLIBS += -lGLEW
-
 ifeq ($(PLATFORM), Win32)
-	LDLIBS += -lopengl32 -lglu32
+	LDLIBS += -lopengl32 -lglu32 -lglew32
 else ifeq ($(PLATFORM), xlib)
-	LDLIBS += -lGL -lGLU
+	LDLIBS += -lGL -lGLU -lGLEW
 else ifeq ($(PLATFORM), Cocoa)
-	LDLIBS += -framework OpenGL
+	LDLIBS += -framework OpenGL -lGLEW
 endif
