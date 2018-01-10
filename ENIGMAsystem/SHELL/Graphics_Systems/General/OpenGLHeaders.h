@@ -19,4 +19,4 @@
 // something more elegant.          -Josh
 
 #define GLEW_STATIC
-#include "glew.h"
+#include <GL/glew.h>

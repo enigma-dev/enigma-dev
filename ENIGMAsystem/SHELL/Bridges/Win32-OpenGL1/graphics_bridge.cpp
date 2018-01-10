@@ -27,9 +27,10 @@
 
 #include <string>
 #include <windows.h>
+#include <GL/wglew.h>
+
 using namespace std;
 
-#include "../General/wglew.h"
 #include "libEGMstd.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Platforms/Win32/WINDOWSmain.h"

@@ -1,4 +1,6 @@
-SOURCES += $(wildcard Graphics_Systems/OpenGL3/*.cpp) $(wildcard Graphics_Systems/General/*.cpp) Graphics_Systems/General/glew.c
+SOURCES += $(wildcard Graphics_Systems/OpenGL3/*.cpp) $(wildcard Graphics_Systems/General/*.cpp)
+
+LDLIBS += -lGLEW
 
 ifeq ($(PLATFORM), Win32)
 	LDLIBS += -lopengl32 -lglu32
@@ -8,6 +10,4 @@ else ifeq ($(PLATFORM), Cocoa)
 	LDLIBS += -framework OpenGL
 endif
 
-#$(OBJDIR)/Graphics_Systems/OpenGL3/glew.o: Graphics_Systems/OpenGL3/glew.c
-#	gcc -c $^ -O3 -DGLEW_STATIC -o $@
 
