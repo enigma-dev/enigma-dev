@@ -1,4 +1,7 @@
 #include "Game.hpp"
+
+using std::map;
+using std::pair;
 using std::string;
 
 namespace {
@@ -23,20 +26,16 @@ void Game::AddSimpleEvent(std::vector<MainEvent>* main_events,
   main_events->push_back({main_id, events.data(), (int) events.size()});
 }
 
-void Game::AddSimpleObject(string create, string step, string draw) {
+void Game::AddSimpleObject(const map<pair<int,int>, string> &events) {
   const int object_index = _objects.size();
 
   _main_events.push_back({});
   auto &main_events = _main_events.back();
 
-  if (create.length()) {
-    AddSimpleEvent(&main_events, 0, 0, create);
-  }
-  if (step.length()) {
-    AddSimpleEvent(&main_events, 3, 0, step);
-  }
-  if (draw.length()) {
-    AddSimpleEvent(&main_events, 8, 0, draw);
+  for (auto event : events) {
+    AddSimpleEvent(&main_events,
+                   event.first.first, event.first.second,  // Main ID, ID
+                   event.second);  // Code
   }
 
   _objects.push_back({});

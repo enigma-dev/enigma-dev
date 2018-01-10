@@ -1,7 +1,7 @@
 #include "OptionsParser.hpp"
 #include "EnigmaPlugin.hpp"
 #include "Game.hpp"
-#include "3FG.hpp"
+#include "SOG.hpp"
 
 #include <fstream>
 #include <iostream>
@@ -51,7 +51,7 @@ int main(int argc, char* argv[])
       std::string ext;
       size_t dot = input_file.find_last_of('.');
       if (dot != std::string::npos) ext = tolower(input_file.substr(dot + 1));
-      if (ext != "3fg") {
+      if (ext != "sog") {
         if (ext == "egm") {
           std::cerr << "EGM format not yet supported. "
                        "Please use LateralGM for the time being." << std::endl;
@@ -69,7 +69,7 @@ int main(int argc, char* argv[])
         }
         return 1;
       }
-      if (!read_3fg(input_file, &game)) return 1;
+      if (!ReadSOG(input_file, &game)) return 1;
     } else {
       std::cerr << "Warning: No game file specified. "
                    "Building an empty game." << std::endl;
