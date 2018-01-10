@@ -3,13 +3,14 @@
 
 #include "backend/EnigmaStruct.h"
 
-#include <vector>
+#include <map>
 #include <string>
+#include <vector>
 
 class Game
 {
 public:
-  void AddSimpleObject(std::string create, std::string step, std::string draw);
+  void AddSimpleObject(const std::map<std::pair<int,int>, std::string> &events);
   void AddDefaultRoom();
   EnigmaStruct* ConstructGame();
 

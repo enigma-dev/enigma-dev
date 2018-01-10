@@ -53,6 +53,11 @@ enum p_type {
 #include <vector>
 #include <map>
 
+using std::map;
+using std::string;
+using std::vector;
+using std::pair;
+
 struct event_info
 {
   string name; // The identifier-compliant name of this event.
