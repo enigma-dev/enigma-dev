@@ -22,6 +22,7 @@
 #include <vector>
 #include <map>
 using namespace std;
+#define tostring to_string
 
 #include "general/darray.h"
 #include "general/parse_basics_old.h"
@@ -328,7 +329,6 @@ int event_parse_resourcefile()
   return 0;
 }
 
-extern string tostring(int);
 string format_lookup(int id, p_type t)
 {
   switch (t)
