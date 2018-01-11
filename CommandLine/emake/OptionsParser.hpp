@@ -53,6 +53,7 @@ private:
 
   opt::variables_map _rawArgs;
   opt::options_description _desc;
+  opt::positional_options_description _positional;
   std::map<std::string, func_t> _handler;
   std::map<std::string, list_t> _api;
 };

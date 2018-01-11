@@ -13,17 +13,21 @@ EXECUTABLE=../../emake
 
 all: $(SOURCES) $(EXECUTABLE)
     
-$(EXECUTABLE): $(OBJECTS) eyaml
-	$(CXX) $(OBJECTS) $(LDFLAGS) .eobjs/eyaml.o -o $@
+$(EXECUTABLE): $(OBJECTS) eyaml eventsres
+	$(CXX) $(OBJECTS) $(LDFLAGS) .eobjs/eyaml.o .eobjs/event_parser.o -o $@
 
-.eobjs/%.o : %.cpp dir
+.eobjs/%.o : %.cpp .eobjs
 	$(CXX) $(CXXFLAGS) $< -o $@
+
+.PHONY: eyaml, eventsres, clean
 
 #I'm To lazy to write my own yaml parser or fix plugin to do shit I need
 eyaml:
 	$(CXX) $(CXXFLAGS) ../../CompilerSource/settings-parse/eyaml.cpp -o .eobjs/eyaml.o
+eventsres:
+	$(CXX) $(CXXFLAGS) ../../CompilerSource/compiler/event_reader/event_parser.cpp -o .eobjs/event_parser.o
 	
-dir:
+.eobjs:
 	mkdir -p .eobjs/
 
 clean:
