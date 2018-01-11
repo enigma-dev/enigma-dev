@@ -1,8 +1,12 @@
+OS := $(shell uname -s)
+
 CXX=g++
 CXXFLAGS=-g -std=c++11 -c -Wall -I. -I../../CompilerSource
 
 ifeq ($(OS),Windows_NT)
 	LDFLAGS=-lboost_system-mt -Wl,--no-as-needed -Wl,-rpath=./ -lboost_program_options-mt -lboost_iostreams-mt -lboost_filesystem-mt -lboost_system-mt -lpthread
+else ifeq ($(OS), Darwin)
+	LDFLAGS=-lboost_system -lboost_program_options -lboost_iostreams -lboost_filesystem -lboost_system -lpthread -ldl
 else
 	LDFLAGS=-lboost_system -Wl,--no-as-needed -Wl,-rpath=./ -lboost_program_options -lboost_iostreams -lboost_filesystem -lboost_system -lpthread -ldl
 endif
@@ -13,17 +17,21 @@ EXECUTABLE=../../emake
 
 all: $(SOURCES) $(EXECUTABLE)
     
-$(EXECUTABLE): $(OBJECTS) eyaml
-	$(CXX) $(OBJECTS) $(LDFLAGS) .eobjs/eyaml.o -o $@
+$(EXECUTABLE): $(OBJECTS) eyaml eventsres
+	$(CXX) $(OBJECTS) $(LDFLAGS) .eobjs/eyaml.o .eobjs/event_parser.o -o $@
 
-.eobjs/%.o : %.cpp dir
+.eobjs/%.o : %.cpp .eobjs
 	$(CXX) $(CXXFLAGS) $< -o $@
+
+.PHONY: eyaml, eventsres, clean
 
 #I'm To lazy to write my own yaml parser or fix plugin to do shit I need
 eyaml:
 	$(CXX) $(CXXFLAGS) ../../CompilerSource/settings-parse/eyaml.cpp -o .eobjs/eyaml.o
+eventsres:
+	$(CXX) $(CXXFLAGS) ../../CompilerSource/compiler/event_reader/event_parser.cpp -o .eobjs/event_parser.o
 	
-dir:
+.eobjs:
 	mkdir -p .eobjs/
 
 clean:

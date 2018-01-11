@@ -75,22 +75,26 @@ inline list_t splitString(const std::string &str)
 OptionsParser::OptionsParser() : _desc("Options")
 {
   // Platform Defaults
-  std::string def_platform, def_workdir;
+  std::string def_platform, def_workdir, def_compiler;
   #if CURRENT_PLATFORM_ID == OS_WINDOWS
     def_platform = "Win32";
     def_workdir = "%LOCALAPPDATA%/ENIGMA/";
+    def_compiler = "gcc";
   #elif CURRENT_PLATFORM_ID ==  OS_MACOSX
     def_platform = "Cocoa";
     def_workdir = "/tmp/ENIGMA/";
+    def_compiler = "clang";
   #else
     def_platform = "xlib";
     def_workdir = "/tmp/ENIGMA/";
+    def_compiler = "gcc";
   #endif
 
   _desc.add_options()
     ("help,h", "Print help messages")
     ("info,i", opt::value<std::string>(), "Provides a listing of Platforms, APIs and Extensions")
-    ("output,o", opt::value<std::string>()->required(), "Output file")
+    ("input",   opt::value<std::string>()->default_value(""), "Input game file; currently, only test harness single-object games (*.sog) are supported. The --input string is optional.")
+    ("output,o", opt::value<std::string>()->required(), "Output executable file")
     ("platform,p", opt::value<std::string>()->default_value(def_platform), "Target Platform (XLib, Win32, Cocoa)")
     ("workdir,w", opt::value<std::string>()->default_value(def_workdir), "Working Directory")
     ("mode,m", opt::value<std::string>()->default_value("Debug"), "Game Mode (Run, Release, Debug, Design)")
@@ -100,9 +104,11 @@ OptionsParser::OptionsParser() : _desc("Options")
     ("network,n", opt::value<std::string>()->default_value("None"), "Networking System (Async, Berkeley, DirectPlay)")
     ("collision,c", opt::value<std::string>()->default_value("None"), "Collision System")
     ("extensions,e", opt::value<std::string>()->default_value("None"), "Extensions (Paths, Timelines, Particles)")
-    ("compiler,x", opt::value<std::string>()->default_value("gcc"), "Compiler.ey Descriptor")
+    ("compiler,x", opt::value<std::string>()->default_value(def_compiler), "Compiler.ey Descriptor")
     ("run,r", opt::bool_switch()->default_value(false), "Automatically run the game after it is built")
   ;
+
+  _positional.add("input", 1);
 
   _handler["info"] = std::bind(&OptionsParser::printInfo, this, std::placeholders::_1);
   _handler["output"] = std::bind(&OptionsParser::output, this, std::placeholders::_1);
@@ -129,7 +135,9 @@ int OptionsParser::ReadArgs(int argc, char* argv[])
 
   try
   {
-    opt::store(opt::parse_command_line(argc, argv, _desc), _rawArgs);
+    opt::store(opt::command_line_parser(argc, argv)
+                   .options(_desc).positional(_positional).run(),
+               _rawArgs);
 
     if (!_rawArgs.count("info"))
       opt::notify(_rawArgs);
