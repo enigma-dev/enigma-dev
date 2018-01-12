@@ -16,22 +16,23 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-
 // This file contains functions that are used by virtually all components of ENIGMA.
 // They are also, directly or otherwise, available to the user.
 
-#include <string>
-#include <stdio.h>
-
 #include "libEGMstd.h"
 
-using namespace std;
+#include <stdio.h>
+#include <sstream>
+#include <string>
 
 namespace {
   ///Many integral types (such as long) vary based on platform and architecture. 
   ///To avoid crashing in string(#), we reserve generously.
   char buf[128];
-}
+}  // namespace
+
+namespace enigma_user {
+using std::string;
 
 string toString(int n)                { return string(buf,sprintf(buf,"%d",  n)); }
 string toString(long n)               { return string(buf,sprintf(buf,"%ld", n)); }
@@ -57,3 +58,53 @@ string toString(const string& str, size_t pos, size_t n) { return string (str, p
 string toString(const char *s, size_t n)                 { return string (s, n); }
 string toString(const char *s)                           { return string (s);    }
 string toString(size_t n, char c)                        { return string (n, c); }
+
+string toString(const variant &a) {
+  if (a.type == enigma_user::ty_real) {
+    //Ensure that integral types don't pick up any baggage from being stored
+    //  as a double in a var-type.
+    double dVal = a.rval.d;
+    long lVal = (long)dVal;
+    if (dVal == lVal) {
+      return toString(lVal);
+    }
+    return toString(dVal);
+  }
+  return a.sval;
+}
+
+string toString(const var &a) {
+  //Arrays (2D and linear) are printed differently.
+  if (a.array_height() > 1) {
+    std::stringstream res;
+    res << "<";
+    for (int i = 0; i < a.array_height(); i++) {
+      for (int j = 0; j < a.array_len(i); j++) {
+        res << toString(const_cast<var &>(a)(i, j));
+        if (j + 1 < a.array_len(i)) {
+          res << " , ";
+        }
+      }
+      if (i + 1 < a.array_height()) {
+        res << " ; ";
+      }
+    }
+    res << ">";
+    return res.str();
+  } else if (a.array_len() > 1) {
+    std::stringstream res;
+    res << "[";
+    for (int i = 0; i < a.array_len(); i++) {
+      res << toString(const_cast<var &>(a)[i]);
+      if (i + 1 < a.array_len()) {
+        res << " , ";
+      }
+    }
+    res << "]";
+    return res.str();
+  } else {
+    return toString(*a);
+  }
+}
+
+}  // namespace enigma_user

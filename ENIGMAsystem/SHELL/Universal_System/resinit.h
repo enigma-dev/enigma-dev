@@ -25,10 +25,24 @@
 **                                                                              **
 \********************************************************************************/
 
-namespace enigma {
-  void exe_loadsprs(FILE* exe);
-  void exe_loadsounds(FILE* exe);
-  void exe_loadbackgrounds(FILE* exe);
-  void exe_loadfonts(FILE* exe);
-  void exe_loadpaths(FILE* exe);
-}
+#ifdef INCLUDED_FROM_SHELLMAIN
+#  error This file includes non-ENIGMA STL headers and should not be included from SHELLmain.
+#endif
+
+#ifndef ENIGMA_RESINIT_H
+#define ENIGMA_RESINIT_H
+
+#include <stdio.h>
+
+namespace enigma 
+{
+
+void exe_loadsprs(FILE* exe);
+void exe_loadsounds(FILE* exe);
+void exe_loadbackgrounds(FILE* exe);
+void exe_loadfonts(FILE* exe);
+void exe_loadpaths(FILE* exe);
+
+} //namespace enigma
+
+#endif //ENIGMA_RESINIT_H

@@ -22,8 +22,8 @@
 //using std::string;
 #include "../General/GStextures.h"
 #include "Universal_System/image_formats.h"
-#include "Universal_System/backgroundstruct.h"
-#include "Universal_System/spritestruct.h"
+#include "Universal_System/background_internal.h"
+#include "Universal_System/sprites_internal.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "GLTextureStruct.h"
 

@@ -17,8 +17,13 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef _FONTSTRUCT__H
-#define _FONTSTRUCT__H
+//FIXME: this should be ifdef shellmain but enigmas in a sorry state
+#ifdef JUST_DEFINE_IT_RUN
+#  error This file includes non-ENIGMA STL headers and should not be included from SHELLmain.
+#endif
+
+#ifndef ENIGMA_FONTS_INTERNAL_H
+#define ENIGMA_FONTS_INTERNAL_H
 
 #include <string>
 #include <vector>
@@ -43,7 +48,7 @@ namespace enigma
     int fontsize; bool bold, italic;
 
     // Metrics and such
-	  unsigned glyphRangeCount;
+    unsigned glyphRangeCount;
     std::vector<fontglyphrange*> glyphRanges;
     unsigned int height, yoffset;
 
@@ -65,30 +70,6 @@ namespace enigma
   extern int rawfontcount, rawfontmaxid;
   int font_new(uint32_t gs, uint32_t gc); // Creates a new font, allocating 'gc' glyphs
   int font_pack(enigma::font *font, int spr, uint32_t gcount, bool prop, int sep);
-}
+} //namespace enigma
 
-namespace enigma_user {
-  int font_add(std::string name, int size, bool bold, bool italic, uint32_t first, uint32_t last);
-  bool font_replace(int ind, std::string name, int size, bool bold, bool italic, uint32_t first, uint32_t last);
-  int  font_add_sprite(int spr, uint32_t first, bool prop, int sep);
-  bool font_replace_sprite(int ind, int spr, uint32_t first, bool prop, int sep);
-  std::string font_get_fontname(int fnt);
-  void font_delete(int fnt);
-  bool font_exists(int fnt);
-  bool font_get_bold(int fnt);
-  bool font_get_italic(int fnt);
-  int font_get_size(int fnt);
-  uint32_t font_get_first(int fnt, int range=0);
-  uint32_t font_get_last(int fnt, int range=0);
-  int font_get_range_count(int fnt);
-  float font_get_glyph_left(int fnt, uint32_t character);
-  float font_get_glyph_right(int fnt, uint32_t character);
-  float font_get_glyph_top(int fnt, uint32_t character);
-  float font_get_glyph_bottom(int fnt, uint32_t character);
-  float font_get_glyph_texture_left(int fnt, uint32_t character);
-  float font_get_glyph_texture_top(int fnt, uint32_t character);
-  float font_get_glyph_texture_right(int fnt, uint32_t character);
-  float font_get_glyph_texture_bottom(int fnt, uint32_t character);
-}
-
-#endif
+#endif //ENIGMA_FONTS_INTERNAL_H
