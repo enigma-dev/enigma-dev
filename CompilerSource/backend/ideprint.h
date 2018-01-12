@@ -24,7 +24,7 @@
 #include <string>
 #include <cstdint>
 
-#define flushl "\n"
+#define flushl '\n'
 // The MinGW team is the most thoughtless, incompetent bunch of inconsistent morons who ever lived
 
 struct ideprint {
@@ -36,6 +36,7 @@ struct ideprint {
 template<> inline ideprint& ideprint::operator<< <const char*>(const char* x) { f(x); return *this; }
 template<> inline ideprint& ideprint::operator<< <std::string>(std::string x) { f(x.c_str()); return *this; }
 template<> inline ideprint& ideprint::operator<< <void *>(void* x) { f(tostringv(x).c_str()); return *this; }
+template<> inline ideprint& ideprint::operator<< <char>(char x) { char a[2]; a[1] = 0; a[0] = x; f(a); return *this; }
 
 void ide_dia_add_direct(const char*);
 void ide_dia_add_debug(const char*);
