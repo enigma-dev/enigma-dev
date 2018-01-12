@@ -91,8 +91,7 @@ namespace parse_bacics {
       return is.whatever[(unsigned char) x] & is.SPACER;
     }
 
-	template<typename T> inline std::string toString(T n) { return std::to_string(n); }
-    template<> inline std::string toString<char>(char n) { return std::to_string(n); }
+    template<typename T> inline std::string toString(T n) { return std::to_string(n); }
     template<> inline std::string toString<char*>(char* n) { if (n == nullptr) return ""; else return std::string(n); }
   }
 }

@@ -52,6 +52,8 @@ namespace enigma {
 
 namespace enigma_user {
 
+void io_clear() {}
+
 string os_get_config() {
   return "";
 }

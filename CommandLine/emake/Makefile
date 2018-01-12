@@ -3,12 +3,12 @@ OS := $(shell uname -s)
 CXX=g++
 CXXFLAGS=-g -std=c++11 -c -Wall -I. -I../../CompilerSource
 
-ifeq ($(OS),Windows_NT)
-	LDFLAGS=-lboost_system-mt -Wl,--no-as-needed -Wl,-rpath=./ -lboost_program_options-mt -lboost_iostreams-mt -lboost_filesystem-mt -lboost_system-mt -lpthread
+ifeq ($(OS), Linux)
+	LDFLAGS=-lboost_system -Wl,--no-as-needed -Wl,-rpath=./ -lboost_program_options -lboost_iostreams -lboost_filesystem -lboost_system -lpthread -ldl
 else ifeq ($(OS), Darwin)
 	LDFLAGS=-lboost_system -lboost_program_options -lboost_iostreams -lboost_filesystem -lboost_system -lpthread -ldl
 else
-	LDFLAGS=-lboost_system -Wl,--no-as-needed -Wl,-rpath=./ -lboost_program_options -lboost_iostreams -lboost_filesystem -lboost_system -lpthread -ldl
+	LDFLAGS=-lboost_system-mt -Wl,--no-as-needed -Wl,-rpath=./ -lboost_program_options-mt -lboost_iostreams-mt -lboost_filesystem-mt -lboost_system-mt -lpthread
 endif
 	
 SOURCES=$(shell find . -name "*.cpp")
