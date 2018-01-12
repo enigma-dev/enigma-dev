@@ -1,4 +1,5 @@
 /** Copyright (C) 2008-2013 IsmAvatar <ismavatar@gmail.com>
+*** Copyright (C) 2014 Seth N. Hetu
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -19,15 +20,18 @@
 // GM front-end functions - Implementations of standard GM collision functions.
 ////////////////////////////////////
 
+#include <cmath>
+#include <limits>
+
 #include "Universal_System/collisions_object.h"
 #include "Universal_System/instance_system.h" //iter
 #include "Universal_System/roomsystem.h"
 #include "Collision_Systems/collision_mandatory.h" //iter
-#include "PRECimpl.h"
-#include "../General/CSfuncs.h"
-#include <limits>
-#include <cmath>
 #include "Universal_System/instance.h"
+#include "Universal_System/math_consts.h"
+
+#include "../General/CSfuncs.h"
+#include "PRECimpl.h"
 
 static inline void get_border(int *leftv, int *rightv, int *topv, int *bottomv, int left, int top, int right, int bottom, cs_scalar x, cs_scalar y, double xscale, double yscale, double angle)
 {
@@ -179,7 +183,7 @@ double distance_to_object(int object)
         return -1;
     double distance = std::numeric_limits<double>::infinity();
     double tempdist;
-    const bbox_rect_t &box = inst1->$bbox_relative();
+    const enigma::bbox_rect_t &box = inst1->$bbox_relative();
     const double x1 = inst1->x, y1 = inst1->y,
                  xscale1 = inst1->image_xscale, yscale1 = inst1->image_yscale,
                  ia1 = inst1->image_angle;
@@ -194,7 +198,7 @@ double distance_to_object(int object)
         if (inst2->sprite_index == -1 && (inst2->mask_index == -1))
             continue;
 
-        const bbox_rect_t &box2 = inst2->$bbox_relative();
+        const enigma::bbox_rect_t &box2 = inst2->$bbox_relative();
         const double x2 = inst2->x, y2 = inst2->y,
                      xscale2 = inst2->image_xscale, yscale2 = inst2->image_yscale,
                      ia2 = inst2->image_angle;
@@ -221,7 +225,7 @@ double distance_to_point(cs_scalar x, cs_scalar y)
     enigma::object_collisions* const inst1 = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
     if (inst1->sprite_index == -1 && (inst1->mask_index == -1))
         return -1;
-    const bbox_rect_t &box = inst1->$bbox_relative();
+    const enigma::bbox_rect_t &box = inst1->$bbox_relative();
     const double x1 = inst1->x, y1 = inst1->y,
                  xscale1 = inst1->image_xscale, yscale1 = inst1->image_yscale,
                  ia1 = inst1->image_angle;
@@ -260,7 +264,7 @@ double move_contact_object(int object, double angle, double max_dist, bool solid
 
     const int quad = int(angle/90.0);
 
-    const bbox_rect_t &box = inst1->$bbox_relative();
+    const enigma::bbox_rect_t &box = inst1->$bbox_relative();
     const double x1 = inst1->x, y1 = inst1->y,
                  xscale1 = inst1->image_xscale, yscale1 = inst1->image_yscale,
                  ia1 = inst1->image_angle;
@@ -275,7 +279,7 @@ double move_contact_object(int object, double angle, double max_dist, bool solid
             continue;
         if (inst2->id == inst1->id || (solid_only && !inst2->solid))
             continue;
-        const bbox_rect_t &box2 = inst2->$bbox_relative();
+        const enigma::bbox_rect_t &box2 = inst2->$bbox_relative();
         const double x2 = inst2->x, y2 = inst2->y,
                      xscale2 = inst2->image_xscale, yscale2 = inst2->image_yscale,
                      ia2 = inst2->image_angle;
@@ -446,7 +450,7 @@ bool move_bounce_object(int object, bool adv, bool solid_only)
 
         const double effective_direction = inst1->speed >= 0 ? inst1->direction : fmod(inst1->direction+180.0, 360.0);
         const double flipped_direction = fmod(effective_direction + 180.0, 360.0);
-        const double speed = abs(inst1->speed + 1);//max(1, abs(inst1->speed));
+        const double speed = abs((double) inst1->speed + 1); //max(1, abs(inst1->speed));
 
         // Find the normal direction of the collision by doing radial collisions based on the speed and flipped direction.
 
@@ -516,7 +520,7 @@ bool move_bounce_object(int object, bool adv, bool solid_only)
 
 }
 
-typedef std::pair<int,enigma::inst_iter*> inode_pair;
+typedef std::pair<int,enigma::object_basic*> inode_pair;
 
 namespace enigma_user
 {
@@ -524,12 +528,12 @@ namespace enigma_user
 void instance_deactivate_region(int rleft, int rtop, int rwidth, int rheight, bool inside, bool notme) {
     for (enigma::iterator it = enigma::instance_list_first(); it; ++it) {
         if (notme && (*it)->id == enigma::instance_event_iterator->inst->id) continue;
-        enigma::object_collisions* const inst = ((enigma::object_collisions*)*it);
+        enigma::object_collisions* const inst = (enigma::object_collisions*) *it;
 
         if (inst->sprite_index == -1 && (inst->mask_index == -1)) //no sprite/mask then no collision
             continue;
 
-        const bbox_rect_t &box = inst->$bbox_relative();
+        const enigma::bbox_rect_t &box = inst->$bbox_relative();
         const double x = inst->x, y = inst->y,
         xscale = inst->image_xscale, yscale = inst->image_yscale,
         ia = inst->image_angle;
@@ -539,23 +543,22 @@ void instance_deactivate_region(int rleft, int rtop, int rwidth, int rheight, bo
 
         if ((left <= (rleft+rwidth) && rleft <= right && top <= (rtop+rheight) && rtop <= bottom) == inside) {
             inst->deactivate();
-            enigma::instance_deactivated_list.insert(inode_pair((*it)->id,it.it));
+            enigma::instance_deactivated_list.insert(inode_pair(inst->id,inst));
         }
     }
 }
 
 void instance_activate_region(int rleft, int rtop, int rwidth, int rheight, bool inside) {
-    std::map<int,enigma::inst_iter*>::iterator iter = enigma::instance_deactivated_list.begin();
+    std::map<int,enigma::object_basic*>::iterator iter = enigma::instance_deactivated_list.begin();
     while (iter != enigma::instance_deactivated_list.end()) {
-
-        enigma::object_collisions* const inst = ((enigma::object_collisions*)(iter->second->inst));
+        enigma::object_collisions* const inst = (enigma::object_collisions*) iter->second;
 
         if (inst->sprite_index == -1 && (inst->mask_index == -1)) {//no sprite/mask then no collision
             ++iter;
             continue;
         }
 
-        const bbox_rect_t &box = inst->$bbox_relative();
+        const enigma::bbox_rect_t &box = inst->$bbox_relative();
         const double x = inst->x, y = inst->y,
         xscale = inst->image_xscale, yscale = inst->image_yscale,
         ia = inst->image_angle;
@@ -597,12 +600,12 @@ void instance_deactivate_circle(int x, int y, int r, bool inside, bool notme)
     {
         if (notme && (*it)->id == enigma::instance_event_iterator->inst->id)
             continue;
-        enigma::object_collisions* const inst = ((enigma::object_collisions*)*it);
+        enigma::object_collisions* const inst = (enigma::object_collisions*) *it;
 
         if (inst->sprite_index == -1 && (inst->mask_index == -1)) //no sprite/mask then no collision
             continue;
 
-        const bbox_rect_t &box = inst->$bbox_relative();
+        const enigma::bbox_rect_t &box = inst->$bbox_relative();
         const double x1 = inst->x, y1 = inst->y,
         xscale = inst->image_xscale, yscale = inst->image_yscale,
         ia = inst->image_angle;
@@ -621,7 +624,7 @@ void instance_deactivate_circle(int x, int y, int r, bool inside, bool notme)
             if (inside)
             {
                 inst->deactivate();
-                enigma::instance_deactivated_list.insert(inode_pair((*it)->id,it.it));
+                enigma::instance_deactivated_list.insert(inode_pair(inst->id,inst));
             }
         }
         else
@@ -629,7 +632,7 @@ void instance_deactivate_circle(int x, int y, int r, bool inside, bool notme)
             if (!inside)
             {
                 inst->deactivate();
-                enigma::instance_deactivated_list.insert(inode_pair((*it)->id,it.it));
+                enigma::instance_deactivated_list.insert(inode_pair(inst->id,inst));
             }
         }
     }
@@ -637,16 +640,16 @@ void instance_deactivate_circle(int x, int y, int r, bool inside, bool notme)
 
 void instance_activate_circle(int x, int y, int r, bool inside)
 {
-    std::map<int,enigma::inst_iter*>::iterator iter = enigma::instance_deactivated_list.begin();
+    std::map<int,enigma::object_basic*>::iterator iter = enigma::instance_deactivated_list.begin();
     while (iter != enigma::instance_deactivated_list.end()) {
-        enigma::object_collisions* const inst = ((enigma::object_collisions*)(iter->second->inst));
+        enigma::object_collisions* const inst = (enigma::object_collisions*)iter->second;
 
         if (inst->sprite_index == -1 && (inst->mask_index == -1)) { //no sprite/mask then no collision
             ++iter;
             continue;
         }
 
-        const bbox_rect_t &box = inst->$bbox_relative();
+        const enigma::bbox_rect_t &box = inst->$bbox_relative();
         const double x1 = inst->x, y1 = inst->y,
         xscale = inst->image_xscale, yscale = inst->image_yscale,
         ia = inst->image_angle;

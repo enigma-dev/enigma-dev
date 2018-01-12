@@ -1,6 +1,7 @@
 /********************************************************************************\
  **                                                                              **
  **  Copyright (C) 2010 Alasdair Morrison <tgmg@g-java.com>                      **
+ **  Copyright (C) 2014 Seth N. Hetu                                             **
  **                                                                              **
  **  This file is a part of the ENIGMA Development Environment.                  **
  **                                                                              **
@@ -30,12 +31,20 @@
 #include <stdio.h>
 #include "Universal_System/CallbackArrays.h"
 #include "Universal_System/roomsystem.h"
+#include <cstring>
+
 
 namespace enigma
 {
 	extern char keymap[256];
 	void ENIGMA_events(void);
 	extern int initialize_everything();
+}
+
+namespace enigma_user 
+{
+  extern int keyboard_key;
+  extern int keyboard_lastkey;
 }
 
 namespace enigma
@@ -87,10 +96,8 @@ namespace enigma {
     }
 }
 
-  extern string working_directory;
   int init() {
   timeAtStartup=mach_absolute_time();
-  working_directory=cocoa_get_working_directory();
   enigma::initialize_everything();
   enigma::initkeymap();
     
@@ -103,6 +110,8 @@ namespace enigma {
 void key_press(int keycode) {
     //printf("Keycode pressed: %d",keycode); //useful to create the keymap array
 	int actualKey = enigma::keymap[keycode];
+	enigma_user::keyboard_lastkey = actualKey;
+	enigma_user::keyboard_key = actualKey;
 	
 	if (cocoa_keybdstatus[actualKey]==1) {
 		cocoa_last_keybdstatus[actualKey]=1; //its already handeled the key press
@@ -118,6 +127,7 @@ void key_press(int keycode) {
 void key_release(int keycode) {
 	int actualKey =enigma::keymap[keycode];
 	cocoa_keybdstatus[actualKey]=0;
+	enigma_user::keyboard_key = 0;
 }
 
 extern int enigma_user::mouse_button;

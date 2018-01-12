@@ -1,6 +1,7 @@
 /********************************************************************************\
 **                                                                              **
 **  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2014 Seth N. Hetu                                             **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -30,6 +31,7 @@
 
 #include <map>
 #include <string>
+#include <sstream>
 #include <iostream>
 #include <stdio.h>
 using namespace std;
@@ -52,7 +54,7 @@ struct scope_ignore {
 #include "collect_variables.h"
 #include "languages/language_adapter.h"
 
-void collect_variables(language_adapter *lang, string &code, string &synt, parsed_event* pev, const std::set<std::string>& script_names)
+void collect_variables(language_adapter *lang, string &code, string &synt, parsed_event* pev, const std::set<std::string>& script_names, bool trackGotos)
 {
   int igpos = 0;
   darray<scope_ignore*> igstack;
@@ -66,6 +68,7 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
   int dec_initializing = false; //This tells us we've passed an = in our initialization
   pt dec_equals_at = 0;
   int bracklevel = 0; //This will help us make sure not to add unwanted unary symbols or miss variables/scripts.
+  int parenlevel = 0; //Prevent inner vars from being ignored
   
   bool dec_name_givn = false; //Has an identifier been named in this declaration?
   string dec_name; //Identifier being declared
@@ -74,7 +77,10 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
   bool with_until_semi = false;
 
   bool grab_tline_index = false; //Are we currently trying to stockpile a list of known timeline indices?
-  
+
+  //Tracking for "exit" commands
+  int currGotoBlock = 0;
+  bool foundGoto = false;
   for (pt pos = 0; pos < code.length(); pos++)
   {
     //Stop grabbing the timeline index?
@@ -89,6 +95,17 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
     }
     if (synt[pos] == '}') {
       delete igstack[igpos--];
+
+      //Have we completed a new block?
+      if (igpos==0 && foundGoto) {
+        stringstream newName;
+        newName <<"enigma_block_end_" <<currGotoBlock++ <<":";
+        code.insert(pos+1, newName.str());
+        synt.insert(pos+1, string(newName.str().size(), 'X'));
+        pos += newName.str().size();
+        foundGoto = false;
+      }
+
       continue;
     }
     
@@ -98,7 +115,10 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
     
     with_until_semi &= (synt[pos] != ';');
     
-    if (bracklevel == 0 and in_decl)
+    if (synt[pos] == '(' and dec_initializing) parenlevel++;
+    if (synt[pos] == ')' and dec_initializing) parenlevel--;
+    
+    if (bracklevel == 0 and parenlevel == 0 and in_decl)
     {
       if (synt[pos] == ';' or synt[pos] == ',')
       {
@@ -164,7 +184,7 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
           ((dec_name_givn)?dec_suffixes:dec_prefixes) += '(';
           continue;
         }
-        if (synt[pos] == '(') {
+        if (synt[pos] == ')') {
           ((dec_name_givn)?dec_suffixes:dec_prefixes) += ')';
           continue;
         }
@@ -249,6 +269,21 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
       
       //Looking at a straight identifier. Make sure it actually needs declared.
       string nname = code.substr(spos,pos-spos);
+
+      //Special case; "exit"
+      if (nname=="exit") {
+        stringstream newName;
+        if (trackGotos) {
+          newName <<"goto enigma_block_end_" <<currGotoBlock <<";";
+          foundGoto = true;
+        } else {
+          newName <<"return 0;";
+        }
+        code.replace(spos, 4, newName.str());
+        synt.replace(spos, 4, string(newName.str().size(), 'X'));
+        pos += (newName.str().size()-4 - 1);
+        continue;
+      }
       
       if (!nts)
         { pos--; continue; }
@@ -289,7 +324,7 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
         }
         
         //Second, check that it's not a global
-        if (lang->global_exists(nname)) {
+        if (lang->global_exists(nname) or pev->myObj->globals.find(nname) != pev->myObj->globals.end()) {
           cout << "Ignoring `" << nname << "' because it's a global.\n";
           continue;
         }
@@ -311,21 +346,32 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
           continue;
         }
         
-        //Last, make sure we're not in a with.
-        if (with_until_semi or igstack[igpos]->is_with)
-        {
-          pos += 5;
-          code.insert(spos,"self.");
-          synt.insert(spos,"nnnn.");
-        }
-        
         //Of course, we also don't want to risk overwriting a typed version
         if (pev->myObj->locals.find(nname) != pev->myObj->locals.end()) {
+          if (with_until_semi or igstack[igpos]->is_with) {
+            pos += 5;
+            cout << "Add a self. before " << nname;
+            code.insert(spos,"self.");
+            synt.insert(spos,"nnnn.");
+          }
           cout << "Ignoring `" << nname << "' because it's already a local.\n"; continue;
         }
         
-        cout << "Adding `" << nname << "' because that's just what I do.\n";
-        pev->myObj->locals[nname] = dectrip();
+        //We want to add "ambi." before every ambiguous reference, not just new references
+        if (with_until_semi or igstack[igpos]->is_with)
+        {
+          pos += 5;
+          code.insert(spos,"ambi.");
+          synt.insert(spos,"aaaa.");
+        }
+        
+        //Make sure it's not already an ambiguous usage
+        if (pev->myObj->ambiguous.find(nname) != pev->myObj->ambiguous.end()) {
+          cout << "Ignoring `" << nname << "' because it's already ambiguous.\n"; continue;
+        }
+        
+        cout << "Delaying `" << nname << "' because it's either a local or a global.\n";
+        pev->myObj->ambiguous[nname] = dectrip();
         continue_2: continue;
       }
       else //Since a syntax check already completed, we assume this is a valid function
@@ -390,7 +436,15 @@ void collect_variables(language_adapter *lang, string &code, string &synt, parse
       }
     }
   }
-  
+
+  //There's sometimes a trailing block specifier; we do our best to catch these.
+  if (foundGoto) {
+    stringstream newName;
+    newName <<"enigma_block_end_" <<currGotoBlock++ <<":;"; //The semicolon is a convention.
+    code.insert(code.size(), newName.str());
+    synt.insert(synt.size(), string(newName.str().size(), 'X'));
+  } 
+ 
   //cout << "**Finished collections in " << (pev==NULL ? "some event for some unspecified object" : pev->myObj->name + ", event " + event_get_human_name(pev->mainId,pev->id))<< "\n";
   
   //Store these for later.

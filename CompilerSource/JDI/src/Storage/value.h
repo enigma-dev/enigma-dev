@@ -72,10 +72,15 @@ namespace jdi {
 
     std::string toString(); ///< Convert to a string, whatever the value is
 
+#if __cplusplus >= 201100
+    operator long long unsigned() const; ///< Cast to a long int, returning zero if no valid cast exists.
+	operator long long int() const; ///< Cast to a long int, returning zero if no valid cast exists.
+#endif
     operator long() const; ///< Cast to a long int, returning zero if no valid cast exists.
     operator double() const; ///< Cast to a double, returning zero if no valid cast exists.
     operator bool() const; ///< Cast to a boolean, returning false if no valid cast exists, true if this is a non-empty string.
-    operator const char* () const; ///< Cast to a const char*, returning NULL if no valid cast exists. @warning May be null. @warning Do not free.
+    //operator const char* () const; ///< Cast to a const char*, returning NULL if no valid cast exists. @warning May be null. @warning Do not free.
+    operator std::string(); ///< Cast to std::string, return "" if no valid cast exists or if the pointer is null.
   };
 }
 

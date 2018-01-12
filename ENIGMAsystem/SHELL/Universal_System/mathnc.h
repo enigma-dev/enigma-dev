@@ -38,8 +38,12 @@
 #error ln2math and stop including this damn header.
 #endif
 
-#include <cstdlib> // random()
+#include "math_consts.h"
 #include "scalar.h"
+#include "var4.h"
+
+#include <cstdlib> // random()
+#include <string>
 
 namespace enigma_user
 {
@@ -74,6 +78,13 @@ namespace enigma_user
   inline ma_scalar arctan(ma_scalar x)           { return ::atan(x); }
   inline ma_scalar arctan2(ma_scalar y,ma_scalar x) { return ::atan2(y,x); }
 
+  inline int64_t int64(ma_scalar x) { return (int64_t)x; }
+  inline int64_t int64(std::string x) { return (int64_t) atol(x.c_str()); }
+  inline int64_t int64(const variant& x) {
+    return x.type == ty_string ? int64((std::string) x) : int64((double) x);
+  }
+  inline int64_t int64(const var& x) { return int64(*x); }
+
   // TODO: Once the user space switch to namespace enigma_user has been made,
   // comment in these functions.
   /*
@@ -102,6 +113,7 @@ namespace enigma_user
 
   int sign(ma_scalar x);
   int cmp(ma_scalar x,ma_scalar y);
+  bool equal(ma_scalar x, ma_scalar y);
   ma_scalar frac(ma_scalar x);
 
   ma_scalar degtorad(ma_scalar x);
@@ -114,18 +126,20 @@ namespace enigma_user
   ma_scalar point_distance(ma_scalar x1, ma_scalar y1, ma_scalar x2, ma_scalar y2);
   ma_scalar point_distance_3d(ma_scalar x1, ma_scalar y1, ma_scalar z1, ma_scalar x2,
   ma_scalar y2, ma_scalar z2);
-  
+
   //NOTE: These are technically collision functions in Studio
   ma_scalar triangle_area(ma_scalar x1, ma_scalar y1, ma_scalar x2, ma_scalar y2, ma_scalar x3, ma_scalar y3);
   bool point_in_circle(ma_scalar px, ma_scalar py, ma_scalar x1, ma_scalar y1, ma_scalar rad);
   bool point_in_rectangle(ma_scalar px, ma_scalar py, ma_scalar x1, ma_scalar y1, ma_scalar x2, ma_scalar y2);
   bool point_in_triangle(ma_scalar px, ma_scalar py, ma_scalar x1, ma_scalar y1, ma_scalar x2, ma_scalar y2, ma_scalar x3, ma_scalar y3);
-  
+
   ma_scalar lines_intersect(ma_scalar x1, ma_scalar y1, ma_scalar x2, ma_scalar y2, ma_scalar x3, ma_scalar y3, ma_scalar x4, ma_scalar y4, bool segment);
   int rectangle_in_circle(ma_scalar x1, ma_scalar sy1, ma_scalar sx2, ma_scalar sy2, ma_scalar x, ma_scalar y, ma_scalar rad);
   int rectangle_in_rectangle(ma_scalar sx1, ma_scalar sy1, ma_scalar sx2, ma_scalar sy2, ma_scalar dx1, ma_scalar dy1, ma_scalar dx2, ma_scalar dy2);
   int rectangle_in_triangle(ma_scalar sx1, ma_scalar sy1, ma_scalar sx2, ma_scalar sy2, ma_scalar dx1, ma_scalar dy1, ma_scalar dx2, ma_scalar dy2, ma_scalar dx3, ma_scalar dy3);
-  
+
+  int ray_sphere_intersect(ma_scalar xc, ma_scalar yc, ma_scalar zc, ma_scalar xs, ma_scalar ys, ma_scalar zs, ma_scalar xd, ma_scalar yd, ma_scalar zd, ma_scalar r);
+
   ma_scalar dot_product(ma_scalar x1, ma_scalar y1, ma_scalar x2, ma_scalar y2);
   ma_scalar dot_product_3d(ma_scalar x1, ma_scalar y1, ma_scalar z1, ma_scalar x2,
   ma_scalar y2, ma_scalar z2);

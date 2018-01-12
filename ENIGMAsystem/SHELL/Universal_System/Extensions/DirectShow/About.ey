@@ -2,7 +2,7 @@
 ---
 
 Name: DirectShow
-ID: DirectShow
+Identifier: DirectShow
 Description: Video playback support on Windows platforms.
 Default: false
 Build-date: 10/26/2013
@@ -10,5 +10,3 @@ Icon: dshowlogo.png
 
 Depends: None
 Dependencies: None
-Implement: extension_dshow
-

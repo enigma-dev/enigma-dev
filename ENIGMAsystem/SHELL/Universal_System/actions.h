@@ -2,6 +2,7 @@
  **                                                                              **
  **  Copyright (C) 2010 Alasdair Morrison <tgmg@g-java.com>                      **
  **  Copyright (C) 2011 Polygone                                                 **
+ **  Copyright (C) 2014 Seth N. Hetu                                             **
  **                                                                              **
  **  This file is a part of the ENIGMA Development Environment.                  **
  **                                                                              **
@@ -26,12 +27,14 @@
  **                                                                              **
  \********************************************************************************/
 
-#include <stdio.h>
+
 
 extern bool argument_relative;
 
 #include "instance_system_base.h"
 #include "lives.h"
+
+#include <stdio.h>
 
 namespace enigma_user
 {
@@ -77,6 +80,8 @@ inline bool action_if_variable(const variant& variable, const variant& value, in
         case 0: return (variable==value); break;
         case 1: return (variable<value); break;
         case 2: return (variable>value); break;
+        case 3: return (variable<=value); break;
+        case 4: return (variable>=value); break;
         default: return false; //invalid operation
     }
 }
@@ -117,6 +122,8 @@ inline bool action_if_number(const int object, const double number, const int op
 	    case 0: return (instance_number(object) == lrint(number)); break;
 	    case 1:	return (instance_number(object) < number); break;
 	    case 2: return (instance_number(object) > number); break;
+      case 3: return (instance_number(object) <= number); break;
+      case 4: return (instance_number(object) >= number); break;
 	    default: return false; //invalid operation
   }
 }
@@ -277,7 +284,7 @@ inline void action_set_motion(const double dir, const double nspeed) {
 #define action_message(message) show_message(message)
 #define action_if_sound sound_isplaying
 #define action_end_sound sound_stop
-#define exit return 0;
+//#define exit return 0; //NOTE: This is intentionally disabled; we handle it elsewhere.
 #define globalvar global var
 
 inline void action_create_object(const int object, const double x, const double y)
@@ -326,6 +333,8 @@ inline bool action_if_health(const double value, const int operation)
 	    case 0: return (fabs(health - value) < _V_EPSILON); break;
 	    case 1:	return (health < value); break;
 	    case 2: return (health > value); break;
+      case 3: return (health <= value); break;
+      case 4: return (health >= value); break;
 	    default: return false; //invalid operation
   }
 }
@@ -337,6 +346,8 @@ inline bool action_if_life(const double value, const int operation)
 	    case 0: return (fabs(lives - value) < _V_EPSILON); break;
 	    case 1:	return (lives < value); break;
 	    case 2: return (lives > value); break;
+      case 3: return (lives <= value); break;
+      case 4: return (lives >= value); break;
 	    default: return false; //invalid operation
     }
 }
@@ -348,6 +359,8 @@ inline bool action_if_score(const double value, const int operation)
 	    case 0: return (fabs(score - value) < _V_EPSILON); break;
 	    case 1:	return (score < value); break;
 	    case 2: return (score > value); break;
+      case 3: return (score <= value); break;
+      case 4: return (score >= value); break;
 	    default: return false; //invalid operation
   }
 }

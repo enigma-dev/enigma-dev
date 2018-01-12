@@ -1,6 +1,7 @@
 /********************************************************************************\
 **                                                                              **
 **  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2014 Seth N. Hetu                                             **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -46,9 +47,6 @@ using namespace std;
 #define flushs flush
 
 #include "languages/lang_CPP.h"
-
-// modes: 0=run, 1=debug, 2=design, 3=compile
-enum { emode_run, emode_debug, emode_design, emode_compile, emode_rebuild };
 
 int lang_CPP::compile_writeRoomData(EnigmaStruct* es, parsed_object *EGMglobal, int mode)
 {
@@ -169,6 +167,8 @@ int lang_CPP::compile_writeRoomData(EnigmaStruct* es, parsed_object *EGMglobal, 
 
     if (es->rooms[i].id > room_highid)
       room_highid = es->rooms[i].id;
+    
+    (void)EGMglobal; // No need to know globals, here.
   }
 
   wto << "  };\n  \n"; // End of all rooms
@@ -196,7 +196,7 @@ wto.open((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_roomcreates.h").c
     parsed_room *pr = parsed_rooms[es->rooms[i].id];
     for (map<int,parsed_room::parsed_icreatecode>::iterator it = pr->instance_create_codes.begin(); it != pr->instance_create_codes.end(); it++)
     {
-      wto << "void room_"<< es->rooms[i].id <<"_instancecreate_" << it->first << "()\n{\n  ";
+      wto << "variant room_"<< es->rooms[i].id <<"_instancecreate_" << it->first << "()\n{\n  ";
       if (mode == emode_debug) {
         wto << "enigma::debug_scope $current_scope(\"'instance creation' for instance '" << it->first << "'\");\n";
       }
@@ -215,12 +215,12 @@ wto.open((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_roomcreates.h").c
         syntOvr.empty() ? it->second.pe->synt : syntOvr,
         it->second.pe->strc, it->second.pe->strs, 2, wto
       );
-      wto << "}\n\n";
+      wto << "  return 0;\n}\n\n";
     }
     
     for (map<int,parsed_room::parsed_icreatecode>::iterator it = pr->instance_precreate_codes.begin(); it != pr->instance_precreate_codes.end(); it++)
     {
-      wto << "void room_"<< es->rooms[i].id <<"_instanceprecreate_" << it->first << "()\n{\n  ";
+      wto << "variant room_"<< es->rooms[i].id <<"_instanceprecreate_" << it->first << "()\n{\n  ";
       if (mode == emode_debug) {
         wto << "enigma::debug_scope $current_scope(\"'instance preCreation' for instance '" << it->first << "'\");\n";
       }
@@ -239,10 +239,10 @@ wto.open((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_roomcreates.h").c
         syntOvr.empty() ? it->second.pe->synt : syntOvr,
         it->second.pe->strc, it->second.pe->strs, 2, wto
       );
-      wto << "}\n\n";
+      wto << "  return 0;\n}\n\n";
     }
     
-    wto << "void roomprecreate" << es->rooms[i].id << "()\n{\n  ";
+    wto << "variant roomprecreate" << es->rooms[i].id << "()\n{\n  ";
     if (mode == emode_debug) {
       wto << "enigma::debug_scope $current_scope(\"'room preCreation' for room '" << es->rooms[i].name << "'\");\n";
     }
@@ -253,9 +253,9 @@ wto.open((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_roomcreates.h").c
     for (map<int,parsed_room::parsed_icreatecode>::iterator it = pr->instance_precreate_codes.begin(); it != pr->instance_precreate_codes.end(); it++)
       wto << "\n  room_"<< es->rooms[i].id <<"_instanceprecreate_" << it->first << "();";
 
-    wto << "\n}\n";
+    wto << "\n  return 0;\n  }\n";
 
-    wto << "void roomcreate" << es->rooms[i].id << "()\n{\n  ";
+    wto << "variant roomcreate" << es->rooms[i].id << "()\n{\n  ";
     if (mode == emode_debug) {
       wto << "enigma::debug_scope $current_scope(\"'room creation' for room '" << es->rooms[i].name << "'\");\n";
     }
@@ -265,7 +265,7 @@ wto.open((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_roomcreates.h").c
     for (map<int,parsed_room::parsed_icreatecode>::iterator it = pr->instance_create_codes.begin(); it != pr->instance_create_codes.end(); it++)
       wto << "\n  room_"<< es->rooms[i].id <<"_instancecreate_" << it->first << "();";
     
-    wto << "\n}\n";
+    wto << "\n  return 0;\n  }\n";
   }
 wto.close();
 

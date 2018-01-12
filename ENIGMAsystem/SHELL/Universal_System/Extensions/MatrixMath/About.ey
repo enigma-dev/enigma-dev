@@ -1,0 +1,13 @@
+%E-YAML
+---
+
+Name: Matrix Math
+Identifier: MatrixMath
+Description: Adds templated matrix and quaternion classes.
+Build-date: 26/01/2014
+Default: false
+Icon: matrix.png
+
+Depends: None
+Dependencies: None
+

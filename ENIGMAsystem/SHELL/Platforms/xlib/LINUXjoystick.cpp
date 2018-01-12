@@ -17,7 +17,6 @@
 
 #include <linux/joystick.h>
 #include <math.h>
-#include <stropts.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdio.h>
@@ -121,7 +120,7 @@ namespace enigma_user
 {
   
   #ifdef DEBUG_MODE
-  #  define checkId(failv) { if (size_t(id) > enigma::joysticks.size()) { return (failv); } }
+  #  define checkId(failv) { if (size_t(id) >= enigma::joysticks.size()) { return (failv); } }
   #  define checkPositiveId(failv) { if (id < 0) return (failv); }
   #else
   #  define checkId(failv)
@@ -143,7 +142,6 @@ namespace enigma_user
       return false;
     
     int ac = 4, bc = 4;
-    ioctl(device, I_SRDOPT, RMSGN);
     if (ioctl(device, JSIOCGAXES, &ac) or ioctl(device, JSIOCGBUTTONS, &bc))
       return (close(device), false);
     
@@ -191,7 +189,7 @@ namespace enigma_user
   }
 
   bool joystick_exists(int id) {
-    if (size_t(id) > enigma::joysticks.size())
+    if (size_t(id) >= enigma::joysticks.size())
       return false;
     const enigma::e_joystick * const js = enigma::joysticks[id];
     return js && js->device != -1;

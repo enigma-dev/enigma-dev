@@ -27,11 +27,14 @@ extern std::string program_directory;
 
 void game_end(int ret=0);
 void action_end_game();
+void url_open(std::string url,std::string target="_self",std::string options="");
+void url_open_ext(std::string url, std::string target);
+void url_open_full(std::string url, std::string target,std::string options);
 void action_webpage(const std::string &url);
 
 // Data type could be unsigned for the paramter since the collection is size_t, however this would make the function not behave as GM.
 // show_message(parameter_string(-1)); in GM8.1 will show an empty string, if this function cast the parameter to unsigned that won't be the behavior.
-string parameter_string(int x);
+std::string parameter_string(int x);
 // This function does not work the same as GM8.1, while it returns the native argument count, GM8.1 reports an argument count of 0 for an empty game, even
 // though the first parameter which is the filename is successfully returned from parameter_string. So the assumption is GM8.1's version always reports 1 less
 // than the ENIGMA version.
@@ -46,7 +49,6 @@ void execute_program(std::string fname, std::string args, bool wait);
 void execute_program(std::string operation, std::string fname, std::string args, bool wait);
 
 std::string environment_get_variable(std::string name);
-
 }
 
 #endif //ENIGMA_PLATFORM_MAIN

@@ -1,6 +1,7 @@
 /********************************************************************************\
 **                                                                              **
 **  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2014 Seth N. Hetu                                             **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -32,6 +33,15 @@
 #include <vector>
 #include "compile_organization.h"
 #include "parser/object_storage.h"
+
+// modes: 0=run, 1=debug, 2=design, 3=compile
+enum compile_modes {
+  emode_run,
+  emode_debug,
+  emode_design,
+  emode_compile,
+  emode_rebuild
+};
 
 namespace used_funcs
 {

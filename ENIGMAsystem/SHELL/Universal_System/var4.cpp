@@ -1,4 +1,5 @@
 /** Copyright (C) 2011 Josh Ventura
+*** Copyright (C) 2014 Seth N. Hetu
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,15 +16,14 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <map>
-#include <string>
-#include <math.h>
-using namespace std;
 
 #include "var4.h"
 #undef   string
-
 #include "var_te.h"
+
+#include <math.h>
+
+using std::string;
 
 #ifdef DEBUG_MODE
 #include "Widget_Systems/widgets_mandatory.h"
@@ -89,20 +89,23 @@ variant::operator float()     const { ccast(0); return float      (rval.d); }
 
 variant::operator string() const { ccast(1); return sval; }
 
-#define real enigma::vt_real
-#define tstr enigma::vt_tstr
+#define real enigma_user::ty_real
+#define tstr enigma_user::ty_string
 
 types_extrapolate_real_p  (variant::variant,: rval(x), sval( ), type(real) {})
-types_extrapolate_string_p(variant::variant,: rval(0), sval(x), type(tstr) {})
+types_extrapolate_string_p(variant::variant,: rval(0.0), sval(x), type(tstr) {})
 //variant::variant(var x): rval(x[0].rval), sval(x[0].sval) { }
+variant::variant(const void *p): rval(p), type(enigma_user::ty_pointer) {}
 variant::variant(const variant& x): rval(x.rval.d), sval(x.sval), type(x.type) { }
 variant::variant(const var& x): rval((*x).rval.d), sval((*x).sval), type((*x).type) { }
-variant::variant(): rval(0), sval( ), type(default_type) { }
+variant::variant(): rval(0.0), sval( ), type(default_type) { }
 
 types_extrapolate_real_p  (variant& variant::operator=, { rval.d = x; type = real; return *this; })
 types_extrapolate_string_p(variant& variant::operator=, { sval   = x; type = tstr; return *this; })
 variant& variant::operator=(const variant x)            { rval.d = x.rval.d; if ((type = x.type) == tstr) sval = x.sval; return *this; }
 variant& variant::operator=(const var &x)               { return *this = *x; }
+variant& variant::operator=(const void* p)              { type = enigma_user::ty_pointer; rval.p = p; return *this; }
+
 types_extrapolate_real_p  (variant& variant::operator+=, { terror(real); rval.d += x; return *this; })
 types_extrapolate_string_p(variant& variant::operator+=, { terror(tstr); sval   += x; return *this; })
 variant& variant::operator+=(const variant x)            { terror(x.type); if (x.type == real) rval.d += x.rval.d; else sval += x.sval; return *this; }
@@ -260,10 +263,10 @@ variant::~variant() { }
 var::operator variant&() { return **this; }
 var::operator const variant&() const { return **this; }
 
-var::var() { initialize(); }
-var::var(variant x) { initialize(); **this = x; }
+var::var() : values(NULL) { initialize(); }
+var::var(variant x) : values(NULL) { initialize(); **this = x; }
 //TODO: Overload var for std::array
-var::var(variant x, size_t length, size_t length2) {
+var::var(variant x, size_t length, size_t length2) : values(NULL) {
   initialize();
   for (size_t j = 0; j < length2; ++j) {
     for (size_t i = 0; i < length; ++i) {
@@ -271,8 +274,8 @@ var::var(variant x, size_t length, size_t length2) {
     }
   }
 }
-types_extrapolate_real_p  (var::var, { initialize(); **this = x; })
-types_extrapolate_string_p(var::var, { initialize(); **this = x; })
+types_extrapolate_real_p  (var::var,  : values(NULL) { initialize(); **this = x; })
+types_extrapolate_string_p(var::var,  : values(NULL) { initialize(); **this = x; })
 
 
 
@@ -325,6 +328,7 @@ types_extrapolate_all_fromvariant(variant& , +=)
 types_extrapolate_all_fromvariant(variant& , -=)
 types_extrapolate_all_fromvariant(variant& , *=)
 types_extrapolate_all_fromvariant(variant& , /=)
+types_extrapolate_all_fromvariant(variant& , %=)
 
 types_extrapolate_all_fromvariant(variant& , <<=)
 types_extrapolate_all_fromvariant(variant& , >>=)
@@ -513,25 +517,9 @@ double    var::operator- () const { return -(double)(**this); }
 double    var::operator+ () const { return +(double)(**this); }
 
 
-
-
-#include <stdio.h>
-#include "libEGMstd.h"
-string toString(const variant &a)
-{
-  if (a.type == real) {
-    //Ensure that integral types don't pick up any baggage from being stored 
-    //  as a double in a var-type.
-    double dVal = a.rval.d;
-    long lVal = (long)dVal;
-    if (dVal == lVal) {
-      return toString(lVal);
-    }
-    return toString(dVal);
-  }
-  return a.sval;
+namespace enigma_user {
+  bool is_undefined(variant val)   { return val.type == ty_undefined; }
+  bool is_real(variant val)   { return val.type == real; }
+  bool is_string(variant val) { return val.type == tstr;  }
+  bool is_ptr(variant val)   { return val.type == ty_pointer; }
 }
-string toString(const var &a) {
-  return toString(*a);
-}
-

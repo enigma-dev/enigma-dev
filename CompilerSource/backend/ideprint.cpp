@@ -1,4 +1,5 @@
 /** Copyright (C) 2008 Josh Ventura
+*** Copyright (C) 2014 Seth N. Hetu
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -26,26 +27,24 @@ ideprint &ideprint::operator<< (string x) {
 ideprint &ideprint::operator<< (const char* x) {
   f(x); return *this;
 }
-ideprint &ideprint::operator<< (int x) {
+ideprint &ideprint::operator<< (int16_t x) {
   f(tostring(x).c_str()); return *this;
 }
-ideprint &ideprint::operator<< (long x) {
+ideprint &ideprint::operator<< (int32_t x) {
   f(tostring(x).c_str()); return *this;
 }
-ideprint &ideprint::operator<< (unsigned x) {
+ideprint &ideprint::operator<< (int64_t x) {
   f(tostring(x).c_str()); return *this;
 }
-ideprint &ideprint::operator<< (unsigned long x) {
+ideprint &ideprint::operator<< (uint16_t x) {
   f(tostring(x).c_str()); return *this;
 }
-#ifdef USE_LONG_LONG
-  ideprint &ideprint::operator<< (long long x) {
-    f(tostring(x).c_str()); return *this;
-  }
-  ideprint &ideprint::operator<< (unsigned long long x) {
-    f(tostring(x).c_str()); return *this;
-  }
-#endif
+ideprint &ideprint::operator<< (uint32_t x) {
+  f(tostring(x).c_str()); return *this;
+}
+ideprint &ideprint::operator<< (uint64_t x) {
+  f(tostring(x).c_str()); return *this;
+}
 ideprint &ideprint::operator<< (void *x) {
   f(tostringv(x).c_str()); return *this;
 }

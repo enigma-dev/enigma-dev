@@ -16,14 +16,22 @@
 **/
 
 /**
-  @file  graphics_object.h
-  @brief Adds a collisions-related tier following the transform tier.
-*/
+ * @file  graphics_object.h
+ * @brief Adds a collisions-related tier following the transform tier.
+ */
 
 #include "collisions_object.h"
-#include <cmath>
+#include "math_consts.h"
+#include "sprites.h"
+#include "sprites_internal.h"
 
+#include <cmath>
 #include <floatcomp.h>
+
+using enigma_user::sprite_get_bbox_right_relative;
+using enigma_user::sprite_get_bbox_left_relative;
+using enigma_user::sprite_get_bbox_top_relative;
+using enigma_user::sprite_get_bbox_bottom_relative;
 
 namespace enigma
 {

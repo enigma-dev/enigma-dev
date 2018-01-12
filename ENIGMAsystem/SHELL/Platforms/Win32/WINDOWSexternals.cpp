@@ -76,33 +76,33 @@ int external_define(string dll,string func,int calltype,bool returntype,int argc
                     bool t09,bool t10,bool t11,bool t12,bool t13,bool t14,bool t15,bool t16)
 {
   ffi_status status;
-  
+
   int ac=(argcount>16)?16:((int)argcount);
   external *a = new external(ac,(int)returntype);
 
   switch (ac)
   {
-    case 16: a->arg_type[15] = (t16==ty_string?(&ffi_type_pointer):(&ffi_type_double));
-    case 15: a->arg_type[14] = (t15==ty_string?(&ffi_type_pointer):(&ffi_type_double));
-    case 14: a->arg_type[13] = (t14==ty_string?(&ffi_type_pointer):(&ffi_type_double));
-    case 13: a->arg_type[12] = (t13==ty_string?(&ffi_type_pointer):(&ffi_type_double));
-    case 12: a->arg_type[11] = (t12==ty_string?(&ffi_type_pointer):(&ffi_type_double));
-    case 11: a->arg_type[10] = (t11==ty_string?(&ffi_type_pointer):(&ffi_type_double));
-    case 10: a->arg_type[ 9] = (t10==ty_string?(&ffi_type_pointer):(&ffi_type_double));
-    case 9:  a->arg_type[ 8] = (t09==ty_string?(&ffi_type_pointer):(&ffi_type_double));
-    case 8:  a->arg_type[ 7] = (t08==ty_string?(&ffi_type_pointer):(&ffi_type_double));
-    case 7:  a->arg_type[ 6] = (t07==ty_string?(&ffi_type_pointer):(&ffi_type_double));
-    case 6:  a->arg_type[ 5] = (t06==ty_string?(&ffi_type_pointer):(&ffi_type_double));
-    case 5:  a->arg_type[ 4] = (t05==ty_string?(&ffi_type_pointer):(&ffi_type_double));
-    case 4:  a->arg_type[ 3] = (t04==ty_string?(&ffi_type_pointer):(&ffi_type_double));
-    case 3:  a->arg_type[ 2] = (t03==ty_string?(&ffi_type_pointer):(&ffi_type_double));
-    case 2:  a->arg_type[ 1] = (t02==ty_string?(&ffi_type_pointer):(&ffi_type_double));
-    case 1:  a->arg_type[ 0] = (t01==ty_string?(&ffi_type_pointer):(&ffi_type_double));
+    case 16: a->arg_type[15] = (t16 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
+    case 15: a->arg_type[14] = (t15 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
+    case 14: a->arg_type[13] = (t14 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
+    case 13: a->arg_type[12] = (t13 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
+    case 12: a->arg_type[11] = (t12 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
+    case 11: a->arg_type[10] = (t11 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
+    case 10: a->arg_type[ 9] = (t10 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
+    case 9:  a->arg_type[ 8] = (t09 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
+    case 8:  a->arg_type[ 7] = (t08 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
+    case 7:  a->arg_type[ 6] = (t07 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
+    case 6:  a->arg_type[ 5] = (t06 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
+    case 5:  a->arg_type[ 4] = (t05 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
+    case 4:  a->arg_type[ 3] = (t04 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
+    case 3:  a->arg_type[ 2] = (t03 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
+    case 2:  a->arg_type[ 1] = (t02 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
+    case 1:  a->arg_type[ 0] = (t01 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
   }
-  
-  ffi_type *restype = ((returntype==ty_string)?(&ffi_type_pointer):(&ffi_type_double));
+
+  ffi_type *restype = (returntype == ty_real) ? &ffi_type_double : &ffi_type_pointer;
   status=ffi_prep_cif(&(a->cif), ((calltype==dll_stdcall)?FFI_STDCALL:FFI_DEFAULT_ABI), ac, restype, a->arg_type);
-  
+
   if (status != FFI_OK)
   {
     show_error("Defining DLL failed.",0);
@@ -115,35 +115,35 @@ int external_define(string dll,string func,int calltype,bool returntype,int argc
   	dllmod = LoadLibrary(dll.c_str());
   else
   {
-  	printf("LOADING PREEXISTING HANDLE");
+    printf("LOADING PREEXISTING HANDLE");
     dllmod = dllHandles[dll];
   }
 
   if (dllmod == NULL)
   {
-  	show_error(std::string("Cannot load library \"") + dll + std::string("\"!"), 0);
-  	return -1;
+    show_error(std::string("Cannot load library \"") + dll + std::string("\"!"), 0);
+    return -1;
   }
-  
+
   FARPROC funcptr = GetProcAddress(dllmod,func.c_str());
   if (funcptr==NULL)
   {
-  	show_error(std::string("No such function \"") + func + std::string("\"."), 0);
-  	return -1;
+    show_error(std::string("No such function \"") + func + std::string("\"."), 0);
+    return -1;
   }
 
   a->functionptr=(void(*)())funcptr;
-  
+
   int ind=external_count++;
   externals[ind]=a;
-  
+
   return ind;
 }
 
 }
 
 using namespace enigma;
-union ambiguous { double d; const char* s; };
+union ambiguous { double d; const char* s; const void* p; };
 
 namespace enigma_user
 {
@@ -154,24 +154,26 @@ variant external_call(int id,variant a1,variant a2, variant a3, variant a4, vari
   map<int,external*>::iterator it;
   if ((it=externals.find(id)) == externals.end())
   {
-  	show_error("Unknown external function called", 0);
-  	return 0;
+    show_error("Unknown external function called", 0);
+    return 0;
   }
   external* a=it->second;
-  
+
   ambiguous array[a->argc];
   void *arg_values[a->argc];
-  
+
   variant args[] = { a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16 };
-  for (int i=0;i<a->argc;i++)
+  for (int i = 0; i < a->argc; ++i)
   {
-    if (a->arg_type[i]==&ffi_type_double)
-      array[i].d=(double)args[i];
+    if (a->arg_type[i] == &ffi_type_double)
+      array[i].d = (double)args[i];
+    else if (args[i].type == ty_pointer)
+      array[i].p = args[i].rval.p;
     else
-      array[i].s=((string)args[i]).c_str();
+      array[i].s = ((string)args[i]).c_str();
     arg_values[i]=&array[i];
   }
-  
+
   ambiguous result;
   ffi_call(&(a->cif), a->functionptr, &result, arg_values);
   if (a->restype==ty_string) return result.s;

@@ -1,6 +1,7 @@
 /********************************************************************************\
  **                                                                              **
  **  Copyright (C) 2010 Alasdair Morrison <tgmg@g-java.com>                      **
+ **  Copyright (C) 2014 Seth N. Hetu                                             **
  **                                                                              **
  **  This file is a part of the ENIGMA Development Environment.                  **
  **                                                                              **
@@ -37,7 +38,6 @@ int loopy();
 	void key_press(int keycode);
 	void key_release(int keycode);
     void cocoa_io_handle();
-    const char* cocoa_get_working_directory();
 #ifdef __cplusplus
 }
 #endif

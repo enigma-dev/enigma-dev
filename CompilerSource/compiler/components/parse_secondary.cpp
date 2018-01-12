@@ -1,6 +1,7 @@
 /********************************************************************************\
 **                                                                              **
 **  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2014 Seth N. Hetu                                             **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -51,6 +52,16 @@ int lang_CPP::compile_parseSecondary(map<int,parsed_object*> &parsed_objects, pa
     parsed_object *oto = it->second;
     for (unsigned iit = 0; iit < oto->events.size; iit++)
       parser_secondary(oto->events[iit].code,oto->events[iit].synt,EGMglobal,oto,&oto->events[iit], script_names);
+  }
+  
+  // Build an inheritance tree
+  for (po_i it = parsed_objects.begin(); it != parsed_objects.end(); it++) {
+    po_i parent_it = parsed_objects.find(it->second->parent_index);
+    if (parent_it != parsed_objects.end()) {
+      it->second->parent = parent_it->second;
+      parent_it->second->children.push_back(it->second);
+      printf("Object %s (%d) is a child of %s (%d)\n", it->second->name.c_str(), it->second->id, it->second->parent->name.c_str(), it->second->parent->id);
+    }
   }
   
   // Give all scripts a second pass

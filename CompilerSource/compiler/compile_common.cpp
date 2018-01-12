@@ -1,6 +1,7 @@
 /********************************************************************************\
 **                                                                              **
 **  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2014 Seth N. Hetu                                             **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -34,9 +35,10 @@ using namespace std;
 
 namespace used_funcs
 {
+  // TODO(JoshDreamland): This is hideous, and was never implemented.
+  // Replace with map of functions of interest
   bool object_set_sprite = 0;
-  void zero()
-  {
+  void zero() {
     object_set_sprite = 0;
   }
 }

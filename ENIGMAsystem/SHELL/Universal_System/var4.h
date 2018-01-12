@@ -1,6 +1,7 @@
 /********************************************************************************\
 **                                                                              **
 **  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2014 Seth N. Hetu                                             **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -25,21 +26,20 @@
 **                                                                              **
 \********************************************************************************/
 
-#ifndef _var4_h
-#define _var4_h
-
-#include <string>
-using std::string;
+#ifndef ENIGMA_VAR4_H
+#define ENIGMA_VAR4_H
 
 // We want var and variant to support a lot of assignment types.
-
 #include "var_te.h"
+
+#include <string>
 
 namespace enigma {
   union rvt {
     double d;
-    void * p;
+    const void * p;
     rvt(double x): d(x) {}
+    rvt(const void * x): p(x) {}
     #define var_e 1e-12
   };
 }
@@ -53,7 +53,7 @@ struct variant
   static const int default_type;
 
   enigma::rvt rval;
-  string sval;
+  std::string sval;
   int type;
   
   operator int();
@@ -70,7 +70,7 @@ struct variant
   operator double();
   operator float();
   
-  operator string();
+  operator std::string();
   
   operator int() const;
   operator bool() const;
@@ -86,12 +86,14 @@ struct variant
   operator double() const;
   operator float() const;
   
-  operator string() const;
+  operator std::string() const;
   
   variant();
+  variant(const void *p);
   types_extrapolate_alldecc(variant)
   
   types_extrapolate_alldec(variant& operator=)
+  variant& operator=(const void* p);
   types_extrapolate_alldec(variant& operator+=)
   types_extrapolate_alldec(variant& operator-=)
   types_extrapolate_alldec(variant& operator*=)
@@ -163,7 +165,7 @@ struct variant
 
 struct var
 {
-  void *values;
+  void* values;
   
   private:
     void initialize();
@@ -187,7 +189,7 @@ struct var
   operator double();
   operator float();
   
-  operator string();
+  operator std::string();
   
   operator int() const;
   operator bool() const;
@@ -203,7 +205,7 @@ struct var
   operator double() const;
   operator float() const;
   
-  operator string() const;
+  operator std::string() const;
   
   var();
   var(const var&);
@@ -225,6 +227,7 @@ struct var
   types_extrapolate_alldec(variant& operator-=)
   types_extrapolate_alldec(variant& operator*=)
   types_extrapolate_alldec(variant& operator/=)
+  types_extrapolate_alldec(variant& operator%=)
   
   types_extrapolate_alldec(variant& operator<<=)
   types_extrapolate_alldec(variant& operator>>=)
@@ -287,6 +290,11 @@ struct var
   const variant& operator[] (int) const;
   const variant& operator() (int) const;
   const variant& operator() (int,int) const;
+
+  //Calculate array lengths.
+  int array_len() const;
+  int array_height() const;
+  int array_len(int row) const;
   
   ~var();
 };
@@ -299,6 +307,7 @@ types_binary_assign_extrapolate_declare(+, const variant&)
 types_binary_assign_extrapolate_declare(-, const variant&)
 types_binary_assign_extrapolate_declare(*, const variant&)
 types_binary_assign_extrapolate_declare(/, const variant&)
+types_binary_assign_extrapolate_declare(%, const variant&)
 
 types_binary_assign_extrapolate_declare(<<, const variant&) 
 types_binary_assign_extrapolate_declare(>>, const variant&) 
@@ -334,6 +343,7 @@ types_binary_assign_extrapolate_declare(+, const var&)
 types_binary_assign_extrapolate_declare(-, const var&)
 types_binary_assign_extrapolate_declare(*, const var&)
 types_binary_assign_extrapolate_declare(/, const var&)
+types_binary_assign_extrapolate_declare(%, const var&)
 
 types_binary_assign_extrapolate_declare(<<, const var&) 
 types_binary_assign_extrapolate_declare(>>, const var&) 
@@ -376,4 +386,18 @@ types_binary_extrapolate_alldecce(bool, operator<,  const var&)
 
 #undef unsigll
 
-#endif
+namespace enigma_user {
+  enum {
+    ty_undefined = -1,
+    ty_real = 0,
+    ty_string = 1,
+    ty_pointer = 2
+  };
+
+  bool is_undefined(variant var);
+  bool is_real(variant val);
+  bool is_string(variant val);
+  bool is_ptr(variant var);
+}
+
+#endif //ENIGMA_VAR4_H

@@ -1,6 +1,7 @@
 /********************************************************************************\
 **                                                                              **
 **  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2014 Seth N. Hetu                                             **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -126,7 +127,7 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
         last_token = '@';
         continue;
       }
-      
+
       jdi::macro_iter_c itm = main_context->get_macros().find(name);
       if (itm != main_context->get_macros().end())
       {
@@ -150,7 +151,7 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
         }
       }
       
-      char c = 'n';
+      char c = 'n', cprime = 0;
       
       jdi::definition* d;
       tokiter itt = edl_tokens.find(name);
@@ -162,12 +163,12 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
         if (d->flags & jdi::DEF_TYPENAME)
           c = 't';
         else if (d->flags & jdi::DEF_FUNCTION and referencers_varargs(((jdi::definition_function*)d)->referencers))
-          c = 'V';
+          c = 'V', cprime = 'n';
       }
       else if (name == "then")
         continue; //"Then" is a truly useless keyword. I see no need to preserve it.
       
-      if (last_token == c)
+      if (last_token == c || last_token == cprime)
       {
         if (c == '&' or c == '^' or c == '|') {} //Ignore these tokens
         else if (c != 'r' and c != 't' and c != '!')
@@ -248,7 +249,8 @@ int parser_ready_input(string &code,string &synt,unsigned int &strc, varray<stri
         str = (code.substr(spos,++pos-spos));
       }
       string_in_code[strc++] = str;
-      codo[bpos] = synt[bpos] = last_token = '"', bpos++;
+      codo[bpos] = synt[bpos] = last_token = setting::use_cpp_strings? '\'' : '\"';
+      bpos++;
       continue;
     }
     if (code[pos] == '/')
@@ -411,7 +413,7 @@ int parser_reinterpret(string &code,string &synt)
       cout << "CHECK POINT" << endl;
       if (!en) {
         code.insert(pos,"(enigma::varargs(),");
-        synt.insert(pos,"(ttttttttttttttt(),");
+        synt.insert(pos,"(nnnnnnnnnnnnnnn(),");
         pos += 19;
         for (unsigned lvl = 1; lvl; pos++)
         {
@@ -780,9 +782,15 @@ const char * indent_chars   =  "\n                                \
                                                                   ";
 static inline string string_settings_escape(string n)
 {
-  if (!n.length()) return "\"\"";
-  if (n[0] == '\'' and n[n.length()-1] == '\'')
-    n[0] = n[n.length() - 1] = '"';
+  if (!setting::use_cpp_strings) {
+    if (!n.length()) return "\"\"";
+    if (n[0] == '\'' and n[n.length()-1] == '\'')
+      n[0] = n[n.length() - 1] = '"';
+  } else {
+    if (!n.length()) {
+      return "\'\'";
+    }
+  }
   for (size_t pos = 1; pos < n.length()-1; pos++)
   {
     switch (n[pos])
@@ -814,7 +822,8 @@ static inline string string_settings_escape(string n)
   }
   return n;
 }
-void print_to_file(string code,string synt,unsigned int &strc, varray<string> &string_in_code,int indentmin_b4,ofstream &of)
+
+void print_to_file(string code,string synt,const unsigned int strc, const varray<string> &string_in_code,int indentmin_b4,ofstream &of)
 {
   //FILE* of = fopen("/media/HP_PAVILION/Documents and Settings/HP_Owner/Desktop/parseout.txt","w+b");
   FILE* of_ = fopen("/home/josh/Desktop/parseout.txt","ab");
@@ -873,9 +882,9 @@ void print_to_file(string code,string synt,unsigned int &strc, varray<string> &s
             }
           }
         break;
-      case '"':
+      case '"': case '\'':
           if (pars) pars--;
-            if (str_ind >= strc) cout << "What the crap.\n";
+            if (str_ind >= strc) cout << "What the string literal.\n";
             of << string_settings_escape(string_in_code[str_ind]).c_str();
             str_ind++;
             if (synt[pos+1] == '+' and synt[pos+2] == '"')

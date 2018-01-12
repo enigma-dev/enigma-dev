@@ -1,1 +1,1 @@
-SOURCES += $(wildcard Universal_System/Extensions/Asynchronous/*.cpp) 
+SOURCES += $(wildcard Universal_System/Extensions/Asynchronous/*.cpp)

@@ -4,6 +4,7 @@
   
   @section License
     Copyright (C) 2008-2012 Josh Ventura
+    Copyright (C) 2014 Seth N. Hetu
     This file is a part of the ENIGMA Development Environment.
 
     ENIGMA is free software: you can redistribute it and/or modify it under the
@@ -35,6 +36,7 @@ struct language_adapter {
   
   // Sizable utilities
   virtual int link_globals(parsed_object*, EnigmaStruct*, parsed_script*[], vector<parsed_script*>& tlines) = 0;
+  virtual int link_ambiguous(parsed_object*, EnigmaStruct*, parsed_script*[], vector<parsed_script*>& tlines) = 0;
 
   // IDE_EDITABLEs added before compile
   virtual int compile_parseAndLink(EnigmaStruct*,parsed_script*[], vector<parsed_script*>& tlines, const std::set<std::string>& script_names) = 0;

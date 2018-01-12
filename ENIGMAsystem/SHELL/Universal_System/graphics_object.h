@@ -1,4 +1,5 @@
 /** Copyright (C) 2010-2011 Josh Ventura
+*** Copyright (C) 2014 Seth N. Hetu
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -25,9 +26,7 @@
 
 #ifndef INCLUDED_FROM_SHELLMAIN
   #include "var4.h"
-  #include "spritestruct.h"
-  #include <cstdlib>
-  #include <cmath>
+  #include "sprites.h"
 #endif
 
 #include "scalar.h"
@@ -62,6 +61,12 @@ namespace enigma
       gs_scalar image_yscale;
       gs_scalar image_angle;
 
+      virtual variant myevent_draw();
+      virtual bool myevent_draw_subcheck();
+      virtual variant myevent_drawgui();
+      virtual bool myevent_drawgui_subcheck();
+      virtual variant myevent_drawresize();
+      
     //Accessors
       #ifdef JUST_DEFINE_IT_RUN
         int sprite_width, sprite_height;
@@ -85,6 +90,6 @@ namespace enigma
       object_graphics(unsigned x, int y);
       virtual ~object_graphics();
   };
-}
+} //namespace enigma
 
 #endif

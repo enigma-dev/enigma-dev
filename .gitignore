@@ -22,6 +22,7 @@ blank.txt
 .DS_Store
 .eobjs/
 plugins/
+ENIGMA/
 ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/
 ENIGMAsystem/SHELL/API_Switchboard.h
 *.layout
@@ -42,3 +43,8 @@ ENIGMAsystem/SHELL/ENIGMAengine
 *.cbTemp
 ENIGMAsystem/SHELL/.objs
 *.res
+MacOS/build/Release/EnigmaXcode.app/Contents/Info.plist
+MacOS/build/Release/EnigmaXcode.app/Contents/Resources/*
+*.stackdump
+/emake
+.deps

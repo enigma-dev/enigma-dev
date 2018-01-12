@@ -1,4 +1,5 @@
 /** Copyright (C) 2013 Robert B. Colton
+***               2014 Harijs Grinbergs
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,8 +16,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef _GLSHADER__H
-#define _GLSHADER__H
+#ifndef GL_SHADER_H
+#define GL_SHADER_H
 
 #include "../General/OpenGLHeaders.h"
 #include <string>
@@ -24,15 +25,24 @@ using std::string;
 
 namespace enigma
 {
-    string getVertexShaderPrefix();
-    string getFragmentShaderPrefix();
-    string getDefaultFragmentShader();
-    string getDefaultVertexShader();
-    void getDefaultUniforms(int prog_id);
-    void getDefaultAttributes(int prog_id);
-    void getUniforms(int prog_id);
-    void getAttributes(int prog_id);
-    int getGLTypeSize(GLuint type);
+  string getVertexShaderPrefix();
+  string getFragmentShaderPrefix();
+  string getDefaultFragmentShader();
+  string getDefaultVertexShader();
+  void getDefaultUniforms(int prog_id);
+  void getDefaultAttributes(int prog_id);
+  void getUniforms(int prog_id);
+  void getAttributes(int prog_id);
+  int getGLTypeSize(GLuint type);
+
+  void glsl_uniform_matrix3fv_internal(int location, int size, const float *matrix);
+  void glsl_uniform_matrix4fv_internal(int location, int size, const float *matrix);
+  void glsl_uniformi_internal(int location, int v0);
+  void glsl_uniformf_internal(int location, float v0, float v1, float v2, float v3);
+
+  void glsl_attribute_enable_all_internal(bool enable);
+  void glsl_attribute_enable_internal(int location, bool enable);
+  void glsl_attribute_set_internal(int location, int size, int type, bool normalize, int stride, int offset);
 }
 
 namespace enigma_user
@@ -70,6 +80,7 @@ void glsl_program_free(int id);
 void glsl_program_default_set(int id); //Override default shader
 void glsl_program_default_reset(); //Reset back the default shader
 void glsl_program_set_name(int id, string name); //Useful for debug
+int glsl_program_get();
 
 int glsl_get_uniform_location(int program, string name);
 int glsl_get_attribute_location(int program, string name);
@@ -101,6 +112,14 @@ void glsl_uniform1uiv(int location, int size, const float *value);
 void glsl_uniform2uiv(int location, int size, const float *value);
 void glsl_uniform3uiv(int location, int size, const float *value);
 void glsl_uniform4uiv(int location, int size, const float *value);
+
+void glsl_uniform_matrix2fv(int location, int size, const float *matrix);
+void glsl_uniform_matrix3fv(int location, int size, const float *matrix);
+void glsl_uniform_matrix4fv(int location, int size, const float *matrix);
+
+void glsl_attribute_enable_all(bool enable);
+void glsl_attribute_enable(int location, bool enable);
+void glsl_attribute_set(int location, int size, int type, bool normalize, int stride, int offset);
 
 // Wrap our abstracted version to the GameMaker version
 #define shader_set            glsl_program_set

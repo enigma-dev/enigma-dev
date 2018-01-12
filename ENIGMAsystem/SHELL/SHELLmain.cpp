@@ -1,4 +1,5 @@
 /** Copyright (C) 2008-2013 Josh Ventura
+*** Copyright (C) 2014 Seth N. Hetu
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,17 +16,13 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-
-#include <cstdlib>
-#include <cstddef>
-#include <string>
-
 #define INCLUDED_FROM_SHELLMAIN 1
 
 // Simple Universal libraries
 ///////////////////////////////
 
 #include "Universal_System/var4.h"
+#include "Universal_System/var_array.h"
 #include "Universal_System/dynamic_args.h"
 
 #ifdef DEBUG_MODE
@@ -34,13 +31,14 @@
 
 #include "Universal_System/mathnc.h"
 #include "Universal_System/estring.h"
-#include "Universal_System/bufferstruct.h"
+#include "Universal_System/buffers.h"
 #include "Universal_System/fileio.h"
 #include "Universal_System/terminal_io.h"
 
-#include "Universal_System/backgroundstruct.h"
-#include "Universal_System/spritestruct.h"
-#include "Universal_System/fontstruct.h"
+#include "Universal_System/background.h"
+#include "Universal_System/sprites.h"
+#include "Universal_System/fonts.h"
+#include "Universal_System/texture_atlas.h"
 
 #include "Universal_System/callbacks_events.h"
 

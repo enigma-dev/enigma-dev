@@ -1,6 +1,7 @@
 /********************************************************************************\
 **                                                                              **
 **  Copyright (C) 2008-2011 Josh Ventura                                        **
+**  Copyright (C) 2014 Seth N. Hetu                                             **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -116,8 +117,8 @@ bool decquad::operator!= (const decquad& x) {
 parsed_event::parsed_event():                               id(0), mainId(0), code(), synt(), strc(0), otherObjId(-4), myObj(NULL) {}
 parsed_event::parsed_event(parsed_object *po):              id(0), mainId(0), code(), synt(), strc(0), otherObjId(-4), myObj(po) {}
 parsed_event::parsed_event(int m, int s,parsed_object *po): id(s), mainId(m), code(), synt(), strc(0), otherObjId(-4), myObj(po) {}
-parsed_object::parsed_object() {}
-parsed_object::parsed_object(string n, int i, int s, int m, int p, bool vis, bool sol, double d,bool pers): name(n), id(i), sprite_index(s), mask_index(m), parent(p), visible(vis), solid(sol), persistent(pers), depth(d) {}
+parsed_object::parsed_object(): parent(NULL) {}
+parsed_object::parsed_object(string n, int i, int s, int m, int p, bool vis, bool sol, double d,bool pers): name(n), id(i), sprite_index(s), mask_index(m), parent_index(p), visible(vis), solid(sol), persistent(pers), depth(d), parent(NULL) {}
 map<int,parsed_object*> parsed_objects;
 map<int,parsed_room*> parsed_rooms;
 vector<parsed_extension> parsed_extensions;
@@ -132,6 +133,14 @@ void parsed_object::copy_from(parsed_object& source, string sourcename, string d
   for (parsed_object::locit vit = source.locals.begin(); vit != source.locals.end(); vit++)
   {
     dectrip &t = dest.locals[vit->first];
+    if (!t.defined())
+      t = vit->second, cout << "Copied `" << vit->first << "' from " << sourcename << " to " << destname;
+    else if (vit->second.defined() and vit->second != t)
+      cout << "***ENIGMA: WARNING: Conflicting types `" << vit->second.type << vit->second.prefix << vit->second.suffix << "' and `" << t.type << t.prefix << t.suffix << "' to variable `" << vit->first << "' in " << destname;
+  }
+  for (parsed_object::ambit vit = source.ambiguous.begin(); vit != source.ambiguous.end(); vit++)
+  {
+    dectrip &t = dest.ambiguous[vit->first];
     if (!t.defined())
       t = vit->second, cout << "Copied `" << vit->first << "' from " << sourcename << " to " << destname;
     else if (vit->second.defined() and vit->second != t)

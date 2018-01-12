@@ -1,4 +1,5 @@
 /** Copyright (C) 2008 Josh Ventura
+*** Copyright (C) 2014 Seth N. Hetu
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -37,28 +38,40 @@ using namespace std;
 #include "languages/lang_CPP.h"
 
 struct foundevent { int mid, id, count; foundevent(): mid(0),id(0),count(0) {} void f2(int m,int i) { id = i, mid = m; } void inc(int m,int i) { mid=m,id=i,count++; } void operator++(int) { count++; } };
-map<string,foundevent> used_events;
 typedef map<string,foundevent>::iterator evfit;
 
 int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
 {
-  ofstream wto((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_evparent.h").c_str());
-  wto << license;
-
   /* Generate a new list of events used by the objects in
   ** this game. Only events on this list will be exported.
   ***********************************************************/
+  map<string,foundevent> used_events;
+  
+  // Defragged events must be written before object data, or object data cannot determine which events were used.
   used_events.clear();
-  for (int i = 0; i < es->gmObjectCount; i++)
-    for (int ii = 0; ii < es->gmObjects[i].mainEventCount; ii++)
-      for (int iii = 0; iii < es->gmObjects[i].mainEvents[ii].eventCount; iii++)
-      {
+  for (int i = 0; i < es->gmObjectCount; i++) {
+    for (int ii = 0; ii < es->gmObjects[i].mainEventCount; ii++) {
+      for (int iii = 0; iii < es->gmObjects[i].mainEvents[ii].eventCount; iii++) {
         const int mid = es->gmObjects[i].mainEvents[ii].id, id = es->gmObjects[i].mainEvents[ii].events[iii].id;
-        if (event_is_instance(mid,id))
+        if (event_is_instance(mid,id)) {
           used_events[event_stacked_get_root_name(mid)].inc(mid,id);
-        else
+        } else {
           used_events[event_get_function_name(mid,id)].inc(mid,id);
+        }
       }
+    }
+  }
+
+  ofstream wto((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_evparent.h").c_str());
+  wto << license;
+
+  //Write timeline/moment names. Timelines are like scripts, but we don't have to worry about arguments or return types.
+  for (int i=0; i<es->timelineCount; i++) {
+    for (int j=0; j<es->timelines[i].momentCount; j++) {
+      wto << "void TLINE_" <<es->timelines[i].name <<"_MOMENT_" <<es->timelines[i].moments[j].stepNo <<"();\n";
+    }
+  }
+  wto <<"\n";
 
   /* Some events are included in all objects, even if the user
   ** hasn't specified code for them. Account for those here.
@@ -100,6 +113,26 @@ int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
                 wto << endl << "    {" << endl << "  " << event_get_default_code(it->second.mid,it->second.id) << endl << (e_is_inst ? "    }" : "    return 0;\n    }") << endl;
               else wto << (e_is_inst ? " { } // No default " : " { return 0; } // No default ") << event_get_human_name(it->second.mid,it->second.id) << " code." << endl;
             }
+
+  //The event_parent also contains the definitive lookup table for all timelines, as a fail-safe in case localized instances can't find their own timelines.
+  wto << "    virtual void timeline_call_moment_script(int timeline_index, int moment_index) {\n";
+  wto << "      switch (timeline_index) {\n";
+  for (int i=0; i<es->timelineCount; i++) {
+    wto << "        case " <<es->timelines[i].id <<": {\n";
+    wto << "          switch (moment_index) {\n";
+    for (int j=0; j<es->timelines[i].momentCount; j++) {
+      wto << "            case " <<j <<": {\n";
+      wto << "              ::TLINE_" <<es->timelines[i].name <<"_MOMENT_" <<es->timelines[i].moments[j].stepNo <<"();\n";
+      wto << "              break;\n";
+      wto << "            }\n";
+    }
+    wto << "          }\n";
+    wto << "        }\n";
+    wto << "        break;\n";
+  }
+  wto << "      }\n";
+  wto << "    }\n";
+
   wto << "    //virtual void unlink() {} // This is already declared at the super level." << endl;
   wto << "    virtual variant myevents_perf(int type, int numb) {return 0;}" << endl;
   wto << "    event_parent() {}" << endl;
@@ -203,9 +236,4 @@ int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
   wto.close();
 
   return 0;
-}
-
-bool event_used_by_something(string name)
-{
-  return used_events.find(name) != used_events.end();
 }

@@ -1,3 +1,5 @@
+
+
 #################
 # configuration #
 #################
@@ -40,7 +42,7 @@ RESOURCES += Preprocessor_Environment_Editable/Resources.rc
 endif
 
 # Default windres
-WINDRES = windres.exe
+WINDRES = windres.exe --codepage=65001
 
 # Default find
 FIND = find
@@ -58,21 +60,20 @@ CC := gcc
 DEPENDENCIES :=
 
 ifeq ($(GMODE), Debug)
-	CXXFLAGS += -Wall -g -DDEBUG_MODE
-	CFLAGS += -Wall -g -DDEBUG_MODE
+	override CXXFLAGS += -Wall -g -DDEBUG_MODE
+	override CFLAGS += -Wall -g -DDEBUG_MODE
 else ifeq ($(GMODE), Compile)
-	CXXFLAGS += -Wall -s -O3 -fno-rtti -fno-exceptions -flto -fdata-sections -ffunction-sections
-	CFLAGS += -Wall -s -O3 -flto -fno-exceptions -fdata-sections -ffunction-sections
-	LDFLAGS += -flto -s -O3
+	override CXXFLAGS += -Wall -s -O3 -fno-rtti -fno-exceptions -flto -fdata-sections -ffunction-sections
+	override CFLAGS += -Wall -s -O3 -flto -fno-exceptions -fdata-sections -ffunction-sections
+	override LDFLAGS += -flto -s -O3
 else
-	CXXFLAGS += -Wall -s -O3 -fno-rtti -fno-exceptions
-	CFLAGS += -Wall -s -O3 -fno-exceptions
+	override CXXFLAGS += -Wall -s -O3 -fno-rtti -fno-exceptions
+	override CFLAGS += -Wall -s -O3 -fno-exceptions
 endif
 
 ifeq ($(PLATFORM), Win32)
-	LDFLAGS += -L../Additional/i686-w64-mingw32/lib -static-libgcc -static-libstdc++
 	ifeq ($(GMODE), Compile)
-		LDFLAGS += -static-libgcc -Wl,-subsystem,windows
+		override LDFLAGS += -static-libgcc -Wl,-subsystem,windows
 	endif
 endif
 
@@ -86,8 +87,11 @@ all: compile_game
 
 clean:
 	$(RM) $(OUTPUTNAME) $(RESOURCEBINARY)
-	$(FIND) $(OBJDIR) -name "*.o" -exec $(RM) -rf {} \;
-	$(FIND) $(OBJDIR) -name "*.d" -exec $(RM) -rf {} \;
+	$(FIND) "$(WORKDIR).eobjs/$(COMPILEPATH)" -name "*.o" -exec $(RM) -rf {} \;
+	$(FIND) "$(WORKDIR).eobjs/$(COMPILEPATH)" -name "*.d" -exec $(RM) -rf {} \;
+	
+cleandep:
+	$(RM) $(CLEANDEPS)
 
 SOURCES := $(wildcard *.cpp)
 include $(addsuffix /Makefile,$(SYSTEMS) $(EXTENSIONS))
@@ -109,7 +113,7 @@ endif
 # building #
 ############
 
-compile_game: $(OBJECTS) $(RCFILES) $(RESOURCEBINARY) $(DEPENDENCIES)
+compile_game: cleandep $(OBJECTS) $(RCFILES) $(RESOURCEBINARY) $(DEPENDENCIES)
 	$(CXX) $(LDFLAGS) -o "$(OUTPUTNAME)" $(OBJECTS) $(RESOURCEBINARY) $(LDLIBS)
 	@echo Built to "$(OUTPUTNAME)"
 
@@ -117,7 +121,7 @@ compile_game: $(OBJECTS) $(RCFILES) $(RESOURCEBINARY) $(DEPENDENCIES)
 # -MMD outputs dependencies to %.d as a side effect of compilation, ignoring system headers
 # -MP gives phony rules for non-target files, avoiding problems with missing files
 $(OBJDIR)/%.o $(OBJDIR)/%.d: %.cpp | $(OBJDIRS)
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(CFLAGS) $(INCLUDES) -MMD -MP -c -o $(OBJDIR)/$*.o $<
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(INCLUDES) -MMD -MP -c -o $(OBJDIR)/$*.o $<
 
 $(OBJDIR)/%.o $(OBJDIR)/%.d: %.c | $(OBJDIRS)
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(INCLUDES) -MMD -MP -c -o $(OBJDIR)/$*.o $<
@@ -126,14 +130,13 @@ $(OBJDIR)/%.o $(OBJDIR)/%.d: %.m | $(OBJDIRS)
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(INCLUDES) -MMD -MP -c -o $(OBJDIR)/$*.o $<
 
 $(OBJDIR)/resources.res: $(RCFILES) GENERATED_FILE
-	echo "// GENERATED RESOURCE FILE FRONTEND" > $(OBJDIR)/resources.rc
-	
+	echo // GENERATED RESOURCE FILE FRONTEND > $(OBJDIR)/resources.rc
 	for res in $(RESOURCES); do echo "#include \"$$res\"" >> $(OBJDIR)/resources.rc; done
-	$(WINDRES) -o $@ -I. -I$(WORKDIR) $(OBJDIR)/resources.rc -O coff
+	$(WINDRES) -o $@ -I. -I$(WORKDIR) $(OBJDIR)/resources.rc -O coff $(RCFLAGS) 
 GENERATED_FILE:
 
 $(OBJDIR)/%.rc: %.rc
-	$(WINDRES) -o $@ -I. -I$(WORKDIR) $^ -O rc
+	$(WINDRES) -o $@ -I. -I$(WORKDIR) $^ -O rc $(RCFLAGS)
 
 $(OBJDIRS):
 	$(MKDIR) -p $@

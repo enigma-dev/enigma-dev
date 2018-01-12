@@ -1,4 +1,5 @@
 /** Copyright (C) 2014 Josh Ventura
+*** Copyright (C) 2014 Seth N. Hetu
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -20,15 +21,20 @@
   @brief Adds a timelines tier following the main tier.
 */
 
-#ifndef _timelines_object_h
-#define _timelines_object_h
+//FIXME: this should be ifdef shellmain but enigmas in a sorry state
+#ifdef JUST_DEFINE_IT_RUN
+#  error This file includes non-ENIGMA STL headers and should not be included from SHELLmain.
+#endif
 
-#include <vector>
-#include <map>
+#ifndef ENIGMA_TIMELINES_OBJECT_H
+#define ENIGMA_TIMELINES_OBJECT_H
 
 #include "planar_object.h"
 #include "var4.h"
 #include "scalar.h"
+
+#include <vector>
+#include <map>
 
 namespace enigma
 {
@@ -55,6 +61,6 @@ namespace enigma
     void loop_curr_timeline();
     virtual void timeline_call_moment_script(int timeline_index, int moment_index) {} //This will be provided by the object_locals subclass in compiled code.
   };
-}
+} //namespace enigma
 
-#endif //_timelines_object_h
+#endif //ENIGMA_TIMELINES_OBJECT_H

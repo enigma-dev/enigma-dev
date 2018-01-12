@@ -1,6 +1,7 @@
 /********************************************************************************\
 **                                                                              **
 **  Copyright (C) 2012 Josh Ventura                                             **
+**  Copyright (C) 2014 Seth N. Hetu                                             **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -188,6 +189,13 @@ int directory_create(std::string dname) {
     }
 }
 
+int directory_delete(std::string dname) {
+  BOOL result = RemoveDirectory(dname.c_str());
+  if (result) return 1;
+  else return 0;
+}
+
+
 // Maintainer: If this segment errors, it is an error of philosophy.
 // The Game Maker constants do not have a standard, but line up with
 // their Windows equivalents. Should either change, we have an issue.
@@ -253,9 +261,9 @@ bool file_attributes(std::string fname,int attributes)
     return fa & attributes;
 }
 
-void export_include_file(std::string fname);
+/*void export_include_file(std::string fname);
 void export_include_file_location(std::string fname,std::string location);
-void discard_include_file(std::string fname);
+void discard_include_file(std::string fname);*/
 
 extern unsigned game_id;
 extern std::string working_directory;

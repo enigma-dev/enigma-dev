@@ -19,7 +19,8 @@
 #include "Universal_System/depth_draw.h"
 #include <algorithm>
 #include "../General/GSbackground.h"
-#include "Universal_System/backgroundstruct.h"
+#include "Universal_System/background.h"
+#include "Universal_System/background_internal.h"
 #include "../General/GStextures.h"
 #include "GL3TextureStruct.h"
 #include "../General/GStiles.h"
@@ -28,44 +29,26 @@
 #include "../General/GSprimitives.h" //pr_trianglestrip
 #include "../General/GSmodel.h" //For batcher
 
-#ifdef DEBUG_MODE
-  #include <string>
-  #include "libEGMstd.h"
-  #include "Widget_Systems/widgets_mandatory.h"
-  #define get_background(bck2d,back)\
-    if (back < 0 or size_t(back) >= enigma::background_idmax or !enigma::backgroundstructarray[back]) {\
-      show_error("Attempting to draw non-existing background " + toString(back), false);\
-      return;\
-    }\
-    const enigma::background *const bck2d = enigma::backgroundstructarray[back];
-#else
-  #define get_background(bck2d,back)\
-    const enigma::background *const bck2d = enigma::backgroundstructarray[back];
-#endif
-
-#define __GETR(x) ((x & 0x0000FF))
-#define __GETG(x) ((x & 0x00FF00) >> 8)
-#define __GETB(x) ((x & 0xFF0000) >> 16)
-
 namespace enigma
 {
     static void draw_tile(int index, int back, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, double alpha)
     {
-        if (!enigma_user::background_exists(back)) return;
-        get_background(bck2d,back);
-        float tbw = bck2d->width/(float)bck2d->texbordx, tbh = bck2d->height/(float)bck2d->texbordy,
-              xvert1 = x, xvert2 = xvert1 + width*xscale,
-              yvert1 = y, yvert2 = yvert1 + height*yscale,
-              tbx1 = left/tbw, tbx2 = tbx1 + width/tbw,
-              tby1 = top/tbh, tby2 = tby1 + height/tbh;
+      if (!enigma_user::background_exists(back)) return;
+      get_background(bck2d,back);
+      const gs_scalar tbx = bck2d->texturex, tby = bck2d->texturey,
+                      tbw = bck2d->width/(gs_scalar)bck2d->texturew, tbh = bck2d->height/(gs_scalar)bck2d->textureh,
+                      xvert1 = x, xvert2 = xvert1 + width*xscale,
+                      yvert1 = y, yvert2 = yvert1 + height*yscale,
+                      tbx1 = tbx+left/tbw, tbx2 = tbx1 + width/tbw,
+                      tby1 = tby+top/tbh, tby2 = tby1 + height/tbh;
 
-        //TODO: The model should probably be populated manually along with indicies. The _end() calls a lot of useless code now. Upside is that this needs to be done once.
-        enigma_user::d3d_model_primitive_begin(index, enigma_user::pr_trianglestrip);
-        enigma_user::d3d_model_vertex_texture_color(index, xvert1, yvert1, tbx1, tby1, color, alpha);
-        enigma_user::d3d_model_vertex_texture_color(index, xvert2, yvert1, tbx2, tby1, color, alpha);
-        enigma_user::d3d_model_vertex_texture_color(index, xvert1, yvert2, tbx1, tby2, color, alpha);
-        enigma_user::d3d_model_vertex_texture_color(index, xvert2, yvert2, tbx2, tby2, color, alpha);
-        enigma_user::d3d_model_primitive_end(index);
+      //TODO: The model should probably be populated manually along with indicies. The _end() calls a lot of useless code now. Upside is that this needs to be done once.
+      enigma_user::d3d_model_primitive_begin(index, enigma_user::pr_trianglestrip);
+      enigma_user::d3d_model_vertex_texture_color(index, xvert1, yvert1, tbx1, tby1, color, alpha);
+      enigma_user::d3d_model_vertex_texture_color(index, xvert2, yvert1, tbx2, tby1, color, alpha);
+      enigma_user::d3d_model_vertex_texture_color(index, xvert1, yvert2, tbx1, tby2, color, alpha);
+      enigma_user::d3d_model_vertex_texture_color(index, xvert2, yvert2, tbx2, tby2, color, alpha);
+      enigma_user::d3d_model_primitive_end(index);
     }
 
     void load_tiles()
@@ -91,7 +74,7 @@ namespace enigma
                     if (prev_bkid != t.bckid || i == dit->second.tiles.size()-1){ //Texture switch has happened. Create new batch
                         get_background(bck2d,prev_bkid);
                         drawing_depths[dit->second.tiles[0].depth].tilevector.push_back( vector< int >(3) );
-                        drawing_depths[dit->second.tiles[0].depth].tilevector.back()[0] = textureStructs[bck2d->texture]->gltex;
+                        drawing_depths[dit->second.tiles[0].depth].tilevector.back()[0] = bck2d->texture;
                         drawing_depths[dit->second.tiles[0].depth].tilevector.back()[1] = vert_start;
                         drawing_depths[dit->second.tiles[0].depth].tilevector.back()[2] = vert_size;
                         //printf("Texture id = %i and vertices to render = %i and start = %i\n", prev_bkid, vert_size, vert_start );

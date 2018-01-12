@@ -1,5 +1,6 @@
 /** Copyright (C) 2008-2012 Josh Ventura
 *** Copyright (C) 2013-2014 Robert B. Colton, Harijs Grinbergs
+*** Copyright (C) 2015 Harijs Grinbergs
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -20,16 +21,20 @@
 #define ENIGMA_GSMATRIX_H
 
 #include "Universal_System/scalar.h"
-#include "../General/GSmath.h"
+#include "Universal_System/var4.h"
 #include <string>
 
 namespace enigma
 {
-    extern Matrix4 projection_matrix, view_matrix, model_matrix;
-    extern Matrix4 mv_matrix, mvp_matrix;
-    extern Matrix3 normal_matrix;
-    extern bool transform_needs_update;
-    extern void transformation_update();
+  //Forward declare
+  struct Matrix3;
+  struct Matrix4;
+
+  extern Matrix4 projection_matrix, view_matrix, model_matrix;
+  extern Matrix4 mv_matrix, mvp_matrix;
+  extern Matrix3 normal_matrix;
+  extern bool transform_needs_update;
+  extern void transformation_update();
 }
 
 namespace enigma_user
@@ -48,6 +53,7 @@ void d3d_set_projection(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs_sca
 void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs_scalar xto, gs_scalar yto, gs_scalar zto, gs_scalar xup, gs_scalar yup, gs_scalar zup, gs_scalar angle, gs_scalar aspect, gs_scalar znear, gs_scalar zfar);
 void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, gs_scalar angle);
 void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, gs_scalar angle);
+void d3d_set_projection_ortho_lookat(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom, gs_scalar xto, gs_scalar yto, gs_scalar zto, gs_scalar xup, gs_scalar yup, gs_scalar zup);
 
 void d3d_transform_set_identity();
 void d3d_transform_add_translation(gs_scalar xt, gs_scalar yt, gs_scalar zt);
@@ -56,26 +62,55 @@ void d3d_transform_add_rotation_x(gs_scalar angle);
 void d3d_transform_add_rotation_y(gs_scalar angle);
 void d3d_transform_add_rotation_z(gs_scalar angle);
 void d3d_transform_add_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar angle);
+void d3d_transform_add_rotation(gs_scalar x, gs_scalar y, gs_scalar z);
+void d3d_transform_add_look_at(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs_scalar xto, gs_scalar yto, gs_scalar zto, gs_scalar xup, gs_scalar yup, gs_scalar zup);
+
 void d3d_transform_set_translation(gs_scalar xt, gs_scalar yt, gs_scalar zt);
 void d3d_transform_set_scaling(gs_scalar xs, gs_scalar ys, gs_scalar zs);
 void d3d_transform_set_rotation_x(gs_scalar angle);
 void d3d_transform_set_rotation_y(gs_scalar angle);
 void d3d_transform_set_rotation_z(gs_scalar angle);
 void d3d_transform_set_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar angle);
+void d3d_transform_set_rotation(gs_scalar x, gs_scalar y, gs_scalar z);
+void d3d_transform_set_look_at(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs_scalar xto, gs_scalar yto, gs_scalar zto, gs_scalar xup, gs_scalar yup, gs_scalar zup);
+
+void d3d_transform_set_array(const gs_scalar *matrix);
+void d3d_transform_add_array(const gs_scalar *matrix);
+gs_scalar * d3d_transform_get_array_pointer();
+var d3d_transform_get_array();
+void d3d_transform_force_update();
+
 bool d3d_transform_stack_push();
 bool d3d_transform_stack_pop();
 void d3d_transform_stack_clear();
 bool d3d_transform_stack_empty();
 bool d3d_transform_stack_top();
-bool d3d_transform_stack_disgard();
+bool d3d_transform_stack_discard();
 
-gs_scalar* d3d_transform_vertex(gs_scalar x, gs_scalar y, gs_scalar z);
+bool d3d_projection_stack_push();
+bool d3d_projection_stack_pop();
+void d3d_projection_stack_clear();
+bool d3d_projection_stack_empty();
+bool d3d_projection_stack_top();
+bool d3d_projection_stack_discard();
+void d3d_projection_set_array(const gs_scalar *matrix);
+void d3d_projection_add_array(const gs_scalar *matrix);
+gs_scalar * d3d_projection_get_array_pointer();
+var d3d_projection_get_array();
+
+gs_scalar * d3d_view_get_array_pointer();
+var d3d_view_get_array();
+
+gs_scalar * d3d_transformation_get_mv();
+gs_scalar * d3d_transformation_get_mvp();
+
+/*gs_scalar* d3d_transform_vertex(gs_scalar x, gs_scalar y, gs_scalar z);
 
 gs_scalar* matrix_get(int type);
 void matrix_set(int type, gs_scalar* matrix);
 gs_scalar* matrix_build(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar xrotation, gs_scalar yrotation, gs_scalar zrotation, gs_scalar xscale, gs_scalar yscale, gs_scalar zscale);
-gs_scalar* matrix_multiply(gs_scalar* matrix1, gs_scalar* matrix2);
+gs_scalar* matrix_multiply(gs_scalar* matrix1, gs_scalar* matrix2);*/
 
 }
 
-#endif // ENIGMA_GL3D3D_H
+#endif // ENIGMA_GSMATRIX_H

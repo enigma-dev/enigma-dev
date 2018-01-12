@@ -18,9 +18,13 @@
  * You should have received a copy of the GNU General Public License along with
  * JustDefineIt. If not, see <http://www.gnu.org/licenses/>.
 **/
+#ifndef PARSE_BASICS_H
+#define PARSE_BASICS_H
 
 #include <string>
 #include <cstdlib>
+#include <cstdint>
+#include <cinttypes>
 
 typedef size_t pt;
 /** Namespace defining basic utility functions.
@@ -88,20 +92,21 @@ namespace parse_bacics {
     }
 
     using std::string;
-    string toString(int);
-    string toString(long);
+    string toString(int16_t);
+    string toString(int32_t);
+    string toString(int64_t);
+    string toString(uint16_t);
+    string toString(uint32_t);
+    string toString(uint64_t);
     string toString(short);
-    string toString(unsigned);
-    string toString(unsigned long);
-  #if __cplusplus >= 201100
-    string toString(long long x);
-    string toString(unsigned long long x);
-  #endif
     string toString(unsigned short);
     string toString(char);
     string toString(char*);
     string toString(float);
     string toString(double);
+    string toString(size_t);
   }
 }
 using namespace parse_bacics::visible;
+
+#endif

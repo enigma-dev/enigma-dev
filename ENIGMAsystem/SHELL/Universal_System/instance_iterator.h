@@ -1,68 +1,73 @@
-/********************************************************************************\
-**                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
-**                                                                              **
-**  This file is a part of the ENIGMA Development Environment.                  **
-**                                                                              **
-**                                                                              **
-**  ENIGMA is free software: you can redistribute it and/or modify it under the **
-**  terms of the GNU General Public License as published by the Free Software   **
-**  Foundation, version 3 of the license or any later version.                  **
-**                                                                              **
-**  This application and its source code is distributed AS-IS, WITHOUT ANY      **
-**  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS   **
-**  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more       **
-**  details.                                                                    **
-**                                                                              **
-**  You should have recieved a copy of the GNU General Public License along     **
-**  with this code. If not, see <http://www.gnu.org/licenses/>                  **
-**                                                                              **
-**  ENIGMA is an environment designed to create games and other programs with a **
-**  high-level, fully compilable language. Developers of ENIGMA or anything     **
-**  associated with ENIGMA are in no way responsible for its users or           **
-**  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **
-**                                                                              **
-\********************************************************************************/
+/** Copyright (C) 2008 Josh Ventura
+*** Copyright (C) 2014 Josh Ventura, Robert B. Colton
+*** Copyright (C) 2014 Seth N. Hetu
+***
+*** This file is a part of the ENIGMA Development Environment.
+***
+*** ENIGMA is free software: you can redistribute it and/or modify it under the
+*** terms of the GNU General Public License as published by the Free Software
+*** Foundation, version 3 of the license or any later version.
+***
+*** This application and its source code is distributed AS-IS, WITHOUT ANY
+*** WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+*** FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+*** details.
+***
+*** You should have received a copy of the GNU General Public License along
+*** with this code. If not, see <http://www.gnu.org/licenses/>
+**/
 
-#ifndef _INSTANCE_ITERATOR_H
-#define _INSTANCE_ITERATOR_H
+#ifndef ENIGMA_INSTANCE_ITERATOR_H
+#define ENIGMA_INSTANCE_ITERATOR_H
+
+#include "instance_system_base.h"
 
 namespace enigma {
-  struct iterator {
-    struct inst_iter* it;
-    bool temp;
-    
-    operator bool();
-    object_basic* operator*();
-    object_basic* operator->();
-    
-    iterator &operator++();
-    iterator operator++(int);
-    iterator &operator--();
-    iterator operator--(int);
-    
-    const iterator &operator=(iterator&);
-    const iterator &operator=(const iterator&);
-    const iterator &operator=(inst_iter*);
-    const iterator &operator=(object_basic*);
-    
-    iterator(iterator&);
-    iterator(const iterator&);
-    iterator(inst_iter*,bool=false);
-    iterator(object_basic*);
-    iterator();
-    
-    ~iterator();
-    
-    private: void addme();
-  };
-  
-  void update_iterators_for_destroy(const inst_iter*);
-  iterator instance_list_first();
-  iterator fetch_inst_iter_by_id(int id);
-  iterator fetch_inst_iter_by_int(int x);
-  iterator fetch_roominst_iter_by_id(int x);
-}
 
-#endif
+class iterator {
+  enigma::inst_iter temp_iter;
+  enigma::inst_iter* it;
+
+  void addme();
+  void copy(const iterator& other);
+
+ public:
+  operator bool();
+  object_basic* operator*() const;
+  object_basic* operator->() const;
+
+  void handle_unlink(const inst_iter* dead);
+
+  iterator& operator++();
+  iterator operator++(int);
+  iterator& operator--();
+  iterator operator--(int);
+
+  iterator& operator=(const iterator&);
+  iterator& operator=(inst_iter*);
+  iterator& operator=(object_basic*);
+
+  iterator(const iterator&);
+  iterator(inst_iter*);
+  iterator(object_basic*);
+  iterator();
+
+  ~iterator();
+
+  class with;
+};
+
+class iterator::with : iterator, iterator_level {
+ public:
+  with(const iterator& push) : iterator(push), iterator_level(it) {}
+};
+
+void update_iterators_for_destroy(const inst_iter*);
+iterator instance_list_first();
+iterator fetch_inst_iter_by_id(int id);
+iterator fetch_inst_iter_by_int(int x);
+iterator fetch_roominst_iter_by_id(int x);
+
+}  //namespace enigma
+
+#endif  //ENIGMA_INSTANCE_ITERATOR_H

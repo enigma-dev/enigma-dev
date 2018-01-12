@@ -1,8 +1,8 @@
 %E-YAML
 ---
 
-Name: ParticleSystems
-ID: Particle Systems
+Name: Particle Systems
+Identifier: ParticleSystems
 Description: Adds particle systems functions.
 Default: true
 Icon: ps.png

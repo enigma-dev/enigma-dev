@@ -1,6 +1,7 @@
 /********************************************************************************\
 **                                                                              **
 **  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2014 Seth N. Hetu                                             **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -42,7 +43,7 @@ namespace extensions
       windowLinks, graphicsLinks, audioLinks, collisionLinks, widgetLinks, networkLinks;
   };
   struct compiler_descriptor {
-    string identifier, resfile, buildext, buildname, runprog, runparam;
+    string compiler, identifier, resfile, buildext, buildname, runprog, runparam, builddir;
   };
 
   extern sdk_descriptor targetSDK;
@@ -55,8 +56,11 @@ namespace setting
   //Compliance levels. These enforce various settings specific to certain versions of GM.
   //Prefer generalized solutions; use these for direct incompatibilities. (Add other GM versions as needed).
   enum COMPLIANCE_LVL {
-    COMPL_STANDARD = 0,  //Standard (enigma) compliance. Default and recommended.
-    COMPL_GM5 = 1,       //GM5 compliance. timeline_running will default to "true".
+    COMPL_GM5 = 50,       //GM5 compliance. timeline_running will default to "true". exit will abort single code actions. Sprite and background alphas default to 1
+    COMPL_GM6 = 60,       //Same as GM5 for now
+    COMPL_GM7 = 70,       //Same as GM5 for now
+    COMPL_GM8 = 80,         //GM8 compliance. exit will abort single code actions. Sprite and background alphas default to 1.
+    COMPL_STANDARD = 65535,    //Standard (enigma) compliance. Default and recommended. High so we can do things like compliance_mode<=8
   };
 
   //Compatibility / Progess options
@@ -66,8 +70,9 @@ namespace setting
   extern bool use_incrementals; // Defines how operators ++ and -- are treated.         0 = GML,               1 = C++
   extern bool literal_autocast; // Determines how literals are treated.                 0 = enigma::variant,   1 = C++ scalars
   extern bool inherit_objects;  // Determines whether objects should automatically inherit locals and events from their parents
-  extern string make_directory; // Where to output make objects and preprocessor.
+  extern bool automatic_semicolons; // Determines whether semicolons should automatically be added or if the user wants strict syntax
   extern COMPLIANCE_LVL compliance_mode; // How to resolve differences between GM versions.
+  extern string keyword_blacklist; //Words to blacklist from user scripts, separated by commas.
 }
 
 #endif

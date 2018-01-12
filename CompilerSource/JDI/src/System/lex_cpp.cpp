@@ -173,6 +173,7 @@ string lexer_cpp::_flatten(const string param, const macro_map& macros, const to
   const char* s;
   string result = param;
   const char* begin = param.c_str();
+  int resOffset = 0;
   for (const char* i = begin; *i; ) {
     bool id = is_letterd(*i);
     s = i; while (is_letterd(*i)) ++i;
@@ -191,7 +192,8 @@ string lexer_cpp::_flatten(const string param, const macro_map& macros, const to
             char *buf=0, *bufe=0;
             mf->parse(arguments, buf, bufe, errep, herr);
             i = begin + p;
-            result.replace(s-begin, i-s, buf, bufe-buf);
+            result.replace(s-begin+resOffset, i-s+resOffset, buf, bufe-buf);
+            resOffset += (bufe-buf) - (i-s);
             delete[] buf;
           }
         }
@@ -217,8 +219,8 @@ bool lexer_cpp::parse_macro_params(const macro_function* mf, const macro_map &ma
       pspos = ++pos;
       _skip_noncode(continue);
       continue;
-    } else if (cfile[pos] == ')') { if (--nestcnt) ++pos; continue; }
-      else if (cfile[pos] == '(') ++nestcnt;
+    } else if (cfile[pos] == ')' || cfile[pos] == ']') { if (--nestcnt) ++pos; continue; }
+      else if (cfile[pos] == '(' || cfile[pos] == '[') ++nestcnt;
       else if (cfile[pos] == '"' or cfile[pos] == '\'') 
         ::skip_string(cfile, pos, length);
     ++pos; _skip_noncode(continue);
@@ -249,8 +251,8 @@ bool lexer_cpp::parse_macro_params(const macro_function* mf, vector<string>& des
       pspos = ++pos;
       skip_noncode(continue);
       continue;
-    } else if (cfile[pos] == ')') { if (--nestcnt) ++pos; continue; }
-      else if (cfile[pos] == '(') ++nestcnt;
+    } else if (cfile[pos] == ')' || cfile[pos] == ']') { if (--nestcnt) ++pos; continue; }
+      else if (cfile[pos] == '(' || cfile[pos] == '[') ++nestcnt;
       else if (cfile[pos] == '"' or cfile[pos] == '\'') 
         skip_string(herr);
     ++pos; skip_noncode(continue);

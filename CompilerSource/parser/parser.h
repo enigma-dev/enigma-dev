@@ -1,6 +1,7 @@
 /********************************************************************************\
 **                                                                              **
 **  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2014 Seth N. Hetu                                             **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -30,6 +31,6 @@
 
 void parser_init();
 string file_parse(string filename,string outname);
-string parser_main(string code,parsed_event* x = NULL, const std::set<std::string>& script_names=std::set<std::string>());
+string parser_main(string code,parsed_event* x = NULL, const std::set<std::string>& script_names=std::set<std::string>(), bool isObject=false);
 int parser_secondary(string& code, string& synt, parsed_object *glob = NULL, parsed_object *thisobj = NULL, parsed_event *pev = NULL, const std::set<std::string>& script_names=std::set<std::string>());
-void print_to_file(string,string,unsigned int&,varray<string>&,int,ofstream&);
+void print_to_file(string,string,const unsigned int,const varray<string>&,int,ofstream&);

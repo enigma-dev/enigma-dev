@@ -1,29 +1,21 @@
-/********************************************************************************\
-**                                                                              **
-**  Copyright (C) 2008-2011 Josh Ventura                                        **
-**                                                                              **
-**  This file is a part of the ENIGMA Development Environment.                  **
-**                                                                              **
-**                                                                              **
-**  ENIGMA is free software: you can redistribute it and/or modify it under the **
-**  terms of the GNU General Public License as published by the Free Software   **
-**  Foundation, version 3 of the license or any later version.                  **
-**                                                                              **
-**  This application and its source code is distributed AS-IS, WITHOUT ANY      **
-**  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS   **
-**  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more       **
-**  details.                                                                    **
-**                                                                              **
-**  You should have recieved a copy of the GNU General Public License along     **
-**  with this code. If not, see <http://www.gnu.org/licenses/>                  **
-**                                                                              **
-**  ENIGMA is an environment designed to create games and other programs with a **
-**  high-level, fully compilable language. Developers of ENIGMA or anything     **
-**  associated with ENIGMA are in no way responsible for its users or           **
-**  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **
-**                                                                              **
-\********************************************************************************/
+/** Copyright (C) 2008-2011 Josh Ventura
+*** Copyright (C) 2014 Josh Ventura, Robert B. Colton
+*** Copyright (C) 2014 Seth N. Hetu
+***
+*** This file is a part of the ENIGMA Development Environment.
+***
+*** ENIGMA is free software: you can redistribute it and/or modify it under the
+*** terms of the GNU General Public License as published by the Free Software
+*** Foundation, version 3 of the license or any later version.
+***
+*** This application and its source code is distributed AS-IS, WITHOUT ANY
+*** WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+*** FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+*** details.
+***
+*** You should have received a copy of the GNU General Public License along
+*** with this code. If not, see <http://www.gnu.org/licenses/>
+**/
 
 #include <map>
 #include <deque>
@@ -42,65 +34,124 @@ using namespace std;
 
 namespace enigma_user {
   int instance_count = 0;
+  extern deque<int> instance_id;  // TODO: Implement and move to enigma_user.
 }
-
-extern  deque<int> instance_id; // TODO: Implement and move to enigma_user.
 
 namespace enigma
 {
-  inst_iter::inst_iter(object_basic* i,inst_iter *n = NULL,inst_iter *p = NULL): inst(i), next(n), prev(p) {}
+  inst_iter::inst_iter(object_basic* i,inst_iter *n = NULL,inst_iter *p = NULL):
+      inst(i), next(n), prev(p) {}
+  inst_iter::inst_iter() {}
+  
   objectid_base::objectid_base(): inst_iter(NULL,NULL,this), count(0) {}
   event_iter::event_iter(string n): inst_iter(NULL,NULL,this), name(n) {}
   event_iter::event_iter(): inst_iter(NULL,NULL,this) {}
 
 
-  /*------ New iterator system --------------------------------*\
-  \*-----------------------------------------------------------*/
+  /*------ New iterator system -----------------------------------------------*\
+  \*--------------------------------------------------------------------------*/
 
-    set<iterator*> central_iterator_cache;
-    typedef set<iterator*>::iterator central_iterator_cache_iterator;
+  set<iterator*> central_iterator_cache;
+  typedef set<iterator*>::iterator central_iterator_cache_iterator;
 
-    object_basic* iterator::operator*() { return it->inst; }
-    object_basic* iterator::operator->() { return it->inst; }
+  object_basic* iterator::operator*()  const { return it->inst; }
+  object_basic* iterator::operator->() const { return it->inst; }
 
-    void iterator::addme() { central_iterator_cache.insert(this); }
-
-    iterator::operator bool() { return it; }
-    iterator &iterator::operator++()    { it = it->next; return *this; }
-    iterator  iterator::operator++(int) { iterator ret(it,temp); it = it->next; return ret; }
-    iterator &iterator::operator--()    { it = it->prev; return *this; }
-    iterator  iterator::operator--(int) { iterator ret(it,temp); it = it->prev; return ret; }
-
-    const iterator &iterator::operator=(iterator& other)       { if (temp) delete it; it = other.it; temp = other.temp; other.temp = false; return other; }
-    const iterator &iterator::operator=(const iterator& other) { if (temp) delete it; it = other.it; temp = false; return other; }
-    const iterator &iterator::operator=(inst_iter* niter)      { if (temp) delete it; it = niter; temp = false; return *this; }
-    const iterator &iterator::operator=(object_basic* object)  { if (temp) delete it; it = new inst_iter(object,NULL,NULL); temp = true; return *this; }
-
-    iterator::iterator(inst_iter*_it, bool tmp): it(_it), temp(tmp) { addme(); }
-    iterator::iterator(const iterator&other): it(other.it?new inst_iter(*other.it):NULL), temp(true) { addme(); }
-    iterator::iterator(iterator&other): it(other.it), temp(other.temp) { other.temp = false; }
-    iterator::iterator(object_basic*ob): it(new inst_iter(ob,NULL,NULL)), temp(true) { }
-    iterator::iterator(): it(NULL), temp(true) { }
-    iterator:: ~iterator() {
-      central_iterator_cache.erase(this);
-      if (temp) delete it;
+  void iterator::addme() {
+    central_iterator_cache.insert(this);
+  }
+  
+  void iterator::copy(const iterator& other) {
+    // If the other pointer indicates its own temporary object, copy
+    // it into our temporary object and point to ours, instead.
+    if (other.it == &other.temp_iter) {
+      temp_iter = other.temp_iter;
+      it = &temp_iter;
+    } else {
+      // Otherwise, assume the pointer is from one of the global lists.
+      // Registering ourself with the central iterator list will handle
+      // memory management caveats, for us.
+      it = other.it;
     }
-
-    void update_iterators_for_destroy(const inst_iter* dd)
-    {
-      for (central_iterator_cache_iterator it = central_iterator_cache.begin();
-           it != central_iterator_cache.end(); ++it)
-      {
-        if ((*it)->it->next == dd)
-          (*it)->it->next = dd->next;
-        else if ((*it)->it->prev == dd)
-          (*it)->it->prev = dd->prev;
+  }
+  
+  void iterator::handle_unlink(const inst_iter *dead) {
+    if (it) {
+      if (it->next == dead) {
+        it->next = dead->next;
+      } else if (it->prev == dead) {
+        it->prev = dead->prev;
       }
     }
+  }
+
+  iterator::operator bool() { return it; }
+  iterator &iterator::operator++() {
+    it = it->next;
+    return *this;
+  }
+  iterator  iterator::operator++(int) {
+    iterator ret(*this);
+    it = it->next;
+    return ret;
+  }
+  iterator &iterator::operator--() {
+    it = it->prev;
+    return *this;
+  }
+  iterator  iterator::operator--(int) {
+    iterator ret(*this);
+    it = it->prev;
+    return ret;
+  }
+
+  iterator &iterator::operator=(const iterator& other) {
+    copy(other);
+    return *this;
+  }
+  iterator &iterator::operator=(inst_iter* niter) {
+    it = niter;
+    return *this;
+  }
+  iterator &iterator::operator=(object_basic* object) {
+    temp_iter.next = temp_iter.prev = NULL;
+    temp_iter.inst = object;
+    it = &temp_iter;
+    return *this;
+  }
+  
+  // Always add ourself to the central iterator cache, because future
+  // assignment could cause us to point to something deleteable
+  iterator::iterator(): it(NULL) {
+    addme();
+  }
+  iterator::iterator(const iterator& other) {
+    copy(other);
+    addme();
+  }
+  iterator::iterator(inst_iter* iter): it(iter) {
+    addme();
+  }
+  iterator::iterator(object_basic* ob):
+      temp_iter(ob, NULL, NULL), it(&temp_iter) {
+    addme();
+  }
+
+  iterator:: ~iterator() {
+    central_iterator_cache.erase(this);
+  }
+
+  void update_iterators_for_destroy(const inst_iter* dd)
+  {
+    for (central_iterator_cache_iterator it = central_iterator_cache.begin();
+         it != central_iterator_cache.end(); ++it) {
+      (*it)->handle_unlink(dd);
+    }
+  }
 
 
-  /*------Iterator methods ------------------------------------*\
-  \*-----------------------------------------------------------*/
+  /*------Iterator methods ---------------------------------------------------*\
+  \*--------------------------------------------------------------------------*/
 
   inst_iter *event_iter::add_inst(object_basic* ninst)
   {
@@ -146,21 +197,16 @@ namespace enigma
 
   // This is the all-inclusive, centralized list of instances.
   map<int,inst_iter*> instance_list;
-  map<int,inst_iter*> instance_deactivated_list;
+  map<int,object_basic*> instance_deactivated_list;
   typedef map<int,inst_iter*>::iterator iliter;
   typedef pair<int,inst_iter*> inode_pair;
-    
-   
+
+
 
   // When you say "global.vname", this is the structure that answers
-  extern object_basic *ENIGMA_global_instance; // We also need an iterator for only global.
+  extern object_basic *ENIGMA_global_instance;
+  // We also need an iterator for only global.
   inst_iter ENIGMA_global_instance_iterator(ENIGMA_global_instance,0,0);
-
-  // With() will operate on this
-  iterator_level::iterator_level(inst_iter* i,object_basic* o, iterator_level* l): it(i), other(o), last(l) {}
-  void iterator_level::push(inst_iter* i,object_basic* o) { il_top = new iterator_level(i,o,il_top); }
-  void iterator_level::pop() { il_top = il_top->last; }
-  iterator_level *il_top = NULL;
 
   // This is basically a garbage collection list for when instances are destroyed
   set<object_basic*> cleanups; // We'll use set, to prevent stupidity
@@ -182,7 +228,7 @@ namespace enigma
     return a != instance_list.end() ? a->second : NULL;
   }
 
-  extern int object_idmax;
+  extern size_t object_idmax;
   object_basic* fetch_instance_by_int(int x)
   {
     using namespace enigma_user;
@@ -218,7 +264,7 @@ namespace enigma
     if (x < 0) switch (x) // Keyword-based lookup
     {
       case self:
-      case local:  return instance_event_iterator;
+      case local:  return iterator(instance_event_iterator->inst);
       case other:  return instance_other ? iterator(instance_other) : iterator();
       case all:    return instance_list_first();
       case global: return &ENIGMA_global_instance_iterator;
@@ -248,9 +294,9 @@ namespace enigma
       return iterator();
 
     //Check if it's a deactivated instance first.
-    std::map<int,enigma::inst_iter*>::iterator rIt = enigma::instance_deactivated_list.find(x);
+    std::map<int,enigma::object_basic*>::iterator rIt = enigma::instance_deactivated_list.find(x);
     if (rIt!=enigma::instance_deactivated_list.end()) {
-      return iterator(((enigma::object_basic*)(rIt->second->inst)));
+      return iterator(rIt->second);
     }
 
     //Else, it's still live (or was null). Use normal dispatch.
@@ -271,7 +317,7 @@ namespace enigma
   pinstance_list_iterator link_instance(object_basic* who)
   {
     inst_iter *ins = new inst_iter(who);
-    instance_id.push_back(who->id);
+    enigma_user::instance_id.push_back(who->id);
     pair<iliter,bool> it = instance_list.insert(inode_pair(who->id,ins));
     if (!it.second) {
       delete ins;
@@ -286,9 +332,11 @@ namespace enigma
     else ins->prev = NULL; // Found nothing.
 
     iliter in = it.first; in++; // Find next iterator
-    if (in != instance_list.end()) // If it exists
+    if (in != instance_list.end())
+    {
       ins->next = in->second, // Link this to next instance
       in->second->prev = ins; // Link next to this
+    }
     else ins->next = NULL;
     return new winstance_list_iterator(it.first);
   }
@@ -298,9 +346,9 @@ namespace enigma
     return objects[oid].add_inst(who);
   }
 
-  void instance_iter_queue_for_destroy(pinstance_list_iterator whop)
+  void instance_iter_queue_for_destroy(object_basic* inst)
   {
-    enigma::cleanups.insert((object_basic*)whop->w->second->inst);
+    enigma::cleanups.insert(inst);
     enigma::instancecount--;
     enigma_user::instance_count--;
   }

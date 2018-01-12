@@ -32,7 +32,11 @@
     -compliance-mode:
         Type: Combobox
         Label: Compliance Mode: 
-        Options: "Standard, GM5"
+        Options: "Standard, GM5, GM6, GM7, GM8"
+    -keyword-blacklist:
+        Type: Textfield
+        Label: Keyword Blacklist: 
+        Default: ""
 
 		
 
@@ -42,13 +46,17 @@
     -make-directory:
         Type: Textfield
         Label: Make Directory
-        Default-Windows: "%PROGRAMDATA%/ENIGMA/"
+        Default-Windows: "%LOCALAPPDATA%/ENIGMA/"
         Default-Linux: "%HOME%/.enigma/"
         Default-MacOSX: "./ENIGMA/"
         Default: "./ENIGMA/"
     -inherit-objects:
         Type: Checkbox
         Label: Object Inheritance
+        Default: true
+    -automatic-semicolons:
+        Type: Checkbox
+        Label: Automatic Semicolons
         Default: true
 		
 -Graphics:

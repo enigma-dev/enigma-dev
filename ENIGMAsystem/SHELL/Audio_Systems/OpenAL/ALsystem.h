@@ -1,4 +1,5 @@
 /** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton
+*** Copyright (C) 2014 Seth N. Hetu
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -37,7 +38,7 @@ extern ALfloat listenerOri[];
 
 #include "SoundResource.h"
 
-namespace enigma { 
+namespace enigma {
   extern size_t sound_idmax;
 
   int get_free_channel(double priority);
@@ -45,11 +46,12 @@ namespace enigma {
   #ifdef DEBUG_MODE
     #define get_sound(snd,id,failure)\
       if (id < 0 or sound_resources.find(id)==sound_resources.end() or !sound_resources[id]) {\
-        show_error("Sound " + toString(id) + " does not exist", false);\
+        show_error("Sound " + enigma_user::toString(id) + " does not exist", false);\
         return failure;\
       } SoundResource *const snd = sound_resources[id];
   #else
     #define get_sound(snd,id,failure)\
+      if (id < 0) return failure;\
       SoundResource *const snd = sound_resources[id];
   #endif
 

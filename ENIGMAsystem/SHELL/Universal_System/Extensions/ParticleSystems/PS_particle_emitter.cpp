@@ -25,14 +25,17 @@
 **                                                                              **
 \********************************************************************************/
 
+#include <cmath>
+#include <cstdlib>
+#include <algorithm>
+
+#include "Universal_System/math_consts.h"
+#include <Widget_Systems/widgets_mandatory.h> // show_error
+
 #include "PS_particle_emitter.h"
 #include "PS_particle_system.h"
 #include "PS_particle_system_manager.h"
 #include "PS_particle.h"
-#include <Widget_Systems/widgets_mandatory.h> // show_error
-#include <cstdlib>
-#include <algorithm>
-#include <cmath>
 
 namespace enigma
 {

@@ -26,7 +26,6 @@ namespace enigma //TODO: Find where this belongs
 {
   extern HINSTANCE hInstance;
   extern HWND hWnd;
-  extern HWND hWndParent;
   extern HDC window_hDC;
   extern HANDLE mainthread;
 }
@@ -36,7 +35,17 @@ void windowsystem_write_exename(char* exenamehere);
 namespace enigma_user
 {
 
-unsigned long long window_handle();
+//NOTE: window_handle() should never be used by the engine, other systems, such as bridges, can make direct use of the HWND
+#if GM_COMPATIBILITY_VERSION <= 81
+static inline unsigned long long window_handle() {
+  return (unsigned long long)enigma::hWnd;
+}
+#else
+static inline HWND window_handle() {
+  return enigma::hWnd;
+}
+#endif
+
 int sleep(int millis);
 
 }

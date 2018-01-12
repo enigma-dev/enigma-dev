@@ -23,8 +23,8 @@ using std::string;
 #include "../General/GStextures.h"
 #include "DX11TextureStruct.h"
 #include "Universal_System/image_formats.h"
-#include "Universal_System/backgroundstruct.h"
-#include "Universal_System/spritestruct.h"
+#include "Universal_System/background_internal.h"
+#include "Universal_System/sprites_internal.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 
 vector<TextureStruct*> textureStructs(0);
@@ -96,6 +96,16 @@ namespace enigma
 
   }
 
+  void graphics_copy_texture(int source, int destination, int x, int y)
+  {
+
+  }
+
+  void graphics_copy_texture_part(int source, int destination, int xoff, int yoff, int w, int h, int x, int y)
+  {
+
+  }
+
   void graphics_replace_texture_alpha_from_texture(int tex, int copy_tex)
   {
 
@@ -117,8 +127,9 @@ namespace enigma_user
 
 int texture_add(string filename, bool mipmap) {
   unsigned int w, h, fullwidth, fullheight;
+  int img_num;
 
-  unsigned char *pxdata = enigma::image_load(filename,&w,&h,&fullwidth,&fullheight,false);
+  unsigned char *pxdata = enigma::image_load(filename,&w,&h,&fullwidth,&fullheight,&img_num,false);
   if (pxdata == NULL) { printf("ERROR - Failed to append sprite to index!\n"); return -1; }
   unsigned texture = enigma::graphics_create_texture(w, h, fullwidth, fullheight, pxdata, mipmap);
   delete[] pxdata;
@@ -164,14 +175,14 @@ gs_scalar texture_get_height(int texid)
 	return textureStructs[texid]->height / textureStructs[texid]->fullheight;
 }
 
-unsigned texture_get_texel_width(int texid)
+gs_scalar texture_get_texel_width(int texid)
 {
-	return textureStructs[texid]->width;
+	return 1.0/textureStructs[texid]->width;
 }
 
-unsigned texture_get_texel_height(int texid)
+gs_scalar texture_get_texel_height(int texid)
 {
-	return textureStructs[texid]->height;
+	return 1.0/textureStructs[texid]->height;
 }
 
 void texture_set_enabled(bool enable)

@@ -17,12 +17,13 @@
 **/
 
 #include <cmath>
+#include <floatcomp.h>
+
 #include "collisions_object.h"
 #include "instance_system.h"
 #include "roomsystem.h"
 #include "move_functions.h"
-
-#include <floatcomp.h>
+#include "math_consts.h"
 
 namespace enigma_user
 {

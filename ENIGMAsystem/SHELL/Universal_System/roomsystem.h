@@ -30,12 +30,21 @@
 
 #include "var4.h"
 
+#include <string>
+
+namespace enigma
+{
+
+void follow_object(int vob, size_t vc);
+
+}
+
 namespace enigma_user
 {
 
 int room_goto(int roomind);
 int room_restart();
-string room_get_name(int index);
+std::string room_get_name(int index);
 int room_goto_absolute(int index);
 int room_goto_first(bool restart_game=false);
 int room_goto_previous();
@@ -48,7 +57,7 @@ int room_set_height(int indx, int hei);
 int room_set_background(int indx, int bind, bool vis, bool fore, bool back, double x, double y, bool htiled, bool vtiled, double hspeed, double vspeed, double alpha = 1, int color = 0xFFFFFF);
 int room_set_view(int indx, int vind, int vis, int xview, int yview, int wview, int hview, int xport, int yport, int wport, int hport, int hborder, int vborder, int hspeed, int vspeed, int obj);
 int room_set_background_color(int indx, int col, bool show);
-int room_set_caption(int indx, string str);
+int room_set_caption(int indx, std::string str);
 int room_set_persistent(int indx, bool pers);
 int room_set_view_enabled(int indx, int val);
 int room_tile_add_ext(int indx, int bck, int left, int top, int width, int height, int x, int y, int depth, int xscale, int yscale, double alpha, int color = 0xFFFFFF);
@@ -70,6 +79,9 @@ int view_set(int vind, int vis, int xview, int yview, int wview, int hview, int 
 int window_views_mouse_get_x(); // same as mouse_x variable, with respect to the view the mouse intersects
 int window_views_mouse_get_y(); // same as mouse_y variable, with respect to the view the mouse intersects
 void window_views_mouse_set(int x, int y); // with respect to first visible view
+void window_update_mouse();
+
+void window_update();
 
 extern int background_color;
 extern int background_showcolor;
@@ -81,6 +93,8 @@ extern int room_height;
 extern int room_persistent;
 extern int room_speed;
 extern int room_width;
+extern int room_first;
+extern int room_last;
 
 extern var room_caption;
 extern var current_caption;
@@ -134,13 +148,13 @@ namespace enigma
   {
     int id;
     int order;
-    string name;
-    string cap;
+    std::string name;
+    std::string cap;
 
     int backcolor;
     bool drawbackcolor;
-    void(*createcode)();
-    void(*precreatecode)();
+    variant(*createcode)();
+    variant(*precreatecode)();
     int width, height, spd, persistent;
     int views_enabled;
     viewstruct views[10];

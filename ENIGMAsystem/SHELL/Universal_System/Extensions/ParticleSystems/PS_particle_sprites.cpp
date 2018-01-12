@@ -25,17 +25,19 @@
 **                                                                              **
 \********************************************************************************/
 
-#include "PS_particle_sprites.h"
-#include "PS_particle_enums.h"
-#include "Graphics_Systems/graphics_mandatory.h"
-#include "Universal_System/spritestruct.h"
-#include "Collision_Systems/collision_mandatory.h"
-#include "Widget_Systems/widgets_mandatory.h" // show_error
 #include <map>
 #include <cmath>
 #include <cstdlib>
 
 #include <floatcomp.h>
+
+#include "PS_particle_sprites.h"
+#include "PS_particle_enums.h"
+#include "Graphics_Systems/graphics_mandatory.h"
+#include "Universal_System/sprites_internal.h"
+#include "Collision_Systems/collision_mandatory.h"
+#include "Widget_Systems/widgets_mandatory.h" // show_error
+#include "Universal_System/math_consts.h"
 
 #ifdef CODEBLOX
 #  define codebloxt(x, y) (x)
@@ -959,8 +961,10 @@ namespace enigma
 
     sprite* sprstr = enigma::spritestructarray[sprid];
     sprstr->texturearray.push_back(ps->texture);
-    sprstr->texbordxarray.push_back(1.0); // Assumes multiple of 2.
-    sprstr->texbordyarray.push_back(1.0); // Assumes multiple of 2.
+    sprstr->texturexarray.push_back(0.0); // Assumes multiple of 2.
+    sprstr->textureyarray.push_back(0.0); // Assumes multiple of 2.
+    sprstr->texturewarray.push_back(1.0); // Assumes multiple of 2.
+    sprstr->textureharray.push_back(1.0); // Assumes multiple of 2.
     sprstr->colldata.push_back(get_collision_mask(sprstr,0,ct_bbox));
 
     shape_to_actual_sprite.insert(std::pair<pt_shape,int>(particle_shape,sprid));

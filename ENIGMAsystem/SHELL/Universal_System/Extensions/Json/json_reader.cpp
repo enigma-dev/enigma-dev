@@ -3,6 +3,8 @@
 // recognized in your jurisdiction.
 // See file LICENSE for detail or copy at http://jsoncpp.sourceforge.net/LICENSE
 
+#include "Widget_Systems/widgets_mandatory.h"
+
 #if !defined(JSON_IS_AMALGAMATION)
 # include "reader.h"
 # include "value.h"
@@ -843,7 +845,7 @@ std::istream& operator>>( std::istream &sin, Value &root )
     Json::Reader reader;
     bool ok = reader.parse(sin, root, true);
     //JSON_ASSERT( ok );
-    if (!ok) throw std::runtime_error(reader.getFormattedErrorMessages());
+    if (!ok) show_error(reader.getFormattedErrorMessages(), 1);
     return sin;
 }
 

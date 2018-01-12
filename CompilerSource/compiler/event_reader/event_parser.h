@@ -53,6 +53,11 @@ enum p_type {
 #include <vector>
 #include <map>
 
+using std::map;
+using std::string;
+using std::vector;
+using std::pair;
+
 struct event_info
 {
   string name; // The identifier-compliant name of this event.
@@ -114,12 +119,8 @@ string event_stacked_get_root_name(int mid);
 
 string event_forge_sequence_code(int mid,int id, string preferred_name);
 
-// This is implemented in write_defragged_events.
-extern bool   event_used_by_something(string name);
-
 typedef pair<int, int> evpair;
 extern  vector<evpair> event_sequence;
-
 
 bool event_has_iterator_declare_code(int mid, int id);
 bool event_has_iterator_initialize_code(int mid, int id);

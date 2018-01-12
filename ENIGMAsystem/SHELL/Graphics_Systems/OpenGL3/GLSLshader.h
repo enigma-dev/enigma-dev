@@ -18,12 +18,13 @@
 #ifndef _GLSLSHADER__H
 #define _GLSLSHADER__H
 
+//#include <functional> //For std::hash
 #include <vector>
 #include <string>
-#include <map>
+#include <unordered_map>
 using std::string;
 using std::vector;
-using std::map;
+using std::unordered_map;
 
 #include "../General/OpenGLHeaders.h"
 
@@ -53,30 +54,46 @@ namespace enigma
     };
 
     struct Uniform{
-        string name;
-        GLint location;
-        GLenum type;
-        GLint arraySize;
-        int size;
+        string name = "";
+        GLint location = -1;
+        GLenum type = GL_INVALID_VALUE;
+        GLint arraySize = -1;
+        int size = -1;
         vector<UAType> data;
     };
 
     struct Attribute{
-        string name;
-        GLint location;
-        GLenum type;
-        GLint arraySize;
-        int size;
+        string name = "";
+        GLint location = -1;
+        GLenum type = GL_INVALID_VALUE;
+        GLint arraySize = -1;
+        int size = -1;
+        bool enabled = false;
+        bool normalize = false;
+        int stride = -1;
+        int offset = -1;
+        int datatype = 0; //Difference is that "type" is the type inside the shader (like float for color), but "datatype" is the type for data (unsigned int for color)
+        int datasize = -1;
+        int vao = -1;
     };
 
-    struct ShaderProgram{
-        //These should be unordered maps, but they are only Cx11
-        map<string,GLint> uniform_names;
+    //This holds attribute parameters and works as a OpenGL VAO
+    /*struct AttributeObject{
+        GLuint vertexArrayObject;
+
+        AttributeObject(){ glGenVertexArrays(1, &vertexArrayObject); }
+        ~AttributeObject(){ glDeleteBuffers(1, &vertexArrayObject); }
         map<string,GLint> attribute_names;
-        map<GLint,Uniform> uniforms;
         map<GLint,Attribute> attributes;
+    };*/
+
+    struct ShaderProgram{
+        unordered_map<string,GLint> uniform_names;
+        unordered_map<string,GLint> attribute_names;
+        unordered_map<GLint,Uniform> uniforms;
+        unordered_map<GLint,Attribute> attributes;
         string log;
-		string name;
+        string name;
         GLuint shaderprogram;
         int uniform_count;
         int attribute_count;
@@ -92,8 +109,10 @@ namespace enigma
         GLint uni_textureEnable;
         GLint uni_colorEnable;
         GLint uni_lightEnable;
+        GLint uni_alphaTestEnable;
 
         GLint uni_color;
+        GLint uni_alphaTest;
 
         //3D lights
         GLint uni_ambient_color;
@@ -120,7 +139,7 @@ namespace enigma
         ShaderProgram()
         {
             shaderprogram = glCreateProgram();
-			name = "";
+            name = "";
         }
 
         ~ShaderProgram()
@@ -129,6 +148,24 @@ namespace enigma
         }
     };
 }
+
+//Specialize std::hash for attribute hashing
+/*namespace std
+{
+    template<>
+    struct hash<Attribute>
+    {
+        typedef Attribute argument_type;
+        typedef std::size_t result_type;
+
+        result_type operator()(argument_type const& s) const
+        {
+            result_type const h1 ( std::hash<std::string>()(s.name) );
+            result_type const h2 ( std::hash<std::string>()(s.location) );
+            return h1 ^ (h2 << 1);
+        }
+    };
+}*/
 
 //extern vector<enigma::Shader*> shaders;
 //extern vector<enigma::ShaderProgram*> shaderprograms;

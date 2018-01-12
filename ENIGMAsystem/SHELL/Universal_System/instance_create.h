@@ -1,29 +1,22 @@
-/********************************************************************************\
-**                                                                              **
-**  Copyright (C) 2008 Josh Ventura                                             **
-**                                                                              **
-**  This file is a part of the ENIGMA Development Environment.                  **
-**                                                                              **
-**                                                                              **
-**  ENIGMA is free software: you can redistribute it and/or modify it under the **
-**  terms of the GNU General Public License as published by the Free Software   **
-**  Foundation, version 3 of the license or any later version.                  **
-**                                                                              **
-**  This application and its source code is distributed AS-IS, WITHOUT ANY      **
-**  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS   **
-**  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more       **
-**  details.                                                                    **
-**                                                                              **
-**  You should have recieved a copy of the GNU General Public License along     **
-**  with this code. If not, see <http://www.gnu.org/licenses/>                  **
-**                                                                              **
-**  ENIGMA is an environment designed to create games and other programs with a **
-**  high-level, fully compilable language. Developers of ENIGMA or anything     **
-**  associated with ENIGMA are in no way responsible for its users or           **
-**  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **
-**                                                                              **
-\********************************************************************************/
+/** Copyright (C) 2008 Josh Ventura
+***
+*** This file is a part of the ENIGMA Development Environment.
+***
+*** ENIGMA is free software: you can redistribute it and/or modify it under the
+*** terms of the GNU General Public License as published by the Free Software
+*** Foundation, version 3 of the license or any later version.
+***
+*** This application and its source code is distributed AS-IS, WITHOUT ANY
+*** WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+*** FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+*** details.
+***
+*** You should have received a copy of the GNU General Public License along
+*** with this code. If not, see <http://www.gnu.org/licenses/>
+**/
+
+#ifndef ENIGMA_INSTANCE_CREATE_H
+#define ENIGMA_INSTANCE_CREATE_H
 
 namespace enigma
 {
@@ -36,21 +29,22 @@ namespace enigma
       double  xstart=inst->xstart, ystart=inst->ystart;
       double image_index=inst->image_index;
       double image_speed=inst->image_speed;
-      bool visible=inst->visible;
       double image_xscale=inst->image_xscale;
       double image_yscale=inst->image_yscale;
       double image_angle=inst->image_angle;
       vspeedv vspeed=inst->vspeed;
       hspeedv hspeed=inst->hspeed;
 
+      //For reference, these properties should remain as default:
+      //  visible,
+
       //the instance id is the same
-      int idn=inst->id;
+      int idn = inst->id;
 
-      //Destory the instance
-      if (perf) inst->myevent_destroy();
-      inst->unlink();
+      // Destroy the instance
+      instance_destroy(idn, perf);
 
-      //Create the instance
+      // Re-create the instance
       object_basic* ob = NULL;
       switch((int)obj)
       {
@@ -65,12 +59,12 @@ namespace enigma
       (void)ob;
       
       object_graphics* newinst = (object_graphics*) (*fetch_inst_iter_by_int(idn));
-      if (perf) newinst->myevent_create();
       newinst->x=x; newinst->y=y; newinst->yprevious=yprevious; newinst->xprevious=xprevious;
       newinst->xstart=xstart; newinst->ystart=ystart;
       newinst->image_index=image_index; newinst->image_speed=image_speed;
-      newinst->visible=visible; newinst->image_xscale=image_xscale; newinst->image_yscale=image_yscale; newinst->image_angle=image_angle;
+      newinst->image_xscale=image_xscale; newinst->image_yscale=image_yscale; newinst->image_angle=image_angle;
       newinst->hspeed=hspeed; newinst->vspeed=vspeed;
+      if (perf) newinst->myevent_create();
   }
   
   object_basic* instance_create_id(int x,int y,int object,int idn)
@@ -90,7 +84,7 @@ namespace enigma
     }
     return ob;
   }
-}
+} //namespace enigma
 
 namespace enigma_user
 {
@@ -148,5 +142,7 @@ namespace enigma_user
     newinst->visible=inst->visible; newinst->image_xscale=inst->image_xscale; newinst->image_yscale=inst->image_yscale; newinst->image_angle=inst->image_angle;
     newinst->hspeed=inst->hspeed; newinst->vspeed=inst->vspeed;
   }
-}
+} //namespace enigma_user
+
+#endif //ENIGMA_INSTANCE_CREATE_H
 

@@ -1,4 +1,5 @@
 /** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton, Serpex
+*** Copyright (C) 2014 Seth N. Hetu
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -88,13 +89,13 @@ void draw_set_alpha_test_ref_value(unsigned val)
 	glAlphaFunc(GL_GREATER, val/256);
 }
 
-void draw_set_line_pattern(short pattern, int scale)
+void draw_set_line_pattern(int pattern, int scale)
 {
   if (pattern == -1)
       glDisable(GL_LINE_STIPPLE);
   else
     glEnable(GL_LINE_STIPPLE),
-    glLineStipple(scale,pattern);
+    glLineStipple(scale,(short)pattern);
 }
 
 }

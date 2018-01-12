@@ -28,29 +28,10 @@ using namespace std;
 #define flushl '\n' << flush
 #define flushs flush
 
-#include "syntax/checkfile.h"
 #include "general/parse_basics_old.h"
 #include "general/bettersystem.h"
 
 #include "gcc_backend.h"
-
-inline string fc(const char* fn)
-{
-    FILE *pt = fopen(fn,"rb");
-    if (pt==NULL) return "";
-    else {
-      fseek(pt,0,SEEK_END);
-      size_t sz = ftell(pt);
-      fseek(pt,0,SEEK_SET);
-
-      char a[sz+1];
-      sz = fread(a,1,sz,pt);
-      fclose(pt);
-
-      a[sz] = 0;
-      return a;
-    }
-}
 
 #include <sys/time.h>
 
@@ -65,12 +46,7 @@ inline string fc(const char* fn)
 bool init_found_gcc = false;
 bool init_load_successful = false;
 
-string MAKE_paths, MAKE_tcpaths, MAKE_location, TOPLEVEL_cflags, TOPLEVEL_cppflags, TOPLEVEL_cxxflags, TOPLEVEL_links, CXX_override, CC_override, WINDRES_location, TOPLEVEL_ldflags;
-
-inline int rdir_system(string x, string y)
-{
-  return system((x + " " + y).c_str());
-}
+string MAKE_flags, MAKE_paths, MAKE_tcpaths, MAKE_location, TOPLEVEL_cflags, TOPLEVEL_cppflags, TOPLEVEL_cxxflags, TOPLEVEL_links, TOPLEVEL_rcflags, CXX_override, CC_override, WINDRES_location, TOPLEVEL_ldflags;
 
 #include "OS_Switchboard.h"
 #include "settings-parse/eyaml.h"
@@ -79,9 +55,12 @@ inline int rdir_system(string x, string y)
 #include <System/builtins.h>
 #include <API/context.h>
 
+static char errbuf[1024];
+static string lastbearings;
+
 // This function parses one command line specified to the eYAML into a filename string and a parameter string,
 // then returns whether or not the output from this call must be manually redirected to the output file ofile.
-static inline bool toolchain_parseout(string line, string &exename, string &command, string ofile = "")
+static bool toolchain_parseout(string line, string &exename, string &command, string ofile = "")
 { 
   pt pos = 0, spos;
 
@@ -133,9 +112,6 @@ static inline bool toolchain_parseout(string line, string &exename, string &comm
   return redir;
 }
 
-static char errbuf[1024];
-static string lastbearings;
-
 // Read info about our compiler configuration and run with it
 const char* establish_bearings(const char *compiler)
 {
@@ -164,6 +140,7 @@ const char* establish_bearings(const char *compiler)
   ****************************/
   MAKE_paths = compey.get("path");
   MAKE_tcpaths = compey.get("tcpath");
+  MAKE_flags =  compey.get("makeflags");
   TOPLEVEL_cflags = compey.get("cflags");
   TOPLEVEL_cppflags = compey.get("cppflags");
   TOPLEVEL_cxxflags = compey.get("cxxflags");
@@ -172,6 +149,7 @@ const char* establish_bearings(const char *compiler)
   CC_override = compey.get("cc");
   WINDRES_location = compey.get("windres");
   TOPLEVEL_ldflags = compey.get("ldflags");
+  TOPLEVEL_rcflags = compey.get("rcflags");
 
   /* Get a list of all macros defined by our compiler.
   ** These will help us through parsing available libraries.
@@ -213,6 +191,7 @@ const char* establish_bearings(const char *compiler)
       pos += idirstart.length();
     }
     jdi::builtin->add_search_directory("ENIGMAsystem/SHELL/");
+    jdi::builtin->add_search_directory("ENIGMAsystem/SHELL/Mock_JDI_Headers/");
     jdi::builtin->add_search_directory(makedir.c_str());
 
     while (is_useless(idirs[++pos]));

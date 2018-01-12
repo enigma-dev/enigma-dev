@@ -29,12 +29,11 @@
 using namespace std;
 
 #include "Universal_System/image_formats.h"
+#include "Universal_System/background_internal.h"
+#include "Universal_System/background.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/estring.h"
 
-#define __GETR(x) (((unsigned int)x & 0x0000FF))
-#define __GETG(x) (((unsigned int)x & 0x00FF00) >> 8)
-#define __GETB(x) (((unsigned int)x & 0xFF0000) >> 16)
 
 #include "Universal_System/roomsystem.h"
 #include "Universal_System/instance_system.h"
@@ -49,10 +48,15 @@ using namespace std;
   #define GL_BGR 0x80E0
 #endif
 
+//WE SHOULDN'T DO THIS! Don't specify namespaces like this - Harijs
 using namespace enigma;
+using namespace enigma_user;
+
 namespace enigma_user {
   extern int window_get_width();
   extern int window_get_height();
+  extern int window_get_region_width();
+  extern int window_get_region_height();
 }
 
 namespace enigma
@@ -69,6 +73,7 @@ namespace enigma
   unsigned gui_width;
   unsigned gui_height;
   unsigned int bound_framebuffer = 0; //Shows the bound framebuffer, so glGetIntegerv(GL_FRAMEBUFFER_BINDING_EXT, &fbo); don't need to be called (they are very slow)
+  int viewport_x, viewport_y, viewport_w, viewport_h; //These are used by surfaces, to set back the viewport
 }
 
 static inline void draw_back()
@@ -88,95 +93,22 @@ static inline void draw_back()
   using enigma_user::draw_background_tiled_ext;
   using enigma_user::draw_background_ext;
   // Draw the rooms backgrounds
-  for (int back_current = 0; back_current < 8; back_current++) {
+  for (size_t back_current = 0; back_current < 8; back_current++) {
     if (background_visible[back_current] == 1) {
-      //NOTE: This has been double checked with Game Maker 8.1 to work exactly the same, the background_x/y is modified just as object locals are
-      //and also just as one would assume the system to work.
-      //TODO: This should probably be moved to room system.
-      background_x[back_current] += background_hspeed[back_current];
-      background_y[back_current] += background_vspeed[back_current];
-      if (background_htiled[back_current] || background_vtiled[back_current]) {
-        draw_background_tiled_ext(background_index[back_current], background_x[back_current], background_y[back_current], background_xscale[back_current],
-          background_xscale[back_current], background_coloring[back_current], background_alpha[back_current], background_htiled[back_current], background_vtiled[back_current]);
-      } else {
-        draw_background_ext(background_index[back_current], background_x[back_current], background_y[back_current], background_xscale[back_current], background_xscale[back_current], 0, background_coloring[back_current], background_alpha[back_current]);
+      if (enigma_user::background_exists(background_index[back_current])) {
+        //NOTE: This has been double checked with Game Maker 8.1 to work exactly the same, the background_x/y is modified just as object locals are
+        //and also just as one would assume the system to work.
+        //TODO: This should probably be moved to room system.
+        background_x[back_current] += background_hspeed[back_current];
+        background_y[back_current] += background_vspeed[back_current];
+        if (background_htiled[back_current] || background_vtiled[back_current]) {
+          draw_background_tiled_ext(background_index[back_current], background_x[back_current], background_y[back_current], background_xscale[back_current],
+            background_xscale[back_current], background_coloring[back_current], background_alpha[back_current], background_htiled[back_current], background_vtiled[back_current]);
+        } else {
+          draw_background_ext(background_index[back_current], background_x[back_current], background_y[back_current], background_xscale[back_current], background_xscale[back_current], 0, background_coloring[back_current], background_alpha[back_current]);
+        }
       }
     }
-  }
-}
-
-static inline void follow_object(int vob, size_t vc)
-{
-  object_basic *instanceexists = fetch_instance_by_int(vob);
-
-  if (instanceexists)
-  {
-    object_planar* vobr = (object_planar*)instanceexists;
-
-    double vobx = vobr->x, voby = vobr->y;
-
-    //int bbl=*vobr.x+*vobr.bbox_left,bbr=*vobr.x+*vobr.bbox_right,bbt=*vobr.y+*vobr.bbox_top,bbb=*vobr.y+*vobr.bbox_bottom;
-    //if (bbl<view_xview[vc]+view_hbor[vc]) view_xview[vc]=bbl-view_hbor[vc];
-
-    double vbc_h, vbc_v;
-    (view_hborder[vc] > view_wview[vc]/2) ? vbc_h = view_wview[vc]/2 : vbc_h = view_hborder[vc];
-    (view_vborder[vc] > view_hview[vc]/2) ? vbc_v = view_hview[vc]/2 : vbc_v = view_vborder[vc];
-
-    if (view_hspeed[vc] == -1)
-    {
-      if (vobx < view_xview[vc] + vbc_h)
-        view_xview[vc] = vobx - vbc_h;
-      else if (vobx > view_xview[vc] + view_wview[vc] - vbc_h)
-        view_xview[vc] = vobx + vbc_h - view_wview[vc];
-    }
-    else
-    {
-      if (vobx < view_xview[vc] + vbc_h)
-      {
-        view_xview[vc] -= view_hspeed[vc];
-        if (view_xview[vc] < vobx - vbc_h)
-          view_xview[vc] = vobx - vbc_h;
-      }
-      else if (vobx > view_xview[vc] + view_wview[vc] - vbc_h)
-      {
-        view_xview[vc] += view_hspeed[vc];
-        if (view_xview[vc] > vobx + vbc_h - view_wview[vc])
-          view_xview[vc] = vobx + vbc_h - view_wview[vc];
-      }
-    }
-
-    if (view_vspeed[vc] == -1)
-    {
-      if (voby < view_yview[vc] + vbc_v)
-        view_yview[vc] = voby - vbc_v;
-      else if (voby > view_yview[vc] + view_hview[vc] - vbc_v)
-        view_yview[vc] = voby + vbc_v - view_hview[vc];
-    }
-    else
-    {
-      if (voby < view_yview[vc] + vbc_v)
-      {
-        view_yview[vc] -= view_vspeed[vc];
-        if (view_yview[vc] < voby - vbc_v)
-          view_yview[vc] = voby - vbc_v;
-      }
-      if (voby > view_yview[vc] + view_hview[vc] - vbc_v)
-      {
-        view_yview[vc] += view_vspeed[vc];
-        if (view_yview[vc] > voby + vbc_v - view_hview[vc])
-          view_yview[vc] = voby + vbc_v - view_hview[vc];
-      }
-    }
-
-    if (view_xview[vc] < 0)
-      view_xview[vc] = 0;
-    else if (view_xview[vc] > room_width - view_wview[vc])
-      view_xview[vc] = room_width - view_wview[vc];
-
-    if (view_yview[vc] < 0)
-      view_yview[vc] = 0;
-    else if (view_yview[vc] > room_height - view_hview[vc])
-      view_yview[vc] = room_height - view_hview[vc];
   }
 }
 
@@ -216,16 +148,16 @@ static inline int draw_tiles()
   {
     if (dit->second.tiles.size())
     {
-      for (unsigned int t = 0; t<drawing_depths[dit->second.tiles[0].depth].tilevector.size(); ++t){
-        enigma_user::texture_set(drawing_depths[dit->second.tiles[0].depth].tilevector[t][0]);
-        d3d_model_part_draw(drawing_depths[dit->second.tiles[0].depth].tilelist, drawing_depths[dit->second.tiles[0].depth].tilevector[t][1], drawing_depths[dit->second.tiles[0].depth].tilevector[t][2]);
+      for (auto &t : drawing_depths[dit->second.tiles[0].depth].tilevector){
+        d3d_model_part_draw(drawing_depths[dit->second.tiles[0].depth].tilelist, t[0], t[1], t[2]);
       }
     }
     enigma::inst_iter* push_it = enigma::instance_event_iterator;
     //loop instances
     for (enigma::instance_event_iterator = dit->second.draw_events->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next) {
-      if (enigma::instance_event_iterator->inst->myevent_draw_subcheck())
-        enigma::instance_event_iterator->inst->myevent_draw();
+      enigma::object_graphics* inst = ((object_graphics*)enigma::instance_event_iterator->inst);
+      if (inst->myevent_draw_subcheck())
+        inst->myevent_draw();
       if (enigma::room_switching_id != -1)
         return 1;
     }
@@ -276,8 +208,9 @@ static inline void draw_gui()
     enigma::inst_iter* push_it = enigma::instance_event_iterator;
     //loop instances
     for (enigma::instance_event_iterator = dit->second.draw_events->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next) {
-      if (enigma::instance_event_iterator->inst->myevent_drawgui_subcheck())
-        enigma::instance_event_iterator->inst->myevent_drawgui();
+      enigma::object_graphics* inst = ((object_graphics*)enigma::instance_event_iterator->inst);
+      if (inst->myevent_drawgui_subcheck())
+        inst->myevent_drawgui();
       if (enigma::room_switching_id != -1) {
         stop_loop = true;
         break;
@@ -307,11 +240,11 @@ void screen_redraw()
   if (!view_enabled)
   {
     if (bound_framebuffer != 0) //This fixes off-by-one error when rendering on surfaces. This should be checked to see if other GPU's have the same effect
-      screen_set_viewport(1, 1, window_get_region_width_scaled(), window_get_region_height_scaled());
+      screen_set_viewport(1, 1, window_get_region_width(), window_get_region_height());
     else
-      screen_set_viewport(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled());
+      screen_set_viewport(0, 0, window_get_region_width(), window_get_region_height());
 
-    clear_view(0, 0, room_width, room_height, 0, background_showcolor);
+    clear_view(0, 0, window_get_region_width(), window_get_region_height(), 0, background_showcolor);
     draw_back();
     draw_insts();
     draw_tiles();
@@ -348,6 +281,7 @@ void screen_redraw()
         break;
       draw_backs = background_allviews;
     }
+    // In Studio this variable is not reset until the next iteration of views as is actually 7 in the draw_gui event, in 8.1 however view_current will always be 0 in the step event.
     view_current = 0;
   }
 
@@ -355,7 +289,7 @@ void screen_redraw()
   // It is for drawing GUI elements without view scaling and transformation
   if (enigma::gui_used)
   {
-    screen_set_viewport(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled());
+    screen_set_viewport(0, 0, window_get_region_width(), window_get_region_height());
     d3d_set_projection_ortho(0, 0, enigma::gui_width, enigma::gui_height, 0);
 
     // Clear the depth buffer if hidden surface removal is on at the beginning of the draw step.
@@ -384,8 +318,9 @@ void screen_redraw()
 
 void screen_init()
 {
-  enigma::gui_width = window_get_region_width_scaled();
-  enigma::gui_height = window_get_region_height_scaled();
+  oglmgr->EndShapesBatching();
+  enigma::gui_width = window_get_region_width();
+  enigma::gui_height = window_get_region_height();
 
   glClearColor(0,0,0,0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -393,7 +328,7 @@ void screen_init()
   if (!view_enabled)
   {
     glClearColor(0,0,0,0);
-    screen_set_viewport(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled());
+    screen_set_viewport(0, 0, window_get_region_width(), window_get_region_height());
     d3d_set_projection_ortho(0, 0, room_width, room_height, 0);
   } else {
     for (view_current = 0; view_current < 7; view_current++)
@@ -413,16 +348,16 @@ void screen_init()
 
   glDisable(GL_DEPTH_TEST);
   glEnable(GL_BLEND);
-  glEnable(GL_ALPHA_TEST);
-  glEnable(GL_TEXTURE_2D);
+  glEnable(GL_SCISSOR_TEST);
+
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glAlphaFunc(GL_ALWAYS,0);
   texture_reset();
   draw_set_color(c_white);
 }
 
 int screen_save(string filename) //Assumes native integers are little endian
 {
+  oglmgr->EndShapesBatching();
   unsigned int w=window_get_width(),h=window_get_height(),sz=w*h;
 
   string ext = enigma::image_get_format(filename);
@@ -443,6 +378,7 @@ int screen_save(string filename) //Assumes native integers are little endian
 
 int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h) //Assumes native integers are little endian
 {
+  oglmgr->EndShapesBatching();
   unsigned sz = w*h;
 
   string ext = enigma::image_get_format(filename);
@@ -462,12 +398,34 @@ int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h
 }
 
 void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height) {
-	glViewport(x, y, width, height);
+  x = (x / window_get_region_width()) * window_get_region_width_scaled();
+  y = (y / window_get_region_height()) * window_get_region_height_scaled();
+  width = (width / window_get_region_width()) * window_get_region_width_scaled();
+  height = (height / window_get_region_height()) * window_get_region_height_scaled();
+  gs_scalar sx, sy;
+  sx = (window_get_width() - window_get_region_width_scaled()) / 2;
+  sy = (window_get_height() - window_get_region_height_scaled()) / 2;
+  viewport_x = sx + x;
+  viewport_y = window_get_height() - (sy + y) - height;
+  viewport_w = width;
+  viewport_h = height;
+  //NOTE: OpenGL viewports are bottom left unlike Direct3D viewports which are top left
+  glViewport(viewport_x, viewport_y, viewport_w, viewport_h);
+  glScissor(viewport_x, viewport_y, viewport_w, viewport_h);
 }
 
-void display_set_gui_size(unsigned width, unsigned height) {
+//TODO: These need to be in some kind of General
+void display_set_gui_size(unsigned int width, unsigned int height) {
   enigma::gui_width = width;
   enigma::gui_height = height;
+}
+
+unsigned int display_get_gui_width(){
+  return enigma::gui_width;
+}
+
+unsigned int display_get_gui_height(){
+  return enigma::gui_height;
 }
 
 }

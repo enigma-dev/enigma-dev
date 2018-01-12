@@ -1,6 +1,7 @@
 /********************************************************************************\
 **                                                                              **
 **  Copyright (C) 2008 Josh Ventura                                             **
+**  Copyright (C) 2014 Seth N. Hetu                                             **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -39,29 +40,63 @@ using namespace std;
 #include "crawler.h"
 #include "eyaml.h"
 
+#include "gcc_interface/gcc_backend.h"
 #include "parse_ide_settings.h"
+#include "compiler/compile_common.h"
 #include "makedir.h"
 
 string makedir = "";
 
-void clear_ide_editables();
-static inline vector<string> explode(string n) {
-  vector<string> ret;
-  size_t pos = 0, epos;
-  while (is_useless(n[pos])) pos++;
-  for (epos = n.find(','); epos != string::npos; epos = n.find(',',pos)) {
-    ret.push_back(n.substr(pos,epos-pos));
-    pos = epos; while (is_useless(n[++pos]));
-  }
-  if (n.length() > pos)
-    ret.push_back(n.substr(pos));
-  return ret;
-}
+inline string fc(const char* fn);
+static void clear_ide_editables()
+{
+  ofstream wto;
+  string f2comp = fc((makedir + "API_Switchboard.h").c_str());
+  string f2write = license;
+    string inc = "/include.h\"\n";
+    f2write += "#include \"Platforms/" + (extensions::targetAPI.windowSys)            + "/include.h\"\n"
+               "#include \"Graphics_Systems/" + (extensions::targetAPI.graphicsSys)   + "/include.h\"\n"
+               "#include \"Audio_Systems/" + (extensions::targetAPI.audioSys)         + "/include.h\"\n"
+               "#include \"Collision_Systems/" + (extensions::targetAPI.collisionSys) + "/include.h\"\n"
+               "#include \"Networking_Systems/" + (extensions::targetAPI.networkSys) + "/include.h\"\n"
+               "#include \"Widget_Systems/" + (extensions::targetAPI.widgetSys)       + inc;
 
-inline string tolower(string x) {
-  for (size_t i = 0; i < x.length(); i++)
-    if (x[i] >= 'A' and x[i] <= 'Z') x[i] -= 'A' - 'a';
-  return x;
+    const string incg = "#include \"", impl = "/implement.h\"\n";
+    f2write += "\n// Extensions selected by user\n";
+    for (unsigned i = 0; i < parsed_extensions.size(); i++)
+    {
+      ifstream ifabout((parsed_extensions[i].pathname + "/About.ey").c_str());
+      ey_data about = parse_eyaml(ifabout,parsed_extensions[i].path + parsed_extensions[i].name + "/About.ey");
+      f2write += incg + parsed_extensions[i].pathname + inc;
+      if (parsed_extensions[i].implements != "")
+        f2write += incg + parsed_extensions[i].pathname + impl;
+    }
+
+  if (f2comp != f2write)
+  {
+    wto.open((makedir +"API_Switchboard.h").c_str(),ios_base::out);
+      wto << f2write << endl;
+    wto.close();
+  }
+
+  wto.open((makedir +"Preprocessor_Environment_Editable/LIBINCLUDE.h").c_str());
+    wto << license;
+    wto << "/*************************************************************\nOptionally included libraries\n****************************/\n";
+    wto << "#define STRINGLIB 1\n#define COLORSLIB 1\n#define STDRAWLIB 1\n#define PRIMTVLIB 1\n#define WINDOWLIB 1\n"
+           "#define STDDRWLIB 1\n#define GMSURFACE 0\n#define BLENDMODE 1\n";
+    wto << "/***************\nEnd optional libs\n ***************/\n";
+  wto.close();
+
+  wto.open((makedir +"Preprocessor_Environment_Editable/GAME_SETTINGS.h").c_str(),ios_base::out);
+    wto << license;
+    wto << "#define ASSUMEZERO 0\n";
+    wto << "#define PRIMBUFFER 0\n";
+    wto << "#define PRIMDEPTH2 6\n";
+    wto << "#define AUTOLOCALS 0\n";
+    wto << "#define MODE3DVARS 0\n";
+    wto << "void ABORT_ON_ALL_ERRORS() { }\n";
+    wto << '\n';
+  wto.close();
 }
 
 //#include "backend/ideprint.h"
@@ -84,13 +119,40 @@ void parse_ide_settings(const char* eyaml)
   setting::use_gml_equals    = !settree.get("inherit-equivalence-from").toInt();
   setting::literal_autocast  = settree.get("treat-literals-as").toInt();
   setting::inherit_objects   = settree.get("inherit-objects").toBool();
-  setting::make_directory = settree.get("make-directory").toString();
-  setting::compliance_mode = settree.get("compliance-mode").toInt()==1 ? setting::COMPL_GM5 : setting::COMPL_STANDARD;
+  switch (settree.get("compliance-mode").toInt()) {
+    case 4:
+      setting::compliance_mode = setting::COMPL_GM8;
+      break;
+    case 3:
+      setting::compliance_mode = setting::COMPL_GM7;
+      break;
+    case 2:
+      setting::compliance_mode = setting::COMPL_GM6;
+      break;
+    case 1:
+      setting::compliance_mode = setting::COMPL_GM5;
+      break;
+    default:
+      setting::compliance_mode = setting::COMPL_STANDARD;
+  }
+  setting::automatic_semicolons   = settree.get("automatic-semicolons").toBool();
+  setting::keyword_blacklist = settree.get("keyword-blacklist").toString();
 
+  // Use a platform-specific make directory.
+  std::string make_directory = "./ENIGMA/";
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
-	setMakeDirectory(myReplace(escapeEnv(setting::make_directory), "\\","/"));
+  make_directory = "%LOCALAPPDATA%/ENIGMA/";
+#elif CURRENT_PLATFORM_ID == OS_LINUX
+  make_directory = "%HOME%/.enigma/";
+#elif CURRENT_PLATFORM_ID == OS_MACOSX
+  make_directory = "./ENIGMA/";
+#endif
+
+  //Now actually set it, taking backslashes into account.
+#if CURRENT_PLATFORM_ID == OS_WINDOWS
+	setMakeDirectory(myReplace(escapeEnv(make_directory), "\\","/"));
 #else
-	setMakeDirectory(escapeEnv(setting::make_directory));
+	setMakeDirectory(escapeEnv(make_directory));
 #endif
 
   //ide_dia_open();
@@ -148,8 +210,8 @@ void parse_ide_settings(const char* eyaml)
   eygl(Audio_Systems, audio);
   eygl(Networking_Systems, network);
 
-  string cinffile = settree.get("target-compiler");
-  cinffile = "Compilers/" CURRENT_PLATFORM_NAME "/" + cinffile + ".ey";
+  string target_compiler = settree.get("target-compiler");
+  string cinffile = "Compilers/" CURRENT_PLATFORM_NAME "/" + target_compiler + ".ey";
 
   const char *a = establish_bearings(cinffile.c_str());
   if (a) cout << "Parse fail: " << a << endl;
@@ -157,12 +219,19 @@ void parse_ide_settings(const char* eyaml)
   // Read info about the compiler
   ifstream cinfstream(cinffile.c_str());
   ey_data cinfo = parse_eyaml(cinfstream,cinffile);
-  extensions::targetOS.resfile   = cinfo.get("resources");
-  extensions::targetOS.buildext  = cinfo.get("build-extension");
-  extensions::targetOS.buildname = cinfo.get("run-output");
-  extensions::targetOS.runprog   = cinfo.get("run-program");
-  extensions::targetOS.runparam  = cinfo.get("run-params");
+  extensions::targetOS.compiler   = target_compiler;
+  extensions::targetOS.resfile    = cinfo.get("resources");
+  extensions::targetOS.buildext   = cinfo.get("build-extension");
+  extensions::targetOS.buildname  = cinfo.get("run-output");
+  extensions::targetOS.runprog    = cinfo.get("run-program");
+  extensions::targetOS.runparam   = cinfo.get("run-params");
   extensions::targetOS.identifier = cinfo.get("target-platform");
+
+  if (cinfo.exists("build-dir") == true){
+    extensions::targetOS.builddir = cinfo.get("build-dir");
+  }else{
+    extensions::targetOS.builddir = cinfo.get("target-platform");
+  }
 
   cout << "Setting up IDE editables... " << endl;
   requested_extensions.clear();
@@ -170,4 +239,3 @@ void parse_ide_settings(const char* eyaml)
   extensions::parse_extensions(requested_extensions);
   clear_ide_editables();
 }
-

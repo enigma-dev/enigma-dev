@@ -15,24 +15,26 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <string>
-#include <stdio.h>
-using namespace std;
-
-#include "spritestruct.h"
-#include "Platforms/platforms_mandatory.h"
-#include "Graphics_Systems/graphics_mandatory.h"
-#include "Widget_Systems/widgets_mandatory.h"
 #include "libEGMstd.h"
-#include "zlib.h"
 #include "resinit.h"
+#include "sprites_internal.h"
+#include "zlib.h"
+
+#include "Graphics_Systems/graphics_mandatory.h"
+#include "Platforms/platforms_mandatory.h"
+#include "Widget_Systems/widgets_mandatory.h"
+
+#include <stdio.h>
+#include <string>
+
+using enigma_user::toString;
 
 namespace enigma
 {
   void exe_loadsprs(FILE *exe)
   {
     int nullhere;
-    unsigned sprid, width, height, bbt, bbb, bbl, bbr, shape;
+    unsigned sprid, width, height, bbt, bbb, bbl, bbr, bbm, shape;
     int xorig, yorig;
     
     if (!fread(&nullhere,4,1,exe)) return;
@@ -59,6 +61,7 @@ namespace enigma
       if (!fread(&bbb, 4,1,exe)) return;
       if (!fread(&bbl, 4,1,exe)) return;
       if (!fread(&bbr, 4,1,exe)) return;
+      if (!fread(&bbm, 4,1,exe)) return;
       if (!fread(&shape, 4,1,exe)) return;
 
       collision_type coll_type;

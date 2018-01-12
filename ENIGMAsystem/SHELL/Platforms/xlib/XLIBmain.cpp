@@ -1,5 +1,7 @@
 /** Copyright (C) 2008-2011 IsmAvatar <cmagicj@nni.com>, Josh Ventura
 *** Copyright (C) 2013 Robert B. Colton
+*** Copyright (C) 2014 Seth N. Hetu
+*** Copyright (C) 2015 Harijs Grinbergs
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -16,15 +18,14 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-//This file has been modified beyond recognition by Josh @ Dreamland
-//under the pretense that it would be better compatible with ENIGMA
-
 #include <X11/Xlib.h>
-#include <GL/glx.h>
+#include <X11/Xutil.h>
 #include <unistd.h>
+#include <sys/resource.h>
 #include <stdio.h>
 #include <string>
 #include <cstdlib>
+#include <stdlib.h> //getenv and system
 
 #include "Platforms/platforms_mandatory.h"
 
@@ -35,7 +36,6 @@
 #include "Universal_System/var4.h"
 #include "Universal_System/CallbackArrays.h"
 #include "Universal_System/roomsystem.h"
-#include "Universal_System/loading.h"
 
 #include <time.h>
 
@@ -50,12 +50,18 @@ namespace enigma_user {
 namespace enigma
 {
   int game_return = 0;
-  extern char keymap[512];
-  //extern char usermap[256];
+  extern unsigned char keymap[512];
   void ENIGMA_events(void); //TODO: Synchronize this with Windows by putting these two in a single header.
   bool gameWindowFocused = false;
+  extern int windowWidth, windowHeight;
   extern bool freezeOnLoseFocus;
   unsigned int pausedSteps = 0;
+
+  void (*WindowResizedCallback)();
+  XVisualInfo* CreateVisualInfo();
+  void EnableDrawing();
+  void DisableDrawing();
+  void WindowResized();
 
   namespace x11
   {
@@ -83,8 +89,7 @@ namespace enigma
                 int len = XLookupString(&e.xkey, str, 1, NULL, NULL);
                 if (len > 0) {
                   enigma_user::keyboard_lastchar = string(1,str[0]);
-                  enigma_user::keyboard_string += enigma_user::keyboard_lastchar;
-                  if (enigma_user::keyboard_lastkey == enigma_user::vk_backspace) {
+                  if (actualKey == enigma_user::vk_backspace) {
                     enigma_user::keyboard_string = enigma_user::keyboard_string.substr(0, enigma_user::keyboard_string.length() - 1);
                   } else {
                     enigma_user::keyboard_string += enigma_user::keyboard_lastchar;
@@ -136,8 +141,16 @@ namespace enigma
             }
           return 0;
         }
-        case Expose: {
-            //screen_refresh();
+        case ConfigureNotify: {
+          enigma::windowWidth = e.xconfigure.width;
+          enigma::windowHeight = e.xconfigure.height;
+
+          //NOTE: This will lead to a loop, and it seems superfluous.
+          //enigma::setwindowsize();
+
+          if (WindowResizedCallback != NULL) {
+            WindowResizedCallback();
+          }
           return 0;
         }
         case FocusIn:
@@ -166,6 +179,8 @@ using namespace enigma::x11;
 
 namespace enigma
 {
+  extern int windowColor;
+
   void input_initialize()
   {
     //Clear the input arrays
@@ -216,20 +231,27 @@ static inline long clamp(long value, long min, long max)
   return value;
 }
 
+static void set_net_wm_pid(Window window) {
+  pid_t pid = getpid();
+  Atom cardinal = XInternAtom(disp, "CARDINAL", False);
+  Atom net_wm_pid = XInternAtom(disp, "_NET_WM_PID", False);
+  XChangeProperty(disp, window, net_wm_pid, cardinal, 32, PropModeReplace,
+                  (unsigned char*) &pid, sizeof(pid) / 4);
+}
+
 #include <unistd.h>
 static bool game_isending = false;
 int main(int argc,char** argv)
 {
+    // Set the working_directory
+    char buffer[1024];
+    if (getcwd(buffer, sizeof(buffer)) != NULL)
+       fprintf(stdout, "Current working dir: %s\n", buffer);
+    else
+       perror("getcwd() error");
+    enigma_user::working_directory = string( buffer );
 
-  // Set the working_directory
-  char buffer[1024];
-  if (getcwd(buffer, sizeof(buffer)) != NULL)
-     fprintf(stdout, "Current working dir: %s\n", buffer);
-  else
-     perror("getcwd() error");
-  enigma_user::working_directory = string( buffer );
-
-  // Copy our parameters
+    // Copy our parameters
     enigma::parameters = new string[argc];
     enigma::parameterc = argc;
     for (int i=0; i<argc; i++)
@@ -244,61 +266,45 @@ int main(int argc,char** argv)
         return -1;
     }
 
-
     // Identify components (close button, root pane)
     wm_delwin = XInternAtom(disp,"WM_DELETE_WINDOW",False);
     Window root = DefaultRootWindow(disp);
 
-    // Prepare openGL
-    GLint att[] = { GLX_RGBA, GLX_DOUBLEBUFFER, GLX_DEPTH_SIZE, 24, None };
-    XVisualInfo *vi = glXChooseVisual(disp,0,att);
-    if(!vi){
-        printf("GLFail\n");
-        return -2;
-    }
+    // Defined in the appropriate graphics bridge.
+    // Populates GLX attributes (or other graphics-system-specific properties).
+    XVisualInfo* vi = enigma::CreateVisualInfo();
 
     // Window event listening and coloring
     XSetWindowAttributes swa;
     swa.border_pixel = 0;
-    swa.background_pixel = 0;
+    swa.background_pixel =  (enigma::windowColor & 0xFF000000)
+                         | ((enigma::windowColor & 0xFF0000) >> 16)
+                         |  (enigma::windowColor & 0xFF00)
+                         | ((enigma::windowColor & 0xFF) << 16);
     swa.colormap = XCreateColormap(disp,root,vi->visual,AllocNone);
-    swa.event_mask = ExposureMask | KeyPressMask | KeyReleaseMask | ButtonPressMask | ButtonReleaseMask | FocusChangeMask;// | StructureNotifyMask;
-    unsigned long valmask = CWColormap | CWEventMask; //  | CWBackPixel | CWBorderPixel;
+    swa.event_mask = ExposureMask | KeyPressMask | KeyReleaseMask | ButtonPressMask
+                   | ButtonReleaseMask | FocusChangeMask | StructureNotifyMask;
+    unsigned long valmask = CWColormap | CWEventMask | CWBackPixel; // | CWBorderPixel;
 
-    //prepare window for display (center, caption, etc)
+    // Prepare window for display (center, caption, etc)
     screen = DefaultScreenOfDisplay(disp);
-    //default window size
     int winw = enigma_user::room_width;
     int winh = enigma_user::room_height;
-    // By default if the room is too big instead of creating a gigantic ass window
-    // make it not bigger than the screen to full screen it, this is what 8.1 and Studio
-    // do, if the user wants to manually override this they can using
-    // views/screen_set_viewport or window_set_size/window_set_region_size
-    // We won't limit those functions like GM, just the default.
+    // By default, if the room is too big, limit the size of the window to the
+    // size of the screen. This is what 8.1 and Studio do; if the user wants to
+    // manually override this they can do so using views/screen_set_viewport or
+    // window_set_size/window_set_region_size.
     if (winw > screen->width) winw = screen->width;
     if (winh > screen->height) winh = screen->height;
-    win = XCreateWindow(disp,root,0,0,winw,winh,0,vi->depth,InputOutput,vi->visual,valmask,&swa);
-    XMapRaised(disp,win); //request visible
 
-    //printf("Screen: %d %d %d %d\n",s->width/2,s->height/2,winw,winh);
-    XMoveWindow(disp,win,(screen->width-winw)/2,(screen->height-winh)/2);
+    // Make the window
+    win = XCreateWindow(disp, root, 0, 0, winw, winh,
+                        0, vi->depth, InputOutput, vi->visual, valmask, &swa);
+    set_net_wm_pid(win);
+    XMapRaised(disp, win);
+    XMoveWindow(disp, win, (screen->width-winw) / 2, (screen->height-winh) / 2);
 
-    //geom();
-    //give us a GL context
-    GLXContext glxc = glXCreateContext(disp, vi, NULL, True);
-    if (!glxc){
-        printf("NoContext\n");
-        return -3;
-    }
-
-    //apply context
-    glXMakeCurrent(disp,win,glxc); //flushes
-    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_ACCUM_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
-
-    /* XEvent e;//wait for server to report our display request
-    do {
-    XNextEvent(disp, &e); //auto-flush
-    } while (e.type != MapNotify);*/
+    enigma::EnableDrawing();
 
     //register CloseButton listener
     Atom prots[] = {wm_delwin};
@@ -306,20 +312,10 @@ int main(int argc,char** argv)
         printf("NoClose\n");
         return -4;
     }
-    gmw_init(); //init gm window functions, flushes
-    //#include "initialize.h"
+    gmw_init();  // Initialize resources for use in window API
 
-    //Call ENIGMA system initializers; sprites, audio, and what have you
+    // Call ENIGMA system initializers; sprites, audio, and what have you
     enigma::initialize_everything();
-
-    /*
-    for(char q=1;q;ENIGMA_events())
-        while(XQLength(disp))
-            if(handleEvents()>0) q=0;
-    glxc = glXGetCurrentContext();
-    glXDestroyContext(disp,glxc);
-    XCloseDisplay(disp);
-    return 0;*/
 
     struct timespec time_offset;
     struct timespec time_offset_slowing;
@@ -389,12 +385,12 @@ int main(int argc,char** argv)
             if(handleEvents() > 0)
                 goto end;
 
-        if (!enigma::gameWindowFocused && enigma::freezeOnLoseFocus) { 
+        if (!enigma::gameWindowFocused && enigma::freezeOnLoseFocus) {
           if (enigma::pausedSteps < 1) {
             enigma::pausedSteps += 1;
           } else {
-            usleep(100000); 
-            continue; 
+            usleep(100000);
+            continue;
           }
         }
 
@@ -407,7 +403,7 @@ int main(int argc,char** argv)
 
     end:
     enigma::game_ending();
-    glXDestroyContext(disp,glxc);
+    enigma::DisableDrawing();
     XCloseDisplay(disp);
     return enigma::game_return;
 }
@@ -423,6 +419,46 @@ int parameter_count() {
   return enigma::parameterc;
 }
 
+void execute_shell(string fname, string args)
+{
+  if (system(NULL)) {
+    system((fname + args + " &").c_str());
+  } else {
+    printf("execute_shell cannot be used as there is no command processor!");
+    return;
+  }
+}
+
+void execute_shell(string operation, string fname, string args)
+{
+  if (system(NULL)) {
+    system((fname + args + " &").c_str());
+  } else {
+    printf("execute_shell cannot be used as there is no command processor!");
+    return;
+  }
+}
+
+void execute_program(string operation, string fname, string args, bool wait)
+{
+  if (system(NULL)) {
+    system((fname + args + (wait?" &":"")).c_str());
+  } else {
+    printf("execute_program cannot be used as there is no command processor!");
+    return;
+  }
+}
+
+void execute_program(string fname, string args, bool wait)
+{
+  if (system(NULL)) {
+    system((fname + args + (wait?" &":"")).c_str());
+  } else {
+    printf("execute_program cannot be used as there is no command processor!");
+    return;
+  }
+}
+
 void game_end(int ret) {
   game_isending = true;
   enigma::game_return = ret;
@@ -430,6 +466,29 @@ void game_end(int ret) {
 
 void action_end_game() {
   game_end();
+}
+
+void url_open(std::string url,std::string target,std::string options)
+{
+	if (!fork()) {
+		execlp("xdg-open","xdg-open",url.c_str(),NULL);
+		exit(0);
+	}
+}
+
+void url_open_ext(std::string url,std::string target)
+{
+	url_open(url,target);
+}
+
+void url_open_full(std::string url,std::string target,std::string options)
+{
+	url_open(url,target, options);
+}
+
+void action_webpage(const std::string &url)
+{
+	url_open(url);
 }
 
 int display_get_width() { return XWidthOfScreen(screen); }
@@ -440,5 +499,8 @@ string environment_get_variable(string name) {
   return ev? ev : "";
 }
 
+void set_program_priority(int value) {
+  setpriority(PRIO_PROCESS, getpid(), value);
 }
 
+}

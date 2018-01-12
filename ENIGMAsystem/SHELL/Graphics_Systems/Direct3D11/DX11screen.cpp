@@ -30,6 +30,8 @@ using namespace std;
 
 #include "Universal_System/var4.h"
 #include "Universal_System/estring.h"
+#include "Universal_System/background.h"
+#include "Universal_System/background_internal.h"
 
 #define __GETR(x) (((unsigned int)x & 0x0000FF))/255.0
 #define __GETG(x) (((unsigned int)x & 0x00FF00) >> 8)/255.0
@@ -57,6 +59,8 @@ using namespace enigma;
 namespace enigma_user {
   extern int window_get_width();
   extern int window_get_height();
+  extern int window_get_region_width();
+  extern int window_get_region_height();
 }
 
 static inline void draw_back()
@@ -78,17 +82,19 @@ static inline void draw_back()
     // Draw the rooms backgrounds
     for (int back_current = 0; back_current < 8; back_current++) {
         if (background_visible[back_current] == 1) {
-			//NOTE: This has been double checked with Game Maker 8.1 to work exactly the same, the background_x/y is modified just as object locals are
-			//and also just as one would assume the system to work.
-			//TODO: This should probably be moved to room system.
-			background_x[back_current] += background_hspeed[back_current];
-			background_y[back_current] += background_vspeed[back_current];
-            if (background_htiled[back_current] || background_vtiled[back_current]) {
-                draw_background_tiled_ext(background_index[back_current], background_x[back_current], background_y[back_current], background_xscale[back_current], 
-					background_xscale[back_current], background_coloring[back_current], background_alpha[back_current], background_htiled[back_current], background_vtiled[back_current]);
-            } else {
-                draw_background_ext(background_index[back_current], background_x[back_current], background_y[back_current], background_xscale[back_current], background_xscale[back_current], 0, background_coloring[back_current], background_alpha[back_current]);
-			}
+          if (enigma_user::background_exists(background_index[back_current])) {
+				//NOTE: This has been double checked with Game Maker 8.1 to work exactly the same, the background_x/y is modified just as object locals are
+				//and also just as one would assume the system to work.
+				//TODO: This should probably be moved to room system.
+				background_x[back_current] += background_hspeed[back_current];
+				background_y[back_current] += background_vspeed[back_current];
+	            if (background_htiled[back_current] || background_vtiled[back_current]) {
+	                draw_background_tiled_ext(background_index[back_current], background_x[back_current], background_y[back_current], background_xscale[back_current], 
+						background_xscale[back_current], background_coloring[back_current], background_alpha[back_current], background_htiled[back_current], background_vtiled[back_current]);
+	            } else {
+	                draw_background_ext(background_index[back_current], background_x[back_current], background_y[back_current], background_xscale[back_current], background_xscale[back_current], 0, background_coloring[back_current], background_alpha[back_current]);
+				}
+        }
 		}
     }
 }
@@ -118,8 +124,8 @@ void screen_redraw()
 
 	if (!view_enabled)
     {
-		screen_set_viewport(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled());
-		d3d_set_projection_ortho(0, 0, room_width, room_height, 0);
+		screen_set_viewport(0, 0, window_get_region_width(), window_get_region_height());
+		d3d_set_projection_ortho(0, 0, window_get_region_width(), window_get_region_height(), 0);
 	
 		if (background_showcolor)
 		{
@@ -163,7 +169,8 @@ void screen_redraw()
             enigma::inst_iter* push_it = enigma::instance_event_iterator;
             //loop instances
             for (enigma::instance_event_iterator = dit->second.draw_events->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next) {
-                enigma::instance_event_iterator->inst->myevent_draw();
+                enigma::object_graphics* inst = ((object_graphics*)enigma::instance_event_iterator->inst);
+                inst->myevent_draw();
                 if (enigma::room_switching_id != -1) {
                     stop_loop = true;
                     break;
@@ -314,7 +321,8 @@ void screen_redraw()
 				enigma::inst_iter* push_it = enigma::instance_event_iterator;
 				//loop instances
 				for (enigma::instance_event_iterator = dit->second.draw_events->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next) {
-					enigma::instance_event_iterator->inst->myevent_draw();
+          enigma::object_graphics* inst = ((object_graphics*)enigma::instance_event_iterator->inst);
+					inst->myevent_draw();
 					if (enigma::room_switching_id != -1) {
 						stop_loop = true;
 						break;
@@ -334,6 +342,7 @@ void screen_redraw()
 			view_first = false;
 			if (stop_loop) break;
         }
+        // In Studio this variable is not reset until the next iteration of views as is actually 7 in the draw_gui event, in 8.1 however view_current will always be 0 in the step event.
         view_current = 0;
     }
 
@@ -346,7 +355,7 @@ void screen_redraw()
     {
 		// Now process the sub event of draw called draw gui
 		// It is for drawing GUI elements without view scaling and transformation
-		screen_set_viewport(0, 0, window_get_region_width_scaled(), window_get_region_height_scaled());
+		screen_set_viewport(0, 0, window_get_region_width(), window_get_region_height());
 		d3d_set_projection_ortho(0, 0, enigma::gui_width, enigma::gui_height, 0);
 
 		// Clear the depth buffer if 3d mode is on at the beginning of the draw step.
@@ -361,7 +370,8 @@ void screen_redraw()
             enigma::inst_iter* push_it = enigma::instance_event_iterator;
             //loop instances
             for (enigma::instance_event_iterator = dit->second.draw_events->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next) {
-				enigma::instance_event_iterator->inst->myevent_drawgui();
+                enigma::object_graphics* inst = ((object_graphics*)enigma::instance_event_iterator->inst);
+                inst->myevent_drawgui();
                 if (enigma::room_switching_id != -1) {
                     stop_loop = true;
                     break;
@@ -380,8 +390,8 @@ void screen_redraw()
 
 void screen_init()
 {
-	enigma::gui_width = window_get_region_width_scaled();
-	enigma::gui_height = window_get_region_height_scaled();
+	enigma::gui_width = window_get_region_width();
+	enigma::gui_height = window_get_region_height();
 	
 	//d3dmgr->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
 	//d3dmgr->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
@@ -390,8 +400,8 @@ void screen_init()
     {
 		//d3dmgr->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
 
-		screen_set_viewport(0, 0, (DWORD)window_get_region_width_scaled(), (DWORD)window_get_region_height_scaled());
-		d3d_set_projection_ortho(0, 0, room_width, room_height, 0);
+		screen_set_viewport(0, 0, window_get_region_width(), window_get_region_height());
+		d3d_set_projection_ortho(0, 0, window_get_region_width(), window_get_region_height(), 0);
     } else {
 		for (view_current = 0; view_current < 7; view_current++)
         {
@@ -419,20 +429,37 @@ int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h
 }
 
 void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height) {
+    x = (x / window_get_region_width()) * window_get_region_width_scaled();
+    y = (y / window_get_region_height()) * window_get_region_height_scaled();
+    width = (width / window_get_region_width()) * window_get_region_width_scaled();
+    height = (height / window_get_region_height()) * window_get_region_height_scaled();
+    gs_scalar sx, sy;
+    sx = (window_get_width() - window_get_region_width_scaled()) / 2;
+    sy = (window_get_height() - window_get_region_height_scaled()) / 2;
+
     D3D11_VIEWPORT viewport;
     ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
 
-    viewport.TopLeftX = x;
-    viewport.TopLeftY = y;
+    viewport.TopLeftX = sx + x;
+    viewport.TopLeftY = sy + y;
     viewport.Width = width;
     viewport.Height = height;
 
     m_deviceContext->RSSetViewports(1, &viewport);
 }
 
-void display_set_gui_size(unsigned width, unsigned height) {
+//TODO: These need to be in some kind of General
+void display_set_gui_size(unsigned int width, unsigned int height) {
 	enigma::gui_width = width;
 	enigma::gui_height = height;
+}
+
+unsigned int display_get_gui_width(){
+  return enigma::gui_width;
+}
+
+unsigned int display_get_gui_height(){
+  return enigma::gui_height;
 }
 
 }

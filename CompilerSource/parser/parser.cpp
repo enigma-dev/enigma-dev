@@ -1,29 +1,21 @@
-/********************************************************************************\
-**                                                                              **
-**  Copyright (C) 2011 Josh Ventura                                             **
-**                                                                              **
-**  This file is a part of the ENIGMA Development Environment.                  **
-**                                                                              **
-**                                                                              **
-**  ENIGMA is free software: you can redistribute it and/or modify it under the **
-**  terms of the GNU General Public License as published by the Free Software   **
-**  Foundation, version 3 of the license or any later version.                  **
-**                                                                              **
-**  This application and its source code is distributed AS-IS, WITHOUT ANY      **
-**  WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS   **
-**  FOR A PARTICULAR PURPOSE. See the GNU General Public License for more       **
-**  details.                                                                    **
-**                                                                              **
-**  You should have recieved a copy of the GNU General Public License along     **
-**  with this code. If not, see <http://www.gnu.org/licenses/>                  **
-**                                                                              **
-**  ENIGMA is an environment designed to create games and other programs with a **
-**  high-level, fully compilable language. Developers of ENIGMA or anything     **
-**  associated with ENIGMA are in no way responsible for its users or           **
-**  applications created by its users, or damages caused by the environment     **
-**  or programs made in the environment.                                        **
-**                                                                              **
-\********************************************************************************/
+/** Copyright (C) 2008,2014 Josh Ventura
+*** Copyright (C) 2014 Seth N. Hetu
+*** Copyright (C) 2014 Robert B. Colton
+***
+*** This file is a part of the ENIGMA Development Environment.
+***
+*** ENIGMA is free software: you can redistribute it and/or modify it under the
+*** terms of the GNU General Public License as published by the Free Software
+*** Foundation, version 3 of the license or any later version.
+***
+*** This application and its source code is distributed AS-IS, WITHOUT ANY
+*** WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+*** FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+*** details.
+***
+*** You should have received a copy of the GNU General Public License along
+*** with this code. If not, see <http://www.gnu.org/licenses/>
+**/
 
 //Welcome to the ENIGMA EDL-to-C++ parser; just add semicolons.
 //No, it's not really that simple.
@@ -101,6 +93,10 @@ void parser_init()
   //These two are... Special.
   edl_tokens["do"]   = 'r';
   edl_tokens["else"] = 'e';
+  
+  //These get translated into other symbols
+  edl_tokens["begin"] = '{';
+  edl_tokens["end"] = '}';
 
   //These must be passed a parameter in parentheses
   //Token is 's'
@@ -155,7 +151,7 @@ void parser_init()
 
 
 
-string parser_main(string code, parsed_event* pev, const std::set<std::string>& script_names)
+string parser_main(string code, parsed_event* pev, const std::set<std::string>& script_names, bool isObject)
 {
   //Converting EDL to C++ is still relatively simple.
   //It can be done, for the most part, using only find and replace.
@@ -170,9 +166,6 @@ string parser_main(string code, parsed_event* pev, const std::set<std::string>& 
   //Initialize us a spot in the global scope
   initscope("script scope");
 
-
-
-
   if (pev) {
     pev->strc = 0; //Number of strings in this code
     parser_ready_input(code,synt,pev->strc,pev->strs);
@@ -183,22 +176,13 @@ string parser_main(string code, parsed_event* pev, const std::set<std::string>& 
     unsigned int strct = 0;
     parser_ready_input(code,synt,strct,strst);
   }
-
-
-
   parser_reinterpret(code,synt);
-
-
-
-  parser_add_semicolons(code,synt);
-
-
-  //cout << synt << endl;
-  //cout << code << endl;
+  if (setting::automatic_semicolons) {
+    parser_add_semicolons(code,synt);
+  }
 
   if (pev) { cout << "collecting variables..."; fflush(stdout);
-    collect_variables(current_language, code,synt,pev, script_names); cout << " done>"; fflush(stdout);
-
+    collect_variables(current_language, code,synt,pev, script_names, isObject); cout << " done>"; fflush(stdout);
   }
 
   return code;
@@ -395,6 +379,23 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
       {
         string repstr;
         string repsyn;
+        if (synt[ebp] == 'a') //Access type is "ambi"
+        {
+          if(glob->globals.find(member) != glob->globals.end())
+          {
+            code.erase(ebp, 5);
+            synt.erase(ebp, 5);
+            pos = ebp - 1;
+            continue;
+          }
+          else
+          {
+            code.replace(ebp, 4, "self");
+            synt.replace(ebp, 4, "nnnn");
+            exp = "self";
+            expsynt = "nnnn";
+          }
+        }
         if (shared_object_locals.find(member) != shared_object_locals.end())
         {
           repstr = "enigma::glaccess(int("   + exp +   "))->" + member;
@@ -430,10 +431,28 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
     {
       const pt sp = move_to_beginning(code,synt,pos-1);
       const string exp = code.substr(sp,pos-sp);
-      /*cout << "GET TYPE2 OF " << exp << endl;
-      onode n = exp_typeof(exp,sstack.where,slev+1,glob,obj);
-      if (n.type == enigma_type__var and !n.pad and !n.deref)
-      {*/
+      
+      bool replace = false;
+      for (size_t pars = 0, bracks = 1, pot = pos + 1; bracks > 0 and pot < synt.length(); ++pot) {
+        if (synt[pot] == '(') {
+          ++pars;
+        } else if (synt[pot] == ')') {
+          --pars;
+        } else if (synt[pot] == '[') {
+          ++bracks;
+        } else if (synt[pot] == ']') {
+          --bracks;
+        } else if (synt[pot] == ',' and pars == 0 and bracks == 1) {
+          replace = true;
+          break;
+        }
+      }
+
+      cout << "GET TYPE2 OF " << exp << endl;
+      /*onode n = exp_typeof(exp,sstack.where,slev+1,glob,obj);
+      if (n.type == enigma_type__var and !n.pad and !n.deref)*/
+      if (replace) {
+        //cout << "is a var array" << endl;
         pt cp = pos;
         code[cp++] = '(';
         for (int cnt = 1; cnt; cp++)
@@ -441,16 +460,19 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
           else if (synt[cp] == ']') cnt--;
         if (synt[--cp] == ']')
           code[cp] = ')';
-      /*}
-      else if (n.pad or n.deref) // Regardless of type, as long as we have some kind of pointer to be dereferenced
-      {
+      //} else if (n.pad or n.deref) { // Regardless of type, as long as we have some kind of pointer to be dereferenced
+      } else {
+        //cout << "not a var array" << endl;
         const pt ep = end_of_brackets(synt,pos); // Get position of closing ']'
-        code.insert(ep, 1, ')');
-        synt.insert(ep, 1, ')');
-        pos++; // Move after the '['
-        code.insert(pos, "int(");
-        synt.insert(pos, "ccc(");
-      }*/
+        // see if there is actually something between the brackets because ISO C forbids 0 size arrays
+        if (ep != pos + 1) {
+          code.insert(ep, 1, ')');
+          synt.insert(ep, 1, ')');
+          pos++; // Move after the '['
+          code.insert(pos, "int(");
+          synt.insert(pos, "ccc(");
+        }
+      }
       level++;
     }
     else switch (synt[pos])
@@ -519,7 +541,9 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
                 std::cout <<"ERROR: function-name match runs to end of code [2].\n";
                 break; 
               }
+
               string innerName;
+              pt savedPos = pos;
               if (!skip_paren(innerName, pos, code, synt, 'n')) {
                 std::cout <<"ERROR: Parentheses don't match on \"" <<ctrlType <<"\" statement.\n";
                 break;
@@ -531,6 +555,33 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
                   std::cout <<"ERROR: with inside with can't be handled yet when self is involved.\n";
                   //break; //Don't break; this will replace object-local with global scripts, but that *should* be harmless (and we might have a nested script).
                }
+              } else if (ctrlType=="if" || ctrlType=="for" || ctrlType=="while") {
+                //If the control type is "if" or "for" (TODO: others?), then we may have parsed over some required scope changes in "inner name".
+                for (pt p=savedPos; p<pos; p++) {
+                  if (synt[p]=='n') {
+                    //Match the name
+                    string funcName;
+                    pt oldPos = p;
+                    if (!scan_token(funcName, p, code, synt, 'n')) {
+                      std::cout <<"ERROR: function-name match runs to end of code [1].\n";
+                      break; 
+                    }
+
+                    //Are we calling a function?
+                    if (synt[p]=='(') {
+                      //Are we calling a valid script?
+                      if (script_names.find(funcName)!=script_names.end()) {
+                        //This needs to be globally scoped, unless we've done this already (with inside with)
+                        if (code[oldPos-1] != ':') { //TODO: We could presumably fix nested "with (x) { with(self) {}}" here, if it occurs often in practice.
+                          code.insert(oldPos, "::");
+                          synt.insert(oldPos, "XX"); //TODO: I have no idea what syntax to use here.
+                          pos += 2;
+                          p += 2;
+                        }
+                      }
+                    }
+                  }
+                }
               }
 
               //The next character determines how much scope we are searching for.
@@ -602,9 +653,11 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
         deceq |= indecl;
         if (setting::use_gml_equals and (level or rhs))
         {
-          if (infor != 3 and infor != 1 and synt[++pos] != '=')
-            code.insert(pos,"="),
+          if (infor != 3 and infor != 1 and synt[pos-1] != '=' and synt[pos+1] != '=') {
+            pos++;
+            code.insert(pos,"=");
             synt.insert(pos,"=");
+          }
         }
         rhs |= !level;
         break;
@@ -660,7 +713,7 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
           synt.replace(pos,n,"^^^^^^^");
           pos += 6; break;
         }
-      case '&': case '|': case '~': case '/':
+      case '&': case '|': case '~': case '/': case '%':
           Ass: // Assignment operator
           if (synt[pos+1] == '=') {
             deceq |= indecl;
@@ -670,6 +723,18 @@ int parser_secondary(string& code, string& synt,parsed_object* glob,parsed_objec
           notAss: //Not an assignment operator; !=, >=, <=
             if (synt[pos+1] == '=')
               pos++; // Already know it isn't an assignment; already handled.
+        break;
+      case '{':
+        if(code[pos] == 'b') {
+          code.replace(pos,5,"{");
+          synt.replace(pos,5,"{");
+        }
+        break;
+      case '}':
+        if(code[pos] == 'e') {
+          code.replace(pos,3,"}");
+          synt.replace(pos,3,"}");
+        }
         break;
 
       case 'f': // We need to be aware of for loops.

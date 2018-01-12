@@ -1,6 +1,7 @@
 /********************************************************************************\
  **                                                                              **
  **  Copyright (C) 2010 Alasdair Morrison <tgmg@g-java.com>                      **
+ **  Copyright (C) 2014 Seth N. Hetu                                             **
  **                                                                              **
  **  This file is a part of the ENIGMA Development Environment.                  **
  **                                                                              **
@@ -32,9 +33,70 @@
 EnigmaXcodeAppDelegate* delegate;
 NSPoint mouse; 
 
+void cocoa_window_set_fullscreen(bool full) 
+{
+	if (full) {
+		[[delegate enigmaview] enterFullScreenMode:[NSScreen mainScreen] withOptions:nil];
+	} else {
+		[[delegate enigmaview] exitFullScreenModeWithOptions: nil];
+	}
+}
+
+int cocoa_window_get_fullscreen()
+{
+	return [[delegate enigmaview] isInFullScreenMode];
+}
+
 const char* cocoa_window_get_caption()
 {
 	return [[[delegate window] title] UTF8String];	
+}
+
+int cocoa_get_screen_size(int getWidth)
+{
+	if (getWidth) {
+		return [[NSScreen mainScreen] frame].size.width;
+	} else {
+		return [[NSScreen mainScreen] frame].size.height;
+	}
+}
+
+void cocoa_clipboard_set_text(const char* text)
+{
+  //Get the general pasteboard, clear its contents.
+  NSPasteboard* pasteboard = [NSPasteboard generalPasteboard];
+  [pasteboard clearContents];
+
+  //Pass an array of objects to write to the pasteboard.
+  NSString* objToCopy = [NSString stringWithUTF8String:text];
+  NSArray* objectsToCopy = [NSArray arrayWithObject:objToCopy];
+  [pasteboard writeObjects:objectsToCopy];
+}
+
+char* cocoa_clipboard_get_text()
+{
+  NSPasteboard* pasteboard = [NSPasteboard generalPasteboard];
+  NSArray* classes = [[NSArray alloc] initWithObjects:[NSString class], nil];
+  NSDictionary *options = [NSDictionary dictionary];
+  NSArray *copiedItems = [pasteboard readObjectsForClasses:classes options:options];
+  if (copiedItems!=nil && [copiedItems count]>0) {
+    NSString* res1 = [copiedItems firstObject];
+    const char* res2 = [res1 cStringUsingEncoding:NSUTF8StringEncoding]; //This will be auto-collected.
+    char* res3 = malloc(strlen(res2)+1); //This will be freed by the caller (clipboard_get_text()).
+    strcpy(res3, res2);
+    return res3;
+  }
+
+  return 0;
+}
+
+bool cocoa_clipboard_has_text()
+{
+  NSPasteboard* pasteboard = [NSPasteboard generalPasteboard];
+  NSArray* classes = [[NSArray alloc] initWithObjects:[NSString class], nil];
+  NSDictionary *options = [NSDictionary dictionary];
+  NSArray *copiedItems = [pasteboard readObjectsForClasses:classes options:options];
+  return copiedItems!=nil && [copiedItems count]>0;
 }
 
 int getWindowDimension(int i)
@@ -67,6 +129,11 @@ int getMouse(int i)
 		default: return -1;
 	}
 	
+}
+
+void cocoa_window_set_color(int bgrColor) 
+{
+	[[delegate window] setBackgroundColor: [NSColor colorWithRed:(bgrColor&0xFF)  green:((bgrColor&0xFF00)>>8)  blue:((bgrColor&0xFF0000)>>16)  alpha:1.0]];
 }
 
 void cocoa_window_set_caption(const char* caption)
@@ -121,8 +188,9 @@ int cocoa_window_get_region_height() {
     return getWindowDimension(3);
 }
 
-const char* cocoa_get_working_directory() {
+//This does not appear to work right.
+/*const char* cocoa_get_working_directory() {
     NSBundle* bundle = [NSBundle mainBundle];
     return [[bundle bundlePath] UTF8String];
-}
+}*/
 

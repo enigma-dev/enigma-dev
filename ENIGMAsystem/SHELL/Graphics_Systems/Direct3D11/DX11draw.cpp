@@ -1,4 +1,5 @@
 /** Copyright (C) 2013 Robert B. Colton
+*** Copyright (C) 2014 Seth N. Hetu
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -77,7 +78,7 @@ void draw_set_alpha_test_ref_value(unsigned val)
 
 }
 
-void draw_set_line_pattern(unsigned short pattern, int scale)
+void draw_set_line_pattern(int pattern, int scale)
 {
 
 }
