@@ -16,9 +16,10 @@ init:
       $apiURL = "https://ci.appveyor.com/api/projects/$env:APPVEYOR_ACCOUNT_NAME/$env:APPVEYOR_PROJECT_SLUG"
       $project = Invoke-RestMethod -Method Get -Uri $apiURL
       Write-Host ($project.builds | ConvertTo-Json)
-      $env:ARCHIVE_JOB = (Invoke-RestMethod -Method Get -Uri $apiURL).build.jobs[0].jobId
+      $env:ARCHIVE_JOB = (Invoke-RestMethod -Method Get -Uri $apiURL).builds[$env:APPVEYOR_BUILD_ID].jobs[0].jobId
   - echo "%ARCHIVE_JOB%"
   - echo "%APPVEYOR_BUILD_ID%"
+  - echo "%APPVEYOR_BUILD_NUMBER%"
   - cd %APPVEYOR_BUILD_FOLDER%
 environment:
   OUTPUT: /tmp/test.exe
