@@ -55,7 +55,7 @@ install:
   - gcc -v
   - ps: |
       $artifactsURL = "https://ci.appveyor.com/api/buildjobs/$env:ARCHIVE_JOB/artifacts/"
-      If (($env:APPVEYOR_JOB_NUMBER -eq 1) || !(appveyor DownloadFile ($artifactsURL + "blobs.zip") -FileName blobs.zip && 7z e -mmt blobs.zip)) {
+      If (($env:APPVEYOR_JOB_NUMBER -eq 1) -or !(appveyor DownloadFile ($artifactsURL + "blobs.zip") -FileName blobs.zip -and 7z e -mmt blobs.zip)) {
         # use our first job to build JDI and the CLI
         bash -lc "cd '$env:APPVEYOR_BUILD_FOLDER'; make -j 4; make -j 4 emake"
 
