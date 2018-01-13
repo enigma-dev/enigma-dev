@@ -19,6 +19,7 @@
 
 #include <stdio.h> //fstream can get staked
 #include <string> //We will use string, though
+#include <sstream>
 using namespace std;
 
 #include "darray.h" //Simpler vector with logarithmic time
@@ -36,13 +37,11 @@ namespace enigma
 {
   struct openFile
   {
-    FILE *f;      //FILE we opened, or NULL if it has been closed.
-    string sdata; //Use varies depending on type.
-    unsigned spos;      //position in sdata string
-    bool eof;
+    FILE *f; //FILE we opened, or NULL if it has been closed.
+    bool eoln;
 
-    openFile(): f(NULL), sdata(), spos(0), eof(false) {};
-    openFile(FILE* a,string b): f(a), sdata(b), spos(0), eof(false) {};
+    openFile(): f(NULL), eoln(false) {};
+    openFile(FILE* a,string b): f(a), eoln(false) {};
   };
   varray<openFile> files; //Use a dynamic array to store as many files as the user cares to open
   int file_highid = 0; //This isn't what GM does, but it's not a bad idea. GM checks for the smallest unused ID.
@@ -64,7 +63,6 @@ int file_text_open_read(string fname) // Opens the file with the indicated name 
   if (!a)      //Failure
     return -1; //Behavior for fail is -1 return
   enigma::files[enigma::file_highid] = enigma::openFile(a,""); //Store it in the lowest available ID, highid
-  file_text_readln(enigma::file_highid);
   return enigma::file_highid++; //Return our index and increment it for next time
 }
 
@@ -122,15 +120,20 @@ void file_text_writeln(int fileid) // Write a newline character to the file.
 
 string file_text_read_string(int fileid) { // Reads a string from the file with the given file id and returns this string. A string ends at the end of line.
   enigma::openFile &mf = enigma::files[fileid];
-  if (!mf.sdata[mf.spos]) return "";
-  string strr = mf.sdata.substr(mf.spos);
+  string ret = "";
+  char buf[BUFSIZ];
+  buf[0] = 0;
+  while (fgets(buf,BUFSIZ,mf.f))
+  {
+    ret += buf;
+    if (ret[ret.length()-1] == '\n' or ret[ret.length()-1] == '\r')
+      break;
+    buf[0] = 0;
+  }
   size_t dp;
-  for (dp = strr.length()-1; dp != size_t(-1) and (strr[dp] == '\n' or strr[dp] == '\r'); dp--);
-  strr.erase(dp+1);
-  mf.spos += strr.length();
-  if (feof(mf.f))
-    mf.eof = true;
-  return strr;
+  for (dp = ret.length()-1; dp != size_t(-1) and (ret[dp] == '\n' or ret[dp] == '\r'); dp--)
+    ungetc(ret[dp], mf.f);
+  return ret.substr(0, dp + 1);
 }
 
 string file_text_read_all(int fileid) {
@@ -139,57 +142,43 @@ string file_text_read_all(int fileid) {
   contents.resize(ftell(enigma::files[fileid].f));
   fseek(enigma::files[fileid].f, 0, SEEK_SET);
   fread(&contents[0],1,contents.size(),enigma::files[fileid].f);
-  enigma::files[fileid].eof = true;
   return contents;
 }
 
 bool file_text_eoln(int fileid)
 {
-    enigma::openFile &mf = enigma::files[fileid];
-    return (mf.spos >= mf.sdata.length());
+  enigma::openFile &mf = enigma::files[fileid];
+  return mf.eoln;
 }
 
 inline bool is_whitespace(char x) { return x == ' ' or x == '\t' or x == '\r' or x == '\n'; }
 
 double file_text_read_real(int fileid) { // Reads a real value from the file and returns this value.
   enigma::openFile &mf = enigma::files[fileid];
-  double r1;
-  int apos;
-  if (mf.spos >= mf.sdata.length()) return -1;
-  while (is_whitespace(mf.sdata[mf.spos])) {
-    mf.spos++;
-    if (mf.spos >= mf.sdata.length()) return -1;
-  }
-  if (sscanf(mf.sdata.substr(mf.spos).c_str(),"%lf%n",&r1,&apos),apos)
-    mf.spos += apos;
-  if (mf.spos >= mf.sdata.length() && feof(mf.f))
-    mf.eof = true;
-  return r1;
+  double ret = 0;
+  fscanf(mf.f,"%lf",&ret);
+  return ret;
 }
 
 string file_text_readln(int fileid) // Skips the rest of the line in the file and starts at the start of the next line.
 {
   enigma::openFile &mf = enigma::files[fileid];
-  string ret = mf.sdata.substr(mf.spos);
-  if (feof(mf.f))
-    mf.eof = true;
-  string next;
+  mf.eoln = false;
+  string ret;
   char buf[BUFSIZ];
   buf[0] = 0;
-  while (fgets(buf,BUFSIZ,mf.f))
+  while (fgets(buf,BUFSIZ,enigma::files[fileid].f))
   {
-    next += buf;
-    if (next[next.length()-1] == '\n' or next[next.length()-1] == '\r')
+    ret += buf;
+    if (ret[ret.length()-1] == '\n' or ret[ret.length()-1] == '\r')
       break;
     buf[0] = 0;
   }
-  mf.sdata = next;
-  mf.spos = 0;
   return ret;
 }
 
 bool file_text_eof(int fileid) { // Returns whether we reached the end of the file.
-  return (enigma::files[fileid].eof);
+  return feof(enigma::files[fileid].f);
 }
 
 void load_info(string fname) {
@@ -223,7 +212,8 @@ int file_bin_open(string fname,int mode) // Opens the file with the indicated na
 bool file_bin_rewrite(int fileid) // Rewrites the file with the given file id, that is, clears it and starts writing at the start.
 {
   enigma::openFile &mf = enigma::files[fileid];
-  mf.f = freopen (mf.sdata.c_str(), "wb", mf.f);
+  string sdata;
+  mf.f = freopen (sdata.c_str(), "wb", mf.f);
 
   if (mf.f == NULL) {
     #ifdef DEBUGMODE
