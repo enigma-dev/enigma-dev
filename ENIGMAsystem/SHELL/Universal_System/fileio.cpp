@@ -127,7 +127,7 @@ string file_text_read_string(int fileid) { // Reads a string from the file with 
   size_t dp;
   for (dp = strr.length()-1; dp != size_t(-1) and (strr[dp] == '\n' or strr[dp] == '\r'); dp--);
   strr.erase(dp+1);
-  mf.spos = dp+1;
+  mf.spos += strr.length();
   if (feof(mf.f))
     mf.eof = true;
   return strr;
