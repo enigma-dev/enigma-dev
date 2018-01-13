@@ -12,14 +12,15 @@ init:
   - echo "%APPVEYOR_JOB_ID%"
   # store the name of the archive job in an environment variable
   # this designates the first job of every build as the archive job
+  - echo "%APPVEYOR_BUILD_ID%"
+  - echo "%APPVEYOR_BUILD_NUMBER%"
+  - echo "%APPVEYOR_BUILD_VERSION%"
   - ps: |
-      $apiURL = "https://ci.appveyor.com/api/projects/$env:APPVEYOR_ACCOUNT_NAME/$env:APPVEYOR_PROJECT_SLUG"
+      $apiURL = "https://ci.appveyor.com/api/projects/$env:APPVEYOR_ACCOUNT_NAME/$env:APPVEYOR_PROJECT_SLUG/build/$env:APPVEYOR_BUILD_VERSION"
       $project = Invoke-RestMethod -Method Get -Uri $apiURL
       Write-Host ($project | ConvertTo-Json)
       $env:ARCHIVE_JOB = (Invoke-RestMethod -Method Get -Uri $apiURL).build.jobs[0].jobId
   - echo "%ARCHIVE_JOB%"
-  - echo "%APPVEYOR_BUILD_ID%"
-  - echo "%APPVEYOR_BUILD_NUMBER%"
   - cd %APPVEYOR_BUILD_FOLDER%
 environment:
   OUTPUT: /tmp/test.exe
