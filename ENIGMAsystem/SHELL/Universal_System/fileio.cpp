@@ -118,7 +118,7 @@ void file_text_writeln(int fileid) // Write a newline character to the file.
   fputc('\n',mf.f);
 }
 
-string file_text_read_string(int fileid) { // Reads a string from the file with the given file id and returns this string. A string ends at the end of line.
+string file_text_read_string(int fileid) { // Reads a string from the file, excluding the end of line, with the given file id and returns this string.
   enigma::openFile &mf = enigma::files[fileid];
   string ret = "";
   char buf[BUFSIZ];
@@ -161,7 +161,7 @@ double file_text_read_real(int fileid) { // Reads a real value from the file and
   return ret;
 }
 
-string file_text_readln(int fileid) // Skips the rest of the line in the file and starts at the start of the next line.
+string file_text_readln(int fileid) // Reads a string from the file, including the end of line, with the given file id and returns this string.
 {
   enigma::openFile &mf = enigma::files[fileid];
   mf.eoln = false;
