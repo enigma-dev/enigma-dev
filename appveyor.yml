@@ -18,6 +18,7 @@ init:
       Write-Host ($mytest)
       $env:ARCHIVE_JOB = (Invoke-RestMethod -Method Get -Uri $apiURL).build.jobs[0].jobId
   - echo "%ARCHIVE_JOB%"
+  - echo "%APPVEYOR_BUILD_ID%"
   - cd %APPVEYOR_BUILD_FOLDER%
 environment:
   OUTPUT: /tmp/test.exe
