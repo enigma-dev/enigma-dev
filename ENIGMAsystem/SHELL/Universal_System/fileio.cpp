@@ -132,7 +132,8 @@ string file_text_read_string(int fileid) { // Reads a string from the file with 
   size_t dp;
   for (dp = ret.length()-1; dp != size_t(-1) and (ret[dp] == '\n' or ret[dp] == '\r'); dp--)
     ungetc(ret[dp], mf.f);
-  return ret.substr(0, dp + 1);
+  ret.erase(dp + 1);
+  return ret;
 }
 
 string file_text_read_all(int fileid) {
