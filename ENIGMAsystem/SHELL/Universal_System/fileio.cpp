@@ -149,9 +149,8 @@ bool file_text_eoln(int fileid)
 {
   enigma::openFile &mf = enigma::files[fileid];
   int c = fgetc(mf.f);
-  bool eoln = (c == '\n' or c == '\r');
   ungetc(c, mf.f);
-  return eoln;
+  return (c == '\n' or c == '\r');
 }
 
 inline bool is_whitespace(char x) { return x == ' ' or x == '\t' or x == '\r' or x == '\n'; }
