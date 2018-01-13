@@ -36,10 +36,10 @@ namespace enigma
 {
   struct openFile
   {
-    FILE *f;      //FILE we opened, or NULL if it has been closed.
-    string sdata; //Use varies depending on type.
-    unsigned spos;      //position in sdata string
-    size_t dp;
+    FILE *f;       //FILE we opened, or NULL if it has been closed.
+    string sdata;  //Use varies depending on type.
+    unsigned spos; //position in sdata string
+    size_t dp;     //position of the new line or the null-terminator in sdata
 
     openFile(): f(NULL), sdata(), spos(0), dp(0) {};
     openFile(FILE* a,string b): f(a), sdata(b), spos(0), dp(0) {};
