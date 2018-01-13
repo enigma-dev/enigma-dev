@@ -13,7 +13,7 @@ init:
   # store the name of the archive job in an environment variable
   # this designates the first job of every build as the archive job
   - ps: |
-      $apiURL = "https://ci.appveyor.com/api/projects/$env:APPVEYOR_ACCOUNT_NAME/$env:APPVEYOR_PROJECT_SLUG"
+      $apiURL = "http://ci.appveyor.com/api/projects/$env:APPVEYOR_ACCOUNT_NAME/$env:APPVEYOR_PROJECT_SLUG"
       $env:ARCHIVE_JOB = (Invoke-RestMethod -Method Get -Uri $apiURL).build.jobs[0].jobId
   - echo "%ARCHIVE_JOB%"
   - cd %APPVEYOR_BUILD_FOLDER%
@@ -75,7 +75,7 @@ install:
         }
       } Else {
         # simply restore JDI and the CLI from the archive artifact of this same build using REST API
-        $artifactsURL = "https://ci.appveyor.com/api/buildjobs/$env:ARCHIVE_JOB/artifacts/"
+        $artifactsURL = "http://ci.appveyor.com/api/buildjobs/$env:ARCHIVE_JOB/artifacts/"
         appveyor DownloadFile ($artifactsURL + "blobs.zip") -FileName blobs.zip
         7z e -mmt blobs.zip
       }

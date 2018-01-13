@@ -1,0 +1,7 @@
+table Image {
+  width:int;
+  height:int;
+  data:[byte]; // zlib compressed BGRA
+}
+
+root_type Image;
