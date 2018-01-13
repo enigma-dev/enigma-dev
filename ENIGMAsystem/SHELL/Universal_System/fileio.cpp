@@ -38,10 +38,9 @@ namespace enigma
   {
     FILE *f; //FILE we opened, or NULL if it has been closed.
     string name;
-    bool eoln;
 
-    openFile(): f(NULL), name(), eoln(false) {};
-    openFile(FILE* f,string name): f(f), name(name), eoln(false) {};
+    openFile(): f(NULL), name() {};
+    openFile(FILE* f, string name): f(f), name(name) {};
   };
   varray<openFile> files; //Use a dynamic array to store as many files as the user cares to open
   int file_highid = 0; //This isn't what GM does, but it's not a bad idea. GM checks for the smallest unused ID.
@@ -149,7 +148,10 @@ string file_text_read_all(int fileid) {
 bool file_text_eoln(int fileid)
 {
   enigma::openFile &mf = enigma::files[fileid];
-  return mf.eoln;
+  int c = fgetc(mf.f);
+  bool eoln = (c == '\n' or c == '\r');
+  ungetc(c, mf.f);
+  return eoln;
 }
 
 inline bool is_whitespace(char x) { return x == ' ' or x == '\t' or x == '\r' or x == '\n'; }
@@ -163,8 +165,6 @@ double file_text_read_real(int fileid) { // Reads a real value from the file and
 
 string file_text_readln(int fileid) // Reads a string from the file, including the end of line, with the given file id and returns this string.
 {
-  enigma::openFile &mf = enigma::files[fileid];
-  mf.eoln = false;
   string ret;
   char buf[BUFSIZ];
   buf[0] = 0;
