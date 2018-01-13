@@ -15,7 +15,7 @@ init:
   - ps: |
       $apiURL = "https://ci.appveyor.com/api/projects/$env:APPVEYOR_ACCOUNT_NAME/$env:APPVEYOR_PROJECT_SLUG"
       $project = Invoke-RestMethod -Method Get -Uri $apiURL
-      Write-Host ($project | ConvertTo-Json)
+      Write-Host ($project.builds | ConvertTo-Json)
       $env:ARCHIVE_JOB = (Invoke-RestMethod -Method Get -Uri $apiURL).build.jobs[0].jobId
   - echo "%ARCHIVE_JOB%"
   - echo "%APPVEYOR_BUILD_ID%"
