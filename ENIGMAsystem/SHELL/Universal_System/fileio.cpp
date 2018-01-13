@@ -94,7 +94,7 @@ void file_text_close(int fileid) // Closes the file with the given file id.
     #endif
     return;
   }
-  
+
   fclose(enigma::files[fileid].f);
   enigma::files[fileid].f = NULL;
 
@@ -124,7 +124,10 @@ string file_text_read_string(int fileid) { // Reads a string from the file with 
   enigma::openFile &mf = enigma::files[fileid];
   if (!mf.sdata[mf.spos]) return "";
   string strr = mf.sdata.substr(mf.spos);
-  mf.spos = mf.sdata.length();
+  size_t dp;
+  for (dp = strr.length()-1; dp != size_t(-1) and (strr[dp] == '\n' or strr[dp] == '\r'); dp--);
+  strr.erase(dp+1);
+  mf.spos = dp+1;
   if (feof(mf.f))
     mf.eof = true;
   return strr;
@@ -164,25 +167,25 @@ double file_text_read_real(int fileid) { // Reads a real value from the file and
   return r1;
 }
 
-void file_text_readln(int fileid) // Skips the rest of the line in the file and starts at the start of the next line.
+string file_text_readln(int fileid) // Skips the rest of the line in the file and starts at the start of the next line.
 {
-  if (feof(enigma::files[fileid].f))
-    enigma::files[fileid].eof = true;
-  string ret;
+  enigma::openFile &mf = enigma::files[fileid];
+  string ret = mf.sdata.substr(mf.spos);
+  if (feof(mf.f))
+    mf.eof = true;
+  string next;
   char buf[BUFSIZ];
-    buf[0] = 0;
-  while (fgets(buf,BUFSIZ,enigma::files[fileid].f))
+  buf[0] = 0;
+  while (fgets(buf,BUFSIZ,mf.f))
   {
-    ret += buf;
-    if (ret[ret.length()-1] == '\n' or ret[ret.length()-1] == '\r')
+    next += buf;
+    if (next[next.length()-1] == '\n' or next[next.length()-1] == '\r')
       break;
     buf[0] = 0;
   }
-  size_t dp;
-  for (dp = ret.length()-1; dp != size_t(-1) and (ret[dp] == '\n' or ret[dp] == '\r'); dp--);
-  ret.erase(dp+1);
-  enigma::files[fileid].sdata = ret;
-  enigma::files[fileid].spos = 0;
+  mf.sdata = next;
+  mf.spos = 0;
+  return ret;
 }
 
 bool file_text_eof(int fileid) { // Returns whether we reached the end of the file.
