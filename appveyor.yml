@@ -14,7 +14,7 @@ init:
   # this designates the first job of every build as the archive job
   - ps: |
       $apiURL = "https://ci.appveyor.com/api/projects/$env:APPVEYOR_ACCOUNT_NAME/$env:APPVEYOR_PROJECT_SLUG"
-      $mytest = Invoke-RestMethod -Method Get -Uri $apiURL
+      $project = Invoke-RestMethod -Method Get -Uri $apiURL
       Write-Host ($mytest | ConvertTo-Json)
       $env:ARCHIVE_JOB = (Invoke-RestMethod -Method Get -Uri $apiURL).build.jobs[0].jobId
   - echo "%ARCHIVE_JOB%"
