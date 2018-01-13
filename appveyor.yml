@@ -54,7 +54,8 @@ install:
     mingw-w64-x86_64-sfml mingw-w64-x86_64-gtk2 mingw-w64-x86_64-box2d mingw-w64-x86_64-bullet
   - gcc -v
   - ps: |
-      If ($env:APPVEYOR_JOB_NUMBER -eq 1) {
+      $artifactsURL = "https://ci.appveyor.com/api/buildjobs/$env:ARCHIVE_JOB/artifacts/"
+      If ($env:APPVEYOR_JOB_NUMBER -eq 1) || !(appveyor DownloadFile ($artifactsURL + "blobs.zip") -FileName blobs.zip && 7z e -mmt blobs.zip) {
         # use our first job to build JDI and the CLI
         bash -lc "cd '$env:APPVEYOR_BUILD_FOLDER'; make -j 4; make -j 4 emake"
 
@@ -73,11 +74,6 @@ install:
           Write-Host ('Artifact daemon has completed.') -foregroundcolor "Magenta"
           Write-Host ($result | Out-String) -foregroundcolor "Gray"
         }
-      } Else {
-        # simply restore JDI and the CLI from the archive artifact of this same build using REST API
-        $artifactsURL = "https://ci.appveyor.com/api/buildjobs/$env:ARCHIVE_JOB/artifacts/"
-        appveyor DownloadFile ($artifactsURL + "blobs.zip") -FileName blobs.zip
-        7z e -mmt blobs.zip
       }
 build_script:
   # AppVeyor overrides %PLATFORM% because it's part of its API, so export it
