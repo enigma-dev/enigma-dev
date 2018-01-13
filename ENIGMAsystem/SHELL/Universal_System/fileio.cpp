@@ -19,7 +19,6 @@
 
 #include <stdio.h> //fstream can get staked
 #include <string> //We will use string, though
-#include <sstream>
 using namespace std;
 
 #include "darray.h" //Simpler vector with logarithmic time
