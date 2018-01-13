@@ -37,10 +37,11 @@ namespace enigma
   struct openFile
   {
     FILE *f; //FILE we opened, or NULL if it has been closed.
+    string name;
     bool eoln;
 
-    openFile(): f(NULL), eoln(false) {};
-    openFile(FILE* a,string b): f(a), eoln(false) {};
+    openFile(): f(NULL), name(), eoln(false) {};
+    openFile(FILE* f,string name): f(f), name(name), eoln(false) {};
   };
   varray<openFile> files; //Use a dynamic array to store as many files as the user cares to open
   int file_highid = 0; //This isn't what GM does, but it's not a bad idea. GM checks for the smallest unused ID.
@@ -212,8 +213,7 @@ int file_bin_open(string fname,int mode) // Opens the file with the indicated na
 bool file_bin_rewrite(int fileid) // Rewrites the file with the given file id, that is, clears it and starts writing at the start.
 {
   enigma::openFile &mf = enigma::files[fileid];
-  string sdata;
-  mf.f = freopen (sdata.c_str(), "wb", mf.f);
+  mf.f = freopen(mf.name.c_str(), "wb", mf.f);
 
   if (mf.f == NULL) {
     #ifdef DEBUGMODE
