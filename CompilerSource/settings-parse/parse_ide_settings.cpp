@@ -139,14 +139,16 @@ void parse_ide_settings(const char* eyaml)
   setting::keyword_blacklist = settree.get("keyword-blacklist").toString();
 
   // Use a platform-specific make directory.
-  std::string make_directory = "./ENIGMA/";
-#if CURRENT_PLATFORM_ID == OS_WINDOWS
-  make_directory = "%LOCALAPPDATA%/ENIGMA/";
-#elif CURRENT_PLATFORM_ID == OS_LINUX
-  make_directory = "%HOME%/.enigma/";
-#elif CURRENT_PLATFORM_ID == OS_MACOSX
-  make_directory = "./ENIGMA/";
-#endif
+  std::string make_directory = settree.get("make-directory").toString();
+  
+  if (make_directory.empty())
+  {
+  #if CURRENT_PLATFORM_ID == OS_WINDOWS
+    make_directory = "%LOCALAPPDATA%/ENIGMA/";
+  #else
+    make_directory = "%HOME%/.enigma/";
+  #endif
+  }
 
   //Now actually set it, taking backslashes into account.
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
