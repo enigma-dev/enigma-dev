@@ -92,6 +92,30 @@ inline string string_replace_all(string str,string substr,string nstr)
   return str;
 }
 
+inline void write_desktop_entry(const std::string fPath, const GameSettings& gameSet)
+{
+  std::ofstream wto;
+  std::string fName = fPath.substr(fPath.find_last_of("/\\") + 1);
+  
+  wto.open(fPath + ".desktop");
+  wto << "[Desktop Entry]\n";
+  wto << "Type=Application\n";
+  wto << "Version=" << gameSet.versionMajor << "." << gameSet.versionMinor << "." << gameSet.versionRelease << "." << gameSet.versionBuild << "\n";
+  wto << "Name=" << fName << "\n";
+  wto << "Comment=" << gameSet.description << "\n";
+  wto << "Path=.\n";
+  wto << "Exec=./" << fName << "\n";
+  //NOTE: Due to security concerns linux doesn't allow releative paths for icons
+  // hardcoding icon because relative paths search /usr/share/icons and full paths aren't portable
+  wto << "Icon=applications-games-symbolic.svg\n";
+  wto << "Terminal=false\n"; //TODO: Add setting for this in ide
+  wto << "Categories=Game;\n";
+  wto << "MimeType=application/octet-stream;\n";
+  wto.close();
+  
+  chmod((fPath + ".desktop").c_str(), S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH);
+}
+
 #include "System/builtins.h"
 
 dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode) {
@@ -712,6 +736,9 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
   idpr("Closing game module and running if requested.",99);
   edbg << "Closing game module and running if requested." << flushl;
   fclose(gameModule);
+  
+  if (extensions::targetOS.identifier == "Linux" && mode == emode_compile)
+    write_desktop_entry(gameFname, gameSet);
 
   // Run the game if requested
   if (run_game && (mode == emode_run or mode == emode_debug or mode == emode_design))
