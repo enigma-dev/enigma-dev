@@ -26,10 +26,9 @@
  **                                                                              **
  \********************************************************************************/
 
-extern bool argument_relative;
-
 namespace enigma_user
 {
+extern bool argument_relative;
 
 inline void action_path(unsigned pathid, cs_scalar speed, unsigned endaction, bool absolute)
 {
