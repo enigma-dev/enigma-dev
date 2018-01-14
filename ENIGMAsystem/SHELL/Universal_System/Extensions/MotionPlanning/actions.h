@@ -28,10 +28,9 @@
 
 #include "Universal_System/instance_system_base.h"
 
-extern bool argument_relative;
-
 namespace enigma_user
 {
+extern bool argument_relative;
 
 inline void action_linear_step(double x, double y, double stepsize, bool solid_only)
 {
@@ -58,4 +57,3 @@ inline void action_potential_step(double x, double y, double stepsize, bool soli
 }
 
 }
-
