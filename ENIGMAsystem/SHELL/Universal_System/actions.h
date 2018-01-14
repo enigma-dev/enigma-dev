@@ -27,10 +27,6 @@
  **                                                                              **
  \********************************************************************************/
 
-
-
-extern bool argument_relative;
-
 #include "instance_system_base.h"
 #include "lives.h"
 
@@ -38,6 +34,7 @@ extern bool argument_relative;
 
 namespace enigma_user
 {
+extern bool argument_relative;
 
 //TODO: Confirm timeline mechanics (e.g., stopping resets position?)
 inline void action_set_timeline(int timeline, double position, int startImmediately=0, int loop=0)
@@ -48,7 +45,7 @@ inline void action_set_timeline(int timeline, double position, int startImmediat
   ((enigma::object_timelines*)enigma::instance_event_iterator->inst)->timeline_loop = (loop==1);
 }
 
-inline void action_set_timeline_position(double position) 
+inline void action_set_timeline_position(double position)
 {
   ((enigma::object_timelines*)enigma::instance_event_iterator->inst)->timeline_position=position;
 }

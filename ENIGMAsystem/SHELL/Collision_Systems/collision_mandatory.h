@@ -35,11 +35,10 @@ namespace enigma
   // It is used to clean up on game termination.
   void free_collision_mask(void* mask);
 
-  #ifdef _COLLISIONS_OBJECT_H
+  #ifdef ENIGMA_COLLISIONS_OBJECT_H
     // This function will be invoked each collision event to obtain a pointer to any
     // instance being collided with. It is expected to return NULL for no collision, or
     // an object_basic* pointing to the first instance found.
     object_basic *place_meeting_inst(cs_scalar x, cs_scalar y, int object);
   #endif
 }
-

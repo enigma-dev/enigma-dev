@@ -26,8 +26,6 @@
  **                                                                              **
  \********************************************************************************/
 
-extern bool argument_relative;
-
 #include "libEGMstd.h"
 
 #include "Universal_System/scalar.h"
@@ -37,6 +35,7 @@ extern bool argument_relative;
 
 namespace enigma_user
 {
+extern bool argument_relative;
 
 inline void action_color(const int color) {
 	draw_set_color(color);

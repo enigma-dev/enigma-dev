@@ -18,10 +18,9 @@
 #include "Universal_System/scalar.h"
 #include "Universal_System/instance_system_base.h"
 
-extern bool argument_relative;
-
 namespace enigma_user
 {
+extern bool argument_relative;
 
 inline bool action_if_object(const int object, const cs_scalar xx, const cs_scalar yy) {
     if (argument_relative) {
@@ -76,4 +75,3 @@ inline bool action_if_collision(const cs_scalar x, const cs_scalar y, const int 
 }
 
 }
-
