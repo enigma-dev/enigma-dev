@@ -1,6 +1,6 @@
 PATH := $(eTCpath)$(PATH)
 
-.PHONY: ENIGMA
+.PHONY: ENIGMA clean Game clean-game
 
 ENIGMA:
 	$(MAKE) -C CompilerSource 

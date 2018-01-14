@@ -3,8 +3,7 @@ notifications:
 language: cpp
 
 git:
-  depth: 1
-
+  depth: false
 compiler:
   - gcc
 
