@@ -19,7 +19,8 @@ LDFLAGS   := $(OS_LIBS)
 
 EXTRA_OBJS := $(patsubst $(EXTRA_SRC_DIR)/%, $(OBJ_DIR)/Extra/%, $(patsubst %.cpp, %.o, $(EXTRA_SOURCES)))
 
-SOURCES := $(shell find $(SRC_DIR) -name '*.cpp')
+rwildcard=$(wildcard $1/$2) $(foreach d,$(wildcard $1/*),$(call rwildcard,$d,$2))
+SOURCES := $(call rwildcard,$(SRC_DIR),*.cpp)
 OBJECTS := $(patsubst $(SRC_DIR)/%, $(OBJ_DIR)/%, $(patsubst %.cpp, %.o, $(SOURCES)))
 OBJDIRS := $(sort $(OBJ_DIR) $(dir $(OBJECTS)) $(dir $(EXTRA_OBJS)))
 DEPENDS := $(OBJECTS:.o=.d) $(EXTRA_OBJS:.o=.d)
