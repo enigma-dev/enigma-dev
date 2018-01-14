@@ -15,6 +15,6 @@ clean-game:
 	$(MAKE) -C ENIGMAsystem/SHELL clean
 	
 emake:
-	$(MAKE) -d -C CommandLine/emake/
+	$(MAKE) -C CommandLine/emake/
 
 
