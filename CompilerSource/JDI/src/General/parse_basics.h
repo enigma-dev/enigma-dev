@@ -91,20 +91,8 @@ namespace parse_bacics {
       return is.whatever[(unsigned char) x] & is.SPACER;
     }
 
-    using std::string;
-    string toString(int16_t);
-    string toString(int32_t);
-    string toString(int64_t);
-    string toString(uint16_t);
-    string toString(uint32_t);
-    string toString(uint64_t);
-    string toString(short);
-    string toString(unsigned short);
-    string toString(char);
-    string toString(char*);
-    string toString(float);
-    string toString(double);
-    string toString(size_t);
+    template<typename T> inline std::string toString(T n) { return std::to_string(n); }
+    template<> inline std::string toString<char*>(char* n) { if (n == nullptr) return ""; else return std::string(n); }
   }
 }
 using namespace parse_bacics::visible;
