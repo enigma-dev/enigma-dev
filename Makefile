@@ -17,4 +17,7 @@ clean-game:
 emake:
 	$(MAKE) -C CommandLine/emake/
 
+test-runner:
+	$(MAKE) -C CommandLine/testing/
+
 
