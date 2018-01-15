@@ -52,16 +52,4 @@ namespace parse_bacics {
   }
 
   is_ is;
-  namespace visible {
-    string toString(int16_t n) { return std::to_string(n); }
-    string toString(int32_t n) { return std::to_string(n); }
-    string toString(int64_t n) { return std::to_string(n); }
-    string toString(uint16_t n) { return std::to_string(n); }
-    string toString(uint32_t n) { return std::to_string(n); }
-    string toString(uint64_t n) { return std::to_string(n); }
-    string toString(char n) { return std::to_string(n); }
-    string toString(char* n) { if (n == nullptr) return ""; else return string(n); }
-    string toString(float n) { return std::to_string(n); }
-    string toString(double n) { return std::to_string(n); }
-  }
 }

@@ -1,30 +1,33 @@
-sudo: required
-dist: trusty
 notifications:
   irc: "chat.freenode.net#enigma"
 language: cpp
+
 git:
   depth: false
 compiler:
   - gcc
+
 # don't build "feature" branches
 branches:
   only:
     - "master"
 
 before_install:
-  - sudo dpkg --add-architecture i386
-  - sudo apt-get -qq -y install build-essential libglu1-mesa-dev zlib1g-dev libalure-dev libvorbisfile3 libvorbis-dev 
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo dpkg --add-architecture i386; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get -qq -y install build-essential libglu1-mesa-dev zlib1g-dev libalure-dev libvorbisfile3 libvorbis-dev 
       libdumb1-dev libc++-dev libsfml-dev libgtk2.0-dev libbullet-dev libbox2d-dev libgme-dev gcc-multilib 
       g++-multilib libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1-dev libglu1-mesa:i386 libx11-6:i386  libc++-dev:i386
-      mingw-w64 wine libboost-dev libboost-iostreams-dev libboost-filesystem-dev libboost-program-options-dev libboost-system-dev
+      mingw-w64 wine libboost-dev libboost-iostreams-dev libboost-filesystem-dev libboost-program-options-dev libboost-system-dev; fi
   
   # Ubuntu is a turd
-  - sudo ln -s /usr/lib/i386-linux-gnu/mesa/libGL.so.1 /usr/lib/i386-linux-gnu/libGL.so
-  - sudo ln -s /usr/lib/i386-linux-gnu/libX11.so.6 /usr/lib/i386-linux-gnu/libX11.so
-  - sudo ln -s /usr/lib/i386-linux-gnu/libGLU.so.1 /usr/lib/i386-linux-gnu/libGLU.so
-  - sudo ln -s /usr/include/x86_64-linux-gnu/zconf.h /usr/include
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo ln -s /usr/lib/i386-linux-gnu/mesa/libGL.so.1 /usr/lib/i386-linux-gnu/libGL.so; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo ln -s /usr/lib/i386-linux-gnu/libX11.so.6 /usr/lib/i386-linux-gnu/libX11.so; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo ln -s /usr/lib/i386-linux-gnu/libGLU.so.1 /usr/lib/i386-linux-gnu/libGLU.so; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo ln -s /usr/include/x86_64-linux-gnu/zconf.h /usr/include; fi
   
+  #OSX is also a turd
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew upgrade gcc || brew install gcc || brew link --overwrite gcc; fi  
+
 install:
   - chmod +x ./ci-build.sh
   - make -j4
@@ -36,55 +39,139 @@ install:
 env:
   global:
     - OUTPUT=/tmp/test
-  matrix:
-  #BEGIN LINUX
-    # Game Modes
-    - COMPILER=gcc PLATFORM=xlib MODE=Run GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
-    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
-    - COMPILER=gcc PLATFORM=xlib MODE=Compile GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
-    # Compilers
-    - COMPILER=gcc32 PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
-    - COMPILER=clang PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
-    - COMPILER=clang32 PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
-    # Graphics
-    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL3 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
-    # Audio
-    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=OpenAL COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
-    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=SFML COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
-    # Networking
-    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=Asynchronous WIDGETS=None EXTENSIONS="None"
-    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=BerkeleySockets WIDGETS=None EXTENSIONS="None"
-    # Widgets
-    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=GTK+ EXTENSIONS="None"
-    # Collision
-    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=BBox NETWORK=None WIDGETS=None EXTENSIONS="None"
-    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=Precise NETWORK=None WIDGETS=None EXTENSIONS="None"
-    # Extensions
-    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="Alarms"
-    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="DataStructures,Asynchronous"
-    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=GTK+ EXTENSIONS="BasicGUI"
-    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="Box2DPhysics"
-    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="BulletDynamics"
-    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="DataStructures"
-    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="DateTime"
-    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="GM5Compat"
-    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=OpenAL COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="GME"
-    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=SFML COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="GME"
-    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="IniFilesystem"
-    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="DataStructures,Json"
-    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="MatrixMath"
-    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=BBox NETWORK=None WIDGETS=None EXTENSIONS="Paths"
-    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=BBox NETWORK=None WIDGETS=None EXTENSIONS="Paths,MotionPlanning"
-    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=Precise NETWORK=None WIDGETS=None EXTENSIONS="Paths,MotionPlanning"
-    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="ParticleSystems"
-    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL3 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="ParticleSystems"
-    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL3 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="StudioPhysics"
-    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="Timelines"
+  
+matrix:
+  include:
+#BEGIN OSX
+  # Compilers
+  - { os: osx, osx_image: xcode9.2,
+      env: { COMPILER: "clang", PLATFORM: "None", MODE: "Debug", GRAPHICS: "None", AUDIO: "None", COLLISION: "None", NETWORK: "None", WIDGETS: "None", EXTENSIONS: "None" } }
+  - { os: osx, osx_image: xcode9.2,
+      env: { COMPILER: "gcc", PLATFORM: "None", MODE: "Debug", GRAPHICS: "None", AUDIO: "None", COLLISION: "None", NETWORK: "None", WIDGETS: "None", EXTENSIONS: "None" } }
+#END OSX
+ 
+#BEGIN LINUX
+  # Game Modes
+  - { os: linux, sudo: required, dist: trusty,
+      env: { COMPILER: "gcc", PLATFORM: "xlib", MODE: "Run", GRAPHICS: "OpenGL1", AUDIO: "None", COLLISION: "None", NETWORK: "None", WIDGETS: "None", EXTENSIONS: "None" } }
+ 
+  - { os: linux, sudo: required, dist: trusty,
+      env: { COMPILER: "gcc", PLATFORM: "xlib", MODE: "Debug", GRAPHICS: "OpenGL1", AUDIO: "None", COLLISION: "None", NETWORK: "None", WIDGETS: "None", EXTENSIONS: "None" } }
+      
+  - { os: linux, sudo: required, dist: trusty,
+      env: { COMPILER: "gcc", PLATFORM: "xlib", MODE: "Compile", GRAPHICS: "OpenGL1", AUDIO: "None", COLLISION: "None", NETWORK: "None", WIDGETS: "None", EXTENSIONS: "None" } }
+  
+  # Compilers
+  - { os: linux, sudo: required, dist: trusty,
+      env: { COMPILER: "gcc32", PLATFORM: "xlib", MODE: "Debug", GRAPHICS: "OpenGL1", AUDIO: "None", COLLISION: "None", NETWORK: "None", WIDGETS: "None", EXTENSIONS: "None" } }
+  
+  - { os: linux, sudo: required, dist: trusty,
+      env: { COMPILER: "clang", PLATFORM: "xlib", MODE: "Debug", GRAPHICS: "OpenGL1", AUDIO: "None", COLLISION: "None", NETWORK: "None", WIDGETS: "None", EXTENSIONS: "None" } }
+  
+  - { os: linux, sudo: required, dist: trusty,
+      env: { COMPILER: "clang32", PLATFORM: "xlib", MODE: "Debug", GRAPHICS: "OpenGL1", AUDIO: "None", COLLISION: "None", NETWORK: "None", WIDGETS: "None", EXTENSIONS: "None" } }
+  
+  # Graphics
+  - { os: linux, sudo: required, dist: trusty,
+      env: { COMPILER: "gcc", PLATFORM: "xlib", MODE: "Debug", GRAPHICS: "OpenGL3", AUDIO: "None", COLLISION: "None", NETWORK: "None", WIDGETS: "None", EXTENSIONS: "None" } }
+  
+  # Audio
+  - { os: linux, sudo: required, dist: trusty,
+      env: { COMPILER: "gcc", PLATFORM: "xlib", MODE: "Debug", GRAPHICS: "OpenGL1", AUDIO: "OpenAL", COLLISION: "None", NETWORK: "None", WIDGETS: "None", EXTENSIONS: "None" } }
+  
+  - { os: linux, sudo: required, dist: trusty,
+      env: { COMPILER: "gcc", PLATFORM: "xlib", MODE: "Debug", GRAPHICS: "OpenGL1", AUDIO: "SFML", COLLISION: "None", NETWORK: "None", WIDGETS: "None", EXTENSIONS: "None" } }
+  
+  # Networking
+  - { os: linux, sudo: required, dist: trusty,
+      env: { COMPILER: "gcc", PLATFORM: "xlib", MODE: "Debug", GRAPHICS: "OpenGL1", AUDIO: "None", COLLISION: "None", NETWORK: "Asynchronous", WIDGETS: "None", EXTENSIONS: "None" } }
+  
+  - { os: linux, sudo: required, dist: trusty,
+      env: { COMPILER: "gcc", PLATFORM: "xlib", MODE: "Debug", GRAPHICS: "OpenGL1", AUDIO: "None", COLLISION: "None", NETWORK: "BerkeleySockets", WIDGETS: "None", EXTENSIONS: "None" } }
+  
+  # Widgets
+  - { os: linux, sudo: required, dist: trusty,
+      env: { COMPILER: "gcc", PLATFORM: "xlib", MODE: "Debug", GRAPHICS: "OpenGL1", AUDIO: "None", COLLISION: "None", NETWORK: "None", WIDGETS: "GTK+", EXTENSIONS: "None" } }
+  
+  # Collision
+  - { os: linux, sudo: required, dist: trusty,
+      env: { COMPILER: "gcc", PLATFORM: "xlib", MODE: "Debug", GRAPHICS: "OpenGL1", AUDIO: "None", COLLISION: "BBox", NETWORK: "None", WIDGETS: "None", EXTENSIONS: "None" } }
+  
+  - { os: linux, sudo: required, dist: trusty,
+      env: { COMPILER: "gcc", PLATFORM: "xlib", MODE: "Debug", GRAPHICS: "OpenGL1", AUDIO: "None", COLLISION: "Precise", NETWORK: "None", WIDGETS: "None", EXTENSIONS: "None" } }
+  
+  # Extensions
+  - { os: linux, sudo: required, dist: trusty,
+      env: { COMPILER: "gcc", PLATFORM: "xlib", MODE: "Debug", GRAPHICS: "OpenGL1", AUDIO: "None", COLLISION: "None", NETWORK: "None", WIDGETS: "None", EXTENSIONS: "Alarms" } }
+  
+  - { os: linux, sudo: required, dist: trusty,
+      env: { COMPILER: "gcc", PLATFORM: "xlib", MODE: "Debug", GRAPHICS: "OpenGL1", AUDIO: "None", COLLISION: "None", NETWORK: "None", WIDGETS: "None", EXTENSIONS: "DataStructures,Asynchronous" } }
+  
+  - { os: linux, sudo: required, dist: trusty,
+      env: { COMPILER: "gcc", PLATFORM: "xlib", MODE: "Debug", GRAPHICS: "OpenGL1", AUDIO: "None", COLLISION: "None", NETWORK: "None", WIDGETS: "GTK+", EXTENSIONS: "BasicGUI" } }
+  
+  - { os: linux, sudo: required, dist: trusty,
+      env: { COMPILER: "gcc", PLATFORM: "xlib", MODE: "Debug", GRAPHICS: "OpenGL1", AUDIO: "None", COLLISION: "None", NETWORK: "None", WIDGETS: "None", EXTENSIONS: "Box2DPhysics" } }
+  
+  - { os: linux, sudo: required, dist: trusty,
+      env: { COMPILER: "gcc", PLATFORM: "xlib", MODE: "Debug", GRAPHICS: "OpenGL1", AUDIO: "None", COLLISION: "None", NETWORK: "None", WIDGETS: "None", EXTENSIONS: "BulletDynamics" } }
+  
+  - { os: linux, sudo: required, dist: trusty,
+      env: { COMPILER: "gcc", PLATFORM: "xlib", MODE: "Debug", GRAPHICS: "OpenGL1", AUDIO: "None", COLLISION: "None", NETWORK: "None", WIDGETS: "None", EXTENSIONS: "DataStructures" } }
+  
+  - { os: linux, sudo: required, dist: trusty,
+      env: { COMPILER: "gcc", PLATFORM: "xlib", MODE: "Debug", GRAPHICS: "OpenGL1", AUDIO: "None", COLLISION: "None", NETWORK: "None", WIDGETS: "None", EXTENSIONS: "DateTime" } }
+  
+  - { os: linux, sudo: required, dist: trusty,
+      env: { COMPILER: "gcc", PLATFORM: "xlib", MODE: "Debug", GRAPHICS: "OpenGL1", AUDIO: "None", COLLISION: "None", NETWORK: "None", WIDGETS: "None", EXTENSIONS: "GM5Compat" } }
+  
+  - { os: linux, sudo: required, dist: trusty,
+      env: { COMPILER: "gcc", PLATFORM: "xlib", MODE: "Debug", GRAPHICS: "OpenGL1", AUDIO: "OpenAL", COLLISION: "None", NETWORK: "None", WIDGETS: "None", EXTENSIONS: "GME" } }
+  
+  - { os: linux, sudo: required, dist: trusty,
+      env: { COMPILER: "gcc", PLATFORM: "xlib", MODE: "Debug", GRAPHICS: "OpenGL1", AUDIO: "SFML", COLLISION: "None", NETWORK: "None", WIDGETS: "None", EXTENSIONS: "GME" } }
+  
+  - { os: linux, sudo: required, dist: trusty,
+      env: { COMPILER: "gcc", PLATFORM: "xlib", MODE: "Debug", GRAPHICS: "OpenGL1", AUDIO: "None", COLLISION: "None", NETWORK: "None", WIDGETS: "None", EXTENSIONS: "IniFilesystem" } }
+  
+  - { os: linux, sudo: required, dist: trusty,
+      env: { COMPILER: "gcc", PLATFORM: "xlib", MODE: "Debug", GRAPHICS: "OpenGL1", AUDIO: "None", COLLISION: "None", NETWORK: "None", WIDGETS: "None", EXTENSIONS: "DataStructures,Json" } }
+  
+  - { os: linux, sudo: required, dist: trusty,
+      env: { COMPILER: "gcc", PLATFORM: "xlib", MODE: "Debug", GRAPHICS: "OpenGL1", AUDIO: "None", COLLISION: "None", NETWORK: "None", WIDGETS: "None", EXTENSIONS: "MatrixMath" } }
+  
+  - { os: linux, sudo: required, dist: trusty,
+      env: { COMPILER: "gcc", PLATFORM: "xlib", MODE: "Debug", GRAPHICS: "OpenGL1", AUDIO: "None", COLLISION: "BBox", NETWORK: "None", WIDGETS: "None", EXTENSIONS: "Paths" } }
+  
+  - { os: linux, sudo: required, dist: trusty,
+      env: { COMPILER: "gcc", PLATFORM: "xlib", MODE: "Debug", GRAPHICS: "OpenGL1", AUDIO: "None", COLLISION: "BBox", NETWORK: "None", WIDGETS: "None", EXTENSIONS: "Paths,MotionPlanning" } }
+  
+  - { os: linux, sudo: required, dist: trusty,
+      env: { COMPILER: "gcc", PLATFORM: "xlib", MODE: "Debug", GRAPHICS: "OpenGL1", AUDIO: "None", COLLISION: "Precise", NETWORK: "None", WIDGETS: "None", EXTENSIONS: "Paths,MotionPlanning" } }
+  
+  - { os: linux, sudo: required, dist: trusty,
+      env: { COMPILER: "gcc", PLATFORM: "xlib", MODE: "Debug", GRAPHICS: "OpenGL1", AUDIO: "None", COLLISION: "None", NETWORK: "None", WIDGETS: "None", EXTENSIONS: "ParticleSystems" } }
+  
+  - { os: linux, sudo: required, dist: trusty,
+      env: { COMPILER: "gcc", PLATFORM: "xlib", MODE: "Debug", GRAPHICS: "OpenGL3", AUDIO: "None", COLLISION: "None", NETWORK: "None", WIDGETS: "None", EXTENSIONS: "ParticleSystems" } }
+  
+  - { os: linux, sudo: required, dist: trusty,
+      env: { COMPILER: "gcc", PLATFORM: "xlib", MODE: "Debug", GRAPHICS: "OpenGL3", AUDIO: "None", COLLISION: "None", NETWORK: "None", WIDGETS: "None", EXTENSIONS: "StudioPhysics" } }
+  
+  - { os: linux, sudo: required, dist: trusty,
+      env: { COMPILER: "gcc", PLATFORM: "xlib", MODE: "Debug", GRAPHICS: "OpenGL1", AUDIO: "None", COLLISION: "None", NETWORK: "None", WIDGETS: "None", EXTENSIONS: "Timelines" } }
+    
     # Cross Compile
-    - COMPILER=MinGW32 PLATFORM=Win32 MODE=Run GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
-    - COMPILER=MinGW64 PLATFORM=Win32 MODE=Run GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
-    # The big ol' None test.
-    - COMPILER=gcc PLATFORM=None MODE=Debug GRAPHICS=None AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
-  #END LINUX
+  - { os: linux, sudo: required, dist: trusty,
+      env: { COMPILER: "MinGW32", PLATFORM: "Win32", MODE: "Debug", GRAPHICS: "OpenGL1", AUDIO: "None", COLLISION: "None", NETWORK: "None", WIDGETS: "None", EXTENSIONS: "None" } }
+  
+  - { os: linux, sudo: required, dist: trusty,
+      env: { COMPILER: "MinGW64", PLATFORM: "Win32", MODE: "Debug", GRAPHICS: "OpenGL1", AUDIO: "None", COLLISION: "None", NETWORK: "None", WIDGETS: "None", EXTENSIONS: "None" } }
+    
+    # The big ol' "None", test.
+  - { os: linux, sudo: required, dist: trusty,
+      env: { COMPILER: "gcc", PLATFORM: "None", MODE: "Debug", GRAPHICS: "None", AUDIO: "None", COLLISION: "None", NETWORK: "None", WIDGETS: "None", EXTENSIONS: "None" } }
+#END LINUX
+
 script:
   - ./ci-build.sh
