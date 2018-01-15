@@ -16,30 +16,32 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#ifndef ENIGMA_IDEPRINT_H
+#define ENIGMA_IDEPRINT_H
+
+#include "general/estring.h"
+
 #include <string>
 #include <cstdint>
+
 #define flushl '\n'
 // The MinGW team is the most thoughtless, incompetent bunch of inconsistent morons who ever lived
 
 struct ideprint {
   void (*f)(const char*);
-  ideprint &operator<< (std::string);
-  ideprint &operator<< (const char* x);
-  ideprint &operator<< (void* x);
-  ideprint &operator<< (int16_t x);
-  ideprint &operator<< (int32_t x);
-  ideprint &operator<< (int64_t x);
-  ideprint &operator<< (uint16_t x);
-  ideprint &operator<< (uint32_t x);
-  ideprint &operator<< (uint64_t x);
-  ideprint &operator<< (char x);
-  ideprint &operator<< (unsigned char x);
-  ideprint &operator<< (double x);
+  template<typename T> inline ideprint &operator<< (T x) { f(std::to_string(x).c_str()); return *this; }
   ideprint(void (*f)(const char*));
 };
+
+template<> inline ideprint& ideprint::operator<< <const char*>(const char* x) { f(x); return *this; }
+template<> inline ideprint& ideprint::operator<< <std::string>(std::string x) { f(x.c_str()); return *this; }
+template<> inline ideprint& ideprint::operator<< <void *>(void* x) { f(tostringv(x).c_str()); return *this; }
+template<> inline ideprint& ideprint::operator<< <char>(char x) { char a[2]; a[1] = 0; a[0] = x; f(a); return *this; }
 
 void ide_dia_add_direct(const char*);
 void ide_dia_add_debug(const char*);
 
 extern ideprint user;
 extern ideprint edbg;
+
+#endif

@@ -17,48 +17,7 @@
 **/
 
 #include "ideprint.h"
-using std::string;
-#include "general/estring.h"
 #include "JavaCallbacks.h"
-
-ideprint &ideprint::operator<< (string x) {
-  f(x.c_str()); return *this;
-}
-ideprint &ideprint::operator<< (const char* x) {
-  f(x); return *this;
-}
-ideprint &ideprint::operator<< (int16_t x) {
-  f(tostring(x).c_str()); return *this;
-}
-ideprint &ideprint::operator<< (int32_t x) {
-  f(tostring(x).c_str()); return *this;
-}
-ideprint &ideprint::operator<< (int64_t x) {
-  f(tostring(x).c_str()); return *this;
-}
-ideprint &ideprint::operator<< (uint16_t x) {
-  f(tostring(x).c_str()); return *this;
-}
-ideprint &ideprint::operator<< (uint32_t x) {
-  f(tostring(x).c_str()); return *this;
-}
-ideprint &ideprint::operator<< (uint64_t x) {
-  f(tostring(x).c_str()); return *this;
-}
-ideprint &ideprint::operator<< (void *x) {
-  f(tostringv(x).c_str()); return *this;
-}
-ideprint &ideprint::operator<< (char x) {
-  char a[2]; a[1] = 0; a[0] = x;
-  f(a); return *this;
-}
-ideprint &ideprint::operator<< (unsigned char x) {
-  char a[2]; a[1] = 0; a[0] = x;
-  f(a); return *this;
-}
-ideprint &ideprint::operator<< (double x) {
-  f(tostringd(x).c_str()); return *this;
-}
 
 ideprint::ideprint(void(*ftu)(const char*)): f(ftu) {}
 

@@ -43,7 +43,7 @@
 
 #include <time.h>
 
-#define uint unsigned int
+using uint = unsigned;
 
 namespace enigma {
   extern bool gameWindowFocused;

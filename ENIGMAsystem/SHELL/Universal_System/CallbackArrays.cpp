@@ -150,7 +150,6 @@ bool mouse_wheel_down()
     return (mouse_vscrolls < 0);
 }
 
-#ifndef __APPLE__
 void io_clear()
 {
   for (int i = 0; i < 255; i++)
@@ -158,7 +157,6 @@ void io_clear()
   for (int i = 0; i < 3; i++)
     enigma::mousestatus[i] = enigma::last_mousestatus[i] = 0;
 }
-#endif
 
 }
 

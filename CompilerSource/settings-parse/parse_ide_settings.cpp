@@ -146,7 +146,7 @@ void parse_ide_settings(const char* eyaml)
 #elif CURRENT_PLATFORM_ID == OS_LINUX
   make_directory = "%HOME%/.enigma/";
 #elif CURRENT_PLATFORM_ID == OS_MACOSX
-  make_directory = "./ENIGMA/";
+  make_directory = "%HOME%/.enigma/";
 #endif
 
   //Now actually set it, taking backslashes into account.
