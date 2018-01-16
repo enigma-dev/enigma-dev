@@ -31,7 +31,6 @@
 
 #include "Universal_System/mathnc.h"
 #include "Universal_System/estring.h"
-#include "Universal_System/Resources/buffers.h"
 #include "Universal_System/fileio.h"
 #include "Universal_System/terminal_io.h"
 
@@ -39,6 +38,7 @@
 #include "Universal_System/Resources/sprites.h"
 #include "Universal_System/Resources/fonts.h"
 #include "Universal_System/Resources/texture_atlas.h"
+#include "Universal_System/Resources/buffers.h"
 
 #include "Universal_System/callbacks_events.h"
 
