@@ -60,10 +60,10 @@ static string esc(string str) {
 int lang_CPP::compile_writeShaderData(EnigmaStruct* es, parsed_object *EGMglobal)
 {
   ofstream wto((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_shaderarrays.h").c_str(),ios_base::out);
-  
-  wto << license << "#include \"Universal_System/shaderstruct.h\"\n" << "namespace enigma {\n";
+
+  wto << license << "#include \"Universal_System/Resources/shaderstruct.h\"\n" << "namespace enigma {\n";
   wto << "  ShaderStruct shaderstructarray[] = {\n";
-  
+
   int idmax = 0;
   for (int i = 0; i < es->shaderCount; i++)
   {
@@ -81,10 +81,10 @@ int lang_CPP::compile_writeShaderData(EnigmaStruct* es, parsed_object *EGMglobal
         << " },\n";
 	idmax += 1;
   }
-  
+
   wto << "  };\n";
   wto << "} // Namespace enigma\n";
   wto.close();
-  
+
   return 0;
 }

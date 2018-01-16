@@ -28,7 +28,7 @@
 
 #include "Universal_System/var4.h"
 #include "Universal_System/Resources/object.h"
-#include "math_consts.h"
+#include "Universal_System/math_consts.h"
 #include "Universal_System/reflexive_types.h"
 
 #include "planar_object.h"

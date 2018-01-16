@@ -21,7 +21,7 @@
   @brief Adds a graphics-related tier following the planar tier.
 */
 
-#include "depth_draw.h"
+#include "Universal_System/depth_draw.h"
 #include "graphics_object.h"
 
 #include <math.h>
@@ -32,7 +32,7 @@ namespace enigma
   object_graphics::object_graphics() {}
   object_graphics::object_graphics(unsigned _x, int _y): object_timelines(_x,_y) {}
   object_graphics::~object_graphics() {}
-  
+
   variant object_graphics::myevent_draw()      { return 0; }
   bool object_graphics::myevent_draw_subcheck() { return 0; }
   variant object_graphics::myevent_drawgui()   { return 0; }
