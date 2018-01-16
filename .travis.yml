@@ -41,15 +41,8 @@ env:
     - OUTPUT=/tmp/test
   
 matrix:
+  fast_finish: true
   include:
-#BEGIN OSX
-  # Compilers
-  - { os: osx, osx_image: xcode9.2,
-      env: { COMPILER: "clang", PLATFORM: "None", MODE: "Debug", GRAPHICS: "None", AUDIO: "None", COLLISION: "None", NETWORK: "None", WIDGETS: "None", EXTENSIONS: "None" } }
-  - { os: osx, osx_image: xcode9.2,
-      env: { COMPILER: "gcc", PLATFORM: "None", MODE: "Debug", GRAPHICS: "None", AUDIO: "None", COLLISION: "None", NETWORK: "None", WIDGETS: "None", EXTENSIONS: "None" } }
-#END OSX
- 
 #BEGIN LINUX
   # Game Modes
   - { os: linux, sudo: required, dist: trusty,
@@ -172,6 +165,15 @@ matrix:
   - { os: linux, sudo: required, dist: trusty,
       env: { COMPILER: "gcc", PLATFORM: "None", MODE: "Debug", GRAPHICS: "None", AUDIO: "None", COLLISION: "None", NETWORK: "None", WIDGETS: "None", EXTENSIONS: "None" } }
 #END LINUX
+
+  allow_failures:
+#BEGIN OSX
+  # Compilers
+  - { os: osx, osx_image: xcode9.2,
+      env: { COMPILER: "clang", PLATFORM: "None", MODE: "Debug", GRAPHICS: "None", AUDIO: "None", COLLISION: "None", NETWORK: "None", WIDGETS: "None", EXTENSIONS: "None" } }
+  - { os: osx, osx_image: xcode9.2,
+      env: { COMPILER: "gcc", PLATFORM: "None", MODE: "Debug", GRAPHICS: "None", AUDIO: "None", COLLISION: "None", NETWORK: "None", WIDGETS: "None", EXTENSIONS: "None" } }
+#END OSX
 
 script:
   - ./ci-build.sh
