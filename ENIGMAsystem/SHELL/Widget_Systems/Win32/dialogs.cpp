@@ -210,6 +210,13 @@ tstring widen(const string &str) {
   return tstring{buf.data(), (size_t)MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, buf.data(), (int)wchar_count)};
 }
 
+// shorten() does the same type conversion as widen(), but in reverse.
+string shorten(tstring str) {
+  int nbytes = WideCharToMultiByte(CP_UTF8, 0, str.c_str(), (int)str.length(), nullptr, 0, nullptr, nullptr);
+  vector<char> buf((size_t)nbytes);
+  return string{buf.data(), (size_t)WideCharToMultiByte(CP_UTF8, 0, str.c_str(), (int)str.length(), buf.data(), nbytes, nullptr, nullptr)};
+}
+
 namespace enigma_user {
 
 extern string window_get_caption();
