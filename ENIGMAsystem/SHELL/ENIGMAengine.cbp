@@ -943,7 +943,6 @@
 		<Unit filename="Universal_System/Extensions/Timelines/include.h" />
 		<Unit filename="Universal_System/Extensions/Timelines/timelines.cpp" />
 		<Unit filename="Universal_System/GAME_GLOBALS.h" />
-		<Unit filename="Universal_System/IMGloading.h" />
 		<Unit filename="Universal_System/Makefile" />
 		<Unit filename="Universal_System/actions.h" />
 		<Unit filename="Universal_System/Resources/backgroundinit.cpp" />
