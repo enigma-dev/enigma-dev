@@ -21,7 +21,7 @@
 #include "../General/GSmatrix.h"
 #include "../General/GSmath.h"
 #include "Universal_System/var4.h"
-#include "Universal_System/roomsystem.h"
+#include "Universal_System/Resources/roomsystem.h"
 #include "Bridges/General/GL3Context.h"
 #include <math.h>
 
@@ -303,7 +303,7 @@ namespace enigma_user
       oglmgr->Transformation();
       enigma::transformation_update();
   }
-  
+
   void d3d_projection_set_array(const gs_scalar *matrix)
   {
       oglmgr->Transformation();
@@ -320,7 +320,7 @@ namespace enigma_user
       enigma::view_matrix.init_identity();
       enigma::transform_needs_update = true;
   }
-  
+
   gs_scalar * d3d_projection_get_array_pointer(){
       return enigma::projection_matrix;
   }

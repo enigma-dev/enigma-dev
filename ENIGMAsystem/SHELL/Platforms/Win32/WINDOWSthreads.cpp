@@ -17,7 +17,7 @@
 **/
 
 #include "Universal_System/var4.h"
-#include "Universal_System/resource_data.h"
+#include "Universal_System/Resources/resource_data.h"
 #include "../General/PFthreads.h"
 #include "WINDOWSmain.h"
 
@@ -55,7 +55,7 @@ int thread_create_script(int scr,variant arg0, variant arg1, variant arg2, varia
 
 int thread_start(int thread) {
   if (threads[thread]->active) { return -1; }
-  
+
   DWORD dwThreadId;
   threads[thread]->handle = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)&thread_script_func, (LPVOID)threads[thread]->sd, 0, &dwThreadId);
   //TODO: May need to check if ret is -1L, and yes it is quite obvious the return value is
@@ -73,10 +73,10 @@ void thread_join(int thread) {
   if (GetCurrentThread() == enigma::mainthread) {
     while (WaitForSingleObject(threads[thread]->handle, 10) == WAIT_TIMEOUT) {
       MSG msg;
-      while (PeekMessage (&msg, NULL, 0, 0, PM_REMOVE)) { 
+      while (PeekMessage (&msg, NULL, 0, 0, PM_REMOVE)) {
         TranslateMessage (&msg);
         DispatchMessage (&msg);
-      } 
+      }
     }
   } else {
     WaitForSingleObject(threads[thread]->handle, INFINITE);

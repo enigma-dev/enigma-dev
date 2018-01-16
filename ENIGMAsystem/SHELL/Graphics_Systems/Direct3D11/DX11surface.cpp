@@ -25,8 +25,8 @@ using namespace std;
 
 #include <stdio.h> //for file writing (surface_save)
 #include "Universal_System/nlpo2.h"
-#include "Universal_System/sprites_internal.h"
-#include "Universal_System/background_internal.h"
+#include "Universal_System/Resources/sprites_internal.h"
+#include "Universal_System/Resources/background_internal.h"
 #include "Collision_Systems/collision_types.h"
 
 #define __GETR(x) ((x & 0x0000FF))
@@ -246,4 +246,3 @@ void surface_copy(int destination, gs_scalar x, gs_scalar y, int source)
 }
 
 }
-

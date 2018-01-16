@@ -18,7 +18,7 @@
 #ifndef ENIGMA_BUFFERS_H
 #define ENIGMA_BUFFERS_H
 
-#include "var4.h"
+#include "Universal_System/var4.h"
 
 #include <string>
 

@@ -18,7 +18,7 @@
 #ifndef ENIGMA_GLTILESTRUCT_H
 #define ENIGMA_GLTILESTRUCT_H
 
-#include "Universal_System/roomsystem.h"
+#include "Universal_System/Resources/roomsystem.h"
 namespace enigma
 {
     struct bkinxop

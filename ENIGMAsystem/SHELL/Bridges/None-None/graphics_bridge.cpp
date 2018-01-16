@@ -21,15 +21,14 @@
 #include <iostream>
 #include <cstring>
 #include <stdio.h>
-#include <Universal_System/roomsystem.h> // room_caption, update_mouse_variables
+#include <Universal_System/Resources/roomsystem.h> // room_caption, update_mouse_variables
 
 namespace enigma_user {
   int display_aa = 14;
 
   void set_synchronization(bool enable){}
-    
+
   void display_reset(int samples, bool vsync){}
-    
+
   void screen_refresh(){}
 }
-

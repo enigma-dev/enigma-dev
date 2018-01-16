@@ -1,6 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2011 Harijs Grînbergs                                         **
+**  Copyright (C) 2011 Harijs Grï¿½nbergs                                         **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
 **                                                                              **
@@ -30,7 +30,7 @@
 //using namespace std;
 
 #include "pathstruct.h"
-#include "Universal_System/resinit.h"
+#include "Universal_System/Resources/resinit.h"
 //#include "Platforms/platforms_mandatory.h"
 //#include "libEGMstd.h"
 

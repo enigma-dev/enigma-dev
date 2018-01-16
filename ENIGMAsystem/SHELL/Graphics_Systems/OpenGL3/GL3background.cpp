@@ -22,11 +22,11 @@
 
 #include "Universal_System/image_formats.h"
 #include "Universal_System/nlpo2.h"
-#include "Universal_System/background_internal.h"
+#include "Universal_System/Resources/background_internal.h"
 #include "Graphics_Systems/graphics_mandatory.h"
-#include "Universal_System/sprites_internal.h"
+#include "Universal_System/Resources/sprites_internal.h"
 
-#include "Universal_System/roomsystem.h"
+#include "Universal_System/Resources/roomsystem.h"
 
 namespace enigma_user {
   extern int window_get_region_height_scaled();
@@ -50,9 +50,9 @@ int background_create_from_screen(int x, int y, int w, int h, bool removeback, b
 	std::vector<unsigned char> rgbdata(4*patchSize);
 	glReadPixels(x, enigma_user::window_get_region_height_scaled()-h-y,w,h,GL_RGBA, GL_UNSIGNED_BYTE, &rgbdata[0]);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, prevFbo);
-	
+
 	unsigned char* data = enigma::image_flip(&rgbdata[0], w, h, 4);
-	
+
 	enigma::backgroundstructarray_reallocate();
   int bckid=enigma::background_idmax;
 	enigma::background_new(bckid, w, h, &data[0], removeback, smooth, preload, false, 0, 0, 0, 0, 0, 0);
@@ -63,4 +63,3 @@ int background_create_from_screen(int x, int y, int w, int h, bool removeback, b
 }
 
 }
-

@@ -22,7 +22,7 @@
 
 #include "../General/GSmodel.h"
 #include "Universal_System/var4.h"
-#include "Universal_System/roomsystem.h"
+#include "Universal_System/Resources/roomsystem.h"
 
 #define __GETR(x) ((x & 0x0000FF))/255.0
 #define __GETG(x) ((x & 0x00FF00)>>8)/255.0

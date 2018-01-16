@@ -20,7 +20,7 @@
 #include "../General/GSmatrix.h"
 #include "../General/GSmath.h"
 #include "Universal_System/var4.h"
-#include "Universal_System/roomsystem.h"
+#include "Universal_System/Resources/roomsystem.h"
 #include <math.h>
 #include <stack>
 

@@ -34,7 +34,7 @@ std::string working_directory, temp_directory;
 
 using namespace std;
 
-#include <Universal_System/roomsystem.h>
+#include <Universal_System/Resources/roomsystem.h>
 #include <Universal_System/CallbackArrays.h>
 
 
@@ -503,4 +503,3 @@ namespace enigma_user {
     return cocoa_get_screen_size(false);
   }
 }
-

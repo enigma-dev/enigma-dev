@@ -21,7 +21,7 @@
 #include "../General/GSmath.h"
 #include "GLSLshader.h"
 #include "Universal_System/var4.h"
-#include "Universal_System/roomsystem.h"
+#include "Universal_System/Resources/roomsystem.h"
 #include "Bridges/General/GL3Context.h"
 #include "GL3shader.h"
 #include <math.h>

@@ -26,9 +26,9 @@ using namespace std;
 #include "OPENGL3Std.h"
 #include "GL3shader.h"
 #include "GLSLshader.h"
-#include "Universal_System/shaderstruct.h"
+#include "Universal_System/Resources/shaderstruct.h"
 #include "Universal_System/var4.h"
-#include "Universal_System/roomsystem.h" // Room dimensions.
+#include "Universal_System/Resources/roomsystem.h" // Room dimensions.
 #include "Graphics_Systems/graphics_mandatory.h" // Room dimensions.
 
 ContextManager* oglmgr = NULL;

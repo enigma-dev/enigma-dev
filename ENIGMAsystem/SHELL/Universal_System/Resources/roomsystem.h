@@ -28,7 +28,7 @@
 #ifndef room_system_h
 #define room_system_h
 
-#include "var4.h"
+#include "Universal_System/var4.h"
 
 #include <string>
 
@@ -177,7 +177,7 @@ namespace enigma
 
 // room variable
 
-#include "multifunction_variant.h"
+#include "Universal_System/multifunction_variant.h"
 namespace enigma { struct roomv: multifunction_variant {
   INHERIT_OPERATORS(roomv)
   void function(variant oldval);
@@ -193,4 +193,3 @@ namespace enigma_user {
 #define action_restart_game game_restart
 
 #endif
-

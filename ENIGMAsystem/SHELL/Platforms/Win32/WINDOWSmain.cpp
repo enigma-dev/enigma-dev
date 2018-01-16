@@ -27,7 +27,7 @@ using std::vector;
 
 #include "WINDOWScallback.h"
 #include "Universal_System/var4.h"
-#include "Universal_System/roomsystem.h"
+#include "Universal_System/Resources/roomsystem.h"
 #include "Universal_System/estring.h"
 #include "../General/PFwindow.h"
 #include "WINDOWSmain.h"
@@ -55,7 +55,7 @@ namespace enigma //TODO: Find where this belongs
 
   void EnableDrawing (HGLRC *hRC);
   void DisableDrawing (HWND hWnd, HDC hDC, HGLRC hRC);
-  
+
   void (*touch_extension_register)(HWND hWnd);
 
   void windowsystem_write_exename(char* exenamehere)
@@ -233,7 +233,7 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
     wcontainer.lpszMenuName = NULL;
     wcontainer.lpszClassName = "EnigmaDevGameMainWindow";
     RegisterClass (&wcontainer);
-    
+
     //Create the parent window
     int screen_width = GetSystemMetrics(SM_CXSCREEN);
     int screen_height = GetSystemMetrics(SM_CYSCREEN);
@@ -518,4 +518,3 @@ void action_webpage(const std::string &url)
 
 
 }
-

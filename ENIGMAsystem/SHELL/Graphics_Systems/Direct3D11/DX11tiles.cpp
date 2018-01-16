@@ -38,7 +38,7 @@
 #include "Universal_System/depth_draw.h"
 #include <algorithm>
 #include "../General/GSbackground.h"
-#include "Universal_System/background_internal.h"
+#include "Universal_System/Resources/background_internal.h"
 #include "../General/GStextures.h"
 
 #include "Direct3D11Headers.h"
@@ -484,4 +484,3 @@ bool tile_layer_shift(int layer_depth, int x, int y)
 }
 
 }
-

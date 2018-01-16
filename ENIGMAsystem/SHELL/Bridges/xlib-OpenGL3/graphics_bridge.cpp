@@ -31,14 +31,14 @@ namespace enigma {
   GLuint msaa_fbo = 0;
   GLXContext glxc;
   XVisualInfo *vi;
-  
+
   extern void (*WindowResizedCallback)();
   void WindowResized() {
     glViewport(0,0,enigma_user::window_get_width(),enigma_user::window_get_height());
     glScissor(0,0,enigma_user::window_get_width(),enigma_user::window_get_height());
     enigma_user::draw_clear(enigma_user::window_get_color());
   }
-  
+
   XVisualInfo* CreateVisualInfo() {
     // Prepare openGL
     GLint att[] = { GLX_RGBA, GLX_DOUBLEBUFFER, GLX_DEPTH_SIZE, 24, None };
@@ -52,19 +52,19 @@ namespace enigma {
 
   void EnableDrawing() {
     WindowResizedCallback = &WindowResized;
-    
+
     //give us a GL context
     glxc = glXCreateContext(enigma::x11::disp, vi, NULL, True);
     if (!glxc){
         printf("Failed to Create Graphics Context\n");
         return;
     }
-    
+
     //apply context
     glXMakeCurrent(enigma::x11::disp,enigma::x11::win,glxc); //flushes
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_ACCUM_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
   }
-  
+
   void DisableDrawing() {
    glXDestroyContext(enigma::x11::disp,glxc);
       /*
@@ -76,7 +76,7 @@ namespace enigma {
     XCloseDisplay(disp);
     return 0;*/
   }
-  
+
   namespace swaphandling {
     bool has_checked_extensions = false;
     bool ext_swapcontrol_supported;
@@ -110,7 +110,7 @@ namespace enigma {
 }
 
 #include <Platforms/xlib/XLIBwindow.h> // window_set_caption
-#include <Universal_System/roomsystem.h> // room_caption, update_mouse_variables
+#include <Universal_System/Resources/roomsystem.h> // room_caption, update_mouse_variables
 
 namespace enigma_user {
 // Don't know where to query this on XLIB, just defaulting it to 2,4,and 8 samples all supported, Windows puts it in EnableDrawing
@@ -145,12 +145,12 @@ void set_synchronization(bool enable) {
 	  // See http://www.opengl.org/registry/specs/SGI/swap_control.txt for more information.
 	}
 }
-	
+
 void display_reset(int samples, bool vsync) {
 	set_synchronization(vsync);
 	//TODO: Copy over from the Win32 bridge
 }
-  
+
 void screen_refresh() {
 	glXSwapBuffers(enigma::x11::disp, enigma::x11::win);
 	enigma::update_mouse_variables();
@@ -158,5 +158,3 @@ void screen_refresh() {
 }
 
 }
-
-

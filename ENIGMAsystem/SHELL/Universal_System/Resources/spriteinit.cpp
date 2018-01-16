@@ -18,7 +18,7 @@
 #include "libEGMstd.h"
 #include "resinit.h"
 #include "sprites_internal.h"
-#include "zlib.h"
+#include "Universal_System/zlib.h"
 
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Platforms/platforms_mandatory.h"
@@ -36,20 +36,20 @@ namespace enigma
     int nullhere;
     unsigned sprid, width, height, bbt, bbb, bbl, bbr, bbm, shape;
     int xorig, yorig;
-    
+
     if (!fread(&nullhere,4,1,exe)) return;
     if (nullhere != *(int*)"SPR ")
       return;
-    
+
     // Determine how many sprites we have
     int sprcount;
     if (!fread(&sprcount,4,1,exe)) return;
-    
+
     // Fetch the highest ID we will be using
     int spr_highid;
     if (!fread(&spr_highid,4,1,exe)) return;
     sprites_init();
-    
+
     for (int i = 0; i < sprcount; i++)
     {
       if (!fread(&sprid, 4,1,exe)) return;
@@ -75,12 +75,12 @@ namespace enigma
         case ct_circle: coll_type = ct_circle; break;
         default: coll_type = ct_bbox; break;
       };
-      
+
       int subimages;
       if (!fread(&subimages,4,1,exe)) return; //co//ut << "Subimages: " << subimages << endl;
-      
+
       sprite_new_empty(sprid, subimages, width, height, xorig, yorig, bbt, bbb, bbl, bbr, 1,0);
-      for (int ii=0;ii<subimages;ii++) 
+      for (int ii=0;ii<subimages;ii++)
       {
         int unpacked;
         if (!fread(&unpacked,4,1,exe)) return;
@@ -104,7 +104,7 @@ namespace enigma
           continue;
         }
         delete[] cpixels;
-        
+
         unsigned char* collision_data = 0;
         switch (coll_type)
         {
@@ -116,12 +116,12 @@ namespace enigma
           case ct_polygon: collision_data = 0; break; //FIXME: Support vertex data.
           default: collision_data = 0; break;
         };
-        
+
         sprite_set_subimage(sprid, ii, width, height, pixels, collision_data, coll_type);
-        
+
         delete[] pixels;
         if (!fread(&nullhere,4,1,exe)) return;
-        
+
         if (nullhere)
         {
           show_error("Sprite load error: Null terminator expected",0);

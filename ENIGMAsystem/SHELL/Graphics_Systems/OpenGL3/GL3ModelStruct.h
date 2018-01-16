@@ -25,7 +25,7 @@
 #include "Bridges/General/GL3Context.h" //Needed to get if bound texture == -1
 #include "GLSLshader.h"
 #include "Universal_System/var4.h"
-#include "Universal_System/roomsystem.h"
+#include "Universal_System/Resources/roomsystem.h"
 #include "GL3shader.h"
 #include <math.h>
 #include <stdint.h>

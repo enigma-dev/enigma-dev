@@ -16,9 +16,9 @@
 **/
 
 
-#include "Universal_System/collisions_object.h"
+#include "Universal_System/Resources/Objects/collisions_object.h"
 #include "Universal_System/instance_system.h" //iter
-//#include "Universal_System/roomsystem.h"
+//#include "Universal_System/Resources/roomsystem.h"
 #include "Collision_Systems/collision_mandatory.h" //iter
 #include "Universal_System/instance.h"
 

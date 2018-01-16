@@ -18,8 +18,8 @@
 
 #include "background_internal.h"
 #include "libEGMstd.h"
-#include "zlib.h"
 #include "resinit.h"
+#include "Universal_System/zlib.h"
 
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Widget_Systems/widgets_mandatory.h"

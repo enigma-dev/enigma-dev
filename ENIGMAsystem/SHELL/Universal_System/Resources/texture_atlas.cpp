@@ -20,9 +20,9 @@
 #include "texture_atlas.h"
 #include "texture_atlas_internal.h"
 
-#include "Universal_System/background_internal.h"
-#include "Universal_System/fonts_internal.h"
-#include "Universal_System/sprites_internal.h"
+#include "background_internal.h"
+#include "fonts_internal.h"
+#include "sprites_internal.h"
 
 #include "Universal_System/nlpo2.h"
 #include "Graphics_Systems/graphics_mandatory.h"
@@ -49,7 +49,7 @@ namespace enigma {
     unsigned int metric = 0;
     unsigned int size = 0;
     TextureAtlasRect(unsigned int m, unsigned int s) : metric(m), size(s) {}
-    const bool operator<(TextureAtlasRect const &rhs) const{   
+    const bool operator<(TextureAtlasRect const &rhs) const{
       return this->size < rhs.size;
     }
   };

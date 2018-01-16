@@ -16,11 +16,11 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "resinit.h"
-#include "sprites_internal.h"
-#include "background_internal.h"
-#include "roomsystem.h"
-#include "object.h"
+#include "Resources/resinit.h"
+#include "Resources/sprites_internal.h"
+#include "Resources/background_internal.h"
+#include "Resources/roomsystem.h"
+#include "Resources/object.h"
 #include "libEGMstd.h"
 //#include "mathnc.h"
 
@@ -39,7 +39,7 @@ namespace enigma_user
   extern int mtrandom_seed(int x);
 } //namespace enigma_user
 
-namespace enigma 
+namespace enigma
 {
   extern int event_system_initialize(); //Leave this here until you can find a more brilliant way to include it; it's pretty much not-optional.
   extern void timeline_system_initialize();

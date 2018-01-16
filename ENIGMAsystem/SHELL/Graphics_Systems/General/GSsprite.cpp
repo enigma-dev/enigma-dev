@@ -26,9 +26,9 @@ using std::string;
 #include "../General/GSprimitives.h"
 
 #include "Universal_System/nlpo2.h"
-#include "Universal_System/sprites.h"
+#include "Universal_System/Resources/sprites.h"
 #include "Universal_System/instance_system.h"
-#include "Universal_System/graphics_object.h"
+#include "Universal_System/Resources/Objects/graphics_object.h"
 #include "Universal_System/math_consts.h"
 
 #define __GETR(x) ((x & 0x0000FF))
@@ -384,7 +384,7 @@ void draw_sprite_padded(int spr, int subimg, gs_scalar left, gs_scalar top, gs_s
 #include <string>
 using std::string;
 #include "Universal_System/var4.h"
-#include "Universal_System/roomsystem.h"
+#include "Universal_System/Resources/roomsystem.h"
 
 namespace enigma_user
 {

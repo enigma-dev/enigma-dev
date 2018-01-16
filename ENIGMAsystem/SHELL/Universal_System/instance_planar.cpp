@@ -25,7 +25,7 @@
 **                                                                              **
 \********************************************************************************/
 
-#include "planar_object.h"
+#include "Resources/Objects/planar_object.h"
 #include "instance_system.h"
 #include "instance.h"
 #include <cfloat>
@@ -78,4 +78,3 @@ int instance_furthest(int x,int y,int obj,bool notme)
 }
 
 }
-

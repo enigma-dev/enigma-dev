@@ -23,7 +23,7 @@ using namespace std;
 
 #include "Universal_System/estring.h" // For string_replace_all
 #include "Universal_System/var4.h"
-#include "Universal_System/roomsystem.h"
+#include "Universal_System/Resources/roomsystem.h"
 #include <unistd.h> //usleep
 #include "Universal_System/CallbackArrays.h" // For those damn vk_ constants.
 

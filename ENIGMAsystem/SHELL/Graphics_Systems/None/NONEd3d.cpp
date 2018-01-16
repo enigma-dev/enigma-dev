@@ -18,7 +18,7 @@
 **/
 #include "../General/GSd3d.h"
 #include "Universal_System/var4.h"
-#include "Universal_System/roomsystem.h"
+#include "Universal_System/Resources/roomsystem.h"
 #include <math.h>
 
 #define __GETR(x) ((x & 0x0000FF))/255.0

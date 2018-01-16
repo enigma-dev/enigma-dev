@@ -20,8 +20,8 @@
 #include "Universal_System/depth_draw.h"
 #include <algorithm>
 #include "../General/GSbackground.h"
-#include "Universal_System/background.h"
-#include "Universal_System/background_internal.h"
+#include "Universal_System/Resources/background.h"
+#include "Universal_System/Resources/background_internal.h"
 #include "../General/GStextures.h"
 #include "../General/GStiles.h"
 #include "../General/GLtilestruct.h"
@@ -535,4 +535,3 @@ bool tile_layer_shift(int layer_depth, int x, int y)
 }
 
 }
-

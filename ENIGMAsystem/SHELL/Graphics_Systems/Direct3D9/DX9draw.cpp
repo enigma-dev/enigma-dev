@@ -24,7 +24,7 @@
 #include "Graphics_Systems/General/GScolors.h"
 
 #include <stdio.h>
-#include "Universal_System/roomsystem.h"
+#include "Universal_System/Resources/roomsystem.h"
 
 #define __GETR(x) ((x & 0x0000FF))
 #define __GETG(x) ((x & 0x00FF00) >> 8)
@@ -183,4 +183,3 @@ bool fill_complex_polygon(const std::list<PolyVertex>& vertices, int defaultColo
 }
 
 }
-

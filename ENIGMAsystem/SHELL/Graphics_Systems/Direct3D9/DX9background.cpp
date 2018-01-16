@@ -23,8 +23,8 @@
 #include "Graphics_Systems/General/GSbackground.h"
 #include "Graphics_Systems/General/GStextures.h"
 #include "Universal_System/nlpo2.h"
-#include "Universal_System/background_internal.h"
-#include "Universal_System/sprites_internal.h"
+#include "Universal_System/Resources/background_internal.h"
+#include "Universal_System/Resources/sprites_internal.h"
 
 #ifdef DEBUG_MODE
   #include <string>
@@ -76,4 +76,3 @@ int background_create_from_screen(int x, int y, int w, int h, bool removeback, b
 }
 
 }
-

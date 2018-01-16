@@ -662,7 +662,7 @@ static inline void write_object_declarations(lang_CPP* lcpp, EnigmaStruct* es, p
   ofstream wto;
   wto.open((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_objectdeclarations.h").c_str(),ios_base::out);
     wto << license;
-    wto << "#include \"Universal_System/collisions_object.h\"\n";
+    wto << "#include \"Universal_System/Resources/Objects/collisions_object.h\"\n";
     wto << "#include \"Universal_System/object.h\"\n\n";
     wto << "#include <map>";
 

@@ -22,7 +22,7 @@
 #include "../General/GSmatrix.h" //For d3d_transform_add_translation
 #include "../General/GSmodel.h"
 #include "Universal_System/var4.h"
-#include "Universal_System/roomsystem.h"
+#include "Universal_System/Resources/roomsystem.h"
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>

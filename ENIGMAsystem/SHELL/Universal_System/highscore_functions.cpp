@@ -80,7 +80,7 @@ static bool cmp_highscore( const playerScore& a, const playerScore& b ) {
 
 }
 
-#include <Universal_System/roomsystem.h>
+#include <Universal_System/Resources/roomsystem.h>
 #include <Universal_System/CallbackArrays.h>
 #include <Graphics_Systems/graphics_mandatory.h>
 
@@ -184,4 +184,3 @@ void draw_highscore(int x1, int y1, int x2, int y2) {
 }
 
 }
-

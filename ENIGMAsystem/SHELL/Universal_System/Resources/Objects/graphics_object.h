@@ -25,13 +25,13 @@
 #define _GRAPHICS_OBJECT_H
 
 #ifndef INCLUDED_FROM_SHELLMAIN
-  #include "var4.h"
-  #include "sprites.h"
+  #include "Universal_System/var4.h"
+  #include "Universal_System/Resources/sprites.h"
 #endif
 
-#include "scalar.h"
+#include "Universal_System/scalar.h"
 #include "timelines_object.h"
-#include "multifunction_variant.h"
+#include "Universal_System/multifunction_variant.h"
 
 namespace enigma
 {
@@ -66,7 +66,7 @@ namespace enigma
       virtual variant myevent_drawgui();
       virtual bool myevent_drawgui_subcheck();
       virtual variant myevent_drawresize();
-      
+
     //Accessors
       #ifdef JUST_DEFINE_IT_RUN
         int sprite_width, sprite_height;

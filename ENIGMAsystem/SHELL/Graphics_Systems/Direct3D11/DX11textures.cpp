@@ -23,8 +23,8 @@ using std::string;
 #include "../General/GStextures.h"
 #include "DX11TextureStruct.h"
 #include "Universal_System/image_formats.h"
-#include "Universal_System/background_internal.h"
-#include "Universal_System/sprites_internal.h"
+#include "Universal_System/Resources/background_internal.h"
+#include "Universal_System/Resources/sprites_internal.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 
 vector<TextureStruct*> textureStructs(0);
@@ -133,7 +133,7 @@ int texture_add(string filename, bool mipmap) {
   if (pxdata == NULL) { printf("ERROR - Failed to append sprite to index!\n"); return -1; }
   unsigned texture = enigma::graphics_create_texture(w, h, fullwidth, fullheight, pxdata, mipmap);
   delete[] pxdata;
-    
+
   return texture;
 }
 

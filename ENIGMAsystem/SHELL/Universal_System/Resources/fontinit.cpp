@@ -21,7 +21,7 @@
 #include "fonts_internal.h"
 #include "libEGMstd.h"
 #include "resinit.h"
-#include "zlib.h"
+#include "Universal_System/zlib.h"
 
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Platforms/platforms_mandatory.h"

@@ -23,7 +23,7 @@ using namespace std;
 #include "Platforms/platforms_mandatory.h"
 #include "libEGMstd.h"
 #include "resinit.h"
-#include "zlib.h"
+#include "Universal_System/zlib.h"
 
 namespace enigma_user {
   void sound_play(int sound);
@@ -33,36 +33,36 @@ namespace enigma
 {
   void sound_safety_override()
   {
-    
+
   }
-  
+
   void exe_loadsounds(FILE *exe)
-  { 
+  {
     int nullhere;
-    
+
     if (!fread(&nullhere,4,1,exe)) return;
     if (nullhere != *(int*)"SND ")
       return;
-    
+
     // Determine how many sprites we have
     int sndcount;
     if (!fread(&sndcount,4,1,exe)) return;
-    
+
     // Fetch the highest ID we will be using
     int snd_highid;
     if (!fread(&snd_highid,4,1,exe)) return;
-    
+
     for (int i = 0; i < sndcount; i++)
     {
       int id;
       if (!fread(&id,1,4,exe)) return;
-      
+
       unsigned size;
       if (!fread(&size,1,4,exe)) return;
-      
+
       char* fdata = new char[size];
       if (!fread(fdata,1,size,exe)) return;
-      
+
       int e = sound_add_from_buffer(id,fdata,size);
       if (e) printf("Failed to load sound %d; error %d\n",i,e);
       delete[] fdata;

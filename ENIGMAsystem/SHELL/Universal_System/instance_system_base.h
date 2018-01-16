@@ -19,7 +19,7 @@
 #ifndef INSTANCE_SYSTEM_BASE_h
 #define INSTANCE_SYSTEM_BASE_h
 
-#include "object.h"
+#include "Resources/object.h"
 #include <string>
 
 namespace enigma
@@ -41,7 +41,7 @@ namespace enigma
     object_basic *oinst;
     inst_iter *oiter;
     object_basic* prev_other; //Should always be NULL, but just in case...
-    
+
     public:
     temp_event_scope(object_basic*);
     ~temp_event_scope();

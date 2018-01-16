@@ -31,7 +31,7 @@
 #include <string>
 //#include "reflexive_types.h"
 //#include "EGMstd.h"
-#include "object.h"
+#include "Resources/object.h"
 
 #include "instance_system.h"
 #include "instance.h"
@@ -147,4 +147,3 @@ int instance_number(int obj)
 }
 
 }
-

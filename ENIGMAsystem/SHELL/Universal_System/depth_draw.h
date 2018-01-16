@@ -36,15 +36,15 @@
 #define ENIGMA_DEPTH_DRAW_H
 
 #include "instance_system.h"
-#include "roomsystem.h"
+#include "Resources/roomsystem.h"
 
 #include <map>
 #include <set>
 #include <vector>
 
-namespace enigma 
+namespace enigma
 {
-struct depth_layer 
+struct depth_layer
 {
   std::vector<tile> tiles;
   event_iter* draw_events;

@@ -27,7 +27,7 @@ using namespace std;
 #include "Platforms/Win32/WINDOWSmain.h"
 #include "Platforms/General/PFwindow.h"
 #include "Platforms/platforms_mandatory.h"
-#include "Universal_System/roomsystem.h"
+#include "Universal_System/Resources/roomsystem.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Graphics_Systems/Direct3D9/DX9SurfaceStruct.h"
 #include "Bridges/General/DX9Context.h"
@@ -140,7 +140,7 @@ namespace enigma
   }
 }
 
-#include "Universal_System/roomsystem.h"
+#include "Universal_System/Resources/roomsystem.h"
 
 namespace enigma_user
 {

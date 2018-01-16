@@ -21,9 +21,9 @@
 #include "OpenGLHeaders.h"
 
 #include "../General/GSsprite.h"
-#include "Universal_System/sprites_internal.h"
+#include "Universal_System/Resources/sprites_internal.h"
 #include "Universal_System/instance_system.h"
-#include "Universal_System/graphics_object.h"
+#include "Universal_System/Resources/Objects/graphics_object.h"
 
 #define __GETR(x) ((x & 0x0000FF))
 #define __GETG(x) ((x & 0x00FF00) >> 8)

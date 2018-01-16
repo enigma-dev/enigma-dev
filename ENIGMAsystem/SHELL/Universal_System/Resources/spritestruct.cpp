@@ -17,9 +17,9 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "estring.h"
-#include "graphics_object.h"
-#include "image_formats.h"
+#include "Universal_System/estring.h"
+#include "Objects/graphics_object.h"
+#include "Universal_System/image_formats.h"
 #include "libEGMstd.h"
 #include "sprites_internal.h"
 
@@ -217,13 +217,13 @@ void sprite_merge(int ind, int copy_sprite)
  * use at load time with data read from the executable. These both expect
  * RAW format, RGB only.
  */
-#include "nlpo2.h"
+#include "Universal_System/nlpo2.h"
 
 namespace enigma
 {
   // INVARIANT: Should always be equal to the actual size of spritestructarray.
   size_t spritestructarray_actualsize = 0;
-  
+
   //Allocates and zero-fills the array at game start
   void sprites_init() {
     spritestructarray_actualsize = sprite_idmax+1;
@@ -276,7 +276,7 @@ namespace enigma
   void sprite_add_to_index(sprite *ns, string filename, int imgnumb,
       bool precise, bool transparent, bool smooth, int x_offset, int y_offset,
       bool mipmap) {
-  
+
         unsigned int width, height, fullwidth, fullheight;
     unsigned char *pxdata = image_load(
         filename, &width, &height, &fullwidth, &fullheight, &imgnumb, false);
@@ -298,8 +298,8 @@ namespace enigma
             int tmp = ih*fullwidth*4;
             for (iw = 0; iw < width; iw++)
             {
-          if (pxdata[tmp] == t_pixel_b 
-              && pxdata[tmp+1] == t_pixel_g 
+          if (pxdata[tmp] == t_pixel_b
+              && pxdata[tmp+1] == t_pixel_g
               && pxdata[tmp+2] == t_pixel_r) {
                 pxdata[tmp+3] = 0;
           }
@@ -454,7 +454,7 @@ namespace enigma
 
     delete[] imgpxdata;
   }
-  
+
   bbox_rect_t dummy_bbox = {32,0,32,0};
 
   const bbox_rect_t &sprite_get_bbox(int sprid)
@@ -465,7 +465,7 @@ namespace enigma
 
     return spr->bbox;
   }
-  
+
   const bbox_rect_t &sprite_get_bbox_relative(int sprid)
   {
     sprite *spr;
@@ -680,7 +680,7 @@ void sprite_set_precise(int ind, bool precise) {
 
 var sprite_get_uvs(int ind, int subimg){
   var uvs;
-  uvs[4] = 0; 
+  uvs[4] = 0;
 
   enigma::sprite *spr;
   if (!get_sprite(spr,ind))
@@ -694,4 +694,3 @@ var sprite_get_uvs(int ind, int subimg){
 }
 
 }
-

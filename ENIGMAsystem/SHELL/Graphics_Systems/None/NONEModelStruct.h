@@ -20,7 +20,7 @@
 #include "../General/GSmodel.h"
 #include "../General/GSprimitives.h"
 #include "Universal_System/var4.h"
-#include "Universal_System/roomsystem.h"
+#include "Universal_System/Resources/roomsystem.h"
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>

@@ -25,9 +25,9 @@ using std::string;
 
 #include "Universal_System/image_formats.h"
 #include "Universal_System/nlpo2.h"
-#include "Universal_System/sprites_internal.h"
+#include "Universal_System/Resources/sprites_internal.h"
 #include "Universal_System/instance_system.h"
-#include "Universal_System/graphics_object.h"
+#include "Universal_System/Resources/Objects/graphics_object.h"
 
 #define __GETR(x) (gs_scalar)(((x & 0x0000FF))/255.0)
 #define __GETG(x) (gs_scalar)(((x & 0x00FF00) >> 8)/255.0)
@@ -67,7 +67,7 @@ using std::string;
 #include <string>
 using std::string;
 #include "Universal_System/var4.h"
-#include "Universal_System/roomsystem.h"
+#include "Universal_System/Resources/roomsystem.h"
 
 namespace enigma_user {
   extern int window_get_region_height_scaled();
@@ -85,9 +85,9 @@ int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool 
 	std::vector<unsigned char> rgbdata(4*patchSize);
 	glReadPixels(x,enigma_user::window_get_region_height_scaled()-h-y,w,h,GL_RGBA, GL_UNSIGNED_BYTE, &rgbdata[0]);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, prevFbo);
-	
+
 	unsigned char* data = enigma::image_flip(&rgbdata[0], w, h, 4);
-	
+
 	enigma::spritestructarray_reallocate();
   int sprid=enigma::sprite_idmax;
   enigma::sprite_new_empty(sprid, 1, w, h, xorig, yorig, 0, h, 0, w, preload, smooth);
@@ -110,7 +110,7 @@ void sprite_add_from_screen(int id, int x, int y, int w, int h, bool removeback,
 	std::vector<unsigned char> rgbdata(4*patchSize);
 	glReadPixels(x, enigma_user::window_get_region_height_scaled()-h-y,w,h,GL_RGBA, GL_UNSIGNED_BYTE, &rgbdata[0]);
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, prevFbo);
-	
+
 	unsigned char* data = enigma::image_flip(&rgbdata[0], w, h, 4);
 
 	enigma::sprite_add_subimage(id, w, h, &data[0], &data[0], enigma::ct_precise); //TODO: Support toggling of precise.
@@ -119,4 +119,3 @@ void sprite_add_from_screen(int id, int x, int y, int w, int h, bool removeback,
 }
 
 }
-

@@ -30,8 +30,8 @@ using namespace std;
 
 #include <stdio.h> //for file writing (surface_save)
 #include "Universal_System/nlpo2.h"
-#include "Universal_System/sprites_internal.h"
-#include "Universal_System/background_internal.h"
+#include "Universal_System/Resources/sprites_internal.h"
+#include "Universal_System/Resources/background_internal.h"
 #include "Collision_Systems/collision_types.h"
 
 #define __GETR(x) (gs_scalar)(((x & 0x0000FF))/255.0)

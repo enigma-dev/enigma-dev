@@ -45,8 +45,8 @@ namespace enigma_user {
   };
 }
 
-#include "var4.h"
-#include "scalar.h"
+#include "Universal_System/var4.h"
+#include "Universal_System/scalar.h"
 
 namespace enigma
 {

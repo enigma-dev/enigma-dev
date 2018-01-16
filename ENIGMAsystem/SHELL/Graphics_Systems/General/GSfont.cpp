@@ -28,8 +28,8 @@
 #include "../General/GSsprite.h"
 
 #include "Universal_System/math_consts.h"
-#include "Universal_System/fonts_internal.h"
-#include "Universal_System/sprites.h"
+#include "Universal_System/Resources/fonts_internal.h"
+#include "Universal_System/Resources/sprites.h"
 
 using namespace std;
 
@@ -234,7 +234,7 @@ unsigned int string_height_ext(variant vstr, gs_scalar sep, gs_scalar w)
       if (character == ' ' or g == NULL) {
         width += slen;
       }
-      
+
       tw = 0;
       for (size_t c = i+1; c < str.length(); c++) {
         character = getUnicodeCharacter(str, c);
@@ -1328,4 +1328,3 @@ int draw_get_font() {
 }
 
 }
-

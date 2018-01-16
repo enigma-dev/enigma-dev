@@ -27,9 +27,9 @@ using std::string;
 #include "../General/GSprimitives.h"
 
 #include "Universal_System/nlpo2.h"
-#include "Universal_System/sprites_internal.h"
+#include "Universal_System/Resources/sprites_internal.h"
 #include "Universal_System/instance_system.h"
-#include "Universal_System/graphics_object.h"
+#include "Universal_System/Resources/Objects/graphics_object.h"
 
 #define __GETR(x) ((x & 0x0000FF))
 #define __GETG(x) ((x & 0x00FF00) >> 8)
@@ -83,4 +83,3 @@ void sprite_add_from_screen(int id, int x, int y, int w, int h, bool removeback,
 }
 
 }
-

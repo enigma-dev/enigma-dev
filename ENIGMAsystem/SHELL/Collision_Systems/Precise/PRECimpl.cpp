@@ -21,7 +21,7 @@
 // In this case, we treat instances as their bounding box (BBox).
 ////////////////////////////////////
 
-#include "Universal_System/collisions_object.h"
+#include "Universal_System/Resources/Objects/collisions_object.h"
 #include "Universal_System/instance_system.h" //iter
 #include "Universal_System/instance.h"
 #include "Universal_System/math_consts.h"
@@ -877,4 +877,3 @@ void change_inst_point(int obj, bool perf, int x1, int y1)
         }
     }
 }
-

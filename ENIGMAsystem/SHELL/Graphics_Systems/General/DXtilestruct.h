@@ -20,7 +20,7 @@
 
 ///TODO(harijs) - This is the same as GLtileStruct.h. Do we need this?
 
-#include "Universal_System/roomsystem.h"
+#include "Universal_System/Resources/roomsystem.h"
 namespace enigma
 {
     struct bkinxop

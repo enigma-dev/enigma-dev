@@ -29,7 +29,7 @@
 #include "../General/PFfilemanip.h"
 
 #include "Universal_System/CallbackArrays.h"
-#include "Universal_System/roomsystem.h"
+#include "Universal_System/Resources/roomsystem.h"
 
 namespace enigma {
   void SetResizeFptr();
@@ -51,7 +51,7 @@ int main(int argc,char** argv)
   else
     perror("copy_bundle_cwd() error");
   enigma_user::working_directory = string( buffer );
-  
+
 	enigma::parameters=new char* [argc];
 	for (int i=0; i<argc; i++)
 		enigma::parameters[i]=argv[i];
@@ -67,7 +67,7 @@ namespace enigma_user {
     if (ms > 1000) ::sleep(ms/1000);
     usleep((ms % 1000) *1000);
   };
-  
+
   void game_end(int ret) {
     //audiosystem_cleanup();
     exit(ret);
@@ -77,7 +77,7 @@ namespace enigma_user {
   {
     game_end();
   }
-  
+
   int parameter_count(){
   // TODO
   return 0;

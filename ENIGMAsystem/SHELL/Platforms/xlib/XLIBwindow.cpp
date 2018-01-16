@@ -29,7 +29,7 @@
 using namespace std;
 
 #include "Universal_System/CallbackArrays.h" // For those damn vk_ constants, and io_clear().
-#include "Universal_System/roomsystem.h"
+#include "Universal_System/Resources/roomsystem.h"
 #include "Platforms/platforms_mandatory.h" // For type insurance
 #include "XLIBwindow.h" // Type insurance for non-mandatory functions
 #include "GameSettings.h" // ABORT_ON_ALL_ERRORS (MOVEME: this shouldn't be needed here)
@@ -48,7 +48,7 @@ namespace enigma {
   double scaledWidth = 0, scaledHeight = 0;
   extern bool isSizeable, showBorder, showIcons, freezeOnLoseFocus, isFullScreen;
   extern int viewScale, windowColor;
-    
+
   void setwindowsize(int forceX=-1, int forceY=-1)
   {
       if (!regionWidth)
@@ -215,7 +215,7 @@ int window_mouse_get_y()  { return getMouse(3); }
 void window_set_stayontop(bool stay) {
   if (enigma::stayOnTop == stay) return;
   enigma::stayOnTop = stay;
-  
+
   Atom wmState = XInternAtom(disp, "_NET_WM_STATE", False);
   Atom aStay = XInternAtom(disp,"_NET_WM_STATE_ABOVE", False);
   XEvent xev;
@@ -238,7 +238,7 @@ bool window_get_stayontop() {
 void window_set_sizeable(bool sizeable) {
   if (enigma::isSizeable == sizeable) return;
   enigma::isSizeable = sizeable;
-  
+
   XSizeHints hints;
   hints.min_width = 640;
   hints.min_height = 480;
@@ -254,7 +254,7 @@ bool window_get_sizeable() {
 void window_set_showborder(bool show) {
   if (enigma::showBorder == show) return;
   enigma::showBorder = show;
-  
+
   Atom property = XInternAtom(disp,"_MOTIF_WM_HINTS",True);
   if (!show) {
     Hints   hints;
@@ -349,11 +349,11 @@ void window_set_maximized(bool maximized) {
   enigma::isMaximized = maximized;
 }
 
-bool window_get_minimized() { 
+bool window_get_minimized() {
 	return enigma::isMinimized;
 }
 
-bool window_get_maximized() { 
+bool window_get_maximized() {
   return enigma::isMaximized;
 }
 
@@ -397,7 +397,7 @@ void window_default(bool center_size)
     forceY = display_get_height()/2 - enigma::windowHeight/2;
     //window_center();
   }
-  
+
   enigma::setwindowsize(forceX, forceY);
 }
 
@@ -492,7 +492,7 @@ void window_set_fullscreen(bool full)
 {
   if (enigma::isFullScreen == full) return;
   enigma::isFullScreen = full;
-  
+
 	Atom wmState = XInternAtom(disp, "_NET_WM_STATE", False);
 	Atom aFullScreen = XInternAtom(disp,"_NET_WM_STATE_FULLSCREEN", False);
 	XEvent xev;
@@ -550,19 +550,19 @@ namespace enigma
 {
   std::map<int,int> keybdmap;
 
-  inline unsigned short highbyte_allornothing(short x) { 
-    return x & 0xFF00? x | 0xFF00 : x; 
+  inline unsigned short highbyte_allornothing(short x) {
+    return x & 0xFF00? x | 0xFF00 : x;
   }
-  
+
   unsigned char keymap[512];
   unsigned short keyrmap[256];
   void initkeymap()
   {
     using namespace enigma_user;
-    
+
     for (size_t i = 0; i < 512; ++i) keymap[i] = 0;
     for (size_t i = 0; i < 256; ++i) keyrmap[i] = 0;
-    
+
     // Pretend this part doesn't exist
     keymap[0x151] = vk_left;
     keymap[0x153] = vk_right;
@@ -627,7 +627,7 @@ namespace enigma
       keymap[i] = i + 'A' - 'a';
     for (int i = 'z'+1; i < 255; i++)
       keymap[i] = i;
-      
+
     for (size_t i = 0; i < 512; ++i) keyrmap[keymap[i]] = highbyte_allornothing(i);
    }
 }

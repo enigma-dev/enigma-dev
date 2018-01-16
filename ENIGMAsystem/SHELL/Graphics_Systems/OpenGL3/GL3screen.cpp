@@ -29,15 +29,15 @@
 using namespace std;
 
 #include "Universal_System/image_formats.h"
-#include "Universal_System/background_internal.h"
-#include "Universal_System/background.h"
+#include "Universal_System/Resources/background_internal.h"
+#include "Universal_System/Resources/background.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/estring.h"
 
 
-#include "Universal_System/roomsystem.h"
+#include "Universal_System/Resources/roomsystem.h"
 #include "Universal_System/instance_system.h"
-#include "Universal_System/graphics_object.h"
+#include "Universal_System/Resources/Objects/graphics_object.h"
 #include "Universal_System/depth_draw.h"
 #include "Platforms/platforms_mandatory.h"
 #include "Graphics_Systems/graphics_mandatory.h"

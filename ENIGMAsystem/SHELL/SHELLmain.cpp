@@ -31,14 +31,14 @@
 
 #include "Universal_System/mathnc.h"
 #include "Universal_System/estring.h"
-#include "Universal_System/buffers.h"
+#include "Universal_System/Resources/buffers.h"
 #include "Universal_System/fileio.h"
 #include "Universal_System/terminal_io.h"
 
-#include "Universal_System/background.h"
-#include "Universal_System/sprites.h"
-#include "Universal_System/fonts.h"
-#include "Universal_System/texture_atlas.h"
+#include "Universal_System/Resources/background.h"
+#include "Universal_System/Resources/sprites.h"
+#include "Universal_System/Resources/fonts.h"
+#include "Universal_System/Resources/texture_atlas.h"
 
 #include "Universal_System/callbacks_events.h"
 
@@ -46,7 +46,7 @@
 #include "Preprocessor_Environment_Editable/LIBINCLUDE.h"
 #include "Preprocessor_Environment_Editable/GAME_SETTINGS.h"
 
-#include "Universal_System/collisions_object.h"
+#include "Universal_System/Resources/Objects/collisions_object.h"
 
 #include "Collision_Systems/collision_mandatory.h"
 #include "Graphics_Systems/graphics_mandatory.h"
@@ -69,15 +69,15 @@ extern int amain();
 
 #include "Universal_System/image_formats.h"
 
-#include "Universal_System/object.h"
+#include "Universal_System/Resources/object.h"
 #include "Universal_System/instance.h"
-#include "Universal_System/roomsystem.h"
+#include "Universal_System/Resources/roomsystem.h"
 
 #include "Universal_System/globalupdate.h"
 
 #include "Universal_System/instance_system_frontend.h"
 
-#include "Universal_System/resource_data.h"
+#include "Universal_System/Resources/resource_data.h"
 #include "Universal_System/highscore_functions.h"
 
 #include "Universal_System/move_functions.h"
@@ -127,11 +127,11 @@ namespace enigma
       it->myevent_roomend();
       it->myevent_gameend();
     }
-    
+
     // Now clean up instances and free them from memory.
     for (enigma::iterator it = instance_list_first(); it; ++it)
-    { 
-        it->unlink(); delete *it; 
+    {
+        it->unlink(); delete *it;
     }
     return 0;
   }

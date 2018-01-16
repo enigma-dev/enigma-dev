@@ -1,6 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2011 Harijs Grînbergs                                         **
+**  Copyright (C) 2011 Harijs Grï¿½nbergs                                         **
 **  Modified 2013 by Josh Ventura                                               **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
@@ -45,7 +45,7 @@ namespace enigma {
 	extern unsigned bound_texture;
 }
 
-#include "Universal_System/collisions_object.h"
+#include "Universal_System/Resources/Objects/collisions_object.h"
 #include "Universal_System/instance_system.h"
 #include "implement.h"
 
@@ -507,4 +507,3 @@ void draw_path(unsigned pathid, gs_scalar x, gs_scalar y, bool absolute)
 }
 
 }
-

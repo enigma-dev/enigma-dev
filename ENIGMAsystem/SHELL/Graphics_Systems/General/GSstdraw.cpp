@@ -22,7 +22,7 @@
 #include "Graphics_Systems/General/GScolors.h"
 
 #include <stdio.h>
-#include "Universal_System/roomsystem.h"
+#include "Universal_System/Resources/roomsystem.h"
 #include "Universal_System/math_consts.h"
 
 #include <list>
@@ -357,9 +357,9 @@ void draw_sector(gs_scalar x, gs_scalar y, gs_scalar rx, gs_scalar ry, float a1,
   // TODO(JoshDreamland): Replace with settings macro to get from preferred unit to radians
   a1 *= M_PI/180;
   a2 *= M_PI/180;
-  
+
   gs_scalar pr = 2*M_PI/enigma::circleprecision;
-  
+
   if (outline) {
     draw_primitive_begin(pr_linestrip);
     draw_vertex(x, y);
@@ -951,4 +951,3 @@ void draw_polygon_end(bool outline, bool allowHoles)
 }
 
 }
-

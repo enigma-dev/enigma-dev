@@ -29,8 +29,8 @@ using namespace std;
 
 #include "sprites_internal.h"
 #include "fonts_internal.h"
-#include "rectpack.h"
-#include "image_formats.h"
+#include "Universal_System/rectpack.h"
+#include "Universal_System/image_formats.h"
 
 namespace enigma
 {
@@ -336,4 +336,3 @@ float font_get_glyph_bottom(int fnt, uint32_t character) {
 }
 
 }
-
