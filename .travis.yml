@@ -47,9 +47,9 @@ matrix:
 #BEGIN OSX
   # Compilers
   - { os: osx, osx_image: xcode9.2,
-      env: { ALLOW_FAIL="TRUE" COMPILER: "clang", PLATFORM: "None", MODE: "Debug", GRAPHICS: "None", AUDIO: "None", COLLISION: "None", NETWORK: "None", WIDGETS: "None", EXTENSIONS: "None" } }
+      env: { ALLOW_FAIL="TRUE", COMPILER: "clang", PLATFORM: "None", MODE: "Debug", GRAPHICS: "None", AUDIO: "None", COLLISION: "None", NETWORK: "None", WIDGETS: "None", EXTENSIONS: "None" } }
   - { os: osx, osx_image: xcode9.2,
-      env: { ALLOW_FAIL="TRUE" COMPILER: "gcc", PLATFORM: "None", MODE: "Debug", GRAPHICS: "None", AUDIO: "None", COLLISION: "None", NETWORK: "None", WIDGETS: "None", EXTENSIONS: "None" } }
+      env: { ALLOW_FAIL="TRUE", COMPILER: "gcc", PLATFORM: "None", MODE: "Debug", GRAPHICS: "None", AUDIO: "None", COLLISION: "None", NETWORK: "None", WIDGETS: "None", EXTENSIONS: "None" } }
 #END OSX
   include:
 #BEGIN LINUX
