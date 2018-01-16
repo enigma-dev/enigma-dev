@@ -1,6 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2011 Harijs Gr�nbergs                                         **
+**  Copyright (C) 2011 Harijs Grînbergs                                         **
 **  Modified 2013 by Josh Ventura                                               **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
