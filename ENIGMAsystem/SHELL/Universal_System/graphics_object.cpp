@@ -29,8 +29,12 @@
 
 namespace enigma
 {
-  object_graphics::object_graphics() {}
-  object_graphics::object_graphics(unsigned _x, int _y): object_timelines(_x,_y) {}
+  object_graphics::object_graphics() {
+    image_single.parent = this;
+  }
+  object_graphics::object_graphics(unsigned _x, int _y): object_timelines(_x,_y) {
+    image_single.parent = this;
+  }
   object_graphics::~object_graphics() {}
   
   variant object_graphics::myevent_draw()      { return 0; }

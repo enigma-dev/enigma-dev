@@ -50,6 +50,11 @@ namespace enigma
     //Sprites: these are mostly for higher tiers...
       int sprite_index;
       gs_scalar image_index;
+      struct {
+        object_graphics* parent;
+        void operator= (gs_scalar v) { parent->image_index = v; parent->image_speed = 0; }
+        operator gs_scalar() const { return parent->image_index; }
+      } image_single;
       gs_scalar image_speed;
 
       //Depth
