@@ -11,18 +11,27 @@ branches:
 
 before_install:
   - |
-    if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
+    if [ "$TRAVIS_OS_NAME" == "linux" ]; then
       sudo dpkg --add-architecture i386;
 
-      sudo apt-get -qq -y install build-essential libglu1-mesa-dev zlib1g-dev libc++-dev libboost-dev\
+      sudo apt-get -qq -y install build-essential zlib1g-dev libboost-dev\
         libboost-iostreams-dev libboost-filesystem-dev libboost-program-options-dev libboost-system-dev;
-      # mingw-w64 wine
-      # gcc-multilib g++-multilib libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1-dev libglu1-mesa:i386 libx11-6:i386 libc++-dev:i386
-      # sudo ln -s /usr/lib/i386-linux-gnu/mesa/libGL.so.1 /usr/lib/i386-linux-gnu/libGL.so;
-      # sudo ln -s /usr/lib/i386-linux-gnu/libX11.so.6 /usr/lib/i386-linux-gnu/libX11.so;
-      # sudo ln -s /usr/lib/i386-linux-gnu/libGLU.so.1 /usr/lib/i386-linux-gnu/libGLU.so;
+
+       # gcc-multilib g++-multilib
+      if [ "$COMPILER" == "gcc32" ] || [ "$COMPILER" == "clang32" ]; then
+        sudo apt-get -qq -y install libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1-dev libglu1-mesa:i386 libx11-6:i386 libc++-dev:i386;
+
+        sudo ln -s /usr/lib/i386-linux-gnu/mesa/libGL.so.1 /usr/lib/i386-linux-gnu/libGL.so;
+        sudo ln -s /usr/lib/i386-linux-gnu/libX11.so.6 /usr/lib/i386-linux-gnu/libX11.so;
+        sudo ln -s /usr/lib/i386-linux-gnu/libGLU.so.1 /usr/lib/i386-linux-gnu/libGLU.so;
+      elif  [ "$COMPILER" == "MinGW64" ]; then
+        sudo apt-get -qq -y install mingw-w64 wine;
+      else
+        sudo apt-get -qq -y install libc++-dev libglu1-mesa-dev;
+      fi
+
       sudo ln -s /usr/include/x86_64-linux-gnu/zconf.h /usr/include;
-    elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+    elif [ "$TRAVIS_OS_NAME" == "osx" ]; then
       brew upgrade gcc || brew install gcc || brew link --overwrite gcc;
     fi
 
