@@ -9,15 +9,25 @@ branches:
   only:
     - "master"
 
+# by default most of our jobs will be run on a linux instance
+os: linux
+sudo: false
+dist: trusty
+compiler: gcc
+language: cpp
+
+# apt packages for linux
+addons:
+  apt:
+    packages: [build-essential, zlib1g-dev, libboost-dev, libboost-iostreams-dev,
+      libboost-filesystem-dev, libboost-program-options-dev, libboost-system-dev]
+
 # install general dependencies used by more than one job
 before_install:
   - |
     set -ev # fail when any command returns non-zero
 
     if [ "$TRAVIS_OS_NAME" == "linux" ]; then
-      sudo apt-get -qq -y install build-essential zlib1g-dev libboost-dev libboost-iostreams-dev\
-        libboost-filesystem-dev libboost-program-options-dev libboost-system-dev;
-
       if [ "$COMPILER" == "gcc32" ] || [ "$COMPILER" == "clang32" ]; then
         sudo dpkg --add-architecture i386;
         sudo apt-get -qq -y install libc++-dev:i386 libglu1-mesa:i386\
@@ -54,12 +64,6 @@ install:
   - curl -L https://github.com/fundies/enigma-libs/files/1347135/enigma-libs.zip > enigma-libs.zip
   - unzip enigma-libs.zip -d ENIGMAsystem/
   - mv ENIGMAsystem/Install ENIGMAsystem/Additional
-
-# by default most of our jobs will be run on a linux instance
-os: linux
-dist: trusty
-compiler: gcc
-language: cpp
 
 env:
   global:
