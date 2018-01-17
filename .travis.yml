@@ -17,7 +17,21 @@ before_install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo apt-get -qq -y install build-essential libglu1-mesa-dev zlib1g-dev libalure-dev libvorbisfile3 libvorbis-dev 
       libdumb1-dev libc++-dev libsfml-dev libgtk2.0-dev libbullet-dev libbox2d-dev libgme-dev gcc-multilib 
       g++-multilib libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1-dev libglu1-mesa:i386 libx11-6:i386  libc++-dev:i386
-      mingw-w64 wine libboost-dev libboost-iostreams-dev libboost-filesystem-dev libboost-program-options-dev libboost-system-dev; fi
+      mingw-w64 wine libboost-dev libboost-iostreams-dev libboost-filesystem-dev libboost-program-options-dev libboost-system-dev
+      libglew-dev libglew1.10:i386; fi
+  
+  # Ubuntu is a turd
+  - sudo ln -s /usr/lib/i386-linux-gnu/mesa/libGL.so.1 /usr/lib/i386-linux-gnu/libGL.so
+  - sudo ln -s /usr/lib/i386-linux-gnu/libX11.so.6 /usr/lib/i386-linux-gnu/libX11.so
+  - sudo ln -s /usr/lib/i386-linux-gnu/libGLU.so.1 /usr/lib/i386-linux-gnu/libGLU.so
+  - sudo ln -s /usr/include/x86_64-linux-gnu/zconf.h /usr/include
+  - sudo ln -s /usr/lib/i386-linux-gnu/libGLEW.so.1.10 /usr/lib/i386-linux-gnu/libGLEW.so
+  
+  # Ubuntu is a turd
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo ln -s /usr/lib/i386-linux-gnu/mesa/libGL.so.1 /usr/lib/i386-linux-gnu/libGL.so; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo ln -s /usr/lib/i386-linux-gnu/libX11.so.6 /usr/lib/i386-linux-gnu/libX11.so; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo ln -s /usr/lib/i386-linux-gnu/libGLU.so.1 /usr/lib/i386-linux-gnu/libGLU.so; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo ln -s /usr/include/x86_64-linux-gnu/zconf.h /usr/include; fi
   
   # Ubuntu is a turd
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo ln -s /usr/lib/i386-linux-gnu/mesa/libGL.so.1 /usr/lib/i386-linux-gnu/libGL.so; fi
@@ -32,7 +46,7 @@ install:
   - chmod +x ./ci-build.sh
   - make -j4
   - make -j4 emake
-  - curl -L https://github.com/fundies/enigma-libs/files/1347135/enigma-libs.zip > enigma-libs.zip
+  - curl -L https://github.com/fundies/enigma-libs/files/1620148/enigma-libs.zip > enigma-libs.zip
   - unzip enigma-libs.zip -d ENIGMAsystem/
   - mv ENIGMAsystem/Install ENIGMAsystem/Additional
 
