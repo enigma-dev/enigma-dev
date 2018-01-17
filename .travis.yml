@@ -14,12 +14,16 @@ before_install:
     if [ "$TRAVIS_OS_NAME" == "linux" ]; then
       sudo dpkg --add-architecture i386;
 
-      sudo apt-get -qq -y install build-essential zlib1g-dev libboost-dev\
-        libboost-iostreams-dev libboost-filesystem-dev libboost-program-options-dev libboost-system-dev;
+      sudo apt-get -qq -y install build-essential zlib1g-dev libboost-dev libboost-iostreams-dev\
+        libboost-filesystem-dev libboost-program-options-dev libboost-system-dev;
 
-       # gcc-multilib g++-multilib
       if [ "$COMPILER" == "gcc32" ] || [ "$COMPILER" == "clang32" ]; then
-        sudo apt-get -qq -y install libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1-dev libglu1-mesa:i386 libx11-6:i386 libc++-dev:i386;
+        sudo apt-get -qq -y install libc++-dev:i386 libglu1-mesa:i386\
+          libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1-dev libx11-6:i386;
+
+        if [ "$COMPILER" == "gcc32" ]; then
+          sudo apt-get -qq -y install gcc-multilib g++-multilib;
+        fi
 
         sudo ln -s /usr/lib/i386-linux-gnu/mesa/libGL.so.1 /usr/lib/i386-linux-gnu/libGL.so;
         sudo ln -s /usr/lib/i386-linux-gnu/libX11.so.6 /usr/lib/i386-linux-gnu/libX11.so;
@@ -53,65 +57,11 @@ env:
   global:
     - OUTPUT=/tmp/test
   matrix:
-    # Game Modes
-    - COMPILER=gcc PLATFORM=xlib MODE=Run GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
     - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
-    - COMPILER=gcc PLATFORM=xlib MODE=Compile GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
-    # Compilers
     - COMPILER=gcc32 PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
     - COMPILER=clang PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
     - COMPILER=clang32 PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
-    # Graphics
-    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL3 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
-    # Collision
-    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=BBox NETWORK=None WIDGETS=None EXTENSIONS="None"
-    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=Precise NETWORK=None WIDGETS=None EXTENSIONS="None"
-    # Networking
-    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=Asynchronous WIDGETS=None EXTENSIONS="None"
-    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=BerkeleySockets WIDGETS=None EXTENSIONS="None"
-    # Extensions
-    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="Alarms"
-    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="DataStructures,Asynchronous"
-    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=GTK+ EXTENSIONS="BasicGUI"
-    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="DataStructures"
-    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="DateTime"
-    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="GM5Compat"
-    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="IniFilesystem"
-    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="DataStructures,Json"
-    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="MatrixMath"
-    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=BBox NETWORK=None WIDGETS=None EXTENSIONS="Paths"
-    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=BBox NETWORK=None WIDGETS=None EXTENSIONS="Paths,MotionPlanning"
-    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=Precise NETWORK=None WIDGETS=None EXTENSIONS="Paths,MotionPlanning"
-    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="ParticleSystems"
-    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL3 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="ParticleSystems"
-    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="Timelines"
-    # Cross Compile
     - COMPILER=MinGW32 PLATFORM=Win32 MODE=Run GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
     - COMPILER=MinGW64 PLATFORM=Win32 MODE=Run GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
-    # The big ol' None test.
-    - COMPILER=gcc PLATFORM=None MODE=Debug GRAPHICS=None AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
-matrix:
-  include:
-    # Audio
-    - env: COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=OpenAL COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
-      before_script: sudo apt-get -qq -y install libalure-dev libvorbisfile3 libvorbis-dev libdumb1-dev
-    - env: COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=SFML COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
-      before_script: sudo apt-get -qq -y install libsfml-dev
-    # GME
-    - env: COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=OpenAL COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="GME"
-      before_script: sudo apt-get -qq -y install libgme-dev libalure-dev libvorbisfile3 libvorbis-dev libdumb1-dev
-    - env: COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=SFML COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="GME"
-      before_script: sudo apt-get -qq -y install libgme-dev libsfml-dev
-    # Widgets
-    - env: COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=GTK+ EXTENSIONS="None"
-      before_script: sudo apt-get -qq -y install libgtk2.0-dev
-    # Box2D
-    - env: COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="Box2DPhysics"
-      before_script: sudo apt-get -qq -y install libbox2d-dev
-    - env: COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="StudioPhysics"
-      before_script: sudo apt-get -qq -y install libbox2d-dev
-    # Bullet Physics
-    - env: COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="BulletDynamics"
-      before_script: sudo apt-get -qq -y install libbullet-dev
 script:
   - ./ci-build.sh
