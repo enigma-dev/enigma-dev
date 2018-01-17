@@ -32,6 +32,7 @@ class TestHarness {
 };
 
 struct TestConfig {
+  std::string compiler;
   std::string mode;
   std::string graphics;
   std::string audio;
