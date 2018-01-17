@@ -52,8 +52,9 @@ namespace enigma
       gs_scalar image_index;
       struct {
         object_graphics* parent;
+        gs_scalar value() const { return parent->image_speed ? -1 : parent->image_index; }
         void operator= (gs_scalar v) { parent->image_index = v; parent->image_speed = 0; }
-        operator gs_scalar() const { return parent->image_index; }
+        operator gs_scalar() const { return value(); }
       } image_single;
       gs_scalar image_speed;
 
