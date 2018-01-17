@@ -94,13 +94,12 @@ env:
   #END LINUX
 matrix:
   include:
-    - os: osx
-      osx_image: xcode9.2
-      env:
-      #BEGIN OSX
-        # Compilers
-        - COMPILER=gcc PLATFORM=None MODE=Debug GRAPHICS=None AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
-        - COMPILER=clang PLATFORM=None MODE=Debug GRAPHICS=None AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
-      #END OSX
+  #BEGIN OSX
+    # Compilers
+    - { os: osx, osx_image: xcode9.2,
+        env: { COMPILER: "clang", PLATFORM: "None", MODE: "Debug", GRAPHICS: "None", AUDIO: "None", COLLISION: "None", NETWORK: "None", WIDGETS: "None", EXTENSIONS: "None" } }
+    - { os: osx, osx_image: xcode9.2,
+        env: { COMPILER: "gcc", PLATFORM: "None", MODE: "Debug", GRAPHICS: "None", AUDIO: "None", COLLISION: "None", NETWORK: "None", WIDGETS: "None", EXTENSIONS: "None" } }
+  #END OSX
 script:
   - ./ci-build.sh
