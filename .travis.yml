@@ -43,7 +43,7 @@ before_install:
         sudo apt-get -qq -y install libsfml-dev;
       fi
 
-      sudo ln -s /usr/include/x86_64-linux-gnu/zconf.h /usr/include;
+      #sudo ln -s /usr/include/x86_64-linux-gnu/zconf.h /usr/include;
     elif [ "$TRAVIS_OS_NAME" == "osx" ]; then
       brew upgrade gcc || brew install gcc || brew link --overwrite gcc;
     fi
