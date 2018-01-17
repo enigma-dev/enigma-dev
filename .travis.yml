@@ -15,8 +15,8 @@ before_install:
       sudo dpkg --add-architecture i386;
 
       sudo apt-get -qq -y install build-essential libglu1-mesa-dev zlib1g-dev libc++-dev gcc-multilib
-        g++-multilib libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1-dev libglu1-mesa:i386 libx11-6:i386  libc++-dev:i386
-        mingw-w64 wine libboost-dev libboost-iostreams-dev libboost-filesystem-dev libboost-program-options-dev libboost-system-dev;
+      g++-multilib libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1-dev libglu1-mesa:i386 libx11-6:i386 libc++-dev:i386
+      mingw-w64 wine libboost-dev libboost-iostreams-dev libboost-filesystem-dev libboost-program-options-dev libboost-system-dev;
 
       sudo ln -s /usr/lib/i386-linux-gnu/mesa/libGL.so.1 /usr/lib/i386-linux-gnu/libGL.so;
       sudo ln -s /usr/lib/i386-linux-gnu/libX11.so.6 /usr/lib/i386-linux-gnu/libX11.so;
