@@ -1,3 +1,4 @@
+sudo: required
 # competition for Thundercleese
 notifications:
   irc: "chat.freenode.net#enigma"
