@@ -14,6 +14,7 @@ namespace {
 using std::string;
 using std::to_string;
 using std::unique_ptr;
+using std::getenv;
 
 string get_window_caption(Display *disp, Window win) {
   char *caption;
@@ -89,7 +90,7 @@ class X11_TestHarness final: public TestHarness {
                 + " -b remove,fullscreen").c_str());
   }
   void close_window() final {
-    system(("xdotool windowkill " + to_string(window_id)).c_str());
+    system(("wmctrl -i -c " + to_string(window_id)).c_str());
   }
 
   bool game_is_running() final {
@@ -137,6 +138,7 @@ constexpr const char *kDefaultExtensions =
     "Paths,DateTime,DataStructures,MotionPlanning,Alarms,Timelines,"
     "ParticleSystems";
 
+static int testNumber = 1;
 int build_game(const string &game, const TestConfig &tc, const string &out) {
   if (pid_t emake = fork()) {
     int status = 0;
@@ -149,8 +151,9 @@ int build_game(const string &game, const TestConfig &tc, const string &out) {
   // Invoke the compiler via emake
   using TC = TestConfig;
   string emake_cmd = "./emake";
-  string mode = "--mode=" + tc.get_or(&TC::mode, "Compile");
-  string graphics = "--graphics=" + tc.get_or(&TC::graphics, "OpenGL3");
+  string compiler = "--compiler=" + tc.get_or(&TC::compiler, "TestHarness");
+  string mode = "--mode=" + tc.get_or(&TC::mode, "Debug");
+  string graphics = "--graphics=" + tc.get_or(&TC::graphics, "OpenGL1");
   string audio = "--audio=" + tc.get_or(&TC::audio, "None");
   string widgets = "--widgets=" + tc.get_or(&TC::widgets, "None");
   string network = "--network=" + tc.get_or(&TC::network, "None");
@@ -160,6 +163,7 @@ int build_game(const string &game, const TestConfig &tc, const string &out) {
 
   const char *const args[] = {
     emake_cmd.c_str(),
+    compiler.c_str(),
     mode.c_str(),
     graphics.c_str(),
     audio.c_str(),
@@ -174,6 +178,28 @@ int build_game(const string &game, const TestConfig &tc, const string &out) {
   };
 
   execvp(emake_cmd.c_str(), (char**) args);
+  
+  if (compiler == "--compiler=TestHarness")
+  {
+      string srcDir = "--directory=" + string(getenv("HOME")) + "/.enigma/.eobjs/Linux/Linux/TestHarness/Debug";
+      string outFile = "--output-file=coverage_" + to_string(testNumber) + ".info";
+      
+      const char *const lcovArgs[] = {
+        "lcov",
+        "--quiet",
+        "--no-external",
+        "--base-directory=ENIGMAsystem/SHELL/",
+        "--capture",
+        srcDir.c_str(),
+        outFile.c_str(),
+        nullptr
+      };
+      
+      execvp("lcov", (char**) lcovArgs);
+      
+      testNumber++;
+  }
+  
   abort();
 }
 

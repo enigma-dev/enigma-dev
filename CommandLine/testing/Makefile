@@ -14,8 +14,8 @@ else
 	OS_SRCS=./Platform/TestHarness-Win32.cpp
 endif
 
-CXXFLAGS  := -I$(SRC_DIR) -Wall -Wextra -Wpedantic -g
-LDFLAGS   := $(OS_LIBS) -lgtest_main -lgtest
+CXXFLAGS  := -I$(SRC_DIR) -Wall -Wextra -Wpedantic -g -std=c++11
+LDFLAGS   := $(OS_LIBS) -lgtest_main -lgtest -lpthread
 
 SOURCES := $(wildcard $(SRC_DIR)/*.cpp) $(wildcard $(TESTCASES_DIR)/*.cpp) $(OS_SRCS)
 OBJECTS := $(patsubst $(SRC_DIR)/%, $(OBJ_DIR)/%, $(patsubst %.cpp, %.o, $(SOURCES)))
@@ -25,7 +25,7 @@ DEPENDS := $(OBJECTS:.o=.d)
 $(BINARY): $(OBJECTS)
 	g++ $^ -o $@ $(LDFLAGS)
 
-.PHONY: all clean
+.PHONY: all clean obj_dirs
 
 all: $(BINARY)
 clean:
@@ -34,9 +34,11 @@ clean:
 # Create the object directories
 $(OBJDIRS):
 	mkdir -p $@
+# Old make has a bug which requires this nonsense...
+obj_dirs: $(OBJDIRS)
 
 # Generate rules for new (unbuilt) files
-$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp | $(OBJDIRS)
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp | obj_dirs
 	$(CXX) $(CXXFLAGS) $(CXXFLAGS) -MMD -c -o $(OBJ_DIR)/$*.o $<
 
 # Include rules for known (previously-built) files
