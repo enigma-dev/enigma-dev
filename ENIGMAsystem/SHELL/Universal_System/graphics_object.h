@@ -55,6 +55,7 @@ namespace enigma
         gs_scalar value() const { return parent->image_speed ? -1 : parent->image_index; }
         void operator= (gs_scalar v) { parent->image_index = v; parent->image_speed = 0; }
         operator gs_scalar() const { return value(); }
+        operator var() const { return var(value()); }
       } image_single;
       gs_scalar image_speed;
 
