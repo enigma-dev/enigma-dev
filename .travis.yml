@@ -33,6 +33,12 @@ before_install:
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo ln -s /usr/lib/i386-linux-gnu/libGLU.so.1 /usr/lib/i386-linux-gnu/libGLU.so; fi
   - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo ln -s /usr/include/x86_64-linux-gnu/zconf.h /usr/include; fi
   
+  # Ubuntu is a turd
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo ln -s /usr/lib/i386-linux-gnu/mesa/libGL.so.1 /usr/lib/i386-linux-gnu/libGL.so; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo ln -s /usr/lib/i386-linux-gnu/libX11.so.6 /usr/lib/i386-linux-gnu/libX11.so; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo ln -s /usr/lib/i386-linux-gnu/libGLU.so.1 /usr/lib/i386-linux-gnu/libGLU.so; fi
+  - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then sudo ln -s /usr/include/x86_64-linux-gnu/zconf.h /usr/include; fi
+  
   #OSX is also a turd
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew upgrade gcc || brew install gcc || brew link --overwrite gcc; fi  
 
