@@ -96,10 +96,11 @@ matrix:
   include:
     - os: osx
       osx_image: xcode9.2
-    #BEGIN OSX
-    # Compilers
-    - COMPILER=gcc PLATFORM=None MODE=Debug GRAPHICS=None AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
-    - COMPILER=clang PLATFORM=None MODE=Debug GRAPHICS=None AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
-    #END OSX
+      env:
+      #BEGIN OSX
+        # Compilers
+        - COMPILER=gcc PLATFORM=None MODE=Debug GRAPHICS=None AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
+        - COMPILER=clang PLATFORM=None MODE=Debug GRAPHICS=None AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
+      #END OSX
 script:
   - ./ci-build.sh
