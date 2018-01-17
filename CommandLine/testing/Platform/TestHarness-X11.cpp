@@ -16,11 +16,11 @@ using std::to_string;
 using std::unique_ptr;
 
 string get_window_caption(Display *disp, Window win) {
-	char *caption;
-	XFetchName(disp, win, &caption);
-	string res = caption ? caption : "";
+  char *caption;
+  XFetchName(disp, win, &caption);
+  string res = caption ? caption : "";
   XFree(caption);
-	return res;
+  return res;
 }
 
 pid_t get_window_pid(Display *disp, Window win) {
@@ -89,7 +89,7 @@ class X11_TestHarness final: public TestHarness {
                 + " -b remove,fullscreen").c_str());
   }
   void close_window() final {
-    system(("xdotool windowkill " + to_string(window_id)).c_str());
+    system(("wmctrl -i -c " + to_string(window_id)).c_str());
   }
 
   bool game_is_running() final {
