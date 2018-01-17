@@ -15,12 +15,11 @@ before_install:
     set -ev # fail when any command returns non-zero
 
     if [ "$TRAVIS_OS_NAME" == "linux" ]; then
-      sudo dpkg --add-architecture i386;
-
       sudo apt-get -qq -y install build-essential zlib1g-dev libboost-dev libboost-iostreams-dev\
         libboost-filesystem-dev libboost-program-options-dev libboost-system-dev;
 
       if [ "$COMPILER" == "gcc32" ] || [ "$COMPILER" == "clang32" ]; then
+        sudo dpkg --add-architecture i386;
         sudo apt-get -qq -y install libc++-dev:i386 libglu1-mesa:i386\
           libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1-dev libx11-6:i386;
 
