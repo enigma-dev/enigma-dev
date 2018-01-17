@@ -48,6 +48,6 @@ env:
 matrix:
   include:
     - env: COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="Box2DPhysics"
-      install: sudo apt-get -qq -y install libbox2d-dev
+      before_script: sudo apt-get -qq -y install libbox2d-dev
 script:
   - ./ci-build.sh
