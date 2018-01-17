@@ -106,7 +106,6 @@ env:
     # The big ol' None test.
     - COMPILER=gcc PLATFORM=None MODE=Debug GRAPHICS=None AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
 matrix:
-  fast_finish: true # don't wait for OSX
   include:
     # Widgets
     - env: COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=GTK+ EXTENSIONS="None"
@@ -124,11 +123,15 @@ matrix:
     # Bullet Physics
     - env: COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="BulletDynamics"
       before_script: sudo apt-get -qq -y install libbullet-dev
-  allow_failures:
     # OSX
     - { os: osx, osx_image: xcode9.2,
         env: COMPILER="clang" PLATFORM="None" MODE="Debug" GRAPHICS="None" AUDIO="None" COLLISION="None" NETWORK="None" WIDGETS="None" EXTENSIONS="None" }
     - { os: osx, osx_image: xcode9.2,
         env: COMPILER="gcc" PLATFORM="None" MODE="Debug" GRAPHICS="None" AUDIO="None" COLLISION="None" NETWORK="None" WIDGETS="None" EXTENSIONS="None" }
+  # don't wait for OSX
+  fast_finish: true
+  allow_failures:
+    - os: osx
+
 script:
   - ./ci-build.sh
