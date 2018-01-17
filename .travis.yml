@@ -46,9 +46,12 @@ env:
     - COMPILER=gcc PLATFORM=xlib MODE=Run GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
 matrix:
   include:
-    - os: linux
-      dist: trusty
-      env: { COMPILER: "gcc", PLATFORM: "xlib", MODE: "Debug", GRAPHICS: "OpenGL1", AUDIO: "None", COLLISION: "None", NETWORK: "None", WIDGETS: "None", EXTENSIONS: "Box2DPhysics" }
-      install: sudo apt-get -qq -y install libbox2d-dev
+  #BEGIN OSX
+    # Compilers
+    - { os: osx, osx_image: xcode9.2,
+        env: { COMPILER: "clang", PLATFORM: "None", MODE: "Debug", GRAPHICS: "None", AUDIO: "None", COLLISION: "None", NETWORK: "None", WIDGETS: "None", EXTENSIONS: "None" } }
+    - { os: osx, osx_image: xcode9.2,
+        env: { COMPILER: "gcc", PLATFORM: "None", MODE: "Debug", GRAPHICS: "None", AUDIO: "None", COLLISION: "None", NETWORK: "None", WIDGETS: "None", EXTENSIONS: "None" } }
+  #END OSX
 script:
   - ./ci-build.sh
