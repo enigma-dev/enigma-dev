@@ -12,6 +12,8 @@ branches:
 # install general dependencies used by more than one job
 before_install:
   - |
+    set -ev # fail when any command returns non-zero
+
     if [ "$TRAVIS_OS_NAME" == "linux" ]; then
       sudo dpkg --add-architecture i386;
 
@@ -87,7 +89,7 @@ env:
     # Extensions
     - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="Alarms"
     - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="DataStructures,Asynchronous"
-    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=GTK+ EXTENSIONS="BasicGUI"
+    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="BasicGUI"
     - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="DataStructures"
     - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="DateTime"
     - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="GM5Compat"
