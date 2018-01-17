@@ -16,6 +16,7 @@ TEST(Game, window_test) {
   bool game_running = test_harness->game_is_running();
   for (int i = 0; game_running && i < 10; ++i) {
     test_harness->wait();
+    game_running = test_harness->game_is_running();
   }
   ASSERT_FALSE(game_running) << "Game did not exit after window was closed!";
 }
