@@ -9,6 +9,7 @@ branches:
   only:
     - "master"
 
+# install general dependencies used by more than one job
 before_install:
   - |
     if [ "$TRAVIS_OS_NAME" == "linux" ]; then
@@ -34,11 +35,18 @@ before_install:
         sudo apt-get -qq -y install libc++-dev libglu1-mesa-dev;
       fi
 
+      if [ "$AUDIO" == "OpenAL" ]; then
+        sudo apt-get -qq -y install libalure-dev libvorbisfile3 libvorbis-dev libdumb1-dev;
+      elif [ "$AUDIO" == "SFML" ]; then
+        sudo apt-get -qq -y install libsfml-dev;
+      fi
+
       sudo ln -s /usr/include/x86_64-linux-gnu/zconf.h /usr/include;
     elif [ "$TRAVIS_OS_NAME" == "osx" ]; then
       brew upgrade gcc || brew install gcc || brew link --overwrite gcc;
     fi
 
+# build JDI and the CLI
 install:
   - chmod +x ./ci-build.sh
   - make -j4
@@ -57,11 +65,70 @@ env:
   global:
     - OUTPUT=/tmp/test
   matrix:
-    - COMPILER=MinGW32 PLATFORM=Win32 MODE=Run GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
-    - COMPILER=MinGW64 PLATFORM=Win32 MODE=Run GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
+    # Game Modes
+    - COMPILER=gcc PLATFORM=xlib MODE=Run GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
     - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
+    - COMPILER=gcc PLATFORM=xlib MODE=Compile GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
+    # Compilers
     - COMPILER=gcc32 PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
     - COMPILER=clang PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
     - COMPILER=clang32 PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
+    # Graphics
+    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL3 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
+    # Audio
+    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=OpenAL COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
+    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=SFML COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
+    # Collision
+    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=BBox NETWORK=None WIDGETS=None EXTENSIONS="None"
+    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=Precise NETWORK=None WIDGETS=None EXTENSIONS="None"
+    # Networking
+    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=Asynchronous WIDGETS=None EXTENSIONS="None"
+    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=BerkeleySockets WIDGETS=None EXTENSIONS="None"
+    # Extensions
+    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="Alarms"
+    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="DataStructures,Asynchronous"
+    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=GTK+ EXTENSIONS="BasicGUI"
+    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="DataStructures"
+    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="DateTime"
+    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="GM5Compat"
+    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="IniFilesystem"
+    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="DataStructures,Json"
+    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="MatrixMath"
+    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=BBox NETWORK=None WIDGETS=None EXTENSIONS="Paths"
+    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=BBox NETWORK=None WIDGETS=None EXTENSIONS="Paths,MotionPlanning"
+    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=Precise NETWORK=None WIDGETS=None EXTENSIONS="Paths,MotionPlanning"
+    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="ParticleSystems"
+    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL3 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="ParticleSystems"
+    - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="Timelines"
+    # Cross Compile
+    - COMPILER=MinGW32 PLATFORM=Win32 MODE=Run GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
+    - COMPILER=MinGW64 PLATFORM=Win32 MODE=Run GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
+    # The big ol' None test.
+    - COMPILER=gcc PLATFORM=None MODE=Debug GRAPHICS=None AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
+matrix:
+  fast_finish: true # don't wait for OSX
+  include:
+    # Widgets
+    - env: COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=GTK+ EXTENSIONS="None"
+      before_script: sudo apt-get -qq -y install libgtk2.0-dev
+    # GME (Note: requires an Audio system)
+    - env: COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=OpenAL COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="GME"
+      before_script: sudo apt-get -qq -y install libgme-dev
+    - env: COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=SFML COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="GME"
+      before_script: sudo apt-get -qq -y install libgme-dev
+    # Box2D
+    - env: COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="Box2DPhysics"
+      before_script: sudo apt-get -qq -y install libbox2d-dev
+    - env: COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="StudioPhysics"
+      before_script: sudo apt-get -qq -y install libbox2d-dev
+    # Bullet Physics
+    - env: COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="BulletDynamics"
+      before_script: sudo apt-get -qq -y install libbullet-dev
+  allow_failures:
+    # OSX
+    - { os: osx, osx_image: xcode9.2,
+        env: COMPILER="clang" PLATFORM="None" MODE="Debug" GRAPHICS="None" AUDIO="None" COLLISION="None" NETWORK="None" WIDGETS="None" EXTENSIONS="None" }
+    - { os: osx, osx_image: xcode9.2,
+        env: COMPILER="gcc" PLATFORM="None" MODE="Debug" GRAPHICS="None" AUDIO="None" COLLISION="None" NETWORK="None" WIDGETS="None" EXTENSIONS="None" }
 script:
   - ./ci-build.sh
