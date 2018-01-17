@@ -46,6 +46,6 @@ env:
     - COMPILER=gcc PLATFORM=xlib MODE=Run GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
 matrix:
   include:
-    - env: COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="Box2DPhysics"
+    - env: { COMPILER: "gcc", PLATFORM: "xlib", MODE: "Debug", GRAPHICS: "OpenGL1", AUDIO: "None", COLLISION: "None", NETWORK: "None", WIDGETS: "None", EXTENSIONS: "Box2DPhysics" }
 script:
   - ./ci-build.sh
