@@ -24,10 +24,10 @@
 #include <limits>
 
 #include "Universal_System/Resources/Objects/collisions_object.h"
-#include "Universal_System/instance_system.h" //iter
+#include "Universal_System/Instances/instance_system.h" //iter
 #include "Universal_System/Resources/roomsystem.h"
 #include "Collision_Systems/collision_mandatory.h" //iter
-#include "Universal_System/instance.h"
+#include "Universal_System/Instances/instance.h"
 #include "Universal_System/math_consts.h"
 
 #include "../General/CSfuncs.h"

@@ -16,7 +16,7 @@
 **/
 
 #include "Universal_System/scalar.h"
-#include "Universal_System/instance_system_base.h"
+#include "Universal_System/Instances/instance_system_base.h"
 
 namespace enigma_user
 {

@@ -36,7 +36,7 @@ using namespace std;
 
 
 #include "Universal_System/Resources/roomsystem.h"
-#include "Universal_System/instance_system.h"
+#include "Universal_System/Instances/instance_system.h"
 #include "Universal_System/Resources/Objects/graphics_object.h"
 #include "Universal_System/depth_draw.h"
 #include "Platforms/platforms_mandatory.h"

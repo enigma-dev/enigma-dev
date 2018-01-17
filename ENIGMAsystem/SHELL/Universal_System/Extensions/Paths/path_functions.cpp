@@ -46,7 +46,7 @@ namespace enigma {
 }
 
 #include "Universal_System/Resources/Objects/collisions_object.h"
-#include "Universal_System/instance_system.h"
+#include "Universal_System/Instances/instance_system.h"
 #include "implement.h"
 
 namespace enigma {

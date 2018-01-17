@@ -19,7 +19,7 @@
 #include <string>
 using std::string;
 #include "Widget_Systems/widgets_mandatory.h"
-#include "Universal_System/instance_system.h"
+#include "Universal_System/Instances/instance_system.h"
 #include <cstdlib>
 #include <cstdio>
 
@@ -36,7 +36,7 @@ using namespace std;
 #  include <termios.h>
 #  include <unistd.h>
 #endif
- 
+
 class PasswordContext {
 # ifdef TC_WINDOWS
   DWORD old_attrs = 0;
@@ -44,7 +44,7 @@ class PasswordContext {
 # else
   termios old_attrs;
 # endif
- 
+
  public:
   PasswordContext() {
 #   ifdef TC_WINDOWS
@@ -58,7 +58,7 @@ class PasswordContext {
       tcsetattr(STDIN_FILENO, TCSANOW, &new_attrs);
 #   endif
   }
- 
+
   ~PasswordContext() {
 #   ifdef TC_WINDOWS
       SetConsoleMode(hStdin, old_attrs);

@@ -36,7 +36,7 @@ using namespace std;
 #include "Universal_System/fileio.h"
 #include "Universal_System/estring.h"
 #include "Collision_Systems/collision_types.h"
-#include "Universal_System/instance_system.h"
+#include "Universal_System/Instances/instance_system.h"
 #include "Universal_System/Resources/Objects/graphics_object.h"
 #include <algorithm>
 #include "Graphics_Systems/graphics_mandatory.h" // Room dimensions.

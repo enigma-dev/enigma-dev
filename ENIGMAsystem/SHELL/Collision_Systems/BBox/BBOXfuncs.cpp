@@ -20,14 +20,14 @@
 ////////////////////////////////////
 
 #include "Universal_System/Resources/Objects/collisions_object.h"
-#include "Universal_System/instance_system.h" //iter
+#include "Universal_System/Instances/instance_system.h" //iter
 #include "Universal_System/Resources/roomsystem.h"
 #include "Collision_Systems/collision_mandatory.h" //iter
 #include "BBOXimpl.h"
 #include "../General/CSfuncs.h"
 #include <limits>
 #include <cmath>
-#include "Universal_System/instance.h"
+#include "Universal_System/Instances/instance.h"
 
 #include <floatcomp.h>
 

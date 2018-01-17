@@ -27,8 +27,8 @@ using std::map;
 #include "WINDOWScallback.h"
 #include "Universal_System/CallbackArrays.h" // For those damn vk_ constants.
 
-#include "Universal_System/instance_system.h"
-#include "Universal_System/instance.h"
+#include "Universal_System/Instances/instance_system.h"
+#include "Universal_System/Instances/instance.h"
 
 #ifndef WM_MOUSEHWHEEL
   #define WM_MOUSEHWHEEL 0x020E
@@ -69,7 +69,7 @@ namespace enigma
 
   LRESULT CALLBACK (*touch_extension_callback)(HWND hWndParameter, UINT message, WPARAM wParam, LPARAM lParam);
   void (*WindowResizedCallback)();
-  
+
   LRESULT CALLBACK WndProc (HWND hWndParameter, UINT message,WPARAM wParam, LPARAM lParam)
   {
     switch (message)
@@ -112,7 +112,7 @@ namespace enigma
         }
         gameWindowFocused = false;
         return 0;
-        
+
       case WM_SIZE:
         // make sure window resized is only processed once per resize because there could possibly be child windows and handles, especially with widgets
         if (hWndParameter == hWnd) {
@@ -148,13 +148,13 @@ namespace enigma
         windowHeight = tempHeight;
         setwindowsize();
         return 0;
-        
+
       case WM_GETMINMAXINFO: {
         if (viewScale > 0) { //Fixed Scale, this is GM8.1 behaviour
           RECT c;
           c.left = 0; c.top = 0; c.right = scaledWidth; c.bottom = scaledHeight;
           AdjustWindowRect(&c, getwindowstyle(), false);
-        
+
           LPMINMAXINFO lpMinMaxInfo = (LPMINMAXINFO) lParam;
           lpMinMaxInfo->ptMinTrackSize.x = c.right-c.left;
           lpMinMaxInfo->ptMinTrackSize.y = c.bottom-c.top;
@@ -240,13 +240,13 @@ namespace enigma
       case WM_RBUTTONDOWN: mousestatus[1]=1; return 0;
       case WM_MBUTTONUP:   mousestatus[2]=0; return 0;
       case WM_MBUTTONDOWN: mousestatus[2]=1; return 0;
-      
-      case WM_ERASEBKGND: 
+
+      case WM_ERASEBKGND:
         RECT rc;
-        GetClientRect(hWnd, &rc); 
-        FillRect((HDC) wParam, &rc, CreateSolidBrush(windowColor)); 
-        return 1L; 
-      
+        GetClientRect(hWnd, &rc);
+        FillRect((HDC) wParam, &rc, CreateSolidBrush(windowColor));
+        return 1L;
+
       case WM_PAINT:
 
         DefWindowProc(hWndParameter, message, wParam, lParam);

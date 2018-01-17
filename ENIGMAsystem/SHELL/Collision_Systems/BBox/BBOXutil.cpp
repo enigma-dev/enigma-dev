@@ -16,7 +16,7 @@
 **/
 
 #include "BBOXutil.h"
-#include "Universal_System/instance.h"
+#include "Universal_System/Instances/instance.h"
 
 ////////////////////////////////////
 // utility intersection functions - test shape intersection, which is largely API independant

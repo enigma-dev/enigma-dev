@@ -34,7 +34,7 @@ using namespace std;
 
 
 #include "Universal_System/Resources/roomsystem.h"
-#include "Universal_System/instance_system.h"
+#include "Universal_System/Instances/instance_system.h"
 #include "graphics_object.h"
 
 //Fuck whoever did this to the spec

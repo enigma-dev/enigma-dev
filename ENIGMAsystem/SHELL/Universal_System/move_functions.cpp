@@ -20,7 +20,7 @@
 #include <floatcomp.h>
 
 #include "Resources/Objects/collisions_object.h"
-#include "instance_system.h"
+#include "Instances/instance_system.h"
 #include "Resources/roomsystem.h"
 #include "move_functions.h"
 #include "math_consts.h"

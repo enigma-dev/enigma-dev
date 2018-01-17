@@ -27,7 +27,7 @@ using std::string;
 
 #include "Universal_System/nlpo2.h"
 #include "Universal_System/Resources/sprites.h"
-#include "Universal_System/instance_system.h"
+#include "Universal_System/Instances/instance_system.h"
 #include "Universal_System/Resources/Objects/graphics_object.h"
 #include "Universal_System/math_consts.h"
 

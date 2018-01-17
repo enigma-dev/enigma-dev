@@ -22,7 +22,7 @@
 
 #include "../General/GSsprite.h"
 #include "Universal_System/Resources/sprites_internal.h"
-#include "Universal_System/instance_system.h"
+#include "Universal_System/Instances/instance_system.h"
 #include "Universal_System/Resources/Objects/graphics_object.h"
 
 #define __GETR(x) ((x & 0x0000FF))

@@ -70,12 +70,12 @@ extern int amain();
 #include "Universal_System/image_formats.h"
 
 #include "Universal_System/Resources/object.h"
-#include "Universal_System/instance.h"
+#include "Universal_System/Instances/instance.h"
 #include "Universal_System/Resources/roomsystem.h"
 
 #include "Universal_System/globalupdate.h"
 
-#include "Universal_System/instance_system_frontend.h"
+#include "Universal_System/Instances/instance_system_frontend.h"
 
 #include "Universal_System/Resources/resource_data.h"
 #include "Universal_System/highscore_functions.h"
@@ -112,7 +112,7 @@ using namespace enigma_user;
     #include "Modes/buildmode.h"
   #endif
 
-  #include "Universal_System/instance_create.h"
+  #include "Universal_System/Instances/instance_create.h"
 #endif
 
 namespace enigma
