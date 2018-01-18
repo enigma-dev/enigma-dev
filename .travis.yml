@@ -1,3 +1,10 @@
+# by default most of our jobs will be run on a linux instance
+sudo: false
+os: linux
+dist: trusty
+compiler: gcc
+language: cpp
+
 # competition for Thundercleese
 notifications:
   irc: "chat.freenode.net#enigma"
@@ -8,13 +15,6 @@ git:
 branches:
   only:
     - "master"
-
-# by default most of our jobs will be run on a linux instance
-os: linux
-sudo: false
-dist: trusty
-compiler: gcc
-language: cpp
 
 # apt packages for linux
 addons:
