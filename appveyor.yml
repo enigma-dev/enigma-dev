@@ -29,7 +29,7 @@ environment:
 
 matrix:
   include:
-    - { COMPILER: gcc, PLATFORM: Win32, MODE: Run, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "None"}
+    - environment: { COMPILER: gcc, PLATFORM: Win32, MODE: Run, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "None"}
       before_build:
         - pacman --noconfirm -S mingw-w64-x86_64-box2d
 install:
