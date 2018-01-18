@@ -1,4 +1,3 @@
-# by default most of our jobs will be run on a linux instance
 dist: trusty
 sudo: false
 
