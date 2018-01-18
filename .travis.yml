@@ -105,6 +105,11 @@ env:
     - COMPILER=MinGW64 PLATFORM=Win32 MODE=Run GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
     # The big ol' None test.
     - COMPILER=gcc PLATFORM=None MODE=Debug GRAPHICS=None AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
+    # OSX
+    - os: osx
+      osx_image: xcode9.2
+    - COMPILER=clang PLATFORM=None MODE=Debug GRAPHICS=None AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS=None
+    - COMPILER=gcc PLATFORM=None MODE=Debug GRAPHICS=None AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS=None
 matrix:
   include:
     # Widgets
@@ -123,13 +128,6 @@ matrix:
     # Bullet Physics
     - env: COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="BulletDynamics"
       before_script: sudo apt-get -qq -y install libbullet-dev
-    # OSX
-    - os: osx
-      osx_image: xcode9.2
-      env:
-        matrix:
-          - COMPILER=clang PLATFORM=None MODE=Debug GRAPHICS=None AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS=None
-          - COMPILER=gcc PLATFORM=None MODE=Debug GRAPHICS=None AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS=None
   # don't wait for OSX
   fast_finish: true
   allow_failures:
