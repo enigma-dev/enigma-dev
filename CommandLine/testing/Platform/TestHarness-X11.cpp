@@ -150,7 +150,7 @@ int build_game(const string &game, const TestConfig &tc, const string &out) {
   using TC = TestConfig;
   string emake_cmd = "./emake";
   string mode = "--mode=" + tc.get_or(&TC::mode, "Compile");
-  string graphics = "--graphics=" + tc.get_or(&TC::graphics, "OpenGL3");
+  string graphics = "--graphics=" + tc.get_or(&TC::graphics, "OpenGL1");
   string audio = "--audio=" + tc.get_or(&TC::audio, "None");
   string widgets = "--widgets=" + tc.get_or(&TC::widgets, "None");
   string network = "--network=" + tc.get_or(&TC::network, "None");
