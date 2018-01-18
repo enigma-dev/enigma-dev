@@ -1,6 +1,6 @@
 # by default most of our jobs will be run on a linux instance
+sudo: false
 os: linux
-dist: trusty
 compiler: gcc
 language: cpp
 
