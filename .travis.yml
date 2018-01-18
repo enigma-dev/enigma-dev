@@ -13,15 +13,6 @@ before_install:
   - |
     # install general dependencies used by more than one job
     set -eo pipefail
-    
-    if [ "$TEST_HARNESS" == true ]; then
-      sudo apt-get -qq -y install cmake libgtest-dev xvfb wmctrl xdotool xfwm4;
-      pushd /usr/src/gtest;
-      sudo cmake CMakeLists.txt;
-      sudo make;
-      sudo cp *.a /usr/lib
-      popd
-    fi;
 
     if [ "$TRAVIS_OS_NAME" == "linux" ]; then
       sudo apt-get -qq -y install build-essential zlib1g-dev libboost-dev libboost-iostreams-dev\
@@ -53,6 +44,15 @@ before_install:
         sudo apt-get -qq -y install libalure-dev libvorbisfile3 libvorbis-dev libdumb1-dev;
       elif [ "$AUDIO" == "SFML" ]; then
         sudo apt-get -qq -y install libsfml-dev;
+      fi
+
+      if [ "$TEST_HARNESS" == true ]; then
+        sudo apt-get -qq -y install cmake libgtest-dev xvfb wmctrl xdotool xfwm4;
+        pushd /usr/src/gtest;
+        sudo cmake CMakeLists.txt;
+        sudo make;
+        sudo cp *.a /usr/lib
+        popd
       fi
     elif [ "$TRAVIS_OS_NAME" == "osx" ]; then
       brew upgrade gcc || brew install gcc || brew link --overwrite gcc;
