@@ -12,7 +12,7 @@ branches:
 before_install:
   - |
     # install general dependencies used by more than one job
-    set -exo pipefail
+    set -evo pipefail
 
     if [ "$TRAVIS_OS_NAME" == "linux" ]; then
       sudo apt-get -qq -y install build-essential zlib1g-dev libboost-dev libboost-iostreams-dev\
