@@ -24,8 +24,6 @@ init:
 environment:
   OUTPUT: /tmp/test.exe
   MSYS2_FC_CACHE_SKIP: yes
-  matrix:
-    # Game Modes
 
 matrix:
   include:
