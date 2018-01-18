@@ -134,8 +134,9 @@ jobs:
     - stage: OSX
       os: osx
       osx_image: xcode9.2
-    - env: COMPILER=clang PLATFORM=None MODE=Debug GRAPHICS=None AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS=None
-    - env: COMPILER=gcc PLATFORM=None MODE=Debug GRAPHICS=None AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS=None
+      env:
+        - COMPILER=clang PLATFORM=None MODE=Debug GRAPHICS=None AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS=None
+        - COMPILER=gcc PLATFORM=None MODE=Debug GRAPHICS=None AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS=None
 
 script:
   - ./ci-build.sh
