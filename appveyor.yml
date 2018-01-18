@@ -25,8 +25,33 @@ environment:
   OUTPUT: /tmp/test.exe
   MSYS2_FC_CACHE_SKIP: yes
   matrix:
-    - { COMPILER: gcc, PLATFORM: Win32, MODE: Run, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "None",
-        PACKAGES: "mingw-w64-x86_64-box2d" }
+    # Game Modes
+    - {COMPILER: gcc, PLATFORM: Win32, MODE: Run, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "None"}
+    - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "None"}
+    - {COMPILER: gcc, PLATFORM: Win32, MODE: Compile, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "None"}
+    # Graphics
+    - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D11, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "None"}
+    # Audio
+    - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: DirectSound, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "None"}
+    - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: OpenAL, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "None",
+       PACKAGES: "mingw-w64-x86_64-openal mingw-w64-x86_64-dumb mingw-w64-x86_64-libvorbis mingw-w64-x86_64-libogg mingw-w64-x86_64-flac mingw-w64-x86_64-mpg123 mingw-w64-x86_64-libsndfile" }
+    - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: SFML, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "None",
+       PACKAGES: "mingw-w64-x86_64-sfml" }
+    # Widgets
+    - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: Win32, EXTENSIONS: "None"}
+    - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: GTK+, EXTENSIONS: "None",
+       PACKAGES: "mingw-w64-x86_64-gtk2"}
+    # Extensions
+    - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "DirectShow"}
+    - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "WindowsTouch"}
+    - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "XInput"}
+    - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "MediaControlInterface"}
+    - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "Box2DPhysics",
+       PACKAGES: "mingw-w64-x86_64-box2d"}
+    - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "StudioPhysics",
+       PACKAGES: "mingw-w64-x86_64-box2d"}
+    - {COMPILER: gcc, PLATFORM: Win32, MODE: Debug, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "BulletDynamics",
+       PACKAGES: "mingw-w64-x86_64-bullet"}
 install:
   - set PATH=c:\msys64;C:\msys64\mingw64\bin;c:\msys64\usr\local\bin;c:\msys64\usr\bin;%PATH%
   - set MSYSTEM=MINGW64
