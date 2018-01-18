@@ -1,31 +1,5 @@
-dist: trusty
 sudo: false
-
-# competition for Thundercleese
-notifications:
-  irc: "chat.freenode.net#enigma"
-# disable the depth option for git allowing us to merge multiple prs simultaneously
-git:
-  depth: false
-# don't build "feature" branches
-branches:
-  only:
-    - "master"
-
-# apt packages for linux
-addons:
-  apt:
-    packages: [build-essential, zlib1g-dev, libboost-dev, libboost-iostreams-dev,
-      libboost-filesystem-dev, libboost-program-options-dev, libboost-system-dev]
-
-# build JDI and the CLI
-install:
-  - chmod +x ./ci-build.sh
-  - make -j4
-  - make -j4 emake
-  - curl -L https://github.com/fundies/enigma-libs/files/1347135/enigma-libs.zip > enigma-libs.zip
-  - unzip enigma-libs.zip -d ENIGMAsystem/
-  - mv ENIGMAsystem/Install ENIGMAsystem/Additional
+dist: trusty
 
 env:
   global:
