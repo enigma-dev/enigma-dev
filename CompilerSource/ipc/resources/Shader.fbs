@@ -1,0 +1,14 @@
+enum ShaderType : byte { GLSL, GLSLES, HLSL9, HLSL11 }
+
+table Shader {
+  name:string;
+  id:int;
+
+  type:ShaderType;
+  precompile:bool;
+
+  vertex_code:string;
+  fragment_code:string;
+}
+
+root_type Shader;

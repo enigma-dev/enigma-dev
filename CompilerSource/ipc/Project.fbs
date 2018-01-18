@@ -1,0 +1,37 @@
+include "Sprite.fbs";
+include "Sound.fbs";
+include "Background.fbs";
+include "Path.fbs";
+include "Script.fbs";
+include "Shader.fbs";
+include "Font.fbs";
+include "Timeline.fbs";
+include "Object.fbs";
+include "Room.fbs";
+
+include "GameInformation.fbs";
+//include "GameSettings.fbs";
+
+table TreeNode {
+  file_name:string;
+  is_directory:bool;
+  children:[TreeNode];
+}
+
+table Project {
+  file_name:string;
+  tree_root:TreeNode;
+
+  sprites:[Sprite];
+  sounds:[Sound];
+  backgrounds:[Background];
+  paths:[Path];
+  scripts:[Script];
+  shaders:[Shader];
+  fonts:[Font];
+  timelines:[Timeline];
+  objects:[Object];
+  rooms:[Room];
+}
+
+root_type Project;
