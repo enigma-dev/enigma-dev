@@ -9,9 +9,9 @@ branches:
   only:
     - "master"
 
-# install general dependencies used by more than one job
 before_install:
   - |
+    # install general dependencies used by more than one job
     set -ev # fail when any command returns non-zero
 
     if [ "$TRAVIS_OS_NAME" == "linux" ]; then
