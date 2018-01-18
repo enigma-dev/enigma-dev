@@ -25,8 +25,8 @@ environment:
   OUTPUT: /tmp/test.exe
   MSYS2_FC_CACHE_SKIP: yes
   matrix:
-    - { COMPILER: gcc, PLATFORM: Win32, MODE: Run, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "None"}
-      before_build: pacman --noconfirm -S mingw-w64-x86_64-box2d
+    - { COMPILER: gcc, PLATFORM: Win32, MODE: Run, GRAPHICS: Direct3D9, AUDIO: None, COLLISION: None, NETWORK: None, WIDGETS: None, EXTENSIONS: "None",
+        PACKAGES: "mingw-w64-x86_64-box2d" }
 install:
   - set PATH=c:\msys64;C:\msys64\mingw64\bin;c:\msys64\usr\local\bin;c:\msys64\usr\bin;%PATH%
   - set MSYSTEM=MINGW64
@@ -37,8 +37,7 @@ install:
   - set MINGW_PREFIX=/mingw64
   - set MINGW_CHOST=x86_64-w64-mingw32
   - set PKG_CONFIG_PATH=/mingw64/lib/pkgconfig:/mingw64/share/pkgconfig
-  - >
-    pacman --noconfirm -S mingw-w64-x86_64-boost
+  - pacman --noconfirm -S mingw-w64-x86_64-boost %PACKAGES%
   - gcc -v
   - ps: |
       If ($env:APPVEYOR_JOB_NUMBER -eq 1) {
