@@ -70,6 +70,12 @@ dist: trusty
 compiler: gcc
 language: cpp
 
+# by default most of our jobs will be run on a linux instance
+os: linux
+dist: trusty
+compiler: gcc
+language: cpp
+
 env:
   global:
     - OUTPUT=/tmp/test
