@@ -219,9 +219,9 @@ namespace enigma
   temp_event_scope::temp_event_scope(object_basic* ninst)
       : oinst(instance_event_iterator->inst),
         oiter(instance_event_iterator),
-        prev_other(instance_other) {
-    instance_event_iterator = &dummy_event_iterator;
-    instance_event_iterator->inst = ninst;
+        prev_other(instance_other),
+        niter(ninst, NULL, NULL) {
+    instance_event_iterator = &niter;
     instance_other = ninst;
   }
   temp_event_scope::~temp_event_scope() {
