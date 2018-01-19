@@ -1,6 +1,6 @@
 SOURCES += $(wildcard Networking_Systems/BerkeleySockets/*.cpp)
 ifeq ($(PLATFORM), Win32)
-	LDLIBS += -lws2_32
+	override LDLIBS += -lws2_32
 else
-	LDLIBS += -lcurl 
+	override LDLIBS += -lcurl 
 endif

@@ -1,11 +1,11 @@
 SOURCES += $(wildcard Graphics_Systems/OpenGL3/*.cpp) $(wildcard Graphics_Systems/General/*.cpp) Graphics_Systems/General/glew.c
 
 ifeq ($(PLATFORM), Win32)
-	LDLIBS += -lopengl32 -lglu32
+	override LDLIBS += -lopengl32 -lglu32
 else ifeq ($(PLATFORM), xlib)
-	LDLIBS += -lGL -lGLU
+	override LDLIBS += -lGL -lGLU
 else ifeq ($(PLATFORM), Cocoa)
-	LDLIBS += -framework OpenGL
+	override LDLIBS += -framework OpenGL
 endif
 
 #$(OBJDIR)/Graphics_Systems/OpenGL3/glew.o: Graphics_Systems/OpenGL3/glew.c
