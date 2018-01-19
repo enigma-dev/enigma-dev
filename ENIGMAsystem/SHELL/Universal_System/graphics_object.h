@@ -45,19 +45,28 @@ namespace enigma
     depthv();
     ~depthv();
   };
+  struct image_indexv: multifunction_variant {
+    INHERIT_OPERATORS(image_indexv)
+    double *image_single, *image_speed;
+    void function(variant oldval);
+  };
+  struct image_speedv: multifunction_variant {
+    INHERIT_OPERATORS(image_speedv)
+    double *image_index, *image_single;
+    void function(variant oldval);
+  };
+  struct image_singlev: multifunction_variant {
+    INHERIT_OPERATORS(image_singlev)
+    double *image_index, *image_speed;
+    void function(variant oldval);
+  };
   struct object_graphics: object_timelines
   {
     //Sprites: these are mostly for higher tiers...
       int sprite_index;
-      gs_scalar image_index;
-      struct {
-        object_graphics* parent;
-        gs_scalar value() const { return parent->image_speed ? -1 : parent->image_index; }
-        void operator= (gs_scalar v) { parent->image_index = v; parent->image_speed = 0; }
-        operator gs_scalar() const { return value(); }
-        operator var() const { return var(value()); }
-      } image_single;
-      gs_scalar image_speed;
+      image_indexv  image_index;
+      image_speedv  image_speed;
+      image_singlev image_single;
 
       //Depth
       enigma::depthv  depth;

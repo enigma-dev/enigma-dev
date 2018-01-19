@@ -30,10 +30,20 @@
 namespace enigma
 {
   object_graphics::object_graphics() {
-    image_single.parent = this;
+    image_index .image_speed  = &image_speed .rval.d;
+    image_index .image_single = &image_single.rval.d;
+    image_speed .image_index  = &image_index .rval.d;
+    image_speed .image_single = &image_single.rval.d;
+    image_single.image_index  = &image_index .rval.d;
+    image_single.image_speed  = &image_speed .rval.d;
   }
   object_graphics::object_graphics(unsigned _x, int _y): object_timelines(_x,_y) {
-    image_single.parent = this;
+    image_index .image_speed  = &image_speed .rval.d;
+    image_index .image_single = &image_single.rval.d;
+    image_speed .image_index  = &image_index .rval.d;
+    image_speed .image_single = &image_single.rval.d;
+    image_single.image_index  = &image_index .rval.d;
+    image_single.image_speed  = &image_speed .rval.d;
   }
   object_graphics::~object_graphics() {}
   
@@ -74,6 +84,19 @@ namespace enigma
 
   depthv::depthv() : myiter(0) {}
   depthv::~depthv() {}
+
+  void image_indexv::function(variant) {
+    *image_single = *image_speed == 0 ? rval.d : -1;
+  }
+
+  void image_speedv::function(variant) {
+    *image_single = rval.d == 0 ? *image_index : -1;
+  }
+
+  void image_singlev::function(variant) {
+    *image_index = rval.d;
+    *image_speed = 0;
+  }
 
   int object_graphics::$sprite_width()  const { return sprite_index == -1? 0 : enigma_user::sprite_get_width(sprite_index)*image_xscale; }
   int object_graphics::$sprite_height() const { return sprite_index == -1? 0 : enigma_user::sprite_get_height(sprite_index)*image_yscale; }
