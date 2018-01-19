@@ -1,2 +1,2 @@
 SOURCES += $(wildcard Universal_System/Extensions/DirectShow/*.cpp) 
-LDLIBS += -lstrmiids -lole32
+override LDLIBS += -lstrmiids -lole32
