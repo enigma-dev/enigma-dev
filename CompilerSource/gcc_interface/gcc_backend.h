@@ -30,41 +30,41 @@
 #define GCC_BACKEND_H
 #include "general/parse_basics_old.h"
 
-extern string MAKE_flags, MAKE_paths, MAKE_tcpaths, MAKE_location, TOPLEVEL_cflags, TOPLEVEL_cppflags, TOPLEVEL_cxxflags, TOPLEVEL_links, TOPLEVEL_rcflags, CXX_override, CC_override, WINDRES_location, TOPLEVEL_ldflags;
+extern string MAKE_flags, MAKE_paths, MAKE_tcpaths, MAKE_location, TOPLEVEL_cflags, TOPLEVEL_cppflags,
+    TOPLEVEL_cxxflags, TOPLEVEL_rcflags, CXX_override, CC_override, WINDRES_location, TOPLEVEL_ldflags,
+    TOPLEVEL_ldlibs;
 
-inline string fc(const char* fn)
-{
-    FILE *pt = fopen(fn,"rb");
-    if (pt==NULL) return "";
-    else {
-      fseek(pt,0,SEEK_END);
-      size_t sz = ftell(pt);
-      fseek(pt,0,SEEK_SET);
+inline string fc(const char* fn) {
+  FILE* pt = fopen(fn, "rb");
+  if (pt == NULL)
+    return "";
+  else {
+    fseek(pt, 0, SEEK_END);
+    size_t sz = ftell(pt);
+    fseek(pt, 0, SEEK_SET);
 
-      char a[sz+1];
-      sz = fread(a,1,sz,pt);
-      fclose(pt);
+    char a[sz + 1];
+    sz = fread(a, 1, sz, pt);
+    fclose(pt);
 
-      a[sz] = 0;
-      return a;
-    }
+    a[sz] = 0;
+    return a;
+  }
 }
 
-inline int rdir_system(string x, string y)
-{
-  return system((x + " " + y).c_str());
-}
+inline int rdir_system(string x, string y) { return system((x + " " + y).c_str()); }
 
 static inline vector<string> explode(string n) {
   vector<string> ret;
   size_t pos = 0, epos;
   while (is_useless(n[pos])) pos++;
-  for (epos = n.find(','); epos != string::npos; epos = n.find(',',pos)) {
-    ret.push_back(n.substr(pos,epos-pos));
-    pos = epos; while (is_useless(n[++pos]));
+  for (epos = n.find(','); epos != string::npos; epos = n.find(',', pos)) {
+    ret.push_back(n.substr(pos, epos - pos));
+    pos = epos;
+    while (is_useless(n[++pos]))
+      ;
   }
-  if (n.length() > pos)
-    ret.push_back(n.substr(pos));
+  if (n.length() > pos) ret.push_back(n.substr(pos));
   return ret;
 }
 
@@ -73,6 +73,5 @@ inline string tolower(string x) {
     if (x[i] >= 'A' and x[i] <= 'Z') x[i] -= 'A' - 'a';
   return x;
 }
-
 
 #endif
