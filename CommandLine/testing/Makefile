@@ -2,7 +2,6 @@ BINARY := ../../test-runner
 SRC_DIR := .
 OBJ_DIR := .eobjs
 TESTCASES_DIR := $(SRC_DIR)/Tests
-EMAKE := ../../emake
 
 OS := $(shell uname -s)
 ifeq ($(OS), Linux)
@@ -44,10 +43,3 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp | obj_dirs
 # Include rules for known (previously-built) files
 -include $(DEPENDS)
 .SUFFIXES:
-
-# ==============================================================================
-# == CUSTOM RULES ==============================================================
-# ==============================================================================
-
-$(EMAKE):
-	$(MAKE) -C $(dir $(EMAKE)) $(notdir $(EMAKE))
