@@ -164,6 +164,7 @@ script:
       Xvfb :1 -screen 0 1024x768x24 &
       xfwm4 &
       ./test-runner
+      bash <(curl -s https://codecov.io/bash) -f "*.info"
     else
       ./ci-build.sh
     fi
