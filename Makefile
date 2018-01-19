@@ -1,6 +1,6 @@
 PATH := $(eTCpath)$(PATH)
 
-.PHONY: ENIGMA clean Game clean-game
+.PHONY: ENIGMA clean Game clean-game .FORCE
 
 ENIGMA:
 	$(MAKE) -C CompilerSource 
@@ -14,10 +14,10 @@ Game:
 clean-game:
 	$(MAKE) -C ENIGMAsystem/SHELL clean
 	
-emake:
+emake: .FORCE
 	$(MAKE) -C CommandLine/emake/
 
-test-runner:
+test-runner: emake .FORCE
 	$(MAKE) -C CommandLine/testing/
 
-
+.FORCE:
