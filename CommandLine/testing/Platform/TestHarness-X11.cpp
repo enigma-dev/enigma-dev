@@ -16,6 +16,8 @@ using std::to_string;
 using std::unique_ptr;
 using std::getenv;
 
+void gather_coverage();
+
 string get_window_caption(Display *disp, Window win) {
   char *caption;
   XFetchName(disp, win, &caption);
@@ -118,12 +120,15 @@ class X11_TestHarness final: public TestHarness {
   void wait() final {
     usleep(250000);
   }
-  X11_TestHarness(Display *disp, pid_t game_pid, Window game_window):
-      pid(game_pid), window_id(game_window), display(disp) {}
+  X11_TestHarness(Display *disp, pid_t game_pid, Window game_window, bool lcov):
+      pid(game_pid), window_id(game_window), display(disp), run_lcov(lcov) {}
   ~X11_TestHarness() {
     if (game_is_running()) {
       kill(pid, SIGKILL);
       std::cerr << "Game still running; killed" << std::endl;
+    }
+    if (run_lcov) {
+      gather_coverage();
     }
   }
 
@@ -131,6 +136,7 @@ class X11_TestHarness final: public TestHarness {
   pid_t pid;
   Window window_id;
   Display *display;
+  bool run_lcov;
   int return_code = 0x10000;
 };
 
@@ -138,7 +144,6 @@ constexpr const char *kDefaultExtensions =
     "Paths,DateTime,DataStructures,MotionPlanning,Alarms,Timelines,"
     "ParticleSystems";
 
-static int testNumber = 1;
 int build_game(const string &game, const TestConfig &tc, const string &out) {
   if (pid_t emake = fork()) {
     int status = 0;
@@ -178,29 +183,53 @@ int build_game(const string &game, const TestConfig &tc, const string &out) {
   };
 
   execvp(emake_cmd.c_str(), (char**) args);
-  
-  if (compiler == "--compiler=TestHarness")
-  {
-      string srcDir = "--directory=" + string(getenv("HOME")) + "/.enigma/.eobjs/Linux/Linux/TestHarness/Debug";
-      string outFile = "--output-file=coverage_" + to_string(testNumber) + ".info";
-      
-      const char *const lcovArgs[] = {
-        "lcov",
-        "--quiet",
-        "--no-external",
-        "--base-directory=ENIGMAsystem/SHELL/",
-        "--capture",
-        srcDir.c_str(),
-        outFile.c_str(),
-        nullptr
-      };
-      
-      execvp("lcov", (char**) lcovArgs);
-      
-      testNumber++;
-  }
-  
   abort();
+}
+
+void gather_coverage() {
+  static int test_num = 0;
+  test_num++;
+
+  pid_t child = fork();
+  if (child) {
+    if (child == -1) {
+      std::cerr << "Coverage failed to execute for test " << test_num << "!\n";
+      return;
+    }
+    int status = -1;
+    if (waitpid(child, &status, 0) == -1) {
+      std::cerr << "Waiting on coverage report for test " << test_num
+                << " somehow failed..." << std::endl;
+      return;
+    }
+    if (WIFEXITED(status)) {
+      int code = WEXITSTATUS(status);
+      if (code) {
+        std::cerr << "LCOV run for test " << test_num << " exited with status "
+                  << code << "..." << std::endl;
+      }
+      std::cout << "Coverage completed successfully for test " << test_num
+                << '.' << std::endl;
+    }
+    return;
+  }
+
+  string src_dir = "--directory=" + string(getenv("HOME"))
+                 + "/.enigma/.eobjs/Linux/Linux/TestHarness/Debug";
+  string out_file = "--output-file=coverage_" + to_string(test_num) + ".info";
+
+  const char *const lcovArgs[] = {
+    "lcov",
+    "--quiet",
+    "--no-external",
+    "--base-directory=ENIGMAsystem/SHELL/",
+    "--capture",
+    src_dir.c_str(),
+    out_file.c_str(),
+    nullptr
+  };
+
+  execvp("lcov", (char**) lcovArgs);
 }
 
 }  // namespace
@@ -222,7 +251,10 @@ unique_ptr<TestHarness> launch(const string &game, const TestConfig &tc) {
 
   pid_t pid = fork();
   if (!pid) execl(out.c_str(), out.c_str(), nullptr);
+  if (pid == -1) return nullptr;
   usleep(250000); // Give the window a quarter second to load and display.
+
+  bool gen_cov_report = tc.compiler.empty() || tc.compiler == "TestHarness";
 
   Display *display = XOpenDisplay(0);
   Window root = XDefaultRootWindow(display);
@@ -230,7 +262,7 @@ unique_ptr<TestHarness> launch(const string &game, const TestConfig &tc) {
     Window win = find_window_by_pid(display, root, pid);
     if (win != None)
       return std::unique_ptr<X11_TestHarness>(
-          new X11_TestHarness(display, pid, win));
+          new X11_TestHarness(display, pid, win, gen_cov_report));
     usleep(250000);
   }
 
