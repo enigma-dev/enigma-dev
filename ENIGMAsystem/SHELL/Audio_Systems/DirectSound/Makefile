@@ -1,2 +1,2 @@
 SOURCES += $(wildcard Audio_Systems/DirectSound/*.cpp)
-LDLIBS += -ldsound -ldxguid -lwinmm
+override LDLIBS += -ldsound -ldxguid -lwinmm
