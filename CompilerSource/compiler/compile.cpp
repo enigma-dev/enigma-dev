@@ -118,7 +118,8 @@ inline void write_desktop_entry(const std::string fPath, const GameSettings& gam
   #endif
 }
 
-inline void write_exe_info(const std::string makedir, const EnigmaStruct *es) {
+inline void write_exe_info(const std::string makedir, const EnigmaStruct *es)
+{
   std::ofstream wto;
   GameSettings gameSet = es->gameSettings;
 
