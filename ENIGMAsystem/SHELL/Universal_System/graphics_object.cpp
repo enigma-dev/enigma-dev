@@ -29,8 +29,14 @@
 
 namespace enigma
 {
-  object_graphics::object_graphics() {}
-  object_graphics::object_graphics(unsigned _x, int _y): object_timelines(_x,_y) {}
+  object_graphics::object_graphics() {
+    image_single.image_index = &image_index;
+    image_single.image_speed = &image_speed;
+  }
+  object_graphics::object_graphics(unsigned _x, int _y): object_timelines(_x,_y) {
+    image_single.image_index = &image_index;
+    image_single.image_speed = &image_speed;
+  }
   object_graphics::~object_graphics() {}
   
   variant object_graphics::myevent_draw()      { return 0; }
@@ -70,6 +76,15 @@ namespace enigma
 
   depthv::depthv() : myiter(0) {}
   depthv::~depthv() {}
+
+  void image_singlev::function(variant) {
+    if (rval.d == -1) {
+      *image_speed = 1;
+    } else {
+      *image_index = rval.d;
+      *image_speed = 0;
+    }
+  }
 
   int object_graphics::$sprite_width()  const { return sprite_index == -1? 0 : enigma_user::sprite_get_width(sprite_index)*image_xscale; }
   int object_graphics::$sprite_height() const { return sprite_index == -1? 0 : enigma_user::sprite_get_height(sprite_index)*image_yscale; }
