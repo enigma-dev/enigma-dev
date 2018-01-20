@@ -94,8 +94,12 @@ namespace enigma
   }
 
   void image_singlev::function(variant) {
-    *image_index = rval.d;
-    *image_speed = 0;
+    if (rval.d == -1) {
+      *image_speed = 1;
+    } else {
+      *image_index = rval.d;
+      *image_speed = 0;
+    }
   }
 
   int object_graphics::$sprite_width()  const { return sprite_index == -1? 0 : enigma_user::sprite_get_width(sprite_index)*image_xscale; }
