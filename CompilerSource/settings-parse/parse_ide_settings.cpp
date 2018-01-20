@@ -149,8 +149,8 @@ void parse_ide_settings(const char* eyaml)
     make_directory = "%HOME%/.enigma/";
   #endif
   }
-
-  //Now actually set it, taking backslashes into account.
+  
+//Now actually set it, taking backslashes into account.
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
 	setMakeDirectory(myReplace(escapeEnv(make_directory), "\\","/"));
 #else

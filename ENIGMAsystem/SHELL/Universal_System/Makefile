@@ -1,3 +1,3 @@
 SOURCES += $(wildcard Universal_System/*.cpp)
-LDLIBS += -lz
+override LDLIBS += -lz
 CLEANDEPS += $(OBJDIR)/Universal_System/loading.o

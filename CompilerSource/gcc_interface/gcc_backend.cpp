@@ -46,7 +46,8 @@ using namespace std;
 bool init_found_gcc = false;
 bool init_load_successful = false;
 
-string MAKE_flags, MAKE_paths, MAKE_tcpaths, MAKE_location, TOPLEVEL_cflags, TOPLEVEL_cppflags, TOPLEVEL_cxxflags, TOPLEVEL_links, TOPLEVEL_rcflags, CXX_override, CC_override, WINDRES_location, TOPLEVEL_ldflags;
+string MAKE_flags, MAKE_paths, MAKE_tcpaths, MAKE_location, TOPLEVEL_cflags, TOPLEVEL_cppflags, TOPLEVEL_cxxflags,
+    TOPLEVEL_rcflags, CXX_override, CC_override, WINDRES_location, TOPLEVEL_ldflags, TOPLEVEL_ldlibs;
 
 #include "OS_Switchboard.h"
 #include "settings-parse/eyaml.h"
@@ -144,11 +145,11 @@ const char* establish_bearings(const char *compiler)
   TOPLEVEL_cflags = compey.get("cflags");
   TOPLEVEL_cppflags = compey.get("cppflags");
   TOPLEVEL_cxxflags = compey.get("cxxflags");
-  TOPLEVEL_links = compey.get("links");
   CXX_override = compey.get("cxx");
   CC_override = compey.get("cc");
   WINDRES_location = compey.get("windres");
   TOPLEVEL_ldflags = compey.get("ldflags");
+  TOPLEVEL_ldlibs = compey.get("ldlibs");
   TOPLEVEL_rcflags = compey.get("rcflags");
 
   /* Get a list of all macros defined by our compiler.
