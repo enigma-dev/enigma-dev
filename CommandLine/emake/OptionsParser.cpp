@@ -97,6 +97,7 @@ OptionsParser::OptionsParser() : _desc("Options")
     ("output,o", opt::value<std::string>()->required(), "Output executable file")
     ("platform,p", opt::value<std::string>()->default_value(def_platform), "Target Platform (XLib, Win32, Cocoa)")
     ("workdir,w", opt::value<std::string>()->default_value(def_workdir), "Working Directory")
+    ("codegen,k", opt::value<std::string>()->default_value(def_workdir), "Codegen Directory")
     ("mode,m", opt::value<std::string>()->default_value("Debug"), "Game Mode (Run, Release, Debug, Design)")
     ("graphics,g", opt::value<std::string>()->default_value("OpenGL1"), "Graphics System (OpenGL1, OpenGL3, DirectX)")
     ("audio,a", opt::value<std::string>()->default_value("None"), "Audio System (OpenAL, DirectSound, SFML, None)")
@@ -113,6 +114,7 @@ OptionsParser::OptionsParser() : _desc("Options")
   _handler["info"] = std::bind(&OptionsParser::printInfo, this, std::placeholders::_1);
   _handler["output"] = std::bind(&OptionsParser::output, this, std::placeholders::_1);
   _handler["workdir"] = std::bind(&OptionsParser::workdir, this, std::placeholders::_1);
+  _handler["codegen"] = std::bind(&OptionsParser::codegen, this, std::placeholders::_1);
   _handler["mode"] = std::bind(&OptionsParser::mode, this, std::placeholders::_1);
   _handler["graphics"] = std::bind(&OptionsParser::graphics, this, std::placeholders::_1);
   _handler["audio"] = std::bind(&OptionsParser::audio, this, std::placeholders::_1);
@@ -194,6 +196,7 @@ std::string OptionsParser::APIyaml()
   yaml += "sample-lots-of-radios: 0\n";
   yaml += "inherit-equivalence-from: 0\n";
   yaml += "make-directory: " + _rawArgs["workdir"].as<std::string>() + "\n";
+  yaml += "codegen-directory: " + _rawArgs["codegen"].as<std::string>() + "\n";
   yaml += "sample-checkbox: on\n";
   yaml += "sample-edit: DEADBEEF\n";
   yaml += "sample-combobox: 0\n";
@@ -364,6 +367,11 @@ int OptionsParser::parse(const std::string &str)
 int OptionsParser::workdir(const std::string &str)
 {
   //set workdir
+  return OPTIONS_SUCCESS;
+}
+
+int OptionsParser::codegen(const std::string &str)
+{
   return OPTIONS_SUCCESS;
 }
 

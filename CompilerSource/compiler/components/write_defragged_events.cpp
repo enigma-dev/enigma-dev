@@ -62,7 +62,7 @@ int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
     }
   }
 
-  ofstream wto((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_evparent.h").c_str());
+  ofstream wto((codegen_directory +"Preprocessor_Environment_Editable/IDE_EDIT_evparent.h").c_str());
   wto << license;
 
   //Write timeline/moment names. Timelines are like scripts, but we don't have to worry about arguments or return types.
@@ -145,7 +145,7 @@ int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
   /* Now we write the actual event sequence code, as
   ** well as an initializer function for the whole system.
   ***************************************************************/
-  wto.open((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_events.h").c_str());
+  wto.open((codegen_directory +"Preprocessor_Environment_Editable/IDE_EDIT_events.h").c_str());
   wto << license;
   wto << "namespace enigma" << endl << "{" << endl;
 

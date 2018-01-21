@@ -70,14 +70,6 @@ extern const char* establish_bearings(const char *compiler);
 
 #include "makedir.h"
 
-dllexport void libSetMakeDirectory(const char* dir) {
-#if CURRENT_PLATFORM_ID == OS_WINDOWS
-	setMakeDirectory(myReplace(escapeEnv(dir), "\\","/"));
-#else
-	setMakeDirectory(escapeEnv(dir));
-#endif
-}
-
 dllexport const char* libInit(EnigmaCallbacks* ecs)
 {
   if (ecs)

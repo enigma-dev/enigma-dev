@@ -36,6 +36,7 @@ private:
   int output(const std::string &str);
   int mode(const std::string &str);
   int workdir(const std::string &str);
+  int codegen(const std::string &str);
   int parse(const std::string &str);
 
   int graphics(const std::string &str);
