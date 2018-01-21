@@ -230,6 +230,7 @@ void gather_coverage() {
   };
 
   execvp("lcov", (char**) lcovArgs);
+  abort();
 }
 
 }  // namespace
