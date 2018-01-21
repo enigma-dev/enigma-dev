@@ -28,6 +28,7 @@ int EnigmaPlugin::Init()
   // Load Plugin
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
 #	define dlopen(x, y) LoadLibrary(x)
+#define dlerror() "Can't be arsed to implement windows errors" //FIXME
   std::string extension = ".dll";
   std::string prefix = "";
 #elif CURRENT_PLATFORM_ID ==  OS_MACOSX

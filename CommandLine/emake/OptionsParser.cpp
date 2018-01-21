@@ -195,8 +195,8 @@ std::string OptionsParser::APIyaml()
   yaml += "treat-literals-as: 0\n";
   yaml += "sample-lots-of-radios: 0\n";
   yaml += "inherit-equivalence-from: 0\n";
-  yaml += "make-directory: " + _rawArgs["workdir"].as<std::string>() + "\n";
-  yaml += "codegen-directory: " + _rawArgs["codegen"].as<std::string>() + "\n";
+  yaml += "make-directory: " + boost::filesystem::absolute(_rawArgs["workdir"].as<std::string>()).string() + "\n";
+  yaml += "codegen-directory: " + boost::filesystem::absolute(_rawArgs["codegen"].as<std::string>()).string() + "\n";
   yaml += "sample-checkbox: on\n";
   yaml += "sample-edit: DEADBEEF\n";
   yaml += "sample-combobox: 0\n";
