@@ -1,7 +1,6 @@
 %e-yaml
 ---
 Name: TestHarness (GCC Coverage for use in travis-ci)
-Native: Yes
 Maintainer: cheeseboy
 Target-platform: Linux
 
