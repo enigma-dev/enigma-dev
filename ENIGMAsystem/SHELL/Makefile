@@ -79,7 +79,7 @@ endif
 
 # CPPFLAGS needs these include dirs unconditionally
 override CPPFLAGS += $(SYSTEMS:%=-I%/Info)
-override CPPFLAGS += -I. -I${WORKDIR}
+override CPPFLAGS += -I. -I$(CODEGEN)
 
 .PHONY: all clean
 

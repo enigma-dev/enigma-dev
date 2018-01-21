@@ -145,6 +145,7 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
     make += " clean-game ";
   	make += "COMPILEPATH=\"" + compilepath + "\" ";
   	make += "WORKDIR=\"" + make_directory + "\" ";
+    make += "CODEGEN=\"" + codegen_directory + "\" ";
   	make += "eTCpath=\"" + MAKE_tcpaths + "\"";
 
   	edbg << "Full command line: " << MAKE_location << " " << make << flushl;
@@ -595,6 +596,7 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
 
   make += " Game ";
   make += "WORKDIR=\"" + make_directory + "\" ";
+  make += "CODEGEN=\"" + codegen_directory + "\" ";
   make += mode == emode_debug? "GMODE=Debug ": mode == emode_design? "GMODE=Design ": mode == emode_compile?"GMODE=Compile ": "GMODE=Run ";
   make += "GRAPHICS=" + extensions::targetAPI.graphicsSys + " ";
   make += "AUDIO=" + extensions::targetAPI.audioSys + " ";

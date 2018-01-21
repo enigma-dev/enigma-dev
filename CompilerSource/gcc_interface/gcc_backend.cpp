@@ -151,6 +151,8 @@ const char* establish_bearings(const char *compiler)
   TOPLEVEL_ldflags = compey.get("ldflags");
   TOPLEVEL_ldlibs = compey.get("ldlibs");
   TOPLEVEL_rcflags = compey.get("rcflags");
+  
+  e_execs("make", "CODEGEN=" + codegen_directory, "codegen");
 
   /* Get a list of all macros defined by our compiler.
   ** These will help us through parsing available libraries.

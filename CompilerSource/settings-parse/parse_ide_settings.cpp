@@ -137,7 +137,7 @@ void parse_ide_settings(const char* eyaml)
   setting::keyword_blacklist = settree.get("keyword-blacklist").toString();
 
   // Use a platform-specific make directory.
-  std::string make_directory = settree.get("make-directory").toString();
+  make_directory = settree.get("make-directory").toString();
   
   if (make_directory.empty())
   {
@@ -148,7 +148,7 @@ void parse_ide_settings(const char* eyaml)
   #endif
   }
   
-  std::string codegen_directory = settree.get("codegen-directory").toString();
+  codegen_directory = settree.get("codegen-directory").toString();
   
   if (codegen_directory.empty())
     codegen_directory = make_directory;
@@ -161,6 +161,12 @@ void parse_ide_settings(const char* eyaml)
   make_directory = escapeEnv(make_directory);
   codegen_directory = escapeEnv(codegen_directory);
 #endif
+
+  if (make_directory.back() != '/')
+    make_directory += '/';
+    
+  if (codegen_directory.back() != '/')
+    codegen_directory += '/';
 
   //ide_dia_open();
 

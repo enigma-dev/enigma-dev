@@ -55,3 +55,6 @@ string escapeEnv(string str) {
 	escaped = escapeEnv(escaped, "HOME");
 	return escaped;
 }
+
+std::string make_directory;
+std::string codegen_directory;
