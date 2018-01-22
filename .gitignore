@@ -34,6 +34,7 @@ hs_err_pid*.log
 *.d
 *.db
 *.depend
+*.gch
 *.so
 *.dll
 *.dylib
