@@ -45,6 +45,25 @@
 #include <cstdlib> // random()
 #include <string>
 
+namespace enigma {
+  template<typename T> struct SIntType {};
+  template<> struct SIntType<int8_t>  { typedef int16_t T; };
+  template<> struct SIntType<int16_t> { typedef int16_t T; };
+  template<> struct SIntType<int32_t> { typedef int32_t T; };
+  template<> struct SIntType<int64_t> { typedef int64_t T; };
+
+  template<typename T> struct UIntType {};
+  template<> struct UIntType<uint8_t>  { typedef uint16_t T; };
+  template<> struct UIntType<uint16_t> { typedef uint16_t T; };
+  template<> struct UIntType<uint32_t> { typedef uint32_t T; };
+  template<> struct UIntType<uint64_t> { typedef uint64_t T; };
+
+  template<typename T> struct FloatType {};
+  template<> struct FloatType<float>       { typedef float T; };
+  template<> struct FloatType<double>      { typedef double T; };
+  template<> struct FloatType<long double> { typedef long double T; };
+}
+
 namespace enigma_user
 {
   const ma_scalar pi = M_PI;
@@ -52,14 +71,16 @@ namespace enigma_user
   // Overloading
   // TODO: Once the user space switch to namespace enigma_user has been made,
   // remove these functions.
-  ma_scalar abs(const variant& x);
-  ma_scalar abs(const var& x);
+  template<typename T> typename enigma::SIntType<T>::T abs(T x)  { return ::abs(x); }
+  template<typename T> typename enigma::UIntType<T>::T abs(T x)  { return x; }
+  template<typename T> typename enigma::FloatType<T>::T abs(T x) { return ::fabs(x); }
+  static inline double abs(const variant& x) { return ::fabs(ma_scalar(x)); }
+  static inline double abs(const var& x)     { return ::fabs(ma_scalar(x)); }
 
   // Functions
 
   // TODO: Once the user space switch to namespace enigma_user has been made,
   // comment in all these functions.
-  inline ma_scalar abs(double x)   { return ::fabs(x); }
   //inline ma_scalar ceil(ma_scalar x)  { return ::ceil(x); }
   //inline ma_scalar floor(ma_scalar x) { return ::floor(x); }
   //inline ma_scalar round(ma_scalar x) { return ::round(x); }
