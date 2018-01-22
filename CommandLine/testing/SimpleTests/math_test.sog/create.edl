@@ -1,0 +1,23 @@
+float f = (float) -.5;
+double d = -.5;
+// long double ld = -.5;
+int i = -30;
+unsigned u = 30;
+long l = -60;
+unsigned lu = 60;
+variant v = -120;
+var a = -150;
+
+cons_show_message("Test start!");
+gtest_assert_eq(abs(f),  -f);
+gtest_assert_eq(abs(d),  -d);
+// gtest_assert_eq(abs(ld), -ld);
+gtest_assert_eq(abs(i),  -i);
+gtest_assert_eq(abs(l),  -l);
+gtest_assert_eq(abs(u),   u);
+gtest_assert_eq(abs(lu),  lu);
+gtest_assert_eq(abs(v),  -v);
+gtest_assert_eq(abs(a),  -a);
+cons_show_message("Test end!");
+
+game_end();
