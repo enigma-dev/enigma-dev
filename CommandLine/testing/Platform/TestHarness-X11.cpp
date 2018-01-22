@@ -104,6 +104,10 @@ class X11_TestHarness final: public TestHarness {
         return_code = WEXITSTATUS(status);
         return false;
       }
+      if (kill(pid, 0)) {
+        return_code = ErrorCodes::GAME_CRASHED;
+        return false;
+      }
     }
     return !kill(pid, 0);
   }
@@ -115,6 +119,7 @@ class X11_TestHarness final: public TestHarness {
     }
     std::cerr << "Warning: game did not close; terminated" << std::endl;
     kill(pid, SIGTERM);
+    return_code = ErrorCodes::TIMED_OUT;
   }
 
   void wait() final {
@@ -239,7 +244,8 @@ bool TestHarness::windowing_supported() {
   return true;
 }
 
-unique_ptr<TestHarness> launch(const string &game, const TestConfig &tc) {
+unique_ptr<TestHarness>
+TestHarness::launch_and_attach(const string &game, const TestConfig &tc) {
   string out = "/tmp/test-game";
   if (int retcode = build_game(game, tc, out)) {
     if (retcode != -1) {
@@ -251,7 +257,10 @@ unique_ptr<TestHarness> launch(const string &game, const TestConfig &tc) {
   }
 
   pid_t pid = fork();
-  if (!pid) execl(out.c_str(), out.c_str(), nullptr);
+  if (!pid) {
+    execl(out.c_str(), out.c_str(), nullptr);
+    abort();
+  }
   if (pid == -1) return nullptr;
   usleep(250000); // Give the window a quarter second to load and display.
 
@@ -268,4 +277,46 @@ unique_ptr<TestHarness> launch(const string &game, const TestConfig &tc) {
   }
 
   return nullptr;
+}
+
+constexpr int operator"" _million(unsigned long long x) {
+  return x * 1000 * 1000;
+}
+
+int TestHarness::run_to_completion(const string &game, const TestConfig &tc) {
+  string out = "/tmp/test-game";
+  if (int retcode = build_game(game, tc, out)) {
+    if (retcode != -1) {
+      std::cerr << "Failed to run emake." << std::endl;
+    } else {
+      std::cerr << "emake returned " << retcode << "; abort" << std::endl;
+    }
+    return ErrorCodes::BUILD_FAILED;
+  }
+
+  pid_t pid = fork();
+  if (!pid) {
+    execl(out.c_str(), out.c_str(), nullptr);
+    abort();
+  }
+  if (pid == -1) {
+    return ErrorCodes::LAUNCH_FAILED;
+  }
+  for (int i = 0; i < 30000000; i += 12500) {
+    int status = 0, wr = waitpid(pid, &status, WNOHANG);
+    if (wr) {
+      if (wr != -1) {
+        if (WIFEXITED(status)) {
+          return WEXITSTATUS(status);
+        }
+        return ErrorCodes::GAME_CRASHED;
+      }
+      // Ignore the error for now...
+      std::cerr << "Warning: ignoring waitpid being dumb." << std::endl;
+    }
+    usleep(12500);
+  }
+  std::cerr << "ERROR: game still running after 30 seconds; killed" << std::endl;
+  kill(pid, SIGKILL);  // We're not dicking around with this.
+  return ErrorCodes::TIMED_OUT;
 }

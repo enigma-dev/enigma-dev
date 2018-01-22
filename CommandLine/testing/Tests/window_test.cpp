@@ -3,7 +3,7 @@
 
 TEST(Game, window_test) {
   if (!TestHarness::windowing_supported()) return;
-  auto test_harness = launch(kGamesDir + "window_test.sog", TestConfig());
+  auto test_harness = LAUNCH_HARNESS_FOR_SOG(TestConfig());
   if (!test_harness) FAIL() << "Game could not be run.";
 
   test_harness->wait();  // Let the game run for a moment.
