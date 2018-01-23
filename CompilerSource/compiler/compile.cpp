@@ -92,8 +92,7 @@ inline string string_replace_all(string str,string substr,string nstr)
   return str;
 }
 
-inline void write_desktop_entry(const std::string fPath, const GameSettings& gameSet)
-{
+inline void write_desktop_entry(const std::string fPath, const GameSettings& gameSet) {
   std::ofstream wto;
   std::string fName = fPath.substr(fPath.find_last_of("/\\") + 1);
 
@@ -113,13 +112,12 @@ inline void write_desktop_entry(const std::string fPath, const GameSettings& gam
   wto << "MimeType=application/octet-stream;\n";
   wto.close();
 
-  #if defined(__linux__)
+  #ifndef _WIN32
   chmod((fPath + ".desktop").c_str(), S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH);
   #endif
 }
 
-inline void write_exe_info(const std::string makedir, const EnigmaStruct *es)
-{
+inline void write_exe_info(const std::string makedir, const EnigmaStruct *es) {
   std::ofstream wto;
   GameSettings gameSet = es->gameSettings;
 
