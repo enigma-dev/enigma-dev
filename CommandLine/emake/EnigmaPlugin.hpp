@@ -20,7 +20,8 @@ typedef enum
   emode_debug,
   emode_design,
   emode_compile,
-  emode_rebuild
+  emode_rebuild,
+  emode_invalid
 } GameMode;
 
 class EnigmaPlugin

@@ -144,7 +144,7 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   	string make = MAKE_flags;
     make += " clean-game ";
   	make += "COMPILEPATH=\"" + compilepath + "\" ";
-  	make += "WORKDIR=\"" + make_directory + "\" ";
+  	make += "WORKDIR=\"" + eobjs_directory + "\" ";
     make += "CODEGEN=\"" + codegen_directory + "\" ";
   	make += "eTCpath=\"" + MAKE_tcpaths + "\"";
 
@@ -493,7 +493,7 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
   //NEXT FILE ----------------------------------------
   //Timelines: Defines "moment" lookup structures for timelines.
   edbg << "Writing timeline control information" << flushl;
-  wto.open((codegen_directory +"Preprocessor_Environment_Editable/IDE_EDIT_timelines.h").c_str(),ios_base::out);
+  wto.open((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_timelines.h").c_str(),ios_base::out);
   {
     wto << license;
     wto <<"namespace enigma {\n\n";
@@ -595,7 +595,7 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
   string make = MAKE_flags;
 
   make += " Game ";
-  make += "WORKDIR=\"" + make_directory + "\" ";
+  make += "WORKDIR=\"" + eobjs_directory + "\" ";
   make += "CODEGEN=\"" + codegen_directory + "\" ";
   make += mode == emode_debug? "GMODE=Debug ": mode == emode_design? "GMODE=Design ": mode == emode_compile?"GMODE=Compile ": "GMODE=Run ";
   make += "GRAPHICS=" + extensions::targetAPI.graphicsSys + " ";
@@ -640,8 +640,13 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
   string flags = "";
 
   if (redirect_make) {
+    
+    std::string dirs = "CODEGEN=" + codegen_directory + " ";
+    dirs += "WORKDIR=" + eobjs_directory + " ";
+    e_execs("make", dirs, "required-directories");
+
     // Pick a file and flush it
-    const string redirfile = (make_directory + "enigma_compile.log");
+    const string redirfile = (eobjs_directory + "enigma_compile.log");
     fclose(fopen(redirfile.c_str(),"wb"));
 
     // Redirect it

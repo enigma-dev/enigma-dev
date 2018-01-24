@@ -56,5 +56,5 @@ string escapeEnv(string str) {
 	return escaped;
 }
 
-std::string make_directory;
+std::string eobjs_directory;
 std::string codegen_directory;

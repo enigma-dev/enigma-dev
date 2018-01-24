@@ -72,12 +72,12 @@ static void clear_ide_editables()
 
   if (f2comp != f2write)
   {
-    wto.open((codegen_directory +"API_Switchboard.h").c_str(),ios_base::out);
+    wto.open((codegen_directory + "API_Switchboard.h").c_str(),ios_base::out);
       wto << f2write << endl;
     wto.close();
   }
 
-  wto.open((codegen_directory +"Preprocessor_Environment_Editable/LIBINCLUDE.h").c_str());
+  wto.open((codegen_directory + "Preprocessor_Environment_Editable/LIBINCLUDE.h").c_str());
     wto << license;
     wto << "/*************************************************************\nOptionally included libraries\n****************************/\n";
     wto << "#define STRINGLIB 1\n#define COLORSLIB 1\n#define STDRAWLIB 1\n#define PRIMTVLIB 1\n#define WINDOWLIB 1\n"
@@ -85,7 +85,7 @@ static void clear_ide_editables()
     wto << "/***************\nEnd optional libs\n ***************/\n";
   wto.close();
 
-  wto.open((codegen_directory +"Preprocessor_Environment_Editable/GAME_SETTINGS.h").c_str(),ios_base::out);
+  wto.open((codegen_directory + "Preprocessor_Environment_Editable/GAME_SETTINGS.h").c_str(),ios_base::out);
     wto << license;
     wto << "#define ASSUMEZERO 0\n";
     wto << "#define PRIMBUFFER 0\n";
@@ -137,33 +137,33 @@ void parse_ide_settings(const char* eyaml)
   setting::keyword_blacklist = settree.get("keyword-blacklist").toString();
 
   // Use a platform-specific make directory.
-  make_directory = settree.get("make-directory").toString();
+  eobjs_directory = settree.get("eobjs-directory").toString();
   
-  if (make_directory.empty())
+  if (eobjs_directory.empty())
   {
   #if CURRENT_PLATFORM_ID == OS_WINDOWS
-    make_directory = "%LOCALAPPDATA%/ENIGMA/";
+    eobjs_directory = "%LOCALAPPDATA%/ENIGMA/";
   #else
-    make_directory = "%HOME%/.enigma/";
+    eobjs_directory = "%HOME%/.enigma/";
   #endif
   }
   
   codegen_directory = settree.get("codegen-directory").toString();
   
   if (codegen_directory.empty())
-    codegen_directory = make_directory;
+    codegen_directory = eobjs_directory;
   
 //Now actually set it, taking backslashes into account.
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
-  make_directory = myReplace(escapeEnv(make_directory), "\\","/");
+  eobjs_directory = myReplace(escapeEnv(eobjs_directory), "\\","/");
   codegen_directory = myReplace(escapeEnv(codegen_directory), "\\","/");
 #else
-  make_directory = escapeEnv(make_directory);
+  eobjs_directory = escapeEnv(eobjs_directory);
   codegen_directory = escapeEnv(codegen_directory);
 #endif
 
-  if (make_directory.back() != '/')
-    make_directory += '/';
+  if (eobjs_directory.back() != '/')
+    eobjs_directory += '/';
     
   if (codegen_directory.back() != '/')
     codegen_directory += '/';

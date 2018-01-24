@@ -58,6 +58,7 @@ string MAKE_flags, MAKE_paths, MAKE_tcpaths, MAKE_location, TOPLEVEL_cflags, TOP
 
 static char errbuf[1024];
 static string lastbearings;
+static string lastcodegen_directory;
 
 // This function parses one command line specified to the eYAML into a filename string and a parameter string,
 // then returns whether or not the output from this call must be manually redirected to the output file ofile.
@@ -116,9 +117,11 @@ static bool toolchain_parseout(string line, string &exename, string &command, st
 // Read info about our compiler configuration and run with it
 const char* establish_bearings(const char *compiler)
 {
-  if (compiler == lastbearings)
+  if (compiler == lastbearings && codegen_directory == lastcodegen_directory)
     return 0;
+  
   lastbearings = compiler;
+  lastcodegen_directory = codegen_directory;
   
   string GCC_location;
   string compfq = compiler; //Filename of compiler.ey
@@ -152,7 +155,9 @@ const char* establish_bearings(const char *compiler)
   TOPLEVEL_ldlibs = compey.get("ldlibs");
   TOPLEVEL_rcflags = compey.get("rcflags");
   
-  e_execs("make", "CODEGEN=" + codegen_directory, "codegen");
+  std::string dirs = "CODEGEN=" + codegen_directory + " ";
+  dirs += "WORKDIR=" + eobjs_directory + " ";
+  e_execs("make", dirs, "required-directories");
 
   /* Get a list of all macros defined by our compiler.
   ** These will help us through parsing available libraries.

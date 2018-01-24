@@ -660,7 +660,7 @@ static inline void write_object_declarations(lang_CPP* lcpp, EnigmaStruct* es, p
   //NEXT FILE ----------------------------------------
   //Object declarations: object classes/names and locals.
   ofstream wto;
-  wto.open((codegen_directory +"Preprocessor_Environment_Editable/IDE_EDIT_objectdeclarations.h").c_str(),ios_base::out);
+  wto.open((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_objectdeclarations.h").c_str(),ios_base::out);
     wto << license;
     wto << "#include \"Universal_System/collisions_object.h\"\n";
     wto << "#include \"Universal_System/object.h\"\n\n";

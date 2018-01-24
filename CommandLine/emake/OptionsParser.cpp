@@ -112,9 +112,6 @@ OptionsParser::OptionsParser() : _desc("Options")
   _positional.add("input", 1);
 
   _handler["info"] = std::bind(&OptionsParser::printInfo, this, std::placeholders::_1);
-  _handler["output"] = std::bind(&OptionsParser::output, this, std::placeholders::_1);
-  _handler["workdir"] = std::bind(&OptionsParser::workdir, this, std::placeholders::_1);
-  _handler["codegen"] = std::bind(&OptionsParser::codegen, this, std::placeholders::_1);
   _handler["mode"] = std::bind(&OptionsParser::mode, this, std::placeholders::_1);
   _handler["graphics"] = std::bind(&OptionsParser::graphics, this, std::placeholders::_1);
   _handler["audio"] = std::bind(&OptionsParser::audio, this, std::placeholders::_1);
@@ -144,14 +141,16 @@ int OptionsParser::ReadArgs(int argc, char* argv[])
     if (!_rawArgs.count("info"))
       opt::notify(_rawArgs);
   }
-  catch(opt::error& e)
+  catch(std::exception& e)
   {
-    std::cerr << "OPTIONS_ERROR: " << boost::diagnostic_information(e) << std::endl << std::endl;
+    if (!_rawArgs.count("help"))
+      std::cerr << "OPTIONS_ERROR: " << e.what() << std::endl << std::endl;
 
     _readArgsFail = true;
 
     return OPTIONS_ERROR;
   }
+  
   find_ey("ENIGMAsystem/SHELL/");
 
   // Platform Compilers
@@ -195,7 +194,7 @@ std::string OptionsParser::APIyaml()
   yaml += "treat-literals-as: 0\n";
   yaml += "sample-lots-of-radios: 0\n";
   yaml += "inherit-equivalence-from: 0\n";
-  yaml += "make-directory: " + boost::filesystem::absolute(_rawArgs["workdir"].as<std::string>()).string() + "\n";
+  yaml += "eobjs-directory: " + boost::filesystem::absolute(_rawArgs["workdir"].as<std::string>()).string() + "\n";
   yaml += "codegen-directory: " + boost::filesystem::absolute(_rawArgs["codegen"].as<std::string>()).string() + "\n";
   yaml += "sample-checkbox: on\n";
   yaml += "sample-edit: DEADBEEF\n";
@@ -326,12 +325,6 @@ int OptionsParser::help(const std::string &str)
   return OPTIONS_HELP;
 }
 
-int OptionsParser::output(const std::string &str)
-{
-  //set outfile
-  return OPTIONS_SUCCESS;
-}
-
 int OptionsParser::parse(const std::string &str)
 {
   try
@@ -362,17 +355,6 @@ int OptionsParser::parse(const std::string &str)
     std::cerr << "OPTIONS_ERROR: " << ex.what() << std::endl;
     return OPTIONS_ERROR;
   }
-}
-
-int OptionsParser::workdir(const std::string &str)
-{
-  //set workdir
-  return OPTIONS_SUCCESS;
-}
-
-int OptionsParser::codegen(const std::string &str)
-{
-  return OPTIONS_SUCCESS;
 }
 
 int OptionsParser::mode(const std::string &str)
