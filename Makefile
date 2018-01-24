@@ -21,7 +21,7 @@ test-runner: emake .FORCE
 	$(MAKE) -C CommandLine/testing/
 
 required-directories:
+	mkdir -p "$(WORKDIR)"
 	mkdir -p "$(CODEGEN)Preprocessor_Environment_Editable/"
-	mkdir -p "$(WORKDIR)Preprocessor_Environment_Editable/"
 
 .FORCE:
