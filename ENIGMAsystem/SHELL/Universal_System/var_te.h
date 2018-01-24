@@ -13,9 +13,10 @@
 #define unsigll unsigned long long
 #define llong   long long
 
-/** / **
- * / We want error reporting to be unobtrusive, both efficiency-wise and in terms of code space used.
- */
+/*‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾*\
+|* We want error reporting to be unobtrusive, both  *|
+|* efficiency-wise and in terms of code space used. *|
+\*__________________________________________________*/
 
 #ifdef DEBUG_MODE
   #define terror(x)
@@ -31,9 +32,9 @@
 #undef EVCONST
 #define EVCONST
 
-/** / **
- * / This stuff just takes up entirely too much space.
- */
+/*‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾*\
+|* This stuff just takes up entirely too much space. *|
+\*___________________________________________________*/
 
 #define types_extrapolate_real_p(prefix,suffix...)\
  prefix (int x)       EVCONST suffix\
