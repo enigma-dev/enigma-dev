@@ -19,8 +19,8 @@
     with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef ENIGMA_LANG_CPP__H
-#define ENIGMA_LANG_CPP__H
+#ifndef ENIGMA_LANG_CPP_H
+#define ENIGMA_LANG_CPP_H
 #include "language_adapter.h"
 #include <Storage/definition.h>
 #include <API/context.h>

@@ -6,8 +6,8 @@
  * See LICENSE for details.
  */
 
-#ifndef ENIGMA_TIMELINE__H
-#define ENIGMA_TIMELINE__H
+#ifndef ENIGMA_TIMELINE_H
+#define ENIGMA_TIMELINE_H
 
 #include "backend/sub/Moment.h"
 #include "backend/JavaStruct.h"

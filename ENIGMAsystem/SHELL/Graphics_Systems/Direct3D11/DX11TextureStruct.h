@@ -15,8 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef ENIGMA_DX11TEXTURESTRUCT__H
-#define ENIGMA_DX11TEXTURESTRUCT__H
+#ifndef ENIGMA_DX11TEXTURESTRUCT_H
+#define ENIGMA_DX11TEXTURESTRUCT_H
 
 #include "Direct3D11Headers.h"
 

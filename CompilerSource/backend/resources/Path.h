@@ -6,8 +6,8 @@
  * See LICENSE for details.
  */
 
-#ifndef ENIGMA_PATH__H
-#define ENIGMA_PATH__H
+#ifndef ENIGMA_PATH_H
+#define ENIGMA_PATH_H
 
 #include "backend/sub/PathPoint.h"
 #include "backend/JavaStruct.h"

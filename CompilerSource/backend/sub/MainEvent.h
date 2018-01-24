@@ -6,8 +6,8 @@
  * See LICENSE for details.
  */
 
-#ifndef ENIGMA_MAINEVENT__H
-#define ENIGMA_MAINEVENT__H
+#ifndef ENIGMA_MAINEVENT_H
+#define ENIGMA_MAINEVENT_H
 
 #include "Event.h"
 #include "backend/JavaStruct.h"

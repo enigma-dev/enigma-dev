@@ -6,8 +6,8 @@
  * See LICENSE for details.
  */
 
-#ifndef ENIGMA_EXTENSION__H
-#define ENIGMA_EXTENSION__H
+#ifndef ENIGMA_EXTENSION_H
+#define ENIGMA_EXTENSION_H
 
 #include "backend/JavaStruct.h"
 

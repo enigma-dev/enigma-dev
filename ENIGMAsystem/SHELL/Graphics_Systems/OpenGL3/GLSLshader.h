@@ -15,8 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef ENIGMA_GLSLSHADER__H
-#define ENIGMA_GLSLSHADER__H
+#ifndef ENIGMA_GLSLSHADER_H
+#define ENIGMA_GLSLSHADER_H
 
 //#include <functional> //For std::hash
 #include <vector>

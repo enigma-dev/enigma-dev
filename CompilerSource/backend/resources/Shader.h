@@ -6,8 +6,8 @@
  * See LICENSE for details.
  */
 
-#ifndef ENIGMA_SHADER__H
-#define ENIGMA_SHADER__H
+#ifndef ENIGMA_SHADER_H
+#define ENIGMA_SHADER_H
 
 #include "backend/JavaStruct.h"
 

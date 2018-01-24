@@ -15,8 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef ENIGMA_STUDIO_PHYSICS_FUNCTIONS__H
-#define ENIGMA_STUDIO_PHYSICS_FUNCTIONS__H
+#ifndef ENIGMA_STUDIO_PHYSICS_FUNCTIONS_H
+#define ENIGMA_STUDIO_PHYSICS_FUNCTIONS_H
 
 #include <vector>
 using std::vector;
@@ -99,4 +99,4 @@ void physics_pause_enable(bool pause);
 
 }
 
-#endif // ENIGMA_STUDIO_PHYSICS_FUNCTIONS__H
+#endif // ENIGMA_STUDIO_PHYSICS_FUNCTIONS_H

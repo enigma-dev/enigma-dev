@@ -16,8 +16,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef ENIGMA_WIDGETS_MANDATORY__H
-#define ENIGMA_WIDGETS_MANDATORY__H
+#ifndef ENIGMA_WIDGETS_MANDATORY_H
+#define ENIGMA_WIDGETS_MANDATORY_H
 
 #include <string>
 using std::string;

@@ -6,8 +6,8 @@
  * See LICENSE for details.
  */
 
-#ifndef ENIGMA_LGM_INCLUDE__H
-#define ENIGMA_LGM_INCLUDE__H
+#ifndef ENIGMA_LGM_INCLUDE_H
+#define ENIGMA_LGM_INCLUDE_H
 
 #include "backend/JavaStruct.h"
 

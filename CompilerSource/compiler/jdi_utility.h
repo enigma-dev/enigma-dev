@@ -21,8 +21,8 @@
  * JustDefineIt. If not, see <http://www.gnu.org/licenses/>.
 **/
 
-#ifndef ENIGMA_JDI_UTILITY__H
-#define ENIGMA_JDI_UTILITY__H
+#ifndef ENIGMA_JDI_UTILITY_H
+#define ENIGMA_JDI_UTILITY_H
 
 #include <Storage/definition.h>
 int referencers_varargs_at(jdi::ref_stack &refs);

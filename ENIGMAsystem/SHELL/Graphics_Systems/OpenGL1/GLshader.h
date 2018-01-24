@@ -15,8 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef ENIGMA_GLSHADER__H
-#define ENIGMA_GLSHADER__H
+#ifndef ENIGMA_GLSHADER_H
+#define ENIGMA_GLSHADER_H
 
 #include <string>
 using std::string;

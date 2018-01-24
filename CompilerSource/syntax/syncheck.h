@@ -25,8 +25,8 @@
 **                                                                              **
 \********************************************************************************/
 
-#ifndef ENIGMA_SYNCHECK__H
-#define ENIGMA_SYNCHECK__H
+#ifndef ENIGMA_SYNCHECK_H
+#define ENIGMA_SYNCHECK_H
 
 namespace syncheck
 {

@@ -4,29 +4,28 @@
 **  See the license of local files for more details.
 **/
 
+#ifndef ENIGMA_VAR_TE_H
+#define ENIGMA_VAR_TE_H
+
 #include <string>
 
 #define unsigl  unsigned long
 #define unsigll unsigned long long
 #define llong   long long
 
-
 /** / **
  * / We want error reporting to be unobtrusive, both efficiency-wise and in terms of code space used.
  */
 
-#ifndef ENIGMA_VAR_TE
-#define ENIGMA_VAR_TE
-  #ifdef DEBUG_MODE
-    #define terror(x)
-    #define nterror(x)
-    #define terror2(dt)
-    #define terrortrue() show_error("Incompatible right-hand type to operator.",0);
-  #else
-    #define terror(x)
-    #define terror2(x)
-    #define terrortrue()
-  #endif
+#ifdef DEBUG_MODE
+  #define terror(x)
+  #define nterror(x)
+  #define terror2(dt)
+  #define terrortrue() show_error("Incompatible right-hand type to operator.",0);
+#else
+  #define terror(x)
+  #define terror2(x)
+  #define terrortrue()
 #endif
 
 #undef EVCONST
@@ -134,3 +133,5 @@
 #define types_binary_extrapolate_alldecce(type,fname,type2)\
  types_binary_extrapolate_real_p  (type fname, type2,;)\
  types_binary_extrapolate_string_p(type fname, type2,;)
+
+#endif // ENIGMA_VAR_TE_H

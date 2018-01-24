@@ -7,8 +7,8 @@
  * See LICENSE for details.
  */
 
-#ifndef ENIGMA_FONT__H
-#define ENIGMA_FONT__H
+#ifndef ENIGMA_FONT_H
+#define ENIGMA_FONT_H
 
 #include "backend/JavaStruct.h"
 #include "backend/sub/GlyphRange.h"

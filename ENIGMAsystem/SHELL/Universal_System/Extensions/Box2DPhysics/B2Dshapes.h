@@ -15,8 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef ENIGMA_B2D_SHAPES__H
-#define ENIGMA_B2D_SHAPES__H
+#ifndef ENIGMA_B2D_SHAPES_H
+#define ENIGMA_B2D_SHAPES_H
 
 #include <Box2D/Box2D.h>
 
@@ -67,4 +67,4 @@ int b2d_fixture_get_body(int id);
 
 }
 
-#endif // ENIGMA_B2D_SHAPES__H
+#endif // ENIGMA_B2D_SHAPES_H

@@ -1,5 +1,5 @@
-#ifndef ENIGMA_FRONTEND__H
-#define ENIGMA_FRONTEND__H
+#ifndef ENIGMA_FRONTEND_H
+#define ENIGMA_FRONTEND_H
 #include <string>
 using namespace std;
 

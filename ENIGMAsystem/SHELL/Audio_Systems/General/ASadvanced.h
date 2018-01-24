@@ -18,8 +18,8 @@
 #include "Universal_System/scalar.h"
 
 // ***** New Sound System *****
-#ifndef ENIGMA_AS_ADVANCED__H
-#define ENIGMA_AS_ADVANCED__H
+#ifndef ENIGMA_AS_ADVANCED_H
+#define ENIGMA_AS_ADVANCED_H
 
 #include <string>
 using std::string;

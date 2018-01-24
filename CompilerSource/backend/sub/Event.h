@@ -6,8 +6,8 @@
  * See LICENSE for details.
  */
 
-#ifndef ENIGMA_EVENTS__H
-#define ENIGMA_EVENTS__H
+#ifndef ENIGMA_EVENTS_H
+#define ENIGMA_EVENTS_H
 
 #include "backend/JavaStruct.h"
 

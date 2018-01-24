@@ -6,8 +6,8 @@
  * See LICENSE for details.
  */
 
-#ifndef ENIGMA_POINT__H
-#define ENIGMA_POINT__H
+#ifndef ENIGMA_POINT_H
+#define ENIGMA_POINT_H
 
 #include "backend/JavaStruct.h"
 

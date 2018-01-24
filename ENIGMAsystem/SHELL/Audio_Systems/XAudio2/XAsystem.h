@@ -15,8 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef ENIGMA_XA_SYSTEM__H
-#define ENIGMA_XA_SYSTEM__H
+#ifndef ENIGMA_XA_SYSTEM_H
+#define ENIGMA_XA_SYSTEM_H
 #include <stddef.h>
 
 extern int falloff_model;

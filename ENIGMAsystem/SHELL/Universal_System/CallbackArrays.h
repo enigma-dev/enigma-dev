@@ -25,8 +25,8 @@
 **                                                                              **
 \********************************************************************************/
 
-#ifndef ENIGMA_CALLBACK_ARRAYS__H
-#define ENIGMA_CALLBACK_ARRAYS__H
+#ifndef ENIGMA_CALLBACK_ARRAYS_H
+#define ENIGMA_CALLBACK_ARRAYS_H
 
 #include <string>
 

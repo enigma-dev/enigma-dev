@@ -21,8 +21,8 @@
     with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef ENIGMA_COMPILE_INCLUDES__H
-#define ENIGMA_COMPILE_INCLUDES__H
+#ifndef ENIGMA_COMPILE_INCLUDES_H
+#define ENIGMA_COMPILE_INCLUDES_H
 
 #include <JDI/src/Storage/definition.h>
 

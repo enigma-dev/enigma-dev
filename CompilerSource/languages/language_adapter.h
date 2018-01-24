@@ -19,8 +19,8 @@
     with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef ENIGMA_LANGUAGE_ADAPTER__H
-#define ENIGMA_LANGUAGE_ADAPTER__H
+#ifndef ENIGMA_LANGUAGE_ADAPTER_H
+#define ENIGMA_LANGUAGE_ADAPTER_H
 
 #include <string>
 #include <vector>

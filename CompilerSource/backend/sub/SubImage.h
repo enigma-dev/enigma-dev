@@ -6,8 +6,8 @@
  * See LICENSE for details.
  */
 
-#ifndef ENIGMA_SUBIMAGE__H
-#define ENIGMA_SUBIMAGE__H
+#ifndef ENIGMA_SUBIMAGE_H
+#define ENIGMA_SUBIMAGE_H
 
 #include "backend/JavaStruct.h"
 #include "backend/util/Image.h"

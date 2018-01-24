@@ -6,8 +6,8 @@
  * See LICENSE for details.
  */
 
-#ifndef ENIGMA_MOMENT__H
-#define ENIGMA_MOMENT__H
+#ifndef ENIGMA_MOMENT_H
+#define ENIGMA_MOMENT_H
 
 #include "backend/JavaStruct.h"
 #include "backend/sub/Action.h"

@@ -15,8 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef ENIGMA_BOX2D_WORLD__H
-#define ENIGMA_BOX2D_WORLD__H
+#ifndef ENIGMA_BOX2D_WORLD_H
+#define ENIGMA_BOX2D_WORLD_H
 
 #include <vector>
 using std::vector;
@@ -47,7 +47,7 @@ struct worldInstance {
   }
 
   void world_update();
-}; 
+};
 extern vector<worldInstance*> worlds;
 
 struct fixtureInstance {
@@ -58,7 +58,7 @@ struct fixtureInstance {
   b2PolygonShape* polygonshape;
   vector<b2Vec2> vertices;
 
-  fixtureInstance() 
+  fixtureInstance()
   {
 
   }
@@ -75,7 +75,7 @@ struct fixtureInstance {
     fixture = body->CreateFixture(&fixtureDef);
   }
 
-}; 
+};
 extern vector<fixtureInstance*> fixtures;
 
 #ifdef DEBUG_MODE
@@ -112,5 +112,4 @@ extern vector<fixtureInstance*> fixtures;
     fixtureInstance* f = fixtures[id];
 #endif
 
-#endif // ENIGMA_BOX2D_WORLD__H
-
+#endif // ENIGMA_BOX2D_WORLD_H

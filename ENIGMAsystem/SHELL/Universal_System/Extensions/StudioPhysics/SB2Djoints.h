@@ -15,8 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef ENIGMA_STUDIO_PHYSICS_JOINTS__H
-#define ENIGMA_STUDIO_PHYSICS_JOINTS__H
+#ifndef ENIGMA_STUDIO_PHYSICS_JOINTS_H
+#define ENIGMA_STUDIO_PHYSICS_JOINTS_H
 
 #include "Universal_System/var4.h"
 #include <Box2D/Box2D.h>
@@ -64,4 +64,4 @@ void physics_joint_set_value(int id, int field, variant value);
 
 }
 
-#endif // ENIGMA_STUDIO_PHYSICS_JOINTS__H
+#endif // ENIGMA_STUDIO_PHYSICS_JOINTS_H

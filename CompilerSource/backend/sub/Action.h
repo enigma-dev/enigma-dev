@@ -6,8 +6,8 @@
  * See LICENSE for details.
  */
 
-#ifndef ENIGMA_ACTION__H
-#define ENIGMA_ACTION__H
+#ifndef ENIGMA_ACTION_H
+#define ENIGMA_ACTION_H
 
 #include "backend/JavaStruct.h"
 

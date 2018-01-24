@@ -6,8 +6,8 @@
  * See LICENSE for details.
  */
 
-#ifndef ENIGMA_GMOBJECT__H
-#define ENIGMA_GMOBJECT__H
+#ifndef ENIGMA_GMOBJECT_H
+#define ENIGMA_GMOBJECT_H
 
 #include "backend/sub/MainEvent.h"
 #include "backend/JavaStruct.h"

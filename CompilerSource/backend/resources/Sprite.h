@@ -6,8 +6,8 @@
  * See LICENSE for details.
  */
 
-#ifndef ENIGMA_SPRITE__H
-#define ENIGMA_SPRITE__H
+#ifndef ENIGMA_SPRITE_H
+#define ENIGMA_SPRITE_H
 
 #include "backend/JavaStruct.h"
 #include "backend/sub/SubImage.h"

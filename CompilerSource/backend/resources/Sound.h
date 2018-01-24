@@ -6,8 +6,8 @@
  * See LICENSE for details.
  */
 
-#ifndef ENIGMA_SOUND__H
-#define ENIGMA_SOUND__H
+#ifndef ENIGMA_SOUND_H
+#define ENIGMA_SOUND_H
 
 #include "backend/JavaStruct.h"
 

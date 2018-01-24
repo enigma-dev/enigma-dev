@@ -15,8 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef ENIGMA_SOUND_RESOURCE__H
-#define ENIGMA_SOUND_RESOURCE__H
+#ifndef ENIGMA_SOUND_RESOURCE_H
+#define ENIGMA_SOUND_RESOURCE_H
 #include "../General/ASadvanced.h"
 
 #ifdef DEBUG_MODE

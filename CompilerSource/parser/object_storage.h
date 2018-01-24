@@ -26,8 +26,8 @@
 **                                                                              **
 \********************************************************************************/
 
-#ifndef ENIGMA_OBJECT_STORAGE__H
-#define ENIGMA_OBJECT_STORAGE__H
+#ifndef ENIGMA_OBJECT_STORAGE_H
+#define ENIGMA_OBJECT_STORAGE_H
 
 #include <map>
 #include <string>

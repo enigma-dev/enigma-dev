@@ -6,8 +6,8 @@
  * See LICENSE for details.
  */
 
-#ifndef ENIGMA_GAMESETTINGS__H
-#define ENIGMA_GAMESETTINGS__H
+#ifndef ENIGMA_GAMESETTINGS_H
+#define ENIGMA_GAMESETTINGS_H
 
 #include "backend/JavaStruct.h"
 #include "backend/util/Image.h"

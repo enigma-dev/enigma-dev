@@ -6,8 +6,8 @@
  * See LICENSE for details.
  */
 
-#ifndef ENIGMA_ROOM__H
-#define ENIGMA_ROOM__H
+#ifndef ENIGMA_ROOM_H
+#define ENIGMA_ROOM_H
 
 
 #include "backend/sub/BackgroundDef.h"

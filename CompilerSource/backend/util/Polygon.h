@@ -6,8 +6,8 @@
  * See LICENSE for details.
  */
 
-#ifndef ENIGMA_POLYGON__H
-#define ENIGMA_POLYGON__H
+#ifndef ENIGMA_POLYGON_H
+#define ENIGMA_POLYGON_H
 
 #include "backend/JavaStruct.h"
 #include "Point.h"
