@@ -15,8 +15,8 @@
  * / We want error reporting to be unobtrusive, both efficiency-wise and in terms of code space used.
  */
 
-#ifndef __var_te
-#define __var_te
+#ifndef ENIGMA_VAR_TE
+#define ENIGMA_VAR_TE
   #ifdef DEBUG_MODE
     #define terror(x)
     #define nterror(x)
@@ -134,4 +134,3 @@
 #define types_binary_extrapolate_alldecce(type,fname,type2)\
  types_binary_extrapolate_real_p  (type fname, type2,;)\
  types_binary_extrapolate_string_p(type fname, type2,;)
-

@@ -15,12 +15,12 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-// ***** Information BEGIN ***** 
+// ***** Information BEGIN *****
 /*
    Everything must use Vertex Buffer Object's in the new graphics system's, the old one also needs to use similiar
    shape functions for obtaining data for Vertex Array pointer's. Nothing can use immediate mode anymore.
    These are the basic shappes...
-   
+
    Plane : Walls/Floors/Sprites
    Cube
    Uvsphere
@@ -29,12 +29,12 @@
    Cylinder
    Torus
 */
-// ***** Information END ***** 
+// ***** Information END *****
 
-#ifndef __GLSHAPESH_
-#define __GLSHAPESH_
+#ifndef ENIGMA_GLSHAPES_H
+#define ENIGMA_GLSHAPES_H
 #include "Universal_System/scalar.h"
 #include "../General/OpenGLHeaders.h"
 GLfloat* block_vertices(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2);
 GLfloat* block_indices(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2);
-#endif
+#endif // ENIGMA_GLSHAPES_H
