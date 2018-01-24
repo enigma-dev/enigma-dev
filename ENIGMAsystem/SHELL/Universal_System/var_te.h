@@ -4,9 +4,6 @@
 **  See the license of local files for more details.
 **/
 
-#ifndef ENIGMA_VAR_TE_H
-#define ENIGMA_VAR_TE_H
-
 #include <string>
 
 #define unsigl  unsigned long
@@ -17,6 +14,9 @@
 |* We want error reporting to be unobtrusive, both  *|
 |* efficiency-wise and in terms of code space used. *|
 \*__________________________________________________*/
+
+#ifndef ENIGMA_VAR_TE_H
+#define ENIGMA_VAR_TE_H
 
 #ifdef DEBUG_MODE
   #define terror(x)
@@ -31,6 +31,8 @@
 
 #undef EVCONST
 #define EVCONST
+
+#endif // ENIGMA_VAR_TE_H
 
 /*‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾*\
 |* This stuff just takes up entirely too much space. *|
@@ -134,5 +136,3 @@
 #define types_binary_extrapolate_alldecce(type,fname,type2)\
  types_binary_extrapolate_real_p  (type fname, type2,;)\
  types_binary_extrapolate_string_p(type fname, type2,;)
-
-#endif // ENIGMA_VAR_TE_H
