@@ -16,8 +16,8 @@
 **/
 
 // ***** Old Sound System *****
-#ifndef _AS_BASIC__H
-#define _AS_BASIC__H
+#ifndef ENIGMA_AS_BASIC__H
+#define ENIGMA_AS_BASIC__H
 
 #include <string>
 using std::string;

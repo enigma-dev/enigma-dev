@@ -21,8 +21,8 @@
   @summary Adds a graphics-related tier following the timelines tier.
 */
 
-#ifndef _GRAPHICS_OBJECT_H
-#define _GRAPHICS_OBJECT_H
+#ifndef ENIGMA_GRAPHICS_OBJECT_H
+#define ENIGMA_GRAPHICS_OBJECT_H
 
 #ifndef INCLUDED_FROM_SHELLMAIN
   #include "var4.h"
@@ -72,7 +72,7 @@ namespace enigma
       virtual variant myevent_drawgui();
       virtual bool myevent_drawgui_subcheck();
       virtual variant myevent_drawresize();
-      
+
     //Accessors
       #ifdef JUST_DEFINE_IT_RUN
         int sprite_width, sprite_height;

@@ -26,8 +26,8 @@
 **                                                                              **
 \********************************************************************************/
 
-#ifndef _COMPILE_COMMON__H
-#define _COMPILE_COMMON__H
+#ifndef ENIGMA_COMPILE_COMMON__H
+#define ENIGMA_COMPILE_COMMON__H
 
 #include <map>
 #include <vector>

@@ -6,8 +6,8 @@
  * See LICENSE for details.
  */
 
-#ifndef _TILE__H
-#define _TILE__H
+#ifndef ENIGMA_TILE__H
+#define ENIGMA_TILE__H
 
 #include "backend/JavaStruct.h"
 

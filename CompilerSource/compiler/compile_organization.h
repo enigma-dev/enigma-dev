@@ -25,8 +25,8 @@
 **                                                                              **
 \********************************************************************************/
 
-#ifndef _COMPILE__ORGANIZATION__H
-#define _COMPILE__ORGANIZATION__H
+#ifndef ENIGMA_COMPILE__ORGANIZATION__H
+#define ENIGMA_COMPILE__ORGANIZATION__H
 
 //Error codes
 enum {

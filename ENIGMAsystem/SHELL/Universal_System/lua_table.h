@@ -29,18 +29,18 @@
 #error This file is high-impact and should not be included from SHELLmain.cpp.
 #endif
 
-#ifndef _H_LUA_TABLE
-#define _H_LUA_TABLE
+#ifndef ENIGMA_H_LUA_TABLE
+#define ENIGMA_H_LUA_TABLE
 
 #include <map>      // Sparse part
 #include <string.h> // Memcpy
 #include <stdlib.h> // Malloc, Realloc, Free
 
 /**
-  This file implements a Lua-table-like structure. It borrows ideas not only from 
+  This file implements a Lua-table-like structure. It borrows ideas not only from
   Lua, but from STL containers. It also borrows the entirety of std::map. This should
   be replaced with a sparse hash map container when it's a "good time" to do so.
-  
+
   By ENIGMA-defined standard, this table class takes up sizeof(void*) bytes. The class
   itself contains a single pointer to a dense part (dynamic array). This ctually points
   to a fixed-length position from the beginning of an allocated block. At the beginning
@@ -84,7 +84,7 @@ private:
     mx_size = who.mx_size;
 
     //Free old memory?
-    if (dense) { 
+    if (dense) {
       delete [] dense;
       dense = NULL;
     }
@@ -103,7 +103,7 @@ private:
   {
     //Create a new dense section and copy over values; free old memory.
     T* new_dense = new T[c];
-    if (dense) { 
+    if (dense) {
       for (size_t i=0; i<dn_reserve; i++) {
         new_dense[i] = dense[i];
       }
@@ -121,21 +121,21 @@ private:
       sparse.erase(it++);
     }
   }
-  
+
 
 public:
-  T& operator[] (size_t ind) 
-  { 
+  T& operator[] (size_t ind)
+  {
     mx_size = my_max(ind+1, mx_size);
     if (ind >= dn_reserve)
     {
       // Calculate tolerable size increase
       const size_t c = (dn_reserve < 4) ? 4 : dn_reserve << 1;
-      
+
       // If we're far out of range of the currently allocated dense array
       if (ind >= c) // Default to the map and return a sparse node
         return sparse[ind];
-      
+
       // Otherwise, resize and reconstruct
       upsize(c);
     }
@@ -150,13 +150,13 @@ public:
   int max_index() const {
     return mx_size;
   }
-  
+
   lua_table<T>& operator= (const lua_table<T>& x)
   {
     pick_up(x);
     return *this;
   }
-  
+
   lua_table<T>() : dense(new T[1]), dn_reserve(1), mx_size(1) {
   }
   lua_table<T>(const lua_table<T> &x): dense(NULL), dn_reserve(0), mx_size(0) {
@@ -167,4 +167,4 @@ public:
   }
 };
 
-#endif //_H_LUA_TABLE
+#endif // ENIGMA_H_LUA_TABLE
