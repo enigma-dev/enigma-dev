@@ -15,8 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef _DX9SHADER__H
-#define _DX9SHADER__H
+#ifndef ENIGMA_DX9SHADER_H
+#define ENIGMA_DX9SHADER_H
 
 namespace enigma_user
 {

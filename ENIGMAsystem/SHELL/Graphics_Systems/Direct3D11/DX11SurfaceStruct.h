@@ -15,8 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef _SURFSTRUCT__H
-#define _SURFSTRUCT__H
+#ifndef ENIGMA_SURFSTRUCT_H
+#define ENIGMA_SURFSTRUCT_H
 
 #include <string>
 #include "Direct3D11Headers.h"
@@ -31,11 +31,11 @@ namespace enigma
   {
     ID3D11RenderTargetView* renderTargetView;
     int tex, width, height;
-    
+
     Surface(): renderTargetView(NULL), tex(0), width(0), height(0) {
 
     };
-    
+
     ~Surface() {
       if (renderTargetView != NULL) {
         renderTargetView->Release();
@@ -43,7 +43,7 @@ namespace enigma
       }
     };
   };
-  
+
   extern vector<Surface*> Surfaces;
 }
 
