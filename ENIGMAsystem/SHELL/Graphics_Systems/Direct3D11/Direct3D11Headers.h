@@ -15,8 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef __DIRECT3D11_HEADERS_H
-#define __DIRECT3D11_HEADERS_H
+#ifndef ENIGMA_DIRECT3D11_HEADERS_H
+#define ENIGMA_DIRECT3D11_HEADERS_H
 #include <d3d11.h>
 #include <cmath>
 #include <string>

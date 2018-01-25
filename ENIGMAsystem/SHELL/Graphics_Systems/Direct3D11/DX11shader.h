@@ -15,8 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef _DX11SHADER__H
-#define _DX11SHADER__H
+#ifndef ENIGMA_DX11SHADER_H
+#define ENIGMA_DX11SHADER_H
 
 namespace enigma_user
 {

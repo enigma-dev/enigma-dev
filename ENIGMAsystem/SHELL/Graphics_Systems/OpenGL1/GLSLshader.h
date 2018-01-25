@@ -15,8 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef _GLSLSHADER__H
-#define _GLSLSHADER__H
+#ifndef ENIGMA_GLSLSHADER_H
+#define ENIGMA_GLSLSHADER_H
 
 #include <vector>
 #include <string>
@@ -30,11 +30,11 @@ extern GLenum shadertypes[];
 struct Shader{
   string log;
   GLuint shader;
-  Shader(int type) 
+  Shader(int type)
   {
     shader = glCreateShader(shadertypes[type]);
   }
- 
+
   ~Shader()
   {
     glDeleteShader(shader);

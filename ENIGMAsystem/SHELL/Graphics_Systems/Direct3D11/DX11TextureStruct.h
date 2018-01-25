@@ -15,8 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef _DX11TEXTURESTRUCT__H
-#define _DX11TEXTURESTRUCT__H
+#ifndef ENIGMA_DX11TEXTURESTRUCT_H
+#define ENIGMA_DX11TEXTURESTRUCT_H
 
 #include "Direct3D11Headers.h"
 
@@ -27,18 +27,18 @@ struct TextureStruct {
   ID3D11Texture2D *texture;
   unsigned width,height;
 	unsigned fullwidth,fullheight;
-  
+
   TextureStruct(ID3D11Texture2D *ntexture): texture(ntexture) {
-  
+
   }
-  
+
   ~TextureStruct() {
     if (texture != NULL) {
       texture->Release();
       texture = NULL;
     }
   }
-  
+
 };
 extern vector<TextureStruct*> textureStructs;
 

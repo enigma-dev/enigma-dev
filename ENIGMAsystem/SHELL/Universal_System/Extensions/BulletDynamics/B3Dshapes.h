@@ -15,8 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef _B3D_SHAPES__H
-#define _B3D_SHAPES__H
+#ifndef ENIGMA_B3D_SHAPES_H
+#define ENIGMA_B3D_SHAPES_H
 
 namespace enigma_user {
 
@@ -56,7 +56,7 @@ void b3d_shape_compound(int id, bool aabbtree = true);
 void b3d_shape_empty(int id);
 
 // These functions are special for compound shapes which contain multiple child shapes
-// It is important to note, if you intend to keep the shape but not access its children later, you should clear them after 
+// It is important to note, if you intend to keep the shape but not access its children later, you should clear them after
 // calling the shape build function
 // If you modify any of the shapes children after it has already been built, you need to call its build function again
 void b3d_shape_add_child(int id, int child, double lx, double ly, double lz, double rx, double ry, double rz);

@@ -1,7 +1,7 @@
 /**
   @file  lang_CPP.h
   @brief Defines the C++ languages adapter class.
-  
+
   @section License
     Copyright (C) 2008-2012 Josh Ventura
     Copyright (C) 2014 Seth N. Hetu
@@ -11,7 +11,7 @@
     terms of the GNU General Public License as published by the Free Software
     Foundation, version 3 of the license or any later version.
 
-    This application and its source code is distributed AS-IS, WITHOUT ANY WARRANTY; 
+    This application and its source code is distributed AS-IS, WITHOUT ANY WARRANTY;
     without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
     PURPOSE. See the GNU General Public License for more details.
 
@@ -19,8 +19,8 @@
     with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef _LANG_CPP__H
-#define _LANG_CPP__H
+#ifndef ENIGMA_LANG_CPP_H
+#define ENIGMA_LANG_CPP_H
 #include "language_adapter.h"
 #include <Storage/definition.h>
 #include <API/context.h>
@@ -28,16 +28,16 @@
 struct lang_CPP: language_adapter {
   /// A map of all global local variables.
   map<string,dectrip> locals;
-  
+
   /// The context of all parsed definitions.
   jdi::context definitions;
-  
+
   /// The ENIGMA namespace.
   jdi::definition_scope *namespace_enigma;
-  
+
   // Utility
   string get_name();
-  
+
   // Sizable utilities
   int link_globals(parsed_object*, EnigmaStruct*,parsed_script*[], vector<parsed_script*>& tlines);
   int link_ambiguous(parsed_object*, EnigmaStruct*, parsed_script*[], vector<parsed_script*>& tlines);
@@ -60,16 +60,16 @@ struct lang_CPP: language_adapter {
   int module_write_backgrounds(EnigmaStruct *es, FILE *gameModule);
   int module_write_paths(EnigmaStruct *es, FILE *gameModule);
   int module_write_fonts(EnigmaStruct *es, FILE *gameModule);
-  
+
   int  load_shared_locals();
   void load_extension_locals();
-  
+
   virtual syntax_error* definitionsModified(const char*, const char*);
   virtual int compile(EnigmaStruct *es, const char* exe_filename, int mode);
-  
+
   bool global_exists(string name);
   jdi::definition* find_typename(string name);
-  
+
   virtual ~lang_CPP();
 };
 

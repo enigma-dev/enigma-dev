@@ -1,13 +1,13 @@
 /*
  * Copyright (C) 2010 IsmAvatar <IsmAvatar@gmail.com>
- * 
+ *
  * This file is part of Enigma Plugin.
  * Enigma Plugin is free software and comes with ABSOLUTELY NO WARRANTY.
  * See LICENSE for details.
  */
 
-#ifndef _LGM_INCLUDE__H
-#define _LGM_INCLUDE__H
+#ifndef ENIGMA_LGM_INCLUDE_H
+#define ENIGMA_LGM_INCLUDE_H
 
 #include "backend/JavaStruct.h"
 

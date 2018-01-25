@@ -1,5 +1,5 @@
-#ifndef __MAIN_H__
-#define __MAIN_H__
+#ifndef ENIGMA_MAIN_H
+#define ENIGMA_MAIN_H
 
 #include <windows.h>
 
@@ -25,4 +25,4 @@ void DLL_EXPORT SomeFunction(const LPCSTR sometext);
 }
 #endif
 
-#endif // __MAIN_H__
+#endif // ENIGMA_MAIN_H

@@ -17,7 +17,7 @@
 
 // For querying the graphic's output for debugging purposes, eg. triangles rendered, VRAM usage, and VBO's, etc.
 
-#ifndef __DX111PROFILERH_
-#define __DX11PROFILERH_
+#ifndef ENIGMA_DX11PROFILER_H
+#define ENIGMA_DX11PROFILER_H
 
-#endif
+#endif // ENIGMA_DX11PROFILER_H

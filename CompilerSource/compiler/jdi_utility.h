@@ -2,27 +2,27 @@
  * @file jdi_utility.h
  * @brief File declaring utility functions to pluck extra information from
  *        JDI constructs.
- * 
+ *
  * This file was written as a helper set in plugging JDI into the old parser.
- * 
+ *
  * @section License
  * Copyright (C) 2011-2012 Josh Ventura
  * This file is part of JustDefineIt.
- * 
+ *
  * JustDefineIt is free software: you can redistribute it and/or modify it under
  * the terms of the GNU General Public License as published by the Free Software
  * Foundation, version 3 of the License, or (at your option) any later version.
- * 
- * JustDefineIt is distributed in the hope that it will be useful, but WITHOUT ANY 
+ *
+ * JustDefineIt is distributed in the hope that it will be useful, but WITHOUT ANY
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
  * PARTICULAR PURPOSE. See the GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License along with
  * JustDefineIt. If not, see <http://www.gnu.org/licenses/>.
 **/
 
-#ifndef _JDI_UTILITY__H
-#define _JDI_UTILITY__H
+#ifndef ENIGMA_JDI_UTILITY_H
+#define ENIGMA_JDI_UTILITY_H
 
 #include <Storage/definition.h>
 int referencers_varargs_at(jdi::ref_stack &refs);

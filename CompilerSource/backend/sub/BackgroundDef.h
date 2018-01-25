@@ -6,8 +6,8 @@
  * See LICENSE for details.
  */
 
-#ifndef _BACKGROUNDDEF__H
-#define _BACKGROUNDDEF__H
+#ifndef ENIGMA_BACKGROUNDDEF_H
+#define ENIGMA_BACKGROUNDDEF_H
 
 #include "backend/JavaStruct.h"
 

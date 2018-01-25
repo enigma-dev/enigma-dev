@@ -15,8 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef ENIGMA_BOX2D_SHAPE__H
-#define ENIGMA_BOX2D_SHAPE__H
+#ifndef ENIGMA_BOX2D_SHAPE_H
+#define ENIGMA_BOX2D_SHAPE_H
 
 #include <vector>
 using std::vector;
@@ -40,7 +40,7 @@ struct B2DShape {
 
   }
 
-}; 
+};
 extern vector<B2DShape*> b2dshapes;
 
 struct B2DFixture {
@@ -58,7 +58,7 @@ struct B2DFixture {
 
   }
 
-}; 
+};
 extern vector<B2DFixture*> b2dfixtures;
 
 #ifdef DEBUG_MODE
@@ -101,5 +101,4 @@ extern vector<B2DFixture*> b2dfixtures;
   #define check_cast(obj, shapeid, failv)
 #endif
 
-#endif // ENIGMA_BOX2D_SHAPE__H
-
+#endif // ENIGMA_BOX2D_SHAPE_H

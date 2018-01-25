@@ -17,8 +17,8 @@
 
 // For querying the graphic's output for debugging purposes, eg. triangles rendered, VRAM usage, and VBO's, etc.
 
-#ifndef __GLPROFILERH_
-#define __GLPROFILERH_
+#ifndef ENIGMA_GLPROFILER_H
+#define ENIGMA_GLPROFILER_H
 #include "../General/OpenGLHeaders.h"
 
-#endif
+#endif // ENIGMA_GLPROFILER_H

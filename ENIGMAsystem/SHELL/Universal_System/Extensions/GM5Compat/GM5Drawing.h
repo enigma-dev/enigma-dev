@@ -1,30 +1,30 @@
-// 
+//
 // Copyright (C) 2014 Seth N. Hetu
-// 
+//
 // This file is a part of the ENIGMA Development Environment.
-// 
+//
 // ENIGMA is free software: you can redistribute it and/or modify it under the
 // terms of the GNU General Public License as published by the Free Software
 // Foundation, version 3 of the license or any later version.
-// 
+//
 // This application and its source code is distributed AS-IS, WITHOUT ANY
 // WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
 // FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
 // details.
-// 
+//
 // You should have received a copy of the GNU General Public License along
 // with this code. If not, see <http://www.gnu.org/licenses/>
 //
 
 
-#ifndef ENIGMA_GM5COMPAT_DRAWING__H
-#define ENIGMA_GM5COMPAT_DRAWING__H
+#ifndef ENIGMA_GM5COMPAT_DRAWING_H
+#define ENIGMA_GM5COMPAT_DRAWING_H
 
 
-///This file contains drawing functions in the GM5 style. 
+///This file contains drawing functions in the GM5 style.
 ///GM5 always draws shapes as background+pen, with the pen having
-/// a variable thickness. The background can be "hollow", "solid", 
-/// or several other patterns. 
+/// a variable thickness. The background can be "hollow", "solid",
+/// or several other patterns.
 ///Note that drawing with these functions may incur some slowdown,
 /// due to the way that line widths are simulated.
 
@@ -38,7 +38,7 @@
 namespace enigma_user
 {
 
-//Placing these here allows Enigma to identify them as globals, so 
+//Placing these here allows Enigma to identify them as globals, so
 // they can be set properly from any script.
 //BUG: Invalid statements such as "brush_color = dafadf;" seem to be valid.
 extern gs_scalar pen_size;
@@ -74,5 +74,4 @@ void draw_polygon_end();
 
 }
 
-#endif // ENIGMA_GM5COMPAT_DRAWING__H
-
+#endif // ENIGMA_GM5COMPAT_DRAWING_H

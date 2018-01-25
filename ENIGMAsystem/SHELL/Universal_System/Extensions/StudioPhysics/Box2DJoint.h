@@ -15,8 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef ENIGMA_BOX2D_JOINT__H
-#define ENIGMA_BOX2D_JOINT__H
+#ifndef ENIGMA_BOX2D_JOINT_H
+#define ENIGMA_BOX2D_JOINT_H
 
 #include <Box2D/Box2D.h>
 #include "SB2Dfunctions.h"
@@ -35,5 +35,4 @@ struct jointInstance {
 };
 extern vector<jointInstance> joints;
 
-#endif // ENIGMA_BOX2D_JOINT__H
-
+#endif // ENIGMA_BOX2D_JOINT_H

@@ -26,8 +26,8 @@
 **                                                                              **
 \********************************************************************************/
 
-#ifndef _OBJECT_STORAGE__H
-#define _OBJECT_STORAGE__H
+#ifndef ENIGMA_OBJECT_STORAGE_H
+#define ENIGMA_OBJECT_STORAGE_H
 
 #include <map>
 #include <string>
@@ -89,7 +89,7 @@ struct parsed_object
   int id, sprite_index, mask_index, parent_index;
   bool visible, solid, persistent;
   double depth;
-  
+
   parsed_object* parent; ///< The parent of this object, or NULL if the object has none.
   vector<parsed_object*> children; ///< A vector of the children of this object; parsed_objects which list this object as a parent.
 
@@ -136,7 +136,7 @@ struct parsed_script
 struct parsed_room: parsed_object {
   struct parsed_icreatecode { parsed_event* pe; int object_index; };
   map<int,parsed_icreatecode> instance_create_codes;
-  //PreCreate code uses the same struct, as nothing is really different 
+  //PreCreate code uses the same struct, as nothing is really different
   map<int,parsed_icreatecode> instance_precreate_codes;
 };
 extern map<int,parsed_room*> parsed_rooms;

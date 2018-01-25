@@ -6,8 +6,8 @@
  * See LICENSE for details.
  */
 
-#ifndef _ENIGMASTRUCT__H
-#define _ENIGMASTRUCT__H
+#ifndef ENIGMA_ENIGMASTRUCT_H
+#define ENIGMA_ENIGMASTRUCT_H
 
 #include "JavaStruct.h"
 #include "resources/GameInformation.h"

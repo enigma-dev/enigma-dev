@@ -17,8 +17,8 @@
 
 #include "Universal_System/scalar.h"
 
-#ifndef ENIGMA_GL3_TEXTURESTRUCT__H
-#define ENIGMA_GL3_TEXTURESTRUCT__H
+#ifndef ENIGMA_GL3_TEXTURESTRUCT_H
+#define ENIGMA_GL3_TEXTURESTRUCT_H
 
 #include <vector>
 using std::vector;
@@ -34,4 +34,4 @@ struct TextureStruct {
 };
 extern vector<TextureStruct*> textureStructs;
 
-#endif // ENIGMA_GL3_TEXTURESTRUCT__H
+#endif // ENIGMA_GL3_TEXTURESTRUCT_H

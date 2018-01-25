@@ -19,8 +19,8 @@
 // We don't want to load ALURE from a DLL. Would be kind of a waste.
 #define ALURE_STATIC_LIBRARY 1
 
-#ifndef _AL_SYSTEM__H
-#define _AL_SYSTEM__H
+#ifndef ENIGMA_AL_SYSTEM_H
+#define ENIGMA_AL_SYSTEM_H
 #include <stddef.h>
 
 #ifdef __APPLE__

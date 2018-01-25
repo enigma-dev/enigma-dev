@@ -47,8 +47,8 @@ using std::string;
     BulletBody* w = bulletBodies[id];
 #endif
 
-#ifndef _BULLETRIGIDBODY__H
-#define _BULLETRIGIDBODY__H
+#ifndef ENIGMA_BULLETRIGIDBODY_H
+#define ENIGMA_BULLETRIGIDBODY_H
 
 #include <vector>
 using std::vector;
@@ -73,27 +73,27 @@ struct BulletBody {
     rigidBody = new btRigidBody(rigidBodyCI);
   }
 
-  ~BulletBody() 
+  ~BulletBody()
   {
     bulletWorlds[worldid]->dynamicsWorld->removeRigidBody(rigidBody);
     delete rigidBody->getMotionState();
     delete rigidBody;
   }
 
-  double getX() 
+  double getX()
   {
     btTransform trans;
     rigidBody->getMotionState()->getWorldTransform(trans);
     return trans.getOrigin().getX();
   }
 
-  double getY() 
+  double getY()
   {
     btTransform trans;
     rigidBody->getMotionState()->getWorldTransform(trans);
     return trans.getOrigin().getY();
   }
-  
+
   double getZ()
   {
     btTransform trans = rigidBody->getWorldTransform();
@@ -169,7 +169,7 @@ struct BulletBody {
     return rigidBody->getOrientation().getW();
   }
 
-}; 
+};
 extern vector<BulletBody*> bulletBodies;
 
 #endif

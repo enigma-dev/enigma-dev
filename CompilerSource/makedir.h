@@ -15,8 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef _WORKDIR_H
-#define _WORKDIR_H
+#ifndef ENIGMA_WORKDIR_H
+#define ENIGMA_WORKDIR_H
 
 #include <cstdlib>
 #include <string>
@@ -32,4 +32,4 @@ string myReplace(string str, const string& oldStr, const string& newStr);
 string escapeEnv(string str, string env);
 string escapeEnv(string str);
 
-#endif //_WORKDIR_H
+#endif // ENIGMA_WORKDIR_H

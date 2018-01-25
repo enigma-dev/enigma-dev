@@ -54,8 +54,8 @@ using std::string;
     c w = (c) bulletWorlds[id]->dynamicsWorld;
 #endif
 
-#ifndef _BULLETWORLD__H
-#define _BULLETWORLD__H
+#ifndef ENIGMA_BULLETWORLD_H
+#define ENIGMA_BULLETWORLD_H
 
 #include <vector>
 using std::vector;
@@ -115,7 +115,7 @@ struct BulletWorld {
     type = enigma_user::b3d_world_simple;
   }
 
-  ~BulletWorld() 
+  ~BulletWorld()
   {
     delete dynamicsWorld;
     delete solver;
@@ -124,11 +124,11 @@ struct BulletWorld {
     delete broadphase;
   }
 
-  void update(double timestep, double iterations) 
+  void update(double timestep, double iterations)
   {
     dynamicsWorld->stepSimulation(timestep, iterations);
   }
-}; 
+};
 extern vector<BulletWorld*> bulletWorlds;
 
 #endif

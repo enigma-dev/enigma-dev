@@ -16,8 +16,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef _WIDGETS_MANDATORY__H
-#define _WIDGETS_MANDATORY__H
+#ifndef ENIGMA_WIDGETS_MANDATORY_H
+#define ENIGMA_WIDGETS_MANDATORY_H
 
 #include <string>
 using std::string;
@@ -42,8 +42,8 @@ inline int action_show_message(string str)
 {
   return show_message(str);
 }
-void show_info(string text=enigma::gameInfoText, int bgcolor=enigma::gameInfoBackgroundColor, int left=enigma::gameInfoLeft, int top=enigma::gameInfoTop, int width=enigma::gameInfoWidth, int height=enigma::gameInfoHeight, 
-	bool embedGameWindow=enigma::gameInfoEmbedGameWindow, bool showBorder=enigma::gameInfoShowBorder, bool allowResize=enigma::gameInfoAllowResize, bool stayOnTop=enigma::gameInfoStayOnTop, 
+void show_info(string text=enigma::gameInfoText, int bgcolor=enigma::gameInfoBackgroundColor, int left=enigma::gameInfoLeft, int top=enigma::gameInfoTop, int width=enigma::gameInfoWidth, int height=enigma::gameInfoHeight,
+	bool embedGameWindow=enigma::gameInfoEmbedGameWindow, bool showBorder=enigma::gameInfoShowBorder, bool allowResize=enigma::gameInfoAllowResize, bool stayOnTop=enigma::gameInfoStayOnTop,
 	bool pauseGame=enigma::gameInfoPauseGame, string caption=enigma::gameInfoCaption);
 static inline void action_show_info() { show_info(); }
 

@@ -15,8 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef _SOUND_RESOURCE__H
-#define _SOUND_RESOURCE__H
+#ifndef ENIGMA_SOUND_RESOURCE_H
+#define ENIGMA_SOUND_RESOURCE_H
 #include "../General/ASadvanced.h"
 
 #ifdef DEBUG_MODE
@@ -33,7 +33,7 @@ enum load_state {
     LOADSTATE_INDICATED,
     LOADSTATE_COMPLETE
 };
-  
+
 struct SoundResource
 {
     unsigned buf[3]; // The buffer-id of the sound data
