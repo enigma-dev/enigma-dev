@@ -65,7 +65,7 @@ float ini_read_real(std::string section, std::string key, float defaultValue)
 	char res[255];
 	char def[255];
 	sprintf(def, "%f", defaultValue);
-	GetPrivateProfileString(section.c_str(), key.c_str(), def, res, 255, iniFilename.c_str()); 
+	GetPrivateProfileString(section.c_str(), key.c_str(), def, res, 255, iniFilename.c_str());
 	return atof(res);
 	//return GetPrivateProfileInt(section.c_str(), key.c_str(), defaultValue, iniFilename.c_str());
 }
@@ -164,7 +164,7 @@ int file_copy(std::string fname, std::string newname) {
 int directory_exists(std::string dname) {
   DWORD dwAttrib = GetFileAttributes(dname.c_str());
 
-  return (dwAttrib != INVALID_FILE_ATTRIBUTES && 
+  return (dwAttrib != INVALID_FILE_ATTRIBUTES &&
          (dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
 }
 
@@ -189,7 +189,7 @@ int directory_create(std::string dname) {
     }
 }
 
-int directory_delete(std::string dname) {
+int directory_destroy(std::string dname) {
   BOOL result = RemoveDirectory(dname.c_str());
   if (result) return 1;
   else return 0;
