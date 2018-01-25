@@ -1,7 +1,7 @@
 /**
   @file  language_adapter.h
   @brief Defines a class by which ENIGMA can interface with and output to other languages.
-  
+
   @section License
     Copyright (C) 2008-2012 Josh Ventura
     Copyright (C) 2014 Seth N. Hetu
@@ -11,7 +11,7 @@
     terms of the GNU General Public License as published by the Free Software
     Foundation, version 3 of the license or any later version.
 
-    This application and its source code is distributed AS-IS, WITHOUT ANY WARRANTY; 
+    This application and its source code is distributed AS-IS, WITHOUT ANY WARRANTY;
     without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
     PURPOSE. See the GNU General Public License for more details.
 
@@ -19,8 +19,8 @@
     with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef _LANGUAGE_ADAPTER__H
-#define _LANGUAGE_ADAPTER__H
+#ifndef ENIGMA_LANGUAGE_ADAPTER_H
+#define ENIGMA_LANGUAGE_ADAPTER_H
 
 #include <string>
 #include <vector>
@@ -33,7 +33,7 @@ using namespace std;
 
 struct language_adapter {
   virtual string get_name() = 0;
-  
+
   // Sizable utilities
   virtual int link_globals(parsed_object*, EnigmaStruct*, parsed_script*[], vector<parsed_script*>& tlines) = 0;
   virtual int link_ambiguous(parsed_object*, EnigmaStruct*, parsed_script*[], vector<parsed_script*>& tlines) = 0;
@@ -56,16 +56,16 @@ struct language_adapter {
   virtual int module_write_backgrounds(EnigmaStruct *es, FILE *gameModule) = 0;
   virtual int module_write_paths(EnigmaStruct *es, FILE *gameModule) = 0;
   virtual int module_write_fonts(EnigmaStruct *es, FILE *gameModule) = 0;
-  
+
   // Globals and locals
   virtual int  load_shared_locals() = 0;
   virtual void load_extension_locals() = 0;
   virtual bool global_exists(string name) = 0;
-  
+
   // Big things
   virtual syntax_error* definitionsModified(const char*, const char*) = 0;
   virtual int compile(EnigmaStruct *es, const char* exe_filename, int mode) = 0;
-  
+
   virtual ~language_adapter();
 };
 

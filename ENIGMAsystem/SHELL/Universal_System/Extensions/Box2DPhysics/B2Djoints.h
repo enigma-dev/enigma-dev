@@ -15,8 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef ENIGMA_B2D_JOINTS__H
-#define ENIGMA_B2D_JOINTS__H
+#ifndef ENIGMA_B2D_JOINTS_H
+#define ENIGMA_B2D_JOINTS_H
 
 #include <Box2D/Box2D.h>
 
@@ -36,5 +36,4 @@ void b2d_joint_enable_motor(int id);
 
 }
 
-#endif // ENIGMA_B2D_JOINTS__H
-
+#endif // ENIGMA_B2D_JOINTS_H

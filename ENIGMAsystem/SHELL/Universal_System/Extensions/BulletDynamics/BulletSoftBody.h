@@ -47,8 +47,8 @@ using std::string;
     BulletSoftBody* w = bulletSoftBodies[id];
 #endif
 
-#ifndef _BULLETSOFTBODY__H
-#define _BULLETSOFTBODY__H
+#ifndef ENIGMA_BULLETSOFTBODY_H
+#define ENIGMA_BULLETSOFTBODY_H
 
 #include <vector>
 using std::vector;
@@ -76,25 +76,25 @@ struct BulletSoftBody {
     softBody = new btSoftBody(softBodyWI, nodecount, test, new btScalar(5));
   }
 
-  ~BulletSoftBody() 
+  ~BulletSoftBody()
   {
     btSoftRigidDynamicsWorld* dynamicsWorld = (btSoftRigidDynamicsWorld*) bulletWorlds[worldid]->dynamicsWorld;
     dynamicsWorld->removeSoftBody(softBody);
     delete softBody;
   }
 
-  double getX() 
+  double getX()
   {
     btTransform trans = softBody->getWorldTransform();
     return trans.getOrigin().getX();
   }
 
-  double getY() 
+  double getY()
   {
     btTransform trans = softBody->getWorldTransform();
     return trans.getOrigin().getY();
   }
-  
+
   double getZ()
   {
     btTransform trans = softBody->getWorldTransform();
@@ -165,7 +165,7 @@ struct BulletSoftBody {
     return softBody->getWorldTransform().getRotation().getW();
   }
 
-}; 
+};
 extern vector<BulletSoftBody*> bulletSoftBodies;
 
 #endif

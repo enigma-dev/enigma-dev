@@ -47,8 +47,8 @@ using std::string;
     BulletShape* s = bulletShapes[id];
 #endif
 
-#ifndef _BULLETSHAPE__H
-#define _BULLETSHAPE__H
+#ifndef ENIGMA_BULLETSHAPE_H
+#define ENIGMA_BULLETSHAPE_H
 
 #include <vector>
 using std::vector;
@@ -67,21 +67,21 @@ struct BulletShape {
     shapebuilt = false;
   }
 
-  ~BulletShape() 
+  ~BulletShape()
   {
     delete colShape;
   }
 
-  void beginShape() 
+  void beginShape()
   {
     if (shapebuilt) {
       delete colShape;
-    } else {  
+    } else {
       shapebuilt = true;
     }
   }
 
-}; 
+};
 extern vector<BulletShape*> bulletShapes;
 
 #endif

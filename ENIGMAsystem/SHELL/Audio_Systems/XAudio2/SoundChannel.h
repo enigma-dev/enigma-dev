@@ -15,8 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef _SOUND_CHANNEL__H
-#define _SOUND_CHANNEL__H
+#ifndef ENIGMA_SOUND_CHANNEL_H
+#define ENIGMA_SOUND_CHANNEL_H
 #include "../General/ASadvanced.h"
 #include "XAsystem.h"
 

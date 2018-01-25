@@ -15,8 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef _DS_SYSTEM__H
-#define _DS_SYSTEM__H
+#ifndef ENIGMA_DS_SYSTEM_H
+#define ENIGMA_DS_SYSTEM_H
 
 #include <stddef.h>
 #include <windows.h>
@@ -30,10 +30,10 @@ extern size_t channel_num;
 extern float listenerPos[];
 extern float listenerVel[];
 extern float listenerOri[];
-	
+
 #include "SoundResource.h"
-	
-namespace enigma { 
+
+namespace enigma {
 
   int get_free_channel(double priority);
 

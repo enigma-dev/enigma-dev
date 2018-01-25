@@ -15,8 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef _XLIB_WINDOW__H
-#define _XLIB_WINDOW__H
+#ifndef ENIGMA_XLIB_WINDOW_H
+#define ENIGMA_XLIB_WINDOW_H
 
 #include "../General/PFwindow.h"
 #include "../General/PFmain.h"

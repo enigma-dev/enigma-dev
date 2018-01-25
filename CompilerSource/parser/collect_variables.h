@@ -26,8 +26,8 @@
 **                                                                              **
 \********************************************************************************/
 
-#ifndef COLLECT_VARIABLES__H
-#define COLLECT_VARIABLES__H
+#ifndef COLLECT_VARIABLES_H
+#define COLLECT_VARIABLES_H
 
 #include "object_storage.h"
 #include "languages/language_adapter.h"
