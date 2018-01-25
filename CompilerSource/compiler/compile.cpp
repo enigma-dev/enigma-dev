@@ -144,7 +144,8 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   	string make = MAKE_flags;
     make += " clean-game ";
   	make += "COMPILEPATH=\"" + compilepath + "\" ";
-  	make += "WORKDIR=\"" + makedir + "\" ";
+  	make += "WORKDIR=\"" + eobjs_directory + "\" ";
+    make += "CODEGEN=\"" + codegen_directory + "\" ";
   	make += "eTCpath=\"" + MAKE_tcpaths + "\"";
 
   	edbg << "Full command line: " << MAKE_location << " " << make << flushl;
@@ -296,7 +297,7 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
 
   GameSettings gameSet = es->gameSettings;
   edbg << "Writing executable information and resources." << flushl;
-  wto.open((makedir + "Preprocessor_Environment_Editable/Resources.rc").c_str(),ios_base::out);
+  wto.open((codegen_directory + "Preprocessor_Environment_Editable/Resources.rc").c_str(),ios_base::out);
   wto << license;
   wto << "#include <windows.h>\n";
 	if (gameSet.gameIcon != NULL && strlen(gameSet.gameIcon) > 0) {
@@ -323,7 +324,7 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   wto.close();
 
   edbg << "Writing modes and settings" << flushl;
-  wto.open((makedir + "Preprocessor_Environment_Editable/GAME_SETTINGS.h").c_str(),ios_base::out);
+  wto.open((codegen_directory + "Preprocessor_Environment_Editable/GAME_SETTINGS.h").c_str(),ios_base::out);
   wto << license;
   wto << "#define ASSUMEZERO 0\n";
   wto << "#define PRIMBUFFER 0\n";
@@ -335,20 +336,20 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   wto << '\n';
   wto.close();
 
-  wto.open((makedir + "Preprocessor_Environment_Editable/IDE_EDIT_modesenabled.h").c_str(),ios_base::out);
+  wto.open((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_modesenabled.h").c_str(),ios_base::out);
   wto << license;
   wto << "#define BUILDMODE " << 0 << "\n";
   wto << "#define DEBUGMODE " << 0 << "\n";
   wto << '\n';
   wto.close();
 
-  wto.open((makedir + "Preprocessor_Environment_Editable/IDE_EDIT_inherited_locals.h").c_str(),ios_base::out);
+  wto.open((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_inherited_locals.h").c_str(),ios_base::out);
   wto.close();
 
   //NEXT FILE ----------------------------------------
   //Object switch: A listing of all object IDs and the code to allocate them.
   edbg << "Writing object switch" << flushl;
-  wto.open((makedir + "Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h").c_str(),ios_base::out);
+  wto.open((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h").c_str(),ios_base::out);
     wto << license;
     wto << "#ifndef NEW_OBJ_PREFIX\n#  define NEW_OBJ_PREFIX\n#endif\n\n";
     for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
@@ -365,7 +366,7 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   //Resource names: Defines integer constants for all resources.
   int max;
   edbg << "Writing resource names and maxima" << flushl;
-  wto.open((makedir + "Preprocessor_Environment_Editable/IDE_EDIT_resourcenames.h").c_str(),ios_base::out);
+  wto.open((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_resourcenames.h").c_str(),ios_base::out);
   wto << license;
 
 
@@ -492,7 +493,7 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
   //NEXT FILE ----------------------------------------
   //Timelines: Defines "moment" lookup structures for timelines.
   edbg << "Writing timeline control information" << flushl;
-  wto.open((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_timelines.h").c_str(),ios_base::out);
+  wto.open((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_timelines.h").c_str(),ios_base::out);
   {
     wto << license;
     wto <<"namespace enigma {\n\n";
@@ -594,7 +595,8 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
   string make = MAKE_flags;
 
   make += " Game ";
-  make += "WORKDIR=\"" + makedir + "\" ";
+  make += "WORKDIR=\"" + eobjs_directory + "\" ";
+  make += "CODEGEN=\"" + codegen_directory + "\" ";
   make += mode == emode_debug? "GMODE=Debug ": mode == emode_design? "GMODE=Design ": mode == emode_compile?"GMODE=Compile ": "GMODE=Run ";
   make += "GRAPHICS=" + extensions::targetAPI.graphicsSys + " ";
   make += "AUDIO=" + extensions::targetAPI.audioSys + " ";
@@ -638,8 +640,13 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
   string flags = "";
 
   if (redirect_make) {
+    
+    std::string dirs = "CODEGEN=" + codegen_directory + " ";
+    dirs += "WORKDIR=" + eobjs_directory + " ";
+    e_execs("make", dirs, "required-directories");
+
     // Pick a file and flush it
-    const string redirfile = (makedir + "enigma_compile.log");
+    const string redirfile = (eobjs_directory + "enigma_compile.log");
     fclose(fopen(redirfile.c_str(),"wb"));
 
     // Redirect it
