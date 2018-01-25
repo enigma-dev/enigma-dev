@@ -22,9 +22,9 @@
 
 #include "general/darray.h"
 
- #include <cstdio>
+#include <cstdio>
 
-#ifdef _WIN32
+#if CURRENT_PLATFORM_ID == OS_WINDOWS
  #define dllexport extern "C" __declspec(dllexport)
  #include <windows.h>
  #define sleep Sleep
@@ -112,7 +112,7 @@ inline void write_desktop_entry(const std::string fPath, const GameSettings& gam
   wto << "MimeType=application/octet-stream;\n";
   wto.close();
 
-  #ifndef _WIN32
+  #if CURRENT_PLATFORM_ID != OS_WINDOWS
   chmod((fPath + ".desktop").c_str(), S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH);
   #endif
 }
