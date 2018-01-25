@@ -28,6 +28,7 @@ int EnigmaPlugin::Init()
   // Load Plugin
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
 #	define dlopen(x, y) LoadLibrary(x)
+#define dlerror() "Can't be arsed to implement windows errors" //FIXME
   std::string extension = ".dll";
   std::string prefix = "";
 #elif CURRENT_PLATFORM_ID ==  OS_MACOSX
@@ -45,6 +46,7 @@ int EnigmaPlugin::Init()
   if (!_handle)
   {
     std::cerr << "Error Loading Plugin '" << pluginName << "'" << std::endl;
+    std::cerr << dlerror() << std::endl;
     return PLUGIN_ERROR;
   }
 
@@ -56,7 +58,6 @@ int EnigmaPlugin::Init()
 #endif
 
   plugin_Init = reinterpret_cast<const char*(*)(EnigmaCallbacks*)>(BindFunc(_handle, "libInit"));
-  plugin_SetMakeDirectory = reinterpret_cast<void (*)(const char* dir)>(BindFunc(_handle, "libSetMakeDirectory"));
   plugin_CompileEGM = reinterpret_cast<int (*)(EnigmaStruct *es, const char* exe_filename, int mode)>(BindFunc(_handle, "compileEGMf"));
   plugin_NextResource = reinterpret_cast<const char* (*)()>(BindFunc(_handle, "next_available_resource"));
   plugin_FirstResource = reinterpret_cast<const char* (*)()>(BindFunc(_handle, "first_available_resource"));
@@ -76,9 +77,6 @@ int EnigmaPlugin::Init()
 
   CallBack ecb;
   plugin_Init(&ecb);
-
-  // Who Added this garbage and why?
-  //plugin_SetMakeDirectory("");
 
   return PLUGIN_SUCCESS;
 }
