@@ -25,6 +25,7 @@
 .DS_Store
 
 ValgrindOut.xml
+output_log.txt
 hs_err_pid*.log
 *.stackdump
 
