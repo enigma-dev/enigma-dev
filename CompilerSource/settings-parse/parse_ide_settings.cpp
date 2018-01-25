@@ -45,13 +45,11 @@ using namespace std;
 #include "compiler/compile_common.h"
 #include "makedir.h"
 
-string makedir = "";
-
 inline string fc(const char* fn);
 static void clear_ide_editables()
 {
   ofstream wto;
-  string f2comp = fc((makedir + "API_Switchboard.h").c_str());
+  string f2comp = fc((codegen_directory + "API_Switchboard.h").c_str());
   string f2write = license;
     string inc = "/include.h\"\n";
     f2write += "#include \"Platforms/" + (extensions::targetAPI.windowSys)            + "/include.h\"\n"
@@ -74,12 +72,12 @@ static void clear_ide_editables()
 
   if (f2comp != f2write)
   {
-    wto.open((makedir +"API_Switchboard.h").c_str(),ios_base::out);
+    wto.open((codegen_directory + "API_Switchboard.h").c_str(),ios_base::out);
       wto << f2write << endl;
     wto.close();
   }
 
-  wto.open((makedir +"Preprocessor_Environment_Editable/LIBINCLUDE.h").c_str());
+  wto.open((codegen_directory + "Preprocessor_Environment_Editable/LIBINCLUDE.h").c_str());
     wto << license;
     wto << "/*************************************************************\nOptionally included libraries\n****************************/\n";
     wto << "#define STRINGLIB 1\n#define COLORSLIB 1\n#define STDRAWLIB 1\n#define PRIMTVLIB 1\n#define WINDOWLIB 1\n"
@@ -87,7 +85,7 @@ static void clear_ide_editables()
     wto << "/***************\nEnd optional libs\n ***************/\n";
   wto.close();
 
-  wto.open((makedir +"Preprocessor_Environment_Editable/GAME_SETTINGS.h").c_str(),ios_base::out);
+  wto.open((codegen_directory + "Preprocessor_Environment_Editable/GAME_SETTINGS.h").c_str(),ios_base::out);
     wto << license;
     wto << "#define ASSUMEZERO 0\n";
     wto << "#define PRIMBUFFER 0\n";
@@ -140,21 +138,36 @@ void parse_ide_settings(const char* eyaml)
   setting::keyword_blacklist = settree.get("keyword-blacklist").toString();
 
   // Use a platform-specific make directory.
-  std::string make_directory = "./ENIGMA/";
+  eobjs_directory = settree.get("eobjs-directory").toString();
+  
+  if (eobjs_directory.empty())
+  {
+  #if CURRENT_PLATFORM_ID == OS_WINDOWS
+    eobjs_directory = "%LOCALAPPDATA%/ENIGMA/";
+  #else
+    eobjs_directory = "%HOME%/.enigma/";
+  #endif
+  }
+  
+  codegen_directory = settree.get("codegen-directory").toString();
+  
+  if (codegen_directory.empty())
+    codegen_directory = eobjs_directory;
+  
+//Now actually set it, taking backslashes into account.
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
-  make_directory = "%LOCALAPPDATA%/ENIGMA/";
-#elif CURRENT_PLATFORM_ID == OS_LINUX
-  make_directory = "%HOME%/.enigma/";
-#elif CURRENT_PLATFORM_ID == OS_MACOSX
-  make_directory = "%HOME%/.enigma/";
+  eobjs_directory = myReplace(escapeEnv(eobjs_directory), "\\","/");
+  codegen_directory = myReplace(escapeEnv(codegen_directory), "\\","/");
+#else
+  eobjs_directory = escapeEnv(eobjs_directory);
+  codegen_directory = escapeEnv(codegen_directory);
 #endif
 
-  //Now actually set it, taking backslashes into account.
-#if CURRENT_PLATFORM_ID == OS_WINDOWS
-	setMakeDirectory(myReplace(escapeEnv(make_directory), "\\","/"));
-#else
-	setMakeDirectory(escapeEnv(make_directory));
-#endif
+  if (eobjs_directory.back() != '/')
+    eobjs_directory += '/';
+    
+  if (codegen_directory.back() != '/')
+    codegen_directory += '/';
 
   //ide_dia_open();
 

@@ -43,13 +43,20 @@
 -Build Options:
     Layout: Grid
     Columns: 2
-    -make-directory:
+    -eobjs-directory:
         Type: Textfield
-        Label: Make Directory
+        Label: EOBJS Directory
         Default-Windows: "%LOCALAPPDATA%/ENIGMA/"
         Default-Linux: "%HOME%/.enigma/"
-        Default-MacOSX: "./ENIGMA/"
-        Default: "./ENIGMA/"
+        Default-MacOSX: "%HOME%/.enigma/"
+        Default: "%HOME%/.enigma/"
+    -codegen-directory:
+        Type: Textfield
+        Label: Codegen Directory
+        Default-Windows: "%LOCALAPPDATA%/ENIGMA/"
+        Default-Linux: "%HOME%/.enigma/"
+        Default-MacOSX: "%HOME%/.enigma/"
+        Default: "%HOME%/.enigma/"
     -inherit-objects:
         Type: Checkbox
         Label: Object Inheritance

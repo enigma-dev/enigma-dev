@@ -50,7 +50,7 @@ using namespace std;
 
 int lang_CPP::compile_writeRoomData(EnigmaStruct* es, parsed_object *EGMglobal, int mode)
 {
-  ofstream wto((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_roomarrays.h").c_str(),ios_base::out);
+  ofstream wto((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_roomarrays.h").c_str(),ios_base::out);
 
   wto << license << "namespace enigma {\n"
   << "  int room_loadtimecount = " << es->roomCount << ";\n";
@@ -189,7 +189,7 @@ int lang_CPP::compile_writeRoomData(EnigmaStruct* es, parsed_object *EGMglobal, 
 wto.close();
 
 
-wto.open((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_roomcreates.h").c_str(),ios_base::out);
+wto.open((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_roomcreates.h").c_str(),ios_base::out);
   wto << license;
   for (int i = 0; i < es->roomCount; i++)
   {

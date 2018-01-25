@@ -33,9 +33,7 @@ private:
   int searchCompilers(const std::string &target);
 
   int help(const std::string &str);
-  int output(const std::string &str);
   int mode(const std::string &str);
-  int workdir(const std::string &str);
   int parse(const std::string &str);
 
   int graphics(const std::string &str);

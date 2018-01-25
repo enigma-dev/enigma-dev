@@ -41,6 +41,13 @@ int main(int argc, char* argv[])
       mode = emode_design;
     else if (_mode == "Rebuild")
       mode = emode_rebuild;
+    else
+      mode = emode_invalid;
+      
+    if (mode == emode_invalid) {
+      std::cerr << "Invalid game mode: " << _mode << " aborting!" << std::endl;
+      return OPTIONS_ERROR;
+    }
 
     bool _run = options.GetOption("run").as<bool>();
     if (!_run) plugin.HandleGameLaunch();

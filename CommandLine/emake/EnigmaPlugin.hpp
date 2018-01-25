@@ -20,7 +20,8 @@ typedef enum
   emode_debug,
   emode_design,
   emode_compile,
-  emode_rebuild
+  emode_rebuild,
+  emode_invalid
 } GameMode;
 
 class EnigmaPlugin
@@ -35,7 +36,6 @@ public:
 
 private:
   std::function<const char*(EnigmaCallbacks*)> plugin_Init = nullptr;
-  std::function<void(const char*)> plugin_SetMakeDirectory = nullptr;
   std::function<int(EnigmaStruct*, const char*, int)> plugin_CompileEGM = nullptr;
   std::function<const char*()> plugin_NextResource = nullptr;
   std::function<const char*()> plugin_FirstResource = nullptr;

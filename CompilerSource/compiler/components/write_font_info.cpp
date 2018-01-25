@@ -38,7 +38,7 @@ using namespace std;
 #include "languages/lang_CPP.h"
 int lang_CPP::compile_writeFontInfo(EnigmaStruct* es)
 {
-  ofstream wto((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_fontinfo.h").c_str(),ios_base::out);
+  ofstream wto((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_fontinfo.h").c_str(),ios_base::out);
   wto << license << "#include \"Universal_System/fonts_internal.h\"" << endl
       << endl;
 

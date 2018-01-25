@@ -58,6 +58,7 @@ string MAKE_flags, MAKE_paths, MAKE_tcpaths, MAKE_location, TOPLEVEL_cflags, TOP
 
 static char errbuf[1024];
 static string lastbearings;
+static string lastcodegen_directory;
 
 // This function parses one command line specified to the eYAML into a filename string and a parameter string,
 // then returns whether or not the output from this call must be manually redirected to the output file ofile.
@@ -102,12 +103,12 @@ static inline bool toolchain_parseout(string line, string &exename, string &comm
     bool mblank = false;
     srp = command.find("$blank");
     while (srp != string::npos) {
-      command.replace(srp,6,("\"" + makedir + "enigma_blank.txt\"").c_str());
+      command.replace(srp,6,("\"" + codegen_directory + "enigma_blank.txt\"").c_str());
       srp = command.find("$blank");
       mblank = true;
     }
     if (mblank)
-      fclose(fopen((makedir + "enigma_blank.txt").c_str(),"wb"));
+      fclose(fopen((codegen_directory + "enigma_blank.txt").c_str(),"wb"));
 
   /* Return whether or not to redirect */
   return redir;
@@ -116,10 +117,12 @@ static inline bool toolchain_parseout(string line, string &exename, string &comm
 // Read info about our compiler configuration and run with it
 const char* establish_bearings(const char *compiler)
 {
-  if (compiler == lastbearings)
+  if (compiler == lastbearings && codegen_directory == lastcodegen_directory)
     return 0;
+  
   lastbearings = compiler;
-
+  lastcodegen_directory = codegen_directory;
+  
   string GCC_location;
   string compfq = compiler; //Filename of compiler.ey
   ifstream compis(compfq.c_str());
@@ -151,15 +154,19 @@ const char* establish_bearings(const char *compiler)
   TOPLEVEL_ldflags = compey.get("ldflags");
   TOPLEVEL_ldlibs = compey.get("ldlibs");
   TOPLEVEL_rcflags = compey.get("rcflags");
+  
+  std::string dirs = "CODEGEN=" + codegen_directory + " ";
+  dirs += "WORKDIR=" + eobjs_directory + " ";
+  e_execs("make", dirs, "required-directories");
 
   /* Get a list of all macros defined by our compiler.
   ** These will help us through parsing available libraries.
   ***********************************************************/
   if ((cmd = compey.get("defines")) == "")
     return (sprintf(errbuf,"Compiler descriptor file `%s` does not specify 'defines' executable.\n", compfq.c_str()), errbuf);
-  redir = toolchain_parseout(cmd, toolchainexec,parameters,("\"" + makedir + "enigma_defines.txt\""));
+  redir = toolchain_parseout(cmd, toolchainexec,parameters,("\"" + codegen_directory + "enigma_defines.txt\""));
   cout << "Read key `defines` as `" << cmd << "`\nParsed `" << toolchainexec << "` `" << parameters << "`: redirect=" << (redir?"yes":"no") << "\n";
-  got_success = !(redir? e_execsp(toolchainexec, parameters, ("> \"" + makedir + "enigma_defines.txt\""),MAKE_paths) : e_execsp(toolchainexec, parameters, MAKE_paths));
+  got_success = !(redir? e_execsp(toolchainexec, parameters, ("> \"" + codegen_directory + "enigma_defines.txt\""),MAKE_paths) : e_execsp(toolchainexec, parameters, MAKE_paths));
   if (!got_success) return "Call to 'defines' toolchain executable returned non-zero!\n";
   else cout << "Call succeeded" << endl;
 
@@ -168,15 +175,15 @@ const char* establish_bearings(const char *compiler)
   ****************************************************/
   if ((cmd = compey.get("searchdirs")) == "")
     return (sprintf(errbuf,"Compiler descriptor file `%s` does not specify 'searchdirs' executable.", compfq.c_str()), errbuf);
-  redir = toolchain_parseout(cmd, toolchainexec,parameters,("\"" + makedir + "enigma_searchdirs.txt\""));
+  redir = toolchain_parseout(cmd, toolchainexec,parameters,("\"" + codegen_directory + "enigma_searchdirs.txt\""));
   cout << "Read key `searchdirs` as `" << cmd << "`\nParsed `" << toolchainexec << "` `" << parameters << "`: redirect=" << (redir?"yes":"no") << "\n";
-  got_success = !(redir? e_execsp(toolchainexec, parameters, ("&> \"" + makedir + "enigma_searchdirs.txt\""), MAKE_paths) : e_execsp(toolchainexec, parameters, MAKE_paths));
+  got_success = !(redir? e_execsp(toolchainexec, parameters, ("&> \"" + codegen_directory + "enigma_searchdirs.txt\""), MAKE_paths) : e_execsp(toolchainexec, parameters, MAKE_paths));
   if (!got_success) return "Call to 'searchdirs' toolchain executable returned non-zero!";
   else cout << "Call succeeded" << endl;
 
   /* Parse include directories
   ****************************************/
-    string idirs = fc((makedir + "enigma_searchdirs.txt").c_str());
+    string idirs = fc((codegen_directory + "enigma_searchdirs.txt").c_str());
     if (idirs == "")
       return "Invalid search directories returned. Error 6.";
 
@@ -193,7 +200,7 @@ const char* establish_bearings(const char *compiler)
     }
     jdi::builtin->add_search_directory("ENIGMAsystem/SHELL/");
     jdi::builtin->add_search_directory("ENIGMAsystem/SHELL/Mock_JDI_Headers/");
-    jdi::builtin->add_search_directory(makedir.c_str());
+    jdi::builtin->add_search_directory(codegen_directory.c_str());
 
     while (is_useless(idirs[++pos]));
 
@@ -216,11 +223,11 @@ const char* establish_bearings(const char *compiler)
 
   /* Parse built-in #defines
   ****************************/
-    llreader macro_reader((makedir + "enigma_defines.txt").c_str());
+    llreader macro_reader((codegen_directory + "enigma_defines.txt").c_str());
     if (!macro_reader.is_open())
       return "Call to `defines' toolchain executable returned no data.\n";
 
-    int res = jdi::builtin->parse_C_stream(macro_reader, (makedir + "enigma_defines.txt").c_str());
+    int res = jdi::builtin->parse_C_stream(macro_reader, (codegen_directory + "enigma_defines.txt").c_str());
     if (res)
       return "Highly unlikely error: Compiler builtins failed to parse. But stupid things can happen when working with files.";
 

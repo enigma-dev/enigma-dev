@@ -20,17 +20,16 @@
 
 #include <cstdlib>
 #include <string>
-using std::string;
 
 #include "makedir.h"
 #include "settings.h"
 #include "OS_Switchboard.h" //Tell us where the hell we are
 
-extern string makedir;
+extern std::string eobjs_directory;
+extern std::string codegen_directory;
 
 string myReplace(string str, const string& oldStr, const string& newStr);
 string escapeEnv(string str, string env);
 string escapeEnv(string str);
-void setMakeDirectory(string dir);
 
 #endif //_WORKDIR_H

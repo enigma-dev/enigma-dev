@@ -70,13 +70,8 @@ extern const char* establish_bearings(const char *compiler);
 
 #include "makedir.h"
 
-dllexport void libSetMakeDirectory(const char* dir) {
-#if CURRENT_PLATFORM_ID == OS_WINDOWS
-	setMakeDirectory(myReplace(escapeEnv(dir), "\\","/"));
-#else
-	setMakeDirectory(escapeEnv(dir));
-#endif
-}
+//FIXME: remove this function from enigma.jar and here
+dllexport void libSetMakeDirectory(const char* dir) {} 
 
 dllexport const char* libInit(EnigmaCallbacks* ecs)
 {

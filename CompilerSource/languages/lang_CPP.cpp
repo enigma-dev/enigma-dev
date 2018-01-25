@@ -96,7 +96,7 @@ syntax_error *lang_CPP::definitionsModified(const char* wscode, const char* targ
   main_context = new jdi::context();
   
   cout << "Dumping whiteSpace definitions..." << endl;
-  FILE *of = wscode ? fopen((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_whitespace.h").c_str(),"wb") : NULL;
+  FILE *of = wscode ? fopen((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_whitespace.h").c_str(),"wb") : NULL;
   if (of) fputs(wscode,of), fclose(of);
   
   cout << "Opening ENIGMA for parse..." << endl;
