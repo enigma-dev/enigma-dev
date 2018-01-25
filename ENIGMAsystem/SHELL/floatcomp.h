@@ -15,8 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef _FLOATCMP__H
-#define _FLOATCMP__H
+#ifndef ENIGMA_FLOATCMP_H
+#define ENIGMA_FLOATCMP_H
 #include <cmath>
 static inline bool fzero(double x)   { return fabs(x) < 1e-8; }
 static inline bool fnzero(double x)  { return fabs(x) >= 1e-8; }

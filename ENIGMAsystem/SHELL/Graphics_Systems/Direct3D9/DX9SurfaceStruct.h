@@ -15,8 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef DX9_SURFSTRUCT__H
-#define DX9_SURFSTRUCT__H
+#ifndef DX9_SURFSTRUCT_H
+#define DX9_SURFSTRUCT_H
 #include <windows.h>
 #include <string>
 #include "Direct3D9Headers.h"
@@ -36,29 +36,29 @@ namespace enigma
     Surface(): surf(NULL), tex(0), width(0), height(0) {
 
     };
-    
+
     void Release() {
       if (surf != NULL) {
         surf->Release();
         surf = NULL;
       }
     }
-    
+
     ~Surface() {
       Release();
     };
-    
+
     void OnDeviceLost() {
       Release();
       textureStructs[tex]->OnDeviceLost();
     }
-    
+
     void OnDeviceReset() {
       textureStructs[tex]->OnDeviceReset();
       textureStructs[tex]->gTexture->GetSurfaceLevel(0,&surf);
     }
   };
-  
+
   extern vector<Surface*> Surfaces;
 }
 
@@ -85,4 +85,4 @@ namespace enigma
     enigma::Surface* surf = enigma::Surfaces[id];
 #endif
 
-#endif // DX9_SURFSTRUCT__H
+#endif // DX9_SURFSTRUCT_H

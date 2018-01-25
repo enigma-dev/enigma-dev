@@ -15,8 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef ENIGMA_GL_TEXTURESTRUCT__H
-#define ENIGMA_GL_TEXTURESTRUCT__H
+#ifndef ENIGMA_GL_TEXTURESTRUCT_H
+#define ENIGMA_GL_TEXTURESTRUCT_H
 
 #include "Universal_System/scalar.h"
 #include "GLSamplerState.h"
@@ -39,4 +39,4 @@ unsigned get_texture(int texid);
 void graphics_samplers_apply();
 }
 
-#endif // ENIGMA_GL_TEXTURESTRUCT__H
+#endif // ENIGMA_GL_TEXTURESTRUCT_H

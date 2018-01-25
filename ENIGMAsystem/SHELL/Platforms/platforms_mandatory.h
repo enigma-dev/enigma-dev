@@ -16,8 +16,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef PLATFORMS_MANDATORY__H
-#define PLATFORMS_MANDATORY__H
+#ifndef PLATFORMS_MANDATORY_H
+#define PLATFORMS_MANDATORY_H
 
 // This file contains functions that are required to be implemented by any API
 // under this directory, /Platforms/. They are not required to do anything at all
@@ -41,7 +41,7 @@ namespace enigma
 
   // This method is called at load time. It allows for initializing arrays for input.
   void input_initialize();
-  
+
   int initialize_everything();
 }
 
