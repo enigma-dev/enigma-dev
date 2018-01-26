@@ -247,22 +247,8 @@ namespace enigma
         return 1L;
 
       case WM_PAINT:
-
         DefWindowProc(hWndParameter, message, wParam, lParam);
         return 0;
-
-        /*
-      case WM_TOUCH:
-      if (touch_extension_callback != NULL) {
-        return touch_extension_callback(hWndParameter, message, wParam, lParam);
-      }
-      return 0;
-*/
-  //#ifdef DSHOW_EXT
-  //#include <dshow.h>
-  //case WM_GRAPHNOTIFY:
-    //TODO: Handle DirectShow media events
-  //return 0;
     }
     return DefWindowProc (hWndParameter, message, wParam, lParam);
   }
