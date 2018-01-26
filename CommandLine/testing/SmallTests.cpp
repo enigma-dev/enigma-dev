@@ -14,7 +14,7 @@ namespace {
 using std::map;
 using std::string;
 using std::vector;
-typedef map<string, string> NameMap;
+using NameMap = map<string, string>;
 
 const char *const kSimpleTestDirectory = "CommandLine/testing/SimpleTests";
 const char *const kDrivenTestDirectory = "CommandLine/testing/Tests";
@@ -24,29 +24,24 @@ void read_files(string directory,
   boost::filesystem::path targetDir(directory);
   boost::filesystem::directory_iterator iter(targetDir), eod;
   BOOST_FOREACH(boost::filesystem::path const& i, std::make_pair(iter, eod)) {
-    string fullname = i.filename().string(), filename = fullname, ext;
-    size_t dot = filename.find_last_of('.');
-    if (dot != 0 && dot != string::npos) {
-      ext = filename.substr(dot + 1);
-      for (size_t i = 0; i < ext.size(); ++i) {
-        if (ext[i] >= 'A' && ext[i] <= 'Z') ext += 'a' - 'A';
-      }
-      filename = filename.substr(0, dot);
+    string fullname = i.filename().string();
+    string filename = i.filename().stem().string();
+    string ext = i.filename().extension().string();
+    std::cout << fullname << " = " << filename << " + " << ext << std::endl;
+    for (size_t i = 0; i < ext.size(); ++i) {
+      if (ext[i] >= 'A' && ext[i] <= 'Z') ext += 'a' - 'A';
     }
     if (!games && others) games = others;
     if (!sources && others) sources = others;
-    if (games && ext == "sog") {
+    if (games && ext == ".sog") {
       games->insert(NameMap::value_type(fullname, filename));
-    } else if (sources && (ext == "cpp" || ext == "cc")) {
+    } else if (sources && (ext == ".cpp" || ext == ".cc")) {
       sources->insert(NameMap::value_type(fullname, filename));
     } else if (others) {
       others->insert(NameMap::value_type(fullname, filename));
     }
   }
 }
-
-using std::cout;
-using std::endl;
 
 TEST(GTestHarness, SanityCheck) {
   NameMap games, sources, others;

@@ -307,6 +307,7 @@ int TestHarness::run_to_completion(const string &game, const TestConfig &tc) {
     if (wr) {
       if (wr != -1) {
         if (WIFEXITED(status)) {
+          gather_coverage();
           return WEXITSTATUS(status);
         }
         return ErrorCodes::GAME_CRASHED;
