@@ -728,13 +728,11 @@ int window_set_cursor(int c)
   switch (c)
   {
       case cr_default:
+      case cr_arrow:
           cursor = IDC_ARROW;
           break;
       case cr_none:
           cursor = NULL;
-          break;
-      case cr_arrow:
-          cursor = IDC_ARROW;
           break;
       case cr_cross:
           cursor = IDC_CROSS;
