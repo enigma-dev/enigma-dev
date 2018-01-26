@@ -72,12 +72,7 @@ int window_set_cursor(int c);
 extern int cursor_sprite;
 inline void action_set_cursor(int spr, bool c) {
   cursor_sprite = spr;
-
-  if (c) {
-    window_set_cursor(0); // no system cursor
-  } else {
-    window_set_cursor(-1); // default system cursor
-  }
+  window_set_cursor(c ? 0 : -1);
 }
 int window_get_cursor();
 void window_set_region_scale(double scale, bool adaptwindow);
