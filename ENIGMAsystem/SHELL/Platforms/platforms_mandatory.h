@@ -69,9 +69,10 @@ void window_set_fullscreen(bool full);
 bool window_get_fullscreen();
 
 int window_set_cursor(int c);
+extern int cursor_sprite;
 inline void action_set_cursor(int spr, bool c) {
-	// TODO: if spr exists should create a sprite cursor, game maker allows
-	// both the sprite cursor and system cursor to be visible at the same time
+  cursor_sprite = spr;
+
 	if (c) {
 		window_set_cursor(0); // no system cursor
 	} else {
