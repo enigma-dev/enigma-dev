@@ -1,6 +1,6 @@
 float f = (float) -.5;
 double d = -.5;
-// long double ld = -.5;
+long double ld = -.5;
 int i = -30;
 unsigned u = 30;
 long l = -60;
@@ -9,6 +9,10 @@ variant v = -120;
 var a = -150;
 
 cons_show_message("Test start!");
+
+gtest_assert_true(f && d && ld && i && u && l && lu && (v != 0) && (a != 0),
+                  "Someone zeroed one of the inputs.");
+
 gtest_assert_eq(abs(f),  -f);
 gtest_assert_eq(abs(d),  -d);
 // gtest_assert_eq(abs(ld), -ld);
