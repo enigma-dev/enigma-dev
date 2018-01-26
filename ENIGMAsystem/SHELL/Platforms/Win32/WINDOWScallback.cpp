@@ -56,7 +56,7 @@ namespace enigma
   extern int windowX, windowY, windowWidth, windowHeight, windowColor;
   extern int viewScale;
   extern double scaledWidth, scaledHeight;
-  extern char* currentCursor;
+  extern HCURSOR currentCursor;
   extern HWND hWnd;
   extern HDC window_hDC;
   extern LONG_PTR getwindowstyle();
@@ -166,7 +166,7 @@ namespace enigma
         // Set the user cursor if the mouse is in the client area of the window, otherwise let Windows handle setting the cursor
         // since it knows how to set the gripper cursor for window resizing. This is exactly how GM handles it.
         if (LOWORD(lParam) == HTCLIENT) {
-          SetCursor(LoadCursor(NULL, currentCursor));
+          SetCursor(currentCursor);
           return TRUE;
         }
         break;
