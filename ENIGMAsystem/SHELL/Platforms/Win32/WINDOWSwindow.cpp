@@ -760,6 +760,7 @@ int window_set_cursor(int c)
           break;
       case cr_drag:
           // Delphi-made?
+          cursor = IDC_HAND;
           break;
       case cr_nodrop:
           cursor = IDC_NO;
