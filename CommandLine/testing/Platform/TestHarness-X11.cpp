@@ -1,5 +1,7 @@
 #include "TestHarness.hpp"
 
+#include <gtest/gtest.h>
+
 #include <cstdint>
 #include <cstdio>
 #include <iostream>
@@ -16,7 +18,10 @@ using std::to_string;
 using std::unique_ptr;
 using std::getenv;
 
-void gather_coverage();
+void gather_coverage(const TestConfig&);
+bool config_supports_lcov(const TestConfig &tc) {
+  return tc.compiler.empty() || tc.compiler == "TestHarness";
+}
 
 string get_window_caption(Display *disp, Window win) {
   char *caption;
@@ -125,16 +130,15 @@ class X11_TestHarness final: public TestHarness {
   void wait() final {
     usleep(250000);
   }
-  X11_TestHarness(Display *disp, pid_t game_pid, Window game_window, bool lcov):
-      pid(game_pid), window_id(game_window), display(disp), run_lcov(lcov) {}
+  X11_TestHarness(Display *disp, pid_t game_pid, Window game_window,
+                  const TestConfig &tc):
+      pid(game_pid), window_id(game_window), display(disp), test_config(tc) {}
   ~X11_TestHarness() {
     if (game_is_running()) {
       kill(pid, SIGKILL);
       std::cerr << "Game still running; killed" << std::endl;
     }
-    if (run_lcov) {
-      gather_coverage();
-    }
+    gather_coverage(test_config);
   }
 
  private:
@@ -142,6 +146,7 @@ class X11_TestHarness final: public TestHarness {
   Window window_id;
   Display *display;
   bool run_lcov;
+  TestConfig test_config;
   int return_code = 0x10000;
 };
 
@@ -191,27 +196,32 @@ int build_game(const string &game, const TestConfig &tc, const string &out) {
   abort();
 }
 
-void gather_coverage() {
+void gather_coverage(const TestConfig &config) {
   static int test_num = 0;
   test_num++;
+
+  if (!config_supports_lcov(config)) {
+    return;
+  }
 
   pid_t child = fork();
   if (child) {
     if (child == -1) {
-      std::cerr << "Coverage failed to execute for test " << test_num << "!\n";
+      ADD_FAILURE() << "Coverage failed to execute for test " << test_num << '!';
       return;
     }
     int status = -1;
     if (waitpid(child, &status, 0) == -1) {
-      std::cerr << "Waiting on coverage report for test " << test_num
-                << " somehow failed..." << std::endl;
+      ADD_FAILURE() << "Waiting on coverage report for test " << test_num
+                    << " somehow failed...";
       return;
     }
     if (WIFEXITED(status)) {
       int code = WEXITSTATUS(status);
       if (code) {
-        std::cerr << "LCOV run for test " << test_num << " exited with status "
-                  << code << "..." << std::endl;
+        ADD_FAILURE() << "LCOV run for test " << test_num
+                      << " exited with status " << code << "...";
+        return;
       }
       std::cout << "Coverage completed successfully for test " << test_num
                 << '.' << std::endl;
@@ -219,8 +229,8 @@ void gather_coverage() {
     return;
   }
 
-  string src_dir = "--directory=" + string(getenv("HOME"))
-                 + "/.enigma/.eobjs/Linux/Linux/TestHarness/Debug";
+  string src_dir = "--directory=/tmp/ENIGMA/.eobjs/Linux/Linux/TestHarness/"
+                 + config.get_or(&TestConfig::mode, "Debug") + "/";
   string out_file = "--output-file=coverage_" + to_string(test_num) + ".info";
 
   const char *const lcovArgs[] = {
@@ -264,15 +274,13 @@ TestHarness::launch_and_attach(const string &game, const TestConfig &tc) {
   if (pid == -1) return nullptr;
   usleep(250000); // Give the window a quarter second to load and display.
 
-  bool gen_cov_report = tc.compiler.empty() || tc.compiler == "TestHarness";
-
   Display *display = XOpenDisplay(0);
   Window root = XDefaultRootWindow(display);
   for (int i = 0; i < 50; ++i) {  // Try for over ten seconds to grab the window
     Window win = find_window_by_pid(display, root, pid);
     if (win != None)
       return std::unique_ptr<X11_TestHarness>(
-          new X11_TestHarness(display, pid, win, gen_cov_report));
+          new X11_TestHarness(display, pid, win, tc));
     usleep(250000);
   }
 
@@ -307,7 +315,7 @@ int TestHarness::run_to_completion(const string &game, const TestConfig &tc) {
     if (wr) {
       if (wr != -1) {
         if (WIFEXITED(status)) {
-          gather_coverage();
+          gather_coverage(tc);
           return WEXITSTATUS(status);
         }
         return ErrorCodes::GAME_CRASHED;
