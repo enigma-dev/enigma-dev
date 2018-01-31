@@ -15,8 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef _ENIGMA_CALLBACKS_EVENTS__H
-#define _ENIGMA_CALLBACKS_EVENTS__H
+#ifndef ENIGMA_CALLBACKS_EVENTS_H
+#define ENIGMA_CALLBACKS_EVENTS_H
 
 namespace enigma {
   // Before collision event.
@@ -32,5 +32,4 @@ namespace enigma {
   void register_callback_clean_up_roomend(void (*callback)());
 }
 
-#endif // _ENIGMA_CALLBACKS_EVENTS__H
-
+#endif // ENIGMA_CALLBACKS_EVENTS_H

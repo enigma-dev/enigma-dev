@@ -1,13 +1,13 @@
 /*
  * Copyright (C) 2010 IsmAvatar <IsmAvatar@gmail.com>
- * 
+ *
  * This file is part of Enigma Plugin.
  * Enigma Plugin is free software and comes with ABSOLUTELY NO WARRANTY.
  * See LICENSE for details.
  */
 
-#ifndef _ROOM__H
-#define _ROOM__H
+#ifndef ENIGMA_ROOM_H
+#define ENIGMA_ROOM_H
 
 
 #include "backend/sub/BackgroundDef.h"
@@ -53,7 +53,7 @@ struct Room
 	int scrollBarX;
 	int scrollBarY;
 	// ^^^ useless stuff ^^^ //
-	
+
 	// Ism thought this one was useless:
 	boolean enableViews;
 

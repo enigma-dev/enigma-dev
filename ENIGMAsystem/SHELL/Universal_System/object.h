@@ -31,8 +31,8 @@
   @summary This file outlines the most basic local variables needed by different systems
 */
 
-#ifndef _object_h
-#define _object_h
+#ifndef ENIGMA_OBJECT_H
+#define ENIGMA_OBJECT_H
 
 namespace enigma_user {
   enum {
@@ -114,4 +114,4 @@ bool object_get_visible(int objid);
 bool object_is_ancestor(int objid, int acid);
 }
 
-#endif //_object_h
+#endif // ENIGMA_OBJECT_H

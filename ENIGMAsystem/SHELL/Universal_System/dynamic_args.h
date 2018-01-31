@@ -25,8 +25,8 @@
 **                                                                              **
 \********************************************************************************/
 
-#ifndef _VARARGS_H
-#define _VARARGS_H
+#ifndef ENIGMA_VARARGS_H
+#define ENIGMA_VARARGS_H
 namespace enigma {
   struct varargs
   {

@@ -16,8 +16,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef _SOUND_RESOURCE__H
-#define _SOUND_RESOURCE__H
+#ifndef ENIGMA_SOUND_RESOURCE_H
+#define ENIGMA_SOUND_RESOURCE_H
 #include "../General/ASadvanced.h"
 
 #ifdef __APPLE__
@@ -39,7 +39,7 @@ enum load_state {
     LOADSTATE_INDICATED,
     LOADSTATE_COMPLETE
 };
-  
+
 struct SoundResource
 {
     ALuint buf[3]; // The buffer-id of the sound data
@@ -59,7 +59,7 @@ struct SoundResource
 	SoundResource(): stream(0), cleanup(0), userdata(0), seek(0), kind(0), loaded(LOADSTATE_NONE), idle(1), playing(0) {
 		buf[0] = 0; buf[1] = 0; buf[2] = 0; volume = 1.0f; pan = 0.0f; pitch = 1.0f;
 	}
-		
+
 	~SoundResource() {
 
 	}
