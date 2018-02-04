@@ -29,6 +29,10 @@ int referencers_varargs_at(jdi::ref_stack &refs);
 static inline bool referencers_varargs(jdi::ref_stack &refs) {
   return referencers_varargs_at(refs) != -1; // I'm afraid to put ~referencers_varargs because (1) the optimizer should do that and (2) I have no idea what C++ guarantees
 }
+/// Check whether the given definition is callable as a function.
+bool definition_is_function(jdi::definition *d);
+/// Assuming this definition is a function, retrieve the number of overloads it has.
+size_t definition_overload_count(jdi::definition *d);
 /// Read parameter bounds from the current definition into args min and max. For variadics, max = unsigned(-1).
 void definition_parameter_bounds(jdi::definition *d, unsigned &min, unsigned &max);
 /// Create a standard variable member in the given scope.
