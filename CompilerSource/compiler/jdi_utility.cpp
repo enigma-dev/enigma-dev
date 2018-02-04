@@ -40,10 +40,10 @@ int referencers_varargs_at(ref_stack &refs) {
 }
 
 /*
- Iterate over function overloads and change minimum argument count and maximum argument count based on the number
- of arguments in the overload.
+ * Visit a function overload and change minimum argument count and maximum
+ * argument count based on the number of arguments in the overload.
  */
-void iterate_overloads(definition_function* d, unsigned &min, unsigned &max) {
+static void visit_overload(definition_function* d, unsigned &min, unsigned &max) {
   bool variadic = false;
   unsigned int local_min=0,local_max=0;
   
@@ -57,16 +57,68 @@ void iterate_overloads(definition_function* d, unsigned &min, unsigned &max) {
   if (max < local_max) max = local_max;
 }
 
+/*
+ * Iterate overloads of a function and change minimum argument count and maximum
+ * argument count based on the number of arguments in the overload.
+ */
+static void iterate_overloads(definition_function* d, unsigned &min, unsigned &max) {
+  for (map<arg_key, definition_function*>::iterator iter = d->overloads.begin();
+       iter != ((definition_function*)d)->overloads.end(); iter++) {
+    visit_overload(iter->second, min, max);
+  }
+}
+
 void definition_parameter_bounds(definition *d, unsigned &min, unsigned &max) {
   min = SIZE_MAX;
   max = 0;
   
-  if (!(d->flags & DEF_FUNCTION)) { cout << "Attempt to use " << d->toString() << " as function" << endl; return; }
-    
-  map<arg_key, definition_function*>::iterator iter=((definition_function*)d)->overloads.begin();
-  for (; iter!=((definition_function*)d)->overloads.end(); iter++) {
-        iterate_overloads(iter->second,min,max);
+  if (!(d->flags & DEF_FUNCTION)) {
+    if (d->flags & DEF_TEMPLATE) {
+      definition_template *dt = (definition_template*) d;
+      if (dt->def && (dt->def->flags & DEF_FUNCTION)) {
+        iterate_overloads((definition_function*) dt->def, min, max);
+        for (definition_template::specmap::iterator it = dt->specializations.begin();
+             it != dt->specializations.end(); ++it) {
+          definition_template *spec = it->second;
+          if (spec->def && spec->def->flags & DEF_FUNCTION)
+            iterate_overloads((definition_function*) spec->def, min, max);
+        }
+        return;
+      }
+    }
+    cout << "Attempt to use " << d->toString() << " as function" << endl;
+    return;
   }
+  
+  iterate_overloads((definition_function*) d, min, max);
+}
+
+bool definition_is_function(definition *d) {
+  if (d->flags & DEF_FUNCTION) return true;
+  if (d->flags & DEF_TEMPLATE) {
+    definition_template *dt = (definition_template*) d;
+    if (dt->def && (dt->def->flags & DEF_FUNCTION)) return true;
+  }
+  return false;
+}
+
+size_t definition_overload_count(jdi::definition *d) {
+  if (!(d->flags & DEF_FUNCTION)) {
+    if (d->flags & DEF_TEMPLATE) {
+      definition_template *dt = (definition_template*) d;
+      if (dt->def && (dt->def->flags & DEF_FUNCTION)) {
+        size_t res = definition_overload_count(dt->def);
+        for (definition_template::specmap::iterator it = dt->specializations.begin();
+             it != dt->specializations.end(); ++it) {
+          res += definition_overload_count(it->second);
+        }
+        return res;
+      }
+    }
+    return 0;
+  }
+  definition_function *df = (definition_function*) d;
+  return df->overloads.size() + df->template_overloads.size();
 }
 
 
