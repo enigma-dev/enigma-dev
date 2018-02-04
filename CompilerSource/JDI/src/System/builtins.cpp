@@ -161,6 +161,35 @@ namespace jdi {
     builtin_type__float  = add_declarator("float",   UF_PRIMITIVE, 4).def;
     builtin_type__double = add_declarator("double",  UF_PRIMITIVE, 8).def;
     
+    // Sometimes engineering is more about duct tape
+    add_declarator("__int8",     UF_PRIMITIVE, 1).def;
+    add_declarator("__uint8",    UF_PRIMITIVE, 1).def;
+    add_declarator("__int16",    UF_PRIMITIVE, 2).def;
+    add_declarator("__short16",  UF_PRIMITIVE, 2).def;
+    add_declarator("__uint16",   UF_PRIMITIVE, 2).def;
+    add_declarator("__int32",    UF_PRIMITIVE, 4).def;
+    add_declarator("__uint32",   UF_PRIMITIVE, 4).def;
+    add_declarator("__int64",    UF_PRIMITIVE, 8).def;
+    add_declarator("__uint64",   UF_PRIMITIVE, 8).def;
+    add_declarator("__int8_t",     UF_PRIMITIVE, 1).def;
+    add_declarator("__uint8_t",    UF_PRIMITIVE, 1).def;
+    add_declarator("__int16_t",    UF_PRIMITIVE, 2).def;
+    add_declarator("__short16_t",  UF_PRIMITIVE, 2).def;
+    add_declarator("__uint16_t",   UF_PRIMITIVE, 2).def;
+    add_declarator("__int32_t",    UF_PRIMITIVE, 4).def;
+    add_declarator("__uint32_t",   UF_PRIMITIVE, 4).def;
+    add_declarator("__int64_t",    UF_PRIMITIVE, 8).def;
+    add_declarator("__uint64_t",   UF_PRIMITIVE, 8).def;
+    add_declarator("int8_t",     UF_PRIMITIVE, 1).def;
+    add_declarator("uint8_t",    UF_PRIMITIVE, 1).def;
+    add_declarator("int16_t",    UF_PRIMITIVE, 2).def;
+    add_declarator("short16_t",  UF_PRIMITIVE, 2).def;
+    add_declarator("uint16_t",   UF_PRIMITIVE, 2).def;
+    add_declarator("int32_t",    UF_PRIMITIVE, 4).def;
+    add_declarator("uint32_t",   UF_PRIMITIVE, 4).def;
+    add_declarator("int64_t",    UF_PRIMITIVE, 8).def;
+    add_declarator("uint64_t",   UF_PRIMITIVE, 8).def;
+    
     builtin_type__wchar_t = add_declarator("wchar_t",   UF_PRIMITIVE, 2).def;
     builtin_type__va_list = add_declarator("__builtin_va_list",   UF_PRIMITIVE, 8).def;
     
