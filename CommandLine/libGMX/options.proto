@@ -1,0 +1,5 @@
+syntax = "proto2";
+package buffers;
+
+import "google/protobuf/descriptor.proto";
+extend google.protobuf.FieldOptions { optional string gmx = 50000; }

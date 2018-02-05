@@ -62,6 +62,7 @@ int EnigmaPlugin::Init()
 
   plugin_Init = reinterpret_cast<const char*(*)(EnigmaCallbacks*)>(BindFunc(_handle, "libInit"));
   plugin_CompileEGM = reinterpret_cast<int (*)(EnigmaStruct *es, const char* exe_filename, int mode)>(BindFunc(_handle, "compileEGMf"));
+  plugin_CompileBuffer = reinterpret_cast<int (*)(buffers::Project *project, const char* exe_filename, int mode)>(BindFunc(_handle, "compileBuffer"));
   plugin_NextResource = reinterpret_cast<const char* (*)()>(BindFunc(_handle, "next_available_resource"));
   plugin_FirstResource = reinterpret_cast<const char* (*)()>(BindFunc(_handle, "first_available_resource"));
   plugin_ResourceIsFunction = reinterpret_cast<bool (*)()>(BindFunc(_handle, "resource_isFunction"));
@@ -101,7 +102,19 @@ void EnigmaPlugin::LogMakeToConsole()
 
 int EnigmaPlugin::BuildGame(EnigmaStruct* data, GameMode mode, const char* fpath)
 {
+  /* TODO: Use to print keywords list...
+  const char* currentResource = plugin_FirstResource();
+  while (!plugin_ResourcesAtEnd())
+  {
+    currentResource = plugin_NextResource();
+  }*/
+
   return plugin_CompileEGM(data, fpath, mode);
+}
+
+int EnigmaPlugin::BuildGame(buffers::Project* data, GameMode mode, const char* fpath)
+{
+  return plugin_CompileBuffer(data, fpath, mode);
 }
 
 void EnigmaPlugin::PrintBuiltins(std::string& fName)
@@ -126,7 +139,7 @@ void EnigmaPlugin::PrintBuiltins(std::string& fName)
     
     currentResource = plugin_NextResource();
   }
-  
+
   std::sort(types.begin(), types.end());
   
   std::ostream out(std::cout.rdbuf());
@@ -136,8 +149,8 @@ void EnigmaPlugin::PrintBuiltins(std::string& fName)
     std::cout << "Writing builtins..." << std::endl;
     fb.open(fName.c_str(), std::ios::out);
     out.rdbuf(&fb);
-  }
-  
+}
+
   out << "[Types]" << std::endl;
   for (const std::string& t : types)
     out << t << std::endl;

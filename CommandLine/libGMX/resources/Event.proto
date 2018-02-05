@@ -1,0 +1,32 @@
+syntax = "proto2";
+package buffers.resources;
+
+import "options.proto";
+
+message Argument {
+  optional int32 kind = 1;
+  optional string string = 2;
+}
+
+message Action {
+  optional int32 libid = 1;
+  optional int32 id = 2;
+  optional int32 kind = 3;
+  optional bool use_relative = 4 [(gmx) = "userelative"];
+  optional bool is_question = 5 [(gmx) = "isquestion"];
+  optional int32 use_apply_to = 6 [(gmx) = "useapplyto"];
+  optional int32 exe_type = 7 [(gmx) = "exetype"];
+  optional string function_name = 8 [(gmx) = "functionname"];
+  optional string code_string = 9 [(gmx) = "codestring"];
+  optional string who_name = 10 [(gmx) = "whoName"];
+  optional bool relative = 11;
+  optional bool is_not = 12 [(gmx) = "isnot"];
+  repeated Argument arguments = 13 [(gmx) = "arguments/argument"]; 
+}
+
+message Event {
+  optional int32 type = 1 [(gmx) = "eventtype"];
+  optional int32 number = 2 [(gmx) = "enumb"];
+  optional string name = 3 [(gmx) = "ename"];
+  repeated Action action = 4;
+}

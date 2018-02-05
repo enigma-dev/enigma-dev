@@ -1,0 +1,22 @@
+syntax = "proto2";
+package buffers.resources;
+
+import "options.proto";
+
+message GameInformation {
+  optional int32 background_color = 1;
+  optional bool embed_game_window = 2;
+  optional string form_caption = 3;
+
+  optional int32 left = 4;
+  optional int32 top = 5;
+  optional int32 right = 6;
+  optional int32 bottom = 7;
+
+  optional bool show_border = 8;
+  optional bool allow_resize = 9;
+  optional bool stay_on_top = 10;
+  optional bool pause_game = 11;
+
+  optional string text = 12;
+}

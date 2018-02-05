@@ -1,0 +1,17 @@
+syntax = "proto2";
+package buffers.resources;
+
+import "options.proto";
+import "resources/Event.proto";
+
+message Timeline {
+  message Moment {
+    optional int32 step = 1;
+    repeated Event event = 2;
+  }
+
+  optional string name = 1;
+  optional int32 id = 2 [(gmx) = "GMX_DEPRECATED"];
+
+  repeated Moment moments = 3 [(gmx) = "entry"];
+}

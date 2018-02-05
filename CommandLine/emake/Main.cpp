@@ -2,6 +2,8 @@
 #include "EnigmaPlugin.hpp"
 #include "Game.hpp"
 #include "SOG.hpp"
+#include "gmx.h"
+#include "Proto2ES.h"
 
 #include <fstream>
 #include <iostream>
@@ -73,14 +75,17 @@ int main(int argc, char* argv[])
       std::string ext;
       size_t dot = input_file.find_last_of('.');
       if (dot != std::string::npos) ext = tolower(input_file.substr(dot + 1));
-      if (ext != "sog") {
+      if (ext == "sog") {
+        if (!ReadSOG(input_file, &game)) return 1;
+        return plugin.BuildGame(game.ConstructGame(), mode, output_file.c_str());
+      } else if (ext == "gmx") {
+        buffers::Project* project;
+        if (!(project = gmx::LoadGMX(input_file, true))) return 1;
+        return plugin.BuildGame(project, mode, output_file.c_str());
+      } else {
         if (ext == "egm") {
           std::cerr << "EGM format not yet supported. "
                        "Please use LateralGM for the time being." << std::endl;
-        } else if (ext == "gmx") {
-          std::cerr << "GMX format not supported. "
-                       "Please use LateralGM or find a converter." << std::endl;
-          return 1;
         } else if (ext.empty()) {
           std::cerr << "Error: Unknown filetype: cannot determine type of file "
                     << '"' << input_file << "\"." << std::endl;
@@ -89,9 +94,8 @@ int main(int argc, char* argv[])
                     << "\": cannot read input file \"" << input_file
                     << "\"." << std::endl;
         }
-        return 1;
       }
-      if (!ReadSOG(input_file, &game)) return 1;
+      return 1;
     } else {
       std::cerr << "Warning: No game file specified. "
                    "Building an empty game." << std::endl;
