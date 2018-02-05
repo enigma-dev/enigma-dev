@@ -3,6 +3,7 @@ PATH := $(eTCpath)$(PATH)
 .PHONY: ENIGMA clean Game clean-game codegen .FORCE
 
 ENIGMA:
+	$(MAKE) -C CommandLine/libGMX/ codegen
 	$(MAKE) -C CompilerSource 
 
 clean:
@@ -14,7 +15,10 @@ Game:
 clean-game:
 	$(MAKE) -C ENIGMAsystem/SHELL clean
 
-emake: .FORCE
+libGMX: .FORCE
+	$(MAKE) -C CommandLine/libGMX/
+
+emake: libGMX .FORCE
 	$(MAKE) -C CommandLine/emake/
 
 test-runner: emake .FORCE

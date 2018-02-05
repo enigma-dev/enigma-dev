@@ -6,6 +6,9 @@
 /MacOS/build/Release/EnigmaXcode.app/Contents/Resources/*
 /definitions.h
 
+/CommandLine/libGMX/libGMX.a
+/CommandLine/libGMX/codegen
+
 /ENIGMAsystem/SHELL/API_Switchboard.h
 /ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/
 /ENIGMAsystem/SHELL/ENIGMAengine

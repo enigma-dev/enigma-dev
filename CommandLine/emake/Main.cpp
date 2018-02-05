@@ -2,6 +2,7 @@
 #include "EnigmaPlugin.hpp"
 #include "Game.hpp"
 #include "SOG.hpp"
+#include "gmx.h"
 
 #include <fstream>
 #include <iostream>
@@ -63,8 +64,7 @@ int main(int argc, char* argv[])
           std::cerr << "EGM format not yet supported. "
                        "Please use LateralGM for the time being." << std::endl;
         } else if (ext == "gmx") {
-          std::cerr << "GMX format not supported. "
-                       "Please use LateralGM or find a converter." << std::endl;
+          gmx::LoadGMX(input_file, true);
           return 1;
         } else if (ext.empty()) {
           std::cerr << "Error: Unknown filetype: cannot determine type of file "

@@ -29,8 +29,9 @@ endif
 ###########
 
 CXX := g++
-CXXFLAGS += -std=c++11 -Wall -O3 -g -I./JDI/src
+CXXFLAGS += -std=c++11 -Wall -O3 -g -I./JDI/src -I../CommandLine/libGMX/codegen/
 LDFLAGS += -shared -O3 -g
+LDLIBS += -lprotobuf
 
 # This implements a recursive wildcard allowing us to iterate in subdirs
 rwildcard=$(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2))

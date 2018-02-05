@@ -14,8 +14,8 @@ endif
 EXTRA_SOURCES := ../../CompilerSource/settings-parse/eyaml.cpp ../../CompilerSource/compiler/event_reader/event_parser.cpp
 EXTRA_SRC_DIR := ../../CompilerSource
 
-CXXFLAGS  := -I$(SRC_DIR) -I$(EXTRA_SRC_DIR) -std=c++11 -Wall -Wextra -Wpedantic -g
-LDFLAGS   := $(OS_LIBS)
+CXXFLAGS  := -I$(SRC_DIR) -I$(EXTRA_SRC_DIR) -I../libGMX -I../libGMX/codegen -std=c++11 -Wall -Wextra -Wpedantic -g
+LDFLAGS   := $(OS_LIBS) -L../libGMX -lGMX -lprotobuf -L/mingw64/lib/pugixml-1.8/ -lpugixml
 
 EXTRA_OBJS := $(patsubst $(EXTRA_SRC_DIR)/%, $(OBJ_DIR)/Extra/%, $(patsubst %.cpp, %.o, $(EXTRA_SOURCES)))
 
