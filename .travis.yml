@@ -18,7 +18,8 @@ before_install:
 
     if [ "$TRAVIS_OS_NAME" == "linux" ]; then
       sudo apt-get -qq -y install build-essential zlib1g-dev libboost-dev libboost-iostreams-dev\
-        libboost-filesystem-dev libboost-program-options-dev libboost-system-dev libglew-dev;
+        libboost-filesystem-dev libboost-program-options-dev libboost-system-dev libglew-dev \
+        libpugixml-dev libprotobuf-dev protobuf-compiler;
 
       if [ "$COMPILER" == "gcc32" ] || [ "$COMPILER" == "clang32" ]; then
         sudo dpkg --add-architecture i386;
