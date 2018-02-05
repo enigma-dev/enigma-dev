@@ -17,8 +17,8 @@ else
 endif
 
 # As a "temporary hack," allow including from CompilerSource to give access to backend/ folder.
-CXXFLAGS  := -I$(SRC_DIR) -I../../CompilerSource -std=c++11 -Wall -Wextra -Wpedantic -g
-LDFLAGS   := $(OS_LIBS)
+CXXFLAGS  := -I$(SRC_DIR) -I../../CompilerSource -I../libGMX -I../libGMX/codegen -std=c++11 -Wall -Wextra -Wpedantic -g
+LDFLAGS   := $(OS_LIBS) -L../libGMX -lGMX -lprotobuf -L/mingw64/lib/pugixml-1.8/ -lpugixml
 
 rwildcard=$(wildcard $1/$2) $(foreach d,$(wildcard $1/*),$(call rwildcard,$d,$2))
 SOURCES := $(call rwildcard,$(SRC_DIR),*.cpp)
