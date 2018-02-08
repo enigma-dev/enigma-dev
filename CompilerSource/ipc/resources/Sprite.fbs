@@ -1,0 +1,41 @@
+include "Point.fbs";
+include "Image.fbs";
+
+attribute "gmx";
+
+enum SpriteShape : byte { PRECISE, RECTANGLE, DISK, DIAMOND }
+
+enum SpriteBoundingBoxType : byte { AUTOMATIC, FULL_IMAGE, MANUAL }
+
+struct SpriteBoundingBox {
+  type:SpriteBoundingBoxType (gmx: "bboxmode");
+  left:int (gmx: "bbox_left");
+  right:int (gmx: "bbox_right");
+  top:int (gmx: "bbox_top");
+  bottom:int (gmx: "bbox_bottom");
+}
+
+table Polygon {
+  points:[Point];  
+}
+
+table Sprite {
+  name:string;
+  id:int;
+
+  preload:bool;
+  transparent:bool;
+  smooth_edges:bool;
+  shape:SpriteShape (gmx: "type");
+  alpha_tolerance:int (gmx: "coltolerance");
+  separate_mask:bool (gmx: "sepmasks");
+  origin_x:int (gmx: "xorig");
+  origin_y:int (gmx: "yorigin");
+
+  bounding_box:SpriteBoundingBox;
+
+  subimages:[Image] (gmx: "frames");
+  mask_shapes:[Polygon];
+}
+
+root_type Sprite;

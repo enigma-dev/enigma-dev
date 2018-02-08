@@ -1,0 +1,113 @@
+attribute "gmx";
+
+table RoomInstance {
+  name:string;
+
+  x:int;
+  y:int;
+  locked:bool;
+  object_name:string (gmx: "objName");
+
+  scale_x:double (gmx: "scaleX");
+  scale_y:double (gmx: "scaleY");
+  rotation:double (gmx: "rotation");
+  color:int (gmx: "colour");
+
+  creation_code:string (gmx: "code");
+}
+
+table RoomTile {
+  name:string;
+
+  x:int;
+  y:int;
+  locked:bool;
+  background_name:string (gmx: "bgName");
+
+  width:int (gmx: "w");
+  height:int (gmx: "h");
+  bg_x:int (gmx: "xo");
+  bg_y:int (gmx: "yo");
+  depth:int;
+
+  scale_x:double (gmx: "scaleX");
+  scale_y:double (gmx: "scaleY");
+  color:int (gmx: "colour");
+}
+
+struct RoomBackground {
+  background_visible:bool (gmx: "visible");
+  background_foreground:bool (gmx: "foreground");
+  background_index:int (gmx: "name");
+  background_x:int (gmx: "x");
+  background_y:int (gmx: "y");
+  background_htiled:bool (gmx: "htiled");
+  background_vtiled:bool (gmx: "vtiled");
+  background_hspeed:int (gmx: "hspeed");
+  background_vspeed:int (gmx: "vspeed");
+  stretch:bool (gmx: "stretch");
+}
+
+struct RoomView {
+  view_visible:bool (gmx: "visible");
+  view_xview:int (gmx: "xview");
+  view_yview:int (gmx: "yview");
+  view_wview:int (gmx: "wview");
+  view_hview:int (gmx: "hview");
+  view_xport:int (gmx: "xport");
+  view_yport:int (gmx: "yport");
+  view_wport:int (gmx: "wport");
+  view_hport:int (gmx: "hport");
+  view_hborder:int (gmx: "hborder");
+  view_vborder:int (gmx: "vborder");
+  view_hspeed:int (gmx: "hspeed");
+  view_vspeed:int (gmx: "vspeed");
+  view_object:int (gmx: "objName");
+}
+
+struct RoomEditorMetadata {
+  remember_state:bool (gmx: "isSet");
+  editor_width:int (gmx: "w");
+  editor_height:int (gmx: "h");
+  current_tab:int (gmx: "page");
+  scroll_x:int (gmx: "xoffset");
+  scroll_y:int (gmx: "yoffset");
+
+  show_grid:bool (gmx: "showGrid");
+  show_objects:bool (gmx: "showObjects");
+  show_tiles:bool (gmx: "showTiles");
+  show_backgrounds:bool (gmx: "showBackgrounds");
+  show_foregrounds:bool (gmx: "showForegrounds");
+  show_views:bool (gmx: "showViews");
+  delete_underlying_objects:bool (gmx: "deleteUnderlyingObj");
+  delete_underlying_tiles:bool (gmx: "deleteUnderlyingTiles");
+
+  snap_x:int (gmx: "hsnap");
+  snap_y:int (gmx: "vsnap");
+  isometric:bool;
+}
+
+table Room {
+  name:string;
+  id:int;
+
+  editor_metadata:RoomEditorMetadata (gmx: "makerSettings");
+
+  room_caption:string;
+  width:int;
+  height:int;
+
+  speed:int;
+  persistent:bool;
+  background_color:int (gmx: "colour");
+  background_showcolor:bool (gmx: "showcolour");
+  creation_code:string (gmx: "code");
+
+  view_enabled:bool (gmx: "enableViews");
+  views:[RoomView];
+  backgrounds:[RoomBackground];
+  instances:[RoomInstance];
+  tiles:[RoomTile];
+}
+
+root_type Room;

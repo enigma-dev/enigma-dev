@@ -1,0 +1,29 @@
+attribute "gmx";
+attribute "split";
+
+struct PathPoint {
+  x:int;
+  y:int;
+  speed:int;
+}
+
+table PathEditorMetadata {
+  background_room_name:string (gmx: "backroom");
+  snap_x:int (gmx: "hsnap");
+  snap_y:int (gmx: "vsnap");
+}
+
+table Path {
+  name:string;
+  id:int;
+
+  editor_metadata:PathEditorMetadata;
+
+  smooth:bool (gmx: "kind");
+  closed:bool;
+  precision:int;
+
+  points:[PathPoint] (split: ",");
+}
+
+root_type Path;

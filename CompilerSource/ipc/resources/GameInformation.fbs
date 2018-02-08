@@ -1,0 +1,17 @@
+table GameInformation {
+  background_color:int;
+  embed_game_window:bool;
+  form_caption:string;
+  left:int;
+  top:int;
+  width:int;
+  height:int;
+  show_border:bool;
+  allow_resize:bool;
+  stay_on_top:bool;
+  pause_game:bool;
+
+  text:string;
+}
+
+root_type GameInformation;
