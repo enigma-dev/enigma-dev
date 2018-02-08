@@ -6,7 +6,7 @@ Sprite AddSprite(const buffers::resources::Sprite& spr);
 SubImage AddSubImage(const std::string fPath);
 GmObject AddObject(const buffers::resources::Object& obj);
 Room AddRoom(const buffers::resources::Room& rmn);
-Instance AddInstance(const buffers::resources::Instance& obj);
+Instance AddInstance(const buffers::resources::Room::Instance& inst);
 
 EnigmaStruct* ProtoBuf2ES(buffers::Project* protobuf) {
   EnigmaStruct *es = new EnigmaStruct();
@@ -159,14 +159,14 @@ Room AddRoom(const buffers::resources::Room& rmn) {
   return r;
 }
 
-Instance AddInstance(const buffers::resources::Instance& inst) {
+Instance AddInstance(const buffers::resources::Room::Instance& inst) {
   Instance i = Instance();
 
   i.x = inst.x();
   i.y = inst.y();
-  i.id = inst.id();
+  i.id = 0;
   i.locked = inst.locked();
-  i.objectId = inst.object_type();
+  i.objectId = -1;
   i.creationCode = inst.code().c_str();
   i.preCreationCode = "";
 
