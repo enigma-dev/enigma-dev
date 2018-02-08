@@ -51,7 +51,7 @@ static string esc(string str) {
     if (c == '\n') { res += "\\n"; continue; }
     if (c == '\r') { res += "\\r"; continue; }
     if (c == '\\') { res += "\\\\"; continue; }
-	if (c == '\"') { res += "\\\""; continue; }
+    if (c == '\"') { res += "\\\""; continue; }
     res.append(1, c);
   }
   return res;
@@ -60,31 +60,31 @@ static string esc(string str) {
 int lang_CPP::compile_writeShaderData(EnigmaStruct* es, parsed_object *EGMglobal)
 {
   ofstream wto((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_shaderarrays.h").c_str(),ios_base::out);
-  
+
   wto << license << "#include \"Universal_System/shaderstruct.h\"\n" << "namespace enigma {\n";
   wto << "  ShaderStruct shaderstructarray[] = {\n";
-  
+
   int idmax = 0;
   for (int i = 0; i < es->shaderCount; i++)
   {
     while (idmax < es->shaders[i].id) {
       ++idmax, wto << "ShaderStruct(),\n";
-	}
-	string vertexcode = es->shaders[i].vertex;
-	string fragmentcode = es->shaders[i].fragment;
-	//TODO: Replace quotations with escape sequences.
+    }
+    string vertexcode = es->shaders[i].vertex;
+    string fragmentcode = es->shaders[i].fragment;
+    //TODO: Replace quotations with escape sequences.
     wto << "    { "
         << '"' << esc(vertexcode)   << "\", "
         << '"' << esc(fragmentcode) << "\", "
         << '"' << es->shaders[i].type << "\", "
         << (es->shaders[i].precompile? "true" : "false")
         << " },\n";
-	idmax += 1;
+    idmax += 1;
   }
-  
+
   wto << "  };\n";
   wto << "} // Namespace enigma\n";
   wto.close();
-  
+
   return 0;
 }

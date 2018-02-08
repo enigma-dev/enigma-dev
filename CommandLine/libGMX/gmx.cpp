@@ -223,7 +223,7 @@ void PackRes(std::string &name, pugi::xml_node &node, google::protobuf::Message 
             }
             case google::protobuf::FieldDescriptor::CppType::CPPTYPE_BOOL: {
               refl->SetBool(m, field,
-                            (isAttribute) ? attr.as_bool() : (isSplit) ? (splitValue != "0") : xmlValue.as_bool());
+                            (isAttribute) ? attr.as_bool() : (isSplit) ? (std::stof(splitValue) != 0) : (xmlValue.as_int() != 0));
               break;
             }
             case google::protobuf::FieldDescriptor::CppType::CPPTYPE_ENUM: {
