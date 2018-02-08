@@ -1,3 +1,20 @@
+/** Copyright (C) 2018 Greg Williamson, Robert B. Colton
+***
+*** This file is a part of the ENIGMA Development Environment.
+***
+*** ENIGMA is free software: you can redistribute it and/or modify it under the
+*** terms of the GNU General Public License as published by the Free Software
+*** Foundation, version 3 of the license or any later version.
+***
+*** This application and its source code is distributed AS-IS, WITHOUT ANY
+*** WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+*** FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+*** details.
+***
+*** You should have received a copy of the GNU General Public License along
+*** with this code. If not, see <http://www.gnu.org/licenses/>
+**/
+
 #include <pugixml.hpp>
 
 #include <fstream>
@@ -16,7 +33,7 @@ static std::map<std::string, std::vector<std::string>> resMap;
 
 class visited_walker : public pugi::xml_tree_walker {
   virtual bool for_each(pugi::xml_node &node) {
-    if (node.type() != 3 && std::string(node.attribute("visited").value()) != "true")
+    if (node.type() != pugi::node_pcdata  && std::string(node.attribute("visited").value()) != "true")
       outputStream << "Error: Node at " << node.path() << " was never visited " << std::endl;
     return true;
   }
@@ -26,7 +43,7 @@ class gmx_root_walker : public pugi::xml_tree_walker {
   std::map<std::string, int> constants;
 
   virtual bool for_each(pugi::xml_node &node) {
-    if (node.type() == 3) {
+    if (node.type() == pugi::node_pcdata) {
       if (std::string(node.parent().name()) == "constant") {
         constants[node.parent().attribute("name").value()] = node.text().as_int();
       } else {
@@ -69,8 +86,9 @@ void PackShader(std::string fName, buffers::resources::Shader *shader) {
 
   if (code.empty()) outputStream << "Error: " << fName << " empty." << std::endl;
 
-  // I've seen a few different versions of this marker on github n such. I dunno which is correct
-  const std::string marker = "//######################_==_YOYO_SHADER_MARKER_==_######################@~/*";
+  // GMS 1.4 doesn't care if you have a newline after the marker
+  // and before the start of the first line of the fragment shader
+  const std::string marker = "//######################_==_YOYO_SHADER_MARKER_==_######################@~";
   size_t markerPos = code.find(marker);
 
   if (markerPos == std::string::npos)
@@ -85,14 +103,17 @@ void PackShader(std::string fName, buffers::resources::Shader *shader) {
   }
 }
 
-void PackRes(std::string &name, pugi::xml_node &node, google::protobuf::Message *m, int depth) {
+void PackRes(std::string &name, int id, pugi::xml_node &node, google::protobuf::Message *m, int depth) {
   const google::protobuf::Descriptor *desc = m->GetDescriptor();
   const google::protobuf::Reflection *refl = m->GetReflection();
   for (int i = 0; i < desc->field_count(); i++) {
     const google::protobuf::FieldDescriptor *field = desc->field(i);
     const google::protobuf::FieldOptions opts = field->options();
 
-    if (depth == 0 && field->name() == "name") {
+    if (field->name() == "id") {
+      outputStream << "Setting " << field->name() << " (" << field->type_name() << ") as " << id << std::endl;
+      refl->SetInt32(m, field, id);
+    } else if (depth == 0 && field->name() == "name") {
       outputStream << "Setting " << field->name() << " (" << field->type_name() << ") as " << name.c_str() << std::endl;
       refl->SetString(m, field, name);
     } else {
@@ -128,112 +149,113 @@ void PackRes(std::string &name, pugi::xml_node &node, google::protobuf::Message 
         // We want the data from the node "child" but if its empty what we seek is likely in the attributes
         if (child.empty()) attr = node.attribute(xmlElement.c_str());
         isAttribute = !attr.empty();
-      }
 
-      if (child.empty() && gmxName != "GMX_DEPRECATED" && !isAttribute && !field->is_repeated()) {
-        // ename only exists if etype = 4. Also, etype and enumb don't exist in timeline events
-        pugi::xml_attribute a = node.attribute("eventtype");
-        if (xmlElement != "ename" && a.as_int() != 4 && node.path() != "/timeline/entry/event")
-          outputStream << "Error: no such element " << node.path() << "/" << xmlElement << std::endl;
-      } else if (gmxName != "GMX_DEPRECATED") {
-        if (field->is_repeated()) {
-          outputStream << "Appending (" << field->type_name() << ") to " << field->name() << std::endl;
-
-          switch (field->cpp_type()) {
-            case google::protobuf::FieldDescriptor::FieldDescriptor::CppType::CPPTYPE_MESSAGE: {
-              for (pugi::xml_node n = child; n != nullptr; n = n.next_sibling()) {
-                // skip over any siblings that aren't twins
-                if (n.name() == xmlElement) {
-                  n.append_attribute("visited") = "true";
-                  google::protobuf::Message *msg = refl->AddMessage(m, field);
-                  PackRes(name, n, msg, depth + 1);
-                }
-              }
-              break;
-            }
-
-            case google::protobuf::FieldDescriptor::CppType::CPPTYPE_STRING: {
-              for (pugi::xml_node n = child; n != nullptr; n = n.next_sibling()) {
-                if (n.name() == xmlElement) {
-                  n.append_attribute("visited") = "true";
-                  refl->AddString(m, field, n.text().as_string());
-                }
-              }
-              break;
-            }
-
-            default: {
-              outputStream << "Error: missing condition for repeated type: " << field->type_name()
-                           << ". Instigated by: " << field->type_name() << std::endl;
-              // I don't think we repeat anything other than messages and strings
-              break;
-            }
-          }
+        if (child.empty() && !isAttribute && !field->is_repeated()) {
+          // ename only exists if etype = 4. Also, etype and enumb don't exist in timeline events
+          pugi::xml_attribute a = node.attribute("eventtype");
+          if (xmlElement != "ename" && a.as_int() != 4 && node.path() != "/timeline/entry/event")
+            outputStream << "Error: no such element " << node.path() << "/" << xmlElement << std::endl;
         } else {
-          pugi::xml_text xmlValue;
-          std::string splitValue;
+          if (field->is_repeated()) {
+            outputStream << "Appending (" << field->type_name() << ") to " << field->name() << std::endl;
 
-          if (!isAttribute) {
-            if (isSplit) {
-              std::vector<std::string> split = SplitString(node.text().as_string(), ',');
-              splitValue = split[static_cast<int>(gmxName.back()) - '0'];
-            } else
-              xmlValue = child.text();
-          }
+            switch (field->cpp_type()) {
+              case google::protobuf::FieldDescriptor::FieldDescriptor::CppType::CPPTYPE_MESSAGE: {
+                int cid = 0;
+                for (pugi::xml_node n = child; n != nullptr; n = n.next_sibling()) {
+                  // skip over any siblings that aren't twins
+                  if (n.name() == xmlElement) {
+                    n.append_attribute("visited") = "true";
+                    google::protobuf::Message *msg = refl->AddMessage(m, field);
+                    PackRes(name, cid++, n, msg, depth + 1);
+                  }
+                }
+                break;
+              }
 
-          std::string value = (isAttribute) ? attr.as_string() : (isSplit) ? splitValue : xmlValue.as_string();
-          outputStream << "Setting " << field->name() << " (" << field->type_name() << ") as " << value << std::endl;
+              case google::protobuf::FieldDescriptor::CppType::CPPTYPE_STRING: {
+                for (pugi::xml_node n = child; n != nullptr; n = n.next_sibling()) {
+                  if (n.name() == xmlElement) {
+                    n.append_attribute("visited") = "true";
+                    refl->AddString(m, field, n.text().as_string());
+                  }
+                }
+                break;
+              }
 
-          switch (field->cpp_type()) {
-            case google::protobuf::FieldDescriptor::CppType::CPPTYPE_MESSAGE: {
-              google::protobuf::Message *msg = refl->MutableMessage(m, field);
-              PackRes(name, child, msg, depth + 1);
-              break;
+              default: {
+                outputStream << "Error: missing condition for repeated type: " << field->type_name()
+                            << ". Instigated by: " << field->type_name() << std::endl;
+                // I don't think we repeat anything other than messages and strings
+                break;
+              }
             }
-            case google::protobuf::FieldDescriptor::CppType::CPPTYPE_INT32: {
-              refl->SetInt32(m, field,
-                             (isAttribute) ? attr.as_int() : (isSplit) ? std::stoi(splitValue) : xmlValue.as_int());
-              break;
+          } else {
+            pugi::xml_text xmlValue;
+            std::string splitValue;
+
+            if (!isAttribute) {
+              if (isSplit) {
+                std::vector<std::string> split = SplitString(node.text().as_string(), ',');
+                splitValue = split[static_cast<int>(gmxName.back()) - '0'];
+              } else
+                xmlValue = child.text();
             }
-            case google::protobuf::FieldDescriptor::CppType::CPPTYPE_INT64: {
-              refl->SetInt64(m, field,
-                             (isAttribute) ? attr.as_int() : (isSplit) ? std::stoi(splitValue) : xmlValue.as_int());
-              break;
-            }
-            case google::protobuf::FieldDescriptor::CppType::CPPTYPE_UINT32: {
-              refl->SetUInt32(m, field,
-                              (isAttribute) ? attr.as_uint() : (isSplit) ? std::stoi(splitValue) : xmlValue.as_uint());
-              break;
-            }
-            case google::protobuf::FieldDescriptor::CppType::CPPTYPE_UINT64: {
-              refl->SetUInt64(m, field,
-                              (isAttribute) ? attr.as_uint() : (isSplit) ? std::stoi(splitValue) : xmlValue.as_uint());
-              break;
-            }
-            case google::protobuf::FieldDescriptor::CppType::CPPTYPE_DOUBLE: {
-              refl->SetDouble(
-                  m, field,
-                  (isAttribute) ? attr.as_double() : (isSplit) ? std::stod(splitValue) : xmlValue.as_double());
-              break;
-            }
-            case google::protobuf::FieldDescriptor::CppType::CPPTYPE_FLOAT: {
-              refl->SetFloat(m, field,
-                             (isAttribute) ? attr.as_float() : (isSplit) ? std::stof(splitValue) : xmlValue.as_float());
-              break;
-            }
-            case google::protobuf::FieldDescriptor::CppType::CPPTYPE_BOOL: {
-              refl->SetBool(m, field,
-                            (isAttribute) ? attr.as_bool() : (isSplit) ? (std::stof(splitValue) != 0) : (xmlValue.as_int() != 0));
-              break;
-            }
-            case google::protobuf::FieldDescriptor::CppType::CPPTYPE_ENUM: {
-              //refl->SetEnum(m, field,
-              //             (isAttribute) ? attr.as_int() : (isSplit) ? std::stoi(splitValue) : xmlValue.as_int());
-              break;
-            }
-            case google::protobuf::FieldDescriptor::CppType::CPPTYPE_STRING: {
-              refl->SetString(m, field, (isSplit) ? splitValue : xmlValue.as_string());
-              break;
+
+            std::string value = (isAttribute) ? attr.as_string() : (isSplit) ? splitValue : xmlValue.as_string();
+            outputStream << "Setting " << field->name() << " (" << field->type_name() << ") as " << value << std::endl;
+
+            switch (field->cpp_type()) {
+              case google::protobuf::FieldDescriptor::CppType::CPPTYPE_MESSAGE: {
+                google::protobuf::Message *msg = refl->MutableMessage(m, field);
+                PackRes(name, 0, child, msg, depth + 1);
+                break;
+              }
+              case google::protobuf::FieldDescriptor::CppType::CPPTYPE_INT32: {
+                refl->SetInt32(m, field,
+                              (isAttribute) ? attr.as_int() : (isSplit) ? std::stoi(splitValue) : xmlValue.as_int());
+                break;
+              }
+              case google::protobuf::FieldDescriptor::CppType::CPPTYPE_INT64: {
+                refl->SetInt64(m, field,
+                              (isAttribute) ? attr.as_int() : (isSplit) ? std::stoi(splitValue) : xmlValue.as_int());
+                break;
+              }
+              case google::protobuf::FieldDescriptor::CppType::CPPTYPE_UINT32: {
+                refl->SetUInt32(m, field,
+                                (isAttribute) ? attr.as_uint() : (isSplit) ? std::stoi(splitValue) : xmlValue.as_uint());
+                break;
+              }
+              case google::protobuf::FieldDescriptor::CppType::CPPTYPE_UINT64: {
+                refl->SetUInt64(m, field,
+                                (isAttribute) ? attr.as_uint() : (isSplit) ? std::stoi(splitValue) : xmlValue.as_uint());
+                break;
+              }
+              case google::protobuf::FieldDescriptor::CppType::CPPTYPE_DOUBLE: {
+                refl->SetDouble(
+                    m, field,
+                    (isAttribute) ? attr.as_double() : (isSplit) ? std::stod(splitValue) : xmlValue.as_double());
+                break;
+              }
+              case google::protobuf::FieldDescriptor::CppType::CPPTYPE_FLOAT: {
+                refl->SetFloat(m, field,
+                              (isAttribute) ? attr.as_float() : (isSplit) ? std::stof(splitValue) : xmlValue.as_float());
+                break;
+              }
+              case google::protobuf::FieldDescriptor::CppType::CPPTYPE_BOOL: {
+                refl->SetBool(m, field,
+                              (isAttribute) ? attr.as_bool() : (isSplit) ? (std::stof(splitValue) != 0) : (xmlValue.as_int() != 0));
+                break;
+              }
+              case google::protobuf::FieldDescriptor::CppType::CPPTYPE_ENUM: {
+                //refl->SetEnum(m, field,
+                //             (isAttribute) ? attr.as_int() : (isSplit) ? std::stoi(splitValue) : xmlValue.as_int());
+                break;
+              }
+              case google::protobuf::FieldDescriptor::CppType::CPPTYPE_STRING: {
+                refl->SetString(m, field, (isSplit) ? splitValue : xmlValue.as_string());
+                break;
+              }
             }
           }
         }
@@ -255,6 +277,7 @@ void PackBuffer(google::protobuf::Message *m, std::string gmxPath) {
       outputStream << "Found " << resMap.at(name).size() << " " << name << std::endl;
 
       // Scripts and Shaders are plain text not xml
+      int id = 0;
       for (const auto &res : resMap.at(name)) {
         std::string fName = res;
         std::replace(fName.begin(), fName.end(), '\\', '/');
@@ -285,7 +308,7 @@ void PackBuffer(google::protobuf::Message *m, std::string gmxPath) {
             outputStream << "Parsing " << fName << "..." << std::endl;
             // Start a resource (sprite, object, room)
             google::protobuf::Message *msg = refl->AddMessage(m, field);
-            PackRes(resName, root, msg, 0);
+            PackRes(resName, id++, root, msg, 0);
 
             visited_walker walker;
             doc.traverse(walker);
