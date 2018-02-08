@@ -56,15 +56,13 @@ int main(int argc, char* argv[])
 
     std::string input_file = options.GetOption("input").as<std::string>();
     std::string output_file = options.GetOption("output").as<std::string>();
-
+    Game game;
     if (input_file.size()) {
       std::string ext;
       size_t dot = input_file.find_last_of('.');
       if (dot != std::string::npos) ext = tolower(input_file.substr(dot + 1));
       if (ext == "sog") {
-        Game game;
         if (!ReadSOG(input_file, &game)) return 1;
-        return plugin.BuildGame(game.ConstructGame(), mode, output_file.c_str());
       } else if (ext == "gmx") {
         buffers::Project* project;
         if (!(project = gmx::LoadGMX(input_file, true))) return 1;
@@ -81,13 +79,14 @@ int main(int argc, char* argv[])
                     << "\": cannot read input file \"" << input_file
                     << "\"." << std::endl;
         }
+        return 1;
       }
     } else {
       std::cerr << "Warning: No game file specified. "
                    "Building an empty game." << std::endl;
     }
 
-    return 1;
+    return plugin.BuildGame(game.ConstructGame(), mode, output_file.c_str());
   }
 
   return result;
