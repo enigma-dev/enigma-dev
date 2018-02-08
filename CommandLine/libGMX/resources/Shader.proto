@@ -7,9 +7,7 @@ message Shader {
   optional string name = 1;
   optional int32 id = 2;
 
-  enum Type { GLSL = 0; GLSLES = 1; HLSL9 = 2; HLSL11 = 3; }
-
-  optional Type type = 3;
+  optional string type = 3;
   optional bool precompile = 4;
 
   optional string vertex_code = 5;
