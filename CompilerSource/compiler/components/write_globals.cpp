@@ -52,7 +52,7 @@ static string esc(string str) {
     if (c == '\n') { res += "\\n"; continue; }
     if (c == '\r') { res += "\\r"; continue; }
     if (c == '\\') { res += "\\\\"; continue; }
-	  if (c == '\"') { res += "\\\""; continue; }
+    if (c == '\"') { res += "\\\""; continue; }
     res.append(1, c);
   }
   return res;
