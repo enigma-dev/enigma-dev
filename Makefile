@@ -14,7 +14,7 @@ Game:
 clean-game:
 	$(MAKE) -C ENIGMAsystem/SHELL clean
 
-emake: .FORCE
+emake: ENIGMA .FORCE
 	$(MAKE) -C CommandLine/emake/
 
 test-runner: emake .FORCE

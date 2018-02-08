@@ -25,11 +25,13 @@
 **                                                                              **
 \********************************************************************************/
 
-#ifndef ENIGMA_VARARGS_H
-#define ENIGMA_VARARGS_H
+#ifndef ENIGMA_DYNAMIC_ARGS_H
+#define ENIGMA_DYNAMIC_ARGS_H
+
+#include "var4.h"
+
 namespace enigma {
-  struct varargs
-  {
+  struct varargs {
     int argc;
     void *argv;
     #ifndef JUST_DEFINE_IT_RUN
