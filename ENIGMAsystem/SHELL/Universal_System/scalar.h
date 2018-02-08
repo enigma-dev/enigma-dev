@@ -27,7 +27,9 @@
 //#define AS_SCALAR_64
 #define CS_SCALAR_64
 
-// Controls mathematics scalar precision
+// Controls mathematics scalar precision, where possible.
+// Note that many methods offer arbitrary precision, or are locked into the C++
+// standard library's choice of precision (double).
 #ifdef MA_SCALAR_64
 typedef double ma_scalar;
 #else
