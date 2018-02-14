@@ -96,8 +96,8 @@ message Room {
     optional int32 y = 3;
     optional uint32 width = 4 [(gmx) = "w"];
     optional uint32 height = 5 [(gmx) = "h"];
-    optional int32 x_offset = 6 [(gmx) = "xo"];
-    optional int32 y_offset = 7 [(gmx) = "yo"];
+    optional int32 xoffset = 6 [(gmx) = "xo"];
+    optional int32 yoffset = 7 [(gmx) = "yo"];
     optional int32 id = 8;
     optional string name = 9;
     optional int32 depth = 10;
