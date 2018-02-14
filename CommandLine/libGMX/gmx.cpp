@@ -70,21 +70,31 @@ std::vector<std::string> SplitString(const std::string &str, char delimiter) {
   return vec;
 }
 
-void PackScript(std::string fName, buffers::resources::Script *script) {
+void PackScript(std::string &name, int id, std::string fName, buffers::resources::Script *script) {
   outputStream << "Parsing " << fName << std::endl;
   std::string code = FileToString(fName);
 
-  if (code.empty()) outputStream << "Error: " << fName << " empty." << std::endl;
+  outputStream << "Setting name as:" << std::endl << name << std::endl;
+  script->set_name(name);
+  outputStream << "Setting id as:" << std::endl << id << std::endl;
+  script->set_id(id);
+
+  if (code.empty()) outputStream << "Warning: " << fName << " empty." << std::endl;
 
   outputStream << "Setting code as:" << std::endl << code << std::endl;
   script->set_code(code);
 }
 
-void PackShader(std::string fName, buffers::resources::Shader *shader) {
+void PackShader(std::string &name, int id, std::string fName, buffers::resources::Shader *shader) {
   outputStream << "Parsing " << fName << std::endl;
   std::string code = FileToString(fName);
 
-  if (code.empty()) outputStream << "Error: " << fName << " empty." << std::endl;
+  outputStream << "Setting name as:" << std::endl << name << std::endl;
+  shader->set_name(name);
+  outputStream << "Setting id as:" << std::endl << id << std::endl;
+  shader->set_id(id);
+
+  if (code.empty()) outputStream << "Warning: " << fName << " empty." << std::endl;
 
   // GMS 1.4 doesn't care if you have a newline after the marker
   // and before the start of the first line of the fragment shader
@@ -248,8 +258,8 @@ void PackRes(std::string &name, int id, pugi::xml_node &node, google::protobuf::
                 break;
               }
               case google::protobuf::FieldDescriptor::CppType::CPPTYPE_ENUM: {
-                //refl->SetEnum(m, field,
-                //             (isAttribute) ? attr.as_int() : (isSplit) ? std::stoi(splitValue) : xmlValue.as_int());
+                refl->SetEnum(m, field, field->enum_type()->FindValueByNumber(
+                              (isAttribute) ? attr.as_int() : (isSplit) ? std::stoi(splitValue) : xmlValue.as_int()));
                 break;
               }
               case google::protobuf::FieldDescriptor::CppType::CPPTYPE_STRING: {
@@ -284,15 +294,16 @@ void PackBuffer(google::protobuf::Message *m, std::string gmxPath) {
         std::replace(fName.begin(), fName.end(), '\\', '/');
         std::string type = name.substr(0, name.length() - 1);
         std::string resName = fName.substr(fName.find_last_of('/') + 1, fName.length() - 1);
+        resName = resName.substr(0, resName.find_last_of('.'));
 
         if (name == "scripts") {
           buffers::resources::Script *script = new buffers::resources::Script();
-          PackScript(gmxPath + fName, script);
+          PackScript(resName, id++, gmxPath + fName, script);
           google::protobuf::Message *msg = refl->AddMessage(m, field);
           msg->CopyFrom(*static_cast<google::protobuf::Message *>(script));
         } else if (name == "shaders") {
           buffers::resources::Shader *shader = new buffers::resources::Shader();
-          PackShader(gmxPath + fName, shader);
+          PackShader(resName, id++, gmxPath + fName, shader);
           google::protobuf::Message *msg = refl->AddMessage(m, field);
           msg->CopyFrom(*static_cast<google::protobuf::Message *>(shader));
         } else {
