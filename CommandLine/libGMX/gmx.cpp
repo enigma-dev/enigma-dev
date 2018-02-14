@@ -253,7 +253,8 @@ void PackRes(std::string &name, int id, pugi::xml_node &node, google::protobuf::
                 break;
               }
               case google::protobuf::FieldDescriptor::CppType::CPPTYPE_STRING: {
-                refl->SetString(m, field, (isSplit) ? splitValue : xmlValue.as_string());
+                refl->SetString(m, field,
+                              (isAttribute) ? attr.as_string() : (isSplit) ? splitValue : xmlValue.as_string());
                 break;
               }
             }
