@@ -391,8 +391,8 @@ Instance AddInstance(const buffers::resources::Room::Instance& inst, buffers::Pr
 Tile AddTile(const buffers::resources::Room::Tile& tile, buffers::Project* protobuf) {
   Tile t = Tile();
 
-  t.bgX = tile.x_offset();
-  t.bgY = tile.y_offset();
+  t.bgX = tile.xoffset();
+  t.bgY = tile.yoffset();
   t.roomX = tile.x();
   t.roomY = tile.y();
   t.width = tile.width();
@@ -421,7 +421,7 @@ View AddView(const buffers::resources::Room::View& view, buffers::Project* proto
   v.borderV = view.vborder();
   v.speedH = view.hspeed();
   v.speedV = view.vspeed();
-	v.objectId = Name2Id(protobuf->objects(), view.object_following());
+  v.objectId = Name2Id(protobuf->objects(), view.object_following());
 
   return v;
 }
@@ -429,16 +429,16 @@ View AddView(const buffers::resources::Room::View& view, buffers::Project* proto
 BackgroundDef AddRoomBackground(const buffers::resources::Room::Background& bkg, buffers::Project* protobuf) {
   BackgroundDef b = BackgroundDef();
 
-	b.visible = bkg.visible();
-	b.foreground = bkg.foreground();
-	b.x = bkg.x();
-	b.y = bkg.y();
-	b.tileHoriz = bkg.htiled();
-	b.tileVert = bkg.vtiled();
-	b.hSpeed = bkg.hspeed();
-	b.vSpeed = bkg.vspeed();
-	b.stretch = bkg.stretch();
-	b.backgroundId = Name2Id(protobuf->backgrounds(), bkg.name());
+  b.visible = bkg.visible();
+  b.foreground = bkg.foreground();
+  b.x = bkg.x();
+  b.y = bkg.y();
+  b.tileHoriz = bkg.htiled();
+  b.tileVert = bkg.vtiled();
+  b.hSpeed = bkg.hspeed();
+  b.vSpeed = bkg.vspeed();
+  b.stretch = bkg.stretch();
+  b.backgroundId = Name2Id(protobuf->backgrounds(), bkg.name());
 
   return b;
 }
