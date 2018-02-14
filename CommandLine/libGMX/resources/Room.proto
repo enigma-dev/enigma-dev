@@ -41,7 +41,7 @@ message Room {
 
   optional MakerSettings maker_settings = 14 [(gmx) = "makerSettings"];
 
-  message RoomBackground {
+  message Background {
     optional bool visible = 1;
     optional bool foreground = 2;
     optional string name = 3;
@@ -54,7 +54,7 @@ message Room {
     optional bool stretch = 10;
   }
 
-  repeated RoomBackground backgrounds = 15 [(gmx) = "backgrounds/background"];
+  repeated Background backgrounds = 15 [(gmx) = "backgrounds/background"];
 
   message View {
     optional bool visible = 1;
@@ -91,13 +91,13 @@ message Room {
   repeated Instance instances = 17 [(gmx) = "instances/instance"];
 
   message Tile {
-    optional string image = 1 [(gmx) = "bgName"];
+    optional string background_name = 1 [(gmx) = "bgName"];
     optional int32 x = 2;
     optional int32 y = 3;
     optional uint32 width = 4 [(gmx) = "w"];
     optional uint32 height = 5 [(gmx) = "h"];
-    optional int32 xoffset = 6 [(gmx) = "xo"];
-    optional int32 yoffset = 7 [(gmx) = "yo"];
+    optional int32 x_offset = 6 [(gmx) = "xo"];
+    optional int32 y_offset = 7 [(gmx) = "yo"];
     optional int32 id = 8;
     optional string name = 9;
     optional int32 depth = 10;

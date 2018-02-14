@@ -26,9 +26,27 @@ PathPoint AddPathPoint(const buffers::resources::Path::Point& pnt);
 Script AddScript(const buffers::resources::Script& scr);
 Shader AddShader(const buffers::resources::Shader& shr);
 Font AddFont(const buffers::resources::Font& fnt);
-GmObject AddObject(const buffers::resources::Object& obj);
-Room AddRoom(const buffers::resources::Room& rmn);
-Instance AddInstance(const buffers::resources::Room::Instance& inst);
+GmObject AddObject(const buffers::resources::Object& obj, buffers::Project* protobuf);
+Room AddRoom(const buffers::resources::Room& rmn, buffers::Project* protobuf);
+Instance AddInstance(const buffers::resources::Room::Instance& inst, buffers::Project* protobuf);
+Tile AddTile(const buffers::resources::Room::Tile& tile, buffers::Project* protobuf);
+View AddView(const buffers::resources::Room::View& view, buffers::Project* protobuf);
+BackgroundDef AddRoomBackground(const buffers::resources::Room::Background& bkg, buffers::Project* protobuf);
+
+template <class T>
+int Name2Id(const ::google::protobuf::RepeatedPtrField< T >& group, std::string name) {
+  for (auto& message : group) {
+    const google::protobuf::Descriptor *desc = message.GetDescriptor();
+    const google::protobuf::Reflection *refl = message.GetReflection();
+
+    const google::protobuf::FieldDescriptor *nameField = desc->FindFieldByName("name");
+    if (refl->GetString(message, nameField) == name) {
+      const google::protobuf::FieldDescriptor *idField = desc->FindFieldByName("id");
+      return refl->GetInt32(message, idField);
+    }
+  }
+  return -1;
+}
 
 EnigmaStruct* ProtoBuf2ES(buffers::Project* protobuf) {
   EnigmaStruct *es = new EnigmaStruct();
@@ -108,7 +126,7 @@ EnigmaStruct* ProtoBuf2ES(buffers::Project* protobuf) {
   if (es->gmObjectCount > 0) {
     es->gmObjects = new GmObject[es->gmObjectCount];
     for (int i = 0; i < es->gmObjectCount; ++i) {
-        es->gmObjects[i] = AddObject(protobuf->objects(i));
+        es->gmObjects[i] = AddObject(protobuf->objects(i), protobuf);
     }
   }
 
@@ -116,7 +134,7 @@ EnigmaStruct* ProtoBuf2ES(buffers::Project* protobuf) {
   if (es->roomCount > 0) {
     es->rooms = new Room[es->roomCount];
     for (int i = 0; i < es->roomCount; ++i) {
-        es->rooms[i] = AddRoom(protobuf->rooms(i));
+        es->rooms[i] = AddRoom(protobuf->rooms(i), protobuf);
     }
   }
 
@@ -134,7 +152,7 @@ Sprite AddSprite(const buffers::resources::Sprite& spr) {
   s.alphaTolerance = spr.alpha_tolerance();
   s.separateMask = spr.separate_mask();
   s.smoothEdges = spr.smooth_edges();
-  s.preload = false;
+  s.preload = spr.preload();
   s.originX = spr.origin_x();
   s.originY = spr.origin_y();
 
@@ -147,7 +165,7 @@ Sprite AddSprite(const buffers::resources::Sprite& spr) {
   s.subImageCount = spr.subimages_size();
   if (s.subImageCount > 0) {
     s.subImages = new SubImage[s.subImageCount];
-    for (int i=0; i < s.subImageCount; ++i) {
+    for (int i = 0; i < s.subImageCount; ++i) {
       s.subImages[i] = AddSubImage(spr.subimages(i));
     }
   }
@@ -275,19 +293,19 @@ Font AddFont(const buffers::resources::Font& fnt) {
   return f;
 }
 
-GmObject AddObject(const buffers::resources::Object& obj) {
+GmObject AddObject(const buffers::resources::Object& obj, buffers::Project* protobuf) {
   GmObject o = GmObject();
 
   o.name = obj.name().c_str();
   o.id = obj.id();
 
-  o.spriteId = -1;
+  o.spriteId = Name2Id(protobuf->sprites(), obj.sprite_name());
   o.solid = obj.solid();
   o.visible = obj.visible();
   o.depth = obj.depth();
   o.persistent = obj.persistent();
-  o.parentId = -1;
-  o.maskId = -1;
+  o.parentId = Name2Id(protobuf->objects(), obj.parent_name());
+  o.maskId = Name2Id(protobuf->sprites(), obj.mask_name());
 
   o.mainEvents = nullptr;
   o.mainEventCount = 0;
@@ -305,7 +323,7 @@ GmObject AddObject(const buffers::resources::Object& obj) {
   return o;
 }
 
-Room AddRoom(const buffers::resources::Room& rmn) {
+Room AddRoom(const buffers::resources::Room& rmn, buffers::Project* protobuf) {
   Room r = Room();
 
   r.name = rmn.name().c_str();
@@ -321,36 +339,106 @@ Room AddRoom(const buffers::resources::Room& rmn) {
   r.creationCode = rmn.code().c_str();
   r.enableViews = rmn.enable_views();
 
-  r.backgroundDefs = nullptr;
-  r.backgroundDefCount = 0;
+  r.backgroundDefCount = rmn.backgrounds_size();
+  if (r.backgroundDefCount > 0) {
+    r.backgroundDefs = new BackgroundDef[r.backgroundDefCount];
+    for (int i = 0; i < r.backgroundDefCount; ++i) {
+      r.backgroundDefs[i] = AddRoomBackground(rmn.backgrounds(i), protobuf);
+    }
+  }
 
-  r.views = nullptr;
-  r.viewCount = 0;
+  r.viewCount = rmn.views_size();
+  if (r.viewCount > 0) {
+    r.views = new View[r.viewCount];
+    for (int i = 0; i < r.viewCount; ++i) {
+      r.views[i] = AddView(rmn.views(i), protobuf);
+    }
+  }
 
   r.instanceCount = rmn.instances_size();
   if (r.instanceCount > 0) {
     r.instances = new Instance[r.instanceCount];
     for (int i = 0; i < r.instanceCount; ++i) {
-      r.instances[i] = AddInstance(rmn.instances(i));
+      r.instances[i] = AddInstance(rmn.instances(i), protobuf);
     }
   }
 
-  r.tiles = nullptr;
-  r.tileCount = 0;
+  r.tileCount = rmn.tiles_size();
+  if (r.tileCount > 0) {
+    r.tiles = new Tile[r.tileCount];
+    for (int i = 0; i < r.tileCount; ++i) {
+      r.tiles[i] = AddTile(rmn.tiles(i), protobuf);
+    }
+  }
 
   return r;
 }
 
-Instance AddInstance(const buffers::resources::Room::Instance& inst) {
+Instance AddInstance(const buffers::resources::Room::Instance& inst, buffers::Project* protobuf) {
   Instance i = Instance();
 
   i.x = inst.x();
   i.y = inst.y();
   i.id = 0;
   i.locked = inst.locked();
-  i.objectId = -1;
+  i.objectId = Name2Id(protobuf->objects(), inst.object_type());
   i.creationCode = inst.code().c_str();
   i.preCreationCode = "";
 
   return i;
+}
+
+Tile AddTile(const buffers::resources::Room::Tile& tile, buffers::Project* protobuf) {
+  Tile t = Tile();
+
+  t.bgX = tile.x_offset();
+  t.bgY = tile.y_offset();
+  t.roomX = tile.x();
+  t.roomY = tile.y();
+  t.width = tile.width();
+  t.height = tile.height();
+  t.depth = tile.depth();
+  t.backgroundId = Name2Id(protobuf->backgrounds(), tile.background_name());
+  t.id = tile.id();
+  t.locked = tile.locked();
+
+  return t;
+}
+
+View AddView(const buffers::resources::Room::View& view, buffers::Project* protobuf) {
+  View v = View();
+
+  v.visible = view.visible();
+  v.viewX = view.xview();
+  v.viewY = view.yview();
+  v.viewW = view.wview();
+  v.viewH = view.hview();
+  v.portX = view.xport();
+  v.portY = view.yport();
+  v.portW = view.wport();
+  v.portH = view.hport();
+  v.borderH = view.hborder();
+  v.borderV = view.vborder();
+  v.speedH = view.hspeed();
+  v.speedV = view.vspeed();
+	v.objectId = Name2Id(protobuf->objects(), view.object_following());
+
+  return v;
+}
+
+BackgroundDef AddRoomBackground(const buffers::resources::Room::Background& bkg, buffers::Project* protobuf) {
+  BackgroundDef b = BackgroundDef();
+
+	b.visible = bkg.visible();
+	b.foreground = bkg.foreground();
+	b.x = bkg.x();
+	b.y = bkg.y();
+	b.tileHoriz = bkg.htiled();
+	b.tileVert = bkg.vtiled();
+	b.hSpeed = bkg.hspeed();
+	b.vSpeed = bkg.vspeed();
+	b.stretch = bkg.stretch();
+	b.backgroundId = Name2Id(protobuf->backgrounds(), bkg.name());
+
+  return b;
 }
