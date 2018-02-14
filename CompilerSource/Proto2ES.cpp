@@ -307,18 +307,34 @@ GmObject AddObject(const buffers::resources::Object& obj, buffers::Project* prot
   o.parentId = Name2Id(protobuf->objects(), obj.parent_name());
   o.maskId = Name2Id(protobuf->sprites(), obj.mask_name());
 
-  o.mainEvents = nullptr;
-  o.mainEventCount = 0;
+  std::unordered_map<int,std::vector<Event> > mainEventMap;
 
-/*
-  o.mainEventCount = obj.instances_size();
+  for (int i = 0; i < obj.events_size(); ++i) {
+    const auto &evt = obj.events(i);
+    std::vector<Event>& events = mainEventMap[evt.type()];
+    Event e;
+    e.id = evt.number();
+    e.code = "{ game_end(666); /**/\n}\n";
+    events.push_back(e);
+  }
+
+  o.mainEventCount = mainEventMap.size();
   if (o.mainEventCount > 0) {
-    r.mainEvents = new Instance[r.mainEventCount];
-    for (int i = 0; i < r.mainEventCount; ++i) {
-      r.mainEvents[i] = AddInstance(rmn.mainEvents(i));
+    o.mainEvents = new MainEvent[o.mainEventCount];
+    int m = 0;
+    for (const auto &mainEvent : mainEventMap) {
+      MainEvent me = MainEvent();
+      me.id = mainEvent.first;
+      me.eventCount = mainEvent.second.size();
+      if (me.eventCount > 0) {
+        me.events = new Event[me.eventCount];
+        for (int i = 0; i < me.eventCount; ++i) {
+          me.events[i] = mainEvent.second[i];
+        }
+      }
+      o.mainEvents[m++] = me;
     }
   }
-*/
 
   return o;
 }
@@ -391,8 +407,8 @@ Instance AddInstance(const buffers::resources::Room::Instance& inst, buffers::Pr
 Tile AddTile(const buffers::resources::Room::Tile& tile, buffers::Project* protobuf) {
   Tile t = Tile();
 
-  t.bgX = tile.x_offset();
-  t.bgY = tile.y_offset();
+  t.bgX = tile.xoffset();
+  t.bgY = tile.yoffset();
   t.roomX = tile.x();
   t.roomY = tile.y();
   t.width = tile.width();
@@ -421,7 +437,7 @@ View AddView(const buffers::resources::Room::View& view, buffers::Project* proto
   v.borderV = view.vborder();
   v.speedH = view.hspeed();
   v.speedV = view.vspeed();
-	v.objectId = Name2Id(protobuf->objects(), view.object_following());
+  v.objectId = Name2Id(protobuf->objects(), view.object_following());
 
   return v;
 }
@@ -429,16 +445,16 @@ View AddView(const buffers::resources::Room::View& view, buffers::Project* proto
 BackgroundDef AddRoomBackground(const buffers::resources::Room::Background& bkg, buffers::Project* protobuf) {
   BackgroundDef b = BackgroundDef();
 
-	b.visible = bkg.visible();
-	b.foreground = bkg.foreground();
-	b.x = bkg.x();
-	b.y = bkg.y();
-	b.tileHoriz = bkg.htiled();
-	b.tileVert = bkg.vtiled();
-	b.hSpeed = bkg.hspeed();
-	b.vSpeed = bkg.vspeed();
-	b.stretch = bkg.stretch();
-	b.backgroundId = Name2Id(protobuf->backgrounds(), bkg.name());
+  b.visible = bkg.visible();
+  b.foreground = bkg.foreground();
+  b.x = bkg.x();
+  b.y = bkg.y();
+  b.tileHoriz = bkg.htiled();
+  b.tileVert = bkg.vtiled();
+  b.hSpeed = bkg.hspeed();
+  b.vSpeed = bkg.vspeed();
+  b.stretch = bkg.stretch();
+  b.backgroundId = Name2Id(protobuf->backgrounds(), bkg.name());
 
   return b;
 }
