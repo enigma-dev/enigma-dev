@@ -17,6 +17,9 @@
 
 #include "Proto2ES.h"
 
+#include <unordered_map>
+#include <vector>
+
 Sprite AddSprite(const buffers::resources::Sprite& spr);
 SubImage AddSubImage(const std::string fPath);
 Sound AddSound(const buffers::resources::Sound& snd);
