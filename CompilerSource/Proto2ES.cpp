@@ -29,7 +29,7 @@ PathPoint AddPathPoint(const buffers::resources::Path::Point& pnt);
 Script AddScript(const buffers::resources::Script& scr);
 Shader AddShader(const buffers::resources::Shader& shr);
 Font AddFont(const buffers::resources::Font& fnt);
-GmObject AddObject(const buffers::resources::Object& obj, buffers::Project* protobuf);
+GmObject AddObject(buffers::resources::Object* obj, buffers::Project* protobuf);
 Room AddRoom(const buffers::resources::Room& rmn, buffers::Project* protobuf);
 Instance AddInstance(const buffers::resources::Room::Instance& inst, buffers::Project* protobuf);
 Tile AddTile(const buffers::resources::Room::Tile& tile, buffers::Project* protobuf);
@@ -49,6 +49,146 @@ int Name2Id(const ::google::protobuf::RepeatedPtrField< T >& group, std::string 
     }
   }
   return -1;
+}
+
+inline std::string string_replace_all(std::string str, std::string substr, std::string nstr)
+{
+  size_t pos = 0;
+  while ((pos = str.find(substr, pos)) != std::string::npos)
+  {
+    str.replace(pos, substr.length(), nstr);
+    pos += nstr.length();
+  }
+  return str;
+}
+
+std::string Argument2Code(const buffers::resources::Argument& arg) {
+  using buffers::resources::ArgumentKind;
+  std::string val = arg.string();
+
+  if (val.length() == 0) {
+    if (arg.kind() == ArgumentKind::ARG_STRING)
+      return "\"\"";
+    else
+      return "0";
+  }
+  switch (arg.kind()) {
+    case ArgumentKind::ARG_BOTH:
+      // treat as literal if starts with quote (")
+      if (val[0] == '"' || val[0] == '\'') return val;
+      // else fall through
+    case ArgumentKind::ARG_STRING:
+      return '\"' + string_replace_all(string_replace_all(val, "\\", "\\\\"), "\"", "\"+'\"'+\"") + '\"';
+    case ArgumentKind::ARG_BOOLEAN:
+      return std::to_string(val != "0");
+    case ArgumentKind::ARG_MENU:
+    case ArgumentKind::ARG_COLOR:
+      return val;
+    default:
+      return val; // TODO: fix oneof <background> <sprite> etc
+  }
+}
+
+std::string Actions2Code(const ::google::protobuf::RepeatedPtrField< buffers::resources::Action >& actions) {
+  using buffers::resources::ActionKind;
+  using buffers::resources::ActionExecution;
+  std::string code = "";
+
+  int numberOfBraces = 0; // gm ignores brace actions which are in the wrong place or missing
+  int numberOfIfs = 0; // gm allows multipe else actions after 1 if, so its important to track the number
+
+  for (const auto &action : actions) {
+    const auto &args = action.arguments();
+
+    if (action.use_apply_to())
+      code += "with (" + action.who_name() + ") {\n";
+
+    switch (action.kind()) {
+      case ActionKind::ACT_BEGIN:
+        code += '{';
+        numberOfBraces++;
+        break;
+      case ActionKind::ACT_END:
+        if (numberOfBraces > 0) {
+          code += '}';
+          numberOfBraces--;
+        }
+        break;
+      case ActionKind::ACT_ELSE:
+        if (numberOfIfs > 0) {
+          code += "else ";
+          numberOfIfs--;
+        }
+        break;
+      case ActionKind::ACT_EXIT:
+        code += "exit ";
+        break;
+      case ActionKind::ACT_REPEAT:
+        code += "repeat (" + args[0].string() + ") ";
+        break;
+      case ActionKind::ACT_VARIABLE:
+        code += args[0].string();
+        if (action.relative())
+          code += " += ";
+        else
+          code += " = ";
+        code += args[1].string();
+        break;
+      case ActionKind::ACT_CODE:
+        code += args[0].string();
+        break;
+      case ActionKind::ACT_NORMAL:
+        if (action.exe_type() == ActionExecution::EXEC_NONE) break;
+
+        if (action.is_question()) {
+          code += "if ";
+          numberOfIfs++;
+        }
+
+        if (action.is_not())
+          code += '!';
+
+        if (action.relative()) {
+          if (action.is_question())
+            code += "(argument_relative := " + std::to_string(action.relative()) + ", ";
+          else
+            code += "{argument_relative := " + std::to_string(action.relative()) + "; ";
+        }
+
+        if (action.is_question() && action.exe_type() == ActionExecution::EXEC_CODE)
+          code += action.code_string();
+        else
+          code += action.function_name();
+
+        if (action.exe_type() == ActionExecution::EXEC_FUNCTION) {
+          code += '(';
+          for (int i = 0; i < args.size(); i++) {
+            if (i != 0)
+              code += ',';
+            code += Argument2Code(args[i]);
+          }
+          code += ')';
+        }
+
+        if (action.relative())
+          code += action.is_question() ? ")" : "\n}";
+
+        code += '\n';
+
+        break;
+      default:
+        break;
+    }
+    if (action.use_apply_to())
+      code += "\n}\n";
+  }
+
+  // someone forgot the closing block action
+  if (numberOfBraces > 0)
+    for (int i = 0; i < numberOfBraces; i++)
+      code += "\n}";
+
+  return code;
 }
 
 EnigmaStruct* ProtoBuf2ES(buffers::Project* protobuf) {
@@ -129,7 +269,7 @@ EnigmaStruct* ProtoBuf2ES(buffers::Project* protobuf) {
   if (es->gmObjectCount > 0) {
     es->gmObjects = new GmObject[es->gmObjectCount];
     for (int i = 0; i < es->gmObjectCount; ++i) {
-        es->gmObjects[i] = AddObject(protobuf->objects(i), protobuf);
+        es->gmObjects[i] = AddObject(protobuf->mutable_objects(i), protobuf);
     }
   }
 
@@ -296,28 +436,30 @@ Font AddFont(const buffers::resources::Font& fnt) {
   return f;
 }
 
-GmObject AddObject(const buffers::resources::Object& obj, buffers::Project* protobuf) {
+GmObject AddObject(buffers::resources::Object* obj, buffers::Project* protobuf) {
   GmObject o = GmObject();
 
-  o.name = obj.name().c_str();
-  o.id = obj.id();
+  o.name = obj->name().c_str();
+  o.id = obj->id();
 
-  o.spriteId = Name2Id(protobuf->sprites(), obj.sprite_name());
-  o.solid = obj.solid();
-  o.visible = obj.visible();
-  o.depth = obj.depth();
-  o.persistent = obj.persistent();
-  o.parentId = Name2Id(protobuf->objects(), obj.parent_name());
-  o.maskId = Name2Id(protobuf->sprites(), obj.mask_name());
+  o.spriteId = Name2Id(protobuf->sprites(), obj->sprite_name());
+  o.solid = obj->solid();
+  o.visible = obj->visible();
+  o.depth = obj->depth();
+  o.persistent = obj->persistent();
+  o.parentId = Name2Id(protobuf->objects(), obj->parent_name());
+  o.maskId = Name2Id(protobuf->sprites(), obj->mask_name());
 
   std::unordered_map<int,std::vector<Event> > mainEventMap;
 
-  for (int i = 0; i < obj.events_size(); ++i) {
-    const auto &evt = obj.events(i);
-    std::vector<Event>& events = mainEventMap[evt.type()];
+  for (int i = 0; i < obj->events_size(); ++i) {
+    auto *evt = obj->mutable_events(i);
+    std::vector<Event>& events = mainEventMap[evt->type()];
     Event e;
-    e.id = evt.number();
-    e.code = "{ game_end(666); /**/\n}\n";
+    e.id = evt->number();
+    if (evt->actions_size() > 0)
+      evt->set_code(Actions2Code(evt->actions()));
+    e.code = evt->code().c_str();
     events.push_back(e);
   }
 
