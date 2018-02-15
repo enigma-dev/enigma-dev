@@ -165,7 +165,7 @@ std::string Actions2Code(const ::google::protobuf::RepeatedPtrField< buffers::re
           for (int i = 0; i < args.size(); i++) {
             if (i != 0)
               code += ',';
-            code += Argument2Code(args[i]);
+            code += Argument2Code(args.Get(i));
           }
           code += ')';
         }
