@@ -124,18 +124,18 @@ std::string Actions2Code(const ::google::protobuf::RepeatedPtrField< buffers::re
         code += "exit ";
         break;
       case ActionKind::ACT_REPEAT:
-        code += "repeat (" + args[0].string() + ") ";
+        code += "repeat (" + args.Get(0).string() + ") ";
         break;
       case ActionKind::ACT_VARIABLE:
-        code += args[0].string();
+        code += args.Get(0).string();
         if (action.relative())
           code += " += ";
         else
           code += " = ";
-        code += args[1].string();
+        code += args.Get(1).string();
         break;
       case ActionKind::ACT_CODE:
-        code += args[0].string();
+        code += args.Get(0).string();
         break;
       case ActionKind::ACT_NORMAL:
         if (action.exe_type() == ActionExecution::EXEC_NONE) break;
