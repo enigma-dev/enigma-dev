@@ -191,8 +191,6 @@ std::string Actions2Code(const ::google::protobuf::RepeatedPtrField< buffers::re
   if (numberOfIfs > 0)
     code = "var __if__ = false;\n" + code;
 
-  std::cout << "HEYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY\n" << code << "\n";
-
   return code;
 }
 
