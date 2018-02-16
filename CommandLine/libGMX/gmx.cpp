@@ -258,8 +258,8 @@ void PackRes(std::string &name, int id, pugi::xml_node &node, google::protobuf::
                 break;
               }
               case google::protobuf::FieldDescriptor::CppType::CPPTYPE_ENUM: {
-                refl->SetEnumValue(m, field,
-                             (isAttribute) ? attr.as_int() : (isSplit) ? std::stoi(splitValue) : xmlValue.as_int());
+                refl->SetEnum(m, field, field->enum_type()->FindValueByNumber(
+                              (isAttribute) ? attr.as_int() : (isSplit) ? std::stoi(splitValue) : xmlValue.as_int()));
                 break;
               }
               case google::protobuf::FieldDescriptor::CppType::CPPTYPE_STRING: {
