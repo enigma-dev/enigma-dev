@@ -122,10 +122,10 @@ std::string Actions2Code(const ::google::protobuf::RepeatedPtrField< buffers::re
         }
         break;
       case ActionKind::ACT_EXIT:
-        code += "exit ";
+        code += "exit;";
         break;
       case ActionKind::ACT_REPEAT:
-        code += "repeat (" + args.Get(0).string() + ") ";
+        code += "repeat (" + args.Get(0).string() + ")";
         break;
       case ActionKind::ACT_VARIABLE:
         code += args.Get(0).string();
@@ -142,18 +142,18 @@ std::string Actions2Code(const ::google::protobuf::RepeatedPtrField< buffers::re
         if (action.exe_type() == ActionExecution::EXEC_NONE) break;
 
         if (action.is_question()) {
-          code += "{\n__if__ = ";
+          code += "__if__ = ";
           numberOfIfs++;
         }
 
         if (action.is_not())
-          code += "!(";
+          code += "!";
 
         if (action.relative()) {
           if (action.is_question())
-            code += "(argument_relative := " + std::to_string(action.relative()) + ", ";
+            code += "(argument_relative = " + std::to_string(action.relative()) + ", ";
           else
-            code += "{argument_relative := " + std::to_string(action.relative()) + "; ";
+            code += "{\nargument_relative = " + std::to_string(action.relative()) + ";\n";
         }
 
         if (action.is_question() && action.exe_type() == ActionExecution::EXEC_CODE)
@@ -172,19 +172,15 @@ std::string Actions2Code(const ::google::protobuf::RepeatedPtrField< buffers::re
         }
 
         if (action.relative())
-          code += action.is_question() ? ");\n" : "\n}\n";
+          code += action.is_question() ? ");" : "\n}";
         if (action.is_question()) {
-          if (in_with)
-            code += "if (__if__) break;";
-          code += "}\nif (__if__)\n";
+          code += "\nif (__if__)";
         }
-
-        code += '\n';
-
         break;
       default:
         break;
     }
+    code += '\n';
   }
 
   // someone forgot the closing block action
@@ -194,6 +190,8 @@ std::string Actions2Code(const ::google::protobuf::RepeatedPtrField< buffers::re
 
   if (numberOfIfs > 0)
     code = "var __if__ = false;\n" + code;
+
+  std::cout << "HEYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY\n" << code << "\n";
 
   return code;
 }
@@ -545,11 +543,11 @@ Room AddRoom(const buffers::resources::Room& rmn, buffers::Project* protobuf) {
 Instance AddInstance(const buffers::resources::Room::Instance& inst, buffers::Project* protobuf) {
   Instance i = Instance();
 
+  i.id = inst.id();
+  i.objectId = Name2Id(protobuf->objects(), inst.object_type());
   i.x = inst.x();
   i.y = inst.y();
-  i.id = inst.id();
   i.locked = inst.locked();
-  i.objectId = Name2Id(protobuf->objects(), inst.object_type());
   i.creationCode = inst.code().c_str();
   i.preCreationCode = "";
 
@@ -559,16 +557,16 @@ Instance AddInstance(const buffers::resources::Room::Instance& inst, buffers::Pr
 Tile AddTile(const buffers::resources::Room::Tile& tile, buffers::Project* protobuf) {
   Tile t = Tile();
 
-  t.bgX = tile.xoffset();
-  t.bgY = tile.yoffset();
+  t.id = tile.id();
+  t.backgroundId = Name2Id(protobuf->backgrounds(), tile.background_name());
   t.roomX = tile.x();
   t.roomY = tile.y();
+  t.locked = tile.locked();
+  t.bgX = tile.xoffset();
+  t.bgY = tile.yoffset();
   t.width = tile.width();
   t.height = tile.height();
   t.depth = tile.depth();
-  t.backgroundId = Name2Id(protobuf->backgrounds(), tile.background_name());
-  t.id = tile.id();
-  t.locked = tile.locked();
 
   return t;
 }

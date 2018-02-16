@@ -722,7 +722,7 @@ static inline void write_script_implementations(ofstream& wto, EnigmaStruct *es,
     }
     wto << ")\n{\n  ";
     if (mode == emode_debug) {
-      wto << "enigma::debug_scope $current_scope(\"script '" << es->scripts[i].name << "'\");\n";
+      wto << "enigma::debug_scope $current_scope(\"script '" << es->scripts[i].name << "'\");\n  ";
     }
     parsed_event& upev = scr->pev_global?*scr->pev_global:scr->pev;
 
@@ -829,7 +829,7 @@ static inline void write_event_func(ofstream& wto, const parsed_event &event, st
   const int mid = event.mainId, id = event.id;
   wto << "variant enigma::OBJ_" << objname << "::myevent_" << evname << "()\n{\n  ";
   if (mode == emode_debug) {
-    wto << "enigma::debug_scope $current_scope(\"event '" << evname << "' for object '" << objname << "'\");\n";
+    wto << "enigma::debug_scope $current_scope(\"event '" << evname << "' for object '" << objname << "'\");\n  ";
   }
 
   if (!event_execution_uses_default(event.mainId,event.id))
