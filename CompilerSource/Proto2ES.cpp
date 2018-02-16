@@ -100,8 +100,9 @@ std::string Actions2Code(const ::google::protobuf::RepeatedPtrField< buffers::re
   for (const auto &action : actions) {
     const auto &args = action.arguments();
 
-    if (action.use_apply_to())
-      code += "with (" + action.who_name() + ") {\n";
+    bool in_with = action.use_apply_to() && action.who_name() != "self";
+    if (in_with)
+      code += "with (" + action.who_name() + ")\n";
 
     switch (action.kind()) {
       case ActionKind::ACT_BEGIN:
@@ -135,18 +136,18 @@ std::string Actions2Code(const ::google::protobuf::RepeatedPtrField< buffers::re
         code += args.Get(1).string();
         break;
       case ActionKind::ACT_CODE:
-        code += args.Get(0).string();
+        code += "{\n" + args.Get(0).string() + "\n/**/\n}";
         break;
       case ActionKind::ACT_NORMAL:
         if (action.exe_type() == ActionExecution::EXEC_NONE) break;
 
         if (action.is_question()) {
-          code += "if ";
+          code += "{\n__if__ = ";
           numberOfIfs++;
         }
 
         if (action.is_not())
-          code += '!';
+          code += "!(";
 
         if (action.relative()) {
           if (action.is_question())
@@ -171,7 +172,12 @@ std::string Actions2Code(const ::google::protobuf::RepeatedPtrField< buffers::re
         }
 
         if (action.relative())
-          code += action.is_question() ? ")" : "\n}";
+          code += action.is_question() ? ");\n" : "\n}\n";
+        if (action.is_question()) {
+          if (in_with)
+            code += "if (__if__) break;";
+          code += "}\nif (__if__)\n";
+        }
 
         code += '\n';
 
@@ -179,14 +185,15 @@ std::string Actions2Code(const ::google::protobuf::RepeatedPtrField< buffers::re
       default:
         break;
     }
-    if (action.use_apply_to())
-      code += "\n}\n";
   }
 
   // someone forgot the closing block action
   if (numberOfBraces > 0)
     for (int i = 0; i < numberOfBraces; i++)
       code += "\n}";
+
+  if (numberOfIfs > 0)
+    code = "var __if__ = false;\n" + code;
 
   return code;
 }
@@ -540,7 +547,7 @@ Instance AddInstance(const buffers::resources::Room::Instance& inst, buffers::Pr
 
   i.x = inst.x();
   i.y = inst.y();
-  i.id = 0;
+  i.id = inst.id();
   i.locked = inst.locked();
   i.objectId = Name2Id(protobuf->objects(), inst.object_type());
   i.creationCode = inst.code().c_str();

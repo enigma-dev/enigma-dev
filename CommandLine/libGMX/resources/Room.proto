@@ -79,13 +79,14 @@ message Room {
     optional string object_type = 1 [(gmx) = "objName"];
     optional int32 x = 2;
     optional int32 y = 3;
-    optional string name = 4;
-    optional bool locked = 5;
-    optional string code = 6;
-    optional double xscale = 7 [(gmx) = "scaleX"];
-    optional double yscale = 8 [(gmx) = "scaleY"];
-    optional int32 color = 9 [(gmx) = "colour"];
-    optional double rotation = 10;
+    optional int32 id = 4;
+    optional string name = 5;
+    optional bool locked = 6;
+    optional string code = 7;
+    optional double xscale = 8 [(gmx) = "scaleX"];
+    optional double yscale = 9 [(gmx) = "scaleY"];
+    optional int32 color = 10 [(gmx) = "colour"];
+    optional double rotation = 11;
   }
 
   repeated Instance instances = 17 [(gmx) = "instances/instance"];
