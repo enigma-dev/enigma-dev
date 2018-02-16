@@ -242,9 +242,8 @@ void PackRes(std::string &name, int id, pugi::xml_node &node, google::protobuf::
                 break;
               }
               case google::protobuf::FieldDescriptor::CppType::CPPTYPE_DOUBLE: {
-                refl->SetDouble(
-                    m, field,
-                    (isAttribute) ? attr.as_double() : (isSplit) ? std::stod(splitValue) : xmlValue.as_double());
+                refl->SetDouble(m, field,
+                                (isAttribute) ? attr.as_double() : (isSplit) ? std::stod(splitValue) : xmlValue.as_double());
                 break;
               }
               case google::protobuf::FieldDescriptor::CppType::CPPTYPE_FLOAT: {
