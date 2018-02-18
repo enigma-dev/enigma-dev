@@ -54,7 +54,7 @@ environment:
        PACKAGES: "mingw-w64-x86_64-bullet"}
 install:
   - set PATH=c:\msys64;C:\msys64\mingw64\bin;c:\msys64\usr\local\bin;c:\msys64\usr\bin;%PATH%
-  - ps:. C:/msys64/mingw64.exe
+  - ps: . C:/msys64/mingw64.exe
   - C:/msys64/usr/bin/bash.exe -lc "pacman --noconfirm -S mingw-w64-x86_64-boost %PACKAGES%"
   - gcc -v
   - ps: |
