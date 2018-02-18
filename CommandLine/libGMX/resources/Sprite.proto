@@ -28,7 +28,7 @@ message Sprite {
   optional int32 bbox_right = 14;
   optional int32 bbox_top = 15;
   optional int32 bbox_bottom = 16;
-  
+
   optional int32 type = 17;
   optional int32 h_tile = 18 [(gmx) = "HTile"];
   optional int32 v_tile = 19 [(gmx) = "VTile"];
@@ -37,5 +37,5 @@ message Sprite {
   optional uint32 width = 22;
   optional uint32 height = 23;
 
-  repeated string subimages = 3 [(gmx) = "frames/frame"];
+  repeated string subimages = 3 [(gmx) = "frames/frame", (file_path) = true];
 }

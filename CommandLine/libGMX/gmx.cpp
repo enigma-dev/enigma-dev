@@ -26,6 +26,17 @@
 
 #include "gmx.h"
 
+inline std::string string_replace_all(std::string str, std::string substr, std::string nstr)
+{
+  size_t pos = 0;
+  while ((pos = str.find(substr, pos)) != std::string::npos)
+  {
+    str.replace(pos, substr.length(), nstr);
+    pos += nstr.length();
+  }
+  return str;
+}
+
 namespace gmx {
 
 static std::ostream outputStream(nullptr);
@@ -113,7 +124,7 @@ void PackShader(std::string &name, int id, std::string fName, buffers::resources
   }
 }
 
-void PackRes(std::string &name, int id, pugi::xml_node &node, google::protobuf::Message *m, int depth) {
+void PackRes(std::string &dir, std::string &name, int id, pugi::xml_node &node, google::protobuf::Message *m, int depth) {
   const google::protobuf::Descriptor *desc = m->GetDescriptor();
   const google::protobuf::Reflection *refl = m->GetReflection();
   for (int i = 0; i < desc->field_count(); i++) {
@@ -128,6 +139,7 @@ void PackRes(std::string &name, int id, pugi::xml_node &node, google::protobuf::
       refl->SetString(m, field, name);
     } else {
       const std::string gmxName = opts.GetExtension(buffers::gmx);
+      const bool isFilePath = opts.GetExtension(buffers::file_path);
       std::string xmlElement = gmxName;
       bool isSplit = false;
       bool isAttribute = false;
@@ -177,7 +189,7 @@ void PackRes(std::string &name, int id, pugi::xml_node &node, google::protobuf::
                   if (n.name() == xmlElement) {
                     n.append_attribute("visited") = "true";
                     google::protobuf::Message *msg = refl->AddMessage(m, field);
-                    PackRes(name, cid++, n, msg, depth + 1);
+                    PackRes(dir, name, cid++, n, msg, depth + 1);
                   }
                 }
                 break;
@@ -187,7 +199,7 @@ void PackRes(std::string &name, int id, pugi::xml_node &node, google::protobuf::
                 for (pugi::xml_node n = child; n != nullptr; n = n.next_sibling()) {
                   if (n.name() == xmlElement) {
                     n.append_attribute("visited") = "true";
-                    refl->AddString(m, field, n.text().as_string());
+                    refl->AddString(m, field, ((isFilePath) ? dir : "") + n.text().as_string());
                   }
                 }
                 break;
@@ -218,7 +230,7 @@ void PackRes(std::string &name, int id, pugi::xml_node &node, google::protobuf::
             switch (field->cpp_type()) {
               case google::protobuf::FieldDescriptor::CppType::CPPTYPE_MESSAGE: {
                 google::protobuf::Message *msg = refl->MutableMessage(m, field);
-                PackRes(name, 0, child, msg, depth + 1);
+                PackRes(dir, name, 0, child, msg, depth + 1);
                 break;
               }
               case google::protobuf::FieldDescriptor::CppType::CPPTYPE_INT32: {
@@ -262,8 +274,8 @@ void PackRes(std::string &name, int id, pugi::xml_node &node, google::protobuf::
                 break;
               }
               case google::protobuf::FieldDescriptor::CppType::CPPTYPE_STRING: {
-                refl->SetString(m, field,
-                              (isAttribute) ? attr.as_string() : (isSplit) ? splitValue : xmlValue.as_string());
+                refl->SetString(m, field, ((isFilePath) ? dir : "") +
+                              ((isAttribute) ? attr.as_string() : (isSplit) ? splitValue : xmlValue.as_string()));
                 break;
               }
             }
@@ -289,8 +301,7 @@ void PackBuffer(google::protobuf::Message *m, std::string gmxPath) {
       // Scripts and Shaders are plain text not xml
       int id = 0;
       for (const auto &res : resMap.at(name)) {
-        std::string fName = res;
-        std::replace(fName.begin(), fName.end(), '\\', '/');
+        std::string fName = string_replace_all(res, "\\", "/");
         std::string type = name.substr(0, name.length() - 1);
         std::string resName = fName.substr(fName.find_last_of('/') + 1, fName.length() - 1);
         resName = resName.substr(0, resName.find_last_of('.'));
@@ -319,7 +330,8 @@ void PackBuffer(google::protobuf::Message *m, std::string gmxPath) {
             outputStream << "Parsing " << fName << "..." << std::endl;
             // Start a resource (sprite, object, room)
             google::protobuf::Message *msg = refl->AddMessage(m, field);
-            PackRes(resName, id++, root, msg, 0);
+            std::string dir = fName.substr(0, fName.find_last_of("/\\") + 1);
+            PackRes(dir, resName, id++, root, msg, 0);
 
             visited_walker walker;
             doc.traverse(walker);
