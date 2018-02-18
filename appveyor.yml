@@ -54,14 +54,7 @@ environment:
        PACKAGES: "mingw-w64-x86_64-bullet"}
 install:
   - set PATH=c:\msys64;C:\msys64\mingw64\bin;c:\msys64\usr\local\bin;c:\msys64\usr\bin;%PATH%
-  - set MSYSTEM=MINGW64
-  - set MSYSTEM_PREFIX=/mingw64
-  - set MSYSTEM_CHOST=x86_64-w64-mingw32
-  - set CONFIG_SITE=/mingw64/etc/config.site
-  - set MINGW_PACKAGE_PREFIX=mingw-w64-x86_64
-  - set MINGW_PREFIX=/mingw64
-  - set MINGW_CHOST=x86_64-w64-mingw32
-  - set PKG_CONFIG_PATH=/mingw64/lib/pkgconfig:/mingw64/share/pkgconfig
+  - C:/msys64/mingw64.exe
   - pacman --noconfirm -S mingw-w64-x86_64-boost %PACKAGES%
   - gcc -v
   - ps: |
