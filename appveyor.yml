@@ -58,7 +58,7 @@ install:
   - ps: . C:/msys64/mingw64.exe
   - C:/msys64/usr/bin/bash.exe -lc "pacman --noconfirm -S mingw-w64-x86_64-boost %PACKAGES%"
   - gcc -v
-  - ps: |
+  - pwsh: |
       If ($env:APPVEYOR_JOB_NUMBER -eq 1) {
         # use our first job to build JDI and the CLI
         C:/msys64/usr/bin/bash.exe -lc "export TERM='ansi'; export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01';
