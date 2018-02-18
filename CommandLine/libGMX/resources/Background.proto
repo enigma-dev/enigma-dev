@@ -19,7 +19,7 @@ message Background {
   optional int32 vertical_offset    = 14 [(gmx) = "tileyoff"];
   optional int32 horizontal_spacing = 15 [(gmx) = "tilehsep"];
   optional int32 vertical_spacing   = 16 [(gmx) = "tilevsep"];
-  
+
   optional int32 h_tile = 17 [(gmx) = "HTile"];
   optional int32 v_tile = 18 [(gmx) = "VTile"];
   optional int32 texture_group = 19 [(gmx) = "TextureGroups/TextureGroup0"];
@@ -27,5 +27,5 @@ message Background {
   optional uint32 width = 21;
   optional uint32 height = 22;
 
-  optional string image = 3 [(gmx) = "data"];
+  optional string image = 3 [(gmx) = "data", (file_path) = true];
 }
