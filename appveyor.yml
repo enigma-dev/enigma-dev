@@ -57,10 +57,10 @@ install:
   - ps: . C:/msys64/mingw64.exe
   - C:/msys64/usr/bin/bash.exe -lc "pacman --noconfirm -S mingw-w64-x86_64-boost %PACKAGES%"
   - gcc -v
-  - ps: |
+  - pwsh: |
       If ($env:APPVEYOR_JOB_NUMBER -eq 1) {
         # use our first job to build JDI and the CLI
-        C:/msys64/usr/bin/bash.exe -lc "cd '$env:APPVEYOR_BUILD_FOLDER'; make -j 4; make -j 4 emake" 2>&1 | out-null
+        C:/msys64/usr/bin/bash.exe -lc "cd '$env:APPVEYOR_BUILD_FOLDER'; make -j 4; make -j 4 emake"
 
         # create a daemon PowerShell "job" (not the same as an AppVeyor build job) to zip and upload
         # the blobs artifact while we start building the engine
@@ -85,4 +85,4 @@ install:
       }
 build_script:
   # AppVeyor overrides %PLATFORM% because it's part of its API, so export it
-  - C:/msys64/usr/bin/bash.exe -lc "cd $APPVEYOR_BUILD_FOLDER; export PLATFORM=%PLATFORM%; ./ci-build.sh" 2>&1 | out-null
+  - C:/msys64/usr/bin/bash.exe -lc "cd $APPVEYOR_BUILD_FOLDER; export PLATFORM=%PLATFORM%; ./ci-build.sh"
