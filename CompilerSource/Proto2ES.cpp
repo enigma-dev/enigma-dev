@@ -29,6 +29,7 @@ PathPoint AddPathPoint(const buffers::resources::Path::Point& pnt);
 Script AddScript(const buffers::resources::Script& scr);
 Shader AddShader(const buffers::resources::Shader& shr);
 Font AddFont(const buffers::resources::Font& fnt);
+Timeline AddTimeline(buffers::resources::Timeline* tml, buffers::Project* protobuf);
 GmObject AddObject(buffers::resources::Object* obj, buffers::Project* protobuf);
 Room AddRoom(const buffers::resources::Room& rmn, buffers::Project* protobuf);
 Instance AddInstance(const buffers::resources::Room::Instance& inst, buffers::Project* protobuf);
@@ -268,6 +269,14 @@ EnigmaStruct* ProtoBuf2ES(buffers::Project* protobuf) {
     }
   }
 
+  es->timelineCount = protobuf->timelines_size();
+  if (es->timelineCount > 0) {
+    es->timelines = new Timeline[es->timelineCount];
+    for (int i = 0; i < es->timelineCount; ++i) {
+        es->timelines[i] = AddTimeline(protobuf->mutable_timelines(i), protobuf);
+    }
+  }
+
   es->gmObjectCount = protobuf->objects_size();
   if (es->gmObjectCount > 0) {
     es->gmObjects = new GmObject[es->gmObjectCount];
@@ -437,6 +446,23 @@ Font AddFont(const buffers::resources::Font& fnt) {
   f.italic = fnt.italic();
 
   return f;
+}
+
+Timeline AddTimeline(buffers::resources::Timeline* tml, buffers::Project* protobuf) {
+  Timeline t = Timeline();
+
+  t.name = tml->name().c_str();
+  t.id = tml->id();
+
+  t.momentCount = tml->moments_size();
+  if (t.momentCount > 0) {
+    t.moments = new Moment[t.momentCount];
+    for (int i = 0; i < t.momentCount; ++i) {
+        //t.moments[i] = AddMoment(tml->mutable_moments(i), protobuf);
+    }
+  }
+
+  return t;
 }
 
 GmObject AddObject(buffers::resources::Object* obj, buffers::Project* protobuf) {
