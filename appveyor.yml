@@ -54,15 +54,13 @@ environment:
        PACKAGES: "mingw-w64-x86_64-bullet"}
 install:
   - set PATH=c:\msys64;C:\msys64\mingw64\bin;c:\msys64\usr\local\bin;c:\msys64\usr\bin;%PATH%
-  - set TERM="ansi"
   - ps: . C:/msys64/mingw64.exe
   - C:/msys64/usr/bin/bash.exe -lc "pacman --noconfirm -S mingw-w64-x86_64-boost %PACKAGES%"
   - gcc -v
   - pwsh: |
       If ($env:APPVEYOR_JOB_NUMBER -eq 1) {
         # use our first job to build JDI and the CLI
-        C:/msys64/usr/bin/bash.exe -lc "export TERM='ansi'; export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01';
-        cd '$env:APPVEYOR_BUILD_FOLDER'; make CXXFLAGS='-fdiagnostics-color' -j 4; make -j 4 emake"
+        C:/msys64/usr/bin/bash.exe -lc "cd '$env:APPVEYOR_BUILD_FOLDER'; make CXXFLAGS='-fdiagnostics-color' -j 4; make -j 4 emake"
 
         # create a daemon PowerShell "job" (not the same as an AppVeyor build job) to zip and upload
         # the blobs artifact while we start building the engine
