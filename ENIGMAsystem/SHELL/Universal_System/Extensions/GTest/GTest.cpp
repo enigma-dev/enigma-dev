@@ -53,5 +53,9 @@ IMPLEMENT_GTEST_BINARY_FUNC_FOR_ALL_TYPES(gtest_assert_le, ASSERT_LE);
 IMPLEMENT_GTEST_BINARY_FUNC_FOR_ALL_TYPES(gtest_assert_gt, ASSERT_GT);
 IMPLEMENT_GTEST_BINARY_FUNC_FOR_ALL_TYPES(gtest_assert_ge, ASSERT_GE);
 
+IMPLEMENT_GTEST_BINARY_FUNC_G(gtest_assert_eq, ASSERT_EQ, float, int);
 IMPLEMENT_GTEST_BINARY_FUNC_G(gtest_assert_eq, ASSERT_EQ, double, int);
 IMPLEMENT_GTEST_BINARY_FUNC_G(gtest_assert_eq, ASSERT_EQ, int, double);
+
+IMPLEMENT_GTEST_BINARY_FUNC_G(gtest_assert_eq_eps, ASSERT_FLOAT_EQ, float, double);
+IMPLEMENT_GTEST_BINARY_FUNC_G(gtest_assert_eq_eps, ASSERT_DOUBLE_EQ, double, double);
