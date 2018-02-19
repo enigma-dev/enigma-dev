@@ -33,10 +33,58 @@ DECLARE_BINARY_FOR_ALL_TYPES(gtest_assert_le);
 DECLARE_BINARY_FOR_ALL_TYPES(gtest_assert_gt);
 DECLARE_BINARY_FOR_ALL_TYPES(gtest_assert_ge);
 
-DECLARE_BINARY_FOR_TYPE_G(gtest_assert_eq, int, double);
+DECLARE_BINARY_FOR_TYPE_G(gtest_assert_eq, float, int);
 DECLARE_BINARY_FOR_TYPE_G(gtest_assert_eq, double, int);
+DECLARE_BINARY_FOR_TYPE_G(gtest_assert_eq, int, double);
+
+void gtest_assert_eq_eps(double a, double b, std::string m = "");
+void gtest_assert_eq_eps(float a,  double b, std::string m = "");
 
 #undef DECLARE_BINARY_FOR_ALL_TYPES
 #undef DECLARE_BINARY_FOR_TYPE
+
+#if defined INCLUDED_FROM_SHELLMAIN && !defined JUST_DEFINE_IT_RUN
+namespace enigma {
+
+class DefaultGtestErrorMessage {
+  std::string default_message_;
+
+ public:
+  DefaultGtestErrorMessage(std::string default_message):
+      default_message_(default_message) {}
+  string operator()() { return default_message_; }
+  string operator()(std::string msg) { return default_message_ + "\n" + msg; }
+};
+
+# define gtest_assert_eq(a, b, m...) \
+         gtest_assert_eq(a, b,       \
+             enigma::DefaultGtestErrorMessage("Where a = " #a ", b = " #b)(m))
+# define gtest_assert_eq_eps(a, b, m...) \
+         gtest_assert_eq_eps(a, b,       \
+             enigma::DefaultGtestErrorMessage("Where a = " #a ", b = " #b)(m))
+# define gtest_assert_ne(a, b, m...) \
+         gtest_assert_ne(a, b,       \
+             enigma::DefaultGtestErrorMessage("Where a = " #a ", b = " #b)(m))
+# define gtest_assert_lt(a, b, m...) \
+         gtest_assert_lt(a, b,       \
+             enigma::DefaultGtestErrorMessage("Where a = " #a ", b = " #b)(m))
+# define gtest_assert_le(a, b, m...) \
+         gtest_assert_le(a, b,       \
+             enigma::DefaultGtestErrorMessage("Where a = " #a ", b = " #b)(m))
+# define gtest_assert_gt(a, b, m...) \
+         gtest_assert_gt(a, b,       \
+             enigma::DefaultGtestErrorMessage("Where a = " #a ", b = " #b)(m))
+# define gtest_assert_ge(a, b, m...) \
+         gtest_assert_ge(a, b,       \
+             enigma::DefaultGtestErrorMessage("Where a = " #a ", b = " #b)(m))
+# define gtest_assert_true(exp, m...) \
+         gtest_assert_true(exp,       \
+             enigma::DefaultGtestErrorMessage("False expression: " #exp)(m))
+# define gtest_assert_false(exp, m...) \
+         gtest_assert_false(exp,       \
+             enigma::DefaultGtestErrorMessage("True expression: " #exp)(m))
+
+}
+#endif  // Included from SHELLmain, not JDI
 
 #endif  // ENIGMA_EXTENSION_GTEST_h

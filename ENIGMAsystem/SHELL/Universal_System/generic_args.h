@@ -95,10 +95,10 @@ template<> struct ArithmeticTypeEnabler<const var&>     : EnabledType<const var&
 template<> struct ArithmeticTypeEnabler<const variant&> : EnabledType<const variant&> {};
 template<typename T> using ArithmeticType = typename ArithmeticTypeEnabler<T>::T;
 
-template<typename T, typename U = T, typename V = U,
-         typename W = V, typename X = W, typename Y = X>
-struct ArithmeticTypes:
-    EnabledType<decltype(T() + U() + V() + W() + X() + Y())> {};
+template<typename X, typename Y = X, typename Z = Y,
+         typename W = Z, typename P = W, typename R = P,
+         typename EN = decltype(X() - Y() - Z() - W() - P() - R())>
+struct ArithmeticTypes: EnabledType<EN> {};
 
 }  // namespace enigma
 
@@ -131,7 +131,8 @@ template<typename X> class FloatType      : EnabledType<double> {};
 template<typename X> class NumericType    : EnabledType<double> {};
 template<typename X> class ArithmeticType : EnabledType<double> {};
 
-template<typename X, typename Y=int, typename Z=int, typename W=int, typename P=int>
+template<typename X, typename Y=int, typename Z = int,
+         typename W = int, typename P = int, typename R = int>
 class ArithmeticTypes { typedef double T; };
 
 }  // namespace enigma
