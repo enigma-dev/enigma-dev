@@ -57,23 +57,27 @@
 #  define WITH_RETURN_TYPE(type) ::template returns<type>::T
 #  define ARITHMETIC_OPERATION(guess_type, expression...) decltype(expression)
 #endif
+#define STL_ARITHMETIC(func)                                                  \
+  using ::func;                                                               \
+  static inline double func(const variant &v) { return ::func((double) v); }  \
+  static inline double func(const var &v)     { return ::func((double) v); }
 
 namespace enigma_user
 {
   const ma_scalar pi = M_PI;
 
   // STL functions.
-  using ::ceil;
-  using ::floor;
-  using ::round;
-  using ::exp;
-  using ::sqrt;
-  using ::log;
-  using ::log2;
-  using ::log10;
-  using ::sin;
-  using ::cos;
-  using ::tan;
+  STL_ARITHMETIC(ceil);
+  STL_ARITHMETIC(floor);
+  STL_ARITHMETIC(round);
+  STL_ARITHMETIC(exp);
+  STL_ARITHMETIC(sqrt);
+  STL_ARITHMETIC(log);
+  STL_ARITHMETIC(log2);
+  STL_ARITHMETIC(log10);
+  STL_ARITHMETIC(sin);
+  STL_ARITHMETIC(cos);
+  STL_ARITHMETIC(tan);
 
   // Overloading - These functions have special implementations
   // in C++ for each supported type.
@@ -93,8 +97,9 @@ namespace enigma_user
   inline ma_scalar arctan2(double y, double x) { return ::atan2(y,x); }
   inline ma_scalar power(double x, double p)   { return ::pow(x,p); }
 
-  template<typename T>
-  inline int64_t int64(enigma::NumericType<T> x) { return (int64_t) x; }
+  template<typename T> WITH_ARITHMETIC_TYPES(T) WITH_RETURN_TYPE(int64_t)
+  inline int64(T x) { return (int64_t) x; }
+  inline int64_t int64(const char *x) { return (int64_t) atol(x); }
   inline int64_t int64(std::string x) { return (int64_t) atol(x.c_str()); }
   inline int64_t int64(const variant& x) {
     return x.type == ty_string ? int64((std::string) x) : int64((double) x);
