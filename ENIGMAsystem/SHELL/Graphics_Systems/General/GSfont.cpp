@@ -70,16 +70,6 @@ static uint32_t getUnicodeCharacter(const string str, size_t& pos) {
   return character;
 }
 
-static fontglyph* findGlyph(const font *const fnt, uint32_t character) {
-  for (size_t i = 0; i < fnt->glyphRangeCount; i++) {
-    fontglyphrange* fgr = fnt->glyphRanges[i];
-    if (character >= fgr->glyphstart && character < fgr->glyphstart + fgr->glyphcount) {
-      return fgr->glyphs[character - fgr->glyphstart];
-    }
-  }
-  return NULL;
-}
-
 namespace enigma_user {
 
 void draw_set_halign(unsigned align){
