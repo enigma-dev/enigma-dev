@@ -235,23 +235,6 @@ bool font_exists(int fnt)
     return unsigned(fnt) < enigma::font_idmax && bool(enigma::fontstructarray[fnt]);
 }
 
-int font_add(string name, int size, bool bold, bool italic, uint32_t first, uint32_t last)
-{
-  int res = enigma::font_new(first, last-first);
-  enigma::font *fnt = enigma::fontstructarray[res];
-  fnt->name = name;
-  fnt->fontsize = size;
-  fnt->bold = bold;
-  fnt->italic = italic;
-  fnt->glyphRangeCount = 1;
-  enigma::fontglyphrange* fgr = new enigma::fontglyphrange();
-  fnt->glyphRanges.push_back(fgr);
-  fgr->glyphstart = first;
-  fgr->glyphcount = last-first;
-
-  return res;
-}
-
 bool font_replace(int ind, string name, int size, bool bold, bool italic, uint32_t first, uint32_t last)
 {
   enigma::font *fnt = enigma::fontstructarray[ind];
