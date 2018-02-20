@@ -139,8 +139,10 @@ namespace enigma_user {
       error = FT_Load_Char(face, g.index + first, FT_LOAD_RENDER);
       
       #ifdef DEBUG_MODE
-      if (error != 0)
+      if (error != 0) {
         std::cerr << "Freetype error loading bitmap for char: " <<  static_cast<char>(g.index) << std::endl;
+        continue;
+      }
       #endif
       
       FT_Bitmap& charBitmap = slot->bitmap;
