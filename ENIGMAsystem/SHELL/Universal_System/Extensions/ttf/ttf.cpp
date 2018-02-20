@@ -3,7 +3,6 @@
 #include "Universal_System/sprites.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Universal_System/rectpack.h"
-#include "Universal_System/make_unique.h"
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -84,10 +83,10 @@ namespace enigma_user {
     fnt->bold = bold;
     fnt->italic = italic;
     fnt->glyphRangeCount = 1;
-    std::unique_ptr<enigma::fontglyphrange> fgr = make_unique<enigma::fontglyphrange>();
-    fgr->glyphstart = first;
-    fgr->glyphcount = gcount;
-    fgr->glyphs.resize(gcount);
+    enigma::fontglyphrange fgr;
+    fgr.glyphstart = first;
+    fgr.glyphcount = gcount;
+    fgr.glyphs.resize(gcount);
     
     std::vector<pvrect> glyphmetrics(gcount);
     std::vector<GlyphPair> glyphPairs(gcount);  
@@ -149,18 +148,18 @@ namespace enigma_user {
       
       pvrect glyphInfo = glyphmetrics[g.index];
       
-      std::unique_ptr<enigma::fontglyph> glyph = std::make_unique<enigma::fontglyph>();
-      glyph->x = fftMetrics.horiBearingX / 64;
-      glyph->y = -fftMetrics.horiBearingY / 64;
-      glyph->x2 = fftMetrics.horiBearingX / 64 + charBitmap.width;
-      glyph->y2 = -fftMetrics.horiBearingY / 64 + charBitmap.rows;
-      glyph->tx = glyphInfo.x / double(w);
-      glyph->ty = glyphInfo.y / double(h);
-      glyph->tx2 = (glyphInfo.x +charBitmap.width) / double(w);
-      glyph->ty2 = (glyphInfo.y + charBitmap.rows) / double(h);
-      glyph->xs = face->glyph->linearHoriAdvance / 65536; // more fixed point conversion
+      enigma::fontglyph glyph;
+      glyph.x = fftMetrics.horiBearingX / 64;
+      glyph.y = -fftMetrics.horiBearingY / 64;
+      glyph.x2 = fftMetrics.horiBearingX / 64 + charBitmap.width;
+      glyph.y2 = -fftMetrics.horiBearingY / 64 + charBitmap.rows;
+      glyph.tx = glyphInfo.x / double(w);
+      glyph.ty = glyphInfo.y / double(h);
+      glyph.tx2 = (glyphInfo.x +charBitmap.width) / double(w);
+      glyph.ty2 = (glyphInfo.y + charBitmap.rows) / double(h);
+      glyph.xs = face->glyph->linearHoriAdvance / 65536; // more fixed point conversion
       
-      fgr->glyphs[g.index] = std::move(glyph);
+      fgr.glyphs[g.index] = glyph;
       
       for (unsigned y = 0; y < charBitmap.rows; ++y) {
         for (unsigned x = 0; x < charBitmap.width; ++x) {
@@ -172,7 +171,7 @@ namespace enigma_user {
       }
     }
     
-    fnt->glyphRanges[0] = std::move(fgr);
+    fnt->glyphRanges[0] = fgr;
     fnt->texture = enigma::graphics_create_texture(w, h, w, h, pxdata, false);
     fnt->twid = w;
     fnt->thgt = h;
