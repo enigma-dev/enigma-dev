@@ -17,20 +17,23 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "sprites_internal.h"
+#include "fonts_internal.h"
+#include "rectpack.h"
+#include "image_formats.h"
+#include "libEGMstd.h"
+#include "make_unique.h"
+
+#include "Graphics_Systems/graphics_mandatory.h"
+
 #include <list>
 #include <string>
 #include <string.h>
 #include <stdio.h>
 #include <vector>
-using namespace std;
 
-#include "Graphics_Systems/graphics_mandatory.h"
-#include "libEGMstd.h"
-
-#include "sprites_internal.h"
-#include "fonts_internal.h"
-#include "rectpack.h"
-#include "image_formats.h"
+using std::list;
+using std::string;
 
 namespace enigma
 {
@@ -40,12 +43,13 @@ namespace enigma
   int font_new(uint32_t gs, uint32_t gc) // Creates a new font, allocating 'gc' glyphs
   {
     font *ret = new font;
-
-    ret->glyphRangeCount = 1;
-    fontglyphrange* fgr = new fontglyphrange();
-    ret->glyphRanges.push_back(fgr);
+    
+    std::unique_ptr<fontglyphrange> fgr = make_unique<fontglyphrange>();
     fgr->glyphstart = gs;
     fgr->glyphcount = gc;
+    
+    ret->glyphRangeCount = 1;
+    ret->glyphRanges.push_back(std::move(fgr));
     ret->height = 0;
 
     font **fsan = new font*[font_idmax+2];
@@ -60,15 +64,15 @@ namespace enigma
     return font_idmax++;
   }
 
-  int font_pack(enigma::font *font, int spr, uint32_t gcount, bool prop, int sep)
+  int font_pack(font *font, int spr, uint32_t gcount, bool prop, int sep)
   {
       // Implement packing algorithm.
       // This algorithm will try to fit as many glyphs as possible into
       // a square space based on the max height of the font.
 
-      enigma::sprite *sspr = enigma::spritestructarray[spr];
+      sprite *sspr = spritestructarray[spr];
       unsigned char* glyphdata[gcount]; // Raw font image data
-      std::vector<enigma::rect_packer::pvrect> glyphmetrics(gcount);
+      std::vector<rect_packer::pvrect> glyphmetrics(gcount);
       int glyphx[gcount], glyphy[gcount];
 
       int gwm = sspr->width, // Glyph width max: sprite width
@@ -77,14 +81,13 @@ namespace enigma
 
       font->height = ghm;
 
-      enigma::fontglyphrange* fgr = font->glyphRanges[0];
+      std::unique_ptr<fontglyphrange>& fgr = font->glyphRanges[0];
 
       for (unsigned i = 0; i < gcount; i++)
       {
-        enigma::fontglyph* fg = new enigma::fontglyph();
-        fgr->glyphs.push_back(fg);
+        std::unique_ptr<fontglyph> fg = make_unique<fontglyph>();
         unsigned fw, fh;
-        unsigned char* data = enigma::graphics_get_texture_pixeldata(sspr->texturearray[i], &fw, &fh);
+        unsigned char* data = graphics_get_texture_pixeldata(sspr->texturearray[i], &fw, &fh);
         //NOTE: Following line replaced gtw = int((double)sspr->width / sspr->texturewarray[i]);
         //this was to fix non-power of two subimages
         //NTOE2: The commented out code was actually wrong - the width was divided by y instead of x. That is why it only worked with power of two.
@@ -126,6 +129,8 @@ namespace enigma
         glyphmetrics[i].h -= glyphmetrics[i].y - 1; // instead of right and bottom
         glyphx[i] = glyphmetrics[i].x, glyphy[i] = glyphmetrics[i].y;
         glyphmetrics[i].placed = -1;
+
+        fgr->glyphs.push_back(std::move(fg));
       }
 
       list<unsigned int> boxes;
@@ -134,17 +139,17 @@ namespace enigma
       boxes.sort();
 
       unsigned w = 64, h = 64;
-      enigma::rect_packer::rectpnode *rectplane = new enigma::rect_packer::rectpnode(0,0,w,h);
+      rect_packer::rectpnode *rectplane = new rect_packer::rectpnode(0,0,w,h);
       for (list<unsigned int>::reverse_iterator i = boxes.rbegin(); i != boxes.rend() and w and h; )
       {
-        enigma::rect_packer::rectpnode *nn = enigma::rect_packer::rninsert(rectplane, *i & 0xFF, &glyphmetrics.front());
+        rect_packer::rectpnode *nn = rect_packer::rninsert(rectplane, *i & 0xFF, &glyphmetrics.front());
         if (nn)
-          enigma::rect_packer::rncopy(nn, &glyphmetrics.front(), *i & 0xFF),
+          rect_packer::rncopy(nn, &glyphmetrics.front(), *i & 0xFF),
           i++;
         else
         {
           w > h ? h <<= 1 : w <<= 1,
-          rectplane = enigma::rect_packer::expand(rectplane, w, h);
+          rectplane = rect_packer::expand(rectplane, w, h);
           printf("Expanded to %d by %d\n", w, h);
           if (!w or !h) return false;
         }
@@ -153,7 +158,7 @@ namespace enigma
       int bigtex[w*h];
       for (unsigned i = 0; i < gcount; i++)
       {
-        enigma::fontglyph* fg = fgr->glyphs[i];
+        std::unique_ptr<fontglyph>& fg = fgr->glyphs[i];
         // Copy the font glyph image into the big texture we just allocated
         for (int yy = 0; yy < glyphmetrics[i].h; yy++) {
           for (int xx = 0; xx < glyphmetrics[i].w; xx++) {
@@ -168,24 +173,25 @@ namespace enigma
         fg->ty2 = (glyphmetrics[i].y + glyphmetrics[i].h) / double(h);
       }
 
-      font->texture = enigma::graphics_create_texture(w,h,w,h,bigtex,false);
+      font->texture = graphics_create_texture(w,h,w,h,bigtex,false);
       font->twid = w;
       font->thgt = h;
       font->yoffset = 0;
 
       return true;
   }
-}
 
-static enigma::fontglyph* findGlyph(const enigma::font *const fnt, uint32_t character) {
+fontglyph* findGlyph(const font *const fnt, uint32_t character) {
 	for (size_t i = 0; i < fnt->glyphRangeCount; i++) {
-		enigma::fontglyphrange* fgr = fnt->glyphRanges[i];
+		const std::unique_ptr<fontglyphrange>& fgr = fnt->glyphRanges[i];
 		if (character >= fgr->glyphstart && character < fgr->glyphstart + fgr->glyphcount) {
-			return fgr->glyphs[character - fgr->glyphstart];
+			return fgr->glyphs[character - fgr->glyphstart].get();
 		}
 	}
-	return NULL;
+	return nullptr;
 }
+
+} // namespace enigma
 
 namespace enigma_user
 {
@@ -235,23 +241,6 @@ bool font_exists(int fnt)
     return unsigned(fnt) < enigma::font_idmax && bool(enigma::fontstructarray[fnt]);
 }
 
-int font_add(string name, int size, bool bold, bool italic, uint32_t first, uint32_t last)
-{
-  int res = enigma::font_new(first, last-first);
-  enigma::font *fnt = enigma::fontstructarray[res];
-  fnt->name = name;
-  fnt->fontsize = size;
-  fnt->bold = bold;
-  fnt->italic = italic;
-  fnt->glyphRangeCount = 1;
-  enigma::fontglyphrange* fgr = new enigma::fontglyphrange();
-  fnt->glyphRanges.push_back(fgr);
-  fgr->glyphstart = first;
-  fgr->glyphcount = last-first;
-
-  return res;
-}
-
 bool font_replace(int ind, string name, int size, bool bold, bool italic, uint32_t first, uint32_t last)
 {
   enigma::font *fnt = enigma::fontstructarray[ind];
@@ -260,10 +249,13 @@ bool font_replace(int ind, string name, int size, bool bold, bool italic, uint32
   fnt->bold = bold;
   fnt->italic = italic;
   fnt->glyphRangeCount = 1;
-  enigma::fontglyphrange* fgr = new enigma::fontglyphrange();
-  fnt->glyphRanges.push_back(fgr);
+  
+  std::unique_ptr<enigma::fontglyphrange> fgr = make_unique<enigma::fontglyphrange>();
   fgr->glyphstart = first;
   fgr->glyphcount = last-first;
+  
+  fnt->glyphRanges.push_back(std::move(fgr));
+  
   return true;
 }
 
@@ -276,10 +268,12 @@ bool font_replace_sprite(int ind, int spr, uint32_t first, bool prop, int sep)
   enigma::font *fnt = enigma::fontstructarray[ind];
   fnt->glyphRanges.clear(); //TODO: Delete glyphs for each range or add it to the destructor?
   fnt->glyphRangeCount = 1;
-  enigma::fontglyphrange* fgr = new enigma::fontglyphrange();
-  fnt->glyphRanges.push_back(fgr);
+  
+  std::unique_ptr<enigma::fontglyphrange> fgr = make_unique<enigma::fontglyphrange>();
   fgr->glyphstart = first;
   fgr->glyphcount = gcount;
+  fnt->glyphRanges.push_back(std::move(fgr));
+  
   return enigma::font_pack(fnt, spr, gcount, prop, sep);
 }
 
@@ -296,42 +290,42 @@ int font_add_sprite(int spr, uint32_t first, bool prop, int sep)
 }
 
 float font_get_glyph_texture_left(int fnt, uint32_t character) {
-  enigma::fontglyph* glyph = findGlyph(enigma::fontstructarray[fnt], character);
+  enigma::fontglyph* glyph = enigma::findGlyph(enigma::fontstructarray[fnt], character);
   return glyph->tx;
 }
 
 float font_get_glyph_texture_top(int fnt, uint32_t character) {
-  enigma::fontglyph* glyph = findGlyph(enigma::fontstructarray[fnt], character);
+  enigma::fontglyph* glyph = enigma::findGlyph(enigma::fontstructarray[fnt], character);
   return glyph->ty;
 }
 
 float font_get_glyph_texture_right(int fnt, uint32_t character) {
-  enigma::fontglyph* glyph = findGlyph(enigma::fontstructarray[fnt], character);
+  enigma::fontglyph* glyph = enigma::findGlyph(enigma::fontstructarray[fnt], character);
   return glyph->tx2;
 }
 
 float font_get_glyph_texture_bottom(int fnt, uint32_t character) {
-  enigma::fontglyph* glyph = findGlyph(enigma::fontstructarray[fnt], character);
+  enigma::fontglyph* glyph = enigma::findGlyph(enigma::fontstructarray[fnt], character);
   return glyph->ty2;
 }
 
 float font_get_glyph_left(int fnt, uint32_t character) {
-  enigma::fontglyph* glyph = findGlyph(enigma::fontstructarray[fnt], character);
+  enigma::fontglyph* glyph = enigma::findGlyph(enigma::fontstructarray[fnt], character);
   return glyph->x;
 }
 
 float font_get_glyph_top(int fnt, uint32_t character) {
-  enigma::fontglyph* glyph = findGlyph(enigma::fontstructarray[fnt], character);
+  enigma::fontglyph* glyph = enigma::findGlyph(enigma::fontstructarray[fnt], character);
   return glyph->y;
 }
 
 float font_get_glyph_right(int fnt, uint32_t character) {
-  enigma::fontglyph* glyph = findGlyph(enigma::fontstructarray[fnt], character);
+  enigma::fontglyph* glyph = enigma::findGlyph(enigma::fontstructarray[fnt], character);
   return glyph->x2;
 }
 
 float font_get_glyph_bottom(int fnt, uint32_t character) {
-  enigma::fontglyph* glyph = findGlyph(enigma::fontstructarray[fnt], character);
+  enigma::fontglyph* glyph = enigma::findGlyph(enigma::fontstructarray[fnt], character);
   return glyph->y2;
 }
 

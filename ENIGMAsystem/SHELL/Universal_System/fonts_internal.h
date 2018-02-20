@@ -28,6 +28,7 @@
 #include <string>
 #include <vector>
 #include <stdint.h>
+#include <memory>
 
 namespace enigma
 {
@@ -39,7 +40,7 @@ namespace enigma
   };
   struct fontglyphrange {
     unsigned int glyphstart, glyphcount;
-    std::vector<fontglyph*> glyphs;
+    std::vector<std::unique_ptr<fontglyph>> glyphs;
   };
   struct font
   {
@@ -49,7 +50,7 @@ namespace enigma
 
     // Metrics and such
     unsigned glyphRangeCount;
-    std::vector<fontglyphrange*> glyphRanges;
+    std::vector<std::unique_ptr<fontglyphrange>> glyphRanges;
     unsigned int height, yoffset;
 
     // Texture layer
@@ -70,6 +71,7 @@ namespace enigma
   extern int rawfontcount, rawfontmaxid;
   int font_new(uint32_t gs, uint32_t gc); // Creates a new font, allocating 'gc' glyphs
   int font_pack(enigma::font *font, int spr, uint32_t gcount, bool prop, int sep);
+  fontglyph* findGlyph(const font *const fnt, uint32_t character);
 } //namespace enigma
 
 #endif //ENIGMA_FONTS_INTERNAL_H

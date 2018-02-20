@@ -74,7 +74,7 @@ namespace enigma {
           metrics.erase(metrics.begin());
           enigma::font *fnt = enigma::fontstructarray[textures[i].id];
           for (size_t g = 0; g < fnt->glyphRangeCount; g++) {
-            enigma::fontglyphrange* fgr = fnt->glyphRanges[g];
+            std::unique_ptr<enigma::fontglyphrange>& fgr = fnt->glyphRanges[g];
             for (size_t s = 0; s < fgr->glyphcount; s++){
               metrics.emplace_back();
             }
@@ -103,7 +103,7 @@ namespace enigma {
         case 2: { //Metrics for font glyps
           enigma::font *fnt = enigma::fontstructarray[textures[i].id];
           for (size_t g = 0; g < fnt->glyphRangeCount; g++) {
-            enigma::fontglyphrange* fgr = fnt->glyphRanges[g];
+            std::unique_ptr<enigma::fontglyphrange>& fgr = fnt->glyphRanges[g];
             for (size_t s = 0; s < fgr->glyphcount; s++){
               metrics[counter].w = fgr->glyphs[s]->x2-fgr->glyphs[s]->x, metrics[counter].h = fgr->glyphs[s]->y2-fgr->glyphs[s]->y;
               counter++;
@@ -194,7 +194,7 @@ namespace enigma {
           ///This sometimes draws cut of letters - need to investigate!
           enigma::font *fnt = enigma::fontstructarray[textures[i].id];
           for (size_t g = 0; g < fnt->glyphRangeCount; g++) {
-            enigma::fontglyphrange* fgr = fnt->glyphRanges[g];
+            std::unique_ptr<enigma::fontglyphrange>& fgr = fnt->glyphRanges[g];
             for (size_t s = 0; s < fgr->glyphcount; s++){
               double tix, tiy; //Calculate texture position in image space (pixels) instead of normalized 0-1. We sadly don't hold this information, but maybe we should
               tix = (double)fgr->glyphs[s]->tx*(double)fnt->twid;
