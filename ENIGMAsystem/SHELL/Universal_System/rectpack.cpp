@@ -33,6 +33,12 @@ namespace enigma
     rectpnode::rectpnode(): x(0),y(0), c(-1) { child[0] = NULL, child[1] = NULL; }
     rectpnode::rectpnode(int xx,int yy,int w,int h,rectpnode* c1,rectpnode* c2):
         x(xx), y(yy), wid(w), hgt(h), c(-1) { child[0] = c1, child[1]=c2; }
+
+    rectpnode::~rectpnode() {
+      delete child[0];
+      delete child[1];
+    }
+    
     void rectpnode::rect(int xx, int yy, int w, int h) { x=xx, y=yy, wid=w, hgt=h; }
     
     // Copies the content of a element `c` of pvrect array `boxes` into container `h`

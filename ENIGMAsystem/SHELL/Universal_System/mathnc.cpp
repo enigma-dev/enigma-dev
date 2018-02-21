@@ -417,4 +417,3 @@ namespace enigma_user
   int random_get_seed() { return enigma::Random_Seed; }
   int randomize() { return enigma::Random_Seed = mtrandom32(); }
 }
-

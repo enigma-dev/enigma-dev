@@ -43,7 +43,7 @@ inline void writef(float x, FILE *f) {
   fwrite(&x,4,1,f);
 }
 
-using namespace rect_packer;
+using namespace enigma::rect_packer;
 
 struct GlyphTextureRect {
   float x, y, x2, y2;

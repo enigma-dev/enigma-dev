@@ -33,6 +33,7 @@ struct rectpnode {
   int c;
   rectpnode();
   rectpnode(int xx, int yy, int w, int h, rectpnode* c1 = nullptr, rectpnode* c2 = nullptr);
+  ~rectpnode();
   void rect(int xx, int yy, int w, int h);
 };
 
