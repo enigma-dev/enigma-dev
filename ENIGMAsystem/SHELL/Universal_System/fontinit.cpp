@@ -98,19 +98,17 @@ void exe_loadfonts(FILE* exe) {
     delete[] cpixels;*/
     int ymin = 100, ymax = -100;
     for (size_t gri = 0; gri < enigma::fontstructarray[i]->glyphRangeCount; gri++) {
-      fontglyphrange* fgr = new fontglyphrange;
-      fontstructarray[i]->glyphRanges.push_back(fgr);
+      fontglyphrange fgr;
 
-      //if (fgr == NULL)
 
       unsigned strt, cnt;
       if (!fread(&strt, 4, 1, exe)) return;
       if (!fread(&cnt, 4, 1, exe)) return;
 
-      fgr->glyphstart = strt;
-      fgr->glyphcount = cnt;
+      fgr.glyphstart = strt;
+      fgr.glyphcount = cnt;
 
-      for (unsigned gi = 0; gi < fgr->glyphcount; gi++) {
+      for (unsigned gi = 0; gi < fgr.glyphcount; gi++) {
         if (!fread(&advance, 4, 1, exe)) return;
         if (!fread(&baseline, 4, 1, exe)) return;
         if (!fread(&origin, 4, 1, exe)) return;
@@ -120,23 +118,27 @@ void exe_loadfonts(FILE* exe) {
         if (!fread(&gty, 4, 1, exe)) return;
         if (!fread(&gtx2, 4, 1, exe)) return;
         if (!fread(&gty2, 4, 1, exe)) return;
-        fontglyph* fg = new fontglyph;
-        fgr->glyphs.push_back(fg);
+        fontglyph fg;
 
-        fg->x = int(origin + .5);
-        fg->y = int(baseline + .5);
-        fg->x2 = int(origin + .5) + gwid;
-        fg->y2 = int(baseline + .5) + ghgt;
-        fg->tx = gtx;
-        fg->ty = gty;
-        fg->tx2 = gtx2;
-        fg->ty2 = gty2;
-        fg->xs = advance + .5;
+        fg.x = int(origin + .5);
+        fg.y = int(baseline + .5);
+        fg.x2 = int(origin + .5) + gwid;
+        fg.y2 = int(baseline + .5) + ghgt;
+        fg.tx = gtx;
+        fg.ty = gty;
+        fg.tx2 = gtx2;
+        fg.ty2 = gty2;
+        fg.xs = advance + .5;
 
-        if (fg->y < ymin) ymin = fg->y;
-        if (fg->y2 > ymax) ymax = fg->y2;
+        if (fg.y < ymin) ymin = fg.y;
+        if (fg.y2 > ymax) ymax = fg.y2;
+
+        fgr.glyphs.push_back(fg);
+
         //printf("fntid%d, twid%d, thgt%d, advance%f, baseline%f, origin%f, gwid%d, ghgt%d, gtx%f, gty%f, gtx2%f, gty2%f\n", fntid, twid, thgt, advance, baseline, origin, gwid, ghgt, gtx, gty, gtx2, gty2);
       }
+
+      fontstructarray[i]->glyphRanges.push_back(std::move(fgr));
     }
 
     fontstructarray[i]->height = ymax - ymin + 2;
