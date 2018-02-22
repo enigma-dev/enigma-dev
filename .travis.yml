@@ -146,6 +146,9 @@ matrix:
     # Bullet Physics
     - env: COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="BulletDynamics"
       before_script: sudo apt-get -qq -y install libbullet-dev
+    #FreeType
+    - env: COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="ttf"
+      before_script: sudo apt-get -qq -y install libfreetype6-dev
     # OSX
     - { os: osx, osx_image: xcode9.2,
         env: COMPILER=clang PLATFORM=None MODE=Debug GRAPHICS=None AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None" }

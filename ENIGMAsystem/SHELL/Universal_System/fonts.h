@@ -24,7 +24,6 @@
 
 namespace enigma_user 
 {
-  int font_add(std::string name, int size, bool bold, bool italic, uint32_t first, uint32_t last);
   bool font_replace(int ind, std::string name, int size, bool bold, bool italic, uint32_t first, uint32_t last);
   int  font_add_sprite(int spr, uint32_t first, bool prop, int sep);
   bool font_replace_sprite(int ind, int spr, uint32_t first, bool prop, int sep);
