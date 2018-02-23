@@ -1,90 +1,102 @@
 #ifndef ENIGMA_EXTENSION_GTEST_h
 #define ENIGMA_EXTENSION_GTEST_h
 
-#include "Universal_System/var4.h"
+#include "libEGMstd.h"
+
+#ifdef JUST_DEFINE_IT_RUN
 void gtest_assert_true(bool exp,  std::string message = "");
 void gtest_assert_false(bool exp, std::string message = "");
 
-#define DECLARE_BINARY_FOR_TYPE_G(FUNC, TYPE1, TYPE2)  \
-  void FUNC(TYPE1 a, TYPE2 b, std::string message = "");
-#define DECLARE_BINARY_FOR_TYPE(FUNC, TYPE)  \
-  DECLARE_BINARY_FOR_TYPE_G(FUNC, TYPE, TYPE);
+void gtest_assert_eq_eps(var a, var b, std::string message = "");
 
-#define DECLARE_BINARY_FOR_ALL_TYPES(FUNC)     \
-  DECLARE_BINARY_FOR_TYPE(FUNC, int8_t);       \
-  DECLARE_BINARY_FOR_TYPE(FUNC, int16_t);      \
-  DECLARE_BINARY_FOR_TYPE(FUNC, int32_t);      \
-  DECLARE_BINARY_FOR_TYPE(FUNC, int64_t);      \
-  DECLARE_BINARY_FOR_TYPE(FUNC, uint8_t);      \
-  DECLARE_BINARY_FOR_TYPE(FUNC, uint16_t);     \
-  DECLARE_BINARY_FOR_TYPE(FUNC, uint32_t);     \
-  DECLARE_BINARY_FOR_TYPE(FUNC, uint64_t);     \
-  DECLARE_BINARY_FOR_TYPE(FUNC, float);        \
-  DECLARE_BINARY_FOR_TYPE(FUNC, double);       \
-  DECLARE_BINARY_FOR_TYPE(FUNC, long double);  \
-  DECLARE_BINARY_FOR_TYPE(FUNC, std::string);  \
-  DECLARE_BINARY_FOR_TYPE(FUNC, const var&);   \
-  DECLARE_BINARY_FOR_TYPE(FUNC, const variant&);
+void gtest_assert_eq(var a, var b, std::string message = "");
+void gtest_assert_eq(var a, var b, std::string message = "");
+void gtest_assert_ne(var a, var b, std::string message = "");
+void gtest_assert_lt(var a, var b, std::string message = "");
+void gtest_assert_le(var a, var b, std::string message = "");
+void gtest_assert_gt(var a, var b, std::string message = "");
+void gtest_assert_ge(var a, var b, std::string message = "");
+#else
 
-DECLARE_BINARY_FOR_ALL_TYPES(gtest_assert_eq);
-DECLARE_BINARY_FOR_ALL_TYPES(gtest_assert_ne);
-DECLARE_BINARY_FOR_ALL_TYPES(gtest_assert_lt);
-DECLARE_BINARY_FOR_ALL_TYPES(gtest_assert_le);
-DECLARE_BINARY_FOR_ALL_TYPES(gtest_assert_gt);
-DECLARE_BINARY_FOR_ALL_TYPES(gtest_assert_ge);
-
-DECLARE_BINARY_FOR_TYPE_G(gtest_assert_eq, float, int);
-DECLARE_BINARY_FOR_TYPE_G(gtest_assert_eq, double, int);
-DECLARE_BINARY_FOR_TYPE_G(gtest_assert_eq, int, double);
-
-void gtest_assert_eq_eps(double a, double b, std::string m = "");
-void gtest_assert_eq_eps(float a,  double b, std::string m = "");
-
-#undef DECLARE_BINARY_FOR_ALL_TYPES
-#undef DECLARE_BINARY_FOR_TYPE
-
-#if defined INCLUDED_FROM_SHELLMAIN && !defined JUST_DEFINE_IT_RUN
 namespace enigma {
 
-class DefaultGtestErrorMessage {
-  std::string default_message_;
+void gtest_binary(std::string expression, std::string left_value, std::string right_value,
+                  std::string left_exp, std::string right_exp, std::string operator_english,
+                  bool pass, bool assert, std::string user_message,
+                  std::string script, int line);
 
- public:
-  DefaultGtestErrorMessage(std::string default_message):
-      default_message_(default_message) {}
-  string operator()() { return default_message_; }
-  string operator()(std::string msg) { return default_message_ + "\n" + msg; }
-};
+void gtest_unary(std::string expression, std::string value, std::string expected_value,
+                 bool pass, bool assert, std::string user_message,
+                 std::string script, int line);
 
-# define gtest_assert_eq(a, b, m...) \
-         gtest_assert_eq(a, b,       \
-             enigma::DefaultGtestErrorMessage("Where a = " #a ", b = " #b)(m))
-# define gtest_assert_eq_eps(a, b, m...) \
-         gtest_assert_eq_eps(a, b,       \
-             enigma::DefaultGtestErrorMessage("Where a = " #a ", b = " #b)(m))
-# define gtest_assert_ne(a, b, m...) \
-         gtest_assert_ne(a, b,       \
-             enigma::DefaultGtestErrorMessage("Where a = " #a ", b = " #b)(m))
-# define gtest_assert_lt(a, b, m...) \
-         gtest_assert_lt(a, b,       \
-             enigma::DefaultGtestErrorMessage("Where a = " #a ", b = " #b)(m))
-# define gtest_assert_le(a, b, m...) \
-         gtest_assert_le(a, b,       \
-             enigma::DefaultGtestErrorMessage("Where a = " #a ", b = " #b)(m))
-# define gtest_assert_gt(a, b, m...) \
-         gtest_assert_gt(a, b,       \
-             enigma::DefaultGtestErrorMessage("Where a = " #a ", b = " #b)(m))
-# define gtest_assert_ge(a, b, m...) \
-         gtest_assert_ge(a, b,       \
-             enigma::DefaultGtestErrorMessage("Where a = " #a ", b = " #b)(m))
-# define gtest_assert_true(exp, m...) \
-         gtest_assert_true(exp,       \
-             enigma::DefaultGtestErrorMessage("False expression: " #exp)(m))
-# define gtest_assert_false(exp, m...) \
-         gtest_assert_false(exp,       \
-             enigma::DefaultGtestErrorMessage("True expression: " #exp)(m))
-
+template<typename T, typename U> bool within_five_ulp(T a, U b) {
+  if (a == b) return true;
+  T next = nexttoward(a, b);
+  return  (a < b) != (a + 5 * (next - a) < b);
 }
-#endif  // Included from SHELLmain, not JDI
+
+}  // namespace enigma
+
+namespace enigma_user {
+
+template<typename T, typename U>
+void gtest_assert_eq(T a, U b, std::string message, std::string aE, std::string bE) {
+  enigma::gtest_binary("(" + aE + ") == (" + bE + ")", toString(a), toString(b), aE, bE,
+                       "is equal to",                  a == b, true, message, "EDL", 1);
+}
+template<typename T, typename U>
+void gtest_assert_ne(T a, U b, std::string message, std::string aE, std::string bE) {
+  enigma::gtest_binary("(" + aE + ") != (" + bE + ")", toString(a), toString(b), aE, bE,
+                       "is not equal to",              a != b, true, message, "EDL", 1);
+}
+template<typename T, typename U>
+void gtest_assert_lt(T a, U b, std::string message, std::string aE, std::string bE) {
+  enigma::gtest_binary("(" + aE + ") < ("  + bE + ")", toString(a), toString(b), aE, bE,
+                       "is less than",                 a <  b, true, message, "EDL", 1);
+}
+template<typename T, typename U>
+void gtest_assert_le(T a, U b, std::string message, std::string aE, std::string bE) {
+  enigma::gtest_binary("(" + aE + ") <= (" + bE + ")", toString(a), toString(b), aE, bE,
+                       "is less than or equal to",     a <= b, true, message, "EDL", 1);
+}
+template<typename T, typename U>
+void gtest_assert_gt(T a, U b, std::string message, std::string aE, std::string bE) {
+  enigma::gtest_binary("(" + aE + ") > ("  + bE + ")", toString(a), toString(b), aE, bE,
+                       "is greater than",              a >  b, true, message, "EDL", 1);
+}
+template<typename T, typename U>
+void gtest_assert_ge(T a, U b, std::string message, std::string aE, std::string bE) {
+  enigma::gtest_binary("(" + aE + ") >= (" + bE + ")", toString(a), toString(b), aE, bE,
+                       "is greater than or equal to",  a >= b, true, message, "EDL", 1);
+}
+
+template<typename T, typename U>
+void gtest_assert_eq_eps(T a, U b, std::string message, std::string aE, std::string bE) {
+  bool approx_eq = enigma::within_five_ulp(a, b);
+  enigma::gtest_binary("(" + aE + ") == (" + bE + ")", toString(a), toString(b), aE, bE,
+                       "is approximately equal to", approx_eq, true, message, "EDL", 1);
+}
+
+static inline void gtest_assert_true(bool exp,  std::string message, std::string exp_str) {
+  enigma::gtest_unary(exp_str, (exp ? "true" : "false"), "true", exp, true, message, "EDL", 1);
+}
+static inline void gtest_assert_false(bool exp, std::string message, std::string exp_str) {
+  enigma::gtest_unary(exp_str, (exp ? "true" : "false"), "false", !exp, true, message, "EDL", 1);
+}
+
+}  // namespace enigma_user
+
+#ifdef INCLUDED_FROM_SHELLMAIN
+# define gtest_assert_eq_eps(a, b, m...) gtest_assert_eq_eps(a, b, std::string{m}, #a, #b)
+# define gtest_assert_eq(a, b, m...)     gtest_assert_eq    (a, b, std::string{m}, #a, #b)
+# define gtest_assert_ne(a, b, m...)     gtest_assert_ne    (a, b, std::string{m}, #a, #b)
+# define gtest_assert_lt(a, b, m...)     gtest_assert_lt    (a, b, std::string{m}, #a, #b)
+# define gtest_assert_le(a, b, m...)     gtest_assert_le    (a, b, std::string{m}, #a, #b)
+# define gtest_assert_gt(a, b, m...)     gtest_assert_gt    (a, b, std::string{m}, #a, #b)
+# define gtest_assert_ge(a, b, m...)     gtest_assert_ge    (a, b, std::string{m}, #a, #b)
+# define gtest_assert_true(exp, m...)    gtest_assert_true  (exp,  std::string{m}, #exp)
+# define gtest_assert_false(exp, m...)   gtest_assert_false (exp,  std::string{m}, #exp)
+#endif  // Included from SHELLmain
+#endif  // Not JDI
 
 #endif  // ENIGMA_EXTENSION_GTEST_h
