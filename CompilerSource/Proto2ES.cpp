@@ -352,6 +352,18 @@ Sound AddSound(const buffers::resources::Sound& snd) {
   return s;
 }
 
+#include "lodepng.h"
+
+inline unsigned int nlpo2dc(unsigned int x)  // Taking x, returns n such that n = 2**k where k is an integer and n >= x.
+{
+  --x;
+  x |= x >> 1;
+  x |= x >> 2;
+  x |= x >> 4;
+  x |= x >> 8;
+  return x | (x >> 16);
+}
+
 Background AddBackground(const buffers::resources::Background& bkg) {
   Background b = Background();
 
@@ -370,7 +382,46 @@ Background AddBackground(const buffers::resources::Background& bkg) {
   b.hSep = bkg.horizontal_spacing();
   b.vSep = bkg.vertical_spacing();
 
+  std::cout << bkg.image() << " HEYYYYYYYYYYYYYYYYYYYYYYYYYYY\n";
   b.backgroundImage = Image();
+
+	unsigned error;
+	unsigned char* image;
+	unsigned pngwidth, pngheight;
+
+	error = lodepng_decode32_file(&image, &pngwidth, &pngheight, bkg.image().c_str());
+	if (error)
+	{
+	  printf("error %u: %s\n", error, lodepng_error_text(error));
+	  return b;
+	}
+
+	unsigned
+	  widfull = nlpo2dc(pngwidth) + 1,
+	  hgtfull = nlpo2dc(pngheight) + 1,
+	  ih,iw;
+	const int bitmap_size = widfull*hgtfull*4;
+	unsigned char* bitmap = new unsigned char[bitmap_size](); // Initialize to zero.
+
+	for (ih = 0; ih < pngheight; ih++) {
+	  unsigned tmp = 0;
+		tmp = (pngheight - 1 - ih)*widfull*4;
+	  for (iw = 0; iw < pngwidth; iw++) {
+		bitmap[tmp+0] = image[4*pngwidth*ih+iw*4+2];
+		bitmap[tmp+1] = image[4*pngwidth*ih+iw*4+1];
+		bitmap[tmp+2] = image[4*pngwidth*ih+iw*4+0];
+		bitmap[tmp+3] = image[4*pngwidth*ih+iw*4+3];
+		tmp+=4;
+	  }
+	}
+
+	free(image);
+	b.backgroundImage.width  = pngwidth;
+	b.backgroundImage.height = pngheight;
+	b.backgroundImage.data = reinterpret_cast<char*>(bitmap);
+  b.backgroundImage.dataSize = bitmap_size;
+
+  std::cout << b.backgroundImage.dataSize << " " << b.backgroundImage.width << " wtf\n";
 
   return b;
 }
