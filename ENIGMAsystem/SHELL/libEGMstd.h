@@ -39,6 +39,7 @@ std::string toString(char);
 std::string toString(char*);
 std::string toString(float);
 std::string toString(double);
+std::string toString(long double);
 
 std::string toString();
 std::string toString(const std::string& str);
