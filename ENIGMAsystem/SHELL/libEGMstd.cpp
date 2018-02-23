@@ -51,6 +51,7 @@ string toString(char n)               { return string(buf,sprintf(buf,"%d", n));
 string toString(char* n)              { return string(n); }
 string toString(float n)              { return string(buf,sprintf(buf,"%g", n)); }
 string toString(double n)             { return string(buf,sprintf(buf,"%g", n)); }
+string toString(long double n)        { return std::to_string(n); }
 
 string toString()                                        { return string ();     }
 string toString(const string& str)                       { return string (str);  }

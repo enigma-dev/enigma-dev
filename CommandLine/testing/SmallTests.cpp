@@ -120,6 +120,8 @@ TEST_P(SimpleTestHarness, SimpleTestRunner) {
     case TestHarness::ErrorCodes::TIMED_OUT:
       FAIL() << "Game \"" << game << "\" did not finish running in the time "
                 "allotted, and has therefore been killed.";
+    case 42:
+      FAIL() << "Game \"" << game << "\" had failing tests.";
     default:
       FAIL() << "Game \"" << game << "\" returned " << ret << ". "
                 "Check log for other errors (possibly gTest-flavored).";

@@ -1,61 +1,40 @@
 #include "include.h"
 #include <gtest/gtest.h>
+#include <iostream>
 using std::string;
+using std::cout;
+using std::endl;
 
-#define IMPLEMENT_GTEST_BINARY_FUNC_G(FUNC, GTEST_CALL, TYPE1, TYPE2)     \
-  static void FUNC##_impl(TYPE1 a, TYPE2 b, string msg, bool *survived) { \
-    if (msg.empty()) ASSERT_EQ(a, b);                                     \
-    else GTEST_CALL(a, b) << msg;                                         \
-    *survived = true;                                                     \
-  }                                                                       \
-  void FUNC(TYPE1 a, TYPE2 b, string msg) {                               \
-    bool survived = false;                                                \
-    FUNC##_impl(a, b, msg, &survived);                                    \
-    if (!survived) abort();                                               \
+namespace enigma {
+
+void gtest_binary(string expression, string left_value, string right_value,
+                  string left_exp, string right_exp, string operator_english,
+                  bool pass, bool assert, string user_message,
+                  string script, int line) {
+  if (pass) {
+    cout << "Pass: " << expression << endl;
+    return;
   }
-#define IMPLEMENT_GTEST_BINARY_FUNC(F, C, T)                              \
-        IMPLEMENT_GTEST_BINARY_FUNC_G(F, C, T, T)
-#define IMPLEMENT_GTEST_UNARY_FUNC(TYPE, FUNC, GTEST_CALL)                \
-  static void FUNC##_impl(TYPE exp, string msg, bool *survived) {         \
-    if (msg.empty()) GTEST_CALL(exp);                                     \
-    else GTEST_CALL(exp) << msg;                                          \
-    *survived = true;                                                     \
-  }                                                                       \
-  void FUNC(TYPE exp, string message) {                                   \
-    bool survived = false;                                                \
-    FUNC##_impl(exp, message, &survived);                                 \
-    if (!survived) abort();                                               \
+  ADD_FAILURE_AT(script.c_str(), line)
+      << "Failure: Not true that " << left_exp << " (which is " << left_value
+      << ") " << operator_english << " " << right_exp << " (which is "
+      << right_value << ")."
+      << (user_message.empty() ? "" : "\n" + user_message);
+  if (assert) exit(42);
+}
+
+void gtest_unary(string expression, string value, string expected_value,
+                 bool pass, bool assert, string user_message,
+                 string script, int line) {
+  if (pass) {
+    cout << "Pass: " << expression << " is " << expected_value << endl;
+    return;
   }
+  ADD_FAILURE_AT(script.c_str(), line)
+      << "Failure: Not true that " << expression << " is " << expected_value
+      << "; it is actually " << value
+      << (user_message.empty() ? "." : ".\n" + user_message);
+  if (assert) exit(42);
+}
 
-#define IMPLEMENT_GTEST_BINARY_FUNC_FOR_ALL_TYPES(FUNC, GTEST_CALL)       \
-  IMPLEMENT_GTEST_BINARY_FUNC(FUNC, GTEST_CALL, int8_t);                  \
-  IMPLEMENT_GTEST_BINARY_FUNC(FUNC, GTEST_CALL, int16_t);                 \
-  IMPLEMENT_GTEST_BINARY_FUNC(FUNC, GTEST_CALL, int32_t);                 \
-  IMPLEMENT_GTEST_BINARY_FUNC(FUNC, GTEST_CALL, int64_t);                 \
-  IMPLEMENT_GTEST_BINARY_FUNC(FUNC, GTEST_CALL, uint8_t);                 \
-  IMPLEMENT_GTEST_BINARY_FUNC(FUNC, GTEST_CALL, uint16_t);                \
-  IMPLEMENT_GTEST_BINARY_FUNC(FUNC, GTEST_CALL, uint32_t);                \
-  IMPLEMENT_GTEST_BINARY_FUNC(FUNC, GTEST_CALL, uint64_t);                \
-  IMPLEMENT_GTEST_BINARY_FUNC(FUNC, GTEST_CALL, float);                   \
-  IMPLEMENT_GTEST_BINARY_FUNC(FUNC, GTEST_CALL, double);                  \
-  IMPLEMENT_GTEST_BINARY_FUNC(FUNC, GTEST_CALL, long double);             \
-  IMPLEMENT_GTEST_BINARY_FUNC(FUNC, GTEST_CALL, std::string);             \
-  IMPLEMENT_GTEST_BINARY_FUNC(FUNC, GTEST_CALL, const var&);              \
-  IMPLEMENT_GTEST_BINARY_FUNC(FUNC, GTEST_CALL, const variant&);
-
-IMPLEMENT_GTEST_UNARY_FUNC(bool, gtest_assert_true, ASSERT_TRUE);
-IMPLEMENT_GTEST_UNARY_FUNC(bool, gtest_assert_false, ASSERT_FALSE);
-
-IMPLEMENT_GTEST_BINARY_FUNC_FOR_ALL_TYPES(gtest_assert_eq, ASSERT_EQ);
-IMPLEMENT_GTEST_BINARY_FUNC_FOR_ALL_TYPES(gtest_assert_ne, ASSERT_NE);
-IMPLEMENT_GTEST_BINARY_FUNC_FOR_ALL_TYPES(gtest_assert_lt, ASSERT_LT);
-IMPLEMENT_GTEST_BINARY_FUNC_FOR_ALL_TYPES(gtest_assert_le, ASSERT_LE);
-IMPLEMENT_GTEST_BINARY_FUNC_FOR_ALL_TYPES(gtest_assert_gt, ASSERT_GT);
-IMPLEMENT_GTEST_BINARY_FUNC_FOR_ALL_TYPES(gtest_assert_ge, ASSERT_GE);
-
-IMPLEMENT_GTEST_BINARY_FUNC_G(gtest_assert_eq, ASSERT_EQ, float, int);
-IMPLEMENT_GTEST_BINARY_FUNC_G(gtest_assert_eq, ASSERT_EQ, double, int);
-IMPLEMENT_GTEST_BINARY_FUNC_G(gtest_assert_eq, ASSERT_EQ, int, double);
-
-IMPLEMENT_GTEST_BINARY_FUNC_G(gtest_assert_eq_eps, ASSERT_FLOAT_EQ, float, double);
-IMPLEMENT_GTEST_BINARY_FUNC_G(gtest_assert_eq_eps, ASSERT_DOUBLE_EQ, double, double);
+}  // namespace enigma
