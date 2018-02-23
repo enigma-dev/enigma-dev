@@ -385,40 +385,40 @@ Background AddBackground(const buffers::resources::Background& bkg) {
   std::cout << bkg.image() << " HEYYYYYYYYYYYYYYYYYYYYYYYYYYY\n";
   b.backgroundImage = Image();
 
-	unsigned error;
-	unsigned char* image;
-	unsigned pngwidth, pngheight;
+  unsigned error;
+  unsigned char* image;
+  unsigned pngwidth, pngheight;
 
-	error = lodepng_decode32_file(&image, &pngwidth, &pngheight, bkg.image().c_str());
-	if (error)
-	{
-	  printf("error %u: %s\n", error, lodepng_error_text(error));
-	  return b;
-	}
+  error = lodepng_decode32_file(&image, &pngwidth, &pngheight, bkg.image().c_str());
+  if (error)
+  {
+    printf("error %u: %s\n", error, lodepng_error_text(error));
+    return b;
+  }
 
-	unsigned
-	  widfull = nlpo2dc(pngwidth) + 1,
-	  hgtfull = nlpo2dc(pngheight) + 1,
-	  ih,iw;
-	const int bitmap_size = widfull*hgtfull*4;
-	unsigned char* bitmap = new unsigned char[bitmap_size](); // Initialize to zero.
+  unsigned
+    widfull = nlpo2dc(pngwidth) + 1,
+    hgtfull = nlpo2dc(pngheight) + 1,
+    ih,iw;
+  const int bitmap_size = widfull*hgtfull*4;
+  unsigned char* bitmap = new unsigned char[bitmap_size](); // Initialize to zero.
 
-	for (ih = 0; ih < pngheight; ih++) {
-	  unsigned tmp = 0;
-		tmp = (pngheight - 1 - ih)*widfull*4;
-	  for (iw = 0; iw < pngwidth; iw++) {
-		bitmap[tmp+0] = image[4*pngwidth*ih+iw*4+2];
-		bitmap[tmp+1] = image[4*pngwidth*ih+iw*4+1];
-		bitmap[tmp+2] = image[4*pngwidth*ih+iw*4+0];
-		bitmap[tmp+3] = image[4*pngwidth*ih+iw*4+3];
-		tmp+=4;
-	  }
-	}
+  for (ih = 0; ih < pngheight; ih++) {
+    unsigned tmp = 0;
+    tmp = (pngheight - 1 - ih)*widfull*4;
+    for (iw = 0; iw < pngwidth; iw++) {
+    bitmap[tmp+0] = image[4*pngwidth*ih+iw*4+2];
+    bitmap[tmp+1] = image[4*pngwidth*ih+iw*4+1];
+    bitmap[tmp+2] = image[4*pngwidth*ih+iw*4+0];
+    bitmap[tmp+3] = image[4*pngwidth*ih+iw*4+3];
+    tmp+=4;
+    }
+  }
 
-	free(image);
-	b.backgroundImage.width  = pngwidth;
-	b.backgroundImage.height = pngheight;
-	b.backgroundImage.data = reinterpret_cast<char*>(bitmap);
+  free(image);
+  b.backgroundImage.width  = pngwidth;
+  b.backgroundImage.height = pngheight;
+  b.backgroundImage.data = reinterpret_cast<char*>(bitmap);
   b.backgroundImage.dataSize = bitmap_size;
 
   std::cout << b.backgroundImage.dataSize << " " << b.backgroundImage.width << " wtf\n";
