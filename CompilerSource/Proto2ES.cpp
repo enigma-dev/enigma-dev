@@ -195,6 +195,64 @@ std::string Actions2Code(const ::google::protobuf::RepeatedPtrField< buffers::re
   return code;
 }
 
+#include "lodepng.h"
+
+inline unsigned int nlpo2dc(unsigned int x)  // Taking x, returns n such that n = 2**k where k is an integer and n >= x.
+{
+  --x;
+  x |= x >> 1;
+  x |= x >> 2;
+  x |= x >> 4;
+  x |= x >> 8;
+  return x | (x >> 16);
+}
+
+Image AddImage(const std::string fname) {
+  Image i = Image();
+
+  std::cout << fname << " HEYYYYYYYYYYYYYYYYYYYYYYYYYYY\n";
+
+  unsigned error;
+  unsigned char* image;
+  unsigned pngwidth, pngheight;
+
+  error = lodepng_decode32_file(&image, &pngwidth, &pngheight, fname.c_str());
+  if (error)
+  {
+    printf("error %u: %s\n", error, lodepng_error_text(error));
+    return i;
+  }
+
+  unsigned
+    widfull = nlpo2dc(pngwidth) + 1,
+    hgtfull = nlpo2dc(pngheight) + 1,
+    ih,iw;
+  const int bitmap_size = widfull*hgtfull*4;
+  unsigned char* bitmap = new unsigned char[bitmap_size](); // Initialize to zero.
+
+  for (ih = 0; ih < pngheight; ih++) {
+    unsigned tmp = 0;
+    tmp = (pngheight - 1 - ih)*widfull*4;
+    for (iw = 0; iw < pngwidth; iw++) {
+    bitmap[tmp+0] = image[4*pngwidth*ih+iw*4+2];
+    bitmap[tmp+1] = image[4*pngwidth*ih+iw*4+1];
+    bitmap[tmp+2] = image[4*pngwidth*ih+iw*4+0];
+    bitmap[tmp+3] = image[4*pngwidth*ih+iw*4+3];
+    tmp+=4;
+    }
+  }
+
+  free(image);
+  i.width  = widfull;
+  i.height = hgtfull;
+  i.data = reinterpret_cast<char*>(bitmap);
+  i.dataSize = bitmap_size;
+
+  std::cout << i.data << " " << i.width << " wtf\n";
+
+  return i;
+}
+
 EnigmaStruct* ProtoBuf2ES(buffers::Project* protobuf) {
   EnigmaStruct *es = new EnigmaStruct();
 
@@ -321,19 +379,13 @@ Sprite AddSprite(const buffers::resources::Sprite& spr) {
   if (s.subImageCount > 0) {
     s.subImages = new SubImage[s.subImageCount];
     for (int i = 0; i < s.subImageCount; ++i) {
-      s.subImages[i] = AddSubImage(spr.subimages(i));
+      s.subImages[i].image = AddImage(spr.subimages(i));
     }
   }
 
   // Polygon_LOLWINDOWS *maskShapes; ???
 
   return s;
-}
-
-SubImage AddSubImage(const std::string fPath) {
-  // Why do we have a Subimage class that contains only an image class?
-  SubImage i;
-  return i;
 }
 
 Sound AddSound(const buffers::resources::Sound& snd) {
@@ -352,18 +404,6 @@ Sound AddSound(const buffers::resources::Sound& snd) {
   return s;
 }
 
-#include "lodepng.h"
-
-inline unsigned int nlpo2dc(unsigned int x)  // Taking x, returns n such that n = 2**k where k is an integer and n >= x.
-{
-  --x;
-  x |= x >> 1;
-  x |= x >> 2;
-  x |= x >> 4;
-  x |= x >> 8;
-  return x | (x >> 16);
-}
-
 Background AddBackground(const buffers::resources::Background& bkg) {
   Background b = Background();
 
@@ -372,7 +412,7 @@ Background AddBackground(const buffers::resources::Background& bkg) {
 
   b.transparent = bkg.transparent();
   b.smoothEdges = bkg.smooth_edges();
-  b.preload = bkg.preload();
+  b.preload = true;//bkg.preload();
   b.useAsTileset = bkg.use_as_tileset();
 
   b.tileWidth = bkg.tile_width();
@@ -382,46 +422,7 @@ Background AddBackground(const buffers::resources::Background& bkg) {
   b.hSep = bkg.horizontal_spacing();
   b.vSep = bkg.vertical_spacing();
 
-  std::cout << bkg.image() << " HEYYYYYYYYYYYYYYYYYYYYYYYYYYY\n";
-  b.backgroundImage = Image();
-
-  unsigned error;
-  unsigned char* image;
-  unsigned pngwidth, pngheight;
-
-  error = lodepng_decode32_file(&image, &pngwidth, &pngheight, bkg.image().c_str());
-  if (error)
-  {
-    printf("error %u: %s\n", error, lodepng_error_text(error));
-    return b;
-  }
-
-  unsigned
-    widfull = nlpo2dc(pngwidth) + 1,
-    hgtfull = nlpo2dc(pngheight) + 1,
-    ih,iw;
-  const int bitmap_size = widfull*hgtfull*4;
-  unsigned char* bitmap = new unsigned char[bitmap_size](); // Initialize to zero.
-
-  for (ih = 0; ih < pngheight; ih++) {
-    unsigned tmp = 0;
-    tmp = (pngheight - 1 - ih)*widfull*4;
-    for (iw = 0; iw < pngwidth; iw++) {
-    bitmap[tmp+0] = image[4*pngwidth*ih+iw*4+2];
-    bitmap[tmp+1] = image[4*pngwidth*ih+iw*4+1];
-    bitmap[tmp+2] = image[4*pngwidth*ih+iw*4+0];
-    bitmap[tmp+3] = image[4*pngwidth*ih+iw*4+3];
-    tmp+=4;
-    }
-  }
-
-  free(image);
-  b.backgroundImage.width  = pngwidth;
-  b.backgroundImage.height = pngheight;
-  b.backgroundImage.data = reinterpret_cast<char*>(bitmap);
-  b.backgroundImage.dataSize = bitmap_size;
-
-  std::cout << b.backgroundImage.dataSize << " " << b.backgroundImage.width << " wtf\n";
+  b.backgroundImage = AddImage(bkg.image());
 
   return b;
 }

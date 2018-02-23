@@ -199,7 +199,7 @@ void PackRes(std::string &dir, std::string &name, int id, pugi::xml_node &node, 
                 for (pugi::xml_node n = child; n != nullptr; n = n.next_sibling()) {
                   if (n.name() == xmlElement) {
                     n.append_attribute("visited") = "true";
-                    refl->AddString(m, field, n.text().as_string());
+                    refl->AddString(m, field, ((isFilePath) ? dir : "") + n.text().as_string());
                   }
                 }
                 break;
