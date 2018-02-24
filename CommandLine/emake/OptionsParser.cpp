@@ -92,6 +92,7 @@ OptionsParser::OptionsParser() : _desc("Options")
 
   _desc.add_options()
     ("help,h", "Print help messages")
+    ("list,l", opt::bool_switch()->default_value(false), "List availiable types, globals & functions")
     ("info,i", opt::value<std::string>(), "Provides a listing of Platforms, APIs and Extensions")
     ("input",   opt::value<std::string>()->default_value(""), "Input game file; currently, only test harness single-object games (*.sog) are supported. The --input string is optional.")
     ("output,o", opt::value<std::string>()->required(), "Output executable file")
@@ -167,6 +168,10 @@ int OptionsParser::ReadArgs(int argc, char* argv[])
 
 int OptionsParser::HandleArgs()
 {
+  // Exit early on list
+  if (_rawArgs.count("list"))
+    return OPTIONS_SUCCESS;
+  
   // Exit early on help
   if (_readArgsFail || _rawArgs.count("help"))
   {

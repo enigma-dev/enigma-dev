@@ -30,6 +30,17 @@ int main(int argc, char* argv[])
 
     GameMode mode;
     std::string _mode = options.GetOption("mode").as<std::string>();
+    
+    std::string output_file; 
+    
+    if (!options.GetOption("output").empty())
+      output_file = options.GetOption("output").as<std::string>();
+    
+    bool list = options.GetOption("list").as<bool>();
+    if (list) {
+      plugin.PrintBuiltins(output_file);
+      return result;
+    }
 
     if (_mode == "Compile")
       mode = emode_compile;
@@ -87,7 +98,6 @@ int main(int argc, char* argv[])
                    "Building an empty game." << std::endl;
     }
 
-    std::string output_file = options.GetOption("output").as<std::string>();
     return plugin.BuildGame(game.ConstructGame(), mode, output_file.c_str());
   }
 
