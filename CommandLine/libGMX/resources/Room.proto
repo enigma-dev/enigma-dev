@@ -77,7 +77,7 @@ message Room {
 
   message Instance {
     optional string name = 1;
-    optional int32 id = 2;
+    optional int32 id = 2 [(id_start) = 100000];
     optional string object_type = 3 [(gmx) = "objName"];
     optional int32 x = 4;
     optional int32 y = 5;
@@ -93,7 +93,7 @@ message Room {
 
   message Tile {
     optional string name = 1;
-    optional int32 id = 2;
+    optional int32 id = 2 [(id_start) = 10000000];
     optional string background_name = 3 [(gmx) = "bgName"];
     optional int32 x = 4;
     optional int32 y = 5;

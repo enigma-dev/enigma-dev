@@ -24,7 +24,18 @@ enum ArgumentKind {
 
 message Argument {
   optional ArgumentKind kind = 1;
-  optional string string = 2;
+  oneof value {
+    string string = 2;
+    string sprite = 3;
+    string sound = 4;
+    string background = 5;
+    string path = 6;
+    string script = 7;
+    string object = 8;
+    string room = 9;
+    string font = 10;
+    string timeline = 11;
+  }
 }
 
 enum ActionKind {
