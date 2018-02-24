@@ -408,6 +408,24 @@ Sound AddSound(const buffers::resources::Sound& snd) {
   s.pan = snd.pan();
   s.preload = snd.preload();
 
+  std::cout << snd.data() << " HEYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY\n";
+
+  // Open sound
+  FILE *afile = fopen(snd.data().c_str(),"rb");
+  if (!afile)
+    return s;
+
+  // Buffer sound
+  fseek(afile,0,SEEK_END);
+  const size_t flen = ftell(afile);
+  unsigned char *fdata = new unsigned char[flen];
+  fseek(afile,0,SEEK_SET);
+  if (fread(fdata,1,flen,afile) != flen)
+    puts("WARNING: Resource stream cut short while loading sound data");
+
+  s.data = fdata;
+  s.size = flen;
+
   return s;
 }
 
