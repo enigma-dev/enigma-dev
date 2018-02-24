@@ -67,12 +67,6 @@ std::string Argument2Code(const buffers::resources::Argument& arg) {
   using buffers::resources::ArgumentKind;
   std::string val = arg.string();
 
-  if (val.length() == 0) {
-    if (arg.kind() == ArgumentKind::ARG_STRING)
-      return "\"\"";
-    else
-      return "0";
-  }
   switch (arg.kind()) {
     case ArgumentKind::ARG_BOTH:
       // treat as literal if starts with quote (")
@@ -82,12 +76,37 @@ std::string Argument2Code(const buffers::resources::Argument& arg) {
       return '\"' + string_replace_all(string_replace_all(val, "\\", "\\\\"), "\"", "\"+'\"'+\"") + '\"';
     case ArgumentKind::ARG_BOOLEAN:
       return std::to_string(val != "0");
+    case ArgumentKind::ARG_SPRITE:
+      return arg.has_sprite() ? arg.sprite() : "-1";
+    case ArgumentKind::ARG_SOUND:
+      return arg.has_sound() ? arg.sound() : "-1";
+    case ArgumentKind::ARG_BACKGROUND:
+      return arg.has_background() ? arg.background() : "-1";
+    case ArgumentKind::ARG_PATH:
+      return arg.has_path() ? arg.path() : "-1";
+    case ArgumentKind::ARG_SCRIPT:
+      return arg.has_script() ? arg.script() : "-1";
+    case ArgumentKind::ARG_OBJECT:
+      return arg.has_object() ? arg.object() : "-1";
+    case ArgumentKind::ARG_ROOM:
+      return arg.has_room() ? arg.room() : "-1";
+    case ArgumentKind::ARG_FONT:
+      return arg.has_font() ? arg.font() : "-1";
+    case ArgumentKind::ARG_TIMELINE:
+      return arg.has_timeline() ? arg.timeline() : "-1";
     case ArgumentKind::ARG_MENU:
     case ArgumentKind::ARG_COLOR:
-      return val;
     default:
-      return val; // TODO: fix oneof <background> <sprite> etc
+      if (val.empty()) {
+        if (arg.kind() == ArgumentKind::ARG_STRING)
+          return "\"\"";
+        else
+          return "0";
+      }
+      // else fall all the way through
   }
+
+  return val;
 }
 
 std::string Actions2Code(const ::google::protobuf::RepeatedPtrField< buffers::resources::Action >& actions) {
@@ -207,10 +226,20 @@ inline unsigned int nlpo2dc(unsigned int x)  // Taking x, returns n such that n 
   return x | (x >> 16);
 }
 
+#include <zlib.h>
+
+unsigned char* zlib_compress(unsigned char* inbuffer,int actualsize)
+{
+    uLongf outsize=(int)(actualsize*1.1)+12;
+    Bytef* outbytef=new Bytef[outsize];
+
+    compress(outbytef,&outsize,(Bytef*)inbuffer,actualsize);
+
+    return (unsigned char*)outbytef;
+}
+
 Image AddImage(const std::string fname) {
   Image i = Image();
-
-  std::cout << fname << " HEYYYYYYYYYYYYYYYYYYYYYYYYYYY\n";
 
   unsigned error;
   unsigned char* image;
@@ -231,24 +260,21 @@ Image AddImage(const std::string fname) {
   unsigned char* bitmap = new unsigned char[bitmap_size](); // Initialize to zero.
 
   for (ih = 0; ih < pngheight; ih++) {
-    unsigned tmp = 0;
-    tmp = (pngheight - 1 - ih)*widfull*4;
+    unsigned tmp = ih*widfull*4;
     for (iw = 0; iw < pngwidth; iw++) {
-    bitmap[tmp+0] = image[4*pngwidth*ih+iw*4+2];
-    bitmap[tmp+1] = image[4*pngwidth*ih+iw*4+1];
-    bitmap[tmp+2] = image[4*pngwidth*ih+iw*4+0];
-    bitmap[tmp+3] = image[4*pngwidth*ih+iw*4+3];
-    tmp+=4;
+      bitmap[tmp+0] = image[4*pngwidth*ih+iw*4+2];
+      bitmap[tmp+1] = image[4*pngwidth*ih+iw*4+1];
+      bitmap[tmp+2] = image[4*pngwidth*ih+iw*4+0];
+      bitmap[tmp+3] = image[4*pngwidth*ih+iw*4+3];
+      tmp+=4;
     }
   }
 
   free(image);
   i.width  = widfull;
   i.height = hgtfull;
-  i.data = reinterpret_cast<char*>(bitmap);
+  i.data = reinterpret_cast<char*>(zlib_compress(bitmap, bitmap_size));
   i.dataSize = bitmap_size;
-
-  std::cout << i.data << " " << i.width << " wtf\n";
 
   return i;
 }
@@ -401,6 +427,22 @@ Sound AddSound(const buffers::resources::Sound& snd) {
   s.pan = snd.pan();
   s.preload = snd.preload();
 
+  // Open sound
+  FILE *afile = fopen(snd.data().c_str(),"rb");
+  if (!afile)
+    return s;
+
+  // Buffer sound
+  fseek(afile,0,SEEK_END);
+  const size_t flen = ftell(afile);
+  unsigned char *fdata = new unsigned char[flen];
+  fseek(afile,0,SEEK_SET);
+  if (fread(fdata,1,flen,afile) != flen)
+    puts("WARNING: Resource stream cut short while loading sound data");
+
+  s.data = fdata;
+  s.size = flen;
+
   return s;
 }
 
@@ -412,7 +454,7 @@ Background AddBackground(const buffers::resources::Background& bkg) {
 
   b.transparent = bkg.transparent();
   b.smoothEdges = bkg.smooth_edges();
-  b.preload = true;//bkg.preload();
+  b.preload = bkg.preload();
   b.useAsTileset = bkg.use_as_tileset();
 
   b.tileWidth = bkg.tile_width();
