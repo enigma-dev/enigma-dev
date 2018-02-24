@@ -207,10 +207,20 @@ inline unsigned int nlpo2dc(unsigned int x)  // Taking x, returns n such that n 
   return x | (x >> 16);
 }
 
+#include <zlib.h>
+
+unsigned char* zlib_compress(unsigned char* inbuffer,int actualsize)
+{
+    uLongf outsize=(int)(actualsize*1.1)+12;
+    Bytef* outbytef=new Bytef[outsize];
+
+    compress(outbytef,&outsize,(Bytef*)inbuffer,actualsize);
+
+    return (unsigned char*)outbytef;
+}
+
 Image AddImage(const std::string fname) {
   Image i = Image();
-
-  std::cout << fname << " HEYYYYYYYYYYYYYYYYYYYYYYYYYYY\n";
 
   unsigned error;
   unsigned char* image;
@@ -231,24 +241,21 @@ Image AddImage(const std::string fname) {
   unsigned char* bitmap = new unsigned char[bitmap_size](); // Initialize to zero.
 
   for (ih = 0; ih < pngheight; ih++) {
-    unsigned tmp = 0;
-    tmp = (pngheight - 1 - ih)*widfull*4;
+    unsigned tmp = ih*widfull*4;
     for (iw = 0; iw < pngwidth; iw++) {
-    bitmap[tmp+0] = image[4*pngwidth*ih+iw*4+2];
-    bitmap[tmp+1] = image[4*pngwidth*ih+iw*4+1];
-    bitmap[tmp+2] = image[4*pngwidth*ih+iw*4+0];
-    bitmap[tmp+3] = image[4*pngwidth*ih+iw*4+3];
-    tmp+=4;
+      bitmap[tmp+0] = image[4*pngwidth*ih+iw*4+2];
+      bitmap[tmp+1] = image[4*pngwidth*ih+iw*4+1];
+      bitmap[tmp+2] = image[4*pngwidth*ih+iw*4+0];
+      bitmap[tmp+3] = image[4*pngwidth*ih+iw*4+3];
+      tmp+=4;
     }
   }
 
   free(image);
   i.width  = widfull;
   i.height = hgtfull;
-  i.data = reinterpret_cast<char*>(bitmap);
+  i.data = reinterpret_cast<char*>(zlib_compress(bitmap, bitmap_size));
   i.dataSize = bitmap_size;
-
-  std::cout << i.data << " " << i.width << " wtf\n";
 
   return i;
 }
@@ -412,7 +419,7 @@ Background AddBackground(const buffers::resources::Background& bkg) {
 
   b.transparent = bkg.transparent();
   b.smoothEdges = bkg.smooth_edges();
-  b.preload = true;//bkg.preload();
+  b.preload = bkg.preload();
   b.useAsTileset = bkg.use_as_tileset();
 
   b.tileWidth = bkg.tile_width();
