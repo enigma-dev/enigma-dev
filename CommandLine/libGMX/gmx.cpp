@@ -138,9 +138,13 @@ void PackRes(std::string &dir, std::string &name, int id, pugi::xml_node &node, 
   const google::protobuf::Reflection *refl = m->GetReflection();
   for (int i = 0; i < desc->field_count(); i++) {
     const google::protobuf::FieldDescriptor *field = desc->field(i);
+    const google::protobuf::OneofDescriptor *oneof = field->containing_oneof();
+    if (oneof && refl->HasOneof(*m, oneof))
+      continue;
     const google::protobuf::FieldOptions opts = field->options();
 
     if (field->name() == "id") {
+      id += opts.GetExtension(buffers::id_start);
       outputStream << "Setting " << field->name() << " (" << field->type_name() << ") as " << id << std::endl;
       refl->SetInt32(m, field, id);
     } else if (depth == 0 && field->name() == "name") {
@@ -278,7 +282,7 @@ void PackRes(std::string &dir, std::string &name, int id, pugi::xml_node &node, 
               }
               case google::protobuf::FieldDescriptor::CppType::CPPTYPE_BOOL: {
                 refl->SetBool(m, field,
-                              (isAttribute) ? attr.as_bool() : (isSplit) ? (std::stof(splitValue) != 0) : (xmlValue.as_int() != 0));
+                              (isAttribute) ? (attr.as_int() != 0) : (isSplit) ? (std::stof(splitValue) != 0) : (xmlValue.as_int() != 0));
                 break;
               }
               case google::protobuf::FieldDescriptor::CppType::CPPTYPE_ENUM: {

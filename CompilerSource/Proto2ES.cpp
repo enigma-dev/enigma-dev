@@ -67,12 +67,6 @@ std::string Argument2Code(const buffers::resources::Argument& arg) {
   using buffers::resources::ArgumentKind;
   std::string val = arg.string();
 
-  if (val.length() == 0) {
-    if (arg.kind() == ArgumentKind::ARG_STRING)
-      return "\"\"";
-    else
-      return "0";
-  }
   switch (arg.kind()) {
     case ArgumentKind::ARG_BOTH:
       // treat as literal if starts with quote (")
@@ -82,12 +76,37 @@ std::string Argument2Code(const buffers::resources::Argument& arg) {
       return '\"' + string_replace_all(string_replace_all(val, "\\", "\\\\"), "\"", "\"+'\"'+\"") + '\"';
     case ArgumentKind::ARG_BOOLEAN:
       return std::to_string(val != "0");
+    case ArgumentKind::ARG_SPRITE:
+      return arg.has_sprite() ? arg.sprite() : "-1";
+    case ArgumentKind::ARG_SOUND:
+      return arg.has_sound() ? arg.sound() : "-1";
+    case ArgumentKind::ARG_BACKGROUND:
+      return arg.has_background() ? arg.background() : "-1";
+    case ArgumentKind::ARG_PATH:
+      return arg.has_path() ? arg.path() : "-1";
+    case ArgumentKind::ARG_SCRIPT:
+      return arg.has_script() ? arg.script() : "-1";
+    case ArgumentKind::ARG_OBJECT:
+      return arg.has_object() ? arg.object() : "-1";
+    case ArgumentKind::ARG_ROOM:
+      return arg.has_room() ? arg.room() : "-1";
+    case ArgumentKind::ARG_FONT:
+      return arg.has_font() ? arg.font() : "-1";
+    case ArgumentKind::ARG_TIMELINE:
+      return arg.has_timeline() ? arg.timeline() : "-1";
     case ArgumentKind::ARG_MENU:
     case ArgumentKind::ARG_COLOR:
-      return val;
     default:
-      return val; // TODO: fix oneof <background> <sprite> etc
+      if (val.empty()) {
+        if (arg.kind() == ArgumentKind::ARG_STRING)
+          return "\"\"";
+        else
+          return "0";
+      }
+      // else fall all the way through
   }
+
+  return val;
 }
 
 std::string Actions2Code(const ::google::protobuf::RepeatedPtrField< buffers::resources::Action >& actions) {
