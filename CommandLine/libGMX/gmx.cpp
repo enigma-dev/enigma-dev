@@ -26,6 +26,8 @@
 
 #include "gmx.h"
 
+namespace gmx {
+
 inline std::string string_replace_all(std::string str, std::string substr, std::string nstr)
 {
   size_t pos = 0;
@@ -37,7 +39,14 @@ inline std::string string_replace_all(std::string str, std::string substr, std::
   return str;
 }
 
-namespace gmx {
+inline std::string extract_file_path(std::string dir, const std::string value) {
+  const std::string end = dir.substr(dir.find_last_of("/\\") + 1);
+  if (value.find(end) == 0)
+    dir = dir.substr(0, dir.find_last_of("/\\") + 1);
+  else
+    dir += '/';
+  return dir + value;
+}
 
 static std::ostream outputStream(nullptr);
 static std::map<std::string, std::vector<std::string>> resMap;
@@ -129,9 +138,13 @@ void PackRes(std::string &dir, std::string &name, int id, pugi::xml_node &node, 
   const google::protobuf::Reflection *refl = m->GetReflection();
   for (int i = 0; i < desc->field_count(); i++) {
     const google::protobuf::FieldDescriptor *field = desc->field(i);
+    const google::protobuf::OneofDescriptor *oneof = field->containing_oneof();
+    if (oneof && refl->HasOneof(*m, oneof))
+      continue;
     const google::protobuf::FieldOptions opts = field->options();
 
     if (field->name() == "id") {
+      id += opts.GetExtension(buffers::id_start);
       outputStream << "Setting " << field->name() << " (" << field->type_name() << ") as " << id << std::endl;
       refl->SetInt32(m, field, id);
     } else if (depth == 0 && field->name() == "name") {
@@ -199,7 +212,11 @@ void PackRes(std::string &dir, std::string &name, int id, pugi::xml_node &node, 
                 for (pugi::xml_node n = child; n != nullptr; n = n.next_sibling()) {
                   if (n.name() == xmlElement) {
                     n.append_attribute("visited") = "true";
-                    refl->AddString(m, field, ((isFilePath) ? dir : "") + n.text().as_string());
+                    std::string value = n.text().as_string();
+                    if (isFilePath) {
+                      value = extract_file_path(dir, value);
+                    }
+                    refl->AddString(m, field, value);
                   }
                 }
                 break;
@@ -265,7 +282,7 @@ void PackRes(std::string &dir, std::string &name, int id, pugi::xml_node &node, 
               }
               case google::protobuf::FieldDescriptor::CppType::CPPTYPE_BOOL: {
                 refl->SetBool(m, field,
-                              (isAttribute) ? attr.as_bool() : (isSplit) ? (std::stof(splitValue) != 0) : (xmlValue.as_int() != 0));
+                              (isAttribute) ? (attr.as_int() != 0) : (isSplit) ? (std::stof(splitValue) != 0) : (xmlValue.as_int() != 0));
                 break;
               }
               case google::protobuf::FieldDescriptor::CppType::CPPTYPE_ENUM: {
@@ -274,8 +291,11 @@ void PackRes(std::string &dir, std::string &name, int id, pugi::xml_node &node, 
                 break;
               }
               case google::protobuf::FieldDescriptor::CppType::CPPTYPE_STRING: {
-                refl->SetString(m, field, ((isFilePath) ? dir : "") +
-                              ((isAttribute) ? attr.as_string() : (isSplit) ? splitValue : xmlValue.as_string()));
+                std::string value = (isAttribute) ? attr.as_string() : (isSplit) ? splitValue : xmlValue.as_string();
+                if (isFilePath) {
+                  value = extract_file_path(dir, value);
+                }
+                refl->SetString(m, field, value);
                 break;
               }
             }
@@ -330,7 +350,7 @@ void PackBuffer(google::protobuf::Message *m, std::string gmxPath) {
             outputStream << "Parsing " << fName << "..." << std::endl;
             // Start a resource (sprite, object, room)
             google::protobuf::Message *msg = refl->AddMessage(m, field);
-            std::string dir = fName.substr(0, fName.find_last_of("/\\") + 1);
+            std::string dir = fName.substr(0, fName.find_last_of("/\\"));
             PackRes(dir, resName, id++, root, msg, 0);
 
             visited_walker walker;

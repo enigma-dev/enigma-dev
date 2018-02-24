@@ -10,7 +10,7 @@ message Sound {
   optional bool preload = 3;
   optional double pan = 4;
   optional double volume = 5 [(gmx) = "volume/volume"];
-  optional string file_name = 6 [(gmx) = "origname"];
+  optional string file_name = 6 [(gmx) = "data"];
   optional string file_extension = 7 [(gmx) = "extension"];
 
   enum Kind { NORMAL = 0; BACKGROUND_MUSIC = 1; THREE_DIMENSIONAL = 2; MULTIMEDIA_PLAYER = 3; }
@@ -21,8 +21,8 @@ message Sound {
 
   optional Type type = 9 [(gmx) = "types/type"];
 
-  optional string data = 10;
-  
+  optional string data = 10 [(gmx) = "origname", (file_path) = true];
+
   optional int32 effects = 11;
   optional uint32 bit_rate = 12 [(gmx) = "bitRates/bitRate"];
   optional uint32 sample_rate = 13 [(gmx) = "sampleRates/sampleRate"];

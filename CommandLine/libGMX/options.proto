@@ -5,5 +5,6 @@ import "google/protobuf/descriptor.proto";
 extend google.protobuf.FieldOptions {
   optional string gmx = 50000;
   optional string gmx_id = 50001;
-  optional bool file_path = 50002;
+  optional int32 id_start = 50002;
+  optional bool file_path = 50003;
 }
