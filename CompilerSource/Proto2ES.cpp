@@ -408,8 +408,6 @@ Sound AddSound(const buffers::resources::Sound& snd) {
   s.pan = snd.pan();
   s.preload = snd.preload();
 
-  std::cout << snd.data() << " HEYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY\n";
-
   // Open sound
   FILE *afile = fopen(snd.data().c_str(),"rb");
   if (!afile)
