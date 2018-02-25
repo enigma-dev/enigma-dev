@@ -63,6 +63,10 @@ inline std::string string_replace_all(std::string str, std::string substr, std::
   return str;
 }
 
+unsigned int BGR2RGBA(unsigned int x) {
+  return (((x & 0xFF0000) >> 16) | (x & 0xFF00) | ((x & 0xFF) << 16)) << 8 | 0xFF;
+}
+
 std::string Argument2Code(const buffers::resources::Argument& arg) {
   using buffers::resources::ArgumentKind;
   std::string val = arg.string();
@@ -618,7 +622,7 @@ Room AddRoom(const buffers::resources::Room& rmn, buffers::Project* protobuf) {
   r.height = rmn.height();
   r.speed = rmn.speed();
   r.persistent = rmn.persistent();
-  r.backgroundColor = 0x40C0FFFF;
+  r.backgroundColor = BGR2RGBA(rmn.color());
   r.drawBackgroundColor = rmn.show_color();
   r.creationCode = rmn.code().c_str();
   r.enableViews = rmn.enable_views();
