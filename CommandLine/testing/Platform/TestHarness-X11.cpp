@@ -1,5 +1,7 @@
 #include "TestHarness.hpp"
 
+#include <gtest/gtest.h>
+
 #include <cstdint>
 #include <cstdio>
 #include <iostream>
@@ -16,7 +18,10 @@ using std::to_string;
 using std::unique_ptr;
 using std::getenv;
 
-void gather_coverage();
+void gather_coverage(const TestConfig&);
+bool config_supports_lcov(const TestConfig &tc) {
+  return tc.compiler.empty() || tc.compiler == "TestHarness";
+}
 
 string get_window_caption(Display *disp, Window win) {
   char *caption;
@@ -104,6 +109,10 @@ class X11_TestHarness final: public TestHarness {
         return_code = WEXITSTATUS(status);
         return false;
       }
+      if (kill(pid, 0)) {
+        return_code = ErrorCodes::GAME_CRASHED;
+        return false;
+      }
     }
     return !kill(pid, 0);
   }
@@ -115,21 +124,21 @@ class X11_TestHarness final: public TestHarness {
     }
     std::cerr << "Warning: game did not close; terminated" << std::endl;
     kill(pid, SIGTERM);
+    return_code = ErrorCodes::TIMED_OUT;
   }
 
   void wait() final {
     usleep(250000);
   }
-  X11_TestHarness(Display *disp, pid_t game_pid, Window game_window, bool lcov):
-      pid(game_pid), window_id(game_window), display(disp), run_lcov(lcov) {}
+  X11_TestHarness(Display *disp, pid_t game_pid, Window game_window,
+                  const TestConfig &tc):
+      pid(game_pid), window_id(game_window), display(disp), test_config(tc) {}
   ~X11_TestHarness() {
     if (game_is_running()) {
       kill(pid, SIGKILL);
       std::cerr << "Game still running; killed" << std::endl;
     }
-    if (run_lcov) {
-      gather_coverage();
-    }
+    gather_coverage(test_config);
   }
 
  private:
@@ -137,6 +146,7 @@ class X11_TestHarness final: public TestHarness {
   Window window_id;
   Display *display;
   bool run_lcov;
+  TestConfig test_config;
   int return_code = 0x10000;
 };
 
@@ -186,27 +196,32 @@ int build_game(const string &game, const TestConfig &tc, const string &out) {
   abort();
 }
 
-void gather_coverage() {
+void gather_coverage(const TestConfig &config) {
   static int test_num = 0;
   test_num++;
+
+  if (!config_supports_lcov(config)) {
+    return;
+  }
 
   pid_t child = fork();
   if (child) {
     if (child == -1) {
-      std::cerr << "Coverage failed to execute for test " << test_num << "!\n";
+      ADD_FAILURE() << "Coverage failed to execute for test " << test_num << '!';
       return;
     }
     int status = -1;
     if (waitpid(child, &status, 0) == -1) {
-      std::cerr << "Waiting on coverage report for test " << test_num
-                << " somehow failed..." << std::endl;
+      ADD_FAILURE() << "Waiting on coverage report for test " << test_num
+                    << " somehow failed...";
       return;
     }
     if (WIFEXITED(status)) {
       int code = WEXITSTATUS(status);
       if (code) {
-        std::cerr << "LCOV run for test " << test_num << " exited with status "
-                  << code << "..." << std::endl;
+        ADD_FAILURE() << "LCOV run for test " << test_num
+                      << " exited with status " << code << "...";
+        return;
       }
       std::cout << "Coverage completed successfully for test " << test_num
                 << '.' << std::endl;
@@ -214,8 +229,8 @@ void gather_coverage() {
     return;
   }
 
-  string src_dir = "--directory=" + string(getenv("HOME"))
-                 + "/.enigma/.eobjs/Linux/Linux/TestHarness/Debug";
+  string src_dir = "--directory=/tmp/ENIGMA/.eobjs/Linux/Linux/TestHarness/"
+                 + config.get_or(&TestConfig::mode, "Debug") + "/";
   string out_file = "--output-file=coverage_" + to_string(test_num) + ".info";
 
   const char *const lcovArgs[] = {
@@ -239,7 +254,8 @@ bool TestHarness::windowing_supported() {
   return true;
 }
 
-unique_ptr<TestHarness> launch(const string &game, const TestConfig &tc) {
+unique_ptr<TestHarness>
+TestHarness::launch_and_attach(const string &game, const TestConfig &tc) {
   string out = "/tmp/test-game";
   if (int retcode = build_game(game, tc, out)) {
     if (retcode != -1) {
@@ -251,11 +267,12 @@ unique_ptr<TestHarness> launch(const string &game, const TestConfig &tc) {
   }
 
   pid_t pid = fork();
-  if (!pid) execl(out.c_str(), out.c_str(), nullptr);
+  if (!pid) {
+    execl(out.c_str(), out.c_str(), nullptr);
+    abort();
+  }
   if (pid == -1) return nullptr;
   usleep(250000); // Give the window a quarter second to load and display.
-
-  bool gen_cov_report = tc.compiler.empty() || tc.compiler == "TestHarness";
 
   Display *display = XOpenDisplay(0);
   Window root = XDefaultRootWindow(display);
@@ -263,9 +280,52 @@ unique_ptr<TestHarness> launch(const string &game, const TestConfig &tc) {
     Window win = find_window_by_pid(display, root, pid);
     if (win != None)
       return std::unique_ptr<X11_TestHarness>(
-          new X11_TestHarness(display, pid, win, gen_cov_report));
+          new X11_TestHarness(display, pid, win, tc));
     usleep(250000);
   }
 
   return nullptr;
+}
+
+constexpr int operator"" _million(unsigned long long x) {
+  return x * 1000 * 1000;
+}
+
+int TestHarness::run_to_completion(const string &game, const TestConfig &tc) {
+  string out = "/tmp/test-game";
+  if (int retcode = build_game(game, tc, out)) {
+    if (retcode != -1) {
+      std::cerr << "Failed to run emake." << std::endl;
+    } else {
+      std::cerr << "emake returned " << retcode << "; abort" << std::endl;
+    }
+    return ErrorCodes::BUILD_FAILED;
+  }
+
+  pid_t pid = fork();
+  if (!pid) {
+    execl(out.c_str(), out.c_str(), nullptr);
+    abort();
+  }
+  if (pid == -1) {
+    return ErrorCodes::LAUNCH_FAILED;
+  }
+  for (int i = 0; i < 30000000; i += 12500) {
+    int status = 0, wr = waitpid(pid, &status, WNOHANG);
+    if (wr) {
+      if (wr != -1) {
+        if (WIFEXITED(status)) {
+          gather_coverage(tc);
+          return WEXITSTATUS(status);
+        }
+        return ErrorCodes::GAME_CRASHED;
+      }
+      // Ignore the error for now...
+      std::cerr << "Warning: ignoring waitpid being dumb." << std::endl;
+    }
+    usleep(12500);
+  }
+  std::cerr << "ERROR: game still running after 30 seconds; killed" << std::endl;
+  kill(pid, SIGKILL);  // We're not dicking around with this.
+  return ErrorCodes::TIMED_OUT;
 }

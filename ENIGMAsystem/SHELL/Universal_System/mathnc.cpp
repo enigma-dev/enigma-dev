@@ -33,12 +33,6 @@
 
 namespace enigma_user
 {
-  // Overloading
-  // TODO: Once the user space switch to namespace enigma_user has been made,
-  // remove these functions.
-  ma_scalar abs(const variant& x)   { return ::fabs(ma_scalar(x)); }
-  ma_scalar abs(const var& x)     { return ::fabs(ma_scalar(x)); }
-
   // Functions
 
   ma_scalar sqr(ma_scalar x)              { return x*x;      }
@@ -423,4 +417,3 @@ namespace enigma_user
   int random_get_seed() { return enigma::Random_Seed; }
   int randomize() { return enigma::Random_Seed = mtrandom32(); }
 }
-
