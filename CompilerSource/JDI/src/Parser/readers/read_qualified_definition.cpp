@@ -6,8 +6,8 @@ definition* jdip::read_qualified_definition(lexer *lex, definition_scope* scope,
 {
   definition *res = NULL;
   if (token.type == TT_SCOPE) {
-    token = lex->get_token_in_scope(cp->get_global());
-    if (!(res = token.def)) return NULL;
+    token = lex->get_token_in_scope(scope);
+    res = token.def = cp->get_global();
   }
   for (;;) {
     if (token.def->flags & DEF_TEMPLATE)
