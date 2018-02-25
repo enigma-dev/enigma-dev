@@ -33,7 +33,7 @@ extern int sprite_get_bbox_bottom(int sprid);
 extern int sprite_get_bbox_left(int sprid);
 extern int sprite_get_bbox_right(int sprid);
 extern int sprite_get_bbox_top(int sprid);
-//extern int sprite_get_bbox_mode   (int sprid); //We don't support this yet
+extern int sprite_get_bbox_mode(int sprid);
 extern int sprite_get_bbox_bottom_relative(int sprid);
 extern int sprite_get_bbox_left_relative(int sprid);
 extern int sprite_get_bbox_right_relative(int sprid);
@@ -54,18 +54,18 @@ bool sprite_replace(int ind, std::string fname, int imgnumb, bool transparent, b
                     bool free_texture = true, bool mipmap = false);  //GM7+ compatible
 bool sprite_exists(int spr);
 void sprite_save(int ind, unsigned subimg, std::string fname);
-void sprite_save_strip(int ind, std::string fname);
+//void sprite_save_strip(int ind, std::string fname); //FIXME: We don't support this yet
 void sprite_delete(int ind, bool free_texture = true);
 int sprite_duplicate(int ind);
 void sprite_assign(int ind, int copy_sprite, bool free_texture = true);
 void sprite_merge(int ind, int copy_sprite);
 void sprite_set_offset(int ind, int xoff, int yoff);
 void sprite_set_alpha_from_sprite(int ind, int copy_sprite, bool free_texture = true);
-void sprite_set_bbox_mode(int ind, int mode);
+void sprite_set_bbox_mode(int ind, int mode); //FIXME: This sets the mode but the mode is currently meaningless
 void sprite_set_bbox(int ind, int left, int top, int right, int bottom);
-void sprite_set_precise(int ind, bool precise);
-void sprite_collision_mask(int ind, bool sepmasks, int mode, int left, int right, int top, int bottom, int kind,
-                           unsigned char tolerance);
+//void sprite_set_precise(int ind, bool precise); //FIXME: We don't support this yet
+void sprite_collision_mask(int ind, bool sepmasks, int mode, int left, int top, int right, int bottom, int kind,
+                           unsigned char tolerance); //FIXME: This only updates the bbox currently
 var sprite_get_uvs(int ind, int subimg);
 
 }  //namespace enigma_user

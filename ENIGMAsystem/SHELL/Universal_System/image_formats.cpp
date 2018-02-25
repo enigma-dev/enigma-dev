@@ -320,7 +320,7 @@ int image_save_png(string filename, const unsigned char* data, unsigned width, u
         file.close();
     }
     free(buffer);
-	free(bitmap);
+    delete[] bitmap;
 
     if (error) return -1; else return 1;
 }
