@@ -333,7 +333,7 @@ namespace syncheck
               continue;
             }
 
-            if (d->flags & jdi::DEF_FUNCTION) {
+            if (definition_is_function(d)) {
               lex.push_back(token(TT_FUNCTION, d, name, superPos, name.length(), false, true, false, mymacroind));
               continue;
             }
@@ -653,7 +653,7 @@ namespace syncheck
             params += contented;
 
             #ifndef WRITE_UNIMPLEMENTED_TXT
-            if (!referencers_varargs(((jdi::definition_function*)lex[i].ext)->referencers)) {
+            if (maxarg != (unsigned) -1) {
               if (exceeded_at)
                 return (syerr = "Too many arguments to function `" + lex[i].content + "': provided " + tostring(params) + ", allowed " + tostring(maxarg) + ".", lex[exceeded_at].pos);
               if (params > maxarg)
