@@ -72,8 +72,7 @@ before_install:
       fi
     elif [ "$TRAVIS_OS_NAME" == "osx" ]; then
       brew upgrade gcc || brew install gcc || brew link --overwrite gcc;
-      brew install glew;
-      brew install protobuf;
+      brew install glew protobuf pugixml;
     fi
 
 # build JDI and the CLI
