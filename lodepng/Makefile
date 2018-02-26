@@ -1,7 +1,9 @@
-liblodepng.a:
+.PHONY: liblodepng.a clean .FORCE
+
+liblodepng.a: .FORCE
 	mkdir -p .eobjs/
-	g++ -fPIC -MMD -c -o .eobjs/lodepng.o lodepng.cpp
-	ar rvs liblodepng.a .eobjs/lodepng.o
+	$(CXX) -fPIC -MMD -c -o .eobjs/lodepng.o lodepng.cpp
+	$(AR) rvs liblodepng.a .eobjs/lodepng.o
 	
 clean:
 	rm .eobjs/lodepng.o liblodepng.a
