@@ -39,13 +39,12 @@ inline std::string string_replace_all(std::string str, std::string substr, std::
   return str;
 }
 
-inline std::string extract_file_path(std::string dir, const std::string value) {
-  const std::string end = dir.substr(dir.find_last_of("/\\") + 1);
+inline std::string extract_file_path(std::string dir, std::string value) {
+  value = string_replace_all(value, "\\", "/");
+  const std::string end = dir.substr(dir.find_last_of("/") + 1);
   if (value.find(end) == 0)
-    dir = dir.substr(0, dir.find_last_of("/\\") + 1);
-  else
-    dir += '/';
-  return dir + value;
+    return dir.substr(0, dir.find_last_of("/") + 1) + value;
+  return dir + "/" + value;
 }
 
 static std::ostream outputStream(nullptr);
@@ -90,7 +89,7 @@ std::vector<std::string> SplitString(const std::string &str, char delimiter) {
   return vec;
 }
 
-void PackScript(std::string &name, int id, std::string fName, buffers::resources::Script *script) {
+void PackScript(std::string fName, std::string &name, int id, buffers::resources::Script *script) {
   outputStream << "Parsing " << fName << std::endl;
   std::string code = FileToString(fName);
 
@@ -105,7 +104,7 @@ void PackScript(std::string &name, int id, std::string fName, buffers::resources
   script->set_code(code);
 }
 
-void PackShader(std::string &name, int id, std::string fName, buffers::resources::Shader *shader) {
+void PackShader(std::string fName, std::string &name, int id, buffers::resources::Shader *shader) {
   outputStream << "Parsing " << fName << std::endl;
   std::string code = FileToString(fName);
 
@@ -321,23 +320,23 @@ void PackBuffer(google::protobuf::Message *m, std::string gmxPath) {
       // Scripts and Shaders are plain text not xml
       int id = 0;
       for (const auto &res : resMap.at(name)) {
-        std::string fName = string_replace_all(res, "\\", "/");
-        std::string type = name.substr(0, name.length() - 1);
+        std::string fName = gmxPath + string_replace_all(res, "\\", "/");
         std::string resName = fName.substr(fName.find_last_of('/') + 1, fName.length() - 1);
         resName = resName.substr(0, resName.find_last_of('.'));
 
         if (name == "scripts") {
           buffers::resources::Script *script = new buffers::resources::Script();
-          PackScript(resName, id++, gmxPath + fName, script);
+          PackScript(fName, resName, id++, script);
           google::protobuf::Message *msg = refl->AddMessage(m, field);
           msg->CopyFrom(*static_cast<google::protobuf::Message *>(script));
         } else if (name == "shaders") {
           buffers::resources::Shader *shader = new buffers::resources::Shader();
-          PackShader(resName, id++, gmxPath + fName, shader);
+          PackShader(fName, resName, id++, shader);
           google::protobuf::Message *msg = refl->AddMessage(m, field);
           msg->CopyFrom(*static_cast<google::protobuf::Message *>(shader));
         } else {
-          fName = gmxPath + fName + "." + type + ".gmx";
+          std::string type = name.substr(0, name.length() - 1);
+          fName += "." + type + ".gmx";
 
           pugi::xml_document doc;
           pugi::xml_parse_result result = doc.load_file(fName.c_str());
@@ -349,8 +348,9 @@ void PackBuffer(google::protobuf::Message *m, std::string gmxPath) {
           else {
             outputStream << "Parsing " << fName << "..." << std::endl;
             // Start a resource (sprite, object, room)
+            std::string dir = fName.substr(0, fName.find_last_of("/"));
             google::protobuf::Message *msg = refl->AddMessage(m, field);
-            std::string dir = fName.substr(0, fName.find_last_of("/\\"));
+
             PackRes(dir, resName, id++, root, msg, 0);
 
             visited_walker walker;
@@ -372,7 +372,8 @@ buffers::Project *LoadGMX(std::string fName, bool verbose) {
   gmx_root_walker walker;
   doc.traverse(walker);
 
-  std::string gmxPath = fName.substr(0, fName.find_last_of("/\\") + 1);
+  fName = string_replace_all(fName, "\\", "/");
+  std::string gmxPath = fName.substr(0, fName.find_last_of("/") + 1);
   PackBuffer(proj, gmxPath);
 
   return proj;
