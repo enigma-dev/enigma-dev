@@ -79,7 +79,10 @@ endif
 
 # CPPFLAGS needs these include dirs unconditionally
 override CPPFLAGS += $(SYSTEMS:%=-I%/Info)
-override CPPFLAGS += -I. -I$(CODEGEN)
+override CPPFLAGS += -I. -I$(CODEGEN) -I../../lodepng
+
+# Unconditional LDLIBS
+override LDLIBS += -L../../lodepng -llodepng
 
 .PHONY: all clean
 
