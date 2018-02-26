@@ -2,7 +2,7 @@
 
 liblodepng.a: .FORCE
 	mkdir -p .eobjs/
-	$(CXX) -fPIC -MMD -c -o .eobjs/lodepng.o lodepng.cpp
+	$(CXX) $(CXXFLAGS) -fPIC -MMD -c -o .eobjs/lodepng.o lodepng.cpp
 	$(AR) rvs liblodepng.a .eobjs/lodepng.o
 	
 clean:
