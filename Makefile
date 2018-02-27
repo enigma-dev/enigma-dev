@@ -1,8 +1,8 @@
 PATH := $(eTCpath)$(PATH)
 
-.PHONY: ENIGMA clean Game clean-game codegen .FORCE
+.PHONY: ENIGMA clean Game clean-game .FORCE
 
-ENIGMA: .FORCE liblodepng
+ENIGMA: .FORCE libProtocols liblodepng
 	$(MAKE) -C CommandLine/libGMX/ codegen
 	$(MAKE) -C CompilerSource 
 
@@ -18,7 +18,10 @@ clean-game:
 liblodepng:
 	$(MAKE) -C lodepng/
 
-libGMX: .FORCE
+libProtocols: .FORCE
+	$(MAKE) -C CommandLine/protos/
+
+libGMX: .FORCE libProtocols
 	$(MAKE) -C CommandLine/libGMX/
 
 emake: libGMX .FORCE

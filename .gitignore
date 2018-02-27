@@ -7,7 +7,8 @@
 /definitions.h
 
 /CommandLine/libGMX/libGMX.a
-/CommandLine/libGMX/codegen
+/CommandLine/protos/libProtocols.a
+/CommandLine/protos/codegen
 
 /lodepng/liblodepng.a
 
