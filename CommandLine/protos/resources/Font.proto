@@ -19,7 +19,6 @@ message Font {
     optional int32 max = 2 [(gmx) = "GMX_SPLIT/1"];
   }
 
-  optional string name = 1;
   optional int32 id = 2 [(gmx) = "GMX_DEPRECATED"];
 
   optional string font_name = 3 [(gmx) = "name"];
@@ -32,7 +31,7 @@ message Font {
   
   optional bool renderhq = 10;
   optional uint32 charset = 11;
-  optional uint32 aa = 12;
+  optional uint32 antialias = 12 [(gmx) = "aa"];
   optional bool include_ttf = 13 [(gmx) = "includeTTF"];
   optional string ttf_file = 14 [(gmx) = "TTFName"]; 
   optional int32 texture_group = 15 [(gmx) = "texgroups/texgroup0"];

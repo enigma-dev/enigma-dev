@@ -29,18 +29,19 @@ class EnigmaPlugin
 {
 public:
   EnigmaPlugin();
-  int Init();
+  int Load();
+  const char* Init();
   void SetDefinitions(const char* def);
   void HandleGameLaunch();
   void LogMakeToConsole();
   int BuildGame(EnigmaStruct* data, GameMode mode, const char* fpath);
-  int BuildGame(buffers::Project* data, GameMode mode, const char* fpath);
+  int BuildGame(buffers::Game* data, GameMode mode, const char* fpath);
   void PrintBuiltins(std::string& fName);
 
 private:
   std::function<const char*(EnigmaCallbacks*)> plugin_Init = nullptr;
   std::function<int(EnigmaStruct*, const char*, int)> plugin_CompileEGM = nullptr;
-  std::function<int(buffers::Project *project, const char*, int)> plugin_CompileBuffer = nullptr;
+  std::function<int(buffers::Game *project, const char*, int)> plugin_CompileBuffer = nullptr;
   std::function<const char*()> plugin_NextResource = nullptr;
   std::function<const char*()> plugin_FirstResource = nullptr;
   std::function<bool()> plugin_ResourceIsFunction = nullptr;

@@ -1,0 +1,38 @@
+syntax = "proto2";
+package buffers;
+
+import "resources/Sprite.proto";
+import "resources/Sound.proto";
+import "resources/Background.proto";
+import "resources/Object.proto";
+import "resources/Script.proto";
+import "resources/Shader.proto";
+import "resources/Path.proto";
+import "resources/Font.proto";
+import "resources/Timeline.proto";
+import "resources/Room.proto";
+
+message TreeNode {
+  oneof type {
+    bool folder = 1;
+    //resources.Include include = 2;
+    resources.Sound sound = 3;
+    resources.Background background = 4;
+    resources.Sprite sprite = 5;
+    resources.Shader shader = 6;
+    resources.Font font = 7;
+    resources.Object object = 8;
+    resources.Timeline timeline = 9;
+    resources.Room room = 10;
+    //resources.Help help = 11;
+    //resources.Settings settings = 12;
+    resources.Path path = 13;
+    resources.Script script = 14;
+    //resources.Macros macros = 15;
+  }
+
+  optional string name = 16;
+
+  optional TreeNode parent = 17;
+  repeated TreeNode child = 18;
+}

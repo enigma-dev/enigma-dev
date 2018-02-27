@@ -39,4 +39,4 @@ protected:
                       int main_id, int id, std::string code);
 };
 
-#endif
+#endif // EMAKE_GAME_HPP

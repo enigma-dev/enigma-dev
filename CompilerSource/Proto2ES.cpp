@@ -20,36 +20,52 @@
 #include <unordered_map>
 #include <vector>
 
-Sprite AddSprite(const buffers::resources::Sprite& spr);
+void AddSprite(const char* name, const buffers::resources::Sprite& spr);
 SubImage AddSubImage(const std::string fPath);
-Sound AddSound(const buffers::resources::Sound& snd);
-Background AddBackground(const buffers::resources::Background& bkg);
-Path AddPath(const buffers::resources::Path& pth);
+void AddSound(const char* name, const buffers::resources::Sound& snd);
+void AddBackground(const char* name, const buffers::resources::Background& bkg);
+void AddPath(const char* name, const buffers::resources::Path& pth);
 PathPoint AddPathPoint(const buffers::resources::Path::Point& pnt);
-Script AddScript(const buffers::resources::Script& scr);
-Shader AddShader(const buffers::resources::Shader& shr);
-Font AddFont(const buffers::resources::Font& fnt);
-Timeline AddTimeline(buffers::resources::Timeline* tml, buffers::Project* protobuf);
-GmObject AddObject(buffers::resources::Object* obj, buffers::Project* protobuf);
-Room AddRoom(const buffers::resources::Room& rmn, buffers::Project* protobuf);
-Instance AddInstance(const buffers::resources::Room::Instance& inst, buffers::Project* protobuf);
-Tile AddTile(const buffers::resources::Room::Tile& tile, buffers::Project* protobuf);
-View AddView(const buffers::resources::Room::View& view, buffers::Project* protobuf);
-BackgroundDef AddRoomBackground(const buffers::resources::Room::Background& bkg, buffers::Project* protobuf);
+void AddScript(const char* name, const buffers::resources::Script& scr);
+void AddShader(const char* name, const buffers::resources::Shader& shr);
+void AddFont(const char* name, const buffers::resources::Font& fnt);
+void AddTimeline(const char* name, buffers::resources::Timeline* tml, buffers::Game* protobuf);
+void AddObject(const char* name, buffers::resources::Object* obj, buffers::Game* protobuf);
+void AddRoom(const char* name, const buffers::resources::Room& rmn, buffers::Game* protobuf);
+Instance AddInstance(const buffers::resources::Room::Instance& inst, buffers::Game* protobuf);
+Tile AddTile(const buffers::resources::Room::Tile& tile, buffers::Game* protobuf);
+View AddView(const buffers::resources::Room::View& view, buffers::Game* protobuf);
+BackgroundDef AddRoomBackground(const buffers::resources::Room::Background& bkg, buffers::Game* protobuf);
 
-template <class T>
-int Name2Id(const ::google::protobuf::RepeatedPtrField< T >& group, std::string name) {
-  for (auto& message : group) {
+static std::unordered_map<int, int> countMap;
+static std::unordered_map<std::string, int> idMap;
+
+static void CacheNames(const buffers::TreeNode& root) {
+  using TypeCase = buffers::TreeNode::TypeCase;
+
+  for (auto& message : root.child()) {
+    if (message.type_case() == TypeCase::kFolder) {
+      CacheNames(message);
+      continue;
+    }
+    countMap[message.type_case()]++;
+
     const google::protobuf::Descriptor *desc = message.GetDescriptor();
     const google::protobuf::Reflection *refl = message.GetReflection();
 
-    const google::protobuf::FieldDescriptor *nameField = desc->FindFieldByName("name");
-    if (refl->GetString(message, nameField) == name) {
-      const google::protobuf::FieldDescriptor *idField = desc->FindFieldByName("id");
-      return refl->GetInt32(message, idField);
-    }
+    const google::protobuf::OneofDescriptor *typeOneof =  desc->FindOneofByName("type");
+    const google::protobuf::FieldDescriptor *typeField = refl->GetOneofFieldDescriptor(message, typeOneof);
+    if (!typeField) continue; // might not be set
+    const google::protobuf::Message &typeMessage = refl->GetMessage(message, typeField);
+    const google::protobuf::FieldDescriptor *idField = typeMessage.GetDescriptor()->FindFieldByName("id");
+    if (!idField) continue; // might not have an id field on this type
+    idMap[message.name()] = typeMessage.GetReflection()->GetInt32(typeMessage, idField);
   }
-  return -1;
+}
+
+int Name2Id(std::string name) {
+  auto it = idMap.find(name);
+  return (it != idMap.end()) ? it->second : -1;
 }
 
 inline std::string string_replace_all(std::string str, std::string substr, std::string nstr)
@@ -283,7 +299,55 @@ Image AddImage(const std::string fname) {
   return i;
 }
 
-EnigmaStruct* ProtoBuf2ES(buffers::Project* protobuf) {
+void AddResource(buffers::Game* protobuf, buffers::TreeNode* node) {
+  for (int i = 0; i < node->child_size(); i++) {
+    buffers::TreeNode* child = node->mutable_child(i);
+    const char* name = child->name().c_str();
+    if (child->has_folder())
+      AddResource(protobuf, child);
+    if (child->has_background())
+      AddBackground(name, child->background());
+    if (child->has_font())
+      AddFont(name, child->font());
+    if (child->has_object())
+      AddObject(name, child->mutable_object(), protobuf);
+    if (child->has_path())
+     AddPath(name, child->path());
+    if (child->has_room())
+     AddRoom(name, child->room(), protobuf);
+    if (child->has_script())
+     AddScript(name, child->script());
+    if (child->has_shader())
+     AddShader(name, child->shader());
+    if (child->has_sound())
+     AddSound(name, child->sound());
+    if (child->has_sprite())
+     AddSprite(name, child->sprite());
+    if (child->has_timeline())
+     AddTimeline(name, child->mutable_timeline(), protobuf);
+  }
+}
+
+static Sprite* sprites;
+static Sound* sounds;
+static Background* backgrounds;
+static Path* paths;
+static Script* scripts;
+static Shader* shaders;
+static Font* fonts;
+static Timeline* timelines;
+static GmObject* objects;
+static Room* rooms;
+
+template<typename T>
+T* AllocateGroup(T** group, int &count, buffers::TreeNode::TypeCase typeCase) {
+  count = countMap[typeCase];
+  return (*group = new T[count]);
+}
+
+EnigmaStruct* Proto2ES(buffers::Game* protobuf) {
+  using TypeCase = buffers::TreeNode::TypeCase;
+
   EnigmaStruct *es = new EnigmaStruct();
 
   es->gameSettings.gameIcon = "";
@@ -301,93 +365,30 @@ EnigmaStruct* ProtoBuf2ES(buffers::Project* protobuf) {
   es->gameInfo.gameInfoStr = "";
   es->gameInfo.formCaption = "";
 
-  es->spriteCount = protobuf->sprites_size();
-  if (es->spriteCount > 0) {
-    es->sprites = new Sprite[es->spriteCount];
-    for (int i = 0; i < es->spriteCount; ++i) {
-        es->sprites[i] = AddSprite(protobuf->sprites(i));
-    }
-  }
+  auto root = protobuf->mutable_root();
+  CacheNames(*root);
 
-  es->soundCount = protobuf->sounds_size();
-  if (es->soundCount > 0) {
-    es->sounds = new Sound[es->soundCount];
-    for (int i = 0; i < es->soundCount; ++i) {
-        es->sounds[i] = AddSound(protobuf->sounds(i));
-    }
-  }
+  es->sprites = AllocateGroup(&sprites, es->spriteCount, TypeCase::kSprite);
+  es->sounds = AllocateGroup(&sounds, es->soundCount, TypeCase::kSound);
+  es->backgrounds = AllocateGroup(&backgrounds, es->backgroundCount, TypeCase::kBackground);
+  es->paths = AllocateGroup(&paths, es->pathCount, TypeCase::kPath);
+  es->scripts = AllocateGroup(&scripts, es->scriptCount, TypeCase::kScript);
+  es->shaders = AllocateGroup(&shaders, es->shaderCount, TypeCase::kShader);
+  es->fonts = AllocateGroup(&fonts, es->fontCount, TypeCase::kFont);
+  es->timelines = AllocateGroup(&timelines, es->timelineCount, TypeCase::kTimeline);
+  es->gmObjects = AllocateGroup(&objects, es->gmObjectCount, TypeCase::kObject);
+  es->rooms = AllocateGroup(&rooms, es->roomCount, TypeCase::kRoom);
 
-  es->backgroundCount = protobuf->backgrounds_size();
-  if (es->backgroundCount > 0) {
-    es->backgrounds = new Background[es->backgroundCount];
-    for (int i = 0; i < es->backgroundCount; ++i) {
-        es->backgrounds[i] = AddBackground(protobuf->backgrounds(i));
-    }
-  }
-
-  es->pathCount = protobuf->paths_size();
-  if (es->pathCount > 0) {
-    es->paths = new Path[es->pathCount];
-    for (int i = 0; i < es->pathCount; ++i) {
-        es->paths[i] = AddPath(protobuf->paths(i));
-    }
-  }
-
-  es->scriptCount = protobuf->scripts_size();
-  if (es->scriptCount > 0) {
-    es->scripts = new Script[es->scriptCount];
-    for (int i = 0; i < es->scriptCount; ++i) {
-        es->scripts[i] = AddScript(protobuf->scripts(i));
-    }
-  }
-
-  es->shaderCount = protobuf->shaders_size();
-  if (es->shaderCount > 0) {
-    es->shaders = new Shader[es->shaderCount];
-    for (int i = 0; i < es->shaderCount; ++i) {
-        es->shaders[i] = AddShader(protobuf->shaders(i));
-    }
-  }
-
-  es->fontCount = protobuf->fonts_size();
-  if (es->fontCount > 0) {
-    es->fonts = new Font[es->fontCount];
-    for (int i = 0; i < es->fontCount; ++i) {
-        es->fonts[i] = AddFont(protobuf->fonts(i));
-    }
-  }
-
-  es->timelineCount = protobuf->timelines_size();
-  if (es->timelineCount > 0) {
-    es->timelines = new Timeline[es->timelineCount];
-    for (int i = 0; i < es->timelineCount; ++i) {
-        es->timelines[i] = AddTimeline(protobuf->mutable_timelines(i), protobuf);
-    }
-  }
-
-  es->gmObjectCount = protobuf->objects_size();
-  if (es->gmObjectCount > 0) {
-    es->gmObjects = new GmObject[es->gmObjectCount];
-    for (int i = 0; i < es->gmObjectCount; ++i) {
-        es->gmObjects[i] = AddObject(protobuf->mutable_objects(i), protobuf);
-    }
-  }
-
-  es->roomCount = protobuf->rooms_size();
-  if (es->roomCount > 0) {
-    es->rooms = new Room[es->roomCount];
-    for (int i = 0; i < es->roomCount; ++i) {
-        es->rooms[i] = AddRoom(protobuf->rooms(i), protobuf);
-    }
-  }
+  AddResource(protobuf, root);
 
   return es;
 }
 
-Sprite AddSprite(const buffers::resources::Sprite& spr) {
-  Sprite s = Sprite();
+void AddSprite(const char* name, const buffers::resources::Sprite& spr) {
+  static size_t sprite = 0;
+  Sprite& s = sprites[sprite++];
 
-  s.name = spr.name().c_str();
+  s.name = name;
   s.id = spr.id();
 
   s.transparent = spr.transparent();
@@ -414,14 +415,13 @@ Sprite AddSprite(const buffers::resources::Sprite& spr) {
   }
 
   // Polygon_LOLWINDOWS *maskShapes; ???
-
-  return s;
 }
 
-Sound AddSound(const buffers::resources::Sound& snd) {
-  Sound s = Sound();
+void AddSound(const char* name, const buffers::resources::Sound& snd) {
+  static size_t sound = 0;
+  Sound& s = sounds[sound++];
 
-  s.name = snd.name().c_str();
+  s.name = name;
   s.id = snd.id();
 
   s.kind = snd.kind();
@@ -434,7 +434,7 @@ Sound AddSound(const buffers::resources::Sound& snd) {
   // Open sound
   FILE *afile = fopen(snd.data().c_str(),"rb");
   if (!afile)
-    return s;
+    return;
 
   // Buffer sound
   fseek(afile,0,SEEK_END);
@@ -446,14 +446,13 @@ Sound AddSound(const buffers::resources::Sound& snd) {
 
   s.data = fdata;
   s.size = flen;
-
-  return s;
 }
 
-Background AddBackground(const buffers::resources::Background& bkg) {
-  Background b = Background();
+void AddBackground(const char* name, const buffers::resources::Background& bkg) {
+  static size_t background = 0;
+  Background& b = backgrounds[background++];
 
-  b.name = bkg.name().c_str();
+  b.name = name;
   b.id = bkg.id();
 
   b.transparent = bkg.transparent();
@@ -469,14 +468,13 @@ Background AddBackground(const buffers::resources::Background& bkg) {
   b.vSep = bkg.vertical_spacing();
 
   b.backgroundImage = AddImage(bkg.image());
-
-  return b;
 }
 
-Path AddPath(const buffers::resources::Path& pth) {
-  Path p = Path();
+void AddPath(const char* name, const buffers::resources::Path& pth) {
+  static size_t path = 0;
+  Path& p = paths[path++];
 
-  p.name = pth.name().c_str();
+  p.name = name;
   p.id = pth.id();
 
   p.smooth = pth.smooth();
@@ -493,8 +491,6 @@ Path AddPath(const buffers::resources::Path& pth) {
       p.points[i] = AddPathPoint(pth.points(i));
     }
   }
-
-  return p;
 }
 
 PathPoint AddPathPoint(const buffers::resources::Path::Point& pnt) {
@@ -507,75 +503,77 @@ PathPoint AddPathPoint(const buffers::resources::Path::Point& pnt) {
   return p;
 }
 
-Script AddScript(const buffers::resources::Script& scr) {
-  Script s = Script();
+void AddScript(const char* name, const buffers::resources::Script& scr) {
+  static size_t script = 0;
+  Script& s = scripts[script++];
 
-  s.name = scr.name().c_str();
+  s.name = name;
   s.id = scr.id();
 
   s.code = scr.code().c_str();
-
-  return s;
 }
 
-Shader AddShader(const buffers::resources::Shader& shr) {
-  Shader s = Shader();
+void AddShader(const char* name, const buffers::resources::Shader& shr) {
+  static size_t shader = 0;
+  Shader& s = shaders[shader++];
 
-  s.name = shr.name().c_str();
+  s.name = name;
   s.id = shr.id();
 
   s.vertex = shr.vertex_code().c_str();
   s.fragment = shr.fragment_code().c_str();
   s.type = shr.type().c_str();
   s.precompile = shr.precompile();
-
-  return s;
 }
 
-Font AddFont(const buffers::resources::Font& fnt) {
-  Font f = Font();
+void AddFont(const char* name, const buffers::resources::Font& fnt) {
+  static size_t font = 0;
+  Font& f = fonts[font++];
 
-  f.name = fnt.name().c_str();
+  f.name = name;
   f.id = fnt.id();
 
   f.fontName = fnt.font_name().c_str();
   f.size = fnt.size();
   f.bold = fnt.bold();
   f.italic = fnt.italic();
-
-  return f;
 }
 
-Timeline AddTimeline(buffers::resources::Timeline* tml, buffers::Project* protobuf) {
-  Timeline t = Timeline();
+void AddTimeline(const char* name, buffers::resources::Timeline* tml, buffers::Game* protobuf) {
+  static size_t timeline = 0;
+  Timeline& t = timelines[timeline++];
 
-  t.name = tml->name().c_str();
+  t.name = name;
   t.id = tml->id();
 
   t.momentCount = tml->moments_size();
   if (t.momentCount > 0) {
     t.moments = new Moment[t.momentCount];
     for (int i = 0; i < t.momentCount; ++i) {
-        //t.moments[i] = AddMoment(tml->mutable_moments(i), protobuf);
+      buffers::resources::Timeline::Moment* mmt = tml->mutable_moments(i);
+      buffers::resources::Event* evt = mmt->mutable_event();
+      t.moments[i].stepNo = mmt->step();
+      if (evt->actions_size() > 0)
+        evt->set_code(Actions2Code(evt->actions()));
+      t.moments[i].code = evt->code().c_str();
     }
   }
-
-  return t;
 }
 
-GmObject AddObject(buffers::resources::Object* obj, buffers::Project* protobuf) {
-  GmObject o = GmObject();
+void AddObject(const char* name, buffers::resources::Object* obj, buffers::Game* protobuf) {
+  static size_t object = 0;
+  GmObject& o = objects[object++];
 
-  o.name = obj->name().c_str();
+  o.name = name;
   o.id = obj->id();
 
-  o.spriteId = Name2Id(protobuf->sprites(), obj->sprite_name());
+  o.spriteId = Name2Id(obj->sprite_name());
   o.solid = obj->solid();
   o.visible = obj->visible();
   o.depth = obj->depth();
   o.persistent = obj->persistent();
-  o.parentId = Name2Id(protobuf->objects(), obj->parent_name());
-  o.maskId = Name2Id(protobuf->sprites(), obj->mask_name());
+  o.parentId = Name2Id(obj->parent_name());
+  o.maskId = Name2Id(obj->mask_name());
 
   std::unordered_map<int,std::vector<Event> > mainEventMap;
 
@@ -607,66 +605,63 @@ GmObject AddObject(buffers::resources::Object* obj, buffers::Project* protobuf) 
       o.mainEvents[m++] = me;
     }
   }
-
-  return o;
 }
 
-Room AddRoom(const buffers::resources::Room& rmn, buffers::Project* protobuf) {
-  Room r = Room();
+void AddRoom(const char* name, const buffers::resources::Room& rm, buffers::Game* protobuf) {
+  static size_t room = 0;
+  Room& r = rooms[room++];
 
-  r.name = rmn.name().c_str();
-  r.id = rmn.id();
+  r.name = name;
+  r.id = rm.id();
 
-  r.caption = rmn.caption().c_str();
-  r.width = rmn.width();
-  r.height = rmn.height();
-  r.speed = rmn.speed();
-  r.persistent = rmn.persistent();
-  r.backgroundColor = BGR2RGBA(rmn.color());
-  r.drawBackgroundColor = rmn.show_color();
-  r.creationCode = rmn.code().c_str();
-  r.enableViews = rmn.enable_views();
+  r.caption = rm.caption().c_str();
+  r.width = rm.width();
+  r.height = rm.height();
+  r.speed = rm.speed();
+  r.persistent = rm.persistent();
+  r.backgroundColor = BGR2RGBA(rm.color());
+  r.drawBackgroundColor = rm.show_color();
+  r.creationCode = rm.code().c_str();
+  r.enableViews = rm.enable_views();
 
-  r.backgroundDefCount = rmn.backgrounds_size();
+  r.backgroundDefCount = rm.backgrounds_size();
   if (r.backgroundDefCount > 0) {
     r.backgroundDefs = new BackgroundDef[r.backgroundDefCount];
     for (int i = 0; i < r.backgroundDefCount; ++i) {
-      r.backgroundDefs[i] = AddRoomBackground(rmn.backgrounds(i), protobuf);
+      r.backgroundDefs[i] = AddRoomBackground(rm.backgrounds(i), protobuf);
     }
   }
 
-  r.viewCount = rmn.views_size();
+  r.viewCount = rm.views_size();
   if (r.viewCount > 0) {
     r.views = new View[r.viewCount];
     for (int i = 0; i < r.viewCount; ++i) {
-      r.views[i] = AddView(rmn.views(i), protobuf);
+      r.views[i] = AddView(rm.views(i), protobuf);
     }
   }
 
-  r.instanceCount = rmn.instances_size();
+  r.instanceCount = rm.instances_size();
   if (r.instanceCount > 0) {
     r.instances = new Instance[r.instanceCount];
     for (int i = 0; i < r.instanceCount; ++i) {
-      r.instances[i] = AddInstance(rmn.instances(i), protobuf);
+      r.instances[i] = AddInstance(rm.instances(i), protobuf);
     }
   }
 
-  r.tileCount = rmn.tiles_size();
+  r.tileCount = rm.tiles_size();
   if (r.tileCount > 0) {
     r.tiles = new Tile[r.tileCount];
     for (int i = 0; i < r.tileCount; ++i) {
-      r.tiles[i] = AddTile(rmn.tiles(i), protobuf);
+      r.tiles[i] = AddTile(rm.tiles(i), protobuf);
     }
   }
-
-  return r;
 }
 
-Instance AddInstance(const buffers::resources::Room::Instance& inst, buffers::Project* protobuf) {
+Instance AddInstance(const buffers::resources::Room::Instance& inst, buffers::Game* protobuf) {
   Instance i = Instance();
 
   i.id = inst.id();
-  i.objectId = Name2Id(protobuf->objects(), inst.object_type());
+  i.objectId = Name2Id(inst.object_type());
   i.x = inst.x();
   i.y = inst.y();
   i.locked = inst.locked();
@@ -676,11 +671,11 @@ Instance AddInstance(const buffers::resources::Room::Instance& inst, buffers::Pr
   return i;
 }
 
-Tile AddTile(const buffers::resources::Room::Tile& tile, buffers::Project* protobuf) {
+Tile AddTile(const buffers::resources::Room::Tile& tile, buffers::Game* protobuf) {
   Tile t = Tile();
 
   t.id = tile.id();
-  t.backgroundId = Name2Id(protobuf->backgrounds(), tile.background_name());
+  t.backgroundId = Name2Id(tile.background_name());
   t.roomX = tile.x();
   t.roomY = tile.y();
   t.locked = tile.locked();
@@ -693,7 +688,7 @@ Tile AddTile(const buffers::resources::Room::Tile& tile, buffers::Project* proto
   return t;
 }
 
-View AddView(const buffers::resources::Room::View& view, buffers::Project* protobuf) {
+View AddView(const buffers::resources::Room::View& view, buffers::Game* protobuf) {
   View v = View();
 
   v.visible = view.visible();
@@ -709,12 +704,12 @@ View AddView(const buffers::resources::Room::View& view, buffers::Project* proto
   v.borderV = view.vborder();
   v.speedH = view.hspeed();
   v.speedV = view.vspeed();
-  v.objectId = Name2Id(protobuf->objects(), view.object_following());
+  v.objectId = Name2Id(view.object_following());
 
   return v;
 }
 
-BackgroundDef AddRoomBackground(const buffers::resources::Room::Background& bkg, buffers::Project* protobuf) {
+BackgroundDef AddRoomBackground(const buffers::resources::Room::Background& bkg, buffers::Game* protobuf) {
   BackgroundDef b = BackgroundDef();
 
   b.visible = bkg.visible();
@@ -726,7 +721,7 @@ BackgroundDef AddRoomBackground(const buffers::resources::Room::Background& bkg,
   b.hSpeed = bkg.hspeed();
   b.vSpeed = bkg.vspeed();
   b.stretch = bkg.stretch();
-  b.backgroundId = Name2Id(protobuf->backgrounds(), bkg.name());
+  b.backgroundId = Name2Id(bkg.background_name());
 
   return b;
 }
