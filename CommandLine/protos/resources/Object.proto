@@ -1,0 +1,44 @@
+syntax = "proto2";
+package buffers.resources;
+
+import "options.proto";
+import "resources/Event.proto";
+
+message Object {
+  optional int32 id = 2 [(gmx) = "GMX_DEPRECATED"];
+
+  optional string parent_name = 3 [(gmx) = "parentName"];
+  optional string sprite_name = 4 [(gmx) = "spriteName"];
+  optional string mask_name = 5 [(gmx) = "maskName"];
+
+  optional int32 depth = 6;
+  optional bool solid = 7;
+  optional bool visible = 8;
+  optional bool persistent = 9;
+
+  repeated Event events = 10 [(gmx) = "events/event"];
+
+  enum PhysicsShape { CIRCLE = 0; BOX = 1; SHAPE = 2; }
+
+  message PhysicsShapePoint {
+    optional int32 x = 1 [(gmx) = "GMX_SPLIT/0"];
+    optional int32 y = 2 [(gmx) = "GMX_SPLIT/1"];
+  }
+
+  message ObjectPhysicsSettings {
+    optional bool use_physics = 1 [(gmx) = "PhysicsObject"];
+    optional bool phy_sensor = 2 [(gmx) = "PhysicsObjectSensor"];
+    optional PhysicsShape phy_shape_type = 3 [(gmx) = "PhysicsObjectShape"];
+    optional double phy_density = 4 [(gmx) = "PhysicsObjectDensity"];
+    optional double phy_restitution = 5 [(gmx) = "PhysicsObjectRestitution"];
+    optional int32 phy_group = 6 [(gmx) = "PhysicsObjectGroup"];
+    optional double phy_linear_damping = 7 [(gmx) = "PhysicsObjectLinearDamping"];
+    optional double phy_angular_damping = 8 [(gmx) = "PhysicsObjectAngularDamping"];
+    optional double phy_friction = 9 [(gmx) = "PhysicsObjectFriction"];
+    optional bool phy_awake = 10 [(gmx) = "PhysicsObjectAwake"];
+    optional bool phy_kinematic = 11 [(gmx) = "PhysicsObjectKinematic"];
+    repeated PhysicsShapePoint phy_shape = 12 [(gmx) = "PhysicsShapePoints/point"];
+  }
+  
+  optional ObjectPhysicsSettings physics_settings = 11 [(gmx) = "EGM_NESTED"];
+}
