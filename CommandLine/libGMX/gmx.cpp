@@ -215,7 +215,6 @@ void PackRes(std::string &dir, std::string &name, int id, pugi::xml_node &node, 
                     if (isFilePath) {
                       value = extract_file_path(dir, value);
                     }
-                    std::cout << value << std::endl;
                     refl->AddString(m, field, value);
                   }
                 }
