@@ -6,9 +6,9 @@ OBJ_DIR := .eobjs
 
 rwildcard=$(wildcard $1/$2) $(foreach d,$(wildcard $1/*),$(call rwildcard,$d,$2))
 PROTOS := $(call rwildcard,$(SRC_DIR),*.proto)
-PROTO_OUT := $(patsubst $(SRC_DIR)/%, $(PROTO_DIR)/%, $(patsubst %.proto, %.pb, $(PROTOS)))
+PROTO_OUT := $(patsubst $(SRC_DIR)/%, $(PROTO_DIR)/%, $(patsubst %.proto, %.pb.h, $(PROTOS)))
 
-$(PROTO_DIR)/%.pb: $(SRC_DIR)/%.proto
+$(PROTO_DIR)/%.pb.h: $(SRC_DIR)/%.proto
 	protoc -I=./ -I=/usr/include --cpp_out=$(PROTO_DIR) $<
 
 SOURCES := $(call rwildcard,$(SRC_DIR),*.cpp)
@@ -31,10 +31,10 @@ obj_dirs: $(OBJDIRS)
 
 clean:
 	rm -rf $(LIBRARY) $(OBJ_DIR)
-	
+
 $(LIBRARY): $(PROTO_OBJECTS) $(OBJECTS)
 	ar rvs $@ $^
-	
+
 # Create the object directories
 $(OBJDIRS):
 	mkdir -p $@
@@ -45,7 +45,7 @@ protodir:
 # Generate rules for new (unbuilt) files
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.pb.cc | obj_dirs
 	$(CXX) $(CXXFLAGS) -MMD -c -o $@ $<
-	
+
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp | obj_dirs
 	$(CXX) $(CXXFLAGS) -MMD -c -o $@ $<
 
