@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<assets>
+  <Configs name="configs">
+    <Config>Configs\Default</Config>
+  </Configs>
+  <sprites name="sprites">
+    <sprite>sprites\spr_0</sprite>
+  </sprites>
+  <sounds name="sound">
+    <sound>sound\snd_0</sound>
+  </sounds>
+  <backgrounds name="background">
+    <background>background\bkg_0</background>
+  </backgrounds>
+  <paths name="paths">
+    <path>paths\path_0</path>
+  </paths>
+  <scripts name="scripts">
+    <script>scripts\scr_0.gml</script>
+  </scripts>
+  <shaders name="shaders"/>
+  <fonts name="fonts">
+    <font>fonts\font_0</font>
+  </fonts>
+  <timelines name="timelines">
+    <timeline>timelines\time_0</timeline>
+  </timelines>
+  <objects name="objects">
+    <object>objects\obj_0</object>
+  </objects>
+  <rooms name="rooms">
+    <room>rooms\rm_0</room>
+  </rooms>
+  <constants number="0"/>
+  <help>
+    <rtf>help.rtf</rtf>
+  </help>
+</assets>
