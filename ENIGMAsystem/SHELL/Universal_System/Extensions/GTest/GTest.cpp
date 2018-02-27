@@ -1,36 +1,40 @@
 #include "include.h"
 #include <gtest/gtest.h>
+#include <iostream>
 using std::string;
+using std::cout;
+using std::endl;
 
-#define IMPLEMENT_GTEST_BINARY_FUNC(FUNC, GTEST_CALL)                          \
-  static void FUNC##_impl(variant a, variant b, string msg, bool *survived) {  \
-    if (msg.empty()) ASSERT_EQ(a, b);                                          \
-    else GTEST_CALL(a, b) << msg;                                              \
-    *survived = true;                                                          \
-  }                                                                            \
-  void FUNC(variant a, variant b, string msg) {                                \
-    bool survived = false;                                                     \
-    FUNC##_impl(a, b, msg, &survived);                                         \
-    if (!survived) abort();                                                    \
+namespace enigma {
+
+void gtest_binary(string expression, string left_value, string right_value,
+                  string left_exp, string right_exp, string operator_english,
+                  bool pass, bool assert, string user_message,
+                  string script, int line) {
+  if (pass) {
+    cout << "Pass: " << expression << endl;
+    return;
   }
-#define IMPLEMENT_GTEST_UNARY_FUNC(TYPE, FUNC, GTEST_CALL)         \
-  static void FUNC##_impl(TYPE exp, string msg, bool *survived) {  \
-    if (msg.empty()) GTEST_CALL(exp);                              \
-    else GTEST_CALL(exp) << msg;                                   \
-    *survived = true;                                              \
-  }                                                                \
-  void FUNC(TYPE exp, string message) {                            \
-    bool survived = false;                                         \
-    FUNC##_impl(exp, message, &survived);                          \
-    if (!survived) abort();                                        \
+  ADD_FAILURE_AT(script.c_str(), line)
+      << "Failure: Not true that " << left_exp << " (which is " << left_value
+      << ") " << operator_english << " " << right_exp << " (which is "
+      << right_value << ")."
+      << (user_message.empty() ? "" : "\n" + user_message);
+  if (assert) exit(42);
+}
+
+void gtest_unary(string expression, string value, string expected_value,
+                 bool pass, bool assert, string user_message,
+                 string script, int line) {
+  if (pass) {
+    cout << "Pass: " << expression << " is " << expected_value << endl;
+    return;
   }
+  ADD_FAILURE_AT(script.c_str(), line)
+      << "Failure: Not true that " << expression << " is " << expected_value
+      << "; it is actually " << value
+      << (user_message.empty() ? "." : ".\n" + user_message);
+  if (assert) exit(42);
+}
 
-IMPLEMENT_GTEST_UNARY_FUNC(bool, gtest_assert_true, ASSERT_TRUE);
-IMPLEMENT_GTEST_UNARY_FUNC(bool, gtest_assert_false, ASSERT_FALSE);
-
-IMPLEMENT_GTEST_BINARY_FUNC(gtest_assert_eq, ASSERT_EQ);
-IMPLEMENT_GTEST_BINARY_FUNC(gtest_assert_ne, ASSERT_NE);
-IMPLEMENT_GTEST_BINARY_FUNC(gtest_assert_lt, ASSERT_LT);
-IMPLEMENT_GTEST_BINARY_FUNC(gtest_assert_le, ASSERT_LE);
-IMPLEMENT_GTEST_BINARY_FUNC(gtest_assert_gt, ASSERT_GT);
-IMPLEMENT_GTEST_BINARY_FUNC(gtest_assert_ge, ASSERT_GE);
+}  // namespace enigma

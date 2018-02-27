@@ -2,7 +2,7 @@ PATH := $(eTCpath)$(PATH)
 
 .PHONY: ENIGMA clean Game clean-game codegen .FORCE
 
-ENIGMA: liblodepng
+ENIGMA: .FORCE liblodepng
 	$(MAKE) -C CommandLine/libGMX/ codegen
 	$(MAKE) -C CompilerSource 
 

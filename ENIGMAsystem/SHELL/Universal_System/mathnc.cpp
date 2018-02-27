@@ -1,4 +1,4 @@
-/** Copyright (C) 2008-2012 Josh Ventura
+/** Copyright (C) 2008-2018 Josh Ventura
 *** Copyright (C) 2014 Robert B. Colton, TheExDeus
 ***
 *** This file is a part of the ENIGMA Development Environment.
@@ -19,13 +19,16 @@
 #include <limits>
 #include <stdlib.h>
 #include <cmath>
+
 #include "var4.h"
 #include "dynamic_args.h"
+#include "generic_args.h"
 
 // Note: This hack is justifiable in that it was put here to prevent
 // around contributors' bad habits, not because of developers' bad habits.
 #define INCLUDED_FROM_SHELLMAIN Not really.
 #include "mathnc.h"
+#undef INCLUDED_FROM_SHELLMAIN
 
 #define M_PI    3.14159265358979323846
 
@@ -33,42 +36,6 @@
 
 namespace enigma_user
 {
-  // Functions
-
-  ma_scalar sqr(ma_scalar x)              { return x*x;      }
-  ma_scalar logn(ma_scalar n,ma_scalar x)    { return ::log(x)/::log(n); }
-
-  ma_scalar sind(ma_scalar x)              { return ::sin(x * M_PI / 180.0); }
-  ma_scalar cosd(ma_scalar x)              { return ::cos(x * M_PI / 180.0); }
-  ma_scalar tand(ma_scalar x)              { return ::tan(x * M_PI / 180.0); }
-  ma_scalar asind(ma_scalar x)             { return ::asin(x)    * 180.0 / M_PI; }
-  ma_scalar acosd(ma_scalar x)             { return ::acos(x)    * 180.0 / M_PI; }
-  ma_scalar atand(ma_scalar x)             { return ::atan(x)    * 180.0 / M_PI; }
-  ma_scalar atand2(ma_scalar y,ma_scalar x)   { return ::atan2(y,x) * 180.0 / M_PI; }
-  ma_scalar arcsind(ma_scalar x)           { return ::asin(x)    * 180.0 / M_PI; }
-  ma_scalar arccosd(ma_scalar x)           { return ::acos(x)    * 180.0 / M_PI; }
-  ma_scalar arctand(ma_scalar x)           { return ::atan(x)    * 180.0 / M_PI; }
-  ma_scalar arctand2(ma_scalar y,ma_scalar x) { return ::atan2(y,x) * 180.0 / M_PI; }
-
-  int sign(ma_scalar x)                { return (x>0)-(x<0); }
-  int cmp(ma_scalar x,ma_scalar y)        { return (x>y)-(x<y); }
-  bool equal(ma_scalar x, ma_scalar y)    { return (::fabs(x-y) <= std::numeric_limits<ma_scalar>::epsilon() * ::fmax(ma_scalar(1.0), ::fmax(::fabs(x), ::fabs(y)))); }
-  ma_scalar frac(ma_scalar x)             { return x-(int)x;    }
-
-  ma_scalar degtorad(ma_scalar x)         { return x*(M_PI/180.0);}
-  ma_scalar radtodeg(ma_scalar x)         { return x*(180.0/M_PI);}
-
-  ma_scalar lengthdir_x(ma_scalar len,ma_scalar dir) { return len *  cosd(dir); }
-  ma_scalar lengthdir_y(ma_scalar len,ma_scalar dir) { return len * -sind(dir); }
-
-  ma_scalar angle_difference(ma_scalar dir1,ma_scalar dir2) {
-	  return fmod((fmod((dir1 - dir2),360) + 540), 360) - 180;
-  }
-  ma_scalar point_direction(ma_scalar x1,ma_scalar y1,ma_scalar x2,ma_scalar y2) { return ::fmod((::atan2(y1-y2,x2-x1)*(180/M_PI))+360,360); }
-  ma_scalar point_distance(ma_scalar x1,ma_scalar y1,ma_scalar x2,ma_scalar y2)  { return ::hypot(x2-x1,y2-y1); }
-  ma_scalar point_distance_3d(ma_scalar x1,ma_scalar y1,ma_scalar z1,ma_scalar x2,
-  ma_scalar y2,ma_scalar z2)  { return ::sqrt(sqr(x1-x2) + sqr(y1-y2) + sqr(z1-z2)); }
-  
   ma_scalar triangle_area(ma_scalar x1, ma_scalar y1, ma_scalar x2, ma_scalar y2, ma_scalar x3, ma_scalar y3){
     return fabs(((x2 - x1)*(y3 - y1) - (x3 - x1)*(y2 - y1))/2.0);
   }
