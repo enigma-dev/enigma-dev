@@ -1,7 +1,7 @@
 LIBRARY   := libGMX.a
 PROTO_DIR := ../protos
 CXXFLAGS  := -I/mingw64/include/pugixml-1.8/ -I$(PROTO_DIR) -I$(PROTO_DIR)/codegen -std=c++11 -Wall -Wextra -Wpedantic -g
-LDFLAGS   := $(OS_LIBS) -L../protos -lProtocols -L/mingw64/lib/pugixml-1.8/ -lpugixml
+LDFLAGS   := $(OS_LIBS) -L../../ -lProtocols -L/mingw64/lib/pugixml-1.8/ -lpugixml
 SRC_DIR   := .
 OBJ_DIR   := .eobjs
 

@@ -1,4 +1,13 @@
-LIBRARY := libProtocols.a
+OS := $(shell uname -s)
+ifeq ($(OS), Linux)
+	EXT := .so
+else ifeq ($(OS), Darwin)
+	EXT := .dylib
+else
+	EXT := .dll
+endif
+
+LIBRARY := ../../libProtocols$(EXT)
 PROTO_DIR := codegen/
 CXXFLAGS := -I$(PROTO_DIR) -std=c++11 -Wall -Wextra -Wpedantic -g -fPIC
 SRC_DIR := .
@@ -30,10 +39,10 @@ codegen: protodir $(PROTO_OUT)
 obj_dirs: $(OBJDIRS)
 
 clean:
-	rm -rf $(LIBRARY) $(OBJ_DIR)
+	rm -rf $(LIBRARY) $(OBJ_DIR) $(PROTO_DIR)
 	
 $(LIBRARY): $(PROTO_OBJECTS) $(OBJECTS)
-	ar rvs $@ $^
+	$(CXX) -shared -o $@ $^
 	
 # Create the object directories
 $(OBJDIRS):

@@ -6,11 +6,7 @@
 /MacOS/build/Release/EnigmaXcode.app/Contents/Resources/*
 /definitions.h
 
-/CommandLine/libGMX/libGMX.a
-/CommandLine/protos/libProtocols.a
 /CommandLine/protos/codegen
-
-/lodepng/liblodepng.a
 
 /ENIGMAsystem/SHELL/API_Switchboard.h
 /ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/
@@ -35,6 +31,7 @@ output_log.txt
 hs_err_pid*.log
 *.stackdump
 
+*.a
 *.class
 *.o
 *.d
