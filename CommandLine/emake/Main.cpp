@@ -5,6 +5,8 @@
 #include "gmx.h"
 #include "Proto2ES.h"
 
+#include <boost/filesystem.hpp>
+
 #include <fstream>
 #include <iostream>
 #include <streambuf>
@@ -55,6 +57,7 @@ int main(int argc, char* argv[])
     if (!_run) plugin.HandleGameLaunch();
 
     std::string input_file = options.GetOption("input").as<std::string>();
+    if (input_file.back() == '/') input_file.pop_back();
     std::string output_file = options.GetOption("output").as<std::string>();
     Game game;
     if (input_file.size()) {
@@ -64,6 +67,13 @@ int main(int argc, char* argv[])
       if (ext == "sog") {
         if (!ReadSOG(input_file, &game)) return 1;
       } else if (ext == "gmx") {
+        boost::filesystem::path p = input_file;
+        std::string gmxPath = input_file;
+        
+        if (boost::filesystem::is_directory(p)) {
+          input_file += "/" + p.filename().stem().string() + ".project.gmx";
+        }
+        
         buffers::Project* project;
         if (!(project = gmx::LoadGMX(input_file, true))) return 1;
         return plugin.BuildGame(project, mode, output_file.c_str());
