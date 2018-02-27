@@ -42,7 +42,7 @@ clean:
 	rm -rf $(LIBRARY) $(OBJ_DIR) $(PROTO_DIR)
 	
 $(LIBRARY): $(PROTO_OBJECTS) $(OBJECTS)
-	$(CXX) -shared -o $@ $^
+	$(CXX) -shared -o $@ $^ -lprotobuf
 	
 # Create the object directories
 $(OBJDIRS):
