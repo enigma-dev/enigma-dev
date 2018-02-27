@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <sound>
   <extension>.wav</extension>
-  <origname>bloop_x.wav</origname>
+  <origname>sound\audio\snd_0.wav</origname>
   <kind>0</kind>
   <volume>
     <volume>1.0</volume>

@@ -22,9 +22,7 @@
   <fonts name="fonts">
     <font>fonts\font_0</font>
   </fonts>
-  <timelines name="timelines">
-    <timeline>timelines\time_0</timeline>
-  </timelines>
+  <timelines name="timelines"/>
   <objects name="objects">
     <object>objects\obj_0</object>
   </objects>
