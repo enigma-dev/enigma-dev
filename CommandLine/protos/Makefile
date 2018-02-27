@@ -9,7 +9,7 @@ PROTOS := $(call rwildcard,$(SRC_DIR),*.proto)
 PROTO_OUT := $(patsubst $(SRC_DIR)/%, $(PROTO_DIR)/%, $(patsubst %.proto, %.pb, $(PROTOS)))
 
 $(PROTO_DIR)/%.pb: $(SRC_DIR)/%.proto
-	protoc -I=protos/ -I=/usr/include --cpp_out=$(PROTO_DIR) $<
+	protoc -I=. -I=/usr/include --cpp_out=$(PROTO_DIR) $<
 
 SOURCES := $(call rwildcard,$(SRC_DIR),*.cpp)
 OBJECTS := $(patsubst $(SRC_DIR)/%, $(OBJ_DIR)/%, $(patsubst %.cpp, %.o, $(SOURCES)))
