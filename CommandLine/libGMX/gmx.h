@@ -15,10 +15,30 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "codegen/game.pb.h"
+#include "codegen/project.pb.h"
 
+#include <iostream>
+#include <streambuf>
 #include <string>
 
 namespace gmx {
-  buffers::Project *LoadGMX(std::string fName, bool verbose);
-} //namespace gmx
+extern std::ostream outputStream;
+extern std::ostream errorStream;
+
+inline void bind_output_streams(std::ostream &out, std::ostream &err) {
+  outputStream.rdbuf(out.rdbuf());
+  errorStream.rdbuf(err.rdbuf());
+}
+
+buffers::Project* LoadGMX(std::string fName);
+buffers::resources::Background* LoadBackground(std::string fName);
+buffers::resources::Sound* LoadSound(std::string fName);
+buffers::resources::Sprite* LoadSprite(std::string fName);
+buffers::resources::Shader* LoadShader(std::string fName);
+buffers::resources::Font* LoadFont(std::string fName);
+buffers::resources::Object* LoadObject(std::string fName);
+buffers::resources::Timeline* LoadTimeLine(std::string fName);
+buffers::resources::Room* LoadRoom(std::string fName);
+buffers::resources::Path* LoadPath(std::string fName);
+buffers::resources::Script* LoadScript(std::string fName);
+}  //namespace gmx
