@@ -39,7 +39,8 @@ inline std::string string_replace_all(std::string str, std::string substr, std::
   return str;
 }
 
-inline std::string extract_file_path(std::string dir, const std::string value) {
+inline std::string extract_file_path(std::string dir, std::string value) {
+  value = string_replace_all(value, "\\", "/");
   const std::string end = dir.substr(dir.find_last_of("/\\") + 1);
   if (value.find(end) == 0)
     dir = dir.substr(0, dir.find_last_of("/\\") + 1);
