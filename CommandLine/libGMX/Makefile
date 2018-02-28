@@ -14,7 +14,7 @@ OBJDIRS = $(sort $(OBJ_DIR) $(dir $(PROTO_OBJECTS)) $(dir $(OBJECTS)))
 DEPENDS = $(PROTO_OBJECTS:.o=.d) $(OBJECTS:.o=.d)
 
 lib:
-	make $(LIBRARY)
+	$(MAKE) $(LIBRARY)
 
 # Old make has a bug which requires this nonsense...
 obj_dirs: $(OBJDIRS)

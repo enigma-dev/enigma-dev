@@ -30,8 +30,8 @@ DEPENDS = $(PROTO_OBJECTS:.o=.d) $(OBJECTS:.o=.d)
 
 
 lib:
-	make codegen
-	make $(LIBRARY)
+	$(MAKE) codegen
+	$(MAKE) $(LIBRARY)
 
 codegen: protodir $(PROTO_OUT)
 
@@ -40,10 +40,10 @@ obj_dirs: $(OBJDIRS)
 
 clean:
 	rm -rf $(LIBRARY) $(OBJ_DIR) $(PROTO_DIR)
-	
+
 $(LIBRARY): $(PROTO_OBJECTS) $(OBJECTS)
 	$(CXX) -shared -o $@ $^ -lprotobuf
-	
+
 # Create the object directories
 $(OBJDIRS):
 	mkdir -p $@
@@ -54,7 +54,7 @@ protodir:
 # Generate rules for new (unbuilt) files
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.pb.cc | obj_dirs
 	$(CXX) $(CXXFLAGS) -MMD -c -o $@ $<
-	
+
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp | obj_dirs
 	$(CXX) $(CXXFLAGS) -MMD -c -o $@ $<
 
