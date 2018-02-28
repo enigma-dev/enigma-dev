@@ -169,7 +169,7 @@ int build_game(const string &game, const TestConfig &tc, const string &out) {
   string compiler = "--compiler=" + tc.get_or(&TC::compiler, "TestHarness");
   string mode = "--mode=" + tc.get_or(&TC::mode, "Debug");
   string graphics = "--graphics=" + tc.get_or(&TC::graphics, "OpenGL1");
-  string audio = "--audio=" + tc.get_or(&TC::audio, "None");
+  string audio = "--audio=" + tc.get_or(&TC::audio, "OpenAL");
   string widgets = "--widgets=" + tc.get_or(&TC::widgets, "None");
   string network = "--network=" + tc.get_or(&TC::network, "None");
   string collision = "--collision=" + tc.get_or(&TC::collision, "Precise");
