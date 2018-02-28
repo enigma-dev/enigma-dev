@@ -556,7 +556,12 @@ Timeline AddTimeline(buffers::resources::Timeline* tml, buffers::Project* protob
   if (t.momentCount > 0) {
     t.moments = new Moment[t.momentCount];
     for (int i = 0; i < t.momentCount; ++i) {
-        //t.moments[i] = AddMoment(tml->mutable_moments(i), protobuf);
+      buffers::resources::Timeline::Moment* mmt = tml->mutable_moments(i);
+      buffers::resources::Event* evt = mmt->mutable_event();
+      t.moments[i].stepNo = mmt->step();
+      if (evt->actions_size() > 0)
+        evt->set_code(Actions2Code(evt->actions()));
+      t.moments[i].code = evt->code().c_str();
     }
   }
 
