@@ -91,7 +91,7 @@ env:
     - OUTPUT=/tmp/test
   matrix:
     # Test Harness
-    - TEST_HARNESS=true
+    - TEST_HARNESS=true AUDIO=OpenAL
     # Game Modes
     - COMPILER=gcc PLATFORM=xlib MODE=Run GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
     - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
