@@ -55,6 +55,8 @@ inline void action_set_timeline_speed(double speed)
   ((enigma::object_timelines*)enigma::instance_event_iterator->inst)->timeline_speed=speed;
 }
 
+#define action_timeline_set action_set_timeline
+
 inline void action_timeline_pause()
 {
   ((enigma::object_timelines*)enigma::instance_event_iterator->inst)->timeline_running = false;
