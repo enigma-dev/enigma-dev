@@ -226,7 +226,7 @@ unsigned char* image_load_png(string filename, unsigned int* width, unsigned int
     }
   }
 
-  delete[] image;
+  free(image);
   *width  = pngwidth;
   *height = pngheight;
   *fullwidth  = widfull;
@@ -319,7 +319,8 @@ int image_save_png(string filename, const unsigned char* data, unsigned width, u
     file.write(reinterpret_cast<const char*>(buffer), std::streamsize(buffersize));
     file.close();
   }
-  delete[] buffer;
+  
+  free(buffer);
   delete[] bitmap;
 
   if (error) return -1; else return 1;
