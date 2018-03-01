@@ -54,6 +54,11 @@ int main(int argc, char* argv[])
 
     Game game;
     std::string input_file = options.GetOption("input").as<std::string>();
+    
+    // Working directory hacks
+    if (mode != emode_compile)
+      game.SetOutputFile(input_file);
+    
     if (input_file.size()) {
       std::string ext;
       size_t dot = input_file.find_last_of('.');
