@@ -13,6 +13,7 @@ public:
   void AddSimpleObject(const std::map<std::pair<int,int>, std::string> &events);
   void AddDefaultRoom();
   EnigmaStruct* ConstructGame();
+  void SetOutputFile(std::string fName);
 
 protected:
   EnigmaStruct _game;

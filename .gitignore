@@ -5,6 +5,7 @@
 /MacOS/build/Release/EnigmaXcode.app/Contents/Info.plist
 /MacOS/build/Release/EnigmaXcode.app/Contents/Resources/*
 /definitions.h
+/coverage_*.info
 
 /ENIGMAsystem/SHELL/API_Switchboard.h
 /ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/

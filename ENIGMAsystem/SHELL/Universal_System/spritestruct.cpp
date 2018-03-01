@@ -396,17 +396,29 @@ namespace enigma
   }
 
   void sprite_add_copy(sprite *spr, sprite *spr_copy) {
-    spr->subcount  = spr_copy->subcount;
-    spr->width   = spr_copy->width;
-    spr->height  = spr_copy->height;
-    spr->xoffset   = spr_copy->xoffset;
-    spr->yoffset   = spr_copy->yoffset;
+        spr->subcount  = spr_copy->subcount;
+        spr->width     = spr_copy->width;
+        spr->height    = spr_copy->height;
+        spr->xoffset   = spr_copy->xoffset;
+        spr->yoffset   = spr_copy->yoffset;
+        spr->bbox.bottom  = spr_copy->bbox.bottom;
+        spr->bbox.left  = spr_copy->bbox.left;
+        spr->bbox.top   = spr_copy->bbox.top;
+        spr->bbox.right = spr_copy->bbox.right;
+        spr->bbox_relative.bottom  = spr_copy->bbox_relative.bottom;
+        spr->bbox_relative.left  = spr_copy->bbox_relative.left;
+        spr->bbox_relative.top   = spr_copy->bbox_relative.top;
+        spr->bbox_relative.right = spr_copy->bbox_relative.right;
+        spr->smooth = spr_copy->smooth;
+
 
         for (int i = 0; i < spr->subcount; i++)
         {
             spr->texturearray.push_back(graphics_duplicate_texture(spr_copy->texturearray[i]));
             spr->texturexarray.push_back(spr_copy->texturexarray[i]);
             spr->textureyarray.push_back(spr_copy->textureyarray[i]);
+            spr->texturewarray.push_back(spr_copy->texturewarray[i]);
+            spr->textureharray.push_back(spr_copy->textureharray[i]);
         }
     }
   }
@@ -697,17 +709,9 @@ void sprite_set_bbox(int ind, int left, int top, int right, int bottom)
 }
 
 void sprite_collision_mask(int ind, bool sepmasks, int mode,
-    int left, int right, int top, int bottom, int kind,
+    int left, int top, int right, int bottom, int kind,
     unsigned char tolerance) {
   sprite_set_bbox(ind, left, top, right, bottom);
-}
-
-void sprite_set_precise(int ind, bool precise) {
-  enigma::sprite *spr;
-  if (!get_sprite_mtx(spr,ind))
-      return;
-
-  // TODO
 }
 
 var sprite_get_uvs(int ind, int subimg){
