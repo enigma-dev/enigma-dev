@@ -193,7 +193,7 @@ unsigned char* image_load_bmp(string filename, unsigned int* width, unsigned int
 
 unsigned char* image_load_png(string filename, unsigned int* width, unsigned int* height, unsigned int* fullwidth, unsigned int* fullheight, bool flipped) {
   unsigned error;
-  unsigned char* image;
+  unsigned char* image = nullptr;
   unsigned pngwidth, pngheight;
 
   error = lodepng_decode32_file(&image, &pngwidth, &pngheight, filename.c_str());
@@ -310,7 +310,7 @@ int image_save_png(string filename, const unsigned char* data, unsigned width, u
     }
   }
 
-  unsigned char* buffer;
+  unsigned char* buffer = nullptr;
   size_t buffersize;
 
   unsigned error = lodepng_encode_memory(&buffer, &buffersize, bitmap, width, height, LCT_RGBA, 8);
