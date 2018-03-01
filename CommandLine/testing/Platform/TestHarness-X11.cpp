@@ -304,6 +304,7 @@ int TestHarness::run_to_completion(const string &game, const TestConfig &tc) {
 
   pid_t pid = fork();
   if (!pid) {
+    chdir(game.substr(0, game.find_last_of("\\/")).c_str());
     execl(out.c_str(), out.c_str(), nullptr);
     abort();
   }
