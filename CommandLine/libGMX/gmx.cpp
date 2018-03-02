@@ -41,7 +41,7 @@ inline std::string string_replace_all(std::string str, std::string substr, std::
   return str;
 }
 
-inline std::string extract_file_path(std::string dir, std::string value) {
+inline std::string GMXPath2FilePath(std::string dir, std::string value) {
   value = string_replace_all(value, "\\", "/");
   const std::string end = dir.substr(dir.find_last_of("/") + 1);
   if (value.find(end) == 0)
@@ -217,7 +217,7 @@ void PackRes(std::string &dir, std::string &name, int id, pugi::xml_node &node, 
                     n.append_attribute("visited") = "true";
                     std::string value = n.text().as_string();
                     if (isFilePath) {
-                      value = extract_file_path(dir, value);
+                      value = GMXPath2FilePath(dir, value);
                     }
                     refl->AddString(m, field, value);
                   }
@@ -296,7 +296,7 @@ void PackRes(std::string &dir, std::string &name, int id, pugi::xml_node &node, 
               case google::protobuf::FieldDescriptor::CppType::CPPTYPE_STRING: {
                 std::string value = (isAttribute) ? attr.as_string() : (isSplit) ? splitValue : xmlValue.as_string();
                 if (isFilePath) {
-                  value = extract_file_path(dir, value);
+                  value = GMXPath2FilePath(dir, value);
                 }
                 refl->SetString(m, field, value);
                 break;
