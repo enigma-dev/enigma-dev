@@ -166,7 +166,7 @@ script:
       export DISPLAY=:1
       Xvfb :1 -screen 0 1024x768x24 &
       xfwm4 &
-      ASAN_OPTIONS=exitcode=0 ./test-runner
+      ASAN_OPTIONS=detect_leaks=0 ./test-runner
       bash <(curl -s https://codecov.io/bash) -f "*.info"
     else
       ./ci-build.sh

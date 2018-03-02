@@ -27,7 +27,8 @@
 #include "Platforms/platforms_mandatory.h"
 #include "Widget_Systems/widgets_mandatory.h"
 
-#include <stdio.h>
+#include <cstring>
+#include <cstdio>
 #include <string>
 
 namespace enigma {
@@ -37,7 +38,7 @@ void exe_loadfonts(FILE* exe) {
   float advance, baseline, origin, gtx, gty, gtx2, gty2;
 
   if (!fread(&nullhere, 4, 1, exe)) return;
-  if (nullhere != *(int*)"FNT ") return;
+  if (memcmp(&nullhere, "FNT ", sizeof(int)) != 0) return;
 
   if (!fread(&fontcount, 4, 1, exe)) return;
   if ((int)fontcount != rawfontcount) {
@@ -84,7 +85,7 @@ void exe_loadfonts(FILE* exe) {
       return;
     }
     if (!fread(&nullhere, 4, 1, exe)) return;
-    if (nullhere != *(int*)"done") {
+    if (memcmp(&nullhere, "done", sizeof(int)) != 0) {
       printf("Unexpected end; eof:%s\n", feof(exe) ? "true" : "false");
       return;
     }
@@ -151,7 +152,7 @@ void exe_loadfonts(FILE* exe) {
     delete[] pixels;
 
     if (!fread(&nullhere, 4, 1, exe)) return;
-    if (nullhere != *(int*)"endf") return;
+    if (memcmp(&nullhere, "endf", sizeof(int)) != 0) return;
   }
 }
 }  //namespace enigma
