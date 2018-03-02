@@ -102,6 +102,6 @@ message Room {
     optional double phy_world_pixel_meters = 26 [(gmx) = "PhysicsWorldPixToMeters"];
   }
   
-  optional RoomPhysicsSettings physics_settings = 11 [(gmx) = "EGM_NESTED"];
+  optional RoomPhysicsSettings physics_settings = 19 [(gmx) = "EGM_NESTED"];
   
 }
