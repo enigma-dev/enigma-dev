@@ -1,33 +1,27 @@
 PATH := $(eTCpath)$(PATH)
 
-.PHONY: ENIGMA all clean Game clean-game .FORCE
+.PHONY: ENIGMA all clean Game clean-game liblodepng libProtocols libGMX required-directories .FORCE
 
 ENIGMA: .FORCE libProtocols liblodepng
 	$(MAKE) -C CompilerSource 
 
-clean:
+clean: .FORCE
 	$(MAKE) -C CompilerSource/ clean
 	$(MAKE) -C CommandLine/emake/ clean
 	$(MAKE) -C CommandLine/libGMX/ clean
 	$(MAKE) -C CommandLine/protos/ clean
 	$(MAKE) -C CommandLine/testing/ clean
 	$(MAKE) -C lodepng/ clean
-	
-all:
-	$(MAKE) -C lodepng/
-	$(MAKE) -C CommandLine/protos/
-	$(MAKE) -C CommandLine/libGMX/
-	$(MAKE) -C CompilerSource/
-	$(MAKE) -C CommandLine/emake/
-	$(MAKE) -C CommandLine/testing/
 
-Game: liblodepng
+all: liblodepng libProtocols libGMX ENIGMA emake test-runner .FORCE
+
+Game: liblodepng .FORCE
 	$(MAKE) -C ENIGMAsystem/SHELL
 
-clean-game:
+clean-game: .FORCE
 	$(MAKE) -C ENIGMAsystem/SHELL clean
 	
-liblodepng:
+liblodepng: .FORCE
 	$(MAKE) -C lodepng/
 
 libProtocols: .FORCE
@@ -42,7 +36,7 @@ emake: libGMX .FORCE
 test-runner: emake .FORCE
 	$(MAKE) -C CommandLine/testing/
 
-required-directories:
+required-directories: .FORCE
 	mkdir -p "$(WORKDIR)"
 	mkdir -p "$(CODEGEN)Preprocessor_Environment_Editable/"
 
