@@ -28,6 +28,8 @@
 
 namespace gmx {
 
+namespace {
+  
 inline std::string string_replace_all(std::string str, std::string substr, std::string nstr)
 {
   size_t pos = 0;
@@ -88,6 +90,8 @@ std::vector<std::string> SplitString(const std::string &str, char delimiter) {
 
   return vec;
 }
+
+} //namespace
 
 void PackScript(std::string fName, std::string &name, int id, buffers::resources::Script *script) {
   outputStream << "Parsing " << fName << std::endl;
