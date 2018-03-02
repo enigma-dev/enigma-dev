@@ -26,16 +26,20 @@ message Object {
     optional int32 y = 2 [(gmx) = "GMX_SPLIT/1"];
   }
 
-  optional bool use_physics = 11 [(gmx) = "PhysicsObject"];
-  optional bool phy_sensor = 12 [(gmx) = "PhysicsObjectSensor"];
-  optional PhysicsShape phy_shape_type = 13 [(gmx) = "PhysicsObjectShape"];
-  optional double phy_density = 14 [(gmx) = "PhysicsObjectDensity"];
-  optional double phy_restitution = 15 [(gmx) = "PhysicsObjectRestitution"];
-  optional int32 phy_group = 16 [(gmx) = "PhysicsObjectGroup"];
-  optional double phy_linear_damping = 17 [(gmx) = "PhysicsObjectLinearDamping"];
-  optional double phy_angular_damping = 18 [(gmx) = "PhysicsObjectAngularDamping"];
-  optional double phy_friction = 19 [(gmx) = "PhysicsObjectFriction"];
-  optional bool phy_awake = 20 [(gmx) = "PhysicsObjectAwake"];
-  optional bool phy_kinematic = 21 [(gmx) = "PhysicsObjectKinematic"];
-  repeated PhysicsShapePoint phy_shape = 22 [(gmx) = "PhysicsShapePoints/point"];
+  message ObjectPhysicsSettings {
+    optional bool use_physics = 1 [(gmx) = "PhysicsObject"];
+    optional bool phy_sensor = 2 [(gmx) = "PhysicsObjectSensor"];
+    optional PhysicsShape phy_shape_type = 3 [(gmx) = "PhysicsObjectShape"];
+    optional double phy_density = 4 [(gmx) = "PhysicsObjectDensity"];
+    optional double phy_restitution = 5 [(gmx) = "PhysicsObjectRestitution"];
+    optional int32 phy_group = 6 [(gmx) = "PhysicsObjectGroup"];
+    optional double phy_linear_damping = 7 [(gmx) = "PhysicsObjectLinearDamping"];
+    optional double phy_angular_damping = 8 [(gmx) = "PhysicsObjectAngularDamping"];
+    optional double phy_friction = 9 [(gmx) = "PhysicsObjectFriction"];
+    optional bool phy_awake = 10 [(gmx) = "PhysicsObjectAwake"];
+    optional bool phy_kinematic = 11 [(gmx) = "PhysicsObjectKinematic"];
+    repeated PhysicsShapePoint phy_shape = 12 [(gmx) = "PhysicsShapePoints/point"];
+  }
+  
+  optional ObjectPhysicsSettings physics_settings = 11 [(gmx) = "EGM_NESTED"];
 }

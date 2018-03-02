@@ -175,8 +175,9 @@ void PackRes(std::string &dir, std::string &name, int id, pugi::xml_node &node, 
         isSplit = splitPos != std::string::npos;
 
         // if it's not a split then we deal with yoyo's useless nesting
-        if (!isSplit) {
+        if (!isSplit && xmlElement != "EGM_NESTED") { // and our useless nesting
           std::vector<std::string> nodes = SplitString(xmlElement, '/');
+            
           for (auto n : nodes) {
             child = child.child(n.c_str());
             child.append_attribute("visited") = "true";
@@ -188,7 +189,7 @@ void PackRes(std::string &dir, std::string &name, int id, pugi::xml_node &node, 
         if (child.empty()) attr = node.attribute(xmlElement.c_str());
         isAttribute = !attr.empty();
 
-        if (child.empty() && !isAttribute && !field->is_repeated()) {
+        if (child.empty() && !isAttribute && !field->is_repeated() && xmlElement != "EGM_NESTED") {
           // ename only exists if etype = 4. Also, etype and enumb don't exist in timeline events
           pugi::xml_attribute a = node.attribute("eventtype");
           if (xmlElement != "ename" && a.as_int() != 4 && node.path() != "/timeline/entry/event")
