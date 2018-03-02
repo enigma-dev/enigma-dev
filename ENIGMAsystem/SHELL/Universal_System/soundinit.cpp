@@ -15,15 +15,14 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <string>
-#include <stdio.h>
-using namespace std;
-
 #include "Audio_Systems/audio_mandatory.h"
 #include "Platforms/platforms_mandatory.h"
 #include "libEGMstd.h"
 #include "resinit.h"
 #include "zlib.h"
+
+#include <cstring>
+#include <cstdio>
 
 namespace enigma_user {
   void sound_play(int sound);
@@ -41,7 +40,7 @@ namespace enigma
     int nullhere;
     
     if (!fread(&nullhere,4,1,exe)) return;
-    if (nullhere != *(int*)"SND ")
+    if (memcmp(&nullhere, "SND ", sizeof(int)) != 0)
       return;
     
     // Determine how many sprites we have
