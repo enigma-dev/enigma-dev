@@ -7,7 +7,6 @@
 /definitions.h
 /coverage_*.info
 
-
 /CommandLine/protos/codegen
 
 /ENIGMAsystem/SHELL/API_Switchboard.h

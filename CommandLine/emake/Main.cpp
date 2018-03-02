@@ -60,6 +60,11 @@ int main(int argc, char* argv[])
     if (input_file.back() == '/') input_file.pop_back();
     std::string output_file = options.GetOption("output").as<std::string>();
     Game game;
+
+    // Working directory hacks
+    if (mode != emode_compile)
+      game.SetOutputFile(input_file);
+    
     if (input_file.size()) {
       std::string ext;
       size_t dot = input_file.find_last_of('.');

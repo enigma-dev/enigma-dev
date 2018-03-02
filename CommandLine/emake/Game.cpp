@@ -140,3 +140,7 @@ EnigmaStruct* Game::ConstructGame()
 
   return &_game;
 }
+
+void Game::SetOutputFile(std::string fName) {
+  _output_filename = fName;
+}

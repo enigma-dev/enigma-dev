@@ -25,7 +25,8 @@
 #include "Widget_Systems/widgets_mandatory.h"
 #include "Platforms/platforms_mandatory.h"
 
-#include <stdio.h>
+#include <cstring>
+#include <cstdio>
 
 namespace enigma
 {
@@ -33,9 +34,9 @@ namespace enigma
   {
     int nullhere;
     unsigned bkgid, width, height,transparent,smoothEdges,preload,useAsTileset,tileWidth,tileHeight,hOffset,vOffset,hSep,vSep;
-
-    if (!fread(&nullhere,4,1,exe) or nullhere != *(int*)"BKG ")
-      return;
+ 
+    if (!fread(&nullhere, 4, 1, exe)) return;
+    if (memcmp(&nullhere, "BKG ", sizeof(int)) != 0) return;
 
     // Determine how many backgrounds we have
     int bkgcount;
