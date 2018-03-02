@@ -25,14 +25,11 @@
 **                                                                              **
 \********************************************************************************/
 
-//#include <string>
-#include <stdio.h>
-//using namespace std;
-
 #include "pathstruct.h"
 #include "Universal_System/resinit.h"
-//#include "Platforms/platforms_mandatory.h"
-//#include "libEGMstd.h"
+
+#include <cstring>
+#include <cstdio>
 
 namespace enigma
 {
@@ -43,7 +40,7 @@ namespace enigma
     int x, y, speed, nullhere, precision;
 
     if (!fread(&nullhere,4,1,exe)) return;
-    if (nullhere != *(int*)"PTH ")
+    if (memcmp(&nullhere, "PTH ", sizeof(int)) != 0)
       return;
 
     // Determine how many paths we have

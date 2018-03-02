@@ -24,7 +24,8 @@
 #include "Platforms/platforms_mandatory.h"
 #include "Widget_Systems/widgets_mandatory.h"
 
-#include <stdio.h>
+#include <cstring>
+#include <cstdio>
 #include <string>
 
 using enigma_user::toString;
@@ -38,7 +39,7 @@ namespace enigma
     int xorig, yorig;
     
     if (!fread(&nullhere,4,1,exe)) return;
-    if (nullhere != *(int*)"SPR ")
+    if (memcmp(&nullhere, "SPR ", sizeof(int)) != 0)
       return;
     
     // Determine how many sprites we have

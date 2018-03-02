@@ -16,10 +16,10 @@ searchdirs-start: "#include <...> search starts here:"
 searchdirs-end: "End of search list."
 resources: $exe
 cppflags:
-cxxflags: -std=c++11 -ftest-coverage -fprofile-arcs -fsanitize=address -fno-omit-frame-pointer 
+cxxflags: -std=c++11 -ftest-coverage -fprofile-arcs -fsanitize=undefined -fno-omit-frame-pointer 
 cflags:
 ldflags:
-ldlibs: -lgcov -lasan
+ldlibs: -lgcov -lasan -lubsan
 
 Build-Extension:
 Run-output: $tempfile
