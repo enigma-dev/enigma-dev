@@ -17,6 +17,7 @@ message TreeNode {
     HELP = 10;
     CONFIG = 11;
     PATH = 12;
+    SCRIPT = 13;
   }
   
   optional Type type = 1;

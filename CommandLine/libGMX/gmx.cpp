@@ -80,6 +80,7 @@ private:
     if (str == "background") return buffers::TreeNode::BACKGROUND;
     if (str == "sprite") return buffers::TreeNode::SPRITE;
     if (str == "shader") return buffers::TreeNode::SHADER;
+    if (str == "cript") return buffers::TreeNode::SCRIPT;
     if (str == "font") return buffers::TreeNode::FONT;
     if (str == "object") return buffers::TreeNode::OBJECT;
     if (str == "timeline") return buffers::TreeNode::TIMELINE;
@@ -93,32 +94,32 @@ private:
     
     if (node.type() != pugi::node_pcdata) {
       // if there's a name attribute, then use that
-      std::string name = node.parent().attribute("name").value();
-      // else use the tag as the name
-      if (name.empty()) name = node.name();
+      std::string name = node.attribute("name").value();
+      
+      if (node.name() == std::string("help"))
+        name = "help";
       
       while (lastName != name) {
         lastName = name;
         
         if (static_cast<int>(nodes.size()) < depth()+1) { // if the nodes.size() is less than our current xml depth go up a level and add a folder 
-          if (depth() < 3) { // UNLESS the depth is less than 3 AND  
-            std::string a = node.name(); // GM has like <sprites><sprite> OR
-            std::string b = lastName; // it's some data in the project thats not related to the tree like constants and tutorial states
-            std::transform(a.begin(), a.end(), a.begin(), ::tolower);
-            std::transform(b.begin(), b.end(), b.begin(), ::tolower);
-            if ((a == b + 's') || (a + 's' == b) || (name.find("constant") != std::string::npos) || (name.find("Tutorial") != std::string::npos) || (name.find("rtf") != std::string::npos))
-              continue;
-          }
+          if (name.empty())
+            continue;
 
           buffers::TreeNode *n = nodes.back()->add_node(); // adding folder
-          n->set_name(name);
+          if (depth() == 1) { // fix gmx names
+            std::string fixedName = name;
+            fixedName[0] = toupper(fixedName[0]);
+            if (fixedName != "Help" && fixedName.back() != 's' ) fixedName += 's';
+            n->set_name(fixedName);
+          } else n->set_name(name);
+          
           n->set_type(buffers::TreeNode::FOLDER);
           nodes.push_back(n);
           
-        } else if (nodes.size() > 1) { // our xml depth was less than our tree depth need to go back 
+        } else if (static_cast<int>(nodes.size()) > depth()) { // our xml depth was less than our tree depth need to go back 
           nodes.pop_back();
           lastName = nodes.back()->name();
-          continue;
         }
         
         for (size_t i = 0; i < nodes.size(); ++i) outputStream << "  ";
