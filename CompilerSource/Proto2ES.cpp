@@ -29,13 +29,13 @@ PathPoint AddPathPoint(const buffers::resources::Path::Point& pnt);
 Script AddScript(const buffers::resources::Script& scr);
 Shader AddShader(const buffers::resources::Shader& shr);
 Font AddFont(const buffers::resources::Font& fnt);
-Timeline AddTimeline(buffers::resources::Timeline* tml, buffers::Project* protobuf);
-GmObject AddObject(buffers::resources::Object* obj, buffers::Project* protobuf);
-Room AddRoom(const buffers::resources::Room& rmn, buffers::Project* protobuf);
-Instance AddInstance(const buffers::resources::Room::Instance& inst, buffers::Project* protobuf);
-Tile AddTile(const buffers::resources::Room::Tile& tile, buffers::Project* protobuf);
-View AddView(const buffers::resources::Room::View& view, buffers::Project* protobuf);
-BackgroundDef AddRoomBackground(const buffers::resources::Room::Background& bkg, buffers::Project* protobuf);
+Timeline AddTimeline(buffers::resources::Timeline* tml, buffers::Game* protobuf);
+GmObject AddObject(buffers::resources::Object* obj, buffers::Game* protobuf);
+Room AddRoom(const buffers::resources::Room& rmn, buffers::Game* protobuf);
+Instance AddInstance(const buffers::resources::Room::Instance& inst, buffers::Game* protobuf);
+Tile AddTile(const buffers::resources::Room::Tile& tile, buffers::Game* protobuf);
+View AddView(const buffers::resources::Room::View& view, buffers::Game* protobuf);
+BackgroundDef AddRoomBackground(const buffers::resources::Room::Background& bkg, buffers::Game* protobuf);
 
 template <class T>
 int Name2Id(const ::google::protobuf::RepeatedPtrField< T >& group, std::string name) {
@@ -283,7 +283,7 @@ Image AddImage(const std::string fname) {
   return i;
 }
 
-EnigmaStruct* ProtoBuf2ES(buffers::Project* protobuf) {
+EnigmaStruct* ProtoBuf2ES(buffers::Game* protobuf) {
   EnigmaStruct *es = new EnigmaStruct();
 
   es->gameSettings.gameIcon = "";
@@ -546,7 +546,7 @@ Font AddFont(const buffers::resources::Font& fnt) {
   return f;
 }
 
-Timeline AddTimeline(buffers::resources::Timeline* tml, buffers::Project* protobuf) {
+Timeline AddTimeline(buffers::resources::Timeline* tml, buffers::Game* protobuf) {
   Timeline t = Timeline();
 
   t.name = tml->name().c_str();
@@ -568,7 +568,7 @@ Timeline AddTimeline(buffers::resources::Timeline* tml, buffers::Project* protob
   return t;
 }
 
-GmObject AddObject(buffers::resources::Object* obj, buffers::Project* protobuf) {
+GmObject AddObject(buffers::resources::Object* obj, buffers::Game* protobuf) {
   GmObject o = GmObject();
 
   o.name = obj->name().c_str();
@@ -616,7 +616,7 @@ GmObject AddObject(buffers::resources::Object* obj, buffers::Project* protobuf) 
   return o;
 }
 
-Room AddRoom(const buffers::resources::Room& rmn, buffers::Project* protobuf) {
+Room AddRoom(const buffers::resources::Room& rmn, buffers::Game* protobuf) {
   Room r = Room();
 
   r.name = rmn.name().c_str();
@@ -667,7 +667,7 @@ Room AddRoom(const buffers::resources::Room& rmn, buffers::Project* protobuf) {
   return r;
 }
 
-Instance AddInstance(const buffers::resources::Room::Instance& inst, buffers::Project* protobuf) {
+Instance AddInstance(const buffers::resources::Room::Instance& inst, buffers::Game* protobuf) {
   Instance i = Instance();
 
   i.id = inst.id();
@@ -681,7 +681,7 @@ Instance AddInstance(const buffers::resources::Room::Instance& inst, buffers::Pr
   return i;
 }
 
-Tile AddTile(const buffers::resources::Room::Tile& tile, buffers::Project* protobuf) {
+Tile AddTile(const buffers::resources::Room::Tile& tile, buffers::Game* protobuf) {
   Tile t = Tile();
 
   t.id = tile.id();
@@ -698,7 +698,7 @@ Tile AddTile(const buffers::resources::Room::Tile& tile, buffers::Project* proto
   return t;
 }
 
-View AddView(const buffers::resources::Room::View& view, buffers::Project* protobuf) {
+View AddView(const buffers::resources::Room::View& view, buffers::Game* protobuf) {
   View v = View();
 
   v.visible = view.visible();
@@ -719,7 +719,7 @@ View AddView(const buffers::resources::Room::View& view, buffers::Project* proto
   return v;
 }
 
-BackgroundDef AddRoomBackground(const buffers::resources::Room::Background& bkg, buffers::Project* protobuf) {
+BackgroundDef AddRoomBackground(const buffers::resources::Room::Background& bkg, buffers::Game* protobuf) {
   BackgroundDef b = BackgroundDef();
 
   b.visible = bkg.visible();

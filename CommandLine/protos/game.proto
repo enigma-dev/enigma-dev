@@ -12,7 +12,7 @@ import "resources/Font.proto";
 import "resources/Timeline.proto";
 import "resources/Room.proto";
 
-message Project {
+message Game {
   repeated resources.Sprite sprites = 1;
   repeated resources.Sound sounds = 2;
   repeated resources.Background backgrounds = 3;
@@ -25,3 +25,4 @@ message Project {
   repeated resources.Room rooms = 10;
   //repeated resources.Include includes = 11;
 }
+

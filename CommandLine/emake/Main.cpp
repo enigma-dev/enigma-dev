@@ -81,7 +81,7 @@ int main(int argc, char* argv[])
         
         buffers::Project* project;
         if (!(project = gmx::LoadGMX(input_file, false))) return 1;
-        return plugin.BuildGame(project, mode, output_file.c_str());
+        return plugin.BuildGame(project->mutable_game(), mode, output_file.c_str());
       } else {
         if (ext == "egm") {
           std::cerr << "EGM format not yet supported. "

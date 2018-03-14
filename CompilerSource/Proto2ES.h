@@ -22,6 +22,6 @@
 
 #include "backend/EnigmaStruct.h"
 
-EnigmaStruct* ProtoBuf2ES(buffers::Project* protobuf);
+EnigmaStruct* ProtoBuf2ES(buffers::Game* protobuf);
 
 #endif // ENIGMA_PROTO2ES_H

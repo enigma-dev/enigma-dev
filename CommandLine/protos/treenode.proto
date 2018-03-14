@@ -1,0 +1,26 @@
+syntax = "proto2";
+package buffers;
+
+message TreeNode {
+  enum Type {
+    INVALID = -1;
+    FOLDER = 0; 
+    DATAFILE = 1; 
+    SOUND = 2; 
+    BACKGROUND = 3;
+    SPRITE = 4;
+    SHADER = 5;
+    FONT = 6;
+    OBJECT = 7;
+    TIMELINE = 8;
+    ROOM = 9;
+    HELP = 10;
+    CONFIG = 11;
+    PATH = 12;
+  }
+  
+  optional Type type = 1;
+  optional string name = 2;
+  
+  repeated TreeNode node = 3;
+}
