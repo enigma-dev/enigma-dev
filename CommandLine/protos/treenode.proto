@@ -18,6 +18,7 @@ message TreeNode {
     CONFIG = 11;
     PATH = 12;
     SCRIPT = 13;
+    CONSTANT = 14;
   }
   
   optional Type type = 1;

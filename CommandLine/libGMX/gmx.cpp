@@ -87,6 +87,7 @@ private:
     if (str == "room") return buffers::TreeNode::ROOM;
     if (str == "help") return buffers::TreeNode::HELP;
     if (str == "path") return buffers::TreeNode::PATH;
+    if (str == "constant") return buffers::TreeNode::CONSTANT;
     return buffers::TreeNode::INVALID;
   }
       
@@ -98,6 +99,9 @@ private:
       
       if (node.name() == std::string("help"))
         name = "help";
+        
+      if (node.name() == std::string("constants"))
+        name = "constants";
       
       while (lastName != name) {
         lastName = name;
@@ -114,7 +118,10 @@ private:
             n->set_name(fixedName);
           } else n->set_name(name);
           
-          n->set_type(buffers::TreeNode::FOLDER);
+          if (node.name() == std::string("constant"))
+            n->set_type(buffers::TreeNode::CONSTANT);
+          else
+            n->set_type(buffers::TreeNode::FOLDER);
           nodes.push_back(n);
           
         } else if (static_cast<int>(nodes.size()) > depth()) { // our xml depth was less than our tree depth need to go back 
