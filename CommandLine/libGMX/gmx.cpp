@@ -80,7 +80,7 @@ private:
     if (str == "background") return buffers::TreeNode::BACKGROUND;
     if (str == "sprite") return buffers::TreeNode::SPRITE;
     if (str == "shader") return buffers::TreeNode::SHADER;
-    if (str == "cript") return buffers::TreeNode::SCRIPT;
+    if (str == "script") return buffers::TreeNode::SCRIPT;
     if (str == "font") return buffers::TreeNode::FONT;
     if (str == "object") return buffers::TreeNode::OBJECT;
     if (str == "timeline") return buffers::TreeNode::TIMELINE;
@@ -141,6 +141,12 @@ private:
         if (marker != std::string::npos) {
           resName = res.substr(marker + 1, res.length());
           resType = res.substr(0, (res[marker-1] == 's') ? marker-1 : marker);
+          if (resType != "datafile") { // remove extensions (eg .gml, .shader)
+            size_t dot = resName.find_last_of(".");
+            if (dot != std::string::npos) {
+              resName = resName.substr(0, dot);
+            }
+          }
         } else { // some things are in the root (eg help.rtf) of the gmx so there is no \. Therfore, we must get the type from the parent tag
           resName = res;
           resType = parent.name();
