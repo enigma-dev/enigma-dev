@@ -24,5 +24,6 @@ message TreeNode {
   optional Type type = 1;
   optional string name = 2;
   
-  repeated TreeNode node = 3;
+  optional TreeNode parent = 3;
+  repeated TreeNode node = 4;
 }

@@ -109,7 +109,8 @@ private:
         if (static_cast<int>(nodes.size()) < depth()+1) { // if the nodes.size() is less than our current xml depth go up a level and add a folder 
           if (name.empty())
             continue;
-
+          
+          buffers::TreeNode *parent = nodes.back();
           buffers::TreeNode *n = nodes.back()->add_node(); // adding folder
           if (depth() == 1) { // fix gmx names
             std::string fixedName = name;
@@ -122,6 +123,8 @@ private:
             n->set_type(buffers::TreeNode::CONSTANT);
           else
             n->set_type(buffers::TreeNode::FOLDER);
+            
+          n->set_allocated_parent(parent);
           nodes.push_back(n);
           
         } else if (static_cast<int>(nodes.size()) > depth()) { // our xml depth was less than our tree depth need to go back 
@@ -159,7 +162,9 @@ private:
           resType = parent.name();
         }
         
+        buffers::TreeNode *parent = nodes.back();
         buffers::TreeNode *n = nodes.back()->add_node(); // adding res here
+        n->set_allocated_parent(parent);
         n->set_name(resName);
         n->set_type(String2Type(resType));
         
