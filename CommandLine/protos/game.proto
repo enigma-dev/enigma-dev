@@ -1,28 +1,22 @@
 syntax = "proto2";
 package buffers;
 
-import "resources/Sprite.proto";
-import "resources/Sound.proto";
-import "resources/Background.proto";
-import "resources/Object.proto";
-import "resources/Script.proto";
-import "resources/Shader.proto";
-import "resources/Path.proto";
-import "resources/Font.proto";
-import "resources/Timeline.proto";
-import "resources/Room.proto";
+import "treenode.proto";
 
 message Game {
-  repeated resources.Sprite sprites = 1;
-  repeated resources.Sound sounds = 2;
-  repeated resources.Background backgrounds = 3;
-  repeated resources.Path paths = 4;
-  repeated resources.Script scripts = 5;
-  repeated resources.Shader shaders = 6;
-  repeated resources.Font fonts = 7;
-  repeated resources.Timeline timelines = 8;
-  repeated resources.Object objects = 9;
-  repeated resources.Room rooms = 10;
-  //repeated resources.Include includes = 11;
+  optional TreeNode root = 1;
+  optional uint32 include_count = 2; 
+  optional uint32 sound_count = 3; 
+  optional uint32 background_count = 4;
+  optional uint32 sprite_count = 5;
+  optional uint32 shader_count = 6;
+  optional uint32 font_count = 7;
+  optional uint32 object_count = 8;
+  optional uint32 timeline_count = 9;
+  optional uint32 room_count = 10;
+  optional uint32 help_count = 11;
+  optional uint32 config_count = 12;
+  optional uint32 path_count = 13;
+  optional uint32 script_count = 14;
+  optional uint32 constant_count = 15;
 }
-

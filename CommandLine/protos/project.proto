@@ -2,9 +2,8 @@ syntax = "proto2";
 package buffers;
 
 import "game.proto";
-import "treenode.proto";
 
 message Project {
   optional Game game = 1;
-  optional TreeNode treeRoot = 2;
+  //optional EditorMetaData = 2;
 }

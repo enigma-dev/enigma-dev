@@ -5,7 +5,6 @@ import "options.proto";
 import "resources/Event.proto";
 
 message Object {
-  optional string name = 1;
   optional int32 id = 2 [(gmx) = "GMX_DEPRECATED"];
 
   optional string parent_name = 3 [(gmx) = "parentName"];

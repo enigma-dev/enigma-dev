@@ -10,8 +10,7 @@ message Timeline {
     optional Event event = 2;
   }
 
-  optional string name = 1;
-  optional int32 id = 2 [(gmx) = "GMX_DEPRECATED"];
+  optional int32 id = 1 [(gmx) = "GMX_DEPRECATED"];
 
-  repeated Moment moments = 3 [(gmx) = "entry"];
+  repeated Moment moments = 2 [(gmx) = "entry"];
 }

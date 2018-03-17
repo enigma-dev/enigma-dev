@@ -19,7 +19,6 @@ message Font {
     optional int32 max = 2 [(gmx) = "GMX_SPLIT/1"];
   }
 
-  optional string name = 1;
   optional int32 id = 2 [(gmx) = "GMX_DEPRECATED"];
 
   optional string font_name = 3 [(gmx) = "name"];
