@@ -25,7 +25,7 @@ SubImage AddSubImage(const std::string fPath);
 Sound AddSound(std::string name, const buffers::resources::Sound& snd);
 Background AddBackground(std::string name, const buffers::resources::Background& bkg);
 Path AddPath(std::string name, const buffers::resources::Path& pth);
-PathPoint AddPathPoint(std::string name, const buffers::resources::Path::Point& pnt);
+PathPoint AddPathPoint(const buffers::resources::Path::Point& pnt);
 Script AddScript(std::string name, const buffers::resources::Script& scr);
 Shader AddShader(std::string name, const buffers::resources::Shader& shr);
 Font AddFont(std::string name, const buffers::resources::Font& fnt);
@@ -67,7 +67,7 @@ unsigned int BGR2RGBA(unsigned int x) {
   return (((x & 0xFF0000) >> 16) | (x & 0xFF00) | ((x & 0xFF) << 16)) << 8 | 0xFF;
 }
 
-std::string Argument2Code(std::string name, const buffers::resources::Argument& arg) {
+std::string Argument2Code(const buffers::resources::Argument& arg) {
   using buffers::resources::ArgumentKind;
   std::string val = arg.string();
 
@@ -457,7 +457,7 @@ Path AddPath(std::string name, const buffers::resources::Path& pth) {
   return p;
 }
 
-PathPoint AddPathPoint(std::string name, const buffers::resources::Path::Point& pnt) {
+PathPoint AddPathPoint(const buffers::resources::Path::Point& pnt) {
   PathPoint p = PathPoint();
 
   p.x = pnt.x();
