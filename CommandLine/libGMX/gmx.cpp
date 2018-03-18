@@ -413,18 +413,15 @@ void PackRes(std::string &dir, std::string &name, int id, pugi::xml_node &node, 
                 break;
               }
               case google::protobuf::FieldDescriptor::CppType::CPPTYPE_INT32: {  // if int32
-                refl->SetInt32(m, field,
-                               (isAttribute) ? attr.as_int() : (isSplit) ? std::stoi(splitValue) : xmlValue.as_int());
+                refl->SetInt32(m, field, (isAttribute) ? attr.as_int() : (isSplit) ? std::stoi(splitValue) : xmlValue.as_int());
                 break;
               }
               case google::protobuf::FieldDescriptor::CppType::CPPTYPE_INT64: {  // if int64
-                refl->SetInt64(m, field,
-                               (isAttribute) ? attr.as_int() : (isSplit) ? std::stoi(splitValue) : xmlValue.as_int());
+                refl->SetInt64(m, field, (isAttribute) ? attr.as_int() : (isSplit) ? std::stoi(splitValue) : xmlValue.as_int());
                 break;
               }
               case google::protobuf::FieldDescriptor::CppType::CPPTYPE_UINT32: {  // if uint32
-                refl->SetUInt32(
-                    m, field, (isAttribute) ? attr.as_uint() : (isSplit) ? std::stoi(splitValue) : xmlValue.as_uint());
+                refl->SetUInt32(m, field, (isAttribute) ? attr.as_uint() : (isSplit) ? std::stoi(splitValue) : xmlValue.as_uint());
                 break;
               }
               case google::protobuf::FieldDescriptor::CppType::CPPTYPE_UINT64: {  // if uint64
@@ -433,28 +430,19 @@ void PackRes(std::string &dir, std::string &name, int id, pugi::xml_node &node, 
                 break;
               }
               case google::protobuf::FieldDescriptor::CppType::CPPTYPE_DOUBLE: {  // if double
-                refl->SetDouble(
-                    m, field,
-                    (isAttribute) ? attr.as_double() : (isSplit) ? std::stod(splitValue) : xmlValue.as_double());
+                refl->SetDouble(m, field, (isAttribute) ? attr.as_double() : (isSplit) ? std::stod(splitValue) : xmlValue.as_double());
                 break;
               }
               case google::protobuf::FieldDescriptor::CppType::CPPTYPE_FLOAT: {  // if float
-                refl->SetFloat(
-                    m, field,
-                    (isAttribute) ? attr.as_float() : (isSplit) ? std::stof(splitValue) : xmlValue.as_float());
+                refl->SetFloat(m, field, (isAttribute) ? attr.as_float() : (isSplit) ? std::stof(splitValue) : xmlValue.as_float());
                 break;
               }
               case google::protobuf::FieldDescriptor::CppType::CPPTYPE_BOOL: {  // if bool
-                refl->SetBool(m, field,
-                              (isAttribute) ? (attr.as_int() != 0)
-                                            : (isSplit) ? (std::stof(splitValue) != 0) : (xmlValue.as_int() != 0));
+                refl->SetBool(m, field, (isAttribute) ? (attr.as_int() != 0) : (isSplit) ? (std::stof(splitValue) != 0) : (xmlValue.as_int() != 0));
                 break;
               }
               case google::protobuf::FieldDescriptor::CppType::CPPTYPE_ENUM: {  // if enum
-                refl->SetEnum(
-                    m, field,
-                    field->enum_type()->FindValueByNumber(
-                        (isAttribute) ? attr.as_int() : (isSplit) ? std::stoi(splitValue) : xmlValue.as_int()));
+                refl->SetEnum(m, field, field->enum_type()->FindValueByNumber((isAttribute) ? attr.as_int() : (isSplit) ? std::stoi(splitValue) : xmlValue.as_int()));
                 break;
               }
               case google::protobuf::FieldDescriptor::CppType::CPPTYPE_STRING: {  // if singular string
