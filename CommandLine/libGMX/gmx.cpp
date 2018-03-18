@@ -64,9 +64,9 @@ class gmx_root_walker : public pugi::xml_tree_walker {
     root->set_name("/");  // root node is called assets in GM but we'll use /
     nodes.push_back(root);
   }
-  
-  unsigned include_count = 0; 
-  unsigned sound_count = 0; 
+
+  unsigned include_count = 0;
+  unsigned sound_count = 0;
   unsigned background_count = 0;
   unsigned sprite_count = 0;
   unsigned shader_count = 0;
@@ -147,58 +147,60 @@ class gmx_root_walker : public pugi::xml_tree_walker {
       path_count++;
       return;
     }
-    
-    outputStream << "Unsuported resource type: " << resType << " " << resName << std::endl; 
+
+    outputStream << "Unsuported resource type: " << resType << " " << resName << std::endl;
     /*if (resType == "config") return;    //not supported yet
     if (resType == "datafile") return;  //not supported yet
     if (resType == "constant") return;  //not supported yet
     if (resType == "help") return;      //not supported yet*/
   }
-
+  
+  std::string fix_folder_name(const std::string& name) {
+    std::string fixedName = name;
+    fixedName[0] = toupper(fixedName[0]);
+    if (fixedName != "Help" && fixedName.back() != 's') fixedName += 's';
+    return fixedName;
+  }
+  
   virtual bool for_each(pugi::xml_node &node) {
+        
     if (node.type() != pugi::node_pcdata) {
-      // if there's a name attribute, then use that
+      
       std::string name = node.attribute("name").value();
-
-      if (node.name() == std::string("help")) name = "help";
-
-      if (node.name() == std::string("constants")) name = "constants";
-
-      while (lastName != name) {
-        lastName = name;
-
-        if (static_cast<int>(nodes.size()) <
-            depth() + 1) {  // if the nodes.size() is less than our current xml depth go up a level and add a folder
-          if (name.empty()) continue;
-          
-          if (node.name() == std::string("constant")) {
-            continue; //TODO: add constants here
-          }
-
-          buffers::TreeNode *parent = nodes.back();
-          buffers::TreeNode *n = nodes.back()->add_child();  // adding folder
-          if (depth() == 1) {                                // fix gmx names
-            std::string fixedName = name;
-            fixedName[0] = toupper(fixedName[0]);
-            if (fixedName != "Help" && fixedName.back() != 's') fixedName += 's';
-            n->set_name(fixedName);
-          } else
-            n->set_name(name);
-
-          n->set_folder(true);
-          n->set_allocated_parent(parent);
-          nodes.push_back(n);
-
-        } else if (static_cast<int>(nodes.size()) > depth()) {  // our xml depth was less than our tree depth need to go back
-          nodes.pop_back();
-          lastName = nodes.back()->name();
-        }
+      
+      // These nodes don't have name attributes but appear in tree
+      if (name.empty()) {
+        if (node.name() == std::string("help")) name = "help";
+        if (node.name() == std::string("constants")) name = "constants";
+        if (node.name() == std::string("TutorialState")) name = "TutorialState";
+      }
+      
+      while (depth() > 0 && static_cast<int>(nodes.size()) >= depth() + 1) {  // our xml depth was less than our tree depth need to go back
+        nodes.pop_back();
+      }
+      
+      if (!name.empty()) {
+        if (node.name() == std::string("constant"))
+          return true; //TODO: add constants here
+        
+        buffers::TreeNode *parent = nodes.back();
+        buffers::TreeNode *n = nodes.back()->add_child(); // adding a folder
+        if (depth() == 1) // fix root folder names
+          name = fix_folder_name(name);
+        
+        n->set_name(name);
+        n->set_folder(true);
+        n->set_allocated_parent(parent);
+        nodes.push_back(n);
       }
     } else {
-      pugi::xml_node parent = node.parent();
-      if (parent.name() == std::string("constant"))
-        return true; // constants are added with folders above
-
+      pugi::xml_node xml_parent = node.parent();
+      if (xml_parent.name() == std::string("constant"))
+        return true; //constants are handled above with folders
+        
+      if (xml_parent.parent().name() == std::string("TutorialState"))
+        return true; // TODO: handle tutorial states
+        
       std::string res = node.value();
       std::string resName;
       std::string resType;
@@ -206,24 +208,26 @@ class gmx_root_walker : public pugi::xml_tree_walker {
       if (marker != std::string::npos) {
         resName = res.substr(marker + 1, res.length());
         resType = res.substr(0, (res[marker - 1] == 's') ? marker - 1 : marker);
-        if (resType != "datafile") {  // remove extensions (eg .gml, .shader)
-          size_t dot = resName.find_last_of(".");
-          if (dot != std::string::npos) {
-            resName = resName.substr(0, dot);
-          }
-        } else {  // some things are in the root (eg help.rtf) of the gmx so there is no \. Therfore, we must get the type from the parent tag
-          resName = res;
-          resType = parent.name();
-        }
-
-        buffers::TreeNode *parent = nodes.back();
-        buffers::TreeNode *n = nodes.back()->add_child();  // adding res here
-        n->set_allocated_parent(parent);
-        n->set_name(resName);
-
-        AddResource(n, resType, node.value());
+      } else {  // some things are in the root (eg help.rtf) of the gmx so there is no \. Therfore, we must get the type from the parent tag
+        resName = res;
+        resType = xml_parent.name();
       }
+      
+      if (resType != "datafile") {  // remove extensions (eg .gml, .shader)
+        size_t dot = resName.find_last_of(".");
+        if (dot != std::string::npos) {
+          resName = resName.substr(0, dot);
+        }
+      }
+
+      buffers::TreeNode *parent = nodes.back();
+      buffers::TreeNode *n = nodes.back()->add_child();  // adding res here
+      n->set_allocated_parent(parent);
+      n->set_name(resName);
+
+      AddResource(n, resType, node.value());
     }
+    
     return true;
   }
 };
