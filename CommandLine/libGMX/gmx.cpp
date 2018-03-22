@@ -17,8 +17,6 @@
 
 #include "gmx.h"
 
-#include <pugixml.hpp>
-
 #include <algorithm>
 #include <fstream>
 #include <iostream>
@@ -48,7 +46,7 @@ inline std::string GMXPath2FilePath(std::string dir, std::string value) {
   return dir + "/" + value;
 }
 
-static std::ostream outputStream(nullptr);
+static std::ostream outputStream(std::cout.rdbuf());
 
 class visited_walker : public pugi::xml_tree_walker {
   virtual bool for_each(pugi::xml_node &node) {
@@ -154,40 +152,38 @@ class gmx_root_walker : public pugi::xml_tree_walker {
     if (resType == "constant") return;  //not supported yet
     if (resType == "help") return;      //not supported yet*/
   }
-  
-  std::string fix_folder_name(const std::string& name) {
+
+  std::string fix_folder_name(const std::string &name) {
     std::string fixedName = name;
     fixedName[0] = toupper(fixedName[0]);
     if (fixedName != "Help" && fixedName.back() != 's') fixedName += 's';
     return fixedName;
   }
-  
+
   virtual bool for_each(pugi::xml_node &node) {
-        
     if (node.type() != pugi::node_pcdata) {
-      
       std::string name = node.attribute("name").value();
-      
+
       // These nodes don't have name attributes but appear in tree
       if (name.empty()) {
         if (node.name() == std::string("help")) name = "help";
         if (node.name() == std::string("constants")) name = "constants";
         if (node.name() == std::string("TutorialState")) name = "TutorialState";
       }
-      
-      while (depth() > 0 && static_cast<int>(nodes.size()) >= depth() + 1) {  // our xml depth was less than our tree depth need to go back
+
+      while (depth() > 0 && static_cast<int>(nodes.size()) >=
+                                depth() + 1) {  // our xml depth was less than our tree depth need to go back
         nodes.pop_back();
       }
-      
+
       if (!name.empty()) {
-        if (node.name() == std::string("constant"))
-          return true; //TODO: add constants here
-        
+        if (node.name() == std::string("constant")) return true;  //TODO: add constants here
+
         buffers::TreeNode *parent = nodes.back();
-        buffers::TreeNode *n = nodes.back()->add_child(); // adding a folder
-        if (depth() == 1) // fix root folder names
+        buffers::TreeNode *n = nodes.back()->add_child();  // adding a folder
+        if (depth() == 1)                                  // fix root folder names
           name = fix_folder_name(name);
-        
+
         n->set_name(name);
         n->set_folder(true);
         n->set_allocated_parent(parent);
@@ -195,12 +191,10 @@ class gmx_root_walker : public pugi::xml_tree_walker {
       }
     } else {
       pugi::xml_node xml_parent = node.parent();
-      if (xml_parent.name() == std::string("constant"))
-        return true; //constants are handled above with folders
-        
-      if (xml_parent.parent().name() == std::string("TutorialState"))
-        return true; // TODO: handle tutorial states
-        
+      if (xml_parent.name() == std::string("constant")) return true;  //constants are handled above with folders
+
+      if (xml_parent.parent().name() == std::string("TutorialState")) return true;  // TODO: handle tutorial states
+
       std::string res = node.value();
       std::string resName;
       std::string resType;
@@ -212,7 +206,7 @@ class gmx_root_walker : public pugi::xml_tree_walker {
         resName = res;
         resType = xml_parent.name();
       }
-      
+
       if (resType != "datafile") {  // remove extensions (eg .gml, .shader)
         size_t dot = resName.find_last_of(".");
         if (dot != std::string::npos) {
@@ -227,7 +221,7 @@ class gmx_root_walker : public pugi::xml_tree_walker {
 
       AddResource(n, resType, node.value());
     }
-    
+
     return true;
   }
 };
@@ -413,15 +407,18 @@ void PackRes(std::string &dir, std::string &name, int id, pugi::xml_node &node, 
                 break;
               }
               case google::protobuf::FieldDescriptor::CppType::CPPTYPE_INT32: {  // if int32
-                refl->SetInt32(m, field, (isAttribute) ? attr.as_int() : (isSplit) ? std::stoi(splitValue) : xmlValue.as_int());
+                refl->SetInt32(m, field,
+                               (isAttribute) ? attr.as_int() : (isSplit) ? std::stoi(splitValue) : xmlValue.as_int());
                 break;
               }
               case google::protobuf::FieldDescriptor::CppType::CPPTYPE_INT64: {  // if int64
-                refl->SetInt64(m, field, (isAttribute) ? attr.as_int() : (isSplit) ? std::stoi(splitValue) : xmlValue.as_int());
+                refl->SetInt64(m, field,
+                               (isAttribute) ? attr.as_int() : (isSplit) ? std::stoi(splitValue) : xmlValue.as_int());
                 break;
               }
               case google::protobuf::FieldDescriptor::CppType::CPPTYPE_UINT32: {  // if uint32
-                refl->SetUInt32(m, field, (isAttribute) ? attr.as_uint() : (isSplit) ? std::stoi(splitValue) : xmlValue.as_uint());
+                refl->SetUInt32(
+                    m, field, (isAttribute) ? attr.as_uint() : (isSplit) ? std::stoi(splitValue) : xmlValue.as_uint());
                 break;
               }
               case google::protobuf::FieldDescriptor::CppType::CPPTYPE_UINT64: {  // if uint64
@@ -430,19 +427,28 @@ void PackRes(std::string &dir, std::string &name, int id, pugi::xml_node &node, 
                 break;
               }
               case google::protobuf::FieldDescriptor::CppType::CPPTYPE_DOUBLE: {  // if double
-                refl->SetDouble(m, field, (isAttribute) ? attr.as_double() : (isSplit) ? std::stod(splitValue) : xmlValue.as_double());
+                refl->SetDouble(
+                    m, field,
+                    (isAttribute) ? attr.as_double() : (isSplit) ? std::stod(splitValue) : xmlValue.as_double());
                 break;
               }
               case google::protobuf::FieldDescriptor::CppType::CPPTYPE_FLOAT: {  // if float
-                refl->SetFloat(m, field, (isAttribute) ? attr.as_float() : (isSplit) ? std::stof(splitValue) : xmlValue.as_float());
+                refl->SetFloat(
+                    m, field,
+                    (isAttribute) ? attr.as_float() : (isSplit) ? std::stof(splitValue) : xmlValue.as_float());
                 break;
               }
               case google::protobuf::FieldDescriptor::CppType::CPPTYPE_BOOL: {  // if bool
-                refl->SetBool(m, field, (isAttribute) ? (attr.as_int() != 0) : (isSplit) ? (std::stof(splitValue) != 0) : (xmlValue.as_int() != 0));
+                refl->SetBool(m, field,
+                              (isAttribute) ? (attr.as_int() != 0)
+                                            : (isSplit) ? (std::stof(splitValue) != 0) : (xmlValue.as_int() != 0));
                 break;
               }
               case google::protobuf::FieldDescriptor::CppType::CPPTYPE_ENUM: {  // if enum
-                refl->SetEnum(m, field, field->enum_type()->FindValueByNumber((isAttribute) ? attr.as_int() : (isSplit) ? std::stoi(splitValue) : xmlValue.as_int()));
+                refl->SetEnum(
+                    m, field,
+                    field->enum_type()->FindValueByNumber(
+                        (isAttribute) ? attr.as_int() : (isSplit) ? std::stoi(splitValue) : xmlValue.as_int()));
                 break;
               }
               case google::protobuf::FieldDescriptor::CppType::CPPTYPE_STRING: {  // if singular string
