@@ -53,16 +53,19 @@ static void CacheNames(const buffers::TreeNode& root) {
     const google::protobuf::Descriptor *desc = message.GetDescriptor();
     const google::protobuf::Reflection *refl = message.GetReflection();
 
-    const google::protobuf::FieldDescriptor *nameField = desc->FindFieldByName("name");
-    const std::string name = refl->GetString(message, nameField);
-    const google::protobuf::FieldDescriptor *idField = desc->FindFieldByName("id");
-    idMap[name] = refl->GetInt32(message, idField);
+    const google::protobuf::OneofDescriptor *typeOneof =  desc->FindOneofByName("type");
+    const google::protobuf::FieldDescriptor *typeField = refl->GetOneofFieldDescriptor(message, typeOneof);
+    if (!typeField) continue; // might not be set
+    const google::protobuf::Message &typeMessage = refl->GetMessage(message, typeField);
+    const google::protobuf::FieldDescriptor *idField = typeMessage.GetDescriptor()->FindFieldByName("id");
+    if (!idField) continue; // might not have an id field on this type
+    idMap[message.name()] = typeMessage.GetReflection()->GetInt32(typeMessage, idField);
   }
 }
 
 int Name2Id(std::string name) {
-  auto id = idMap.find(name);
-  return (id != idMap.end()) ? id->second : -1;
+  auto it = idMap.find(name);
+  return (it != idMap.end()) ? it->second : -1;
 }
 
 inline std::string string_replace_all(std::string str, std::string substr, std::string nstr)
@@ -324,7 +327,7 @@ void AddResource(buffers::Game* protobuf, buffers::TreeNode* node) {
   }
 }
 
-EnigmaStruct* ProtoBuf2ES(buffers::Game* protobuf) {
+EnigmaStruct* Proto2ES(buffers::Game* protobuf) {
   using TypeCase = buffers::TreeNode::TypeCase;
 
   EnigmaStruct *es = new EnigmaStruct();

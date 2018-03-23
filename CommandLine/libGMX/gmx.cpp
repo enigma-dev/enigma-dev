@@ -98,7 +98,7 @@ class gmx_root_walker : public pugi::xml_tree_walker {
         PackBuffer(resType, resName, id, res, gmxPath);
         return;
     }
-    outputStream << "Unsuported resource type: " << resType << " " << resName << std::endl;
+    outputStream << "Unsupported resource type: " << resType << " " << resName << std::endl;
   }
 
   std::string fix_folder_name(const std::string &name) {
