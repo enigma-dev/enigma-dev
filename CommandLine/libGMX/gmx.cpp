@@ -17,6 +17,8 @@
 
 #include "gmx.h"
 
+#include <pugixml.hpp>
+
 #include <iostream>
 #include <functional>
 #include <algorithm>
@@ -25,6 +27,8 @@
 #include <unordered_map>
 #include <sstream>
 #include <vector>
+
+using namespace buffers::resources;
 
 namespace gmx {
 
@@ -465,6 +469,82 @@ buffers::Project *LoadGMX(std::string fName, bool verbose) {
   doc.traverse(walker);
 
   return proj;
+}
+
+template<class T>
+T* LoadResource(std::string fName, std::string type, bool verbose) {
+  if (verbose) outputStream.rdbuf(std::cerr.rdbuf());
+    
+  size_t dot = fName.find_last_of(".");
+  size_t slash = fName.find_last_of("/");
+
+  if (dot == std::string::npos || slash == std::string::npos)
+    return nullptr;
+
+  std::string resType = fName.substr(dot+1, fName.length());
+  std::string resName = fName.substr(slash+1, fName.length());
+
+  dot = resName.find_first_of(".");
+
+  if (dot == std::string::npos)
+    return nullptr;
+
+  resName = resName.substr(0, dot);
+  std::string dir = fName.substr(0, slash+1);
+
+  if (resType == "gmx") {
+    pugi::xml_document doc;
+    if (!doc.load_file(fName.c_str())) return nullptr;
+    resType = doc.document_element().name(); // get type from root xml element
+  }  else if (resType == "gml") resType = "script";
+
+  if (resType != type || resName.empty()) // trying to load wrong type (eg a.gmx has <b> instead of <a> as root xml)
+    return nullptr;
+
+  int id = 0;
+  T* res = new T();
+  PackBuffer(resType, resName, id, res, dir);
+  return res;
+}
+
+Background* LoadBackground(std::string fName, bool verbose) {
+  return LoadResource<Background>(fName, "background", verbose);
+}
+
+buffers::resources::Sound* LoadSound(std::string fName, bool verbose) {
+  return LoadResource<Sound>(fName, "sound", verbose);
+}
+
+buffers::resources::Sprite* LoadSprite(std::string fName, bool verbose) {
+  return LoadResource<Sprite>(fName, "sprite", verbose);
+}
+
+buffers::resources::Shader* LoadShader(std::string fName, bool verbose) {
+  return LoadResource<Shader>(fName, "shader", verbose);
+}
+
+buffers::resources::Font* LoadFont(std::string fName, bool verbose) {
+  return LoadResource<Font>(fName, "font", verbose);
+}
+
+buffers::resources::Object* LoadObject(std::string fName, bool verbose) {
+  return LoadResource<Object>(fName, "object", verbose);
+}
+
+buffers::resources::Timeline* LoadTimeLine(std::string fName, bool verbose) {
+  return LoadResource<Timeline>(fName, "timeline", verbose);
+}
+
+buffers::resources::Room* LoadRoom(std::string fName, bool verbose) {
+  return LoadResource<Room>(fName, "room", verbose);
+}
+
+buffers::resources::Path* LoadPath(std::string fName, bool verbose) {
+  return LoadResource<Path>(fName, "path", verbose);
+}
+
+buffers::resources::Script* LoadScript(std::string fName, bool verbose) {
+  return LoadResource<Script>(fName, "script", verbose);
 }
 
 }  //namespace gmx

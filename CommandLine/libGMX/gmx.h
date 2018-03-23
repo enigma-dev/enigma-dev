@@ -17,45 +17,18 @@
 
 #include "codegen/project.pb.h"
 
-#include <pugixml.hpp>
-
 #include <string>
 
 namespace gmx {
 buffers::Project* LoadGMX(std::string fName, bool verbose = false);
-void PackBuffer(std::string type, std::string res, int &id, google::protobuf::Message *m, std::string gmxPath);
-template<class T>
-T* LoadResource(std::string fName, std::string type, bool verbose) {
-  size_t dot = fName.find_last_of(".");
-  size_t slash = fName.find_last_of("/");
-
-  if (dot == std::string::npos || slash == std::string::npos)
-    return nullptr;
-
-  std::string resType = fName.substr(dot+1, fName.length());
-  std::string resName = fName.substr(slash+1, fName.length());
-
-  dot = resName.find_first_of(".");
-
-  if (dot == std::string::npos)
-    return nullptr;
-
-  resName = resName.substr(0, dot);
-  std::string dir = fName.substr(0, slash+1);
-
-  if (resType == "gmx") {
-    pugi::xml_document doc;
-    if (!doc.load_file(fName.c_str())) return nullptr;
-    resType = doc.document_element().name(); // get type from root xml element
-  }  else if (resType == "gml") resType = "script";
-
-  if (resType != type || resName.empty()) // trying to load wrong type (eg a.gmx has <b> instead of <a> as root xml)
-    return nullptr;
-
-  int id = 0;
-  T* res = new T();
-  PackBuffer(resType, resName, id, res, dir);
-  return res;
-}
-
+buffers::resources::Background* LoadBackground(std::string fName, bool verbose);
+buffers::resources::Sound* LoadSound(std::string fName, bool verbose);
+buffers::resources::Sprite* LoadSprite(std::string fName, bool verbose);
+buffers::resources::Shader* LoadShader(std::string fName, bool verbose);
+buffers::resources::Font* LoadFont(std::string fName, bool verbose);
+buffers::resources::Object* LoadObject(std::string fName, bool verbose);
+buffers::resources::Timeline* LoadTimeLine(std::string fName, bool verbose);
+buffers::resources::Room* LoadRoom(std::string fName, bool verbose);
+buffers::resources::Path* LoadPath(std::string fName, bool verbose);
+buffers::resources::Script* LoadScript(std::string fName, bool verbose);
 }  //namespace gmx
