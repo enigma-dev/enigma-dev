@@ -17,8 +17,6 @@
 
 #include "gmx.h"
 
-#include <pugixml.hpp>
-
 #include <iostream>
 #include <functional>
 #include <algorithm>
@@ -50,7 +48,7 @@ inline std::string GMXPath2FilePath(std::string dir, std::string value) {
   return dir + "/" + value;
 }
 
-static std::ostream outputStream(std::cout.rdbuf());
+static std::ostream outputStream(nullptr);
 
 class visited_walker : public pugi::xml_tree_walker {
   virtual bool for_each(pugi::xml_node &node) {
@@ -467,40 +465,6 @@ buffers::Project *LoadGMX(std::string fName, bool verbose) {
   doc.traverse(walker);
 
   return proj;
-}
-
-template<class T>
-T* LoadResource(std::string fName, std::string type, bool verbose) {
-  size_t dot = fName.find_last_of(".");
-  size_t slash = fName.find_last_of("/");
-
-  if (dot == std::string::npos || slash == dot == std::string::npos)
-    return nullptr;
-
-  std::string resType = fName.substr(dot+1, fName.length());
-  std::string resName = fName.substr(slash+1, fName.length());
-
-  dot = resName.find_first_of(".");
-
-  if (dot == std::string::npos)
-    return nullptr;
-
-  resName = resName.substr(0, dot);
-  std::string dir = fName.substr(0, slash+1);
-
-  if (resType == "gmx") {
-    pugi::xml_document doc;
-    if (!doc.load_file(fName.c_str())) return nullptr;
-    resType = doc.document_element().name(); // get type from root xml element
-  }  else if (resType == "gml") resType = "script";
-
-  if (resType != type || resName.empty()) // trying to load wrong type (eg a.gmx has <b> instead of <a> as root xml)
-    return nullptr;
-
-  int id = 0;
-  T* res = new T();
-  PackBuffer(resType, resName, id, res, dir);
-  return res;
 }
 
 }  //namespace gmx
