@@ -7,7 +7,7 @@
 #include <boost/foreach.hpp>
 #include <boost/iostreams/device/mapped_file.hpp>
 #include <boost/algorithm/string.hpp>
-#include <boost/exception/diagnostic_information.hpp> 
+#include <boost/exception/diagnostic_information.hpp>
 
 #include <iostream>
 
@@ -94,6 +94,8 @@ OptionsParser::OptionsParser() : _desc("Options")
     ("help,h", "Print help messages")
     ("info,i", opt::value<std::string>(), "Provides a listing of Platforms, APIs and Extensions")
     ("input",   opt::value<std::string>()->default_value(""), "Input game file; currently, only test harness single-object games (*.sog) are supported. The --input string is optional.")
+    ("quiet,q", opt::bool_switch()->default_value(false), "Suppresses output to std::out and std::err streams.")
+    ("daemon,d", opt::bool_switch()->default_value(false), "Starts the CLI in server mode as a daemon process.")
     ("output,o", opt::value<std::string>()->required(), "Output executable file")
     ("platform,p", opt::value<std::string>()->default_value(def_platform), "Target Platform (XLib, Win32, Cocoa)")
     ("workdir,w", opt::value<std::string>()->default_value(def_workdir), "Working Directory")
@@ -150,7 +152,7 @@ int OptionsParser::ReadArgs(int argc, char* argv[])
 
     return OPTIONS_ERROR;
   }
-  
+
   find_ey("ENIGMAsystem/SHELL/");
 
   // Platform Compilers

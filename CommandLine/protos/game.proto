@@ -5,18 +5,4 @@ import "treenode.proto";
 
 message Game {
   optional TreeNode root = 1;
-  optional uint32 include_count = 2; 
-  optional uint32 sound_count = 3; 
-  optional uint32 background_count = 4;
-  optional uint32 sprite_count = 5;
-  optional uint32 shader_count = 6;
-  optional uint32 font_count = 7;
-  optional uint32 object_count = 8;
-  optional uint32 timeline_count = 9;
-  optional uint32 room_count = 10;
-  optional uint32 help_count = 11;
-  optional uint32 config_count = 12;
-  optional uint32 path_count = 13;
-  optional uint32 script_count = 14;
-  optional uint32 constant_count = 15;
 }

@@ -13,10 +13,10 @@ import "resources/Timeline.proto";
 import "resources/Room.proto";
 
 message TreeNode {
-  oneof Type {
-    bool folder = 1; 
-    //resources.DataFile include = 2; 
-    resources.Sound sound = 3; 
+  oneof type {
+    bool folder = 1;
+    //resources.Include include = 2;
+    resources.Sound sound = 3;
     resources.Background background = 4;
     resources.Sprite sprite = 5;
     resources.Shader shader = 6;
@@ -25,14 +25,14 @@ message TreeNode {
     resources.Timeline timeline = 9;
     resources.Room room = 10;
     //resources.Help help = 11;
-    //resources.Config config = 12;
+    //resources.Settings settings = 12;
     resources.Path path = 13;
     resources.Script script = 14;
-    //resources.Constant constant = 15;
+    //resources.Macros macros = 15;
   }
-  
+
   optional string name = 16;
-  
+
   optional TreeNode parent = 17;
   repeated TreeNode child = 18;
 }

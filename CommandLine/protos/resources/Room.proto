@@ -24,7 +24,7 @@ message Room {
   message Background {
     optional bool visible = 1;
     optional bool foreground = 2;
-    //optional string name = 3;
+    optional string background_name = 3 [(gmx) = "name"];
     optional int32 x = 4;
     optional int32 y = 5;
     optional bool htiled = 6;
@@ -56,7 +56,7 @@ message Room {
   repeated View views = 16 [(gmx) = "views/view"];
 
   message Instance {
-    //optional string name = 1;
+    optional string name = 1;
     optional int32 id = 2 [(id_start) = 100000];
     optional string object_type = 3 [(gmx) = "objName"];
     optional int32 x = 4;
@@ -72,7 +72,7 @@ message Room {
   repeated Instance instances = 17 [(gmx) = "instances/instance"];
 
   message Tile {
-    //optional string name = 1;
+    optional string name = 1;
     optional int32 id = 2 [(id_start) = 10000000];
     optional string background_name = 3 [(gmx) = "bgName"];
     optional int32 x = 4;
@@ -100,7 +100,7 @@ message Room {
     optional double phy_world_ygravity = 25 [(gmx) = "PhysicsWorldGravityY"];
     optional double phy_world_pixel_meters = 26 [(gmx) = "PhysicsWorldPixToMeters"];
   }
-  
+
   optional RoomPhysicsSettings physics_settings = 19 [(gmx) = "EGM_NESTED"];
-  
+
 }

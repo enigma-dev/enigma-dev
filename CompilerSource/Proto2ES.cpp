@@ -32,24 +32,37 @@ Font AddFont(std::string name, const buffers::resources::Font& fnt);
 Timeline AddTimeline(std::string name, buffers::resources::Timeline* tml, buffers::Game* protobuf);
 GmObject AddObject(std::string name, buffers::resources::Object* obj, buffers::Game* protobuf);
 Room AddRoom(std::string name, const buffers::resources::Room& rmn, buffers::Game* protobuf);
-Instance AddInstance(std::string name, const buffers::resources::Room::Instance& inst, buffers::Game* protobuf);
+Instance AddInstance(const buffers::resources::Room::Instance& inst, buffers::Game* protobuf);
 Tile AddTile(const buffers::resources::Room::Tile& tile, buffers::Game* protobuf);
 View AddView(const buffers::resources::Room::View& view, buffers::Game* protobuf);
-BackgroundDef AddRoomBackground(std::string name, const buffers::resources::Room::Background& bkg, buffers::Game* protobuf);
+BackgroundDef AddRoomBackground(const buffers::resources::Room::Background& bkg, buffers::Game* protobuf);
 
-template <class T>
-int Name2Id(const ::google::protobuf::RepeatedPtrField< T >& group, std::string name) {
-  for (auto& message : group) {
+static std::unordered_map<int, int> countMap;
+static std::unordered_map<std::string, int> idMap;
+
+static void CacheNames(const buffers::TreeNode& root) {
+  using TypeCase = buffers::TreeNode::TypeCase;
+
+  for (auto& message : root.child()) {
+    if (message.type_case() == TypeCase::kFolder) {
+      CacheNames(message);
+      continue;
+    }
+    countMap[message.type_case()]++;
+
     const google::protobuf::Descriptor *desc = message.GetDescriptor();
     const google::protobuf::Reflection *refl = message.GetReflection();
 
     const google::protobuf::FieldDescriptor *nameField = desc->FindFieldByName("name");
-    if (refl->GetString(message, nameField) == name) {
-      const google::protobuf::FieldDescriptor *idField = desc->FindFieldByName("id");
-      return refl->GetInt32(message, idField);
-    }
+    const std::string name = refl->GetString(message, nameField);
+    const google::protobuf::FieldDescriptor *idField = desc->FindFieldByName("id");
+    idMap[name] = refl->GetInt32(message, idField);
   }
-  return -1;
+}
+
+int Name2Id(std::string name) {
+  auto id = idMap.find(name);
+  return (id != idMap.end()) ? id->second : -1;
 }
 
 inline std::string string_replace_all(std::string str, std::string substr, std::string nstr)
@@ -308,10 +321,12 @@ void AddResource(buffers::Game* protobuf, buffers::TreeNode* node) {
      AddSprite(child->name(), child->sprite());
     if (child->has_timeline())
      AddTimeline(child->name(), child->mutable_timeline(), protobuf);
-  } 
+  }
 }
 
 EnigmaStruct* ProtoBuf2ES(buffers::Game* protobuf) {
+  using TypeCase = buffers::TreeNode::TypeCase;
+
   EnigmaStruct *es = new EnigmaStruct();
 
   es->gameSettings.gameIcon = "";
@@ -329,17 +344,20 @@ EnigmaStruct* ProtoBuf2ES(buffers::Game* protobuf) {
   es->gameInfo.gameInfoStr = "";
   es->gameInfo.formCaption = "";
 
-  es->spriteCount = protobuf->sprite_count();
-  es->backgroundCount = protobuf->background_count();
-  es->pathCount = protobuf->path_count();
-  es->scriptCount = protobuf->script_count();
-  es->shaderCount = protobuf->shader_count();
-  es->fontCount = protobuf->font_count();
-  es->timelineCount = protobuf->timeline_count();
-  es->gmObjectCount = protobuf->object_count();
-  es->roomCount = protobuf->room_count();
-  
-  AddResource(protobuf, protobuf->mutable_root());
+  auto root = protobuf->mutable_root();
+  CacheNames(*root);
+
+  es->spriteCount = countMap[TypeCase::kSprite];
+  es->backgroundCount = countMap[TypeCase::kBackground];
+  es->pathCount = countMap[TypeCase::kPath];
+  es->scriptCount = countMap[TypeCase::kScript];
+  es->shaderCount = countMap[TypeCase::kShader];
+  es->fontCount = countMap[TypeCase::kFont];
+  es->timelineCount = countMap[TypeCase::kTimeline];
+  es->gmObjectCount = countMap[TypeCase::kObject];
+  es->roomCount = countMap[TypeCase::kRoom];
+
+  AddResource(protobuf, root);
 
   return es;
 }
@@ -534,13 +552,13 @@ GmObject AddObject(std::string name, buffers::resources::Object* obj, buffers::G
   o.name = name.c_str();
   o.id = obj->id();
 
-  o.spriteId = Name2Id(protobuf->sprites(), obj->sprite_name());
+  o.spriteId = Name2Id(obj->sprite_name());
   o.solid = obj->solid();
   o.visible = obj->visible();
   o.depth = obj->depth();
   o.persistent = obj->persistent();
-  o.parentId = Name2Id(protobuf->objects(), obj->parent_name());
-  o.maskId = Name2Id(protobuf->sprites(), obj->mask_name());
+  o.parentId = Name2Id(obj->parent_name());
+  o.maskId = Name2Id(obj->mask_name());
 
   std::unordered_map<int,std::vector<Event> > mainEventMap;
 
@@ -631,7 +649,7 @@ Instance AddInstance(const buffers::resources::Room::Instance& inst, buffers::Ga
   Instance i = Instance();
 
   i.id = inst.id();
-  i.objectId = Name2Id(protobuf->objects(), inst.object_type());
+  i.objectId = Name2Id(inst.object_type());
   i.x = inst.x();
   i.y = inst.y();
   i.locked = inst.locked();
@@ -645,7 +663,7 @@ Tile AddTile(const buffers::resources::Room::Tile& tile, buffers::Game* protobuf
   Tile t = Tile();
 
   t.id = tile.id();
-  t.backgroundId = Name2Id(protobuf->backgrounds(), tile.background_name());
+  t.backgroundId = Name2Id(tile.background_name());
   t.roomX = tile.x();
   t.roomY = tile.y();
   t.locked = tile.locked();
@@ -674,12 +692,12 @@ View AddView(const buffers::resources::Room::View& view, buffers::Game* protobuf
   v.borderV = view.vborder();
   v.speedH = view.hspeed();
   v.speedV = view.vspeed();
-  v.objectId = Name2Id(protobuf->objects(), view.object_following());
+  v.objectId = Name2Id(view.object_following());
 
   return v;
 }
 
-BackgroundDef AddRoomBackground(std::string name, const buffers::resources::Room::Background& bkg, buffers::Game* protobuf) {
+BackgroundDef AddRoomBackground(const buffers::resources::Room::Background& bkg, buffers::Game* protobuf) {
   BackgroundDef b = BackgroundDef();
 
   b.visible = bkg.visible();
@@ -691,7 +709,7 @@ BackgroundDef AddRoomBackground(std::string name, const buffers::resources::Room
   b.hSpeed = bkg.hspeed();
   b.vSpeed = bkg.vspeed();
   b.stretch = bkg.stretch();
-  b.backgroundId = Name2Id(protobuf->backgrounds(), bkg.name());
+  b.backgroundId = Name2Id(bkg.background_name());
 
   return b;
 }

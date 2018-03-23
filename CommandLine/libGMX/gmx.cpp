@@ -17,10 +17,14 @@
 
 #include "gmx.h"
 
+#include <pugixml.hpp>
+
+#include <iostream>
+#include <functional>
 #include <algorithm>
 #include <fstream>
 #include <iostream>
-#include <map>
+#include <unordered_map>
 #include <sstream>
 #include <vector>
 
@@ -63,21 +67,6 @@ class gmx_root_walker : public pugi::xml_tree_walker {
     nodes.push_back(root);
   }
 
-  unsigned include_count = 0;
-  unsigned sound_count = 0;
-  unsigned background_count = 0;
-  unsigned sprite_count = 0;
-  unsigned shader_count = 0;
-  unsigned font_count = 0;
-  unsigned object_count = 0;
-  unsigned timeline_count = 0;
-  unsigned room_count = 0;
-  unsigned help_count = 0;
-  unsigned config_count = 0;
-  unsigned path_count = 0;
-  unsigned script_count = 0;
-  unsigned constant_count = 0;
-
  private:
   std::vector<buffers::TreeNode *> nodes;
   std::string lastName;
@@ -85,72 +74,31 @@ class gmx_root_walker : public pugi::xml_tree_walker {
   int id = 0;
 
   void AddResource(buffers::TreeNode *node, std::string resType, std::string resName) {
-    if (resType == "sound") {
-      buffers::resources::Sound *snd = node->mutable_sound();
-      PackBuffer(resType, resName, id, snd, gmxPath);
-      sound_count++;
-      return;
-    }
-    if (resType == "background") {
-      buffers::resources::Background *bkg = node->mutable_background();
-      PackBuffer(resType, resName, id, bkg, gmxPath);
-      background_count++;
-      return;
-    }
-    if (resType == "sprite") {
-      buffers::resources::Sprite *spr = node->mutable_sprite();
-      PackBuffer(resType, resName, id, spr, gmxPath);
-      sprite_count++;
-      return;
-    }
-    if (resType == "shader") {
-      buffers::resources::Shader *shdr = node->mutable_shader();
-      PackBuffer(resType, resName, id, shdr, gmxPath);
-      shader_count++;
-      return;
-    }
-    if (resType == "script") {
-      buffers::resources::Script *scr = node->mutable_script();
-      PackBuffer(resType, resName, id, scr, gmxPath);
-      script_count++;
-      return;
-    }
-    if (resType == "font") {
-      buffers::resources::Font *fnt = node->mutable_font();
-      PackBuffer(resType, resName, id, fnt, gmxPath);
-      font_count++;
-      return;
-    }
-    if (resType == "object") {
-      buffers::resources::Object *obj = node->mutable_object();
-      PackBuffer(resType, resName, id, obj, gmxPath);
-      object_count++;
-      return;
-    }
-    if (resType == "timeline") {
-      buffers::resources::Timeline *tml = node->mutable_timeline();
-      PackBuffer(resType, resName, id, tml, gmxPath);
-      timeline_count++;
-      return;
-    }
-    if (resType == "room") {
-      buffers::resources::Room *rm = node->mutable_room();
-      PackBuffer(resType, resName, id, rm, gmxPath);
-      room_count++;
-      return;
-    }
-    if (resType == "path") {
-      buffers::resources::Path *pth = node->mutable_path();
-      PackBuffer(resType, resName, id, pth, gmxPath);
-      path_count++;
-      return;
-    }
+    using buffers::TreeNode;
 
+    using CreateFunction = std::function<google::protobuf::Message *(TreeNode*)>;
+    using CreateMap = std::unordered_map<std::string,  CreateFunction>;
+
+    static const CreateMap createMap({
+      { "sound", &TreeNode::mutable_sound },
+      { "background", &TreeNode::mutable_background },
+      { "sprite", &TreeNode::mutable_sprite },
+      { "shader", &TreeNode::mutable_shader },
+      { "script", &TreeNode::mutable_script },
+      { "font", &TreeNode::mutable_font },
+      { "object", &TreeNode::mutable_object },
+      { "timeline", &TreeNode::mutable_timeline },
+      { "room", &TreeNode::mutable_room },
+      { "path", &TreeNode::mutable_path }
+    });
+
+    auto createFunc = createMap.find(resType);
+    if (createFunc != createMap.end()) {
+        auto *res = createFunc->second(node);
+        PackBuffer(resType, resName, id, res, gmxPath);
+        return;
+    }
     outputStream << "Unsuported resource type: " << resType << " " << resName << std::endl;
-    /*if (resType == "config") return;    //not supported yet
-    if (resType == "datafile") return;  //not supported yet
-    if (resType == "constant") return;  //not supported yet
-    if (resType == "help") return;      //not supported yet*/
   }
 
   std::string fix_folder_name(const std::string &name) {
@@ -396,8 +344,8 @@ void PackRes(std::string &dir, std::string &name, int id, pugi::xml_node &node, 
             std::string value = (isAttribute) ? attr.as_string() : (isSplit) ? splitValue : xmlValue.as_string();
             outputStream << "Setting " << field->name() << " (" << field->type_name() << ") as " << value << std::endl;
 
-            /* Here we finally set the proto values from the xml (unless it's a message). The same logic above is followed, 
-             * if datas in attribute use that, else if it's in a split grab the text from a vector we previous split up by 
+            /* Here we finally set the proto values from the xml (unless it's a message). The same logic above is followed,
+             * if datas in attribute use that, else if it's in a split grab the text from a vector we previous split up by
              * the delimeter, else if the datas in a element use that */
             switch (field->cpp_type()) {
               case google::protobuf::FieldDescriptor::CppType::
@@ -516,23 +464,43 @@ buffers::Project *LoadGMX(std::string fName, bool verbose) {
 
   buffers::Game *game = proj->mutable_game();
   gmx_root_walker walker(game->mutable_root(), gmxPath);
-  game->set_include_count(walker.include_count);
-  game->set_sound_count(walker.sound_count);
-  game->set_background_count(walker.background_count);
-  game->set_sprite_count(walker.sprite_count);
-  game->set_shader_count(walker.shader_count);
-  game->set_font_count(walker.font_count);
-  game->set_object_count(walker.object_count);
-  game->set_timeline_count(walker.timeline_count);
-  game->set_room_count(walker.room_count);
-  game->set_help_count(walker.help_count);
-  game->set_config_count(walker.config_count);
-  game->set_path_count(walker.path_count);
-  game->set_script_count(walker.script_count);
-  game->set_constant_count(walker.constant_count);
   doc.traverse(walker);
 
   return proj;
+}
+
+template<class T>
+T* LoadResource(std::string fName, std::string type, bool verbose) {
+  size_t dot = fName.find_last_of(".");
+  size_t slash = fName.find_last_of("/");
+
+  if (dot == std::string::npos || slash == dot == std::string::npos)
+    return nullptr;
+
+  std::string resType = fName.substr(dot+1, fName.length());
+  std::string resName = fName.substr(slash+1, fName.length());
+
+  dot = resName.find_first_of(".");
+
+  if (dot == std::string::npos)
+    return nullptr;
+
+  resName = resName.substr(0, dot);
+  std::string dir = fName.substr(0, slash+1);
+
+  if (resType == "gmx") {
+    pugi::xml_document doc;
+    if (!doc.load_file(fName.c_str())) return nullptr;
+    resType = doc.document_element().name(); // get type from root xml element
+  }  else if (resType == "gml") resType = "script";
+
+  if (resType != type || resName.empty()) // trying to load wrong type (eg a.gmx has <b> instead of <a> as root xml)
+    return nullptr;
+
+  int id = 0;
+  T* res = new T();
+  PackBuffer(resType, resName, id, res, dir);
+  return res;
 }
 
 }  //namespace gmx
