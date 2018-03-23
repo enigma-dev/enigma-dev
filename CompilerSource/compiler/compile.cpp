@@ -260,7 +260,6 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
     cout << "Pointer on this side: " << (&globals_scope) << endl;
     cout << "Address on this side: " << ((jdi::definition_scope*)&globals_scope) << endl;
 
-    cout << es->sprites[i].name << endl;
     quickmember_variable(&globals_scope,jdi::builtin_type__int,es->sprites[i].name);
   }
 
