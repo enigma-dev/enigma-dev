@@ -73,7 +73,7 @@ class gmx_root_walker : public pugi::xml_tree_walker {
   std::vector<buffers::TreeNode *> nodes;
   std::string lastName;
   std::string gmxPath;
-  int id = 0;
+  std::unordered_map<std::string, int> idMap;
 
   void AddResource(buffers::TreeNode *node, std::string resType, std::string resName) {
     using buffers::TreeNode;
@@ -97,7 +97,7 @@ class gmx_root_walker : public pugi::xml_tree_walker {
     auto createFunc = createMap.find(resType);
     if (createFunc != createMap.end()) {
         auto *res = createFunc->second(node);
-        PackBuffer(resType, resName, id, res, gmxPath);
+        PackBuffer(resType, resName, idMap[resType], res, gmxPath);
         return;
     }
     errorStream << "Unsupported resource type: " << resType << " " << resName << std::endl;
