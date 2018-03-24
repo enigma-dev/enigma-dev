@@ -42,7 +42,6 @@ int main(int argc, char* argv[])
   }
   gmx::bind_output_streams(outputStream, errorStream);
   plugin.Init();
-  return 0;
   plugin.SetDefinitions(options.APIyaml().c_str());
 
   GameMode mode;
