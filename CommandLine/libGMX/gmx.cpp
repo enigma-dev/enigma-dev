@@ -78,10 +78,10 @@ class gmx_root_walker : public pugi::xml_tree_walker {
   void AddResource(buffers::TreeNode *node, std::string resType, std::string resName) {
     using buffers::TreeNode;
 
-    using CreateFunction = std::function<google::protobuf::Message *(TreeNode*)>;
-    using CreateMap = std::unordered_map<std::string,  CreateFunction>;
+    using FactoryFunction = std::function<google::protobuf::Message *(TreeNode*)>;
+    using FactoryMap = std::unordered_map<std::string, FactoryFunction>;
 
-    static const CreateMap createMap({
+    static const FactoryMap factoryMap({
       { "sound", &TreeNode::mutable_sound },
       { "background", &TreeNode::mutable_background },
       { "sprite", &TreeNode::mutable_sprite },
@@ -94,8 +94,8 @@ class gmx_root_walker : public pugi::xml_tree_walker {
       { "path", &TreeNode::mutable_path }
     });
 
-    auto createFunc = createMap.find(resType);
-    if (createFunc != createMap.end()) {
+    auto createFunc = factoryMap.find(resType);
+    if (createFunc != factoryMap.end()) {
         auto *res = createFunc->second(node);
         PackBuffer(resType, resName, idMap[resType], res, gmxPath);
         return;
