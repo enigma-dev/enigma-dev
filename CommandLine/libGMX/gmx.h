@@ -17,10 +17,20 @@
 
 #include "codegen/project.pb.h"
 
+#include <iostream>
+#include <streambuf>
 #include <string>
 
 namespace gmx {
-buffers::Project* LoadGMX(std::string fName, bool verbose = false);
+extern std::ostream outputStream;
+extern std::ostream errorStream;
+
+inline void bind_output_streams(std::ostream &out, std::ostream &err) {
+  outputStream.rdbuf(out.rdbuf());
+  errorStream.rdbuf(err.rdbuf());
+}
+
+buffers::Project* LoadGMX(std::string fName);
 buffers::resources::Background* LoadBackground(std::string fName, bool verbose);
 buffers::resources::Sound* LoadSound(std::string fName, bool verbose);
 buffers::resources::Sprite* LoadSprite(std::string fName, bool verbose);

@@ -1,4 +1,5 @@
 #include "OptionsParser.hpp"
+#include "Main.hpp"
 
 #include "settings-parse/eyaml.h"
 #include "OS_Switchboard.h"
@@ -146,7 +147,7 @@ int OptionsParser::ReadArgs(int argc, char* argv[])
   catch(std::exception& e)
   {
     if (!_rawArgs.count("help"))
-      std::cerr << "OPTIONS_ERROR: " << e.what() << std::endl << std::endl;
+      errorStream << "OPTIONS_ERROR: " << e.what() << std::endl << std::endl;
 
     _readArgsFail = true;
 
@@ -260,7 +261,7 @@ int OptionsParser::printInfo(const std::string &api)
   auto it = _api.find(api);
   if (it != std::end(_api))
   {
-    std::cout << std::endl << "Target " << api << ":" << std::endl;
+    outputStream << std::endl << "Target " << api << ":" << std::endl;
 
     for (auto&& p : _api[api])
     {
@@ -282,24 +283,24 @@ int OptionsParser::printInfo(const std::string &api)
         if (!target.empty() && !name.empty())
         {
           boost::filesystem::path ey(p);
-          std::cout << '\t' << name << " (" << ey.stem().string() << "):" << std::endl;
-          std::cout << "\t\t Target: " << target << std::endl << std::endl;
+          outputStream << '\t' << name << " (" << ey.stem().string() << "):" << std::endl;
+          outputStream << "\t\t Target: " << target << std::endl << std::endl;
         }
         else if (!name.empty() && !desc.empty() && !id.empty())
         {
-          std::cout << '\t' << name << " (" << id << "):" << std::endl;
-          std::cout << "\t\t" << word_wrap(desc, 80) << std::endl << std::endl;
+          outputStream << '\t' << name << " (" << id << "):" << std::endl;
+          outputStream << "\t\t" << word_wrap(desc, 80) << std::endl << std::endl;
         }
       }
     }
   }
   else
   {
-    std::cerr << "OPTIONS_ERROR: Unknown System: \"" << api  << '"'
+    errorStream << "OPTIONS_ERROR: Unknown System: \"" << api  << '"'
               << std::endl << std::endl << "Avaliable Systems: " << std::endl;
 
     for (auto &&a : _api)
-      std::cerr << a.first << std::endl;
+      errorStream << a.first << std::endl;
 
     return OPTIONS_ERROR;
   }
@@ -309,7 +310,7 @@ int OptionsParser::printInfo(const std::string &api)
 
 void OptionsParser::printHelp()
 {
-  std::cout << "Enigma Command Line Compiler" << std::endl
+  outputStream << "Enigma Command Line Compiler" << std::endl
             << _desc << std::endl;
 }
 
@@ -334,27 +335,27 @@ int OptionsParser::parse(const std::string &str)
     fs::path file(str);
     if (fs::is_directory(file))
     {
-      std::cerr << "OPTIONS_ERROR: " << str << " Is a Directory!" << std::endl;
+      errorStream << "OPTIONS_ERROR: " << str << " Is a Directory!" << std::endl;
       return OPTIONS_ERROR;
     }
 
     bool exists = fs::exists(file);
     if (exists)
     {
-      std::cout << "Parsing: " << str <<std::endl;
+      outputStream << "Parsing: " << str <<std::endl;
       // call parser
       return OPTIONS_SUCCESS;
     }
     else
     {
-      std::cerr << "OPTIONS_ERROR: No Such File " << str << std::endl;
+      errorStream << "OPTIONS_ERROR: No Such File " << str << std::endl;
     }
 
     return OPTIONS_ERROR;
   }
   catch (const fs::filesystem_error& ex)
   {
-    std::cerr << "OPTIONS_ERROR: " << ex.what() << std::endl;
+    errorStream << "OPTIONS_ERROR: " << ex.what() << std::endl;
     return OPTIONS_ERROR;
   }
 }
@@ -366,7 +367,7 @@ int OptionsParser::mode(const std::string &str)
     return OPTIONS_SUCCESS;
   }
   else
-    std::cerr << "OPTIONS_ERROR: invalid mode: " << str << std::endl
+    errorStream << "OPTIONS_ERROR: invalid mode: " << str << std::endl
               << "Available Modes: " << std::endl
               << "Run" << std::endl
               << "Debug" << std::endl
@@ -390,7 +391,7 @@ int OptionsParser::searchCompilers(const std::string &target)
     return OPTIONS_SUCCESS;
   }
   else
-    std::cerr << "OPTIONS_ERROR: Unknown Compiler Target: " << target << std::endl
+    errorStream << "OPTIONS_ERROR: Unknown Compiler Target: " << target << std::endl
               << "Run \"emake --info Compiler\" For a List of Available Targets" << std::endl;
 
   return OPTIONS_ERROR;
@@ -424,7 +425,7 @@ int OptionsParser::searchAPI(const std::string &api, const std::string &target)
     return OPTIONS_SUCCESS;
   }
   else
-    std::cerr << "OPTIONS_ERROR: Unknown " << api << " Target: " << target << std::endl
+    errorStream << "OPTIONS_ERROR: Unknown " << api << " Target: " << target << std::endl
               << "Run \"emake --info " << api << "\" For a List of Available Targets" << std::endl;
 
   return OPTIONS_ERROR;

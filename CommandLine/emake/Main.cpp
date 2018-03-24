@@ -1,3 +1,4 @@
+#include "Main.hpp"
 #include "OptionsParser.hpp"
 #include "EnigmaPlugin.hpp"
 #include "Game.hpp"
@@ -10,6 +11,9 @@
 #include <fstream>
 #include <iostream>
 #include <streambuf>
+
+std::ostream outputStream(nullptr);
+std::ostream errorStream(nullptr);
 
 static std::string tolower(const std::string &str) {
   std::string res = str;
@@ -31,8 +35,12 @@ int main(int argc, char* argv[])
   EnigmaPlugin plugin;
   plugin.Init();
   bool quiet = options.GetOption("quiet").as<bool>();
-  if (!quiet)
+  if (!quiet) {
+    outputStream.rdbuf(std::cout.rdbuf());
+    errorStream.rdbuf(std::cerr.rdbuf());
     plugin.LogMakeToConsole();
+  }
+  gmx::bind_output_streams(outputStream, errorStream);
   plugin.SetDefinitions(options.APIyaml().c_str());
 
   GameMode mode;
@@ -52,7 +60,7 @@ int main(int argc, char* argv[])
     mode = emode_invalid;
 
   if (mode == emode_invalid) {
-    std::cerr << "Invalid game mode: " << _mode << " aborting!" << std::endl;
+    errorStream << "Invalid game mode: " << _mode << " aborting!" << std::endl;
     return OPTIONS_ERROR;
   }
 
@@ -83,24 +91,24 @@ int main(int argc, char* argv[])
       }
 
       buffers::Project* project;
-      if (!(project = gmx::LoadGMX(input_file, false))) return 1;
+      if (!(project = gmx::LoadGMX(input_file))) return 1;
       return plugin.BuildGame(project->mutable_game(), mode, output_file.c_str());
     } else {
       if (ext == "egm") {
-        std::cerr << "EGM format not yet supported. "
+        errorStream << "EGM format not yet supported. "
                       "Please use LateralGM for the time being." << std::endl;
       } else if (ext.empty()) {
-        std::cerr << "Error: Unknown filetype: cannot determine type of file "
+        errorStream << "Error: Unknown filetype: cannot determine type of file "
                   << '"' << input_file << "\"." << std::endl;
       } else {
-        std::cerr << "Error: Unknown filetype \"" << ext
+        errorStream << "Error: Unknown filetype \"" << ext
                   << "\": cannot read input file \"" << input_file
                   << "\"." << std::endl;
       }
       return 1;
     }
   } else {
-    std::cerr << "Warning: No game file specified. "
+    errorStream << "Warning: No game file specified. "
                   "Building an empty game." << std::endl;
   }
 

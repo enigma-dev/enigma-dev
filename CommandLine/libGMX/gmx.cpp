@@ -31,6 +31,8 @@
 using namespace buffers::resources;
 
 namespace gmx {
+std::ostream outputStream(nullptr);
+std::ostream errorStream(nullptr);
 
 void PackBuffer(std::string type, std::string res, int &id, google::protobuf::Message *m, std::string gmxPath);
 
@@ -52,12 +54,10 @@ inline std::string GMXPath2FilePath(std::string dir, std::string value) {
   return dir + "/" + value;
 }
 
-static std::ostream outputStream(nullptr);
-
 class visited_walker : public pugi::xml_tree_walker {
   virtual bool for_each(pugi::xml_node &node) {
     if (node.type() != pugi::node_pcdata && std::string(node.attribute("visited").value()) != "true")
-      outputStream << "Error: Node at " << node.path() << " was never visited " << std::endl;
+      errorStream << "Error: Node at " << node.path() << " was never visited " << std::endl;
     return true;
   }
 };
@@ -100,7 +100,7 @@ class gmx_root_walker : public pugi::xml_tree_walker {
         PackBuffer(resType, resName, id, res, gmxPath);
         return;
     }
-    outputStream << "Unsupported resource type: " << resType << " " << resName << std::endl;
+    errorStream << "Unsupported resource type: " << resType << " " << resName << std::endl;
   }
 
   std::string fix_folder_name(const std::string &name) {
@@ -201,7 +201,7 @@ void PackScript(std::string fName, int id, buffers::resources::Script *script) {
   outputStream << "Setting id as:" << std::endl << id << std::endl;
   script->set_id(id);
 
-  if (code.empty()) outputStream << "Warning: " << fName << " empty." << std::endl;
+  if (code.empty()) errorStream << "Warning: " << fName << " empty." << std::endl;
 
   outputStream << "Setting code as:" << std::endl << code << std::endl;
   script->set_code(code);
@@ -214,7 +214,7 @@ void PackShader(std::string fName, int id, buffers::resources::Shader *shader) {
   outputStream << "Setting id as:" << std::endl << id << std::endl;
   shader->set_id(id);
 
-  if (code.empty()) outputStream << "Warning: " << fName << " empty." << std::endl;
+  if (code.empty()) errorStream << "Warning: " << fName << " empty." << std::endl;
 
   // GMS 1.4 doesn't care if you have a newline after the marker
   // and before the start of the first line of the fragment shader
@@ -222,7 +222,7 @@ void PackShader(std::string fName, int id, buffers::resources::Shader *shader) {
   size_t markerPos = code.find(marker);
 
   if (markerPos == std::string::npos)
-    outputStream << "Error: missing shader marker." << std::endl;
+    errorStream << "Error: missing shader marker." << std::endl;
   else {
     std::string vert = code.substr(0, markerPos);
     std::string frag = code.substr(markerPos + marker.length() - 1, code.length() - 1);
@@ -290,7 +290,7 @@ void PackRes(std::string &dir, std::string &name, int id, pugi::xml_node &node, 
           // ename only exists if etype = 4. Also, etype and enumb don't exist in timeline events
           pugi::xml_attribute a = node.attribute("eventtype");
           if (xmlElement != "ename" && a.as_int() != 4 && node.path() != "/timeline/entry/event")
-            outputStream << "Error: no such element " << node.path() << "/" << xmlElement << std::endl;
+            errorStream << "Error: no such element " << node.path() << "/" << xmlElement << std::endl;
         } else {                       // bullshit special cases out of the way, we now look for proto feilds in xml
           if (field->is_repeated()) {  // Repeated feilds (are usally messages or file_paths(strings)
             outputStream << "Appending (" << field->type_name() << ") to " << field->name() << std::endl;
@@ -326,7 +326,7 @@ void PackRes(std::string &dir, std::string &name, int id, pugi::xml_node &node, 
                * BUT incase someone tries to add one to a proto in the future I added this warning to prevent the reader
                * from exploding and gives them a warning of why their shit don't work and a clue where to implement a fix */
               default: {
-                outputStream << "Error: missing condition for repeated type: " << field->type_name()
+                errorStream << "Error: missing condition for repeated type: " << field->type_name()
                              << ". Instigated by: " << field->type_name() << std::endl;
                 break;
               }
@@ -441,7 +441,7 @@ void PackBuffer(std::string type, std::string res, int &id, google::protobuf::Me
     root.append_attribute("visited") = "true";
 
     if (!result)
-      outputStream << "Error opening: " << fName << " : " << result.description() << std::endl;
+      errorStream << "Error opening: " << fName << " : " << result.description() << std::endl;
     else {
       outputStream << "Parsing " << fName << "..." << std::endl;
       // Start a resource (sprite, object, room)
@@ -454,9 +454,7 @@ void PackBuffer(std::string type, std::string res, int &id, google::protobuf::Me
   }
 }
 
-buffers::Project *LoadGMX(std::string fName, bool verbose) {
-  if (verbose) outputStream.rdbuf(std::cerr.rdbuf());
-
+buffers::Project *LoadGMX(std::string fName) {
   buffers::Project *proj = new buffers::Project();
   pugi::xml_document doc;
   if (!doc.load_file(fName.c_str())) return nullptr;
@@ -472,9 +470,7 @@ buffers::Project *LoadGMX(std::string fName, bool verbose) {
 }
 
 template<class T>
-T* LoadResource(std::string fName, std::string type, bool verbose) {
-  if (verbose) outputStream.rdbuf(std::cerr.rdbuf());
-    
+T* LoadResource(std::string fName, std::string type) {
   size_t dot = fName.find_last_of(".");
   size_t slash = fName.find_last_of("/");
 
@@ -507,44 +503,44 @@ T* LoadResource(std::string fName, std::string type, bool verbose) {
   return res;
 }
 
-Background* LoadBackground(std::string fName, bool verbose) {
-  return LoadResource<Background>(fName, "background", verbose);
+Background* LoadBackground(std::string fName) {
+  return LoadResource<Background>(fName, "background");
 }
 
-buffers::resources::Sound* LoadSound(std::string fName, bool verbose) {
-  return LoadResource<Sound>(fName, "sound", verbose);
+buffers::resources::Sound* LoadSound(std::string fName) {
+  return LoadResource<Sound>(fName, "sound");
 }
 
-buffers::resources::Sprite* LoadSprite(std::string fName, bool verbose) {
-  return LoadResource<Sprite>(fName, "sprite", verbose);
+buffers::resources::Sprite* LoadSprite(std::string fName) {
+  return LoadResource<Sprite>(fName, "sprite");
 }
 
-buffers::resources::Shader* LoadShader(std::string fName, bool verbose) {
-  return LoadResource<Shader>(fName, "shader", verbose);
+buffers::resources::Shader* LoadShader(std::string fName) {
+  return LoadResource<Shader>(fName, "shader");
 }
 
-buffers::resources::Font* LoadFont(std::string fName, bool verbose) {
-  return LoadResource<Font>(fName, "font", verbose);
+buffers::resources::Font* LoadFont(std::string fName) {
+  return LoadResource<Font>(fName, "font");
 }
 
-buffers::resources::Object* LoadObject(std::string fName, bool verbose) {
-  return LoadResource<Object>(fName, "object", verbose);
+buffers::resources::Object* LoadObject(std::string fName) {
+  return LoadResource<Object>(fName, "object");
 }
 
-buffers::resources::Timeline* LoadTimeLine(std::string fName, bool verbose) {
-  return LoadResource<Timeline>(fName, "timeline", verbose);
+buffers::resources::Timeline* LoadTimeLine(std::string fName) {
+  return LoadResource<Timeline>(fName, "timeline");
 }
 
-buffers::resources::Room* LoadRoom(std::string fName, bool verbose) {
-  return LoadResource<Room>(fName, "room", verbose);
+buffers::resources::Room* LoadRoom(std::string fName) {
+  return LoadResource<Room>(fName, "room");
 }
 
-buffers::resources::Path* LoadPath(std::string fName, bool verbose) {
-  return LoadResource<Path>(fName, "path", verbose);
+buffers::resources::Path* LoadPath(std::string fName) {
+  return LoadResource<Path>(fName, "path");
 }
 
-buffers::resources::Script* LoadScript(std::string fName, bool verbose) {
-  return LoadResource<Script>(fName, "script", verbose);
+buffers::resources::Script* LoadScript(std::string fName) {
+  return LoadResource<Script>(fName, "script");
 }
 
 }  //namespace gmx

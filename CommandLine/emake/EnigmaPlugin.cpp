@@ -1,4 +1,5 @@
 #include "EnigmaPlugin.hpp"
+#include "Main.hpp"
 
 #include "OS_Switchboard.h"
 
@@ -45,8 +46,8 @@ int EnigmaPlugin::Init()
 
   if (!_handle)
   {
-    std::cerr << "Error Loading Plugin '" << pluginName << "'" << std::endl;
-    std::cerr << dlerror() << std::endl;
+    errorStream  << "Error Loading Plugin '" << pluginName << "'" << std::endl;
+    errorStream << dlerror() << std::endl;
     return PLUGIN_ERROR;
   }
 
