@@ -210,6 +210,12 @@ tstring widen(const string &str) {
   return tstring{buf.data(), (size_t)MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, buf.data(), (int)wchar_count)};
 }
 
+string shorten(tstring str) {
+  int nbytes = WideCharToMultiByte(CP_UTF8, 0, str.c_str(), (int)str.length(), NULL, 0, NULL, NULL);
+  vector<char> buf((size_t)nbytes);
+  return string{buf.data(), (size_t)WideCharToMultiByte(CP_UTF8, 0, str.c_str(), (int)str.length(), buf.data(), nbytes, NULL, NULL)};
+}
+
 namespace enigma_user {
 
 extern string window_get_caption();
