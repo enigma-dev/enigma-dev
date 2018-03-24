@@ -24,7 +24,7 @@ EnigmaPlugin::EnigmaPlugin()
 {
 }
 
-int EnigmaPlugin::Init()
+int EnigmaPlugin::Load()
 {
   // Load Plugin
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
@@ -77,10 +77,13 @@ int EnigmaPlugin::Init()
   plugin_HandleGameLaunch = reinterpret_cast<void (*)()>(BindFunc(_handle, "ide_handles_game_launch"));
   plugin_LogMakeToConsole = reinterpret_cast<void (*)()>(BindFunc(_handle, "log_make_to_console"));
 
-  CallBack ecb;
-  plugin_Init(&ecb);
-
   return PLUGIN_SUCCESS;
+}
+
+const char* EnigmaPlugin::Init()
+{
+  CallBack ecb;
+  return plugin_Init(&ecb);
 }
 
 void EnigmaPlugin::SetDefinitions(const char* def)

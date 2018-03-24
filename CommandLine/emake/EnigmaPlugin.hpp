@@ -29,7 +29,8 @@ class EnigmaPlugin
 {
 public:
   EnigmaPlugin();
-  int Init();
+  int Load();
+  const char* Init();
   void SetDefinitions(const char* def);
   void HandleGameLaunch();
   void LogMakeToConsole();

@@ -33,7 +33,7 @@ int main(int argc, char* argv[])
     return result;
 
   EnigmaPlugin plugin;
-  plugin.Init();
+  plugin.Load();
   bool quiet = options.GetOption("quiet").as<bool>();
   if (!quiet) {
     outputStream.rdbuf(std::cout.rdbuf());
@@ -41,6 +41,8 @@ int main(int argc, char* argv[])
     plugin.LogMakeToConsole();
   }
   gmx::bind_output_streams(outputStream, errorStream);
+  plugin.Init();
+  return 0;
   plugin.SetDefinitions(options.APIyaml().c_str());
 
   GameMode mode;
