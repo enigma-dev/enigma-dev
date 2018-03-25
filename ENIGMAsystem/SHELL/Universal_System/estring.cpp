@@ -28,7 +28,7 @@
 
 using std::string;
 
-#include "CompilerSource/OS_Switchboard.h"
+#include "../../../CompilerSource/OS_Switchboard.h"
 
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
 
