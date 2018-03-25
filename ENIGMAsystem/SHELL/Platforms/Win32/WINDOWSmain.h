@@ -25,6 +25,7 @@
 #include <string>
 #include <vector>
 using std::string;
+using std::vector;
 
 typedef std::basic_string<WCHAR> tstring;
 tstring widen(const string &str);
