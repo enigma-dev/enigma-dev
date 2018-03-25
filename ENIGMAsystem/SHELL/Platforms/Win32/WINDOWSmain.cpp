@@ -36,7 +36,6 @@ using std::vector;
 
 #include "Platforms/platforms_mandatory.h"
 
-typedef basic_string<WCHAR> tstring;
 tstring widen(const string &str) {
   // Number of shorts will be <= number of bytes; add one for null terminator
   const size_t wchar_count = str.size() + 1;
