@@ -29,6 +29,7 @@
 
 using namespace std;
 #include "Widget_Systems/widgets_mandatory.h"
+#include "Universal_System/estring.h"
 #include "GameSettings.h"
 
 #include "../General/WSdialogs.h"
