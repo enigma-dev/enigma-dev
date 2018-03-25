@@ -35,6 +35,7 @@ using std::string;
 #include <windows.h>
 #include <wchar.h>
 #include <vector>
+using std::vector;
 
 tstring widen(const string &str) {
   // Number of shorts will be <= number of bytes; add one for null terminator
