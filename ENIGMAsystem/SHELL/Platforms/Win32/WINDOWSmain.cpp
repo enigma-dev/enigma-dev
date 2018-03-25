@@ -21,6 +21,8 @@
 #include <sstream>
 #include <algorithm>
 #include <unistd.h>
+#include <windows.h>
+#include <wchar.h>
 #include <vector>
 using std::string;
 using std::vector;
