@@ -26,9 +26,7 @@
 
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
 
-#include <windows.h>
 #include <wchar.h>
-#include <vector>
 
 typedef std::basic_string<WCHAR> tstring;
 tstring widen(const std::string &str);
