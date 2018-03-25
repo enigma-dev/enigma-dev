@@ -31,14 +31,14 @@ inline void bind_output_streams(std::ostream &out, std::ostream &err) {
 }
 
 buffers::Project* LoadGMX(std::string fName);
-buffers::resources::Background* LoadBackground(std::string fName, bool verbose);
-buffers::resources::Sound* LoadSound(std::string fName, bool verbose);
-buffers::resources::Sprite* LoadSprite(std::string fName, bool verbose);
-buffers::resources::Shader* LoadShader(std::string fName, bool verbose);
-buffers::resources::Font* LoadFont(std::string fName, bool verbose);
-buffers::resources::Object* LoadObject(std::string fName, bool verbose);
-buffers::resources::Timeline* LoadTimeLine(std::string fName, bool verbose);
-buffers::resources::Room* LoadRoom(std::string fName, bool verbose);
-buffers::resources::Path* LoadPath(std::string fName, bool verbose);
-buffers::resources::Script* LoadScript(std::string fName, bool verbose);
+buffers::resources::Background* LoadBackground(std::string fName);
+buffers::resources::Sound* LoadSound(std::string fName);
+buffers::resources::Sprite* LoadSprite(std::string fName);
+buffers::resources::Shader* LoadShader(std::string fName);
+buffers::resources::Font* LoadFont(std::string fName);
+buffers::resources::Object* LoadObject(std::string fName);
+buffers::resources::Timeline* LoadTimeLine(std::string fName);
+buffers::resources::Room* LoadRoom(std::string fName);
+buffers::resources::Path* LoadPath(std::string fName);
+buffers::resources::Script* LoadScript(std::string fName);
 }  //namespace gmx
