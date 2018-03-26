@@ -26,6 +26,7 @@
 
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
 
+#include <windows.h>
 #include <wchar.h>
 
 typedef std::basic_string<WCHAR> tstring;
