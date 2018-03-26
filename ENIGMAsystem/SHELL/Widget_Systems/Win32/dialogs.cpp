@@ -26,10 +26,10 @@
 #include <richedit.h>
 #include <stdio.h>
 #include <string>
-#include <vector>
 
 using namespace std;
 #include "Widget_Systems/widgets_mandatory.h"
+#include "Universal_System/estring.h"
 #include "GameSettings.h"
 
 #include "../General/WSdialogs.h"
@@ -200,14 +200,6 @@ static int CALLBACK GetDirectoryAltProc(HWND hwnd, UINT uMsg, LPARAM lp, LPARAM 
     SetWindowText(hwnd, gs_cap.c_str());
 
   return 0;
-}
-
-typedef basic_string<WCHAR> tstring;
-tstring widen(const string &str) {
-  // Number of shorts will be <= number of bytes; add one for null terminator
-  const size_t wchar_count = str.size() + 1;
-  vector<WCHAR> buf(wchar_count);
-  return tstring{buf.data(), (size_t)MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, buf.data(), (int)wchar_count)};
 }
 
 namespace enigma_user {
