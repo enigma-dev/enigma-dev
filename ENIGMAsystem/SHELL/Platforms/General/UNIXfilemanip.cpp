@@ -19,6 +19,7 @@
 #include <cstdlib>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
 
 #include <string>
 #include "PFfilemanip.h"
@@ -47,7 +48,16 @@ int file_rename(string oldname,string newname)
 
 int file_copy(string fname,string newname)
 {
-  return system(("cp "+fname+" "+newname).c_str()); // Hackish, but there's no good implementation on Linux
+  pid_t c = fork();
+  if (c == -1) return false;
+  if (c) {
+    int status;
+    waitpid(c,&status,0);
+    return !status;
+  } else {
+    execlp("cp","cp",fname.c_str(),newname.c_str(),(char *)0);
+    exit(1);
+  }
 }
 
 int directory_exists(string dname)
@@ -60,7 +70,7 @@ int directory_create(string dname) {
   return mkdir(dname.c_str(),S_IRUSR|S_IWUSR|S_IXUSR);
 }
 
-int directory_delete(string dname) {
+int directory_destroy(string dname) {
   return rmdir(dname.c_str());
 }
 
