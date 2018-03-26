@@ -22,6 +22,19 @@
 
 #include <string>
 
+#include "../../../CompilerSource/OS_Switchboard.h"
+
+#if CURRENT_PLATFORM_ID == OS_WINDOWS
+
+#include <windows.h>
+#include <wchar.h>
+
+typedef std::basic_string<WCHAR> tstring;
+tstring widen(const std::string &str);
+std::string shorten(tstring str);
+
+#endif
+
 namespace enigma_user {
 
 std::string base64_encode(std::string const& str);
