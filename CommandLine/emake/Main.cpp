@@ -13,8 +13,8 @@
 #include <iostream>
 #include <streambuf>
 
-std::ostream outputStream(nullptr);
-std::ostream errorStream(nullptr);
+std::ostream outputStream(std::cout.rdbuf());
+std::ostream errorStream(std::cerr.rdbuf());
 
 static std::string tolower(const std::string &str) {
   std::string res = str;
@@ -37,9 +37,10 @@ int main(int argc, char* argv[])
   plugin.Load();
   bool quiet = options.GetOption("quiet").as<bool>();
   if (!quiet) {
-    outputStream.rdbuf(std::cout.rdbuf());
-    errorStream.rdbuf(std::cerr.rdbuf());
     plugin.LogMakeToConsole();
+  } else {
+    outputStream.rdbuf(nullptr);
+    errorStream.rdbuf(nullptr);
   }
   gmx::bind_output_streams(outputStream, errorStream);
   plugin.Init();

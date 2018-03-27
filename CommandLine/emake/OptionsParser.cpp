@@ -94,12 +94,12 @@ OptionsParser::OptionsParser() : _desc("Options")
   _desc.add_options()
     ("help,h", "Print help messages")
     ("info,i", opt::value<std::string>(), "Provides a listing of Platforms, APIs and Extensions")
-    ("input",   opt::value<std::string>()->default_value(""), "Input game file; currently, only test harness single-object games (*.sog) are supported. The --input string is optional.")
+    ("input",   opt::value<std::string>(), "Input game file; currently, only test harness single-object games (*.sog) are supported. The --input string is optional.")
     ("quiet,q", opt::bool_switch()->default_value(false), "Suppresses output to std::out and std::err streams.")
     ("server,s", opt::bool_switch()->default_value(false), "Starts the CLI in server mode (ignores input file).")
-    ("ip", opt::value<std::string>()->default_value("localhost"), "The ip address of the server when running in server mode (defaults to localhost).")
-    ("port", opt::value<int>()->default_value(37818), "The port number to bind when in server mode (defaults to 37818).")
-    ("output,o", opt::value<std::string>()->required(), "Output executable file")
+    ("ip", opt::value<std::string>()->default_value("localhost"), "The ip address of the server when running in server mode.")
+    ("port", opt::value<int>()->default_value(37818), "The port number to bind when in server mode.")
+    ("output,o", opt::value<std::string>(), "Output executable file")
     ("platform,p", opt::value<std::string>()->default_value(def_platform), "Target Platform (XLib, Win32, Cocoa)")
     ("workdir,w", opt::value<std::string>()->default_value(def_workdir), "Working Directory")
     ("codegen,k", opt::value<std::string>()->default_value(def_workdir), "Codegen Directory")
@@ -145,6 +145,14 @@ int OptionsParser::ReadArgs(int argc, char* argv[])
 
     if (!_rawArgs.count("info"))
       opt::notify(_rawArgs);
+    //std::cout << "Hello'" << _rawArgs["input"].as<std::string>() << "'" << std::endl;
+    if (_rawArgs.count("input")) {
+      if (!_rawArgs.count("output")) {
+        throw std::logic_error("Option 'input' requires option 'output'.");
+      }
+    } else if (!_rawArgs["server"].as<bool>()) {
+      throw std::logic_error("Option 'input' or option 'server' is required.");
+    }
   }
   catch(std::exception& e)
   {
