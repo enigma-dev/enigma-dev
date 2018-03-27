@@ -94,7 +94,7 @@ OptionsParser::OptionsParser() : _desc("Options")
   _desc.add_options()
     ("help,h", "Print help messages")
     ("info,i", opt::value<std::string>(), "Provides a listing of Platforms, APIs and Extensions")
-    ("input",   opt::value<std::string>(), "Input game file; currently, only test harness single-object games (*.sog) are supported. The --input string is optional.")
+    ("input",   opt::value<std::string>()->default_value(""), "Input game file; currently, only test harness single-object games (*.sog) are supported. The --input string is optional.")
     ("quiet,q", opt::bool_switch()->default_value(false), "Suppresses output to std::out and std::err streams.")
     ("server,s", opt::bool_switch()->default_value(false), "Starts the CLI in server mode (ignores input file).")
     ("ip", opt::value<std::string>()->default_value("localhost"), "The ip address of the server when running in server mode.")
@@ -146,12 +146,8 @@ int OptionsParser::ReadArgs(int argc, char* argv[])
     if (!_rawArgs.count("info"))
       opt::notify(_rawArgs);
 
-    if (_rawArgs.count("input")) {
-      if (!_rawArgs.count("output")) {
-        throw std::logic_error("Option 'input' requires option 'output'.");
-      }
-    } else if (!_rawArgs["server"].as<bool>()) {
-      throw std::logic_error("Option 'input' or option 'server' is required.");
+    if (!_rawArgs["server"].as<bool>() && !_rawArgs.count("output")) {
+      throw std::logic_error("Option 'server' or option 'output' is required.");
     }
   }
   catch(std::exception& e)
