@@ -145,7 +145,7 @@ int OptionsParser::ReadArgs(int argc, char* argv[])
 
     if (!_rawArgs.count("info"))
       opt::notify(_rawArgs);
-    //std::cout << "Hello'" << _rawArgs["input"].as<std::string>() << "'" << std::endl;
+
     if (_rawArgs.count("input")) {
       if (!_rawArgs.count("output")) {
         throw std::logic_error("Option 'input' requires option 'output'.");
