@@ -31,7 +31,7 @@ class CompilerServiceImpl final : public Compiler::Service {
     while (raw != nullptr) {
       Resource resource;
 
-      resource.set_value(raw);
+      resource.set_name(raw);
       resource.set_is_function(plugin.ResourceIsFunction());
       resource.set_arg_count_min(plugin.ResourceArgCountMin());
       resource.set_arg_count_max(plugin.ResourceArgCountMax());

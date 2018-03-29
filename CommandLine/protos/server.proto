@@ -17,7 +17,7 @@ message Empty {
 }
 
 message Resource {
-  optional string value = 1;
+  optional string name = 1;
   optional bool is_function = 2;
   optional int32 arg_count_min = 3;
   optional int32 arg_count_max = 4;
