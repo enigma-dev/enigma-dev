@@ -8,7 +8,7 @@ service Compiler {
   rpc GetResources (Empty) returns (stream Resource);
 
   rpc SyntaxCheck(SyntaxCheckRequest) returns (SyntaxError);
-  rpc DefinitionsModified(DefinitionsModifiedRequest) returns (SyntaxError);
+  rpc SetDefinitions(SetDefinitionsRequest) returns (SyntaxError);
 
   rpc Teardown (Empty) returns (Empty);
 }
@@ -55,8 +55,8 @@ message SyntaxError {
   optional int32 absolute_index = 4; ///< The zero-based position in the entire code at which the error occurred.
 }
 
-message DefinitionsModifiedRequest {
-  optional string wscode = 1;
+message SetDefinitionsRequest {
+  optional string code = 1;
   optional string yaml = 2;
 }
 

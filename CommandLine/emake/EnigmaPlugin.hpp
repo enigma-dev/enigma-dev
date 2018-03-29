@@ -31,7 +31,9 @@ public:
   EnigmaPlugin();
   int Load();
   const char* Init();
-  void SetDefinitions(const char* def);
+  syntax_error* SetDefinitions(const char* def, const char* yaml);
+  syntax_error* SetDefinitions(const char* yaml);
+  syntax_error* SyntaxCheck(int count, const char** names, const char* code);
   void HandleGameLaunch();
   void LogMakeToConsole();
   int BuildGame(EnigmaStruct* data, GameMode mode, const char* fpath);

@@ -56,6 +56,15 @@ class CompilerServiceImpl final : public Compiler::Service {
     return Status::OK;
   }
 
+  Status SetDefinitions(ServerContext* /*context*/, const SetDefinitionsRequest* request, SyntaxError* reply) override {
+    syntax_error* err = plugin.SetDefinitions(request->code().c_str(), request->yaml().c_str());
+    reply->set_message(err->err_str);
+    reply->set_line(err->line);
+    reply->set_position(err->position);
+    reply->set_absolute_index(err->absolute_index);
+    return Status::OK;
+  }
+
   private:
   EnigmaPlugin& plugin;
 };

@@ -86,9 +86,19 @@ const char* EnigmaPlugin::Init()
   return plugin_Init(&ecb);
 }
 
-void EnigmaPlugin::SetDefinitions(const char* def)
+syntax_error* EnigmaPlugin::SetDefinitions(const char* def, const char* yaml)
 {
-  plugin_DefinitionsModified("", def);
+  return plugin_DefinitionsModified(def, yaml);
+}
+
+syntax_error* EnigmaPlugin::SetDefinitions(const char* yaml)
+{
+  return plugin_DefinitionsModified("", yaml);
+}
+
+syntax_error* EnigmaPlugin::SyntaxCheck(int count, const char** names, const char* code)
+{
+  return plugin_SyntaxCheck(count, names, code);
 }
 
 void EnigmaPlugin::HandleGameLaunch()
