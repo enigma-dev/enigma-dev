@@ -7,8 +7,8 @@ service Compiler {
   rpc CompileBuffer (CompileRequest) returns (stream CompileReply);
   rpc GetResources (Empty) returns (stream Resource);
 
-  //std::function<syntax_error*(const char*, const char*)> rpc DefinitionsModified = nullptr;
-  //std::function<syntax_error*(int, const char**, const char*)> rpc SyntaxCheck = nullptr;
+  rpc SyntaxCheck(SyntaxCheckRequest) returns (SyntaxError);
+  rpc DefinitionsModified(DefinitionsModifiedRequest) returns (SyntaxError);
 
   rpc Teardown (Empty) returns (Empty);
 }
@@ -46,4 +46,22 @@ message CompileRequest {
 message CompileReply {
   optional string message = 1;
   optional int32 progress = 2;
+}
+
+message SyntaxError {
+  optional string message = 1; ///< The text associated with the error.
+  optional int32 line = 2; ///< The line number on which the error occurred.
+  optional int32 position = 3; ///< The column number in the line at which the error occurred.
+  optional int32 absolute_index = 4; ///< The zero-based position in the entire code at which the error occurred.
+}
+
+message DefinitionsModifiedRequest {
+  optional string wscode = 1;
+  optional string yaml = 2;
+}
+
+message SyntaxCheckRequest {
+  optional string code = 1;
+  optional int32 script_count = 2;
+  repeated string script_names = 3;
 }
