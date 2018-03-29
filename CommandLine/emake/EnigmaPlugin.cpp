@@ -103,17 +103,50 @@ void EnigmaPlugin::LogMakeToConsole()
 
 int EnigmaPlugin::BuildGame(EnigmaStruct* data, GameMode mode, const char* fpath)
 {
-  /* TODO: Use to print keywords list...
-  const char* currentResource = plugin_FirstResource();
-  while (!plugin_ResourcesAtEnd())
-  {
-    currentResource = plugin_NextResource();
-  }*/
-
   return plugin_CompileEGM(data, fpath, mode);
 }
 
 int EnigmaPlugin::BuildGame(buffers::Game* data, GameMode mode, const char* fpath)
 {
   return plugin_CompileBuffer(data, fpath, mode);
+}
+
+const char* EnigmaPlugin::NextResource() {
+  return plugin_NextResource();
+}
+
+const char* EnigmaPlugin::FirstResource() {
+  return plugin_FirstResource();
+}
+
+bool EnigmaPlugin::ResourceIsFunction() {
+  return plugin_ResourceIsFunction();
+}
+
+int EnigmaPlugin::ResourceArgCountMin() {
+  return plugin_ResourceArgCountMin();
+}
+
+int EnigmaPlugin::ResourceArgCountMax() {
+  return plugin_ResourceArgCountMax();
+}
+
+int EnigmaPlugin::ResourceOverloadCount() {
+  return plugin_ResourceOverloadCount();
+}
+
+const char* EnigmaPlugin::ResourceParameters(int i) {
+  return plugin_ResourceParameters(i);
+}
+
+int EnigmaPlugin::ResourceIsTypeName() {
+  return plugin_ResourceIsTypeName();
+}
+
+int EnigmaPlugin::ResourceIsGlobal() {
+  return plugin_ResourceIsGlobal();
+}
+
+bool EnigmaPlugin::ResourcesAtEnd() {
+  return plugin_ResourcesAtEnd();
 }

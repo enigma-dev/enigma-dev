@@ -5,9 +5,7 @@ import "game.proto";
 
 service Compiler {
   rpc CompileBuffer (CompileRequest) returns (stream CompileReply);
-
-  rpc FirstResource (Empty) returns (Resource);
-  rpc NextResource (Empty) returns (Resource);
+  rpc GetResources (Empty) returns (stream Resource);
 
   //std::function<syntax_error*(const char*, const char*)> rpc DefinitionsModified = nullptr;
   //std::function<syntax_error*(int, const char**, const char*)> rpc SyntaxCheck = nullptr;

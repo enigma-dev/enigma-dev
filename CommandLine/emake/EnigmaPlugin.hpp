@@ -36,6 +36,16 @@ public:
   void LogMakeToConsole();
   int BuildGame(EnigmaStruct* data, GameMode mode, const char* fpath);
   int BuildGame(buffers::Game* data, GameMode mode, const char* fpath);
+  const char* NextResource();
+  const char* FirstResource();
+  bool ResourceIsFunction();
+  int ResourceArgCountMin();
+  int ResourceArgCountMax();
+  int ResourceOverloadCount();
+  const char* ResourceParameters(int i);
+  int ResourceIsTypeName();
+  int ResourceIsGlobal();
+  bool ResourcesAtEnd();
 
 private:
   std::function<const char*(EnigmaCallbacks*)> plugin_Init = nullptr;
