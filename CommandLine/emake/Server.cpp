@@ -56,12 +56,25 @@ class CompilerServiceImpl final : public Compiler::Service {
     return Status::OK;
   }
 
+  SyntaxError GetSyntaxError(syntax_error* err) {
+    SyntaxError error;
+    error.set_message(err->err_str);
+    error.set_line(err->line);
+    error.set_position(err->position);
+    error.set_absolute_index(err->absolute_index);
+    return error;
+  }
+
   Status SetDefinitions(ServerContext* /*context*/, const SetDefinitionsRequest* request, SyntaxError* reply) override {
     syntax_error* err = plugin.SetDefinitions(request->code().c_str(), request->yaml().c_str());
-    reply->set_message(err->err_str);
-    reply->set_line(err->line);
-    reply->set_position(err->position);
-    reply->set_absolute_index(err->absolute_index);
+    reply->CopyFrom(GetSyntaxError(err));
+    return Status::OK;
+  }
+
+  Status SyntaxCheck(ServerContext* /*context*/, const SyntaxCheckRequest* request, SyntaxError* reply) override {
+    //FIXME: not sure how to turn std::string* into const char** for script_names()
+    //syntax_error* err = plugin.SyntaxCheck(request->script_count(), request->script_names().data(), request->code().c_str());
+    //reply->CopyFrom(GetSyntaxError(err));
     return Status::OK;
   }
 
