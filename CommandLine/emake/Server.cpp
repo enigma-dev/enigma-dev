@@ -26,8 +26,8 @@ class CompilerServiceImpl final : public Compiler::Service {
     return Status::OK;
   }
 
-  Status GetResources(ServerContext* /*context*/, const CompileRequest* request, ServerWriter<CompileReply>* writer) override {
-    const char* raw = plugin.FirstAvailableResource();
+  Status GetResources(ServerContext* /*context*/, const Empty* request, ServerWriter<Resource>* writer) override {
+    const char* raw = plugin.FirstResource();
     while (raw != nullptr) {
       Resource resource;
 
@@ -43,9 +43,9 @@ class CompilerServiceImpl final : public Compiler::Service {
         resource.add_parameters(plugin.ResourceParameters(i));
       }
 
-      if (!plugin.ResourcesAtEnd())
+      if (!plugin.ResourcesAtEnd()) {
         resource.set_is_end(false);
-        raw = plugin.NextAvailableResource();
+        raw = plugin.NextResource();
       } else {
         resource.set_is_end(true);
       }
