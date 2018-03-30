@@ -34,6 +34,7 @@ using std::vector;
 
 #include "Platforms/platforms_mandatory.h"
 
+
 namespace enigma_user {
 
 const int os_type = os_windows;

@@ -104,7 +104,7 @@ namespace enigma_user
 
 bool object_exists(int objid)
 {
-  return ((objid >= 0) && (objid < enigma::objectcount) && bool(enigma::objectdata[objid]));
+  return ((objid >= 0) && (unsigned(objid) < enigma::obj_idmax) && bool(enigma::objectdata[objid]));
 }
 
 void object_set_depth(int objid, int val)
