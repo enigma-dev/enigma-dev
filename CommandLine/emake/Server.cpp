@@ -26,7 +26,7 @@ class CompilerServiceImpl final : public Compiler::Service {
     return Status::OK;
   }
 
-  Status GetResources(ServerContext* /*context*/, const Empty* request, ServerWriter<Resource>* writer) override {
+  Status GetResources(ServerContext* /*context*/, const Empty* /*request*/, ServerWriter<Resource>* writer) override {
     const char* raw = plugin.FirstResource();
     while (raw != nullptr) {
       Resource resource;
@@ -72,8 +72,10 @@ class CompilerServiceImpl final : public Compiler::Service {
   }
 
   Status SyntaxCheck(ServerContext* /*context*/, const SyntaxCheckRequest* request, SyntaxError* reply) override {
-    const char* firstName = request->script_names().data()[0]->c_str();
-    syntax_error* err = plugin.SyntaxCheck(request->script_count(), &firstName, request->code().c_str());
+    vector<const char*> script_names;
+    script_names.reserve(request->script_names().size());
+    for (const std::string &str : request->script_names()) script_names.push_back(str.c_str());
+    syntax_error* err = plugin.SyntaxCheck(request->script_count(), script_names.data(), request->code().c_str());
     reply->CopyFrom(GetSyntaxError(err));
     return Status::OK;
   }
