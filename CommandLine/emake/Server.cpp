@@ -72,9 +72,9 @@ class CompilerServiceImpl final : public Compiler::Service {
   }
 
   Status SyntaxCheck(ServerContext* /*context*/, const SyntaxCheckRequest* request, SyntaxError* reply) override {
-    //FIXME: not sure how to turn std::string* into const char** for script_names()
-    //syntax_error* err = plugin.SyntaxCheck(request->script_count(), request->script_names().data(), request->code().c_str());
-    //reply->CopyFrom(GetSyntaxError(err));
+    const char* firstName = request->script_names().data()[0]->c_str();
+    syntax_error* err = plugin.SyntaxCheck(request->script_count(), &firstName, request->code().c_str());
+    reply->CopyFrom(GetSyntaxError(err));
     return Status::OK;
   }
 
