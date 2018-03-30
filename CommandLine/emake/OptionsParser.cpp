@@ -150,8 +150,8 @@ int OptionsParser::ReadArgs(int argc, char* argv[])
 #ifndef CLI_DISABLE_SERVER
     if (!_rawArgs["server"].as<bool>() && !_rawArgs.count("output")) {
       throw std::logic_error("Option 'server' or option 'output' is required.");
-#endif
     }
+#endif
   }
   catch(std::exception& e)
   {
