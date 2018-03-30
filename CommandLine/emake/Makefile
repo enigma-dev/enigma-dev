@@ -11,13 +11,18 @@ else
 	OS_LIBS=-lboost_system-mt -Wl,--no-as-needed -Wl,-rpath=./ -lboost_program_options-mt -lboost_iostreams-mt -lboost_filesystem-mt -lboost_system-mt -lpthread
 endif
 
+ifeq ($(TRAVIS), true)
+	GOOGLE_LIBS=-lgrpc++ -lgrpc -lgpr -lssl -lcrypto -lcares -lprotobuf -lz
+else
+	GOOGLE_LIBS= -lgrpc++ -lprotobuf
+endif
+
 EXTRA_SOURCES := ../../CompilerSource/settings-parse/eyaml.cpp ../../CompilerSource/compiler/event_reader/event_parser.cpp
 EXTRA_SRC_DIR := ../../CompilerSource
 
 PROTO_DIR := ../protos
 CXXFLAGS  := -I$(SRC_DIR) -I$(EXTRA_SRC_DIR) -I../libGMX -I$(PROTO_DIR) -I$(PROTO_DIR)/codegen -std=c++11 -Wall -Wextra -Wpedantic -g
-LDFLAGS   := $(OS_LIBS) -L../libGMX -lGMX -L/mingw64/lib/pugixml-1.8/ -lpugixml -L../../ -lProtocols -lprotobuf -lgrpc++
-
+LDFLAGS   := $(OS_LIBS) -L../../ -lProtocols -L../libGMX -lGMX -L/mingw64/lib/pugixml-1.8/ -lpugixml $(GOOGLE_LIBS)
 EXTRA_OBJS := $(patsubst $(EXTRA_SRC_DIR)/%, $(OBJ_DIR)/Extra/%, $(patsubst %.cpp, %.o, $(EXTRA_SOURCES)))
 
 rwildcard=$(wildcard $1/$2) $(foreach d,$(wildcard $1/*),$(call rwildcard,$d,$2))
