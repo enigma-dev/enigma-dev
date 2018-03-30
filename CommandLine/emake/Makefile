@@ -23,7 +23,7 @@ EXTRA_OBJS := $(patsubst $(EXTRA_SRC_DIR)/%, $(OBJ_DIR)/Extra/%, $(patsubst %.cp
 rwildcard=$(wildcard $1/$2) $(foreach d,$(wildcard $1/*),$(call rwildcard,$d,$2))
 SOURCES := $(call rwildcard,$(SRC_DIR),*.cpp)
 ifeq ($(TRAVIS), true)
-	SOURCES := $(filter-out Server.cpp, $(SOURCES))
+	SOURCES := $(filter-out ./Server.cpp, $(SOURCES))
 	CXXFLAGS += -DCLI_DISABLE_SERVER
 else
 	LDFLAGS += -lgrpc++
