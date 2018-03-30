@@ -2,7 +2,9 @@
 #include "OptionsParser.hpp"
 #include "EnigmaPlugin.hpp"
 #include "Game.hpp"
+#ifndef CLI_DISABLE_SERVER
 #include "Server.hpp"
+#endif
 #include "SOG.hpp"
 #include "gmx.h"
 #include "Proto2ES.h"
@@ -49,12 +51,14 @@ int main(int argc, char* argv[])
   bool run = options.GetOption("run").as<bool>();
   if (!run) plugin.HandleGameLaunch();
 
+#ifndef CLI_DISABLE_SERVER
   bool server = options.GetOption("server").as<bool>();
   if (server) {
     int port = options.GetOption("port").as<int>();
     string ip = options.GetOption("ip").as<std::string>();
     return RunServer(ip + ":" + std::to_string(port), plugin);
   }
+#endif
 
   GameMode mode;
   std::string _mode = options.GetOption("mode").as<std::string>();
