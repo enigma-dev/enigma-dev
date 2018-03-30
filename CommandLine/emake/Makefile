@@ -16,7 +16,7 @@ EXTRA_SRC_DIR := ../../CompilerSource
 
 PROTO_DIR := ../protos
 CXXFLAGS  := -I$(SRC_DIR) -I$(EXTRA_SRC_DIR) -I../libGMX -I$(PROTO_DIR) -I$(PROTO_DIR)/codegen -std=c++11 -Wall -Wextra -Wpedantic -g
-LDFLAGS   := $(OS_LIBS) -L../libGMX -lGMX -L/mingw64/lib/pugixml-1.8/ -lpugixml -L../../ -lProtocols -lprotobuf -lgrpc++
+LDFLAGS   := $(OS_LIBS) -L../libGMX -lGMX -L/mingw64/lib/pugixml-1.8/ -lpugixml -L../../ -lProtocols -lprotobuf
 
 EXTRA_OBJS := $(patsubst $(EXTRA_SRC_DIR)/%, $(OBJ_DIR)/Extra/%, $(patsubst %.cpp, %.o, $(EXTRA_SOURCES)))
 
@@ -25,6 +25,8 @@ SOURCES := $(call rwildcard,$(SRC_DIR),*.cpp)
 ifeq ($(TRAVIS), true)
 	SOURCES := $(filter-out server.cpp, $(SOURCES))
 	CXXFLAGS += -DCLI_DISABLE_SERVER
+else
+	LDFLAGS += -lgrpc++
 endif
 OBJECTS := $(patsubst $(SRC_DIR)/%, $(OBJ_DIR)/%, $(patsubst %.cpp, %.o, $(SOURCES)))
 OBJDIRS := $(sort $(OBJ_DIR) $(dir $(OBJECTS)) $(dir $(EXTRA_OBJS)))

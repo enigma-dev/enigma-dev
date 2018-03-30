@@ -37,6 +37,7 @@ ifeq ($(TRAVIS), true)
 else
 	PROTO_OUT += $(PROTO_DIR)/server.grpc.pb.cc
 	PROTO_OBJECTS += $(OBJ_DIR)/codegen/server.grpc.o
+	LIBLDFLAGS := -lgrpc++
 endif
 
 OBJDIRS = $(sort $(OBJ_DIR) $(dir $(PROTO_OBJECTS)) $(dir $(OBJECTS)))
@@ -55,7 +56,7 @@ clean:
 	rm -rf $(LIBRARY) $(OBJ_DIR) $(PROTO_DIR)
 
 $(LIBRARY): $(PROTO_OBJECTS) $(OBJECTS)
-	$(CXX) -shared -o $@ $^ -lprotobuf -lgrpc++
+	$(CXX) -shared -o $@ $^ $(LIBLDFLAGS) -lprotobuf
 
 # Create the object directories
 $(OBJDIRS):
