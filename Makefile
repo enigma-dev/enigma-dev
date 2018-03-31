@@ -1,36 +1,36 @@
 PATH := $(eTCpath)$(PATH)
 
-.PHONY: ENIGMA all clean Game clean-game liblodepng libProtocols libGMX required-directories .FORCE
+.PHONY: ENIGMA all clean Game clean-game liblodepng libProtocols libGM required-directories .FORCE
 
 ENIGMA: .FORCE libProtocols liblodepng
-	$(MAKE) -C CompilerSource 
+	$(MAKE) -C CompilerSource
 
 clean: .FORCE
 	$(MAKE) -C CompilerSource/ clean
 	$(MAKE) -C CommandLine/emake/ clean
-	$(MAKE) -C CommandLine/libGMX/ clean
+	$(MAKE) -C CommandLine/libGM/ clean
 	$(MAKE) -C CommandLine/protos/ clean
 	$(MAKE) -C CommandLine/testing/ clean
 	$(MAKE) -C lodepng/ clean
 
-all: liblodepng libProtocols libGMX ENIGMA emake test-runner .FORCE
+all: liblodepng libProtocols libGM ENIGMA emake test-runner .FORCE
 
 Game: liblodepng .FORCE
 	$(MAKE) -C ENIGMAsystem/SHELL
 
 clean-game: .FORCE
 	$(MAKE) -C ENIGMAsystem/SHELL clean
-	
+
 liblodepng: .FORCE
 	$(MAKE) -C lodepng/
 
 libProtocols: .FORCE
 	$(MAKE) -C CommandLine/protos/
 
-libGMX: .FORCE libProtocols
-	$(MAKE) -C CommandLine/libGMX/
+libGM: .FORCE libProtocols
+	$(MAKE) -C CommandLine/libGM/
 
-emake: libGMX .FORCE
+emake: libGM .FORCE
 	$(MAKE) -C CommandLine/emake/
 
 test-runner: emake .FORCE
