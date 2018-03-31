@@ -1,4 +1,4 @@
-LIBRARY   := libGM.a
+LIBRARY   := libEGM.a
 PROTO_DIR := ../protos
 CXXFLAGS  := -I/mingw64/include/pugixml-1.8/ -I$(PROTO_DIR) -I$(PROTO_DIR)/codegen -std=c++11 -Wall -Wextra -Wpedantic -g
 LDFLAGS   := $(OS_LIBS) -L../../ -lProtocols -L/mingw64/lib/pugixml-1.8/ -lpugixml

@@ -15,8 +15,8 @@ EXTRA_SOURCES := ../../CompilerSource/settings-parse/eyaml.cpp ../../CompilerSou
 EXTRA_SRC_DIR := ../../CompilerSource
 
 PROTO_DIR := ../protos
-CXXFLAGS  := -I$(SRC_DIR) -I$(EXTRA_SRC_DIR) -I../libGM -I../libGM -I$(PROTO_DIR) -I$(PROTO_DIR)/codegen -std=c++11 -Wall -Wextra -Wpedantic -g
-LDFLAGS   := $(OS_LIBS) -L../libGM -lGM -L/mingw64/lib/pugixml-1.8/ -lpugixml -L../../ -lProtocols -lprotobuf
+CXXFLAGS  := -I$(SRC_DIR) -I$(EXTRA_SRC_DIR) -I../libEGM -I../libEGM -I$(PROTO_DIR) -I$(PROTO_DIR)/codegen -std=c++11 -Wall -Wextra -Wpedantic -g
+LDFLAGS   := $(OS_LIBS) -L../libEGM -lEGM -L/mingw64/lib/pugixml-1.8/ -lpugixml -L../../ -lProtocols -lprotobuf
 
 EXTRA_OBJS := $(patsubst $(EXTRA_SRC_DIR)/%, $(OBJ_DIR)/Extra/%, $(patsubst %.cpp, %.o, $(EXTRA_SOURCES)))
 
