@@ -17,9 +17,16 @@
 
 #include "gmk.h"
 
+#include "codegen/project.pb.h"
+
 #include <fstream>
 #include <utility>
+#include <functional>
+#include <unordered_map>
+#include <vector>
+#include <set>
 
+using namespace buffers;
 using namespace buffers::resources;
 
 namespace gmk {
@@ -144,7 +151,7 @@ int LoadSettings(Decoder &dec) {
   int ver = dec.read4();
   if (ver != 530 && ver != 542 && ver != 600 && ver != 702 && ver != 800 && ver != 810) {
     err << "Unsupported GMK Settings version: " << ver << std::endl;
-    return -1;
+    return 0;
   }
 
   //if (ver >= 800) beginInflate(in); // TODO: zlib beginInflate
@@ -244,14 +251,14 @@ int LoadSettings(Decoder &dec) {
   }
   //in.endInflate(); TODO: zlib endInflate
 
-  return 0;
+  return 1;
 }
 
 int LoadTriggers(Decoder &dec) {
   int ver = dec.read4();
   if (ver != 800) {
     err << "Unsupported GMK Triggers version: " << ver << std::endl;
-    return -1;
+    return 0;
   }
 
   int no = dec.read4();
@@ -264,7 +271,7 @@ int LoadTriggers(Decoder &dec) {
     ver = dec.read4();
     if (ver != 800) {
       err << "Unsupported GMK Trigger version: " << ver << std::endl;
-      return -1;
+      return 0;
     }
     dec.readStr(); // trigger name
     dec.readStr(); // trigger condition
@@ -274,7 +281,7 @@ int LoadTriggers(Decoder &dec) {
   }
   dec.skip(8); //last changed
 
-  return 0;
+  return 1;
 }
 
 int LoadConstants(Decoder &dec) {
@@ -290,6 +297,71 @@ int LoadConstants(Decoder &dec) {
     dec.readStr(); // constant value
   }
   dec.skip(8); //last changed
+
+  return 1;
+}
+
+using TypeCase = TreeNode::TypeCase;
+using IdMap = std::unordered_map<TypeCase, std::unordered_map<int, std::string>>;
+using FactoryFunction = std::function<std::unique_ptr<google::protobuf::Message> (Decoder&)>;
+using FactoryMap = std::unordered_map<TypeCase, FactoryFunction>;
+using VersionMap = std::unordered_map<TypeCase, std::set<int>>;
+
+std::unique_ptr<Sound> LoadSound(Decoder &dec) {
+  std::unique_ptr<Sound> sound(new Sound());
+
+
+  return sound;
+}
+
+int LoadGroup(Decoder &dec, TypeCase type, IdMap &idMap) {
+  static VersionMap supportedGroupVersion({
+    { TypeCase::kSound, { 400, 800 } }
+  });
+  static VersionMap supportedVersion({
+    { TypeCase::kSound, { 440, 600, 800 } }
+  });
+  static FactoryMap factoryMap({
+    { TypeCase::kSound, &LoadSound }
+  });
+
+  int ver = dec.read4();
+  auto supportedGroupVersions = supportedGroupVersion[type];
+  if (!supportedGroupVersions.count(ver)) {
+    err << "GMK group '" << type << "' with version '" << ver << "' is unsupported" << std::endl;
+    return 0;
+  }
+
+  const auto createFunc = factoryMap.find(type);
+  if (createFunc == factoryMap.end()) {
+    err << "GMK group '" << type << "' with version '" << ver << "' does not have a registered factory function" << std::endl;
+    return 0;
+  }
+
+  int count = dec.read4();
+  for (size_t i = 0; i < count; ++i) {
+    //if (ver == 800) in.beginInflate();
+    if (!dec.readBool()) {
+      // was deleted
+      //in.endInflate();
+      continue;
+    }
+    std::string name = dec.readStr();
+    if (ver == 800) dec.skip(8); //last changed
+    ver = dec.read4();
+    auto supportedVersions = supportedVersion[type];
+    if (!supportedVersions.count(ver)) {
+      err << "GMK resource of type '" << type << "' with id '" << i
+          << "' has an unsupported version '" << ver << "'" << std::endl;
+      return 0;
+    }
+
+    auto nameMap = idMap[type];
+    nameMap[i] = name;
+    auto res = createFunc->second(dec);
+
+    //in.endInflate();
+  }
 
   return 1;
 }
@@ -339,6 +411,24 @@ buffers::Project *LoadGMK(std::string fName) {
   if (ver >= 800) {
     if (!LoadTriggers(dec)) return nullptr;
     if (!LoadConstants(dec)) return nullptr;
+  }
+
+  IdMap idMap;
+  static const std::vector<TypeCase> orderedGroups({
+    TypeCase::kSound,
+    TypeCase::kSprite,
+    TypeCase::kBackground,
+    TypeCase::kPath,
+    TypeCase::kScript,
+    TypeCase::kFont,
+    TypeCase::kTimeline,
+    TypeCase::kObject,
+    TypeCase::kRoom
+  });
+
+  for (TypeCase type : orderedGroups) {
+    out << type << std::endl;
+    if (!LoadGroup(dec, type, idMap)) return nullptr;
   }
 
   return proj.release();
