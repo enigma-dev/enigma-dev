@@ -58,6 +58,11 @@ class Decoder {
 
   std::unique_ptr<char[]> read(size_t length, size_t off=0) {
     char* bytes = new char[length];
+    read(bytes, length, off);
+    return std::unique_ptr<char[]>(bytes);
+  }
+
+  void read(char* bytes, size_t length, size_t off=0) {
     int pos = in.tellg();
     in.read(bytes, length);
     if (decodeTable) {
@@ -67,7 +72,6 @@ class Decoder {
         bytes[off + i] = (char) x;
       }
     }
-    return std::unique_ptr<char[]>(bytes);
   }
 
   std::string readStr() {
@@ -77,9 +81,9 @@ class Decoder {
   }
 
   double readD() {
-    std::unique_ptr<char[]> bytes = read(8);
-    // TODO: mek double
-    return 0;
+    union { char bytes[8]; double dbl; } data;
+    read(data.bytes, 8);
+    return data.dbl;
   }
 
   void readZlibImage() {
@@ -216,7 +220,7 @@ int LoadSettings(Decoder &dec) {
   // ERROR_ON_ARGS = ((errors & 0x02) != 0)
   dec.readStr(); // AUTHOR
   if (ver > 600)
-    std::cout << "version: " << dec.readStr() << std::endl; // VERSION
+    dec.readStr(); // VERSION
   else
     dec.read4(); // VERSION std::to_string
   dec.readD(); // LAST_CHANGED
