@@ -406,6 +406,8 @@ std::unique_ptr<Sprite> LoadSprite(Decoder &dec, int ver) {
       dec.readZlibImage();
     }
   }
+  sprite->set_width(w);
+  sprite->set_height(h);
 
   if (ver >= 800) {
     sprite->set_shape(static_cast<Sprite::Shape>(dec.read4()));
@@ -421,21 +423,77 @@ std::unique_ptr<Sprite> LoadSprite(Decoder &dec, int ver) {
   return sprite;
 }
 
+std::unique_ptr<Background> LoadBackground(Decoder &dec, int ver) {
+  auto background = std::make_unique<Background>();
+
+  int w = 0, h = 0;
+  if (ver < 710) {
+    w = dec.read4();
+    h = dec.read4();
+    background->set_width(w);
+    background->set_height(h);
+    background->set_transparent(dec.readBool());
+    if (ver > 400) {
+      background->set_smooth_edges(dec.readBool());
+      background->set_preload(dec.readBool());
+
+      background->set_use_as_tileset(dec.readBool());
+      background->set_tile_width(dec.read4());
+      background->set_tile_height(dec.read4());
+      background->set_horizontal_offset(dec.read4());
+      background->set_vertical_offset(dec.read4());
+      background->set_horizontal_spacing(dec.read4());
+      background->set_vertical_spacing(dec.read4());
+    } else {
+      dec.skip(4); //use video memory
+      background->set_preload(!dec.readBool());
+    }
+    if (dec.readBool()) {
+      if (dec.read4() != -1)
+        dec.readZlibImage();
+    }
+  } else { //ver >= 710
+    background->set_use_as_tileset(dec.readBool());
+    background->set_tile_width(dec.read4());
+    background->set_tile_height(dec.read4());
+    background->set_horizontal_offset(dec.read4());
+    background->set_vertical_offset(dec.read4());
+    background->set_horizontal_spacing(dec.read4());
+    background->set_vertical_spacing(dec.read4());
+    int dataver = dec.read4();
+    if (dataver != 800) {
+      err << "GMK Background with inner version '" << ver << "' has image data with "
+          << "unsupported version '" << dataver << "'" << std::endl;
+      return nullptr;
+    }
+    w = dec.read4();
+    h = dec.read4();
+    if (w != 0 && h != 0) dec.readBGRAImage();
+  }
+  background->set_width(w);
+  background->set_height(h);
+
+  return background;
+}
+
 int LoadGroup(Decoder &dec, TypeCase type, IdMap &idMap) {
   using FactoryFunction = std::function<std::unique_ptr<google::protobuf::Message>(Decoder&, int)>;
   using FactoryMap = std::unordered_map<TypeCase, FactoryFunction>;
 
   static VersionMap supportedGroupVersion({
     { TypeCase::kSound,  { 400, 800 } },
-    { TypeCase::kSprite, { 400, 800, 810 } }
+    { TypeCase::kSprite, { 400, 800, 810 } },
+    { TypeCase::kBackground, { 400, 800 } }
   });
   static VersionMap supportedVersion({
     { TypeCase::kSound,  { 440, 600, 800 } },
-    { TypeCase::kSprite, { 400, 542, 800, 810 } }
+    { TypeCase::kSprite, { 400, 542, 800, 810 } },
+    { TypeCase::kBackground, { 400, 543, 710 } }
   });
   static const FactoryMap factoryMap({
     { TypeCase::kSound,  LoadSound },
-    { TypeCase::kSprite, LoadSprite }
+    { TypeCase::kSprite, LoadSprite },
+    { TypeCase::kBackground, LoadBackground }
   });
 
   int ver = dec.read4();
@@ -478,6 +536,7 @@ int LoadGroup(Decoder &dec, TypeCase type, IdMap &idMap) {
           << "' and the project cannot be loaded" << std::endl;
       return 0;
     }
+    std::cout << res->DebugString() << std::endl;
 
     //in.endInflate();
   }
