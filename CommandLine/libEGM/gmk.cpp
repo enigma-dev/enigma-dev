@@ -500,7 +500,7 @@ std::unique_ptr<Path> LoadPath(Decoder &dec, int ver) {
   return path;
 }
 
-std::unique_ptr<Script> LoadScript(Decoder &dec, int ver) {
+std::unique_ptr<Script> LoadScript(Decoder &dec, int /*ver*/) {
   auto script = std::make_unique<Script>();
 
   script->set_code(dec.readStr());
@@ -508,7 +508,7 @@ std::unique_ptr<Script> LoadScript(Decoder &dec, int ver) {
   return script;
 }
 
-std::unique_ptr<Font> LoadFont(Decoder &dec, int ver) {
+std::unique_ptr<Font> LoadFont(Decoder &dec, int /*ver*/) {
   auto font = std::make_unique<Font>();
 
   font->set_font_name(dec.readStr());
