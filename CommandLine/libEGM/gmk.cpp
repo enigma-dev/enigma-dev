@@ -496,6 +496,14 @@ std::unique_ptr<Path> LoadPath(Decoder &dec, int ver) {
   return path;
 }
 
+std::unique_ptr<Script> LoadScript(Decoder &dec, int ver) {
+  auto script = std::make_unique<Script>();
+
+  script->set_code(dec.readStr());
+
+  return script;
+}
+
 int LoadGroup(Decoder &dec, TypeCase type, IdMap &idMap) {
   using FactoryFunction = std::function<std::unique_ptr<google::protobuf::Message>(Decoder&, int)>;
   using FactoryMap = std::unordered_map<TypeCase, FactoryFunction>;
@@ -504,19 +512,22 @@ int LoadGroup(Decoder &dec, TypeCase type, IdMap &idMap) {
     { TypeCase::kSound,      { 400, 800      } },
     { TypeCase::kSprite,     { 400, 800, 810 } },
     { TypeCase::kBackground, { 400, 800      } },
-    { TypeCase::kPath,       { 420, 800      } }
+    { TypeCase::kPath,       { 420, 800      } },
+    { TypeCase::kScript,     { 400, 800, 810 } }
   });
   static VersionMap supportedVersion({
     { TypeCase::kSound,      { 440, 600, 800      } },
     { TypeCase::kSprite,     { 400, 542, 800, 810 } },
     { TypeCase::kBackground, { 400, 543, 710      } },
-    { TypeCase::kPath,       { 530                } }
+    { TypeCase::kPath,       { 530                } },
+    { TypeCase::kScript,     { 400, 800, 810      } }
   });
   static const FactoryMap factoryMap({
     { TypeCase::kSound,      LoadSound      },
     { TypeCase::kSprite,     LoadSprite     },
     { TypeCase::kBackground, LoadBackground },
-    { TypeCase::kPath,       LoadPath       }
+    { TypeCase::kPath,       LoadPath       },
+    { TypeCase::kScript,     LoadScript     }
   });
 
   int ver = dec.read4();
