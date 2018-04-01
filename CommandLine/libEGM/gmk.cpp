@@ -34,7 +34,6 @@ using namespace buffers::resources;
 
 using TypeCase = TreeNode::TypeCase;
 using IdMap = std::unordered_map<TypeCase, std::unordered_map<int, std::string>>;
-using VersionMap = std::unordered_map<TypeCase, std::set<int>>;
 
 using std::unordered_map;
 
@@ -480,7 +479,7 @@ std::unique_ptr<Background> LoadBackground(Decoder &dec, int ver) {
   return background;
 }
 
-std::unique_ptr<Path> LoadPath(Decoder &dec, int ver) {
+std::unique_ptr<Path> LoadPath(Decoder &dec, int /*ver*/) {
   auto path = std::make_unique<Path>();
 
   path->set_smooth(dec.readBool());
@@ -529,45 +528,35 @@ std::unique_ptr<Font> LoadFont(Decoder &dec, int /*ver*/) {
   return font;
 }
 
-int LoadGroup(Decoder &dec, TypeCase type, IdMap &idMap) {
-  using FactoryFunction = std::function<std::unique_ptr<google::protobuf::Message>(Decoder&, int)>;
-  using FactoryMap = std::unordered_map<TypeCase, FactoryFunction>;
+using FactoryFunction = std::function<std::unique_ptr<google::protobuf::Message>(Decoder&, int)>;
 
-  static VersionMap supportedGroupVersion({
-    { TypeCase::kSound,      { 400, 800      } },
-    { TypeCase::kSprite,     { 400, 800, 810 } },
-    { TypeCase::kBackground, { 400, 800      } },
-    { TypeCase::kPath,       { 420, 800      } },
-    { TypeCase::kScript,     { 400, 800, 810 } },
-    { TypeCase::kFont,       { 440, 540, 800 } }
-  });
-  static VersionMap supportedVersion({
-    { TypeCase::kSound,      { 440, 600, 800      } },
-    { TypeCase::kSprite,     { 400, 542, 800, 810 } },
-    { TypeCase::kBackground, { 400, 543, 710      } },
-    { TypeCase::kPath,       { 530                } },
-    { TypeCase::kScript,     { 400, 800, 810      } },
-    { TypeCase::kFont,       { 540, 800           } }
-  });
-  static const FactoryMap factoryMap({
-    { TypeCase::kSound,      LoadSound      },
-    { TypeCase::kSprite,     LoadSprite     },
-    { TypeCase::kBackground, LoadBackground },
-    { TypeCase::kPath,       LoadPath       },
-    { TypeCase::kScript,     LoadScript     },
-    { TypeCase::kFont,       LoadFont       }
+struct GroupFactory {
+  std::set<int> supportedGroupVersions;
+  std::set<int> supportedVersions;
+  FactoryFunction loadFunc;
+};
+
+using FactoryMap = std::unordered_map<TypeCase, GroupFactory>;
+
+int LoadGroup(Decoder &dec, TypeCase type, IdMap &idMap) {
+  static const FactoryMap groupFactories({
+    { TypeCase::kSound,      { { 400, 800      }, { 440, 600, 800      }, LoadSound      } },
+    { TypeCase::kSprite,     { { 400, 800, 810 }, { 400, 542, 800, 810 }, LoadSprite     } },
+    { TypeCase::kBackground, { { 400, 800      }, { 400, 543, 710      }, LoadBackground } },
+    { TypeCase::kPath,       { { 420, 800      }, { 530                }, LoadPath       } },
+    { TypeCase::kScript,     { { 400, 800, 810 }, { 400, 800, 810      }, LoadScript     } },
+    { TypeCase::kFont,       { { 440, 540, 800 }, { 540, 800           }, LoadFont       } }
   });
 
   int ver = dec.read4();
-  auto supportedGroupVersions = supportedGroupVersion[type];
-  if (!supportedGroupVersions.count(ver)) {
-    err << "GMK group '" << type << "' with version '" << ver << "' is unsupported" << std::endl;
+  auto groupFactoryIt = groupFactories.find(type);
+  if (groupFactoryIt == groupFactories.end()) {
+    err << "GMK group '" << type << "' with version '" << ver << "' does not have a registered factory" << std::endl;
     return 0;
   }
-
-  const auto createFunc = factoryMap.find(type);
-  if (createFunc == factoryMap.end()) {
-    err << "GMK group '" << type << "' with version '" << ver << "' does not have a registered factory function" << std::endl;
+  auto groupFactory = groupFactoryIt->second;
+  if (!groupFactory.supportedGroupVersions.count(ver)) {
+    err << "GMK group '" << type << "' with version '" << ver << "' is unsupported" << std::endl;
     return 0;
   }
 
@@ -583,8 +572,7 @@ int LoadGroup(Decoder &dec, TypeCase type, IdMap &idMap) {
     out << name << " " << ver << std::endl;
     if (ver == 800) dec.skip(8); //last changed
     ver = dec.read4();
-    auto supportedVersions = supportedVersion[type];
-    if (!supportedVersions.count(ver)) {
+    if (!groupFactory.supportedVersions.count(ver)) {
       err << "GMK resource of type '" << type << "' with name '" << name
           << "' has an unsupported version '" << ver << "'" << std::endl;
       return 0;
@@ -592,7 +580,7 @@ int LoadGroup(Decoder &dec, TypeCase type, IdMap &idMap) {
 
     auto nameMap = idMap[type];
     nameMap[i] = name;
-    auto res = createFunc->second(dec, ver);
+    auto res = groupFactory.loadFunc(dec, ver);
     if (!res) {
       err << "There was a problem reading GMK resource of type '" << type << "' with name '" << name
           << "' and the project cannot be loaded" << std::endl;
