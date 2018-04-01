@@ -60,6 +60,10 @@ class Decoder {
     return byte;
   }
 
+  int read2() {
+    return (read() | (read() << 8));
+  }
+
   int read3() {
     return (read() | (read() << 8) | (read() << 16));
   }
@@ -504,6 +508,27 @@ std::unique_ptr<Script> LoadScript(Decoder &dec, int ver) {
   return script;
 }
 
+std::unique_ptr<Font> LoadFont(Decoder &dec, int ver) {
+  auto font = std::make_unique<Font>();
+
+  font->set_font_name(dec.readStr());
+  font->set_size(dec.read4());
+  font->set_bold(dec.readBool());
+  font->set_italic(dec.readBool());
+
+  int rangemin = dec.read2();
+  font->set_charset(dec.read());
+  int aa = dec.read();
+  //if (aa == 0 && gmk < 810) aa = 3;
+  font->set_antialias(aa);
+
+  auto char_range = font->add_ranges();
+  char_range->set_min(rangemin);
+  char_range->set_max(dec.read4());
+
+  return font;
+}
+
 int LoadGroup(Decoder &dec, TypeCase type, IdMap &idMap) {
   using FactoryFunction = std::function<std::unique_ptr<google::protobuf::Message>(Decoder&, int)>;
   using FactoryMap = std::unordered_map<TypeCase, FactoryFunction>;
@@ -513,21 +538,24 @@ int LoadGroup(Decoder &dec, TypeCase type, IdMap &idMap) {
     { TypeCase::kSprite,     { 400, 800, 810 } },
     { TypeCase::kBackground, { 400, 800      } },
     { TypeCase::kPath,       { 420, 800      } },
-    { TypeCase::kScript,     { 400, 800, 810 } }
+    { TypeCase::kScript,     { 400, 800, 810 } },
+    { TypeCase::kFont,       { 440, 540, 800 } }
   });
   static VersionMap supportedVersion({
     { TypeCase::kSound,      { 440, 600, 800      } },
     { TypeCase::kSprite,     { 400, 542, 800, 810 } },
     { TypeCase::kBackground, { 400, 543, 710      } },
     { TypeCase::kPath,       { 530                } },
-    { TypeCase::kScript,     { 400, 800, 810      } }
+    { TypeCase::kScript,     { 400, 800, 810      } },
+    { TypeCase::kFont,       { 540, 800           } }
   });
   static const FactoryMap factoryMap({
     { TypeCase::kSound,      LoadSound      },
     { TypeCase::kSprite,     LoadSprite     },
     { TypeCase::kBackground, LoadBackground },
     { TypeCase::kPath,       LoadPath       },
-    { TypeCase::kScript,     LoadScript     }
+    { TypeCase::kScript,     LoadScript     },
+    { TypeCase::kFont,       LoadFont       }
   });
 
   int ver = dec.read4();
