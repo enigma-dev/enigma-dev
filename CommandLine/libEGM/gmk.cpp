@@ -390,11 +390,11 @@ std::unique_ptr<Sprite> LoadSprite(Decoder &dec, int ver) {
   sprite->set_origin_y(dec.read4());
 
   int nosub = dec.read4();
-  for (int j = 0; j < nosub; j++) {
+  for (int i = 0; i < nosub; i++) {
     if (ver >= 800) {
       int subver = dec.read4();
       if (subver != 800 && subver != 810) {
-        err << "GMK Sprite with inner version '" << ver << "' has a subimage with id '" << j
+        err << "GMK Sprite with inner version '" << ver << "' has a subimage with id '" << i
             << "' that has an unsupported version '" << subver << "'" << std::endl;
         return nullptr;
       }
@@ -476,24 +476,47 @@ std::unique_ptr<Background> LoadBackground(Decoder &dec, int ver) {
   return background;
 }
 
+std::unique_ptr<Path> LoadPath(Decoder &dec, int ver) {
+  auto path = std::make_unique<Path>();
+
+  path->set_smooth(dec.readBool());
+  path->set_closed(dec.readBool());
+  path->set_precision(dec.read4());
+  int background_room_id = dec.read4(); // TODO: use idMap to find the name
+  path->set_snap_x(dec.read4());
+  path->set_snap_y(dec.read4());
+  int nopoints = dec.read4();
+  for (int i = 0; i < nopoints; i++) {
+    auto point = path->add_points();
+    point->set_x(dec.readD());
+    point->set_y(dec.readD());
+    point->set_speed(dec.readD());
+  }
+
+  return path;
+}
+
 int LoadGroup(Decoder &dec, TypeCase type, IdMap &idMap) {
   using FactoryFunction = std::function<std::unique_ptr<google::protobuf::Message>(Decoder&, int)>;
   using FactoryMap = std::unordered_map<TypeCase, FactoryFunction>;
 
   static VersionMap supportedGroupVersion({
-    { TypeCase::kSound,  { 400, 800 } },
-    { TypeCase::kSprite, { 400, 800, 810 } },
-    { TypeCase::kBackground, { 400, 800 } }
+    { TypeCase::kSound,      { 400, 800      } },
+    { TypeCase::kSprite,     { 400, 800, 810 } },
+    { TypeCase::kBackground, { 400, 800      } },
+    { TypeCase::kPath,       { 420, 800      } }
   });
   static VersionMap supportedVersion({
-    { TypeCase::kSound,  { 440, 600, 800 } },
-    { TypeCase::kSprite, { 400, 542, 800, 810 } },
-    { TypeCase::kBackground, { 400, 543, 710 } }
+    { TypeCase::kSound,      { 440, 600, 800      } },
+    { TypeCase::kSprite,     { 400, 542, 800, 810 } },
+    { TypeCase::kBackground, { 400, 543, 710      } },
+    { TypeCase::kPath,       { 530                } }
   });
   static const FactoryMap factoryMap({
-    { TypeCase::kSound,  LoadSound },
-    { TypeCase::kSprite, LoadSprite },
-    { TypeCase::kBackground, LoadBackground }
+    { TypeCase::kSound,      LoadSound      },
+    { TypeCase::kSprite,     LoadSprite     },
+    { TypeCase::kBackground, LoadBackground },
+    { TypeCase::kPath,       LoadPath       }
   });
 
   int ver = dec.read4();
