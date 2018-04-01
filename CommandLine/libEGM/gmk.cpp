@@ -150,8 +150,9 @@ class Decoder {
 
   std::unique_ptr<int[]> makeDecodeTable(std::unique_ptr<int[]> encodeTable) {
     std::unique_ptr<int[]> table(new int[256]);
-    for (int i = 1; i < 256; i++)
+    for (int i = 0; i < 256; i++) {
       table[encodeTable[i]] = i;
+    }
     return table;
   }
 
@@ -459,7 +460,7 @@ int LoadGroup(Decoder &dec, TypeCase type, IdMap &idMap) {
       continue;
     }
     std::string name = dec.readStr();
-    out << name << std::endl;
+    out << name << " " << ver << std::endl;
     if (ver == 800) dec.skip(8); //last changed
     ver = dec.read4();
     auto supportedVersions = supportedVersion[type];
