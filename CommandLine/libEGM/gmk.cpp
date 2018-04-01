@@ -116,6 +116,12 @@ class Decoder {
     return bytes;
   }
 
+  std::unique_ptr<char[]> readBGRAImage() {
+    size_t length = read4();
+    std::unique_ptr<char[]> bytes = read(length);
+    return bytes;
+  }
+
   void setSeed(int seed) {
     if (seed >= 0)
       decodeTable = makeDecodeTable(seed);
@@ -353,18 +359,82 @@ std::unique_ptr<Sound> LoadSound(Decoder &dec, int ver) {
   return sound;
 }
 
+std::unique_ptr<Sprite> LoadSprite(Decoder &dec, int ver) {
+  auto sprite = std::make_unique<Sprite>();
+
+  int w = 0, h = 0;
+  if (ver < 800) {
+    w = dec.read4();
+    h = dec.read4();
+    sprite->set_bbox_left(dec.read4());
+    sprite->set_bbox_right(dec.read4());
+    sprite->set_bbox_bottom(dec.read4());
+    sprite->set_bbox_top(dec.read4());
+    sprite->set_transparent(dec.readBool());
+    if (ver > 400) {
+      sprite->set_smooth_edges(dec.readBool());
+      sprite->set_preload(dec.readBool());
+    }
+    sprite->set_bbox_mode(static_cast<Sprite::BoundingBox>(dec.read4()));
+    bool precise = dec.readBool();
+    sprite->set_shape(precise ? Sprite::Shape::Sprite_Shape_PRECISE : Sprite::Shape::Sprite_Shape_RECTANGLE);
+    if (ver == 400) {
+      dec.skip(4); //use video memory
+      sprite->set_preload(!dec.readBool());
+    }
+  } else {
+    sprite->set_transparent(false);
+  }
+  sprite->set_origin_x(dec.read4());
+  sprite->set_origin_y(dec.read4());
+
+  int nosub = dec.read4();
+  for (int j = 0; j < nosub; j++) {
+    if (ver >= 800) {
+      int subver = dec.read4();
+      if (subver != 800 && subver != 810) {
+        err << "GMK Sprite with inner version '" << ver << "' has a subimage with id '" << j
+            << "' that has an unsupported version '" << subver << "'" << std::endl;
+        return nullptr;
+      }
+      w = dec.read4();
+      h = dec.read4();
+      if (w != 0 && h != 0) dec.readBGRAImage();
+    } else {
+      if (dec.read4() == -1) continue;
+      dec.readZlibImage();
+    }
+  }
+
+  if (ver >= 800) {
+    sprite->set_shape(static_cast<Sprite::Shape>(dec.read4()));
+    sprite->set_alpha_tolerance(dec.read4());
+    sprite->set_separate_mask(dec.readBool());
+    sprite->set_bbox_mode(static_cast<Sprite::BoundingBox>(dec.read4()));
+    sprite->set_bbox_left(dec.read4());
+    sprite->set_bbox_right(dec.read4());
+    sprite->set_bbox_bottom(dec.read4());
+    sprite->set_bbox_top(dec.read4());
+  }
+
+  return sprite;
+}
+
 int LoadGroup(Decoder &dec, TypeCase type, IdMap &idMap) {
   using FactoryFunction = std::function<std::unique_ptr<google::protobuf::Message>(Decoder&, int)>;
   using FactoryMap = std::unordered_map<TypeCase, FactoryFunction>;
 
   static VersionMap supportedGroupVersion({
-    { TypeCase::kSound, { 400, 800 } }
+    { TypeCase::kSound,  { 400, 800 } },
+    { TypeCase::kSprite, { 400, 800, 810 } }
   });
   static VersionMap supportedVersion({
-    { TypeCase::kSound, { 440, 600, 800 } }
+    { TypeCase::kSound,  { 440, 600, 800 } },
+    { TypeCase::kSprite, { 400, 542, 800, 810 } }
   });
   static const FactoryMap factoryMap({
-    { TypeCase::kSound, LoadSound }
+    { TypeCase::kSound,  LoadSound },
+    { TypeCase::kSprite, LoadSprite }
   });
 
   int ver = dec.read4();
@@ -389,11 +459,12 @@ int LoadGroup(Decoder &dec, TypeCase type, IdMap &idMap) {
       continue;
     }
     std::string name = dec.readStr();
+    out << name << std::endl;
     if (ver == 800) dec.skip(8); //last changed
     ver = dec.read4();
     auto supportedVersions = supportedVersion[type];
     if (!supportedVersions.count(ver)) {
-      err << "GMK resource of type '" << type << "' with id '" << i
+      err << "GMK resource of type '" << type << "' with name '" << name
           << "' has an unsupported version '" << ver << "'" << std::endl;
       return 0;
     }
@@ -401,6 +472,11 @@ int LoadGroup(Decoder &dec, TypeCase type, IdMap &idMap) {
     auto nameMap = idMap[type];
     nameMap[i] = name;
     auto res = createFunc->second(dec, ver);
+    if (!res) {
+      err << "There was a problem reading GMK resource of type '" << type << "' with name '" << name
+          << "' and the project cannot be loaded" << std::endl;
+      return 0;
+    }
 
     //in.endInflate();
   }
