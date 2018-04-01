@@ -19,15 +19,24 @@
 
 #include "codegen/project.pb.h"
 
+#include <zlib.h>
+
 #include <fstream>
 #include <utility>
 #include <functional>
+#include <memory>
 #include <unordered_map>
 #include <vector>
 #include <set>
 
 using namespace buffers;
 using namespace buffers::resources;
+
+using TypeCase = TreeNode::TypeCase;
+using IdMap = std::unordered_map<TypeCase, std::unordered_map<int, std::string>>;
+using VersionMap = std::unordered_map<TypeCase, std::set<int>>;
+
+using std::unordered_map;
 
 namespace gmk {
 std::ostream out(nullptr);
@@ -73,7 +82,7 @@ class Decoder {
     int pos = in.tellg();
     in.read(bytes, length);
     if (decodeTable) {
-      for (int i = 0; i < length; i++) {
+      for (size_t i = 0; i < length; i++) {
         int t = bytes[off + i] & 0xFF;
         int x = (decodeTable[t] - pos - i) & 0xFF;
         bytes[off + i] = (char) x;
@@ -93,10 +102,18 @@ class Decoder {
     return data.dbl;
   }
 
-  void readZlibImage() {
+  std::unique_ptr<char[]> decompress(size_t length, size_t off=0) {
+    std::unique_ptr<char[]> src = read(length, off);
+    char* dest = new char[length];
+    uLongf destLength = length;
+    uncompress((Bytef*)dest, &destLength, (Bytef*)src.get(), length);
+    return std::unique_ptr<char[]>(dest);
+  }
+
+  std::unique_ptr<char[]> readZlibImage() {
     size_t length = read4();
-    std::unique_ptr<char[]> bytes = read(length);
-    // TODO: put the bytes somewhere
+    std::unique_ptr<char[]> bytes = decompress(length);
+    return bytes;
   }
 
   void setSeed(int seed) {
@@ -301,28 +318,53 @@ int LoadConstants(Decoder &dec) {
   return 1;
 }
 
-using TypeCase = TreeNode::TypeCase;
-using IdMap = std::unordered_map<TypeCase, std::unordered_map<int, std::string>>;
-using FactoryFunction = std::function<std::unique_ptr<google::protobuf::Message> (Decoder&)>;
-using FactoryMap = std::unordered_map<TypeCase, FactoryFunction>;
-using VersionMap = std::unordered_map<TypeCase, std::set<int>>;
+std::unique_ptr<Sound> LoadSound(Decoder &dec, int ver) {
+  auto sound = std::make_unique<Sound>();
 
-std::unique_ptr<Sound> LoadSound(Decoder &dec) {
-  std::unique_ptr<Sound> sound(new Sound());
+  int kind53 = -1;
+  if (ver == 440)
+    kind53 = dec.read4(); //kind (wav, mp3, etc)
+  else
+    sound->set_kind(static_cast<Sound_Kind>(dec.read4())); //normal, background, etc
+  sound->set_file_extension(dec.readStr());
 
+  if (ver == 440) {
+    //-1 = no sound
+    if (kind53 != -1) {
+      std::unique_ptr<char[]> data = dec.decompress(dec.read4());
+    }
+    dec.skip(8);
+    sound->set_preload(!dec.readBool());
+  } else {
+    sound->set_file_name(dec.readStr());
+    if (dec.readBool()) {
+      if (ver == 600) {
+        std::unique_ptr<char[]> data = dec.decompress(dec.read4());
+      } else {
+        std::unique_ptr<char[]> data = dec.read(dec.read4());
+      }
+    }
+    dec.read4(); // effects flags
+    sound->set_volume(dec.readD());
+    sound->set_pan(dec.readD());
+    sound->set_preload(dec.readBool());
+  }
 
   return sound;
 }
 
 int LoadGroup(Decoder &dec, TypeCase type, IdMap &idMap) {
+  using FactoryFunction = std::function<std::unique_ptr<google::protobuf::Message>(Decoder&, int)>;
+  using FactoryMap = std::unordered_map<TypeCase, FactoryFunction>;
+
   static VersionMap supportedGroupVersion({
     { TypeCase::kSound, { 400, 800 } }
   });
   static VersionMap supportedVersion({
     { TypeCase::kSound, { 440, 600, 800 } }
   });
-  static FactoryMap factoryMap({
-    { TypeCase::kSound, &LoadSound }
+  static const FactoryMap factoryMap({
+    { TypeCase::kSound, LoadSound }
   });
 
   int ver = dec.read4();
@@ -339,7 +381,7 @@ int LoadGroup(Decoder &dec, TypeCase type, IdMap &idMap) {
   }
 
   int count = dec.read4();
-  for (size_t i = 0; i < count; ++i) {
+  for (int i = 0; i < count; ++i) {
     //if (ver == 800) in.beginInflate();
     if (!dec.readBool()) {
       // was deleted
@@ -358,7 +400,7 @@ int LoadGroup(Decoder &dec, TypeCase type, IdMap &idMap) {
 
     auto nameMap = idMap[type];
     nameMap[i] = name;
-    auto res = createFunc->second(dec);
+    auto res = createFunc->second(dec, ver);
 
     //in.endInflate();
   }
@@ -367,9 +409,6 @@ int LoadGroup(Decoder &dec, TypeCase type, IdMap &idMap) {
 }
 
 buffers::Project *LoadGMK(std::string fName) {
-  std::unique_ptr<buffers::Project> proj(new buffers::Project());
-  buffers::Game *game = proj->mutable_game();
-
   std::ifstream in(fName, std::ios::binary);
   Decoder dec(in);
 
@@ -414,7 +453,7 @@ buffers::Project *LoadGMK(std::string fName) {
   }
 
   IdMap idMap;
-  static const std::vector<TypeCase> orderedGroups({
+  static const std::vector<TypeCase> binaryOrderGroups({
     TypeCase::kSound,
     TypeCase::kSprite,
     TypeCase::kBackground,
@@ -426,10 +465,13 @@ buffers::Project *LoadGMK(std::string fName) {
     TypeCase::kRoom
   });
 
-  for (TypeCase type : orderedGroups) {
+  for (TypeCase type : binaryOrderGroups) {
     out << type << std::endl;
     if (!LoadGroup(dec, type, idMap)) return nullptr;
   }
+
+  auto proj = std::make_unique<buffers::Project>();
+  buffers::Game *game = proj->mutable_game();
 
   return proj.release();
 }
