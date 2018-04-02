@@ -32,10 +32,12 @@
 using namespace buffers;
 using namespace buffers::resources;
 
-using TypeCase = TreeNode::TypeCase;
-using IdMap = std::unordered_map<TypeCase, std::unordered_map<int, std::string>>;
-
 using std::unordered_map;
+using std::vector;
+using std::set;
+
+using TypeCase = TreeNode::TypeCase;
+using IdMap = unordered_map<TypeCase, unordered_map<int, std::string>>;
 
 namespace gmk {
 std::ostream out(nullptr);
@@ -728,33 +730,16 @@ std::unique_ptr<Room> LoadRoom(Decoder &dec, int ver) {
 using FactoryFunction = std::function<std::unique_ptr<google::protobuf::Message>(Decoder&, int)>;
 
 struct GroupFactory {
-  std::set<int> supportedGroupVersions;
-  std::set<int> supportedVersions;
+  TypeCase type;
+  set<int> supportedGroupVersions;
+  set<int> supportedVersions;
   FactoryFunction loadFunc;
 };
 
-using FactoryMap = std::unordered_map<TypeCase, GroupFactory>;
-
-int LoadGroup(Decoder &dec, TypeCase type, IdMap &idMap) {
-  static const FactoryMap groupFactories({
-    { TypeCase::kSound,      { { 400, 800      }, { 440, 600, 800      }, LoadSound      } },
-    { TypeCase::kSprite,     { { 400, 800, 810 }, { 400, 542, 800, 810 }, LoadSprite     } },
-    { TypeCase::kBackground, { { 400, 800      }, { 400, 543, 710      }, LoadBackground } },
-    { TypeCase::kPath,       { { 420, 800      }, { 530                }, LoadPath       } },
-    { TypeCase::kScript,     { { 400, 800, 810 }, { 400, 800, 810      }, LoadScript     } },
-    { TypeCase::kFont,       { { 440, 540, 800 }, { 540, 800           }, LoadFont       } },
-    { TypeCase::kTimeline,   { { 500, 800      }, { 500                }, LoadTimeline   } },
-    { TypeCase::kObject,     { { 400, 800      }, { 430                }, LoadObject     } },
-    { TypeCase::kRoom,       { { 420, 800      }, { 520, 541           }, LoadRoom       } }
-  });
+int LoadGroup(Decoder &dec, GroupFactory groupFactory, IdMap &idMap) {
+  TypeCase type = groupFactory.type;
 
   int ver = dec.read4();
-  auto groupFactoryIt = groupFactories.find(type);
-  if (groupFactoryIt == groupFactories.end()) {
-    err << "GMK group '" << type << "' with version '" << ver << "' does not have a registered factory" << std::endl;
-    return 0;
-  }
-  auto groupFactory = groupFactoryIt->second;
   if (!groupFactory.supportedGroupVersions.count(ver)) {
     err << "GMK group '" << type << "' with version '" << ver << "' is unsupported" << std::endl;
     return 0;
@@ -771,6 +756,7 @@ int LoadGroup(Decoder &dec, TypeCase type, IdMap &idMap) {
     std::string name = dec.readStr();
     out << name << " " << ver << std::endl;
     if (ver == 800) dec.skip(8); //last changed
+
     ver = dec.read4();
     if (!groupFactory.supportedVersions.count(ver)) {
       err << "GMK resource of type '" << type << "' with name '" << name
@@ -838,22 +824,22 @@ buffers::Project *LoadGMK(std::string fName) {
     if (!LoadConstants(dec)) return nullptr;
   }
 
-  IdMap idMap;
-  static const std::vector<TypeCase> binaryOrderGroups({
-    TypeCase::kSound,
-    TypeCase::kSprite,
-    TypeCase::kBackground,
-    TypeCase::kPath,
-    TypeCase::kScript,
-    TypeCase::kFont,
-    TypeCase::kTimeline,
-    TypeCase::kObject,
-    TypeCase::kRoom
+  static const vector<GroupFactory> groupFactories({
+    { TypeCase::kSound,      { 400, 800      }, { 440, 600, 800      }, LoadSound      },
+    { TypeCase::kSprite,     { 400, 800, 810 }, { 400, 542, 800, 810 }, LoadSprite     },
+    { TypeCase::kBackground, { 400, 800      }, { 400, 543, 710      }, LoadBackground },
+    { TypeCase::kPath,       { 420, 800      }, { 530                }, LoadPath       },
+    { TypeCase::kScript,     { 400, 800, 810 }, { 400, 800, 810      }, LoadScript     },
+    { TypeCase::kFont,       { 440, 540, 800 }, { 540, 800           }, LoadFont       },
+    { TypeCase::kTimeline,   { 500, 800      }, { 500                }, LoadTimeline   },
+    { TypeCase::kObject,     { 400, 800      }, { 430                }, LoadObject     },
+    { TypeCase::kRoom,       { 420, 800      }, { 520, 541           }, LoadRoom       }
   });
+  IdMap idMap;
 
-  for (TypeCase type : binaryOrderGroups) {
-    out << type << std::endl;
-    if (!LoadGroup(dec, type, idMap)) return nullptr;
+  for (auto factory : groupFactories) {
+    out << factory.type << std::endl;
+    if (!LoadGroup(dec, factory, idMap)) return nullptr;
   }
 
   auto proj = std::make_unique<buffers::Project>();
