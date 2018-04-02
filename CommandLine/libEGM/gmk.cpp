@@ -625,8 +625,102 @@ std::unique_ptr<Object> LoadObject(Decoder &dec, int /*ver*/) {
   return object;
 }
 
-std::unique_ptr<Room> LoadRoom(Decoder &dec, int /*ver*/) {
+std::unique_ptr<Room> LoadRoom(Decoder &dec, int ver) {
   auto room = std::make_unique<Room>();
+
+  room->set_caption(dec.readStr());
+  room->set_width(dec.read4());
+  room->set_height(dec.read4());
+  room->set_snap_y(dec.read4());
+  room->set_snap_x(dec.read4());
+  room->set_isometric(dec.readBool());
+  room->set_speed(dec.read4());
+  room->set_persistent(dec.readBool());
+  room->set_color(dec.read4());
+  room->set_show_color(dec.readBool());
+  room->set_code(dec.readStr());
+
+  int nobackgrounds = dec.read4();
+  for (int j = 0; j < nobackgrounds; j++) {
+    auto background = room->add_backgrounds();
+    background->set_visible(dec.readBool());
+    background->set_foreground(dec.readBool());
+    int background_id = dec.read4();
+    background->set_x(dec.read4());
+    background->set_y(dec.read4());
+    background->set_htiled(dec.readBool());
+    background->set_vtiled(dec.readBool());
+    background->set_hspeed(dec.read4());
+    background->set_vspeed(dec.read4());
+    background->set_stretch(dec.readBool());
+  }
+
+  room->set_enable_views(dec.readBool());
+  int noviews = dec.read4();
+  for (int j = 0; j < noviews; j++) {
+    auto view = room->add_views();
+    view->set_visible(dec.readBool());
+    view->set_xview(dec.read4());
+    view->set_yview(dec.read4());
+    view->set_wview(dec.read4());
+    view->set_hview(dec.read4());
+    view->set_xport(dec.read4());
+    view->set_yport(dec.read4());
+    if (ver > 520) {
+      view->set_wport(dec.read4());
+      view->set_hport(dec.read4());
+    } else {
+      //Older versions of GM assume port_size == view_size.
+      view->set_wport(view->wview());
+      view->set_hport(view->hview());
+    }
+    view->set_hborder(dec.read4());
+    view->set_vborder(dec.read4());
+    view->set_hspeed(dec.read4());
+    view->set_vspeed(dec.read4());
+    int object_following_id = dec.read4();
+  }
+
+  int noinstances = dec.read4();
+  for (int j = 0; j < noinstances; j++) {
+    auto instance = room->add_instances();
+    instance->set_x(dec.read4());
+    instance->set_y(dec.read4());
+    int object_type_id = dec.read4();
+    instance->set_id(dec.read4());
+    instance->set_code(dec.readStr());
+    instance->set_locked(dec.readBool());
+  }
+
+  int notiles = dec.read4();
+  for (int j = 0; j < notiles; j++) {
+    auto tile = room->add_tiles();
+    tile->set_x(dec.read4());
+    tile->set_y(dec.read4());
+    int background_id = dec.read4();
+    tile->set_xoffset(dec.read4());
+    tile->set_yoffset(dec.read4());
+    tile->set_width(dec.read4());
+    tile->set_height(dec.read4());
+    tile->set_depth(dec.read4());
+    tile->set_id(dec.read4());
+    tile->set_locked(dec.readBool());
+  }
+
+  dec.readBool(); // REMEMBER_WINDOW_SIZE
+  dec.read4(); // EDITOR_WIDTH
+  dec.read4(); // EDITOR_HEIGHT
+  dec.readBool(); // SHOW_GRID
+  dec.readBool(); // SHOW_OBJECTS
+  dec.readBool(); // SHOW_TILES
+  dec.readBool(); // SHOW_BACKGROUNDS
+  dec.readBool(); // SHOW_FOREGROUNDS
+  dec.readBool(); // SHOW_VIEWS
+  dec.readBool(); // DELETE_UNDERLYING_OBJECTS
+  dec.readBool(); // DELETE_UNDERLYING_TILES
+  if (ver == 520) dec.skip(6 * 4); //tile info
+  // CURRENT_TAB, SCROLL_BAR_X, SCROLL_BAR_Y
+  dec.read4(); dec.read4(); dec.read4();
 
   return room;
 }
