@@ -433,29 +433,17 @@ std::unique_ptr<Background> LoadBackground(Decoder &dec, int ver) {
   if (ver < 710) {
     w = dec.read4();
     h = dec.read4();
-    background->set_width(w);
-    background->set_height(h);
     background->set_transparent(dec.readBool());
     if (ver > 400) {
       background->set_smooth_edges(dec.readBool());
       background->set_preload(dec.readBool());
-
-      background->set_use_as_tileset(dec.readBool());
-      background->set_tile_width(dec.read4());
-      background->set_tile_height(dec.read4());
-      background->set_horizontal_offset(dec.read4());
-      background->set_vertical_offset(dec.read4());
-      background->set_horizontal_spacing(dec.read4());
-      background->set_vertical_spacing(dec.read4());
     } else {
       dec.skip(4); //use video memory
       background->set_preload(!dec.readBool());
     }
-    if (dec.readBool()) {
-      if (dec.read4() != -1)
-        dec.readZlibImage();
-    }
-  } else { //ver >= 710
+  }
+
+  if (ver > 400) {
     background->set_use_as_tileset(dec.readBool());
     background->set_tile_width(dec.read4());
     background->set_tile_height(dec.read4());
@@ -463,6 +451,14 @@ std::unique_ptr<Background> LoadBackground(Decoder &dec, int ver) {
     background->set_vertical_offset(dec.read4());
     background->set_horizontal_spacing(dec.read4());
     background->set_vertical_spacing(dec.read4());
+  }
+
+  if (ver < 710) {
+    if (dec.readBool()) {
+      if (dec.read4() != -1)
+        dec.readZlibImage();
+    }
+  } else { // >= 710
     int dataver = dec.read4();
     if (dataver != 800) {
       err << "GMK Background with inner version '" << ver << "' has image data with "
@@ -473,6 +469,7 @@ std::unique_ptr<Background> LoadBackground(Decoder &dec, int ver) {
     h = dec.read4();
     if (w != 0 && h != 0) dec.readBGRAImage();
   }
+
   background->set_width(w);
   background->set_height(h);
 
