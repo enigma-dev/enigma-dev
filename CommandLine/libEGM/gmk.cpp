@@ -625,6 +625,12 @@ std::unique_ptr<Object> LoadObject(Decoder &dec, int /*ver*/) {
   return object;
 }
 
+std::unique_ptr<Room> LoadRoom(Decoder &dec, int /*ver*/) {
+  auto room = std::make_unique<Room>();
+
+  return room;
+}
+
 using FactoryFunction = std::function<std::unique_ptr<google::protobuf::Message>(Decoder&, int)>;
 
 struct GroupFactory {
@@ -644,7 +650,8 @@ int LoadGroup(Decoder &dec, TypeCase type, IdMap &idMap) {
     { TypeCase::kScript,     { { 400, 800, 810 }, { 400, 800, 810      }, LoadScript     } },
     { TypeCase::kFont,       { { 440, 540, 800 }, { 540, 800           }, LoadFont       } },
     { TypeCase::kTimeline,   { { 500, 800      }, { 500                }, LoadTimeline   } },
-    { TypeCase::kObject,     { { 400, 800      }, { 430                }, LoadObject     } }
+    { TypeCase::kObject,     { { 400, 800      }, { 430                }, LoadObject     } },
+    { TypeCase::kRoom,       { { 420, 800      }, { 520, 541           }, LoadRoom       } }
   });
 
   int ver = dec.read4();
