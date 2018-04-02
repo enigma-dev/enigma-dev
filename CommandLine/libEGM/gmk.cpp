@@ -528,6 +528,106 @@ std::unique_ptr<Font> LoadFont(Decoder &dec, int /*ver*/) {
   return font;
 }
 
+int LoadActions(Decoder &dec, Event *event) {
+  int ver = dec.read4();
+  if (ver != 400) {
+    err << "Unsupported GMK actions version '" << ver << "' for event type '" << event->type()
+        << "' and number '" << event->number() << "'" << std::endl;
+    return 0;
+  }
+
+  int noacts = dec.read4();
+  for (int k = 0; k < noacts; k++) {
+    auto action = event->add_actions();
+    dec.skip(4);
+    action->set_libid(dec.read4());
+    action->set_id(dec.read4());
+    action->set_kind(static_cast<ActionKind>(dec.read4()));
+    action->set_use_relative(dec.readBool());
+    action->set_is_question(dec.readBool());
+    action->set_use_apply_to(dec.readBool());
+    action->set_exe_type(static_cast<ActionExecution>(dec.read4()));
+    action->set_function_name(dec.readStr());
+    action->set_code_string(dec.readStr());
+
+    int numofargs = dec.read4(); // number of library action's arguments
+    int numofargkinds = dec.read4(); // number of library action's argument kinds
+    int* argkinds = new int[numofargkinds];
+    for (int x = 0; x < numofargkinds; x++)
+      argkinds[x] = dec.read4(); // argument x's kind
+
+    int applies_to = dec.read4();
+    switch (applies_to) {
+      case -1:
+        action->set_who_name("self");
+        break;
+      case -2:
+        action->set_who_name("other");
+        break;
+      default:
+        action->set_who_name(std::to_string(applies_to)); // TODO: set to name of the object with id=applies_to
+    }
+    action->set_relative(dec.readBool());
+
+    int actualnoargs = dec.read4();
+    for (int l = 0; l < actualnoargs; l++) {
+      if (l >= numofargs) {
+        dec.skip(dec.read4());
+        continue;
+      }
+      auto argument = action->add_arguments();
+      argument->set_kind(static_cast<ArgumentKind>(argkinds[l]));
+      std::string strval = dec.readStr();
+      argument->set_string(strval);
+    }
+
+    action->set_is_not(dec.readBool());
+  }
+
+  return 1;
+}
+
+std::unique_ptr<Timeline> LoadTimeline(Decoder &dec, int /*ver*/) {
+  auto timeline = std::make_unique<Timeline>();
+
+  int nomoms = dec.read4();
+  for (int i = 0; i < nomoms; i++) {
+    auto moment = timeline->add_moments();
+    moment->set_step(dec.read4());
+    if (!LoadActions(dec, moment->mutable_event())) return nullptr;
+  }
+
+  return timeline;
+}
+
+std::unique_ptr<Object> LoadObject(Decoder &dec, int /*ver*/) {
+  auto object = std::make_unique<Object>();
+
+  int sprite_id = dec.read4();
+  object->set_solid(dec.readBool());
+  object->set_visible(dec.readBool());
+  object->set_depth(dec.read4());
+  object->set_persistent(dec.readBool());
+  int parent_id = dec.read4();
+  int mask_id = dec.read4();
+
+  int noEvents = dec.read4() + 1;
+  for (int i = 0; i < noEvents; i++) {
+    while (true) {
+      int second = dec.read4();
+      if (second == -1) break;
+
+      auto event = object->add_events();
+      event->set_type(i);
+      event->set_number(second);
+
+      if (!LoadActions(dec, event)) return nullptr;
+    }
+  }
+
+  return object;
+}
+
 using FactoryFunction = std::function<std::unique_ptr<google::protobuf::Message>(Decoder&, int)>;
 
 struct GroupFactory {
@@ -545,7 +645,9 @@ int LoadGroup(Decoder &dec, TypeCase type, IdMap &idMap) {
     { TypeCase::kBackground, { { 400, 800      }, { 400, 543, 710      }, LoadBackground } },
     { TypeCase::kPath,       { { 420, 800      }, { 530                }, LoadPath       } },
     { TypeCase::kScript,     { { 400, 800, 810 }, { 400, 800, 810      }, LoadScript     } },
-    { TypeCase::kFont,       { { 440, 540, 800 }, { 540, 800           }, LoadFont       } }
+    { TypeCase::kFont,       { { 440, 540, 800 }, { 540, 800           }, LoadFont       } },
+    { TypeCase::kTimeline,   { { 500, 800      }, { 500                }, LoadTimeline   } },
+    { TypeCase::kObject,     { { 400, 800      }, { 430                }, LoadObject     } }
   });
 
   int ver = dec.read4();
