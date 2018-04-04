@@ -861,6 +861,24 @@ int LoadGroup(Decoder &dec, GroupFactory groupFactory, IdMap &idMap) {
   return 1;
 }
 
+void LoadTree(Decoder &dec, TreeNode* root) {
+  int status = dec.read4();
+  int kind = dec.read4();
+  int id = dec.read4();
+  std::string name = dec.readStr();
+  int children = dec.read4();
+  out << status << " " << kind << " " << name << " " << id << " " << children << std::endl;
+
+  TreeNode *node = root->add_child();
+  node->set_name(name);
+  node->set_folder(status <= 2);
+  if (node->folder()) {
+    for (int i = 0; i < children; i++) {
+      LoadTree(dec, node);
+    }
+  }
+}
+
 buffers::Project *LoadGMK(std::string fName) {
   std::ifstream in(fName, std::ios::binary);
   Decoder dec(in);
@@ -948,10 +966,17 @@ buffers::Project *LoadGMK(std::string fName) {
   }
   dec.skip(dec.read4() * 4);
 
-  out << "success!" << std::endl;
+  // Project Tree
+  TreeNode *root = new TreeNode();
+  int rootnodes = (ver > 540) ? 12 : 11;
+  while (rootnodes-- > 0) {
+    LoadTree(dec, root);
+  }
 
+  out << "success!" << std::endl;
   auto proj = std::make_unique<buffers::Project>();
   buffers::Game *game = proj->mutable_game();
+  game->set_allocated_root(root);
 
   return proj.release();
 }
