@@ -930,6 +930,24 @@ buffers::Project *LoadGMK(std::string fName) {
 
   if (!LoadGameInformation(dec)) return nullptr;
 
+  // Library Creation Code
+  ver = dec.read4();
+  if (ver != 500) {
+    err << "Unsupported GMK Library Creation Code version: " << ver << std::endl;
+    return 0;
+  }
+  int no = dec.read4();
+  for (int i = 0; i < no; i++)
+    dec.skip(dec.read4());
+
+  // Room Execution Order
+  ver = dec.read4();
+  if (ver != 500 && ver != 540 && ver != 700) {
+    err << "Unsupported GMK Room Execution Order version: " << ver << std::endl;
+    return 0;
+  }
+  dec.skip(dec.read4() * 4);
+
   out << "success!" << std::endl;
 
   auto proj = std::make_unique<buffers::Project>();
