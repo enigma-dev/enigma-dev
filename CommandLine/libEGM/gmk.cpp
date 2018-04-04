@@ -166,7 +166,7 @@ class Decoder {
   }
 };
 
-void LoadIncludes(Decoder &dec) {
+void LoadSettingsIncludes(Decoder &dec) {
   int no = dec.read4();
   for (int i = 0; i < no; i++) {
     dec.readStr(); // include filepath
@@ -276,7 +276,7 @@ int LoadSettings(Decoder &dec) {
 
     if (ver >= 800) dec.skip(8); //last changed
   } else if (ver > 530) {
-    LoadIncludes(dec);
+    LoadSettingsIncludes(dec);
   }
   //in.endInflate(); TODO: zlib endInflate
 
@@ -723,8 +723,90 @@ std::unique_ptr<Room> LoadRoom(Decoder &dec, int ver) {
   if (ver == 520) dec.skip(6 * 4); //tile info
   // CURRENT_TAB, SCROLL_BAR_X, SCROLL_BAR_Y
   dec.read4(); dec.read4(); dec.read4();
+  // last instance id, last tile id
+  dec.read4(); dec.read4();
 
   return room;
+}
+
+int LoadIncludes(Decoder &dec) {
+  int ver = dec.read4();
+  if (ver != 430 && ver != 600 && ver != 620 && ver != 800 && ver != 810) {
+    err << "Unsupported GMK Includes version: " << ver << std::endl;
+    return 0;
+  }
+
+  int no = dec.read4();
+  for (int i = 0; i < no; i++) {
+    if (ver >= 800) {
+      //in.beginInflate();
+      dec.skip(8); //last changed
+    }
+    ver = dec.read4();
+    if (ver != 620 && ver != 800 && ver != 810) {
+      err << "Unsupported GMK Include version: " << ver << std::endl;
+      return 0;
+    }
+
+    dec.readStr(); // filename
+    dec.readStr(); // filepath
+    dec.readBool(); // isOriginal
+    dec.read4(); // size
+    if (dec.readBool()) { //store in editable?
+      std::unique_ptr<char[]> data = dec.read(dec.read4()); // data
+    }
+    dec.read4(); // export
+    dec.readStr(); // export folder
+    dec.readBool(); // overwrite existing
+    dec.readBool(); // free memory after export
+    dec.readBool(); // remove at game end
+    //in.endInflate();
+  }
+
+  return 1;
+}
+
+int LoadPackages(Decoder &dec) {
+  int ver = dec.read4();
+  if (ver != 700) {
+    err << "Unsupported GMK Extension Packages version: " << ver << std::endl;
+    return 0;
+  }
+
+  int no = dec.read4();
+  for (int i = 0; i < no; i++) {
+    dec.readStr(); // package name
+  }
+
+  return 1;
+}
+
+int LoadGameInformation(Decoder &dec) {
+  int ver = dec.read4();
+  if (ver != 430 && ver != 600 && ver != 620 && ver != 800 && ver != 810) {
+    err << "Unsupported GMK Game Information version: " << ver << std::endl;
+    return 0;
+  }
+
+  //if (ver >= 800) in.beginInflate();
+  int bc = dec.read4();
+  // if (bc >= 0) // background color
+  if (ver < 800)
+    dec.readBool(); // embed game window
+  else
+    dec.readBool(); // show help in a separate window, inverted so negate it !
+  if (ver > 430) {
+    dec.readStr(); // form caption
+    // LEFT, TOP, WIDTH, HEIGHT
+    dec.read4(); dec.read4(); dec.read4(); dec.read4();
+    // SHOW_BORDER, ALLOW_RESIZE, STAY_ON_TOP, PAUSE_GAME
+    dec.readBool(); dec.readBool(); dec.readBool(); dec.readBool();
+  }
+  if (ver >= 800) dec.skip(8); //last changed
+  out << dec.readStr() << std::endl; // the rtf text
+  //in.endInflate();
+
+  return 1;
 }
 
 using FactoryFunction = std::function<std::unique_ptr<google::protobuf::Message>(Decoder&, int)>;
@@ -738,7 +820,6 @@ struct GroupFactory {
 
 int LoadGroup(Decoder &dec, GroupFactory groupFactory, IdMap &idMap) {
   TypeCase type = groupFactory.type;
-
   int ver = dec.read4();
   if (!groupFactory.supportedGroupVersions.count(ver)) {
     err << "GMK group '" << type << "' with version '" << ver << "' is unsupported" << std::endl;
@@ -841,6 +922,15 @@ buffers::Project *LoadGMK(std::string fName) {
     out << factory.type << std::endl;
     if (!LoadGroup(dec, factory, idMap)) return nullptr;
   }
+
+  if (ver >= 700) {
+    if (!LoadIncludes(dec)) return nullptr;
+    if (!LoadPackages(dec)) return nullptr;
+  }
+
+  if (!LoadGameInformation(dec)) return nullptr;
+
+  out << "success!" << std::endl;
 
   auto proj = std::make_unique<buffers::Project>();
   buffers::Game *game = proj->mutable_game();
