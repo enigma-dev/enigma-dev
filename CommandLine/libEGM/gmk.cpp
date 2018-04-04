@@ -17,8 +17,6 @@
 
 #include "gmk.h"
 
-#include "codegen/project.pb.h"
-
 #include <zlib.h>
 
 #include <fstream>
@@ -37,7 +35,7 @@ using std::vector;
 using std::set;
 
 using TypeCase = TreeNode::TypeCase;
-using IdMap = unordered_map<TypeCase, unordered_map<int, std::string>>;
+using IdMap = unordered_map<TypeCase, unordered_map<int, std::unique_ptr<google::protobuf::Message> > >;
 
 namespace gmk {
 std::ostream out(nullptr);
@@ -818,7 +816,7 @@ struct GroupFactory {
   FactoryFunction loadFunc;
 };
 
-int LoadGroup(Decoder &dec, GroupFactory groupFactory, IdMap &idMap) {
+int LoadGroup(Decoder &dec, IdMap &idMap, GroupFactory groupFactory) {
   TypeCase type = groupFactory.type;
   int ver = dec.read4();
   if (!groupFactory.supportedGroupVersions.count(ver)) {
@@ -845,28 +843,27 @@ int LoadGroup(Decoder &dec, GroupFactory groupFactory, IdMap &idMap) {
       return 0;
     }
 
-    auto nameMap = idMap[type];
-    nameMap[i] = name;
     auto res = groupFactory.loadFunc(dec, ver);
     if (!res) {
       err << "There was a problem reading GMK resource of type '" << type << "' with name '" << name
           << "' and the project cannot be loaded" << std::endl;
       return 0;
     }
-    std::cout << res->DebugString() << std::endl;
 
+    auto &resMap = idMap[type];
+    resMap[i] = std::move(res);
     //in.endInflate();
   }
 
   return 1;
 }
 
-void LoadTree(Decoder &dec, TreeNode* root) {
-  int status = dec.read4();
-  int kind = dec.read4();
-  int id = dec.read4();
-  std::string name = dec.readStr();
-  int children = dec.read4();
+void LoadTree(Decoder &dec, IdMap &idMap, TreeNode* root) {
+  const int status = dec.read4();
+  const int kind = dec.read4();
+  const int id = dec.read4();
+  const std::string name = dec.readStr();
+  const int children = dec.read4();
   out << status << " " << kind << " " << name << " " << id << " " << children << std::endl;
 
   TreeNode *node = root->add_child();
@@ -874,8 +871,31 @@ void LoadTree(Decoder &dec, TreeNode* root) {
   node->set_folder(status <= 2);
   if (node->folder()) {
     for (int i = 0; i < children; i++) {
-      LoadTree(dec, node);
+      LoadTree(dec, idMap, node);
     }
+  } else {
+    static const TypeCase RESOURCE_KIND[] = { TypeCase::TYPE_NOT_SET,TypeCase::kObject,TypeCase::kSprite,TypeCase::kSound,
+      TypeCase::kRoom,TypeCase::TYPE_NOT_SET,TypeCase::kBackground,TypeCase::kScript,TypeCase::kPath,TypeCase::kFont,TypeCase::TYPE_NOT_SET,
+      TypeCase::TYPE_NOT_SET,TypeCase::kTimeline,TypeCase::TYPE_NOT_SET,TypeCase::kShader };
+
+    const TypeCase type = RESOURCE_KIND[kind];
+
+    auto resMapIt = idMap.find(type);
+    if (resMapIt == idMap.end()) {
+      err << "No map of ids to protocol buffers for GMK type '" << type
+          << "' and the project cannot be loaded" << std::endl;
+      return;
+    }
+    auto &resMap = resMapIt->second;
+
+    const google::protobuf::Descriptor *desc = node->GetDescriptor();
+    const google::protobuf::Reflection *refl = node->GetReflection();
+    const google::protobuf::FieldDescriptor *field = desc->FindFieldByNumber(type);
+    if (!field) {
+      err << "TreeNode protocol buffer does not have a field for GMK type '" << type << "'" << std::endl;
+      return;
+    }
+    refl->SetAllocatedMessage(node, resMap[id].release(), field);
   }
 }
 
@@ -938,7 +958,7 @@ buffers::Project *LoadGMK(std::string fName) {
 
   for (auto factory : groupFactories) {
     out << factory.type << std::endl;
-    if (!LoadGroup(dec, factory, idMap)) return nullptr;
+    if (!LoadGroup(dec, idMap, factory)) return nullptr;
   }
 
   if (ver >= 700) {
@@ -970,13 +990,14 @@ buffers::Project *LoadGMK(std::string fName) {
   TreeNode *root = new TreeNode();
   int rootnodes = (ver > 540) ? 12 : 11;
   while (rootnodes-- > 0) {
-    LoadTree(dec, root);
+    LoadTree(dec, idMap, root);
   }
 
-  out << "success!" << std::endl;
   auto proj = std::make_unique<buffers::Project>();
   buffers::Game *game = proj->mutable_game();
   game->set_allocated_root(root);
+  out << game->DebugString() << std::endl;
+  out << "success!" << std::endl;
 
   return proj.release();
 }
