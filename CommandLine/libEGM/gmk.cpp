@@ -148,12 +148,11 @@ class Decoder {
   }
 
   void writeTempDataFile(std::string *data_file_path, char *bytes, size_t length) {
-    char temp[] = "gmk_dataXXXXXX";
-    mktemp(temp);
-    out << temp << std::endl;
-    ofstream output(temp, ios::binary|ios::out|ios::trunc);
-    output.write(bytes, length);
-    output.close();
+    char temp[] = "gmk_data.XXXXXX";
+    int fd = mkstemp(temp);
+    if (fd == -1) return;
+    write(fd, bytes, length);
+    close(fd);
     data_file_path->append(temp, strlen(temp));
   }
 
@@ -248,7 +247,7 @@ class Decoder {
   void readImage(std::string *data_file_path=nullptr, size_t width=0, size_t height=0, bool compressed=false) {
     size_t length = read4();
     std::unique_ptr<char[]> bytes = compressed ? decompress(length) : read(length);
-    if (data_file_path && width && height && bytes) writeTempImageFile(data_file_path, bytes.release(), length, width, height);
+    if (data_file_path && width && height && bytes) writeTempImageFile(data_file_path, bytes.get(), length, width, height);
   }
 
   void readZlibImage(std::string *data_file_path=nullptr, size_t width=0, size_t height=0) {
@@ -271,7 +270,6 @@ class Decoder {
   }
 
   void processPostoned(const std::string name, const int id, const TypeCase type) {
-    cout << name << " " << id << " " << type << std::endl;
     auto idMapIt = postponeds.find(type);
     if (idMapIt == postponeds.end()) {
       return; // no postponeds for this type
@@ -281,7 +279,6 @@ class Decoder {
     if (mutableNameIt == idMap.end()) {
       return; // no postponeds for this id
     }
-    cout << name << std::endl;
     for (std::string *mutableName : mutableNameIt->second)
       mutableName->append(name.c_str(), name.size());
   }
@@ -991,7 +988,6 @@ int LoadGroup(Decoder &dec, TypeMap &typeMap, GroupFactory groupFactory) {
       continue;
     }
     std::string name = dec.readStr();
-    out << name << " " << ver << std::endl;
     if (ver == 800) dec.skip(8); //last changed
 
     ver = dec.read4();
@@ -1159,8 +1155,6 @@ buffers::Project *LoadGMK(std::string fName) {
   while (rootnodes-- > 0) {
     LoadTree(dec, typeMap, root.get());
   }
-
-  out << root->DebugString() << std::endl;
 
   auto proj = std::make_unique<buffers::Project>();
   buffers::Game *game = proj->mutable_game();
