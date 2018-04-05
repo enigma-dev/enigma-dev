@@ -717,7 +717,7 @@ int LoadActions(Decoder &dec, Event *event) {
         action->set_who_name("other");
         break;
       default:
-        action->set_who_name(std::to_string(applies_to)); // TODO: set to name of the object with id=applies_to
+        dec.postponeName(action->mutable_who_name(), applies_to, TypeCase::kObject);
     }
     action->set_relative(dec.readBool());
 
