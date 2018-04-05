@@ -174,8 +174,9 @@ class Decoder {
     readData(data_file_path, false);
   }
 
-  void writeTempImageFile(std::string *data_file_path, char *bmp, size_t length, size_t width, size_t height) {
+  void writeTempImageFile(std::string *data_file_path, const char *bytes, size_t length, size_t width, size_t height) {
     static const unsigned MINHEADER = 54; //minimum BMP header size
+    auto bmp = reinterpret_cast<const unsigned char*>(bytes); // all of the following logic expects unsigned
 
     if (length < MINHEADER) {
       err << "Image from the GMK file had a length '" << length << "' smaller than the minimum header "
@@ -211,7 +212,7 @@ class Decoder {
       return;
     }
 
-    unsigned char* png = new unsigned char[w * h * 4];
+    std::vector<unsigned char> rgba(w * h * 4);
 
     /*
     There are 3 differences between BMP and the raw image buffer for LodePNG:
@@ -227,22 +228,22 @@ class Decoder {
         //pixel start byte position in the new raw image
         unsigned newpos = 4 * y * w + 4 * x;
         if (numChannels == 3) {
-          png[newpos + 0] = bmp[bmpos + 2]; //R<-B
-          png[newpos + 1] = bmp[bmpos + 1]; //G<-G
-          png[newpos + 2] = bmp[bmpos + 0]; //B<-R
-          png[newpos + 3] = 255;            //A<-A
+          rgba[newpos + 0] = bmp[bmpos + 2]; //R<-B
+          rgba[newpos + 1] = bmp[bmpos + 1]; //G<-G
+          rgba[newpos + 2] = bmp[bmpos + 0]; //B<-R
+          rgba[newpos + 3] = 255;            //A<-A
         } else {
-          png[newpos + 0] = bmp[bmpos + 3]; //R<-A
-          png[newpos + 1] = bmp[bmpos + 2]; //G<-B
-          png[newpos + 2] = bmp[bmpos + 1]; //B<-G
-          png[newpos + 3] = bmp[bmpos + 0]; //A<-R
+          rgba[newpos + 0] = bmp[bmpos + 3]; //R<-A
+          rgba[newpos + 1] = bmp[bmpos + 2]; //G<-B
+          rgba[newpos + 2] = bmp[bmpos + 1]; //B<-G
+          rgba[newpos + 3] = bmp[bmpos + 0]; //A<-R
         }
       }
     }
 
     unsigned char *buffer = nullptr;
     size_t buffer_length;
-    lodepng_encode32(&buffer, &buffer_length, png, w, h);
+    lodepng_encode32(&buffer, &buffer_length, rgba.data(), w, h);
 
     writeTempDataFile(data_file_path, reinterpret_cast<char*>(buffer), buffer_length);
   }
@@ -939,7 +940,7 @@ int LoadGameInformation(Decoder &dec) {
     dec.readBool(); dec.readBool(); dec.readBool(); dec.readBool();
   }
   if (ver >= 800) dec.skip(8); //last changed
-  out << dec.readStr() << std::endl; // the rtf text
+  dec.readStr(); // the rtf text
   //in.endInflate();
 
   return 1;
@@ -1002,7 +1003,6 @@ void LoadTree(Decoder &dec, TypeMap &typeMap, TreeNode* root) {
   const int id = dec.read4();
   const std::string name = dec.readStr();
   const int children = dec.read4();
-  out << status << " " << kind << " " << name << " " << id << " " << children << std::endl;
 
   TreeNode *node = root->add_child();
   node->set_name(name);
@@ -1020,8 +1020,9 @@ void LoadTree(Decoder &dec, TypeMap &typeMap, TreeNode* root) {
 
     auto typeMapIt = typeMap.find(type);
     if (typeMapIt == typeMap.end()) {
-      err << "No map of ids to protocol buffers for GMK type '" << type
-          << "' and the project cannot be loaded" << std::endl;
+      err << "No map of ids to protocol buffers for GMK kind '" << kind
+          << "' so tree node with name '" << name << "' will not have "
+          << "its protocol buffer set" << std::endl;
       return;
     }
     auto &resMap = typeMapIt->second;
@@ -1134,8 +1135,6 @@ buffers::Project *LoadGMK(std::string fName) {
   auto proj = std::make_unique<buffers::Project>();
   buffers::Game *game = proj->mutable_game();
   game->set_allocated_root(root);
-  out << game->DebugString() << std::endl;
-  out << "success!" << std::endl;
 
   return proj.release();
 }
