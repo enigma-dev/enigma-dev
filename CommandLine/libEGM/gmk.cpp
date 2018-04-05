@@ -40,9 +40,24 @@ namespace gmk {
 ostream out(nullptr);
 ostream err(nullptr);
 
+static vector<std::string> tempFilesCreated;
+static bool atexit_tempdata_cleanup_registered = false;
+static void atexit_tempdata_cleanup() {
+  for (std::string tempFile : tempFilesCreated)
+    unlink(tempFile.c_str());
+}
+
 class Decoder {
   public:
-  explicit Decoder(std::istream &in): in(in), decodeTable(nullptr) {}
+  explicit Decoder(std::istream &in): in(in), decodeTable(nullptr) {
+    if (atexit_tempdata_cleanup_registered) return;
+    const int ret = std::atexit(atexit_tempdata_cleanup);
+    if (ret != 0) {
+      err << "Failed to register cleanup handler for process exit, temporary files will not be removed" << std::endl;
+    } else {
+      atexit_tempdata_cleanup_registered = true;
+    }
+  }
   ~Decoder() {}
 
   void skip(size_t count) {
@@ -151,6 +166,7 @@ class Decoder {
     char temp[] = "gmk_data.XXXXXX";
     int fd = mkstemp(temp);
     if (fd == -1) return;
+    tempFilesCreated.push_back(temp);
     write(fd, bytes, length);
     close(fd);
     data_file_path->append(temp, strlen(temp));
