@@ -75,9 +75,9 @@ class Decoder {
   }
 
   std::unique_ptr<char[]> read(size_t length, size_t off=0) {
-    char* bytes = new char[length];
-    read(bytes, length, off);
-    return std::unique_ptr<char[]>(bytes);
+    auto bytes = make_unique<char[]>(length);
+    read(bytes.get(), length, off);
+    return bytes;
   }
 
   void read(char* bytes, size_t length, size_t off=0) {
@@ -139,14 +139,12 @@ class Decoder {
       return nullptr;
     }
 
-    out << outstring.size() << std::endl;
-
     length = outstring.size();
-    char* bytes = new char[length];
+    auto bytes = make_unique<char[]>(length);
     for (size_t i = 0; i < length; ++i)
       bytes[i] = outstring[i];
 
-    return std::unique_ptr<char[]>(bytes);
+    return bytes;
   }
 
   void writeTempDataFile(std::string *data_file_path, char *bytes, size_t length) {
@@ -274,7 +272,8 @@ class Decoder {
   std::unique_ptr<int[]> decodeTable;
 
   std::unique_ptr<int[]> makeEncodeTable(int seed) {
-    std::unique_ptr<int[]> table(new int[256]);
+    auto table = make_unique<int[]>(256);
+
     int a = 6 + (seed % 250);
     int b = seed / 250;
     for (int i = 0; i < 256; i++)
@@ -289,7 +288,7 @@ class Decoder {
   }
 
   std::unique_ptr<int[]> makeDecodeTable(std::unique_ptr<int[]> encodeTable) {
-    std::unique_ptr<int[]> table(new int[256]);
+    auto table = make_unique<int[]>(256);
     for (int i = 0; i < 256; i++) {
       table[encodeTable[i]] = i;
     }
@@ -688,7 +687,7 @@ int LoadActions(Decoder &dec, Event *event) {
 
     int numofargs = dec.read4(); // number of library action's arguments
     int numofargkinds = dec.read4(); // number of library action's argument kinds
-    int* argkinds = new int[numofargkinds];
+    auto argkinds = make_unique<int[]>(numofargkinds);
     for (int x = 0; x < numofargkinds; x++)
       argkinds[x] = dec.read4(); // argument x's kind
 
@@ -1126,15 +1125,15 @@ buffers::Project *LoadGMK(std::string fName) {
   dec.skip(dec.read4() * 4);
 
   // Project Tree
-  TreeNode *root = new TreeNode();
+  auto root = make_unique<TreeNode>();
   int rootnodes = (ver > 540) ? 12 : 11;
   while (rootnodes-- > 0) {
-    LoadTree(dec, typeMap, root);
+    LoadTree(dec, typeMap, root.get());
   }
 
   auto proj = std::make_unique<buffers::Project>();
   buffers::Game *game = proj->mutable_game();
-  game->set_allocated_root(root);
+  game->set_allocated_root(root.release());
 
   return proj.release();
 }
