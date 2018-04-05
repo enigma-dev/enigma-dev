@@ -876,8 +876,6 @@ std::unique_ptr<Room> LoadRoom(Decoder &dec, int ver) {
   if (ver == 520) dec.skip(6 * 4); //tile info
   // CURRENT_TAB, SCROLL_BAR_X, SCROLL_BAR_Y
   dec.read4(); dec.read4(); dec.read4();
-  // last instance id, last tile id
-  dec.read4(); dec.read4();
 
   return room;
 }
@@ -1123,6 +1121,9 @@ buffers::Project *LoadGMK(std::string fName) {
   for (auto factory : groupFactories) {
     if (!LoadGroup(dec, typeMap, factory)) return nullptr;
   }
+
+  // last instance id, last tile id read after the final room is read
+  dec.read4(); dec.read4();
 
   if (ver >= 700) {
     if (!LoadIncludes(dec)) return nullptr;
