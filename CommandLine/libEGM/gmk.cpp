@@ -148,14 +148,13 @@ class Decoder {
   }
 
   void writeTempDataFile(std::string *data_file_path, char *bytes, size_t length) {
-    char temp[16] = "gmk_data.XXXXXX";
+    char temp[] = "gmk_dataXXXXXX";
     mktemp(temp);
     out << temp << std::endl;
     ofstream output(temp, ios::binary|ios::out|ios::trunc);
     output.write(bytes, length);
     output.close();
-    for (int i = 0; i < strlen(temp); i++)
-      data_file_path->push_back(temp[i]);
+    data_file_path->append(temp, strlen(temp));
   }
 
   void readData(std::string *data_file_path=nullptr, bool compressed=false) {
@@ -267,9 +266,30 @@ class Decoder {
       decodeTable = nullptr;
   }
 
+  void postponeName(std::string* name, int id, TypeCase type) {
+    postponeds[type][id].push_back(name);
+  }
+
+  void processPostoned(const std::string name, const int id, const TypeCase type) {
+    cout << name << " " << id << " " << type << std::endl;
+    auto idMapIt = postponeds.find(type);
+    if (idMapIt == postponeds.end()) {
+      return; // no postponeds for this type
+    }
+    auto &idMap = idMapIt->second;
+    auto mutableNameIt = idMap.find(id);
+    if (mutableNameIt == idMap.end()) {
+      return; // no postponeds for this id
+    }
+    cout << name << std::endl;
+    for (std::string *mutableName : mutableNameIt->second)
+      mutableName->append(name.c_str(), name.size());
+  }
+
   private:
   std::istream &in;
   std::unique_ptr<int[]> decodeTable;
+  std::unordered_map<TypeCase, std::unordered_map<int, std::vector<std::string*> > > postponeds;
 
   std::unique_ptr<int[]> makeEncodeTable(int seed) {
     auto table = make_unique<int[]>(256);
@@ -620,7 +640,7 @@ std::unique_ptr<Path> LoadPath(Decoder &dec, int /*ver*/) {
   path->set_smooth(dec.readBool());
   path->set_closed(dec.readBool());
   path->set_precision(dec.read4());
-  int background_room_id = dec.read4(); // TODO: use typeMap[TypeCase::kBackground][background_room_id] to find the name
+  dec.postponeName(path->mutable_background_room_name(), dec.read4(), TypeCase::kBackground);
   path->set_snap_x(dec.read4());
   path->set_snap_y(dec.read4());
   int nopoints = dec.read4();
@@ -738,13 +758,13 @@ std::unique_ptr<Timeline> LoadTimeline(Decoder &dec, int /*ver*/) {
 std::unique_ptr<Object> LoadObject(Decoder &dec, int /*ver*/) {
   auto object = std::make_unique<Object>();
 
-  int sprite_id = dec.read4();
+  dec.postponeName(object->mutable_sprite_name(), dec.read4(), TypeCase::kSprite);
   object->set_solid(dec.readBool());
   object->set_visible(dec.readBool());
   object->set_depth(dec.read4());
   object->set_persistent(dec.readBool());
-  int parent_id = dec.read4();
-  int mask_id = dec.read4();
+  dec.postponeName(object->mutable_parent_name(), dec.read4(), TypeCase::kObject);
+  dec.postponeName(object->mutable_mask_name(), dec.read4(), TypeCase::kSprite);
 
   int noEvents = dec.read4() + 1;
   for (int i = 0; i < noEvents; i++) {
@@ -783,7 +803,7 @@ std::unique_ptr<Room> LoadRoom(Decoder &dec, int ver) {
     auto background = room->add_backgrounds();
     background->set_visible(dec.readBool());
     background->set_foreground(dec.readBool());
-    int background_id = dec.read4();
+    dec.postponeName(background->mutable_background_name(), dec.read4(), TypeCase::kBackground);
     background->set_x(dec.read4());
     background->set_y(dec.read4());
     background->set_htiled(dec.readBool());
@@ -816,7 +836,7 @@ std::unique_ptr<Room> LoadRoom(Decoder &dec, int ver) {
     view->set_vborder(dec.read4());
     view->set_hspeed(dec.read4());
     view->set_vspeed(dec.read4());
-    int object_following_id = dec.read4();
+    dec.postponeName(view->mutable_object_following(), dec.read4(), TypeCase::kObject);
   }
 
   int noinstances = dec.read4();
@@ -824,7 +844,7 @@ std::unique_ptr<Room> LoadRoom(Decoder &dec, int ver) {
     auto instance = room->add_instances();
     instance->set_x(dec.read4());
     instance->set_y(dec.read4());
-    int object_type_id = dec.read4();
+    dec.postponeName(instance->mutable_object_type(), dec.read4(), TypeCase::kObject);
     instance->set_id(dec.read4());
     instance->set_code(dec.readStr());
     instance->set_locked(dec.readBool());
@@ -835,7 +855,7 @@ std::unique_ptr<Room> LoadRoom(Decoder &dec, int ver) {
     auto tile = room->add_tiles();
     tile->set_x(dec.read4());
     tile->set_y(dec.read4());
-    int background_id = dec.read4();
+    dec.postponeName(tile->mutable_background_name(), dec.read4(), TypeCase::kBackground);
     tile->set_xoffset(dec.read4());
     tile->set_yoffset(dec.read4());
     tile->set_width(dec.read4());
@@ -988,6 +1008,13 @@ int LoadGroup(Decoder &dec, TypeMap &typeMap, GroupFactory groupFactory) {
       return 0;
     }
 
+    const google::protobuf::Descriptor *desc = res->GetDescriptor();
+    const google::protobuf::Reflection *refl = res->GetReflection();
+    const google::protobuf::FieldDescriptor *field = desc->FindFieldByName("id");
+    if (field) {
+      refl->SetInt32(res.get(), field, i);
+    }
+
     auto &resMap = typeMap[type];
     resMap[i] = std::move(res);
     //in.endInflate();
@@ -1016,6 +1043,9 @@ void LoadTree(Decoder &dec, TypeMap &typeMap, TreeNode* root) {
       TypeCase::TYPE_NOT_SET,TypeCase::kTimeline,TypeCase::TYPE_NOT_SET,TypeCase::kShader };
 
     const TypeCase type = RESOURCE_KIND[kind];
+
+    // Handle postponed id->name references
+    dec.processPostoned(name, id, type);
 
     auto typeMapIt = typeMap.find(type);
     if (typeMapIt == typeMap.end()) {
@@ -1095,7 +1125,6 @@ buffers::Project *LoadGMK(std::string fName) {
   TypeMap typeMap;
 
   for (auto factory : groupFactories) {
-    out << factory.type << std::endl;
     if (!LoadGroup(dec, typeMap, factory)) return nullptr;
   }
 
@@ -1130,6 +1159,8 @@ buffers::Project *LoadGMK(std::string fName) {
   while (rootnodes-- > 0) {
     LoadTree(dec, typeMap, root.get());
   }
+
+  out << root->DebugString() << std::endl;
 
   auto proj = std::make_unique<buffers::Project>();
   buffers::Game *game = proj->mutable_game();
