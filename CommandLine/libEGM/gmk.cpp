@@ -174,22 +174,75 @@ class Decoder {
     readData(data_file_path, false);
   }
 
-  void writeTempImageFile(std::string *data_file_path, char *bytes, size_t length, size_t width, size_t height) {
-    unsigned char* png = new unsigned char[length];
-    for (size_t i = 0; i < height; ++i) {
-        for (size_t j = 0; j < width; ++j) {
-            std::size_t b = (height - i - 1) * (width * 4) + 4 * j;
-            std::size_t p = i * (width * 4) + 4 * j;
-            png[p + 0] = bytes[b + 2]; // R<-B
-            png[p + 1] = bytes[b + 1]; // G<-G
-            png[p + 2] = bytes[b + 0]; // B<-R
-            png[p + 3] = bytes[b + 3]; // A<-A
+  void writeTempImageFile(std::string *data_file_path, char *bmp, size_t length, size_t width, size_t height) {
+    static const unsigned MINHEADER = 54; //minimum BMP header size
+
+    if (length < MINHEADER) {
+      err << "Image from the GMK file had a length '" << length << "' smaller than the minimum header "
+          << "size '" << MINHEADER << "' for the BMP format" << std::endl;
+      return;
+    }
+    if (bmp[0] != 'B' || bmp[1] != 'M') {
+      err << "Image from the GMK file did not have the correct BMP signature '"
+          << bmp[0] << bmp[1] << "'" << std::endl;
+      return;
+    }
+    unsigned pixeloffset = bmp[10] + 256 * bmp[11]; //where the pixel data starts
+    //read width and height from BMP header
+    size_t w = bmp[18] + bmp[19] * 256;
+    size_t h = bmp[22] + bmp[23] * 256;
+    //read number of channels from BMP header
+    if (bmp[28] != 24 && bmp[28] != 32) {
+      err << "Image from the GMK file was " << bmp[28] << " bit while this reader "
+          << "only supports 24 and 32 bit BMP images" << std::endl;
+      return;
+    }
+    unsigned numChannels = bmp[28] / 8;
+
+    //The amount of scanline bytes is width of image times channels, with extra bytes added if needed
+    //to make it a multiple of 4 bytes.
+    unsigned scanlineBytes = w * numChannels;
+    if (scanlineBytes % 4 != 0) scanlineBytes = (scanlineBytes / 4) * 4 + 4;
+
+    unsigned dataSize = scanlineBytes * h;
+    if (length < dataSize + pixeloffset) {
+      err << "Image from the GMK file had a length '" << length << "' smaller than the estimated "
+          << "size '" << (dataSize + pixeloffset) << "' based on the BMP header dimensions" << std::endl;
+      return;
+    }
+
+    unsigned char* png = new unsigned char[w * h * 4];
+
+    /*
+    There are 3 differences between BMP and the raw image buffer for LodePNG:
+    -it's upside down
+    -it's in BGR instead of RGB format (or BRGA instead of RGBA)
+    -each scanline has padding bytes to make it a multiple of 4 if needed
+    The 2D for loop below does all these 3 conversions at once.
+    */
+    for (unsigned y = 0; y < h; y++) {
+      for (unsigned x = 0; x < w; x++) {
+        //pixel start byte position in the BMP
+        unsigned bmpos = pixeloffset + (h - y - 1) * scanlineBytes + numChannels * x;
+        //pixel start byte position in the new raw image
+        unsigned newpos = 4 * y * w + 4 * x;
+        if (numChannels == 3) {
+          png[newpos + 0] = bmp[bmpos + 2]; //R<-B
+          png[newpos + 1] = bmp[bmpos + 1]; //G<-G
+          png[newpos + 2] = bmp[bmpos + 0]; //B<-R
+          png[newpos + 3] = 255;            //A<-A
+        } else {
+          png[newpos + 0] = bmp[bmpos + 3]; //R<-A
+          png[newpos + 1] = bmp[bmpos + 2]; //G<-B
+          png[newpos + 2] = bmp[bmpos + 1]; //B<-G
+          png[newpos + 3] = bmp[bmpos + 0]; //A<-R
         }
+      }
     }
 
     unsigned char *buffer = nullptr;
     size_t buffer_length;
-    lodepng_encode32(&buffer, &buffer_length, png, width, height);
+    lodepng_encode32(&buffer, &buffer_length, png, w, h);
 
     writeTempDataFile(data_file_path, reinterpret_cast<char*>(buffer), buffer_length);
   }
@@ -200,7 +253,7 @@ class Decoder {
     if (data_file_path && width && height && bytes) writeTempImageFile(data_file_path, bytes.release(), length, width, height);
   }
 
-  void readZLIBImage(std::string *data_file_path=nullptr, size_t width=0, size_t height=0) {
+  void readZlibImage(std::string *data_file_path=nullptr, size_t width=0, size_t height=0) {
     readImage(data_file_path, width, height, true);
   }
 
@@ -309,19 +362,19 @@ int LoadSettings(Decoder &dec) {
   int load_bar_mode = dec.read4(); // LOAD_BAR_MODE
   if (load_bar_mode == 2) { // 0=NONE 1=DEFAULT 2=CUSTOM
     if (ver < 800) {
-      if (dec.read4() != -1) dec.readZLIBImage(); // BACK_LOAD_BAR
-      if (dec.read4() != -1) dec.readZLIBImage(); // FRONT_LOAD_BAR
+      if (dec.read4() != -1) dec.readZlibImage(); // BACK_LOAD_BAR
+      if (dec.read4() != -1) dec.readZlibImage(); // FRONT_LOAD_BAR
     } else { //ver >= 800
-      if (dec.readBool()) dec.readZLIBImage(); // BACK_LOAD_BAR
-      if (dec.readBool()) dec.readZLIBImage(); // FRONT_LOAD_BAR
+      if (dec.readBool()) dec.readZlibImage(); // BACK_LOAD_BAR
+      if (dec.readBool()) dec.readZlibImage(); // FRONT_LOAD_BAR
     }
   }
   bool show_custom_load_image = dec.readBool(); // SHOW_CUSTOM_LOAD_IMAGE
   if (show_custom_load_image) {
     if (ver < 800) {
-      if (dec.read4() != -1) dec.readZLIBImage(); // LOADING_IMAGE
+      if (dec.read4() != -1) dec.readZlibImage(); // LOADING_IMAGE
     } else if (dec.readBool()) {
-      dec.readZLIBImage(); // LOADING_IMAGE
+      dec.readZlibImage(); // LOADING_IMAGE
     }
   }
   dec.readBool(); // IMAGE_PARTIALLY_TRANSPARENTY
@@ -490,7 +543,7 @@ std::unique_ptr<Sprite> LoadSprite(Decoder &dec, int ver) {
         dec.readBGRAImage(sprite->add_subimages(), w, h);
     } else {
       if (dec.read4() == -1) continue;
-      dec.readZLIBImage(sprite->add_subimages(), w, h);
+      dec.readZlibImage(sprite->add_subimages(), w, h);
     }
   }
   sprite->set_width(w);
@@ -540,7 +593,7 @@ std::unique_ptr<Background> LoadBackground(Decoder &dec, int ver) {
   if (ver < 710) {
     if (dec.readBool()) {
       if (dec.read4() != -1)
-        dec.readZLIBImage(background->mutable_image(), w, h);
+        dec.readZlibImage(background->mutable_image(), w, h);
     }
   } else { // >= 710
     int dataver = dec.read4();
