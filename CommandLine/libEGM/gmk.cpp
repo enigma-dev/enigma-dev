@@ -17,6 +17,7 @@
 
 #include "gmk.h"
 
+#include "lodepng.h"
 #include <zlib.h>
 
 #include <fstream>
@@ -29,17 +30,15 @@
 
 using namespace buffers;
 using namespace buffers::resources;
-
-using std::unordered_map;
-using std::vector;
-using std::set;
+using namespace std;
 
 using TypeCase = TreeNode::TypeCase;
-using IdMap = unordered_map<TypeCase, unordered_map<int, std::unique_ptr<google::protobuf::Message> > >;
+using IdMap = unordered_map<int, std::unique_ptr<google::protobuf::Message> >;
+using TypeMap = unordered_map<TypeCase, IdMap>;
 
 namespace gmk {
-std::ostream out(nullptr);
-std::ostream err(nullptr);
+ostream out(nullptr);
+ostream err(nullptr);
 
 class Decoder {
   public:
@@ -105,24 +104,108 @@ class Decoder {
     return data.dbl;
   }
 
-  std::unique_ptr<char[]> decompress(size_t length, size_t off=0) {
+  std::unique_ptr<char[]> decompress(size_t &length, size_t off=0) {
     std::unique_ptr<char[]> src = read(length, off);
-    char* dest = new char[length];
-    uLongf destLength = length;
-    uncompress((Bytef*)dest, &destLength, (Bytef*)src.get(), length);
-    return std::unique_ptr<char[]>(dest);
+
+    z_stream zs = {}; // zero-initialize
+    if (inflateInit(&zs) != Z_OK) {
+      err << "Failed to initialize zlib inflate" << std::endl;
+      return nullptr;
+    }
+
+    zs.next_in = (Bytef*)src.get();
+    zs.avail_in = (uInt)length;
+
+    int ret;
+    char outbuffer[32768];
+    std::string outstring;
+
+    // get the decompressed bytes blockwise using repeated calls to inflate
+    do {
+      zs.next_out = reinterpret_cast<Bytef*>(outbuffer);
+      zs.avail_out = sizeof(outbuffer);
+
+      ret = inflate(&zs, 0);
+
+      if (outstring.size() < zs.total_out) {
+          outstring.append(outbuffer, zs.total_out - outstring.size());
+      }
+    } while (ret == Z_OK);
+
+    inflateEnd(&zs);
+
+    if (ret != Z_STREAM_END) { // an error occurred that was not EOF
+      err << "There was an error with code '" << ret << "' while using zlib to decompress data" << std::endl;
+      return nullptr;
+    }
+
+    out << outstring.size() << std::endl;
+
+    length = outstring.size();
+    char* bytes = new char[length];
+    for (size_t i = 0; i < length; ++i)
+      bytes[i] = outstring[i];
+
+    return std::unique_ptr<char[]>(bytes);
   }
 
-  std::unique_ptr<char[]> readZlibImage() {
-    size_t length = read4();
-    std::unique_ptr<char[]> bytes = decompress(length);
-    return bytes;
+  void writeTempDataFile(std::string *data_file_path, char *bytes, size_t length) {
+    char temp[16] = "gmk_data.XXXXXX";
+    mktemp(temp);
+    out << temp << std::endl;
+    ofstream output(temp, ios::binary|ios::out|ios::trunc);
+    output.write(bytes, length);
+    output.close();
+    for (int i = 0; i < strlen(temp); i++)
+      data_file_path->push_back(temp[i]);
   }
 
-  std::unique_ptr<char[]> readBGRAImage() {
+  void readData(std::string *data_file_path=nullptr, bool compressed=false) {
     size_t length = read4();
-    std::unique_ptr<char[]> bytes = read(length);
-    return bytes;
+    std::unique_ptr<char[]> bytes = compressed ? decompress(length) : read(length);
+    if (data_file_path && bytes) writeTempDataFile(data_file_path, bytes.get(), length);
+  }
+
+  void readCompressedData(std::string *data_file_path=nullptr) {
+    readData(data_file_path, true);
+  }
+
+  void readUncompressedData(std::string *data_file_path=nullptr) {
+    readData(data_file_path, false);
+  }
+
+  void writeTempImageFile(std::string *data_file_path, char *bytes, size_t length, size_t width, size_t height) {
+    unsigned char* png = new unsigned char[length];
+    for (size_t i = 0; i < height; ++i) {
+        for (size_t j = 0; j < width; ++j) {
+            std::size_t b = (height - i - 1) * (width * 4) + 4 * j;
+            std::size_t p = i * (width * 4) + 4 * j;
+            png[p + 0] = bytes[b + 2]; // R<-B
+            png[p + 1] = bytes[b + 1]; // G<-G
+            png[p + 2] = bytes[b + 0]; // B<-R
+            png[p + 3] = bytes[b + 3]; // A<-A
+        }
+    }
+
+    unsigned char *buffer = nullptr;
+    size_t buffer_length;
+    lodepng_encode32(&buffer, &buffer_length, png, width, height);
+
+    writeTempDataFile(data_file_path, reinterpret_cast<char*>(buffer), buffer_length);
+  }
+
+  void readImage(std::string *data_file_path=nullptr, size_t width=0, size_t height=0, bool compressed=false) {
+    size_t length = read4();
+    std::unique_ptr<char[]> bytes = compressed ? decompress(length) : read(length);
+    if (data_file_path && width && height && bytes) writeTempImageFile(data_file_path, bytes.release(), length, width, height);
+  }
+
+  void readZLIBImage(std::string *data_file_path=nullptr, size_t width=0, size_t height=0) {
+    readImage(data_file_path, width, height, true);
+  }
+
+  void readBGRAImage(std::string *data_file_path=nullptr, size_t width=0, size_t height=0) {
+    readImage(data_file_path, width, height, false);
   }
 
   void setSeed(int seed) {
@@ -226,19 +309,19 @@ int LoadSettings(Decoder &dec) {
   int load_bar_mode = dec.read4(); // LOAD_BAR_MODE
   if (load_bar_mode == 2) { // 0=NONE 1=DEFAULT 2=CUSTOM
     if (ver < 800) {
-      if (dec.read4() != -1) dec.readZlibImage(); // BACK_LOAD_BAR
-      if (dec.read4() != -1) dec.readZlibImage(); // FRONT_LOAD_BAR
+      if (dec.read4() != -1) dec.readZLIBImage(); // BACK_LOAD_BAR
+      if (dec.read4() != -1) dec.readZLIBImage(); // FRONT_LOAD_BAR
     } else { //ver >= 800
-      if (dec.readBool()) dec.readZlibImage(); // BACK_LOAD_BAR
-      if (dec.readBool()) dec.readZlibImage(); // FRONT_LOAD_BAR
+      if (dec.readBool()) dec.readZLIBImage(); // BACK_LOAD_BAR
+      if (dec.readBool()) dec.readZLIBImage(); // FRONT_LOAD_BAR
     }
   }
   bool show_custom_load_image = dec.readBool(); // SHOW_CUSTOM_LOAD_IMAGE
   if (show_custom_load_image) {
     if (ver < 800) {
-      if (dec.read4() != -1) dec.readZlibImage(); // LOADING_IMAGE
+      if (dec.read4() != -1) dec.readZLIBImage(); // LOADING_IMAGE
     } else if (dec.readBool()) {
-      dec.readZlibImage(); // LOADING_IMAGE
+      dec.readZLIBImage(); // LOADING_IMAGE
     }
   }
   dec.readBool(); // IMAGE_PARTIALLY_TRANSPARENTY
@@ -341,7 +424,7 @@ std::unique_ptr<Sound> LoadSound(Decoder &dec, int ver) {
   if (ver == 440) {
     //-1 = no sound
     if (kind53 != -1) {
-      std::unique_ptr<char[]> data = dec.decompress(dec.read4());
+      dec.readCompressedData(sound->mutable_data());
     }
     dec.skip(8);
     sound->set_preload(!dec.readBool());
@@ -349,9 +432,9 @@ std::unique_ptr<Sound> LoadSound(Decoder &dec, int ver) {
     sound->set_file_name(dec.readStr());
     if (dec.readBool()) {
       if (ver == 600) {
-        std::unique_ptr<char[]> data = dec.decompress(dec.read4());
+        dec.readCompressedData(sound->mutable_data());
       } else {
-        std::unique_ptr<char[]> data = dec.read(dec.read4());
+        dec.readUncompressedData(sound->mutable_data());
       }
     }
     dec.read4(); // effects flags
@@ -403,10 +486,11 @@ std::unique_ptr<Sprite> LoadSprite(Decoder &dec, int ver) {
       }
       w = dec.read4();
       h = dec.read4();
-      if (w != 0 && h != 0) dec.readBGRAImage();
+      if (w != 0 && h != 0)
+        dec.readBGRAImage(sprite->add_subimages(), w, h);
     } else {
       if (dec.read4() == -1) continue;
-      dec.readZlibImage();
+      dec.readZLIBImage(sprite->add_subimages(), w, h);
     }
   }
   sprite->set_width(w);
@@ -456,7 +540,7 @@ std::unique_ptr<Background> LoadBackground(Decoder &dec, int ver) {
   if (ver < 710) {
     if (dec.readBool()) {
       if (dec.read4() != -1)
-        dec.readZlibImage();
+        dec.readZLIBImage(background->mutable_image(), w, h);
     }
   } else { // >= 710
     int dataver = dec.read4();
@@ -467,7 +551,8 @@ std::unique_ptr<Background> LoadBackground(Decoder &dec, int ver) {
     }
     w = dec.read4();
     h = dec.read4();
-    if (w != 0 && h != 0) dec.readBGRAImage();
+    if (w != 0 && h != 0)
+      dec.readBGRAImage(background->mutable_image(), w, h);
   }
 
   background->set_width(w);
@@ -482,7 +567,7 @@ std::unique_ptr<Path> LoadPath(Decoder &dec, int /*ver*/) {
   path->set_smooth(dec.readBool());
   path->set_closed(dec.readBool());
   path->set_precision(dec.read4());
-  int background_room_id = dec.read4(); // TODO: use idMap to find the name
+  int background_room_id = dec.read4(); // TODO: use typeMap[TypeCase::kBackground][background_room_id] to find the name
   path->set_snap_x(dec.read4());
   path->set_snap_y(dec.read4());
   int nopoints = dec.read4();
@@ -816,7 +901,7 @@ struct GroupFactory {
   FactoryFunction loadFunc;
 };
 
-int LoadGroup(Decoder &dec, IdMap &idMap, GroupFactory groupFactory) {
+int LoadGroup(Decoder &dec, TypeMap &typeMap, GroupFactory groupFactory) {
   TypeCase type = groupFactory.type;
   int ver = dec.read4();
   if (!groupFactory.supportedGroupVersions.count(ver)) {
@@ -850,7 +935,7 @@ int LoadGroup(Decoder &dec, IdMap &idMap, GroupFactory groupFactory) {
       return 0;
     }
 
-    auto &resMap = idMap[type];
+    auto &resMap = typeMap[type];
     resMap[i] = std::move(res);
     //in.endInflate();
   }
@@ -858,7 +943,7 @@ int LoadGroup(Decoder &dec, IdMap &idMap, GroupFactory groupFactory) {
   return 1;
 }
 
-void LoadTree(Decoder &dec, IdMap &idMap, TreeNode* root) {
+void LoadTree(Decoder &dec, TypeMap &typeMap, TreeNode* root) {
   const int status = dec.read4();
   const int kind = dec.read4();
   const int id = dec.read4();
@@ -871,7 +956,7 @@ void LoadTree(Decoder &dec, IdMap &idMap, TreeNode* root) {
   node->set_folder(status <= 2);
   if (node->folder()) {
     for (int i = 0; i < children; i++) {
-      LoadTree(dec, idMap, node);
+      LoadTree(dec, typeMap, node);
     }
   } else {
     static const TypeCase RESOURCE_KIND[] = { TypeCase::TYPE_NOT_SET,TypeCase::kObject,TypeCase::kSprite,TypeCase::kSound,
@@ -880,13 +965,13 @@ void LoadTree(Decoder &dec, IdMap &idMap, TreeNode* root) {
 
     const TypeCase type = RESOURCE_KIND[kind];
 
-    auto resMapIt = idMap.find(type);
-    if (resMapIt == idMap.end()) {
+    auto typeMapIt = typeMap.find(type);
+    if (typeMapIt == typeMap.end()) {
       err << "No map of ids to protocol buffers for GMK type '" << type
           << "' and the project cannot be loaded" << std::endl;
       return;
     }
-    auto &resMap = resMapIt->second;
+    auto &resMap = typeMapIt->second;
 
     const google::protobuf::Descriptor *desc = node->GetDescriptor();
     const google::protobuf::Reflection *refl = node->GetReflection();
@@ -954,11 +1039,11 @@ buffers::Project *LoadGMK(std::string fName) {
     { TypeCase::kObject,     { 400, 800      }, { 430                }, LoadObject     },
     { TypeCase::kRoom,       { 420, 800      }, { 520, 541           }, LoadRoom       }
   });
-  IdMap idMap;
+  TypeMap typeMap;
 
   for (auto factory : groupFactories) {
     out << factory.type << std::endl;
-    if (!LoadGroup(dec, idMap, factory)) return nullptr;
+    if (!LoadGroup(dec, typeMap, factory)) return nullptr;
   }
 
   if (ver >= 700) {
@@ -990,7 +1075,7 @@ buffers::Project *LoadGMK(std::string fName) {
   TreeNode *root = new TreeNode();
   int rootnodes = (ver > 540) ? 12 : 11;
   while (rootnodes-- > 0) {
-    LoadTree(dec, idMap, root);
+    LoadTree(dec, typeMap, root);
   }
 
   auto proj = std::make_unique<buffers::Project>();
