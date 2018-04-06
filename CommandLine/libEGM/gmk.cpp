@@ -60,15 +60,36 @@ class Decoder {
   }
   ~Decoder() {}
 
+  void beginInflate() {
+    size_t limit = read4();
+    zlibStart = in.tellg();
+    zlibBuffer = decompress(limit, 0);
+    zlibPos = 0;
+  }
+
+  void endInflate() {
+    zlibBuffer.release();
+    zlibStart = 0;
+    zlibPos = 0;
+  }
+
   void skip(size_t count) {
-    in.seekg(count, std::ios_base::cur);
+    if (zlibBuffer)
+      zlibPos += count;
+    else
+      in.seekg(count, std::ios_base::cur);
   }
 
   int read() {
-    int byte = in.get();
+    int byte, pos = in.tellg();
+    if (zlibBuffer) {
+      pos = zlibStart + zlibPos;
+      byte = static_cast<unsigned char>(zlibBuffer[zlibPos++]);
+    } else {
+      byte = in.get();
+    }
     if (decodeTable) {
-      int pos = in.tellg();
-      return (decodeTable[byte] - (pos - 1)) & 0xFF;
+      return (decodeTable[byte] - pos) & 0xFF;
     }
     return byte;
   }
@@ -89,15 +110,15 @@ class Decoder {
     return read4();
   }
 
-  std::unique_ptr<char[]> read(size_t length, size_t off=0) {
-    auto bytes = make_unique<char[]>(length);
-    read(bytes.get(), length, off);
-    return bytes;
-  }
-
   void read(char* bytes, size_t length, size_t off=0) {
     int pos = in.tellg();
-    in.read(bytes, length);
+    if (zlibBuffer) {
+      pos = zlibStart + zlibPos;
+      memcpy(bytes, zlibBuffer.get() + zlibPos, length);
+      zlibPos += length;
+    } else {
+      in.read(bytes, length);
+    }
     if (decodeTable) {
       for (size_t i = 0; i < length; i++) {
         int t = bytes[off + i] & 0xFF;
@@ -105,6 +126,12 @@ class Decoder {
         bytes[off + i] = (char) x;
       }
     }
+  }
+
+  std::unique_ptr<char[]> read(size_t length, size_t off=0) {
+    auto bytes = make_unique<char[]>(length);
+    read(bytes.get(), length, off);
+    return bytes;
   }
 
   std::string readStr() {
@@ -301,6 +328,8 @@ class Decoder {
 
   private:
   std::istream &in;
+  std::unique_ptr<char[]> zlibBuffer;
+  int zlibPos, zlibStart;
   std::unique_ptr<int[]> decodeTable;
   std::unordered_map<TypeCase, std::unordered_map<int, std::vector<std::string*> > > postponeds;
 
@@ -350,7 +379,7 @@ int LoadSettings(Decoder &dec) {
     return 0;
   }
 
-  //if (ver >= 800) beginInflate(in); // TODO: zlib beginInflate
+  if (ver >= 800) dec.beginInflate();
   dec.readBool(); // start_fullscreen
   if (ver >= 600) {
     dec.readBool(); // interpolate
@@ -445,7 +474,7 @@ int LoadSettings(Decoder &dec) {
   } else if (ver > 530) {
     LoadSettingsIncludes(dec);
   }
-  //in.endInflate(); TODO: zlib endInflate
+  dec.endInflate();
 
   return 1;
 }
@@ -459,9 +488,9 @@ int LoadTriggers(Decoder &dec) {
 
   int no = dec.read4();
   for (int i = 0; i < no; i++) {
-    //in.beginInflate();
+    dec.beginInflate();
     if (!dec.readBool()) {
-      //in.endInflate();
+      dec.endInflate();
       continue;
     }
     ver = dec.read4();
@@ -473,7 +502,7 @@ int LoadTriggers(Decoder &dec) {
     dec.readStr(); // trigger condition
     dec.read4(); // trigger check step
     dec.readStr(); // trigger constant
-    //in.endInflate();
+    dec.endInflate();
   }
   dec.skip(8); //last changed
 
@@ -906,7 +935,7 @@ int LoadIncludes(Decoder &dec) {
   int no = dec.read4();
   for (int i = 0; i < no; i++) {
     if (ver >= 800) {
-      //in.beginInflate();
+      dec.beginInflate();
       dec.skip(8); //last changed
     }
     ver = dec.read4();
@@ -927,7 +956,7 @@ int LoadIncludes(Decoder &dec) {
     dec.readBool(); // overwrite existing
     dec.readBool(); // free memory after export
     dec.readBool(); // remove at game end
-    //in.endInflate();
+    dec.endInflate();
   }
 
   return 1;
@@ -955,7 +984,7 @@ int LoadGameInformation(Decoder &dec) {
     return 0;
   }
 
-  //if (ver >= 800) in.beginInflate();
+  if (ver >= 800) dec.beginInflate();
   int bc = dec.read4();
   // if (bc >= 0) // background color
   if (ver < 800)
@@ -971,7 +1000,7 @@ int LoadGameInformation(Decoder &dec) {
   }
   if (ver >= 800) dec.skip(8); //last changed
   dec.readStr(); // the rtf text
-  //in.endInflate();
+  dec.endInflate();
 
   return 1;
 }
@@ -995,10 +1024,10 @@ int LoadGroup(Decoder &dec, TypeMap &typeMap, GroupFactory groupFactory) {
 
   int count = dec.read4();
   for (int i = 0; i < count; ++i) {
-    //if (ver == 800) in.beginInflate();
+    if (ver == 800) dec.beginInflate();
     if (!dec.readBool()) {
       // was deleted
-      //in.endInflate();
+      dec.endInflate();
       continue;
     }
     std::string name = dec.readStr();
@@ -1027,7 +1056,7 @@ int LoadGroup(Decoder &dec, TypeMap &typeMap, GroupFactory groupFactory) {
 
     auto &resMap = typeMap[type];
     resMap[i] = std::move(res);
-    //in.endInflate();
+    dec.endInflate();
   }
 
   return 1;
