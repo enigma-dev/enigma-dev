@@ -706,7 +706,7 @@ std::unique_ptr<Path> LoadPath(Decoder &dec, int /*ver*/) {
   path->set_smooth(dec.readBool());
   path->set_closed(dec.readBool());
   path->set_precision(dec.read4());
-  dec.postponeName(path->mutable_background_room_name(), dec.read4(), TypeCase::kBackground);
+  dec.postponeName(path->mutable_background_room_name(), dec.read4(), TypeCase::kRoom);
   path->set_snap_x(dec.read4());
   path->set_snap_y(dec.read4());
   int nopoints = dec.read4();
@@ -1040,25 +1040,23 @@ struct GroupFactory {
 
 int LoadGroup(Decoder &dec, TypeMap &typeMap, GroupFactory groupFactory) {
   TypeCase type = groupFactory.type;
-  int ver = dec.read4();
-  if (!groupFactory.supportedGroupVersions.count(ver)) {
-    err << "GMK group '" << type << "' with version '" << ver << "' is unsupported" << std::endl;
+  int groupVer = dec.read4();
+  if (!groupFactory.supportedGroupVersions.count(groupVer)) {
+    err << "GMK group '" << type << "' with version '" << groupVer << "' is unsupported" << std::endl;
     return 0;
   }
 
   int count = dec.read4();
   for (int i = 0; i < count; ++i) {
-    if (ver >= 800) dec.beginInflate();
-    if (!dec.readBool()) {
-      // was deleted
+    if (groupVer >= 800) dec.beginInflate();
+    if (!dec.readBool()) { // was deleted
       dec.endInflate();
       continue;
     }
     std::string name = dec.readStr();
-    std::cout << type << " " << name << std::endl;
-    if (ver == 800) dec.skip(8); //last changed
+    if (groupVer == 800) dec.skip(8); // last changed
 
-    ver = dec.read4();
+    int ver = dec.read4();
     if (!groupFactory.supportedVersions.count(ver)) {
       err << "GMK resource of type '" << type << "' with name '" << name
           << "' has an unsupported version '" << ver << "'" << std::endl;
