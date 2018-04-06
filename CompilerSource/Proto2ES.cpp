@@ -537,6 +537,16 @@ void AddFont(const char* name, const buffers::resources::Font& fnt) {
   f.size = fnt.size();
   f.bold = fnt.bold();
   f.italic = fnt.italic();
+
+  f.glyphRangeCount = 0;//fnt.ranges_size();
+  if (f.glyphRangeCount > 0) {
+    f.glyphRanges = new GlyphRange[f.glyphRangeCount];
+    for (int i=0; i < f.glyphRangeCount; ++i) {
+      f.glyphRanges[i].rangeMin = 0;
+      f.glyphRanges[i].rangeMax = 0;
+      f.glyphRanges[i].glyphs = nullptr;
+    }
+  }
 }
 
 void AddTimeline(const char* name, buffers::resources::Timeline* tml, buffers::Game* protobuf) {
