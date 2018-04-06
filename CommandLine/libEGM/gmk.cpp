@@ -68,7 +68,7 @@ class Decoder {
   }
 
   void endInflate() {
-    zlibBuffer.release();
+    zlibBuffer.reset();
     zlibStart = 0;
     zlibPos = 0;
   }
@@ -287,18 +287,42 @@ class Decoder {
     writeTempDataFile(data_file_path, reinterpret_cast<char*>(buffer), buffer_length);
   }
 
+  void writeTempBGRAImageFile(std::string *data_file_path, const char *bytes, size_t length, size_t width, size_t height) {
+    auto bgra = reinterpret_cast<const unsigned char*>(bytes); // all of the following logic expects unsigned
+
+    std::vector<unsigned char> rgba(width * height * 4);
+
+    for (unsigned y = 0; y < height; y++) {
+      for (unsigned x = 0; x < width; x++) {
+        unsigned pos = width * 4 * y + 4 * x;
+        rgba[pos + 0] = bgra[pos + 2]; //R<-B
+        rgba[pos + 1] = bgra[pos + 1]; //G<-G
+        rgba[pos + 2] = bgra[pos + 0]; //B<-R
+        rgba[pos + 3] = bgra[pos + 3]; //A<-A
+      }
+    }
+
+    unsigned char *buffer = nullptr;
+    size_t buffer_length;
+    lodepng_encode32(&buffer, &buffer_length, rgba.data(), width, height);
+
+    writeTempDataFile(data_file_path, reinterpret_cast<char*>(buffer), buffer_length);
+  }
+
   void readImage(std::string *data_file_path=nullptr, size_t width=0, size_t height=0, bool compressed=false) {
-    size_t length = read4();
-    std::unique_ptr<char[]> bytes = compressed ? decompress(length) : read(length);
-    if (data_file_path && width && height && bytes) writeTempImageFile(data_file_path, bytes.get(), length, width, height);
+
   }
 
   void readZlibImage(std::string *data_file_path=nullptr, size_t width=0, size_t height=0) {
-    readImage(data_file_path, width, height, true);
+    size_t length = read4();
+    std::unique_ptr<char[]> bytes = decompress(length);
+    if (data_file_path && bytes) writeTempImageFile(data_file_path, bytes.get(), length, width, height);
   }
 
   void readBGRAImage(std::string *data_file_path=nullptr, size_t width=0, size_t height=0) {
-    readImage(data_file_path, width, height, false);
+    size_t length = read4();
+    std::unique_ptr<char[]> bytes = read(length);
+    if (data_file_path && bytes) writeTempBGRAImageFile(data_file_path, bytes.get(), length, width, height);
   }
 
   void setSeed(int seed) {
@@ -1024,13 +1048,14 @@ int LoadGroup(Decoder &dec, TypeMap &typeMap, GroupFactory groupFactory) {
 
   int count = dec.read4();
   for (int i = 0; i < count; ++i) {
-    if (ver == 800) dec.beginInflate();
+    if (ver >= 800) dec.beginInflate();
     if (!dec.readBool()) {
       // was deleted
       dec.endInflate();
       continue;
     }
     std::string name = dec.readStr();
+    std::cout << type << " " << name << std::endl;
     if (ver == 800) dec.skip(8); //last changed
 
     ver = dec.read4();
