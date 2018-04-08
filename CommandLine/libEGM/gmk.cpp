@@ -48,13 +48,6 @@ static void atexit_tempdata_cleanup() {
     unlink(tempFile.c_str());
 }
 
-static vector<std::future<void>> tempFileFuturesCreated;
-static void get_tempdata_futures() {
-  for (std::future<void> &future : tempFileFuturesCreated)
-    future.get();
-  tempFileFuturesCreated.clear();
-}
-
 void writeTempDataFile(std::string *data_file_path, char *bytes, size_t length) {
   char temp[] = "gmk_data.XXXXXX";
   int fd = mkstemp(temp);
@@ -171,12 +164,6 @@ void writeTempBGRAImageFile(std::string *data_file_path, std::unique_ptr<char[]>
   free(buffer);
 }
 
-template<class Function, class... Args>
-void threadTempFileWrite(Function&& f, Args&&... args) {
-  std::future<void> tempFileFuture = std::async(f, std::move(args)...);
-  tempFileFuturesCreated.push_back(std::move(tempFileFuture));
-}
-
 class Decoder {
   public:
   explicit Decoder(std::istream &in): in(in), decodeTable(nullptr) {
@@ -188,7 +175,17 @@ class Decoder {
       atexit_tempdata_cleanup_registered = true;
     }
   }
-  ~Decoder() {}
+
+  void waitForTempFutures() {
+    for (std::future<void> &future : tempFileFuturesCreated)
+      future.wait();
+  }
+
+  template<class Function, class... Args>
+  void threadTempFileWrite(Function&& f, Args&&... args) {
+    std::future<void> tempFileFuture = std::async(f, std::move(args)...);
+    tempFileFuturesCreated.push_back(std::move(tempFileFuture));
+  }
 
   void beginInflate() {
     size_t limit = read4();
@@ -376,6 +373,7 @@ class Decoder {
   int zlibPos, zlibStart;
   std::unique_ptr<int[]> decodeTable;
   std::unordered_map<TypeCase, std::unordered_map<int, std::vector<std::string*> > > postponeds;
+  std::vector<std::future<void> > tempFileFuturesCreated;
 
   std::unique_ptr<int[]> makeEncodeTable(int seed) {
     auto table = make_unique<int[]>(256);
@@ -1249,7 +1247,7 @@ buffers::Project *LoadGMK(std::string fName) {
   buffers::Game *game = proj->mutable_game();
   game->set_allocated_root(root.release());
   // ensure all temporary files have been written
-  get_tempdata_futures();
+  dec.waitForTempFutures();
 
   return proj.release();
 }
