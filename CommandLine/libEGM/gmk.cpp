@@ -48,33 +48,33 @@ static void atexit_tempdata_cleanup() {
     unlink(tempFile.c_str());
 }
 
-void writeTempDataFile(std::string *data_file_path, char *bytes, size_t length) {
+std::string writeTempDataFile(char *bytes, size_t length) {
   char temp[] = "gmk_data.XXXXXX";
   int fd = mkstemp(temp);
-  if (fd == -1) return;
+  if (fd == -1) return "";
   tempFilesCreated.push_back(temp);
   write(fd, bytes, length);
   close(fd);
-  data_file_path->append(temp, strlen(temp));
+  return temp;
 }
 
-void writeTempDataFile(std::string *data_file_path, std::unique_ptr<char[]> bytes, size_t length) {
-  writeTempDataFile(data_file_path, bytes.get(), length);
+std::string writeTempDataFile(std::unique_ptr<char[]> bytes, size_t length) {
+  return writeTempDataFile(bytes.get(), length);
 }
 
-void writeTempImageFile(std::string *data_file_path, std::unique_ptr<char[]> bytes, size_t length, size_t width, size_t height) {
+std::string writeTempImageFile(std::unique_ptr<char[]> bytes, size_t length, size_t width, size_t height) {
   static const unsigned MINHEADER = 54; //minimum BMP header size
   auto bmp = reinterpret_cast<const unsigned char*>(bytes.get()); // all of the following logic expects unsigned
 
   if (length < MINHEADER) {
     err << "Image from the GMK file had a length '" << length << "' smaller than the minimum header "
         << "size '" << MINHEADER << "' for the BMP format" << std::endl;
-    return;
+    return "";
   }
   if (bmp[0] != 'B' || bmp[1] != 'M') {
     err << "Image from the GMK file did not have the correct BMP signature '"
         << bmp[0] << bmp[1] << "'" << std::endl;
-    return;
+    return "";
   }
   unsigned pixeloffset = bmp[10] + 256 * bmp[11]; //where the pixel data starts
   //read width and height from BMP header
@@ -84,7 +84,7 @@ void writeTempImageFile(std::string *data_file_path, std::unique_ptr<char[]> byt
   if (bmp[28] != 24 && bmp[28] != 32) {
     err << "Image from the GMK file was " << bmp[28] << " bit while this reader "
         << "only supports 24 and 32 bit BMP images" << std::endl;
-    return;
+    return "";
   }
   unsigned numChannels = bmp[28] / 8;
 
@@ -97,7 +97,7 @@ void writeTempImageFile(std::string *data_file_path, std::unique_ptr<char[]> byt
   if (length < dataSize + pixeloffset) {
     err << "Image from the GMK file had a length '" << length << "' smaller than the estimated "
         << "size '" << (dataSize + pixeloffset) << "' based on the BMP header dimensions" << std::endl;
-    return;
+    return "";
   }
 
   std::vector<unsigned char> rgba(w * h * 4);
@@ -134,12 +134,13 @@ void writeTempImageFile(std::string *data_file_path, std::unique_ptr<char[]> byt
   lodepng_encode32(&buffer, &buffer_length, rgba.data(), w, h);
 
   char *buffer_signed = reinterpret_cast<char*>(buffer);
-  writeTempDataFile(data_file_path, buffer_signed, buffer_length);
+  std::string temp_file_path = writeTempDataFile(buffer_signed, buffer_length);
   // explicitly free because lodepng allocated it with malloc
   free(buffer);
+  return temp_file_path;
 }
 
-void writeTempBGRAImageFile(std::string *data_file_path, std::unique_ptr<char[]> bytes, size_t length, size_t width, size_t height) {
+std::string writeTempBGRAImageFile(std::unique_ptr<char[]> bytes, size_t length, size_t width, size_t height) {
   auto bgra = reinterpret_cast<const unsigned char*>(bytes.get()); // all of the following logic expects unsigned
   std::vector<unsigned char> rgba;
   rgba.resize(width * height * 4);
@@ -159,9 +160,10 @@ void writeTempBGRAImageFile(std::string *data_file_path, std::unique_ptr<char[]>
   lodepng_encode32(&buffer, &buffer_length, rgba.data(), width, height);
 
   char *buffer_signed = reinterpret_cast<char*>(buffer);
-  writeTempDataFile(data_file_path, buffer_signed, buffer_length);
+  std::string temp_file_path = writeTempDataFile(buffer_signed, buffer_length);
   // explicitly free because lodepng allocated it with malloc
   free(buffer);
+  return temp_file_path;
 }
 
 class Decoder {
@@ -176,15 +178,16 @@ class Decoder {
     }
   }
 
-  void waitForTempFutures() {
-    for (std::future<void> &future : tempFileFuturesCreated)
-      future.wait();
+  template<class Function, class... Args>
+  void threadTempFileWrite(Function&& f, std::string* data_file_path, Args&&... args) {
+    std::future<std::string> tempFileFuture = std::async(std::launch::async, f, std::move(args)...);
+    tempFileFuturesCreated.emplace_back(std::make_pair(std::move(tempFileFuture), data_file_path));
   }
 
-  template<class Function, class... Args>
-  void threadTempFileWrite(Function&& f, Args&&... args) {
-    std::future<void> tempFileFuture = std::async(f, std::move(args)...);
-    tempFileFuturesCreated.push_back(std::move(tempFileFuture));
+  void processTempFileFutures() {
+    for (auto &tempFilePair : tempFileFuturesCreated) {
+      tempFilePair.second->append(tempFilePair.first.get());
+    }
   }
 
   void beginInflate() {
@@ -318,7 +321,7 @@ class Decoder {
   void readData(std::string *data_file_path=nullptr, bool compressed=false) {
     size_t length = read4();
     std::unique_ptr<char[]> bytes = compressed ? decompress(length) : read(length);
-    using WriteTempDataFileManaged = void(*)(std::string*, std::unique_ptr<char[]>, size_t);
+    using WriteTempDataFileManaged = std::string(*)(std::unique_ptr<char[]>, size_t);
     if (data_file_path && bytes) threadTempFileWrite((WriteTempDataFileManaged)writeTempDataFile, data_file_path, std::move(bytes), length);
   }
 
@@ -373,7 +376,7 @@ class Decoder {
   int zlibPos, zlibStart;
   std::unique_ptr<int[]> decodeTable;
   std::unordered_map<TypeCase, std::unordered_map<int, std::vector<std::string*> > > postponeds;
-  std::vector<std::future<void> > tempFileFuturesCreated;
+  std::vector<std::pair<std::future<std::string>, std::string*> > tempFileFuturesCreated;
 
   std::unique_ptr<int[]> makeEncodeTable(int seed) {
     auto table = make_unique<int[]>(256);
@@ -1148,6 +1151,18 @@ void LoadTree(Decoder &dec, TypeMap &typeMap, TreeNode* root) {
 }
 
 buffers::Project *LoadGMK(std::string fName) {
+  static const vector<GroupFactory> groupFactories({
+    { TypeCase::kSound,      { 400, 800      }, { 440, 600, 800      }, LoadSound      },
+    { TypeCase::kSprite,     { 400, 800, 810 }, { 400, 542, 800, 810 }, LoadSprite     },
+    { TypeCase::kBackground, { 400, 800      }, { 400, 543, 710      }, LoadBackground },
+    { TypeCase::kPath,       { 420, 800      }, { 530                }, LoadPath       },
+    { TypeCase::kScript,     { 400, 800, 810 }, { 400, 800, 810      }, LoadScript     },
+    { TypeCase::kFont,       { 440, 540, 800 }, { 540, 800           }, LoadFont       },
+    { TypeCase::kTimeline,   { 500, 800      }, { 500                }, LoadTimeline   },
+    { TypeCase::kObject,     { 400, 800      }, { 430                }, LoadObject     },
+    { TypeCase::kRoom,       { 420, 800      }, { 520, 541           }, LoadRoom       }
+  });
+  TypeMap typeMap;
   std::ifstream in(fName, std::ios::binary);
   Decoder dec(in);
 
@@ -1191,19 +1206,6 @@ buffers::Project *LoadGMK(std::string fName) {
     if (!LoadConstants(dec)) return nullptr;
   }
 
-  static const vector<GroupFactory> groupFactories({
-    { TypeCase::kSound,      { 400, 800      }, { 440, 600, 800      }, LoadSound      },
-    { TypeCase::kSprite,     { 400, 800, 810 }, { 400, 542, 800, 810 }, LoadSprite     },
-    { TypeCase::kBackground, { 400, 800      }, { 400, 543, 710      }, LoadBackground },
-    { TypeCase::kPath,       { 420, 800      }, { 530                }, LoadPath       },
-    { TypeCase::kScript,     { 400, 800, 810 }, { 400, 800, 810      }, LoadScript     },
-    { TypeCase::kFont,       { 440, 540, 800 }, { 540, 800           }, LoadFont       },
-    { TypeCase::kTimeline,   { 500, 800      }, { 500                }, LoadTimeline   },
-    { TypeCase::kObject,     { 400, 800      }, { 430                }, LoadObject     },
-    { TypeCase::kRoom,       { 420, 800      }, { 520, 541           }, LoadRoom       }
-  });
-  TypeMap typeMap;
-
   for (auto factory : groupFactories) {
     if (!LoadGroup(dec, typeMap, factory)) return nullptr;
   }
@@ -1246,8 +1248,8 @@ buffers::Project *LoadGMK(std::string fName) {
   auto proj = std::make_unique<buffers::Project>();
   buffers::Game *game = proj->mutable_game();
   game->set_allocated_root(root.release());
-  // ensure all temporary files have been written
-  dec.waitForTempFutures();
+  // ensure all temp data files are written and the paths are set in the protos
+  dec.processTempFileFutures();
 
   return proj.release();
 }
