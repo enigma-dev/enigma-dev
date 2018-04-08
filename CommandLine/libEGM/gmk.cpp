@@ -24,6 +24,7 @@
 #include <utility>
 #include <functional>
 #include <memory>
+#include <thread>
 #include <unordered_map>
 #include <vector>
 #include <set>
@@ -43,8 +44,138 @@ ostream err(nullptr);
 static vector<std::string> tempFilesCreated;
 static bool atexit_tempdata_cleanup_registered = false;
 static void atexit_tempdata_cleanup() {
-  for (std::string tempFile : tempFilesCreated)
+  for (std::string &tempFile : tempFilesCreated)
     unlink(tempFile.c_str());
+}
+
+static vector<std::thread> tempThreadsCreated;
+static void join_tempdata_threads() {
+  for (std::thread &thread : tempThreadsCreated)
+    thread.join();
+  tempThreadsCreated.clear();
+}
+
+void writeTempDataFile(std::string *data_file_path, char *bytes, size_t length) {
+  char temp[] = "gmk_data.XXXXXX";
+  int fd = mkstemp(temp);
+  if (fd == -1) return;
+  tempFilesCreated.push_back(temp);
+  write(fd, bytes, length);
+  close(fd);
+  data_file_path->append(temp, strlen(temp));
+}
+
+void writeTempDataFile(std::string *data_file_path, std::unique_ptr<char[]> bytes, size_t length) {
+  writeTempDataFile(data_file_path, bytes.get(), length);
+}
+
+void writeTempImageFile(std::string *data_file_path, std::unique_ptr<char[]> bytes, size_t length, size_t width, size_t height) {
+  static const unsigned MINHEADER = 54; //minimum BMP header size
+  auto bmp = reinterpret_cast<const unsigned char*>(bytes.get()); // all of the following logic expects unsigned
+
+  if (length < MINHEADER) {
+    err << "Image from the GMK file had a length '" << length << "' smaller than the minimum header "
+        << "size '" << MINHEADER << "' for the BMP format" << std::endl;
+    return;
+  }
+  if (bmp[0] != 'B' || bmp[1] != 'M') {
+    err << "Image from the GMK file did not have the correct BMP signature '"
+        << bmp[0] << bmp[1] << "'" << std::endl;
+    return;
+  }
+  unsigned pixeloffset = bmp[10] + 256 * bmp[11]; //where the pixel data starts
+  //read width and height from BMP header
+  size_t w = bmp[18] + bmp[19] * 256;
+  size_t h = bmp[22] + bmp[23] * 256;
+  //read number of channels from BMP header
+  if (bmp[28] != 24 && bmp[28] != 32) {
+    err << "Image from the GMK file was " << bmp[28] << " bit while this reader "
+        << "only supports 24 and 32 bit BMP images" << std::endl;
+    return;
+  }
+  unsigned numChannels = bmp[28] / 8;
+
+  //The amount of scanline bytes is width of image times channels, with extra bytes added if needed
+  //to make it a multiple of 4 bytes.
+  unsigned scanlineBytes = w * numChannels;
+  if (scanlineBytes % 4 != 0) scanlineBytes = (scanlineBytes / 4) * 4 + 4;
+
+  unsigned dataSize = scanlineBytes * h;
+  if (length < dataSize + pixeloffset) {
+    err << "Image from the GMK file had a length '" << length << "' smaller than the estimated "
+        << "size '" << (dataSize + pixeloffset) << "' based on the BMP header dimensions" << std::endl;
+    return;
+  }
+
+  std::vector<unsigned char> rgba;
+  rgba.resize(w * h * 4);
+
+  /*
+  There are 3 differences between BMP and the raw image buffer for LodePNG:
+  -it's upside down
+  -it's in BGR instead of RGB format (or BRGA instead of RGBA)
+  -each scanline has padding bytes to make it a multiple of 4 if needed
+  The 2D for loop below does all these 3 conversions at once.
+  */
+  for (unsigned y = 0; y < h; y++) {
+    for (unsigned x = 0; x < w; x++) {
+      //pixel start byte position in the BMP
+      unsigned bmpos = pixeloffset + (h - y - 1) * scanlineBytes + numChannels * x;
+      //pixel start byte position in the new raw image
+      unsigned newpos = 4 * y * w + 4 * x;
+      if (numChannels == 3) {
+        rgba[newpos + 0] = bmp[bmpos + 2]; //R<-B
+        rgba[newpos + 1] = bmp[bmpos + 1]; //G<-G
+        rgba[newpos + 2] = bmp[bmpos + 0]; //B<-R
+        rgba[newpos + 3] = 255;            //A<-A
+      } else {
+        rgba[newpos + 0] = bmp[bmpos + 3]; //R<-A
+        rgba[newpos + 1] = bmp[bmpos + 2]; //G<-B
+        rgba[newpos + 2] = bmp[bmpos + 1]; //B<-G
+        rgba[newpos + 3] = bmp[bmpos + 0]; //A<-R
+      }
+    }
+  }
+
+  unsigned char *buffer = nullptr;
+  size_t buffer_length;
+  lodepng_encode32(&buffer, &buffer_length, rgba.data(), w, h);
+
+  char *buffer_signed = reinterpret_cast<char*>(buffer);
+  writeTempDataFile(data_file_path, buffer_signed, buffer_length);
+  // explicitly free because lodepng allocated it with malloc
+  free(buffer);
+}
+
+void writeTempBGRAImageFile(std::string *data_file_path, std::unique_ptr<char[]> bytes, size_t length, size_t width, size_t height) {
+  auto bgra = reinterpret_cast<const unsigned char*>(bytes.get()); // all of the following logic expects unsigned
+  std::vector<unsigned char> rgba;
+  rgba.resize(width * height * 4);
+
+  for (unsigned y = 0; y < height; y++) {
+    for (unsigned x = 0; x < width; x++) {
+      unsigned pos = width * 4 * y + 4 * x;
+      rgba[pos + 0] = bgra[pos + 2]; //R<-B
+      rgba[pos + 1] = bgra[pos + 1]; //G<-G
+      rgba[pos + 2] = bgra[pos + 0]; //B<-R
+      rgba[pos + 3] = bgra[pos + 3]; //A<-A
+    }
+  }
+
+  unsigned char *buffer = nullptr;
+  size_t buffer_length;
+  lodepng_encode32(&buffer, &buffer_length, rgba.data(), width, height);
+
+  char *buffer_signed = reinterpret_cast<char*>(buffer);
+  writeTempDataFile(data_file_path, buffer_signed, buffer_length);
+  // explicitly free because lodepng allocated it with malloc
+  free(buffer);
+}
+
+template<class Function, class... Args>
+void threadTempFileWrite(Function&& f, Args&&... args) {
+  std::thread tempFileThread = std::thread(f, std::move(args)...);
+  tempThreadsCreated.push_back(std::move(tempFileThread));
 }
 
 class Decoder {
@@ -183,26 +314,16 @@ class Decoder {
 
     length = outstring.size();
     auto bytes = make_unique<char[]>(length);
-    for (size_t i = 0; i < length; ++i)
-      bytes[i] = outstring[i];
+    memcpy(bytes.get(), outstring.c_str(), length);
 
     return bytes;
-  }
-
-  void writeTempDataFile(std::string *data_file_path, char *bytes, size_t length) {
-    char temp[] = "gmk_data.XXXXXX";
-    int fd = mkstemp(temp);
-    if (fd == -1) return;
-    tempFilesCreated.push_back(temp);
-    write(fd, bytes, length);
-    close(fd);
-    data_file_path->append(temp, strlen(temp));
   }
 
   void readData(std::string *data_file_path=nullptr, bool compressed=false) {
     size_t length = read4();
     std::unique_ptr<char[]> bytes = compressed ? decompress(length) : read(length);
-    if (data_file_path && bytes) writeTempDataFile(data_file_path, bytes.get(), length);
+    using WriteTempDataFileManaged = void(*)(std::string*, std::unique_ptr<char[]>, size_t);
+    if (data_file_path && bytes) threadTempFileWrite((WriteTempDataFileManaged)writeTempDataFile, data_file_path, std::move(bytes), length);
   }
 
   void readCompressedData(std::string *data_file_path=nullptr) {
@@ -213,116 +334,16 @@ class Decoder {
     readData(data_file_path, false);
   }
 
-  void writeTempImageFile(std::string *data_file_path, const char *bytes, size_t length, size_t width, size_t height) {
-    static const unsigned MINHEADER = 54; //minimum BMP header size
-    auto bmp = reinterpret_cast<const unsigned char*>(bytes); // all of the following logic expects unsigned
-
-    if (length < MINHEADER) {
-      err << "Image from the GMK file had a length '" << length << "' smaller than the minimum header "
-          << "size '" << MINHEADER << "' for the BMP format" << std::endl;
-      return;
-    }
-    if (bmp[0] != 'B' || bmp[1] != 'M') {
-      err << "Image from the GMK file did not have the correct BMP signature '"
-          << bmp[0] << bmp[1] << "'" << std::endl;
-      return;
-    }
-    unsigned pixeloffset = bmp[10] + 256 * bmp[11]; //where the pixel data starts
-    //read width and height from BMP header
-    size_t w = bmp[18] + bmp[19] * 256;
-    size_t h = bmp[22] + bmp[23] * 256;
-    //read number of channels from BMP header
-    if (bmp[28] != 24 && bmp[28] != 32) {
-      err << "Image from the GMK file was " << bmp[28] << " bit while this reader "
-          << "only supports 24 and 32 bit BMP images" << std::endl;
-      return;
-    }
-    unsigned numChannels = bmp[28] / 8;
-
-    //The amount of scanline bytes is width of image times channels, with extra bytes added if needed
-    //to make it a multiple of 4 bytes.
-    unsigned scanlineBytes = w * numChannels;
-    if (scanlineBytes % 4 != 0) scanlineBytes = (scanlineBytes / 4) * 4 + 4;
-
-    unsigned dataSize = scanlineBytes * h;
-    if (length < dataSize + pixeloffset) {
-      err << "Image from the GMK file had a length '" << length << "' smaller than the estimated "
-          << "size '" << (dataSize + pixeloffset) << "' based on the BMP header dimensions" << std::endl;
-      return;
-    }
-
-    std::vector<unsigned char> rgba(w * h * 4);
-
-    /*
-    There are 3 differences between BMP and the raw image buffer for LodePNG:
-    -it's upside down
-    -it's in BGR instead of RGB format (or BRGA instead of RGBA)
-    -each scanline has padding bytes to make it a multiple of 4 if needed
-    The 2D for loop below does all these 3 conversions at once.
-    */
-    for (unsigned y = 0; y < h; y++) {
-      for (unsigned x = 0; x < w; x++) {
-        //pixel start byte position in the BMP
-        unsigned bmpos = pixeloffset + (h - y - 1) * scanlineBytes + numChannels * x;
-        //pixel start byte position in the new raw image
-        unsigned newpos = 4 * y * w + 4 * x;
-        if (numChannels == 3) {
-          rgba[newpos + 0] = bmp[bmpos + 2]; //R<-B
-          rgba[newpos + 1] = bmp[bmpos + 1]; //G<-G
-          rgba[newpos + 2] = bmp[bmpos + 0]; //B<-R
-          rgba[newpos + 3] = 255;            //A<-A
-        } else {
-          rgba[newpos + 0] = bmp[bmpos + 3]; //R<-A
-          rgba[newpos + 1] = bmp[bmpos + 2]; //G<-B
-          rgba[newpos + 2] = bmp[bmpos + 1]; //B<-G
-          rgba[newpos + 3] = bmp[bmpos + 0]; //A<-R
-        }
-      }
-    }
-
-    unsigned char *buffer = nullptr;
-    size_t buffer_length;
-    lodepng_encode32(&buffer, &buffer_length, rgba.data(), w, h);
-
-    writeTempDataFile(data_file_path, reinterpret_cast<char*>(buffer), buffer_length);
-  }
-
-  void writeTempBGRAImageFile(std::string *data_file_path, const char *bytes, size_t length, size_t width, size_t height) {
-    auto bgra = reinterpret_cast<const unsigned char*>(bytes); // all of the following logic expects unsigned
-
-    std::vector<unsigned char> rgba(width * height * 4);
-
-    for (unsigned y = 0; y < height; y++) {
-      for (unsigned x = 0; x < width; x++) {
-        unsigned pos = width * 4 * y + 4 * x;
-        rgba[pos + 0] = bgra[pos + 2]; //R<-B
-        rgba[pos + 1] = bgra[pos + 1]; //G<-G
-        rgba[pos + 2] = bgra[pos + 0]; //B<-R
-        rgba[pos + 3] = bgra[pos + 3]; //A<-A
-      }
-    }
-
-    unsigned char *buffer = nullptr;
-    size_t buffer_length;
-    lodepng_encode32(&buffer, &buffer_length, rgba.data(), width, height);
-
-    writeTempDataFile(data_file_path, reinterpret_cast<char*>(buffer), buffer_length);
-  }
-
-  void readImage(std::string *data_file_path=nullptr, size_t width=0, size_t height=0, bool compressed=false) {
-
-  }
-
   void readZlibImage(std::string *data_file_path=nullptr, size_t width=0, size_t height=0) {
     size_t length = read4();
     std::unique_ptr<char[]> bytes = decompress(length);
-    if (data_file_path && bytes) writeTempImageFile(data_file_path, bytes.get(), length, width, height);
+    if (data_file_path && bytes) threadTempFileWrite(writeTempImageFile, data_file_path, std::move(bytes), length, width, height);
   }
 
   void readBGRAImage(std::string *data_file_path=nullptr, size_t width=0, size_t height=0) {
     size_t length = read4();
     std::unique_ptr<char[]> bytes = read(length);
-    if (data_file_path && bytes) writeTempBGRAImageFile(data_file_path, bytes.get(), length, width, height);
+    if (data_file_path && bytes) threadTempFileWrite(writeTempBGRAImageFile, data_file_path, std::move(bytes), length, width, height);
   }
 
   void setSeed(int seed) {
@@ -1228,6 +1249,8 @@ buffers::Project *LoadGMK(std::string fName) {
   auto proj = std::make_unique<buffers::Project>();
   buffers::Game *game = proj->mutable_game();
   game->set_allocated_root(root.release());
+  // ensure all temporary files have been written
+  join_tempdata_threads();
 
   return proj.release();
 }
