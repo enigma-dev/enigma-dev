@@ -22,9 +22,9 @@
 
 #include <fstream>
 #include <utility>
-#include <functional>
 #include <memory>
-#include <thread>
+#include <future>
+#include <functional>
 #include <unordered_map>
 #include <vector>
 #include <set>
@@ -48,11 +48,11 @@ static void atexit_tempdata_cleanup() {
     unlink(tempFile.c_str());
 }
 
-static vector<std::thread> tempThreadsCreated;
-static void join_tempdata_threads() {
-  for (std::thread &thread : tempThreadsCreated)
-    thread.join();
-  tempThreadsCreated.clear();
+static vector<std::future<void>> tempFileFuturesCreated;
+static void get_tempdata_futures() {
+  for (std::future<void> &future : tempFileFuturesCreated)
+    future.get();
+  tempFileFuturesCreated.clear();
 }
 
 void writeTempDataFile(std::string *data_file_path, char *bytes, size_t length) {
@@ -107,8 +107,7 @@ void writeTempImageFile(std::string *data_file_path, std::unique_ptr<char[]> byt
     return;
   }
 
-  std::vector<unsigned char> rgba;
-  rgba.resize(w * h * 4);
+  std::vector<unsigned char> rgba(w * h * 4);
 
   /*
   There are 3 differences between BMP and the raw image buffer for LodePNG:
@@ -174,8 +173,8 @@ void writeTempBGRAImageFile(std::string *data_file_path, std::unique_ptr<char[]>
 
 template<class Function, class... Args>
 void threadTempFileWrite(Function&& f, Args&&... args) {
-  std::thread tempFileThread = std::thread(f, std::move(args)...);
-  tempThreadsCreated.push_back(std::move(tempFileThread));
+  std::future<void> tempFileFuture = std::async(f, std::move(args)...);
+  tempFileFuturesCreated.push_back(std::move(tempFileFuture));
 }
 
 class Decoder {
@@ -1250,7 +1249,7 @@ buffers::Project *LoadGMK(std::string fName) {
   buffers::Game *game = proj->mutable_game();
   game->set_allocated_root(root.release());
   // ensure all temporary files have been written
-  join_tempdata_threads();
+  get_tempdata_futures();
 
   return proj.release();
 }
