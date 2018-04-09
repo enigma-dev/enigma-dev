@@ -820,7 +820,28 @@ int LoadActions(Decoder &dec, Event *event) {
       auto argument = action->add_arguments();
       argument->set_kind(static_cast<ArgumentKind>(argkinds[l]));
       std::string strval = dec.readStr();
-      argument->set_string(strval);
+
+      using ArgumentMutator = std::function<std::string*(Argument*)>;
+      using MutatorMap = std::unordered_map<ArgumentKind, ArgumentMutator>;
+
+      static const MutatorMap mutatorMap({
+        { ArgumentKind::ARG_SOUND,      &Argument::mutable_sound      },
+        { ArgumentKind::ARG_BACKGROUND, &Argument::mutable_background },
+        { ArgumentKind::ARG_SPRITE,     &Argument::mutable_sprite     },
+        { ArgumentKind::ARG_SCRIPT,     &Argument::mutable_script     },
+        { ArgumentKind::ARG_FONT,       &Argument::mutable_font       },
+        { ArgumentKind::ARG_OBJECT,     &Argument::mutable_object     },
+        { ArgumentKind::ARG_TIMELINE,   &Argument::mutable_timeline   },
+        { ArgumentKind::ARG_ROOM,       &Argument::mutable_room       },
+        { ArgumentKind::ARG_PATH,       &Argument::mutable_path       }
+      });
+
+      const auto &mutator = mutatorMap.find(argument->kind());
+      if (mutator != mutatorMap.end()) {
+        mutator->second(argument)->append(strval);
+      } else {
+        argument->set_string(strval);
+      }
     }
 
     action->set_is_not(dec.readBool());
