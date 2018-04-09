@@ -1185,6 +1185,10 @@ buffers::Project *LoadGMK(std::string fName) {
   });
   TypeMap typeMap;
   std::ifstream in(fName, std::ios::binary);
+  if (!in) {
+    err << "Could not open GMK for reading: " << fName << std::endl;
+    return nullptr;
+  }
   Decoder dec(in);
 
   int identifier = dec.read4();
