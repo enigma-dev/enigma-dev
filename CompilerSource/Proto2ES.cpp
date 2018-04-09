@@ -63,7 +63,7 @@ static void CacheNames(const buffers::TreeNode& root) {
   }
 }
 
-int Name2Id(std::string name) {
+int Name2Id(const std::string &name) {
   auto it = idMap.find(name);
   return (it != idMap.end()) ? it->second : -1;
 }
@@ -592,7 +592,7 @@ void AddObject(const char* name, buffers::resources::Object* obj, buffers::Game*
     auto *evt = obj->mutable_events(i);
     std::vector<Event>& events = mainEventMap[evt->type()];
     Event e;
-    e.id = evt->number();
+    e.id = evt->has_name() ? Name2Id(evt->name()) : evt->number();
     if (evt->actions_size() > 0)
       evt->set_code(Actions2Code(evt->actions()));
     e.code = evt->code().c_str();
