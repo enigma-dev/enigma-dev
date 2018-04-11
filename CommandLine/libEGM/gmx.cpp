@@ -19,7 +19,6 @@
 
 #include <pugixml.hpp>
 
-#include <iostream>
 #include <functional>
 #include <algorithm>
 #include <fstream>

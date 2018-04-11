@@ -8,6 +8,7 @@
 #include "SOG.hpp"
 #include "gmk.h"
 #include "gmx.h"
+#include "yyp.h"
 #include "Proto2ES.h"
 
 #include <boost/filesystem.hpp>
@@ -45,6 +46,7 @@ int main(int argc, char* argv[])
     outputStream.rdbuf(nullptr);
     errorStream.rdbuf(nullptr);
   }
+  yyp::bind_output_streams(outputStream, errorStream);
   gmx::bind_output_streams(outputStream, errorStream);
   gmk::bind_output_streams(outputStream, errorStream);
   plugin.Init();
@@ -115,6 +117,10 @@ int main(int argc, char* argv[])
 
       buffers::Project* project;
       if (!(project = gmx::LoadGMX(input_file))) return 1;
+      return plugin.BuildGame(project->mutable_game(), mode, output_file.c_str());
+    } else if (ext == "yyp") {
+      buffers::Project* project;
+      if (!(project = yyp::LoadYYP(input_file))) return 1;
       return plugin.BuildGame(project->mutable_game(), mode, output_file.c_str());
     } else {
       if (ext == "egm") {
