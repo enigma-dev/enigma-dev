@@ -127,6 +127,12 @@ void PackRes(std::string &dir, int id, rapidjson::Value::ValueType &node, google
         out << "Setting " << field->name() << " (" << field->type_name() << ") as " << value << std::endl;
 
         switch (field->cpp_type()) {
+          // If field is a singular message we need to recurse into this method again
+          case CppType::CPPTYPE_MESSAGE: {
+            google::protobuf::Message *msg = refl->MutableMessage(m, field);
+            PackRes(dir, 0, child, msg, depth + 1);
+            break;
+          }
           case CppType::CPPTYPE_INT32: {
             refl->SetInt32(m, field, (isSplit) ? std::stoi(splitValue) : child.GetInt());
             break;
@@ -157,9 +163,9 @@ void PackRes(std::string &dir, int id, rapidjson::Value::ValueType &node, google
           }
           case CppType::CPPTYPE_ENUM: {
             refl->SetEnum(
-                m, field,
-                field->enum_type()->FindValueByNumber(
-                  (isSplit) ? std::stoi(splitValue) : child.GetInt()));
+              m, field,
+              field->enum_type()->FindValueByNumber(
+                (isSplit) ? std::stoi(splitValue) : child.GetInt()));
             break;
           }
           case CppType::CPPTYPE_STRING: {
