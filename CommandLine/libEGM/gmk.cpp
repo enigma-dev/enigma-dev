@@ -727,8 +727,8 @@ std::unique_ptr<Path> LoadPath(Decoder &dec, int /*ver*/) {
   path->set_closed(dec.readBool());
   path->set_precision(dec.read4());
   dec.postponeName(path->mutable_background_room_name(), dec.read4(), TypeCase::kRoom);
-  path->set_snap_x(dec.read4());
-  path->set_snap_y(dec.read4());
+  path->set_hsnap(dec.read4());
+  path->set_vsnap(dec.read4());
   int nopoints = dec.read4();
   for (int i = 0; i < nopoints; i++) {
     auto point = path->add_points();
@@ -896,8 +896,8 @@ std::unique_ptr<Room> LoadRoom(Decoder &dec, int ver) {
   room->set_caption(dec.readStr());
   room->set_width(dec.read4());
   room->set_height(dec.read4());
-  room->set_snap_y(dec.read4());
-  room->set_snap_x(dec.read4());
+  room->set_vsnap(dec.read4());
+  room->set_hsnap(dec.read4());
   room->set_isometric(dec.readBool());
   room->set_speed(dec.read4());
   room->set_persistent(dec.readBool());
