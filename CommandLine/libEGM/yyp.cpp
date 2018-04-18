@@ -83,7 +83,7 @@ void PackRes(std::string &dir, int id, rapidjson::Value::ValueType &node, google
 
       if (alias.empty()) alias = field->name();
 
-      // this is for <point>0,0</point> crap
+      // this is for 0,0 crap
       const std::string splitMarker = "YYP_SPLIT/";
       size_t splitPos = alias.find(splitMarker);
       isSplit = splitPos != std::string::npos;
@@ -170,8 +170,8 @@ void PackRes(std::string &dir, int id, rapidjson::Value::ValueType &node, google
           }
           case CppType::CPPTYPE_STRING: {
             std::string value = (isSplit) ? splitValue : child.GetString();
-            if (isFilePath) {  // again gotta prepend the gmx's path & fix the string to be posix compatible
-              //value = GMXPath2FilePath(dir, value);
+            if (isFilePath) {  // again gotta prepend the yyp's path & fix the string to be posix compatible
+              //value = YYPPath2FilePath(dir, value);
             }
             refl->SetString(m, field, value);
             break;

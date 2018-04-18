@@ -357,7 +357,7 @@ void PackRes(std::string &dir, int id, pugi::xml_node &node, google::protobuf::M
             }
             case CppType::CPPTYPE_INT64: {
               refl->SetInt64(m, field,
-                              (isAttribute) ? attr.as_int() : (isSplit) ? std::stoi(splitValue) : xmlValue.as_int());
+                              (isAttribute) ? attr.as_int() : (isSplit) ? std::stoi(splitValue) : xmlValue.as_llong());
               break;
             }
             case CppType::CPPTYPE_UINT32: {
@@ -367,7 +367,7 @@ void PackRes(std::string &dir, int id, pugi::xml_node &node, google::protobuf::M
             }
             case CppType::CPPTYPE_UINT64: {
               refl->SetUInt64(
-                  m, field, (isAttribute) ? attr.as_uint() : (isSplit) ? std::stoi(splitValue) : xmlValue.as_uint());
+                  m, field, (isAttribute) ? attr.as_uint() : (isSplit) ? std::stoi(splitValue) : xmlValue.as_ullong());
               break;
             }
             case CppType::CPPTYPE_DOUBLE: {
