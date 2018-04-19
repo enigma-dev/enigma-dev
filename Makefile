@@ -18,7 +18,7 @@ all: liblodepng libProtocols libEGM ENIGMA emake test-runner .FORCE
 Game: liblodepng .FORCE
 	$(MAKE) -C ENIGMAsystem/SHELL
 
-clean-game: .FORCE
+clean-game:
 	$(MAKE) -C ENIGMAsystem/SHELL clean
 
 liblodepng: .FORCE
@@ -30,13 +30,7 @@ libProtocols: .FORCE
 libEGM: .FORCE libProtocols
 	$(MAKE) -C CommandLine/libEGM/
 
-EMAKE_TARGETS = ENIGMA .FORCE
-
-ifneq (_$(disable_egm),$(filter _$(disable_egm),_true _1 _yes _y))
-	EMAKE_TARGETS += libEGM
-endif
-
-emake: $(EMAKE_TARGETS)
+emake: ENIGMA .FORCE
 	$(MAKE) -C CommandLine/emake/
 
 test-runner: emake .FORCE
