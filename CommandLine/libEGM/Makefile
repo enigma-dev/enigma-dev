@@ -30,8 +30,9 @@ obj_dirs: $(OBJDIRS)
 clean:
 	rm -rf $(LIBRARY) $(OBJ_DIR)
 
+# -lpugixml is redundantly specified because the Trusty Tahr package for pugixml does not have a proper pkg-config
 $(LIBRARY): $(OBJECTS)
-	$(CXX) -shared -o $@ $^ -lz $(shell pkg-config --libs pugixml) -L../../ -lProtocols -lprotobuf -L../../lodepng -llodepng
+	$(CXX) -shared -o $@ $^ -lz $(shell pkg-config --libs pugixml) -lpugixml -L../../ -lProtocols -lprotobuf -L../../lodepng -llodepng
 
 # Create the object directories
 $(OBJDIRS):
