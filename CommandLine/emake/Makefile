@@ -15,8 +15,8 @@ EXTRA_SOURCES := ../../CompilerSource/settings-parse/eyaml.cpp ../../CompilerSou
 EXTRA_SRC_DIR := ../../CompilerSource
 
 PROTO_DIR := ../protos
-CXXFLAGS  := -I$(SRC_DIR) -I$(EXTRA_SRC_DIR) -I../libEGM -I../libEGM -I$(PROTO_DIR) -I$(PROTO_DIR)/codegen -std=c++11 -Wall -Wextra -Wpedantic -g
-LDFLAGS   := $(OS_LIBS) -L/mingw64/lib/pugixml-1.8/ -lpugixml -L../../ -lProtocols -lEGM -lprotobuf
+CXXFLAGS  := -I$(SRC_DIR) -I$(EXTRA_SRC_DIR) -I$(PROTO_DIR) -I$(PROTO_DIR)/codegen -std=c++11 -Wall -Wextra -Wpedantic -g
+LDFLAGS   := $(OS_LIBS) -L../../ -lProtocols -lprotobuf
 
 EXTRA_OBJS := $(patsubst $(EXTRA_SRC_DIR)/%, $(OBJ_DIR)/Extra/%, $(patsubst %.cpp, %.o, $(EXTRA_SOURCES)))
 
@@ -25,7 +25,13 @@ SOURCES := $(call rwildcard,$(SRC_DIR),*.cpp)
 ifeq ($(TRAVIS), true)
 	disable_server := true
 endif
-ifeq ($(disable_server),$(filter $(disable_server),true 1 yes y))
+ifeq (_$(disable_egm),$(filter _$(disable_egm),_true _1 _yes _y))
+	CXXFLAGS += -DCLI_DISABLE_EGM
+else
+	CXXFLAGS += -I../libEGM -I../libEGM
+	LDFLAGS += -L/mingw64/lib/pugixml-1.8/ -lpugixml -lEGM
+endif
+ifeq (_$(disable_server),$(filter _$(disable_server),_true _1 _yes _y))
 	SOURCES := $(filter-out ./Server.cpp, $(SOURCES))
 	CXXFLAGS += -DCLI_DISABLE_SERVER
 else
