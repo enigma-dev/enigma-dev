@@ -56,7 +56,7 @@ before_install:
           g++-7 cpp-7 pulseaudio libpugixml-dev;
 
         # download rapidjson manually because ubuntu is ancient
-        wget -O rapidjson-mater.zip https://github.com/Tencent/rapidjson/archive/master.zip;
+        wget -O rapidjson-master.zip https://github.com/Tencent/rapidjson/archive/master.zip;
         unzip rapidjson-master.zip;
         sudo cp -r rapidjson-master/include /usr/include;
 
