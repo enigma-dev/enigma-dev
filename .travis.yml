@@ -58,7 +58,7 @@ before_install:
         # download rapidjson manually because ubuntu is ancient
         wget -O rapidjson-master.zip https://github.com/Tencent/rapidjson/archive/master.zip;
         unzip rapidjson-master.zip;
-        sudo cp -a /rapidjson-master/include/. /usr/include/;
+        sudo cp -a rapidjson-master/include/. /usr/include/;
 
         sudo update-alternatives --remove-all cpp;
         sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 \
