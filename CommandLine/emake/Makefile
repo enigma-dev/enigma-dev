@@ -23,6 +23,9 @@ EXTRA_OBJS := $(patsubst $(EXTRA_SRC_DIR)/%, $(OBJ_DIR)/Extra/%, $(patsubst %.cp
 rwildcard=$(wildcard $1/$2) $(foreach d,$(wildcard $1/*),$(call rwildcard,$d,$2))
 SOURCES := $(call rwildcard,$(SRC_DIR),*.cpp)
 ifeq ($(TRAVIS), true)
+	disable_server := true
+endif
+ifeq ($(disable_server),$(filter $(disable_server),true 1 yes y))
 	SOURCES := $(filter-out ./Server.cpp, $(SOURCES))
 	CXXFLAGS += -DCLI_DISABLE_SERVER
 else
