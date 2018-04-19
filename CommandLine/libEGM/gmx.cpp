@@ -285,8 +285,8 @@ void PackRes(std::string &dir, int id, pugi::xml_node &node, google::protobuf::M
         pugi::xml_attribute a = node.attribute("eventtype");
         if (alias != "ename" && a.as_int() != 4 && node.path() != "/timeline/entry/event")
           errorStream << "Error: no such element " << node.path() << "/" << alias << std::endl;
-      } else {                       // bullshit special cases out of the way, we now look for proto feilds in xml
-        if (field->is_repeated()) {  // Repeated feilds (are usally messages or file_paths(strings)
+      } else {                       // bullshit special cases out of the way, we now look for proto fields in xml
+        if (field->is_repeated()) {  // Repeated fields (are usally messages or file_paths(strings)
           outputStream << "Appending (" << field->type_name() << ") to " << field->name() << std::endl;
 
           switch (field->cpp_type()) {

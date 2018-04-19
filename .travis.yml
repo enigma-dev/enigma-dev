@@ -83,6 +83,7 @@ install:
 # by default most of our jobs will be run on a linux instance
 os: linux
 group: travis_latest
+dist: xenial
 compiler: gcc
 language: cpp
 
