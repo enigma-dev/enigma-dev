@@ -29,7 +29,7 @@ ifeq (_$(disable_egm),$(filter _$(disable_egm),_true _1 _yes _y))
 	CXXFLAGS += -DCLI_DISABLE_EGM
 else
 	CXXFLAGS += -I../libEGM -I../libEGM
-	LDFLAGS += -L/mingw64/lib/pugixml-1.8/ -lpugixml -lEGM
+	LDFLAGS += $(shell pkg-config --libs pugixml) -lEGM
 endif
 ifeq (_$(disable_server),$(filter _$(disable_server),_true _1 _yes _y))
 	SOURCES := $(filter-out ./Server.cpp, $(SOURCES))
