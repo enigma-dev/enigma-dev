@@ -55,6 +55,9 @@ before_install:
         sudo apt-get -qq -y install cmake libgtest-dev xvfb wmctrl xdotool xfwm4 lcov gcc-7\
           g++-7 cpp-7 pulseaudio libpugixml-dev;
 
+        # fix pkg-config for pugixml
+        sudo cp /usr/lib/x86_64-linux-gnu/pkgconfig/pkgconfig/pugixml.pc /usr/lib/x86_64-linux-gnu/pkgconfig/pugixml.pc;
+
         # download rapidjson manually because ubuntu is ancient
         wget -O rapidjson-master.zip https://github.com/Tencent/rapidjson/archive/master.zip;
         unzip rapidjson-master.zip;
