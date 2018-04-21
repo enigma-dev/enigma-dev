@@ -79,7 +79,10 @@ endif
 
 # CPPFLAGS needs these include dirs unconditionally
 override CPPFLAGS += $(SYSTEMS:%=-I%/Info)
-override CPPFLAGS += -I. -I$(CODEGEN)
+override CPPFLAGS += -I. -I$(CODEGEN) -I../../lodepng
+
+# Unconditional LDLIBS
+override LDLIBS += -L../../lodepng -llodepng
 
 .PHONY: all clean
 
@@ -89,7 +92,7 @@ clean:
 	$(RM) $(OUTPUTNAME) $(RESOURCEBINARY)
 	$(FIND) "$(WORKDIR).eobjs/$(COMPILEPATH)" -name "*.o" -exec $(RM) -rf {} \;
 	$(FIND) "$(WORKDIR).eobjs/$(COMPILEPATH)" -name "*.d" -exec $(RM) -rf {} \;
-	
+
 cleandep:
 	$(RM) $(CLEANDEPS)
 
@@ -132,7 +135,7 @@ $(OBJDIR)/%.o $(OBJDIR)/%.d: %.m | $(OBJDIRS)
 $(OBJDIR)/resources.res: $(RCFILES) GENERATED_FILE
 	echo // GENERATED RESOURCE FILE FRONTEND > $(OBJDIR)/resources.rc
 	for res in $(RESOURCES); do echo "#include \"$$res\"" >> $(OBJDIR)/resources.rc; done
-	$(WINDRES) -o $@ -I. -I$(WORKDIR) $(OBJDIR)/resources.rc -O coff $(RCFLAGS) 
+	$(WINDRES) -o $@ -I. -I$(WORKDIR) $(OBJDIR)/resources.rc -O coff $(RCFLAGS)
 GENERATED_FILE:
 
 $(OBJDIR)/%.rc: %.rc
