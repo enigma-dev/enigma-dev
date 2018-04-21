@@ -51,6 +51,8 @@ SYSTEMS := Platforms/$(PLATFORM) Graphics_Systems/$(GRAPHICS) Audio_Systems/$(AU
 
 OBJDIR := $(WORKDIR).eobjs/$(COMPILEPATH)/$(GMODE)
 
+SHARED_SOURCES := ../../shared
+
 ###########
 # options #
 ###########
@@ -79,10 +81,10 @@ endif
 
 # CPPFLAGS needs these include dirs unconditionally
 override CPPFLAGS += $(SYSTEMS:%=-I%/Info)
-override CPPFLAGS += -I. -I$(CODEGEN) -I../../lodepng
+override CPPFLAGS += -I. -I$(CODEGEN) -I$(SHARED_SOURCES)/lodepng
 
 # Unconditional LDLIBS
-override LDLIBS += -L../../lodepng -llodepng
+override LDLIBS += -L$(SHARED_SOURCES)/lodepng -llodepng
 
 .PHONY: all clean
 

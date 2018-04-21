@@ -15,7 +15,7 @@ clean-game:
 	$(MAKE) -C ENIGMAsystem/SHELL clean
 
 liblodepng:
-	$(MAKE) -C lodepng/
+	$(MAKE) -C shared/lodepng/
 
 emake: ENIGMA .FORCE
 	$(MAKE) -C CommandLine/emake/
