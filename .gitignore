@@ -30,6 +30,7 @@ output_log.txt
 hs_err_pid*.log
 *.stackdump
 
+*.a
 *.class
 *.o
 *.d
