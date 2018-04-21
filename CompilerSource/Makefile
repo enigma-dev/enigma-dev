@@ -28,10 +28,11 @@ endif
 # options #
 ###########
 
+SHARED_SOURCES := ../shared
 CXX := g++
-CXXFLAGS += -std=c++11 -Wall -O3 -g -I./JDI/src -I../CommandLine/protos/codegen/ -I../lodepng
+CXXFLAGS += -std=c++11 -Wall -O3 -g -I./JDI/src -I../CommandLine/protos/codegen/ -I$(SHARED_SOURCES)/lodepng
 LDFLAGS += -shared -O3 -g
-LDLIBS += -L../lodepng -llodepng -L../ -lProtocols -lprotobuf -lz
+LDLIBS += -L$(SHARED_SOURCES)/lodepng -llodepng -L../ -lProtocols -lprotobuf -lz
 
 # This implements a recursive wildcard allowing us to iterate in subdirs
 rwildcard=$(wildcard $1$2) $(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2))

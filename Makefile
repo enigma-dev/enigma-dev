@@ -11,7 +11,7 @@ clean: .FORCE
 	$(MAKE) -C CommandLine/libEGM/ clean
 	$(MAKE) -C CommandLine/protos/ clean
 	$(MAKE) -C CommandLine/testing/ clean
-	$(MAKE) -C lodepng/ clean
+	$(MAKE) -C shared/lodepng/ clean
 
 all: liblodepng libProtocols libEGM ENIGMA emake test-runner .FORCE
 
@@ -22,7 +22,7 @@ clean-game: .FORCE
 	$(MAKE) -C ENIGMAsystem/SHELL clean
 
 liblodepng: .FORCE
-	$(MAKE) -C lodepng/
+	$(MAKE) -C shared/lodepng/
 
 libProtocols: .FORCE
 	$(MAKE) -C CommandLine/protos/
