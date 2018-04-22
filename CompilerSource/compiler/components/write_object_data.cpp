@@ -720,10 +720,11 @@ static inline void write_script_implementations(ofstream& wto, EnigmaStruct *es,
       wto << comma << "variant argument" << argn;
       comma = ", ";
     }
-    wto << ")\n{\n  ";
+    wto << ")\n{\n";
     if (mode == emode_debug) {
-      wto << "enigma::debug_scope $current_scope(\"script '" << es->scripts[i].name << "'\");\n";
+      wto << "  enigma::debug_scope $current_scope(\"script '" << es->scripts[i].name << "'\");\n";
     }
+    wto << "  ";
     parsed_event& upev = scr->pev_global?*scr->pev_global:scr->pev;
 
     // TODO(JoshDreamland): Super-hacky
@@ -827,11 +828,11 @@ static inline void write_object_event_funcs(ofstream& wto, const parsed_object *
 
 static inline void write_event_func(ofstream& wto, const parsed_event &event, string objname, string evname, int mode) {
   const int mid = event.mainId, id = event.id;
-  wto << "variant enigma::OBJ_" << objname << "::myevent_" << evname << "()\n{\n  ";
+  wto << "variant enigma::OBJ_" << objname << "::myevent_" << evname << "()\n{\n";
   if (mode == emode_debug) {
-    wto << "enigma::debug_scope $current_scope(\"event '" << evname << "' for object '" << objname << "'\");\n";
+    wto << "  enigma::debug_scope $current_scope(\"event '" << evname << "' for object '" << objname << "'\");\n";
   }
-
+  wto << "  ";
   if (!event_execution_uses_default(event.mainId,event.id))
     wto << "enigma::temp_event_scope ENIGMA_PUSH_ITERATOR_AND_VALIDATE(this);\n  ";
   if (event_has_const_code(mid, id))

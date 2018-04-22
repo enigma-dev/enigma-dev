@@ -196,10 +196,11 @@ int lang_CPP::compile_writeRoomData(EnigmaStruct* es, parsed_object *EGMglobal, 
     parsed_room *pr = parsed_rooms[es->rooms[i].id];
     for (map<int,parsed_room::parsed_icreatecode>::iterator it = pr->instance_create_codes.begin(); it != pr->instance_create_codes.end(); it++)
     {
-      wto << "variant room_"<< es->rooms[i].id <<"_instancecreate_" << it->first << "()\n{\n  ";
+      wto << "variant room_"<< es->rooms[i].id <<"_instancecreate_" << it->first << "()\n{\n";
       if (mode == emode_debug) {
-        wto << "enigma::debug_scope $current_scope(\"'instance creation' for instance '" << it->first << "'\");\n";
+        wto << "  enigma::debug_scope $current_scope(\"'instance creation' for instance '" << it->first << "'\");\n";
       }
+      wto << "  ";
 
       std::string codeOvr;
       std::string syntOvr;
@@ -220,10 +221,11 @@ int lang_CPP::compile_writeRoomData(EnigmaStruct* es, parsed_object *EGMglobal, 
 
     for (map<int,parsed_room::parsed_icreatecode>::iterator it = pr->instance_precreate_codes.begin(); it != pr->instance_precreate_codes.end(); it++)
     {
-      wto << "variant room_"<< es->rooms[i].id <<"_instanceprecreate_" << it->first << "()\n{\n  ";
+      wto << "variant room_"<< es->rooms[i].id <<"_instanceprecreate_" << it->first << "()\n{\n";
       if (mode == emode_debug) {
-        wto << "enigma::debug_scope $current_scope(\"'instance preCreation' for instance '" << it->first << "'\");\n";
+        wto << "  enigma::debug_scope $current_scope(\"'instance preCreation' for instance '" << it->first << "'\");\n";
       }
+      wto << "  ";
 
       std::string codeOvr;
       std::string syntOvr;
@@ -242,10 +244,12 @@ int lang_CPP::compile_writeRoomData(EnigmaStruct* es, parsed_object *EGMglobal, 
       wto << "  return 0;\n}\n\n";
     }
 
-    wto << "variant roomprecreate" << es->rooms[i].id << "()\n{\n  ";
+    wto << "variant roomprecreate" << es->rooms[i].id << "()\n{\n";
     if (mode == emode_debug) {
-      wto << "enigma::debug_scope $current_scope(\"'room preCreation' for room '" << es->rooms[i].name << "'\");\n";
+      wto << "  enigma::debug_scope $current_scope(\"'room preCreation' for room '" << es->rooms[i].name << "'\");\n";
     }
+    wto << "  ";
+
     //LGM doesn't expose a ROOM PreCreation code yet, only the instance one
     //parsed_event& ev = pr->events[0];
     //print_to_file(ev.code, ev.synt, ev.strc, ev.strs, 2, wto);
@@ -255,10 +259,11 @@ int lang_CPP::compile_writeRoomData(EnigmaStruct* es, parsed_object *EGMglobal, 
 
     wto << "\n  return 0;\n  }\n";
 
-    wto << "variant roomcreate" << es->rooms[i].id << "()\n{\n  ";
+    wto << "variant roomcreate" << es->rooms[i].id << "()\n{\n";
     if (mode == emode_debug) {
-      wto << "enigma::debug_scope $current_scope(\"'room creation' for room '" << es->rooms[i].name << "'\");\n";
+      wto << "  enigma::debug_scope $current_scope(\"'room creation' for room '" << es->rooms[i].name << "'\");\n";
     }
+    wto << "  ";
     parsed_event& ev = pr->events[0];
     print_to_file(ev.code, ev.synt, ev.strc, ev.strs, 2, wto);
 
