@@ -65,7 +65,7 @@ int lang_CPP::module_write_backgrounds(EnigmaStruct *es, FILE *gameModule)
 
   for (int i = 0; i < back_count; i++)
   {
-      writei(es->backgrounds[i].id,gameModule); //id
+    writei(es->backgrounds[i].id,gameModule); //id
     writei(es->backgrounds[i].backgroundImage.width, gameModule); // width
     writei(es->backgrounds[i].backgroundImage.height, gameModule); // height
 

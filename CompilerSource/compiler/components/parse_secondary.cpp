@@ -53,7 +53,7 @@ int lang_CPP::compile_parseSecondary(map<int,parsed_object*> &parsed_objects, pa
     for (unsigned iit = 0; iit < oto->events.size; iit++)
       parser_secondary(oto->events[iit].code,oto->events[iit].synt,EGMglobal,oto,&oto->events[iit], script_names);
   }
-  
+
   // Build an inheritance tree
   for (po_i it = parsed_objects.begin(); it != parsed_objects.end(); it++) {
     po_i parent_it = parsed_objects.find(it->second->parent_index);
@@ -63,7 +63,7 @@ int lang_CPP::compile_parseSecondary(map<int,parsed_object*> &parsed_objects, pa
       printf("Object %s (%d) is a child of %s (%d)\n", it->second->name.c_str(), it->second->id, it->second->parent->name.c_str(), it->second->parent->id);
     }
   }
-  
+
   // Give all scripts a second pass
   for (int i = 0; i < scrcount; i++) {
     parser_secondary(scripts[i]->pev.code,scripts[i]->pev.synt,EGMglobal,&scripts[i]->obj,&scripts[i]->pev, script_names);
@@ -77,7 +77,7 @@ int lang_CPP::compile_parseSecondary(map<int,parsed_object*> &parsed_objects, pa
     if (tlines[i]->pev_global)
       parser_secondary(tlines[i]->pev_global->code,tlines[i]->pev_global->synt,EGMglobal,&tlines[i]->obj,tlines[i]->pev_global, script_names);
   }
-  
+
   // Give all room creation codes a second pass
   for (pr_i it = parsed_rooms.begin(); it != parsed_rooms.end(); it++)
   {
@@ -96,7 +96,6 @@ int lang_CPP::compile_parseSecondary(map<int,parsed_object*> &parsed_objects, pa
       parser_secondary(ici->second.pe->code,ici->second.pe->synt,EGMglobal,oto,ici->second.pe, script_names);
     }
   }
-  
+
   return 0;
 }
-

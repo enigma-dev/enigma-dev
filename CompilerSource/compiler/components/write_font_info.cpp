@@ -44,27 +44,27 @@ int lang_CPP::compile_writeFontInfo(EnigmaStruct* es)
 
   int maxid = -1, rawfontcount = 0;
   wto << "namespace enigma {" << endl;
-    wto << "  rawfont rawfontdata[] = {" << endl;
-    for (int i = 0; i < es->fontCount; i++)
-    {
-      wto << "    {\"" <<
-      es->fonts[i].name   << "\", " <<   // string name;
-      es->fonts[i].id     << ", \"" <<   // int id;
+  wto << "  rawfont rawfontdata[] = {" << endl;
+  for (int i = 0; i < es->fontCount; i++)
+  {
+    wto << "    {\"" <<
+    es->fonts[i].name   << "\", " <<   // string name;
+    es->fonts[i].id     << ", \"" <<   // int id;
 
-      es->fonts[i].fontName << "\", " << // string fontName;
-      es->fonts[i].size     <<   ", " << // int size;
-      bool(es->fonts[i].bold)     <<   ", " << // bool bold;
-      bool(es->fonts[i].italic)   <<   ", " << // bool italic;
-      es->fonts[i].glyphRangeCount // int glyphRangeCount;
-      << "}," << endl;
+    es->fonts[i].fontName << "\", " << // string fontName;
+    es->fonts[i].size     <<   ", " << // int size;
+    bool(es->fonts[i].bold)     <<   ", " << // bool bold;
+    bool(es->fonts[i].italic)   <<   ", " << // bool italic;
+    es->fonts[i].glyphRangeCount // int glyphRangeCount;
+    << "}," << endl;
 
-      if (es->fonts[i].id > maxid)
-        maxid = es->fonts[i].id;
-      rawfontcount++;
-    }
-    wto << "  };" << endl;
-    wto << endl << "  int rawfontcount = " << rawfontcount << ", rawfontmaxid = " << maxid << ";" << endl;
-	wto << "}" << endl;
-	wto.close();
-	return 0;
+    if (es->fonts[i].id > maxid)
+      maxid = es->fonts[i].id;
+    rawfontcount++;
+  }
+  wto << "  };" << endl;
+  wto << endl << "  int rawfontcount = " << rawfontcount << ", rawfontmaxid = " << maxid << ";" << endl;
+  wto << "}" << endl;
+  wto.close();
+  return 0;
 }

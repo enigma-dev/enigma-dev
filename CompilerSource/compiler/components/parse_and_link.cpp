@@ -354,7 +354,7 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
       if (subscr != scr_lookup.end()) { //If we've got ourselves a script
 
         t->copy_from(subscr->second->obj,  "script `"+it->first+"'",  "object `"+i->second->name+"'");
-		}
+      }
     }
   }
 

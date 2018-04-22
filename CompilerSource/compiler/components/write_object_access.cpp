@@ -70,81 +70,81 @@ int lang_CPP::compile_writeObjAccess(map<int,parsed_object*> &parsed_objects, pa
 {
   ofstream wto;
   wto.open((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_objectaccess.h").c_str(),ios_base::out);
-    wto << license;
-    wto << "// Depending on how many times your game accesses variables via OBJECT.varname, this file may be empty." << endl << endl;
-    wto << "namespace enigma" << endl << "{" << endl;
+  wto << license;
+  wto << "// Depending on how many times your game accesses variables via OBJECT.varname, this file may be empty." << endl << endl;
+  wto << "namespace enigma" << endl << "{" << endl;
 
-    wto <<
-    "  object_locals ldummy;" << endl <<
-    "  object_locals *glaccess(int x)" << endl <<
-    "  {" << endl << "    object_locals* ri = (object_locals*)fetch_instance_by_int(x);" << endl << "    return ri ? ri : &ldummy;" << endl << "  }" << endl << endl;
+  wto <<
+  "  object_locals ldummy;" << endl <<
+  "  object_locals *glaccess(int x)" << endl <<
+  "  {" << endl << "    object_locals* ri = (object_locals*)fetch_instance_by_int(x);" << endl << "    return ri ? ri : &ldummy;" << endl << "  }" << endl << endl;
 
-    wto <<
-    "  var &map_var(std::map<string, var> **vmap, string str)" << endl <<
-    "  {" << endl <<
-    "      if (*vmap == NULL)" << endl <<
-    "        *vmap = new std::map<string, var>();" << endl <<
-    "      if ((*vmap)->find(str) == (*vmap)->end())" << endl <<
-    "        (*vmap)->insert(std::pair<string, var>(str, 0));" << endl <<
-    "      return ((*vmap)->find(str))->second;" << endl <<
-    "  }" << endl << endl;
+  wto <<
+  "  var &map_var(std::map<string, var> **vmap, string str)" << endl <<
+  "  {" << endl <<
+  "      if (*vmap == NULL)" << endl <<
+  "        *vmap = new std::map<string, var>();" << endl <<
+  "      if ((*vmap)->find(str) == (*vmap)->end())" << endl <<
+  "        (*vmap)->insert(std::pair<string, var>(str, 0));" << endl <<
+  "      return ((*vmap)->find(str))->second;" << endl <<
+  "  }" << endl << endl;
 
 
-    map<string,usedtype> usedtypes;
-    for (map<string,dectrip>::iterator dait = dot_accessed_locals.begin(); dait != dot_accessed_locals.end(); dait++) {
-      usedtype &ut = usedtypes[dait->second.type + " " + dait->second.prefix + dait->second.suffix];
-      if (!ut.uc) ut.original = dait->second;
-      ut.uc++;
-    }
-    int dummynumber = 0;
-    for (map<string,usedtype>::iterator i = usedtypes.begin(); i != usedtypes.end(); i++)
+  map<string,usedtype> usedtypes;
+  for (map<string,dectrip>::iterator dait = dot_accessed_locals.begin(); dait != dot_accessed_locals.end(); dait++) {
+    usedtype &ut = usedtypes[dait->second.type + " " + dait->second.prefix + dait->second.suffix];
+    if (!ut.uc) ut.original = dait->second;
+    ut.uc++;
+  }
+  int dummynumber = 0;
+  for (map<string,usedtype>::iterator i = usedtypes.begin(); i != usedtypes.end(); i++)
+  {
+    int uc = i->second.uc;
+    i->second.uc = dummynumber++;
+    wto << "  " << i->second.original.type << " " << i->second.original.prefix << "dummy_" << i->second.uc << i->second.original.suffix << "; // Referenced by " << uc << " accessors" << endl;
+  }
+
+  for (map<string,dectrip>::iterator dait = dot_accessed_locals.begin(); dait != dot_accessed_locals.end(); dait++)
+  {
+    const string& pmember = dait->first;
+    wto << "  " << dait->second.type << " " << dait->second.prefix << REFERENCE_POSTFIX(dait->second.suffix) << " &varaccess_" << pmember << "(int x)" << endl;
+    wto << "  {" << endl;
+
+    wto << "    object_basic *inst = fetch_instance_by_int(x);" << endl;
+    wto << "    if (inst) switch (inst->object_index)" << endl << "    {" << endl;
+
+    for (po_i it = parsed_objects.begin(); it != parsed_objects.end(); it++)
     {
-      int uc = i->second.uc;
-      i->second.uc = dummynumber++;
-      wto << "  " << i->second.original.type << " " << i->second.original.prefix << "dummy_" << i->second.uc << i->second.original.suffix << "; // Referenced by " << uc << " accessors" << endl;
-    }
-
-    for (map<string,dectrip>::iterator dait = dot_accessed_locals.begin(); dait != dot_accessed_locals.end(); dait++)
-    {
-      const string& pmember = dait->first;
-      wto << "  " << dait->second.type << " " << dait->second.prefix << REFERENCE_POSTFIX(dait->second.suffix) << " &varaccess_" << pmember << "(int x)" << endl;
-      wto << "  {" << endl;
-              
-      wto << "    object_basic *inst = fetch_instance_by_int(x);" << endl;
-      wto << "    if (inst) switch (inst->object_index)" << endl << "    {" << endl;
-
-      for (po_i it = parsed_objects.begin(); it != parsed_objects.end(); it++)
-      {
-        parsed_object *parent = it->second;
-        while (parent) {
-          map<string,dectrip>::iterator x = parent->locals.find(pmember);
-          if (x != parent->locals.end())
+      parsed_object *parent = it->second;
+      while (parent) {
+        map<string,dectrip>::iterator x = parent->locals.find(pmember);
+        if (x != parent->locals.end())
+        {
+          string tot = x->second.type != "" ? x->second.type : "var";
+          if (tot == dait->second.type and x->second.prefix == dait->second.prefix and x->second.suffix == dait->second.suffix)
           {
-            string tot = x->second.type != "" ? x->second.type : "var";
-            if (tot == dait->second.type and x->second.prefix == dait->second.prefix and x->second.suffix == dait->second.suffix)
-            {
-              wto << "      case " << it->second->name << ": return ((OBJ_" << it->second->name << "*)inst)->" << pmember << ";" << endl;
-              break;
-            }
+            wto << "      case " << it->second->name << ": return ((OBJ_" << it->second->name << "*)inst)->" << pmember << ";" << endl;
+            break;
           }
-          parent = parent->parent;
         }
+        parent = parent->parent;
       }
-
-      if (global->globals.find(pmember) != global->globals.end())
-        wto << "      case global: return " << pmember << ";" << endl; 
-      else
-        wto << "      case global: return ((ENIGMA_global_structure*)ENIGMA_global_instance)->" << pmember << ";" << endl;
-      if (dait->second.type == "var")
-        wto << "      default: return map_var(&(((enigma::object_locals*)inst)->vmap), \"" << pmember << "\");"  << endl;
-      wto << "    }" << endl;
-      if (treatUninitAs0) { //Can't keep re-using the same dummy variable.
-        wto << "    dummy_" <<(usedtypes[dait->second.type + " " + dait->second.prefix + dait->second.suffix].uc) <<" = var();" << endl;
-      }
-      wto << "    return dummy_" << usedtypes[dait->second.type + " " + dait->second.prefix + dait->second.suffix].uc << ";" << endl;
-      wto << "  }" << endl;
     }
-    wto << "} // namespace enigma" << endl;
+
+    if (global->globals.find(pmember) != global->globals.end())
+      wto << "      case global: return " << pmember << ";" << endl;
+    else
+      wto << "      case global: return ((ENIGMA_global_structure*)ENIGMA_global_instance)->" << pmember << ";" << endl;
+    if (dait->second.type == "var")
+      wto << "      default: return map_var(&(((enigma::object_locals*)inst)->vmap), \"" << pmember << "\");"  << endl;
+    wto << "    }" << endl;
+    if (treatUninitAs0) { //Can't keep re-using the same dummy variable.
+      wto << "    dummy_" <<(usedtypes[dait->second.type + " " + dait->second.prefix + dait->second.suffix].uc) <<" = var();" << endl;
+    }
+    wto << "    return dummy_" << usedtypes[dait->second.type + " " + dait->second.prefix + dait->second.suffix].uc << ";" << endl;
+    wto << "  }" << endl;
+  }
+  wto << "} // namespace enigma" << endl;
   wto.close();
   return 0;
 }

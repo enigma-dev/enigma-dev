@@ -53,20 +53,20 @@ int lang_CPP::module_write_sounds(EnigmaStruct *es, FILE *gameModule)
     edbg << " " << es->sounds[i].name << flushl;
     fflush(stdout);
   }
-  
+
   //Magic number
   fwrite("SND ",4,1,gameModule);
-  
+
   //Indicate how many
   int sound_count = es->soundCount;
   fwrite(&sound_count,4,1,gameModule);
-  
+
   int sound_maxid = 0;
   for (int i = 0; i < sound_count; i++)
     if (es->sounds[i].id > sound_maxid)
       sound_maxid = es->sounds[i].id;
   fwrite(&sound_maxid,4,1,gameModule);
-  
+
   for (int i = 0; i < sound_count; i++)
   {
     unsigned sndsz = es->sounds[i].size;
@@ -74,12 +74,12 @@ int lang_CPP::module_write_sounds(EnigmaStruct *es, FILE *gameModule)
       user << "Sound `" << es->sounds[i].name << "' has no size. It will be omitted from the game." << flushl;
       continue;
     }
-    
+
     writei(es->sounds[i].id, gameModule); // id
     writei(sndsz, gameModule); // Size
     fwrite(es->sounds[i].data, 1, sndsz, gameModule); // Sound data
   }
- 
+
   edbg << "Done writing sounds." << flushl;
   return 0;
 }
