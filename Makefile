@@ -34,6 +34,8 @@ EMAKE_TARGETS = .FORCE
 
 ifneq (_$(disable_egm),$(filter _$(disable_egm),_true _1 _yes _y))
 	EMAKE_TARGETS += libEGM
+else
+	EMAKE_TARGETS += libProtocols
 endif
 
 emake: liblodepng $(EMAKE_TARGETS)
