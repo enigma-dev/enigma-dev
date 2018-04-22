@@ -257,7 +257,7 @@ int lang_CPP::compile_writeRoomData(EnigmaStruct* es, parsed_object *EGMglobal, 
     for (map<int,parsed_room::parsed_icreatecode>::iterator it = pr->instance_precreate_codes.begin(); it != pr->instance_precreate_codes.end(); it++)
       wto << "\n  room_"<< es->rooms[i].id <<"_instanceprecreate_" << it->first << "();";
 
-    wto << "\n  return 0;\n  }\n";
+    wto << "\n  return 0;\n}\n\n";
 
     wto << "variant roomcreate" << es->rooms[i].id << "()\n{\n";
     if (mode == emode_debug) {
@@ -270,7 +270,7 @@ int lang_CPP::compile_writeRoomData(EnigmaStruct* es, parsed_object *EGMglobal, 
     for (map<int,parsed_room::parsed_icreatecode>::iterator it = pr->instance_create_codes.begin(); it != pr->instance_create_codes.end(); it++)
       wto << "\n  room_"<< es->rooms[i].id <<"_instancecreate_" << it->first << "();";
 
-    wto << "\n  return 0;\n  }\n";
+    wto << "\n  return 0;\n}\n";
   }
   wto.close();
 
