@@ -150,20 +150,8 @@ inline void write_exe_info(const std::string codegen_directory, const EnigmaStru
 
 #include "System/builtins.h"
 
-static inline int compileEGMf_Raw(EnigmaStruct *es, const char* exe_filename, int mode) {
-  return current_language->compile(es, exe_filename, mode);
-}
-
 dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode) {
-  return compileEGMf_Raw(es, exe_filename, mode);
-}
-
-#include "Proto2ES.h"
-
-dllexport int compileBuffer(buffers::Game *project, const char* exe_filename, int mode) {
-  EnigmaStruct *es = Proto2ES(project);
-  es->filename = exe_filename;
-  return compileEGMf_Raw(es, exe_filename, mode);
+  return current_language->compile(es, exe_filename, mode);
 }
 
 static bool run_game = true;
