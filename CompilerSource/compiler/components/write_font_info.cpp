@@ -64,7 +64,7 @@ int lang_CPP::compile_writeFontInfo(EnigmaStruct* es)
     }
     wto << "  };" << endl;
     wto << endl << "  int rawfontcount = " << rawfontcount << ", rawfontmaxid = " << maxid << ";" << endl;
-	wto << "}" << endl;
-	wto.close();
-	return 0;
+  wto << "}" << endl;
+  wto.close();
+  return 0;
 }

@@ -51,7 +51,7 @@ static string esc(string str) {
     if (c == '\n') { res += "\\n"; continue; }
     if (c == '\r') { res += "\\r"; continue; }
     if (c == '\\') { res += "\\\\"; continue; }
-	if (c == '\"') { res += "\\\""; continue; }
+  if (c == '\"') { res += "\\\""; continue; }
     res.append(1, c);
   }
   return res;
@@ -69,17 +69,17 @@ int lang_CPP::compile_writeShaderData(EnigmaStruct* es, parsed_object *EGMglobal
   {
     while (idmax < es->shaders[i].id) {
       ++idmax, wto << "ShaderStruct(),\n";
-	}
-	string vertexcode = es->shaders[i].vertex;
-	string fragmentcode = es->shaders[i].fragment;
-	//TODO: Replace quotations with escape sequences.
+  }
+  string vertexcode = es->shaders[i].vertex;
+  string fragmentcode = es->shaders[i].fragment;
+  //TODO: Replace quotations with escape sequences.
     wto << "    { "
         << '"' << esc(vertexcode)   << "\", "
         << '"' << esc(fragmentcode) << "\", "
         << '"' << es->shaders[i].type << "\", "
         << (es->shaders[i].precompile? "true" : "false")
         << " },\n";
-	idmax += 1;
+  idmax += 1;
   }
 
   wto << "  };\n";
