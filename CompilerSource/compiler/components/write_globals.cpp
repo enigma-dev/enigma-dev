@@ -97,6 +97,9 @@ int lang_CPP::compile_writeGlobals(EnigmaStruct* es, parsed_object* global)
   wto << "  bool freezeOnLoseFocus = " << es->gameSettings.freezeOnLoseFocus << ";" << endl;
   wto << "  bool treatCloseAsEscape = " << es->gameSettings.treatCloseAsEscape << ";" << endl;
   wto << "  bool isFullScreen = " << es->gameSettings.startFullscreen << ";" << endl;
+  wto << "  int viewScale = " << es->gameSettings.scaling << ";" << endl;
+  wto << "  int windowColor = " << javaColor(es->gameSettings.colorOutsideRoom) << ";" << endl;
+
   wto << "  string gameInfoText = \"" << esc(es->gameInfo.gameInfoStr) << "\";" << endl;
   wto << "  string gameInfoCaption = \"" << es->gameInfo.formCaption << "\";" << endl;
   wto << "  int gameInfoBackgroundColor = " << javaColor(es->gameInfo.backgroundColor) << ";" << endl;
@@ -109,8 +112,6 @@ int lang_CPP::compile_writeGlobals(EnigmaStruct* es, parsed_object* global)
   wto << "  bool gameInfoAllowResize = " << es->gameInfo.allowResize << ";" << endl;
   wto << "  bool gameInfoStayOnTop = " << es->gameInfo.stayOnTop << ";" << endl;
   wto << "  bool gameInfoPauseGame = " << es->gameInfo.pauseGame << ";" << endl;
-  wto << "  int viewScale = " << es->gameSettings.scaling << ";" << endl;
-  wto << "  int windowColor = " << javaColor(es->gameSettings.colorOutsideRoom) << ";" << endl;
   wto << "}" << endl;
 
   for (parsed_object::globit i = global->globals.begin(); i != global->globals.end(); i++)
