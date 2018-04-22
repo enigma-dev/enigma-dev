@@ -1,6 +1,7 @@
 BINARY := ../../emake
 SRC_DIR := .
 OBJ_DIR := .eobjs
+SHARED_SOURCES := ../../shared
 
 OS := $(shell uname -s)
 ifeq ($(OS), Linux)
@@ -15,8 +16,8 @@ EXTRA_SOURCES := ../../CompilerSource/settings-parse/eyaml.cpp ../../CompilerSou
 EXTRA_SRC_DIR := ../../CompilerSource
 
 PROTO_DIR := ../protos
-CXXFLAGS  := -I$(SRC_DIR) -I$(EXTRA_SRC_DIR) -I$(PROTO_DIR) -I$(PROTO_DIR)/codegen -std=c++11 -Wall -Wextra -Wpedantic -g
-LDFLAGS   := $(OS_LIBS) -L../../ -lProtocols -lprotobuf
+CXXFLAGS  := -I$(SRC_DIR) -I$(EXTRA_SRC_DIR) -I$(PROTO_DIR) -I$(PROTO_DIR)/codegen -I$(SHARED_SOURCES)/lodepng -std=c++11 -Wall -Wextra -Wpedantic -g
+LDFLAGS   := $(OS_LIBS) -L../../ -lz -L$(SHARED_SOURCES)/lodepng -llodepng -lProtocols -lprotobuf
 
 EXTRA_OBJS := $(patsubst $(EXTRA_SRC_DIR)/%, $(OBJ_DIR)/Extra/%, $(patsubst %.cpp, %.o, $(EXTRA_SOURCES)))
 
