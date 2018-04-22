@@ -2,7 +2,7 @@ PATH := $(eTCpath)$(PATH)
 
 .PHONY: ENIGMA all clean Game clean-game liblodepng libProtocols libEGM required-directories .FORCE
 
-ENIGMA: .FORCE libProtocols liblodepng
+ENIGMA: .FORCE
 	$(MAKE) -C CompilerSource
 
 clean: .FORCE
@@ -11,14 +11,14 @@ clean: .FORCE
 	$(MAKE) -C CommandLine/libEGM/ clean
 	$(MAKE) -C CommandLine/protos/ clean
 	$(MAKE) -C CommandLine/testing/ clean
-	$(MAKE) -C lodepng/ clean
+	$(MAKE) -C shared/lodepng/ clean
 
 all: liblodepng libProtocols libEGM ENIGMA emake test-runner .FORCE
 
 Game: liblodepng .FORCE
 	$(MAKE) -C ENIGMAsystem/SHELL
 
-clean-game:
+clean-game: .FORCE
 	$(MAKE) -C ENIGMAsystem/SHELL clean
 
 liblodepng: .FORCE
@@ -30,7 +30,13 @@ libProtocols: .FORCE
 libEGM: .FORCE libProtocols
 	$(MAKE) -C CommandLine/libEGM/
 
-emake: ENIGMA .FORCE
+EMAKE_TARGETS = .FORCE
+
+ifneq (_$(disable_egm),$(filter _$(disable_egm),_true _1 _yes _y))
+	EMAKE_TARGETS += libEGM
+endif
+
+emake: liblodepng $(EMAKE_TARGETS)
 	$(MAKE) -C CommandLine/emake/
 
 test-runner: emake .FORCE

@@ -29,13 +29,13 @@ PathPoint AddPathPoint(const buffers::resources::Path::Point& pnt);
 void AddScript(const char* name, const buffers::resources::Script& scr);
 void AddShader(const char* name, const buffers::resources::Shader& shr);
 void AddFont(const char* name, const buffers::resources::Font& fnt);
-void AddTimeline(const char* name, buffers::resources::Timeline* tml, buffers::Game* protobuf);
-void AddObject(const char* name, buffers::resources::Object* obj, buffers::Game* protobuf);
-void AddRoom(const char* name, const buffers::resources::Room& rmn, buffers::Game* protobuf);
-Instance AddInstance(const buffers::resources::Room::Instance& inst, buffers::Game* protobuf);
-Tile AddTile(const buffers::resources::Room::Tile& tile, buffers::Game* protobuf);
-View AddView(const buffers::resources::Room::View& view, buffers::Game* protobuf);
-BackgroundDef AddRoomBackground(const buffers::resources::Room::Background& bkg, buffers::Game* protobuf);
+void AddTimeline(const char* name, buffers::resources::Timeline* tml);
+void AddObject(const char* name, buffers::resources::Object* obj);
+void AddRoom(const char* name, const buffers::resources::Room& rmn);
+Instance AddInstance(const buffers::resources::Room::Instance& inst);
+Tile AddTile(const buffers::resources::Room::Tile& tile);
+View AddView(const buffers::resources::Room::View& view);
+BackgroundDef AddRoomBackground(const buffers::resources::Room::Background& bkg);
 
 static std::unordered_map<int, int> countMap;
 static std::unordered_map<std::string, int> idMap;
@@ -310,11 +310,11 @@ void AddResource(buffers::Game* protobuf, buffers::TreeNode* node) {
     if (child->has_font())
       AddFont(name, child->font());
     if (child->has_object())
-      AddObject(name, child->mutable_object(), protobuf);
+      AddObject(name, child->mutable_object());
     if (child->has_path())
      AddPath(name, child->path());
     if (child->has_room())
-     AddRoom(name, child->room(), protobuf);
+     AddRoom(name, child->room());
     if (child->has_script())
      AddScript(name, child->script());
     if (child->has_shader())
@@ -324,7 +324,7 @@ void AddResource(buffers::Game* protobuf, buffers::TreeNode* node) {
     if (child->has_sprite())
      AddSprite(name, child->sprite());
     if (child->has_timeline())
-     AddTimeline(name, child->mutable_timeline(), protobuf);
+     AddTimeline(name, child->mutable_timeline());
   }
 }
 
@@ -550,7 +550,7 @@ void AddFont(const char* name, const buffers::resources::Font& fnt) {
   }
 }
 
-void AddTimeline(const char* name, buffers::resources::Timeline* tml, buffers::Game* protobuf) {
+void AddTimeline(const char* name, buffers::resources::Timeline* tml) {
   static size_t timeline = 0;
   Timeline& t = timelines[timeline++];
 
@@ -571,7 +571,7 @@ void AddTimeline(const char* name, buffers::resources::Timeline* tml, buffers::G
   }
 }
 
-void AddObject(const char* name, buffers::resources::Object* obj, buffers::Game* protobuf) {
+void AddObject(const char* name, buffers::resources::Object* obj) {
   static size_t object = 0;
   GmObject& o = objects[object++];
 
@@ -618,7 +618,7 @@ void AddObject(const char* name, buffers::resources::Object* obj, buffers::Game*
   }
 }
 
-void AddRoom(const char* name, const buffers::resources::Room& rm, buffers::Game* protobuf) {
+void AddRoom(const char* name, const buffers::resources::Room& rm) {
   static size_t room = 0;
   Room& r = rooms[room++];
 
@@ -639,7 +639,7 @@ void AddRoom(const char* name, const buffers::resources::Room& rm, buffers::Game
   if (r.backgroundDefCount > 0) {
     r.backgroundDefs = new BackgroundDef[r.backgroundDefCount];
     for (int i = 0; i < r.backgroundDefCount; ++i) {
-      r.backgroundDefs[i] = AddRoomBackground(rm.backgrounds(i), protobuf);
+      r.backgroundDefs[i] = AddRoomBackground(rm.backgrounds(i));
     }
   }
 
@@ -647,7 +647,7 @@ void AddRoom(const char* name, const buffers::resources::Room& rm, buffers::Game
   if (r.viewCount > 0) {
     r.views = new View[r.viewCount];
     for (int i = 0; i < r.viewCount; ++i) {
-      r.views[i] = AddView(rm.views(i), protobuf);
+      r.views[i] = AddView(rm.views(i));
     }
   }
 
@@ -655,7 +655,7 @@ void AddRoom(const char* name, const buffers::resources::Room& rm, buffers::Game
   if (r.instanceCount > 0) {
     r.instances = new Instance[r.instanceCount];
     for (int i = 0; i < r.instanceCount; ++i) {
-      r.instances[i] = AddInstance(rm.instances(i), protobuf);
+      r.instances[i] = AddInstance(rm.instances(i));
     }
   }
 
@@ -663,12 +663,12 @@ void AddRoom(const char* name, const buffers::resources::Room& rm, buffers::Game
   if (r.tileCount > 0) {
     r.tiles = new Tile[r.tileCount];
     for (int i = 0; i < r.tileCount; ++i) {
-      r.tiles[i] = AddTile(rm.tiles(i), protobuf);
+      r.tiles[i] = AddTile(rm.tiles(i));
     }
   }
 }
 
-Instance AddInstance(const buffers::resources::Room::Instance& inst, buffers::Game* protobuf) {
+Instance AddInstance(const buffers::resources::Room::Instance& inst) {
   Instance i = Instance();
 
   i.id = inst.id();
@@ -682,7 +682,7 @@ Instance AddInstance(const buffers::resources::Room::Instance& inst, buffers::Ga
   return i;
 }
 
-Tile AddTile(const buffers::resources::Room::Tile& tile, buffers::Game* protobuf) {
+Tile AddTile(const buffers::resources::Room::Tile& tile) {
   Tile t = Tile();
 
   t.id = tile.id();
@@ -699,7 +699,7 @@ Tile AddTile(const buffers::resources::Room::Tile& tile, buffers::Game* protobuf
   return t;
 }
 
-View AddView(const buffers::resources::Room::View& view, buffers::Game* protobuf) {
+View AddView(const buffers::resources::Room::View& view) {
   View v = View();
 
   v.visible = view.visible();
@@ -720,7 +720,7 @@ View AddView(const buffers::resources::Room::View& view, buffers::Game* protobuf
   return v;
 }
 
-BackgroundDef AddRoomBackground(const buffers::resources::Room::Background& bkg, buffers::Game* protobuf) {
+BackgroundDef AddRoomBackground(const buffers::resources::Room::Background& bkg) {
   BackgroundDef b = BackgroundDef();
 
   b.visible = bkg.visible();

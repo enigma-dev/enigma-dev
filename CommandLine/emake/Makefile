@@ -16,13 +16,10 @@ else
 	OS_LIBS=-lboost_system-mt -Wl,--no-as-needed -Wl,-rpath=./ -lboost_program_options-mt -lboost_iostreams-mt -lboost_filesystem-mt -lboost_system-mt -lpthread
 endif
 
-EXTRA_SOURCES := ../../CompilerSource/settings-parse/eyaml.cpp ../../CompilerSource/compiler/event_reader/event_parser.cpp
-EXTRA_SRC_DIR := ../../CompilerSource
-
 PROTO_DIR := ../protos
 # As a "temporary hack," allow including from CompilerSource to give access to backend/ folder.
-CXXFLAGS  := -I$(SRC_DIR) -I../../CompilerSource -I../libEGM -I../libGMX -I../libGMX/codegen -I$(PROTO_DIR) -I$(PROTO_DIR)/codegen -std=c++11 -Wall -Wextra -Wpedantic -g
-LDFLAGS   := $(OS_LIBS) -L/mingw64/lib/pugixml-1.8/ -lpugixml -L../../ -lProtocols -lEGM -lprotobuf
+CXXFLAGS  := -I$(SRC_DIR) -I../../CompilerSource -I$(PROTO_DIR) -I$(PROTO_DIR)/codegen -I$(SHARED_SRC_DIR)/lodepng -std=c++11 -Wall -Wextra -Wpedantic -g
+LDFLAGS   := $(OS_LIBS) -L../../ -lz -L$(SHARED_SRC_DIR)/lodepng -llodepng -lProtocols -lprotobuf
 
 rwildcard=$(wildcard $1/$2) $(foreach d,$(wildcard $1/*),$(call rwildcard,$d,$2))
 SOURCES := $(call rwildcard,$(SRC_DIR),*.cpp)
@@ -57,6 +54,7 @@ $(BINARY): $(OBJECTS)
 .PHONY: all clean obj_dirs
 
 all: $(BINARY)
+
 clean:
 	rm -rf $(BINARY) $(OBJ_DIR)
 
