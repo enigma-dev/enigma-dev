@@ -820,7 +820,7 @@ static inline void write_object_event_funcs(ofstream& wto, const parsed_object *
         wto << "inline bool enigma::OBJ_" << object->name << "::myevent_" << evname << "_subcheck()\n{\n  ";
         cout << "DBGMSG 4-3" << endl;
         wto << event_get_sub_check_condition(mid, id) << endl;
-        wto << "\n}\n";
+        wto << "\n}\n\n";
       }
     }
   }
@@ -844,7 +844,7 @@ static inline void write_event_func(ofstream& wto, const parsed_event &event, st
   if (event_has_suffix_code(mid, id))
     wto << event_get_suffix_code(mid, id) << endl;
   cout << "DBGMSG 4-5" << endl;
-  wto << "\n  return 0;\n}\n";
+  wto << "\n  return 0;\n}\n\n";
 }
 
 static inline void write_object_script_funcs(ofstream& wto, const parsed_object *const t) {
