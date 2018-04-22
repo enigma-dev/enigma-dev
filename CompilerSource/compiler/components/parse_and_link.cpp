@@ -78,9 +78,9 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
 
   //Next we just parse the timeline scripts to add semicolons and collect variable names
   tline_lookup.clear();
-  for (int i=0; i<es->timelineCount; i++) 
+  for (int i=0; i<es->timelineCount; i++)
   {
-    for (int j=0; j<es->timelines[i].momentCount; j++) 
+    for (int j=0; j<es->timelines[i].momentCount; j++)
     {
       std::string newcode;
       int a = syncheck::syntaxcheck(es->timelines[i].moments[j].code, newcode);
@@ -354,7 +354,7 @@ int lang_CPP::compile_parseAndLink(EnigmaStruct *es,parsed_script *scripts[], ve
       if (subscr != scr_lookup.end()) { //If we've got ourselves a script
 
         t->copy_from(subscr->second->obj,  "script `"+it->first+"'",  "object `"+i->second->name+"'");
-		}
+      }
     }
   }
 
