@@ -46,7 +46,7 @@ int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
   ** this game. Only events on this list will be exported.
   ***********************************************************/
   map<string,foundevent> used_events;
-  
+
   // Defragged events must be written before object data, or object data cannot determine which events were used.
   used_events.clear();
   for (int i = 0; i < es->gmObjectCount; i++) {
@@ -107,7 +107,7 @@ int lang_CPP::compile_writeDefraggedEvents(EnigmaStruct* es)
               const bool e_is_inst = event_is_instance(it->second.mid, it->second.id);
               if (event_has_sub_check(it->second.mid, it->second.id) && !e_is_inst) {
                 wto << "    inline virtual bool myevent_" << it->first << "_subcheck() { return false; }\n";
-              } 
+              }
               wto << (e_is_inst ? "    virtual void    myevent_" : "    virtual variant myevent_") << it->first << "()";
               if (event_has_default_code(it->second.mid,it->second.id))
                 wto << endl << "    {" << endl << "  " << event_get_default_code(it->second.mid,it->second.id) << endl << (e_is_inst ? "    }" : "    return 0;\n    }") << endl;

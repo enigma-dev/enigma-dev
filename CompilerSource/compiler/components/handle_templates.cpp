@@ -103,6 +103,6 @@ int lang_CPP::compile_handle_templates(EnigmaStruct* es)
 	values["copyright"]      = gs->copyright;
 	values["description"]    = gs->description;
 	values["information"]    = gs->gameIcon;
-	
+
   return 0;
 }

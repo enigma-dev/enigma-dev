@@ -109,7 +109,7 @@ int lang_CPP::compile_writeObjAccess(map<int,parsed_object*> &parsed_objects, pa
       const string& pmember = dait->first;
       wto << "  " << dait->second.type << " " << dait->second.prefix << REFERENCE_POSTFIX(dait->second.suffix) << " &varaccess_" << pmember << "(int x)" << endl;
       wto << "  {" << endl;
-              
+
       wto << "    object_basic *inst = fetch_instance_by_int(x);" << endl;
       wto << "    if (inst) switch (inst->object_index)" << endl << "    {" << endl;
 
@@ -132,7 +132,7 @@ int lang_CPP::compile_writeObjAccess(map<int,parsed_object*> &parsed_objects, pa
       }
 
       if (global->globals.find(pmember) != global->globals.end())
-        wto << "      case global: return " << pmember << ";" << endl; 
+        wto << "      case global: return " << pmember << ";" << endl;
       else
         wto << "      case global: return ((ENIGMA_global_structure*)ENIGMA_global_instance)->" << pmember << ";" << endl;
       if (dait->second.type == "var")

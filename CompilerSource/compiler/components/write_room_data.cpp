@@ -113,7 +113,7 @@ int lang_CPP::compile_writeRoomData(EnigmaStruct* es, parsed_object *EGMglobal, 
     << (es->rooms[i].drawBackgroundColor ? "true" : "false")
     << ", roomcreate" << es->rooms[i].id << ",\n      " // Creation code
     << "roomprecreate" << es->rooms[i].id << ",\n      " // PreCreation code
-    
+
     << es->rooms[i].width << ", " << es->rooms[i].height << ", " // Width and Height
     << es->rooms[i].speed << ",  "  // Speed
     << (es->rooms[i].persistent ? "true" : "false") << ",  "  // Persistent
@@ -167,7 +167,7 @@ int lang_CPP::compile_writeRoomData(EnigmaStruct* es, parsed_object *EGMglobal, 
 
     if (es->rooms[i].id > room_highid)
       room_highid = es->rooms[i].id;
-    
+
     (void)EGMglobal; // No need to know globals, here.
   }
 
@@ -217,7 +217,7 @@ wto.open((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_roomcr
       );
       wto << "  return 0;\n}\n\n";
     }
-    
+
     for (map<int,parsed_room::parsed_icreatecode>::iterator it = pr->instance_precreate_codes.begin(); it != pr->instance_precreate_codes.end(); it++)
     {
       wto << "variant room_"<< es->rooms[i].id <<"_instanceprecreate_" << it->first << "()\n{\n  ";
@@ -241,7 +241,7 @@ wto.open((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_roomcr
       );
       wto << "  return 0;\n}\n\n";
     }
-    
+
     wto << "variant roomprecreate" << es->rooms[i].id << "()\n{\n  ";
     if (mode == emode_debug) {
       wto << "enigma::debug_scope $current_scope(\"'room preCreation' for room '" << es->rooms[i].name << "'\");\n";
@@ -264,7 +264,7 @@ wto.open((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_roomcr
 
     for (map<int,parsed_room::parsed_icreatecode>::iterator it = pr->instance_create_codes.begin(); it != pr->instance_create_codes.end(); it++)
       wto << "\n  room_"<< es->rooms[i].id <<"_instancecreate_" << it->first << "();";
-    
+
     wto << "\n  return 0;\n  }\n";
   }
 wto.close();

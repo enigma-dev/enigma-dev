@@ -72,7 +72,7 @@ int lang_CPP::compile_writeGlobals(EnigmaStruct* es, parsed_object* global)
         wto << ", argument" << i << " = 0";
       wto << ";\n\n";
     }
-	
+
     wto << "namespace enigma_user { " << endl;
     //wto << "  string working_directory = \"\";" << endl; // moved over to PFmain.h
     wto << "  unsigned int game_id = " << es->gameSettings.gameId << ";" << endl;
