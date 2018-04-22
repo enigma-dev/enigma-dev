@@ -186,10 +186,10 @@ int lang_CPP::compile_writeRoomData(EnigmaStruct* es, parsed_object *EGMglobal, 
     wto << "int room_first = " << es->rooms[0].id << ";\n";
     wto << "int room_last = " << es->rooms[es->roomCount-1].id << ";\n";
   }
-wto.close();
+  wto.close();
 
 
-wto.open((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_roomcreates.h").c_str(),ios_base::out);
+  wto.open((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_roomcreates.h").c_str(),ios_base::out);
   wto << license;
   for (int i = 0; i < es->roomCount; i++)
   {
@@ -267,7 +267,7 @@ wto.open((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_roomcr
 
     wto << "\n  return 0;\n  }\n";
   }
-wto.close();
+  wto.close();
 
   return 0;
 }

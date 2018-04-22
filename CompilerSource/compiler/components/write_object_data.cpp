@@ -492,100 +492,100 @@ static inline void write_object_constructors(std::ostream &wto, parsed_object *o
 
   if (object->parent) {
     wto << ": OBJ_" << object->parent->name << "(enigma_genericconstructor_newinst_x,enigma_genericconstructor_newinst_y,id,enigma_genericobjid,false)";
-   } else {
+  } else {
     wto << ": object_locals(id,enigma_genericobjid) ";
-   }
+  }
 
-    for (size_t ii = 0; ii < object->initializers.size(); ii++)
-      wto << ", " << object->initializers[ii].first << "(" << object->initializers[ii].second << ")";
-    wto << "\n    {\n";
-    wto << "      if (!handle) return;\n";
-      // Sprite index
-        if (used_funcs::object_set_sprite) //We want to initialize
-          wto << "      sprite_index = enigma::object_table[" << object->id << "].->sprite;\n"
-              << "      make_index = enigma::object_table[" << object->id << "]->mask;\n";
-        else
-          wto << "      sprite_index = enigma::objectdata[" << object->id << "]->sprite;\n"
-              << "      mask_index = enigma::objectdata[" << object->id << "]->mask;\n";
-        wto << "      visible = enigma::objectdata[" << object->id << "]->visible;\n      solid = enigma::objectdata[" << object->id << "]->solid;\n";
-        wto << "      persistent = enigma::objectdata[" << object->id << "]->persistent;\n";
+  for (size_t ii = 0; ii < object->initializers.size(); ii++)
+    wto << ", " << object->initializers[ii].first << "(" << object->initializers[ii].second << ")";
+  wto << "\n    {\n";
+  wto << "      if (!handle) return;\n";
+  // Sprite index
+  if (used_funcs::object_set_sprite) //We want to initialize
+    wto << "      sprite_index = enigma::object_table[" << object->id << "].->sprite;\n"
+        << "      make_index = enigma::object_table[" << object->id << "]->mask;\n";
+  else
+    wto << "      sprite_index = enigma::objectdata[" << object->id << "]->sprite;\n"
+        << "      mask_index = enigma::objectdata[" << object->id << "]->mask;\n";
+  wto << "      visible = enigma::objectdata[" << object->id << "]->visible;\n      solid = enigma::objectdata[" << object->id << "]->solid;\n";
+  wto << "      persistent = enigma::objectdata[" << object->id << "]->persistent;\n";
 
-      wto << "      activate();\n";
+  wto << "      activate();\n";
 
 
-      // Coordinates
-        wto << "      x = enigma_genericconstructor_newinst_x, y = enigma_genericconstructor_newinst_y;\n";
+  // Coordinates
+  wto << "      x = enigma_genericconstructor_newinst_x, y = enigma_genericconstructor_newinst_y;\n";
 
-    wto << "      enigma::constructor(this);\n";
-    wto << "    }\n\n";
+  wto << "      enigma::constructor(this);\n";
+  wto << "    }\n\n";
 
-    wto << "    void activate()\n    {\n";
-      if (object->parent) {
-          wto << "      OBJ_" << object->parent->name << "::activate();\n";
-          // Have to remove the one the parent added so we can add our own
-          wto << "      depth.remove();\n";
-      }
-    // Depth iterator used for draw events in graphics system screen_redraw
-    wto << "      depth.init(enigma::objectdata[" << object->id << "]->depth, this);\n";
-// Instance system interface
-      if (!object->parent) {
-        wto << "      ENOBJ_ITER_me = enigma::link_instance(this);\n";
-        for (parsed_object *obj = object; obj; obj = obj->parent) {
-          wto << "      ENOBJ_ITER_myobj" << obj->id << " = enigma::link_obj_instance(this, " << obj->id << ");\n";
-        }
+  wto << "    void activate()\n    {\n";
+  if (object->parent) {
+      wto << "      OBJ_" << object->parent->name << "::activate();\n";
+      // Have to remove the one the parent added so we can add our own
+      wto << "      depth.remove();\n";
+  }
+  // Depth iterator used for draw events in graphics system screen_redraw
+  wto << "      depth.init(enigma::objectdata[" << object->id << "]->depth, this);\n";
+  // Instance system interface
+  if (!object->parent) {
+    wto << "      ENOBJ_ITER_me = enigma::link_instance(this);\n";
+    for (parsed_object *obj = object; obj; obj = obj->parent) {
+      wto << "      ENOBJ_ITER_myobj" << obj->id << " = enigma::link_obj_instance(this, " << obj->id << ");\n";
+    }
+  } else {
+    wto << "      ENOBJ_ITER_myobj" << object->id << " = enigma::link_obj_instance(this, " << object->id << ");\n";
+  }
+  // Event system interface
+  for (vector<unsigned>::iterator it = parent_undefined.begin(); it != parent_undefined.end(); it++) {
+    if (!event_is_instance(object->events[*it].mainId, object->events[*it].id)) {
+      const string evname = event_get_function_name(object->events[*it].mainId, object->events[*it].id);
+      if (event_has_iterator_initialize_code(object->events[*it].mainId, object->events[*it].id)) {
+        if (!iscomment(event_get_iterator_initialize_code(object->events[*it].mainId, object->events[*it].id)))
+          wto << "      " << event_get_iterator_initialize_code(object->events[*it].mainId, object->events[*it].id) << ";\n";
       } else {
-        wto << "      ENOBJ_ITER_myobj" << object->id << " = enigma::link_obj_instance(this, " << object->id << ");\n";
-      }
-      // Event system interface
-      for (vector<unsigned>::iterator it = parent_undefined.begin(); it != parent_undefined.end(); it++) {
-        if (!event_is_instance(object->events[*it].mainId, object->events[*it].id)) {
-          const string evname = event_get_function_name(object->events[*it].mainId, object->events[*it].id);
-          if (event_has_iterator_initialize_code(object->events[*it].mainId, object->events[*it].id)) {
-            if (!iscomment(event_get_iterator_initialize_code(object->events[*it].mainId, object->events[*it].id)))
-              wto << "      " << event_get_iterator_initialize_code(object->events[*it].mainId, object->events[*it].id) << ";\n";
-          } else {
-            wto << "      ENOBJ_ITER_myevent_" << evname << " = enigma::event_" << evname << "->add_inst(this);\n";
-          }
-        }
-      }
-    for (map<int, vector<int> >::iterator it = evgroup.begin(); it != evgroup.end(); it++) { // The stacked ones should have their root exported
-      if (!object->parent || !parent_declares_groupedevent(object->parent, it->first)) {
-        wto << "      ENOBJ_ITER_myevent_" << event_stacked_get_root_name(it->first) << " = enigma::event_" << event_stacked_get_root_name(it->first) << "->add_inst(this);\n";
+        wto << "      ENOBJ_ITER_myevent_" << evname << " = enigma::event_" << evname << "->add_inst(this);\n";
       }
     }
-    wto << "    }\n";
+  }
+  for (map<int, vector<int> >::iterator it = evgroup.begin(); it != evgroup.end(); it++) { // The stacked ones should have their root exported
+    if (!object->parent || !parent_declares_groupedevent(object->parent, it->first)) {
+      wto << "      ENOBJ_ITER_myevent_" << event_stacked_get_root_name(it->first) << " = enigma::event_" << event_stacked_get_root_name(it->first) << "->add_inst(this);\n";
+    }
+  }
+  wto << "    }\n";
 }
 
 static inline void write_object_destructor(std::ostream &wto, parsed_object *object, robertvec &parent_undefined, event_map &evgroup) {
-    wto <<   "    \n    ~OBJ_" <<  object->name << "()\n    {\n";
+  wto <<   "    \n    ~OBJ_" <<  object->name << "()\n    {\n";
 
-      if (!object->parent) {
-          wto << "      delete vmap;\n";
-          wto << "      enigma::winstance_list_iterator_delete(ENOBJ_ITER_me);\n";
-          for (parsed_object *obj = object; obj; obj = obj->parent) {
-            wto << "      delete ENOBJ_ITER_myobj" << obj->id << ";\n";
-          }
-      } else {
-          wto << "      delete ENOBJ_ITER_myobj" << object->id << ";\n";
-      }
-      for (vector<unsigned>::iterator it = parent_undefined.begin(); it != parent_undefined.end(); it++) {
-        if (!event_is_instance(object->events[*it].mainId, object->events[*it].id)) {
-          if (event_has_iterator_delete_code(object->events[*it].mainId, object->events[*it].id)) {
-            if (!iscomment(event_get_iterator_delete_code(object->events[*it].mainId, object->events[*it].id)))
-              wto << "      " << event_get_iterator_delete_code(object->events[*it].mainId, object->events[*it].id) << ";\n";
-          } else
-            wto << "      delete ENOBJ_ITER_myevent_" << event_get_function_name(object->events[*it].mainId, object->events[*it].id) << ";\n";
-        }
-      }
-    for (map<int, vector<int> >::iterator it = evgroup.begin(); it != evgroup.end(); it++) { // The stacked ones should have their root exported
-      if (!object->parent || !parent_declares_groupedevent(object->parent, it->first)) {
-        wto << "      delete ENOBJ_ITER_myevent_" << event_stacked_get_root_name(it->first) << ";\n";
-      }
+  if (!object->parent) {
+    wto << "      delete vmap;\n";
+    wto << "      enigma::winstance_list_iterator_delete(ENOBJ_ITER_me);\n";
+    for (parsed_object *obj = object; obj; obj = obj->parent) {
+      wto << "      delete ENOBJ_ITER_myobj" << obj->id << ";\n";
     }
-    wto << "    }\n";
+  } else {
+    wto << "      delete ENOBJ_ITER_myobj" << object->id << ";\n";
+  }
+  for (vector<unsigned>::iterator it = parent_undefined.begin(); it != parent_undefined.end(); it++) {
+    if (!event_is_instance(object->events[*it].mainId, object->events[*it].id)) {
+      if (event_has_iterator_delete_code(object->events[*it].mainId, object->events[*it].id)) {
+        if (!iscomment(event_get_iterator_delete_code(object->events[*it].mainId, object->events[*it].id)))
+          wto << "      " << event_get_iterator_delete_code(object->events[*it].mainId, object->events[*it].id) << ";\n";
+      } else
+        wto << "      delete ENOBJ_ITER_myevent_" << event_get_function_name(object->events[*it].mainId, object->events[*it].id) << ";\n";
+    }
+  }
+  for (map<int, vector<int> >::iterator it = evgroup.begin(); it != evgroup.end(); it++) { // The stacked ones should have their root exported
+    if (!object->parent || !parent_declares_groupedevent(object->parent, it->first)) {
+      wto << "      delete ENOBJ_ITER_myevent_" << event_stacked_get_root_name(it->first) << ";\n";
+    }
+  }
+  wto << "    }\n";
 
-    //We'll sneak this in here.
-    wto << "    virtual bool can_cast(int obj) const;\n";
+  //We'll sneak this in here.
+  wto << "    virtual bool can_cast(int obj) const;\n";
 }
 
 static inline void write_object_class_body(parsed_object* object, lang_CPP *lcpp, std::ostream &wto, EnigmaStruct *es, parsed_object* global, robertmap &parent_undefinitions, map<string, int> &revTlineLookup, evpairmap &evmap) {
@@ -661,27 +661,27 @@ static inline void write_object_declarations(lang_CPP* lcpp, EnigmaStruct* es, p
   //Object declarations: object classes/names and locals.
   ofstream wto;
   wto.open((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_objectdeclarations.h").c_str(),ios_base::out);
-    wto << license;
-    wto << "#include \"Universal_System/collisions_object.h\"\n";
-    wto << "#include \"Universal_System/object.h\"\n\n";
-    wto << "#include <map>";
+  wto << license;
+  wto << "#include \"Universal_System/collisions_object.h\"\n";
+  wto << "#include \"Universal_System/object.h\"\n\n";
+  wto << "#include <map>";
 
-    declare_scripts(wto, es);
+  declare_scripts(wto, es);
 
-    wto << "namespace enigma\n{\n";
-    declare_object_locals_class(wto);
-    wto << "\n";
-    declare_extension_casts(wto);
-    wto << "}\n\n";
+  wto << "namespace enigma\n{\n";
+  declare_object_locals_class(wto);
+  wto << "\n";
+  declare_extension_casts(wto);
+  wto << "}\n\n";
 
-    // TODO(JoshDreamland): Replace with enigma_user:
-    wto << "namespace enigma // TODO: Replace with enigma_user\n{\n";
-    write_object_class_bodies(lcpp, wto, es, global, parent_undefinitions, revTlineLookup);
-    wto << "}\n\n";
+  // TODO(JoshDreamland): Replace with enigma_user:
+  wto << "namespace enigma // TODO: Replace with enigma_user\n{\n";
+  write_object_class_bodies(lcpp, wto, es, global, parent_undefinitions, revTlineLookup);
+  wto << "}\n\n";
 
-    wto << "namespace enigma {\n";
-    write_object_data_structs(wto);
-    wto << "}\n";
+  wto << "namespace enigma {\n";
+  write_object_data_structs(wto);
+  wto << "}\n";
   wto.close();
 }
 
@@ -782,7 +782,7 @@ static inline void write_event_bodies(ofstream& wto, EnigmaStruct *es, int mode,
     write_object_script_funcs(wto, i->second);
 
     // Write local object copies of timelines
-     write_object_timeline_funcs(wto, es, i->second, revTlineLookup);
+    write_object_timeline_funcs(wto, es, i->second, revTlineLookup);
 
     //Write the required "can_cast()" function.
     write_can_cast_func(wto, i->second);
