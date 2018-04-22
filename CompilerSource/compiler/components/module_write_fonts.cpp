@@ -52,13 +52,13 @@ struct GlyphTextureRect {
 static inline void populate_texture(const Font& font, pvrect* boxes, GlyphTextureRect *glyphtexc, unsigned char* bigtex, int w, int h) {
   for (int ii = 0; ii < w * h; ii++)
     bigtex[ii] = 0;
-  
+
   size_t igt = 0;
   for (int ii = 0; ii < font.glyphRangeCount; ii++) {
     GlyphRange &glyphRange = font.glyphRanges[ii];
     for (int ig = 0; ig < glyphRange.rangeMax - glyphRange.rangeMin + 1; ig++) {
       Glyph &glyph = font.glyphRanges[ii].glyphs[ig];
-      
+
       for (int yy = 0; yy < glyph.height; yy++)
         for (int xx = 0; xx < glyph.width; xx++)
           bigtex[w * (boxes[igt].y + yy) + boxes[igt].x + xx] = glyph.data[yy * glyph.width + xx];
@@ -105,9 +105,9 @@ int lang_CPP::module_write_fonts(EnigmaStruct *es, FILE *gameModule)
       GlyphRange &glyphRange = es->fonts[i].glyphRanges[ii];
       gc += glyphRange.rangeMax - glyphRange.rangeMin + 1 + 1;
     }
-    
+
     pvrect* boxes = new pvrect[gc];
-    
+
     typedef pair<size_t, size_t> sizepair; // Gives glyph no by area of glyph (<area, gno>)
     list<sizepair> box_order;
     cout << "Allocated some font stuff" << endl;
@@ -158,21 +158,21 @@ int lang_CPP::module_write_fonts(EnigmaStruct *es, FILE *gameModule)
     cout << "Finished packing font stuff." << endl;
 
     GlyphTextureRect *glyphtexc = new GlyphTextureRect[gc];
-    
+
     cout << "Generating font map and metrics..." << endl; {
       unsigned char *bigtex = new unsigned char[w * h];
-      
+
       cout << "Allocated a big texture. Moving font into it..." << endl;
       populate_texture(es->fonts[i], boxes, glyphtexc, bigtex, w, h);
-      
+
       writei(es->fonts[i].id,gameModule);
       writei(w,gameModule), writei(h,gameModule);
       fwrite(bigtex,1,w*h,gameModule);
       fwrite("done",1,4,gameModule);
-      
+
       delete[] bigtex;
     }
-	
+
     size_t igt = 0;
     for (int ii = 0; ii < es->fonts[i].glyphRangeCount; ii++) {
       GlyphRange &glyphRange = es->fonts[i].glyphRanges[ii];
@@ -186,7 +186,7 @@ int lang_CPP::module_write_fonts(EnigmaStruct *es, FILE *gameModule)
         writef(glyph.origin, gameModule);
         writei(glyph.width,  gameModule);
         writei(glyph.height, gameModule);
-        
+
         writef(glyphtexc[igt].x,  gameModule),
         writef(glyphtexc[igt].y,  gameModule),
         writef(glyphtexc[igt].x2, gameModule),
