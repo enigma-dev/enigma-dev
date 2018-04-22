@@ -2,7 +2,7 @@ PATH := $(eTCpath)$(PATH)
 
 .PHONY: ENIGMA all clean Game clean-game liblodepng libProtocols libEGM required-directories .FORCE
 
-ENIGMA: .FORCE libProtocols liblodepng
+ENIGMA: .FORCE
 	$(MAKE) -C CompilerSource
 
 clean: .FORCE
@@ -36,7 +36,7 @@ ifneq (_$(disable_egm),$(filter _$(disable_egm),_true _1 _yes _y))
 	EMAKE_TARGETS += libEGM
 endif
 
-emake: $(EMAKE_TARGETS)
+emake: liblodepng $(EMAKE_TARGETS)
 	$(MAKE) -C CommandLine/emake/
 
 test-runner: emake .FORCE
