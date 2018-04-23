@@ -11,23 +11,24 @@ import "resources/Path.proto";
 import "resources/Font.proto";
 import "resources/Timeline.proto";
 import "resources/Room.proto";
+import "resources/Include.proto";
 
 message TreeNode {
   oneof type {
     bool folder = 1;
-    //resources.Include include = 2;
+    resources.Sprite sprite = 2;
     resources.Sound sound = 3;
     resources.Background background = 4;
-    resources.Sprite sprite = 5;
-    resources.Shader shader = 6;
-    resources.Font font = 7;
-    resources.Object object = 8;
+    resources.Path path = 5;
+    resources.Script script = 6;
+    resources.Shader shader = 7;
+    resources.Font font = 8;
     resources.Timeline timeline = 9;
-    resources.Room room = 10;
-    //resources.Help help = 11;
-    //resources.Settings settings = 12;
-    resources.Path path = 13;
-    resources.Script script = 14;
+    resources.Object object = 10;
+    resources.Room room = 11;
+    resources.Include include = 12;
+    //resources.Help help = 13;
+    //resources.Settings settings = 14;
     //resources.Macros macros = 15;
   }
 
