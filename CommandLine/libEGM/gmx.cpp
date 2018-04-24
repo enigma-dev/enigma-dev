@@ -36,6 +36,7 @@ std::ostream outputStream(nullptr);
 std::ostream errorStream(nullptr);
 
 void PackBuffer(std::string type, std::string res, int &id, google::protobuf::Message *m, std::string gmxPath);
+void PackRes(std::string &dir, int id, pugi::xml_node &node, google::protobuf::Message *m, int depth);
 
 namespace {
 
@@ -63,11 +64,23 @@ class visited_walker : public pugi::xml_tree_walker {
   }
 };
 
-class gmx_root_walker : public pugi::xml_tree_walker {
+class gmx_root_walker {
  public:
   gmx_root_walker(buffers::TreeNode *root, std::string &gmxPath) : gmxPath(gmxPath) {
     root->set_name("/");  // root node is called assets in GM but we'll use /
     nodes.push_back(root);
+  }
+
+  // this works similar to pugixml's doc.traverse but allows us
+  // to return false from for_each when we just want to skip the subtree
+  // and not the rest of the document
+  virtual void traverse(pugi::xml_node &node, size_t depth=-1) {
+    for (auto &child : node) {
+      bool result = for_each(child, depth + 1);
+      if (result) {
+        traverse(child, depth + 1);
+      }
+    }
   }
 
  private:
@@ -76,32 +89,41 @@ class gmx_root_walker : public pugi::xml_tree_walker {
   std::string gmxPath;
   std::unordered_map<std::string, int> idMap;
 
-  void AddResource(buffers::TreeNode *node, std::string resType, std::string resName) {
+  void AddResource(buffers::TreeNode *node, std::string resType, pugi::xml_node &xmlNode) {
     using buffers::TreeNode;
 
     using FactoryFunction = std::function<google::protobuf::Message *(TreeNode*)>;
     using FactoryMap = std::unordered_map<std::string, FactoryFunction>;
 
     static const FactoryMap factoryMap({
+      { "sprite", &TreeNode::mutable_sprite },
       { "sound", &TreeNode::mutable_sound },
       { "background", &TreeNode::mutable_background },
-      { "sprite", &TreeNode::mutable_sprite },
-      { "shader", &TreeNode::mutable_shader },
+      { "path", &TreeNode::mutable_path },
       { "script", &TreeNode::mutable_script },
+      { "shader", &TreeNode::mutable_shader },
       { "font", &TreeNode::mutable_font },
-      { "object", &TreeNode::mutable_object },
       { "timeline", &TreeNode::mutable_timeline },
+      { "object", &TreeNode::mutable_object },
       { "room", &TreeNode::mutable_room },
-      { "path", &TreeNode::mutable_path }
+      { "datafile", &TreeNode::mutable_include }
     });
 
     auto createFunc = factoryMap.find(resType);
     if (createFunc != factoryMap.end()) {
         auto *res = createFunc->second(node);
-        PackBuffer(resType, resName, idMap[resType], res, gmxPath);
+        if (resType == "datafile") {
+          std::string groupPath = gmxPath;
+          for (auto parent = std::next(nodes.begin()); parent != nodes.end(); ++parent) {
+            groupPath += (*parent)->name() + "/";
+          }
+          PackRes(groupPath, idMap[resType], xmlNode, res, 0);
+        } else {
+          PackBuffer(resType, xmlNode.value(), idMap[resType], res, gmxPath);
+        }
         return;
     }
-    errorStream << "Unsupported resource type: " << resType << " " << resName << std::endl;
+    errorStream << "Unsupported resource type: " << resType << " " << xmlNode.value() << std::endl;
   }
 
   std::string fix_folder_name(const std::string &name) {
@@ -111,8 +133,8 @@ class gmx_root_walker : public pugi::xml_tree_walker {
     return fixedName;
   }
 
-  virtual bool for_each(pugi::xml_node &node) {
-    if (node.type() != pugi::node_pcdata) {
+  virtual bool for_each(pugi::xml_node &node, int depth) {
+    if (node.type() != pugi::node_pcdata && node.name() != std::string("datafile")) {
       std::string name = node.attribute("name").value();
 
       // These nodes don't have name attributes but appear in tree
@@ -122,17 +144,16 @@ class gmx_root_walker : public pugi::xml_tree_walker {
         if (node.name() == std::string("TutorialState")) name = "TutorialState";
       }
 
-      while (depth() > 0 && static_cast<int>(nodes.size()) >=
-                                depth() + 1) {  // our xml depth was less than our tree depth need to go back
+      while (depth > 0 && static_cast<int>(nodes.size()) >= depth + 1) {
+        // our xml depth was less than our tree depth need to go back
         nodes.pop_back();
       }
 
       if (!name.empty()) {
         if (node.name() == std::string("constant")) return true;  //TODO: add constants here
 
-        //buffers::TreeNode *parent = nodes.back();
         buffers::TreeNode *n = nodes.back()->add_child();  // adding a folder
-        if (depth() == 1)                                  // fix root folder names
+        if (depth == 1)                                  // fix root folder names
           name = fix_folder_name(name);
 
         n->set_name(name);
@@ -145,30 +166,38 @@ class gmx_root_walker : public pugi::xml_tree_walker {
 
       if (xml_parent.parent().name() == std::string("TutorialState")) return true;  // TODO: handle tutorial states
 
-      std::string res = node.value();
       std::string resName;
-      std::string resType;
-      size_t marker = res.find_last_of("\\");  // split sound\song
-      if (marker != std::string::npos) {
-        resName = res.substr(marker + 1, res.length());
-        resType = res.substr(0, (res[marker - 1] == 's') ? marker - 1 : marker);
-      } else {  // some things are in the root (eg help.rtf) of the gmx so there is no \. Therfore, we must get the type from the parent tag
-        resName = res;
-        resType = xml_parent.name();
-      }
+      std::string resType = node.name();
+      if (resType != "datafile") {
+        // remove extensions (eg .gml, .shader)
+        std::string res = node.value();
+        size_t marker = res.find_last_of("\\");  // split sound\song
+        if (marker != std::string::npos) {
+          resName = res.substr(marker + 1, res.length());
+          resType = res.substr(0, (res[marker - 1] == 's') ? marker - 1 : marker);
+        } else {  // some things are in the root (eg help.rtf) of the gmx so there is no \. Therfore, we must get the type from the parent tag
+          resName = res;
+          resType = xml_parent.name();
+        }
 
-      if (resType != "datafile") {  // remove extensions (eg .gml, .shader)
         size_t dot = resName.find_last_of(".");
         if (dot != std::string::npos) {
           resName = resName.substr(0, dot);
         }
+      } else {
+        resName = node.child_value("name");
       }
 
-      //buffers::TreeNode *parent = nodes.back();
       buffers::TreeNode *n = nodes.back()->add_child();  // adding res here
       n->set_name(resName);
 
-      AddResource(n, resType, node.value());
+      AddResource(n, resType, node);
+
+      if (resType == "datafile") {
+        // we handled the metadata in AddResource
+        // so just skip the subtree
+        return false;
+      }
     }
 
     return true;
@@ -457,7 +486,9 @@ buffers::Project *LoadGMX(std::string fName) {
   buffers::Project *proj = new buffers::Project();
   buffers::Game *game = proj->mutable_game();
   gmx_root_walker walker(game->mutable_root(), gmxPath);
-  doc.traverse(walker);
+  // we use our own traverse(...) instead of the pugixml one
+  // so that we can skip subtrees for datafiles and such
+  walker.traverse(doc);
 
   return proj;
 }
