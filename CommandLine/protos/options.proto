@@ -8,4 +8,5 @@ extend google.protobuf.FieldOptions {
   optional string gmx = 50002;
   optional string gmx_id = 50003;
   optional string yyp = 50004;
+  optional string yyp_id = 50005;
 }
