@@ -26,8 +26,8 @@ extern std::ostream out;
 extern std::ostream err;
 
 inline void bind_output_streams(std::ostream &out, std::ostream &err) {
-  out.rdbuf(out.rdbuf());
-  err.rdbuf(err.rdbuf());
+  yyp::out.rdbuf(out.rdbuf());
+  yyp::err.rdbuf(err.rdbuf());
 }
 
 buffers::Project* LoadYYP(std::string fName);
