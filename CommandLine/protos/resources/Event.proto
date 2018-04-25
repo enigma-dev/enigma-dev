@@ -78,7 +78,7 @@ message Event {
   optional int32 type = 1 [(gmx) = "eventtype"];
   oneof reference {
     int32 number = 2 [(gmx) = "enumb"];
-    string name = 3 [(gmx) = "ename"];
+    string name = 3 [(gmx) = "ename", (yyp_id) = "collisionObjectId"];
   }
   repeated Action actions = 4 [(gmx) = "action"];
   optional string code = 5 [(gmx) = "GMX_DEPRECATED"];

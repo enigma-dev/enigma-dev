@@ -54,7 +54,7 @@ std::vector<std::string> SplitString(const std::string &str, char delimiter) {
 
 } // Anonymous namespace
 
-void PackRes(std::string &dir, int id, rapidjson::Value::ValueType &node, google::protobuf::Message *m, int depth) {
+void PackRes(std::string &dir, int id, const rapidjson::Value::ValueType &node, google::protobuf::Message *m, int depth) {
   const google::protobuf::Descriptor *desc = m->GetDescriptor();
   const google::protobuf::Reflection *refl = m->GetReflection();
   for (int i = 0; i < desc->field_count(); i++) {
@@ -73,7 +73,7 @@ void PackRes(std::string &dir, int id, rapidjson::Value::ValueType &node, google
       std::string alias = yypName;
       bool isSplit = false;
       const bool isFilePath = opts.GetExtension(buffers::file_path);
-      rapidjson::Value::ValueType &child = node;
+      const rapidjson::Value::ValueType *child = &node;
 
       if (yypName == "YYP_DEPRECATED") {
         continue;
@@ -90,17 +90,59 @@ void PackRes(std::string &dir, int id, rapidjson::Value::ValueType &node, google
 
       // if it's not a split then we deal with yoyo's useless nesting
       if (!isSplit && alias != "EGM_NESTED") {  // and our useless nesting
-        if (!child.HasMember(alias)) {
+        if (!child->HasMember(alias)) {
           continue;
         }
-        child = child[alias];
+        child = &child->FindMember(alias)->value;
       }
+      if (child->IsNull()) continue; // no point
 
       if (field->is_repeated()) {  // Repeated fields (are usally messages or file_paths(strings)
         out << "Appending (" << field->type_name() << ") to " << field->name() << std::endl;
 
         switch (field->cpp_type()) {
-          //TODO: Handle repeated fields which are likely JSON arrays
+          case CppType::CPPTYPE_MESSAGE: {
+            int cid = 0;
+            for (auto &n : child->GetArray()) {
+              google::protobuf::Message *msg = refl->AddMessage(m, field);
+              PackRes(dir, cid++, n, msg, depth + 1);
+              if (alias == "eventList") {
+                const google::protobuf::Descriptor *eventDesc = msg->GetDescriptor();
+                const google::protobuf::Reflection *eventRefl = msg->GetReflection();
+                const google::protobuf::FieldDescriptor *codeField = eventDesc->FindFieldByName("code");
+                // Triggers are technically deprecated in GMS1.4 and GMS2, but they still hold the event
+                // type 11, so they are included here anyway.
+                static const std::string eventNames[14] = {
+                  "Create", "Destroy", "Alarm", "Step", "Collision", "Keyboard", "Mouse", "Other",
+                  "Draw", "KeyPress", "KeyRelease", "Trigger", "CleanUp", "Gesture"
+                };
+                const int eventType = n["eventtype"].GetInt();
+                const int eventNumber = n["enumb"].GetInt();
+                if (eventType < 0 || eventType > 13) {
+                  err << "No event name for event type '" << eventType << "' so it will not be loaded" << std::endl;
+                } else {
+                  std::string eventName = eventNames[eventType];
+                  std::string fileName = dir + eventName + "_" + std::to_string(eventNumber) + ".gml";
+
+                  FILE *afile = fopen(fileName.c_str(),"r");
+                  if (!afile) {
+                    err << "WARNING: Could not open event code file for reading: " << fileName << std::endl;
+                    continue;
+                  }
+                  fseek(afile,0,SEEK_END);
+                  const size_t flen = ftell(afile);
+                  char *fdata = new char[flen];
+                  fseek(afile,0,SEEK_SET);
+                  if (fread(fdata,1,flen,afile) != flen)
+                    err << "WARNING: Resource stream cut short while loading event code: " << fileName << std::endl;
+                  fclose(afile);
+
+                  eventRefl->SetString(msg, codeField, fdata);
+                }
+              }
+            }
+            break;
+          }
 
           /* I don't code options for repeated fields other than messages and strings because we don't need them atm
            * BUT incase someone tries to add one to a proto in the future I added this warning to prevent the reader
@@ -121,7 +163,7 @@ void PackRes(std::string &dir, int id, rapidjson::Value::ValueType &node, google
 
         rapidjson::StringBuffer buffer;
         rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-        child.Accept(writer);
+        child->Accept(writer);
 
         std::string value = (isSplit) ? splitValue : buffer.GetString();
         out << "Setting " << field->name() << " (" << field->type_name() << ") as " << value << std::endl;
@@ -130,46 +172,46 @@ void PackRes(std::string &dir, int id, rapidjson::Value::ValueType &node, google
           // If field is a singular message we need to recurse into this method again
           case CppType::CPPTYPE_MESSAGE: {
             google::protobuf::Message *msg = refl->MutableMessage(m, field);
-            PackRes(dir, 0, child, msg, depth + 1);
+            PackRes(dir, 0, *child, msg, depth + 1);
             break;
           }
           case CppType::CPPTYPE_INT32: {
-            refl->SetInt32(m, field, (isSplit) ? std::stoi(splitValue) : child.GetInt());
+            refl->SetInt32(m, field, (isSplit) ? std::stoi(splitValue) : child->GetInt());
             break;
           }
           case CppType::CPPTYPE_INT64: {
-            refl->SetInt64(m, field, (isSplit) ? std::stoi(splitValue) : child.GetInt64());
+            refl->SetInt64(m, field, (isSplit) ? std::stoi(splitValue) : child->GetInt64());
             break;
           }
           case CppType::CPPTYPE_UINT32: {
-            refl->SetUInt32(m, field, (isSplit) ? std::stoi(splitValue) : child.GetUint());
+            refl->SetUInt32(m, field, (isSplit) ? std::stoi(splitValue) : child->GetUint());
             break;
           }
           case CppType::CPPTYPE_UINT64: {
-            refl->SetUInt64(m, field, (isSplit) ? std::stoi(splitValue) : child.GetUint64());
+            refl->SetUInt64(m, field, (isSplit) ? std::stoi(splitValue) : child->GetUint64());
             break;
           }
           case CppType::CPPTYPE_DOUBLE: {
-            refl->SetDouble(m, field, (isSplit) ? std::stod(splitValue) : child.GetDouble());
+            refl->SetDouble(m, field, (isSplit) ? std::stod(splitValue) : child->GetDouble());
             break;
           }
           case CppType::CPPTYPE_FLOAT: {
-            refl->SetFloat(m, field, (isSplit) ? std::stof(splitValue) : child.GetFloat());
+            refl->SetFloat(m, field, (isSplit) ? std::stof(splitValue) : child->GetFloat());
             break;
           }
           case CppType::CPPTYPE_BOOL: {
-            refl->SetBool(m, field, (isSplit) ? (std::stof(splitValue) != 0) : (child.GetBool()));
+            refl->SetBool(m, field, (isSplit) ? (std::stof(splitValue) != 0) : (child->GetBool()));
             break;
           }
           case CppType::CPPTYPE_ENUM: {
             refl->SetEnum(
               m, field,
               field->enum_type()->FindValueByNumber(
-                (isSplit) ? std::stoi(splitValue) : child.GetInt()));
+                (isSplit) ? std::stoi(splitValue) : child->GetInt()));
             break;
           }
           case CppType::CPPTYPE_STRING: {
-            std::string value = (isSplit) ? splitValue : child.GetString();
+            std::string value = (isSplit) ? splitValue : child->GetString();
             if (isFilePath) {  // again gotta prepend the yyp's path & fix the string to be posix compatible
               //value = YYPPath2FilePath(dir, value);
             }
@@ -212,6 +254,7 @@ buffers::Project *LoadYYP(std::string fName) {
     const auto &resourceType = value["resourceType"].GetString();
 
     const std::string nodePath = yypDir + resourcePath;
+    std::string resDir = nodePath.substr(0, nodePath.find_last_of("/\\\\") + 1);
     std::ifstream ifsNode(nodePath);
     if (!ifsNode) {
       err << "Could not open YYP resource for reading: " << nodePath << std::endl;
@@ -260,7 +303,7 @@ buffers::Project *LoadYYP(std::string fName) {
       auto createFunc = factoryMap.find(resourceType);
       if (createFunc != factoryMap.end()) {
         auto *res = createFunc->second(node);
-        PackRes(yypDir, idCount[node->type_case()]++, nodeDoc, res, 0);
+        PackRes(resDir, idCount[node->type_case()]++, nodeDoc, res, 0);
       } else {
         err << "Unsupported resource type: " << resourceType << " " << node->name() << std::endl;
       }
