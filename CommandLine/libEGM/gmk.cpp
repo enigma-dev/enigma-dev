@@ -410,6 +410,7 @@ class Decoder {
 void LoadSettingsIncludes(Decoder &dec) {
   int no = dec.read4();
   for (int i = 0; i < no; i++) {
+    auto include = std::make_unique<Include>();
     dec.readStr(); // include filepath
   }
   dec.read4(); // INCLUDE_FOLDER 0=main 1=temp
@@ -577,7 +578,7 @@ std::unique_ptr<Sound> LoadSound(Decoder &dec, int ver) {
   if (ver == 440)
     kind53 = dec.read4(); //kind (wav, mp3, etc)
   else
-    sound->set_kind(static_cast<Sound_Kind>(dec.read4())); //normal, background, etc
+    sound->set_kind(static_cast<Sound::Kind>(dec.read4())); //normal, background, etc
   sound->set_file_extension(dec.readStr());
 
   if (ver == 440) {
@@ -1009,18 +1010,21 @@ int LoadIncludes(Decoder &dec) {
       return 0;
     }
 
+    auto include = std::make_unique<Include>();
     dec.readStr(); // filename
     dec.readStr(); // filepath
     dec.readBool(); // isOriginal
-    dec.read4(); // size
-    if (dec.readBool()) { //store in editable?
+    include->set_size(dec.read4());
+    include->set_store(dec.readBool());
+    if (include->store()) { //store in editable?
       std::unique_ptr<char[]> data = dec.read(dec.read4()); // data
     }
-    dec.read4(); // export
-    dec.readStr(); // export folder
-    dec.readBool(); // overwrite existing
-    dec.readBool(); // free memory after export
-    dec.readBool(); // remove at game end
+    include->set_export_action(static_cast<Include::ExportAction>(dec.read4()));
+    include->set_export_directory(dec.readStr());
+    include->set_overwrite_existing(dec.readBool());
+    include->set_free_after_export(dec.readBool());
+    include->set_remove_at_game_end(dec.readBool());
+
     dec.endInflate();
   }
 
