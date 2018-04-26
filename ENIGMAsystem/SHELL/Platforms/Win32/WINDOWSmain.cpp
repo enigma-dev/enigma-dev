@@ -33,7 +33,7 @@ using std::vector;
 #include "WINDOWSmain.h"
 
 #include "Platforms/platforms_mandatory.h"
-
+#include "Universal_System/estring.h"
 
 namespace enigma_user {
 
@@ -45,7 +45,7 @@ namespace enigma //TODO: Find where this belongs
 {
   HINSTANCE hInstance;
   HWND hWnd;
-  LRESULT CALLBACK WndProc (HWND hWnd, UINT message,WPARAM wParam, LPARAM lParam);
+  LRESULT CALLBACK WndProc(HWND hWnd, UINT message,WPARAM wParam, LPARAM lParam);
   HDC window_hDC;
   HANDLE mainthread;
   extern bool gameWindowFocused, freezeOnLoseFocus;
@@ -54,9 +54,9 @@ namespace enigma //TODO: Find where this belongs
   vector<string> main_argv;
   int main_argc;
 
-  void EnableDrawing (HGLRC *hRC);
-  void DisableDrawing (HWND hWnd, HDC hDC, HGLRC hRC);
-  
+  void EnableDrawing(HGLRC *hRC);
+  void DisableDrawing(HWND hWnd, HDC hDC, HGLRC hRC);
+
   void (*touch_extension_register)(HWND hWnd);
 
   void windowsystem_write_exename(char* exenamehere)
@@ -187,7 +187,7 @@ namespace enigma {
 
 #include <cstdio>
 #include <mmsystem.h>
-int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,int iCmdShow)
+int WINAPI WinMain(HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,int iCmdShow)
 {
     int wid = (int)enigma_user::room_width, hgt = (int)enigma_user::room_height;
     if (!wid || !hgt) wid = 640, hgt = 480;
@@ -195,14 +195,14 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
     enigma::mainthread = GetCurrentThread();
 
     // Set the working_directory
-    char buffer[MAX_PATH];
-    GetCurrentDirectory( MAX_PATH, buffer );
-    enigma_user::working_directory = string( buffer );
+    WCHAR buffer[MAX_PATH];
+    GetCurrentDirectoryW( MAX_PATH, buffer );
+    enigma_user::working_directory = shorten( buffer );
 
     // Set the program_directory
     memset(&buffer[0], 0, MAX_PATH);
-    GetModuleFileName( NULL, buffer, MAX_PATH );
-    enigma_user::program_directory = string( buffer );
+    GetModuleFileNameW( NULL, buffer, MAX_PATH );
+    enigma_user::program_directory = shorten( buffer );
     enigma_user::program_directory = enigma_user::program_directory.substr( 0, enigma_user::program_directory.find_last_of( "\\/" ));
 
     LPWSTR *argv;
@@ -233,8 +233,8 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
     wcontainer.hbrBackground = (HBRUSH) GetStockObject (BLACK_BRUSH);
     wcontainer.lpszMenuName = NULL;
     wcontainer.lpszClassName = "EnigmaDevGameMainWindow";
-    RegisterClass (&wcontainer);
-    
+    RegisterClass(&wcontainer);
+
     //Create the parent window
     int screen_width = GetSystemMetrics(SM_CXSCREEN);
     int screen_height = GetSystemMetrics(SM_CYSCREEN);
@@ -245,15 +245,11 @@ int WINAPI WinMain (HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,
     // We won't limit those functions like GM, just the default.
     if (wid > screen_width) wid = screen_width;
     if (hgt > screen_height) hgt = screen_height;
-    // Create the window initially without the WS_VISIBLE flag until we've loaded all of the resources.
-    // This will be handled by game_start in roomsystem.cpp where window_default(true) sets the initial
-    // fullscreen state of the window before showing it.
-    enigma::hWnd = CreateWindow("EnigmaDevGameMainWindow", "",
-                                (enigma::getwindowstyle() & ~(WS_VISIBLE)),
-                                (screen_width-wid)/2, (screen_height-hgt)/2, wid, hgt,
-                                NULL, NULL, hInstance, NULL);
+      enigma::hWnd = CreateWindow("EnigmaDevGameMainWindow", "", (enigma::getwindowstyle() & ~(WS_VISIBLE)), (screen_width-wid)/2, (screen_height-hgt)/2, wid, hgt, NULL, NULL, hInstance, NULL);
 
     enigma::EnableDrawing (&hRC);
+    //Do not set the parent window visible until we have initialized the graphics context.
+    ShowWindow(enigma::hWnd, iCmdShow);
     enigma::initialize_everything();
 
     //Main loop
@@ -412,10 +408,14 @@ unsigned long long disk_size(std::string drive)
 {
 	DWORD sectorsPerCluster, bytesPerSector, totalClusters, freeClusters;
 
-	if (drive.length() == 1)
-		drive += ":\\";
+	tstring tstr_drive = widen(drive);
+	tstring tstr_colonslash = widen(":\\");
+	tstring tstr_empty = widen("");
 
-	if (!GetDiskFreeSpace((drive == "") ? NULL : drive.c_str(), &sectorsPerCluster, &bytesPerSector, &freeClusters, &totalClusters))
+	if (tstr_drive.length() == 1)
+		tstr_drive += tstr_colonslash;
+
+	if (!GetDiskFreeSpaceW((tstr_drive == tstr_empty) ? NULL : tstr_drive.c_str(), &sectorsPerCluster, &bytesPerSector, &freeClusters, &totalClusters))
 		return 0;
 
 	return (unsigned long long)(totalClusters * sectorsPerCluster) * (unsigned long long)bytesPerSector;
@@ -425,10 +425,14 @@ unsigned long long disk_free(std::string drive)
 {
 	DWORD sectorsPerCluster, bytesPerSector, totalClusters, freeClusters;
 
-	if (drive.length() == 1)
-		drive += ":\\";
+        tstring tstr_drive = widen(drive);
+	tstring tstr_colonslash = widen(":\\");
+	tstring tstr_empty = widen("");
 
-	if (!GetDiskFreeSpace((drive == "") ? NULL : drive.c_str(), &sectorsPerCluster, &bytesPerSector, &freeClusters, &totalClusters))
+	if (tstr_drive.length() == 1)
+		tstr_drive += tstr_colonslash;
+
+	if (!GetDiskFreeSpaceW((tstr_drive == tstr_empty) ? NULL : tstr_drive.c_str(), &sectorsPerCluster, &bytesPerSector, &freeClusters, &totalClusters))
 		return 0;
 
 	return ((unsigned long long)(totalClusters * sectorsPerCluster) * (unsigned long long)bytesPerSector) -
@@ -456,33 +460,41 @@ void set_program_priority(int value)
 
 void execute_shell(std::string fname, std::string args)
 {
-  TCHAR cDir[MAX_PATH];
-  GetCurrentDirectory(MAX_PATH, cDir);
-  ShellExecute(enigma::hWnd, NULL, fname.c_str(), args.c_str(), cDir, SW_SHOW);
+  WCHAR cDir[MAX_PATH];
+  GetCurrentDirectoryW(MAX_PATH, cDir);
+  tstring tstr_fname = widen(fname);
+  tstring tstr_args = widen(args);
+  ShellExecuteW(enigma::hWnd, NULL, tstr_fname.c_str(), tstr_args.c_str(), cDir, SW_SHOW);
 }
 
 void execute_shell(std::string operation, std::string fname, std::string args)
 {
-  TCHAR cDir[MAX_PATH];
-  GetCurrentDirectory(MAX_PATH, cDir);
-  ShellExecute(enigma::hWnd, operation.c_str(), fname.c_str(), args.c_str(), cDir, SW_SHOW);
+  WCHAR cDir[MAX_PATH];
+  GetCurrentDirectoryW(MAX_PATH, cDir);
+  tstring tstr_operation = widen(operation);
+  tstring tstr_fname = widen(fname);
+  tstring tstr_args = widen(args);
+  ShellExecuteW(enigma::hWnd, tstr_operation.c_str(), tstr_fname.c_str(), tstr_args.c_str(), cDir, SW_SHOW);
 }
 
 void execute_program(std::string operation, std::string fname, std::string args, bool wait)
 {
-  SHELLEXECUTEINFO lpExecInfo;
-  lpExecInfo.cbSize  = sizeof(SHELLEXECUTEINFO);
-  lpExecInfo.lpFile = fname.c_str();
-  lpExecInfo.fMask=SEE_MASK_DOENVSUBST|SEE_MASK_NOCLOSEPROCESS;
+  SHELLEXECUTEINFOW lpExecInfo;
+  tstring tstr_operation = widen(operation);
+  tstring tstr_fname = widen(fname);
+  tstring tstr_args = widen(args);
+  lpExecInfo.cbSize  = sizeof(SHELLEXECUTEINFOW);
+  lpExecInfo.lpFile = tstr_fname.c_str();
+  lpExecInfo.fMask = SEE_MASK_DOENVSUBST|SEE_MASK_NOCLOSEPROCESS;
   lpExecInfo.hwnd = enigma::hWnd;
-  lpExecInfo.lpVerb = operation.c_str();
-  lpExecInfo.lpParameters = args.c_str();
-  TCHAR cDir[MAX_PATH];
-  GetCurrentDirectory(MAX_PATH, cDir);
+  lpExecInfo.lpVerb = tstr_operation.c_str();
+  lpExecInfo.lpParameters = tstr_args.c_str();
+  WCHAR cDir[MAX_PATH];
+  GetCurrentDirectoryW(MAX_PATH, cDir);
   lpExecInfo.lpDirectory = cDir;
   lpExecInfo.nShow = SW_SHOW;
   lpExecInfo.hInstApp = (HINSTANCE) SE_ERR_DDEFAIL ;   //WINSHELLAPI BOOL WINAPI result;
-  ShellExecuteEx(&lpExecInfo);
+  ShellExecuteExW(&lpExecInfo);
 
   //wait until a file is finished printing
   if (wait && lpExecInfo.hProcess != NULL)
@@ -494,15 +506,16 @@ void execute_program(std::string operation, std::string fname, std::string args,
 
 void execute_program(std::string fname, std::string args, bool wait)
 {
-	execute_program("open", fname, args, wait);
+  execute_program("open", fname, args, wait);
 }
 
 std::string environment_get_variable(std::string name)
 {
-	char buffer[1024];
-	GetEnvironmentVariable(name.c_str(), (LPTSTR)&buffer, 1024);
+  WCHAR buffer[1024];
+  tstring tstr_name = widen(name);
+  GetEnvironmentVariableW(tstr_name.c_str(), (LPWSTR)&buffer, 1024);
 
-	return buffer;
+  return shorten( buffer );
 }
 
 void game_end(int ret) { PostQuitMessage(ret); }
@@ -511,9 +524,10 @@ void action_end_game() { game_end(); }
 
 void action_webpage(const std::string &url)
 {
-	ShellExecute (NULL, "open", url.c_str(), NULL, NULL, SW_SHOWNORMAL);
+  tstring tstr_url = widen(url);
+  tstring tstr_open = widen("open");
+  ShellExecuteW(NULL, tstr_open.c_str(), tstr_url.c_str(), NULL, NULL, SW_SHOWNORMAL);
 }
 
 
 }
-
