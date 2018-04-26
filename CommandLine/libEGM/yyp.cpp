@@ -274,12 +274,15 @@ buffers::Project *LoadYYP(std::string fName) {
         roots.push_back(node);
       const auto &children = nodeDoc["children"];
       const auto &childrenArray = children.GetArray();
+      // rapidjson uses fucked up move semantics and since nodeDoc is RAII
+      // we need to copy this array of strings to use it again later when
+      // we actually attach the children nodes to their parents below
       std::vector<std::string> childrenVector;
-      childrenVector.resize(childrenArray.Size());
+      childrenVector.reserve(childrenArray.Size());
       for (const auto &child : childrenArray) {
         childrenVector.emplace_back(child.GetString());
       }
-      parents.push_back(std::make_pair(node, childrenVector));
+      parents.emplace_back(std::make_pair(node, childrenVector));
     } else {
       node->set_folder(false);
       node->set_name(nodeDoc["name"].GetString());
