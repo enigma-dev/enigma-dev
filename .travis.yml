@@ -54,7 +54,7 @@ before_install:
         sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test;
         sudo apt-get update;
         sudo apt-get -qq -y install cmake libgtest-dev xvfb wmctrl xdotool xfwm4 lcov gcc-7\
-          g++-7 cpp-7 pulseaudio libpugixml-dev;
+          g++-7 cpp-7 pulseaudio libpugixml-dev libyaml-cpp-dev;
 
         # download rapidjson manually because ubuntu is ancient
         wget -O rapidjson-master.zip https://github.com/Tencent/rapidjson/archive/master.zip;
