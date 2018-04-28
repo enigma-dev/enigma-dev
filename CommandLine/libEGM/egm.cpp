@@ -30,12 +30,19 @@ using CppType = google::protobuf::FieldDescriptor::CppType;
 namespace egm {
 
 bool CreateDirectory(std::string dir) {
+  /* MSYS2/MINGW64 error:
+  egm.cpp:33:39: error: too many arguments to function 'int mkdir(const char*)'
+   int result = mkdir(dir.c_str(), 0777);
+                                       ^
+  */
+  /*
   int result = mkdir(dir.c_str(), 0777);
   if (result != 0 && errno != EEXIST) {
     std::cerr << "Error: Failed to Create Directory: " << dir << " " << errno << std::endl;
-    return false; 
+    return false;
   }
-  
+  */
+
   return true;
 }
 
@@ -49,8 +56,8 @@ bool ChangeDirectory(std::string dir) {
 }
 
 bool CopyFile(std::string src, std::string dst) {
-  //std::cout << src << " > " << dst << std::endl; 
-  
+  //std::cout << src << " > " << dst << std::endl;
+
   if (src == dst)
     return true;
 
@@ -100,7 +107,7 @@ std::string Proto2String(google::protobuf::Message *m, const google::protobuf::F
 bool WriteYaml(std::string& dir, std::string& lastDir, std::string& ext, YAML::Emitter& yaml, google::protobuf::Message *m) {
   std::string newDir = dir + ext;
   std::vector<std::string> files;
-  
+
   const google::protobuf::Descriptor *desc = m->GetDescriptor();
   const google::protobuf::Reflection *refl = m->GetReflection();
   for (int i = 0; i < desc->field_count(); i++) {
@@ -161,7 +168,7 @@ bool WriteYaml(std::string& dir, std::string& lastDir, std::string& ext, YAML::E
   if (files.size() > 0) {
     if (!CreateDirectory(newDir + "/data") || !ChangeDirectory(newDir + "/data"))
       return false;
-    
+
     for (std::string& f : files) {
       if (!CopyFile(f, RemovePath(f))) return false;
     }
@@ -186,10 +193,10 @@ void WriteShader(std::string fName, buffers::resources::Shader* shdr) {
 
 bool WriteRes(buffers::TreeNode* res, std::string& dir) {
   std::string ext;
-  std::string newDir = dir + res->name(); 
+  std::string newDir = dir + res->name();
   YAML::Emitter yaml;
   yaml << YAML::BeginMap;
-  
+
   if (res->has_background()) {
     ext = ".bkg";
     WriteYaml(newDir, dir, ext, yaml, res->mutable_background());
@@ -197,7 +204,7 @@ bool WriteRes(buffers::TreeNode* res, std::string& dir) {
   else if (res->has_font()) {
     ext = ".fnt";
     WriteYaml(newDir, dir, ext, yaml, res->mutable_font());
-  } 
+  }
   //if (res->has_include)
   else if (res->has_object()) {
     ext = ".obj";
@@ -275,9 +282,8 @@ bool WriteEGM(std::string fName, buffers::Project* project) {
 
   if (!ChangeDirectory(fName))
     return false;
-  
+
   return WriteNode(project->mutable_game()->mutable_root(), fName);
 }
 
 } //namespace egm
- 

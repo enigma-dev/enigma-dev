@@ -7,19 +7,19 @@ message Room {
   optional int32 id = 29 [(gmx) = "GMX_DEPRECATED"];
 
   optional string caption = 1;
-  optional uint32 width = 2;
-  optional uint32 height = 3;
+  optional uint32 width = 2 [(yyp) = "roomSettings/Width"];
+  optional uint32 height = 3 [(yyp) = "roomSettings/Height"];
   optional uint32 hsnap = 4;
   optional uint32 vsnap = 5;
   optional bool isometric = 6;
   optional uint32 speed = 27;
-  optional bool persistent = 7;
+  optional bool persistent = 7 [(yyp) = "roomSettings/persistent"];
   optional int32 color = 8 [(gmx) = "colour"];
   optional bool show_color = 9 [(gmx) = "showcolour"];
   optional string code = 10;
-  optional bool enable_views = 11 [(gmx) = "enableViews"];
-  optional bool clear_view_background = 12 [(gmx) = "clearViewBackground"];
-  optional bool clear_display_buffer = 13 [(gmx) = "clearDisplayBuffer"];
+  optional bool enable_views = 11 [(gmx) = "enableViews", (yyp) = "viewSettings/enableViews"];
+  optional bool clear_view_background = 12 [(gmx) = "clearViewBackground", (yyp) = "viewSettings/clearViewBackground"];
+  optional bool clear_display_buffer = 13 [(gmx) = "clearDisplayBuffer", (yyp) = "viewSettings/clearDisplayBuffer"];
 
   message Background {
     optional bool visible = 1;
@@ -53,7 +53,7 @@ message Room {
     optional string object_following = 14 [(gmx) = "objName"];
   }
 
-  repeated View views = 16 [(gmx) = "views/view"];
+  repeated View views = 16 [(gmx) = "views/view", (yyp) = "views"];
 
   message Instance {
     optional string name = 1;
