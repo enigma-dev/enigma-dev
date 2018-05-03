@@ -1220,8 +1220,7 @@ void ds_list_replace(const unsigned int id, const unsigned int pos, const varian
   //replaces the value at pos with the val in the list
   if (pos < ds_lists[id].size())
   {
-    ds_lists[id].erase(ds_lists[id].begin() + pos);
-    ds_lists[id].insert(ds_lists[id].begin() + pos, val);
+    ds_lists[id][pos] = val;
   }
 }
 
