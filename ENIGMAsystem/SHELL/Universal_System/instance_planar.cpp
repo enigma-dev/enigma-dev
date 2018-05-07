@@ -36,7 +36,7 @@ namespace enigma_user
 enigma::instance_t instance_nearest(int x,int y,int obj,bool notme)
 {
   double dist_lowest = DBL_MAX;
-  int retid = -4;
+  int retid = noone;
   double xl, yl;
 
   for (enigma::iterator it = enigma::fetch_inst_iter_by_int(obj); it; ++it)
