@@ -38,7 +38,7 @@ using namespace std;
 
 #include "backend/EnigmaStruct.h" //LateralGM interface structures
 #include "compiler/compile_common.h"
-#include "compiler/event_reader/event_parser.h"
+#include "event_reader/event_parser.h"
 #include "parser/object_storage.h"
 
 string REFERENCE_POSTFIX(string ref) {
