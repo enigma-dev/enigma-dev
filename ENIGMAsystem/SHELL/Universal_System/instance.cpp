@@ -117,7 +117,7 @@ bool instance_exists(int obj)
   return enigma::fetch_instance_by_int(obj) != NULL;
 }
 
-int instance_find(int obj, int num)
+enigma::instance_t instance_find(int obj, int num)
 {
   int nth=0;
   for (enigma::iterator it = enigma::fetch_inst_iter_by_int(obj); it; ++it)
@@ -128,6 +128,7 @@ int instance_find(int obj, int num)
   }
   return noone;
 }
+
 enigma::instance_t instance_last(int obj) {
   return (enigma::objects[obj].count > 0)? enigma::objects[obj].prev->inst->id : noone;
 }
@@ -147,4 +148,3 @@ int instance_number(int obj)
 }
 
 }
-

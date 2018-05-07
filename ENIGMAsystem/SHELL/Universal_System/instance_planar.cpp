@@ -33,7 +33,7 @@
 namespace enigma_user
 {
 
-int instance_nearest(int x,int y,int obj,bool notme)
+enigma::instance_t instance_nearest(int x,int y,int obj,bool notme)
 {
   double dist_lowest = DBL_MAX;
   int retid = -4;
@@ -54,7 +54,7 @@ int instance_nearest(int x,int y,int obj,bool notme)
   return retid;
 }
 
-int instance_furthest(int x,int y,int obj,bool notme)
+enigma::instance_t instance_furthest(int x,int y,int obj,bool notme)
 {
   double dist_highest = -1;
   int retid = noone;
@@ -78,4 +78,3 @@ int instance_furthest(int x,int y,int obj,bool notme)
 }
 
 }
-
