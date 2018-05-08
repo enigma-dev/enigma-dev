@@ -85,10 +85,10 @@ bool place_meeting(cs_scalar x, cs_scalar y, int object)
   return collide_inst_inst(object,false,true,x,y);
 }
 
-int instance_place(cs_scalar x, cs_scalar y, int object)
+enigma::instance_t instance_place(cs_scalar x, cs_scalar y, int object)
 {
   enigma::object_collisions* const r = collide_inst_inst(object,false,true,x,y);
-  return r == NULL ? noone : r->id;
+  return r == NULL ? noone : static_cast<int>(r->id);
 }
 
 }
@@ -132,40 +132,40 @@ void position_destroy(cs_scalar x, cs_scalar y)
     destroy_inst_point(all,false,x+.5,y+.5);
 }
 
-int instance_position(cs_scalar x, cs_scalar y, int object)
+enigma::instance_t instance_position(cs_scalar x, cs_scalar y, int object)
 {
   const enigma::object_collisions* r = collide_inst_point(object,false,false,x+.5,y+.5);
-  return r == NULL ? noone : r->id;
+  return r == NULL ? noone : static_cast<int>(r->id);
 }
 
-int collision_rectangle(cs_scalar x1, cs_scalar y1, cs_scalar x2, cs_scalar y2, int obj, bool prec /*ignored*/, bool notme)
+enigma::instance_t collision_rectangle(cs_scalar x1, cs_scalar y1, cs_scalar x2, cs_scalar y2, int obj, bool prec /*ignored*/, bool notme)
 {
   const enigma::object_collisions* r = collide_inst_rect(obj,false,notme,x1+.5,y1+.5,x2+.5,y2+.5); //false is for solid_only, not prec
-  return r == NULL ? noone : r->id;
+  return r == NULL ? noone : static_cast<int>(r->id);
 }
 
-int collision_line(cs_scalar x1, cs_scalar y1, cs_scalar x2, cs_scalar y2, int obj, bool prec /*ignored*/, bool notme)
+enigma::instance_t collision_line(cs_scalar x1, cs_scalar y1, cs_scalar x2, cs_scalar y2, int obj, bool prec /*ignored*/, bool notme)
 {
   const enigma::object_collisions* r = collide_inst_line(obj,false,notme,x1+.5,y1+.5,x2+.5,y2+.5); //false is for solid_only, not prec
-  return r == NULL ? noone : r->id;
+  return r == NULL ? noone : static_cast<int>(r->id);
 }
 
-int collision_point(cs_scalar x, cs_scalar y, int obj, bool prec /*ignored*/, bool notme)
+enigma::instance_t collision_point(cs_scalar x, cs_scalar y, int obj, bool prec /*ignored*/, bool notme)
 {
   const enigma::object_collisions* r = collide_inst_point(obj,false,notme,x+.5,y+.5); //false is for solid_only, not prec
-  return r == NULL ? noone : r->id;
+  return r == NULL ? noone : static_cast<int>(r->id);
 }
 
-int collision_circle(cs_scalar x, cs_scalar y, double radius, int obj, bool prec /*ignored*/, bool notme)
+enigma::instance_t collision_circle(cs_scalar x, cs_scalar y, double radius, int obj, bool prec /*ignored*/, bool notme)
 {
   const enigma::object_collisions* r = collide_inst_circle(obj,false,notme,x+.5,y+.5,radius); //false is for solid_only, not prec
-  return r == NULL ? noone : r->id;
+  return r == NULL ? noone : static_cast<int>(r->id);
 }
 
-int collision_ellipse(cs_scalar x1, cs_scalar y1, cs_scalar x2, cs_scalar y2, int obj, bool prec /*ignored*/, bool notme)
+enigma::instance_t collision_ellipse(cs_scalar x1, cs_scalar y1, cs_scalar x2, cs_scalar y2, int obj, bool prec /*ignored*/, bool notme)
 {
   const enigma::object_collisions* r = collide_inst_ellipse(obj,false,notme,((x1+x2)/2)+.5,((y1+y2)/2)+.5,fabs(x2-x1)/2,fabs(y2-y1)/2); //false is for solid_only, not prec
-  return r == NULL ? noone : r->id;
+  return r == NULL ? noone : static_cast<int>(r->id);
 }
 
 double distance_to_object(int object)
@@ -953,4 +953,3 @@ void position_change(cs_scalar x1, cs_scalar y1, int obj, bool perf)
 }
 
 }
-
