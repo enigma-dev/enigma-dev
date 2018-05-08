@@ -23,7 +23,7 @@
 
 namespace enigma
 {
-  typedef int instance_t;
+  typedef variant instance_t;
 
   struct inst_iter
   {
@@ -40,7 +40,7 @@ namespace enigma
     inst_iter *oiter;
     object_basic* prev_other;
     inst_iter niter;
-    
+
     public:
     temp_event_scope(object_basic*);
     ~temp_event_scope();
