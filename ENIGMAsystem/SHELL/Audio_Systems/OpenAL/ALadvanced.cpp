@@ -341,6 +341,7 @@ int audio_add(string fname)
   fseek(afile,0,SEEK_SET);
   if (fread(fdata,1,flen,afile) != flen)
     puts("WARNING: Resource stream cut short while loading sound data");
+  fclose(afile);
 
   // Decode sound
   int rid = enigma::sound_allocate();
