@@ -130,7 +130,7 @@ enigma::instance_t instance_find(int obj, int num)
 }
 
 enigma::instance_t instance_last(int obj) {
-  return (enigma::objects[obj].count > 0)? enigma::objects[obj].prev->inst->id : noone;
+  return (enigma::objects[obj].count > 0) ? static_cast<int>(enigma::objects[obj].prev->inst->id) : noone;
 }
 
 int instance_number(int obj)
