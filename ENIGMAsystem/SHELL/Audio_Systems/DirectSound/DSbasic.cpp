@@ -117,7 +117,7 @@ bool sound_isplaying(int sound) {
 	get_sound(snd, sound, false);
 	DWORD ret = 0;
 	snd->soundBuffer->GetStatus(&ret);
-	return (ret == DSBSTATUS_PLAYING);
+	return (ret & DSBSTATUS_PLAYING);
 }
 
 bool sound_ispaused(int sound) {
