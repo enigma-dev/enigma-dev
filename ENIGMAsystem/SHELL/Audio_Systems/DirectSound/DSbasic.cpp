@@ -115,7 +115,7 @@ void sound_resume_all()
 
 bool sound_isplaying(int sound) {
 	get_sound(snd, sound, false);
-	DWORD ret = NULL;
+	DWORD ret = 0;
 	snd->soundBuffer->GetStatus(&ret);
 	return (ret == DSBSTATUS_PLAYING);
 }
@@ -133,14 +133,14 @@ void sound_pan(int sound, float value)
 
 float sound_get_pan(int sound) {
 	get_sound(snd, sound, -1);
-	LONG ret = NULL;
+	LONG ret = 0;
 	snd->soundBuffer->GetPan(&ret);
 	return ret;
 }
 
 float sound_get_volume(int sound) {
 	get_sound(snd, sound, -1);
-	LONG ret = NULL;
+	LONG ret = 0;
 	snd->soundBuffer->GetVolume(&ret);
 	return ret;
 }
@@ -153,7 +153,7 @@ float sound_get_length(int sound) { // Not for Streams
 
 float sound_get_position(int sound) { // Not for Streams
 	get_sound(snd, sound, -1);
-	DWORD ret = NULL;
+	DWORD ret = 0;
 	snd->soundBuffer->GetCurrentPosition(&ret, NULL);
 	return ret;
 }
