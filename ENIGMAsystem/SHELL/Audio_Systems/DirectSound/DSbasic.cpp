@@ -115,13 +115,9 @@ void sound_resume_all()
 
 bool sound_isplaying(int sound) {
 	get_sound(snd, sound, false);
-	LPDWORD ret = NULL;
-	snd->soundBuffer->GetStatus(ret);
-	if (*ret == DSBSTATUS_LOOPING || *ret == DSBSTATUS_LOOPING) {
-		return true;
-	} else {
-		return false;
-	}
+	DWORD ret = NULL;
+	snd->soundBuffer->GetStatus(&ret);
+	return (ret == DSBSTATUS_PLAYING);
 }
 
 bool sound_ispaused(int sound) {
@@ -137,16 +133,16 @@ void sound_pan(int sound, float value)
 
 float sound_get_pan(int sound) {
 	get_sound(snd, sound, -1);
-	LPLONG ret = NULL;
-	snd->soundBuffer->GetPan(ret);
-	return *ret;
+	LONG ret = NULL;
+	snd->soundBuffer->GetPan(&ret);
+	return ret;
 }
 
 float sound_get_volume(int sound) {
 	get_sound(snd, sound, -1);
-	LPLONG ret = NULL;
-	snd->soundBuffer->GetVolume(ret);
-	return *ret;
+	LONG ret = NULL;
+	snd->soundBuffer->GetVolume(&ret);
+	return ret;
 }
 
 float sound_get_length(int sound) { // Not for Streams
@@ -157,9 +153,9 @@ float sound_get_length(int sound) { // Not for Streams
 
 float sound_get_position(int sound) { // Not for Streams
 	get_sound(snd, sound, -1);
-	LPDWORD ret = NULL;
-	snd->soundBuffer->GetCurrentPosition(ret, NULL);
-	return *ret;
+	DWORD ret = NULL;
+	snd->soundBuffer->GetCurrentPosition(&ret, NULL);
+	return ret;
 }
 
 void sound_seek(int sound, float position) {
@@ -212,7 +208,7 @@ int sound_add(string fname, int kind, bool preload) //At the moment, the latter 
   int rid = enigma::sound_allocate();
   bool fail = enigma::sound_add_from_buffer(rid,fdata,flen);
   delete fdata;
-  
+
   if (fail)
     return -1;
   return rid;
@@ -260,23 +256,23 @@ void sound_effect_gargle(int sound, unsigned rate, unsigned wave) {
 void sound_effect_reverb(int sound, float gain, float mix, float time, float ratio) {
 }
 
-//const _GUID& sound_effect_types[8] = { GUID_DSFX_STANDARD_CHORUS, GUID_DSFX_STANDARD_ECHO, GUID_DSFX_STANDARD_FLANGER, GUID_DSFX_STANDARD_GARGLE, 
+//const _GUID& sound_effect_types[8] = { GUID_DSFX_STANDARD_CHORUS, GUID_DSFX_STANDARD_ECHO, GUID_DSFX_STANDARD_FLANGER, GUID_DSFX_STANDARD_GARGLE,
 	//GUID_DSFX_WAVES_REVERB, GUID_DSFX_STANDARD_COMPRESSOR, GUID_DSFX_STANDARD_PARAMEQ };
-	
+
 void sound_effect_set(int sound, int effect) {
 /*
   HRESULT hr;
   DWORD dwResults[1];  // One element for each effect.
- 
+
   // Describe the effect.
   DSEFFECTDESC dsEffect;
   memset(&dsEffect, 0, sizeof(DSEFFECTDESC));
   dsEffect.dwSize = sizeof(DSEFFECTDESC);
   dsEffect.dwFlags = 0;
   dsEffect.guidDSFXClass = sound_effect_types[effect];
- 
+
   get_sound(snd, sound, 0);
-	
+
   // Set the effect
   if (SUCCEEDED(hr = snd->soundBuffer->SetFX(1, &dsEffect, dwResults)))
   {
