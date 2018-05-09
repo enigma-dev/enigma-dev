@@ -127,11 +127,6 @@ namespace enigma {
 
   int sound_add_from_buffer(int id, void* buffer, size_t bufsize)
   {
-    if (sound_resources.find(id)!=sound_resources.end() && sound_resources[id]) {
-      fprintf(stderr, "Sound id %d collides with existing id (for internally-managed ids).\n", id);
-      return 3;
-    }
-
     SoundResource *snd = sound_new_with_source();
     sound_resources[id] = snd;
     if (id>=next_sound_id) { next_sound_id=id+1; }
@@ -154,11 +149,6 @@ namespace enigma {
 
   int sound_add_from_stream(int id, size_t (*callback)(void *userdata, void *buffer, size_t size), void (*seek)(void *userdata, float position), void (*cleanup)(void *userdata), void *userdata)
   {
-    if (sound_resources.find(id)!=sound_resources.end() && sound_resources[id]) {
-      fprintf(stderr, "Sound id %d collides with existing id (for internally-managed ids).\n", id);
-      return 3;
-    }
-
     SoundResource *snd = sound_new_with_source();
     sound_resources[id] = snd;
     if (id>=next_sound_id) { next_sound_id=id+1; }
@@ -193,7 +183,7 @@ namespace enigma {
 
   void audiosystem_cleanup()
   {
-    for (std::map<int, SoundResource*>::iterator it=sound_resources.begin(); it!=sound_resources.end(); it++) 
+    for (std::map<int, SoundResource*>::iterator it=sound_resources.begin(); it!=sound_resources.end(); it++)
     {
       SoundResource* sr = it->second;
       if (!sr) { continue; }
@@ -212,7 +202,7 @@ namespace enigma {
             alDeleteSources(1, &sound_channels[j]->source);
           }
           break;
-  
+
         case LOADSTATE_INDICATED:
         case LOADSTATE_NONE:
         default: ;
