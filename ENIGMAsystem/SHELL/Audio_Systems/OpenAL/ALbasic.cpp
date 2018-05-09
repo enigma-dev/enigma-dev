@@ -312,7 +312,6 @@ bool sound_replace(int sound, string fname, int kind, bool preload)
       }
     }
   }
-  sound_resources[sound] = enigma::sound_new_with_source();
 
   // Open sound
   size_t flen = 0;
