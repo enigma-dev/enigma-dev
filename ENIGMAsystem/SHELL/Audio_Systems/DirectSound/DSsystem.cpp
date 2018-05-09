@@ -37,10 +37,10 @@ struct WaveHeaderType
 	char dataChunkId[4];
 	unsigned long dataSize;
 };
-	
+
 IDirectSound8* dsound;
 
-const GUID GUID_NULL = { 0, 0, 0, { 0, 0, 0, 0, 0, 0, 0, 0 } }; 
+const GUID GUID_NULL = { 0, 0, 0, { 0, 0, 0, 0, 0, 0, 0, 0 } };
 
 #include <time.h>
 clock_t starttime;
@@ -63,7 +63,7 @@ using std::string;
 IDirectSoundBuffer* primaryBuffer;
 
 vector<SoundResource*> sound_resources(0);
-	
+
 namespace enigma {
 
   void eos_callback(void *soundID, unsigned src)
@@ -79,10 +79,10 @@ namespace enigma {
     elapsedtime = starttime;
     lasttime = elapsedtime;
     printf("Initializing audio system...\n");
-	
+
 	HRESULT result;
 	DSBUFFERDESC bufferDesc;
- 
+
 	// Initialize the direct sound interface pointer for the default sound device.
 	result = DirectSoundCreate8(NULL, &dsound, NULL);
 	if(FAILED(result))
@@ -90,7 +90,7 @@ namespace enigma {
 		MessageBox(NULL, "Failed to create DirectSound8 object.", "Error", MB_OK);
 		return false;
 	}
- 
+
 	// Set the cooperative level to priority so the format of the primary sound buffer can be modified.
 	result = dsound->SetCooperativeLevel(hWnd, DSSCL_PRIORITY);
 	if(FAILED(result))
@@ -98,7 +98,7 @@ namespace enigma {
 		MessageBox(NULL, "Failed to set the cooperative level of the Window handle.", "Error", MB_OK);
 		return false;
 	}
-	
+
 	// Setup the primary buffer description.
 	bufferDesc.dwSize = sizeof(DSBUFFERDESC);
 	bufferDesc.dwFlags = DSBCAPS_PRIMARYBUFFER | DSBCAPS_CTRLVOLUME;
@@ -107,7 +107,7 @@ namespace enigma {
 	bufferDesc.lpwfxFormat = NULL;
 	bufferDesc.guid3DAlgorithm = GUID_NULL;
 	dsound->CreateSoundBuffer(&bufferDesc, &primaryBuffer, NULL);
-	
+
 	// Setup the format of the primary sound bufffer.
 	// In this case it is a .WAV file recorded at 44,100 samples per second in 16-bit stereo (cd audio format).
 	WAVEFORMATEX primaryFormat;
@@ -118,9 +118,9 @@ namespace enigma {
 	primaryFormat.nBlockAlign = (primaryFormat.wBitsPerSample / 8) * primaryFormat.nChannels;
 	primaryFormat.nAvgBytesPerSec = primaryFormat.nSamplesPerSec * primaryFormat.nBlockAlign;
 	primaryFormat.cbSize = 0;
-	
+
 	primaryBuffer->SetFormat(&primaryFormat);
-	
+
 	return true;
   }
 
@@ -134,21 +134,21 @@ WaveHeaderType* buffer_get_wave_header(char* buffer, size_t bufsize) {
 	WaveHeaderType* waveHeader = new WaveHeaderType();
 
 	memcpy(waveHeader,buffer,36);
-	
+
 	unsigned long remaining = waveHeader->subChunkSize - 16;
 	if (remaining) {
 		memcpy(&waveHeader->parSize,buffer+36,2);
 	}
-	
+
 	if (strncmp(waveHeader->chunkId, "RIFF",4) != 0 || strncmp(waveHeader->format, "WAVE",4) != 0) {
 		return NULL; // Not a WAVE file or the format is just messed up
-	} 
-		
+	}
+
 	// Read Subchunks
 	char chunkId[5] = { 'H', 'U', 'N', 'G' };
 	unsigned long chunkSize = 0;
 	for (unsigned i = 36 + remaining; i < bufsize; i += 8 + chunkSize) {
-		
+
 		memcpy(&chunkId, buffer + i, 4);
 		memcpy(&chunkSize, buffer + i + 4, 4);
 		if (strncmp(chunkId, "data", 4) == 0) {
@@ -159,7 +159,7 @@ WaveHeaderType* buffer_get_wave_header(char* buffer, size_t bufsize) {
 			continue;
 		}
 	}
-	
+
 	return waveHeader;
 }
 
@@ -184,7 +184,7 @@ WaveHeaderType* buffer_get_wave_header(char* buffer, size_t bufsize) {
 	waveFormat.nBlockAlign = waveHeader->blockAlign;
 	waveFormat.nAvgBytesPerSec = waveHeader->bytesPerSecond;
 	waveFormat.cbSize = waveHeader->parSize;
-	
+
 	DSBUFFERDESC bufferDesc;
 	bufferDesc.dwSize = sizeof(DSBUFFERDESC);
 	bufferDesc.dwFlags = DSBCAPS_CTRLDEFAULT;
@@ -198,13 +198,13 @@ WaveHeaderType* buffer_get_wave_header(char* buffer, size_t bufsize) {
 	DWORD  dwLength;
 
 	IDirectSoundBuffer* sndBuf = snd->soundBuffer;
-	
+
 	if (DS_OK == sndBuf->Lock(
       0,          // Offset at which to start lock.
       waveHeader->dataSize,          // Size of lock; ignored because of flag.
       &lpvWrite,  // Gets address of first part of lock.
       &dwLength,  // Gets size of first part of lock.
-      NULL,       // Address of wraparound not needed. 
+      NULL,       // Address of wraparound not needed.
       NULL,       // Size of wraparound not needed.
       0))  // Flag.
 	{
@@ -217,7 +217,7 @@ WaveHeaderType* buffer_get_wave_header(char* buffer, size_t bufsize) {
 	} else {
 		//ErrorHandler();  // Add error-handling here.
 	}
-	
+
 	snd->soundBuffer->SetCurrentPosition(0);
 	// Set volume of the buffer to 100%.
 	snd->soundBuffer->SetVolume(0);
@@ -262,7 +262,7 @@ WaveHeaderType* buffer_get_wave_header(char* buffer, size_t bufsize) {
 		dsound->Release();
 		dsound = 0;
 	}
- 
+
 	return;
   }
 

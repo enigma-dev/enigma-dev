@@ -208,7 +208,20 @@ int sound_add(string fname, int kind, bool preload) //At the moment, the latter 
 
 bool sound_replace(int sound, string fname, int kind, bool preload)
 {
-	return false;
+  if (sound >= 0 && sound < sound_resources.size() && sound_resources[sound]) {
+    get_sound(snd,sound,false);
+    delete snd;
+  }
+
+  // Open sound
+  size_t flen = 0;
+  char *fdata = enigma::read_all_bytes(fname, flen);
+  if (!fdata) return -1;
+
+  // Decode sound
+  bool fail = enigma::sound_add_from_buffer(sound,fdata,flen);
+  delete [] fdata;
+  return fail;
 }
 
 void sound_3d_set_sound_cone(int sound, float x, float y, float z, double anglein, double angleout, long voloutside) {
