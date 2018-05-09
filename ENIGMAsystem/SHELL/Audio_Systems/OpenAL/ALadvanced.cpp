@@ -22,6 +22,7 @@
 #include <math.h>
 using std::string;
 #include "../General/ASadvanced.h"
+#include "../General/ASutil.h"
 #include "Audio_Systems/audio_mandatory.h"
 #include "SoundChannel.h"
 #include "SoundResource.h"
@@ -330,18 +331,9 @@ int audio_system()
 int audio_add(string fname)
 {
   // Open sound
-  FILE *afile = fopen(fname.c_str(),"rb");
-  if (!afile)
-    return -1;
-
-  // Buffer sound
-  fseek(afile,0,SEEK_END);
-  const size_t flen = ftell(afile);
-  char *fdata = new char[flen];
-  fseek(afile,0,SEEK_SET);
-  if (fread(fdata,1,flen,afile) != flen)
-    puts("WARNING: Resource stream cut short while loading sound data");
-  fclose(afile);
+  size_t flen = 0;
+  char *fdata = enigma::read_all_bytes(fname, flen);
+  if (!fdata) return -1;
 
   // Decode sound
   int rid = enigma::sound_allocate();
