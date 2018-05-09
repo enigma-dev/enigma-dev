@@ -218,11 +218,13 @@ WaveHeaderType* buffer_get_wave_header(char* buffer, size_t bufsize) {
 		//ErrorHandler();  // Add error-handling here.
 	}
 
+	delete waveHeader;
+
 	snd->soundBuffer->SetCurrentPosition(0);
 	// Set volume of the buffer to 100%.
 	snd->soundBuffer->SetVolume(0);
-
     snd->loaded = LOADSTATE_COMPLETE;
+
     return 0;
   }
 
