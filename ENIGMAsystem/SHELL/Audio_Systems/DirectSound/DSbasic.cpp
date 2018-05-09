@@ -181,6 +181,7 @@ const char* sound_get_audio_error() {
 
 }
 
+#include "../General/ASutil.h"
 #include <string>
 using namespace std;
 extern void show_message(string);
@@ -191,23 +192,14 @@ namespace enigma_user
 int sound_add(string fname, int kind, bool preload) //At the moment, the latter two arguments do nothing! =D
 {
   // Open sound
-  FILE *afile = fopen(fname.c_str(),"rb");
-  if (!afile)
-    return -1;
-
-  // Buffer sound
-  fseek(afile,0,SEEK_END);
-  const size_t flen = ftell(afile);
-  char *fdata = new char[flen];
-  fseek(afile,0,SEEK_SET);
-  if (fread(fdata,1,flen,afile) != flen)
-    puts("WARNING: Resource stream cut short while loading sound data");
-  fclose(afile);
+  size_t flen = 0;
+  char *fdata = enigma::read_all_bytes(fname, flen);
+  if (!fdata) return -1;
 
   // Decode sound
   int rid = enigma::sound_allocate();
   bool fail = enigma::sound_add_from_buffer(rid,fdata,flen);
-  delete fdata;
+  delete [] fdata;
 
   if (fail)
     return -1;
