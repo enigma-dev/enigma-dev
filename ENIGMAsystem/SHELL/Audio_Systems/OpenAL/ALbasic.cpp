@@ -126,12 +126,6 @@ void sound_delete(int sound) {
       sound_stop(sound);
       get_sound(snd,sound,);
       alureDestroyStream(snd->stream, 0, 0);
-      for (size_t i = 0; i < sound_channels.size(); i++) {
-        if (sound_channels[i]->soundIndex == sound) {
-          alDeleteSources(1, &sound_channels[i]->source);
-          sound_channels[i]->soundIndex=-1;
-        }
-      }
       delete sound_resources[sound];
     }
     sound_resources.erase(sound);
@@ -305,12 +299,6 @@ bool sound_replace(int sound, string fname, int kind, bool preload)
   if (sound_resources.find(sound)!=sound_resources.end() && sound_resources[sound]) {
     get_sound(snd,sound,false);
     alureDestroyStream(snd->stream, 0, 0);
-    for(size_t i = 0; i < sound_channels.size(); i++) {
-      if (sound_channels[i]->soundIndex == sound)
-      {
-        alDeleteSources(1, &sound_channels[i]->source);
-      }
-    }
   }
 
   // Open sound
