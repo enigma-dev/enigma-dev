@@ -31,12 +31,6 @@ using std::string;
 #include "SoundEmitter.h"
 #include "ALsystem.h"
 
-#ifdef __APPLE__
-#include "../../../additional/alure/include/AL/alure.h"
-#else
-#include <AL/alure.h>
-#endif
-
 #ifdef DEBUG_MODE
 #include "libEGMstd.h"
 #include "Widget_Systems/widgets_mandatory.h" // show_error

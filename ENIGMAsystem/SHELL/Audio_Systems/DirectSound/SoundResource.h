@@ -17,7 +17,6 @@
 
 #ifndef ENIGMA_SOUND_RESOURCE_H
 #define ENIGMA_SOUND_RESOURCE_H
-#include "../General/ASadvanced.h"
 
 #ifdef DEBUG_MODE
 #include "libEGMstd.h"

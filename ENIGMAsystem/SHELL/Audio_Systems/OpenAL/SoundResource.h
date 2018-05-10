@@ -18,13 +18,8 @@
 
 #ifndef ENIGMA_SOUND_RESOURCE_H
 #define ENIGMA_SOUND_RESOURCE_H
-#include "../General/ASadvanced.h"
 
-#ifdef __APPLE__
-#include "../../../additional/alure/include/AL/alure.h"
-#else
-#include <AL/alure.h>
-#endif
+#include "ALsystem.h"
 
 #ifdef DEBUG_MODE
 #include "libEGMstd.h"

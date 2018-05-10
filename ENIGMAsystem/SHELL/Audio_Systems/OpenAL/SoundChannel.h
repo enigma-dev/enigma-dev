@@ -18,14 +18,7 @@
 #ifndef ENIGMA_SOUND_CHANNEL_H
 #define ENIGMA_SOUND_CHANNEL_H
 
-#include "../General/ASadvanced.h"
 #include "ALsystem.h"
-
-#ifdef __APPLE__
-#include "../../../additional/alure/include/AL/alure.h"
-#else
-#include <AL/alure.h>
-#endif
 
 #ifdef DEBUG_MODE
 #include "libEGMstd.h"
