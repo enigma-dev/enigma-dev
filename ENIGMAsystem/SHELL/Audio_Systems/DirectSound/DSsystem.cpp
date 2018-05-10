@@ -47,13 +47,6 @@ clock_t starttime;
 clock_t elapsedtime;
 clock_t lasttime;
 
-int falloff_model = 0;
-size_t channel_num = 128;
-
-float listenerPos[] = {0.0f,0.0f,0.0f};
-float listenerVel[] = {0.0f,0.0f,0.0f};
-float listenerOri[] = {0.0f,0.0f,1.0f, 0.0f,1.0f,0.0f};
-
 #include <string>
 #include <sstream>
 using std::stringstream;
