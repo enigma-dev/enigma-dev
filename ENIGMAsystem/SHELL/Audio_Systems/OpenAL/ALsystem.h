@@ -59,6 +59,8 @@ namespace enigma {
   int audiosystem_initialize();
   SoundResource* sound_new_with_source();
   int sound_add_from_buffer(int id, void* buffer, size_t bufsize);
+  int sound_add_from_file(int id, string fname);
+  int sound_replace_from_file(int id, string fname);
   int sound_add_from_stream(int id, size_t (*callback)(void *userdata, void *buffer, size_t size), void (*seek)(void *userdata, float position), void (*cleanup)(void *userdata), void *userdata);
   int sound_allocate();
   void audiosystem_update(void);
