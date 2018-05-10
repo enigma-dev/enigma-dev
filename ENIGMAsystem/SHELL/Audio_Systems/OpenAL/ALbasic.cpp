@@ -269,7 +269,6 @@ const char* sound_get_audio_error() {
 
 }
 
-#include "../General/ASutil.h"
 #include <string>
 using namespace std;
 extern void show_message(string);
@@ -279,19 +278,11 @@ namespace enigma_user
 
 int sound_add(string fname, int kind, bool preload) //At the moment, the latter two arguments do nothing! =D
 {
-  // Open sound
-  size_t flen = 0;
-  char *fdata = enigma::read_all_bytes(fname, flen);
-  if (!fdata) return -1;
-
   // Decode sound
   int rid = enigma::sound_allocate();
-  bool fail = enigma::sound_add_from_buffer(rid,fdata,flen);
-  delete [] fdata;
+  bool fail = enigma::sound_add_from_file(rid,fname);
 
-  if (fail)
-    return -1;
-  return rid;
+  return (fail ? -1 : rid);
 }
 
 bool sound_replace(int sound, string fname, int kind, bool preload)
@@ -301,15 +292,7 @@ bool sound_replace(int sound, string fname, int kind, bool preload)
     alureDestroyStream(snd->stream, 0, 0);
   }
 
-  // Open sound
-  size_t flen = 0;
-  char *fdata = enigma::read_all_bytes(fname, flen);
-  if (!fdata) return -1;
-
-  // Decode sound
-  bool fail = enigma::sound_add_from_buffer(sound,fdata,flen);
-  delete [] fdata;
-  return fail;
+  return enigma::sound_replace_from_file(sound,fname);
 }
 
 void sound_3d_set_sound_cone(int sound, float x, float y, float z, double anglein, double angleout, long voloutside) {

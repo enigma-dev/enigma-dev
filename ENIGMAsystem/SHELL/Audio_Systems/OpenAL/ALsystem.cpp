@@ -111,36 +111,51 @@ namespace enigma {
     return 0;
   }
 
-  SoundResource* sound_new_with_source() {
-    SoundResource *res = new SoundResource();
-    alGetError();
-    int a = alGetError();
-    if(a != AL_NO_ERROR) {
-      fprintf(stderr, "Failed to create OpenAL source! Error %d: %s\n",a,alGetString(a));
-      printf("%d %d %d %d %d\n",AL_INVALID_NAME,AL_INVALID_ENUM,AL_INVALID_VALUE,AL_INVALID_OPERATION,AL_OUT_OF_MEMORY);
-      delete res;
-      return NULL;
-    }
-    res->loaded = LOADSTATE_SOURCED;
-    return res;
-  }
-
   int sound_add_from_buffer(int id, void* buffer, size_t bufsize)
   {
-    SoundResource *snd = sound_new_with_source();
+    SoundResource *snd = new SoundResource();
     sound_resources[id] = snd;
     if (id>=next_sound_id) { next_sound_id=id+1; }
 
-    if (snd->loaded != LOADSTATE_SOURCED) {
-      fprintf(stderr, "Could not load sound %d: %s\n", id, alureGetErrorString());
-      return 1;
-    }
     ALuint& buf = snd->buf[0];
     buf = alureCreateBufferFromMemory((ALubyte*)buffer, bufsize);
 
     if(!buf) {
-      fprintf(stderr, "Could not load sound %d: %s\n", id, alureGetErrorString());
-      return 2;
+      fprintf(stderr, "Could not load sound %d from memory buffer: %s\n", id, alureGetErrorString());
+      return 1;
+    }
+
+    snd->loaded = LOADSTATE_COMPLETE;
+    return 0;
+  }
+
+  int sound_add_from_file(int id, string fname)
+  {
+    SoundResource *snd = new SoundResource();
+    sound_resources[id] = snd;
+    if (id>=next_sound_id) { next_sound_id=id+1; }
+
+    ALuint& buf = snd->buf[0];
+    buf = alureCreateBufferFromFile(fname.c_str());
+
+    if(!buf) {
+      fprintf(stderr, "Could not add sound %d from file %s: %s\n", id, fname, alureGetErrorString());
+      return 1;
+    }
+
+    snd->loaded = LOADSTATE_COMPLETE;
+    return 0;
+  }
+
+  int sound_replace_from_file(int id, string fname)
+  {
+    get_sound(snd, id, -1);
+
+    ALboolean res = alureBufferDataFromFile(fname.c_str(), snd->buf[0]);
+
+    if (res == AL_FALSE) {
+      fprintf(stderr, "Could not replace sound %d from file %s: %s\n", id, fname, alureGetErrorString());
+      return 1;
     }
 
     snd->loaded = LOADSTATE_COMPLETE;
@@ -149,12 +164,9 @@ namespace enigma {
 
   int sound_add_from_stream(int id, size_t (*callback)(void *userdata, void *buffer, size_t size), void (*seek)(void *userdata, float position), void (*cleanup)(void *userdata), void *userdata)
   {
-    SoundResource *snd = sound_new_with_source();
+    SoundResource *snd = new SoundResource();
     sound_resources[id] = snd;
     if (id>=next_sound_id) { next_sound_id=id+1; }
-
-    if (snd->loaded != LOADSTATE_SOURCED)
-      return 1;
 
     snd->stream = alureCreateStreamFromCallback((ALuint (*)(void*, ALubyte*, ALuint))callback, userdata, AL_FORMAT_STEREO16, 44100, 4096, 0, NULL);
     if (!snd->stream) {
@@ -183,6 +195,7 @@ namespace enigma {
 
   void audiosystem_cleanup()
   {
+    // cleanup sound resources
     for (std::map<int, SoundResource*>::iterator it=sound_resources.begin(); it!=sound_resources.end(); it++)
     {
       SoundResource* sr = it->second;
@@ -195,18 +208,17 @@ namespace enigma {
             alureDestroyStream(sr->stream, 0, 0);
             if (sr->cleanup) sr->cleanup(sr->userdata);
           }
-          // fallthrough
-        case LOADSTATE_SOURCED:
-          for (size_t j = 0; j < sound_channels.size(); j++) {
-            alureStopSource(sound_channels[j]->source, true);
-            alDeleteSources(1, &sound_channels[j]->source);
-          }
-          break;
-
+        // fallthrough
         case LOADSTATE_INDICATED:
         case LOADSTATE_NONE:
         default: ;
       }
+    }
+
+    // cleanup sound channels
+    for (size_t j = 0; j < sound_channels.size(); j++) {
+      alureStopSource(sound_channels[j]->source, true);
+      alDeleteSources(1, &sound_channels[j]->source);
     }
 
     alureShutdownDevice();
