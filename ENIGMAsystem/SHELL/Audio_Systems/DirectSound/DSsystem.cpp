@@ -117,12 +117,6 @@ namespace enigma {
 	return true;
   }
 
-  SoundResource* sound_new_with_source() {
-    SoundResource *res = new SoundResource();
-    res->loaded = LOADSTATE_SOURCED;
-    return res;
-  }
-
 WaveHeaderType* buffer_get_wave_header(char* buffer, size_t bufsize) {
 	WaveHeaderType* waveHeader = new WaveHeaderType();
 
@@ -158,16 +152,11 @@ WaveHeaderType* buffer_get_wave_header(char* buffer, size_t bufsize) {
 
   int sound_add_from_buffer(int id, void* buffer, size_t bufsize)
   {
-    SoundResource *snd = sound_new_with_source();
+    SoundResource *snd = new SoundResource();
     if (id >= sound_resources.size()) {
       sound_resources.resize(id + 1);
     }
     sound_resources[id] = snd;
-
-    if (snd->loaded != LOADSTATE_SOURCED) {
-      //fprintf(stderr, "Could not load sound %d: %s\n", id, alureGetErrorString());
-      return 1;
-    }
 
 	WaveHeaderType* waveHeader = buffer_get_wave_header((char*)buffer, bufsize);
 	WAVEFORMATEX waveFormat = { };
