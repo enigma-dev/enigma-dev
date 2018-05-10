@@ -388,6 +388,7 @@ void sound_effect_set(int sound, int effect) {
   DWORD status = 0;
 	snd->soundBuffer->GetStatus(&status);
   bool wasPlaying = (status & DSBSTATUS_PLAYING);
+  bool wasLooping = (status & DSBSTATUS_LOOPING);
   if (wasPlaying) snd->soundBuffer->Stop(); // pause
 
   // query for the effect interface and set the effects on the sound buffer
@@ -395,7 +396,7 @@ void sound_effect_set(int sound, int effect) {
   snd->soundBuffer->QueryInterface(IID_IDirectSoundBuffer8, (void**) &soundBuffer8);
   soundBuffer8->SetFX(numOfEffects, dsEffects, dwResults);
 
-  if (wasPlaying) snd->soundBuffer->Play(0, 0, 0); // resume
+  if (wasPlaying) snd->soundBuffer->Play(0, 0, wasLooping ? DSBPLAY_LOOPING : 0); // resume
 }
 
 }
