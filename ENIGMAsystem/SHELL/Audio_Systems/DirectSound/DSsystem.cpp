@@ -85,7 +85,7 @@ namespace enigma {
 
 	// Initialize the direct sound interface pointer for the default sound device.
 	result = DirectSoundCreate8(NULL, &dsound, NULL);
-	if(FAILED(result))
+	if (FAILED(result))
 	{
 		MessageBox(NULL, "Failed to create DirectSound8 object.", "Error", MB_OK);
 		return false;
@@ -93,7 +93,7 @@ namespace enigma {
 
 	// Set the cooperative level to priority so the format of the primary sound buffer can be modified.
 	result = dsound->SetCooperativeLevel(hWnd, DSSCL_PRIORITY);
-	if(FAILED(result))
+	if (FAILED(result))
 	{
 		MessageBox(NULL, "Failed to set the cooperative level of the Window handle.", "Error", MB_OK);
 		return false;
@@ -177,7 +177,7 @@ WaveHeaderType* buffer_get_wave_header(char* buffer, size_t bufsize) {
     }
 
 	WaveHeaderType* waveHeader = buffer_get_wave_header((char*)buffer, bufsize);
-	WAVEFORMATEX waveFormat;
+	WAVEFORMATEX waveFormat = { };
 	waveFormat.wFormatTag = waveHeader->audioFormat;
 	waveFormat.nSamplesPerSec = waveHeader->sampleRate;
 	waveFormat.wBitsPerSample = waveHeader->bitsPerSample;
@@ -186,9 +186,9 @@ WaveHeaderType* buffer_get_wave_header(char* buffer, size_t bufsize) {
 	waveFormat.nAvgBytesPerSec = waveHeader->bytesPerSecond;
 	waveFormat.cbSize = waveHeader->parSize;
 
-	DSBUFFERDESC bufferDesc;
+	DSBUFFERDESC bufferDesc = { };
 	bufferDesc.dwSize = sizeof(DSBUFFERDESC);
-	bufferDesc.dwFlags = DSBCAPS_CTRLDEFAULT;
+	bufferDesc.dwFlags = DSBCAPS_CTRLDEFAULT | DSBCAPS_CTRLFX;
 	bufferDesc.dwBufferBytes = waveHeader->dataSize;
 	bufferDesc.dwReserved = 0;
 	bufferDesc.lpwfxFormat = &waveFormat;

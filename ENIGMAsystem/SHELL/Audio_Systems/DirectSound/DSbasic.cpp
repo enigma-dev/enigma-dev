@@ -66,7 +66,7 @@ void sound_pause_all()
 {
   for (size_t i = 0; i < sound_resources.size(); i++) {
     get_soundv(snd, i);
-	snd->soundBuffer->Stop();
+    snd->soundBuffer->Stop();
   }
 }
 
@@ -79,7 +79,7 @@ void sound_stop_all()
 {
   for (size_t i = 0; i < sound_resources.size(); i++) {
     get_soundv(snd, i);
-	snd->soundBuffer->Stop();
+    snd->soundBuffer->Stop();
   }
 }
 
@@ -109,7 +109,7 @@ void sound_resume_all()
 {
   for (size_t i = 0; i < sound_resources.size(); i++) {
     get_soundv(snd, i);
-	snd->soundBuffer->Play(0, 0, 0);
+    snd->soundBuffer->Play(0, 0, 0);
   }
 }
 
@@ -166,13 +166,13 @@ void sound_seek(int sound, float position) {
 void sound_seek_all(float position) {
   for (size_t i = 0; i < sound_resources.size(); i++) {
     get_soundv(snd, i);
-	snd->soundBuffer->SetCurrentPosition(position);
+    snd->soundBuffer->SetCurrentPosition(position);
   }
 }
 
 void action_sound(int snd, bool loop)
 {
-    (loop ? sound_loop:sound_play)(snd);
+  (loop ? sound_loop:sound_play)(snd);
 }
 
 const char* sound_get_audio_error() {
@@ -237,67 +237,134 @@ void sound_3d_set_sound_velocity(int sound, float x, float y, float z) {
 }
 
 void sound_effect_chorus(int sound, float wetdry, float depth, float feedback, float frequency, long wave, float delay, long phase) {
-	/*
-	DSFXChorus pcDsFxChorus;
-	IDirectSoundFXChorus::SetAllParameters(pcDsFxChorus);
-	*/
-}
-
-void sound_effect_compressor(int sound, float gain, float attack, float release, float threshold, float ratio, float delay) {
+  /*
+	DSFXChorus effectParams = { };
+  effectParams.fWetDryMix = wetdry;
+  effectParams.fDepth = depth;
+  effectParams.fFeedback = Feedback;
+  effectParams.fFrequency = frequency;
+  effectParams.lWaveform = wave;
+  effectParams.fDelay = delay;
+  effectParams.lPhase = phase;
+  */
 }
 
 void sound_effect_echo(int sound, float wetdry, float feedback, float leftdelay, float rightdelay, long pandelay) {
-}
-
-void sound_effect_equalizer(int sound, float center, float bandwidth, float gain) {
+  /*
+  DSFXEcho effectParams = { };
+  effectParams.fWetDryMix = wetdry;
+  effectParams.fFeedback = feedback;
+  effectParams.fLeftDelay = leftdelay;
+  effectParams.fRightDelay = rightdelay;
+  effectParams.lPanDelay = pandelay;
+  */
 }
 
 void sound_effect_flanger(int sound, float wetdry, float depth, float feedback, float frequency, long wave, float delay, long phase) {
+  /*
+  DSFXFlanger effectParams = { };
+  effectParams.fWetDryMix = wetdry;
+  effectParams.fDepth = depth;
+  effectParams.fFeedback = feedback;
+  effectParams.fFrequency = frequency;
+  effectParams.lWaveform = wave;
+  effectParams.fDelay = delay;
+  effectParams.lPhase = phase;
+  */
 }
 
 void sound_effect_gargle(int sound, unsigned rate, unsigned wave) {
+  /*
+  DSFXGargle effectParams = { };
+  effectParams.dwRateHz = rate;
+  effectParams.dwWaveShape = wave;
+  */
 }
 
 void sound_effect_reverb(int sound, float gain, float mix, float time, float ratio) {
+  /*
+  DSFXWavesReverb effectParams = { };
+  effectParams.fInGain = gain;
+  effectParams.fReverbMix = mix;
+  effectParams.fReverbTime = time;
+  effectParams.fHighFreqRTRatio = ratio;
+  */
 }
 
-//const _GUID& sound_effect_types[8] = { GUID_DSFX_STANDARD_CHORUS, GUID_DSFX_STANDARD_ECHO, GUID_DSFX_STANDARD_FLANGER, GUID_DSFX_STANDARD_GARGLE,
-	//GUID_DSFX_WAVES_REVERB, GUID_DSFX_STANDARD_COMPRESSOR, GUID_DSFX_STANDARD_PARAMEQ };
+void sound_effect_compressor(int sound, float gain, float attack, float release, float threshold, float ratio, float delay) {
+  /*
+  DSFXCompressor effectParams = { };
+  effectParams.fGain = gain;
+  effectParams.fAttack = attack;
+  effectParams.fRelease = release;
+  effectParams.fThreshold = threshold;
+  effectParams.fRatio = ratio;
+  effectParams.fPredelay = delay;
+  */
+}
+
+void sound_effect_equalizer(int sound, float center, float bandwidth, float gain) {
+  /*
+  DSFXParamEq effectParams = { };
+  effectParams.fCenter = center;
+  effectParams.fBandwidth = bandwidth;
+  effectParams.fGain = gain;
+  */
+}
+
+static const GUID sound_effect_guids[7] = { GUID_DSFX_STANDARD_CHORUS, GUID_DSFX_STANDARD_ECHO, GUID_DSFX_STANDARD_FLANGER, GUID_DSFX_STANDARD_GARGLE,
+	GUID_DSFX_WAVES_REVERB, GUID_DSFX_STANDARD_COMPRESSOR, GUID_DSFX_STANDARD_PARAMEQ };
 
 void sound_effect_set(int sound, int effect) {
-/*
-  HRESULT hr;
-  DWORD dwResults[1];  // One element for each effect.
+  size_t numOfEffects = 0;
 
-  // Describe the effect.
-  DSEFFECTDESC dsEffect;
-  memset(&dsEffect, 0, sizeof(DSEFFECTDESC));
-  dsEffect.dwSize = sizeof(DSEFFECTDESC);
-  dsEffect.dwFlags = 0;
-  dsEffect.guidDSFXClass = sound_effect_types[effect];
+  DWORD* dwResults = 0;
+  DSEFFECTDESC* dsEffects = 0;
 
-  get_sound(snd, sound, 0);
-
-  // Set the effect
-  if (SUCCEEDED(hr = snd->soundBuffer->SetFX(1, &dsEffect, dwResults)))
-  {
-    #ifdef DEBUG_MODE
-    switch (dwResults[0])
-    {
-      case DSFXR_LOCHARDWARE:
-        printf("Effect was placed in hardware.");
-        break;
-      case DSFXR_LOCSOFTWARE:
-        printf("Effect was placed in software.");
-        break;
-      case DSFXR_UNALLOCATED:
-        printf("Effect is not yet allocated to hardware or software.");
-        break;
+  if (effect != 0) {
+    // count the number of effect flags that were set
+    for (size_t i = 0; i < 7; ++i) {
+      if ((effect >> i) & 1U) {
+        ++numOfEffects;
+      }
     }
-	#endif
+
+    // allocate an array of effect descriptions and results
+    dwResults = new DWORD[numOfEffects];
+    dsEffects = new DSEFFECTDESC[numOfEffects];
+
+    size_t eff = 0;
+    // loop all the bits of the effect parameter to see which of the flags were set
+    // and fill in the effect descriptions based on that
+    for (size_t i = 0; i < 7; ++i) {
+      if ((effect >> i) & 1U) {
+        memset(&dsEffects[eff], 0, sizeof(DSEFFECTDESC));
+        dsEffects[eff].dwSize = sizeof(DSEFFECTDESC);
+        dsEffects[eff].dwFlags = 0;
+        dsEffects[eff].guidDSFXClass = sound_effect_guids[i];
+        ++eff;
+      }
+    }
   }
-  return;
-  */
+
+  get_soundv(snd, sound);
+
+  // GM8 allows changing the effect flags in the middle of a sound playing
+  // but this doesn't work unless we follow the Microsoft documentation
+  // and temporarily pause the sound
+  // "Additionally, the buffer must not be playing or locked."
+  // https://msdn.microsoft.com/en-us/library/windows/desktop/microsoft.directx_sdk.idirectsoundbuffer8.idirectsoundbuffer8.setfx%28v=vs.85%29.aspx
+  DWORD status = 0;
+	snd->soundBuffer->GetStatus(&status);
+  bool wasPlaying = (status & DSBSTATUS_PLAYING);
+  if (wasPlaying) snd->soundBuffer->Stop(); // pause
+
+  // query for the effect interface and set the effects on the sound buffer
+  IDirectSoundBuffer8* soundBuffer8 = 0;
+  snd->soundBuffer->QueryInterface(IID_IDirectSoundBuffer8, (void**) &soundBuffer8);
+  soundBuffer8->SetFX(numOfEffects, dsEffects, dwResults);
+
+  if (wasPlaying) snd->soundBuffer->Play(0, 0, 0); // resume
 }
 
 }
