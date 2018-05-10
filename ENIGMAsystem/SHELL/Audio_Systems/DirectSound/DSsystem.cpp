@@ -166,10 +166,8 @@ WaveHeaderType* buffer_get_wave_header(char* buffer, size_t bufsize) {
   int sound_add_from_buffer(int id, void* buffer, size_t bufsize)
   {
     SoundResource *snd = sound_new_with_source();
-	if (id > sound_resources.size()) {
-		sound_resources.resize(id + 1);
-	}
-    sound_resources.insert(sound_resources.begin() + id, snd);
+	sound_resources[id] = snd;
+
     if (snd->loaded != LOADSTATE_SOURCED) {
       //fprintf(stderr, "Could not load sound %d: %s\n", id, alureGetErrorString());
       return 1;
@@ -243,11 +241,9 @@ WaveHeaderType* buffer_get_wave_header(char* buffer, size_t bufsize) {
 	}
 	if (id < 0) {
 	  id = sound_resources.size();
+	  sound_resources.push_back(NULL);
 	}
-	if (id > sound_resources.size()) {
-		sound_resources.resize(id + 1);
-	}
-	sound_resources.insert(sound_resources.begin() + id, new SoundResource());
+
 	return id;
   }
 
