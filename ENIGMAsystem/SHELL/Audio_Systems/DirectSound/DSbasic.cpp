@@ -225,15 +225,46 @@ bool sound_replace(int sound, string fname, int kind, bool preload)
 }
 
 void sound_3d_set_sound_cone(int sound, float x, float y, float z, double anglein, double angleout, long voloutside) {
+  get_soundv(snd, sound);
+
+  // query for the 3d buffer interface
+  IDirectSound3DBuffer8* sound3DBuffer8 = 0;
+  snd->soundBuffer->QueryInterface(IID_IDirectSound3DBuffer, (void**) &sound3DBuffer8);
+
+  sound3DBuffer8->SetConeOrientation(x, y, z, DS3D_IMMEDIATE);
+  sound3DBuffer8->SetConeAngles(anglein, angleout, DS3D_IMMEDIATE);
+  sound3DBuffer8->SetConeOutsideVolume(voloutside, DS3D_IMMEDIATE);
 }
 
 void sound_3d_set_sound_distance(int sound, float mindist, float maxdist) {
+  get_soundv(snd, sound);
+
+  // query for the 3d buffer interface
+  IDirectSound3DBuffer8* sound3DBuffer8 = 0;
+  snd->soundBuffer->QueryInterface(IID_IDirectSound3DBuffer, (void**) &sound3DBuffer8);
+
+  sound3DBuffer8->SetMinDistance(mindist, DS3D_IMMEDIATE);
+  sound3DBuffer8->SetMaxDistance(maxdist, DS3D_IMMEDIATE);
 }
 
 void sound_3d_set_sound_position(int sound, float x, float y, float z) {
+  get_soundv(snd, sound);
+
+  // query for the 3d buffer interface
+  IDirectSound3DBuffer8* sound3DBuffer8 = 0;
+  snd->soundBuffer->QueryInterface(IID_IDirectSound3DBuffer, (void**) &sound3DBuffer8);
+
+  sound3DBuffer8->SetPosition(x, y, z, DS3D_IMMEDIATE);
 }
 
 void sound_3d_set_sound_velocity(int sound, float x, float y, float z) {
+  get_soundv(snd, sound);
+
+  // query for the 3d buffer interface
+  IDirectSound3DBuffer8* sound3DBuffer8 = 0;
+  snd->soundBuffer->QueryInterface(IID_IDirectSound3DBuffer, (void**) &sound3DBuffer8);
+
+  sound3DBuffer8->SetVelocity(x, y, z, DS3D_IMMEDIATE);
 }
 
 void sound_effect_chorus(int sound, float wetdry, float depth, float feedback, float frequency, long wave, float delay, long phase) {
