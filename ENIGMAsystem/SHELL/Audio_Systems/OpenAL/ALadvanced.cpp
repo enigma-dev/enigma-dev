@@ -351,13 +351,6 @@ void audio_delete(int sound)
     if (sound_resources[sound]) {
       get_sound(snd,sound,);
       alureDestroyStream(snd->stream, 0, 0);
-      for(size_t i = 0; i < sound_channels.size(); i++) {
-        if (sound_channels[i]->soundIndex == sound) {
-          alDeleteSources(1, &sound_channels[i]->source);
-          sound_channels[i]->soundIndex=-1;
-          audio_stop_sound(i);
-        }
-      }
       delete sound_resources[sound];
     }
     sound_resources.erase(sound);
