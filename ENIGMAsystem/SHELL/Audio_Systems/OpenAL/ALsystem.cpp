@@ -139,7 +139,7 @@ namespace enigma {
     buf = alureCreateBufferFromFile(fname.c_str());
 
     if(!buf) {
-      fprintf(stderr, "Could not add sound %d from file %s: %s\n", id, fname, alureGetErrorString());
+      fprintf(stderr, "Could not add sound %d from file %s: %s\n", id, fname.c_str(), alureGetErrorString());
       return 1;
     }
 
@@ -154,7 +154,7 @@ namespace enigma {
     ALboolean res = alureBufferDataFromFile(fname.c_str(), snd->buf[0]);
 
     if (res == AL_FALSE) {
-      fprintf(stderr, "Could not replace sound %d from file %s: %s\n", id, fname, alureGetErrorString());
+      fprintf(stderr, "Could not replace sound %d from file %s: %s\n", id, fname.c_str(), alureGetErrorString());
       return 1;
     }
 
