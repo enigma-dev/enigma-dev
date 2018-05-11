@@ -46,13 +46,13 @@ vector<SoundChannel*> sound_channels(0);
 map<int, SoundResource*> sound_resources;
 vector<SoundEmitter*> sound_emitters(0);
 
+list<ALuint> garbageBuffers; // OpenAL buffers queued for deletion
+
 namespace {
 int next_sound_id = 0; //ID of the next sound to allocate (GM does not actually re-use sound IDs).
 }
 
 namespace enigma {
-  list<ALuint> garbageBuffers; // OpenAL buffers queued for deletion
-
   int get_free_channel(double priority)
   {
     // test for channels not playing anything
@@ -157,7 +157,7 @@ namespace enigma {
     garbageBuffers.push_back(buf);
     buf = alureCreateBufferFromFile(fname.c_str());
 
-    if (res == AL_FALSE) {
+    if (!buf) {
       fprintf(stderr, "Could not replace sound %d from file %s: %s\n", id, fname.c_str(), alureGetErrorString());
       return 1;
     }
@@ -197,10 +197,8 @@ namespace enigma {
     map<ALuint, int> bufferReferences;
     // count how many sources are still referencing each buffer
     for (SoundChannel* channel : sound_channels) {
-      ALuint buffer;
+      ALint buffer, state;
       alGetSourcei(channel->source, AL_BUFFER, &buffer);
-
-      ALint state;
       alGetSourcei(channel->source, AL_SOURCE_STATE, &state);
 
       bufferReferences[buffer] += (state == AL_PLAYING);

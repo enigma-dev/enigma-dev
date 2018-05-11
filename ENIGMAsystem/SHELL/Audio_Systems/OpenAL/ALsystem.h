@@ -36,12 +36,13 @@ extern ALfloat listenerPos[];
 extern ALfloat listenerVel[];
 extern ALfloat listenerOri[];
 
+#include <list>
+using std::list;
+extern list<ALuint> garbageBuffers;
+
 #include "SoundResource.h"
 
-#include <list>
-
 namespace enigma {
-  extern list<ALuint> garbageBuffers;
   extern size_t sound_idmax;
 
   int get_free_channel(double priority);
@@ -52,9 +53,17 @@ namespace enigma {
         show_error("Sound " + enigma_user::toString(id) + " does not exist", false);\
         return failure;\
       } SoundResource *const snd = sound_resources[id];
+    #define get_soundv(snd,id)\
+      if (id < 0 or sound_resources.find(id)==sound_resources.end() or !sound_resources[id]) {\
+        show_error("Sound " + enigma_user::toString(id) + " does not exist", false);\
+        return;\
+      } SoundResource *const snd = sound_resources[id];
   #else
     #define get_sound(snd,id,failure)\
       if (id < 0) return failure;\
+      SoundResource *const snd = sound_resources[id];
+    #define get_soundv(snd,id)\
+      if (id < 0) return;\
       SoundResource *const snd = sound_resources[id];
   #endif
 
