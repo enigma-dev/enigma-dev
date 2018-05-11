@@ -18,13 +18,8 @@
 
 #ifndef ENIGMA_SOUND_RESOURCE_H
 #define ENIGMA_SOUND_RESOURCE_H
-#include "../General/ASadvanced.h"
 
-#ifdef __APPLE__
-#include "../../../additional/alure/include/AL/alure.h"
-#else
-#include <AL/alure.h>
-#endif
+#include "ALsystem.h"
 
 #ifdef DEBUG_MODE
 #include "libEGMstd.h"
@@ -35,7 +30,6 @@
 
 enum load_state {
     LOADSTATE_NONE,
-    LOADSTATE_SOURCED,
     LOADSTATE_INDICATED,
     LOADSTATE_COMPLETE
 };
@@ -61,7 +55,7 @@ struct SoundResource
 	}
 
 	~SoundResource() {
-
+        garbageBuffers.push_back(buf[0]);
 	}
 };
 
