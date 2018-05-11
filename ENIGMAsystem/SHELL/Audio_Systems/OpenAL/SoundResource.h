@@ -55,7 +55,7 @@ struct SoundResource
 	}
 
 	~SoundResource() {
-
+        enigma::garbageBuffers.push_back(buf[0]);
 	}
 };
 

@@ -117,17 +117,16 @@ void sound_stop_all() {
 void sound_delete(int sound) {
   if (sound_resources.find(sound)!=sound_resources.end()) {
     if (sound_resources[sound]) {
-      sound_stop(sound);
-      get_sound(snd,sound,);
+      get_soundv(snd,sound);
       alureDestroyStream(snd->stream, 0, 0);
       delete sound_resources[sound];
+      sound_resources[sound] = 0;
     }
-    sound_resources.erase(sound);
   }
 }
 
 void sound_pan(int sound, float value) {
-  get_sound(snd,sound,);
+  get_soundv(snd,sound);
   snd->pan = value;
   for (size_t i = 0; i < sound_channels.size(); i++) {
     if (sound_channels[i]->soundIndex == sound) {
@@ -138,7 +137,7 @@ void sound_pan(int sound, float value) {
 }
 
 void sound_volume(int sound, float value) {
-  get_sound(snd,sound,);
+  get_soundv(snd,sound);
   snd->volume = value;
   for (size_t i = 0; i < sound_channels.size(); i++) {
     if (sound_channels[i]->soundIndex == sound) {
@@ -148,7 +147,7 @@ void sound_volume(int sound, float value) {
 }
 
 void sound_pitch(int sound, float value) {
-  get_sound(snd,sound,);
+  get_soundv(snd,sound);
   snd->pitch = value;
   for (size_t i = 0; i < sound_channels.size(); i++) {
     if (sound_channels[i]->soundIndex == sound) {
@@ -230,7 +229,7 @@ float sound_get_position(int sound) { // Not for Streams
 }
 
 void sound_seek(int sound, float position) {
-  get_sound(snd,sound,);
+  get_soundv(snd,sound);
   if (snd->seek) snd->seek(snd->userdata, position); // Streams
   for (size_t i = 0; i < sound_channels.size(); i++) {
     if (sound_channels[i]->soundIndex == sound) {
@@ -254,7 +253,7 @@ void sound_seek_all(float position) {
 
 void action_sound(int snd, bool loop)
 {
-    (loop ? sound_loop:sound_play)(snd);
+  (loop ? sound_loop:sound_play)(snd);
 }
 
 const char* sound_get_audio_error() {

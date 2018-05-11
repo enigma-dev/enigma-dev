@@ -340,11 +340,11 @@ void audio_delete(int sound)
 {
   if (sound_resources.find(sound)!=sound_resources.end()) {
     if (sound_resources[sound]) {
-      get_sound(snd,sound,);
+      get_soundv(snd,sound);
       alureDestroyStream(snd->stream, 0, 0);
       delete sound_resources[sound];
+      sound_resources[sound] = 0;
     }
-    sound_resources.erase(sound);
   }
 }
 

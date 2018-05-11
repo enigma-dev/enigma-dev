@@ -16,21 +16,24 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
-#include <stdio.h>
-#include <vector>
-#include <map>
-using std::vector;
-using std::map;
 
 #include "ALsystem.h"
 #include "SoundChannel.h"
 #include "SoundResource.h"
 #include "SoundEmitter.h"
 
+#include "Widget_Systems/widgets_mandatory.h" // show_error
+
 #include <time.h>
 clock_t starttime;
 clock_t elapsedtime;
 clock_t lasttime;
+
+#include <stdio.h>
+#include <vector>
+#include <map>
+using std::vector;
+using std::map;
 
 bool load_al_dll();
 size_t channel_num = 128;
@@ -43,14 +46,12 @@ vector<SoundChannel*> sound_channels(0);
 map<int, SoundResource*> sound_resources;
 vector<SoundEmitter*> sound_emitters(0);
 
-#include "Widget_Systems/widgets_mandatory.h" // show_error
-
 namespace {
 int next_sound_id = 0; //ID of the next sound to allocate (GM does not actually re-use sound IDs).
 }
 
-
 namespace enigma {
+  list<ALuint> garbageBuffers; // OpenAL buffers queued for deletion
 
   int get_free_channel(double priority)
   {
@@ -152,7 +153,9 @@ namespace enigma {
   {
     get_sound(snd, id, -1);
 
-    ALboolean res = alureBufferDataFromFile(fname.c_str(), snd->buf[0]);
+    ALuint& buf = snd->buf[0];
+    garbageBuffers.push_back(buf);
+    buf = alureCreateBufferFromFile(fname.c_str());
 
     if (res == AL_FALSE) {
       fprintf(stderr, "Could not replace sound %d from file %s: %s\n", id, fname.c_str(), alureGetErrorString());
@@ -191,6 +194,27 @@ namespace enigma {
 
   void audiosystem_update(void)
   {
+    map<ALuint, int> bufferReferences;
+    // count how many sources are still referencing each buffer
+    for (SoundChannel* channel : sound_channels) {
+      ALuint buffer;
+      alGetSourcei(channel->source, AL_BUFFER, &buffer);
+
+      ALint state;
+      alGetSourcei(channel->source, AL_SOURCE_STATE, &state);
+
+      bufferReferences[buffer] += (state == AL_PLAYING);
+    }
+    // remove garbage buffers that are no longer referenced by sources
+    for (auto it = garbageBuffers.begin(); it != garbageBuffers.end();) {
+      ALuint buffer = *it;
+      if (bufferReferences.find(buffer) == bufferReferences.end()) {
+        alDeleteBuffers(1, &buffer);
+        it = garbageBuffers.erase(it);
+      } else {
+        ++it;
+      }
+    }
     alureUpdate();
   }
 

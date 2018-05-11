@@ -38,7 +38,10 @@ extern ALfloat listenerOri[];
 
 #include "SoundResource.h"
 
+#include <list>
+
 namespace enigma {
+  extern list<ALuint> garbageBuffers;
   extern size_t sound_idmax;
 
   int get_free_channel(double priority);
