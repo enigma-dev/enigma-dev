@@ -1,5 +1,6 @@
 /** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton
 *** Copyright (C) 2014 Seth N. Hetu
+*** Copyright (C) 2018 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,21 +16,24 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
-#include <stdio.h>
-#include <vector>
-#include <map>
-using std::vector;
-using std::map;
 
 #include "ALsystem.h"
 #include "SoundChannel.h"
 #include "SoundResource.h"
 #include "SoundEmitter.h"
 
+#include "Widget_Systems/widgets_mandatory.h" // show_error
+
 #include <time.h>
 clock_t starttime;
 clock_t elapsedtime;
 clock_t lasttime;
+
+#include <stdio.h>
+#include <vector>
+#include <map>
+using std::vector;
+using std::map;
 
 bool load_al_dll();
 size_t channel_num = 128;
@@ -42,15 +46,13 @@ vector<SoundChannel*> sound_channels(0);
 map<int, SoundResource*> sound_resources;
 vector<SoundEmitter*> sound_emitters(0);
 
-#include "Widget_Systems/widgets_mandatory.h" // show_error
+list<ALuint> garbageBuffers; // OpenAL buffers queued for deletion
 
 namespace {
 int next_sound_id = 0; //ID of the next sound to allocate (GM does not actually re-use sound IDs).
 }
 
-
 namespace enigma {
-
   int get_free_channel(double priority)
   {
     // test for channels not playing anything
@@ -111,41 +113,53 @@ namespace enigma {
     return 0;
   }
 
-  SoundResource* sound_new_with_source() {
-    SoundResource *res = new SoundResource();
-    alGetError();
-    int a = alGetError();
-    if(a != AL_NO_ERROR) {
-      fprintf(stderr, "Failed to create OpenAL source! Error %d: %s\n",a,alGetString(a));
-      printf("%d %d %d %d %d\n",AL_INVALID_NAME,AL_INVALID_ENUM,AL_INVALID_VALUE,AL_INVALID_OPERATION,AL_OUT_OF_MEMORY);
-      delete res;
-      return NULL;
-    }
-    res->loaded = LOADSTATE_SOURCED;
-    return res;
-  }
-
   int sound_add_from_buffer(int id, void* buffer, size_t bufsize)
   {
-    if (sound_resources.find(id)!=sound_resources.end() && sound_resources[id]) {
-      fprintf(stderr, "Sound id %d collides with existing id (for internally-managed ids).\n", id);
-      return 3;
-    }
-
-    SoundResource *snd = sound_new_with_source();
+    SoundResource *snd = new SoundResource();
     sound_resources[id] = snd;
     if (id>=next_sound_id) { next_sound_id=id+1; }
 
-    if (snd->loaded != LOADSTATE_SOURCED) {
-      fprintf(stderr, "Could not load sound %d: %s\n", id, alureGetErrorString());
-      return 1;
-    }
     ALuint& buf = snd->buf[0];
     buf = alureCreateBufferFromMemory((ALubyte*)buffer, bufsize);
 
     if(!buf) {
-      fprintf(stderr, "Could not load sound %d: %s\n", id, alureGetErrorString());
-      return 2;
+      fprintf(stderr, "Could not load sound %d from memory buffer: %s\n", id, alureGetErrorString());
+      return 1;
+    }
+
+    snd->loaded = LOADSTATE_COMPLETE;
+    return 0;
+  }
+
+  int sound_add_from_file(int id, string fname)
+  {
+    SoundResource *snd = new SoundResource();
+    sound_resources[id] = snd;
+    if (id>=next_sound_id) { next_sound_id=id+1; }
+
+    ALuint& buf = snd->buf[0];
+    buf = alureCreateBufferFromFile(fname.c_str());
+
+    if(!buf) {
+      fprintf(stderr, "Could not add sound %d from file %s: %s\n", id, fname.c_str(), alureGetErrorString());
+      return 1;
+    }
+
+    snd->loaded = LOADSTATE_COMPLETE;
+    return 0;
+  }
+
+  int sound_replace_from_file(int id, string fname)
+  {
+    get_sound(snd, id, -1);
+
+    ALuint& buf = snd->buf[0];
+    garbageBuffers.push_back(buf);
+    buf = alureCreateBufferFromFile(fname.c_str());
+
+    if (!buf) {
+      fprintf(stderr, "Could not replace sound %d from file %s: %s\n", id, fname.c_str(), alureGetErrorString());
+      return 1;
     }
 
     snd->loaded = LOADSTATE_COMPLETE;
@@ -154,17 +168,9 @@ namespace enigma {
 
   int sound_add_from_stream(int id, size_t (*callback)(void *userdata, void *buffer, size_t size), void (*seek)(void *userdata, float position), void (*cleanup)(void *userdata), void *userdata)
   {
-    if (sound_resources.find(id)!=sound_resources.end() && sound_resources[id]) {
-      fprintf(stderr, "Sound id %d collides with existing id (for internally-managed ids).\n", id);
-      return 3;
-    }
-
-    SoundResource *snd = sound_new_with_source();
+    SoundResource *snd = new SoundResource();
     sound_resources[id] = snd;
     if (id>=next_sound_id) { next_sound_id=id+1; }
-
-    if (snd->loaded != LOADSTATE_SOURCED)
-      return 1;
 
     snd->stream = alureCreateStreamFromCallback((ALuint (*)(void*, ALubyte*, ALuint))callback, userdata, AL_FORMAT_STEREO16, 44100, 4096, 0, NULL);
     if (!snd->stream) {
@@ -188,12 +194,32 @@ namespace enigma {
 
   void audiosystem_update(void)
   {
+    map<ALuint, int> bufferReferences;
+    // count how many sources are still referencing each buffer
+    for (SoundChannel* channel : sound_channels) {
+      ALint buffer, state;
+      alGetSourcei(channel->source, AL_BUFFER, &buffer);
+      alGetSourcei(channel->source, AL_SOURCE_STATE, &state);
+
+      bufferReferences[buffer] += (state == AL_PLAYING);
+    }
+    // remove garbage buffers that are no longer referenced by sources
+    for (auto it = garbageBuffers.begin(); it != garbageBuffers.end();) {
+      ALuint buffer = *it;
+      if (bufferReferences.find(buffer) == bufferReferences.end()) {
+        alDeleteBuffers(1, &buffer);
+        it = garbageBuffers.erase(it);
+      } else {
+        ++it;
+      }
+    }
     alureUpdate();
   }
 
   void audiosystem_cleanup()
   {
-    for (std::map<int, SoundResource*>::iterator it=sound_resources.begin(); it!=sound_resources.end(); it++) 
+    // cleanup sound resources
+    for (std::map<int, SoundResource*>::iterator it=sound_resources.begin(); it!=sound_resources.end(); it++)
     {
       SoundResource* sr = it->second;
       if (!sr) { continue; }
@@ -205,18 +231,17 @@ namespace enigma {
             alureDestroyStream(sr->stream, 0, 0);
             if (sr->cleanup) sr->cleanup(sr->userdata);
           }
-          // fallthrough
-        case LOADSTATE_SOURCED:
-          for (size_t j = 0; j < sound_channels.size(); j++) {
-            alureStopSource(sound_channels[j]->source, true);
-            alDeleteSources(1, &sound_channels[j]->source);
-          }
-          break;
-  
+        // fallthrough
         case LOADSTATE_INDICATED:
         case LOADSTATE_NONE:
         default: ;
       }
+    }
+
+    // cleanup sound channels
+    for (size_t j = 0; j < sound_channels.size(); j++) {
+      alureStopSource(sound_channels[j]->source, true);
+      alDeleteSources(1, &sound_channels[j]->source);
     }
 
     alureShutdownDevice();
