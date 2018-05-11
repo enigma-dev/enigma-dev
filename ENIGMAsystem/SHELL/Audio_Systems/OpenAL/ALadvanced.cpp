@@ -329,46 +329,22 @@ int audio_system()
 
 int audio_add(string fname)
 {
-  // Open sound
-  FILE *afile = fopen(fname.c_str(),"rb");
-  if (!afile)
-    return -1;
-
-  // Buffer sound
-  fseek(afile,0,SEEK_END);
-  const size_t flen = ftell(afile);
-  char *fdata = new char[flen];
-  fseek(afile,0,SEEK_SET);
-  if (fread(fdata,1,flen,afile) != flen)
-    puts("WARNING: Resource stream cut short while loading sound data");
-  fclose(afile);
-
   // Decode sound
   int rid = enigma::sound_allocate();
-  bool fail = enigma::sound_add_from_buffer(rid,fdata,flen);
-  delete [] fdata;
+  bool fail = enigma::sound_add_from_file(rid,fname);
 
-  if (fail)
-    return -1;
-  return rid;
+  return (fail ? -1 : rid);
 }
 
 void audio_delete(int sound)
 {
   if (sound_resources.find(sound)!=sound_resources.end()) {
     if (sound_resources[sound]) {
-      get_sound(snd,sound,);
+      get_soundv(snd,sound);
       alureDestroyStream(snd->stream, 0, 0);
-      for(size_t i = 0; i < sound_channels.size(); i++) {
-        if (sound_channels[i]->soundIndex == sound) {
-          alDeleteSources(1, &sound_channels[i]->source);
-          sound_channels[i]->soundIndex=-1;
-          audio_stop_sound(i);
-        }
-      }
       delete sound_resources[sound];
+      sound_resources[sound] = 0;
     }
-    sound_resources.erase(sound);
   }
 }
 

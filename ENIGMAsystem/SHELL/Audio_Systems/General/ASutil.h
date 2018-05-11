@@ -1,4 +1,5 @@
 /** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton
+*** Copyright (C) 2018 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,28 +16,31 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef ENIGMA_SOUND_CHANNEL_H
-#define ENIGMA_SOUND_CHANNEL_H
+#ifndef ENIGMA_AS_UTIL_H
+#define ENIGMA_AS_UTIL_H
 
-#include "ALsystem.h"
+#include <string>
+using std::string;
 
-#ifdef DEBUG_MODE
-#include "libEGMstd.h"
-#include "Widget_Systems/widgets_mandatory.h" // show_error
-#endif
+namespace enigma {
 
-#include <vector>
-using std::vector;
+inline char* read_all_bytes(string fname, size_t &flen) {
+  FILE *afile = fopen(fname.c_str(),"rb");
+  if (!afile)
+    return NULL;
 
-struct SoundChannel {
-ALuint source;
-int soundIndex;
-double priority;
-SoundChannel(ALuint alsource, int sound_id): source(alsource), soundIndex(sound_id), priority(0) {}
-~SoundChannel() {}
+  // Buffer sound
+  fseek(afile,0,SEEK_END);
+  flen = ftell(afile);
+  char *fdata = new char[flen];
+  fseek(afile,0,SEEK_SET);
+  if (fread(fdata,1,flen,afile) != flen)
+    puts("WARNING: Resource stream cut short while loading sound data");
+  fclose(afile);
 
-};
+  return fdata;
+}
 
-extern vector<SoundChannel*> sound_channels;
+} // namespace enigma
 
-#endif
+#endif // ENIGMA_AS_UTIL_H

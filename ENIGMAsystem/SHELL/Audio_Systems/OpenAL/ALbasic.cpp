@@ -31,12 +31,6 @@ using std::string;
 #include "SoundEmitter.h"
 #include "ALsystem.h"
 
-#ifdef __APPLE__
-#include "../../../additional/alure/include/AL/alure.h"
-#else
-#include <AL/alure.h>
-#endif
-
 #ifdef DEBUG_MODE
 #include "libEGMstd.h"
 #include "Widget_Systems/widgets_mandatory.h" // show_error
@@ -123,23 +117,16 @@ void sound_stop_all() {
 void sound_delete(int sound) {
   if (sound_resources.find(sound)!=sound_resources.end()) {
     if (sound_resources[sound]) {
-      sound_stop(sound);
-      get_sound(snd,sound,);
+      get_soundv(snd,sound);
       alureDestroyStream(snd->stream, 0, 0);
-      for (size_t i = 0; i < sound_channels.size(); i++) {
-        if (sound_channels[i]->soundIndex == sound) {
-          alDeleteSources(1, &sound_channels[i]->source);
-          sound_channels[i]->soundIndex=-1;
-        }
-      }
       delete sound_resources[sound];
+      sound_resources[sound] = 0;
     }
-    sound_resources.erase(sound);
   }
 }
 
 void sound_pan(int sound, float value) {
-  get_sound(snd,sound,);
+  get_soundv(snd,sound);
   snd->pan = value;
   for (size_t i = 0; i < sound_channels.size(); i++) {
     if (sound_channels[i]->soundIndex == sound) {
@@ -150,7 +137,7 @@ void sound_pan(int sound, float value) {
 }
 
 void sound_volume(int sound, float value) {
-  get_sound(snd,sound,);
+  get_soundv(snd,sound);
   snd->volume = value;
   for (size_t i = 0; i < sound_channels.size(); i++) {
     if (sound_channels[i]->soundIndex == sound) {
@@ -160,7 +147,7 @@ void sound_volume(int sound, float value) {
 }
 
 void sound_pitch(int sound, float value) {
-  get_sound(snd,sound,);
+  get_soundv(snd,sound);
   snd->pitch = value;
   for (size_t i = 0; i < sound_channels.size(); i++) {
     if (sound_channels[i]->soundIndex == sound) {
@@ -242,7 +229,7 @@ float sound_get_position(int sound) { // Not for Streams
 }
 
 void sound_seek(int sound, float position) {
-  get_sound(snd,sound,);
+  get_soundv(snd,sound);
   if (snd->seek) snd->seek(snd->userdata, position); // Streams
   for (size_t i = 0; i < sound_channels.size(); i++) {
     if (sound_channels[i]->soundIndex == sound) {
@@ -266,7 +253,7 @@ void sound_seek_all(float position) {
 
 void action_sound(int snd, bool loop)
 {
-    (loop ? sound_loop:sound_play)(snd);
+  (loop ? sound_loop:sound_play)(snd);
 }
 
 const char* sound_get_audio_error() {
@@ -284,28 +271,11 @@ namespace enigma_user
 
 int sound_add(string fname, int kind, bool preload) //At the moment, the latter two arguments do nothing! =D
 {
-  // Open sound
-  FILE *afile = fopen(fname.c_str(),"rb");
-  if (!afile)
-    return -1;
-
-  // Buffer sound
-  fseek(afile,0,SEEK_END);
-  const size_t flen = ftell(afile);
-  char *fdata = new char[flen];
-  fseek(afile,0,SEEK_SET);
-  if (fread(fdata,1,flen,afile) != flen)
-    puts("WARNING: Resource stream cut short while loading sound data");
-  fclose(afile);
-
   // Decode sound
   int rid = enigma::sound_allocate();
-  bool fail = enigma::sound_add_from_buffer(rid,fdata,flen);
-  delete [] fdata;
+  bool fail = enigma::sound_add_from_file(rid,fname);
 
-  if (fail)
-    return -1;
-  return rid;
+  return (fail ? -1 : rid);
 }
 
 bool sound_replace(int sound, string fname, int kind, bool preload)
@@ -313,33 +283,9 @@ bool sound_replace(int sound, string fname, int kind, bool preload)
   if (sound_resources.find(sound)!=sound_resources.end() && sound_resources[sound]) {
     get_sound(snd,sound,false);
     alureDestroyStream(snd->stream, 0, 0);
-    for(size_t i = 0; i < sound_channels.size(); i++) {
-      if (sound_channels[i]->soundIndex == sound)
-      {
-        alDeleteSources(1, &sound_channels[i]->source);
-      }
-    }
   }
-  sound_resources[sound] = enigma::sound_new_with_source();
 
-  // Open sound
-  FILE *afile = fopen(fname.c_str(),"rb");
-  if (!afile)
-    return -1;
-
-  // Buffer sound
-  fseek(afile,0,SEEK_END);
-  const size_t flen = ftell(afile);
-  char *fdata = new char[flen];
-  fseek(afile,0,SEEK_SET);
-  if (fread(fdata,1,flen,afile) != flen)
-    puts("WARNING: Resource stream cut short while loading sound data");
-  fclose(afile);
-
-  // Decode sound
-  bool fail = enigma::sound_add_from_buffer(sound,fdata,flen);
-  delete [] fdata;
-  return fail;
+  return enigma::sound_replace_from_file(sound,fname);
 }
 
 void sound_3d_set_sound_cone(int sound, float x, float y, float z, double anglein, double angleout, long voloutside) {

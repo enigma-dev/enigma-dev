@@ -24,12 +24,6 @@
 #include <dsound.h>
 
 extern IDirectSoundBuffer* primaryBuffer;
-extern int falloff_model;
-extern size_t channel_num;
-
-extern float listenerPos[];
-extern float listenerVel[];
-extern float listenerOri[];
 
 #include "SoundResource.h"
 
@@ -43,15 +37,15 @@ namespace enigma {
         show_error("Sound " + enigma_user::toString(id) + " does not exist", false);\
         return failure;\
       } SoundResource *const snd = sound_resources[id];
-	#define get_soundv(snd,id)\
+  #define get_soundv(snd,id)\
       if (id < 0 or size_t(id) >= sound_resources.size() or !sound_resources[id]) {\
         show_error("Sound " + enigma_user::toString(id) + " does not exist", false);\
-		return;\
+        return;\
       } SoundResource *const snd = sound_resources[id];
   #else
     #define get_sound(snd,id,failure)\
       SoundResource *const snd = sound_resources[id];
-	#define get_soundv(snd,id)\
+  #define get_soundv(snd,id)\
       SoundResource *const snd = sound_resources[id];
   #endif
 
