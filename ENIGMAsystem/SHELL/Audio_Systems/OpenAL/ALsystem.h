@@ -43,40 +43,44 @@ extern list<ALuint> garbageBuffers;
 #include "SoundResource.h"
 
 namespace enigma {
-  extern size_t sound_idmax;
+extern size_t sound_idmax;
 
-  int get_free_channel(double priority);
+int get_free_channel(double priority);
 
-  #ifdef DEBUG_MODE
-    #define get_sound(snd,id,failure)\
-      if (id < 0 or sound_resources.find(id)==sound_resources.end() or !sound_resources[id]) {\
-        show_error("Sound " + enigma_user::toString(id) + " does not exist", false);\
-        return failure;\
-      } SoundResource *const snd = sound_resources[id];
-    #define get_soundv(snd,id)\
-      if (id < 0 or sound_resources.find(id)==sound_resources.end() or !sound_resources[id]) {\
-        show_error("Sound " + enigma_user::toString(id) + " does not exist", false);\
-        return;\
-      } SoundResource *const snd = sound_resources[id];
-  #else
-    #define get_sound(snd,id,failure)\
-      if (id < 0) return failure;\
-      SoundResource *const snd = sound_resources[id];
-    #define get_soundv(snd,id)\
-      if (id < 0) return;\
-      SoundResource *const snd = sound_resources[id];
-  #endif
+#ifdef DEBUG_MODE
+#define get_sound(snd, id, failure)                                                          \
+  if (id < 0 or sound_resources.find(id) == sound_resources.end() or !sound_resources[id]) { \
+    show_error("Sound " + enigma_user::toString(id) + " does not exist", false);             \
+    return failure;                                                                          \
+  }                                                                                          \
+  SoundResource *const snd = sound_resources[id];
+#define get_soundv(snd, id)                                                                  \
+  if (id < 0 or sound_resources.find(id) == sound_resources.end() or !sound_resources[id]) { \
+    show_error("Sound " + enigma_user::toString(id) + " does not exist", false);             \
+    return;                                                                                  \
+  }                                                                                          \
+  SoundResource *const snd = sound_resources[id];
+#else
+#define get_sound(snd, id, failure) \
+  if (id < 0) return failure;       \
+  SoundResource *const snd = sound_resources[id];
+#define get_soundv(snd, id) \
+  if (id < 0) return;       \
+  SoundResource *const snd = sound_resources[id];
+#endif
 
-  void eos_callback(void *soundID, ALuint src);
-  int audiosystem_initialize();
-  SoundResource* sound_new_with_source();
-  int sound_add_from_buffer(int id, void* buffer, size_t bufsize);
-  int sound_add_from_file(int id, string fname);
-  int sound_replace_from_file(int id, string fname);
-  int sound_add_from_stream(int id, size_t (*callback)(void *userdata, void *buffer, size_t size), void (*seek)(void *userdata, float position), void (*cleanup)(void *userdata), void *userdata);
-  int sound_allocate();
-  void audiosystem_update(void);
-  void audiosystem_cleanup();
-}
+void eos_callback(void *soundID, ALuint src);
+int audiosystem_initialize();
+SoundResource *sound_new_with_source();
+int sound_add_from_buffer(int id, void *buffer, size_t bufsize);
+int sound_add_from_file(int id, string fname);
+int sound_replace_from_file(int id, string fname);
+int sound_add_from_stream(int id, size_t (*callback)(void *userdata, void *buffer, size_t size),
+                          void (*seek)(void *userdata, float position), void (*cleanup)(void *userdata),
+                          void *userdata);
+int sound_allocate();
+void audiosystem_update(void);
+void audiosystem_cleanup();
+}  // namespace enigma
 
 #endif

@@ -21,20 +21,19 @@
 #include "ALsystem.h"
 
 #ifdef DEBUG_MODE
+#include "Widget_Systems/widgets_mandatory.h"  // show_error
 #include "libEGMstd.h"
-#include "Widget_Systems/widgets_mandatory.h" // show_error
 #endif
 
 #include <vector>
 using std::vector;
 
 struct SoundChannel {
-ALuint source;
-int soundIndex;
-double priority;
-SoundChannel(ALuint alsource, int sound_id): source(alsource), soundIndex(sound_id), priority(0) {}
-~SoundChannel() {}
-
+  ALuint source;
+  int soundIndex;
+  double priority;
+  SoundChannel(ALuint alsource, int sound_id) : source(alsource), soundIndex(sound_id), priority(0) {}
+  ~SoundChannel() {}
 };
 
 extern vector<SoundChannel*> sound_channels;
