@@ -25,167 +25,170 @@
 **                                                                              **
 \********************************************************************************/
 
-#ifndef X86_WIN32  
-#define X86_WIN32 
+#ifndef X86_WIN32
+#define X86_WIN32
 #endif
 
+#include <windows.h>
 #include <map>
 #include <string>
-#include <windows.h>
 
 #include <ffi.h>
-#include "Universal_System/var4.h"
 #include "Universal_System/estring.h"
+#include "Universal_System/var4.h"
 
+#include "Platforms/General/PFexternals.h"
 #include "Platforms/platforms_mandatory.h"
 #include "Widget_Systems/widgets_mandatory.h"
-#include "Platforms/General/PFexternals.h"
 
 #include <cstdio>
 
 using namespace std;
 
-struct external
-{
+struct external {
   ffi_cif cif;
-  int argc,restype;
+  int argc, restype;
   ffi_type **arg_type;
   void (*functionptr)();
-  
-  external(int acount,int returntype)
-  {
-    argc=acount;
-    restype=returntype;
-    arg_type=new ffi_type*[acount];
+
+  external(int acount, int returntype) {
+    argc = acount;
+    restype = returntype;
+    arg_type = new ffi_type *[acount];
   }
-  ~external()
-  {
-    delete[] arg_type;
-  }
+  ~external() { delete[] arg_type; }
 };
 
 std::map<std::string, HMODULE> dllHandles;
-map<int,external*> externals;
-int external_count=0;
+map<int, external *> externals;
+int external_count = 0;
 
-namespace enigma_user
-{
+namespace enigma_user {
 
-int external_define(string dll,string func,int calltype,bool returntype,int argcount,
-                    bool t01,bool t02,bool t03,bool t04,bool t05,bool t06,bool t07,bool t08,
-                    bool t09,bool t10,bool t11,bool t12,bool t13,bool t14,bool t15,bool t16)
-{
+int external_define(string dll, string func, int calltype, bool returntype, int argcount, bool t01, bool t02, bool t03,
+                    bool t04, bool t05, bool t06, bool t07, bool t08, bool t09, bool t10, bool t11, bool t12, bool t13,
+                    bool t14, bool t15, bool t16) {
   ffi_status status;
 
-  int ac=(argcount>16)?16:((int)argcount);
-  external *a = new external(ac,(int)returntype);
+  int ac = (argcount > 16) ? 16 : ((int)argcount);
+  external *a = new external(ac, (int)returntype);
 
-  switch (ac)
-  {
-    case 16: a->arg_type[15] = (t16 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
-    case 15: a->arg_type[14] = (t15 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
-    case 14: a->arg_type[13] = (t14 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
-    case 13: a->arg_type[12] = (t13 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
-    case 12: a->arg_type[11] = (t12 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
-    case 11: a->arg_type[10] = (t11 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
-    case 10: a->arg_type[ 9] = (t10 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
-    case 9:  a->arg_type[ 8] = (t09 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
-    case 8:  a->arg_type[ 7] = (t08 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
-    case 7:  a->arg_type[ 6] = (t07 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
-    case 6:  a->arg_type[ 5] = (t06 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
-    case 5:  a->arg_type[ 4] = (t05 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
-    case 4:  a->arg_type[ 3] = (t04 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
-    case 3:  a->arg_type[ 2] = (t03 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
-    case 2:  a->arg_type[ 1] = (t02 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
-    case 1:  a->arg_type[ 0] = (t01 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
+  switch (ac) {
+    case 16:
+      a->arg_type[15] = (t16 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
+    case 15:
+      a->arg_type[14] = (t15 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
+    case 14:
+      a->arg_type[13] = (t14 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
+    case 13:
+      a->arg_type[12] = (t13 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
+    case 12:
+      a->arg_type[11] = (t12 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
+    case 11:
+      a->arg_type[10] = (t11 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
+    case 10:
+      a->arg_type[9] = (t10 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
+    case 9:
+      a->arg_type[8] = (t09 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
+    case 8:
+      a->arg_type[7] = (t08 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
+    case 7:
+      a->arg_type[6] = (t07 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
+    case 6:
+      a->arg_type[5] = (t06 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
+    case 5:
+      a->arg_type[4] = (t05 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
+    case 4:
+      a->arg_type[3] = (t04 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
+    case 3:
+      a->arg_type[2] = (t03 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
+    case 2:
+      a->arg_type[1] = (t02 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
+    case 1:
+      a->arg_type[0] = (t01 == ty_real) ? &ffi_type_double : &ffi_type_pointer;
   }
 
   ffi_type *restype = (returntype == ty_real) ? &ffi_type_double : &ffi_type_pointer;
-  status=ffi_prep_cif(&(a->cif), ((calltype==dll_stdcall)?FFI_STDCALL:FFI_DEFAULT_ABI), ac, restype, a->arg_type);
+  status =
+      ffi_prep_cif(&(a->cif), ((calltype == dll_stdcall) ? FFI_STDCALL : FFI_DEFAULT_ABI), ac, restype, a->arg_type);
 
-  if (status != FFI_OK)
-  {
-    show_error("Defining DLL failed.",0);
+  if (status != FFI_OK) {
+    show_error("Defining DLL failed.", 0);
     return -1;
   }
 
   HMODULE dllmod;
   std::map<std::string, HMODULE>::iterator dllIt;
-  if ((dllIt=dllHandles.find(dll)) == dllHandles.end())
-  	dllmod = LoadLibrary(dll.c_str());
-  else
-  {
+  if ((dllIt = dllHandles.find(dll)) == dllHandles.end())
+    dllmod = LoadLibrary(dll.c_str());
+  else {
     printf("LOADING PREEXISTING HANDLE");
     dllmod = dllHandles[dll];
   }
 
-  if (dllmod == NULL)
-  {
+  if (dllmod == NULL) {
     show_error(std::string("Cannot load library \"") + dll + std::string("\"!"), 0);
     return -1;
   }
 
-  FARPROC funcptr = GetProcAddress(dllmod,func.c_str());
-  if (funcptr==NULL)
-  {
+  FARPROC funcptr = GetProcAddress(dllmod, func.c_str());
+  if (funcptr == NULL) {
     show_error(std::string("No such function \"") + func + std::string("\"."), 0);
     return -1;
   }
 
-  a->functionptr=(void(*)())funcptr;
+  a->functionptr = (void (*)())funcptr;
 
-  int ind=external_count++;
-  externals[ind]=a;
+  int ind = external_count++;
+  externals[ind] = a;
 
   return ind;
 }
 
-}
+}  // namespace enigma_user
 
 using namespace enigma;
-union ambiguous { double d; const char* s; const void* p; };
+union ambiguous {
+  double d;
+  const char *s;
+  const void *p;
+};
 
-namespace enigma_user
-{
+namespace enigma_user {
 
-variant external_call(int id,variant a1,variant a2, variant a3, variant a4, variant a5, variant a6, variant a7, variant a8,
-                             variant a9,variant a10,variant a11,variant a12,variant a13,variant a14,variant a15,variant a16)
-{
-  map<int,external*>::iterator it;
-  if ((it=externals.find(id)) == externals.end())
-  {
+variant external_call(int id, variant a1, variant a2, variant a3, variant a4, variant a5, variant a6, variant a7,
+                      variant a8, variant a9, variant a10, variant a11, variant a12, variant a13, variant a14,
+                      variant a15, variant a16) {
+  map<int, external *>::iterator it;
+  if ((it = externals.find(id)) == externals.end()) {
     show_error("Unknown external function called", 0);
     return 0;
   }
-  external* a=it->second;
+  external *a = it->second;
 
   ambiguous array[a->argc];
   void *arg_values[a->argc];
 
-  variant args[] = { a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16 };
-  for (int i = 0; i < a->argc; ++i)
-  {
+  variant args[] = {a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15, a16};
+  for (int i = 0; i < a->argc; ++i) {
     if (a->arg_type[i] == &ffi_type_double)
       array[i].d = (double)args[i];
     else if (args[i].type == ty_pointer)
       array[i].p = args[i].rval.p;
     else
       array[i].s = ((string)args[i]).c_str();
-    arg_values[i]=&array[i];
+    arg_values[i] = &array[i];
   }
 
   ambiguous result;
   ffi_call(&(a->cif), a->functionptr, &result, arg_values);
-  if (a->restype==ty_string) return result.s;
+  if (a->restype == ty_string) return result.s;
   return result.d;
 }
 
-void external_free(std::string dll)
-{
+void external_free(std::string dll) {
   std::map<std::string, HMODULE>::iterator dllIt;
-  if ((dllIt=dllHandles.find(dll)) != dllHandles.end())
-    FreeLibrary(dllHandles[dll]);
+  if ((dllIt = dllHandles.find(dll)) != dllHandles.end()) FreeLibrary(dllHandles[dll]);
 }
 
-}
-
+}  // namespace enigma_user

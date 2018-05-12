@@ -28,9 +28,8 @@
 #include <map>
 using std::map;
 
-namespace enigma
-{
-  extern map<int,int> keybdmap;
-  void input_push();
-  void input_initialize();
-}
+namespace enigma {
+extern map<int, int> keybdmap;
+void input_push();
+void input_initialize();
+}  // namespace enigma

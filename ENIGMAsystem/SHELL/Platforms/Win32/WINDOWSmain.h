@@ -19,47 +19,41 @@
 #ifndef ENIGMA_WINDOWS_MAIN
 #define ENIGMA_WINDOWS_MAIN
 
-#include "../General/PFmain.h"
-#include <windows.h>
 #include <wchar.h>
+#include <windows.h>
 #include <string>
 #include <vector>
+#include "../General/PFmain.h"
 using std::string;
 using std::vector;
 
 typedef std::basic_string<WCHAR> tstring;
-tstring widen(const string &str);
+tstring widen(const string& str);
 string shorten(tstring str);
 
-namespace enigma //TODO: Find where this belongs
+namespace enigma  //TODO: Find where this belongs
 {
-  extern HINSTANCE hInstance;
-  extern HWND hWnd;
-  extern HDC window_hDC;
-  extern HANDLE mainthread;
-}
+extern HINSTANCE hInstance;
+extern HWND hWnd;
+extern HDC window_hDC;
+extern HANDLE mainthread;
+}  // namespace enigma
 
 void windowsystem_write_exename(char* exenamehere);
 
-namespace enigma_user
-{
+namespace enigma_user {
 
 //NOTE: window_handle() should never be used by the engine, other systems, such as bridges, can make direct use of the HWND
 #if GM_COMPATIBILITY_VERSION <= 81
-static inline unsigned long long window_handle() {
-  return (unsigned long long)enigma::hWnd;
-}
+static inline unsigned long long window_handle() { return (unsigned long long)enigma::hWnd; }
 #else
-static inline HWND window_handle() {
-  return enigma::hWnd;
-}
+static inline HWND window_handle() { return enigma::hWnd; }
 #endif
 
 int sleep(int millis);
-
 }
 
 void enigma_catchmouse_backend(bool x);
-#define enigmacatchmouse() enigma_catchmouse_backend(enigma::mousestatus[0]==1 && enigma::last_mousestatus[0]==1)
+#define enigmacatchmouse() enigma_catchmouse_backend(enigma::mousestatus[0] == 1 && enigma::last_mousestatus[0] == 1)
 
-#endif //ENIGMA_WINDOWS_MAIN
+#endif  //ENIGMA_WINDOWS_MAIN

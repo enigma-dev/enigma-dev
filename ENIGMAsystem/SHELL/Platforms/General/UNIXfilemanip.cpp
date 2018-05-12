@@ -15,10 +15,10 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include <sys/stat.h>
+#include <unistd.h>
 #include <cstdio>
 #include <cstdlib>
-#include <unistd.h>
-#include <sys/stat.h>
 
 #include <string>
 #include "PFfilemanip.h"
@@ -26,42 +26,28 @@ using namespace std;
 
 /* UNIX-ready port of file manipulation */
 
-namespace enigma_user
-{
+namespace enigma_user {
 
-int file_exists(string fname)
-{
+int file_exists(string fname) {
   struct stat st;
-  return (stat(fname.c_str(),&st) == 0) and !(S_ISDIR(st.st_mode));
+  return (stat(fname.c_str(), &st) == 0) and !(S_ISDIR(st.st_mode));
 }
 
-int file_delete(string fname)
-{
-  return remove(fname.c_str());
+int file_delete(string fname) { return remove(fname.c_str()); }
+
+int file_rename(string oldname, string newname) { return rename(oldname.c_str(), newname.c_str()); }
+
+int file_copy(string fname, string newname) {
+  return system(("cp " + fname + " " + newname).c_str());  // Hackish, but there's no good implementation on Linux
 }
 
-int file_rename(string oldname,string newname)
-{
-  return rename(oldname.c_str(),newname.c_str());
-}
-
-int file_copy(string fname,string newname)
-{
-  return system(("cp "+fname+" "+newname).c_str()); // Hackish, but there's no good implementation on Linux
-}
-
-int directory_exists(string dname)
-{
+int directory_exists(string dname) {
   struct stat st;
-  return (stat(dname.c_str(),&st) == 0) and (S_ISDIR(st.st_mode));
+  return (stat(dname.c_str(), &st) == 0) and (S_ISDIR(st.st_mode));
 }
 
-int directory_create(string dname) {
-  return mkdir(dname.c_str(),S_IRUSR|S_IWUSR|S_IXUSR);
-}
+int directory_create(string dname) { return mkdir(dname.c_str(), S_IRUSR | S_IWUSR | S_IXUSR); }
 
-int directory_delete(string dname) {
-  return rmdir(dname.c_str());
-}
+int directory_delete(string dname) { return rmdir(dname.c_str()); }
 
-}
+}  // namespace enigma_user
