@@ -18,137 +18,126 @@
 #ifndef DIRECTX9CONTEXTMANAGER
 #define DIRECTX9CONTEXTMANAGER
 
-#include <windows.h>
-#include <windowsx.h>
 #include <d3d9.h>
 #include <dxerr9.h>
+#include <windows.h>
+#include <windowsx.h>
 #include "Graphics_Systems/Direct3D9/Direct3D9Headers.h"
 #include "Graphics_Systems/General/GSmodel.h"
 #include "Platforms/Win32/WINDOWSmain.h"
 using namespace enigma_user;
 
-#include <vector>
 #include <map>
-using std::vector;
+#include <vector>
 using std::map;
+using std::vector;
 
-#include "Widget_Systems/widgets_mandatory.h"
-#include <sstream>
 #include <string.h>
+#include <sstream>
+#include "Widget_Systems/widgets_mandatory.h"
 using std::string;
 using std::stringstream;
 
-extern LPDIRECT3D9 d3dobj;    // the pointer to our Direct3D interface
+extern LPDIRECT3D9 d3dobj;  // the pointer to our Direct3D interface
 
 //TODO: Replace the fixed function pipeline with shaders
 
 class ContextManager {
-private:
+ private:
+  //Keep track of current shaders.
+  LPDIRECT3DPIXELSHADER9 pixelShader;
+  LPDIRECT3DVERTEXSHADER9 vertexShader;
 
-//Keep track of current shaders.
-LPDIRECT3DPIXELSHADER9	pixelShader;
-LPDIRECT3DVERTEXSHADER9	vertexShader;
+  // This is used for resetting the render target if it is changed
+  LPDIRECT3DSURFACE9 pBackBuffer;
+  LPDIRECT3DSURFACE9 pRenderTarget;
 
-// This is used for resetting the render target if it is changed
-LPDIRECT3DSURFACE9 pBackBuffer;
-LPDIRECT3DSURFACE9 pRenderTarget;
+  float last_depth;
+  unsigned last_stride;
+  bool hasdrawn;
+  int shapes_d3d_model;
+  int shapes_d3d_texture;
 
-float last_depth;
-unsigned last_stride;
-bool hasdrawn;
-int shapes_d3d_model;
-int shapes_d3d_texture;
+  bool renderingScene;
 
-bool renderingScene;
+ protected:
+  map<D3DRENDERSTATETYPE, DWORD> cacheRenderStates;                 /// cached RenderStates
+  map<DWORD, LPDIRECT3DTEXTURE9> cacheTextureStates;                /// cached Texture States
+  map<DWORD, map<D3DSAMPLERSTATETYPE, DWORD> > cacheSamplerStates;  /// cached Sampler States
+  map<DWORD, D3DLIGHT9> cacheLightStates;                           /// cached Light States
+  map<DWORD, BOOL> cacheLightEnable;                                /// cached Light States
 
-protected:
-   map< D3DRENDERSTATETYPE, DWORD > cacheRenderStates;                  /// cached RenderStates
-   map< DWORD, LPDIRECT3DTEXTURE9 > cacheTextureStates;                 /// cached Texture States
-   map< DWORD, map< D3DSAMPLERSTATETYPE, DWORD > > cacheSamplerStates;  /// cached Sampler States
-   map< DWORD, D3DLIGHT9 > cacheLightStates;                            /// cached Light States
-   map< DWORD, BOOL > cacheLightEnable;                                 /// cached Light States
+ public:
+  LPDIRECT3DDEVICE9 device;  // the pointer to the device class
 
-public:
-LPDIRECT3DDEVICE9 device;    // the pointer to the device class
+  ContextManager() {
+    hasdrawn = false;
+    shapes_d3d_model = -1;
+    shapes_d3d_texture = -1;
+    last_stride = 0;
+    vertexShader = NULL;
+    pixelShader = NULL;
+    last_depth = 0.0f;
+  }
 
-ContextManager() {
-	hasdrawn = false;
-	shapes_d3d_model = -1;
-	shapes_d3d_texture = -1;
-	last_stride = 0;
-	vertexShader = NULL;
-	pixelShader = NULL;
-	last_depth = 0.0f;
-}
+  ~ContextManager() {}
 
-~ContextManager() {
+  float GetDepth() { return last_depth; }
 
-}
+  //TODO: Write this method so that for debugging purposes we can dump the entire render state to a text file.
+  void DumpState() {}
 
-float GetDepth() {
-	return last_depth;
-}
+  //TODO: Write this method so that we can serialize and save the entire render state to be reloaded
+  void SaveState() {}
 
-//TODO: Write this method so that for debugging purposes we can dump the entire render state to a text file.
-void DumpState() {
+  //TODO: Write this method so that we can read and restore a previously saved render state
+  void LoadState() {}
 
-}
-
-//TODO: Write this method so that we can serialize and save the entire render state to be reloaded
-void SaveState() {
-
-}
-
-//TODO: Write this method so that we can read and restore a previously saved render state
-void LoadState() {
-
-}
-
-// Reapply the render states and other stuff to the device.
-void RestoreState() {
-	// Cached Texture Stage States
-	map< DWORD, LPDIRECT3DTEXTURE9 >::iterator tit = cacheTextureStates.begin();
+  // Reapply the render states and other stuff to the device.
+  void RestoreState() {
+    // Cached Texture Stage States
+    map<DWORD, LPDIRECT3DTEXTURE9>::iterator tit = cacheTextureStates.begin();
     while (tit != cacheTextureStates.end()) {
-		device->SetTexture(tit->first, tit->second);
-		tit++;
-	}
+      device->SetTexture(tit->first, tit->second);
+      tit++;
+    }
 
-	device->SetVertexShader(vertexShader);
-	device->SetPixelShader(pixelShader);
+    device->SetVertexShader(vertexShader);
+    device->SetPixelShader(pixelShader);
 
-	// Cached Render States
-	map< D3DRENDERSTATETYPE, DWORD >::iterator it = cacheRenderStates.begin();
+    // Cached Render States
+    map<D3DRENDERSTATETYPE, DWORD>::iterator it = cacheRenderStates.begin();
     while (it != cacheRenderStates.end()) {
-		device->SetRenderState(it->first, it->second);
-		it++;
-	}
+      device->SetRenderState(it->first, it->second);
+      it++;
+    }
 
-	// Cached Sampler States
-	map< DWORD, map< D3DSAMPLERSTATETYPE, DWORD > >::iterator sit = cacheSamplerStates.begin();
+    // Cached Sampler States
+    map<DWORD, map<D3DSAMPLERSTATETYPE, DWORD> >::iterator sit = cacheSamplerStates.begin();
     while (sit != cacheSamplerStates.end()) {
-		map< D3DSAMPLERSTATETYPE, DWORD >::iterator secit = sit->second.begin();
-		while (secit != sit->second.end()) {
-			device->SetSamplerState(sit->first, secit->first, secit->second);
-			secit++;
-		}
-		sit++;
-	}
+      map<D3DSAMPLERSTATETYPE, DWORD>::iterator secit = sit->second.begin();
+      while (secit != sit->second.end()) {
+        device->SetSamplerState(sit->first, secit->first, secit->second);
+        secit++;
+      }
+      sit++;
+    }
 
-	// Cached Lights
-	map< DWORD, BOOL >::iterator lite = cacheLightEnable.begin();
+    // Cached Lights
+    map<DWORD, BOOL>::iterator lite = cacheLightEnable.begin();
     while (lite != cacheLightEnable.end()) {
-		device->LightEnable(lite->first, lite->second);
-		lite++;
-	}
-	return;
-	map< DWORD, D3DLIGHT9 >::iterator lit = cacheLightStates.begin();
+      device->LightEnable(lite->first, lite->second);
+      lite++;
+    }
+    return;
+    map<DWORD, D3DLIGHT9>::iterator lit = cacheLightStates.begin();
     while (lit != cacheLightStates.end()) {
-		device->SetLight(lit->first, &lit->second);
-		lit++;
-	}
-}
+      device->SetLight(lit->first, &lit->second);
+      lit++;
+    }
+  }
 
-/*
+  /*
 void EndSpriteBatch() {
 	// Textures should be clamped when rendering 2D sprites and stuff, so memorize it.
 	DWORD wrapu, wrapv, wrapw;
@@ -176,338 +165,326 @@ void EndSpriteBatch() {
 }
 */
 
-int GetShapesModel() {
-	return shapes_d3d_model;
-}
+  int GetShapesModel() { return shapes_d3d_model; }
 
-void BeginShapesBatching(int texId) {
-	if (shapes_d3d_model == -1) {
-		shapes_d3d_model = d3d_model_create(model_dynamic);
-		last_stride = 0;
-	} else if (texId != shapes_d3d_texture || (d3d_model_get_stride(shapes_d3d_model) != last_stride)) {
-		last_stride = 0;
-		if (!hasdrawn) {
-			d3d_model_draw(shapes_d3d_model, shapes_d3d_texture);
-			d3d_model_clear(shapes_d3d_model);
-		}
-	} else {
-		last_stride = d3d_model_get_stride(shapes_d3d_model);
-	}
-	hasdrawn = false;
-	shapes_d3d_texture = texId;
-}
-
-void EndShapesBatching() {
-	last_depth -= 1;
-	if (hasdrawn || shapes_d3d_model == -1) { return; }
-	hasdrawn = true;
-	d3d_model_draw(shapes_d3d_model, shapes_d3d_texture);
-	d3d_model_clear(shapes_d3d_model);
-	shapes_d3d_texture = -1;
-	last_stride = 0;
-}
-
-void Clear(DWORD Count, const D3DRECT *pRects, DWORD Flags, D3DCOLOR Color, float Z, DWORD Stencil) {
-	device->Clear(Count, pRects, Flags, Color, Z, Stencil);
-}
-
-void LightEnable(DWORD Index, BOOL bEnable) {
-	// Update the light state cache
-    // If the return value is 'true', the command must be forwarded to the D3D Runtime.
-	map< DWORD, BOOL >::iterator it = cacheLightEnable.find( Index );
-    if( cacheLightEnable.end() == it )
-    {
-        cacheLightEnable.insert( map< DWORD, BOOL >::value_type(Index, bEnable) );
-		EndShapesBatching();
-        device->LightEnable( Index, bEnable );
-		return;
+  void BeginShapesBatching(int texId) {
+    if (shapes_d3d_model == -1) {
+      shapes_d3d_model = d3d_model_create(model_dynamic);
+      last_stride = 0;
+    } else if (texId != shapes_d3d_texture || (d3d_model_get_stride(shapes_d3d_model) != last_stride)) {
+      last_stride = 0;
+      if (!hasdrawn) {
+        d3d_model_draw(shapes_d3d_model, shapes_d3d_texture);
+        d3d_model_clear(shapes_d3d_model);
+      }
+    } else {
+      last_stride = d3d_model_get_stride(shapes_d3d_model);
     }
-    if( it->second == bEnable )
-        return;
-    it->second = bEnable;
-	EndShapesBatching();
-    device->LightEnable( Index, bEnable );
-}
+    hasdrawn = false;
+    shapes_d3d_texture = texId;
+  }
 
-void BeginScene() {
-	last_depth = 0;
-	device->BeginScene();
-	// Reapply the stored render states and what not
-	RestoreState();
-}
-
-void EndScene() {
-	EndShapesBatching();
-	device->EndScene();
-}
-
-void Present(const RECT *pSourceRect, const RECT *pDestRect, HWND hDestWindowOverride, const RGNDATA *pDirtyRegion) {
-	device->Present(pSourceRect, pDestRect, hDestWindowOverride, pDirtyRegion);
-}
-
-void Release() {
-	device->Release();
-}
-
-void Reset(D3DPRESENT_PARAMETERS *pPresentationParameters) {
-	HRESULT hr = device->Reset(pPresentationParameters);
-		if(FAILED(hr)){
-			MessageBox(enigma::hWnd,
-               "Failed to reset Direct3D 9.0 Device",
-			   DXGetErrorDescription9(hr), //DXGetErrorString9(hr)
-               MB_ICONERROR | MB_OK);
-			return;  // should probably force the game closed
-		}
-}
-
-void DrawIndexedPrimitive(D3DPRIMITIVETYPE Type, INT BaseVertexIndex, UINT MinIndex, UINT NumVertices, UINT StartIndex, UINT PrimitiveCount) {
-	//EndShapesBatching();
-	device->DrawIndexedPrimitive(Type, BaseVertexIndex, MinIndex, NumVertices, StartIndex, PrimitiveCount);
-}
-
-void DrawPrimitive(D3DPRIMITIVETYPE PrimitiveType, UINT StartVertex, UINT PrimitiveCount) {
-	//EndShapesBatching();
-	device->DrawPrimitive(PrimitiveType, StartVertex, PrimitiveCount);
-}
-
-void DrawPrimitiveUP(D3DPRIMITIVETYPE PrimitiveType, UINT PrimitiveCount, const void *pVertexStreamZeroData, UINT VertexStreamZeroStride) {
-	//EndShapesBatching();
-	device->DrawPrimitiveUP(PrimitiveType, PrimitiveCount, pVertexStreamZeroData, VertexStreamZeroStride);
-}
-
-void CreateVertexBuffer(UINT Length, DWORD Usage, DWORD FVF, D3DPOOL Pool, IDirect3DVertexBuffer9 **ppVertexBuffer, HANDLE *pSharedHandle) {
-	device->CreateVertexBuffer(Length, Usage, FVF, Pool, ppVertexBuffer, pSharedHandle);
-}
-
-void CreateIndexBuffer(UINT Length, DWORD Usage,  D3DFORMAT Format,  D3DPOOL Pool, IDirect3DIndexBuffer9 **ppIndexBuffer, HANDLE *pSharedHandle) {
-	device->CreateIndexBuffer(Length, Usage, Format, Pool, ppIndexBuffer, pSharedHandle);
-}
-
-void CreateTexture(UINT Width, UINT Height, UINT Levels, DWORD Usage, D3DFORMAT Format, D3DPOOL Pool, IDirect3DTexture9 **ppTexture, HANDLE *pSharedHandle) {
-	HRESULT hr = device->CreateTexture(Width, Height, Levels, Usage, Format, Pool, ppTexture, pSharedHandle);
-  	if (FAILED(hr)) {
-      MessageBox(NULL, DXGetErrorDescription9(hr), DXGetErrorString9(hr), MB_OK|MB_ICONEXCLAMATION);
-	  return;
-    }
-}
-
-void CreateRenderTarget(UINT Width,  UINT Height,  D3DFORMAT Format,  D3DMULTISAMPLE_TYPE MultiSample,
-DWORD MultisampleQuality,  BOOL Lockable, IDirect3DSurface9 **ppSurface, HANDLE *pSharedHandle) {
-	device->CreateRenderTarget(Width, Height, Format, MultiSample, MultisampleQuality, Lockable, ppSurface, pSharedHandle);
-}
-
-void CreateVertexDeclaration(const D3DVERTEXELEMENT9 *pVertexElements, IDirect3DVertexDeclaration9 **ppDecl) {
-	device->CreateVertexDeclaration(pVertexElements, ppDecl);
-}
-
-void CreatePixelShader(const DWORD *pFunction, IDirect3DPixelShader9 **ppShader) {
-	HRESULT hr = device->CreatePixelShader(pFunction, ppShader);
-	if (FAILED(hr)) {
-      MessageBox(NULL, "CreatePixelShader failed", "CRendererDX9::Create", MB_OK|MB_ICONEXCLAMATION);
+  void EndShapesBatching() {
+    last_depth -= 1;
+    if (hasdrawn || shapes_d3d_model == -1) {
       return;
     }
-}
+    hasdrawn = true;
+    d3d_model_draw(shapes_d3d_model, shapes_d3d_texture);
+    d3d_model_clear(shapes_d3d_model);
+    shapes_d3d_texture = -1;
+    last_stride = 0;
+  }
 
-void CreateVertexShader(const DWORD *pFunction, IDirect3DVertexShader9 **ppShader) {
-	HRESULT hr = device->CreateVertexShader(pFunction, ppShader);
-	if (FAILED(hr)) {
-      MessageBox(NULL, "CreateVertexShader failed", "CRendererDX9::Create", MB_OK|MB_ICONEXCLAMATION);
-	  return;
-    }
-}
+  void Clear(DWORD Count, const D3DRECT *pRects, DWORD Flags, D3DCOLOR Color, float Z, DWORD Stencil) {
+    device->Clear(Count, pRects, Flags, Color, Z, Stencil);
+  }
 
-void GetSwapChain(UINT  iSwapChain, IDirect3DSwapChain9 **ppSwapChain) {
-	HRESULT hr = device->GetSwapChain(iSwapChain, ppSwapChain);
-		if(FAILED(hr)){
-			MessageBox(enigma::hWnd,
-               "Failed to retrieve the Direct3D 9.0 Swap Chain",
-			   DXGetErrorDescription9(hr), //DXGetErrorString9(hr)
-               MB_ICONERROR | MB_OK);
-			return;  // should probably force the game closed
-		}
-}
-
-void GetRenderTarget(DWORD RenderTargetIndex, IDirect3DSurface9 **ppRenderTarget) {
-	device->GetRenderTarget(RenderTargetIndex, ppRenderTarget);
-}
-
-void GetRenderState(D3DRENDERSTATETYPE State, DWORD *pValue) {
-	device->GetRenderState(State, pValue);
-}
-
-void GetSamplerState(DWORD Sampler, D3DSAMPLERSTATETYPE Type, DWORD *pValue) {
-	device->GetSamplerState(Sampler, Type, pValue);
-}
-
-void GetDeviceCaps(D3DCAPS9 *pCaps) {
-	device->GetDeviceCaps(pCaps);
-}
-
-void SetSoftwareVertexProcessing(bool bSoftware) {
-	device->SetSoftwareVertexProcessing(bSoftware);
-}
-
-void SetMaterial(const D3DMATERIAL9 *pMaterial) {
-	device->SetMaterial(pMaterial);
-}
-
-void SetFVF(DWORD FVF) {
-	//EndShapesBatching();
-	device->SetFVF(FVF);
-}
-
-void SetViewport(const D3DVIEWPORT9 *pViewport) {
-	EndShapesBatching();
-	device->SetViewport(pViewport);
-}
-
-void SetLight(DWORD Index, const D3DLIGHT9 *pLight) {
-device->SetLight( Index, pLight );
-	return;
-	// Update the light state cache
+  void LightEnable(DWORD Index, BOOL bEnable) {
+    // Update the light state cache
     // If the return value is 'true', the command must be forwarded to the D3D Runtime.
-	map< DWORD, D3DLIGHT9 >::iterator it = cacheLightStates.find( Index );
-    if ( cacheLightStates.end() == it ) {
-        cacheLightStates.insert( map< DWORD, D3DLIGHT9 >::value_type(Index, *pLight) );
-		EndShapesBatching();
-        device->SetLight( Index, pLight );
-		return;
+    map<DWORD, BOOL>::iterator it = cacheLightEnable.find(Index);
+    if (cacheLightEnable.end() == it) {
+      cacheLightEnable.insert(map<DWORD, BOOL>::value_type(Index, bEnable));
+      EndShapesBatching();
+      device->LightEnable(Index, bEnable);
+      return;
+    }
+    if (it->second == bEnable) return;
+    it->second = bEnable;
+    EndShapesBatching();
+    device->LightEnable(Index, bEnable);
+  }
+
+  void BeginScene() {
+    last_depth = 0;
+    device->BeginScene();
+    // Reapply the stored render states and what not
+    RestoreState();
+  }
+
+  void EndScene() {
+    EndShapesBatching();
+    device->EndScene();
+  }
+
+  void Present(const RECT *pSourceRect, const RECT *pDestRect, HWND hDestWindowOverride, const RGNDATA *pDirtyRegion) {
+    device->Present(pSourceRect, pDestRect, hDestWindowOverride, pDirtyRegion);
+  }
+
+  void Release() { device->Release(); }
+
+  void Reset(D3DPRESENT_PARAMETERS *pPresentationParameters) {
+    HRESULT hr = device->Reset(pPresentationParameters);
+    if (FAILED(hr)) {
+      MessageBox(enigma::hWnd, "Failed to reset Direct3D 9.0 Device",
+                 DXGetErrorDescription9(hr),  //DXGetErrorString9(hr)
+                 MB_ICONERROR | MB_OK);
+      return;  // should probably force the game closed
+    }
+  }
+
+  void DrawIndexedPrimitive(D3DPRIMITIVETYPE Type, INT BaseVertexIndex, UINT MinIndex, UINT NumVertices,
+                            UINT StartIndex, UINT PrimitiveCount) {
+    //EndShapesBatching();
+    device->DrawIndexedPrimitive(Type, BaseVertexIndex, MinIndex, NumVertices, StartIndex, PrimitiveCount);
+  }
+
+  void DrawPrimitive(D3DPRIMITIVETYPE PrimitiveType, UINT StartVertex, UINT PrimitiveCount) {
+    //EndShapesBatching();
+    device->DrawPrimitive(PrimitiveType, StartVertex, PrimitiveCount);
+  }
+
+  void DrawPrimitiveUP(D3DPRIMITIVETYPE PrimitiveType, UINT PrimitiveCount, const void *pVertexStreamZeroData,
+                       UINT VertexStreamZeroStride) {
+    //EndShapesBatching();
+    device->DrawPrimitiveUP(PrimitiveType, PrimitiveCount, pVertexStreamZeroData, VertexStreamZeroStride);
+  }
+
+  void CreateVertexBuffer(UINT Length, DWORD Usage, DWORD FVF, D3DPOOL Pool, IDirect3DVertexBuffer9 **ppVertexBuffer,
+                          HANDLE *pSharedHandle) {
+    device->CreateVertexBuffer(Length, Usage, FVF, Pool, ppVertexBuffer, pSharedHandle);
+  }
+
+  void CreateIndexBuffer(UINT Length, DWORD Usage, D3DFORMAT Format, D3DPOOL Pool,
+                         IDirect3DIndexBuffer9 **ppIndexBuffer, HANDLE *pSharedHandle) {
+    device->CreateIndexBuffer(Length, Usage, Format, Pool, ppIndexBuffer, pSharedHandle);
+  }
+
+  void CreateTexture(UINT Width, UINT Height, UINT Levels, DWORD Usage, D3DFORMAT Format, D3DPOOL Pool,
+                     IDirect3DTexture9 **ppTexture, HANDLE *pSharedHandle) {
+    HRESULT hr = device->CreateTexture(Width, Height, Levels, Usage, Format, Pool, ppTexture, pSharedHandle);
+    if (FAILED(hr)) {
+      MessageBox(NULL, DXGetErrorDescription9(hr), DXGetErrorString9(hr), MB_OK | MB_ICONEXCLAMATION);
+      return;
+    }
+  }
+
+  void CreateRenderTarget(UINT Width, UINT Height, D3DFORMAT Format, D3DMULTISAMPLE_TYPE MultiSample,
+                          DWORD MultisampleQuality, BOOL Lockable, IDirect3DSurface9 **ppSurface,
+                          HANDLE *pSharedHandle) {
+    device->CreateRenderTarget(Width, Height, Format, MultiSample, MultisampleQuality, Lockable, ppSurface,
+                               pSharedHandle);
+  }
+
+  void CreateVertexDeclaration(const D3DVERTEXELEMENT9 *pVertexElements, IDirect3DVertexDeclaration9 **ppDecl) {
+    device->CreateVertexDeclaration(pVertexElements, ppDecl);
+  }
+
+  void CreatePixelShader(const DWORD *pFunction, IDirect3DPixelShader9 **ppShader) {
+    HRESULT hr = device->CreatePixelShader(pFunction, ppShader);
+    if (FAILED(hr)) {
+      MessageBox(NULL, "CreatePixelShader failed", "CRendererDX9::Create", MB_OK | MB_ICONEXCLAMATION);
+      return;
+    }
+  }
+
+  void CreateVertexShader(const DWORD *pFunction, IDirect3DVertexShader9 **ppShader) {
+    HRESULT hr = device->CreateVertexShader(pFunction, ppShader);
+    if (FAILED(hr)) {
+      MessageBox(NULL, "CreateVertexShader failed", "CRendererDX9::Create", MB_OK | MB_ICONEXCLAMATION);
+      return;
+    }
+  }
+
+  void GetSwapChain(UINT iSwapChain, IDirect3DSwapChain9 **ppSwapChain) {
+    HRESULT hr = device->GetSwapChain(iSwapChain, ppSwapChain);
+    if (FAILED(hr)) {
+      MessageBox(enigma::hWnd, "Failed to retrieve the Direct3D 9.0 Swap Chain",
+                 DXGetErrorDescription9(hr),  //DXGetErrorString9(hr)
+                 MB_ICONERROR | MB_OK);
+      return;  // should probably force the game closed
+    }
+  }
+
+  void GetRenderTarget(DWORD RenderTargetIndex, IDirect3DSurface9 **ppRenderTarget) {
+    device->GetRenderTarget(RenderTargetIndex, ppRenderTarget);
+  }
+
+  void GetRenderState(D3DRENDERSTATETYPE State, DWORD *pValue) { device->GetRenderState(State, pValue); }
+
+  void GetSamplerState(DWORD Sampler, D3DSAMPLERSTATETYPE Type, DWORD *pValue) {
+    device->GetSamplerState(Sampler, Type, pValue);
+  }
+
+  void GetDeviceCaps(D3DCAPS9 *pCaps) { device->GetDeviceCaps(pCaps); }
+
+  void SetSoftwareVertexProcessing(bool bSoftware) { device->SetSoftwareVertexProcessing(bSoftware); }
+
+  void SetMaterial(const D3DMATERIAL9 *pMaterial) { device->SetMaterial(pMaterial); }
+
+  void SetFVF(DWORD FVF) {
+    //EndShapesBatching();
+    device->SetFVF(FVF);
+  }
+
+  void SetViewport(const D3DVIEWPORT9 *pViewport) {
+    EndShapesBatching();
+    device->SetViewport(pViewport);
+  }
+
+  void SetLight(DWORD Index, const D3DLIGHT9 *pLight) {
+    device->SetLight(Index, pLight);
+    return;
+    // Update the light state cache
+    // If the return value is 'true', the command must be forwarded to the D3D Runtime.
+    map<DWORD, D3DLIGHT9>::iterator it = cacheLightStates.find(Index);
+    if (cacheLightStates.end() == it) {
+      cacheLightStates.insert(map<DWORD, D3DLIGHT9>::value_type(Index, *pLight));
+      EndShapesBatching();
+      device->SetLight(Index, pLight);
+      return;
     }
     //if( it->second == *pLight )
-        //return;
+    //return;
     it->second = *pLight;
-	EndShapesBatching();
-    device->SetLight( Index, pLight );
-}
+    EndShapesBatching();
+    device->SetLight(Index, pLight);
+  }
 
-void SetTransform(D3DTRANSFORMSTATETYPE State, const D3DMATRIX *pMatrix) {
-	// if projection EndShapesBatching();
-	EndShapesBatching();
-	device->SetTransform(State, pMatrix);
-}
+  void SetTransform(D3DTRANSFORMSTATETYPE State, const D3DMATRIX *pMatrix) {
+    // if projection EndShapesBatching();
+    EndShapesBatching();
+    device->SetTransform(State, pMatrix);
+  }
 
-void SetRenderState(D3DRENDERSTATETYPE State, DWORD Value) {
-	// Update the render state cache
+  void SetRenderState(D3DRENDERSTATETYPE State, DWORD Value) {
+    // Update the render state cache
     // If the return value is 'true', the command must be forwarded to the D3D Runtime.
-	map< D3DRENDERSTATETYPE, DWORD >::iterator it = cacheRenderStates.find( State );
-    if ( cacheRenderStates.end() == it ) {
-        cacheRenderStates.insert( map< D3DRENDERSTATETYPE, DWORD >::value_type(State, Value) );
-		EndShapesBatching();
-        device->SetRenderState( State, Value );
+    map<D3DRENDERSTATETYPE, DWORD>::iterator it = cacheRenderStates.find(State);
+    if (cacheRenderStates.end() == it) {
+      cacheRenderStates.insert(map<D3DRENDERSTATETYPE, DWORD>::value_type(State, Value));
+      EndShapesBatching();
+      device->SetRenderState(State, Value);
     }
-    if( it->second == Value )
-        return;
+    if (it->second == Value) return;
     it->second = Value;
-	EndShapesBatching();
-    device->SetRenderState( State, Value );
-}
+    EndShapesBatching();
+    device->SetRenderState(State, Value);
+  }
 
-void GetBackBuffer(UINT  iSwapChain, UINT BackBuffer, D3DBACKBUFFER_TYPE Type, IDirect3DSurface9 **ppBackBuffer) {
-	device->GetBackBuffer(iSwapChain, BackBuffer, Type, ppBackBuffer);
-}
+  void GetBackBuffer(UINT iSwapChain, UINT BackBuffer, D3DBACKBUFFER_TYPE Type, IDirect3DSurface9 **ppBackBuffer) {
+    device->GetBackBuffer(iSwapChain, BackBuffer, Type, ppBackBuffer);
+  }
 
-void SetRenderTarget(DWORD RenderTargetIndex, IDirect3DSurface9 *pTarget) {
-	device->GetRenderTarget(0, &pBackBuffer);
-	if (pBackBuffer == pTarget) { return; }
-	EndShapesBatching();
-	device->SetRenderTarget(RenderTargetIndex, pTarget);
-	pRenderTarget = pTarget;
-}
-
-void ResetRenderTarget() {
-	device->GetRenderTarget(0, &pBackBuffer);
-	if (pBackBuffer == pRenderTarget) { return; }
-	EndShapesBatching();
-	device->SetRenderTarget(0, pBackBuffer);
-}
-
-void SetSamplerState(DWORD Sampler, D3DSAMPLERSTATETYPE Type, DWORD Value) {
-	// Update the render state cache
-    // If the return value is 'true', the command must be forwarded to the D3D Runtime.
-	typedef map<D3DSAMPLERSTATETYPE, DWORD> innerType;
-	map< DWORD, map< D3DSAMPLERSTATETYPE, DWORD >  >::iterator it = cacheSamplerStates.find( Sampler );
-    if ( it == cacheSamplerStates.end() ) {
-		map<DWORD, innerType> outer;
-		innerType inner;
-		inner.insert(pair<D3DSAMPLERSTATETYPE, DWORD>(Type, Value));
-        cacheSamplerStates.insert( pair<DWORD, innerType>(Sampler, inner) );
-		//EndShapesBatching();
-        device->SetSamplerState( Sampler, Type, Value );
+  void SetRenderTarget(DWORD RenderTargetIndex, IDirect3DSurface9 *pTarget) {
+    device->GetRenderTarget(0, &pBackBuffer);
+    if (pBackBuffer == pTarget) {
+      return;
     }
-	map< D3DSAMPLERSTATETYPE, DWORD >::iterator sit = it->second.find( Type );
-    if ( sit != it->second.end() ) {
-		if (sit->second == Value) {
-			return;
-		}
-		sit->second = Value;
-		//EndShapesBatching();
-		device->SetSamplerState( Sampler, Type, Value );
-	} else {
-		it->second.insert(map< D3DSAMPLERSTATETYPE, DWORD >::value_type(Type, Value));
-		device->SetSamplerState( Sampler, Type, Value );
-	}
-}
+    EndShapesBatching();
+    device->SetRenderTarget(RenderTargetIndex, pTarget);
+    pRenderTarget = pTarget;
+  }
 
-void SetTexture(DWORD Sampler, LPDIRECT3DTEXTURE9 pTexture) {
-	// Update the render state cache
-    // If the return value is 'true', the command must be forwarded to the D3D Runtime.
-	map< DWORD, LPDIRECT3DTEXTURE9 >::iterator it = cacheTextureStates.find( Sampler );
-    if ( cacheTextureStates.end() == it ) {
-        cacheTextureStates.insert( map< DWORD, LPDIRECT3DTEXTURE9 >::value_type(Sampler, pTexture) );
-		//EndShapesBatching();
-        device->SetTexture( Sampler, pTexture );
+  void ResetRenderTarget() {
+    device->GetRenderTarget(0, &pBackBuffer);
+    if (pBackBuffer == pRenderTarget) {
+      return;
     }
-    if( it->second == pTexture )
+    EndShapesBatching();
+    device->SetRenderTarget(0, pBackBuffer);
+  }
+
+  void SetSamplerState(DWORD Sampler, D3DSAMPLERSTATETYPE Type, DWORD Value) {
+    // Update the render state cache
+    // If the return value is 'true', the command must be forwarded to the D3D Runtime.
+    typedef map<D3DSAMPLERSTATETYPE, DWORD> innerType;
+    map<DWORD, map<D3DSAMPLERSTATETYPE, DWORD> >::iterator it = cacheSamplerStates.find(Sampler);
+    if (it == cacheSamplerStates.end()) {
+      map<DWORD, innerType> outer;
+      innerType inner;
+      inner.insert(pair<D3DSAMPLERSTATETYPE, DWORD>(Type, Value));
+      cacheSamplerStates.insert(pair<DWORD, innerType>(Sampler, inner));
+      //EndShapesBatching();
+      device->SetSamplerState(Sampler, Type, Value);
+    }
+    map<D3DSAMPLERSTATETYPE, DWORD>::iterator sit = it->second.find(Type);
+    if (sit != it->second.end()) {
+      if (sit->second == Value) {
         return;
+      }
+      sit->second = Value;
+      //EndShapesBatching();
+      device->SetSamplerState(Sampler, Type, Value);
+    } else {
+      it->second.insert(map<D3DSAMPLERSTATETYPE, DWORD>::value_type(Type, Value));
+      device->SetSamplerState(Sampler, Type, Value);
+    }
+  }
+
+  void SetTexture(DWORD Sampler, LPDIRECT3DTEXTURE9 pTexture) {
+    // Update the render state cache
+    // If the return value is 'true', the command must be forwarded to the D3D Runtime.
+    map<DWORD, LPDIRECT3DTEXTURE9>::iterator it = cacheTextureStates.find(Sampler);
+    if (cacheTextureStates.end() == it) {
+      cacheTextureStates.insert(map<DWORD, LPDIRECT3DTEXTURE9>::value_type(Sampler, pTexture));
+      //EndShapesBatching();
+      device->SetTexture(Sampler, pTexture);
+    }
+    if (it->second == pTexture) return;
     it->second = pTexture;
-	//EndShapesBatching();
-    device->SetTexture( Sampler, pTexture );
-}
+    //EndShapesBatching();
+    device->SetTexture(Sampler, pTexture);
+  }
 
-void SetTextureStageState(DWORD Sampler, D3DTEXTURESTAGESTATETYPE Type, DWORD Value) {
-	device->SetTextureStageState(Sampler, Type, Value);
-}
+  void SetTextureStageState(DWORD Sampler, D3DTEXTURESTAGESTATETYPE Type, DWORD Value) {
+    device->SetTextureStageState(Sampler, Type, Value);
+  }
 
-void SetStreamSource(UINT StreamNumber, IDirect3DVertexBuffer9 *pStreamData, UINT OffsetInBytes, UINT Stride) {
-	device->SetStreamSource(StreamNumber, pStreamData, OffsetInBytes, Stride);
-}
+  void SetStreamSource(UINT StreamNumber, IDirect3DVertexBuffer9 *pStreamData, UINT OffsetInBytes, UINT Stride) {
+    device->SetStreamSource(StreamNumber, pStreamData, OffsetInBytes, Stride);
+  }
 
-void SetVertexDeclaration(IDirect3DVertexDeclaration9 *pDecl) {
-	device->SetVertexDeclaration(pDecl);
-}
+  void SetVertexDeclaration(IDirect3DVertexDeclaration9 *pDecl) { device->SetVertexDeclaration(pDecl); }
 
-void SetIndices(IDirect3DIndexBuffer9 *pIndexData) {
-	device->SetIndices(pIndexData);
-}
+  void SetIndices(IDirect3DIndexBuffer9 *pIndexData) { device->SetIndices(pIndexData); }
 
-void SetPixelShader(LPDIRECT3DPIXELSHADER9 shader)
-{
-	//Nothing to do, return
-	if (shader == pixelShader) return;
-	EndShapesBatching();
-	pixelShader = shader;
-	device->SetPixelShader(shader);
-}
+  void SetPixelShader(LPDIRECT3DPIXELSHADER9 shader) {
+    //Nothing to do, return
+    if (shader == pixelShader) return;
+    EndShapesBatching();
+    pixelShader = shader;
+    device->SetPixelShader(shader);
+  }
 
-void SetVertexShader(LPDIRECT3DVERTEXSHADER9 shader)
-{
-	//Nothing to do, return
-	if (shader == vertexShader) return;
-	EndShapesBatching();
-	vertexShader = shader;
-	device->SetVertexShader(shader);
-}
+  void SetVertexShader(LPDIRECT3DVERTEXSHADER9 shader) {
+    //Nothing to do, return
+    if (shader == vertexShader) return;
+    EndShapesBatching();
+    vertexShader = shader;
+    device->SetVertexShader(shader);
+  }
 
-void SetVertexShaderConstantF(UINT StartRegister, const float *pConstantData, UINT Vector4fCount) {
-	device->SetVertexShaderConstantF(StartRegister, pConstantData, Vector4fCount);
-}
+  void SetVertexShaderConstantF(UINT StartRegister, const float *pConstantData, UINT Vector4fCount) {
+    device->SetVertexShaderConstantF(StartRegister, pConstantData, Vector4fCount);
+  }
 
-void SetPixelShaderConstantF(UINT StartRegister, const float *pConstantData, UINT Vector4fCount) {
-	device->SetPixelShaderConstantF(StartRegister, pConstantData, Vector4fCount);
-}
-
+  void SetPixelShaderConstantF(UINT StartRegister, const float *pConstantData, UINT Vector4fCount) {
+    device->SetPixelShaderConstantF(StartRegister, pConstantData, Vector4fCount);
+  }
 };
 
-extern ContextManager* d3dmgr; // point to our device manager
+extern ContextManager *d3dmgr;  // point to our device manager
 
 #endif
