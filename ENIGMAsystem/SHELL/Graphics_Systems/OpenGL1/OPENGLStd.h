@@ -24,20 +24,18 @@
 
 //#include "OpenGLHeaders.h"
 
-namespace enigma
-{
-  extern unsigned char currentcolor[4];
-  extern int currentblendmode[2];
-  extern int currentblendtype;
-  extern bool glew_isgo;
-  extern bool pbo_isgo;
-}
+namespace enigma {
+extern unsigned char currentcolor[4];
+extern int currentblendmode[2];
+extern int currentblendtype;
+extern bool glew_isgo;
+extern bool pbo_isgo;
+}  // namespace enigma
 
-#include "../General/GScolors.h"
-#include "../General/GSprimitives.h"
-#include "../General/GSd3d.h"
-#include "../General/GSstdraw.h"
 #include "../General/GSblend.h"
-#include "../General/GSsurface.h"
+#include "../General/GScolors.h"
+#include "../General/GSd3d.h"
+#include "../General/GSprimitives.h"
 #include "../General/GSscreen.h"
-
+#include "../General/GSstdraw.h"
+#include "../General/GSsurface.h"

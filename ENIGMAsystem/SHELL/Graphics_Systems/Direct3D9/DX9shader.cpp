@@ -15,41 +15,34 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Universal_System/scalar.h"
-#include "Bridges/General/DX9Context.h"
-#include "Direct3D9Headers.h"
 #include "DX9shader.h"
 #include <math.h>
+#include "Bridges/General/DX9Context.h"
+#include "Direct3D9Headers.h"
 
-#include <stdio.h>      /* printf, scanf, NULL */
-#include <stdlib.h>     /* malloc, free, rand */
+#include <stdio.h>  /* printf, scanf, NULL */
+#include <stdlib.h> /* malloc, free, rand */
 
 #include <vector>
 using std::vector;
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
 using namespace std;
 
 struct Shader {
   int type;
-  LPD3DXCONSTANTTABLE       constants;
-  
-  Shader() 
-  {
-	type = enigma_user::sh_unknown;
-  }
- 
-  ~Shader()
-  {
+  LPD3DXCONSTANTTABLE constants;
 
-  }
-  
+  Shader() { type = enigma_user::sh_unknown; }
+
+  ~Shader() {}
+
   virtual int Load(string fname) = 0;
   virtual void Use() = 0;
   virtual void SetConstantF(unsigned start, const float* data, unsigned count) = 0;
-  
-  void SetVector(string name, const D3DXVECTOR4 *vec) {
+
+  void SetVector(string name, const D3DXVECTOR4* vec) {
     D3DXHANDLE handle;
     handle = constants->GetConstantByName(NULL, name.c_str());
     constants->SetVector(d3dmgr->device, handle, vec);
@@ -57,79 +50,64 @@ struct Shader {
 };
 
 struct VertexShader : public Shader {
-  LPDIRECT3DVERTEXSHADER9   shader;
+  LPDIRECT3DVERTEXSHADER9 shader;
   LPDIRECT3DVERTEXDECLARATION9 declaration;
 
-  VertexShader()
-  {
-	type = enigma_user::sh_vertex;
-  }
+  VertexShader() { type = enigma_user::sh_vertex; }
 
-  ~VertexShader()
-  {
+  ~VertexShader() {}
 
-  }
-  
   int Load(string fname) {
-    DWORD dwFlags = 0; 
+    DWORD dwFlags = 0;
     //dwFlags |= D3DXSHADER_DEBUG;
-    LPD3DXBUFFER pCode   = NULL;
+    LPD3DXBUFFER pCode = NULL;
     LPD3DXBUFFER pErrors = NULL;
     HRESULT hrErr = D3DXAssembleShaderFromFile(fname.c_str(), NULL, NULL, dwFlags, &pCode, &pErrors);
-    if(pErrors)
-    {
+    if (pErrors) {
       char* szErrors = (char*)pErrors->GetBufferPointer();
       pErrors->Release();
     }
-    if(FAILED(hrErr)) 
-    {
-      MessageBox(NULL, "vertex shader creation failed", "CRendererDX9::Create", MB_OK|MB_ICONEXCLAMATION);
-	  return 1;
+    if (FAILED(hrErr)) {
+      MessageBox(NULL, "vertex shader creation failed", "CRendererDX9::Create", MB_OK | MB_ICONEXCLAMATION);
+      return 1;
     }
-  
+
     char* szCode = (char*)pCode->GetBufferPointer();
     d3dmgr->CreateVertexShader((DWORD*)pCode->GetBufferPointer(), &shader);
     pCode->Release();
-	return 3;
+    return 3;
   }
-  
+
   void Use() {
-	d3dmgr->SetVertexDeclaration(declaration);
-	d3dmgr->SetVertexShader(shader);
+    d3dmgr->SetVertexDeclaration(declaration);
+    d3dmgr->SetVertexShader(shader);
   }
-  
+
   void SetConstantF(unsigned start, const float* data, unsigned count) {
     d3dmgr->SetVertexShaderConstantF(start, data, count);
   }
 };
 
 struct PixelShader : public Shader {
-  LPDIRECT3DPIXELSHADER9    shader;
-	
-  PixelShader()
-  {
-	type = enigma_user::sh_pixel;
-  }
+  LPDIRECT3DPIXELSHADER9 shader;
 
-  ~PixelShader()
-  {
+  PixelShader() { type = enigma_user::sh_pixel; }
 
-  }
-  
+  ~PixelShader() {}
+
   int Load(string fname) {
-    DWORD dwFlags = 0; 
-	//dwFlags |= D3DXSHADER_DEBUG;
-    LPD3DXBUFFER pCode   = NULL;
+    DWORD dwFlags = 0;
+    //dwFlags |= D3DXSHADER_DEBUG;
+    LPD3DXBUFFER pCode = NULL;
     LPD3DXBUFFER pErrors = NULL;
-    HRESULT hrErr = D3DXCompileShaderFromFile(fname.c_str(), NULL, NULL, "PShade", "ps_1_1", dwFlags, &pCode, &pErrors, &constants);
-    if(pErrors)
-    {
+    HRESULT hrErr =
+        D3DXCompileShaderFromFile(fname.c_str(), NULL, NULL, "PShade", "ps_1_1", dwFlags, &pCode, &pErrors, &constants);
+    if (pErrors) {
       char* szErrors = (char*)pErrors->GetBufferPointer();
       pErrors->Release();
     }
-    if(FAILED(hrErr)) 
-    {
-      MessageBox(NULL, "pixel shader creation failed", "CRendererDX9::Create", MB_OK|MB_ICONEXCLAMATION);
+    if (FAILED(hrErr)) {
+      MessageBox(NULL, "pixel shader creation failed", "CRendererDX9::Create", MB_OK | MB_ICONEXCLAMATION);
       return false;
     }
 
@@ -137,11 +115,9 @@ struct PixelShader : public Shader {
     d3dmgr->CreatePixelShader((DWORD*)pCode->GetBufferPointer(), &shader);
     pCode->Release();
   }
-  
-  void Use() {
-	d3dmgr->SetPixelShader(shader);
-  }
-  
+
+  void Use() { d3dmgr->SetPixelShader(shader); }
+
   void SetConstantF(unsigned start, const float* data, unsigned count) {
     d3dmgr->SetPixelShaderConstantF(start, data, count);
   }
@@ -149,35 +125,29 @@ struct PixelShader : public Shader {
 
 vector<Shader*> shaders(0);
 
-namespace enigma_user
-{
+namespace enigma_user {
 
-int hlsl_shader_create(int type)
-{
+int hlsl_shader_create(int type) {
   unsigned int id = shaders.size();
   switch (type) {
-	case sh_vertex:
-		shaders.push_back(new VertexShader());
-		break;
-	case sh_pixel:
-		shaders.push_back(new PixelShader());
-		break;
-	default:
-		// create unknown shader type
-		break;
+    case sh_vertex:
+      shaders.push_back(new VertexShader());
+      break;
+    case sh_pixel:
+      shaders.push_back(new PixelShader());
+      break;
+    default:
+      // create unknown shader type
+      break;
   }
   return id;
 }
 
-}
+}  // namespace enigma_user
 
-namespace enigma_user
-{
+namespace enigma_user {
 
-int hlsl_shader_load(int id, string fname)
-{
-  shaders[id]->Load(fname);
-}
+int hlsl_shader_load(int id, string fname) { shaders[id]->Load(fname); }
 
 void hlsl_shader_set_constantf(int id, unsigned start, const float* data, unsigned count) {
   shaders[id]->SetConstantF(start, data, count);
@@ -188,22 +158,14 @@ void hlsl_shader_set_vector(int id, string name, gs_scalar x, gs_scalar y, gs_sc
   shaders[id]->SetVector(name, &vec);
 }
 
-void hlsl_shader_use(int id)
-{
-  shaders[id]->Use();
-}
+void hlsl_shader_use(int id) { shaders[id]->Use(); }
 
-void hlsl_shader_reset()
-{
+void hlsl_shader_reset() {
   d3dmgr->SetVertexDeclaration(NULL);
   d3dmgr->SetVertexShader(NULL);
   d3dmgr->SetPixelShader(NULL);
 }
 
-void hlsl_shader_free(int id)
-{
-  delete shaders[id];
-}
+void hlsl_shader_free(int id) { delete shaders[id]; }
 
-}
-
+}  // namespace enigma_user

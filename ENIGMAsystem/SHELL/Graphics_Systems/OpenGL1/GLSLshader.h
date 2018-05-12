@@ -18,8 +18,8 @@
 #ifndef ENIGMA_GLSLSHADER_H
 #define ENIGMA_GLSLSHADER_H
 
-#include <vector>
 #include <string>
+#include <vector>
 using std::string;
 using std::vector;
 
@@ -27,32 +27,20 @@ using std::vector;
 
 extern GLenum shadertypes[];
 
-struct Shader{
+struct Shader {
   string log;
   GLuint shader;
-  Shader(int type)
-  {
-    shader = glCreateShader(shadertypes[type]);
-  }
+  Shader(int type) { shader = glCreateShader(shadertypes[type]); }
 
-  ~Shader()
-  {
-    glDeleteShader(shader);
-  }
+  ~Shader() { glDeleteShader(shader); }
 };
 
-struct ShaderProgram{
+struct ShaderProgram {
   GLuint shaderprogram;
 
-  ShaderProgram()
-  {
-    shaderprogram = glCreateProgram();
-  }
+  ShaderProgram() { shaderprogram = glCreateProgram(); }
 
-  ~ShaderProgram()
-  {
-    glDeleteProgram(shaderprogram);
-  }
+  ~ShaderProgram() { glDeleteProgram(shaderprogram); }
 };
 
 extern vector<Shader*> shaders;

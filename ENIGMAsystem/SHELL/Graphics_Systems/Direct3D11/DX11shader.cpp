@@ -15,18 +15,18 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Universal_System/scalar.h"
-#include "Bridges/General/DX11Context.h"
-#include "Direct3D11Headers.h"
 #include "DX11shader.h"
 #include <math.h>
+#include "Bridges/General/DX11Context.h"
+#include "Direct3D11Headers.h"
+#include "Universal_System/scalar.h"
 
-#include <stdio.h>      /* printf, scanf, NULL */
-#include <stdlib.h>     /* malloc, free, rand */
+#include <stdio.h>  /* printf, scanf, NULL */
+#include <stdlib.h> /* malloc, free, rand */
 
 #include <vector>
 using std::vector;
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
 using namespace std;

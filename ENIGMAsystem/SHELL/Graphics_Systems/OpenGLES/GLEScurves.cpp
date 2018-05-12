@@ -15,22 +15,22 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "OpenGLHeaders.h"
-#include "../General/GScolors.h"
+#include <math.h>
 #include <stack>
 #include <vector>
-#include <math.h>
+#include "../General/GScolors.h"
+#include "OpenGLHeaders.h"
 
-#define __GETR(x) (((x & 0x0000FF))/255.0)
-#define __GETG(x) (((x & 0x00FF00)>>8)/255.0)
-#define __GETB(x) (((x & 0xFF0000)>>16)/255.0)
+#define __GETR(x) (((x & 0x0000FF)) / 255.0)
+#define __GETG(x) (((x & 0x00FF00) >> 8) / 255.0)
+#define __GETB(x) (((x & 0xFF0000) >> 16) / 255.0)
 
-
-namespace enigma{
-    extern unsigned bound_texture;
-    extern unsigned char currentcolor[4];
-}
-#define untexture() if(enigma::bound_texture) glBindTexture(GL_TEXTURE_2D,enigma::bound_texture=0);
+namespace enigma {
+extern unsigned bound_texture;
+extern unsigned char currentcolor[4];
+}  // namespace enigma
+#define untexture() \
+  if (enigma::bound_texture) glBindTexture(GL_TEXTURE_2D, enigma::bound_texture = 0);
 
 namespace enigma_user {
 
@@ -44,44 +44,32 @@ int pr_spline_points = 0;
 int pr_curve_width = 1;
 
 struct splinePoint {
-    float x,y,al;
-    int col;
+  float x, y, al;
+  int col;
 };
-typedef std::vector< splinePoint > spline;
-static std::stack< spline, std::vector<spline*> > startedSplines;
-static std::stack< int > startedSplinesMode;
+typedef std::vector<splinePoint> spline;
+static std::stack<spline, std::vector<spline*> > startedSplines;
+static std::stack<int> startedSplinesMode;
 
-void draw_set_curve_width(int width)
-{
-    pr_curve_width=width;
+void draw_set_curve_width(int width) { pr_curve_width = width; }
+
+void draw_set_curve_color(int c1, int c2) {
+  pr_curve_color1 = c1;
+  pr_curve_color2 = c2;
 }
 
-void draw_set_curve_color(int c1, int c2)
-{
-    pr_curve_color1 = c1;
-    pr_curve_color2 = c2;
+void draw_set_curve_alpha(float a1, float a2) {
+  pr_curve_alpha1 = a1;
+  pr_curve_alpha2 = a2;
 }
 
-void draw_set_curve_alpha(float a1, float a2)
-{
-    pr_curve_alpha1 = a1;
-    pr_curve_alpha2 = a2;
-}
+void draw_set_curve_mode(int mode) { pr_curve_mode = mode; }
 
-void draw_set_curve_mode(int mode)
-{
-    pr_curve_mode = mode;
-}
+void draw_set_curve_detail(int detail) { pr_curve_detail = detail; }
 
-void draw_set_curve_detail(int detail)
-{
-    pr_curve_detail = detail;
-}
-
-void draw_bezier_quadratic(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3)
-{
-    untexture();
-   /* glPushAttrib(GL_LINE_BIT);
+void draw_bezier_quadratic(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3) {
+  untexture();
+  /* glPushAttrib(GL_LINE_BIT);
     glLineWidth(pr_curve_width);
     glBegin(pr_curve_mode);
     int col;
@@ -106,9 +94,9 @@ void draw_bezier_quadratic(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y
     glColor4ubv(enigma::currentcolor);*/
 }
 
-void draw_bezier_cubic(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, gs_scalar x4, gs_scalar y4)
-{
-    untexture();
+void draw_bezier_cubic(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, gs_scalar x4,
+                       gs_scalar y4) {
+  untexture();
   /*  glPushAttrib(GL_LINE_BIT);
     glLineWidth(pr_curve_width);
     glBegin(pr_curve_mode);
@@ -136,60 +124,61 @@ void draw_bezier_cubic(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, g
 
 //NOTICE:
 //Some of the arguments are not used, but I left them in so it would be easier to use these functions together with drawing functions
-float draw_bezier_quadratic_x( gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, float t)
-{
-    float a = 1.0 - t, b = t;
-    return x1*a*a + x2*2*a*b + x3*b*b;
+float draw_bezier_quadratic_x(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3,
+                              float t) {
+  float a = 1.0 - t, b = t;
+  return x1 * a * a + x2 * 2 * a * b + x3 * b * b;
 }
 
-float draw_bezier_quadratic_y(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, float t)
-{
-    float a = 1.0 - t, b = t;
-    return y1*a*a + y2*2*a*b + y3*b*b;
+float draw_bezier_quadratic_y(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3,
+                              float t) {
+  float a = 1.0 - t, b = t;
+  return y1 * a * a + y2 * 2 * a * b + y3 * b * b;
 }
 
-float draw_bezier_cubic_x(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, gs_scalar x4, gs_scalar y4, float t)
-{
-    float a = 1.0 - t, b = t, a2, b2;
-    a2 = a*a; b2 = b*b;
-    return x1*a2*a + x2*3*a2*b + x3*3*a*b2 + x4*b2*b;
+float draw_bezier_cubic_x(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3,
+                          gs_scalar x4, gs_scalar y4, float t) {
+  float a = 1.0 - t, b = t, a2, b2;
+  a2 = a * a;
+  b2 = b * b;
+  return x1 * a2 * a + x2 * 3 * a2 * b + x3 * 3 * a * b2 + x4 * b2 * b;
 }
 
-float draw_bezier_cubic_y(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, gs_scalar x4, gs_scalar y4, float t)
-{
-    float a = 1.0 - t, b = t, a2, b2;
-    a2 = a*a; b2 = b*b;
-    return y1*a2*a + y2*3*a2*b + y3*3*a*b2 + y4*b2*b;
+float draw_bezier_cubic_y(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3,
+                          gs_scalar x4, gs_scalar y4, float t) {
+  float a = 1.0 - t, b = t, a2, b2;
+  a2 = a * a;
+  b2 = b * b;
+  return y1 * a2 * a + y2 * 3 * a2 * b + y3 * 3 * a * b2 + y4 * b2 * b;
 }
 
 //The following function is used in other drawing functions for all splines
 //it takes 4 points. Two control points which are at the beggining and the end, and the two points which it actually draws through
 //in the middle
-void draw_spline_part(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, gs_scalar x4, gs_scalar y4, int c1, int c2, float a1, float a2)
-{
-    int col;
-    float x, y, al, t = 0, det = 1/(float)pr_curve_detail;
-    for (int i=0; i<=pr_curve_detail; i++){
+void draw_spline_part(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, gs_scalar x4,
+                      gs_scalar y4, int c1, int c2, float a1, float a2) {
+  int col;
+  float x, y, al, t = 0, det = 1 / (float)pr_curve_detail;
+  for (int i = 0; i <= pr_curve_detail; i++) {
+    al = a1 + (a2 - a1) * t;
 
-        al = a1 + (a2-a1)*t;
+    col = merge_color(c1, c2, t);
 
-        col = merge_color(c1, c2, t);
-
-        float t2 = t * t, t3 = t2 * t;
-        x = 0.5 * ( ( 2.0 * x2 ) + ( -x1 + x3 ) * t + ( 2.0 * x1 - 5.0 * x2 + 4 * x3 - x4 ) * t2 +
-        ( -x1 + 3.0 * x2 - 3.0 * x3 + x4 ) * t3 );
-        y = 0.5 * ( ( 2.0 * y2 ) + ( -y1 + y3 ) * t + ( 2.0 * y1 - 5.0 * y2 + 4 * y3 - y4 ) * t2 +
-        ( -y1 + 3.0 * y2 - 3.0 * y3 + y4 ) * t3 );
-        glColor4f(__GETR(col),__GETG(col),__GETB(col),al);
-     //   glVertex2f(x, y);
-        t += det;
-    }
+    float t2 = t * t, t3 = t2 * t;
+    x = 0.5 * ((2.0 * x2) + (-x1 + x3) * t + (2.0 * x1 - 5.0 * x2 + 4 * x3 - x4) * t2 +
+               (-x1 + 3.0 * x2 - 3.0 * x3 + x4) * t3);
+    y = 0.5 * ((2.0 * y2) + (-y1 + y3) * t + (2.0 * y1 - 5.0 * y2 + 4 * y3 - y4) * t2 +
+               (-y1 + 3.0 * y2 - 3.0 * y3 + y4) * t3);
+    glColor4f(__GETR(col), __GETG(col), __GETB(col), al);
+    //   glVertex2f(x, y);
+    t += det;
+  }
 }
 
-void draw_spline2c(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, gs_scalar x4, gs_scalar y4)
-{
-    untexture();
-   /* glPushAttrib(GL_LINE_BIT);
+void draw_spline2c(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, gs_scalar x4,
+                   gs_scalar y4) {
+  untexture();
+  /* glPushAttrib(GL_LINE_BIT);
     glLineWidth(pr_curve_width);
     glBegin(pr_curve_mode);
     draw_spline_part(x1, y1, x2, y2, x3, y3, x4, y4, pr_curve_color1, pr_curve_color2, pr_curve_alpha1, pr_curve_alpha2);
@@ -198,9 +187,8 @@ void draw_spline2c(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_sc
     glColor4ubv(enigma::currentcolor);*/
 }
 
-void draw_spline3(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3)
-{
-    untexture();
+void draw_spline3(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3) {
+  untexture();
   /*  glPushAttrib(GL_LINE_BIT);
     glLineWidth(pr_curve_width);
     glBegin(pr_curve_mode);
@@ -217,9 +205,9 @@ void draw_spline3(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_sca
     glColor4ubv(enigma::currentcolor); */
 }
 
-void draw_spline3c(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, gs_scalar x4, gs_scalar y4, gs_scalar x5, gs_scalar y5)
-{
-    untexture();
+void draw_spline3c(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, gs_scalar x4,
+                   gs_scalar y4, gs_scalar x5, gs_scalar y5) {
+  untexture();
   /*  glPushAttrib(GL_LINE_BIT);
     glLineWidth(pr_curve_width);
     glBegin(pr_curve_mode);
@@ -236,9 +224,9 @@ void draw_spline3c(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_sc
     glColor4ubv(enigma::currentcolor); */
 }
 
-void draw_spline4(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, gs_scalar x4, gs_scalar y4)
-{
-    untexture();
+void draw_spline4(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, gs_scalar x4,
+                  gs_scalar y4) {
+  untexture();
   /*  glPushAttrib(GL_LINE_BIT);
     glLineWidth(pr_curve_width);
     glBegin(pr_curve_mode);
@@ -257,9 +245,9 @@ void draw_spline4(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_sca
     glColor4ubv(enigma::currentcolor); */
 }
 
-void draw_spline4c(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, gs_scalar x4, gs_scalar y4, gs_scalar x5, gs_scalar y5, gs_scalar x6, gs_scalar y6)
-{
-    untexture();
+void draw_spline4c(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, gs_scalar x4,
+                   gs_scalar y4, gs_scalar x5, gs_scalar y5, gs_scalar x6, gs_scalar y6) {
+  untexture();
   /*  glPushAttrib(GL_LINE_BIT);
     glLineWidth(pr_curve_width);
     glBegin(pr_curve_mode);
@@ -278,31 +266,26 @@ void draw_spline4c(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_sc
     glColor4ubv(enigma::currentcolor); */
 }
 
-void draw_spline_begin(int mode)
-{
-    startedSplinesMode.push(mode);
-    startedSplines.push(new spline);
+void draw_spline_begin(int mode) {
+  startedSplinesMode.push(mode);
+  startedSplines.push(new spline);
 }
 
-int draw_spline_vertex(gs_scalar x, gs_scalar y)
-{
-    splinePoint point={x,y,pr_curve_alpha1,pr_curve_color1};
-    startedSplines.top()->push_back(point);
-    return startedSplines.top()->size()-2;
+int draw_spline_vertex(gs_scalar x, gs_scalar y) {
+  splinePoint point = {x, y, pr_curve_alpha1, pr_curve_color1};
+  startedSplines.top()->push_back(point);
+  return startedSplines.top()->size() - 2;
 }
 
-int draw_spline_vertex_color(gs_scalar x, gs_scalar y, int col, float alpha)
-{
-    splinePoint point={x,y,alpha,col};
-    startedSplines.top()->push_back(point);
-    return startedSplines.top()->size()-2;
+int draw_spline_vertex_color(gs_scalar x, gs_scalar y, int col, float alpha) {
+  splinePoint point = {x, y, alpha, col};
+  startedSplines.top()->push_back(point);
+  return startedSplines.top()->size() - 2;
 }
 
-
-void draw_spline_end()
-{
-    untexture();
-   /* glPushAttrib(GL_LINE_BIT);
+void draw_spline_end() {
+  untexture();
+  /* glPushAttrib(GL_LINE_BIT);
       glLineWidth(pr_curve_width);
       glBegin(startedSplinesMode.top());
         spline &arr = *startedSplines.top();
@@ -317,12 +300,11 @@ void draw_spline_end()
     startedSplinesMode.pop();*/
 }
 
-int draw_spline_optimized_end()
-{
-    double tmp_detail = (double)pr_curve_detail;
-    int tot_det = 0;
-    untexture();
-   /* glPushAttrib(GL_LINE_BIT);
+int draw_spline_optimized_end() {
+  double tmp_detail = (double)pr_curve_detail;
+  int tot_det = 0;
+  untexture();
+  /* glPushAttrib(GL_LINE_BIT);
     glLineWidth(pr_curve_width);
     glBegin(startedSplinesMode.top());
     spline &arr = *startedSplines.top();
@@ -344,4 +326,4 @@ int draw_spline_optimized_end()
     return tot_det;*/
 }
 
-}
+}  // namespace enigma_user

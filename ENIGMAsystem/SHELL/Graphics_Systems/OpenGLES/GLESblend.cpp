@@ -15,37 +15,42 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "OpenGLHeaders.h"
 #include "../General/GSblend.h"
+#include "OpenGLHeaders.h"
 
 namespace enigma_user {
 
-int draw_set_blend_mode(int mode){
-	switch (mode)
-	{
+int draw_set_blend_mode(int mode) {
+  switch (mode) {
     case bm_add:
-        glBlendFunc(GL_SRC_ALPHA,GL_DST_ALPHA);
+      glBlendFunc(GL_SRC_ALPHA, GL_DST_ALPHA);
       return 0;
     case bm_max:
-        glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_COLOR);
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_COLOR);
       return 0;
     case bm_subtract:
-        glBlendFunc(GL_ZERO,GL_ONE_MINUS_SRC_COLOR);
+      glBlendFunc(GL_ZERO, GL_ONE_MINUS_SRC_COLOR);
       return 0;
     default:
-        glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
       return 0;
   }
 }
 
-int draw_set_blend_mode_ext(int src, int dest){
-	const static GLenum blendequivs[11] = {
-	  GL_ZERO, GL_ONE, GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR, GL_SRC_ALPHA,
-	  GL_ONE_MINUS_SRC_ALPHA, GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA, GL_DST_COLOR,
-	  GL_ONE_MINUS_DST_COLOR, GL_SRC_ALPHA_SATURATE
-  };
-	glBlendFunc(blendequivs[(src-1)%10],blendequivs[(dest-1)%10]);
-	return 0;
+int draw_set_blend_mode_ext(int src, int dest) {
+  const static GLenum blendequivs[11] = {GL_ZERO,
+                                         GL_ONE,
+                                         GL_SRC_COLOR,
+                                         GL_ONE_MINUS_SRC_COLOR,
+                                         GL_SRC_ALPHA,
+                                         GL_ONE_MINUS_SRC_ALPHA,
+                                         GL_DST_ALPHA,
+                                         GL_ONE_MINUS_DST_ALPHA,
+                                         GL_DST_COLOR,
+                                         GL_ONE_MINUS_DST_COLOR,
+                                         GL_SRC_ALPHA_SATURATE};
+  glBlendFunc(blendequivs[(src - 1) % 10], blendequivs[(dest - 1) % 10]);
+  return 0;
 }
 
-}
+}  // namespace enigma_user

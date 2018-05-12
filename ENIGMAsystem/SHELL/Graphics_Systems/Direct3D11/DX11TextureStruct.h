@@ -25,12 +25,10 @@ using std::vector;
 
 struct TextureStruct {
   ID3D11Texture2D *texture;
-  unsigned width,height;
-	unsigned fullwidth,fullheight;
+  unsigned width, height;
+  unsigned fullwidth, fullheight;
 
-  TextureStruct(ID3D11Texture2D *ntexture): texture(ntexture) {
-
-  }
+  TextureStruct(ID3D11Texture2D *ntexture) : texture(ntexture) {}
 
   ~TextureStruct() {
     if (texture != NULL) {
@@ -38,8 +36,7 @@ struct TextureStruct {
       texture = NULL;
     }
   }
-
 };
-extern vector<TextureStruct*> textureStructs;
+extern vector<TextureStruct *> textureStructs;
 
 #endif

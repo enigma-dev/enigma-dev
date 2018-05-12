@@ -18,14 +18,14 @@
 #ifndef ENIGMA_DX11SHADER_H
 #define ENIGMA_DX11SHADER_H
 
-namespace enigma_user
-{
+#include "Universal_System/scalar.h"
 
-enum {
-  sh_unknown = 0,
-  sh_vertex = 1,
-  sh_pixel = 2
-};
+#include <string>
+using std::string;
+
+namespace enigma_user {
+
+enum { sh_unknown = 0, sh_vertex = 1, sh_pixel = 2 };
 
 int hlsl_shader_create(int type);
 int hlsl_shader_load(int id, string fname);
@@ -35,6 +35,6 @@ void hlsl_shader_use(int id);
 void hlsl_shader_reset();
 void hlsl_shader_free(int id);
 
-}
+}  // namespace enigma_user
 
 #endif

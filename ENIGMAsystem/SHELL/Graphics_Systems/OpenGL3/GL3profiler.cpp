@@ -15,11 +15,11 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Bridges/General/GL3Context.h"
 #include "GL3profiler.h"
+#include "Bridges/General/GL3Context.h"
 
-namespace enigma_user{
-	int profiler_get_vertex_count() { return oglmgr->gpuprof.drawn_vertex_number; }
-	int profiler_get_drawcall_count() { return oglmgr->gpuprof.drawn_drawcall_number; }
-	int profiler_get_vbo_count() { return oglmgr->gpuprof.drawn_vbo_number; }
-}
+namespace enigma_user {
+int profiler_get_vertex_count() { return oglmgr->gpuprof.drawn_vertex_number; }
+int profiler_get_drawcall_count() { return oglmgr->gpuprof.drawn_drawcall_number; }
+int profiler_get_vbo_count() { return oglmgr->gpuprof.drawn_vbo_number; }
+}  // namespace enigma_user

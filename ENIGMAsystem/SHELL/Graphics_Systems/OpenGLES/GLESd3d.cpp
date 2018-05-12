@@ -17,12 +17,12 @@
 
 using namespace std;
 
-#include "OpenGLHeaders.h"
-#include "GLESprmtvs.h"
-#include <string>
-#include "Universal_System/var4.h"
-#include "Universal_System/roomsystem.h"
 #include <math.h>
+#include <string>
+#include "GLESprmtvs.h"
+#include "OpenGLHeaders.h"
+#include "Universal_System/roomsystem.h"
+#include "Universal_System/var4.h"
 
 /*void gluPerspective(GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar)
 {
@@ -40,44 +40,39 @@ using namespace std;
 
 namespace enigma_user {
 
-int d3d_start()
-{
-    glEnable(GL_DEPTH_TEST);
+int d3d_start() {
+  glEnable(GL_DEPTH_TEST);
   //  gluPerspective(110, view_wview[view_current]/view_hview[view_current], 5, 6);
 
-    return 0;
+  return 0;
 }
 
-int d3d_end()
-{
-    glDisable(GL_DEPTH_TEST);
+int d3d_end() {
+  glDisable(GL_DEPTH_TEST);
   //  glOrtho(0,room_width,0,room_height,0,1);
 
-    return 0;
+  return 0;
 }
 
-int d3d_primitive_begin(int kind)
-{
-   // glBegin(kind);
-    return 0;
+int d3d_primitive_begin(int kind) {
+  // glBegin(kind);
+  return 0;
 }
 
-int d3d_vertex(gs_scalar x, gs_scalar y, gs_scalar z)
-{
-   // glVertex3d(x,y,z);
-    return 0;
+int d3d_vertex(gs_scalar x, gs_scalar y, gs_scalar z) {
+  // glVertex3d(x,y,z);
+  return 0;
 }
 
-int d3d_primitive_end()
-{
+int d3d_primitive_end() {
   //  glEnd();
-    return 0;
+  return 0;
 }
 
-int d3d_set_projection(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom, gs_scalar xto, gs_scalar yto, gs_scalar zto, gs_scalar xup, gs_scalar yup, gs_scalar zup)
-{
-   // gluLookAt(xfrom, yfrom, zfrom, xto, yto, zto, xup, yup, zup);
-    return 0;
+int d3d_set_projection(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom, gs_scalar xto, gs_scalar yto, gs_scalar zto,
+                       gs_scalar xup, gs_scalar yup, gs_scalar zup) {
+  // gluLookAt(xfrom, yfrom, zfrom, xto, yto, zto, xup, yup, zup);
+  return 0;
 }
 
-}
+}  // namespace enigma_user

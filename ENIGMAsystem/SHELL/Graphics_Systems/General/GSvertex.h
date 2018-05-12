@@ -18,52 +18,50 @@
 #ifndef ENIGMA_GSVERTEX_H
 #define ENIGMA_GSVERTEX_H
 
-#include "../General/OpenGLHeaders.h"
-#include <vector>
 #include <utility>
-using std::vector;
+#include <vector>
+#include "../General/OpenGLHeaders.h"
 using std::pair;
+using std::vector;
 
 #include "Universal_System/scalar.h"
 
 namespace enigma {
-  struct VertexFormat {
-    vector<pair<int,int> > flags;
+struct VertexFormat {
+  vector<pair<int, int> > flags;
 
-    void AddAttribute(int type, int attribute) {
-      flags.push_back(std::make_pair(type, attribute));
-    }
-  };
-}
+  void AddAttribute(int type, int attribute) { flags.push_back(std::make_pair(type, attribute)); }
+};
+}  // namespace enigma
 
 namespace enigma_user {
-  enum {
-    vertex_type_float1, // D3DDECLTYPE_FLOAT1
-    vertex_type_float2, // D3DDECLTYPE_FLOAT2
-    vertex_type_float3, // D3DDECLTYPE_FLOAT3
-    vertex_type_float4, // D3DDECLTYPE_FLOAT4
-    vertex_type_colour, // D3DDECLTYPE_D3DCOLOR
-    vertex_type_ubyte4  // D3DDECLTYPE_UBYTE4
-  };
+enum {
+  vertex_type_float1,  // D3DDECLTYPE_FLOAT1
+  vertex_type_float2,  // D3DDECLTYPE_FLOAT2
+  vertex_type_float3,  // D3DDECLTYPE_FLOAT3
+  vertex_type_float4,  // D3DDECLTYPE_FLOAT4
+  vertex_type_colour,  // D3DDECLTYPE_D3DCOLOR
+  vertex_type_ubyte4   // D3DDECLTYPE_UBYTE4
+};
 
-  enum {
-    vertex_usage_position,        // D3DDECLUSAGE_POSITION
-    vertex_usage_colour,          // D3DDECLUSAGE_COLOR
-    vertex_usage_normal,          // D3DDECLUSAGE_NORMAL
-    vertex_usage_textcoord,       // D3DDECLUSAGE_TEXCOORD
-    vertex_usage_blendweight,     // D3DDECLUSAGE_BLENDWEIGHT
-    vertex_usage_blendindices,    // D3DDECLUSAGE_BLENDINDICES
-    vertex_usage_depth,           // D3DDECLUSAGE_DEPTH
-    vertex_usage_tangent,         // D3DDECLUSAGE_TANGENT
-    vertex_usage_binormal,        // D3DDECLUSAGE_BINORMAL
-    vertex_usage_fog,             // D3DDECLUSAGE_FOG
-    vertex_usage_sample           // D3DDECLUSAGE_SAMPLE
-  };
+enum {
+  vertex_usage_position,      // D3DDECLUSAGE_POSITION
+  vertex_usage_colour,        // D3DDECLUSAGE_COLOR
+  vertex_usage_normal,        // D3DDECLUSAGE_NORMAL
+  vertex_usage_textcoord,     // D3DDECLUSAGE_TEXCOORD
+  vertex_usage_blendweight,   // D3DDECLUSAGE_BLENDWEIGHT
+  vertex_usage_blendindices,  // D3DDECLUSAGE_BLENDINDICES
+  vertex_usage_depth,         // D3DDECLUSAGE_DEPTH
+  vertex_usage_tangent,       // D3DDECLUSAGE_TANGENT
+  vertex_usage_binormal,      // D3DDECLUSAGE_BINORMAL
+  vertex_usage_fog,           // D3DDECLUSAGE_FOG
+  vertex_usage_sample         // D3DDECLUSAGE_SAMPLE
+};
 
-  unsigned vertex_format_create();
-  void vertex_format_destroy(int id);
-  bool vertex_format_exists(int id);
-  void vertex_format_add(int id, int type, int attribute);
-}
+unsigned vertex_format_create();
+void vertex_format_destroy(int id);
+bool vertex_format_exists(int id);
+void vertex_format_add(int id, int type, int attribute);
+}  // namespace enigma_user
 
-#endif //ENIGMA_GSVERTEX_H
+#endif  //ENIGMA_GSVERTEX_H

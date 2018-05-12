@@ -21,16 +21,14 @@
 ///TODO(harijs) - This is the same as GLtileStruct.h. Do we need this?
 
 #include "Universal_System/roomsystem.h"
-namespace enigma
-{
-    struct bkinxop
-    {
-        bool operator() (const tile a, const tile b) {return (a.bckid < b.bckid);}
-    }   bkinxcomp;
-    void draw_tile();
-    void delete_tiles();
-    void load_tiles();
-    void rebuild_tile_layer(int layer_depth);
-}
+namespace enigma {
+struct bkinxop {
+  bool operator()(const tile a, const tile b) { return (a.bckid < b.bckid); }
+} bkinxcomp;
+void draw_tile();
+void delete_tiles();
+void load_tiles();
+void rebuild_tile_layer(int layer_depth);
+}  // namespace enigma
 
 #endif

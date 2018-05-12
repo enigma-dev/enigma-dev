@@ -21,16 +21,9 @@
 #include <string>
 using std::string;
 
-namespace enigma_user
-{
+namespace enigma_user {
 
-enum {
-  sh_vertex = 0,
-  sh_fragment = 1,
-  sh_tesscontrol = 2,
-  sh_tessevaluation = 3,
-  sh_geometry = 4
-};
+enum { sh_vertex = 0, sh_fragment = 1, sh_tesscontrol = 2, sh_tessevaluation = 3, sh_geometry = 4 };
 
 int glsl_shader_create(int type);
 int glsl_shader_load(int id, string fname);
@@ -65,13 +58,13 @@ void glsl_uniformui(int location, unsigned v0, unsigned v1, unsigned v2);
 void glsl_uniformui(int location, unsigned v0, unsigned v1, unsigned v2, unsigned v3);
 
 // Wrap our abstracted version to the useless GayMaker version
-#define shader_set            glsl_program_set
-#define shader_reset          glsl_program_reset
-#define shader_get_uniform    glsl_get_uniform_location
+#define shader_set glsl_program_set
+#define shader_reset glsl_program_reset
+#define shader_get_uniform glsl_get_uniform_location
 #define shader_get_sampler_index glsl_get_uniform_location
-#define shader_set_uniform_f  glsl_uniformf
-#define shader_set_uniform_i  glsl_uniformi
+#define shader_set_uniform_f glsl_uniformf
+#define shader_set_uniform_i glsl_uniformi
 
-}
+}  // namespace enigma_user
 
 #endif

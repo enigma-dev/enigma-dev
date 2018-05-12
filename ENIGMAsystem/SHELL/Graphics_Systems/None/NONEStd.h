@@ -19,31 +19,23 @@
 
 #include <string>
 #include <vector>
-#include "../General/GScolors.h"
-#include "../General/GSprimitives.h"
-#include "../General/GSd3d.h"
-#include "../General/GSstdraw.h"
 #include "../General/GSblend.h"
-#include "../General/GSsurface.h"
+#include "../General/GScolors.h"
+#include "../General/GSd3d.h"
+#include "../General/GSprimitives.h"
 #include "../General/GSscreen.h"
+#include "../General/GSstdraw.h"
+#include "../General/GSsurface.h"
 #include "Universal_System/scalar.h"
 
-namespace enigma
-{
-  extern unsigned char currentcolor[4];
+namespace enigma {
+extern unsigned char currentcolor[4];
 
-  extern int currentblendmode[2];
-  extern int currentblendtype;
-	unsigned get_texture(int texid);
-}
+extern int currentblendmode[2];
+extern int currentblendtype;
+unsigned get_texture(int texid);
+}  // namespace enigma
 
-namespace enigma_user
-{
-enum {
-  sh_vertex = 0,
-  sh_fragment = 1,
-  sh_tesscontrol = 2,
-  sh_tessevaluation = 3,
-  sh_geometry = 4
-};
+namespace enigma_user {
+enum { sh_vertex = 0, sh_fragment = 1, sh_tesscontrol = 2, sh_tessevaluation = 3, sh_geometry = 4 };
 }
