@@ -18,17 +18,15 @@
 #ifndef ENIGMA_COLLISIONTYPE
 #define ENIGMA_COLLISIONTYPE
 
-namespace enigma
-{
-  enum collision_type { //The order fits with the MaskShape enum in org.lateralgm.resources.Sprite.
-    ct_precise, //Data is the image, collision shape is the precise image inside the bounding box.
-    ct_bbox, //Data should be ignored, collision shape is the bounding box.
-    ct_ellipse, //Data should be ignored, collision shape is an ellipse fitting the bounding box.
-    ct_diamond, //Data should be ignored, collision shape is a diamond fitting the bounding box.
-    ct_polygon,
-    ct_circle //Data should be ignored, collision shape is a circle fitting inside the middle of the bounding box.
-  };
+namespace enigma {
+enum collision_type {  //The order fits with the MaskShape enum in org.lateralgm.resources.Sprite.
+  ct_precise,          //Data is the image, collision shape is the precise image inside the bounding box.
+  ct_bbox,             //Data should be ignored, collision shape is the bounding box.
+  ct_ellipse,          //Data should be ignored, collision shape is an ellipse fitting the bounding box.
+  ct_diamond,          //Data should be ignored, collision shape is a diamond fitting the bounding box.
+  ct_polygon,
+  ct_circle  //Data should be ignored, collision shape is a circle fitting inside the middle of the bounding box.
+};
 }
 
-#endif // ENIGMA_COLLISIONTYPE
-
+#endif  // ENIGMA_COLLISIONTYPE
