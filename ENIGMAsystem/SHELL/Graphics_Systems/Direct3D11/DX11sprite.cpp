@@ -20,65 +20,59 @@
 #include <string>
 using std::string;
 
-#include "Direct3D11Headers.h"
-#include "Bridges/General/DX11Context.h"
-#include "DX11TextureStruct.h"
 #include "../General/GScolors.h"
+#include "../General/GSprimitives.h"
 #include "../General/GSsprite.h"
 #include "../General/GStextures.h"
-#include "../General/GSprimitives.h"
+#include "Bridges/General/DX11Context.h"
+#include "DX11TextureStruct.h"
+#include "Direct3D11Headers.h"
 
+#include "Universal_System/graphics_object.h"
+#include "Universal_System/instance_system.h"
 #include "Universal_System/nlpo2.h"
 #include "Universal_System/sprites_internal.h"
-#include "Universal_System/instance_system.h"
-#include "Universal_System/graphics_object.h"
 
 #define __GETR(x) ((x & 0x0000FF))
 #define __GETG(x) ((x & 0x00FF00) >> 8)
 #define __GETB(x) ((x & 0xFF0000) >> 16)
 
-
 #ifdef DEBUG_MODE
-  #include "libEGMstd.h"
-  #include "Widget_Systems/widgets_mandatory.h"
-  #define get_sprite(spr,id,r) \
-    if (id < -1 or size_t(id) > enigma::sprite_idmax or !enigma::spritestructarray[id]) { \
-      show_error("Cannot access sprite with id " + toString(id), false); \
-      return r; \
-    } const enigma::sprite *const spr = enigma::spritestructarray[id];
-  #define get_spritev(spr,id) \
-    if (id < -1 or size_t(id) > enigma::sprite_idmax or !enigma::spritestructarray[id]) { \
-      show_error("Cannot access sprite with id " + toString(id), false); \
-      return; \
-    } const enigma::sprite *const spr = enigma::spritestructarray[id];
-  #define get_sprite_null(spr,id,r) \
-    if (id < -1 or size_t(id) > enigma::sprite_idmax) { \
-      show_error("Cannot access sprite with id " + toString(id), false); \
-      return r; \
-    } const enigma::sprite *const spr = enigma::spritestructarray[id];
+#include "Widget_Systems/widgets_mandatory.h"
+#include "libEGMstd.h"
+#define get_sprite(spr, id, r)                                                          \
+  if (id < -1 or size_t(id) > enigma::sprite_idmax or !enigma::spritestructarray[id]) { \
+    show_error("Cannot access sprite with id " + toString(id), false);                  \
+    return r;                                                                           \
+  }                                                                                     \
+  const enigma::sprite *const spr = enigma::spritestructarray[id];
+#define get_spritev(spr, id)                                                            \
+  if (id < -1 or size_t(id) > enigma::sprite_idmax or !enigma::spritestructarray[id]) { \
+    show_error("Cannot access sprite with id " + toString(id), false);                  \
+    return;                                                                             \
+  }                                                                                     \
+  const enigma::sprite *const spr = enigma::spritestructarray[id];
+#define get_sprite_null(spr, id, r)                                    \
+  if (id < -1 or size_t(id) > enigma::sprite_idmax) {                  \
+    show_error("Cannot access sprite with id " + toString(id), false); \
+    return r;                                                          \
+  }                                                                    \
+  const enigma::sprite *const spr = enigma::spritestructarray[id];
 #else
-  #define get_sprite(spr,id,r) \
-    const enigma::sprite *const spr = enigma::spritestructarray[id];
-  #define get_spritev(spr,id) \
-    const enigma::sprite *const spr = enigma::spritestructarray[id];
-  #define get_sprite_null(spr,id,r) \
-    const enigma::sprite *const spr = enigma::spritestructarray[id];
+#define get_sprite(spr, id, r) const enigma::sprite *const spr = enigma::spritestructarray[id];
+#define get_spritev(spr, id) const enigma::sprite *const spr = enigma::spritestructarray[id];
+#define get_sprite_null(spr, id, r) const enigma::sprite *const spr = enigma::spritestructarray[id];
 #endif
 
-namespace enigma_user
-{
+namespace enigma_user {
 
-int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload, int xorig, int yorig) {
-
-}
+int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload, int xorig,
+                              int yorig) {}
 
 int sprite_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, int xorig, int yorig) {
-	return sprite_create_from_screen(x, y, w, h, removeback, smooth, true, xorig, yorig);
+  return sprite_create_from_screen(x, y, w, h, removeback, smooth, true, xorig, yorig);
 }
 
-void sprite_add_from_screen(int id, int x, int y, int w, int h, bool removeback, bool smooth) {
+void sprite_add_from_screen(int id, int x, int y, int w, int h, bool removeback, bool smooth) {}
 
-}
-
-}
-
+}  // namespace enigma_user

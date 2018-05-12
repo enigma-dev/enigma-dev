@@ -15,45 +15,43 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "OpenGLHeaders.h"
 #include <stdio.h>
+#include "OpenGLHeaders.h"
 
-namespace enigma{extern unsigned bound_texture;}
-
-namespace enigma
-{
-  unsigned graphics_create_texture(int fullwidth, int fullheight, void* pxdata)
-  {
-    GLuint texture;
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, fullwidth, fullheight, 0, GL_RGBA, GL_UNSIGNED_BYTE, pxdata); //OPENGLES changed 4 to GL_RGBA
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_LINEAR); //GL_NEAREST to GL_LINEAR
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_LINEAR); //GL_NEAREST to GL_LINEAR
-    //glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP); OPENGLES
-    //glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP); OPENGLES
-    glBindTexture(GL_TEXTURE_2D, 0);
-    return texture;
-  }
-    
-    //Retrieve image data from a texture, in unsigned char, RGBA format.
-    //OpenGLES doesn't have support for glGetTexImage!!!
-    unsigned char* graphics_get_texture_rgba(unsigned texture)
-    {
-        if (texture != enigma::bound_texture)
-            glBindTexture(GL_TEXTURE_2D, texture);
-        
-        int w,h;
-        //glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_WIDTH, &w);
-        //glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_HEIGHT,&h);
-        
-        unsigned char* ret = new unsigned char[(w*h) << 2];
-        //glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, ret);
-        
-        if (texture != enigma::bound_texture)
-            glBindTexture(GL_TEXTURE_2D, enigma::bound_texture);
-        
-        return ret;
-  }
-    
+namespace enigma {
+extern unsigned bound_texture;
 }
+
+namespace enigma {
+unsigned graphics_create_texture(int fullwidth, int fullheight, void* pxdata) {
+  GLuint texture;
+  glGenTextures(1, &texture);
+  glBindTexture(GL_TEXTURE_2D, texture);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, fullwidth, fullheight, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+               pxdata);                                              //OPENGLES changed 4 to GL_RGBA
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);  //GL_NEAREST to GL_LINEAR
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);  //GL_NEAREST to GL_LINEAR
+  //glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S,GL_CLAMP); OPENGLES
+  //glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T,GL_CLAMP); OPENGLES
+  glBindTexture(GL_TEXTURE_2D, 0);
+  return texture;
+}
+
+//Retrieve image data from a texture, in unsigned char, RGBA format.
+//OpenGLES doesn't have support for glGetTexImage!!!
+unsigned char* graphics_get_texture_rgba(unsigned texture) {
+  if (texture != enigma::bound_texture) glBindTexture(GL_TEXTURE_2D, texture);
+
+  int w, h;
+  //glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_WIDTH, &w);
+  //glGetTexLevelParameteriv(GL_TEXTURE_2D,0,GL_TEXTURE_HEIGHT,&h);
+
+  unsigned char* ret = new unsigned char[(w * h) << 2];
+  //glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, ret);
+
+  if (texture != enigma::bound_texture) glBindTexture(GL_TEXTURE_2D, enigma::bound_texture);
+
+  return ret;
+}
+
+}  // namespace enigma

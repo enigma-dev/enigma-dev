@@ -21,4 +21,4 @@
 #define ENIGMA_GLPROFILER_H
 #include "../General/OpenGLHeaders.h"
 
-#endif // ENIGMA_GLPROFILER_H
+#endif  // ENIGMA_GLPROFILER_H

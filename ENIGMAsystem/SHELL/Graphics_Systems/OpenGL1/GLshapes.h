@@ -33,8 +33,8 @@
 
 #ifndef ENIGMA_GLSHAPES_H
 #define ENIGMA_GLSHAPES_H
-#include "Universal_System/scalar.h"
 #include "../General/OpenGLHeaders.h"
+#include "Universal_System/scalar.h"
 GLfloat* block_vertices(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2);
 GLfloat* block_indices(gs_scalar x1, gs_scalar y1, gs_scalar z1, gs_scalar x2, gs_scalar y2, gs_scalar z2);
-#endif // ENIGMA_GLSHAPES_H
+#endif  // ENIGMA_GLSHAPES_H

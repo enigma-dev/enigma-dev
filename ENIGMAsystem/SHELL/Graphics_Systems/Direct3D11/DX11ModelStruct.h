@@ -1,4 +1,4 @@
-       /** Copyright (C) 2013 Robert B. Colton, Adriano Tumminelli
+/** Copyright (C) 2013 Robert B. Colton, Adriano Tumminelli
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,180 +15,168 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Bridges/General/DX11Context.h"
-#include "../General/GSd3d.h"
-#include "../General/GSprimitives.h"
-#include "Universal_System/var4.h"
-#include "Universal_System/roomsystem.h"
 #include <math.h>
 #include <stdlib.h>
-
+#include "../General/GSd3d.h"
+#include "../General/GSprimitives.h"
+#include "Bridges/General/DX11Context.h"
+#include "Universal_System/roomsystem.h"
+#include "Universal_System/var4.h"
 
 using namespace std;
 
 #define __GETR(x) ((x & 0x0000FF))
-#define __GETG(x) ((x & 0x00FF00)>>8)
-#define __GETB(x) ((x & 0xFF0000)>>16)
-#define __GETRf(x) fmod(__GETR(x),256)
-#define __GETGf(x) fmod(x/256,256)
-#define __GETBf(x) fmod(x/65536,256)*
+#define __GETG(x) ((x & 0x00FF00) >> 8)
+#define __GETB(x) ((x & 0xFF0000) >> 16)
+#define __GETRf(x) fmod(__GETR(x), 256)
+#define __GETGf(x) fmod(x / 256, 256)
+#define __GETBf(x) fmod(x / 65536, 256)*
 
 #include <iostream>
-#include <map>
 #include <list>
-#include "Universal_System/fileio.h"
+#include <map>
 #include "Universal_System/estring.h"
+#include "Universal_System/fileio.h"
 
 #include <vector>
 using std::vector;
 
 extern int ptypes_by_id[16];
 namespace enigma {
-  extern unsigned char currentcolor[4];
+extern unsigned char currentcolor[4];
 
-  //split a string and convert to float
-  vector<float> float_split(const string& str, const char& ch) {
-    string next;
-    vector<float> result;
+//split a string and convert to float
+vector<float> float_split(const string& str, const char& ch) {
+  string next;
+  vector<float> result;
 
-    for (string::const_iterator it = str.begin(); it != str.end(); it++)
-	{
-		if (*it == ch)
-		{
-			if (!next.empty())
-			{
-				result.push_back(atof(next.c_str()));
-				next.clear();
-			}
-        } else {
-            next += *it;
-        }
+  for (string::const_iterator it = str.begin(); it != str.end(); it++) {
+    if (*it == ch) {
+      if (!next.empty()) {
+        result.push_back(atof(next.c_str()));
+        next.clear();
+      }
+    } else {
+      next += *it;
     }
-    if (!next.empty())
-         result.push_back(atof(next.c_str()));
-    return result;
   }
-
-  //obj model parsing functions
-  void string_parse( string *s )
-  {
-	size_t spaces = 0;
-	bool trimmed = false;
-	bool checknormal = false;
-	for (unsigned int i = 0; i < s->size() ; i++)
-	{
-		//comment
-		if ((*s)[i] == '#')
-		{
-			s->erase(i, s->length() - i);
-			break;
-		}
-		else if((*s)[i] == ' ')
-		{
-			if (!trimmed)
-			{
-				s->erase(i,1);
-				i--;
-			}
-			else
-			{
-				if (spaces >= 1)
-				{
-					s->erase(i,1);
-					i--;
-				}
-				spaces++;
-			}
-		}
-		else
-		{
-			if((*s)[i] == '/')
-			{
-				(*s)[i] = ' ';
-				if(checknormal)
-				{
-					s->erase(i, 1);
-					checknormal = false;
-				}
-				else
-					checknormal = true;
-			}
-			else
-				checknormal = false;
-			spaces = 0;
-			trimmed = true;
-		}
-	}
-	//end trim
-	if (s->size() > 0) {
-		if ((*s)[s->size()-1] == ' ')
-		{
-			s->erase(s->size()-1, 1);
-		}
-	}
-  }
+  if (!next.empty()) result.push_back(atof(next.c_str()));
+  return result;
 }
 
-union VertexElement {
-	unsigned long d;
-	gs_scalar f;
+//obj model parsing functions
+void string_parse(string* s) {
+  size_t spaces = 0;
+  bool trimmed = false;
+  bool checknormal = false;
+  for (unsigned int i = 0; i < s->size(); i++) {
+    //comment
+    if ((*s)[i] == '#') {
+      s->erase(i, s->length() - i);
+      break;
+    } else if ((*s)[i] == ' ') {
+      if (!trimmed) {
+        s->erase(i, 1);
+        i--;
+      } else {
+        if (spaces >= 1) {
+          s->erase(i, 1);
+          i--;
+        }
+        spaces++;
+      }
+    } else {
+      if ((*s)[i] == '/') {
+        (*s)[i] = ' ';
+        if (checknormal) {
+          s->erase(i, 1);
+          checknormal = false;
+        } else
+          checknormal = true;
+      } else
+        checknormal = false;
+      spaces = 0;
+      trimmed = true;
+    }
+  }
+  //end trim
+  if (s->size() > 0) {
+    if ((*s)[s->size() - 1] == ' ') {
+      s->erase(s->size() - 1, 1);
+    }
+  }
+}
+}  // namespace enigma
 
-	VertexElement(gs_scalar v): f(v) {}
-	VertexElement(unsigned long v): d(v) {}
+union VertexElement {
+  unsigned long d;
+  gs_scalar f;
+
+  VertexElement(gs_scalar v) : f(v) {}
+  VertexElement(unsigned long v) : d(v) {}
 };
 
 /* Mesh clearing has a memory leak */
-class Mesh
-{
-  public:
-  unsigned currentPrimitive; //The type of the current primitive being added to the model
+class Mesh {
+ public:
+  unsigned currentPrimitive;  //The type of the current primitive being added to the model
 
-  vector<VertexElement> vertices; // Temporary vertices container for the current primitive until they are batched
-  vector<unsigned> indices; // Temporary indices that can optionally be supplied, otherwise they will get generated by the batcher.
-  vector<VertexElement> triangleVertices; // The vertices added to triangle primitives batched into a single triangle list to be buffered to the GPU
-  vector<VertexElement> triangleIndexedVertices; // The vertices added to indexed triangle primitives batched into a single triangle list to be buffered to the GPU
-  vector<unsigned> triangleIndices; // The triangle indices either concatenated by batching or supplied in the temporary container.
-  vector<VertexElement> lineVertices; // The vertices added to line primitives batched into a single line list to be buffered to the GPU
-  vector<VertexElement> lineIndexedVertices; // The vertices added to indexed line primitives batched into a single line list to be buffered to the GPU
-  vector<unsigned> lineIndices; // The line indices either concatenated by batching or supplied in the temporary container.
-  vector<VertexElement> pointVertices; // The vertices added to point primitives batched into a single point list to be buffered to the GPU
-  vector<VertexElement> pointIndexedVertices; // The vertices added to indexed point primitives batched into a single point list to be buffered to the GPU
-  vector<unsigned> pointIndices; // The point indices either concatenated by batching or supplied in the temporary container.
+  vector<VertexElement> vertices;  // Temporary vertices container for the current primitive until they are batched
+  vector<unsigned>
+      indices;  // Temporary indices that can optionally be supplied, otherwise they will get generated by the batcher.
+  vector<VertexElement>
+      triangleVertices;  // The vertices added to triangle primitives batched into a single triangle list to be buffered to the GPU
+  vector<VertexElement>
+      triangleIndexedVertices;  // The vertices added to indexed triangle primitives batched into a single triangle list to be buffered to the GPU
+  vector<unsigned>
+      triangleIndices;  // The triangle indices either concatenated by batching or supplied in the temporary container.
+  vector<VertexElement>
+      lineVertices;  // The vertices added to line primitives batched into a single line list to be buffered to the GPU
+  vector<VertexElement>
+      lineIndexedVertices;  // The vertices added to indexed line primitives batched into a single line list to be buffered to the GPU
+  vector<unsigned>
+      lineIndices;  // The line indices either concatenated by batching or supplied in the temporary container.
+  vector<VertexElement>
+      pointVertices;  // The vertices added to point primitives batched into a single point list to be buffered to the GPU
+  vector<VertexElement>
+      pointIndexedVertices;  // The vertices added to indexed point primitives batched into a single point list to be buffered to the GPU
+  vector<unsigned>
+      pointIndices;  // The point indices either concatenated by batching or supplied in the temporary container.
 
-  unsigned vertexStride; // Whether the vertices are 2D or 3D
-  bool useDepth; // Whether or not the Z-values should be treated as a depth component
-  bool useColors; // If colors have been added to the model
-  bool useTextures; // If texture coordinates have been added
-  bool useNormals; // If normals have been added
+  unsigned vertexStride;  // Whether the vertices are 2D or 3D
+  bool useDepth;          // Whether or not the Z-values should be treated as a depth component
+  bool useColors;         // If colors have been added to the model
+  bool useTextures;       // If texture coordinates have been added
+  bool useNormals;        // If normals have been added
 
-  unsigned pointCount; // The number of indices in the point buffer
-  unsigned triangleCount; // The number of indices in the triangle buffer
-  unsigned triangleVertCount; // The number of vertices in the triangle buffer
-  unsigned lineCount; // The number of indices in the line buffer
-  unsigned lineVertCount; //The number of vertices in the line buffer
+  unsigned pointCount;         // The number of indices in the point buffer
+  unsigned triangleCount;      // The number of indices in the triangle buffer
+  unsigned triangleVertCount;  // The number of vertices in the triangle buffer
+  unsigned lineCount;          // The number of indices in the line buffer
+  unsigned lineVertCount;      //The number of vertices in the line buffer
 
-  unsigned indexedoffset; // The number of indexed vertices
-  unsigned pointIndexedCount; // The number of point indices
-  unsigned triangleIndexedCount; // The number of triangle indices
-  unsigned lineIndexedCount; // The number of line indices
+  unsigned indexedoffset;         // The number of indexed vertices
+  unsigned pointIndexedCount;     // The number of point indices
+  unsigned triangleIndexedCount;  // The number of triangle indices
+  unsigned lineIndexedCount;      // The number of line indices
 
   // Indexed primitives are first since the indices must be offset, and keeps them as small as possible.
   // INDEXEDTRIANGLES|INDEXEDLINES|INDEXEDPOINTS|TRIANGLES|LINES|POINTS
-  ID3D11Buffer* vertexbuffer;    // Interleaved vertex buffer object TRIANGLES|LINES|POINTS with triangles first since they are most likely to be used
-  ID3D11Buffer* indexbuffer;    // Interleaved index buffer object TRIANGLES|LINES|POINTS with triangles first since they are most likely to be used
+  ID3D11Buffer*
+      vertexbuffer;  // Interleaved vertex buffer object TRIANGLES|LINES|POINTS with triangles first since they are most likely to be used
+  ID3D11Buffer*
+      indexbuffer;  // Interleaved index buffer object TRIANGLES|LINES|POINTS with triangles first since they are most likely to be used
 
-
-  int vbotype; // Can be static = 0 or dynamic > 0
-  bool vbobuffered; // Whether or not the buffer objects have been generated
-  bool vboindexed; // Whether or not the model contains any indexed primitives or just regular lists
+  int vbotype;       // Can be static = 0 or dynamic > 0
+  bool vbobuffered;  // Whether or not the buffer objects have been generated
+  bool vboindexed;   // Whether or not the model contains any indexed primitives or just regular lists
 
   void SetPrimitive(int pr) {
-	vbobuffered = false;
-	currentPrimitive = pr;
+    vbobuffered = false;
+    currentPrimitive = pr;
   }
 
-  Mesh (int type)
-  {
+  Mesh(int type) {
     triangleIndexedVertices.reserve(64000);
     pointIndexedVertices.reserve(64000);
     lineIndexedVertices.reserve(64000);
@@ -201,14 +189,14 @@ class Mesh
     vertices.reserve(64000);
     indices.reserve(64000);
 
-    vertexbuffer = NULL;    // the pointer to the vertex buffer
-    indexbuffer = NULL;    // the pointer to the index buffer
+    vertexbuffer = NULL;  // the pointer to the vertex buffer
+    indexbuffer = NULL;   // the pointer to the index buffer
 
     vbobuffered = false;
-    if (type == model_static){
-        vbotype = 0;
+    if (type == model_static) {
+      vbotype = 0;
     } else {
-        vbotype = 1;
+      vbotype = 1;
     }
 
     vertexStride = 0;
@@ -231,8 +219,7 @@ class Mesh
     currentPrimitive = 0;
   }
 
-  ~Mesh()
-  {
+  ~Mesh() {
     // Release the buffers and make sure we don't leave hanging pointers.
     if (vertexbuffer != NULL) {
       vertexbuffer->Release();
@@ -244,8 +231,7 @@ class Mesh
     }
   }
 
-  void ClearData()
-  {
+  void ClearData() {
     triangleVertices.clear();
     pointVertices.clear();
     lineVertices.clear();
@@ -257,8 +243,7 @@ class Mesh
     lineIndices.clear();
   }
 
-  void Clear()
-  {
+  void Clear() {
     ClearData();
 
     triangleIndexedVertices.reserve(64000);
@@ -300,50 +285,47 @@ class Mesh
     return stride;
   }
 
-  void Begin(int pt)
-  {
+  void Begin(int pt) {
     vbobuffered = false;
     currentPrimitive = pt;
   }
 
-  void AddVertex(gs_scalar x, gs_scalar y)
-  {
-    vertices.push_back(x); vertices.push_back(y); vertices.push_back(0.0f);
+  void AddVertex(gs_scalar x, gs_scalar y) {
+    vertices.push_back(x);
+    vertices.push_back(y);
+    vertices.push_back(0.0f);
     vertexStride = 3;
   }
 
-  void AddVertex(gs_scalar x, gs_scalar y, gs_scalar z)
-  {
-    vertices.push_back(x); vertices.push_back(y); vertices.push_back(z);
+  void AddVertex(gs_scalar x, gs_scalar y, gs_scalar z) {
+    vertices.push_back(x);
+    vertices.push_back(y);
+    vertices.push_back(z);
     vertexStride = 3;
   }
 
-  void AddIndex(unsigned ind)
-  {
-    indices.push_back(ind);
-  }
+  void AddIndex(unsigned ind) { indices.push_back(ind); }
 
-  void AddNormal(gs_scalar nx, gs_scalar ny, gs_scalar nz)
-  {
-    vertices.push_back(nx); vertices.push_back(ny); vertices.push_back(nz);
+  void AddNormal(gs_scalar nx, gs_scalar ny, gs_scalar nz) {
+    vertices.push_back(nx);
+    vertices.push_back(ny);
+    vertices.push_back(nz);
     useNormals = true;
   }
 
-  void AddTexture(gs_scalar tx, gs_scalar ty)
-  {
-    vertices.push_back(tx); vertices.push_back(ty);
+  void AddTexture(gs_scalar tx, gs_scalar ty) {
+    vertices.push_back(tx);
+    vertices.push_back(ty);
     useTextures = true;
   }
 
-  void AddColor(int col, double alpha)
-  {
+  void AddColor(int col, double alpha) {
     //DWORD final = D3DCOLOR_ARGB( (unsigned char)(alpha*255), __GETR(col), __GETG(col), __GETB(col) );
     //vertices.push_back(final);
     useColors = true;
   }
 
-  void End()
-  {
+  void End() {
     //NOTE: This batching only checks for degenerate primitives on triangle strips and fans since the GPU does not render triangles where the two
     //vertices are exactly the same, triangle lists could also check for degenerates, it is unknown whether the GPU will render a degenerative
     //in a line strip primitive.
@@ -358,7 +340,9 @@ class Mesh
       case enigma_user::pr_pointlist:
         if (indices.size() > 0) {
           pointIndexedVertices.insert(pointIndexedVertices.end(), vertices.begin(), vertices.end());
-          for (std::vector<unsigned>::iterator it = indices.begin(); it != indices.end(); ++it) { *it += pointIndexedCount; }
+          for (std::vector<unsigned>::iterator it = indices.begin(); it != indices.end(); ++it) {
+            *it += pointIndexedCount;
+          }
           pointIndices.insert(pointIndices.end(), indices.begin(), indices.end());
         } else {
           pointVertices.insert(pointVertices.end(), vertices.begin(), vertices.end());
@@ -369,7 +353,9 @@ class Mesh
       case enigma_user::pr_linelist:
         if (indices.size() > 0) {
           lineIndexedVertices.insert(lineIndexedVertices.end(), vertices.begin(), vertices.end());
-          for (std::vector<unsigned>::iterator it = indices.begin(); it != indices.end(); ++it) { *it += lineIndexedCount; }
+          for (std::vector<unsigned>::iterator it = indices.begin(); it != indices.end(); ++it) {
+            *it += lineIndexedCount;
+          }
           lineIndices.insert(lineIndices.end(), indices.begin(), indices.end());
         } else {
           lineVertices.insert(lineVertices.end(), vertices.begin(), vertices.end());
@@ -379,7 +365,9 @@ class Mesh
       case enigma_user::pr_linestrip:
         lineIndexedVertices.insert(lineIndexedVertices.end(), vertices.begin(), vertices.end());
         if (indices.size() > 0) {
-          for (std::vector<unsigned>::iterator it = indices.begin(); it != indices.end(); ++it) { *it += lineIndexedCount; }
+          for (std::vector<unsigned>::iterator it = indices.begin(); it != indices.end(); ++it) {
+            *it += lineIndexedCount;
+          }
           for (unsigned i = 0; i < indices.size() - 2; i++) {
             lineIndices.push_back(indices[i]);
             lineIndices.push_back(indices[i + 1]);
@@ -395,7 +383,9 @@ class Mesh
       case enigma_user::pr_trianglelist:
         if (indices.size() > 0) {
           triangleIndexedVertices.insert(triangleIndexedVertices.end(), vertices.begin(), vertices.end());
-          for (std::vector<unsigned>::iterator it = indices.begin(); it != indices.end(); ++it) { *it += triangleIndexedCount; }
+          for (std::vector<unsigned>::iterator it = indices.begin(); it != indices.end(); ++it) {
+            *it += triangleIndexedCount;
+          }
           triangleIndices.insert(triangleIndices.end(), indices.begin(), indices.end());
         } else {
           triangleVertices.insert(triangleVertices.end(), vertices.begin(), vertices.end());
@@ -405,13 +395,17 @@ class Mesh
       case enigma_user::pr_trianglestrip:
         triangleIndexedVertices.insert(triangleIndexedVertices.end(), vertices.begin(), vertices.end());
         if (indices.size() > 0) {
-          for (std::vector<unsigned>::iterator it = indices.begin(); it != indices.end(); ++it) { *it += triangleIndexedCount; }
+          for (std::vector<unsigned>::iterator it = indices.begin(); it != indices.end(); ++it) {
+            *it += triangleIndexedCount;
+          }
           for (unsigned i = 0; i < indices.size() - 2; i++) {
             // check for and continue if indexed triangle is degenerate, because the GPU won't render it anyway
-            if (indices[i] == indices[i + 1] || indices[i] == indices[i + 2]  || indices[i + 1] == indices[i + 2] ) { continue; }
+            if (indices[i] == indices[i + 1] || indices[i] == indices[i + 2] || indices[i + 1] == indices[i + 2]) {
+              continue;
+            }
             triangleIndices.push_back(indices[i]);
-            triangleIndices.push_back(indices[i+1]);
-            triangleIndices.push_back(indices[i+2]);
+            triangleIndices.push_back(indices[i + 1]);
+            triangleIndices.push_back(indices[i + 2]);
           }
         } else {
           unsigned offset = (triangleIndexedVertices.size() - vertices.size()) / stride;
@@ -433,10 +427,14 @@ class Mesh
       case enigma_user::pr_trianglefan:
         triangleIndexedVertices.insert(triangleIndexedVertices.end(), vertices.begin(), vertices.end());
         if (indices.size() > 0) {
-          for (std::vector<unsigned>::iterator it = indices.begin(); it != indices.end(); ++it) { *it += triangleIndexedCount; }
+          for (std::vector<unsigned>::iterator it = indices.begin(); it != indices.end(); ++it) {
+            *it += triangleIndexedCount;
+          }
           for (unsigned i = 1; i < indices.size() - 1; i++) {
             // check for and continue if indexed triangle is degenerate, because the GPU won't render it anyway
-            if (indices[0] == indices[i] || indices[0] == indices[i + 1]  || indices[i] == indices[i + 1] ) { continue; }
+            if (indices[0] == indices[i] || indices[0] == indices[i + 1] || indices[i] == indices[i + 1]) {
+              continue;
+            }
             triangleIndices.push_back(indices[0]);
             triangleIndices.push_back(indices[i]);
             triangleIndices.push_back(indices[i + 1]);
@@ -457,12 +455,12 @@ class Mesh
     indices.clear();
   }
 
-  void BufferGenerate()
-  {
+  void BufferGenerate() {
     vector<VertexElement> vdata;
     vector<unsigned> idata;
 
-    vdata.reserve(triangleIndexedVertices.size() + lineIndexedVertices.size() + pointIndexedVertices.size() + triangleVertices.size() + lineVertices.size() + pointVertices.size());
+    vdata.reserve(triangleIndexedVertices.size() + lineIndexedVertices.size() + pointIndexedVertices.size() +
+                  triangleVertices.size() + lineVertices.size() + pointVertices.size());
     idata.reserve(triangleIndices.size() + lineIndices.size() + pointIndices.size());
 
     unsigned interleave = 0;
@@ -477,7 +475,9 @@ class Mesh
 
     if (lineIndices.size() > 0) {
       vdata.insert(vdata.end(), lineIndexedVertices.begin(), lineIndexedVertices.end());
-      for (unsigned i = 0; i < lineIndices.size(); i++) { lineIndices[i] += interleave; }
+      for (unsigned i = 0; i < lineIndices.size(); i++) {
+        lineIndices[i] += interleave;
+      }
       idata.insert(idata.end(), lineIndices.begin(), lineIndices.end());
       interleave += lineIndexedCount;
       lineVertCount = lineIndexedVertices.size();
@@ -486,7 +486,9 @@ class Mesh
 
     if (pointIndices.size() > 0) {
       vdata.insert(vdata.end(), pointIndexedVertices.begin(), pointIndexedVertices.end());
-      for (unsigned i = 0; i < pointIndices.size(); i++) { pointIndices[i] += interleave; }
+      for (unsigned i = 0; i < pointIndices.size(); i++) {
+        pointIndices[i] += interleave;
+      }
       idata.insert(idata.end(), pointIndices.begin(), pointIndices.end());
       //pointVertCount = pointIndexedVertices.size();
       pointIndexedCount = pointIndices.size();
@@ -544,8 +546,7 @@ class Mesh
 
     // Create the index buffer.
     result = m_device->CreateBuffer(&indexBufferDesc, &indexData, &indexbuffer);
-    if(FAILED(result))
-    {
+    if (FAILED(result)) {
       return;
     }
 
@@ -560,7 +561,6 @@ class Mesh
     if (pointCount > 0) {
       vdata.insert(vdata.end(), pointVertices.begin(), pointVertices.end());
     }
-
 
     unsigned stride = vertexStride;
     /*
@@ -605,8 +605,7 @@ class Mesh
 
     // Now create the vertex buffer.
     result = m_device->CreateBuffer(&vertexBufferDesc, &vertexData, &vertexbuffer);
-    if (FAILED(result))
-    {
+    if (FAILED(result)) {
       return;
     }
 
@@ -616,11 +615,12 @@ class Mesh
     ClearData();
   }
 
-  void Draw()
-  {
-    if (!GetStride()) { return; }
+  void Draw() {
+    if (!GetStride()) {
+      return;
+    }
     if (vertexbuffer == NULL || !vbobuffered) {
-	  vbobuffered = true;
+      vbobuffered = true;
       BufferGenerate();
     }
 
@@ -639,20 +639,20 @@ class Mesh
       m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
       m_deviceContext->DrawIndexed(triangleIndexedCount / 3, offset, base);
       offset += triangleIndexedCount;
-      base += triangleVertCount/stride;
+      base += triangleVertCount / stride;
     }
     if (lineVertCount > 0) {
       m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
-      m_deviceContext->DrawIndexed(lineIndexedCount/2, offset, base);
+      m_deviceContext->DrawIndexed(lineIndexedCount / 2, offset, base);
       offset += lineIndexedCount;
-      base += lineVertCount/stride;
+      base += lineVertCount / stride;
     }
     if (pointIndexedCount > 0) {
       m_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
       m_deviceContext->DrawIndexed(pointIndexedCount, offset, base);
     }
 
-    offset = indexedoffset/stride;
+    offset = indexedoffset / stride;
 
     // Draw the unindexed primitives
     if (triangleCount > 0) {

@@ -15,63 +15,60 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "../General/OpenGLHeaders.h"
 #include "../General/GSblend.h"
-namespace enigma
-{
-  extern int currentblendmode[2];
-  extern int currentblendtype;
-}
+#include "../General/OpenGLHeaders.h"
+namespace enigma {
+extern int currentblendmode[2];
+extern int currentblendtype;
+}  // namespace enigma
 
-namespace enigma_user
-{
+namespace enigma_user {
 
-int draw_set_blend_mode(int mode){
-    if (enigma::currentblendmode[0] == mode && enigma::currentblendtype == 0) return 0;
-    enigma::currentblendmode[0] = mode;
-    enigma::currentblendtype = 0;
-	switch (mode)
-	{
+int draw_set_blend_mode(int mode) {
+  if (enigma::currentblendmode[0] == mode && enigma::currentblendtype == 0) return 0;
+  enigma::currentblendmode[0] = mode;
+  enigma::currentblendtype = 0;
+  switch (mode) {
     case bm_add:
-        glBlendFunc(GL_SRC_ALPHA,GL_ONE);
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE);
       return 0;
     case bm_max:
-        glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_COLOR);
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_COLOR);
       return 0;
     case bm_subtract:
-        glBlendFunc(GL_ZERO,GL_ONE_MINUS_SRC_COLOR);
+      glBlendFunc(GL_ZERO, GL_ONE_MINUS_SRC_COLOR);
       return 0;
     default:
-        glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
       return 0;
   }
 }
 
-int draw_set_blend_mode_ext(int src,int dest){
-    if (enigma::currentblendmode[0] == src && enigma::currentblendmode[1] == dest && enigma::currentblendtype == 1) return 0;
-	const static GLenum blendequivs[11] = {
-	  GL_ZERO, GL_ONE, GL_SRC_COLOR, GL_ONE_MINUS_SRC_COLOR, GL_SRC_ALPHA,
-	  GL_ONE_MINUS_SRC_ALPHA, GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA, GL_DST_COLOR,
-	  GL_ONE_MINUS_DST_COLOR, GL_SRC_ALPHA_SATURATE
-    };
-    enigma::currentblendtype = 1;
-    enigma::currentblendmode[0] = src;
-    enigma::currentblendmode[1] = dest;
-	glBlendFunc(blendequivs[(src-1)%10],blendequivs[(dest-1)%10]);
-	return 0;
+int draw_set_blend_mode_ext(int src, int dest) {
+  if (enigma::currentblendmode[0] == src && enigma::currentblendmode[1] == dest && enigma::currentblendtype == 1)
+    return 0;
+  const static GLenum blendequivs[11] = {GL_ZERO,
+                                         GL_ONE,
+                                         GL_SRC_COLOR,
+                                         GL_ONE_MINUS_SRC_COLOR,
+                                         GL_SRC_ALPHA,
+                                         GL_ONE_MINUS_SRC_ALPHA,
+                                         GL_DST_ALPHA,
+                                         GL_ONE_MINUS_DST_ALPHA,
+                                         GL_DST_COLOR,
+                                         GL_ONE_MINUS_DST_COLOR,
+                                         GL_SRC_ALPHA_SATURATE};
+  enigma::currentblendtype = 1;
+  enigma::currentblendmode[0] = src;
+  enigma::currentblendmode[1] = dest;
+  glBlendFunc(blendequivs[(src - 1) % 10], blendequivs[(dest - 1) % 10]);
+  return 0;
 }
 
-int draw_get_blend_mode(){
-    return enigma::currentblendmode[0];
-}
+int draw_get_blend_mode() { return enigma::currentblendmode[0]; }
 
-int draw_get_blend_mode_ext(bool src){
-    return enigma::currentblendmode[(src==true?0:1)];
-}
+int draw_get_blend_mode_ext(bool src) { return enigma::currentblendmode[(src == true ? 0 : 1)]; }
 
-int draw_get_blend_mode_type(){
-    return enigma::currentblendtype;
-}
+int draw_get_blend_mode_type() { return enigma::currentblendtype; }
 
-}
-
+}  // namespace enigma_user

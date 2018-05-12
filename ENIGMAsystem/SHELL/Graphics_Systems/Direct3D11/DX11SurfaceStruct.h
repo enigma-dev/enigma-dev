@@ -25,49 +25,49 @@ using std::string;
 #include <vector>
 using std::vector;
 
-namespace enigma
-{
-  struct Surface
-  {
-    ID3D11RenderTargetView* renderTargetView;
-    int tex, width, height;
+namespace enigma {
+struct Surface {
+  ID3D11RenderTargetView* renderTargetView;
+  int tex, width, height;
 
-    Surface(): renderTargetView(NULL), tex(0), width(0), height(0) {
+  Surface()
+      : renderTargetView(NULL),
+        tex(0),
+        width(0),
+        height(0){
 
-    };
+        };
 
-    ~Surface() {
-      if (renderTargetView != NULL) {
-        renderTargetView->Release();
-        renderTargetView = NULL;
-      }
-    };
+  ~Surface() {
+    if (renderTargetView != NULL) {
+      renderTargetView->Release();
+      renderTargetView = NULL;
+    }
   };
+};
 
-  extern vector<Surface*> Surfaces;
-}
+extern vector<Surface*> Surfaces;
+}  // namespace enigma
 
 #ifdef DEBUG_MODE
-  #include <string>
-  #include "libEGMstd.h"
-  #include "Widget_Systems/widgets_mandatory.h"
-  #define get_surface(surf,id)\
-    if (id < 0 or id >= enigma::Surfaces.size() or !enigma::Surfaces[id]) {\
-      show_error("Attempting to use non-existing surface " + toString(id), false);\
-      return;\
-    }\
-    enigma::Surface* surf = enigma::Surfaces[id];
-  #define get_surfacev(surf,id,r)\
-    if (id < 0 or size_t(id) >= enigma::Surfaces.size() or !enigma::Surfaces[id]) {\
-      show_error("Attempting to use non-existing surface " + toString(id), false);\
-      return r;\
-    }\
-    enigma::Surface* surf = enigma::Surfaces[id];
+#include <string>
+#include "Widget_Systems/widgets_mandatory.h"
+#include "libEGMstd.h"
+#define get_surface(surf, id)                                                    \
+  if (id < 0 or id >= enigma::Surfaces.size() or !enigma::Surfaces[id]) {        \
+    show_error("Attempting to use non-existing surface " + toString(id), false); \
+    return;                                                                      \
+  }                                                                              \
+  enigma::Surface* surf = enigma::Surfaces[id];
+#define get_surfacev(surf, id, r)                                                 \
+  if (id < 0 or size_t(id) >= enigma::Surfaces.size() or !enigma::Surfaces[id]) { \
+    show_error("Attempting to use non-existing surface " + toString(id), false);  \
+    return r;                                                                     \
+  }                                                                               \
+  enigma::Surface* surf = enigma::Surfaces[id];
 #else
-  #define get_surface(surf,id)\
-    enigma::Surface* surf = enigma::Surfaces[id];
-  #define get_surfacev(surf,id,r)\
-    enigma::Surface* surf = enigma::Surfaces[id];
+#define get_surface(surf, id) enigma::Surface* surf = enigma::Surfaces[id];
+#define get_surfacev(surf, id, r) enigma::Surface* surf = enigma::Surfaces[id];
 #endif
 
 #endif
