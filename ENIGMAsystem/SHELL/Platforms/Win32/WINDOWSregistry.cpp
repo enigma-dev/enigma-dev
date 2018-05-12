@@ -16,154 +16,138 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <string>
 #include <sstream>
+#include <string>
 using std::string;
 
 #include <windows.h>
 
-#include "WINDOWScallback.h"
 #include "../General/PFregistry.h"
+#include "WINDOWScallback.h"
 
 #include "Platforms/platforms_mandatory.h"
 
 namespace enigma_user {
 
 extern unsigned int game_id;
-
 }
 
 static HKEY registryCurrentRoot = HKEY_CURRENT_USER;
 
-namespace enigma_user
-{
+namespace enigma_user {
 
-void registry_write_string(std::string name, std::string str)
-{
-	std::stringstream ss;
-	ss << "Software\\EnigmaGM\\" << game_id;
+void registry_write_string(std::string name, std::string str) {
+  std::stringstream ss;
+  ss << "Software\\EnigmaGM\\" << game_id;
 
-	// Write to registry
-	registry_write_string_ext(ss.str(), name, str);
+  // Write to registry
+  registry_write_string_ext(ss.str(), name, str);
 }
 
-void registry_write_real(std::string name, int x)
-{
-	std::stringstream ss;
-	ss << "Software\\EnigmaGM\\" << game_id;
+void registry_write_real(std::string name, int x) {
+  std::stringstream ss;
+  ss << "Software\\EnigmaGM\\" << game_id;
 
-	// Write to registry
-	registry_write_real_ext(ss.str(), name, x);
+  // Write to registry
+  registry_write_real_ext(ss.str(), name, x);
 }
 
-std::string registry_read_string(std::string name)
-{
-	std::stringstream ss;
-	ss << "Software\\EnigmaGM\\" << game_id;
+std::string registry_read_string(std::string name) {
+  std::stringstream ss;
+  ss << "Software\\EnigmaGM\\" << game_id;
 
-	// Read from registry
-	return registry_read_string_ext(ss.str(), name);
+  // Read from registry
+  return registry_read_string_ext(ss.str(), name);
 }
 
-int registry_read_real(std::string name)
-{
-	std::stringstream ss;
-	ss << "Software\\EnigmaGM\\" << game_id;
+int registry_read_real(std::string name) {
+  std::stringstream ss;
+  ss << "Software\\EnigmaGM\\" << game_id;
 
-	// Read from registry
-	return registry_read_real_ext(ss.str(), name);
+  // Read from registry
+  return registry_read_real_ext(ss.str(), name);
 }
 
-bool registry_exists(std::string name)
-{
-	std::stringstream ss;
-	ss << "Software\\EnigmaGM\\" << game_id;
+bool registry_exists(std::string name) {
+  std::stringstream ss;
+  ss << "Software\\EnigmaGM\\" << game_id;
 
-	return registry_exists_ext(ss.str(), name);
+  return registry_exists_ext(ss.str(), name);
 }
 
-void registry_write_string_ext(std::string key, std::string name, std::string str)
-{
-	HKEY hKey;
+void registry_write_string_ext(std::string key, std::string name, std::string str) {
+  HKEY hKey;
 
-	// Open registry key
-	if (RegCreateKeyEx(registryCurrentRoot, key.c_str(), 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hKey, NULL) != ERROR_SUCCESS)
-		return;
+  // Open registry key
+  if (RegCreateKeyEx(registryCurrentRoot, key.c_str(), 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hKey,
+                     NULL) != ERROR_SUCCESS)
+    return;
 
-	// Write file and close key
-	RegSetValueEx(hKey, name.c_str(), 0, REG_SZ, (LPBYTE)str.c_str(), str.length() + 1);
-	RegCloseKey(hKey);
+  // Write file and close key
+  RegSetValueEx(hKey, name.c_str(), 0, REG_SZ, (LPBYTE)str.c_str(), str.length() + 1);
+  RegCloseKey(hKey);
 }
 
-void registry_write_real_ext(std::string key, std::string name, int x)
-{
-	HKEY hKey;
+void registry_write_real_ext(std::string key, std::string name, int x) {
+  HKEY hKey;
 
-	// Open registry key
-	if (RegCreateKeyEx(registryCurrentRoot, key.c_str(), 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hKey, NULL) != ERROR_SUCCESS)
-		return;
+  // Open registry key
+  if (RegCreateKeyEx(registryCurrentRoot, key.c_str(), 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hKey,
+                     NULL) != ERROR_SUCCESS)
+    return;
 
-	// Write value and close key
-	RegSetValueEx(hKey, name.c_str(), 0, REG_DWORD, (LPBYTE)&x, sizeof(int));
-	RegCloseKey(hKey);
+  // Write value and close key
+  RegSetValueEx(hKey, name.c_str(), 0, REG_DWORD, (LPBYTE)&x, sizeof(int));
+  RegCloseKey(hKey);
 }
 
-std::string registry_read_string_ext(std::string key, std::string name)
-{
-	char buffer[1024];
-	DWORD type = REG_SZ, len = 1024;
-	HKEY hKey;
+std::string registry_read_string_ext(std::string key, std::string name) {
+  char buffer[1024];
+  DWORD type = REG_SZ, len = 1024;
+  HKEY hKey;
 
-	// Open registry key
-	if (RegOpenKeyEx(registryCurrentRoot, key.c_str(), 0, KEY_ALL_ACCESS, &hKey) != ERROR_SUCCESS)
-		return "";
+  // Open registry key
+  if (RegOpenKeyEx(registryCurrentRoot, key.c_str(), 0, KEY_ALL_ACCESS, &hKey) != ERROR_SUCCESS) return "";
 
-	// Read value and close key
-	RegQueryValueEx(hKey, (LPCTSTR)name.c_str(), 0, &type, (LPBYTE)buffer, &len);
-	RegCloseKey(hKey);
+  // Read value and close key
+  RegQueryValueEx(hKey, (LPCTSTR)name.c_str(), 0, &type, (LPBYTE)buffer, &len);
+  RegCloseKey(hKey);
 
-	return buffer;
+  return buffer;
 }
 
-int registry_read_real_ext(std::string key, std::string name)
-{
-	DWORD type = REG_DWORD, len = sizeof(int);
-	HKEY hKey;
-	int value;
+int registry_read_real_ext(std::string key, std::string name) {
+  DWORD type = REG_DWORD, len = sizeof(int);
+  HKEY hKey;
+  int value;
 
-	// Open registry key
-	if (RegOpenKeyEx(registryCurrentRoot, key.c_str(), 0, KEY_ALL_ACCESS, &hKey) != ERROR_SUCCESS)
-		return 0;
+  // Open registry key
+  if (RegOpenKeyEx(registryCurrentRoot, key.c_str(), 0, KEY_ALL_ACCESS, &hKey) != ERROR_SUCCESS) return 0;
 
-	// Read value and close key
-	RegQueryValueEx(hKey, (LPCTSTR)name.c_str(), 0, &type, (LPBYTE)&value, &len);
-	RegCloseKey(hKey);
+  // Read value and close key
+  RegQueryValueEx(hKey, (LPCTSTR)name.c_str(), 0, &type, (LPBYTE)&value, &len);
+  RegCloseKey(hKey);
 
-	return value;
+  return value;
 }
 
-bool registry_exists_ext(std::string key, std::string name)
-{
-	HKEY hKey;
-	bool value;
+bool registry_exists_ext(std::string key, std::string name) {
+  HKEY hKey;
+  bool value;
 
-	// Open registry key
-	if (RegOpenKeyEx(registryCurrentRoot, key.c_str(), 0, KEY_ALL_ACCESS, &hKey) != ERROR_SUCCESS)
-		return false;
+  // Open registry key
+  if (RegOpenKeyEx(registryCurrentRoot, key.c_str(), 0, KEY_ALL_ACCESS, &hKey) != ERROR_SUCCESS) return false;
 
-	// Read value and close key
-	value = RegQueryValueEx(hKey, (LPCTSTR)name.c_str(), 0, NULL, NULL, NULL) != ERROR_FILE_NOT_FOUND;
-	RegCloseKey(hKey);
+  // Read value and close key
+  value = RegQueryValueEx(hKey, (LPCTSTR)name.c_str(), 0, NULL, NULL, NULL) != ERROR_FILE_NOT_FOUND;
+  RegCloseKey(hKey);
 
-	return value;
+  return value;
 }
 
-void registry_set_root(int root)
-{
-	const HKEY keyLookup[4] = { HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE, HKEY_CLASSES_ROOT, HKEY_USERS };
-	if (root >= 0 && root < 4)
-		registryCurrentRoot = keyLookup[root];
+void registry_set_root(int root) {
+  const HKEY keyLookup[4] = {HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE, HKEY_CLASSES_ROOT, HKEY_USERS};
+  if (root >= 0 && root < 4) registryCurrentRoot = keyLookup[root];
 }
 
-}
-
+}  // namespace enigma_user

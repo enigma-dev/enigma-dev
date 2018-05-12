@@ -20,40 +20,34 @@
 #ifndef ENIGMA_PLATFORM_WINDOW_H
 #define ENIGMA_PLATFORM_WINDOW_H
 
-namespace enigma_user
-{
+namespace enigma_user {
 
 enum {
-  cr_default    = 0,
-  cr_none       = -1,
-  cr_arrow      = -2,
-  cr_cross      = -3,
-  cr_beam       = -4,
-  cr_size_nesw  = -6,
-  cr_size_ns    = -7,
-  cr_size_nwse  = -8,
-  cr_size_we    = -9,
-  cr_uparrow    = -10,
-  cr_hourglass  = -11,
-  cr_drag       = -12,
-  cr_nodrop     = -13,
-  cr_hsplit     = -14,
-  cr_vsplit     = -15,
-  cr_multidrag  = -16,
-  cr_sqlwait    = -17,
-  cr_no         = -18,
-  cr_appstart   = -19,
-  cr_help       = -20,
-  cr_handpoint  = -21,
-  cr_size_all   = -22
+  cr_default = 0,
+  cr_none = -1,
+  cr_arrow = -2,
+  cr_cross = -3,
+  cr_beam = -4,
+  cr_size_nesw = -6,
+  cr_size_ns = -7,
+  cr_size_nwse = -8,
+  cr_size_we = -9,
+  cr_uparrow = -10,
+  cr_hourglass = -11,
+  cr_drag = -12,
+  cr_nodrop = -13,
+  cr_hsplit = -14,
+  cr_vsplit = -15,
+  cr_multidrag = -16,
+  cr_sqlwait = -17,
+  cr_no = -18,
+  cr_appstart = -19,
+  cr_help = -20,
+  cr_handpoint = -21,
+  cr_size_all = -22
 };
 
-enum {
-  display_landscape,
-  display_landscape_flipped,
-  display_portrait,
-  display_portrait_flipped
-};
+enum { display_landscape, display_landscape_flipped, display_portrait, display_portrait_flipped };
 
 void io_handle();
 void io_clear();
@@ -76,7 +70,7 @@ void mouse_clear(const int button);
 
 int display_mouse_get_x();
 int display_mouse_get_y();
-void display_mouse_set(int x,int y);
+void display_mouse_set(int x, int y);
 int display_get_width();
 int display_get_height();
 int display_get_colordepth();
@@ -86,7 +80,7 @@ unsigned display_get_dpi_x();
 unsigned display_get_dpi_y();
 extern int display_aa;
 void display_reset(int samples, bool vsync);
-void display_reset(); //TODO: for some odd reason this has to be second or it will error if you call the one that has parameters
+void display_reset();  //TODO: for some odd reason this has to be second or it will error if you call the one that has parameters
 bool display_set_colordepth(int depth);
 bool display_set_size(int w, int h);
 bool display_set_frequency(int freq);
@@ -111,7 +105,7 @@ void window_set_position(int x, int y);
 void window_set_size(unsigned int width, unsigned int height);
 void window_set_rectangle(int x, int y, int width, int height);
 void window_center();
-void window_default(bool center_size); // default false specified in platforms mandatory
+void window_default(bool center_size);  // default false specified in platforms mandatory
 void window_set_region_size(int w, int h, bool adaptwindow);
 
 int window_get_region_width();
@@ -140,6 +134,6 @@ std::string clipboard_get_text();
 void clipboard_set_text(std::string text);
 bool clipboard_has_text();
 
-}
+}  // namespace enigma_user
 
 #endif

@@ -30,14 +30,13 @@
 using std::string;
 
 namespace enigma {
-  void input_push();
-  namespace x11 {
-    extern Display *disp;
-    extern Window win;
-    extern GC gc;
-    extern Atom wm_delwin;
-    
-    int handleEvents();
-  }
-}
+void input_push();
+namespace x11 {
+extern Display *disp;
+extern Window win;
+extern GC gc;
+extern Atom wm_delwin;
 
+int handleEvents();
+}  // namespace x11
+}  // namespace enigma

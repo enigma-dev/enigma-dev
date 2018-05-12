@@ -19,42 +19,28 @@
 #include "../General/PFsystem.h"
 
 namespace enigma {
-	extern bool gameWindowFocused;
+extern bool gameWindowFocused;
 }
 
 namespace enigma_user {
 
-string os_get_config() {
+string os_get_config() {}
 
-}
+int os_get_info() {}
 
-int os_get_info() {
+string os_get_language() {}
 
-}
-
-string os_get_language() {
-
-}
-
-string os_get_region() {
-
-}
+string os_get_region() {}
 
 bool os_is_network_connected() {
-	DWORD dwFlags;
-	return InternetGetConnectedState( &dwFlags, NULL );
+  DWORD dwFlags;
+  return InternetGetConnectedState(&dwFlags, NULL);
 }
 
-bool os_is_paused() {
-	return !enigma::gameWindowFocused;
-}
+bool os_is_paused() { return !enigma::gameWindowFocused; }
 
-void os_lock_orientation(bool enable) {
+void os_lock_orientation(bool enable) {}
 
-}
+void os_powersave_enable(bool enable) {}
 
-void os_powersave_enable(bool enable) {
-
-}
-
-}
+}  // namespace enigma_user

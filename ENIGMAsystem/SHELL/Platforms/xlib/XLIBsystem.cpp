@@ -18,19 +18,15 @@
 #include "../General/PFsystem.h"
 
 namespace enigma {
-  extern bool gameWindowFocused;
-  extern bool freezeOnLoseFocus;
-}
+extern bool gameWindowFocused;
+extern bool freezeOnLoseFocus;
+}  // namespace enigma
 
 namespace enigma_user {
 
-string os_get_config() {
-  return "";
-}
+string os_get_config() { return ""; }
 
-int os_get_info() {
-  return 0;
-}
+int os_get_info() { return 0; }
 
 string os_get_language() {
   char *s = getenv("LANG");
@@ -38,7 +34,7 @@ string os_get_language() {
   if (!s[2] || s[2] == '.' || s[2] == '_') {
     return string(s, 2);
   }
-  return s; // It won't match people's ISO-639 checks, but it's better than "".
+  return s;  // It won't match people's ISO-639 checks, but it's better than "".
 }
 
 string os_get_region() {
@@ -49,12 +45,10 @@ string os_get_region() {
 }
 
 bool os_is_network_connected() {
-  return true; // Please change to false should the year drop below 2010
+  return true;  // Please change to false should the year drop below 2010
 }
 
-bool os_is_paused() {
-  return enigma::freezeOnLoseFocus && !enigma::gameWindowFocused;
-}
+bool os_is_paused() { return enigma::freezeOnLoseFocus && !enigma::gameWindowFocused; }
 
 void os_lock_orientation(bool enable) {
   // Responsive reorientation is not a feature of the X window system.
@@ -65,4 +59,4 @@ void os_powersave_enable(bool enable) {
   // distribution cares about your opinion, anyway.
 }
 
-}
+}  // namespace enigma_user

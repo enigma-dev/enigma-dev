@@ -28,17 +28,15 @@
 #include "../General/PFjoystick.h"
 
 namespace enigma {
-  void init_joysticks();
-  void handle_joysticks();
-}
+void init_joysticks();
+void handle_joysticks();
+}  // namespace enigma
 
-namespace enigma_user
-{
+namespace enigma_user {
 
 void joystick_map_button(int id, int butnum, char key);
 void joystick_map_axis(int id, int axisnum, char keyneg, char keypos);
 
 extern int joystick_lastbutton;
 
-}
-
+}  // namespace enigma_user
