@@ -1,6 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2011 Harijs Grînbergs                                         **
+**  Copyright (C) 2011 Harijs GrÃ®nbergs                                         **
 **  Modified 2013 by Josh Ventura                                               **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
@@ -60,6 +60,12 @@ namespace enigma_user
 
 void path_start(unsigned pathid, cs_scalar speed, unsigned endaction, bool absolute)
 {
+    #ifndef PATH_EXT_SET
+        return;
+    #endif
+
+    return;  //function can cause crashes atm, until extension variables fixed
+
     enigma::object_collisions* const inst = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
     enigma::extension_path* const inst_paths = enigma::extension_cast::as_extension_path(enigma::instance_event_iterator->inst);
     inst_paths->path_index = pathid;
@@ -90,6 +96,12 @@ void path_end()
 
 void path_set_position(cs_scalar position, bool relative)
 {
+    #ifndef PATH_EXT_SET
+        return;
+    #endif
+
+    return;  //function can cause crashes atm, until extension variables fixed
+
     enigma::object_collisions* const inst = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
     enigma::extension_path* const inst_paths = enigma::extension_cast::as_extension_path(enigma::instance_event_iterator->inst);
     inst_paths->path_position = position;
@@ -102,6 +114,12 @@ void path_set_position(cs_scalar position, bool relative)
 
 void path_set_speed(cs_scalar speed, bool relative)
 {
+    #ifndef PATH_EXT_SET
+        return;
+    #endif
+
+    return;  //function can cause crashes atm, until extension variables fixed
+
     enigma::object_collisions* const inst = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
     enigma::extension_path* const inst_paths = enigma::extension_cast::as_extension_path(enigma::instance_event_iterator->inst);
     inst_paths->path_speed = relative ? speed : double(inst->speed + speed);
