@@ -50,7 +50,7 @@ string MAKE_flags, MAKE_paths, MAKE_tcpaths, MAKE_location, TOPLEVEL_cflags, TOP
     TOPLEVEL_rcflags, CXX_override, CC_override, WINDRES_location, TOPLEVEL_ldflags, TOPLEVEL_ldlibs;
 
 #include "OS_Switchboard.h"
-#include "settings-parse/eyaml.h"
+#include "eyaml/eyaml.h"
 
 #include "languages/lang_CPP.h"
 #include <System/builtins.h>
