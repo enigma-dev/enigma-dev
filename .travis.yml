@@ -71,6 +71,7 @@ before_install:
       fi
     elif [ "$TRAVIS_OS_NAME" == "osx" ]; then
       brew upgrade gcc || brew install gcc || brew link --overwrite gcc;
+      brew install glew;
     fi
 
 # build JDI and the CLI
