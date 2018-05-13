@@ -16,12 +16,12 @@ before_install:
 
     if [ "$TRAVIS_OS_NAME" == "linux" ]; then
       sudo apt-get -qq -y install build-essential zlib1g-dev libboost-dev libboost-iostreams-dev\
-        libboost-filesystem-dev libboost-program-options-dev libboost-system-dev;
+        libboost-filesystem-dev libboost-program-options-dev libboost-system-dev libglew-dev;
 
       if [ "$COMPILER" == "gcc32" ] || [ "$COMPILER" == "clang32" ]; then
         sudo dpkg --add-architecture i386;
         sudo apt-get -qq -y install libc++-dev:i386 libglu1-mesa:i386\
-          libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1-dev libx11-6:i386;
+          libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1-dev libx11-6:i386 libglew1.10:i386;
 
         if [ "$COMPILER" == "gcc32" ]; then
           sudo apt-get -qq -y install gcc-multilib g++-multilib;
@@ -31,9 +31,10 @@ before_install:
         sudo ln -s /usr/lib/i386-linux-gnu/libX11.so.6 /usr/lib/i386-linux-gnu/libX11.so;
         sudo ln -s /usr/lib/i386-linux-gnu/libGLU.so.1 /usr/lib/i386-linux-gnu/libGLU.so;
         sudo ln -s /usr/include/x86_64-linux-gnu/zconf.h /usr/include;
+        sudo ln -s /usr/lib/i386-linux-gnu/libGLEW.so.1.10 /usr/lib/i386-linux-gnu/libGLEW.so;
       elif [ "$COMPILER" == "MinGW64" ] || [ "$COMPILER" == "MinGW32" ]; then
         sudo apt-get -qq -y install mingw-w64 wine;
-        curl -L https://github.com/fundies/enigma-libs/files/1347135/enigma-libs.zip > enigma-libs.zip;
+        curl -L https://github.com/fundies/enigma-libs/files/1620148/enigma-libs.zip > enigma-libs.zip;
         unzip enigma-libs.zip -d ENIGMAsystem/;
         mv ENIGMAsystem/Install ENIGMAsystem/Additional;
       else

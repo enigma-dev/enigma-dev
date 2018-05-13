@@ -16,7 +16,7 @@
 **/
 //#include <GL/glx.h>
 #include <X11/Xlib.h>
-#include "../General/glxew.h"
+#include <GL/glxew.h>
 #include "Platforms/xlib/XLIBmain.h"
 #include "Platforms/General/PFwindow.h"
 #include "Graphics_Systems/General/GScolors.h"

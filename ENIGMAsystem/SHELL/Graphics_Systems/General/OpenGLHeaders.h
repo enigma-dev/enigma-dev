@@ -18,5 +18,4 @@
 // TGMG: I've replaced your include of the switchboard with this hard-coded job until I find
 // something more elegant.          -Josh
 
-#define GLEW_STATIC
-#include "glew.h"
+#include <GL/glew.h>

@@ -1,12 +1,10 @@
-SOURCES += $(wildcard Graphics_Systems/OpenGL1/*.cpp) $(wildcard Graphics_Systems/General/*.cpp) Graphics_Systems/General/glew.c
+SOURCES += $(wildcard Graphics_Systems/OpenGL1/*.cpp) $(wildcard Graphics_Systems/General/*.cpp)
 
 ifeq ($(PLATFORM), Win32)
-	override LDLIBS += -lopengl32 -lglu32
+	override CXXFLAGS += -DGLEW_STATIC
+	override LDLIBS += -lglew32 -lopengl32 -lglu32
 else ifeq ($(PLATFORM), xlib)
-	override LDLIBS += -lGL -lGLU
+	override LDLIBS += -lGL -lGLU -lGLEW
 else ifeq ($(PLATFORM), Cocoa)
-	override LDLIBS += -framework OpenGL
+	override LDLIBS += -framework OpenGL -lGLEW
 endif
-
-#$(OBJDIR)/Graphics_Systems/OpenGL1/glew.o: Graphics_Systems/OpenGL1/glew.c
-#	gcc -c $^ -O3 -DGLEW_STATIC -o $@
