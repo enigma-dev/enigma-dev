@@ -15,7 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "../General/glxew.h"
+#include <GL/glxew.h>
 #include "Platforms/Cocoa/CocoaMain.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Platforms/General/PFwindow.h"

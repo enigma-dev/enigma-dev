@@ -1,4 +1,5 @@
 /** Copyright (C) 2008-2013 Josh Ventura, Robert B. Colton
+*** Copyright (C) 2018 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,31 +16,31 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef ENIGMA_SOUND_EMITTER_H
-#define ENIGMA_SOUND_EMITTER_H
+#ifndef ENIGMA_AS_UTIL_H
+#define ENIGMA_AS_UTIL_H
 
-#include "ALsystem.h"
+#include <string>
+using std::string;
 
-#ifdef DEBUG_MODE
-#include "Widget_Systems/widgets_mandatory.h"  // show_error
-#include "libEGMstd.h"
-#endif
+namespace enigma {
 
-#include <vector>
-using std::vector;
+inline char* read_all_bytes(string fname, size_t &flen) {
+  FILE *afile = fopen(fname.c_str(),"rb");
+  if (!afile)
+    return NULL;
 
-struct SoundEmitter {
-  ALfloat emitPos[3];
-  ALfloat emitVel[3];
-  ALfloat falloff[3];
-  ALfloat pitch;
-  ALfloat volume;
-  vector<int> sound_tracks;
-  SoundEmitter() {
-    emitPos[0] = emitPos[1] = emitPos[2] = 0.0f, emitVel[0] = emitVel[1] = emitVel[2] = 0.0f, falloff[0] = 100.0f,
-    falloff[1] = 300.0f, falloff[2] = 1.0f, volume = 1.0f;
-  }
-};
+  // Buffer sound
+  fseek(afile,0,SEEK_END);
+  flen = ftell(afile);
+  char *fdata = new char[flen];
+  fseek(afile,0,SEEK_SET);
+  if (fread(fdata,1,flen,afile) != flen)
+    puts("WARNING: Resource stream cut short while loading sound data");
+  fclose(afile);
 
-extern vector<SoundEmitter*> sound_emitters;
-#endif
+  return fdata;
+}
+
+} // namespace enigma
+
+#endif // ENIGMA_AS_UTIL_H
