@@ -57,8 +57,8 @@ using namespace std;
 #include "compile_includes.h"
 #include "compile_common.h"
 
+#include "eyaml/eyaml.h"
 #include "settings-parse/crawler.h"
-#include "settings-parse/eyaml.h"
 
 #include "components/components.h"
 #include "gcc_interface/gcc_backend.h"

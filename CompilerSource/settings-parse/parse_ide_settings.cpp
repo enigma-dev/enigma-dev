@@ -33,12 +33,12 @@
 
 using namespace std;
 
+#include "eyaml/eyaml.h"
 #include "filesystem/file_find.h"
 #include "general/parse_basics_old.h"
 #include "OS_Switchboard.h"
 #include "parser/object_storage.h"
 #include "crawler.h"
-#include "eyaml.h"
 
 #include "gcc_interface/gcc_backend.h"
 #include "parse_ide_settings.h"

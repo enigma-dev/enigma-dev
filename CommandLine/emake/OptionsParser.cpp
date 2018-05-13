@@ -1,6 +1,6 @@
 #include "OptionsParser.hpp"
 
-#include "settings-parse/eyaml.h"
+#include "eyaml/eyaml.h"
 #include "OS_Switchboard.h"
 
 #include <boost/filesystem.hpp>

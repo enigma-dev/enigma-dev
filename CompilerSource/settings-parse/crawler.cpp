@@ -34,7 +34,7 @@ using namespace std;
 #include "filesystem/file_find.h"
 
 #include "crawler.h"
-#include "eyaml.h"
+#include "eyaml/eyaml.h"
 
 namespace settings
 {

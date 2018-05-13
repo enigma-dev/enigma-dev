@@ -27,6 +27,7 @@
 
 #include <string>
 #include <fstream>
+#include <map>
 using std::string;
 
 typedef std::map<string, struct ey_base*>::iterator eyit;
