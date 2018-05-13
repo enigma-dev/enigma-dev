@@ -1,6 +1,8 @@
 # competition for Thundercleese
 notifications:
-  irc: "chat.freenode.net#enigma"
+  irc:
+    skip_join: true
+    channels: ["chat.freenode.net#enigma"]
 # disable the depth option for git allowing us to merge multiple prs simultaneously
 git:
   depth: false
