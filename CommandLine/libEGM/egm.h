@@ -1,4 +1,4 @@
-/** Copyright (C) 2018 Robert B. Colton
+/** Copyright (C) 2018 Greg Williamson, Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -17,19 +17,8 @@
 
 #include "codegen/project.pb.h"
 
-#include <iostream>
-#include <streambuf>
 #include <string>
 
-namespace yyp {
-extern std::ostream out;
-extern std::ostream err;
-
-inline void bind_output_streams(std::ostream &out, std::ostream &err) {
-  yyp::out.rdbuf(out.rdbuf());
-  yyp::err.rdbuf(err.rdbuf());
-}
-
-buffers::Project* LoadYYP(std::string fName);
-
-}  //namespace yyp
+namespace egm {
+  bool WriteEGM(std::string fName, buffers::Project* project);
+} //namespace egm

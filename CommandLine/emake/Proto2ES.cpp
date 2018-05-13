@@ -36,6 +36,7 @@ Instance AddInstance(const buffers::resources::Room::Instance& inst);
 Tile AddTile(const buffers::resources::Room::Tile& tile);
 View AddView(const buffers::resources::Room::View& view);
 BackgroundDef AddRoomBackground(const buffers::resources::Room::Background& bkg);
+void AddInclude(const char* name, const buffers::resources::Include& inc);
 
 static std::unordered_map<int, int> countMap;
 static std::unordered_map<std::string, int> idMap;
@@ -305,26 +306,28 @@ void AddResource(buffers::Game* protobuf, buffers::TreeNode* node) {
     const char* name = child->name().c_str();
     if (child->has_folder())
       AddResource(protobuf, child);
+    if (child->has_sprite())
+      AddSprite(name, child->sprite());
+    if (child->has_sound())
+      AddSound(name, child->sound());
     if (child->has_background())
       AddBackground(name, child->background());
+    if (child->has_path())
+      AddPath(name, child->path());
+    if (child->has_script())
+      AddScript(name, child->script());
+    if (child->has_shader())
+      AddShader(name, child->shader());
     if (child->has_font())
       AddFont(name, child->font());
+    if (child->has_timeline())
+      AddTimeline(name, child->mutable_timeline());
     if (child->has_object())
       AddObject(name, child->mutable_object());
-    if (child->has_path())
-     AddPath(name, child->path());
     if (child->has_room())
-     AddRoom(name, child->room());
-    if (child->has_script())
-     AddScript(name, child->script());
-    if (child->has_shader())
-     AddShader(name, child->shader());
-    if (child->has_sound())
-     AddSound(name, child->sound());
-    if (child->has_sprite())
-     AddSprite(name, child->sprite());
-    if (child->has_timeline())
-     AddTimeline(name, child->mutable_timeline());
+      AddRoom(name, child->room());
+    if (child->has_include())
+      AddInclude(name, child->include());
   }
 }
 
@@ -338,6 +341,7 @@ static Font* fonts;
 static Timeline* timelines;
 static GmObject* objects;
 static Room* rooms;
+static Include* includes;
 
 template<typename T>
 T* AllocateGroup(T** group, int &count, buffers::TreeNode::TypeCase typeCase) {
@@ -378,6 +382,7 @@ EnigmaStruct* Proto2ES(buffers::Game* protobuf) {
   es->timelines = AllocateGroup(&timelines, es->timelineCount, TypeCase::kTimeline);
   es->gmObjects = AllocateGroup(&objects, es->gmObjectCount, TypeCase::kObject);
   es->rooms = AllocateGroup(&rooms, es->roomCount, TypeCase::kRoom);
+  es->includes = AllocateGroup(&includes, es->includeCount, TypeCase::kInclude);
 
   AddResource(protobuf, root);
 
@@ -735,4 +740,11 @@ BackgroundDef AddRoomBackground(const buffers::resources::Room::Background& bkg)
   b.backgroundId = Name2Id(bkg.background_name());
 
   return b;
+}
+
+void AddInclude(const char* /*name*/, const buffers::resources::Include& inc) {
+  static size_t include = 0;
+  Include& i = includes[include++];
+
+  i.filepath = inc.file_name().c_str();
 }
