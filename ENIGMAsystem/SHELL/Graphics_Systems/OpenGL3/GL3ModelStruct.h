@@ -826,7 +826,7 @@ namespace enigma {
       }
       enigma::glsl_uniformi_internal(enigma::shaderprograms[enigma::bound_shader]->uni_colorEnable,useColors);
 
-      #define OFFSETE( P )  ( ( const GLvoid * ) ( sizeof( GLuint ) * ( P         ) ) )
+      #define OFFSETE( P )  ( ( GLvoid * ) ( sizeof( GLuint ) * ( P         ) ) )
       offset = ringBufferIDrawOffset+vertex_start;
 
       // Draw the indexed primitives
