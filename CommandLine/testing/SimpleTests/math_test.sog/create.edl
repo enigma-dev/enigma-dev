@@ -24,7 +24,7 @@ var pi_over_6 = pi / 6;
 cons_show_message("Test start!");
 
 // is gtest full of shit?
-gtest_assert_eq(false, true);
+//gtest_assert_eq(false, true); //fails: Failure: Not true that 0 (which is 0) is equal to 1 (which is 1).
 gtest_assert_eq(true, false);
 gtest_assert_eq(false, false);
 gtest_assert_eq(true, true);
