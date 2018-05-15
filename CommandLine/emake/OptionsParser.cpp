@@ -93,6 +93,7 @@ OptionsParser::OptionsParser() : _desc("Options")
 
   _desc.add_options()
     ("help,h", "Print help messages")
+    ("list,l", "List available types, globals & functions")
     ("info,i", opt::value<std::string>(), "Provides a listing of Platforms, APIs and Extensions")
     ("input",   opt::value<std::string>()->default_value(""), "Input game file; currently, only test harness single-object games (*.sog) are supported. The --input string is optional.")
     ("quiet,q", opt::bool_switch()->default_value(false), "Suppresses output to std::out and std::err streams.")
@@ -103,12 +104,12 @@ OptionsParser::OptionsParser() : _desc("Options")
 #endif
     ("output,o", opt::value<std::string>(), "Output executable file")
     ("platform,p", opt::value<std::string>()->default_value(def_platform), "Target Platform (XLib, Win32, Cocoa)")
-    ("workdir,w", opt::value<std::string>()->default_value(def_workdir), "Working Directory")
+    ("workdir,d", opt::value<std::string>()->default_value(def_workdir), "Working Directory")
     ("codegen,k", opt::value<std::string>()->default_value(def_workdir), "Codegen Directory")
     ("mode,m", opt::value<std::string>()->default_value("Debug"), "Game Mode (Run, Release, Debug, Design)")
     ("graphics,g", opt::value<std::string>()->default_value("OpenGL1"), "Graphics System (OpenGL1, OpenGL3, DirectX)")
     ("audio,a", opt::value<std::string>()->default_value("None"), "Audio System (OpenAL, DirectSound, SFML, None)")
-    ("widgets,W", opt::value<std::string>()->default_value("None"), "Widget System (Win32, GTK, None)")
+    ("widgets,w", opt::value<std::string>()->default_value("None"), "Widget System (Win32, GTK, None)")
     ("network,n", opt::value<std::string>()->default_value("None"), "Networking System (Async, Berkeley, DirectPlay)")
     ("collision,c", opt::value<std::string>()->default_value("None"), "Collision System")
     ("extensions,e", opt::value<std::string>()->default_value("None"), "Extensions (Paths, Timelines, Particles)")
@@ -135,6 +136,11 @@ opt::variable_value OptionsParser::GetOption(std::string option)
   return _rawArgs[option];
 }
 
+bool OptionsParser::HasOption(std::string option)
+{
+  return _rawArgs.count(option) > 0;
+}
+
 int OptionsParser::ReadArgs(int argc, char* argv[])
 {
   _readArgsFail = false;
@@ -149,14 +155,15 @@ int OptionsParser::ReadArgs(int argc, char* argv[])
       opt::notify(_rawArgs);
 #ifndef CLI_DISABLE_SERVER
     if (!_rawArgs["server"].as<bool>() && !_rawArgs.count("output")) {
+      if (_rawArgs.count("help") || _rawArgs.count("list"))
+        return OPTIONS_HELP;
       throw std::logic_error("Option 'server' or option 'output' is required.");
     }
 #endif
   }
   catch(std::exception& e)
   {
-    if (!_rawArgs.count("help"))
-      errorStream << "OPTIONS_ERROR: " << e.what() << std::endl << std::endl;
+    errorStream << "OPTIONS_ERROR: " << e.what() << std::endl << std::endl;
 
     _readArgsFail = true;
 
@@ -179,6 +186,10 @@ int OptionsParser::ReadArgs(int argc, char* argv[])
 
 int OptionsParser::HandleArgs()
 {
+  // Exit early on list
+  if (_rawArgs.count("list"))
+    return OPTIONS_SUCCESS;
+
   // Exit early on help
   if (_readArgsFail || _rawArgs.count("help"))
   {

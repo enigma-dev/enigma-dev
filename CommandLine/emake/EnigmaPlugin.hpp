@@ -38,6 +38,7 @@ public:
   void LogMakeToConsole();
   int BuildGame(EnigmaStruct* data, GameMode mode, const char* fpath);
   int BuildGame(buffers::Game* data, GameMode mode, const char* fpath);
+  void PrintBuiltins(std::string& fName);
   const char* NextResource();
   const char* FirstResource();
   bool ResourceIsFunction();

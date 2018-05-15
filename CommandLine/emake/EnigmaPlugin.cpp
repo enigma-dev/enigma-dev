@@ -20,6 +20,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <cstdint>
+#include <map>
+#include <vector>
+#include <algorithm>
 
 EnigmaPlugin::EnigmaPlugin()
 {
@@ -67,7 +70,7 @@ int EnigmaPlugin::Load()
   plugin_ResourceArgCountMin = reinterpret_cast<int (*)()>(BindFunc(_handle, "resource_argCountMin"));
   plugin_ResourceArgCountMax = reinterpret_cast<int (*)()>(BindFunc(_handle, "resource_argCountMax"));
   plugin_ResourceOverloadCount = reinterpret_cast<int (*)()>(BindFunc(_handle, "resource_overloadCount"));
-  plugin_ResourceParameters = reinterpret_cast<const char* (*)(int i)>(BindFunc(_handle, "resource_paramters"));
+  plugin_ResourceParameters = reinterpret_cast<const char* (*)(int i)>(BindFunc(_handle, "resource_parameters"));
   plugin_ResourceIsTypeName = reinterpret_cast<int (*)()>(BindFunc(_handle, "resource_isTypeName"));
   plugin_ResourceIsGlobal = reinterpret_cast<int (*)()>(BindFunc(_handle, "resource_isGlobal"));
   plugin_ResourcesAtEnd = reinterpret_cast<bool (*)()>(BindFunc(_handle, "resources_atEnd"));
@@ -121,6 +124,60 @@ int EnigmaPlugin::BuildGame(buffers::Game* data, GameMode mode, const char* fpat
   EnigmaStruct *es = Proto2ES(data);
   es->filename = fpath;
   return plugin_CompileEGM(es, fpath, mode);
+}
+
+void EnigmaPlugin::PrintBuiltins(std::string& fName)
+{
+  std::vector<std::string> types;
+  std::vector<std::string> globals;
+  std::map<std::string, std::string> functions;
+
+  const char* currentResource = plugin_FirstResource();
+  while (!plugin_ResourcesAtEnd()) {
+
+    if (plugin_ResourceIsFunction()) {
+      //for (int i = 0; i < plugin_ResourceOverloadCount(); i++) // FIXME: JDI can't print overloads
+        functions[currentResource] = plugin_ResourceParameters(0);
+    }
+
+    if (plugin_ResourceIsGlobal())
+      globals.push_back(currentResource);
+
+    if (plugin_ResourceIsTypeName())
+      types.push_back(currentResource);
+
+    currentResource = plugin_NextResource();
+  }
+
+  std::sort(types.begin(), types.end());
+
+  std::ostream out(std::cout.rdbuf());
+  std::filebuf fb;
+
+  if (!fName.empty()) {
+    std::cout << "Writing builtins..." << std::endl;
+    fb.open(fName.c_str(), std::ios::out);
+    out.rdbuf(&fb);
+  }
+
+  out << "[Types]" << std::endl;
+  for (const std::string& t : types)
+    out << t << std::endl;
+
+  std::sort(globals.begin(), globals.end());
+
+  out << "[Globals]" << std::endl;
+  for (const std::string& g : globals)
+    out << g << std::endl;
+
+  out << "[Functions]" << std::endl;
+  for (const auto& f : functions)
+    out << f.second << std::endl;
+
+  if (!fName.empty()) {
+    fb.close();
+    std::cout << "Done writing builtins" << std::endl;
+  }
 }
 
 const char* EnigmaPlugin::NextResource() {
