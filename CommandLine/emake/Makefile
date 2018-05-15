@@ -1,9 +1,9 @@
 BINARY := ../../emake
 SRC_DIR := .
 OBJ_DIR := .eobjs
-SHARED_SOURCES := ../../shared
-
+SHARED_SOURCES := eyaml/eyaml.cpp event_reader/event_parser.cpp
 SHARED_SRC_DIR := ../../shared
+
 include $(SHARED_SRC_DIR)/Makefile
 include $(SHARED_SRC_DIR)/eyaml/Makefile
 include $(SHARED_SRC_DIR)/event_reader/Makefile
@@ -17,12 +17,9 @@ else
 	OS_LIBS=-lboost_system-mt -Wl,--no-as-needed -Wl,-rpath=./ -lboost_program_options-mt -lboost_iostreams-mt -lboost_filesystem-mt -lboost_system-mt -lpthread
 endif
 
-EXTRA_SOURCES := ../../CompilerSource/settings-parse/eyaml.cpp ../../CompilerSource/compiler/event_reader/event_parser.cpp
-EXTRA_SRC_DIR := ../../CompilerSource
-
 PROTO_DIR := ../protos
-CXXFLAGS  := -I$(SRC_DIR) -I$(EXTRA_SRC_DIR) -I$(PROTO_DIR) -I$(PROTO_DIR)/codegen -I$(SHARED_SOURCES)/lodepng -std=c++11 -Wall -Wextra -Wpedantic -g
-LDFLAGS   := $(OS_LIBS) -L../../ -lz -L$(SHARED_SOURCES)/lodepng -llodepng -lProtocols -lprotobuf
+CXXFLAGS  := -I$(SRC_DIR) -I../../CompilerSource -I$(PROTO_DIR) -I$(PROTO_DIR)/codegen -I$(SHARED_SRC_DIR)/lodepng -std=c++11 -Wall -Wextra -Wpedantic -g
+LDFLAGS   := $(OS_LIBS) -L../../ -lz -L$(SHARED_SRC_DIR)/lodepng -llodepng -lProtocols -lprotobuf
 
 rwildcard=$(wildcard $1/$2) $(foreach d,$(wildcard $1/*),$(call rwildcard,$d,$2))
 SOURCES := $(call rwildcard,$(SRC_DIR),*.cpp)

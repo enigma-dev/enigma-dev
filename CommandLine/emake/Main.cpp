@@ -105,7 +105,6 @@ int main(int argc, char* argv[])
 
   std::string input_file = options.GetOption("input").as<std::string>();
   if (input_file.back() == '/') input_file.pop_back();
-  std::string output_file = options.GetOption("output").as<std::string>();
   Game game;
 
   // Working directory hacks
