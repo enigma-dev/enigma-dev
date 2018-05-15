@@ -60,6 +60,16 @@ int main(int argc, char* argv[])
   plugin.Init();
   plugin.SetDefinitions(options.APIyaml().c_str());
 
+  std::string output_file;
+
+  if (!options.GetOption("output").empty())
+    output_file = options.GetOption("output").as<std::string>();
+
+  if (options.HasOption("list")) {
+    plugin.PrintBuiltins(output_file);
+    return result;
+  }
+
   bool run = options.GetOption("run").as<bool>();
   if (!run) plugin.HandleGameLaunch();
 
@@ -74,16 +84,6 @@ int main(int argc, char* argv[])
 
   GameMode mode;
   std::string _mode = options.GetOption("mode").as<std::string>();
-
-  std::string output_file;
-
-  if (!options.GetOption("output").empty())
-    output_file = options.GetOption("output").as<std::string>();
-
-  if (options.HasOption("list")) {
-    plugin.PrintBuiltins(output_file);
-    return result;
-  }
 
   if (_mode == "Compile")
     mode = emode_compile;
