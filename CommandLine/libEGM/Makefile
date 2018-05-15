@@ -34,7 +34,7 @@ clean:
 # --libs-only-L is specified because the Trusty Tahr package for pugixml does not have a proper pkg-config
 # hence we only use pkg-config for the lib dirs and just always link pugixml whether in travis, on ubuntu, or in msys2
 $(LIBRARY): $(OBJECTS)
-	$(CXX) -shared -o $@ $^ -lz $(shell pkg-config --libs-only-L pugixml) -lpugixml -L../../ -lProtocols -lprotobuf -L$(SHARED_SOURCES)/lodepng -llodepng
+	$(CXX) -shared -o $@ $^ -lz $(shell pkg-config --libs-only-L pugixml) -lpugixml -lyaml-cpp -L../../ -lProtocols -lprotobuf -L$(SHARED_SOURCES)/lodepng -llodepng
 
 # Create the object directories
 $(OBJDIRS):
