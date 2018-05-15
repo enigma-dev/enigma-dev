@@ -31,7 +31,7 @@ gtest_assert_eq(true, true);
 
 gtest_assert_true(true);
 gtest_assert_false(false);
-gtest_assert_true(false);
+//gtest_assert_true(false); //Failure: Not true that 0 is true; it is actually false.
 gtest_assert_false(true);
 
 gtest_assert_true(f && d && ld && i && u && l && lu && (v != 0) && (a != 0),
