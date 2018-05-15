@@ -18,11 +18,13 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include <X11/Xatom.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <unistd.h>
 #include <sys/resource.h>
 #include <stdio.h>
+#include <string.h> //strdup
 #include <string>
 #include <cstdlib>
 #include <stdlib.h> //getenv and system
@@ -69,6 +71,10 @@ namespace enigma
     Screen *screen;
     Window win;
     Atom wm_delwin;
+    Atom XA_CLIPBOARD;
+    Atom ENIG_CLIP_STRING;
+    Atom XA_TARGETS;
+    char* x11_clipboard;
 
     int handleEvents()
     {
@@ -151,6 +157,62 @@ namespace enigma
           if (WindowResizedCallback != NULL) {
             WindowResizedCallback();
           }
+          return 0;
+        }
+        case SelectionClear: {
+          //We are no longer the owner of the selection.
+          //NOTE: We don't care if we lose PRIMARY selection.
+          if (e.xselectionclear.selection == XA_CLIPBOARD) {
+            delete [] x11_clipboard;
+            x11_clipboard = 0;
+          }
+          return 0;
+        }
+        case SelectionRequest: {
+          //Respond to another application's request for our clipboard selection.
+          XSelectionEvent selEv;
+          selEv.type      = SelectionNotify;
+          selEv.display   = e.xselectionrequest.display;
+          selEv.requestor = e.xselectionrequest.requestor;
+          selEv.selection = e.xselectionrequest.selection;
+          selEv.target    = e.xselectionrequest.target;
+          selEv.property  = None;
+          selEv.time      = e.xselectionrequest.time;
+
+          //Only respond to the clipboard.
+          char* data = 0;
+          int bitsPerItem = 0;
+          int nItems = 0;
+          if ((e.xselectionrequest.selection == XA_CLIPBOARD) || (e.xselectionrequest.selection == XA_PRIMARY)) {
+            if (e.xselectionrequest.target == XA_STRING) {
+              //A string (also works fine for UTF-8).
+              data = strdup(x11_clipboard);
+              nItems = strlen(data);
+              bitsPerItem = 8; // bits-per-item
+            } else if (e.xselectionrequest.target == XA_TARGETS) {
+              //List the targets we are able to send.
+              data = (char*)malloc(1 * 4); //1 "long" element.
+              ((Atom*)data)[0] = XA_STRING;
+              nItems = 1;
+              bitsPerItem = 32; //32 bits-per-atom
+            } 
+
+            //Anything to send?
+            if (data) {
+              const size_t MAX_REASONABLE_SELECTION_SIZE = 1000000;
+              if (e.xselectionrequest.property != None && strlen(data) < MAX_REASONABLE_SELECTION_SIZE) {
+                //Transfer ownership to the requesting window.
+                XChangeProperty(e.xselectionrequest.display, e.xselectionrequest.requestor, e.xselectionrequest.property, e.xselectionrequest.target, bitsPerItem, PropModeReplace, (unsigned char*)data, nItems);
+                selEv.property = e.xselectionrequest.property;
+              }
+              free(data);
+              data = 0;
+            }
+
+            //Send a message either way, so they know if it failed.
+            XSendEvent(e.xselectionrequest.display, e.xselectionrequest.requestor, False, NoEventMask, (XEvent*) &selEv);
+          }
+          
           return 0;
         }
         case FocusIn:
@@ -269,6 +331,10 @@ int main(int argc,char** argv)
     // Identify components (close button, root pane)
     wm_delwin = XInternAtom(disp,"WM_DELETE_WINDOW",False);
     Window root = DefaultRootWindow(disp);
+    XA_CLIPBOARD = XInternAtom(disp, "CLIPBOARD", False);
+    ENIG_CLIP_STRING = XInternAtom (disp, "ENIG_CLIP_STRING", False);
+    XA_TARGETS = XInternAtom (disp, "TARGETS", False);
+    x11_clipboard = 0;
 
     // Defined in the appropriate graphics bridge.
     // Populates GLX attributes (or other graphics-system-specific properties).
