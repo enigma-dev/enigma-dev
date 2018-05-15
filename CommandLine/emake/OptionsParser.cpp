@@ -7,7 +7,7 @@
 #include <boost/foreach.hpp>
 #include <boost/iostreams/device/mapped_file.hpp>
 #include <boost/algorithm/string.hpp>
-#include <boost/exception/diagnostic_information.hpp> 
+#include <boost/exception/diagnostic_information.hpp>
 
 #include <iostream>
 
@@ -92,17 +92,17 @@ OptionsParser::OptionsParser() : _desc("Options")
 
   _desc.add_options()
     ("help,h", "Print help messages")
-    ("list,l", opt::bool_switch()->default_value(false), "List available types, globals & functions")
+    ("list,l", "List available types, globals & functions")
     ("info,i", opt::value<std::string>(), "Provides a listing of Platforms, APIs and Extensions")
     ("input",   opt::value<std::string>()->default_value(""), "Input game file; currently, only test harness single-object games (*.sog) are supported. The --input string is optional.")
     ("output,o", opt::value<std::string>()->required(), "Output executable file")
     ("platform,p", opt::value<std::string>()->default_value(def_platform), "Target Platform (XLib, Win32, Cocoa)")
-    ("workdir,w", opt::value<std::string>()->default_value(def_workdir), "Working Directory")
+    ("workdir,d", opt::value<std::string>()->default_value(def_workdir), "Working Directory")
     ("codegen,k", opt::value<std::string>()->default_value(def_workdir), "Codegen Directory")
     ("mode,m", opt::value<std::string>()->default_value("Debug"), "Game Mode (Run, Release, Debug, Design)")
     ("graphics,g", opt::value<std::string>()->default_value("OpenGL1"), "Graphics System (OpenGL1, OpenGL3, DirectX)")
     ("audio,a", opt::value<std::string>()->default_value("None"), "Audio System (OpenAL, DirectSound, SFML, None)")
-    ("widgets,W", opt::value<std::string>()->default_value("None"), "Widget System (GTK, None)")
+    ("widgets,w", opt::value<std::string>()->default_value("None"), "Widget System (Win32, GTK, None)")
     ("network,n", opt::value<std::string>()->default_value("None"), "Networking System (Async, Berkeley, DirectPlay)")
     ("collision,c", opt::value<std::string>()->default_value("None"), "Collision System")
     ("extensions,e", opt::value<std::string>()->default_value("None"), "Extensions (Paths, Timelines, Particles)")
@@ -129,6 +129,11 @@ opt::variable_value OptionsParser::GetOption(std::string option)
   return _rawArgs[option];
 }
 
+bool OptionsParser::HasOption(std::string option)
+{
+  return _rawArgs.count(option) > 0;
+}
+
 int OptionsParser::ReadArgs(int argc, char* argv[])
 {
   _readArgsFail = false;
@@ -151,7 +156,7 @@ int OptionsParser::ReadArgs(int argc, char* argv[])
 
     return OPTIONS_ERROR;
   }
-  
+
   find_ey("ENIGMAsystem/SHELL/");
 
   // Platform Compilers
@@ -171,7 +176,7 @@ int OptionsParser::HandleArgs()
   // Exit early on list
   if (_rawArgs.count("list"))
     return OPTIONS_SUCCESS;
-  
+
   // Exit early on help
   if (_readArgsFail || _rawArgs.count("help"))
   {
