@@ -33,7 +33,8 @@ public:
   void HandleGameLaunch();
   void LogMakeToConsole();
   int BuildGame(EnigmaStruct* data, GameMode mode, const char* fpath);
-
+  void PrintBuiltins(std::string& fName);
+  
 private:
   std::function<const char*(EnigmaCallbacks*)> plugin_Init = nullptr;
   std::function<int(EnigmaStruct*, const char*, int)> plugin_CompileEGM = nullptr;
