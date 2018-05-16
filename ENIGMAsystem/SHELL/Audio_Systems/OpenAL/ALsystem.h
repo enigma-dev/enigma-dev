@@ -36,11 +36,14 @@ extern ALfloat listenerPos[];
 extern ALfloat listenerVel[];
 extern ALfloat listenerOri[];
 
+#include "SoundResource.h"
+
+#include <string>
+using std::string;
+
 #include <list>
 using std::list;
 extern list<ALuint> garbageBuffers;
-
-#include "SoundResource.h"
 
 namespace enigma {
 extern size_t sound_idmax;
