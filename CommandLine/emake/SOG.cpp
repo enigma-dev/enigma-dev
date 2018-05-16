@@ -1,5 +1,5 @@
 #include "SOG.hpp"
-#include "compiler/event_reader/event_parser.h"
+#include "event_reader/event_parser.h"
 
 #include <boost/filesystem.hpp>
 #include <boost/foreach.hpp>

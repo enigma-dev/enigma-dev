@@ -31,6 +31,16 @@ int main(int argc, char* argv[])
     GameMode mode;
     std::string _mode = options.GetOption("mode").as<std::string>();
 
+    std::string output_file;
+
+    if (!options.GetOption("output").empty())
+      output_file = options.GetOption("output").as<std::string>();
+
+    if (options.HasOption("list")) {
+      plugin.PrintBuiltins(output_file);
+      return result;
+    }
+
     if (_mode == "Compile")
       mode = emode_compile;
     else if (_mode == "Run")
@@ -43,7 +53,7 @@ int main(int argc, char* argv[])
       mode = emode_rebuild;
     else
       mode = emode_invalid;
-      
+
     if (mode == emode_invalid) {
       std::cerr << "Invalid game mode: " << _mode << " aborting!" << std::endl;
       return OPTIONS_ERROR;
@@ -54,11 +64,11 @@ int main(int argc, char* argv[])
 
     Game game;
     std::string input_file = options.GetOption("input").as<std::string>();
-    
+
     // Working directory hacks
     if (mode != emode_compile)
       game.SetOutputFile(input_file);
-    
+
     if (input_file.size()) {
       std::string ext;
       size_t dot = input_file.find_last_of('.');
@@ -87,7 +97,6 @@ int main(int argc, char* argv[])
                    "Building an empty game." << std::endl;
     }
 
-    std::string output_file = options.GetOption("output").as<std::string>();
     return plugin.BuildGame(game.ConstructGame(), mode, output_file.c_str());
   }
 

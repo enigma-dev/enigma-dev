@@ -38,7 +38,7 @@ using namespace std;
 #include "backend/EnigmaStruct.h" //LateralGM interface structures
 #include "parser/object_storage.h"
 #include "compiler/compile_common.h"
-#include "compiler/event_reader/event_parser.h"
+#include "event_reader/event_parser.h"
 
 #include "languages/lang_CPP.h"
 int lang_CPP::compile_parseSecondary(map<int,parsed_object*> &parsed_objects, parsed_script* scripts[], int scrcount, vector<parsed_script*>& tlines, map<int,parsed_room*> &parsed_rooms, parsed_object* EGMglobal, const std::set<std::string>& script_names)

@@ -24,6 +24,7 @@ public:
   int HandleArgs();
   std::string APIyaml();
   opt::variable_value GetOption(std::string option);
+  bool HasOption(std::string option);
 
 private:
   int find_ey(const char* dir);

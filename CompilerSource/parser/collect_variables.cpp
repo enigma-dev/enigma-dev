@@ -37,7 +37,7 @@
 using namespace std;
 
 #include "config.h"
-#include "compiler/event_reader/event_parser.h"
+#include "event_reader/event_parser.h"
 
 extern int global_script_argument_count;
 
