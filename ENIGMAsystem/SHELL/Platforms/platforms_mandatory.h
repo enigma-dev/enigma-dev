@@ -16,8 +16,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef PLATFORMS_MANDATORY__H
-#define PLATFORMS_MANDATORY__H
+#ifndef PLATFORMS_MANDATORY_H
+#define PLATFORMS_MANDATORY_H
 
 // This file contains functions that are required to be implemented by any API
 // under this directory, /Platforms/. They are not required to do anything at all
@@ -42,6 +42,10 @@ namespace enigma
   // This method is called at load time. It allows for initializing arrays for input.
   void input_initialize();
 
+  // This method initializes all of the major systems generically and is universally
+  // called by every platform.
+  int initialize_everything();
+
   // Control variables.
   /// Controls whether we suspend the event loop while the game is out of focus.
   extern bool freezeOnLoseFocus;
@@ -54,7 +58,7 @@ namespace enigma
    * ENIGMA competes with their toolchain of choice).
    */
   extern int windowWidth, windowHeight;
-  
+
   /// Controls whether the window will be adapted to fit its content.
   extern bool windowAdapt;
   /// Probably the dumbest variable in ENIGMA. Serves as a scaling factor

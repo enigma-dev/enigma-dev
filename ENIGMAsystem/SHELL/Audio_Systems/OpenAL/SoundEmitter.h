@@ -15,39 +15,30 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef _SOUND_EMITTER__H
-#define _SOUND_EMITTER__H
+#ifndef ENIGMA_SOUND_EMITTER_H
+#define ENIGMA_SOUND_EMITTER_H
 
-#ifdef __APPLE__
-#include "../../../additional/alure/include/AL/alure.h"
-#else
-#include <AL/alure.h>
-#endif
+#include "ALsystem.h"
 
 #ifdef DEBUG_MODE
+#include "Widget_Systems/widgets_mandatory.h"  // show_error
 #include "libEGMstd.h"
-#include "Widget_Systems/widgets_mandatory.h" // show_error
 #endif
 
 #include <vector>
 using std::vector;
 
-struct SoundEmitter
-{
+struct SoundEmitter {
   ALfloat emitPos[3];
   ALfloat emitVel[3];
   ALfloat falloff[3];
   ALfloat pitch;
   ALfloat volume;
   vector<int> sound_tracks;
-  SoundEmitter() 
-  {
-	  emitPos[0] = emitPos[1] = emitPos[2] = 0.0f, 
-	  emitVel[0] = emitVel[1] = emitVel[2] = 0.0f, 
-	  falloff[0] = 100.0f, falloff[1] = 300.0f, falloff[2] = 1.0f, 
-	  volume = 1.0f;
-   }
-
+  SoundEmitter() {
+    emitPos[0] = emitPos[1] = emitPos[2] = 0.0f, emitVel[0] = emitVel[1] = emitVel[2] = 0.0f, falloff[0] = 100.0f,
+    falloff[1] = 300.0f, falloff[2] = 1.0f, volume = 1.0f;
+  }
 };
 
 extern vector<SoundEmitter*> sound_emitters;

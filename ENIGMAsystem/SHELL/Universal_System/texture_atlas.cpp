@@ -18,10 +18,11 @@
 #include <algorithm>    // std::sort
 
 #include "texture_atlas.h"
+#include "texture_atlas_internal.h"
 
-#include "Universal_System/spritestruct.h"
-#include "Universal_System/fontstruct.h"
-#include "Universal_System/backgroundstruct.h"
+#include "Universal_System/background_internal.h"
+#include "Universal_System/fonts_internal.h"
+#include "Universal_System/sprites_internal.h"
 
 #include "Universal_System/nlpo2.h"
 #include "Graphics_Systems/graphics_mandatory.h"
@@ -39,6 +40,9 @@
   #define get_sprite(spr,id) \
     enigma::sprite *const spr = enigma::spritestructarray[id];
 #endif
+
+using std::unordered_map;
+using std::vector;
 
 namespace enigma {
   struct TextureAtlasRect{
@@ -70,8 +74,8 @@ namespace enigma {
           metrics.erase(metrics.begin());
           enigma::font *fnt = enigma::fontstructarray[textures[i].id];
           for (size_t g = 0; g < fnt->glyphRangeCount; g++) {
-            enigma::fontglyphrange* fgr = fnt->glyphRanges[g];
-            for (size_t s = 0; s < fgr->glyphcount; s++){
+            enigma::fontglyphrange& fgr = fnt->glyphRanges[g];
+            for (size_t s = 0; s < fgr.glyphcount; s++){
               metrics.emplace_back();
             }
           }
@@ -99,9 +103,9 @@ namespace enigma {
         case 2: { //Metrics for font glyps
           enigma::font *fnt = enigma::fontstructarray[textures[i].id];
           for (size_t g = 0; g < fnt->glyphRangeCount; g++) {
-            enigma::fontglyphrange* fgr = fnt->glyphRanges[g];
-            for (size_t s = 0; s < fgr->glyphcount; s++){
-              metrics[counter].w = fgr->glyphs[s]->x2-fgr->glyphs[s]->x, metrics[counter].h = fgr->glyphs[s]->y2-fgr->glyphs[s]->y;
+            enigma::fontglyphrange& fgr = fnt->glyphRanges[g];
+            for (size_t s = 0; s < fgr.glyphcount; s++){
+              metrics[counter].w = fgr.glyphs[s].x2-fgr.glyphs[s].x, metrics[counter].h = fgr.glyphs[s].y2-fgr.glyphs[s].y;
               counter++;
             }
           }
@@ -190,22 +194,22 @@ namespace enigma {
           ///This sometimes draws cut of letters - need to investigate!
           enigma::font *fnt = enigma::fontstructarray[textures[i].id];
           for (size_t g = 0; g < fnt->glyphRangeCount; g++) {
-            enigma::fontglyphrange* fgr = fnt->glyphRanges[g];
-            for (size_t s = 0; s < fgr->glyphcount; s++){
+            enigma::fontglyphrange& fgr = fnt->glyphRanges[g];
+            for (size_t s = 0; s < fgr.glyphcount; s++){
               double tix, tiy; //Calculate texture position in image space (pixels) instead of normalized 0-1. We sadly don't hold this information, but maybe we should
-              tix = (double)fgr->glyphs[s]->tx*(double)fnt->twid;
-              tiy = (double)fgr->glyphs[s]->ty*(double)fnt->thgt;
+              tix = (double)fgr.glyphs[s].tx*(double)fnt->twid;
+              tiy = (double)fgr.glyphs[s].ty*(double)fnt->thgt;
 
-              int gw = fgr->glyphs[s]->x2-fgr->glyphs[s]->x;
-              int gh = fgr->glyphs[s]->y2-fgr->glyphs[s]->y;
+              int gw = fgr.glyphs[s].x2-fgr.glyphs[s].x;
+              int gh = fgr.glyphs[s].y2-fgr.glyphs[s].y;
 
               //printf("Glyph %i from %f, %f placed at x = %i and y = %i, w = %i, h = %i\n",s, tix, tiy, metrics[counter].x, metrics[counter].y, metrics[counter].w, metrics[counter].h);
               enigma::graphics_copy_texture_part(fnt->texture, enigma::texture_atlas_array[ta].texture, tix, tiy, gw, gh, metrics[counter].x, metrics[counter].y);
 
-              fgr->glyphs[s]->tx = (double)metrics[counter].x/(double)(enigma::texture_atlas_array[ta].width);
-              fgr->glyphs[s]->ty = (double)metrics[counter].y/(double)(enigma::texture_atlas_array[ta].height);
-              fgr->glyphs[s]->tx2 = (double)(metrics[counter].x+gw)/(double)(enigma::texture_atlas_array[ta].width);
-              fgr->glyphs[s]->ty2 = (double)(metrics[counter].y+gh)/(double)(enigma::texture_atlas_array[ta].height);
+              fgr.glyphs[s].tx = (double)metrics[counter].x/(double)(enigma::texture_atlas_array[ta].width);
+              fgr.glyphs[s].ty = (double)metrics[counter].y/(double)(enigma::texture_atlas_array[ta].height);
+              fgr.glyphs[s].tx2 = (double)(metrics[counter].x+gw)/(double)(enigma::texture_atlas_array[ta].width);
+              fgr.glyphs[s].ty2 = (double)(metrics[counter].y+gh)/(double)(enigma::texture_atlas_array[ta].height);
 
               counter++;
               if (counter > max_textures) { return false; }
@@ -240,7 +244,7 @@ namespace enigma_user {
     enigma::texture_atlas_array.emplace(id,enigma::texture_atlas());
 
     if (w != -1 && h != -1){ //If we set the size manually
-      unsigned int fullwidth = nlpo2dc(w)+1, fullheight = nlpo2dc(h)+1; //We only take power of two
+      unsigned int fullwidth = enigma::nlpo2dc(w)+1, fullheight = enigma::nlpo2dc(h)+1; //We only take power of two
       enigma::texture_atlas_array[id].width = fullwidth;
       enigma::texture_atlas_array[id].height = fullheight;
       enigma::texture_atlas_array[id].texture = enigma::graphics_create_texture(fullwidth, fullheight, fullwidth, fullheight, nullptr, false);

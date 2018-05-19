@@ -1,13 +1,13 @@
 #include "OptionsParser.hpp"
 
-#include "settings-parse/eyaml.h"
+#include "eyaml/eyaml.h"
 #include "OS_Switchboard.h"
 
 #include <boost/filesystem.hpp>
 #include <boost/foreach.hpp>
 #include <boost/iostreams/device/mapped_file.hpp>
 #include <boost/algorithm/string.hpp>
-#include <boost/exception/diagnostic_information.hpp> 
+#include <boost/exception/diagnostic_information.hpp>
 
 #include <iostream>
 
@@ -75,38 +75,44 @@ inline list_t splitString(const std::string &str)
 OptionsParser::OptionsParser() : _desc("Options")
 {
   // Platform Defaults
-  std::string def_platform, def_workdir;
+  std::string def_platform, def_workdir, def_compiler;
   #if CURRENT_PLATFORM_ID == OS_WINDOWS
     def_platform = "Win32";
     def_workdir = "%LOCALAPPDATA%/ENIGMA/";
+    def_compiler = "gcc";
   #elif CURRENT_PLATFORM_ID ==  OS_MACOSX
     def_platform = "Cocoa";
     def_workdir = "/tmp/ENIGMA/";
+    def_compiler = "clang";
   #else
     def_platform = "xlib";
     def_workdir = "/tmp/ENIGMA/";
+    def_compiler = "gcc";
   #endif
 
   _desc.add_options()
     ("help,h", "Print help messages")
+    ("list,l", "List available types, globals & functions")
     ("info,i", opt::value<std::string>(), "Provides a listing of Platforms, APIs and Extensions")
-    ("output,o", opt::value<std::string>()->required(), "Output file")
+    ("input",   opt::value<std::string>()->default_value(""), "Input game file; currently, only test harness single-object games (*.sog) are supported. The --input string is optional.")
+    ("output,o", opt::value<std::string>()->required(), "Output executable file")
     ("platform,p", opt::value<std::string>()->default_value(def_platform), "Target Platform (XLib, Win32, Cocoa)")
-    ("workdir,w", opt::value<std::string>()->default_value(def_workdir), "Working Directory")
+    ("workdir,d", opt::value<std::string>()->default_value(def_workdir), "Working Directory")
+    ("codegen,k", opt::value<std::string>()->default_value(def_workdir), "Codegen Directory")
     ("mode,m", opt::value<std::string>()->default_value("Debug"), "Game Mode (Run, Release, Debug, Design)")
     ("graphics,g", opt::value<std::string>()->default_value("OpenGL1"), "Graphics System (OpenGL1, OpenGL3, DirectX)")
     ("audio,a", opt::value<std::string>()->default_value("None"), "Audio System (OpenAL, DirectSound, SFML, None)")
-    ("widgets,W", opt::value<std::string>()->default_value("None"), "Widget System (GTK, None)")
+    ("widgets,w", opt::value<std::string>()->default_value("None"), "Widget System (Win32, GTK, None)")
     ("network,n", opt::value<std::string>()->default_value("None"), "Networking System (Async, Berkeley, DirectPlay)")
     ("collision,c", opt::value<std::string>()->default_value("None"), "Collision System")
     ("extensions,e", opt::value<std::string>()->default_value("None"), "Extensions (Paths, Timelines, Particles)")
-    ("compiler,x", opt::value<std::string>()->default_value("gcc"), "Compiler.ey Descriptor")
+    ("compiler,x", opt::value<std::string>()->default_value(def_compiler), "Compiler.ey Descriptor")
     ("run,r", opt::bool_switch()->default_value(false), "Automatically run the game after it is built")
   ;
 
+  _positional.add("input", 1);
+
   _handler["info"] = std::bind(&OptionsParser::printInfo, this, std::placeholders::_1);
-  _handler["output"] = std::bind(&OptionsParser::output, this, std::placeholders::_1);
-  _handler["workdir"] = std::bind(&OptionsParser::workdir, this, std::placeholders::_1);
   _handler["mode"] = std::bind(&OptionsParser::mode, this, std::placeholders::_1);
   _handler["graphics"] = std::bind(&OptionsParser::graphics, this, std::placeholders::_1);
   _handler["audio"] = std::bind(&OptionsParser::audio, this, std::placeholders::_1);
@@ -123,25 +129,34 @@ opt::variable_value OptionsParser::GetOption(std::string option)
   return _rawArgs[option];
 }
 
+bool OptionsParser::HasOption(std::string option)
+{
+  return _rawArgs.count(option) > 0;
+}
+
 int OptionsParser::ReadArgs(int argc, char* argv[])
 {
   _readArgsFail = false;
 
   try
   {
-    opt::store(opt::parse_command_line(argc, argv, _desc), _rawArgs);
+    opt::store(opt::command_line_parser(argc, argv)
+                   .options(_desc).positional(_positional).run(),
+               _rawArgs);
 
     if (!_rawArgs.count("info"))
       opt::notify(_rawArgs);
   }
-  catch(opt::error& e)
+  catch(std::exception& e)
   {
-    std::cerr << "OPTIONS_ERROR: " << boost::diagnostic_information(e) << std::endl << std::endl;
+    if (!_rawArgs.count("help"))
+      std::cerr << "OPTIONS_ERROR: " << e.what() << std::endl << std::endl;
 
     _readArgsFail = true;
 
     return OPTIONS_ERROR;
   }
+
   find_ey("ENIGMAsystem/SHELL/");
 
   // Platform Compilers
@@ -158,6 +173,10 @@ int OptionsParser::ReadArgs(int argc, char* argv[])
 
 int OptionsParser::HandleArgs()
 {
+  // Exit early on list
+  if (_rawArgs.count("list"))
+    return OPTIONS_SUCCESS;
+
   // Exit early on help
   if (_readArgsFail || _rawArgs.count("help"))
   {
@@ -185,7 +204,8 @@ std::string OptionsParser::APIyaml()
   yaml += "treat-literals-as: 0\n";
   yaml += "sample-lots-of-radios: 0\n";
   yaml += "inherit-equivalence-from: 0\n";
-  yaml += "make-directory: " + _rawArgs["workdir"].as<std::string>() + "\n";
+  yaml += "eobjs-directory: " + boost::filesystem::absolute(_rawArgs["workdir"].as<std::string>()).string() + "\n";
+  yaml += "codegen-directory: " + boost::filesystem::absolute(_rawArgs["codegen"].as<std::string>()).string() + "\n";
   yaml += "sample-checkbox: on\n";
   yaml += "sample-edit: DEADBEEF\n";
   yaml += "sample-combobox: 0\n";
@@ -315,12 +335,6 @@ int OptionsParser::help(const std::string &str)
   return OPTIONS_HELP;
 }
 
-int OptionsParser::output(const std::string &str)
-{
-  //set outfile
-  return OPTIONS_SUCCESS;
-}
-
 int OptionsParser::parse(const std::string &str)
 {
   try
@@ -351,12 +365,6 @@ int OptionsParser::parse(const std::string &str)
     std::cerr << "OPTIONS_ERROR: " << ex.what() << std::endl;
     return OPTIONS_ERROR;
   }
-}
-
-int OptionsParser::workdir(const std::string &str)
-{
-  //set workdir
-  return OPTIONS_SUCCESS;
 }
 
 int OptionsParser::mode(const std::string &str)

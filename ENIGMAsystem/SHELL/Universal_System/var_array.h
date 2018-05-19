@@ -25,21 +25,16 @@
 **                                                                              **
 \********************************************************************************/
 
-#ifndef _H_VAR_ARRAY
-#define _H_VAR_ARRAY
+#ifndef ENIGMA_VAR_ARRAY_H
+#define ENIGMA_VAR_ARRAY_H
 
 #include "var4.h"
 
 namespace enigma_user {
-
 int array_length_1d(const var& v);
-
 int array_length_2d(const var& v, int n);
-
 int array_height_2d(const var& v);
-
 bool is_array(const var& v);
+}  //namespace enigma_user
 
-}
-
-#endif //_H_VAR_ARRAY
+#endif  //ENIGMA_VAR_ARRAY_H

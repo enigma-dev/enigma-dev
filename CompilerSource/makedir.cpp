@@ -56,34 +56,5 @@ string escapeEnv(string str) {
 	return escaped;
 }
 
-void setMakeDirectory(string dir) {
-	if (makedir.compare(dir) == 0) { return; }
-	makedir = dir;
-#if CURRENT_PLATFORM_ID == OS_WINDOWS
-	CreateDirectory((makedir).c_str(), NULL);
-	if (!CreateDirectory((makedir + "Preprocessor_Environment_Editable").c_str(), NULL)) {
-		DWORD error = GetLastError();
-		switch (error) {
-			case ERROR_ALREADY_EXISTS: 
-				std::cout << "WARNING! Failed to create make directory, directory already exists: \"" << makedir << "\"" << endl;
-				break;
-			case ERROR_PATH_NOT_FOUND:
-				std::cout << "ERROR! Failed to create make directory, path not found: \"" << makedir << "\"" << endl;
-				break;
-			default:
-				std::cout << "Created make directory: \"" << makedir << "\"" << endl;
-				break;
-		}
-	}
-#else
-	mkdir((makedir).c_str(),0755);
-	if (mkdir((makedir + "Preprocessor_Environment_Editable").c_str(),0755) == -1)
-	{
-	  std::cout << "Failed to create make directory at " << makedir << endl;
-	} else {
-	  std::cout << "Created make directory: \"" << makedir << "\"" << endl;
-	}
-#endif
-
-	std::cout << "Make directory is: \"" << makedir << "\"" << endl;
-}
+std::string eobjs_directory;
+std::string codegen_directory;

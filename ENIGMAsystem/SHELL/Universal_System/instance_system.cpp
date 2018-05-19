@@ -34,9 +34,8 @@ using namespace std;
 
 namespace enigma_user {
   int instance_count = 0;
+  extern deque<int> instance_id;  // TODO: Implement and move to enigma_user.
 }
-
-extern deque<int> instance_id; // TODO: Implement and move to enigma_user.
 
 namespace enigma
 {
@@ -217,9 +216,17 @@ namespace enigma
   inst_iter *instance_event_iterator = &dummy_event_iterator; // Not bad for efficiency, either.
   object_basic *instance_other = NULL;
 
-  temp_event_scope::temp_event_scope(object_basic* ninst): oinst(instance_event_iterator->inst), oiter(instance_event_iterator), prev_other(instance_other)
-    { instance_event_iterator = &dummy_event_iterator; instance_event_iterator->inst = ninst; instance_other=ninst; }
-  temp_event_scope::~temp_event_scope() { instance_event_iterator = oiter; instance_event_iterator->inst = oinst; instance_other=prev_other; }
+  temp_event_scope::temp_event_scope(object_basic* ninst)
+      : oiter(instance_event_iterator),
+        prev_other(instance_other),
+        niter(ninst, NULL, NULL) {
+    instance_event_iterator = &niter;
+    instance_other = ninst;
+  }
+  temp_event_scope::~temp_event_scope() {
+    instance_event_iterator = oiter;
+    instance_other = prev_other;
+  }
 
   /* **  Methods ** */
   // Retrieve the first instance on the complete list.
@@ -318,7 +325,7 @@ namespace enigma
   pinstance_list_iterator link_instance(object_basic* who)
   {
     inst_iter *ins = new inst_iter(who);
-    instance_id.push_back(who->id);
+    enigma_user::instance_id.push_back(who->id);
     pair<iliter,bool> it = instance_list.insert(inode_pair(who->id,ins));
     if (!it.second) {
       delete ins;

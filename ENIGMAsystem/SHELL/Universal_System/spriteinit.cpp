@@ -15,17 +15,20 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <string>
-#include <stdio.h>
-using namespace std;
-
-#include "spritestruct.h"
-#include "Platforms/platforms_mandatory.h"
-#include "Graphics_Systems/graphics_mandatory.h"
-#include "Widget_Systems/widgets_mandatory.h"
 #include "libEGMstd.h"
-#include "zlib.h"
 #include "resinit.h"
+#include "sprites_internal.h"
+#include "zlib.h"
+
+#include "Graphics_Systems/graphics_mandatory.h"
+#include "Platforms/platforms_mandatory.h"
+#include "Widget_Systems/widgets_mandatory.h"
+
+#include <cstring>
+#include <cstdio>
+#include <string>
+
+using enigma_user::toString;
 
 namespace enigma
 {
@@ -36,7 +39,7 @@ namespace enigma
     int xorig, yorig;
     
     if (!fread(&nullhere,4,1,exe)) return;
-    if (nullhere != *(int*)"SPR ")
+    if (memcmp(&nullhere, "SPR ", sizeof(int)) != 0)
       return;
     
     // Determine how many sprites we have

@@ -20,9 +20,11 @@
  *      along with this program.  If not, see <http://www.gnu.org/licenses/>.
 **/
 #pragma once
-#ifndef _ENIGMA_INIFILESYSTEM__HPP
-#define _ENIGMA_INIFILESYSTEM__HPP
+#ifndef ENIGMA_INIFILESYSTEM_HPP
+#define ENIGMA_INIFILESYSTEM_HPP
 #include "Universal_System/estring.h"
+
+#include <string>
 
 #ifndef ENIGMA_INI_BUFFER_SIZE
 #define ENIGMA_INI_BUFFER_SIZE 512
@@ -30,10 +32,10 @@
 
 namespace enigma_user
 {
-	variant json_decode(string data);
+	variant json_decode(std::string data);
 
-	string json_encode(variant ds_map);
+	std::string json_encode(variant ds_map);
 }
 
 
-#endif // _ENIGMA_INIFILESYSTEM__HPP
+#endif // ENIGMA_INIFILESYSTEM_HPP

@@ -15,8 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef _reflexive_types_h
-#define _reflexive_types_h
+#ifndef ENIGMA_REFLEXIVE_TYPES_H
+#define ENIGMA_REFLEXIVE_TYPES_H
 
 #include "multifunction_variant.h"
 
@@ -46,4 +46,4 @@ namespace enigma {
   };
 }
 
-#endif //_reflexive_types_h
+#endif // ENIGMA_REFLEXIVE_TYPES_H

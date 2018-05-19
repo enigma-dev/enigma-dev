@@ -15,8 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef ENIGMA_BOX2D_WORLD__H
-#define ENIGMA_BOX2D_WORLD__H
+#ifndef ENIGMA_BOX2D_WORLD_H
+#define ENIGMA_BOX2D_WORLD_H
 
 #include <vector>
 using std::vector;
@@ -49,7 +49,7 @@ struct B2DWorld {
   }
 
   void world_update();
-}; 
+};
 extern vector<B2DWorld*> b2dworlds;
 
 struct B2DBody {
@@ -57,7 +57,7 @@ struct B2DBody {
   vector<int> fixtures;
   b2Body* body;
 
-  B2DBody() 
+  B2DBody()
   {
 
   }
@@ -67,7 +67,7 @@ struct B2DBody {
     this->body->GetWorld()->DestroyBody(this->body);
   }
 
-}; 
+};
 extern vector<B2DBody*> b2dbodies;
 
 #ifdef DEBUG_MODE
@@ -105,5 +105,4 @@ extern vector<B2DBody*> b2dbodies;
     B2DBody* b = b2dbodies[id];
 #endif
 
-#endif // ENIGMA_BOX2D_WORLD__H
-
+#endif // ENIGMA_BOX2D_WORLD_H

@@ -20,8 +20,8 @@
   @brief Adds a rotation, blending, and stretching tier following the graphics tier.
 */
 
-#ifndef _TRANSFORM_OBJECT_H
-#define _TRANSFORM_OBJECT_H
+#ifndef ENIGMA_TRANSFORM_OBJECT_H
+#define ENIGMA_TRANSFORM_OBJECT_H
 
 #include "graphics_object.h"
 
@@ -37,6 +37,6 @@ namespace enigma
       object_transform(unsigned x, int y);
       virtual ~object_transform();
   };
-}
+} //namespace ennigma
 
-#endif
+#endif //ENIGMA_TRANSFORM_OBJECT_H

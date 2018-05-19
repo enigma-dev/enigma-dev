@@ -40,11 +40,10 @@
 #include "Universal_System/var4.h"
 #include "Universal_System/CallbackArrays.h"
 #include "Universal_System/roomsystem.h"
-#include "Universal_System/loading.h"
 
 #include <time.h>
 
-#define uint unsigned int
+using uint = unsigned;
 
 namespace enigma {
   extern bool gameWindowFocused;

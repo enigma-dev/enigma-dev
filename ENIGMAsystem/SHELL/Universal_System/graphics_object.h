@@ -21,14 +21,12 @@
   @summary Adds a graphics-related tier following the timelines tier.
 */
 
-#ifndef _GRAPHICS_OBJECT_H
-#define _GRAPHICS_OBJECT_H
+#ifndef ENIGMA_GRAPHICS_OBJECT_H
+#define ENIGMA_GRAPHICS_OBJECT_H
 
 #ifndef INCLUDED_FROM_SHELLMAIN
   #include "var4.h"
-  #include "spritestruct.h"
-  #include <cstdlib>
-  #include <cmath>
+  #include "sprites.h"
 #endif
 
 #include "scalar.h"
@@ -47,12 +45,18 @@ namespace enigma
     depthv();
     ~depthv();
   };
+  struct image_singlev: multifunction_variant {
+    INHERIT_OPERATORS(image_singlev)
+    gs_scalar *image_index, *image_speed;
+    void function(variant oldval);
+  };
   struct object_graphics: object_timelines
   {
     //Sprites: these are mostly for higher tiers...
       int sprite_index;
       gs_scalar image_index;
       gs_scalar image_speed;
+      image_singlev image_single;
 
       //Depth
       enigma::depthv  depth;
@@ -68,7 +72,7 @@ namespace enigma
       virtual variant myevent_drawgui();
       virtual bool myevent_drawgui_subcheck();
       virtual variant myevent_drawresize();
-      
+
     //Accessors
       #ifdef JUST_DEFINE_IT_RUN
         int sprite_width, sprite_height;
@@ -92,6 +96,6 @@ namespace enigma
       object_graphics(unsigned x, int y);
       virtual ~object_graphics();
   };
-}
+} //namespace enigma
 
 #endif

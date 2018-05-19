@@ -22,38 +22,12 @@
 
 #include "Universal_System/image_formats.h"
 #include "Universal_System/nlpo2.h"
-#include "Universal_System/backgroundstruct.h"
+#include "Universal_System/background_internal.h"
 #include "Graphics_Systems/graphics_mandatory.h"
-#include "Universal_System/spritestruct.h"
+#include "Universal_System/sprites_internal.h"
 
 #include "Universal_System/roomsystem.h"
 
-#define __GETR(x) (gs_scalar)(((x & 0x0000FF))/255.0)
-#define __GETG(x) (gs_scalar)(((x & 0x00FF00) >> 8)/255.0)
-#define __GETB(x) (gs_scalar)(((x & 0xFF0000) >> 16)/255.0)
-
-#ifdef DEBUG_MODE
-  #include <string>
-  #include "libEGMstd.h"
-  #include "Widget_Systems/widgets_mandatory.h"
-  #define get_background(bck2d,back)\
-    if (back < 0 or size_t(back) >= enigma::background_idmax or !enigma::backgroundstructarray[back]) {\
-      show_error("Attempting to draw non-existing background " + toString(back), false);\
-      return;\
-    }\
-    const enigma::background *const bck2d = enigma::backgroundstructarray[back];
-  #define get_backgroundnv(bck2d,back,r)\
-    if (back < 0 or size_t(back) >= enigma::background_idmax or !enigma::backgroundstructarray[back]) {\
-      show_error("Attempting to draw non-existing background " + toString(back), false);\
-      return r;\
-    }\
-    const enigma::background *const bck2d = enigma::backgroundstructarray[back];
-#else
-  #define get_background(bck2d,back)\
-    const enigma::background *const bck2d = enigma::backgroundstructarray[back];
-  #define get_backgroundnv(bck2d,back,r)\
-    const enigma::background *const bck2d = enigma::backgroundstructarray[back];
-#endif
 namespace enigma_user {
   extern int window_get_region_height_scaled();
 }
@@ -68,7 +42,7 @@ namespace enigma_user
 {
 
 int background_create_from_screen(int x, int y, int w, int h, bool removeback, bool smooth, bool preload) {
-  int full_width=nlpo2dc(w)+1, full_height=nlpo2dc(h)+1;
+  int full_width=enigma::nlpo2dc(w)+1, full_height=enigma::nlpo2dc(h)+1;
 	int prevFbo;
 	glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFbo);
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);

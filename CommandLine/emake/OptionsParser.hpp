@@ -24,6 +24,7 @@ public:
   int HandleArgs();
   std::string APIyaml();
   opt::variable_value GetOption(std::string option);
+  bool HasOption(std::string option);
 
 private:
   int find_ey(const char* dir);
@@ -33,9 +34,7 @@ private:
   int searchCompilers(const std::string &target);
 
   int help(const std::string &str);
-  int output(const std::string &str);
   int mode(const std::string &str);
-  int workdir(const std::string &str);
   int parse(const std::string &str);
 
   int graphics(const std::string &str);
@@ -53,6 +52,7 @@ private:
 
   opt::variables_map _rawArgs;
   opt::options_description _desc;
+  opt::positional_options_description _positional;
   std::map<std::string, func_t> _handler;
   std::map<std::string, list_t> _api;
 };

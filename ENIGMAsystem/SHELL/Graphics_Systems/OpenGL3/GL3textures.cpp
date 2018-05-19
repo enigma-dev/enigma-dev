@@ -22,8 +22,8 @@
 #include "../General/GStextures.h"
 #include "GL3TextureStruct.h"
 #include "Universal_System/image_formats.h"
-#include "Universal_System/backgroundstruct.h"
-#include "Universal_System/spritestruct.h"
+#include "Universal_System/background_internal.h"
+#include "Universal_System/sprites_internal.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Bridges/General/GL3Context.h"
 #include "GL3aux.h" //glExtension_supported

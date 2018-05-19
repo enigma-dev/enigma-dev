@@ -16,55 +16,47 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef _SOUND_RESOURCE__H
-#define _SOUND_RESOURCE__H
-#include "../General/ASadvanced.h"
+#ifndef ENIGMA_SOUND_RESOURCE_H
+#define ENIGMA_SOUND_RESOURCE_H
 
-#ifdef __APPLE__
-#include "../../../additional/alure/include/AL/alure.h"
-#else
-#include <AL/alure.h>
-#endif
+#include "ALsystem.h"
 
 #ifdef DEBUG_MODE
+#include "Widget_Systems/widgets_mandatory.h"  // show_error
 #include "libEGMstd.h"
-#include "Widget_Systems/widgets_mandatory.h" // show_error
 #endif
 
 #include <map>
 
-enum load_state {
-    LOADSTATE_NONE,
-    LOADSTATE_SOURCED,
-    LOADSTATE_INDICATED,
-    LOADSTATE_COMPLETE
-};
-  
-struct SoundResource
-{
-    ALuint buf[3]; // The buffer-id of the sound data
-    alureStream *stream; // optional stream
-    void (*cleanup)(void *userdata); // optional cleanup callback for streams
-    void *userdata; // optional userdata for streams
-    void (*seek)(void *userdata, float position); // optional seeking
-	int kind; //
-	float volume;
-	float pan;
-	float pitch;
+enum load_state { LOADSTATE_NONE, LOADSTATE_INDICATED, LOADSTATE_COMPLETE };
 
-    load_state loaded;   // Degree to which this sound has been loaded successfully
-    bool idle;    // True if this sound is not being used, false if playing or paused.
-    bool playing; // True if this sound is playing; not paused or idle.
+struct SoundResource {
+  ALuint buf[3];                                 // The buffer-id of the sound data
+  alureStream *stream;                           // optional stream
+  void (*cleanup)(void *userdata);               // optional cleanup callback for streams
+  void *userdata;                                // optional userdata for streams
+  void (*seek)(void *userdata, float position);  // optional seeking
+  int kind;                                      //
+  float volume;
+  float pan;
+  float pitch;
 
-	SoundResource(): stream(0), cleanup(0), userdata(0), seek(0), kind(0), loaded(LOADSTATE_NONE), idle(1), playing(0) {
-		buf[0] = 0; buf[1] = 0; buf[2] = 0; volume = 1.0f; pan = 0.0f; pitch = 1.0f;
-	}
-		
-	~SoundResource() {
+  load_state loaded;  // Degree to which this sound has been loaded successfully
+  bool idle;          // True if this sound is not being used, false if playing or paused.
+  bool playing;       // True if this sound is playing; not paused or idle.
 
-	}
+  SoundResource() : stream(0), cleanup(0), userdata(0), seek(0), kind(0), loaded(LOADSTATE_NONE), idle(1), playing(0) {
+    buf[0] = 0;
+    buf[1] = 0;
+    buf[2] = 0;
+    volume = 1.0f;
+    pan = 0.0f;
+    pitch = 1.0f;
+  }
+
+  ~SoundResource() { garbageBuffers.push_back(buf[0]); }
 };
 
-extern std::map<int, SoundResource*> sound_resources;
+extern std::map<int, SoundResource *> sound_resources;
 
 #endif

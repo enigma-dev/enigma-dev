@@ -18,6 +18,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <cstdint>
+#include <map>
+#include <vector>
+#include <algorithm>
 
 EnigmaPlugin::EnigmaPlugin()
 {
@@ -28,6 +31,7 @@ int EnigmaPlugin::Init()
   // Load Plugin
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
 #	define dlopen(x, y) LoadLibrary(x)
+#define dlerror() "Can't be arsed to implement windows errors" //FIXME
   std::string extension = ".dll";
   std::string prefix = "";
 #elif CURRENT_PLATFORM_ID ==  OS_MACOSX
@@ -45,6 +49,7 @@ int EnigmaPlugin::Init()
   if (!_handle)
   {
     std::cerr << "Error Loading Plugin '" << pluginName << "'" << std::endl;
+    std::cerr << dlerror() << std::endl;
     return PLUGIN_ERROR;
   }
 
@@ -56,7 +61,6 @@ int EnigmaPlugin::Init()
 #endif
 
   plugin_Init = reinterpret_cast<const char*(*)(EnigmaCallbacks*)>(BindFunc(_handle, "libInit"));
-  plugin_SetMakeDirectory = reinterpret_cast<void (*)(const char* dir)>(BindFunc(_handle, "libSetMakeDirectory"));
   plugin_CompileEGM = reinterpret_cast<int (*)(EnigmaStruct *es, const char* exe_filename, int mode)>(BindFunc(_handle, "compileEGMf"));
   plugin_NextResource = reinterpret_cast<const char* (*)()>(BindFunc(_handle, "next_available_resource"));
   plugin_FirstResource = reinterpret_cast<const char* (*)()>(BindFunc(_handle, "first_available_resource"));
@@ -64,7 +68,7 @@ int EnigmaPlugin::Init()
   plugin_ResourceArgCountMin = reinterpret_cast<int (*)()>(BindFunc(_handle, "resource_argCountMin"));
   plugin_ResourceArgCountMax = reinterpret_cast<int (*)()>(BindFunc(_handle, "resource_argCountMax"));
   plugin_ResourceOverloadCount = reinterpret_cast<int (*)()>(BindFunc(_handle, "resource_overloadCount"));
-  plugin_ResourceParameters = reinterpret_cast<const char* (*)(int i)>(BindFunc(_handle, "resource_paramters"));
+  plugin_ResourceParameters = reinterpret_cast<const char* (*)(int i)>(BindFunc(_handle, "resource_parameters"));
   plugin_ResourceIsTypeName = reinterpret_cast<int (*)()>(BindFunc(_handle, "resource_isTypeName"));
   plugin_ResourceIsGlobal = reinterpret_cast<int (*)()>(BindFunc(_handle, "resource_isGlobal"));
   plugin_ResourcesAtEnd = reinterpret_cast<bool (*)()>(BindFunc(_handle, "resources_atEnd"));
@@ -76,9 +80,6 @@ int EnigmaPlugin::Init()
 
   CallBack ecb;
   plugin_Init(&ecb);
-
-  // Who Added this garbage and why?
-  //plugin_SetMakeDirectory("");
 
   return PLUGIN_SUCCESS;
 }
@@ -100,14 +101,60 @@ void EnigmaPlugin::LogMakeToConsole()
 
 int EnigmaPlugin::BuildGame(EnigmaStruct* data, GameMode mode, const char* fpath)
 {
-  /* TODO: Use to print keywords list...
-  const char* currentResource = plugin_FirstResource();
-  while (!plugin_ResourcesAtEnd())
-  {
-    currentResource = plugin_NextResource();
-  }*/
-
   return plugin_CompileEGM(data, fpath, mode);
 }
 
+void EnigmaPlugin::PrintBuiltins(std::string& fName)
+{
+  std::vector<std::string> types;
+  std::vector<std::string> globals;
+  std::map<std::string, std::string> functions;
+  
+  const char* currentResource = plugin_FirstResource();
+  while (!plugin_ResourcesAtEnd()) {
+    
+    if (plugin_ResourceIsFunction()) {
+      //for (int i = 0; i < plugin_ResourceOverloadCount(); i++) // FIXME: JDI can't print overloads
+        functions[currentResource] = plugin_ResourceParameters(0);
+    }
+    
+    if (plugin_ResourceIsGlobal())
+      globals.push_back(currentResource);
+      
+    if (plugin_ResourceIsTypeName())
+      types.push_back(currentResource);
+    
+    currentResource = plugin_NextResource();
+  }
+  
+  std::sort(types.begin(), types.end());
+  
+  std::ostream out(std::cout.rdbuf());
+  std::filebuf fb;
+  
+  if (!fName.empty()) {
+    std::cout << "Writing builtins..." << std::endl;
+    fb.open(fName.c_str(), std::ios::out);
+    out.rdbuf(&fb);
+  }
+  
+  out << "[Types]" << std::endl;
+  for (const std::string& t : types)
+    out << t << std::endl;
+  
+  std::sort(globals.begin(), globals.end());
+  
+  out << "[Globals]" << std::endl;
+  for (const std::string& g : globals)
+    out << g << std::endl;
+  
+  out << "[Functions]" << std::endl;
+  for (const auto& f : functions)
+    out << f.second << std::endl;
+    
+  if (!fName.empty()) {
+    fb.close();
+    std::cout << "Done writing builtins" << std::endl;
+  }
+}
 

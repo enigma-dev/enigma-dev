@@ -15,8 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef _SOUND_EMITTER__H
-#define _SOUND_EMITTER__H
+#ifndef ENIGMA_SOUND_EMITTER_H
+#define ENIGMA_SOUND_EMITTER_H
 
 #ifdef DEBUG_MODE
 #include "libEGMstd.h"

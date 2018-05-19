@@ -25,8 +25,8 @@
 **  or programs made in the environment.                                        **
 **                                                                              **
 \********************************************************************************/
-#ifndef _SETTINGS_H
-#define _SETTINGS_H
+#ifndef ENIGMA_SETTINGS_H
+#define ENIGMA_SETTINGS_H
 #include <string>
 using std::string;
 
@@ -76,5 +76,3 @@ namespace setting
 }
 
 #endif
-
-

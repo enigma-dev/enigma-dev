@@ -22,9 +22,9 @@
 
 #include "general/darray.h"
 
- #include <cstdio>
+#include <cstdio>
 
-#ifdef _WIN32
+#if CURRENT_PLATFORM_ID == OS_WINDOWS
  #define dllexport extern "C" __declspec(dllexport)
  #include <windows.h>
  #define sleep Sleep
@@ -57,8 +57,8 @@ using namespace std;
 #include "compile_includes.h"
 #include "compile_common.h"
 
+#include "eyaml/eyaml.h"
 #include "settings-parse/crawler.h"
-#include "settings-parse/eyaml.h"
 
 #include "components/components.h"
 #include "gcc_interface/gcc_backend.h"
@@ -92,6 +92,62 @@ inline string string_replace_all(string str,string substr,string nstr)
   return str;
 }
 
+inline void write_desktop_entry(const std::string fPath, const GameSettings& gameSet) {
+  std::ofstream wto;
+  std::string fName = fPath.substr(fPath.find_last_of("/\\") + 1);
+
+  wto.open(fPath + ".desktop");
+  wto << "[Desktop Entry]\n";
+  wto << "Type=Application\n";
+  wto << "Version=" << gameSet.versionMajor << "." << gameSet.versionMinor << "." << gameSet.versionRelease << "." << gameSet.versionBuild << "\n";
+  wto << "Name=" << fName << "\n";
+  wto << "Comment=" << gameSet.description << "\n";
+  wto << "Path=.\n";
+  wto << "Exec=./" << fName << "\n";
+  //NOTE: Due to security concerns linux doesn't allow releative paths for icons
+  // hardcoding icon because relative paths search /usr/share/icons and full paths aren't portable
+  wto << "Icon=applications-games-symbolic.svg\n";
+  wto << "Terminal=false\n"; //TODO: Add setting for this in ide
+  wto << "Categories=Game;\n";
+  wto << "MimeType=application/octet-stream;\n";
+  wto.close();
+
+  #if CURRENT_PLATFORM_ID != OS_WINDOWS
+  chmod((fPath + ".desktop").c_str(), S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH);
+  #endif
+}
+
+inline void write_exe_info(const std::string codegen_directory, const EnigmaStruct *es) {
+  std::ofstream wto;
+  GameSettings gameSet = es->gameSettings;
+
+  wto.open((codegen_directory + "Preprocessor_Environment_Editable/Resources.rc").c_str(),ios_base::out);
+  wto << license;
+  wto << "#include <windows.h>\n";
+  if (gameSet.gameIcon != NULL && strlen(gameSet.gameIcon) > 0) {
+    wto << "IDI_MAIN_ICON ICON          \"" << string_replace_all(gameSet.gameIcon,"\\","/")  << "\"\n";
+  }
+  wto << "VS_VERSION_INFO VERSIONINFO\n";
+  wto << "FILEVERSION " << gameSet.versionMajor << "," << gameSet.versionMinor << "," << gameSet.versionRelease << "," << gameSet.versionBuild << "\n";
+  wto << "PRODUCTVERSION " << gameSet.versionMajor << "," << gameSet.versionMinor << "," << gameSet.versionRelease << "," << gameSet.versionBuild << "\n";
+  wto << "BEGIN\n" << "BLOCK \"StringFileInfo\"\n" << "BEGIN\n" << "BLOCK \"040904E4\"\n" << "BEGIN\n";
+  wto << "VALUE \"CompanyName\",         \"" << gameSet.company << "\"\n";
+  wto << "VALUE \"FileDescription\",     \"" << gameSet.description << "\"\n";
+  wto << "VALUE \"FileVersion\",         \"" << gameSet.version << "\\0\"\n";
+  wto << "VALUE \"ProductName\",         \"" << gameSet.product << "\"\n";
+  wto << "VALUE \"ProductVersion\",      \"" << gameSet.version << "\\0\"\n";
+  wto << "VALUE \"LegalCopyright\",      \"" << gameSet.copyright << "\"\n";
+  if (es->filename != NULL && strlen(es->filename) > 0) {
+    wto << "VALUE \"OriginalFilename\",         \"" << string_replace_all(es->filename,"\\","/") << "\"\n";
+  } else {
+    wto << "VALUE \"OriginalFilename\",         \"\"\n";
+  }
+  wto << "END\nEND\nBLOCK \"VarFileInfo\"\nBEGIN\n";
+  wto << "VALUE \"Translation\", 0x409, 1252\n";
+  wto << "END\nEND";
+  wto.close();
+}
+
 #include "System/builtins.h"
 
 dllexport int compileEGMf(EnigmaStruct *es, const char* exe_filename, int mode) {
@@ -120,7 +176,8 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   	string make = MAKE_flags;
     make += " clean-game ";
   	make += "COMPILEPATH=\"" + compilepath + "\" ";
-  	make += "WORKDIR=\"" + makedir + "\" ";
+  	make += "WORKDIR=\"" + eobjs_directory + "\" ";
+    make += "CODEGEN=\"" + codegen_directory + "\" ";
   	make += "eTCpath=\"" + MAKE_tcpaths + "\"";
 
   	edbg << "Full command line: " << MAKE_location << " " << make << flushl;
@@ -270,36 +327,18 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   // FIRST FILE
   // Modes, settings and executable information.
 
-  GameSettings gameSet = es->gameSettings;
+  idpr("Adding resources...",90);
+  string desstr = "./ENIGMAsystem/SHELL/design_game" + extensions::targetOS.buildext;
+  string gameFname = mode == emode_design ? desstr.c_str() : (desstr = exe_filename, exe_filename); // We will be using this first to write, then to run
+
   edbg << "Writing executable information and resources." << flushl;
-  wto.open((makedir + "Preprocessor_Environment_Editable/Resources.rc").c_str(),ios_base::out);
-  wto << license;
-  wto << "#include <windows.h>\n";
-	if (gameSet.gameIcon != NULL && strlen(gameSet.gameIcon) > 0) {
-		wto << "IDI_MAIN_ICON ICON          \"" << string_replace_all(gameSet.gameIcon,"\\","/")  << "\"\n";
-	}
-	wto << "VS_VERSION_INFO VERSIONINFO\n";
-	wto << "FILEVERSION " << gameSet.versionMajor << "," << gameSet.versionMinor << "," << gameSet.versionRelease << "," << gameSet.versionBuild << "\n";
-	wto << "PRODUCTVERSION " << gameSet.versionMajor << "," << gameSet.versionMinor << "," << gameSet.versionRelease << "," << gameSet.versionBuild << "\n";
-	wto << "BEGIN\n" << "BLOCK \"StringFileInfo\"\n" << "BEGIN\n" << "BLOCK \"040904E4\"\n" << "BEGIN\n";
-	wto << "VALUE \"CompanyName\",         \"" << gameSet.company << "\"\n";
-	wto << "VALUE \"FileDescription\",     \"" << gameSet.description << "\"\n";
-	wto << "VALUE \"FileVersion\",         \"" << gameSet.version << "\\0\"\n";
-	wto << "VALUE \"ProductName\",         \"" << gameSet.product << "\"\n";
-	wto << "VALUE \"ProductVersion\",      \"" << gameSet.version << "\\0\"\n";
-	wto << "VALUE \"LegalCopyright\",      \"" << gameSet.copyright << "\"\n";
-	if (es->filename != NULL && strlen(es->filename) > 0) {
-		wto << "VALUE \"OriginalFilename\",         \"" << string_replace_all(es->filename,"\\","/") << "\"\n";
-	} else {
-		wto << "VALUE \"OriginalFilename\",         \"\"\n";
-	}
-	wto << "END\nEND\nBLOCK \"VarFileInfo\"\nBEGIN\n";
-	wto << "VALUE \"Translation\", 0x409, 1252\n";
-	wto << "END\nEND";
-  wto.close();
+  if (extensions::targetOS.identifier == "Windows")
+    write_exe_info(codegen_directory, es);
+  else if (extensions::targetOS.identifier == "Linux" && mode == emode_compile)
+    write_desktop_entry(gameFname, es->gameSettings);
 
   edbg << "Writing modes and settings" << flushl;
-  wto.open((makedir + "Preprocessor_Environment_Editable/GAME_SETTINGS.h").c_str(),ios_base::out);
+  wto.open((codegen_directory + "Preprocessor_Environment_Editable/GAME_SETTINGS.h").c_str(),ios_base::out);
   wto << license;
   wto << "#define ASSUMEZERO 0\n";
   wto << "#define PRIMBUFFER 0\n";
@@ -311,20 +350,20 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   wto << '\n';
   wto.close();
 
-  wto.open((makedir + "Preprocessor_Environment_Editable/IDE_EDIT_modesenabled.h").c_str(),ios_base::out);
+  wto.open((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_modesenabled.h").c_str(),ios_base::out);
   wto << license;
   wto << "#define BUILDMODE " << 0 << "\n";
   wto << "#define DEBUGMODE " << 0 << "\n";
   wto << '\n';
   wto.close();
 
-  wto.open((makedir + "Preprocessor_Environment_Editable/IDE_EDIT_inherited_locals.h").c_str(),ios_base::out);
+  wto.open((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_inherited_locals.h").c_str(),ios_base::out);
   wto.close();
 
   //NEXT FILE ----------------------------------------
   //Object switch: A listing of all object IDs and the code to allocate them.
   edbg << "Writing object switch" << flushl;
-  wto.open((makedir + "Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h").c_str(),ios_base::out);
+  wto.open((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_object_switch.h").c_str(),ios_base::out);
     wto << license;
     wto << "#ifndef NEW_OBJ_PREFIX\n#  define NEW_OBJ_PREFIX\n#endif\n\n";
     for (po_i i = parsed_objects.begin(); i != parsed_objects.end(); i++)
@@ -341,7 +380,7 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   //Resource names: Defines integer constants for all resources.
   int max;
   edbg << "Writing resource names and maxima" << flushl;
-  wto.open((makedir + "Preprocessor_Environment_Editable/IDE_EDIT_resourcenames.h").c_str(),ios_base::out);
+  wto.open((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_resourcenames.h").c_str(),ios_base::out);
   wto << license;
 
 
@@ -468,7 +507,7 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
   //NEXT FILE ----------------------------------------
   //Timelines: Defines "moment" lookup structures for timelines.
   edbg << "Writing timeline control information" << flushl;
-  wto.open((makedir +"Preprocessor_Environment_Editable/IDE_EDIT_timelines.h").c_str(),ios_base::out);
+  wto.open((codegen_directory + "Preprocessor_Environment_Editable/IDE_EDIT_timelines.h").c_str(),ios_base::out);
   {
     wto << license;
     wto <<"namespace enigma {\n\n";
@@ -561,16 +600,13 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
     resources, our task is to compile the game itself via GNU Make.
   * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 
-  idpr("Adding resources...",90);
-  string desstr = "./ENIGMAsystem/SHELL/design_game" + extensions::targetOS.buildext;
-  string gameFname = mode == emode_design ? desstr.c_str() : (desstr = exe_filename, exe_filename); // We will be using this first to write, then to run
-
   idpr("Starting compile (This may take a while...)", 30);
 
   string make = MAKE_flags;
 
   make += " Game ";
-  make += "WORKDIR=\"" + makedir + "\" ";
+  make += "WORKDIR=\"" + eobjs_directory + "\" ";
+  make += "CODEGEN=\"" + codegen_directory + "\" ";
   make += mode == emode_debug? "GMODE=Debug ": mode == emode_design? "GMODE=Design ": mode == emode_compile?"GMODE=Compile ": "GMODE=Run ";
   make += "GRAPHICS=" + extensions::targetAPI.graphicsSys + " ";
   make += "AUDIO=" + extensions::targetAPI.audioSys + " ";
@@ -583,18 +619,11 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
   if (CC_override.length()) make += "CC=" + CC_override + " ";
   if (WINDRES_location.length()) make += "WINDRES=" + WINDRES_location + " ";
 
-  if (mode != emode_debug) {
-    if (TOPLEVEL_cflags.length()) make += "CFLAGS=\"" + TOPLEVEL_cflags + "\" ";
-    if (TOPLEVEL_cppflags.length()) make += "CPPFLAGS=\"" + TOPLEVEL_cppflags + "\" ";
-    if (TOPLEVEL_cxxflags.length()) make += "CXXFLAGS=\"" + TOPLEVEL_cxxflags + "\" ";
-    if (TOPLEVEL_ldflags.length()) make += "LDFLAGS=\"" + TOPLEVEL_ldflags + "\" ";
-  }
-  else {
-    if (TOPLEVEL_cflags.length()) make += "CFLAGS=\"" + TOPLEVEL_cflags + " -g -DDEBUG_MODE\" ";
-    if (TOPLEVEL_cppflags.length()) make += "CPPFLAGS=\"" + TOPLEVEL_cppflags + "\" ";
-    if (TOPLEVEL_cxxflags.length()) make += "CXXFLAGS=\"" + TOPLEVEL_cxxflags + " -g -DDEBUG_MODE\" ";
-    if (TOPLEVEL_ldflags.length()) make += "LDFLAGS=\"" + TOPLEVEL_ldflags + "\" ";
-  }
+  if (TOPLEVEL_cflags.length()) make += "CFLAGS=\"" + TOPLEVEL_cflags + "\" ";
+  if (TOPLEVEL_cppflags.length()) make += "CPPFLAGS=\"" + TOPLEVEL_cppflags + "\" ";
+  if (TOPLEVEL_cxxflags.length()) make += "CXXFLAGS=\"" + TOPLEVEL_cxxflags + "\" ";
+  if (TOPLEVEL_ldflags.length()) make += "LDFLAGS=\"" + TOPLEVEL_ldflags + "\" ";
+  if (TOPLEVEL_ldlibs.length()) make += "LDLIBS=\"" + TOPLEVEL_ldlibs + "\" ";
 
   if (TOPLEVEL_rcflags.length()) make += "RCFLAGS=\"" + TOPLEVEL_rcflags + "\" ";
 
@@ -621,8 +650,13 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
   string flags = "";
 
   if (redirect_make) {
+
+    std::string dirs = "CODEGEN=" + codegen_directory + " ";
+    dirs += "WORKDIR=" + eobjs_directory + " ";
+    e_execs("make", dirs, "required-directories");
+
     // Pick a file and flush it
-    const string redirfile = (makedir + "enigma_compile.log");
+    const string redirfile = (eobjs_directory + "enigma_compile.log");
     fclose(fopen(redirfile.c_str(),"wb"));
 
     // Redirect it

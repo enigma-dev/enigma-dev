@@ -87,10 +87,10 @@ bool place_meeting(cs_scalar x, cs_scalar y, int object)
   return collide_inst_inst(object,false,true,x,y);
 }
 
-int instance_place(cs_scalar x, cs_scalar y, int object)
+enigma::instance_t instance_place(cs_scalar x, cs_scalar y, int object)
 {
   enigma::object_collisions* const r = collide_inst_inst(object,false,true,x,y);
-  return r == NULL ? noone : r->id;
+  return r == NULL ? noone : static_cast<int>(r->id);
 }
 
 }
@@ -140,40 +140,40 @@ void position_change(cs_scalar x, cs_scalar y, int obj, bool perf)
     change_inst_point(obj, perf, x+.5, y+.5);
 }
 
-int instance_position(cs_scalar x, cs_scalar y, int object)
+enigma::instance_t instance_position(cs_scalar x, cs_scalar y, int object)
 {
   const enigma::object_collisions* r = collide_inst_point(object,false,true,false,x+.5,y+.5);
-  return r == NULL ? noone : r->id;
+  return r == NULL ? noone : static_cast<int>(r->id);
 }
 
-int collision_rectangle(cs_scalar x1, cs_scalar y1, cs_scalar x2, cs_scalar y2, int obj, bool prec, bool notme)
+enigma::instance_t collision_rectangle(cs_scalar x1, cs_scalar y1, cs_scalar x2, cs_scalar y2, int obj, bool prec, bool notme)
 {
   const enigma::object_collisions* r = collide_inst_rect(obj,false,prec,notme,x1+.5,y1+.5,x2+.5,y2+.5); //false is for solid_only
-  return r == NULL ? noone : r->id;
+  return r == NULL ? noone : static_cast<int>(r->id);
 }
 
-int collision_line(cs_scalar x1, cs_scalar y1, cs_scalar x2, cs_scalar y2, int obj, bool prec, bool notme)
+enigma::instance_t collision_line(cs_scalar x1, cs_scalar y1, cs_scalar x2, cs_scalar y2, int obj, bool prec, bool notme)
 {
   const enigma::object_collisions* r = collide_inst_line(obj,false,prec,notme,x1+.5,y1+.5,x2+.5,y2+.5);
-  return r == NULL ? noone : r->id;
+  return r == NULL ? noone : static_cast<int>(r->id);
 }
 
-int collision_point(cs_scalar x, cs_scalar y, int obj, bool prec, bool notme)
+enigma::instance_t collision_point(cs_scalar x, cs_scalar y, int obj, bool prec, bool notme)
 {
   const enigma::object_collisions* r = collide_inst_point(obj,false, prec,notme,x+.5,y+.5);
-  return r == NULL ? noone : r->id;
+  return r == NULL ? noone : static_cast<int>(r->id);
 }
 
-int collision_circle(cs_scalar x, cs_scalar y, double radius, int obj, bool prec, bool notme)
+enigma::instance_t collision_circle(cs_scalar x, cs_scalar y, double radius, int obj, bool prec, bool notme)
 {
   const enigma::object_collisions* r = collide_inst_circle(obj,false,prec,notme,x+.5,y+.5,radius);
-  return r == NULL ? noone : r->id;
+  return r == NULL ? noone : static_cast<int>(r->id);
 }
 
-int collision_ellipse(cs_scalar x1, cs_scalar y1, cs_scalar x2, cs_scalar y2, int obj, bool prec, bool notme)
+enigma::instance_t collision_ellipse(cs_scalar x1, cs_scalar y1, cs_scalar x2, cs_scalar y2, int obj, bool prec, bool notme)
 {
   const enigma::object_collisions* r = collide_inst_ellipse(obj,false,prec,notme,((x1+x2)/2)+.5,((y1+y2)/2)+.5,fabs(x2-x1)/2,fabs(y2-y1)/2);
-  return r == NULL ? noone : r->id;
+  return r == NULL ? noone : static_cast<int>(r->id);
 }
 
 double distance_to_object(int object)
@@ -183,7 +183,7 @@ double distance_to_object(int object)
         return -1;
     double distance = std::numeric_limits<double>::infinity();
     double tempdist;
-    const bbox_rect_t &box = inst1->$bbox_relative();
+    const enigma::bbox_rect_t &box = inst1->$bbox_relative();
     const double x1 = inst1->x, y1 = inst1->y,
                  xscale1 = inst1->image_xscale, yscale1 = inst1->image_yscale,
                  ia1 = inst1->image_angle;
@@ -198,7 +198,7 @@ double distance_to_object(int object)
         if (inst2->sprite_index == -1 && (inst2->mask_index == -1))
             continue;
 
-        const bbox_rect_t &box2 = inst2->$bbox_relative();
+        const enigma::bbox_rect_t &box2 = inst2->$bbox_relative();
         const double x2 = inst2->x, y2 = inst2->y,
                      xscale2 = inst2->image_xscale, yscale2 = inst2->image_yscale,
                      ia2 = inst2->image_angle;
@@ -225,7 +225,7 @@ double distance_to_point(cs_scalar x, cs_scalar y)
     enigma::object_collisions* const inst1 = ((enigma::object_collisions*)enigma::instance_event_iterator->inst);
     if (inst1->sprite_index == -1 && (inst1->mask_index == -1))
         return -1;
-    const bbox_rect_t &box = inst1->$bbox_relative();
+    const enigma::bbox_rect_t &box = inst1->$bbox_relative();
     const double x1 = inst1->x, y1 = inst1->y,
                  xscale1 = inst1->image_xscale, yscale1 = inst1->image_yscale,
                  ia1 = inst1->image_angle;
@@ -264,7 +264,7 @@ double move_contact_object(int object, double angle, double max_dist, bool solid
 
     const int quad = int(angle/90.0);
 
-    const bbox_rect_t &box = inst1->$bbox_relative();
+    const enigma::bbox_rect_t &box = inst1->$bbox_relative();
     const double x1 = inst1->x, y1 = inst1->y,
                  xscale1 = inst1->image_xscale, yscale1 = inst1->image_yscale,
                  ia1 = inst1->image_angle;
@@ -279,7 +279,7 @@ double move_contact_object(int object, double angle, double max_dist, bool solid
             continue;
         if (inst2->id == inst1->id || (solid_only && !inst2->solid))
             continue;
-        const bbox_rect_t &box2 = inst2->$bbox_relative();
+        const enigma::bbox_rect_t &box2 = inst2->$bbox_relative();
         const double x2 = inst2->x, y2 = inst2->y,
                      xscale2 = inst2->image_xscale, yscale2 = inst2->image_yscale,
                      ia2 = inst2->image_angle;
@@ -533,7 +533,7 @@ void instance_deactivate_region(int rleft, int rtop, int rwidth, int rheight, bo
         if (inst->sprite_index == -1 && (inst->mask_index == -1)) //no sprite/mask then no collision
             continue;
 
-        const bbox_rect_t &box = inst->$bbox_relative();
+        const enigma::bbox_rect_t &box = inst->$bbox_relative();
         const double x = inst->x, y = inst->y,
         xscale = inst->image_xscale, yscale = inst->image_yscale,
         ia = inst->image_angle;
@@ -558,7 +558,7 @@ void instance_activate_region(int rleft, int rtop, int rwidth, int rheight, bool
             continue;
         }
 
-        const bbox_rect_t &box = inst->$bbox_relative();
+        const enigma::bbox_rect_t &box = inst->$bbox_relative();
         const double x = inst->x, y = inst->y,
         xscale = inst->image_xscale, yscale = inst->image_yscale,
         ia = inst->image_angle;
@@ -605,7 +605,7 @@ void instance_deactivate_circle(int x, int y, int r, bool inside, bool notme)
         if (inst->sprite_index == -1 && (inst->mask_index == -1)) //no sprite/mask then no collision
             continue;
 
-        const bbox_rect_t &box = inst->$bbox_relative();
+        const enigma::bbox_rect_t &box = inst->$bbox_relative();
         const double x1 = inst->x, y1 = inst->y,
         xscale = inst->image_xscale, yscale = inst->image_yscale,
         ia = inst->image_angle;
@@ -649,7 +649,7 @@ void instance_activate_circle(int x, int y, int r, bool inside)
             continue;
         }
 
-        const bbox_rect_t &box = inst->$bbox_relative();
+        const enigma::bbox_rect_t &box = inst->$bbox_relative();
         const double x1 = inst->x, y1 = inst->y,
         xscale = inst->image_xscale, yscale = inst->image_yscale,
         ia = inst->image_angle;
@@ -689,4 +689,3 @@ void instance_activate_circle(int x, int y, int r, bool inside)
 }
 
 }
-
