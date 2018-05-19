@@ -480,7 +480,7 @@ int tile_layer_find(int layer_depth, int x, int y)
             for(std::vector<enigma::tile>::size_type i = 0; i !=  dit->second.tiles.size(); i++)
             {
                 enigma::tile t = dit->second.tiles[i];
-                if (point_in_rectangle(x, y, t.roomX, t.roomY, t.roomX + t.width, t.roomY + t.height))
+                if (point_in_rectangle(x, y, t.roomX, t.roomY, t.roomX + t.width - 1, t.roomY + t.height - 1))
                     return t.id;
             }
         }
