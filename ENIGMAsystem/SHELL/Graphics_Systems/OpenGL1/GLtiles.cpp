@@ -28,6 +28,11 @@
 #include "../General/OpenGLHeaders.h"
 #include "GLTextureStruct.h"
 
+// not allowed to include mathnc.h outside of SHELLmain
+namespace enigma_user {
+    bool point_in_rectangle(ma_scalar px, ma_scalar py, ma_scalar x1, ma_scalar y1, ma_scalar x2, ma_scalar y2);
+}
+
 namespace enigma
 {
     static void draw_tile(int back, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, double alpha)
@@ -475,7 +480,7 @@ int tile_layer_find(int layer_depth, int x, int y)
             for(std::vector<enigma::tile>::size_type i = 0; i !=  dit->second.tiles.size(); i++)
             {
                 enigma::tile t = dit->second.tiles[i];
-                if (t.roomX == x && t.roomY == y)
+                if (point_in_rectangle(x, y, t.roomX, t.roomY, t.roomX + t.width - 1, t.roomY + t.height - 1))
                     return t.id;
             }
         }
@@ -535,4 +540,3 @@ bool tile_layer_shift(int layer_depth, int x, int y)
 }
 
 }
-
