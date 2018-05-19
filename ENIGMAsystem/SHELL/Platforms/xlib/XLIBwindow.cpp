@@ -307,7 +307,8 @@ void window_set_stayontop(bool stay) {
 }
 
 bool window_get_stayontop() {
-  return windowHasAtom({XInternAtom(disp,"_NET_WM_STATE_ABOVE", False)});
+  Atom a[] = {XInternAtom(disp,"_NET_WM_STATE_ABOVE", False)};
+  return windowHasAtom(a);
 }
 
 void window_set_sizeable(bool sizeable) {
@@ -339,7 +340,8 @@ void window_set_showborder(bool show) {
 }
 
 bool window_get_showborder() {
-  return windowHasAtom({XInternAtom(disp,"_MOTIF_WM_HINTS",True)});
+  Atom a[] = {XInternAtom(disp,"_NET_WM_STATE_ABOVE", False)};
+  return windowHasAtom(a);
 }
 
 void window_set_showicons(bool show) {
@@ -382,7 +384,8 @@ void window_set_minimized(bool minimized) {
 }
 
 bool window_get_minimized() {
-	return windowHasAtom({XInternAtom(disp, "_NET_WM_STATE_HIDDEN", False)});
+  Atom a[] = {XInternAtom(disp, "_NET_WM_STATE_HIDDEN", False)};
+	return windowHasAtom(a);
 }
 
 void window_set_maximized(bool maximized) {
