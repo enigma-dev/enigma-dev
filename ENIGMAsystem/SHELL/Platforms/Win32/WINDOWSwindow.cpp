@@ -63,50 +63,49 @@ namespace enigma
 
   void setwindowsize()
   {
-      if (!regionWidth)
-	  return;
+    if (!regionWidth)
+      return;
 
-      int parWidth = isFullScreen?GetSystemMetrics(SM_CXSCREEN):windowWidth, parHeight = isFullScreen?GetSystemMetrics(SM_CYSCREEN):windowHeight;
-      if (viewScale > 0)  //Fixed Scale
+    int parWidth = isFullScreen?GetSystemMetrics(SM_CXSCREEN):windowWidth, parHeight = isFullScreen?GetSystemMetrics(SM_CYSCREEN):windowHeight;
+    if (viewScale > 0)  //Fixed Scale
+    {
+      double viewDouble = viewScale/100.0;
+      scaledWidth = regionWidth*viewDouble;
+      scaledHeight = regionHeight*viewDouble;
+    }
+    else if (viewScale == 0)  //Full Scale
+    {
+      scaledWidth = parWidth;
+      scaledHeight = parHeight;
+    }
+    else  //Keep Aspect Ratio
+    {
+      double fitWidth = parWidth/double(regionWidth), fitHeight = parHeight/double(regionHeight);
+      if (fitWidth < fitHeight)
       {
-	  double viewDouble = viewScale/100.0;
-	  scaledWidth = regionWidth*viewDouble;
-	  scaledHeight = regionHeight*viewDouble;
+        scaledWidth = parWidth;
+        scaledHeight = regionHeight*fitWidth;
       }
-      else if (viewScale == 0)  //Full Scale
+      else
       {
-	  scaledWidth = parWidth;
-	  scaledHeight = parHeight;
+        scaledWidth = regionWidth*fitHeight;
+        scaledHeight = parHeight;
       }
-      else  //Keep Aspect Ratio
-      {
-	  double fitWidth = parWidth/double(regionWidth), fitHeight = parHeight/double(regionHeight);
-	  if (fitWidth < fitHeight)
-	  {
-	      scaledWidth = parWidth;
-	      scaledHeight = regionHeight*fitWidth;
-	  }
-	  else
-	  {
-	      scaledWidth = regionWidth*fitHeight;
-	      scaledHeight = parHeight;
-	  }
-      }
+    }
 
-      if (!isFullScreen)
+    if (!isFullScreen)
+    {
+      if (windowAdapt && viewScale > 0) // If the window is to be adapted and Fixed Scale
       {
-	  if (windowAdapt && viewScale > 0) // If the window is to be adapted and Fixed Scale
-	  {
-	      if (scaledWidth > windowWidth)
-		  windowWidth = scaledWidth;
-	      if (scaledHeight > windowHeight)
-		  windowHeight = scaledHeight;
-	  }
-	   clampwindow();
-      } else {
-	SetWindowPos(hWnd, NULL, 0, 0, parWidth, parHeight, SWP_NOACTIVATE);
+        if (scaledWidth > windowWidth)
+          windowWidth = scaledWidth;
+        if (scaledHeight > windowHeight)
+          windowHeight = scaledHeight;
       }
-
+      clampwindow();
+    } else {
+      SetWindowPos(hWnd, NULL, 0, 0, parWidth, parHeight, SWP_NOACTIVATE);
+    }
   }
 }
 
@@ -287,25 +286,42 @@ namespace {
 }
 
 void window_set_fullscreen(bool full) {
-  LONG_PTR style = GetWindowLongPtr(enigma::hWnd, GWL_EXSTYLE);
+  // tweak the style first to remove or restore the window border
+  LONG_PTR style = GetWindowLongPtr(enigma::hWnd, GWL_STYLE);
   if (full) {
     style &= ~(WS_CAPTION | WS_SIZEBOX | WS_MAXIMIZEBOX);
-    style |= WS_POPUP | WS_MAXIMIZE;
+    style |= WS_POPUP;
   } else {
-    style &= ~(WS_POPUP | WS_MAXIMIZE);
+    style &= ~(WS_POPUP);
     style |= WS_CAPTION;
     if (prefer_sizeable) {
       style |= WS_SIZEBOX | WS_MAXIMIZEBOX;
     }
   }
-  SetWindowLongPtr(enigma::hWnd, GWL_EXSTYLE, style);
+  SetWindowLongPtr(enigma::hWnd, GWL_STYLE, style);
+
+  if (full) {
+    // get information about the monitor most applicable to our window
+    HMONITOR hmon = MonitorFromWindow(enigma::hWnd,
+                                      MONITOR_DEFAULTTONEAREST);
+    MONITORINFO mi = { sizeof(mi) };
+    if (!GetMonitorInfo(hmon, &mi)) return;
+
+    SetWindowPos(enigma::hWnd, HWND_TOPMOST,
+      mi.rcMonitor.left,
+      mi.rcMonitor.top,
+      mi.rcMonitor.right - mi.rcMonitor.left,
+      mi.rcMonitor.bottom - mi.rcMonitor.top,
+      SWP_NOACTIVATE);
+  } else {
+    enigma::clampwindow();
+  }
 }
 
 bool window_get_fullscreen() {
-  LONG_PTR style = GetWindowLongPtr(enigma::hWnd, GWL_EXSTYLE);
+  LONG_PTR style = GetWindowLongPtr(enigma::hWnd, GWL_STYLE);
   // The window should be a maximized popup window.
   if ((style & WS_POPUP) != WS_POPUP) return false;
-  if ((style & WS_MAXIMIZE) != WS_MAXIMIZE) return false;
   // The window should have no caption, resize box, or (probably?) border
   if ((style & WS_CAPTION) == WS_CAPTION) return false;
   if ((style & WS_THICKFRAME) == WS_THICKFRAME) return false;

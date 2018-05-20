@@ -173,13 +173,13 @@ namespace enigma {
 unsigned long current_time_mcs = 0; // microseconds since the start of the game
 
 static LONG_PTR ComputeInitialWindowStyle() {
-  LONG_PTR newlong = WS_VISIBLE;
+  LONG_PTR newlong = 0;
 
   if (enigma::showIcons)
     newlong |= WS_SYSMENU;
 
   if (enigma::isFullScreen) {
-    newlong |= WS_POPUP | WS_MAXIMIZE;
+    newlong |= WS_POPUP;
   } else if (enigma::showBorder) {
     newlong |= WS_CAPTION | WS_MINIMIZEBOX;
     if (enigma::isSizeable)
