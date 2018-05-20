@@ -66,6 +66,7 @@ namespace enigma
     if (!regionWidth)
       return;
 
+    bool isFullScreen = enigma_user::window_get_fullscreen();
     int parWidth = isFullScreen?GetSystemMetrics(SM_CXSCREEN):windowWidth, parHeight = isFullScreen?GetSystemMetrics(SM_CYSCREEN):windowHeight;
     if (viewScale > 0)  //Fixed Scale
     {
@@ -300,22 +301,7 @@ void window_set_fullscreen(bool full) {
   }
   SetWindowLongPtr(enigma::hWnd, GWL_STYLE, style);
 
-  if (full) {
-    // get information about the monitor most applicable to our window
-    HMONITOR hmon = MonitorFromWindow(enigma::hWnd,
-                                      MONITOR_DEFAULTTONEAREST);
-    MONITORINFO mi = { sizeof(mi) };
-    if (!GetMonitorInfo(hmon, &mi)) return;
-
-    SetWindowPos(enigma::hWnd, HWND_TOPMOST,
-      mi.rcMonitor.left,
-      mi.rcMonitor.top,
-      mi.rcMonitor.right - mi.rcMonitor.left,
-      mi.rcMonitor.bottom - mi.rcMonitor.top,
-      SWP_NOACTIVATE);
-  } else {
-    enigma::clampwindow();
-  }
+  enigma::setwindowsize();
 }
 
 bool window_get_fullscreen() {
