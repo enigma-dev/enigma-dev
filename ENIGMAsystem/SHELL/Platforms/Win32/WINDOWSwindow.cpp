@@ -57,7 +57,7 @@ namespace enigma
   {
     RECT c;
     c.left = enigma::windowX; c.top = enigma::windowY; c.right = enigma::windowX + enigma::windowWidth; c.bottom = enigma::windowY + enigma::windowHeight;
-    AdjustWindowRect(&c, GetWindowLongPtr(enigma::hWnd, GWL_EXSTYLE), false);
+    AdjustWindowRect(&c, GetWindowLongPtr(enigma::hWnd, GWL_STYLE), false);
     SetWindowPos(enigma::hWnd, HWND_TOP, c.left, c.top, c.right-c.left, c.bottom-c.top, SWP_NOZORDER|SWP_FRAMECHANGED);
   }
 
@@ -316,12 +316,12 @@ bool window_get_fullscreen() {
 }
 
 void window_set_sizeable(bool sizeable) {
-  SetWindowLongPtr(enigma::hWnd, GWL_EXSTYLE,
-      GetWindowLongPtr(enigma::hWnd, GWL_EXSTYLE) | WS_SIZEBOX);
+  SetWindowLongPtr(enigma::hWnd, GWL_STYLE,
+      GetWindowLongPtr(enigma::hWnd, GWL_STYLE) | WS_SIZEBOX);
 }
 
 bool window_get_sizeable() {
-  return (GetWindowLongPtr(enigma::hWnd, GWL_EXSTYLE) & WS_THICKFRAME) == WS_THICKFRAME;
+  return (GetWindowLongPtr(enigma::hWnd, GWL_STYLE) & WS_THICKFRAME) == WS_THICKFRAME;
 }
 
 void window_set_showborder(bool show) {
@@ -330,7 +330,7 @@ void window_set_showborder(bool show) {
 }
 
 bool window_get_showborder() {
-  return (GetWindowLongPtr(enigma::hWnd, GWL_EXSTYLE) & WS_CAPTION) == WS_CAPTION;
+  return (GetWindowLongPtr(enigma::hWnd, GWL_STYLE) & WS_CAPTION) == WS_CAPTION;
 }
 
 void window_set_showicons(bool show) {
@@ -339,7 +339,7 @@ void window_set_showicons(bool show) {
 }
 
 bool window_get_showicons() {
-  return (GetWindowLongPtr(enigma::hWnd, GWL_EXSTYLE) & WS_THICKFRAME) == WS_THICKFRAME;
+  return (GetWindowLongPtr(enigma::hWnd, GWL_STYLE) & WS_THICKFRAME) == WS_THICKFRAME;
 }
 
 void window_set_visible(bool visible) {
