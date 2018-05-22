@@ -1,4 +1,4 @@
-/** Copyright (C) 2008 Josh Ventura
+/** Copyright (C) 2008-2017 Josh Ventura
 *** Copyright (C) 2013 Robert B. Colton
 *** Copyright (C) 2014 Seth N. Hetu
 ***
@@ -24,9 +24,9 @@ using namespace std;
 #include "Universal_System/estring.h" // For string_replace_all
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
-#include <unistd.h> //usleep
 #include "Universal_System/CallbackArrays.h" // For those damn vk_ constants.
 
+#include "Platforms/platforms_mandatory.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include "../General/PFwindow.h"
 
@@ -39,108 +39,113 @@ static int displayInitialResolutionWidth = 0, displayInitialResolutionHeight = 0
 
 namespace enigma
 {
-    extern HWND hWnd;
-    bool isVisible = true, stayOnTop = false, windowAdapt = true, gameWindowFocused = false;
-    int cursorInt = 0, regionWidth = 0, regionHeight = 0, windowWidth = 0, windowHeight = 0, windowX = 0, windowY = 0;
-    double scaledWidth = 0, scaledHeight = 0;
-    char* currentCursor = IDC_ARROW;
-    extern bool isSizeable, showBorder, showIcons, freezeOnLoseFocus, isFullScreen;
-    extern int viewScale, windowColor;
+  extern HWND hWnd;
+  bool windowAdapt = true;
+  int windowWidth = 0, windowHeight = 0;
+  int cursorInt = 0, regionWidth = 0, regionHeight = 0, windowX = 0, windowY = 0;
+  double scaledWidth = 0, scaledHeight = 0;
+  char* currentCursor = IDC_ARROW;
 
-    // Tested and confirmed to have the exact behaviour of GM8.1
-    LONG_PTR getwindowstyle()
+  void centerwindow() {
+    int screen_width = GetSystemMetrics(SM_CXSCREEN);
+    int screen_height = GetSystemMetrics(SM_CYSCREEN);
+    enigma::windowX = (screen_width - enigma::regionWidth)/2;
+    enigma::windowY = (screen_height - enigma::regionHeight)/2;
+  }
+
+  void clampwindow()
+  {
+    RECT c;
+    c.left = enigma::windowX; c.top = enigma::windowY; c.right = enigma::windowX + enigma::windowWidth; c.bottom = enigma::windowY + enigma::windowHeight;
+    AdjustWindowRect(&c, GetWindowLongPtr(enigma::hWnd, GWL_STYLE), false);
+    SetWindowPos(enigma::hWnd, HWND_TOP, c.left, c.top, c.right-c.left, c.bottom-c.top, SWP_NOZORDER|SWP_FRAMECHANGED);
+  }
+
+  void setwindowsize()
+  {
+    if (!regionWidth)
+      return;
+
+    bool isFullScreen = enigma_user::window_get_fullscreen();
+    int parWidth = isFullScreen?GetSystemMetrics(SM_CXSCREEN):windowWidth, parHeight = isFullScreen?GetSystemMetrics(SM_CYSCREEN):windowHeight;
+    if (viewScale > 0)  //Fixed Scale
     {
-        LONG_PTR newlong = WS_MINIMIZEBOX;
-
-        if (showIcons)
-            newlong |= WS_SYSMENU;
-        if (isVisible)
-            newlong |= WS_VISIBLE;
-
-        if (isFullScreen) {
-            newlong |= WS_POPUP | WS_MAXIMIZE;
-        } else if (showBorder) {
-            newlong |= WS_CAPTION;
-            if (isSizeable)
-                newlong |= WS_SIZEBOX | WS_MAXIMIZEBOX;
-        }
-
-        // these two flags are necessary for extensions like Ultimate3D and GMOgre to render on top of the window
-        return newlong | WS_CLIPCHILDREN | WS_CLIPSIBLINGS;
+      double viewDouble = viewScale/100.0;
+      scaledWidth = regionWidth*viewDouble;
+      scaledHeight = regionHeight*viewDouble;
     }
-
-    void centerwindow() {
-      int screen_width = GetSystemMetrics(SM_CXSCREEN);
-      int screen_height = GetSystemMetrics(SM_CYSCREEN);
-      enigma::windowX = (screen_width - enigma::regionWidth)/2;
-      enigma::windowY = (screen_height - enigma::regionHeight)/2;
-    }
-
-    void clampwindow()
+    else if (viewScale == 0)  //Full Scale
     {
-        RECT c;
-        c.left = enigma::windowX; c.top = enigma::windowY; c.right = enigma::windowX + enigma::windowWidth; c.bottom = enigma::windowY + enigma::windowHeight;
-        AdjustWindowRect(&c, getwindowstyle(), false);
-        SetWindowPos(enigma::hWnd, HWND_TOP, c.left, c.top, c.right-c.left, c.bottom-c.top, SWP_NOZORDER|SWP_FRAMECHANGED);
+      scaledWidth = parWidth;
+      scaledHeight = parHeight;
     }
-
-    void setwindowstyle()
+    else  //Keep Aspect Ratio
     {
-        SetWindowLongPtr(enigma::hWnd,GWL_STYLE,getwindowstyle());
-        clampwindow();
+      double fitWidth = parWidth/double(regionWidth), fitHeight = parHeight/double(regionHeight);
+      if (fitWidth < fitHeight)
+      {
+        scaledWidth = parWidth;
+        scaledHeight = regionHeight*fitWidth;
+      }
+      else
+      {
+        scaledWidth = regionWidth*fitHeight;
+        scaledHeight = parHeight;
+      }
     }
 
-    void setwindowsize()
+    if (!isFullScreen)
     {
-        if (!regionWidth)
-            return;
-
-        int parWidth = isFullScreen?GetSystemMetrics(SM_CXSCREEN):windowWidth, parHeight = isFullScreen?GetSystemMetrics(SM_CYSCREEN):windowHeight;
-        if (viewScale > 0)  //Fixed Scale
-        {
-            double viewDouble = viewScale/100.0;
-            scaledWidth = regionWidth*viewDouble;
-            scaledHeight = regionHeight*viewDouble;
-        }
-        else if (viewScale == 0)  //Full Scale
-        {
-            scaledWidth = parWidth;
-            scaledHeight = parHeight;
-        }
-        else  //Keep Aspect Ratio
-        {
-            double fitWidth = parWidth/double(regionWidth), fitHeight = parHeight/double(regionHeight);
-            if (fitWidth < fitHeight)
-            {
-                scaledWidth = parWidth;
-                scaledHeight = regionHeight*fitWidth;
-            }
-            else
-            {
-                scaledWidth = regionWidth*fitHeight;
-                scaledHeight = parHeight;
-            }
-        }
-
-        if (!isFullScreen)
-        {
-            if (windowAdapt && viewScale > 0) // If the window is to be adapted and Fixed Scale
-            {
-                if (scaledWidth > windowWidth)
-                    windowWidth = scaledWidth;
-                if (scaledHeight > windowHeight)
-                    windowHeight = scaledHeight;
-            }
-             clampwindow();
-        } else {
-          SetWindowPos(hWnd, NULL, 0, 0, parWidth, parHeight, SWP_NOACTIVATE);
-        }
-
+      if (windowAdapt && viewScale > 0) // If the window is to be adapted and Fixed Scale
+      {
+        if (scaledWidth > windowWidth)
+          windowWidth = scaledWidth;
+        if (scaledHeight > windowHeight)
+          windowHeight = scaledHeight;
+      }
+      clampwindow();
+    } else {
+      SetWindowPos(hWnd, NULL, 0, 0, parWidth, parHeight, SWP_NOACTIVATE);
     }
+  }
 }
 
-namespace enigma_user
-{
+namespace enigma_user {
+
+int window_get_region_width() {
+  return enigma::regionWidth;
+}
+
+int window_get_region_height() {
+  return enigma::regionHeight;
+}
+
+int window_get_region_width_scaled() {
+  return enigma::scaledWidth;
+}
+
+int window_get_region_height_scaled() {
+  return enigma::scaledHeight;
+}
+
+void window_set_region_scale(double scale, bool adaptwindow) {
+  enigma::viewScale = int(scale*100);
+  enigma::windowAdapt = adaptwindow;
+  enigma::setwindowsize();
+}
+
+double window_get_region_scale() {
+  return enigma::viewScale/100.0;
+}
+
+void window_set_region_size(int w, int h, bool adaptwindow) {
+  if (w <= 0 || h <= 0) return;
+
+  enigma::regionWidth = w;
+  enigma::regionHeight = h;
+  enigma::windowAdapt = adaptwindow;
+  enigma::setwindowsize();
+}
 
 // GM8.1 Used its own internal variables for these functions and reported the regular window dimensions when minimized,
 // Studio uses the native functions and will tell you the dimensions of the window are 0 when it is minimized,
@@ -194,8 +199,8 @@ string window_get_caption()
 
 void window_set_alpha(double alpha) {
   // Set WS_EX_LAYERED on this window
-  SetWindowLong(enigma::hWnd, GWL_EXSTYLE,
-  GetWindowLong(enigma::hWnd, GWL_EXSTYLE) | WS_EX_LAYERED);
+  SetWindowLongPtr(enigma::hWnd, GWL_EXSTYLE,
+      GetWindowLongPtr(enigma::hWnd, GWL_EXSTYLE) | WS_EX_LAYERED);
 
   // Make this window transparent
   SetLayeredWindowAttributes(enigma::hWnd, 0, (unsigned char)(alpha*255), LWA_ALPHA);
@@ -274,227 +279,153 @@ void window_default(bool center_size)
   if (center)
     enigma::centerwindow();
 
-  enigma::setwindowstyle();
   enigma::setwindowsize();
 }
 
-void window_set_fullscreen(bool full)
-{
-    if (enigma::isFullScreen == full)
-        return;
-
-    enigma::isFullScreen = full;
-    enigma::setwindowstyle();
-    enigma::setwindowsize();
+namespace {
+  bool prefer_sizeable;
 }
 
-int window_get_fullscreen()
-{
-    return enigma::isFullScreen;
-}
-
-void window_set_sizeable(bool sizeable)
-{
-    if (enigma::isSizeable == sizeable)
-        return;
-
-    enigma::isSizeable = sizeable;
-    enigma::setwindowstyle();
-}
-
-bool window_get_sizeable()
-{
-    return enigma::isSizeable;
-}
-
-void window_set_showborder(bool show)
-{
-    if (enigma::showBorder == show)
-        return;
-
-    enigma::showBorder = show;
-    enigma::setwindowstyle();
-}
-
-bool window_get_showborder()
-{
-    return enigma::showBorder;
-}
-
-void window_set_showicons(bool show)
-{
-    if (enigma::showIcons == show)
-        return;
-
-    enigma::showIcons = show;
-    enigma::setwindowstyle();
-}
-
-bool window_get_showicons()
-{
-    return enigma::showIcons;
-}
-
-void window_set_visible(bool visible)
-{
-    if (enigma::isVisible == visible)
-        return;
-
-    if (!visible) {
-      ShowWindow(enigma::hWnd,SW_HIDE);
-    } else {
-      ShowWindow(enigma::hWnd,SW_SHOW);
+void window_set_fullscreen(bool full) {
+  // tweak the style first to remove or restore the window border
+  LONG_PTR style = GetWindowLongPtr(enigma::hWnd, GWL_STYLE);
+  if (full) {
+    style &= ~(WS_CAPTION | WS_SIZEBOX | WS_MAXIMIZEBOX);
+    style |= WS_POPUP;
+  } else {
+    style &= ~(WS_POPUP);
+    style |= WS_CAPTION;
+    if (prefer_sizeable) {
+      style |= WS_SIZEBOX | WS_MAXIMIZEBOX;
     }
-    enigma::isVisible = visible;
-    enigma::setwindowstyle();
+  }
+  SetWindowLongPtr(enigma::hWnd, GWL_STYLE, style);
+
+  enigma::setwindowsize();
 }
 
-int window_get_visible()
-{
-    return enigma::isVisible;
+bool window_get_fullscreen() {
+  LONG_PTR style = GetWindowLongPtr(enigma::hWnd, GWL_STYLE);
+  // The window should be a maximized popup window.
+  if ((style & WS_POPUP) != WS_POPUP) return false;
+  // The window should have no caption, resize box, or (probably?) border
+  if ((style & WS_CAPTION) == WS_CAPTION) return false;
+  if ((style & WS_THICKFRAME) == WS_THICKFRAME) return false;
+  if ((style & WS_BORDER) == WS_BORDER) return false;
+  return true;
 }
 
-void window_set_minimized(bool minimized)
-{
-    ShowWindow(enigma::hWnd,(minimized?SW_MINIMIZE:SW_RESTORE));
+void window_set_sizeable(bool sizeable) {
+  SetWindowLongPtr(enigma::hWnd, GWL_STYLE,
+      GetWindowLongPtr(enigma::hWnd, GWL_STYLE) | WS_SIZEBOX);
 }
 
-void window_set_maximized(bool maximized)
-{
-    ShowWindow(enigma::hWnd,(maximized?SW_MAXIMIZE:SW_RESTORE));
+bool window_get_sizeable() {
+  return (GetWindowLongPtr(enigma::hWnd, GWL_STYLE) & WS_THICKFRAME) == WS_THICKFRAME;
 }
 
-bool window_get_minimized()
-{
-    return IsIconic(enigma::hWnd);
+void window_set_showborder(bool show) {
+  SetWindowLongPtr(enigma::hWnd, GWL_EXSTYLE,
+      GetWindowLongPtr(enigma::hWnd, GWL_EXSTYLE) | WS_EX_LAYERED);
 }
 
-bool window_get_maximized()
-{
-    return IsZoomed (enigma::hWnd);
+bool window_get_showborder() {
+  return (GetWindowLongPtr(enigma::hWnd, GWL_STYLE) & WS_CAPTION) == WS_CAPTION;
+}
+
+void window_set_showicons(bool show) {
+  SetWindowLongPtr(enigma::hWnd, GWL_EXSTYLE,
+      GetWindowLongPtr(enigma::hWnd, GWL_EXSTYLE) | WS_EX_LAYERED);
+}
+
+bool window_get_showicons() {
+  return (GetWindowLongPtr(enigma::hWnd, GWL_STYLE) & WS_THICKFRAME) == WS_THICKFRAME;
+}
+
+void window_set_visible(bool visible) {
+  ShowWindow(enigma::hWnd, visible? SW_SHOW : SW_HIDE);
+}
+
+int window_get_visible() {
+  return IsWindowVisible(enigma::hWnd);
+}
+
+void window_set_minimized(bool minimized) {
+  ShowWindow(enigma::hWnd, minimized? SW_MINIMIZE : SW_RESTORE);
+}
+
+void window_set_maximized(bool maximized) {
+  ShowWindow(enigma::hWnd, maximized? SW_MAXIMIZE : SW_RESTORE);
+}
+
+bool window_get_minimized() {
+  return IsIconic(enigma::hWnd);
+}
+
+bool window_get_maximized() {
+  return IsZoomed(enigma::hWnd);
 }
 
 void window_set_stayontop(bool stay)
 {
-    if (enigma::stayOnTop == stay)
-        return;
-
-    if ((enigma::stayOnTop = stay))
-    {
-        SetWindowPos(enigma::hWnd,HWND_TOPMOST,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE);
-    }
-    else
-    {
-        SetWindowPos(enigma::hWnd,HWND_BOTTOM,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE|SWP_NOACTIVATE);
-        SetWindowPos(enigma::hWnd,HWND_TOP,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE);
-    }
+  if (stay) {
+    SetWindowPos(enigma::hWnd,HWND_TOPMOST,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE);
+  } else {
+    SetWindowPos(enigma::hWnd,HWND_BOTTOM,0,0,0,0,SWP_NOSIZE|SWP_NOMOVE|SWP_NOACTIVATE);
+    SetWindowPos(enigma::hWnd,HWND_TOP,   0,0,0,0,SWP_NOSIZE|SWP_NOMOVE);
+  }
 }
 
-void window_set_freezeonlosefocus(bool freeze)
-{
-    enigma::freezeOnLoseFocus = freeze;
+bool window_get_stayontop() {
+    return (GetWindowLongPtr(enigma::hWnd, GWL_EXSTYLE) & WS_EX_TOPMOST) == WS_EX_TOPMOST;
 }
 
-bool window_get_freezeonlosefocus()
-{
-    return enigma::freezeOnLoseFocus;
+void window_set_freezeonlosefocus(bool freeze) {
+  enigma::freezeOnLoseFocus = freeze;
 }
 
-bool window_get_stayontop()
-{
-    return enigma::stayOnTop;
+bool window_get_freezeonlosefocus() {
+  return enigma::freezeOnLoseFocus;
 }
 
-void window_set_region_scale(double scale, bool adaptwindow)
-{
-    enigma::viewScale = int(scale*100);
-    enigma::windowAdapt = adaptwindow;
-    enigma::setwindowsize();
-}
-
-double window_get_region_scale()
-{
-    return enigma::viewScale/100.0;
-}
-
-void window_set_region_size(int w, int h, bool adaptwindow)
-{
-    if (w <= 0 || h <= 0) return;
-
-    enigma::regionWidth = w;
-    enigma::regionHeight = h;
-    enigma::windowAdapt = adaptwindow;
-    enigma::setwindowsize();
-    //window_center();
-}
-
-int window_get_region_width()
-{
-    return enigma::regionWidth;
-}
-
-int window_get_region_height()
-{
-    return enigma::regionHeight;
-}
-
-int window_get_region_width_scaled()
-{
-    return enigma::scaledWidth;
-}
-
-int window_get_region_height_scaled()
-{
-    return enigma::scaledHeight;
-}
-
-int display_mouse_get_x()
-{
+int display_mouse_get_x() {
   POINT mouse;
   GetCursorPos(&mouse);
   return mouse.x;
 }
 
-int display_mouse_get_y()
-{
+int display_mouse_get_y() {
   POINT mouse;
   GetCursorPos(&mouse);
   return mouse.y;
 }
 
-void display_mouse_set(int x,int y)
-{
+void display_mouse_set(int x,int y) {
     SetCursorPos(x,y);
 }
 
-int display_get_width()
-{
+int display_get_width() {
    return GetSystemMetrics(SM_CXSCREEN);
 }
 
-int display_get_height()
-{
+int display_get_height() {
    return GetSystemMetrics(SM_CYSCREEN);
 }
 
-int display_get_colordepth()
-{
-	return GetDeviceCaps(GetDC(enigma::hWnd), BITSPIXEL);
+int display_get_colordepth() {
+  return GetDeviceCaps(GetDC(enigma::hWnd), BITSPIXEL);
 }
 
-int display_get_frequency()
-{
-	return GetDeviceCaps(GetDC(enigma::hWnd), VREFRESH);
+int display_get_frequency() {
+  return GetDeviceCaps(GetDC(enigma::hWnd), VREFRESH);
 }
 
-unsigned display_get_dpi_x()
-{
-	return GetDeviceCaps(GetDC(enigma::hWnd), LOGPIXELSX);
+unsigned display_get_dpi_x() {
+  return GetDeviceCaps(GetDC(enigma::hWnd), LOGPIXELSX);
 }
 
-unsigned display_get_dpi_y()
-{
-	return GetDeviceCaps(GetDC(enigma::hWnd), LOGPIXELSY);
+unsigned display_get_dpi_y() {
+  return GetDeviceCaps(GetDC(enigma::hWnd), LOGPIXELSY);
 }
 
 void display_reset()
@@ -829,7 +760,7 @@ void keyboard_wait()
         io_clear();
         return;
       }
-    usleep(10000); // Sleep 1/100 second
+    Sleep(10); // Sleep 1/100 second
   }
 }
 
@@ -841,7 +772,7 @@ void mouse_wait()
     for (int i = 0; i < 3; i++)
       if (enigma::mousestatus[i])
         return;
-    usleep(10000); // Sleep 1/100 second
+    Sleep(10); // Sleep 1/100 second
   }
 }
 
@@ -956,26 +887,27 @@ void keyboard_set_scroll(bool on) {
   }
 }
 
+static map<int, int> keybdmap;
 void keyboard_set_map(int key1, int key2) {
-	map< int, int >::iterator it = enigma::keybdmap.find( key1 );
-    if ( enigma::keybdmap.end() != it ) {
-		it->second = key2;
-    } else {
-		enigma::keybdmap.insert( map< int, int >::value_type(key1, key2) );
-	}
+  map<int, int>::iterator it = keybdmap.find(key1);
+  if (keybdmap.end() != it) {
+    it->second = key2;
+  } else {
+    keybdmap.insert(map<int, int>::value_type(key1, key2));
+  }
 }
 
 int keyboard_get_map(int key) {
-	map< int, int >::iterator it = enigma::keybdmap.find( key );
-    if ( enigma::keybdmap.end() != it ) {
-		return it->second;
-    } else {
-		return key;
-	}
+  map<int, int>::iterator it = keybdmap.find(key);
+  if (keybdmap.end() != it) {
+    return it->second;
+  } else {
+    return key;
+  }
 }
 
 void keyboard_unset_map() {
-	enigma::keybdmap.clear();
+  keybdmap.clear();
 }
 
 void mouse_clear(const int button)
