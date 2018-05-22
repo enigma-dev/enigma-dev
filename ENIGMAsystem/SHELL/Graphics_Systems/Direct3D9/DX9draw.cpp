@@ -128,7 +128,7 @@ int draw_getpixel(int x, int y)
 	unsigned offset = y * rect.Pitch + x * 4;
 	int ret = bitmap[offset + 2] | (bitmap[offset + 1] << 8) | (bitmap[offset + 0] << 16);
 	pDestBuffer->UnlockRect();
-	delete[] bitmap;
+
 	pBackBuffer->Release();
 	pDestBuffer->Release();
 
@@ -165,7 +165,7 @@ int draw_getpixel_ext(int x, int y)
 	unsigned offset = y * rect.Pitch + x * 4;
 	int ret = bitmap[offset + 2] | (bitmap[offset + 1] << 8) | (bitmap[offset + 0] << 16) | (bitmap[offset + 3] << 24);
 	pDestBuffer->UnlockRect();
-	delete[] bitmap;
+
 	pBackBuffer->Release();
 	pDestBuffer->Release();
 	return ret;
@@ -183,4 +183,3 @@ bool fill_complex_polygon(const std::list<PolyVertex>& vertices, int defaultColo
 }
 
 }
-
