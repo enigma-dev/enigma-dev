@@ -19,6 +19,12 @@
 
 #include "Universal_System/scalar.h"
 
+#include <map>
+#include <vector>
+
+extern std::map<int,int> tile_layer_models;
+extern std::map<int,std::vector<std::vector<int> > > tile_layer_metadata;
+
 namespace enigma_user
 {
   int tile_add(int background, int left, int top, int width, int height, int x, int y, int depth, double xscale = 1.0, double yscale = 1.0, double alpha = 1, int color = 0xFFFFFF);

@@ -178,11 +178,11 @@ bool d3d_model_load(int id, string fname)
 				int faceVertices = f.size() / (1 + hasTexture + hasNormals);
 				int of = 1 + hasTexture + hasNormals;
         int nof = 1 + hasTexture;
-        
+
 				meshes[id]->AddVertex(vertices[(f[0]-1)*3],  vertices[(f[0]-1)*3 +1], vertices[(f[0]-1)*3 +2]);
 				if(hasTexture) meshes[id]->AddTexture(uvs[(f[1]-1)*2], 1 - uvs[(f[1]-1)*2 +1]);
 				if(hasNormals) meshes[id]->AddNormal(normals[(f[nof]-1)*3], normals[(f[nof]-1)*3 +1], normals[(f[nof]-1)*3 +2]);
-        
+
 				meshes[id]->AddVertex(vertices[(f[1*of]-1)*3],  vertices[(f[1*of]-1)*3 +1] , vertices[(f[1*of]-1)*3 +2]);
 				if(hasTexture) meshes[id]->AddTexture(uvs[(f[1*of + 1]-1)*2], 1 - uvs[(f[1*of + 1]-1)*2 +1]);
        	if(hasNormals) meshes[id]->AddNormal(normals[(f[of + nof]-1)*3], normals[(f[of  + nof]-1)*3 +1], normals[(f[of  + nof]-1)*3 +2]);
@@ -190,18 +190,18 @@ bool d3d_model_load(int id, string fname)
 				meshes[id]->AddVertex(vertices[(f[2*of]-1)*3],  vertices[(f[2*of]-1)*3 +1] , vertices[(f[2*of]-1)*3 +2]);
 				if(hasTexture) meshes[id]->AddTexture(uvs[(f[2*of + 1]-1)*2], 1 - uvs[(f[2*of + 1]-1)*2 +1]);
 				if(hasNormals) meshes[id]->AddNormal(normals[(f[2*of +nof]-1)*3], normals[(f[2*of  + nof]-1)*3 +1], normals[(f[2*of  + nof]-1)*3 +2]);
-        
+
 				//is a quad
 				if(faceVertices == 4)
 				{
 					meshes[id]->AddVertex(vertices[(f[2*of]-1)*3],  vertices[(f[2*of]-1)*3 +1] , vertices[(f[2*of]-1)*3 +2]);
 					if(hasTexture) meshes[id]->AddTexture(uvs[(f[2*of + 1]-1)*2], 1 - uvs[(f[2*of + 1]-1)*2 +1]);
 					if(hasNormals) meshes[id]->AddNormal(normals[(f[2*of + nof]-1)*3], normals[(f[2*of  + nof]-1)*3 +1], normals[(f[2*of  + nof]-1)*3 +2]);
-          
+
 					meshes[id]->AddVertex( vertices[(f[3*of]-1)*3],  vertices[(f[3*of]-1)*3 +1] , vertices[(f[3*of]-1)*3 +2]);
 					if(hasTexture) meshes[id]->AddTexture(uvs[(f[3*of + 1]-1)*2], 1 - uvs[(f[3*of + 1]-1)*2 +1]);
 					if(hasNormals) meshes[id]->AddNormal(normals[(f[3*of + nof]-1)*3], normals[(f[3*of  + nof]-1)*3 +1], normals[(f[3*of  + nof]-1)*3 +2]);
-          
+
 					meshes[id]->AddVertex(vertices[(f[0]-1)*3],  vertices[(f[0]-1)*3 +1], vertices[(f[0]-1)*3 +2]);
 					if(hasTexture) meshes[id]->AddTexture(uvs[(f[0 + 1]-1)*2], 1 - uvs[(f[0 + 1]-1)*2 +1]);
           if(hasNormals) meshes[id]->AddNormal(normals[(f[nof]-1)*3], normals[(f[nof]-1)*3 +1], normals[(f[nof]-1)*3 +2]);
@@ -307,56 +307,56 @@ bool d3d_model_load(int id, string fname)
   return true;
 }
 
-void d3d_model_part_draw(int id, int vertex_start, int vertex_count) // overload for no additional texture or transformation call's
-{
-    meshes[id]->Draw(vertex_start, vertex_count);
-}
-
-void d3d_model_part_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z, int vertex_start, int vertex_count) // overload for no additional texture call's
-{
-    d3d_transform_add_translation(x, y, z);
-    meshes[id]->Draw(vertex_start, vertex_count);
-    d3d_transform_add_translation(-x, -y, -z);
-}
-
-void d3d_model_part_draw(int id, int texId, int vertex_start, int vertex_count)
-{
-    texture_set(texId);
-    meshes[id]->Draw(vertex_start, vertex_count);
-}
-
-void d3d_model_part_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z, int texId, int vertex_start, int vertex_count)
-{
-    texture_set(texId);
-    d3d_transform_add_translation(x, y, z);
-    meshes[id]->Draw(vertex_start, vertex_count);
-    d3d_transform_add_translation(-x, -y, -z);
-}
-
 void d3d_model_draw(int id) // overload for no additional texture or transformation call's
 {
-    meshes[id]->Draw();
+	meshes[id]->Draw();
 }
 
 void d3d_model_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z) // overload for no additional texture call's
 {
-    d3d_transform_add_translation(x, y, z);
-    meshes[id]->Draw();
-    d3d_transform_add_translation(-x, -y, -z);
+	d3d_transform_add_translation(x, y, z);
+	meshes[id]->Draw();
+	d3d_transform_add_translation(-x, -y, -z);
 }
 
 void d3d_model_draw(int id, int texId)
 {
-    texture_set(texId);
-    meshes[id]->Draw();
+	texture_set(texId);
+	meshes[id]->Draw();
 }
 
 void d3d_model_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z, int texId)
 {
-    texture_set(texId);
-    d3d_transform_add_translation(x, y, z);
-    meshes[id]->Draw();
-    d3d_transform_add_translation(-x, -y, -z);
+	texture_set(texId);
+	d3d_transform_add_translation(x, y, z);
+	meshes[id]->Draw();
+	d3d_transform_add_translation(-x, -y, -z);
+}
+
+void d3d_model_part_draw(int id, int vertex_start, int vertex_count) // overload for no additional texture or transformation call's
+{
+	meshes[id]->Draw(vertex_start, vertex_count);
+}
+
+void d3d_model_part_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z, int vertex_start, int vertex_count) // overload for no additional texture call's
+{
+	d3d_transform_add_translation(x, y, z);
+	meshes[id]->Draw(vertex_start, vertex_count);
+	d3d_transform_add_translation(-x, -y, -z);
+}
+
+void d3d_model_part_draw(int id, int texId, int vertex_start, int vertex_count)
+{
+	texture_set(texId);
+	meshes[id]->Draw(vertex_start, vertex_count);
+}
+
+void d3d_model_part_draw(int id, gs_scalar x, gs_scalar y, gs_scalar z, int texId, int vertex_start, int vertex_count)
+{
+	texture_set(texId);
+	d3d_transform_add_translation(x, y, z);
+	meshes[id]->Draw(vertex_start, vertex_count);
+	d3d_transform_add_translation(-x, -y, -z);
 }
 
 void d3d_model_primitive_begin(int id, int kind, int format)

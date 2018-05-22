@@ -21,6 +21,8 @@
 #include "../General/GStextures.h"
 #include "../General/GSbackground.h"
 #include "../General/GSscreen.h"
+#include "../General/GStiles.h"
+#include "../General/GSmodel.h"
 #include "../General/GSd3d.h"
 #include "../General/GSmatrix.h"
 #include "../General/GScolors.h"
@@ -51,6 +53,7 @@ using namespace std;
 
 using namespace enigma;
 using namespace enigma_user;
+
 namespace enigma_user {
   extern int window_get_width();
   extern int window_get_height();
@@ -145,8 +148,9 @@ static inline int draw_tiles()
   {
     if (dit->second.tiles.size())
     {
-        glCallList(drawing_depths[dit->second.tiles[0].depth].tilelist);
-        texture_reset();
+      for (auto &t : tile_layer_metadata[dit->second.tiles[0].depth]){
+        enigma_user::d3d_model_part_draw(tile_layer_models[dit->second.tiles[0].depth], t[0], t[1], t[2]);
+      }
     }
     enigma::inst_iter* push_it = enigma::instance_event_iterator;
     //loop instances

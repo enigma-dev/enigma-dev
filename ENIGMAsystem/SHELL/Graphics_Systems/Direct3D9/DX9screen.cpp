@@ -20,6 +20,7 @@
 #include "Bridges/General/DX9Context.h"
 #include "Direct3D9Headers.h"
 #include "../General/GSbackground.h"
+#include "../General/GStiles.h"
 #include "../General/GSscreen.h"
 #include "../General/GSd3d.h"
 #include "../General/GSmatrix.h"
@@ -151,9 +152,8 @@ static inline int draw_tiles()
   {
     if (dit->second.tiles.size())
     {
-      for (unsigned int t = 0; t<drawing_depths[dit->second.tiles[0].depth].tilevector.size(); ++t){
-        enigma_user::texture_set(drawing_depths[dit->second.tiles[0].depth].tilevector[t][0]);
-        //d3d_model_part_draw(drawing_depths[dit->second.tiles[0].depth].tilelist, drawing_depths[dit->second.tiles[0].depth].tilevector[t][1], drawing_depths[dit->second.tiles[0].depth].tilevector[t][2]);
+      for (auto &t : tile_layer_metadata[dit->second.tiles[0].depth]){
+        //enigma_user::d3d_model_part_draw(tile_layer_models[dit->second.tiles[0].depth], t[0], t[1], t[2]);
       }
     }
     enigma::inst_iter* push_it = enigma::instance_event_iterator;

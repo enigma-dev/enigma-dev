@@ -23,7 +23,6 @@
 #include <math.h>
 #include <stdlib.h>
 
-
 using namespace std;
 
 #define __GETR(x) ((x & 0x0000FF))
@@ -575,7 +574,7 @@ class Mesh
   {
     if (!GetStride()) { return; }
     if (vertexbuffer == NULL || !vbobuffered) {
-	  vbobuffered = true;
+      vbobuffered = true;
       BufferGenerate();
     }
 

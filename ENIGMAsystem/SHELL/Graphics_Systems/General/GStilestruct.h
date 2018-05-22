@@ -15,8 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#ifndef ENIGMA_GLTILESTRUCT_H
-#define ENIGMA_GLTILESTRUCT_H
+#ifndef ENIGMA_GSTILESTRUCT_H
+#define ENIGMA_GSTILESTRUCT_H
 
 #include "Universal_System/roomsystem.h"
 namespace enigma

@@ -19,6 +19,7 @@
 #include <cstdio>
 #include "../General/OpenGLHeaders.h"
 #include "../General/GStextures.h"
+#include "../General/GStiles.h"
 #include "../General/GSbackground.h"
 #include "../General/GSscreen.h"
 #include "../General/GSd3d.h"
@@ -148,8 +149,8 @@ static inline int draw_tiles()
   {
     if (dit->second.tiles.size())
     {
-      for (auto &t : drawing_depths[dit->second.tiles[0].depth].tilevector){
-        d3d_model_part_draw(drawing_depths[dit->second.tiles[0].depth].tilelist, t[0], t[1], t[2]);
+      for (auto &t : tile_layer_metadata[dit->second.tiles[0].depth]){
+        enigma_user::d3d_model_part_draw(tile_layer_models[dit->second.tiles[0].depth], t[0], t[1], t[2]);
       }
     }
     enigma::inst_iter* push_it = enigma::instance_event_iterator;
