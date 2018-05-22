@@ -15,12 +15,9 @@
 **/
 
 #include <cstdlib>
-#include "../General/PFsystem.h"
-
-namespace enigma {
-  extern bool gameWindowFocused;
-  extern bool freezeOnLoseFocus;
-}
+#include "Platforms/General/PFsystem.h"
+#include "Platforms/platforms_mandatory.h"
+#include "XLIBmain.h"
 
 namespace enigma_user {
 
@@ -53,7 +50,7 @@ bool os_is_network_connected() {
 }
 
 bool os_is_paused() {
-  return enigma::freezeOnLoseFocus && !enigma::gameWindowFocused;
+  return enigma::freezeOnLoseFocus && !enigma::x11::game_window_focused;
 }
 
 void os_lock_orientation(bool enable) {

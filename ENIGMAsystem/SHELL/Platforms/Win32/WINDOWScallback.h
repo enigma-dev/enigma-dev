@@ -28,9 +28,12 @@
 #include <map>
 using std::map;
 
-namespace enigma
-{
-  extern map<int,int> keybdmap;
+namespace enigma {
   void input_push();
   void input_initialize();
+}
+
+namespace enigma_win32 {
+  // Used internally by this system to track whether the game has focus. 
+  extern bool game_window_focused;
 }

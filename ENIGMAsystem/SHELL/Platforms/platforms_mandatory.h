@@ -1,4 +1,4 @@
-/** Copyright (C) 2008 Josh Ventura
+/** Copyright (C) 2008-2017 Josh Ventura
 *** Copyright (C) 2013 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
@@ -42,14 +42,50 @@ namespace enigma
   // This method is called at load time. It allows for initializing arrays for input.
   void input_initialize();
 
+  // This method initializes all of the major systems generically and is universally
+  // called by every platform.
   int initialize_everything();
+
+  // Control variables.
+  /// Controls whether we suspend the event loop while the game is out of focus.
+  extern bool freezeOnLoseFocus;
+
+  /**
+   * Gives a cached value of the dimensions of the screen. This allows the main
+   * draw loop to avoid querying the window server every frame. Performing these
+   * queries is relatively expensive, and can lower ENIGMA's peak framerate to
+   * around 300 (which is a metric naive users compare to determine whether
+   * ENIGMA competes with their toolchain of choice).
+   */
+  extern int windowWidth, windowHeight;
+
+  /// Controls whether the window will be adapted to fit its content.
+  extern bool windowAdapt;
+  /// Probably the dumbest variable in ENIGMA. Serves as a scaling factor
+  /// between 1 and 100 (for no reason). If it's zero, rather than scaling by
+  /// this factor, the drawing area should be shrunk to fit. If this value goes
+  /// negative, a third behavior is used: the drawing region is shrunk to fit,
+  /// but the aspect ratio is maintained.
+  extern int viewScale;
+  /// These are the view-calculated or user-defined dimensions of the drawing
+  /// region. They are used in fitting the graphics to the window.
+  extern int regionWidth, regionHeight;
+  /// These are the drawing area dimensions, calculated according to the scaling
+  /// settings defined above.
+  extern double scaledWidth, scaledHeight;
+
+  // Game Settings variables. TODO: Remove; pass to a window_initialize() method.
+  extern bool isSizeable, showBorder, showIcons, isFullScreen;
+  extern bool treatCloseAsEscape; // TODO: Not implemented outside of Windows...
+  extern int windowColor;
 }
 
 namespace enigma_user
 {
 
 // These functions are standard GML that are an integral part of the system.
-// Each instance must implement these, even if they are unable to do anything on the target platform.
+// Each instance must implement these, even if they are unable to do anything
+// on the target platform.
 
 // This is used with roomsystem
 void window_default(bool center_size = false);
@@ -68,17 +104,6 @@ int window_get_region_height_scaled();
 void window_set_fullscreen(bool full);
 bool window_get_fullscreen();
 
-int window_set_cursor(int c);
-inline void action_set_cursor(int spr, bool c) {
-	// TODO: if spr exists should create a sprite cursor, game maker allows
-	// both the sprite cursor and system cursor to be visible at the same time
-	if (c) {
-		window_set_cursor(0); // no system cursor
-	} else {
-		window_set_cursor(-1); // default system cursor
-	}
-}
-int window_get_cursor();
 void window_set_region_scale(double scale, bool adaptwindow);
 void window_set_stayontop(bool stay);
 void window_set_sizeable(bool sizeable);
@@ -86,6 +111,16 @@ void window_set_showborder(bool show);
 void window_set_showicons(bool show);
 void window_set_freezeonlosefocus(bool freeze);
 unsigned long get_timer(); // number of microseconds since the game started
+
+// TODO: cursor functions are absolutely not necessary; move out
+int window_set_cursor(int c);
+int window_get_cursor();
+inline void action_set_cursor(int spr, bool c) {
+  // TODO: if spr exists should create a sprite cursor, game maker allows
+  // both the sprite cursor and system cursor to be visible at the same time
+  window_set_cursor(c? 0 : -1); // default system cursor
 }
+
+}  // namespace enigma_user
 
 #endif

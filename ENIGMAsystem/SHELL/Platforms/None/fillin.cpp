@@ -91,17 +91,6 @@ void os_powersave_enable(bool enable) {
 }
 
 }
-namespace enigma {
-  bool isVisible = true, isMinimized = false, isMaximized = false, stayOnTop = false, windowAdapt = true;
-  int regionWidth = 0, regionHeight = 0, windowWidth = 0, windowHeight = 0;
-  double scaledWidth = 0, scaledHeight = 0;
-  extern bool isSizeable, showBorder, showIcons, freezeOnLoseFocus, isFullScreen;
-  extern int viewScale, windowColor;
-
-  void setwindowsize(int forceX=-1, int forceY=-1)
-  {
-  }
-}
 
 //////////
 // INIT //
@@ -111,8 +100,6 @@ void Sleep(int ms)
 	if(ms>=1000) sleep(ms/1000);
 	if(ms>0)	usleep(ms%1000*1000);
 }
-
-int visx = -1, visy = -1;
 
 namespace enigma_user
 {
@@ -287,82 +274,7 @@ namespace enigma
     return x & 0xFF00? x | 0xFF00 : x;
   }
 
-  unsigned char keymap[512];
-  unsigned short keyrmap[256];
-  void initkeymap()
-  {
-    using namespace enigma_user;
-
-    for (size_t i = 0; i < 512; ++i) keymap[i] = 0;
-    for (size_t i = 0; i < 256; ++i) keyrmap[i] = 0;
-
-    // Pretend this part doesn't exist
-    keymap[0x151] = vk_left;
-    keymap[0x153] = vk_right;
-    keymap[0x152] = vk_up;
-    keymap[0x154] = vk_down;
-    keymap[0x1E3] = vk_control;
-    keymap[0x1E4] = vk_control;
-    keymap[0x1E9] = vk_alt;
-    keymap[0x1EA] = vk_alt;
-    keymap[0x1E1] = vk_shift;
-    keymap[0x1E2] = vk_shift;
-    keymap[0x10D] = vk_enter;
-    keymap[0x185] = vk_lsuper;
-    keymap[0x186] = vk_rsuper;
-    keymap[0x117] = vk_tab;
-    keymap[0x142] = vk_caps;
-    keymap[0x14E] = vk_scroll;
-    keymap[0x17F] = vk_pause;
-    keymap[0x19E] = vk_numpad0;
-    keymap[0x19C] = vk_numpad1;
-    keymap[0x199] = vk_numpad2;
-    keymap[0x19B] = vk_numpad3;
-    keymap[0x196] = vk_numpad4;
-    keymap[0x19D] = vk_numpad5;
-    keymap[0x198] = vk_numpad6;
-    keymap[0x195] = vk_numpad7;
-    keymap[0x197] = vk_numpad8;
-    keymap[0x19A] = vk_numpad9;
-    keymap[0x1AF] = vk_divide;
-    keymap[0x1AA] = vk_multiply;
-    keymap[0x1AD] = vk_subtract;
-    keymap[0x1AB] = vk_add;
-    keymap[0x19F] = vk_decimal;
-    keymap[0x1BE] = vk_f1;
-    keymap[0x1BF] = vk_f2;
-    keymap[0x1C0] = vk_f3;
-    keymap[0x1C1] = vk_f4;
-    keymap[0x1C2] = vk_f5;
-    keymap[0x1C3] = vk_f6;
-    keymap[0x1C4] = vk_f7;
-    keymap[0x1C5] = vk_f8;
-    keymap[0x1C6] = vk_f9;
-    keymap[0x1C7] = vk_f10;
-    keymap[0x1C8] = vk_f11;
-    keymap[0x1C9] = vk_f12;
-    keymap[0x108] = vk_backspace;
-    keymap[0x11B] = vk_escape;
-    keymap[0x150] = vk_home;
-    keymap[0x157] = vk_end;
-    keymap[0x155] = vk_pageup;
-    keymap[0x156] = vk_pagedown;
-    keymap[0x1FF] = vk_delete;
-    keymap[0x163] = vk_insert;
-
-    // Set up identity map...
-    //for (int i = 0; i < 255; i++)
-    //  usermap[i] = i;
-
-    for (int i = 0; i < 'a'; i++)
-      keymap[i] = i;
-    for (int i = 'a'; i <= 'z'; i++) // 'a' to 'z' wrap to 'A' to 'Z'
-      keymap[i] = i + 'A' - 'a';
-    for (int i = 'z'+1; i < 255; i++)
-      keymap[i] = i;
-
-    for (size_t i = 0; i < 512; ++i) keyrmap[keymap[i]] = highbyte_allornothing(i);
-   }
+  void initkeymap() {}
 }
 
 #include <sys/time.h>
@@ -505,12 +417,7 @@ namespace enigma_user {
 namespace enigma
 {
   int game_return = 0;
-  extern unsigned char keymap[512];
   void ENIGMA_events(void); //TODO: Synchronize this with Windows by putting these two in a single header.
-  bool gameWindowFocused = false;
-  extern int windowWidth, windowHeight;
-  extern bool freezeOnLoseFocus;
-  unsigned int pausedSteps = 0;
 
   void (*WindowResizedCallback)();
   void EnableDrawing();
@@ -798,7 +705,6 @@ namespace enigma_user
       closedir(fff_dir_open);
     fff_dir_open = NULL;
   }
-
 }
 
 
