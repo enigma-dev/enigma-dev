@@ -29,6 +29,7 @@
 #include <stdlib.h> //getenv and system
 
 #include "Platforms/General/PFsystem.h"
+#include "Platforms/General/PFmain.h"
 #include "Platforms/platforms_mandatory.h"
 
 #include "XLIBmain.h"
@@ -51,7 +52,6 @@ namespace enigma_user {
 
 namespace enigma
 {
-  int game_return = 0;
   extern unsigned char keymap[512];
   void ENIGMA_events(void); //TODO: Synchronize this with Windows by putting these two in a single header.
   unsigned int pausedSteps = 0;
@@ -203,8 +203,6 @@ namespace enigma
     }
     mouse_hscrolls = mouse_vscrolls = 0;
   }
-
-  int game_ending();
 }
 
 //TODO: Implement pause events
@@ -237,7 +235,6 @@ static void set_net_wm_pid(Window window) {
 }
 
 #include <unistd.h>
-static bool game_isending = false;
 int main(int argc,char** argv)
 {
     // Set the working_directory
@@ -322,7 +319,7 @@ int main(int argc,char** argv)
     time_offset_slowing.tv_nsec = time_offset.tv_nsec;
     int frames_count = 0;
 
-    while (!game_isending)
+    while (!enigma::game_isending)
     {
         using enigma::current_room_speed;
         clock_gettime(CLOCK_MONOTONIC, &time_current);
@@ -456,36 +453,27 @@ void execute_program(string fname, string args, bool wait)
   }
 }
 
-void game_end(int ret) {
-  game_isending = true;
-  enigma::game_return = ret;
-}
-
-void action_end_game() {
-  game_end();
-}
-
 void url_open(std::string url,std::string target,std::string options)
 {
-	if (!fork()) {
-		execlp("xdg-open","xdg-open",url.c_str(),NULL);
-		exit(0);
-	}
+  if (!fork()) {
+    execlp("xdg-open","xdg-open",url.c_str(),NULL);
+    exit(0);
+  }
 }
 
 void url_open_ext(std::string url,std::string target)
 {
-	url_open(url,target);
+  url_open(url,target);
 }
 
 void url_open_full(std::string url,std::string target,std::string options)
 {
-	url_open(url,target, options);
+  url_open(url,target, options);
 }
 
 void action_webpage(const std::string &url)
 {
-	url_open(url);
+  url_open(url);
 }
 
 int display_get_width() { return XWidthOfScreen(screen); }

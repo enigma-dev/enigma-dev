@@ -117,7 +117,6 @@ using namespace enigma_user;
 
 namespace enigma
 {
-  int game_ending();
   int game_ending()
   {
     // Fire Room End then Game End events in that order.
