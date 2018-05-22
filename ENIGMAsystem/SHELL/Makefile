@@ -98,7 +98,7 @@ clean:
 cleandep:
 	$(RM) $(CLEANDEPS)
 
-SOURCES := $(wildcard *.cpp)
+SOURCES := $(wildcard *.cpp) Platforms/General/PFmain.cpp
 include $(addsuffix /Makefile,$(SYSTEMS) $(EXTENSIONS))
 include Bridges/$(PLATFORM)-$(GRAPHICS)/Makefile
 
