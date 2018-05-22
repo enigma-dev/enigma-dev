@@ -68,15 +68,10 @@ class PasswordContext {
   }
 };
 
-namespace enigma
-{
-  bool widget_system_initialize()
-  {
+namespace enigma {
+  bool widget_system_initialize() {
     return 0;
   }
-  extern string gameInfoText, gameInfoCaption;
-  extern int gameInfoBackgroundColor, gameInfoLeft, gameInfoTop, gameInfoWidth, gameInfoHeight;
-  extern bool gameInfoEmbedGameWindow, gameInfoShowBorder, gameInfoAllowResize, gameInfoStayOnTop, gameInfoPauseGame;
 }
 
 void show_error(string err, const bool fatal)

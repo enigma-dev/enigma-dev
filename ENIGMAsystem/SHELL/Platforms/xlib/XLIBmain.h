@@ -25,6 +25,9 @@
 **                                                                              **
 \********************************************************************************/
 
+#ifndef Platforms_xlib_XLIBmain_h
+#define Platforms_xlib_XLIBmain_h
+
 #include <X11/Xlib.h>
 #include <string>
 using std::string;
@@ -36,8 +39,10 @@ namespace enigma {
     extern Window win;
     extern GC gc;
     extern Atom wm_delwin;
+    extern bool game_window_focused;
     
     int handleEvents();
   }
 }
 
+#endif

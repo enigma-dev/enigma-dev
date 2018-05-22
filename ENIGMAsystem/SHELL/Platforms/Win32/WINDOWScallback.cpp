@@ -1,4 +1,4 @@
-/** Copyright (C) 2008 Josh Ventura
+/** Copyright (C) 2008-2017 Josh Ventura
 *** Copyright (C) 2013 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
@@ -25,10 +25,12 @@ using std::map;
 
 #include "../General/PFwindow.h"
 #include "WINDOWScallback.h"
-#include "Universal_System/CallbackArrays.h" // For those damn vk_ constants.
 
+#include "Universal_System/CallbackArrays.h" // For those damn vk_ constants.
 #include "Universal_System/instance_system.h"
 #include "Universal_System/instance.h"
+
+#include "Platforms/platforms_mandatory.h"
 
 #ifndef WM_MOUSEHWHEEL
   #define WM_MOUSEHWHEEL 0x020E
@@ -45,27 +47,30 @@ void draw_clear(int col);
 void screen_set_viewport(gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height);
 }
 
+namespace enigma_win32 {
+  bool game_window_focused = true;
+}
+
 namespace enigma
 {
+  extern HWND hWnd;
+  extern HDC window_hDC;
+
   using enigma_user::keyboard_key;
   using enigma_user::keyboard_lastkey;
   using enigma_user::keyboard_lastchar;
   using enigma_user::keyboard_string;
-  extern char mousestatus[3],last_mousestatus[3],keybdstatus[256],last_keybdstatus[256];
-  map<int,int> keybdmap;
-  extern int windowX, windowY, windowWidth, windowHeight, windowColor;
-  extern int viewScale;
-  extern double scaledWidth, scaledHeight;
-  extern char* currentCursor;
-  extern HWND hWnd;
-  extern HDC window_hDC;
-  extern LONG_PTR getwindowstyle();
+
   extern void setwindowsize();
+
+  extern char mousestatus[3],last_mousestatus[3],keybdstatus[256],last_keybdstatus[256];
+  extern int windowX, windowY, windowColor;
+  extern char* currentCursor;
   extern unsigned int pausedSteps;
-  extern bool gameWindowFocused, treatCloseAsEscape;
+
+  static RECT tempWindow;
   static short hdeltadelta = 0, vdeltadelta = 0;
-  int tempLeft = 0, tempTop = 0, tempRight = 0, tempBottom = 0, tempWidth, tempHeight;
-  RECT tempWindow;
+  static int tempLeft = 0, tempTop = 0, tempRight = 0, tempBottom = 0, tempWidth, tempHeight;
 
   LRESULT CALLBACK (*touch_extension_callback)(HWND hWndParameter, UINT message, WPARAM wParam, LPARAM lParam);
   void (*WindowResizedCallback)();
@@ -95,7 +100,7 @@ namespace enigma
 
       case WM_SETFOCUS:
         input_initialize();
-        gameWindowFocused = true;
+        enigma_win32::game_window_focused = true;
         pausedSteps = 0;
         return 0;
 
@@ -110,7 +115,7 @@ namespace enigma
             last_mousestatus[i] = mousestatus[i];
             mousestatus[i] = 0;
         }
-        gameWindowFocused = false;
+        enigma_win32::game_window_focused = false;
         return 0;
         
       case WM_SIZE:
@@ -153,7 +158,7 @@ namespace enigma
         if (viewScale > 0) { //Fixed Scale, this is GM8.1 behaviour
           RECT c;
           c.left = 0; c.top = 0; c.right = scaledWidth; c.bottom = scaledHeight;
-          AdjustWindowRect(&c, getwindowstyle(), false);
+          AdjustWindowRect(&c, GetWindowLongPtr(enigma::hWnd, GWL_EXSTYLE), false);
         
           LPMINMAXINFO lpMinMaxInfo = (LPMINMAXINFO) lParam;
           lpMinMaxInfo->ptMinTrackSize.x = c.right-c.left;
@@ -248,7 +253,6 @@ namespace enigma
         return 1L; 
       
       case WM_PAINT:
-
         DefWindowProc(hWndParameter, message, wParam, lParam);
         return 0;
 

@@ -16,45 +16,26 @@
 
 #include <windows.h>
 #include <wininet.h>
-#include "../General/PFsystem.h"
-
-namespace enigma {
-	extern bool gameWindowFocused;
-}
+#include "Platforms/General/PFsystem.h"
+#include "Platforms/platforms_mandatory.h"
+#include "WINDOWScallback.h"
 
 namespace enigma_user {
 
-string os_get_config() {
-
-}
-
-int os_get_info() {
-
-}
-
-string os_get_language() {
-
-}
-
-string os_get_region() {
-
-}
+int os_get_info()         { return {}; }
+string os_get_config()    { return {}; }
+string os_get_language()  { return {}; }
+string os_get_region()    { return {}; }
+void os_lock_orientation(bool enable) {}
+void os_powersave_enable(bool enable) {}
 
 bool os_is_network_connected() {
-	DWORD dwFlags;
-	return InternetGetConnectedState( &dwFlags, NULL );
+	DWORD dwFlags = 0;
+	return InternetGetConnectedState(&dwFlags, NULL);
 }
 
 bool os_is_paused() {
-	return !enigma::gameWindowFocused;
+	return !enigma_win32::game_window_focused && enigma::freezeOnLoseFocus;
 }
 
-void os_lock_orientation(bool enable) {
-
-}
-
-void os_powersave_enable(bool enable) {
-
-}
-
-}
+}  // namespace enigma_user

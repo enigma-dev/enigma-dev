@@ -277,13 +277,13 @@ void show_info(string info, int bgcolor, int left, int top, int width, int heigh
     if (showBorder) {
       flags |= WS_BORDER | WS_DLGFRAME | WS_CAPTION;
     }
-    if (stayOnTop) {
-      flags |= DS_MODALFRAME; // Same as WS_EX_TOPMOST
-    }
     if (allowResize) {
       flags |= WS_SIZEBOX;
     }
-
+    if (stayOnTop) {
+      flags |= DS_MODALFRAME; // Same as WS_EX_TOPMOST
+    }
+  
     parent = CreateWindow("infodialog", TEXT(caption.c_str()),
       flags, left, top, width, height, enigma::hWnd, 0, enigma::hInstance, 0);
 

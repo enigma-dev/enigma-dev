@@ -1,4 +1,5 @@
-/** Copyright (C) 2008-2011 IsmAvatar <cmagicj@nni.com>, Josh Ventura
+/** Copyright (C) 2008-2017 Josh Ventura
+*** Copyright (C) 2008-2011 IsmAvatar <cmagicj@nni.com>
 *** Copyright (C) 2014 Seth N. Hetu
 ***
 *** This file is a part of the ENIGMA Development Environment.
@@ -43,11 +44,9 @@ using namespace std;
 using namespace enigma::x11;
 
 namespace enigma {
-  bool isVisible = true, isMinimized = false, isMaximized = false, stayOnTop = false, windowAdapt = true;
+  bool windowAdapt = true;
   int regionWidth = 0, regionHeight = 0, windowWidth = 0, windowHeight = 0;
   double scaledWidth = 0, scaledHeight = 0;
-  extern bool isSizeable, showBorder, showIcons, freezeOnLoseFocus, isFullScreen;
-  extern int viewScale, windowColor;
     
   void setwindowsize(int forceX=-1, int forceY=-1)
   {
@@ -103,6 +102,46 @@ namespace enigma {
   }
 }
 
+namespace enigma_user {
+
+int window_get_region_width() {
+  return enigma::regionWidth;
+}
+
+int window_get_region_height() {
+  return enigma::regionHeight;
+}
+
+int window_get_region_width_scaled() {
+  return enigma::scaledWidth;
+}
+
+int window_get_region_height_scaled() {
+  return enigma::scaledHeight;
+}
+
+void window_set_region_scale(double scale, bool adaptwindow) {
+  enigma::viewScale = int(scale*100);
+  enigma::windowAdapt = adaptwindow;
+  enigma::setwindowsize();
+}
+
+double window_get_region_scale() {
+  return enigma::viewScale/100.0;
+}
+
+void window_set_region_size(int w, int h, bool adaptwindow) {
+  if (w <= 0 || h <= 0) return;
+
+  enigma::regionWidth = w;
+  enigma::regionHeight = h;
+  enigma::windowAdapt = adaptwindow;
+  enigma::setwindowsize();
+  window_center();
+}
+
+}
+
 //////////
 // INIT //
 //////////
@@ -130,8 +169,6 @@ void Sleep(int ms)
 	if(ms>0)	usleep(ms%1000*1000);
 }
 
-int visx = -1, visy = -1;
-
 namespace enigma_user
 {
 
@@ -139,12 +176,6 @@ void window_set_visible(bool visible)
 {
   if (visible) {
     XMapRaised(disp,win);
-    //TODO: Move to bridges or some shit this is the last remaining GL call in XLIB
-    //#include <GL/glx.h>
-    //GLXContext glxc = glXGetCurrentContext();
-    //glXMakeCurrent(disp,win,glxc);
-    if(visx != -1 && visy != -1)
-      window_set_position(visx,visy);
   } else {
     XUnmapWindow(disp, win);
   }
@@ -194,15 +225,62 @@ enum {
   _NET_WM_STATE_TOGGLE
 };
 
-typedef struct
-            {
-              unsigned long   flags;
-              unsigned long   functions;
-              unsigned long   decorations;
-              long            inputMode;
-              unsigned long   status;
-            } Hints;
+typedef struct {
+  unsigned long   flags;
+  unsigned long   functions;
+  unsigned long   decorations;
+  long            inputMode;
+  unsigned long   status;
+} Hints;
 
+
+static int getWindowDimension(int i)
+{
+	XFlush(disp);
+	XWindowAttributes wa;
+	XGetWindowAttributes(disp,win,&wa);
+	if(i == 2) return wa.width;
+	if(i == 3) return wa.height;
+	Window root, parent, *child;
+	uint children;
+	XQueryTree(disp,win,&root,&parent,&child,&children);
+	XWindowAttributes pwa;
+	XGetWindowAttributes(disp,parent,&pwa);
+	return i?(i==1?pwa.y+wa.y:-1):pwa.x+wa.x;
+}
+
+template<int count> static bool windowHasAtom(const Atom (&atom)[count]) {
+  bool res = false;
+	Atom wmState = XInternAtom(disp, "_NET_WM_STATE", False);
+  
+	//Return types, not really used.
+	Atom actualType;
+	int actualFormat;
+	unsigned long bytesAfterReturn;
+
+	//These are used.
+	unsigned long numItems;
+	unsigned char* data = NULL;
+
+	if (XGetWindowProperty(disp, win, wmState, 0, LONG_MAX, False,
+          AnyPropertyType, &actualType, &actualFormat, &numItems,
+          &bytesAfterReturn, &data) == Success) {
+		for (unsigned long i = 0; i < numItems; ++i) {
+      for (int j = 0; j < count; ++j) {
+        if (atom[j] == reinterpret_cast<unsigned long*>(data)[i]) {
+          res = true;
+          break;
+        }
+      }
+		}
+	}
+
+	// Reclaim memory.
+	if (data) {
+		XFree(data);
+	}
+	return res;
+}
 
 namespace enigma_user
 {
@@ -213,9 +291,6 @@ int window_mouse_get_x()  { return getMouse(2); }
 int window_mouse_get_y()  { return getMouse(3); }
 
 void window_set_stayontop(bool stay) {
-  if (enigma::stayOnTop == stay) return;
-  enigma::stayOnTop = stay;
-  
   Atom wmState = XInternAtom(disp, "_NET_WM_STATE", False);
   Atom aStay = XInternAtom(disp,"_NET_WM_STATE_ABOVE", False);
   XEvent xev;
@@ -232,7 +307,8 @@ void window_set_stayontop(bool stay) {
 }
 
 bool window_get_stayontop() {
-  return enigma::stayOnTop;
+  Atom a[] = {XInternAtom(disp,"_NET_WM_STATE_ABOVE", False)};
+  return windowHasAtom(a);
 }
 
 void window_set_sizeable(bool sizeable) {
@@ -252,9 +328,6 @@ bool window_get_sizeable() {
 }
 
 void window_set_showborder(bool show) {
-  if (enigma::showBorder == show) return;
-  enigma::showBorder = show;
-  
   Atom property = XInternAtom(disp,"_MOTIF_WM_HINTS",True);
   if (!show) {
     Hints   hints;
@@ -267,7 +340,8 @@ void window_set_showborder(bool show) {
 }
 
 bool window_get_showborder() {
-  return enigma::showBorder;
+  Atom a[] = {XInternAtom(disp,"_NET_WM_STATE_ABOVE", False)};
+  return windowHasAtom(a);
 }
 
 void window_set_showicons(bool show) {
@@ -294,8 +368,6 @@ bool window_get_showicons() {
 }
 
 void window_set_minimized(bool minimized) {
-  if (enigma::isMinimized == minimized) return;
-
   XClientMessageEvent ev;
   Atom prop;
 
@@ -309,14 +381,17 @@ void window_set_minimized(bool minimized) {
   ev.format = 32;
   ev.data.l[0] = minimized ? IconicState : NormalState;
   XSendEvent(disp, RootWindow(disp, 0), False, SubstructureRedirectMask|SubstructureNotifyMask,(XEvent *)&ev);
-  enigma::isMinimized = minimized;
+}
+
+bool window_get_minimized() {
+  Atom a[] = {XInternAtom(disp, "_NET_WM_STATE_HIDDEN", False)};
+	return windowHasAtom(a);
 }
 
 void window_set_maximized(bool maximized) {
-  if (enigma::isMaximized == maximized) return;
   XClientMessageEvent ev;
 
-  if (maximized == true){
+  if (maximized) {
     Atom wm_state, max_horz, max_vert;
     wm_state = XInternAtom(disp, "_NET_WM_STATE", False);
     if (wm_state == None) return;
@@ -332,8 +407,9 @@ void window_set_maximized(bool maximized) {
     ev.data.l[0] = _NET_WM_STATE_ADD;
     ev.data.l[1] = max_horz;
     ev.data.l[2] = max_vert;
-    XSendEvent(disp, RootWindow(disp, 0), False, SubstructureRedirectMask|SubstructureNotifyMask,(XEvent *)&ev);
-  }else{
+    XSendEvent(disp, RootWindow(disp, 0), False,
+               SubstructureRedirectMask | SubstructureNotifyMask, (XEvent*)&ev);
+  } else {
     Atom prop;
     prop = XInternAtom(disp, "WM_CHANGE_STATE", False);
     if (prop == None) return;
@@ -344,17 +420,15 @@ void window_set_maximized(bool maximized) {
     ev.message_type = prop;
     ev.format = 32;
     ev.data.l[0] = NormalState;
-    XSendEvent(disp, RootWindow(disp, 0), False, SubstructureRedirectMask|SubstructureNotifyMask,(XEvent *)&ev);
+    XSendEvent(disp, RootWindow(disp, 0), False,
+               SubstructureRedirectMask|SubstructureNotifyMask,(XEvent *)&ev);
   }
-  enigma::isMaximized = maximized;
 }
 
-bool window_get_minimized() { 
-	return enigma::isMinimized;
-}
-
-bool window_get_maximized() { 
-  return enigma::isMaximized;
+bool window_get_maximized() {
+  Atom maximized[] = {XInternAtom(disp, "_NET_WM_STATE_MAXIMIZED_VERT", False),
+                      XInternAtom(disp, "_NET_WM_STATE_MAXIMIZED_HORZ", False)};
+	return windowHasAtom(maximized);
 }
 
 void window_default(bool center_size)
@@ -409,29 +483,9 @@ void display_mouse_set(double x,double y) {
 	XWarpPointer(disp,None,DefaultRootWindow(disp),0,0,0,0,(int)x,(int)y);
 }
 
-}
-
 ////////////
 // WINDOW //
 ////////////
-
-static int getWindowDimension(int i)
-{
-	XFlush(disp);
-	XWindowAttributes wa;
-	XGetWindowAttributes(disp,win,&wa);
-	if(i == 2) return wa.width;
-	if(i == 3) return wa.height;
-	Window root, parent, *child;
-	uint children;
-	XQueryTree(disp,win,&root,&parent,&child,&children);
-	XWindowAttributes pwa;
-	XGetWindowAttributes(disp,parent,&pwa);
-	return i?(i==1?pwa.y+wa.y:-1):pwa.x+wa.x;
-}
-
-namespace enigma_user
-{
 
 //Getters
 int window_get_x()      { return getWindowDimension(0); }
@@ -448,9 +502,6 @@ void window_set_position(int x,int y)
 }
 void window_set_size(unsigned int w,unsigned int h) {
 	XResizeWindow(disp,win, w, h);
-  //enigma::windowWidth = w;
-  //enigma::windowHeight = h;
-  //enigma::setwindowsize(); //NOTE: I think this will also infinitely loop.
 }
 void window_set_rectangle(int x,int y,int w,int h) {
 	XMoveResizeWindow(disp, win, x, y, w, h);
@@ -469,14 +520,9 @@ void window_center()
 	XMoveWindow(disp,win,windowX,windowY);
 }
 
-}
-
 ////////////////
 // FULLSCREEN //
 ////////////////
-
-namespace enigma_user
-{
 
 void window_set_freezeonlosefocus(bool freeze)
 {
@@ -510,35 +556,9 @@ void window_set_fullscreen(bool full)
 	enigma::setwindowsize();
 }
 
-bool window_get_fullscreen()
-{
-	//return enigma::isFullScreen;
-	Atom wmState = XInternAtom(disp, "_NET_WM_STATE", False);
-	Atom aFullScreen = XInternAtom(disp,"_NET_WM_STATE_FULLSCREEN", False);
-	bool res = false;
-
-	//Return types, not really used.
-	Atom actualType;
-	int actualFormat;
-	unsigned long bytesAfterReturn;
-
-	//These are used.
-	unsigned long numItems;
-	unsigned char* data = NULL;
-
-	if (XGetWindowProperty(disp, win, wmState, 0, LONG_MAX, False, AnyPropertyType, &actualType, &actualFormat, &numItems, &bytesAfterReturn, &data) == Success) {
-		for (unsigned long i=0; i<numItems; ++i) {
-			if (aFullScreen == reinterpret_cast<unsigned long *>(data)[i]) {
-				res = true;
-			}
-		}
-	}
-
-	//Reclaim memory.
-	if (data) {
-		XFree(data);
-	}
-	return res;
+bool window_get_fullscreen() {
+  Atom fullscreen[] = {XInternAtom(disp,"_NET_WM_STATE_FULLSCREEN", False)};
+  return windowHasAtom(fullscreen);
 }
 
 }
@@ -785,49 +805,6 @@ bool keyboard_check_direct(int key)
 
   key = XKeysymToKeycode(enigma::x11::disp, enigma::keyrmap[key]);
   return (keyState[key >> 3] & (1 << (key & 7)));
-}
-
-void window_set_region_scale(double scale, bool adaptwindow)
-{
-    enigma::viewScale = int(scale*100);
-    enigma::windowAdapt = adaptwindow;
-    enigma::setwindowsize();
-}
-
-double window_get_region_scale()
-{
-    return enigma::viewScale/100.0;
-}
-
-void window_set_region_size(int w, int h, bool adaptwindow)
-{
-    if (w <= 0 || h <= 0) return;
-
-    enigma::regionWidth = w;
-    enigma::regionHeight = h;
-    enigma::windowAdapt = adaptwindow;
-    enigma::setwindowsize();
-    window_center();
-}
-
-int window_get_region_width()
-{
-    return enigma::regionWidth;
-}
-
-int window_get_region_height()
-{
-    return enigma::regionHeight;
-}
-
-int window_get_region_width_scaled()
-{
-    return enigma::scaledWidth;
-}
-
-int window_get_region_height_scaled()
-{
-    return enigma::scaledHeight;
 }
 
 void window_set_color(int color)
