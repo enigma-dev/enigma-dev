@@ -52,13 +52,13 @@ int main(int argc,char** argv)
     perror("copy_bundle_cwd() error");
   enigma_user::working_directory = string( buffer );
   
-	enigma::parameters=new char* [argc];
-	for (int i=0; i<argc; i++)
-		enigma::parameters[i]=argv[i];
+  enigma::parameters=new char* [argc];
+  for (int i=0; i<argc; i++)
+    enigma::parameters[i]=argv[i];
 
    enigma::SetResizeFptr();
 
-	return mainO(argc, argv);
+  return mainO(argc, argv);
 }
 
 namespace enigma_user {
@@ -67,16 +67,6 @@ namespace enigma_user {
     if (ms > 1000) ::sleep(ms/1000);
     usleep((ms % 1000) *1000);
   };
-  
-  void game_end(int ret) {
-    //audiosystem_cleanup();
-    exit(ret);
-  }
-
-  void action_end_game()
-  {
-    game_end();
-  }
   
   int parameter_count(){
   // TODO

@@ -73,7 +73,6 @@ namespace enigma {
 
 namespace enigma {
   int current_room_speed;
-  int game_return = 0;
   bool use_pc;
   // Filetime.
   ULARGE_INTEGER time_offset_ft;
@@ -284,6 +283,9 @@ int WINAPI WinMain(HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,i
     while (!bQuit)
     {
         using enigma::current_room_speed;
+        
+        if (enigma::game_isending)
+          PostQuitMessage(enigma::game_return);
 
         // Update current time.
         enigma::update_current_time();
@@ -368,7 +370,7 @@ int WINAPI WinMain(HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,i
           frames_count++;
         }
     }
-
+    
     enigma::game_ending();
     timeEndPeriod(minimum_resolution);
     enigma::DisableDrawing (enigma::hWnd, enigma::window_hDC, hRC);
@@ -533,10 +535,6 @@ std::string environment_get_variable(std::string name)
 
   return shorten( buffer );
 }
-
-void game_end(int ret) { PostQuitMessage(ret); }
-
-void action_end_game() { game_end(); }
 
 void action_webpage(const std::string &url)
 {

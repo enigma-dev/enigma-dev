@@ -19,8 +19,15 @@
 #ifndef ENIGMA_PLATFORM_MAIN
 #define ENIGMA_PLATFORM_MAIN
 
-namespace enigma_user
-{
+#include <string>
+
+namespace enigma {
+  extern bool game_isending;
+  extern int game_return;
+  int game_ending();
+}
+
+namespace enigma_user {
 
 extern std::string working_directory;
 extern std::string program_directory;
