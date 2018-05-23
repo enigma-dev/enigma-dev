@@ -63,6 +63,8 @@ namespace enigma //TODO: Find where this belongs
   {
     GetModuleFileName(NULL, exenamehere, 1024);
   }
+  
+  void Sleep(int ms) { Sleep(ms); }
 }
 
 namespace enigma {

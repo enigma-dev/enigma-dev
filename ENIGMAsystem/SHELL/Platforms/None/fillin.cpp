@@ -19,6 +19,16 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "fillin.h"
+
+#include "Platforms/platforms_mandatory.h"
+#include "Platforms/General/PFsystem.h"
+#include "Platforms/General/PFfilemanip.h"
+
+#include "Universal_System/var4.h"
+#include "Platforms/General/PFmain.h"
+#include "Universal_System/roomsystem.h"
+
 #include <unistd.h>
 #include <sys/resource.h>
 #include <sys/stat.h>
@@ -30,15 +40,6 @@
 #include <map>
 #include <stdlib.h> //getenv and system
 
-#include "Platforms/platforms_mandatory.h"
-#include "../General/PFsystem.h"
-#include "../General/PFfilemanip.h"
-
-#include "fillin.h"
-
-#include "Universal_System/var4.h"
-#include "Universal_System/CallbackArrays.h"
-#include "Universal_System/roomsystem.h"
 
 #include <time.h>
 
@@ -317,32 +318,6 @@ int window_get_cursor()
   return enigma::cursorInt;
 }
 
-void keyboard_wait()
-{
-}
-
-void keyboard_set_map(int key1, int key2)
-{
-}
-
-int keyboard_get_map(int key)
-{
-  return key;
-}
-
-void keyboard_unset_map()
-{
-}
-
-void keyboard_clear(const int key)
-{
-}
-
-bool keyboard_check_direct(int key)
-{
-  return false;
-}
-
 void window_set_region_scale(double scale, bool adaptwindow)
 {
 }
@@ -422,14 +397,6 @@ namespace enigma
 namespace enigma
 {
   extern int windowColor;
-
-  void input_initialize()
-  {
-  }
-
-  void input_push()
-  {
-  }
 }
 
 //TODO: Implement pause events

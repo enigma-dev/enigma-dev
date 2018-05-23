@@ -19,6 +19,18 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "XLIBmain.h"
+#include "XLIBwindow.h"
+#include "LINUXjoystick.h"
+
+#include "Platforms/General/PFsystem.h"
+#include "Platforms/General/PFmain.h"
+#include "Platforms/platforms_mandatory.h"
+#include "Platforms/General/PFmain.h"
+
+#include "Universal_System/var4.h"
+#include "Universal_System/roomsystem.h"
+
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <unistd.h>
@@ -27,19 +39,6 @@
 #include <string>
 #include <cstdlib>
 #include <stdlib.h> //getenv and system
-
-#include "Platforms/General/PFsystem.h"
-#include "Platforms/General/PFmain.h"
-#include "Platforms/platforms_mandatory.h"
-
-#include "XLIBmain.h"
-#include "XLIBwindow.h"
-#include "LINUXjoystick.h"
-
-#include "Universal_System/var4.h"
-#include "Universal_System/CallbackArrays.h"
-#include "Universal_System/roomsystem.h"
-
 #include <time.h>
 
 namespace enigma_user {
@@ -122,10 +121,10 @@ namespace enigma
         case ButtonPress: {
             if (e.xbutton.button < 4) enigma::mousestatus[e.xbutton.button == 1 ? 0 : 4-e.xbutton.button] = 1;
             else switch (e.xbutton.button) {
-              case 4: mouse_vscrolls++; break;
-              case 5: mouse_vscrolls--; break;
-              case 6: mouse_hscrolls++; break;
-              case 7: mouse_hscrolls--; break;
+              case 4: enigma_user::mouse_vscrolls++; break;
+              case 5: enigma_user::mouse_vscrolls--; break;
+              case 6: enigma_user::mouse_hscrolls++; break;
+              case 7: enigma_user::mouse_hscrolls--; break;
               default: ;
             }
           return 0;
@@ -133,10 +132,10 @@ namespace enigma
         case ButtonRelease: {
             if (e.xbutton.button < 4) enigma::mousestatus[e.xbutton.button == 1 ? 0 : 4-e.xbutton.button] = 0;
             else switch (e.xbutton.button) {
-              case 4: mouse_vscrolls++; break;
-              case 5: mouse_vscrolls--; break;
-              case 6: mouse_hscrolls++; break;
-              case 7: mouse_hscrolls--; break;
+              case 4: enigma_user::mouse_vscrolls++; break;
+              case 5: enigma_user::mouse_vscrolls--; break;
+              case 6: enigma_user::mouse_hscrolls++; break;
+              case 7: enigma_user::mouse_hscrolls--; break;
               default: ;
             }
           return 0;
@@ -151,6 +150,8 @@ namespace enigma
           return 0;
         }
         case FocusIn:
+          input_initialize();
+          init_joysticks();
           game_window_focused = true;
           pausedSteps = 0;
           return 0;
@@ -177,32 +178,6 @@ using namespace enigma::x11;
 namespace enigma
 {
   extern int windowColor;
-
-  void input_initialize()
-  {
-    //Clear the input arrays
-    for(int i=0;i<3;i++){
-      last_mousestatus[i]=0;
-      mousestatus[i]=0;
-    }
-    for(int i=0;i<256;i++){
-      last_keybdstatus[i]=0;
-      keybdstatus[i]=0;
-    }
-
-    init_joysticks();
-  }
-
-  void input_push()
-  {
-    for(int i=0;i<3;i++){
-      last_mousestatus[i] = mousestatus[i];
-    }
-    for(int i=0;i<256;i++){
-      last_keybdstatus[i] = keybdstatus[i];
-    }
-    mouse_hscrolls = mouse_vscrolls = 0;
-  }
 }
 
 //TODO: Implement pause events
