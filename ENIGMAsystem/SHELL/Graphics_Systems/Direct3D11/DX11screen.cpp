@@ -19,12 +19,12 @@
 #include <cstdio>
 #include "Bridges/General/DX11Context.h"
 #include "Direct3D11Headers.h"
-#include "../General/GSbackground.h"
-#include "../General/GSscreen.h"
-#include "../General/GSd3d.h"
-#include "../General/GSmatrix.h"
-#include "../General/GStextures.h"
-#include "../General/GScolors.h"
+#include "Graphics_Systems/General/GSbackground.h"
+#include "Graphics_Systems/General/GSscreen.h"
+#include "Graphics_Systems/General/GSd3d.h"
+#include "Graphics_Systems/General/GSmatrix.h"
+#include "Graphics_Systems/General/GStextures.h"
+#include "Graphics_Systems/General/GScolors.h"
 
 using namespace std;
 
@@ -89,7 +89,7 @@ static inline void draw_back()
 				background_x[back_current] += background_hspeed[back_current];
 				background_y[back_current] += background_vspeed[back_current];
 	            if (background_htiled[back_current] || background_vtiled[back_current]) {
-	                draw_background_tiled_ext(background_index[back_current], background_x[back_current], background_y[back_current], background_xscale[back_current], 
+	                draw_background_tiled_ext(background_index[back_current], background_x[back_current], background_y[back_current], background_xscale[back_current],
 						background_xscale[back_current], background_coloring[back_current], background_alpha[back_current], background_htiled[back_current], background_vtiled[back_current]);
 	            } else {
 	                draw_background_ext(background_index[back_current], background_x[back_current], background_y[back_current], background_xscale[back_current], background_xscale[back_current], 0, background_coloring[back_current], background_alpha[back_current]);
@@ -126,7 +126,7 @@ void screen_redraw()
     {
 		screen_set_viewport(0, 0, window_get_region_width(), window_get_region_height());
 		d3d_set_projection_ortho(0, 0, window_get_region_width(), window_get_region_height(), 0);
-	
+
 		if (background_showcolor)
 		{
 			draw_clear(background_color);
@@ -278,7 +278,7 @@ void screen_redraw()
 			screen_set_viewport(view_xport[vc], view_yport[vc],
 				(window_get_region_width_scaled() - view_xport[vc]), (window_get_region_height_scaled() - view_yport[vc]));
 			d3d_set_projection_ortho(view_xview[vc], view_wview[vc] + view_xview[vc], view_yview[vc], view_hview[vc] + view_yview[vc], 0);
-				
+
 			if (background_showcolor && view_first)
 			{
 				draw_clear(background_color);
@@ -392,10 +392,10 @@ void screen_init()
 {
 	enigma::gui_width = window_get_region_width();
 	enigma::gui_height = window_get_region_height();
-	
+
 	//d3dmgr->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
 	//d3dmgr->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
-	
+
     if (!view_enabled)
     {
 		//d3dmgr->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);

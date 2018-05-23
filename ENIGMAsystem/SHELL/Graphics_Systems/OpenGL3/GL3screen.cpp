@@ -17,14 +17,14 @@
 
 #include <string>
 #include <cstdio>
-#include "../General/OpenGLHeaders.h"
-#include "../General/GStextures.h"
-#include "../General/GStiles.h"
-#include "../General/GSbackground.h"
-#include "../General/GSscreen.h"
-#include "../General/GSd3d.h"
-#include "../General/GSmatrix.h"
-#include "../General/GScolors.h"
+#include "Graphics_Systems/General/OpenGLHeaders.h"
+#include "Graphics_Systems/General/GStextures.h"
+#include "Graphics_Systems/General/GStiles.h"
+#include "Graphics_Systems/General/GSbackground.h"
+#include "Graphics_Systems/General/GSscreen.h"
+#include "Graphics_Systems/General/GSd3d.h"
+#include "Graphics_Systems/General/GSmatrix.h"
+#include "Graphics_Systems/General/GScolors.h"
 #include "Bridges/General/GL3Context.h"
 
 using namespace std;
@@ -34,7 +34,6 @@ using namespace std;
 #include "Universal_System/background.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/estring.h"
-
 
 #include "Universal_System/roomsystem.h"
 #include "Universal_System/instance_system.h"

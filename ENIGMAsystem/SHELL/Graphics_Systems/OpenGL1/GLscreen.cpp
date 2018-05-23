@@ -17,15 +17,15 @@
 
 #include <string>
 #include <cstdio>
-#include "../General/OpenGLHeaders.h"
-#include "../General/GStextures.h"
-#include "../General/GSbackground.h"
-#include "../General/GSscreen.h"
-#include "../General/GStiles.h"
-#include "../General/GSmodel.h"
-#include "../General/GSd3d.h"
-#include "../General/GSmatrix.h"
-#include "../General/GScolors.h"
+#include "Graphics_Systems/General/OpenGLHeaders.h"
+#include "Graphics_Systems/General/GStextures.h"
+#include "Graphics_Systems/General/GSbackground.h"
+#include "Graphics_Systems/General/GSscreen.h"
+#include "Graphics_Systems/General/GStiles.h"
+#include "Graphics_Systems/General/GSmodel.h"
+#include "Graphics_Systems/General/GSd3d.h"
+#include "Graphics_Systems/General/GSmatrix.h"
+#include "Graphics_Systems/General/GScolors.h"
 
 using namespace std;
 

@@ -19,13 +19,13 @@
 #include <cstdio>
 #include "Bridges/General/DX9Context.h"
 #include "Direct3D9Headers.h"
-#include "../General/GSbackground.h"
-#include "../General/GStiles.h"
-#include "../General/GSscreen.h"
-#include "../General/GSd3d.h"
-#include "../General/GSmatrix.h"
-#include "../General/GStextures.h"
-#include "../General/GScolors.h"
+#include "Graphics_Systems/General/GSbackground.h"
+#include "Graphics_Systems/General/GStiles.h"
+#include "Graphics_Systems/General/GSscreen.h"
+#include "Graphics_Systems/General/GSd3d.h"
+#include "Graphics_Systems/General/GSmatrix.h"
+#include "Graphics_Systems/General/GStextures.h"
+#include "Graphics_Systems/General/GScolors.h"
 
 using namespace std;
 
