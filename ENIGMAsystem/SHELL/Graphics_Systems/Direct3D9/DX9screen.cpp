@@ -19,6 +19,7 @@
 #include <cstdio>
 #include "Bridges/General/DX9Context.h"
 #include "Direct3D9Headers.h"
+#include "../General/GSsprite.h"
 #include "../General/GSbackground.h"
 #include "../General/GSscreen.h"
 #include "../General/GSd3d.h"
@@ -296,6 +297,7 @@ void screen_redraw()
     draw_gui();
   }
 
+  draw_sprite(cursor_sprite, 0, mouse_x, mouse_y);
   d3dmgr->EndScene();
 
   ///TODO: screen_refresh() shouldn't be in screen_redraw(). They are separate functions for a reason.

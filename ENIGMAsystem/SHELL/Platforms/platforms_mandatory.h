@@ -115,10 +115,11 @@ unsigned long get_timer(); // number of microseconds since the game started
 // TODO: cursor functions are absolutely not necessary; move out
 int window_set_cursor(int c);
 int window_get_cursor();
+
+extern int cursor_sprite;
 inline void action_set_cursor(int spr, bool c) {
-  // TODO: if spr exists should create a sprite cursor, game maker allows
-  // both the sprite cursor and system cursor to be visible at the same time
-  window_set_cursor(c? 0 : -1); // default system cursor
+  cursor_sprite = spr;
+  window_set_cursor(c ? 0 : -1);
 }
 
 }  // namespace enigma_user
