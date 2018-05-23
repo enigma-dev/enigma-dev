@@ -307,7 +307,9 @@ void screen_redraw()
     // glReadPixels(0, 0, width, height, GL_BGRA, GL_UNSIGNED_BYTE, pixels);
   }
 
-  draw_sprite(cursor_sprite, 0, mouse_x, mouse_y);
+  if (sprite_exists(cursor_sprite))
+    draw_sprite(cursor_sprite, 0, mouse_x, mouse_y);
+
   ///TODO: screen_refresh() shouldn't be in screen_redraw(). They are separate functions for a reason.
   if (bound_framebuffer==0 || enigma::msaa_fbo != 0) { screen_refresh(); }
 }

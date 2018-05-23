@@ -300,7 +300,9 @@ void screen_redraw()
 
     draw_gui();
   }
-  draw_sprite(cursor_sprite, 0, mouse_x, mouse_y);
+  if (sprite_exists(cursor_sprite))
+    draw_sprite(cursor_sprite, 0, mouse_x, mouse_y);
+
   oglmgr->EndScene();
 
   if (enigma::msaa_fbo != 0) {
