@@ -84,16 +84,7 @@ namespace enigma {
   LARGE_INTEGER time_current_pc;
   LARGE_INTEGER frequency_pc;
   // Timing functions.
-  long clamp(LONGLONG value, long min, long max)
-  {
-    if (value < min) {
-      return min;
-    }
-    if (value > max) {
-      return max;
-    }
-    return long(value);
-  }
+  
   void set_room_speed(int rs)
   {
     current_room_speed = rs;
