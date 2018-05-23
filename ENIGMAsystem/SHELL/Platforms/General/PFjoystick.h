@@ -16,12 +16,13 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-namespace enigma_user
-{
+#include <string>
+
+namespace enigma_user {
 
 bool joystick_load(int id);
 bool joystick_exists(int id);
-string joystick_name(int id);
+std::string joystick_name(int id);
 int joystick_axes(int id);
 int joystick_buttons(int id);
 bool joystick_has_pov(int id);

@@ -28,12 +28,16 @@
 
 #include "highscore_functions.h"
 #include "libEGMstd.h"
+
+#include "Platforms/General/PFwindow.h"
+
+#include "Graphics_Systems/General/GSscreen.h"
+
+#include "Widget_Systems/widgets_mandatory.h" // show_error
+
 #include <algorithm>
 #include <vector>
 #include <string>
-#include "CallbackArrays.h"
-
-#include "Widget_Systems/widgets_mandatory.h" // show_error
 
 namespace enigma_user {
 extern double score;
@@ -79,10 +83,6 @@ static bool cmp_highscore( const playerScore& a, const playerScore& b ) {
     }
 
 }
-
-#include <Universal_System/roomsystem.h>
-#include <Universal_System/CallbackArrays.h>
-#include <Graphics_Systems/graphics_mandatory.h>
 
 namespace enigma_user
 {

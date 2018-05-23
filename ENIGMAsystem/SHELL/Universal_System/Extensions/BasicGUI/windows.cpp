@@ -26,7 +26,7 @@ using std::map;
 using std::deque;
 
 #include "Universal_System/var4.h"
-#include "Universal_System/CallbackArrays.h" //For mouse_check_button
+#include "Platforms/General/PFmain.h" //For mouse_check_button
 #include "Universal_System/resource_data.h" //For script_execute
 //#include "Universal_System/sprites_internal.h"
 #include "Graphics_Systems/General/GSsprite.h"

@@ -63,7 +63,7 @@
 #include "libEGMstd.h"
 
 #include "Universal_System/switch_stuff.h"
-#include "Universal_System/CallbackArrays.h"
+#include "Platforms/General/PFmain.h"
 
 extern int amain();
 

@@ -24,7 +24,7 @@ using namespace std;
 #include "Universal_System/estring.h" // For string_replace_all
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
-#include "Universal_System/CallbackArrays.h" // For those damn vk_ constants.
+#include "Platforms/General/PFmain.h" // For those damn vk_ constants.
 
 #include "Platforms/platforms_mandatory.h"
 #include "Widget_Systems/widgets_mandatory.h"
@@ -748,38 +748,6 @@ void io_handle()
   enigma::update_mouse_variables();
 }
 
-void keyboard_wait()
-{
-  io_clear();
-  for (;;)
-  {
-    io_handle();
-    for (int i = 0; i < 255; i++)
-      if (enigma::keybdstatus[i])
-      {
-        io_clear();
-        return;
-      }
-    Sleep(10); // Sleep 1/100 second
-  }
-}
-
-void mouse_wait()
-{
-  for (;;)
-  {
-    io_handle();
-    for (int i = 0; i < 3; i++)
-      if (enigma::mousestatus[i])
-        return;
-    Sleep(10); // Sleep 1/100 second
-  }
-}
-
-void keyboard_clear(const int key)
-{
-    enigma::keybdstatus[key] = enigma::last_keybdstatus[key] = 0;
-}
 
 bool keyboard_check_direct(int key)
 {
@@ -885,34 +853,6 @@ void keyboard_set_scroll(bool on) {
     // Simulate a key release
     keybd_event( VK_SCROLL, 0x91, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
   }
-}
-
-static map<int, int> keybdmap;
-void keyboard_set_map(int key1, int key2) {
-  map<int, int>::iterator it = keybdmap.find(key1);
-  if (keybdmap.end() != it) {
-    it->second = key2;
-  } else {
-    keybdmap.insert(map<int, int>::value_type(key1, key2));
-  }
-}
-
-int keyboard_get_map(int key) {
-  map<int, int>::iterator it = keybdmap.find(key);
-  if (keybdmap.end() != it) {
-    return it->second;
-  } else {
-    return key;
-  }
-}
-
-void keyboard_unset_map() {
-  keybdmap.clear();
-}
-
-void mouse_clear(const int button)
-{
-  enigma::mousestatus[button] = enigma::last_mousestatus[button] = 0;
 }
 
 string clipboard_get_text()

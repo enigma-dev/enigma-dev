@@ -23,7 +23,7 @@ using std::to_string;
 using std::unordered_map;
 
 #include "Universal_System/var4.h"
-#include "Universal_System/CallbackArrays.h" //For mouse_check_button and keyboard_check_button
+#include "Platforms/General/PFmain.h" //For mouse_check_button and keyboard_check_button
 #include "Universal_System/resource_data.h" //For script_execute
 #include "Universal_System/estring.h" //For string manipulation
 #include "Platforms/General/PFwindow.h" //For clipboard

@@ -15,6 +15,11 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+
+#include "LINUXjoystick.h"  
+#include "Platforms/General/PFwindow.h"  
+#include "Universal_System/scalar.h"
+
 #include <linux/joystick.h>
 #include <math.h>
 #include <unistd.h>
@@ -25,12 +30,8 @@
 #include <cstdlib>
 #include <iostream>
 #include <cmath>
+
 using namespace std;
-
-#include "LINUXjoystick.h"  
-#include "Universal_System/CallbackArrays.h"  
-#include "Universal_System/scalar.h"
-
 
 namespace enigma
 {

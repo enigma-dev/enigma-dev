@@ -17,6 +17,17 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
+#include "Platforms/General/PFmain.h" // For those damn vk_ constants, and io_clear().
+#include "Platforms/platforms_mandatory.h" // For type insurance
+
+#include "Universal_System/roomsystem.h"
+#include "Universal_System/globalupdate.h"
+
+#include "XLIBwindow.h" // Type insurance for non-mandatory functions
+#include "GameSettings.h" // ABORT_ON_ALL_ERRORS (MOVEME: this shouldn't be needed here)
+#include "XLIBwindow.h"
+#include "XLIBmain.h"
+
 #include <stdio.h> //printf, NULL
 #include <stdlib.h> //malloc
 #include <unistd.h> //usleep
@@ -29,13 +40,6 @@
 
 using namespace std;
 
-#include "Universal_System/CallbackArrays.h" // For those damn vk_ constants, and io_clear().
-#include "Universal_System/roomsystem.h"
-#include "Platforms/platforms_mandatory.h" // For type insurance
-#include "XLIBwindow.h" // Type insurance for non-mandatory functions
-#include "GameSettings.h" // ABORT_ON_ALL_ERRORS (MOVEME: this shouldn't be needed here)
-#include "XLIBwindow.h"
-#include "XLIBmain.h"
 #undef sleep
 
 #include <X11/Xlib.h>
@@ -672,8 +676,6 @@ namespace enigma {
   }
 }
 
-#include "Universal_System/globalupdate.h"
-
 namespace enigma_user
 {
 
@@ -699,49 +701,6 @@ int window_set_cursor(int c)
 int window_get_cursor()
 {
   return enigma::cursorInt;
-}
-
-void keyboard_wait()
-{
-  io_clear();
-  for (;;)
-  {
-    io_handle();
-    for (int i = 0; i < 255; i++)
-      if (enigma::keybdstatus[i])
-        return;
-    usleep(10000); // Sleep 1/100 second
-  }
-}
-
-void keyboard_set_map(int key1, int key2)
-{
-  std::map< int, int >::iterator it = enigma::keybdmap.find( key1 );
-  if ( enigma::keybdmap.end() != it ) {
-    it->second = key2;
-  } else {
-    enigma::keybdmap.insert( map< int, int >::value_type(key1, key2) );
-  }
-}
-
-int keyboard_get_map(int key)
-{
-  std::map< int, int >::iterator it = enigma::keybdmap.find( key );
-  if ( enigma::keybdmap.end() != it ) {
-    return it->second;
-  } else {
-    return key;
-  }
-}
-
-void keyboard_unset_map()
-{
-  enigma::keybdmap.clear();
-}
-
-void keyboard_clear(const int key)
-{
-  enigma::keybdstatus[key] = enigma::last_keybdstatus[key] = 0;
 }
 
 bool keyboard_check_direct(int key)

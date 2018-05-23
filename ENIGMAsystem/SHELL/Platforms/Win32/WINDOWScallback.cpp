@@ -26,7 +26,7 @@ using std::map;
 #include "../General/PFwindow.h"
 #include "WINDOWScallback.h"
 
-#include "Universal_System/CallbackArrays.h" // For those damn vk_ constants.
+#include "Platforms/General/PFmain.h" // For those damn vk_ constants.
 #include "Universal_System/instance_system.h"
 #include "Universal_System/instance.h"
 
@@ -36,8 +36,6 @@ using std::map;
   #define WM_MOUSEHWHEEL 0x020E
 #endif
 
-extern short mouse_hscrolls;
-extern short mouse_vscrolls;
 namespace enigma_user {
 extern int keyboard_key;
 extern int keyboard_lastkey;
@@ -229,13 +227,13 @@ namespace enigma
       }
       case WM_MOUSEWHEEL:
          vdeltadelta += (int)HIWORD(wParam);
-         mouse_vscrolls += vdeltadelta / WHEEL_DELTA;
+         enigma_user::mouse_vscrolls += vdeltadelta / WHEEL_DELTA;
          vdeltadelta %= WHEEL_DELTA;
          return 0;
 
       case WM_MOUSEHWHEEL:
          hdeltadelta += (int)HIWORD(wParam);
-         mouse_hscrolls += hdeltadelta / WHEEL_DELTA;
+         enigma_user::mouse_hscrolls += hdeltadelta / WHEEL_DELTA;
          hdeltadelta %= WHEEL_DELTA;
          return 0;
 
@@ -270,29 +268,5 @@ namespace enigma
   //return 0;
     }
     return DefWindowProc (hWndParameter, message, wParam, lParam);
-  }
-
-  void input_initialize()
-  {
-    //Clear the input arrays
-    for(int i=0;i<3;i++){
-      last_mousestatus[i]=0;
-      mousestatus[i]=0;
-    }
-    for(int i=0;i<256;i++){
-      last_keybdstatus[i]=0;
-      keybdstatus[i]=0;
-    }
-  }
-
-  void input_push()
-  {
-    for(int i=0;i<3;i++){
-      last_mousestatus[i] = mousestatus[i];
-    }
-    for(int i=0;i<256;i++){
-      last_keybdstatus[i] = keybdstatus[i];
-    }
-    mouse_hscrolls = mouse_vscrolls = 0;
   }
 }
