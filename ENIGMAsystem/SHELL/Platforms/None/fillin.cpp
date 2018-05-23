@@ -416,7 +416,6 @@ namespace enigma_user {
 
 namespace enigma
 {
-  int game_return = 0;
   void ENIGMA_events(void); //TODO: Synchronize this with Windows by putting these two in a single header.
 
   void (*WindowResizedCallback)();
@@ -437,8 +436,6 @@ namespace enigma
   void input_push()
   {
   }
-
-  int game_ending();
 }
 
 //TODO: Implement pause events
@@ -463,7 +460,6 @@ static inline long clamp(long value, long min, long max)
 }
 
 #include <unistd.h>
-static bool game_isending = false;
 int main(int argc,char** argv)
 {
     // Set the working_directory
@@ -495,7 +491,7 @@ int main(int argc,char** argv)
     time_offset_slowing.tv_nsec = time_offset.tv_nsec;
     int frames_count = 0;
 
-    while (!game_isending)
+    while (!enigma::game_isending)
     {
         using enigma::current_room_speed;
         clock_gettime(CLOCK_MONOTONIC, &time_current);
@@ -558,7 +554,6 @@ int main(int argc,char** argv)
     }
 
     enigma::game_ending();
-    //enigma::DisableDrawing();
     return enigma::game_return;
 }
 
@@ -611,15 +606,6 @@ void execute_program(string fname, string args, bool wait)
     printf("execute_program cannot be used as there is no command processor!");
     return;
   }
-}
-
-void game_end(int ret) {
-  game_isending = true;
-  enigma::game_return = ret;
-}
-
-void action_end_game() {
-  game_end();
 }
 
 int display_get_width() { return 0;}
