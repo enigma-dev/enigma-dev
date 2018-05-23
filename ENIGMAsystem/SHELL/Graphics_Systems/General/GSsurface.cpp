@@ -40,8 +40,8 @@ namespace enigma_user {
 extern int room_width, room_height/*, sprite_idmax*/;
 }
 
-#include "../General/GSprimitives.h"
-#include "../General/GSsurface.h"
+#include "GSprimitives.h"
+#include "GSsurface.h"
 
 
 namespace enigma_user

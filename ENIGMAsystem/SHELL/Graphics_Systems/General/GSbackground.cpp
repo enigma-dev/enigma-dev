@@ -18,10 +18,10 @@
 #include <cstddef>
 
 #include <math.h>
-#include "Graphics_Systems/General/GScolors.h"
-#include "Graphics_Systems/General/GSprimitives.h"
-#include "Graphics_Systems/General/GSbackground.h"
-#include "Graphics_Systems/General/GStextures.h"
+#include "GScolors.h"
+#include "GSprimitives.h"
+#include "GSbackground.h"
+#include "GStextures.h"
 #include "Universal_System/nlpo2.h"
 #include "Universal_System/background_internal.h"
 #include "Universal_System/sprites_internal.h"

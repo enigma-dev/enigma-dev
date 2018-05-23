@@ -20,10 +20,10 @@
 #include <string>
 using std::string;
 
-#include "../General/GScolors.h"
-#include "../General/GSsprite.h"
-#include "../General/GStextures.h"
-#include "../General/GSprimitives.h"
+#include "GScolors.h"
+#include "GSsprite.h"
+#include "GStextures.h"
+#include "GSprimitives.h"
 
 #include "Universal_System/nlpo2.h"
 #include "Universal_System/sprites.h"

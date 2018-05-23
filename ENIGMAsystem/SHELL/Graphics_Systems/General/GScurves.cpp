@@ -19,7 +19,6 @@
 #include <vector>
 #include <math.h>
 
-#include "OpenGLHeaders.h"
 #include "GScolors.h"
 #include "GScurves.h"
 //#include "GStextures.h"
@@ -35,7 +34,7 @@ namespace enigma{
 }
 
 int pr_curve_detail = 20;
-int pr_curve_mode = GL_LINE_STRIP;
+int pr_curve_mode = enigma_user::pr_linestrip;
 int pr_spline_points = 0;
 gs_scalar pr_curve_width = 1;
 
@@ -436,4 +435,3 @@ int draw_spline_optimized_end()
 }
 
 }
-

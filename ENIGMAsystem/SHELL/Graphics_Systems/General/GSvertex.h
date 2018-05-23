@@ -18,7 +18,6 @@
 #ifndef ENIGMA_GSVERTEX_H
 #define ENIGMA_GSVERTEX_H
 
-#include "../General/OpenGLHeaders.h"
 #include <vector>
 #include <utility>
 using std::vector;

@@ -21,11 +21,11 @@
 #include <cstdint>
 #include "libEGMstd.h"
 #include "Universal_System/var4.h"
-#include "../General/GScolors.h"
-#include "../General/GSfont.h"
-#include "../General/GStextures.h"
-#include "../General/GSprimitives.h"
-#include "../General/GSsprite.h"
+#include "GScolors.h"
+#include "GSfont.h"
+#include "GStextures.h"
+#include "GSprimitives.h"
+#include "GSsprite.h"
 
 #include "Universal_System/math_consts.h"
 #include "Universal_System/fonts_internal.h"
@@ -224,7 +224,7 @@ unsigned int string_height_ext(variant vstr, gs_scalar sep, gs_scalar w)
       if (character == ' ' or g.empty()) {
         width += slen;
       }
-      
+
       tw = 0;
       for (size_t c = i+1; c < str.length(); c++) {
         character = getUnicodeCharacter(str, c);
@@ -1318,4 +1318,3 @@ int draw_get_font() {
 }
 
 }
-
