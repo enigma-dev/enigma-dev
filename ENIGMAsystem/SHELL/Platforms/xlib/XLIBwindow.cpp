@@ -163,12 +163,6 @@ void gmw_init()
 	}
 }
 
-void Sleep(int ms)
-{
-	if(ms>=1000) sleep(ms/1000);
-	if(ms>0)	usleep(ms%1000*1000);
-}
-
 namespace enigma_user
 {
 

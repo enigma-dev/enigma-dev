@@ -25,6 +25,7 @@ namespace enigma {
   extern bool game_isending;
   extern int game_return;
   int game_ending();
+  long clamp(long value, long min, long max);
 }
 
 namespace enigma_user {

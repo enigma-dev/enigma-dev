@@ -15,8 +15,9 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-namespace enigma_user
-{
+#include <string>
+
+namespace enigma_user {
 
 // File attribute constants
 enum {
@@ -55,4 +56,4 @@ extern std::string working_directory;
 extern std::string program_directory;
 extern std::string temp_directory;
 
-}
+} //namespace enigma_user
