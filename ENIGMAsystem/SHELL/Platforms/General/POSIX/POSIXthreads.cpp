@@ -18,7 +18,8 @@
 
 #include "Universal_System/var4.h"
 #include "Universal_System/resource_data.h"
-#include "PFthreads.h"
+
+#include "Platforms/General/PFthreads.h"
 
 std::deque<ethread*> threads;
 

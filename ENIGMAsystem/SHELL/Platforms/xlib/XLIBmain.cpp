@@ -219,13 +219,6 @@ namespace enigma_user {
   }
 }
 
-static inline long clamp(long value, long min, long max)
-{
-  if (value < min) return min;
-  if (value > max) return max;
-  return value;
-}
-
 static void set_net_wm_pid(Window window) {
   pid_t pid = getpid();
   Atom cardinal = XInternAtom(disp, "CARDINAL", False);
@@ -325,7 +318,7 @@ int main(int argc,char** argv)
         clock_gettime(CLOCK_MONOTONIC, &time_current);
         {
             long passed_mcs = (time_current.tv_sec - time_offset.tv_sec)*1000000 + (time_current.tv_nsec/1000 - + time_offset.tv_nsec/1000);
-            passed_mcs = clamp(passed_mcs, 0, 1000000);
+            passed_mcs = enigma::clamp(passed_mcs, 0, 1000000);
             if (passed_mcs >= 1000000) { // Handle resetting.
 
                 enigma_user::fps = frames_count;
@@ -339,7 +332,7 @@ int main(int argc,char** argv)
         long last_mcs = 0;
         if (current_room_speed > 0) {
             spent_mcs = (time_current.tv_sec - time_offset_slowing.tv_sec)*1000000 + (time_current.tv_nsec/1000 - time_offset_slowing.tv_nsec/1000);
-            spent_mcs = clamp(spent_mcs, 0, 1000000);
+            spent_mcs = enigma::clamp(spent_mcs, 0, 1000000);
             long remaining_mcs = 1000000 - spent_mcs;
             long needed_mcs = long((1.0 - 1.0*frames_count/current_room_speed)*1e6);
             const int catchup_limit_ms = 50;
@@ -351,7 +344,7 @@ int main(int argc,char** argv)
                 // And if there is very heavy load once in a while, the game will only run too fast for catchup_limit ms.
                 time_offset_slowing.tv_nsec += 1000*(needed_mcs - (remaining_mcs + catchup_limit_ms*1000));
                 spent_mcs = (time_current.tv_sec - time_offset_slowing.tv_sec)*1000000 + (time_current.tv_nsec/1000 - time_offset_slowing.tv_nsec/1000);
-                spent_mcs = clamp(spent_mcs, 0, 1000000);
+                spent_mcs = enigma::clamp(spent_mcs, 0, 1000000);
                 remaining_mcs = 1000000 - spent_mcs;
                 needed_mcs = long((1.0 - 1.0*frames_count/current_room_speed)*1e6);
             }
