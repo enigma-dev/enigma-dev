@@ -6,7 +6,7 @@ void Sleep(int ms);
 } //namespace enigma
 
 namespace enigma_user {
-  inline void sleep(int ms);
+void sleep(int ms);
 } //namespace enigma_user
 
 #endif

@@ -12,5 +12,5 @@ void Sleep(int ms)
 } //namespace enigma
 
 namespace enigma_user {
-  inline void sleep(int ms) { enigma::Sleep(ms); }
+void sleep(int ms) { enigma::Sleep(ms); }
 } //namespace enigma_user
