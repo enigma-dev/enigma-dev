@@ -33,29 +33,28 @@ void input_push();
 namespace enigma_user {
 
 enum {
-  cr_default = 0,
-  cr_none = -1,
-  cr_arrow = -2,
-  cr_cross = -3,
-  cr_beam = -4,
-  cr_size_nesw = -6,
-  cr_size_ns = -7,
-  cr_size_nwse = -8,
-  cr_size_we = -9,
-  cr_uparrow = -10,
-  cr_hourglass = -11,
-  cr_drag = -12,
-  cr_nodrop = -13,
-  cr_hsplit = -14,
-  cr_vsplit = -15,
-  cr_multidrag = -16,
-  cr_sqlwait = -17,
-  cr_no = -18,
-  cr_appstart = -19,
-  cr_help = -20,
-  cr_handpoint = -21,
-  cr_size_all = -22
-};
+  cr_default    = 0,
+  cr_none       = -1,
+  cr_arrow      = -2,
+  cr_cross      = -3,
+  cr_beam       = -4,
+  cr_size_nesw  = -6,
+  cr_size_ns    = -7,
+  cr_size_nwse  = -8,
+  cr_size_we    = -9,
+  cr_uparrow    = -10,
+  cr_hourglass  = -11,
+  cr_drag       = -12,
+  cr_nodrop     = -13,
+  cr_hsplit     = -14,
+  cr_vsplit     = -15,
+  cr_multidrag  = -16,
+  cr_sqlwait    = -17,
+  cr_no         = -18,
+  cr_appstart   = -19,
+  cr_help       = -20,
+  cr_handpoint  = -21,
+  cr_size_all   = -22
 
 enum { display_landscape, display_landscape_flipped, display_portrait, display_portrait_flipped };
 
