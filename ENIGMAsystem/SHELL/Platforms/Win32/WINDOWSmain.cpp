@@ -63,6 +63,8 @@ namespace enigma //TODO: Find where this belongs
   {
     GetModuleFileName(NULL, exenamehere, 1024);
   }
+
+  void Sleep(int ms) { ::Sleep(ms); }
 }
 
 namespace enigma {
@@ -84,16 +86,7 @@ namespace enigma {
   LARGE_INTEGER time_current_pc;
   LARGE_INTEGER frequency_pc;
   // Timing functions.
-  long clamp(LONGLONG value, long min, long max)
-  {
-    if (value < min) {
-      return min;
-    }
-    if (value > max) {
-      return max;
-    }
-    return long(value);
-  }
+
   void set_room_speed(int rs)
   {
     current_room_speed = rs;
@@ -286,7 +279,7 @@ int WINAPI WinMain(HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,i
     while (!bQuit)
     {
         using enigma::current_room_speed;
-        
+
         if (enigma::game_isending)
           PostQuitMessage(enigma::game_return);
 
@@ -373,7 +366,7 @@ int WINAPI WinMain(HINSTANCE hInstance,HINSTANCE hPrevInstance,LPSTR lpCmdLine,i
           frames_count++;
         }
     }
-    
+
     enigma::game_ending();
     timeEndPeriod(minimum_resolution);
     enigma::DisableDrawing (enigma::hWnd, enigma::window_hDC, hRC);

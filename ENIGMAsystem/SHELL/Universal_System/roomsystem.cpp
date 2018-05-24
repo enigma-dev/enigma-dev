@@ -37,7 +37,7 @@
 #include "roomsystem.h"
 #include "depth_draw.h"
 
-#include "CallbackArrays.h"
+#include "Platforms/General/PFmain.h"
 
 #include "lives.h"
 #include <string.h>
