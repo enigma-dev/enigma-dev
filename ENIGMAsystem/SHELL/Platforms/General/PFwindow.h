@@ -55,6 +55,7 @@ enum {
   cr_help       = -20,
   cr_handpoint  = -21,
   cr_size_all   = -22
+};
 
 enum { display_landscape, display_landscape_flipped, display_portrait, display_portrait_flipped };
 
