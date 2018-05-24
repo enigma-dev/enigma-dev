@@ -39,8 +39,6 @@ namespace enigma //TODO: Find where this belongs
   extern HANDLE mainthread;
 }
 
-void windowsystem_write_exename(char* exenamehere);
-
 namespace enigma_user
 {
 
