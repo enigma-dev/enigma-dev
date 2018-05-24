@@ -19,6 +19,7 @@
 #include <cstdio>
 #include "Graphics_Systems/General/OpenGLHeaders.h"
 #include "Graphics_Systems/General/GStextures.h"
+#include "Graphics_Systems/General/GSsprite.h"
 #include "Graphics_Systems/General/GSbackground.h"
 #include "Graphics_Systems/General/GSscreen.h"
 #include "Graphics_Systems/General/GStiles.h"
@@ -42,6 +43,7 @@ using namespace std;
 #include "Universal_System/instance_system.h"
 #include "Universal_System/graphics_object.h"
 #include "Universal_System/depth_draw.h"
+#include "Platforms/General/PFwindow.h"
 #include "Platforms/platforms_mandatory.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 #include <limits>
@@ -308,6 +310,9 @@ void screen_redraw()
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo);
     // glReadPixels(0, 0, width, height, GL_BGRA, GL_UNSIGNED_BYTE, pixels);
   }
+
+  if (sprite_exists(cursor_sprite))
+    draw_sprite(cursor_sprite, 0, mouse_x, mouse_y);
 
   ///TODO: screen_refresh() shouldn't be in screen_redraw(). They are separate functions for a reason.
   if (bound_framebuffer==0 || enigma::msaa_fbo != 0) { screen_refresh(); }

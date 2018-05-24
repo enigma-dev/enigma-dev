@@ -24,7 +24,7 @@ using namespace std;
 #include "Universal_System/estring.h" // For string_replace_all
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
-#include "Universal_System/CallbackArrays.h" // For those damn vk_ constants.
+#include "Platforms/General/PFmain.h" // For those damn vk_ constants.
 
 #include "Platforms/platforms_mandatory.h"
 #include "Widget_Systems/widgets_mandatory.h"
@@ -44,7 +44,7 @@ namespace enigma
   int windowWidth = 0, windowHeight = 0;
   int cursorInt = 0, regionWidth = 0, regionHeight = 0, windowX = 0, windowY = 0;
   double scaledWidth = 0, scaledHeight = 0;
-  char* currentCursor = IDC_ARROW;
+  HCURSOR currentCursor = LoadCursor(NULL, IDC_ARROW);
 
   void centerwindow() {
     int screen_width = GetSystemMetrics(SM_CXSCREEN);
@@ -654,80 +654,80 @@ namespace enigma_user
 int window_set_cursor(int c)
 {
   enigma::cursorInt = c;
+  char* cursor = NULL;
   // this switch statement could be replaced with an array aligned to the constants
   switch (c)
   {
       case cr_default:
-          enigma::currentCursor= IDC_ARROW;
+      case cr_arrow:
+          cursor = IDC_ARROW;
           break;
       case cr_none:
-          enigma::currentCursor = NULL;
-          break;
-      case cr_arrow:
-          enigma::currentCursor = IDC_ARROW;
+          cursor = NULL;
           break;
       case cr_cross:
-          enigma::currentCursor = IDC_CROSS;
+          cursor = IDC_CROSS;
           break;
       case cr_beam:
-          enigma::currentCursor = IDC_IBEAM;
+          cursor = IDC_IBEAM;
           break;
       case cr_size_nesw:
-          enigma::currentCursor = IDC_SIZENESW;
+          cursor = IDC_SIZENESW;
           break;
       case cr_size_ns:
-          enigma::currentCursor = IDC_SIZENS;
+          cursor = IDC_SIZENS;
           break;
       case cr_size_nwse:
-          enigma::currentCursor = IDC_SIZENWSE;
+          cursor = IDC_SIZENWSE;
           break;
       case cr_size_we:
-          enigma::currentCursor = IDC_SIZEWE;
+          cursor = IDC_SIZEWE;
           break;
       case cr_uparrow:
-          enigma::currentCursor = IDC_UPARROW;
+          cursor = IDC_UPARROW;
           break;
       case cr_hourglass:
-          enigma::currentCursor = IDC_WAIT;
+          cursor = IDC_WAIT;
           break;
       case cr_drag:
           // Delphi-made?
+          cursor = IDC_HAND;
           break;
       case cr_nodrop:
-          enigma::currentCursor = IDC_NO;
+          cursor = IDC_NO;
           break;
       case cr_hsplit:
           // Delphi-made?
-          enigma::currentCursor = IDC_SIZENS;
+          cursor = IDC_SIZENS;
           break;
       case cr_vsplit:
           // Delphi-made?
-          enigma::currentCursor = IDC_SIZEWE;
+          cursor = IDC_SIZEWE;
           break;
       case cr_multidrag:
-          enigma::currentCursor = IDC_SIZEALL;
+          cursor = IDC_SIZEALL;
           break;
       case cr_sqlwait:
           // DEAR GOD WHY
-          enigma::currentCursor = IDC_WAIT;
+          cursor = IDC_WAIT;
           break;
       case cr_no:
-          enigma::currentCursor = IDC_NO;
+          cursor = IDC_NO;
           break;
       case cr_appstart:
-          enigma::currentCursor = IDC_APPSTARTING;
+          cursor = IDC_APPSTARTING;
           break;
       case cr_help:
-          enigma::currentCursor = IDC_HELP;
+          cursor = IDC_HELP;
           break;
       case cr_handpoint:
-          enigma::currentCursor = IDC_HAND;
+          cursor = IDC_HAND;
           break;
       case cr_size_all:
-          enigma::currentCursor = IDC_SIZEALL;
+          cursor = IDC_SIZEALL;
           break;
   }
-
+  enigma::currentCursor = LoadCursor(NULL, cursor);
   return SendMessage(enigma::hWnd, WM_SETCURSOR, (WPARAM)enigma::hWnd, MAKELPARAM(HTCLIENT, WM_MOUSEMOVE));
 }
 
@@ -748,38 +748,6 @@ void io_handle()
   enigma::update_mouse_variables();
 }
 
-void keyboard_wait()
-{
-  io_clear();
-  for (;;)
-  {
-    io_handle();
-    for (int i = 0; i < 255; i++)
-      if (enigma::keybdstatus[i])
-      {
-        io_clear();
-        return;
-      }
-    Sleep(10); // Sleep 1/100 second
-  }
-}
-
-void mouse_wait()
-{
-  for (;;)
-  {
-    io_handle();
-    for (int i = 0; i < 3; i++)
-      if (enigma::mousestatus[i])
-        return;
-    Sleep(10); // Sleep 1/100 second
-  }
-}
-
-void keyboard_clear(const int key)
-{
-    enigma::keybdstatus[key] = enigma::last_keybdstatus[key] = 0;
-}
 
 bool keyboard_check_direct(int key)
 {
@@ -885,34 +853,6 @@ void keyboard_set_scroll(bool on) {
     // Simulate a key release
     keybd_event( VK_SCROLL, 0x91, KEYEVENTF_EXTENDEDKEY | KEYEVENTF_KEYUP, 0);
   }
-}
-
-static map<int, int> keybdmap;
-void keyboard_set_map(int key1, int key2) {
-  map<int, int>::iterator it = keybdmap.find(key1);
-  if (keybdmap.end() != it) {
-    it->second = key2;
-  } else {
-    keybdmap.insert(map<int, int>::value_type(key1, key2));
-  }
-}
-
-int keyboard_get_map(int key) {
-  map<int, int>::iterator it = keybdmap.find(key);
-  if (keybdmap.end() != it) {
-    return it->second;
-  } else {
-    return key;
-  }
-}
-
-void keyboard_unset_map() {
-  keybdmap.clear();
-}
-
-void mouse_clear(const int button)
-{
-  enigma::mousestatus[button] = enigma::last_mousestatus[button] = 0;
 }
 
 string clipboard_get_text()
