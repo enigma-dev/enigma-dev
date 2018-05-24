@@ -147,6 +147,7 @@ namespace enigma
         }
         case FocusIn:
           input_initialize();
+          init_joysticks();
           game_window_focused = true;
           pausedSteps = 0;
           return 0;
