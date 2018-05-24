@@ -26,7 +26,7 @@ using std::map;
 using std::deque;
 
 #include "Universal_System/var4.h"
-#include "Platforms/General/PFmain.h" //For mouse_check_button
+#include "Platforms/General/PFwindow.h" //For mouse_check_button
 #include "Universal_System/resource_data.h" //For script_execute
 //#include "Universal_System/sprites_internal.h"
 #include "Graphics_Systems/General/GSsprite.h"
@@ -111,15 +111,15 @@ namespace gui
         //Resize
         if (enigma_user::mouse_check_button_pressed(enigma_user::mb_left) && (box_left.point_inside(txox,tyoy) || box_top.point_inside(txox,tyoy) || box_right.point_inside(txox,tyoy) || box_bottom.point_inside(txox,tyoy))){ //Press
           if (box_bottom.point_inside(txox,tyoy)){ //Check bottom and corners
-            if (box_left.point_inside(txox,tyoy)){ resize_side = 7; } 
-            else if (box_right.point_inside(txox,tyoy)){ resize_side = 5; } 
-            else { resize_side = 6; } 
+            if (box_left.point_inside(txox,tyoy)){ resize_side = 7; }
+            else if (box_right.point_inside(txox,tyoy)){ resize_side = 5; }
+            else { resize_side = 6; }
           } else if (box_top.point_inside(txox, tyoy)){ //Check top and corners
-            if (box_left.point_inside(txox,tyoy)){ resize_side = 1; } 
-            else if (box_right.point_inside(txox,tyoy)){ resize_side = 3; } 
-            else { resize_side = 2; } 
+            if (box_left.point_inside(txox,tyoy)){ resize_side = 1; }
+            else if (box_right.point_inside(txox,tyoy)){ resize_side = 3; }
+            else { resize_side = 2; }
           } else if (box_left.point_inside(txox,tyoy)){ //Check left
-            resize_side = 0; 
+            resize_side = 0;
           } else if (box_right.point_inside(txox,tyoy)){ //Check right
             resize_side = 4;
           }

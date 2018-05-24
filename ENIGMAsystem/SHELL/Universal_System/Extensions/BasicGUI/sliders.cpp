@@ -21,7 +21,7 @@ using std::string;
 using std::unordered_map;
 
 #include "Universal_System/var4.h"
-#include "Platforms/General/PFmain.h" //For mouse_check_button
+#include "Platforms/General/PFwindow.h" //For mouse_check_button
 #include "Universal_System/resource_data.h" //For script_execute
 //#include "Universal_System/sprites_internal.h"
 #include "Graphics_Systems/General/GSsprite.h"
@@ -191,7 +191,7 @@ namespace enigma_user
 	int gui_slider_create(){
 		if (gui::gui_bound_skin == -1){ //Add default one
 			gui::gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(gui::gui_elements_maxid), std::forward_as_tuple(gui::Slider(), gui::gui_elements_maxid));
-		}else{  
+		}else{
       get_data_elementv(ski,gui::Skin,gui::GUI_TYPE::SKIN,gui::gui_bound_skin,-1);
       get_elementv(sli,gui::Slider,gui::GUI_TYPE::SLIDER,ski.slider_style,-1);
       gui::gui_elements.emplace(std::piecewise_construct, std::forward_as_tuple(gui::gui_elements_maxid), std::forward_as_tuple(sli, gui::gui_elements_maxid));
@@ -467,4 +467,3 @@ namespace enigma_user
     enigma_user::draw_set_font(pfont);
 	}
 }
-

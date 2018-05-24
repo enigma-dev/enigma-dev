@@ -21,7 +21,7 @@ using std::string;
 using std::unordered_map;
 
 #include "Universal_System/var4.h"
-#include "Platforms/General/PFmain.h" //For mouse_check_button
+#include "Platforms/General/PFwindow.h" //For mouse_check_button
 #include "Universal_System/resource_data.h" //For script_execute
 //#include "Universal_System/sprites_internal.h"
 #include "Graphics_Systems/General/GSsprite.h"
@@ -365,4 +365,3 @@ namespace enigma_user
     enigma_user::draw_set_font(pfont);
 	}
 }
-
