@@ -24,6 +24,8 @@
 namespace enigma {
   extern bool game_isending;
   extern int game_return;
+  extern int parameterc;
+  extern std::string* parameters;
   int game_ending();
   long clamp(long value, long min, long max);
   void Sleep(int ms);

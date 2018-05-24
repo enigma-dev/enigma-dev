@@ -657,19 +657,8 @@ namespace enigma_user {
 }
 
 namespace enigma {
-  string* parameters;
-  int parameterc;
   int current_room_speed;
   int cursorInt;
-  void windowsystem_write_exename(char* x)
-  {
-    unsigned irx = 0;
-    if (enigma::parameterc)
-      for (irx = 0; enigma::parameters[0][irx] != 0; irx++)
-        x[irx] = enigma::parameters[0][irx];
-    x[irx] = 0;
-  }
-  #define hielem 9
   void set_room_speed(int rs)
   {
     current_room_speed = rs;

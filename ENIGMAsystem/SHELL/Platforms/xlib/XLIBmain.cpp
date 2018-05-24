@@ -33,13 +33,9 @@
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
-#include <unistd.h>
-#include <sys/resource.h>
-#include <stdio.h>
-#include <string>
-#include <cstdlib>
-#include <stdlib.h> //getenv and system
-#include <time.h>
+
+#include <sys/types.h> //getpid
+#include <unistd.h> //usleep
 
 namespace enigma_user {
   const int os_type = os_linux;
@@ -151,7 +147,6 @@ namespace enigma
         }
         case FocusIn:
           input_initialize();
-          init_joysticks();
           game_window_focused = true;
           pausedSteps = 0;
           return 0;
@@ -192,6 +187,9 @@ namespace enigma_user {
   unsigned long get_timer() {  // microseconds since the start of the game
     return current_time_mcs;
   }
+
+  int display_get_width() { return XWidthOfScreen(screen); }
+  int display_get_height() { return XHeightOfScreen(screen); }
 }
 
 static void set_net_wm_pid(Window window) {
@@ -202,7 +200,6 @@ static void set_net_wm_pid(Window window) {
                   (unsigned char*) &pid, sizeof(pid) / 4);
 }
 
-#include <unistd.h>
 int main(int argc,char** argv)
 {
     // Set the working_directory
@@ -218,7 +215,9 @@ int main(int argc,char** argv)
     enigma::parameterc = argc;
     for (int i=0; i<argc; i++)
         enigma::parameters[i]=argv[i];
+        
     enigma::initkeymap();
+    enigma::init_joysticks();
 
 
     // Initiate display
@@ -368,92 +367,4 @@ int main(int argc,char** argv)
     enigma::DisableDrawing();
     XCloseDisplay(disp);
     return enigma::game_return;
-}
-
-namespace enigma_user
-{
-
-string parameter_string(int num) {
-  return num < enigma::parameterc ? enigma::parameters[num] : "";
-}
-
-int parameter_count() {
-  return enigma::parameterc;
-}
-
-void execute_shell(string fname, string args)
-{
-  if (system(NULL)) {
-    system((fname + args + " &").c_str());
-  } else {
-    printf("execute_shell cannot be used as there is no command processor!");
-    return;
-  }
-}
-
-void execute_shell(string operation, string fname, string args)
-{
-  if (system(NULL)) {
-    system((fname + args + " &").c_str());
-  } else {
-    printf("execute_shell cannot be used as there is no command processor!");
-    return;
-  }
-}
-
-void execute_program(string operation, string fname, string args, bool wait)
-{
-  if (system(NULL)) {
-    system((fname + args + (wait?" &":"")).c_str());
-  } else {
-    printf("execute_program cannot be used as there is no command processor!");
-    return;
-  }
-}
-
-void execute_program(string fname, string args, bool wait)
-{
-  if (system(NULL)) {
-    system((fname + args + (wait?" &":"")).c_str());
-  } else {
-    printf("execute_program cannot be used as there is no command processor!");
-    return;
-  }
-}
-
-void url_open(std::string url,std::string target,std::string options)
-{
-  if (!fork()) {
-    execlp("xdg-open","xdg-open",url.c_str(),NULL);
-    exit(0);
-  }
-}
-
-void url_open_ext(std::string url,std::string target)
-{
-  url_open(url,target);
-}
-
-void url_open_full(std::string url,std::string target,std::string options)
-{
-  url_open(url,target, options);
-}
-
-void action_webpage(const std::string &url)
-{
-  url_open(url);
-}
-
-int display_get_width() { return XWidthOfScreen(screen); }
-int display_get_height() { return XHeightOfScreen(screen); }
-
-string environment_get_variable(string name) {
-  char *ev = getenv(name.c_str());
-  return ev? ev : "";
-}
-
-void set_program_priority(int value) {
-  setpriority(PRIO_PROCESS, getpid(), value);
-}
-
 }
