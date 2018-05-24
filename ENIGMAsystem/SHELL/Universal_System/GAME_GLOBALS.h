@@ -57,7 +57,7 @@ int transition_kind = 0;
 int transition_steps = 80;
 bool automatic_redraw = true;
 int gamemaker_version = 0;
-int cursor_sprite;
+int cursor_sprite = -1;
 extern int room_first, room_last;
 }  // namespace enigma_user
 

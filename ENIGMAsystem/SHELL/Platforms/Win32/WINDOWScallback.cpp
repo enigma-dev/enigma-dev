@@ -63,7 +63,7 @@ namespace enigma
 
   extern char mousestatus[3],last_mousestatus[3],keybdstatus[256],last_keybdstatus[256];
   extern int windowX, windowY, windowColor;
-  extern char* currentCursor;
+  extern HCURSOR currentCursor;
   extern unsigned int pausedSteps;
 
   static RECT tempWindow;
@@ -72,7 +72,7 @@ namespace enigma
 
   LRESULT CALLBACK (*touch_extension_callback)(HWND hWndParameter, UINT message, WPARAM wParam, LPARAM lParam);
   void (*WindowResizedCallback)();
-  
+
   LRESULT CALLBACK WndProc (HWND hWndParameter, UINT message,WPARAM wParam, LPARAM lParam)
   {
     switch (message)
@@ -115,7 +115,7 @@ namespace enigma
         }
         enigma_win32::game_window_focused = false;
         return 0;
-        
+
       case WM_SIZE:
         // make sure window resized is only processed once per resize because there could possibly be child windows and handles, especially with widgets
         if (hWndParameter == hWnd) {
@@ -151,13 +151,13 @@ namespace enigma
         windowHeight = tempHeight;
         setwindowsize();
         return 0;
-        
+
       case WM_GETMINMAXINFO: {
         if (viewScale > 0) { //Fixed Scale, this is GM8.1 behaviour
           RECT c;
           c.left = 0; c.top = 0; c.right = scaledWidth; c.bottom = scaledHeight;
           AdjustWindowRect(&c, GetWindowLongPtr(enigma::hWnd, GWL_EXSTYLE), false);
-        
+
           LPMINMAXINFO lpMinMaxInfo = (LPMINMAXINFO) lParam;
           lpMinMaxInfo->ptMinTrackSize.x = c.right-c.left;
           lpMinMaxInfo->ptMinTrackSize.y = c.bottom-c.top;
@@ -169,11 +169,10 @@ namespace enigma
         // Set the user cursor if the mouse is in the client area of the window, otherwise let Windows handle setting the cursor
         // since it knows how to set the gripper cursor for window resizing. This is exactly how GM handles it.
         if (LOWORD(lParam) == HTCLIENT) {
-          SetCursor(LoadCursor(NULL, currentCursor));
-        } else {
-          DefWindowProc(hWndParameter, message, wParam, lParam);
+          SetCursor(currentCursor);
+          return TRUE;
         }
-        return 0;
+        break;
       case WM_CHAR:
         keyboard_lastchar = string(1,wParam);
         if (keyboard_lastkey == enigma_user::vk_backspace) {
@@ -243,29 +242,16 @@ namespace enigma
       case WM_RBUTTONDOWN: mousestatus[1]=1; return 0;
       case WM_MBUTTONUP:   mousestatus[2]=0; return 0;
       case WM_MBUTTONDOWN: mousestatus[2]=1; return 0;
-      
-      case WM_ERASEBKGND: 
+
+      case WM_ERASEBKGND:
         RECT rc;
-        GetClientRect(hWnd, &rc); 
-        FillRect((HDC) wParam, &rc, CreateSolidBrush(windowColor)); 
-        return 1L; 
-      
+        GetClientRect(hWnd, &rc);
+        FillRect((HDC) wParam, &rc, CreateSolidBrush(windowColor));
+        return 1L;
+
       case WM_PAINT:
         DefWindowProc(hWndParameter, message, wParam, lParam);
         return 0;
-
-        /*
-      case WM_TOUCH:
-      if (touch_extension_callback != NULL) {
-        return touch_extension_callback(hWndParameter, message, wParam, lParam);
-      }
-      return 0;
-*/
-  //#ifdef DSHOW_EXT
-  //#include <dshow.h>
-  //case WM_GRAPHNOTIFY:
-    //TODO: Handle DirectShow media events
-  //return 0;
     }
     return DefWindowProc (hWndParameter, message, wParam, lParam);
   }

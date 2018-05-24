@@ -112,15 +112,6 @@ void window_set_showicons(bool show);
 void window_set_freezeonlosefocus(bool freeze);
 unsigned long get_timer(); // number of microseconds since the game started
 
-// TODO: cursor functions are absolutely not necessary; move out
-int window_set_cursor(int c);
-int window_get_cursor();
-inline void action_set_cursor(int spr, bool c) {
-  // TODO: if spr exists should create a sprite cursor, game maker allows
-  // both the sprite cursor and system cursor to be visible at the same time
-  window_set_cursor(c? 0 : -1); // default system cursor
-}
-
 }  // namespace enigma_user
 
 #endif

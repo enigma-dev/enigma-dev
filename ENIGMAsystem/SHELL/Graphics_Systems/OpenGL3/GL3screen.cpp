@@ -19,6 +19,7 @@
 #include <cstdio>
 #include "../General/OpenGLHeaders.h"
 #include "../General/GStextures.h"
+#include "../General/GSsprite.h"
 #include "../General/GSbackground.h"
 #include "../General/GSscreen.h"
 #include "../General/GSd3d.h"
@@ -39,6 +40,7 @@ using namespace std;
 #include "Universal_System/instance_system.h"
 #include "Universal_System/graphics_object.h"
 #include "Universal_System/depth_draw.h"
+#include "Platforms/General/PFwindow.h"
 #include "Platforms/platforms_mandatory.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 #include <limits>
@@ -298,6 +300,8 @@ void screen_redraw()
 
     draw_gui();
   }
+  if (sprite_exists(cursor_sprite))
+    draw_sprite(cursor_sprite, 0, mouse_x, mouse_y);
 
   oglmgr->EndScene();
 

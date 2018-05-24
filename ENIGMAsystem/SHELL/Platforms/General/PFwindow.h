@@ -240,6 +240,15 @@ int window_mouse_get_y();
 int window_view_mouse_get_x(int id);
 int window_view_mouse_get_y(int id);
 
+int window_set_cursor(int c);
+int window_get_cursor();
+
+extern int cursor_sprite;
+inline void action_set_cursor(int spr, bool c) {
+  cursor_sprite = spr;
+  window_set_cursor(c ? cr_default : cr_none);
+}
+
 std::string clipboard_get_text();
 void clipboard_set_text(std::string text);
 bool clipboard_has_text();
