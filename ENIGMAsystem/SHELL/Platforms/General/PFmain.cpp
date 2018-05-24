@@ -1,7 +1,7 @@
 #include "PFmain.h"
 
 namespace enigma {
-  
+
 bool game_isending = false;
 int game_return = 0;
 
@@ -11,7 +11,7 @@ long clamp(long value, long min, long max) {
   return value;
 }
 
-} //namespace enigma
+}  //namespace enigma
 
 namespace enigma_user {
 
@@ -20,8 +20,6 @@ void game_end(int ret) {
   enigma::game_return = ret;
 }
 
-void action_end_game() {
-  return game_end();
-}
+void action_end_game() { return game_end(); }
 
-} //namespace enigma_user
+}  //namespace enigma_user
