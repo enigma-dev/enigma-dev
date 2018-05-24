@@ -21,24 +21,25 @@
 
 #include "fillin.h"
 
-#include "Platforms/General/PFfilemanip.h"
-#include "Platforms/General/PFsystem.h"
 #include "Platforms/platforms_mandatory.h"
+#include "Platforms/General/PFsystem.h"
+#include "Platforms/General/PFfilemanip.h"
 
+#include "Universal_System/var4.h"
 #include "Platforms/General/PFmain.h"
 #include "Universal_System/roomsystem.h"
-#include "Universal_System/var4.h"
 
-#include <stdio.h>
-#include <stdlib.h>  //malloc
-#include <stdlib.h>  //getenv and system
+#include <unistd.h>
 #include <sys/resource.h>
 #include <sys/stat.h>
-#include <time.h>  //clock
-#include <unistd.h>
-#include <cstdlib>
-#include <map>
+#include <stdio.h>
 #include <string>
+#include <cstdlib>
+#include <stdlib.h> //malloc
+#include <time.h> //clock
+#include <map>
+#include <stdlib.h> //getenv and system
+
 
 #include <time.h>
 
@@ -156,7 +157,19 @@ int window_set_cursor(int c) {
   return 0;
 }
 
-void io_handle() {}
+int window_get_cursor()
+{
+  return enigma::cursorInt;
+}
+
+void window_set_region_scale(double scale, bool adaptwindow)
+{
+}
+
+double window_get_region_scale()
+{
+    return 0;
+}
 
 void clipboard_set_text(string text) {}
 string clipboard_get_text() { return ""; }
@@ -190,13 +203,31 @@ int main(int argc, char** argv) {
   //Call ENIGMA system initializers; sprites, audio, and what have you
   enigma::initialize_everything();
 
-  struct timespec time_offset;
-  struct timespec time_offset_slowing;
-  struct timespec time_current;
-  clock_gettime(CLOCK_MONOTONIC, &time_offset);
-  time_offset_slowing.tv_sec = time_offset.tv_sec;
-  time_offset_slowing.tv_nsec = time_offset.tv_nsec;
-  int frames_count = 0;
+}
+
+namespace enigma_user {
+  const int os_type = os_linux;
+  extern int keyboard_key;
+  extern int keyboard_lastkey;
+  extern string keyboard_lastchar;
+  extern string keyboard_string;
+}
+
+namespace enigma
+{
+  void ENIGMA_events(void); //TODO: Synchronize this with Windows by putting these two in a single header.
+
+  void (*WindowResizedCallback)();
+  void EnableDrawing();
+  void DisableDrawing();
+  void WindowResized();
+
+}
+
+namespace enigma
+{
+  extern int windowColor;
+}
 
   while (!enigma::game_isending) {
     using enigma::current_room_speed;

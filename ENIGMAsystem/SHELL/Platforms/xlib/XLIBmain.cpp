@@ -33,9 +33,13 @@
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
-
-#include <sys/types.h> //getpid
-#include <unistd.h> //usleep
+#include <unistd.h>
+#include <sys/resource.h>
+#include <stdio.h>
+#include <string>
+#include <cstdlib>
+#include <stdlib.h> //getenv and system
+#include <time.h>
 
 namespace enigma_user {
   const int os_type = os_linux;
@@ -147,6 +151,7 @@ namespace enigma
         }
         case FocusIn:
           input_initialize();
+          init_joysticks();
           game_window_focused = true;
           pausedSteps = 0;
           return 0;
