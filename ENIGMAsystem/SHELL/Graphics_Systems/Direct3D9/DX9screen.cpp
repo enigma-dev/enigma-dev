@@ -43,9 +43,9 @@ using namespace std;
 #include "Universal_System/instance_system.h"
 #include "Universal_System/graphics_object.h"
 #include "Universal_System/depth_draw.h"
-#include "Platforms/platforms_mandatory.h"
 #include "Platforms/General/PFwindow.h"
 #include "Platforms/General/PFmain.h"
+#include "Platforms/platforms_mandatory.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 #include <limits>
 
