@@ -36,6 +36,7 @@
 
 #include <sys/types.h> //getpid
 #include <unistd.h> //usleep
+#include <time.h>  //CLOCK_MONOTONIC
 
 namespace enigma_user {
   const int os_type = os_linux;
