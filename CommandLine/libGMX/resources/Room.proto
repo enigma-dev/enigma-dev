@@ -1,0 +1,120 @@
+syntax = "proto2";
+package buffers.resources;
+
+import "options.proto";
+
+message Room {
+  optional string name = 28;
+  optional int32 id = 29 [(gmx) = "GMX_DEPRECATED"];
+  
+  optional string caption = 1;
+  optional uint32 width = 2;
+  optional uint32 height = 3;
+  optional uint32 vsnap = 4;
+  optional uint32 hsnap = 5; 
+  optional bool isometric = 6;
+  optional uint32 speed = 27;
+  optional bool persistent = 7;
+  optional int32 color = 8 [(gmx) = "colour"];
+  optional bool show_color = 9 [(gmx) = "showcolour"];
+  optional string code = 10;
+  optional bool enable_views = 11 [(gmx) = "enableViews"];
+  optional bool clear_view_background = 12 [(gmx) = "clearViewBackground"];
+  optional bool clear_display_buffer = 13 [(gmx) = "clearDisplayBuffer"];
+  
+  message MakerSettings {
+    optional bool set = 1 [(gmx) = "isSet"];
+    optional bool width = 2 [(gmx) = "w"];
+    optional bool height = 3 [(gmx) = "h"];
+    optional bool show_grid = 4 [(gmx) = "showGrid"];
+    optional bool show_objects = 5 [(gmx) = "showObjects"];
+    optional bool show_tiles = 6 [(gmx) = "showTiles"];
+    optional bool show_backgrounds = 7 [(gmx) = "showBackgrounds"];
+    optional bool show_foregrounds = 8 [(gmx) = "showForegrounds"];
+    optional bool show_views = 9 [(gmx) = "showViews"];
+    optional bool delete_underlying_objects = 10 [(gmx) = "deleteUnderlyingObj"];
+    optional bool delete_underlying_tiles = 11 [(gmx) = "deleteUnderlyingTiles"];
+    optional uint32 page = 12;
+    optional int32 xoffset = 13;
+    optional int32 yoffset = 14;
+  }
+  
+  optional MakerSettings maker_settings = 14 [(gmx) = "makerSettings"];
+  
+  message RoomBackground {
+    optional bool visible = 1; 
+    optional bool foreground = 2; 
+    optional string name = 3;
+    optional int32 x = 4; 
+    optional int32 y = 5;
+    optional bool htiled = 6; 
+    optional bool vtiled = 7; 
+    optional double hspeed = 8;
+    optional double vspeed = 9; 
+    optional bool stretch = 10;
+  }
+  
+  repeated RoomBackground backgrounds = 15 [(gmx) = "backgrounds/background"];
+  
+  message View {
+    optional bool visible = 1;
+    optional string object_following = 2 [(gmx) = "objName"];
+    optional int32 xview = 3;
+    optional int32 yview = 4; 
+    optional uint32 wview = 5;
+    optional uint32 hview = 6; 
+    optional int32 xport = 7; 
+    optional int32 yport = 8;
+    optional uint32 wport = 9; 
+    optional uint32 hport = 10; 
+    optional int32 hborder = 11; 
+    optional int32 vborder = 12; 
+    optional double hspeed = 13; 
+    optional double vspeed = 14;
+  }
+  
+  repeated View views = 16 [(gmx) = "views/view"];
+  
+  message Instance {
+    optional string object_type = 1 [(gmx) = "objName"];
+    optional int32 x = 2; 
+    optional int32 y = 3; 
+    optional string id = 4 [(gmx) = "name"];
+    optional bool locked = 5; 
+    optional string code = 6; 
+    optional double xscale = 7 [(gmx) = "scaleX"]; 
+    optional double yscale = 8 [(gmx) = "scaleY"];
+    optional int32 color = 9 [(gmx) = "colour"];
+    optional double rotation = 10;
+  }
+  
+  repeated Instance instances = 17 [(gmx) = "instances/instance"];
+  
+  message Tile {
+    optional string image = 1 [(gmx) = "bgName"]; 
+    optional int32 x = 2; 
+    optional int32 y = 3;
+    optional uint32 width = 4 [(gmx) = "w"]; 
+    optional uint32 height = 5 [(gmx) = "h"];
+    optional int32 xoffset = 6 [(gmx) = "xo"];
+    optional int32 yoffset = 7 [(gmx) = "yo"];
+    optional int32 id = 8;
+    optional string name = 9; 
+    optional int32 depth = 10; 
+    optional bool locked = 11; 
+    optional int32 color = 12 [(gmx) = "colour"];
+    optional double xscale = 13 [(gmx) = "scaleX"]; 
+    optional double yscale = 14 [(gmx) = "scaleY"];
+  }
+  
+  repeated Tile tiles = 18 [(gmx) = "tiles/tile"];
+  
+  optional bool use_physics = 19 [(gmx) = "PhysicsWorld"];
+  optional int32 phy_world_top = 20 [(gmx) = "PhysicsWorldTop"];
+  optional int32 phy_world_left = 21 [(gmx) = "PhysicsWorldLeft"];
+  optional int32 phy_world_right = 22 [(gmx) = "PhysicsWorldRight"];
+  optional int32 phy_world_bottom = 23 [(gmx) = "PhysicsWorldBottom"];
+  optional double phy_world_xgravity = 24 [(gmx) = "PhysicsWorldGravityX"];
+  optional double phy_world_ygravity = 25 [(gmx) = "PhysicsWorldGravityY"];
+  optional double phy_world_pixel_meters = 26 [(gmx) = "PhysicsWorldPixToMeters"];
+}
