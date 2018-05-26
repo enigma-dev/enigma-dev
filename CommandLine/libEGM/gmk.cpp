@@ -62,7 +62,7 @@ std::string writeTempDataFile(std::unique_ptr<char[]> bytes, size_t length) {
   return writeTempDataFile(bytes.get(), length);
 }
 
-std::string writeTempImageFile(std::unique_ptr<char[]> bytes, size_t length, size_t width, size_t height) {
+std::string writeTempBMPFile(std::unique_ptr<char[]> bytes, size_t length) {
   static const unsigned MINHEADER = 54; //minimum BMP header size
   auto bmp = reinterpret_cast<const unsigned char*>(bytes.get()); // all of the following logic expects unsigned
 
@@ -140,7 +140,7 @@ std::string writeTempImageFile(std::unique_ptr<char[]> bytes, size_t length, siz
   return temp_file_path;
 }
 
-std::string writeTempBGRAImageFile(std::unique_ptr<char[]> bytes, size_t length, size_t width, size_t height) {
+std::string writeTempBGRAFile(std::unique_ptr<char[]> bytes, size_t width, size_t height) {
   auto bgra = reinterpret_cast<const unsigned char*>(bytes.get()); // all of the following logic expects unsigned
   std::vector<unsigned char> rgba;
   rgba.resize(width * height * 4);
@@ -333,16 +333,16 @@ class Decoder {
     readData(data_file_path, false);
   }
 
-  void readZlibImage(std::string *data_file_path=nullptr, size_t width=0, size_t height=0) {
+  void readZlibImage(std::string *data_file_path=nullptr) {
     size_t length = read4();
     std::unique_ptr<char[]> bytes = decompress(length);
-    if (data_file_path && bytes) threadTempFileWrite(writeTempImageFile, data_file_path, std::move(bytes), length, width, height);
+    if (data_file_path && bytes) threadTempFileWrite(writeTempBMPFile, data_file_path, std::move(bytes), length);
   }
 
   void readBGRAImage(std::string *data_file_path=nullptr, size_t width=0, size_t height=0) {
     size_t length = read4();
     std::unique_ptr<char[]> bytes = read(length);
-    if (data_file_path && bytes) threadTempFileWrite(writeTempBGRAImageFile, data_file_path, std::move(bytes), length, width, height);
+    if (data_file_path && bytes) threadTempFileWrite(writeTempBGRAFile, data_file_path, std::move(bytes), width, height);
   }
 
   void setSeed(int seed) {
@@ -441,17 +441,16 @@ int LoadSettings(Decoder &dec) {
   }
   dec.readBool(); // set_resolution
 
-  int color_depth = 0, resolution, frequency;
   if (ver == 530) {
     dec.skip(8); //Color Depth, Exclusive Graphics
-    resolution = dec.read4();
-    int b = dec.read4();
-    frequency = (b == 4) ? 0 : (b + 1);
+    dec.read4(); // resolution
+    dec.read4(); // int b
+    //frequency = (b == 4) ? 0 : (b + 1);
     dec.skip(8); //vertical blank, caption in fullscreen
   } else {
-    color_depth = dec.read4();
-    resolution = dec.read4();
-    frequency = dec.read4();
+    dec.read4(); // color depth
+    dec.read4(); // resolution
+    dec.read4(); // frequency
   }
 
   dec.readBool(); // DONT_SHOW_BUTTONS
@@ -650,7 +649,7 @@ std::unique_ptr<Sprite> LoadSprite(Decoder &dec, int ver) {
         dec.readBGRAImage(sprite->add_subimages(), w, h);
     } else {
       if (dec.read4() == -1) continue;
-      dec.readZlibImage(sprite->add_subimages(), w, h);
+      dec.readZlibImage(sprite->add_subimages());
     }
   }
   sprite->set_width(w);
@@ -700,7 +699,7 @@ std::unique_ptr<Background> LoadBackground(Decoder &dec, int ver) {
   if (ver < 710) {
     if (dec.readBool()) {
       if (dec.read4() != -1)
-        dec.readZlibImage(background->mutable_image(), w, h);
+        dec.readZlibImage(background->mutable_image());
     }
   } else { // >= 710
     int dataver = dec.read4();
@@ -728,8 +727,8 @@ std::unique_ptr<Path> LoadPath(Decoder &dec, int /*ver*/) {
   path->set_closed(dec.readBool());
   path->set_precision(dec.read4());
   dec.postponeName(path->mutable_background_room_name(), dec.read4(), TypeCase::kRoom);
-  path->set_snap_x(dec.read4());
-  path->set_snap_y(dec.read4());
+  path->set_hsnap(dec.read4());
+  path->set_vsnap(dec.read4());
   int nopoints = dec.read4();
   for (int i = 0; i < nopoints; i++) {
     auto point = path->add_points();
@@ -897,8 +896,8 @@ std::unique_ptr<Room> LoadRoom(Decoder &dec, int ver) {
   room->set_caption(dec.readStr());
   room->set_width(dec.read4());
   room->set_height(dec.read4());
-  room->set_snap_y(dec.read4());
-  room->set_snap_x(dec.read4());
+  room->set_vsnap(dec.read4());
+  room->set_hsnap(dec.read4());
   room->set_isometric(dec.readBool());
   room->set_speed(dec.read4());
   room->set_persistent(dec.readBool());
@@ -1051,7 +1050,7 @@ int LoadGameInformation(Decoder &dec) {
   }
 
   if (ver >= 800) dec.beginInflate();
-  int bc = dec.read4();
+  dec.read4(); // int bc, if non-zero then it's set
   // if (bc >= 0) // background color
   if (ver < 800)
     dec.readBool(); // embed game window
