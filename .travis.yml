@@ -75,12 +75,6 @@ before_install:
       brew install glew protobuf pugixml;
     fi
 
-    if [ "$TRAVIS_OS_NAME" == "linux" ]; then
-      latest=$(curl --silent "https://api.github.com/repos/RemoveRusky/grpc-trusy/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/');
-      curl -L -o google-trash.deb "https://github.com/RemoveRusky/grpc-trusy/releases/download/$latest/google-trash.deb";
-      sudo dpkg -i --force-all google-trash.deb;
-    fi
-
 # build JDI and the CLI
 install:
   - chmod +x ./ci-build.sh
