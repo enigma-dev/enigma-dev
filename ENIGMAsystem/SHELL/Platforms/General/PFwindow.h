@@ -15,16 +15,21 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
-#include <string>
-
 #ifndef ENIGMA_PLATFORM_WINDOW_H
 #define ENIGMA_PLATFORM_WINDOW_H
+
+#include "Platforms/platforms_mandatory.h"
+
+#include <string>
 
 namespace enigma {
 extern char mousestatus[3];
 extern char last_mousestatus[3];
 extern char last_keybdstatus[256];
 extern char keybdstatus[256];
+extern int cursorInt;
+extern int windowX;
+extern int windowY;
 
 void input_initialize();
 void input_push();

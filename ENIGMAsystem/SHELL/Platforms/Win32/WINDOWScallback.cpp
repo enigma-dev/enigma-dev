@@ -59,8 +59,6 @@ namespace enigma
   using enigma_user::keyboard_lastchar;
   using enigma_user::keyboard_string;
 
-  extern void setwindowsize();
-
   extern char mousestatus[3],last_mousestatus[3],keybdstatus[256],last_keybdstatus[256];
   extern int windowX, windowY, windowColor;
   extern HCURSOR currentCursor;
@@ -149,7 +147,7 @@ namespace enigma
         windowY += tempWindow.top - tempTop;
         windowWidth = tempWidth;
         windowHeight = tempHeight;
-        setwindowsize();
+        compute_window_size();
         return 0;
 
       case WM_GETMINMAXINFO: {
