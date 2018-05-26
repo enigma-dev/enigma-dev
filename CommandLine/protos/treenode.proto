@@ -33,6 +33,5 @@ message TreeNode {
 
   optional string name = 16;
 
-  optional TreeNode parent = 17;
-  repeated TreeNode child = 18;
+  repeated TreeNode child = 17;
 }

@@ -19,7 +19,7 @@ before_install:
       sudo apt-get update --option Acquire::Retries=100 --option Acquire::http::Timeout="60";
       sudo apt-get -qq -y install build-essential zlib1g-dev libboost-dev libboost-iostreams-dev \
         libboost-filesystem-dev libboost-program-options-dev libboost-system-dev libglew-dev     \
-        libpugixml-dev libprotobuf-dev=3.4.1-0~maarten0 protobuf-compiler;
+        libpugixml-dev libprotobuf-dev protobuf-compiler;
 
       if [ "$COMPILER" == "gcc32" ] || [ "$COMPILER" == "clang32" ]; then
         sudo dpkg --add-architecture i386;
@@ -73,6 +73,12 @@ before_install:
     elif [ "$TRAVIS_OS_NAME" == "osx" ]; then
       brew upgrade gcc || brew install gcc || brew link --overwrite gcc;
       brew install glew protobuf pugixml;
+    fi
+
+    if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+      latest=$(curl --silent "https://api.github.com/repos/RemoveRusky/grpc-trusy/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/');
+      curl -L -o google-trash.deb "https://github.com/RemoveRusky/grpc-trusy/releases/download/$latest/google-trash.deb";
+      sudo dpkg -i --force-all google-trash.deb;
     fi
 
 # build JDI and the CLI
@@ -171,7 +177,7 @@ script:
       export DISPLAY=:1
       Xvfb :1 -screen 0 1024x768x24 &
       xfwm4 &
-      ASAN_OPTIONS=exitcode=0 ./test-runner
+      ASAN_OPTIONS=detect_leaks=0 ./test-runner
       bash <(curl -s https://codecov.io/bash) -f "*.info"
     else
       ./ci-build.sh
