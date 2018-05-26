@@ -31,11 +31,23 @@ public:
   EnigmaPlugin();
   int Load();
   const char* Init();
-  void SetDefinitions(const char* def);
+  syntax_error* SetDefinitions(const char* def, const char* yaml);
+  syntax_error* SetDefinitions(const char* yaml);
+  syntax_error* SyntaxCheck(int count, const char** names, const char* code);
   void HandleGameLaunch();
   void LogMakeToConsole();
   int BuildGame(EnigmaStruct* data, GameMode mode, const char* fpath);
   int BuildGame(buffers::Game* data, GameMode mode, const char* fpath);
+  const char* NextResource();
+  const char* FirstResource();
+  bool ResourceIsFunction();
+  int ResourceArgCountMin();
+  int ResourceArgCountMax();
+  int ResourceOverloadCount();
+  const char* ResourceParameters(int i);
+  int ResourceIsTypeName();
+  int ResourceIsGlobal();
+  bool ResourcesAtEnd();
   void PrintBuiltins(std::string& fName);
 
 private:
