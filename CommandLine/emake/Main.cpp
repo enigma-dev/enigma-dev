@@ -102,6 +102,11 @@ int main(int argc, char* argv[])
     game.SetOutputFile(input_file);
 
   if (input_file.size()) {
+    if (!boost::filesystem::exists(input_file)) {
+      errorStream << "Input file does not exist: " << input_file << std::endl;
+      return OPTIONS_ERROR;
+    }
+
     std::string ext;
     size_t dot = input_file.find_last_of('.');
     if (dot != std::string::npos) ext = tolower(input_file.substr(dot + 1));
