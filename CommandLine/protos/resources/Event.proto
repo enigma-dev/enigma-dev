@@ -81,5 +81,5 @@ message Event {
     string name = 3 [(gmx) = "ename"];
   }
   repeated Action actions = 4 [(gmx) = "action"];
-  optional string code = 5;
+  optional string code = 5 [(gmx) = "GMX_DEPRECATED"];
 }

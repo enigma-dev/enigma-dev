@@ -1,6 +1,9 @@
+#ifndef _WIN32_WINNT
+#define _WIN32_WINNT 0x0600 // at least windows vista required for grpc
+#endif
+
 #include "Server.hpp"
 
-#define _WIN32_WINNT 0x0600
 #include "server.grpc.pb.h"
 
 #include <grpc/grpc.h>
