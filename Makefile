@@ -30,7 +30,7 @@ libProtocols: .FORCE
 libEGM: .FORCE libProtocols
 	$(MAKE) -C CommandLine/libEGM/
 
-emake: ENIGMA libGM .FORCE
+emake: ENIGMA libEGM .FORCE
 	$(MAKE) -C CommandLine/emake/
 
 test-runner: emake .FORCE

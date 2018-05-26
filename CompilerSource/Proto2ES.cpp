@@ -63,7 +63,7 @@ static void CacheNames(const buffers::TreeNode& root) {
   }
 }
 
-int Name2Id(std::string name) {
+int Name2Id(const std::string &name) {
   auto it = idMap.find(name);
   return (it != idMap.end()) ? it->second : -1;
 }
@@ -443,6 +443,7 @@ void AddSound(const char* name, const buffers::resources::Sound& snd) {
   fseek(afile,0,SEEK_SET);
   if (fread(fdata,1,flen,afile) != flen)
     puts("WARNING: Resource stream cut short while loading sound data");
+  fclose(afile);
 
   s.data = fdata;
   s.size = flen;
@@ -537,6 +538,16 @@ void AddFont(const char* name, const buffers::resources::Font& fnt) {
   f.size = fnt.size();
   f.bold = fnt.bold();
   f.italic = fnt.italic();
+
+  f.glyphRangeCount = 0;//fnt.ranges_size();
+  if (f.glyphRangeCount > 0) {
+    f.glyphRanges = new GlyphRange[f.glyphRangeCount];
+    for (int i=0; i < f.glyphRangeCount; ++i) {
+      f.glyphRanges[i].rangeMin = 0;
+      f.glyphRanges[i].rangeMax = 0;
+      f.glyphRanges[i].glyphs = nullptr;
+    }
+  }
 }
 
 void AddTimeline(const char* name, buffers::resources::Timeline* tml, buffers::Game* protobuf) {
@@ -581,7 +592,7 @@ void AddObject(const char* name, buffers::resources::Object* obj, buffers::Game*
     auto *evt = obj->mutable_events(i);
     std::vector<Event>& events = mainEventMap[evt->type()];
     Event e;
-    e.id = evt->number();
+    e.id = evt->has_name() ? Name2Id(evt->name()) : evt->number();
     if (evt->actions_size() > 0)
       evt->set_code(Actions2Code(evt->actions()));
     e.code = evt->code().c_str();

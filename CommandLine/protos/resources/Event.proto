@@ -76,8 +76,10 @@ message Action {
 
 message Event {
   optional int32 type = 1 [(gmx) = "eventtype"];
-  optional int32 number = 2 [(gmx) = "enumb"];
-  optional string name = 3 [(gmx) = "ename"];
+  oneof reference {
+    int32 number = 2 [(gmx) = "enumb"];
+    string name = 3 [(gmx) = "ename"];
+  }
   repeated Action actions = 4 [(gmx) = "action"];
   optional string code = 5;
 }

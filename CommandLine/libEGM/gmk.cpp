@@ -22,8 +22,9 @@
 
 #include <fstream>
 #include <utility>
-#include <functional>
 #include <memory>
+#include <future>
+#include <functional>
 #include <unordered_map>
 #include <vector>
 #include <set>
@@ -40,20 +41,185 @@ namespace gmk {
 ostream out(nullptr);
 ostream err(nullptr);
 
+static vector<std::string> tempFilesCreated;
+static bool atexit_tempdata_cleanup_registered = false;
+static void atexit_tempdata_cleanup() {
+  for (std::string &tempFile : tempFilesCreated)
+    unlink(tempFile.c_str());
+}
+
+std::string writeTempDataFile(char *bytes, size_t length) {
+  char temp[] = "gmk_data.XXXXXX";
+  int fd = mkstemp(temp);
+  if (fd == -1) return "";
+  tempFilesCreated.push_back(temp);
+  write(fd, bytes, length);
+  close(fd);
+  return temp;
+}
+
+std::string writeTempDataFile(std::unique_ptr<char[]> bytes, size_t length) {
+  return writeTempDataFile(bytes.get(), length);
+}
+
+std::string writeTempImageFile(std::unique_ptr<char[]> bytes, size_t length, size_t width, size_t height) {
+  static const unsigned MINHEADER = 54; //minimum BMP header size
+  auto bmp = reinterpret_cast<const unsigned char*>(bytes.get()); // all of the following logic expects unsigned
+
+  if (length < MINHEADER) {
+    err << "Image from the GMK file had a length '" << length << "' smaller than the minimum header "
+        << "size '" << MINHEADER << "' for the BMP format" << std::endl;
+    return "";
+  }
+  if (bmp[0] != 'B' || bmp[1] != 'M') {
+    err << "Image from the GMK file did not have the correct BMP signature '"
+        << bmp[0] << bmp[1] << "'" << std::endl;
+    return "";
+  }
+  unsigned pixeloffset = bmp[10] + 256 * bmp[11]; //where the pixel data starts
+  //read width and height from BMP header
+  size_t w = bmp[18] + bmp[19] * 256;
+  size_t h = bmp[22] + bmp[23] * 256;
+  //read number of channels from BMP header
+  if (bmp[28] != 24 && bmp[28] != 32) {
+    err << "Image from the GMK file was " << bmp[28] << " bit while this reader "
+        << "only supports 24 and 32 bit BMP images" << std::endl;
+    return "";
+  }
+  unsigned numChannels = bmp[28] / 8;
+
+  //The amount of scanline bytes is width of image times channels, with extra bytes added if needed
+  //to make it a multiple of 4 bytes.
+  unsigned scanlineBytes = w * numChannels;
+  if (scanlineBytes % 4 != 0) scanlineBytes = (scanlineBytes / 4) * 4 + 4;
+
+  unsigned dataSize = scanlineBytes * h;
+  if (length < dataSize + pixeloffset) {
+    err << "Image from the GMK file had a length '" << length << "' smaller than the estimated "
+        << "size '" << (dataSize + pixeloffset) << "' based on the BMP header dimensions" << std::endl;
+    return "";
+  }
+
+  std::vector<unsigned char> rgba(w * h * 4);
+
+  /*
+  There are 3 differences between BMP and the raw image buffer for LodePNG:
+  -it's upside down
+  -it's in BGR instead of RGB format (or BRGA instead of RGBA)
+  -each scanline has padding bytes to make it a multiple of 4 if needed
+  The 2D for loop below does all these 3 conversions at once.
+  */
+  for (unsigned y = 0; y < h; y++) {
+    for (unsigned x = 0; x < w; x++) {
+      //pixel start byte position in the BMP
+      unsigned bmpos = pixeloffset + (h - y - 1) * scanlineBytes + numChannels * x;
+      //pixel start byte position in the new raw image
+      unsigned newpos = 4 * y * w + 4 * x;
+      if (numChannels == 3) {
+        rgba[newpos + 0] = bmp[bmpos + 2]; //R<-B
+        rgba[newpos + 1] = bmp[bmpos + 1]; //G<-G
+        rgba[newpos + 2] = bmp[bmpos + 0]; //B<-R
+        rgba[newpos + 3] = 255;            //A<-A
+      } else {
+        rgba[newpos + 0] = bmp[bmpos + 3]; //R<-A
+        rgba[newpos + 1] = bmp[bmpos + 2]; //G<-B
+        rgba[newpos + 2] = bmp[bmpos + 1]; //B<-G
+        rgba[newpos + 3] = bmp[bmpos + 0]; //A<-R
+      }
+    }
+  }
+
+  unsigned char *buffer = nullptr;
+  size_t buffer_length;
+  lodepng_encode32(&buffer, &buffer_length, rgba.data(), w, h);
+
+  char *buffer_signed = reinterpret_cast<char*>(buffer);
+  std::string temp_file_path = writeTempDataFile(buffer_signed, buffer_length);
+  // explicitly free because lodepng allocated it with malloc
+  free(buffer);
+  return temp_file_path;
+}
+
+std::string writeTempBGRAImageFile(std::unique_ptr<char[]> bytes, size_t length, size_t width, size_t height) {
+  auto bgra = reinterpret_cast<const unsigned char*>(bytes.get()); // all of the following logic expects unsigned
+  std::vector<unsigned char> rgba;
+  rgba.resize(width * height * 4);
+
+  for (unsigned y = 0; y < height; y++) {
+    for (unsigned x = 0; x < width; x++) {
+      unsigned pos = width * 4 * y + 4 * x;
+      rgba[pos + 0] = bgra[pos + 2]; //R<-B
+      rgba[pos + 1] = bgra[pos + 1]; //G<-G
+      rgba[pos + 2] = bgra[pos + 0]; //B<-R
+      rgba[pos + 3] = bgra[pos + 3]; //A<-A
+    }
+  }
+
+  unsigned char *buffer = nullptr;
+  size_t buffer_length;
+  lodepng_encode32(&buffer, &buffer_length, rgba.data(), width, height);
+
+  char *buffer_signed = reinterpret_cast<char*>(buffer);
+  std::string temp_file_path = writeTempDataFile(buffer_signed, buffer_length);
+  // explicitly free because lodepng allocated it with malloc
+  free(buffer);
+  return temp_file_path;
+}
+
 class Decoder {
   public:
-  explicit Decoder(std::istream &in): in(in), decodeTable(nullptr) {}
-  ~Decoder() {}
+  explicit Decoder(std::istream &in): in(in), decodeTable(nullptr) {
+    if (atexit_tempdata_cleanup_registered) return;
+    const int ret = std::atexit(atexit_tempdata_cleanup);
+    if (ret != 0) {
+      err << "Failed to register cleanup handler for process exit, temporary files will not be removed" << std::endl;
+    } else {
+      atexit_tempdata_cleanup_registered = true;
+    }
+  }
+
+  template<class Function, class... Args>
+  void threadTempFileWrite(Function&& f, std::string* data_file_path, Args&&... args) {
+    std::future<std::string> tempFileFuture = std::async(std::launch::async, f, std::move(args)...);
+    tempFileFuturesCreated.emplace_back(std::make_pair(std::move(tempFileFuture), data_file_path));
+  }
+
+  void processTempFileFutures() {
+    for (auto &tempFilePair : tempFileFuturesCreated) {
+      tempFilePair.second->append(tempFilePair.first.get());
+    }
+  }
+
+  void beginInflate() {
+    size_t limit = read4();
+    zlibStart = in.tellg();
+    zlibBuffer = decompress(limit, 0);
+    zlibPos = 0;
+  }
+
+  void endInflate() {
+    zlibBuffer.reset();
+    zlibStart = 0;
+    zlibPos = 0;
+  }
 
   void skip(size_t count) {
-    in.seekg(count, std::ios_base::cur);
+    if (zlibBuffer)
+      zlibPos += count;
+    else
+      in.seekg(count, std::ios_base::cur);
   }
 
   int read() {
-    int byte = in.get();
+    int byte, pos = in.tellg();
+    if (zlibBuffer) {
+      pos = zlibStart + zlibPos;
+      byte = static_cast<unsigned char>(zlibBuffer[zlibPos++]);
+    } else {
+      byte = in.get();
+    }
     if (decodeTable) {
-      int pos = in.tellg();
-      return (decodeTable[byte] - (pos - 1)) & 0xFF;
+      return (decodeTable[byte] - pos) & 0xFF;
     }
     return byte;
   }
@@ -74,15 +240,15 @@ class Decoder {
     return read4();
   }
 
-  std::unique_ptr<char[]> read(size_t length, size_t off=0) {
-    auto bytes = make_unique<char[]>(length);
-    read(bytes.get(), length, off);
-    return bytes;
-  }
-
   void read(char* bytes, size_t length, size_t off=0) {
     int pos = in.tellg();
-    in.read(bytes, length);
+    if (zlibBuffer) {
+      pos = zlibStart + zlibPos;
+      memcpy(bytes, zlibBuffer.get() + zlibPos, length);
+      zlibPos += length;
+    } else {
+      in.read(bytes, length);
+    }
     if (decodeTable) {
       for (size_t i = 0; i < length; i++) {
         int t = bytes[off + i] & 0xFF;
@@ -90,6 +256,12 @@ class Decoder {
         bytes[off + i] = (char) x;
       }
     }
+  }
+
+  std::unique_ptr<char[]> read(size_t length, size_t off=0) {
+    auto bytes = make_unique<char[]>(length);
+    read(bytes.get(), length, off);
+    return bytes;
   }
 
   std::string readStr() {
@@ -141,25 +313,16 @@ class Decoder {
 
     length = outstring.size();
     auto bytes = make_unique<char[]>(length);
-    for (size_t i = 0; i < length; ++i)
-      bytes[i] = outstring[i];
+    memcpy(bytes.get(), outstring.c_str(), length);
 
     return bytes;
-  }
-
-  void writeTempDataFile(std::string *data_file_path, char *bytes, size_t length) {
-    char temp[] = "gmk_data.XXXXXX";
-    int fd = mkstemp(temp);
-    if (fd == -1) return;
-    write(fd, bytes, length);
-    close(fd);
-    data_file_path->append(temp, strlen(temp));
   }
 
   void readData(std::string *data_file_path=nullptr, bool compressed=false) {
     size_t length = read4();
     std::unique_ptr<char[]> bytes = compressed ? decompress(length) : read(length);
-    if (data_file_path && bytes) writeTempDataFile(data_file_path, bytes.get(), length);
+    using WriteTempDataFileManaged = std::string(*)(std::unique_ptr<char[]>, size_t);
+    if (data_file_path && bytes) threadTempFileWrite((WriteTempDataFileManaged)writeTempDataFile, data_file_path, std::move(bytes), length);
   }
 
   void readCompressedData(std::string *data_file_path=nullptr) {
@@ -170,92 +333,16 @@ class Decoder {
     readData(data_file_path, false);
   }
 
-  void writeTempImageFile(std::string *data_file_path, const char *bytes, size_t length, size_t width, size_t height) {
-    static const unsigned MINHEADER = 54; //minimum BMP header size
-    auto bmp = reinterpret_cast<const unsigned char*>(bytes); // all of the following logic expects unsigned
-
-    if (length < MINHEADER) {
-      err << "Image from the GMK file had a length '" << length << "' smaller than the minimum header "
-          << "size '" << MINHEADER << "' for the BMP format" << std::endl;
-      return;
-    }
-    if (bmp[0] != 'B' || bmp[1] != 'M') {
-      err << "Image from the GMK file did not have the correct BMP signature '"
-          << bmp[0] << bmp[1] << "'" << std::endl;
-      return;
-    }
-    unsigned pixeloffset = bmp[10] + 256 * bmp[11]; //where the pixel data starts
-    //read width and height from BMP header
-    size_t w = bmp[18] + bmp[19] * 256;
-    size_t h = bmp[22] + bmp[23] * 256;
-    //read number of channels from BMP header
-    if (bmp[28] != 24 && bmp[28] != 32) {
-      err << "Image from the GMK file was " << bmp[28] << " bit while this reader "
-          << "only supports 24 and 32 bit BMP images" << std::endl;
-      return;
-    }
-    unsigned numChannels = bmp[28] / 8;
-
-    //The amount of scanline bytes is width of image times channels, with extra bytes added if needed
-    //to make it a multiple of 4 bytes.
-    unsigned scanlineBytes = w * numChannels;
-    if (scanlineBytes % 4 != 0) scanlineBytes = (scanlineBytes / 4) * 4 + 4;
-
-    unsigned dataSize = scanlineBytes * h;
-    if (length < dataSize + pixeloffset) {
-      err << "Image from the GMK file had a length '" << length << "' smaller than the estimated "
-          << "size '" << (dataSize + pixeloffset) << "' based on the BMP header dimensions" << std::endl;
-      return;
-    }
-
-    std::vector<unsigned char> rgba(w * h * 4);
-
-    /*
-    There are 3 differences between BMP and the raw image buffer for LodePNG:
-    -it's upside down
-    -it's in BGR instead of RGB format (or BRGA instead of RGBA)
-    -each scanline has padding bytes to make it a multiple of 4 if needed
-    The 2D for loop below does all these 3 conversions at once.
-    */
-    for (unsigned y = 0; y < h; y++) {
-      for (unsigned x = 0; x < w; x++) {
-        //pixel start byte position in the BMP
-        unsigned bmpos = pixeloffset + (h - y - 1) * scanlineBytes + numChannels * x;
-        //pixel start byte position in the new raw image
-        unsigned newpos = 4 * y * w + 4 * x;
-        if (numChannels == 3) {
-          rgba[newpos + 0] = bmp[bmpos + 2]; //R<-B
-          rgba[newpos + 1] = bmp[bmpos + 1]; //G<-G
-          rgba[newpos + 2] = bmp[bmpos + 0]; //B<-R
-          rgba[newpos + 3] = 255;            //A<-A
-        } else {
-          rgba[newpos + 0] = bmp[bmpos + 3]; //R<-A
-          rgba[newpos + 1] = bmp[bmpos + 2]; //G<-B
-          rgba[newpos + 2] = bmp[bmpos + 1]; //B<-G
-          rgba[newpos + 3] = bmp[bmpos + 0]; //A<-R
-        }
-      }
-    }
-
-    unsigned char *buffer = nullptr;
-    size_t buffer_length;
-    lodepng_encode32(&buffer, &buffer_length, rgba.data(), w, h);
-
-    writeTempDataFile(data_file_path, reinterpret_cast<char*>(buffer), buffer_length);
-  }
-
-  void readImage(std::string *data_file_path=nullptr, size_t width=0, size_t height=0, bool compressed=false) {
-    size_t length = read4();
-    std::unique_ptr<char[]> bytes = compressed ? decompress(length) : read(length);
-    if (data_file_path && width && height && bytes) writeTempImageFile(data_file_path, bytes.get(), length, width, height);
-  }
-
   void readZlibImage(std::string *data_file_path=nullptr, size_t width=0, size_t height=0) {
-    readImage(data_file_path, width, height, true);
+    size_t length = read4();
+    std::unique_ptr<char[]> bytes = decompress(length);
+    if (data_file_path && bytes) threadTempFileWrite(writeTempImageFile, data_file_path, std::move(bytes), length, width, height);
   }
 
   void readBGRAImage(std::string *data_file_path=nullptr, size_t width=0, size_t height=0) {
-    readImage(data_file_path, width, height, false);
+    size_t length = read4();
+    std::unique_ptr<char[]> bytes = read(length);
+    if (data_file_path && bytes) threadTempFileWrite(writeTempBGRAImageFile, data_file_path, std::move(bytes), length, width, height);
   }
 
   void setSeed(int seed) {
@@ -285,8 +372,11 @@ class Decoder {
 
   private:
   std::istream &in;
+  std::unique_ptr<char[]> zlibBuffer;
+  int zlibPos, zlibStart;
   std::unique_ptr<int[]> decodeTable;
   std::unordered_map<TypeCase, std::unordered_map<int, std::vector<std::string*> > > postponeds;
+  std::vector<std::pair<std::future<std::string>, std::string*> > tempFileFuturesCreated;
 
   std::unique_ptr<int[]> makeEncodeTable(int seed) {
     auto table = make_unique<int[]>(256);
@@ -334,7 +424,7 @@ int LoadSettings(Decoder &dec) {
     return 0;
   }
 
-  //if (ver >= 800) beginInflate(in); // TODO: zlib beginInflate
+  if (ver >= 800) dec.beginInflate();
   dec.readBool(); // start_fullscreen
   if (ver >= 600) {
     dec.readBool(); // interpolate
@@ -429,7 +519,7 @@ int LoadSettings(Decoder &dec) {
   } else if (ver > 530) {
     LoadSettingsIncludes(dec);
   }
-  //in.endInflate(); TODO: zlib endInflate
+  dec.endInflate();
 
   return 1;
 }
@@ -443,9 +533,9 @@ int LoadTriggers(Decoder &dec) {
 
   int no = dec.read4();
   for (int i = 0; i < no; i++) {
-    //in.beginInflate();
+    dec.beginInflate();
     if (!dec.readBool()) {
-      //in.endInflate();
+      dec.endInflate();
       continue;
     }
     ver = dec.read4();
@@ -457,7 +547,7 @@ int LoadTriggers(Decoder &dec) {
     dec.readStr(); // trigger condition
     dec.read4(); // trigger check step
     dec.readStr(); // trigger constant
-    //in.endInflate();
+    dec.endInflate();
   }
   dec.skip(8); //last changed
 
@@ -637,7 +727,7 @@ std::unique_ptr<Path> LoadPath(Decoder &dec, int /*ver*/) {
   path->set_smooth(dec.readBool());
   path->set_closed(dec.readBool());
   path->set_precision(dec.read4());
-  dec.postponeName(path->mutable_background_room_name(), dec.read4(), TypeCase::kBackground);
+  dec.postponeName(path->mutable_background_room_name(), dec.read4(), TypeCase::kRoom);
   path->set_snap_x(dec.read4());
   path->set_snap_y(dec.read4());
   int nopoints = dec.read4();
@@ -730,7 +820,28 @@ int LoadActions(Decoder &dec, Event *event) {
       auto argument = action->add_arguments();
       argument->set_kind(static_cast<ArgumentKind>(argkinds[l]));
       std::string strval = dec.readStr();
-      argument->set_string(strval);
+
+      using ArgumentMutator = std::function<std::string*(Argument*)>;
+      using MutatorMap = std::unordered_map<ArgumentKind, ArgumentMutator>;
+
+      static const MutatorMap mutatorMap({
+        { ArgumentKind::ARG_SOUND,      &Argument::mutable_sound      },
+        { ArgumentKind::ARG_BACKGROUND, &Argument::mutable_background },
+        { ArgumentKind::ARG_SPRITE,     &Argument::mutable_sprite     },
+        { ArgumentKind::ARG_SCRIPT,     &Argument::mutable_script     },
+        { ArgumentKind::ARG_FONT,       &Argument::mutable_font       },
+        { ArgumentKind::ARG_OBJECT,     &Argument::mutable_object     },
+        { ArgumentKind::ARG_TIMELINE,   &Argument::mutable_timeline   },
+        { ArgumentKind::ARG_ROOM,       &Argument::mutable_room       },
+        { ArgumentKind::ARG_PATH,       &Argument::mutable_path       }
+      });
+
+      const auto &mutator = mutatorMap.find(argument->kind());
+      if (mutator != mutatorMap.end()) {
+        mutator->second(argument)->append(strval);
+      } else {
+        argument->set_string(strval);
+      }
     }
 
     action->set_is_not(dec.readBool());
@@ -876,8 +987,6 @@ std::unique_ptr<Room> LoadRoom(Decoder &dec, int ver) {
   if (ver == 520) dec.skip(6 * 4); //tile info
   // CURRENT_TAB, SCROLL_BAR_X, SCROLL_BAR_Y
   dec.read4(); dec.read4(); dec.read4();
-  // last instance id, last tile id
-  dec.read4(); dec.read4();
 
   return room;
 }
@@ -892,7 +1001,7 @@ int LoadIncludes(Decoder &dec) {
   int no = dec.read4();
   for (int i = 0; i < no; i++) {
     if (ver >= 800) {
-      //in.beginInflate();
+      dec.beginInflate();
       dec.skip(8); //last changed
     }
     ver = dec.read4();
@@ -913,7 +1022,7 @@ int LoadIncludes(Decoder &dec) {
     dec.readBool(); // overwrite existing
     dec.readBool(); // free memory after export
     dec.readBool(); // remove at game end
-    //in.endInflate();
+    dec.endInflate();
   }
 
   return 1;
@@ -941,7 +1050,7 @@ int LoadGameInformation(Decoder &dec) {
     return 0;
   }
 
-  //if (ver >= 800) in.beginInflate();
+  if (ver >= 800) dec.beginInflate();
   int bc = dec.read4();
   // if (bc >= 0) // background color
   if (ver < 800)
@@ -957,7 +1066,7 @@ int LoadGameInformation(Decoder &dec) {
   }
   if (ver >= 800) dec.skip(8); //last changed
   dec.readStr(); // the rtf text
-  //in.endInflate();
+  dec.endInflate();
 
   return 1;
 }
@@ -973,24 +1082,23 @@ struct GroupFactory {
 
 int LoadGroup(Decoder &dec, TypeMap &typeMap, GroupFactory groupFactory) {
   TypeCase type = groupFactory.type;
-  int ver = dec.read4();
-  if (!groupFactory.supportedGroupVersions.count(ver)) {
-    err << "GMK group '" << type << "' with version '" << ver << "' is unsupported" << std::endl;
+  int groupVer = dec.read4();
+  if (!groupFactory.supportedGroupVersions.count(groupVer)) {
+    err << "GMK group '" << type << "' with version '" << groupVer << "' is unsupported" << std::endl;
     return 0;
   }
 
   int count = dec.read4();
   for (int i = 0; i < count; ++i) {
-    //if (ver == 800) in.beginInflate();
-    if (!dec.readBool()) {
-      // was deleted
-      //in.endInflate();
+    if (groupVer >= 800) dec.beginInflate();
+    if (!dec.readBool()) { // was deleted
+      dec.endInflate();
       continue;
     }
     std::string name = dec.readStr();
-    if (ver == 800) dec.skip(8); //last changed
+    if (groupVer == 800) dec.skip(8); // last changed
 
-    ver = dec.read4();
+    int ver = dec.read4();
     if (!groupFactory.supportedVersions.count(ver)) {
       err << "GMK resource of type '" << type << "' with name '" << name
           << "' has an unsupported version '" << ver << "'" << std::endl;
@@ -1013,7 +1121,7 @@ int LoadGroup(Decoder &dec, TypeMap &typeMap, GroupFactory groupFactory) {
 
     auto &resMap = typeMap[type];
     resMap[i] = std::move(res);
-    //in.endInflate();
+    dec.endInflate();
   }
 
   return 1;
@@ -1064,7 +1172,23 @@ void LoadTree(Decoder &dec, TypeMap &typeMap, TreeNode* root) {
 }
 
 buffers::Project *LoadGMK(std::string fName) {
+  static const vector<GroupFactory> groupFactories({
+    { TypeCase::kSound,      { 400, 800      }, { 440, 600, 800      }, LoadSound      },
+    { TypeCase::kSprite,     { 400, 800, 810 }, { 400, 542, 800, 810 }, LoadSprite     },
+    { TypeCase::kBackground, { 400, 800      }, { 400, 543, 710      }, LoadBackground },
+    { TypeCase::kPath,       { 420, 800      }, { 530                }, LoadPath       },
+    { TypeCase::kScript,     { 400, 800, 810 }, { 400, 800, 810      }, LoadScript     },
+    { TypeCase::kFont,       { 440, 540, 800 }, { 540, 800           }, LoadFont       },
+    { TypeCase::kTimeline,   { 500, 800      }, { 500                }, LoadTimeline   },
+    { TypeCase::kObject,     { 400, 800      }, { 430                }, LoadObject     },
+    { TypeCase::kRoom,       { 420, 800      }, { 520, 541           }, LoadRoom       }
+  });
+  TypeMap typeMap;
   std::ifstream in(fName, std::ios::binary);
+  if (!in) {
+    err << "Could not open GMK for reading: " << fName << std::endl;
+    return nullptr;
+  }
   Decoder dec(in);
 
   int identifier = dec.read4();
@@ -1107,22 +1231,12 @@ buffers::Project *LoadGMK(std::string fName) {
     if (!LoadConstants(dec)) return nullptr;
   }
 
-  static const vector<GroupFactory> groupFactories({
-    { TypeCase::kSound,      { 400, 800      }, { 440, 600, 800      }, LoadSound      },
-    { TypeCase::kSprite,     { 400, 800, 810 }, { 400, 542, 800, 810 }, LoadSprite     },
-    { TypeCase::kBackground, { 400, 800      }, { 400, 543, 710      }, LoadBackground },
-    { TypeCase::kPath,       { 420, 800      }, { 530                }, LoadPath       },
-    { TypeCase::kScript,     { 400, 800, 810 }, { 400, 800, 810      }, LoadScript     },
-    { TypeCase::kFont,       { 440, 540, 800 }, { 540, 800           }, LoadFont       },
-    { TypeCase::kTimeline,   { 500, 800      }, { 500                }, LoadTimeline   },
-    { TypeCase::kObject,     { 400, 800      }, { 430                }, LoadObject     },
-    { TypeCase::kRoom,       { 420, 800      }, { 520, 541           }, LoadRoom       }
-  });
-  TypeMap typeMap;
-
   for (auto factory : groupFactories) {
     if (!LoadGroup(dec, typeMap, factory)) return nullptr;
   }
+
+  // last instance id, last tile id read after the final room is read
+  dec.read4(); dec.read4();
 
   if (ver >= 700) {
     if (!LoadIncludes(dec)) return nullptr;
@@ -1159,6 +1273,8 @@ buffers::Project *LoadGMK(std::string fName) {
   auto proj = std::make_unique<buffers::Project>();
   buffers::Game *game = proj->mutable_game();
   game->set_allocated_root(root.release());
+  // ensure all temp data files are written and the paths are set in the protos
+  dec.processTempFileFutures();
 
   return proj.release();
 }
