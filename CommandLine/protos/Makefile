@@ -12,7 +12,7 @@ endif
 
 LIBRARY := ../../libProtocols$(EXT)
 PROTO_DIR := codegen/
-CXXFLAGS := -I$(PROTO_DIR) -std=c++11 -Wall -Wextra -Wpedantic -g -fPIC -D_WIN32_WINNT=0x0600
+CXXFLAGS := -I$(PROTO_DIR) -std=c++11 -Wall -Wextra -Wpedantic -g -fPIC
 SRC_DIR := .
 OBJ_DIR := .eobjs
 
@@ -38,6 +38,7 @@ else
 	PROTO_OUT += $(PROTO_DIR)/server.grpc.pb.cc
 	PROTO_OBJECTS += $(OBJ_DIR)/codegen/server.grpc.o
 	LIBLDFLAGS := -lgrpc++
+	CXXFLAGS += -D_WIN32_WINNT=0x0600
 endif
 
 OBJDIRS = $(sort $(OBJ_DIR) $(dir $(PROTO_OBJECTS)) $(dir $(OBJECTS)))

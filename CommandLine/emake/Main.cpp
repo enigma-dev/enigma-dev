@@ -2,12 +2,19 @@
 #include "OptionsParser.hpp"
 #include "EnigmaPlugin.hpp"
 #include "Game.hpp"
+
 #ifndef CLI_DISABLE_SERVER
 #include "Server.hpp"
 #endif
+
 #include "SOG.hpp"
+
+#ifndef CLI_DISABLE_EGM
 #include "gmk.h"
 #include "gmx.h"
+#include "yyp.h"
+#endif
+
 #include "Proto2ES.h"
 
 #include <boost/filesystem.hpp>
@@ -45,8 +52,11 @@ int main(int argc, char* argv[])
     outputStream.rdbuf(nullptr);
     errorStream.rdbuf(nullptr);
   }
+#ifndef CLI_DISABLE_EGM
+  yyp::bind_output_streams(outputStream, errorStream);
   gmx::bind_output_streams(outputStream, errorStream);
   gmk::bind_output_streams(outputStream, errorStream);
+#endif
   plugin.Init();
   plugin.SetDefinitions(options.APIyaml().c_str());
 
@@ -113,6 +123,7 @@ int main(int argc, char* argv[])
     if (ext == "sog") {
       if (!ReadSOG(input_file, &game)) return 1;
       return plugin.BuildGame(game.ConstructGame(), mode, output_file.c_str());
+#ifndef CLI_DISABLE_EGM
     } else if (ext == "gm81" || ext == "gmk" || ext == "gm6" || ext == "gmd") {
       buffers::Project* project;
       if (!(project = gmk::LoadGMK(input_file))) return 1;
@@ -126,6 +137,11 @@ int main(int argc, char* argv[])
       buffers::Project* project;
       if (!(project = gmx::LoadGMX(input_file))) return 1;
       return plugin.BuildGame(project->mutable_game(), mode, output_file.c_str());
+    } else if (ext == "yyp") {
+      buffers::Project* project;
+      if (!(project = yyp::LoadYYP(input_file))) return 1;
+      return plugin.BuildGame(project->mutable_game(), mode, output_file.c_str());
+#endif
     } else {
       if (ext == "egm") {
         errorStream << "EGM format not yet supported. "

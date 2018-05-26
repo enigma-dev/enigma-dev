@@ -13,8 +13,8 @@ message Path {
   optional int32 id = 2 [(gmx) = "GMX_DEPRECATED"];
 
   optional string background_room_name = 3 [(gmx_id) = "backroom"];
-  optional int32 snap_x = 4 [(gmx) = "hsnap"];
-  optional int32 snap_y = 5 [(gmx) = "vsnap"];
+  optional int32 hsnap= 4;
+  optional int32 vsnap = 5;
 
   optional bool smooth = 6 [(gmx) = "kind"];
   optional bool closed = 7;

@@ -30,7 +30,13 @@ libProtocols: .FORCE
 libEGM: .FORCE libProtocols
 	$(MAKE) -C CommandLine/libEGM/
 
-emake: ENIGMA libEGM .FORCE
+EMAKE_TARGETS = ENIGMA .FORCE
+
+ifneq (_$(disable_egm),$(filter _$(disable_egm),_true _1 _yes _y))
+	EMAKE_TARGETS += libEGM
+endif
+
+emake: $(EMAKE_TARGETS)
 	$(MAKE) -C CommandLine/emake/
 
 test-runner: emake .FORCE

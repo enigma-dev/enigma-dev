@@ -19,14 +19,15 @@
 
 #include <pugixml.hpp>
 
-#include <iostream>
 #include <functional>
 #include <algorithm>
 #include <fstream>
 #include <iostream>
-#include <unordered_map>
 #include <sstream>
+#include <unordered_map>
 #include <vector>
+
+using CppType = google::protobuf::FieldDescriptor::CppType;
 
 using namespace buffers::resources;
 
@@ -190,7 +191,7 @@ std::vector<std::string> SplitString(const std::string &str, char delimiter) {
   return vec;
 }
 
-}  //namespace
+}  // Anonymous namespace
 
 void PackScript(std::string fName, int id, buffers::resources::Script *script) {
   outputStream << "Parsing " << fName << std::endl;
@@ -231,8 +232,7 @@ void PackShader(std::string fName, int id, buffers::resources::Shader *shader) {
   }
 }
 
-void PackRes(std::string &dir, std::string &name, int id, pugi::xml_node &node, google::protobuf::Message *m,
-             int depth) {
+void PackRes(std::string &dir, int id, pugi::xml_node &node, google::protobuf::Message *m, int depth) {
   const google::protobuf::Descriptor *desc = m->GetDescriptor();
   const google::protobuf::Reflection *refl = m->GetReflection();
   for (int i = 0; i < desc->field_count(); i++) {
@@ -245,168 +245,163 @@ void PackRes(std::string &dir, std::string &name, int id, pugi::xml_node &node, 
       id += opts.GetExtension(buffers::id_start);
       outputStream << "Setting " << field->name() << " (" << field->type_name() << ") as " << id << std::endl;
       refl->SetInt32(m, field, id);
-    } else if (depth == 0 && field->name() == "name") {
-      outputStream << "Setting " << field->name() << " (" << field->type_name() << ") as " << name.c_str() << std::endl;
-      refl->SetString(m, field, name);
     } else {
       const std::string gmxName = opts.GetExtension(buffers::gmx);
       const bool isFilePath = opts.GetExtension(buffers::file_path);
-      std::string xmlElement = gmxName;
+      std::string alias = gmxName;
       bool isSplit = false;
       bool isAttribute = false;
       pugi::xml_node child = node;
       pugi::xml_attribute attr;
 
-      // if deprecated we'll just try gmx name anyway and not whine when it fails
       if (gmxName == "GMX_DEPRECATED")
-        xmlElement = gmxName;
-      else {
-        // use the name the protobuf field uses unless there a (gmx) attr
-        if (xmlElement.empty()) xmlElement = field->name();
+        continue;
 
-        // this is for <point>0,0</point> crap
-        const std::string splitMarker = "GMX_SPLIT/";
-        size_t splitPos = gmxName.find(splitMarker);
-        isSplit = splitPos != std::string::npos;
+      // use the name the protobuf field uses unless there a (gmx) attr
+      if (alias.empty()) alias = field->name();
 
-        // if it's not a split then we deal with yoyo's useless nesting
-        if (!isSplit && xmlElement != "EGM_NESTED") {  // and our useless nesting
-          std::vector<std::string> nodes = SplitString(xmlElement, '/');
+      // this is for <point>0,0</point> crap
+      const std::string splitMarker = "GMX_SPLIT/";
+      size_t splitPos = gmxName.find(splitMarker);
+      isSplit = splitPos != std::string::npos;
 
-          for (auto n : nodes) {
-            child = child.child(n.c_str());
-            child.append_attribute("visited") = "true";
-            xmlElement = n;
-          }
+      // if it's not a split then we deal with yoyo's useless nesting
+      if (!isSplit && alias != "EGM_NESTED") {  // and our useless nesting
+        std::vector<std::string> nodes = SplitString(alias, '/');
+
+        for (auto n : nodes) {
+          child = child.child(n.c_str());
+          child.append_attribute("visited") = "true";
+          alias = n;
         }
+      }
 
-        // We want the data from the node "child" but if its empty what we seek is likely in the attributes
-        if (child.empty()) attr = node.attribute(xmlElement.c_str());
-        isAttribute = !attr.empty();
+      // We want the data from the node "child" but if its empty what we seek is likely in the attributes
+      if (child.empty()) attr = node.attribute(alias.c_str());
+      isAttribute = !attr.empty();
 
-        if (child.empty() && !isAttribute && !field->is_repeated() && xmlElement != "EGM_NESTED") {
-          // ename only exists if etype = 4. Also, etype and enumb don't exist in timeline events
-          pugi::xml_attribute a = node.attribute("eventtype");
-          if (xmlElement != "ename" && a.as_int() != 4 && node.path() != "/timeline/entry/event")
-            errorStream << "Error: no such element " << node.path() << "/" << xmlElement << std::endl;
-        } else {                       // bullshit special cases out of the way, we now look for proto feilds in xml
-          if (field->is_repeated()) {  // Repeated feilds (are usally messages or file_paths(strings)
-            outputStream << "Appending (" << field->type_name() << ") to " << field->name() << std::endl;
+      if (child.empty() && !isAttribute && !field->is_repeated() && alias != "EGM_NESTED") {
+        // ename only exists if etype = 4. Also, etype and enumb don't exist in timeline events
+        pugi::xml_attribute a = node.attribute("eventtype");
+        if (alias != "ename" && a.as_int() != 4 && node.path() != "/timeline/entry/event")
+          errorStream << "Error: no such element " << node.path() << "/" << alias << std::endl;
+      } else {                       // bullshit special cases out of the way, we now look for proto fields in xml
+        if (field->is_repeated()) {  // Repeated fields (are usally messages or file_paths(strings)
+          outputStream << "Appending (" << field->type_name() << ") to " << field->name() << std::endl;
 
-            switch (field->cpp_type()) {
-              case google::protobuf::FieldDescriptor::FieldDescriptor::CppType::CPPTYPE_MESSAGE: {  // repeated message
-                int cid = 0;
-                for (pugi::xml_node n = child; n != nullptr; n = n.next_sibling()) {
-                  if (n.name() ==
-                      xmlElement) {  // skip over any siblings that aren't twins <foo/><bar/><foo/> <- bar would be skipped
-                    n.append_attribute("visited") = "true";
-                    google::protobuf::Message *msg = refl->AddMessage(m, field);
-                    PackRes(dir, name, cid++, n, msg, depth + 1);
-                  }
+          switch (field->cpp_type()) {
+            case CppType::CPPTYPE_MESSAGE: {
+              int cid = 0;
+              for (pugi::xml_node n = child; n != nullptr; n = n.next_sibling()) {
+                if (n.name() ==
+                    alias) {  // skip over any siblings that aren't twins <foo/><bar/><foo/> <- bar would be skipped
+                  n.append_attribute("visited") = "true";
+                  google::protobuf::Message *msg = refl->AddMessage(m, field);
+                  PackRes(dir, cid++, n, msg, depth + 1);
                 }
-                break;
               }
-
-              case google::protobuf::FieldDescriptor::CppType::CPPTYPE_STRING: {  // repeated string
-                for (pugi::xml_node n = child; n != nullptr; n = n.next_sibling()) {
-                  if (n.name() == xmlElement) {
-                    n.append_attribute("visited") = "true";
-                    std::string value = n.text().as_string();
-                    if (isFilePath) {  // gotta prepend the gmx's path & fix the string to be posix compatible
-                      value = GMXPath2FilePath(dir, value);
-                    }
-                    refl->AddString(m, field, value);
-                  }
-                }
-                break;
-              }
-              /* I don't code options for repeated fields other than messages and strings because we don't need them atm
-               * BUT incase someone tries to add one to a proto in the future I added this warning to prevent the reader
-               * from exploding and gives them a warning of why their shit don't work and a clue where to implement a fix */
-              default: {
-                errorStream << "Error: missing condition for repeated type: " << field->type_name()
-                             << ". Instigated by: " << field->type_name() << std::endl;
-                break;
-              }
-            }
-          } else {  // Now we parse individual proto fields to individual xml fields (and attributes)
-            pugi::xml_text xmlValue;
-            std::string splitValue;
-
-            if (!isAttribute) {  // if data we want is not in an attribute (eg <bar x="9001">)
-              if (isSplit) {     // if data use a comma delimiter (eg (<foo>0,7,9</foo>)
-                std::vector<std::string> split = SplitString(node.text().as_string(), ',');
-                splitValue = split[static_cast<int>(gmxName.back()) - '0'];
-              } else  // else data is just in an xml tag (eg <foo>Josh can't read code</foo>)
-                xmlValue = child.text();
+              break;
             }
 
-            std::string value = (isAttribute) ? attr.as_string() : (isSplit) ? splitValue : xmlValue.as_string();
-            outputStream << "Setting " << field->name() << " (" << field->type_name() << ") as " << value << std::endl;
-
-            /* Here we finally set the proto values from the xml (unless it's a message). The same logic above is followed,
-             * if datas in attribute use that, else if it's in a split grab the text from a vector we previous split up by
-             * the delimeter, else if the datas in a element use that */
-            switch (field->cpp_type()) {
-              case google::protobuf::FieldDescriptor::CppType::
-                  CPPTYPE_MESSAGE: {  // If field is a singular message we need to recurse into this method again
-                google::protobuf::Message *msg = refl->MutableMessage(m, field);
-                PackRes(dir, name, 0, child, msg, depth + 1);
-                break;
-              }
-              case google::protobuf::FieldDescriptor::CppType::CPPTYPE_INT32: {  // if int32
-                refl->SetInt32(m, field,
-                               (isAttribute) ? attr.as_int() : (isSplit) ? std::stoi(splitValue) : xmlValue.as_int());
-                break;
-              }
-              case google::protobuf::FieldDescriptor::CppType::CPPTYPE_INT64: {  // if int64
-                refl->SetInt64(m, field,
-                               (isAttribute) ? attr.as_int() : (isSplit) ? std::stoi(splitValue) : xmlValue.as_int());
-                break;
-              }
-              case google::protobuf::FieldDescriptor::CppType::CPPTYPE_UINT32: {  // if uint32
-                refl->SetUInt32(
-                    m, field, (isAttribute) ? attr.as_uint() : (isSplit) ? std::stoi(splitValue) : xmlValue.as_uint());
-                break;
-              }
-              case google::protobuf::FieldDescriptor::CppType::CPPTYPE_UINT64: {  // if uint64
-                refl->SetUInt64(
-                    m, field, (isAttribute) ? attr.as_uint() : (isSplit) ? std::stoi(splitValue) : xmlValue.as_uint());
-                break;
-              }
-              case google::protobuf::FieldDescriptor::CppType::CPPTYPE_DOUBLE: {  // if double
-                refl->SetDouble(
-                    m, field,
-                    (isAttribute) ? attr.as_double() : (isSplit) ? std::stod(splitValue) : xmlValue.as_double());
-                break;
-              }
-              case google::protobuf::FieldDescriptor::CppType::CPPTYPE_FLOAT: {  // if float
-                refl->SetFloat(
-                    m, field,
-                    (isAttribute) ? attr.as_float() : (isSplit) ? std::stof(splitValue) : xmlValue.as_float());
-                break;
-              }
-              case google::protobuf::FieldDescriptor::CppType::CPPTYPE_BOOL: {  // if bool
-                refl->SetBool(m, field,
-                              (isAttribute) ? (attr.as_int() != 0)
-                                            : (isSplit) ? (std::stof(splitValue) != 0) : (xmlValue.as_int() != 0));
-                break;
-              }
-              case google::protobuf::FieldDescriptor::CppType::CPPTYPE_ENUM: {  // if enum
-                refl->SetEnum(
-                    m, field,
-                    field->enum_type()->FindValueByNumber(
-                        (isAttribute) ? attr.as_int() : (isSplit) ? std::stoi(splitValue) : xmlValue.as_int()));
-                break;
-              }
-              case google::protobuf::FieldDescriptor::CppType::CPPTYPE_STRING: {  // if singular string
-                std::string value = (isAttribute) ? attr.as_string() : (isSplit) ? splitValue : xmlValue.as_string();
-                if (isFilePath) {  // again gotta prepend the gmx's path & fix the string to be posix compatible
-                  value = GMXPath2FilePath(dir, value);
+            case CppType::CPPTYPE_STRING: {
+              for (pugi::xml_node n = child; n != nullptr; n = n.next_sibling()) {
+                if (n.name() == alias) {
+                  n.append_attribute("visited") = "true";
+                  std::string value = n.text().as_string();
+                  if (isFilePath) {  // gotta prepend the gmx's path & fix the string to be posix compatible
+                    value = GMXPath2FilePath(dir, value);
+                  }
+                  refl->AddString(m, field, value);
                 }
-                refl->SetString(m, field, value);
-                break;
               }
+              break;
+            }
+            /* I don't code options for repeated fields other than messages and strings because we don't need them atm
+             * BUT incase someone tries to add one to a proto in the future I added this warning to prevent the reader
+             * from exploding and gives them a warning of why their shit don't work and a clue where to implement a fix */
+            default: {
+              errorStream << "Error: missing condition for repeated type: " << field->type_name()
+                            << ". Instigated by: " << field->type_name() << std::endl;
+              break;
+            }
+          }
+        } else {  // Now we parse individual proto fields to individual xml fields (and attributes)
+          pugi::xml_text xmlValue;
+          std::string splitValue;
+
+          if (!isAttribute) {  // if data we want is not in an attribute (eg <bar x="9001">)
+            if (isSplit) {     // if data use a comma delimiter (eg (<foo>0,7,9</foo>)
+              std::vector<std::string> split = SplitString(node.text().as_string(), ',');
+              splitValue = split[static_cast<int>(gmxName.back()) - '0'];
+            } else  // else data is just in an xml tag (eg <foo>Josh can't read code</foo>)
+              xmlValue = child.text();
+          }
+
+          std::string value = (isAttribute) ? attr.as_string() : (isSplit) ? splitValue : xmlValue.as_string();
+          outputStream << "Setting " << field->name() << " (" << field->type_name() << ") as " << value << std::endl;
+
+          /* Here we finally set the proto values from the xml (unless it's a message). The same logic above is followed,
+           * if datas in attribute use that, else if it's in a split grab the text from a vector we previous split up by
+           * the delimeter, else if the datas in a element use that */
+          switch (field->cpp_type()) {
+            // If field is a singular message we need to recurse into this method again
+            case CppType::CPPTYPE_MESSAGE: {
+              google::protobuf::Message *msg = refl->MutableMessage(m, field);
+              PackRes(dir, 0, child, msg, depth + 1);
+              break;
+            }
+            case CppType::CPPTYPE_INT32: {
+              refl->SetInt32(m, field,
+                              (isAttribute) ? attr.as_int() : (isSplit) ? std::stoi(splitValue) : xmlValue.as_int());
+              break;
+            }
+            case CppType::CPPTYPE_INT64: {
+              refl->SetInt64(m, field,
+                              (isAttribute) ? attr.as_int() : (isSplit) ? std::stoi(splitValue) : std::stoll(xmlValue.as_string()));
+              break;
+            }
+            case CppType::CPPTYPE_UINT32: {
+              refl->SetUInt32(
+                  m, field, (isAttribute) ? attr.as_uint() : (isSplit) ? std::stoi(splitValue) : xmlValue.as_uint());
+              break;
+            }
+            case CppType::CPPTYPE_UINT64: {
+              refl->SetUInt64(
+                  m, field, (isAttribute) ? attr.as_uint() : (isSplit) ? std::stoi(splitValue) : std::stoull(xmlValue.as_string()));
+              break;
+            }
+            case CppType::CPPTYPE_DOUBLE: {
+              refl->SetDouble(
+                  m, field,
+                  (isAttribute) ? attr.as_double() : (isSplit) ? std::stod(splitValue) : xmlValue.as_double());
+              break;
+            }
+            case CppType::CPPTYPE_FLOAT: {
+              refl->SetFloat(
+                  m, field,
+                  (isAttribute) ? attr.as_float() : (isSplit) ? std::stof(splitValue) : xmlValue.as_float());
+              break;
+            }
+            case CppType::CPPTYPE_BOOL: {
+              refl->SetBool(m, field,
+                            (isAttribute) ? (attr.as_int() != 0)
+                                          : (isSplit) ? (std::stof(splitValue) != 0) : (xmlValue.as_int() != 0));
+              break;
+            }
+            case CppType::CPPTYPE_ENUM: {
+              refl->SetEnum(
+                  m, field,
+                  field->enum_type()->FindValueByNumber(
+                      (isAttribute) ? attr.as_int() : (isSplit) ? std::stoi(splitValue) : xmlValue.as_int()));
+              break;
+            }
+            case CppType::CPPTYPE_STRING: {
+              std::string value = (isAttribute) ? attr.as_string() : (isSplit) ? splitValue : xmlValue.as_string();
+              if (isFilePath) {  // again gotta prepend the gmx's path & fix the string to be posix compatible
+                value = GMXPath2FilePath(dir, value);
+              }
+              refl->SetString(m, field, value);
+              break;
             }
           }
         }
@@ -444,7 +439,7 @@ void PackBuffer(std::string type, std::string res, int &id, google::protobuf::Me
       outputStream << "Parsing " << fName << "..." << std::endl;
       // Start a resource (sprite, object, room)
       std::string dir = fName.substr(0, fName.find_last_of("/"));
-      PackRes(dir, resName, id++, root, m, 0);
+      PackRes(dir, id++, root, m, 0);
 
       visited_walker walker;
       doc.traverse(walker);
