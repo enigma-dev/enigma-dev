@@ -1,0 +1,51 @@
+syntax = "proto2";
+package buffers;
+
+import "game.proto";
+
+service Compiler {
+  rpc CompileBuffer (CompileRequest) returns (stream CompileReply);
+
+  rpc FirstResource (Empty) returns (Resource);
+  rpc NextResource (Empty) returns (Resource);
+
+  //std::function<syntax_error*(const char*, const char*)> rpc DefinitionsModified = nullptr;
+  //std::function<syntax_error*(int, const char**, const char*)> rpc SyntaxCheck = nullptr;
+
+  rpc Teardown (Empty) returns (Empty);
+}
+
+message Empty {
+}
+
+message Resource {
+  optional string value = 1;
+  optional bool is_function = 2;
+  optional int32 arg_count_min = 3;
+  optional int32 arg_count_max = 4;
+  optional int32 overload_count = 5;
+  optional int32 is_type_name = 6;
+  optional int32 is_global = 7;
+  optional bool is_end = 8;
+  repeated string parameters = 9;
+}
+
+enum CompileMode {
+  RUN = 1;
+  DEBUG = 2;
+  DESIGN = 3;
+  COMPILE = 4;
+  REBUILD = 5;
+  INVALID = 6;
+}
+
+message CompileRequest {
+  optional Game game = 1;
+  optional string name = 2;
+  optional CompileMode mode = 3;
+}
+
+message CompileReply {
+  optional string message = 1;
+  optional int32 progress = 2;
+}
