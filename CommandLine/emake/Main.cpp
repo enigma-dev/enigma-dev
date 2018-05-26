@@ -6,6 +6,7 @@
 #include "Server.hpp"
 #endif
 #include "SOG.hpp"
+#include "gmk.h"
 #include "gmx.h"
 #include "Proto2ES.h"
 
@@ -45,6 +46,7 @@ int main(int argc, char* argv[])
     errorStream.rdbuf(nullptr);
   }
   gmx::bind_output_streams(outputStream, errorStream);
+  gmk::bind_output_streams(outputStream, errorStream);
   plugin.Init();
   plugin.SetDefinitions(options.APIyaml().c_str());
 
@@ -106,10 +108,12 @@ int main(int argc, char* argv[])
     if (ext == "sog") {
       if (!ReadSOG(input_file, &game)) return 1;
       return plugin.BuildGame(game.ConstructGame(), mode, output_file.c_str());
+    } else if (ext == "gmk") {
+      buffers::Project* project;
+      if (!(project = gmk::LoadGMK(input_file))) return 1;
+      return plugin.BuildGame(project->mutable_game(), mode, output_file.c_str());
     } else if (ext == "gmx") {
       boost::filesystem::path p = input_file;
-      std::string gmxPath = input_file;
-
       if (boost::filesystem::is_directory(p)) {
         input_file += "/" + p.filename().stem().string() + ".project.gmx";
       }

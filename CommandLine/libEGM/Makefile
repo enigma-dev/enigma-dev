@@ -1,7 +1,15 @@
-LIBRARY   := libGMX.a
+OS := $(shell uname -s)
+ifeq ($(OS), Linux)
+	EXT := .so
+else ifeq ($(OS), Darwin)
+	EXT := .dylib
+else
+	EXT := .dll
+endif
+
+LIBRARY   := ../../libEGM$(EXT)
 PROTO_DIR := ../protos
-CXXFLAGS  := -I/mingw64/include/pugixml-1.8/ -I$(PROTO_DIR) -I$(PROTO_DIR)/codegen -std=c++11 -Wall -Wextra -Wpedantic -g
-LDFLAGS   := $(OS_LIBS) -L../../ -lProtocols -L/mingw64/lib/pugixml-1.8/ -lpugixml
+CXXFLAGS  := -I/mingw64/include/pugixml-1.8/ -I$(PROTO_DIR) -I$(PROTO_DIR)/codegen -std=c++14 -Wall -Wextra -Wpedantic -g -fPIC
 SRC_DIR   := .
 OBJ_DIR   := .eobjs
 
@@ -23,7 +31,7 @@ clean:
 	rm -rf $(LIBRARY) $(OBJ_DIR)
 
 $(LIBRARY): $(OBJECTS)
-	ar rvs $@ $^
+	$(CXX) -shared -o $@ $^ -lz -L/mingw64/lib/pugixml-1.8/ -lpugixml -L../../ -lProtocols -lprotobuf
 
 # Create the object directories
 $(OBJDIRS):
