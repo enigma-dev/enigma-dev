@@ -482,8 +482,8 @@ void AddPath(const char* name, const buffers::resources::Path& pth) {
   p.closed = pth.closed();
   p.precision = pth.precision();
 
-  p.snapX = pth.snap_x();
-  p.snapY = pth.snap_y();
+  p.snapX = pth.hsnap();
+  p.snapY = pth.vsnap();
 
   p.pointCount = pth.points_size();
   if (p.pointCount > 0) {
