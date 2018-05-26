@@ -33,7 +33,7 @@ void CallBack::SetProgressText(const char*)
 {
 }
 
-void CallBack::SetOutFile(const char* file)
+void CallBack::SetOutFile(const char* /*file*/)
 {
 }
 

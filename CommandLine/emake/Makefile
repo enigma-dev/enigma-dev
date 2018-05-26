@@ -27,6 +27,15 @@ LDFLAGS   := $(OS_LIBS) -L/mingw64/lib/pugixml-1.8/ -lpugixml -L../../ -lProtoco
 rwildcard=$(wildcard $1/$2) $(foreach d,$(wildcard $1/*),$(call rwildcard,$d,$2))
 SOURCES := $(call rwildcard,$(SRC_DIR),*.cpp)
 ifeq ($(TRAVIS), true)
+	disable_server := true
+endif
+ifeq (_$(disable_egm),$(filter _$(disable_egm),_true _1 _yes _y))
+	CXXFLAGS += -DCLI_DISABLE_EGM
+else
+	CXXFLAGS += -I../libEGM -I../libEGM
+	LDFLAGS += $(shell pkg-config --libs pugixml) -lEGM
+endif
+ifeq (_$(disable_server),$(filter _$(disable_server),_true _1 _yes _y))
 	SOURCES := $(filter-out ./Server.cpp, $(SOURCES))
 	CXXFLAGS += -DCLI_DISABLE_SERVER
 else

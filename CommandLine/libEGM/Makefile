@@ -9,7 +9,7 @@ endif
 
 LIBRARY   := ../../libEGM$(EXT)
 PROTO_DIR := ../protos
-CXXFLAGS  := -I/mingw64/include/pugixml-1.8/ -I$(PROTO_DIR) -I$(PROTO_DIR)/codegen -I../../lodepng -std=c++14 -Wall -Wextra -Wpedantic -g -fPIC
+CXXFLAGS  := $(shell pkg-config --cflags pugixml) -I$(PROTO_DIR) -I$(PROTO_DIR)/codegen -I../../lodepng -std=c++14 -Wall -Wextra -Wpedantic -g -fPIC
 SRC_DIR   := .
 OBJ_DIR   := .eobjs
 
@@ -30,8 +30,9 @@ obj_dirs: $(OBJDIRS)
 clean:
 	rm -rf $(LIBRARY) $(OBJ_DIR)
 
+# -lpugixml is redundantly specified because the Trusty Tahr package for pugixml does not have a proper pkg-config
 $(LIBRARY): $(OBJECTS)
-	$(CXX) -shared -o $@ $^ -lz -L/mingw64/lib/pugixml-1.8/ -lpugixml -L../../ -lProtocols -lprotobuf -L../../lodepng -llodepng
+	$(CXX) -shared -o $@ $^ -lz $(shell pkg-config --libs pugixml) -lpugixml -L../../ -lProtocols -lprotobuf -L../../lodepng -llodepng
 
 # Create the object directories
 $(OBJDIRS):
