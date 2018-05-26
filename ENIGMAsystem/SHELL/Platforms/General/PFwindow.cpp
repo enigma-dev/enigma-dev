@@ -1,6 +1,8 @@
 #include "PFwindow.h"
 #include "PFmain.h"
 
+#include "Universal_System/roomsystem.h"  // room_width
+
 #include <map>
 
 namespace enigma {
@@ -10,6 +12,11 @@ char last_mousestatus[3];
 char last_keybdstatus[256];
 char keybdstatus[256];
 static std::map<int, int> keybdmap;
+
+bool windowAdapt = true;
+int windowWidth = 0, windowHeight = 0;
+int cursorInt = 0, regionWidth = 0, regionHeight = 0, windowX = 0, windowY = 0;
+double scaledWidth = 0, scaledHeight = 0;
 
 void input_initialize() {
   //Clear the input arrays
@@ -31,6 +38,45 @@ void input_push() {
     last_keybdstatus[i] = keybdstatus[i];
   }
   enigma_user::mouse_hscrolls = enigma_user::mouse_vscrolls = 0;
+}
+
+void compute_window_size() {
+  if (!regionWidth) return;
+
+  bool isFullScreen = enigma_user::window_get_fullscreen();
+  int parWidth = isFullScreen ? enigma_user::display_get_width() : windowWidth,
+      parHeight = isFullScreen ? enigma_user::display_get_height() : windowHeight;
+  if (viewScale > 0)  //Fixed Scale
+  {
+    double viewDouble = viewScale / 100.0;
+    scaledWidth = regionWidth * viewDouble;
+    scaledHeight = regionHeight * viewDouble;
+  } else if (viewScale == 0)  //Full Scale
+  {
+    scaledWidth = parWidth;
+    scaledHeight = parHeight;
+  } else  //Keep Aspect Ratio
+  {
+    double fitWidth = parWidth / double(regionWidth), fitHeight = parHeight / double(regionHeight);
+    if (fitWidth < fitHeight) {
+      scaledWidth = parWidth;
+      scaledHeight = regionHeight * fitWidth;
+    } else {
+      scaledWidth = regionWidth * fitHeight;
+      scaledHeight = parHeight;
+    }
+  }
+
+  if (!isFullScreen) {
+    if (windowAdapt && viewScale > 0)  // If the window is to be adapted and Fixed Scale
+    {
+      if (scaledWidth > windowWidth) windowWidth = scaledWidth;
+      if (scaledHeight > windowHeight) windowHeight = scaledHeight;
+    }
+    enigma_user::window_set_rectangle(0, 0, enigma_user::display_get_width(), enigma_user::display_get_height());
+  } else {
+    enigma_user::window_set_rectangle(0, 0, parWidth, parHeight);
+  }
 }
 
 }  //namespace enigma
@@ -195,6 +241,82 @@ void mouse_wait() {
       if (enigma::mousestatus[i]) return;
     enigma::Sleep(10);  // Sleep 1/100 second
   }
+}
+
+void window_set_color(int color) { enigma::windowColor = color; }
+
+int window_get_color() { return enigma::windowColor; }
+
+void window_default(bool center_size) {
+  int xm = room_width, ym = room_height;
+  if (view_enabled) {
+    int tx = 0, ty = 0;
+    for (int i = 0; i < 8; i++)
+      if (view_visible[i]) {
+        if (view_xport[i] + view_wport[i] > tx) tx = (int)(view_xport[i] + view_wport[i]);
+        if (view_yport[i] + view_hport[i] > ty) ty = (int)(view_yport[i] + view_hport[i]);
+      }
+    if (tx and ty) xm = tx, ym = ty;
+  } else {
+    int screen_width = display_get_width();
+    int screen_height = display_get_height();
+    // By default if the room is too big instead of creating a gigantic ass window
+    // make it not bigger than the screen to full screen it, this is what 8.1 and Studio
+    // do, if the user wants to manually override this they can using
+    // views/screen_set_viewport or window_set_size/window_set_region_size
+    // We won't limit those functions like GM, just the default.
+    if (xm > screen_width) xm = screen_width;
+    if (ym > screen_height) ym = screen_height;
+  }
+  bool center = true;
+  if (center_size) {
+    center = (xm != enigma::windowWidth || ym != enigma::windowHeight);
+  }
+
+  enigma::windowWidth = enigma::regionWidth = xm;
+  enigma::windowHeight = enigma::regionHeight = ym;
+  if (center) window_center();
+
+  enigma::compute_window_size();
+}
+
+void window_center() {
+  window_set_position(display_get_width() / 2 - window_get_width() / 2,
+                      display_get_height() / 2 - window_get_height() / 2);
+}
+
+void window_set_freezeonlosefocus(bool freeze) { enigma::freezeOnLoseFocus = freeze; }
+
+bool window_get_freezeonlosefocus() { return enigma::freezeOnLoseFocus; }
+
+int window_get_region_width() { return enigma::regionWidth; }
+
+int window_get_region_height() { return enigma::regionHeight; }
+
+int window_get_region_width_scaled() { return enigma::scaledWidth; }
+
+int window_get_region_height_scaled() { return enigma::scaledHeight; }
+
+void window_set_region_scale(double scale, bool adaptwindow) {
+  enigma::viewScale = int(scale * 100);
+  enigma::windowAdapt = adaptwindow;
+  enigma::compute_window_size();
+}
+
+double window_get_region_scale() { return enigma::viewScale / 100.0; }
+
+void window_set_region_size(int w, int h, bool adaptwindow) {
+  if (w <= 0 || h <= 0) return;
+
+  enigma::regionWidth = w;
+  enigma::regionHeight = h;
+  enigma::windowAdapt = adaptwindow;
+  enigma::compute_window_size();
+}
+
+void window_set_rectangle(int x, int y, int width, int height) {
+  window_set_size(width, height);
+  window_set_position(x, y);
 }
 
 }  //namespace enigma_user

@@ -46,11 +46,7 @@
 using uint = unsigned;
 
 namespace enigma {
-extern bool gameWindowFocused;
-extern bool freezeOnLoseFocus;
-extern int windowColor;
 int current_room_speed;
-int cursorInt;
 //TODO: Implement pause events
 unsigned long current_time_mcs = 0;  // microseconds since the start of the game
 
@@ -128,30 +124,15 @@ void window_set_minimized(bool minimized) {}
 void window_set_maximized(bool maximized) {}
 bool window_get_minimized() { return false; }
 bool window_get_maximized() { return false; }
-void window_default(bool center_size) {}
 void window_mouse_set(int x, int y) {}
 int window_get_x() { return -1; }
 int window_get_y() { return -1; }
 int window_get_width() { return -1; }
 int window_get_height() { return -1; }
-bool window_get_freezeonlosefocus() { return false; }
 bool window_get_fullscreen() { return false; }
 void window_set_position(int x, int y) {}
 void window_set_size(unsigned int w, unsigned int h) {}
-void window_set_rectangle(int x, int y, int w, int h) {}
-void window_set_freezeonlosefocus(bool freeze) {}
 void window_set_fullscreen(bool full) {}
-int window_get_cursor() { return enigma::cursorInt; }
-void window_set_region_scale(double scale, bool adaptwindow) {}
-double window_get_region_scale() { return 0; }
-void window_set_region_size(int w, int h, bool adaptwindow) {}
-int window_get_region_width() { return 0; }
-int window_get_region_height() { return 0; }
-int window_get_region_width_scaled() { return 0; }
-int window_get_region_height_scaled() { return 0; }
-void window_set_color(int color) {}
-int window_get_color() { return -1; }
-void window_center() {}
 int window_set_cursor(int c) {
   enigma::cursorInt = c;
   return 0;
@@ -189,6 +170,7 @@ int main(int argc, char** argv) {
 
   // Set the working_directory
   char buffer[1024];
+
   if (getcwd(buffer, sizeof(buffer)) != NULL)
     fprintf(stdout, "Current working dir: %s\n", buffer);
   else

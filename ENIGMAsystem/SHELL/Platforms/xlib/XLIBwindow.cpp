@@ -47,105 +47,6 @@ using namespace std;
 
 using namespace enigma::x11;
 
-namespace enigma {
-  bool windowAdapt = true;
-  int regionWidth = 0, regionHeight = 0, windowWidth = 0, windowHeight = 0;
-  double scaledWidth = 0, scaledHeight = 0;
-    
-  void setwindowsize(int forceX=-1, int forceY=-1)
-  {
-      if (!regionWidth)
-          return;
-
-      Screen *screen = DefaultScreenOfDisplay(disp);
-      int parWidth = isFullScreen?XWidthOfScreen(screen):windowWidth, parHeight = isFullScreen?XHeightOfScreen(screen):windowHeight;
-      if (viewScale > 0)  //Fixed Scale
-      {
-          double viewDouble = viewScale/100.0;
-          scaledWidth = regionWidth*viewDouble;
-          scaledHeight = regionHeight*viewDouble;
-      }
-      else if (viewScale == 0)  //Full Scale
-      {
-          scaledWidth = parWidth;
-          scaledHeight = parHeight;
-      }
-      else  //Keep Aspect Ratio
-      {
-          double fitWidth = parWidth/double(regionWidth), fitHeight = parHeight/double(regionHeight);
-          if (fitWidth < fitHeight)
-          {
-              scaledWidth = parWidth;
-              scaledHeight = regionHeight*fitWidth;
-          }
-          else
-          {
-              scaledWidth = regionWidth*fitHeight;
-              scaledHeight = parHeight;
-          }
-      }
-
-      if (!isFullScreen)
-      {
-          if (windowAdapt && viewScale > 0) // If the window is to be adapted and Fixed Scale
-          {
-              if (scaledWidth > windowWidth)
-                  windowWidth = scaledWidth;
-              if (scaledHeight > windowHeight)
-                  windowHeight = scaledHeight;
-          }
-          //Now actually set the window's position and size:
-          if (forceX==-1 || forceY==-1) {
-            enigma_user::window_set_size(windowWidth, windowHeight);
-          } else {
-            enigma_user::window_set_rectangle(forceX, forceY, windowWidth, windowHeight);
-          }
-      } else {
-        //SetWindowPos(hWnd, NULL, 0, 0, parWidth, parHeight, SWP_NOACTIVATE); 
-      }
-  }
-}
-
-namespace enigma_user {
-
-int window_get_region_width() {
-  return enigma::regionWidth;
-}
-
-int window_get_region_height() {
-  return enigma::regionHeight;
-}
-
-int window_get_region_width_scaled() {
-  return enigma::scaledWidth;
-}
-
-int window_get_region_height_scaled() {
-  return enigma::scaledHeight;
-}
-
-void window_set_region_scale(double scale, bool adaptwindow) {
-  enigma::viewScale = int(scale*100);
-  enigma::windowAdapt = adaptwindow;
-  enigma::setwindowsize();
-}
-
-double window_get_region_scale() {
-  return enigma::viewScale/100.0;
-}
-
-void window_set_region_size(int w, int h, bool adaptwindow) {
-  if (w <= 0 || h <= 0) return;
-
-  enigma::regionWidth = w;
-  enigma::regionHeight = h;
-  enigma::windowAdapt = adaptwindow;
-  enigma::setwindowsize();
-  window_center();
-}
-
-}
-
 //////////
 // INIT //
 //////////
@@ -429,50 +330,6 @@ bool window_get_maximized() {
 	return windowHasAtom(maximized);
 }
 
-void window_default(bool center_size)
-{
-  int xm = room_width, ym = room_height;
-  if (view_enabled)
-  {
-    int tx = 0, ty = 0;
-    for (int i = 0; i < 8; i++)
-      if (view_visible[i])
-      {
-        if (view_xport[i]+view_wport[i] > tx)
-          tx = (int)(view_xport[i]+view_wport[i]);
-        if (view_yport[i]+view_hport[i] > ty)
-          ty = (int)(view_yport[i]+view_hport[i]);
-      }
-    if (tx and ty)
-      xm = tx, ym = ty;
-  } else {
-    // By default if the room is too big instead of creating a gigantic ass window
-    // make it not bigger than the screen to full screen it, this is what 8.1 and Studio
-    // do, if the user wants to manually override this they can using
-    // views/screen_set_viewport or window_set_size/window_set_region_size
-    // We won't limit those functions like GM, just the default.
-    Screen *screen = DefaultScreenOfDisplay(disp);
-    if (xm > screen->width) xm = screen->width;
-    if (ym > screen->height) ym = screen->height;
-  }
-  bool center = true;
-  if (center_size) {
-    center = (xm != window_get_width() || ym != window_get_height());
-  }
-  enigma::windowWidth = enigma::regionWidth = xm;
-  enigma::windowHeight = enigma::regionHeight = ym;
-
-  int forceX = -1;
-  int forceY = -1;
-  if (center) {
-    forceX = display_get_width()/2 - enigma::windowWidth/2;
-    forceY = display_get_height()/2 - enigma::windowHeight/2;
-    //window_center();
-  }
-  
-  enigma::setwindowsize(forceX, forceY);
-}
-
 void window_mouse_set(int x,int y) {
 	XWarpPointer(disp,None,win,0,0,0,0,(int)x,(int)y);
 }
@@ -498,39 +355,14 @@ void window_set_position(int x,int y)
 	XGetWindowAttributes(disp,win,&wa);
 	XMoveWindow(disp,win,(int) x  - wa.x,(int) y - wa.y);
 }
+
 void window_set_size(unsigned int w,unsigned int h) {
 	XResizeWindow(disp,win, w, h);
-}
-void window_set_rectangle(int x,int y,int w,int h) {
-	XMoveResizeWindow(disp, win, x, y, w, h);
-}
-
-//Center
-void window_center()
-{
-	Window r;
-	int x,y;
-	uint w,h,b,d;
-	XGetGeometry(disp,win,&r,&x,&y,&w,&h,&b,&d);
-	Screen *s = DefaultScreenOfDisplay(disp);
-   int windowX = s->width/2-w/2;
-   int windowY = s->height/2-h/2;
-	XMoveWindow(disp,win,windowX,windowY);
 }
 
 ////////////////
 // FULLSCREEN //
 ////////////////
-
-void window_set_freezeonlosefocus(bool freeze)
-{
-    enigma::freezeOnLoseFocus = freeze;
-}
-
-bool window_get_freezeonlosefocus()
-{
-    return enigma::freezeOnLoseFocus;
-}
 
 void window_set_fullscreen(bool full)
 {
@@ -551,7 +383,7 @@ void window_set_fullscreen(bool full)
 	xev.xclient.data.l[2] = 0;
 	XSendEvent(disp,DefaultRootWindow(disp),False,SubstructureRedirectMask|SubstructureNotifyMask,&xev);
 
-	enigma::setwindowsize();
+	enigma::compute_window_size();
 }
 
 bool window_get_fullscreen() {
@@ -658,7 +490,6 @@ namespace enigma_user {
 
 namespace enigma {
   int current_room_speed;
-  int cursorInt;
   void set_room_speed(int rs)
   {
     current_room_speed = rs;
@@ -747,20 +578,6 @@ bool keyboard_check_direct(int key)
 
   key = XKeysymToKeycode(enigma::x11::disp, enigma::keyrmap[key]);
   return (keyState[key >> 3] & (1 << (key & 7)));
-}
-
-void window_set_color(int color)
-{
-    enigma::windowColor = color;
-
-    //Inform xlib
-    int revColor = (color & 0xFF000000) | ((color & 0xFF0000) >> 16) | (color & 0xFF00) | ((color & 0xFF) << 16);
-    XSetWindowBackground(disp, win, revColor);
-}
-
-int window_get_color()
-{
-    return enigma::windowColor;
 }
 
 void clipboard_set_text(string text)

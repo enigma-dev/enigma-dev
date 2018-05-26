@@ -23,7 +23,7 @@ using namespace std;
 
 #include "Universal_System/estring.h" // For string_replace_all
 #include "Universal_System/var4.h"
-#include "Universal_System/roomsystem.h"
+#include "Universal_System/roomsystem.h" // room_caption
 #include "Platforms/General/PFmain.h" // For those damn vk_ constants.
 
 #include "Platforms/platforms_mandatory.h"
@@ -40,112 +40,10 @@ static int displayInitialResolutionWidth = 0, displayInitialResolutionHeight = 0
 namespace enigma
 {
   extern HWND hWnd;
-  bool windowAdapt = true;
-  int windowWidth = 0, windowHeight = 0;
-  int cursorInt = 0, regionWidth = 0, regionHeight = 0, windowX = 0, windowY = 0;
-  double scaledWidth = 0, scaledHeight = 0;
   HCURSOR currentCursor = LoadCursor(NULL, IDC_ARROW);
-
-  void centerwindow() {
-    int screen_width = GetSystemMetrics(SM_CXSCREEN);
-    int screen_height = GetSystemMetrics(SM_CYSCREEN);
-    enigma::windowX = (screen_width - enigma::regionWidth)/2;
-    enigma::windowY = (screen_height - enigma::regionHeight)/2;
-  }
-
-  void clampwindow()
-  {
-    RECT c;
-    c.left = enigma::windowX; c.top = enigma::windowY; c.right = enigma::windowX + enigma::windowWidth; c.bottom = enigma::windowY + enigma::windowHeight;
-    AdjustWindowRect(&c, GetWindowLongPtr(enigma::hWnd, GWL_STYLE), false);
-    SetWindowPos(enigma::hWnd, HWND_TOP, c.left, c.top, c.right-c.left, c.bottom-c.top, SWP_NOZORDER|SWP_FRAMECHANGED);
-  }
-
-  void setwindowsize()
-  {
-    if (!regionWidth)
-      return;
-
-    bool isFullScreen = enigma_user::window_get_fullscreen();
-    int parWidth = isFullScreen?GetSystemMetrics(SM_CXSCREEN):windowWidth, parHeight = isFullScreen?GetSystemMetrics(SM_CYSCREEN):windowHeight;
-    if (viewScale > 0)  //Fixed Scale
-    {
-      double viewDouble = viewScale/100.0;
-      scaledWidth = regionWidth*viewDouble;
-      scaledHeight = regionHeight*viewDouble;
-    }
-    else if (viewScale == 0)  //Full Scale
-    {
-      scaledWidth = parWidth;
-      scaledHeight = parHeight;
-    }
-    else  //Keep Aspect Ratio
-    {
-      double fitWidth = parWidth/double(regionWidth), fitHeight = parHeight/double(regionHeight);
-      if (fitWidth < fitHeight)
-      {
-        scaledWidth = parWidth;
-        scaledHeight = regionHeight*fitWidth;
-      }
-      else
-      {
-        scaledWidth = regionWidth*fitHeight;
-        scaledHeight = parHeight;
-      }
-    }
-
-    if (!isFullScreen)
-    {
-      if (windowAdapt && viewScale > 0) // If the window is to be adapted and Fixed Scale
-      {
-        if (scaledWidth > windowWidth)
-          windowWidth = scaledWidth;
-        if (scaledHeight > windowHeight)
-          windowHeight = scaledHeight;
-      }
-      clampwindow();
-    } else {
-      SetWindowPos(hWnd, NULL, 0, 0, parWidth, parHeight, SWP_NOACTIVATE);
-    }
-  }
 }
 
 namespace enigma_user {
-
-int window_get_region_width() {
-  return enigma::regionWidth;
-}
-
-int window_get_region_height() {
-  return enigma::regionHeight;
-}
-
-int window_get_region_width_scaled() {
-  return enigma::scaledWidth;
-}
-
-int window_get_region_height_scaled() {
-  return enigma::scaledHeight;
-}
-
-void window_set_region_scale(double scale, bool adaptwindow) {
-  enigma::viewScale = int(scale*100);
-  enigma::windowAdapt = adaptwindow;
-  enigma::setwindowsize();
-}
-
-double window_get_region_scale() {
-  return enigma::viewScale/100.0;
-}
-
-void window_set_region_size(int w, int h, bool adaptwindow) {
-  if (w <= 0 || h <= 0) return;
-
-  enigma::regionWidth = w;
-  enigma::regionHeight = h;
-  enigma::windowAdapt = adaptwindow;
-  enigma::setwindowsize();
-}
 
 // GM8.1 Used its own internal variables for these functions and reported the regular window dimensions when minimized,
 // Studio uses the native functions and will tell you the dimensions of the window are 0 when it is minimized,
@@ -224,62 +122,7 @@ void window_set_size(unsigned int width, unsigned int height)
 {
     enigma::windowWidth = width;
     enigma::windowHeight = height;
-    enigma::setwindowsize();
-}
-
-void window_set_rectangle(int x, int y, int width, int height)
-{
-    enigma::windowX = x;
-    enigma::windowY = y;
-    enigma::windowWidth = width;
-    enigma::windowHeight = height;
-    enigma::setwindowsize();
-}
-
-void window_center()
-{
-  enigma::centerwindow();
-  enigma::clampwindow();
-}
-
-void window_default(bool center_size)
-{
-  int xm = room_width, ym = room_height;
-  if (view_enabled)
-  {
-    int tx = 0, ty = 0;
-    for (int i = 0; i < 8; i++)
-      if (view_visible[i])
-      {
-        if (view_xport[i]+view_wport[i] > tx)
-          tx = (int)(view_xport[i]+view_wport[i]);
-        if (view_yport[i]+view_hport[i] > ty)
-          ty = (int)(view_yport[i]+view_hport[i]);
-      }
-    if (tx and ty)
-      xm = tx, ym = ty;
-  } else {
-    int screen_width = GetSystemMetrics(SM_CXSCREEN);
-    int screen_height = GetSystemMetrics(SM_CYSCREEN);
-    // By default if the room is too big instead of creating a gigantic ass window
-    // make it not bigger than the screen to full screen it, this is what 8.1 and Studio
-    // do, if the user wants to manually override this they can using
-    // views/screen_set_viewport or window_set_size/window_set_region_size
-    // We won't limit those functions like GM, just the default.
-    if (xm > screen_width) xm = screen_width;
-    if (ym > screen_height) ym = screen_height;
-  }
-  bool center = true;
-  if (center_size) {
-    center = (xm != enigma::windowWidth || ym != enigma::windowHeight);
-  }
-
-  enigma::windowWidth = enigma::regionWidth = xm;
-  enigma::windowHeight = enigma::regionHeight = ym;
-  if (center)
-    enigma::centerwindow();
-
-  enigma::setwindowsize();
+    enigma::compute_window_size();
 }
 
 namespace {
@@ -301,7 +144,7 @@ void window_set_fullscreen(bool full) {
   }
   SetWindowLongPtr(enigma::hWnd, GWL_STYLE, style);
 
-  enigma::setwindowsize();
+  enigma::compute_window_size();
 }
 
 bool window_get_fullscreen() {
@@ -378,14 +221,6 @@ void window_set_stayontop(bool stay)
 
 bool window_get_stayontop() {
     return (GetWindowLongPtr(enigma::hWnd, GWL_EXSTYLE) & WS_EX_TOPMOST) == WS_EX_TOPMOST;
-}
-
-void window_set_freezeonlosefocus(bool freeze) {
-  enigma::freezeOnLoseFocus = freeze;
-}
-
-bool window_get_freezeonlosefocus() {
-  return enigma::freezeOnLoseFocus;
 }
 
 int display_mouse_get_x() {
@@ -634,16 +469,6 @@ void window_mouse_set(int x, int y)
   pt.y=y;
   ClientToScreen(enigma::hWnd, &pt);
   SetCursorPos(pt.x, pt.y);
-}
-
-void window_set_color(int color)
-{
-    enigma::windowColor = color;
-}
-
-int window_get_color()
-{
-    return enigma::windowColor;
 }
 
 }
