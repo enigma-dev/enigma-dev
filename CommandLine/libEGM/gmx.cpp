@@ -129,7 +129,7 @@ class gmx_root_walker : public pugi::xml_tree_walker {
       if (!name.empty()) {
         if (node.name() == std::string("constant")) return true;  //TODO: add constants here
 
-        buffers::TreeNode *parent = nodes.back();
+        //buffers::TreeNode *parent = nodes.back();
         buffers::TreeNode *n = nodes.back()->add_child();  // adding a folder
         if (depth() == 1)                                  // fix root folder names
           name = fix_folder_name(name);
@@ -163,7 +163,7 @@ class gmx_root_walker : public pugi::xml_tree_walker {
         }
       }
 
-      buffers::TreeNode *parent = nodes.back();
+      //buffers::TreeNode *parent = nodes.back();
       buffers::TreeNode *n = nodes.back()->add_child();  // adding res here
       n->set_name(resName);
 
