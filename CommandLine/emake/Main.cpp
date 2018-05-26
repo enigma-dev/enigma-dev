@@ -2,6 +2,7 @@
 #include "OptionsParser.hpp"
 #include "EnigmaPlugin.hpp"
 #include "Game.hpp"
+#include "Server.hpp"
 #include "SOG.hpp"
 #include "gmx.h"
 #include "Proto2ES.h"
@@ -44,6 +45,16 @@ int main(int argc, char* argv[])
   plugin.Init();
   plugin.SetDefinitions(options.APIyaml().c_str());
 
+  bool run = options.GetOption("run").as<bool>();
+  if (!run) plugin.HandleGameLaunch();
+
+  bool server = options.GetOption("server").as<bool>();
+  if (server) {
+    int port = options.GetOption("port").as<int>();
+    string ip = options.GetOption("ip").as<std::string>();
+    return RunServer(ip + ":" + std::to_string(port), plugin);
+  }
+
   GameMode mode;
   std::string _mode = options.GetOption("mode").as<std::string>();
 
@@ -74,9 +85,6 @@ int main(int argc, char* argv[])
     errorStream << "Invalid game mode: " << _mode << " aborting!" << std::endl;
     return OPTIONS_ERROR;
   }
-
-  bool run = options.GetOption("run").as<bool>();
-  if (!run) plugin.HandleGameLaunch();
 
   Game game;
   std::string input_file = options.GetOption("input").as<std::string>();
