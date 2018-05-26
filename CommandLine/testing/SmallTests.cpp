@@ -33,7 +33,7 @@ void read_files(string directory,
     }
     if (!games && others) games = others;
     if (!sources && others) sources = others;
-    if (games && (ext == ".sog" || ext == ".gmx")) {
+    if (games && (ext == ".sog" || ext == ".gmx" || ext == ".gm81" || ext == ".gmk" || ext == ".gm6" || ext == ".gmd")) {
       games->insert(NameMap::value_type(fullname, filename));
     } else if (sources && (ext == ".cpp" || ext == ".cc")) {
       sources->insert(NameMap::value_type(fullname, filename));
