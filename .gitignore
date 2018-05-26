@@ -7,6 +7,9 @@
 /definitions.h
 /coverage_*.info
 
+/CommandLine/libGMX/libGMX.a
+/CommandLine/libGMX/codegen
+
 /ENIGMAsystem/SHELL/API_Switchboard.h
 /ENIGMAsystem/SHELL/Preprocessor_Environment_Editable/
 /ENIGMAsystem/SHELL/ENIGMAengine
