@@ -136,7 +136,6 @@ class gmx_root_walker : public pugi::xml_tree_walker {
 
         n->set_name(name);
         n->set_folder(true);
-        n->set_allocated_parent(parent);
         nodes.push_back(n);
       }
     } else {
@@ -166,7 +165,6 @@ class gmx_root_walker : public pugi::xml_tree_walker {
 
       buffers::TreeNode *parent = nodes.back();
       buffers::TreeNode *n = nodes.back()->add_child();  // adding res here
-      n->set_allocated_parent(parent);
       n->set_name(resName);
 
       AddResource(n, resType, node.value());
