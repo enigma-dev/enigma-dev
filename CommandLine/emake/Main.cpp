@@ -108,7 +108,7 @@ int main(int argc, char* argv[])
     if (ext == "sog") {
       if (!ReadSOG(input_file, &game)) return 1;
       return plugin.BuildGame(game.ConstructGame(), mode, output_file.c_str());
-    } else if (ext == "gmk") {
+    } else if (ext == "gm81" || ext == "gmk" || ext == "gm6" || ext == "gmd") {
       buffers::Project* project;
       if (!(project = gmk::LoadGMK(input_file))) return 1;
       return plugin.BuildGame(project->mutable_game(), mode, output_file.c_str());

@@ -9,7 +9,7 @@ endif
 
 LIBRARY   := ../../libEGM$(EXT)
 PROTO_DIR := ../protos
-CXXFLAGS  := -I/mingw64/include/pugixml-1.8/ -I$(PROTO_DIR) -I$(PROTO_DIR)/codegen -std=c++14 -Wall -Wextra -Wpedantic -g -fPIC
+CXXFLAGS  := -I/mingw64/include/pugixml-1.8/ -I$(PROTO_DIR) -I$(PROTO_DIR)/codegen -I../../lodepng -std=c++14 -Wall -Wextra -Wpedantic -g -fPIC
 SRC_DIR   := .
 OBJ_DIR   := .eobjs
 
@@ -31,7 +31,7 @@ clean:
 	rm -rf $(LIBRARY) $(OBJ_DIR)
 
 $(LIBRARY): $(OBJECTS)
-	$(CXX) -shared -o $@ $^ -lz -L/mingw64/lib/pugixml-1.8/ -lpugixml -L../../ -lProtocols -lprotobuf
+	$(CXX) -shared -o $@ $^ -lz -L/mingw64/lib/pugixml-1.8/ -lpugixml -L../../ -lProtocols -lprotobuf -L../../lodepng -llodepng
 
 # Create the object directories
 $(OBJDIRS):

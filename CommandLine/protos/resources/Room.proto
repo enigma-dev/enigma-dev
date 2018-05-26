@@ -9,8 +9,8 @@ message Room {
   optional string caption = 1;
   optional uint32 width = 2;
   optional uint32 height = 3;
-  optional uint32 vsnap = 4;
-  optional uint32 hsnap = 5;
+  optional uint32 snap_x = 4 [(gmx) = "hsnap"];
+  optional uint32 snap_y = 5 [(gmx) = "vsnap"];
   optional bool isometric = 6;
   optional uint32 speed = 27;
   optional bool persistent = 7;
@@ -38,19 +38,19 @@ message Room {
 
   message View {
     optional bool visible = 1;
-    optional string object_following = 2 [(gmx) = "objName"];
-    optional int32 xview = 3;
-    optional int32 yview = 4;
-    optional uint32 wview = 5;
-    optional uint32 hview = 6;
-    optional int32 xport = 7;
-    optional int32 yport = 8;
-    optional uint32 wport = 9;
-    optional uint32 hport = 10;
-    optional int32 hborder = 11;
-    optional int32 vborder = 12;
-    optional double hspeed = 13;
-    optional double vspeed = 14;
+    optional int32 xview = 2;
+    optional int32 yview = 3;
+    optional uint32 wview = 4;
+    optional uint32 hview = 5;
+    optional int32 xport = 6;
+    optional int32 yport = 7;
+    optional uint32 wport = 8;
+    optional uint32 hport = 9;
+    optional int32 hborder = 10;
+    optional int32 vborder = 11;
+    optional double hspeed = 12;
+    optional double vspeed = 13;
+    optional string object_following = 14 [(gmx) = "objName"];
   }
 
   repeated View views = 16 [(gmx) = "views/view"];
