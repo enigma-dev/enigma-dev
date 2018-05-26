@@ -97,9 +97,11 @@ OptionsParser::OptionsParser() : _desc("Options")
     ("info,i", opt::value<std::string>(), "Provides a listing of Platforms, APIs and Extensions")
     ("input",   opt::value<std::string>()->default_value(""), "Input game file; currently, only test harness single-object games (*.sog) are supported. The --input string is optional.")
     ("quiet,q", opt::bool_switch()->default_value(false), "Suppresses output to std::out and std::err streams.")
+#ifndef CLI_DISABLE_SERVER
     ("server,s", opt::bool_switch()->default_value(false), "Starts the CLI in server mode (ignores input file).")
     ("ip", opt::value<std::string>()->default_value("localhost"), "The ip address of the server when running in server mode.")
     ("port", opt::value<int>()->default_value(37818), "The port number to bind when in server mode.")
+#endif
     ("output,o", opt::value<std::string>(), "Output executable file")
     ("platform,p", opt::value<std::string>()->default_value(def_platform), "Target Platform (XLib, Win32, Cocoa)")
     ("workdir,d", opt::value<std::string>()->default_value(def_workdir), "Working Directory")
@@ -151,10 +153,11 @@ int OptionsParser::ReadArgs(int argc, char* argv[])
 
     if (!_rawArgs.count("info"))
       opt::notify(_rawArgs);
-
+#ifndef CLI_DISABLE_SERVER
     if (!_rawArgs["server"].as<bool>() && !_rawArgs.count("output")) {
       throw std::logic_error("Option 'server' or option 'output' is required.");
     }
+#endif
   }
   catch(std::exception& e)
   {
