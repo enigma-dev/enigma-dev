@@ -46,17 +46,14 @@ void compute_window_size() {
   bool isFullScreen = enigma_user::window_get_fullscreen();
   int parWidth = isFullScreen ? enigma_user::display_get_width() : windowWidth,
       parHeight = isFullScreen ? enigma_user::display_get_height() : windowHeight;
-  if (viewScale > 0)  //Fixed Scale
-  {
+  if (viewScale > 0) {  //Fixed Scale
     double viewDouble = viewScale / 100.0;
     scaledWidth = regionWidth * viewDouble;
     scaledHeight = regionHeight * viewDouble;
-  } else if (viewScale == 0)  //Full Scale
-  {
+  } else if (viewScale == 0) {  //Full Scale
     scaledWidth = parWidth;
     scaledHeight = parHeight;
-  } else  //Keep Aspect Ratio
-  {
+  } else {  //Keep Aspect Ratio
     double fitWidth = parWidth / double(regionWidth), fitHeight = parHeight / double(regionHeight);
     if (fitWidth < fitHeight) {
       scaledWidth = parWidth;
@@ -68,12 +65,11 @@ void compute_window_size() {
   }
 
   if (!isFullScreen) {
-    if (windowAdapt && viewScale > 0)  // If the window is to be adapted and Fixed Scale
-    {
+    if (windowAdapt && viewScale > 0) {  // If the window is to be adapted and Fixed Scale
       if (scaledWidth > windowWidth) windowWidth = scaledWidth;
       if (scaledHeight > windowHeight) windowHeight = scaledHeight;
     }
-    enigma_user::window_set_rectangle(0, 0, enigma_user::display_get_width(), enigma_user::display_get_height());
+    enigma_user::window_set_rectangle(windowX, windowY, windowWidth, windowHeight);
   } else {
     enigma_user::window_set_rectangle(0, 0, parWidth, parHeight);
   }
@@ -312,11 +308,6 @@ void window_set_region_size(int w, int h, bool adaptwindow) {
   enigma::regionHeight = h;
   enigma::windowAdapt = adaptwindow;
   enigma::compute_window_size();
-}
-
-void window_set_rectangle(int x, int y, int width, int height) {
-  window_set_size(width, height);
-  window_set_position(x, y);
 }
 
 }  //namespace enigma_user

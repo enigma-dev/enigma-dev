@@ -133,6 +133,7 @@ bool window_get_fullscreen() { return false; }
 void window_set_position(int x, int y) {}
 void window_set_size(unsigned int w, unsigned int h) {}
 void window_set_fullscreen(bool full) {}
+void window_set_rectangle(int, int, int, int) {}
 int window_set_cursor(int c) {
   enigma::cursorInt = c;
   return 0;
