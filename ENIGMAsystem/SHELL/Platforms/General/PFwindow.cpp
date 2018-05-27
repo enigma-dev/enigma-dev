@@ -69,7 +69,7 @@ void compute_window_size() {
       if (scaledWidth > windowWidth) windowWidth = scaledWidth;
       if (scaledHeight > windowHeight) windowHeight = scaledHeight;
     }
-    enigma_user::window_set_rectangle(0, 0, windowWidth, windowHeight);
+    enigma_user::window_set_rectangle(windowX, windowY, windowWidth, windowHeight);
   } else {
     enigma_user::window_set_rectangle(0, 0, parWidth, parHeight);
   }
