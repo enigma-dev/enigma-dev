@@ -113,16 +113,23 @@ double window_get_alpha() {
 
 void window_set_position(int x, int y)
 {
-    enigma::windowX = x;
-    enigma::windowY = y;
-    SetWindowPos(enigma::hWnd, HWND_TOP, enigma::windowX, enigma::windowY, 0, 0, SWP_NOSIZE|SWP_NOACTIVATE);
+  enigma::windowX = x;
+  enigma::windowY = y;
+  SetWindowPos(enigma::hWnd, HWND_TOP, enigma::windowX, enigma::windowY, 0, 0, SWP_NOSIZE|SWP_NOACTIVATE);
 }
 
 void window_set_size(unsigned int width, unsigned int height)
 {
-    enigma::windowWidth = width;
-    enigma::windowHeight = height;
-    enigma::compute_window_size();
+  enigma::windowWidth = width;
+  enigma::windowHeight = height;
+  enigma::compute_window_size();
+}
+
+void window_set_rectangle(int x, int y, int width, int height) {
+  RECT c;
+  c.left = (enigma::windowX = x); c.top = (enigma::windowY = y); c.right = enigma::windowX + (enigma::windowWidth = width); c.bottom = enigma::windowY + (enigma::windowHeight = height);
+  AdjustWindowRect(&c, GetWindowLongPtr(enigma::hWnd, GWL_STYLE), false);
+  SetWindowPos(enigma::hWnd, HWND_TOP, c.left, c.top, c.right-c.left, c.bottom-c.top, SWP_NOZORDER|SWP_FRAMECHANGED);
 }
 
 namespace {
