@@ -19,9 +19,6 @@
 #include "GStextures.h"
 #include "GScolor_macros.h"
 
-#include <vector>
-using std::vector;
-
 #define __GETR(x) ((x & 0x0000FF))
 #define __GETG(x) ((x & 0x00FF00)>>8)
 #define __GETB(x) ((x & 0xFF0000)>>16)
@@ -29,13 +26,9 @@ using std::vector;
 namespace enigma {
 
 vector<VertexFormat*> vertexFormats;
-VertexFormat* vertexFormat = 0;
-
-struct VertexBuffer {
-  vector<gs_scalar> vertices;
-};
-
 vector<VertexBuffer*> vertexBuffers;
+
+VertexFormat* vertexFormat = 0;
 
 }
 
@@ -103,6 +96,7 @@ void vertex_delete_buffer(int buffer) {
 
 void vertex_begin(int buffer, int format) {
   enigma::vertexBuffers[buffer]->vertices.clear();
+  enigma::vertexBuffers[buffer]->format = format;
 }
 
 void vertex_end(int buffer) {
@@ -118,16 +112,23 @@ unsigned vertex_get_number(int buffer) {
 }
 
 void vertex_freeze(int buffer) {
-
+  if (enigma::vertexBuffers[buffer]->frozen) return;
+  enigma::vertexBuffers[buffer]->frozen = true;
+  enigma::graphics_create_vertex_buffer_peer(buffer);
 }
 
 void vertex_submit(int buffer, int primitive) {
-
+  vertex_submit(buffer, primitive, 0, enigma::vertexBuffers[buffer]->vertices.size());
 }
 
 void vertex_submit(int buffer, int primitive, int texture) {
   texture_set(texture);
   vertex_submit(buffer, primitive);
+}
+
+void vertex_submit(int buffer, int primitive, int texture, unsigned offset, unsigned count) {
+  texture_set(texture);
+  vertex_submit(buffer, primitive, offset, count);
 }
 
 void vertex_position(int buffer, gs_scalar x, gs_scalar y) {

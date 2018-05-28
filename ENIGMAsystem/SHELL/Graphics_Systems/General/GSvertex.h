@@ -27,6 +27,8 @@ using std::pair;
 #include "Universal_System/scalar.h"
 
 namespace enigma {
+  void graphics_create_vertex_buffer_peer(int buffer);
+
   struct VertexFormat {
     vector<pair<int,int> > flags;
 
@@ -34,6 +36,16 @@ namespace enigma {
       flags.push_back(std::make_pair(type, attribute));
     }
   };
+
+  struct VertexBuffer {
+    vector<gs_scalar> vertices;
+    bool frozen;
+    int format;
+    VertexBuffer(): vertices(0), frozen(false), format(-1) {}
+  };
+
+  extern vector<VertexFormat*> vertexFormats;
+  extern vector<VertexBuffer*> vertexBuffers;
 }
 
 namespace enigma_user {
@@ -82,7 +94,9 @@ unsigned vertex_get_size(int buffer);
 unsigned vertex_get_number(int buffer);
 void vertex_freeze(int buffer);
 void vertex_submit(int buffer, int primitive);
+void vertex_submit(int buffer, int primitive, unsigned offset, unsigned count);
 void vertex_submit(int buffer, int primitive, int texture);
+void vertex_submit(int buffer, int primitive, int texture, unsigned offset, unsigned count);
 void vertex_position(int buffer, gs_scalar x, gs_scalar y);
 void vertex_position_3d(int buffer, gs_scalar x, gs_scalar y, gs_scalar z);
 void vertex_normal(int buffer, gs_scalar nx, gs_scalar ny, gs_scalar nz);
