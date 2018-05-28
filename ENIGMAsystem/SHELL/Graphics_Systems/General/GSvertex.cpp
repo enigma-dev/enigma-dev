@@ -156,8 +156,10 @@ void vertex_argb(int buffer, unsigned argb) {
   enigma::vertexBuffers[buffer]->vertices.push_back(argb);
 }
 
-void vertex_colour(int buffer, int color, double alpha) {
-  enigma::vertexBuffers[buffer]->vertices.push_back(alpha);
+void vertex_color(int buffer, int color, double alpha) {
+  unsigned char a = alpha * 255;
+  unsigned argb = (a << 24) | (__GETR(color) << 16) | (__GETG(color) << 8) | __GETB(color);
+  enigma::vertexBuffers[buffer]->vertices.push_back(argb);
 }
 
 void vertex_float1(int buffer, float f1) {
@@ -183,7 +185,8 @@ void vertex_float4(int buffer, float f1, float f2, float f3, float f4) {
 }
 
 void vertex_ubyte4(int buffer, unsigned char u1, unsigned char u2, unsigned char u3, unsigned char u4) {
-  enigma::vertexBuffers[buffer]->vertices.push_back(u1 | u2 | u3 | u4);
+  unsigned val = (u1 << 24) | (u2 << 16) | (u3 << 8) | u4;
+  enigma::vertexBuffers[buffer]->vertices.push_back(val);
 }
 
 }

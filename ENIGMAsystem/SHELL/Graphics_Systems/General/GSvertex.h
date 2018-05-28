@@ -88,7 +88,8 @@ void vertex_position_3d(int buffer, gs_scalar x, gs_scalar y, gs_scalar z);
 void vertex_normal(int buffer, gs_scalar nx, gs_scalar ny, gs_scalar nz);
 void vertex_texcoord(int buffer, gs_scalar u, gs_scalar v);
 void vertex_argb(int buffer, unsigned argb);
-void vertex_colour(int buffer, int color, double alpha);
+void vertex_color(int buffer, int color, double alpha);
+#define vertex_colour vertex_color
 void vertex_float1(int buffer, float f1);
 void vertex_float2(int buffer, float f1, float f2);
 void vertex_float3(int buffer, float f1, float f2, float f3);
