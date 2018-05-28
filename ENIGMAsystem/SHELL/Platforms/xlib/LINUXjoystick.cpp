@@ -17,8 +17,11 @@
 
 
 #include "LINUXjoystick.h"  
+
 #include "Platforms/General/PFwindow.h"  
+
 #include "Universal_System/scalar.h"
+#include "Universal_System/make_unique.h"
 
 #include <linux/joystick.h>
 #include <math.h>
@@ -62,9 +65,15 @@ namespace enigma
     
     ~e_joystick() {
       close(device);
+      delete[] axis;
+      delete[] button;
+      delete[] wrapaxis_positive;
+      delete[] wrapaxis_negative;
+      delete[] wrapbutton;
     }
   };
-  static vector<e_joystick*> joysticks;
+  
+  static vector<std::unique_ptr<e_joystick>> joysticks;
   
   void init_joysticks()
   {
@@ -113,7 +122,7 @@ namespace enigma
   {
     for (unsigned i = 0; i < joysticks.size(); i++)
       if (joysticks[i])
-        handle_joystick(joysticks[i]);
+        handle_joystick(joysticks[i].get());
   }
 }
 
@@ -131,10 +140,6 @@ namespace enigma_user
   bool joystick_load(int id)
   {
     checkPositiveId(false);
-    if (size_t(id) >= enigma::joysticks.size())
-      enigma::joysticks.resize(id+1, 0);
-    else
-       delete enigma::joysticks[id];
     
     char sps[32]; sprintf(sps,"/dev/input/js%d",id);
     string devn(sps);
@@ -149,11 +154,13 @@ namespace enigma_user
     char name[256]; name[0] = 0;
     if (ioctl(device, JSIOCGNAME(256), name) > 0)
       devn = name;
+
+    #ifdef DEBUG_MODE
     printf("Joystick name: %s\n",name);
-    
-    enigma::e_joystick* const jsn = new enigma::e_joystick(device, devn, ac, bc);
-    enigma::joysticks[id] = jsn;
-    enigma::handle_joystick(jsn);
+    #endif
+
+    enigma::joysticks.emplace(enigma::joysticks.begin() + id, make_unique<enigma::e_joystick>(device, devn, ac, bc));
+    enigma::handle_joystick(enigma::joysticks[id].get());
     return true;
   }
 
@@ -162,7 +169,7 @@ namespace enigma_user
     checkId(void());
     if ((unsigned)id >= enigma::joysticks.size())
       return;
-    enigma::e_joystick *js = enigma::joysticks[id];
+    enigma::e_joystick *js = enigma::joysticks[id].get();
     if (js and butnum < js->buttoncount)
       js->wrapbutton[butnum] = key;
   }
@@ -172,7 +179,7 @@ namespace enigma_user
     checkId(void());
     if ((unsigned)id >= enigma::joysticks.size())
       return;
-    enigma::e_joystick *js = enigma::joysticks[id];
+    enigma::e_joystick *js = enigma::joysticks[id].get();
     if (js and axisnum < js->axiscount)
       js->wrapaxis_negative[axisnum] = keyneg,
       js->wrapaxis_positive[axisnum] = keypos;
@@ -180,37 +187,37 @@ namespace enigma_user
 
   double joystick_axis(int id, int axisnum) {
     checkId(0);
-    const enigma::e_joystick * const js = enigma::joysticks[id];
+    const enigma::e_joystick * const js = enigma::joysticks[id].get();
     return js->axis[axisnum];
   }
   bool joystick_button(int id, int buttonnum) {
     checkId(0);
-    const enigma::e_joystick * const js = enigma::joysticks[id];
+    const enigma::e_joystick * const js = enigma::joysticks[id].get();
     return js->button[buttonnum];
   }
 
   bool joystick_exists(int id) {
     if (size_t(id) >= enigma::joysticks.size())
       return false;
-    const enigma::e_joystick * const js = enigma::joysticks[id];
+    const enigma::e_joystick * const js = enigma::joysticks[id].get();
     return js && js->device != -1;
   }
 
   string joystick_name(int id) {
     checkId("");
-    enigma::e_joystick * const js = enigma::joysticks[id];
+    enigma::e_joystick * const js = enigma::joysticks[id].get();
     return js->name;
   }
 
   int joystick_axes(int id) {
     checkId(0);
-    enigma::e_joystick * const js = enigma::joysticks[id];
+    enigma::e_joystick * const js = enigma::joysticks[id].get();
     return js->axiscount;
   }
 
   int joystick_buttons(int id) {
     checkId(0);
-    enigma::e_joystick * const js = enigma::joysticks[id];
+    enigma::e_joystick * const js = enigma::joysticks[id].get();
     return js->buttoncount;
   }
 
@@ -222,7 +229,7 @@ namespace enigma_user
   int joystick_direction(int id, int axis1, int axis2)
   {
     checkId(0);
-    enigma::e_joystick * const js = enigma::joysticks[id];
+    enigma::e_joystick * const js = enigma::joysticks[id].get();
     if (js->axiscount < 2) return 0;
     const int x = js->axis[axis1] < -.5 ? 0 : js->axis[axis1] > .5 ? 2 : 1;
     const int y = js->axis[axis2] < -.5 ? 0 : js->axis[axis2] > .5 ? 6 : 3;
