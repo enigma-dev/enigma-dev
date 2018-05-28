@@ -55,13 +55,15 @@ enum {
   vertex_type_float2, // D3DDECLTYPE_FLOAT2
   vertex_type_float3, // D3DDECLTYPE_FLOAT3
   vertex_type_float4, // D3DDECLTYPE_FLOAT4
-  vertex_type_colour, // D3DDECLTYPE_D3DCOLOR
+  vertex_type_color,  // D3DDECLTYPE_D3DCOLOR
   vertex_type_ubyte4  // D3DDECLTYPE_UBYTE4
 };
 
+#define vertex_type_colour vertex_type_color
+
 enum {
   vertex_usage_position,        // D3DDECLUSAGE_POSITION
-  vertex_usage_colour,          // D3DDECLUSAGE_COLOR
+  vertex_usage_color,           // D3DDECLUSAGE_COLOR
   vertex_usage_normal,          // D3DDECLUSAGE_NORMAL
   vertex_usage_textcoord,       // D3DDECLUSAGE_TEXCOORD
   vertex_usage_blendweight,     // D3DDECLUSAGE_BLENDWEIGHT
@@ -72,6 +74,8 @@ enum {
   vertex_usage_fog,             // D3DDECLUSAGE_FOG
   vertex_usage_sample           // D3DDECLUSAGE_SAMPLE
 };
+
+#define vertex_usage_colour vertex_usage_color
 
 void vertex_format_begin();
 int vertex_format_end();

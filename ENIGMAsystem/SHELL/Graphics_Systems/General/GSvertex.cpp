@@ -39,11 +39,11 @@ void vertex_format_begin() {
 }
 
 void vertex_format_add_color() {
-  enigma::vertexFormat->AddAttribute(vertex_type_colour, vertex_usage_colour);
+  enigma::vertexFormat->AddAttribute(vertex_type_color, vertex_usage_color);
 }
 
 void vertex_format_add_position() {
-  enigma::vertexFormat->AddAttribute(vertex_type_float2, vertex_usage_position);
+  enigma::vertexFormat->AddAttribute(vertex_type_float3, vertex_usage_position);
 }
 
 void vertex_format_add_position_3d() {
@@ -134,6 +134,7 @@ void vertex_submit(int buffer, int primitive, int texture, unsigned offset, unsi
 void vertex_position(int buffer, gs_scalar x, gs_scalar y) {
   enigma::vertexBuffers[buffer]->vertices.push_back(x);
   enigma::vertexBuffers[buffer]->vertices.push_back(y);
+  enigma::vertexBuffers[buffer]->vertices.push_back(0);
 }
 
 void vertex_position_3d(int buffer, gs_scalar x, gs_scalar y, gs_scalar z) {
@@ -159,7 +160,7 @@ void vertex_argb(int buffer, unsigned argb) {
 
 void vertex_color(int buffer, int color, double alpha) {
   unsigned char a = alpha * 255;
-  unsigned argb = (a << 24) | (__GETR(color) << 16) | (__GETG(color) << 8) | __GETB(color);
+  unsigned argb = (__GETR(color) << 24) | (__GETB(color) << 16) | (__GETG(color) << 8) | a;
   enigma::vertexBuffers[buffer]->vertices.push_back(argb);
 }
 
