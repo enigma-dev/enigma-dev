@@ -27,12 +27,17 @@
 \********************************************************************************/
 
 #include "settings.h"
+#include "utility.h"
+
+#include "eyaml/eyaml.h"
+
+#include <fstream>
+#include <iostream>
 
 namespace extensions
 {
   sdk_descriptor targetSDK;
   api_descriptor targetAPI;
-  compiler_descriptor targetOS;
 }
 
 namespace setting
@@ -46,5 +51,60 @@ namespace setting
   bool inherit_objects = 0;  // Determines whether objects should automatically inherit locals and events from their parents
   bool automatic_semicolons = 0; // Determines whether semicolons should automatically be added or if the user wants strict syntax
   COMPLIANCE_LVL compliance_mode = COMPL_STANDARD;
-  string keyword_blacklist = "";
+  std::string keyword_blacklist = "";
+}
+
+CompilerInfo compilerInfo;
+
+void map_ey(ey_data& key, std::map<std::string, std::string>& map) {
+  for (const auto& v : key) {
+    map[toUpper(v.first)] = v.second->data().scalar().toString();
+    std::cout << toUpper(v.first) << "=\""; 
+    std::cout << v.second->data().scalar().toString() << "\"" << std::endl;
+  }
+}
+
+bool load_compiler_ey(std::string fPath) {
+
+  std::cout << std::endl << "Loading compiler ey file: " << fPath << std::endl;
+
+  // Clear old info
+  compilerInfo = CompilerInfo(); 
+
+  std::ifstream compiler_ifstream(fPath.c_str());
+
+  // Bail if error
+  if (!compiler_ifstream.is_open())
+    return false;
+
+  // Parse our compiler data file
+  ey_data compiler_yaml = parse_eyaml(compiler_ifstream, fPath.c_str());
+
+  // Write down our top level ey fields (Note yaml toLowers all fields)
+  compilerInfo.name = compiler_yaml.get("name");
+  compilerInfo.maintainer = compiler_yaml.get("maintainer");
+  compilerInfo.target_platform = compiler_yaml.get("target-platform");
+
+  // Write down grouped fields 
+  const std::map<std::string, std::map<std::string, std::string>&> pairs = {
+      {"parser-vars", compilerInfo.parser_vars},
+      {"make-vars", compilerInfo.make_vars},
+      {"exe-vars", compilerInfo.exe_vars}};
+  
+  for (const auto& p : pairs) {
+    std::cout << "[" << p.first << "]" << std::endl;
+    ey_base* keyPtr = compiler_yaml.values[p.first];
+    if (keyPtr != nullptr && !keyPtr->is_scalar)  {
+      ey_data& key = keyPtr->data();
+      map_ey(key, p.second);
+    }
+  }
+
+  return true;
+}
+
+std::string compiler_map_get(std::string key, const std::map<std::string, std::string>& map) {
+  auto it = map.find(key);
+  if (it != map.end()) return it->second;
+  return "";
 }
