@@ -17,22 +17,6 @@
 
 #include "Graphics_Systems/General/GSvertex.h"
 
-#include <vector>
-#include <map>
-using std::vector;
-using std::map;
-
-namespace enigma {
-
-struct VertexBuffer {
-  vector<gs_scalar> vertices;
-  vector<gs_scalar> indices;
-};
-
-vector<VertexBuffer*> vertexBuffers;
-
-}
-
 namespace enigma_user {
 
 }

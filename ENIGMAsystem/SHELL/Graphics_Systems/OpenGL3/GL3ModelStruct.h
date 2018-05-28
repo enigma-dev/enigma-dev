@@ -16,12 +16,13 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
-#include "../General/OpenGLHeaders.h"
-#include "../General/GSd3d.h"
-#include "../General/GSprimitives.h"
-#include "../General/GSmatrix.h"
-#include "../General/GSmath.h"
-#include "../General/GSvertex.h"
+#include "Graphics_Systems/General/OpenGLHeaders.h"
+#include "Graphics_Systems/General/GSd3d.h"
+#include "Graphics_Systems/General/GSprimitives.h"
+#include "Graphics_Systems/General/GSmatrix.h"
+#include "Graphics_Systems/General/GSmath.h"
+#include "Graphics_Systems/General/GSvertex.h"
+#include "Graphics_Systems/General/GScolor_macros.h"
 #include "Bridges/General/GL3Context.h" //Needed to get if bound texture == -1
 #include "GLSLshader.h"
 #include "Universal_System/var4.h"
@@ -33,10 +34,6 @@
 #include <stdlib.h>
 
 using namespace std;
-
-#define __GETR(x) (x & 0x0000FF)
-#define __GETG(x) ((x & 0x00FF00)>>8)
-#define __GETB(x) ((x & 0xFF0000)>>16)
 
 #include <iostream>
 #include <map>

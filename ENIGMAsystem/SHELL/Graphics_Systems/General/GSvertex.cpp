@@ -17,11 +17,25 @@
 
 #include "GSvertex.h"
 #include "GStextures.h"
+#include "GScolor_macros.h"
+
+#include <vector>
+using std::vector;
+
+#define __GETR(x) ((x & 0x0000FF))
+#define __GETG(x) ((x & 0x00FF00)>>8)
+#define __GETB(x) ((x & 0xFF0000)>>16)
 
 namespace enigma {
 
 vector<VertexFormat*> vertexFormats;
 VertexFormat* vertexFormat = 0;
+
+struct VertexBuffer {
+  vector<gs_scalar> vertices;
+};
+
+vector<VertexBuffer*> vertexBuffers;
 
 }
 
@@ -71,23 +85,36 @@ void vertex_format_delete(int id) {
 }
 
 int vertex_create_buffer() {
-
+  int id = enigma::vertexBuffers.size();
+  enigma::vertexBuffers.push_back(new enigma::VertexBuffer());
+  return id;
 }
 
 int vertex_create_buffer_ext(unsigned size) {
-
+  int id = enigma::vertexBuffers.size();
+  enigma::vertexBuffers.push_back(new enigma::VertexBuffer());
+  return id;
 }
 
 void vertex_delete_buffer(int buffer) {
-
+  delete enigma::vertexBuffers[buffer];
+  enigma::vertexBuffers[buffer] = nullptr;
 }
 
 void vertex_begin(int buffer, int format) {
-
+  enigma::vertexBuffers[buffer]->vertices.clear();
 }
 
 void vertex_end(int buffer) {
 
+}
+
+unsigned vertex_get_size(int buffer) {
+  return enigma::vertexBuffers[buffer]->vertices.size() * sizeof(gs_scalar);
+}
+
+unsigned vertex_get_number(int buffer) {
+  return enigma::vertexBuffers[buffer]->vertices.size();
 }
 
 void vertex_freeze(int buffer) {
@@ -100,59 +127,63 @@ void vertex_submit(int buffer, int primitive) {
 
 void vertex_submit(int buffer, int primitive, int texture) {
   texture_set(texture);
-
-}
-
-void vertex_delete(int buffer) {
-
-}
-
-void vertex_index(int buffer, unsigned id) {
-
+  vertex_submit(buffer, primitive);
 }
 
 void vertex_position(int buffer, gs_scalar x, gs_scalar y) {
-
+  enigma::vertexBuffers[buffer]->vertices.push_back(x);
+  enigma::vertexBuffers[buffer]->vertices.push_back(y);
 }
 
 void vertex_position_3d(int buffer, gs_scalar x, gs_scalar y, gs_scalar z) {
-
+  enigma::vertexBuffers[buffer]->vertices.push_back(x);
+  enigma::vertexBuffers[buffer]->vertices.push_back(y);
+  enigma::vertexBuffers[buffer]->vertices.push_back(z);
 }
 
 void vertex_normal(int buffer, gs_scalar nx, gs_scalar ny, gs_scalar nz) {
-
+  enigma::vertexBuffers[buffer]->vertices.push_back(nx);
+  enigma::vertexBuffers[buffer]->vertices.push_back(ny);
+  enigma::vertexBuffers[buffer]->vertices.push_back(nz);
 }
 
 void vertex_texcoord(int buffer, gs_scalar u, gs_scalar v) {
-
+  enigma::vertexBuffers[buffer]->vertices.push_back(u);
+  enigma::vertexBuffers[buffer]->vertices.push_back(v);
 }
 
-void vertex_argb(int buffer, double alpha, unsigned char r, unsigned char g, unsigned char b) {
-
+void vertex_argb(int buffer, unsigned argb) {
+  enigma::vertexBuffers[buffer]->vertices.push_back(argb);
 }
 
 void vertex_colour(int buffer, int color, double alpha) {
-
+  enigma::vertexBuffers[buffer]->vertices.push_back(alpha);
 }
 
 void vertex_float1(int buffer, float f1) {
-
+  enigma::vertexBuffers[buffer]->vertices.push_back(f1);
 }
 
 void vertex_float2(int buffer, float f1, float f2) {
-
+  enigma::vertexBuffers[buffer]->vertices.push_back(f1);
+  enigma::vertexBuffers[buffer]->vertices.push_back(f2);
 }
 
 void vertex_float3(int buffer, float f1, float f2, float f3) {
-
+  enigma::vertexBuffers[buffer]->vertices.push_back(f1);
+  enigma::vertexBuffers[buffer]->vertices.push_back(f2);
+  enigma::vertexBuffers[buffer]->vertices.push_back(f3);
 }
 
 void vertex_float4(int buffer, float f1, float f2, float f3, float f4) {
-
+  enigma::vertexBuffers[buffer]->vertices.push_back(f1);
+  enigma::vertexBuffers[buffer]->vertices.push_back(f2);
+  enigma::vertexBuffers[buffer]->vertices.push_back(f3);
+  enigma::vertexBuffers[buffer]->vertices.push_back(f4);
 }
 
 void vertex_ubyte4(int buffer, unsigned char u1, unsigned char u2, unsigned char u3, unsigned char u4) {
-
+  enigma::vertexBuffers[buffer]->vertices.push_back(u1 | u2 | u3 | u4);
 }
 
 }
