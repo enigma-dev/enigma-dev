@@ -111,7 +111,9 @@ unsigned vertex_get_number(int buffer) {
 }
 
 void vertex_freeze(int buffer) {
+  if (enigma::vertexBuffers[buffer]->frozen) return;
   enigma::vertexBuffers[buffer]->frozen = true;
+  enigma::vertexBuffers[buffer]->dirty = true;
 }
 
 void vertex_submit(int buffer, int primitive) {

@@ -83,7 +83,7 @@ void vertex_submit(int buffer, int primitive, unsigned vertex_start, unsigned ve
       D3DVERTEXBUFFER_DESC pDesc;
       vertexBufferPeer->GetDesc(&pDesc);
 
-      if (size > pDesc.Size) {
+      if (size > pDesc.Size || vertexBuffer->frozen) {
         vertexBufferPeer->Release();
         vertexBufferPeer = NULL;
       }
