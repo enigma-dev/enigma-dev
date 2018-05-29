@@ -29,6 +29,7 @@ namespace enigma {
   int game_ending();
   long clamp(long value, long min, long max);
   void Sleep(int ms);
+  void compute_window_size();
 }
 
 namespace enigma_user {
