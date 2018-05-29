@@ -27,20 +27,37 @@
 
 #include "Bridges/General/GL3Context.h" //Needed to get if bound texture == -1
 
+#define bind_array_buffer(vbo) if (enigma::bound_vbo != vbo) glBindBuffer( GL_ARRAY_BUFFER, enigma::bound_vbo = vbo );
+
 namespace enigma {
 
 extern unsigned char currentcolor[4];
+extern unsigned bound_vbo;
+extern unsigned bound_vboi;
 extern unsigned bound_shader;
 extern vector<enigma::ShaderProgram*> shaderprograms;
 
 GLenum primitive_types[] = { 0, GL_POINTS, GL_LINES, GL_LINE_STRIP, GL_TRIANGLES, GL_TRIANGLE_STRIP, GL_TRIANGLE_FAN };
 
-void graphics_create_vertex_buffer_peer(int buffer) {
+map<int, GLuint> peers;
 
+void graphics_create_vertex_buffer_peer(int buffer) {
+  GLuint vertexBufferPeer;
+  glGenBuffers(1, &vertexBufferPeer);
+  peers[buffer] = vertexBufferPeer;
 }
 
-void graphics_destroy_vertex_buffer_peer(int buffer) {
+void graphics_upload_vertex_buffer_peer(int buffer) {
+  const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
+  size_t size = enigma_user::vertex_get_size(buffer);
 
+  bind_array_buffer(peers[buffer]);
+  glBufferData(GL_ARRAY_BUFFER, size, &vertexBuffer->vertices[0], GL_STATIC_DRAW);
+}
+
+void graphics_delete_vertex_buffer_peer(int buffer) {
+  glDeleteBuffers(1, &peers[buffer]);
+  peers.erase(buffer);
 }
 
 }
@@ -69,6 +86,9 @@ void vertex_submit(int buffer, int primitive, unsigned vertex_start, unsigned ve
 
   //Bind texture
   enigma::glsl_uniformi_internal(enigma::shaderprograms[enigma::bound_shader]->uni_texSampler, 0);
+
+  bind_array_buffer(enigma::peers[buffer]);
+
   enigma::glsl_attribute_enable_all_internal(false); //Disable all attributes
 
   bool useTextCoords, useColors;
@@ -93,7 +113,7 @@ void vertex_submit(int buffer, int primitive, unsigned vertex_start, unsigned ve
     if (flag.second == vertex_usage_color) useColors = true;
     if (flag.second == vertex_usage_textcoord) useTextCoords = true;
 
-    enigma::glsl_attribute_set_internal_unbound(flag.second, elements, type, (type == GL_FLOAT), stride, &vertexBuffer->vertices[offset]);
+    enigma::glsl_attribute_set_internal(flag.second, elements, type, (type == GL_FLOAT), stride, offset);
 
     offset += size;
   }
@@ -112,12 +132,7 @@ void vertex_submit(int buffer, int primitive, unsigned vertex_start, unsigned ve
   enigma::glsl_uniformi_internal(enigma::shaderprograms[enigma::bound_shader]->uni_colorEnable, useColors);
 
   vertex_start *= (stride / 4);
-  if (vertexBuffer->frozen) {
-
-  } else {
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-	  glDrawArrays(enigma::primitive_types[primitive], vertex_start, vertex_count);
-  }
+	glDrawArrays(enigma::primitive_types[primitive], vertex_start, vertex_count);
 }
 
 }
