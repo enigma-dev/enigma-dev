@@ -43,6 +43,7 @@ namespace enigma
   void glsl_attribute_enable_all_internal(bool enable);
   void glsl_attribute_enable_internal(int location, bool enable);
   void glsl_attribute_set_internal(int location, int size, int type, bool normalize, int stride, int offset);
+  void glsl_attribute_set_internal_unbound(int location, int size, int type, bool normalize, int stride, const void* offset);
 }
 
 namespace enigma_user

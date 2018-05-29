@@ -58,7 +58,10 @@ enum {
 }
 
 namespace enigma {
+
   void graphics_create_vertex_buffer_peer(int buffer);
+  void graphics_upload_vertex_buffer_peer(int buffer);
+  void graphics_delete_vertex_buffer_peer(int buffer);
 
   struct VertexFormat {
     vector<pair<int,int> > flags;
