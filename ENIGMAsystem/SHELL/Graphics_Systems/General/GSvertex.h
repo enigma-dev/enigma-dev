@@ -26,28 +26,6 @@ using std::pair;
 
 #include "Universal_System/scalar.h"
 
-namespace enigma {
-  void graphics_create_vertex_buffer_peer(int buffer);
-
-  struct VertexFormat {
-    vector<pair<int,int> > flags;
-
-    void AddAttribute(int type, int attribute) {
-      flags.push_back(std::make_pair(type, attribute));
-    }
-  };
-
-  struct VertexBuffer {
-    vector<gs_scalar> vertices;
-    bool frozen;
-    int format;
-    VertexBuffer(): vertices(0), frozen(false), format(-1) {}
-  };
-
-  extern vector<VertexFormat*> vertexFormats;
-  extern vector<VertexBuffer*> vertexBuffers;
-}
-
 namespace enigma_user {
 
 enum {
@@ -76,6 +54,45 @@ enum {
 };
 
 #define vertex_usage_colour vertex_usage_color
+
+}
+
+namespace enigma {
+  void graphics_create_vertex_buffer_peer(int buffer);
+
+  struct VertexFormat {
+    vector<pair<int,int> > flags;
+    size_t stride;
+
+    VertexFormat(): stride(0) {}
+
+    void AddAttribute(int type, int attribute) {
+      using namespace enigma_user;
+
+      switch (type) {
+        case vertex_type_float1: stride += 1; break;
+        case vertex_type_float2: stride += 2; break;
+        case vertex_type_float3: stride += 3; break;
+        case vertex_type_float4: stride += 4; break;
+        case vertex_type_color: stride += 1; break;
+        case vertex_type_ubyte4: stride += 1; break;
+      }
+      flags.push_back(std::make_pair(type, attribute));
+    }
+  };
+
+  struct VertexBuffer {
+    vector<gs_scalar> vertices;
+    bool frozen;
+    int format;
+    VertexBuffer(): vertices(0), frozen(false), format(-1) {}
+  };
+
+  extern vector<VertexFormat*> vertexFormats;
+  extern vector<VertexBuffer*> vertexBuffers;
+}
+
+namespace enigma_user {
 
 void vertex_format_begin();
 int vertex_format_end();

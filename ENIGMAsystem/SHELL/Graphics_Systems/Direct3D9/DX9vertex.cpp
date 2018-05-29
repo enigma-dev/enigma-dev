@@ -68,7 +68,7 @@ inline LPDIRECT3DVERTEXDECLARATION9 vertex_format_declaration(const enigma::Vert
 
 namespace enigma_user {
 
-void vertex_submit(int buffer, int primitive, unsigned offset, unsigned count) {
+void vertex_submit(int buffer, int primitive, unsigned vertex_start, unsigned primitive_count) {
   const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
   const enigma::VertexFormat* vertexFormat = enigma::vertexFormats[vertexBuffer->format];
 
@@ -76,10 +76,11 @@ void vertex_submit(int buffer, int primitive, unsigned offset, unsigned count) {
   LPDIRECT3DVERTEXDECLARATION9 vertexDeclaration = vertex_format_declaration(vertexFormat, stride);
   d3dmgr->SetVertexDeclaration(vertexDeclaration);
 
+  vertex_start *= (stride / 4);
   if (enigma::vertexBuffers[buffer]->frozen) {
-    d3dmgr->DrawPrimitive(enigma::primitive_types[primitive], offset, count);
+    d3dmgr->DrawPrimitive(enigma::primitive_types[primitive], vertex_start, primitive_count);
   } else {
-    d3dmgr->DrawPrimitiveUP(enigma::primitive_types[primitive], 1, &vertexBuffer->vertices[offset], stride);
+    d3dmgr->DrawPrimitiveUP(enigma::primitive_types[primitive], primitive_count, &vertexBuffer->vertices[vertex_start], stride);
   }
 }
 

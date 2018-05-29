@@ -16,12 +16,9 @@
 **/
 
 #include "GSvertex.h"
+#include "GSprimitives.h"
 #include "GStextures.h"
 #include "GScolor_macros.h"
-
-#define __GETR(x) ((x & 0x0000FF))
-#define __GETG(x) ((x & 0x00FF00)>>8)
-#define __GETB(x) ((x & 0xFF0000)>>16)
 
 namespace enigma {
 
@@ -118,7 +115,20 @@ void vertex_freeze(int buffer) {
 }
 
 void vertex_submit(int buffer, int primitive) {
-  vertex_submit(buffer, primitive, 0, enigma::vertexBuffers[buffer]->vertices.size());
+  const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
+  const enigma::VertexFormat* vertexFormat = enigma::vertexFormats[vertexBuffer->format];
+  const size_t vertex_count = vertexBuffer->vertices.size() / vertexFormat->stride;
+  size_t primitive_count = 0;
+  switch (primitive) {
+    case pr_pointlist: primitive_count = vertex_count; break;
+    case pr_linelist: primitive_count = vertex_count / 2; break;
+    case pr_linestrip: primitive_count = vertex_count - 1; break;
+    case pr_trianglelist: primitive_count = vertex_count / 3; break;
+    case pr_trianglestrip: primitive_count = vertex_count - 2; break;
+    case pr_trianglefan: primitive_count = vertex_count - 2; break;
+  }
+  if (primitive_count < 0) primitive_count = 0;
+  vertex_submit(buffer, primitive, 0, primitive_count);
 }
 
 void vertex_submit(int buffer, int primitive, int texture) {
@@ -126,9 +136,9 @@ void vertex_submit(int buffer, int primitive, int texture) {
   vertex_submit(buffer, primitive);
 }
 
-void vertex_submit(int buffer, int primitive, int texture, unsigned offset, unsigned count) {
+void vertex_submit(int buffer, int primitive, int texture, unsigned vertex_start, unsigned primitive_count) {
   texture_set(texture);
-  vertex_submit(buffer, primitive, offset, count);
+  vertex_submit(buffer, primitive, vertex_start, primitive_count);
 }
 
 void vertex_position(int buffer, gs_scalar x, gs_scalar y) {
