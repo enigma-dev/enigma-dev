@@ -66,7 +66,6 @@ void draw_set_color_rgba(unsigned char red,unsigned char green,unsigned char blu
 	enigma::currentcolor[1] = green;
 	enigma::currentcolor[2] = blue;
 	enigma::currentcolor[3] = bind_alpha(alpha);
-	D3DCOLOR D3DColor = D3DCOLOR_RGBA(enigma::currentcolor[0],enigma::currentcolor[1],enigma::currentcolor[2], enigma::currentcolor[3]);
 }
 
 void draw_set_color_write_enable(bool red, bool green, bool blue, bool alpha)

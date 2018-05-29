@@ -118,17 +118,8 @@ void vertex_submit(int buffer, int primitive) {
   const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
   const enigma::VertexFormat* vertexFormat = enigma::vertexFormats[vertexBuffer->format];
   const size_t vertex_count = vertexBuffer->vertices.size() / vertexFormat->stride;
-  size_t primitive_count = 0;
-  switch (primitive) {
-    case pr_pointlist: primitive_count = vertex_count; break;
-    case pr_linelist: primitive_count = vertex_count / 2; break;
-    case pr_linestrip: primitive_count = vertex_count - 1; break;
-    case pr_trianglelist: primitive_count = vertex_count / 3; break;
-    case pr_trianglestrip: primitive_count = vertex_count - 2; break;
-    case pr_trianglefan: primitive_count = vertex_count - 2; break;
-  }
-  if (primitive_count < 0) primitive_count = 0;
-  vertex_submit(buffer, primitive, 0, primitive_count);
+
+  vertex_submit(buffer, primitive, 0, vertex_count);
 }
 
 void vertex_submit(int buffer, int primitive, int texture) {
@@ -136,9 +127,9 @@ void vertex_submit(int buffer, int primitive, int texture) {
   vertex_submit(buffer, primitive);
 }
 
-void vertex_submit(int buffer, int primitive, int texture, unsigned vertex_start, unsigned primitive_count) {
+void vertex_submit(int buffer, int primitive, int texture, unsigned vertex_start, unsigned vertex_count) {
   texture_set(texture);
-  vertex_submit(buffer, primitive, vertex_start, primitive_count);
+  vertex_submit(buffer, primitive, vertex_start, vertex_count);
 }
 
 void vertex_position(int buffer, gs_scalar x, gs_scalar y) {
@@ -170,7 +161,7 @@ void vertex_argb(int buffer, unsigned argb) {
 
 void vertex_color(int buffer, int color, double alpha) {
   unsigned char a = alpha * 255;
-  unsigned argb = (__GETR(color) << 24) | (__GETB(color) << 16) | (__GETG(color) << 8) | a;
+  unsigned argb = (__GETB(color) << 24) | (__GETR(color) << 16) | (__GETG(color) << 8) | a;
   enigma::vertexBuffers[buffer]->vertices.push_back(argb);
 }
 

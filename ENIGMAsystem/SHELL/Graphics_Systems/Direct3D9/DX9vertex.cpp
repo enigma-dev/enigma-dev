@@ -16,6 +16,7 @@
 **/
 
 #include "Graphics_Systems/General/GSvertex.h"
+#include "Graphics_Systems/General/GSprimitives.h"
 
 #include "Bridges/General/DX9Context.h"
 
@@ -68,7 +69,7 @@ inline LPDIRECT3DVERTEXDECLARATION9 vertex_format_declaration(const enigma::Vert
 
 namespace enigma_user {
 
-void vertex_submit(int buffer, int primitive, unsigned vertex_start, unsigned primitive_count) {
+void vertex_submit(int buffer, int primitive, unsigned vertex_start, unsigned vertex_count) {
   const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
   const enigma::VertexFormat* vertexFormat = enigma::vertexFormats[vertexBuffer->format];
 
@@ -76,8 +77,10 @@ void vertex_submit(int buffer, int primitive, unsigned vertex_start, unsigned pr
   LPDIRECT3DVERTEXDECLARATION9 vertexDeclaration = vertex_format_declaration(vertexFormat, stride);
   d3dmgr->SetVertexDeclaration(vertexDeclaration);
 
+  int primitive_count = enigma_user::draw_primitive_count(primitive, vertex_count);
+
   vertex_start *= (stride / 4);
-  if (enigma::vertexBuffers[buffer]->frozen) {
+  if (vertexBuffer->frozen) {
     d3dmgr->DrawPrimitive(enigma::primitive_types[primitive], vertex_start, primitive_count);
   } else {
     d3dmgr->DrawPrimitiveUP(enigma::primitive_types[primitive], primitive_count, &vertexBuffer->vertices[vertex_start], stride);
