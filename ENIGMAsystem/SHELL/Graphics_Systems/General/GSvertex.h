@@ -59,8 +59,6 @@ enum {
 
 namespace enigma {
 
-  void graphics_create_vertex_buffer_peer(int buffer);
-  void graphics_upload_vertex_buffer_peer(int buffer);
   void graphics_delete_vertex_buffer_peer(int buffer);
 
   struct VertexFormat {
@@ -86,9 +84,9 @@ namespace enigma {
 
   struct VertexBuffer {
     vector<gs_scalar> vertices;
-    bool frozen;
+    bool frozen, dirty;
     int format;
-    VertexBuffer(): vertices(0), frozen(false), format(-1) {}
+    VertexBuffer(): vertices(0), frozen(false), dirty(false), format(-1) {}
   };
 
   extern vector<VertexFormat*> vertexFormats;

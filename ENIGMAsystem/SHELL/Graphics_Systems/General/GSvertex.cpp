@@ -77,14 +77,12 @@ void vertex_format_delete(int id) {
 int vertex_create_buffer() {
   int id = enigma::vertexBuffers.size();
   enigma::vertexBuffers.push_back(new enigma::VertexBuffer());
-  enigma::graphics_create_vertex_buffer_peer(id);
   return id;
 }
 
 int vertex_create_buffer_ext(unsigned size) {
   int id = enigma::vertexBuffers.size();
   enigma::vertexBuffers.push_back(new enigma::VertexBuffer());
-  enigma::graphics_create_vertex_buffer_peer(id);
   return id;
 }
 
@@ -100,7 +98,8 @@ void vertex_begin(int buffer, int format) {
 }
 
 void vertex_end(int buffer) {
-  enigma::graphics_upload_vertex_buffer_peer(buffer);
+  if (enigma::vertexBuffers[buffer]->frozen) return;
+  enigma::vertexBuffers[buffer]->dirty = true;
 }
 
 unsigned vertex_get_size(int buffer) {
@@ -112,9 +111,7 @@ unsigned vertex_get_number(int buffer) {
 }
 
 void vertex_freeze(int buffer) {
-  if (enigma::vertexBuffers[buffer]->frozen) return;
   enigma::vertexBuffers[buffer]->frozen = true;
-  enigma::graphics_create_vertex_buffer_peer(buffer);
 }
 
 void vertex_submit(int buffer, int primitive) {

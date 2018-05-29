@@ -544,7 +544,7 @@ class Mesh
     // create a vertex buffer interface
     if (vertexbuffer == NULL) {
       if (vbotype == 1) {
-        d3dmgr->CreateVertexBuffer(vdata.size() * sizeof( gs_scalar ), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, GetFVF(), D3DPOOL_SYSTEMMEM, &vertexbuffer, NULL);
+        d3dmgr->CreateVertexBuffer(vdata.size() * sizeof( gs_scalar ), D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY, GetFVF(), D3DPOOL_DEFAULT, &vertexbuffer, NULL);
       } else {
         d3dmgr->CreateVertexBuffer(vdata.size() * sizeof( gs_scalar ), D3DUSAGE_WRITEONLY, GetFVF(), D3DPOOL_MANAGED, &vertexbuffer, NULL);
       }
