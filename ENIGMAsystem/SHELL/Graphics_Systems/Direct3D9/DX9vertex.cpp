@@ -20,6 +20,7 @@
 
 #include "Bridges/General/DX9Context.h"
 
+#include <iostream>
 #include <map>
 using std::map;
 
@@ -31,11 +32,11 @@ WORD declaration_type_sizes[] = { 4, 8, 12, 16, 4, 4 };
 D3DDECLUSAGE usage_types[] = { D3DDECLUSAGE_POSITION, D3DDECLUSAGE_COLOR, D3DDECLUSAGE_NORMAL, D3DDECLUSAGE_TEXCOORD, D3DDECLUSAGE_BLENDWEIGHT,
   D3DDECLUSAGE_BLENDINDICES, D3DDECLUSAGE_DEPTH, D3DDECLUSAGE_TANGENT, D3DDECLUSAGE_BINORMAL, D3DDECLUSAGE_FOG, D3DDECLUSAGE_SAMPLE };
 
-map<int, LPDIRECT3DVERTEXBUFFER9> peers;
+map<int, LPDIRECT3DVERTEXBUFFER9> vertexBufferPeers;
 
 void graphics_delete_vertex_buffer_peer(int buffer) {
-  peers[buffer]->Release();
-  peers.erase(buffer);
+  vertexBufferPeers[buffer]->Release();
+  vertexBufferPeers.erase(buffer);
 }
 
 inline LPDIRECT3DVERTEXDECLARATION9 vertex_format_declaration(const enigma::VertexFormat* vertexFormat, size_t &stride) {
@@ -72,12 +73,17 @@ void vertex_submit(int buffer, int primitive, unsigned vertex_start, unsigned ve
   enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
   const enigma::VertexFormat* vertexFormat = enigma::vertexFormats[vertexBuffer->format];
 
+  // if the contents of the vertex buffer are dirty then we need to update
+  // our native vertex buffer object "peer"
   if (vertexBuffer->dirty) {
     LPDIRECT3DVERTEXBUFFER9 vertexBufferPeer = NULL;
-    auto it = enigma::peers.find(buffer);
+    auto it = enigma::vertexBufferPeers.find(buffer);
     size_t size = enigma_user::vertex_get_size(buffer);
 
-    if (it != enigma::peers.end()) {
+    // if we have already created a native "peer" vbo for this user buffer,
+    // then we have to release it if it isn't big enough to hold the new contents
+    // or if it has just been frozen (so we can remove its D3DUSAGE_DYNAMIC)
+    if (it != enigma::vertexBufferPeers.end()) {
       vertexBufferPeer = it->second;
 
       D3DVERTEXBUFFER_DESC pDesc;
@@ -89,23 +95,29 @@ void vertex_submit(int buffer, int primitive, unsigned vertex_start, unsigned ve
       }
     }
 
+    // create either a static or dynamic vbo peer depending on if the user called
+    // vertex_freeze on the buffer
     if (!vertexBufferPeer) {
-      d3dmgr->CreateVertexBuffer(size, vertexBuffer->frozen ? 0 : (D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY), 0, D3DPOOL_DEFAULT, &vertexBufferPeer, NULL);
-      enigma::peers[buffer] = vertexBufferPeer;
+      std::cout << d3dmgr->CreateVertexBuffer(
+        size, vertexBuffer->frozen ? D3DUSAGE_WRITEONLY : (D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY),
+        0, D3DPOOL_DEFAULT, &vertexBufferPeer, NULL
+      );
+      enigma::vertexBufferPeers[buffer] = vertexBufferPeer;
     }
 
-    VOID* pVoid;
-
+    // copy the vertex buffer contents over to the native peer vbo on the GPU
+    VOID* pVoid = new char[size];
     vertexBufferPeer->Lock(0, 0, (VOID**)&pVoid, D3DLOCK_DISCARD);
-    memcpy(pVoid, &vertexBuffer->vertices[0], size);
+    memcpy(pVoid, vertexBuffer->vertices.data(), size);
     vertexBufferPeer->Unlock();
 
+    vertexBuffer->vertices.clear(); //TODO: WHY DOES THIS NOT WORK???
     vertexBuffer->dirty = false;
   }
 
   size_t stride = 0;
   LPDIRECT3DVERTEXDECLARATION9 vertexDeclaration = vertex_format_declaration(vertexFormat, stride);
-  LPDIRECT3DVERTEXBUFFER9 vertexBufferPeer = enigma::peers[buffer];
+  LPDIRECT3DVERTEXBUFFER9 vertexBufferPeer = enigma::vertexBufferPeers[buffer];
   d3dmgr->SetVertexDeclaration(vertexDeclaration);
   d3dmgr->SetStreamSource(0, vertexBufferPeer, vertex_start * stride, stride);
 

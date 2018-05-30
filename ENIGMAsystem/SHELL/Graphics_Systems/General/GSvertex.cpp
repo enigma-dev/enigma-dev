@@ -98,6 +98,8 @@ void vertex_begin(int buffer, int format) {
 }
 
 void vertex_end(int buffer) {
+  // we can only flag the vertex buffer contents as dirty and needing an update
+  // if the vertex buffer hasn't been frozen, otherwise we just ignore it
   if (enigma::vertexBuffers[buffer]->frozen) return;
   enigma::vertexBuffers[buffer]->dirty = true;
 }
@@ -111,6 +113,8 @@ unsigned vertex_get_number(int buffer) {
 }
 
 void vertex_freeze(int buffer) {
+  // we can freeze the vertex buffer only if it isn't already frozen
+  // if it's not frozen, then we we'll freeze it when we do a dirty update
   if (enigma::vertexBuffers[buffer]->frozen) return;
   enigma::vertexBuffers[buffer]->frozen = true;
   enigma::vertexBuffers[buffer]->dirty = true;
