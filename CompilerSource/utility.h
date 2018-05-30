@@ -1,5 +1,5 @@
-#ifndef COMPILER_UTILITY_H
-#define COMPILER_UTILITY_H
+#ifndef ENIGMA_COMPILER_UTILITY_H
+#define ENIGMA_COMPILER_UTILITY_H
 
 #include <string>
 
@@ -10,4 +10,4 @@ static inline std::string toUpper(std::string x) {
   return res;
 }
 
-#endif  // COMPILER_UTILITY_H
+#endif  // ENIGMA_COMPILER_UTILITY_H

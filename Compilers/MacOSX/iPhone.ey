@@ -25,4 +25,3 @@ Build-Extension: .app
 Run-output: ./MacOS/EnigmaIPhone
 Run-Program: /MacOS/build/Release/EnigmaIPhone.app/Contents/MacOS/EnigmaIPhone
 Run-Params:
-

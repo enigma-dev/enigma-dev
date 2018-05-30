@@ -24,4 +24,3 @@ Build-Extension:
 Run-output: game.exe
 Run-Program: $game
 Run-Params:
-
