@@ -26,25 +26,11 @@ namespace enigma {
 
 GLenum primitive_types[] = { 0, GL_POINTS, GL_LINES, GL_LINE_STRIP, GL_TRIANGLES, GL_TRIANGLE_STRIP, GL_TRIANGLE_FAN };
 
-map<int, GLuint> peers;
-
-void graphics_create_vertex_buffer_peer(int buffer) {
-  GLuint vertexBufferPeer;
-  glGenBuffers(1, &vertexBufferPeer);
-  peers[buffer] = vertexBufferPeer;
-}
-
-void graphics_upload_vertex_buffer_peer(int buffer) {
-  const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
-  size_t size = enigma_user::vertex_get_size(buffer);
-
-  glBindBuffer(GL_ARRAY_BUFFER, peers[buffer]);
-  glBufferData(GL_ARRAY_BUFFER, size, &vertexBuffer->vertices[0], GL_DYNAMIC_DRAW);
-}
+map<int, GLuint> vertexBufferPeers;
 
 void graphics_delete_vertex_buffer_peer(int buffer) {
-  glDeleteBuffers(1, &peers[buffer]);
-  peers.erase(buffer);
+  glDeleteBuffers(1, &vertexBufferPeers[buffer]);
+  vertexBufferPeers.erase(buffer);
 }
 
 }
@@ -52,10 +38,44 @@ void graphics_delete_vertex_buffer_peer(int buffer) {
 namespace enigma_user {
 
 void vertex_submit(int buffer, int primitive, unsigned vertex_start, unsigned vertex_count) {
-  const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
+  enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
   const enigma::VertexFormat* vertexFormat = enigma::vertexFormats[vertexBuffer->format];
 
-  glBindBuffer(GL_ARRAY_BUFFER, enigma::peers[buffer]);
+  // if the contents of the vertex buffer are dirty then we need to update
+  // our native vertex buffer object "peer"
+  if (vertexBuffer->dirty) {
+    GLuint vertexBufferPeer;
+    auto it = enigma::vertexBufferPeers.find(buffer);
+    size_t size = enigma_user::vertex_get_size(buffer);
+
+    // if we haven't created a native "peer" vbo for this vertex buffer yet,
+    // then we need to do so now
+    if (it == enigma::vertexBufferPeers.end()) {
+      glGenBuffers(1, &vertexBufferPeer);
+      enigma::vertexBufferPeers[buffer] = vertexBufferPeer;
+    } else {
+      vertexBufferPeer = it->second;
+    }
+
+    glBindBuffer(GL_ARRAY_BUFFER, vertexBufferPeer);
+    GLint pSize;
+    glGetBufferParameteriv(vertexBufferPeer, GL_BUFFER_SIZE, &pSize);
+
+    // if the size of the peer vbo isn't big enough to hold the new contents
+    // or vertex_freeze was called, then we need to make a call to glBufferData
+    // to allocate a bigger peer vbo or remove the GL_DYNAMIC_DRAW usage
+    if (size > pSize || vertexBuffer->frozen) {
+      GLenum usage = vertexBuffer->frozen ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW;
+      glBufferData(GL_ARRAY_BUFFER, size, &vertexBuffer->vertices[0], usage);
+    } else {
+      glBufferSubData(GL_ARRAY_BUFFER, 0, size, &vertexBuffer->vertices[0]);
+    }
+
+    vertexBuffer->vertices.clear();
+    vertexBuffer->dirty = false;
+  } else {
+    glBindBuffer(GL_ARRAY_BUFFER, enigma::vertexBufferPeers[buffer]);
+  }
 
   bool useVertices, useNormals, useColors, useTextCoords, useFogCoords;
   size_t offset = 0, texture = 0;
@@ -113,7 +133,6 @@ void vertex_submit(int buffer, int primitive, unsigned vertex_start, unsigned ve
 
     offset += size;
   }
-
 
   vertex_start *= (stride / 4);
 	glDrawArrays(enigma::primitive_types[primitive], vertex_start, vertex_count);
