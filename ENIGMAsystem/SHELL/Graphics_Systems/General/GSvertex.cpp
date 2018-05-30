@@ -98,18 +98,24 @@ void vertex_begin(int buffer, int format) {
 }
 
 void vertex_end(int buffer) {
+  enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
+
   // we can only flag the vertex buffer contents as dirty and needing an update
   // if the vertex buffer hasn't been frozen, otherwise we just ignore it
-  if (enigma::vertexBuffers[buffer]->frozen) return;
-  enigma::vertexBuffers[buffer]->dirty = true;
+  if (vertexBuffer->frozen) return;
+  vertexBuffer->dirty = true;
+  vertexBuffer->number = vertexBuffer->vertices.size();
 }
 
 unsigned vertex_get_size(int buffer) {
-  return enigma::vertexBuffers[buffer]->vertices.size() * sizeof(gs_scalar);
+  return enigma::vertexBuffers[buffer]->number * sizeof(gs_scalar);
 }
 
 unsigned vertex_get_number(int buffer) {
-  return enigma::vertexBuffers[buffer]->vertices.size();
+  const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
+  const enigma::VertexFormat* vertexFormat = enigma::vertexFormats[vertexBuffer->format];
+
+  return vertexBuffer->number / vertexFormat->stride;
 }
 
 void vertex_freeze(int buffer) {
@@ -121,11 +127,7 @@ void vertex_freeze(int buffer) {
 }
 
 void vertex_submit(int buffer, int primitive) {
-  const enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
-  const enigma::VertexFormat* vertexFormat = enigma::vertexFormats[vertexBuffer->format];
-  const size_t vertex_count = vertexBuffer->vertices.size() / vertexFormat->stride;
-
-  vertex_submit(buffer, primitive, 0, vertex_count);
+  vertex_submit(buffer, primitive, 0, vertex_get_number(buffer));
 }
 
 void vertex_submit(int buffer, int primitive, int texture) {

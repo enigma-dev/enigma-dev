@@ -98,7 +98,7 @@ void vertex_submit(int buffer, int primitive, unsigned vertex_start, unsigned ve
     // create either a static or dynamic vbo peer depending on if the user called
     // vertex_freeze on the buffer
     if (!vertexBufferPeer) {
-      std::cout << d3dmgr->CreateVertexBuffer(
+      d3dmgr->CreateVertexBuffer(
         size, vertexBuffer->frozen ? D3DUSAGE_WRITEONLY : (D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY),
         0, D3DPOOL_DEFAULT, &vertexBufferPeer, NULL
       );
@@ -106,12 +106,12 @@ void vertex_submit(int buffer, int primitive, unsigned vertex_start, unsigned ve
     }
 
     // copy the vertex buffer contents over to the native peer vbo on the GPU
-    VOID* pVoid = new char[size];
+    VOID* pVoid;
     vertexBufferPeer->Lock(0, 0, (VOID**)&pVoid, D3DLOCK_DISCARD);
     memcpy(pVoid, vertexBuffer->vertices.data(), size);
     vertexBufferPeer->Unlock();
 
-    vertexBuffer->vertices.clear(); //TODO: WHY DOES THIS NOT WORK???
+    vertexBuffer->vertices.clear();
     vertexBuffer->dirty = false;
   }
 

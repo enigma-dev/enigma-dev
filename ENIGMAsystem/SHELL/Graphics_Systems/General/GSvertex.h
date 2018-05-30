@@ -86,7 +86,8 @@ namespace enigma {
     vector<gs_scalar> vertices;
     bool frozen, dirty;
     int format;
-    VertexBuffer(): vertices(0), frozen(false), dirty(false), format(-1) {}
+    size_t number;
+    VertexBuffer(): vertices(0), frozen(false), dirty(false), format(-1), number(0) {}
   };
 
   extern vector<VertexFormat*> vertexFormats;
