@@ -40,7 +40,7 @@ OBJECTS := $(addprefix .eobjs/,$(SOURCES:.cpp=.o))
 DEPENDS := $(OBJECTS:.o=.d)
 
 CXXFLAGS += -I../shared $(addprefix -I../shared/, $(SHARED_INCLUDES))
-SOURCES += $(addprefix ../shared/,$(SHARED_SOURCES))
+SOURCES += $(addprefix $(SHARED_SRC_DIR),$(SHARED_SOURCES))
 OBJECTS += $(addprefix .eobjs/shared/,$(SHARED_SOURCES:.cpp=.o))
 DEPENDS += $(addprefix .eobjs/shared/,$(SHARED_SOURCES:.cpp=.d))
 
