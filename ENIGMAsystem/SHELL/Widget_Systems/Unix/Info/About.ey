@@ -1,0 +1,9 @@
+%e-yaml
+---
+
+Name: Unix
+Identifier: Unix
+Build-Platforms: MacOSX, Linux
+Represents: MacOSX, Linux
+Description: Create Widgets using Tiny File Dialogs, with AppleScript on Mac, and Zenity on Linux.
+Author: Samuel Venable
