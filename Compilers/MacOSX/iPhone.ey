@@ -23,7 +23,7 @@ Parser-Vars:
   searchdirs-start: "#include <...> search starts here:"
   searchdirs-end: "End of search list."
   
-Exe-Vars:
+EXE-Vars:
   resources: /MacOS/build/Release/EnigmaIPhone.app/Contents/MacOS/EnigmaXcode.res
   Build-Extension: .app
   Run-output: ./MacOS/EnigmaIPhone
