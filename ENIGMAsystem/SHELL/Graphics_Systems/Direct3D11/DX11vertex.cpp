@@ -15,8 +15,20 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "../General/GSvertex.h"
+#include "Graphics_Systems/General/GSvertex_impl.h"
+
+namespace enigma {
+
+void graphics_delete_vertex_buffer_peer(int buffer) {}
+
+}
 
 namespace enigma_user {
+
+void vertex_argb(int buffer, unsigned argb) {}
+
+void vertex_color(int buffer, int color, double alpha) {}
+
+void vertex_submit(int buffer, int primitive, unsigned vertex_start, unsigned vertex_count) {}
 
 }
