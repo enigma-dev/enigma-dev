@@ -150,6 +150,8 @@ matrix:
     # Widgets
     - env: COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=GTK+ EXTENSIONS="None"
       before_script: sudo apt-get -qq -y install libgtk2.0-dev
+    - env: COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=TinyFileDialogs EXTENSIONS="None"
+      before_script: sudo apt-get -qq -y install zenity
     # GME (Note: requires an Audio system)
     - env: COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=OpenAL COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="GME"
       before_script: sudo apt-get -qq -y install libgme-dev
