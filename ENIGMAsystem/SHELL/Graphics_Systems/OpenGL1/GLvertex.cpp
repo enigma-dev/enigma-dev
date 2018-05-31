@@ -15,7 +15,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Graphics_Systems/General/GSvertex.h"
+#include "Graphics_Systems/General/GSvertex_impl.h"
+#include "Graphics_Systems/General/GScolor_macros.h"
 
 #include "Graphics_Systems/General/OpenGLHeaders.h"
 
@@ -36,6 +37,17 @@ void graphics_delete_vertex_buffer_peer(int buffer) {
 }
 
 namespace enigma_user {
+
+void vertex_argb(int buffer, unsigned argb) {
+  enigma::color_t finalcol = argb | (__GETR(argb) << 16) | (__GETG(argb) << 8) | __GETB(argb);
+  enigma::vertexBuffers[buffer]->vertices.push_back(finalcol);
+}
+
+void vertex_color(int buffer, int color, double alpha) {
+  unsigned char a = alpha * 255;
+  enigma::color_t finalcol = color + ((unsigned char)(a) << 24);
+  enigma::vertexBuffers[buffer]->vertices.push_back(finalcol);
+}
 
 void vertex_submit(int buffer, int primitive, unsigned vertex_start, unsigned vertex_count) {
   enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];

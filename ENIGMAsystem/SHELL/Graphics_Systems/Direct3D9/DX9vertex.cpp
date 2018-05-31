@@ -15,12 +15,12 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "Graphics_Systems/General/GSvertex.h"
-#include "Graphics_Systems/General/GSprimitives.h"
+#include "Graphics_Systems/General/GSvertex_impl.h"
+#include "Graphics_Systems/General/GSprimitives.h" // for enigma_user::draw_primitive_count
+#include "Graphics_Systems/General/GScolor_macros.h"
 
 #include "Bridges/General/DX9Context.h"
 
-#include <iostream>
 #include <map>
 using std::map;
 
@@ -68,6 +68,16 @@ inline LPDIRECT3DVERTEXDECLARATION9 vertex_format_declaration(const enigma::Vert
 }
 
 namespace enigma_user {
+
+void vertex_argb(int buffer, unsigned argb) {
+  enigma::vertexBuffers[buffer]->vertices.push_back(argb);
+}
+
+void vertex_color(int buffer, int color, double alpha) {
+  unsigned char a = alpha * 255;
+  enigma::color_t finalcol = (a << 24) | (__GETR(color) << 16) | (__GETG(color) << 8) | __GETB(color);
+  enigma::vertexBuffers[buffer]->vertices.push_back(finalcol);
+}
 
 void vertex_submit(int buffer, int primitive, unsigned vertex_start, unsigned vertex_count) {
   enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];

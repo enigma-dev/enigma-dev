@@ -19,11 +19,6 @@
 #ifndef ENIGMA_GSVERTEX_H
 #define ENIGMA_GSVERTEX_H
 
-#include <vector>
-#include <utility>
-using std::vector;
-using std::pair;
-
 #include "Universal_System/scalar.h"
 
 namespace enigma_user {
@@ -54,47 +49,6 @@ enum {
 };
 
 #define vertex_usage_colour vertex_usage_color
-
-}
-
-namespace enigma {
-
-  void graphics_delete_vertex_buffer_peer(int buffer);
-
-  struct VertexFormat {
-    vector<pair<int,int> > flags;
-    size_t stride;
-
-    VertexFormat(): stride(0) {}
-
-    void AddAttribute(int type, int attribute) {
-      using namespace enigma_user;
-
-      switch (type) {
-        case vertex_type_float1: stride += 1; break;
-        case vertex_type_float2: stride += 2; break;
-        case vertex_type_float3: stride += 3; break;
-        case vertex_type_float4: stride += 4; break;
-        case vertex_type_color: stride += 1; break;
-        case vertex_type_ubyte4: stride += 1; break;
-      }
-      flags.push_back(std::make_pair(type, attribute));
-    }
-  };
-
-  struct VertexBuffer {
-    vector<gs_scalar> vertices;
-    bool frozen, dirty;
-    int format;
-    size_t number;
-    VertexBuffer(): vertices(0), frozen(false), dirty(false), format(-1), number(0) {}
-  };
-
-  extern vector<VertexFormat*> vertexFormats;
-  extern vector<VertexBuffer*> vertexBuffers;
-}
-
-namespace enigma_user {
 
 void vertex_format_begin();
 int vertex_format_end();

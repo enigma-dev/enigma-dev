@@ -15,10 +15,9 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "GSvertex.h"
+#include "GSvertex_impl.h"
 #include "GSprimitives.h"
 #include "GStextures.h"
-#include "GScolor_macros.h"
 
 namespace enigma {
 
@@ -143,7 +142,7 @@ void vertex_submit(int buffer, int primitive, int texture, unsigned vertex_start
 void vertex_position(int buffer, gs_scalar x, gs_scalar y) {
   enigma::vertexBuffers[buffer]->vertices.push_back(x);
   enigma::vertexBuffers[buffer]->vertices.push_back(y);
-  enigma::vertexBuffers[buffer]->vertices.push_back(0);
+  enigma::vertexBuffers[buffer]->vertices.push_back((gs_scalar)0);
 }
 
 void vertex_position_3d(int buffer, gs_scalar x, gs_scalar y, gs_scalar z) {
@@ -161,16 +160,6 @@ void vertex_normal(int buffer, gs_scalar nx, gs_scalar ny, gs_scalar nz) {
 void vertex_texcoord(int buffer, gs_scalar u, gs_scalar v) {
   enigma::vertexBuffers[buffer]->vertices.push_back(u);
   enigma::vertexBuffers[buffer]->vertices.push_back(v);
-}
-
-void vertex_argb(int buffer, unsigned argb) {
-  enigma::vertexBuffers[buffer]->vertices.push_back(argb);
-}
-
-void vertex_color(int buffer, int color, double alpha) {
-  unsigned char a = alpha * 255;
-  unsigned argb = (__GETB(color) << 24) | (__GETR(color) << 16) | (__GETG(color) << 8) | a;
-  enigma::vertexBuffers[buffer]->vertices.push_back(argb);
 }
 
 void vertex_float1(int buffer, float f1) {
