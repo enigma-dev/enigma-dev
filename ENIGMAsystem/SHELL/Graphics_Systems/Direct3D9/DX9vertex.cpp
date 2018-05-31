@@ -83,6 +83,10 @@ void vertex_submit(int buffer, int primitive, unsigned vertex_start, unsigned ve
   enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
   const enigma::VertexFormat* vertexFormat = enigma::vertexFormats[vertexBuffer->format];
 
+  // this is fucking temporary until we rewrite the model classes and
+  // figure out a proper way to flush
+  d3dmgr->EndShapesBatching();
+
   // if the contents of the vertex buffer are dirty then we need to update
   // our native vertex buffer object "peer"
   if (vertexBuffer->dirty) {
