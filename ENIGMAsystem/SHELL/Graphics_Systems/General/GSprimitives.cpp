@@ -3,7 +3,7 @@
 namespace enigma_user {
 
 int draw_primitive_count(int kind, int vertex_count) {
-  size_t primitive_count = 0;
+  std::size_t primitive_count = 0;
   switch (kind) {
     case pr_pointlist: primitive_count = vertex_count; break;
     case pr_linelist: primitive_count = vertex_count / 2; break;
