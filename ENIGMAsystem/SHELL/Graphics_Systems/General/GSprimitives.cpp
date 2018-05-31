@@ -2,18 +2,16 @@
 
 namespace enigma_user {
 
-int draw_primitive_count(int kind, int vertex_count) {
-  int primitive_count = 0;
+unsigned draw_primitive_count(int kind, unsigned vertex_count) {
   switch (kind) {
-    case pr_pointlist: primitive_count = vertex_count; break;
-    case pr_linelist: primitive_count = vertex_count / 2; break;
-    case pr_linestrip: primitive_count = vertex_count - 1; break;
-    case pr_trianglelist: primitive_count = vertex_count / 3; break;
-    case pr_trianglestrip: primitive_count = vertex_count - 2; break;
-    case pr_trianglefan: primitive_count = vertex_count - 2; break;
+    case pr_pointlist: return vertex_count;
+    case pr_linelist: return vertex_count / 2;
+    case pr_linestrip: if (vertex_count > 1) return vertex_count - 1;
+    case pr_trianglelist: return vertex_count / 3;
+    case pr_trianglestrip: if (vertex_count > 2) return vertex_count - 2;
+    case pr_trianglefan: if (vertex_count > 2) return vertex_count - 2;
   }
-  if (primitive_count < 0) primitive_count = 0;
-  return primitive_count;
+  return 0;
 }
 
 }
