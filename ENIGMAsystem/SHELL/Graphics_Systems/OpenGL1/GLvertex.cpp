@@ -44,8 +44,7 @@ void vertex_argb(int buffer, unsigned argb) {
 }
 
 void vertex_color(int buffer, int color, double alpha) {
-  unsigned char a = alpha * 255;
-  enigma::color_t finalcol = color + ((unsigned char)(a) << 24);
+  enigma::color_t finalcol = color + (bind_alpha(alpha) << 24);
   enigma::vertexBuffers[buffer]->vertices.push_back(finalcol);
 }
 
