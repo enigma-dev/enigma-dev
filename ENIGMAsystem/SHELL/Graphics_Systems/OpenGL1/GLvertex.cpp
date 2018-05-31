@@ -39,7 +39,7 @@ void graphics_delete_vertex_buffer_peer(int buffer) {
 namespace enigma_user {
 
 void vertex_argb(int buffer, unsigned argb) {
-  enigma::color_t finalcol = argb | (__GETR(argb) << 16) | (__GETG(argb) << 8) | __GETB(argb);
+  enigma::color_t finalcol = (__GETA32(argb) << 24) | (__GETR32(argb) << 16) | (__GETG32(argb) << 8) | __GETB32(argb);
   enigma::vertexBuffers[buffer]->vertices.push_back(finalcol);
 }
 
