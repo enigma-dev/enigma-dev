@@ -1,4 +1,5 @@
-/** Copyright (C) 2015 Harijs Grinbergs
+/** Copyright (C) 2014 Josh Ventura
+*** Copyright (C) 2015 Harijs Grinbergs
 *** Copyright (C) 2018 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
