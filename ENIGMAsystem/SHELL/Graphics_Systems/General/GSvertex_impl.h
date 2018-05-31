@@ -33,7 +33,7 @@ void graphics_delete_vertex_buffer_peer(int buffer);
 
 struct VertexFormat {
   vector<pair<int,int> > flags;
-  size_t stride;
+  std::size_t stride;
 
   VertexFormat(): stride(0) {}
 
@@ -75,7 +75,7 @@ struct VertexBuffer {
   vector<VertexElement> vertices;
   bool frozen, dirty;
   int format;
-  size_t number;
+  std::size_t number;
 
   VertexBuffer(): frozen(false), dirty(false), format(-1), number(0) {}
 };
