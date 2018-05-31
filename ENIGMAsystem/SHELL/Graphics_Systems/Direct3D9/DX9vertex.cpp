@@ -137,6 +137,8 @@ void vertex_submit(int buffer, int primitive, unsigned vertex_start, unsigned ve
   int primitive_count = enigma_user::draw_primitive_count(primitive, vertex_count);
 
   d3dmgr->DrawPrimitive(enigma::primitive_types[primitive], 0, primitive_count);
+
+  vertexDeclaration->Release();
 }
 
 }
