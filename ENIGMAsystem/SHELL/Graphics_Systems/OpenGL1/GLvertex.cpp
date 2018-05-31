@@ -70,7 +70,7 @@ void vertex_submit(int buffer, int primitive, unsigned vertex_start, unsigned ve
 
     glBindBuffer(GL_ARRAY_BUFFER, vertexBufferPeer);
     GLint pSize;
-    glGetBufferParameteriv(vertexBufferPeer, GL_BUFFER_SIZE, &pSize);
+    glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &pSize);
 
     // if the size of the peer vbo isn't big enough to hold the new contents
     // or vertex_freeze was called, then we need to make a call to glBufferData
