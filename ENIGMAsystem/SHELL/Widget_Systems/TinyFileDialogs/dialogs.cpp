@@ -1,6 +1,6 @@
 #include "dialogs.h"
 #include "Widget_Systems/widgets_mandatory.h"
-#include "tinyfiledialogs.h"
+#include "shared/tinyfiledialogs/tinyfiledialogs.h"
 #include <sys/stat.h>
 #include <limits.h>
 #include <unistd.h>
