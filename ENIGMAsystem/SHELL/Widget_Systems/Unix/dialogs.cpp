@@ -23,18 +23,13 @@ namespace enigma
 
 bool is_number(string input)
 {
-    if (input[0] == '0' || input[0] == '1' || input[0] == '2' || input[0] == '3' || input[0] == '4' ||
-        input[0] == '5' || input[0] == '6' || input[0] == '7' || input[0] == '8' || input[0] == '9')
+    if (input[0] >= '0' && input[0] <= '9')
         return true;
 
-    if (input[0] == '+' &&
-        (input[1] == '0' || input[1] == '1' || input[1] == '2' || input[1] == '3' || input[1] == '4' ||
-        input[1] == '5' || input[1] == '6' || input[1] == '7' || input[1] == '8' || input[1] == '9'))
+    if (input[0] == '+' && (input[1] >= '0' && input[1] <= '9'))
         return true;
 
-    if (input[0] == '-' &&
-        (input[1] == '0' || input[1] == '1' || input[1] == '2' || input[1] == '3' || input[1] == '4' ||
-        input[1] == '5' || input[1] == '6' || input[1] == '7' || input[1] == '8' || input[1] == '9'))
+    if (input[0] == '-' && (input[1] >= '0' && input[1] <= '9'))
         return true;
 
     return false;
