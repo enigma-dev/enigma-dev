@@ -107,23 +107,28 @@ void vertex_submit(int buffer, int primitive, unsigned vertex_start, unsigned ve
 
     #define OFFSET( P )  ( ( const GLvoid * ) ( sizeof( gs_scalar ) * ( P         ) ) )
 
+    // this is an "emulation" of vertex format declarations for the OpenGL fixed-function pipeline
     switch (flag.second) {
       case vertex_usage_position:
+        if (useVertices) break;
         useVertices = true;
         glEnableClientState(GL_VERTEX_ARRAY);
         glVertexPointer(elements, type, stride, OFFSET(offset));
         break;
       case vertex_usage_color:
+        if (useColors) break;
         useColors = true;
         glEnableClientState(GL_COLOR_ARRAY);
         glColorPointer(elements, type, stride, OFFSET(offset));
         break;
       case vertex_usage_normal:
+        if (useNormals) break;
         useNormals = true;
         glEnableClientState(GL_NORMAL_ARRAY);
         glNormalPointer(type, stride, OFFSET(offset));
         break;
       case vertex_usage_textcoord:
+        if (texture >= GL_MAX_TEXTURE_UNITS) break;
         useTextCoords = true;
         glClientActiveTexture(GL_TEXTURE0 + texture++);
         glEnableClientState(GL_TEXTURE_COORD_ARRAY);
@@ -135,6 +140,7 @@ void vertex_submit(int buffer, int primitive, unsigned vertex_start, unsigned ve
       case vertex_usage_tangent: break;
       case vertex_usage_binormal: break;
       case vertex_usage_fog:
+        if (useFogCoords) break;
         useFogCoords = true;
         glEnableClientState(GL_FOG_COORD_ARRAY);
         glFogCoordPointer(type, stride, OFFSET(offset));
@@ -158,15 +164,6 @@ void vertex_submit(int buffer, int primitive, unsigned vertex_start, unsigned ve
       glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     }
   }
-
-/*
-glEnableClientState(GL_VERTEX_ARRAY);
-glVertexPointer(3, GL_FLOAT, 16, &vertexBuffer->vertices[0]);
-glEnableClientState(GL_COLOR_ARRAY);
-glColorPointer(4, GL_UNSIGNED_BYTE, 16, &vertexBuffer->vertices[3]);
-glDrawArrays(GL_TRIANGLES, 0, 3);
-glDisableClientState(GL_VERTEX_ARRAY);
-glDisableClientState(GL_COLOR_ARRAY);*/
 }
 
 }
