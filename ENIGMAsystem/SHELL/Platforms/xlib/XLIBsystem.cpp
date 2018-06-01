@@ -17,7 +17,7 @@
 #include <cstdlib>
 #include "Platforms/General/PFsystem.h"
 #include "Platforms/platforms_mandatory.h"
-#include "XLIBmain.h"
+#include "XLIBwindow.h"
 
 namespace enigma_user {
 
