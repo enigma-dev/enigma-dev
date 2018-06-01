@@ -1,5 +1,6 @@
 #include "Platforms/General/PFmain.h"
 
+#include <time.h> //CLOCK_MONOTONIC
 #include <sys/resource.h>  //setpriority
 #include <sys/types.h>     //getpid
 #include <unistd.h>        //usleep
