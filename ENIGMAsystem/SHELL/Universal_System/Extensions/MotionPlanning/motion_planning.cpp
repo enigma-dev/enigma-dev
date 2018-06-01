@@ -1,6 +1,6 @@
 /********************************************************************************\
 **                                                                              **
-**  Copyright (C) 2011 Harijs Grînbergs                                         **
+**  Copyright (C) 2011 Harijs GrÃ®nbergs                                         **
 **  Modified 2013 by Josh Ventura                                               **
 **                                                                              **
 **  This file is a part of the ENIGMA Development Environment.                  **
@@ -36,11 +36,8 @@ using namespace std;
 #include "libEGMstd.h"
 #include "motion_planning_struct.h"
 #include "motion_planning.h"
+#include "Collision_Systems/General/CSfuncs.h"
 #include "Universal_System/scalar.h"
-
-namespace enigma_user {
-int collision_rectangle(cs_scalar x1, cs_scalar y1, cs_scalar x2, cs_scalar y2, int obj, bool prec /*ignored*/, bool notme);
-}
 
 namespace enigma {
 	extern size_t grid_idmax;
