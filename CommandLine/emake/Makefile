@@ -23,9 +23,12 @@ LDFLAGS   := $(OS_LIBS) -L../../ -lz -L$(SHARED_SRC_DIR)/lodepng -llodepng -lPro
 
 rwildcard=$(wildcard $1/$2) $(foreach d,$(wildcard $1/*),$(call rwildcard,$d,$2))
 SOURCES := $(call rwildcard,$(SRC_DIR),*.cpp)
-ifeq ($(TRAVIS), true)
-	disable_server := true
-endif
+
+# disable the server by default because we aren't sure in what
+# capacity we are using it yet, Travis can't build it
+# and neither can anybody else because of Ubuntu being 100 years old
+disable_server ?= true
+
 ifeq (_$(disable_egm),$(filter _$(disable_egm),_true _1 _yes _y))
 	CXXFLAGS += -DCLI_DISABLE_EGM
 else
