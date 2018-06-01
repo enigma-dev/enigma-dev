@@ -1,4 +1,4 @@
-#include "tinyfiledialogs.h"
+#include "shared/tinyfiledialogs/tinyfiledialogs.h"
 #include <string>
 
 //void show_error(std::string errortext, const bool fatal);
