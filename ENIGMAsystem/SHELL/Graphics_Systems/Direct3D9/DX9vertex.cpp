@@ -43,6 +43,7 @@ inline LPDIRECT3DVERTEXDECLARATION9 vertex_format_declaration(const enigma::Vert
   vector<D3DVERTEXELEMENT9> vertexDeclarationElements(vertexFormat->flags.size() + 1);
 
   WORD offset = 0;
+  map<int,int> useCount;
   for (size_t i = 0; i < vertexFormat->flags.size(); ++i) {
     const pair<int, int> flag = vertexFormat->flags[i];
     D3DVERTEXELEMENT9 *vertexDeclarationElement = &vertexDeclarationElements[i];
@@ -52,7 +53,7 @@ inline LPDIRECT3DVERTEXDECLARATION9 vertex_format_declaration(const enigma::Vert
     vertexDeclarationElement->Type = declaration_types[flag.first];
     vertexDeclarationElement->Method = D3DDECLMETHOD_DEFAULT;
     vertexDeclarationElement->Usage = usage_types[flag.second];
-    vertexDeclarationElement->UsageIndex = 0;
+    vertexDeclarationElement->UsageIndex = useCount[flag.second]++;
 
     offset += declaration_type_sizes[flag.first];
   }
