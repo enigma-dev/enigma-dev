@@ -49,6 +49,17 @@ void graphics_delete_vertex_buffer_peer(int buffer) {
   vertexBufferPeers.erase(buffer);
 }
 
+static inline int graphics_find_attribute_location(std::string name, int usageIndex) {
+  int location = -1;
+  if (usageIndex == 0) {
+    location = glGetAttribLocation(enigma::shaderprograms[enigma::bound_shader]->shaderprogram, name.c_str());
+  }
+  if (usageIndex > 0 || location == -1) {
+    location = glGetAttribLocation(enigma::shaderprograms[enigma::bound_shader]->shaderprogram, (name + std::to_string(usageIndex)).c_str());
+  }
+  return location;
+}
+
 }
 
 namespace enigma_user {
@@ -128,11 +139,10 @@ void vertex_submit(int buffer, int primitive, unsigned vertex_start, unsigned ve
 
   bool useTextCoords, useColors;
   size_t offset = 0;
+  map<int,int> useCount;
   const size_t stride = vertexFormat->stride * sizeof(float);
   for (size_t i = 0; i < vertexFormat->flags.size(); ++i) {
     const pair<int, int> flag = vertexFormat->flags[i];
-
-    enigma::glsl_attribute_enable_internal(flag.second,true);
 
     size_t elements = 0, size = 0;
     GLenum type = GL_FLOAT;
@@ -148,7 +158,29 @@ void vertex_submit(int buffer, int primitive, unsigned vertex_start, unsigned ve
     if (flag.second == vertex_usage_color) useColors = true;
     if (flag.second == vertex_usage_textcoord) useTextCoords = true;
 
-    enigma::glsl_attribute_set_internal(flag.second, elements, type, (type == GL_FLOAT), stride, offset);
+    // NOTE: This is not what GMS1.4 does, it uses glBindAttribLocation
+    // so that in_Color0 is an alias of in_Color which glBindAttribLocation allows
+    // GMS1.4 also apparently does this binding before the shaders are linked
+    // according to a GMS tech blog:
+    // https://www.yoyogames.com/blog/16/shaders-overview-part-2
+    // https://www.yoyogames.com/blog/18/shaders-overview-part-4
+    std::string name = "";
+    int usageIndex = useCount[flag.second]++;
+    switch (flag.second) {
+      case vertex_usage_position: name = "in_Position"; break;
+      case vertex_usage_color: name = "in_Color"; break;
+      case vertex_usage_normal: name = "in_Normal"; break;
+      case vertex_usage_textcoord: name = "in_TextureCoord"; break;
+    }
+    int location = enigma::graphics_find_attribute_location(name, usageIndex);
+    if (location == -1 && flag.second == vertex_usage_color) {
+      location = enigma::graphics_find_attribute_location("in_Colour", usageIndex);
+    }
+
+    if (location != -1) {
+      enigma::glsl_attribute_enable_internal(location, true);
+      enigma::glsl_attribute_set_internal(location, elements, type, (type == GL_UNSIGNED_BYTE), stride, offset);
+    }
 
     offset += size;
   }
@@ -164,7 +196,7 @@ void vertex_submit(int buffer, int primitive, unsigned vertex_start, unsigned ve
   } else {
     enigma::glsl_uniformi_internal(enigma::shaderprograms[enigma::bound_shader]->uni_textureEnable, 0);
   }
-  enigma::glsl_uniformi_internal(enigma::shaderprograms[enigma::bound_shader]->uni_colorEnable, useColors);
+  enigma::glsl_uniformi_internal(enigma::shaderprograms[enigma::bound_shader]->uni_colorEnable, 1);
 
   vertex_start *= (stride / 4);
 	glDrawArrays(enigma::primitive_types[primitive], vertex_start, vertex_count);
