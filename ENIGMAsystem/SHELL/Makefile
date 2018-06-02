@@ -52,7 +52,8 @@ SYSTEMS := Platforms/$(PLATFORM) Graphics_Systems/$(GRAPHICS) Audio_Systems/$(AU
 OBJDIR := $(WORKDIR).eobjs/$(COMPILEPATH)/$(GMODE)
 
 SHARED_SOURCES := ../../shared
-include $(SHARED_SOURCES)/Makefile
+SHARED_SRC_DIR := ../../shared
+include $(SHARED_SRC_DIR)/Makefile
 
 ###########
 # options #
