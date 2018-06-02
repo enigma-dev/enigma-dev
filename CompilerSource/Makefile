@@ -40,9 +40,9 @@ OBJECTS := $(addprefix .eobjs/,$(SOURCES:.cpp=.o))
 DEPENDS := $(OBJECTS:.o=.d)
 
 CXXFLAGS += -I../shared $(addprefix -I../shared/, $(SHARED_INCLUDES))
-SOURCES += $(addprefix ../shared/,$(SHARED_SOURCES))
-OBJECTS += $(addprefix .eobjs/shared/,$(SHARED_SOURCES:.cpp=.o))
-DEPENDS += $(addprefix .eobjs/shared/,$(SHARED_SOURCES:.cpp=.d))
+SOURCES += $(addprefix ../shared/,$(SHARED_SRC_DIR))
+OBJECTS += $(addprefix .eobjs/shared/,$(SHARED_SRC_DIR:.cpp=.o))
+DEPENDS += $(addprefix .eobjs/shared/,$(SHARED_SRC_DIR:.cpp=.d))
 
 # sort has the nice side effect of removing duplicates. this may or may not be faster.
 OBJDIRS := $(sort $(dir $(OBJECTS)))
