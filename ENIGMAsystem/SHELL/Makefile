@@ -108,16 +108,16 @@ OBJECTS := $(addprefix $(OBJDIR)/,$(patsubst %.m, %.o, $(patsubst %.cpp, %.o, $(
 #RCFILES := $(addprefix $(WORKDIR),$(RESOURCES))
 DEPENDS := $(OBJECTS:.o=.d)
 
+SOURCES += $(addprefix $(SHARED_SRC_DIR),$(SHARED_SOURCES))
+OBJECTS += $(addprefix .eobjs/shared/,$(SHARED_SOURCES:.cpp=.o))
+DEPENDS += $(addprefix .eobjs/shared/,$(SHARED_SOURCES:.cpp=.d))
+
 OBJDIRS := $(sort $(dir $(OBJECTS) $(RCFILES)))
 
 ifeq ($(RESOURCES),)
 else
 	RESOURCEBINARY := $(OBJDIR)/resources.res
 endif
-
-SOURCES += $(addprefix $(SHARED_SRC_DIR),$(SHARED_SOURCES))
-OBJECTS += $(addprefix .eobjs/shared/,$(SHARED_SOURCES:.cpp=.o))
-DEPENDS += $(addprefix .eobjs/shared/,$(SHARED_SOURCES:.cpp=.d))
 
 ############
 # building #
