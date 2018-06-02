@@ -58,7 +58,8 @@ namespace enigma
     enigma_user::draw_clear(enigma_user::window_get_color());
   }
   
-  void EnableDrawing (HGLRC *hRC) {
+  void EnableDrawing(void* handle) {
+    HGLRC *hRC = static_cast<HGLRC*>(handle);
     WindowResizedCallback = &WindowResized;
   
     d3dmgr = new ContextManager();
@@ -375,10 +376,7 @@ namespace enigma
     m_deviceContext->RSSetViewports(1, &viewport);
   }
 
-  void DisableDrawing (HWND hWnd, HDC hDC, HGLRC hRC)
-  {
-
-  }
+  void DisableDrawing(void* handle) {}
 
 }
 

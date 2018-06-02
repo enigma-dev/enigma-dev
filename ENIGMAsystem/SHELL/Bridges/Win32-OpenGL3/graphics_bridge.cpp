@@ -83,8 +83,9 @@ namespace enigma
     enigma_user::draw_clear(enigma_user::window_get_color());
   }
 
-  void EnableDrawing (HGLRC *hRC)
+  void EnableDrawing(void* handle)
   {
+    HGLRC *hRC = static_cast<HGLRC*>(handle);
     WindowResizedCallback = &WindowResized;
     /**
      * Edited by Cool Breeze on 16th October 2013
@@ -163,11 +164,12 @@ namespace enigma
     glGetIntegerv(GL_MAX_SAMPLES_EXT, &enigma_user::display_aa);
   }
 
-  void DisableDrawing (HWND hWnd, HDC hDC, HGLRC hRC)
-  {
-      wglMakeCurrent (NULL, NULL);
-      wglDeleteContext (hRC);
-      ReleaseDC (hWnd, hDC);
+  void DisableDrawing(void* handle) {
+    HGLRC *hRC = static_cast<HGLRC*>(handle);
+
+    wglMakeCurrent (NULL, NULL);
+    wglDeleteContext (*hRC);
+    ReleaseDC (enigma::hWnd, enigma::window_hDC);
   }
 }
 

@@ -37,7 +37,6 @@ GM Global variables
 namespace enigma_user {
 std::string caption_score = "Score:", caption_lives = "Lives:", caption_health = "Health:";
 bool argument_relative = false;
-double fps;
 double health = 100;
 
 // TODO: MOVEME: Who put this here?
@@ -48,8 +47,6 @@ std::deque<int> instance_id;
 int *instance_id;
 #endif
 
-int keyboard_key = 0;
-std::string keyboard_string = "";
 double score = 0;
 bool secure_mode = false;
 bool show_score = 0, show_lives = 0, show_health = 0;
