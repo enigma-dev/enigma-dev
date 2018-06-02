@@ -5,7 +5,6 @@
 
 namespace enigma_user
 {
-	std::string window_get_caption();
 	//int show_message(std::string str);
 	double show_question(std::string str);
 	std::string get_string(std::string str, std::string def);
