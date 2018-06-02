@@ -96,7 +96,7 @@ misrepresented as being the original software.
 #include <ctype.h>
 #include <sys/stat.h>
 
-#include "../../../../shared/tinyfiledialogs/tinyfiledialogs.h"
+#include "tinyfiledialogs.h"
 /* #define TINYFD_NOLIB */
 
  #include <limits.h>
