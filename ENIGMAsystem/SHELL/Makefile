@@ -115,6 +115,10 @@ else
 	RESOURCEBINARY := $(OBJDIR)/resources.res
 endif
 
+SOURCES += $(addprefix ../shared/,$(SHARED_SOURCES))
+OBJECTS += $(addprefix .eobjs/shared/,$(SHARED_SOURCES:.cpp=.o))
+DEPENDS += $(addprefix .eobjs/shared/,$(SHARED_SOURCES:.cpp=.d))
+
 ############
 # building #
 ############
