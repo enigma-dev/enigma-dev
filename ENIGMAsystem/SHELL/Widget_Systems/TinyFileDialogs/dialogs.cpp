@@ -21,20 +21,6 @@ namespace enigma
     }
 }
 
-bool is_number(string input)
-{
-    if (input[0] >= '0' && input[0] <= '9')
-        return true;
-
-    if (input[0] == '+' && (input[1] >= '0' && input[1] <= '9'))
-        return true;
-
-    if (input[0] == '-' && (input[1] >= '0' && input[1] <= '9'))
-        return true;
-
-    return false;
-}
-
 class FileFilter {
   string filter_buf;
   std::vector<const char*> descriptions_;
@@ -120,14 +106,12 @@ void show_error(string errortext, const bool fatal)
 
 namespace enigma_user
 {
-    char result[PATH_MAX];
-
     void show_info(string text, int bgcolor, int left, int top, int width, int height,
 	bool embedGameWindow, bool showBorder, bool allowResize, bool stayOnTop,
 	bool pauseGame, string caption)
-	{
+    {
 
-	}
+    }
 
     int show_message(string str)
     {
@@ -194,9 +178,7 @@ namespace enigma_user
         if (input == NULL)
             input = "";
 
-        strncpy(result, input, PATH_MAX);
-
-        return result;
+        return input;
     }
 
     string get_password(string str, string def)
@@ -222,9 +204,7 @@ namespace enigma_user
         if (input == NULL)
             input = "";
 
-        strncpy(result, input, PATH_MAX);
-
-        return result;
+        return input;
     }
 
     double get_integer(string str, double def)
@@ -253,16 +233,7 @@ namespace enigma_user
         if (input == NULL)
             input = "";
 
-        if (is_number(input) == false)
-            input = "0";
-
-        strncpy(result, input, PATH_MAX);
-
-        std::istringstream text(result);
-        double res_integer;
-        text >> res_integer;
-
-        return res_integer;
+        return strtod(input);
     }
 
     double get_passcode(string str, double def)
@@ -291,16 +262,7 @@ namespace enigma_user
         if (input == NULL)
             input = "";
 
-        if (is_number(input) == false)
-            input = "0";
-
-        strncpy(result, input, PATH_MAX);
-
-        std::istringstream text(result);
-        double res_integer;
-        text >> res_integer;
-
-        return res_integer;
+        return strtod(input);
     }
 
     string get_open_filename(string filter, string fname)
@@ -315,9 +277,7 @@ namespace enigma_user
         if (path == NULL)
             path = "";
 
-        strncpy(result, path, PATH_MAX);
-
-        return result;
+        return path;
     }
 
     string get_open_filename_ext(string filter, string fname, string dir, string title)
@@ -355,9 +315,7 @@ namespace enigma_user
         if (path == NULL)
             path = "";
 
-        strncpy(result, path, PATH_MAX);
-
-        return result;
+        return path;
     }
 
     string get_save_filename(string filter, string fname)
@@ -372,9 +330,7 @@ namespace enigma_user
         if (path == NULL)
             path = "";
 
-        strncpy(result, path, PATH_MAX);
-
-        return result;
+        return path;
     }
 
     string get_save_filename_ext(string filter, string fname, string dir, string title)
@@ -412,9 +368,7 @@ namespace enigma_user
         if (path == NULL)
             path = "";
 
-        strncpy(result, path, PATH_MAX);
-
-        return result;
+        return path;
     }
 
     string get_directory(string dname)
@@ -426,9 +380,7 @@ namespace enigma_user
         if (path == NULL)
             path = "";
 
-        strncpy(result, path, PATH_MAX);
-
-        return result;
+        return path;
     }
 
     string get_directory_alt(string capt, string root)
@@ -448,9 +400,7 @@ namespace enigma_user
         if (path == NULL)
             path = "";
 
-        strncpy(result, path, PATH_MAX);
-
-        return result;
+        return path;
     }
 
     double get_color(double defcol)
