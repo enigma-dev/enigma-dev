@@ -1,4 +1,5 @@
 #include "dialogs.h"
+#include "Platforms/General/PFwindow.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include <tinyfiledialogs/tinyfiledialogs.h>
 #include <sys/stat.h>
