@@ -51,7 +51,6 @@ SYSTEMS := Platforms/$(PLATFORM) Graphics_Systems/$(GRAPHICS) Audio_Systems/$(AU
 
 OBJDIR := $(WORKDIR).eobjs/$(COMPILEPATH)/$(GMODE)
 
-SHARED_SOURCES := ../../shared
 SHARED_SRC_DIR := ../../shared
 include $(SHARED_SRC_DIR)/Makefile
 
@@ -86,7 +85,7 @@ override CPPFLAGS += $(SYSTEMS:%=-I%/Info)
 override CPPFLAGS += -I. -I$(CODEGEN) -I$(SHARED_SOURCES)/lodepng
 
 # Unconditional LDLIBS
-override LDLIBS += -L$(SHARED_SOURCES)/lodepng -llodepng
+override LDLIBS += -L$(SHARED_SRC_DIR)/lodepng -llodepng
 
 .PHONY: all clean
 
