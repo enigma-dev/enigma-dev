@@ -134,7 +134,7 @@ $(OBJDIR)/%.o $(OBJDIR)/%.d: %.cpp | $(OBJDIRS)
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(INCLUDES) -MMD -MP -c -o $(OBJDIR)/$*.o $<
 	
 $(OBJDIR)/shared/%.o $(OBJDIR)/%.d: $(SHARED_SRC_DIR)/%.cpp | $(OBJDIRS)
-     $(CXX) $(CXXFLAGS) $(CPPFLAGS) $(INCLUDES) -MMD -MP -c -o $(OBJDIR)/$*.o $<
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(INCLUDES) -MMD -MP -c -o $(OBJDIR)/$*.o $<
 
 $(OBJDIR)/%.o $(OBJDIR)/%.d: %.c | $(OBJDIRS)
 	$(CC) $(CFLAGS) $(CPPFLAGS) $(INCLUDES) -MMD -MP -c -o $(OBJDIR)/$*.o $<
