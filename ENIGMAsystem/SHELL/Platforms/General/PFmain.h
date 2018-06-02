@@ -26,17 +26,36 @@ namespace enigma {
   extern int game_return;
   extern int parameterc;
   extern std::string* parameters;
+  extern int pausedSteps;
+  extern int current_room_speed;
+  extern int frames_count;
+  extern unsigned long current_time_mcs;
+
+  int main(int argc, char** argv, void* windowHandle = nullptr);
   int game_ending();
   long clamp(long value, long min, long max);
   void Sleep(int ms);
   void compute_window_size();
+  void set_working_directory();
+  void set_program_args(int argc, char** argv);
+  void initTimer();
+  int updateTimer();
+  int gameWait();
+  void set_room_speed(int rs);
+  unsigned long get_timer();
 }
 
 namespace enigma_user {
 
 extern std::string working_directory;
 extern std::string program_directory;
+extern std::string keyboard_string;
+extern int keyboard_key;
+extern double fps;
+extern unsigned long delta_time;
+extern unsigned long current_time;
 
+void sleep(int ms);
 void game_end(int ret=0);
 void action_end_game();
 void url_open(std::string url,std::string target="_self",std::string options="");
