@@ -1,1 +1,2 @@
-SHARED_SOURCES := $(SHARED_SOURCES) $(addprefix tinyfiledialogs/,$(call relative_wildcard,*.cpp))
+HEADERS += $(SHARED_SRC_DIR)/tinyfiledialogs/tinyfiledialogs.h
+SOURCES += $(SHARED_SRC_DIR)/tinyfiledialogs/tinyfiledialogs.cpp
