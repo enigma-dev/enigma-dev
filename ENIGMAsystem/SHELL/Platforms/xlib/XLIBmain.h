@@ -25,24 +25,14 @@
 **                                                                              **
 \********************************************************************************/
 
-#ifndef Platforms_xlib_XLIBmain_h
-#define Platforms_xlib_XLIBmain_h
+#ifndef PLATFORMS_XLIB_XLIBMAIN_H
+#define PLATFORMS_XLIB_XLIBMAIN_H
 
 #include <X11/Xlib.h>
-#include <string>
-using std::string;
 
 namespace enigma {
   void input_push();
-  namespace x11 {
-    extern Display *disp;
-    extern Window win;
-    extern GC gc;
-    extern Atom wm_delwin;
-    extern bool game_window_focused;
-    
-    int handleEvents();
-  }
+  extern unsigned char keymap[512];
 }
 
 #endif
