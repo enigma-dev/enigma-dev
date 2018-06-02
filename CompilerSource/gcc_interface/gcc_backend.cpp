@@ -139,8 +139,7 @@ const char* establish_bearings(const char *compiler)
   /* Get a list of all macros defined by our compiler.
   ** These will help us through parsing available libraries.
   ***********************************************************/
-  if ((cmd = compiler_map_get("DEFINES", compilerInfo.parser_vars)) == "")
-    return (sprintf(errbuf,"Compiler descriptor file `%s` does not specify 'defines' executable.\n", compiler), errbuf);
+  cmd = compilerInfo.defines_cmd;
   redir = toolchain_parseout(cmd, toolchainexec,parameters,("\"" + codegen_directory + "enigma_defines.txt\""));
   cout << "Read key `defines` as `" << cmd << "`\nParsed `" << toolchainexec << "` `" << parameters << "`: redirect=" << (redir?"yes":"no") << "\n";
   got_success = !(redir? e_execsp(toolchainexec, parameters, ("> \"" + codegen_directory + "enigma_defines.txt\""),MAKE_paths) : e_execsp(toolchainexec, parameters, MAKE_paths));
@@ -150,8 +149,7 @@ const char* establish_bearings(const char *compiler)
   /* Get a list of all available search directories.
   ** These are where we'll look for headers to parse.
   ****************************************************/
-  if ((cmd = compiler_map_get("SEARCHDIRS", compilerInfo.parser_vars)) == "")
-    return (sprintf(errbuf,"Compiler descriptor file `%s` does not specify 'searchdirs' executable.", compiler), errbuf);
+  cmd = compilerInfo.searchdirs_cmd;
   redir = toolchain_parseout(cmd, toolchainexec,parameters,("\"" + codegen_directory + "enigma_searchdirs.txt\""));
   cout << "Read key `searchdirs` as `" << cmd << "`\nParsed `" << toolchainexec << "` `" << parameters << "`: redirect=" << (redir?"yes":"no") << "\n";
   got_success = !(redir? e_execsp(toolchainexec, parameters, ("&> \"" + codegen_directory + "enigma_searchdirs.txt\""), MAKE_paths) : e_execsp(toolchainexec, parameters, MAKE_paths));
@@ -165,7 +163,7 @@ const char* establish_bearings(const char *compiler)
       return "Invalid search directories returned. Error 6.";
 
     pt pos = 0;
-    string idirstart = compiler_map_get("SEARCHDIRS-START", compilerInfo.parser_vars), idirend = compiler_map_get("SEARCHDIRS-END", compilerInfo.parser_vars);
+    string idirstart = compilerInfo.searchdirs_start, idirend = compilerInfo.searchdirs_end;
     cout << "Searching for directories between \"" << idirstart << "\" and \"" << idirend << "\"" << endl;
     if (idirstart != "")
     {
@@ -211,7 +209,9 @@ const char* establish_bearings(const char *compiler)
   /* Note `make` location
   *****************************/
 
-  if ((cmd = compiler_map_get("MAKE", compilerInfo.make_vars)) == "")
+  if (compilerInfo.make_vars.find("MAKE") != compilerInfo.make_vars.end())
+    cmd = compilerInfo.make_vars["MAKE"];
+  else
     cmd = "make", cout << "WARNING: Compiler descriptor file `" << compiler <<"` does not specify 'make' executable. Using 'make'.\n";
   toolchain_parseout(cmd, toolchainexec,parameters);
   compilerInfo.MAKE_location = toolchainexec;

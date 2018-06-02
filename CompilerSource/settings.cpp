@@ -59,9 +59,20 @@ CompilerInfo compilerInfo;
 void map_ey(ey_data& key, std::map<std::string, std::string>& map) {
   for (const auto& v : key) {
     map[toUpper(v.first)] = v.second->data().scalar().toString();
-    std::cout << toUpper(v.first) << "=\""; 
+    std::cout << toUpper(v.first) << "=\""; // The makefiles expect caps
     std::cout << v.second->data().scalar().toString() << "\"" << std::endl;
   }
+}
+
+inline bool get_ey_field(ey_base* keyPtr, std::string field, std::string& str) {
+  ey_data& key = keyPtr->data();
+  str = key.get(field);
+  if (str.empty()) {
+    std::cerr << "Error: misssing required field: \"" << field << "\"" << std::endl; 
+  } else if (str.length() > 2 && (str.front() == '"') && (str.back() == '"')) { // Josh's shitty yaml parser is copying quotes from quoted fields
+    str = str.substr(1, str.length()-2);
+  }
+  return !str.empty();
 }
 
 bool load_compiler_ey(std::string fPath) {
@@ -80,31 +91,48 @@ bool load_compiler_ey(std::string fPath) {
   // Parse our compiler data file
   ey_data compiler_yaml = parse_eyaml(compiler_ifstream, fPath.c_str());
 
-  // Write down our top level ey fields (Note yaml toLowers all fields)
-  compilerInfo.name = compiler_yaml.get("name");
-  compilerInfo.maintainer = compiler_yaml.get("maintainer");
-  compilerInfo.target_platform = compiler_yaml.get("target-platform");
+  // Write down our top level ey fields (Note yaml toLowers all field names)
+  if (!get_ey_field(&compiler_yaml, "name", compilerInfo.name)) return false;
+  if (!get_ey_field(&compiler_yaml, "maintainer", compilerInfo.maintainer)) return false;
+  if (!get_ey_field(&compiler_yaml, "target-platform", compilerInfo.target_platform)) return false;
 
-  // Write down grouped fields 
-  const std::map<std::string, std::map<std::string, std::string>&> pairs = {
-      {"parser-vars", compilerInfo.parser_vars},
-      {"make-vars", compilerInfo.make_vars},
-      {"exe-vars", compilerInfo.exe_vars}};
-  
-  for (const auto& p : pairs) {
-    std::cout << "[" << p.first << "]" << std::endl;
-    ey_base* keyPtr = compiler_yaml.values[p.first];
-    if (keyPtr != nullptr && !keyPtr->is_scalar)  {
-      ey_data& key = keyPtr->data();
-      map_ey(key, p.second);
-    }
+  std::string native;
+  if (!get_ey_field(&compiler_yaml, "native", native)) return false;
+  compilerInfo.native = toUpper(native) == "YES";
+
+  // Write down required parser things
+  ey_base* parserKeyPtr = compiler_yaml.values["parser-vars"];
+  if (parserKeyPtr == nullptr || parserKeyPtr->is_scalar) {
+    std::cerr << "Error: missing Parser-Vars group" << std::endl;
+    return false;
+  } 
+
+  if (!get_ey_field(parserKeyPtr, "defines", compilerInfo.defines_cmd)) return false;
+  if (!get_ey_field(parserKeyPtr, "searchdirs", compilerInfo.searchdirs_cmd)) return false;
+  if (!get_ey_field(parserKeyPtr, "searchdirs-start", compilerInfo.searchdirs_start)) return false;
+  if (!get_ey_field(parserKeyPtr, "searchdirs-end", compilerInfo.searchdirs_end)) return false;
+
+  // Write down make vars which can be literally anything to maps
+  ey_base* makeKeyPtr = compiler_yaml.values["make-vars"];
+  if (makeKeyPtr == nullptr || makeKeyPtr->is_scalar) {
+    std::cerr << "Warning: missing Make-Vars group" << std::endl;
+  } else {
+    map_ey(makeKeyPtr->data(), compilerInfo.make_vars);
+  }
+
+  // Write down exe and runtime args which can be literally anything to map
+  ey_base* exeKeyPtr = compiler_yaml.values["exe-vars"];
+  if (exeKeyPtr == nullptr || exeKeyPtr->is_scalar) {
+    std::cerr << "Error: missing EXE-Vars group" << std::endl;
+  } else {
+    map_ey(exeKeyPtr->data(), compilerInfo.exe_vars);
+  }
+
+  // TODO: everything in exe-vars should be optional but for now the compiler will break if some things aren't set
+  if (compilerInfo.exe_vars.find("RESOURCES") == compilerInfo.exe_vars.end()) {
+    std::cerr << "Error: misssing required field: Resources" << std::endl; 
+    return false;
   }
 
   return true;
-}
-
-std::string compiler_map_get(std::string key, const std::map<std::string, std::string>& map) {
-  auto it = map.find(key);
-  if (it != map.end()) return it->second;
-  return "";
 }

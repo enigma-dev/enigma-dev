@@ -74,11 +74,19 @@ namespace setting
 }
 
 struct CompilerInfo {
+
+  // these are  needed or the ide will self destruct
   std::string name;
   std::string maintainer;
   std::string target_platform;
+  bool native;
 
-  std::map<std::string, std::string> parser_vars;
+  // these are needed in every ey or jdi will self destruct
+  std::string defines_cmd;
+  std::string searchdirs_cmd;
+  std::string searchdirs_start;
+  std::string searchdirs_end;
+
   std::map<std::string, std::string> make_vars;
   std::map<std::string, std::string> exe_vars;
 
@@ -88,7 +96,5 @@ struct CompilerInfo {
 extern CompilerInfo compilerInfo;
 
 bool load_compiler_ey(std::string fPath);
-std::string compiler_map_get(std::string key, const std::map<std::string, std::string>& map);
-
 
 #endif
