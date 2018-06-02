@@ -137,7 +137,7 @@ void vertex_submit(int buffer, int primitive, unsigned vertex_start, unsigned ve
 
   enigma::glsl_attribute_enable_all_internal(false); //Disable all attributes
 
-  bool useTextCoords, useColors;
+  bool useTextCoords = false, useColors = false;
   size_t offset = 0;
   map<int,int> useCount;
   const size_t stride = vertexFormat->stride * sizeof(float);
@@ -172,14 +172,16 @@ void vertex_submit(int buffer, int primitive, unsigned vertex_start, unsigned ve
       case vertex_usage_normal: name = "in_Normal"; break;
       case vertex_usage_textcoord: name = "in_TextureCoord"; break;
     }
-    int location = enigma::graphics_find_attribute_location(name, usageIndex);
-    if (location == -1 && flag.second == vertex_usage_color) {
-      location = enigma::graphics_find_attribute_location("in_Colour", usageIndex);
-    }
+    if (!name.empty()) {
+      int location = enigma::graphics_find_attribute_location(name, usageIndex);
+      if (location == -1 && flag.second == vertex_usage_color) {
+        location = enigma::graphics_find_attribute_location("in_Colour", usageIndex);
+      }
 
-    if (location != -1) {
-      enigma::glsl_attribute_enable_internal(location, true);
-      enigma::glsl_attribute_set_internal(location, elements, type, (type == GL_UNSIGNED_BYTE), stride, offset);
+      if (location != -1) {
+        enigma::glsl_attribute_enable_internal(location, true);
+        enigma::glsl_attribute_set_internal(location, elements, type, (type == GL_UNSIGNED_BYTE), stride, offset);
+      }
     }
 
     offset += size;

@@ -88,7 +88,7 @@ void vertex_submit(int buffer, int primitive, unsigned vertex_start, unsigned ve
     glBindBuffer(GL_ARRAY_BUFFER, enigma::vertexBufferPeers[buffer]);
   }
 
-  bool useVertices, useNormals, useColors, useTextCoords, useFogCoords;
+  bool useVertices = false, useNormals = false, useColors = false, useTextCoords = false, useFogCoords = false;
   size_t offset = 0, texture = 0;
   const size_t stride = vertexFormat->stride * sizeof(float);
   for (size_t i = 0; i < vertexFormat->flags.size(); ++i) {
