@@ -175,10 +175,7 @@ namespace enigma_user
 
         const char *input = tinyfd_inputBox(caption.c_str(), msg.c_str(), def.c_str());
 
-        if (input == NULL)
-            input = "";
-
-        return input;
+        return input ? : "";
     }
 
     string get_password(string str, string def)
@@ -201,10 +198,7 @@ namespace enigma_user
 
         const char *input = tinyfd_passwordBox(caption.c_str(), msg.c_str(), def.c_str());
 
-        if (input == NULL)
-            input = "";
-
-        return input;
+        return input ? : "";
     }
 
     double get_integer(string str, double def)
@@ -230,10 +224,7 @@ namespace enigma_user
 
         const char *input = tinyfd_inputBox(caption.c_str(), msg.c_str(), integer.c_str());
 
-        if (input == NULL)
-            input = "";
-
-        return strtod(input);
+        return input ? strtod(input) : 0;
     }
 
     double get_passcode(string str, double def)
@@ -259,10 +250,7 @@ namespace enigma_user
 
         const char *input = tinyfd_passwordBox(caption.c_str(), msg.c_str(), integer.c_str());
 
-        if (input == NULL)
-            input = "";
-
-        return strtod(input);
+        return input ? strtod(input) : 0;
     }
 
     string get_open_filename(string filter, string fname)
@@ -274,10 +262,7 @@ namespace enigma_user
         const char *path = tinyfd_openFileDialog("Open", fname.c_str(),
             ff.count() ? *ff.pattern_counts() : 0, *ff.patterns(), (char *)filter.c_str(), 0);
 
-        if (path == NULL)
-            path = "";
-
-        return path;
+        return path ? : "";
     }
 
     string get_open_filename_ext(string filter, string fname, string dir, string title)
@@ -312,10 +297,7 @@ namespace enigma_user
         const char *path = tinyfd_openFileDialog(titlebar.c_str(), fname_or_dir,
             ff.count() ? *ff.pattern_counts() : 0, *ff.patterns(), (char *)filter.c_str(), 0);
 
-        if (path == NULL)
-            path = "";
-
-        return path;
+        return path ? : "";
     }
 
     string get_save_filename(string filter, string fname)
@@ -327,10 +309,7 @@ namespace enigma_user
         const char *path = tinyfd_saveFileDialog("Save As", fname.c_str(),
             ff.count() ? *ff.pattern_counts() : 0, *ff.patterns(), (char *)filter.c_str());
 
-        if (path == NULL)
-            path = "";
-
-        return path;
+        return path ? : "";
     }
 
     string get_save_filename_ext(string filter, string fname, string dir, string title)
@@ -365,10 +344,7 @@ namespace enigma_user
         const char *path = tinyfd_saveFileDialog(titlebar.c_str(), fname_or_dir,
             ff.count() ? *ff.pattern_counts() : 0, *ff.patterns(), (char *)filter.c_str());
 
-        if (path == NULL)
-            path = "";
-
-        return path;
+        return path ? : "";
     }
 
     string get_directory(string dname)
@@ -376,9 +352,6 @@ namespace enigma_user
         replace(dname.begin(), dname.end(), '"', '\'');
 
         const char *path = tinyfd_selectFolderDialog("Select Directory", dname.c_str());
-
-        if (path == NULL)
-            path = "";
 
         return path;
     }
@@ -397,10 +370,7 @@ namespace enigma_user
 
         const char *path = tinyfd_selectFolderDialog(titlebar.c_str(), root.c_str());
 
-        if (path == NULL)
-            path = "";
-
-        return path;
+        return path ? : "";
     }
 
     double get_color(double defcol)
