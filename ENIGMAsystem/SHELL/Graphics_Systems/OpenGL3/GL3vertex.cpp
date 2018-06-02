@@ -198,7 +198,7 @@ void vertex_submit(int buffer, int primitive, unsigned vertex_start, unsigned ve
   } else {
     enigma::glsl_uniformi_internal(enigma::shaderprograms[enigma::bound_shader]->uni_textureEnable, 0);
   }
-  enigma::glsl_uniformi_internal(enigma::shaderprograms[enigma::bound_shader]->uni_colorEnable, 1);
+  enigma::glsl_uniformi_internal(enigma::shaderprograms[enigma::bound_shader]->uni_colorEnable, useColors);
 
   vertex_start *= (stride / 4);
 	glDrawArrays(enigma::primitive_types[primitive], vertex_start, vertex_count);
