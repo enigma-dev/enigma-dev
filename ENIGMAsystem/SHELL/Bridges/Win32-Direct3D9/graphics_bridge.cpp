@@ -76,8 +76,8 @@ namespace enigma
     enigma_user::draw_clear(enigma_user::window_get_color());
   }
 
-  void EnableDrawing (HGLRC *hRC)
-  {
+  void EnableDrawing(void* handle) {
+    HGLRC *hRC = static_cast<HGLRC*>(handle);
     WindowResizedCallback = &WindowResized;
 
     d3dmgr = new ContextManager();
@@ -164,8 +164,7 @@ namespace enigma
     enigma_user::draw_clear(enigma_user::window_get_color());
 	}
 
-  void DisableDrawing (HWND hWnd, HDC hDC, HGLRC hRC)
-  {
+  void DisableDrawing(void* handle) {
     d3dmgr->Release(); // close and release the 3D device
     d3dobj->Release(); // close and release Direct3D
   }

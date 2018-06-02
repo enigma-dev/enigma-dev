@@ -17,7 +17,7 @@
 //#include <GL/glx.h>
 #include <X11/Xlib.h>
 #include <GL/glxew.h>
-#include "Platforms/xlib/XLIBmain.h"
+#include "Platforms/xlib/XLIBwindow.h"
 #include "Graphics_Systems/graphics_mandatory.h"
 #include "Platforms/General/PFwindow.h"
 #include "Graphics_Systems/General/GScolors.h"
@@ -44,7 +44,9 @@ namespace enigma {
     return vi;
   }
 
-  void EnableDrawing() {
+  void EnableDrawing(void* handle) {
+    WindowResizedCallback = &WindowResized;
+    
     //give us a GL context
     glxc = glXCreateContext(enigma::x11::disp, vi, NULL, True);
     if (!glxc){
@@ -57,7 +59,7 @@ namespace enigma {
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT|GL_ACCUM_BUFFER_BIT|GL_STENCIL_BUFFER_BIT);
   }
   
-  void DisableDrawing() {
+  void DisableDrawing(void* handle) {
    glXDestroyContext(enigma::x11::disp,glxc);
       /*
     for(char q=1;q;ENIGMA_events())

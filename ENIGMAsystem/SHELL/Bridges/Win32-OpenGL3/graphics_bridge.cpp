@@ -78,8 +78,16 @@ namespace enigma
 
 	GLuint msaa_fbo = 0;
 
-  void EnableDrawing (HGLRC *hRC)
+  extern void (*WindowResizedCallback)();
+  void WindowResized() {
+    // clear the window color, viewport does not need set because backbuffer was just recreated
+    enigma_user::draw_clear(enigma_user::window_get_color());
+  }
+
+  void EnableDrawing(void* handle)
   {
+    HGLRC *hRC = static_cast<HGLRC*>(handle);
+    WindowResizedCallback = &WindowResized;
     /**
      * Edited by Cool Breeze on 16th October 2013
      * + Updated the Pixel Format to support 24-bitdepth buffers
@@ -158,17 +166,12 @@ namespace enigma
     glGetIntegerv(GL_MAX_SAMPLES_EXT, &enigma_user::display_aa);
   }
 
+  void DisableDrawing(void* handle) {
+    HGLRC *hRC = static_cast<HGLRC*>(handle);
 
-  void WindowResized() {
-    // clear the window color, viewport does not need set because backbuffer was just recreated
-    enigma_user::draw_clear(enigma_user::window_get_color());
-  }
-
-  void DisableDrawing (HWND hWnd, HDC hDC, HGLRC hRC)
-  {
-      wglMakeCurrent (NULL, NULL);
-      wglDeleteContext (hRC);
-      ReleaseDC (hWnd, hDC);
+    wglMakeCurrent (NULL, NULL);
+    wglDeleteContext (*hRC);
+    ReleaseDC (enigma::hWnd, enigma::window_hDC);
   }
 }
 

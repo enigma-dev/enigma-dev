@@ -18,26 +18,25 @@
 #ifndef ENIGMA_XLIB_WINDOW_H
 #define ENIGMA_XLIB_WINDOW_H
 
-#include "../General/PFwindow.h"
-#include "../General/PFmain.h"
+#include "Platforms/General/PFmain.h"
+#include "Platforms/General/PFwindow.h"
 
-#include <string>
-using std::string;
-
-void gmw_init();
-
-void Sleep(int ms);
-
-namespace enigma_user {
-  static inline void sleep(int ms) { Sleep(ms); }
-}
+#include <X11/Xlib.h>
+#include <X11/Xutil.h>
 
 namespace enigma {
-  extern string*  parameters;
-  extern int parameterc;
-  extern int current_room_speed;
-  //void writename(char* x);
-  void initkeymap();
-}
+
+namespace x11 {
+extern Display* disp;
+extern Screen* screen;
+extern Window win;
+extern Atom wm_delwin;
+extern bool game_window_focused;
+}  // namespace x11
+
+XVisualInfo* CreateVisualInfo();
+void initkeymap();
+int handleEvents();
+}  // namespace enigma
 
 #endif

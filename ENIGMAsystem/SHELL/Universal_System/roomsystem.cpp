@@ -73,7 +73,6 @@ rvt view_hborder, view_hport, view_hspeed, view_hview, view_object, view_vborder
 
 namespace enigma
 {
-  int ENIGMA_events();
 
   roomstruct** roomdata;
   roomstruct** roomorder;

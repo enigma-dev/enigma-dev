@@ -52,7 +52,16 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 namespace enigma
 {
 	
-  void EnableDrawing (HGLRC *hRC) {
+  extern void (*WindowResizedCallback)();
+  void WindowResized() {
+    // clear the window color, viewport does not need set because backbuffer was just recreated
+    enigma_user::draw_clear(enigma_user::window_get_color());
+  }
+  
+  void EnableDrawing(void* handle) {
+    HGLRC *hRC = static_cast<HGLRC*>(handle);
+    WindowResizedCallback = &WindowResized;
+  
     d3dmgr = new ContextManager();
       int screenWidth = window_get_width(),
           screenHeight = window_get_height();
@@ -372,10 +381,7 @@ namespace enigma
     enigma_user::draw_clear(enigma_user::window_get_color());
   }
 
-  void DisableDrawing (HWND hWnd, HDC hDC, HGLRC hRC)
-  {
-
-  }
+  void DisableDrawing(void* handle) {}
 
 }
 

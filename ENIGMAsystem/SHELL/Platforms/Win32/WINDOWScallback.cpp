@@ -62,7 +62,6 @@ namespace enigma
   extern char mousestatus[3],last_mousestatus[3],keybdstatus[256],last_keybdstatus[256];
   extern int windowX, windowY, windowColor;
   extern HCURSOR currentCursor;
-  extern unsigned int pausedSteps;
 
   static RECT tempWindow;
   static short hdeltadelta = 0, vdeltadelta = 0;
