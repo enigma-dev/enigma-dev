@@ -224,7 +224,7 @@ namespace enigma_user
 
         const char *input = tinyfd_inputBox(caption.c_str(), msg.c_str(), integer.c_str());
 
-        return strtod(input) ? : 0;
+        return strtod(input, NULL) ? : 0;
     }
 
     double get_passcode(string str, double def)
@@ -250,7 +250,7 @@ namespace enigma_user
 
         const char *input = tinyfd_passwordBox(caption.c_str(), msg.c_str(), integer.c_str());
 
-        return strtod(input) ? : 0;
+        return strtod(input, NULL) ? : 0;
     }
 
     string get_open_filename(string filter, string fname)
