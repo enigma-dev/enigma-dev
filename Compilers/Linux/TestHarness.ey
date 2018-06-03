@@ -4,6 +4,7 @@
 Name: TestHarness
 Maintainer: fundies
 Target-platform: Linux
+Native: No
 
 Make-Vars:
   path:

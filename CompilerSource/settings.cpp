@@ -77,6 +77,8 @@ inline bool get_ey_field(ey_base* keyPtr, std::string field, std::string& str) {
 
 bool load_compiler_ey(std::string fPath) {
 
+  bool success = true; // ugly hacks cause josh can't program 
+
   std::cout << std::endl << "Loading compiler ey file: " << fPath << std::endl;
 
   // Clear old info
@@ -92,12 +94,12 @@ bool load_compiler_ey(std::string fPath) {
   ey_data compiler_yaml = parse_eyaml(compiler_ifstream, fPath.c_str());
 
   // Write down our top level ey fields (Note yaml toLowers all field names)
-  if (!get_ey_field(&compiler_yaml, "name", compilerInfo.name)) return false;
-  if (!get_ey_field(&compiler_yaml, "maintainer", compilerInfo.maintainer)) return false;
-  if (!get_ey_field(&compiler_yaml, "target-platform", compilerInfo.target_platform)) return false;
+  success = get_ey_field(&compiler_yaml, "name", compilerInfo.name);
+  success = get_ey_field(&compiler_yaml, "maintainer", compilerInfo.maintainer);
+  success = get_ey_field(&compiler_yaml, "target-platform", compilerInfo.target_platform);
 
   std::string native;
-  if (!get_ey_field(&compiler_yaml, "native", native)) return false;
+  success = get_ey_field(&compiler_yaml, "native", native);
   compilerInfo.native = toUpper(native) == "YES";
 
   // Write down required parser things
@@ -107,10 +109,10 @@ bool load_compiler_ey(std::string fPath) {
     return false;
   } 
 
-  if (!get_ey_field(parserKeyPtr, "defines", compilerInfo.defines_cmd)) return false;
-  if (!get_ey_field(parserKeyPtr, "searchdirs", compilerInfo.searchdirs_cmd)) return false;
-  if (!get_ey_field(parserKeyPtr, "searchdirs-start", compilerInfo.searchdirs_start)) return false;
-  if (!get_ey_field(parserKeyPtr, "searchdirs-end", compilerInfo.searchdirs_end)) return false;
+  success = get_ey_field(parserKeyPtr, "defines", compilerInfo.defines_cmd);
+  success = get_ey_field(parserKeyPtr, "searchdirs", compilerInfo.searchdirs_cmd);
+  success = get_ey_field(parserKeyPtr, "searchdirs-start", compilerInfo.searchdirs_start);
+  success = get_ey_field(parserKeyPtr, "searchdirs-end", compilerInfo.searchdirs_end);
 
   // Write down make vars which can be literally anything to maps
   ey_base* makeKeyPtr = compiler_yaml.values["make-vars"];
@@ -131,8 +133,8 @@ bool load_compiler_ey(std::string fPath) {
   // TODO: everything in exe-vars should be optional but for now the compiler will break if some things aren't set
   if (compilerInfo.exe_vars.find("RESOURCES") == compilerInfo.exe_vars.end()) {
     std::cerr << "Error: misssing required field: Resources" << std::endl; 
-    return false;
+    success = false;
   }
 
-  return true;
+  return success;
 }
