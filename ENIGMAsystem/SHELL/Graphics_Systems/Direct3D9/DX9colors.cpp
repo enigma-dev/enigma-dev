@@ -18,16 +18,8 @@
 #include "Bridges/General/DX9Context.h"
 #include "Direct3D9Headers.h"
 #include "Graphics_Systems/General/GScolors.h"
+#include "Graphics_Systems/General/GScolor_macros.h"
 #include <math.h>
-
-#define __GETR(x) ((x & 0x0000FF))
-#define __GETG(x) ((x & 0x00FF00)>>8)
-#define __GETB(x) ((x & 0xFF0000)>>16)
-/*#define __GETRf(x) fmod(x,256)
-#define __GETGf(x) fmod(x/256,256)
-#define __GETBf(x) fmod(x/65536,256)*/
-
-#define bind_alpha(alpha) (alpha>1?255:(alpha<0?0:(unsigned char)(alpha*255)))
 
 namespace enigma {
   extern unsigned char currentcolor[4];
@@ -74,7 +66,6 @@ void draw_set_color_rgba(unsigned char red,unsigned char green,unsigned char blu
 	enigma::currentcolor[1] = green;
 	enigma::currentcolor[2] = blue;
 	enigma::currentcolor[3] = bind_alpha(alpha);
-	D3DCOLOR D3DColor = D3DCOLOR_RGBA(enigma::currentcolor[0],enigma::currentcolor[1],enigma::currentcolor[2], enigma::currentcolor[3]);
 }
 
 void draw_set_color_write_enable(bool red, bool green, bool blue, bool alpha)
