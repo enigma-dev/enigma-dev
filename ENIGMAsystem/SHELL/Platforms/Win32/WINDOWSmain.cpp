@@ -432,11 +432,10 @@ void action_webpage(const std::string &url) {
 }  // namespace enigma_user
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int iCmdShow) {
-  LPWSTR *_argv;
+  int argc = 0;
   std::vector<const char*> argv;
-  int argc;
-  if ((_argv = CommandLineToArgvW(GetCommandLineW(), &argc))) {
-    std::vector<string> shortened;
+  std::vector<string> shortened;
+  if (LPWSTR *_argv = CommandLineToArgvW(GetCommandLineW(), &argc)) {
     for (int i = 0; i < argc; ++i) {
       shortened.push_back(shorten(_argv[i]));
       argv.push_back(shortened[i].c_str());
