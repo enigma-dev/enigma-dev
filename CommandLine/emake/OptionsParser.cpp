@@ -104,12 +104,12 @@ OptionsParser::OptionsParser() : _desc("Options")
 #endif
     ("output,o", opt::value<std::string>(), "Output executable file")
     ("platform,p", opt::value<std::string>()->default_value(def_platform), "Target Platform (XLib, Win32, Cocoa)")
-    ("workdir,w", opt::value<std::string>()->default_value(def_workdir), "Working Directory")
+    ("workdir,d", opt::value<std::string>()->default_value(def_workdir), "Working Directory")
     ("codegen,k", opt::value<std::string>()->default_value(def_workdir), "Codegen Directory")
     ("mode,m", opt::value<std::string>()->default_value("Debug"), "Game Mode (Run, Release, Debug, Design)")
     ("graphics,g", opt::value<std::string>()->default_value("OpenGL1"), "Graphics System (OpenGL1, OpenGL3, DirectX)")
     ("audio,a", opt::value<std::string>()->default_value("None"), "Audio System (OpenAL, DirectSound, SFML, None)")
-    ("widgets,W", opt::value<std::string>()->default_value("None"), "Widget System (Win32, GTK, None)")
+    ("widgets,w", opt::value<std::string>()->default_value("None"), "Widget System (Win32, GTK, None)")
     ("network,n", opt::value<std::string>()->default_value("None"), "Networking System (Async, Berkeley, DirectPlay)")
     ("collision,c", opt::value<std::string>()->default_value("None"), "Collision System")
     ("extensions,e", opt::value<std::string>()->default_value("None"), "Extensions (Paths, Timelines, Particles)")
@@ -154,8 +154,12 @@ int OptionsParser::ReadArgs(int argc, char* argv[])
     if (!_rawArgs.count("info"))
       opt::notify(_rawArgs);
 #ifndef CLI_DISABLE_SERVER
-    if (!_rawArgs["server"].as<bool>() && !_rawArgs.count("output")) {
-      throw std::logic_error("Option 'server' or option 'output' is required.");
+    if (!_rawArgs.count("help") && !_rawArgs.count("list") && !_rawArgs.count("info") && !_rawArgs.count("server") && !_rawArgs.count("output")) {
+      throw std::logic_error("Option 'help', 'list', 'info', 'server', or option 'output' is required.");
+    }
+#else
+    if (!_rawArgs.count("help") && !_rawArgs.count("list") && !_rawArgs.count("info") && !_rawArgs.count("output")) {
+      throw std::logic_error("Option 'help', 'list', 'info', or option 'output' is required.");
     }
 #endif
   }
