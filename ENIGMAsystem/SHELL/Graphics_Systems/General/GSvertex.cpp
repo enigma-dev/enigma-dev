@@ -119,7 +119,7 @@ unsigned vertex_get_number(int buffer) {
 
 void vertex_freeze(int buffer) {
   // we can freeze the vertex buffer only if it isn't already frozen
-  // if it's not frozen, then we we'll freeze it when we do a dirty update
+  // if it's not frozen, then we'll freeze it when we do a dirty update
   if (enigma::vertexBuffers[buffer]->frozen) return;
   enigma::vertexBuffers[buffer]->frozen = true;
   enigma::vertexBuffers[buffer]->dirty = true;
