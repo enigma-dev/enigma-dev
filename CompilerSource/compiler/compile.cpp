@@ -19,6 +19,7 @@
 #include "makedir.h"
 #include "OS_Switchboard.h" //Tell us where the hell we are
 #include "backend/EnigmaStruct.h" //LateralGM interface structures
+#include "settings.h"
 
 #include "general/darray.h"
 
@@ -57,11 +58,10 @@ using namespace std;
 #include "compile_includes.h"
 #include "compile_common.h"
 
-#include "eyaml/eyaml.h"
+
 #include "settings-parse/crawler.h"
 
 #include "components/components.h"
-#include "gcc_interface/gcc_backend.h"
 
 #include "general/bettersystem.h"
 #include "event_reader/event_parser.h"
@@ -167,21 +167,23 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   ide_dia_clear();
   ide_dia_open();
   cout << "Initialized." << endl;
-  string compilepath = CURRENT_PLATFORM_NAME "/" + extensions::targetOS.builddir + "/" + extensions::targetOS.compiler;
+  
+  // replace any spaces in ey name because make is trash
+  string name = string_replace_all(compilerInfo.name, " ", "_");
+  string compilepath = CURRENT_PLATFORM_NAME "/" + compilerInfo.target_platform + "/" + name;
 
   if (mode == emode_rebuild)
   {
     edbg << "Cleaning..." << flushl;
 
-  	string make = MAKE_flags;
+  	string make = compilerInfo.make_vars["MAKEFLAGS"];
     make += " clean-game ";
   	make += "COMPILEPATH=\"" + compilepath + "\" ";
   	make += "WORKDIR=\"" + eobjs_directory + "\" ";
     make += "CODEGEN=\"" + codegen_directory + "\" ";
-  	make += "eTCpath=\"" + MAKE_tcpaths + "\"";
 
-  	edbg << "Full command line: " << MAKE_location << " " << make << flushl;
-    e_execs(MAKE_location,make);
+  	edbg << "Full command line: " << compilerInfo.MAKE_location << " " << make << flushl;
+    e_execs(compilerInfo.MAKE_location,make);
 
     edbg << "Done.\n" << flushl;
   	idpr("Done.", 100);
@@ -328,13 +330,13 @@ int lang_CPP::compile(EnigmaStruct *es, const char* exe_filename, int mode)
   // Modes, settings and executable information.
 
   idpr("Adding resources...",90);
-  string desstr = "./ENIGMAsystem/SHELL/design_game" + extensions::targetOS.buildext;
+  string desstr = "./ENIGMAsystem/SHELL/design_game" + compilerInfo.exe_vars["BUILD-EXTENSION"];
   string gameFname = mode == emode_design ? desstr.c_str() : (desstr = exe_filename, exe_filename); // We will be using this first to write, then to run
 
   edbg << "Writing executable information and resources." << flushl;
-  if (extensions::targetOS.identifier == "Windows")
+  if (compilerInfo.target_platform == "Windows")
     write_exe_info(codegen_directory, es);
-  else if (extensions::targetOS.identifier == "Linux" && mode == emode_compile)
+  else if (compilerInfo.target_platform == "Linux" && mode == emode_compile)
     write_desktop_entry(gameFname, es->gameSettings);
 
   edbg << "Writing modes and settings" << flushl;
@@ -602,30 +604,25 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
 
   idpr("Starting compile (This may take a while...)", 30);
 
-  string make = MAKE_flags;
+  string make = compilerInfo.make_vars["MAKEFLAGS"];
 
-  make += " Game ";
+  make += "Game ";
   make += "WORKDIR=\"" + eobjs_directory + "\" ";
   make += "CODEGEN=\"" + codegen_directory + "\" ";
-  make += mode == emode_debug? "GMODE=Debug ": mode == emode_design? "GMODE=Design ": mode == emode_compile?"GMODE=Compile ": "GMODE=Run ";
-  make += "GRAPHICS=" + extensions::targetAPI.graphicsSys + " ";
-  make += "AUDIO=" + extensions::targetAPI.audioSys + " ";
-  make += "COLLISION=" + extensions::targetAPI.collisionSys + " ";
-  make += "WIDGETS="  + extensions::targetAPI.widgetSys + " ";
-  make += "NETWORKING="  + extensions::targetAPI.networkSys + " ";
-  make += "PLATFORM=" + extensions::targetAPI.windowSys + " ";
-
-  if (CXX_override.length()) make += "CXX=" + CXX_override + " ";
-  if (CC_override.length()) make += "CC=" + CC_override + " ";
-  if (WINDRES_location.length()) make += "WINDRES=" + WINDRES_location + " ";
-
-  if (TOPLEVEL_cflags.length()) make += "CFLAGS=\"" + TOPLEVEL_cflags + "\" ";
-  if (TOPLEVEL_cppflags.length()) make += "CPPFLAGS=\"" + TOPLEVEL_cppflags + "\" ";
-  if (TOPLEVEL_cxxflags.length()) make += "CXXFLAGS=\"" + TOPLEVEL_cxxflags + "\" ";
-  if (TOPLEVEL_ldflags.length()) make += "LDFLAGS=\"" + TOPLEVEL_ldflags + "\" ";
-  if (TOPLEVEL_ldlibs.length()) make += "LDLIBS=\"" + TOPLEVEL_ldlibs + "\" ";
-
-  if (TOPLEVEL_rcflags.length()) make += "RCFLAGS=\"" + TOPLEVEL_rcflags + "\" ";
+  make += mode == emode_debug? "GMODE=\"Debug\"" : mode == emode_design? "GMODE=\"Design\"" : mode == emode_compile?"GMODE=\"Compile\"" : "GMODE=\"Run\"";
+  make += " ";
+  make += "GRAPHICS=\"" + extensions::targetAPI.graphicsSys + "\" ";
+  make += "AUDIO=\"" + extensions::targetAPI.audioSys + "\" ";
+  make += "COLLISION=\"" + extensions::targetAPI.collisionSys + "\" ";
+  make += "WIDGETS=\""  + extensions::targetAPI.widgetSys + "\" ";
+  make += "NETWORKING=\""  + extensions::targetAPI.networkSys + "\" ";
+  make += "PLATFORM=\"" + extensions::targetAPI.windowSys + "\" ";
+  make += "TARGET-PLATFORM=\"" + compilerInfo.target_platform + "\" ";
+  
+  for (const auto& key : compilerInfo.make_vars) {
+    if (key.second != "")
+      make += key.first + "=\"" + key.second + "\" ";
+  }
 
   make += "COMPILEPATH=\"" + compilepath + "\" ";
 
@@ -638,10 +635,9 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
   for (size_t i = 0; i < mfgfn.length(); i++)
     if (mfgfn[i] == '\\') mfgfn[i] = '/';
   make += string(" OUTPUTNAME=\"") + mfgfn + "\" ";
-  make += "eTCpath=\"" + MAKE_tcpaths + "\"";
 
-  edbg << "Running make from `" << MAKE_location << "'" << flushl;
-  edbg << "Full command line: " << MAKE_location << " " << make << flushl;
+  edbg << "Running make from `" << compilerInfo.MAKE_location << "'" << flushl;
+  edbg << "Full command line: " << compilerInfo.MAKE_location << " " << make << flushl;
 
 //  #if CURRENT_PLATFORM_ID == OS_MACOSX
 //  int makeres = better_system("cd ","/MacOS/");
@@ -665,7 +661,7 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
     flags += "&> \"" + redirfile + "\"";
   }
 
-  int makeres = e_execs(MAKE_location, make, flags);
+  int makeres = e_execs(compilerInfo.MAKE_location, make, flags);
 
   // Stop redirecting GCC output
   if (redirect_make)
@@ -690,8 +686,9 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
 
   FILE *gameModule;
   int resourceblock_start = 0;
-  cout << "`" << extensions::targetOS.resfile << "` == '$exe': " << (extensions::targetOS.resfile == "$exe"?"true":"FALSE") << endl;
-  if (extensions::targetOS.resfile == "$exe")
+  std::string resfile = compilerInfo.exe_vars["RESOURCES"];
+  cout << "`" << resfile << "` == '$exe': " << (resfile == "$exe"?"true":"FALSE") << endl;
+  if (resfile == "$exe")
   {
     gameModule = fopen(gameFname.c_str(),"ab");
     if (!gameModule) {
@@ -709,7 +706,7 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
   }
   else
   {
-    string resname = extensions::targetOS.resfile;
+    string resname = resfile;
     for (size_t p = resname.find("$exe"); p != string::npos; p = resname.find("$game"))
       resname.replace(p,4,gameFname);
     gameModule = fopen(resname.c_str(),"wb");
@@ -771,7 +768,7 @@ wto << "namespace enigma_user {\nstring shader_get_name(int i) {\n switch (i) {\
     chdir(newdir.c_str());
     #endif
 
-    string rprog = extensions::targetOS.runprog, rparam = extensions::targetOS.runparam;
+    string rprog = compilerInfo.exe_vars["RUN-PROGRAM"], rparam = compilerInfo.exe_vars["RUN-PARAMS"];
     rprog = string_replace_all(rprog,"$game",gameFname);
     rparam = string_replace_all(rparam,"$game",gameFname);
     user << "Running \"" << rprog << "\" " << rparam << flushl;
