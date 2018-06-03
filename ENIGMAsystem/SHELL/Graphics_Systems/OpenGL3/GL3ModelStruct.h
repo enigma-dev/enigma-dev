@@ -16,12 +16,13 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
-#include "../General/OpenGLHeaders.h"
-#include "../General/GSd3d.h"
-#include "../General/GSprimitives.h"
-#include "../General/GSmatrix.h"
-#include "../General/GSmath.h"
-#include "../General/GSvertex.h"
+#include "Graphics_Systems/General/OpenGLHeaders.h"
+#include "Graphics_Systems/General/GSd3d.h"
+#include "Graphics_Systems/General/GSprimitives.h"
+#include "Graphics_Systems/General/GSmatrix.h"
+#include "Graphics_Systems/General/GSmath.h"
+#include "Graphics_Systems/General/GSvertex_impl.h"
+#include "Graphics_Systems/General/GScolor_macros.h"
 #include "Bridges/General/GL3Context.h" //Needed to get if bound texture == -1
 #include "GLSLshader.h"
 #include "Universal_System/var4.h"
@@ -33,10 +34,6 @@
 #include <stdlib.h>
 
 using namespace std;
-
-#define __GETR(x) (x & 0x0000FF)
-#define __GETG(x) ((x & 0x00FF00)>>8)
-#define __GETB(x) ((x & 0xFF0000)>>16)
 
 #include <iostream>
 #include <map>
@@ -142,25 +139,6 @@ namespace enigma {
   		}
   	}
   }
-
-  template<int x> struct intmatch { };
-  template<int x> struct uintmatch { };
-  template<> struct intmatch<1>   { typedef int8_t type;  };
-  template<> struct intmatch<2>   { typedef int16_t type; };
-  template<> struct intmatch<4>   { typedef int32_t type; };
-  template<> struct intmatch<8>   { typedef int64_t type; };
-  template<> struct uintmatch<1>  { typedef uint8_t type;  };
-  template<> struct uintmatch<2>  { typedef uint16_t type; };
-  template<> struct uintmatch<4>  { typedef uint32_t type; };
-  template<> struct uintmatch<8>  { typedef uint64_t type; };
-  typedef uintmatch<sizeof(gs_scalar)>::type color_t;
-  union VertexElement {
-  	color_t d;
-  	gs_scalar f;
-
-  	VertexElement(gs_scalar v): f(v) {}
-  	VertexElement(color_t v): d(v) {}
-  };
 
   //NOTE: This class handles batching, indexing, and other optimization for you and is very very efficient.
   class Mesh

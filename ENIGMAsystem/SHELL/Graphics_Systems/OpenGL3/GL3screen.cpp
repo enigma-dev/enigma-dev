@@ -351,6 +351,7 @@ void screen_init()
   }
 
   glDisable(GL_DEPTH_TEST);
+  glDisable(GL_CULL_FACE);
   glEnable(GL_BLEND);
   glEnable(GL_SCISSOR_TEST);
 
