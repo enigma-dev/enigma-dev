@@ -94,12 +94,12 @@ bool load_compiler_ey(std::string fPath) {
   ey_data compiler_yaml = parse_eyaml(compiler_ifstream, fPath.c_str());
 
   // Write down our top level ey fields (Note yaml toLowers all field names)
-  success = get_ey_field(&compiler_yaml, "name", compilerInfo.name);
-  success = get_ey_field(&compiler_yaml, "maintainer", compilerInfo.maintainer);
-  success = get_ey_field(&compiler_yaml, "target-platform", compilerInfo.target_platform);
+  success &= get_ey_field(&compiler_yaml, "name", compilerInfo.name);
+  success &= get_ey_field(&compiler_yaml, "maintainer", compilerInfo.maintainer);
+  success &= get_ey_field(&compiler_yaml, "target-platform", compilerInfo.target_platform);
 
   std::string native;
-  success = get_ey_field(&compiler_yaml, "native", native);
+  success &= get_ey_field(&compiler_yaml, "native", native);
   compilerInfo.native = toUpper(native) == "YES";
 
   // Write down required parser things
@@ -109,10 +109,10 @@ bool load_compiler_ey(std::string fPath) {
     return false;
   } 
 
-  success = get_ey_field(parserKeyPtr, "defines", compilerInfo.defines_cmd);
-  success = get_ey_field(parserKeyPtr, "searchdirs", compilerInfo.searchdirs_cmd);
-  success = get_ey_field(parserKeyPtr, "searchdirs-start", compilerInfo.searchdirs_start);
-  success = get_ey_field(parserKeyPtr, "searchdirs-end", compilerInfo.searchdirs_end);
+  success &= get_ey_field(parserKeyPtr, "defines", compilerInfo.defines_cmd);
+  success &= get_ey_field(parserKeyPtr, "searchdirs", compilerInfo.searchdirs_cmd);
+  success &= get_ey_field(parserKeyPtr, "searchdirs-start", compilerInfo.searchdirs_start);
+  success &= get_ey_field(parserKeyPtr, "searchdirs-end", compilerInfo.searchdirs_end);
 
   // Write down make vars which can be literally anything to maps
   ey_base* makeKeyPtr = compiler_yaml.values["make-vars"];
