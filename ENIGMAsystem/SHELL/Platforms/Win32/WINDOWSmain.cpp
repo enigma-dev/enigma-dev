@@ -433,17 +433,17 @@ void action_webpage(const std::string &url) {
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int iCmdShow) {
   LPWSTR *_argv;
-  char **argv;
+  std::vector<const char*> argv;
   int argc;
   if ((_argv = CommandLineToArgvW(GetCommandLineW(), &argc))) {
-    argv = new char *[argc];
-    for (int i = 0; i < argc; i++) {
-      char buffer[256];
-      wsprintfA (buffer, "%S", argv[i]);
+    std::vector<string> shortened;
+    for (int i = 0; i < argc; ++i) {
+      shortened.push_back(shorten(_argv[i]));
+      argv.push_back(shortened[i].c_str());
     }
-    LocalFree(argv);
+    LocalFree (_argv);
   }
 
   //Main loop
-  return enigma::main(argc, argv, &enigma::hRC);
+  return enigma::main(argc, const_cast<char**>(argv.data()), &enigma::hRC);
 }
