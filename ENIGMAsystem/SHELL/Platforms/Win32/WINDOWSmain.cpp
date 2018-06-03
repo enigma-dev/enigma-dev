@@ -434,9 +434,9 @@ void action_webpage(const std::string &url) {
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int iCmdShow) {
   LPWSTR *_argv;
   std::vector<const char*> argv;
+  std::vector<string> shortened;
   int argc;
   if ((_argv = CommandLineToArgvW(GetCommandLineW(), &argc))) {
-    std::vector<string> shortened;
     for (int i = 0; i < argc; ++i) {
       shortened.push_back(shorten(_argv[i]));
       argv.push_back(shortened[i].c_str());
