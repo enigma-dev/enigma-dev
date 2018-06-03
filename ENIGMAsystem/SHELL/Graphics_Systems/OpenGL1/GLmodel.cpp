@@ -16,24 +16,20 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 #include "GLModelStruct.h"
-#include "../General/OpenGLHeaders.h"
-#include "../General/GSd3d.h"
-#include "../General/GStextures.h"
-#include "../General/GSmatrix.h" //For d3d_transform_add_translation
 #include "GLshapes.h"
-#include "../General/GSmodel.h"
+#include "Graphics_Systems/General/OpenGLHeaders.h"
+#include "Graphics_Systems/General/GSd3d.h"
+#include "Graphics_Systems/General/GStextures.h"
+#include "Graphics_Systems/General/GSmatrix.h" //For d3d_transform_add_translation
+#include "Graphics_Systems/General/GSmodel.h"
+#include "Graphics_Systems/General/GScolor_macros.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-
 using namespace std;
-
-#define __GETR(x) ((x & 0x0000FF))/255.0
-#define __GETG(x) ((x & 0x00FF00)>>8)/255.0
-#define __GETB(x) ((x & 0xFF0000)>>16)/255.0
 
 #include <iostream>
 #include <map>
@@ -178,11 +174,11 @@ bool d3d_model_load(int id, string fname)
 				int faceVertices = f.size() / (1 + hasTexture + hasNormals);
 				int of = 1 + hasTexture + hasNormals;
         int nof = 1 + hasTexture;
-        
+
 				meshes[id]->AddVertex(vertices[(f[0]-1)*3],  vertices[(f[0]-1)*3 +1], vertices[(f[0]-1)*3 +2]);
 				if(hasTexture) meshes[id]->AddTexture(uvs[(f[1]-1)*2], 1 - uvs[(f[1]-1)*2 +1]);
 				if(hasNormals) meshes[id]->AddNormal(normals[(f[nof]-1)*3], normals[(f[nof]-1)*3 +1], normals[(f[nof]-1)*3 +2]);
-        
+
 				meshes[id]->AddVertex(vertices[(f[1*of]-1)*3],  vertices[(f[1*of]-1)*3 +1] , vertices[(f[1*of]-1)*3 +2]);
 				if(hasTexture) meshes[id]->AddTexture(uvs[(f[1*of + 1]-1)*2], 1 - uvs[(f[1*of + 1]-1)*2 +1]);
        	if(hasNormals) meshes[id]->AddNormal(normals[(f[of + nof]-1)*3], normals[(f[of  + nof]-1)*3 +1], normals[(f[of  + nof]-1)*3 +2]);
@@ -190,18 +186,18 @@ bool d3d_model_load(int id, string fname)
 				meshes[id]->AddVertex(vertices[(f[2*of]-1)*3],  vertices[(f[2*of]-1)*3 +1] , vertices[(f[2*of]-1)*3 +2]);
 				if(hasTexture) meshes[id]->AddTexture(uvs[(f[2*of + 1]-1)*2], 1 - uvs[(f[2*of + 1]-1)*2 +1]);
 				if(hasNormals) meshes[id]->AddNormal(normals[(f[2*of +nof]-1)*3], normals[(f[2*of  + nof]-1)*3 +1], normals[(f[2*of  + nof]-1)*3 +2]);
-        
+
 				//is a quad
 				if(faceVertices == 4)
 				{
 					meshes[id]->AddVertex(vertices[(f[2*of]-1)*3],  vertices[(f[2*of]-1)*3 +1] , vertices[(f[2*of]-1)*3 +2]);
 					if(hasTexture) meshes[id]->AddTexture(uvs[(f[2*of + 1]-1)*2], 1 - uvs[(f[2*of + 1]-1)*2 +1]);
 					if(hasNormals) meshes[id]->AddNormal(normals[(f[2*of + nof]-1)*3], normals[(f[2*of  + nof]-1)*3 +1], normals[(f[2*of  + nof]-1)*3 +2]);
-          
+
 					meshes[id]->AddVertex( vertices[(f[3*of]-1)*3],  vertices[(f[3*of]-1)*3 +1] , vertices[(f[3*of]-1)*3 +2]);
 					if(hasTexture) meshes[id]->AddTexture(uvs[(f[3*of + 1]-1)*2], 1 - uvs[(f[3*of + 1]-1)*2 +1]);
 					if(hasNormals) meshes[id]->AddNormal(normals[(f[3*of + nof]-1)*3], normals[(f[3*of  + nof]-1)*3 +1], normals[(f[3*of  + nof]-1)*3 +2]);
-          
+
 					meshes[id]->AddVertex(vertices[(f[0]-1)*3],  vertices[(f[0]-1)*3 +1], vertices[(f[0]-1)*3 +2]);
 					if(hasTexture) meshes[id]->AddTexture(uvs[(f[0 + 1]-1)*2], 1 - uvs[(f[0 + 1]-1)*2 +1]);
           if(hasNormals) meshes[id]->AddNormal(normals[(f[nof]-1)*3], normals[(f[nof]-1)*3 +1], normals[(f[nof]-1)*3 +2]);

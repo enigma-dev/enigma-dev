@@ -86,46 +86,18 @@ namespace enigma
 	void graphics_delete_texture(int texid){}
 	unsigned char* graphics_get_texture_pixeldata(unsigned texture, unsigned* fullwidth, unsigned* fullheight){return NULL;}
 
+	void graphics_delete_vertex_buffer_peer(int buffer) {}
+
 	bool fill_complex_polygon(const std::list<PolyVertex>& vertices, int defaultColor, bool allowHoles){return false;}
 }
 
 namespace enigma_user
 {
 	string draw_get_graphics_error(){return "Running in headless mode";}
-	unsigned vertex_format_create(){return (unsigned) -1;}
 
-	void vertex_format_destroy(int id){}
-	bool vertex_format_exists(int id){return false;}
-	unsigned vertex_create_buffer(){return (unsigned) -1;}
-	unsigned vertex_create_buffer_ext(unsigned size){return (unsigned) -1;}
-	void vertex_delete_buffer(int buffer){}
-	void vertex_begin(int buffer, int format){}
-	void vertex_end(int buffer){}
-	void vertex_freeze(int buffer){}
-	void vertex_submit(int buffer, int primitive){}
-	void vertex_submit(int buffer, int primitive, int texture){}
-	void vertex_delete(int buffer){}
-	void vertex_index(int buffer, unsigned id){}
-	void vertex_position(int buffer, gs_scalar x, gs_scalar y){}
-	void vertex_position_3d(int buffer, gs_scalar x, gs_scalar y, gs_scalar z){}
-	void vertex_normal(int buffer, gs_scalar nx, gs_scalar ny, gs_scalar nz){}
-	void vertex_texcoord(int buffer, gs_scalar u, gs_scalar v){}
-	void vertex_argb(int buffer, double alpha, unsigned char r, unsigned char g, unsigned char b){}
-	void vertex_colour(int buffer, int color, double alpha){}
-	void vertex_float1(int buffer, float f1){}
-	void vertex_float2(int buffer, float f1, float f2){}
-	void vertex_float3(int buffer, float f1, float f2, float f3){}
-	void vertex_float4(int buffer, float f1, float f2, float f3, float f4){}
-	void vertex_ubyte4(int buffer, unsigned char u1, unsigned char u2, unsigned char u3, unsigned char u4){}
-	void vertex_format_begin(){}
-	void vertex_format_add(int id, int type, int attribute){}
-	void vertex_format_add_colour(){}
-	void vertex_format_add_position(){}
-	void vertex_format_add_position_3d(){}
-	void vertex_format_add_textcoord(){}
-	void vertex_format_add_normal(){}
-	void vertex_format_add_custom(int type, int usage){}
-	unsigned vertex_format_end(){return (unsigned) -1;}
+	void vertex_argb(int buffer, unsigned argb) {}
+	void vertex_color(int buffer, int color, double alpha) {}
+	void vertex_submit(int buffer, int primitive, unsigned vertex_start, unsigned vertex_count) {}
 
 	int texture_add(string filename, bool mipmap){return -1;}
 	void texture_save(int texid, string fname){}

@@ -16,10 +16,10 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 #include "GL3ModelStruct.h"
-#include "../General/OpenGLHeaders.h"
-#include "../General/GSd3d.h"
-#include "../General/GSmodel.h"
-#include "../General/GStextures.h"
+#include "Graphics_Systems/General/OpenGLHeaders.h"
+#include "Graphics_Systems/General/GSd3d.h"
+#include "Graphics_Systems/General/GSmodel.h"
+#include "Graphics_Systems/General/GStextures.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
 #include <math.h>

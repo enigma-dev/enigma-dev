@@ -17,13 +17,8 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 #include "GScolors.h"
+#include "GScolor_macros.h"
 #include <math.h>
-
-#define __GETR(x) ((x & 0x0000FF))
-#define __GETG(x) ((x & 0x00FF00) >> 8)
-#define __GETB(x) ((x & 0xFF0000) >> 16)
-
-#define bind_alpha(alpha) (alpha>1?255:(alpha<0?0:(unsigned char)(alpha*255)))
 
 static inline int min(int x,int y){return x<y ? x:y;}
 static inline int max(int x,int y){return x>y ? x:y;}
