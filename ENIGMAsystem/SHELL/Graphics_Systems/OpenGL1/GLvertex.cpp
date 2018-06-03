@@ -105,7 +105,7 @@ void vertex_submit(int buffer, int primitive, unsigned vertex_start, unsigned ve
       case vertex_type_ubyte4: elements = 4; size = 1; type = GL_UNSIGNED_BYTE; break;
     }
 
-    #define OFFSET( P )  ( ( const GLvoid * ) ( sizeof( gs_scalar ) * ( P         ) ) )
+    #define GL_ATTRIB_OFFSET(P) ((const GLvoid *) (sizeof(gs_scalar) * P))
 
     // this is an "emulation" of vertex format declarations for the OpenGL fixed-function pipeline
     switch (flag.second) {
@@ -113,26 +113,26 @@ void vertex_submit(int buffer, int primitive, unsigned vertex_start, unsigned ve
         if (useVertices) break;
         useVertices = true;
         glEnableClientState(GL_VERTEX_ARRAY);
-        glVertexPointer(elements, type, stride, OFFSET(offset));
+        glVertexPointer(elements, type, stride, GL_ATTRIB_OFFSET(offset));
         break;
       case vertex_usage_color:
         if (useColors) break;
         useColors = true;
         glEnableClientState(GL_COLOR_ARRAY);
-        glColorPointer(elements, type, stride, OFFSET(offset));
+        glColorPointer(elements, type, stride, GL_ATTRIB_OFFSET(offset));
         break;
       case vertex_usage_normal:
         if (useNormals) break;
         useNormals = true;
         glEnableClientState(GL_NORMAL_ARRAY);
-        glNormalPointer(type, stride, OFFSET(offset));
+        glNormalPointer(type, stride, GL_ATTRIB_OFFSET(offset));
         break;
       case vertex_usage_textcoord:
         if (texture >= GL_MAX_TEXTURE_UNITS) break;
         useTextCoords = true;
         glClientActiveTexture(GL_TEXTURE0 + texture++);
         glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-        glTexCoordPointer(elements, type, stride, OFFSET(offset));
+        glTexCoordPointer(elements, type, stride, GL_ATTRIB_OFFSET(offset));
         break;
       case vertex_usage_blendweight: break;
       case vertex_usage_blendindices: break;
@@ -143,7 +143,7 @@ void vertex_submit(int buffer, int primitive, unsigned vertex_start, unsigned ve
         if (useFogCoords) break;
         useFogCoords = true;
         glEnableClientState(GL_FOG_COORD_ARRAY);
-        glFogCoordPointer(type, stride, OFFSET(offset));
+        glFogCoordPointer(type, stride, GL_ATTRIB_OFFSET(offset));
         break;
       case vertex_usage_sample: break;
     }
