@@ -39,7 +39,7 @@ void vertex_format_add_color() {
 }
 
 void vertex_format_add_position() {
-  enigma::vertexFormat->AddAttribute(vertex_type_float3, vertex_usage_position);
+  enigma::vertexFormat->AddAttribute(vertex_type_float2, vertex_usage_position);
 }
 
 void vertex_format_add_position_3d() {
@@ -142,7 +142,6 @@ void vertex_submit(int buffer, int primitive, int texture, unsigned vertex_start
 void vertex_position(int buffer, gs_scalar x, gs_scalar y) {
   enigma::vertexBuffers[buffer]->vertices.push_back(x);
   enigma::vertexBuffers[buffer]->vertices.push_back(y);
-  enigma::vertexBuffers[buffer]->vertices.push_back((gs_scalar)0);
 }
 
 void vertex_position_3d(int buffer, gs_scalar x, gs_scalar y, gs_scalar z) {
