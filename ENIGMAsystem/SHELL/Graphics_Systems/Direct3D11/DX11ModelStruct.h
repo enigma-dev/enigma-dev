@@ -16,22 +16,15 @@
 **/
 
 #include "Bridges/General/DX11Context.h"
-#include "../General/GSd3d.h"
-#include "../General/GSprimitives.h"
+#include "Graphics_Systems/General/GSd3d.h"
+#include "Graphics_Systems/General/GSprimitives.h"
+#include "Graphics_Systems/General/GScolor_macros.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
 #include <math.h>
 #include <stdlib.h>
 
-
 using namespace std;
-
-#define __GETR(x) ((x & 0x0000FF))
-#define __GETG(x) ((x & 0x00FF00)>>8)
-#define __GETB(x) ((x & 0xFF0000)>>16)
-#define __GETRf(x) fmod(__GETR(x),256)
-#define __GETGf(x) fmod(x/256,256)
-#define __GETBf(x) fmod(x/65536,256)*
 
 #include <iostream>
 #include <map>

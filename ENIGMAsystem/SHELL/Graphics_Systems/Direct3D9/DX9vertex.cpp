@@ -1,4 +1,4 @@
-/** Copyright (C) 2013 Robert B. Colton
+/** Copyright (C) 2018 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -15,145 +15,131 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <vector>
-#include <map>
-using std::vector;
-using std::map;
+#include "Graphics_Systems/General/GSvertex_impl.h"
+#include "Graphics_Systems/General/GSprimitives.h" // for enigma_user::draw_primitive_count
+#include "Graphics_Systems/General/GScolor_macros.h"
 
-#include "../General/GSvertex.h"
+#include "Bridges/General/DX9Context.h"
+
+#include <map>
+using std::map;
 
 namespace enigma {
 
-struct VertexBuffer {
-	vector<gs_scalar> vertices;
-	vector<gs_scalar> indices;
-	
-};
+D3DPRIMITIVETYPE primitive_types[] = { static_cast<D3DPRIMITIVETYPE>(0), D3DPT_POINTLIST, D3DPT_LINELIST, D3DPT_LINESTRIP, D3DPT_TRIANGLELIST, D3DPT_TRIANGLESTRIP, D3DPT_TRIANGLEFAN };
+D3DDECLTYPE declaration_types[] = { D3DDECLTYPE_FLOAT1, D3DDECLTYPE_FLOAT2, D3DDECLTYPE_FLOAT3, D3DDECLTYPE_FLOAT4, D3DDECLTYPE_D3DCOLOR, D3DDECLTYPE_UBYTE4 };
+size_t declaration_type_sizes[] = { sizeof(float) * 1, sizeof(float) * 2, sizeof(float) * 3, sizeof(float) * 4, sizeof(unsigned byte) * 4, sizeof(unsigned byte) * 4 };
+D3DDECLUSAGE usage_types[] = { D3DDECLUSAGE_POSITION, D3DDECLUSAGE_COLOR, D3DDECLUSAGE_NORMAL, D3DDECLUSAGE_TEXCOORD, D3DDECLUSAGE_BLENDWEIGHT,
+  D3DDECLUSAGE_BLENDINDICES, D3DDECLUSAGE_DEPTH, D3DDECLUSAGE_TANGENT, D3DDECLUSAGE_BINORMAL, D3DDECLUSAGE_FOG, D3DDECLUSAGE_SAMPLE };
 
-vector<VertexFormat*> vertexFormats;
-vector<VertexBuffer*> vertexBuffers;
-	
-VertexFormat* vertexFormat = 0;
+map<int, LPDIRECT3DVERTEXBUFFER9> vertexBufferPeers;
+
+void graphics_delete_vertex_buffer_peer(int buffer) {
+  vertexBufferPeers[buffer]->Release();
+  vertexBufferPeers.erase(buffer);
+}
+
+inline LPDIRECT3DVERTEXDECLARATION9 vertex_format_declaration(const enigma::VertexFormat* vertexFormat, size_t &stride) {
+  vector<D3DVERTEXELEMENT9> vertexDeclarationElements(vertexFormat->flags.size() + 1);
+
+  WORD offset = 0;
+  map<int,int> useCount;
+  for (size_t i = 0; i < vertexFormat->flags.size(); ++i) {
+    const pair<int, int> flag = vertexFormat->flags[i];
+    D3DVERTEXELEMENT9 *vertexDeclarationElement = &vertexDeclarationElements[i];
+
+    vertexDeclarationElement->Stream = 0;
+    vertexDeclarationElement->Offset = offset;
+    vertexDeclarationElement->Type = declaration_types[flag.first];
+    vertexDeclarationElement->Method = D3DDECLMETHOD_DEFAULT;
+    vertexDeclarationElement->Usage = usage_types[flag.second];
+    vertexDeclarationElement->UsageIndex = useCount[flag.second]++;
+
+    offset += declaration_type_sizes[flag.first];
+  }
+  stride = offset;
+  vertexDeclarationElements[vertexFormat->flags.size()] = D3DDECL_END();
+
+  LPDIRECT3DVERTEXDECLARATION9 vertexDeclaration;
+  d3dmgr->CreateVertexDeclaration(&vertexDeclarationElements[0], &vertexDeclaration);
+
+  return vertexDeclaration;
+}
 
 }
 
 namespace enigma_user {
 
-int vertex_create_buffer() {
-
+void vertex_argb(int buffer, unsigned argb) {
+  enigma::vertexBuffers[buffer]->vertices.push_back(argb);
 }
 
-int vertex_create_buffer_ext(unsigned size) {
-
+void vertex_color(int buffer, int color, double alpha) {
+  enigma::color_t finalcol = (bind_alpha(alpha) << 24) | (__GETR(color) << 16) | (__GETG(color) << 8) | __GETB(color);
+  enigma::vertexBuffers[buffer]->vertices.push_back(finalcol);
 }
 
-void vertex_delete_buffer(int buffer) {
+void vertex_submit(int buffer, int primitive, unsigned vertex_start, unsigned vertex_count) {
+  enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
+  const enigma::VertexFormat* vertexFormat = enigma::vertexFormats[vertexBuffer->format];
 
-}
+  // this is fucking temporary until we rewrite the model classes and
+  // figure out a proper way to flush
+  d3dmgr->EndShapesBatching();
 
-void vertex_begin(int buffer, int format) {
+  // if the contents of the vertex buffer are dirty then we need to update
+  // our native vertex buffer object "peer"
+  if (vertexBuffer->dirty) {
+    LPDIRECT3DVERTEXBUFFER9 vertexBufferPeer = NULL;
+    auto it = enigma::vertexBufferPeers.find(buffer);
+    size_t size = enigma_user::vertex_get_size(buffer);
 
-}
+    // if we have already created a native "peer" vbo for this user buffer,
+    // then we have to release it if it isn't big enough to hold the new contents
+    // or if it has just been frozen (so we can remove its D3DUSAGE_DYNAMIC)
+    if (it != enigma::vertexBufferPeers.end()) {
+      vertexBufferPeer = it->second;
 
-void vertex_end(int buffer) {
+      D3DVERTEXBUFFER_DESC pDesc;
+      vertexBufferPeer->GetDesc(&pDesc);
 
-}
+      if (size > pDesc.Size || vertexBuffer->frozen) {
+        vertexBufferPeer->Release();
+        vertexBufferPeer = NULL;
+      }
+    }
 
-void vertex_freeze(int buffer) {
+    // create either a static or dynamic vbo peer depending on if the user called
+    // vertex_freeze on the buffer
+    if (!vertexBufferPeer) {
+      d3dmgr->CreateVertexBuffer(
+        size, vertexBuffer->frozen ? D3DUSAGE_WRITEONLY : (D3DUSAGE_DYNAMIC | D3DUSAGE_WRITEONLY),
+        0, D3DPOOL_DEFAULT, &vertexBufferPeer, NULL
+      );
+      enigma::vertexBufferPeers[buffer] = vertexBufferPeer;
+    }
 
-}
+    // copy the vertex buffer contents over to the native peer vbo on the GPU
+    VOID* pVoid;
+    vertexBufferPeer->Lock(0, 0, (VOID**)&pVoid, D3DLOCK_DISCARD);
+    memcpy(pVoid, vertexBuffer->vertices.data(), size);
+    vertexBufferPeer->Unlock();
 
-void vertex_submit(int buffer, int primitive) {
+    vertexBuffer->vertices.clear();
+    vertexBuffer->dirty = false;
+  }
 
-}
+  size_t stride = 0;
+  LPDIRECT3DVERTEXDECLARATION9 vertexDeclaration = vertex_format_declaration(vertexFormat, stride);
+  LPDIRECT3DVERTEXBUFFER9 vertexBufferPeer = enigma::vertexBufferPeers[buffer];
+  d3dmgr->SetVertexDeclaration(vertexDeclaration);
+  d3dmgr->SetStreamSource(0, vertexBufferPeer, vertex_start * stride, stride);
 
-void vertex_submit(int buffer, int primitive, int texture) {
+  int primitive_count = enigma_user::draw_primitive_count(primitive, vertex_count);
 
-}
+  d3dmgr->DrawPrimitive(enigma::primitive_types[primitive], 0, primitive_count);
 
-void vertex_delete(int buffer) {
-
-}
-
-void vertex_index(int buffer, unsigned id) {
-
-}
-
-void vertex_position(int buffer, gs_scalar x, gs_scalar y) {
-
-}
-
-void vertex_position_3d(int buffer, gs_scalar x, gs_scalar y, gs_scalar z) {
-
-}
-
-void vertex_normal(int buffer, gs_scalar nx, gs_scalar ny, gs_scalar nz) {
-
-}
-
-void vertex_texcoord(int buffer, gs_scalar u, gs_scalar v) {
-
-}
-
-void vertex_argb(int buffer, double alpha, unsigned char r, unsigned char g, unsigned char b) {
-
-}
-
-void vertex_colour(int buffer, int color, double alpha) {
-
-}
-
-void vertex_float1(int buffer, float f1) {
-
-}
-
-void vertex_float2(int buffer, float f1, float f2) {
-
-}
-
-void vertex_float3(int buffer, float f1, float f2, float f3) {
-
-}
-
-void vertex_float4(int buffer, float f1, float f2, float f3, float f4) {
-
-}
-
-void vertex_ubyte4(int buffer, unsigned char u1, unsigned char u2, unsigned char u3, unsigned char u4) {
-
-}
-
-void vertex_format_begin() {
-	enigma::vertexFormat = new enigma::VertexFormat();
-}
-
-void vertex_format_add_colour() {
-	enigma::vertexFormat->AddAttribute(vertex_type_colour, vertex_usage_colour);
-}
-
-void vertex_format_add_position() {
-	enigma::vertexFormat->AddAttribute(vertex_type_float2, vertex_usage_position);
-}
-
-void vertex_format_add_position_3d() {
-	enigma::vertexFormat->AddAttribute(vertex_type_float3, vertex_usage_position);
-} 
-
-void vertex_format_add_textcoord() {
-	enigma::vertexFormat->AddAttribute(vertex_type_float2, vertex_usage_textcoord);
-}
-
-void vertex_format_add_normal() {
-	enigma::vertexFormat->AddAttribute(vertex_type_float3, vertex_usage_normal);
-}
-
-void vertex_format_add_custom(int type, int usage) {
-	enigma::vertexFormat->AddAttribute(type, usage);
-}
-
-int vertex_format_end() {
-	enigma::vertexFormats.push_back(enigma::vertexFormat);
-	return enigma::vertexFormats.size() - 1;
+  vertexDeclaration->Release();
 }
 
 }

@@ -16,24 +16,20 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "../General/OpenGLHeaders.h"
-#include "../General/GSd3d.h"
-#include "../General/GSmodel.h"
 #include "GLshapes.h"
 #include "GLTextureStruct.h"
-#include "../General/GSprimitives.h"
+#include "Graphics_Systems/General/OpenGLHeaders.h"
+#include "Graphics_Systems/General/GSd3d.h"
+#include "Graphics_Systems/General/GSmodel.h"
+#include "Graphics_Systems/General/GSprimitives.h"
+#include "Graphics_Systems/General/GScolor_macros.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-
 using namespace std;
-
-#define __GETR(x) ((x & 0x0000FF))/255.0
-#define __GETG(x) ((x & 0x00FF00)>>8)/255.0
-#define __GETB(x) ((x & 0xFF0000)>>16)/255.0
 
 #include <iostream>
 #include <map>

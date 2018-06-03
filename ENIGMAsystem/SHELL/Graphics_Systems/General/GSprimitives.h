@@ -31,6 +31,7 @@ namespace enigma_user
     pr_trianglefan    = 6      // GL_TRIANGLE_FAN      D3DPT_TRIANGLEFAN
   };
 
+  unsigned draw_primitive_count(int kind, unsigned vertex_count);
   void draw_primitive_begin(int kind);
   void draw_primitive_begin_texture(int kind, int texId);
   void draw_primitive_end();

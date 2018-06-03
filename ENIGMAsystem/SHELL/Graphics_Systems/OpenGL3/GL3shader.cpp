@@ -263,7 +263,7 @@ void main()
   }
   string getDefaultFragmentShader(){
     return  R"CODE(
-    
+
 in vec2 v_TextureCoord;
 in vec4 v_Color;
 out vec4 out_FragColor;
@@ -529,7 +529,7 @@ bool glsl_shader_load(int id, string fname)
   string source;
   if (enigma::shaders[id]->type == sh_vertex) source = enigma::getVertexShaderPrefix() + shaderSource;
   if (enigma::shaders[id]->type == sh_fragment) source = enigma::getFragmentShaderPrefix() + shaderSource;
-  
+
   const char *ShaderSource = source.c_str();
   //std::cout << ShaderSource << std::endl;
   glShaderSource(enigma::shaders[id]->shader, 1, &ShaderSource, NULL);
