@@ -1,0 +1,12 @@
+%e-yaml
+---
+
+Name: SDL
+Identifier: SDL
+Represents:
+	Build-Platforms: Linux
+Description: Run on any Linux distribution powered by the X Window Server.
+Author: cheeseboy
+
+Depends:
+	Build-Platforms: Linux
