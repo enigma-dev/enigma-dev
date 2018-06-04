@@ -14,28 +14,20 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
-
-#include <string>
-#include <cstdio>
-#include "../General/OpenGLHeaders.h"
-#include "../General/GStextures.h"
-#include "../General/GSsprite.h"
-#include "../General/GSbackground.h"
-#include "../General/GSscreen.h"
-#include "../General/GSd3d.h"
-#include "../General/GSmatrix.h"
-#include "../General/GScolors.h"
-
-using namespace std;
+#include "Graphics_Systems/General/OpenGLHeaders.h"
+#include "Graphics_Systems/General/GStextures.h"
+#include "Graphics_Systems/General/GSsprite.h"
+#include "Graphics_Systems/General/GSbackground.h"
+#include "Graphics_Systems/General/GSscreen.h"
+#include "Graphics_Systems/General/GSd3d.h"
+#include "Graphics_Systems/General/GSmatrix.h"
+#include "Graphics_Systems/General/GScolors.h"
+#include "Graphics_Systems/General/GScolor_macros.h"
 
 #include "Universal_System/image_formats.h"
 #include "Universal_System/background.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/estring.h"
-
-#define __GETR(x) (((unsigned int)x & 0x0000FF))
-#define __GETG(x) (((unsigned int)x & 0x00FF00) >> 8)
-#define __GETB(x) (((unsigned int)x & 0xFF0000) >> 16)
 
 #include "Universal_System/roomsystem.h"
 #include "Universal_System/instance_system.h"
@@ -44,15 +36,21 @@ using namespace std;
 #include "Platforms/General/PFwindow.h"
 #include "Platforms/platforms_mandatory.h"
 #include "Graphics_Systems/graphics_mandatory.h"
+
+#include <string>
+#include <cstdio>
 #include <limits>
+
+using namespace enigma;
+using namespace enigma_user;
+
+using namespace std;
 
 //Fuck whoever did this to the spec
 #ifndef GL_BGR
   #define GL_BGR 0x80E0
 #endif
 
-using namespace enigma;
-using namespace enigma_user;
 namespace enigma_user {
   extern int window_get_width();
   extern int window_get_height();

@@ -15,24 +15,21 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "../General/OpenGLHeaders.h"
-#include "../General/GSd3d.h"
-#include "../General/GSmatrix.h"
-#include "../General/GSmath.h"
 #include "GLSLshader.h"
+#include "GL3shader.h"
+#include "Graphics_Systems/General/OpenGLHeaders.h"
+#include "Graphics_Systems/General/GSd3d.h"
+#include "Graphics_Systems/General/GSmatrix.h"
+#include "Graphics_Systems/General/GSmath.h"
+#include "Graphics_Systems/General/GScolor_macros.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
 #include "Bridges/General/GL3Context.h"
-#include "GL3shader.h"
+
 #include <math.h>
+#include <floatcomp.h>
 
 using namespace std;
-
-#define __GETR(x) ((x & 0x0000FF))/255.0
-#define __GETG(x) ((x & 0x00FF00)>>8)/255.0
-#define __GETB(x) ((x & 0xFF0000)>>16)/255.0
-
-#include <floatcomp.h>
 
 namespace enigma {
   bool d3dMode = false;

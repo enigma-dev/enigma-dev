@@ -35,9 +35,7 @@ using namespace std;
 #include "Universal_System/var4.h"
 #include "Universal_System/estring.h"
 
-#define __GETR(x) (((unsigned int)x & 0x0000FF))
-#define __GETG(x) (((unsigned int)x & 0x00FF00) >> 8)
-#define __GETB(x) (((unsigned int)x & 0xFF0000) >> 16)
+#include "Graphics_Systems/General/GScolor_macros.h"
 
 #include "Universal_System/roomsystem.h"
 #include "Universal_System/instance_system.h"

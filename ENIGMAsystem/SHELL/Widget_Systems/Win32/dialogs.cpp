@@ -34,9 +34,7 @@ using namespace std;
 
 #include "../General/WSdialogs.h"
 
-#define __GETR(x) ((x & 0x0000FF))
-#define __GETG(x) ((x & 0x00FF00)>>8)
-#define __GETB(x) ((x & 0xFF0000)>>16)
+#include "Graphics_Systems/General/GScolor_macros.h"
 
 static string gs_cap;
 static string gs_def;
@@ -256,7 +254,7 @@ void message_text_charset(int type, int charset) {
 
 void show_info(string info, int bgcolor, int left, int top, int width, int height, bool embedGameWindow, bool showBorder, bool allowResize, bool stayOnTop, bool pauseGame, string caption) {
   LoadLibrary(TEXT("Riched32.dll"));
-  
+
   // Center Information Window to the Middle of the Screen
   if (left < 0) {
     left = (GetSystemMetrics(SM_CXSCREEN) - width)/2;
@@ -264,7 +262,7 @@ void show_info(string info, int bgcolor, int left, int top, int width, int heigh
   if (top < 0) {
     top = (GetSystemMetrics(SM_CYSCREEN) - height)/2;
   }
-  
+
   HWND parent;
   if (embedGameWindow) {
     parent = enigma::hWnd;
@@ -272,7 +270,7 @@ void show_info(string info, int bgcolor, int left, int top, int width, int heigh
     WNDCLASS wc = {CS_VREDRAW|CS_HREDRAW,(WNDPROC)ShowInfoProc,0,0,enigma::hInstance,0,
       0,GetSysColorBrush(COLOR_WINDOW),0,"infodialog"};
     RegisterClass(&wc);
-    
+
     DWORD flags = WS_VISIBLE|WS_POPUP|WS_SYSMENU|WS_TABSTOP|WS_CLIPCHILDREN; // DS_3DLOOK|DS_CENTER|DS_FIXEDSYS
     if (showBorder) {
       flags |= WS_BORDER | WS_DLGFRAME | WS_CAPTION;
@@ -283,10 +281,10 @@ void show_info(string info, int bgcolor, int left, int top, int width, int heigh
     if (stayOnTop) {
       flags |= DS_MODALFRAME; // Same as WS_EX_TOPMOST
     }
-  
+
     parent = CreateWindow("infodialog", TEXT(caption.c_str()),
       flags, left, top, width, height, enigma::hWnd, 0, enigma::hInstance, 0);
-      
+
     if (showBorder) {
       // Set Window Information Icon
       HICON hIcon = LoadIcon(enigma::hInstance, "infoicon");
@@ -296,49 +294,49 @@ void show_info(string info, int bgcolor, int left, int top, int width, int heigh
       }
     }
   }
-    
+
   enigma::infore=CreateWindowEx(WS_EX_TOPMOST,"RICHEDIT",TEXT("information text"),
     ES_LEFT | ES_MULTILINE | ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_WANTRETURN | ES_READONLY | WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP,
     0, 0, width, height, parent, 0, enigma::hInstance, 0);
-    
+
   // Size the RTF Component to the Window
   RECT rectParent;
   GetClientRect(parent, &rectParent);
-  MoveWindow(enigma::infore, rectParent.top, rectParent.left, rectParent.right, rectParent.bottom, TRUE); 
-  
+  MoveWindow(enigma::infore, rectParent.top, rectParent.left, rectParent.right, rectParent.bottom, TRUE);
+
   // Set RTF Editor Background Color
   SendMessage(enigma::infore, EM_SETBKGNDCOLOR, (WPARAM)0, (LPARAM)RGB(__GETR(bgcolor), __GETG(bgcolor), __GETB(bgcolor)));
-  
+
   // Set RTF Information Text
   SETTEXTEX se;
   se.codepage = CP_ACP;
   se.flags = ST_DEFAULT;
   SendMessage(enigma::infore, EM_SETTEXTEX, (WPARAM)&se, (LPARAM)info.c_str());
-    
+
   //TODO: Figure out how to block if we need to pause the game, otherwise ShowWindowAsync
   ShowWindow(parent, SW_SHOWDEFAULT);
   if (!embedGameWindow) {
     SetFocus(enigma::infore);
   }
-  
+
   /*
   MSG msg;
   BOOL bRet;
 
   bool bQuit = false;
   while (!bQuit)
-  { 
+  {
     bRet = PeekMessage(&msg, main, 0, 0, PM_REMOVE);
     if (bRet == -1) {
       // handle the error and possibly exit
     } else if (msg.message == WM_CLOSE) {
       bQuit = true;
     } else {
-      TranslateMessage(&msg); 
-      DispatchMessage(&msg); 
+      TranslateMessage(&msg);
+      DispatchMessage(&msg);
     }
   }*/
-  
+
   /* Round two...
   MSG msg;
   BOOL bRet;
@@ -352,7 +350,7 @@ void show_info(string info, int bgcolor, int left, int top, int width, int heigh
       // handle the error and possibly exit
       PostMessage(embedGameWindow ? infore : main, WM_CLOSE, 0, 0);
       bQuit = true;
-    } else { 
+    } else {
       if (msg.message == WM_KEYUP) {
         switch(msg.wParam)
         {
@@ -362,11 +360,11 @@ void show_info(string info, int bgcolor, int left, int top, int width, int heigh
           break;
         }
       } else {
-        TranslateMessage(&msg); 
-        DispatchMessage(&msg); 
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
       }
     }
-    
+
     // If game information was showed in a separate window, then handle the messages for sizing and stuff
     if (!embedGameWindow) {
       bRet = PeekMessage(&msg, main, 0, 0, PM_REMOVE);
@@ -374,7 +372,7 @@ void show_info(string info, int bgcolor, int left, int top, int width, int heigh
         // handle the error and possibly exit
         PostMessage(main, WM_CLOSE, 0, 0);
         bQuit = true;
-      } else { 
+      } else {
         if (msg.message == WM_KEYUP) {
           switch(msg.wParam)
             {
@@ -386,14 +384,14 @@ void show_info(string info, int bgcolor, int left, int top, int width, int heigh
         } else if (msg.message == WM_SIZE) {
           RECT rectParent;
           GetClientRect(main, &rectParent);
-          MoveWindow(infore, rectParent.top, rectParent.left, rectParent.right, rectParent.bottom, TRUE); 
+          MoveWindow(infore, rectParent.top, rectParent.left, rectParent.right, rectParent.bottom, TRUE);
         } else {
-          TranslateMessage(&msg); 
-          DispatchMessage(&msg); 
+          TranslateMessage(&msg);
+          DispatchMessage(&msg);
         }
       }
     }
-    
+
 
   }
   */
@@ -402,7 +400,7 @@ void show_info(string info, int bgcolor, int left, int top, int width, int heigh
 int show_message(string str)
 {
   //NOTE: This will not work with a fullscreen application, it is an issue with Windows
-  //this could be why GM8.1, unlike Studio, did not use native dialogs and custom 
+  //this could be why GM8.1, unlike Studio, did not use native dialogs and custom
   //rendered its own message boxes like most game engines.
   //In Studio this function will cause the window to be minimized and the message shown, fullscreen will not be restored.
   //A possible alternative is fake fullscreen for Win32, but who knows if we have to do that on XLIB or anywhere else.
@@ -555,27 +553,27 @@ string get_directory(string dname, string caption)
 
   DWORD options;
   fileDialog->GetOptions(&options);
-  options &= ~FOS_FILEMUSTEXIST;  
+  options &= ~FOS_FILEMUSTEXIST;
   options &= ~FOS_PATHMUSTEXIST;
   fileDialog->SetOptions(options | FOS_PICKFOLDERS);
   //TODO: Set default directory to dname
   //fileDialog->SetDefaultFolder(std::wstring(dname.begin(), dname.end()).c_str());
   fileDialog->SetTitle(std::wstring(caption.begin(), caption.end()).c_str());
-  
+
   fileDialog->Show(enigma::hWnd);
-  
+
   string res = "";
   IShellItem *psi;
-  
+
   if (SUCCEEDED(fileDialog->GetResult(&psi))) {
     LPWSTR wideres;
     psi->GetDisplayName(SIGDN_DESKTOPABSOLUTEPARSING, &wideres);
     psi->Release();
-    
+
     std::wstring wstr = wideres;
     res = string(wstr.begin(), wstr.end());
   }
-  
+
   return res;
 }
 
@@ -584,17 +582,17 @@ string get_directory_alt(string message, string root, bool modern, string captio
   bool f_selected = false;
 
   char szDir [MAX_PATH];
-  BROWSEINFO bi;        
-  LPITEMIDLIST pidl;        
+  BROWSEINFO bi;
+  LPITEMIDLIST pidl;
   LPMALLOC pMalloc;
 
   if (SUCCEEDED (::SHGetMalloc (&pMalloc)))
   {
-    ::ZeroMemory (&bi,sizeof(bi)); 
+    ::ZeroMemory (&bi,sizeof(bi));
 
     bi.lpszTitle = message.c_str();
     bi.hwndOwner = enigma::hWnd;
-    bi.pszDisplayName = 0;           
+    bi.pszDisplayName = 0;
     bi.pidlRoot = 0;
     bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_STATUSTEXT;
     if (modern) {
@@ -603,7 +601,7 @@ string get_directory_alt(string message, string root, bool modern, string captio
     gs_cap = caption;
     bi.lpfn =  GetDirectoryAltProc;      //callback to set window caption
 
-    pidl = ::SHBrowseForFolder(&bi);           
+    pidl = ::SHBrowseForFolder(&bi);
     if (pidl) {
       if (::SHGetPathFromIDList(pidl, szDir)) {
         f_selected = true;
@@ -611,7 +609,7 @@ string get_directory_alt(string message, string root, bool modern, string captio
 
       pMalloc->Free(pidl);
       pMalloc->Release();
-    }     
+    }
   }
 
   if (f_selected) {

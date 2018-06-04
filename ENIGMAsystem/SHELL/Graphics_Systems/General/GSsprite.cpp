@@ -15,15 +15,11 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <cmath>
-#include <cstdlib>
-#include <string>
-using std::string;
-
-#include "../General/GScolors.h"
-#include "../General/GSsprite.h"
-#include "../General/GStextures.h"
-#include "../General/GSprimitives.h"
+#include "Graphics_Systems/General/GScolors.h"
+#include "Graphics_Systems/General/GScolor_macros.h"
+#include "Graphics_Systems/General/GSsprite.h"
+#include "Graphics_Systems/General/GStextures.h"
+#include "Graphics_Systems/General/GSprimitives.h"
 
 #include "Universal_System/nlpo2.h"
 #include "Universal_System/sprites.h"
@@ -31,9 +27,10 @@ using std::string;
 #include "Universal_System/graphics_object.h"
 #include "Universal_System/math_consts.h"
 
-#define __GETR(x) ((x & 0x0000FF))
-#define __GETG(x) ((x & 0x00FF00) >> 8)
-#define __GETB(x) ((x & 0xFF0000) >> 16)
+#include <cmath>
+#include <cstdlib>
+#include <string>
+using std::string;
 
 //Note that this clamps between 0 and 1, not 0 and 255
 #define clamp_alpha(alpha) (alpha <= 0 ? 0: alpha >= 1? 1: alpha)

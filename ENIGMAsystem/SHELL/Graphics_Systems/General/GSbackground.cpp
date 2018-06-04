@@ -15,9 +15,6 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <cstddef>
-
-#include <math.h>
 #include "Graphics_Systems/General/GScolors.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GSbackground.h"
@@ -26,6 +23,10 @@
 #include "Universal_System/background_internal.h"
 #include "Universal_System/sprites_internal.h"
 #include "Universal_System/math_consts.h"
+
+#include <cstddef>
+#include <math.h>
+#include <string.h> // needed for querying ARB extensions
 
 //Note that this clamps between 0 and 1, not 0 and 255
 #define clamp_alpha(alpha) (alpha <= 0 ? 0: alpha >= 1? 1: alpha)
@@ -36,9 +37,6 @@ namespace enigma_user {
 namespace enigma {
   extern size_t background_idmax;
 }
-
-
-#include <string.h> // needed for querying ARB extensions
 
 namespace enigma_user
 {

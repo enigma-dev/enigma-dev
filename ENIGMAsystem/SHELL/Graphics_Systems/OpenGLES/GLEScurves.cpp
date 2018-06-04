@@ -16,15 +16,11 @@
 **/
 
 #include "OpenGLHeaders.h"
-#include "../General/GScolors.h"
+#include "Graphics_Systems/General/GScolors.h"
+#include "Graphics_Systems/General/GScolor_macros.h"
 #include <stack>
 #include <vector>
 #include <math.h>
-
-#define __GETR(x) (((x & 0x0000FF))/255.0)
-#define __GETG(x) (((x & 0x00FF00)>>8)/255.0)
-#define __GETB(x) (((x & 0xFF0000)>>16)/255.0)
-
 
 namespace enigma{
     extern unsigned bound_texture;
@@ -311,7 +307,7 @@ void draw_spline_end()
               draw_spline_part(arr[i-3].x, arr[i-3].y, arr[i-2].x, arr[i-2].y, arr[i-1].x, arr[i-1].y, arr[i].x, arr[i].y, arr[i-2].col, arr[i-1].col, arr[i-2].al, arr[i-1].al);
       glEnd();
     glPopAttrib();
-    glColor4ubv(enigma::currentcolor); 
+    glColor4ubv(enigma::currentcolor);
     delete &arr;
     startedSplines.pop();
     startedSplinesMode.pop();*/

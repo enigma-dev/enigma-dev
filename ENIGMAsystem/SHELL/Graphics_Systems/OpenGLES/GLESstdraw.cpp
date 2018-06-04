@@ -16,13 +16,12 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <math.h>
-#include "OpenGLHeaders.h"
-#include <stdio.h>
 
-#define __GETR(x) ((x & 0x0000FF))
-#define __GETG(x) ((x & 0x00FF00) >> 8)
-#define __GETB(x) ((x & 0xFF0000) >> 16)
+#include "OpenGLHeaders.h"
+#include "Graphics_Systems/General/GScolor_macros.h"
+
+#include <math.h>
+#include <stdio.h>
 
 namespace enigma{
 float circleprecision=24;

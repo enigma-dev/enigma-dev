@@ -24,9 +24,7 @@
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
 
-#define __GETR(x) ((x & 0x0000FF))/255.0
-#define __GETG(x) ((x & 0x00FF00)>>8)/255.0
-#define __GETB(x) ((x & 0xFF0000)>>16)/255.0
+#include "Graphics_Systems/General/GScolor_macros.h"
 
 namespace enigma {
   bool d3dMode = false;

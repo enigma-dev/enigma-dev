@@ -24,9 +24,7 @@
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
 
-#define __GETR(x) ((x & 0x0000FF))/255.0
-#define __GETG(x) ((x & 0x00FF00)>>8)/255.0
-#define __GETB(x) ((x & 0xFF0000)>>16)/255.0
+#include "Graphics_Systems/General/GScolor_macros.h"
 
 namespace enigma_user
 {
@@ -57,8 +55,8 @@ void d3d_set_projection(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs_sca
 	D3DXMatrixLookAtLH( &matView, &vEyePt, &vLookatPt, &vUpVec );
 
 	// Set our view matrix
-	d3dmgr->SetTransform( D3DTS_VIEW, &matView ); 
-	
+	d3dmgr->SetTransform( D3DTS_VIEW, &matView );
+
 	D3DXMATRIX matProj;
 
 	D3DXMatrixPerspectiveFovLH( &matProj, D3DXToRadian(45), view_wview[view_current] / (double)view_hview[view_current], 1.0f, 32000.0f );
@@ -74,10 +72,10 @@ void d3d_set_projection_ext(gs_scalar xfrom, gs_scalar yfrom, gs_scalar zfrom,gs
 	// Get D3DX to fill in the matrix values
 	D3DXMATRIX matView;
 	D3DXMatrixLookAtLH( &matView, &vEyePt, &vLookatPt, &vUpVec );
-		
+
 	// Set our view matrix
-	d3dmgr->SetTransform( D3DTS_VIEW, &matView ); 
-	
+	d3dmgr->SetTransform( D3DTS_VIEW, &matView );
+
 	D3DXMATRIX matProj;
 
 	D3DXMatrixPerspectiveFovLH( &matProj, gs_angle_to_radians(angle), aspect, znear, zfar );
@@ -89,13 +87,13 @@ void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scal
   // This fixes font glyph edge artifacting and vertical scroll gaps
   // seen by mostly NVIDIA GPU users.  Rounds x and y and adds +0.01 offset.
   // This will prevent the fix from being negated through moving projections
-  // and fractional coordinates. 
+  // and fractional coordinates.
   x = round(x) + 0.01f; y = round(y) + 0.01f;
   D3DXMATRIX matRotZ, mat1Trans, mat2Trans, matScale;
 
   // Translate so the center is at 0,0
-  D3DXMatrixTranslation(&mat1Trans, -x-width/2.0, -y-height/2.0, 0); 
-  
+  D3DXMatrixTranslation(&mat1Trans, -x-width/2.0, -y-height/2.0, 0);
+
 	// Rotate around the center
 	D3DXMatrixRotationZ( &matRotZ, gs_angle_to_radians(angle) );        // Roll
 
@@ -106,7 +104,7 @@ void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scal
 	D3DXMatrixTranslation(&mat2Trans, width/2.0, height/2.0-height, 0);
   // I don't get why the view moving is done here though. It should be possible in D3DXMatrixOrthoOffCenterLH instead,
   // like we do in GL - H.G.
-  
+
  	D3DXMatrixScaling(&matScale, 1, -1, 1);
 
 	// Calculate our world matrix by multiplying the above (in the correct order)
@@ -114,16 +112,16 @@ void d3d_set_projection_ortho(gs_scalar x, gs_scalar y, gs_scalar width, gs_scal
 
 	// Set the matrix to be applied to anything we render from now on
 	d3dmgr->SetTransform( D3DTS_VIEW, &matView);
-	
+
 	D3DXMATRIX matProjection;    // the projection transform matrix
 	D3DXMatrixOrthoOffCenterLH(&matProjection,
 							0,
-							(FLOAT)width,   
-							0, 
-							(FLOAT)height,   
+							(FLOAT)width,
+							0,
+							(FLOAT)height,
 							32000.0f,    // the near view-plane
 							-32000.0f);    // the far view-plane
-						   
+
 	d3dmgr->SetTransform(D3DTS_PROJECTION, &matProjection);    // set the projection transform
 }
 
@@ -133,12 +131,12 @@ void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, g
 
   D3DXMatrixOrthoOffCenterLH(&matView,
     (FLOAT)x,
-    (FLOAT)x+width,   
+    (FLOAT)x+width,
     (FLOAT)y,
-    (FLOAT)y+height,   
+    (FLOAT)y+height,
     -32000.0f,    // the near view-plane
     32000.0f);    // the far view-plane
-    
+
   // Initialize rotation matrix
   D3DXMatrixRotationZ( &matRotZ, gs_angle_to_radians(angle) );
   matView *= matRotZ;
@@ -153,7 +151,7 @@ void d3d_set_projection_perspective(gs_scalar x, gs_scalar y, gs_scalar width, g
   d3dmgr->SetTransform(D3DTS_PROJECTION, &matProj);    // set the projection transform
 }
 
-D3DXMATRIX matWorld; 
+D3DXMATRIX matWorld;
 D3DXMATRIX matNull;
 
 // ***** TRANSFORMATIONS BEGIN *****
@@ -171,12 +169,12 @@ void d3d_transform_add_translation(gs_scalar xt, gs_scalar yt, gs_scalar zt)
 	// build a matrix to move the model
 	// store it to matTranslate
 	D3DXMatrixTranslation(&matTranslate, xt, yt, zt);
-	
+
 	matWorld *= matTranslate;
 
 	// tell Direct3D about our matrix
 	d3dmgr->SetTransform(D3DTS_WORLD, &matWorld);
-	
+
 }
 
 void d3d_transform_add_scaling(gs_scalar xs, gs_scalar ys, gs_scalar zs)
@@ -186,7 +184,7 @@ void d3d_transform_add_scaling(gs_scalar xs, gs_scalar ys, gs_scalar zs)
 	// build a matrix to double the size of the model
 	// store it to matScale
 	D3DXMatrixScaling(&matScale, xs, ys, zs);
-	
+
 	matWorld *= matScale;
 
 	// tell Direct3D about our matrix
@@ -199,7 +197,7 @@ void d3d_transform_add_rotation_x(gs_scalar angle)
 
 	// build a matrix to rotate the model by so many radians
 	D3DXMatrixRotationX(&matRot, gs_angle_to_radians(-angle));
-	
+
 	matWorld *= matRot;
 
 	// tell Direct3D about our matrix
@@ -210,10 +208,10 @@ void d3d_transform_add_rotation_y(gs_scalar angle)
 {
 //D3DXMatrixIdentity( &matWorld );
 	D3DXMATRIX matRot;
-	
+
 	// build a matrix to rotate the model by so many radians
 	D3DXMatrixRotationY(&matRot, gs_angle_to_radians(-angle));
-	
+
 	matWorld *= matRot;
 
 	// tell Direct3D about our matrix
@@ -223,10 +221,10 @@ void d3d_transform_add_rotation_y(gs_scalar angle)
 void d3d_transform_add_rotation_z(gs_scalar angle)
 {
 	D3DXMATRIX matRot;
-	
+
 	// build a matrix to rotate the model by so many radians
 	D3DXMatrixRotationZ(&matRot, gs_angle_to_radians(-angle));
-	
+
 	matWorld *= matRot;
 
 	// tell Direct3D about our matrix
@@ -236,13 +234,13 @@ void d3d_transform_add_rotation_z(gs_scalar angle)
 void d3d_transform_add_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar angle)
 {
 	D3DXMATRIX matRot;
-	
+
 	// build a matrix to rotate the model by so many radians
 	angle = D3DXToRadian(-angle);
 	D3DXMatrixRotationYawPitchRoll(&matRot, y * angle, x * angle, z * angle);
-	
+
 	matWorld *= matRot;
-	
+
 	// tell Direct3D about our matrix
 	d3dmgr->SetTransform(D3DTS_WORLD, &matWorld);
 }
@@ -271,7 +269,7 @@ void d3d_transform_set_rotation_x(double angle)
 {
 	// build a matrix to rotate the model by so many radians
 	D3DXMatrixRotationX(&matWorld, gs_angle_to_radians(-angle));
-	
+
 	// tell Direct3D about our matrix
 	d3dmgr->SetTransform(D3DTS_WORLD, &matWorld);
 }
@@ -280,7 +278,7 @@ void d3d_transform_set_rotation_y(gs_scalar angle)
 {
 	// build a matrix to rotate the model by so many radians
 	D3DXMatrixRotationY(&matWorld, gs_angle_to_radians(-angle));
-		
+
 	// tell Direct3D about our matrix
 	d3dmgr->SetTransform(D3DTS_WORLD, &matWorld);
 }
@@ -290,7 +288,7 @@ void d3d_transform_set_rotation_z(gs_scalar angle)
 	D3DXMatrixIdentity( &matWorld );
 	// build a matrix to rotate the model by so many radians
 	D3DXMatrixRotationZ(&matWorld, gs_angle_to_radians(-angle));
-		
+
 	// tell Direct3D about our matrix
 	d3dmgr->SetTransform(D3DTS_WORLD, &matWorld);
 }
@@ -300,7 +298,7 @@ void d3d_transform_set_rotation_axis(gs_scalar x, gs_scalar y, gs_scalar z, gs_s
 	// build a matrix to rotate the model by so many radians
 	angle = gs_angle_to_radians(-angle);
 	D3DXMatrixRotationYawPitchRoll(&matWorld, y * angle, x * angle, z * angle);
-		
+
 	// tell Direct3D about our matrix
 	d3dmgr->SetTransform(D3DTS_WORLD, &matWorld);
 }

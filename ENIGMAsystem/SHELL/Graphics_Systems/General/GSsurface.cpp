@@ -29,9 +29,9 @@ using namespace std;
 #include "Collision_Systems/collision_types.h"
 #include "Universal_System/math_consts.h"
 
-#define __GETR(x) ((x & 0x0000FF))
-#define __GETG(x) ((x & 0x00FF00) >> 8)
-#define __GETB(x) ((x & 0xFF0000) >> 16)
+#include "Graphics_Systems/General/GSprimitives.h"
+#include "Graphics_Systems/General/GSsurface.h"
+#include "Graphics_Systems/General/GScolor_macros.h"
 
 //Note that this clamps between 0 and 1, not 0 and 255
 #define clamp_alpha(alpha) (alpha <= 0 ? 0: alpha >= 1? 1: alpha)
@@ -39,10 +39,6 @@ using namespace std;
 namespace enigma_user {
 extern int room_width, room_height/*, sprite_idmax*/;
 }
-
-#include "../General/GSprimitives.h"
-#include "../General/GSsurface.h"
-
 
 namespace enigma_user
 {

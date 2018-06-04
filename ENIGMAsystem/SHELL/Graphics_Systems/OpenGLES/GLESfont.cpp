@@ -18,14 +18,11 @@
 #include <math.h>
 #include <string>
 #include "OpenGLHeaders.h"
-#include "../General/GScolors.h"
+#include "Graphics_Systems/General/GScolors.h"
+#include "Graphics_Systems/General/GScolor_macros.h"
 
 using namespace std;
 #include "Universal_System/fontstruct.h"
-
-#define __GETR(x) ((x & 0x0000FF))
-#define __GETG(x) ((x & 0x00FF00) >> 8)
-#define __GETB(x) ((x & 0xFF0000) >> 16)
 
 namespace enigma {
   static int currentfont = -1;

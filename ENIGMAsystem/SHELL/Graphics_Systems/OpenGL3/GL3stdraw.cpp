@@ -16,20 +16,17 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <stdio.h>
-#include <math.h>
-
-#include "../General/OpenGLHeaders.h"
-#include "../General/GSstdraw.h"
-#include "../General/GStextures.h"
+#include "Graphics_Systems/General/OpenGLHeaders.h"
+#include "Graphics_Systems/General/GSstdraw.h"
+#include "Graphics_Systems/General/GStextures.h"
+#include "Graphics_Systems/General/GScolor_macros.h"
 #include "Universal_System/roomsystem.h"
 #include "Bridges/General/GL3Context.h"
 #include "GLSLshader.h"
 #include "GL3shader.h"
 
-#define __GETR(x) ((x & 0x0000FF))
-#define __GETG(x) ((x & 0x00FF00) >> 8)
-#define __GETB(x) ((x & 0xFF0000) >> 16)
+#include <stdio.h>
+#include <math.h>
 
 namespace enigma {
   extern unsigned char currentcolor[4];
@@ -182,4 +179,3 @@ bool fill_complex_polygon(const std::list<PolyVertex>& vertices, int defaultColo
 
 
 }
-

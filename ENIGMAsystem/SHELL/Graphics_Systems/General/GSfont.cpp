@@ -21,21 +21,18 @@
 #include <cstdint>
 #include "libEGMstd.h"
 #include "Universal_System/var4.h"
-#include "../General/GScolors.h"
-#include "../General/GSfont.h"
-#include "../General/GStextures.h"
-#include "../General/GSprimitives.h"
-#include "../General/GSsprite.h"
+#include "Graphics_Systems/General/GScolors.h"
+#include "Graphics_Systems/General/GScolor_macros.h"
+#include "Graphics_Systems/General/GSfont.h"
+#include "Graphics_Systems/General/GStextures.h"
+#include "Graphics_Systems/General/GSprimitives.h"
+#include "Graphics_Systems/General/GSsprite.h"
 
 #include "Universal_System/math_consts.h"
 #include "Universal_System/fonts_internal.h"
 #include "Universal_System/sprites.h"
 
 using namespace std;
-
-#define __GETR(x) ((x & 0x0000FF))
-#define __GETG(x) ((x & 0x00FF00) >> 8)
-#define __GETB(x) ((x & 0xFF0000) >> 16)
 
 namespace enigma {
   static int currentfont = -1;
@@ -224,7 +221,7 @@ unsigned int string_height_ext(variant vstr, gs_scalar sep, gs_scalar w)
       if (character == ' ' or g.empty()) {
         width += slen;
       }
-      
+
       tw = 0;
       for (size_t c = i+1; c < str.length(); c++) {
         character = getUnicodeCharacter(str, c);
@@ -1318,4 +1315,3 @@ int draw_get_font() {
 }
 
 }
-

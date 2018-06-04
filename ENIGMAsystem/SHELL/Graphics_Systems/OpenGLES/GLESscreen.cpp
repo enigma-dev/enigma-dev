@@ -19,23 +19,19 @@
 int screen_redraw(int dontswap)
 **********************************************/
 
-#include <string>
 #include "OpenGLHeaders.h"
-#include "../General/GSbackground.h"
-
-using namespace std;
+#include "Graphics_Systems/General/GSbackground.h"
+#include "Graphics_Systems/General/GScolor_macros.h"
 
 #include "Universal_System/background_internal.h"
 #include "Universal_System/var4.h"
-
-#define __GETR(x) (((unsigned int)x & 0x0000FF))
-#define __GETG(x) (((unsigned int)x & 0x00FF00) >> 8)
-#define __GETB(x) (((unsigned int)x & 0xFF0000) >> 16)
-
-
 #include "Universal_System/roomsystem.h"
 #include "Universal_System/instance_system.h"
 #include "graphics_object.h"
+
+#include <string>
+
+using namespace std;
 
 //Fuck whoever did this to the spec
 #ifndef GL_BGR
@@ -79,9 +75,9 @@ int screen_redraw()
 		glOrthof(0,room_width-1,0,room_height-1,0,1); //OPENGLES put f back in
 #else
 		glOrtho(-1,room_width,-1,room_height,0,1); //OPENGLES put f back in
-#endif 
-       
-	
+#endif
+
+
       if (background_showcolor)
       {
          int clearcolor=((int)background_color)&0xFFFFFF;
@@ -89,25 +85,25 @@ int screen_redraw()
          glClear(GL_COLOR_BUFFER_BIT);
       }
         draw_back();
-        
+
       for (enigma::instance_event_iterator = event_draw->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next)
         enigma::instance_event_iterator->inst->myevent_draw();
     }
-    else 
+    else
     for (view_current=0; view_current<7; view_current++)
     if (view_visible[(int)view_current])
     {
       int vc=(int)view_current;
       int vob=(int)view_object[vc];
-      
+
       if (vob != -1)
       {
         object_basic *instanceexists = fetch_instance_by_int(vob);
-        
+
         if (instanceexists)
         {
           object_planar* vobr = (object_planar*)instanceexists;
-          
+
           int vobx=(int)(vobr->x),voby=(int)(vobr->y);
           //int bbl=*vobr.x+*vobr.bbox_left,bbr=*vobr.x+*vobr.bbox_right,bbt=*vobr.y+*vobr.bbox_top,bbb=*vobr.y+*vobr.bbox_bottom;
           //if (bbl<view_xview[vc]+view_hbor[vc]) view_xview[vc]=bbl-view_hbor[vc];
@@ -121,7 +117,7 @@ int screen_redraw()
           if (view_yview[vc]>room_height-view_hview[vc]) view_yview[vc]=room_height-view_hview[vc];
         }
       }
-      
+
       glViewport((int)view_xport[vc],(int)view_yport[vc],(int)view_wport[vc],(int)view_hport[vc]);
       glLoadIdentity();
       glScalef(1,-1,1);
@@ -129,7 +125,7 @@ int screen_redraw()
 		glOrthof((int)view_xview[vc],(int)view_wview[vc]+(int)view_xview[vc],(int)view_yview[vc],(int)view_hview[vc]+(int)view_yview[vc],0,1); //OPENGLES put f back in
 #else
       glOrtho((int)view_xview[vc],(int)view_wview[vc]+(int)view_xview[vc],(int)view_yview[vc],(int)view_hview[vc]+(int)view_yview[vc],0,1); //OPENGLES put f back in
-#endif    
+#endif
       if (background_showcolor)
       {
          int clearcolor=((int)background_color)&0xFFFFFF;
@@ -137,11 +133,11 @@ int screen_redraw()
          glClear(GL_COLOR_BUFFER_BIT);
       }
       draw_back();
-        
+
       for (enigma::instance_event_iterator = event_draw->next; enigma::instance_event_iterator != NULL; enigma::instance_event_iterator = enigma::instance_event_iterator->next)
         enigma::instance_event_iterator->inst->myevent_draw();
     }
-    
+
     return 0;
 }
 
@@ -159,13 +155,13 @@ int screen_save(string filename) //Assumes native integers are little endian
 	if(!bmp) return -1;
 	fwrite("BM",2,1,bmp);
 	sz<<=2;
-	
+
 	fwrite(&sz,4,1,bmp);
 	fwrite("\0\0\0\0\x36\0\0\0\x28\0\0",12,1,bmp);
 	fwrite(&w,4,1,bmp);
 	fwrite(&h,4,1,bmp);
 	fwrite("\1\0\x18\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0",28,1,bmp);
-	
+
 	if(w&3)
 	{
 		size_t pad=w&3;
@@ -190,14 +186,14 @@ int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h
 	FILE *bmp=fopen(filename.c_str(),"wb");
 	if(!bmp) return -1;
 	fwrite("BM",2,1,bmp);
-	
+
 	sz <<= 2;
 	fwrite(&sz,4,1,bmp);
 	fwrite("\0\0\0\0\x36\0\0\0\x28\0\0",12,1,bmp);
 	fwrite(&w,4,1,bmp);
 	fwrite(&h,4,1,bmp);
 	fwrite("\1\0\x18\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0",28,1,bmp);
-	
+
 	if(w&3)
 	{
 		size_t pad=w&3;
@@ -210,11 +206,10 @@ int screen_save_part(string filename,unsigned x,unsigned y,unsigned w,unsigned h
 		}
 	}
 	else fwrite(scrbuf,w*3,h,bmp);
-	
+
 	fclose(bmp);
 	delete[] scrbuf;
 	return 0;
 }
 
 }
-
