@@ -4,9 +4,6 @@
 Name: SDL
 Identifier: SDL
 Represents:
-	Build-Platforms: Linux
-Description: Run on any Linux distribution powered by the X Window Server.
-Author: cheeseboy
-
-Depends:
-	Build-Platforms: Linux
+	Build-Platforms: Linux, MacOSX, Windows, iPhone, Android
+Description: Simple DirectMedia Layer is a cross-platform development library designed to provide low level access to audio, keyboard, mouse, joystick, and graphics hardware via OpenGL and Direct3D. It is used by video playback software, emulators, and popular games including Valve's award winning catalog and many Humble Bundle games.
+Author: fundies

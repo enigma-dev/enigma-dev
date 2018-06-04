@@ -15,12 +15,13 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <GL/glxew.h>
-#include "Platforms/xlib/XLIBmain.h"
 #include "Graphics_Systems/graphics_mandatory.h"
-#include "Platforms/General/PFwindow.h"
 #include "Graphics_Systems/General/GScolors.h"
+
+#include "Platforms/General/PFwindow.h"
 #include "Platforms/SDL/Window.h"
+
+#include "Universal_System/roomsystem.h" // room_caption, update_mouse_variables
 
 #include <SDL2/SDL.h>
 
@@ -28,8 +29,33 @@
 #include <cstring>
 #include <stdio.h>
 
-#include "Platforms/xlib/XLIBwindow.h" // window_set_caption
-#include "Universal_System/roomsystem.h" // room_caption, update_mouse_variables
+namespace enigma {
+
+int msaa_fbo = 0;
+
+SDL_GLContext context;
+SDL_Renderer *renderer;
+
+bool initGameWindow() {
+  windowHandle = SDL_CreateWindow("SDL", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, SDL_WINDOW_HIDDEN | SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE);
+  return (windowHandle != nullptr);
+}
+
+void EnableDrawing(void*) {
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+    SDL_GL_SetSwapInterval(0);
+    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+    context = SDL_GL_CreateContext(windowHandle);
+    renderer = SDL_CreateRenderer(windowHandle, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE);
+}
+
+void DisableDrawing(void*) {
+  SDL_DestroyRenderer(renderer);
+}
+
+}
 
 namespace enigma_user {
   // Don't know where to query this on XLIB, just defaulting it to 2,4,and 8 samples all supported, Windows puts it in EnableDrawing

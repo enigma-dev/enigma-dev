@@ -18,12 +18,6 @@ void handleInput() { input_push(); }
 
 void showWindow() { SDL_ShowWindow(windowHandle); }
 
-bool initGameWindow() {
-  windowHandle = SDL_CreateWindow("SDL", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, SDL_WINDOW_HIDDEN);
-
-  return (windowHandle != nullptr);
-}
-
 void destroyWindow() {
   SDL_DestroyWindow(windowHandle);
   SDL_Quit();
