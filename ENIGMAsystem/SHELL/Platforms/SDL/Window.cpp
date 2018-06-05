@@ -56,6 +56,7 @@ int window_mouse_get_y() {
 
 void window_mouse_set(int x, int y) { SDL_WarpMouseInWindow(windowHandle, x, y); }
 
+#if SDL_VERSION_ATLEAST(2, 0, 4)
 int display_mouse_get_x() {
   int x;
   SDL_GetGlobalMouseState(&x, nullptr);
@@ -70,6 +71,12 @@ int display_mouse_get_y() {
 
 void display_mouse_set(int x, int y) { SDL_WarpMouseGlobal(x, y); }
 
+#else
+#warning "display_mouse_get_x(), display_mouse_get_y() and display_mouse_set() require SDL >= 2.0.4"
+#endif
+
+
+#if SDL_VERSION_ATLEAST(2, 0, 5)
 bool window_get_stayontop() {
   Uint32 flags = SDL_GetWindowFlags(windowHandle);
   return (flags & SDL_WINDOW_ALWAYS_ON_TOP);
@@ -81,13 +88,18 @@ void window_set_stayontop(bool stay) {
   * in X11
   */
 }
+#else
+#warning "window_get_stayontop() and window_set_stayontop() require SDL >= 2.0.5"
+#endif
 
 bool window_get_sizeable() {
   Uint32 flags = SDL_GetWindowFlags(windowHandle);
   return (flags & SDL_WINDOW_RESIZABLE);
 }
 
+#if SDL_VERSION_ATLEAST(2, 0, 5)
 void window_set_sizeable(bool resize) { SDL_SetWindowResizable(windowHandle, (resize) ? SDL_TRUE : SDL_FALSE); }
+#endif
 
 bool window_get_showborder() {
   Uint32 flags = SDL_GetWindowFlags(windowHandle);
