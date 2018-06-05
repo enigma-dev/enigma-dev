@@ -82,15 +82,16 @@ bool window_get_stayontop() {
   return (flags & SDL_WINDOW_ALWAYS_ON_TOP);
 }
 
+#else
+#warning "window_get_stayontop() and window_set_stayontop() require SDL >= 2.0.5"
+#endif
+
 void window_set_stayontop(bool stay) {
   /* SDL (as of 2.0.5) can set SDL_WINDOW_ALWAYS_ON_TOP 
   *  upon creation but not after. Also, this only works 
   * in X11
   */
 }
-#else
-#warning "window_get_stayontop() and window_set_stayontop() require SDL >= 2.0.5"
-#endif
 
 bool window_get_sizeable() {
   Uint32 flags = SDL_GetWindowFlags(windowHandle);
