@@ -4,6 +4,7 @@
 
 #include <string>
 
+/*
 namespace enigma {
   std::vector<GamepadState> gamepads;
 }
@@ -119,7 +120,7 @@ double gamepad_button_value(int id, int btn) {
 }
 
 //TODO: Implement these
-/*void gamepad_set_vibration(int id, double left, double right)
+void gamepad_set_vibration(int id, double left, double right)
 {
   // https://wiki.libsdl.org/CategoryForceFeedback
   #ifdef DEBUG_MODE
@@ -148,8 +149,8 @@ void gamepad_set_axis_deadzone(int id, double deadzone)
   #ifdef DEBUG_MODE
   printf("Error: use of unimplemented function:  gamepad_set_axis_deadzoned\n");
   #endif
-}*/
+}
 
 //gamepad_set_colour is playstation 4 only so why bother?
 
-}  // namespace enigma_user
+}*/  // namespace enigma_user

@@ -79,12 +79,14 @@ int SDL_Event_Handler::processEvents() {
       case SDL_CONTROLLERDEVICEREMAPPED:
         //controllerDeviceRemmaped(&e);
         break;
+      #if SDL_VERSION_ATLEAST(2, 0, 4)
       case SDL_AUDIODEVICEADDED:
         //audioDeviceAdded(&e);
         break;
       case SDL_AUDIODEVICEREMOVED:
         //audioDeviceRemoved(&e);
         break;
+      #endif
       case SDL_QUIT:
         quit(&e);
         return 1;
@@ -109,6 +111,7 @@ int SDL_Event_Handler::processEvents() {
       case SDL_DROPFILE:
         //dropFile(&e);
         break;
+      #if SDL_VERSION_ATLEAST(2, 0, 5)
       case SDL_DROPTEXT:
         //dropText(&e);
         break;
@@ -118,6 +121,7 @@ int SDL_Event_Handler::processEvents() {
       case SDL_DROPCOMPLETE:
         //dropEnd(&e);
         break;
+      #endif
     }
   }
 
@@ -167,12 +171,14 @@ void SDL_Event_Handler::windowEvent(const SDL_Event *event) {
     case SDL_WINDOWEVENT_CLOSE:
       //windowClose(event);
       break;
+    #if SDL_VERSION_ATLEAST(2, 0, 5)
     case SDL_WINDOWEVENT_TAKE_FOCUS:
       //windowTakeFocus(event);
       break;
     case SDL_WINDOWEVENT_HIT_TEST:
       //windowHitTest(event);
       break;
+    #endif
     default:
       //unkownEvent(event);
       break;
