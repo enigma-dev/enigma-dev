@@ -149,7 +149,7 @@ matrix:
   include:
     # SDL
     - env: COMPILER=gcc PLATFORM=SDL MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
-      before_script: sudo apt-get -y install libsdl2-dev
+      before_script: sudo apt-get -y install libsdl2-dev libegl1-mesa-dev libgles2-mesa-dev
     # Widgets
     - env: COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=GTK+ EXTENSIONS="None"
       before_script: sudo apt-get -y install libgtk2.0-dev
