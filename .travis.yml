@@ -16,7 +16,7 @@ before_install:
 
     if [ "$TRAVIS_OS_NAME" == "linux" ]; then
       sudo add-apt-repository -y ppa:maarten-fonville/protobuf;
-      sudo add-apt-repository -y ppa:zoogie/sdl2-snapshots
+      sudo add-apt-repository -y sudo ppa:team-xbmc/ppa
       sudo apt-get update --option Acquire::Retries=100 --option Acquire::http::Timeout="60";
       sudo apt-get -qq -y install build-essential zlib1g-dev libboost-dev libboost-iostreams-dev \
         libboost-filesystem-dev libboost-program-options-dev libboost-system-dev libglew-dev     \
