@@ -194,7 +194,7 @@ void clear_view(float x, float y, float w, float h, float angle, bool showcolor)
 	if (enigma::d3dMode)
 		clearflags |= D3DCLEAR_ZBUFFER;
 
-  d3dmgr->Clear(0, NULL, clearflags, D3DCOLOR_XRGB(__GETR(clearcolor), __GETG(clearcolor), __GETB(clearcolor)), 1.0f, 0);
+  d3dmgr->Clear(0, NULL, clearflags, D3DCOLOR_XRGB(COL_GET_R(clearcolor), COL_GET_G(clearcolor), COL_GET_B(clearcolor)), 1.0f, 0);
 }
 
 static inline void draw_gui()

@@ -16,6 +16,7 @@
 **/
 
 #include "Graphics_Systems/General/GScolors.h"
+#include "Graphics_Systems/General/GScolor_macros.h"
 #include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GSbackground.h"
 #include "Graphics_Systems/General/GStextures.h"
@@ -27,9 +28,6 @@
 #include <cstddef>
 #include <math.h>
 #include <string.h> // needed for querying ARB extensions
-
-//Note that this clamps between 0 and 1, not 0 and 255
-#define clamp_alpha(alpha) (alpha <= 0 ? 0: alpha >= 1? 1: alpha)
 
 namespace enigma_user {
   extern int room_width, room_height;
@@ -43,7 +41,7 @@ namespace enigma_user
 
 void draw_background(int back, gs_scalar x, gs_scalar y, int color, gs_scalar alpha)
 {
-  alpha=clamp_alpha(alpha);
+  alpha=CLAMP_ALPHAF(alpha);
 	get_background(bck2d,back);
 
 	const gs_scalar tbx=bck2d->texturex,tby=bck2d->texturey,
@@ -58,7 +56,7 @@ void draw_background(int back, gs_scalar x, gs_scalar y, int color, gs_scalar al
 
 void draw_background_stretched(int back, gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, int color, gs_scalar alpha)
 {
-  alpha=clamp_alpha(alpha);
+  alpha=CLAMP_ALPHAF(alpha);
 	get_background(bck2d, back);
 
 	const gs_scalar tbx=bck2d->texturex,tby=bck2d->texturey,
@@ -73,7 +71,7 @@ void draw_background_stretched(int back, gs_scalar x, gs_scalar y, gs_scalar wid
 
 void draw_background_part(int back, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, int color, gs_scalar alpha)
 {
-  alpha=clamp_alpha(alpha);
+  alpha=CLAMP_ALPHAF(alpha);
 	get_background(bck2d, back);
 
 	const gs_scalar tbw = bck2d->width/(gs_scalar)bck2d->texturew, tbh = bck2d->height/(gs_scalar)bck2d->textureh,
@@ -91,7 +89,7 @@ void draw_background_part(int back, gs_scalar left, gs_scalar top, gs_scalar wid
 
 void draw_background_ext(int back, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int color, gs_scalar alpha)
 {
-    alpha=clamp_alpha(alpha);
+    alpha=CLAMP_ALPHAF(alpha);
     get_background(bck2d,back);
 
   rot *= M_PI/180;
@@ -120,7 +118,7 @@ void draw_background_ext(int back, gs_scalar x, gs_scalar y, gs_scalar xscale, g
 
 void draw_background_stretched_ext(int back, gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, int color, gs_scalar alpha)
 {
-  alpha=clamp_alpha(alpha);
+  alpha=CLAMP_ALPHAF(alpha);
 	get_background(bck2d,back);
 
 	const gs_scalar tbx=bck2d->texturex, tby=bck2d->texturey,
@@ -136,7 +134,7 @@ void draw_background_stretched_ext(int back, gs_scalar x, gs_scalar y, gs_scalar
 
 void draw_background_part_ext(int back, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, gs_scalar alpha)
 {
-  alpha=clamp_alpha(alpha);
+  alpha=CLAMP_ALPHAF(alpha);
 	get_background(bck2d, back);
 
 	gs_scalar tbw = bck2d->width/(gs_scalar)bck2d->texturew, tbh = bck2d->height/(gs_scalar)bck2d->textureh,
@@ -156,7 +154,7 @@ void draw_background_part_ext(int back, gs_scalar left, gs_scalar top, gs_scalar
 
 void draw_background_general(int back, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, gs_scalar alpha)
 {
-  alpha=clamp_alpha(alpha);
+  alpha=CLAMP_ALPHAF(alpha);
 	get_background(bck2d, back);
   const gs_scalar tbx = bck2d->texturex,  tby = bck2d->texturey,
                   tbw = bck2d->texturew,  tbh = bck2d->textureh,
@@ -185,7 +183,7 @@ void draw_background_general(int back, gs_scalar left, gs_scalar top, gs_scalar 
 
 void draw_background_tiled(int back, gs_scalar x, gs_scalar y, int color, gs_scalar alpha)
 {
-    alpha=clamp_alpha(alpha);
+    alpha=CLAMP_ALPHAF(alpha);
     get_background(bck2d,back);
     x = (x<0?0:bck2d->width)-fmod(x,bck2d->width);
     y = (y<0?0:bck2d->height)-fmod(y,bck2d->height);
@@ -218,7 +216,7 @@ void draw_background_tiled(int back, gs_scalar x, gs_scalar y, int color, gs_sca
 
 void draw_background_tiled_ext(int back, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, gs_scalar alpha, bool htiled, bool vtiled)
 {
-  alpha=clamp_alpha(alpha);
+  alpha=CLAMP_ALPHAF(alpha);
 	get_background(bck2d,back);
 
 	const gs_scalar tbx = bck2d->texturex, tby = bck2d->texturey,
@@ -261,7 +259,7 @@ void draw_background_tiled_ext(int back, gs_scalar x, gs_scalar y, gs_scalar xsc
 
 void draw_background_tiled_area(int back, gs_scalar x, gs_scalar y, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, int color, gs_scalar alpha)
 {
-  alpha=clamp_alpha(alpha);
+  alpha=CLAMP_ALPHAF(alpha);
 	get_background(bck2d,back);
 
   const gs_scalar tbx=bck2d->texturex,tby=bck2d->texturey,
@@ -309,7 +307,7 @@ void draw_background_tiled_area(int back, gs_scalar x, gs_scalar y, gs_scalar x1
 
 void draw_background_tiled_area_ext(int back, gs_scalar x, gs_scalar y, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar xscale, gs_scalar yscale, int color, gs_scalar alpha)
 {
-  alpha=clamp_alpha(alpha);
+  alpha=CLAMP_ALPHAF(alpha);
 	get_background(bck2d,back);
 
   const gs_scalar tbx=bck2d->texturex,tby=bck2d->texturey,

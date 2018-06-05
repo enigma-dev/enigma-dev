@@ -118,7 +118,7 @@ void d3d_vertex(gs_scalar x, gs_scalar y, gs_scalar z) {
 }
 
 void d3d_vertex_color(gs_scalar x, gs_scalar y, gs_scalar z, int color, double alpha) {
-  glColor4ub(__GETR(color), __GETG(color), __GETB(color), (unsigned char)(alpha*255));
+  glColor4ub(COL_GET_R(color), COL_GET_G(color), COL_GET_B(color), (unsigned char)(alpha*255));
   glVertex3d(x,y,z);
   glColor4ubv(enigma::currentcolor);
 }
@@ -129,7 +129,7 @@ void d3d_vertex_texture(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar tx, gs_
 }
 
 void d3d_vertex_texture_color(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar tx, gs_scalar ty, int color, double alpha) {
-  glColor4ub(__GETR(color), __GETG(color), __GETB(color), (unsigned char)(alpha*255));
+  glColor4ub(COL_GET_R(color), COL_GET_G(color), COL_GET_B(color), (unsigned char)(alpha*255));
   glTexCoord2f(tx,ty);
   glVertex3d(x,y,z);
   glColor4ubv(enigma::currentcolor);
@@ -143,7 +143,7 @@ void d3d_vertex_normal(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_s
 
 void d3d_vertex_normal_color(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, int color, double alpha)
 {
-  glColor4ub(__GETR(color), __GETG(color), __GETB(color), (unsigned char)(alpha*255));
+  glColor4ub(COL_GET_R(color), COL_GET_G(color), COL_GET_B(color), (unsigned char)(alpha*255));
   glNormal3f(nx, ny, nz);
   glVertex3d(x,y,z);
   glColor4ubv(enigma::currentcolor);
@@ -158,7 +158,7 @@ void d3d_vertex_normal_texture(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar 
 
 void d3d_vertex_normal_texture_color(gs_scalar x, gs_scalar y, gs_scalar z, gs_scalar nx, gs_scalar ny, gs_scalar nz, gs_scalar tx, gs_scalar ty, int color, double alpha)
 {
-  glColor4ub(__GETR(color), __GETG(color), __GETB(color), (unsigned char)(alpha*255));
+  glColor4ub(COL_GET_R(color), COL_GET_G(color), COL_GET_B(color), (unsigned char)(alpha*255));
   glTexCoord2f(tx,ty);
   glNormal3f(nx, ny, nz);
   glVertex3d(x,y,z);

@@ -65,12 +65,12 @@ static inline int graphics_find_attribute_location(std::string name, int usageIn
 namespace enigma_user {
 
 void vertex_argb(int buffer, unsigned argb) {
-  enigma::color_t finalcol = (__GETA32(argb) << 24) | (__GETR32(argb) << 16) | (__GETG32(argb) << 8) | __GETB32(argb);
+  enigma::color_t finalcol = (COL_GET_A32(argb) << 24) | (COL_GET_R32(argb) << 16) | (COL_GET_G32(argb) << 8) | COL_GET_B32(argb);
   enigma::vertexBuffers[buffer]->vertices.push_back(finalcol);
 }
 
 void vertex_color(int buffer, int color, double alpha) {
-  enigma::color_t finalcol = color + (bind_alpha(alpha) << 24);
+  enigma::color_t finalcol = color + (CLAMP_ALPHA(alpha) << 24);
   enigma::vertexBuffers[buffer]->vertices.push_back(finalcol);
 }
 

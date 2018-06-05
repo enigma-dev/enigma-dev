@@ -33,9 +33,6 @@ using namespace std;
 #include "Graphics_Systems/General/GSsurface.h"
 #include "Graphics_Systems/General/GScolor_macros.h"
 
-//Note that this clamps between 0 and 1, not 0 and 255
-#define clamp_alpha(alpha) (alpha <= 0 ? 0: alpha >= 1? 1: alpha)
-
 namespace enigma_user {
 extern int room_width, room_height/*, sprite_idmax*/;
 }
@@ -45,7 +42,7 @@ namespace enigma_user
 
 void draw_surface(int id, gs_scalar x, gs_scalar y, int color, gs_scalar alpha)
 {
-  alpha=clamp_alpha(alpha);
+  alpha=CLAMP_ALPHAF(alpha);
 	int w=surface_get_width(id);
 	int h=surface_get_height(id);
 
@@ -59,7 +56,7 @@ void draw_surface(int id, gs_scalar x, gs_scalar y, int color, gs_scalar alpha)
 
 void draw_surface_ext(int id,gs_scalar x, gs_scalar y,gs_scalar xscale, gs_scalar yscale,double rot,int color,gs_scalar alpha)
 {
-    alpha=clamp_alpha(alpha);
+    alpha=CLAMP_ALPHAF(alpha);
     const gs_scalar w=surface_get_width(id)*xscale, h=surface_get_height(id)*yscale;
     rot *= M_PI/180;
 
@@ -78,7 +75,7 @@ void draw_surface_ext(int id,gs_scalar x, gs_scalar y,gs_scalar xscale, gs_scala
 
 void draw_surface_stretched(int id, gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h, int color, gs_scalar alpha)
 {
-  alpha=clamp_alpha(alpha);
+  alpha=CLAMP_ALPHAF(alpha);
 	draw_primitive_begin_texture(pr_trianglestrip, surface_get_texture(id));
 	draw_vertex_texture_color(x,y,0,0,color,alpha);
 	draw_vertex_texture_color(x+w,y,1,0,color,alpha);
@@ -89,7 +86,7 @@ void draw_surface_stretched(int id, gs_scalar x, gs_scalar y, gs_scalar w, gs_sc
 
 void draw_surface_stretched_ext(int id, gs_scalar x, gs_scalar y, gs_scalar w, gs_scalar h, int color, gs_scalar alpha)
 {
-  alpha=clamp_alpha(alpha);
+  alpha=CLAMP_ALPHAF(alpha);
 	draw_primitive_begin_texture(pr_trianglestrip, surface_get_texture(id));
 	draw_vertex_texture_color(x,y,0,0,color,alpha);
 	draw_vertex_texture_color(x+w,y,1,0,color,alpha);
@@ -100,7 +97,7 @@ void draw_surface_stretched_ext(int id, gs_scalar x, gs_scalar y, gs_scalar w, g
 
 void draw_surface_part(int id, gs_scalar left, gs_scalar top, gs_scalar w, gs_scalar h, gs_scalar x, gs_scalar y, int color, gs_scalar alpha)
 {
-  alpha=clamp_alpha(alpha);
+  alpha=CLAMP_ALPHAF(alpha);
 	const gs_scalar tbw=surface_get_width(id),tbh=surface_get_height(id);
 
 	draw_primitive_begin_texture(pr_trianglestrip, surface_get_texture(id));
@@ -113,7 +110,7 @@ void draw_surface_part(int id, gs_scalar left, gs_scalar top, gs_scalar w, gs_sc
 
 void draw_surface_part_ext(int id, gs_scalar left, gs_scalar top, gs_scalar w, gs_scalar h, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale,int color, gs_scalar alpha)
 {
-  alpha=clamp_alpha(alpha);
+  alpha=CLAMP_ALPHAF(alpha);
 	const gs_scalar tbw = surface_get_width(id), tbh = surface_get_height(id);
 	draw_primitive_begin_texture(pr_trianglestrip, surface_get_texture(id));
 	draw_vertex_texture_color(x,y,left/tbw,top/tbh,color,alpha);
@@ -125,7 +122,7 @@ void draw_surface_part_ext(int id, gs_scalar left, gs_scalar top, gs_scalar w, g
 
 void draw_surface_general(int id, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, gs_scalar alpha)
 {
-  alpha=clamp_alpha(alpha);
+  alpha=CLAMP_ALPHAF(alpha);
 	const gs_scalar tbw = surface_get_width(id), tbh = surface_get_height(id),
 	  w = width*xscale, h = height*yscale;
 
@@ -148,7 +145,7 @@ void draw_surface_general(int id, gs_scalar left, gs_scalar top, gs_scalar width
 
 void draw_surface_tiled(int id, gs_scalar x, gs_scalar y, int color, gs_scalar alpha)
 {
-  alpha=clamp_alpha(alpha);
+  alpha=CLAMP_ALPHAF(alpha);
 	const gs_scalar tbw = surface_get_width(id), tbh = surface_get_height(id);
 	x=surface_get_width(id)-fmod(x,surface_get_width(id));
 	y=surface_get_height(id)-fmod(y,surface_get_height(id));
@@ -172,7 +169,7 @@ void draw_surface_tiled(int id, gs_scalar x, gs_scalar y, int color, gs_scalar a
 
 void draw_surface_tiled_ext(int id, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, gs_scalar alpha)
 {
-    alpha=clamp_alpha(alpha);
+    alpha=CLAMP_ALPHAF(alpha);
     const gs_scalar w=surface_get_width(id)*xscale, h=surface_get_height(id)*yscale;
     const int hortil= int (ceil(room_width/(surface_get_width(id)))),
         vertil= int (ceil(room_height/(surface_get_height(id))));
@@ -195,7 +192,7 @@ void draw_surface_tiled_ext(int id, gs_scalar x, gs_scalar y, gs_scalar xscale, 
 
 void draw_surface_tiled_area(int id, gs_scalar x, gs_scalar y, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, int color, gs_scalar alpha)
 {
-    alpha=clamp_alpha(alpha);
+    alpha=CLAMP_ALPHAF(alpha);
     gs_scalar sw,sh,i,j,jj,left,top,width,height,X,Y;
     sw = surface_get_width(id);
     sh = surface_get_height(id);
@@ -235,7 +232,7 @@ void draw_surface_tiled_area(int id, gs_scalar x, gs_scalar y, gs_scalar x1, gs_
 
 void draw_surface_tiled_area_ext(int id, gs_scalar x, gs_scalar y, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar xscale, gs_scalar yscale, int color, gs_scalar alpha)
 {
-    alpha=clamp_alpha(alpha);
+    alpha=CLAMP_ALPHAF(alpha);
     gs_scalar sw,sh,i,j,jj,left,top,width,height,X,Y;
     sw = surface_get_width(id)*xscale;
     sh = surface_get_height(id)*yscale;

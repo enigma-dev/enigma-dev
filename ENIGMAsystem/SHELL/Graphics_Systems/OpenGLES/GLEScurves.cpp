@@ -91,7 +91,7 @@ void draw_bezier_quadratic(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y
         al = pr_curve_alpha1 + (pr_curve_alpha2-pr_curve_alpha1)*b;
         col = merge_color(pr_curve_color1, pr_curve_color2, b);
 
-        glColor4f(__GETR(col),__GETG(col),__GETB(col),al);
+        glColor4f(COL_GET_R(col),COL_GET_G(col),COL_GET_B(col),al);
         glVertex2f(x, y);
 
         a -= det;
@@ -119,7 +119,7 @@ void draw_bezier_cubic(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, g
         al = pr_curve_alpha1 + (pr_curve_alpha2-pr_curve_alpha1)*b;
         col = merge_color(pr_curve_color1, pr_curve_color2, b);
 
-        glColor4f(__GETR(col),__GETG(col),__GETB(col),al);
+        glColor4f(COL_GET_R(col),COL_GET_G(col),COL_GET_B(col),al);
         glVertex2f(x, y);
 
         a -= det;
@@ -176,7 +176,7 @@ void draw_spline_part(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs
         ( -x1 + 3.0 * x2 - 3.0 * x3 + x4 ) * t3 );
         y = 0.5 * ( ( 2.0 * y2 ) + ( -y1 + y3 ) * t + ( 2.0 * y1 - 5.0 * y2 + 4 * y3 - y4 ) * t2 +
         ( -y1 + 3.0 * y2 - 3.0 * y3 + y4 ) * t3 );
-        glColor4f(__GETR(col),__GETG(col),__GETB(col),al);
+        glColor4f(COL_GET_R(col),COL_GET_G(col),COL_GET_B(col),al);
      //   glVertex2f(x, y);
         t += det;
     }
