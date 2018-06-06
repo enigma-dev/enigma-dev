@@ -15,18 +15,10 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "../General/OpenGLHeaders.h"
-#include "../General/GScolors.h"
+#include "Graphics_Systems/General/OpenGLHeaders.h"
+#include "Graphics_Systems/General/GScolors.h"
+#include "Graphics_Systems/General/GScolor_macros.h"
 #include <math.h>
-
-#define __GETR(x) ((x & 0x0000FF))
-#define __GETG(x) ((x & 0x00FF00)>>8)
-#define __GETB(x) ((x & 0xFF0000)>>16)
-/*#define __GETRf(x) fmod(x,256)
-#define __GETGf(x) fmod(x/256,256)
-#define __GETBf(x) fmod(x/65536,256)*/
-
-#define bind_alpha(alpha) (alpha>1?255:(alpha<0?0:(unsigned char)(alpha*255)))
 
 namespace enigma {
   extern unsigned char currentcolor[4];
@@ -38,20 +30,20 @@ namespace enigma_user
 void draw_clear_alpha(int col,float alpha)
 {
   //Unfortunately, we lack a 255-based method for setting ClearColor.
-	glClearColor(__GETR(col)/255.0,__GETG(col)/255.0,__GETB(col)/255.0,alpha);
+	glClearColor(COL_GET_R(col)/255.0,COL_GET_G(col)/255.0,COL_GET_B(col)/255.0,alpha);
 	glClear(GL_COLOR_BUFFER_BIT);
 }
 void draw_clear(int col)
 {
-	glClearColor(__GETR(col)/255.0,__GETG(col)/255.0,__GETB(col)/255.0,1);
+	glClearColor(COL_GET_R(col)/255.0,COL_GET_G(col)/255.0,COL_GET_B(col)/255.0,1);
 	glClear(GL_COLOR_BUFFER_BIT);
 }
 
 void draw_set_color(int color)
 {
-	enigma::currentcolor[0] = __GETR(color);
-	enigma::currentcolor[1] = __GETG(color);
-	enigma::currentcolor[2] = __GETB(color);
+	enigma::currentcolor[0] = COL_GET_R(color);
+	enigma::currentcolor[1] = COL_GET_G(color);
+	enigma::currentcolor[2] = COL_GET_B(color);
 	glColor4ubv(enigma::currentcolor);
 }
 
@@ -65,7 +57,7 @@ void draw_set_color_rgb(unsigned char red,unsigned char green,unsigned char blue
 
 void draw_set_alpha(float alpha)
 {
-	enigma::currentcolor[3] = bind_alpha(alpha);
+	enigma::currentcolor[3] = CLAMP_ALPHA(alpha);
 	glColor4ubv(enigma::currentcolor);
 }
 
@@ -74,7 +66,7 @@ void draw_set_color_rgba(unsigned char red,unsigned char green,unsigned char blu
 	enigma::currentcolor[0] = red;
 	enigma::currentcolor[1] = green;
 	enigma::currentcolor[2] = blue;
-	enigma::currentcolor[3] = bind_alpha(alpha);
+	enigma::currentcolor[3] = CLAMP_ALPHA(alpha);
 	glColor4ubv(enigma::currentcolor);
 }
 

@@ -49,9 +49,7 @@
     const enigma::background *const bck2d = enigma::backgroundstructarray[back];
 #endif
 
-#define __GETR(x) ((x & 0x0000FF))
-#define __GETG(x) ((x & 0x00FF00) >> 8)
-#define __GETB(x) ((x & 0xFF0000) >> 16)
+#include "Graphics_Systems/General/GScolor_macros.h"
 
 namespace enigma_user {
   extern int room_width, room_height;
@@ -76,4 +74,3 @@ int background_create_from_screen(int x, int y, int w, int h, bool removeback, b
 }
 
 }
-

@@ -15,30 +15,25 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <string>
-#include <cstdio>
-#include "Bridges/General/DX9Context.h"
-#include "Direct3D9Headers.h"
+#include "Graphics_Systems/graphics_mandatory.h"
 #include "Graphics_Systems/General/GSsprite.h"
 #include "Graphics_Systems/General/GSbackground.h"
 #include "Graphics_Systems/General/GStiles.h"
 #include "Graphics_Systems/General/GSscreen.h"
 #include "Graphics_Systems/General/GSd3d.h"
+#include "Graphics_Systems/General/GSmodel.h"
 #include "Graphics_Systems/General/GSmatrix.h"
 #include "Graphics_Systems/General/GStextures.h"
 #include "Graphics_Systems/General/GScolors.h"
-
-using namespace std;
+#include "Graphics_Systems/General/GScolor_macros.h"
+#include "Bridges/General/DX9Context.h"
+#include "Direct3D9Headers.h"
 
 #include "Universal_System/image_formats.h"
 #include "Universal_System/background_internal.h"
 #include "Universal_System/background.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/estring.h"
-
-#define __GETR(x) (((unsigned int)x & 0x0000FF))
-#define __GETG(x) (((unsigned int)x & 0x00FF00) >> 8)
-#define __GETB(x) (((unsigned int)x & 0xFF0000) >> 16)
 
 #include "Universal_System/roomsystem.h"
 #include "Universal_System/instance_system.h"
@@ -47,17 +42,13 @@ using namespace std;
 #include "Platforms/General/PFwindow.h"
 #include "Platforms/General/PFmain.h"
 #include "Platforms/platforms_mandatory.h"
-#include "Graphics_Systems/graphics_mandatory.h"
+
+#include <string>
+#include <cstdio>
 #include <limits>
 
-//Fuck whoever did this to the spec
-#ifndef GL_BGR
-  #define GL_BGR 0x80E0
-#endif
-
+using namespace std;
 using namespace enigma;
-
-#include "../General/GSmodel.h"
 
 namespace enigma_user {
   extern int window_get_width();
@@ -196,7 +187,7 @@ void clear_view(float x, float y, float w, float h, float angle, bool showcolor)
 	if (enigma::d3dMode)
 		clearflags |= D3DCLEAR_ZBUFFER;
 
-  d3dmgr->Clear(0, NULL, clearflags, D3DCOLOR_XRGB(__GETR(clearcolor), __GETG(clearcolor), __GETB(clearcolor)), 1.0f, 0);
+  d3dmgr->Clear(0, NULL, clearflags, D3DCOLOR_XRGB(COL_GET_R(clearcolor), COL_GET_G(clearcolor), COL_GET_B(clearcolor)), 1.0f, 0);
 }
 
 static inline void draw_gui()
@@ -308,11 +299,11 @@ void screen_redraw()
 
 void screen_init()
 {
-	enigma::gui_width = window_get_region_width();
-	enigma::gui_height = window_get_region_height();
+  enigma::gui_width = window_get_region_width();
+  enigma::gui_height = window_get_region_height();
 
-	d3dmgr->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
-	d3dmgr->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
+  d3dmgr->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
+  d3dmgr->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0, 0, 0), 1.0f, 0);
 
     if (!view_enabled)
     {
@@ -335,18 +326,19 @@ void screen_init()
       }
     }
 
-	d3dmgr->SetRenderState(D3DRS_LIGHTING, FALSE);
-	d3dmgr->SetRenderState(D3DRS_ZENABLE, FALSE);
+  d3dmgr->SetRenderState(D3DRS_LIGHTING, FALSE);
+  d3dmgr->SetRenderState(D3DRS_ZENABLE, FALSE);
   // make the same default as GL, keep in mind GM uses reverse depth ordering for ortho projections, where the higher the z value the further into the screen you are
   // but that is currently taken care of by using 32000/-32000 for znear/zfar respectively
   d3dmgr->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESS);
-	d3dmgr->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-	d3dmgr->SetRenderState(D3DRS_ALPHAREF, (DWORD)0x00000001);
-	d3dmgr->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);
-	d3dmgr->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATEREQUAL);
-	d3dmgr->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
-	d3dmgr->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
-	draw_set_color(c_white);
+  d3dmgr->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);
+  d3dmgr->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
+  d3dmgr->SetRenderState(D3DRS_ALPHAREF, (DWORD)0x00000001);
+  d3dmgr->SetRenderState(D3DRS_ALPHATESTENABLE, TRUE);
+  d3dmgr->SetRenderState(D3DRS_ALPHAFUNC, D3DCMP_GREATEREQUAL);
+  d3dmgr->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
+  d3dmgr->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
+  draw_set_color(c_white);
 }
 
 int screen_save(string filename) //Assumes native integers are little endian

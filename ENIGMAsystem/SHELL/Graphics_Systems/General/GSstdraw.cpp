@@ -16,17 +16,18 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <math.h>
 #include "GSprimitives.h"
 #include "GSstdraw.h"
 #include "GScolors.h"
 
-#include <stdio.h>
 #include "Universal_System/roomsystem.h"
 #include "Universal_System/math_consts.h"
 
 #include <list>
 #include <vector>
+#include <math.h>
+#include <stdio.h>
+
 using std::vector;
 
 namespace enigma {

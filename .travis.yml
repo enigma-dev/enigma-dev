@@ -1,8 +1,6 @@
 # competition for Thundercleese
 notifications:
-  irc:
-    skip_join: true
-    channels: ["chat.freenode.net#enigma"]
+  irc: "chat.freenode.net#enigma"
 # disable the depth option for git allowing us to merge multiple prs simultaneously
 git:
   depth: false
@@ -17,8 +15,11 @@ before_install:
     set -eo pipefail
 
     if [ "$TRAVIS_OS_NAME" == "linux" ]; then
-      sudo apt-get -qq -y install build-essential zlib1g-dev libboost-dev libboost-iostreams-dev\
-        libboost-filesystem-dev libboost-program-options-dev libboost-system-dev libglew-dev;
+      sudo add-apt-repository -y ppa:maarten-fonville/protobuf;
+      sudo apt-get update --option Acquire::Retries=100 --option Acquire::http::Timeout="60";
+      sudo apt-get -qq -y install build-essential zlib1g-dev libboost-dev libboost-iostreams-dev \
+        libboost-filesystem-dev libboost-program-options-dev libboost-system-dev libglew-dev     \
+        libprotobuf-dev protobuf-compiler;
 
       if [ "$COMPILER" == "gcc32" ] || [ "$COMPILER" == "clang32" ]; then
         sudo dpkg --add-architecture i386;
@@ -52,7 +53,14 @@ before_install:
       if [ "$TEST_HARNESS" == true ]; then
         sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test;
         sudo apt-get update;
-        sudo apt-get -qq -y install cmake libgtest-dev xvfb wmctrl xdotool xfwm4 lcov gcc-7 g++-7 cpp-7;
+        sudo apt-get -qq -y install cmake libgtest-dev xvfb wmctrl xdotool xfwm4 lcov gcc-7\
+          g++-7 cpp-7 pulseaudio libpugixml-dev libyaml-cpp-dev;
+
+        # download rapidjson manually because ubuntu is ancient
+        wget -O rapidjson-master.zip https://github.com/Tencent/rapidjson/archive/master.zip;
+        unzip rapidjson-master.zip;
+        sudo cp -a rapidjson-master/include/. /usr/include/;
+
         sudo update-alternatives --remove-all cpp;
         sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 \
                     15 \
@@ -71,18 +79,23 @@ before_install:
       fi
     elif [ "$TRAVIS_OS_NAME" == "osx" ]; then
       brew upgrade gcc || brew install gcc || brew link --overwrite gcc;
-      brew install glew;
+      brew install glew protobuf pugixml;
     fi
 
 # build JDI and the CLI
 install:
   - chmod +x ./ci-build.sh
   - make -j4
-  - make -j4 emake
+  - |
+    if [ "$TEST_HARNESS" == true ]; then
+      make -j4 emake
+    else
+      make -j4 emake disable_egm=true
+    fi
 
 # by default most of our jobs will be run on a linux instance
 os: linux
-dist: trusty
+group: travis_latest
 compiler: gcc
 language: cpp
 
@@ -91,7 +104,7 @@ env:
     - OUTPUT=/tmp/test
   matrix:
     # Test Harness
-    - TEST_HARNESS=true
+    - TEST_HARNESS=true AUDIO=OpenAL
     # Game Modes
     - COMPILER=gcc PLATFORM=xlib MODE=Run GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"
     - COMPILER=gcc PLATFORM=xlib MODE=Debug GRAPHICS=OpenGL1 AUDIO=None COLLISION=None NETWORK=None WIDGETS=None EXTENSIONS="None"

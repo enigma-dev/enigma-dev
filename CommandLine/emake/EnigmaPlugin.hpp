@@ -4,6 +4,7 @@
 #include "EnigmaCallbacks.hpp"
 #include "backend/EnigmaStruct.h"
 #include "frontend.h"
+#include "game.pb.h"
 
 #include <functional>
 #include <string>
@@ -28,16 +29,31 @@ class EnigmaPlugin
 {
 public:
   EnigmaPlugin();
-  int Init();
-  void SetDefinitions(const char* def);
+  int Load();
+  const char* Init();
+  syntax_error* SetDefinitions(const char* def, const char* yaml);
+  syntax_error* SetDefinitions(const char* yaml);
+  syntax_error* SyntaxCheck(int count, const char** names, const char* code);
   void HandleGameLaunch();
   void LogMakeToConsole();
   int BuildGame(EnigmaStruct* data, GameMode mode, const char* fpath);
+  int BuildGame(buffers::Game* data, GameMode mode, const char* fpath);
+  const char* NextResource();
+  const char* FirstResource();
+  bool ResourceIsFunction();
+  int ResourceArgCountMin();
+  int ResourceArgCountMax();
+  int ResourceOverloadCount();
+  const char* ResourceParameters(int i);
+  int ResourceIsTypeName();
+  int ResourceIsGlobal();
+  bool ResourcesAtEnd();
   void PrintBuiltins(std::string& fName);
-  
+
 private:
   std::function<const char*(EnigmaCallbacks*)> plugin_Init = nullptr;
   std::function<int(EnigmaStruct*, const char*, int)> plugin_CompileEGM = nullptr;
+  std::function<int(buffers::Game *project, const char*, int)> plugin_CompileBuffer = nullptr;
   std::function<const char*()> plugin_NextResource = nullptr;
   std::function<const char*()> plugin_FirstResource = nullptr;
   std::function<bool()> plugin_ResourceIsFunction = nullptr;

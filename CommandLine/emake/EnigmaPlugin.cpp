@@ -1,4 +1,6 @@
 #include "EnigmaPlugin.hpp"
+#include "Main.hpp"
+#include "Proto2ES.h"
 
 #include "OS_Switchboard.h"
 
@@ -26,7 +28,7 @@ EnigmaPlugin::EnigmaPlugin()
 {
 }
 
-int EnigmaPlugin::Init()
+int EnigmaPlugin::Load()
 {
   // Load Plugin
 #if CURRENT_PLATFORM_ID == OS_WINDOWS
@@ -48,8 +50,8 @@ int EnigmaPlugin::Init()
 
   if (!_handle)
   {
-    std::cerr << "Error Loading Plugin '" << pluginName << "'" << std::endl;
-    std::cerr << dlerror() << std::endl;
+    errorStream  << "Error Loading Plugin '" << pluginName << "'" << std::endl;
+    errorStream << dlerror() << std::endl;
     return PLUGIN_ERROR;
   }
 
@@ -78,15 +80,28 @@ int EnigmaPlugin::Init()
   plugin_HandleGameLaunch = reinterpret_cast<void (*)()>(BindFunc(_handle, "ide_handles_game_launch"));
   plugin_LogMakeToConsole = reinterpret_cast<void (*)()>(BindFunc(_handle, "log_make_to_console"));
 
-  CallBack ecb;
-  plugin_Init(&ecb);
-
   return PLUGIN_SUCCESS;
 }
 
-void EnigmaPlugin::SetDefinitions(const char* def)
+const char* EnigmaPlugin::Init()
 {
-  plugin_DefinitionsModified("", def);
+  CallBack ecb;
+  return plugin_Init(&ecb);
+}
+
+syntax_error* EnigmaPlugin::SetDefinitions(const char* def, const char* yaml)
+{
+  return plugin_DefinitionsModified(def, yaml);
+}
+
+syntax_error* EnigmaPlugin::SetDefinitions(const char* yaml)
+{
+  return plugin_DefinitionsModified("", yaml);
+}
+
+syntax_error* EnigmaPlugin::SyntaxCheck(int count, const char** names, const char* code)
+{
+  return plugin_SyntaxCheck(count, names, code);
 }
 
 void EnigmaPlugin::HandleGameLaunch()
@@ -102,6 +117,53 @@ void EnigmaPlugin::LogMakeToConsole()
 int EnigmaPlugin::BuildGame(EnigmaStruct* data, GameMode mode, const char* fpath)
 {
   return plugin_CompileEGM(data, fpath, mode);
+}
+
+int EnigmaPlugin::BuildGame(buffers::Game* data, GameMode mode, const char* fpath)
+{
+  EnigmaStruct *es = Proto2ES(data);
+  es->filename = fpath;
+  return plugin_CompileEGM(es, fpath, mode);
+}
+
+const char* EnigmaPlugin::NextResource() {
+  return plugin_NextResource();
+}
+
+const char* EnigmaPlugin::FirstResource() {
+  return plugin_FirstResource();
+}
+
+bool EnigmaPlugin::ResourceIsFunction() {
+  return plugin_ResourceIsFunction();
+}
+
+int EnigmaPlugin::ResourceArgCountMin() {
+  return plugin_ResourceArgCountMin();
+}
+
+int EnigmaPlugin::ResourceArgCountMax() {
+  return plugin_ResourceArgCountMax();
+}
+
+int EnigmaPlugin::ResourceOverloadCount() {
+  return plugin_ResourceOverloadCount();
+}
+
+const char* EnigmaPlugin::ResourceParameters(int i) {
+  return plugin_ResourceParameters(i);
+}
+
+int EnigmaPlugin::ResourceIsTypeName() {
+  return plugin_ResourceIsTypeName();
+}
+
+int EnigmaPlugin::ResourceIsGlobal() {
+  return plugin_ResourceIsGlobal();
+}
+
+bool EnigmaPlugin::ResourcesAtEnd() {
+  return plugin_ResourcesAtEnd();
 }
 
 void EnigmaPlugin::PrintBuiltins(std::string& fName)
@@ -126,7 +188,7 @@ void EnigmaPlugin::PrintBuiltins(std::string& fName)
     
     currentResource = plugin_NextResource();
   }
-  
+
   std::sort(types.begin(), types.end());
   
   std::ostream out(std::cout.rdbuf());
@@ -137,7 +199,7 @@ void EnigmaPlugin::PrintBuiltins(std::string& fName)
     fb.open(fName.c_str(), std::ios::out);
     out.rdbuf(&fb);
   }
-  
+
   out << "[Types]" << std::endl;
   for (const std::string& t : types)
     out << t << std::endl;

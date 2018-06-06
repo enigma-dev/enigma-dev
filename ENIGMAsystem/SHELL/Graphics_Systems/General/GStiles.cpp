@@ -15,13 +15,13 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-
 #include "GSprimitives.h"
 #include "GSbackground.h"
 #include "GStextures.h"
 #include "GStiles.h"
 #include "GSmodel.h"
 #include "GStilestruct.h"
+
 #include "Universal_System/depth_draw.h"
 #include "Universal_System/background.h"
 #include "Universal_System/background_internal.h"

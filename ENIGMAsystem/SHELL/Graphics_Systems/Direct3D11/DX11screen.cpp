@@ -15,27 +15,22 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <string>
-#include <cstdio>
 #include "Bridges/General/DX11Context.h"
 #include "Direct3D11Headers.h"
 #include "Graphics_Systems/General/GSbackground.h"
 #include "Graphics_Systems/General/GSscreen.h"
 #include "Graphics_Systems/General/GSd3d.h"
+#include "Graphics_Systems/General/GSmodel.h"
 #include "Graphics_Systems/General/GSmatrix.h"
 #include "Graphics_Systems/General/GStextures.h"
 #include "Graphics_Systems/General/GScolors.h"
-
-using namespace std;
+#include "Graphics_Systems/graphics_mandatory.h"
+#include "Graphics_Systems/General/GScolor_macros.h"
 
 #include "Universal_System/var4.h"
 #include "Universal_System/estring.h"
 #include "Universal_System/background.h"
 #include "Universal_System/background_internal.h"
-
-#define __GETR(x) (((unsigned int)x & 0x0000FF))/255.0
-#define __GETG(x) (((unsigned int)x & 0x00FF00) >> 8)/255.0
-#define __GETB(x) (((unsigned int)x & 0xFF0000) >> 16)/255.0
 
 #include "Universal_System/roomsystem.h"
 #include "Universal_System/instance_system.h"
@@ -44,17 +39,13 @@ using namespace std;
 #include "Platforms/platforms_mandatory.h"
 #include "Platforms/General/PFwindow.h"
 #include "Platforms/General/PFmain.h"
-#include "Graphics_Systems/graphics_mandatory.h"
+
 #include <limits>
+#include <string>
+#include <cstdio>
 
-//Fuck whoever did this to the spec
-#ifndef GL_BGR
-  #define GL_BGR 0x80E0
-#endif
-
+using namespace std;
 using namespace enigma;
-
-#include "../General/GSmodel.h"
 
 namespace enigma_user {
   extern int window_get_width();

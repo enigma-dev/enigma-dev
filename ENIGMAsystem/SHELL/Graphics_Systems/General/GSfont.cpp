@@ -16,26 +16,24 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <cmath>
-#include <string>
-#include <cstdint>
 #include "libEGMstd.h"
-#include "Universal_System/var4.h"
+
 #include "GScolors.h"
 #include "GSfont.h"
 #include "GStextures.h"
 #include "GSprimitives.h"
 #include "GSsprite.h"
 
+#include "Universal_System/var4.h"
 #include "Universal_System/math_consts.h"
 #include "Universal_System/fonts_internal.h"
 #include "Universal_System/sprites.h"
 
-using namespace std;
+#include <cmath>
+#include <string>
+#include <cstdint>
 
-#define __GETR(x) ((x & 0x0000FF))
-#define __GETG(x) ((x & 0x00FF00) >> 8)
-#define __GETB(x) ((x & 0xFF0000) >> 16)
+using namespace std;
 
 namespace enigma {
   static int currentfont = -1;

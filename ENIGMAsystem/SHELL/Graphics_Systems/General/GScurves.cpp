@@ -14,20 +14,13 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
+#include "GScolors.h"
+#include "GScurves.h"
+#include "GSprimitives.h"
 
 #include <stack>
 #include <vector>
 #include <math.h>
-
-#include "GScolors.h"
-#include "GScurves.h"
-//#include "GStextures.h"
-#include "GSprimitives.h"
-
-//#define __GETR(x) (((x & 0x0000FF))/255.0)
-//#define __GETG(x) (((x & 0x00FF00)>>8)/255.0)
-//#define __GETB(x) (((x & 0xFF0000)>>16)/255.0)
-
 
 namespace enigma{
     extern unsigned char currentcolor[4];

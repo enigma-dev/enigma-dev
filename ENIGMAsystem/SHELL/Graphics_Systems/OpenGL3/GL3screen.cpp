@@ -15,8 +15,7 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <string>
-#include <cstdio>
+#include "Graphics_Systems/graphics_mandatory.h"
 #include "Graphics_Systems/General/OpenGLHeaders.h"
 #include "Graphics_Systems/General/GStextures.h"
 #include "Graphics_Systems/General/GStiles.h"
@@ -27,8 +26,6 @@
 #include "Graphics_Systems/General/GSmatrix.h"
 #include "Graphics_Systems/General/GScolors.h"
 #include "Bridges/General/GL3Context.h"
-
-using namespace std;
 
 #include "Universal_System/image_formats.h"
 #include "Universal_System/background_internal.h"
@@ -42,15 +39,14 @@ using namespace std;
 #include "Universal_System/depth_draw.h"
 #include "Platforms/General/PFwindow.h"
 #include "Platforms/platforms_mandatory.h"
-#include "Graphics_Systems/graphics_mandatory.h"
+
+#include <string>
+#include <cstdio>
 #include <limits>
 
-//Fuck whoever did this to the spec
-#ifndef GL_BGR
-  #define GL_BGR 0x80E0
-#endif
-
 //WE SHOULDN'T DO THIS! Don't specify namespaces like this - Harijs
+using namespace std;
+
 using namespace enigma;
 using namespace enigma_user;
 
@@ -184,7 +180,7 @@ void clear_view(float x, float y, float w, float h, float angle, bool showcolor)
   if (showcolor)
   {
     int clearcolor = ((int)background_color) & 0x00FFFFFF;
-    glClearColor(__GETR(clearcolor) / 255.0, __GETG(clearcolor) / 255.0, __GETB(clearcolor) / 255.0, 1);
+    glClearColor(COL_GET_R(clearcolor) / 255.0, COL_GET_G(clearcolor) / 255.0, COL_GET_B(clearcolor) / 255.0, 1);
     clear_bits |= GL_COLOR_BUFFER_BIT;
   }
 
@@ -351,6 +347,7 @@ void screen_init()
   }
 
   glDisable(GL_DEPTH_TEST);
+  glDisable(GL_CULL_FACE);
   glEnable(GL_BLEND);
   glEnable(GL_SCISSOR_TEST);
 

@@ -1,8 +1,4 @@
-/** Copyright (C) 2017 Faissal I. Bensefia
-*** Copyright (C) 2008-2011 IsmAvatar <cmagicj@nni.com>, Josh Ventura
-*** Copyright (C) 2013 Robert B. Colton
-*** Copyright (C) 2014 Seth N. Hetu
-*** Copyright (C) 2015 Harijs Grinbergs
+/** Copyright (C) 2018 Robert B. Colton
 ***
 *** This file is a part of the ENIGMA Development Environment.
 ***
@@ -19,28 +15,13 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <string>
-using std::string;
+#ifndef ENIGMA_PROTO2ES_H
+#define ENIGMA_PROTO2ES_H
 
-namespace enigma {
-  void input_push();
-}
+#include "game.pb.h"
 
-#include "../General/PFwindow.h"
-#include "../General/PFmain.h"
+#include "backend/EnigmaStruct.h"
 
-#include <string>
-using std::string;
+EnigmaStruct* Proto2ES(buffers::Game* protobuf);
 
-void Sleep(int ms);
-
-namespace enigma_user {
-  static inline void sleep(int ms) { Sleep(ms); }
-}
-
-namespace enigma {
-  extern string* parameters;
-  extern int parameterc;
-  extern int current_room_speed;
-  //void writename(char* x);
-}
+#endif // ENIGMA_PROTO2ES_H
