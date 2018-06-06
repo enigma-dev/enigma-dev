@@ -24,9 +24,7 @@
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
 
-#define __GETR(x) ((x & 0x0000FF))/255.0
-#define __GETG(x) ((x & 0x00FF00)>>8)/255.0
-#define __GETB(x) ((x & 0xFF0000)>>16)/255.0
+#include "Graphics_Systems/General/GScolor_macros.h"
 
 namespace enigma {
   bool d3dMode = false;
@@ -135,7 +133,7 @@ void d3d_set_fog_hint(int mode) {
 void d3d_set_fog_color(int color)
 {
 	d3dmgr->SetRenderState(D3DRS_FOGCOLOR,
-                    D3DCOLOR_COLORVALUE(__GETR(color), __GETG(color), __GETB(color), 1.0f)); // Highest 8 bits are not used.
+                    D3DCOLOR_COLORVALUE(COL_GET_R(color), COL_GET_G(color), COL_GET_B(color), 1.0f)); // Highest 8 bits are not used.
 }
 
 void d3d_set_fog_start(double start)
@@ -272,7 +270,7 @@ class d3d_lights
 
 		ZeroMemory(&light, sizeof(light));    // clear out the light struct for use
 		light.Type = D3DLIGHT_DIRECTIONAL;    // make the light type 'directional light'
-		light.Diffuse = D3DXCOLOR(__GETR(col), __GETR(col), __GETB(col), 1.0f);    // set the light's color
+		light.Diffuse = D3DXCOLOR(COL_GET_R(col), COL_GET_R(col), COL_GET_B(col), 1.0f);    // set the light's color
 		light.Direction = D3DXVECTOR3(dx, dy, dz);
 
 		d3dmgr->SetLight(ms, &light);    // send the light struct properties to nth light
@@ -317,7 +315,7 @@ class d3d_lights
 
 		ZeroMemory(&light, sizeof(light));    // clear out the light struct for use
 		light.Type = D3DLIGHT_POINT;    // make the light type 'directional light'
-		light.Diffuse = D3DXCOLOR(__GETR(col), __GETG(col), __GETB(col), 1.0f);    // set the light's color
+		light.Diffuse = D3DXCOLOR(COL_GET_R(col), COL_GET_G(col), COL_GET_B(col), 1.0f);    // set the light's color
 		light.Position = D3DXVECTOR3(x, y, z);
 		light.Range = range;
 		light.Attenuation0 = 1.0f;    // no constant inverse attenuation
@@ -419,7 +417,7 @@ void d3d_light_shininess(int facemode, int shine)
 
 void d3d_light_define_ambient(int col)
 {
-	d3dmgr->SetRenderState(D3DRS_AMBIENT, D3DCOLOR_COLORVALUE(__GETR(col), __GETG(col), __GETB(col), 1));
+	d3dmgr->SetRenderState(D3DRS_AMBIENT, D3DCOLOR_COLORVALUE(COL_GET_R(col), COL_GET_G(col), COL_GET_B(col), 1));
 }
 
 bool d3d_light_enable(int id, bool enable)
