@@ -18,14 +18,11 @@
 #include <math.h>
 #include <string>
 #include "OpenGLHeaders.h"
-#include "../General/GScolors.h"
+#include "Graphics_Systems/General/GScolors.h"
+#include "Graphics_Systems/General/GScolor_macros.h"
 
 using namespace std;
 #include "Universal_System/fontstruct.h"
-
-#define __GETR(x) ((x & 0x0000FF))
-#define __GETG(x) ((x & 0x00FF00) >> 8)
-#define __GETB(x) ((x & 0xFF0000) >> 16)
 
 namespace enigma {
   static int currentfont = -1;
@@ -352,17 +349,17 @@ void draw_text_transformed_color(gs_scalar x, gs_scalar y, string str, gs_scalar
         const float lx = xx + g.y * svy;
         const float ly = yy + g.y * cvy;
 
-        glColor4ub(__GETR(hcol1),__GETG(hcol1),__GETB(hcol1),char(a*255));
+        glColor4ub(COL_GET_R(hcol1),COL_GET_G(hcol1),COL_GET_B(hcol1),char(a*255));
         glTexCoord2f(g.tx,  g.ty);
           glVertex2f(lx, ly);
-        glColor4ub(__GETR(hcol2),__GETG(hcol2),__GETB(hcol2),char(a*255));
+        glColor4ub(COL_GET_R(hcol2),COL_GET_G(hcol2),COL_GET_B(hcol2),char(a*255));
         glTexCoord2f(g.tx2, g.ty);
           glVertex2f(lx + w * cvx, ly - w * svx);
 
-        glColor4ub(__GETR(hcol3),__GETG(hcol3),__GETB(hcol3),char(a*255));
+        glColor4ub(COL_GET_R(hcol3),COL_GET_G(hcol3),COL_GET_B(hcol3),char(a*255));
         glTexCoord2f(g.tx2, g.ty2);
           glVertex2f(xx + w * cvx + g.y2 * svy, yy - w * svx + g.y2 * cvy);
-        glColor4ub(__GETR(hcol4),__GETG(hcol4),__GETB(hcol4),char(a*255));
+        glColor4ub(COL_GET_R(hcol4),COL_GET_G(hcol4),COL_GET_B(hcol4),char(a*255));
         glTexCoord2f(g.tx,  g.ty2);
           glVertex2f(xx + g.y2 * svy,  yy + g.y2 * cvy);
 
@@ -429,17 +426,17 @@ void draw_text_ext_transformed_color(gs_scalar x, gs_scalar y, string str, int s
         const float lx = xx + g.y * svy;
         const float ly = yy + g.y * cvy;
 
-        glColor4ub(__GETR(hcol1),__GETG(hcol1),__GETB(hcol1),char(a*255));
+        glColor4ub(COL_GET_R(hcol1),COL_GET_G(hcol1),COL_GET_B(hcol1),char(a*255));
         glTexCoord2f(g.tx,  g.ty);
           glVertex2f(lx, ly);
-        glColor4ub(__GETR(hcol2),__GETG(hcol2),__GETB(hcol2),char(a*255));
+        glColor4ub(COL_GET_R(hcol2),COL_GET_G(hcol2),COL_GET_B(hcol2),char(a*255));
         glTexCoord2f(g.tx2, g.ty);
           glVertex2f(lx + wi * cvx, ly - wi * svx);
 
-        glColor4ub(__GETR(hcol3),__GETG(hcol3),__GETB(hcol3),char(a*255));
+        glColor4ub(COL_GET_R(hcol3),COL_GET_G(hcol3),COL_GET_B(hcol3),char(a*255));
         glTexCoord2f(g.tx2, g.ty2);
           glVertex2f(xx + wi * cvx + g.y2 * svy, yy - wi * svx + g.y2 * cvy);
-        glColor4ub(__GETR(hcol4),__GETG(hcol4),__GETB(hcol4),char(a*255));
+        glColor4ub(COL_GET_R(hcol4),COL_GET_G(hcol4),COL_GET_B(hcol4),char(a*255));
         glTexCoord2f(g.tx,  g.ty2);
           glVertex2f(xx + g.y2 * svy,  yy + g.y2 * cvy);
 
@@ -484,19 +481,19 @@ void draw_text_color(gs_scalar x, gs_scalar y, string str, int c1, int c2, int c
       hcol2 = merge_color(c1,c2,tx2/sw);
       hcol3 = merge_color(c4,c3,tx1/sw);
       hcol4 = merge_color(c4,c3,tx2/sw);
-        glColor4ub(__GETR(hcol1),__GETG(hcol1),__GETB(hcol1),char(a*255));
+        glColor4ub(COL_GET_R(hcol1),COL_GET_G(hcol1),COL_GET_B(hcol1),char(a*255));
         glTexCoord2f(g.tx,  g.ty);
           glVertex2i(xx + g.x,  yy + g.y);
 
-        glColor4ub(__GETR(hcol2),__GETG(hcol2),__GETB(hcol2),char(a*255));
+        glColor4ub(COL_GET_R(hcol2),COL_GET_G(hcol2),COL_GET_B(hcol2),char(a*255));
         glTexCoord2f(g.tx2, g.ty);
           glVertex2i(xx + g.x2, yy + g.y);
 
-        glColor4ub(__GETR(hcol3),__GETG(hcol3),__GETB(hcol3),char(a*255));
+        glColor4ub(COL_GET_R(hcol3),COL_GET_G(hcol3),COL_GET_B(hcol3),char(a*255));
         glTexCoord2f(g.tx2, g.ty2);
           glVertex2i(xx + g.x2, yy + g.y2);
 
-        glColor4ub(__GETR(hcol4),__GETG(hcol4),__GETB(hcol4),char(a*255));
+        glColor4ub(COL_GET_R(hcol4),COL_GET_G(hcol4),COL_GET_B(hcol4),char(a*255));
         glTexCoord2f(g.tx,  g.ty2);
           glVertex2i(xx + g.x,  yy + g.y2);
       xx += g.xs;
@@ -542,16 +539,16 @@ void draw_text_ext_color(gs_scalar x, gs_scalar y,string str, gs_scalar sep, gs_
       hcol2 = merge_color(c1,c2,double(width+g.xs)/sw);
       hcol3 = merge_color(c4,c3,double(width)/sw);
       hcol4 = merge_color(c4,c3,double(width+g.xs)/sw);
-        glColor4ub(__GETR(hcol1),__GETG(hcol1),__GETB(hcol1),char(a*255));
+        glColor4ub(COL_GET_R(hcol1),COL_GET_G(hcol1),COL_GET_B(hcol1),char(a*255));
         glTexCoord2f(g.tx,  g.ty);
           glVertex2i(xx + g.x,  yy + g.y);
-        glColor4ub(__GETR(hcol2),__GETG(hcol2),__GETB(hcol2),char(a*255));
+        glColor4ub(COL_GET_R(hcol2),COL_GET_G(hcol2),COL_GET_B(hcol2),char(a*255));
         glTexCoord2f(g.tx2, g.ty);
           glVertex2i(xx + g.x2, yy + g.y);
-        glColor4ub(__GETR(hcol3),__GETG(hcol3),__GETB(hcol3),char(a*255));
+        glColor4ub(COL_GET_R(hcol3),COL_GET_G(hcol3),COL_GET_B(hcol3),char(a*255));
         glTexCoord2f(g.tx2, g.ty2);
           glVertex2i(xx + g.x2, yy + g.y2);
-        glColor4ub(__GETR(hcol4),__GETG(hcol4),__GETB(hcol4),char(a*255));
+        glColor4ub(COL_GET_R(hcol4),COL_GET_G(hcol4),COL_GET_B(hcol4),char(a*255));
         glTexCoord2f(g.tx,  g.ty2);
           glVertex2i(xx + g.x,  yy + g.y2);
       xx += g.xs;

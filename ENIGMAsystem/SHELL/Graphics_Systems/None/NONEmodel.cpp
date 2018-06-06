@@ -17,29 +17,28 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 #include "NONEModelStruct.h"
-#include "../General/GSd3d.h"
-#include "../General/GStextures.h"
-#include "../General/GSmatrix.h" //For d3d_transform_add_translation
-#include "../General/GSmodel.h"
+
+#include "Graphics_Systems/General/GSd3d.h"
+#include "Graphics_Systems/General/GStextures.h"
+#include "Graphics_Systems/General/GSmatrix.h" //For d3d_transform_add_translation
+#include "Graphics_Systems/General/GSmodel.h"
+#include "Graphics_Systems/General/GScolor_macros.h"
+
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-
-
-using namespace std;
-
-#define __GETR(x) ((x & 0x0000FF))/255.0
-#define __GETG(x) ((x & 0x00FF00)>>8)/255.0
-#define __GETB(x) ((x & 0xFF0000)>>16)/255.0
+#include "Universal_System/fileio.h"
+#include "Universal_System/estring.h"
 
 #include <iostream>
 #include <map>
 #include <list>
 #include <vector>
-#include "Universal_System/fileio.h"
-#include "Universal_System/estring.h"
+
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+using namespace std;
 
 vector<Mesh*> meshes(0);
 

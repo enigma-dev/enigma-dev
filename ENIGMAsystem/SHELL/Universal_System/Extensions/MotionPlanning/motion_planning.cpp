@@ -251,9 +251,6 @@ bool mp_grid_path(unsigned id,unsigned pathid,double xstart,double ystart,double
 }
 
 #include "Universal_System/var4.h"
-#define __GETR(x) (((x & 0x0000FF)))
-#define __GETG(x) (((x & 0x00FF00)>>8))
-#define __GETB(x) (((x & 0xFF0000)>>16))
 
 namespace enigma_user
 {
@@ -337,4 +334,3 @@ void mp_grid_draw(unsigned int id, unsigned int mode, unsigned int color_mode)
 }
 
 }
-

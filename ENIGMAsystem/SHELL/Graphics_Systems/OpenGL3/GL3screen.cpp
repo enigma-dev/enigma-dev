@@ -184,7 +184,7 @@ void clear_view(float x, float y, float w, float h, float angle, bool showcolor)
   if (showcolor)
   {
     int clearcolor = ((int)background_color) & 0x00FFFFFF;
-    glClearColor(__GETR(clearcolor) / 255.0, __GETG(clearcolor) / 255.0, __GETB(clearcolor) / 255.0, 1);
+    glClearColor(COL_GET_R(clearcolor) / 255.0, COL_GET_G(clearcolor) / 255.0, COL_GET_B(clearcolor) / 255.0, 1);
     clear_bits |= GL_COLOR_BUFFER_BIT;
   }
 
