@@ -21,7 +21,8 @@
 #include "Graphics_Systems/General/GStiles.h"
 #include "Graphics_Systems/General/GSscreen.h"
 #include "Graphics_Systems/General/GSd3d.h"
-#include "Graphics_Systems/General/GSmodel.h"
+#include "Graphics_Systems/General/GSvertex.h"
+#include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GSmatrix.h"
 #include "Graphics_Systems/General/GStextures.h"
 #include "Graphics_Systems/General/GScolors.h"
@@ -145,7 +146,7 @@ static inline int draw_tiles()
     if (dit->second.tiles.size())
     {
       for (auto &t : tile_layer_metadata[dit->second.tiles[0].depth]){
-        //enigma_user::d3d_model_part_draw(tile_layer_models[dit->second.tiles[0].depth], t[0], t[1], t[2]);
+        enigma_user::vertex_submit(tile_layer_buffers[dit->second.tiles[0].depth], enigma_user::pr_trianglelist, t[0], t[1], t[2]);
       }
     }
     enigma::inst_iter* push_it = enigma::instance_event_iterator;

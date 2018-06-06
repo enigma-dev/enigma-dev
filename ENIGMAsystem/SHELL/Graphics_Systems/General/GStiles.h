@@ -22,7 +22,7 @@
 #include <map>
 #include <vector>
 
-extern std::map<int,int> tile_layer_models;
+extern std::map<int,int> tile_layer_buffers;
 extern std::map<int,std::vector<std::vector<int> > > tile_layer_metadata;
 
 namespace enigma_user
