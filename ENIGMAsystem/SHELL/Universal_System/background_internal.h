@@ -92,8 +92,6 @@ namespace enigma
     enigma::background *bck2d = enigma::backgroundstructarray[back];
 #endif
 
-#define __GETR(x) ((x & 0x0000FF))
-#define __GETG(x) ((x & 0x00FF00) >> 8)
-#define __GETB(x) ((x & 0xFF0000) >> 16)
+#include "Graphics_Systems/General/GScolor_macros.h"
 
 #endif //ENIGMA_BACKGROUND_INTERNAL_H
