@@ -33,19 +33,19 @@ namespace enigma_user
 
 void draw_clear_alpha(int col, float alpha)
 {
-	d3dmgr->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_COLORVALUE(__GETR(col), __GETG(col), __GETB(col), alpha), 1.0f, 0);
+	d3dmgr->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_COLORVALUE(COL_GET_R(col), COL_GET_G(col), COL_GET_B(col), alpha), 1.0f, 0);
 }
 
 void draw_clear(int col)
 {
-	d3dmgr->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(__GETR(col), __GETG(col), __GETB(col)), 1.0f, 0);
+	d3dmgr->Clear(0, NULL, D3DCLEAR_TARGET, D3DCOLOR_XRGB(COL_GET_R(col), COL_GET_G(col), COL_GET_B(col)), 1.0f, 0);
 }
 
 void draw_set_color(int col)
 {
-	enigma::currentcolor[0] = __GETR(col);
-	enigma::currentcolor[1] = __GETG(col);
-	enigma::currentcolor[2] = __GETB(col);
+	enigma::currentcolor[0] = COL_GET_R(col);
+	enigma::currentcolor[1] = COL_GET_G(col);
+	enigma::currentcolor[2] = COL_GET_B(col);
 }
 
 void draw_set_color_rgb(unsigned char red,unsigned char green,unsigned char blue)
@@ -57,7 +57,7 @@ void draw_set_color_rgb(unsigned char red,unsigned char green,unsigned char blue
 
 void draw_set_alpha(float alpha)
 {
-	enigma::currentcolor[3] = bind_alpha(alpha);
+	enigma::currentcolor[3] = CLAMP_ALPHA(alpha);
 }
 
 void draw_set_color_rgba(unsigned char red,unsigned char green,unsigned char blue,float alpha)
@@ -65,7 +65,7 @@ void draw_set_color_rgba(unsigned char red,unsigned char green,unsigned char blu
 	enigma::currentcolor[0] = red;
 	enigma::currentcolor[1] = green;
 	enigma::currentcolor[2] = blue;
-	enigma::currentcolor[3] = bind_alpha(alpha);
+	enigma::currentcolor[3] = CLAMP_ALPHA(alpha);
 }
 
 void draw_set_color_write_enable(bool red, bool green, bool blue, bool alpha)

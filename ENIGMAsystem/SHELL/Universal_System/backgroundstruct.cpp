@@ -181,9 +181,9 @@ int background_create_color(unsigned w, unsigned h, int col, bool preload) {
   unsigned char *surfbuf = new unsigned char[sz * 4];
 
   for (unsigned int i = 0; i + 3 < sz * 4; i += 4) {
-    surfbuf[i] = __GETR(col);
-    surfbuf[i + 1] = __GETG(col);
-    surfbuf[i + 2] = __GETB(col);
+    surfbuf[i] = COL_GET_R(col);
+    surfbuf[i + 1] = COL_GET_G(col);
+    surfbuf[i + 2] = COL_GET_B(col);
     surfbuf[i + 3] = 255;
   }
 

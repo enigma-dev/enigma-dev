@@ -1,20 +1,18 @@
 #ifndef ENIGMA_GSCOLOR_MACROS_H
 #define ENIGMA_GSCOLOR_MACROS_H
 
-#define __GETR(x) ((x & 0x0000FF))
-#define __GETG(x) ((x & 0x00FF00)>>8)
-#define __GETB(x) ((x & 0xFF0000)>>16)
+// 32-bit alpha-enabled color macros used for color constants and
+// swizzling the color components for model and vertex functions
+// they are combined with the alpha component to minimize the bandwidth
+// necessary to send vertex data to the GPU
+#define COL_GET_R(x) ((x & 0x000000FF))
+#define COL_GET_G(x) ((x & 0x0000FF00)>>8)
+#define COL_GET_B(x) ((x & 0x00FF0000)>>16)
+#define COL_GET_A(x) ((x & 0xFF000000)>>24)
 
-// this is Goombert's abomination
-#define __GETR32(x) ((x & 0x000000FF))
-#define __GETG32(x) ((x & 0x0000FF00)>>8)
-#define __GETB32(x) ((x & 0x00FF0000)>>16)
-#define __GETA32(x) ((x & 0xFF000000)>>24)
-
-#define __GETRf(x) fmod(__GETR(x),256)
-#define __GETGf(x) fmod(x/256,256)
-#define __GETBf(x) fmod(x/65536,256)*
-
-#define bind_alpha(alpha) (alpha>1?255:(alpha<0?0:(unsigned char)(alpha*255)))
+// clamps a floating-point alpha (from 0 to 1) between 0 and 255
+#define CLAMP_ALPHA(alpha) (alpha>1?255:(alpha<0?0:(unsigned char)(alpha*255)))
+// clamps a floating-point alpha (from 0 to 1) between 0 and 1
+#define CLAMP_ALPHAF(alpha) (alpha <= 0 ? 0: alpha >= 1? 1: alpha)
 
 #endif

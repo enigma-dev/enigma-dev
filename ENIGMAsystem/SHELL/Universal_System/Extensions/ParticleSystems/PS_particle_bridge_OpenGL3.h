@@ -23,6 +23,7 @@
 #include "Graphics_Systems/General/GStextures.h"
 #include "Graphics_Systems/General/GLTextureStruct.h"
 #include "Graphics_Systems/General/GScolors.h"
+#include "Graphics_Systems/General/GScolor_macros.h"
 #include "Graphics_Systems/General/GSd3d.h"
 #include "PS_particle_instance.h"
 #include "PS_particle_sprites.h"
@@ -128,9 +129,6 @@ namespace enigma {
       glLinkProgram(shader_program);
       glUseProgram(shader_program);
     }
-    inline int __GETR(int x) {return x & 0x0000FF;}
-    inline int __GETG(int x) {return (x & 0x00FF00) >> 8;}
-    inline int __GETB(int x) {return (x & 0xFF0000) >> 16;}
     double wiggle;
     int subimage_index;
     double x_offset;
@@ -294,7 +292,7 @@ namespace enigma {
           points.push_back(v3y);
           points.push_back(v4x);
           points.push_back(v4y);
-          const GLfloat r = __GETR(color)/255.0, g = __GETG(color)/255.0, b = __GETB(color)/255.0;
+          const GLfloat r = COL_GET_R(color)/255.0, g = COL_GET_G(color)/255.0, b = COL_GET_B(color)/255.0;
           const GLfloat a = alpha/255.0;
           colors.push_back(r);
           colors.push_back(g);
@@ -448,4 +446,3 @@ namespace enigma {
 }
 
 #endif // ENIGMA_PS_PARTICLE_BRIDGE_OPENGL3_H
-

@@ -22,6 +22,7 @@
 #include "Graphics_Systems/General/GStextures.h"
 #include "Graphics_Systems/General/GLTextureStruct.h"
 #include "Graphics_Systems/General/GScolors.h"
+#include "Graphics_Systems/General/GScolor_macros.h"
 #include "PS_particle_instance.h"
 #include "PS_particle_sprites.h"
 #include <vector>
@@ -39,14 +40,11 @@
 namespace enigma {
   namespace particle_bridge {
     void initialize_particle_bridge() {} // Do nothing, nothing to initialize.
-    inline int __GETR(int x) {return x & 0x0000FF;}
-    inline int __GETG(int x) {return (x & 0x00FF00) >> 8;}
-    inline int __GETB(int x) {return (x & 0xFF0000) >> 16;}
     double wiggle;
     int subimage_index;
     double x_offset;
     double y_offset;
-    
+
     static void draw_particle(particle_instance* it)
     {
       int color = it->color;
@@ -106,7 +104,7 @@ namespace enigma {
               glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
           }
 
-          glColor4ub(__GETR(color),__GETG(color),__GETB(color), alpha);
+          glColor4ub(COL_GET_R(color),COL_GET_G(color),COL_GET_B(color), alpha);
 
           const double rot = rot_degrees*M_PI/180.0;
 
@@ -149,7 +147,7 @@ namespace enigma {
         enigma_user::texture_set(textureStructs[ps->texture]->gltex);
 
         glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-        glColor4ub(__GETR(color),__GETG(color),__GETB(color), alpha);
+        glColor4ub(COL_GET_R(color),COL_GET_G(color),COL_GET_B(color), alpha);
 
         const double rot = rot_degrees*M_PI/180.0;
 
@@ -182,7 +180,7 @@ namespace enigma {
         glEnd();
       }
     }
-    
+
     void draw_particles(std::vector<particle_instance>& pi_list, bool oldtonew, double a_wiggle, int a_subimage_index,
         double a_x_offset, double a_y_offset)
     {
@@ -222,4 +220,3 @@ namespace enigma {
 }
 
 #endif // ENIGMA_PS_PARTICLE_BRIDGE_OPENGL1_H
-

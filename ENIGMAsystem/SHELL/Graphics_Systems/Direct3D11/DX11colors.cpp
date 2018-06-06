@@ -33,9 +33,9 @@ void draw_clear_alpha(int col, float alpha)
 	float color[4];
 
 	// Setup the color to clear the buffer to.
-	color[0] = __GETR(col)/255.0;
-	color[1] = __GETG(col)/255.0;
-	color[2] = __GETB(col)/255.0;
+	color[0] = COL_GET_R(col)/255.0;
+	color[1] = COL_GET_G(col)/255.0;
+	color[2] = COL_GET_B(col)/255.0;
 	color[3] = alpha;
 
 	// Clear the back buffer.
@@ -47,9 +47,9 @@ void draw_clear(int col)
 	float color[4];
 
 	// Setup the color to clear the buffer to.
-	color[0] = __GETR(col)/255.0;
-	color[1] = __GETG(col)/255.0;
-	color[2] = __GETB(col)/255.0;
+	color[0] = COL_GET_R(col)/255.0;
+	color[1] = COL_GET_G(col)/255.0;
+	color[2] = COL_GET_B(col)/255.0;
 	color[3] = 1;
 
 	// Clear the back buffer.
@@ -58,9 +58,9 @@ void draw_clear(int col)
 
 void draw_set_color(int col)
 {
-	enigma::currentcolor[0] = __GETR(col);
-	enigma::currentcolor[1] = __GETG(col);
-	enigma::currentcolor[2] = __GETB(col);
+	enigma::currentcolor[0] = COL_GET_R(col);
+	enigma::currentcolor[1] = COL_GET_G(col);
+	enigma::currentcolor[2] = COL_GET_B(col);
 }
 
 void draw_set_color_rgb(unsigned char red,unsigned char green,unsigned char blue)
@@ -72,7 +72,7 @@ void draw_set_color_rgb(unsigned char red,unsigned char green,unsigned char blue
 
 void draw_set_alpha(float alpha)
 {
-	enigma::currentcolor[3] = bind_alpha(alpha);
+	enigma::currentcolor[3] = CLAMP_ALPHA(alpha);
 }
 
 void draw_set_color_rgba(unsigned char red,unsigned char green,unsigned char blue,float alpha)
@@ -80,7 +80,7 @@ void draw_set_color_rgba(unsigned char red,unsigned char green,unsigned char blu
 	enigma::currentcolor[0] = red;
 	enigma::currentcolor[1] = green;
 	enigma::currentcolor[2] = blue;
-	enigma::currentcolor[3] = bind_alpha(alpha);
+	enigma::currentcolor[3] = CLAMP_ALPHA(alpha);
 }
 
 void draw_set_color_write_enable(bool red, bool green, bool blue, bool alpha)

@@ -15,24 +15,21 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "../General/OpenGLHeaders.h"
-#include "../General/GSd3d.h"
-#include "../General/GSmatrix.h"
-#include "../General/GSmath.h"
 #include "GLSLshader.h"
+#include "GL3shader.h"
+#include "Graphics_Systems/General/OpenGLHeaders.h"
+#include "Graphics_Systems/General/GSd3d.h"
+#include "Graphics_Systems/General/GSmatrix.h"
+#include "Graphics_Systems/General/GSmath.h"
+#include "Graphics_Systems/General/GScolor_macros.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
 #include "Bridges/General/GL3Context.h"
-#include "GL3shader.h"
+
 #include <math.h>
+#include <floatcomp.h>
 
 using namespace std;
-
-#define __GETR(x) ((x & 0x0000FF))/255.0
-#define __GETG(x) ((x & 0x00FF00)>>8)/255.0
-#define __GETB(x) ((x & 0xFF0000)>>16)/255.0
-
-#include <floatcomp.h>
 
 namespace enigma {
   bool d3dMode = false;
@@ -393,9 +390,9 @@ class d3d_lights
       lights[id].position[1] = -dy;
       lights[id].position[2] = -dz;
       lights[id].position[3] = 0.0;
-      lights[id].diffuse[0] = __GETR(col);
-      lights[id].diffuse[1] = __GETG(col);
-      lights[id].diffuse[2] = __GETB(col);
+      lights[id].diffuse[0] = COL_GET_R(col);
+      lights[id].diffuse[1] = COL_GET_G(col);
+      lights[id].diffuse[2] = COL_GET_B(col);
       lights[id].diffuse[3] = 1.0f;
       lights[id].update = true;
       lightsource_update();
@@ -416,9 +413,9 @@ class d3d_lights
       lights[id].position[1] = y;
       lights[id].position[2] = z;
       lights[id].position[3] = range;
-      lights[id].diffuse[0] = __GETR(col);
-      lights[id].diffuse[1] = __GETG(col);
-      lights[id].diffuse[2] = __GETB(col);
+      lights[id].diffuse[0] = COL_GET_R(col);
+      lights[id].diffuse[1] = COL_GET_G(col);
+      lights[id].diffuse[2] = COL_GET_B(col);
       lights[id].diffuse[3] = 1.0f;
       lights[id].specular[0] = 0.0f;
       lights[id].specular[1] = 0.0f;
@@ -517,9 +514,9 @@ bool d3d_light_set_ambient(int id, int r, int g, int b, double a)
 
 void d3d_light_define_ambient(int col)
 {
-  enigma::d3d_lighting.global_ambient_color[0] = __GETR(col);
-  enigma::d3d_lighting.global_ambient_color[1] = __GETG(col);
-  enigma::d3d_lighting.global_ambient_color[2] = __GETB(col);
+  enigma::d3d_lighting.global_ambient_color[0] = COL_GET_R(col);
+  enigma::d3d_lighting.global_ambient_color[1] = COL_GET_G(col);
+  enigma::d3d_lighting.global_ambient_color[2] = COL_GET_B(col);
   enigma::d3d_lighting.light_update();
 }
 

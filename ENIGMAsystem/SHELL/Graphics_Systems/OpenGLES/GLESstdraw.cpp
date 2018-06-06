@@ -16,13 +16,12 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <math.h>
-#include "OpenGLHeaders.h"
-#include <stdio.h>
 
-#define __GETR(x) ((x & 0x0000FF))
-#define __GETG(x) ((x & 0x00FF00) >> 8)
-#define __GETB(x) ((x & 0xFF0000) >> 16)
+#include "OpenGLHeaders.h"
+#include "Graphics_Systems/General/GScolor_macros.h"
+
+#include <math.h>
+#include <stdio.h>
 
 namespace enigma{
 float circleprecision=24;
@@ -56,7 +55,7 @@ int draw_point_color(gs_scalar x, gs_scalar y, int col)
 {
 	untexture();
 	/*glPushAttrib(GL_CURRENT_BIT);
-	glColor4ub(__GETR(col),__GETG(col),__GETB(col),enigma::currentcolor[3]);
+	glColor4ub(COL_GET_R(col),COL_GET_G(col),COL_GET_B(col),enigma::currentcolor[3]);
 	glBegin(GL_POINTS);
 	glVertex2f(x,y);
 	glEnd();
@@ -91,9 +90,9 @@ int draw_line_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, int 
 {
 	untexture();
 	/*glBegin(GL_LINES);
-    glColor4ub(__GETR(c1),__GETG(c1),__GETB(c1),enigma::currentcolor[3]);
+    glColor4ub(COL_GET_R(c1),COL_GET_G(c1),COL_GET_B(c1),enigma::currentcolor[3]);
       glVertex2f(x1,y1);
-    glColor4ub(__GETR(c2),__GETG(c2),__GETB(c2),enigma::currentcolor[3]);
+    glColor4ub(COL_GET_R(c2),COL_GET_G(c2),COL_GET_B(c2),enigma::currentcolor[3]);
       glVertex2f(x2,y2);
 	glEnd();
 	glColor4ubv(enigma::currentcolor); OPENGLES */
@@ -105,9 +104,9 @@ int draw_line_width_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2
 	/*glPushAttrib(GL_LINE_BIT);
     glLineWidth(width);
     glBegin(GL_LINES);
-      glColor4ub(__GETR(c1),__GETG(c1),__GETB(c1),enigma::currentcolor[3]);
+      glColor4ub(COL_GET_R(c1),COL_GET_G(c1),COL_GET_B(c1),enigma::currentcolor[3]);
       glVertex2f(x1,y1);
-      glColor4ub(__GETR(c2),__GETG(c2),__GETB(c2),enigma::currentcolor[3]);
+      glColor4ub(COL_GET_R(c2),COL_GET_G(c2),COL_GET_B(c2),enigma::currentcolor[3]);
       glVertex2f(x2,y2);
     glEnd();
 	glPopAttrib();
@@ -166,13 +165,13 @@ int draw_rectangle_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2,
 {
 	untexture();
 	/*glBegin(outline?GL_LINE_LOOP:GL_QUADS);
-    glColor4ub(__GETR(c1),__GETG(c1),__GETB(c1),enigma::currentcolor[3]);
+    glColor4ub(COL_GET_R(c1),COL_GET_G(c1),COL_GET_B(c1),enigma::currentcolor[3]);
       glVertex2f(x1,y1);
-    glColor4ub(__GETR(c2),__GETG(c2),__GETB(c2),enigma::currentcolor[3]);
+    glColor4ub(COL_GET_R(c2),COL_GET_G(c2),COL_GET_B(c2),enigma::currentcolor[3]);
       glVertex2f(x2,y1);
-    glColor4ub(__GETR(c4),__GETG(c4),__GETB(c4),enigma::currentcolor[3]);
+    glColor4ub(COL_GET_R(c4),COL_GET_G(c4),COL_GET_B(c4),enigma::currentcolor[3]);
       glVertex2f(x2,y2);
-    glColor4ub(__GETR(c3),__GETG(c3),__GETB(c3),enigma::currentcolor[3]);
+    glColor4ub(COL_GET_R(c3),COL_GET_G(c3),COL_GET_B(c3),enigma::currentcolor[3]);
       glVertex2f(x1,y2);
 	glEnd();
 	glColor4ubv(enigma::currentcolor); OPENGLES*/
@@ -234,11 +233,11 @@ int draw_circle_color(gs_scalar x, gs_scalar y, float rad, int c1, int c2, bool 
 	else
 	{
 		glBegin(GL_TRIANGLE_FAN);
-      glColor4ub(__GETR(c1),__GETG(c1),__GETB(c1),enigma::currentcolor[3]);
+      glColor4ub(COL_GET_R(c1),COL_GET_G(c1),COL_GET_B(c1),enigma::currentcolor[3]);
         glVertex2f(x,y);
 	}
 	//Bagan above
-    glColor4ub(__GETR(c2),__GETG(c2),__GETB(c2),enigma::currentcolor[3]);
+    glColor4ub(COL_GET_R(c2),COL_GET_G(c2),COL_GET_B(c2),enigma::currentcolor[3]);
       float pr=2*M_PI/enigma::circleprecision;
       glVertex2f(x+rad,y);
       for(float i=pr;i<2*M_PI;i+=pr)
@@ -277,7 +276,7 @@ int draw_circle_color_perfect(gs_scalar x, gs_scalar y, float rad, int c1, int c
 	/*if(outline)
 	{
 		glBegin(GL_POINTS);
-      glColor4ub(__GETR(c2),__GETG(c2),__GETB(c2),enigma::currentcolor[3]);
+      glColor4ub(COL_GET_R(c2),COL_GET_G(c2),COL_GET_B(c2),enigma::currentcolor[3]);
         gs_scalar r12=rad*M_SQRT1_2;
         for(float xc=0,yc=rad;xc<=r12;xc++)
         {
@@ -295,9 +294,9 @@ int draw_circle_color_perfect(gs_scalar x, gs_scalar y, float rad, int c1, int c
 	else
 	{
 		glBegin(GL_TRIANGLE_FAN);
-      glColor4ub(__GETR(c1),__GETG(c1),__GETB(c1),enigma::currentcolor[3]);
+      glColor4ub(COL_GET_R(c1),COL_GET_G(c1),COL_GET_B(c1),enigma::currentcolor[3]);
         glVertex2f(x,y);
-      glColor4ub(__GETR(c2),__GETG(c2),__GETB(c2),enigma::currentcolor[3]);
+      glColor4ub(COL_GET_R(c2),COL_GET_G(c2),COL_GET_B(c2),enigma::currentcolor[3]);
         glVertex2f(x-rad,y);
         for(float xc=-rad+1;xc<r;xc++)
           glVertex2f(x+xc,y+sqrt(r2-(xc*xc)));
@@ -360,11 +359,11 @@ int draw_ellipse_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, i
 	else
 	{
 		glBegin(GL_TRIANGLE_FAN);
-		glColor4ub(__GETR(c1),__GETG(c1),__GETB(c1),enigma::currentcolor[3]);
+		glColor4ub(COL_GET_R(c1),COL_GET_G(c1),COL_GET_B(c1),enigma::currentcolor[3]);
 		glVertex2f(x,y);
 	}
 
-    glColor4ub(__GETR(c2),__GETG(c2),__GETB(c2),enigma::currentcolor[3]);
+    glColor4ub(COL_GET_R(c2),COL_GET_G(c2),COL_GET_B(c2),enigma::currentcolor[3]);
       glVertex2f(x+hr,0);
     for(float i=pr;i<2*M_PI;i+=pr)
       glVertex2f(x+hr*cos(i),y+vr*sin(i));
@@ -409,11 +408,11 @@ int draw_triangle_color(gs_scalar x1, gs_scalar y1,gs_scalar x2, gs_scalar y2, g
 {
 	untexture();
 	/*glBegin(outline?GL_LINE_LOOP:GL_TRIANGLES);
-	glColor4ub(__GETR(col1),__GETG(col1),__GETB(col1),enigma::currentcolor[3]);
+	glColor4ub(COL_GET_R(col1),COL_GET_G(col1),COL_GET_B(col1),enigma::currentcolor[3]);
 	glVertex2f(x1,y1);
-	glColor4ub(__GETR(col2),__GETG(col2),__GETB(col2),enigma::currentcolor[3]);
+	glColor4ub(COL_GET_R(col2),COL_GET_G(col2),COL_GET_B(col2),enigma::currentcolor[3]);
 	glVertex2f(x2,y2);
-	glColor4ub(__GETR(col3),__GETG(col3),__GETB(col3),enigma::currentcolor[3]);
+	glColor4ub(COL_GET_R(col3),COL_GET_G(col3),COL_GET_B(col3),enigma::currentcolor[3]);
 	glVertex2f(x3,y3);
 	glEnd();
 	glColor4ubv(enigma::currentcolor); OPENGLES*/
@@ -508,7 +507,7 @@ int draw_roundrect_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2,
    /* glBegin(GL_LINES);
     if(outline)
     {
-        glColor4ub(__GETR(col2),__GETG(col2),__GETB(col2),enigma::currentcolor[3]);
+        glColor4ub(COL_GET_R(col2),COL_GET_G(col2),COL_GET_B(col2),enigma::currentcolor[3]);
         glVertex2f(x1,by1);glVertex2f(x1,by2);
         glVertex2f(x2,by1);glVertex2f(x2,by2);
         glVertex2f(bx1,y1);glVertex2f(bx2,y1);
@@ -531,7 +530,7 @@ int draw_roundrect_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2,
     }
     else
     {
-        glColor4ub(__GETR(col2),__GETG(col2),__GETB(col2),enigma::currentcolor[3]);
+        glColor4ub(COL_GET_R(col2),COL_GET_G(col2),COL_GET_B(col2),enigma::currentcolor[3]);
         for(float xc=0,yc=rad;xc<=r12;xc++)
         {
             if(xc*xc+yc*yc>r2) yc--;
@@ -546,9 +545,9 @@ int draw_roundrect_color(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2,
         }
         glEnd();
         glBegin(GL_TRIANGLE_FAN);
-        glColor4ub(__GETR(col1),__GETG(col1),__GETB(col1),enigma::currentcolor[3]);
+        glColor4ub(COL_GET_R(col1),COL_GET_G(col1),COL_GET_B(col1),enigma::currentcolor[3]);
         glVertex2f(x1+(x2-x1)/2,y1+(y2-y1)/2);
-        glColor4ub(__GETR(col2),__GETG(col2),__GETB(col2),enigma::currentcolor[3]);
+        glColor4ub(COL_GET_R(col2),COL_GET_G(col2),COL_GET_B(col2),enigma::currentcolor[3]);
         glVertex2f(x1,by1);
         glVertex2f(bx1,y1);
         glVertex2f(bx2,y1);
@@ -653,7 +652,7 @@ int draw_healthbar(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, float
 	untexture();
 	/*if(showborder)
 	{
-		glColor4ub(__GETR(backcol),__GETG(backcol),__GETB(backcol),enigma::currentcolor[3]);
+		glColor4ub(COL_GET_R(backcol),COL_GET_G(backcol),COL_GET_B(backcol),enigma::currentcolor[3]);
 		glBegin(GL_LINE_LOOP);
       glVertex2f(x1-1,y1-1);
       glVertex2f(x1-1,y2+1);
@@ -665,7 +664,7 @@ int draw_healthbar(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, float
     goto showback_no;
 	}
 	if(showback) {
-		glColor4ub(__GETR(backcol),__GETG(backcol),__GETB(backcol),enigma::currentcolor[3]);
+		glColor4ub(COL_GET_R(backcol),COL_GET_G(backcol),COL_GET_B(backcol),enigma::currentcolor[3]);
 		showback_yes: glRectf(x1,y1,x2,y2);
 	} showback_no:
 
@@ -677,11 +676,11 @@ int draw_healthbar(gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, float
 	}
 
 	const int
-		R = __GETR(mincol),
-		G = __GETG(mincol),
-		B = __GETB(mincol);
+		R = COL_GET_R(mincol),
+		G = COL_GET_G(mincol),
+		B = COL_GET_B(mincol);
 
-	glColor4ub(R+(unsigned char)((__GETR(maxcol)-R)*amount),G+(unsigned char)((__GETG(maxcol)-G)*amount),B+(unsigned char)((__GETB(maxcol)-B)*amount),enigma::currentcolor[3]);
+	glColor4ub(R+(unsigned char)((COL_GET_R(maxcol)-R)*amount),G+(unsigned char)((COL_GET_G(maxcol)-G)*amount),B+(unsigned char)((COL_GET_B(maxcol)-B)*amount),enigma::currentcolor[3]);
 	printf("%d\n",mincol);
 	glRectf(x1,y1,x2,y2);
 	glColor4ubv(enigma::currentcolor);OPENGLES */

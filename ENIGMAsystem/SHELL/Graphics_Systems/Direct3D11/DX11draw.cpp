@@ -17,19 +17,16 @@
 **/
 
 #include <math.h>
-#include "../General/GSprimitives.h"
 #include "Direct3D11Headers.h"
 #include "Bridges/General/DX11Context.h"
 #include "Graphics_Systems/General/GSstdraw.h"
+#include "Graphics_Systems/General/GSprimitives.h"
 #include "Graphics_Systems/General/GScolors.h"
+#include "Graphics_Systems/General/GScolor_macros.h"
 
-#include <stdio.h>
 #include "Universal_System/roomsystem.h"
 
-#define __GETR(x) ((x & 0x0000FF))
-#define __GETG(x) ((x & 0x00FF00) >> 8)
-#define __GETB(x) ((x & 0xFF0000) >> 16)
-
+#include <stdio.h>
 #include <vector>
 using std::vector;
 
@@ -114,4 +111,3 @@ bool fill_complex_polygon(const std::list<PolyVertex>& vertices, int defaultColo
 }
 
 }
-

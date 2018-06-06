@@ -15,28 +15,25 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <cmath>
-#include <cstdlib>
-#include <string>
-using std::string;
-
 #include "Direct3D11Headers.h"
 #include "Bridges/General/DX11Context.h"
 #include "DX11TextureStruct.h"
-#include "../General/GScolors.h"
-#include "../General/GSsprite.h"
-#include "../General/GStextures.h"
-#include "../General/GSprimitives.h"
+#include "Graphics_Systems/General/GScolors.h"
+#include "Graphics_Systems/General/GScolor_macros.h"
+#include "Graphics_Systems/General/GSsprite.h"
+#include "Graphics_Systems/General/GStextures.h"
+#include "Graphics_Systems/General/GSprimitives.h"
 
 #include "Universal_System/nlpo2.h"
 #include "Universal_System/sprites_internal.h"
 #include "Universal_System/instance_system.h"
 #include "Universal_System/graphics_object.h"
 
-#define __GETR(x) ((x & 0x0000FF))
-#define __GETG(x) ((x & 0x00FF00) >> 8)
-#define __GETB(x) ((x & 0xFF0000) >> 16)
+#include <cmath>
+#include <cstdlib>
+#include <string>
 
+using std::string;
 
 #ifdef DEBUG_MODE
   #include "libEGMstd.h"
@@ -81,4 +78,3 @@ void sprite_add_from_screen(int id, int x, int y, int w, int h, bool removeback,
 }
 
 }
-

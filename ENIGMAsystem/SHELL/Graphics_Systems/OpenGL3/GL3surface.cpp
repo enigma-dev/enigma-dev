@@ -16,36 +16,34 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "../General/OpenGLHeaders.h"
-#include "../General/GSscreen.h"
-#include "../General/GSmatrix.h"
 #include "Bridges/General/GL3Context.h"
+
+#include "GL3TextureStruct.h"
+#include "Graphics_Systems/General/OpenGLHeaders.h"
+#include "Graphics_Systems/General/GSscreen.h"
+#include "Graphics_Systems/General/GSmatrix.h"
+#include "Graphics_Systems/General/GScolor_macros.h"
 #include "Graphics_Systems/graphics_mandatory.h"
+#include "Graphics_Systems/General/GSsurface.h"
+#include "Graphics_Systems/General/GLSurfaceStruct.h"
+#include "Graphics_Systems/General/GStextures.h"
 
-using namespace std;
-#include <cstddef>
-#include <iostream>
-#include <cmath>
-#include <unordered_map>
-
-#include <stdio.h> //for file writing (surface_save)
 #include "Universal_System/nlpo2.h"
 #include "Universal_System/sprites_internal.h"
 #include "Universal_System/background_internal.h"
 #include "Collision_Systems/collision_types.h"
 
-#define __GETR(x) (gs_scalar)(((x & 0x0000FF))/255.0)
-#define __GETG(x) (gs_scalar)(((x & 0x00FF00) >> 8)/255.0)
-#define __GETB(x) (gs_scalar)(((x & 0xFF0000) >> 16)/255.0)
+#include <cstddef>
+#include <iostream>
+#include <cmath>
+#include <unordered_map>
+#include <stdio.h> //for file writing (surface_save)
+
+using namespace std;
 
 namespace enigma_user {
   extern int room_width, room_height/*, sprite_idmax*/;
 }
-
-#include "../General/GSsurface.h"
-#include "../General/GLSurfaceStruct.h"
-#include "../General/GStextures.h"
-#include "GL3TextureStruct.h"
 
 #ifdef DEBUG_MODE
   #include <string>

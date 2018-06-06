@@ -16,29 +16,27 @@
 *** You should have received a copy of the GNU General Public License along
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
-#include "../General/GSd3d.h"
-#include "../General/GSmodel.h"
-#include "../General/GSprimitives.h"
+#include "Graphics_Systems/General/GSd3d.h"
+#include "Graphics_Systems/General/GSmodel.h"
+#include "Graphics_Systems/General/GSprimitives.h"
+#include "Graphics_Systems/General/GScolor_macros.h"
+
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
-
-using namespace std;
-
-#define __GETR(x) ((x & 0x0000FF))/255.0
-#define __GETG(x) ((x & 0x00FF00)>>8)/255.0
-#define __GETB(x) ((x & 0xFF0000)>>16)/255.0
+#include "Universal_System/fileio.h"
+#include "Universal_System/estring.h"
 
 #include <iostream>
 #include <map>
 #include <list>
-#include "Universal_System/fileio.h"
-#include "Universal_System/estring.h"
-
 #include <vector>
+
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 using std::vector;
+using namespace std;
 
 namespace enigma
 {

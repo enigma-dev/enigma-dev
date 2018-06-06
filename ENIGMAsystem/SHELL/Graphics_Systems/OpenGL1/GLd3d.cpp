@@ -15,19 +15,16 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include "../General/OpenGLHeaders.h"
-#include "../General/GSd3d.h"
+#include "Graphics_Systems/General/OpenGLHeaders.h"
+#include "Graphics_Systems/General/GSd3d.h"
+#include "Graphics_Systems/General/GScolor_macros.h"
 #include "Universal_System/var4.h"
 #include "Universal_System/roomsystem.h"
+
 #include <math.h>
+#include <floatcomp.h>
 
 using namespace std;
-
-#define __GETR(x) ((x & 0x0000FF))/255.0
-#define __GETG(x) ((x & 0x00FF00)>>8)/255.0
-#define __GETB(x) ((x & 0xFF0000)>>16)/255.0
-
-#include <floatcomp.h>
 
 namespace enigma {
   bool d3dMode = false;
@@ -173,9 +170,9 @@ void d3d_set_fog_hint(int mode) {
 void d3d_set_fog_color(int color)
 {
    GLfloat fog_color[3];
-   fog_color[0] = __GETR(color);
-   fog_color[1] = __GETG(color);
-   fog_color[2] = __GETB(color);
+   fog_color[0] = COL_GET_R(color);
+   fog_color[1] = COL_GET_G(color);
+   fog_color[2] = COL_GET_B(color);
    glFogfv(GL_FOG_COLOR, fog_color);
 }
 
@@ -310,7 +307,7 @@ class d3d_lights
             ind_pos.insert(pair<int,posi>(ms, posi(-dx, -dy, -dz, 0.0f)));
         }
 
-        const float dir[4] = {float(-dx), float(-dy), float(-dz), 0.0f}, color[4] = {float(__GETR(col)), float(__GETG(col)), float(__GETB(col)), 1.0f};
+        const float dir[4] = {float(-dx), float(-dy), float(-dz), 0.0f}, color[4] = {float(COL_GET_R(col)), float(COL_GET_G(col)), float(COL_GET_B(col)), 1.0f};
         glLightfv(GL_LIGHT0+ms, GL_POSITION, dir);
         glLightfv(GL_LIGHT0+ms, GL_DIFFUSE, color);
         light_update_positions();
@@ -342,7 +339,7 @@ class d3d_lights
             light_ind.insert(pair<int,int>(id, ms));
             ind_pos.insert(pair<int,posi>(ms, posi(x, y, z, 1)));
         }
-        const float pos[4] = {(float)x, (float)y, (float)z, 1.0f}, color[4] = {float(__GETR(col)), float(__GETG(col)), float(__GETB(col)), 1.0f},
+        const float pos[4] = {(float)x, (float)y, (float)z, 1.0f}, color[4] = {float(COL_GET_R(col)), float(COL_GET_G(col)), float(COL_GET_B(col)), 1.0f},
             specular[4] = {0.0f, 0.0f, 0.0f, 0.0f}, ambient[4] = {0.0f, 0.0f, 0.0f, 0.0f};
         glLightfv(GL_LIGHT0+ms, GL_POSITION, pos);
         glLightfv(GL_LIGHT0+ms, GL_DIFFUSE, color);
@@ -493,7 +490,7 @@ void d3d_light_shininess(int facemode, int shine)
 
 void d3d_light_define_ambient(int col)
 {
-    float color[4] = {float(__GETR(col)), float(__GETG(col)), float(__GETB(col)), 1.0f};
+    float color[4] = {float(COL_GET_R(col)), float(COL_GET_G(col)), float(COL_GET_B(col)), 1.0f};
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, color);
 }
 

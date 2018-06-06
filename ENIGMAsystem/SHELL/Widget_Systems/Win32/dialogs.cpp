@@ -34,9 +34,7 @@ using namespace std;
 
 #include "../General/WSdialogs.h"
 
-#define __GETR(x) ((x & 0x0000FF))
-#define __GETG(x) ((x & 0x00FF00)>>8)
-#define __GETB(x) ((x & 0xFF0000)>>16)
+#include "Graphics_Systems/General/GScolor_macros.h"
 
 static string gs_cap;
 static string gs_def;
@@ -273,7 +271,7 @@ void show_info(string info, int bgcolor, int left, int top, int width, int heigh
       0, GetSysColorBrush(COLOR_WINDOW), 0, "infodialog" };
     RegisterClass(&wc);
 
-    DWORD flags = WS_VISIBLE | WS_POPUP | WS_SYSMENU | WS_TABSTOP | WS_CLIPCHILDREN; // DS_3DLOOK|DS_CENTER|DS_FIXEDSYS
+    DWORD flags = WS_VISIBLE|WS_POPUP|WS_SYSMENU|WS_TABSTOP|WS_CLIPCHILDREN; // DS_3DLOOK|DS_CENTER|DS_FIXEDSYS
     if (showBorder) {
       flags |= WS_BORDER | WS_DLGFRAME | WS_CAPTION;
     }
@@ -283,7 +281,7 @@ void show_info(string info, int bgcolor, int left, int top, int width, int heigh
     if (stayOnTop) {
       flags |= DS_MODALFRAME; // Same as WS_EX_TOPMOST
     }
-  
+
     parent = CreateWindow("infodialog", TEXT(caption.c_str()),
       flags, left, top, width, height, enigma::hWnd, 0, enigma::hInstance, 0);
 
@@ -297,7 +295,7 @@ void show_info(string info, int bgcolor, int left, int top, int width, int heigh
     }
   }
 
-  enigma::infore = CreateWindowEx(WS_EX_TOPMOST, "RICHEDIT", TEXT("information text"),
+  enigma::infore=CreateWindowEx(WS_EX_TOPMOST,"RICHEDIT",TEXT("information text"),
     ES_LEFT | ES_MULTILINE | ES_AUTOVSCROLL | ES_AUTOHSCROLL | ES_WANTRETURN | ES_READONLY | WS_CHILD | WS_VISIBLE | WS_BORDER | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP,
     0, 0, width, height, parent, 0, enigma::hInstance, 0);
 
@@ -307,7 +305,7 @@ void show_info(string info, int bgcolor, int left, int top, int width, int heigh
   MoveWindow(enigma::infore, rectParent.top, rectParent.left, rectParent.right, rectParent.bottom, TRUE);
 
   // Set RTF Editor Background Color
-  SendMessage(enigma::infore, EM_SETBKGNDCOLOR, (WPARAM)0, (LPARAM)RGB(__GETR(bgcolor), __GETG(bgcolor), __GETB(bgcolor)));
+  SendMessage(enigma::infore, EM_SETBKGNDCOLOR, (WPARAM)0, (LPARAM)RGB(COL_GET_R(bgcolor), COL_GET_G(bgcolor), COL_GET_B(bgcolor)));
 
   // Set RTF Information Text
   SETTEXTEX se;
@@ -578,48 +576,45 @@ string get_directory(string dname, string caption)
 }
 
 string get_directory_alt(string message, string root, bool modern, string caption) {
-	//standard use of the Shell API to browse for folders
-	bool f_selected = false;
+  //standard use of the Shell API to browse for folders
+  bool f_selected = false;
 
-	char szDir [MAX_PATH];
-	BROWSEINFO bi;        
-	LPITEMIDLIST pidl;        
-	LPMALLOC pMalloc;
+  char szDir [MAX_PATH];
+  BROWSEINFO bi;
+  LPITEMIDLIST pidl;
+  LPMALLOC pMalloc;
 
-	if (SUCCEEDED (::SHGetMalloc (&pMalloc)))
-	{
-	  ::ZeroMemory (&bi,sizeof(bi)); 
+  if (SUCCEEDED (::SHGetMalloc (&pMalloc)))
+  {
+    ::ZeroMemory (&bi,sizeof(bi));
 
-	  bi.lpszTitle = message.c_str();
-	  bi.hwndOwner = enigma::hWnd;
-	  bi.pszDisplayName = 0;           
-	  bi.pidlRoot = 0;
-	  bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_STATUSTEXT;
-	  if (modern) {
-		bi.ulFlags |= BIF_EDITBOX | BIF_NEWDIALOGSTYLE;
-	  }
-	  gs_cap = caption;
-	  bi.lpfn =  GetDirectoryAltProc;      //callback to set window caption
-	  //bi.lParam = (LPARAM)root.c_str();    //start in root directory
+    bi.lpszTitle = message.c_str();
+    bi.hwndOwner = enigma::hWnd;
+    bi.pszDisplayName = 0;
+    bi.pidlRoot = 0;
+    bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_STATUSTEXT;
+    if (modern) {
+    bi.ulFlags |= BIF_EDITBOX | BIF_NEWDIALOGSTYLE;
+    }
+    gs_cap = caption;
+    bi.lpfn =  GetDirectoryAltProc;      //callback to set window caption
 
-	  pidl = ::SHBrowseForFolder(&bi);           
-	  if (pidl)
-	  {
-		 if (::SHGetPathFromIDList(pidl, szDir))
-		 {
-			f_selected = true;
-		 }
+    pidl = ::SHBrowseForFolder(&bi);
+    if (pidl) {
+      if (::SHGetPathFromIDList(pidl, szDir)) {
+        f_selected = true;
+      }
 
-		 pMalloc->Free(pidl);
-		 pMalloc->Release();
-	  }     
-	}
+      pMalloc->Free(pidl);
+      pMalloc->Release();
+    }
+  }
 
-	if (f_selected) {
-		return szDir;
-	} else {
-		return "";
-	}
+  if (f_selected) {
+    return szDir;
+  } else {
+    return "";
+  }
 }
 
 }

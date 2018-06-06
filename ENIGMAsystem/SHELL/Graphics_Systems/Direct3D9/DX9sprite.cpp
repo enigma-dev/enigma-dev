@@ -31,9 +31,7 @@ using std::string;
 #include "Universal_System/instance_system.h"
 #include "Universal_System/graphics_object.h"
 
-#define __GETR(x) ((x & 0x0000FF))
-#define __GETG(x) ((x & 0x00FF00) >> 8)
-#define __GETB(x) ((x & 0xFF0000) >> 16)
+#include "Graphics_Systems/General/GScolor_macros.h"
 
 
 #ifdef DEBUG_MODE
@@ -83,4 +81,3 @@ void sprite_add_from_screen(int id, int x, int y, int w, int h, bool removeback,
 }
 
 }
-

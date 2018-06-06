@@ -17,35 +17,32 @@
 
 #include "Bridges/General/DX11Context.h"
 #include "Direct3D11Headers.h"
-using namespace std;
-#include <cstddef>
-#include <iostream>
-#include <math.h>
 
+#include "DX11SurfaceStruct.h"
+#include "DX11TextureStruct.h"
 
-#include <stdio.h> //for file writing (surface_save)
 #include "Universal_System/nlpo2.h"
 #include "Universal_System/sprites_internal.h"
 #include "Universal_System/background_internal.h"
 #include "Collision_Systems/collision_types.h"
+#include "Graphics_Systems/General/GSprimitives.h"
+#include "Graphics_Systems/General/GSsurface.h"
+#include "Graphics_Systems/General/GScolor_macros.h"
 
-#define __GETR(x) ((x & 0x0000FF))
-#define __GETG(x) ((x & 0x00FF00) >> 8)
-#define __GETB(x) ((x & 0xFF0000) >> 16)
+#include <stdio.h> //for file writing (surface_save)
+#include <cstddef>
+#include <iostream>
+#include <math.h>
+
+using namespace std;
 
 namespace enigma_user {
 extern int room_width, room_height/*, sprite_idmax*/;
 }
 
-#include "../General/GSprimitives.h"
-#include "../General/GSsurface.h"
-#include "DX11SurfaceStruct.h"
-#include "DX11TextureStruct.h"
-
 namespace enigma
 {
   vector<Surface*> Surfaces(0);
-
 }
 
 
@@ -246,4 +243,3 @@ void surface_copy(int destination, gs_scalar x, gs_scalar y, int source)
 }
 
 }
-

@@ -36,9 +36,9 @@ namespace enigma_user
 	int merge_color(int c1,int c2,double amount)
 	{
 		amount = amount > 1 ? 1 : (amount < 0 ? 0 : amount);
-		return (unsigned char)(fabs(__GETR(c1)+(__GETR(c2)-__GETR(c1))*amount))
-		|      (unsigned char)(fabs(__GETG(c1)+(__GETG(c2)-__GETG(c1))*amount))<<8
-		|      (unsigned char)(fabs(__GETB(c1)+(__GETB(c2)-__GETB(c1))*amount))<<16;
+		return (unsigned char)(fabs(COL_GET_R(c1)+(COL_GET_R(c2)-COL_GET_R(c1))*amount))
+		|      (unsigned char)(fabs(COL_GET_G(c1)+(COL_GET_G(c2)-COL_GET_G(c1))*amount))<<8
+		|      (unsigned char)(fabs(COL_GET_B(c1)+(COL_GET_B(c2)-COL_GET_B(c1))*amount))<<16;
 	}
 
 	int draw_get_color(){
@@ -52,13 +52,13 @@ namespace enigma_user
 	  return enigma::currentcolor[3] / 255.0;
 	}
 
-	int color_get_red  (int c){return __GETR(c);}
-	int color_get_green(int c){return __GETG(c);}
-	int color_get_blue (int c){return __GETB(c);}
+	int color_get_red  (int c){return COL_GET_R(c);}
+	int color_get_green(int c){return COL_GET_G(c);}
+	int color_get_blue (int c){return COL_GET_B(c);}
 
 	int color_get_hue(int c)
 	{
-		int r = __GETR(c),g = __GETG(c),b = __GETB(c);
+		int r = COL_GET_R(c),g = COL_GET_G(c),b = COL_GET_B(c);
 		int cmpmax = r>g ? (r>b?r:b) : (g>b?g:b);
 		if(!cmpmax) return 0;
 
@@ -68,12 +68,12 @@ namespace enigma_user
 	}
 	int color_get_value(int c)
 	{
-	  int r = __GETR(c), g = __GETG(c), b = __GETB(c);
+	  int r = COL_GET_R(c), g = COL_GET_G(c), b = COL_GET_B(c);
 		return r>g ? (r>b?r:b) : (g>b?g:b);
 	}
 	int color_get_saturation(int color)
 	{
-		int r = __GETR(color), g = __GETG(color), b = __GETB(color);
+		int r = COL_GET_R(color), g = COL_GET_G(color), b = COL_GET_B(color);
 		int cmpmax = r>g  ?  (r>b ? r : b)  :  (g>b ? g : b);
 		return cmpmax  ?  255 - int(255 * (r<g ? (r<b?r:b) : (g<b?g:b)) / double(cmpmax))  :  0;
 	}

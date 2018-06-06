@@ -30,20 +30,18 @@
     const enigma::background *const bck2d = enigma::backgroundstructarray[back];
 #endif
 
-#define __GETR(x) ((x & 0x0000FF))
-#define __GETG(x) ((x & 0x00FF00) >> 8)
-#define __GETB(x) ((x & 0xFF0000) >> 16)
+#include "Graphics_Systems/General/GScolor_macros.h"
 
 // Tile system
 #include "Universal_System/depth_draw.h"
 #include <algorithm>
-#include "../General/GSbackground.h"
+#include "Graphics_Systems/General/GSbackground.h"
 #include "Universal_System/background_internal.h"
-#include "../General/GStextures.h"
+#include "Graphics_Systems/General/GStextures.h"
 
 #include "Direct3D11Headers.h"
-#include "../General/GStiles.h"
-#include "../General/DXtilestruct.h"
+#include "Graphics_Systems/General/GStiles.h"
+#include "Graphics_Systems/General/DXtilestruct.h"
 namespace enigma
 {
     void draw_tile(int back, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, double alpha)
@@ -484,4 +482,3 @@ bool tile_layer_shift(int layer_depth, int x, int y)
 }
 
 }
-

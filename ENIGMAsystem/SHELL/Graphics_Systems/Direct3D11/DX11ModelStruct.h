@@ -330,7 +330,7 @@ class Mesh
 
   void AddColor(int col, double alpha)
   {
-    //DWORD final = D3DCOLOR_ARGB( (unsigned char)(alpha*255), __GETR(col), __GETG(col), __GETB(col) );
+    //DWORD final = D3DCOLOR_ARGB( (unsigned char)(alpha*255), COL_GET_R(col), COL_GET_G(col), COL_GET_B(col) );
     //vertices.push_back(final);
     useColors = true;
   }

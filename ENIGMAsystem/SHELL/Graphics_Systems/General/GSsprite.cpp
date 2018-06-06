@@ -15,15 +15,11 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-#include <cmath>
-#include <cstdlib>
-#include <string>
-using std::string;
-
-#include "../General/GScolors.h"
-#include "../General/GSsprite.h"
-#include "../General/GStextures.h"
-#include "../General/GSprimitives.h"
+#include "Graphics_Systems/General/GScolors.h"
+#include "Graphics_Systems/General/GScolor_macros.h"
+#include "Graphics_Systems/General/GSsprite.h"
+#include "Graphics_Systems/General/GStextures.h"
+#include "Graphics_Systems/General/GSprimitives.h"
 
 #include "Universal_System/nlpo2.h"
 #include "Universal_System/sprites.h"
@@ -31,12 +27,10 @@ using std::string;
 #include "Universal_System/graphics_object.h"
 #include "Universal_System/math_consts.h"
 
-#define __GETR(x) ((x & 0x0000FF))
-#define __GETG(x) ((x & 0x00FF00) >> 8)
-#define __GETB(x) ((x & 0xFF0000) >> 16)
-
-//Note that this clamps between 0 and 1, not 0 and 255
-#define clamp_alpha(alpha) (alpha <= 0 ? 0: alpha >= 1? 1: alpha)
+#include <cmath>
+#include <cstdlib>
+#include <string>
+using std::string;
 
 #ifdef DEBUG_MODE
   #include "libEGMstd.h"
@@ -70,8 +64,9 @@ namespace enigma_user
 
 void draw_sprite(int spr,int subimg, gs_scalar x, gs_scalar y, int color, gs_scalar alpha)
 {
-  get_spritev(spr2d,spr);
-  const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
+    alpha=CLAMP_ALPHAF(alpha);
+    get_spritev(spr2d,spr);
+    const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
 
 	const gs_scalar tbx = spr2d->texturexarray[usi], tby = spr2d->textureyarray[usi],
     tbw = spr2d->texturewarray[usi], tbh = spr2d->textureharray[usi],
@@ -88,8 +83,9 @@ void draw_sprite(int spr,int subimg, gs_scalar x, gs_scalar y, int color, gs_sca
 
 void draw_sprite_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int color, gs_scalar alpha)
 {
-  get_spritev(spr2d,spr);
-  const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
+    alpha=CLAMP_ALPHAF(alpha);
+    get_spritev(spr2d,spr);
+    const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
 
 	rot *= M_PI/180.0;
 
@@ -117,8 +113,9 @@ void draw_sprite_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar xs
 ///Maybe we should forget about GM compatibility once again and just modify this so it fits the others
 void draw_sprite_pos(int spr, int subimg, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, gs_scalar x3, gs_scalar y3, gs_scalar x4, gs_scalar y4, gs_scalar alpha)
 {
-  get_spritev(spr2d,spr);
-  const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
+    alpha=CLAMP_ALPHAF(alpha);
+    get_spritev(spr2d,spr);
+    const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
 
   const gs_scalar tbx = spr2d->texturexarray[usi], tby = spr2d->textureyarray[usi],
   tbw = spr2d->texturewarray[usi], tbh = spr2d->textureharray[usi];
@@ -133,8 +130,9 @@ void draw_sprite_pos(int spr, int subimg, gs_scalar x1, gs_scalar y1, gs_scalar 
 
 void draw_sprite_part(int spr, int subimg, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, int color, gs_scalar alpha)
 {
-  get_spritev(spr2d,spr);
-  const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
+    alpha=CLAMP_ALPHAF(alpha);
+    get_spritev(spr2d,spr);
+    const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
 
 	const gs_scalar tbw = spr2d->width/(gs_scalar)spr2d->texturewarray[usi], tbh = spr2d->height/(gs_scalar)spr2d->textureharray[usi],
 	  tbx1 = spr2d->texturexarray[usi]+left/tbw, tbx2 = spr2d->texturexarray[usi]+tbx1 + width/tbw,
@@ -150,8 +148,9 @@ void draw_sprite_part(int spr, int subimg, gs_scalar left, gs_scalar top, gs_sca
 
 void draw_sprite_part_offset(int spr, int subimg, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, int color, gs_scalar alpha)
 {
-  get_spritev(spr2d,spr);
-  const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
+    alpha=CLAMP_ALPHAF(alpha);
+    get_spritev(spr2d,spr);
+    const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
 
 	const gs_scalar tbw = spr2d->width/spr2d->texturewarray[usi], tbh = spr2d->height/spr2d->textureharray[usi],
 	  xvert1 = x-spr2d->xoffset, xvert2 = xvert1 + spr2d->width,
@@ -169,8 +168,9 @@ void draw_sprite_part_offset(int spr, int subimg, gs_scalar left, gs_scalar top,
 
 void draw_sprite_part_ext(int spr, int subimg, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, gs_scalar alpha)
 {
-  get_spritev(spr2d,spr);
-  const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
+    alpha=CLAMP_ALPHAF(alpha);
+    get_spritev(spr2d,spr);
+    const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
 
 	const gs_scalar tbw = spr2d->width/(gs_scalar)spr2d->texturewarray[usi], tbh = spr2d->height/(gs_scalar)spr2d->textureharray[usi],
 	  xvert1 = x, xvert2 = xvert1 + width*xscale,
@@ -188,8 +188,9 @@ void draw_sprite_part_ext(int spr, int subimg, gs_scalar left, gs_scalar top, gs
 
 void draw_sprite_general(int spr, int subimg, gs_scalar left, gs_scalar top, gs_scalar width, gs_scalar height, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, double rot, int c1, int c2, int c3, int c4, gs_scalar alpha)
 {
-  get_spritev(spr2d,spr);
-  const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
+    alpha=CLAMP_ALPHAF(alpha);
+    get_spritev(spr2d,spr);
+    const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
 
 	const gs_scalar
 	  tbx = spr2d->texturexarray[usi],  tby = spr2d->textureyarray[usi],
@@ -219,8 +220,9 @@ void draw_sprite_general(int spr, int subimg, gs_scalar left, gs_scalar top, gs_
 
 void draw_sprite_stretched(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar width, gs_scalar height, int color, gs_scalar alpha)
 {
-  get_spritev(spr2d,spr);
-  const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
+    alpha=CLAMP_ALPHAF(alpha);
+    get_spritev(spr2d,spr);
+    const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
 
   const gs_scalar tbx = spr2d->texturexarray[usi], tby = spr2d->textureyarray[usi],
               tbw = spr2d->texturewarray[usi], tbh = spr2d->textureharray[usi],
@@ -261,7 +263,7 @@ void d3d_draw_sprite(int spr,int subimg, gs_scalar x, gs_scalar y, gs_scalar z)
 //Draw padded
 void draw_sprite_padded(int spr, int subimg, gs_scalar left, gs_scalar top, gs_scalar right, gs_scalar bottom, gs_scalar x1, gs_scalar y1, gs_scalar x2, gs_scalar y2, int color, gs_scalar alpha)
 {
-  alpha=clamp_alpha(alpha);
+  alpha=CLAMP_ALPHAF(alpha);
   get_spritev(spr2d,spr);
   const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
 
@@ -383,8 +385,9 @@ namespace enigma_user
 
 void draw_sprite_tiled(int spr, int subimg, gs_scalar x, gs_scalar y, int color, gs_scalar alpha)
 {
-  get_spritev(spr2d,spr);
-  const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
+    alpha=CLAMP_ALPHAF(alpha);
+    get_spritev(spr2d,spr);
+    const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
 
   x = ((spr2d->xoffset+x)<0?0:spr2d->width)-fmod(spr2d->xoffset+x,spr2d->width);
   y = ((spr2d->yoffset+y)<0?0:spr2d->height)-fmod(spr2d->yoffset+y,spr2d->height);
@@ -418,8 +421,9 @@ void draw_sprite_tiled(int spr, int subimg, gs_scalar x, gs_scalar y, int color,
 
 void draw_sprite_tiled_ext(int spr, int subimg, gs_scalar x, gs_scalar y, gs_scalar xscale, gs_scalar yscale, int color, gs_scalar alpha)
 {
-  get_spritev(spr2d,spr);
-  const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
+    alpha=CLAMP_ALPHAF(alpha);
+    get_spritev(spr2d,spr);
+    const int usi = subimg >= 0 ? (subimg % spr2d->subcount) : int(((enigma::object_graphics*)enigma::instance_event_iterator->inst)->image_index) % spr2d->subcount;
 
   const gs_scalar
   tbx  = spr2d->texturexarray[usi], tby  = spr2d->textureyarray[usi],
