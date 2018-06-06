@@ -99,36 +99,32 @@ namespace enigma
         enigma_user::vertex_begin(vertexBuffer, vertexFormat);
 
         int prev_bkid;
-        int vert_size = 0;
-        int vert_start = 0;
+        int vertex_start = 0;
+        int vertex_count = 0;
         for (enigma::diter dit = drawing_depths.rbegin(); dit != drawing_depths.rend(); dit++){
             if (dit->second.tiles.size())
             {
                 //TODO: Should they really be sorted by background? This may help batching, but breaks compatiblity. Nothing texture atlas wouldn't solve.
                 sort(dit->second.tiles.begin(), dit->second.tiles.end(), bkinxcomp);
                 tile_layer_buffers[dit->second.tiles[0].depth] = vertexBuffer;
-                vert_size = 0;
-                vert_start = 0;
                 for(std::vector<tile>::size_type i = 0; i != dit->second.tiles.size(); ++i)
                 {
                     tile t = dit->second.tiles[i];
                     if (i==0){ prev_bkid = t.bckid; }
                     draw_tile(vertexBuffer, t.bckid, t.bgx, t.bgy, t.width, t.height, t.roomX, t.roomY, t.xscale, t.yscale, t.color, t.alpha);
-
+                    vertex_count += 6;
                     if (prev_bkid != t.bckid || i == dit->second.tiles.size()-1){ //Texture switch has happened. Create new batch
                         get_background(bck2d,prev_bkid);
                         tile_layer_metadata[dit->second.tiles[0].depth].push_back( std::vector< int >(3) );
                         tile_layer_metadata[dit->second.tiles[0].depth].back()[0] = bck2d->texture;
-                        tile_layer_metadata[dit->second.tiles[0].depth].back()[1] = vert_start;
-                        tile_layer_metadata[dit->second.tiles[0].depth].back()[2] = vert_size;
-                        //printf("Texture id = %i and vertices to render = %i and start = %i\n", prev_bkid, vert_size, vert_start );
-                        vert_start += vert_size;
-                        vert_size = 0;
-                        //printf("Texture switch at i = %i and now texture = %i\n", i, prev_bkid );
+                        tile_layer_metadata[dit->second.tiles[0].depth].back()[1] = vertex_start;
+                        tile_layer_metadata[dit->second.tiles[0].depth].back()[2] = vertex_count;
+
+                        vertex_start += vertex_count;
+                        vertex_count = 0;
+
                         prev_bkid = t.bckid;
                     }
-                    vert_size+=6;
-                    //printf("Tile = %i, tile x = %i and tile y = %i\n", i, t.bgx, t.bgy);
                 }
                 tile_layer_metadata[dit->second.tiles[0].depth].back()[2] += 6; //Add last quad
             }
