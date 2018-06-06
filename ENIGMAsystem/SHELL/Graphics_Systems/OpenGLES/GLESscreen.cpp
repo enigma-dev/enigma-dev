@@ -141,11 +141,6 @@ int screen_redraw()
     return 0;
 }
 
-
-#undef COL_GET_R
-#undef COL_GET_G
-#undef COL_GET_B
-
 int screen_save(string filename) //Assumes native integers are little endian
 {
 	unsigned int w=window_get_width(),h=window_get_height(),sz=w*h;
