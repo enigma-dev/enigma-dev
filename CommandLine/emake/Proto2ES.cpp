@@ -235,18 +235,6 @@ std::string Actions2Code(const ::google::protobuf::RepeatedPtrField< buffers::re
   return code;
 }
 
-#include "lodepng.h"
-
-inline unsigned int nlpo2dc(unsigned int x)  // Taking x, returns n such that n = 2**k where k is an integer and n >= x.
-{
-  --x;
-  x |= x >> 1;
-  x |= x >> 2;
-  x |= x >> 4;
-  x |= x >> 8;
-  return x | (x >> 16);
-}
-
 #include <zlib.h>
 
 unsigned char* zlib_compress(unsigned char* inbuffer,int actualsize)
@@ -258,6 +246,8 @@ unsigned char* zlib_compress(unsigned char* inbuffer,int actualsize)
 
     return (unsigned char*)outbytef;
 }
+
+#include "lodepng.h"
 
 Image AddImage(const std::string fname) {
   Image i = Image();
@@ -273,15 +263,12 @@ Image AddImage(const std::string fname) {
     return i;
   }
 
-  unsigned
-    widfull = nlpo2dc(pngwidth) + 1,
-    hgtfull = nlpo2dc(pngheight) + 1,
-    ih,iw;
-  const int bitmap_size = widfull*hgtfull*4;
+  unsigned ih,iw;
+  const int bitmap_size = pngwidth*pngheight*4;
   unsigned char* bitmap = new unsigned char[bitmap_size](); // Initialize to zero.
 
   for (ih = 0; ih < pngheight; ih++) {
-    unsigned tmp = ih*widfull*4;
+    unsigned tmp = ih*pngwidth*4;
     for (iw = 0; iw < pngwidth; iw++) {
       bitmap[tmp+0] = image[4*pngwidth*ih+iw*4+2];
       bitmap[tmp+1] = image[4*pngwidth*ih+iw*4+1];
@@ -292,8 +279,8 @@ Image AddImage(const std::string fname) {
   }
 
   free(image);
-  i.width  = widfull;
-  i.height = hgtfull;
+  i.width  = pngwidth;
+  i.height = pngheight;
   i.data = reinterpret_cast<char*>(zlib_compress(bitmap, bitmap_size));
   i.dataSize = bitmap_size;
 
@@ -419,7 +406,8 @@ void AddSprite(const char* name, const buffers::resources::Sprite& spr) {
     }
   }
 
-  // Polygon_LOLWINDOWS *maskShapes; ???
+  s.maskShapeCount = 0;
+  s.maskShapes = nullptr;
 }
 
 void AddSound(const char* name, const buffers::resources::Sound& snd) {
