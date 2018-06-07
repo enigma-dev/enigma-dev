@@ -15,25 +15,23 @@
 *** with this code. If not, see <http://www.gnu.org/licenses/>
 **/
 
-
-#include "OS_Switchboard.h"
 #include "makedir.h"
-#include "gcc_backend.h"
-#include "settings.h"
+#include <time.h>
+#include <string>
+#include <iostream>
+#include <fstream>
+#include <cstdlib>
+#include <vector>
+#include <map>
+
+using namespace std;
+#define flushl '\n' << flush
+#define flushs flush
 
 #include "general/parse_basics_old.h"
 #include "general/bettersystem.h"
 
-#include "languages/lang_CPP.h"
-
-#include "System/builtins.h"
-
-#include "API/context.h"
-
-#include <time.h>
-#include <iostream>
-#include <fstream>
-#include <cstdlib>
+#include "gcc_backend.h"
 
 #include <sys/time.h>
 
@@ -45,12 +43,18 @@
  #include <cstdio>
 #endif
 
-using namespace std;
-#define flushl '\n' << flush
-#define flushs flush
-
 bool init_found_gcc = false;
 bool init_load_successful = false;
+
+string MAKE_flags, MAKE_paths, MAKE_tcpaths, MAKE_location, TOPLEVEL_cflags, TOPLEVEL_cppflags, TOPLEVEL_cxxflags,
+    TOPLEVEL_rcflags, CXX_override, CC_override, WINDRES_location, TOPLEVEL_ldflags, TOPLEVEL_ldlibs;
+
+#include "OS_Switchboard.h"
+#include "eyaml/eyaml.h"
+
+#include "languages/lang_CPP.h"
+#include <System/builtins.h>
+#include <API/context.h>
 
 static char errbuf[1024];
 static string lastbearings;
@@ -115,14 +119,20 @@ const char* establish_bearings(const char *compiler)
 {
   if (compiler == lastbearings && codegen_directory == lastcodegen_directory)
     return 0;
-
-  if (!load_compiler_ey(compiler))
-    return (sprintf(errbuf, "Could not open compiler descriptor `%s`.", compiler), errbuf);
   
   lastbearings = compiler;
   lastcodegen_directory = codegen_directory;
   
   string GCC_location;
+  string compfq = compiler; //Filename of compiler.ey
+  ifstream compis(compfq.c_str());
+
+  // Bail if error
+  if (!compis.is_open())
+    return (sprintf(errbuf,"Could not open compiler descriptor `%s`.", compfq.c_str()), errbuf);
+
+  // Parse our compiler data file
+  ey_data compey = parse_eyaml(compis,compiler);
 
   bool got_success = false;
 
@@ -130,7 +140,20 @@ const char* establish_bearings(const char *compiler)
   string cmd, toolchainexec, parameters; // Full command line, executable part, parameter part
   bool redir; // Whether or not to redirect the output manually
 
-  std::string MAKE_paths = compilerInfo.make_vars["PATH"];
+  /* Write down our PATH, etc
+  ****************************/
+  MAKE_paths = compey.get("path");
+  MAKE_tcpaths = compey.get("tcpath");
+  MAKE_flags =  compey.get("makeflags");
+  TOPLEVEL_cflags = compey.get("cflags");
+  TOPLEVEL_cppflags = compey.get("cppflags");
+  TOPLEVEL_cxxflags = compey.get("cxxflags");
+  CXX_override = compey.get("cxx");
+  CC_override = compey.get("cc");
+  WINDRES_location = compey.get("windres");
+  TOPLEVEL_ldflags = compey.get("ldflags");
+  TOPLEVEL_ldlibs = compey.get("ldlibs");
+  TOPLEVEL_rcflags = compey.get("rcflags");
   
   std::string dirs = "CODEGEN=" + codegen_directory + " ";
   dirs += "WORKDIR=" + eobjs_directory + " ";
@@ -139,7 +162,8 @@ const char* establish_bearings(const char *compiler)
   /* Get a list of all macros defined by our compiler.
   ** These will help us through parsing available libraries.
   ***********************************************************/
-  cmd = compilerInfo.defines_cmd;
+  if ((cmd = compey.get("defines")) == "")
+    return (sprintf(errbuf,"Compiler descriptor file `%s` does not specify 'defines' executable.\n", compfq.c_str()), errbuf);
   redir = toolchain_parseout(cmd, toolchainexec,parameters,("\"" + codegen_directory + "enigma_defines.txt\""));
   cout << "Read key `defines` as `" << cmd << "`\nParsed `" << toolchainexec << "` `" << parameters << "`: redirect=" << (redir?"yes":"no") << "\n";
   got_success = !(redir? e_execsp(toolchainexec, parameters, ("> \"" + codegen_directory + "enigma_defines.txt\""),MAKE_paths) : e_execsp(toolchainexec, parameters, MAKE_paths));
@@ -149,7 +173,8 @@ const char* establish_bearings(const char *compiler)
   /* Get a list of all available search directories.
   ** These are where we'll look for headers to parse.
   ****************************************************/
-  cmd = compilerInfo.searchdirs_cmd;
+  if ((cmd = compey.get("searchdirs")) == "")
+    return (sprintf(errbuf,"Compiler descriptor file `%s` does not specify 'searchdirs' executable.", compfq.c_str()), errbuf);
   redir = toolchain_parseout(cmd, toolchainexec,parameters,("\"" + codegen_directory + "enigma_searchdirs.txt\""));
   cout << "Read key `searchdirs` as `" << cmd << "`\nParsed `" << toolchainexec << "` `" << parameters << "`: redirect=" << (redir?"yes":"no") << "\n";
   got_success = !(redir? e_execsp(toolchainexec, parameters, ("&> \"" + codegen_directory + "enigma_searchdirs.txt\""), MAKE_paths) : e_execsp(toolchainexec, parameters, MAKE_paths));
@@ -163,7 +188,7 @@ const char* establish_bearings(const char *compiler)
       return "Invalid search directories returned. Error 6.";
 
     pt pos = 0;
-    string idirstart = compilerInfo.searchdirs_start, idirend = compilerInfo.searchdirs_end;
+    string idirstart = compey.get("searchdirs-start").toString(), idirend = compey.get("searchdirs-end").toString();
     cout << "Searching for directories between \"" << idirstart << "\" and \"" << idirend << "\"" << endl;
     if (idirstart != "")
     {
@@ -209,14 +234,12 @@ const char* establish_bearings(const char *compiler)
   /* Note `make` location
   *****************************/
 
-  if (compilerInfo.make_vars.find("MAKE") != compilerInfo.make_vars.end())
-    cmd = compilerInfo.make_vars["MAKE"];
-  else
-    cmd = "make", cout << "WARNING: Compiler descriptor file `" << compiler <<"` does not specify 'make' executable. Using 'make'.\n";
+  if ((cmd = compey.get("make")) == "")
+    cmd = "make", cout << "WARNING: Compiler descriptor file `" << compfq <<"` does not specify 'make' executable. Using 'make'.\n";
   toolchain_parseout(cmd, toolchainexec,parameters);
-  compilerInfo.MAKE_location = toolchainexec;
+  MAKE_location = toolchainexec;
   if (parameters != "")
-    cout << "WARNING: Discarding parameters `" << parameters << "` to " << compilerInfo.MAKE_location << "." << endl;
+    cout << "WARNING: Discarding parameters `" << parameters << "` to " << MAKE_location << "." << endl;
 
   return 0;
 }

@@ -25,17 +25,16 @@
 **                                                                              **
 \********************************************************************************/
 
-#include <string>
-
 int e_exec(const char* fcmd, const char* *Cenviron = NULL);
-int e_execp(const char* cmd, std::string path);
-int e_execs(std::string cmd);
-int e_execs(std::string cmd, std::string cat1);
-int e_execs(std::string cmd, std::string cat1, std::string cat2);
-int e_execs(std::string cmd, std::string cat1, std::string cat2, std::string cat3);
-int e_execsp(std::string cmd, std::string path);
-int e_execsp(std::string cmd, std::string cat1, std::string path);
-int e_execsp(std::string cmd, std::string cat1, std::string cat2, std::string path);
-int e_execsp(std::string cmd, std::string cat1, std::string cat2, std::string cat3, std::string path);
+int e_execp(const char* cmd, string path);
+int e_execs(string cmd);
+int e_execs(string cmd, string cat1);
+int e_execs(string cmd, string cat1, string cat2);
+int e_execs(string cmd, string cat1, string cat2, string cat3);
+int e_execsp(string cmd, string path);
+int e_execsp(string cmd, string cat1, string path);
+int e_execsp(string cmd, string cat1, string cat2, string path);
+int e_execsp(string cmd, string cat1, string cat2, string cat3, string path);
 
-//int better_system(std::string,std::string,std::string="",const char* = NULL);
+//int better_system(string,string,string="",const char* = NULL);
+

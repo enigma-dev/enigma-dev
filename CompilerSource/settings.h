@@ -27,26 +27,28 @@
 \********************************************************************************/
 #ifndef ENIGMA_SETTINGS_H
 #define ENIGMA_SETTINGS_H
-
 #include <string>
-#include <map>
+using std::string;
 
 namespace extensions
 {
   struct sdk_descriptor {
-    std::string name, identifier, represents, description, author, build_platforms;
+    string name, identifier, represents, description, author, build_platforms;
   };
-  
   struct api_descriptor
   {
-    std::string
+    string
       windowSys,   graphicsSys,   audioSys,   collisionSys,   widgetSys,   networkSys;
-    std::string
+    string
       windowLinks, graphicsLinks, audioLinks, collisionLinks, widgetLinks, networkLinks;
+  };
+  struct compiler_descriptor {
+    string compiler, identifier, resfile, buildext, buildname, runprog, runparam, builddir;
   };
 
   extern sdk_descriptor targetSDK;
   extern api_descriptor targetAPI;
+  extern compiler_descriptor targetOS;
 }
 
 namespace setting
@@ -70,31 +72,7 @@ namespace setting
   extern bool inherit_objects;  // Determines whether objects should automatically inherit locals and events from their parents
   extern bool automatic_semicolons; // Determines whether semicolons should automatically be added or if the user wants strict syntax
   extern COMPLIANCE_LVL compliance_mode; // How to resolve differences between GM versions.
-  extern std::string keyword_blacklist; //Words to blacklist from user scripts, separated by commas.
+  extern string keyword_blacklist; //Words to blacklist from user scripts, separated by commas.
 }
-
-struct CompilerInfo {
-
-  // these are  needed or the ide will self destruct
-  std::string name;
-  std::string maintainer;
-  std::string target_platform;
-  bool native;
-
-  // these are needed in every ey or jdi will self destruct
-  std::string defines_cmd;
-  std::string searchdirs_cmd;
-  std::string searchdirs_start;
-  std::string searchdirs_end;
-
-  std::map<std::string, std::string> make_vars;
-  std::map<std::string, std::string> exe_vars;
-
-  std::string MAKE_location;
-};
-
-extern CompilerInfo compilerInfo;
-
-bool load_compiler_ey(std::string fPath);
 
 #endif
