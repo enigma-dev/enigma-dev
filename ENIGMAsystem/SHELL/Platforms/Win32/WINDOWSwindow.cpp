@@ -321,8 +321,7 @@ bool display_set_size(int w, int h)
 	devMode.dmPelsWidth = w;
 	devMode.dmPelsHeight = h;
 
-	ChangeDisplaySettings(&devMode, 0);
-	return true;
+	return (ChangeDisplaySettings(&devMode, 0) == DISP_CHANGE_SUCCESSFUL);
 }
 
 bool display_set_frequency(int freq)
