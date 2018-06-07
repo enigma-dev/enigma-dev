@@ -406,7 +406,8 @@ void AddSprite(const char* name, const buffers::resources::Sprite& spr) {
     }
   }
 
-  // Polygon_LOLWINDOWS *maskShapes; ???
+  s.maskShapeCount = 0;
+  s.maskShapes = nullptr;
 }
 
 void AddSound(const char* name, const buffers::resources::Sound& snd) {
