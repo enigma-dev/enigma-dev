@@ -237,12 +237,14 @@ std::string Actions2Code(const ::google::protobuf::RepeatedPtrField< buffers::re
 
 #include <zlib.h>
 
-unsigned char* zlib_compress(unsigned char* inbuffer,int actualsize)
+unsigned char* zlib_compress(unsigned char* inbuffer,int &actualsize)
 {
     uLongf outsize=(int)(actualsize*1.1)+12;
     Bytef* outbytef=new Bytef[outsize];
 
     compress(outbytef,&outsize,(Bytef*)inbuffer,actualsize);
+
+    actualsize = outsize;
 
     return (unsigned char*)outbytef;
 }
@@ -281,8 +283,8 @@ Image AddImage(const std::string fname) {
   free(image);
   i.width  = pngwidth;
   i.height = pngheight;
-  i.data = reinterpret_cast<char*>(zlib_compress(bitmap, bitmap_size));
   i.dataSize = bitmap_size;
+  i.data = reinterpret_cast<char*>(zlib_compress(bitmap, i.dataSize));
 
   return i;
 }
