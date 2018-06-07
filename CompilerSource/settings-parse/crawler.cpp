@@ -34,8 +34,6 @@ using namespace std;
 #include "filesystem/file_find.h"
 
 #include "crawler.h"
-#include "utility.h"
-
 #include "eyaml/eyaml.h"
 
 namespace settings
@@ -60,6 +58,13 @@ namespace settings
 #include "parser/object_storage.h"
 #include "OS_Switchboard.h"
 #include "languages/language_adapter.h"
+
+static inline string toUpper(string x) {
+  string res = x;
+  for (size_t i = 0; i < res.length(); i++)
+    res[i] = res[i] >= 'a' and res[i] <= 'z' ? res[i] + 'A' - 'a' : res[i];
+  return res;
+}
 
 namespace extensions
 {

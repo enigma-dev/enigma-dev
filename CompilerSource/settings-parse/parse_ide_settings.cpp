@@ -230,6 +230,23 @@ void parse_ide_settings(const char* eyaml)
   const char *a = establish_bearings(cinffile.c_str());
   if (a) cout << "Parse fail: " << a << endl;
 
+  // Read info about the compiler
+  ifstream cinfstream(cinffile.c_str());
+  ey_data cinfo = parse_eyaml(cinfstream,cinffile);
+  extensions::targetOS.compiler   = target_compiler;
+  extensions::targetOS.resfile    = cinfo.get("resources");
+  extensions::targetOS.buildext   = cinfo.get("build-extension");
+  extensions::targetOS.buildname  = cinfo.get("run-output");
+  extensions::targetOS.runprog    = cinfo.get("run-program");
+  extensions::targetOS.runparam   = cinfo.get("run-params");
+  extensions::targetOS.identifier = cinfo.get("target-platform");
+
+  if (cinfo.exists("build-dir") == true){
+    extensions::targetOS.builddir = cinfo.get("build-dir");
+  }else{
+    extensions::targetOS.builddir = cinfo.get("target-platform");
+  }
+
   cout << "Setting up IDE editables... " << endl;
   requested_extensions.clear();
   requested_extensions = explode((string)settree.get("extensions"));

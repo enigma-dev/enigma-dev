@@ -28,8 +28,8 @@
 extern std::string eobjs_directory;
 extern std::string codegen_directory;
 
-std::string myReplace(std::string str, const std::string& oldStr, const std::string& newStr);
-std::string escapeEnv(std::string str, std::string env);
-std::string escapeEnv(std::string str);
+string myReplace(string str, const string& oldStr, const string& newStr);
+string escapeEnv(string str, string env);
+string escapeEnv(string str);
 
 #endif // ENIGMA_WORKDIR_H
