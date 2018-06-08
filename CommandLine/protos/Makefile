@@ -23,10 +23,10 @@ ifeq (_$(disable_server),$(filter _$(disable_server),_true _1 _yes _y))
 endif
 PROTO_OUT := $(patsubst $(SRC_DIR)/%, $(PROTO_DIR)/%, $(patsubst %.proto, %.pb.cc, $(PROTOS)))
 
-$(PROTO_DIR)/%.grpc.pb.cc: $(SRC_DIR)/server.proto
+$(PROTO_DIR)%.grpc.pb.cc: $(SRC_DIR)/server.proto
 	protoc -I=. -I=/usr/include --grpc_out=$(PROTO_DIR) --plugin=protoc-gen-grpc=$(GRPC_CPP_PLUGIN_PATH) server.proto
 
-$(PROTO_DIR)/%.pb.cc: $(SRC_DIR)/%.proto
+$(PROTO_DIR)%.pb.cc: $(SRC_DIR)/%.proto
 	protoc -I=. -I=/usr/include --cpp_out=$(PROTO_DIR) $<
 
 SOURCES := $(call rwildcard,$(SRC_DIR),*.cpp)
