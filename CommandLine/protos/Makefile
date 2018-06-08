@@ -18,6 +18,9 @@ OBJ_DIR := .eobjs
 
 rwildcard=$(wildcard $1/$2) $(foreach d,$(wildcard $1/*),$(call rwildcard,$d,$2))
 PROTOS := $(call rwildcard,$(SRC_DIR),*.proto)
+ifeq (_$(disable_server),$(filter _$(disable_server),_true _1 _yes _y))
+	PROTOS := $(filter-out server.proto, $(PROTOS))
+endif
 PROTO_OUT := $(patsubst $(SRC_DIR)/%, $(PROTO_DIR)/%, $(patsubst %.proto, %.pb.cc, $(PROTOS)))
 
 $(PROTO_DIR)/%.grpc.pb.cc: $(SRC_DIR)/server.proto
@@ -32,7 +35,7 @@ OBJECTS := $(patsubst $(SRC_DIR)/%, $(OBJ_DIR)/%, $(patsubst %.cpp, %.o, $(SOURC
 PROTO_SOURCES = $(call rwildcard,$(SRC_DIR),*.pb.cc)
 PROTO_OBJECTS = $(patsubst $(SRC_DIR)/%, $(OBJ_DIR)/%, $(patsubst %.pb.cc, %.o, $(PROTO_SOURCES)))
 
-ifeq ($(TRAVIS), true)
+ifeq (_$(disable_server),$(filter _$(disable_server),_true _1 _yes _y))
 	CXXFLAGS += -DCLI_DISABLE_SERVER
 else
 	PROTO_OUT += $(PROTO_DIR)/server.grpc.pb.cc
