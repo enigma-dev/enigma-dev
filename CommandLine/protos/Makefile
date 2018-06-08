@@ -11,9 +11,9 @@ else
 endif
 
 LIBRARY := ../../libProtocols$(EXT)
-PROTO_DIR := codegen/
 CXXFLAGS := -I$(PROTO_DIR) -std=c++11 -Wall -Wextra -Wpedantic -g -fPIC
 SRC_DIR := .
+PROTO_DIR := codegen
 OBJ_DIR := .eobjs
 
 rwildcard=$(wildcard $1/$2) $(foreach d,$(wildcard $1/*),$(call rwildcard,$d,$2))
@@ -23,11 +23,11 @@ ifeq (_$(disable_server),$(filter _$(disable_server),_true _1 _yes _y))
 endif
 PROTO_OUT := $(patsubst $(SRC_DIR)/%, $(PROTO_DIR)/%, $(patsubst %.proto, %.pb.cc, $(PROTOS)))
 
-$(PROTO_DIR)%.grpc.pb.cc: $(SRC_DIR)/server.proto
-	protoc -I=. -I=/usr/include --grpc_out=$(PROTO_DIR) --plugin=protoc-gen-grpc=$(GRPC_CPP_PLUGIN_PATH) server.proto
+$(PROTO_DIR)/%.grpc.pb.cc: $(SRC_DIR)/server.proto
+	protoc -I=. -I=/usr/include --grpc_out=$(PROTO_DIR)/ --plugin=protoc-gen-grpc=$(GRPC_CPP_PLUGIN_PATH) server.proto
 
-$(PROTO_DIR)%.pb.cc: $(SRC_DIR)/%.proto
-	protoc -I=. -I=/usr/include --cpp_out=$(PROTO_DIR) $<
+$(PROTO_DIR)/%.pb.cc: $(SRC_DIR)/%.proto
+	protoc -I=. -I=/usr/include --cpp_out=$(PROTO_DIR)/ $<
 
 SOURCES := $(call rwildcard,$(SRC_DIR),*.cpp)
 OBJECTS := $(patsubst $(SRC_DIR)/%, $(OBJ_DIR)/%, $(patsubst %.cpp, %.o, $(SOURCES)))
