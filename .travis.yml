@@ -17,14 +17,14 @@ before_install:
     if [ "$TRAVIS_OS_NAME" == "linux" ]; then
       sudo add-apt-repository -y ppa:maarten-fonville/protobuf;
       sudo apt-get update --option Acquire::Retries=100 --option Acquire::http::Timeout="60";
-      sudo apt-get -qq -y install build-essential libxrandr-dev zlib1g-dev libboost-dev libboost-iostreams-dev \
+      sudo apt-get -qq -y install build-essential zlib1g-dev libboost-dev libboost-iostreams-dev \
         libboost-filesystem-dev libboost-program-options-dev libboost-system-dev libglew-dev     \
         libprotobuf-dev protobuf-compiler;
 
       if [ "$COMPILER" == "gcc32" ] || [ "$COMPILER" == "clang32" ]; then
         sudo dpkg --add-architecture i386;
         sudo apt-get -qq -y install libc++-dev:i386 libglu1-mesa:i386\
-          libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1-dev libx11-6:i386 libglew1.10:i386;
+          libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1-dev libx11-6:i386 libxrandr-dev:i386 libglew1.10:i386;
 
         if [ "$COMPILER" == "gcc32" ]; then
           sudo apt-get -qq -y install gcc-multilib g++-multilib;
@@ -41,7 +41,7 @@ before_install:
         unzip enigma-libs.zip -d ENIGMAsystem/;
         mv ENIGMAsystem/Install ENIGMAsystem/Additional;
       else
-        sudo apt-get -qq -y install libc++-dev libglu1-mesa-dev;
+        sudo apt-get -qq -y install libc++-dev libglu1-mesa-dev libxrandr-dev;
       fi
 
       if [ "$AUDIO" == "OpenAL" ]; then
