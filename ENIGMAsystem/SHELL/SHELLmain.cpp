@@ -30,6 +30,7 @@
 #endif
 
 #include "Universal_System/mathnc.h"
+#include "Universal_System/random.h"
 #include "Universal_System/estring.h"
 #include "Universal_System/buffers.h"
 #include "Universal_System/fileio.h"
@@ -126,11 +127,11 @@ namespace enigma
       it->myevent_roomend();
       it->myevent_gameend();
     }
-    
+
     // Now clean up instances and free them from memory.
     for (enigma::iterator it = instance_list_first(); it; ++it)
-    { 
-        it->unlink(); delete *it; 
+    {
+        it->unlink(); delete *it;
     }
     return 0;
   }
