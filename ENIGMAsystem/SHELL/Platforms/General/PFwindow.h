@@ -19,6 +19,7 @@
 #define ENIGMA_PLATFORM_WINDOW_H
 
 #include "Platforms/platforms_mandatory.h"
+#include "Universal_System/var4.h" // for variant
 
 #include <string>
 
@@ -210,6 +211,9 @@ int window_get_width();
 int window_get_height();
 
 void window_set_caption(std::string caption);
+inline void window_set_caption(variant caption) {
+  window_set_caption(caption.sval);
+}
 std::string window_get_caption();
 void window_set_color(int color);
 int window_get_color();
