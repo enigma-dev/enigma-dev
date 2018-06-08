@@ -45,7 +45,6 @@
 #include "scalar.h"
 #include "var4.h"
 
-#include <cstdlib> // random()
 #include <string>
 
 #ifdef JUST_DEFINE_IT_RUN
@@ -204,47 +203,6 @@ namespace enigma_user
   ma_scalar median(enigma::varargs t);
   ma_scalar mean(const enigma::varargs &t);
   variant choose(const enigma::varargs& args);
-
-  // Delphi-esque Random
-
-  extern ma_scalar random(ma_scalar n);
-  inline ma_scalar random(ma_scalar low, ma_scalar high) {
-    return low + random(high - low);
-  }
-  inline ma_scalar random_range(ma_scalar low, ma_scalar high) { return random(low, high); }
-
-  int random_set_seed(int seed);
-  int random_get_seed();
-
-  static inline int random_integer(int x) { // Mark made this inclusive of x...
-    return int(random(x + 1));
-  }
-  static inline ma_scalar random_integer(int low, int high) {
-    return low + random_integer(high - low);
-  }
-
-  // These functions are for compatability with GM8, wherein they were implemented to circumvent
-  // GML's lack of function overload capability. Since irandom is a nice shorthand, it supports
-  // random_integer's overload. Since irandom_range is a stupid idea, it uses only GM's behavior.
-  #define irandom random_integer
-  inline ma_scalar irandom_range(int low, int high) { return random_integer(low, high); }
-
-  // Mersenne random
-  int randomize();
-  int mtrandom_integer(int x);
-  ma_scalar mtrandom();
-  int mtrandom_seed(int x);
-  unsigned int mtrandom32();
-  static inline ma_scalar mtrandom(ma_scalar x) {
-    return mtrandom() * x;
-  }
-  static inline ma_scalar mtrandom(ma_scalar x, ma_scalar y) {
-    return x + mtrandom() * (y-x);
-  }
-
-  // C Random
-  static inline int random32() { return rand(); }
-  static inline long random64() { return ::rand(); }
 }
 
 #undef WITH_ARITHMETIC_TYPES
