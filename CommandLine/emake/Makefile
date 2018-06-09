@@ -43,8 +43,8 @@ DEPENDS := $(OBJECTS:.o=.d)
 
 CXXFLAGS += -I$(SHARED_SRC_DIR) $(addprefix -I$(SHARED_SRC_DIR)/, $(SHARED_INCLUDES))
 SOURCES += $(addprefix $(SHARED_SRC_DIR),$(SHARED_SOURCES))
-OBJECTS += $(addprefix .eobjs/shared/,$(SHARED_SOURCES:.cpp=.o))
-DEPENDS += $(addprefix .eobjs/shared/,$(SHARED_SOURCES:.cpp=.d))
+OBJECTS += $(addprefix $(OBJ_DIR)/shared/,$(SHARED_SOURCES:.cpp=.o))
+DEPENDS += $(addprefix $(OBJ_DIR)/shared/,$(SHARED_SOURCES:.cpp=.d))
 
 OBJDIRS := $(sort $(OBJ_DIR) $(dir $(OBJECTS)))
 
