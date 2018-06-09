@@ -62,22 +62,22 @@ enum {
     void message_mouse_color(int col);
     void message_position(int x, int y);
     void message_size(int w, int h);
-    void message_text_font(string name, int size, int color, int style);
-	void message_text_charset(int type, int charset);
-
+    void message_text_font(string name, int size, int color, int style); 
+	void message_text_charset(int type, int charset); 
+	
 	int show_message_ext(string str, string but1, string but2, string but3);
-
+  
 	bool show_question(string str);
 	inline bool action_if_question(string str)
 	{
 		return show_question(str);
 	}
-
+	
 	// IMPLEMENTS from widgets_mandatory:
 	// void show_error(string errortext, const bool fatal);
 
 	int get_color(int defcol, bool advanced = false);
-
+	
 	string get_open_filename(string filter, string fname, string caption="");
 	string get_save_filename(string filter, string fname, string caption="");
 	string get_directory(string dname, string caption="Select Folder");
