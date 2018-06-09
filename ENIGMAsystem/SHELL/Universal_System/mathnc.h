@@ -148,9 +148,9 @@ namespace enigma_user
   }
 
   // ENIGMA's own math helpers
-  inline ma_scalar frac(ma_scalar x)     { return x - (ma_scalar) floor(x); }
-  inline ma_scalar degtorad(ma_scalar x) { return x * (pi / (ma_scalar) 180); }
-  inline ma_scalar radtodeg(ma_scalar x) { return x * ((ma_scalar) 180 / pi); }
+  template<typename T> enigma::FloatType<T> frac(T x) { return x - floor(x); }
+  template<typename T> enigma::FloatType<T> degtorad(T x) { return x * (pi / (ma_scalar) 180); }
+  template<typename T> enigma::FloatType<T> radtodeg(T x) { return x * ((ma_scalar) 180 / pi); }
 
   inline double lengthdir_x(double len, double dir) { return len *  cosd(dir); }
   inline double lengthdir_y(double len, double dir) { return len * -sind(dir); }
