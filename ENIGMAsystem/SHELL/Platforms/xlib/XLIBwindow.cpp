@@ -155,7 +155,7 @@ int window_get_visible() {
   return wa.map_state != IsUnmapped;
 }
 
-void window_set_caption(string caption) { XStoreName(disp, win, caption.c_str()); }
+void window_set_caption(const string &caption) { XStoreName(disp, win, caption.c_str()); }
 
 string window_get_caption() {
   char* caption;

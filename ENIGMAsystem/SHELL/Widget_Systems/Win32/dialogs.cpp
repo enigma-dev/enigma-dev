@@ -397,7 +397,7 @@ void show_info(string info, int bgcolor, int left, int top, int width, int heigh
   */
 }
 
-int show_message(string str)
+int show_message(const string &str)
 {
   //NOTE: This will not work with a fullscreen application, it is an issue with Windows
   //this could be why GM8.1, unlike Studio, did not use native dialogs and custom

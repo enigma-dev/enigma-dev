@@ -16,20 +16,8 @@
 **/
 
 #ifdef DEBUG_MODE
-
-/*
-#ifndef stringinclude
-#define stringinclude
-#include <string>
-using std::string;
-#endif
-
-  #include "libEGMstd.h"
-*/
-#define toString(s) \
-  s
-
   #include "Widget_Systems/widgets_mandatory.h"
+  #include "libEGMstd.h"
   #define get_softbodyr(w,id,r) \
     if (unsigned(id) >= bulletSoftBodies.size() || id < 0) { \
       show_error("Cannot access Bullet Dynamics physics body with id " + toString(id), false); \

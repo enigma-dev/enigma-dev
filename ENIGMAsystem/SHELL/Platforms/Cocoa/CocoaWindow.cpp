@@ -100,14 +100,14 @@ namespace enigma_user {
   }
 
 
-  int window_set_caption(string caption)
+  int window_set_caption(const string &caption)
   {
-	cocoa_window_set_caption(caption.c_str());
-	return 0; // TODO, this function should be void in all files
+    cocoa_window_set_caption(caption.c_str());
+    return 0; // TODO, this function should be void in all files
   }
   string window_get_caption()
   {
-	return string(cocoa_window_get_caption());
+    return string(cocoa_window_get_caption());
   }
 
 
@@ -491,4 +491,3 @@ namespace enigma_user {
     return cocoa_get_screen_size(false);
   }
 }
-

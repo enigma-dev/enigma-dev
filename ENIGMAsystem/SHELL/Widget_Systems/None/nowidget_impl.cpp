@@ -92,7 +92,7 @@ void show_error(string err, const bool fatal)
 
 namespace enigma_user {
 
-int show_message(string message)
+int show_message(const string &message)
 {
   printf("show_message: %s\n", message.c_str());
   return 0;

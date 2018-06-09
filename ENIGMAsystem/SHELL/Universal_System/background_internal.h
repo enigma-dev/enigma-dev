@@ -71,8 +71,8 @@ namespace enigma
 } //namespace enigma
 
 #ifdef DEBUG_MODE
-  #include "libEGMstd.h"
   #include "Widget_Systems/widgets_mandatory.h"
+  #include "libEGMstd.h"
   #define get_background(bck2d,back)\
     if (back < 0 or size_t(back) >= enigma::background_idmax or !enigma::backgroundstructarray[back]) {\
       show_error("Attempting to draw non-existing background " + toString(back), false);\

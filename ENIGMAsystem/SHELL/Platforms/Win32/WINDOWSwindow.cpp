@@ -77,7 +77,7 @@ int window_get_height()
   return rc.bottom-rc.top;
 }
 
-void window_set_caption(string caption)
+void window_set_caption(const string &caption)
 {
 /*  if (caption == "")
       if (score != 0)
