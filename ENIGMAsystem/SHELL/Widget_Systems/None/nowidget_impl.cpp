@@ -36,7 +36,7 @@ using namespace std;
 #  include <termios.h>
 #  include <unistd.h>
 #endif
- 
+
 class PasswordContext {
 # ifdef TC_WINDOWS
   DWORD old_attrs = 0;
@@ -44,7 +44,7 @@ class PasswordContext {
 # else
   termios old_attrs;
 # endif
- 
+
  public:
   PasswordContext() {
 #   ifdef TC_WINDOWS
@@ -58,7 +58,7 @@ class PasswordContext {
       tcsetattr(STDIN_FILENO, TCSANOW, &new_attrs);
 #   endif
   }
- 
+
   ~PasswordContext() {
 #   ifdef TC_WINDOWS
       SetConsoleMode(hStdin, old_attrs);
@@ -92,7 +92,7 @@ void show_error(string err, const bool fatal)
 
 namespace enigma_user {
 
-int show_message(string message)
+int show_message(const string &message)
 {
   printf("show_message: %s\n", message.c_str());
   return 0;
