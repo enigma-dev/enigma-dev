@@ -16,10 +16,10 @@ using std::string;
 
 namespace enigma
 {
-    bool widget_system_initialize()
-    {
-        return true;
-    }
+  bool widget_system_initialize()
+  {
+    return true;
+  }
 }
 
 class FileFilter {
@@ -74,317 +74,317 @@ class FileFilter {
 
 void show_error(string errortext, const bool fatal)
 {
-    string msg;
+  string msg;
 
-    if (errortext == "")
-        msg = " ";
-    else
-        msg = errortext;
+  if (errortext == "")
+    msg = " ";
+  else
+    msg = errortext;
 
-    if (msg != " ")
-        msg = msg + "\n\n";
+  if (msg != " ")
+    msg = msg + "\n\n";
 
-    replace(msg.begin(), msg.end(), '"', '\'');
+  replace(msg.begin(), msg.end(), '"', '\'');
 
-    if (fatal == 0)
-    {
-        msg = msg + "Do you want to abort the application?";
+  if (fatal == 0)
+  {
+    msg = msg + "Do you want to abort the application?";
 
-        double input = tinyfd_messageBox("Error", msg.c_str(), "yesno", "error", 1);
+    double input = tinyfd_messageBox("Error", msg.c_str(), "yesno", "error", 1);
 
-        if (input == 1)
-            exit(0);
-    }
-    else
-    {
-        msg = msg + "Click 'OK' to abort the application.";
+    if (input == 1)
+      exit(0);
+  }
+  else
+  {
+    msg = msg + "Click 'OK' to abort the application.";
 
-        tinyfd_messageBox("Error", msg.c_str(), "ok", "error", 1);
+    tinyfd_messageBox("Error", msg.c_str(), "ok", "error", 1);
 
-        exit(0);
-    }
+    exit(0);
+  }
 }
 
 namespace enigma_user
 {
-    void show_info(string text, int bgcolor, int left, int top, int width, int height,
-	bool embedGameWindow, bool showBorder, bool allowResize, bool stayOnTop,
-	bool pauseGame, string caption)
-    {
+  void show_info(string text, int bgcolor, int left, int top, int width, int height,
+    bool embedGameWindow, bool showBorder, bool allowResize, bool stayOnTop,
+    bool pauseGame, string caption)
+  {
 
-    }
+  }
 
-    int show_message(string str)
-    {
-        string caption = window_get_caption();
+  int show_message(string str)
+  {
+    string caption = window_get_caption();
 
-        if (caption == "")
-            caption = " ";
+    if (caption == "")
+      caption = " ";
 
-        string msg;
+      string msg;
 
-        if (str == "")
-            msg = " ";
-        else
-            msg = str;
+      if (str == "")
+        msg = " ";
+      else
+        msg = str;
 
-        replace(msg.begin(), msg.end(), '"', '\'');
-        replace(caption.begin(), caption.end(), '"', '\'');
+      replace(msg.begin(), msg.end(), '"', '\'');
+      replace(caption.begin(), caption.end(), '"', '\'');
 
-        tinyfd_messageBox(caption.c_str(), msg.c_str(), "ok", "info", 1);
+      tinyfd_messageBox(caption.c_str(), msg.c_str(), "ok", "info", 1);
 
-        return 1;
-    }
+    return 1;
+  }
 
-    double show_question(string str)
-    {
-        string caption = window_get_caption();
+  double show_question(string str)
+  {
+    string caption = window_get_caption();
+	  
+    if (caption == "")
+      caption = " ";
 
-        if (caption == "")
-            caption = " ";
+      string msg;
 
-        string msg;
+    if (str == "")
+      msg = " ";
+    else
+      msg = str;
 
-        if (str == "")
-            msg = " ";
-        else
-            msg = str;
+    replace(msg.begin(), msg.end(), '"', '\'');
+    replace(caption.begin(), caption.end(), '"', '\'');
 
-        replace(msg.begin(), msg.end(), '"', '\'');
-        replace(caption.begin(), caption.end(), '"', '\'');
+    return tinyfd_messageBox(caption.c_str(), msg.c_str(), "yesno", "question", 1);
+  }
 
-        return tinyfd_messageBox(caption.c_str(), msg.c_str(), "yesno", "question", 1);
-    }
+  string get_string(string str, string def)
+  {
+    string caption = window_get_caption();
+    
+    if (caption == "")
+      caption = " ";
 
-    string get_string(string str, string def)
-    {
-        string caption = window_get_caption();
+    string msg;
 
-        if (caption == "")
-            caption = " ";
+    if (str == "")
+      msg = " ";
+    else
+      msg = str;
 
-        string msg;
+    replace(msg.begin(), msg.end(), '"', '\'');
+    replace(def.begin(), def.end(), '"', '\'');
+    replace(caption.begin(), caption.end(), '"', '\'');
 
-        if (str == "")
-            msg = " ";
-        else
-            msg = str;
+    const char *input = tinyfd_inputBox(caption.c_str(), msg.c_str(), def.c_str());
 
-        replace(msg.begin(), msg.end(), '"', '\'');
-        replace(def.begin(), def.end(), '"', '\'');
-        replace(caption.begin(), caption.end(), '"', '\'');
+    return input ? : "";
+  }
 
-        const char *input = tinyfd_inputBox(caption.c_str(), msg.c_str(), def.c_str());
+  string get_password(string str, string def)
+  {
+    string caption = window_get_caption();
 
-        return input ? : "";
-    }
+    if (caption == "")
+      caption = " ";
 
-    string get_password(string str, string def)
-    {
-        string caption = window_get_caption();
+    string msg;
 
-        if (caption == "")
-            caption = " ";
+    if (str == "")
+      msg = " ";
+    else
+      msg = str;
 
-        string msg;
+    replace(msg.begin(), msg.end(), '"', '\'');
+    replace(def.begin(), def.end(), '"', '\'');
+    replace(caption.begin(), caption.end(), '"', '\'');
 
-        if (str == "")
-            msg = " ";
-        else
-            msg = str;
+    const char *input = tinyfd_passwordBox(caption.c_str(), msg.c_str(), def.c_str());
+	  
+    return input ? : "";
+  }
 
-        replace(msg.begin(), msg.end(), '"', '\'');
-        replace(def.begin(), def.end(), '"', '\'');
-        replace(caption.begin(), caption.end(), '"', '\'');
+  double get_integer(string str, double def)
+  {
+    string caption = window_get_caption();
 
-        const char *input = tinyfd_passwordBox(caption.c_str(), msg.c_str(), def.c_str());
+    if (caption == "")
+      caption = " ";
 
-        return input ? : "";
-    }
+    std::ostringstream def_integer;
+    def_integer << def;
+    string integer = def_integer.str();
 
-    double get_integer(string str, double def)
-    {
-        string caption = window_get_caption();
+    string msg;
 
-        if (caption == "")
-            caption = " ";
+    if (str == "")
+      msg = " ";
+    else
+      msg = str;
 
-        std::ostringstream def_integer;
-        def_integer << def;
-        string integer = def_integer.str();
+    replace(msg.begin(), msg.end(), '"', '\'');
+    replace(caption.begin(), caption.end(), '"', '\'');
 
-        string msg;
+    const char *input = tinyfd_inputBox(caption.c_str(), msg.c_str(), integer.c_str());
 
-        if (str == "")
-            msg = " ";
-        else
-            msg = str;
+    return input ? strtod(input, NULL) : 0;
+  }
 
-        replace(msg.begin(), msg.end(), '"', '\'');
-        replace(caption.begin(), caption.end(), '"', '\'');
+  double get_passcode(string str, double def)
+  {
+    string caption = window_get_caption();
+	 
+    if (caption == "")
+      caption = " ";
 
-        const char *input = tinyfd_inputBox(caption.c_str(), msg.c_str(), integer.c_str());
+    std::ostringstream def_integer;
+    def_integer << def;
+    string integer = def_integer.str();
 
-        return input ? strtod(input, NULL) : 0;
-    }
+    string msg;
 
-    double get_passcode(string str, double def)
-    {
-        string caption = window_get_caption();
+    if (str == "")
+      msg = " ";
+    else
+      msg = str;
+  
+    replace(msg.begin(), msg.end(), '"', '\'');
+    replace(caption.begin(), caption.end(), '"', '\'');
 
-        if (caption == "")
-            caption = " ";
+    const char *input = tinyfd_passwordBox(caption.c_str(), msg.c_str(), integer.c_str());
 
-        std::ostringstream def_integer;
-        def_integer << def;
-        string integer = def_integer.str();
+    return input ? strtod(input, NULL) : 0;
+  }
 
-        string msg;
+  string get_open_filename(string filter, string fname)
+  {
+    replace(fname.begin(), fname.end(), '"', '\'');
+    replace(filter.begin(), filter.end(), '"', '\'');
+    FileFilter ff(filter.c_str());
 
-        if (str == "")
-            msg = " ";
-        else
-            msg = str;
+    const char *path = tinyfd_openFileDialog("Open", fname.c_str(),
+      ff.count() ? *ff.pattern_counts() : 0, *ff.patterns(), (char *)filter.c_str(), 0);
 
-        replace(msg.begin(), msg.end(), '"', '\'');
-        replace(caption.begin(), caption.end(), '"', '\'');
+    return path ? : "";
+  }
 
-        const char *input = tinyfd_passwordBox(caption.c_str(), msg.c_str(), integer.c_str());
+  string get_open_filename_ext(string filter, string fname, string dir, string title)
+  {
+    const char *fname_or_dir;
 
-        return input ? strtod(input, NULL) : 0;
-    }
+    replace(fname.begin(), fname.end(), '"', '\'');
+    replace(dir.begin(), dir.end(), '"', '\'');
 
-    string get_open_filename(string filter, string fname)
-    {
-        replace(fname.begin(), fname.end(), '"', '\'');
-        replace(filter.begin(), filter.end(), '"', '\'');
-        FileFilter ff(filter.c_str());
+    if (access(fname.c_str(), F_OK) != -1)
+      fname_or_dir = fname.c_str();
+    else
+      fname_or_dir = dir.c_str();
 
-        const char *path = tinyfd_openFileDialog("Open", fname.c_str(),
-            ff.count() ? *ff.pattern_counts() : 0, *ff.patterns(), (char *)filter.c_str(), 0);
+    struct stat sb;
 
-        return path ? : "";
-    }
+    if ((stat(dir.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode)) == 0)
+      fname_or_dir = "";
 
-    string get_open_filename_ext(string filter, string fname, string dir, string title)
-    {
-        const char *fname_or_dir;
+    string titlebar;
 
-        replace(fname.begin(), fname.end(), '"', '\'');
-        replace(dir.begin(), dir.end(), '"', '\'');
+    if (title == "")
+      titlebar = "Open";
+    else
+      titlebar = title;
 
-        if(access(fname.c_str(), F_OK) != -1)
-            fname_or_dir = fname.c_str();
-        else
-            fname_or_dir = dir.c_str();
+    replace(fname.begin(), fname.end(), '"', '\'');
+    replace(filter.begin(), filter.end(), '"', '\'');
+    replace(titlebar.begin(), titlebar.end(), '"', '\'');
+    FileFilter ff(filter.c_str());
 
-        struct stat sb;
+    const char *path = tinyfd_openFileDialog(titlebar.c_str(), fname_or_dir,
+      ff.count() ? *ff.pattern_counts() : 0, *ff.patterns(), (char *)filter.c_str(), 0);
 
-        if ((stat(dir.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode)) == 0)
-            fname_or_dir = "";
+    return path ? : "";
+  }
 
-        string titlebar;
+  string get_save_filename(string filter, string fname)
+  {
+    replace(fname.begin(), fname.end(), '"', '\'');
+    replace(filter.begin(), filter.end(), '"', '\'');
+    FileFilter ff(filter.c_str());
 
-        if (title == "")
-            titlebar = "Open";
-        else
-            titlebar = title;
+    const char *path = tinyfd_saveFileDialog("Save As", fname.c_str(),
+      ff.count() ? *ff.pattern_counts() : 0, *ff.patterns(), (char *)filter.c_str());
 
-        replace(fname.begin(), fname.end(), '"', '\'');
-        replace(filter.begin(), filter.end(), '"', '\'');
-        replace(titlebar.begin(), titlebar.end(), '"', '\'');
-        FileFilter ff(filter.c_str());
+    return path ? : "";
+  }
 
-        const char *path = tinyfd_openFileDialog(titlebar.c_str(), fname_or_dir,
-            ff.count() ? *ff.pattern_counts() : 0, *ff.patterns(), (char *)filter.c_str(), 0);
+  string get_save_filename_ext(string filter, string fname, string dir, string title)
+  {
+    const char *fname_or_dir;
 
-        return path ? : "";
-    }
+    replace(fname.begin(), fname.end(), '"', '\'');
+    replace(dir.begin(), dir.end(), '"', '\'');
 
-    string get_save_filename(string filter, string fname)
-    {
-        replace(fname.begin(), fname.end(), '"', '\'');
-        replace(filter.begin(), filter.end(), '"', '\'');
-        FileFilter ff(filter.c_str());
+    if (access(fname.c_str(), F_OK) != -1)
+      fname_or_dir = fname.c_str();
+    else
+      fname_or_dir = dir.c_str();
 
-        const char *path = tinyfd_saveFileDialog("Save As", fname.c_str(),
-            ff.count() ? *ff.pattern_counts() : 0, *ff.patterns(), (char *)filter.c_str());
+    struct stat sb;
 
-        return path ? : "";
-    }
+    if ((stat(dir.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode)) == 0)
+      fname_or_dir = "";
 
-    string get_save_filename_ext(string filter, string fname, string dir, string title)
-    {
-        const char *fname_or_dir;
+    string titlebar;
 
-        replace(fname.begin(), fname.end(), '"', '\'');
-        replace(dir.begin(), dir.end(), '"', '\'');
+    if (title == "")
+      titlebar = "Save As";
+    else
+      titlebar = title;
 
-        if(access(fname.c_str(), F_OK) != -1)
-            fname_or_dir = fname.c_str();
-        else
-            fname_or_dir = dir.c_str();
+    replace(fname.begin(), fname.end(), '"', '\'');
+    replace(filter.begin(), filter.end(), '"', '\'');
+    replace(titlebar.begin(), titlebar.end(), '"', '\'');
+    FileFilter ff(filter.c_str());
 
-        struct stat sb;
+    const char *path = tinyfd_saveFileDialog(titlebar.c_str(), fname_or_dir,
+      ff.count() ? *ff.pattern_counts() : 0, *ff.patterns(), (char *)filter.c_str());
 
-        if ((stat(dir.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode)) == 0)
-            fname_or_dir = "";
+    return path ? : "";
+  }
 
-        string titlebar;
+  string get_directory(string dname)
+  {
+    replace(dname.begin(), dname.end(), '"', '\'');
 
-        if (title == "")
-            titlebar = "Save As";
-        else
-            titlebar = title;
+    const char *path = tinyfd_selectFolderDialog("Select Directory", dname.c_str());
 
-        replace(fname.begin(), fname.end(), '"', '\'');
-        replace(filter.begin(), filter.end(), '"', '\'');
-        replace(titlebar.begin(), titlebar.end(), '"', '\'');
-        FileFilter ff(filter.c_str());
+    return path ? : "";
+  }
 
-        const char *path = tinyfd_saveFileDialog(titlebar.c_str(), fname_or_dir,
-            ff.count() ? *ff.pattern_counts() : 0, *ff.patterns(), (char *)filter.c_str());
+  string get_directory_alt(string capt, string root)
+  {
+    string titlebar;
 
-        return path ? : "";
-    }
+    if (capt == "")
+      titlebar = "Browse For Folder";
+    else
+      titlebar = capt;
 
-    string get_directory(string dname)
-    {
-        replace(dname.begin(), dname.end(), '"', '\'');
+    replace(root.begin(), root.end(), '"', '\'');
+    replace(titlebar.begin(), titlebar.end(), '"', '\'');
 
-        const char *path = tinyfd_selectFolderDialog("Select Directory", dname.c_str());
+    const char *path = tinyfd_selectFolderDialog(titlebar.c_str(), root.c_str());
 
-        return path ? : "";
-    }
+    return path ? : "";
+  }
 
-    string get_directory_alt(string capt, string root)
-    {
-        string titlebar;
+  double get_color(double defcol)
+  {
+    unsigned char rescol[3];
 
-        if (capt == "")
-            titlebar = "Browse For Folder";
-        else
-            titlebar = capt;
+    rescol[0] = (int)defcol & 0xFF;
+    rescol[1] = ((int)defcol >> 8) & 0xFF;
+    rescol[2] = ((int)defcol >> 16) & 0xFF;
 
-        replace(root.begin(), root.end(), '"', '\'');
-        replace(titlebar.begin(), titlebar.end(), '"', '\'');
+    if (tinyfd_colorChooser("Color", NULL, rescol, rescol) == NULL)
+      return -1;
 
-        const char *path = tinyfd_selectFolderDialog(titlebar.c_str(), root.c_str());
-
-        return path ? : "";
-    }
-
-    double get_color(double defcol)
-    {
-        unsigned char rescol[3];
-
-        rescol[0] = (int)defcol & 0xFF;
-        rescol[1] = ((int)defcol >> 8) & 0xFF;
-        rescol[2] = ((int)defcol >> 16) & 0xFF;
-
-        if (tinyfd_colorChooser("Color", NULL, rescol, rescol) == NULL)
-            return -1;
-
-        return (int)((rescol[0] & 0xff) + ((rescol[1] & 0xff) << 8) + ((rescol[2] & 0xff) << 16));
-    }
+    return (int)((rescol[0] & 0xff) + ((rescol[1] & 0xff) << 8) + ((rescol[2] & 0xff) << 16));
+  }
 }
