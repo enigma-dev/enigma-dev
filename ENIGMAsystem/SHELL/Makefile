@@ -109,8 +109,8 @@ OBJECTS := $(addprefix $(OBJDIR)/,$(patsubst %.m, %.o, $(patsubst %.cpp, %.o, $(
 DEPENDS := $(OBJECTS:.o=.d)
 
 SOURCES += $(addprefix $(SHARED_SRC_DIR),$(SHARED_SOURCES))
-OBJECTS += $(addprefix .eobjs/shared/,$(SHARED_SOURCES:.cpp=.o))
-DEPENDS += $(addprefix .eobjs/shared/,$(SHARED_SOURCES:.cpp=.d))
+OBJECTS += $(addprefix $(OBJDIR)/shared/,$(SHARED_SOURCES:.cpp=.o))
+DEPENDS += $(addprefix $(OBJDIR)/shared/,$(SHARED_SOURCES:.cpp=.d))
 
 OBJDIRS := $(sort $(dir $(OBJECTS) $(RCFILES)))
 
