@@ -18,6 +18,7 @@
 #ifndef ENIGMA_PLATFORM_WINDOW_H
 #define ENIGMA_PLATFORM_WINDOW_H
 
+#include "libEGMstd.h"
 #include "Platforms/platforms_mandatory.h"
 
 #include <string>
@@ -209,7 +210,8 @@ int window_get_y();
 int window_get_width();
 int window_get_height();
 
-void window_set_caption(std::string caption);
+void window_set_caption(const std::string &caption);
+template<typename T> void window_set_caption(T caption) { return window_set_caption(enigma_user::toString(caption)); }
 std::string window_get_caption();
 void window_set_color(int color);
 int window_get_color();
