@@ -114,7 +114,7 @@ namespace enigma_user
 
   }
 
-  int show_message(string str)
+  int show_message(const string &str)
   {
     string caption = window_get_caption();
 
