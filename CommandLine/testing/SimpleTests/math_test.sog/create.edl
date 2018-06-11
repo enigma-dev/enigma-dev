@@ -37,6 +37,18 @@ gtest_assert_eq(abs(lu),  lu);
 gtest_assert_eq(abs(v),  -v);
 gtest_assert_eq(abs(a),  -a);
 
+// Test fractional floats
+gtest_assert_eq(frac(1.234f), 0.234f);
+gtest_assert_eq(frac(-1.234f), -0.234f);
+gtest_assert_eq(frac(1.234d), 0.234d);
+gtest_assert_eq(frac(-1.234d), -0.234d);
+gtest_assert_eq(frac(1.234L), 0.234L);
+gtest_assert_eq(frac(-1.234L), -0.234L);
+
+// Test radian/degree conversion
+gtest_assert_eq(radtodeg(1.5708), 90.0002105);
+gtest_assert_eq(degtorad(90), 1.5708);
+
 // Simple tests of sqr
 gtest_assert_eq(sqr(f), f * f);
 gtest_assert_eq(sqr(d), d * d);
