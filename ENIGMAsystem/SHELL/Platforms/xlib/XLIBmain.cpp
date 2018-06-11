@@ -227,6 +227,11 @@ namespace enigma_user {
 int display_get_width() { return XWidthOfScreen(enigma::x11::screen); }
 int display_get_height() { return XHeightOfScreen(enigma::x11::screen); }
 
+int display_get_frequency() {
+  XRRScreenConfiguration *conf = XRRGetScreenInfo(enigma::x11::disp, enigma::x11::win);
+  return XRRConfigCurrentRate(conf);
+}
+
 bool display_set_size(int w, int h) {
   XRRScreenConfiguration *conf = XRRGetScreenInfo(enigma::x11::disp, enigma::x11::win);
   Rotation original_rotation;
