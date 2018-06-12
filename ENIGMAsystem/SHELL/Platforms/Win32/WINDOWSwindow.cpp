@@ -35,12 +35,38 @@ using namespace std;
 
 #include <stdio.h>
 
-static int displayInitialResolutionWidth = 0, displayInitialResolutionHeight = 0, displayInitialBitdepth = 0, displayInitialFrequency = 0;
-
 namespace enigma
 {
-  extern HWND hWnd;
-  HCURSOR currentCursor = LoadCursor(NULL, IDC_ARROW);
+
+extern HWND hWnd;
+HCURSOR currentCursor = LoadCursor(NULL, IDC_ARROW);
+
+void configure_devmode(DEVMODE &devMode, int w, int h, int freq, int bitdepth) {
+  if (w != -1)
+	{
+		devMode.dmFields |= DM_PELSWIDTH;
+		devMode.dmPelsWidth = w;
+	}
+
+	if (h != -1)
+	{
+		devMode.dmFields |= DM_PELSHEIGHT;
+		devMode.dmPelsHeight = h;
+	}
+
+	if (freq != -1)
+	{
+		devMode.dmFields |= DM_DISPLAYFREQUENCY;
+		devMode.dmDisplayFrequency = freq;
+	}
+
+	if (bitdepth != -1)
+	{
+		devMode.dmFields |= DM_BITSPERPEL;
+		devMode.dmBitsPerPel = bitdepth;
+	}
+}
+
 }
 
 namespace enigma_user {
@@ -272,36 +298,7 @@ unsigned display_get_dpi_y() {
 
 void display_reset()
 {
-	DEVMODE devMode;
-
-	if (!EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &devMode))
-		return;
-
-	if (displayInitialBitdepth != 0)
-	{
-		devMode.dmFields |= DM_BITSPERPEL;
-		devMode.dmBitsPerPel = displayInitialBitdepth;
-	}
-
-	if (displayInitialFrequency != 0)
-	{
-		devMode.dmFields |= DM_DISPLAYFREQUENCY;
-		devMode.dmDisplayFrequency = displayInitialFrequency;
-	}
-
-	if (displayInitialResolutionWidth != 0)
-	{
-		devMode.dmFields |= DM_PELSWIDTH;
-		devMode.dmPelsWidth = displayInitialResolutionWidth;
-	}
-
-	if (displayInitialResolutionHeight != 0)
-	{
-		devMode.dmFields |= DM_PELSHEIGHT;
-		devMode.dmPelsHeight = displayInitialResolutionHeight;
-	}
-
-	ChangeDisplaySettings(&devMode, CDS_FULLSCREEN);
+	ChangeDisplaySettings(NULL, 0);
 }
 
 bool display_set_size(int w, int h)
@@ -310,12 +307,6 @@ bool display_set_size(int w, int h)
 
 	if (!EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &devMode))
 		return false;
-
-	if (displayInitialResolutionWidth == 0)
-		displayInitialResolutionWidth = devMode.dmPelsWidth;
-
-	if (displayInitialResolutionHeight == 0)
-		displayInitialResolutionHeight = devMode.dmPelsHeight;
 
 	devMode.dmFields = DM_PELSWIDTH | DM_PELSHEIGHT;
 	devMode.dmPelsWidth = w;
@@ -331,9 +322,6 @@ bool display_set_frequency(int freq)
 	if (!EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &devMode))
 		return false;
 
-	if (displayInitialFrequency == 0)
-		displayInitialFrequency = devMode.dmBitsPerPel;
-
 	devMode.dmFields = DM_DISPLAYFREQUENCY;
 	devMode.dmDisplayFrequency = freq;
 
@@ -346,9 +334,6 @@ bool display_set_colordepth(int depth)
 
 	if (!EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &devMode))
 		return true;
-
-	if (displayInitialBitdepth == 0)
-		displayInitialBitdepth = devMode.dmBitsPerPel;
 
 	devMode.dmFields = DM_BITSPERPEL;
 	devMode.dmBitsPerPel = depth;
@@ -363,41 +348,7 @@ bool display_set_all(int w, int h, int freq, int bitdepth)
 	if (!EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &devMode))
 		return false;
 
-	if (w != -1)
-	{
-		if (displayInitialResolutionWidth == 0)
-			displayInitialResolutionWidth = devMode.dmPelsWidth;
-
-		devMode.dmFields |= DM_PELSWIDTH;
-		devMode.dmPelsWidth = w;
-	}
-
-	if (h != -1)
-	{
-		if (displayInitialResolutionHeight == 0)
-			displayInitialResolutionHeight = devMode.dmPelsHeight;
-
-		devMode.dmFields |= DM_PELSHEIGHT;
-		devMode.dmPelsHeight = h;
-	}
-
-	if (freq != -1)
-	{
-		if (displayInitialFrequency == 0)
-			displayInitialFrequency = devMode.dmDisplayFrequency;
-
-		devMode.dmFields |= DM_DISPLAYFREQUENCY;
-		devMode.dmDisplayFrequency = freq;
-	}
-
-	if (bitdepth != -1)
-	{
-		if (displayInitialBitdepth == 0)
-			displayInitialBitdepth = devMode.dmBitsPerPel;
-
-		devMode.dmFields |= DM_BITSPERPEL;
-		devMode.dmBitsPerPel = bitdepth;
-	}
+	enigma::configure_devmode(devMode, w, h, freq, bitdepth);
 
 	return (ChangeDisplaySettings(&devMode, CDS_FULLSCREEN) == DISP_CHANGE_SUCCESSFUL);
 }
@@ -409,41 +360,7 @@ bool display_test_all(int w, int h, int freq, int bitdepth)
 	if (!EnumDisplaySettings(NULL, ENUM_CURRENT_SETTINGS, &devMode))
 		return false;
 
-	if (w != -1)
-	{
-		if (displayInitialResolutionWidth == 0)
-			displayInitialResolutionWidth = devMode.dmPelsWidth;
-
-		devMode.dmFields |= DM_PELSWIDTH;
-		devMode.dmPelsWidth = w;
-	}
-
-	if (h != -1)
-	{
-		if (displayInitialResolutionHeight == 0)
-			displayInitialResolutionHeight = devMode.dmPelsHeight;
-
-		devMode.dmFields |= DM_PELSHEIGHT;
-		devMode.dmPelsHeight = h;
-	}
-
-	if (freq != -1)
-	{
-		if (displayInitialFrequency == 0)
-			displayInitialFrequency = devMode.dmDisplayFrequency;
-
-		devMode.dmFields |= DM_DISPLAYFREQUENCY;
-		devMode.dmDisplayFrequency = freq;
-	}
-
-	if (bitdepth != -1)
-	{
-		if (displayInitialBitdepth == 0)
-			displayInitialBitdepth = devMode.dmBitsPerPel;
-
-		devMode.dmFields |= DM_BITSPERPEL;
-		devMode.dmBitsPerPel = bitdepth;
-	}
+	enigma::configure_devmode(devMode, w, h, freq, bitdepth);
 
 	return (ChangeDisplaySettings(&devMode, CDS_TEST) == DISP_CHANGE_SUCCESSFUL);
 }
