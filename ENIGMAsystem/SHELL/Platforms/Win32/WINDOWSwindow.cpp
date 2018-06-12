@@ -301,7 +301,7 @@ void display_reset()
 		devMode.dmPelsHeight = displayInitialResolutionHeight;
 	}
 
-	ChangeDisplaySettings(&devMode, 0);
+	ChangeDisplaySettings(&devMode, CDS_FULLSCREEN);
 }
 
 bool display_set_size(int w, int h)
@@ -321,7 +321,7 @@ bool display_set_size(int w, int h)
 	devMode.dmPelsWidth = w;
 	devMode.dmPelsHeight = h;
 
-	return (ChangeDisplaySettings(&devMode, 0) == DISP_CHANGE_SUCCESSFUL);
+	return (ChangeDisplaySettings(&devMode, CDS_FULLSCREEN) == DISP_CHANGE_SUCCESSFUL);
 }
 
 bool display_set_frequency(int freq)
@@ -337,7 +337,7 @@ bool display_set_frequency(int freq)
 	devMode.dmFields = DM_DISPLAYFREQUENCY;
 	devMode.dmDisplayFrequency = freq;
 
-	ChangeDisplaySettings(&devMode, 0);
+	ChangeDisplaySettings(&devMode, CDS_FULLSCREEN);
 	return true;
 }
 
@@ -354,7 +354,7 @@ bool display_set_colordepth(int depth)
 	devMode.dmFields = DM_BITSPERPEL;
 	devMode.dmBitsPerPel = depth;
 
-	ChangeDisplaySettings(&devMode, 0);
+	ChangeDisplaySettings(&devMode, CDS_FULLSCREEN);
 	return true;
 }
 
@@ -401,7 +401,7 @@ bool display_set_all(int w, int h, int freq, int bitdepth)
 		devMode.dmBitsPerPel = bitdepth;
 	}
 
-	return ChangeDisplaySettings(&devMode, 0) == DISP_CHANGE_SUCCESSFUL;
+	return ChangeDisplaySettings(&devMode, CDS_FULLSCREEN) == DISP_CHANGE_SUCCESSFUL;
 }
 
 bool display_test_all(int w, int h, int freq, int bitdepth)
