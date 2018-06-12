@@ -251,7 +251,7 @@ unsigned char* zlib_compress(unsigned char* inbuffer,int &actualsize)
 
 #include "lodepng.h"
 
-Image AddImage(const std::string fname) {
+Image AddImage(const std::string fname, bool transparent) {
   Image i = Image();
 
   unsigned error;
@@ -265,6 +265,10 @@ Image AddImage(const std::string fname) {
     return i;
   }
 
+  unsigned char t_pixel_b = image[(pngheight-1)*pngwidth*4+0];
+  unsigned char t_pixel_g = image[(pngheight-1)*pngwidth*4+1];
+  unsigned char t_pixel_r = image[(pngheight-1)*pngwidth*4+2];
+
   unsigned ih,iw;
   const int bitmap_size = pngwidth*pngheight*4;
   unsigned char* bitmap = new unsigned char[bitmap_size](); // Initialize to zero.
@@ -275,7 +279,14 @@ Image AddImage(const std::string fname) {
       bitmap[tmp+0] = image[4*pngwidth*ih+iw*4+2];
       bitmap[tmp+1] = image[4*pngwidth*ih+iw*4+1];
       bitmap[tmp+2] = image[4*pngwidth*ih+iw*4+0];
-      bitmap[tmp+3] = image[4*pngwidth*ih+iw*4+3];
+      if (transparent &&
+          image[tmp+0] == t_pixel_b &&
+          image[tmp+1] == t_pixel_g &&
+          image[tmp+2] == t_pixel_r) {
+        bitmap[tmp+3] = 0;
+      } else {
+        bitmap[tmp+3] = image[4*pngwidth*ih+iw*4+3];
+      }
       tmp+=4;
     }
   }
@@ -404,7 +415,7 @@ void AddSprite(const char* name, const buffers::resources::Sprite& spr) {
   if (s.subImageCount > 0) {
     s.subImages = new SubImage[s.subImageCount];
     for (int i = 0; i < s.subImageCount; ++i) {
-      s.subImages[i].image = AddImage(spr.subimages(i));
+      s.subImages[i].image = AddImage(spr.subimages(i), s.transparent);
     }
   }
 
@@ -463,7 +474,7 @@ void AddBackground(const char* name, const buffers::resources::Background& bkg) 
   b.hSep = bkg.horizontal_spacing();
   b.vSep = bkg.vertical_spacing();
 
-  b.backgroundImage = AddImage(bkg.image());
+  b.backgroundImage = AddImage(bkg.image(), b.transparent);
 }
 
 void AddPath(const char* name, const buffers::resources::Path& pth) {
