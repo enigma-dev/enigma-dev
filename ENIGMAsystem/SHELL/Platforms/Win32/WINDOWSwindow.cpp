@@ -337,8 +337,7 @@ bool display_set_frequency(int freq)
 	devMode.dmFields = DM_DISPLAYFREQUENCY;
 	devMode.dmDisplayFrequency = freq;
 
-	ChangeDisplaySettings(&devMode, CDS_FULLSCREEN);
-	return true;
+	return (ChangeDisplaySettings(&devMode, CDS_FULLSCREEN) == DISP_CHANGE_SUCCESSFUL);
 }
 
 bool display_set_colordepth(int depth)
@@ -354,8 +353,7 @@ bool display_set_colordepth(int depth)
 	devMode.dmFields = DM_BITSPERPEL;
 	devMode.dmBitsPerPel = depth;
 
-	ChangeDisplaySettings(&devMode, CDS_FULLSCREEN);
-	return true;
+  return (ChangeDisplaySettings(&devMode, CDS_FULLSCREEN) == DISP_CHANGE_SUCCESSFUL);
 }
 
 bool display_set_all(int w, int h, int freq, int bitdepth)
@@ -401,7 +399,7 @@ bool display_set_all(int w, int h, int freq, int bitdepth)
 		devMode.dmBitsPerPel = bitdepth;
 	}
 
-	return ChangeDisplaySettings(&devMode, CDS_FULLSCREEN) == DISP_CHANGE_SUCCESSFUL;
+	return (ChangeDisplaySettings(&devMode, CDS_FULLSCREEN) == DISP_CHANGE_SUCCESSFUL);
 }
 
 bool display_test_all(int w, int h, int freq, int bitdepth)
@@ -447,7 +445,7 @@ bool display_test_all(int w, int h, int freq, int bitdepth)
 		devMode.dmBitsPerPel = bitdepth;
 	}
 
-	return ChangeDisplaySettings(&devMode, CDS_TEST) == DISP_CHANGE_SUCCESSFUL;
+	return (ChangeDisplaySettings(&devMode, CDS_TEST) == DISP_CHANGE_SUCCESSFUL);
 }
 
 int window_mouse_get_x()
