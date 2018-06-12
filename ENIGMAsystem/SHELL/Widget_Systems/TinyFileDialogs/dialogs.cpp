@@ -1,4 +1,5 @@
 #include "dialogs.h"
+#include "Universal_System/estring.h"
 #include "Platforms/General/PFwindow.h"
 #include "Widget_Systems/widgets_mandatory.h"
 #include <tinyfiledialogs/tinyfiledialogs.h>
@@ -7,12 +8,13 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
-#include <algorithm>
 #include <sstream>
 #include <vector>
 #include <string>
 
 using std::string;
+
+using enigma_user::string_replace_all;
 
 namespace enigma
 {
@@ -84,7 +86,7 @@ void show_error(string errortext, const bool fatal)
   if (msg != " ")
     msg = msg + "\n\n";
 
-  replace(msg.begin(), msg.end(), '"', '\'');
+  msg = string_replace_all(msg, "\"", "\\\"");
 
   if (fatal == 0)
   {
@@ -121,17 +123,17 @@ namespace enigma_user
     if (caption == "")
       caption = " ";
 
-      string msg;
+    string msg;
 
-      if (str == "")
-        msg = " ";
-      else
-        msg = str;
+    if (str == "")
+      msg = " ";
+    else
+      msg = str;
 
-      replace(msg.begin(), msg.end(), '"', '\'');
-      replace(caption.begin(), caption.end(), '"', '\'');
+    msg = string_replace_all(msg, "\"", "\\\"");
+    caption = string_replace_all(caption, "\"", "\\\"");
 
-      tinyfd_messageBox(caption.c_str(), msg.c_str(), "ok", "info", 1);
+    tinyfd_messageBox(caption.c_str(), msg.c_str(), "ok", "info", 1);
 
     return 1;
   }
@@ -139,7 +141,7 @@ namespace enigma_user
   double show_question(string str)
   {
     string caption = window_get_caption();
-	  
+
     if (caption == "")
       caption = " ";
 
@@ -150,8 +152,8 @@ namespace enigma_user
     else
       msg = str;
 
-    replace(msg.begin(), msg.end(), '"', '\'');
-    replace(caption.begin(), caption.end(), '"', '\'');
+    msg = string_replace_all(msg, "\"", "\\\"");
+    caption = string_replace_all(caption, "\"", "\\\"");
 
     return tinyfd_messageBox(caption.c_str(), msg.c_str(), "yesno", "question", 1);
   }
@@ -159,7 +161,7 @@ namespace enigma_user
   string get_string(string str, string def)
   {
     string caption = window_get_caption();
-    
+
     if (caption == "")
       caption = " ";
 
@@ -170,9 +172,9 @@ namespace enigma_user
     else
       msg = str;
 
-    replace(msg.begin(), msg.end(), '"', '\'');
-    replace(def.begin(), def.end(), '"', '\'');
-    replace(caption.begin(), caption.end(), '"', '\'');
+    msg = string_replace_all(msg, "\"", "\\\"");
+    def = string_replace_all(def, "\"", "\\\"");
+    caption = string_replace_all(caption, "\"", "\\\"");
 
     const char *input = tinyfd_inputBox(caption.c_str(), msg.c_str(), def.c_str());
 
@@ -193,12 +195,12 @@ namespace enigma_user
     else
       msg = str;
 
-    replace(msg.begin(), msg.end(), '"', '\'');
-    replace(def.begin(), def.end(), '"', '\'');
-    replace(caption.begin(), caption.end(), '"', '\'');
+    msg = string_replace_all(msg, "\"", "\\\"");
+    def = string_replace_all(def, "\"", "\\\"");
+    caption = string_replace_all(caption, "\"", "\\\"");
 
     const char *input = tinyfd_passwordBox(caption.c_str(), msg.c_str(), def.c_str());
-	  
+
     return input ? : "";
   }
 
@@ -220,8 +222,8 @@ namespace enigma_user
     else
       msg = str;
 
-    replace(msg.begin(), msg.end(), '"', '\'');
-    replace(caption.begin(), caption.end(), '"', '\'');
+    msg = string_replace_all(msg, "\"", "\\\"");
+    caption = string_replace_all(caption, "\"", "\\\"");
 
     const char *input = tinyfd_inputBox(caption.c_str(), msg.c_str(), integer.c_str());
 
@@ -231,7 +233,7 @@ namespace enigma_user
   double get_passcode(string str, double def)
   {
     string caption = window_get_caption();
-	 
+
     if (caption == "")
       caption = " ";
 
@@ -245,9 +247,9 @@ namespace enigma_user
       msg = " ";
     else
       msg = str;
-  
-    replace(msg.begin(), msg.end(), '"', '\'');
-    replace(caption.begin(), caption.end(), '"', '\'');
+
+    msg = string_replace_all(msg, "\"", "\\\"");
+    caption = string_replace_all(caption, "\"", "\\\"");
 
     const char *input = tinyfd_passwordBox(caption.c_str(), msg.c_str(), integer.c_str());
 
@@ -256,8 +258,8 @@ namespace enigma_user
 
   string get_open_filename(string filter, string fname)
   {
-    replace(fname.begin(), fname.end(), '"', '\'');
-    replace(filter.begin(), filter.end(), '"', '\'');
+    fname = string_replace_all(fname, "\"", "\\\"");
+    filter = string_replace_all(filter, "\"", "\\\"");
     FileFilter ff(filter.c_str());
 
     const char *path = tinyfd_openFileDialog("Open", fname.c_str(),
@@ -270,8 +272,8 @@ namespace enigma_user
   {
     const char *fname_or_dir;
 
-    replace(fname.begin(), fname.end(), '"', '\'');
-    replace(dir.begin(), dir.end(), '"', '\'');
+    fname = string_replace_all(fname, "\"", "\\\"");
+    dir = string_replace_all(dir, "\"", "\\\"");
 
     if (access(fname.c_str(), F_OK) != -1)
       fname_or_dir = fname.c_str();
@@ -290,9 +292,8 @@ namespace enigma_user
     else
       titlebar = title;
 
-    replace(fname.begin(), fname.end(), '"', '\'');
-    replace(filter.begin(), filter.end(), '"', '\'');
-    replace(titlebar.begin(), titlebar.end(), '"', '\'');
+    filter = string_replace_all(filter, "\"", "\\\"");
+    titlebar = string_replace_all(titlebar, "\"", "\\\"");
     FileFilter ff(filter.c_str());
 
     const char *path = tinyfd_openFileDialog(titlebar.c_str(), fname_or_dir,
@@ -303,8 +304,8 @@ namespace enigma_user
 
   string get_save_filename(string filter, string fname)
   {
-    replace(fname.begin(), fname.end(), '"', '\'');
-    replace(filter.begin(), filter.end(), '"', '\'');
+    fname = string_replace_all(fname, "\"", "\\\"");
+    filter = string_replace_all(filter, "\"", "\\\"");
     FileFilter ff(filter.c_str());
 
     const char *path = tinyfd_saveFileDialog("Save As", fname.c_str(),
@@ -317,8 +318,8 @@ namespace enigma_user
   {
     const char *fname_or_dir;
 
-    replace(fname.begin(), fname.end(), '"', '\'');
-    replace(dir.begin(), dir.end(), '"', '\'');
+    fname = string_replace_all(fname, "\"", "\\\"");
+    dir = string_replace_all(dir, "\"", "\\\"");
 
     if (access(fname.c_str(), F_OK) != -1)
       fname_or_dir = fname.c_str();
@@ -337,9 +338,8 @@ namespace enigma_user
     else
       titlebar = title;
 
-    replace(fname.begin(), fname.end(), '"', '\'');
-    replace(filter.begin(), filter.end(), '"', '\'');
-    replace(titlebar.begin(), titlebar.end(), '"', '\'');
+    filter = string_replace_all(filter, "\"", "\\\"");
+    titlebar = string_replace_all(titlebar, "\"", "\\\"");
     FileFilter ff(filter.c_str());
 
     const char *path = tinyfd_saveFileDialog(titlebar.c_str(), fname_or_dir,
@@ -350,7 +350,7 @@ namespace enigma_user
 
   string get_directory(string dname)
   {
-    replace(dname.begin(), dname.end(), '"', '\'');
+    dname = string_replace_all(dname, "\"", "\\\"");
 
     const char *path = tinyfd_selectFolderDialog("Select Directory", dname.c_str());
 
@@ -366,8 +366,8 @@ namespace enigma_user
     else
       titlebar = capt;
 
-    replace(root.begin(), root.end(), '"', '\'');
-    replace(titlebar.begin(), titlebar.end(), '"', '\'');
+    root = string_replace_all(root, "\"", "\\\"");
+    titlebar = string_replace_all(titlebar, "\"", "\\\"");
 
     const char *path = tinyfd_selectFolderDialog(titlebar.c_str(), root.c_str());
 
