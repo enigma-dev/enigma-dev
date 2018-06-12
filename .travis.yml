@@ -24,14 +24,13 @@ before_install:
       if [ "$COMPILER" == "gcc32" ] || [ "$COMPILER" == "clang32" ]; then
         sudo dpkg --add-architecture i386;
         sudo apt-get -qq -y install libc++-dev:i386 libglu1-mesa:i386\
-          libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1-dev libx11-6:i386 libglew1.10:i386;
+          libc6:i386 libncurses5:i386 libstdc++6:i386 lib32z1-dev libx11-6:i386 libxtst-dev:i386 libglew1.10:i386;
 
         if [ "$COMPILER" == "gcc32" ]; then
           sudo apt-get -qq -y install gcc-multilib g++-multilib;
         fi
 
         sudo ln -s /usr/lib/i386-linux-gnu/mesa/libGL.so.1 /usr/lib/i386-linux-gnu/libGL.so;
-        sudo ln -s /usr/lib/i386-linux-gnu/libX11.so.6 /usr/lib/i386-linux-gnu/libX11.so;
         sudo ln -s /usr/lib/i386-linux-gnu/libGLU.so.1 /usr/lib/i386-linux-gnu/libGLU.so;
         sudo ln -s /usr/include/x86_64-linux-gnu/zconf.h /usr/include;
         sudo ln -s /usr/lib/i386-linux-gnu/libGLEW.so.1.10 /usr/lib/i386-linux-gnu/libGLEW.so;
@@ -41,7 +40,7 @@ before_install:
         unzip enigma-libs.zip -d ENIGMAsystem/;
         mv ENIGMAsystem/Install ENIGMAsystem/Additional;
       else
-        sudo apt-get -qq -y install libc++-dev libglu1-mesa-dev;
+        sudo apt-get -qq -y install libc++-dev libglu1-mesa-dev libxtst-dev;
       fi
 
       if [ "$AUDIO" == "OpenAL" ]; then

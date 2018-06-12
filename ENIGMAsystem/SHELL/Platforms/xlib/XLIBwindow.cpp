@@ -30,6 +30,7 @@
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
+#include <X11/extensions/XTest.h>
 #include <stdio.h>   //printf, NULL
 #include <stdlib.h>  //malloc
 #include <time.h>    //clock
@@ -606,6 +607,16 @@ bool keyboard_check_direct(int key) {
 
   key = XKeysymToKeycode(enigma::x11::disp, enigma::keyrmap[key]);
   return (keyState[key >> 3] & (1 << (key & 7)));
+}
+
+void keyboard_key_press(int key) {
+  key = XKeysymToKeycode(enigma::x11::disp, enigma::keyrmap[key]);
+  XTestFakeKeyEvent(enigma::x11::disp, key, True, 0);
+}
+
+void keyboard_key_release(int key) {
+  key = XKeysymToKeycode(enigma::x11::disp, enigma::keyrmap[key]);
+  XTestFakeKeyEvent(enigma::x11::disp, key, False, 0);
 }
 
 void clipboard_set_text(string text) {
