@@ -133,8 +133,6 @@ void vertex_submit(int buffer, int primitive, unsigned vertex_start, unsigned ve
     bind_array_buffer(enigma::vertexBufferPeers[buffer]);
   }
 
-  //(enigma::vertexBufferPeers[buffer]);
-
   enigma::glsl_attribute_enable_all_internal(false); //Disable all attributes
 
   bool useTextCoords = false, useColors = false;
