@@ -20,6 +20,7 @@
 #define ENIGMA_GSVERTEX_H
 
 #include "Universal_System/scalar.h"
+#include "Universal_System/dynamic_args.h" // for vertex_data
 
 namespace enigma_user {
 
@@ -81,6 +82,7 @@ void vertex_texcoord(int buffer, gs_scalar u, gs_scalar v);
 void vertex_argb(int buffer, unsigned argb);
 void vertex_color(int buffer, int color, double alpha);
 #define vertex_colour vertex_color
+void vertex_data(int buffer, const enigma::varargs& data);
 void vertex_float1(int buffer, float f1);
 void vertex_float2(int buffer, float f1, float f2);
 void vertex_float3(int buffer, float f1, float f2, float f3);

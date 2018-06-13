@@ -161,6 +161,41 @@ void vertex_texcoord(int buffer, gs_scalar u, gs_scalar v) {
   enigma::vertexBuffers[buffer]->vertices.push_back(v);
 }
 
+void vertex_data(int buffer, const enigma::varargs& data) {
+  enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
+  const enigma::VertexFormat* vertexFormat = enigma::vertexFormats[vertexBuffer->format];
+  int attrIndex = 0;
+  for (int i = 0; i < data.argc;) {
+    attrIndex = attrIndex % vertexFormat->flags.size();
+    std::pair<int,int> attr = vertexFormat->flags[attrIndex++];
+    switch (attr.first) {
+      case vertex_type_float1:
+        vertex_float1(buffer, data.get(++i));
+        continue;
+      case vertex_type_float2:
+        vertex_float2(buffer, data.get(i), data.get(i + 1));
+        i += 2;
+        continue;
+      case vertex_type_float3:
+        vertex_float3(buffer, data.get(i), data.get(i + 1), data.get(i + 2));
+        i += 3;
+        continue;
+      case vertex_type_float4:
+        vertex_float4(buffer, data.get(i), data.get(i + 1), data.get(i + 2), data.get(i + 3));
+        i += 4;
+        continue;
+      case vertex_type_color:
+        vertex_argb(buffer, data.get(++i));
+        continue;
+      case vertex_type_ubyte4:
+        vertex_ubyte4(buffer, data.get(i), data.get(i + 1), data.get(i + 2), data.get(i + 3));
+        i += 4;
+        continue;
+    }
+    break;
+  }
+}
+
 void vertex_float1(int buffer, float f1) {
   enigma::vertexBuffers[buffer]->vertices.push_back(f1);
 }
