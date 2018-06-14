@@ -118,11 +118,26 @@ unsigned vertex_get_number(int buffer) {
 }
 
 void vertex_freeze(int buffer) {
+  enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
+
   // we can freeze the vertex buffer only if it isn't already frozen
   // if it's not frozen, then we'll freeze it when we do a dirty update
-  if (enigma::vertexBuffers[buffer]->frozen) return;
-  enigma::vertexBuffers[buffer]->frozen = true;
-  enigma::vertexBuffers[buffer]->dirty = true;
+  if (vertexBuffer->frozen) return;
+  vertexBuffer->frozen = true;
+  vertexBuffer->dirty = true;
+}
+
+void vertex_clear(int buffer) {
+  enigma::VertexBuffer* vertexBuffer = enigma::vertexBuffers[buffer];
+
+  // clear it just for good measure, even though it's probably already empty
+  // since we do that just after uploading it to the GPU "peer"
+  vertexBuffer->vertices.clear();
+
+  // we can clear a.k.a. "unfreeze" the vertex buffer only if it is actually frozen
+  if (!vertexBuffer->frozen) return;
+  vertexBuffer->frozen = false;
+  vertexBuffer->dirty = true;
 }
 
 void vertex_submit(int buffer, int primitive) {

@@ -71,6 +71,7 @@ void vertex_end(int buffer);
 unsigned vertex_get_size(int buffer);
 unsigned vertex_get_number(int buffer);
 void vertex_freeze(int buffer);
+void vertex_clear(int buffer);
 void vertex_submit(int buffer, int primitive);
 void vertex_submit(int buffer, int primitive, unsigned offset, unsigned count);
 void vertex_submit(int buffer, int primitive, int texture);
