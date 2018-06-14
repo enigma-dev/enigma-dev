@@ -23,6 +23,7 @@ namespace enigma {
 
 vector<VertexFormat*> vertexFormats;
 vector<VertexBuffer*> vertexBuffers;
+vector<IndexBuffer*> indexBuffers;
 
 VertexFormat* vertexFormat = 0;
 
