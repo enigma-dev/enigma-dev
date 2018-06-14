@@ -90,6 +90,22 @@ void vertex_float3(int buffer, float f1, float f2, float f3);
 void vertex_float4(int buffer, float f1, float f2, float f3, float f4);
 void vertex_ubyte4(int buffer, unsigned char u1, unsigned char u2, unsigned char u3, unsigned char u4);
 
+enum {
+  index_type_ushort,
+  index_type_uint
+};
+
+int index_create_buffer();
+int index_create_buffer_ext(unsigned size);
+void index_delete_buffer(int buffer);
+unsigned index_get_size(int buffer);
+unsigned index_get_number(int buffer);
+void index_freeze(int buffer);
+void index_clear(int buffer);
+void index_begin(int buffer, int type);
+void index_data(int buffer, const enigma::varargs& data);
+void index_end(int buffer);
+
 }
 
 #endif //ENIGMA_GSVERTEX_H
